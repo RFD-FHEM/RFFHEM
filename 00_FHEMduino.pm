@@ -52,7 +52,7 @@ my %sets = (
   "reset"     => ""
 );
 
-my $clientsFHEMduino = ":IT:CUL_TX:OREGON:FHEMduino_Env:FHEMduino_EZ6:FHEMduino_Oregon:FHEMduino_PT2262:FHEMduino_FA20RF:FHEMduino_TCM:FHEMduino_HX:FHEMduino_DCF77:FHEMduino_Gas:FHEMduino_AS";
+my $clientsFHEMduino = ":IT:CUL_TX:OREGON:FHEMduino_Env:FHEMduino_EZ6:FHEMduino_Oregon:FHEMduino_PT2262:FHEMduino_FA20RF:FHEMduino_TCM:FHEMduino_HX:FHEMduino_DCF77:FHEMduino_Gas:FHEMduino_AS:FHEMduino_ARC";
 
 my %matchListFHEMduino = (
     "1:IT"                 => "^i......\$",
@@ -68,7 +68,7 @@ my %matchListFHEMduino = (
     "11:OREGON"            => "^(3[8-9A-F]|[4-6][0-9A-F]|7[0-8]).*",
     "12:FHEMduino_Gas"     => "G...........\$",      # Special Sketch needed. See GitHub GAS_I2C or FHEMWIKI
     "13:FHEMduino_AS"      => "AS.*\$", #Arduino based Sensors
-#    "14:FHEMduino_ARC"     => "AR.*\$", #ARC protocol switches like IT selflearn
+    "14:FHEMduino_ARC"     => "AR.*\$", #ARC protocol switches like IT selflearn
 );
 ##Sven: Vorschlag sollten wir hier nicht mal das Protokoll, also das Nachrichtenformat etwas abändern. Bem OSV2 z.B. fand ich ganz gut, dass die ersten beiden Werte die Länge der Nachricht wiederspiegeln (HEX)
 ##      Darauf kann man ja ganz gut eine Regex bauen um das Protokoll zu ermitteln. Dass wir hier machchmal einen Buchstaben, manchmal zwei und hin und wieder auch eine konkrete Länge haben macht es etwas unübersichlicht.
@@ -674,10 +674,10 @@ FHEMduino_Parse($$$$)
   elsif($fn eq "O" && $len >= 2) {        # Oregon
     Log3 $name, 4, "OSVduino: $dmsg";
   }
-  elsif($fn eq "A" && $len >= 10) {        # ArduSens
+  elsif($fn eq "A" && $len >= 10 && $len <20 ) {        # ArduSens
     Log3 $name, 4, "AS: $dmsg";
   }
-  elsif($fn eq "AR" && $len >= 10) {        # ARC - ITselflearn
+  elsif($fn eq "A" && $len >= 34) {        # ARC - ITselflearn
     Log3 $name, 4, "ARC: $dmsg";
   }  else {
     DoTrigger($name, "UNKNOWNCODE $dmsg message length ($len)");

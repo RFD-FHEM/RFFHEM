@@ -409,13 +409,13 @@ sub FHEMduino_PT2262_Parse($$){ ################################################
   
   ($msg, $basedur) = split m/_/, $msg, 2;
 
-  Log3 $hash, 3, "Message: $msg Basedur: $basedur";
+  Log3 $hash, 4, "Message: $msg Basedur: $basedur";
   $result = getButton($hash,$msg);
 
   if ($result ne "") {
     ($displayName,$deviceCode,$action) = split m/ /, $result, 3;
 
-    Log3 $hash, 3, "Parse: Device: $displayName Code: $deviceCode Basedur: $basedur Action: $action";
+    Log3 $hash, 4, "Parse: Device: $displayName Code: $deviceCode Basedur: $basedur Action: $action";
 
     my $def = $modules{FHEMduino_PT2262}{defptr}{$hash->{NAME} . "." . $deviceCode};
     $def = $modules{FHEMduino_PT2262}{defptr}{$deviceCode} if(!$def);

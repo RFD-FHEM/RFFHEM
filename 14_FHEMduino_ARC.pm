@@ -122,54 +122,23 @@ sub FHEMduino_ARC_Define($$){ ##################################################
 
   my @a = split("[ \t][ \t]*", $def); #@a - array
 
+  return "wrong syntax: define <name> FHEMduino_ARC <code>".int(@a)
+		if(int(@a) < 3 || int(@a) > 8);
   my $name = $a[0];
-
-  my $tristatecode = $a[2];
-  my $basedur = "";
-
-  if (index($a[2], "_") != -1) {
-    ($tristatecode, $basedur) = split m/_/, $a[2], 2;
-  } else {
-    $tristatecode = $a[2];
-  }
-
-  my $code = lc($tristatecode); 
-
-  my $ontristate = "FF";
-  my $offtristate = "F0";
-
-  if(int(@a) == 3) {
-  }
-  elsif(int(@a) == 5) {
-    $ontristate = $a[3];
-    $offtristate = $a[4];
-  }
-  elsif(int(@a) == 6) {
-    $basedur = $a[3];
-    $ontristate = $a[4];
-    $offtristate = $a[5];
-  }
-  else {
-    return "wrong syntax: define <name> FHEMduino_ARC <code>";
-  }
+  my $code = $a[2];
+  #my $basedur = "";
 
   Log3 undef, 5, "Arraylenght:  int(@a)";
 
-  $hash->{CODE} = $tristatecode;
-  if ($basedur ne "") {
-    $hash->{DEF} = $tristatecode. " " . $basedur . " " . $ontristate . " " . $offtristate;
-    $hash->{BDUR} = $basedur;
-  } else {
-    $hash->{DEF} = $tristatecode. " " . $ontristate . " " . $offtristate;
-  }
-
-  $hash->{XMIT} = lc($tristatecode);
+  $hash->{CODE} = $code;
+  $hash->{DEF} = $code;
+  $hash->{XMIT} = $code;
   
-  Log3 $hash, 5, "Define hascode: {$tristatecode}{$name}";
+  Log3 $hash, 5, "Define hascode: {$code}{$name}";
 
-  $modules{FHEMduino_ARC}{defptr}{$tristatecode} = $hash;
-  $hash->{$elro_c2b{"on"}}  = lc($ontristate);
-  $hash->{$elro_c2b{"off"}} = lc($offtristate);
+  $modules{FHEMduino_ARC}{defptr}{$code} = $hash;
+  $hash->{$elro_c2b{"on"}}  = "FF";
+  $hash->{$elro_c2b{"off"}} = "0F";
   $modules{FHEMduino_ARC}{defptr}{$code}{$name} = $hash;
 
   if(!defined $hash->{IODev} ||!defined $hash->{IODev}{NAME}){
@@ -274,126 +243,33 @@ sub FHEMduino_ARC_Set($@){ #####################################################
   return $ret;
 }
 
-sub getButton($$){ ###################################################################
+sub getButtonARC($$){ ###################################################################
+
+#  ID: 0 till 25(Convert the binary code to decimal to get the correct id)
+#  All: 26
+#  State: 27
+#  Unit: 28 till 31
 
   my ($hash,$msg) = @_;
-  my $receivedHouseCode = "undef";
-  my $receivedButtonCode = "undef";
-  my $receivedActionCode ="undef";
-  my $parsedHouseCode = "undef";
-  my $parsedButtonCode = "undef";
-  my $parsedAction = "undef";
-  my $ontristate = $hash->{$elro_c2b{"on"}};
-  my $offtristate = $hash->{$elro_c2b{"off"}};
+  my $parsedID = "undef";
+  my $parsedALL = "undef";
+  my $parsedSTATE = "undef";
+  my $parsedUNIT = "undef";
 
-  #my $bin = dec2bin($msg);
-  #my $msgmod = bin2tristate($bin);
   my $msgmod = substr($msg,2);
-  #Log3 $hash, 5, "FHEMduino_ARC Message received: $msg BIN $bin TRISTATE $msgmod";
-  Log3 $hash, 5, "FHEMduino_ARC Message received: TRISTATE $msgmod";
+  Log3 $hash, 5, "FHEMduino_ARC Message received: $msgmod";
 
-  ## Groupcode
-  $receivedHouseCode = substr($msgmod,0,5);
-  $receivedButtonCode = substr($msgmod,5,5);
-  $receivedActionCode = substr($msgmod,10,2);
-  Log3 $hash, 5, "FHEMduino_ARC Message Housecode: $receivedHouseCode Buttoncode: $receivedButtonCode actioncode $receivedActionCode";
-
-  my %housecode = ("00000" => "0",
-    "0000F" => "1",
-    "000F0" => "2",
-    "000FF" => "3",
-    "00F00" => "4",
-    "00F0F" => "5",
-    "00FF0" => "6",
-    "00FFF" => "7",
-    "0F000" => "8",
-    "0F00F" => "9",
-    "0F0F0" => "10",
-    "0F0FF" => "11",
-    "0FF00" => "12",
-    "0FF0F" => "13",
-    "0FFF0" => "14",
-    "0FFFF" => "15",
-    "F0000" => "16",
-    "F000F" => "17",
-    "F00F0" => "18",
-    "F00FF" => "19",
-    "F0F00" => "20",
-    "F0F0F" => "21",
-    "F0FF0" => "22",
-    "F0FFF" => "23",
-    "FF000" => "24",
-    "FF00F" => "25",
-    "FF0F0" => "26",
-    "FF0FF" => "27",
-    "FFF00" => "28",
-    "FFF0F" => "29",
-    "FFFF0" => "30",
-    "FFFFF" => "31"
-    );
-
-  my %button = (
-    "00000" => "0",
-    "0000F" => "E",
-    "000F0" => "D",
-    "000FF" => "3",
-    "00F00" => "C",
-    "00F0F" => "5",
-    "00FF0" => "6",
-    "00FFF" => "7",
-    "0F000" => "B",
-    "0F00F" => "9",
-    "0F0F0" => "10",
-    "0F0FF" => "11",
-    "0FF00" => "12",
-    "0FF0F" => "13",
-    "0FFF0" => "14",
-    "0FFFF" => "15",
-    "F0000" => "A",
-    "F000F" => "17",
-    "F00F0" => "18",
-    "F00FF" => "19",
-    "F0F00" => "20",
-    "F0F0F" => "21",
-    "F0FF0" => "22",
-    "F0FFF" => "23",
-    "FF000" => "24",
-    "FF00F" => "25",
-    "FF0F0" => "26",
-    "FF0FF" => "27",
-    "FFF00" => "28",
-    "FFF0F" => "29",
-    "FFFF0" => "30",
-    "FFFFF" => "31"
-    );
-
-  my %action = (
-    "FF" => "on",
-    "0F"	=> "on",
-    "F0"	=> "off"
-    );
-
-  if (exists $housecode{$receivedHouseCode}) {
-    $parsedHouseCode = $housecode{$receivedHouseCode};
+  $parsedID = oct("0b".substr($msgmod,0,26));
+  $parsedALL = oct("0b".substr($msgmod,26,1));
+  $parsedSTATE = ((oct("0b".substr($msgmod,27,1))==1) ? "on":"off");
+  $parsedUNIT = oct("0b".substr($msgmod,28,4));
+  Log3 $hash, 5, "FHEMduino_ARC Message ID: $parsedID ALL: $parsedALL STATE: $parsedSTATE UNIT $parsedUNIT";
+ 
+  if (($parsedID eq "undef") | ($parsedUNIT eq "undef") | ($parsedALL eq "undef") | ($parsedSTATE eq "undef")) {
+    #Log3 $hash, 5, "Get button return/result: ID: " . $receivedHouseCode . $receivedButtonCode . "DEVICE: " . $parsedHouseCode . "_" . $parsedButtonCode . " ACTION: " . $parsedAction;
+    return "";
   }
-
-  if (exists $button{$receivedButtonCode}) {
-    $parsedButtonCode = $button{$receivedButtonCode};
-  }
-
-  if (exists $action{$receivedActionCode}) {
-    $parsedAction = $action{$receivedActionCode};
-  }
-  
-  if ($parsedHouseCode ne "undef") {
-    if ($parsedButtonCode ne "undef") {
-      if ($parsedAction ne "undef") {
-        Log3 $hash, 5, "Get button return/result: ID: " . $receivedHouseCode . $receivedButtonCode . "DEVICE: " . $parsedHouseCode . "_" . $parsedButtonCode . " ACTION: " . $parsedAction;
-        return $parsedHouseCode . "_" . $parsedButtonCode . " " . $receivedHouseCode . $receivedButtonCode . " " . $parsedAction;
-      }
-    }
-  }
-  return "";
+  return $parsedID . "_" . $parsedUNIT . " " . $parsedALL . " " . $parsedSTATE ;
 }
 
 sub FHEMduino_ARC_Parse($$){ ########################################################
@@ -401,6 +277,7 @@ sub FHEMduino_ARC_Parse($$){ ###################################################
   my ($hash,$msg) = @_;
 
   my $deviceCode = "";
+  my $deviceALL = "";
   my $displayName = "";
   my $action = "";
   my $result = "";
@@ -408,20 +285,20 @@ sub FHEMduino_ARC_Parse($$){ ###################################################
   
   #($msg, $basedur) = split m/_/, $msg, 2;
 
-  Log3 $hash, 3, "Message: $msg";
-  $result = getButton($hash,$msg);
+  Log3 $hash, 4, "Message: $msg";
+  $result = getButtonARC($hash,$msg);
 
   if ($result ne "") {
-    ($displayName,$deviceCode,$action) = split m/ /, $result, 3;
-
-    Log3 $hash, 3, "Parse: Device: $displayName Code: $deviceCode Basedur: $basedur Action: $action";
+    ($displayName,$deviceALL,$action) = split m/ /, $result, 3;
+	$deviceCode = $displayName;
+    Log3 $hash, 4, "Parse: Device: $displayName Code: $deviceCode Action: $action";
 
     my $def = $modules{FHEMduino_ARC}{defptr}{$hash->{NAME} . "." . $deviceCode};
     $def = $modules{FHEMduino_ARC}{defptr}{$deviceCode} if(!$def);
 
     if(!$def) {
       Log3 $hash, 5, "UNDEFINED Remotebutton send to define: $displayName";
-      return "UNDEFINED FHEMduino_ARC_$displayName FHEMduino_ARC $deviceCode"."_".$basedur;
+      return "UNDEFINED FHEMduino_ARC_$displayName FHEMduino_ARC $deviceCode";
     }
 
     $hash = $def;
@@ -437,7 +314,6 @@ sub FHEMduino_ARC_Parse($$){ ###################################################
 
     readingsBeginUpdate($hash);
     readingsBulkUpdate($hash, "state", $action);
-    readingsBulkUpdate($hash, "basedur", $basedur);
     readingsEndUpdate($hash, 1);
     return $name;
   }
@@ -465,37 +341,6 @@ sub FHEMduino_ARC_Undef($$){ ###################################################
   return undef;
 }
 
-sub dec2bin($){ ######################################################################
-	my ($strraw) = @_;
-	my $str = unpack("B*", pack("N", substr($strraw,2,length($strraw)-2)));
-    $str =~ s/^0{8}(?=\d)//;   # cut first 8 zeros
-    return $str;
-  }
 
-sub bin2tristate{ ####################################################################
-	my $bindata = shift;
-	my $returnValue = "";
-	my $pos = 0;
-	my $i = 0;
-
-	while($i < length($bindata)/2){
-
-		if (substr($bindata,$pos,1)=='0' && substr($bindata,$pos+1,1)=='0') {
-			$returnValue .= '0';
-			#print "value $returnValue.\n";
-      } elsif (substr($bindata,$pos,1)=='1' && substr($bindata,$pos+1,1)=='1') {
-       $returnValue .= '1';
-			#print "value $returnValue.\n";
-      } elsif (substr($bindata,$pos,1)=='0' && substr($bindata,$pos+1,1)=='1') {
-       $returnValue .= 'F';
-			#print "value $returnValue.\n";
-      } else {
-			#return "not applicable";
-		}
-		$pos = $pos+2;
-		$i++;
-	}
-  return $returnValue;
-}
 
 1;
