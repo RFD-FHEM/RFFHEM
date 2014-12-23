@@ -33,8 +33,8 @@ FHEMduino_AS_Initialize($)
   #-----------------------------
   # T	Type:
   # 0
-  # 1
-  # 2
+  # 1	moisture
+  # 2	door
   # 3   light hirange (outdoor)
   # 4	light hires (indoor)
   # 5	water
@@ -111,8 +111,8 @@ FHEMduino_AS_Parse($$)
   # 7	reed gas
   # 8    voltage
   # ..31 
-  my %typeStr = (0, "type0", 1,"type1", 2,"door", 3,"lightHiRange", 4,"lightHiRes", 5,"water", 6,"temp", 7,"reedGas", 8,"voltage");
-  my %sigStr = (0, "type0", 1,"type1", 2,"door", 3,"light", 4,"light", 5,"water", 6,"temp", 7,"gas", 8,"voltage");
+  my %typeStr = (0, "type0", 1,"moisture", 2,"door", 3,"lightHiRange", 4,"lightHiRes", 5,"water", 6,"temp", 7,"reedGas", 8,"voltage");
+  my %sigStr = (0, "type0", 1,"moisture", 2,"door", 3,"light", 4,"light", 5,"water", 6,"temp", 7,"gas", 8,"voltage");
   my %batStr = (0,"bad",1,"change",2,"ok",3,"optimal");
   my %trigStr = (0,"auto",1,"manual");
 
@@ -146,6 +146,9 @@ FHEMduino_AS_Parse($$)
 	}
 	if ($model eq "door") {
 	  $Sigval = (($Sigval==255)? 1:0); 
+	}
+	if ($model eq "moisture") {
+	  $Sigval = sprintf( "%.1f%%", (1024-$Sigval)*100/1024);
 	}
 	# Bei Voltage Sensoren die Batterieinfo als Zahl ausgeben, damit man sie in einem Diagramm abbilden kann	
 	if ($model eq "voltage") {
