@@ -74,7 +74,7 @@ FHEMduino_Env_Parse($$)
   my ($hash,$msg) = @_;
   my @a = split("", $msg);
 
-  if (length($msg) < 12) {
+  if (length($msg) < 9) {
     Log3 "FHEMduino", 4, "FHEMduino_Env: wrong message -> $msg";
     return "";
   }
@@ -290,7 +290,7 @@ FHEMduino_Env_Parse($$)
   #           /        //  /  /           /--- unknown ?crc
   #          /        //  /  /           //--- manual trigger = 1
   #         /        //  /  /           //
-            01010000 0000  0010101110   10
+  #         01010000 0000  0010101110   10
   # Bit     0        8 10  12            23
     $SensorTyp = "TCM97001";
     $hum = "";     # not supported
