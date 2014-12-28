@@ -22,6 +22,7 @@ FHEMduino_Env_Initialize($)
   #         04 = Lifetec
   #         05 = TX70DTH (Aldi)
   #         06 = AURIOL (Lidl Version: 09/2013)
+  #         08 = TCM 97001
   #     R = Raw data in hex (9 Byte)
 
   $hash->{Match}     = "W.*\$";
@@ -282,6 +283,8 @@ FHEMduino_Env_Parse($$)
     $hum = (-1);
     $val = "T: $temp H: $hum B: $bat";
   } elsif ($model eq "08") {      # TCM 97001
+      #Log3 $hash, 4, "FHEMduino_Env decoding TCM97001: $model";
+
   #                /-------------------------- Sensor ID
   #               /        /------------------ Battery state 0 == Ok
   #              /        //------------------ unknown
@@ -293,7 +296,7 @@ FHEMduino_Env_Parse($$)
   #         01010000 0000  0010101110   10
   # Bit     0        8 10  12            23
     $SensorTyp = "TCM97001";
-    $hum = "";     # not supported
+    $hum = (-1);   # not supported
     $channel = ""; # not supported
     $trend = "";   # not supported
     $bin = substr($bitsequence,0,8);
