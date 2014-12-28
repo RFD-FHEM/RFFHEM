@@ -285,7 +285,7 @@ FHEMduino_Env_Parse($$)
   #                /-------------------------- Sensor ID
   #               /        /------------------ Battery state 0 == Ok
   #              /        //------------------ unknown
-  #             /        //  / --------------- neg temp if 11, then temp xor 0x47 / 00 if positiv
+  #             /        //  / --------------- neg temp if 11, then temp xor 0x3fe / 00 if positiv
   #            /        //  /  / ------------- 12 Bit Temperature
   #           /        //  /  /           /--- unknown ?crc
   #          /        //  /  /           //--- manual trigger = 1
@@ -302,7 +302,7 @@ FHEMduino_Env_Parse($$)
     $sendMode = int(substr($bitsequence,23,1)) eq "0" ? "automatic" : "manual";
     $temp = bin2dec(substr($bitsequence,12,10));
     if (substr($bitsequence,10,2) eq "11") {
-      $temp = $temp ^ 0x47;
+      $temp = $temp ^ 0x3fe;
     }
     $temp = $temp / 10.0;
 
