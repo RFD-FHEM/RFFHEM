@@ -41,6 +41,7 @@ FHEMduino_AS_Initialize($)
   # 6	temp
   # 7	reed gas
   # 8    voltage
+  # 9   Humidity
   # ..31 
  $hash->{Match}     = "AS.*\$";
   $hash->{DefFn}     = "FHEMduino_AS_Define";
@@ -110,9 +111,10 @@ FHEMduino_AS_Parse($$)
   # 6	temp
   # 7	reed gas
   # 8    voltage
+  # 9   Humidity
   # ..31 
-  my %typeStr = (0, "type0", 1,"moisture", 2,"door", 3,"lightHiRange", 4,"lightHiRes", 5,"water", 6,"temp", 7,"reedGas", 8,"voltage");
-  my %sigStr = (0, "type0", 1,"moisture", 2,"door", 3,"light", 4,"light", 5,"water", 6,"temp", 7,"gas", 8,"voltage");
+  my %typeStr = (0, "type0", 1,"moisture", 2,"door", 3,"lightHiRange", 4,"lightHiRes", 5,"water", 6,"temp", 7,"reedGas", 8,"voltage",9,"humidity");
+  my %sigStr = (0, "type0", 1,"moisture", 2,"door", 3,"light", 4,"light", 5,"water", 6,"temp", 7,"gas", 8,"voltage",9,"humidity");
   my %batStr = (0,"bad",1,"change",2,"ok",3,"optimal");
   my %trigStr = (0,"auto",1,"manual");
 
@@ -138,28 +140,33 @@ FHEMduino_AS_Parse($$)
 	if ($model eq "lightHiRange") {
 	  $Sigval = sprintf( "%.1f", $Sigval /1.2) #TBD
 	}
-	if ($model eq "lightHiRes") {
+	elsif ($model eq "lightHiRes") {
 	  $Sigval = sprintf( "%.1f", $Sigval /1.2/2)
 	}
-	if ($model eq "temp") {
+	elsif ($model eq "temp") {
 	  $Sigval = sprintf( "%.1f", ($Sigval-0x8000) /10) #temp is send 10*°C
 	}
-	if ($model eq "door") {
+	elsif ($model eq "door") {
 	  $Sigval = (($Sigval==255)? 1:0); 
 	}
-	if ($model eq "moisture") {
+	elsif ($model eq "moisture") {
 	  $Sigval = sprintf( "%.1f%%", (1024-$Sigval)*100/1024);
 	}
-	# Bei Voltage Sensoren die Batterieinfo als Zahl ausgeben, damit man sie in einem Diagramm abbilden kann	
-	if ($model eq "voltage") {
-	  $bat = (hex(substr($msg,9,2))>>1)&3
+	elsif ($model eq "humidity") {
+	  $Sigval = sprintf( "%i %", ($Sigval-0x8000) /10) #hum is send 10*%
 	}
+	elsif ($model eq "reedGas") {
+	  $Sigval = sprintf( "%i m3", ($Sigval)); #simple counter, code has to be extended to support restart of the sensor etc.
+	}
+
+	# Bei Voltage Sensoren die Batterieinfo als Zahl ausgeben, damit man sie in einem Diagramm abbilden kann	
+	elsif ($model eq "voltage") {
+	  $bat = (hex(substr($msg,9,2))>>1)&3
+	} else {
+		Log3 $hash, 1, "FHEMduino_AS unknown model: $model";#
+		return "";
+    }
     $val = "S: $Sigval B: $bat";
-#  }
-#  else {
-#    Log3 $hash, 1, "FHEMduino_AS unknown model: $model";#
-#	return "";
-#  }
 
   if ($id ne "") {
     $deviceCode = $model."_".$id;
