@@ -22,8 +22,9 @@ FHEMduino_Env_Initialize($)
   #         04 = Lifetec
   #         05 = TX70DTH (Aldi)
   #         06 = AURIOL (Lidl Version: 09/2013)
+  #         08 = TCM 97001
   #     R = Raw data in hex (9 Byte)
-  
+
   $hash->{Match}     = "W.*\$";
   $hash->{DefFn}     = "FHEMduino_Env_Define";
   $hash->{UndefFn}   = "FHEMduino_Env_Undef";
@@ -74,7 +75,7 @@ FHEMduino_Env_Parse($$)
   my ($hash,$msg) = @_;
   my @a = split("", $msg);
 
-  if (length($msg) < 12) {
+  if (length($msg) < 9) {
     Log3 "FHEMduino", 4, "FHEMduino_Env: wrong message -> $msg";
     return "";
   }
@@ -94,14 +95,14 @@ FHEMduino_Env_Parse($$)
   Log3 $hash, 4, "FHEMduino_Env: $msg";
   Log3 $hash, 4, "FHEMduino_Env: $hextext";
   Log3 $hash, 4, "FHEMduino_Env: $bitsequence";
-  
+
   #         01 = KW9010
   #         02 = EuroChron / Tchibo
   #         03 = PEARL NC7159, LogiLink WS0002
   #         04 = Lifetec
   #         05 = TX70DTH (Aldi)
   #         06 = AUREOL (Lidl Version: 09/2013)
-  
+  #         08 = TCM 97001
   my $bin = "";
   my $deviceCode;
   my $SensorTyp;
@@ -109,14 +110,14 @@ FHEMduino_Env_Parse($$)
   my ($channel, $tmp, $temp, $hum, $bat, $sendMode, $trend);
 
   if ($model eq "01") {			# KW9010
-  # Re: Tchibo Wetterstation 433 MHz - Dekodierung mal ganz einfach 
+  # Re: Tchibo Wetterstation 433 MHz - Dekodierung mal ganz einfach
   # See also http://forum.arduino.cc/index.php?PHPSESSID=ffoeoe9qeuv7rf4fh0d637hd74&topic=136836.msg1536416#msg1536416
-  #                 /------------------------------------- Random ID part one      
-  #                /    / -------------------------------- Channel switch       
-  #               /    /  /------------------------------- Random ID part two      
-  #              /    /  /  / ---------------------------- Battery state 0 == Ok      
-  #             /    /  /  / / --------------------------- Trend (continous, rising, falling      
-  #            /    /  /  / /  / ------------------------- forced send      
+  #                 /------------------------------------- Random ID part one
+  #                /    / -------------------------------- Channel switch
+  #               /    /  /------------------------------- Random ID part two
+  #              /    /  /  / ---------------------------- Battery state 0 == Ok
+  #             /    /  /  / / --------------------------- Trend (continous, rising, falling
+  #            /    /  /  / /  / ------------------------- forced send
   #           /    /  /  / /  /  / ----------------------- Temperature
   #          /    /  /  / /  /  /          /-------------- Temperature sign bit. if 1 then temp = temp - 4096
   #         /    /  /  / /  /  /          /  /------------ Humidity
@@ -152,12 +153,12 @@ FHEMduino_Env_Parse($$)
     $val = "T: $temp H: $hum B: $bat";
   }
   elsif ($model eq "02") {      # EuroChron / Tchibo
-  #                /--------------------------- Channel, changes after every battery change      
-  #               /        / ------------------ Battery state 0 == Ok      
-  #              /        / /------------------ unknown      
-  #             /        / /  / --------------- forced send      
-  #            /        / /  /  / ------------- unknown      
-  #           /        / /  /  /     / -------- Humidity      
+  #                /--------------------------- Channel, changes after every battery change
+  #               /        / ------------------ Battery state 0 == Ok
+  #              /        / /------------------ unknown
+  #             /        / /  / --------------- forced send
+  #            /        / /  /  / ------------- unknown
+  #           /        / /  /  /     / -------- Humidity
   #          /        / /  /  /     /       / - neg Temp: if 1 then temp = temp - 2048
   #         /        / /  /  /     /       /  / Temp
   #         01100010 1 00 1  00000 0100011 0  00011011101
@@ -178,11 +179,11 @@ FHEMduino_Env_Parse($$)
     $val = "T: $temp H: $hum B: $bat";
   }
   elsif ($model eq "03") {      # PEARL NC7159, LogiLink WS0002
-  #                 /--------------------------------- Sensdortype      
-  #                /    / ---------------------------- ID, changes after every battery change      
+  #                 /--------------------------------- Sensdortype
+  #                /    / ---------------------------- ID, changes after every battery change
   #               /    /        /--------------------- Battery state 0 == Ok
-  #              /    /        /  / ------------------ forced send      
-  #             /    /        /  /  / ---------------- Channel (0..2)      
+  #              /    /        /  / ------------------ forced send
+  #             /    /        /  /  / ---------------- Channel (0..2)
   #            /    /        /  /  /  / -------------- neg Temp: if 1 then temp = temp - 2048
   #           /    /        /  /  /  /   / ----------- Temp
   #          /    /        /  /  /  /   /          /-- unknown
@@ -237,13 +238,13 @@ FHEMduino_Env_Parse($$)
     $val = "T: $temp H: $hum B: $bat";
   }
   elsif ($model eq "06") {      # AURIOL (Lidl Version: 09/2013)
-  #                /--------------------------------- Channel, changes after every battery change      
-  #               /        / ------------------------ Battery state 1 == Ok      
-  #              /        / /------------------------ Battery changed, Sync startet      
-  #             /        / /  ----------------------- Unknown      
+  #                /--------------------------------- Channel, changes after every battery change
+  #               /        / ------------------------ Battery state 1 == Ok
+  #              /        / /------------------------ Battery changed, Sync startet
+  #             /        / /  ----------------------- Unknown
   #            /        / / /  /--------------------- neg Temp: if 1 then temp = temp - 4096
   #           /        / / /  /---------------------- 12 Bit Temperature
-  #          /        / / /  /            /---------- ??? CRC 
+  #          /        / / /  /            /---------- ??? CRC
   #         /        / / /  /            /      /---- Trend 10 == rising, 01 == falling
   #         01010101 1 0 00 000100001011 110001 00
   # Bit     0        8 9 10 12           24     30
@@ -272,7 +273,7 @@ FHEMduino_Env_Parse($$)
     else
     {
       $trend = "stable";
-    }    
+    }
     $sendMode = "";
     $temp = bin2dec(substr($bitsequence,12,12));
     if (substr($bitsequence,12,1) eq "1") {
@@ -281,6 +282,34 @@ FHEMduino_Env_Parse($$)
     $temp = $temp / 10.0;
     $hum = (-1);
     $val = "T: $temp H: $hum B: $bat";
+  } elsif ($model eq "08") {      # TCM 97001
+      #Log3 $hash, 4, "FHEMduino_Env decoding TCM97001: $model";
+
+  #                /-------------------------- Sensor ID
+  #               /        /------------------ Battery state 0 == Ok
+  #              /        //------------------ unknown
+  #             /        //  / --------------- neg temp if 11, then temp xor 0x3fe / 00 if positiv
+  #            /        //  /  / ------------- 12 Bit Temperature
+  #           /        //  /  /           /--- unknown ?crc
+  #          /        //  /  /           //--- manual trigger = 1
+  #         /        //  /  /           //
+  #         01010000 0000  0010101110   10
+  # Bit     0        8 10  12            23
+    $SensorTyp = "TCM97001";
+    $hum = (-1);   # not supported
+    $channel = ""; # not supported
+    $trend = "";   # not supported
+    $bin = substr($bitsequence,0,8);
+    $deviceCode = sprintf('%X', oct("0b$bin"));
+    $bat = int(substr($bitsequence,8,1)) eq "0" ? "ok" : "critical";
+    $sendMode = int(substr($bitsequence,23,1)) eq "0" ? "automatic" : "manual";
+    $temp = bin2dec(substr($bitsequence,12,10));
+    if (substr($bitsequence,10,2) eq "11") {
+      $temp = $temp ^ 0x3fe;
+    }
+    $temp = $temp / 10.0;
+
+    $val = "T: $temp B: $bat";
   }
   else {
     Log3 $hash, 1, "FHEMduino_Env unknown model: $model";
@@ -290,10 +319,10 @@ FHEMduino_Env_Parse($$)
   if ($channel ne "") {
     $deviceCode = $deviceCode."_".$channel;
   }
-  
+
   my $def = $modules{FHEMduino_Env}{defptr}{$hash->{NAME} . "." . $deviceCode};
   $def = $modules{FHEMduino_Env}{defptr}{$deviceCode} if(!$def);
-  
+
   if(!$def) {
     Log3 $hash, 1, "FHEMduino_Env: UNDEFINED sensor $SensorTyp detected, code $deviceCode";
     return "UNDEFINED $SensorTyp"."_"."$deviceCode FHEMduino_Env $deviceCode";
@@ -302,9 +331,9 @@ FHEMduino_Env_Parse($$)
   $hash = $def;
   my $name = $hash->{NAME};
   return "" if(IsIgnored($name));
-  
-  Log3 $name, 4, "FHEMduino_Env: $name ($msg)";  
-  
+
+  Log3 $name, 4, "FHEMduino_Env: $name ($msg)";
+
   if($hash->{lastReceive} && (time() - $hash->{lastReceive} < $def->{minsecs} )) {
     if (($def->{lastMSG} ne $msg) && ($def->{equalMSG} > 0)) {
       Log3 $name, 4, "FHEMduino_Env: $name: $deviceCode no skipping due unequal message even if to short timedifference";
@@ -318,7 +347,7 @@ FHEMduino_Env_Parse($$)
     Log3 $name, 1, "FHEMduino_Env: $name: $deviceCode Cannot decode $msg";
     return "";
   }
-  
+
   if ($hash->{lastReceive} && (time() - $hash->{lastReceive} < 300)) {
     if ($hash->{lastValues} && (abs(abs($hash->{lastValues}{temperature}) - abs($temp)) > 5)) {
       Log3 $name, 4, "FHEMduino_Env: $name: $deviceCode Temperature jump too large";
@@ -340,7 +369,7 @@ FHEMduino_Env_Parse($$)
   my ($af, $td);
   if ($hum >= 0) {
     $hash->{lastValues}{humidity} = $hum;
-    # TD = Taupunkttemperatur in °C 
+    # TD = Taupunkttemperatur in °C
     # AF = absolute Feuchte in g Wasserdampf pro m3 Luft
     ($af, $td) = af_td($temp, $hum);
     $hash->{lastValues}{taupunkttemp} = $td;
@@ -400,16 +429,16 @@ af_td ($$)
 my ($T, $rh) = @_;
 
 # a = 7.5, b = 237.3 für T >= 0
-# a = 9.5, b = 265.5 für T < 0 über Eis (Frostpunkt)  
+# a = 9.5, b = 265.5 für T < 0 über Eis (Frostpunkt)
         my $a = ($T > 0) ? 7.5 : 9.5;
         my $b = ($T > 0) ? 237.3 : 265.5;
 
-# SDD = Sättigungsdampfdruck in hPa  
+# SDD = Sättigungsdampfdruck in hPa
 # SDD(T) = 6.1078 * 10^((a*T)/(b+T))
   my $SDD = 6.1078 * 10**(($a*$T)/($b+$T));
 # DD = Dampfdruck in hPa
 # DD(r,T) = r/100 * SDD(T)
-  my $DD  = $rh/100 * $SDD;  
+  my $DD  = $rh/100 * $SDD;
 # AF(r,TK) = 10^5 * mw/R* * DD(r,T)/TK; AF(TD,TK) = 10^5 * mw/R* * SDD(TD)/TK
 # R* = 8314.3 J/(kmol*K) (universelle Gaskonstante)
 # mw = 18.016 kg (Molekulargewicht des Wasserdampfes)
@@ -417,18 +446,18 @@ my ($T, $rh) = @_;
   my $AF  = (10**5) * (18.016 / 8314.3) * ($DD / (273.15 + $T));
   my $af  = sprintf( "%.1f",$AF); # Auf eine Nachkommastelle runden
 
- # TD(r,T) = b*v/(a-v) mit v(r,T) = log10(DD(r,T)/6.1078)  
+ # TD(r,T) = b*v/(a-v) mit v(r,T) = log10(DD(r,T)/6.1078)
   my $v   =  log10($DD/6.1078);
   my $TD  = $b*$v/($a-$v);
   my $td  = sprintf( "%.1f",$TD); # Auf eine Nachkommastelle runden
 
-# TD = Taupunkttemperatur in °C 
-# AF = absolute Feuchte in g Wasserdampf pro m3 Luft 
+# TD = Taupunkttemperatur in °C
+# AF = absolute Feuchte in g Wasserdampf pro m3 Luft
   return($af, $td);
-  
+
 }
 
-#sub 
+#sub
 #log10 {
 #        my $n = shift;
 #        return log($n)/log(10);
@@ -447,8 +476,8 @@ sub
 bin2dec($)
 {
   my $h = shift;
-  my $int = unpack("N", pack("B32",substr("0" x 32 . $h, -32))); 
-  return sprintf("%d", $int); 
+  my $int = unpack("N", pack("B32",substr("0" x 32 . $h, -32)));
+  return sprintf("%d", $int);
 }
 
 sub
@@ -458,7 +487,7 @@ binflip($)
   my $hlen = length($h);
   my $i = 0;
   my $flip = "";
-  
+
   for ($i=$hlen-1; $i >= 0; $i--) {
     $flip = $flip.substr($h,$i,1);
   }
@@ -483,7 +512,7 @@ binflip($)
     <code>define &lt;name&gt; FHEMduino_Env &lt;code&gt; [minsecs] [equalmsg]</code> <br>
 
     <br>
-    &lt;code&gt; is the housecode of the autogenerated address of the Env device and 
+    &lt;code&gt; is the housecode of the autogenerated address of the Env device and
 	is build by the channelnumber (1 to 3) and an autogenerated address build when including
 	the battery (adress will change every time changing the battery).<br>
     minsecs are the minimum seconds between two log entries or notifications

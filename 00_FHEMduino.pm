@@ -1,12 +1,12 @@
 ##############################################
-# $Id: 00_FHEMduino.pm 
+# $Id: 00_FHEMduino.pm
 # The file is taken from the fhemduino project
 # see http://www.fhemwiki.de/wiki/FHEMduino
 # and was modified by a few additions
 # to provide support for self build sensors.
 # The purpos is to use it as addition to the fhemduino
 # modules in combination with RFDuino
-# N. Butzek, S. Butzek, 2014 
+# N. Butzek, S. Butzek, 2014
 #
 
 package main;
@@ -109,7 +109,7 @@ FHEMduino_FingerprintFn($$)
   Log3 $name,5, "FingerprintFn Message: Name: $name  und Message: $msg";
   # Store only the "relevant" part, as the FHEMduino won't compute the checksum
   $msg = substr($msg, 8) if($msg =~ m/^81/ && length($msg) > 9);
- 
+
   return ($name, $msg);
 }
 
@@ -132,7 +132,7 @@ FHEMduino_Define($$)
 
   my $dev = $a[2];
   $dev .= "\@9600" if( $dev !~ m/\@/ );
-  
+
 #  $hash->{CMDS} = "";
   $hash->{Clients} = $clientsFHEMduino;
   $hash->{MatchList} = \%matchListFHEMduino;
@@ -147,7 +147,7 @@ FHEMduino_Define($$)
     $attr{$name}{dummy} = 1;
     return undef;
   }
-  
+
   $hash->{DeviceName} = $dev;
   my $ret = DevIo_OpenDev($hash, 0, "FHEMduino_DoInit");
   return $ret;
@@ -172,7 +172,7 @@ FHEMduino_Undef($$)
   }
 
   FHEMduino_Shutdown($hash);
-  DevIo_CloseDev($hash); 
+  DevIo_CloseDev($hash);
   return undef;
 }
 
@@ -312,7 +312,7 @@ FHEMduino_Get($@)
   return "No $a[1] for dummies" if(IsDummy($name));
 
   Log3 $name, 5, "$name: command for gets: " . $gets{$a[1]}[0] . " " . $arg;
-  
+
   FHEMduino_SimpleWrite($hash, $gets{$a[1]}[0] . $arg);
 
   ($err, $msg) = FHEMduino_ReadAnswer($hash, $a[1], 0, $gets{$a[1]}[1]);
@@ -438,7 +438,7 @@ FHEMduino_ReadAnswer($$$$)
     if($^O =~ m/Win/ && $hash->{USBDev}) {
       $hash->{USBDev}->read_const_time($to*1000); # set timeout (ms)
       # Read anstatt input sonst funzt read_const_time nicht.
-      $buf = $hash->{USBDev}->read(999);          
+      $buf = $hash->{USBDev}->read(999);
       return ("Timeout reading answer for get $arg", undef)
         if(length($buf) == 0);
 
@@ -578,7 +578,7 @@ FHEMduino_Read($)
   my $name = $hash->{NAME};
 
   my $FHEMduinodata = $hash->{PARTIAL};
-  Log3 $name, 5, "FHEMduino/RAW: $FHEMduinodata/$buf"; 
+  Log3 $name, 5, "FHEMduino/RAW: $FHEMduinodata/$buf";
   $FHEMduinodata .= $buf;
 
   while($FHEMduinodata =~ m/\n/) {
@@ -597,7 +597,7 @@ FHEMduino_Parse($$$$)
 
   my $rssi;
 ##Sven: Auch hier würde sich eine Anpassung auf Basis der oben definierten Regex lohnen. Da wird ja doppelt gemoppelt noch mal ausgewertet zu welchem Protokoll jetzt eine Nachricht vorliegt.
-## 
+##
 ##
   my $dmsg = $rmsg;
   if($dmsg =~ m/^[AFTKEHRStZri]([A-F0-9][A-F0-9])+$/) { # RSSI
@@ -623,7 +623,7 @@ FHEMduino_Parse($$$$)
   ### implement error checking here!
     Log3 $name, 4, "Dispatching OREGON Protokoll. Received: $dmsg";
     Dispatch($hash, $dmsg, undef);
-    return;		
+    return;
   }
 
   my $fn = substr($dmsg,0,1);
@@ -631,12 +631,12 @@ FHEMduino_Parse($$$$)
 
   if($fn eq "i" && $len >= 7) {           # IT
     $dmsg = lc($dmsg);
-  } 
+  }
   elsif($fn eq "E" && $len >= 2) {        # EZ6 Meteo
   ### implement error checking here!
   ;
   }
-  elsif($fn eq "W" && $len >= 12) {       # Weather sensors; allways filled up to 13 letters
+  elsif($fn eq "W" && $len >= 9) {       # Weather sensors; min 9 chars
     $dmsg = uc($dmsg);
   ### implement error checking here!
   ;
@@ -723,7 +723,7 @@ FHEMduino_SimpleWrite(@)
   return if(!$hash);
   if($hash->{TYPE} eq "FHEMduino_RFR") {
     # Prefix $msg with RRBBU and return the corresponding FHEMduino hash.
-    ($hash, $msg) = FHEMduino_RFR_AddPrefix($hash, $msg); 
+    ($hash, $msg) = FHEMduino_RFR_AddPrefix($hash, $msg);
   }
 
   my $name = $hash->{NAME};
@@ -765,22 +765,22 @@ FHEMduino_Attr(@)
   href="https://github.com/mdorenka">link</a>) they are capable
   to receive and send different 433MHz protocols.
   <br><br>
-  
+
   The following protocols are available:
   <br><br>
-  
+
   Date / Time protocol  <br>
   DCF-77 --> 14_FHEMduino_DCF77.pm <br>
   <br><br>
-  
+
   Wireless switches  <br>
   PT2262 (IT / ELRO switches) --> 14_FHEMduino_PT2262.pm <br>
   <br><br>
-  
+
   Smoke detector   <br>
   Flamingo FA20RF / ELRO RM150RF  --> 14_FHEMduino_FA20RF.pm<br>
   <br><br>
-  
+
   Door bells   <br>
   Heidemann HX Series --> 14_FHEMduino_HX.pm<br>
   Tchibo TCM --> 14_FHEMduino_TCM.pm<br>
