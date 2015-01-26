@@ -7,9 +7,12 @@ Counterpart of RFDuino, it's the code for FHEM to work with the data received fr
 Supported Devices
 ======
 
-TCM97001 Weather sensor
-All PT2262 and similar devices
-All PT2262 and similar remote switches
-Oregon Scientific v2 Devices
-Arduino Sensor
-Logilink, KW9010, Pearl NC Weather sensor
+|Device | Function|
+| ------------- | ----------- |
+|TCM97001 | Weather sensor
+|PT2262 Devices | Remote switches, door/window sensors|
+|Oregon Scientific v2 Devices | Weather sensor |
+|Logilink | Weather sensor |
+|KW9010 | Weather sensor |
+|Pearl NC | Weather sensor |
+|Arduino Sensor | multi purpose sensor based on arduino |
