@@ -1,12 +1,12 @@
 ##############################################
-# $Id: 00_FHEMduino.pm 
-# The file is taken from the fhemduino project
+# $Id: 00_SIGNALduino.pm 
+# The file is taken from the FHEMduino project
 # see http://www.fhemwiki.de/wiki/FHEMduino
-# and was modified by a few additions
-# to provide support for self build sensors.
-# The purpos is to use it as addition to the fhemduino
+# and was modified
+# to provide support for raw message handling
+# The purpos is to use it as addition to the SIGNALduino
 # modules in combination with RFDuino
-# N. Butzek, S. Butzek, 2014 
+# N. Butzek, S. Butzek, 2014-2015 
 #
 
 package main;
@@ -15,19 +15,19 @@ use strict;
 use warnings;
 use Time::HiRes qw(gettimeofday);
 
-sub FHEMduino_Attr(@);
-sub FHEMduino_Clear($);
-sub FHEMduino_HandleCurRequest($$);
-sub FHEMduino_HandleWriteQueue($);
-sub FHEMduino_Parse($$$$);
-sub FHEMduino_Read($);
-sub FHEMduino_ReadAnswer($$$$);
-sub FHEMduino_Ready($);
-sub FHEMduino_Write($$$);
+sub SIGNALduino_Attr(@);
+sub SIGNALduino_Clear($);
+sub SIGNALduino_HandleCurRequest($$);
+sub SIGNALduino_HandleWriteQueue($);
+sub SIGNALduino_Parse($$$$);
+sub SIGNALduino_Read($);
+sub SIGNALduino_ReadAnswer($$$$);
+sub SIGNALduino_Ready($);
+sub SIGNALduino_Write($$$);
 
-sub FHEMduino_SimpleWrite(@);
+sub SIGNALduino_SimpleWrite(@);
 
-my %gets = (    # Name, Data to send to the FHEMduino, Regexp for the answer
+my %gets = (    # Name, Data to send to the SIGNALduino, Regexp for the answer
   "version"  => ["V", '^V .*'],
   "raw"      => ["", '.*'],
   "uptime"   => ["t", '^[0-9A-F]{8}[\r\n]*$' ],
@@ -38,13 +38,6 @@ my %gets = (    # Name, Data to send to the FHEMduino, Regexp for the answer
   "HXParms"  => ["hp", '.*' ]
 );
 
-#my %sets = (
-#  "raw"       => "",
-#  "led"       => "",
-#  "patable"   => "",
-#  "time"      => "",
-#  "flash"     => ""
-#);
 
 my %sets = (
   "raw"       => "",
@@ -52,76 +45,61 @@ my %sets = (
   "reset"     => ""
 );
 
-my $clientsFHEMduino = ":IT:CUL_TX:OREGON:FHEMduino_Env:FHEMduino_EZ6:FHEMduino_Oregon:FHEMduino_PT2262:FHEMduino_FA20RF:FHEMduino_TCM:FHEMduino_HX:FHEMduino_DCF77:FHEMduino_Gas:FHEMduino_AS:FHEMduino_ARC";
+my $clientsSIGNALduino = "";
 
-my %matchListFHEMduino = (
-    "1:IT"                 => "^i......\$",
-    "2:CUL_TX"             => "^TX..........",        # Need TX to avoid FHTTK
-    "3:FHEMduino_Env"      => "W.*\$",
-    "4:FHEMduino_EZ6"      => "E...........\$",       # Special Sketch needed. See FHEMWIKI
-    "5:FHEMduino_Oregon"   => "OSV2:.*\$",
-    "6:FHEMduino_PT2262"   => "IR.*\$",
-    "7:FHEMduino_FA20RF"   => "F:.*\$",
-    "8:FHEMduino_TCM"      => "M.....\$",
-    "9:FHEMduino_HX"       => "H...\$",
-    "10:FHEMduino_DCF77"   => "D...............\$",
-    "11:OREGON"            => "^(3[8-9A-F]|[4-6][0-9A-F]|7[0-8]).*",
-    "12:FHEMduino_Gas"     => "G...........\$",      # Special Sketch needed. See GitHub GAS_I2C or FHEMWIKI
-    "13:FHEMduino_AS"      => "AS.*\$", #Arduino based Sensors
-    "14:FHEMduino_ARC"     => "AR.*\$", #ARC protocol switches like IT selflearn
+my %matchListSIGNALduino = (
+    "1:CUL_TX"             => "^TX..........",        # Need TX to avoid FHTTK
+    "2:SIGNALduino_Env"      => "W.*\$",
+    "3:SIGNALduino_PT2262"   => "IR.*\$",
+    "4:SIGNALduino_HX"       => "H...\$",
+    "5:OREGON"            => "^(3[8-9A-F]|[4-6][0-9A-F]|7[0-8]).*",
+    "6:SIGNALduino_AS"      => "AS.*\$", #Arduino based Sensors
+    "7:SIGNALduino_ARC"     => "AR.*\$", #ARC protocol switches like IT selflearn
 );
+
+
 ##Sven: Vorschlag sollten wir hier nicht mal das Protokoll, also das Nachrichtenformat etwas abändern. Bem OSV2 z.B. fand ich ganz gut, dass die ersten beiden Werte die Länge der Nachricht wiederspiegeln (HEX)
 ##      Darauf kann man ja ganz gut eine Regex bauen um das Protokoll zu ermitteln. Dass wir hier machchmal einen Buchstaben, manchmal zwei und hin und wieder auch eine konkrete Länge haben macht es etwas unübersichlicht.
 
 sub
-FHEMduino_Initialize($)
+SIGNALduino_Initialize($)
 {
   my ($hash) = @_;
 
   require "$attr{global}{modpath}/FHEM/DevIo.pm";
 
 # Provider
-  $hash->{ReadFn}  = "FHEMduino_Read";
-  $hash->{WriteFn} = "FHEMduino_Write";
-  $hash->{ReadyFn} = "FHEMduino_Ready";
+  $hash->{ReadFn}  = "SIGNALduino_Read";
+  $hash->{WriteFn} = "SIGNALduino_Write";
+  $hash->{ReadyFn} = "SIGNALduino_Ready";
 
 # Normal devices
-  $hash->{DefFn}   = "FHEMduino_Define";
-  $hash->{FingerprintFn} = "FHEMduino_FingerprintFn";
-  $hash->{UndefFn} = "FHEMduino_Undef";
-  $hash->{GetFn}   = "FHEMduino_Get";
-  $hash->{SetFn}   = "FHEMduino_Set";
-  $hash->{AttrFn}  = "FHEMduino_Attr";
-  $hash->{AttrList}= "Clients MatchList "
+  $hash->{DefFn}  		 	= "SIGNALduino_Define";
+  $hash->{FingerprintFn} 	= "SIGNALduino_FingerprintFn";
+  $hash->{UndefFn} 		 	= "SIGNALduino_Undef";
+  $hash->{GetFn}   			= "SIGNALduino_Get";
+  $hash->{SetFn}   			= "SIGNALduino_Set";
+  $hash->{AttrFn}  			= "SIGNALduino_Attr";
+  $hash->{AttrList}			= "Clients MatchList "
                       ." hexFile"
                       ." initCommands"
                       ." flashCommand"
-                      ." $readingFnAttributes";
+                      .$readingFnAttributes;
 
-  $hash->{ShutdownFn} = "FHEMduino_Shutdown";
+  $hash->{ShutdownFn} = "SIGNALduino_Shutdown";
 
 }
 
-sub
-FHEMduino_FingerprintFn($$)
-{
-  my ($name, $msg) = @_;
-  Log3 $name,5, "FingerprintFn Message: Name: $name  und Message: $msg";
-  # Store only the "relevant" part, as the FHEMduino won't compute the checksum
-  $msg = substr($msg, 8) if($msg =~ m/^81/ && length($msg) > 9);
- 
-  return ($name, $msg);
-}
 
 #####################################
 sub
-FHEMduino_Define($$)
+SIGNALduino_Define($$)
 {
   my ($hash, $def) = @_;
   my @a = split("[ \t][ \t]*", $def);
 
   if(@a != 3) {
-    my $msg = "wrong syntax: define <name> FHEMduino {none | devicename[\@baudrate] | devicename\@directio | hostname:port}";
+    my $msg = "wrong syntax: define <name> SIGNALduino {none | devicename[\@baudrate] | devicename\@directio | hostname:port}";
     Log3 undef, 2, $msg;
     return $msg;
   }
@@ -134,8 +112,8 @@ FHEMduino_Define($$)
   $dev .= "\@9600" if( $dev !~ m/\@/ );
   
 #  $hash->{CMDS} = "";
-  $hash->{Clients} = $clientsFHEMduino;
-  $hash->{MatchList} = \%matchListFHEMduino;
+  $hash->{Clients} = $clientsSIGNALduino;
+  $hash->{MatchList} = \%matchListSIGNALduino;
 
   if( !defined( $attr{$name}{flashCommand} ) ) {
 #    $attr{$name}{flashCommand} = "avrdude -p atmega328P -c arduino -P [PORT] -D -U flash:w:[HEXFILE] 2>[LOGFILE]"
@@ -149,13 +127,13 @@ FHEMduino_Define($$)
   }
   
   $hash->{DeviceName} = $dev;
-  my $ret = DevIo_OpenDev($hash, 0, "FHEMduino_DoInit");
+  my $ret = DevIo_OpenDev($hash, 0, "SIGNALduino_DoInit");
   return $ret;
 }
 
 #####################################
 sub
-FHEMduino_Undef($$)
+SIGNALduino_Undef($$)
 {
   my ($hash, $arg) = @_;
   my $name = $hash->{NAME};
@@ -171,27 +149,27 @@ FHEMduino_Undef($$)
       }
   }
 
-  FHEMduino_Shutdown($hash);
+  SIGNALduino_Shutdown($hash);
   DevIo_CloseDev($hash); 
   return undef;
 }
 
 #####################################
 sub
-FHEMduino_Shutdown($)
+SIGNALduino_Shutdown($)
 {
   my ($hash) = @_;
-  FHEMduino_SimpleWrite($hash, "X00");  # Switch reception off, it may hang up the FHEMduino
+  SIGNALduino_SimpleWrite($hash, "X00");  # Switch reception off, it may hang up the SIGNALduino
   return undef;
 }
 
 #####################################
 sub
-FHEMduino_Set($@)
+SIGNALduino_Set($@)
 {
   my ($hash, @a) = @_;
 
-  return "\"set FHEMduino\" needs at least one parameter" if(@a < 2);
+  return "\"set SIGNALduino\" needs at least one parameter" if(@a < 2);
   return "Unknown argument $a[1], choose one of " . join(" ", sort keys %sets)
   	if(!defined($sets{$a[1]}));
 
@@ -204,7 +182,7 @@ FHEMduino_Set($@)
 
   if($cmd eq "raw") {
     Log3 $name, 4, "set $name $cmd $arg";
-    FHEMduino_SimpleWrite($hash, $arg);
+    SIGNALduino_SimpleWrite($hash, $arg);
   } elsif( $cmd eq "flash" ) {
     my @args = split(' ', $arg);
     my $log = "";
@@ -268,23 +246,23 @@ FHEMduino_Set($@)
       $log .= "\n\nNo flashCommand found. Please define this attribute.\n\n";
     }
 
-    DevIo_OpenDev($hash, 0, "FHEMduino_DoInit");
+    DevIo_OpenDev($hash, 0, "SIGNALduino_DoInit");
     $log .= "$name opened\n";
 
     return $log;
 
   } elsif ($cmd =~ m/reset/i) {
-    return FHEMduino_ResetDevice($hash);
+    return SIGNALduino_ResetDevice($hash);
   } elsif( $cmd eq "led" ) {
     return "Expecting a 0-padded hex number" if((length($arg)&1) == 1);
     Log3 $name, 3, "set $name $cmd $arg";
     $arg = "l$arg";
-    FHEMduino_SimpleWrite($hash, $arg);
+    SIGNALduino_SimpleWrite($hash, $arg);
   } elsif( $cmd eq "patable" ) {
     return "Expecting a 0-padded hex number" if((length($arg)&1) == 1);
     Log3 $name, 3, "set $name $cmd $arg";
     $arg = "x$arg";
-    FHEMduino_SimpleWrite($hash, $arg);
+    SIGNALduino_SimpleWrite($hash, $arg);
   } else {
     return "Unknown argument $cmd, choose one of ".$list;
   }
@@ -294,7 +272,7 @@ FHEMduino_Set($@)
 
 #####################################
 sub
-FHEMduino_Get($@)
+SIGNALduino_Get($@)
 {
   my ($hash, @a) = @_;
   my $type = $hash->{TYPE};
@@ -313,9 +291,9 @@ FHEMduino_Get($@)
 
   Log3 $name, 5, "$name: command for gets: " . $gets{$a[1]}[0] . " " . $arg;
   
-  FHEMduino_SimpleWrite($hash, $gets{$a[1]}[0] . $arg);
+  SIGNALduino_SimpleWrite($hash, $gets{$a[1]}[0] . $arg);
 
-  ($err, $msg) = FHEMduino_ReadAnswer($hash, $a[1], 0, $gets{$a[1]}[1]);
+  ($err, $msg) = SIGNALduino_ReadAnswer($hash, $a[1], 0, $gets{$a[1]}[1]);
   Log3 $name, 5, "$name: received message for gets: " . $msg;
 
   if(!defined($msg)) {
@@ -340,14 +318,14 @@ FHEMduino_Get($@)
 }
 
 sub
-FHEMduino_Clear($)
+SIGNALduino_Clear($)
 {
   my $hash = shift;
 
   # Clear the pipe
   $hash->{RA_Timeout} = 0.1;
   for(;;) {
-    my ($err, undef) = FHEMduino_ReadAnswer($hash, "Clear", 0, undef);
+    my ($err, undef) = SIGNALduino_ReadAnswer($hash, "Clear", 0, undef);
     last if($err && $err =~ m/^Timeout/);
   }
   delete($hash->{RA_Timeout});
@@ -355,37 +333,37 @@ FHEMduino_Clear($)
 
 #####################################
 sub
-FHEMduino_ResetDevice($)
+SIGNALduino_ResetDevice($)
 {
   my ($hash) = @_;
 
   DevIo_CloseDev($hash);
-  my $ret = DevIo_OpenDev($hash, 0, "FHEMduino_DoInit");
+  my $ret = DevIo_OpenDev($hash, 0, "SIGNALduino_DoInit");
 
   return $ret;
 }
 
 #####################################
 sub
-FHEMduino_DoInit($)
+SIGNALduino_DoInit($)
 {
   my $hash = shift;
   my $name = $hash->{NAME};
   my $err;
   my $msg = undef;
 
-  FHEMduino_Clear($hash);
+  SIGNALduino_Clear($hash);
   my ($ver, $try) = ("", 0);
   while ($try++ < 3 && $ver !~ m/^V/) {
-    FHEMduino_SimpleWrite($hash, "V");
-    ($err, $ver) = FHEMduino_ReadAnswer($hash, "Version", 0, undef);
+    SIGNALduino_SimpleWrite($hash, "V");
+    ($err, $ver) = SIGNALduino_ReadAnswer($hash, "Version", 0, undef);
     return "$name: $err" if($err && ($err !~ m/Timeout/ || $try == 3));
     $ver = "" if(!$ver);
   }
 
   if($ver !~ m/^V/) {
     $attr{$name}{dummy} = 1;
-    $msg = "Not an FHEMduino device, got for V:  $ver";
+    $msg = "Not an SIGNALduino device, got for V:  $ver";
     Log3 $name, 1, $msg;
     return $msg;
   }
@@ -394,7 +372,7 @@ FHEMduino_DoInit($)
 
   # Cmd-String feststellen
 
-  my $cmds = FHEMduino_Get($hash, $name, "cmds", 0);
+  my $cmds = SIGNALduino_Get($hash, $name, "cmds", 0);
   $cmds =~ s/$name cmds =>//g;
   $cmds =~ s/ //g;
   $hash->{CMDS} = $cmds;
@@ -402,7 +380,7 @@ FHEMduino_DoInit($)
 #  if( my $initCommandsString = AttrVal($name, "initCommands", undef) ) {
 #    my @initCommands = split(' ', $initCommandsString);
 #    foreach my $command (@initCommands) {
-#      FHEMduino_SimpleWrite($hash, $command);
+#      SIGNALduino_SimpleWrite($hash, $command);
 #    }
 #  }
   $hash->{STATE} = "Initialized";
@@ -417,19 +395,19 @@ FHEMduino_DoInit($)
 # This is a direct read for commands like get
 # Anydata is used by read file to get the filesize
 sub
-FHEMduino_ReadAnswer($$$$)
+SIGNALduino_ReadAnswer($$$$)
 {
   my ($hash, $arg, $anydata, $regexp) = @_;
   my $type = $hash->{TYPE};
 
-  while($hash->{TYPE} eq "FHEMduino_RFR") {   # Look for the first "real" FHEMduino
+  while($hash->{TYPE} eq "SIGNALduino_RFR") {   # Look for the first "real" SIGNALduino
     $hash = $hash->{IODev};
   }
 
   return ("No FD", undef)
         if(!$hash || ($^O !~ /Win/ && !defined($hash->{FD})));
 
-  my ($mFHEMduinodata, $rin) = ("", '');
+  my ($mSIGNALduinodata, $rin) = ("", '');
   my $buf;
   my $to = 3;                                         # 3 seconds timeout
   $to = $hash->{RA_Timeout} if($hash->{RA_Timeout});  # ...or less
@@ -452,7 +430,7 @@ FHEMduino_ReadAnswer($$$$)
         next if ($! == EAGAIN() || $! == EINTR() || $! == 0);
         my $err = $!;
         DevIo_Disconnected($hash);
-        return("FHEMduino_ReadAnswer $arg: $err", undef);
+        return("SIGNALduino_ReadAnswer $arg: $err", undef);
       }
       return ("Timeout reading answer for get $arg", undef)
         if($nfound == 0);
@@ -462,17 +440,17 @@ FHEMduino_ReadAnswer($$$$)
     }
 
     if($buf) {
-      Log3 $hash->{NAME}, 5, "FHEMduino/RAW (ReadAnswer): $buf";
-      $mFHEMduinodata .= $buf;
+      Log3 $hash->{NAME}, 5, "SIGNALduino/RAW (ReadAnswer): $buf";
+      $mSIGNALduinodata .= $buf;
     }
-    $mFHEMduinodata = FHEMduino_RFR_DelPrefix($mFHEMduinodata) if($type eq "FHEMduino_RFR");
+    $mSIGNALduinodata = SIGNALduino_RFR_DelPrefix($mSIGNALduinodata) if($type eq "SIGNALduino_RFR");
 
     # \n\n is socat special
-    if($mFHEMduinodata =~ m/\r\n/ || $anydata || $mFHEMduinodata =~ m/\n\n/ ) {
-      if($regexp && $mFHEMduinodata !~ m/$regexp/) {
-        FHEMduino_Parse($hash, $hash, $hash->{NAME}, $mFHEMduinodata);
+    if($mSIGNALduinodata =~ m/\r\n/ || $anydata || $mSIGNALduinodata =~ m/\n\n/ ) {
+      if($regexp && $mSIGNALduinodata !~ m/$regexp/) {
+        SIGNALduino_Parse($hash, $hash, $hash->{NAME}, $mSIGNALduinodata);
       } else {
-        return (undef, $mFHEMduinodata)
+        return (undef, $mSIGNALduinodata)
       }
     }
   }
@@ -482,7 +460,7 @@ FHEMduino_ReadAnswer($$$$)
 #####################################
 # Check if the 1% limit is reached and trigger notifies
 sub
-FHEMduino_XmitLimitCheck($$)
+SIGNALduino_XmitLimitCheck($$)
 {
   my ($hash,$fn) = @_;
   my $now = time();
@@ -499,7 +477,7 @@ FHEMduino_XmitLimitCheck($$)
   if(@b > 163) {          # Maximum nr of transmissions per hour (unconfirmed).
 
     my $name = $hash->{NAME};
-    Log3 $name, 2, "FHEMduino TRANSMIT LIMIT EXCEEDED";
+    Log3 $name, 2, "SIGNALduino TRANSMIT LIMIT EXCEEDED";
     DoTrigger($name, "TRANSMIT LIMIT EXCEEDED");
 
   } else {
@@ -514,7 +492,7 @@ FHEMduino_XmitLimitCheck($$)
 
 #####################################
 sub
-FHEMduino_Write($$$)
+SIGNALduino_Write($$$)
 {
   my ($hash,$fn,$msg) = @_;
 
@@ -523,31 +501,31 @@ FHEMduino_Write($$$)
   Log3 $name, 5, "$hash->{NAME} sending $fn$msg";
   my $bstring = "$fn$msg";
 
-  FHEMduino_SimpleWrite($hash, $bstring);
+  SIGNALduino_SimpleWrite($hash, $bstring);
 
 }
 
 sub
-FHEMduino_SendFromQueue($$)
+SIGNALduino_SendFromQueue($$)
 {
   my ($hash, $bstring) = @_;
   my $name = $hash->{NAME};
 
   if($bstring ne "") {
-	FHEMduino_XmitLimitCheck($hash,$bstring);
-    FHEMduino_SimpleWrite($hash, $bstring);
+	SIGNALduino_XmitLimitCheck($hash,$bstring);
+    SIGNALduino_SimpleWrite($hash, $bstring);
   }
 
   ##############
   # Write the next buffer not earlier than 0.23 seconds
   # = 3* (12*0.8+1.2+1.0*5*9+0.8+10) = 226.8ms
-  # else it will be sent too early by the FHEMduino, resulting in a collision
-  InternalTimer(gettimeofday()+0.3, "FHEMduino_HandleWriteQueue", $hash, 1);
+  # else it will be sent too early by the SIGNALduino, resulting in a collision
+  InternalTimer(gettimeofday()+0.3, "SIGNALduino_HandleWriteQueue", $hash, 1);
 }
 
 #####################################
 sub
-FHEMduino_HandleWriteQueue($)
+SIGNALduino_HandleWriteQueue($)
 {
   my $hash = shift;
   my $arr = $hash->{QUEUE};
@@ -559,9 +537,9 @@ FHEMduino_HandleWriteQueue($)
     }
     my $bstring = $arr->[0];
     if($bstring eq "") {
-      FHEMduino_HandleWriteQueue($hash);
+      SIGNALduino_HandleWriteQueue($hash);
     } else {
-      FHEMduino_SendFromQueue($hash, $bstring);
+      SIGNALduino_SendFromQueue($hash, $bstring);
     }
   }
 }
@@ -569,7 +547,7 @@ FHEMduino_HandleWriteQueue($)
 #####################################
 # called from the global loop, when the select for hash->{FD} reports data
 sub
-FHEMduino_Read($)
+SIGNALduino_Read($)
 {
   my ($hash) = @_;
 
@@ -577,21 +555,21 @@ FHEMduino_Read($)
   return "" if(!defined($buf));
   my $name = $hash->{NAME};
 
-  my $FHEMduinodata = $hash->{PARTIAL};
-  Log3 $name, 5, "FHEMduino/RAW: $FHEMduinodata/$buf"; 
-  $FHEMduinodata .= $buf;
+  my $SIGNALduinodata = $hash->{PARTIAL};
+  Log3 $name, 5, "SIGNALduino/RAW: $SIGNALduinodata/$buf"; 
+  $SIGNALduinodata .= $buf;
 
-  while($FHEMduinodata =~ m/\n/) {
+  while($SIGNALduinodata =~ m/\n/) {
     my $rmsg;
-    ($rmsg,$FHEMduinodata) = split("\n", $FHEMduinodata, 2);
+    ($rmsg,$SIGNALduinodata) = split("\n", $SIGNALduinodata, 2);
     $rmsg =~ s/\r//;
-    FHEMduino_Parse($hash, $hash, $name, $rmsg) if($rmsg);
+    SIGNALduino_Parse($hash, $hash, $name, $rmsg) if($rmsg);
   }
-  $hash->{PARTIAL} = $FHEMduinodata;
+  $hash->{PARTIAL} = $SIGNALduinodata;
 }
 
 sub
-FHEMduino_Parse($$$$)
+SIGNALduino_Parse($$$$)
 {
   my ($hash, $iohash, $name, $rmsg) = @_;
 
@@ -611,7 +589,7 @@ FHEMduino_Parse($$$$)
   }
 
   ###########################################
-  #Translate Message from FHEMduino to FHZ
+  #Translate Message from SIGNALduino to FHZ
   next if(!$dmsg || length($dmsg) < 1);            # Bogus messages
 
   if($dmsg =~ m/^[0-9A-F]{4}U./) {                 # RF_ROUTER
@@ -699,11 +677,11 @@ FHEMduino_Parse($$$$)
 
 #####################################
 sub
-FHEMduino_Ready($)
+SIGNALduino_Ready($)
 {
   my ($hash) = @_;
 
-  return DevIo_OpenDev($hash, 1, "FHEMduino_DoInit")
+  return DevIo_OpenDev($hash, 1, "SIGNALduino_DoInit")
                 if($hash->{STATE} eq "disconnected");
 
   # This is relevant for windows/USB only
@@ -717,13 +695,13 @@ FHEMduino_Ready($)
 
 ########################
 sub
-FHEMduino_SimpleWrite(@)
+SIGNALduino_SimpleWrite(@)
 {
   my ($hash, $msg, $nonl) = @_;
   return if(!$hash);
-  if($hash->{TYPE} eq "FHEMduino_RFR") {
-    # Prefix $msg with RRBBU and return the corresponding FHEMduino hash.
-    ($hash, $msg) = FHEMduino_RFR_AddPrefix($hash, $msg); 
+  if($hash->{TYPE} eq "SIGNALduino_RFR") {
+    # Prefix $msg with RRBBU and return the corresponding SIGNALduino hash.
+    ($hash, $msg) = SIGNALduino_RFR_AddPrefix($hash, $msg); 
   }
 
   my $name = $hash->{NAME};
@@ -740,7 +718,7 @@ FHEMduino_SimpleWrite(@)
 }
 
 sub
-FHEMduino_Attr(@)
+SIGNALduino_Attr(@)
 {
   my @a = @_;
 
@@ -752,47 +730,44 @@ FHEMduino_Attr(@)
 =pod
 =begin html
 
-<a name="FHEMduino"></a>
-<h3>FHEMduino</h3>
+<a name="SIGNALduino"></a>
+<h3>SIGNALduino</h3>
 <ul>
 
   <table>
   <tr><td>
-  The FHEMduino ia based on an idea from mdorenka published at <a
+  The SIGNALduino ia based on an idea from mdorenka published at <a
   href="http://forum.fhem.de/index.php/topic,17196.0.html">FHEM Forum</a>.
 
   With the opensource firmware (see this <a
-  href="https://github.com/mdorenka">link</a>) they are capable
-  to receive and send different 433MHz protocols.
+  href="https://github.com/RFD-FHEM/RFDuino">link</a>) they are capable
+  to receive and send different wireless protocols.
   <br><br>
   
   The following protocols are available:
   <br><br>
   
-  Date / Time protocol  <br>
-  DCF-77 --> 14_FHEMduino_DCF77.pm <br>
-  <br><br>
   
   Wireless switches  <br>
-  PT2262 (IT / ELRO switches) --> 14_FHEMduino_PT2262.pm <br>
+  PT2262 (IT / ELRO switches) --> 14_SIGNALduino_PT2262.pm <br>
   <br><br>
   
   Smoke detector   <br>
-  Flamingo FA20RF / ELRO RM150RF  --> 14_FHEMduino_FA20RF.pm<br>
+  Flamingo FA20RF / ELRO RM150RF  --> 14_SIGNALduino_FA20RF.pm<br>
   <br><br>
   
   Door bells   <br>
-  Heidemann HX Series --> 14_FHEMduino_HX.pm<br>
-  Tchibo TCM --> 14_FHEMduino_TCM.pm<br>
+  Heidemann HX Series --> 14_SIGNALduino_HX.pm<br>
+  Tchibo TCM --> 14_SIGNALduino_TCM.pm<br>
   <br><br>
 
   Temperatur / humidity sensors  <br>
-  KW9010  --> 14_FHEMduino_Env.pm<br>
-  PEARL NC7159, LogiLink WS0002  --> 14_FHEMduino_Env.pm<br>
-  EUROCHRON / Tchibo  --> 14_FHEMduino_Env.pm<br>
-  LIFETEC  --> 14_FHEMduino_Env.pm<br>
-  TX70DTH  --> 14_FHEMduino_Env.pm<br>
-  AURIOL   --> 14_FHEMduino_Env.pm<br>
+  KW9010  --> 14_SIGNALduino_Env.pm<br>
+  PEARL NC7159, LogiLink WS0002  --> 14_SIGNALduino_Env.pm<br>
+  EUROCHRON / Tchibo  --> 14_SIGNALduino_Env.pm<br>
+  LIFETEC  --> 14_SIGNALduino_Env.pm<br>
+  TX70DTH  --> 14_SIGNALduino_Env.pm<br>
+  AURIOL   --> 14_SIGNALduino_Env.pm<br>
   Intertechno TX2/3/4  --> CUL_TX.pm<br>
   <br><br>
 
@@ -808,17 +783,17 @@ FHEMduino_Attr(@)
   </td></tr>
   </table>
 
-  <a name="FHEMduinodefine"></a>
+  <a name="SIGNALduinodefine"></a>
   <b>Define</b>
   <ul>
-    <code>define &lt;name&gt; FHEMduino &lt;device&gt; &lt;FHTID&gt;</code> <br>
+    <code>define &lt;name&gt; SIGNALduino &lt;device&gt; &lt;FHTID&gt;</code> <br>
     <br>
-    USB-connected devices (FHEMduino/CUR/CUN):<br><ul>
-      &lt;device&gt; specifies the serial port to communicate with the FHEMduino.
+    USB-connected devices (SIGNALduino):<br><ul>
+      &lt;device&gt; specifies the serial port to communicate with the SIGNALduino.
 	  The name of the serial-device depends on your distribution, under
       linux the cdc_acm kernel module is responsible, and usually a
       /dev/ttyACM0 device will be created. If your distribution does not have a
-      cdc_acm module, you can force usbserial to handle the FHEMduino by the
+      cdc_acm module, you can force usbserial to handle the SIGNALduino by the
       following command:<ul>modprobe usbserial vendor=0x03eb
       product=0x204b</ul>In this case the device is most probably
       /dev/ttyUSB0.<br><br>
@@ -835,13 +810,13 @@ FHEMduino_Attr(@)
   </ul>
   <br>
 
-  <a name="FHEMduinoset"></a>
+  <a name="SIGNALduinoset"></a>
   <b>Set </b>
   <ul>
     <li>raw<br>
-        Issue a FHEMduino firmware command.  See the <a
-        href="http://FHEMduinofw.de/commandref.html">this</a> document
-        for details on FHEMduino commands.
+        Issue a SIGNALduino firmware command.  See the <a
+        href="http://SIGNALduinofw.de/commandref.html">this</a> document
+        for details on SIGNALduino commands.
     </li><br>
 
     <li>flash [hexFile]<br>
@@ -877,32 +852,32 @@ FHEMduino_Attr(@)
     </li><br>
 
   </ul>
-  <a name="FHEMduinoget"></a>
+  <a name="SIGNALduinoget"></a>
   <b>Get</b>
   <ul>
     <li>version<br>
-        return the FHEMduino firmware version
+        return the SIGNALduino firmware version
         </li><br>
     <li>raw<br>
-        Issue a FHEMduino firmware command, and wait for one line of data returned by
-        the FHEMduino. See the FHEMduino firmware README document for details on FHEMduino
+        Issue a SIGNALduino firmware command, and wait for one line of data returned by
+        the SIGNALduino. See the SIGNALduino firmware README document for details on SIGNALduino
         commands.
         </li><br>
     <li>cmds<br>
-        Depending on the firmware installed, FHEMduinos have a different set of
+        Depending on the firmware installed, SIGNALduinos have a different set of
         possible commands. Please refer to the README of the firmware of your
-        FHEMduino to interpret the response of this command. See also the raw-
+        SIGNALduino to interpret the response of this command. See also the raw-
         command.
         </li><br>
   </ul>
 
-  <a name="FHEMduinoattr"></a>
+  <a name="SIGNALduinoattr"></a>
   <b>Attributes</b>
   <ul>
     <li><a href="#do_not_notify">do_not_notify</a></li>
     <li><a href="#attrdummy">dummy</a></li>
     <li><a href="#showtime">showtime</a></li>
-    <li><a href="#model">model</a> (FHEMduino,CUN,CUR)</li>
+    <li><a href="#model">model</a> (SIGNALduino,CUN,CUR)</li>
   </ul>
   <br>
 </ul>
