@@ -14,6 +14,7 @@ package main;
 use strict;
 use warnings;
 use Time::HiRes qw(gettimeofday);
+use Data::Dumper; 
 
 sub SIGNALduino_Attr(@);
 sub SIGNALduino_Clear($);
@@ -55,6 +56,36 @@ my %matchListSIGNALduino = (
 #    "5:OREGON"            => "^(3[8-9A-F]|[4-6][0-9A-F]|7[0-8]).*",
 #    "6:SIGNALduino_AS"      => "AS.*\$", #Arduino based Sensors
 #    "7:SIGNALduino_ARC"     => "AR.*\$", #ARC protocol switches like IT selflearn
+);
+
+		#protoID[0]=(s_sigid){-4,-8,-18,500,0,twostate}; // Logi
+		#protoID[1]=(s_sigid){-4,-8,-18,500,0,twostate}; // TCM 97001
+		#protoID[2]=(s_sigid){-1,-2,-18,500,0,twostate}; // AS
+		#protoID[3]=(s_sigid){-1,3,-30,pattern[clock][0],0,tristate}; // IT old
+
+
+my %ProtocoolListSIGNALduino  = (
+    "EV1527type"    => [
+        {
+            id          	=> '0',
+			lowfact         => '-4',
+            highfact        => '-8',
+            syncfact    	=> '-18',
+			clock     		=> '500',
+			format     		=> 'twostate',
+			
+        },
+    ],
+    "pt2262"    => [
+        {
+            id          	=> '0',
+			lowfact         => '-1',
+            highfact        => '-3',
+            syncfact    	=> '-30',
+			clock     		=> 'auto',
+			format 			=> 'tristate',
+        },
+    ],	
 );
 
 
@@ -593,6 +624,26 @@ SIGNALduino_Parse($$$$@)
 #  }
 
 ### Implement filtering signal types here ###
+
+
+while ( my ($prototype, @protodata) = each(%ProtocoolListSIGNALduino) ) {
+#	print "$key => $value\n";
+#}
+
+
+#for %ProtocoolListSIGNALduino.kv -> my $prototype, @protodata {
+    #@protodata{id} @protodata{lowfact} @protodata{highfact} @protodata{syncfact} @protodata{clock} @protodata{format}
+	
+	if ($rmsg =~ m/M:protodata{id}/)
+	{
+		 #Log3 $name, 3, "$name: found $prototype with id".protodata{id}." rmsg";
+		 #my $pattmsg = ($rmsg =~ m/M:protodata{id}/);
+		 $rmsg= m/(\w+)\s*;\s*(.*?)\s*$/;
+		 print Dumper($rmsg); 
+		 #Log3 $name, 3, "$name: Pattern $1 = $2";
+	}
+}
+my $dmsg="";
 
 ####
   $hash->{"${name}_MSGCNT"}++;
