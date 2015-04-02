@@ -18,7 +18,7 @@ use Time::HiRes qw(gettimeofday);
 sub SIGNALduino_Attr(@);
 sub SIGNALduino_Clear($);
 sub SIGNALduino_HandleCurRequest($$);
-sub SIGNALduino_HandleWriteQueue($);
+#sub SIGNALduino_HandleWriteQueue($);
 sub SIGNALduino_Parse($$$$);
 sub SIGNALduino_Read($);
 sub SIGNALduino_ReadAnswer($$$$);
@@ -48,13 +48,13 @@ my %sets = (
 my $clientsSIGNALduino = "";
 
 my %matchListSIGNALduino = (
-    "1:CUL_TX"             => "^TX..........",        # Need TX to avoid FHTTK
-    "2:SIGNALduino_Env"      => "W.*\$",
-    "3:SIGNALduino_PT2262"   => "IR.*\$",
-    "4:SIGNALduino_HX"       => "H...\$",
-    "5:OREGON"            => "^(3[8-9A-F]|[4-6][0-9A-F]|7[0-8]).*",
-    "6:SIGNALduino_AS"      => "AS.*\$", #Arduino based Sensors
-    "7:SIGNALduino_ARC"     => "AR.*\$", #ARC protocol switches like IT selflearn
+#    "1:CUL_TX"             => "^TX..........",        # Need TX to avoid FHTTK
+#    "2:SIGNALduino_Env"      => "W.*\$",
+#    "3:SIGNALduino_PT2262"   => "IR.*\$",
+#    "4:SIGNALduino_HX"       => "H...\$",
+#    "5:OREGON"            => "^(3[8-9A-F]|[4-6][0-9A-F]|7[0-8]).*",
+#    "6:SIGNALduino_AS"      => "AS.*\$", #Arduino based Sensors
+#    "7:SIGNALduino_ARC"     => "AR.*\$", #ARC protocol switches like IT selflearn
 );
 
 
@@ -80,8 +80,9 @@ SIGNALduino_Initialize($)
   $hash->{GetFn}   			= "SIGNALduino_Get";
   $hash->{SetFn}   			= "SIGNALduino_Set";
   $hash->{AttrFn}  			= "SIGNALduino_Attr";
-  $hash->{AttrList}			= "Clients MatchList "
-                      ." hexFile"
+  $hash->{AttrList}			= #"Clients MatchList "
+					  "do_not_notify:1,0 dummy:1,0 "
+					  ." hexFile"
                       ." initCommands"
                       ." flashCommand"
                       .$readingFnAttributes;
@@ -176,9 +177,9 @@ SIGNALduino_Set($@)
   my $name = shift @a;
   my $cmd = shift @a;
   my $arg = join(" ", @a);
-
-  my $list = "raw led:on,off led-on-for-timer reset flash";
-  return $list if( $cmd eq '?' || $cmd eq '');
+  
+  #my $list = "raw led:on,off led-on-for-timer reset flash";
+  #return $list if( $cmd eq '?' || $cmd eq '');
 
   if($cmd eq "raw") {
     Log3 $name, 4, "set $name $cmd $arg";
@@ -253,18 +254,8 @@ SIGNALduino_Set($@)
 
   } elsif ($cmd =~ m/reset/i) {
     return SIGNALduino_ResetDevice($hash);
-  } elsif( $cmd eq "led" ) {
-    return "Expecting a 0-padded hex number" if((length($arg)&1) == 1);
-    Log3 $name, 3, "set $name $cmd $arg";
-    $arg = "l$arg";
-    SIGNALduino_SimpleWrite($hash, $arg);
-  } elsif( $cmd eq "patable" ) {
-    return "Expecting a 0-padded hex number" if((length($arg)&1) == 1);
-    Log3 $name, 3, "set $name $cmd $arg";
-    $arg = "x$arg";
-    SIGNALduino_SimpleWrite($hash, $arg);
   } else {
-    return "Unknown argument $cmd, choose one of ".$list;
+    return "Unknown argument $cmd, choose one of ".$hash->{CMDS};
   }
 
   return undef;
@@ -354,6 +345,8 @@ SIGNALduino_DoInit($)
 
   SIGNALduino_Clear($hash);
   my ($ver, $try) = ("", 0);
+  
+  # Try to get version from Arduino
   while ($try++ < 3 && $ver !~ m/^V/) {
     SIGNALduino_SimpleWrite($hash, "V");
     ($err, $ver) = SIGNALduino_ReadAnswer($hash, "Version", 0, undef);
@@ -361,6 +354,7 @@ SIGNALduino_DoInit($)
     $ver = "" if(!$ver);
   }
 
+  # Check received string
   if($ver !~ m/^V/) {
     $attr{$name}{dummy} = 1;
     $msg = "Not an SIGNALduino device, got for V:  $ver";
@@ -383,7 +377,8 @@ SIGNALduino_DoInit($)
 #      SIGNALduino_SimpleWrite($hash, $command);
 #    }
 #  }
-  $hash->{STATE} = "Initialized";
+#  $hash->{STATE} = "Initialized";
+  readingsSingleUpdate($hash, "state", "Initialized", 1);
 
   # Reset the counter
   delete($hash->{XMIT_TIME});
@@ -505,44 +500,44 @@ SIGNALduino_Write($$$)
 
 }
 
-sub
-SIGNALduino_SendFromQueue($$)
-{
-  my ($hash, $bstring) = @_;
-  my $name = $hash->{NAME};
-
-  if($bstring ne "") {
-	SIGNALduino_XmitLimitCheck($hash,$bstring);
-    SIGNALduino_SimpleWrite($hash, $bstring);
-  }
+#sub
+#SIGNALduino_SendFromQueue($$)
+#{
+#  my ($hash, $bstring) = @_;
+#  my $name = $hash->{NAME};
+#
+#  if($bstring ne "") {
+#	SIGNALduino_XmitLimitCheck($hash,$bstring);
+#    SIGNALduino_SimpleWrite($hash, $bstring);
+#  }
 
   ##############
   # Write the next buffer not earlier than 0.23 seconds
   # = 3* (12*0.8+1.2+1.0*5*9+0.8+10) = 226.8ms
   # else it will be sent too early by the SIGNALduino, resulting in a collision
-  InternalTimer(gettimeofday()+0.3, "SIGNALduino_HandleWriteQueue", $hash, 1);
-}
+#  InternalTimer(gettimeofday()+0.3, "SIGNALduino_HandleWriteQueue", $hash, 1);
+#}
 
 #####################################
-sub
-SIGNALduino_HandleWriteQueue($)
-{
-  my $hash = shift;
-  my $arr = $hash->{QUEUE};
-  if(defined($arr) && @{$arr} > 0) {
-    shift(@{$arr});
-    if(@{$arr} == 0) {
-      delete($hash->{QUEUE});
-      return;
-    }
-    my $bstring = $arr->[0];
-    if($bstring eq "") {
-      SIGNALduino_HandleWriteQueue($hash);
-    } else {
-      SIGNALduino_SendFromQueue($hash, $bstring);
-    }
-  }
-}
+#sub
+#SIGNALduino_HandleWriteQueue($)
+#{
+#  my $hash = shift;
+#  my $arr = $hash->{QUEUE};
+#  if(defined($arr) && @{$arr} > 0) {
+#    shift(@{$arr});
+#    if(@{$arr} == 0) {
+#      delete($hash->{QUEUE});
+#      return;
+#    }
+#    my $bstring = $arr->[0];
+#    if($bstring eq "") {
+#      SIGNALduino_HandleWriteQueue($hash);
+#    } else {
+#      SIGNALduino_SendFromQueue($hash, $bstring);
+#    }
+#  }
+#}
 
 #####################################
 # called from the global loop, when the select for hash->{FD} reports data
@@ -569,109 +564,43 @@ SIGNALduino_Read($)
 }
 
 sub
-SIGNALduino_Parse($$$$)
+SIGNALduino_Parse($$$$@)
 {
-  my ($hash, $iohash, $name, $rmsg) = @_;
+  my ($hash, $iohash, $name, $rmsg,$initstr) = @_;
 
-  my $rssi;
+  #my $rssi;
 ##Sven: Auch hier würde sich eine Anpassung auf Basis der oben definierten Regex lohnen. Da wird ja doppelt gemoppelt noch mal ausgewertet zu welchem Protokoll jetzt eine Nachricht vorliegt.
 ## 
 ##
-  my $dmsg = $rmsg;
-  if($dmsg =~ m/^[AFTKEHRStZri]([A-F0-9][A-F0-9])+$/) { # RSSI
-    my $l = length($dmsg);
-    $rssi = hex(substr($dmsg, $l-2, 2));
-    $dmsg = substr($dmsg, 0, $l-2);
-    $rssi = ($rssi>=128 ? (($rssi-256)/2-74) : ($rssi/2-74));
-    Log3 $name, 5, "$name: $dmsg $rssi";
-  } else {
-    Log3 $name, 5, "$name: $dmsg";
-  }
+#  my $dmsg = $rmsg;
+#  if($dmsg =~ m/^[AFTKEHRStZri]([A-F0-9][A-F0-9])+$/) { # RSSI
+#    my $l = length($dmsg);
+#    $rssi = hex(substr($dmsg, $l-2, 2));
+#    $dmsg = substr($dmsg, 0, $l-2);
+#    $rssi = ($rssi>=128 ? (($rssi-256)/2-74) : ($rssi/2-74));
+#    Log3 $name, 5, "$name: $dmsg $rssi";
+#  } else {
+#    Log3 $name, 5, "$name: $dmsg";
+#  }
 
   ###########################################
   #Translate Message from SIGNALduino to FHZ
-  next if(!$dmsg || length($dmsg) < 1);            # Bogus messages
+#  next if(!$dmsg || length($dmsg) < 1);            # Bogus messages
 
-  if($dmsg =~ m/^[0-9A-F]{4}U./) {                 # RF_ROUTER
-    Dispatch($hash, $dmsg, undef);
-    return;
-  }
+#  if($dmsg =~ m/^[0-9A-F]{4}U./) {                 # RF_ROUTER
+#    Dispatch($hash, $dmsg, undef);
+#    return;
+#  }
 
-  if ($dmsg =~ m/^(3[8-9A-F]|[4-6][0-9A-F]|7[0-8]).*/) {
-  ### implement error checking here!
-    Log3 $name, 4, "Dispatching OREGON Protokoll. Received: $dmsg";
-    Dispatch($hash, $dmsg, undef);
-    return;		
-  }
+### Implement filtering signal types here ###
 
-  my $fn = substr($dmsg,0,1);
-  my $len = int(length($dmsg));
-
-  if($fn eq "i" && $len >= 7) {           # IT
-    $dmsg = lc($dmsg);
-  } 
-  elsif($fn eq "E" && $len >= 2) {        # EZ6 Meteo
-  ### implement error checking here!
-  ;
-  }
-  elsif($fn eq "W" && $len >= 12) {       # Weather sensors; allways filled up to 13 letters
-    $dmsg = uc($dmsg);
-  ### implement error checking here!
-  ;
-  }
-  elsif($fn eq "T" && $len >= 2) {        # Technoline TX2/3/4
-    Log3 $name, 4, "CUL_TX: $dmsg";
-  ### implement error checking here!
-  ;
-  }
-  elsif($fn eq "I" && $len >= 2) {		# PT2262
-    Dispatch($hash, $dmsg, undef);
-  ### implement error checking here!
-  ;
-  }
-  elsif($fn eq "D" && $len >= 2) {		# DCF77
-    Log3 $name, 4, "DCF77: $dmsg";
-  ### implement error checking here!
-  ;
-  }
-  elsif($fn eq "F" && $len >= 2) {		# FA20RF
-    Log3 $name, 4, "FA20RF: $dmsg";
-  ### implement error checking here!
-  ;
-  }
-  elsif($fn eq "M" && $len >= 6) {        # Door bells TCM (Tchibo)
-    Log3 $name, 4, "TCM: $dmsg";
-  ### implement error checking here!
-  ;
-  }
-  elsif($fn eq "H" && $len >= 4) {        # Door bells Heidemann HX
-    Log3 $name, 4, "HX: $dmsg";
-  ### implement error checking here!
-  ;
-  }
-  elsif($fn eq "O" && $len >= 2) {        # Oregon
-    Log3 $name, 4, "OSVduino: $dmsg";
-  }
-  elsif($fn eq "A" && $len >= 10 && $len <20 ) {        # ArduSens
-    Log3 $name, 4, "AS: $dmsg";
-  }
-  elsif($fn eq "A" && $len >= 34) {        # ARC - ITselflearn
-    Log3 $name, 4, "ARC: $dmsg";
-  }  else {
-    DoTrigger($name, "UNKNOWNCODE $dmsg message length ($len)");
-    Log3 $name, 2, "$name: unknown message $dmsg message length ($len)";
-    return;
-  }
-
+####
   $hash->{"${name}_MSGCNT"}++;
   $hash->{"${name}_TIME"} = TimeNow();
+  readingsSingleUpdate($hash, "state", $hash->{READINGS}{state}{VAL}, 0);
   $hash->{RAWMSG} = $rmsg;
   my %addvals = (RAWMSG => $rmsg);
-  if(defined($rssi)) {
-    $hash->{RSSI} = $rssi;
-    $addvals{RSSI} = $rssi;
-  }
-  Dispatch($hash, $dmsg, \%addvals);
+  Dispatch($hash, $dmsg, \%addvals);  ## Dispatch to other Modules 
 }
 
 
