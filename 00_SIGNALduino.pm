@@ -18,9 +18,9 @@ use Data::Dumper;
 
 sub SIGNALduino_Attr(@);
 sub SIGNALduino_Clear($);
-sub SIGNALduino_HandleCurRequest($$);
+#sub SIGNALduino_HandleCurRequest($$);
 #sub SIGNALduino_HandleWriteQueue($);
-sub SIGNALduino_Parse($$$$);
+sub SIGNALduino_Parse($$$$@);
 sub SIGNALduino_Read($);
 sub SIGNALduino_ReadAnswer($$$$);
 sub SIGNALduino_Ready($);
@@ -122,6 +122,16 @@ SIGNALduino_Initialize($)
 
 }
 
+sub
+SIGNALduino_FingerprintFn($$)
+{
+  my ($name, $msg) = @_;
+
+  # Store only the "relevant" part, as the Signalduino won't compute the checksum
+  $msg = substr($msg, 8) if($msg =~ m/^81/ && length($msg) > 8);
+
+  return ($name, $msg);
+}
 
 #####################################
 sub
@@ -316,7 +326,7 @@ SIGNALduino_Get($@)
   SIGNALduino_SimpleWrite($hash, $gets{$a[1]}[0] . $arg);
 
   ($err, $msg) = SIGNALduino_ReadAnswer($hash, $a[1], 0, $gets{$a[1]}[1]);
-  Log3 $name, 5, "$name: received message for gets: " . $msg;
+  Log3 $name, 5, "$name: received message for gets: " . $msg if ($msg);
 
   if(!defined($msg)) {
     DevIo_Disconnected($hash);
@@ -379,7 +389,7 @@ SIGNALduino_DoInit($)
   
   # Try to get version from Arduino
   while ($try++ < 3 && $ver !~ m/^V/) {
-    SIGNALduino_SimpleWrite($hash, "V");
+    SIGNALduino_SimpleWrite($hash, "V\n");
     ($err, $ver) = SIGNALduino_ReadAnswer($hash, "Version", 0, undef);
     return "$name: $err" if($err && ($err !~ m/Timeout/ || $try == 3));
     $ver = "" if(!$ver);
@@ -651,7 +661,7 @@ my $dmsg="";
   readingsSingleUpdate($hash, "state", $hash->{READINGS}{state}{VAL}, 0);
   $hash->{RAWMSG} = $rmsg;
   my %addvals = (RAWMSG => $rmsg);
-  Dispatch($hash, $dmsg, \%addvals);  ## Dispatch to other Modules 
+#  Dispatch($hash, $dmsg, \%addvals);  ## Dispatch to other Modules 
 }
 
 
