@@ -14,7 +14,8 @@ package main;
 use strict;
 use warnings;
 use Time::HiRes qw(gettimeofday);
-use Data::Dumper; 
+use Data::Dumper qw(Dumper);
+use POSIX qw( floor);
 
 sub SIGNALduino_Attr(@);
 sub SIGNALduino_Clear($);
@@ -64,29 +65,34 @@ my %matchListSIGNALduino = (
 		#protoID[3]=(s_sigid){-1,3,-30,pattern[clock][0],0,tristate}; // IT old
 
 
-my %ProtocoolListSIGNALduino  = (
-    "EV1527type"    => [
+my %ProtocolListSIGNALduino  = (
+    "1"    => 
         {
-            id          	=> '0',
-			lowfact         => '-4',
-            highfact        => '-8',
-            syncfact    	=> '-18',
-			clock     		=> '500',
-			format     		=> 'twostate',
+            name			=> 'EV1527type',
+			id          	=> '1',
+			one				=> [1,-8],
+			zero			=> [1,-4],
+			sync			=> [1,-18],		
+			clockabs   		=> '500',		# not used now
+			format     		=> 'twostate',  # not used now
 			
         },
-    ],
-    "pt2262"    => [
+    
+    "2"    => 
         {
-            id          	=> '0',
-			lowfact         => '-1',
-            highfact        => '-3',
-            syncfact    	=> '-30',
-			clock     		=> 'auto',
-			format 			=> 'tristate',
+            name			=> 'pt2262',
+			id          	=> '3',
+			one				=> [1,-1],
+			zero			=> [1,-3],
+			float			=> [-1,3],
+			sync			=> [1,-30],
+			clockabs     	=> 'auto',		# not used now
+			format 			=> 'tristate',	# not used now
         },
-    ],	
+    
 );
+
+
 
 
 ##Sven: Vorschlag sollten wir hier nicht mal das Protokoll, also das Nachrichtenformat etwas abändern. Bem OSV2 z.B. fand ich ganz gut, dass die ersten beiden Werte die Länge der Nachricht wiederspiegeln (HEX)
@@ -153,7 +159,7 @@ SIGNALduino_Define($$)
   my $dev = $a[2];
   $dev .= "\@9600" if( $dev !~ m/\@/ );
   
-#  $hash->{CMDS} = "";
+  $hash->{CMDS} = "";
   $hash->{Clients} = $clientsSIGNALduino;
   $hash->{MatchList} = \%matchListSIGNALduino;
 
@@ -389,7 +395,7 @@ SIGNALduino_DoInit($)
   
   # Try to get version from Arduino
   while ($try++ < 3 && $ver !~ m/^V/) {
-    SIGNALduino_SimpleWrite($hash, "V\n");
+    SIGNALduino_SimpleWrite($hash, "V");
     ($err, $ver) = SIGNALduino_ReadAnswer($hash, "Version", 0, undef);
     return "$name: $err" if($err && ($err !~ m/Timeout/ || $try == 3));
     $ver = "" if(!$ver);
@@ -604,64 +610,159 @@ SIGNALduino_Read($)
   $hash->{PARTIAL} = $SIGNALduinodata;
 }
 
+
+
+
+### Helper Subs >>>
+
+sub
+SIGNALduino_splitMsg
+{
+  my $txt = shift;
+  my $delim = shift;
+  my @msg_parts = split(/$delim/,$txt);
+  
+  return @msg_parts;
+}
+
+
+
+#SIGNALduino_MatchSignalPattern{@array, %hash, @array, $scalar};
+sub SIGNALduino_MatchSignalPattern(\@\%\@$){
+
+	my ($signalpattern,  $patternList,  $data_array, $idx) = @_;
+	
+	#print Dumper($patternList);		
+	#print Dumper($idx);		
+	#print Dumper($signalpattern);		
+	my $found=0;
+	foreach ( @{$signalpattern} )
+	{
+			#print " $idx check: ".$patternList->{$data_array->[$idx]}." == ".$_;		
+			#print "\n";;
+			if ($patternList->{$data_array->[$idx]} != $_ ) 
+			{
+				return -1;
+			}
+			$found=1;
+			$idx++;
+	}
+	if ($found)
+	{
+		return $idx;
+	}
+	
+}
+
+### >>> Helper Subs 
+
+
 sub
 SIGNALduino_Parse($$$$@)
 {
   my ($hash, $iohash, $name, $rmsg,$initstr) = @_;
 
-  #my $rssi;
-##Sven: Auch hier würde sich eine Anpassung auf Basis der oben definierten Regex lohnen. Da wird ja doppelt gemoppelt noch mal ausgewertet zu welchem Protokoll jetzt eine Nachricht vorliegt.
-## 
-##
-#  my $dmsg = $rmsg;
-#  if($dmsg =~ m/^[AFTKEHRStZri]([A-F0-9][A-F0-9])+$/) { # RSSI
-#    my $l = length($dmsg);
-#    $rssi = hex(substr($dmsg, $l-2, 2));
-#    $dmsg = substr($dmsg, 0, $l-2);
-#    $rssi = ($rssi>=128 ? (($rssi-256)/2-74) : ($rssi/2-74));
-#    Log3 $name, 5, "$name: $dmsg $rssi";
-#  } else {
-#    Log3 $name, 5, "$name: $dmsg";
-#  }
+	#print Dumper(\%ProtocolListSIGNALduino);
 
-  ###########################################
-  #Translate Message from SIGNALduino to FHZ
-#  next if(!$dmsg || length($dmsg) < 1);            # Bogus messages
-
-#  if($dmsg =~ m/^[0-9A-F]{4}U./) {                 # RF_ROUTER
-#    Dispatch($hash, $dmsg, undef);
-#    return;
-#  }
-
-### Implement filtering signal types here ###
-
-
-while ( my ($prototype, @protodata) = each(%ProtocoolListSIGNALduino) ) {
-#	print "$key => $value\n";
-#}
-
-
-#for %ProtocoolListSIGNALduino.kv -> my $prototype, @protodata {
-    #@protodata{id} @protodata{lowfact} @protodata{highfact} @protodata{syncfact} @protodata{clock} @protodata{format}
+    #print "$protocol: ";
+    #Log3 $name, 3, "id: $protocol=$ProtocolListSIGNALduino{$protocol}{id} ";
+    
+	#### TODO:  edit print statements to log statements
 	
-	if ($rmsg =~ m/M:protodata{id}/)
+	#print "$name: search $search_string $rmsg\n";
+	if ($rmsg=~ m/^M\d+/) ## Check if a Data Message arrived
 	{
-		 #Log3 $name, 3, "$name: found $prototype with id".protodata{id}." rmsg";
-		 #my $pattmsg = ($rmsg =~ m/M:protodata{id}/);
-		 $rmsg= m/(\w+)\s*;\s*(.*?)\s*$/;
-		 print Dumper($rmsg); 
-		 #Log3 $name, 3, "$name: Pattern $1 = $2";
-	}
-}
-my $dmsg="";
+		my @msg_parts = SIGNALduino_splitMsg($rmsg,';');
+		my $protocolid;
+		
+		my $syncidx;			# currently not used to decode message
+		my $clockidx;			
+		my $protocol;
+		my $rawData;
 
-####
-  $hash->{"${name}_MSGCNT"}++;
-  $hash->{"${name}_TIME"} = TimeNow();
-  readingsSingleUpdate($hash, "state", $hash->{READINGS}{state}{VAL}, 0);
-  $hash->{RAWMSG} = $rmsg;
-  my %addvals = (RAWMSG => $rmsg);
-#  Dispatch($hash, $dmsg, \%addvals);  ## Dispatch to other Modules 
+
+		#print "Message splitted:";
+		#print Dumper(\@msg_parts);
+
+		
+		my %patternList;
+		foreach (@msg_parts){
+ 		   
+		   if ($_ =~ m/^M/) 		#### Extract ID from data
+		   {
+			   $protocolid = $_ = s/\d+/r/;  
+			   $protocol=$ProtocolListSIGNALduino{$protocolid}{name};	
+			   print "$name: found $protocol with id: $protocolid Raw message: ($rmsg)\n";
+		   }
+		   elsif ($_ =~ m/^P/) 		#### Extract Pattern List from array
+		   {
+			   $_ =~ s/^P+//;  
+			   my @pattern = split(/=/,$_);
+			   $patternList{$pattern[0]} = $pattern[1];
+		   }
+		   elsif($_ =~ m/D=\d+/) 		#### Message from array
+		   {
+				$_ =~ s/D=//;  
+				$rawData = $_ ;
+		   }
+		   elsif($_ =~ m/SP=\d+/) 		#### Sync Pulse Index
+		   {
+				(undef, $syncidx) = split(/=/,$_);
+		   }
+		   elsif($_ =~ m/CP=\d+/) 		#### Clock Pulse Index
+		   {
+				(undef, $clockidx) = split(/=/,$_);
+				
+		   }
+
+ 		   #print "$_\n";
+		}
+		
+		## Make a lookup table for our pattern ids
+		#print "List of pattern:";
+		%patternList = map { $_ => floor($patternList{$_}/$patternList{$clockidx}) } keys %patternList; 
+		#print Dumper(\%patternList);		
+		
+		#### Convert rawData in Message
+		my @data_array = split( '', $rawData ); # string to array
+		my @bit_msg;							# array to store decoded signal bits
+		
+		## Iterate over the data_array and find zero, one and sync bits with the signalpattern
+	
+		for ( my $i=0;$i<@data_array;$i++)  ## Does this work also for tristate?
+		{
+			my $tmp_idx=$i;
+			if ( ($tmp_idx=SIGNALduino_MatchSignalPattern(@{$ProtocolListSIGNALduino{$protocolid}{zero}},%patternList,@data_array,$i)) != -1 ) {
+				push(@bit_msg,0);
+				$i=$tmp_idx-1;
+			} elsif ( ($tmp_idx=SIGNALduino_MatchSignalPattern(@{$ProtocolListSIGNALduino{$protocolid}{one}},%patternList,@data_array,$i)) != -1 ) {
+				push(@bit_msg,1);
+				$i=$tmp_idx-1;
+			} elsif ( ($tmp_idx=SIGNALduino_MatchSignalPattern(@{$ProtocolListSIGNALduino{$protocolid}{sync}},%patternList,@data_array,$i)) != -1 ) {
+				push(@bit_msg,'S');
+				$i=$tmp_idx-1;
+			## aditional check for tristate protocols
+			} elsif ( defined($ProtocolListSIGNALduino{$protocolid}{float}) && ($tmp_idx=SIGNALduino_MatchSignalPattern(@{$ProtocolListSIGNALduino{$protocolid}{float}},%patternList,@data_array,$i)) != -1 ) {
+				push(@bit_msg,'F');
+				$i=$tmp_idx-1;
+			
+			}
+		}
+		print "$name: decoded message raw (@bit_msg), ".@bit_msg." bits\n";
+		### Next step: Send RAW Message to clients. May we need to adapt some of them or modify our format to fit
+	}
+  
+  
+	my $dmsg="";
+
+	####
+	#  $hash->{"${name}_MSGCNT"}++;
+	#  $hash->{"${name}_TIME"} = TimeNow();
+	#  readingsSingleUpdate($hash, "state", $hash->{READINGS}{state}{VAL}, 0);
+	#  $hash->{RAWMSG} = $rmsg;
+	#  my %addvals = (RAWMSG => $rmsg);
+	#  Dispatch($hash, $dmsg, \%addvals);  ## Dispatch to other Modules 
+
 }
 
 
