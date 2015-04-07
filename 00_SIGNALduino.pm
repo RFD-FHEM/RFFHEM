@@ -1,11 +1,10 @@
 ##############################################
 # $Id: 00_SIGNALduino.pm 
-# The file is taken from the FHEMduino project
-# see http://www.fhemwiki.de/wiki/FHEMduino
-# and was modified
-# to provide support for raw message handling
-# The purpos is to use it as addition to the SIGNALduino
-# modules in combination with RFDuino
+# The file is taken from the FHEMduino project and modified in serval the processing of incomming messages
+# see http://www.fhemwiki.de/wiki/<tbd>
+# It was modified also to provide support for raw message handling which it's send from the SIGNALduino
+# The purpos is to use it as addition to the SIGNALduino which runs on an arduno nano or arduino uno.
+# It routes Messages serval Modules which are already integrated in FHEM. But there are also modules which comes with it.
 # N. Butzek, S. Butzek, 2014-2015 
 #
 
@@ -36,10 +35,10 @@ my %gets = (    # Name, Data to send to the SIGNALduino, Regexp for the answer
   "raw"      => ["", '.*'],
   "uptime"   => ["t", '^[0-9A-F]{8}[\r\n]*$' ],
   "cmds"     => ["?", '.*Use one of[ 0-9A-Za-z]+[\r\n]*$' ],
-  "ITParms"  => ["ip",'.*' ],
-  "FAParms"  => ["fp", '.*' ],
-  "TCParms"  => ["dp", '.*' ],
-  "HXParms"  => ["hp", '.*' ]
+#  "ITParms"  => ["ip",'.*' ],
+#  "FAParms"  => ["fp", '.*' ],
+#  "TCParms"  => ["dp", '.*' ],
+#  "HXParms"  => ["hp", '.*' ]
 );
 
 
@@ -49,17 +48,23 @@ my %sets = (
   "reset"     => ""
 );
 
-my $clientsSIGNALduino = ":IT:"; 
+## Supported Clients per default
+my $clientsSIGNALduino = ":IT:".
+						"CUL_TCM97001:".
+#						"SIGNALduino_AS:"
+						; 
 
+## default regex match List for dispatching message to logical modules
 my %matchListSIGNALduino = (
-     "1:IT"            		 => 	 "^i......",			   # Intertechno Format
-#    "1:CUL_TX"             => "^TX..........",        # Need TX to avoid FHTTK
-	 "2:SIGNALduino_Env"      => "W[0-9]+[a-f0-9]+\$",	# WNNHHHHHHH N=Number H=Hex
-#    "3:SIGNALduino_PT2262"   => "IR.*\$",
-#    "4:SIGNALduino_HX"       => "H...\$",
-#    "5:OREGON"            => "^(3[8-9A-F]|[4-6][0-9A-F]|7[0-8]).*",
-#    "6:SIGNALduino_AS"      => "AS.*\$", #Arduino based Sensors
-#    "7:SIGNALduino_ARC"     => "AR.*\$", #ARC protocol switches like IT selflearn
+     "1:IT"            			=> 	 "^i......",	   # Intertechno Format
+     "2:CUL_TCM97001"      		=> "^s[A-Fa-f0-9]+",		   # Any hex string		beginning with s
+#    "1:CUL_TX"               	=> "^TX..........",        # Need TX to avoid FHTTK
+#    "3:SIGNALduino_AS"       	=> "AS.*\$", 			   # Arduino based Sensors, should not be default
+#    "2:SIGNALduino_Env"      	=> "W[0-9]+[a-f0-9]+\$",	# WNNHHHHHHH N=Number H=Hex
+#    "3:SIGNALduino_PT2262"   	=> "IR.*\$",
+#    "4:SIGNALduino_HX"       	=> "H...\$",
+#    "5:OREGON"            		=> "^(3[8-9A-F]|[4-6][0-9A-F]|7[0-8]).*",		
+#    "7:SIGNALduino_ARC"     	=> "AR.*\$", #ARC protocol switches like IT selflearn
 );
 
 		#protoID[0]=(s_sigid){-4,-8,-18,500,0,twostate}; // Logi
@@ -78,23 +83,29 @@ my %ProtocolListSIGNALduino  = (
 			sync			=> [1,-18],		
 			clockabs   		=> '500',		# not used now
 			format     		=> 'twostate',  # not used now
-			preamble		=> 'W03',		# Append to converted message	 	
+			preamble		=> 's',			# prepend to converted message	 	
+			postamble		=> '00',		# Append to converted message	 	
+			clientmodule    => 'CUL_TCM97001',   # not used now
+			modulematch     => '^s[A-Fa-f0-9]+', # not used now
         },
     "2"    => 
         {
             name			=> 'AS',		# Self build arduino sensor
 			id          	=> '2',
-			one				=> [1,-2],
-			zero			=> [1,-1],
-			float			=> [-1,3],		# not full supported now later use
+			one				=> [1,-5],
+			zero			=> [1,-2],
+			#float			=> [-1,3],		# not full supported now later use
 			sync			=> [1,-18],
 			clockabs     	=> '500',		# not used now
 			format 			=> 'twostate',	
-			preamble		=> 'W08',		# Append to converted message		
+			preamble		=> 'AS',		# prepend to converted message		
+			clientmodule    => 'SIGNALduino_AS',   # not used now
+			modulematch     => '^AS.*\$', # not used now
+			
         },
     "3"    => 
         {
-            name			=> 'ev1527',	
+            name			=> 'ev1527type',	
 			id          	=> '3',
 			one				=> [3,-1],
 			zero			=> [1,-3],
@@ -103,7 +114,10 @@ my %ProtocolListSIGNALduino  = (
 			clockabs     	=> 'auto',		
 			format 			=> 'twostate',	# not used now
 			preamble		=> 'i',			
-        },
+			clientmodule    => 'IT',   # not used now
+			modulematch     => '^i......', # not used now
+
+			},
     "4"    => 
         {
             name			=> 'intertechno',	
@@ -115,7 +129,10 @@ my %ProtocolListSIGNALduino  = (
 			clockabs     	=> 'auto',		# not used now
 			format 			=> 'tristate',	# tristate can't be migrated from bin into hex!
 			preamble		=> 'i',			# Append to converted message	
-        },
+			clientmodule    => 'IT',   		# not used now
+			modulematch     => '^i......',  # not used now
+
+		},
     
 );
 
@@ -786,20 +803,20 @@ SIGNALduino_Parse($$$$@)
 			if ( ($tmp_idx=SIGNALduino_MatchSignalPattern(@{$ProtocolListSIGNALduino{$protocolid}{zero}},%patternList,@data_array,$i)) != -1 ) {
 				push(@bit_msg,0);
 				$i=$tmp_idx-1;
-				Debug "$name: Pattern [@{$ProtocolListSIGNALduino{$protocolid}{zero}}] found at pos $i.  Adding 0 \n" if ($debug);
+				#Debug "$name: Pattern [@{$ProtocolListSIGNALduino{$protocolid}{zero}}] found at pos $i.  Adding 0 \n" if ($debug);
 			} elsif ( ($tmp_idx=SIGNALduino_MatchSignalPattern(@{$ProtocolListSIGNALduino{$protocolid}{one}},%patternList,@data_array,$i)) != -1 ) {
 				push(@bit_msg,1);
 				$i=$tmp_idx-1;
-				Debug "$name: Pattern [@{$ProtocolListSIGNALduino{$protocolid}{one}}] found at pos $i.  Adding 1 \n" if ($debug);
+				#Debug "$name: Pattern [@{$ProtocolListSIGNALduino{$protocolid}{one}}] found at pos $i.  Adding 1 \n" if ($debug);
 			} elsif ( ($tmp_idx=SIGNALduino_MatchSignalPattern(@{$ProtocolListSIGNALduino{$protocolid}{sync}},%patternList,@data_array,$i)) != -1 ) {
 				#push(@bit_msg,'S');		# Don't print Sync in bit_msg array
-				Debug "$name: Pattern [@{$ProtocolListSIGNALduino{$protocolid}{sync}}] found at pos $i. Skipping \n" if ($debug);
+				#Debug "$name: Pattern [@{$ProtocolListSIGNALduino{$protocolid}{sync}}] found at pos $i. Skipping \n" if ($debug);
 				$i=$tmp_idx-1;
 			## aditional check for tristate protocols
 			} elsif ( defined($ProtocolListSIGNALduino{$protocolid}{float}) && ($tmp_idx=SIGNALduino_MatchSignalPattern(@{$ProtocolListSIGNALduino{$protocolid}{float}},%patternList,@data_array,$i)) != -1 ) {
 				push(@bit_msg,'F');
 				$i=$tmp_idx-1;
-				Debug "$name: Pattern [@{$ProtocolListSIGNALduino{$protocolid}{one}}] found at pos $i.  Adding F \n" if ($debug);
+				#Debug "$name: Pattern [@{$ProtocolListSIGNALduino{$protocolid}{one}}] found at pos $i.  Adding F \n" if ($debug);
 			}
 		}
 		Debug "$name: decoded message raw (@bit_msg), ".@bit_msg." bits\n";
@@ -816,11 +833,10 @@ SIGNALduino_Parse($$$$@)
 				push(@bit_msg,'0');
 				Debug "$name: adding 0 bit to bit_msg array";
 			}
-
-			
-			
+		
 			my $dmsg = sprintf "%02x", oct "0b" . join "", @bit_msg;			## Array -> Sring -> bin -> hex
-			$dmsg = $ProtocolListSIGNALduino{$protocolid}{preamble}."$dmsg";
+			$dmsg = "$dmsg"."$ProtocolListSIGNALduino{$protocolid}{postamble}" if (defined($ProtocolListSIGNALduino{$protocolid}{postamble}));
+			$dmsg = "$ProtocolListSIGNALduino{$protocolid}{preamble}"."$dmsg" if (defined($ProtocolListSIGNALduino{$protocolid}{preamble}));
 			
  		    Debug "$name: converted Data to ($dmsg)";
 
@@ -935,7 +951,7 @@ SIGNALduino_Attr(@)
   href="http://forum.fhem.de/index.php/topic,17196.0.html">FHEM Forum</a>.
 
   With the opensource firmware (see this <a
-  href="https://github.com/RFD-FHEM/RFDuino">link</a>) they are capable
+  href="https://github.com/RFD-FHEM/SIGNALduino">link</a>) they are capable
   to receive and send different wireless protocols.
   <br><br>
   
@@ -944,34 +960,18 @@ SIGNALduino_Attr(@)
   
   
   Wireless switches  <br>
-  PT2262 (IT / ELRO switches) --> 14_SIGNALduino_PT2262.pm <br>
+  IT  switches --> uses IT.pm<br>
   <br><br>
   
-  Smoke detector   <br>
-  Flamingo FA20RF / ELRO RM150RF  --> 14_SIGNALduino_FA20RF.pm<br>
-  <br><br>
-  
-  Door bells   <br>
-  Heidemann HX Series --> 14_SIGNALduino_HX.pm<br>
-  Tchibo TCM --> 14_SIGNALduino_TCM.pm<br>
-  <br><br>
-
-  Temperatur / humidity sensors  <br>
-  KW9010  --> 14_SIGNALduino_Env.pm<br>
-  PEARL NC7159, LogiLink WS0002  --> 14_SIGNALduino_Env.pm<br>
-  EUROCHRON / Tchibo  --> 14_SIGNALduino_Env.pm<br>
-  LIFETEC  --> 14_SIGNALduino_Env.pm<br>
-  TX70DTH  --> 14_SIGNALduino_Env.pm<br>
-  AURIOL   --> 14_SIGNALduino_Env.pm<br>
-  Intertechno TX2/3/4  --> CUL_TX.pm<br>
+  Temperatur / humidity sensors suppored by 14_CUL_TCM97001 <br>
+  PEARL NC7159, LogiLink WS0002,GT-WT-02,AURIOL,TCM97001, TCM27,GT-WT-02..  --> 14_CUL_TCM97001.pm <br>
   <br><br>
 
   It is possible to attach more than one device in order to get better
   reception, fhem will filter out duplicate messages.<br><br>
 
-  Note: this module may require the Device::SerialPort or Win32::SerialPort
-  module if you attach the device via USB and the OS sets strange default
-  parameters for serial devices.
+  Note: this module require the Device::SerialPort or Win32::SerialPort
+  module. It can currently only attatched via USB.
 
   </td><td>
   <img src="ccc.jpg"/>
@@ -981,21 +981,24 @@ SIGNALduino_Attr(@)
   <a name="SIGNALduinodefine"></a>
   <b>Define</b>
   <ul>
-    <code>define &lt;name&gt; SIGNALduino &lt;device&gt; &lt;FHTID&gt;</code> <br>
+    <code>define &lt;name&gt; SIGNALduino &lt;device&gt; </code> <br>
     <br>
     USB-connected devices (SIGNALduino):<br><ul>
       &lt;device&gt; specifies the serial port to communicate with the SIGNALduino.
 	  The name of the serial-device depends on your distribution, under
       linux the cdc_acm kernel module is responsible, and usually a
-      /dev/ttyACM0 device will be created. If your distribution does not have a
+      /dev/ttyACM0 or /dev/ttyUSB0 device will be created. If your distribution does not have a
       cdc_acm module, you can force usbserial to handle the SIGNALduino by the
       following command:<ul>modprobe usbserial vendor=0x03eb
       product=0x204b</ul>In this case the device is most probably
       /dev/ttyUSB0.<br><br>
 
       You can also specify a baudrate if the device name contains the @
-      character, e.g.: /dev/ttyACM0@38400<br><br>
-
+      character, e.g.: /dev/ttyACM0@57600<br><br>This is also the default baudrate
+	
+	  It is recommended to specify the device via a name which does not change:
+	  e.g. via by-id devicename: /dev/serial/by-id/usb-1a86_USB2.0-Serial-if00-port0@57600
+	  
       If the baudrate is "directio" (e.g.: /dev/ttyACM0@directio), then the
       perl module Device::SerialPort is not needed, and fhem opens the device
       with simple file io. This might work if the operating system uses sane
@@ -1010,13 +1013,13 @@ SIGNALduino_Attr(@)
   <ul>
     <li>raw<br>
         Issue a SIGNALduino firmware command.  See the <a
-        href="http://SIGNALduinofw.de/commandref.html">this</a> document
+        href="http://<tbd>/commandref.html">this</a> document
         for details on SIGNALduino commands.
     </li><br>
 
     <li>flash [hexFile]<br>
-    The JeeLink needs the right firmware to be able to receive and deliver the sensor data to fhem. In addition to the way using the
-    arduino IDE to flash the firmware into the JeeLink this provides a way to flash it directly from FHEM.
+    The SIGNALduino needs the right firmware to be able to receive and deliver the sensor data to fhem. In addition to the way using the
+    arduino IDE to flash the firmware into the SIGNALduino this provides a way to flash it directly from FHEM.
 
     There are some requirements:
     <ul>
@@ -1028,7 +1031,7 @@ SIGNALduino_Attr(@)
         It contains some place-holders that automatically get filled with the according values:<br>
         <ul>
           <li>[PORT]<br>
-            is the port the JeeLink is connectd to (e.g. /dev/ttyUSB0)</li>
+            is the port the Signalduino is connectd to (e.g. /dev/ttyUSB0) and will be used from the defenition</li>
           <li>[HEXFILE]<br>
             is the .hex file that shall get flashed. There are three options (applied in this order):<br>
             - passed in set flash<br>
@@ -1040,10 +1043,7 @@ SIGNALduino_Attr(@)
         </ul>
       </li>
     </ul>
-    </li><br>
-
-    <li>led &lt;on|off&gt;<br>
-    Is used to disable the blue activity LED
+	
     </li><br>
 
   </ul>
@@ -1055,12 +1055,12 @@ SIGNALduino_Attr(@)
         </li><br>
     <li>raw<br>
         Issue a SIGNALduino firmware command, and wait for one line of data returned by
-        the SIGNALduino. See the SIGNALduino firmware README document for details on SIGNALduino
+        the SIGNALduino. See the SIGNALduino firmware code  for details on SIGNALduino
         commands.
         </li><br>
     <li>cmds<br>
         Depending on the firmware installed, SIGNALduinos have a different set of
-        possible commands. Please refer to the README of the firmware of your
+        possible commands. Please refer to the sourcecode of the firmware of your
         SIGNALduino to interpret the response of this command. See also the raw-
         command.
         </li><br>
@@ -1069,10 +1069,22 @@ SIGNALduino_Attr(@)
   <a name="SIGNALduinoattr"></a>
   <b>Attributes</b>
   <ul>
-    <li><a href="#do_not_notify">do_not_notify</a></li>
+    <li>Clients<br>
+      The received data gets distributed to a client (e.g. LaCrosse, EMT7110, ...) that handles the data.
+      This attribute tells, which are the clients, that handle the data. If you add a new module to FHEM, that shall handle
+      data distributed by the JeeLink module, you must add it to the Clients attribute.</li>
+
+    <li>MatchList<br>
+      can be set to a perl expression that returns a hash that is used as the MatchList<br>
+      <code>attr myJeeLink MatchList {'5:AliRF' => '^\\S+\\s+5 '}</code></li>
+    <li>hexfile<br>
+      Full path to a hex filename of the arduino sketch e.g. /opt/fhem/RF_Receiver_nano328.hex
+	</li>
+
+	  
+	<li><a href="#do_not_notify">do_not_notify</a></li>
     <li><a href="#attrdummy">dummy</a></li>
-    <li><a href="#showtime">showtime</a></li>
-    <li><a href="#model">model</a> (SIGNALduino,CUN,CUR)</li>
+
   </ul>
   <br>
 </ul>
