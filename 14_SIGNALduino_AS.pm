@@ -1,10 +1,10 @@
 ##############################################
-# $Id: 14_FHEMduino_AS.pm 3818 2014-10-14 $
-# The file is taken from the fhemduino project
-# see http://www.fhemwiki.de/wiki/FHEMduino
+# $Id: 14_SIGNALduino_AS.pm 3818 2014-10-14 $
+# The file is taken from the SIGNALduino project
+# see http://www.fhemwiki.de/wiki/SIGNALduino
 # and was modified by a few additions
 # to provide support for self build sensors.
-# The purpos is to use it as addition to the fhemduino
+# The purpos is to use it as addition to the SIGNALduino
 # modules in combination with RFDuino
 # N. Butzek, S. Butzek, 2014 
 #
@@ -17,7 +17,7 @@ use POSIX;
 
 #####################################
 sub
-FHEMduino_AS_Initialize($)
+SIGNALduino_AS_Initialize($)
 {
   my ($hash) = @_;
 
@@ -44,24 +44,24 @@ FHEMduino_AS_Initialize($)
   # 9   Humidity
   # ..31 
  $hash->{Match}     = "AS.*\$";
-  $hash->{DefFn}     = "FHEMduino_AS_Define";
-  $hash->{UndefFn}   = "FHEMduino_AS_Undef";
-  $hash->{AttrFn}    = "FHEMduino_AS_Attr";
-  $hash->{ParseFn}   = "FHEMduino_AS_Parse";
+  $hash->{DefFn}     = "SIGNALduino_AS_Define";
+  $hash->{UndefFn}   = "SIGNALduino_AS_Undef";
+  $hash->{AttrFn}    = "SIGNALduino_AS_Attr";
+  $hash->{ParseFn}   = "SIGNALduino_AS_Parse";
   $hash->{AttrList}  = "IODev do_not_notify:0,1 showtime:0,1 ignore:0,1 ".$readingFnAttributes;
   $hash->{AutoCreate}=
-        { "FHEMduino_Env.*" => { GPLOT => "light4:Brightness,", FILTER => "%NAME" } };
+        { "SIGNALduino_Env.*" => { GPLOT => "light4:Brightness,", FILTER => "%NAME" } };
 }
 
 
 #####################################
 sub
-FHEMduino_AS_Define($$)
+SIGNALduino_AS_Define($$)
 {
   my ($hash, $def) = @_;
   my @a = split("[ \t][ \t]*", $def);
 
-  return "wrong syntax: define <name> FHEMduino_AS <code> <minsecs> <equalmsg>".int(@a)
+  return "wrong syntax: define <name> SIGNALduino_AS <code> <minsecs> <equalmsg>".int(@a)
 		if(int(@a) < 3 || int(@a) > 5);
 
   $hash->{CODE}    = $a[2];
@@ -70,7 +70,7 @@ FHEMduino_AS_Define($$)
   $hash->{lastMSG} =  "";
   $hash->{bitMSG} =  "";
 
-  $modules{FHEMduino_AS}{defptr}{$a[2]} = $hash;
+  $modules{SIGNALduino_AS}{defptr}{$a[2]} = $hash;
   $hash->{STATE} = "Defined";
 
   AssignIoPort($hash);
@@ -79,26 +79,26 @@ FHEMduino_AS_Define($$)
 
 #####################################
 sub
-FHEMduino_AS_Undef($$)
+SIGNALduino_AS_Undef($$)
 {
   my ($hash, $name) = @_;
-  delete($modules{FHEMduino_AS}{defptr}{$hash->{CODE}}) if($hash && $hash->{CODE});
+  delete($modules{SIGNALduino_AS}{defptr}{$hash->{CODE}}) if($hash && $hash->{CODE});
   return undef;
 }
 
 #####################################
 sub
-FHEMduino_AS_Parse($$)
+SIGNALduino_AS_Parse($$)
 {
   my ($hash,$msg) = @_;
   my @a = split("", $msg);
 
   if (length($msg) < 10) {
-    Log3 "FHEMduino", 4, "FHEMduino_AS: wrong message -> $msg";
+    Log3 "SIGNALduino", 4, "SIGNALduino_AS: wrong message -> $msg";
     return "";
   }
 
-  Log3 $hash, 4, "FHEMduino_AS: $msg";
+  Log3 $hash, 4, "SIGNALduino_AS: $msg";
   
   my ($deviceCode, $SensorTyp, $model, $id, $valHigh, $valLow, $Sigval, $bat, $trigger, $val, $sigType);
   # T	Type
@@ -163,7 +163,7 @@ FHEMduino_AS_Parse($$)
 	elsif ($model eq "voltage") {
 	  $bat = (hex(substr($msg,9,2))>>1)&3
 	} else {
-		Log3 $hash, 1, "FHEMduino_AS unknown model: $model";#
+		Log3 $hash, 1, "SIGNALduino_AS unknown model: $model";#
 		return "";
     }
     $val = "S: $Sigval B: $bat";
@@ -172,38 +172,38 @@ FHEMduino_AS_Parse($$)
     $deviceCode = $model."_".$id;
   }
   
-  my $def = $modules{FHEMduino_AS}{defptr}{$hash->{NAME} . "." . $deviceCode};
-  $def = $modules{FHEMduino_AS}{defptr}{$deviceCode} if(!$def);
+  my $def = $modules{SIGNALduino_AS}{defptr}{$hash->{NAME} . "." . $deviceCode};
+  $def = $modules{SIGNALduino_AS}{defptr}{$deviceCode} if(!$def);
   
   if(!$def) {
-    Log3 $hash, 1, "FHEMduino_AS: UNDEFINED sensor $SensorTyp detected, code $deviceCode";
-    return "UNDEFINED $SensorTyp"."_"."$deviceCode FHEMduino_AS $deviceCode";
+    Log3 $hash, 1, "SIGNALduino_AS: UNDEFINED sensor $SensorTyp detected, code $deviceCode";
+    return "UNDEFINED $SensorTyp"."_"."$deviceCode SIGNALduino_AS $deviceCode";
   }
 
   $hash = $def;
   my $name = $hash->{NAME};
   return "" if(IsIgnored($name));
   
-  Log3 $name, 4, "FHEMduino_AS: $name ($msg)";  
+  Log3 $name, 4, "SIGNALduino_AS: $name ($msg)";  
   
   if($hash->{lastReceive} && (time() - $hash->{lastReceive} < $def->{minsecs} )) {
     if (($def->{lastMSG} ne $msg) && ($def->{equalMSG} > 0)) {
-      Log3 $name, 4, "FHEMduino_AS: $name: $deviceCode no skipping due unequal message even if to short timedifference";
+      Log3 $name, 4, "SIGNALduino_AS: $name: $deviceCode no skipping due unequal message even if to short timedifference";
     } else {
-      Log3 $name, 4, "FHEMduino_AS: $name: $deviceCode Skipping due to short timedifference";
+      Log3 $name, 4, "SIGNALduino_AS: $name: $deviceCode Skipping due to short timedifference";
       return "";
     }
   }
   $hash->{lastReceive} = time();
 
   if(!$val) {
-    Log3 $name, 1, "FHEMduino_AS: $name: $deviceCode Cannot decode $msg";
+    Log3 $name, 1, "SIGNALduino_AS: $name: $deviceCode Cannot decode $msg";
     return "";
   }
   
   $def->{lastMSG} = $msg;
 
-  Log3 $name, 4, "FHEMduino_AS $name: $val";
+  Log3 $name, 4, "SIGNALduino_AS $name: $val";
 
   readingsBeginUpdate($hash);
   readingsBulkUpdate($hash, "state", $val);
@@ -220,7 +220,7 @@ FHEMduino_AS_Parse($$)
 }
 
 sub
-FHEMduino_AS_Attr(@)
+SIGNALduino_AS_Attr(@)
 {
   my @a = @_;
 
@@ -230,8 +230,8 @@ FHEMduino_AS_Attr(@)
   my $hash = $defs{$a[1]};
   my $iohash = $defs{$a[3]};
   my $cde = $hash->{CODE};
-  delete($modules{FHEMduino_AS}{defptr}{$cde});
-  $modules{FHEMduino_AS}{defptr}{$iohash->{NAME} . "." . $cde} = $hash;
+  delete($modules{SIGNALduino_AS}{defptr}{$cde});
+  $modules{SIGNALduino_AS}{defptr}{$iohash->{NAME} . "." . $cde} = $hash;
   return undef;
 }
 
@@ -240,16 +240,16 @@ FHEMduino_AS_Attr(@)
 =pod
 =begin html
 
-<a name="FHEMduino_AS"></a>
-<h3>FHEMduino_AS</h3>
+<a name="SIGNALduino_AS"></a>
+<h3>SIGNALduino_AS</h3>
 <ul>
-  The FHEMduino_AS module interprets Arduino based sensors received via FHEMduino
+  The SIGNALduino_AS module interprets Arduino based sensors received via SIGNALduino
   <br><br>
 
-  <a name="FHEMduino_ASdefine"></a>
+  <a name="SIGNALduino_ASdefine"></a>
   <b>Define</b>
   <ul>
-    <code>define &lt;name&gt; FHEMduino_AS &lt;code&gt; [minsecs] [equalmsg]</code> <br>
+    <code>define &lt;name&gt; SIGNALduino_AS &lt;code&gt; [minsecs] [equalmsg]</code> <br>
 
     <br>
     &lt;code&gt; is the housecode of the autogenerated address of the Env device and 
@@ -265,13 +265,13 @@ FHEMduino_AS_Attr(@)
   </ul>
   <br>
 
-  <a name="FHEMduino_ASset"></a>
+  <a name="SIGNALduino_ASset"></a>
   <b>Set</b> <ul>N/A</ul><br>
 
-  <a name="FHEMduino_ASget"></a>
+  <a name="SIGNALduino_ASget"></a>
   <b>Get</b> <ul>N/A</ul><br>
 
-  <a name="FHEMduino_ASattr"></a>
+  <a name="SIGNALduino_ASattr"></a>
   <b>Attributes</b>
   <ul>
     <li><a href="#IODev">IODev (!)</a></li>
@@ -289,16 +289,16 @@ FHEMduino_AS_Attr(@)
 
 =begin html_DE
 
-<a name="FHEMduino_AS"></a>
-<h3>FHEMduino_AS</h3>
+<a name="SIGNALduino_AS"></a>
+<h3>SIGNALduino_AS</h3>
 <ul>
-  Das FHEMduino_AS module dekodiert vom FHEMduino empfangene Nachrichten von Arduino basierten Sensoren.
+  Das SIGNALduino_AS module dekodiert vom SIGNALduino empfangene Nachrichten von Arduino basierten Sensoren.
   <br><br>
 
-  <a name="FHEMduino_ASdefine"></a>
+  <a name="SIGNALduino_ASdefine"></a>
   <b>Define</b>
   <ul>
-    <code>define &lt;name&gt; FHEMduino_AS &lt;code&gt; [minsecs] [equalmsg]</code> <br>
+    <code>define &lt;name&gt; SIGNALduino_AS &lt;code&gt; [minsecs] [equalmsg]</code> <br>
 
     <br>
     &lt;code&gt; ist der automatisch angelegte Hauscode des Env und besteht aus der
@@ -316,13 +316,13 @@ FHEMduino_AS_Attr(@)
   </ul>
   <br>
 
-  <a name="FHEMduino_ASset"></a>
+  <a name="SIGNALduino_ASset"></a>
   <b>Set</b> <ul>N/A</ul><br>
 
-  <a name="FHEMduino_ASget"></a>
+  <a name="SIGNALduino_ASget"></a>
   <b>Get</b> <ul>N/A</ul><br>
 
-  <a name="FHEMduino_ASattr"></a>
+  <a name="SIGNALduino_ASattr"></a>
   <b>Attributes</b>
   <ul>
     <li><a href="#IODev">IODev (!)</a></li>
