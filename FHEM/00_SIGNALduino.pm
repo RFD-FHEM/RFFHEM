@@ -49,9 +49,9 @@ my %sets = (
 );
 
 ## Supported Clients per default
-my $clientsSIGNALduino = ":IT:".
-						"CUL_TCM97001:".
-#						"SIGNALduino_AS:"
+my $clientsSIGNALduino = ":IT:"
+						."CUL_TCM97001:"
+#						."SIGNALduino_AS:"
 						; 
 
 ## default regex match List for dispatching message to logical modules
@@ -281,7 +281,7 @@ SIGNALduino_Set($@)
     my $hexFile = "";
     my @deviceName = split('@', $hash->{DeviceName});
     my $port = $deviceName[0];
-    my $defaultHexFile = "./hexfiles/$hash->{TYPE}.hex";
+    my $defaultHexFile = "./FHEM/firmware/$hash->{TYPE}.hex";
     my $logFile = AttrVal("global", "logdir", "./log/") . "$hash->{TYPE}-Flash.log";
 
     if(!$arg || $args[0] !~ m/^(\w|\/|.)+$/) {
