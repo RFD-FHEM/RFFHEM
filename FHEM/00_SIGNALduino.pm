@@ -139,8 +139,8 @@ my %ProtocolListSIGNALduino  = (
 
 
 
-##Sven: Vorschlag sollten wir hier nicht mal das Protokoll, also das Nachrichtenformat etwas abändern. Bem OSV2 z.B. fand ich ganz gut, dass die ersten beiden Werte die Länge der Nachricht wiederspiegeln (HEX)
-##      Darauf kann man ja ganz gut eine Regex bauen um das Protokoll zu ermitteln. Dass wir hier machchmal einen Buchstaben, manchmal zwei und hin und wieder auch eine konkrete Länge haben macht es etwas unübersichlicht.
+##Sven: Vorschlag sollten wir hier nicht mal das Protokoll, also das Nachrichtenformat etwas abÃ¤ndern. Bem OSV2 z.B. fand ich ganz gut, dass die ersten beiden Werte die LÃ¤nge der Nachricht wiederspiegeln (HEX)
+##      Darauf kann man ja ganz gut eine Regex bauen um das Protokoll zu ermitteln. Dass wir hier machchmal einen Buchstaben, manchmal zwei und hin und wieder auch eine konkrete LÃ¤nge haben macht es etwas unÃ¼bersichlicht.
 
 sub
 SIGNALduino_Initialize($)
@@ -201,7 +201,7 @@ SIGNALduino_Define($$)
   my $name = $a[0];
 
   my $dev = $a[2];
-  $dev .= "\@9600" if( $dev !~ m/\@/ );
+  $dev .= "\@57600" if( $dev !~ m/\@/ );
   
   $hash->{CMDS} = "";
   $hash->{Clients} = $clientsSIGNALduino;
