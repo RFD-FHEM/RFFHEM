@@ -37,4 +37,7 @@ You have to adapt this to your environment.
 If you made your setup with an Arduino Nano, you can use this command to load the firmware on your device:
 set SDuino flash
 
+If this fails, you may need to install avrdude on your system.
+On a raspberry pi it is done via "sudo apt-get install avrdude"
+
 
