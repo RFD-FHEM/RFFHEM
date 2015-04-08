@@ -31,10 +31,12 @@ sub SIGNALduino_SimpleWrite(@);
 my $debug=1;
 
 my %gets = (    # Name, Data to send to the SIGNALduino, Regexp for the answer
-  "version"  => ["V", '^V .*'],
+  "version"  => ["V", '^V\s.*'],
+  "freeram"  => ["R", '^[0-9]+'],
   "raw"      => ["", '.*'],
-  "uptime"   => ["t", '^[0-9A-F]{8}[\r\n]*$' ],
+#  "uptime"   => ["t", '^[0-9A-F]{8}[\r\n]*$' ],
   "cmds"     => ["?", '.*Use one of[ 0-9A-Za-z]+[\r\n]*$' ],
+
 #  "ITParms"  => ["ip",'.*' ],
 #  "FAParms"  => ["fp", '.*' ],
 #  "TCParms"  => ["dp", '.*' ],
@@ -45,7 +47,8 @@ my %gets = (    # Name, Data to send to the SIGNALduino, Regexp for the answer
 my %sets = (
   "raw"       => "",
   "flash"     => "",
-  "reset"     => ""
+  "reset"     => "",
+  #"disablereceiver"     => "",
 );
 
 ## Supported Clients per default
@@ -138,9 +141,6 @@ my %ProtocolListSIGNALduino  = (
 
 
 
-
-##Sven: Vorschlag sollten wir hier nicht mal das Protokoll, also das Nachrichtenformat etwas abändern. Bem OSV2 z.B. fand ich ganz gut, dass die ersten beiden Werte die Länge der Nachricht wiederspiegeln (HEX)
-##      Darauf kann man ja ganz gut eine Regex bauen um das Protokoll zu ermitteln. Dass wir hier machchmal einen Buchstaben, manchmal zwei und hin und wieder auch eine konkrete Länge haben macht es etwas unübersichlicht.
 
 sub
 SIGNALduino_Initialize($)
@@ -269,8 +269,6 @@ SIGNALduino_Set($@)
   my $cmd = shift @a;
   my $arg = join(" ", @a);
   
-  #my $list = "raw led:on,off led-on-for-timer reset flash";
-  #return $list if( $cmd eq '?' || $cmd eq '');
 
   if($cmd eq "raw") {
     Log3 $name, 4, "set $name $cmd $arg";
@@ -345,8 +343,11 @@ SIGNALduino_Set($@)
 
   } elsif ($cmd =~ m/reset/i) {
     return SIGNALduino_ResetDevice($hash);
+  
+  
   } else {
-    return "Unknown argument $cmd, choose one of ".$hash->{CMDS};
+	    CUL_SimpleWrite($hash, $arg);
+		#return "Unknown argument $cmd, choose one of ".$hash->{CMDS};
   }
 
   return undef;
@@ -532,7 +533,7 @@ SIGNALduino_ReadAnswer($$$$)
     $mSIGNALduinodata = SIGNALduino_RFR_DelPrefix($mSIGNALduinodata) if($type eq "SIGNALduino_RFR");
 
     # \n\n is socat special
-    if($mSIGNALduinodata =~ m/\r\n/ || $anydata || $mSIGNALduinodata =~ m/\n\n/ ) {
+    if($mSIGNALduinodata =~ m/\r\n$/ || $anydata || $mSIGNALduinodata =~ m/\n\n$/ ) {
       if($regexp && $mSIGNALduinodata !~ m/$regexp/) {
         SIGNALduino_Parse($hash, $hash, $hash->{NAME}, $mSIGNALduinodata);
       } else {
