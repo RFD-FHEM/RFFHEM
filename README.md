@@ -11,6 +11,7 @@ Supported Devices / Protocols
 | ------------- | ----------- |
 |TCM97001,Logilink, Pearl NC, and similar | Weather sensor
 |PT2262 Devices | Remote switches like Intertechno V1, door/window sensors|
+|Conrad RSL | only Funk-Jalousieaktor |
 
 Unsupported Devices / Protocols
 ======
