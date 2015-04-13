@@ -1,1 +1,6 @@
-Initial Version of SIGNALduino. It supports IT V1 devices an Devices defined in logical Module CUL_TCM97001 and produces a lot of debug output
+13.04.2015
+- Unterstützung für Empfang von Conrad RSL Protokoll aufgenommen, senden geht noch nicht!
+
+08.04.2015
+- Initial Version of SIGNALduino. It supports IT V1 devices an Devices defined in logical Module CUL_TCM97001 and produces a lot of debug output
+
