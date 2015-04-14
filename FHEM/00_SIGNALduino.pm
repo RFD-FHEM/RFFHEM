@@ -836,11 +836,15 @@ SIGNALduino_Parse($$$$@)
 		   {
 				(undef, $syncidx) = split(/=/,$_);
 				Debug "$name: extracted  syncidx $syncidx\n" if ($debug);
+				return undef if (! defined($patternList{$syncidx}));
+
 		   }
 		   elsif($_ =~ m/CP=\d+/) 		#### Clock Pulse Index
 		   {
 				(undef, $clockidx) = split(/=/,$_);
 				Debug "$name: extracted  clockidx $clockidx\n" if ($debug);;
+				
+				return undef if (! defined($patternList{$clockidx}));
 				
 		   }
 
