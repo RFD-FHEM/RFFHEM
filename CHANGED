@@ -1,3 +1,6 @@
+14.04.2015
+- Updated HEX files for Arduino, due to broken sync detection for pt2262 and similar
+
 13.04.2015
 - Unterstützung für Empfang von Conrad RSL Protokoll aufgenommen, senden geht noch nicht!
 
