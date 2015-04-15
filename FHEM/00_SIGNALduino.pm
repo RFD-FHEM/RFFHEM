@@ -785,7 +785,7 @@ SIGNALduino_Parse($$$$@)
 		
 		my $syncidx;			# currently not used to decode message
 		my $clockidx;			
-		my $protocol;
+		my $protocol=undef;
 		my $rawData;
 
 
@@ -796,8 +796,9 @@ SIGNALduino_Parse($$$$@)
 		my %patternList;
 		## Check for each received message part and parse it
 		foreach (@msg_parts){
- 		   
-		   if ($_ =~ m/^M[0-9]+;/) 		#### Message from known protocol list. Extract ID from data
+		   #Debug "$name: checking msg part:( $_ )" if ($debug);
+
+		   if ($_ =~ m/^M[0-9]+/) 		#### Message from known protocol list. Extract ID from data
 		   {
 			   #Debug "$name: Message Start found $_\n";
 			   #$protocolid = $_ = s/\d+/r/;  
@@ -805,10 +806,11 @@ SIGNALduino_Parse($$$$@)
 			   ($protocolid) = $_ =~ /([0-9]+)/; 
 
 			   $protocol=$ProtocolListSIGNALduino{$protocolid}{name};
+			   #Debug "$name: Serching Protocol ID:( $_ )" if ($debug);
 			   return undef if (!$protocol);
 			   Debug "$name: found $protocol with id: $protocolid Raw message: ($rmsg)\n" if ($debug);
 		   }
-		   if ($_ =~ m/^MU;/) 		#### Message now from protocol list. 
+		   if ($_ =~ m/^MU/) 		#### Message now from protocol list. 
 		   {
 			   #($protocolid) = $_ =~ /([0-9]+)/; 
 
@@ -862,7 +864,7 @@ SIGNALduino_Parse($$$$@)
 		
 		## Iterate over the data_array and find zero, one, float and sync bits with the signalpattern
 	
-		if ($protocolid)
+		if (defined($protocolid))
 		{
 			for ( my $i=0;$i<@data_array;$i++)  ## Does this work also for tristate?
 			{
