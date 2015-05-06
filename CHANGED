@@ -1,3 +1,6 @@
+06.05.2014
+- corrected automatic update of freeram reading.
+
 15.04.2015
 - Decoding for protocols was broken, corrected this error.
 
