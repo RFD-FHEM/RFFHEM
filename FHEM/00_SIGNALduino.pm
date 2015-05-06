@@ -398,7 +398,9 @@ SIGNALduino_Get($@)
 {
   my ($hash, @a) = @_;
   my $type = $hash->{TYPE};
+  my $name = $a[0];
 
+  Log3 $name, 5, "\"get $type\" needs at least one parameter" if(@a < 2);
   return "\"get $type\" needs at least one parameter" if(@a < 2);
   if(!defined($gets{$a[1]})) {
     my @cList = map { $_ =~ m/^(file|raw)$/ ? $_ : "$_:noArg" } sort keys %gets;
@@ -407,7 +409,6 @@ SIGNALduino_Get($@)
 
   my $arg = ($a[2] ? $a[2] : "");
   my ($msg, $err);
-  my $name = $a[0];
 
   return "No $a[1] for dummies" if(IsDummy($name));
 
@@ -752,12 +753,10 @@ sub SIGNALduino_GetUpdate($)
 	my ($hash) = @_;
 	my $name = $hash->{NAME};
 	
-	SIGNALduino_Get($hash,'freeram');	
-	
 	Log3 $name, 3, "$name: GetUpdate called ...";
+	SIGNALduino_Get($hash,$name, "freeram");	
+	
 	InternalTimer(gettimeofday()+$hash->{Interval}, "SIGNALduino_GetUpdate", $hash, 1);
-
-
 }
 
 sub
