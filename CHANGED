@@ -1,4 +1,9 @@
-06.05.2014
+11.05.2015
+ - fixed bug if clock (C=x)is transmitted instead of clockidx (CP=x)
+ - corrected internal filterlist for protocol detection
+ - write protocol filter list at startup into arduino
+ 
+06.05.2015
 - corrected automatic update of freeram reading.
 
 15.04.2015

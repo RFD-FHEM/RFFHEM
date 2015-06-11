@@ -77,7 +77,6 @@ my %matchListSIGNALduino = (
 		#protoID[2]=(s_sigid){-1,-2,-18,500,0,twostate}; // AS
 		#protoID[3]=(s_sigid){-1,3,-30,pattern[clock][0],0,tristate}; // IT old
 
-
 my %ProtocolListSIGNALduino  = (
     "0"    => 
         {
@@ -131,7 +130,7 @@ my %ProtocolListSIGNALduino  = (
 			zero			=> [1,-3],
 			#float			=> [-1,3],		# not full supported now later use
 			sync			=> [1,-30],
-			clockabs     	=> 'auto',		
+			clockabs     	=> -1,	# -1=auto	
 			format 			=> 'twostate',	# not used now
 			preamble		=> 'i',			
 			clientmodule    => 'IT',   # not used now
@@ -146,7 +145,7 @@ my %ProtocolListSIGNALduino  = (
 			zero			=> [1,-3],
 			#float			=> [-1,3],		# not full supported now, for later use
 			sync			=> [1,-30],
-			clockabs     	=> 'auto',		# not used now
+			clockabs     	=> -1,			# -1 = auto
 			format 			=> 'tristate',	# tristate can't be migrated from bin into hex!
 			preamble		=> 'i',			# Append to converted message	
 			clientmodule    => 'IT',   		# not used now
@@ -160,8 +159,8 @@ my %ProtocolListSIGNALduino  = (
 			one				=> [3,-1],
 			zero			=> [1,-3],
 			#float			=> [-1,3],		# not full supported now, for later use
-			#sync			=> [1,-30],		# This special device has no sync
-			clockabs     	=> 'auto',		# not used now
+			sync			=> [0,0],		# This special device has no sync
+			clockabs     	=> -1,			# -1 = auto
 			format 			=> 'twostate',	# tristate can't be migrated from bin into hex!
 			preamble		=> 'i',			# Append to converted message	
 			clientmodule    => 'IT',   		# not used now
@@ -472,52 +471,63 @@ SIGNALduino_ResetDevice($)
 sub
 SIGNALduino_DoInit($)
 {
-  my $hash = shift;
-  my $name = $hash->{NAME};
-  my $err;
-  my $msg = undef;
+	my $hash = shift;
+	my $name = $hash->{NAME};
+	my $err;
+	my $msg = undef;
 
-  SIGNALduino_Clear($hash);
-  my ($ver, $try) = ("", 0);
-  
-  # Try to get version from Arduino
-  while ($try++ < 3 && $ver !~ m/^V/) {
-    SIGNALduino_SimpleWrite($hash, "V");
-    ($err, $ver) = SIGNALduino_ReadAnswer($hash, "Version", 0, undef);
-    return "$name: $err" if($err && ($err !~ m/Timeout/ || $try == 3));
-    $ver = "" if(!$ver);
-  }
+	SIGNALduino_Clear($hash);
+	my ($ver, $try) = ("", 0);
 
-  # Check received string
-  if($ver !~ m/^V/) {
-    $attr{$name}{dummy} = 1;
-    $msg = "Not an SIGNALduino device, got for V:  $ver";
-    Log3 $name, 1, $msg;
-    return $msg;
-  }
-  $ver =~ s/[\r\n]//g;
-  $hash->{VERSION} = $ver;
+	# Try to get version from Arduino
+	while ($try++ < 3 && $ver !~ m/^V/) {
+	SIGNALduino_SimpleWrite($hash, "V");
+	($err, $ver) = SIGNALduino_ReadAnswer($hash, "Version", 0, undef);
+	return "$name: $err" if($err && ($err !~ m/Timeout/ || $try == 3));
+	$ver = "" if(!$ver);
+	}
 
-  # Cmd-String feststellen
+	# Check received string
+	if($ver !~ m/^V/) {
+	$attr{$name}{dummy} = 1;
+	$msg = "Not an SIGNALduino device, got for V:  $ver";
+	Log3 $name, 1, $msg;
+	return $msg;
+	}
+	$ver =~ s/[\r\n]//g;
+	$hash->{VERSION} = $ver;
 
-  my $cmds = SIGNALduino_Get($hash, $name, "cmds", 0);
-  $cmds =~ s/$name cmds =>//g;
-  $cmds =~ s/ //g;
-  $hash->{CMDS} = $cmds;
-  Log3 $name, 3, "$name: Possible commands: " . $hash->{CMDS};
-#  if( my $initCommandsString = AttrVal($name, "initCommands", undef) ) {
-#    my @initCommands = split(' ', $initCommandsString);
-#    foreach my $command (@initCommands) {
-#      SIGNALduino_SimpleWrite($hash, $command);
-#    }
-#  }
-#  $hash->{STATE} = "Initialized";
-  readingsSingleUpdate($hash, "state", "Initialized", 1);
+	# Cmd-String feststellen
 
-  # Reset the counter
-  delete($hash->{XMIT_TIME});
-  delete($hash->{NR_CMD_LAST_H});
-  return undef;
+	my $cmds = SIGNALduino_Get($hash, $name, "cmds", 0);
+	$cmds =~ s/$name cmds =>//g;
+	$cmds =~ s/ //g;
+	$hash->{CMDS} = $cmds;
+	Log3 $name, 3, "$name: Possible commands: " . $hash->{CMDS};
+	readingsSingleUpdate($hash, "state", "Programming", 1);
+	
+	# Program the Filterlist on the arduino, based on the protocolList
+	for my $key ( keys %ProtocolListSIGNALduino ) {
+		my $command = "FA;".$ProtocolListSIGNALduino{$key}{id}.";".$ProtocolListSIGNALduino{$key}{sync}[1].";".$ProtocolListSIGNALduino{$key}{clockabs};
+		#my $command = $ProtocolListSIGNALduino{$key}{id}.";".$ProtocolListSIGNALduino{$key}{sync}[1].";".$ProtocolListSIGNALduino{$key}{clockabs};
+		#Debug "$name: $command" if ($debug);
+
+		SIGNALduino_SimpleWrite($hash, $command);
+	}
+
+	#  if( my $initCommandsString = AttrVal($name, "initCommands", undef) ) {
+	#    my @initCommands = split(' ', $initCommandsString);
+	#    foreach my $command (@initCommands) {
+	#      SIGNALduino_SimpleWrite($hash, $command);
+	#    }
+	#  }
+	#  $hash->{STATE} = "Initialized";
+	readingsSingleUpdate($hash, "state", "Initialized", 1);
+
+	# Reset the counter
+	delete($hash->{XMIT_TIME});
+	delete($hash->{NR_CMD_LAST_H});
+	return undef;
 }
 
 #####################################
@@ -815,7 +825,27 @@ SIGNALduino_Parse($$$$@)
 
 			   #Debug Dumper($protocolid);
   
-			   $protocol=$ProtocolListSIGNALduino{$protocolid}{name};
+			   #$protocol=$ProtocolListSIGNALduino{$protocolid}{name};
+			   return undef if (!$protocol);
+			   Debug "$name: found $protocol with id: $protocolid Raw message: ($rmsg)\n" if ($debug);
+		   }
+		   if ($_ =~ m/^MC/) 		#### Message is already Manchester encoded. 
+		   {
+			   #($protocolid) = $_ =~ /([0-9]+)/; 
+
+			   #Debug Dumper($protocolid);
+  
+			   #$protocol=$ProtocolListSIGNALduino{$protocolid}{name};
+			   
+			   # call sub for manchester decoding
+			   #MC;LL=-936;LH=1028;SL=-520;SH=456;AAAAAAAA669A5A9AA599A59555696/565555AA5A994;C=494;
+			   
+			   ## OSV2 :
+			   ## C=400-550
+			   ## Sync = AAAA 
+			   ## Data = Full Signal, need to reverse nibbles and extract double send inverted databits
+			   
+			   
 			   return undef if (!$protocol);
 			   Debug "$name: found $protocol with id: $protocolid Raw message: ($rmsg)\n" if ($debug);
 		   }
@@ -852,83 +882,86 @@ SIGNALduino_Parse($$$$@)
  		   #print "$_\n";
 		}
 		
-		## Make a lookup table for our pattern index ids
-		#print "List of pattern:";
-		%patternList = map { $_ => floor($patternList{$_}/$patternList{$clockidx}) } keys %patternList; 
-		#print Dumper(\%patternList);		
-		
-		#### Convert rawData in Message
-		my @data_array = split( '', $rawData ); # migrate the data string to array
-		my @bit_msg;							# array to store decoded signal bits
-		
-		## Iterate over the data_array and find zero, one, float and sync bits with the signalpattern
-	
-		if (defined($protocolid))
+		if (defined($clockidx))
 		{
-			for ( my $i=0;$i<@data_array;$i++)  ## Does this work also for tristate?
+			
+			## Make a lookup table for our pattern index ids
+			#print "List of pattern:";
+			%patternList = map { $_ => floor($patternList{$_}/$patternList{$clockidx}) } keys %patternList; 
+			#print Dumper(\%patternList);		
+			
+			#### Convert rawData in Message
+			my @data_array = split( '', $rawData ); # migrate the data string to array
+			my @bit_msg;							# array to store decoded signal bits
+			
+			## Iterate over the data_array and find zero, one, float and sync bits with the signalpattern
+		
+			if (defined($protocolid))
 			{
-				
-				my $tmp_idx=$i;
-				if ( ($tmp_idx=SIGNALduino_MatchSignalPattern(@{$ProtocolListSIGNALduino{$protocolid}{zero}},%patternList,@data_array,$i)) != -1 ) {
-					push(@bit_msg,0);
-					$i=$tmp_idx-1;
-					#Debug "$name: Pattern [@{$ProtocolListSIGNALduino{$protocolid}{zero}}] found at pos $i.  Adding 0 \n" if ($debug);
-				} elsif ( ($tmp_idx=SIGNALduino_MatchSignalPattern(@{$ProtocolListSIGNALduino{$protocolid}{one}},%patternList,@data_array,$i)) != -1 ) {
-					push(@bit_msg,1);
-					$i=$tmp_idx-1;
-					#Debug "$name: Pattern [@{$ProtocolListSIGNALduino{$protocolid}{one}}] found at pos $i.  Adding 1 \n" if ($debug);
-				} elsif ( ($tmp_idx=SIGNALduino_MatchSignalPattern(@{$ProtocolListSIGNALduino{$protocolid}{sync}},%patternList,@data_array,$i)) != -1 ) {
-					#push(@bit_msg,'S');		# Don't print Sync in bit_msg array
-					#Debug "$name: Pattern [@{$ProtocolListSIGNALduino{$protocolid}{sync}}] found at pos $i. Skipping \n" if ($debug);
-					$i=$tmp_idx-1;
-				## aditional check for tristate protocols
-				} elsif ( defined($ProtocolListSIGNALduino{$protocolid}{float}) && ($tmp_idx=SIGNALduino_MatchSignalPattern(@{$ProtocolListSIGNALduino{$protocolid}{float}},%patternList,@data_array,$i)) != -1 ) {
-					push(@bit_msg,'F');
-					$i=$tmp_idx-1;
-					#Debug "$name: Pattern [@{$ProtocolListSIGNALduino{$protocolid}{one}}] found at pos $i.  Adding F \n" if ($debug);
+				for ( my $i=0;$i<@data_array;$i++)  ## Does this work also for tristate?
+				{
+					
+					my $tmp_idx=$i;
+					if ( ($tmp_idx=SIGNALduino_MatchSignalPattern(@{$ProtocolListSIGNALduino{$protocolid}{zero}},%patternList,@data_array,$i)) != -1 ) {
+						push(@bit_msg,0);
+						$i=$tmp_idx-1;
+						#Debug "$name: Pattern [@{$ProtocolListSIGNALduino{$protocolid}{zero}}] found at pos $i.  Adding 0 \n" if ($debug);
+					} elsif ( ($tmp_idx=SIGNALduino_MatchSignalPattern(@{$ProtocolListSIGNALduino{$protocolid}{one}},%patternList,@data_array,$i)) != -1 ) {
+						push(@bit_msg,1);
+						$i=$tmp_idx-1;
+						#Debug "$name: Pattern [@{$ProtocolListSIGNALduino{$protocolid}{one}}] found at pos $i.  Adding 1 \n" if ($debug);
+					} elsif ( ($tmp_idx=SIGNALduino_MatchSignalPattern(@{$ProtocolListSIGNALduino{$protocolid}{sync}},%patternList,@data_array,$i)) != -1 ) {
+						#push(@bit_msg,'S');		# Don't print Sync in bit_msg array
+						#Debug "$name: Pattern [@{$ProtocolListSIGNALduino{$protocolid}{sync}}] found at pos $i. Skipping \n" if ($debug);
+						$i=$tmp_idx-1;
+					## aditional check for tristate protocols
+					} elsif ( defined($ProtocolListSIGNALduino{$protocolid}{float}) && ($tmp_idx=SIGNALduino_MatchSignalPattern(@{$ProtocolListSIGNALduino{$protocolid}{float}},%patternList,@data_array,$i)) != -1 ) {
+						push(@bit_msg,'F');
+						$i=$tmp_idx-1;
+						#Debug "$name: Pattern [@{$ProtocolListSIGNALduino{$protocolid}{one}}] found at pos $i.  Adding F \n" if ($debug);
+					}
+				}
+			} else {			# Handle unknown Protocol ID now
+				## 1. Test for Manchester
+				for ( my $i=0;$i<@data_array;$i++)  ## Does this work also for tristate?
+				{
+
 				}
 			}
-		} else {			# Handle unknown Protocol ID now
-			## 1. Test for Manchester
-			for ( my $i=0;$i<@data_array;$i++)  ## Does this work also for tristate?
+			Debug "$name: decoded message raw (@bit_msg), ".@bit_msg." bits\n";
+			### Next step: Send RAW Message to clients. May we need to adapt some of them or modify our format to fit
+			
+			## Migrate Message to other format as needed, this is for adding support for existing logical modules. New modules shoul'd work with raw data instead
+			if (defined($protocolid) && $ProtocolListSIGNALduino{$protocolid}{format} eq "twostate")
 			{
+				## Twostate Messages can be migrated into a hex string for futher processing in the logical clients
+				
+				#my $dmsg = join '', map { sprintf '%02x', $_ } @bit_msg;
+				while (@bit_msg % 8 > 0)
+				{
+					push(@bit_msg,'0');
+					Debug "$name: adding 0 bit to bit_msg array";
+				}
+			
+				my $dmsg = sprintf "%02x", oct "0b" . join "", @bit_msg;			## Array -> Sring -> bin -> hex
+				$dmsg = "$dmsg"."$ProtocolListSIGNALduino{$protocolid}{postamble}" if (defined($ProtocolListSIGNALduino{$protocolid}{postamble}));
+				$dmsg = "$ProtocolListSIGNALduino{$protocolid}{preamble}"."$dmsg" if (defined($ProtocolListSIGNALduino{$protocolid}{preamble}));
+				
+				Debug "$name: converted Data to ($dmsg)";
 
+				$hash->{"${name}_MSGCNT"}++;
+				$hash->{"${name}_TIME"} = TimeNow();
+				readingsSingleUpdate($hash, "state", $hash->{READINGS}{state}{VAL}, 0);
+				$hash->{RAWMSG} = $rmsg;
+				my %addvals = (RAWMSG => $dmsg);
+				Dispatch($hash, $dmsg, \%addvals);  ## Dispatch to other Modules 
+
+			} elsif (defined($protocolid) && $ProtocolListSIGNALduino{$protocolid}{format} eq "tristate")
+			{
+				## Let's do some stuff here to work with a tristate message
+				
 			}
 		}
-		Debug "$name: decoded message raw (@bit_msg), ".@bit_msg." bits\n";
-		### Next step: Send RAW Message to clients. May we need to adapt some of them or modify our format to fit
-		
-		## Migrate Message to other format as needed, this is for adding support for existing logical modules. New modules shoul'd work with raw data instead
-		if (defined($protocolid) && $ProtocolListSIGNALduino{$protocolid}{format} eq "twostate")
-		{
-			## Twostate Messages can be migrated into a hex string for futher processing in the logical clients
-			
-			#my $dmsg = join '', map { sprintf '%02x', $_ } @bit_msg;
-			while (@bit_msg % 8 > 0)
-			{
-				push(@bit_msg,'0');
-				Debug "$name: adding 0 bit to bit_msg array";
-			}
-		
-			my $dmsg = sprintf "%02x", oct "0b" . join "", @bit_msg;			## Array -> Sring -> bin -> hex
-			$dmsg = "$dmsg"."$ProtocolListSIGNALduino{$protocolid}{postamble}" if (defined($ProtocolListSIGNALduino{$protocolid}{postamble}));
-			$dmsg = "$ProtocolListSIGNALduino{$protocolid}{preamble}"."$dmsg" if (defined($ProtocolListSIGNALduino{$protocolid}{preamble}));
-			
- 		    Debug "$name: converted Data to ($dmsg)";
-
-			$hash->{"${name}_MSGCNT"}++;
-			$hash->{"${name}_TIME"} = TimeNow();
-			readingsSingleUpdate($hash, "state", $hash->{READINGS}{state}{VAL}, 0);
-			$hash->{RAWMSG} = $rmsg;
-			my %addvals = (RAWMSG => $dmsg);
-			Dispatch($hash, $dmsg, \%addvals);  ## Dispatch to other Modules 
-
-		} elsif (defined($protocolid) && $ProtocolListSIGNALduino{$protocolid}{format} eq "tristate")
-		{
-			## Let's do some stuff here to work with a tristate message
-			
-		}
-
 	}
   
   
