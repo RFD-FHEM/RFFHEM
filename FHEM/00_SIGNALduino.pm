@@ -196,6 +196,7 @@ SIGNALduino_Initialize($)
 					  ." hexFile"
                       ." initCommands"
                       ." flashCommand"
+  					  ." hardware:nano328,uno,mega2560,mini328"
                       ." $readingFnAttributes";
 
   $hash->{ShutdownFn} = "SIGNALduino_Shutdown";
@@ -237,6 +238,10 @@ SIGNALduino_Define($$)
   $hash->{Clients} = $clientsSIGNALduino;
   $hash->{MatchList} = \%matchListSIGNALduino;
   
+  if( !defined( $attr{$name}{hardware} ) ) {
+    $attr{$name}{hardware} = "nano328";
+  }
+
 
   if( !defined( $attr{$name}{flashCommand} ) ) {
 #    $attr{$name}{flashCommand} = "avrdude -p atmega328P -c arduino -P [PORT] -D -U flash:w:[HEXFILE] 2>[LOGFILE]"
@@ -317,7 +322,9 @@ SIGNALduino_Set($@)
     my $hexFile = "";
     my @deviceName = split('@', $hash->{DeviceName});
     my $port = $deviceName[0];
-    my $defaultHexFile = "./FHEM/firmware/$hash->{TYPE}.hex";
+	my $hardware=AttrVal($name,"hardware","nano328");
+
+    my $defaultHexFile = "./FHEM/firmware/$hash->{TYPE}_$hardware.hex";
     my $logFile = AttrVal("global", "logdir", "./log/") . "$hash->{TYPE}-Flash.log";
 
     if(!$arg || $args[0] !~ m/^(\w|\/|.)+$/) {
