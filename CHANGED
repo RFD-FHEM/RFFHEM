@@ -1,3 +1,7 @@
+22.06.2015
+ - added option to specify arduino hardware type (nano328,mini328,uno,mega2560) 
+ - changed some code future support of MU and MC messages from signalduino
+
 11.05.2015
  - fixed bug if clock (C=x)is transmitted instead of clockidx (CP=x)
  - corrected internal filterlist for protocol detection
