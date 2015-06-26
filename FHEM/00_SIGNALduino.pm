@@ -798,7 +798,7 @@ SIGNALduino_Parse_Message($$$$@)
 	foreach (@msg_parts){
 	   #Debug "$name: checking msg part:( $_ )" if ($debug);
 
-	   if ($_ =~ m/^M[0-9]+/) 		#### Message from known protocol list. Extract ID from data
+	   if ($_ =~ m/^M[0-9]{1,}/) 		#### Message from known protocol list. Extract ID from data
 	   {
 		   #Debug "$name: Message Start found $_\n";
 		   #$protocolid = $_ = s/\d+/r/;  
@@ -810,10 +810,11 @@ SIGNALduino_Parse_Message($$$$@)
 		   return undef if (!$protocol);
 		   Debug "$name: found $protocol with id: $protocolid Raw message: ($rmsg)\n" if ($debug);
 	   }
-	   elsif ($_ =~ m/^P/) 		#### Extract Pattern List from array
+	   elsif ($_ =~ m/^P\d=\d{2,}/) 		#### Extract Pattern List from array
 	   {
-		   $_ =~ s/^P+//;  
+		   $_ =~ s/^P\d//;  
 		   my @pattern = split(/=/,$_);
+		   
 		   $patternList{$pattern[0]} = $pattern[1];
 		   Debug "$name: extracted  pattern @pattern \n" if ($debug);
 	   }
@@ -823,14 +824,14 @@ SIGNALduino_Parse_Message($$$$@)
 			$rawData = $_ ;
 			Debug "$name: extracted  data $rawData\n" if ($debug);
 	   }
-	   elsif($_ =~ m/SP=\d+/) 		#### Sync Pulse Index
+	   elsif($_ =~ m/^SP=\d{1}/) 		#### Sync Pulse Index
 	   {
 			(undef, $syncidx) = split(/=/,$_);
 			Debug "$name: extracted  syncidx $syncidx\n" if ($debug);
 			return undef if (! defined($patternList{$syncidx}));
 
 	   }
-	   elsif($_ =~ m/CP=\d+/) 		#### Clock Pulse Index
+	   elsif($_ =~ m/^CP=\d{1}/) 		#### Clock Pulse Index
 	   {
 			(undef, $clockidx) = split(/=/,$_);
 			Debug "$name: extracted  clockidx $clockidx\n" if ($debug);;
@@ -934,14 +935,14 @@ SIGNALduino_Parse_MU($$$$@)
 	Debug "$name: processing unsynced message\n" if ($debug);
 
 	foreach (@msg_parts){
-		if ($_ =~ m/^P/) 			#### Extract Pattern List from array
+		if ($_ =~ m/^P\d=\d{2,}/) 			#### Extract Pattern List from array
 		{
 		   $_ =~ s/^P+//;  
 		   my @pattern = split(/=/,$_);
 		   $patternList{$pattern[0]} = $pattern[1];
 		   Debug "$name: extracted  pattern @pattern \n" if ($debug);
 		}
-		elsif($_ =~ m/D=\d+;/) 		#### Message from array
+		elsif($_ =~ m/D=\d+/) 		#### Message from array
 		{
 			$_ =~ s/D=//;  
 			$rawData = $_ ;
@@ -966,14 +967,14 @@ SIGNALduino_Parse_MC($$$$@)
 	Debug "$name: processing mancheser message\n" if ($debug);
 	foreach (@msg_parts){
 
-		if ($_ =~ m/^[SL][LH]/) 			#### Extract manchester pattern
+		if ($_ =~ m/^[SL][LH]=-?\d{2,}/) 			#### Extract manchester pattern
 		{
 		   #$_ =~ s/^[SL][LH]//;  
 		   my @pattern = split(/=/,$_);
 		   $patternList{$pattern[0]} = $pattern[1];
 		   Debug "$name: extracted pattern @pattern \n" if ($debug);
 		}
-		elsif($_ =~ m/D=[A-F0-9]+/) 		#### Message from array
+		elsif($_ =~ m/^D=[A-F0-9]+/) 		#### Message from array
 		{
 			$_ =~ s/D=//;  
 			$rawData = $_ ;
@@ -986,7 +987,7 @@ SIGNALduino_Parse_MC($$$$@)
 			Debug "$name: extracted data $bitData (bin)\n" if ($debug);
 		}
 		
-		elsif ($_ =~ m/^MC/) 		#### Message is already Manchester encoded. 
+		elsif ($_ =~ m/^MC;([SL][HL]=-?\d+;){4}D=[A-F0-9]+;C=\d+;/) 		#### Message is already Manchester encoded. 
 		{
 			# Nothing to do message like:
 			#MC;LL=-936;LH=1028;SL=-520;SH=456;AAAAAAAA669A5A9AA599A59555696/565555AA5A994;C=494;
@@ -1018,14 +1019,13 @@ SIGNALduino_Parse($$$$@)
 	$rmsg=~ s/^\002(M.;.*;)\003/$1/;						# cut off start end end character from message for further processing they are not needed
 	Debug "$name: incomming message: ($rmsg)\n" if ($debug);
 	my @msg_parts = SIGNALduino_splitMsg($rmsg,';');			## Split message parts by ";"
-
 	# Message Synced type   -> M#
-	if ($rmsg=~ m/^M\d+;P\d=.*;.*;D=.*;/) 
+	if ($rmsg=~ m/^M\d+;(P\d=-?\d+;){4,7}D=\d+;CP=\d;SP=\d;/) 
 	{
 		return SIGNALduino_Parse_Message($hash, $iohash, $name, $rmsg,@msg_parts);
 	}
 	# Message unsynced type   -> MU
-  	elsif ($rmsg=~ m/^MU;.*;/)
+  	elsif ($rmsg=~ m/^MU;(P\d=-?\d+;){4,7}D=\d+;CP=\d;/)
 	{
 		return SIGNALduino_Parse_MU($hash, $iohash, $name, $rmsg,@msg_parts);
 
