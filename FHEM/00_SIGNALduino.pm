@@ -956,12 +956,41 @@ SIGNALduino_Parse_MU($$$$@)
 	}
 }
 
+sub SIGNALduino_checkBits($$$$$)
+{
+	my ($pattern,$startpos,$mincount,$maxcount,$end) = @_;
+	my $valid=NULL;
+	my $endcount = $startpos+$maxcount;
+	my $idx;
+	for ($idx=$startpos; $idx<$endcount;$idx+=2)
+	{
+		my $twobit;
+		#my $twobit = getDataBits($idx,2);
+        if ( $twobit == $pattern)						# Check the sync bits against the pattern
+        {
+            next;
+        } elsif ($idx-$startpos >= $mincount)  {    	# minimum of sync bits must be reveived
+            $valid=1;              					    # Valid Sync sequence of mincount bits are valid
+            last;
+        } else {
+            $valid=NULL;              					# Not a valid Sync sequence, to less sync bits
+			last;
+        }
+	}
+	if ($valid){
+		$end = $idx+$startpos;
+	}
+	return $valid;
+
+}
+
 sub
 SIGNALduino_Parse_MC($$$$@)
 {
 	my ($hash, $iohash, $name, $rmsg, @msg_parts) = @_;
 	my $rawData;
 	my $bitData;
+	my $clock;
 	my %patternList;
 
 	Debug "$name: processing mancheser message\n" if ($debug);
@@ -978,7 +1007,7 @@ SIGNALduino_Parse_MC($$$$@)
 		{
 			$_ =~ s/D=//;  
 			$rawData = $_ ;
-			Debug "$name: extracted data $rawData (hex)\n" if ($debug);
+			Debug "$name: extracted data $rawData (hex) len ".length($rawData)."\n" if ($debug);
 			
 			my $hlen = length($rawData);
 			my $blen = $hlen * 4;
@@ -986,18 +1015,58 @@ SIGNALduino_Parse_MC($$$$@)
 			
 			Debug "$name: extracted data $bitData (bin)\n" if ($debug);
 		}
+		elsif($_ =~ m/^C=\d+/) 		#### Message from array
+		{
+			$_ =~ s/C=//;  
+			$clock = $_ ;
+			Debug "$name: extracted clock $clock \n" if ($debug);
+		}
 		
 		elsif ($_ =~ m/^MC;([SL][HL]=-?\d+;){4}D=[A-F0-9]+;C=\d+;/) 		#### Message is already Manchester encoded. 
 		{
+			
+			
 			# Nothing to do message like:
 			#MC;LL=-936;LH=1028;SL=-520;SH=456;AAAAAAAA669A5A9AA599A59555696/565555AA5A994;C=494;
-		   
+			# 1 
+			#01 01 01 01 01 01 01 01 
+			#01 01 01 01 01 01 01 
+   
+			#10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 
+			
+			#01 10 01 10 01 10 10 10 010110100101100101010101100101010101010101011010010101010110010110010101011001010101010101010101101001011001010101100110 
+
 			## OSV2 :
 			## C=400-550
 			## Sync = AAAA 
 			## Data = Full Signal, need to reverse nibbles and extract double send inverted databits
 		}
 	}
+	
+	#Check OSV2
+	
+	if ( $clock >410 and $clock <520 and length($rawData) > 37 and length($rawData) < 55 and $rawData =~ m/^A{6,8}/)
+	{  # Valid OSV2 detected!	
+		Debug "$name: OSV2 protocol detected \n" if ($debug);
+		 
+		my $preamble_pos=index($bitData,"10011001",24);
+		return undef if ($preamble_pos <=24);
+		my $idx=0;
+		my $osv2bits="";
+		for ($idx=$preamble_pos+8;$idx<length($bitData);$idx=$idx+2)
+		{
+			$osv2bits = substr($bitData,$idx,1) . $osv2bits;
+		}
+		Debug "$name: OSV2 bits $osv2bits \n" if ($debug);
+
+		
+	}
+	if ( $clock >380 and $clock <425 and length($rawData) > 13 and length($rawData) < 14 and $rawData =~ m/^A{2,3}/)
+	{  # Valid AS detected!	
+		Debug "$name: AS protocol detected \n" if ($debug);
+	}
+
+	
 }
 
 
