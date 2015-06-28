@@ -238,7 +238,7 @@ SIGNALduino_Initialize($)
 					  ." hexFile"
                       ." initCommands"
                       ." flashCommand"
-  					  ." hardware:nano328,uno,mega2560,mini328"
+  					  ." hardware:nano328,uno,promini328"
                       ." $readingFnAttributes";
 
   $hash->{ShutdownFn} = "SIGNALduino_Shutdown";
@@ -559,9 +559,13 @@ SIGNALduino_DoInit($)
 	for my $key ( keys %ProtocolListSIGNALduino ) {
 		my $command = "FA;".$ProtocolListSIGNALduino{$key}{id}.";".$ProtocolListSIGNALduino{$key}{sync}[1].";".$ProtocolListSIGNALduino{$key}{clockabs};
 		#my $command = $ProtocolListSIGNALduino{$key}{id}.";".$ProtocolListSIGNALduino{$key}{sync}[1].";".$ProtocolListSIGNALduino{$key}{clockabs};
-		#Debug "$name: $command" if ($debug);
+		my $replay;
+		Debug "$name: $command" if ($debug);
 
-		#SIGNALduino_SimpleWrite($hash, $command);
+		SIGNALduino_SimpleWrite($hash, $command);
+		($err, $replay) = SIGNALduino_ReadAnswer($hash, "Update Filter ".$ProtocolListSIGNALduino{$key}{id}, 0, undef);
+		Debug "$name: answert $replay" if ($debug);
+
 	}
 
 	#  if( my $initCommandsString = AttrVal($name, "initCommands", undef) ) {
@@ -901,6 +905,7 @@ SIGNALduino_Parse_Message($$$$@)
 
 		if (defined($protocolid))
 		{
+			
 			for ( my $i=0;$i<@data_array;$i++)  ## Does this work also for tristate?
 			{
 				

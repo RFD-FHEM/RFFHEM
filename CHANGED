@@ -1,7 +1,17 @@
+28.06.2015
+ - Added Firmware 3.1.1 for promini, nano and uno
+ - Removed Firmware for mini and mega2560
+ - Enabled filter list update trough fhem at startup at SIGNALduino (extension from 11.05.2015)
+ - Added eurochon protocol detection and protocol unknown1 
+ - some basic stuff to detect osv2 protocol (not finished)
+ - Changed Regex for better message detection and filtering some bad things out
+
+
 22.06.2015
  - added option to specify arduino hardware type (nano328,mini328,uno,mega2560) 
  - changed some code future support of MU and MC messages from signalduino
 
+ 
 11.05.2015
  - fixed bug if clock (C=x)is transmitted instead of clockidx (CP=x)
  - corrected internal filterlist for protocol detection
