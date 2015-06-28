@@ -166,6 +166,48 @@ my %ProtocolListSIGNALduino  = (
 			clientmodule    => 'IT',   		# not used now
 			modulematch     => '^i......',  # not used now
 		},    
+	"5"    => 			## Similar protocol as intertechno, but without sync
+        {
+            name			=> 'unitec',	
+			id          	=> '5',
+			one				=> [3,-1],
+			zero			=> [1,-3],
+			#float			=> [-1,3],		# not full supported now, for later use
+			sync			=> [0,0],		# This special device has no sync
+			clockabs     	=> -1,			# -1 = auto
+			format 			=> 'twostate',	# tristate can't be migrated from bin into hex!
+			preamble		=> 'i',			# Append to converted message	
+			clientmodule    => 'IT',   		# not used now
+			modulematch     => '^i......',  # not used now
+		},  
+	"6"    => 			## Eurochron Protocol
+        {
+            name			=> 'eurochron',	
+			id          	=> '6',
+			one				=> [1,-9],
+			zero			=> [1,-4],
+			#float			=> [-1,3],		# not full supported now, for later use
+			sync			=> [1,-36],		# This special device has no sync
+			clockabs     	=> 212,			# -1 = auto
+			format 			=> 'twostate',	# tristate can't be migrated from bin into hex!
+			preamble		=> 'w',			# Append to converted message	
+			clientmodule    => 'undef',   	# not used now
+			modulematch     => '^w......',  # not used now
+		},
+	"7"    => 			## unkown Protocol
+        {
+            name			=> 'unknown1',	
+			id          	=> '7',
+			one				=> [1,-4],
+			zero			=> [1,-2],
+			#float			=> [-1,3],		# not full supported now, for later use
+			sync			=> [1,-8],		# 
+			clockabs     	=> 484,			# -1 = auto
+			format 			=> 'twostate',	# tristate can't be migrated from bin into hex!
+			preamble		=> 'u',			# Append to converted message	
+			clientmodule    => 'undef',   	# not used now
+			modulematch     => '^u......',  # not used now
+		}, 
 	
 );
 
