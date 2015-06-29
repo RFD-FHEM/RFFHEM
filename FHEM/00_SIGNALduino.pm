@@ -856,8 +856,9 @@ SIGNALduino_Parse_Message($$$$@)
 		   return undef if (!$protocol);
 		   Debug "$name: found $protocol with id: $protocolid Raw message: ($rmsg)\n" if ($debug);
 	   }
-	   elsif ($_ =~ m/^P\d=\d{2,}/) 		#### Extract Pattern List from array
+	   elsif ($_ =~ m/^P\d=-?\d{2,}/) 		#### Extract Pattern List from array
 	   {
+   		   $_ =~ s/^P+//;  
 		   $_ =~ s/^P\d//;  
 		   my @pattern = split(/=/,$_);
 		   
@@ -874,7 +875,7 @@ SIGNALduino_Parse_Message($$$$@)
 	   {
 			(undef, $syncidx) = split(/=/,$_);
 			Debug "$name: extracted  syncidx $syncidx\n" if ($debug);
-			return undef if (! defined($patternList{$syncidx}));
+			return undef if (!defined($patternList{$syncidx}));
 
 	   }
 	   elsif($_ =~ m/^CP=\d{1}/) 		#### Clock Pulse Index
@@ -882,8 +883,11 @@ SIGNALduino_Parse_Message($$$$@)
 			(undef, $clockidx) = split(/=/,$_);
 			Debug "$name: extracted  clockidx $clockidx\n" if ($debug);;
 			
-			return undef if (! defined($patternList{$clockidx}));
+			return undef if (!defined($patternList{$clockidx}));
 			
+	   }  else {
+			Debug "$name: unknown Message part $_" if ($debug);;
+
 	   }
 
 	   #print "$_\n";
@@ -930,11 +934,7 @@ SIGNALduino_Parse_Message($$$$@)
 				}
 			}
 		} else {			# Handle unknown Protocol ID now
-			## 1. Test for Manchester
-			for ( my $i=0;$i<@data_array;$i++)  ## Does this work also for tristate?
-			{
 
-			}
 		}
 		Debug "$name: decoded message raw (@bit_msg), ".@bit_msg." bits\n";
 		### Next step: Send RAW Message to clients. May we need to adapt some of them or modify our format to fit
@@ -982,7 +982,7 @@ SIGNALduino_Parse_MU($$$$@)
 	Debug "$name: processing unsynced message\n" if ($debug);
 
 	foreach (@msg_parts){
-		if ($_ =~ m/^P\d=\d{2,}/) 			#### Extract Pattern List from array
+		if ($_ =~ m/^P\d=-?\d{2,}/) 			#### Extract Pattern List from array
 		{
 		   $_ =~ s/^P+//;  
 		   my @pattern = split(/=/,$_);
@@ -1151,7 +1151,10 @@ SIGNALduino_Parse($$$$@)
 	{
 		return SIGNALduino_Parse_MC($hash, $iohash, $name, $rmsg,@msg_parts);		   
 	}
-  
+	else {
+		Debug "$name: unknown Messageformat, aborting\n" if ($debug);
+		return undef;
+	}
 	#my $dmsg="";
 
 	####
