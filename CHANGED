@@ -1,3 +1,8 @@
+07.07.2015
+ - Debug output will be suspressed if device is initialized with verbose <= 4.
+ - Added some code for later OSV2 Protocol decodinbg (not finished)
+ - Added a check, to avoid decoding the wrong protocol
+
 28.06.2015
  - Added Firmware 3.1.1 for promini, nano and uno
  - Removed Firmware for mini and mega2560

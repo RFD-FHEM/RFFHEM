@@ -546,6 +546,10 @@ SIGNALduino_DoInit($)
 	$ver =~ s/[\r\n]//g;
 	$hash->{VERSION} = $ver;
 
+	$debug = AttrVal($name, "verbose", 3) == 5;
+	Log3 $name, 3, "$name: setting debug to: " . $debug;
+
+	
 	# Cmd-String feststellen
 
 	my $cmds = SIGNALduino_Get($hash, $name, "cmds", 0);
@@ -791,12 +795,12 @@ sub SIGNALduino_MatchSignalPattern(\@\%\@$){
 	{
 						
 			#Debug " $idx check: ".$patternList->{$data_array->[$idx]}." == ".$_;		
-			Debug " $idx check: ". $patternList->{$data_array->[$idx]}." - ".$_." > ". ceil($patternList->{$data_array->[$idx]}*$tol) if ($debug);		
+			Debug " is $idx check: ". $patternList->{$data_array->[$idx]}." - ".$_." > ". ceil(abs($patternList->{$data_array->[$idx]}*$tol)) if ($debug);		
 			  
 			#print "\n";;
 			#if ($patternList->{$data_array->[$idx]} ne $_ ) 
 			### Nachkommastelle von ceil!!!
-			if (abs($patternList->{$data_array->[$idx]} - $_)  > ceil(abs($patternList->{$data_array->[$idx]}*$tol)))
+			if ($patternList->{$data_array->[$idx]} - $_  > ceil(abs($patternList->{$data_array->[$idx]}*$tol)))
 			{
 				return -1;		## Pattern does not match, return -1 = not matched
 			}
@@ -821,6 +825,25 @@ sub SIGNALduino_GetUpdate($)
 	SIGNALduino_Get($hash,$name, "freeram");	
 	
 	InternalTimer(gettimeofday()+$hash->{Interval}, "SIGNALduino_GetUpdate", $hash, 1);
+}
+
+
+sub SIGNALduino_b2h {
+    my $num   = shift;
+    my $WIDTH = 32;
+    my $index = length($num) - $WIDTH;
+    my $hex = '';
+    do {
+        my $width = $WIDTH;
+        if ($index < 0) {
+            $width += $index;
+            $index = 0;
+        }
+        my $cut_string = substr($num, $index, $width);
+        $hex = sprintf('%X', oct("0b$cut_string")) . $hex;
+        $index -= $WIDTH;
+    } while ($index > (-1 * $WIDTH));
+    return $hex;
 }
 
 sub
@@ -909,7 +932,8 @@ SIGNALduino_Parse_Message($$$$@)
 
 		if (defined($protocolid))
 		{
-			
+			my $fail_cnt=0;
+
 			for ( my $i=0;$i<@data_array;$i++)  ## Does this work also for tristate?
 			{
 				
@@ -931,8 +955,18 @@ SIGNALduino_Parse_Message($$$$@)
 					push(@bit_msg,'F');
 					$i=$tmp_idx-1;
 					#Debug "$name: Pattern [@{$ProtocolListSIGNALduino{$protocolid}{one}}] found at pos $i.  Adding F \n" if ($debug);
+				} else {
+				   # Nothing from Signal matched!
+				   $fail_cnt++;
 				}
+				
 			}
+			if ($fail_cnt > 5)
+			{
+				Debug "$name: to many failures in pattern protocol matching... aborting" if ($debug);
+				return undef;
+			}
+
 		} else {			# Handle unknown Protocol ID now
 
 		}
@@ -1091,7 +1125,7 @@ SIGNALduino_Parse_MC($$$$@)
 	}
 	
 	#Check OSV2
-	
+	# Test code: https://ideone.com/Pp80M8
 	if ( $clock >410 and $clock <520 and length($rawData) > 37 and length($rawData) < 55 and $rawData =~ m/^A{6,8}/)
 	{  # Valid OSV2 detected!	
 		Debug "$name: OSV2 protocol detected \n" if ($debug);
@@ -1102,10 +1136,17 @@ SIGNALduino_Parse_MC($$$$@)
 		my $osv2bits="";
 		for ($idx=$preamble_pos+8;$idx<length($bitData);$idx=$idx+2)
 		{
-			$osv2bits = substr($bitData,$idx,1) . $osv2bits;
+			$osv2bits = $osv2bits.substr($bitData,$idx,1);
+			
+			#reverse $osv2bits;
+			# Need to reverse every bit from a byte. # Get 16 Bit, reverse, extract every second char conv to hex 
 		}
 		Debug "$name: OSV2 bits $osv2bits \n" if ($debug);
-
+		
+		my $osv2hex = SIGNALduino_b2h($osv2bits);
+		my $osv2len = sprintf("0x%x", length($osv2bits)/8);
+		
+		Debug "$name: OSV2 hex $osv2hex with length $osv2len bytes \n" if ($debug);
 		
 	}
 	if ( $clock >380 and $clock <425 and length($rawData) > 13 and length($rawData) < 14 and $rawData =~ m/^A{2,3}/)
