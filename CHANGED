@@ -1,3 +1,8 @@
+12.07.2015
+
+ - removed some debug output if debug is disabled
+ - added oregon module (osv2 support still not finished)
+
 07.07.2015
  - Debug output will be suspressed if device is initialized with verbose <= 4.
  - Added some code for later OSV2 Protocol decodinbg (not finished)

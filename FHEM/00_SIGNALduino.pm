@@ -56,6 +56,7 @@ my $clientsSIGNALduino = ":IT:"
 						."CUL_TCM97001:"
 						."SIGNALduino_RSL:"
 #						."SIGNALduino_AS:"
+						."OREGON:"
 						; 
 
 ## default regex match List for dispatching message to logical modules
@@ -68,7 +69,7 @@ my %matchListSIGNALduino = (
 #    "2:SIGNALduino_Env"      	=> "W[0-9]+[a-f0-9]+\$",	# WNNHHHHHHH N=Number H=Hex
 #    "3:SIGNALduino_PT2262"   	=> "IR.*\$",
 #    "4:SIGNALduino_HX"       	=> "H...\$",
-#    "5:OREGON"            		=> "^(3[8-9A-F]|[4-6][0-9A-F]|7[0-8]).*",		
+     "4:OREGON"            		=> "^(3[8-9A-F]|[4-6][0-9A-F]|7[0-8]).*",		
 #    "7:SIGNALduino_ARC"     	=> "AR.*\$", #ARC protocol switches like IT selflearn
 );
 
@@ -821,7 +822,7 @@ sub SIGNALduino_GetUpdate($)
 	my ($hash) = @_;
 	my $name = $hash->{NAME};
 	
-	Log3 $name, 3, "$name: GetUpdate called ...";
+	Log3 $name, 4, "$name: GetUpdate called ...";
 	SIGNALduino_Get($hash,$name, "freeram");	
 	
 	InternalTimer(gettimeofday()+$hash->{Interval}, "SIGNALduino_GetUpdate", $hash, 1);
@@ -845,6 +846,7 @@ sub SIGNALduino_b2h {
     } while ($index > (-1 * $WIDTH));
     return $hex;
 }
+
 
 sub
 SIGNALduino_Parse_Message($$$$@)
@@ -970,7 +972,7 @@ SIGNALduino_Parse_Message($$$$@)
 		} else {			# Handle unknown Protocol ID now
 
 		}
-		Debug "$name: decoded message raw (@bit_msg), ".@bit_msg." bits\n";
+		Debug "$name: decoded message raw (@bit_msg), ".@bit_msg." bits\n" if ($debug);;
 		### Next step: Send RAW Message to clients. May we need to adapt some of them or modify our format to fit
 		
 		## Migrate Message to other format as needed, this is for adding support for existing logical modules. New modules shoul'd work with raw data instead
@@ -982,14 +984,14 @@ SIGNALduino_Parse_Message($$$$@)
 			while (@bit_msg % 8 > 0)
 			{
 				push(@bit_msg,'0');
-				Debug "$name: adding 0 bit to bit_msg array";
+				Debug "$name: adding 0 bit to bit_msg array" if ($debug);
 			}
 		
 			my $dmsg = sprintf "%02x", oct "0b" . join "", @bit_msg;			## Array -> Sring -> bin -> hex
 			$dmsg = "$dmsg"."$ProtocolListSIGNALduino{$protocolid}{postamble}" if (defined($ProtocolListSIGNALduino{$protocolid}{postamble}));
 			$dmsg = "$ProtocolListSIGNALduino{$protocolid}{preamble}"."$dmsg" if (defined($ProtocolListSIGNALduino{$protocolid}{preamble}));
 			
-			Debug "$name: converted Data to ($dmsg)";
+			Log3 $name, 5, "converted Data to ($dmsg)";
 
 			$hash->{"${name}_MSGCNT"}++;
 			$hash->{"${name}_TIME"} = TimeNow();
@@ -1073,6 +1075,7 @@ SIGNALduino_Parse_MC($$$$@)
 	my $bitData;
 	my $clock;
 	my %patternList;
+	my $dmsg=NULL;
 
 	Debug "$name: processing mancheser message\n" if ($debug);
 	foreach (@msg_parts){
@@ -1123,9 +1126,12 @@ SIGNALduino_Parse_MC($$$$@)
 			## Data = Full Signal, need to reverse nibbles and extract double send inverted databits
 		}
 	}
-	
+
+
+	my $found=0;
+
 	#Check OSV2
-	# Test code: https://ideone.com/Pp80M8
+	# Test code: https://ideone.com/Pp80M8  https://ideone.com/63wjyx
 	if ( $clock >410 and $clock <520 and length($rawData) > 37 and length($rawData) < 55 and $rawData =~ m/^A{6,8}/)
 	{  # Valid OSV2 detected!	
 		Debug "$name: OSV2 protocol detected \n" if ($debug);
@@ -1134,19 +1140,33 @@ SIGNALduino_Parse_MC($$$$@)
 		return undef if ($preamble_pos <=24);
 		my $idx=0;
 		my $osv2bits="";
-		for ($idx=$preamble_pos+8;$idx<length($bitData);$idx=$idx+2)
+		my $osv2hex ="";
+
+		for ($idx=$preamble_pos;$idx<length($bitData);$idx=$idx+8)
 		{
-			$osv2bits = $osv2bits.substr($bitData,$idx,1);
+			my $osv2nibble = "";
+			$osv2nibble=NULL;
+			$osv2nibble=substr($bitData,$idx,8);
+			#Debug "$name: nibble $idx: $osv2nibble";
+
+			my $rvosv2byte="";
 			
+			for (my $p=1;$p<length($osv2nibble);$p=$p+2)
+			{
+				$rvosv2byte = substr($osv2nibble,$p,1).$rvosv2byte;
+			}
+			$osv2hex=$osv2hex.sprintf('%X', oct("0b$rvosv2byte")) ;
+			#Debug "$name: -> reversed: $rvosv2byte\n";
+			$osv2bits = $osv2bits.$rvosv2byte;
 			#reverse $osv2bits;
-			# Need to reverse every bit from a byte. # Get 16 Bit, reverse, extract every second char conv to hex 
+			# Need to reverse every bit from a nibble. # Get 16 Bits, reverse, extract every second char conv to hex 
 		}
-		Debug "$name: OSV2 bits $osv2bits \n" if ($debug);
+		#Debug "$name: OSV2 bits $osv2bits \n" if ($debug);
 		
-		my $osv2hex = SIGNALduino_b2h($osv2bits);
-		my $osv2len = sprintf("0x%x", length($osv2bits)/8);
-		
-		Debug "$name: OSV2 hex $osv2hex with length $osv2len bytes \n" if ($debug);
+		$osv2hex = sprintf("%02X", length($osv2hex)/2).$osv2hex;
+		Debug "$name: OSV2 hex $osv2hex with length ".(length($osv2hex)/2)." bytes \n" if ($debug);
+		$found=1;
+		$dmsg=$osv2hex;
 		
 	}
 	if ( $clock >380 and $clock <425 and length($rawData) > 13 and length($rawData) < 14 and $rawData =~ m/^A{2,3}/)
@@ -1154,7 +1174,16 @@ SIGNALduino_Parse_MC($$$$@)
 		Debug "$name: AS protocol detected \n" if ($debug);
 	}
 
-	
+	if ($found)
+	{
+		Log3 $name, 5, "converted Data to ($dmsg)";
+		$hash->{"${name}_MSGCNT"}++;
+		$hash->{"${name}_TIME"} = TimeNow();
+		readingsSingleUpdate($hash, "state", $hash->{READINGS}{state}{VAL}, 0);
+		$hash->{RAWMSG} = $rmsg;
+		my %addvals = (RAWMSG => $dmsg);
+		Dispatch($hash, $dmsg, \%addvals);  ## Dispatch to other Modules 
+	}
 }
 
 
