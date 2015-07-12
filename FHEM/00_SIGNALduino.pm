@@ -796,12 +796,12 @@ sub SIGNALduino_MatchSignalPattern(\@\%\@$){
 	{
 						
 			#Debug " $idx check: ".$patternList->{$data_array->[$idx]}." == ".$_;		
-			Debug " is $idx check: ". $patternList->{$data_array->[$idx]}." - ".$_." > ". ceil(abs($patternList->{$data_array->[$idx]}*$tol)) if ($debug);		
+			Debug " is $idx check: abs(". $patternList->{$data_array->[$idx]}." - ".$_.") > ". ceil(abs($patternList->{$data_array->[$idx]}*$tol)) if ($debug);		
 			  
 			#print "\n";;
 			#if ($patternList->{$data_array->[$idx]} ne $_ ) 
 			### Nachkommastelle von ceil!!!
-			if ($patternList->{$data_array->[$idx]} - $_  > ceil(abs($patternList->{$data_array->[$idx]}*$tol)))
+			if (abs($patternList->{$data_array->[$idx]} - $_)  > ceil(abs($patternList->{$data_array->[$idx]}*$tol)))
 			{
 				return -1;		## Pattern does not match, return -1 = not matched
 			}
@@ -942,12 +942,12 @@ SIGNALduino_Parse_Message($$$$@)
 				my $tmp_idx=$i;
 				if ( ($tmp_idx=SIGNALduino_MatchSignalPattern(@{$ProtocolListSIGNALduino{$protocolid}{zero}},%patternList,@data_array,$i)) != -1 ) {
 					push(@bit_msg,0);
-					$i=$tmp_idx-1;
 					Debug "$name: Pattern [@{$ProtocolListSIGNALduino{$protocolid}{zero}}] found at pos $i.  Adding 0 \n" if ($debug);
+					$i=$tmp_idx-1;
 				} elsif ( ($tmp_idx=SIGNALduino_MatchSignalPattern(@{$ProtocolListSIGNALduino{$protocolid}{one}},%patternList,@data_array,$i)) != -1 ) {
 					push(@bit_msg,1);
+					Debug "$name: Pattern [@{$ProtocolListSIGNALduino{$protocolid}{one}}] found at pos $i.  Adding 1 \n" if ($debug);
 					$i=$tmp_idx-1;
-					#Debug "$name: Pattern [@{$ProtocolListSIGNALduino{$protocolid}{one}}] found at pos $i.  Adding 1 \n" if ($debug);
 				} elsif ( ($tmp_idx=SIGNALduino_MatchSignalPattern(@{$ProtocolListSIGNALduino{$protocolid}{sync}},%patternList,@data_array,$i)) != -1 ) {
 					#push(@bit_msg,'S');		# Don't print Sync in bit_msg array
 					#Debug "$name: Pattern [@{$ProtocolListSIGNALduino{$protocolid}{sync}}] found at pos $i. Skipping \n" if ($debug);
@@ -1132,11 +1132,15 @@ SIGNALduino_Parse_MC($$$$@)
 
 	#Check OSV2
 	# Test code: https://ideone.com/Pp80M8  https://ideone.com/63wjyx
-	if ( $clock >410 and $clock <520 and length($rawData) > 37 and length($rawData) < 55 and $rawData =~ m/^A{6,8}/)
+	
+
+	if ( $clock >410 and $clock <520 and length($rawData) > 37 and length($rawData) < 55 and index($bitData,"10011001",24) >= 24 and $bitData =~ m/^.?(10){12,16}/) #$rawData =~ m/^A{6,8}/
 	{  # Valid OSV2 detected!	
+		
 		Debug "$name: OSV2 protocol detected \n" if ($debug);
-		 
+		
 		my $preamble_pos=index($bitData,"10011001",24);
+
 		return undef if ($preamble_pos <=24);
 		my $idx=0;
 		my $osv2bits="";
@@ -1151,7 +1155,7 @@ SIGNALduino_Parse_MC($$$$@)
 
 			my $rvosv2byte="";
 			
-			for (my $p=1;$p<length($osv2nibble);$p=$p+2)
+			for (my $p=0;$p<length($osv2nibble);$p=$p+2)
 			{
 				$rvosv2byte = substr($osv2nibble,$p,1).$rvosv2byte;
 			}
@@ -1163,7 +1167,7 @@ SIGNALduino_Parse_MC($$$$@)
 		}
 		#Debug "$name: OSV2 bits $osv2bits \n" if ($debug);
 		
-		$osv2hex = sprintf("%02X", length($osv2hex)/2).$osv2hex;
+		$osv2hex = sprintf("%02X", length($osv2hex)*4).$osv2hex;
 		Debug "$name: OSV2 hex $osv2hex with length ".(length($osv2hex)/2)." bytes \n" if ($debug);
 		$found=1;
 		$dmsg=$osv2hex;
@@ -1172,6 +1176,8 @@ SIGNALduino_Parse_MC($$$$@)
 	if ( $clock >380 and $clock <425 and length($rawData) > 13 and length($rawData) < 14 and $rawData =~ m/^A{2,3}/)
 	{  # Valid AS detected!	
 		Debug "$name: AS protocol detected \n" if ($debug);
+		my $preamble_pos=index($bitData,"1100",16);
+
 	}
 
 	if ($found)

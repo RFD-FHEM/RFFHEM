@@ -1,7 +1,7 @@
 12.07.2015
-
  - removed some debug output if debug is disabled
  - added oregon module (osv2 support still not finished)
+ - fixed TCM_97001 and IT decoding (bug)
 
 07.07.2015
  - Debug output will be suspressed if device is initialized with verbose <= 4.
