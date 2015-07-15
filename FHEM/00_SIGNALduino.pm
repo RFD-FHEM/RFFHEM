@@ -992,6 +992,15 @@ SIGNALduino_Parse_Message($$$$@)
 			$dmsg = "$ProtocolListSIGNALduino{$protocolid}{preamble}"."$dmsg" if (defined($ProtocolListSIGNALduino{$protocolid}{preamble}));
 			
 			Log3 $name, 5, "converted Data to ($dmsg)";
+			
+			## Dirty hack, to check a few things, bevore crating a logical module for complete decoding
+			if ($protocolid eq 7 && $debug)
+			{
+			   my $id = oct ("0b".@bit_msg[0..9]);
+			   my $channel = oct ("0b".@bit_msg[10..11])+1;
+   			   my $temp = oct ("0b".@bit_msg[12..23])/10;
+			   Debug "$name: decoded protocol $protocolid: id=$id, channel=$channel, temp=$temp\n" if ($debug);;
+			}
 
 			$hash->{"${name}_MSGCNT"}++;
 			$hash->{"${name}_TIME"} = TimeNow();
@@ -1077,7 +1086,7 @@ SIGNALduino_Parse_MC($$$$@)
 	my %patternList;
 	my $dmsg=NULL;
 
-	Debug "$name: processing mancheser message\n" if ($debug);
+	Debug "$name: processing manchester message\n" if ($debug);
 	foreach (@msg_parts){
 
 		if ($_ =~ m/^[SL][LH]=-?\d{2,}/) 			#### Extract manchester pattern
@@ -1146,20 +1155,24 @@ SIGNALduino_Parse_MC($$$$@)
 		my $osv2bits="";
 		my $osv2hex ="";
 
-		for ($idx=$preamble_pos;$idx<length($bitData);$idx=$idx+8)
+		for ($idx=$preamble_pos;$idx<length($bitData);$idx=$idx+16)
 		{
-			my $osv2nibble = "";
-			$osv2nibble=NULL;
-			$osv2nibble=substr($bitData,$idx,8);
-			#Debug "$name: nibble $idx: $osv2nibble";
+			if (length($bitData)-$idx  < 16 )
+			{
+			  last;
+			}
+			my $osv2byte = "";
+			$osv2byte=NULL;
+			$osv2byte=substr($bitData,$idx,16);
+			#Debug "$name: byte(16bit) $idx: $osv2byte";
 
 			my $rvosv2byte="";
 			
-			for (my $p=0;$p<length($osv2nibble);$p=$p+2)
+			for (my $p=0;$p<length($osv2byte);$p=$p+2)
 			{
-				$rvosv2byte = substr($osv2nibble,$p,1).$rvosv2byte;
+				$rvosv2byte = substr($osv2byte,$p,1).$rvosv2byte;
 			}
-			$osv2hex=$osv2hex.sprintf('%X', oct("0b$rvosv2byte")) ;
+			$osv2hex=$osv2hex.sprintf('%02X', oct("0b$rvosv2byte")) ;
 			#Debug "$name: -> reversed: $rvosv2byte\n";
 			$osv2bits = $osv2bits.$rvosv2byte;
 			#reverse $osv2bits;
@@ -1177,7 +1190,6 @@ SIGNALduino_Parse_MC($$$$@)
 	{  # Valid AS detected!	
 		Debug "$name: AS protocol detected \n" if ($debug);
 		my $preamble_pos=index($bitData,"1100",16);
-
 	}
 
 	if ($found)

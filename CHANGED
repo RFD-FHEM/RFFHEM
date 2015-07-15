@@ -1,3 +1,6 @@
+15.07.2015
+ - added a debug option to verify decoding information from protocol 7
+ 
 12.07.2015
  - removed some debug output if debug is disabled
  - added oregon module (osv2 support still not finished)
