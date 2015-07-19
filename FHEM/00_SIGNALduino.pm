@@ -167,20 +167,7 @@ my %ProtocolListSIGNALduino  = (
 			clientmodule    => 'IT',   		# not used now
 			modulematch     => '^i......',  # not used now
 		},    
-	"5"    => 			## Similar protocol as intertechno, but without sync
-        {
-            name			=> 'unitec',	
-			id          	=> '5',
-			one				=> [3,-1],
-			zero			=> [1,-3],
-			#float			=> [-1,3],		# not full supported now, for later use
-			sync			=> [0,0],		# This special device has no sync
-			clockabs     	=> -1,			# -1 = auto
-			format 			=> 'twostate',	# tristate can't be migrated from bin into hex!
-			preamble		=> 'i',			# Append to converted message	
-			clientmodule    => 'IT',   		# not used now
-			modulematch     => '^i......',  # not used now
-		},  
+	
 	"6"    => 			## Eurochron Protocol
         {
             name			=> 'eurochron',	
@@ -239,7 +226,7 @@ SIGNALduino_Initialize($)
 					  ." hexFile"
                       ." initCommands"
                       ." flashCommand"
-  					  ." hardware:nano328,uno,promini328"
+  					  ." hardware:nano328,uno,promini328,sim"
                       ." $readingFnAttributes";
 
   $hash->{ShutdownFn} = "SIGNALduino_Shutdown";
@@ -275,11 +262,26 @@ SIGNALduino_Define($$)
   my $name = $a[0];
 
   my $dev = $a[2];
-  $dev .= "\@57600" if( $dev !~ m/\@/ );
+  Debug "dev: $dev" if ($debug);
+  my $hardware=AttrVal($name,"hardware","nano328");
+
+  Debug "hardware: $hardware" if ($debug);
+ 
+  if($dev eq "none") {
+    Log3 $name, 1, "$name device is none, commands will be echoed only";
+    $attr{$name}{dummy} = 1;
+
+    return undef;
+  }
+
+  $dev .= "\@57600" if( $dev ne "none" && $dev !~ m/\@/ );
+		
   
   $hash->{CMDS} = "";
   $hash->{Clients} = $clientsSIGNALduino;
   $hash->{MatchList} = \%matchListSIGNALduino;
+  
+
   
   if( !defined( $attr{$name}{hardware} ) ) {
     $attr{$name}{hardware} = "nano328";
@@ -291,11 +293,6 @@ SIGNALduino_Define($$)
     $attr{$name}{flashCommand} = "avrdude -c arduino -b 57600 -P [PORT] -p atmega328p -vv -U flash:w:[HEXFILE] 2>[LOGFILE]"
   }
 
-  if($dev eq "none") {
-    Log3 $name, 1, "$name device is none, commands will be echoed only";
-    $attr{$name}{dummy} = 1;
-    return undef;
-  }
   
   $hash->{DeviceName} = $dev;
   my $ret = DevIo_OpenDev($hash, 0, "SIGNALduino_DoInit");
@@ -528,51 +525,54 @@ SIGNALduino_DoInit($)
 
 	SIGNALduino_Clear($hash);
 	my ($ver, $try) = ("", 0);
+	#Dirty hack to allow initialisation of DirectIO Device for some debugging and tesing
+  	if (!$hash->{DEF} =~ m/\@DirectIO/ )
+	{
 
-	# Try to get version from Arduino
-	while ($try++ < 3 && $ver !~ m/^V/) {
-	SIGNALduino_SimpleWrite($hash, "V");
-	($err, $ver) = SIGNALduino_ReadAnswer($hash, "Version", 0, undef);
-	return "$name: $err" if($err && ($err !~ m/Timeout/ || $try == 3));
-	$ver = "" if(!$ver);
-	}
 
-	# Check received string
-	if($ver !~ m/^V/) {
-	$attr{$name}{dummy} = 1;
-	$msg = "Not an SIGNALduino device, got for V:  $ver";
-	Log3 $name, 1, $msg;
-	return $msg;
-	}
-	$ver =~ s/[\r\n]//g;
-	$hash->{VERSION} = $ver;
-
-	$debug = AttrVal($name, "verbose", 3) == 5;
-	Log3 $name, 3, "$name: setting debug to: " . $debug;
-
+		# Try to get version from Arduino
+		while ($try++ < 3 && $ver !~ m/^V/) {
+			SIGNALduino_SimpleWrite($hash, "V");
+			($err, $ver) = SIGNALduino_ReadAnswer($hash, "Version", 0, undef);
+			return "$name: $err" if($err && ($err !~ m/Timeout/ || $try == 3));
+			$ver = "" if(!$ver);
+		}
+		# Check received string
+		if($ver !~ m/^V/) {
+			$attr{$name}{dummy} = 1;
+			$msg = "Not an SIGNALduino device, got for V:  $ver";
+			Log3 $name, 1, $msg;
+			return $msg;
+		}
+		$ver =~ s/[\r\n]//g;
+		$hash->{VERSION} = $ver;
 	
-	# Cmd-String feststellen
+		$debug = AttrVal($name, "verbose", 3) == 5;
+		Log3 $name, 3, "$name: setting debug to: " . $debug;
 
-	my $cmds = SIGNALduino_Get($hash, $name, "cmds", 0);
-	$cmds =~ s/$name cmds =>//g;
-	$cmds =~ s/ //g;
-	$hash->{CMDS} = $cmds;
-	Log3 $name, 3, "$name: Possible commands: " . $hash->{CMDS};
-	readingsSingleUpdate($hash, "state", "Programming", 1);
-	
-	# Program the Filterlist on the arduino, based on the protocolList
-	for my $key ( keys %ProtocolListSIGNALduino ) {
-		my $command = "FA;".$ProtocolListSIGNALduino{$key}{id}.";".$ProtocolListSIGNALduino{$key}{sync}[1].";".$ProtocolListSIGNALduino{$key}{clockabs};
-		#my $command = $ProtocolListSIGNALduino{$key}{id}.";".$ProtocolListSIGNALduino{$key}{sync}[1].";".$ProtocolListSIGNALduino{$key}{clockabs};
-		my $replay;
-		Debug "$name: $command" if ($debug);
+		
+		# Cmd-String feststellen
 
-		SIGNALduino_SimpleWrite($hash, $command);
-		($err, $replay) = SIGNALduino_ReadAnswer($hash, "Update Filter ".$ProtocolListSIGNALduino{$key}{id}, 0, undef);
-		Debug "$name: answert $replay" if ($debug);
+		my $cmds = SIGNALduino_Get($hash, $name, "cmds", 0);
+		$cmds =~ s/$name cmds =>//g;
+		$cmds =~ s/ //g;
+		$hash->{CMDS} = $cmds;
+		Log3 $name, 3, "$name: Possible commands: " . $hash->{CMDS};
+		readingsSingleUpdate($hash, "state", "Programming", 1);
+		
+		# Program the Filterlist on the arduino, based on the protocolList
+		for my $key ( keys %ProtocolListSIGNALduino ) {
+			my $command = "FA;".$ProtocolListSIGNALduino{$key}{id}.";".$ProtocolListSIGNALduino{$key}{sync}[1].";".$ProtocolListSIGNALduino{$key}{clockabs};
+			#my $command = $ProtocolListSIGNALduino{$key}{id}.";".$ProtocolListSIGNALduino{$key}{sync}[1].";".$ProtocolListSIGNALduino{$key}{clockabs};
+			my $replay;
+			Debug "$name: $command" if ($debug);
 
+			SIGNALduino_SimpleWrite($hash, $command);
+			($err, $replay) = SIGNALduino_ReadAnswer($hash, "Update Filter ".$ProtocolListSIGNALduino{$key}{id}, 0, undef);
+			Debug "$name: answert $replay" if ($debug);
+
+		}
 	}
-
 	#  if( my $initCommandsString = AttrVal($name, "initCommands", undef) ) {
 	#    my @initCommands = split(' ', $initCommandsString);
 	#    foreach my $command (@initCommands) {
@@ -753,13 +753,15 @@ SIGNALduino_Read($)
   my $name = $hash->{NAME};
 
   my $SIGNALduinodata = $hash->{PARTIAL};
-  Log3 $name, 5, "SIGNALduino/RAW: $SIGNALduinodata/$buf"; 
+  Log3 $name, 5, "SIGNALduino/RAW READ: $SIGNALduinodata/$buf"; 
   $SIGNALduinodata .= $buf;
 
   while($SIGNALduinodata =~ m/\n/) {
     my $rmsg;
     ($rmsg,$SIGNALduinodata) = split("\n", $SIGNALduinodata, 2);
     $rmsg =~ s/\r//;
+    Log3 $name, 5, "SIGNALduino/msg READ: $rmsg"; 
+
     SIGNALduino_Parse($hash, $hash, $name, $rmsg) if($rmsg);
   }
   $hash->{PARTIAL} = $SIGNALduinodata;
@@ -860,8 +862,8 @@ SIGNALduino_Parse_Message($$$$@)
 	my $rawData;
 
 
-	#print "Message splitted:";
-	#print Dumper(\@msg_parts);
+	#Debug "Message splitted:";
+	#Debug Dumper(\@msg_parts);
 
 
 	my %patternList;
@@ -986,7 +988,7 @@ SIGNALduino_Parse_Message($$$$@)
 				push(@bit_msg,'0');
 				Debug "$name: adding 0 bit to bit_msg array" if ($debug);
 			}
-		
+			  
 			my $dmsg = sprintf "%02x", oct "0b" . join "", @bit_msg;			## Array -> Sring -> bin -> hex
 			$dmsg = "$dmsg"."$ProtocolListSIGNALduino{$protocolid}{postamble}" if (defined($ProtocolListSIGNALduino{$protocolid}{postamble}));
 			$dmsg = "$ProtocolListSIGNALduino{$protocolid}{preamble}"."$dmsg" if (defined($ProtocolListSIGNALduino{$protocolid}{preamble}));
@@ -996,10 +998,10 @@ SIGNALduino_Parse_Message($$$$@)
 			## Dirty hack, to check a few things, bevore crating a logical module for complete decoding
 			if ($protocolid eq 7 && $debug)
 			{
-			   my $id = oct ("0b".@bit_msg[0..9]);
-			   my $channel = oct ("0b".@bit_msg[10..11])+1;
-   			   my $temp = oct ("0b".@bit_msg[12..23])/10;
-			   Debug "$name: decoded protocol $protocolid: id=$id, channel=$channel, temp=$temp\n" if ($debug);;
+			   my $id = oct ("0b".join('',@bit_msg[0..9]));
+			   my $channel = oct ("0b".join('',@bit_msg[10..11]))+1;
+   			   my $temp = oct ("0b".join('',@bit_msg[12..23]))/10;
+			   Debug "$name: decoded protocol $protocolid: id=$id, channel=$channel, temp=$temp\n" if ($debug);
 			}
 
 			$hash->{"${name}_MSGCNT"}++;

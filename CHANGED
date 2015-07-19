@@ -1,3 +1,8 @@
+19.07.2015
+ - Fixed a bug, to verify protocol #7
+ - added a option, to run the fhem module without a pysical device. Use directio to run the module from a fifo
+ - updated firmware to 3.1.2a
+
 15.07.2015
  - added a debug option to verify decoding information from protocol 7
  
