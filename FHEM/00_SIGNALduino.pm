@@ -1145,7 +1145,7 @@ SIGNALduino_Parse_MC($$$$@)
 	# Test code: https://ideone.com/Pp80M8  https://ideone.com/63wjyx
 	
 
-	if ( $clock >410 and $clock <520 and length($rawData) > 37 and length($rawData) < 55 and index($bitData,"10011001",24) >= 24 and $bitData =~ m/^.?(10){12,16}/) #$rawData =~ m/^A{6,8}/
+	if ( $clock >390 and $clock <520 and length($rawData) > 37 and length($rawData) < 55 and index($bitData,"10011001",24) >= 24 and $bitData =~ m/^.?(10){12,16}/) #$rawData =~ m/^A{6,8}/
 	{  # Valid OSV2 detected!	
 		
 		Debug "$name: OSV2 protocol detected \n" if ($debug);
@@ -1170,7 +1170,7 @@ SIGNALduino_Parse_MC($$$$@)
 
 			my $rvosv2byte="";
 			
-			for (my $p=0;$p<length($osv2byte);$p=$p+2)
+			for (my $p=1;$p<length($osv2byte);$p=$p+2)
 			{
 				$rvosv2byte = substr($osv2byte,$p,1).$rvosv2byte;
 			}
