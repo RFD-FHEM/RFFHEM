@@ -12,12 +12,12 @@ Supported Devices / Protocols
 |TCM97001,Logilink, Pearl NC, and similar | Weather sensor
 |PT2262 Devices | Remote switches like Intertechno V1, door/window sensors|
 |Conrad RSL | only Funk-Jalousieaktor |
+|Oregon Scientific v2 Devices | Weather sensor |
 
 Unsupported Devices / Protocols
 ======
 This branch has currently also some unsupported versions
 
-|Oregon Scientific v2 Devices | Weather sensor |
 |Arduino Sensor | multi purpose sensor based on arduino |
 
 
