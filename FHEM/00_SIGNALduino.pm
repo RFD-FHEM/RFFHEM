@@ -8,13 +8,16 @@
 # N. Butzek, S. Butzek, 2014-2015 
 #
 
+
 package main;
 
 use strict;
 use warnings;
 use Time::HiRes qw(gettimeofday);
 use Data::Dumper qw(Dumper);
+
 use POSIX qw( floor);
+#use Math::Round qw/round/;
 
 sub SIGNALduino_Attr(@);
 sub SIGNALduino_Clear($);
@@ -832,26 +835,49 @@ sub SIGNALduino_PatternExists
 	#Debug "se: ".Dumper($search);
 
 	my $searchpattern;
-	my $valid=0;  # Next check, set valid to 0
+	my $valid=1;  
 	my $pstr="";
 	
 	foreach $searchpattern (@{$search}) # z.B. [1, -4] 
 	{
-		my $patt_id;
+		#my $patt_id;
+		# Calculate tolernace for search
+		my $tol=abs(abs($searchpattern)>=2 ?$searchpattern*0.3:$searchpattern*1.5);
+		
+		my %pattern_spacing = {};
+		# Find and store every pattern, which is in tolerance
+		%pattern_spacing = map { $_ => abs($patternList->{$_}-$searchpattern) } grep { abs($patternList->{$_}-$searchpattern) <= $tol} (keys %$patternList);
+		if (scalar keys %pattern_spacing > 0) 
+		{
+			
+			Debug "pattern in tol: ".Dumper(\%pattern_spacing); 
+			# Extract fist pattern, which is nearst to our searched value
+			my $closestidx = (sort {$pattern_spacing{$a} <=> $pattern_spacing{$b}} keys %pattern_spacing)[0];
 
-		my $tol=abs(abs($searchpattern)>2 ?$searchpattern*0.3:$searchpattern*1.5);
-		foreach $patt_id (keys %$patternList) {
-			#Debug "$patt_id ->intol $patternList->{$patt_id} $searchpattern $tol"; 
-			$valid =  SIGNALduino_inTol($patternList->{$patt_id}, $searchpattern, $tol);
-			if ( $valid) #one pulse found in tolerance, search next one
-			{
-				$pstr="$pstr$patt_id";
-				# provide this index for further lookup table -> {$patt_id =  $searchpattern}
-				#Debug "pulse found";
-				last ; ## Exit foreach loop if searched pattern matches pattern in list
-			}
+			$pstr="$pstr$closestidx";
+			$valid=1;
+			Debug "closest is $closestidx";
+		} else {
+			# search is not found, return
+			$valid=0;
+			last;	
 		}
-		last if (!$valid);  ## Exit loop if a complete iteration has not found anything
+		#return ($valid ? $pstr : -1);  # return $pstr if $valid or -1
+
+	
+		
+		#foreach $patt_id (keys %$patternList) {
+			#Debug "$patt_id. chk ->intol $patternList->{$patt_id} $searchpattern $tol"; 
+			#$valid =  SIGNALduino_inTol($patternList->{$patt_id}, $searchpattern, $tol);
+			#if ( $valid) #one pulse found in tolerance, search next one
+			#{
+			#	$pstr="$pstr$patt_id";
+			#	# provide this index for further lookup table -> {$patt_id =  $searchpattern}
+			#	Debug "pulse found";
+			#	last ; ## Exit foreach loop if searched pattern matches pattern in list
+			#}
+		#}
+		#last if (!$valid);  ## Exit loop if a complete iteration has not found anything
 	}
 	
 	return ($valid ? $pstr : -1);  # return $pstr if $valid or -1
@@ -960,13 +986,15 @@ sub SIGNALduino_Split_Message($$)
 	my $rawData;
 	
 	my @msg_parts = SIGNALduino_splitMsg($rmsg,';');			## Split message parts by ";"
+	my %ret;
+
 	foreach (@msg_parts)
 	{
 		#Debug "$name: checking msg part:( $_ )" if ($debug);
 
-		if ($_ =~ m/^MS/) 		#### Synced Message start
+		if ($_ =~ m/^MS/ or $_ =~ m/^MC/ or $_ =~ m/^MU/) 		#### Synced Message start
 		{
-			# Noting to do
+			$ret{messagetype} = $_;
 		}
 		elsif ($_ =~ m/^P\d=-?\d{2,}/) 		#### Extract Pattern List from array
 		{
@@ -1001,7 +1029,6 @@ sub SIGNALduino_Split_Message($$)
 
 		#print "$_\n";
 	}
-	my %ret;
 	$ret{clockidx} = $clockidx;
 	$ret{syncidx} = $syncidx;
 	$ret{rawData} = $rawData;
@@ -1181,74 +1208,33 @@ SIGNALduino_Parse_Message($$$$@)
 
 
 sub
-SIGNALduino_Parse_MS($$$$@)
+SIGNALduino_Parse_MS($$$$%)
 {
-	my ($hash, $iohash, $name, $rmsg,@msg_parts) = @_;
+	my ($hash, $iohash, $name, $rmsg,%msg_parts) = @_;
 
 	my $protocolid;
-	my $syncidx;			
-	my $clockidx;			
+	my $syncidx=$msg_parts{syncidx};			
+	my $clockidx=$msg_parts{clockidx};				
 	my $protocol=undef;
-	my $rawData;
+	my $rawData=$msg_parts{rawData};
+	my %patternList;
+    #$patternList{$_} = $msg_parts{rawData}{$_] for keys %msg_parts{rawData};
 
+	#$patternList = \%msg_parts{pattern};
 
 	#Debug "Message splitted:";
 	#Debug Dumper(\@msg_parts);
 
 
-	my %patternList;
-	## Check for each received message part and parse it
-	foreach (@msg_parts){
-	   #Debug "$name: checking msg part:( $_ )" if ($debug);
-
-	   if ($_ =~ m/^MS/) 		#### Synced Message start
-	   {
-	   		# Noting to do
-	   }
-	   elsif ($_ =~ m/^P\d=-?\d{2,}/) 		#### Extract Pattern List from array
-	   {
-   		   $_ =~ s/^P+//;  
-		   $_ =~ s/^P\d//;  
-		   my @pattern = split(/=/,$_);
-		   
-		   $patternList{$pattern[0]} = $pattern[1];
-		   Debug "$name: extracted  pattern @pattern \n" if ($debug);
-	   }
-	   elsif($_ =~ m/D=\d+/) 		#### Message from array
-	   {
-			$_ =~ s/D=//;  
-			$rawData = $_ ;
-			Debug "$name: extracted  data $rawData\n" if ($debug);
-	   }
-	   elsif($_ =~ m/^SP=\d{1}/) 		#### Sync Pulse Index
-	   {
-			(undef, $syncidx) = split(/=/,$_);
-			Debug "$name: extracted  syncidx $syncidx\n" if ($debug);
-			#return undef if (!defined($patternList{$syncidx}));
-	   }
-	   elsif($_ =~ m/^CP=\d{1}/) 		#### Clock Pulse Index
-	   {
-			(undef, $clockidx) = split(/=/,$_);
-			Debug "$name: extracted  clockidx $clockidx\n" if ($debug);;
-			#return undef if (!defined($patternList{$clockidx}));
-	   }  else {
-			Debug "$name: unknown Message part $_" if ($debug);;
-
-	   }
-		
-	   #print "$_\n";
-	}
-	#my $syncFact=$patternList[$syncidx] / $patternList[$clockidx];
 	
 	if (defined($clockidx) and defined($syncidx))
 	{
 		
 		## Make a lookup table for our pattern index ids
 		#Debug "List of pattern:";
-		#Debug Dumper(\%patternList);		
-		my $clockabs= $patternList{$clockidx};
-		%patternList = map { $_ => floor($patternList{$_}/$patternList{$clockidx}) } keys %patternList; 
-		#Debug Dumper(\%patternList);		
+		my $clockabs= $msg_parts{pattern}{$msg_parts{clockidx}};
+		$patternList{$_} = floor($msg_parts{pattern}{$_}/$clockabs) for keys $msg_parts{pattern};
+ 		#Debug Dumper(\%patternList);		
 
 		#my $syncfact = $patternList{$syncidx}/$patternList{$clockidx};
 		#$syncfact=$patternList{$syncidx};
@@ -1359,7 +1345,7 @@ SIGNALduino_Parse_MS($$$$@)
 			
 				#last if ($valid); try other protocols if we got some error
 			}
-			#debug=0;
+			#$debug=0;
 
 		
 		}
@@ -1373,52 +1359,33 @@ SIGNALduino_Parse_MS($$$$@)
 
 sub SIGNALduino_Parse_MU($$$$@)
 {
-	my ($hash, $iohash, $name, $rmsg,@msg_parts) = @_;
-	my $rawData;
-	my $clockidx;
-	my %patternList;
-	my %patternListRaw;
+	#my ($hash, $iohash, $name, $rmsg,@msg_parts) = @_;
+	#my $rawData;
+	#my $clockidx;
+	#my %patternList;
+	#my %patternListRaw;
 	## Check for each received message part and parse it
-	Debug "$name: processing unsynced message\n" if ($debug);
+	
+	my ($hash, $iohash, $name, $rmsg,%msg_parts) = @_;
 
-	foreach (@msg_parts)
-	{
-		if ($_ =~ m/^P\d=-?\d{2,}/) 		#### Extract Pattern List from array
-		{
-   		   $_ =~ s/^P+//;  
-		   $_ =~ s/^P\d//;  
-		   my @pattern = split(/=/,$_);
-		   
-		   $patternListRaw{$pattern[0]} = $pattern[1];
-		   Debug "$name: extracted  pattern @pattern \n" if ($debug);
-		}
-		elsif($_ =~ m/D=\d+/) 		#### Message from array
-		{
-			$_ =~ s/D=//;  
-			$rawData = $_ ;
-			Debug "$name: extracted data $rawData\n" if ($debug);
-		}
-		elsif($_ =~ m/^CP=\d{1}/) 		#### Clock Pulse Index
-	    {
-			(undef, $clockidx) = split(/=/,$_);
-			Debug "$name: extracted  clockidx $clockidx\n" if ($debug);
-			#return undef if (!defined($patternListRaw{$clockidx}));
-		} 
-		elsif ($_ =~ m/^MU/) 		#### Message header 
-		{
-		# Noting to do
-		}	
-		
-	}
+	my $protocolid;
+	my $clockidx=$msg_parts{clockidx};				
+	my $protocol=undef;
+	my $rawData=$msg_parts{rawData};
+	my %patternListRaw;
+    Debug "$name: processing unsynced message\n" if ($debug);
+
+	my $clockabs;  #Clock will be fetched from Protocol
+	#$patternListRaw{$_} = floor($msg_parts{pattern}{$_}/$clockabs) for keys $msg_parts{pattern};
+	$patternListRaw{$_} = $msg_parts{pattern}{$_} for keys $msg_parts{pattern};
+
 	
 	if (defined($clockidx))
 	{
 		
 		## Make a lookup table for our pattern index ids
 		#Debug "List of pattern:"; 		#Debug Dumper(\%patternList);		
-		my $clockabs= $patternListRaw{$clockidx};
-		%patternList = map { $_ => floor($patternListRaw{$_}/$clockabs) } keys %patternListRaw; 
-		#Debug Dumper(\%patternList);		
+
 
 		my $signal_length = length($rawData);        # Length of data array
 
@@ -1427,24 +1394,24 @@ sub SIGNALduino_Parse_MU($$$$@)
 		foreach $id ( keys %ProtocolListSIGNALduino) {
 			next if (exists $ProtocolListSIGNALduino{$id}{sync}); ## We can skip Messages with sync defined
 			my $valid=1;
-			#$debug=1;
+			my $clockabs= $ProtocolListSIGNALduino{$id}{clockabs};
+			my %patternList;
+			
+			%patternList = map { $_ => int($patternListRaw{$_}/$clockabs) } keys %patternListRaw; 
+			my @keys = sort { $patternList{$a} <=> $patternList{$b} } keys %patternList;
+
+			Debug Dumper(\%patternList);	
+			Debug Dumper(@keys);	
+
+			$debug=1;
+			
+			
 			Debug "Testing against Protocol id $id -> $ProtocolListSIGNALduino{$id}{name}"  if ($debug);
 
 			
-			if ($ProtocolListSIGNALduino{$id}{format} eq "pwm" && defined($ProtocolListSIGNALduino{$id}{clockabs}))
-			{
-				%patternList=();
-				%patternList = map { $_ => floor($patternListRaw{$_}/$ProtocolListSIGNALduino{$id}{clockabs}) } keys %patternListRaw; 
-			}
-			else { 			# Check Clock if is it in range
-				if ($ProtocolListSIGNALduino{$id-1}{format} eq "pwm")
-				{
-					%patternList=();
-					%patternList = map { $_ => floor($patternListRaw{$_}/$clockabs) } keys %patternListRaw; 
-				}
+	
+#							$valid=SIGNALduino_inTol($ProtocolListSIGNALduino{$id}{clockabs},$clockabs,$clockabs*0.30) if ($ProtocolListSIGNALduino{$id}{clockabs} > 0);
 
-				$valid=SIGNALduino_inTol($ProtocolListSIGNALduino{$id}{clockabs},$clockabs,$clockabs*0.30) if ($ProtocolListSIGNALduino{$id}{clockabs} > 0);
-			}
 			next if (!$valid) ;
 
 			my $bit_length = ($signal_length/((scalar @{$ProtocolListSIGNALduino{$id}{one}} + scalar @{$ProtocolListSIGNALduino{$id}{zero}})/2));
@@ -1523,7 +1490,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 			
 				#last if ($valid); try other protocols if we got some error
 			}
-			#debug=0;
+			$debug=0;
 
 		
 		}
@@ -1705,27 +1672,37 @@ SIGNALduino_Parse($$$$@)
 	return undef if !($rmsg=~ m/^\002M.;.*;\003/); 			## Check if a Data Message arrived and if it's complete  (start & end control char are received)
 	$rmsg=~ s/^\002(M.;.*;)\003/$1/;						# cut off start end end character from message for further processing they are not needed
 	Debug "$name: incomming message: ($rmsg)\n" if ($debug);
+	
+	my %signal_parts=SIGNALduino_Split_Message($rmsg,$name);   ## Split message and save anything in an hash %signal_parts
+	Debug "raw data ". $signal_parts{rawData};
+	
+	
 	my @msg_parts = SIGNALduino_splitMsg($rmsg,';');			## Split message parts by ";"
 	# Message Synced type   -> M#
 	if ($rmsg=~ m/^M\d+;(P\d=-?\d+;){4,7}D=\d+;CP=\d;SP=\d;/) 
 	{
-		return SIGNALduino_Parse_Message($hash, $iohash, $name, $rmsg,@msg_parts);
+		Log3 $name, 3, "You are using an outdated version of signalduino code on your arduino. Please update";
+		return SIGNALduino_Parse_Message($hash, $iohash, $name, $rmsg,@msg_parts);  
+		
 	}
 	if ($rmsg=~ m/^MS;(P\d=-?\d+;){4,7}D=\d+;CP=\d;SP=\d;/) 
 	{
-		return SIGNALduino_Parse_MS($hash, $iohash, $name, $rmsg,@msg_parts);
+		return SIGNALduino_Parse_MS($hash, $iohash, $name, $rmsg,%signal_parts);
 	}
 
 	# Message unsynced type   -> MU
   	elsif ($rmsg=~ m/^MU;(P\d=-?\d+;){4,7}D=\d+;CP=\d;/)
 	{
-		return SIGNALduino_Parse_MU($hash, $iohash, $name, $rmsg,@msg_parts);
+		#return SIGNALduino_Parse_MU($hash, $iohash, $name, $rmsg,@msg_parts);
+		return SIGNALduino_Parse_MU($hash, $iohash, $name, $rmsg,%signal_parts);
 
 	}
 	# Manchester encoded Data   -> MC
   	elsif ($rmsg=~ m/^MC;.*;/) 
 	{
-		return SIGNALduino_Parse_MC($hash, $iohash, $name, $rmsg,@msg_parts);		   
+		return SIGNALduino_Parse_MC($hash, $iohash, $name, $rmsg,@msg_parts);		
+		#return SIGNALduino_Parse_MC($hash, $iohash, $name, $rmsg,%signal_parts);		   
+		
 	}
 	else {
 		Debug "$name: unknown Messageformat, aborting\n" if ($debug);
