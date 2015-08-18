@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 
+# $Id: 00_SIGNALduino.pm    18.08.2015
 # The file is taken from the FHEMduino project and modified in serval the processing of incomming messages
 # see http://www.fhemwiki.de/wiki/<tbd>
 # It was modified also to provide support for raw message handling which it's send from the SIGNALduino
@@ -63,7 +63,7 @@ my $clientsSIGNALduino = ":IT:"
 						."CUL_TX:"
 						; 
 
-## default regex match List for dispatching message to logical modules
+## default regex match List for dispatching message to logical modules, can be updated during runtime because it is referenced
 my %matchListSIGNALduino = (
      "1:IT"            			=> 	 "^i......",	  			  # Intertechno Format
      "2:CUL_TCM97001"      		=> "^s[A-Fa-f0-9]+",			  # Any hex string		beginning with s
@@ -311,7 +311,7 @@ SIGNALduino_Define($$)
   $hash->{CMDS} = "";
   $hash->{Clients} = $clientsSIGNALduino;
   $hash->{MatchList} = \%matchListSIGNALduino;
-  
+ 
 
   
   #if( !defined( $attr{$name}{hardware} ) ) {
@@ -929,42 +929,7 @@ sub SIGNALduino_MatchSignalPattern($\@\%\@$){
 }
 
 
-sub SIGNALduino_Signaltobits($$\$) {
-	my $fail_cnt=0;
-	my ($name, $data_array,$Protocol, $bit_msg);
-	#my $protocol = 
-	#for ( my $i=0;$i<$data_array;$i++)  ## Does this work also for tristate?
-	#{
-	#	my $tmp_idx=$i;
-#		if ( ($tmp_idx=SIGNALduino_MatchSignalPattern($hash,@{$Protocol{zero}},%patternList,@data_array,$i)) != -1 ) {
-#			push(@bit_msg,0);
-#			Debug "$name: Pattern [@{$ProtocolListSIGNALduino{$protocolid}{zero}}] found at pos $i.  Adding 0 \n" if ($debug);
-#			$i=$tmp_idx-1;
-#		} elsif ( ($tmp_idx=SIGNALduino_MatchSignalPattern($hash,@{$Protocol{$protocolid}{one}},%patternList,@data_array,$i)) != -1 ) {
-#			push(@bit_msg,1);
-#			Debug "$name: Pattern [@{$ProtocolListSIGNALduino{$protocolid}{one}}] found at pos $i.  Adding 1 \n" if ($debug);
-##			$i=$tmp_idx-1;
-	#	} elsif ( ($tmp_idx=SIGNALduino_MatchSignalPattern($hash,@{$Protocol{$protocolid}{sync}},%patternList,@data_array,$i)) != -1 ) {
-	#		#push(@bit_msg,'S');		# Don't print Sync in bit_msg array
-	#		#Debug "$name: Pattern [@{$ProtocolListSIGNALduino{$protocolid}{sync}}] found at pos $i. Skipping \n" if ($debug);
-	#		$i=$tmp_idx-1;
-	#	## aditional check for tristate protocols
-	#	} elsif ( defined($Protocol{$protocolid}{float}) && ($tmp_idx=SIGNALduino_MatchSignalPattern($hash,@{$Protocol{$protocolid}{float}},%patternList,@data_array,$i)) != -1 ) {
-	#		push(@bit_msg,'F');
-	#		$i=$tmp_idx-1;
-	#		#Debug "$name: Pattern [@{$ProtocolListSIGNALduino{$protocolid}{one}}] found at pos $i.  Adding F \n" if ($debug);
-	#	} else {
-	#	   # Nothing from Signal matched!
-	#	   $fail_cnt++;
-	#	}
-	#}
-	if ($fail_cnt > 3) 
-	{
-		return -1;
-	} else {
-		return 1;
-	}
-}
+
 
 sub SIGNALduino_b2h {
     my $num   = shift;
@@ -992,6 +957,7 @@ sub SIGNALduino_Split_Message($$)
 	my $clockidx;
 	my $syncidx;
 	my $rawData;
+	my $clockabs;
 	
 	my @msg_parts = SIGNALduino_splitMsg($rmsg,';');			## Split message parts by ";"
 	my %ret;
@@ -1013,40 +979,46 @@ sub SIGNALduino_Split_Message($$)
 		   $patternList{$pattern[0]} = $pattern[1];
 		   Debug "$name: extracted  pattern @pattern \n" if ($debug);
 		}
-		elsif($_ =~ m/D=\d+/) 		#### Message from array
+		elsif($_ =~ m/D=\d+/ or $_ =~ m/^D=[A-F0-9]+/) 		#### Message from array
+
 		{
 			$_ =~ s/D=//;  
 			$rawData = $_ ;
 			Debug "$name: extracted  data $rawData\n" if ($debug);
+			$ret{rawData} = $rawData;
+
 		}
 		elsif($_ =~ m/^SP=\d{1}/) 		#### Sync Pulse Index
 		{
 			(undef, $syncidx) = split(/=/,$_);
 			Debug "$name: extracted  syncidx $syncidx\n" if ($debug);
 			#return undef if (!defined($patternList{$syncidx}));
+			$ret{syncidx} = $syncidx;
+
 		}
 		elsif($_ =~ m/^CP=\d{1}/) 		#### Clock Pulse Index
 		{
 			(undef, $clockidx) = split(/=/,$_);
 			Debug "$name: extracted  clockidx $clockidx\n" if ($debug);;
 			#return undef if (!defined($patternList{$clockidx}));
+			$ret{clockidx} = $clockidx;
+		}
+		elsif($_ =~ m/^C=\d+/) 		#### Message from array
+		{
+			$_ =~ s/C=//;  
+			$clockabs = $_ ;
+			Debug "$name: extracted absolute clock $clockabs \n" if ($debug);
+			$ret{clockabs} = $clockabs;
 		}  else {
 			Debug "$name: unknown Message part $_" if ($debug);;
-
 		}
-
 		#print "$_\n";
 	}
-	$ret{clockidx} = $clockidx;
-	$ret{syncidx} = $syncidx;
-	$ret{rawData} = $rawData;
-	$ret{pattern} = {%patternList};
-	
+	$ret{pattern} = {%patternList}; 
 	return %ret;
-
 }
-sub
-SIGNALduino_Parse_Message($$$$@)
+
+sub SIGNALduino_Parse_Message($$$$@)
 {
 	my ($hash, $iohash, $name, $rmsg,@msg_parts) = @_;
 
@@ -1328,7 +1300,7 @@ SIGNALduino_Parse_MS($$$$%)
 				}
 				
 				Debug "$name: decoded message raw (@bit_msg), ".@bit_msg." bits\n" if ($debug);;
-				while (@bit_msg % 8 > 0)
+				while (@bit_msg % 8 > 0)  ## can be reduced to 4 bits some times, beacause we need only full nibbles not full bytes
 				{
 					push(@bit_msg,'0');
 					Debug "$name: padding 0 bit to bit_msg array" if ($debug);
@@ -1462,13 +1434,13 @@ sub SIGNALduino_Parse_MU($$$$@)
 				my @bit_msg;							# array to store decoded signal bits
 				my $message_start = (index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}}),\%patternList) > index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{zero}}),\%patternList)) ? index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}},\%patternList)) : index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{zero}},\%patternList));
 				#for (my $i=index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{sync}}))+$signal_width;$i<length($rawData);$i+=$signal_width)
-				Debug "Message starts at:".$message_start;
+				#Debug "Message starts at:".$message_start;
 				for (my $i=$message_start;$i<length($rawData);$i+=$signal_width)
 				{
 					my $sig_str= substr($rawData,$i,$signal_width);
 					#Debug $patternLookupHash{substr($rawData,$i,$signal_width)}; ## Get $signal_width number of chars from raw data string
 					push(@bit_msg,$patternLookupHash{$sig_str}) if (exists $patternLookupHash{$sig_str}); ## Add the bits to our bit array
-					next if !(exists $patternLookupHash{$sig_str}); ## Break if something that doesn't fit our searched pattern
+					next if !(exists $patternLookupHash{$sig_str}); ## Break if something that doesn't fit our searched pattern or we are at the end
 				}
 				
 				Debug "$name: decoded message raw (@bit_msg), ".@bit_msg." bits\n" if ($debug);;
@@ -1509,70 +1481,39 @@ sub SIGNALduino_Parse_MU($$$$@)
 sub
 SIGNALduino_Parse_MC($$$$@)
 {
-	my ($hash, $iohash, $name, $rmsg, @msg_parts) = @_;
-	my $rawData;
+	#my ($hash, $iohash, $name, $rmsg, @msg_parts) = @_;
+	#my $rawData;
+	#my $bitData;
+	#my $clock;
+	#my %patternList;
+	#my $dmsg=NULL;
+	
+	my ($hash, $iohash, $name, $rmsg,%msg_parts) = @_;
+	#my $protocolid;
+	my $clock=$msg_parts{clockabs};	     ## absolute clock
+	my $rawData=$msg_parts{rawData};
 	my $bitData;
-	my $clock;
-	my %patternList;
-	my $dmsg=NULL;
-
+	my $dmsg;
+	
+	return undef if ($clock) == 0;
+	#my $protocol=undef;
+	#my %patternListRaw = %msg_parts{patternList};
+	
 	Debug "$name: processing manchester message\n" if ($debug);
-	foreach (@msg_parts){
-
-		if ($_ =~ m/^[SL][LH]=-?\d{2,}/) 			#### Extract manchester pattern
-		{
-		   #$_ =~ s/^[SL][LH]//;  
-		   my @pattern = split(/=/,$_);
-		   $patternList{$pattern[0]} = $pattern[1];
-		   Debug "$name: extracted pattern @pattern \n" if ($debug);
-		}
-		elsif($_ =~ m/^D=[A-F0-9]+/) 		#### Message from array
-		{
-			$_ =~ s/D=//;  
-			$rawData = $_ ;
-			Debug "$name: extracted data $rawData (hex) len ".length($rawData)."\n" if ($debug);
-			
-			my $hlen = length($rawData);
-			my $blen = $hlen * 4;
-			$bitData= unpack("B$blen", pack("H$hlen", $rawData));
-			
-			Debug "$name: extracted data $bitData (bin)\n" if ($debug);
-		}
-		elsif($_ =~ m/^C=\d+/) 		#### Message from array
-		{
-			$_ =~ s/C=//;  
-			$clock = $_ ;
-			Debug "$name: extracted clock $clock \n" if ($debug);
-		}
-		
-		elsif ($_ =~ m/^MC;([SL][HL]=-?\d+;){4}D=[A-F0-9]+;C=\d+;/) 		#### Message is already Manchester encoded. 
-		{
-			
-			
-			# Nothing to do message like:
-			#MC;LL=-936;LH=1028;SL=-520;SH=456;AAAAAAAA669A5A9AA599A59555696/565555AA5A994;C=494;
-			# 1 
-			#01 01 01 01 01 01 01 01 
-			#01 01 01 01 01 01 01 
-   
-			#10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 10 
-			
-			#01 10 01 10 01 10 10 10 010110100101100101010101100101010101010101011010010101010110010110010101011001010101010101010101101001011001010101100110 
-
-			## OSV2 :
-			## C=400-550
-			## Sync = AAAA 
-			## Data = Full Signal, need to reverse nibbles and extract double send inverted databits
-		}
-	}
-
+	
+	my $hlen = length($rawData);
+	my $blen = $hlen * 4;
+	$bitData= unpack("B$blen", pack("H$hlen", $rawData)); 
+	Debug "$name: extracted data $bitData (bin)\n" if ($debug); ## Convert Message from hex to bits
 
 	my $found=0;
 
 	#Check OSV2
 	# Test code: https://ideone.com/Pp80M8  https://ideone.com/63wjyx
 	
-
+	
+	#Todo Migrate to protocol List, and parse data from protocol list instead of hardcoded data
+	#  $ProtocolListSignalDuino{$id}{format} eq "manchester"  && $ProtocolListSignalDuino{$id}{clock} in tol $ clock,   $ProtocolListSignalDuino{$id}{minlength} $ProtocolListSignalDuino{$id}{maxlength}   how to find preamble and sync bits
 	if ( $clock >390 and $clock <520 and length($rawData) > 37 and length($rawData) < 55 and index($bitData,"10011001",24) >= 24 and $bitData =~ m/^.?(10){12,16}/) #$rawData =~ m/^A{6,8}/
 	{  # Valid OSV2 detected!	
 		
@@ -1676,8 +1617,8 @@ SIGNALduino_Parse($$$$@)
 	# Manchester encoded Data   -> MC
   	elsif ($rmsg=~ m/^MC;.*;/) 
 	{
-		return SIGNALduino_Parse_MC($hash, $iohash, $name, $rmsg,@msg_parts);		
-		#return SIGNALduino_Parse_MC($hash, $iohash, $name, $rmsg,%signal_parts);		   
+		#return SIGNALduino_Parse_MC($hash, $iohash, $name, $rmsg,@msg_parts);		
+		return SIGNALduino_Parse_MC($hash, $iohash, $name, $rmsg,%signal_parts);		   
 		
 	}
 	else {
