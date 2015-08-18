@@ -60,14 +60,15 @@ my $clientsSIGNALduino = ":IT:"
 						."SIGNALduino_RSL:"
 #						."SIGNALduino_AS:"
 						."OREGON:"
+						."CUL_TX:"
 						; 
 
 ## default regex match List for dispatching message to logical modules
 my %matchListSIGNALduino = (
-     "1:IT"            			=> 	 "^i......",	   # Intertechno Format
-     "2:CUL_TCM97001"      		=> "^s[A-Fa-f0-9]+",		   # Any hex string		beginning with s
-	 "3:SIGNALduino_RSL"		=> "^rA-Fa-f0-9]+",			   # Any hex string		beginning with r
-#    "1:CUL_TX"               	=> "^TX..........",        # Need TX to avoid FHTTK
+     "1:IT"            			=> 	 "^i......",	  			  # Intertechno Format
+     "2:CUL_TCM97001"      		=> "^s[A-Fa-f0-9]+",			  # Any hex string		beginning with s
+	 "3:SIGNALduino_RSL"		=> "^rA-Fa-f0-9]+",				  # Any hex string		beginning with r
+     "5:CUL_TX"               	=> "^TX..........",         	  # Need TX to avoid FHTTK
 #    "3:SIGNALduino_AS"       	=> "AS.*\$", 			   # Arduino based Sensors, should not be default
 #    "2:SIGNALduino_Env"      	=> "W[0-9]+[a-f0-9]+\$",	# WNNHHHHHHH N=Number H=Hex
 #    "3:SIGNALduino_PT2262"   	=> "IR.*\$",
@@ -220,9 +221,9 @@ my %ProtocolListSIGNALduino  = (
 			#sync			=> [1,-8],		# 
 			clockabs     	=> 470,			# -1 = auto undef=noclock
 			format 			=> 'pwm',	    # tristate can't be migrated from bin into hex!
-			preamble		=> 'it',		# prepend to converted message	
+			preamble		=> 'TX',		# prepend to converted message	
 			clientmodule    => 'ittx',   	# not used now
-			modulematch     => '^it......',  # not used now
+			modulematch     => '^TX......',  # not used now
 			length_min      => '44',
 			length_max      => '45',
 
@@ -827,6 +828,14 @@ sub SIGNALduino_inTol($$$)
 	return (abs($_[0]-$_[1])<=$_[2]);
 }
 
+
+ # - - - - - - - - - - - -
+ #=item SIGNALduino_PatternExists()
+ #This functons, needs reference to $hash, @array of values to search and %patternList where to find the matches.
+# 
+# Will return -1 if pattern is not found or a string, containing the indexes which are in tolerance and have the smallest gap to what we searched
+# =cut
+
 sub SIGNALduino_PatternExists
 {
 	my ($hash,$search,$patternList) = @_;
@@ -844,19 +853,18 @@ sub SIGNALduino_PatternExists
 		# Calculate tolernace for search
 		my $tol=abs(abs($searchpattern)>=2 ?$searchpattern*0.3:$searchpattern*1.5);
 		
-		my %pattern_spacing = {};
-		# Find and store every pattern, which is in tolerance
-		%pattern_spacing = map { $_ => abs($patternList->{$_}-$searchpattern) } grep { abs($patternList->{$_}-$searchpattern) <= $tol} (keys %$patternList);
-		if (scalar keys %pattern_spacing > 0) 
+		my %pattern_gap ; #= {};
+		# Find and store the gap of every pattern, which is in tolerance
+		%pattern_gap = map { $_ => abs($patternList->{$_}-$searchpattern) } grep { abs($patternList->{$_}-$searchpattern) <= $tol} (keys %$patternList);
+		if (scalar keys %pattern_gap > 0) 
 		{
-			
-			Debug "pattern in tol: ".Dumper(\%pattern_spacing); 
+			#Debug "pattern in tol: ".Dumper(\%pattern_gap); 
 			# Extract fist pattern, which is nearst to our searched value
-			my $closestidx = (sort {$pattern_spacing{$a} <=> $pattern_spacing{$b}} keys %pattern_spacing)[0];
+			my $closestidx = (sort {$pattern_gap{$a} <=> $pattern_gap{$b}} keys %pattern_gap)[0];
 
 			$pstr="$pstr$closestidx";
 			$valid=1;
-			Debug "closest is $closestidx";
+			#Debug "closest pattern is $closestidx";
 		} else {
 			# search is not found, return
 			$valid=0;
@@ -996,7 +1004,7 @@ sub SIGNALduino_Split_Message($$)
 		{
 			$ret{messagetype} = $_;
 		}
-		elsif ($_ =~ m/^P\d=-?\d{2,}/) 		#### Extract Pattern List from array
+		elsif ($_ =~ m/^P\d=-?\d{2,}/ or $_ =~ m/^[SL][LH]=-?\d{2,}/) 		#### Extract Pattern List from array
 		{
 		   $_ =~ s/^P+//;  
 		   $_ =~ s/^P\d//;  
@@ -1385,8 +1393,6 @@ sub SIGNALduino_Parse_MU($$$$@)
 		
 		## Make a lookup table for our pattern index ids
 		#Debug "List of pattern:"; 		#Debug Dumper(\%patternList);		
-
-
 		my $signal_length = length($rawData);        # Length of data array
 
 		## Find matching protocols
@@ -1400,17 +1406,17 @@ sub SIGNALduino_Parse_MU($$$$@)
 			%patternList = map { $_ => int($patternListRaw{$_}/$clockabs) } keys %patternListRaw; 
 			my @keys = sort { $patternList{$a} <=> $patternList{$b} } keys %patternList;
 
-			Debug Dumper(\%patternList);	
-			Debug Dumper(@keys);	
+			#Debug Dumper(\%patternList);	
+			#Debug Dumper(@keys);	
 
-			$debug=1;
+			#$debug=1;
 			
 			
 			Debug "Testing against Protocol id $id -> $ProtocolListSIGNALduino{$id}{name}"  if ($debug);
 
 			
 	
-#							$valid=SIGNALduino_inTol($ProtocolListSIGNALduino{$id}{clockabs},$clockabs,$clockabs*0.30) if ($ProtocolListSIGNALduino{$id}{clockabs} > 0);
+#			$valid=SIGNALduino_inTol($ProtocolListSIGNALduino{$id}{clockabs},$clockabs,$clockabs*0.30) if ($ProtocolListSIGNALduino{$id}{clockabs} > 0);
 
 			next if (!$valid) ;
 
@@ -1454,8 +1460,9 @@ sub SIGNALduino_Parse_MU($$$$@)
 				
 				
 				my @bit_msg;							# array to store decoded signal bits
-				my $message_start = (index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}})) > index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{zero}}))) ? index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}})) : index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{zero}}));
+				my $message_start = (index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}}),\%patternList) > index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{zero}}),\%patternList)) ? index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}},\%patternList)) : index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{zero}},\%patternList));
 				#for (my $i=index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{sync}}))+$signal_width;$i<length($rawData);$i+=$signal_width)
+				Debug "Message starts at:".$message_start;
 				for (my $i=$message_start;$i<length($rawData);$i+=$signal_width)
 				{
 					my $sig_str= substr($rawData,$i,$signal_width);
@@ -1465,7 +1472,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 				}
 				
 				Debug "$name: decoded message raw (@bit_msg), ".@bit_msg." bits\n" if ($debug);;
-				while (@bit_msg % 8 > 0)
+				while (@bit_msg % 4 > 0)
 				{
 					push(@bit_msg,'0');
 					Debug "$name: padding 0 bit to bit_msg array" if ($debug);
@@ -1490,7 +1497,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 			
 				#last if ($valid); try other protocols if we got some error
 			}
-			$debug=0;
+			#$debug=0;
 
 		
 		}
@@ -1498,33 +1505,6 @@ sub SIGNALduino_Parse_MU($$$$@)
 	}
 }
 
-sub SIGNALduino_checkBits($$$$$)
-{
-	my ($pattern,$startpos,$mincount,$maxcount,$end) = @_;
-	my $valid=NULL;
-	my $endcount = $startpos+$maxcount;
-	my $idx;
-	for ($idx=$startpos; $idx<$endcount;$idx+=2)
-	{
-		my $twobit;
-		#my $twobit = getDataBits($idx,2);
-        if ( $twobit == $pattern)						# Check the sync bits against the pattern
-        {
-            next;
-        } elsif ($idx-$startpos >= $mincount)  {    	# minimum of sync bits must be reveived
-            $valid=1;              					    # Valid Sync sequence of mincount bits are valid
-            last;
-        } else {
-            $valid=NULL;              					# Not a valid Sync sequence, to less sync bits
-			last;
-        }
-	}
-	if ($valid){
-		$end = $idx+$startpos;
-	}
-	return $valid;
-
-}
 
 sub
 SIGNALduino_Parse_MC($$$$@)
@@ -1664,17 +1644,14 @@ SIGNALduino_Parse($$$$@)
 
     #print "$protocol: ";
     #Log3 $name, 3, "id: $protocol=$ProtocolListSIGNALduino{$protocol}{id} ";
-    
-	#### TODO:  edit print statements to log statements
-	
-	#print "$name: search $search_string $rmsg\n";
+    	
 	#M%id;P\d=.*;.*;D=.*;\003
 	return undef if !($rmsg=~ m/^\002M.;.*;\003/); 			## Check if a Data Message arrived and if it's complete  (start & end control char are received)
 	$rmsg=~ s/^\002(M.;.*;)\003/$1/;						# cut off start end end character from message for further processing they are not needed
 	Debug "$name: incomming message: ($rmsg)\n" if ($debug);
 	
 	my %signal_parts=SIGNALduino_Split_Message($rmsg,$name);   ## Split message and save anything in an hash %signal_parts
-	Debug "raw data ". $signal_parts{rawData};
+	#Debug "raw data ". $signal_parts{rawData};
 	
 	
 	my @msg_parts = SIGNALduino_splitMsg($rmsg,';');			## Split message parts by ";"
@@ -1683,7 +1660,6 @@ SIGNALduino_Parse($$$$@)
 	{
 		Log3 $name, 3, "You are using an outdated version of signalduino code on your arduino. Please update";
 		return SIGNALduino_Parse_Message($hash, $iohash, $name, $rmsg,@msg_parts);  
-		
 	}
 	if ($rmsg=~ m/^MS;(P\d=-?\d+;){4,7}D=\d+;CP=\d;SP=\d;/) 
 	{
