@@ -13,6 +13,7 @@ Supported Devices / Protocols
 |PT2262 Devices | Remote switches like Intertechno V1, door/window sensors|
 |Conrad RSL | only Funk-Jalousieaktor |
 |Oregon Scientific v2 Devices | Weather sensor |
+|Technoline TX3  | Weather sensor |
 
 Unsupported Devices / Protocols
 ======
