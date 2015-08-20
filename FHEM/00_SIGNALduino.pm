@@ -228,6 +228,23 @@ my %ProtocolListSIGNALduino  = (
 			length_max      => '45',
 
 		}, 	
+	"9"    => 			## Funk Wetterstation CTW600
+			{
+            name			=> 'CTW 600',	
+			id          	=> '9',
+			one				=> [2,-2],
+			zero			=> [1,-2],
+			#float			=> [-1,3],		# not full supported now, for later use
+			#sync			=> [1,-8],		# 
+			clockabs     	=> 500,			# -1 = auto undef=noclock
+			format 			=> 'pwm',	    # tristate can't be migrated from bin into hex!
+			preamble		=> 'u',		# prepend to converted message	
+			clientmodule    => 'undef',   	# not used now
+			modulematch     => '^u......',  # not used now
+			length_min      => '120',
+			length_max      => '122',
+
+		}, 	
 );
 
 
