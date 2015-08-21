@@ -1,4 +1,7 @@
-28.08.2015
+21.08.2015
+ - Added protocol support fot CTW600 weather station
+
+20.08.2015
  - RC2 - 3.1.4
  - Can process unfiltered synced messages from arduino
  - Handles TX3 Type Messages
@@ -6,6 +9,7 @@
  - messages without sync, can now be defined and converted via protocol list
  - some warnings and errors removed
  - Added detection of protocol in this Module. 
+
 27.07.2015
  - RC1
  - Fixed bug in Oregon Scientific decoding, works now

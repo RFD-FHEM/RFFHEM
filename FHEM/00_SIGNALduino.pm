@@ -17,7 +17,7 @@ use Time::HiRes qw(gettimeofday);
 use Data::Dumper qw(Dumper);
 
 use POSIX qw( floor);
-#use Math::Round qw/round/;
+#use Math::Round qw();
 
 sub SIGNALduino_Attr(@);
 sub SIGNALduino_Clear($);
@@ -232,17 +232,17 @@ my %ProtocolListSIGNALduino  = (
 			{
             name			=> 'CTW 600',	
 			id          	=> '9',
-			one				=> [2,-2],
+			one				=> [3,-2],
 			zero			=> [1,-2],
 			#float			=> [-1,3],		# not full supported now, for later use
 			#sync			=> [1,-8],		# 
-			clockabs     	=> 500,			# -1 = auto undef=noclock
+			clockabs     	=> 480,			# -1 = auto undef=noclock
 			format 			=> 'pwm',	    # tristate can't be migrated from bin into hex!
 			preamble		=> 'u',		# prepend to converted message	
 			clientmodule    => 'undef',   	# not used now
 			modulematch     => '^u......',  # not used now
-			length_min      => '120',
-			length_max      => '122',
+			length_min      => '70',
+			length_max      => '90',
 
 		}, 	
 );
@@ -808,7 +808,7 @@ SIGNALduino_Read($)
     my $rmsg;
     ($rmsg,$SIGNALduinodata) = split("\n", $SIGNALduinodata, 2);
     $rmsg =~ s/\r//;
-    Log3 $name, 5, "SIGNALduino/msg READ: $rmsg"; 
+    Log3 $name, 4, "SIGNALduino/msg READ: $rmsg"; 
 
     SIGNALduino_Parse($hash, $hash, $name, $rmsg) if($rmsg);
   }
@@ -909,7 +909,7 @@ sub SIGNALduino_PatternExists
 	return ($valid ? $pstr : -1);  # return $pstr if $valid or -1
 }
 
-#SIGNALduino_MatchSignalPattern{$hash,@array, %hash, @array, $scalar};
+#SIGNALduino_MatchSignalPattern{$hash,@array, %hash, @array, $scalar}; not used >v3.1.3
 sub SIGNALduino_MatchSignalPattern($\@\%\@$){
 
 	my ( $hash, $signalpattern,  $patternList,  $data_array, $idx) = @_;
@@ -1401,7 +1401,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 			my $clockabs= $ProtocolListSIGNALduino{$id}{clockabs};
 			my %patternList;
 			
-			%patternList = map { $_ => int($patternListRaw{$_}/$clockabs) } keys %patternListRaw; 
+			%patternList = map { $_ => round($patternListRaw{$_}/$clockabs,1) } keys %patternListRaw; 
 			my @keys = sort { $patternList{$a} <=> $patternList{$b} } keys %patternList;
 
 			#Debug Dumper(\%patternList);	
@@ -1417,7 +1417,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 #			$valid=SIGNALduino_inTol($ProtocolListSIGNALduino{$id}{clockabs},$clockabs,$clockabs*0.30) if ($ProtocolListSIGNALduino{$id}{clockabs} > 0);
 
 			next if (!$valid) ;
-
+			
 			my $bit_length = ($signal_length/((scalar @{$ProtocolListSIGNALduino{$id}{one}} + scalar @{$ProtocolListSIGNALduino{$id}{zero}})/2));
 			#Debug "Expect $bit_length bits in message"  if ($valid);
 
@@ -1429,73 +1429,74 @@ sub SIGNALduino_Parse_MU($$$$@)
 			next if (!$valid) ;
 			Debug "expecting $bit_length bits in signal" if ($debug && $valid);
 
-			if ($valid)
+			Debug "Searching in patternList: ".Dumper(\%patternList) if($debug);
+			next if (!$valid) ;
+
+	
+			my %patternLookupHash=();
+
+			#Debug "phash:".Dumper(%patternLookupHash)
+			my $pstr="";
+			$valid = $valid && ($pstr=SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}},\%patternList)) >=0;
+			Debug "Found matched one" if ($debug && $valid);
+			$patternLookupHash{$pstr}="1" if ($valid); ## Append one to our lookuptable
+			Debug "added $pstr " if ($debug && $valid);
+
+			$valid = $valid && ($pstr=SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{zero}},\%patternList)) >=0;
+			Debug "Found matched zero" if ($debug && $valid);
+			$patternLookupHash{$pstr}="0" if ($valid); ## Append zero to our lookuptable
+			Debug "added $pstr " if ($debug && $valid);
+
+			next if (!$valid) ;
+			#Debug "Pattern Lookup Table".Dumper(%patternLookupHash);
+			## Check somethin else
+
+		
+			#Anything seems to be valid, we can start decoding this.			
+
+			Log3 $name, 5, "Found matched Protocol id $id -> $ProtocolListSIGNALduino{$id}{name}"  if ($valid);
+			my $signal_width= @{$ProtocolListSIGNALduino{$id}{one}};
+			#Debug $signal_width;
+			
+			
+			my @bit_msg;							# array to store decoded signal bits
+			my $message_start = (index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}}),\%patternList) > index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{zero}}),\%patternList)) ? index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}},\%patternList)) : index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{zero}},\%patternList));
+			#for (my $i=index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{sync}}))+$signal_width;$i<length($rawData);$i+=$signal_width)
+			#Debug "Message starts at:".$message_start;
+			for (my $i=$message_start;$i<length($rawData);$i+=$signal_width)
 			{
-				my %patternLookupHash=();
-
-				#Debug "phash:".Dumper(%patternLookupHash)
-				my $pstr="";
-				$valid = $valid && ($pstr=SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}},\%patternList)) >=0;
-				Debug "Found matched one" if ($debug && $valid);
-				$patternLookupHash{$pstr}="1" if ($valid); ## Append one to our lookuptable
-				Debug "added $pstr " if ($debug && $valid);
-
-				$valid = $valid && ($pstr=SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{zero}},\%patternList)) >=0;
-				Debug "Found matched zero" if ($debug && $valid);
-				$patternLookupHash{$pstr}="0" if ($valid); ## Append zero to our lookuptable
-				Debug "added $pstr " if ($debug && $valid);
-
-				next if (!$valid) ;
-				#Debug "Pattern Lookup Table".Dumper(%patternLookupHash);
-				## Check somethin else
-
-			
-				#Anything seems to be valid, we can start decoding this.			
-
-				Log3 $name, 5, "Found matched Protocol id $id -> $ProtocolListSIGNALduino{$id}{name}"  if ($valid);
-				my $signal_width= @{$ProtocolListSIGNALduino{$id}{one}};
-				#Debug $signal_width;
-				
-				
-				my @bit_msg;							# array to store decoded signal bits
-				my $message_start = (index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}}),\%patternList) > index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{zero}}),\%patternList)) ? index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}},\%patternList)) : index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{zero}},\%patternList));
-				#for (my $i=index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{sync}}))+$signal_width;$i<length($rawData);$i+=$signal_width)
-				#Debug "Message starts at:".$message_start;
-				for (my $i=$message_start;$i<length($rawData);$i+=$signal_width)
-				{
-					my $sig_str= substr($rawData,$i,$signal_width);
-					#Debug $patternLookupHash{substr($rawData,$i,$signal_width)}; ## Get $signal_width number of chars from raw data string
-					push(@bit_msg,$patternLookupHash{$sig_str}) if (exists $patternLookupHash{$sig_str}); ## Add the bits to our bit array
-					next if !(exists $patternLookupHash{$sig_str}); ## Break if something that doesn't fit our searched pattern or we are at the end
-				}
-				
-				Debug "$name: decoded message raw (@bit_msg), ".@bit_msg." bits\n" if ($debug);;
-				while (@bit_msg % 4 > 0)
-				{
-					push(@bit_msg,'0');
-					Debug "$name: padding 0 bit to bit_msg array" if ($debug);
-				}
-				#Check converted message against lengths
-				$valid = $valid && $ProtocolListSIGNALduino{$id}{length_min} <= scalar @bit_msg  if (defined($ProtocolListSIGNALduino{$id}{length_min})); 
-				$valid = $valid && $ProtocolListSIGNALduino{$id}{length_max} >= scalar @bit_msg  if (defined($ProtocolListSIGNALduino{$id}{length_max}));
-				next if (!$valid);  ## Last chance to try next protocol if there is somethin invalid
-
-				#my $dmsg = sprintf "%02x", oct "0b" . join "", @bit_msg;			## Array -> String -> bin -> hex
-				my $dmsg = SIGNALduino_b2h(join "", @bit_msg);
-				$dmsg = "$dmsg"."$ProtocolListSIGNALduino{$id}{postamble}" if (defined($ProtocolListSIGNALduino{$id}{postamble}));
-				$dmsg = "$ProtocolListSIGNALduino{$id}{preamble}"."$dmsg" if (defined($ProtocolListSIGNALduino{$id}{preamble}));
-				
-				Log3 $name, 5, "converted Data to ($dmsg)";
-				$hash->{"${name}_MSGCNT"}++;
-				$hash->{"${name}_TIME"} = TimeNow();
-				readingsSingleUpdate($hash, "state", $hash->{READINGS}{state}{VAL}, 0);
-				$hash->{RAWMSG} = $rmsg;
-				my %addvals = (RAWMSG => $dmsg);
-				Dispatch($hash, $dmsg, \%addvals);  ## Dispatch to other Modules 
-			
-				#last if ($valid); try other protocols if we got some error
+				my $sig_str= substr($rawData,$i,$signal_width);
+				#Debug $patternLookupHash{substr($rawData,$i,$signal_width)}; ## Get $signal_width number of chars from raw data string
+				push(@bit_msg,$patternLookupHash{$sig_str}) if (exists $patternLookupHash{$sig_str}); ## Add the bits to our bit array
+				next if !(exists $patternLookupHash{$sig_str}); ## Break if something that doesn't fit our searched pattern or we are at the end
 			}
-			#$debug=0;
+			
+			Debug "$name: decoded message raw (@bit_msg), ".@bit_msg." bits\n" if ($debug);;
+			while (@bit_msg % 4 > 0)
+			{
+				push(@bit_msg,'0');
+				Debug "$name: padding 0 bit to bit_msg array" if ($debug);
+			}
+			#Check converted message against lengths
+			$valid = $valid && $ProtocolListSIGNALduino{$id}{length_min} <= scalar @bit_msg  if (defined($ProtocolListSIGNALduino{$id}{length_min})); 
+			$valid = $valid && $ProtocolListSIGNALduino{$id}{length_max} >= scalar @bit_msg  if (defined($ProtocolListSIGNALduino{$id}{length_max}));
+			next if (!$valid);  ## Last chance to try next protocol if there is somethin invalid
+
+			#my $dmsg = sprintf "%02x", oct "0b" . join "", @bit_msg;			## Array -> String -> bin -> hex
+			my $dmsg = SIGNALduino_b2h(join "", @bit_msg);
+			$dmsg = "$dmsg"."$ProtocolListSIGNALduino{$id}{postamble}" if (defined($ProtocolListSIGNALduino{$id}{postamble}));
+			$dmsg = "$ProtocolListSIGNALduino{$id}{preamble}"."$dmsg" if (defined($ProtocolListSIGNALduino{$id}{preamble}));
+			
+			Log3 $name, 5, "converted Data to ($dmsg)";
+			$hash->{"${name}_MSGCNT"}++;
+			$hash->{"${name}_TIME"} = TimeNow();
+			readingsSingleUpdate($hash, "state", $hash->{READINGS}{state}{VAL}, 0);
+			$hash->{RAWMSG} = $rmsg;
+			my %addvals = (RAWMSG => $dmsg);
+			Dispatch($hash, $dmsg, \%addvals);  ## Dispatch to other Modules 
+		
+			#last if ($valid); try other protocols if we got some error
+
 
 		
 		}
