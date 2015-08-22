@@ -61,6 +61,7 @@ my $clientsSIGNALduino = ":IT:"
 #						."SIGNALduino_AS:"
 						."OREGON:"
 						."CUL_TX:"
+						."SIGNALduino_AS"
 						; 
 
 ## default regex match List for dispatching message to logical modules, can be updated during runtime because it is referenced
@@ -69,7 +70,7 @@ my %matchListSIGNALduino = (
      "2:CUL_TCM97001"      		=> "^s[A-Fa-f0-9]+",			  # Any hex string		beginning with s
 	 "3:SIGNALduino_RSL"		=> "^rA-Fa-f0-9]+",				  # Any hex string		beginning with r
      "5:CUL_TX"               	=> "^TX..........",         	  # Need TX to avoid FHTTK
-#    "3:SIGNALduino_AS"       	=> "AS.*\$", 			   # Arduino based Sensors, should not be default
+	 "5:SIGNALduino_AS"       	=> "AS[A-Fa-f0-9]{7,8}", 		  # Arduino based Sensors, should not be default
 #    "2:SIGNALduino_Env"      	=> "W[0-9]+[a-f0-9]+\$",	# WNNHHHHHHH N=Number H=Hex
 #    "3:SIGNALduino_PT2262"   	=> "IR.*\$",
 #    "4:SIGNALduino_HX"       	=> "H...\$",
@@ -121,13 +122,15 @@ my %ProtocolListSIGNALduino  = (
 			one				=> [1,-4],
 			zero			=> [1,-2],
 			#float			=> [-1,3],		# not full supported now later use
-			sync			=> [1,-18],
-			clockabs     	=> '500',		# not used now
+			sync			=> [1,-20],
+			clockabs     	=> '405',		# not used now
 			format 			=> 'twostate',	
 			preamble		=> 'AS',		# prepend to converted message		
 			clientmodule    => 'SIGNALduino_AS',   # not used now
 			modulematch     => '^AS.*\$', # not used now
-			
+			length_min      => '32',
+			length_max      => '34',		# Don't know maximal lenth of a valid message
+	
         },
     "3"    => 
         {
@@ -951,7 +954,7 @@ sub SIGNALduino_MatchSignalPattern($\@\%\@$){
 
 sub SIGNALduino_b2h {
     my $num   = shift;
-    my $WIDTH = 32;
+    my $WIDTH = 4;
     my $index = length($num) - $WIDTH;
     my $hex = '';
     do {
