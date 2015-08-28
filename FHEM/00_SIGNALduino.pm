@@ -210,9 +210,9 @@ my %ProtocolListSIGNALduino  = (
 			sync			=> [1,-8],		# 
 			clockabs     	=> 484,			# -1 = auto
 			format 			=> 'twostate',	# tristate can't be migrated from bin into hex!
-			preamble		=> 'u',			# prepend to converted message	
+			preamble		=> 'u7',			# prepend to converted message	
 			clientmodule    => 'undef',   	# not used now
-			modulematch     => '^u......',  # not used now
+			modulematch     => '^u7......',  # not used now
 		}, 
 	"8"    => 			## TX3 (ITTX) Protocol
         {
@@ -226,9 +226,10 @@ my %ProtocolListSIGNALduino  = (
 			format 			=> 'pwm',	    # tristate can't be migrated from bin into hex!
 			preamble		=> 'TX',		# prepend to converted message	
 			clientmodule    => 'ittx',   	# not used now
-			modulematch     => '^TX......',  # not used now
+			modulematch     => '^TX......', # not used now
 			length_min      => '44',
 			length_max      => '45',
+			remove_zero     => 1,           # Removes leading zeros from output
 
 		}, 	
 	"9"    => 			## Funk Wetterstation CTW600
@@ -241,11 +242,11 @@ my %ProtocolListSIGNALduino  = (
 			#sync			=> [1,-8],		# 
 			clockabs     	=> 480,			# -1 = auto undef=noclock
 			format 			=> 'pwm',	    # tristate can't be migrated from bin into hex!
-			preamble		=> 'u',		# prepend to converted message	
+			preamble		=> 'u9',		# prepend to converted message	
 			clientmodule    => 'undef',   	# not used now
-			modulematch     => '^u......',  # not used now
+			modulematch     => '^u9......',  # not used now
 			length_min      => '70',
-			length_max      => '90',
+			length_max      => '120',
 
 		}, 	
 );
@@ -311,8 +312,15 @@ SIGNALduino_Define($$)
   }
   
   DevIo_CloseDev($hash);
-
   my $name = $a[0];
+
+  
+  if (!exists &round)
+  {
+      Log3 $name, 1, "$name Signalduino can't be activated (sub round not found). Please update Fhem via update command";
+	  return undef;
+  }
+  
 
   my $dev = $a[2];
   #Debug "dev: $dev" if ($debug);
@@ -324,6 +332,7 @@ SIGNALduino_Define($$)
     $attr{$name}{dummy} = 1;
     return undef;
   }
+  
 
   $dev .= "\@57600" if( $dev ne "none" && $dev !~ m/\@/ );
 		
@@ -1422,7 +1431,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 			next if (!$valid) ;
 			
 			my $bit_length = ($signal_length/((scalar @{$ProtocolListSIGNALduino{$id}{one}} + scalar @{$ProtocolListSIGNALduino{$id}{zero}})/2));
-			#Debug "Expect $bit_length bits in message"  if ($valid);
+			Debug "Expect $bit_length bits in message"  if ($valid && $debug);
 
 			#Check calculated min length
 			$valid = $valid && $ProtocolListSIGNALduino{$id}{length_min} <= $bit_length if (exists $ProtocolListSIGNALduino{$id}{length_min}); 
@@ -1487,6 +1496,8 @@ sub SIGNALduino_Parse_MU($$$$@)
 
 			#my $dmsg = sprintf "%02x", oct "0b" . join "", @bit_msg;			## Array -> String -> bin -> hex
 			my $dmsg = SIGNALduino_b2h(join "", @bit_msg);
+			$dmsg =~ s/^0+//	 if (defined($ProtocolListSIGNALduino{$id}{remove_zero})); 
+			
 			$dmsg = "$dmsg"."$ProtocolListSIGNALduino{$id}{postamble}" if (defined($ProtocolListSIGNALduino{$id}{postamble}));
 			$dmsg = "$ProtocolListSIGNALduino{$id}{preamble}"."$dmsg" if (defined($ProtocolListSIGNALduino{$id}{preamble}));
 			
