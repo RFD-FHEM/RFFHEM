@@ -1,3 +1,7 @@
+30.08.2015
+ - Added support for cresta protocol. needs still a valid module to send
+ - reworked manchester signal decoding to allow easier adding of new protocols
+ - checks at initialisation if round exists
 28.08.2015
  - TX3 Protocol fix
  - CTW 600 get messages up to 120 bytes

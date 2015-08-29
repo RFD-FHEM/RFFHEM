@@ -249,11 +249,68 @@ my %ProtocolListSIGNALduino  = (
 			length_max      => '120',
 
 		}, 	
+	"10"    => 			## Oregon Scientific 2
+			{
+            name			=> 'OSV2',	
+			id          	=> '10',
+			#one				=> [3,-2],
+			#zero			=> [1,-2],
+			#float			=> [-1,3],		# not full supported now, for later use
+			#sync			=> [1,-8],		# 
+			#clockabs     	=> 480,			# -1 = auto undef=noclock
+			clockrange     	=> [390,520],			# min , max
+			format 			=> 'manchester',	    # tristate can't be migrated from bin into hex!
+			#preamble		=> '',		# prepend to converted message	
+			#clientmodule    => '41_OREGON',   	# not used now
+			#modulematch     => '',  # not used now
+			length_min      => '37',
+			length_max      => '55',
+			method          => \&SIGNALduino_OSV2 # Call to process this message
+
+
+		}, 	
+	"11"    => 			## Arduino Sensor
+			{
+            name			=> 'AS',	
+			id          	=> '11',
+			#one				=> [3,-2],
+			#zero			=> [1,-2],
+			#float			=> [-1,3],		# not full supported now, for later use
+			#sync			=> [1,-8],		# 
+			#clockabs     	=> 500,			# -1 = auto undef=noclock
+			clockrange     	=> [380,425],			# min , max
+			format 			=> 'manchester',	    # tristate can't be migrated from bin into hex!
+			#preamble		=> '',		# prepend to converted message	
+			#clientmodule    => '14_SIGNALduino_AS',   	# not used now
+			#modulematch     => '',  # not used now
+			length_min      => '13',
+			length_max      => '14',
+			method          => \&SIGNALduino_AS # Call to process this message
+
+		}, 
+	"12"    => 			## Cresta
+			{
+            name			=> 'Cresta TX',	
+			id          	=> '12',
+			#one			=> [3,-2],
+			#zero			=> [1,-2],
+			#float			=> [-1,3],				# not full supported now, for later use
+			#sync			=> [1,-8],				# 
+			clockrange     	=> [420,450],			# min , max
+			format 			=> 'manchester',	    # tristate can't be migrated from bin into hex!
+			#preamble		=> '',					# prepend to converted message	
+			#clientmodule    => '14_SIGNALduino_AS',   	# not used now
+			#modulematch     => '',  # not used now
+			length_min      => '20',
+			length_max      => '50',
+			method          => \&SIGNALduino_Cresta	# Call to process this message
+		}, 			
+		
+		
 );
 
 
-# TX3 Protocol, MU , no clock in signal...  1= 470,-1040  / 0= 1222,-1040
-# http://www.f6fbb.org/domo/sensors/tx_signals.php
+
 
 sub
 SIGNALduino_Initialize($)
@@ -1408,7 +1465,10 @@ sub SIGNALduino_Parse_MU($$$$@)
 		## Find matching protocols
 		my $id;
 		foreach $id ( keys %ProtocolListSIGNALduino) {
-			next if (exists $ProtocolListSIGNALduino{$id}{sync}); ## We can skip Messages with sync defined
+			next if (exists $ProtocolListSIGNALduino{$id}{sync}); ## We can skip messages with sync defined
+			next if (defined($ProtocolListSIGNALduino{id}{format}) && $ProtocolListSIGNALduino{id}{format} ne "manchester");
+			next if (!defined($ProtocolListSIGNALduino{$id}{clockabs}));
+				
 			my $valid=1;
 			my $clockabs= $ProtocolListSIGNALduino{$id}{clockabs};
 			my %patternList;
@@ -1522,15 +1582,8 @@ sub SIGNALduino_Parse_MU($$$$@)
 sub
 SIGNALduino_Parse_MC($$$$@)
 {
-	#my ($hash, $iohash, $name, $rmsg, @msg_parts) = @_;
-	#my $rawData;
-	#my $bitData;
-	#my $clock;
-	#my %patternList;
-	#my $dmsg=NULL;
-	
+
 	my ($hash, $iohash, $name, $rmsg,%msg_parts) = @_;
-	#my $protocolid;
 	my $clock=$msg_parts{clockabs};	     ## absolute clock
 	my $rawData=$msg_parts{rawData};
 	my $bitData;
@@ -1540,13 +1593,48 @@ SIGNALduino_Parse_MC($$$$@)
 	#my $protocol=undef;
 	#my %patternListRaw = %msg_parts{patternList};
 	
-	Debug "$name: processing manchester message\n" if ($debug);
+	Debug "$name: processing manchester messag len:".length($rawData) if ($debug);
 	
 	my $hlen = length($rawData);
 	my $blen = $hlen * 4;
 	$bitData= unpack("B$blen", pack("H$hlen", $rawData)); 
 	Debug "$name: extracted data $bitData (bin)\n" if ($debug); ## Convert Message from hex to bits
+	my $id;
+	
+	foreach $id ( keys %ProtocolListSIGNALduino) {
 
+		next if (!defined($ProtocolListSIGNALduino{$id}{format}) or $ProtocolListSIGNALduino{$id}{format} ne "manchester");
+		Debug "Testing against Protocol id $id -> $ProtocolListSIGNALduino{$id}{name}"  if ($debug);
+
+		if ( $clock >$ProtocolListSIGNALduino{$id}{clockrange}[0] and $clock <$ProtocolListSIGNALduino{$id}{clockrange}[1] and length($rawData) > $ProtocolListSIGNALduino{$id}{length_min} and length($rawData) < $ProtocolListSIGNALduino{$id}{length_max} )
+		{
+			Debug "clock and length matched"  if ($debug);
+
+		   	my $method = $ProtocolListSIGNALduino{$id}{method};
+		    if (!exists &$method)
+			{
+				Log 4, "$name: Error: Unknown function=$method. Please define it in file $0";
+			} else {
+				my ($rcode,$res) = $method->($name,$bitData);
+				if ($rcode != -1) {
+					$dmsg = $res;
+					Log3 $name, 5, "converted Data to ($dmsg)";
+					$hash->{"${name}_MSGCNT"}++;
+					$hash->{"${name}_TIME"} = TimeNow();
+					readingsSingleUpdate($hash, "state", $hash->{READINGS}{state}{VAL}, 0);
+					$hash->{RAWMSG} = $rmsg;
+					my %addvals = (RAWMSG => $dmsg);
+					Dispatch($hash, $dmsg, \%addvals);  ## Dispatch to other Modules 
+				} else {
+					Debug "protocol does not match return from method: ($res)"  if ($debug);
+
+				}
+			}
+		}
+			
+	}
+	return undef;    ## Exit bevor running old conversion code
+	
 	my $found=0;
 
 	#Check OSV2
@@ -1603,17 +1691,10 @@ SIGNALduino_Parse_MC($$$$@)
 		Debug "$name: AS protocol detected \n" if ($debug);
 		my $preamble_pos=index($bitData,"1100",16);
 	}
-
-	if ($found)
-	{
-		Log3 $name, 5, "converted Data to ($dmsg)";
-		$hash->{"${name}_MSGCNT"}++;
-		$hash->{"${name}_TIME"} = TimeNow();
-		readingsSingleUpdate($hash, "state", $hash->{READINGS}{state}{VAL}, 0);
-		$hash->{RAWMSG} = $rmsg;
-		my %addvals = (RAWMSG => $dmsg);
-		Dispatch($hash, $dmsg, \%addvals);  ## Dispatch to other Modules 
-	}
+	
+	
+	
+	
 }
 
 
@@ -1755,6 +1836,103 @@ SIGNALduino_Attr(@)
 	
   	return undef;
 }
+
+
+
+sub SIGNALduino_OSV2($$)
+{
+	my ($name,$bitData) = @_;
+	
+	if (index($bitData,"10011001",24) >= 24 and $bitData =~ m/^.?(10){12,16}/) 
+	{  # Valid OSV2 detected!	
+		
+		Debug "$name: OSV2 protocol detected \n" if ($debug);
+		my $preamble_pos=index($bitData,"10011001",24);
+
+		return undef if ($preamble_pos <=24);
+		my $idx=0;
+		my $osv2bits="";
+		my $osv2hex ="";
+		for ($idx=$preamble_pos;$idx<length($bitData);$idx=$idx+16)
+		{
+			if (length($bitData)-$idx  < 16 )
+			{
+			  last;
+			}
+			my $osv2byte = "";
+			$osv2byte=NULL;
+			$osv2byte=substr($bitData,$idx,16);
+
+			my $rvosv2byte="";
+			
+			for (my $p=1;$p<length($osv2byte);$p=$p+2)
+			{
+				$rvosv2byte = substr($osv2byte,$p,1).$rvosv2byte;
+			}
+			$osv2hex=$osv2hex.sprintf('%02X', oct("0b$rvosv2byte")) ;
+			$osv2bits = $osv2bits.$rvosv2byte;
+		}
+		$osv2hex = sprintf("%02X", length($osv2hex)*4).$osv2hex;
+		Log3 $name, 5, "$name: OSV2 protocol converted to hex: ($osv2hex) with length (".(length($osv2hex)*4).") bytes \n";
+		#$found=1;
+		#$dmsg=$osv2hex;
+		return (1,$osv2hex);
+	} 
+	return (-1,undef);
+}
+sub	SIGNALduino_AS()
+{
+	my ($name,$bitData) = @_;
+
+	if(index($bitData,"1100",16) >= 0) # $rawData =~ m/^A{2,3}/)
+	{  # Valid AS detected!	
+		my $message_start = index($bitData,"1100",16);
+		Debug "$name: AS protocol detected \n" if ($debug);
+		my $msgbits =substr($bitData,$message_start);
+		
+		my $ashex=sprintf('%02X', oct("0b$msgbits"));
+		Log3 $name, 5, "$name: AS protocol converted to hex: ($ashex) with length (".(length($ashex)*4).") bytes \n";
+
+		return (1,$bitData);
+	}
+	return (-1,undef);
+}
+
+sub	SIGNALduino_Cresta()
+{
+	my ($name,$bitData) = @_;
+    Debug "$name: search in $bitData \n" if ($debug);
+	if (index($bitData,"0101110") >= 0 )   # 0x75 but in reverse order
+	{
+		Debug "$name: Cresta protocol detected \n" if ($debug);
+
+		my $message_start=index($bitData,"10101110");
+		my $crestahex;  #=substr($bitData,$message_start);
+		my $idx;
+		
+		for ($idx=$message_start;$idx<length($bitData);$idx=$idx+9)
+		{
+			my $byte = "";
+
+			$byte= substr($bitData,$idx,8); ## Ignore every 9th bit
+			Debug "$name: byte in order $byte " if ($debug);
+			$byte = scalar reverse $byte;
+			Debug "$name: byte reversed $byte , as hex: ".sprintf('%X', oct("0b$byte"))."\n" if ($debug);
+
+			$crestahex=$crestahex.sprintf('%02X', oct("0b$byte"));
+		}
+		$crestahex = sprintf("%02X", length($crestahex)*4).$crestahex;
+		Log3 $name, 5, "$name: Cresta protocol converted to hex: ($crestahex) with length (".(length($crestahex)*4).") bytes \n";
+
+		return  (1,$crestahex); ## Return only the original bits, include length
+	}
+	return (-1,undef);
+}
+
+
+
+
+
 
 1;
 
