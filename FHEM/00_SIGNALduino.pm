@@ -305,7 +305,23 @@ my %ProtocolListSIGNALduino  = (
 			length_max      => '50',
 			method          => \&SIGNALduino_Cresta	# Call to process this message
 		}, 			
-		
+	"13"    => 			## RF20
+			{
+            name			=> 'RF20',	
+			id          	=> '13',
+			one				=> [1,-2],
+			zero			=> [1,-4],
+			#float			=> [-1,3],				# not full supported now, for later use
+			sync			=> [-11,1],				# 
+			clockabs		=> 730,
+			format 			=> 'twostate',	  		
+			preamble		=> 'u13',				# prepend to converted message	
+			#clientmodule    => '',   				# not used now
+			#modulematch     => '',  				# not used now
+			length_min      => '20',
+			length_max      => '40',
+			method          => \&SIGNALduino_Cresta	# Call to process this message
+		}, 		
 		
 );
 
