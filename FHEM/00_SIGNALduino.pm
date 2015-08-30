@@ -202,7 +202,7 @@ my %ProtocolListSIGNALduino  = (
 		},
 	"7"    => 			## unkown Protocol
         {
-            name			=> 'unknown1',	
+            name			=> 'unknown1 may TX70DHT',	
 			id          	=> '7',
 			one				=> [1,-4],
 			zero			=> [1,-2],
@@ -210,9 +210,12 @@ my %ProtocolListSIGNALduino  = (
 			sync			=> [1,-8],		# 
 			clockabs     	=> 484,			# -1 = auto
 			format 			=> 'twostate',	# tristate can't be migrated from bin into hex!
-			preamble		=> 'u7',			# prepend to converted message	
+			preamble		=> 'u7',		# prepend to converted message	
 			clientmodule    => 'undef',   	# not used now
-			modulematch     => '^u7......',  # not used now
+			modulematch     => '^u7......', # not used now
+			length_min      => '30',
+			length_max      => '40',
+
 		}, 
 	"8"    => 			## TX3 (ITTX) Protocol
         {
@@ -312,17 +315,50 @@ my %ProtocolListSIGNALduino  = (
 			one				=> [1,-2],
 			zero			=> [1,-4],
 			#float			=> [-1,3],				# not full supported now, for later use
-			sync			=> [-11,1],				# 
-			clockabs		=> 730,
+			#sync			=> [11,-1],				# currently we have no support for sync check for MU messages
+			clockabs		=> 740,
 			format 			=> 'twostate',	  		
 			preamble		=> 'u13',				# prepend to converted message	
 			#clientmodule    => '',   				# not used now
 			#modulematch     => '',  				# not used now
 			length_min      => '20',
 			length_max      => '40',
-			method          => \&SIGNALduino_Cresta	# Call to process this message
+			#method          => \&SIGNALduino_Cresta	# Call to process this message
 		}, 		
-		
+	"14"    => 			## Heidemann HX
+			{
+            name			=> 'Heidemann HX',	
+			id          	=> '14',
+			one				=> [1,-2],
+			zero			=> [1,-1],
+			#float			=> [-1,3],				# not full supported now, for later use
+			sync			=> [1,-14],				# 
+			clockabs		=> 350,
+			format 			=> 'twostate',	  		
+			preamble		=> 'u14',				# prepend to converted message	
+			#clientmodule    => '',   				# not used now
+			#modulematch     => '',  				# not used now
+			length_min      => '10',
+			length_max      => '20',
+			#method          => \&SIGNALduino_Cresta	# Call to process this message
+		}, 			
+	"14"    => 			## TCM234759
+			{
+            name			=> 'TCM Bell',	
+			id          	=> '14',
+			one				=> [1,-1],
+			zero			=> [1,-2],
+			#float			=> [-1,3],				# not full supported now, for later use
+			sync			=> [1,-45],				# 
+			clockabs		=> 700,
+			format 			=> 'twostate',	  		
+			preamble		=> 'u14',				# prepend to converted message	
+			#clientmodule    => '',   				# not used now
+			#modulematch     => '',  				# not used now
+			length_min      => '10',
+			length_max      => '20',
+			#method          => \&SIGNALduino_Cresta	# Call to process this message
+		}, 			
 );
 
 
