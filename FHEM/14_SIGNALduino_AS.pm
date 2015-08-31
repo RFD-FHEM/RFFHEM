@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 14_SIGNALduino_AS.pm 3818 2014-10-14 $
+# $Id: 14_SIGNALduino_AS.pm 3818 2015-08-30 $
 # The file is taken from the SIGNALduino project
 # see http://www.fhemwiki.de/wiki/SIGNALduino
 # and was modified by a few additions
@@ -22,7 +22,7 @@ SIGNALduino_AS_Initialize($)
   my ($hash) = @_;
 
   #FHEM Schnittstelle:
-  #    ASTTIIDDDDDD
+  #    ASTTIIDDDDCC
   # AS  - Arduino Sensor
   # TT  - Bit 0..6 type
   #	- Bit 7 trigger (0 auto, 1 manual)
@@ -30,11 +30,12 @@ SIGNALduino_AS_Initialize($)
   #	- Bit 6,7 battery status (00 - bad, 01 - change, 10 - ok, 11 - optimal)
   # DD1 - LowByte
   # DD2 - HighByte
+  # CC  -  Dallas (now Maxim) iButton 8-bit CRC calculation
   #-----------------------------
   # T	Type:
   # 0
-  # 1	moisture
-  # 2	door
+  # 1
+  # 2
   # 3   light hirange (outdoor)
   # 4	light hires (indoor)
   # 5	water
@@ -43,7 +44,7 @@ SIGNALduino_AS_Initialize($)
   # 8    voltage
   # 9   Humidity
   # ..31 
- $hash->{Match}     = "AS.*\$";
+  $hash->{Match}     = "AS.*\$";
   $hash->{DefFn}     = "SIGNALduino_AS_Define";
   $hash->{UndefFn}   = "SIGNALduino_AS_Undef";
   $hash->{AttrFn}    = "SIGNALduino_AS_Attr";
@@ -97,14 +98,37 @@ SIGNALduino_AS_Parse($$)
     Log3 "SIGNALduino", 4, "SIGNALduino_AS: wrong message -> $msg";
     return "";
   }
+  ### CRC Check only if more than 10 characters for backward compatibility ###
+  if (length($msg) > 10) {
+	my $i;
+	my $crc = 0x0;
+	my $byte;
+	
+    for ($i = 2; $i <= 8; $i+=2) {
+      #convert pairs of hex digits into number for Bytes 0-3 only!
+      $byte = hex(substr $msg, $i, 2);
+      $crc=SIGNALduino_AS_crc($crc,$byte);
+	}
+	my $crc8;
+	$crc8 = substr($msg,-2);  ## Get last two Ascii Chars for CRC Validation
 
-  Log3 $hash, 4, "SIGNALduino_AS: $msg";
+	if ($crc != hex($crc8)) {
+	  Log3 $hash, 4, "SIGNALduino_AS: CRC ($crc) does not not match $msg, should be CRC ($crc8)";
+  	  Log3 "FHEMduino", 4, "SIGNALduino_AS: CRC ($crc) does not not match $msg, should be CRC ($crc8)";
+
+	  return "SIGNALduino_AS: CRC ($crc) does not not match $msg, should be CRC ($crc8)";
+	  
+	}
+  }
+
+
+  Log3 $hash, 3, "SIGNALduino_AS: $msg";
   
   my ($deviceCode, $SensorTyp, $model, $id, $valHigh, $valLow, $Sigval, $bat, $trigger, $val, $sigType);
-  # T	Type
+  # T	Type:
   # 0
-  # 1
-  # 2   door
+  # 1	moisture
+  # 2	door
   # 3   light hirange (outdoor)
   # 4	light hires (indoor)
   # 5	water
@@ -129,7 +153,7 @@ SIGNALduino_AS_Parse($$)
   # DD2 - HighByte
   
 	$SensorTyp = "ArduinoSensor";
-    	$model = $typeStr{hex(substr($msg,2,2)) &0x7f}; # Sensortype
+    $model = $typeStr{hex(substr($msg,2,2)) &0x7f}; # Sensortype
 	$sigType = $sigStr{hex(substr($msg,2,2)) &0x7f}; # Signaltype
 	$id = hex(substr($msg,4,2)) &0x3f;
 	$valLow = hex(substr($msg,6,2));
@@ -137,14 +161,16 @@ SIGNALduino_AS_Parse($$)
 	$Sigval = (($valHigh<<8) + $valLow);
 	$bat = $batStr{(hex(substr($msg,4,2))>>6) &3};
 	$trigger = $trigStr{(hex(substr($msg,2,2))>>7) &1};
+	Log3 $hash, 3, "SIGNALduino_AS Sigval: $Sigval";#
+
 	if ($model eq "lightHiRange") {
-	  $Sigval = sprintf( "%.1f", $Sigval /1.2) #TBD
+	  $Sigval = sprintf( "%.1f", $Sigval /1.2); #TBD
 	}
 	elsif ($model eq "lightHiRes") {
-	  $Sigval = sprintf( "%.1f", $Sigval /1.2/2)
+	  $Sigval = sprintf( "%.1f", $Sigval /1.2/2);
 	}
 	elsif ($model eq "temp") {
-	  $Sigval = sprintf( "%.1f", ($Sigval-0x8000) /10) #temp is send 10*°C
+	  $Sigval = sprintf( "%.1f", ($Sigval-0x8000) /10); #temp is send 10*°C
 	}
 	elsif ($model eq "door") {
 	  $Sigval = (($Sigval==255)? 1:0); 
@@ -153,7 +179,7 @@ SIGNALduino_AS_Parse($$)
 	  $Sigval = sprintf( "%.1f%%", (1024-$Sigval)*100/1024);
 	}
 	elsif ($model eq "humidity") {
-	  $Sigval = sprintf( "%i %", ($Sigval-0x8000) /10) #hum is send 10*%
+	  $Sigval = sprintf( "%i %", ($Sigval-0x8000) /10); #hum is send 10*%
 	}
 	elsif ($model eq "reedGas") {
 	  $Sigval = sprintf( "%i m3", ($Sigval)); #simple counter, code has to be extended to support restart of the sensor etc.
@@ -218,6 +244,29 @@ SIGNALduino_AS_Parse($$)
 
   return $name;
 }
+
+#Optimized Dallas (now Maxim) iButton 8-bit CRC calculation.
+#Polynomial: x^8 + x^5 + x^4 + 1 (0x8C)
+#Initial value: 0x0
+#See http://www.maxim-ic.com/appnotes.cfm/appnote_number/27
+
+sub SIGNALduino_AS_crc($$)
+{
+  my ($lcrc,$ldata) = @_;
+  my $i;
+  $lcrc = $lcrc ^ $ldata;
+  for ($i = 0; $i < 8; $i++)
+  {
+    if ($lcrc & 0x01)
+    {
+      $lcrc = ($lcrc >> 1) ^ 0x8C;
+    } else {
+      $lcrc >>= 1;
+    }
+  }
+  return $lcrc;
+}
+
 
 sub
 SIGNALduino_AS_Attr(@)

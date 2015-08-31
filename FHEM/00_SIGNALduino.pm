@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm    18.08.2015
+# $Id: 00_SIGNALduino.pm    2015-08-30
 # The file is taken from the FHEMduino project and modified in serval the processing of incomming messages
 # see http://www.fhemwiki.de/wiki/<tbd>
 # It was modified also to provide support for raw message handling which it's send from the SIGNALduino
@@ -62,6 +62,7 @@ my $clientsSIGNALduino = ":IT:"
 						."OREGON:"
 						."CUL_TX:"
 						."SIGNALduino_AS"
+						."SIGNALduino_un"
 						; 
 
 ## default regex match List for dispatching message to logical modules, can be updated during runtime because it is referenced
@@ -76,6 +77,7 @@ my %matchListSIGNALduino = (
 #    "4:SIGNALduino_HX"       	=> "H...\$",
      "4:OREGON"            		=> "^(3[8-9A-F]|[4-6][0-9A-F]|7[0-8]).*",		
 #    "7:SIGNALduino_ARC"     	=> "AR.*\$", #ARC protocol switches like IT selflearn
+	 "8:SIGNALduino_u"			=> "u*",
 );
 
 		#protoID[0]=(s_sigid){-4,-8,-18,500,0,twostate}; // Logi
@@ -194,9 +196,9 @@ my %ProtocolListSIGNALduino  = (
 			sync			=> [1,-36],		# This special device has no sync
 			clockabs     	=> 212,			# -1 = auto
 			format 			=> 'twostate',	# tristate can't be migrated from bin into hex!
-			preamble		=> 'w',			# Append to converted message	
+			preamble		=> 'u',			# Append to converted message	
 			clientmodule    => 'undef',   	# not used now
-			modulematch     => '^w......',  # not used now
+			modulematch     => '^u......',  # not used now
 			length_min      => '24',
 
 		},
@@ -342,10 +344,10 @@ my %ProtocolListSIGNALduino  = (
 			length_max      => '20',
 			#method          => \&SIGNALduino_Cresta	# Call to process this message
 		}, 			
-	"14"    => 			## TCM234759
+	"15"    => 			## TCM234759
 			{
             name			=> 'TCM Bell',	
-			id          	=> '14',
+			id          	=> '15',
 			one				=> [1,-1],
 			zero			=> [1,-2],
 			#float			=> [-1,3],				# not full supported now, for later use

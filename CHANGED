@@ -1,3 +1,5 @@
+31.08.2015
+ - Added helper submodule to allow some decoding tests for serval sensors
 30.08.2015
  - Added support for cresta protocol. needs still a valid module to send
  - reworked manchester signal decoding to allow easier adding of new protocols
