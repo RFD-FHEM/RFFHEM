@@ -78,40 +78,40 @@ SIGNALduino_un_Parse($$)
 	my @a = split("", $msg);
 	my $name = $hash->{NAME};
 	Log3 $hash, 4, "$name incomming $msg";
-
+	my $rawData=substr($msg,2);
 	my $hlen = length($rawData);
 	my $blen = $hlen * 4;
-	$bitData= unpack("B$blen", pack("H$hlen", $rawData)); 
+	my $bitData= unpack("B$blen", pack("H$hlen", $rawData)); 
 	Log3 $hash, 4, "$name converted to bits: $bitData";
 
 	if ($a[1] == "7")  ## Unknown Proto 7 
 	{
 		my $id = oct ("0b".substr($bitData,0,9));
 		my $channel = oct ("0b".substr($bitData,10,2))+1;
-		my $temp = oct ("0b".substr($bitData(12,11))/10;
-		Log3 $hash, 4, "$name decoded protocol  $protocolid: 7  sensor id=$id, channel=$channel, temp=$temp\n" if ($debug);
+		my $temp = oct ("0b".substr($bitData,12,11))/10;
+		Log3 $hash, 4, "$name decoded protocolid: 7  sensor id=$id, channel=$channel, temp=$temp\n" ;
 		
 		## Try TX70DTH Decding
-		$SensorTyp = "TX70DTH";
+		my $SensorTyp = "TX70DTH";
 		$channel = bin2dec(substr($bitData,9,3));
-		$bin = substr($bitData,0,8);
-		$id = sprintf('%X', oct("0b$bin"));
-		$bat = int(substr($bitData,8,1)) eq "1" ? "ok" : "critical";
-		$trend = "";
-		$sendMode = "";
-		$temp = bin2dec(substr($bitData,16,8));
+		my $bin = substr($bitData,0,8);
+		my $id = sprintf('%X', oct("0b$bin"));
+		my $bat = int(substr($bitData,8,1)) eq "1" ? "ok" : "critical";
+		my $trend = "";
+		my $sendMode = "";
+		my $temp = bin2dec(substr($bitData,16,8));
 		if (substr($bitData,14,1) eq "1") {
 		  $temp = $temp - 1024;
 		}
 		$temp = $temp / 10;
-		$hum = bin2dec(substr($bitData,29,7));
-		$val = "T: $temp H: $hum B: $bat";
-		Log3 $hash, 4, "$name decoded protocol  $protocolid: 7  sensor id=$id, channel=$channel, temp=$temp\n" if ($debug);
+		my $hum = bin2dec(substr($bitData,29,7));
+		my $val = "T: $temp H: $hum B: $bat";
+		Log3 $hash, 4, "$name decoded protocolid: 7  sensor id=$id, channel=$channel, temp=$temp\n" ;
 
 		
 		return;
 
-	} else if ($a[1] == "9")  ## Eurochron 
+	} elsif ($a[1] == "9")  ## Eurochron 
 	{   
 
 		  # EuroChron / Tchibo
@@ -125,30 +125,30 @@ SIGNALduino_un_Parse($$)
 		  #         /        / /  /  /     /       /  / Temp
 		  #         01100010 1 00 1  00000 0100011 0  00011011101
 		  # Bit     0        8 9  11 12    17      24 25        36
-		$SensorTyp = "EuroChron";
-		$channel = "";
-		$bin = substr($bitData,0,8);
-		$id = sprintf('%X', oct("0b$bin"));
-		$bat = int(substr($bitData,8,1)) eq "0" ? "ok" : "critical";
-		$trend = "";
-		$sendMode = int(substr($bitData,11,1)) eq "0" ? "automatic" : "manual";
-		$temp = bin2dec(substr($bitData,25,11));
+		my $SensorTyp = "EuroChron";
+		my $channel = "";
+		my $bin = substr($bitData,0,8);
+		my $id = sprintf('%X', oct("0b$bin"));
+		my $bat = int(substr($bitData,8,1)) eq "0" ? "ok" : "critical";
+		my $trend = "";
+		my $sendMode = int(substr($bitData,11,1)) eq "0" ? "automatic" : "manual";
+		my $temp = bin2dec(substr($bitData,25,11));
 		if (substr($bitData,24,1) eq "1") {
 		  $temp = $temp - 2048
 		}
 		$temp = $temp / 10.0;
-		$hum = bin2dec(substr($bitData,17,7));
-		$val = "T: $temp H: $hum B: $bat";
-		Log3 $hash, 4, "$name decoded protocol  $protocolid: 9  $SensorTyp, sensor id=$id, channel=$channel, temp=$temp\n" if ($debug);
+		my $hum = bin2dec(substr($bitData,17,7));
+		my $val = "T: $temp H: $hum B: $bat";
+		Log3 $hash, 4, "$name decoded protocolid: 9  $SensorTyp, sensor id=$id, channel=$channel, temp=$temp\n" ;
 
 		return;
-	} else if ($a[1] == "9")  ## Unknown Proto 9 
+	} elsif ($a[1] == "9")  ## Unknown Proto 9 
 	{   #http://nupo-artworks.de/media/report.pdf
 		my $syncpos= index($bitData,"1111111110");
 		my $sensdata = substr($bitData,$syncpos+10);
 
 		my $id = substr($sensdata,4,6);
-		my $batt = substr($sensdata,0,3);
+		my $bat = substr($sensdata,0,3);
 		my $temp = substr($sensdata,12,10);
 		my $hum = substr($sensdata,22,8);
 		my $wind = substr($sensdata,30,16);
@@ -158,7 +158,7 @@ SIGNALduino_un_Parse($$)
 		Log3 $hash, 4, "$name found ctw600 syncpos at $syncpos message is: $sensdata - sensor id:$id, bat:$bat, temp=$temp, hum=$hum, wind=$wind, rain=$rain, winddir=$winddir";
 
 		return;
-	} else if ($a[1] == "1" and $a[2] == "3")  ## RF20 Protocol 
+	} elsif ($a[1] == "1" and $a[2] == "3")  ## RF20 Protocol 
 	{  
 		my $deviceCode = $a[3].$a[5].$a[6].$a[7].$a[8].$a[9];
 		my  $Freq = $a[10].$a[11].$a[12].$a[13].$a[14];
@@ -166,7 +166,7 @@ SIGNALduino_un_Parse($$)
 		Log3 $hash, 4, "$name found TCM dorrbell protocol. devicecode=$deviceCode, freq=$Freq ";
 		return;
 	}
-	else if ($a[1] == "1" and $a[2] == "4")  ## Heidman HX 
+	elsif ($a[1] == "1" and $a[2] == "4")  ## Heidman HX 
 	{  
 		my $deviceCode = $a[4].$a[5].$a[6].$a[7].$a[8];
 
@@ -178,7 +178,7 @@ SIGNALduino_un_Parse($$)
 
 		return;
 	}
-	else if ($a[1] == "1" and $a[2] == "5")  ## TCM 
+	elsif ($a[1] == "1" and $a[2] == "5")  ## TCM 
 	{  
 		my $deviceCode = $a[4].$a[5].$a[6].$a[7].$a[8];
 

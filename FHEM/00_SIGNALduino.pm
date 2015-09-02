@@ -77,7 +77,7 @@ my %matchListSIGNALduino = (
 #    "4:SIGNALduino_HX"       	=> "H...\$",
      "4:OREGON"            		=> "^(3[8-9A-F]|[4-6][0-9A-F]|7[0-8]).*",		
 #    "7:SIGNALduino_ARC"     	=> "AR.*\$", #ARC protocol switches like IT selflearn
-	 "8:SIGNALduino_u"			=> "u*",
+	 "8:SIGNALduino_un"			=> "u.*",
 );
 
 		#protoID[0]=(s_sigid){-4,-8,-18,500,0,twostate}; // Logi
@@ -1975,8 +1975,8 @@ sub	SIGNALduino_Cresta()
 
 			$crestahex=$crestahex.sprintf('%02X', oct("0b$byte"));
 		}
-		$crestahex = sprintf("%02X", length($crestahex)*4).$crestahex;
-		Log3 $name, 5, "$name: Cresta protocol converted to hex: ($crestahex) with length (".(length($crestahex)*4).") bytes \n";
+		$crestahex = sprintf("%02X", length($crestahex)*4).$crestahex; # Number of bits
+		Log3 $name, 5, "$name: Cresta protocol converted to hex: ($crestahex) with length (".(length($crestahex)*4).") bits \n";
 
 		return  (1,$crestahex); ## Return only the original bits, include length
 	}
