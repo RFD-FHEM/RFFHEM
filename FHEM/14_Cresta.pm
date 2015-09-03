@@ -97,6 +97,7 @@ Cresta_Parse($$)
 	my $temp;
 	my $hum;
 	my $rc;
+	my $model;
 	## 1. Detect what type of sensor we have, then calll specific function to decode
 	if ($msg =~ m/^50/) {
 		($rc,$channel, $temp, $hum) = decodeThermoHygro($rawData);
@@ -136,7 +137,7 @@ Cresta_Parse($$)
 
 	Log3 $hash, 4, "$name decoded Cresta protocol   $SensorTyp, sensor id=$id, channel=$channel, temp=$temp\n" ;
 	if ($id ne "") {
-	$deviceCode = $model."_".$id;
+		$deviceCode = $model."_".$id;
 	}
 
 	my $def = $modules{Cresta}{defptr}{$hash->{NAME} . "." . $deviceCode};
