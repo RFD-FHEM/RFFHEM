@@ -84,7 +84,7 @@ SIGNALduino_un_Parse($$)
 	my $bitData= unpack("B$blen", pack("H$hlen", $rawData)); 
 	Log3 $hash, 4, "$name converted to bits: $bitData";
 
-	if ($a[1] == "7")  ## Unknown Proto 7 
+	if ($a[1] == "7" && length($bitData)>=36)  ## Unknown Proto 7 
 	{
 		my $id = oct ("0b".substr($bitData,0,9));
 		my $channel = oct ("0b".substr($bitData,10,2))+1;
@@ -111,7 +111,7 @@ SIGNALduino_un_Parse($$)
 		
 		return;
 
-	} elsif ($a[1] == "9")  ## Eurochron 
+	} elsif ($a[1] == "6" && length($bitData)>=36)  ## Eurochron 
 	{   
 
 		  # EuroChron / Tchibo
@@ -139,10 +139,10 @@ SIGNALduino_un_Parse($$)
 		$temp = $temp / 10.0;
 		my $hum = bin2dec(substr($bitData,17,7));
 		my $val = "T: $temp H: $hum B: $bat";
-		Log3 $hash, 4, "$name decoded protocolid: 9  $SensorTyp, sensor id=$id, channel=$channel, temp=$temp\n" ;
+		Log3 $hash, 4, "$name decoded protocolid: 6  $SensorTyp, sensor id=$id, channel=$channel, temp=$temp\n" ;
 
 		return;
-	} elsif ($a[1] == "9")  ## Unknown Proto 9 
+	} elsif ($a[1] == "9" && length($bitData)>=70)  ## Unknown Proto 9 
 	{   #http://nupo-artworks.de/media/report.pdf
 		my $syncpos= index($bitData,"1111111110");
 		my $sensdata = substr($bitData,$syncpos+10);
@@ -158,7 +158,7 @@ SIGNALduino_un_Parse($$)
 		Log3 $hash, 4, "$name found ctw600 syncpos at $syncpos message is: $sensdata - sensor id:$id, bat:$bat, temp=$temp, hum=$hum, wind=$wind, rain=$rain, winddir=$winddir";
 
 		return;
-	} elsif ($a[1] == "1" and $a[2] == "3")  ## RF20 Protocol 
+	} elsif ($a[1] == "1" and $a[2] == "3" && length($bitData)>=14)  ## RF20 Protocol 
 	{  
 		my $deviceCode = $a[3].$a[5].$a[6].$a[7].$a[8].$a[9];
 		my  $Freq = $a[10].$a[11].$a[12].$a[13].$a[14];
@@ -166,7 +166,7 @@ SIGNALduino_un_Parse($$)
 		Log3 $hash, 4, "$name found TCM dorrbell protocol. devicecode=$deviceCode, freq=$Freq ";
 		return;
 	}
-	elsif ($a[1] == "1" and $a[2] == "4")  ## Heidman HX 
+	elsif ($a[1] == "1" and $a[2] == "4" && length($bitData)>=12)  ## Heidman HX 
 	{  
 		my $deviceCode = $a[4].$a[5].$a[6].$a[7].$a[8];
 
@@ -178,7 +178,7 @@ SIGNALduino_un_Parse($$)
 
 		return;
 	}
-	elsif ($a[1] == "1" and $a[2] == "5")  ## TCM 
+	elsif ($a[1] == "1" and $a[2] == "5" && length($bitData)>=64)  ## TCM 
 	{  
 		my $deviceCode = $a[4].$a[5].$a[6].$a[7].$a[8];
 
