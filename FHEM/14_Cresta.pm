@@ -78,7 +78,7 @@ Cresta_Parse($$)
 	#my $name = $hash->{NAME};
 	my $name="CRESTA";
 	my @a = split("", $msg);
-	my $name = $hash->{NAME};
+	#my $name = $hash->{NAME};
 	Log3 $hash, 4, "$name incomming $msg";
 	my $rawData=substr($msg,2); ## Copy all expect of the message length header
 	
@@ -99,7 +99,8 @@ Cresta_Parse($$)
 	}
 	#for debug only
 	my $test="";
-	for(my $i; $i<scalar @decodedBytes; $i++){
+	
+	for(my $i=0; $i<scalar @decodedBytes; $i++){
 		$test.=sprintf("%02x", $decodedBytes[$i]);
 	}
 	Log3 $name,4, "bytes arr->".$test;
@@ -116,26 +117,23 @@ Cresta_Parse($$)
 		Log3 $hash, 4, "$name crc failed";
 		return "$name crc failed";
 	}
-	my $sensorTyp=$decodedBytes[3] & 0x1F;
+	my $sensorTyp=getSensorType($decodedBytes[3]);
 	Log3 $hash, 4, "SensorTyp=$sensorTyp, ".$decodedBytes[3];
 	my $id=1;
 	my $channel=0;
 	my $temp=0;
 	my $hum=0;
 	my $rc;
-	my $model="TH";
+	my $model;
+	my $val;
 	## 1. Detect what type of sensor we have, then calll specific function to decode
 	if ($sensorTyp==0x1E){
-	#if ($msg =~ m/^50/) {
 		($rc,$channel, $temp, $hum) = decodeThermoHygro($decodedString);
 		$model="th";  
+		$val = "T: $temp H: $hum";
 	}else{
 		Log3 $hash, 4, "$name Sensor Typ $sensorTyp not supported";
 		return "$name Sensor Typ $sensorTyp not supported";
-		
-	#} elseif ($msg =~ m/^58/) {
-	#	($rc,$channel, $temp, $hum) = decodeThermoHygro($rawData);
-	#	$model="th";
 	}
 
 	if ($rc != 1)
@@ -143,18 +141,16 @@ Cresta_Parse($$)
 		Log3 $hash, 4, "$name error, decoding Cresta protocol" ;
 		return "UNDEFINED $sensorTyp error, decoding Cresta protocol";
 	}
-        my $deviceCode=sprintf("%02x",$decodedBytes[1]);
+    my $deviceCode=$model."_".$sensorTyp."_".$channel;
 	Log3 $hash, 4, "$name decoded Cresta protocol Typ=$sensorTyp, sensor id=$id, channel=$channel, temp=$temp, humidity=$hum\n" ;
-	if ($id ne "") {
-		$deviceCode = $deviceCode."_".$id;
-	}
+	
 
 	my $def = $modules{Cresta}{defptr}{$hash->{NAME} . "." . $deviceCode};
 	$def = $modules{Cresta}{defptr}{$deviceCode} if(!$def);
 
 	if(!$def) {
 		Log3 $hash, 1, "Cresta: UNDEFINED sensor $sensorTyp detected, code $deviceCode";
-		return "UNDEFINED $sensorTyp"."_"."$deviceCode Cresta $deviceCode";
+		return "UNDEFINED $deviceCode Cresta $deviceCode";
 	}
 
 	$hash = $def;
@@ -183,7 +179,7 @@ Cresta_Parse($$)
 	Log3 $name, 4, "Cresta update $name:". $name;
 
 	readingsBeginUpdate($hash);
-	#readingsBulkUpdate($hash, "state", $val);
+	readingsBulkUpdate($hash, "state", $val);
 	#readingsBulkUpdate($hash, "battery", $bat)   if ($bat ne "");
 	#readingsBulkUpdate($hash, "trigger", $trigger) if ($trigger ne "");
 	readingsBulkUpdate($hash, "hum", $hum) if ($hum ne "");
@@ -211,9 +207,7 @@ sub Cresta_crc{
 # 0x0E	      Rain level meter
 # 0x1E	      Thermo/hygro-sensor
 sub getSensorType{
-	my $b=0;
-	$b = shift;
-	return $b & 0x1F;
+	return $_[0] & 0x1F;
 }
 
 # decrypt bytes of hex string
@@ -230,7 +224,7 @@ sub decryptBytes{
 	}
 	my $result="";
 	for (my $i=0; $i<scalar (@crestabytes); $i++){
-		$result.=sprintf("%02x",@crestabytes->[$i]);
+		$result.=sprintf("%02x",$crestabytes[$i]);
 	}
 	return $result;
 }
@@ -245,33 +239,33 @@ sub Cresta_decryptByte{
 
 # decode byte array and return channel, temperature and hunidity
 # input: decrypted byte array starting with 0x75, passed by reference as in mysub(\@array);
-# output <return code>, <channel>, <temperature>, <humidity> 
+# output <return code>, <channel>, <temperature>, <humidity>
 # was unable to get this working with an array ref as input, so switched to hex string input
 sub decodeThermoHygro {
 	my $crestahex = shift;
 	my @crestabytes=();
 	for (my $i=0; $i<(length($crestahex))/2; $i++){
-		my $hex=hex(substr($crestahex, $i*2, 2));
+		my $hex=hex(substr($crestahex, $i*2, 2)); ## Mit split und map geht es auch ... $str =~ /(..?)/g;
 		push (@crestabytes, $hex);
 	}
 	my $channel=0;
 	my $temp=0;
 	my $humi=0;
 
-	$channel = @crestabytes->[1] >> 5;
+	$channel = $crestabytes[1] >> 5;
 	# //Internally channel 4 is used for the other sensor types (rain, uv, anemo).
 	# //Therefore, if channel is decoded 5 or 6, the real value set on the device itself is 4 resp 5.
 	if ($channel >= 5) {
 		$channel--;
 	}
-	my $devicetype = @crestabytes->[3]&0x1f;
-	$temp = 100 * (@crestabytes->[5] & 0x0f) + 10 * (@crestabytes->[4] >> 4) + (@crestabytes->[4] & 0x0f);
+	#my $devicetype = $crestabytes[3]&0x1f;
+	$temp = 100 * ($crestabytes[5] & 0x0f) + 10 * ($crestabytes[4] >> 4) + ($crestabytes[4] & 0x0f);
 	## // temp is negative?
-	if (!(@crestabytes->[5] & 0x80)) {
+	if (!($crestabytes[5] & 0x80)) {
 		$temp = -$temp;
 	}
 
-	$humi = 10 * (@crestabytes->[6] >> 4) + (@crestabytes->[6] & 0x0f);	 
+	$humi = 10 * ($crestabytes[6] >> 4) + ($crestabytes[6] & 0x0f);	 
 
 	$temp = $temp / 10;
 	return (1, $channel, $temp, $humi);
