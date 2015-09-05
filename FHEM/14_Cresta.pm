@@ -76,7 +76,8 @@ Cresta_Parse($$)
 {
 	my ($hash,$msg) = @_;
 	my @a = split("", $msg);
-	my $name = $hash->{NAME};
+	#my $name = $hash->{NAME};
+	my $name="CRESTA";
 	Log3 $hash, 4, "$name incomming $msg";
 	my $rawData=substr($msg,2); ## Copy all expect of the message length header
 	
