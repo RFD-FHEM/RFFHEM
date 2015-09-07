@@ -182,8 +182,8 @@ Cresta_Parse($$)
 	readingsBulkUpdate($hash, "state", $val);
 	#readingsBulkUpdate($hash, "battery", $bat)   if ($bat ne "");
 	#readingsBulkUpdate($hash, "trigger", $trigger) if ($trigger ne "");
-	readingsBulkUpdate($hash, "H", $hum) if ($hum ne "");
-	readingsBulkUpdate($hash, "T", $temp) if ($temp ne "");
+	readingsBulkUpdate($hash, "Humidity", $hum) if ($hum ne "");
+	readingsBulkUpdate($hash, "Temperature", $temp) if ($temp ne "");
 
 	readingsEndUpdate($hash, 1); # Notify is done by Dispatch
 
