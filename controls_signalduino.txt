@@ -1,13 +1,3 @@
-<<<<<<< HEAD
-UPD 2015_31_08_22:41:00 11496   FHEM/14_SIGNALduino_AS.pm
-UPD 2015_13_04_21:21:00 7779    FHEM/14_SIGNALduino_RSL.pm
-UPD 2015_20_08_23:43:00 52016   FHEM/firmware/SIGNALduino_nano328.hex
-UPD 2015_20_08_23:44:00 52016   FHEM/firmware/SIGNALduino_promini328.hex
-UPD 2015_20_08_23:44:00 52016   FHEM/firmware/SIGNALduino_uno.hex
-UPD 2015_02_09_22:40:00 10239   FHEM/14_SIGNALduino_un.pm
-UPD 2015_07_09_08:25:00 12566   FHEM/14_Cresta.pm
-UPD 2015_06_09_06:12:00 70248   FHEM/00_SIGNALduino.pm
-=======
 DEL 2015_06-05_23:08:00 41673   FHEM/firmware/SIGNALduino.hex
 DEL 2015_22_06_19:16:00	59908	FHEM/firmware/SIGNALduino_mega2560.hex
 DEL 2015_22_06_19:16:00	50600 	FHEM/firmware/SIGNALduino_mini328.hex
@@ -19,4 +9,3 @@ UPD 2015_20_08_23:44:00 52016   FHEM/firmware/SIGNALduino_promini328.hex
 UPD 2015_20_08_23:44:00 52016   FHEM/firmware/SIGNALduino_uno.hex
 UPD 2015_02_09_22:40:00 10239   FHEM/14_SIGNALduino_un.pm
 UPD 2015_07_09_22:40:00 12566   FHEM/14_Cresta.pm
->>>>>>> 988f86c... filesize for 14_Cresta corrected
