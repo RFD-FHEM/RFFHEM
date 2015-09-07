@@ -190,11 +190,35 @@ Cresta_Parse($$)
 	return $name;
 }
 
+# check crc for incoming message
+# in: hex string with encrypted, raw data, starting with 75
+# out: 1 for OK, 0 for failed
+# sample "75BDBA4AC2BEC855AC0A00"
 sub Cresta_crc{
-	my $rawData=shift;
+	my $crestahex=shift;
+	my @crestabytes=();
+	push @crestabytes,0x75; #first byte always 75 and will not be included in decrypt/encrypt!
+	#convert to array except for first hex
+	for (my $i=1; $i<(length($crestahex))/2; $i++){
+		my $hex=Cresta_decryptByte(hex(substr($crestahex, $i*2, 2)));
+		push (@crestabytes, $hex);
+	}
+	my $cs1=0; #will be zero for xor over all (bytes>>1)&0x1F except first byte (always 0x75)
+	#my $rawData=shift;
 	#todo add the crc check here
-	
-	return 1;
+	my $count=0;
+	$count=($crestabytes[2]>>1) & 0x1f;
+	#iterate over data only, first byte is 0x75 always
+	for (my $i=1; $i<$count+2; $i++) {
+		my $b =  $crestabytes[$i];
+		$cs1 = $cs1 ^ $b; # calc first chksum 
+	} 
+	if($cs1==0){
+		return 1;
+	}
+	else{
+		return 0;
+	}
 }
 
 # return decoded sensor type
