@@ -157,7 +157,7 @@ Cresta_Parse($$)
 	Log3 $hash, 5, "def= ". Dumper($def);
 	
 	$hash = $def;
-	#my $name = $hash->{NAME};
+	$name = $hash->{NAME};
 	return "" if(IsIgnored($name));
 
 	Log3 $name, 4, "Cresta: $name ($msg)";  
@@ -191,7 +191,7 @@ Cresta_Parse($$)
 	readingsEndUpdate($hash, 1); # Notify is done by Dispatch
 
 	Log3 $name, 5, "Cresta test DoTrigger";
-	DoTrigger($name, "T: ".$temp." H: ".$hum);
+#	DoTrigger($name, "T: ".$temp." H: ".$hum);
 	
 	return $name;
 }
