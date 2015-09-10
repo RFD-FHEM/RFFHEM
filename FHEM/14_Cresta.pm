@@ -12,7 +12,9 @@ package main;
 use strict;
 use warnings;
 use POSIX;
-
+ 
+use Data::Dumper;
+ 
 #####################################
 sub
 Cresta_Initialize($)
@@ -75,11 +77,11 @@ sub
 Cresta_Parse($$)
 {
 	my ($hash,$msg) = @_;
-	#my $name = $hash->{NAME};
-	my $name="CRESTA";
+	my $name = $hash->{NAME};
+	#my $name="CRESTA";
 	my @a = split("", $msg);
 	#my $name = $hash->{NAME};
-	Log3 $hash, 4, "$name incomming $msg";
+	Log3 $hash, 4, "Cresta_Parse $name incomming $msg";
 	my $rawData=substr($msg,2); ## Copy all expect of the message length header
 	
 	#Convert hex to bit, may not needed
@@ -143,7 +145,7 @@ Cresta_Parse($$)
 	}
     my $deviceCode=$model."_".$sensorTyp."_".$channel;
 	Log3 $hash, 4, "$name decoded Cresta protocol Typ=$sensorTyp, sensor id=$id, channel=$channel, temp=$temp, humidity=$hum\n" ;
-	
+    Log3 $hash, 5, "deviceCode= $deviceCode";	
 
 	my $def = $modules{Cresta}{defptr}{$hash->{NAME} . "." . $deviceCode};
 	$def = $modules{Cresta}{defptr}{$deviceCode} if(!$def);
@@ -152,7 +154,8 @@ Cresta_Parse($$)
 		Log3 $hash, 1, "Cresta: UNDEFINED sensor $sensorTyp detected, code $deviceCode";
 		return "UNDEFINED $deviceCode Cresta $deviceCode";
 	}
-
+	Log3 $hash, 5, "def= ". Dumper($def);
+	
 	$hash = $def;
 	#my $name = $hash->{NAME};
 	return "" if(IsIgnored($name));
@@ -182,11 +185,14 @@ Cresta_Parse($$)
 	readingsBulkUpdate($hash, "state", $val);
 	#readingsBulkUpdate($hash, "battery", $bat)   if ($bat ne "");
 	#readingsBulkUpdate($hash, "trigger", $trigger) if ($trigger ne "");
-	readingsBulkUpdate($hash, "Humidity", $hum) if ($hum ne "");
-	readingsBulkUpdate($hash, "Temperature", $temp) if ($temp ne "");
+#	readingsBulkUpdate($hash, "Humidity", $hum) if ($hum ne "");
+#	readingsBulkUpdate($hash, "Temperature", $temp) if ($temp ne "");
 
 	readingsEndUpdate($hash, 1); # Notify is done by Dispatch
 
+	Log3 $name, 5, "Cresta test DoTrigger";
+	DoTrigger($name, "T: ".$temp." H: ".$hum);
+	
 	return $name;
 }
 
@@ -409,16 +415,16 @@ binflip($)
 
     <br>
     &lt;code&gt; ist der automatisch angelegte Hauscode des Env und besteht aus der
-	Kanalnummer (1..3) und einer Zufallsadresse, die durch das Gerät beim einlegen der
-	Batterie generiert wird (Die Adresse ändert sich bei jedem Batteriewechsel).<br>
-    minsecs definert die Sekunden die mindesten vergangen sein müssen bis ein neuer
+	Kanalnummer (1..3) und einer Zufallsadresse, die durch das Gerï¿½t beim einlegen der
+	Batterie generiert wird (Die Adresse ï¿½ndert sich bei jedem Batteriewechsel).<br>
+    minsecs definert die Sekunden die mindesten vergangen sein mï¿½ssen bis ein neuer
 	Logeintrag oder eine neue Nachricht generiert werden.
     <br>
-	Z.B. wenn 300, werden Einträge nur alle 5 Minuten erzeugt, auch wenn das Device
-    alle paar Sekunden eine Nachricht generiert. (Reduziert die Log-Dateigröße und die Zeit
-	die zur Anzeige von Plots benötigt wird.)<br>
-	equalmsg gesetzt auf 1 legt fest, dass Einträge auch dann erzeugt werden wenn die durch
-	minsecs vorgegebene Zeit noch nicht verstrichen ist, sich aber der Nachrichteninhalt geändert
+	Z.B. wenn 300, werden Eintrï¿½ge nur alle 5 Minuten erzeugt, auch wenn das Device
+    alle paar Sekunden eine Nachricht generiert. (Reduziert die Log-Dateigrï¿½ï¿½e und die Zeit
+	die zur Anzeige von Plots benï¿½tigt wird.)<br>
+	equalmsg gesetzt auf 1 legt fest, dass Eintrï¿½ge auch dann erzeugt werden wenn die durch
+	minsecs vorgegebene Zeit noch nicht verstrichen ist, sich aber der Nachrichteninhalt geï¿½ndert
 	hat.
   </ul>
   <br>
