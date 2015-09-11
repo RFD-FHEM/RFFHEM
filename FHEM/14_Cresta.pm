@@ -13,7 +13,7 @@ use strict;
 use warnings;
 use POSIX;
  
-use Data::Dumper;
+#use Data::Dumper;
  
 #####################################
 sub
@@ -154,7 +154,7 @@ Cresta_Parse($$)
 		Log3 $hash, 1, "Cresta: UNDEFINED sensor $sensorTyp detected, code $deviceCode";
 		return "UNDEFINED $deviceCode Cresta $deviceCode";
 	}
-	Log3 $hash, 5, "def= ". Dumper($def);
+	#Log3 $hash, 5, "def= ". Dumper($def);
 	
 	$hash = $def;
 	$name = $hash->{NAME};
@@ -185,12 +185,16 @@ Cresta_Parse($$)
 	readingsBulkUpdate($hash, "state", $val);
 	#readingsBulkUpdate($hash, "battery", $bat)   if ($bat ne "");
 	#readingsBulkUpdate($hash, "trigger", $trigger) if ($trigger ne "");
-	readingsBulkUpdate($hash, "H", $hum) if ($hum ne "");
-	readingsBulkUpdate($hash, "T", $temp) if ($temp ne "");
+	# use short term reading names T and H
+#	readingsBulkUpdate($hash, "H", $hum) if ($hum ne "");
+#	readingsBulkUpdate($hash, "T", $temp) if ($temp ne "");
+        # or use long term reading names temperature and humidity
+	readingsBulkUpdate($hash, "humidity", $hum) if ($hum ne "");
+	readingsBulkUpdate($hash, "temperature", $temp) if ($temp ne "");
 
 	readingsEndUpdate($hash, 1); # Notify is done by Dispatch
 
-	Log3 $name, 5, "Cresta test DoTrigger";
+#	Log3 $name, 5, "Cresta test DoTrigger";
 #	DoTrigger($name, "T: ".$temp." H: ".$hum);
 	
 	return $name;
