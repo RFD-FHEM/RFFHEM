@@ -39,7 +39,8 @@ sub listfiles2{
             }
         }
         
-        open(my $fh, '>', 'report.txt');
+        open(my $fh, '>:raw', 'controls_signalduino.txt');
+        
         foreach my $l (sort @lines){
             print $l;
             print $fh $l;
@@ -66,8 +67,9 @@ sub wanted{
 
 sub main {
 
-        listfiles2(@ARGV);
-        return;
+    listfiles2(@ARGV);
+    return;
+    
     my ($dir, $sortby, $order) = @ARGV;
 
     my @dirs_wanted=();
