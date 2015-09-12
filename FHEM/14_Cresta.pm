@@ -1,10 +1,10 @@
 ##############################################
-# $Id: 14_Cresta.pm  2015-08-30 $
+# $Id: 14_Cresta.pm  2015-09-12 $
 # The file is taken from the SIGNALduino project
 # see http://www.fhemwiki.de/wiki/SIGNALduino
 # and was modified by a few additions
 # to support Cresta Sensors
-# S. Butzek, 2015
+# S. Butzek & HJGode  2015  
 #
 
 package main;
@@ -65,12 +65,6 @@ Cresta_Undef($$)
   return undef;
 }
 
-sub Cresta_hex2bin {
-        my $h = shift;
-        my $hlen = length($h);
-        my $blen = $hlen * 4;
-        return unpack("B$blen", pack("H$hlen", $h));
-}
 
 #####################################
 sub
@@ -91,14 +85,11 @@ Cresta_Parse($$)
 	Log3 $hash, 4, "$name converted to bits: $bitData";
 
 	# decrypt bytes
-	my @decodedBytes = (); # holds the decrpyted data as array
-	my $decodedString =(); # holds the decryped hex string
-	$decodedString = decryptBytes($rawData); # decrpyt hex string to hex string
-	#convert back to array of bytes:
-	for (my $i=0; $i<(length($decodedString))/2; $i++){
-		my $hex=hex(substr($decodedString, $i*2, 2));
-		push (@decodedBytes, $hex);
-	}
+	my $decodedString = decryptBytes($rawData); # decrpyt hex string to hex string
+
+	#convert dectypted hex str back to array of bytes:
+	my @decodedBytes  = map { hex($_) } ($decodedString =~ /(..)/g);
+	
 	#for debug only
 	my $test="";
 	
@@ -114,7 +105,7 @@ Cresta_Parse($$)
 		Log3 $hash, 4, "$name decrypt failed";
 		return "$name decrypt failed";
 	}
-	if (!Cresta_crc($rawData))
+	if (!Cresta_crc(\@decodedBytes))
 	{
 		Log3 $hash, 4, "$name crc failed";
 		return "$name crc failed";
@@ -130,7 +121,7 @@ Cresta_Parse($$)
 	my $val;
 	## 1. Detect what type of sensor we have, then calll specific function to decode
 	if ($sensorTyp==0x1E){
-		($rc,$channel, $temp, $hum) = decodeThermoHygro($decodedString);
+		($rc,$channel, $temp, $hum) = decodeThermoHygro(\@decodedBytes); #decodeThermoHygro($decodedString);
 		$model="th";  
 		$val = "T: $temp H: $hum";
 	}else{
@@ -178,6 +169,7 @@ Cresta_Parse($$)
 	#}
 
 	$def->{lastMSG} = $msg;
+	$def->{bitMSG} = $bitData; 
 
 	Log3 $name, 4, "Cresta update $name:". $name;
 
@@ -205,19 +197,22 @@ Cresta_Parse($$)
 # out: 1 for OK, 0 for failed
 # sample "75BDBA4AC2BEC855AC0A00"
 sub Cresta_crc{
-	my $crestahex=shift;
-	my @crestabytes=();
-	push @crestabytes,0x75; #first byte always 75 and will not be included in decrypt/encrypt!
+	#my $crestahex=shift;
+	#my @crestabytes=shift;
+	
+	my @crestabytes = @{$_[0]};
+	#push @crestabytes,0x75; #first byte always 75 and will not be included in decrypt/encrypt!
 	#convert to array except for first hex
-	for (my $i=1; $i<(length($crestahex))/2; $i++){
-		my $hex=Cresta_decryptByte(hex(substr($crestahex, $i*2, 2)));
-		push (@crestabytes, $hex);
-	}
+	#for (my $i=1; $i<(length($crestahex))/2; $i++){
+    #	my $hex=Cresta_decryptByte(hex(substr($crestahex, $i*2, 2)));
+	#	push (@crestabytes, $hex);
+	#}
+	
 	my $cs1=0; #will be zero for xor over all (bytes>>1)&0x1F except first byte (always 0x75)
 	#my $rawData=shift;
 	#todo add the crc check here
-	my $count=0;
-	$count=($crestabytes[2]>>1) & 0x1f;
+	
+	my $count=($crestabytes[2]>>1) & 0x1f;
 	#iterate over data only, first byte is 0x75 always
 	for (my $i=1; $i<$count+2; $i++) {
 		my $b =  $crestabytes[$i];
@@ -250,12 +245,8 @@ sub getSensorType{
 sub decryptBytes{
 	my $crestahex=shift;
 	#create array of hex string
-	my @crestabytes=();
-	push @crestabytes, 0x75; #first byte is not encrypted and always 0x75
-	for (my $i=1; $i<(length($crestahex))/2; $i++){
-		my $hex=Cresta_decryptByte(hex(substr($crestahex, $i*2, 2)));
-		push (@crestabytes, $hex);
-	}
+	my @crestabytes  = map { Cresta_decryptByte(hex($_)) } ($crestahex =~ /(..)/g);
+	
 	my $result="";
 	for (my $i=0; $i<scalar (@crestabytes); $i++){
 		$result.=sprintf("%02x",$crestabytes[$i]);
@@ -276,12 +267,14 @@ sub Cresta_decryptByte{
 # output <return code>, <channel>, <temperature>, <humidity>
 # was unable to get this working with an array ref as input, so switched to hex string input
 sub decodeThermoHygro {
-	my $crestahex = shift;
-	my @crestabytes=();
-	for (my $i=0; $i<(length($crestahex))/2; $i++){
-		my $hex=hex(substr($crestahex, $i*2, 2)); ## Mit split und map geht es auch ... $str =~ /(..?)/g;
-		push (@crestabytes, $hex);
-	}
+	my @crestabytes = @{$_[0]};
+	
+	#my $crestahex = shift;
+	#my @crestabytes=();
+	#for (my $i=0; $i<(length($crestahex))/2; $i++){
+	#	my $hex=hex(substr($crestahex, $i*2, 2)); ## Mit split und map geht es auch ... $str =~ /(..?)/g;
+	#	push (@crestabytes, $hex);
+	#}
 	my $channel=0;
 	my $temp=0;
 	my $humi=0;
