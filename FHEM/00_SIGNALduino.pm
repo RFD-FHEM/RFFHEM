@@ -6,7 +6,8 @@
 # The purpos is to use it as addition to the SIGNALduino which runs on an arduno nano or arduino uno.
 # It routes Messages serval Modules which are already integrated in FHEM. But there are also modules which comes with it.
 # N. Butzek, S. Butzek, 2014-2015 
-#
+# 
+
 
 
 package main;
@@ -58,26 +59,27 @@ my %sets = (
 my $clientsSIGNALduino = ":IT:"
 						."CUL_TCM97001:"
 						."SIGNALduino_RSL:"
-#						."SIGNALduino_AS:"
 						."OREGON:"
 						."CUL_TX:"
 						."SIGNALduino_AS:"
 						."SIGNALduino_un:"
+						."Cresta:"
 						; 
 
 ## default regex match List for dispatching message to logical modules, can be updated during runtime because it is referenced
 my %matchListSIGNALduino = (
-     "1:IT"            			=> 	 "^i......",	  			  # Intertechno Format
+     "1:IT"            			=> "^i......",	  			  # Intertechno Format
      "2:CUL_TCM97001"      		=> "^s[A-Fa-f0-9]+",			  # Any hex string		beginning with s
 	 "3:SIGNALduino_RSL"		=> "^rA-Fa-f0-9]+",				  # Any hex string		beginning with r
      "5:CUL_TX"               	=> "^TX..........",         	  # Need TX to avoid FHTTK
-	 "5:SIGNALduino_AS"       	=> "AS[A-Fa-f0-9]{7,8}", 		  # Arduino based Sensors, should not be default
+	 "6:SIGNALduino_AS"       	=> "AS[A-Fa-f0-9]{7,8}", 		  # Arduino based Sensors, should not be default
 #    "2:SIGNALduino_Env"      	=> "W[0-9]+[a-f0-9]+\$",	# WNNHHHHHHH N=Number H=Hex
 #    "3:SIGNALduino_PT2262"   	=> "IR.*\$",
 #    "4:SIGNALduino_HX"       	=> "H...\$",
      "4:OREGON"            		=> "^(3[8-9A-F]|[4-6][0-9A-F]|7[0-8]).*",		
 #    "7:SIGNALduino_ARC"     	=> "AR.*\$", #ARC protocol switches like IT selflearn
-	 "8:SIGNALduino_un"			=> "^u.*",
+	 "8:SIGNALduino_un"			=> "u.*",
+	 "9:Cresta"					=> "^[5][0|8]75[A-F0-9]+",
 );
 
 		#protoID[0]=(s_sigid){-4,-8,-18,500,0,twostate}; // Logi
@@ -441,7 +443,7 @@ SIGNALduino_Define($$)
   if($dev eq "none") {
     Log3 $name, 1, "$name device is none, commands will be echoed only";
     $attr{$name}{dummy} = 1;
-    return undef;
+    #return undef;
   }
   
 
@@ -466,6 +468,9 @@ SIGNALduino_Define($$)
 
   
   $hash->{DeviceName} = $dev;
+  if($dev eq "none") {
+  	return undef;
+  }
   my $ret = DevIo_OpenDev($hash, 0, "SIGNALduino_DoInit");
   
   ## 
@@ -694,12 +699,14 @@ SIGNALduino_DoInit($)
 	my $err;
 	my $msg = undef;
 
-	SIGNALduino_Clear($hash);
 	my ($ver, $try) = ("", 0);
 	#Dirty hack to allow initialisation of DirectIO Device for some debugging and tesing
-  	if (!$hash->{DEF} =~ m/\@DirectIO/ )
+  	Log3 $name, 1, $hash->{DEF};
+ 
+  	if ((!$hash->{DEF} =~ m/\@DirectIO/) and (!$hash->{DEF} =~ m/none/) )
 	{
-
+		SIGNALduino_Clear($hash);
+		
 
 		# Try to get version from Arduino
 		while ($try++ < 3 && $ver !~ m/^V/) {
