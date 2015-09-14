@@ -1,11 +1,9 @@
 ##############################################
-# $Id: 14_SIGNALduino_un.pm 3818 2015-08-30 $
-# The file is taken from the SIGNALduino project
+# $Id: 14_SIGNALduino_un.pm 3818 2015-09-14 $
+# The file is part of the SIGNALduino project
 # see http://www.fhemwiki.de/wiki/SIGNALduino
-# and was modified by a few additions
 # to support debugging of unknown signal data
 # The purpos is to use it as addition to the SIGNALduino
-# modules in combination with RFDuino
 # S. Butzek, 2015
 #
 
@@ -22,7 +20,7 @@ SIGNALduino_un_Initialize($)
   my ($hash) = @_;
 
 
-  $hash->{Match}     = "u*";
+  $hash->{Match}     = "^u.*";
   $hash->{DefFn}     = "SIGNALduino_un_Define";
   $hash->{UndefFn}   = "SIGNALduino_un_Undef";
   $hash->{AttrFn}    = "SIGNALduino_un_Attr";
@@ -86,14 +84,11 @@ SIGNALduino_un_Parse($$)
 
 	if ($a[1] == "7" && length($bitData)>=36)  ## Unknown Proto 7 
 	{
-		my $id = oct ("0b".substr($bitData,0,9));
-		my $channel = oct ("0b".substr($bitData,10,2))+1;
-		my $temp = oct ("0b".substr($bitData,12,11))/10;
-		Log3 $hash, 4, "$name decoded protocolid: 7  sensor id=$id, channel=$channel, temp=$temp\n" ;
 		
-		## Try TX70DTH Decding
+		
+		## Try TX70DTH Decoding
 		my $SensorTyp = "TX70DTH";
-		$channel = bin2dec(substr($bitData,9,3));
+		my $channel = bin2dec(substr($bitData,9,3));
 		my $bin = substr($bitData,0,8);
 		my $id = sprintf('%X', oct("0b$bin"));
 		my $bat = int(substr($bitData,8,1)) eq "1" ? "ok" : "critical";
@@ -106,8 +101,28 @@ SIGNALduino_un_Parse($$)
 		$temp = $temp / 10;
 		my $hum = bin2dec(substr($bitData,29,7));
 		my $val = "T: $temp H: $hum B: $bat";
-		Log3 $hash, 4, "$name decoded protocolid: 7  sensor id=$id, channel=$channel, temp=$temp\n" ;
+		Log3 $hash, 4, "$name decoded protocolid: 7 ($SensorTyp) sensor id=$id, channel=$channel, temp=$temp, hum=$hum, bat=$bat\n" ;
+		
 
+		# Try Eurochron EAS 800
+		  #		        4	 8    12            24    28        36
+	      #          0011 0110 1010  000100000010  1111  00111000 0000         	Kanal 3, 25.8 Grad, 56%
+	      #          0011 0110 1010  000011110011  1111  00111000 0000     		Kanal 3, 24.3 Grad, 56%
+	      #          0011 0001 1001  000100001001  1111  00111101 0000		 	Kanal 2, 26.5 Grad, 61%
+	      #          0011 1000 1000  000100000011  1111  01000000 0000         	Kanal 1
+	      
+	      #                ID?  CHN       TMP        ??     HUM
+		$SensorTyp = "EAS800z";
+		$id = oct ("0b".substr($bitData,4,4));
+		$channel = bin2dec(substr($bitData,9,3))+1;
+		$temp = oct ("0b".substr($bitData,12,12))/10;
+		$bat = int(substr($bitData,8,1)) eq "1" ? "ok" : "critical";  # Eventuell falsch!
+		$hum = bin2dec(substr($bitData,28,8));
+		$sendMode = int(substr($bitData,4,1)) eq "1" ? "auto" : "manual";  # Eventuell falsch!
+		my $type = bin2dec(substr($bitData,0,4));
+		
+		Log3 $hash, 4, "$name decoded protocolid: 7 ($SensorTyp / type=$type) mode=$sendMode, sensor id=$id, channel=$channel, temp=$temp, hum=$hum, bat=$bat\n" ;
+		
 		
 		return;
 
@@ -124,7 +139,9 @@ SIGNALduino_un_Parse($$)
 		  #          /        / /  /  /     /       / - neg Temp: if 1 then temp = temp - 2048
 		  #         /        / /  /  /     /       /  / Temp
 		  #         01100010 1 00 1  00000 0100011 0  00011011101
+
 		  # Bit     0        8 9  11 12    17      24 25        36
+
 		my $SensorTyp = "EuroChron";
 		my $channel = "";
 		my $bin = substr($bitData,0,8);
