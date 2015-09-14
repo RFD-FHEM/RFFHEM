@@ -1,11 +1,9 @@
 ##############################################
-# $Id: 14_SIGNALduino_un.pm 3818 2015-08-30 $
-# The file is taken from the SIGNALduino project
+# $Id: 14_SIGNALduino_un.pm 1158 2015-09-15 $
+# The file is part of the SIGNALduino project
 # see http://www.fhemwiki.de/wiki/SIGNALduino
-# and was modified by a few additions
 # to support debugging of unknown signal data
 # The purpos is to use it as addition to the SIGNALduino
-# modules in combination with RFDuino
 # S. Butzek, 2015
 #
 
@@ -22,7 +20,7 @@ SIGNALduino_un_Initialize($)
   my ($hash) = @_;
 
 
-  $hash->{Match}     = "u*";
+  $hash->{Match}     = "^u.*";
   $hash->{DefFn}     = "SIGNALduino_un_Define";
   $hash->{UndefFn}   = "SIGNALduino_un_Undef";
   $hash->{AttrFn}    = "SIGNALduino_un_Attr";
@@ -84,22 +82,13 @@ SIGNALduino_un_Parse($$)
 	my $bitData= unpack("B$blen", pack("H$hlen", $rawData)); 
 	Log3 $hash, 4, "$name converted to bits: $bitData";
 
-        my $laenge = length($bitData);
-          if ($laenge < 29) { 
-            	Log3 $hash, 4, "LÃ¤nge $laenge  stimmt nicht: $bitData" ;
-              return;
-        }
-
-	if ($a[1] == "7")  ## Unknown Proto 7 
+	if ($a[1] == "7" && length($bitData)>=36)  ## Unknown Proto 7 
 	{
-		my $id = oct ("0b".substr($bitData,0,9));
-		my $channel = oct ("0b".substr($bitData,10,2))+1;
-		my $temp = oct ("0b".substr($bitData,12,11))/10;
-		Log3 $hash, 4, "$name decoded protocolid: 7  sensor id=$id, channel=$channel, temp=$temp\n" ;
 		
-		## Try TX70DTH Decding
+		
+		## Try TX70DTH Decoding
 		my $SensorTyp = "TX70DTH";
-		$channel = bin2dec(substr($bitData,9,3));
+		my $channel = bin2dec(substr($bitData,9,3));
 		my $bin = substr($bitData,0,8);
 		my $id = sprintf('%X', oct("0b$bin"));
 		my $bat = int(substr($bitData,8,1)) eq "1" ? "ok" : "critical";
@@ -112,12 +101,32 @@ SIGNALduino_un_Parse($$)
 		$temp = $temp / 10;
 		my $hum = bin2dec(substr($bitData,29,7));
 		my $val = "T: $temp H: $hum B: $bat";
-		Log3 $hash, 4, "$name decoded protocolid: 7  sensor id=$id, channel=$channel, temp=$temp\n" ;
+		Log3 $hash, 4, "$name decoded protocolid: 7 ($SensorTyp) sensor id=$id, channel=$channel, temp=$temp, hum=$hum, bat=$bat\n" ;
+		
 
+		# Try Eurochron EAS 800
+		  #		        4	 8    12            24    28        36
+	      #          0011 0110 1010  000100000010  1111  00111000 0000         	Kanal 3, 25.8 Grad, 56%
+	      #          0011 0110 1010  000011110011  1111  00111000 0000     		Kanal 3, 24.3 Grad, 56%
+	      #          0011 0001 1001  000100001001  1111  00111101 0000		 	Kanal 2, 26.5 Grad, 61%
+	      #          0011 1000 1000  000100000011  1111  01000000 0000         	Kanal 1
+	      
+	      #                ID?  CHN       TMP        ??     HUM
+		$SensorTyp = "EAS800z";
+		$id = oct ("0b".substr($bitData,4,4));
+		$channel = bin2dec(substr($bitData,9,3))+1;
+		$temp = oct ("0b".substr($bitData,12,12))/10;
+		$bat = int(substr($bitData,8,1)) eq "1" ? "ok" : "critical";  # Eventuell falsch!
+		$hum = bin2dec(substr($bitData,28,8));
+		$sendMode = int(substr($bitData,4,1)) eq "1" ? "auto" : "manual";  # Eventuell falsch!
+		my $type = bin2dec(substr($bitData,0,4));
+		
+		Log3 $hash, 4, "$name decoded protocolid: 7 ($SensorTyp / type=$type) mode=$sendMode, sensor id=$id, channel=$channel, temp=$temp, hum=$hum, bat=$bat\n" ;
+		
 		
 		return;
 
-	} elsif ($a[1] == "9")  ## Eurochron 
+	} elsif ($a[1] == "6" && length($bitData)>=36)  ## Eurochron 
 	{   
 
 		  # EuroChron / Tchibo
@@ -130,7 +139,9 @@ SIGNALduino_un_Parse($$)
 		  #          /        / /  /  /     /       / - neg Temp: if 1 then temp = temp - 2048
 		  #         /        / /  /  /     /       /  / Temp
 		  #         01100010 1 00 1  00000 0100011 0  00011011101
+
 		  # Bit     0        8 9  11 12    17      24 25        36
+
 		my $SensorTyp = "EuroChron";
 		my $channel = "";
 		my $bin = substr($bitData,0,8);
@@ -145,10 +156,10 @@ SIGNALduino_un_Parse($$)
 		$temp = $temp / 10.0;
 		my $hum = bin2dec(substr($bitData,17,7));
 		my $val = "T: $temp H: $hum B: $bat";
-		Log3 $hash, 4, "$name decoded protocolid: 9  $SensorTyp, sensor id=$id, channel=$channel, temp=$temp\n" ;
+		Log3 $hash, 4, "$name decoded protocolid: 6  $SensorTyp, sensor id=$id, channel=$channel, temp=$temp\n" ;
 
 		return;
-	} elsif ($a[1] == "9")  ## Unknown Proto 9 
+	} elsif ($a[1] == "9" && length($bitData)>=70)  ## Unknown Proto 9 
 	{   #http://nupo-artworks.de/media/report.pdf
 		my $syncpos= index($bitData,"1111111110");
 		my $sensdata = substr($bitData,$syncpos+10);
@@ -164,7 +175,7 @@ SIGNALduino_un_Parse($$)
 		Log3 $hash, 4, "$name found ctw600 syncpos at $syncpos message is: $sensdata - sensor id:$id, bat:$bat, temp=$temp, hum=$hum, wind=$wind, rain=$rain, winddir=$winddir";
 
 		return;
-	} elsif ($a[1] == "1" and $a[2] == "3")  ## RF20 Protocol 
+	} elsif ($a[1] == "1" and $a[2] == "3" && length($bitData)>=14)  ## RF20 Protocol 
 	{  
 		my $deviceCode = $a[3].$a[5].$a[6].$a[7].$a[8].$a[9];
 		my  $Freq = $a[10].$a[11].$a[12].$a[13].$a[14];
@@ -172,7 +183,7 @@ SIGNALduino_un_Parse($$)
 		Log3 $hash, 4, "$name found TCM dorrbell protocol. devicecode=$deviceCode, freq=$Freq ";
 		return;
 	}
-	elsif ($a[1] == "1" and $a[2] == "4")  ## Heidman HX 
+	elsif ($a[1] == "1" and $a[2] == "4" && length($bitData)>=12)  ## Heidman HX 
 	{  
 		my $deviceCode = $a[4].$a[5].$a[6].$a[7].$a[8];
 
@@ -184,7 +195,7 @@ SIGNALduino_un_Parse($$)
 
 		return;
 	}
-	elsif ($a[1] == "1" and $a[2] == "5")  ## TCM 
+	elsif ($a[1] == "1" and $a[2] == "5" && length($bitData)>=64)  ## TCM 
 	{  
 		my $deviceCode = $a[4].$a[5].$a[6].$a[7].$a[8];
 
@@ -313,16 +324,16 @@ binflip($)
 
     <br>
     &lt;code&gt; ist der automatisch angelegte Hauscode des Env und besteht aus der
-	Kanalnummer (1..3) und einer Zufallsadresse, die durch das GerÃ¤t beim einlegen der
-	Batterie generiert wird (Die Adresse Ã¤ndert sich bei jedem Batteriewechsel).<br>
-    minsecs definert die Sekunden die mindesten vergangen sein mÃ¼ssen bis ein neuer
+	Kanalnummer (1..3) und einer Zufallsadresse, die durch das Gerät beim einlegen der
+	Batterie generiert wird (Die Adresse ändert sich bei jedem Batteriewechsel).<br>
+    minsecs definert die Sekunden die mindesten vergangen sein müssen bis ein neuer
 	Logeintrag oder eine neue Nachricht generiert werden.
     <br>
-	Z.B. wenn 300, werden EintrÃ¤ge nur alle 5 Minuten erzeugt, auch wenn das Device
-    alle paar Sekunden eine Nachricht generiert. (Reduziert die Log-DateigrÃ¶ÃŸe und die Zeit
-	die zur Anzeige von Plots benÃ¶tigt wird.)<br>
-	equalmsg gesetzt auf 1 legt fest, dass EintrÃ¤ge auch dann erzeugt werden wenn die durch
-	minsecs vorgegebene Zeit noch nicht verstrichen ist, sich aber der Nachrichteninhalt geÃ¤ndert
+	Z.B. wenn 300, werden Einträge nur alle 5 Minuten erzeugt, auch wenn das Device
+    alle paar Sekunden eine Nachricht generiert. (Reduziert die Log-Dateigröße und die Zeit
+	die zur Anzeige von Plots benötigt wird.)<br>
+	equalmsg gesetzt auf 1 legt fest, dass Einträge auch dann erzeugt werden wenn die durch
+	minsecs vorgegebene Zeit noch nicht verstrichen ist, sich aber der Nachrichteninhalt geändert
 	hat.
   </ul>
   <br>

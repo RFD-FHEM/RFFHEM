@@ -1,5 +1,9 @@
+15.09.2015
+ - Added some eas800 code for decoding the sensor
+ 
 12.09.2015
  - Cresta_14 is decoding Temp / Humidity Sensors
+ 
 31.08.2015
  - Added helper submodule to allow some decoding tests for serval sensors
 30.08.2015

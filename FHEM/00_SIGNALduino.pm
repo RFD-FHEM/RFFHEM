@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm    2015-08-30
+# $Id: 00_SIGNALduino.pm  72402 2015-09-15
 # The file is taken from the FHEMduino project and modified in serval the processing of incomming messages
 # see http://www.fhemwiki.de/wiki/<tbd>
 # It was modified also to provide support for raw message handling which it's send from the SIGNALduino
