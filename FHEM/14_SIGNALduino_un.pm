@@ -185,7 +185,6 @@ SIGNALduino_un_Parse($$)
 	}
 	elsif ($a[1] == "1" and $a[2] == "4" && length($bitData)>=12)  ## Heidman HX 
 	{  
-		my $deviceCode = $a[4].$a[5].$a[6].$a[7].$a[8];
 
 		my $bin = substr($bitData,0,4);
 		my $deviceCode = sprintf('%X', oct("0b$bin"));
