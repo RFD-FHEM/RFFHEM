@@ -79,9 +79,9 @@ my %matchListSIGNALduino = (
 #    "4:SIGNALduino_HX"       	=> "H...\$",
      "4:OREGON"            		=> "^(3[8-9A-F]|[4-6][0-9A-F]|7[0-8]).*",		
 #    "7:SIGNALduino_ARC"     	=> "AR.*\$", #ARC protocol switches like IT selflearn
-	 "8:SIGNALduino_un"			=> "u.*",
+	 "8:SIGNALduino_un"			=> "u[1-6|8-9].*",
 	 "9:Cresta"					=> "^[5][0|8]75[A-F0-9]+",
-	 "10:SIGNALduino_ID7"		=> "^u7[A-F0-9]+",                       
+	 "10:SIGNALduino_ID7"		=> "^u7[A-Fa-f0-9]+",                       
 );
 
 		#protoID[0]=(s_sigid){-4,-8,-18,500,0,twostate}; // Logi

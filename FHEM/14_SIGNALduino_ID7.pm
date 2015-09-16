@@ -30,7 +30,7 @@ SIGNALduino_ID7_Initialize($)
 {
   my ($hash) = @_;
 
-  $hash->{Match}     = "^u7[a-F0-9]+";    ## Muss noch mal überarbeitet werden, wenn wir mehr über die Sensoren wissen
+  $hash->{Match}     = "^u7[A-Fa-f0-9+";    ## Muss noch mal überarbeitet werden, wenn wir mehr über die Sensoren wissen
   $hash->{DefFn}     = "SIGNALduino_ID7_Define";
   $hash->{UndefFn}   = "SIGNALduino_ID7_Undef";
   $hash->{ParseFn}   = "SIGNALduino_ID7_Parse";
@@ -100,7 +100,8 @@ SIGNALduino_ID7_Parse($$)
   
   #my $hashumidity = FALSE;
   
-  if ($l == 10) {
+  if ($l == 10) 
+  {
     my $hlen = length($rawData);
     my $blen = $hlen * 4;
     my $bitData = unpack("B$blen", pack("H$hlen", $rawData)); 
@@ -122,12 +123,12 @@ SIGNALduino_ID7_Parse($$)
 	my $def = $modules{SIGNALduino_ID7}{defptr}{$hash->{NAME} . "." . $deviceCode};
 	$def = $modules{SIGNALduino_ID7}{defptr}{$deviceCode} if(!$def);
 
-    Log3 $hash, 3, 'SIGNALduino_ID7: ' . $def->{NAME} . ' ' . $id;
 
     if(!$def) {
-		Log3 $hash, 1, 'SIGNALduino_ID7: UNDEFINED sensor ' . $model . ' detected, code ' . $deviceCode . ' name ' . $hash->{NAME};
-		return "UNDEFINED SIGNALduino_ID7 $deviceCode";
+		Log3 $hash, 1, 'SIGNALduino_ID7: UNDEFINED sensor ' . $model . ' detected, code ' . $deviceCode;
+		return "UNDEFINED $deviceCode SIGNALduino_ID7 $deviceCode";
     }
+    Log3 $hash, 3, 'SIGNALduino_ID7: ' . $def->{NAME} . ' ' . $id;
 
 	$hash = $def;
 	$name = $hash->{NAME};
@@ -142,7 +143,7 @@ SIGNALduino_ID7_Parse($$)
 		}
 	}
   	$hash->{lastReceive} = time();
-	$def->{lastMSG} = $rawmsg;
+	$def->{lastMSG} = $rawData;
 	$def->{bitMSG} = $bitData; 
 
     my $state = "T: $temp H: $hum";
@@ -156,19 +157,20 @@ SIGNALduino_ID7_Parse($$)
 
     readingsEndUpdate($hash, 1); # Notify is done by Dispatch
 
+	return $name;
   }
 
   return undef;
 }
 
-
+sub
 SIGNALduino_ID7_Attr(@)
 {
   my @a = @_;
 
   # Make possible to use the same code for different logical devices when they
   # are received through different physical devices.
-  return if($a[0] ne "set" || $a[2] ne "IODev");
+  return  if($a[0] ne "set" || $a[2] ne "IODev");
   my $hash = $defs{$a[1]};
   my $iohash = $defs{$a[3]};
   my $cde = $hash->{CODE};
