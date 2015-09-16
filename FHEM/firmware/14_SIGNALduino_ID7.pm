@@ -30,7 +30,7 @@ SIGNALduino_ID7_Initialize($)
 {
   my ($hash) = @_;
 
-  $hash->{Match}     = "^u7[A-Fa-f0-9]+";    ## Muss noch mal überarbeitet werden, wenn wir mehr über die Sensoren wissen
+  $hash->{Match}     = "^u7[A-Fa-f0-9+";    ## Muss noch mal überarbeitet werden, wenn wir mehr über die Sensoren wissen
   $hash->{DefFn}     = "SIGNALduino_ID7_Define";
   $hash->{UndefFn}   = "SIGNALduino_ID7_Undef";
   $hash->{ParseFn}   = "SIGNALduino_ID7_Parse";
