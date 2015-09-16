@@ -1,4 +1,4 @@
-RFFHEM
+RFFHEM - special branch for developing protocol #7 weather sensor
 ======
 
 Counterpart of SIGNALDuino, it's the code for FHEM to work with the data received from the uC

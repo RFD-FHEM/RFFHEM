@@ -64,6 +64,7 @@ my $clientsSIGNALduino = ":IT:"
 						."SIGNALduino_AS:"
 						."SIGNALduino_un:"
 						."Cresta:"
+						."SIGNALduino_ID7:"
 						; 
 
 ## default regex match List for dispatching message to logical modules, can be updated during runtime because it is referenced
@@ -80,6 +81,7 @@ my %matchListSIGNALduino = (
 #    "7:SIGNALduino_ARC"     	=> "AR.*\$", #ARC protocol switches like IT selflearn
 	 "8:SIGNALduino_un"			=> "u.*",
 	 "9:Cresta"					=> "^[5][0|8]75[A-F0-9]+",
+	 "10:SIGNALduino_ID7"		=> "^u7[A-F0-9]+",                       
 );
 
 		#protoID[0]=(s_sigid){-4,-8,-18,500,0,twostate}; // Logi
