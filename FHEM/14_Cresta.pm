@@ -119,6 +119,11 @@ Cresta_Parse($$)
 	my $rc;
 	my $model;
 	my $val;
+	my $bat = $decodedBytes[2] >> 6;
+	if ($bat == 3) {
+	  $bat = 'ok';
+	}
+	
 	## 1. Detect what type of sensor we have, then calll specific function to decode
 	if ($sensorTyp==0x1E){
 		($rc,$channel, $temp, $hum) = decodeThermoHygro(\@decodedBytes); #decodeThermoHygro($decodedString);
@@ -175,7 +180,7 @@ Cresta_Parse($$)
 
 	readingsBeginUpdate($hash);
 	readingsBulkUpdate($hash, "state", $val);
-	#readingsBulkUpdate($hash, "battery", $bat)   if ($bat ne "");
+	readingsBulkUpdate($hash, "battery", $bat)   if ($bat ne "");
 	#readingsBulkUpdate($hash, "trigger", $trigger) if ($trigger ne "");
 	# use short term reading names T and H
 #	readingsBulkUpdate($hash, "H", $hum) if ($hum ne "");
