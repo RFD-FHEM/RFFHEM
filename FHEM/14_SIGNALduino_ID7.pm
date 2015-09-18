@@ -106,7 +106,7 @@ SIGNALduino_ID7_Parse($$)
     my $blen = $hlen * 4;
     my $bitData = unpack("B$blen", pack("H$hlen", $rawData)); 
     my $bitData2 = substr($bitData,0,4) . ' ' . substr($bitData,4,4) . ' ' . substr($bitData,8,1) . ' ' . substr($bitData,9,3);
-       $bitData2 = $bitData2 . ' ' . substr($bitData,12,12) . ' ' . substr($bitData,24,4) . ' ' . substr($bitData,28,8) . ' ' . substr($bitData,36,4);
+       $bitData2 = $bitData2 . ' ' . substr($bitData,12,12) . ' ' . substr($bitData,24,4) . ' ' . substr($bitData,28,8);
     Log3 $hash, 3, $model . ' converted to bits: ' . $bitData2;
     
     my $id = oct("0b".substr($bitData,4,4) . substr($bitData,9,3));
@@ -115,6 +115,10 @@ SIGNALduino_ID7_Parse($$)
     my $bat = int(substr($bitData,8,1)) eq "1" ? "ok" : "critical";
     my $hum = oct("0b" . substr($bitData,28,8));
     Log3 $hash, 3, "$model decoded protocolid: 7 sensor id=$id, channel=$channel, temp=$temp, hum=$hum, bat=$bat" ;
+    
+    if ($hum > 100 || $hum == 0) {
+      return undef;
+    }
 
     my $deviceCode = $model . '_' . $id;
     
@@ -128,7 +132,7 @@ SIGNALduino_ID7_Parse($$)
 		Log3 $hash, 1, 'SIGNALduino_ID7: UNDEFINED sensor ' . $model . ' detected, code ' . $deviceCode;
 		return "UNDEFINED $deviceCode SIGNALduino_ID7 $deviceCode";
     }
-    Log3 $hash, 3, 'SIGNALduino_ID7: ' . $def->{NAME} . ' ' . $id;
+        #Log3 $hash, 3, 'SIGNALduino_ID7: ' . $def->{NAME} . ' ' . $id;
 
 	$hash = $def;
 	$name = $hash->{NAME};
@@ -144,10 +148,10 @@ SIGNALduino_ID7_Parse($$)
 	}
   	$hash->{lastReceive} = time();
 	$def->{lastMSG} = $rawData;
-	$def->{bitMSG} = $bitData; 
+	$def->{bitMSG} = $bitData2; 
 
     my $state = "T: $temp H: $hum";
- 
+    
     readingsBeginUpdate($hash);
     readingsBulkUpdate($hash, "state", $state);
     readingsBulkUpdate($hash, "temperature", $temp)  if ($temp ne"");
@@ -157,7 +161,7 @@ SIGNALduino_ID7_Parse($$)
 
     readingsEndUpdate($hash, 1); # Notify is done by Dispatch
 
-	return $name;
+    return $name;
   }
 
   return undef;
