@@ -47,7 +47,7 @@ Cresta_Define($$)
   $hash->{minsecs} = ((int(@a) > 3) ? $a[3] : 30);
   $hash->{equalMSG} = ((int(@a) > 4) ? $a[4] : 0);
   $hash->{lastMSG} =  "";
-  $hash->{bitMSG} =  "";
+  #$hash->{bitMSG} =  "";
 
   $modules{Cresta}{defptr}{$a[2]} = $hash;
   $hash->{STATE} = "Defined";
@@ -79,10 +79,10 @@ Cresta_Parse($$)
 	my $rawData=substr($msg,2); ## Copy all expect of the message length header
 	
 	#Convert hex to bit, may not needed
-	my $hlen = length($rawData);
-	my $blen = $hlen * 4;
-	my $bitData= unpack("B$blen", pack("H$hlen", $rawData)); 
-	Log3 $hash, 4, "$name converted to bits: $bitData";
+	#my $hlen = length($rawData);
+	#my $blen = $hlen * 4;
+	#my $bitData= unpack("B$blen", pack("H$hlen", $rawData)); 
+	#Log3 $hash, 4, "$name converted to bits: $bitData";
 
 	# decrypt bytes
 	my $decodedString = decryptBytes($rawData); # decrpyt hex string to hex string
@@ -154,7 +154,7 @@ Cresta_Parse($$)
 	Log3 $name, 4, "Cresta: $name ($msg)";  
 
 	if($hash->{lastReceive} && (time() - $hash->{lastReceive} < $def->{minsecs} )) {
-	if (($def->{lastMSG} ne $msg) && ($def->{equalMSG} > 0)) {
+	if (($def->{lastMSG} ne $decodedString) && ($def->{equalMSG} > 0)) {
 	  Log3 $name, 4, "Cresta: $name: $deviceCode no skipping due unequal message even if to short timedifference";
 	} else {
 	  Log3 $name, 4, "Cresta: $name: $deviceCode Skipping due to short timedifference";
@@ -168,8 +168,8 @@ Cresta_Parse($$)
 	#return "";
 	#}
 
-	$def->{lastMSG} = $msg;
-	$def->{bitMSG} = $bitData; 
+	$def->{lastMSG} = $decodedString;
+	#$def->{bitMSG} = $bitData; 
 
 	Log3 $name, 4, "Cresta update $name:". $name;
 
