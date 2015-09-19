@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm  72402 2015-09-15
+# $Id: 00_SIGNALduino.pm  72402 2015-09-19
 # The file is taken from the FHEMduino project and modified in serval the processing of incomming messages
 # see http://www.fhemwiki.de/wiki/<tbd>
 # It was modified also to provide support for raw message handling which it's send from the SIGNALduino
@@ -318,9 +318,8 @@ my %ProtocolListSIGNALduino  = (
 			id          	=> '13',
 			one				=> [1,-2],
 			zero			=> [1,-4],
-			#float			=> [-1,3],				# not full supported now, for later use
-			#sync			=> [11,-1],				# currently we have no support for sync check for MU messages
-			clockabs		=> 740,
+			sync			=> [1,-27,10,-1],		
+			clockabs		=> 800,
 			format 			=> 'twostate',	  		
 			preamble		=> 'u13',				# prepend to converted message	
 			#clientmodule    => '',   				# not used now
