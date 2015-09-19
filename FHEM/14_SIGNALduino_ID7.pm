@@ -109,16 +109,26 @@ SIGNALduino_ID7_Parse($$)
        $bitData2 = $bitData2 . ' ' . substr($bitData,12,12) . ' ' . substr($bitData,24,4) . ' ' . substr($bitData,28,8);
     Log3 $hash, 3, $model . ' converted to bits: ' . $bitData2;
     
-    my $id = oct("0b".substr($bitData,4,4) . substr($bitData,9,3));
     my $channel = oct("0b" . substr($bitData,9,3)) + 1;
-    my $temp = oct("0b" . substr($bitData,12,12)) / 10;
+    my $id = $channel;
+       #$id = oct("0b".substr($bitData,4,4) . substr($bitData,9,3));
     my $bat = int(substr($bitData,8,1)) eq "1" ? "ok" : "critical";
+    my $temp = oct("0b" . substr($bitData,12,12));
     my $hum = oct("0b" . substr($bitData,28,8));
-    Log3 $hash, 3, "$model decoded protocolid: 7 sensor id=$id, channel=$channel, temp=$temp, hum=$hum, bat=$bat" ;
+    my $bit24bis27 = substr($bitData,24,4);
     
-    if ($hum > 100 || $hum == 0) {
+    if ($hum > 100 || $hum == 0 || $bit24bis27 ne '1111') {
       return undef;
     }
+    
+    if ($temp > 700 && $temp < 3840) {
+      return undef;
+    } elsif ($temp >= 3840) {        # negative Temperaturen, muß noch ueberprueft und optimiert werden 
+      $temp -= 4095;
+    }  
+    $temp /= 10;
+    
+    Log3 $hash, 3, "$model decoded protocolid: 7 sensor id=$id, channel=$channel, temp=$temp, hum=$hum, bat=$bat" ;
 
     my $deviceCode = $model . '_' . $id;
     
@@ -161,7 +171,7 @@ SIGNALduino_ID7_Parse($$)
 
     readingsEndUpdate($hash, 1); # Notify is done by Dispatch
 
-    return $name;
+	return $name;
   }
 
   return undef;
