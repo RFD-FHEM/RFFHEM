@@ -48,8 +48,6 @@ SIGNALduino_ID7_Define($$)
 {
   my ($hash, $def) = @_;
   my @a = split("[ \t][ \t]*", $def);
-  
-  Log3 "SIGNALduino", 3, "SIGNALduino_ID7_Define $def";
 
   return "wrong syntax: define <name> SIGNALduino_ID7 <code> <minsecs> <equalmsg>".int(@a)
         if(int(@a) < 3 || int(@a) > 5);
@@ -92,7 +90,7 @@ SIGNALduino_ID7_Parse($$)
   
   my $l = length($rawData);
 
-  Log3 "SIGNALduino", 3, "SIGNALduino_ID7_Parse  $model ($msg) length: $l";
+  Log3 "SIGNALduino", 4, "SIGNALduino_ID7_Parse  $model ($msg) length: $l";
   
   #      4    8 9    12            24    28       36
   # 0011 0110 1 010  000100000010  1111  00111000 0000 
@@ -143,12 +141,19 @@ SIGNALduino_ID7_Parse($$)
 		return "UNDEFINED $deviceCode SIGNALduino_ID7 $deviceCode";
     }
         #Log3 $hash, 3, 'SIGNALduino_ID7: ' . $def->{NAME} . ' ' . $id;
-
+	
+	my $minsecs;
+	if ($hash->{minsecs}) {          # im sduino definiert?
+	  $minsecs = $hash->{minsecs};
+	} else {
+	  $minsecs = $def->{minsecs};
+	}
+	Log3 $def, 3, 'SIGNALduino_ID7_Parse: minsecs ' . $minsecs;
 	$hash = $def;
 	$name = $hash->{NAME};
 	Log3 $name, 4, "SIGNALduino_ID7: $name ($rawData)";  
 
-   	if($hash->{lastReceive} && (time() - $hash->{lastReceive} < $def->{minsecs} )) {
+   	if($hash->{lastReceive} && (time() - $hash->{lastReceive} < $minsecs)) {
 		if (($def->{lastMSG} ne $rawData) && ($def->{equalMSG} > 0)) {
 			Log3 $name, 4, "SIGNALduino_ID7: $name: $deviceCode no skipping due unequal message even if to short timedifference";
 		} else {

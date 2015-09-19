@@ -396,6 +396,7 @@ SIGNALduino_Initialize($)
                       ." flashCommand"
   					  ." hardware:nano328,uno,promini328"
 					  ." debug:0,1"
+					  ." minsecs"
                       ." $readingFnAttributes";
 
   $hash->{ShutdownFn} = "SIGNALduino_Shutdown";
@@ -1895,6 +1896,11 @@ SIGNALduino_Attr(@)
 	{
 		$debug = $aVal;
 		Log3 $name, 3, "$name: setting debug to: " . $debug;
+	}
+	elsif ($aName eq "minsecs")
+	{
+		$hash->{minsecs} = $aVal;
+		Log3 $name, 3, "$name: setting  minsecs to: " . $aVal;
 	}
 	
   	return undef;
