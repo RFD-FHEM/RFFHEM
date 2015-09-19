@@ -355,7 +355,7 @@ my %ProtocolListSIGNALduino  = (
 			sync			=> [1,-45],				# 
 			clockabs		=> 700,
 			format 			=> 'twostate',	  		
-			preamble		=> 'u14',				# prepend to converted message	
+			preamble		=> 'u15',				# prepend to converted message	
 			#clientmodule    => '',   				# not used now
 			#modulematch     => '',  				# not used now
 			length_min      => '10',
@@ -1360,7 +1360,9 @@ SIGNALduino_Parse_MS($$$$%)
 		## Make a lookup table for our pattern index ids
 		#Debug "List of pattern:";
 		my $clockabs= $msg_parts{pattern}{$msg_parts{clockidx}};
-		$patternList{$_} = floor($msg_parts{pattern}{$_}/$clockabs) for keys $msg_parts{pattern};
+		$patternList{$_} = round($msg_parts{pattern}{$_}/$clockabs,2) for keys $msg_parts{pattern};
+		
+		
  		#Debug Dumper(\%patternList);		
 
 		#my $syncfact = $patternList{$syncidx}/$patternList{$clockidx};
