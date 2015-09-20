@@ -103,17 +103,16 @@ SIGNALduino_ID7_Parse($$)
     my $hlen = length($rawData);
     my $blen = $hlen * 4;
     my $bitData = unpack("B$blen", pack("H$hlen", $rawData)); 
-    my $bitData2 = substr($bitData,0,4) . ' ' . substr($bitData,4,4) . ' ' . substr($bitData,8,1) . ' ' . substr($bitData,9,3);
+    my $bitData2 = substr($bitData,0,8) . ' ' . substr($bitData,8,1) . ' ' . substr($bitData,9,3);
        $bitData2 = $bitData2 . ' ' . substr($bitData,12,12) . ' ' . substr($bitData,24,4) . ' ' . substr($bitData,28,8);
     Log3 $hash, 3, $model . ' converted to bits: ' . $bitData2;
     
-    my $channel = oct("0b" . substr($bitData,9,3)) + 1;
-    my $id = $channel;
-       #$id = oct("0b".substr($bitData,4,4) . substr($bitData,9,3));
+    my $id = substr($rawData,0,2);
     my $bat = int(substr($bitData,8,1)) eq "1" ? "ok" : "critical";
+    my $channel = oct("0b" . substr($bitData,9,3)) + 1;
     my $temp = oct("0b" . substr($bitData,12,12));
-    my $hum = oct("0b" . substr($bitData,28,8));
     my $bit24bis27 = substr($bitData,24,4);
+    my $hum = oct("0b" . substr($bitData,28,8));
     
     if ($hum > 100 || $hum == 0 || $bit24bis27 ne '1111') {
       return undef;
@@ -127,18 +126,20 @@ SIGNALduino_ID7_Parse($$)
     $temp /= 10;
     
     Log3 $hash, 3, "$model decoded protocolid: 7 sensor id=$id, channel=$channel, temp=$temp, hum=$hum, bat=$bat" ;
-
-    my $deviceCode = $model . '_' . $id;
+    
+    if (!$hash->{devicecodeWithId} || index($hash->{devicecodeWithId}, 'ID7') == -1) {
+      $id = '';
+    }
+    my $deviceCode = $model . '_' . $id . $channel;
     
     #print Dumper($modules{SIGNALduino_ID7}{defptr});
     
-	my $def = $modules{SIGNALduino_ID7}{defptr}{$hash->{NAME} . "." . $deviceCode};
-	$def = $modules{SIGNALduino_ID7}{defptr}{$deviceCode} if(!$def);
-
+    my $def = $modules{SIGNALduino_ID7}{defptr}{$hash->{NAME} . "." . $deviceCode};
+    $def = $modules{SIGNALduino_ID7}{defptr}{$deviceCode} if(!$def);
 
     if(!$def) {
-		Log3 $hash, 1, 'SIGNALduino_ID7: UNDEFINED sensor ' . $model . ' detected, code ' . $deviceCode;
-		return "UNDEFINED $deviceCode SIGNALduino_ID7 $deviceCode";
+	Log3 $hash, 1, 'SIGNALduino_ID7: UNDEFINED sensor ' . $model . ' detected, code ' . $deviceCode;
+	return "UNDEFINED $deviceCode SIGNALduino_ID7 $deviceCode";
     }
         #Log3 $hash, 3, 'SIGNALduino_ID7: ' . $def->{NAME} . ' ' . $id;
 	
@@ -148,7 +149,7 @@ SIGNALduino_ID7_Parse($$)
 	} else {
 	  $minsecs = $def->{minsecs};
 	}
-	Log3 $def, 3, 'SIGNALduino_ID7_Parse: minsecs ' . $minsecs;
+	
 	$hash = $def;
 	$name = $hash->{NAME};
 	Log3 $name, 4, "SIGNALduino_ID7: $name ($rawData)";  

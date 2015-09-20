@@ -397,6 +397,7 @@ SIGNALduino_Initialize($)
   					  ." hardware:nano328,uno,promini328"
 					  ." debug:0,1"
 					  ." minsecs"
+					  ." devicecodeWithId:Cresta+ID7"
                       ." $readingFnAttributes";
 
   $hash->{ShutdownFn} = "SIGNALduino_Shutdown";
@@ -437,7 +438,6 @@ SIGNALduino_Define($$)
 	  return undef;
   }
   
-
   my $dev = $a[2];
   #Debug "dev: $dev" if ($debug);
   #my $hardware=AttrVal($name,"hardware","nano328");
@@ -458,7 +458,6 @@ SIGNALduino_Define($$)
   $hash->{MatchList} = \%matchListSIGNALduino;
  
 
-  
   #if( !defined( $attr{$name}{hardware} ) ) {
   #  $attr{$name}{hardware} = "nano328";
   #}
@@ -468,7 +467,6 @@ SIGNALduino_Define($$)
 #    $attr{$name}{flashCommand} = "avrdude -p atmega328P -c arduino -P [PORT] -D -U flash:w:[HEXFILE] 2>[LOGFILE]"
     $attr{$name}{flashCommand} = "avrdude -c arduino -b 57600 -P [PORT] -p atmega328p -vv -U flash:w:[HEXFILE] 2>[LOGFILE]"
   }
-
   
   $hash->{DeviceName} = $dev;
   if($dev eq "none") {
@@ -1879,8 +1877,7 @@ SIGNALduino_Attr(@)
 				Log3 $name, 2, $name .": $aVal: ". $@;
 			}
 		}
-
-
+		
 		if( ref($match_list) eq 'HASH' ) {
 		  $hash->{MatchList} = $match_list;
 		} else {
@@ -1901,6 +1898,10 @@ SIGNALduino_Attr(@)
 	{
 		$hash->{minsecs} = $aVal;
 		Log3 $name, 3, "$name: setting  minsecs to: " . $aVal;
+	}
+	elsif ($aName eq "devicecodeWithId")
+	{
+		$hash->{devicecodeWithId} = $aVal;
 	}
 	
   	return undef;
