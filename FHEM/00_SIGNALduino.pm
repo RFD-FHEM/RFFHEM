@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm  72402 2015-09-19
+# $Id: 00_SIGNALduino.pm  72402 2015-09-21
 # The file is taken from the FHEMduino project and modified in serval the processing of incomming messages
 # see http://www.fhemwiki.de/wiki/<tbd>
 # It was modified also to provide support for raw message handling which it's send from the SIGNALduino
@@ -738,18 +738,6 @@ SIGNALduino_DoInit($)
 		Log3 $name, 3, "$name: Possible commands: " . $hash->{CMDS};
 		readingsSingleUpdate($hash, "state", "Programming", 1);
 		
-		# Program the Filterlist on the arduino, based on the protocolList
-		for my $key ( keys %ProtocolListSIGNALduino ) {
-			my $command = "FA;".$ProtocolListSIGNALduino{$key}{id}.";".$ProtocolListSIGNALduino{$key}{sync}[1].";".$ProtocolListSIGNALduino{$key}{clockabs};
-			#my $command = $ProtocolListSIGNALduino{$key}{id}.";".$ProtocolListSIGNALduino{$key}{sync}[1].";".$ProtocolListSIGNALduino{$key}{clockabs};
-			my $replay;
-			Debug "$name: $command" if ($debug);
-
-			SIGNALduino_SimpleWrite($hash, $command);
-			($err, $replay) = SIGNALduino_ReadAnswer($hash, "Update Filter ".$ProtocolListSIGNALduino{$key}{id}, 0, undef);
-			Debug "$name: answert $replay" if ($debug);
-
-		}
 	}
 	#  if( my $initCommandsString = AttrVal($name, "initCommands", undef) ) {
 	#    my @initCommands = split(' ', $initCommandsString);
@@ -1347,7 +1335,6 @@ sub SIGNALduno_Dispatch($$$)
 	
 	Log3 $name, 5, "converted Data to ($dmsg)";
 	if (($hash->{"${name}_RAWMSG"} ne "$rmsg") || (time() - $hash->{"${name}_TIME"}) ne time() ) { 
-	{
 		$hash->{"${name}_MSGCNT"}++;
 		$hash->{"${name}_TIME"} = TimeNow();
 		readingsSingleUpdate($hash, "state", $hash->{READINGS}{state}{VAL}, 0);
