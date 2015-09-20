@@ -122,13 +122,15 @@ Cresta_Parse($$)
 	my $bat = $decodedBytes[2] >> 6;
 	if ($bat == 3) {
 	  $bat = 'ok';
+	} else {
+	  $bat = 'low';
 	}
 	
 	## 1. Detect what type of sensor we have, then calll specific function to decode
 	if ($sensorTyp==0x1E){
 		($rc,$channel, $temp, $hum) = decodeThermoHygro(\@decodedBytes); #decodeThermoHygro($decodedString);
 		$model="th";  
-		$val = "T: $temp H: $hum";
+		$val = "T: $temp H: $hum Bat: $bat";
 	}else{
 		Log3 $hash, 4, "$name Sensor Typ $sensorTyp not supported";
 		return "$name Sensor Typ $sensorTyp not supported";
