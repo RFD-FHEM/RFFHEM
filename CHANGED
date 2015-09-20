@@ -1,3 +1,9 @@
+21.09.2015
+ - Added support for longids in physical module
+ - Use floating point value for better puls factor detection
+ - some code cleanup
+ - dropped firmware support <3.1.4 -- flashing the microcontroller is needed
+ 
 15.09.2015
  - Added some eas800 code for decoding the sensor
  - Updated rfreceiver to 3.1.5

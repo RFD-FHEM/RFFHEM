@@ -1951,7 +1951,7 @@ sub	SIGNALduino_Cresta()
   href="http://forum.fhem.de/index.php/topic,17196.0.html">FHEM Forum</a>.
 
   With the opensource firmware (see this <a
-  href="https://github.com/RFD-FHEM/SIGNALduino">link</a>) they are capable
+  href="https://github.com/RFD-FHEM/SIGNALduino">link</a>) it is capable
   to receive and send different wireless protocols.
   <br><br>
   
@@ -1961,10 +1961,12 @@ sub	SIGNALduino_Cresta()
   
   Wireless switches  <br>
   IT  switches --> uses IT.pm<br>
+  
   <br><br>
   
   Temperatur / humidity sensors suppored by 14_CUL_TCM97001 <br>
   PEARL NC7159, LogiLink WS0002,GT-WT-02,AURIOL,TCM97001, TCM27,GT-WT-02..  --> 14_CUL_TCM97001.pm <br>
+  Oregon Scientific v2 Sensors  --> 41_OREGON.pm<br>
   <br><br>
 
   It is possible to attach more than one device in order to get better
@@ -2056,7 +2058,7 @@ sub	SIGNALduino_Cresta()
     <li>raw<br>
         Issue a SIGNALduino firmware command, and wait for one line of data returned by
         the SIGNALduino. See the SIGNALduino firmware code  for details on SIGNALduino
-        commands.
+        commands. With this line, you can send almost any signal via a transmitter connected
         </li><br>
     <li>cmds<br>
         Depending on the firmware installed, SIGNALduinos have a different set of
@@ -2070,12 +2072,14 @@ sub	SIGNALduino_Cresta()
   <b>Attributes</b>
   <ul>
     <li>Clients<br>
-      The received data gets distributed to a client (e.g. LaCrosse, EMT7110, ...) that handles the data.
+      * This is currently not implemented:<br>
+      The received data gets distributed to a client (e.g. OREGON, IT, CUL_TCM97001, ...) that handles the data.
       This attribute tells, which are the clients, that handle the data. If you add a new module to FHEM, that shall handle
-      data distributed by the JeeLink module, you must add it to the Clients attribute.</li>
+      data distributed by the SIGNALduino module, you must add it to the Clients attribute.</li>
 
     <li>MatchList<br>
-      can be set to a perl expression that returns a hash that is used as the MatchList<br>
+      * This is currently not implemented:<br>
+      can be set to a perl expression that returns a> hash that is used as the MatchList<br>
       <code>attr myJeeLink MatchList {'5:AliRF' => '^\\S+\\s+5 '}</code></li>
     <li>hexfile<br>
       Full path to a hex filename of the arduino sketch e.g. /opt/fhem/RF_Receiver_nano328.hex
@@ -2084,6 +2088,24 @@ sub	SIGNALduino_Cresta()
 	  
 	<li><a href="#do_not_notify">do_not_notify</a></li>
     <li><a href="#attrdummy">dummy</a></li>
+    <li><a href="#attrdummy">debug</a><br>
+    This will bring the module in a very verbose debug output. Usefull to find new signals and verify if the demodulation works correctly.
+    </li>
+    
+    <li>longids<br>
+        Comma separated list of device-types for SIGNALduino that should be handled using long IDs. This additional ID allows it to differentiate some weather sensors, if they are sending on the same channel. Therfor a random generated id is added. If you choose to use longids, then you'll have to define a different device after battery change.<br>
+Default is to use long IDs for all devices.
+      <br><br>
+      Examples:<PRE>
+# Do not use any long IDs for any devices:
+attr sduino longids 0
+# Use any long IDs for all devices (this is default):
+attr sduino longids 1
+# Use longids for BTHR918N devices.
+# Will generate devices names like BTHR918N_f3.
+attr RFXCOMUSB longids BTHR918N
+</PRE>
+    </li><br>
 
   </ul>
   <br>
