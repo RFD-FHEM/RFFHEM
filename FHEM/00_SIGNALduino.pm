@@ -295,22 +295,17 @@ my %ProtocolListSIGNALduino  = (
 			method          => \&SIGNALduino_AS # Call to process this message
 
 		}, 
-	"12"    => 			## Cresta
+	"12"    => 			## hideki
 			{
-            name			=> 'Cresta TX',	
+            name			=> 'Hideki protocol',	
 			id          	=> '12',
-			#one			=> [3,-2],
-			#zero			=> [1,-2],
-			#float			=> [-1,3],				# not full supported now, for later use
-			#sync			=> [1,-8],				# 
-			clockrange     	=> [420,510],                   # min, max better for Bresser Sensors, OK for Cresta/Hideki/TFA too     
-			format 			=> 'manchester',	    # tristate can't be migrated from bin into hex!
-			#preamble		=> '',					# prepend to converted message	
-			#clientmodule    => '14_SIGNALduino_AS',   	# not used now
-			#modulematch     => '',  # not used now
+			clockrange     	=> [420,510],                   # min, max better for Bresser Sensors, OK for hideki/Hideki/TFA too     
+			format 			=> 'manchester',	    
+			#clientmodule    => '14_hideki',   				# not used now
+			#modulematch     => '',  						# not used now
 			length_min      => '20',
 			length_max      => '50',
-			method          => \&SIGNALduino_Cresta	# Call to process this message
+			method          => \&SIGNALduino_Hideki	# Call to process this message
 		}, 			
 	"13"    => 			## RF20
 			{
@@ -1959,16 +1954,16 @@ sub	SIGNALduino_AS()
 	return (-1,undef);
 }
 
-sub	SIGNALduino_Cresta()
+sub	SIGNALduino_Hideki()
 {
 	my ($name,$bitData) = @_;
     Debug "$name: search in $bitData \n" if ($debug);
 	if (index($bitData,"0101110") >= 0 )   # 0x75 but in reverse order
 	{
-		Debug "$name: Cresta protocol detected \n" if ($debug);
+		Debug "$name: Hideki protocol detected \n" if ($debug);
 
 		my $message_start=index($bitData,"10101110");
-		my $crestahex;  #=substr($bitData,$message_start);
+		my $hidekihex;  #=substr($bitData,$message_start);
 		my $idx;
 		
 		for ($idx=$message_start;$idx<length($bitData);$idx=$idx+9)
@@ -1980,12 +1975,12 @@ sub	SIGNALduino_Cresta()
 			$byte = scalar reverse $byte;
 			Debug "$name: byte reversed $byte , as hex: ".sprintf('%X', oct("0b$byte"))."\n" if ($debug);
 
-			$crestahex=$crestahex.sprintf('%02X', oct("0b$byte"));
+			$hidekihex=$hidekihex.sprintf('%02X', oct("0b$byte"));
 		}
-		$crestahex = sprintf("%02X", length($crestahex)*4).$crestahex; # Number of bits
-		Log3 $name, 5, "$name: Cresta protocol converted to hex: ($crestahex) with length (".(length($crestahex)*4).") bits \n";
+		$hidekihex = sprintf("%02X", length($hidekihex)*4).$hidekihex; # Number of bits
+		Log3 $name, 5, "$name: hideki protocol converted to hex: ($hidekihex) with length (".(length($hidekihex)*4).") bits \n";
 
-		return  (1,$crestahex); ## Return only the original bits, include length
+		return  (1,$hidekihex); ## Return only the original bits, include length
 	}
 	return (-1,undef);
 }

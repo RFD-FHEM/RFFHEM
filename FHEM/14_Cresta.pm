@@ -70,19 +70,19 @@ Cresta_Undef($$)
 sub
 Cresta_Parse($$)
 {
-	my ($hash,$msg) = @_;
-	my $name = $hash->{NAME};
+	my ($iohash,$msg) = @_;
+	my $name = $iohash->{NAME};
 	#my $name="CRESTA";
 	my @a = split("", $msg);
-	#my $name = $hash->{NAME};
-	Log3 $hash, 4, "Cresta_Parse $name incomming $msg";
+	#my $name = $iohash->{NAME};
+	Log3 $iohash, 4, "Cresta_Parse $name incomming $msg";
 	my $rawData=substr($msg,2); ## Copy all expect of the message length header
 	
 	#Convert hex to bit, may not needed
 	my $hlen = length($rawData);
 	my $blen = $hlen * 4;
 	my $bitData= unpack("B$blen", pack("H$hlen", $rawData)); 
-	Log3 $hash, 4, "$name converted to bits: $bitData";
+	Log3 $iohash, 4, "$name converted to bits: $bitData";
 
 	# decrypt bytes
 	my $decodedString = decryptBytes($rawData); # decrpyt hex string to hex string
@@ -102,16 +102,16 @@ Cresta_Parse($$)
 	
 	if (!@decodedBytes)
 	{
-		Log3 $hash, 4, "$name decrypt failed";
+		Log3 $iohash, 4, "$name decrypt failed";
 		return "$name decrypt failed";
 	}
 	if (!Cresta_crc(\@decodedBytes))
 	{
-		Log3 $hash, 4, "$name crc failed";
+		Log3 $iohash, 4, "$name crc failed";
 		return "$name crc failed";
 	}
 	my $sensorTyp=getSensorType($decodedBytes[3]);
-	Log3 $hash, 4, "SensorTyp=$sensorTyp, ".$decodedBytes[3];
+	Log3 $iohash, 4, "SensorTyp=$sensorTyp, ".$decodedBytes[3];
 	my $id=1;
 	my $channel=0;
 	my $temp=0;
@@ -125,29 +125,29 @@ Cresta_Parse($$)
 		$model="th";  
 		$val = "T: $temp H: $hum";
 	}else{
-		Log3 $hash, 4, "$name Sensor Typ $sensorTyp not supported";
+		Log3 $iohash, 4, "$name Sensor Typ $sensorTyp not supported";
 		return "$name Sensor Typ $sensorTyp not supported";
 	}
 
 	if ($rc != 1)
 	{
-		Log3 $hash, 4, "$name error, decoding Cresta protocol" ;
+		Log3 $iohash, 4, "$name error, decoding Cresta protocol" ;
 		return "UNDEFINED $sensorTyp error, decoding Cresta protocol";
 	}
     my $deviceCode=$model."_".$sensorTyp."_".$channel;
-	Log3 $hash, 4, "$name decoded Cresta protocol Typ=$sensorTyp, sensor id=$id, channel=$channel, temp=$temp, humidity=$hum\n" ;
-    Log3 $hash, 5, "deviceCode= $deviceCode";	
+	Log3 $iohash, 4, "$name decoded Cresta protocol Typ=$sensorTyp, sensor id=$id, channel=$channel, temp=$temp, humidity=$hum\n" ;
+    Log3 $iohash, 5, "deviceCode= $deviceCode";	
 
-	my $def = $modules{Cresta}{defptr}{$hash->{NAME} . "." . $deviceCode};
+	my $def = $modules{Cresta}{defptr}{$iohash->{NAME} . "." . $deviceCode};
 	$def = $modules{Cresta}{defptr}{$deviceCode} if(!$def);
 
 	if(!$def) {
-		Log3 $hash, 1, "Cresta: UNDEFINED sensor $sensorTyp detected, code $deviceCode";
+		Log3 $iohash, 1, "Cresta: UNDEFINED sensor $sensorTyp detected, code $deviceCode";
 		return "UNDEFINED $deviceCode Cresta $deviceCode";
 	}
-	#Log3 $hash, 5, "def= ". Dumper($def);
+	#Log3 $iohash, 5, "def= ". Dumper($def);
 	
-	$hash = $def;
+	my $hash = $def;
 	$name = $hash->{NAME};
 	return "" if(IsIgnored($name));
 
