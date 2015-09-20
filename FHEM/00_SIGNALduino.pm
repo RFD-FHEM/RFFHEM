@@ -393,6 +393,7 @@ SIGNALduino_Initialize($)
                       ." flashCommand"
   					  ." hardware:nano328,uno,promini328"
 					  ." debug:0,1"
+					  ." longids"
                       ." $readingFnAttributes";
 
   $hash->{ShutdownFn} = "SIGNALduino_Shutdown";
@@ -1165,6 +1166,7 @@ sub SIGNALduino_Split_Message($$)
 	return %ret;
 }
 
+## Old function, can be removed in future version
 sub SIGNALduino_Parse_Message($$$$@)
 {
 	my ($hash, $iohash, $name, $rmsg,@msg_parts) = @_;
@@ -1317,13 +1319,17 @@ sub SIGNALduino_Parse_Message($$$$@)
    			   my $temp = oct ("0b".join('',@bit_msg[12..23]))/10;
 			   Debug "$name: decoded protocol $protocolid: id=$id, channel=$channel, temp=$temp\n" if ($debug);
 			}
-
+			
+			# Parse only if message is different within 2 seconds 
+			SIGNALduno_Dispatch();
+			
 			$hash->{"${name}_MSGCNT"}++;
 			$hash->{"${name}_TIME"} = TimeNow();
 			readingsSingleUpdate($hash, "state", $hash->{READINGS}{state}{VAL}, 0);
 			$hash->{RAWMSG} = $rmsg;
 			my %addvals = (RAWMSG => $dmsg);
 			Dispatch($hash, $dmsg, \%addvals);  ## Dispatch to other Modules 
+						
 
 		} elsif (defined($protocolid) && $ProtocolListSIGNALduino{$protocolid}{format} eq "tristate")
 		{
@@ -1333,6 +1339,23 @@ sub SIGNALduino_Parse_Message($$$$@)
 	}
 }
 
+# Function which dispatches a message if needed.
+sub SIGNALduno_Dispatch($$$)
+{
+	my ($hash, $rmsg,$dmsg) = @_;
+	my $name = $hash->{NAME};
+	
+	Log3 $name, 5, "converted Data to ($dmsg)";
+	if (($hash->{"${name}_RAWMSG"} ne "$rmsg") || (time() - $hash->{"${name}_TIME"}) ne time() ) { 
+	{
+		$hash->{"${name}_MSGCNT"}++;
+		$hash->{"${name}_TIME"} = TimeNow();
+		readingsSingleUpdate($hash, "state", $hash->{READINGS}{state}{VAL}, 0);
+		$hash->{RAWMSG} = $rmsg;
+		my %addvals = (RAWMSG => $dmsg);
+		Dispatch($hash, $dmsg, \%addvals);  ## Dispatch to other Modules 
+	}		
+}
 
 sub
 SIGNALduino_Parse_MS($$$$%)
@@ -1474,16 +1497,8 @@ SIGNALduino_Parse_MS($$$$%)
 			$dmsg = "$dmsg"."$ProtocolListSIGNALduino{$id}{postamble}" if (defined($ProtocolListSIGNALduino{$id}{postamble}));
 			$dmsg = "$ProtocolListSIGNALduino{$id}{preamble}"."$dmsg" if (defined($ProtocolListSIGNALduino{$id}{preamble}));
 			
-			Log3 $name, 5, "converted Data to ($dmsg)";
-			$hash->{"${name}_MSGCNT"}++;
-			$hash->{"${name}_TIME"} = TimeNow();
-			readingsSingleUpdate($hash, "state", $hash->{READINGS}{state}{VAL}, 0);
-			$hash->{RAWMSG} = $rmsg;
-			my %addvals = (RAWMSG => $dmsg);
-			Dispatch($hash, $dmsg, \%addvals);  ## Dispatch to other Modules 
-		
-			#last if ($valid); try other protocols if we got some error
-
+			SIGNALduno_Dispatch($hash,$rmsg,$dmsg);
+			
 		
 		}
 		return 0;
@@ -1623,15 +1638,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 			$dmsg = "$dmsg"."$ProtocolListSIGNALduino{$id}{postamble}" if (defined($ProtocolListSIGNALduino{$id}{postamble}));
 			$dmsg = "$ProtocolListSIGNALduino{$id}{preamble}"."$dmsg" if (defined($ProtocolListSIGNALduino{$id}{preamble}));
 			
-			Log3 $name, 5, "converted Data to ($dmsg)";
-			$hash->{"${name}_MSGCNT"}++;
-			$hash->{"${name}_TIME"} = TimeNow();
-			readingsSingleUpdate($hash, "state", $hash->{READINGS}{state}{VAL}, 0);
-			$hash->{RAWMSG} = $rmsg;
-			my %addvals = (RAWMSG => $dmsg);
-			Dispatch($hash, $dmsg, \%addvals);  ## Dispatch to other Modules 
-		
-			#last if ($valid); try other protocols if we got some error
+			SIGNALduno_Dispatch($hash,$rmsg,$dmsg);
 
 
 		
@@ -1680,14 +1687,9 @@ SIGNALduino_Parse_MC($$$$@)
 				my ($rcode,$res) = $method->($name,$bitData);
 				if ($rcode != -1) {
 					$dmsg = $res;
-					Log3 $name, 5, "converted Data to ($dmsg)";
-					$hash->{"${name}_MSGCNT"}++;
-					$hash->{"${name}_TIME"} = TimeNow();
-					readingsSingleUpdate($hash, "state", $hash->{READINGS}{state}{VAL}, 0);
-					$hash->{RAWMSG} = $rmsg;
-					my %addvals = (RAWMSG => $dmsg);
-					Dispatch($hash, $dmsg, \%addvals);  ## Dispatch to other Modules 
-				} else {
+					
+					SIGNALduno_Dispatch($hash,$rmsg,$dmsg);
+			} else {
 					Debug "protocol does not match return from method: ($res)"  if ($debug);
 
 				}
@@ -1695,68 +1697,6 @@ SIGNALduino_Parse_MC($$$$@)
 		}
 			
 	}
-	return undef;    ## Exit bevor running old conversion code
-	
-	my $found=0;
-
-	#Check OSV2
-	# Test code: https://ideone.com/Pp80M8  https://ideone.com/63wjyx
-	
-	
-	#Todo Migrate to protocol List, and parse data from protocol list instead of hardcoded data
-	#  $ProtocolListSignalDuino{$id}{format} eq "manchester"  && $ProtocolListSignalDuino{$id}{clock} in tol $ clock,   $ProtocolListSignalDuino{$id}{minlength} $ProtocolListSignalDuino{$id}{maxlength}   how to find preamble and sync bits
-	if ( $clock >390 and $clock <520 and length($rawData) > 37 and length($rawData) < 55 and index($bitData,"10011001",24) >= 24 and $bitData =~ m/^.?(10){12,16}/) #$rawData =~ m/^A{6,8}/
-	{  # Valid OSV2 detected!	
-		
-		Debug "$name: OSV2 protocol detected \n" if ($debug);
-		
-		my $preamble_pos=index($bitData,"10011001",24);
-
-		return undef if ($preamble_pos <=24);
-		my $idx=0;
-		my $osv2bits="";
-		my $osv2hex ="";
-
-		for ($idx=$preamble_pos;$idx<length($bitData);$idx=$idx+16)
-		{
-			if (length($bitData)-$idx  < 16 )
-			{
-			  last;
-			}
-			my $osv2byte = "";
-			$osv2byte=NULL;
-			$osv2byte=substr($bitData,$idx,16);
-			#Debug "$name: byte(16bit) $idx: $osv2byte";
-
-			my $rvosv2byte="";
-			
-			for (my $p=1;$p<length($osv2byte);$p=$p+2)
-			{
-				$rvosv2byte = substr($osv2byte,$p,1).$rvosv2byte;
-			}
-			$osv2hex=$osv2hex.sprintf('%02X', oct("0b$rvosv2byte")) ;
-			#Debug "$name: -> reversed: $rvosv2byte\n";
-			$osv2bits = $osv2bits.$rvosv2byte;
-			#reverse $osv2bits;
-			# Need to reverse every bit from a nibble. # Get 16 Bits, reverse, extract every second char conv to hex 
-		}
-		#Debug "$name: OSV2 bits $osv2bits \n" if ($debug);
-		
-		$osv2hex = sprintf("%02X", length($osv2hex)*4).$osv2hex;
-		Debug "$name: OSV2 hex $osv2hex with length ".(length($osv2hex)/2)." bytes \n" if ($debug);
-		$found=1;
-		$dmsg=$osv2hex;
-		
-	}
-	if ( $clock >380 and $clock <425 and length($rawData) > 13 and length($rawData) < 14 and $rawData =~ m/^A{2,3}/)
-	{  # Valid AS detected!	
-		Debug "$name: AS protocol detected \n" if ($debug);
-		my $preamble_pos=index($bitData,"1100",16);
-	}
-	
-	
-	
-	
 }
 
 
@@ -1784,7 +1724,7 @@ SIGNALduino_Parse($$$$@)
 	if ($rmsg=~ m/^M\d+;(P\d=-?\d+;){4,7}D=\d+;CP=\d;SP=\d;/) 
 	{
 		Log3 $name, 3, "You are using an outdated version of signalduino code on your arduino. Please update";
-		return SIGNALduino_Parse_Message($hash, $iohash, $name, $rmsg,@msg_parts);  
+		return undef;
 	}
 	if ($rmsg=~ m/^MS;(P\d=-?\d+;){4,7}D=\d+;CP=\d;SP=\d;/) 
 	{
