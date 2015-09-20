@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm  72402 2015-09-15
+# $Id: 00_SIGNALduino.pm  72402 2015-09-21
 # The file is taken from the FHEMduino project and modified in serval the processing of incomming messages
 # see http://www.fhemwiki.de/wiki/<tbd>
 # It was modified also to provide support for raw message handling which it's send from the SIGNALduino
@@ -320,9 +320,8 @@ my %ProtocolListSIGNALduino  = (
 			id          	=> '13',
 			one				=> [1,-2],
 			zero			=> [1,-4],
-			#float			=> [-1,3],				# not full supported now, for later use
-			#sync			=> [11,-1],				# currently we have no support for sync check for MU messages
-			clockabs		=> 740,
+			sync			=> [1,-27,10,-1],		
+			clockabs		=> 800,
 			format 			=> 'twostate',	  		
 			preamble		=> 'u13',				# prepend to converted message	
 			#clientmodule    => '',   				# not used now
@@ -358,7 +357,7 @@ my %ProtocolListSIGNALduino  = (
 			sync			=> [1,-45],				# 
 			clockabs		=> 700,
 			format 			=> 'twostate',	  		
-			preamble		=> 'u14',				# prepend to converted message	
+			preamble		=> 'u15',				# prepend to converted message	
 			#clientmodule    => '',   				# not used now
 			#modulematch     => '',  				# not used now
 			length_min      => '10',
@@ -396,6 +395,7 @@ SIGNALduino_Initialize($)
                       ." flashCommand"
   					  ." hardware:nano328,uno,promini328"
 					  ." debug:0,1"
+					  ." longids"
 					  ." minsecs"
 					  ." devicecodeWithId:Cresta+ID7"
                       ." $readingFnAttributes";
@@ -739,18 +739,6 @@ SIGNALduino_DoInit($)
 		Log3 $name, 3, "$name: Possible commands: " . $hash->{CMDS};
 		readingsSingleUpdate($hash, "state", "Programming", 1);
 		
-		# Program the Filterlist on the arduino, based on the protocolList
-		for my $key ( keys %ProtocolListSIGNALduino ) {
-			my $command = "FA;".$ProtocolListSIGNALduino{$key}{id}.";".$ProtocolListSIGNALduino{$key}{sync}[1].";".$ProtocolListSIGNALduino{$key}{clockabs};
-			#my $command = $ProtocolListSIGNALduino{$key}{id}.";".$ProtocolListSIGNALduino{$key}{sync}[1].";".$ProtocolListSIGNALduino{$key}{clockabs};
-			my $replay;
-			Debug "$name: $command" if ($debug);
-
-			SIGNALduino_SimpleWrite($hash, $command);
-			($err, $replay) = SIGNALduino_ReadAnswer($hash, "Update Filter ".$ProtocolListSIGNALduino{$key}{id}, 0, undef);
-			Debug "$name: answert $replay" if ($debug);
-
-		}
 	}
 	#  if( my $initCommandsString = AttrVal($name, "initCommands", undef) ) {
 	#    my @initCommands = split(' ', $initCommandsString);
@@ -1167,6 +1155,7 @@ sub SIGNALduino_Split_Message($$)
 	return %ret;
 }
 
+## Old function, can be removed in future version
 sub SIGNALduino_Parse_Message($$$$@)
 {
 	my ($hash, $iohash, $name, $rmsg,@msg_parts) = @_;
@@ -1319,13 +1308,17 @@ sub SIGNALduino_Parse_Message($$$$@)
    			   my $temp = oct ("0b".join('',@bit_msg[12..23]))/10;
 			   Debug "$name: decoded protocol $protocolid: id=$id, channel=$channel, temp=$temp\n" if ($debug);
 			}
-
+			
+			# Parse only if message is different within 2 seconds 
+			SIGNALduno_Dispatch();
+			
 			$hash->{"${name}_MSGCNT"}++;
 			$hash->{"${name}_TIME"} = TimeNow();
 			readingsSingleUpdate($hash, "state", $hash->{READINGS}{state}{VAL}, 0);
 			$hash->{RAWMSG} = $rmsg;
 			my %addvals = (RAWMSG => $dmsg);
 			Dispatch($hash, $dmsg, \%addvals);  ## Dispatch to other Modules 
+						
 
 		} elsif (defined($protocolid) && $ProtocolListSIGNALduino{$protocolid}{format} eq "tristate")
 		{
@@ -1335,6 +1328,22 @@ sub SIGNALduino_Parse_Message($$$$@)
 	}
 }
 
+# Function which dispatches a message if needed.
+sub SIGNALduno_Dispatch($$$)
+{
+	my ($hash, $rmsg,$dmsg) = @_;
+	my $name = $hash->{NAME};
+	
+	Log3 $name, 5, "converted Data to ($dmsg)";
+	if (($hash->{"${name}_RAWMSG"} ne "$rmsg") || (time() - $hash->{"${name}_TIME"}) ne time() ) { 
+		$hash->{"${name}_MSGCNT"}++;
+		$hash->{"${name}_TIME"} = TimeNow();
+		readingsSingleUpdate($hash, "state", $hash->{READINGS}{state}{VAL}, 0);
+		$hash->{RAWMSG} = $rmsg;
+		my %addvals = (RAWMSG => $dmsg);
+		Dispatch($hash, $dmsg, \%addvals);  ## Dispatch to other Modules 
+	}		
+}
 
 sub
 SIGNALduino_Parse_MS($$$$%)
@@ -1362,7 +1371,9 @@ SIGNALduino_Parse_MS($$$$%)
 		## Make a lookup table for our pattern index ids
 		#Debug "List of pattern:";
 		my $clockabs= $msg_parts{pattern}{$msg_parts{clockidx}};
-		$patternList{$_} = floor($msg_parts{pattern}{$_}/$clockabs) for keys $msg_parts{pattern};
+		$patternList{$_} = round($msg_parts{pattern}{$_}/$clockabs,2) for keys $msg_parts{pattern};
+		
+		
  		#Debug Dumper(\%patternList);		
 
 		#my $syncfact = $patternList{$syncidx}/$patternList{$clockidx};
@@ -1474,16 +1485,8 @@ SIGNALduino_Parse_MS($$$$%)
 			$dmsg = "$dmsg"."$ProtocolListSIGNALduino{$id}{postamble}" if (defined($ProtocolListSIGNALduino{$id}{postamble}));
 			$dmsg = "$ProtocolListSIGNALduino{$id}{preamble}"."$dmsg" if (defined($ProtocolListSIGNALduino{$id}{preamble}));
 			
-			Log3 $name, 5, "converted Data to ($dmsg)";
-			$hash->{"${name}_MSGCNT"}++;
-			$hash->{"${name}_TIME"} = TimeNow();
-			readingsSingleUpdate($hash, "state", $hash->{READINGS}{state}{VAL}, 0);
-			$hash->{RAWMSG} = $rmsg;
-			my %addvals = (RAWMSG => $dmsg);
-			Dispatch($hash, $dmsg, \%addvals);  ## Dispatch to other Modules 
-		
-			#last if ($valid); try other protocols if we got some error
-
+			SIGNALduno_Dispatch($hash,$rmsg,$dmsg);
+			
 		
 		}
 		return 0;
@@ -1623,15 +1626,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 			$dmsg = "$dmsg"."$ProtocolListSIGNALduino{$id}{postamble}" if (defined($ProtocolListSIGNALduino{$id}{postamble}));
 			$dmsg = "$ProtocolListSIGNALduino{$id}{preamble}"."$dmsg" if (defined($ProtocolListSIGNALduino{$id}{preamble}));
 			
-			Log3 $name, 5, "converted Data to ($dmsg)";
-			$hash->{"${name}_MSGCNT"}++;
-			$hash->{"${name}_TIME"} = TimeNow();
-			readingsSingleUpdate($hash, "state", $hash->{READINGS}{state}{VAL}, 0);
-			$hash->{RAWMSG} = $rmsg;
-			my %addvals = (RAWMSG => $dmsg);
-			Dispatch($hash, $dmsg, \%addvals);  ## Dispatch to other Modules 
-		
-			#last if ($valid); try other protocols if we got some error
+			SIGNALduno_Dispatch($hash,$rmsg,$dmsg);
 
 
 		
@@ -1680,14 +1675,9 @@ SIGNALduino_Parse_MC($$$$@)
 				my ($rcode,$res) = $method->($name,$bitData);
 				if ($rcode != -1) {
 					$dmsg = $res;
-					Log3 $name, 5, "converted Data to ($dmsg)";
-					$hash->{"${name}_MSGCNT"}++;
-					$hash->{"${name}_TIME"} = TimeNow();
-					readingsSingleUpdate($hash, "state", $hash->{READINGS}{state}{VAL}, 0);
-					$hash->{RAWMSG} = $rmsg;
-					my %addvals = (RAWMSG => $dmsg);
-					Dispatch($hash, $dmsg, \%addvals);  ## Dispatch to other Modules 
-				} else {
+					
+					SIGNALduno_Dispatch($hash,$rmsg,$dmsg);
+			} else {
 					Debug "protocol does not match return from method: ($res)"  if ($debug);
 
 				}
@@ -1695,68 +1685,6 @@ SIGNALduino_Parse_MC($$$$@)
 		}
 			
 	}
-	return undef;    ## Exit bevor running old conversion code
-	
-	my $found=0;
-
-	#Check OSV2
-	# Test code: https://ideone.com/Pp80M8  https://ideone.com/63wjyx
-	
-	
-	#Todo Migrate to protocol List, and parse data from protocol list instead of hardcoded data
-	#  $ProtocolListSignalDuino{$id}{format} eq "manchester"  && $ProtocolListSignalDuino{$id}{clock} in tol $ clock,   $ProtocolListSignalDuino{$id}{minlength} $ProtocolListSignalDuino{$id}{maxlength}   how to find preamble and sync bits
-	if ( $clock >390 and $clock <520 and length($rawData) > 37 and length($rawData) < 55 and index($bitData,"10011001",24) >= 24 and $bitData =~ m/^.?(10){12,16}/) #$rawData =~ m/^A{6,8}/
-	{  # Valid OSV2 detected!	
-		
-		Debug "$name: OSV2 protocol detected \n" if ($debug);
-		
-		my $preamble_pos=index($bitData,"10011001",24);
-
-		return undef if ($preamble_pos <=24);
-		my $idx=0;
-		my $osv2bits="";
-		my $osv2hex ="";
-
-		for ($idx=$preamble_pos;$idx<length($bitData);$idx=$idx+16)
-		{
-			if (length($bitData)-$idx  < 16 )
-			{
-			  last;
-			}
-			my $osv2byte = "";
-			$osv2byte=NULL;
-			$osv2byte=substr($bitData,$idx,16);
-			#Debug "$name: byte(16bit) $idx: $osv2byte";
-
-			my $rvosv2byte="";
-			
-			for (my $p=1;$p<length($osv2byte);$p=$p+2)
-			{
-				$rvosv2byte = substr($osv2byte,$p,1).$rvosv2byte;
-			}
-			$osv2hex=$osv2hex.sprintf('%02X', oct("0b$rvosv2byte")) ;
-			#Debug "$name: -> reversed: $rvosv2byte\n";
-			$osv2bits = $osv2bits.$rvosv2byte;
-			#reverse $osv2bits;
-			# Need to reverse every bit from a nibble. # Get 16 Bits, reverse, extract every second char conv to hex 
-		}
-		#Debug "$name: OSV2 bits $osv2bits \n" if ($debug);
-		
-		$osv2hex = sprintf("%02X", length($osv2hex)*4).$osv2hex;
-		Debug "$name: OSV2 hex $osv2hex with length ".(length($osv2hex)/2)." bytes \n" if ($debug);
-		$found=1;
-		$dmsg=$osv2hex;
-		
-	}
-	if ( $clock >380 and $clock <425 and length($rawData) > 13 and length($rawData) < 14 and $rawData =~ m/^A{2,3}/)
-	{  # Valid AS detected!	
-		Debug "$name: AS protocol detected \n" if ($debug);
-		my $preamble_pos=index($bitData,"1100",16);
-	}
-	
-	
-	
-	
 }
 
 
@@ -1784,7 +1712,7 @@ SIGNALduino_Parse($$$$@)
 	if ($rmsg=~ m/^M\d+;(P\d=-?\d+;){4,7}D=\d+;CP=\d;SP=\d;/) 
 	{
 		Log3 $name, 3, "You are using an outdated version of signalduino code on your arduino. Please update";
-		return SIGNALduino_Parse_Message($hash, $iohash, $name, $rmsg,@msg_parts);  
+		return undef;
 	}
 	if ($rmsg=~ m/^MS;(P\d=-?\d+;){4,7}D=\d+;CP=\d;SP=\d;/) 
 	{
@@ -2019,7 +1947,7 @@ sub	SIGNALduino_Cresta()
   href="http://forum.fhem.de/index.php/topic,17196.0.html">FHEM Forum</a>.
 
   With the opensource firmware (see this <a
-  href="https://github.com/RFD-FHEM/SIGNALduino">link</a>) they are capable
+  href="https://github.com/RFD-FHEM/SIGNALduino">link</a>) it is capable
   to receive and send different wireless protocols.
   <br><br>
   
@@ -2029,10 +1957,12 @@ sub	SIGNALduino_Cresta()
   
   Wireless switches  <br>
   IT  switches --> uses IT.pm<br>
+  
   <br><br>
   
   Temperatur / humidity sensors suppored by 14_CUL_TCM97001 <br>
   PEARL NC7159, LogiLink WS0002,GT-WT-02,AURIOL,TCM97001, TCM27,GT-WT-02..  --> 14_CUL_TCM97001.pm <br>
+  Oregon Scientific v2 Sensors  --> 41_OREGON.pm<br>
   <br><br>
 
   It is possible to attach more than one device in order to get better
@@ -2124,7 +2054,7 @@ sub	SIGNALduino_Cresta()
     <li>raw<br>
         Issue a SIGNALduino firmware command, and wait for one line of data returned by
         the SIGNALduino. See the SIGNALduino firmware code  for details on SIGNALduino
-        commands.
+        commands. With this line, you can send almost any signal via a transmitter connected
         </li><br>
     <li>cmds<br>
         Depending on the firmware installed, SIGNALduinos have a different set of
@@ -2138,12 +2068,14 @@ sub	SIGNALduino_Cresta()
   <b>Attributes</b>
   <ul>
     <li>Clients<br>
-      The received data gets distributed to a client (e.g. LaCrosse, EMT7110, ...) that handles the data.
+      * This is currently not implemented:<br>
+      The received data gets distributed to a client (e.g. OREGON, IT, CUL_TCM97001, ...) that handles the data.
       This attribute tells, which are the clients, that handle the data. If you add a new module to FHEM, that shall handle
-      data distributed by the JeeLink module, you must add it to the Clients attribute.</li>
+      data distributed by the SIGNALduino module, you must add it to the Clients attribute.</li>
 
     <li>MatchList<br>
-      can be set to a perl expression that returns a hash that is used as the MatchList<br>
+      * This is currently not implemented:<br>
+      can be set to a perl expression that returns a> hash that is used as the MatchList<br>
       <code>attr myJeeLink MatchList {'5:AliRF' => '^\\S+\\s+5 '}</code></li>
     <li>hexfile<br>
       Full path to a hex filename of the arduino sketch e.g. /opt/fhem/RF_Receiver_nano328.hex
@@ -2152,6 +2084,24 @@ sub	SIGNALduino_Cresta()
 	  
 	<li><a href="#do_not_notify">do_not_notify</a></li>
     <li><a href="#attrdummy">dummy</a></li>
+    <li><a href="#attrdummy">debug</a><br>
+    This will bring the module in a very verbose debug output. Usefull to find new signals and verify if the demodulation works correctly.
+    </li>
+    
+    <li>longids<br>
+        Comma separated list of device-types for SIGNALduino that should be handled using long IDs. This additional ID allows it to differentiate some weather sensors, if they are sending on the same channel. Therfor a random generated id is added. If you choose to use longids, then you'll have to define a different device after battery change.<br>
+Default is to use long IDs for all devices.
+      <br><br>
+      Examples:<PRE>
+# Do not use any long IDs for any devices:
+attr sduino longids 0
+# Use any long IDs for all devices (this is default):
+attr sduino longids 1
+# Use longids for BTHR918N devices.
+# Will generate devices names like BTHR918N_f3.
+attr RFXCOMUSB longids BTHR918N
+</PRE>
+    </li><br>
 
   </ul>
   <br>
