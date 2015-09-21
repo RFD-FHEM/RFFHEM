@@ -30,7 +30,7 @@ SIGNALduino_ID7_Initialize($)
 {
   my ($hash) = @_;
 
-  $hash->{Match}     = "^u7[A-Fa-f0-9]+";    ## Muss noch mal überarbeitet werden, wenn wir mehr über die Sensoren wissen
+  $hash->{Match}     = "^u7[A-Fa-f0-9]+";    ## Muss noch mal Ã¼berarbeitet werden, wenn wir mehr Ã¼ber die Sensoren wissen
   $hash->{DefFn}     = "SIGNALduino_ID7_Define";
   $hash->{UndefFn}   = "SIGNALduino_ID7_Undef";
   $hash->{ParseFn}   = "SIGNALduino_ID7_Parse";
@@ -46,7 +46,7 @@ SIGNALduino_ID7_Initialize($)
 sub
 SIGNALduino_ID7_Define($$)
 {
-  my ($hash, $def) = @_;
+  my ($iohash, $def) = @_;
   my @a = split("[ \t][ \t]*", $def);
 
   return "wrong syntax: define <name> SIGNALduino_ID7 <code> <minsecs> <equalmsg>".int(@a)
@@ -100,7 +100,7 @@ SIGNALduino_ID7_Parse($$)
   my $blen = $hlen * 4;
   my $bitData = unpack("B$blen", pack("H$hlen", $rawData)); 
   
-  if ($blen ==40 && oct("0b".substr($bitData,37,4)) == 0x0) # Eigentlich m�sste es gewisse IDs geben
+  if ($blen ==40 && oct("0b".substr($bitData,37,4)) == 0x0) # Eigentlich müsste es gewisse IDs geben
   {
     my $bitData2 = substr($bitData,0,8) . ' ' . substr($bitData,8,1) . ' ' . substr($bitData,9,3);
        $bitData2 = $bitData2 . ' ' . substr($bitData,12,12) . ' ' . substr($bitData,24,4) . ' ' . substr($bitData,28,8);
@@ -114,12 +114,12 @@ SIGNALduino_ID7_Parse($$)
     my $hum = oct("0b" . substr($bitData,28,8));
     
     if ($hum > 100 || $hum == 0 || $bit24bis27 <> 0xF) {
-      return undef;  # Eigentlich m�sste sowas wie ein skip rein, damit ggf. sp�ter noch weitre Sensoren dekodiert werden k�nnen.
+      return undef;  # Eigentlich müsste sowas wie ein skip rein, damit ggf. später noch weitre Sensoren dekodiert werden können.
     }
     
     if ($temp > 700 && $temp < 3840) {
       return undef;
-    } elsif ($temp >= 3840) {        # negative Temperaturen, muß noch ueberprueft und optimiert werden 
+    } elsif ($temp >= 3840) {        # negative Temperaturen, muÃŸ noch ueberprueft und optimiert werden 
       $temp -= 4095;
     }  
     $temp /= 10;
@@ -267,9 +267,9 @@ SIGNALduino_ID7_Attr(@)
 <a name="SIGNALduino_ID7"></a>
 <h3>SIGNALduino_ID7</h3>
 <ul>
-  Das SIGNALduino_ID7 Module verarbeitet von einem IO Gerät (CUL, CUN, SIGNALDuino, etc.) empfangene Nachrichten von Temperatur-Sensoren.<br>
+  Das SIGNALduino_ID7 Module verarbeitet von einem IO GerÃ¤t (CUL, CUN, SIGNALDuino, etc.) empfangene Nachrichten von Temperatur-Sensoren.<br>
   <br>
-  <b>Unterstütze Modelle:</b>
+  <b>UnterstÃ¼tze Modelle:</b>
   <ul>
     <li>EAS800z</li>
   </ul>
@@ -287,10 +287,10 @@ SIGNALduino_ID7_Attr(@)
   <b>Generierte Events:</b>
   <ul>
      <li>temperature: Die aktuelle Temperatur</li>
-     <li>humidity: Die aktuelle Luftfeutigkeit (falls verfügbar)</li>
-     <li>battery: Der Batteriestatus: low oder ok (falls verfügbar)</li>
-     <li>channel: Kanalnummer (falls verfügbar)</li>
-     <li>trend: Der Temperaturtrend (falls verfügbar)</li>
+     <li>humidity: Die aktuelle Luftfeutigkeit (falls verfÃ¼gbar)</li>
+     <li>battery: Der Batteriestatus: low oder ok (falls verfÃ¼gbar)</li>
+     <li>channel: Kanalnummer (falls verfÃ¼gbar)</li>
+     <li>trend: Der Temperaturtrend (falls verfÃ¼gbar)</li>
   </ul>
   <br>
   <b>Attribute</b>
