@@ -46,7 +46,7 @@ SIGNALduino_ID7_Initialize($)
 sub
 SIGNALduino_ID7_Define($$)
 {
-  my ($iohash, $def) = @_;
+  my ($hash, $def) = @_;
   my @a = split("[ \t][ \t]*", $def);
 
   return "wrong syntax: define <name> SIGNALduino_ID7 <code> <minsecs> <equalmsg>".int(@a)
@@ -82,9 +82,9 @@ SIGNALduino_ID7_Undef($$)
 sub
 SIGNALduino_ID7_Parse($$)
 {
-  my ($hash, $msg) = @_;
+  my ($iohash, $msg) = @_;
   my $rawData = substr($msg, 2);
-  my $name = $hash->{NAME};
+  my $name = $iohash->{NAME};
 
   my $model = "EAS800z";
   
@@ -124,35 +124,35 @@ SIGNALduino_ID7_Parse($$)
     }  
     $temp /= 10;
     
-    Log3 $hash, 3, "$model decoded protocolid: 7 sensor id=$id, channel=$channel, temp=$temp, hum=$hum, bat=$bat" ;
-    
+    Log3 $iohash, 3, "$model decoded protocolid: 7 sensor id=$id, channel=$channel, temp=$temp, hum=$hum, bat=$bat" ;
+    my $deviceCode;
     if (SIGNALDuino_use_longid($iohash,"$model"))
 	{
-		my $deviceCode=$model._$id.$channel;
+		$deviceCode=$model._$id.$channel;
 	} else {
-		my $deviceCode=$model."_".$channel;
+		$deviceCode=$model."_".$channel;
 	}	
     
     
     #print Dumper($modules{SIGNALduino_ID7}{defptr});
     
-    my $def = $modules{SIGNALduino_ID7}{defptr}{$hash->{NAME} . "." . $deviceCode};
+    my $def = $modules{SIGNALduino_ID7}{defptr}{$iohash->{NAME} . "." . $deviceCode};
     $def = $modules{SIGNALduino_ID7}{defptr}{$deviceCode} if(!$def);
 
     if(!$def) {
-	Log3 $hash, 1, 'SIGNALduino_ID7: UNDEFINED sensor ' . $model . ' detected, code ' . $deviceCode;
+	Log3 $iohash, 1, 'SIGNALduino_ID7: UNDEFINED sensor ' . $model . ' detected, code ' . $deviceCode;
 	return "UNDEFINED $deviceCode SIGNALduino_ID7 $deviceCode";
     }
         #Log3 $hash, 3, 'SIGNALduino_ID7: ' . $def->{NAME} . ' ' . $id;
 	
 	my $minsecs;
-	if ($hash->{minsecs}) {          # im sduino definiert?
-	  $minsecs = $hash->{minsecs};
+	if ($iohash->{minsecs}) {          # im sduino definiert?
+	  $minsecs = $iohash->{minsecs};
 	} else {
 	  $minsecs = $def->{minsecs};
 	}
 	
-	$hash = $def;
+	my $hash = $def;
 	$name = $hash->{NAME};
 	Log3 $name, 4, "SIGNALduino_ID7: $name ($rawData)";  
 
