@@ -119,29 +119,25 @@ Cresta_Parse($$)
 	my $rc;
 	my $model;
 	my $val;
-	my $bat = $decodedBytes[2] >> 6;
-	if ($bat == 3) {
-	  $bat = 'ok';
-	} else {
-	  $bat = 'low';
-	}
+	my $bat;
 	
 	## 1. Detect what type of sensor we have, then calll specific function to decode
 	if ($sensorTyp==0x1E){
-		($rc,$channel, $temp, $hum) = decodeThermoHygro(\@decodedBytes); #decodeThermoHygro($decodedString);
+		($channel, $temp, $hum) = decodeThermoHygro(\@decodedBytes); # decodeThermoHygro($decodedString);
 		$model="th";  
+		$bat = ($decodedBytes[2] >> 6 == 3) ? 'ok' : 'low';			 # decode battery
 		$val = "T: $temp H: $hum Bat: $bat";
 	}else{
 		Log3 $iohash, 4, "$name Sensor Typ $sensorTyp not supported";
 		return "$name Sensor Typ $sensorTyp not supported";
 	}
-
-	if ($rc != 1)
+	if (SIGNALDuino_use_longid($iohash,"Cresta_$model"))
 	{
-		Log3 $iohash, 4, "$name error, decoding Cresta protocol" ;
-		return "UNDEFINED $sensorTyp error, decoding Cresta protocol";
-	}
-    my $deviceCode=$model."_".$sensorTyp."_".$channel;
+		my $deviceCode=$model."_".$sensorTyp."_".$channel;
+	} else {
+		my $deviceCode=$model."_".$channel;
+	}	
+	
 	Log3 $iohash, 4, "$name decoded Cresta protocol Typ=$sensorTyp, sensor id=$id, channel=$channel, temp=$temp, humidity=$hum\n" ;
     Log3 $iohash, 5, "deviceCode= $deviceCode";	
 
@@ -302,7 +298,7 @@ sub decodeThermoHygro {
 	$humi = 10 * ($crestabytes[6] >> 4) + ($crestabytes[6] & 0x0f);	 
 
 	$temp = $temp / 10;
-	return (1, $channel, $temp, $humi);
+	return ($channel, $temp, $humi);
 }
 
 sub
@@ -320,6 +316,10 @@ Cresta_Attr(@)
   $modules{Cresta}{defptr}{$iohash->{NAME} . "." . $cde} = $hash;
   return undef;
 }
+
+
+
+
 
 sub
 hex2bin($)
