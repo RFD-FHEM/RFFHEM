@@ -120,6 +120,7 @@ Cresta_Parse($$)
 	my $model;
 	my $val;
 	my $bat;
+	my $deviceCode;
 	
 	## 1. Detect what type of sensor we have, then calll specific function to decode
 	if ($sensorTyp==0x1E){
@@ -133,9 +134,9 @@ Cresta_Parse($$)
 	}
 	if (SIGNALDuino_use_longid($iohash,"Cresta_$model"))
 	{
-		my $deviceCode=$model."_".$sensorTyp."_".$channel;
+		$deviceCode=$model."_".$sensorTyp."_".$channel;
 	} else {
-		my $deviceCode=$model."_".$channel;
+		$deviceCode=$model."_".$channel;
 	}	
 	
 	Log3 $iohash, 4, "$name decoded Cresta protocol Typ=$sensorTyp, sensor id=$id, channel=$channel, temp=$temp, humidity=$hum\n" ;
