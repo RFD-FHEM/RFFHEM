@@ -208,19 +208,18 @@ my %ProtocolListSIGNALduino  = (
 		},
 	"7"    => 			## unkown Protocol
         {
-            name			=> 'unknown1 may TX70DHT',	
+            name			=> 'eurochron2',	
 			id          	=> '7',
 			one				=> [1,-4],
 			zero			=> [1,-2],
-			#float			=> [-1,3],		# not full supported now, for later use
-			sync			=> [1,-8],		# 
-			clockabs     	=> 484,			# -1 = auto
-			format 			=> 'twostate',	# tristate can't be migrated from bin into hex!
+			sync			=> [1,-8],		 
+			clockabs     	=> 484,			
+			format 			=> 'twostate',	
 			preamble		=> 'u7',		# prepend to converted message	
 			clientmodule    => 'undef',   	# not used now
 			modulematch     => '^u7......', # not used now
-			length_min      => '30',
-			length_max      => '40',
+			length_min      => '35',
+			length_max      => '37',
 
 		}, 
 	"8"    => 			## TX3 (ITTX) Protocol

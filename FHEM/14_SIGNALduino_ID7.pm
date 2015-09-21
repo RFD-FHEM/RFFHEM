@@ -88,7 +88,6 @@ SIGNALduino_ID7_Parse($$)
 
   my $model = "EAS800z";
   
-  my $l = length($rawData);
 
   Log3 "SIGNALduino", 4, "SIGNALduino_ID7_Parse  $model ($msg) length: $l";
   
@@ -97,25 +96,25 @@ SIGNALduino_ID7_Parse($$)
   #      ID  Bat CHN       TMP      ??   HUM
   
   #my $hashumidity = FALSE;
+  my $hlen = length($rawData);
+  my $blen = $hlen * 4;
+  my $bitData = unpack("B$blen", pack("H$hlen", $rawData)); 
   
-  if ($l == 10) 
+  if ($blen ==40 && oct("0b".substr($bitData,37,4)) == 0x0) # Eigentlich müsste es gewisse IDs geben
   {
-    my $hlen = length($rawData);
-    my $blen = $hlen * 4;
-    my $bitData = unpack("B$blen", pack("H$hlen", $rawData)); 
     my $bitData2 = substr($bitData,0,8) . ' ' . substr($bitData,8,1) . ' ' . substr($bitData,9,3);
        $bitData2 = $bitData2 . ' ' . substr($bitData,12,12) . ' ' . substr($bitData,24,4) . ' ' . substr($bitData,28,8);
     Log3 $hash, 3, $model . ' converted to bits: ' . $bitData2;
     
     my $id = substr($rawData,0,2);
-    my $bat = int(substr($bitData,8,1)) eq "1" ? "ok" : "critical";
+    my $bat = int(substr($bitData,8,1)) eq "1" ? "ok" : "low";
     my $channel = oct("0b" . substr($bitData,9,3)) + 1;
     my $temp = oct("0b" . substr($bitData,12,12));
-    my $bit24bis27 = substr($bitData,24,4);
+    my $bit24bis27 = oct("0b".substr($bitData,24,4));
     my $hum = oct("0b" . substr($bitData,28,8));
     
-    if ($hum > 100 || $hum == 0 || $bit24bis27 ne '1111') {
-      return undef;
+    if ($hum > 100 || $hum == 0 || $bit24bis27 <> 0xF) {
+      return undef;  # Eigentlich müsste sowas wie ein skip rein, damit ggf. später noch weitre Sensoren dekodiert werden können.
     }
     
     if ($temp > 700 && $temp < 3840) {
