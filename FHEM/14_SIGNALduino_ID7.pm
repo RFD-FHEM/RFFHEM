@@ -127,10 +127,13 @@ SIGNALduino_ID7_Parse($$)
     
     Log3 $hash, 3, "$model decoded protocolid: 7 sensor id=$id, channel=$channel, temp=$temp, hum=$hum, bat=$bat" ;
     
-    if (!$hash->{devicecodeWithId} || index($hash->{devicecodeWithId}, 'ID7') == -1) {
-      $id = '';
-    }
-    my $deviceCode = $model . '_' . $id . $channel;
+    if (SIGNALDuino_use_longid($iohash,"$model"))
+	{
+		my $deviceCode=$model._$id.$channel;
+	} else {
+		my $deviceCode=$model."_".$channel;
+	}	
+    
     
     #print Dumper($modules{SIGNALduino_ID7}{defptr});
     
