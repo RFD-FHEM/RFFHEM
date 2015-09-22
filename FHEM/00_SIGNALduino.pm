@@ -219,7 +219,7 @@ my %ProtocolListSIGNALduino  = (
 			clientmodule    => 'undef',   	# not used now
 			modulematch     => '^u7......', # not used now
 			length_min      => '35',
-			length_max      => '37',
+			length_max      => '40',
 
 		}, 
 	"8"    => 			## TX3 (ITTX) Protocol
@@ -1470,12 +1470,16 @@ SIGNALduino_Parse_MS($$$$%)
 			#Check converted message against lengths
 			$valid = $valid && $ProtocolListSIGNALduino{$id}{length_min} <= scalar @bit_msg  if (defined($ProtocolListSIGNALduino{$id}{length_min})); 
 			$valid = $valid && $ProtocolListSIGNALduino{$id}{length_max} >= scalar @bit_msg  if (defined($ProtocolListSIGNALduino{$id}{length_max}));
+			Debug "$name: decoded message raw (@bit_msg), ".@bit_msg." bits\n" if ($debug);;
+			
 			next if (!$valid);  ## Last chance to try next protocol if there is somethin invalid
-
+			
 			#my $dmsg = sprintf "%02x", oct "0b" . join "", @bit_msg;			## Array -> String -> bin -> hex
 			my $dmsg = SIGNALduino_b2h(join "", @bit_msg);
 			$dmsg = "$dmsg"."$ProtocolListSIGNALduino{$id}{postamble}" if (defined($ProtocolListSIGNALduino{$id}{postamble}));
 			$dmsg = "$ProtocolListSIGNALduino{$id}{preamble}"."$dmsg" if (defined($ProtocolListSIGNALduino{$id}{preamble}));
+			
+			Debug "$name: dispatching now msg: $dmsg" if ($debug);
 			
 			SIGNALduno_Dispatch($hash,$rmsg,$dmsg);
 		}

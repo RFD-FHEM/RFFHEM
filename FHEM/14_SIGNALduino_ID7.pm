@@ -96,8 +96,9 @@ SIGNALduino_ID7_Parse($$)
 
   Log3 "SIGNALduino", 4, "SIGNALduino_ID7_Parse  $model ($msg) length: $hlen";
   
-  #      4    8  9    12            24    28       36
-  # 0011 0110 1  010  000100000010  1111  00111000 0000 
+  #      4    8  9    12            24    28     36
+  # 0011 0110 1  010  000100000010  1111  00111000 0000  eas8007
+  # 0111 0010 1  010  000010111100  1111  00000000 0000  other device from anfichtn
   #      ID  Bat CHN       TMP      ??   HUM
   
   #my $hashumidity = FALSE;
@@ -106,9 +107,9 @@ SIGNALduino_ID7_Parse($$)
    #foreach $key (keys %models) {
   #   ....
   #}
+  Log3 "SIGNALduino",3, $blen."_".oct("0b".substr($bitData,36,4));
   
-  
-  if ($blen ==40 && oct("0b".substr($bitData,37,4)) == 0x0) # Eigentlich müsste es gewisse IDs geben
+  if ($blen ==40 && oct("0b".substr($bitData,36,4)) == 0) # Eigentlich müsste es gewisse IDs geben
   {
     my $bitData2 = substr($bitData,0,8) . ' ' . substr($bitData,8,1) . ' ' . substr($bitData,9,3);
        $bitData2 = $bitData2 . ' ' . substr($bitData,12,12) . ' ' . substr($bitData,24,4) . ' ' . substr($bitData,28,8);
@@ -121,7 +122,7 @@ SIGNALduino_ID7_Parse($$)
     my $bit24bis27 = oct("0b".substr($bitData,24,4));
     my $hum = oct("0b" . substr($bitData,28,8));
     
-    if ($hum > 100 || $hum == 0 || $bit24bis27 != 0xF) {
+    if ($hum > 100 || $bit24bis27 != 0xF) {
       return undef;  # Eigentlich müsste sowas wie ein skip rein, damit ggf. später noch weitre Sensoren dekodiert werden können.
     }
     
@@ -167,7 +168,7 @@ SIGNALduino_ID7_Parse($$)
     readingsBeginUpdate($hash);
     readingsBulkUpdate($hash, "state", $state);
     readingsBulkUpdate($hash, "temperature", $temp)  if ($temp ne"");
-    readingsBulkUpdate($hash, "humidity", $hum)  if ($hum ne "");
+    readingsBulkUpdate($hash, "humidity", $hum)  if ($hum ne "" && $hum != 0 );
     readingsBulkUpdate($hash, "battery", $bat) if ($bat ne "");
     readingsBulkUpdate($hash, "channel", $channel) if ($channel ne "");
 
