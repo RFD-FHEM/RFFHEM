@@ -1,6 +1,6 @@
 ##############################################
 ##############################################
-# $Id: 14_SIGNALduino_ID7.pm  2015-09-22 $
+# $Id: 14_SIGNALduino_ID7.pm  2015-09-23 $
 # 
 # The purpose of this module is to support serval eurochron
 # weather sensors like eas8007 which use the same protocol
@@ -107,7 +107,6 @@ SIGNALduino_ID7_Parse($$)
    #foreach $key (keys %models) {
   #   ....
   #}
-  Log3 "SIGNALduino",3, $blen."_".oct("0b".substr($bitData,36,4));
   
   if ($blen ==40 && oct("0b".substr($bitData,36,4)) == 0) # Eigentlich müsste es gewisse IDs geben
   {
@@ -163,7 +162,7 @@ SIGNALduino_ID7_Parse($$)
 	$def->{lastMSG} = $rawData;
 	$def->{bitMSG} = $bitData2; 
 
-    my $state = "T: $temp H: $hum";
+    my $state = "T: $temp". ($hum>0 ? " H: $hum":"");
     
     readingsBeginUpdate($hash);
     readingsBulkUpdate($hash, "state", $state);
@@ -180,8 +179,7 @@ SIGNALduino_ID7_Parse($$)
   return undef;
 }
 
-sub
-SIGNALduino_ID7_Attr(@)
+sub SIGNALduino_ID7_Attr(@)
 {
   my @a = @_;
 
