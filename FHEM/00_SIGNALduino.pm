@@ -1916,10 +1916,10 @@ sub	SIGNALduino_Hideki()
 
 
 
-# Helper Function for locaial Modules, to check if they should use longids
+# Helper Function for locgical Modules, to check if they should use longids
 sub SIGNALDuino_use_longid {
   my ($iohash,$dev_type) = @_;
-  $longids=attrval($iohash{NAME},"0");	      				# Default to not use longids
+  my $longids=AttrVal($iohash->{NAME},"longids","0");	      				# Default to not use longids
   return 0 if ($longids eq "") || ($longids eq "0");
   return 1 if ($longids eq "1") || ($longids eq "ALL") || (",$longids," =~ m/,$dev_type,/) ;
   return 0;
