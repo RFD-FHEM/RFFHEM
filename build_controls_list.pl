@@ -49,22 +49,6 @@ sub listfiles2{
     }
 }
 
-sub wanted{
-    my $currentdir = $File::Find::dir;
-    my $currentfile = $_;
-    my $currentname = $currentdir.$currentfile;
-    my $currentfullname = $File::Find::fullname;
-    print "curr dir: ".$currentdir."\n";
-    print "curr file: ".$currentfile."\n";
-    print "curr fullname: ".$currentfullname."\n";
-    print "curr name: ".$currentname."\n\n";
-    my @s = stat($currentname);
-    print "path".$currentname." ".$s[7]." ".$s[9];
-    
-#    push @file_list, file_info($currentfullname);
-    
-}
-
 sub main {
 
     listfiles2(@ARGV);
@@ -88,17 +72,6 @@ sub main {
     for my $fi (@sorted){
         print $fi->{path}, ' : ', $fi->{size}, ' ', $fi->{mtime}, "\n";
     }
-}
-
-sub read_dir {
-    # Takes a dir path.
-    # Returns a list of file_info() hash refs.
-    my $d = shift;
-    opendir(my $dh, $d) or die $!;
-    return map  { file_info($_) }  # Collect info.
-           map  { "$d/$_" }        # Attach dir path.
-           grep { ! /^\.\.?$/ }    # No dot dirs.
-           readdir($dh);
 }
 
 sub file_info {
