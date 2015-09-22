@@ -1931,7 +1931,7 @@ sub	SIGNALduino_Cresta()
 # Helper Function for locaial Modules, to check if they should use longids
 sub SIGNALDuino_use_longid {
   my ($iohash,$dev_type) = @_;
-  my $longids=attrval($iohash{NAME},"longids","0");	      				# Default to not use longids
+  my $longids=AttrVal($iohash->{NAME},"longids","0");	      				# Default to not use longids
   return 0 if ($longids eq "") || ($longids eq "0");
   return 1 if ($longids eq "1") || ($longids eq "ALL") || (",$longids," =~ m/,$dev_type,/) ;
   return 0;
@@ -2096,7 +2096,7 @@ sub SIGNALDuino_use_longid {
     
     <li>longids<br>
         Comma separated list of device-types for SIGNALduino that should be handled using long IDs. This additional ID allows it to differentiate some weather sensors, if they are sending on the same channel. Therfor a random generated id is added. If you choose to use longids, then you'll have to define a different device after battery change.<br>
-Default is to use long IDs for all devices.
+Default is to not to use long IDs for all devices.
       <br><br>
       Examples:<PRE>
 # Do not use any long IDs for any devices:

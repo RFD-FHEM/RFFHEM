@@ -1,9 +1,9 @@
 ##############################################
 ##############################################
-# $Id: 14_SIGNALduino_ID7.pm  2015-09-16 $
+# $Id: 14_SIGNALduino_ID7.pm  2015-09-22 $
 # 
-# The purpose of this module is to support serval 
-# weather sensors like eas8007
+# The purpose of this module is to support serval eurochron
+# weather sensors like eas8007 which use the same protocol
 # S. Butzek & Ralf9  2015  
 #
 
@@ -22,7 +22,7 @@ use Data::Dumper;
 #
 my %models = (
     "EAS800z"     => 'EAS800z',
-    "TX70DTH"     => 'TX70DTH',
+    "TX70DTH"     => 'TX70DTH',  # Currently nothing tested
 );
 
 sub
@@ -30,13 +30,14 @@ SIGNALduino_ID7_Initialize($)
 {
   my ($hash) = @_;
 
-  $hash->{Match}     = "^u7[A-Fa-f0-9]+";    ## Muss noch mal Ã¼berarbeitet werden, wenn wir mehr Ã¼ber die Sensoren wissen
+  $hash->{Match}     = "^u7[A-Fa-f0-9]{10}";    ## Muss noch mal überarbeitet werden, wenn wir mehr über die Sensoren wissen
   $hash->{DefFn}     = "SIGNALduino_ID7_Define";
   $hash->{UndefFn}   = "SIGNALduino_ID7_Undef";
   $hash->{ParseFn}   = "SIGNALduino_ID7_Parse";
+  $hash->{AttrFn}	 = "SIGNALduino_ID7_Attr";
   $hash->{AttrList}  = "IODev do_not_notify:1,0 ignore:0,1 showtime:1,0 " .
                         "$readingFnAttributes " .
-                        "model:".join(",", sort keys %models);
+                        "model:".join(",",keys %models);
 
   #$hash->{AutoCreate}=
   #     { "SIGNALduino_ID7.*" => { GPLOT => "temp4hum4:Temp/Hum,", FILTER => "%NAME" } };
@@ -87,24 +88,30 @@ SIGNALduino_ID7_Parse($$)
   my $name = $iohash->{NAME};
 
   my $model = "EAS800z";
+  my $hlen = length($rawData);
+  my $blen = $hlen * 4;
+  my $bitData = unpack("B$blen", pack("H$hlen", $rawData)); 
   
 
-  Log3 "SIGNALduino", 4, "SIGNALduino_ID7_Parse  $model ($msg) length: $l";
+  Log3 "SIGNALduino", 4, "SIGNALduino_ID7_Parse  $model ($msg) length: $hlen";
   
   #      4    8 9    12            24    28       36
   # 0011 0110 1 010  000100000010  1111  00111000 0000 
   #      ID  Bat CHN       TMP      ??   HUM
   
   #my $hashumidity = FALSE;
-  my $hlen = length($rawData);
-  my $blen = $hlen * 4;
-  my $bitData = unpack("B$blen", pack("H$hlen", $rawData)); 
   
-  if ($blen ==40 && oct("0b".substr($bitData,37,4)) == 0x0) # Eigentlich müsste es gewisse IDs geben
+  ## Todo: Change decoding per model into a foreach  
+   #foreach $key (keys %models) {
+  #   ....
+  #}
+  
+  
+  if ($blen ==40 && oct("0b".substr($bitData,37,4)) == 0x0) # Eigentlich m�sste es gewisse IDs geben
   {
     my $bitData2 = substr($bitData,0,8) . ' ' . substr($bitData,8,1) . ' ' . substr($bitData,9,3);
        $bitData2 = $bitData2 . ' ' . substr($bitData,12,12) . ' ' . substr($bitData,24,4) . ' ' . substr($bitData,28,8);
-    Log3 $hash, 3, $model . ' converted to bits: ' . $bitData2;
+    Log3 $iohash, 3, $model . ' converted to bits: ' . $bitData2;
     
     my $id = substr($rawData,0,2);
     my $bat = int(substr($bitData,8,1)) eq "1" ? "ok" : "low";
@@ -113,13 +120,13 @@ SIGNALduino_ID7_Parse($$)
     my $bit24bis27 = oct("0b".substr($bitData,24,4));
     my $hum = oct("0b" . substr($bitData,28,8));
     
-    if ($hum > 100 || $hum == 0 || $bit24bis27 <> 0xF) {
-      return undef;  # Eigentlich müsste sowas wie ein skip rein, damit ggf. später noch weitre Sensoren dekodiert werden können.
+    if ($hum > 100 || $hum == 0 || $bit24bis27 != 0xF) {
+      return undef;  # Eigentlich m�sste sowas wie ein skip rein, damit ggf. sp�ter noch weitre Sensoren dekodiert werden k�nnen.
     }
     
     if ($temp > 700 && $temp < 3840) {
       return undef;
-    } elsif ($temp >= 3840) {        # negative Temperaturen, muÃŸ noch ueberprueft und optimiert werden 
+    } elsif ($temp >= 3840) {        # negative Temperaturen, muß noch ueberprueft und optimiert werden 
       $temp -= 4095;
     }  
     $temp /= 10;
@@ -143,14 +150,9 @@ SIGNALduino_ID7_Parse($$)
 	Log3 $iohash, 1, 'SIGNALduino_ID7: UNDEFINED sensor ' . $model . ' detected, code ' . $deviceCode;
 	return "UNDEFINED $deviceCode SIGNALduino_ID7 $deviceCode";
     }
-        #Log3 $hash, 3, 'SIGNALduino_ID7: ' . $def->{NAME} . ' ' . $id;
+        #Log3 $iohash, 3, 'SIGNALduino_ID7: ' . $def->{NAME} . ' ' . $id;
 	
-	my $minsecs;
-	if ($iohash->{minsecs}) {          # im sduino definiert?
-	  $minsecs = $iohash->{minsecs};
-	} else {
-	  $minsecs = $def->{minsecs};
-	}
+	my $minsecs = AttrVal($iohash->{NAME},'minsecs',30);          # minsecs aus dem sduino holen. Idee: format wie folgt: sensortyp:zeit
 	
 	my $hash = $def;
 	$name = $hash->{NAME};
@@ -267,9 +269,9 @@ SIGNALduino_ID7_Attr(@)
 <a name="SIGNALduino_ID7"></a>
 <h3>SIGNALduino_ID7</h3>
 <ul>
-  Das SIGNALduino_ID7 Module verarbeitet von einem IO GerÃ¤t (CUL, CUN, SIGNALDuino, etc.) empfangene Nachrichten von Temperatur-Sensoren.<br>
+  Das SIGNALduino_ID7 Module verarbeitet von einem IO Gerät (CUL, CUN, SIGNALDuino, etc.) empfangene Nachrichten von Temperatur-Sensoren.<br>
   <br>
-  <b>UnterstÃ¼tze Modelle:</b>
+  <b>Unterstütze Modelle:</b>
   <ul>
     <li>EAS800z</li>
   </ul>
@@ -287,10 +289,10 @@ SIGNALduino_ID7_Attr(@)
   <b>Generierte Events:</b>
   <ul>
      <li>temperature: Die aktuelle Temperatur</li>
-     <li>humidity: Die aktuelle Luftfeutigkeit (falls verfÃ¼gbar)</li>
-     <li>battery: Der Batteriestatus: low oder ok (falls verfÃ¼gbar)</li>
-     <li>channel: Kanalnummer (falls verfÃ¼gbar)</li>
-     <li>trend: Der Temperaturtrend (falls verfÃ¼gbar)</li>
+     <li>humidity: Die aktuelle Luftfeutigkeit (falls verfügbar)</li>
+     <li>battery: Der Batteriestatus: low oder ok (falls verfügbar)</li>
+     <li>channel: Kanalnummer (falls verfügbar)</li>
+     <li>trend: Der Temperaturtrend (falls verfügbar)</li>
   </ul>
   <br>
   <b>Attribute</b>
