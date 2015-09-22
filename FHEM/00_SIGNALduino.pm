@@ -90,7 +90,7 @@ my %matchListSIGNALduino = (
 my %ProtocolListSIGNALduino  = (
     "0"    => 
         {
-            name			=> 'pulsepausetype1',		# Logilink, NC, WS, TCM97001 etc.
+            name			=> 'weather1',		# Logilink, NC, WS, TCM97001 etc.
 			id          	=> '0',
 			one				=> [1,-8],
 			zero			=> [1,-4],
@@ -103,6 +103,7 @@ my %ProtocolListSIGNALduino  = (
 			modulematch     => '^s[A-Fa-f0-9]+', # not used now
 			length_min      => '24',
 			length_max      => '40',
+			paddingbits     => '8',				 # pad up to 8 bits, default is 4
         },
     "1"    => 
         {
@@ -1424,16 +1425,6 @@ SIGNALduino_Parse_MS($$$$%)
 
 			next if (!$valid) ;
 
-			#Debug "Found matched sync" if ($valid && $debug); # z.B. [1, -18] 
-			#Debug "phash:".Dumper(%patternLookupHash);
-			#my $pstr=SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{sync}},\%patternList);
-			#$patternLookupHash{$pstr}="" if ($pstr != -1); ## Append Sync to our lookuptable
-			#Debug "added $pstr " if ($debug && $valid);
-
-			#Debug "phash:".Dumper(%patternLookupHash);
-
-			#Debug "Found matched sync" if ($debug && $valid);
-
 			$valid = $valid && ($pstr=SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}},\%patternList)) >=0;
 			Debug "Found matched one with indexes: ($pstr)" if ($debug && $valid);
 			$patternLookupHash{$pstr}="1" if ($valid); ## Append Sync to our lookuptable
@@ -1471,15 +1462,14 @@ SIGNALduino_Parse_MS($$$$%)
 			}
 			
 			Debug "$name: decoded message raw (@bit_msg), ".@bit_msg." bits\n" if ($debug);;
-			while (@bit_msg % 8 > 0)  ## can be reduced to 4 bits some times, beacause we need only full nibbles not full bytes
-			{
-				push(@bit_msg,'0');
-				Debug "$name: padding 0 bit to bit_msg array" if ($debug);
-			}
+			
+			my $padwith = defined($ProtocolListSIGNALduino{id}{paddingbits}) ? $ProtocolListSIGNALduino{id}{paddingbits} : 4;
+			SIGNALduino_padbits(\@bit_msg,$padwith);
+			
 			#Check converted message against lengths
 			$valid = $valid && $ProtocolListSIGNALduino{$id}{length_min} <= scalar @bit_msg  if (defined($ProtocolListSIGNALduino{$id}{length_min})); 
 			$valid = $valid && $ProtocolListSIGNALduino{$id}{length_max} >= scalar @bit_msg  if (defined($ProtocolListSIGNALduino{$id}{length_max}));
-			next if (!$valid);  ## Last chance to try next protocol if there is somethin invalid
+			next if (!$valid);  
 
 			#my $dmsg = sprintf "%02x", oct "0b" . join "", @bit_msg;			## Array -> String -> bin -> hex
 			my $dmsg = SIGNALduino_b2h(join "", @bit_msg);
@@ -1496,7 +1486,15 @@ SIGNALduino_Parse_MS($$$$%)
 	}
 }
 
-
+sub SIGNALduino_padbits($$)
+{
+	my $i=@{$_[0]} % $_[1];
+	while (@{$_[0]} % $_[1] > 0)  ## will pad up full nibbles per default or full byte if specified in protocol
+	{
+		push(@{$_[0]},'0');
+	}
+	return " padded $i bits to bit_msg array";
+}
 
 sub SIGNALduino_Parse_MU($$$$@)
 {
