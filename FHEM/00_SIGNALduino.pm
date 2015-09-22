@@ -477,6 +477,8 @@ SIGNALduino_Define($$)
   $hash->{Interval} = "30";
   InternalTimer(gettimeofday()+2, "SIGNALduino_GetUpdate", $hash, 0);
   
+  $hash->{"${name}_RAWMSG"}="nothing";
+  $hash->{"${name}_TIME"}=TimeNow();
   return $ret;
 }
 
@@ -1309,7 +1311,7 @@ sub SIGNALduino_Parse_Message($$$$@)
 			}
 			
 			 
-			SIGNALduno_Dispatch();
+			#SIGNALduno_Dispatch();
 			
 			$hash->{"${name}_MSGCNT"}++;
 			$hash->{"${name}_TIME"} = TimeNow();
@@ -1334,7 +1336,7 @@ sub SIGNALduno_Dispatch($$$)
 	my $name = $hash->{NAME};
 	
 	Log3 $name, 5, "converted Data to ($dmsg)";
-	if (($hash->{"${name}_RAWMSG"} ne "$rmsg") || (time() - $hash->{"${name}_TIME"}) ne TimeNow() ) { 
+	if ( ($hash->{"${name}_RAWMSG"} ne $rmsg) || ($hash->{"${name}_TIME"} ne TimeNow()) ) { 
 		$hash->{"${name}_MSGCNT"}++;
 		$hash->{"${name}_TIME"} = TimeNow();
 		readingsSingleUpdate($hash, "state", $hash->{READINGS}{state}{VAL}, 0);
