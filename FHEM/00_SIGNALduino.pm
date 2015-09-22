@@ -192,7 +192,7 @@ my %ProtocolListSIGNALduino  = (
 	
 	"6"    => 			## Eurochron Protocol
         {
-            name			=> 'eurochron',	
+            name			=> 'weather2',	
 			id          	=> '6',
 			one				=> [1,-9],
 			zero			=> [1,-4],
@@ -206,9 +206,9 @@ my %ProtocolListSIGNALduino  = (
 			length_min      => '24',
 
 		},
-	"7"    => 			## unkown Protocol
+	"7"    => 			## weather sensors like EAS800z
         {
-            name			=> 'eurochron2',	
+            name			=> 'weather3',	
 			id          	=> '7',
 			one				=> [1,-4],
 			zero			=> [1,-2],
@@ -1308,7 +1308,7 @@ sub SIGNALduino_Parse_Message($$$$@)
 			   Debug "$name: decoded protocol $protocolid: id=$id, channel=$channel, temp=$temp\n" if ($debug);
 			}
 			
-			# Parse only if message is different within 2 seconds 
+			 
 			SIGNALduno_Dispatch();
 			
 			$hash->{"${name}_MSGCNT"}++;
@@ -1334,7 +1334,7 @@ sub SIGNALduno_Dispatch($$$)
 	my $name = $hash->{NAME};
 	
 	Log3 $name, 5, "converted Data to ($dmsg)";
-	if (($hash->{"${name}_RAWMSG"} ne "$rmsg") || (time() - $hash->{"${name}_TIME"}) ne time() ) { 
+	if (($hash->{"${name}_RAWMSG"} ne "$rmsg") || (time() - $hash->{"${name}_TIME"}) ne TimeNow() ) { 
 		$hash->{"${name}_MSGCNT"}++;
 		$hash->{"${name}_TIME"} = TimeNow();
 		readingsSingleUpdate($hash, "state", $hash->{READINGS}{state}{VAL}, 0);
@@ -1422,15 +1422,6 @@ SIGNALduino_Parse_MS($$$$%)
 
 			next if (!$valid) ;
 
-			#Debug "Found matched sync" if ($valid && $debug); # z.B. [1, -18] 
-			#Debug "phash:".Dumper(%patternLookupHash);
-			#my $pstr=SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{sync}},\%patternList);
-			#$patternLookupHash{$pstr}="" if ($pstr != -1); ## Append Sync to our lookuptable
-			#Debug "added $pstr " if ($debug && $valid);
-
-			#Debug "phash:".Dumper(%patternLookupHash);
-
-			#Debug "Found matched sync" if ($debug && $valid);
 
 			$valid = $valid && ($pstr=SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}},\%patternList)) >=0;
 			Debug "Found matched one with indexes: ($pstr)" if ($debug && $valid);
@@ -1485,8 +1476,6 @@ SIGNALduino_Parse_MS($$$$%)
 			$dmsg = "$ProtocolListSIGNALduino{$id}{preamble}"."$dmsg" if (defined($ProtocolListSIGNALduino{$id}{preamble}));
 			
 			SIGNALduno_Dispatch($hash,$rmsg,$dmsg);
-			
-		
 		}
 		return 0;
 		
@@ -1928,7 +1917,7 @@ sub	SIGNALduino_Cresta()
 
 
 
-# Helper Function for locaial Modules, to check if they should use longids
+# Helper Function for logical Modules, to check if they should use longids
 sub SIGNALDuino_use_longid {
   my ($iohash,$dev_type) = @_;
   my $longids=AttrVal($iohash->{NAME},"longids","0");	      				# Default to not use longids

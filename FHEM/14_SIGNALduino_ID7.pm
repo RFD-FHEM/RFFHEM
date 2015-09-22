@@ -50,19 +50,20 @@ SIGNALduino_ID7_Define($$)
   my ($hash, $def) = @_;
   my @a = split("[ \t][ \t]*", $def);
 
-  return "wrong syntax: define <name> SIGNALduino_ID7 <code> <minsecs> <equalmsg>".int(@a)
+  return "wrong syntax: define <name> SIGNALduino_ID7 <code> ".int(@a)
         if(int(@a) < 3 || int(@a) > 5);
 
   $hash->{CODE} = $a[2];
-
-  $hash->{minsecs} = ((int(@a) > 3) ? $a[3] : 30);
-  $hash->{equalMSG} = ((int(@a) > 4) ? $a[4] : 0);
   $hash->{lastMSG} =  "";
   $hash->{bitMSG} =  "";
 
   $modules{SIGNALduino_ID7}{defptr}{$a[2]} = $hash;
   $hash->{STATE} = "Defined";
-
+  
+  my $name= $hash->{NAME};
+  $attr{$name}{"event-min-interval"} = ".*:300";
+  $attr{$name}{"event-on-change-reading"} = ".*";
+ 
   AssignIoPort($hash);
   return undef;
 }
@@ -95,8 +96,8 @@ SIGNALduino_ID7_Parse($$)
 
   Log3 "SIGNALduino", 4, "SIGNALduino_ID7_Parse  $model ($msg) length: $hlen";
   
-  #      4    8 9    12            24    28       36
-  # 0011 0110 1 010  000100000010  1111  00111000 0000 
+  #      4    8  9    12            24    28       36
+  # 0011 0110 1  010  000100000010  1111  00111000 0000 
   #      ID  Bat CHN       TMP      ??   HUM
   
   #my $hashumidity = FALSE;
@@ -133,7 +134,8 @@ SIGNALduino_ID7_Parse($$)
     
     Log3 $iohash, 3, "$model decoded protocolid: 7 sensor id=$id, channel=$channel, temp=$temp, hum=$hum, bat=$bat" ;
     my $deviceCode;
-    if (SIGNALDuino_use_longid($iohash,"$model"))
+    
+    if (exists &SIGNALDuino_use_longid && SIGNALDuino_use_longid($iohash,"$model"))
 	{
 		$deviceCode=$model._$id.$channel;
 	} else {
@@ -147,26 +149,16 @@ SIGNALduino_ID7_Parse($$)
     $def = $modules{SIGNALduino_ID7}{defptr}{$deviceCode} if(!$def);
 
     if(!$def) {
-	Log3 $iohash, 1, 'SIGNALduino_ID7: UNDEFINED sensor ' . $model . ' detected, code ' . $deviceCode;
-	return "UNDEFINED $deviceCode SIGNALduino_ID7 $deviceCode";
+		Log3 $iohash, 1, 'SIGNALduino_ID7: UNDEFINED sensor ' . $model . ' detected, code ' . $deviceCode;
+		return "UNDEFINED $deviceCode SIGNALduino_ID7 $deviceCode";
     }
         #Log3 $iohash, 3, 'SIGNALduino_ID7: ' . $def->{NAME} . ' ' . $id;
 	
-	my $minsecs = AttrVal($iohash->{NAME},'minsecs',30);          # minsecs aus dem sduino holen. Idee: format wie folgt: sensortyp:zeit
 	
 	my $hash = $def;
 	$name = $hash->{NAME};
 	Log3 $name, 4, "SIGNALduino_ID7: $name ($rawData)";  
 
-   	if($hash->{lastReceive} && (time() - $hash->{lastReceive} < $minsecs)) {
-		if (($def->{lastMSG} ne $rawData) && ($def->{equalMSG} > 0)) {
-			Log3 $name, 4, "SIGNALduino_ID7: $name: $deviceCode no skipping due unequal message even if to short timedifference";
-		} else {
-			Log3 $name, 4, "SIGNALduino_ID7: $name: $deviceCode Skipping due to short timedifference";
-			return "";
-		}
-	}
-  	$hash->{lastReceive} = time();
 	$def->{lastMSG} = $rawData;
 	$def->{bitMSG} = $bitData2; 
 
@@ -220,13 +212,14 @@ SIGNALduino_ID7_Attr(@)
     <li>EAS800z</li>
   </ul>
   <br>
-  New received device packages are add in fhem with autocreate.
+  New received device are add in fhem with autocreate.
   <br><br>
 
   <a name="SIGNALduino_ID7_Define"></a>
   <b>Define</b> 
   <ul>The received devices created automatically.<br>
-  The ID of the defive are the first two Hex values of the package as dezimal.<br>
+  The ID of the defice is the cannel or, if the longid attribute is specified, it is a combination of channel and some random generated bits at powering the sensor and the channel.<br>
+  If you want to use more sensors, than channels available, you can use the longid option to differentiate them.
   </ul>
   <br>
   <a name="SIGNALduino_ID7 Events"></a>
@@ -236,13 +229,12 @@ SIGNALduino_ID7_Attr(@)
      <li>humidity: The humidity (if available)</li>
      <li>battery: The battery state: low or ok (if available)</li>
      <li>channel: The Channelnumber (if available)</li>
-     <li>trend: The temperature trend (if available)</li>
   </ul>
   <br>
   <b>Attributes</b>
   <ul>
     <li><a href="#IODev">IODev</a>
-      Note: by setting this attribute you can define different sets of 8
+      Note: by setting this attribute you can define different sets of 
       devices in FHEM, each set belonging to a Device which is capable of receiving the signals. It is important, however,
       that a device is only received by the defined IO Device, e.g. by using
       different Frquencies (433MHz vs 868MHz)
@@ -269,30 +261,29 @@ SIGNALduino_ID7_Attr(@)
 <a name="SIGNALduino_ID7"></a>
 <h3>SIGNALduino_ID7</h3>
 <ul>
-  Das SIGNALduino_ID7 Module verarbeitet von einem IO Ger√§t (CUL, CUN, SIGNALDuino, etc.) empfangene Nachrichten von Temperatur-Sensoren.<br>
+  Das SIGNALduino_ID7 Module verarbeitet von einem IO Ger‰t (CUL, CUN, SIGNALDuino, etc.) empfangene Nachrichten von Temperatur-Sensoren.<br>
   <br>
-  <b>Unterst√ºtze Modelle:</b>
+  <b>Unterst¸tze Modelle:</b>
   <ul>
     <li>EAS800z</li>
   </ul>
   <br>
-  Neu empfangene Sensoren werden in der fhem per autocreate angelegt.
+  Neu empfangene Sensoren werden in FHEM per autocreate angelegt.
   <br><br>
 
   <a name="SIGNALduino_ID7_Define"></a>
   <b>Define</b> 
   <ul>Die empfangenen Sensoren werden automatisch angelegt.<br>
-  Die ID der angelgten Sensoren sind die ersten zwei HEX Werte des empfangenen Paketes in dezimaler Schreibweise.<br>
+  Die ID der angelgten Sensoren ist entweder der Kanal des Sensors, oder wenn das Attribut longid gesetzt ist, dann wird die ID aus dem Kanal und einer Reihe von Bits erzeugt, welche der Sensor beim Einschalten zuf‰llig vergibt.<br>
   </ul>
   <br>
   <a name="SIGNALduino_ID7 Events"></a>
   <b>Generierte Events:</b>
   <ul>
      <li>temperature: Die aktuelle Temperatur</li>
-     <li>humidity: Die aktuelle Luftfeutigkeit (falls verf√ºgbar)</li>
-     <li>battery: Der Batteriestatus: low oder ok (falls verf√ºgbar)</li>
-     <li>channel: Kanalnummer (falls verf√ºgbar)</li>
-     <li>trend: Der Temperaturtrend (falls verf√ºgbar)</li>
+     <li>humidity: Die aktuelle Luftfeutigkeit (falls verf&uuml;gbar)</li>
+     <li>battery: Der Batteriestatus: low oder ok (falls verf&uuml;gbar)</li>
+     <li>channel: Kanalnummer (falls verf¸gbar)</li>
   </ul>
   <br>
   <b>Attribute</b>
