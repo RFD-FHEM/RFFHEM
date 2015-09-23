@@ -135,6 +135,7 @@ my %ProtocolListSIGNALduino  = (
 			modulematch     => '^AS.*\$', # not used now
 			length_min      => '32',
 			length_max      => '34',		# Don't know maximal lenth of a valid message
+			paddingbits     => '8',				 # pad up to 8 bits, default is 4
 	
         },
     "3"    => 
@@ -1463,8 +1464,17 @@ SIGNALduino_Parse_MS($$$$%)
 			
 			Debug "$name: decoded message raw (@bit_msg), ".@bit_msg." bits\n" if ($debug);;
 			
-			my $padwith = defined($ProtocolListSIGNALduino{id}{paddingbits}) ? $ProtocolListSIGNALduino{id}{paddingbits} : 4;
-			SIGNALduino_padbits(\@bit_msg,$padwith);
+			my $padwith = defined($ProtocolListSIGNALduino{$id}{paddingbits}) ? $ProtocolListSIGNALduino{$id}{paddingbits} : 4;
+			
+			my $i=0;
+			while (scalar @bit_msg % $padwith > 0)  ## will pad up full nibbles per default or full byte if specified in protocol
+			{
+				push(@bit_msg,'0');
+				$i++;
+			}
+			Debug "$name padded $i bits to bit_msg array" if ($debug);
+				
+			#my $logmsg = SIGNALduino_padbits(@bit_msg,$padwith);
 			
 			#Check converted message against lengths
 			$valid = $valid && $ProtocolListSIGNALduino{$id}{length_min} <= scalar @bit_msg  if (defined($ProtocolListSIGNALduino{$id}{length_min})); 
@@ -1485,8 +1495,8 @@ SIGNALduino_Parse_MS($$$$%)
 
 	}
 }
-
-sub SIGNALduino_padbits($$)
+## //Todo: check list as reference
+sub SIGNALduino_padbits(\@$)
 {
 	my $i=@{$_[0]} % $_[1];
 	while (@{$_[0]} % $_[1] > 0)  ## will pad up full nibbles per default or full byte if specified in protocol
@@ -1676,7 +1686,7 @@ SIGNALduino_Parse_MC($$$$@)
 					$dmsg = $res;
 					
 					SIGNALduno_Dispatch($hash,$rmsg,$dmsg);
-			} else {
+				} else {
 					Debug "protocol does not match return from method: ($res)"  if ($debug);
 
 				}
@@ -1896,7 +1906,7 @@ sub	SIGNALduino_Cresta()
 		Debug "$name: Cresta protocol detected \n" if ($debug);
 
 		my $message_start=index($bitData,"10101110");
-		my $crestahex;  #=substr($bitData,$message_start);
+		my $crestahex="";  #=substr($bitData,$message_start);
 		my $idx;
 		
 		for ($idx=$message_start;$idx<length($bitData);$idx=$idx+9)
@@ -1915,7 +1925,7 @@ sub	SIGNALduino_Cresta()
 
 		return  (1,$crestahex); ## Return only the original bits, include length
 	}
-	return (-1,undef);
+	return (-1,"");
 }
 
 
