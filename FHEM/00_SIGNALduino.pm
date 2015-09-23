@@ -192,7 +192,7 @@ my %ProtocolListSIGNALduino  = (
 	
 	"6"    => 			## Eurochron Protocol
         {
-            name			=> 'weather2',	
+            name			=> 'weatherID6',	
 			id          	=> '6',
 			one				=> [1,-9],
 			zero			=> [1,-4],
@@ -208,7 +208,7 @@ my %ProtocolListSIGNALduino  = (
 		},
 	"7"    => 			## weather sensors like EAS800z
         {
-            name			=> 'weather3',	
+            name			=> 'weatherID7',	
 			id          	=> '7',
 			one				=> [1,-4],
 			zero			=> [1,-2],
@@ -396,7 +396,6 @@ SIGNALduino_Initialize($)
 					  ." debug:0,1"
 					  ." longids"
 					  ." minsecs"
-					  ." devicecodeWithId:Cresta+ID7"
                       ." $readingFnAttributes";
 
   $hash->{ShutdownFn} = "SIGNALduino_Shutdown";
@@ -477,7 +476,7 @@ SIGNALduino_Define($$)
   $hash->{Interval} = "30";
   InternalTimer(gettimeofday()+2, "SIGNALduino_GetUpdate", $hash, 0);
   
-  $hash->{"${name}_RAWMSG"}="nothing";
+  $hash->{"${name}_DMSG"}="nothing";
   $hash->{"${name}_TIME"}=TimeNow();
   return $ret;
 }
@@ -1336,14 +1335,16 @@ sub SIGNALduno_Dispatch($$$)
 	my $name = $hash->{NAME};
 	
 	Log3 $name, 5, "converted Data to ($dmsg)";
-	if ( ($hash->{"${name}_RAWMSG"} ne $rmsg) || ($hash->{"${name}_TIME"} ne TimeNow()) ) { 
+	
+	if ( ($hash->{"${name}_DMSG"} ne $dmsg) || ($hash->{"${name}_TIME"} ne TimeNow()) ) { 
 		$hash->{"${name}_MSGCNT"}++;
 		$hash->{"${name}_TIME"} = TimeNow();
+		$hash->{"${name}_DMSG"} = $dmsg;
 		readingsSingleUpdate($hash, "state", $hash->{READINGS}{state}{VAL}, 0);
 		$hash->{RAWMSG} = $rmsg;
 		my %addvals = (RAWMSG => $dmsg);
 		Dispatch($hash, $dmsg, \%addvals);  ## Dispatch to other Modules 
-	}		
+	}
 }
 
 sub
@@ -1446,7 +1447,7 @@ SIGNALduino_Parse_MS($$$$%)
 		
 			#Anything seems to be valid, we can start decoding this.			
 
-			Log3 $name, 5, "Found matched Protocol id $id -> $ProtocolListSIGNALduino{$id}{name}"  if ($valid);
+			Log3 $name, 4, "Found matched Protocol id $id -> $ProtocolListSIGNALduino{$id}{name}"  if ($valid);
 			my $signal_width= @{$ProtocolListSIGNALduino{$id}{one}};
 			#Debug $signal_width;
 			
@@ -1585,7 +1586,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 		
 			#Anything seems to be valid, we can start decoding this.			
 
-			Log3 $name, 5, "Found matched Protocol id $id -> $ProtocolListSIGNALduino{$id}{name}"  if ($valid);
+			Log3 $name, 4, "Found matched Protocol id $id -> $ProtocolListSIGNALduino{$id}{name}"  if ($valid);
 			my $signal_width= @{$ProtocolListSIGNALduino{$id}{one}};
 			#Debug $signal_width;
 			
@@ -1815,15 +1816,6 @@ SIGNALduino_Attr(@)
 	{
 		$debug = $aVal;
 		Log3 $name, 3, "$name: setting debug to: " . $debug;
-	}
-	elsif ($aName eq "minsecs")
-	{
-		$hash->{minsecs} = $aVal;
-		Log3 $name, 3, "$name: setting  minsecs to: " . $aVal;
-	}
-	elsif ($aName eq "devicecodeWithId")
-	{
-		$hash->{devicecodeWithId} = $aVal;
 	}
 	
   	return undef;
