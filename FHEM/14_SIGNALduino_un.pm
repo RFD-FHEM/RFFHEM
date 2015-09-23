@@ -161,8 +161,9 @@ SIGNALduino_un_Parse($$)
 		return;
 	} elsif ($a[1] == "9" && length($bitData)>=70)  ## Unknown Proto 9 
 	{   #http://nupo-artworks.de/media/report.pdf
-		my $syncpos= index($bitData,"1111111110");
-		my $sensdata = substr($bitData,$syncpos+10);
+		
+		my $syncpos= index($bitData,"11111110");  #7x1 1x0 preamble
+		my $sensdata = substr($bitData,$syncpos+8);
 
 		my $id = substr($sensdata,4,6);
 		my $bat = substr($sensdata,0,3);

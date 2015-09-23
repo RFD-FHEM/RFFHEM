@@ -244,8 +244,8 @@ my %ProtocolListSIGNALduino  = (
 			{
             name			=> 'CTW 600',	
 			id          	=> '9',
-			one				=> [3,-2],
-			zero			=> [1,-2],
+			zero			=> [3,-2],
+			one				=> [1,-2],
 			#float			=> [-1,3],		# not full supported now, for later use
 			#sync			=> [1,-8],		# 
 			clockabs     	=> 480,			# -1 = auto undef=noclock
