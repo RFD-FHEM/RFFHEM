@@ -126,7 +126,6 @@ my %ProtocolListSIGNALduino  = (
 			id          	=> '2',
 			one				=> [1,-4],
 			zero			=> [1,-2],
-			#float			=> [-1,3],		# not full supported now later use
 			sync			=> [1,-20],
 			clockabs     	=> '405',		# not used now
 			format 			=> 'twostate',	
@@ -363,7 +362,22 @@ my %ProtocolListSIGNALduino  = (
 			length_min      => '10',
 			length_max      => '20',
 			#method          => \&SIGNALduino_Cresta	# Call to process this message
-		}, 			
+		}, 	
+	"16" => # Rohrmotor24 und andere Funk Rolladen / Markisen Motoren
+		{
+            name			=> 'Dooya shutter',	
+			id          	=> '16',
+			one				=> [-3,1],
+			zero			=> [1,-3],
+			#sync			=> [18,-6],				# protocol has a sync, but is detected as MU
+			clockabs		=> 250,
+			format 			=> 'twostate',	  		
+			preamble		=> 'u16',				# prepend to converted message	
+			#clientmodule    => '',   				# not used now
+			#modulematch     => '',  				# not used now
+			length_min      => '30',
+			length_max      => '40',
+		}, 	
 );
 
 

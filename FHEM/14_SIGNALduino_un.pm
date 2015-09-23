@@ -203,7 +203,26 @@ SIGNALduino_un_Parse($$)
 
 		return;
 	}
-
+	elsif ($a[1] == "1" and $a[2] == "6" && length($bitData)>=36)  ##Rohrmotor24
+	{
+		Log3 $hash, 4, "$name / shutter Dooya $bitData received";
+		
+		
+		my $id = oct("0b".substr($bitData,0,29));
+		my $channel = oct("0b".substr($bitData,29,3));
+		
+		my $all = ($channel == 0) ? 1 : 0;
+ 	    my $commandcode = oct("0b".substr($bitData,33,4));
+ 	    my $direction="";
+ 	    
+ 	    if ($commandcode == 0b001) {$direction="up";}
+ 	    elsif ($commandcode == 0b011) {$direction="down";}
+  	    elsif ($commandcode == 0b101) {$direction="stop";}
+		else  { $direction="unknown";}
+ 	    
+		Log3 $hash, 4, "$name found shutter from Dooya. id=$id, channel=$channel, direction=$direction, all_shutters=$all";
+	} 
+	
   return $name;
 }
 
