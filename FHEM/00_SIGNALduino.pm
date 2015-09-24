@@ -313,13 +313,13 @@ my %ProtocolListSIGNALduino  = (
 			length_max      => '50',
 			method          => \&SIGNALduino_Cresta	# Call to process this message
 		}, 			
-	"13"    => 			## RF20
+	"13"    => 			## FA21RF
 			{
-            name			=> 'RF20',	
+            name			=> '21RF',	
 			id          	=> '13',
 			one				=> [1,-2],
 			zero			=> [1,-4],
-			sync			=> [1,-27,10,-1],		
+			sync			=> [10,-1],		
 			clockabs		=> 800,
 			format 			=> 'twostate',	  		
 			preamble		=> 'u13',				# prepend to converted message	
@@ -327,7 +327,6 @@ my %ProtocolListSIGNALduino  = (
 			#modulematch     => '',  				# not used now
 			length_min      => '20',
 			length_max      => '40',
-			#method          => \&SIGNALduino_Cresta	# Call to process this message
 		}, 		
 	"14"    => 			## Heidemann HX
 			{

@@ -178,10 +178,11 @@ SIGNALduino_un_Parse($$)
 		return;
 	} elsif ($a[1] == "1" and $a[2] == "3" && length($bitData)>=14)  ## RF20 Protocol 
 	{  
-		my $deviceCode = $a[3].$a[5].$a[6].$a[7].$a[8].$a[9];
+		my $model=$a[3];
+		my $deviceCode = $a[5].$a[6].$a[7].$a[8].$a[9];
 		my  $Freq = $a[10].$a[11].$a[12].$a[13].$a[14];
 
-		Log3 $hash, 4, "$name found TCM dorrbell protocol. devicecode=$deviceCode, freq=$Freq ";
+		Log3 $hash, 4, "$name found RF21 protocol. model=$model, devicecode=$deviceCode, freq=$Freq ";
 		return;
 	}
 	elsif ($a[1] == "1" and $a[2] == "4" && length($bitData)>=12)  ## Heidman HX 
