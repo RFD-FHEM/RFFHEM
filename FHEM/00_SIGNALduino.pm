@@ -1776,7 +1776,10 @@ sub	SIGNALduino_Cresta()
 }
 
 # Helper Function for logical Modules, to check if they should use longids
-sub SIGNALDuino_use_longid {
+#	call via my $longidfunc= "$iohash->{TYPE}_use_longid";
+#	if (defined(&$longidfunc) and (&$longidfunc($iohash,"Cresta_$model"))) ...
+
+sub SIGNALduino_use_longid {
   my ($iohash,$dev_type) = @_;
   my $longids=AttrVal($iohash->{NAME},"longids","0");	      				# Default to not use longids
   return 0 if ($longids eq "") || ($longids eq "0");
