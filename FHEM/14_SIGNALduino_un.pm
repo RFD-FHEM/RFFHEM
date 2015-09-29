@@ -161,8 +161,9 @@ SIGNALduino_un_Parse($$)
 		return;
 	} elsif ($a[1] == "9" && length($bitData)>=70)  ## Unknown Proto 9 
 	{   #http://nupo-artworks.de/media/report.pdf
-		my $syncpos= index($bitData,"1111111110");
-		my $sensdata = substr($bitData,$syncpos+10);
+		
+		my $syncpos= index($bitData,"11111110");  #7x1 1x0 preamble
+		my $sensdata = substr($bitData,$syncpos+8);
 
 		my $id = substr($sensdata,4,6);
 		my $bat = substr($sensdata,0,3);
@@ -177,10 +178,11 @@ SIGNALduino_un_Parse($$)
 		return;
 	} elsif ($a[1] == "1" and $a[2] == "3" && length($bitData)>=14)  ## RF20 Protocol 
 	{  
-		my $deviceCode = $a[3].$a[5].$a[6].$a[7].$a[8].$a[9];
+		my $model=$a[3];
+		my $deviceCode = $a[5].$a[6].$a[7].$a[8].$a[9];
 		my  $Freq = $a[10].$a[11].$a[12].$a[13].$a[14];
 
-		Log3 $hash, 4, "$name found TCM dorrbell protocol. devicecode=$deviceCode, freq=$Freq ";
+		Log3 $hash, 4, "$name found RF21 protocol. model=$model, devicecode=$deviceCode, freq=$Freq ";
 		return;
 	}
 	elsif ($a[1] == "1" and $a[2] == "4" && length($bitData)>=12)  ## Heidman HX 
@@ -203,7 +205,26 @@ SIGNALduino_un_Parse($$)
 
 		return;
 	}
-
+	elsif ($a[1] == "1" and $a[2] == "6" && length($bitData)>=36)  ##Rohrmotor24
+	{
+		Log3 $hash, 4, "$name / shutter Dooya $bitData received";
+		
+		
+		my $id = oct("0b".substr($bitData,0,29));
+		my $channel = oct("0b".substr($bitData,29,3));
+		
+		my $all = ($channel == 0) ? 1 : 0;
+ 	    my $commandcode = oct("0b".substr($bitData,33,4));
+ 	    my $direction="";
+ 	    
+ 	    if ($commandcode == 0b001) {$direction="up";}
+ 	    elsif ($commandcode == 0b011) {$direction="down";}
+  	    elsif ($commandcode == 0b101) {$direction="stop";}
+		else  { $direction="unknown";}
+ 	    
+		Log3 $hash, 4, "$name found shutter from Dooya. id=$id, channel=$channel, direction=$direction, all_shutters=$all";
+	} 
+	
   return $name;
 }
 
