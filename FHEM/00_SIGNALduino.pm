@@ -1840,8 +1840,11 @@ sub	SIGNALduino_Cresta()
 }
 
 # Helper Function for logical Modules, to check if they should use longids
-#	call via my $longidfunc= "$iohash->{TYPE}_use_longid";
-#	if (defined(&$longidfunc) and (&$longidfunc($iohash,"Cresta_$model"))) ...
+#	call from logical module as following example :
+#		my $longidfunc= \&{"$iohash->{TYPE}_use_longid"};
+#		Log3 $iohash,5, "$name check longid sub ($iohash->{TYPE}_use_longid) exists=".defined(&$longidfunc);
+#		if (defined(&$longidfunc) and (\&$longidfunc($iohash,"Cresta_$model")))
+#		{ ... }
 
 
 sub SIGNALduino_use_longid {
