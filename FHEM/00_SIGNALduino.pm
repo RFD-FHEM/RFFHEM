@@ -63,7 +63,7 @@ my $clientsSIGNALduino = ":IT:"
 						."CUL_TX:"
 						."SIGNALduino_AS:"
 						."SIGNALduino_un:"
-						."Cresta:"
+#						."Cresta:"
 						; 
 
 ## default regex match List for dispatching message to logical modules, can be updated during runtime because it is referenced
@@ -79,7 +79,7 @@ my %matchListSIGNALduino = (
      "4:OREGON"            		=> "^(3[8-9A-F]|[4-6][0-9A-F]|7[0-8]).*",		
 #    "7:SIGNALduino_ARC"     	=> "AR.*\$", #ARC protocol switches like IT selflearn
 	 "8:SIGNALduino_un"			=> "u.*",
-	 "9:Cresta"					=> "^[5][0|8]75[A-F0-9]+",
+#	 "9:Cresta"					=> "^[5][0|8]75[A-F0-9]+",
 );
 
 		#protoID[0]=(s_sigid){-4,-8,-18,500,0,twostate}; // Logi
@@ -1844,7 +1844,7 @@ sub	SIGNALduino_Cresta()
 #	if (defined(&$longidfunc) and (&$longidfunc($iohash,"Cresta_$model"))) ...
 
 
-sub SIGNALDuino_use_longid {
+sub SIGNALduino_use_longid {
   my ($iohash,$dev_type) = @_;
   my $longids=AttrVal($iohash->{NAME},"longids","0");	      				# Default to not use longids
   return 0 if ($longids eq "") || ($longids eq "0");
