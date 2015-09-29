@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm  67539 2015-09-29
+# $Id: 00_SIGNALduino.pm  67293 2015-09-29
 # The file is taken from the FHEMduino project and modified in serval ways for processing the incomming messages
 # see http://www.fhemwiki.de/wiki/SIGNALDuino
 # It was modified also to provide support for raw message handling which it's send from the SIGNALduino
@@ -193,7 +193,7 @@ my %ProtocolListSIGNALduino  = (
 	
 	"6"    => 			## Eurochron Protocol
         {
-            name			=> 'weather2',	
+            name			=> 'weatherID6',	
 			id          	=> '6',
 			one				=> [1,-9],
 			zero			=> [1,-4],
@@ -209,7 +209,7 @@ my %ProtocolListSIGNALduino  = (
 		},
 	"7"    => 			## weather sensors like EAS800z
         {
-            name			=> 'weather3',	
+            name			=> 'weatherID7',	
 			id          	=> '7',
 			one				=> [1,-4],
 			zero			=> [1,-2],
@@ -443,7 +443,6 @@ SIGNALduino_Initialize($)
 					  ." debug:0,1"
 					  ." longids"
 					  ." minsecs"
-					  ." devicecodeWithId:Cresta+ID7"
                       ." $readingFnAttributes";
 
   $hash->{ShutdownFn} = "SIGNALduino_Shutdown";
@@ -1332,7 +1331,7 @@ SIGNALduino_Parse_MS($$$$%)
 		
 			#Anything seems to be valid, we can start decoding this.			
 
-			Log3 $name, 5, "Found matched Protocol id $id -> $ProtocolListSIGNALduino{$id}{name}"  if ($valid);
+			Log3 $name, 4, "Found matched Protocol id $id -> $ProtocolListSIGNALduino{$id}{name}"  if ($valid);
 			my $signal_width= @{$ProtocolListSIGNALduino{$id}{one}};
 			#Debug $signal_width;
 			
@@ -1492,7 +1491,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 		
 			#Anything seems to be valid, we can start decoding this.			
 
-			Log3 $name, 5, "Found matched Protocol id $id -> $ProtocolListSIGNALduino{$id}{name}"  if ($valid);
+			Log3 $name, 4, "Found matched Protocol id $id -> $ProtocolListSIGNALduino{$id}{name}"  if ($valid);
 			my $signal_width= @{$ProtocolListSIGNALduino{$id}{one}};
 			#Debug $signal_width;
 			
@@ -1743,15 +1742,6 @@ SIGNALduino_Attr(@)
 	{
 		$debug = $aVal;
 		Log3 $name, 3, "$name: setting debug to: " . $debug;
-	}
-	elsif ($aName eq "minsecs")
-	{
-		$hash->{minsecs} = $aVal;
-		Log3 $name, 3, "$name: setting  minsecs to: " . $aVal;
-	}
-	elsif ($aName eq "devicecodeWithId")
-	{
-		$hash->{devicecodeWithId} = $aVal;
 	}
 	
   	return undef;
