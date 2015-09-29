@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm  67051 2015-09-29
+# $Id: 00_SIGNALduino.pm  68046 2015-09-29
 # The file is taken from the FHEMduino project and modified in serval ways for processing the incomming messages
 # see http://www.fhemwiki.de/wiki/SIGNALDuino
 # It was modified also to provide support for raw message handling which it's send from the SIGNALduino
@@ -393,6 +393,19 @@ my %ProtocolListSIGNALduino  = (
 			#length_max      => '38',
 		}, 	
 	
+	"18"    => 			## Oregon Scientific v1
+		{
+            name			=> 'OSV1',	
+			id          	=> '18',
+			clockrange     	=> [1550,1650],			# min , max
+			format 			=> 'manchester',	    # tristate can't be migrated from bin into hex!
+			#preamble		=> '',					# prepend to converted message	
+			#clientmodule    => 'to be written',   	# not used now
+			#modulematch     => '',  				# not used now
+			length_min      => '8',
+			length_max      => '8',
+			method          => \&SIGNALduino_OSV1 # Call to process this message
+		},
 	"19" => # nothing knowing about this 2015-09-28 01:25:40-MS;P0=-8916;P1=-19904;P2=390;P3=-535;P4=-1020;P5=12846;P6=1371;D=2120232323232324242423232323232323232320239;CP=2;SP=1;
 	
 		{
@@ -1565,7 +1578,7 @@ SIGNALduino_Parse_MC($$$$@)
 		next if (!defined($ProtocolListSIGNALduino{$id}{format}) or $ProtocolListSIGNALduino{$id}{format} ne "manchester");
 		Debug "Testing against Protocol id $id -> $ProtocolListSIGNALduino{$id}{name}"  if ($debug);
 
-		if ( $clock >$ProtocolListSIGNALduino{$id}{clockrange}[0] and $clock <$ProtocolListSIGNALduino{$id}{clockrange}[1] and length($rawData) > $ProtocolListSIGNALduino{$id}{length_min} and length($rawData) < $ProtocolListSIGNALduino{$id}{length_max} )
+		if ( $clock >$ProtocolListSIGNALduino{$id}{clockrange}[0] and $clock <$ProtocolListSIGNALduino{$id}{clockrange}[1] and length($rawData) >= $ProtocolListSIGNALduino{$id}{length_min} and length($rawData) <= $ProtocolListSIGNALduino{$id}{length_max} )
 		{
 			Debug "clock and length matched"  if ($debug);
 
@@ -1574,7 +1587,7 @@ SIGNALduino_Parse_MC($$$$@)
 			{
 				Log 4, "$name: Error: Unknown function=$method. Please define it in file $0";
 			} else {
-				my ($rcode,$res) = $method->($name,$bitData);
+				my ($rcode,$res) = $method->($name,$bitData,$rawData);
 				if ($rcode != -1) {
 					$dmsg = $res;
 					
@@ -1749,7 +1762,7 @@ SIGNALduino_Attr(@)
 
 
 
-sub SIGNALduino_OSV2($$)
+sub SIGNALduino_OSV2()
 {
 	my ($name,$bitData) = @_;
 	
@@ -1783,13 +1796,24 @@ sub SIGNALduino_OSV2($$)
 			$osv2bits = $osv2bits.$rvosv2byte;
 		}
 		$osv2hex = sprintf("%02X", length($osv2hex)*4).$osv2hex;
-		Log3 $name, 5, "$name: OSV2 protocol converted to hex: ($osv2hex) with length (".(length($osv2hex)*4).") bytes \n";
+		Log3 $name, 5, "$name: OSV2 protocol converted to hex: ($osv2hex) with length (".((length($osv2hex)-2)*4).") bits \n";
 		#$found=1;
 		#$dmsg=$osv2hex;
 		return (1,$osv2hex);
 	} 
 	return (-1,undef);
 }
+
+sub SIGNALduino_OSV1()
+{
+	my ($name,$bitData,$rawData) = @_;
+	my $osv1hex =sprintf("%02X", length($rawData)*4).$rawData;
+
+	Log3 $name, 5, "$name: OSV1 protocol converted to hex: ($osv1hex) with length (".(length($rawData)*4).") bits \n";
+	return (1,$osv1hex);
+
+}
+
 sub	SIGNALduino_AS()
 {
 	my ($name,$bitData) = @_;
@@ -1801,7 +1825,7 @@ sub	SIGNALduino_AS()
 		my $msgbits =substr($bitData,$message_start);
 		
 		my $ashex=sprintf('%02X', oct("0b$msgbits"));
-		Log3 $name, 5, "$name: AS protocol converted to hex: ($ashex) with length (".(length($ashex)*4).") bytes \n";
+		Log3 $name, 5, "$name: AS protocol converted to hex: ($ashex) with length (".(length($ashex)*4).") bits \n";
 
 		return (1,$bitData);
 	}
