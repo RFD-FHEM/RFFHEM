@@ -1807,7 +1807,14 @@ sub SIGNALduino_OSV2()
 sub SIGNALduino_OSV1()
 {
 	my ($name,$bitData,$rawData) = @_;
-	my $osv1hex =sprintf("%02X", length($rawData)*4).$rawData;
+	
+	my $idx=0;
+	
+	my $osv1hex ;# ~hex('0x'.$rawData);
+	my $osv1bit = $bitData =~ tr/10/01/r;
+	#Log3 $name, 5, "$name: OSV1 protocol converted from ($bitData) to bit: ($osv1bit)" ;
+	my $osv1hex=sprintf("%02X", length($rawData)*4, $osv1hex).SIGNALduino_b2h($osv1bit);
+
 
 	Log3 $name, 5, "$name: OSV1 protocol converted to hex: ($osv1hex) with length (".(length($rawData)*4).") bits \n";
 	return (1,$osv1hex);
