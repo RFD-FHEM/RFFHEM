@@ -304,7 +304,7 @@ my %ProtocolListSIGNALduino  = (
 			#zero			=> [1,-2],
 			#float			=> [-1,3],				# not full supported now, for later use
 			#sync			=> [1,-8],				# 
-			clockrange     	=> [420,450],			# min , max
+			clockrange     	=> [420,520],			# min , max
 			format 			=> 'manchester',	    # tristate can't be migrated from bin into hex!
 			#preamble		=> '',					# prepend to converted message	
 			#clientmodule    => '14_SIGNALduino_AS',   	# not used now
@@ -1843,7 +1843,8 @@ sub	SIGNALduino_Cresta()
 #	call via my $longidfunc= "$iohash->{TYPE}_use_longid";
 #	if (defined(&$longidfunc) and (&$longidfunc($iohash,"Cresta_$model"))) ...
 
-sub SIGNALduino_use_longid {
+
+sub SIGNALDuino_use_longid {
   my ($iohash,$dev_type) = @_;
   my $longids=AttrVal($iohash->{NAME},"longids","0");	      				# Default to not use longids
   return 0 if ($longids eq "") || ($longids eq "0");
