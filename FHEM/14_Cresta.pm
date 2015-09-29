@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 14_Cresta.pm  2015-09-12 $
+# $Id: 14_Cresta.pm  2015-09-29 $
 # The file is taken from the SIGNALduino project
 # see http://www.fhemwiki.de/wiki/SIGNALduino
 # and was modified by a few additions
@@ -40,14 +40,15 @@ Cresta_Define($$)
   my ($hash, $def) = @_;
   my @a = split("[ \t][ \t]*", $def);
 
-  return "wrong syntax: define <name> Cresta <code> <minsecs> <equalmsg>".int(@a)
+  return "wrong syntax: define <name> Cresta <code>".int(@a)
 		if(int(@a) < 3 || int(@a) > 5);
 
   $hash->{CODE}    = $a[2];
-  $hash->{minsecs} = ((int(@a) > 3) ? $a[3] : 30);
-  $hash->{equalMSG} = ((int(@a) > 4) ? $a[4] : 0);
   $hash->{lastMSG} =  "";
-  #$hash->{bitMSG} =  "";
+
+  my $name= $hash->{NAME};
+  $attr{$name}{"event-min-interval"} = ".*:300";
+  $attr{$name}{"event-on-change-reading"} = ".*";
 
   $modules{Cresta}{defptr}{$a[2]} = $hash;
   $hash->{STATE} = "Defined";
@@ -129,11 +130,16 @@ Cresta_Parse($$)
 		$bat = ($decodedBytes[2] >> 6 == 3) ? 'ok' : 'low';			 # decode battery
 		$val = "T: $temp H: $hum Bat: $bat";
 	}else{
-		Log3 $iohash, 4, "$name Sensor Typ $sensorTyp not supported";
-		return "$name Sensor Typ $sensorTyp not supported";
+		Log3 $iohash, 4, "$name Sensor Typ $sensorTyp not supported, please report sensor information!";
+		return "$name Sensor Typ $sensorTyp not supported, please report sensor information!";
 	}
-	if (SIGNALDuino_use_longid($iohash,"Cresta_$model"))
+	
+	#Check if we have a iodevice which supports longid and test if it is set
+	my $longidfunc= \&{"$iohash->{TYPE}_use_longid"};
+	Log3 $iohash,5, "$name check longid sub ($iohash->{TYPE}_use_longid) exists=".defined(&$longidfunc);
+	if (defined(&$longidfunc) and (\&$longidfunc($iohash,"Cresta_$model")))
 	{
+		Log3 $iohash,4, "$name using longid";
 		$deviceCode=$model."_".$sensorTyp."_".$channel;
 	} else {
 		$deviceCode=$model."_".$channel;
@@ -157,41 +163,20 @@ Cresta_Parse($$)
 
 	Log3 $name, 4, "Cresta: $name ($msg)";  
 
-	if($hash->{lastReceive} && (time() - $hash->{lastReceive} < $def->{minsecs} )) {
-	if (($def->{lastMSG} ne $decodedString) && ($def->{equalMSG} > 0)) {
-	  Log3 $name, 4, "Cresta: $name: $deviceCode no skipping due unequal message even if to short timedifference";
-	} else {
-	  Log3 $name, 4, "Cresta: $name: $deviceCode Skipping due to short timedifference";
-	  return "";
-	}
-	}
+
 	$hash->{lastReceive} = time();
 
-	#if(!$val) {
-	#Log3 $name, 1, "Cresta: $name: $deviceCode Cannot decode $msg";
-	#return "";
-	#}
-
 	$def->{lastMSG} = $decodedString;
-	#$def->{bitMSG} = $bitData; 
 
 	Log3 $name, 4, "Cresta update $name:". $name;
 
 	readingsBeginUpdate($hash);
 	readingsBulkUpdate($hash, "state", $val);
 	readingsBulkUpdate($hash, "battery", $bat)   if ($bat ne "");
-	#readingsBulkUpdate($hash, "trigger", $trigger) if ($trigger ne "");
-	# use short term reading names T and H
-#	readingsBulkUpdate($hash, "H", $hum) if ($hum ne "");
-#	readingsBulkUpdate($hash, "T", $temp) if ($temp ne "");
-        # or use long term reading names temperature and humidity
 	readingsBulkUpdate($hash, "humidity", $hum) if ($hum ne "");
 	readingsBulkUpdate($hash, "temperature", $temp) if ($temp ne "");
-
 	readingsEndUpdate($hash, 1); # Notify is done by Dispatch
 
-#	Log3 $name, 5, "Cresta test DoTrigger";
-#	DoTrigger($name, "T: ".$temp." H: ".$hum);
 	
 	return $name;
 }
