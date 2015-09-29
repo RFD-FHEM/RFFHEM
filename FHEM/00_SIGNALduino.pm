@@ -1,6 +1,6 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm  64937 2015-09-27
-# The file is taken from the FHEMduino project and modified in serval the processing of incomming messages
+# $Id: 00_SIGNALduino.pm  67051 2015-09-29
+# The file is taken from the FHEMduino project and modified in serval ways for processing the incomming messages
 # see http://www.fhemwiki.de/wiki/SIGNALDuino
 # It was modified also to provide support for raw message handling which it's send from the SIGNALduino
 # The purpos is to use it as addition to the SIGNALduino which runs on an arduno nano or arduino uno.
@@ -1036,7 +1036,9 @@ sub SIGNALduino_PatternExists
 		#my $patt_id;
 		# Calculate tolernace for search
 		#my $tol=abs(abs($searchpattern)>=2 ?$searchpattern*0.3:$searchpattern*1.5);
-		my $tol=abs(abs($searchpattern)>3 ? abs($searchpattern)>16 ? $searchpattern*0.15 : abs($searchpattern)>0.3:1);  #tol is minimum 1 or higer, depending on our searched pulselengh
+		my $tol=abs(abs($searchpattern)>3 ? abs($searchpattern)>16 ? $searchpattern*0.17 : $searchpattern*0.3 : 1);  #tol is minimum 1 or higer, depending on our searched pulselengh
+		
+		Debug "tol (+- $tol) for ($searchpattern)" if($debug);
 		
 		my %pattern_gap ; #= {};
 		# Find and store the gap of every pattern, which is in tolerance
@@ -1253,8 +1255,9 @@ SIGNALduino_Parse_MS($$$$%)
 		## Make a lookup table for our pattern index ids
 		#Debug "List of pattern:";
 		my $clockabs= $msg_parts{pattern}{$msg_parts{clockidx}};
-		$patternList{$_} = round($msg_parts{pattern}{$_}/$clockabs,2) for keys $msg_parts{pattern};
 		
+		$patternList{$_} = round($msg_parts{pattern}{$_}/$clockabs,1) for keys $msg_parts{pattern};
+	
 		
  		#Debug Dumper(\%patternList);		
 
