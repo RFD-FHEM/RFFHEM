@@ -113,12 +113,11 @@ Cresta_Parse($$)
 	}
 	my $sensorTyp=getSensorType($decodedBytes[3]);
 	Log3 $iohash, 4, "SensorTyp=$sensorTyp, ".$decodedBytes[3];
-	my $id=1;
+	my $id=getSensorID($decodedBytes[1]);		# get the random id from the data
 	my $channel=0;
 	my $temp=0;
 	my $hum=0;
 	my $rc;
-	my $model;
 	my $val;
 	my $bat;
 	my $deviceCode;
@@ -126,7 +125,6 @@ Cresta_Parse($$)
 	## 1. Detect what type of sensor we have, then calll specific function to decode
 	if ($sensorTyp==0x1E){
 		($channel, $temp, $hum) = decodeThermoHygro(\@decodedBytes); # decodeThermoHygro($decodedString);
-		$model="th";  
 		$bat = ($decodedBytes[2] >> 6 == 3) ? 'ok' : 'low';			 # decode battery
 		$val = "T: $temp H: $hum Bat: $bat";
 	}else{
@@ -137,12 +135,12 @@ Cresta_Parse($$)
 	#Check if we have a iodevice which supports longid and test if it is set
 	my $longidfunc= \&{"$iohash->{TYPE}_use_longid"};
 	Log3 $iohash,5, "$name check longid sub ($iohash->{TYPE}_use_longid) exists=".defined(&$longidfunc);
-	if (defined(&$longidfunc) and (\&$longidfunc($iohash,"Cresta_$model")))
+	if (defined(&$longidfunc) and (\&$longidfunc($iohash,"Cresta_$sensorTyp")))
 	{
 		Log3 $iohash,4, "$name using longid";
-		$deviceCode=$model."_".$sensorTyp."_".$channel;
+		$deviceCode=$sensorTyp."_".$id."_".$channel;
 	} else {
-		$deviceCode=$model."_".$channel;
+		$deviceCode=$sensorTyp."_".$channel;
 	}	
 	
 	Log3 $iohash, 4, "$name decoded Cresta protocol Typ=$sensorTyp, sensor id=$id, channel=$channel, temp=$temp, humidity=$hum\n" ;
@@ -228,6 +226,11 @@ sub getSensorType{
 	return $_[0] & 0x1F;
 }
 
+# Returns the randomid portion of the data
+sub getSensorID{
+	return $_[0] & 0x1F;
+}
+
 # decrypt bytes of hex string
 # in: hex string
 # out: decrypted hex string
@@ -274,6 +277,7 @@ sub decodeThermoHygro {
 	if ($channel >= 5) {
 		$channel--;
 	}
+	my $sensorId = $crestabytes[1] & 0x1f;  		# Extract random id from sensor
 	#my $devicetype = $crestabytes[3]&0x1f;
 	$temp = 100 * ($crestabytes[5] & 0x0f) + 10 * ($crestabytes[4] >> 4) + ($crestabytes[4] & 0x0f);
 	## // temp is negative?
