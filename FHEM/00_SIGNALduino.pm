@@ -422,6 +422,20 @@ my %ProtocolListSIGNALduino  = (
 			length_min      => '16',
 			length_max      => '32',
 		}, 	 	
+	"20" => #Livolo	
+		{
+            name			=> 'livolo',	
+			id          	=> '20',
+			one				=> [2,-1],
+			zero			=> [1,-1],
+			sync			=> [1,-3],				
+			clockabs		=> -1,                  #can be 140-190
+			format 			=> 'twostate',	  		
+			preamble		=> 'u20#',				# prepend to converted message	
+			#clientmodule    => '',   				# not used now
+			#modulematch     => '',  				# not used now
+			length_min      => '16',
+		},
 );
 
 
