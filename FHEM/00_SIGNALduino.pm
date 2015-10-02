@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm  68046 2015-09-29
+# $Id: 00_SIGNALduino.pm  69150 2015-10-02
 # The file is taken from the FHEMduino project and modified in serval ways for processing the incomming messages
 # see http://www.fhemwiki.de/wiki/SIGNALDuino
 # It was modified also to provide support for raw message handling which it's send from the SIGNALduino
@@ -435,6 +435,20 @@ my %ProtocolListSIGNALduino  = (
 			#clientmodule    => '',   				# not used now
 			#modulematch     => '',  				# not used now
 			length_min      => '16',
+		},
+	"21" => #Einhell Garagentor	
+		{
+            name			=> 'einhell garagedoor',	
+			id          	=> '21',
+			one				=> [3,-1],
+			zero			=> [1,-3],
+			sync			=> [1,-50],				
+			clockabs		=> 400,                  #can be 140-190
+			format 			=> 'twostate',	  		
+			preamble		=> 'u21#',				# prepend to converted message	
+			#clientmodule    => '',   				# not used now
+			#modulematch     => '',  				# not used now
+			length_min      => '30',
 		},
 );
 
