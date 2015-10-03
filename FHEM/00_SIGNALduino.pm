@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm  69150 2015-10-02
+# $Id: 00_SIGNALduino.pm  69138 2015-10-03
 # The file is taken from the FHEMduino project and modified in serval ways for processing the incomming messages
 # see http://www.fhemwiki.de/wiki/SIGNALDuino
 # It was modified also to provide support for raw message handling which it's send from the SIGNALduino
@@ -38,7 +38,7 @@ my %gets = (    # Name, Data to send to the SIGNALduino, Regexp for the answer
   "version"  => ["V", '^V\s.*'],
   "freeram"  => ["R", '^[0-9]+'],
   "raw"      => ["", '.*'],
-#  "uptime"   => ["t", '^[0-9A-F]{8}[\r\n]*$' ],
+  "uptime"   => ["t", '^[0-9]+' ],
   "cmds"     => ["?", '.*Use one of[ 0-9A-Za-z]+[\r\n]*$' ],
 
 #  "ITParms"  => ["ip",'.*' ],
@@ -440,9 +440,9 @@ my %ProtocolListSIGNALduino  = (
 		{
             name			=> 'einhell garagedoor',	
 			id          	=> '21',
-			one				=> [3,-1],
-			zero			=> [1,-3],
-			sync			=> [1,-50],				
+			one				=> [-3,1],
+			zero			=> [-1,3],
+			sync			=> [-50,1],				
 			clockabs		=> 400,                  #can be 140-190
 			format 			=> 'twostate',	  		
 			preamble		=> 'u21#',				# prepend to converted message	
@@ -562,7 +562,7 @@ SIGNALduino_Define($$)
   my $ret = DevIo_OpenDev($hash, 0, "SIGNALduino_DoInit");
   
   ## 
-  $hash->{Interval} = "30";
+  $hash->{Interval} = "300";
   InternalTimer(gettimeofday()+2, "SIGNALduino_GetUpdate", $hash, 0);
   
   $hash->{"DMSG"}="nothing";
@@ -740,7 +740,7 @@ SIGNALduino_Get($@)
 
   } elsif($a[1] eq "uptime") {     # decode it
     $msg =~ s/[\r\n]//g;
-    $msg = hex($msg);              # /125; only for col or coc
+    #$msg = hex($msg);              # /125; only for col or coc
     $msg = sprintf("%d %02d:%02d:%02d", $msg/86400, ($msg%86400)/3600, ($msg%3600)/60, $msg%60);
   }
 
