@@ -156,7 +156,7 @@ Cresta_Parse($$)
 	
 	Log3 $iohash,5, "$name using longid: $longids typ: $sensorTyp ";
         if (Cresta_use_longid($longids,$sensorTyp)) {
-        	$deviceCode=$model."_".$sensorTyp."_".$channel;
+        	$deviceCode=$model."_".$id."_".$channel;
      	} else {
 		$deviceCode=$model."_".$channel;
 	}	
