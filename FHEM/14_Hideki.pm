@@ -1,9 +1,9 @@
 ##############################################
-# $Id: 14_Cresta.pm 1003 2015-10-03 $
+# $Id: 14_Hideki.pm 1003 2015-10-03 $
 # The file is taken from the SIGNALduino project
 # see http://www.fhemwiki.de/wiki/SIGNALduino
 # and was modified by a few additions
-# to support Cresta Sensors
+# to support Hideki Sensors
 # S. Butzek & HJGode  2015  
 #
 
@@ -17,16 +17,16 @@ use POSIX;
  
 #####################################
 sub
-Cresta_Initialize($)
+Hideki_Initialize($)
 {
   my ($hash) = @_;
 
 
   $hash->{Match}     = "^[5][0|8]75[A-F0-9]+";   # GGF. noch weiter anpassen
-  $hash->{DefFn}     = "Cresta_Define";
-  $hash->{UndefFn}   = "Cresta_Undef";
-  $hash->{AttrFn}    = "Cresta_Attr";
-  $hash->{ParseFn}   = "Cresta_Parse";
+  $hash->{DefFn}     = "Hideki_Define";
+  $hash->{UndefFn}   = "Hideki_Undef";
+  $hash->{AttrFn}    = "Hideki_Attr";
+  $hash->{ParseFn}   = "Hideki_Parse";
   $hash->{AttrList}  = "IODev do_not_notify:0,1 showtime:0,1 "
                        ."ignore:0,1 "
                        ." longids"
@@ -37,12 +37,12 @@ Cresta_Initialize($)
 
 #####################################
 sub
-Cresta_Define($$)
+Hideki_Define($$)
 {
   my ($hash, $def) = @_;
   my @a = split("[ \t][ \t]*", $def);
 
-  return "wrong syntax: define <name> Cresta <code>".int(@a)
+  return "wrong syntax: define <name> Hideki <code>".int(@a)
 		if(int(@a) < 3 || int(@a) > 5);
 
   $hash->{CODE}    = $a[2];
@@ -52,7 +52,7 @@ Cresta_Define($$)
   $attr{$name}{"event-min-interval"} = ".*:300";
   $attr{$name}{"event-on-change-reading"} = ".*";
 
-  $modules{Cresta}{defptr}{$a[2]} = $hash;
+  $modules{Hideki}{defptr}{$a[2]} = $hash;
   $hash->{STATE} = "Defined";
 
   AssignIoPort($hash);
@@ -61,17 +61,17 @@ Cresta_Define($$)
 
 #####################################
 sub
-Cresta_Undef($$)
+Hideki_Undef($$)
 {
   my ($hash, $name) = @_;
-  delete($modules{Cresta}{defptr}{$hash->{CODE}}) if($hash && $hash->{CODE});
+  delete($modules{Hideki}{defptr}{$hash->{CODE}}) if($hash && $hash->{CODE});
   return undef;
 }
 
 
 #####################################
 sub
-Cresta_Parse($$)
+Hideki_Parse($$)
 {
 	my ($iohash,$msg) = @_;
 	
@@ -82,17 +82,12 @@ Cresta_Parse($$)
         }
 	
 	my $name = $iohash->{NAME};
-	#my $name="CRESTA";
+	#my $name="Hideki";
 	my @a = split("", $msg);
 	#my $name = $iohash->{NAME};
-	Log3 $iohash, 4, "Cresta_Parse $name incomming $msg";
+	Log3 $iohash, 4, "Hideki_Parse $name incomming $msg";
 	my $rawData=substr($msg,2); ## Copy all expect of the message length header
 	
-	#Convert hex to bit, may not needed
-	#my $hlen = length($rawData);
-	#my $blen = $hlen * 4;
-	#my $bitData= unpack("B$blen", pack("H$hlen", $rawData)); 
-	#Log3 $hash, 4, "$name converted to bits: $bitData";
 
 	# decrypt bytes
 	my $decodedString = decryptBytes($rawData); # decrpyt hex string to hex string
@@ -100,22 +95,13 @@ Cresta_Parse($$)
 	#convert dectypted hex str back to array of bytes:
 	my @decodedBytes  = map { hex($_) } ($decodedString =~ /(..)/g);
 	
-	#for debug only
-	my $test="";
-	
-	for(my $i=0; $i<scalar @decodedBytes; $i++){
-		$test.=sprintf("%02x", $decodedBytes[$i]);
-	}
-	Log3 $name,4, "bytes arr->".$test;
-	Log3 $name,4, "bytes hex->$decodedString";
-	#end for debug only
 	
 	if (!@decodedBytes)
 	{
 		Log3 $iohash, 4, "$name decrypt failed";
 		return "$name decrypt failed";
 	}
-	if (!Cresta_crc(\@decodedBytes))
+	if (!Hideki_crc(\@decodedBytes))
 	{
 		Log3 $iohash, 4, "$name crc failed";
 		return "$name crc failed";
@@ -130,7 +116,7 @@ Cresta_Parse($$)
 	my $val;
 	my $bat;
 	my $deviceCode;
-	my $model= "Cresta";
+	my $model= "Hideki";
 	
 	## 1. Detect what type of sensor we have, then calll specific function to decode
 	if ($sensorTyp==0x1E){
@@ -145,7 +131,7 @@ Cresta_Parse($$)
 	#Check if we have a iodevice which supports longid and test if it is set
 	#my $longidfunc= \&{"$iohash->{TYPE}_use_longid"};
 	#Log3 $iohash,5, "$name check longid sub ($iohash->{TYPE}_use_longid) exists=".defined(&$longidfunc);
-	#if (defined(&$longidfunc) and (\&$longidfunc($iohash,"Cresta_$sensorTyp")))
+	#if (defined(&$longidfunc) and (\&$longidfunc($iohash,"Hideki_$sensorTyp")))
 	#{
 	#	Log3 $iohash,4, "$name using longid";
 	#	$deviceCode=$sensorTyp."_".$id."_".$channel;
@@ -154,21 +140,21 @@ Cresta_Parse($$)
 	#}	
 	
 	Log3 $iohash,5, "$name using longid: $longids typ: $sensorTyp ";
-        if (Cresta_use_longid($longids,$sensorTyp)) {
+        if (Hideki_use_longid($longids,$sensorTyp)) {
         	$deviceCode=$model."_".$id."_".$channel;
      	} else {
 		$deviceCode=$model."_".$channel;
 	}	
   
-       	Log3 $iohash, 4, "$name decoded Cresta protocol Typ=$sensorTyp, sensor id=$id, channel=$channel, temp=$temp, humidity=$hum\n" ;
+       	Log3 $iohash, 4, "$name decoded Hideki protocol Typ=$sensorTyp, sensor id=$id, channel=$channel, temp=$temp, humidity=$hum\n" ;
         Log3 $iohash, 5, "deviceCode= $deviceCode";	
 
-	my $def = $modules{Cresta}{defptr}{$iohash->{NAME} . "." . $deviceCode};
-	$def = $modules{Cresta}{defptr}{$deviceCode} if(!$def);
+	my $def = $modules{Hideki}{defptr}{$iohash->{NAME} . "." . $deviceCode};
+	$def = $modules{Hideki}{defptr}{$deviceCode} if(!$def);
 
 	if(!$def) {
-		Log3 $iohash, 1, "Cresta: UNDEFINED sensor $sensorTyp detected, code $deviceCode";
-		return "UNDEFINED $deviceCode Cresta $deviceCode";
+		Log3 $iohash, 1, "Hideki: UNDEFINED sensor $sensorTyp detected, code $deviceCode";
+		return "UNDEFINED $deviceCode Hideki $deviceCode";
 	}
 	#Log3 $iohash, 5, "def= ". Dumper($def);
 	
@@ -176,14 +162,14 @@ Cresta_Parse($$)
 	$name = $hash->{NAME};
 	return "" if(IsIgnored($name));
 
-	Log3 $name, 4, "Cresta: $name ($msg)";  
+	Log3 $name, 4, "Hideki: $name ($msg)";  
 
 
 	$hash->{lastReceive} = time();
 
 	$def->{lastMSG} = $decodedString;
 
-	Log3 $name, 4, "Cresta update $name:". $name;
+	Log3 $name, 4, "Hideki update $name:". $name;
 
 	readingsBeginUpdate($hash);
 	readingsBulkUpdate($hash, "state", $val);
@@ -200,26 +186,26 @@ Cresta_Parse($$)
 # in: hex string with encrypted, raw data, starting with 75
 # out: 1 for OK, 0 for failed
 # sample "75BDBA4AC2BEC855AC0A00"
-sub Cresta_crc{
-	#my $crestahex=shift;
-	#my @crestabytes=shift;
+sub Hideki_crc{
+	#my $Hidekihex=shift;
+	#my @Hidekibytes=shift;
 	
-	my @crestabytes = @{$_[0]};
-	#push @crestabytes,0x75; #first byte always 75 and will not be included in decrypt/encrypt!
+	my @Hidekibytes = @{$_[0]};
+	#push @Hidekibytes,0x75; #first byte always 75 and will not be included in decrypt/encrypt!
 	#convert to array except for first hex
-	#for (my $i=1; $i<(length($crestahex))/2; $i++){
-    #	my $hex=Cresta_decryptByte(hex(substr($crestahex, $i*2, 2)));
-	#	push (@crestabytes, $hex);
+	#for (my $i=1; $i<(length($Hidekihex))/2; $i++){
+    #	my $hex=Hideki_decryptByte(hex(substr($Hidekihex, $i*2, 2)));
+	#	push (@Hidekibytes, $hex);
 	#}
 	
 	my $cs1=0; #will be zero for xor over all (bytes>>1)&0x1F except first byte (always 0x75)
 	#my $rawData=shift;
 	#todo add the crc check here
 	
-	my $count=($crestabytes[2]>>1) & 0x1f;
+	my $count=($Hidekibytes[2]>>1) & 0x1f;
 	#iterate over data only, first byte is 0x75 always
 	for (my $i=1; $i<$count+2; $i++) {
-		my $b =  $crestabytes[$i];
+		my $b =  $Hidekibytes[$i];
 		$cs1 = $cs1 ^ $b; # calc first chksum 
 	} 
 	if($cs1==0){
@@ -252,18 +238,18 @@ sub getSensorID{
 # in: hex string
 # out: decrypted hex string
 sub decryptBytes{
-	my $crestahex=shift;
+	my $Hidekihex=shift;
 	#create array of hex string
-	my @crestabytes  = map { Cresta_decryptByte(hex($_)) } ($crestahex =~ /(..)/g);
+	my @Hidekibytes  = map { Hideki_decryptByte(hex($_)) } ($Hidekihex =~ /(..)/g);
 	
 	my $result="";
-	for (my $i=0; $i<scalar (@crestabytes); $i++){
-		$result.=sprintf("%02x",$crestabytes[$i]);
+	for (my $i=0; $i<scalar (@Hidekibytes); $i++){
+		$result.=sprintf("%02x",$Hidekibytes[$i]);
 	}
 	return $result;
 }
 
-sub Cresta_decryptByte{
+sub Hideki_decryptByte{
 	my $byte = shift;
 	#printf("\ndecryptByte 0x%02x >>",$byte);
 	my $ret2 = ($byte ^ ($byte << 1) & 0xFF); #gives possible overflow to left so c3->145 instead of 45
@@ -276,40 +262,40 @@ sub Cresta_decryptByte{
 # output <return code>, <channel>, <temperature>, <humidity>
 # was unable to get this working with an array ref as input, so switched to hex string input
 sub decodeThermoHygro {
-	my @crestabytes = @{$_[0]};
+	my @Hidekibytes = @{$_[0]};
 	
-	#my $crestahex = shift;
-	#my @crestabytes=();
-	#for (my $i=0; $i<(length($crestahex))/2; $i++){
-	#	my $hex=hex(substr($crestahex, $i*2, 2)); ## Mit split und map geht es auch ... $str =~ /(..?)/g;
-	#	push (@crestabytes, $hex);
+	#my $Hidekihex = shift;
+	#my @Hidekibytes=();
+	#for (my $i=0; $i<(length($Hidekihex))/2; $i++){
+	#	my $hex=hex(substr($Hidekihex, $i*2, 2)); ## Mit split und map geht es auch ... $str =~ /(..?)/g;
+	#	push (@Hidekibytes, $hex);
 	#}
 	my $channel=0;
 	my $temp=0;
 	my $humi=0;
 
-	$channel = $crestabytes[1] >> 5;
+	$channel = $Hidekibytes[1] >> 5;
 	# //Internally channel 4 is used for the other sensor types (rain, uv, anemo).
 	# //Therefore, if channel is decoded 5 or 6, the real value set on the device itself is 4 resp 5.
 	if ($channel >= 5) {
 		$channel--;
 	}
-	my $sensorId = $crestabytes[1] & 0x1f;  		# Extract random id from sensor
-	#my $devicetype = $crestabytes[3]&0x1f;
-	$temp = 100 * ($crestabytes[5] & 0x0f) + 10 * ($crestabytes[4] >> 4) + ($crestabytes[4] & 0x0f);
+	my $sensorId = $Hidekibytes[1] & 0x1f;  		# Extract random id from sensor
+	#my $devicetype = $Hidekibytes[3]&0x1f;
+	$temp = 100 * ($Hidekibytes[5] & 0x0f) + 10 * ($Hidekibytes[4] >> 4) + ($Hidekibytes[4] & 0x0f);
 	## // temp is negative?
-	if (!($crestabytes[5] & 0x80)) {
+	if (!($Hidekibytes[5] & 0x80)) {
 		$temp = -$temp;
 	}
 
-	$humi = 10 * ($crestabytes[6] >> 4) + ($crestabytes[6] & 0x0f);	 
+	$humi = 10 * ($Hidekibytes[6] >> 4) + ($Hidekibytes[6] & 0x0f);	 
 
 	$temp = $temp / 10;
 	return ($channel, $temp, $humi);
 }
 
 sub
-Cresta_Attr(@)
+Hideki_Attr(@)
 {
   my @a = @_;
 
@@ -319,12 +305,12 @@ Cresta_Attr(@)
   my $hash = $defs{$a[1]};
   my $iohash = $defs{$a[3]};
   my $cde = $hash->{CODE};
-  delete($modules{Cresta}{defptr}{$cde});
-  $modules{Cresta}{defptr}{$iohash->{NAME} . "." . $cde} = $hash;
+  delete($modules{Hideki}{defptr}{$cde});
+  $modules{Hideki}{defptr}{$iohash->{NAME} . "." . $cde} = $hash;
   return undef;
 }
 
-sub Cresta_use_longid {
+sub Hideki_use_longid {
   my ($longids,$dev_type) = @_;
 
   return 0 if ($longids eq "");
@@ -341,74 +327,37 @@ sub Cresta_use_longid {
 
 
 
-sub
-hex2bin($)
-{
-  my $h = shift;
-  my $hlen = length($h);
-  my $blen = $hlen * 4;
-  return unpack("B$blen", pack("H$hlen", $h));
-}
-
-sub
-bin2dec($)
-{
-  my $h = shift;
-  my $int = unpack("N", pack("B32",substr("0" x 32 . $h, -32))); 
-  return sprintf("%d", $int); 
-}
-sub
-binflip($)
-{
-  my $h = shift;
-  my $hlen = length($h);
-  my $i = 0;
-  my $flip = "";
-  
-  for ($i=$hlen-1; $i >= 0; $i--) {
-    $flip = $flip.substr($h,$i,1);
-  }
-
-  return $flip;
-}
-
 1;
 
 =pod
 =begin html
 
-<a name="Cresta"></a>
-<h3>Cresta</h3>
+<a name="Hideki"></a>
+<h3>Hideki</h3>
 <ul>
-  The Cresta module is a testing and debugging module to decode some devices
+  The Hideki module is a module for deconding weather sensors, which use the hideki protocol. Known brands are Bresser, Cresta and Hama.
   <br><br>
 
-  <a name="Cresta_undefine"></a>
+  <a name="Hideki_undefine"></a>
   <b>Define</b>
   <ul>
-    <code>define &lt;name&gt; Cresta &lt;code&gt; [minsecs] [equalmsg]</code> <br>
+    <code>define &lt;name&gt; Hideki &lt;code&gt; </code> <br>
 
     <br>
-    &lt;code&gt; is the housecode of the autogenerated address of the Env device and 
-	is build by the channelnumber (1 to 3) and an autogenerated address build when including
-	the battery (adress will change every time changing the battery).<br>
-    minsecs are the minimum seconds between two log entries or notifications
-    from this device. <br>E.g. if set to 300, logs of the same type will occure
-    with a minimum rate of one per 5 minutes even if the device sends a message
-    every minute. (Reduces the log file size and reduces the time to display
-    the plots)<br>
-	equalmsg set to 1 generates, if even if minsecs is set, a log entrie or notification
-	when the msg content has changed.
+    &lt;code&gt; is the housecode of the autogenerated address of the sensor device and 
+	is build by the channelnumber (1 to 5) or if the attribute longid is specfied an autogenerated address build when inserting
+	the battery (this adress will change every time changing the battery).<br>
+
   </ul>
   <br>
 
-  <a name="Cresta_unset"></a>
+  <a name="Hideki_unset"></a>
   <b>Set</b> <ul>N/A</ul><br>
 
-  <a name="Cresta_unget"></a>
+  <a name="Hideki_unget"></a>
   <b>Get</b> <ul>N/A</ul><br>
 
-  <a name="Cresta_unattr"></a>
+  <a name="Hideki_unattr"></a>
   <b>Attributes</b>
   <ul>
     <li><a href="#IODev">IODev (!)</a></li>
@@ -426,40 +375,34 @@ binflip($)
 
 =begin html_DE
 
-<a name="Cresta"></a>
-<h3>Cresta</h3>
+<a name="Hideki"></a>
+<h3>Hideki</h3>
 <ul>
-  Das Cresta module dekodiert vom Cresta empfangene Nachrichten von Arduino basierten Sensoren.
+  Das Hideki module dekodiert vom Hideki empfangene Nachrichten von Wettersensoren. Bekannte Hersteller sind Cresta, Hama und Bresser.
   <br><br>
 
-  <a name="Cresta_undefine"></a>
+  <a name="Hideki_undefine"></a>
   <b>Define</b>
   <ul>
-    <code>define &lt;name&gt; Cresta &lt;code&gt; [minsecs] [equalmsg]</code> <br>
+    <code>define &lt;name&gt; Hideki &lt;code&gt; </code> <br>
 
     <br>
-    &lt;code&gt; ist der automatisch angelegte Hauscode des Env und besteht aus der
-	Kanalnummer (1..3) und einer Zufallsadresse, die durch das Gerï¿½t beim einlegen der
-	Batterie generiert wird (Die Adresse ï¿½ndert sich bei jedem Batteriewechsel).<br>
-    minsecs definert die Sekunden die mindesten vergangen sein mï¿½ssen bis ein neuer
+    &lt;code&gt; ist der automatisch angelegte Hauscode des Env und besteht aus einer
+	Kanalnummer (1..5) oder wenn longid gesetzt ist aus einer Zufallsadresse, die durch das Gerät beim einlegen der
+	Batterie generiert wird (Die Adresse ändert sich bei jedem Batteriewechsel).<br>
+    minsecs definert die Sekunden die mindesten vergangen sein müssen bis ein neuer
 	Logeintrag oder eine neue Nachricht generiert werden.
     <br>
-	Z.B. wenn 300, werden Eintrï¿½ge nur alle 5 Minuten erzeugt, auch wenn das Device
-    alle paar Sekunden eine Nachricht generiert. (Reduziert die Log-Dateigrï¿½ï¿½e und die Zeit
-	die zur Anzeige von Plots benï¿½tigt wird.)<br>
-	equalmsg gesetzt auf 1 legt fest, dass Eintrï¿½ge auch dann erzeugt werden wenn die durch
-	minsecs vorgegebene Zeit noch nicht verstrichen ist, sich aber der Nachrichteninhalt geï¿½ndert
-	hat.
   </ul>
   <br>
 
-  <a name="Cresta_unset"></a>
+  <a name="Hideki_unset"></a>
   <b>Set</b> <ul>N/A</ul><br>
 
-  <a name="Cresta_unget"></a>
+  <a name="Hideki_unget"></a>
   <b>Get</b> <ul>N/A</ul><br>
 
-  <a name="Cresta_unattr"></a>
+  <a name="Hideki_unattr"></a>
   <b>Attributes</b>
   <ul>
     <li><a href="#IODev">IODev (!)</a></li>
