@@ -20,7 +20,7 @@ SIGNALduino_un_Initialize($)
   my ($hash) = @_;
 
 
-  $hash->{Match}     = "^u.*";
+  $hash->{Match}     = "^u\d+#.*";
   $hash->{DefFn}     = "SIGNALduino_un_Define";
   $hash->{UndefFn}   = "SIGNALduino_un_Undef";
   $hash->{AttrFn}    = "SIGNALduino_un_Attr";
@@ -74,15 +74,24 @@ SIGNALduino_un_Parse($$)
 {
 	my ($hash,$msg) = @_;
 	my @a = split("", $msg);
-	my $name = $hash->{NAME};
-	Log3 $hash, 4, "$name incomming $msg";
-	my $rawData=substr($msg,2);
+	my $name = "SIGNALduino_unknown";# $hash->{NAME};
+	Log3 $hash, 4, "$name incomming msg: $msg";
+	#my $rawData=substr($msg,2);
+
+	my ($protocol,$rawData) = split("#",$msg);
+	
+
+	$protocol=~ s/^u(\d+)/$1/; # extract protocol
+
+	Log3 $hash, 4, "$name rawData: $rawData";
+	Log3 $hash, 4, "$name Protocol: $protocol";
+
 	my $hlen = length($rawData);
 	my $blen = $hlen * 4;
 	my $bitData= unpack("B$blen", pack("H$hlen", $rawData)); 
 	Log3 $hash, 4, "$name converted to bits: $bitData";
-
-	if ($a[1] == "7" && length($bitData)>=36)  ## Unknown Proto 7 
+		
+	if ($protocol == "7" && length($bitData)>=36)  ## Unknown Proto 7 
 	{
 		
 		
@@ -126,7 +135,7 @@ SIGNALduino_un_Parse($$)
 		
 		return;
 
-	} elsif ($a[1] == "6" && length($bitData)>=36)  ## Eurochron 
+	} elsif ($protocol == "6" && length($bitData)>=36)  ## Eurochron 
 	{   
 
 		  # EuroChron / Tchibo
@@ -159,7 +168,7 @@ SIGNALduino_un_Parse($$)
 		Log3 $hash, 4, "$name decoded protocolid: 6  $SensorTyp, sensor id=$id, channel=$channel, temp=$temp\n" ;
 
 		return;
-	} elsif ($a[1] == "9" && length($bitData)>=70)  ## Unknown Proto 9 
+	} elsif ($protocol == "9" && length($bitData)>=70)  ## Unknown Proto 9 
 	{   #http://nupo-artworks.de/media/report.pdf
 		
 		my $syncpos= index($bitData,"11111110");  #7x1 1x0 preamble
@@ -176,7 +185,7 @@ SIGNALduino_un_Parse($$)
 		Log3 $hash, 4, "$name found ctw600 syncpos at $syncpos message is: $sensdata - sensor id:$id, bat:$bat, temp=$temp, hum=$hum, wind=$wind, rain=$rain, winddir=$winddir";
 
 		return;
-	} elsif ($a[1] == "1" and $a[2] == "3" && length($bitData)>=14)  ## RF20 Protocol 
+	} elsif ($protocol == "13"  && length($bitData)>=14)  ## RF20 Protocol 
 	{  
 		my $model=$a[3];
 		my $deviceCode = $a[5].$a[6].$a[7].$a[8].$a[9];
@@ -185,7 +194,7 @@ SIGNALduino_un_Parse($$)
 		Log3 $hash, 4, "$name found RF21 protocol. model=$model, devicecode=$deviceCode, freq=$Freq ";
 		return;
 	}
-	elsif ($a[1] == "1" and $a[2] == "4" && length($bitData)>=12)  ## Heidman HX 
+	elsif ($protocol == "14" && length($bitData)>=12)  ## Heidman HX 
 	{  
 
 		my $bin = substr($bitData,0,4);
@@ -196,7 +205,7 @@ SIGNALduino_un_Parse($$)
 
 		return;
 	}
-	elsif ($a[1] == "1" and $a[2] == "5" && length($bitData)>=64)  ## TCM 
+	elsif ($protocol == "15" && length($bitData)>=64)  ## TCM 
 	{  
 		my $deviceCode = $a[4].$a[5].$a[6].$a[7].$a[8];
 
@@ -205,7 +214,7 @@ SIGNALduino_un_Parse($$)
 
 		return;
 	}
-	elsif ($a[1] == "1" and $a[2] == "6" && length($bitData)>=36)  ##Rohrmotor24
+	elsif ($protocol == "16" && length($bitData)>=36)  ##Rohrmotor24
 	{
 		Log3 $hash, 4, "$name / shutter Dooya $bitData received";
 		
@@ -224,6 +233,20 @@ SIGNALduino_un_Parse($$)
  	    
 		Log3 $hash, 4, "$name found shutter from Dooya. id=$id, channel=$channel, direction=$direction, all_shutters=$all";
 	} 
+	elsif ($protocol == "21" && length($bitData)>=32)  ##Einhell doorshutter
+	{
+		Log3 $hash, 4, "$name / Einhell doorshutter received";
+		
+		
+		my $id = oct("0b".substr($bitData,0,28));
+		my $channel = oct("0b".substr($bitData,28,5));
+		
+ 	    
+		Log3 $hash, 4, "$name found doorshutter from Einhell. id=$id, channel=$channel, direction=unknown";
+	} else {
+		return undef;
+	}
+
 	
   return $name;
 }

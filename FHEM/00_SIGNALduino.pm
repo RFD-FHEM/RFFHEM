@@ -78,7 +78,7 @@ my %matchListSIGNALduino = (
 #    "4:SIGNALduino_HX"       	=> "H...\$",
      "4:OREGON"            		=> "^(3[8-9A-F]|[4-6][0-9A-F]|7[0-8]).*",		
 #    "7:SIGNALduino_ARC"     	=> "AR.*\$", #ARC protocol switches like IT selflearn
-	 "8:SIGNALduino_un"			=> "u.*",
+	 "8:SIGNALduino_un"			=> "^u.*",
 #	 "9:Cresta"					=> "^[5][0|8]75[A-F0-9]+",
 );
 
@@ -199,7 +199,7 @@ my %ProtocolListSIGNALduino  = (
 			sync			=> [1,-36],		# This special device has no sync
 			clockabs     	=> 212,			# -1 = auto
 			format 			=> 'twostate',	# tristate can't be migrated from bin into hex!
-			preamble		=> 'u',			# Append to converted message	
+			preamble		=> 'u6#',			# Append to converted message	
 			clientmodule    => 'undef',   	# not used now
 			modulematch     => '^u......',  # not used now
 			length_min      => '24',
@@ -215,7 +215,7 @@ my %ProtocolListSIGNALduino  = (
 			sync			=> [1,-8],		# 
 			clockabs     	=> 484,			# -1 = auto
 			format 			=> 'twostate',	# tristate can't be migrated from bin into hex!
-			preamble		=> 'u7',		# prepend to converted message	
+			preamble		=> 'u7#',		# prepend to converted message	
 			clientmodule    => 'undef',   	# not used now
 			modulematch     => '^u7......', # not used now
 			length_min      => '30',
@@ -250,7 +250,7 @@ my %ProtocolListSIGNALduino  = (
 			#sync			=> [1,-8],		# 
 			clockabs     	=> 480,			# -1 = auto undef=noclock
 			format 			=> 'pwm',	    # tristate can't be migrated from bin into hex!
-			preamble		=> 'u9',		# prepend to converted message	
+			preamble		=> 'u9#',		# prepend to converted message	
 			clientmodule    => 'undef',   	# not used now
 			modulematch     => '^u9......',  # not used now
 			length_min      => '70',
@@ -322,7 +322,7 @@ my %ProtocolListSIGNALduino  = (
 			sync			=> [10,-1],		
 			clockabs		=> 800,
 			format 			=> 'twostate',	  		
-			preamble		=> 'u13',				# prepend to converted message	
+			preamble		=> 'u13#',				# prepend to converted message	
 			#clientmodule    => '',   				# not used now
 			#modulematch     => '',  				# not used now
 			length_min      => '20',
@@ -338,7 +338,7 @@ my %ProtocolListSIGNALduino  = (
 			sync			=> [1,-14],				# 
 			clockabs		=> 350,
 			format 			=> 'twostate',	  		
-			preamble		=> 'u14',				# prepend to converted message	
+			preamble		=> 'u14#',				# prepend to converted message	
 			#clientmodule    => '',   				# not used now
 			#modulematch     => '',  				# not used now
 			length_min      => '10',
@@ -355,7 +355,7 @@ my %ProtocolListSIGNALduino  = (
 			sync			=> [1,-45],				# 
 			clockabs		=> 700,
 			format 			=> 'twostate',	  		
-			preamble		=> 'u15',				# prepend to converted message	
+			preamble		=> 'u15#',				# prepend to converted message	
 			#clientmodule    => '',   				# not used now
 			#modulematch     => '',  				# not used now
 			length_min      => '10',
@@ -371,7 +371,7 @@ my %ProtocolListSIGNALduino  = (
 			#sync			=> [18,-6],				# protocol has a sync, but is detected as MU
 			clockabs		=> 250,
 			format 			=> 'twostate',	  		
-			preamble		=> 'u16',				# prepend to converted message	
+			preamble		=> 'u16#',				# prepend to converted message	
 			#clientmodule    => '',   				# not used now
 			#modulematch     => '',  				# not used now
 			length_min      => '30',
@@ -386,7 +386,7 @@ my %ProtocolListSIGNALduino  = (
 			sync			=> [1,-22],	# footer [1,-50]			
 			clockabs		=> 400,
 			format 			=> 'twostate',	  		
-			preamble		=> 'u17',				# prepend to converted message	
+			preamble		=> 'u17#',				# prepend to converted message	
 			#clientmodule    => '',   				# not used now
 			#modulematch     => '',  				# not used now
 			length_min      => '30',
@@ -416,7 +416,7 @@ my %ProtocolListSIGNALduino  = (
 			sync			=> [1,-50,1,-22],				
 			clockabs		=> 395,
 			format 			=> 'twostate',	  		
-			preamble		=> 'u19',				# prepend to converted message	
+			preamble		=> 'u19#',				# prepend to converted message	
 			#clientmodule    => '',   				# not used now
 			#modulematch     => '',  				# not used now
 			length_min      => '16',
@@ -443,12 +443,14 @@ my %ProtocolListSIGNALduino  = (
 			one				=> [-3,1],
 			zero			=> [-1,3],
 			sync			=> [-50,1],				
-			clockabs		=> 400,                  #can be 140-190
+			clockabs		=> 400,                  #ca 400us
 			format 			=> 'twostate',	  		
 			preamble		=> 'u21#',				# prepend to converted message	
 			#clientmodule    => '',   				# not used now
 			#modulematch     => '',  				# not used now
-			length_min      => '30',
+			length_min      => '32',
+			#length_max      => '33',				# must be tested
+
 		},
 );
 
@@ -722,6 +724,10 @@ SIGNALduino_Get($@)
   my $arg = ($a[2] ? $a[2] : "");
   my ($msg, $err);
 
+  if (IsDummy($name))
+  {
+  	return SIGNALduino_Parse($hash, $hash, $hash->{NAME}, $arg);
+  }
   return "No $a[1] for dummies" if(IsDummy($name));
 
   Log3 $name, 5, "$name: command for gets: " . $gets{$a[1]}[0] . " " . $arg;
@@ -1347,6 +1353,7 @@ SIGNALduino_Parse_MS($$$$%)
 			$valid = $valid && ($pstr=SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{sync}},\%patternList)) >=0;
 			Debug "Found matched sync with indexes: ($pstr)" if ($debug && $valid);
 			$patternLookupHash{$pstr}="" if ($valid); ## Append Sync to our lookuptable
+			my $syncstr=$pstr; # Store for later start search
 
 			Debug "sync not found " if (!$valid && $debug); # z.B. [1, -18] 
 
@@ -1381,11 +1388,21 @@ SIGNALduino_Parse_MS($$$$%)
 			my @bit_msg;							# array to store decoded signal bits
 
 			#for (my $i=index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{sync}}))+$signal_width;$i<length($rawData);$i+=$signal_width)
-			for (my $i=scalar@{$ProtocolListSIGNALduino{$id}{sync}};$i<length($rawData);$i+=$signal_width)
+			#for (my $i=scalar@{$ProtocolListSIGNALduino{$id}{sync}};$i<length($rawData);$i+=$signal_width)
+			my $message_start =index($rawData,$syncstr)+length($syncstr);
+			Log3 $name, 5, "Starting demodulation at Position $message_start";
+			
+			for (my $i=$message_start;$i<length($rawData);$i+=$signal_width)
 			{
 				my $sig_str= substr($rawData,$i,$signal_width);
+				#Log3 $name, 5, "demodulating $sig_str";
 				#Debug $patternLookupHash{substr($rawData,$i,$signal_width)}; ## Get $signal_width number of chars from raw data string
-				push(@bit_msg,$patternLookupHash{$sig_str}) if (exists $patternLookupHash{$sig_str}); ## Add the bits to our bit array
+				if (exists $patternLookupHash{$sig_str}) { ## Add the bits to our bit array
+					push(@bit_msg,$patternLookupHash{$sig_str})
+				} else {
+					Log3 $name, 5, "Found wrong signal, aborting demodulation";
+					last;					
+				}
 			}
 			
 			Debug "$name: decoded message raw (@bit_msg), ".@bit_msg." bits\n" if ($debug);;
