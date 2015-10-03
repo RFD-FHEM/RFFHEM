@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 14_Cresta.pm  2015-09-29 $
+# $Id: 14_Cresta.pm 1003 2015-10-03 $
 # The file is taken from the SIGNALduino project
 # see http://www.fhemwiki.de/wiki/SIGNALduino
 # and was modified by a few additions
@@ -27,9 +27,11 @@ Cresta_Initialize($)
   $hash->{UndefFn}   = "Cresta_Undef";
   $hash->{AttrFn}    = "Cresta_Attr";
   $hash->{ParseFn}   = "Cresta_Parse";
-  $hash->{AttrList}  = "IODev do_not_notify:0,1 showtime:0,1 ".
-                       "ignore:0,1 ".
-                       $readingFnAttributes;
+  $hash->{AttrList}  = "IODev do_not_notify:0,1 showtime:0,1 "
+                       ."ignore:0,1 "
+                       ." longids"
+                      ." $readingFnAttributes";
+                       #$readingFnAttributes;
 }
 
 
@@ -49,6 +51,7 @@ Cresta_Define($$)
   my $name= $hash->{NAME};
   $attr{$name}{"event-min-interval"} = ".*:300";
   $attr{$name}{"event-on-change-reading"} = ".*";
+  $attr{$name}{"longids"} = "1";
 
   $modules{Cresta}{defptr}{$a[2]} = $hash;
   $hash->{STATE} = "Defined";
@@ -72,6 +75,13 @@ sub
 Cresta_Parse($$)
 {
 	my ($iohash,$msg) = @_;
+	
+	my $longids='';
+        if (defined($attr{$iohash->{NAME}}{longids})) {
+  	$longids = $attr{$iohash->{NAME}}{longids};
+  	#Log 1,"0: attr longids = $longids";
+        }
+	
 	my $name = $iohash->{NAME};
 	#my $name="CRESTA";
 	my @a = split("", $msg);
@@ -127,24 +137,32 @@ Cresta_Parse($$)
 		($channel, $temp, $hum) = decodeThermoHygro(\@decodedBytes); # decodeThermoHygro($decodedString);
 		$bat = ($decodedBytes[2] >> 6 == 3) ? 'ok' : 'low';			 # decode battery
 		$val = "T: $temp H: $hum Bat: $bat";
+		$model= "Cresta";
 	}else{
 		Log3 $iohash, 4, "$name Sensor Typ $sensorTyp not supported, please report sensor information!";
 		return "$name Sensor Typ $sensorTyp not supported, please report sensor information!";
 	}
 	
 	#Check if we have a iodevice which supports longid and test if it is set
-	my $longidfunc= \&{"$iohash->{TYPE}_use_longid"};
-	Log3 $iohash,5, "$name check longid sub ($iohash->{TYPE}_use_longid) exists=".defined(&$longidfunc);
-	if (defined(&$longidfunc) and (\&$longidfunc($iohash,"Cresta_$sensorTyp")))
-	{
-		Log3 $iohash,4, "$name using longid";
-		$deviceCode=$sensorTyp."_".$id."_".$channel;
-	} else {
-		$deviceCode=$sensorTyp."_".$channel;
-	}	
+	#my $longidfunc= \&{"$iohash->{TYPE}_use_longid"};
+	#Log3 $iohash,5, "$name check longid sub ($iohash->{TYPE}_use_longid) exists=".defined(&$longidfunc);
+	#if (defined(&$longidfunc) and (\&$longidfunc($iohash,"Cresta_$sensorTyp")))
+	#{
+	#	Log3 $iohash,4, "$name using longid";
+	#	$deviceCode=$sensorTyp."_".$id."_".$channel;
+	#} else {
+	#	$deviceCode=$sensorTyp."_".$channel;
+	#}	
 	
-	Log3 $iohash, 4, "$name decoded Cresta protocol Typ=$sensorTyp, sensor id=$id, channel=$channel, temp=$temp, humidity=$hum\n" ;
-    Log3 $iohash, 5, "deviceCode= $deviceCode";	
+	Log3 $iohash,5, "$name using longid: $longids typ: $sensorTyp ";
+        if (Cresta_use_longid($longids,$sensorTyp)) {
+        	$deviceCode=$model."_".$sensorTyp."_".$channel;
+     	} else {
+		$deviceCode=$model."_".$channel;
+	}	
+  
+       	Log3 $iohash, 4, "$name decoded Cresta protocol Typ=$sensorTyp, sensor id=$id, channel=$channel, temp=$temp, humidity=$hum\n" ;
+        Log3 $iohash, 5, "deviceCode= $deviceCode";	
 
 	my $def = $modules{Cresta}{defptr}{$iohash->{NAME} . "." . $deviceCode};
 	$def = $modules{Cresta}{defptr}{$deviceCode} if(!$def);
@@ -307,7 +325,20 @@ Cresta_Attr(@)
   return undef;
 }
 
+sub Cresta_use_longid {
+  my ($longids,$dev_type) = @_;
 
+  return 0 if ($longids eq "");
+  return 0 if ($longids eq "NONE");
+  return 0 if ($longids eq "0");
+
+  return 1 if ($longids eq "1");
+  return 1 if ($longids eq "ALL");
+
+  return 1 if(",$longids," =~ m/,$dev_type,/);
+
+  return 0;
+}
 
 
 
