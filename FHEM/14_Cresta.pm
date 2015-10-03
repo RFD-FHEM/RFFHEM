@@ -51,7 +51,6 @@ Cresta_Define($$)
   my $name= $hash->{NAME};
   $attr{$name}{"event-min-interval"} = ".*:300";
   $attr{$name}{"event-on-change-reading"} = ".*";
-  $attr{$name}{"longids"} = "1";
 
   $modules{Cresta}{defptr}{$a[2]} = $hash;
   $hash->{STATE} = "Defined";
