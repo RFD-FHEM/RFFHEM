@@ -31,7 +31,10 @@ Hideki_Initialize($)
                        ."ignore:0,1 "
                        ." longids"
                       ." $readingFnAttributes";
-                       #$readingFnAttributes;
+  $hash->{AutoCreate}=
+        { "Hideki.*" => { attr => "event-min-interval:.*300 event-on-change-reading:.*"} };
+
+
 }
 
 
@@ -43,14 +46,14 @@ Hideki_Define($$)
   my @a = split("[ \t][ \t]*", $def);
 
   return "wrong syntax: define <name> Hideki <code>".int(@a)
-		if(int(@a) < 3 || int(@a) > 5);
+		if(int(@a) < 3);
 
   $hash->{CODE}    = $a[2];
   $hash->{lastMSG} =  "";
 
   my $name= $hash->{NAME};
-  $attr{$name}{"event-min-interval"} = ".*:300";
-  $attr{$name}{"event-on-change-reading"} = ".*";
+  #$attr{$name}{"event-min-interval"} = ".*:300";
+  #$attr{$name}{"event-on-change-reading"} = ".*";
 
   $modules{Hideki}{defptr}{$a[2]} = $hash;
   $hash->{STATE} = "Defined";
