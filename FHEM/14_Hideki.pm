@@ -32,7 +32,7 @@ Hideki_Initialize($)
                        ." longids"
                       ." $readingFnAttributes";
   $hash->{AutoCreate}=
-        { "Hideki.*" => { attr => "event-min-interval:.*300 event-on-change-reading:.*"} };
+        { "Hideki.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*"} };
 
 
 }
@@ -118,9 +118,8 @@ Hideki_Parse($$)
 		Log3 $iohash, 4, "$name Sensor Typ $sensorTyp not supported, please report sensor information!";
 		return "$name Sensor Typ $sensorTyp not supported, please report sensor information!";
 	}
-
-	my $longids = $attr{$iohash->{NAME}}{longids};
-	if (defined($longids) && ($longids eq "1" || $longids eq "ALL" || (",$longids," =~ m/,$model,/)))
+	my $longids = AttrVal($iohash->{NAME},'longids',0);
+	if ( ($longids != 0) && ($longids eq "1" || $longids eq "ALL" || (",$longids," =~ m/,$model,/)))
 	{
 		$deviceCode = $model . "_" . $id;
 		Log3 $iohash,4, "$name using longid: $longids model: $model";
@@ -144,12 +143,14 @@ Hideki_Parse($$)
 	return "" if(IsIgnored($name));
 
 	#Log3 $name, 4, "Hideki: $name ($msg)";
-
-	my $minsecs = $attr{$iohash->{NAME}}{minsecs};
-	if (defined($minsecs) && $minsecs > 0) {
+	
+	
+	if (!defined(AttrVal($hash->{NAME},"event-min-interval",undef)))
+	{
+		my $minsecs = AttrVal($iohash->{NAME},'minsecs',0);
 		if($hash->{lastReceive} && (time() - $hash->{lastReceive} < $minsecs)) {
 			Log3 $iohash, 4, "$deviceCode Dropped ($decodedString) due to short time. minsecs=$minsecs";
-	  		return "";
+		  	return "";
 		}
 	}
 	$hash->{lastReceive} = time();
