@@ -13,34 +13,25 @@ package main;
 use strict;
 use warnings;
 
-use SetExtensions;
-use constant { TRUE => 1, FALSE => 0 };
 use Data::Dumper;
 
-#
-# All suported models
-#
-my %models = (
-    "EAS800z"     => 'EAS800z',
-    "TX70DTH"     => 'TX70DTH',  # Currently nothing tested
-);
 
 sub
 SIGNALduino_ID7_Initialize($)
 {
   my ($hash) = @_;
 
-  $hash->{Match}     = "^u7[A-Fa-f0-9]{10}";    ## Muss noch mal Ã¼berarbeitet werden, wenn wir mehr Ã¼ber die Sensoren wissen
+  $hash->{Match}     = "^u7[A-Fa-f0-9]{6}F[A-Fa-f0-9]{2}";    ## pos 7 ist aktuell immer 0xF
   $hash->{DefFn}     = "SIGNALduino_ID7_Define";
   $hash->{UndefFn}   = "SIGNALduino_ID7_Undef";
   $hash->{ParseFn}   = "SIGNALduino_ID7_Parse";
   $hash->{AttrFn}	 = "SIGNALduino_ID7_Attr";
   $hash->{AttrList}  = "IODev do_not_notify:1,0 ignore:0,1 showtime:1,0 " .
-                        "$readingFnAttributes " .
-                        "model:".join(",",keys %models);
+                        "$readingFnAttributes ";
+  $hash->{AutoCreate} =
+        { "SIGNALduino_ID7.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*"} };
 
-  #$hash->{AutoCreate}=
-  #     { "SIGNALduino_ID7.*" => { GPLOT => "temp4hum4:Temp/Hum,", FILTER => "%NAME" } };
+
 }
 
 #############################
@@ -51,7 +42,7 @@ SIGNALduino_ID7_Define($$)
   my @a = split("[ \t][ \t]*", $def);
 
   return "wrong syntax: define <name> SIGNALduino_ID7 <code> ".int(@a)
-        if(int(@a) < 3 || int(@a) > 5);
+        if(int(@a) < 3 );
 
   $hash->{CODE} = $a[2];
   $hash->{lastMSG} =  "";
@@ -61,8 +52,6 @@ SIGNALduino_ID7_Define($$)
   $hash->{STATE} = "Defined";
   
   my $name= $hash->{NAME};
-  $attr{$name}{"event-min-interval"} = ".*:300";
-  $attr{$name}{"event-on-change-reading"} = ".*";
  
   AssignIoPort($hash);
   return undef;
@@ -88,7 +77,7 @@ SIGNALduino_ID7_Parse($$)
   my $rawData = substr($msg, 2);
   my $name = $iohash->{NAME};
 
-  my $model = "EAS800z";
+  my $model = "temphum";
   my $hlen = length($rawData);
   my $blen = $hlen * 4;
   my $bitData = unpack("B$blen", pack("H$hlen", $rawData)); 
@@ -107,9 +96,6 @@ SIGNALduino_ID7_Parse($$)
    #foreach $key (keys %models) {
   #   ....
   #}
-  
-  if ($blen ==40 && oct("0b".substr($bitData,36,4)) == 0) # Eigentlich müsste es gewisse IDs geben
-  {
     my $bitData2 = substr($bitData,0,8) . ' ' . substr($bitData,8,1) . ' ' . substr($bitData,9,3);
        $bitData2 = $bitData2 . ' ' . substr($bitData,12,12) . ' ' . substr($bitData,24,4) . ' ' . substr($bitData,28,8);
     Log3 $iohash, 3, $model . ' converted to bits: ' . $bitData2;
@@ -121,7 +107,12 @@ SIGNALduino_ID7_Parse($$)
     my $bit24bis27 = oct("0b".substr($bitData,24,4));
     my $hum = oct("0b" . substr($bitData,28,8));
     
-    if ($hum > 100 || $bit24bis27 != 0xF) {
+    if ($hum==0)
+    {
+    	$model="temp";		
+    }
+    
+    if ($hum > 100) {
       return undef;  # Eigentlich müsste sowas wie ein skip rein, damit ggf. später noch weitre Sensoren dekodiert werden können.
     }
     
@@ -135,13 +126,14 @@ SIGNALduino_ID7_Parse($$)
     Log3 $iohash, 3, "$model decoded protocolid: 7 sensor id=$id, channel=$channel, temp=$temp, hum=$hum, bat=$bat" ;
     my $deviceCode;
     
-    if (exists &SIGNALDuino_use_longid && SIGNALDuino_use_longid($iohash,"$model"))
+	my $longids = AttrVal($iohash->{NAME},'longids',0);
+	if ( ($longids != 0) && ($longids eq "1" || $longids eq "ALL" || (",$longids," =~ m/,$model,/)))
 	{
 		$deviceCode=$model._$id.$channel;
+		Log3 $iohash,4, "$name using longid: $longids model: $model";
 	} else {
-		$deviceCode=$model."_".$channel;
-	}	
-    
+		$deviceCode = $model . "_" . $channel;
+	}
     
     #print Dumper($modules{SIGNALduino_ID7}{defptr});
     
@@ -159,6 +151,16 @@ SIGNALduino_ID7_Parse($$)
 	$name = $hash->{NAME};
 	Log3 $name, 4, "SIGNALduino_ID7: $name ($rawData)";  
 
+	if (!defined(AttrVal($hash->{NAME},"event-min-interval",undef)))
+	{
+		my $minsecs = AttrVal($iohash->{NAME},'minsecs',0);
+		if($hash->{lastReceive} && (time() - $hash->{lastReceive} < $minsecs)) {
+			Log3 $hash, 4, "$deviceCode Dropped due to short time. minsecs=$minsecs";
+		  	return "";
+		}
+	}
+
+
 	$def->{lastMSG} = $rawData;
 	$def->{bitMSG} = $bitData2; 
 
@@ -174,9 +176,7 @@ SIGNALduino_ID7_Parse($$)
     readingsEndUpdate($hash, 1); # Notify is done by Dispatch
 
 	return $name;
-  }
 
-  return undef;
 }
 
 sub SIGNALduino_ID7_Attr(@)
