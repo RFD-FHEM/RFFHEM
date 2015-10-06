@@ -1,10 +1,10 @@
 ##############################################
-# $Id: 14_Hideki.pm 1003 2015-10-03 $
+# $Id: 14_Hideki.pm 11028 2015-10-06 $
 # The file is taken from the SIGNALduino project
 # see http://www.fhemwiki.de/wiki/SIGNALduino
 # and was modified by a few additions
 # to support Hideki Sensors
-# S. Butzek & HJGode  2015
+# S. Butzek & HJGode &Ralf9 2015
 #
 
 package main;
@@ -31,8 +31,9 @@ Hideki_Initialize($)
                        ."ignore:0,1 "
                        ." longids"
                       ." $readingFnAttributes";
+                      
   $hash->{AutoCreate}=
-        { "Hideki.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*"} };
+        { "Hideki.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,"} };
 
 
 }
