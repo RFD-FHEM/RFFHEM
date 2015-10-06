@@ -1,10 +1,10 @@
 ##############################################
 ##############################################
-# $Id: 14_SIGNALduino_ID7.pm  2015-09-23 $
+# $Id: 14_SIGNALduino_ID7.pm 9672  2015-10-06 $
 # 
 # The purpose of this module is to support serval eurochron
 # weather sensors like eas8007 which use the same protocol
-# S. Butzek & Ralf9  2015  
+# Sidey79 & Ralf9  2015  
 #
 
 package main;
@@ -29,7 +29,7 @@ SIGNALduino_ID7_Initialize($)
   $hash->{AttrList}  = "IODev do_not_notify:1,0 ignore:0,1 showtime:1,0 " .
                         "$readingFnAttributes ";
   $hash->{AutoCreate} =
-        { "SIGNALduino_ID7.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*"} };
+        { "SIGNALduino_ID7.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,"} };
 
 
 }
@@ -77,13 +77,13 @@ SIGNALduino_ID7_Parse($$)
   my $rawData = substr($msg, 2);
   my $name = $iohash->{NAME};
 
-  my $model = "temphum";
+  my $model = "SIGNALduino_ID7";
   my $hlen = length($rawData);
   my $blen = $hlen * 4;
   my $bitData = unpack("B$blen", pack("H$hlen", $rawData)); 
   
 
-  Log3 "SIGNALduino", 4, "SIGNALduino_ID7_Parse  $model ($msg) length: $hlen";
+  Log3 $name, 4, "SIGNALduino_ID7_Parse  $model ($msg) length: $hlen";
   
   #      4    8  9    12            24    28     36
   # 0011 0110 1  010  000100000010  1111  00111000 0000  eas8007
@@ -109,7 +109,11 @@ SIGNALduino_ID7_Parse($$)
     
     if ($hum==0)
     {
-    	$model="temp";		
+    	$model=$model."_T";		
+    } else {
+    	$model=$model."_TH";		
+    	
+    	
     }
     
     if ($hum > 100) {
