@@ -1,4 +1,11 @@
-
+06.10.2015
+ - Added Demodulation for Oregon Scientific V1 Data. No Decoding
+ - Support Attribute longids
+ - Try to add demodulation for livolo, tests needed
+ - Try to add HS 434/6 6-Channel. ISC GmbH demodulation
+ - Changed Identification for unknown Protocols
+ - Modified demodulation, for start and end of demodulation process
+ 
 28.09.2015
  - Added a history for unhandled messages when verbose=5
 
