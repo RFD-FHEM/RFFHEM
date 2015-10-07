@@ -1,3 +1,8 @@
+07.10.2015
+ - Added Demodulation for Meteo TX6 Signal
+ - Corrected serval bugs in demodulation for MU Messages, shoud be more accurate now
+ - Updated Firmware to 3.1.7 -> bugfix and better detection for MU Messages
+ 
 06.10.2015
  - Added Demodulation for Oregon Scientific V1 Data. No Decoding
  - Support Attribute longids

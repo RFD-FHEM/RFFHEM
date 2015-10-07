@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 14_SIGNALduino_un.pm 1158 2015-09-15 $
+# $Id: 14_SIGNALduino_un.pm 12923 2015-10-07 $
 # The file is part of the SIGNALduino project
 # see http://www.fhemwiki.de/wiki/SIGNALduino
 # to support debugging of unknown signal data
@@ -20,7 +20,7 @@ SIGNALduino_un_Initialize($)
   my ($hash) = @_;
 
 
-  $hash->{Match}     = "^u\d+#.*";
+  $hash->{Match}     = '^u\d+#.*';
   $hash->{DefFn}     = "SIGNALduino_un_Define";
   $hash->{UndefFn}   = "SIGNALduino_un_Undef";
   $hash->{AttrFn}    = "SIGNALduino_un_Attr";
@@ -239,10 +239,13 @@ SIGNALduino_un_Parse($$)
 		
 		
 		my $id = oct("0b".substr($bitData,0,28));
-		my $channel = oct("0b".substr($bitData,28,5));
+		
+		my $dir = oct("0b".substr($bitData,28,2));
+		
+		my $channel = oct("0b".substr($bitData,30,3));
 		
  	    
-		Log3 $hash, 4, "$name found doorshutter from Einhell. id=$id, channel=$channel, direction=unknown";
+		Log3 $hash, 4, "$name found doorshutter from Einhell. id=$id, channel=$channel, direction=$dir";
 	} else {
 		return undef;
 	}
