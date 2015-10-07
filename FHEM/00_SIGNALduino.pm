@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm  71388 2015-10-07
+# $Id: 00_SIGNALduino.pm  71389 2015-10-07
 # The file is taken from the FHEMduino project and modified in serval ways for processing the incomming messages
 # see http://www.fhemwiki.de/wiki/SIGNALDuino
 # It was modified also to provide support for raw message handling which it's send from the SIGNALduino
@@ -193,10 +193,10 @@ my %ProtocolListSIGNALduino  = (
         {
             name			=> 'eurochron',	
 			id          	=> '6',
-			one				=> [1,-4],
-			zero			=> [1,-2],
-			sync			=> [1,-16],		# This special device has no sync
-			clockabs     	=> 500,			# -1 = auto
+			one				=> [1,-10],
+			zero			=> [1,-5],
+			sync			=> [1,-36],		# This special device has no sync
+			clockabs     	=> 220,			# -1 = auto
 			format 			=> 'twostate',	# tristate can't be migrated from bin into hex!
 			preamble		=> 'u6#',			# Append to converted message	
 			clientmodule    => 'undef',   	# not used now
