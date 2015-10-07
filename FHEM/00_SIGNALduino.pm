@@ -193,11 +193,10 @@ my %ProtocolListSIGNALduino  = (
         {
             name			=> 'eurochron',	
 			id          	=> '6',
-			one				=> [1,-9],
-			zero			=> [1,-4],
-			#float			=> [-1,3],		# not full supported now, for later use
-			sync			=> [1,-36],		# This special device has no sync
-			clockabs     	=> 212,			# -1 = auto
+			one				=> [1,-4],
+			zero			=> [1,-2],
+			sync			=> [1,-16],		# This special device has no sync
+			clockabs     	=> 500,			# -1 = auto
 			format 			=> 'twostate',	# tristate can't be migrated from bin into hex!
 			preamble		=> 'u6#',			# Append to converted message	
 			clientmodule    => 'undef',   	# not used now
@@ -207,7 +206,7 @@ my %ProtocolListSIGNALduino  = (
 		},
 	"7"    => 			## unkown Protocol
         {
-            name			=> 'unknown1 may TX70DHT',	
+            name			=> 'weather7',	
 			id          	=> '7',
 			one				=> [1,-4],
 			zero			=> [1,-2],
@@ -450,6 +449,22 @@ my %ProtocolListSIGNALduino  = (
 			#modulematch     => '',  				# not used now
 			length_min      => '32',
 			#length_max      => '33',				# must be tested
+
+		},
+	"222" => #TX-EZ6 / Meteo	
+		{
+            name			=> 'TX-EZ6',	
+			id          	=> '22',
+			one				=> [1,-8],
+			zero			=> [1,-3],
+			sync			=> [1,16],				
+			clockabs		=> 500,                  #ca 400us
+			format 			=> 'twostate',	  		
+			preamble		=> 'u22#',				# prepend to converted message	
+			#clientmodule    => '',   				# not used now
+			#modulematch     => '',  				# not used now
+			length_min      => '40',
+			#length_max      => '',				# must be tested
 
 		},
 );
