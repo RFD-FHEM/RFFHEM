@@ -406,22 +406,22 @@ my %ProtocolListSIGNALduino  = (
 			length_max      => '8',
 			method          => \&SIGNALduino_OSV1 # Call to process this message
 		},
-	"19" => # nothing knowing about this 2015-09-28 01:25:40-MS;P0=-8916;P1=-19904;P2=390;P3=-535;P4=-1020;P5=12846;P6=1371;D=2120232323232324242423232323232323232320239;CP=2;SP=1;
-	
-		{
-            name			=> 'unknown19',	
-			id          	=> '19',
-			one				=> [1,-2],
-			zero			=> [1,-1],
-			sync			=> [1,-50,1,-22],				
-			clockabs		=> 395,
-			format 			=> 'twostate',	  		
-			preamble		=> 'u19#',				# prepend to converted message	
-			#clientmodule    => '',   				# not used now
-			#modulematch     => '',  				# not used now
-			length_min      => '16',
-			length_max      => '32',
-		}, 	 	
+	#"19" => # nothing knowing about this 2015-09-28 01:25:40-MS;P0=-8916;P1=-19904;P2=390;P3=-535;P4=-1020;P5=12846;P6=1371;D=2120232323232324242423232323232323232320239;CP=2;SP=1;
+	#
+	#	{
+    #       name			=> 'unknown19',	
+	#		id          	=> '19',
+	#		one				=> [1,-2],
+	#		zero			=> [1,-1],
+	#		sync			=> [1,-50,1,-22],				
+	#		clockabs		=> 395,
+	#		format 			=> 'twostate',	  		
+	#		preamble		=> 'u19#',				# prepend to converted message	
+	#		#clientmodule    => '',   				# not used now
+	#		#modulematch     => '',  				# not used now
+	#		length_min      => '16',
+	#		length_max      => '32',
+	#	}, 	 	
 	"20" => #Livolo	
 		{
             name			=> 'livolo',	
@@ -442,7 +442,7 @@ my %ProtocolListSIGNALduino  = (
 			id          	=> '21',
 			one				=> [-3,1],
 			zero			=> [-1,3],
-			sync			=> [-50,1],				
+			#sync			=> [-50,1],				
 			clockabs		=> 400,                  #ca 400us
 			format 			=> 'twostate',	  		
 			preamble		=> 'u21#',				# prepend to converted message	
@@ -1488,7 +1488,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 		my $id;
 		foreach $id ( keys %ProtocolListSIGNALduino) {
 			next if (exists $ProtocolListSIGNALduino{$id}{sync}); ## We can skip messages with sync defined
-			next if (defined($ProtocolListSIGNALduino{id}{format}) && $ProtocolListSIGNALduino{id}{format} ne "manchester");
+			next if (defined($ProtocolListSIGNALduino{id}{format} && $ProtocolListSIGNALduino{id}{format} eq "manchester"));
 			next if (!defined($ProtocolListSIGNALduino{$id}{clockabs}));
 				
 			my $valid=1;
