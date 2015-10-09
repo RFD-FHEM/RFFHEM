@@ -376,7 +376,7 @@ my %ProtocolListSIGNALduino  = (
 			length_min      => '30',
 			length_max      => '40',
 		}, 	
-	"17" => # nothing knowing about this MS;P0=-506;P1=444;P2=12860;P3=-8923;P4=-1041;P5=12838;P6=1371;D=13101010101014141410101010101010101010101010101010101010101010101012;CP=1;SP=3;
+	"17" => # nothing known about this MS;P0=-506;P1=444;P2=12860;P3=-8923;P4=-1041;P5=12838;P6=1371;D=13101010101014141410101010101010101010101010101010101010101010101012;CP=1;SP=3;
 		{
             name			=> 'unknown17',	
 			id          	=> '17',
@@ -1317,6 +1317,7 @@ SIGNALduino_Parse_MS($$$$%)
 		## Make a lookup table for our pattern index ids
 		#Debug "List of pattern:";
 		my $clockabs= $msg_parts{pattern}{$msg_parts{clockidx}};
+		if ($clockabs==0) return 0;
 		
 		$patternList{$_} = round($msg_parts{pattern}{$_}/$clockabs,1) for keys $msg_parts{pattern};
 	
