@@ -451,7 +451,7 @@ my %ProtocolListSIGNALduino  = (
 			length_max      => '33',				# must be tested
 
 		},
-	"222" => #TX-EZ6 / Meteo	
+	"22" => #TX-EZ6 / Meteo	
 		{
             name			=> 'TX-EZ6',	
 			id          	=> '22',
@@ -465,6 +465,22 @@ my %ProtocolListSIGNALduino  = (
 			#modulematch     => '',  				# not used now
 			length_min      => '40',
 			#length_max      => '',				# must be tested
+
+		},
+	"23" => # Pearl Sensor
+		{
+            name			=> 'perl unknown',	
+			id          	=> '23',
+			one				=> [1,-6],
+			zero			=> [1,-1],
+			sync			=> [1,-50],				
+			clockabs		=> 200,                  #ca 200us
+			format 			=> 'twostate',	  		
+			preamble		=> 'u23#',				# prepend to converted message	
+			#clientmodule    => '',   				# not used now
+			#modulematch     => '',  				# not used now
+			length_min      => '36',
+			length_max      => '44',				
 
 		},
 );
@@ -1317,7 +1333,7 @@ SIGNALduino_Parse_MS($$$$%)
 		## Make a lookup table for our pattern index ids
 		#Debug "List of pattern:";
 		my $clockabs= $msg_parts{pattern}{$msg_parts{clockidx}};
-		if ($clockabs==0) return 0;
+		if ($clockabs==0) { return 0 };
 		
 		$patternList{$_} = round($msg_parts{pattern}{$_}/$clockabs,1) for keys $msg_parts{pattern};
 	
@@ -1344,6 +1360,8 @@ SIGNALduino_Parse_MS($$$$%)
 
 			# Check Clock if is it in range
 			$valid=SIGNALduino_inTol($ProtocolListSIGNALduino{$id}{clockabs},$clockabs,$clockabs*0.30) if ($ProtocolListSIGNALduino{$id}{clockabs} > 0);
+			Debug "validclock = $valid"  if ($debug);
+			
 			next if (!$valid) ;
 
 			my $bit_length = ($signal_length-(scalar @{$ProtocolListSIGNALduino{$id}{sync}}))/((scalar @{$ProtocolListSIGNALduino{$id}{one}} + scalar @{$ProtocolListSIGNALduino{$id}{zero}})/2);

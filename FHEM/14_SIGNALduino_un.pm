@@ -148,7 +148,6 @@ SIGNALduino_un_Parse($$)
 		  #          /        / /  /  /     /       / - neg Temp: if 1 then temp = temp - 2048
 		  #         /        / /  /  /     /       /  / Temp
 		  #         01100010 1 00 1  00000 0100011 0  00011011101
-
 		  # Bit     0        8 9  11 12    17      24 25        36
 
 		my $SensorTyp = "EuroChron";
@@ -246,6 +245,19 @@ SIGNALduino_un_Parse($$)
 		
  	    
 		Log3 $hash, 4, "$name found doorshutter from Einhell. id=$id, channel=$channel, direction=$dir";
+	} elsif ($protocol == "23" && length($bitData)>=32)  ##Perl Sensor
+	{
+		my $SensorTyp = "perl NC?";
+		my $id = oct ("0b".substr($bitData,4,4));
+		my $channel = bin2dec(substr($bitData,9,3))+1;
+		my $temp = oct ("0b".substr($bitData,20,8))/10;
+		my $bat = int(substr($bitData,8,1)) eq "1" ? "ok" : "critical";  # Eventuell falsch!
+		my $sendMode = int(substr($bitData,4,1)) eq "1" ? "auto" : "manual";  # Eventuell falsch!
+		my $type = bin2dec(substr($bitData,0,4));
+		
+		Log3 $hash, 4, "$name decoded protocolid: 7 ($SensorTyp / type=$type) mode=$sendMode, sensor id=$id, channel=$channel, temp=$temp, bat=$bat\n" ;
+
+
 	} else {
 		return undef;
 	}
