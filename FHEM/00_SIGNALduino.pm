@@ -78,8 +78,8 @@ my %matchListSIGNALduino = (
 #    "4:SIGNALduino_HX"       	=> "H...\$",
      "4:OREGON"            		=> "^(3[8-9A-F]|[4-6][0-9A-F]|7[0-8]).*",		
 #    "7:SIGNALduino_ARC"     	=> "AR.*\$", #ARC protocol switches like IT selflearn
-	 "8:SIGNALduino_un"		=> "u.*",
-	 "7:Hideki"			=> "^Hi75[A-F0-9]+",
+	 "99:SIGNALduino_un"		=> "u.*",
+	 "3:Hideki"					=> "^[5][0|8]75[A-F0-9]+",
 );
 
 		#protoID[0]=(s_sigid){-4,-8,-18,500,0,twostate}; // Logi
@@ -436,8 +436,6 @@ SIGNALduino_Initialize($)
   					  ." hardware:nano328,uno,promini328"
 					  ." debug:0,1"
 					  ." longids"
-					  ." minsecs"
-					  ." whitelist_IDs"
                       ." $readingFnAttributes";
 
   $hash->{ShutdownFn} = "SIGNALduino_Shutdown";
@@ -1268,14 +1266,9 @@ SIGNALduino_Parse_MS($$$$%)
 		## Find matching protocols
 		my $id;
 		my $message_dispatched=0;
-		my $whitelistIDs = AttrVal($hash->{NAME},"whitelist_IDs",undef);
 		foreach $id ( keys %ProtocolListSIGNALduino) {
 			next if !(exists $ProtocolListSIGNALduino{$id}{sync});
-			if (defined($whitelistIDs) && index($whitelistIDs.',', $id.',') == -1)
-                        {
-                                Log3 $name, 4, "skip ID $id";
-                                next;
-                        }
+			
 			
 			my $valid=1;
 			#$debug=1;
@@ -1334,7 +1327,7 @@ SIGNALduino_Parse_MS($$$$%)
 		
 			#Anything seems to be valid, we can start decoding this.			
 
-			Log3 $name, 4, "Found matched Protocol id $id -> $ProtocolListSIGNALduino{$id}{name}"  if ($valid);
+			Log3 $name, 5, "Found matched Protocol id $id -> $ProtocolListSIGNALduino{$id}{name}"  if ($valid);
 			my $signal_width= @{$ProtocolListSIGNALduino{$id}{one}};
 			#Debug $signal_width;
 			
@@ -1814,21 +1807,15 @@ sub	SIGNALduino_Hideki()
 {
 	my ($name,$bitData) = @_;
     Debug "$name: search in $bitData \n" if ($debug);
-	my $message_start = index($bitData,"10101110");
-	if ($message_start >= 0 )   # 0x75 but in reverse order
+	if (index($bitData,"0101110") >= 0 )   # 0x75 but in reverse order
 	{
 		Debug "$name: Hideki protocol detected \n" if ($debug);
 
-		my $message_end = index($bitData,"10101110",$message_start+9);
-                if ($message_end == -1)  # pruefen auf ein zweites 0x75
-                {
-                        $message_end = length($bitData);
-                }
-
-		my $hidekihex;
+		my $message_start=index($bitData,"10101110");
+		my $hidekihex;  #=substr($bitData,$message_start);
 		my $idx;
 		
-		for ($idx=$message_start; $idx<$message_end; $idx=$idx+9)
+		for ($idx=$message_start;$idx<length($bitData);$idx=$idx+9)
 		{
 			my $byte = "";
 
@@ -1839,12 +1826,25 @@ sub	SIGNALduino_Hideki()
 
 			$hidekihex=$hidekihex.sprintf('%02X', oct("0b$byte"));
 		}
-		$hidekihex = "Hi" . $hidekihex;
-		Log3 $name, 4, "$name: hideki protocol converted to hex: $hidekihex with length " .length($hidekihex) ." bits, messagestart $message_start";
+		$hidekihex = sprintf("%02X", length($hidekihex)*4).$hidekihex; # Number of bits
+		Log3 $name, 5, "$name: hideki protocol converted to hex: ($hidekihex) with length (".(length($hidekihex)*4).") bits \n";
 
 		return  (1,$hidekihex); ## Return only the original bits, include length
 	}
 	return (-1,"");
+}
+
+# Helper Function for logical Modules, to check if they should use longids
+#	call via my $longidfunc= "$iohash->{TYPE}_use_longid";
+#	if (defined(&$longidfunc) and (&$longidfunc($iohash,"Cresta_$model"))) ...
+
+
+sub SIGNALduino_use_longid {
+  my ($iohash,$dev_type) = @_;
+  my $longids=AttrVal($iohash->{NAME},"longids","0");	      				# Default to not use longids
+  return 0 if ($longids eq "") || ($longids eq "0");
+  return 1 if ($longids eq "1") || ($longids eq "ALL") || (",$longids," =~ m/,$dev_type,/) ;
+  return 0;
 }
 
 
