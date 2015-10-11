@@ -22,7 +22,7 @@ Hideki_Initialize($)
   my ($hash) = @_;
 
 
-  $hash->{Match}     = "^Hi75[A-F0-9]+";   # GGF. noch weiter anpassen
+  $hash->{Match}     = "^Hi75[A-F0-9]{17,30}";   # Länge (Anhahl nibbles nach 0x75 )noch genauer zpezifiieren
   $hash->{DefFn}     = "Hideki_Define";
   $hash->{UndefFn}   = "Hideki_Undef";
   $hash->{AttrFn}    = "Hideki_Attr";
@@ -91,12 +91,12 @@ Hideki_Parse($$)
 	if (!@decodedBytes)
 	{
 		Log3 $iohash, 4, "$name decrypt failed";
-		return "$name decrypt failed";
+		return undef;
 	}
 	if (!Hideki_crc(\@decodedBytes))
 	{
 		Log3 $iohash, 4, "$name crc failed";
-		return "$name crc failed";
+		return undef;
 	}
 	my $sensorTyp=getSensorType($decodedBytes[3]);
 	Log3 $iohash, 4, "Hideki_Parse SensorTyp = $sensorTyp decodedString = $decodedString";
