@@ -22,7 +22,7 @@ Hideki_Initialize($)
   my ($hash) = @_;
 
 
-  $hash->{Match}     = "^[5][0|8]75[A-F0-9]+";   # GGF. noch weiter anpassen
+  $hash->{Match}     = "^Hi75[A-F0-9]+";   # GGF. noch weiter anpassen
   $hash->{DefFn}     = "Hideki_Define";
   $hash->{UndefFn}   = "Hideki_Undef";
   $hash->{AttrFn}    = "Hideki_Attr";
@@ -57,7 +57,7 @@ Hideki_Define($$)
   $modules{Hideki}{defptr}{$a[2]} = $hash;
   $hash->{STATE} = "Defined";
 
-  AssignIoPort($hash);
+  #AssignIoPort($hash);
   return undef;
 }
 
