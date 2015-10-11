@@ -67,7 +67,7 @@ my $clientsSIGNALduino = ":IT:"
 
 ## default regex match List for dispatching message to logical modules, can be updated during runtime because it is referenced
 my %matchListSIGNALduino = (
-     "1:IT"            			=> "^i......",	  			  # Intertechno Format
+     "1:IT"            			=> "^i......",	  				  # Intertechno Format
      "2:CUL_TCM97001"      		=> "^s[A-Fa-f0-9]+",			  # Any hex string		beginning with s
 	 "3:SIGNALduino_RSL"		=> "^rA-Fa-f0-9]+",				  # Any hex string		beginning with r
      "5:CUL_TX"               	=> "^TX..........",         	  # Need TX to avoid FHTTK
@@ -77,10 +77,6 @@ my %matchListSIGNALduino = (
 	 "7:Hideki"					=> "^Hi75[A-F0-9]+",
 );
 
-		#protoID[0]=(s_sigid){-4,-8,-18,500,0,twostate}; // Logi
-		#protoID[1]=(s_sigid){-4,-8,-18,500,0,twostate}; // TCM 97001
-		#protoID[2]=(s_sigid){-1,-2,-18,500,0,twostate}; // AS
-		#protoID[3]=(s_sigid){-1,3,-30,pattern[clock][0],0,tristate}; // IT old
 
 my %ProtocolListSIGNALduino  = (
     "0"    => 
@@ -519,6 +515,12 @@ SIGNALduino_Define($$)
   
   $hash->{"DMSG"}="nothing";
   $hash->{"TIME"}=time();
+  
+  
+  my %WhitelistIDs = map { $_ => undef } split(",", AttrVal($name,"whitelist_IDs",""));
+  $hash->{"whitelisthash"} = \%WhitelistIDs;
+  
+  
   return $ret;
 }
 
@@ -1750,6 +1752,12 @@ SIGNALduino_Attr(@)
 	{
 		$debug = $aVal;
 		Log3 $name, 3, "$name: setting debug to: " . $debug;
+	}
+	elsif ($aName eq "whitelist_IDs")
+	{
+		#Todo: Hash mit Whit
+		my %WhitelistIDs = map { $_ => undef } split(",", $string);
+		$hash->{"whitelisthash"} = \%WhitelistIDs;
 	}
 	
   	return undef;
