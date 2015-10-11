@@ -193,7 +193,7 @@ sub Hideki_crc{
 	my $count=($Hidekibytes[2]>>1) & 0x1f;
 	my $b;
 	#iterate over data only, first byte is 0x75 always
-	for (my $i=1; $i<$count+2; $i++) {
+	for (my $i=1; $i<$count+2 && $i<scalar @Hidekibytes; $i++) {
 		$b =  $Hidekibytes[$i];
 		$cs1 = $cs1 ^ $b; # calc first chksum
 	}

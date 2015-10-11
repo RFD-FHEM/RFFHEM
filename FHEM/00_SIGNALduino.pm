@@ -1587,7 +1587,7 @@ SIGNALduino_Parse_MC($$$$@)
 				my ($rcode,$res) = $method->($name,$bitData,$id);
 				if ($rcode != -1) {
 					$dmsg = $res;
-					$dmsg=$ProtocolListSIGNALduino{$id}{preamble}.$dmsg if (defined($ProtocolListSIGNALduino{$id}{prefix})) 
+					$dmsg=$ProtocolListSIGNALduino{$id}{preamble}.$dmsg if (defined($ProtocolListSIGNALduino{$id}{prefix})); 
 					SIGNALduno_Dispatch($hash,$rmsg,$dmsg);
 					$message_dispatched=1;
 				} else {
@@ -1755,8 +1755,7 @@ SIGNALduino_Attr(@)
 	}
 	elsif ($aName eq "whitelist_IDs")
 	{
-		#Todo: Hash mit Whit
-		my %WhitelistIDs = map { $_ => undef } split(",", $string);
+ 		my %WhitelistIDs = map { $_ => undef } split(",", $aVal);
 		$hash->{"whitelisthash"} = \%WhitelistIDs;
 	}
 	
@@ -1779,7 +1778,7 @@ sub SIGNALduino_OSV2()
 		
 		my $message_end=index($bitData,"10011001",$preamble_pos+24);
        	$message_end = length($bitData) if ($message_end == -1);
-		my $message_length = $message_end - $message_start;
+		my $message_length = $message_end - $preamble_pos;
 
 		return (-1," message is to short") if (defined($ProtocolListSIGNALduino{$id}{length_min}) && $message_length < $ProtocolListSIGNALduino{$id}{length_min} );
 		return (-1," message is to long") if (defined($ProtocolListSIGNALduino{$id}{length_max}) && $message_length > $ProtocolListSIGNALduino{$id}{length_max} );
