@@ -1,6 +1,6 @@
 ##############################################
 ##############################################
-# $Id: 14_SIGNALduino_ID7.pm 9672  2015-10-06 $
+# $Id: 14_SD_WS07.pm 9463  2015-10-12 $
 # 
 # The purpose of this module is to support serval eurochron
 # weather sensors like eas8007 which use the same protocol
@@ -17,38 +17,38 @@ use Data::Dumper;
 
 
 sub
-SIGNALduino_ID7_Initialize($)
+SD_WS07_Initialize($)
 {
   my ($hash) = @_;
 
-  $hash->{Match}     = "^u7[A-Fa-f0-9]{6}F[A-Fa-f0-9]{2}";    ## pos 7 ist aktuell immer 0xF
-  $hash->{DefFn}     = "SIGNALduino_ID7_Define";
-  $hash->{UndefFn}   = "SIGNALduino_ID7_Undef";
-  $hash->{ParseFn}   = "SIGNALduino_ID7_Parse";
-  $hash->{AttrFn}	 = "SIGNALduino_ID7_Attr";
+  $hash->{Match}     = "^P7#[A-Fa-f0-9]{6}F[A-Fa-f0-9]{2}";    ## pos 7 ist aktuell immer 0xF
+  $hash->{DefFn}     = "SD_WS07_Define";
+  $hash->{UndefFn}   = "SD_WS07_Undef";
+  $hash->{ParseFn}   = "SD_WS07_Parse";
+  $hash->{AttrFn}	 = "SD_WS07_Attr";
   $hash->{AttrList}  = "IODev do_not_notify:1,0 ignore:0,1 showtime:1,0 " .
                         "$readingFnAttributes ";
   $hash->{AutoCreate} =
-        { "SIGNALduino_ID7.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,"} };
+        { "SD_WS07.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,"} };
 
 
 }
 
 #############################
 sub
-SIGNALduino_ID7_Define($$)
+SD_WS07_Define($$)
 {
   my ($hash, $def) = @_;
   my @a = split("[ \t][ \t]*", $def);
 
-  return "wrong syntax: define <name> SIGNALduino_ID7 <code> ".int(@a)
+  return "wrong syntax: define <name> SD_WS07 <code> ".int(@a)
         if(int(@a) < 3 );
 
   $hash->{CODE} = $a[2];
   $hash->{lastMSG} =  "";
   $hash->{bitMSG} =  "";
 
-  $modules{SIGNALduino_ID7}{defptr}{$a[2]} = $hash;
+  $modules{SD_WS07}{defptr}{$a[2]} = $hash;
   $hash->{STATE} = "Defined";
   
   my $name= $hash->{NAME};
@@ -59,31 +59,33 @@ SIGNALduino_ID7_Define($$)
 
 #####################################
 sub
-SIGNALduino_ID7_Undef($$)
+SD_WS07_Undef($$)
 {
   my ($hash, $name) = @_;
-  delete($modules{SIGNALduino_ID7}{defptr}{$hash->{CODE}})
+  delete($modules{SD_WS07}{defptr}{$hash->{CODE}})
      if(defined($hash->{CODE}) &&
-        defined($modules{SIGNALduino_ID7}{defptr}{$hash->{CODE}}));
+        defined($modules{SD_WS07}{defptr}{$hash->{CODE}}));
   return undef;
 }
 
 
 ###################################
 sub
-SIGNALduino_ID7_Parse($$)
+SD_WS07_Parse($$)
 {
   my ($iohash, $msg) = @_;
-  my $rawData = substr($msg, 2);
+  #my $rawData = substr($msg, 2);
   my $name = $iohash->{NAME};
+  my ($protocol,$rawData) = split("#",$msg);
+  $protocol=~ s/^P(\d+)/$1/; # extract protocol
 
-  my $model = "SIGNALduino_ID7";
+  my $model = "SD_WS07";
   my $hlen = length($rawData);
   my $blen = $hlen * 4;
   my $bitData = unpack("B$blen", pack("H$hlen", $rawData)); 
   
 
-  Log3 $name, 4, "SIGNALduino_ID7_Parse  $model ($msg) length: $hlen";
+  Log3 $name, 4, "SD_WS07_Parse  $model ($msg) length: $hlen";
   
   #      4    8  9    12            24    28     36
   # 0011 0110 1  010  000100000010  1111  00111000 0000  eas8007
@@ -139,21 +141,21 @@ SIGNALduino_ID7_Parse($$)
 		$deviceCode = $model . "_" . $channel;
 	}
     
-    #print Dumper($modules{SIGNALduino_ID7}{defptr});
+    #print Dumper($modules{SD_WS07}{defptr});
     
-    my $def = $modules{SIGNALduino_ID7}{defptr}{$iohash->{NAME} . "." . $deviceCode};
-    $def = $modules{SIGNALduino_ID7}{defptr}{$deviceCode} if(!$def);
+    my $def = $modules{SD_WS07}{defptr}{$iohash->{NAME} . "." . $deviceCode};
+    $def = $modules{SD_WS07}{defptr}{$deviceCode} if(!$def);
 
     if(!$def) {
-		Log3 $iohash, 1, 'SIGNALduino_ID7: UNDEFINED sensor ' . $model . ' detected, code ' . $deviceCode;
-		return "UNDEFINED $deviceCode SIGNALduino_ID7 $deviceCode";
+		Log3 $iohash, 1, 'SD_WS07: UNDEFINED sensor ' . $model . ' detected, code ' . $deviceCode;
+		return "UNDEFINED $deviceCode SD_WS07 $deviceCode";
     }
-        #Log3 $iohash, 3, 'SIGNALduino_ID7: ' . $def->{NAME} . ' ' . $id;
+        #Log3 $iohash, 3, 'SD_WS07: ' . $def->{NAME} . ' ' . $id;
 	
 	
 	my $hash = $def;
 	$name = $hash->{NAME};
-	Log3 $name, 4, "SIGNALduino_ID7: $name ($rawData)";  
+	Log3 $name, 4, "SD_WS07: $name ($rawData)";  
 
 	if (!defined(AttrVal($hash->{NAME},"event-min-interval",undef)))
 	{
@@ -183,7 +185,7 @@ SIGNALduino_ID7_Parse($$)
 
 }
 
-sub SIGNALduino_ID7_Attr(@)
+sub SD_WS07_Attr(@)
 {
   my @a = @_;
 
@@ -193,8 +195,8 @@ sub SIGNALduino_ID7_Attr(@)
   my $hash = $defs{$a[1]};
   my $iohash = $defs{$a[3]};
   my $cde = $hash->{CODE};
-  delete($modules{SIGNALduino_ID7}{defptr}{$cde});
-  $modules{SIGNALduino_ID7}{defptr}{$iohash->{NAME} . "." . $cde} = $hash;
+  delete($modules{SD_WS07}{defptr}{$cde});
+  $modules{SD_WS07}{defptr}{$iohash->{NAME} . "." . $cde} = $hash;
   return undef;
 }
 
@@ -208,7 +210,7 @@ sub SIGNALduino_ID7_Attr(@)
 <a name="Wether Sensors protocol #7"></a>
 <h3>Wether Sensors protocol #7</h3>
 <ul>
-  The SIGNALduino_ID7 module interprets temperature sensor messages received by a Device like CUL, CUN, SIGNALduino etc.<br>
+  The SD_WS07 module interprets temperature sensor messages received by a Device like CUL, CUN, SIGNALduino etc.<br>
   <br>
   <b>Supported models:</b>
   <ul>
@@ -218,14 +220,14 @@ sub SIGNALduino_ID7_Attr(@)
   New received device are add in fhem with autocreate.
   <br><br>
 
-  <a name="SIGNALduino_ID7_Define"></a>
+  <a name="SD_WS07_Define"></a>
   <b>Define</b> 
   <ul>The received devices created automatically.<br>
   The ID of the defice is the cannel or, if the longid attribute is specified, it is a combination of channel and some random generated bits at powering the sensor and the channel.<br>
   If you want to use more sensors, than channels available, you can use the longid option to differentiate them.
   </ul>
   <br>
-  <a name="SIGNALduino_ID7 Events"></a>
+  <a name="SD_WS07 Events"></a>
   <b>Generated events:</b>
   <ul>
      <li>temperature: The temperature</li>
@@ -249,10 +251,10 @@ sub SIGNALduino_ID7_Attr(@)
     <li><a href="#readingFnAttributes">readingFnAttributes</a></li>
   </ul>
 
-  <a name="SIGNALduino_ID7_Set"></a>
+  <a name="SD_WS07_Set"></a>
   <b>Set</b> <ul>N/A</ul><br>
 
-  <a name="SIGNALduino_ID7_Parse"></a>
+  <a name="SD_WS07_Parse"></a>
   <b>Set</b> <ul>N/A</ul><br>
 
 </ul>
@@ -261,10 +263,10 @@ sub SIGNALduino_ID7_Attr(@)
 
 =begin html_DE
 
-<a name="SIGNALduino_ID7"></a>
-<h3>SIGNALduino_ID7</h3>
+<a name="SD_WS07"></a>
+<h3>SD_WS07</h3>
 <ul>
-  Das SIGNALduino_ID7 Module verarbeitet von einem IO Gerät (CUL, CUN, SIGNALDuino, etc.) empfangene Nachrichten von Temperatur-Sensoren.<br>
+  Das SD_WS07 Module verarbeitet von einem IO Gerät (CUL, CUN, SIGNALDuino, etc.) empfangene Nachrichten von Temperatur-Sensoren.<br>
   <br>
   <b>Unterstütze Modelle:</b>
   <ul>
@@ -274,13 +276,13 @@ sub SIGNALduino_ID7_Attr(@)
   Neu empfangene Sensoren werden in FHEM per autocreate angelegt.
   <br><br>
 
-  <a name="SIGNALduino_ID7_Define"></a>
+  <a name="SD_WS07_Define"></a>
   <b>Define</b> 
   <ul>Die empfangenen Sensoren werden automatisch angelegt.<br>
   Die ID der angelgten Sensoren ist entweder der Kanal des Sensors, oder wenn das Attribut longid gesetzt ist, dann wird die ID aus dem Kanal und einer Reihe von Bits erzeugt, welche der Sensor beim Einschalten zufällig vergibt.<br>
   </ul>
   <br>
-  <a name="SIGNALduino_ID7 Events"></a>
+  <a name="SD_WS07 Events"></a>
   <b>Generierte Events:</b>
   <ul>
      <li>temperature: Die aktuelle Temperatur</li>
@@ -302,10 +304,10 @@ sub SIGNALduino_ID7_Attr(@)
     <li><a href="#readingFnAttributes">readingFnAttributes</a></li>
   </ul>
 
-  <a name="SIGNALduino_ID71_Set"></a>
+  <a name="SD_WS071_Set"></a>
   <b>Set</b> <ul>N/A</ul><br>
 
-  <a name="SIGNALduino_ID7_Parse"></a>
+  <a name="SD_WS07_Parse"></a>
   <b>Set</b> <ul>N/A</ul><br>
 
 </ul>

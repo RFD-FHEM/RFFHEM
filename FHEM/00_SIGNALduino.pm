@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm  67293 2015-09-29
+# $Id: 00_SIGNALduino.pm  67282 2015-10-12
 # The file is taken from the FHEMduino project and modified in serval ways for processing the incomming messages
 # see http://www.fhemwiki.de/wiki/SIGNALDuino
 # It was modified also to provide support for raw message handling which it's send from the SIGNALduino
@@ -64,7 +64,7 @@ my $clientsSIGNALduino = ":IT:"
 						."SIGNALduino_AS:"
 						."SIGNALduino_un:"
 #						."Cresta:"
-						."SIGNALduino_ID7:"
+						."SD_WS07:"
 						; 
 
 ## default regex match List for dispatching message to logical modules, can be updated during runtime because it is referenced
@@ -81,7 +81,7 @@ my %matchListSIGNALduino = (
 #    "7:SIGNALduino_ARC"     	=> "AR.*\$", #ARC protocol switches like IT selflearn
 	 "8:SIGNALduino_un"			=> "u[1-6|8-9].*",
 #	 "9:Cresta"					=> "^[5][0|8]75[A-F0-9]+",
-	 "10:SIGNALduino_ID7"		=> "^u7[A-Fa-f0-9]+",                       
+	 "10:SD_WS07"				=> "^P7#[A-Fa-f0-9]+",                       
 );
 
 		#protoID[0]=(s_sigid){-4,-8,-18,500,0,twostate}; // Logi
@@ -216,9 +216,9 @@ my %ProtocolListSIGNALduino  = (
 			sync			=> [1,-8],		 
 			clockabs     	=> 484,			
 			format 			=> 'twostate',	
-			preamble		=> 'u7',		# prepend to converted message	
+			preamble		=> 'P7#',		# prepend to converted message	
 			clientmodule    => 'undef',   	# not used now
-			modulematch     => '^u7......', # not used now
+			modulematch     => '^P7#......', # not used now
 			length_min      => '35',
 			length_max      => '40',
 
