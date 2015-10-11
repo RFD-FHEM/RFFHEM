@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm  65112 2015-09-29
+# $Id: 00_SIGNALduino.pm  66676 2015-10-11
 # The file is taken from the FHEMduino project and modified in serval ways for processing the incomming messages
 # see http://www.fhemwiki.de/wiki/SIGNALDuino
 # It was modified also to provide support for raw message handling which it's send from the SIGNALduino
@@ -256,7 +256,7 @@ my %ProtocolListSIGNALduino  = (
 			{
             name			=> 'OSV2',	
 			id          	=> '10',
-			#one				=> [3,-2],
+			#one			=> [3,-2],
 			#zero			=> [1,-2],
 			#float			=> [-1,3],		# not full supported now, for later use
 			#sync			=> [1,-8],		# 
@@ -266,8 +266,8 @@ my %ProtocolListSIGNALduino  = (
 			#preamble		=> '',		# prepend to converted message	
 			#clientmodule    => '41_OREGON',   	# not used now
 			#modulematch     => '',  # not used now
-			length_min      => '37',
-			length_max      => '55',
+			length_min      => '64',
+			length_max      => '220',
 			method          => \&SIGNALduino_OSV2 # Call to process this message
 
 
@@ -286,8 +286,8 @@ my %ProtocolListSIGNALduino  = (
 			#preamble		=> '',		# prepend to converted message	
 			#clientmodule    => '14_SIGNALduino_AS',   	# not used now
 			#modulematch     => '',  # not used now
-			length_min      => '13',
-			length_max      => '14',
+			length_min      => '52',
+			length_max      => '56',
 			method          => \&SIGNALduino_AS # Call to process this message
 
 		}, 
@@ -300,8 +300,8 @@ my %ProtocolListSIGNALduino  = (
 			preamble		=> 'Hi',						# prepend to converted message	
 			#clientmodule    => '14_hideki',   				# not used now
 			#modulematch     => '',  						# not used now
-			length_min      => '20',
-			length_max      => '50',
+			length_min      => '72',
+			length_max      => '88',
 			method          => \&SIGNALduino_Hideki	# Call to process this message
 		}, 			
 	"13"    => 			## FA21RF
