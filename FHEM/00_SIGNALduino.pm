@@ -73,8 +73,8 @@ my %matchListSIGNALduino = (
      "5:CUL_TX"               	=> "^TX..........",         	  # Need TX to avoid FHTTK
 	 "6:SIGNALduino_AS"       	=> "AS[A-Fa-f0-9]{7,8}", 		  # Arduino based Sensors, should not be default
      "4:OREGON"            		=> "^(3[8-9A-F]|[4-6][0-9A-F]|7[0-8]).*",		
-	 "8:SIGNALduino_un"		=> "u.*",
-	 "7:Hideki"			=> "^Hi75[A-F0-9]+",
+	 "8:SIGNALduino_un"			=> "u.*",
+	 "7:Hideki"					=> "^Hi75[A-F0-9]+",
 );
 
 		#protoID[0]=(s_sigid){-4,-8,-18,500,0,twostate}; // Logi
@@ -296,7 +296,8 @@ my %ProtocolListSIGNALduino  = (
             name			=> 'Hideki protocol',	
 			id          	=> '12',
 			clockrange     	=> [420,510],                   # min, max better for Bresser Sensors, OK for hideki/Hideki/TFA too     
-			format 			=> 'manchester',	    
+			format 			=> 'manchester',	
+			preamble		=> 'Hi',						# prepend to converted message	
 			#clientmodule    => '14_hideki',   				# not used now
 			#modulematch     => '',  						# not used now
 			length_min      => '20',
@@ -1565,26 +1566,26 @@ SIGNALduino_Parse_MC($$$$@)
 	my $whitelistIDs = AttrVal($hash->{NAME},"whitelist_IDs",undef);
 	foreach $id ( keys %ProtocolListSIGNALduino) {
 		if (defined($whitelistIDs) && index(','.$whitelistIDs.',', ','.$id.',') == -1)
-                        {
-                                Log3 $name, 4, "skip ID $id";
-                                next;
-                        }
+        {
+        	Log3 $name, 4, "skip ID $id";
+            next;
+        }
 		next if (!defined($ProtocolListSIGNALduino{$id}{format}) or $ProtocolListSIGNALduino{$id}{format} ne "manchester");
 		Debug "Testing against Protocol id $id -> $ProtocolListSIGNALduino{$id}{name}"  if ($debug);
 
-		if ( $clock >$ProtocolListSIGNALduino{$id}{clockrange}[0] and $clock <$ProtocolListSIGNALduino{$id}{clockrange}[1] and length($rawData) > $ProtocolListSIGNALduino{$id}{length_min} and length($rawData) < $ProtocolListSIGNALduino{$id}{length_max} )
+		if ( $clock >$ProtocolListSIGNALduino{$id}{clockrange}[0] and $clock <$ProtocolListSIGNALduino{$id}{clockrange}[1] and length($rawData)*4 >= $ProtocolListSIGNALduino{$id}{length_min} )
 		{
-			Debug "clock and length matched"  if ($debug);
+			Debug "clock and min length matched"  if ($debug);
 
 		   	my $method = $ProtocolListSIGNALduino{$id}{method};
 		    if (!exists &$method)
 			{
 				Log 4, "$name: Error: Unknown function=$method. Please define it in file $0";
 			} else {
-				my ($rcode,$res) = $method->($name,$bitData);
+				my ($rcode,$res) = $method->($name,$bitData,$id);
 				if ($rcode != -1) {
 					$dmsg = $res;
-					
+					$dmsg=$ProtocolListSIGNALduino{$id}{preamble}.$dmsg if (defined($ProtocolListSIGNALduino{$id}{prefix})) 
 					SIGNALduno_Dispatch($hash,$rmsg,$dmsg);
 					$message_dispatched=1;
 				} else {
@@ -1756,20 +1757,29 @@ SIGNALduino_Attr(@)
 
 
 
-sub SIGNALduino_OSV2($$)
+sub SIGNALduino_OSV2()
 {
-	my ($name,$bitData) = @_;
+	my ($name,$bitData,$id) = @_;
 	
 	if (index($bitData,"10011001",24) >= 24 and $bitData =~ m/^.?(10){12,16}/) 
 	{  # Valid OSV2 detected!	
 		
 		Debug "$name: OSV2 protocol detected \n" if ($debug);
 		my $preamble_pos=index($bitData,"10011001",24);
+		
+		return return (-1," sync not found") if ($preamble_pos <=24);
+		
+		my $message_end=index($bitData,"10011001",$preamble_pos+24);
+       	$message_end = length($bitData) if ($message_end == -1);
+		my $message_length = $message_end - $message_start;
 
-		return undef if ($preamble_pos <=24);
+		return (-1," message is to short") if (defined($ProtocolListSIGNALduino{$id}{length_min}) && $message_length < $ProtocolListSIGNALduino{$id}{length_min} );
+		return (-1," message is to long") if (defined($ProtocolListSIGNALduino{$id}{length_max}) && $message_length > $ProtocolListSIGNALduino{$id}{length_max} );
+		
 		my $idx=0;
 		my $osv2bits="";
 		my $osv2hex ="";
+		
 		for ($idx=$preamble_pos;$idx<length($bitData);$idx=$idx+16)
 		{
 			if (length($bitData)-$idx  < 16 )
@@ -1790,7 +1800,7 @@ sub SIGNALduino_OSV2($$)
 			$osv2bits = $osv2bits.$rvosv2byte;
 		}
 		$osv2hex = sprintf("%02X", length($osv2hex)*4).$osv2hex;
-		Log3 $name, 5, "$name: OSV2 protocol converted to hex: ($osv2hex) with length (".(length($osv2hex)*4).") bytes \n";
+		Log3 $name, 5, "$name: OSV2 protocol converted to hex: ($osv2hex) with length (".(length($osv2hex)*4).") bits \n";
 		#$found=1;
 		#$dmsg=$osv2hex;
 		return (1,$osv2hex);
@@ -1799,16 +1809,25 @@ sub SIGNALduino_OSV2($$)
 }
 sub	SIGNALduino_AS()
 {
-	my ($name,$bitData) = @_;
+	my ($name,$bitData,$id) = @_;
 
 	if(index($bitData,"1100",16) >= 0) # $rawData =~ m/^A{2,3}/)
 	{  # Valid AS detected!	
 		my $message_start = index($bitData,"1100",16);
 		Debug "$name: AS protocol detected \n" if ($debug);
+		
+		my $message_end=index($bitData,"1100",$message_start+16);
+       	$message_end = length($bitData) if ($message_end == -1);
+		my $message_length = $message_end - $message_start;
+		
+		return (-1," message is to short") if (defined($ProtocolListSIGNALduino{$id}{length_min}) && $message_length < $ProtocolListSIGNALduino{$id}{length_min} );
+		return (-1," message is to long") if (defined($ProtocolListSIGNALduino{$id}{length_max}) && $message_length > $ProtocolListSIGNALduino{$id}{length_max} );
+		
+		
 		my $msgbits =substr($bitData,$message_start);
 		
 		my $ashex=sprintf('%02X', oct("0b$msgbits"));
-		Log3 $name, 5, "$name: AS protocol converted to hex: ($ashex) with length (".(length($ashex)*4).") bytes \n";
+		Log3 $name, 5, "$name: AS protocol converted to hex: ($ashex) with length ($message_length) bits \n";
 
 		return (1,$bitData);
 	}
@@ -1817,26 +1836,29 @@ sub	SIGNALduino_AS()
 
 sub	SIGNALduino_Hideki()
 {
-	my ($name,$bitData) = @_;
+	my ($name,$bitData,$id) = @_;
     Debug "$name: search in $bitData \n" if ($debug);
 	my $message_start = index($bitData,"10101110");
 	if ($message_start >= 0 )   # 0x75 but in reverse order
 	{
 		Debug "$name: Hideki protocol detected \n" if ($debug);
 
-		my $message_end = index($bitData,"10101110",$message_start+9);
-                if ($message_end == -1)  # pruefen auf ein zweites 0x75
-                {
-                        $message_end = length($bitData);
-                }
+		# Todo: Mindest Länge für startpunkt vorspringen 
+		# Todo: Wiederholung auch an das Modul weitergeben, damit es dort geprüft werden kann
+		my $message_end = index($bitData,"10101110",$message_start+18); # pruefen auf ein zweites 0x75,  mindestens 18 bit nach 1. 0x75
+        $message_end = length($bitData) if ($message_end == -1);
+        my $message_length = $message_end - $message_start;
+		
+		return (-1,"message is to short") if (defined($ProtocolListSIGNALduino{$id}{length_min}) && $message_length < $ProtocolListSIGNALduino{$id}{length_min} );
+		return (-1,"message is to long") if (defined($ProtocolListSIGNALduino{$id}{length_max}) && $message_length > $ProtocolListSIGNALduino{$id}{length_max} );
 
+		
 		my $hidekihex;
 		my $idx;
 		
 		for ($idx=$message_start; $idx<$message_end; $idx=$idx+9)
 		{
 			my $byte = "";
-
 			$byte= substr($bitData,$idx,8); ## Ignore every 9th bit
 			Debug "$name: byte in order $byte " if ($debug);
 			$byte = scalar reverse $byte;
@@ -1844,8 +1866,7 @@ sub	SIGNALduino_Hideki()
 
 			$hidekihex=$hidekihex.sprintf('%02X', oct("0b$byte"));
 		}
-		$hidekihex = "Hi" . $hidekihex;
-		Log3 $name, 4, "$name: hideki protocol converted to hex: $hidekihex with length " .length($hidekihex) ." bytes, messagestart $message_start";
+		Log3 $name, 4, "$name: hideki protocol converted to hex: $hidekihex with " .$message_length ." bits, messagestart $message_start";
 
 		return  (1,$hidekihex); ## Return only the original bits, include length
 	}
