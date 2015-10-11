@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm  66676 2015-10-11
+# $Id: 00_SIGNALduino.pm  66977 2015-10-11
 # The file is taken from the FHEMduino project and modified in serval ways for processing the incomming messages
 # see http://www.fhemwiki.de/wiki/SIGNALDuino
 # It was modified also to provide support for raw message handling which it's send from the SIGNALduino
@@ -517,10 +517,9 @@ SIGNALduino_Define($$)
   $hash->{"TIME"}=time();
   
   
-  my %WhitelistIDs = map { $_ => undef } split(",", AttrVal($name,"whitelist_IDs",""));
-  $hash->{"whitelisthash"} = \%WhitelistIDs;
-  
-  
+  my %WhitelistIDs = map { $_ => 1 } split(",", AttrVal($name,"whitelist_IDs",""));
+  $hash->{"whitelisthash"} = \%WhitelistIDs; 
+  undef($hash->{"whitelisthash"}) if (scalar(keys %WhitelistIDs) <= 0);
   return $ret;
 }
 
@@ -1266,13 +1265,12 @@ SIGNALduino_Parse_MS($$$$%)
 		## Find matching protocols
 		my $id;
 		my $message_dispatched=0;
-		my $whitelistIDs = AttrVal($hash->{NAME},"whitelist_IDs",undef);
 		foreach $id ( keys %ProtocolListSIGNALduino) {
-			if (defined($whitelistIDs) && index(','.$whitelistIDs.',', ','.$id.',') == -1)
-                        {
-                                Log3 $name, 4, "skip ID $id";
-                                next;
-                        }
+			if (defined($hash->{"whitelisthash"}) && !defined($hash->{"whitelisthash"}{$id})) {
+				Log3 $name, 4, "skip ID $id";
+                next;
+			}
+
 			next if !(exists $ProtocolListSIGNALduino{$id}{sync});
 			
 			my $valid=1;
@@ -1428,13 +1426,12 @@ sub SIGNALduino_Parse_MU($$$$@)
 
 		## Find matching protocols
 		my $id;
-		my $whitelistIDs = AttrVal($hash->{NAME},"whitelist_IDs",undef);
 		foreach $id ( keys %ProtocolListSIGNALduino) {
-			if (defined($whitelistIDs) && index(','.$whitelistIDs.',', ','.$id.',') == -1)
-                        {
-                                Log3 $name, 4, "skip ID $id";
-                                next;
-                        }
+			if (defined($hash->{"whitelisthash"}) && !defined($hash->{"whitelisthash"}{$id})) {
+				Log3 $name, 4, "skip ID $id";
+                next;
+			}
+
 			next if (exists $ProtocolListSIGNALduino{$id}{sync}); ## We can skip messages with sync defined
 			next if (defined($ProtocolListSIGNALduino{id}{format}) && $ProtocolListSIGNALduino{id}{format} ne "manchester");
 			next if (!defined($ProtocolListSIGNALduino{$id}{clockabs}));
@@ -1565,13 +1562,12 @@ SIGNALduino_Parse_MC($$$$@)
 	$bitData= unpack("B$blen", pack("H$hlen", $rawData)); 
 	Debug "$name: extracted data $bitData (bin)\n" if ($debug); ## Convert Message from hex to bits
 	my $id;
-	my $whitelistIDs = AttrVal($hash->{NAME},"whitelist_IDs",undef);
 	foreach $id ( keys %ProtocolListSIGNALduino) {
-		if (defined($whitelistIDs) && index(','.$whitelistIDs.',', ','.$id.',') == -1)
-        {
-        	Log3 $name, 4, "skip ID $id";
-            next;
-        }
+		if (defined($hash->{"whitelisthash"}) && !defined($hash->{"whitelisthash"}{$id})) {
+			Log3 $name, 4, "skip ID $id";
+               next;
+		}
+
 		next if (!defined($ProtocolListSIGNALduino{$id}{format}) or $ProtocolListSIGNALduino{$id}{format} ne "manchester");
 		Debug "Testing against Protocol id $id -> $ProtocolListSIGNALduino{$id}{name}"  if ($debug);
 
@@ -1755,8 +1751,12 @@ SIGNALduino_Attr(@)
 	}
 	elsif ($aName eq "whitelist_IDs")
 	{
- 		my %WhitelistIDs = map { $_ => undef } split(",", $aVal);
+		
+ 		my %WhitelistIDs;
+ 		%WhitelistIDs = map { $_ => 1 } split(",", $aVal) if (defined($aVal));
 		$hash->{"whitelisthash"} = \%WhitelistIDs;
+		undef($hash->{"whitelisthash"}) if (scalar(keys %WhitelistIDs) <= 0);
+		
 	}
 	
   	return undef;
@@ -1906,13 +1906,15 @@ sub	SIGNALduino_Hideki()
   
   
   Wireless switches  <br>
-  IT  switches --> uses IT.pm<br>
+  IT  switches --> uses IT.pm  Protocol id: 3 and 4<br>
   
   <br><br>
   
-  Temperatur / humidity sensors suppored by 14_CUL_TCM97001 <br>
-  PEARL NC7159, LogiLink WS0002,GT-WT-02,AURIOL,TCM97001, TCM27,GT-WT-02..  --> 14_CUL_TCM97001.pm <br>
-  Oregon Scientific v2 Sensors  --> 41_OREGON.pm<br>
+  Temperatur / humidity sensors  <br>
+  PEARL NC7159, LogiLink WS0002,GT-WT-02,AURIOL,TCM97001, TCM27,GT-WT-02..  --> 14_CUL_TCM97001.pm Protocol id: 0<br>
+  Oregon Scientific v2 Sensors  --> 41_OREGON.pm Protocol id: 10<br>
+  Hideki/Cresta,Bresser/Hama/TFA --> 14_Hideki.pm Protocol id: 12<br>
+  Lacrosse TX3-TH Sensors -->  14_CUL_TX Protocol id: 8 <br>
   <br><br>
 
   It is possible to attach more than one device in order to get better
@@ -2026,7 +2028,7 @@ sub	SIGNALduino_Hideki()
     <li>MatchList<br>
       * This is currently not implemented:<br>
       can be set to a perl expression that returns a> hash that is used as the MatchList<br>
-      <code>attr myJeeLink MatchList {'5:AliRF' => '^\\S+\\s+5 '}</code></li>
+      <code>attr sduino MatchList {'5:AliRF' => '^\\S+\\s+5 '}</code></li>
     <li>hexfile<br>
       Full path to a hex filename of the arduino sketch e.g. /opt/fhem/RF_Receiver_nano328.hex
 	</li>
@@ -2034,13 +2036,14 @@ sub	SIGNALduino_Hideki()
 	  
 	<li><a href="#do_not_notify">do_not_notify</a></li>
     <li><a href="#attrdummy">dummy</a></li>
+    This mode is only for debug and testing purpose
     <li><a href="#attrdummy">debug</a><br>
     This will bring the module in a very verbose debug output. Usefull to find new signals and verify if the demodulation works correctly.
     </li>
     
     <li>longids<br>
         Comma separated list of device-types for SIGNALduino that should be handled using long IDs. This additional ID allows it to differentiate some weather sensors, if they are sending on the same channel. Therfor a random generated id is added. If you choose to use longids, then you'll have to define a different device after battery change.<br>
-Default is to use long IDs for all devices.
+Default is not to use long IDs for all devices.
       <br><br>
       Examples:<PRE>
 # Do not use any long IDs for any devices:
@@ -2052,6 +2055,10 @@ attr sduino longids 1
 attr RFXCOMUSB longids BTHR918N
 </PRE>
     </li><br>
+    <li>whitelist_IDs<br>
+    	You can specify protocols by it internal ID if you want to limit the supported protocols.
+    	Enter a comma seperated list of ids or nothing. If you specify protocol 0 and 6, then all other protocols are not supported.
+   	</li>
 
   </ul>
   <br>
