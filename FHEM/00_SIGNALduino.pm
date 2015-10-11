@@ -1265,7 +1265,7 @@ SIGNALduino_Parse_MS($$$$%)
 		my $message_dispatched=0;
 		my $whitelistIDs = AttrVal($hash->{NAME},"whitelist_IDs",undef);
 		foreach $id ( keys %ProtocolListSIGNALduino) {
-			if (defined($whitelistIDs) && index($whitelistIDs.',', $id.',') == -1)
+			if (defined($whitelistIDs) && index(','.$whitelistIDs.',', ','.$id.',') == -1)
                         {
                                 Log3 $name, 4, "skip ID $id";
                                 next;
@@ -1427,7 +1427,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 		my $id;
 		my $whitelistIDs = AttrVal($hash->{NAME},"whitelist_IDs",undef);
 		foreach $id ( keys %ProtocolListSIGNALduino) {
-			if (defined($whitelistIDs) && index($whitelistIDs.',', $id.',') == -1)
+			if (defined($whitelistIDs) && index(','.$whitelistIDs.',', ','.$id.',') == -1)
                         {
                                 Log3 $name, 4, "skip ID $id";
                                 next;
@@ -1564,7 +1564,7 @@ SIGNALduino_Parse_MC($$$$@)
 	my $id;
 	my $whitelistIDs = AttrVal($hash->{NAME},"whitelist_IDs",undef);
 	foreach $id ( keys %ProtocolListSIGNALduino) {
-		if (defined($whitelistIDs) && index($whitelistIDs.',', $id.',') == -1)
+		if (defined($whitelistIDs) && index(','.$whitelistIDs.',', ','.$id.',') == -1)
                         {
                                 Log3 $name, 4, "skip ID $id";
                                 next;
@@ -1845,7 +1845,7 @@ sub	SIGNALduino_Hideki()
 			$hidekihex=$hidekihex.sprintf('%02X', oct("0b$byte"));
 		}
 		$hidekihex = "Hi" . $hidekihex;
-		Log3 $name, 4, "$name: hideki protocol converted to hex: $hidekihex with length " .length($hidekihex) ." bits, messagestart $message_start";
+		Log3 $name, 4, "$name: hideki protocol converted to hex: $hidekihex with length " .length($hidekihex) ." bytes, messagestart $message_start";
 
 		return  (1,$hidekihex); ## Return only the original bits, include length
 	}
