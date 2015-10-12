@@ -74,7 +74,7 @@ my %matchListSIGNALduino = (
 	 "6:SIGNALduino_AS"       	=> "AS[A-Fa-f0-9]{7,8}", 		  # Arduino based Sensors, should not be default
      "4:OREGON"            		=> "^(3[8-9A-F]|[4-6][0-9A-F]|7[0-8]).*",		
 	 "8:SIGNALduino_un"			=> "u.*",
-	 "7:Hideki"					=> "^P12#75[A-F0-9]{17,30}",
+	 "7:Hideki"					=> "^P12#75[A-F0-9]",
 );
 
 
@@ -115,10 +115,10 @@ my %ProtocolListSIGNALduino  = (
         {
             name			=> 'AS',		# Self build arduino sensor
 			id          	=> '2',
-			one				=> [1,-4],
-			zero			=> [1,-2],
+			one				=> [1,-2],
+			zero			=> [1,-1],
 			sync			=> [1,-20],
-			clockabs     	=> '405',		# not used now
+			clockabs     	=> '500',		# not used now
 			format 			=> 'twostate',	
 			preamble		=> 'AS',		# prepend to converted message		
 			clientmodule    => 'SIGNALduino_AS',   # not used now
