@@ -171,6 +171,12 @@ SIGNALduino_un_Parse($$)
 	{   #http://nupo-artworks.de/media/report.pdf
 		
 		my $syncpos= index($bitData,"11111110");  #7x1 1x0 preamble
+		
+		if ($syncpos ==-1 || length($bitData)-$syncpos < 70) 
+		{
+			Log3 $hash, 4, "$name  ctw600 not found, aborting";
+			return undef;
+		}
 		my $sensdata = substr($bitData,$syncpos+8);
 
 		my $id = substr($sensdata,4,6);
