@@ -172,15 +172,15 @@ SIGNALduino_un_Parse($$)
 		
 		my $syncpos= index($bitData,"11111110");  #7x1 1x0 preamble
 		
-		if ($syncpos ==-1 || length($bitData)-$syncpos < 70) 
+		if ($syncpos ==-1 || length($bitData)-$syncpos < 68) 
 		{
 			Log3 $hash, 4, "$name  ctw600 not found, aborting";
 			return undef;
 		}
 		my $sensdata = substr($bitData,$syncpos+8);
 
-		my $id = substr($sensdata,4,6);
 		my $bat = substr($sensdata,0,3);
+		my $id = substr($sensdata,4,6);
 		my $temp = substr($sensdata,12,10);
 		my $hum = substr($sensdata,22,8);
 		my $wind = substr($sensdata,30,16);
