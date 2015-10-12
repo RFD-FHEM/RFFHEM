@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 14_Hideki.pm 11028 2015-10-06 $
+# $Id: 14_Hideki.pm 12128 2015-10-12 $
 # The file is taken from the SIGNALduino project
 # see http://www.fhemwiki.de/wiki/SIGNALduino
 # and was modified by a few additions
@@ -22,7 +22,7 @@ Hideki_Initialize($)
   my ($hash) = @_;
 
 
-  $hash->{Match}     = "^P12#75[A-F0-9]+";   # Länge (Anhahl nibbles nach 0x75 )noch genauer zpezifiieren
+  $hash->{Match}     = "^P12#75[A-F0-9]{17,30}";   # Länge (Anhahl nibbles nach 0x75 )noch genauer zpezifiieren
   $hash->{DefFn}     = "Hideki_Define";
   $hash->{UndefFn}   = "Hideki_Undef";
   $hash->{AttrFn}    = "Hideki_Attr";
@@ -334,7 +334,7 @@ Hideki_Attr(@)
   <b>Generated readings</b>
   <ul>
   	<li>state (T:x H:y B:z)</li>
-	<li>temperature (°C)</li>
+	<li>temperature (&deg;C)</li>
 	<li>humidity (0-100)</li>
 	<li>battery (ok or low)</li>
   </ul>
@@ -399,7 +399,7 @@ Hideki_Attr(@)
   <b>Erzeugte Readings</b>
   <ul>
   	<li>state (T:x H:y B:z)</li>
-	<li>temperature (°C)</li>
+	<li>temperature (&deg;C)</li>
 	<li>humidity (0-100)</li>
 	<li>battery (ok or low)</li>
   </ul>
