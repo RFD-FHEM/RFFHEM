@@ -13,7 +13,7 @@ package main;
 use strict;
 use warnings;
 
-use Data::Dumper;
+#use Data::Dumper;
 
 
 sub
@@ -76,8 +76,8 @@ SD_WS07_Parse($$)
   my ($iohash, $msg) = @_;
   #my $rawData = substr($msg, 2);
   my $name = $iohash->{NAME};
-  my ($protocol,$rawData) = split("#",$msg);
-  $protocol=~ s/^P(\d+)/$1/; # extract protocol
+  my (undef ,$rawData) = split("#",$msg);
+  #$protocol=~ s/^P(\d+)/$1/; # extract protocol
 
   my $model = "SD_WS07";
   my $hlen = length($rawData);
