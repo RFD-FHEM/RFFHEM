@@ -1,6 +1,6 @@
 ##############################################
 ##############################################
-# $Id: 14_SD_WS07.pm 9463  2015-10-12 $
+# $Id: 14_SD_WS07.pm 8958  2015-10-12 $
 # 
 # The purpose of this module is to support serval eurochron
 # weather sensors like eas8007 which use the same protocol
@@ -231,7 +231,7 @@ sub SD_WS07_Attr(@)
   <br>Some devices may not support all readings, so they will not be presented<br>
   <ul>
   	 <li>State (T: H:)</li>
-     <li>temperature (°C)</li>
+     <li>temperature (&deg;C)</li>
      <li>humidity: (The humidity (1-100 if available)</li>
      <li>battery: (low or ok)</li>
      <li>channel: (The Channelnumber (number if)</li>
@@ -282,7 +282,7 @@ sub SD_WS07_Attr(@)
   <b>Generierte Readings:</b>
   <ul>
   	 <li>State (T: H:)</li>
-     <li>temperature (°C)</li>
+     <li>temperature (&deg;C)</li>
      <li>humidity: (Luftfeuchte (1-100)</li>
      <li>battery: (low oder ok)</li>
      <li>channel: (Der Sensor Kanal)</li>
