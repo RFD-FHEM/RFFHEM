@@ -117,7 +117,7 @@ my %ProtocolListSIGNALduino  = (
 			id          	=> '2',
 			one				=> [1,-4],
 			zero			=> [1,-2],
-			sync			=> [1,-20],
+			sync			=> [1,-18],
 			clockabs     	=> '405',		# not used now
 			format 			=> 'twostate',	
 			preamble		=> 'AS',		# prepend to converted message		
@@ -182,15 +182,14 @@ my %ProtocolListSIGNALduino  = (
 	
 	"6"    => 			## Eurochron Protocol
         {
-            name			=> 'eurochron',	
+             name			=> 'eurochron',	
 			id          	=> '6',
-			one				=> [1,-9],
-			zero			=> [1,-4],
-			#float			=> [-1,3],		# not full supported now, for later use
+			one				=> [1,-10],
+			zero			=> [1,-5],
 			sync			=> [1,-36],		# This special device has no sync
-			clockabs     	=> 212,			# -1 = auto
+			clockabs     	=> 220,			# -1 = auto
 			format 			=> 'twostate',	# tristate can't be migrated from bin into hex!
-			preamble		=> 'u',			# Append to converted message	
+			preamble		=> 'u6#',			# Append to converted message	
 			clientmodule    => 'undef',   	# not used now
 			modulematch     => '^u......',  # not used now
 			length_min      => '24',
@@ -241,7 +240,7 @@ my %ProtocolListSIGNALduino  = (
 			#sync			=> [1,-8],		# 
 			clockabs     	=> 480,			# -1 = auto undef=noclock
 			format 			=> 'pwm',	    # tristate can't be migrated from bin into hex!
-			preamble		=> 'u9',		# prepend to converted message	
+			preamble		=> 'u9#',		# prepend to converted message	
 			clientmodule    => 'undef',   	# not used now
 			modulematch     => '^u9......',  # not used now
 			length_min      => '70',
@@ -252,7 +251,7 @@ my %ProtocolListSIGNALduino  = (
 			{
             name			=> 'OSV2',	
 			id          	=> '10',
-			#one			=> [3,-2],
+			#one				=> [3,-2],
 			#zero			=> [1,-2],
 			#float			=> [-1,3],		# not full supported now, for later use
 			#sync			=> [1,-8],		# 
@@ -262,8 +261,8 @@ my %ProtocolListSIGNALduino  = (
 			#preamble		=> '',		# prepend to converted message	
 			#clientmodule    => '41_OREGON',   	# not used now
 			#modulematch     => '',  # not used now
-			length_min      => '44',
-			length_max      => '220',
+			length_min      => '37',
+			length_max      => '55',
 			method          => \&SIGNALduino_OSV2 # Call to process this message
 
 
@@ -282,8 +281,8 @@ my %ProtocolListSIGNALduino  = (
 			#preamble		=> '',		# prepend to converted message	
 			#clientmodule    => '14_SIGNALduino_AS',   	# not used now
 			#modulematch     => '',  # not used now
-			length_min      => '52',
-			length_max      => '56',
+			length_min      => '13',
+			length_max      => '14',
 			method          => \&SIGNALduino_AS # Call to process this message
 
 		}, 
@@ -309,7 +308,7 @@ my %ProtocolListSIGNALduino  = (
 			sync			=> [10,-1],		
 			clockabs		=> 800,
 			format 			=> 'twostate',	  		
-			preamble		=> 'u13',				# prepend to converted message	
+			preamble		=> 'u13#',				# prepend to converted message	
 			#clientmodule    => '',   				# not used now
 			#modulematch     => '',  				# not used now
 			length_min      => '20',
@@ -325,7 +324,7 @@ my %ProtocolListSIGNALduino  = (
 			sync			=> [1,-14],				# 
 			clockabs		=> 350,
 			format 			=> 'twostate',	  		
-			preamble		=> 'u14',				# prepend to converted message	
+			preamble		=> 'u14#',				# prepend to converted message	
 			#clientmodule    => '',   				# not used now
 			#modulematch     => '',  				# not used now
 			length_min      => '10',
@@ -342,7 +341,7 @@ my %ProtocolListSIGNALduino  = (
 			sync			=> [1,-45],				# 
 			clockabs		=> 700,
 			format 			=> 'twostate',	  		
-			preamble		=> 'u15',				# prepend to converted message	
+			preamble		=> 'u15#',				# prepend to converted message	
 			#clientmodule    => '',   				# not used now
 			#modulematch     => '',  				# not used now
 			length_min      => '10',
@@ -358,7 +357,7 @@ my %ProtocolListSIGNALduino  = (
 			#sync			=> [18,-6],				# protocol has a sync, but is detected as MU
 			clockabs		=> 250,
 			format 			=> 'twostate',	  		
-			preamble		=> 'u16',				# prepend to converted message	
+			preamble		=> 'u16#',				# prepend to converted message	
 			#clientmodule    => '',   				# not used now
 			#modulematch     => '',  				# not used now
 			length_min      => '30',
@@ -373,29 +372,103 @@ my %ProtocolListSIGNALduino  = (
 			sync			=> [1,-22],	# footer [1,-50]			
 			clockabs		=> 400,
 			format 			=> 'twostate',	  		
-			preamble		=> 'u17',				# prepend to converted message	
+			preamble		=> 'u17#',				# prepend to converted message	
 			#clientmodule    => '',   				# not used now
 			#modulematch     => '',  				# not used now
 			length_min      => '30',
 			#length_max      => '38',
 		}, 	
-	
-	"19" => # nothing knowing about this 2015-09-28 01:25:40-MS;P0=-8916;P1=-19904;P2=390;P3=-535;P4=-1020;P5=12846;P6=1371;D=2120232323232324242423232323232323232320239;CP=2;SP=1;
-	
+	"18"    => 			## Oregon Scientific v1
 		{
-            name			=> 'unknown19',	
-			id          	=> '19',
-			one				=> [1,-2],
+            name			=> 'OSV1',	
+			id          	=> '18',
+			clockrange     	=> [1550,1650],			# min , max
+			format 			=> 'manchester',	    # tristate can't be migrated from bin into hex!
+			#preamble		=> '',					# prepend to converted message	
+			#clientmodule    => 'to be written',   	# not used now
+			#modulematch     => '',  				# not used now
+			length_min      => '8',
+			length_max      => '8',
+			method          => \&SIGNALduino_OSV1 # Call to process this message
+		},	
+	#"19" => # nothing knowing about this 2015-09-28 01:25:40-MS;P0=-8916;P1=-19904;P2=390;P3=-535;P4=-1020;P5=12846;P6=1371;D=2120232323232324242423232323232323232320239;CP=2;SP=1;
+	#
+	#	{
+    #       name			=> 'unknown19',	
+	#		id          	=> '19',
+	#		one				=> [1,-2],
+	#		zero			=> [1,-1],
+	#		sync			=> [1,-50,1,-22],				
+	#		clockabs		=> 395,
+	#		format 			=> 'twostate',	  		
+	#		preamble		=> 'u19#',				# prepend to converted message	
+	#		#clientmodule    => '',   				# not used now
+	#		#modulematch     => '',  				# not used now
+	#		length_min      => '16',
+	#		length_max      => '32',
+	#	}, 	 	
+	"20" => #Livolo	
+		{
+            name			=> 'livolo',	
+			id          	=> '20',
+			one				=> [2,-1],
 			zero			=> [1,-1],
-			sync			=> [1,-50,1,-22],				
-			clockabs		=> 395,
+			sync			=> [1,-3],				
+			clockabs		=> -1,                  #can be 140-190
 			format 			=> 'twostate',	  		
-			preamble		=> 'u19',				# prepend to converted message	
+			preamble		=> 'u20#',				# prepend to converted message	
 			#clientmodule    => '',   				# not used now
 			#modulematch     => '',  				# not used now
 			length_min      => '16',
-			length_max      => '32',
-		}, 	 	
+		},
+	"21" => #Einhell Garagentor	
+		{
+            name			=> 'einhell garagedoor',	
+			id          	=> '21',
+			one				=> [-3,1],
+			zero			=> [-1,3],
+			#sync			=> [-50,1],				
+			clockabs		=> 400,                  #ca 400us
+			format 			=> 'twostate',	  		
+			preamble		=> 'u21#',				# prepend to converted message	
+			#clientmodule    => '',   				# not used now
+			#modulematch     => '',  				# not used now
+			length_min      => '27',
+			length_max      => '33',				# must be tested
+
+		},
+	"22" => #TX-EZ6 / Meteo	
+		{
+            name			=> 'TX-EZ6',	
+			id          	=> '22',
+			one				=> [1,-8],
+			zero			=> [1,-3],
+			sync			=> [1,16],				
+			clockabs		=> 500,                  #ca 400us
+			format 			=> 'twostate',	  		
+			preamble		=> 'u22#',				# prepend to converted message	
+			#clientmodule    => '',   				# not used now
+			#modulematch     => '',  				# not used now
+			length_min      => '40',
+			#length_max      => '',				# must be tested
+
+		},
+	"23" => # Pearl Sensor
+		{
+            name			=> 'perl unknown',	
+			id          	=> '23',
+			one				=> [1,-6],
+			zero			=> [1,-1],
+			sync			=> [1,-50],				
+			clockabs		=> 200,                  #ca 200us
+			format 			=> 'twostate',	  		
+			preamble		=> 'u23#',				# prepend to converted message	
+			#clientmodule    => '',   				# not used now
+			#modulematch     => '',  				# not used now
+			length_min      => '36',
+			length_max      => '44',				
+
+		},
 );
 
 
@@ -1842,6 +1915,24 @@ sub SIGNALduino_OSV2()
 	} 
 	return (-1,undef);
 }
+
+sub SIGNALduino_OSV1()
+{
+	my ($name,$bitData,$rawData) = @_;
+	
+	my $idx=0;
+	
+	my $osv1hex ;# ~hex('0x'.$rawData);
+	my $osv1bit = $bitData =~ tr/10/01/r;
+	#Log3 $name, 5, "$name: OSV1 protocol converted from ($bitData) to bit: ($osv1bit)" ;
+	$osv1hex=sprintf("%02X", length($rawData)*4, $osv1hex).SIGNALduino_b2h($osv1bit);
+
+
+	Log3 $name, 5, "$name: OSV1 protocol converted to hex: ($osv1hex) with length (".(length($rawData)*4).") bits \n";
+	return (1,$osv1hex);
+
+}
+
 sub	SIGNALduino_AS()
 {
 	my ($name,$bitData,$id) = @_;
