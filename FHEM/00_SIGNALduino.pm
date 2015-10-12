@@ -1461,12 +1461,12 @@ sub SIGNALduino_Parse_MU($$$$@)
 			Debug "Expect $bit_length bits in message"  if ($valid && $debug);
 
 			#Check calculated min length
-			$valid = $valid && $ProtocolListSIGNALduino{$id}{length_min} <= $bit_length if (exists $ProtocolListSIGNALduino{$id}{length_min}); 
+			#$valid = $valid && $ProtocolListSIGNALduino{$id}{length_min} <= $bit_length if (exists $ProtocolListSIGNALduino{$id}{length_min});
 			#Check calculated max length
-			$valid = $valid && $ProtocolListSIGNALduino{$id}{length_max} >= $bit_length if (exists $ProtocolListSIGNALduino{$id}{length_max});
+			#$valid = $valid && $ProtocolListSIGNALduino{$id}{length_max} >= $bit_length if (exists $ProtocolListSIGNALduino{$id}{length_max});
 
-			next if (!$valid) ;
-			Debug "expecting $bit_length bits in signal" if ($debug && $valid);
+			#next if (!$valid) ;
+			#Debug "expecting $bit_length bits in signal" if ($debug && $valid);
 
 			Debug "Searching in patternList: ".Dumper(\%patternList) if($debug);
 			next if (!$valid) ;
@@ -1474,7 +1474,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 	
 			my %patternLookupHash=();
 
-			#Debug "phash:".Dumper(%patternLookupHash)
+			#Debug "phash:".Dumper(%patternLookupHash);
 			my $pstr="";
 			$valid = $valid && ($pstr=SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}},\%patternList)) >=0;
 			Debug "Found matched one" if ($debug && $valid);
@@ -1498,46 +1498,66 @@ sub SIGNALduino_Parse_MU($$$$@)
 			#Debug $signal_width;
 			
 			
-			my @bit_msg;							# array to store decoded signal bits
-			my $message_start = (index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}}),\%patternList) > index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{zero}}),\%patternList)) ? index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}},\%patternList)) : index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{zero}},\%patternList));
+			my @bit_msg=();							# array to store decoded signal bits
+			my $message_start = (index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}},\%patternList)) < index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{zero}},\%patternList)) ? index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}},\%patternList)) : index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{zero}},\%patternList)));
+
 			#for (my $i=index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{sync}}))+$signal_width;$i<length($rawData);$i+=$signal_width)
 			#Debug "Message starts at:".$message_start;
+			Log3 $name, 5, "Starting demodulation at Position $message_start";
+			#my $onepos= index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}},\%patternList));
+			#my $zeropos=index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{zero}},\%patternList));
+			#Log3 $name, 3, "op=$onepos zp=$zeropos";
+			#Debug "phash:".Dumper(%patternLookupHash);
 			for (my $i=$message_start;$i<length($rawData);$i+=$signal_width)
 			{
 				my $sig_str= substr($rawData,$i,$signal_width);
 				#Debug $patternLookupHash{substr($rawData,$i,$signal_width)}; ## Get $signal_width number of chars from raw data string
-				push(@bit_msg,$patternLookupHash{$sig_str}) if (exists $patternLookupHash{$sig_str}); ## Add the bits to our bit array
-				next if !(exists $patternLookupHash{$sig_str}); ## Break if something that doesn't fit our searched pattern or we are at the end
+				if (exists $patternLookupHash{$sig_str})
+				{
+					push(@bit_msg,$patternLookupHash{$sig_str}) ; ## Add the bits to our bit array
+				}
+				if (!exists $patternLookupHash{$sig_str} || $i+$signal_width>=length($rawData))  ## Dispatch if last signal or unknown data
+				{
+					Debug "$name: decoded message raw (@bit_msg), ".@bit_msg." bits\n" if ($debug);;
+					while (@bit_msg % 4 > 0)
+					{
+						push(@bit_msg,'0');
+						Debug "$name: padding 0 bit to bit_msg array" if ($debug);
+					}
+
+					#Check converted message against lengths
+					$valid = $valid && $ProtocolListSIGNALduino{$id}{length_min} <= scalar @bit_msg  if (defined($ProtocolListSIGNALduino{$id}{length_min}));
+					$valid = $valid && $ProtocolListSIGNALduino{$id}{length_max} >= scalar @bit_msg  if (defined($ProtocolListSIGNALduino{$id}{length_max}));
+					next if (!$valid);  ## Last chance to try next protocol if there is somethin invalid
+					Log3 $name, 5, "demodulated bits are: @bit_msg";
+
+
+					my $dmsg = SIGNALduino_b2h(join "", @bit_msg);
+					$dmsg =~ s/^0+//	 if (defined($ProtocolListSIGNALduino{$id}{remove_zero}));
+					$dmsg = "$dmsg"."$ProtocolListSIGNALduino{$id}{postamble}" if (defined($ProtocolListSIGNALduino{$id}{postamble}));
+					$dmsg = "$ProtocolListSIGNALduino{$id}{preamble}"."$dmsg" if (defined($ProtocolListSIGNALduino{$id}{preamble}));
+
+					SIGNALduno_Dispatch($hash,$rmsg,$dmsg);
+					$message_dispatched=1;
+
+				    @bit_msg=(); # clear bit_msg array
+
+					#Find next position of valid signal (skip invalid pieces)
+					$i = (index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}},\%patternList),$i) < index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{zero}},\%patternList),$i) ? index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}},\%patternList),$i) : index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{zero}},\%patternList),$i));
+					$i-=$signal_width;
+					last if ($i <=-1);
+					Log3 $name, 5, "restarting demodulation at Position $i+$signal_width";
+				}
 			}
-			
-			Debug "$name: decoded message raw (@bit_msg), ".@bit_msg." bits\n" if ($debug);;
-			while (@bit_msg % 4 > 0)
-			{
-				push(@bit_msg,'0');
-				Debug "$name: padding 0 bit to bit_msg array" if ($debug);
-			}
-			#Check converted message against lengths
-			$valid = $valid && $ProtocolListSIGNALduino{$id}{length_min} <= scalar @bit_msg  if (defined($ProtocolListSIGNALduino{$id}{length_min})); 
-			$valid = $valid && $ProtocolListSIGNALduino{$id}{length_max} >= scalar @bit_msg  if (defined($ProtocolListSIGNALduino{$id}{length_max}));
-			next if (!$valid);  ## Last chance to try next protocol if there is somethin invalid
 
 			#my $dmsg = sprintf "%02x", oct "0b" . join "", @bit_msg;			## Array -> String -> bin -> hex
-			my $dmsg = SIGNALduino_b2h(join "", @bit_msg);
-			$dmsg =~ s/^0+//	 if (defined($ProtocolListSIGNALduino{$id}{remove_zero})); 
-			
-			$dmsg = "$dmsg"."$ProtocolListSIGNALduino{$id}{postamble}" if (defined($ProtocolListSIGNALduino{$id}{postamble}));
-			$dmsg = "$ProtocolListSIGNALduino{$id}{preamble}"."$dmsg" if (defined($ProtocolListSIGNALduino{$id}{preamble}));
-			
-			SIGNALduno_Dispatch($hash,$rmsg,$dmsg);
-			$message_dispatched=1;
-
-		
 		}
 		return 0 if (!$message_dispatched);
-		
+
 		return 1;
 	}
 }
+
 
 
 sub
@@ -1858,8 +1878,8 @@ sub	SIGNALduino_Hideki()
 	{
 		Debug "$name: Hideki protocol detected \n" if ($debug);
 
-		# Todo: Mindest Länge für startpunkt vorspringen 
-		# Todo: Wiederholung auch an das Modul weitergeben, damit es dort geprüft werden kann
+		# Todo: Mindest Laenge fuer startpunkt vorspringen 
+		# Todo: Wiederholung auch an das Modul weitergeben, damit es dort geprueft werden kann
 		my $message_end = index($bitData,"10101110",$message_start+18); # pruefen auf ein zweites 0x75,  mindestens 18 bit nach 1. 0x75
         $message_end = length($bitData) if ($message_end == -1);
         my $message_length = $message_end - $message_start;
