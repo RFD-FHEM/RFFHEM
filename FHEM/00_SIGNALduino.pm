@@ -12,7 +12,7 @@
 package main;
 
 use strict;
-use warning;
+use warnings;
 use Time::HiRes qw(gettimeofday);
 use Data::Dumper qw(Dumper);
 
@@ -262,7 +262,7 @@ my %ProtocolListSIGNALduino  = (
 			#preamble		=> '',		# prepend to converted message	
 			#clientmodule    => '41_OREGON',   	# not used now
 			#modulematch     => '',  # not used now
-			length_min      => '44',
+			length_min      => '64',
 			length_max      => '220',
 			method          => \&SIGNALduino_OSV2 # Call to process this message
 
@@ -297,7 +297,7 @@ my %ProtocolListSIGNALduino  = (
 			#clientmodule    => '14_hideki',   				# not used now
 			#modulematch     => '',  						# not used now
 			length_min      => '72',
-			length_max      => '88',
+			length_max      => '104',
 			method          => \&SIGNALduino_Hideki	# Call to process this message
 		}, 			
 	"13"    => 			## FA21RF
@@ -1583,7 +1583,7 @@ SIGNALduino_Parse_MC($$$$@)
 				my ($rcode,$res) = $method->($name,$bitData,$id);
 				if ($rcode != -1) {
 					$dmsg = $res;
-					$dmsg=$ProtocolListSIGNALduino{$id}{preamble}.$dmsg if (defined($ProtocolListSIGNALduino{$id}{prefix})); 
+					$dmsg=$ProtocolListSIGNALduino{$id}{preamble}.$dmsg if (defined($ProtocolListSIGNALduino{$id}{preamble})); 
 					SIGNALduno_Dispatch($hash,$rmsg,$dmsg);
 					$message_dispatched=1;
 				} else {
