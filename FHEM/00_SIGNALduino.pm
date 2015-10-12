@@ -12,7 +12,7 @@
 package main;
 
 use strict;
-use warnings;
+use warning  ,;
 use Time::HiRes qw(gettimeofday);
 use Data::Dumper qw(Dumper);
 
@@ -1897,7 +1897,7 @@ sub	SIGNALduino_Hideki()
 
 <a name="SIGNALduino"></a>
 <h3>SIGNALduino</h3>
-<ul>
+
 	<table>
 	<tr><td>
 	The SIGNALduino ia based on an idea from mdorenka published at <a
@@ -1932,7 +1932,6 @@ sub	SIGNALduino_Hideki()
 	<img src="ccc.jpg"/>
 	</td></tr>
 	</table>
-
 	<a name="SIGNALduinodefine"></a>
 	<b>Define</b>
 	<code>define &lt;name&gt; SIGNALduino &lt;device&gt; </code> <br>
@@ -1966,10 +1965,7 @@ sub	SIGNALduino_Hideki()
 	<a name="SIGNALduinoset"></a>
 	<b>Set </b>
 	<ul>
-		<li>raw<br>
-		Issue a SIGNALduino firmware command.  See the <a
-		href="http://<tbd>/commandref.html">this</a> document
-		for details on SIGNALduino commands.
+		<li>raw<br>Issue a SIGNALduino firmware command.  See the <a href="http://<tbd>/commandref.html">this</a> document for details on SIGNALduino commands.
 		</li><br>
 
 		<li>flash [hexFile]<br>
@@ -2058,11 +2054,8 @@ sub	SIGNALduino_Hideki()
 		attr RFXCOMUSB longids BTHR918N
 		</PRE>
 		</li><br>
-
-		</ul>
-	<br>
 	</ul>
-</ul>
+
 
 =end html
 =cut
