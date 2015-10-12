@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm  66507 2015-10-12
+# $Id: 00_SIGNALduino.pm  66340 2015-10-12
 # The file is taken from the FHEMduino project and modified in serval ways for processing the incomming messages
 # see http://www.fhemwiki.de/wiki/SIGNALDuino
 # It was modified also to provide support for raw message handling which it's send from the SIGNALduino
@@ -1578,7 +1578,7 @@ SIGNALduino_Parse_MC($$$$@)
 		   	my $method = $ProtocolListSIGNALduino{$id}{method};
 		    if (!exists &$method)
 			{
-				Log 4, "$name: Error: Unknown function=$method. Please define it in file $0";
+				Log3 $name, 5, "$name: Error: Unknown function=$method. Please define it in file $0";
 			} else {
 				my ($rcode,$res) = $method->($name,$bitData,$id);
 				if ($rcode != -1) {
@@ -1587,7 +1587,7 @@ SIGNALduino_Parse_MC($$$$@)
 					SIGNALduno_Dispatch($hash,$rmsg,$dmsg);
 					$message_dispatched=1;
 				} else {
-					Debug "protocol does not match return from method: ($res)"  if ($debug);
+					Log3 $name, 5, "protocol does not match return from method: ($res)"  if ($debug);
 
 				}
 			}
