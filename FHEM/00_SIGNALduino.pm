@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm  66977 2015-10-11
+# $Id: 00_SIGNALduino.pm  66507 2015-10-12
 # The file is taken from the FHEMduino project and modified in serval ways for processing the incomming messages
 # see http://www.fhemwiki.de/wiki/SIGNALDuino
 # It was modified also to provide support for raw message handling which it's send from the SIGNALduino
@@ -262,7 +262,7 @@ my %ProtocolListSIGNALduino  = (
 			#preamble		=> '',		# prepend to converted message	
 			#clientmodule    => '41_OREGON',   	# not used now
 			#modulematch     => '',  # not used now
-			length_min      => '64',
+			length_min      => '44',
 			length_max      => '220',
 			method          => \&SIGNALduino_OSV2 # Call to process this message
 
@@ -1716,6 +1716,7 @@ SIGNALduino_Attr(@)
 	my ($cmd,$name,$aName,$aVal) = @_;
 	my $hash = $defs{$name};
 
+	Log3 $name, 5, "Calling Getting Attr sub with args: $cmd $aName = $aVal";
 		
 	if( $aName eq "Clients" ) {		## Change clientList
 		$hash->{Clients} = $aVal;
@@ -1749,14 +1750,21 @@ SIGNALduino_Attr(@)
 		$debug = $aVal;
 		Log3 $name, 3, "$name: setting debug to: " . $debug;
 	}
-	elsif ($aName eq "whitelist_IDs")
+	elsif ($aName eq "whitelist_IDs" && $cmd=="set")
 	{
 		
  		my %WhitelistIDs;
- 		%WhitelistIDs = map { $_ => 1 } split(",", $aVal) if (defined($aVal));
-		$hash->{"whitelisthash"} = \%WhitelistIDs;
-		undef($hash->{"whitelisthash"}) if (scalar(keys %WhitelistIDs) <= 0);
-		
+ 		if (defined($aVal) && length($aVal)>0)
+ 		{
+ 			%WhitelistIDs = map { $_ => 1 } split(",", $aVal);
+			$hash->{"whitelisthash"} = \%WhitelistIDs;
+ 		} else  {
+ 			 delete $hash->{"whitelisthash"};
+ 			 delete($attr{$name}{$aName});
+ 			 
+ 			 Log3 $name, 5, "$name: deleting $aName";
+ 			 return "$name: deleting $aName";
+ 		}
 	}
 	
   	return undef;
@@ -1776,7 +1784,7 @@ sub SIGNALduino_OSV2()
 		
 		return return (-1," sync not found") if ($preamble_pos <=24);
 		
-		my $message_end=index($bitData,"10011001",$preamble_pos+24);
+		my $message_end=index($bitData,"10011001",$preamble_pos+44);
        	$message_end = length($bitData) if ($message_end == -1);
 		my $message_length = $message_end - $preamble_pos;
 
@@ -1890,178 +1898,170 @@ sub	SIGNALduino_Hideki()
 <a name="SIGNALduino"></a>
 <h3>SIGNALduino</h3>
 <ul>
+	<table>
+	<tr><td>
+	The SIGNALduino ia based on an idea from mdorenka published at <a
+	href="http://forum.fhem.de/index.php/topic,17196.0.html">FHEM Forum</a>.
 
-  <table>
-  <tr><td>
-  The SIGNALduino ia based on an idea from mdorenka published at <a
-  href="http://forum.fhem.de/index.php/topic,17196.0.html">FHEM Forum</a>.
+	With the opensource firmware (see this <a
+	href="https://github.com/RFD-FHEM/SIGNALduino">link</a>) it is capable
+	to receive and send different wireless protocols.
+	<br><br>
 
-  With the opensource firmware (see this <a
-  href="https://github.com/RFD-FHEM/SIGNALduino">link</a>) it is capable
-  to receive and send different wireless protocols.
-  <br><br>
-  
-  The following protocols are available:
-  <br><br>
-  
-  
-  Wireless switches  <br>
-  IT  switches --> uses IT.pm  Protocol id: 3 and 4<br>
-  
-  <br><br>
-  
-  Temperatur / humidity sensors  <br>
-  PEARL NC7159, LogiLink WS0002,GT-WT-02,AURIOL,TCM97001, TCM27,GT-WT-02..  --> 14_CUL_TCM97001.pm Protocol id: 0<br>
-  Oregon Scientific v2 Sensors  --> 41_OREGON.pm Protocol id: 10<br>
-  Hideki/Cresta,Bresser/Hama/TFA --> 14_Hideki.pm Protocol id: 12<br>
-  Lacrosse TX3-TH Sensors -->  14_CUL_TX Protocol id: 8 <br>
-  <br><br>
+	The following protocols are available:
+	<br><br>
 
-  It is possible to attach more than one device in order to get better
-  reception, fhem will filter out duplicate messages.<br><br>
 
-  Note: this module require the Device::SerialPort or Win32::SerialPort
-  module. It can currently only attatched via USB.
+	Wireless switches  <br>
+	IT  switches --> uses IT.pm<br>
 
-  </td><td>
-  <img src="ccc.jpg"/>
-  </td></tr>
-  </table>
+	<br><br>
 
-  <a name="SIGNALduinodefine"></a>
-  <b>Define</b>
-  <ul>
-    <code>define &lt;name&gt; SIGNALduino &lt;device&gt; </code> <br>
-    <br>
-    USB-connected devices (SIGNALduino):<br><ul>
-      &lt;device&gt; specifies the serial port to communicate with the SIGNALduino.
-	  The name of the serial-device depends on your distribution, under
-      linux the cdc_acm kernel module is responsible, and usually a
-      /dev/ttyACM0 or /dev/ttyUSB0 device will be created. If your distribution does not have a
-      cdc_acm module, you can force usbserial to handle the SIGNALduino by the
-      following command:<ul>modprobe usbserial vendor=0x03eb
-      product=0x204b</ul>In this case the device is most probably
-      /dev/ttyUSB0.<br><br>
+	Temperatur / humidity sensors suppored by 14_CUL_TCM97001 <br>
+	PEARL NC7159, LogiLink WS0002,GT-WT-02,AURIOL,TCM97001, TCM27,GT-WT-02..  --> 14_CUL_TCM97001.pm <br>
+	Oregon Scientific v2 Sensors  --> 41_OREGON.pm<br>
+	<br><br>
 
-      You can also specify a baudrate if the device name contains the @
-      character, e.g.: /dev/ttyACM0@57600<br><br>This is also the default baudrate
-	
-	  It is recommended to specify the device via a name which does not change:
-	  e.g. via by-id devicename: /dev/serial/by-id/usb-1a86_USB2.0-Serial-if00-port0@57600
-	  
-      If the baudrate is "directio" (e.g.: /dev/ttyACM0@directio), then the
-      perl module Device::SerialPort is not needed, and fhem opens the device
-      with simple file io. This might work if the operating system uses sane
-      defaults for the serial parameters, e.g. some Linux distributions and
-      OSX.  <br><br>
+	It is possible to attach more than one device in order to get better
+	reception, fhem will filter out duplicate messages.<br><br>
 
-  </ul>
-  <br>
+	Note: this module require the Device::SerialPort or Win32::SerialPort
+	module. It can currently only attatched via USB.
 
-  <a name="SIGNALduinoset"></a>
-  <b>Set </b>
-  <ul>
-    <li>raw<br>
-        Issue a SIGNALduino firmware command.  See the <a
-        href="http://<tbd>/commandref.html">this</a> document
-        for details on SIGNALduino commands.
-    </li><br>
+	</td><td>
+	<img src="ccc.jpg"/>
+	</td></tr>
+	</table>
 
-    <li>flash [hexFile]<br>
-    The SIGNALduino needs the right firmware to be able to receive and deliver the sensor data to fhem. In addition to the way using the
-    arduino IDE to flash the firmware into the SIGNALduino this provides a way to flash it directly from FHEM.
+	<a name="SIGNALduinodefine"></a>
+	<b>Define</b>
+	<code>define &lt;name&gt; SIGNALduino &lt;device&gt; </code> <br>
+	<br>
+	USB-connected devices (SIGNALduino):<br>
+	<ul><li>
+		&lt;device&gt; specifies the serial port to communicate with the SIGNALduino.
+		The name of the serial-device depends on your distribution, under
+		linux the cdc_acm kernel module is responsible, and usually a
+		/dev/ttyACM0 or /dev/ttyUSB0 device will be created. If your distribution does not have a
+		cdc_acm module, you can force usbserial to handle the SIGNALduino by the
+		following command:<ul>modprobe usbserial vendor=0x03eb
+		product=0x204b</ul>In this case the device is most probably
+		/dev/ttyUSB0.<br><br>
 
-    There are some requirements:
-    <ul>
-      <li>avrdude must be installed on the host<br>
-      On a Raspberry PI this can be done with: sudo apt-get install avrdude</li>
-      <li>the flashCommand attribute must be set.<br>
-        This attribute defines the command, that gets sent to avrdude to flash the JeeLink.<br>
-        The default is: avrdude -p atmega328P -c arduino -P [PORT] -D -U flash:w:[HEXFILE] 2>[LOGFILE]<br>
-        It contains some place-holders that automatically get filled with the according values:<br>
-        <ul>
-          <li>[PORT]<br>
-            is the port the Signalduino is connectd to (e.g. /dev/ttyUSB0) and will be used from the defenition</li>
-          <li>[HEXFILE]<br>
-            is the .hex file that shall get flashed. There are three options (applied in this order):<br>
-            - passed in set flash<br>
-            - taken from the hexFile attribute<br>
-            - the default value defined in the module<br>
-          </li>
-          <li>[LOGFILE]<br>
-            The logfile that collects information about the flash process. It gets displayed in FHEM after finishing the flash process</li>
-        </ul>
-      </li>
-    </ul>
-	
-    </li><br>
+		You can also specify a baudrate if the device name contains the @
+		character, e.g.: /dev/ttyACM0@57600<br><br>This is also the default baudrate
 
-  </ul>
-  <a name="SIGNALduinoget"></a>
-  <b>Get</b>
-  <ul>
-    <li>version<br>
-        return the SIGNALduino firmware version
-        </li><br>
-    <li>raw<br>
-        Issue a SIGNALduino firmware command, and wait for one line of data returned by
-        the SIGNALduino. See the SIGNALduino firmware code  for details on SIGNALduino
-        commands. With this line, you can send almost any signal via a transmitter connected
-        </li><br>
-    <li>cmds<br>
-        Depending on the firmware installed, SIGNALduinos have a different set of
-        possible commands. Please refer to the sourcecode of the firmware of your
-        SIGNALduino to interpret the response of this command. See also the raw-
-        command.
-        </li><br>
-  </ul>
+		It is recommended to specify the device via a name which does not change:
+		e.g. via by-id devicename: /dev/serial/by-id/usb-1a86_USB2.0-Serial-if00-port0@57600
 
-  <a name="SIGNALduinoattr"></a>
-  <b>Attributes</b>
-  <ul>
-    <li>Clients<br>
-      * This is currently not implemented:<br>
-      The received data gets distributed to a client (e.g. OREGON, IT, CUL_TCM97001, ...) that handles the data.
-      This attribute tells, which are the clients, that handle the data. If you add a new module to FHEM, that shall handle
-      data distributed by the SIGNALduino module, you must add it to the Clients attribute.</li>
+		If the baudrate is "directio" (e.g.: /dev/ttyACM0@directio), then the
+		perl module Device::SerialPort is not needed, and fhem opens the device
+		with simple file io. This might work if the operating system uses sane
+		defaults for the serial parameters, e.g. some Linux distributions and
+		OSX.  <br><br></li>
 
-    <li>MatchList<br>
-      * This is currently not implemented:<br>
-      can be set to a perl expression that returns a> hash that is used as the MatchList<br>
-      <code>attr sduino MatchList {'5:AliRF' => '^\\S+\\s+5 '}</code></li>
-    <li>hexfile<br>
-      Full path to a hex filename of the arduino sketch e.g. /opt/fhem/RF_Receiver_nano328.hex
-	</li>
+	</ul>
+	<br>
 
-	  
-	<li><a href="#do_not_notify">do_not_notify</a></li>
-    <li><a href="#attrdummy">dummy</a></li>
-    This mode is only for debug and testing purpose
-    <li><a href="#attrdummy">debug</a><br>
-    This will bring the module in a very verbose debug output. Usefull to find new signals and verify if the demodulation works correctly.
-    </li>
-    
-    <li>longids<br>
-        Comma separated list of device-types for SIGNALduino that should be handled using long IDs. This additional ID allows it to differentiate some weather sensors, if they are sending on the same channel. Therfor a random generated id is added. If you choose to use longids, then you'll have to define a different device after battery change.<br>
-Default is not to use long IDs for all devices.
-      <br><br>
-      Examples:<PRE>
-# Do not use any long IDs for any devices:
-attr sduino longids 0
-# Use any long IDs for all devices (this is default):
-attr sduino longids 1
-# Use longids for BTHR918N devices.
-# Will generate devices names like BTHR918N_f3.
-attr RFXCOMUSB longids BTHR918N
-</PRE>
-    </li><br>
-    <li>whitelist_IDs<br>
-    	You can specify protocols by it internal ID if you want to limit the supported protocols.
-    	Enter a comma seperated list of ids or nothing. If you specify protocol 0 and 6, then all other protocols are not supported.
-   	</li>
+	<a name="SIGNALduinoset"></a>
+	<b>Set </b>
+	<ul>
+		<li>raw<br>
+		Issue a SIGNALduino firmware command.  See the <a
+		href="http://<tbd>/commandref.html">this</a> document
+		for details on SIGNALduino commands.
+		</li><br>
 
-  </ul>
-  <br>
+		<li>flash [hexFile]<br>
+		The SIGNALduino needs the right firmware to be able to receive and deliver the sensor data to fhem. In addition to the way using the
+		arduino IDE to flash the firmware into the SIGNALduino this provides a way to flash it directly from FHEM.
+
+		There are some requirements:
+	</ul>
+	<ul>
+		<li>avrdude must be installed on the host<br>
+		On a Raspberry PI this can be done with: sudo apt-get install avrdude</li>
+		<li>the flashCommand attribute must be set.<br>
+		This attribute defines the command, that gets sent to avrdude to flash the JeeLink.<br>
+		The default is: avrdude -p atmega328P -c arduino -P [PORT] -D -U flash:w:[HEXFILE] 2>[LOGFILE]<br>
+		It contains some place-holders that automatically get filled with the according values:<br>
+		<ul>
+			<li>[PORT]<br>
+			is the port the Signalduino is connectd to (e.g. /dev/ttyUSB0) and will be used from the defenition</li>
+			<li>[HEXFILE]<br>
+			is the .hex file that shall get flashed. There are three options (applied in this order):<br>
+			- passed in set flash<br>
+			- taken from the hexFile attribute<br>
+			- the default value defined in the module<br>
+			</li>
+			<li>[LOGFILE]<br>
+			The logfile that collects information about the flash process. It gets displayed in FHEM after finishing the flash process</li>
+		</ul>
+		</li>
+		<br>
+
+	</ul>
+	<a name="SIGNALduinoget"></a>
+	<b>Get</b>
+	<ul>
+		<li>version<br>
+		return the SIGNALduino firmware version
+		</li><br>
+		<li>raw<br>
+		Issue a SIGNALduino firmware command, and wait for one line of data returned by
+		the SIGNALduino. See the SIGNALduino firmware code  for details on SIGNALduino
+		commands. With this line, you can send almost any signal via a transmitter connected
+		</li><br>
+		<li>cmds<br>
+		Depending on the firmware installed, SIGNALduinos have a different set of
+		possible commands. Please refer to the sourcecode of the firmware of your
+		SIGNALduino to interpret the response of this command. See also the raw-
+		command.
+		</li><br>
+	</ul>
+
+	<a name="SIGNALduinoattr"></a>
+	<b>Attributes</b>
+	<ul>
+		<li>Clients<br>
+		* This is currently not implemented:<br>
+		The received data gets distributed to a client (e.g. OREGON, IT, CUL_TCM97001, ...) that handles the data.
+		This attribute tells, which are the clients, that handle the data. If you add a new module to FHEM, that shall handle
+		data distributed by the SIGNALduino module, you must add it to the Clients attribute.</li>
+
+		<li>MatchList<br>
+		* This is currently not implemented:<br>
+		can be set to a perl expression that returns a> hash that is used as the MatchList<br>
+		<code>attr myJeeLink MatchList {'5:AliRF' => '^\\S+\\s+5 '}</code></li>
+		<li>hexfile<br>
+		Full path to a hex filename of the arduino sketch e.g. /opt/fhem/RF_Receiver_nano328.hex
+		</li>
+
+
+		<li><a href="#do_not_notify">do_not_notify</a></li>
+		<li><a href="#attrdummy">dummy</a></li>
+		<li><a href="#attrdummy">debug</a><br>
+		This will bring the module in a very verbose debug output. Usefull to find new signals and verify if the demodulation works correctly.
+		</li>
+
+		<li>longids<br>
+		Comma separated list of device-types for SIGNALduino that should be handled using long IDs. This additional ID allows it to differentiate some weather sensors, if they are sending on the same channel. Therfor a random generated id is added. If you choose to use longids, then you'll have to define a different device after battery change.<br>
+		Default is to use long IDs for all devices.
+		<br><br>
+		Examples:<PRE>
+		# Do not use any long IDs for any devices:
+		attr sduino longids 0
+		# Use any long IDs for all devices (this is default):
+		attr sduino longids 1
+		# Use longids for BTHR918N devices.
+		# Will generate devices names like BTHR918N_f3.
+		attr RFXCOMUSB longids BTHR918N
+		</PRE>
+		</li><br>
+
+		</ul>
+	<br>
+	</ul>
 </ul>
 
 =end html
