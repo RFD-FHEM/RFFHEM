@@ -1,3 +1,7 @@
+12.10.2015
+ - Hotfix2 for firmware 3.1.7
+ - some minor changes
+
 07.10.2015
  - Added Demodulation for Meteo TX6 Signal
  - Corrected serval bugs in demodulation for MU Messages, shoud be more accurate now
