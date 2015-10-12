@@ -13,7 +13,7 @@
 package main;
 
 use strict;
-use warnings;
+use warning;#
 use Time::HiRes qw(gettimeofday);
 use Data::Dumper qw(Dumper);
 
