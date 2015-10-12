@@ -74,7 +74,7 @@ my %matchListSIGNALduino = (
 	 "6:SIGNALduino_AS"       	=> "AS[A-Fa-f0-9]{7,8}", 		  # Arduino based Sensors, should not be default
      "4:OREGON"            		=> "^(3[8-9A-F]|[4-6][0-9A-F]|7[0-8]).*",		
 	 "8:SIGNALduino_un"			=> "u.*",
-	 "7:Hideki"					=> "^Hi75[A-F0-9]+",
+	 "7:Hideki"					=> "^P12#75[A-F0-9]{17,30}",
 );
 
 
@@ -293,9 +293,9 @@ my %ProtocolListSIGNALduino  = (
 			id          	=> '12',
 			clockrange     	=> [420,510],                   # min, max better for Bresser Sensors, OK for hideki/Hideki/TFA too     
 			format 			=> 'manchester',	
-			preamble		=> 'Hi',						# prepend to converted message	
+			preamble		=> 'P12#',						# prepend to converted message	
 			#clientmodule    => '14_hideki',   				# not used now
-			#modulematch     => '',  						# not used now
+			#modulematch     => '^P12#75[A-F0-9]{17,30}',  						# not used now
 			length_min      => '72',
 			length_max      => '104',
 			method          => \&SIGNALduino_Hideki	# Call to process this message

@@ -22,14 +22,13 @@ Hideki_Initialize($)
   my ($hash) = @_;
 
 
-  $hash->{Match}     = "^Hi75[A-F0-9]{17,30}";   # Länge (Anhahl nibbles nach 0x75 )noch genauer zpezifiieren
+  $hash->{Match}     = "^P12#75[A-F0-9]+";   # Länge (Anhahl nibbles nach 0x75 )noch genauer zpezifiieren
   $hash->{DefFn}     = "Hideki_Define";
   $hash->{UndefFn}   = "Hideki_Undef";
   $hash->{AttrFn}    = "Hideki_Attr";
   $hash->{ParseFn}   = "Hideki_Parse";
   $hash->{AttrList}  = "IODev do_not_notify:0,1 showtime:0,1 "
                        ."ignore:0,1 "
-                       ." longids"
                       ." $readingFnAttributes";
                       
   $hash->{AutoCreate}=
@@ -76,11 +75,11 @@ sub
 Hideki_Parse($$)
 {
 	my ($iohash,$msg) = @_;
+	my (undef ,$rawData) = split("#",$msg);
 
 	my $name = $iohash->{NAME};
 	my @a = split("", $msg);
 	Log3 $iohash, 4, "Hideki_Parse $name incomming $msg";
-	my $rawData=substr($msg,2); ## Copy all expect of the message length header
 
 	# decrypt bytes
 	my $decodedString = decryptBytes($rawData); # decrpyt hex string to hex string
