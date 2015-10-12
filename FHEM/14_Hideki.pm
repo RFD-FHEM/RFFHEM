@@ -331,12 +331,12 @@ Hideki_Attr(@)
 
   </ul>
   <a name="Hideki_readings"></a>
-  <b>Erzeugte Readings</b>
+  <b>Generated readings</b>
   <ul>
-  	<li>state</li>
-	<li>temperature</li>
-	<li>humidity</li>
-	<li>battery</li>
+  	<li>state (T:x H:y B:z)</li>
+	<li>temperature (°C)</li>
+	<li>humidity (0-100)</li>
+	<li>battery (ok or low)</li>
   </ul>
   
   
@@ -396,12 +396,12 @@ Hideki_Attr(@)
   <br>
 
   <a name="Hideki_readings"></a>
-  <b>Generated readings</b>
+  <b>Erzeugte Readings</b>
   <ul>
-  	<li>state</li>
-	<li>temperature</li>
-	<li>humidity</li>
-	<li>battery</li>
+  	<li>state (T:x H:y B:z)</li>
+	<li>temperature (°C)</li>
+	<li>humidity (0-100)</li>
+	<li>battery (ok or low)</li>
   </ul>
   <a name="Hideki_unset"></a>
   <b>Set</b> <ul>N/A</ul><br>
