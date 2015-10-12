@@ -29,7 +29,7 @@ SD_WS07_Initialize($)
   $hash->{AttrList}  = "IODev do_not_notify:1,0 ignore:0,1 showtime:1,0 " .
                         "$readingFnAttributes ";
   $hash->{AutoCreate} =
-        { "SD_WS07.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,"} };
+        { "SD_WS07.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,",  autocreateThreshold => "2:180"} };
 
 
 }
@@ -52,8 +52,6 @@ SD_WS07_Define($$)
   $hash->{STATE} = "Defined";
   
   my $name= $hash->{NAME};
- 
-  AssignIoPort($hash);
   return undef;
 }
 
@@ -212,9 +210,10 @@ sub SD_WS07_Attr(@)
 <ul>
   The SD_WS07 module interprets temperature sensor messages received by a Device like CUL, CUN, SIGNALduino etc.<br>
   <br>
-  <b>Supported models:</b>
+  <b>Known models:</b>
   <ul>
-    <li>EAS800z</li>
+    <li>Eurochon EAS800z</li>
+    <li>Technoline WS6750/TX70DTH</li>
   </ul>
   <br>
   New received device are add in fhem with autocreate.
@@ -228,22 +227,18 @@ sub SD_WS07_Attr(@)
   </ul>
   <br>
   <a name="SD_WS07 Events"></a>
-  <b>Generated events:</b>
+  <b>Generated readings:</b>
+  <br>Some devices may not support all readings, so they will not be presented<br>
   <ul>
-     <li>temperature: The temperature</li>
-     <li>humidity: The humidity (if available)</li>
-     <li>battery: The battery state: low or ok (if available)</li>
-     <li>channel: The Channelnumber (if available)</li>
+  	 <li>State (T: H:)</li>
+     <li>temperature (°C)</li>
+     <li>humidity: (The humidity (1-100 if available)</li>
+     <li>battery: (low or ok)</li>
+     <li>channel: (The Channelnumber (number if)</li>
   </ul>
   <br>
   <b>Attributes</b>
   <ul>
-    <li><a href="#IODev">IODev</a>
-      Note: by setting this attribute you can define different sets of 
-      devices in FHEM, each set belonging to a Device which is capable of receiving the signals. It is important, however,
-      that a device is only received by the defined IO Device, e.g. by using
-      different Frquencies (433MHz vs 868MHz)
-      </li>
     <li><a href="#do_not_notify">do_not_notify</a></li>
     <li><a href="#ignore">ignore</a></li>
     <li><a href="#model">model</a> ()</li>
@@ -270,7 +265,8 @@ sub SD_WS07_Attr(@)
   <br>
   <b>Unterstütze Modelle:</b>
   <ul>
-    <li>EAS800z</li>
+    <li>Eurochon EAS800z</li>
+    <li>Technoline WS6750/TX70DTH</li>
   </ul>
   <br>
   Neu empfangene Sensoren werden in FHEM per autocreate angelegt.
@@ -283,20 +279,17 @@ sub SD_WS07_Attr(@)
   </ul>
   <br>
   <a name="SD_WS07 Events"></a>
-  <b>Generierte Events:</b>
+  <b>Generierte Readings:</b>
   <ul>
-     <li>temperature: Die aktuelle Temperatur</li>
-     <li>humidity: Die aktuelle Luftfeutigkeit (falls verf&uuml;gbar)</li>
-     <li>battery: Der Batteriestatus: low oder ok (falls verf&uuml;gbar)</li>
-     <li>channel: Kanalnummer (falls verfügbar)</li>
+  	 <li>State (T: H:)</li>
+     <li>temperature (°C)</li>
+     <li>humidity: (Luftfeuchte (1-100)</li>
+     <li>battery: (low oder ok)</li>
+     <li>channel: (Der Sensor Kanal)</li>
   </ul>
   <br>
   <b>Attribute</b>
   <ul>
-    <li><a href="#IODev">IODev</a>
-      Spezifiziert das physische Ger&auml;t, das die Ausstrahlung der Befehle f&uuml;r das 
-      "logische" Ger&auml;t ausf&uuml;hrt. Ein Beispiel f&uuml;r ein physisches Ger&auml;t ist ein CUL.<br>
-      </li>
     <li><a href="#do_not_notify">do_not_notify</a></li>
     <li><a href="#ignore">ignore</a></li>
     <li><a href="#model">model</a> ()</li>
