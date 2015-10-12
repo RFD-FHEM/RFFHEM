@@ -12,11 +12,11 @@
 package main;
 
 use strict;
-use warning;
+use warnings;
 use Time::HiRes qw(gettimeofday);
 use Data::Dumper qw(Dumper);
 
-use POSIX qw( floor);
+use POSIX qw( floor);  # can be removed
 #use Math::Round qw();
 
 sub SIGNALduino_Attr(@);
@@ -37,7 +37,7 @@ my %gets = (    # Name, Data to send to the SIGNALduino, Regexp for the answer
   "version"  => ["V", '^V\s.*'],
   "freeram"  => ["R", '^[0-9]+'],
   "raw"      => ["", '.*'],
-#  "uptime"   => ["t", '^[0-9A-F]{8}[\r\n]*$' ],
+  "uptime"   => ["t", '^[0-9]+' ],
   "cmds"     => ["?", '.*Use one of[ 0-9A-Za-z]+[\r\n]*$' ],
 
 #  "ITParms"  => ["ip",'.*' ],
@@ -583,7 +583,7 @@ SIGNALduino_Define($$)
   my $ret = DevIo_OpenDev($hash, 0, "SIGNALduino_DoInit");
   
   ## 
-  $hash->{Interval} = "30";
+  $hash->{Interval} = "300";
   InternalTimer(gettimeofday()+2, "SIGNALduino_GetUpdate", $hash, 0);
   
   $hash->{"DMSG"}="nothing";
@@ -748,6 +748,10 @@ SIGNALduino_Get($@)
   my $arg = ($a[2] ? $a[2] : "");
   my ($msg, $err);
 
+  if (IsDummy($name))
+  {
+  	return SIGNALduino_Parse($hash, $hash, $hash->{NAME}, $arg);
+  }
   return "No $a[1] for dummies" if(IsDummy($name));
 
   Log3 $name, 5, "$name: command for gets: " . $gets{$a[1]}[0] . " " . $arg;
@@ -766,7 +770,7 @@ SIGNALduino_Get($@)
 
   } elsif($a[1] eq "uptime") {     # decode it
     $msg =~ s/[\r\n]//g;
-    $msg = hex($msg);              # /125; only for col or coc
+    #$msg = hex($msg);              # /125; only for col or coc
     $msg = sprintf("%d %02d:%02d:%02d", $msg/86400, ($msg%86400)/3600, ($msg%3600)/60, $msg%60);
   }
 
@@ -1322,6 +1326,7 @@ SIGNALduino_Parse_MS($$$$%)
 		## Make a lookup table for our pattern index ids
 		#Debug "List of pattern:";
 		my $clockabs= $msg_parts{pattern}{$msg_parts{clockidx}};
+		if ($clockabs==0) { return 0 };
 		
 		$patternList{$_} = round($msg_parts{pattern}{$_}/$clockabs,1) for keys $msg_parts{pattern};
 	
@@ -1352,6 +1357,8 @@ SIGNALduino_Parse_MS($$$$%)
 
 			# Check Clock if is it in range
 			$valid=SIGNALduino_inTol($ProtocolListSIGNALduino{$id}{clockabs},$clockabs,$clockabs*0.30) if ($ProtocolListSIGNALduino{$id}{clockabs} > 0);
+			Debug "validclock = $valid"  if ($debug);
+			
 			next if (!$valid) ;
 
 			my $bit_length = ($signal_length-(scalar @{$ProtocolListSIGNALduino{$id}{sync}}))/((scalar @{$ProtocolListSIGNALduino{$id}{one}} + scalar @{$ProtocolListSIGNALduino{$id}{zero}})/2);
@@ -1377,6 +1384,7 @@ SIGNALduino_Parse_MS($$$$%)
 			$valid = $valid && ($pstr=SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{sync}},\%patternList)) >=0;
 			Debug "Found matched sync with indexes: ($pstr)" if ($debug && $valid);
 			$patternLookupHash{$pstr}="" if ($valid); ## Append Sync to our lookuptable
+			my $syncstr=$pstr; # Store for later start search
 
 			Debug "sync not found " if (!$valid && $debug); # z.B. [1, -18] 
 
@@ -1411,11 +1419,21 @@ SIGNALduino_Parse_MS($$$$%)
 			my @bit_msg;							# array to store decoded signal bits
 
 			#for (my $i=index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{sync}}))+$signal_width;$i<length($rawData);$i+=$signal_width)
-			for (my $i=scalar@{$ProtocolListSIGNALduino{$id}{sync}};$i<length($rawData);$i+=$signal_width)
+			#for (my $i=scalar@{$ProtocolListSIGNALduino{$id}{sync}};$i<length($rawData);$i+=$signal_width)
+			my $message_start =index($rawData,$syncstr)+length($syncstr);
+			Log3 $name, 5, "Starting demodulation at Position $message_start";
+			
+			for (my $i=$message_start;$i<length($rawData);$i+=$signal_width)
 			{
 				my $sig_str= substr($rawData,$i,$signal_width);
+				#Log3 $name, 5, "demodulating $sig_str";
 				#Debug $patternLookupHash{substr($rawData,$i,$signal_width)}; ## Get $signal_width number of chars from raw data string
-				push(@bit_msg,$patternLookupHash{$sig_str}) if (exists $patternLookupHash{$sig_str}); ## Add the bits to our bit array
+				if (exists $patternLookupHash{$sig_str}) { ## Add the bits to our bit array
+					push(@bit_msg,$patternLookupHash{$sig_str})
+				} else {
+					Log3 $name, 5, "Found wrong signal, aborting demodulation";
+					last;					
+				}
 			}
 			
 			Debug "$name: decoded message raw (@bit_msg), ".@bit_msg." bits\n" if ($debug);;
