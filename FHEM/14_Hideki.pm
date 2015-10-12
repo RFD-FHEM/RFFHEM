@@ -32,8 +32,7 @@ Hideki_Initialize($)
                       ." $readingFnAttributes";
                       
   $hash->{AutoCreate}=
-        { "Hideki.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,"} };
-
+        { "Hideki.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "2:180"} };
 
 }
 
