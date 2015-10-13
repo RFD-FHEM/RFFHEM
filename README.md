@@ -23,20 +23,20 @@ How to install
 ======
 The Perl modules can be loaded directly into your FHEM installation:
 
-update all https://raw.githubusercontent.com/RFD-FHEM/RFFHEM/dev-cresta/controls_signalduino.txt
+```update all https://raw.githubusercontent.com/RFD-FHEM/RFFHEM/dev-rawIn/controls_signalduino.txt```
 
 Prepare your Arduino nano. Look at http://www.fhemwiki.de/wiki/Datei:Fhemduino_schematic.png
 for hardware setup.
 
 
 Connect the Arduino via USB to your FHEM Server and define the device with it's new port:
-Example: define SDuino SIGNALduino /dev/serial/by-id/usb-1a86_USB2.0-Serial-if00-port0@57600
+Example: ```define SDuino SIGNALduino /dev/serial/by-id/usb-1a86_USB2.0-Serial-if00-port0@57600```
 You have to adapt this to your environment.
 
 If you made your setup with an Arduino Nano, you can use this command to load the firmware on your device:
 set SDuino flash
 
 If this fails, you may need to install avrdude on your system.
-On a raspberry pi it is done via "sudo apt-get install avrdude"
+On a raspberry pi it is done via ```sudo apt-get install avrdude```
 
 
