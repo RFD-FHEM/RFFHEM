@@ -1,4 +1,4 @@
-RFFHEM- cresta development branch
+RFFHEM- development branch
 ======
 
 Counterpart of SIGNALDuino, it's the code for FHEM to work with the data received from the uC
