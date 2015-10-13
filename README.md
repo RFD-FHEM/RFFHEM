@@ -9,18 +9,14 @@ Supported Devices / Protocols
 
 |Device | Function|
 | ------------- | ----------- |
-|TCM97001,Logilink, Pearl NC, and similar | Weather sensor
+|TCM97001,Logilink, Pearl NC, and similar,Lifetec LT3594 | Weather sensor
 |PT2262 Devices | Remote switches like Intertechno V1, door/window sensors|
 |Conrad RSL | only Funk-Jalousieaktor |
 |Oregon Scientific v2 Devices | Weather sensor |
 |Technoline TX3  | Weather sensor |
-|Cresta TH Sensors| Weather sensor |
-
-Unsupported Devices / Protocols
-======
-This branch has currently also some unsupported versions
-
+|Hama TS33C, Bresser Thermo/Hygro Sensor  | Weather sensor |
 |Arduino Sensor | multi purpose sensor based on arduino |
+
 
 
 How to install
