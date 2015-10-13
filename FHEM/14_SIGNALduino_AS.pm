@@ -1,9 +1,8 @@
 ##############################################
-# $Id: 14_SIGNALduino_AS.pm 3818 2015-08-30 $
-# The file is taken from the SIGNALduino project
+# $Id: 14_AS.pm 3818 2015-08-30 $
+# The file is part of the SIGNALduino project
 # see http://www.fhemwiki.de/wiki/SIGNALduino
-# and was modified by a few additions
-# to provide support for self build sensors.
+# and was created to provide support for self build sensors.
 # The purpos is to use it as addition to the SIGNALduino
 # modules in combination with RFDuino
 # N. Butzek, S. Butzek, 2014 
@@ -17,7 +16,7 @@ use POSIX;
 
 #####################################
 sub
-SIGNALduino_AS_Initialize($)
+AS_Initialize($)
 {
   my ($hash) = @_;
 
@@ -44,58 +43,60 @@ SIGNALduino_AS_Initialize($)
   # 8    voltage
   # 9   Humidity
   # ..31 
-  $hash->{Match}     = "AS.*\$";
-  $hash->{DefFn}     = "SIGNALduino_AS_Define";
-  $hash->{UndefFn}   = "SIGNALduino_AS_Undef";
-  $hash->{AttrFn}    = "SIGNALduino_AS_Attr";
-  $hash->{ParseFn}   = "SIGNALduino_AS_Parse";
+  $hash->{Match}     = "^P2#[A-Fa-f0-9]{7,8}";
+  $hash->{DefFn}     = "AS_Define";
+  $hash->{UndefFn}   = "AS_Undef";
+  $hash->{AttrFn}    = "AS_Attr";
+  $hash->{ParseFn}   = "AS_Parse";
   $hash->{AttrList}  = "IODev do_not_notify:0,1 showtime:0,1 ignore:0,1 ".$readingFnAttributes;
   $hash->{AutoCreate}=
-        { "SIGNALduino_Env.*" => { GPLOT => "light4:Brightness,", FILTER => "%NAME" } };
+        { "AS_temp.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4:Temp,", autocreateThreshold => "2:600"},
+          "AS_humidity.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "2:600"},
+          "AS_reedGas.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", autocreateThreshold => "2:600"},
+          "AS_voltage.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", autocreateThreshold => "2:600"},
+
+        };
 }
 
 
 #####################################
 sub
-SIGNALduino_AS_Define($$)
+AS_Define($$)
 {
   my ($hash, $def) = @_;
   my @a = split("[ \t][ \t]*", $def);
 
-  return "wrong syntax: define <name> SIGNALduino_AS <code> <minsecs> <equalmsg>".int(@a)
-		if(int(@a) < 3 || int(@a) > 5);
+  return "wrong syntax: define <name> AS <code>".int(@a)
+		if(int(@a) != 3);
 
   $hash->{CODE}    = $a[2];
-  $hash->{minsecs} = ((int(@a) > 3) ? $a[3] : 30);
-  $hash->{equalMSG} = ((int(@a) > 4) ? $a[4] : 0);
   $hash->{lastMSG} =  "";
   $hash->{bitMSG} =  "";
 
-  $modules{SIGNALduino_AS}{defptr}{$a[2]} = $hash;
+  $modules{AS}{defptr}{$a[2]} = $hash;
   $hash->{STATE} = "Defined";
 
-  AssignIoPort($hash);
   return undef;
 }
 
 #####################################
 sub
-SIGNALduino_AS_Undef($$)
+AS_Undef($$)
 {
   my ($hash, $name) = @_;
-  delete($modules{SIGNALduino_AS}{defptr}{$hash->{CODE}}) if($hash && $hash->{CODE});
+  delete($modules{AS}{defptr}{$hash->{CODE}}) if($hash && $hash->{CODE});
   return undef;
 }
 
 #####################################
 sub
-SIGNALduino_AS_Parse($$)
+AS_Parse($$)
 {
   my ($hash,$msg) = @_;
   my @a = split("", $msg);
 
   if (length($msg) < 10) {
-    Log3 "SIGNALduino", 4, "SIGNALduino_AS: wrong message -> $msg";
+    Log3 "SIGNALduino", 4, "AS: wrong message -> $msg";
     return "";
   }
   ### CRC Check only if more than 10 characters for backward compatibility ###
@@ -107,22 +108,21 @@ SIGNALduino_AS_Parse($$)
     for ($i = 2; $i <= 8; $i+=2) {
       #convert pairs of hex digits into number for Bytes 0-3 only!
       $byte = hex(substr $msg, $i, 2);
-      $crc=SIGNALduino_AS_crc($crc,$byte);
+      $crc=AS_crc($crc,$byte);
 	}
 	my $crc8;
 	$crc8 = substr($msg,-2);  ## Get last two Ascii Chars for CRC Validation
 
 	if ($crc != hex($crc8)) {
-	  Log3 $hash, 4, "SIGNALduino_AS: CRC ($crc) does not not match $msg, should be CRC ($crc8)";
-  	  Log3 "FHEMduino", 4, "SIGNALduino_AS: CRC ($crc) does not not match $msg, should be CRC ($crc8)";
+	  Log3 $hash, 4, "AS: CRC ($crc) does not not match $msg, should be CRC ($crc8)";
 
-	  return "SIGNALduino_AS: CRC ($crc) does not not match $msg, should be CRC ($crc8)";
+	  return undef;
 	  
 	}
   }
 
 
-  Log3 $hash, 3, "SIGNALduino_AS: $msg";
+  Log3 $hash, 3, "AS: $msg";
   
   my ($deviceCode, $SensorTyp, $model, $id, $valHigh, $valLow, $Sigval, $bat, $trigger, $val, $sigType);
   # T	Type:
@@ -161,7 +161,7 @@ SIGNALduino_AS_Parse($$)
 	$Sigval = (($valHigh<<8) + $valLow);
 	$bat = $batStr{(hex(substr($msg,4,2))>>6) &3};
 	$trigger = $trigStr{(hex(substr($msg,2,2))>>7) &1};
-	Log3 $hash, 3, "SIGNALduino_AS Sigval: $Sigval";#
+	Log3 $hash, 3, "AS Sigval: $Sigval";#
 
 	if ($model eq "lightHiRange") {
 	  $Sigval = sprintf( "%.1f", $Sigval /1.2); #TBD
@@ -189,8 +189,8 @@ SIGNALduino_AS_Parse($$)
 	elsif ($model eq "voltage") {
 	  $bat = (hex(substr($msg,9,2))>>1)&3
 	} else {
-		Log3 $hash, 1, "SIGNALduino_AS unknown model: $model";#
-		return "";
+		Log3 $hash, 1, "AS unknown model: $model";#
+		return undef;
     }
     $val = "S: $Sigval B: $bat";
 
@@ -198,38 +198,30 @@ SIGNALduino_AS_Parse($$)
     $deviceCode = $model."_".$id;
   }
   
-  my $def = $modules{SIGNALduino_AS}{defptr}{$hash->{NAME} . "." . $deviceCode};
-  $def = $modules{SIGNALduino_AS}{defptr}{$deviceCode} if(!$def);
+  my $def = $modules{AS}{defptr}{$hash->{NAME} . "." . $deviceCode};
+  $def = $modules{AS}{defptr}{$deviceCode} if(!$def);
   
   if(!$def) {
-    Log3 $hash, 1, "SIGNALduino_AS: UNDEFINED sensor $SensorTyp detected, code $deviceCode";
-    return "UNDEFINED $SensorTyp"."_"."$deviceCode SIGNALduino_AS $deviceCode";
+    Log3 $hash, 1, "AS: UNDEFINED sensor $SensorTyp detected, code $deviceCode";
+    return "UNDEFINED $SensorTyp"."_"."$deviceCode AS $deviceCode";
   }
 
   $hash = $def;
   my $name = $hash->{NAME};
   return "" if(IsIgnored($name));
   
-  Log3 $name, 4, "SIGNALduino_AS: $name ($msg)";  
+  Log3 $name, 4, "AS: $name ($msg)";  
   
-  if($hash->{lastReceive} && (time() - $hash->{lastReceive} < $def->{minsecs} )) {
-    if (($def->{lastMSG} ne $msg) && ($def->{equalMSG} > 0)) {
-      Log3 $name, 4, "SIGNALduino_AS: $name: $deviceCode no skipping due unequal message even if to short timedifference";
-    } else {
-      Log3 $name, 4, "SIGNALduino_AS: $name: $deviceCode Skipping due to short timedifference";
-      return "";
-    }
-  }
   $hash->{lastReceive} = time();
 
   if(!$val) {
-    Log3 $name, 1, "SIGNALduino_AS: $name: $deviceCode Cannot decode $msg";
+    Log3 $name, 1, "AS: $name: $deviceCode Cannot decode $msg";
     return "";
   }
   
   $def->{lastMSG} = $msg;
 
-  Log3 $name, 4, "SIGNALduino_AS $name: $val";
+  Log3 $name, 4, "AS $name: $val";
 
   readingsBeginUpdate($hash);
   readingsBulkUpdate($hash, "state", $val);
@@ -250,7 +242,7 @@ SIGNALduino_AS_Parse($$)
 #Initial value: 0x0
 #See http://www.maxim-ic.com/appnotes.cfm/appnote_number/27
 
-sub SIGNALduino_AS_crc($$)
+sub AS_crc($$)
 {
   my ($lcrc,$ldata) = @_;
   my $i;
@@ -269,7 +261,7 @@ sub SIGNALduino_AS_crc($$)
 
 
 sub
-SIGNALduino_AS_Attr(@)
+AS_Attr(@)
 {
   my @a = @_;
 
@@ -279,8 +271,8 @@ SIGNALduino_AS_Attr(@)
   my $hash = $defs{$a[1]};
   my $iohash = $defs{$a[3]};
   my $cde = $hash->{CODE};
-  delete($modules{SIGNALduino_AS}{defptr}{$cde});
-  $modules{SIGNALduino_AS}{defptr}{$iohash->{NAME} . "." . $cde} = $hash;
+  delete($modules{AS}{defptr}{$cde});
+  $modules{AS}{defptr}{$iohash->{NAME} . "." . $cde} = $hash;
   return undef;
 }
 
@@ -289,38 +281,29 @@ SIGNALduino_AS_Attr(@)
 =pod
 =begin html
 
-<a name="SIGNALduino_AS"></a>
-<h3>SIGNALduino_AS</h3>
+<a name="AS"></a>
+<h3>AS</h3>
 <ul>
-  The SIGNALduino_AS module interprets Arduino based sensors received via SIGNALduino
+  The AS module interprets Arduino based sensors received via SIGNALduino
   <br><br>
 
-  <a name="SIGNALduino_ASdefine"></a>
+  <a name="ASdefine"></a>
   <b>Define</b>
   <ul>
-    <code>define &lt;name&gt; SIGNALduino_AS &lt;code&gt; [minsecs] [equalmsg]</code> <br>
+    <code>define &lt;name&gt; AS &lt;code&gt;</code> <br>
 
     <br>
-    &lt;code&gt; is the housecode of the autogenerated address of the Env device and 
-	is build by the channelnumber (1 to 3) and an autogenerated address build when including
-	the battery (adress will change every time changing the battery).<br>
-    minsecs are the minimum seconds between two log entries or notifications
-    from this device. <br>E.g. if set to 300, logs of the same type will occure
-    with a minimum rate of one per 5 minutes even if the device sends a message
-    every minute. (Reduces the log file size and reduces the time to display
-    the plots)<br>
-	equalmsg set to 1 generates, if even if minsecs is set, a log entrie or notification
-	when the msg content has changed.
+    &lt;code&gt; is the housecode of the address saved in the arduinosensor.
   </ul>
   <br>
 
-  <a name="SIGNALduino_ASset"></a>
+  <a name="ASset"></a>
   <b>Set</b> <ul>N/A</ul><br>
 
-  <a name="SIGNALduino_ASget"></a>
+  <a name="ASget"></a>
   <b>Get</b> <ul>N/A</ul><br>
 
-  <a name="SIGNALduino_ASattr"></a>
+  <a name="ASattr"></a>
   <b>Attributes</b>
   <ul>
     <li><a href="#IODev">IODev (!)</a></li>
@@ -338,40 +321,29 @@ SIGNALduino_AS_Attr(@)
 
 =begin html_DE
 
-<a name="SIGNALduino_AS"></a>
-<h3>SIGNALduino_AS</h3>
+<a name="AS"></a>
+<h3>AS</h3>
 <ul>
-  Das SIGNALduino_AS module dekodiert vom SIGNALduino empfangene Nachrichten von Arduino basierten Sensoren.
+  Das AS module dekodiert vom SIGNALduino empfangene Nachrichten von Arduino basierten Sensoren.
   <br><br>
 
-  <a name="SIGNALduino_ASdefine"></a>
+  <a name="ASdefine"></a>
   <b>Define</b>
   <ul>
-    <code>define &lt;name&gt; SIGNALduino_AS &lt;code&gt; [minsecs] [equalmsg]</code> <br>
+    <code>define &lt;name&gt; AS &lt;code&gt; </code> <br>
 
     <br>
-    &lt;code&gt; ist der automatisch angelegte Hauscode des Env und besteht aus der
-	Kanalnummer (1..3) und einer Zufallsadresse, die durch das Gerät beim einlegen der
-	Batterie generiert wird (Die Adresse ändert sich bei jedem Batteriewechsel).<br>
-    minsecs definert die Sekunden die mindesten vergangen sein müssen bis ein neuer
-	Logeintrag oder eine neue Nachricht generiert werden.
-    <br>
-	Z.B. wenn 300, werden Einträge nur alle 5 Minuten erzeugt, auch wenn das Device
-    alle paar Sekunden eine Nachricht generiert. (Reduziert die Log-Dateigröße und die Zeit
-	die zur Anzeige von Plots benötigt wird.)<br>
-	equalmsg gesetzt auf 1 legt fest, dass Einträge auch dann erzeugt werden wenn die durch
-	minsecs vorgegebene Zeit noch nicht verstrichen ist, sich aber der Nachrichteninhalt geändert
-	hat.
+    &lt;code&gt; ist der automatisch angelegte Code, welcher im Arduino gespeichert ist.
   </ul>
   <br>
 
-  <a name="SIGNALduino_ASset"></a>
+  <a name="ASset"></a>
   <b>Set</b> <ul>N/A</ul><br>
 
-  <a name="SIGNALduino_ASget"></a>
+  <a name="ASget"></a>
   <b>Get</b> <ul>N/A</ul><br>
 
-  <a name="SIGNALduino_ASattr"></a>
+  <a name="ASattr"></a>
   <b>Attributes</b>
   <ul>
     <li><a href="#IODev">IODev (!)</a></li>
