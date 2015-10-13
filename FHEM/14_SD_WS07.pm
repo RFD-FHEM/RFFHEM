@@ -205,7 +205,7 @@ sub SD_WS07_Attr(@)
 =pod
 =begin html
 
-<a name="Wether Sensors protocol #7"></a>
+<a name="SD_WS07"></a>
 <h3>Wether Sensors protocol #7</h3>
 <ul>
   The SD_WS07 module interprets temperature sensor messages received by a Device like CUL, CUN, SIGNALduino etc.<br>
