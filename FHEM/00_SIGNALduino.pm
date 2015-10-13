@@ -5,9 +5,8 @@
 # It was modified also to provide support for raw message handling which it's send from the SIGNALduino
 # The purpos is to use it as addition to the SIGNALduino which runs on an arduno nano or arduino uno.
 # It routes Messages serval Modules which are already integrated in FHEM. But there are also modules which comes with it.
-# N. Butzek, S. Butzek, 2014-2015 
-# 
-
+# N. Butzek, S. Butzek, 2014-2015
+#
 
 
 package main;
@@ -63,29 +62,21 @@ my $clientsSIGNALduino = ":IT:"
 						."CUL_TX:"
 						."SIGNALduino_AS:"
 						."SIGNALduino_un:"
-#						."Cresta:"
+						."Hideki:"
 						; 
 
 ## default regex match List for dispatching message to logical modules, can be updated during runtime because it is referenced
 my %matchListSIGNALduino = (
-     "1:IT"            			=> "^i......",	  			  # Intertechno Format
+     "1:IT"            			=> "^i......",	  				  # Intertechno Format
      "2:CUL_TCM97001"      		=> "^s[A-Fa-f0-9]+",			  # Any hex string		beginning with s
 	 "3:SIGNALduino_RSL"		=> "^rA-Fa-f0-9]+",				  # Any hex string		beginning with r
      "5:CUL_TX"               	=> "^TX..........",         	  # Need TX to avoid FHTTK
 	 "6:SIGNALduino_AS"       	=> "AS[A-Fa-f0-9]{7,8}", 		  # Arduino based Sensors, should not be default
-#    "2:SIGNALduino_Env"      	=> "W[0-9]+[a-f0-9]+\$",	# WNNHHHHHHH N=Number H=Hex
-#    "3:SIGNALduino_PT2262"   	=> "IR.*\$",
-#    "4:SIGNALduino_HX"       	=> "H...\$",
      "4:OREGON"            		=> "^(3[8-9A-F]|[4-6][0-9A-F]|7[0-8]).*",		
-#    "7:SIGNALduino_ARC"     	=> "AR.*\$", #ARC protocol switches like IT selflearn
 	 "8:SIGNALduino_un"			=> "^u.*",
-#	 "9:Cresta"					=> "^[5][0|8]75[A-F0-9]+",
+	 "7:Hideki"					=> "^P12#75[A-F0-9]",
 );
 
-		#protoID[0]=(s_sigid){-4,-8,-18,500,0,twostate}; // Logi
-		#protoID[1]=(s_sigid){-4,-8,-18,500,0,twostate}; // TCM 97001
-		#protoID[2]=(s_sigid){-1,-2,-18,500,0,twostate}; // AS
-		#protoID[3]=(s_sigid){-1,3,-30,pattern[clock][0],0,tristate}; // IT old
 
 my %ProtocolListSIGNALduino  = (
     "0"    => 
@@ -124,10 +115,10 @@ my %ProtocolListSIGNALduino  = (
         {
             name			=> 'AS',		# Self build arduino sensor
 			id          	=> '2',
-			one				=> [1,-4],
-			zero			=> [1,-2],
+			one				=> [1,-2],
+			zero			=> [1,-1],
 			sync			=> [1,-18],
-			clockabs     	=> '405',		# not used now
+			clockabs     	=> '500',		# not used now
 			format 			=> 'twostate',	
 			preamble		=> 'AS',		# prepend to converted message		
 			clientmodule    => 'SIGNALduino_AS',   # not used now
@@ -260,7 +251,7 @@ my %ProtocolListSIGNALduino  = (
 			{
             name			=> 'OSV2',	
 			id          	=> '10',
-			#one				=> [3,-2],
+			#one			=> [3,-2],
 			#zero			=> [1,-2],
 			#float			=> [-1,3],		# not full supported now, for later use
 			#sync			=> [1,-8],		# 
@@ -270,8 +261,8 @@ my %ProtocolListSIGNALduino  = (
 			#preamble		=> '',		# prepend to converted message	
 			#clientmodule    => '41_OREGON',   	# not used now
 			#modulematch     => '',  # not used now
-			length_min      => '37',
-			length_max      => '55',
+			length_min      => '64',
+			length_max      => '220',
 			method          => \&SIGNALduino_OSV2 # Call to process this message
 
 
@@ -290,27 +281,23 @@ my %ProtocolListSIGNALduino  = (
 			#preamble		=> '',		# prepend to converted message	
 			#clientmodule    => '14_SIGNALduino_AS',   	# not used now
 			#modulematch     => '',  # not used now
-			length_min      => '13',
-			length_max      => '14',
+			length_min      => '52',
+			length_max      => '56',
 			method          => \&SIGNALduino_AS # Call to process this message
 
 		}, 
-	"12"    => 			## Cresta
+	"12"    => 			## hideki
 			{
-            name			=> 'Cresta TX',	
+            name			=> 'Hideki protocol',	
 			id          	=> '12',
-			#one			=> [3,-2],
-			#zero			=> [1,-2],
-			#float			=> [-1,3],				# not full supported now, for later use
-			#sync			=> [1,-8],				# 
-			clockrange     	=> [420,520],			# min , max
-			format 			=> 'manchester',	    # tristate can't be migrated from bin into hex!
-			#preamble		=> '',					# prepend to converted message	
-			#clientmodule    => '14_SIGNALduino_AS',   	# not used now
-			#modulematch     => '',  # not used now
-			length_min      => '20',
-			length_max      => '50',
-			method          => \&SIGNALduino_Cresta	# Call to process this message
+			clockrange     	=> [420,510],                   # min, max better for Bresser Sensors, OK for hideki/Hideki/TFA too     
+			format 			=> 'manchester',	
+			preamble		=> 'P12#',						# prepend to converted message	
+			#clientmodule    => '14_hideki',   				# not used now
+			#modulematch     => '^P12#75[A-F0-9]{17,30}',  						# not used now
+			length_min      => '72',
+			length_max      => '104',
+			method          => \&SIGNALduino_Hideki	# Call to process this message
 		}, 			
 	"13"    => 			## FA21RF
 			{
@@ -515,6 +502,8 @@ SIGNALduino_Initialize($)
   					  ." hardware:nano328,uno,promini328"
 					  ." debug:0,1"
 					  ." longids"
+					  ." minsecs"
+					  ." whitelist_IDs"
                       ." $readingFnAttributes";
 
   $hash->{ShutdownFn} = "SIGNALduino_Shutdown";
@@ -600,6 +589,11 @@ SIGNALduino_Define($$)
   
   $hash->{"DMSG"}="nothing";
   $hash->{"TIME"}=time();
+  
+  
+  my %WhitelistIDs = map { $_ => 1 } split(",", AttrVal($name,"whitelist_IDs",""));
+  $hash->{"whitelisthash"} = \%WhitelistIDs; 
+  undef($hash->{"whitelisthash"}) if (scalar(keys %WhitelistIDs) <= 0);
   return $ret;
 }
 
@@ -1333,8 +1327,7 @@ SIGNALduino_Parse_MS($$$$%)
 		## Make a lookup table for our pattern index ids
 		#Debug "List of pattern:";
 		my $clockabs= $msg_parts{pattern}{$msg_parts{clockidx}};
-		if ($clockabs==0) { return 0 };
-		
+		return undef if ($clockabs == 0); 
 		$patternList{$_} = round($msg_parts{pattern}{$_}/$clockabs,1) for keys $msg_parts{pattern};
 	
 		
@@ -1351,8 +1344,12 @@ SIGNALduino_Parse_MS($$$$%)
 		my $id;
 		my $message_dispatched=0;
 		foreach $id ( keys %ProtocolListSIGNALduino) {
+			if (defined($hash->{"whitelisthash"}) && !defined($hash->{"whitelisthash"}{$id})) {
+				Log3 $name, 4, "skip ID $id";
+                next;
+			}
+
 			next if !(exists $ProtocolListSIGNALduino{$id}{sync});
-			
 			
 			my $valid=1;
 			#$debug=1;
@@ -1414,7 +1411,7 @@ SIGNALduino_Parse_MS($$$$%)
 		
 			#Anything seems to be valid, we can start decoding this.			
 
-			Log3 $name, 5, "Found matched Protocol id $id -> $ProtocolListSIGNALduino{$id}{name}"  if ($valid);
+			Log3 $name, 4, "Found matched Protocol id $id -> $ProtocolListSIGNALduino{$id}{name}"  if ($valid);
 			my $signal_width= @{$ProtocolListSIGNALduino{$id}{one}};
 			#Debug $signal_width;
 			
@@ -1521,6 +1518,11 @@ sub SIGNALduino_Parse_MU($$$$@)
 		## Find matching protocols
 		my $id;
 		foreach $id ( keys %ProtocolListSIGNALduino) {
+			if (defined($hash->{"whitelisthash"}) && !defined($hash->{"whitelisthash"}{$id})) {
+				Log3 $name, 4, "skip ID $id";
+                next;
+			}
+
 			next if (exists $ProtocolListSIGNALduino{$id}{sync}); ## We can skip messages with sync defined
 			next if (defined($ProtocolListSIGNALduino{id}{format} && $ProtocolListSIGNALduino{id}{format} eq "manchester"));
 			next if (!defined($ProtocolListSIGNALduino{$id}{clockabs}));
@@ -1582,7 +1584,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 		
 			#Anything seems to be valid, we can start decoding this.			
 
-			Log3 $name, 5, "Found matched Protocol id $id -> $ProtocolListSIGNALduino{$id}{name}"  if ($valid);
+			Log3 $name, 4, "Found matched Protocol id $id -> $ProtocolListSIGNALduino{$id}{name}"  if ($valid);
 			my $signal_width= @{$ProtocolListSIGNALduino{$id}{one}};
 			#Debug $signal_width;
 			
@@ -1668,29 +1670,32 @@ SIGNALduino_Parse_MC($$$$@)
 	$bitData= unpack("B$blen", pack("H$hlen", $rawData)); 
 	Debug "$name: extracted data $bitData (bin)\n" if ($debug); ## Convert Message from hex to bits
 	my $id;
-	
 	foreach $id ( keys %ProtocolListSIGNALduino) {
+		if (defined($hash->{"whitelisthash"}) && !defined($hash->{"whitelisthash"}{$id})) {
+			Log3 $name, 4, "skip ID $id";
+               next;
+		}
 
 		next if (!defined($ProtocolListSIGNALduino{$id}{format}) or $ProtocolListSIGNALduino{$id}{format} ne "manchester");
 		Debug "Testing against Protocol id $id -> $ProtocolListSIGNALduino{$id}{name}"  if ($debug);
 
-		if ( $clock >$ProtocolListSIGNALduino{$id}{clockrange}[0] and $clock <$ProtocolListSIGNALduino{$id}{clockrange}[1] and length($rawData) >= $ProtocolListSIGNALduino{$id}{length_min} and length($rawData) <= $ProtocolListSIGNALduino{$id}{length_max} )
+		if ( $clock >$ProtocolListSIGNALduino{$id}{clockrange}[0] and $clock <$ProtocolListSIGNALduino{$id}{clockrange}[1] and length($rawData)*4 >= $ProtocolListSIGNALduino{$id}{length_min} )
 		{
-			Debug "clock and length matched"  if ($debug);
+			Debug "clock and min length matched"  if ($debug);
 
 		   	my $method = $ProtocolListSIGNALduino{$id}{method};
 		    if (!exists &$method)
 			{
-				Log 4, "$name: Error: Unknown function=$method. Please define it in file $0";
+				Log3 $name, 5, "$name: Error: Unknown function=$method. Please define it in file $0";
 			} else {
-				my ($rcode,$res) = $method->($name,$bitData,$rawData);
+				my ($rcode,$res) = $method->($name,$bitData,$id);
 				if ($rcode != -1) {
 					$dmsg = $res;
-					
+					$dmsg=$ProtocolListSIGNALduino{$id}{preamble}.$dmsg if (defined($ProtocolListSIGNALduino{$id}{preamble})); 
 					SIGNALduno_Dispatch($hash,$rmsg,$dmsg);
 					$message_dispatched=1;
 				} else {
-					Debug "protocol does not match return from method: ($res)"  if ($debug);
+					Log3 $name, 5, "protocol does not match return from method: ($res)"  if ($debug);
 
 				}
 			}
@@ -1819,6 +1824,7 @@ SIGNALduino_Attr(@)
 	my ($cmd,$name,$aName,$aVal) = @_;
 	my $hash = $defs{$name};
 
+	Log3 $name, 5, "Calling Getting Attr sub with args: $cmd $aName = $aVal";
 		
 	if( $aName eq "Clients" ) {		## Change clientList
 		$hash->{Clients} = $aVal;
@@ -1852,6 +1858,22 @@ SIGNALduino_Attr(@)
 		$debug = $aVal;
 		Log3 $name, 3, "$name: setting debug to: " . $debug;
 	}
+	elsif ($aName eq "whitelist_IDs" && $cmd=="set")
+	{
+		
+ 		my %WhitelistIDs;
+ 		if (defined($aVal) && length($aVal)>0)
+ 		{
+ 			%WhitelistIDs = map { $_ => 1 } split(",", $aVal);
+			$hash->{"whitelisthash"} = \%WhitelistIDs;
+ 		} else  {
+ 			 delete $hash->{"whitelisthash"};
+ 			 delete($attr{$name}{$aName});
+ 			 
+ 			 Log3 $name, 5, "$name: deleting $aName";
+ 			 return "$name: deleting $aName";
+ 		}
+	}
 	
   	return undef;
 }
@@ -1860,18 +1882,27 @@ SIGNALduino_Attr(@)
 
 sub SIGNALduino_OSV2()
 {
-	my ($name,$bitData) = @_;
+	my ($name,$bitData,$id) = @_;
 	
 	if (index($bitData,"10011001",24) >= 24 and $bitData =~ m/^.?(10){12,16}/) 
 	{  # Valid OSV2 detected!	
 		
 		Debug "$name: OSV2 protocol detected \n" if ($debug);
 		my $preamble_pos=index($bitData,"10011001",24);
+		
+		return return (-1," sync not found") if ($preamble_pos <=24);
+		
+		my $message_end=index($bitData,"10011001",$preamble_pos+44);
+       	$message_end = length($bitData) if ($message_end == -1);
+		my $message_length = $message_end - $preamble_pos;
 
-		return undef if ($preamble_pos <=24);
+		return (-1," message is to short") if (defined($ProtocolListSIGNALduino{$id}{length_min}) && $message_length < $ProtocolListSIGNALduino{$id}{length_min} );
+		return (-1," message is to long") if (defined($ProtocolListSIGNALduino{$id}{length_max}) && $message_length > $ProtocolListSIGNALduino{$id}{length_max} );
+		
 		my $idx=0;
 		my $osv2bits="";
 		my $osv2hex ="";
+		
 		for ($idx=$preamble_pos;$idx<length($bitData);$idx=$idx+16)
 		{
 			if (length($bitData)-$idx  < 16 )
@@ -1892,7 +1923,7 @@ sub SIGNALduino_OSV2()
 			$osv2bits = $osv2bits.$rvosv2byte;
 		}
 		$osv2hex = sprintf("%02X", length($osv2hex)*4).$osv2hex;
-		Log3 $name, 5, "$name: OSV2 protocol converted to hex: ($osv2hex) with length (".((length($osv2hex)-2)*4).") bits \n";
+		Log3 $name, 5, "$name: OSV2 protocol converted to hex: ($osv2hex) with length (".(length($osv2hex)*4).") bits \n";
 		#$found=1;
 		#$dmsg=$osv2hex;
 		return (1,$osv2hex);
@@ -1919,69 +1950,69 @@ sub SIGNALduino_OSV1()
 
 sub	SIGNALduino_AS()
 {
-	my ($name,$bitData) = @_;
+	my ($name,$bitData,$id) = @_;
 
 	if(index($bitData,"1100",16) >= 0) # $rawData =~ m/^A{2,3}/)
 	{  # Valid AS detected!	
 		my $message_start = index($bitData,"1100",16);
 		Debug "$name: AS protocol detected \n" if ($debug);
+		
+		my $message_end=index($bitData,"1100",$message_start+16);
+       	$message_end = length($bitData) if ($message_end == -1);
+		my $message_length = $message_end - $message_start;
+		
+		return (-1," message is to short") if (defined($ProtocolListSIGNALduino{$id}{length_min}) && $message_length < $ProtocolListSIGNALduino{$id}{length_min} );
+		return (-1," message is to long") if (defined($ProtocolListSIGNALduino{$id}{length_max}) && $message_length > $ProtocolListSIGNALduino{$id}{length_max} );
+		
+		
 		my $msgbits =substr($bitData,$message_start);
 		
 		my $ashex=sprintf('%02X', oct("0b$msgbits"));
-		Log3 $name, 5, "$name: AS protocol converted to hex: ($ashex) with length (".(length($ashex)*4).") bits \n";
+		Log3 $name, 5, "$name: AS protocol converted to hex: ($ashex) with length ($message_length) bits \n";
 
 		return (1,$bitData);
 	}
 	return (-1,undef);
 }
 
-sub	SIGNALduino_Cresta()
+sub	SIGNALduino_Hideki()
 {
-	my ($name,$bitData) = @_;
+	my ($name,$bitData,$id) = @_;
     Debug "$name: search in $bitData \n" if ($debug);
-	if (index($bitData,"0101110") >= 0 )   # 0x75 but in reverse order
+	my $message_start = index($bitData,"10101110");
+	if ($message_start >= 0 )   # 0x75 but in reverse order
 	{
-		Debug "$name: Cresta protocol detected \n" if ($debug);
+		Debug "$name: Hideki protocol detected \n" if ($debug);
 
-		my $message_start=index($bitData,"10101110");
-		my $crestahex="";  #=substr($bitData,$message_start);
+		# Todo: Mindest Länge für startpunkt vorspringen 
+		# Todo: Wiederholung auch an das Modul weitergeben, damit es dort geprüft werden kann
+		my $message_end = index($bitData,"10101110",$message_start+18); # pruefen auf ein zweites 0x75,  mindestens 18 bit nach 1. 0x75
+        $message_end = length($bitData) if ($message_end == -1);
+        my $message_length = $message_end - $message_start;
+		
+		return (-1,"message is to short") if (defined($ProtocolListSIGNALduino{$id}{length_min}) && $message_length < $ProtocolListSIGNALduino{$id}{length_min} );
+		return (-1,"message is to long") if (defined($ProtocolListSIGNALduino{$id}{length_max}) && $message_length > $ProtocolListSIGNALduino{$id}{length_max} );
+
+		
+		my $hidekihex;
 		my $idx;
 		
-		for ($idx=$message_start;$idx<length($bitData);$idx=$idx+9)
+		for ($idx=$message_start; $idx<$message_end; $idx=$idx+9)
 		{
 			my $byte = "";
-
 			$byte= substr($bitData,$idx,8); ## Ignore every 9th bit
 			Debug "$name: byte in order $byte " if ($debug);
 			$byte = scalar reverse $byte;
 			Debug "$name: byte reversed $byte , as hex: ".sprintf('%X', oct("0b$byte"))."\n" if ($debug);
 
-			$crestahex=$crestahex.sprintf('%02X', oct("0b$byte"));
+			$hidekihex=$hidekihex.sprintf('%02X', oct("0b$byte"));
 		}
-		$crestahex = sprintf("%02X", length($crestahex)*4).$crestahex; # Number of bits
-		Log3 $name, 5, "$name: Cresta protocol converted to hex: ($crestahex) with length (".(length($crestahex)*4).") bits \n";
+		Log3 $name, 4, "$name: hideki protocol converted to hex: $hidekihex with " .$message_length ." bits, messagestart $message_start";
 
-		return  (1,$crestahex); ## Return only the original bits, include length
+		return  (1,$hidekihex); ## Return only the original bits, include length
 	}
 	return (-1,"");
 }
-
-# Helper Function for logical Modules, to check if they should use longids
-#	call from logical module as following example :
-#		my $longidfunc= \&{"$iohash->{TYPE}_use_longid"};
-#		Log3 $iohash,5, "$name check longid sub ($iohash->{TYPE}_use_longid) exists=".defined(&$longidfunc);
-#		if (defined(&$longidfunc) and (\&$longidfunc($iohash,"Cresta_$model")))
-#		{ ... }
-
-
-sub SIGNALduino_use_longid {
-  my ($iohash,$dev_type) = @_;
-  my $longids=AttrVal($iohash->{NAME},"longids","0");	      				# Default to not use longids
-  return 0 if ($longids eq "") || ($longids eq "0");
-  return 1 if ($longids eq "1") || ($longids eq "ALL") || (",$longids," =~ m/,$dev_type,/) ;
-  return 0;
-}
-
 
 
 
@@ -1992,173 +2023,165 @@ sub SIGNALduino_use_longid {
 
 <a name="SIGNALduino"></a>
 <h3>SIGNALduino</h3>
-<ul>
 
-  <table>
-  <tr><td>
-  The SIGNALduino ia based on an idea from mdorenka published at <a
-  href="http://forum.fhem.de/index.php/topic,17196.0.html">FHEM Forum</a>.
+	<table>
+	<tr><td>
+	The SIGNALduino ia based on an idea from mdorenka published at <a
+	href="http://forum.fhem.de/index.php/topic,17196.0.html">FHEM Forum</a>.
 
-  With the opensource firmware (see this <a
-  href="https://github.com/RFD-FHEM/SIGNALduino">link</a>) it is capable
-  to receive and send different wireless protocols.
-  <br><br>
-  
-  The following protocols are available:
-  <br><br>
-  
-  
-  Wireless switches  <br>
-  IT  switches --> uses IT.pm<br>
-  
-  <br><br>
-  
-  Temperatur / humidity sensors suppored by 14_CUL_TCM97001 <br>
-  PEARL NC7159, LogiLink WS0002,GT-WT-02,AURIOL,TCM97001, TCM27,GT-WT-02..  --> 14_CUL_TCM97001.pm <br>
-  Oregon Scientific v2 Sensors  --> 41_OREGON.pm<br>
-  <br><br>
+	With the opensource firmware (see this <a
+	href="https://github.com/RFD-FHEM/SIGNALduino">link</a>) it is capable
+	to receive and send different wireless protocols.
+	<br><br>
 
-  It is possible to attach more than one device in order to get better
-  reception, fhem will filter out duplicate messages.<br><br>
+	The following protocols are available:
+	<br><br>
 
-  Note: this module require the Device::SerialPort or Win32::SerialPort
-  module. It can currently only attatched via USB.
 
-  </td><td>
-  <img src="ccc.jpg"/>
-  </td></tr>
-  </table>
+	Wireless switches  <br>
+	IT  switches --> uses IT.pm<br>
 
-  <a name="SIGNALduinodefine"></a>
-  <b>Define</b>
-  <ul>
-    <code>define &lt;name&gt; SIGNALduino &lt;device&gt; </code> <br>
-    <br>
-    USB-connected devices (SIGNALduino):<br><ul>
-      &lt;device&gt; specifies the serial port to communicate with the SIGNALduino.
-	  The name of the serial-device depends on your distribution, under
-      linux the cdc_acm kernel module is responsible, and usually a
-      /dev/ttyACM0 or /dev/ttyUSB0 device will be created. If your distribution does not have a
-      cdc_acm module, you can force usbserial to handle the SIGNALduino by the
-      following command:<ul>modprobe usbserial vendor=0x03eb
-      product=0x204b</ul>In this case the device is most probably
-      /dev/ttyUSB0.<br><br>
+	<br><br>
 
-      You can also specify a baudrate if the device name contains the @
-      character, e.g.: /dev/ttyACM0@57600<br><br>This is also the default baudrate
-	
-	  It is recommended to specify the device via a name which does not change:
-	  e.g. via by-id devicename: /dev/serial/by-id/usb-1a86_USB2.0-Serial-if00-port0@57600
-	  
-      If the baudrate is "directio" (e.g.: /dev/ttyACM0@directio), then the
-      perl module Device::SerialPort is not needed, and fhem opens the device
-      with simple file io. This might work if the operating system uses sane
-      defaults for the serial parameters, e.g. some Linux distributions and
-      OSX.  <br><br>
+	Temperatur / humidity sensors suppored by 14_CUL_TCM97001 <br>
+	PEARL NC7159, LogiLink WS0002,GT-WT-02,AURIOL,TCM97001, TCM27,GT-WT-02..  --> 14_CUL_TCM97001.pm <br>
+	Oregon Scientific v2 Sensors  --> 41_OREGON.pm<br>
+	<br><br>
 
-  </ul>
-  <br>
+	It is possible to attach more than one device in order to get better
+	reception, fhem will filter out duplicate messages.<br><br>
 
-  <a name="SIGNALduinoset"></a>
-  <b>Set </b>
-  <ul>
-    <li>raw<br>
-        Issue a SIGNALduino firmware command.  See the <a
-        href="http://<tbd>/commandref.html">this</a> document
-        for details on SIGNALduino commands.
-    </li><br>
+	Note: this module require the Device::SerialPort or Win32::SerialPort
+	module. It can currently only attatched via USB.
 
-    <li>flash [hexFile]<br>
-    The SIGNALduino needs the right firmware to be able to receive and deliver the sensor data to fhem. In addition to the way using the
-    arduino IDE to flash the firmware into the SIGNALduino this provides a way to flash it directly from FHEM.
+	</td><td>
+	<img src="ccc.jpg"/>
+	</td></tr>
+	</table>
+	<a name="SIGNALduinodefine"></a>
+	<b>Define</b>
+	<code>define &lt;name&gt; SIGNALduino &lt;device&gt; </code> <br>
+	<br>
+	USB-connected devices (SIGNALduino):<br>
+	<ul><li>
+		&lt;device&gt; specifies the serial port to communicate with the SIGNALduino.
+		The name of the serial-device depends on your distribution, under
+		linux the cdc_acm kernel module is responsible, and usually a
+		/dev/ttyACM0 or /dev/ttyUSB0 device will be created. If your distribution does not have a
+		cdc_acm module, you can force usbserial to handle the SIGNALduino by the
+		following command:<ul>modprobe usbserial vendor=0x03eb
+		product=0x204b</ul>In this case the device is most probably
+		/dev/ttyUSB0.<br><br>
 
-    There are some requirements:
-    <ul>
-      <li>avrdude must be installed on the host<br>
-      On a Raspberry PI this can be done with: sudo apt-get install avrdude</li>
-      <li>the flashCommand attribute must be set.<br>
-        This attribute defines the command, that gets sent to avrdude to flash the JeeLink.<br>
-        The default is: avrdude -p atmega328P -c arduino -P [PORT] -D -U flash:w:[HEXFILE] 2>[LOGFILE]<br>
-        It contains some place-holders that automatically get filled with the according values:<br>
-        <ul>
-          <li>[PORT]<br>
-            is the port the Signalduino is connectd to (e.g. /dev/ttyUSB0) and will be used from the defenition</li>
-          <li>[HEXFILE]<br>
-            is the .hex file that shall get flashed. There are three options (applied in this order):<br>
-            - passed in set flash<br>
-            - taken from the hexFile attribute<br>
-            - the default value defined in the module<br>
-          </li>
-          <li>[LOGFILE]<br>
-            The logfile that collects information about the flash process. It gets displayed in FHEM after finishing the flash process</li>
-        </ul>
-      </li>
-    </ul>
-	
-    </li><br>
+		You can also specify a baudrate if the device name contains the @
+		character, e.g.: /dev/ttyACM0@57600<br><br>This is also the default baudrate
 
-  </ul>
-  <a name="SIGNALduinoget"></a>
-  <b>Get</b>
-  <ul>
-    <li>version<br>
-        return the SIGNALduino firmware version
-        </li><br>
-    <li>raw<br>
-        Issue a SIGNALduino firmware command, and wait for one line of data returned by
-        the SIGNALduino. See the SIGNALduino firmware code  for details on SIGNALduino
-        commands. With this line, you can send almost any signal via a transmitter connected
-        </li><br>
-    <li>cmds<br>
-        Depending on the firmware installed, SIGNALduinos have a different set of
-        possible commands. Please refer to the sourcecode of the firmware of your
-        SIGNALduino to interpret the response of this command. See also the raw-
-        command.
-        </li><br>
-  </ul>
+		It is recommended to specify the device via a name which does not change:
+		e.g. via by-id devicename: /dev/serial/by-id/usb-1a86_USB2.0-Serial-if00-port0@57600
 
-  <a name="SIGNALduinoattr"></a>
-  <b>Attributes</b>
-  <ul>
-    <li>Clients<br>
-      * This is currently not implemented:<br>
-      The received data gets distributed to a client (e.g. OREGON, IT, CUL_TCM97001, ...) that handles the data.
-      This attribute tells, which are the clients, that handle the data. If you add a new module to FHEM, that shall handle
-      data distributed by the SIGNALduino module, you must add it to the Clients attribute.</li>
+		If the baudrate is "directio" (e.g.: /dev/ttyACM0@directio), then the
+		perl module Device::SerialPort is not needed, and fhem opens the device
+		with simple file io. This might work if the operating system uses sane
+		defaults for the serial parameters, e.g. some Linux distributions and
+		OSX.  <br><br></li>
 
-    <li>MatchList<br>
-      * This is currently not implemented:<br>
-      can be set to a perl expression that returns a> hash that is used as the MatchList<br>
-      <code>attr myJeeLink MatchList {'5:AliRF' => '^\\S+\\s+5 '}</code></li>
-    <li>hexfile<br>
-      Full path to a hex filename of the arduino sketch e.g. /opt/fhem/RF_Receiver_nano328.hex
-	</li>
+	</ul>
+	<br>
 
-	  
-	<li><a href="#do_not_notify">do_not_notify</a></li>
-    <li><a href="#attrdummy">dummy</a></li>
-    <li><a href="#attrdummy">debug</a><br>
-    This will bring the module in a very verbose debug output. Usefull to find new signals and verify if the demodulation works correctly.
-    </li>
-    
-    <li>longids<br>
-        Comma separated list of device-types for SIGNALduino that should be handled using long IDs. This additional ID allows it to differentiate some weather sensors, if they are sending on the same channel. Therfor a random generated id is added. If you choose to use longids, then you'll have to define a different device after battery change.<br>
-Default is to use long IDs for all devices.
-      <br><br>
-      Examples:<PRE>
-# Do not use any long IDs for any devices:
-attr sduino longids 0
-# Use any long IDs for all devices (this is default):
-attr sduino longids 1
-# Use longids for BTHR918N devices.
-# Will generate devices names like BTHR918N_f3.
-attr RFXCOMUSB longids BTHR918N
-</PRE>
-    </li><br>
+	<a name="SIGNALduinoset"></a>
+	<b>Set </b>
+	<ul>
+		<li>raw<br>Issue a SIGNALduino firmware command.  See the <a href="http://<tbd>/commandref.html">this</a> document for details on SIGNALduino commands.
+		</li><br>
 
-  </ul>
-  <br>
-</ul>
+		<li>flash [hexFile]<br>
+		The SIGNALduino needs the right firmware to be able to receive and deliver the sensor data to fhem. In addition to the way using the
+		arduino IDE to flash the firmware into the SIGNALduino this provides a way to flash it directly from FHEM.
+
+		There are some requirements:
+	</ul>
+	<ul>
+		<li>avrdude must be installed on the host<br>
+		On a Raspberry PI this can be done with: sudo apt-get install avrdude</li>
+		<li>the flashCommand attribute must be set.<br>
+		This attribute defines the command, that gets sent to avrdude to flash the JeeLink.<br>
+		The default is: avrdude -p atmega328P -c arduino -P [PORT] -D -U flash:w:[HEXFILE] 2>[LOGFILE]<br>
+		It contains some place-holders that automatically get filled with the according values:<br>
+		<ul>
+			<li>[PORT]<br>
+			is the port the Signalduino is connectd to (e.g. /dev/ttyUSB0) and will be used from the defenition</li>
+			<li>[HEXFILE]<br>
+			is the .hex file that shall get flashed. There are three options (applied in this order):<br>
+			- passed in set flash<br>
+			- taken from the hexFile attribute<br>
+			- the default value defined in the module<br>
+			</li>
+			<li>[LOGFILE]<br>
+			The logfile that collects information about the flash process. It gets displayed in FHEM after finishing the flash process</li>
+		</ul>
+		</li>
+		<br>
+
+	</ul>
+	<a name="SIGNALduinoget"></a>
+	<b>Get</b>
+	<ul>
+		<li>version<br>
+		return the SIGNALduino firmware version
+		</li><br>
+		<li>raw<br>
+		Issue a SIGNALduino firmware command, and wait for one line of data returned by
+		the SIGNALduino. See the SIGNALduino firmware code  for details on SIGNALduino
+		commands. With this line, you can send almost any signal via a transmitter connected
+		</li><br>
+		<li>cmds<br>
+		Depending on the firmware installed, SIGNALduinos have a different set of
+		possible commands. Please refer to the sourcecode of the firmware of your
+		SIGNALduino to interpret the response of this command. See also the raw-
+		command.
+		</li><br>
+	</ul>
+
+	<a name="SIGNALduinoattr"></a>
+	<b>Attributes</b>
+	<ul>
+		<li>Clients<br>
+		* This is currently not implemented:<br>
+		The received data gets distributed to a client (e.g. OREGON, IT, CUL_TCM97001, ...) that handles the data.
+		This attribute tells, which are the clients, that handle the data. If you add a new module to FHEM, that shall handle
+		data distributed by the SIGNALduino module, you must add it to the Clients attribute.</li>
+
+		<li>MatchList<br>
+		* This is currently not implemented:<br>
+		can be set to a perl expression that returns a> hash that is used as the MatchList<br>
+		<code>attr myJeeLink MatchList {'5:AliRF' => '^\\S+\\s+5 '}</code></li>
+		<li>hexfile<br>
+		Full path to a hex filename of the arduino sketch e.g. /opt/fhem/RF_Receiver_nano328.hex
+		</li>
+
+
+		<li><a href="#do_not_notify">do_not_notify</a></li>
+		<li><a href="#attrdummy">dummy</a></li>
+		<li><a href="#attrdummy">debug</a><br>
+		This will bring the module in a very verbose debug output. Usefull to find new signals and verify if the demodulation works correctly.
+		</li>
+
+		<li>longids<br>
+		Comma separated list of device-types for SIGNALduino that should be handled using long IDs. This additional ID allows it to differentiate some weather sensors, if they are sending on the same channel. Therfor a random generated id is added. If you choose to use longids, then you'll have to define a different device after battery change.<br>
+		Default is to use long IDs for all devices.
+		<br><br>
+		Examples:<PRE>
+		# Do not use any long IDs for any devices:
+		attr sduino longids 0
+		# Use any long IDs for all devices (this is default):
+		attr sduino longids 1
+		# Use longids for BTHR918N devices.
+		# Will generate devices names like BTHR918N_f3.
+		attr RFXCOMUSB longids BTHR918N
+		</PRE>
+		</li><br>
+	</ul>
+
 
 =end html
 =cut
