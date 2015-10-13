@@ -39,4 +39,8 @@ set SDuino flash
 If this fails, you may need to install avrdude on your system.
 On a raspberry pi it is done via ```sudo apt-get install avrdude```
 
+More Information
+=====
+Look at the FHEM Wiki, for more Information: http://www.fhemwiki.de/wiki/SIGNALDuino
+Forum thread is at: http://forum.fhem.de/index.php/topic,38831.0.html
 
