@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 14_AS.pm 3818 2015-08-30 $
+# $Id: 14_SD_AS.pm 3818 2015-08-30 $
 # The file is part of the SIGNALduino project
 # see http://www.fhemwiki.de/wiki/SIGNALduino
 # and was created to provide support for self build sensors.
@@ -16,7 +16,7 @@ use POSIX;
 
 #####################################
 sub
-AS_Initialize($)
+SD_AS_Initialize($)
 {
   my ($hash) = @_;
 
@@ -44,16 +44,16 @@ AS_Initialize($)
   # 9   Humidity
   # ..31 
   $hash->{Match}     = "^P2#[A-Fa-f0-9]{7,8}";
-  $hash->{DefFn}     = "AS_Define";
-  $hash->{UndefFn}   = "AS_Undef";
-  $hash->{AttrFn}    = "AS_Attr";
-  $hash->{ParseFn}   = "AS_Parse";
+  $hash->{DefFn}     = "SD_AS_Define";
+  $hash->{UndefFn}   = "SD_AS_Undef";
+  $hash->{AttrFn}    = "SD_AS_Attr";
+  $hash->{ParseFn}   = "SD_AS_Parse";
   $hash->{AttrList}  = "IODev do_not_notify:0,1 showtime:0,1 ignore:0,1 ".$readingFnAttributes;
   $hash->{AutoCreate}=
-        { "AS_temp.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4:Temp,", autocreateThreshold => "2:600"},
-          "AS_humidity.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "2:600"},
-          "AS_reedGas.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", autocreateThreshold => "2:600"},
-          "AS_voltage.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", autocreateThreshold => "2:600"},
+        { "SD_AS_temp.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4:Temp,", autocreateThreshold => "2:600"},
+          "SD_AS_humidity.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "2:600"},
+          "SD_AS_reedGas.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", autocreateThreshold => "2:600"},
+          "SD_AS_voltage.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", autocreateThreshold => "2:600"},
 
         };
 }
@@ -61,7 +61,7 @@ AS_Initialize($)
 
 #####################################
 sub
-AS_Define($$)
+SD_AS_Define($$)
 {
   my ($hash, $def) = @_;
   my @a = split("[ \t][ \t]*", $def);
@@ -81,7 +81,7 @@ AS_Define($$)
 
 #####################################
 sub
-AS_Undef($$)
+SD_AS_Undef($$)
 {
   my ($hash, $name) = @_;
   delete($modules{AS}{defptr}{$hash->{CODE}}) if($hash && $hash->{CODE});
@@ -90,7 +90,7 @@ AS_Undef($$)
 
 #####################################
 sub
-AS_Parse($$)
+SD_AS_Parse($$)
 {
   my ($hash,$msg) = @_;
   my @a = split("", $msg);
@@ -108,7 +108,7 @@ AS_Parse($$)
     for ($i = 2; $i <= 8; $i+=2) {
       #convert pairs of hex digits into number for Bytes 0-3 only!
       $byte = hex(substr $msg, $i, 2);
-      $crc=AS_crc($crc,$byte);
+      $crc=SD_AS_crc($crc,$byte);
 	}
 	my $crc8;
 	$crc8 = substr($msg,-2);  ## Get last two Ascii Chars for CRC Validation
@@ -242,7 +242,7 @@ AS_Parse($$)
 #Initial value: 0x0
 #See http://www.maxim-ic.com/appnotes.cfm/appnote_number/27
 
-sub AS_crc($$)
+sub SD_AS_crc($$)
 {
   my ($lcrc,$ldata) = @_;
   my $i;
@@ -261,7 +261,7 @@ sub AS_crc($$)
 
 
 sub
-AS_Attr(@)
+SD_AS_Attr(@)
 {
   my @a = @_;
 
@@ -284,7 +284,7 @@ AS_Attr(@)
 <a name="AS"></a>
 <h3>AS</h3>
 <ul>
-  The AS module interprets Arduino based sensors received via SIGNALduino
+  The ArduinoSensor module interprets Arduino based sensors received via SIGNALduino
   <br><br>
 
   <a name="ASdefine"></a>
@@ -321,7 +321,7 @@ AS_Attr(@)
 
 =begin html_DE
 
-<a name="AS"></a>
+<a name="SD_AS"></a>
 <h3>AS</h3>
 <ul>
   Das AS module dekodiert vom SIGNALduino empfangene Nachrichten von Arduino basierten Sensoren.
@@ -333,20 +333,19 @@ AS_Attr(@)
     <code>define &lt;name&gt; AS &lt;code&gt; </code> <br>
 
     <br>
-    &lt;code&gt; ist der automatisch angelegte Code, welcher im Arduino gespeichert ist.
+    &lt;code&gt; ist der Sensor ID Code, welcher im Arduino definiert ist.
   </ul>
   <br>
 
-  <a name="ASset"></a>
+  <a name="SD_ASset"></a>
   <b>Set</b> <ul>N/A</ul><br>
 
-  <a name="ASget"></a>
+  <a name="SD_ASget"></a>
   <b>Get</b> <ul>N/A</ul><br>
 
-  <a name="ASattr"></a>
+  <a name="SD_ASattr"></a>
   <b>Attributes</b>
   <ul>
-    <li><a href="#IODev">IODev (!)</a></li>
     <li><a href="#do_not_notify">do_not_notify</a></li>
     <li><a href="#eventMap">eventMap</a></li>
     <li><a href="#ignore">ignore</a></li>
