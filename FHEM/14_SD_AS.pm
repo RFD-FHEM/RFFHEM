@@ -50,10 +50,10 @@ SD_AS_Initialize($)
   $hash->{ParseFn}   = "SD_AS_Parse";
   $hash->{AttrList}  = "IODev do_not_notify:0,1 showtime:0,1 ignore:0,1 ".$readingFnAttributes;
   $hash->{AutoCreate}=
-        { "SD_AS_temp.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4:Temp,", autocreateThreshold => "2:600"},
-          "SD_AS_humidity.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "2:600"},
-          "SD_AS_reedGas.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", autocreateThreshold => "2:600"},
-          "SD_AS_voltage.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", autocreateThreshold => "2:600"},
+        { "ArduinoSensor_temp.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4:Temp,", autocreateThreshold => "2:600"},
+          "ArduinoSensor_humidity.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "2:600"},
+          "ArduinoSensor_reedGas.*" => { ATTR => "event-min-interval:.*:1 event-on-change-reading:.*", FILTER => "%NAME", autocreateThreshold => "2:600"},
+          "ArduinoSensor_voltage.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", autocreateThreshold => "2:600"},
 
         };
 }
@@ -66,7 +66,7 @@ SD_AS_Define($$)
   my ($hash, $def) = @_;
   my @a = split("[ \t][ \t]*", $def);
 
-  return "wrong syntax: define <name> AS <code>".int(@a)
+  return "wrong syntax: define <name> SD_AS <code>".int(@a)
 		if(int(@a) != 3);
 
   $hash->{CODE}    = $a[2];
@@ -92,29 +92,31 @@ SD_AS_Undef($$)
 sub
 SD_AS_Parse($$)
 {
-  my ($hash,$msg) = @_;
-  my @a = split("", $msg);
+  	my ($iohash,$msg) = @_;
+ 	my (undef ,$rawData) = split("#",$msg);
+	my $name = $iohash->{NAME};
 
-  if (length($msg) < 10) {
-    Log3 "SIGNALduino", 4, "AS: wrong message -> $msg";
+	
+  if (length($rawData) < 8) {
+    Log3 $iohash, 4, "SD_AS: wrong message -> $rawData";
     return "";
   }
   ### CRC Check only if more than 10 characters for backward compatibility ###
-  if (length($msg) > 10) {
+  if (length($rawData) > 8) {
 	my $i;
 	my $crc = 0x0;
 	my $byte;
 	
     for ($i = 2; $i <= 8; $i+=2) {
       #convert pairs of hex digits into number for Bytes 0-3 only!
-      $byte = hex(substr $msg, $i, 2);
+      $byte = hex(substr $rawData, $i, 2);
       $crc=SD_AS_crc($crc,$byte);
 	}
 	my $crc8;
-	$crc8 = substr($msg,-2);  ## Get last two Ascii Chars for CRC Validation
+	$crc8 = substr($rawData,-2);  ## Get last two Ascii Chars for CRC Validation
 
 	if ($crc != hex($crc8)) {
-	  Log3 $hash, 4, "AS: CRC ($crc) does not not match $msg, should be CRC ($crc8)";
+	  Log3 $iohash, 4, "AS: CRC ($crc) does not not match $rawData, should be CRC ($crc8)";
 
 	  return undef;
 	  
@@ -122,7 +124,7 @@ SD_AS_Parse($$)
   }
 
 
-  Log3 $hash, 3, "AS: $msg";
+  Log3 $iohash, 3, "AS: $rawData";
   
   my ($deviceCode, $SensorTyp, $model, $id, $valHigh, $valLow, $Sigval, $bat, $trigger, $val, $sigType);
   # T	Type:
@@ -153,15 +155,15 @@ SD_AS_Parse($$)
   # DD2 - HighByte
   
 	$SensorTyp = "ArduinoSensor";
-    $model = $typeStr{hex(substr($msg,2,2)) &0x7f}; # Sensortype
-	$sigType = $sigStr{hex(substr($msg,2,2)) &0x7f}; # Signaltype
-	$id = hex(substr($msg,4,2)) &0x3f;
-	$valLow = hex(substr($msg,6,2));
-	$valHigh = hex(substr($msg,8,2));
+    $model = $typeStr{hex(substr($rawData,0,2)) &0x7f}; # Sensortype
+	$sigType = $sigStr{hex(substr($rawData,0,2)) &0x7f}; # Signaltype
+	$id = hex(substr($rawData,2,2)) &0x3f;
+	$valLow = hex(substr($rawData,4,2));
+	$valHigh = hex(substr($rawData,6,2));
 	$Sigval = (($valHigh<<8) + $valLow);
-	$bat = $batStr{(hex(substr($msg,4,2))>>6) &3};
-	$trigger = $trigStr{(hex(substr($msg,2,2))>>7) &1};
-	Log3 $hash, 3, "AS Sigval: $Sigval";#
+	$bat = $batStr{(hex(substr($rawData,2,2))>>6) &3};
+	$trigger = $trigStr{(hex(substr($rawData,0,2))>>7) &1};
+	Log3 $iohash, 3, "SD_AS Sigval: $Sigval";#
 
 	if ($model eq "lightHiRange") {
 	  $Sigval = sprintf( "%.1f", $Sigval /1.2); #TBD
@@ -179,7 +181,7 @@ SD_AS_Parse($$)
 	  $Sigval = sprintf( "%.1f%%", (1024-$Sigval)*100/1024);
 	}
 	elsif ($model eq "humidity") {
-	  $Sigval = sprintf( "%i %", ($Sigval-0x8000) /10); #hum is send 10*%
+	  $Sigval = sprintf( "%i %%", ($Sigval-0x8000) /10); #hum is send 10*%
 	}
 	elsif ($model eq "reedGas") {
 	  $Sigval = sprintf( "%i m3", ($Sigval)); #simple counter, code has to be extended to support restart of the sensor etc.
@@ -187,9 +189,9 @@ SD_AS_Parse($$)
 
 	# Bei Voltage Sensoren die Batterieinfo als Zahl ausgeben, damit man sie in einem Diagramm abbilden kann	
 	elsif ($model eq "voltage") {
-	  $bat = (hex(substr($msg,9,2))>>1)&3
+	  $bat = (hex(substr($msg,7,2))>>1)&3
 	} else {
-		Log3 $hash, 1, "AS unknown model: $model";#
+		Log3 $iohash, 1, "SD_AS unknown model: $model";#
 		return undef;
     }
     $val = "S: $Sigval B: $bat";
@@ -198,30 +200,30 @@ SD_AS_Parse($$)
     $deviceCode = $model."_".$id;
   }
   
-  my $def = $modules{AS}{defptr}{$hash->{NAME} . "." . $deviceCode};
+  my $def = $modules{AS}{defptr}{$iohash->{NAME} . "." . $deviceCode};
   $def = $modules{AS}{defptr}{$deviceCode} if(!$def);
   
   if(!$def) {
-    Log3 $hash, 1, "AS: UNDEFINED sensor $SensorTyp detected, code $deviceCode";
-    return "UNDEFINED $SensorTyp"."_"."$deviceCode AS $deviceCode";
+    Log3 $iohash, 1, "SD_AS: UNDEFINED sensor $SensorTyp detected, code $deviceCode";
+    return "UNDEFINED $SensorTyp"."_"."$deviceCode SD_AS $deviceCode";
   }
 
-  $hash = $def;
-  my $name = $hash->{NAME};
+  my $hash = $def;
+  $name = $hash->{NAME};
   return "" if(IsIgnored($name));
   
-  Log3 $name, 4, "AS: $name ($msg)";  
+  Log3 $hash, 4, "SD_AS: $name ($msg)";  
   
   $hash->{lastReceive} = time();
 
   if(!$val) {
-    Log3 $name, 1, "AS: $name: $deviceCode Cannot decode $msg";
+    Log3 $hash, 1, "SD_AS: $name: $deviceCode Cannot decode $msg";
     return "";
   }
   
   $def->{lastMSG} = $msg;
 
-  Log3 $name, 4, "AS $name: $val";
+  Log3 $hash, 4, "SD_AS $name: $val";
 
   readingsBeginUpdate($hash);
   readingsBulkUpdate($hash, "state", $val);
@@ -281,13 +283,13 @@ SD_AS_Attr(@)
 =pod
 =begin html
 
-<a name="AS"></a>
+<a name="SD_AS"></a>
 <h3>AS</h3>
 <ul>
   The ArduinoSensor module interprets Arduino based sensors received via SIGNALduino
   <br><br>
 
-  <a name="ASdefine"></a>
+  <a name="SD_ASdefine"></a>
   <b>Define</b>
   <ul>
     <code>define &lt;name&gt; AS &lt;code&gt;</code> <br>
@@ -297,16 +299,15 @@ SD_AS_Attr(@)
   </ul>
   <br>
 
-  <a name="ASset"></a>
+  <a name="SD_ASset"></a>
   <b>Set</b> <ul>N/A</ul><br>
 
-  <a name="ASget"></a>
+  <a name="SD_ASget"></a>
   <b>Get</b> <ul>N/A</ul><br>
 
-  <a name="ASattr"></a>
+  <a name="SD_ASattr"></a>
   <b>Attributes</b>
   <ul>
-    <li><a href="#IODev">IODev (!)</a></li>
     <li><a href="#do_not_notify">do_not_notify</a></li>
     <li><a href="#eventMap">eventMap</a></li>
     <li><a href="#ignore">ignore</a></li>
@@ -327,7 +328,7 @@ SD_AS_Attr(@)
   Das AS module dekodiert vom SIGNALduino empfangene Nachrichten von Arduino basierten Sensoren.
   <br><br>
 
-  <a name="ASdefine"></a>
+  <a name="SD_ASdefine"></a>
   <b>Define</b>
   <ul>
     <code>define &lt;name&gt; AS &lt;code&gt; </code> <br>
