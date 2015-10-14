@@ -60,6 +60,7 @@ my $clientsSIGNALduino = ":IT:"
 						."SIGNALduino_RSL:"
 						."OREGON:"
 						."CUL_TX:"
+						."SIGNALduino_AS:"
 						."AS:"
 						."SIGNALduino_un:"
 						."Hideki:"
@@ -71,7 +72,7 @@ my %matchListSIGNALduino = (
      "2:CUL_TCM97001"      		=> "^s[A-Fa-f0-9]+",			  # Any hex string		beginning with s
 	 "3:SIGNALduino_RSL"		=> "^rA-Fa-f0-9]+",				  # Any hex string		beginning with r
      "5:CUL_TX"               	=> "^TX..........",         	  # Need TX to avoid FHTTK
-	 "6:SIGNALduino_AS"       	=> "^P2#[A-Fa-f0-9]{7,8}", 		  # Arduino based Sensors, should not be default
+	 "6:SIGNALduino_AS"       	=> "AS[A-Fa-f0-9]{7,8}", 		  # Arduino based Sensors, should not be default
      "4:OREGON"            		=> "^(3[8-9A-F]|[4-6][0-9A-F]|7[0-8]).*",		
 	 "8:SIGNALduino_un"			=> "^u.*",
 	 "7:Hideki"					=> "^P12#75[A-F0-9]",
@@ -121,11 +122,11 @@ my %ProtocolListSIGNALduino  = (
 			clockabs     	=> '500',		# not used now
 			format 			=> 'twostate',	
 			preamble		=> 'AS',		# prepend to converted message		
-			clientmodule    => 'AS',   # not used now
-			modulematch     => '^P2#.*', # not used now
+			clientmodule    => 'SIGNALduino_AS',   # not used now
+			modulematch     => '^AS.*\$', # not used now
 			length_min      => '32',
 			length_max      => '34',		# Don't know maximal lenth of a valid message
-			paddingbits     => '8',				 # pad up to 8 bits, default is 4
+			paddingbits     => '8',		    # pad up to 8 bits, default is 4
 	
         },
     "3"    => 
@@ -271,10 +272,15 @@ my %ProtocolListSIGNALduino  = (
 			{
             name			=> 'AS',	
 			id          	=> '11',
+			#one				=> [3,-2],
+			#zero			=> [1,-2],
+			#float			=> [-1,3],		# not full supported now, for later use
+			#sync			=> [1,-8],		# 
+			#clockabs     	=> 500,			# -1 = auto undef=noclock
 			clockrange     	=> [380,425],			# min , max
 			format 			=> 'manchester',	    # tristate can't be migrated from bin into hex!
-			preamble		=> 'P2#',		# prepend to converted message	
-			#clientmodule    => '14_AS',   	# not used now
+			#preamble		=> '',		# prepend to converted message	
+			#clientmodule    => '14_SIGNALduino_AS',   	# not used now
 			#modulematch     => '',  # not used now
 			length_min      => '52',
 			length_max      => '56',
@@ -427,11 +433,11 @@ my %ProtocolListSIGNALduino  = (
 			clockabs		=> 400,                  #ca 400us
 			format 			=> 'twostate',	  		
 			preamble		=> 'u21#',				# prepend to converted message	
-			#clientmodule    => '',   				# not used now
-			#modulematch     => '',  				# not used now
-			length_min      => '27',
-			length_max      => '33',				# must be tested
-
+			#clientmodule   => '',   				# not used now
+			#modulematch    => '',  				# not used now
+			length_min      => '32',
+			length_max      => '32',				
+			paddingbits     => '1',					# This will disable padding 
 		},
 	"22" => #TX-EZ6 / Meteo	
 		{
@@ -586,6 +592,7 @@ SIGNALduino_Define($$)
   $hash->{"TIME"}=time();
   
   
+  my %WhitelistIDs = map { $_ => 1 } split(",", AttrVal($name,"whitelist_IDs",""));
   $hash->{"whitelisthash"} = \%WhitelistIDs; 
   undef($hash->{"whitelisthash"}) if (scalar(keys %WhitelistIDs) <= 0);
   return $ret;
@@ -1585,51 +1592,62 @@ sub SIGNALduino_Parse_MU($$$$@)
 			my @bit_msg=();							# array to store decoded signal bits
 			my $message_start = (index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}},\%patternList)) < index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{zero}},\%patternList)) ? index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}},\%patternList)) : index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{zero}},\%patternList)));
 			#for (my $i=index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{sync}}))+$signal_width;$i<length($rawData);$i+=$signal_width)
-			#Debug "Message starts at:".$message_start;
+			Debug "Message starts at $message_start length of data is ".length($rawData) if ($debug);
 			Log3 $name, 5, "Starting demodulation at Position $message_start";
 			#my $onepos= index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}},\%patternList));
 			#my $zeropos=index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{zero}},\%patternList));
 			#Log3 $name, 3, "op=$onepos zp=$zeropos";
 			#Debug "phash:".Dumper(%patternLookupHash);
-			for (my $i=$message_start;$i<length($rawData);$i+=$signal_width)
+			
+			my $padwith = defined($ProtocolListSIGNALduino{$id}{paddingbits}) ? $ProtocolListSIGNALduino{$id}{paddingbits} : 4;
+			
+			for (my $i=$message_start;$i<=length($rawData)-$signal_width;$i+=$signal_width)
 			{
+				Debug "$name: i=$i" if ($debug);
+				
 				my $sig_str= substr($rawData,$i,$signal_width);
+				$valid=1; # Set valid to 1 for every loop
 				#Debug $patternLookupHash{substr($rawData,$i,$signal_width)}; ## Get $signal_width number of chars from raw data string
 				if (exists $patternLookupHash{$sig_str}) 
 				{
 					push(@bit_msg,$patternLookupHash{$sig_str}) ; ## Add the bits to our bit array
 				}
-				if (!exists $patternLookupHash{$sig_str} || $i+$signal_width>=length($rawData))  ## Dispatch if last signal or unknown data
+				if (!exists $patternLookupHash{$sig_str} || $i+$signal_width>length($rawData))  ## Dispatch if last signal or unknown data
 				{
-					Debug "$name: decoded message raw (@bit_msg), ".@bit_msg." bits\n" if ($debug);;
-					while (@bit_msg % 4 > 0)
+					Debug "$name: demodulated message raw (@bit_msg), ".@bit_msg." bits\n" if ($debug);;
+					while (scalar @bit_msg % $padwith > 0)  ## will pad up full nibbles per default or full byte if specified in protocol
 					{
 						push(@bit_msg,'0');
 						Debug "$name: padding 0 bit to bit_msg array" if ($debug);
 					}
-
 					#Check converted message against lengths
 					$valid = $valid && $ProtocolListSIGNALduino{$id}{length_min} <= scalar @bit_msg  if (defined($ProtocolListSIGNALduino{$id}{length_min})); 
-					$valid = $valid && $ProtocolListSIGNALduino{$id}{length_max} >= scalar @bit_msg  if (defined($ProtocolListSIGNALduino{$id}{length_max}));
-					next if (!$valid);  ## Last chance to try next protocol if there is somethin invalid
-					Log3 $name, 5, "demodulated bits are: @bit_msg";
-
-
-					my $dmsg = SIGNALduino_b2h(join "", @bit_msg);
-					$dmsg =~ s/^0+//	 if (defined($ProtocolListSIGNALduino{$id}{remove_zero})); 
-					$dmsg = "$dmsg"."$ProtocolListSIGNALduino{$id}{postamble}" if (defined($ProtocolListSIGNALduino{$id}{postamble}));
-					$dmsg = "$ProtocolListSIGNALduino{$id}{preamble}"."$dmsg" if (defined($ProtocolListSIGNALduino{$id}{preamble}));
+					$valid = $valid && $ProtocolListSIGNALduino{$id}{length_max} >= scalar @bit_msg  if (defined($ProtocolListSIGNALduino{$id}{length_max}));					
 					
-					SIGNALduno_Dispatch($hash,$rmsg,$dmsg);
-					$message_dispatched=1;
-					
-				    @bit_msg=(); # clear bit_msg array
+					#next if (!$valid);  ## Last chance to try next protocol if there is somethin invalid
+					if ($valid) {
+						Log3 $name, 5, "dispatching bits: @bit_msg";
+						my $dmsg = SIGNALduino_b2h(join "", @bit_msg);
+						$dmsg =~ s/^0+//	 if (defined($ProtocolListSIGNALduino{$id}{remove_zero})); 
+						$dmsg = "$dmsg"."$ProtocolListSIGNALduino{$id}{postamble}" if (defined($ProtocolListSIGNALduino{$id}{postamble}));
+						$dmsg = "$ProtocolListSIGNALduino{$id}{preamble}"."$dmsg" if (defined($ProtocolListSIGNALduino{$id}{preamble}));
+						
+						SIGNALduno_Dispatch($hash,$rmsg,$dmsg);
+						$message_dispatched=1;
+						
+					} else {
+						Debug "$name: length ($ProtocolListSIGNALduino{$id}{length_min})/$ProtocolListSIGNALduino{$id}{length_max} does not match (@bit_msg), ".@bit_msg." bits\n" if ($debug);;
+						
+						
+					}
+					@bit_msg=(); # clear bit_msg array
 					
 					#Find next position of valid signal (skip invalid pieces)
 					$i = (index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}},\%patternList),$i) < index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{zero}},\%patternList),$i) ? index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}},\%patternList),$i) : index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{zero}},\%patternList),$i));
 					$i-=$signal_width;
 					last if ($i <=-1);	
 					Log3 $name, 5, "restarting demodulation at Position $i+$signal_width";												
+				
 				}
 			}
 					
