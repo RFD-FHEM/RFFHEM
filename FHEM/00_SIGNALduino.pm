@@ -60,7 +60,7 @@ my $clientsSIGNALduino = ":IT:"
 						."SIGNALduino_RSL:"
 						."OREGON:"
 						."CUL_TX:"
-						."SIGNALduino_AS:"
+						."SD_AS:"
 						."AS:"
 						."SIGNALduino_un:"
 						."Hideki:"
@@ -72,7 +72,7 @@ my %matchListSIGNALduino = (
      "2:CUL_TCM97001"      		=> "^s[A-Fa-f0-9]+",			  # Any hex string		beginning with s
 	 "3:SIGNALduino_RSL"		=> "^rA-Fa-f0-9]+",				  # Any hex string		beginning with r
      "5:CUL_TX"               	=> "^TX..........",         	  # Need TX to avoid FHTTK
-	 "6:SIGNALduino_AS"       	=> "AS[A-Fa-f0-9]{7,8}", 		  # Arduino based Sensors, should not be default
+	 "6:SD_AS"       			=> "^P2#[A-Fa-f0-9]{7,8}", 		  # Arduino based Sensors, should not be default
      "4:OREGON"            		=> "^(3[8-9A-F]|[4-6][0-9A-F]|7[0-8]).*",		
 	 "8:SIGNALduino_un"			=> "^u.*",
 	 "7:Hideki"					=> "^P12#75[A-F0-9]",
@@ -121,9 +121,9 @@ my %ProtocolListSIGNALduino  = (
 			sync			=> [1,-20],
 			clockabs     	=> '500',		# not used now
 			format 			=> 'twostate',	
-			preamble		=> 'AS',		# prepend to converted message		
-			clientmodule    => 'SIGNALduino_AS',   # not used now
-			modulematch     => '^AS.*\$', # not used now
+			preamble		=> 'P2#',		# prepend to converted message		
+			clientmodule    => 'SD_AS',   # not used now
+			modulematch     => '^P2#[A-Fa-f0-9]{7,8}', # not used now
 			length_min      => '32',
 			length_max      => '34',		# Don't know maximal lenth of a valid message
 			paddingbits     => '8',		    # pad up to 8 bits, default is 4
@@ -272,16 +272,11 @@ my %ProtocolListSIGNALduino  = (
 			{
             name			=> 'AS',	
 			id          	=> '11',
-			#one				=> [3,-2],
-			#zero			=> [1,-2],
-			#float			=> [-1,3],		# not full supported now, for later use
-			#sync			=> [1,-8],		# 
-			#clockabs     	=> 500,			# -1 = auto undef=noclock
 			clockrange     	=> [380,425],			# min , max
 			format 			=> 'manchester',	    # tristate can't be migrated from bin into hex!
-			#preamble		=> '',		# prepend to converted message	
-			#clientmodule    => '14_SIGNALduino_AS',   	# not used now
-			#modulematch     => '',  # not used now
+			preamble		=> 'P2#',		# prepend to converted message	
+			#clientmodule    => '14_SD_AS',   	# not used now
+			#modulematch     => '^P2#[A-Fa-f0-9]{7,8},  # not used now
 			length_min      => '52',
 			length_max      => '56',
 			method          => \&SIGNALduino_AS # Call to process this message
@@ -364,21 +359,21 @@ my %ProtocolListSIGNALduino  = (
 			length_min      => '30',
 			length_max      => '40',
 		}, 	
-	"17" => # nothing known about this MS;P0=-506;P1=444;P2=12860;P3=-8923;P4=-1041;P5=12838;P6=1371;D=13101010101014141410101010101010101010101010101010101010101010101012;CP=1;SP=3;
-		{
-            name			=> 'unknown17',	
-			id          	=> '17',
-			one				=> [1,-2],
-			zero			=> [1,-1],
-			sync			=> [1,-22],	# footer [1,-50]			
-			clockabs		=> 400,
-			format 			=> 'twostate',	  		
-			preamble		=> 'u17#',				# prepend to converted message	
-			#clientmodule    => '',   				# not used now
-			#modulematch     => '',  				# not used now
-			length_min      => '30',
-			#length_max      => '38',
-		}, 	
+	#"17" => # nothing known about this MS;P0=-506;P1=444;P2=12860;P3=-8923;P4=-1041;P5=12838;P6=1371;D=13101010101014141410101010101010101010101010101010101010101010101012;CP=1;SP=3;
+	#	{
+    #       name			=> 'unknown17',	
+	#		id          	=> '17',
+	#		one				=> [1,-2],
+	#		zero			=> [1,-1],
+	#		sync			=> [1,-22],	# footer [1,-50]			
+	#		clockabs		=> 400,
+	#		format 			=> 'twostate',	  		
+	#		preamble		=> 'u17#',				# prepend to converted message	
+	#		#clientmodule    => '',   				# not used now
+	#		#modulematch     => '',  				# not used now
+	#		length_min      => '30',
+	#		#length_max      => '38',
+	#	}, 	
 	
 	"18"    => 			## Oregon Scientific v1
 		{
