@@ -1,3 +1,7 @@
+15.10.2015
+ - Addes SD_WS07 Module for Technoline and Eurochron sensordevices
+ - Bugfixes for MU messages
+ 
 13.10.2015
  - Added support for Sensors which use Hideki Protocol (Cresta, Bresser, TFA, HAMA and more)
  - Addes an option to specify a whitlist for supported protocols
