@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm  71389 2015-10-07
+# $Id: 00_SIGNALduino.pm  67282 2015-10-15
 # The file is taken from the FHEMduino project and modified in serval ways for processing the incomming messages
 # see http://www.fhemwiki.de/wiki/SIGNALDuino
 # It was modified also to provide support for raw message handling which it's send from the SIGNALduino
@@ -64,6 +64,7 @@ my $clientsSIGNALduino = ":IT:"
 						."AS:"
 						."SIGNALduino_un:"
 						."Hideki:"
+						."SD_WS07:"
 						; 
 
 ## default regex match List for dispatching message to logical modules, can be updated during runtime because it is referenced
@@ -76,6 +77,7 @@ my %matchListSIGNALduino = (
      "4:OREGON"            		=> "^(3[8-9A-F]|[4-6][0-9A-F]|7[0-8]).*",		
 	 "8:SIGNALduino_un"			=> "^u.*",
 	 "7:Hideki"					=> "^P12#75[A-F0-9]",
+	 "10:SD_WS07"				=> "^P7#[A-Fa-f0-9]+",                       
 );
 
 
@@ -183,7 +185,7 @@ my %ProtocolListSIGNALduino  = (
 	
 	"6"    => 			## Eurochron Protocol
         {
-            name			=> 'eurochron',	
+            name			=> 'weatherID6',	
 			id          	=> '6',
 			one				=> [1,-10],
 			zero			=> [1,-5],
@@ -196,20 +198,19 @@ my %ProtocolListSIGNALduino  = (
 			length_min      => '24',
 
 		},
-	"7"    => 			## unkown Protocol
+	"7"    => 			## weather sensors like EAS800z
         {
-            name			=> 'weather7',	
+            name			=> 'weatherID7',	
 			id          	=> '7',
 			one				=> [1,-4],
 			zero			=> [1,-2],
-			#float			=> [-1,3],		# not full supported now, for later use
-			sync			=> [1,-8],		# 
-			clockabs     	=> 484,			# -1 = auto
-			format 			=> 'twostate',	# tristate can't be migrated from bin into hex!
-			preamble		=> 'u7#',		# prepend to converted message	
+			sync			=> [1,-8],		 
+			clockabs     	=> 484,			
+			format 			=> 'twostate',	
+			preamble		=> 'P7#',		# prepend to converted message	
 			clientmodule    => 'undef',   	# not used now
-			modulematch     => '^u7......', # not used now
-			length_min      => '30',
+			modulematch     => '^P7#......', # not used now
+			length_min      => '35',
 			length_max      => '40',
 
 		}, 
@@ -540,7 +541,6 @@ SIGNALduino_Define($$)
 	  return undef;
   }
   
-
   my $dev = $a[2];
   #Debug "dev: $dev" if ($debug);
   #my $hardware=AttrVal($name,"hardware","nano328");
@@ -561,7 +561,6 @@ SIGNALduino_Define($$)
   $hash->{MatchList} = \%matchListSIGNALduino;
  
 
-  
   #if( !defined( $attr{$name}{hardware} ) ) {
   #  $attr{$name}{hardware} = "nano328";
   #}
@@ -571,7 +570,6 @@ SIGNALduino_Define($$)
 #    $attr{$name}{flashCommand} = "avrdude -p atmega328P -c arduino -P [PORT] -D -U flash:w:[HEXFILE] 2>[LOGFILE]"
     $attr{$name}{flashCommand} = "avrdude -c arduino -b 57600 -P [PORT] -p atmega328p -vv -U flash:w:[HEXFILE] 2>[LOGFILE]"
   }
-
   
   $hash->{DeviceName} = $dev;
   if($dev eq "none") {
@@ -1450,11 +1448,13 @@ SIGNALduino_Parse_MS($$$$%)
 			$valid = $valid && $ProtocolListSIGNALduino{$id}{length_min} <= scalar @bit_msg  if (defined($ProtocolListSIGNALduino{$id}{length_min})); 
 			$valid = $valid && $ProtocolListSIGNALduino{$id}{length_max} >= scalar @bit_msg  if (defined($ProtocolListSIGNALduino{$id}{length_max}));
 			next if (!$valid);  
-
+			
 			#my $dmsg = sprintf "%02x", oct "0b" . join "", @bit_msg;			## Array -> String -> bin -> hex
 			my $dmsg = SIGNALduino_b2h(join "", @bit_msg);
 			$dmsg = "$dmsg"."$ProtocolListSIGNALduino{$id}{postamble}" if (defined($ProtocolListSIGNALduino{$id}{postamble}));
 			$dmsg = "$ProtocolListSIGNALduino{$id}{preamble}"."$dmsg" if (defined($ProtocolListSIGNALduino{$id}{preamble}));
+			
+			Debug "$name: dispatching now msg: $dmsg" if ($debug);
 			
 			SIGNALduno_Dispatch($hash,$rmsg,$dmsg);
 			$message_dispatched=1;
@@ -1845,8 +1845,7 @@ SIGNALduino_Attr(@)
 				Log3 $name, 2, $name .": $aVal: ". $@;
 			}
 		}
-
-
+		
 		if( ref($match_list) eq 'HASH' ) {
 		  $hash->{MatchList} = $match_list;
 		} else {
@@ -2053,6 +2052,9 @@ sub	SIGNALduino_Hideki()
 	Temperatur / humidity sensors suppored by 14_CUL_TCM97001 <br>
 	PEARL NC7159, LogiLink WS0002,GT-WT-02,AURIOL,TCM97001, TCM27,GT-WT-02..  --> 14_CUL_TCM97001.pm <br>
 	Oregon Scientific v2 Sensors  --> 41_OREGON.pm<br>
+	Temperatur / humidity sensors suppored by 14_SD_WS07 <br>
+    technoline WS 6750 and TX70DTH<br>
+    Eurochon EAS 800z<br>
 	<br><br>
 
 	It is possible to attach more than one device in order to get better
@@ -2095,11 +2097,27 @@ sub	SIGNALduino_Hideki()
 	</ul>
 	<br>
 
-	<a name="SIGNALduinoset"></a>
-	<b>Set </b>
-	<ul>
-		<li>raw<br>Issue a SIGNALduino firmware command.  See the <a href="http://<tbd>/commandref.html">this</a> document for details on SIGNALduino commands.
-		</li><br>
+	  
+	<li><a href="#do_not_notify">do_not_notify</a></li>
+    <li><a href="#attrdummy">dummy</a></li>
+    <li><a href="#attrdummy">debug</a><br>
+    This will bring the module in a very verbose debug output. Usefull to find new signals and verify if the demodulation works correctly.
+    </li>
+    
+    <li>longids<br>
+        Comma separated list of device-types for SIGNALduino that should be handled using long IDs. This additional ID allows it to differentiate some weather sensors, if they are sending on the same channel. Therfor a random generated id is added. If you choose to use longids, then you'll have to define a different device after battery change.<br>
+Default is to not to use long IDs for all devices.
+      <br><br>
+      Examples:<PRE>
+# Do not use any long IDs for any devices:
+attr sduino longids 0
+# Use any long IDs for all devices (this is default):
+attr sduino longids 1
+# Use longids for BTHR918N devices.
+# Will generate devices names like BTHR918N_f3.
+attr sduino longids BTHR918N
+</PRE>
+    </li><br>
 
 		<li>flash [hexFile]<br>
 		The SIGNALduino needs the right firmware to be able to receive and deliver the sensor data to fhem. In addition to the way using the
@@ -2184,7 +2202,7 @@ sub	SIGNALduino_Hideki()
 		attr sduino longids 1
 		# Use longids for BTHR918N devices.
 		# Will generate devices names like BTHR918N_f3.
-		attr RFXCOMUSB longids BTHR918N
+		attr sduino longids BTHR918N
 		</PRE>
 		</li><br>
 	</ul>
