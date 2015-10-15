@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm  66340 2015-10-12
+# $Id: 00_SIGNALduino.pm  67282 2015-10-15
 # The file is taken from the FHEMduino project and modified in serval ways for processing the incomming messages
 # see http://www.fhemwiki.de/wiki/SIGNALDuino
 # It was modified also to provide support for raw message handling which it's send from the SIGNALduino
@@ -16,7 +16,7 @@ use warnings;
 use Time::HiRes qw(gettimeofday);
 use Data::Dumper qw(Dumper);
 
-use POSIX qw( floor);
+use POSIX qw( floor);  # can be removed
 #use Math::Round qw();
 
 sub SIGNALduino_Attr(@);
@@ -37,7 +37,7 @@ my %gets = (    # Name, Data to send to the SIGNALduino, Regexp for the answer
   "version"  => ["V", '^V\s.*'],
   "freeram"  => ["R", '^[0-9]+'],
   "raw"      => ["", '.*'],
-#  "uptime"   => ["t", '^[0-9A-F]{8}[\r\n]*$' ],
+  "uptime"   => ["t", '^[0-9]+' ],
   "cmds"     => ["?", '.*Use one of[ 0-9A-Za-z]+[\r\n]*$' ],
 
 #  "ITParms"  => ["ip",'.*' ],
@@ -60,10 +60,11 @@ my $clientsSIGNALduino = ":IT:"
 						."SIGNALduino_RSL:"
 						."OREGON:"
 						."CUL_TX:"
-						."SIGNALduino_AS:"
+						."SD_AS:"
+						."AS:"
 						."SIGNALduino_un:"
 						."Hideki:"
-                                                ."SD_WS07:"
+						."SD_WS07:"
 						; 
 
 ## default regex match List for dispatching message to logical modules, can be updated during runtime because it is referenced
@@ -72,11 +73,11 @@ my %matchListSIGNALduino = (
      "2:CUL_TCM97001"      		=> "^s[A-Fa-f0-9]+",			  # Any hex string		beginning with s
 	 "3:SIGNALduino_RSL"		=> "^rA-Fa-f0-9]+",				  # Any hex string		beginning with r
      "5:CUL_TX"               	=> "^TX..........",         	  # Need TX to avoid FHTTK
-	 "6:SIGNALduino_AS"       	=> "AS[A-Fa-f0-9]{7,8}", 		  # Arduino based Sensors, should not be default
+	 "6:SD_AS"       			=> "^P2#[A-Fa-f0-9]{7,8}", 		  # Arduino based Sensors, should not be default
      "4:OREGON"            		=> "^(3[8-9A-F]|[4-6][0-9A-F]|7[0-8]).*",		
-	 "8:SIGNALduino_un"			=> "u.*",
+	 "8:SIGNALduino_un"			=> "^u.*",
 	 "7:Hideki"					=> "^P12#75[A-F0-9]",
-         "10:SD_WS07"                           => "^P7#[A-Fa-f0-9]+",                       
+	 "10:SD_WS07"				=> "^P7#[A-Fa-f0-9]+",                       
 );
 
 
@@ -122,12 +123,12 @@ my %ProtocolListSIGNALduino  = (
 			sync			=> [1,-20],
 			clockabs     	=> '500',		# not used now
 			format 			=> 'twostate',	
-			preamble		=> 'AS',		# prepend to converted message		
-			clientmodule    => 'SIGNALduino_AS',   # not used now
-			modulematch     => '^AS.*\$', # not used now
+			preamble		=> 'P2#',		# prepend to converted message		
+			clientmodule    => 'SD_AS',   # not used now
+			modulematch     => '^P2#[A-Fa-f0-9]{7,8}', # not used now
 			length_min      => '32',
 			length_max      => '34',		# Don't know maximal lenth of a valid message
-			paddingbits     => '8',				 # pad up to 8 bits, default is 4
+			paddingbits     => '8',		    # pad up to 8 bits, default is 4
 	
         },
     "3"    => 
@@ -184,53 +185,35 @@ my %ProtocolListSIGNALduino  = (
 	
 	"6"    => 			## Eurochron Protocol
         {
-            name			=> 'eurochron',	
+            name			=> 'weatherID6',	
 			id          	=> '6',
-			one				=> [1,-9],
-			zero			=> [1,-4],
-			#float			=> [-1,3],		# not full supported now, for later use
+			one				=> [1,-10],
+			zero			=> [1,-5],
 			sync			=> [1,-36],		# This special device has no sync
-			clockabs     	=> 212,			# -1 = auto
+			clockabs     	=> 220,			# -1 = auto
 			format 			=> 'twostate',	# tristate can't be migrated from bin into hex!
-			preamble		=> 'u',			# Append to converted message	
+			preamble		=> 'u6#',			# Append to converted message	
 			clientmodule    => 'undef',   	# not used now
 			modulematch     => '^u......',  # not used now
 			length_min      => '24',
 
 		},
-#	"7"    => 			## unkown Protocol
-#        {
-#            name			=> 'unknown1 may TX70DHT',	
-#			id          	=> '7',
-#			one				=> [1,-4],
-#			zero			=> [1,-2],
-#			#float			=> [-1,3],		# not full supported now, for later use
-#			sync			=> [1,-8],		# 
-#			clockabs     	=> 484,			# -1 = auto
-#			format 			=> 'twostate',	# tristate can't be migrated from bin into hex!
-#			preamble		=> 'u7',		# prepend to converted message	
-#			clientmodule    => 'undef',   	# not used now
-#			modulematch     => '^u7......', # not used now
-#			length_min      => '30',
-#			length_max      => '40',
-#
-#		}, 
-        "7"    =>                       ## weather sensors like EAS800z
+	"7"    => 			## weather sensors like EAS800z
         {
-            name                        => 'weatherID7',        
-                        id              => '7',
-                        one                             => [1,-4],
-                        zero                    => [1,-2],
-                        sync                    => [1,-8],               
-                        clockabs        => 484,                 
-                        format                  => 'twostate',  
-                        preamble                => 'P7#',               # prepend to converted message  
-                        clientmodule    => 'SD_WS07',    
-                        modulematch     => '^P7#......', # not used now
-                        length_min      => '35',
-                        length_max      => '40',
+            name			=> 'weatherID7',	
+			id          	=> '7',
+			one				=> [1,-4],
+			zero			=> [1,-2],
+			sync			=> [1,-8],		 
+			clockabs     	=> 484,			
+			format 			=> 'twostate',	
+			preamble		=> 'P7#',		# prepend to converted message	
+			clientmodule    => 'undef',   	# not used now
+			modulematch     => '^P7#......', # not used now
+			length_min      => '35',
+			length_max      => '40',
 
-                }, 
+		}, 
 	"8"    => 			## TX3 (ITTX) Protocol
         {
             name			=> 'TX3 Protocol',	
@@ -259,7 +242,7 @@ my %ProtocolListSIGNALduino  = (
 			#sync			=> [1,-8],		# 
 			clockabs     	=> 480,			# -1 = auto undef=noclock
 			format 			=> 'pwm',	    # tristate can't be migrated from bin into hex!
-			preamble		=> 'u9',		# prepend to converted message	
+			preamble		=> 'u9#',		# prepend to converted message	
 			clientmodule    => 'undef',   	# not used now
 			modulematch     => '^u9......',  # not used now
 			length_min      => '70',
@@ -290,16 +273,11 @@ my %ProtocolListSIGNALduino  = (
 			{
             name			=> 'AS',	
 			id          	=> '11',
-			#one				=> [3,-2],
-			#zero			=> [1,-2],
-			#float			=> [-1,3],		# not full supported now, for later use
-			#sync			=> [1,-8],		# 
-			#clockabs     	=> 500,			# -1 = auto undef=noclock
 			clockrange     	=> [380,425],			# min , max
 			format 			=> 'manchester',	    # tristate can't be migrated from bin into hex!
-			#preamble		=> '',		# prepend to converted message	
-			#clientmodule    => '14_SIGNALduino_AS',   	# not used now
-			#modulematch     => '',  # not used now
+			preamble		=> 'P2#',		# prepend to converted message	
+			#clientmodule    => '14_SD_AS',   	# not used now
+			#modulematch     => '^P2#[A-Fa-f0-9]{7,8},  # not used now
 			length_min      => '52',
 			length_max      => '56',
 			method          => \&SIGNALduino_AS # Call to process this message
@@ -327,7 +305,7 @@ my %ProtocolListSIGNALduino  = (
 			sync			=> [10,-1],		
 			clockabs		=> 800,
 			format 			=> 'twostate',	  		
-			preamble		=> 'u13',				# prepend to converted message	
+			preamble		=> 'u13#',				# prepend to converted message	
 			#clientmodule    => '',   				# not used now
 			#modulematch     => '',  				# not used now
 			length_min      => '20',
@@ -343,7 +321,7 @@ my %ProtocolListSIGNALduino  = (
 			sync			=> [1,-14],				# 
 			clockabs		=> 350,
 			format 			=> 'twostate',	  		
-			preamble		=> 'u14',				# prepend to converted message	
+			preamble		=> 'u14#',				# prepend to converted message	
 			#clientmodule    => '',   				# not used now
 			#modulematch     => '',  				# not used now
 			length_min      => '10',
@@ -360,7 +338,7 @@ my %ProtocolListSIGNALduino  = (
 			sync			=> [1,-45],				# 
 			clockabs		=> 700,
 			format 			=> 'twostate',	  		
-			preamble		=> 'u15',				# prepend to converted message	
+			preamble		=> 'u15#',				# prepend to converted message	
 			#clientmodule    => '',   				# not used now
 			#modulematch     => '',  				# not used now
 			length_min      => '10',
@@ -376,44 +354,119 @@ my %ProtocolListSIGNALduino  = (
 			#sync			=> [18,-6],				# protocol has a sync, but is detected as MU
 			clockabs		=> 250,
 			format 			=> 'twostate',	  		
-			preamble		=> 'u16',				# prepend to converted message	
+			preamble		=> 'u16#',				# prepend to converted message	
 			#clientmodule    => '',   				# not used now
 			#modulematch     => '',  				# not used now
 			length_min      => '30',
 			length_max      => '40',
 		}, 	
-	"17" => # nothing knowing about this MS;P0=-506;P1=444;P2=12860;P3=-8923;P4=-1041;P5=12838;P6=1371;D=13101010101014141410101010101010101010101010101010101010101010101012;CP=1;SP=3;
+	#"17" => # nothing known about this MS;P0=-506;P1=444;P2=12860;P3=-8923;P4=-1041;P5=12838;P6=1371;D=13101010101014141410101010101010101010101010101010101010101010101012;CP=1;SP=3;
+	#	{
+    #       name			=> 'unknown17',	
+	#		id          	=> '17',
+	#		one				=> [1,-2],
+	#		zero			=> [1,-1],
+	#		sync			=> [1,-22],	# footer [1,-50]			
+	#		clockabs		=> 400,
+	#		format 			=> 'twostate',	  		
+	#		preamble		=> 'u17#',				# prepend to converted message	
+	#		#clientmodule    => '',   				# not used now
+	#		#modulematch     => '',  				# not used now
+	#		length_min      => '30',
+	#		#length_max      => '38',
+	#	}, 	
+	
+	"18"    => 			## Oregon Scientific v1
 		{
-            name			=> 'unknown17',	
-			id          	=> '17',
-			one				=> [1,-2],
-			zero			=> [1,-1],
-			sync			=> [1,-22],	# footer [1,-50]			
-			clockabs		=> 400,
-			format 			=> 'twostate',	  		
-			preamble		=> 'u17',				# prepend to converted message	
-			#clientmodule    => '',   				# not used now
+            name			=> 'OSV1',	
+			id          	=> '18',
+			clockrange     	=> [1550,1650],			# min , max
+			format 			=> 'manchester',	    # tristate can't be migrated from bin into hex!
+			#preamble		=> '',					# prepend to converted message	
+			#clientmodule    => 'to be written',   	# not used now
 			#modulematch     => '',  				# not used now
-			length_min      => '30',
-			#length_max      => '38',
-		}, 	
-	
-	"19" => # nothing knowing about this 2015-09-28 01:25:40-MS;P0=-8916;P1=-19904;P2=390;P3=-535;P4=-1020;P5=12846;P6=1371;D=2120232323232324242423232323232323232320239;CP=2;SP=1;
-	
+			length_min      => '8',
+			length_max      => '8',
+			method          => \&SIGNALduino_OSV1 # Call to process this message
+		},
+	#"19" => # nothing knowing about this 2015-09-28 01:25:40-MS;P0=-8916;P1=-19904;P2=390;P3=-535;P4=-1020;P5=12846;P6=1371;D=2120232323232324242423232323232323232320239;CP=2;SP=1;
+	#
+	#	{
+    #       name			=> 'unknown19',	
+	#		id          	=> '19',
+	#		one				=> [1,-2],
+	#		zero			=> [1,-1],
+	#		sync			=> [1,-50,1,-22],				
+	#		clockabs		=> 395,
+	#		format 			=> 'twostate',	  		
+	#		preamble		=> 'u19#',				# prepend to converted message	
+	#		#clientmodule    => '',   				# not used now
+	#		#modulematch     => '',  				# not used now
+	#		length_min      => '16',
+	#		length_max      => '32',
+	#	}, 	 	
+	"20" => #Livolo	
 		{
-            name			=> 'unknown19',	
-			id          	=> '19',
-			one				=> [1,-2],
+            name			=> 'livolo',	
+			id          	=> '20',
+			one				=> [2,-1],
 			zero			=> [1,-1],
-			sync			=> [1,-50,1,-22],				
-			clockabs		=> 395,
+			sync			=> [1,-3],				
+			clockabs		=> -1,                  #can be 140-190
 			format 			=> 'twostate',	  		
-			preamble		=> 'u19',				# prepend to converted message	
+			preamble		=> 'u20#',				# prepend to converted message	
 			#clientmodule    => '',   				# not used now
 			#modulematch     => '',  				# not used now
 			length_min      => '16',
-			length_max      => '32',
-		}, 	 	
+		},
+	"21" => #Einhell Garagentor	
+		{
+            name			=> 'einhell garagedoor',	
+			id          	=> '21',
+			one				=> [-3,1],
+			zero			=> [-1,3],
+			#sync			=> [-50,1],				
+			clockabs		=> 400,                  #ca 400us
+			format 			=> 'twostate',	  		
+			preamble		=> 'u21#',				# prepend to converted message	
+			#clientmodule   => '',   				# not used now
+			#modulematch    => '',  				# not used now
+			length_min      => '32',
+			length_max      => '32',				
+			paddingbits     => '1',					# This will disable padding 
+		},
+	"22" => #TX-EZ6 / Meteo	
+		{
+            name			=> 'TX-EZ6',	
+			id          	=> '22',
+			one				=> [1,-8],
+			zero			=> [1,-3],
+			sync			=> [1,16],				
+			clockabs		=> 500,                  #ca 400us
+			format 			=> 'twostate',	  		
+			preamble		=> 'u22#',				# prepend to converted message	
+			#clientmodule    => '',   				# not used now
+			#modulematch     => '',  				# not used now
+			length_min      => '40',
+			#length_max      => '',				# must be tested
+
+		},
+	"23" => # Pearl Sensor
+		{
+            name			=> 'perl unknown',	
+			id          	=> '23',
+			one				=> [1,-6],
+			zero			=> [1,-1],
+			sync			=> [1,-50],				
+			clockabs		=> 200,                  #ca 200us
+			format 			=> 'twostate',	  		
+			preamble		=> 'u23#',				# prepend to converted message	
+			#clientmodule    => '',   				# not used now
+			#modulematch     => '',  				# not used now
+			length_min      => '36',
+			length_max      => '44',				
+
+		},
 );
 
 
@@ -488,7 +541,6 @@ SIGNALduino_Define($$)
 	  return undef;
   }
   
-
   my $dev = $a[2];
   #Debug "dev: $dev" if ($debug);
   #my $hardware=AttrVal($name,"hardware","nano328");
@@ -509,7 +561,6 @@ SIGNALduino_Define($$)
   $hash->{MatchList} = \%matchListSIGNALduino;
  
 
-  
   #if( !defined( $attr{$name}{hardware} ) ) {
   #  $attr{$name}{hardware} = "nano328";
   #}
@@ -519,7 +570,6 @@ SIGNALduino_Define($$)
 #    $attr{$name}{flashCommand} = "avrdude -p atmega328P -c arduino -P [PORT] -D -U flash:w:[HEXFILE] 2>[LOGFILE]"
     $attr{$name}{flashCommand} = "avrdude -c arduino -b 57600 -P [PORT] -p atmega328p -vv -U flash:w:[HEXFILE] 2>[LOGFILE]"
   }
-
   
   $hash->{DeviceName} = $dev;
   if($dev eq "none") {
@@ -528,7 +578,7 @@ SIGNALduino_Define($$)
   my $ret = DevIo_OpenDev($hash, 0, "SIGNALduino_DoInit");
   
   ## 
-  $hash->{Interval} = "30";
+  $hash->{Interval} = "300";
   InternalTimer(gettimeofday()+2, "SIGNALduino_GetUpdate", $hash, 0);
   
   $hash->{"DMSG"}="nothing";
@@ -693,6 +743,10 @@ SIGNALduino_Get($@)
   my $arg = ($a[2] ? $a[2] : "");
   my ($msg, $err);
 
+  if (IsDummy($name))
+  {
+  	return SIGNALduino_Parse($hash, $hash, $hash->{NAME}, $arg);
+  }
   return "No $a[1] for dummies" if(IsDummy($name));
 
   Log3 $name, 5, "$name: command for gets: " . $gets{$a[1]}[0] . " " . $arg;
@@ -711,7 +765,7 @@ SIGNALduino_Get($@)
 
   } elsif($a[1] eq "uptime") {     # decode it
     $msg =~ s/[\r\n]//g;
-    $msg = hex($msg);              # /125; only for col or coc
+    #$msg = hex($msg);              # /125; only for col or coc
     $msg = sprintf("%d %02d:%02d:%02d", $msg/86400, ($msg%86400)/3600, ($msg%3600)/60, $msg%60);
   }
 
@@ -1297,6 +1351,8 @@ SIGNALduino_Parse_MS($$$$%)
 
 			# Check Clock if is it in range
 			$valid=SIGNALduino_inTol($ProtocolListSIGNALduino{$id}{clockabs},$clockabs,$clockabs*0.30) if ($ProtocolListSIGNALduino{$id}{clockabs} > 0);
+			Debug "validclock = $valid"  if ($debug);
+			
 			next if (!$valid) ;
 
 			my $bit_length = ($signal_length-(scalar @{$ProtocolListSIGNALduino{$id}{sync}}))/((scalar @{$ProtocolListSIGNALduino{$id}{one}} + scalar @{$ProtocolListSIGNALduino{$id}{zero}})/2);
@@ -1322,6 +1378,7 @@ SIGNALduino_Parse_MS($$$$%)
 			$valid = $valid && ($pstr=SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{sync}},\%patternList)) >=0;
 			Debug "Found matched sync with indexes: ($pstr)" if ($debug && $valid);
 			$patternLookupHash{$pstr}="" if ($valid); ## Append Sync to our lookuptable
+			my $syncstr=$pstr; # Store for later start search
 
 			Debug "sync not found " if (!$valid && $debug); # z.B. [1, -18] 
 
@@ -1356,11 +1413,21 @@ SIGNALduino_Parse_MS($$$$%)
 			my @bit_msg;							# array to store decoded signal bits
 
 			#for (my $i=index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{sync}}))+$signal_width;$i<length($rawData);$i+=$signal_width)
-			for (my $i=scalar@{$ProtocolListSIGNALduino{$id}{sync}};$i<length($rawData);$i+=$signal_width)
+			#for (my $i=scalar@{$ProtocolListSIGNALduino{$id}{sync}};$i<length($rawData);$i+=$signal_width)
+			my $message_start =index($rawData,$syncstr)+length($syncstr);
+			Log3 $name, 5, "Starting demodulation at Position $message_start";
+			
+			for (my $i=$message_start;$i<length($rawData);$i+=$signal_width)
 			{
 				my $sig_str= substr($rawData,$i,$signal_width);
+				#Log3 $name, 5, "demodulating $sig_str";
 				#Debug $patternLookupHash{substr($rawData,$i,$signal_width)}; ## Get $signal_width number of chars from raw data string
-				push(@bit_msg,$patternLookupHash{$sig_str}) if (exists $patternLookupHash{$sig_str}); ## Add the bits to our bit array
+				if (exists $patternLookupHash{$sig_str}) { ## Add the bits to our bit array
+					push(@bit_msg,$patternLookupHash{$sig_str})
+				} else {
+					Log3 $name, 5, "Found wrong signal, aborting demodulation";
+					last;					
+				}
 			}
 			
 			Debug "$name: decoded message raw (@bit_msg), ".@bit_msg." bits\n" if ($debug);;
@@ -1381,11 +1448,13 @@ SIGNALduino_Parse_MS($$$$%)
 			$valid = $valid && $ProtocolListSIGNALduino{$id}{length_min} <= scalar @bit_msg  if (defined($ProtocolListSIGNALduino{$id}{length_min})); 
 			$valid = $valid && $ProtocolListSIGNALduino{$id}{length_max} >= scalar @bit_msg  if (defined($ProtocolListSIGNALduino{$id}{length_max}));
 			next if (!$valid);  
-
+			
 			#my $dmsg = sprintf "%02x", oct "0b" . join "", @bit_msg;			## Array -> String -> bin -> hex
 			my $dmsg = SIGNALduino_b2h(join "", @bit_msg);
 			$dmsg = "$dmsg"."$ProtocolListSIGNALduino{$id}{postamble}" if (defined($ProtocolListSIGNALduino{$id}{postamble}));
 			$dmsg = "$ProtocolListSIGNALduino{$id}{preamble}"."$dmsg" if (defined($ProtocolListSIGNALduino{$id}{preamble}));
+			
+			Debug "$name: dispatching now msg: $dmsg" if ($debug);
 			
 			SIGNALduno_Dispatch($hash,$rmsg,$dmsg);
 			$message_dispatched=1;
@@ -1451,7 +1520,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 			}
 
 			next if (exists $ProtocolListSIGNALduino{$id}{sync}); ## We can skip messages with sync defined
-			next if (defined($ProtocolListSIGNALduino{id}{format}) && $ProtocolListSIGNALduino{id}{format} ne "manchester");
+			next if (defined($ProtocolListSIGNALduino{id}{format} && $ProtocolListSIGNALduino{id}{format} eq "manchester"));
 			next if (!defined($ProtocolListSIGNALduino{$id}{clockabs}));
 				
 			my $valid=1;
@@ -1479,12 +1548,12 @@ sub SIGNALduino_Parse_MU($$$$@)
 			Debug "Expect $bit_length bits in message"  if ($valid && $debug);
 
 			#Check calculated min length
-			$valid = $valid && $ProtocolListSIGNALduino{$id}{length_min} <= $bit_length if (exists $ProtocolListSIGNALduino{$id}{length_min}); 
+			#$valid = $valid && $ProtocolListSIGNALduino{$id}{length_min} <= $bit_length if (exists $ProtocolListSIGNALduino{$id}{length_min}); 
 			#Check calculated max length
-			$valid = $valid && $ProtocolListSIGNALduino{$id}{length_max} >= $bit_length if (exists $ProtocolListSIGNALduino{$id}{length_max});
+			#$valid = $valid && $ProtocolListSIGNALduino{$id}{length_max} >= $bit_length if (exists $ProtocolListSIGNALduino{$id}{length_max});
 
-			next if (!$valid) ;
-			Debug "expecting $bit_length bits in signal" if ($debug && $valid);
+			#next if (!$valid) ;
+			#Debug "expecting $bit_length bits in signal" if ($debug && $valid);
 
 			Debug "Searching in patternList: ".Dumper(\%patternList) if($debug);
 			next if (!$valid) ;
@@ -1492,7 +1561,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 	
 			my %patternLookupHash=();
 
-			#Debug "phash:".Dumper(%patternLookupHash)
+			#Debug "phash:".Dumper(%patternLookupHash);
 			my $pstr="";
 			$valid = $valid && ($pstr=SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}},\%patternList)) >=0;
 			Debug "Found matched one" if ($debug && $valid);
@@ -1515,41 +1584,69 @@ sub SIGNALduino_Parse_MU($$$$@)
 			my $signal_width= @{$ProtocolListSIGNALduino{$id}{one}};
 			#Debug $signal_width;
 			
-			
-			my @bit_msg;							# array to store decoded signal bits
-			my $message_start = (index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}}),\%patternList) > index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{zero}}),\%patternList)) ? index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}},\%patternList)) : index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{zero}},\%patternList));
+			my @bit_msg=();							# array to store decoded signal bits
+			my $message_start = (index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}},\%patternList)) < index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{zero}},\%patternList)) ? index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}},\%patternList)) : index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{zero}},\%patternList)));
 			#for (my $i=index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{sync}}))+$signal_width;$i<length($rawData);$i+=$signal_width)
-			#Debug "Message starts at:".$message_start;
-			for (my $i=$message_start;$i<length($rawData);$i+=$signal_width)
+			Debug "Message starts at $message_start length of data is ".length($rawData) if ($debug);
+			Log3 $name, 5, "Starting demodulation at Position $message_start";
+			#my $onepos= index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}},\%patternList));
+			#my $zeropos=index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{zero}},\%patternList));
+			#Log3 $name, 3, "op=$onepos zp=$zeropos";
+			#Debug "phash:".Dumper(%patternLookupHash);
+			
+			my $padwith = defined($ProtocolListSIGNALduino{$id}{paddingbits}) ? $ProtocolListSIGNALduino{$id}{paddingbits} : 4;
+			
+			for (my $i=$message_start;$i<=length($rawData)-$signal_width;$i+=$signal_width)
 			{
+				Debug "$name: i=$i" if ($debug);
+				
 				my $sig_str= substr($rawData,$i,$signal_width);
+				$valid=1; # Set valid to 1 for every loop
 				#Debug $patternLookupHash{substr($rawData,$i,$signal_width)}; ## Get $signal_width number of chars from raw data string
-				push(@bit_msg,$patternLookupHash{$sig_str}) if (exists $patternLookupHash{$sig_str}); ## Add the bits to our bit array
-				next if !(exists $patternLookupHash{$sig_str}); ## Break if something that doesn't fit our searched pattern or we are at the end
+				if (exists $patternLookupHash{$sig_str}) 
+				{
+					push(@bit_msg,$patternLookupHash{$sig_str}) ; ## Add the bits to our bit array
+				}
+				if (!exists $patternLookupHash{$sig_str} || $i+$signal_width>length($rawData))  ## Dispatch if last signal or unknown data
+				{
+					Debug "$name: demodulated message raw (@bit_msg), ".@bit_msg." bits\n" if ($debug);;
+					while (scalar @bit_msg % $padwith > 0)  ## will pad up full nibbles per default or full byte if specified in protocol
+					{
+						push(@bit_msg,'0');
+						Debug "$name: padding 0 bit to bit_msg array" if ($debug);
+					}
+					#Check converted message against lengths
+					$valid = $valid && $ProtocolListSIGNALduino{$id}{length_min} <= scalar @bit_msg  if (defined($ProtocolListSIGNALduino{$id}{length_min})); 
+					$valid = $valid && $ProtocolListSIGNALduino{$id}{length_max} >= scalar @bit_msg  if (defined($ProtocolListSIGNALduino{$id}{length_max}));					
+					
+					#next if (!$valid);  ## Last chance to try next protocol if there is somethin invalid
+					if ($valid) {
+						Log3 $name, 5, "dispatching bits: @bit_msg";
+						my $dmsg = SIGNALduino_b2h(join "", @bit_msg);
+						$dmsg =~ s/^0+//	 if (defined($ProtocolListSIGNALduino{$id}{remove_zero})); 
+						$dmsg = "$dmsg"."$ProtocolListSIGNALduino{$id}{postamble}" if (defined($ProtocolListSIGNALduino{$id}{postamble}));
+						$dmsg = "$ProtocolListSIGNALduino{$id}{preamble}"."$dmsg" if (defined($ProtocolListSIGNALduino{$id}{preamble}));
+						
+						SIGNALduno_Dispatch($hash,$rmsg,$dmsg);
+						$message_dispatched=1;
+						
+					} else {
+						Debug "$name: length ($ProtocolListSIGNALduino{$id}{length_min})/$ProtocolListSIGNALduino{$id}{length_max} does not match (@bit_msg), ".@bit_msg." bits\n" if ($debug);;
+						
+						
+					}
+					@bit_msg=(); # clear bit_msg array
+					
+					#Find next position of valid signal (skip invalid pieces)
+					$i = (index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}},\%patternList),$i) < index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{zero}},\%patternList),$i) ? index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}},\%patternList),$i) : index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{zero}},\%patternList),$i));
+					$i-=$signal_width;
+					last if ($i <=-1);	
+					Log3 $name, 5, "restarting demodulation at Position $i+$signal_width";												
+				
+				}
 			}
-			
-			Debug "$name: decoded message raw (@bit_msg), ".@bit_msg." bits\n" if ($debug);;
-			while (@bit_msg % 4 > 0)
-			{
-				push(@bit_msg,'0');
-				Debug "$name: padding 0 bit to bit_msg array" if ($debug);
-			}
-			#Check converted message against lengths
-			$valid = $valid && $ProtocolListSIGNALduino{$id}{length_min} <= scalar @bit_msg  if (defined($ProtocolListSIGNALduino{$id}{length_min})); 
-			$valid = $valid && $ProtocolListSIGNALduino{$id}{length_max} >= scalar @bit_msg  if (defined($ProtocolListSIGNALduino{$id}{length_max}));
-			next if (!$valid);  ## Last chance to try next protocol if there is somethin invalid
-
+					
 			#my $dmsg = sprintf "%02x", oct "0b" . join "", @bit_msg;			## Array -> String -> bin -> hex
-			my $dmsg = SIGNALduino_b2h(join "", @bit_msg);
-			$dmsg =~ s/^0+//	 if (defined($ProtocolListSIGNALduino{$id}{remove_zero})); 
-			
-			$dmsg = "$dmsg"."$ProtocolListSIGNALduino{$id}{postamble}" if (defined($ProtocolListSIGNALduino{$id}{postamble}));
-			$dmsg = "$ProtocolListSIGNALduino{$id}{preamble}"."$dmsg" if (defined($ProtocolListSIGNALduino{$id}{preamble}));
-			
-			SIGNALduno_Dispatch($hash,$rmsg,$dmsg);
-			$message_dispatched=1;
-
-		
 		}
 		return 0 if (!$message_dispatched);
 		
@@ -1748,8 +1845,7 @@ SIGNALduino_Attr(@)
 				Log3 $name, 2, $name .": $aVal: ". $@;
 			}
 		}
-
-
+		
 		if( ref($match_list) eq 'HASH' ) {
 		  $hash->{MatchList} = $match_list;
 		} else {
@@ -1840,6 +1936,24 @@ sub SIGNALduino_OSV2()
 	} 
 	return (-1,undef);
 }
+
+sub SIGNALduino_OSV1()
+{
+	my ($name,$bitData,$rawData) = @_;
+	
+	my $idx=0;
+	
+	my $osv1hex ;# ~hex('0x'.$rawData);
+	my $osv1bit = $bitData =~ tr/10/01/r;
+	#Log3 $name, 5, "$name: OSV1 protocol converted from ($bitData) to bit: ($osv1bit)" ;
+	$osv1hex=sprintf("%02X", length($rawData)*4, $osv1hex).SIGNALduino_b2h($osv1bit);
+
+
+	Log3 $name, 5, "$name: OSV1 protocol converted to hex: ($osv1hex) with length (".(length($rawData)*4).") bits \n";
+	return (1,$osv1hex);
+
+}
+
 sub	SIGNALduino_AS()
 {
 	my ($name,$bitData,$id) = @_;
@@ -1938,6 +2052,9 @@ sub	SIGNALduino_Hideki()
 	Temperatur / humidity sensors suppored by 14_CUL_TCM97001 <br>
 	PEARL NC7159, LogiLink WS0002,GT-WT-02,AURIOL,TCM97001, TCM27,GT-WT-02..  --> 14_CUL_TCM97001.pm <br>
 	Oregon Scientific v2 Sensors  --> 41_OREGON.pm<br>
+	Temperatur / humidity sensors suppored by 14_SD_WS07 <br>
+    technoline WS 6750 and TX70DTH<br>
+    Eurochon EAS 800z<br>
 	<br><br>
 
 	It is possible to attach more than one device in order to get better
@@ -1980,11 +2097,27 @@ sub	SIGNALduino_Hideki()
 	</ul>
 	<br>
 
-	<a name="SIGNALduinoset"></a>
-	<b>Set </b>
-	<ul>
-		<li>raw<br>Issue a SIGNALduino firmware command.  See the <a href="http://<tbd>/commandref.html">this</a> document for details on SIGNALduino commands.
-		</li><br>
+	  
+	<li><a href="#do_not_notify">do_not_notify</a></li>
+    <li><a href="#attrdummy">dummy</a></li>
+    <li><a href="#attrdummy">debug</a><br>
+    This will bring the module in a very verbose debug output. Usefull to find new signals and verify if the demodulation works correctly.
+    </li>
+    
+    <li>longids<br>
+        Comma separated list of device-types for SIGNALduino that should be handled using long IDs. This additional ID allows it to differentiate some weather sensors, if they are sending on the same channel. Therfor a random generated id is added. If you choose to use longids, then you'll have to define a different device after battery change.<br>
+Default is to not to use long IDs for all devices.
+      <br><br>
+      Examples:<PRE>
+# Do not use any long IDs for any devices:
+attr sduino longids 0
+# Use any long IDs for all devices (this is default):
+attr sduino longids 1
+# Use longids for BTHR918N devices.
+# Will generate devices names like BTHR918N_f3.
+attr sduino longids BTHR918N
+</PRE>
+    </li><br>
 
 		<li>flash [hexFile]<br>
 		The SIGNALduino needs the right firmware to be able to receive and deliver the sensor data to fhem. In addition to the way using the
@@ -2069,7 +2202,7 @@ sub	SIGNALduino_Hideki()
 		attr sduino longids 1
 		# Use longids for BTHR918N devices.
 		# Will generate devices names like BTHR918N_f3.
-		attr RFXCOMUSB longids BTHR918N
+		attr sduino longids BTHR918N
 		</PRE>
 		</li><br>
 	</ul>
