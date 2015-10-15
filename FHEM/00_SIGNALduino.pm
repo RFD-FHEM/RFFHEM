@@ -75,7 +75,7 @@ my %matchListSIGNALduino = (
      "5:CUL_TX"               	=> "^TX..........",         	  # Need TX to avoid FHTTK
 	 "6:SD_AS"       			=> "^P2#[A-Fa-f0-9]{7,8}", 		  # Arduino based Sensors, should not be default
      "4:OREGON"            		=> "^(3[8-9A-F]|[4-6][0-9A-F]|7[0-8]).*",		
-	 "8:SIGNALduino_un"			=> "^u.*",
+	 "8:SIGNALduino_un"			=> "^u\d+#.*",
 	 "7:Hideki"					=> "^P12#75[A-F0-9]",
 	 "10:SD_WS07"				=> "^P7#[A-Fa-f0-9]+",                       
 );
@@ -244,7 +244,7 @@ my %ProtocolListSIGNALduino  = (
 			format 			=> 'pwm',	    # tristate can't be migrated from bin into hex!
 			preamble		=> 'u9#',		# prepend to converted message	
 			clientmodule    => 'undef',   	# not used now
-			modulematch     => '^u9......',  # not used now
+			modulematch     => '^u9#.....',  # not used now
 			length_min      => '70',
 			length_max      => '120',
 
