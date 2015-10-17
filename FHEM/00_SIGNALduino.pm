@@ -75,9 +75,9 @@ my %matchListSIGNALduino = (
      "5:CUL_TX"               	=> "^TX..........",         	  # Need TX to avoid FHTTK
 	 "6:SD_AS"       			=> "^P2#[A-Fa-f0-9]{7,8}", 		  # Arduino based Sensors, should not be default
      "4:OREGON"            		=> "^(3[8-9A-F]|[4-6][0-9A-F]|7[0-8]).*",		
-	 "8:SIGNALduino_un"			=> "^u\d+#.*",
+	 "8:SIGNALduino_un"			=> "^[uP]\d+#.*",
 	 "7:Hideki"					=> "^P12#75[A-F0-9]",
-	 "10:SD_WS07"				=> "^P7#[A-Fa-f0-9]+",                       
+	 "10:SD_WS07"				=> "^P7#[A-Fa-f0-9]{6}F[A-Fa-f0-9]{2}",                       
 );
 
 
@@ -2037,7 +2037,7 @@ sub	SIGNALduino_Hideki()
 
 	With the opensource firmware (see this <a
 	href="https://github.com/RFD-FHEM/SIGNALduino">link</a>) it is capable
-	to receive and send different wireless protocols.
+	to receive and send different protocols over different medias. Currently are 433Mhz protocols implemented.
 	<br><br>
 
 	The following protocols are available:
@@ -2049,10 +2049,10 @@ sub	SIGNALduino_Hideki()
 
 	<br><br>
 
-	Temperatur / humidity sensors suppored by 14_CUL_TCM97001 <br>
-	PEARL NC7159, LogiLink WS0002,GT-WT-02,AURIOL,TCM97001, TCM27,GT-WT-02..  --> 14_CUL_TCM97001.pm <br>
+	Temperatur / humidity sensors suppored by 14_CUL_TCM97001^: <br>
+	PEARL NC7159, LogiLink WS0002,GT-WT-02,AURIOL,TCM97001, TCM27 and many more <br>
 	Oregon Scientific v2 Sensors  --> 41_OREGON.pm<br>
-	Temperatur / humidity sensors suppored by 14_SD_WS07 <br>
+	Temperatur / humidity sensors suppored by 14_SD_WS07: <br>
     technoline WS 6750 and TX70DTH<br>
     Eurochon EAS 800z<br>
 	<br><br>
@@ -2078,8 +2078,12 @@ sub	SIGNALduino_Hideki()
 		linux the cdc_acm kernel module is responsible, and usually a
 		/dev/ttyACM0 or /dev/ttyUSB0 device will be created. If your distribution does not have a
 		cdc_acm module, you can force usbserial to handle the SIGNALduino by the
-		following command:<ul>modprobe usbserial vendor=0x03eb
-		product=0x204b</ul>In this case the device is most probably
+		following command:
+		<ul>
+		modprobe usbserial 
+		vendor=0x03eb
+		product=0x204b
+		</ul>In this case the device is most probably
 		/dev/ttyUSB0.<br><br>
 
 		You can also specify a baudrate if the device name contains the @
@@ -2092,7 +2096,8 @@ sub	SIGNALduino_Hideki()
 		perl module Device::SerialPort is not needed, and fhem opens the device
 		with simple file io. This might work if the operating system uses sane
 		defaults for the serial parameters, e.g. some Linux distributions and
-		OSX.  <br><br></li>
+		OSX.  <br><br>
+		</li>
 
 	</ul>
 	<br>
@@ -2100,7 +2105,7 @@ sub	SIGNALduino_Hideki()
 	  
 	<li><a href="#do_not_notify">do_not_notify</a></li>
     <li><a href="#attrdummy">dummy</a></li>
-    <li><a href="#attrdummy">debug</a><br>
+    <li><a href="#attrdebug">debug</a><br>
     This will bring the module in a very verbose debug output. Usefull to find new signals and verify if the demodulation works correctly.
     </li>
     
@@ -2124,7 +2129,6 @@ attr sduino longids BTHR918N
 		arduino IDE to flash the firmware into the SIGNALduino this provides a way to flash it directly from FHEM.
 
 		There are some requirements:
-	</ul>
 	<ul>
 		<li>avrdude must be installed on the host<br>
 		On a Raspberry PI this can be done with: sudo apt-get install avrdude</li>
@@ -2167,45 +2171,7 @@ attr sduino longids BTHR918N
 		</li><br>
 	</ul>
 
-	<a name="SIGNALduinoattr"></a>
-	<b>Attributes</b>
-	<ul>
-		<li>Clients<br>
-		* This is currently not implemented:<br>
-		The received data gets distributed to a client (e.g. OREGON, IT, CUL_TCM97001, ...) that handles the data.
-		This attribute tells, which are the clients, that handle the data. If you add a new module to FHEM, that shall handle
-		data distributed by the SIGNALduino module, you must add it to the Clients attribute.</li>
-
-		<li>MatchList<br>
-		* This is currently not implemented:<br>
-		can be set to a perl expression that returns a> hash that is used as the MatchList<br>
-		<code>attr myJeeLink MatchList {'5:AliRF' => '^\\S+\\s+5 '}</code></li>
-		<li>hexfile<br>
-		Full path to a hex filename of the arduino sketch e.g. /opt/fhem/RF_Receiver_nano328.hex
-		</li>
-
-
-		<li><a href="#do_not_notify">do_not_notify</a></li>
-		<li><a href="#attrdummy">dummy</a></li>
-		<li><a href="#attrdummy">debug</a><br>
-		This will bring the module in a very verbose debug output. Usefull to find new signals and verify if the demodulation works correctly.
-		</li>
-
-		<li>longids<br>
-		Comma separated list of device-types for SIGNALduino that should be handled using long IDs. This additional ID allows it to differentiate some weather sensors, if they are sending on the same channel. Therfor a random generated id is added. If you choose to use longids, then you'll have to define a different device after battery change.<br>
-		Default is to use long IDs for all devices.
-		<br><br>
-		Examples:<PRE>
-		# Do not use any long IDs for any devices:
-		attr sduino longids 0
-		# Use any long IDs for all devices (this is default):
-		attr sduino longids 1
-		# Use longids for BTHR918N devices.
-		# Will generate devices names like BTHR918N_f3.
-		attr sduino longids BTHR918N
-		</PRE>
-		</li><br>
-	</ul>
+	
 
 
 =end html
