@@ -2113,7 +2113,7 @@ sub	SIGNALduino_Hideki()
     
     <li>longids<br>
         Comma separated list of device-types for SIGNALduino that should be handled using long IDs. This additional ID allows it to differentiate some weather sensors, if they are sending on the same channel. Therfor a random generated id is added. If you choose to use longids, then you'll have to define a different device after battery change.<br>
-Default is to not to use long IDs for all devices.
+		Default is to not to use long IDs for all devices.
       <br><br>
       Examples:<PRE>
 # Do not use any long IDs for any devices:
@@ -2131,29 +2131,30 @@ attr sduino longids BTHR918N
 		arduino IDE to flash the firmware into the SIGNALduino this provides a way to flash it directly from FHEM.
 
 		There are some requirements:
-	<ul>
-		<li>avrdude must be installed on the host<br>
-		On a Raspberry PI this can be done with: sudo apt-get install avrdude</li>
-		<li>the flashCommand attribute must be set.<br>
-		This attribute defines the command, that gets sent to avrdude to flash the JeeLink.<br>
-		The default is: avrdude -p atmega328P -c arduino -P [PORT] -D -U flash:w:[HEXFILE] 2>[LOGFILE]<br>
-		It contains some place-holders that automatically get filled with the according values:<br>
 		<ul>
-			<li>[PORT]<br>
-			is the port the Signalduino is connectd to (e.g. /dev/ttyUSB0) and will be used from the defenition</li>
-			<li>[HEXFILE]<br>
-			is the .hex file that shall get flashed. There are three options (applied in this order):<br>
-			- passed in set flash<br>
-			- taken from the hexFile attribute<br>
-			- the default value defined in the module<br>
+			<li>avrdude must be installed on the host<br>
+				On a Raspberry PI this can be done with: sudo apt-get install avrdude</li>
+			<li>the flashCommand attribute must be set.<br>
+				This attribute defines the command, that gets sent to avrdude to flash the JeeLink.<br>
+				The default is: avrdude -p atmega328P -c arduino -P [PORT] -D -U flash:w:[HEXFILE] 2>[LOGFILE]<br>
+				It contains some place-holders that automatically get filled with the according values:<br>
+				<ul>
+					<li>[PORT]<br>
+					is the port the Signalduino is connectd to (e.g. /dev/ttyUSB0) and will be used from the defenition</li>
+					<li>[HEXFILE]<br>
+					is the .hex file that shall get flashed. There are three options (applied in this order):<br>
+					- passed in set flash<br>
+					- taken from the hexFile attribute<br>
+					- the default value defined in the module<br>
+					</li>
+					<li>[LOGFILE]<br>
+					The logfile that collects information about the flash process. It gets displayed in FHEM after finishing the flash process</li>
+				</ul>
 			</li>
-			<li>[LOGFILE]<br>
-			The logfile that collects information about the flash process. It gets displayed in FHEM after finishing the flash process</li>
-		</ul>
-		</li>
 		<br>
 
-	</ul>
+		</ul>
+		</li>
 	<a name="SIGNALduinoget"></a>
 	<b>Get</b>
 	<ul>
@@ -2172,6 +2173,8 @@ attr sduino longids BTHR918N
 		command.
 		</li><br>
 	</ul>
+
+	
 
 	
 
