@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm  67282 2015-10-15
+# $Id: 00_SIGNALduino.pm  70695 2015-10-17
 # The file is taken from the FHEMduino project and modified in serval ways for processing the incomming messages
 # see http://www.fhemwiki.de/wiki/SIGNALDuino
 # It was modified also to provide support for raw message handling which it's send from the SIGNALduino
@@ -75,9 +75,11 @@ my %matchListSIGNALduino = (
      "5:CUL_TX"               	=> "^TX..........",         	  # Need TX to avoid FHTTK
 	 "6:SD_AS"       			=> "^P2#[A-Fa-f0-9]{7,8}", 		  # Arduino based Sensors, should not be default
      "4:OREGON"            		=> "^(3[8-9A-F]|[4-6][0-9A-F]|7[0-8]).*",		
-	 "8:SIGNALduino_un"			=> "^[uP]\d+#.*",
 	 "7:Hideki"					=> "^P12#75[A-F0-9]",
-	 "10:SD_WS07"				=> "^P7#[A-Fa-f0-9]{6}F[A-Fa-f0-9]{2}",                       
+	 "10:SD_WS07"				=> "^P7#[A-Fa-f0-9]{6}F[A-Fa-f0-9]{2}",
+	
+	
+	 "X:SIGNALduino_un"			=> "^[uP]\d+#.*",                       
 );
 
 

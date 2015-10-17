@@ -25,6 +25,7 @@ sub listfiles2{
         #print ("error: $dir is not a directory\n"), next unless -d;
         my @files=findfiles($dir);
         my @lines=();
+
         foreach my $file (@files){
             if( (-e $file) && (! -d $file) ){ #test exist and is not a dir name
                 #print "$dir contains $file\n";
@@ -38,6 +39,10 @@ sub listfiles2{
                 push @lines, sprintf("UPD %s %-7s %s\n", $date, $fi->{size}, $fi->{path});
             }
         }
+        push @lines, "DEL FHEM/14_Cresta.pm\n";
+        push @lines, "DEL FHEM/14_SIGNALduino_AS.pm\n";
+        push @lines, "DEL FHEM/14_SIGNALduino_un.pm\n";
+        push @lines, "DEL FHEM/14_SIGNALduino_ID7.pm\n";
         
         open(my $fh, '>:raw', 'controls_signalduino.txt');
         
