@@ -80,8 +80,8 @@ SIGNALduino_un_Parse($$)
 
 	my ($protocol,$rawData) = split("#",$msg);
 	
-	my $dummyreturnvalue= "Unknown, please report"
-	$protocol=~ s/^u(\d+)/$1/; # extract protocol
+	my $dummyreturnvalue= "Unknown, please report";
+	$protocol=~ s/^[uP](\d+)/$1/; # extract protocol
 
 	Log3 $hash, 4, "$name rawData: $rawData";
 	Log3 $hash, 4, "$name Protocol: $protocol";
@@ -259,7 +259,7 @@ SIGNALduino_un_Parse($$)
 
 
 	} else {
-		return undef;
+		return $dummyreturnvalue;
 	}
 
 	

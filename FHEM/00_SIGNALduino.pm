@@ -79,7 +79,7 @@ my %matchListSIGNALduino = (
 	 "10:SD_WS07"				=> "^P7#[A-Fa-f0-9]{6}F[A-Fa-f0-9]{2}",
 	
 	
-	 "X:SIGNALduino_un"			=> "^[uP]\d+#.*",                       
+	 "X:SIGNALduino_un"			=> '^[uP]\d+#.*',                       
 );
 
 
