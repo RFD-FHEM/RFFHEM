@@ -68,6 +68,7 @@ sub SIGNALduino_un_hex2bin {
         return unpack("B$blen", pack("H$hlen", $h));
 }
 
+
 #####################################
 sub
 SIGNALduino_un_Parse($$)
@@ -97,18 +98,18 @@ SIGNALduino_un_Parse($$)
 		
 		## Try TX70DTH Decoding
 		my $SensorTyp = "TX70DTH";
-		my $channel = bin2dec(substr($bitData,9,3));
+		my $channel = SIGNALduino_SIGNALduino_bin2dec(substr($bitData,9,3));
 		my $bin = substr($bitData,0,8);
 		my $id = sprintf('%X', oct("0b$bin"));
 		my $bat = int(substr($bitData,8,1)) eq "1" ? "ok" : "critical";
 		my $trend = "";
 		my $sendMode = "";
-		my $temp = bin2dec(substr($bitData,16,8));
+		my $temp = SIGNALduino_SIGNALduino_bin2dec(substr($bitData,16,8));
 		if (substr($bitData,14,1) eq "1") {
 		  $temp = $temp - 1024;
 		}
 		$temp = $temp / 10;
-		my $hum = bin2dec(substr($bitData,29,7));
+		my $hum = SIGNALduino_SIGNALduino_bin2dec(substr($bitData,29,7));
 		my $val = "T: $temp H: $hum B: $bat";
 		Log3 $hash, 4, "$name decoded protocolid: 7 ($SensorTyp) sensor id=$id, channel=$channel, temp=$temp, hum=$hum, bat=$bat\n" ;
 		
@@ -123,12 +124,12 @@ SIGNALduino_un_Parse($$)
 	      #                ID?  CHN       TMP        ??     HUM
 		$SensorTyp = "EAS800z";
 		$id = oct ("0b".substr($bitData,4,4));
-		$channel = bin2dec(substr($bitData,9,3))+1;
+		$channel = SIGNALduino_SIGNALduino_bin2dec(substr($bitData,9,3))+1;
 		$temp = oct ("0b".substr($bitData,12,12))/10;
 		$bat = int(substr($bitData,8,1)) eq "1" ? "ok" : "critical";  # Eventuell falsch!
-		$hum = bin2dec(substr($bitData,28,8));
+		$hum = SIGNALduino_SIGNALduino_bin2dec(substr($bitData,28,8));
 		$sendMode = int(substr($bitData,4,1)) eq "1" ? "auto" : "manual";  # Eventuell falsch!
-		my $type = bin2dec(substr($bitData,0,4));
+		my $type = SIGNALduino_SIGNALduino_bin2dec(substr($bitData,0,4));
 		
 		Log3 $hash, 4, "$name decoded protocolid: 7 ($SensorTyp / type=$type) mode=$sendMode, sensor id=$id, channel=$channel, temp=$temp, hum=$hum, bat=$bat\n" ;
 		
@@ -156,12 +157,12 @@ SIGNALduino_un_Parse($$)
 		my $bat = int(substr($bitData,8,1)) eq "0" ? "ok" : "critical";
 		my $trend = "";
 		my $sendMode = int(substr($bitData,11,1)) eq "0" ? "automatic" : "manual";
-		my $temp = bin2dec(substr($bitData,25,11));
+		my $temp = SIGNALduino_SIGNALduino_bin2dec(substr($bitData,25,11));
 		if (substr($bitData,24,1) eq "1") {
 		  $temp = $temp - 2048
 		}
 		$temp = $temp / 10.0;
-		my $hum = bin2dec(substr($bitData,17,7));
+		my $hum = SIGNALduino_SIGNALduino_bin2dec(substr($bitData,17,7));
 		my $val = "T: $temp H: $hum B: $bat";
 		Log3 $hash, 4, "$name decoded protocolid: 6  $SensorTyp, sensor id=$id, channel=$channel, temp=$temp\n" ;
 
@@ -249,11 +250,11 @@ SIGNALduino_un_Parse($$)
 	{
 		my $SensorTyp = "perl NC-7367?";
 		my $id = oct ("0b".substr($bitData,4,4));  
-		my $channel = bin2dec(substr($bitData,9,3))+1; 
+		my $channel = SIGNALduino_bin2dec(substr($bitData,9,3))+1; 
 		my $temp = oct ("0b".substr($bitData,20,8))/10; 
 		my $bat = int(substr($bitData,8,1)) eq "1" ? "ok" : "critical";  # Eventuell falsch!
 		my $sendMode = int(substr($bitData,4,1)) eq "1" ? "auto" : "manual";  # Eventuell falsch!
-		my $type = bin2dec(substr($bitData,0,4));
+		my $type = SIGNALduino_bin2dec(substr($bitData,0,4));
 		
 		Log3 $hash, 4, "$name decoded protocolid: 7 ($SensorTyp / type=$type) mode=$sendMode, sensor id=$id, channel=$channel, temp=$temp, bat=$bat\n" ;
 
@@ -284,24 +285,17 @@ SIGNALduino_un_Attr(@)
   return undef;
 }
 
-sub
-hex2bin($)
-{
-  my $h = shift;
-  my $hlen = length($h);
-  my $blen = $hlen * 4;
-  return unpack("B$blen", pack("H$hlen", $h));
-}
+
 
 sub
-bin2dec($)
+SIGNALduino_bin2dec($)
 {
   my $h = shift;
   my $int = unpack("N", pack("B32",substr("0" x 32 . $h, -32))); 
   return sprintf("%d", $int); 
 }
 sub
-binflip($)
+SIGNALduino_binflip($)
 {
   my $h = shift;
   my $hlen = length($h);
