@@ -50,11 +50,11 @@ SD_AS_Initialize($)
   $hash->{ParseFn}   = "SD_AS_Parse";
   $hash->{AttrList}  = "IODev do_not_notify:0,1 showtime:0,1 ignore:0,1 ".$readingFnAttributes;
   $hash->{AutoCreate}=
-        { "ArduinoSensor_temp.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4:Temp,", autocreateThreshold => "2:600"},
+        { 
+          "ArduinoSensor_temp.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4:Temp,", autocreateThreshold => "2:600"},
           "ArduinoSensor_humidity.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "2:600"},
           "ArduinoSensor_reedGas.*" => { ATTR => "event-min-interval:.*:1 event-on-change-reading:.*", FILTER => "%NAME", autocreateThreshold => "2:600"},
           "ArduinoSensor_voltage.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", autocreateThreshold => "2:600"},
-
         };
 }
 
@@ -124,7 +124,7 @@ SD_AS_Parse($$)
   }
 
 
-  Log3 $iohash, 3, "AS: $rawData";
+  Log3 $iohash, 4, "AS: $rawData";
   
   my ($deviceCode, $SensorTyp, $model, $id, $valHigh, $valLow, $Sigval, $bat, $trigger, $val, $sigType);
   # T	Type:
@@ -163,7 +163,7 @@ SD_AS_Parse($$)
 	$Sigval = (($valHigh<<8) + $valLow);
 	$bat = $batStr{(hex(substr($rawData,2,2))>>6) &3};
 	$trigger = $trigStr{(hex(substr($rawData,0,2))>>7) &1};
-	Log3 $iohash, 3, "SD_AS Sigval: $Sigval";#
+	Log3 $iohash, 4, "SD_AS Sigval: $Sigval";#
 
 	if ($model eq "lightHiRange") {
 	  $Sigval = sprintf( "%.1f", $Sigval /1.2); #TBD
@@ -172,7 +172,9 @@ SD_AS_Parse($$)
 	  $Sigval = sprintf( "%.1f", $Sigval /1.2/2);
 	}
 	elsif ($model eq "temp") {
-	  $Sigval = sprintf( "%.1f", ($Sigval-0x8000) /10); #temp is send 10*°C
+	  $Sigval = ($Sigval-0x8000) /10;
+	  return "temp out of range" if ($Sigval > 100 || $Sigval < -60);
+	  $Sigval = sprintf( "%.1f", $Sigval); #temp is send 10*°C
 	}
 	elsif ($model eq "door") {
 	  $Sigval = (($Sigval==255)? 1:0); 
@@ -181,7 +183,10 @@ SD_AS_Parse($$)
 	  $Sigval = sprintf( "%.1f%%", (1024-$Sigval)*100/1024);
 	}
 	elsif ($model eq "humidity") {
-	  $Sigval = sprintf( "%i %%", ($Sigval-0x8000) /10); #hum is send 10*%
+	  $Sigval = ($Sigval-0x8000) /10;
+	  return "humidity out of range" if ($Sigval > 100 || $Sigval < 0);
+	  $Sigval = sprintf( "%i %%", $Sigval); #hum is send 10*%
+	  
 	}
 	elsif ($model eq "reedGas") {
 	  $Sigval = sprintf( "%i m3", ($Sigval)); #simple counter, code has to be extended to support restart of the sensor etc.
@@ -191,7 +196,7 @@ SD_AS_Parse($$)
 	elsif ($model eq "voltage") {
 	  $bat = (hex(substr($msg,7,2))>>1)&3
 	} else {
-		Log3 $iohash, 1, "SD_AS unknown model: $model";#
+		Log3 $iohash, 4, "SD_AS unknown model: $model";#
 		return undef;
     }
     $val = "S: $Sigval B: $bat";
@@ -204,8 +209,10 @@ SD_AS_Parse($$)
   $def = $modules{AS}{defptr}{$deviceCode} if(!$def);
   
   if(!$def) {
-    Log3 $iohash, 1, "SD_AS: UNDEFINED sensor $SensorTyp detected, code $deviceCode";
-    return "UNDEFINED $SensorTyp"."_"."$deviceCode SD_AS $deviceCode";
+    Log3 $iohash, 1, "SD_AS: UNDEFINED sensor $SensorTyp detected, code $deviceCode (".$SensorTyp."_".$deviceCode.")";
+    return "UNDEFINED ".$SensorTyp."_".$deviceCode." SD_AS $deviceCode";
+    #return "UNDEFINED $deviceCode SD_AS $deviceCode";
+    
   }
 
   my $hash = $def;
@@ -217,7 +224,7 @@ SD_AS_Parse($$)
   $hash->{lastReceive} = time();
 
   if(!$val) {
-    Log3 $hash, 1, "SD_AS: $name: $deviceCode Cannot decode $msg";
+    Log3 $hash, 3, "SD_AS: $name: $deviceCode Cannot decode $msg";
     return "";
   }
   
