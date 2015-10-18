@@ -361,7 +361,6 @@ SIGNALduino_binflip($)
 
   <a name="SIGNALduino_undefine"></a>
   <b>Define</b>
-  <ul>
     <code>define &lt;name&gt; SIGNALduino_un &lt;code&gt; </code> <br>
 
     <br>
