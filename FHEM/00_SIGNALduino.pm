@@ -34,13 +34,13 @@ sub SIGNALduino_SimpleWrite(@);
 my $debug=0;
 
 my %gets = (    # Name, Data to send to the SIGNALduino, Regexp for the answer
-  "version"  => ["V", '^V\s.*'],
+  "version"  => ["V", '^V\s.*SIGNALduino.*'],
   "freeram"  => ["R", '^[0-9]+'],
   "raw"      => ["", '.*'],
   "uptime"   => ["t", '^[0-9]+' ],
   "cmds"     => ["?", '.*Use one of[ 0-9A-Za-z]+[\r\n]*$' ],
-
-#  "ITParms"  => ["ip",'.*' ],
+  "ITParms"  => ["ip",'.*'],
+#  "ITClock"  => ["ic", '\d+'],
 #  "FAParms"  => ["fp", '.*' ],
 #  "TCParms"  => ["dp", '.*' ],
 #  "HXParms"  => ["hp", '.*' ]
@@ -49,9 +49,11 @@ my %gets = (    # Name, Data to send to the SIGNALduino, Regexp for the answer
 
 my %sets = (
   "raw"       => "",
-  "flash"     => "",
-  "reset"     => "",
+  "flash"     => "noarg",
+  "reset"     => "noarg",
   #"disablereceiver"     => "",
+  "ITClock"  => "200,300,400",
+ 
 );
 
 ## Supported Clients per default
@@ -717,11 +719,27 @@ SIGNALduino_Set($@)
 
   } elsif ($cmd =~ m/reset/i) {
     return SIGNALduino_ResetDevice($hash);
-  
+  } elsif( $cmd eq "ITClock" ) {
+  	Log3 $name, 4, "set $name $cmd $arg";
+  	my $clock = shift @a;
+  	
+  	$clock=300 	if ($clock  eq "" );
+  	
+  	if ($clock  =~ /^\d+$/ ) {
+  		$arg="ic$clock";
+	  	SIGNALduino_SimpleWrite($hash, $arg);
+	  	Log3 $name, 3, "Set - no value passed - setting ITClock to default ($clock)";
+	  	
+	  	#SIGNALduino_Get($hash,$hash->{NAME},"ITParms");
+	  	
+  	} else {
+  		return "argument $arg, is not numeric for set it base duration".$hash->{CMDS};
+  	}
   
   } else {
-	    CUL_SimpleWrite($hash, $arg);
-		#return "Unknown argument $cmd, choose one of ".$hash->{CMDS};
+  	Log3 $name, 5, "set $name $cmd $arg";
+	#SIGNALduino_SimpleWrite($hash, $arg);
+	return "Unknown argument $cmd, choose one of ".$hash->{CMDS};
   }
 
   return undef;
@@ -1056,7 +1074,7 @@ sub SIGNALduino_GetUpdate($){
 	my ($hash) = @_;
 	my $name = $hash->{NAME};
 	
-	Log3 $name, 4, "$name: GetUpdate called ...";
+	Log3 $name, 4, "$name: Get freeram called ...";
 	SIGNALduino_Get($hash,$name, "freeram");	
 	
 	InternalTimer(gettimeofday()+$hash->{Interval}, "SIGNALduino_GetUpdate", $hash, 1);
@@ -2042,21 +2060,22 @@ sub	SIGNALduino_Hideki()
 	to receive and send different protocols over different medias. Currently are 433Mhz protocols implemented.
 	<br><br>
 
-	The following protocols are available:
+	The following devices are currently available:
 	<br><br>
 
 
 	Wireless switches  <br>
-	IT  switches --> uses IT.pm<br>
+	IT/Elro and other brands --> uses IT.pm<br>
 
 	<br><br>
-
-	Temperatur / humidity sensors suppored by 14_CUL_TCM97001^: <br>
-	PEARL NC7159, LogiLink WS0002,GT-WT-02,AURIOL,TCM97001, TCM27 and many more <br>
-	Oregon Scientific v2 Sensors  --> 41_OREGON.pm<br>
-	Temperatur / humidity sensors suppored by 14_SD_WS07: <br>
-    technoline WS 6750 and TX70DTH<br>
-    Eurochon EAS 800z<br>
+	<ul>
+	<li>Temperatur / humidity sensors suppored by 14_CUL_TCM97001</li>
+	<li>PEARL NC7159, LogiLink WS0002,GT-WT-02,AURIOL,TCM97001, TCM27 and many more </li>
+	<li>Oregon Scientific v2 Sensors  --> 41_OREGON.pm</li>
+	<li>Temperatur / humidity sensors suppored by 14_SD_WS07</li>
+    <li>technoline WS 6750 and TX70DTH</li>
+    <li>Eurochon EAS 800z</li>
+	</ul>
 	<br><br>
 
 	It is possible to attach more than one device in order to get better
@@ -2070,7 +2089,7 @@ sub	SIGNALduino_Hideki()
 	</td></tr>
 	</table>
 	<a name="SIGNALduinodefine"></a>
-	<b>Define</b>
+	<b>Define</b><br>
 	<code>define &lt;name&gt; SIGNALduino &lt;device&gt; </code> <br>
 	<br>
 	USB-connected devices (SIGNALduino):<br>
@@ -2107,10 +2126,34 @@ sub	SIGNALduino_Hideki()
 	  
 	<li><a href="#do_not_notify">do_not_notify</a></li>
     <li><a href="#attrdummy">dummy</a></li>
-    <li><a href="#attrdebug">debug</a><br>
+    <li>debug<br>
     This will bring the module in a very verbose debug output. Usefull to find new signals and verify if the demodulation works correctly.
     </li>
+    <li>flashCommand<br>
+    	This is the command, that is executed to performa the firmware flash. Do not edit, if you don't know what you are doing.<br>
+    	The default is: avrdude -p atmega328P -c arduino -P [PORT] -D -U flash:w:[HEXFILE] 2>[LOGFILE]<br>
+		It contains some place-holders that automatically get filled with the according values:<br>
+		<ul>
+			<li>[PORT]<br>
+			is the port the Signalduino is connectd to (e.g. /dev/ttyUSB0) and will be used from the defenition</li>
+			<li>[HEXFILE]<br>
+			is the .hex file that shall get flashed. There are three options (applied in this order):<br>
+			- passed in set flash<br>
+			- taken from the hexFile attribute<br>
+			- the default value defined in the module<br>
+			</li>
+			<li>[LOGFILE]<br>
+			The logfile that collects information about the flash process. It gets displayed in FHEM after finishing the flash process</li>
+		</ul>
     
+    </li>
+    <li>hardware<br>
+    When using the flash command, you should specify whar hardware you have connected to the usbport. Doing not, can cause failures of the device.
+    </li>
+    <li>minsecs<br>
+    This is a very special attribute. It is provided to other modules. minsecs should act like a threshold. All logic must be done in the logical module. 
+    If specified, then supported modules will discard new messages if minsecs isn't past.
+    </li>
     <li>longids<br>
         Comma separated list of device-types for SIGNALduino that should be handled using long IDs. This additional ID allows it to differentiate some weather sensors, if they are sending on the same channel. Therfor a random generated id is added. If you choose to use longids, then you'll have to define a different device after battery change.<br>
 		Default is to not to use long IDs for all devices.
@@ -2126,35 +2169,6 @@ attr sduino longids BTHR918N
 </PRE>
     </li><br>
 
-		<li>flash [hexFile]<br>
-		The SIGNALduino needs the right firmware to be able to receive and deliver the sensor data to fhem. In addition to the way using the
-		arduino IDE to flash the firmware into the SIGNALduino this provides a way to flash it directly from FHEM.
-
-		There are some requirements:
-		<ul>
-			<li>avrdude must be installed on the host<br>
-				On a Raspberry PI this can be done with: sudo apt-get install avrdude</li>
-			<li>the flashCommand attribute must be set.<br>
-				This attribute defines the command, that gets sent to avrdude to flash the JeeLink.<br>
-				The default is: avrdude -p atmega328P -c arduino -P [PORT] -D -U flash:w:[HEXFILE] 2>[LOGFILE]<br>
-				It contains some place-holders that automatically get filled with the according values:<br>
-				<ul>
-					<li>[PORT]<br>
-					is the port the Signalduino is connectd to (e.g. /dev/ttyUSB0) and will be used from the defenition</li>
-					<li>[HEXFILE]<br>
-					is the .hex file that shall get flashed. There are three options (applied in this order):<br>
-					- passed in set flash<br>
-					- taken from the hexFile attribute<br>
-					- the default value defined in the module<br>
-					</li>
-					<li>[LOGFILE]<br>
-					The logfile that collects information about the flash process. It gets displayed in FHEM after finishing the flash process</li>
-				</ul>
-			</li>
-		<br>
-
-		</ul>
-		</li>
 	<a name="SIGNALduinoget"></a>
 	<b>Get</b>
 	<ul>
@@ -2172,6 +2186,42 @@ attr sduino longids BTHR918N
 		SIGNALduino to interpret the response of this command. See also the raw-
 		command.
 		</li><br>
+		<li>ITParms<br>
+		For sending IT Signals for wireless switches, the number of repeats and the base duration can be set.
+		With the get command, you can verify what is programmed into the uC.
+		</li><br>
+		
+	</ul>
+	<a name="SIGNALduinoset"></a>
+	<b>SET</b>
+	<ul>
+		<li>ITClock<br>
+		Sets the clock which is used to send the signal for IT switches. (Default is 300)
+		</li><br>
+		<li>raw<br>
+		Issue a SIGNALduino firmware command, without waiting data returned by
+		the SIGNALduino. See the SIGNALduino firmware code  for details on SIGNALduino
+		commands. With this line, you can send almost any signal via a transmitter connected
+		</li><br>
+		<li>reset<br>
+		This will do a reset of the usb port and normaly causes to reset the uC connected.
+		</li><br>
+		<li>flash [hexFile]<br>
+			The SIGNALduino needs the right firmware to be able to receive and deliver the sensor data to fhem. In addition to the way using the
+			arduino IDE to flash the firmware into the SIGNALduino this provides a way to flash it directly from FHEM.
+
+			There are some requirements:
+			<ul>
+				<li>avrdude must be installed on the host<br>
+					On a Raspberry PI this can be done with: sudo apt-get install avrdude</li>
+				<li>the hardware attribute must be set if using any other hardware as an Arduino nano<br>
+					This attribute defines the command, that gets sent to avrdude to flash the uC.<br></li>
+		     	<br>
+	
+			</ul>
+		</li>
+		
+		
 	</ul>
 
 	
