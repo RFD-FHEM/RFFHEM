@@ -1,9 +1,10 @@
 20.10.2015
+ - Release 3.1
  - Firmware 3.1.8
  - some fixes and removed some warning
  - For sending IT messages, the clock can be adjusted via set <name> ITClock
  - SIGNALduino_un will catch all messages, which coul'd not be processed
-
+ 
 15.10.2015
  - Addes SD_WS07 Module for Technoline and Eurochron sensordevices
  - Bugfixes for MU messages
