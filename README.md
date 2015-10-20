@@ -10,14 +10,14 @@ Supported Devices / Protocols
 |Device | Function|
 | ------------- | ----------- |
 |TCM97001,Logilink, Pearl NC, and similar,Lifetec LT3594 | Weather sensor
-|PT2262 Devices | Remote switches like Intertechno V1, door/window sensors|
+|PT2262 and similar Devices | Remote switches like Intertechno V1, Elro, door/window sensors|
 |Conrad RSL | only Funk-Jalousieaktor |
 |Oregon Scientific v2 Devices | Weather sensor |
 |Technoline TX3  | Weather sensor |
 |Hama TS33C, Bresser Thermo/Hygro Sensor  | Weather sensor |
 |Arduino Sensor | multi purpose sensor based on arduino |
 |technoline Weatherstation WS 6750/TX70DTH| Weather sensor and station |
-|IT, Elro,...| Remote sockets from serval brands|
+|| Remote sockets from serval brands|
 
 
 
