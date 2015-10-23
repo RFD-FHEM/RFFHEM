@@ -1,3 +1,5 @@
+23.10.2015
+ - bugfix in 90_SIGNALduino_un (caused to crash fhem)
 20.10.2015
  - Release 3.1
  - Firmware 3.1.8
