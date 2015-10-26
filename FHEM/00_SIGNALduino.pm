@@ -477,11 +477,28 @@ my %ProtocolListSIGNALduino  = (
 			#sync			=> [1,-3],				
 			clockabs		=> 150,                  #ca 150us
 			format 			=> 'twostate',	  		
-			preamble		=> 'u243#',				# prepend to converted message	
+			preamble		=> 'u24#',				# prepend to converted message	
 			#clientmodule    => '',   				# not used now
 			#modulematch     => '',  				# not used now
 			length_min      => '54',
 			length_max      => '56',				
+
+		},
+		
+	"25" => # LES remote for led lamp
+		{
+            name			=> 'les led remote',	
+			id          	=> '25',
+			one				=> [-2,1],
+			zero			=> [-1,2],
+			sync			=> [-46,1],				# this is a end marker, but we use this as a start marker
+			clockabs		=> 350,                 #ca 350us
+			format 			=> 'twostate',	  		
+			preamble		=> 'u25#',				# prepend to converted message	
+			#clientmodule    => '',   				# not used now
+			#modulematch     => '',  				# not used now
+			length_min      => '24',
+			length_max      => '50',				# message has only 24 bit, but we get more than one message, calculation has to be corrected
 
 		},
 );
