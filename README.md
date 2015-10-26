@@ -1,4 +1,4 @@
-SIGNALduino - FHEM Modules rel 3.2
+SIGNALduino - FHEM Modules rel 3.2 (Development branch for CTW600 and wh1080
 ======
 
 Counterpart of SIGNALDuino uC, it's the code for FHEM to work with the data received from the uC
@@ -18,6 +18,7 @@ Supported Devices / Protocols
 |Arduino Sensor | multi purpose sensor based on arduino |
 |technoline Weatherstation WS 6750/TX70DTH| Weather sensor and station |
 || Remote sockets from serval brands|
+|CTW600 WH1080 | Weather station |
 
 
 
