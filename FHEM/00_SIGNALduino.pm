@@ -2081,9 +2081,8 @@ sub	SIGNALduino_Hideki()
 	Note: this module require the Device::SerialPort or Win32::SerialPort
 	module. It can currently only attatched via USB.
 
-	</td><td>
-	<img src="ccc.jpg"/>
-	</td></tr>
+	</td>
+	</tr>
 	</table>
 	<a name="SIGNALduinodefine"></a>
 	<b>Define</b><br>
