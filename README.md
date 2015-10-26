@@ -1,4 +1,4 @@
-SIGNALduino - FHEM Modules development branch
+SIGNALduino - FHEM Modules development branch (frozen)
 ======
 
 Counterpart of SIGNALDuino, it's the code for FHEM to work with the data received from the uC
