@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm  72788 2015-10-20  v3.1
+# $Id: 00_SIGNALduino.pm  72788 2015-10-26  v3.2-dev
 # The file is taken from the FHEMduino project and modified in serval ways for processing the incomming messages
 # see http://www.fhemwiki.de/wiki/SIGNALDuino
 # It was modified also to provide support for raw message handling which it's send from the SIGNALduino
@@ -466,6 +466,22 @@ my %ProtocolListSIGNALduino  = (
 			#modulematch     => '',  				# not used now
 			length_min      => '36',
 			length_max      => '44',				
+
+		},
+	"24" => # visivon
+		{
+            name			=> 'visivon remote',	
+			id          	=> '24',
+			one				=> [1,-3],
+			zero			=> [3,-1],
+			#sync			=> [1,-3],				
+			clockabs		=> 150,                  #ca 150us
+			format 			=> 'twostate',	  		
+			preamble		=> 'u243#',				# prepend to converted message	
+			#clientmodule    => '',   				# not used now
+			#modulematch     => '',  				# not used now
+			length_min      => '54',
+			length_max      => '56',				
 
 		},
 );
@@ -2081,9 +2097,8 @@ sub	SIGNALduino_Hideki()
 	Note: this module require the Device::SerialPort or Win32::SerialPort
 	module. It can currently only attatched via USB.
 
-	</td><td>
-	<img src="ccc.jpg"/>
-	</td></tr>
+	</td>
+	</tr>
 	</table>
 	<a name="SIGNALduinodefine"></a>
 	<b>Define</b><br>
