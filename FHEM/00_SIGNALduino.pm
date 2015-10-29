@@ -412,13 +412,14 @@ my %ProtocolListSIGNALduino  = (
 			id          	=> '20',
 			one				=> [2,-1],
 			zero			=> [1,-1],
-			sync			=> [1,-3],				
+			#sync			=> [1,-3],				
 			clockabs		=> -1,                  #can be 140-190
 			format 			=> 'twostate',	  		
 			preamble		=> 'u20#',				# prepend to converted message	
 			#clientmodule    => '',   				# not used now
 			#modulematch     => '',  				# not used now
 			length_min      => '16',
+			filterfunc      => 'SIGNALduino_filterSign',
 		},
 	"21" => #Einhell Garagentor	
 		{
@@ -499,7 +500,6 @@ my %ProtocolListSIGNALduino  = (
 			#modulematch     => '',  				# not used now
 			length_min      => '24',
 			length_max      => '50',				# message has only 24 bit, but we get more than one message, calculation has to be corrected
-
 		},
 );
 
@@ -1531,25 +1531,18 @@ sub SIGNALduino_padbits(\@$)
 
 sub SIGNALduino_Parse_MU($$$$@)
 {
-	#my ($hash, $iohash, $name, $rmsg,@msg_parts) = @_;
-	#my $rawData;
-	#my $clockidx;
-	#my %patternList;
-	#my %patternListRaw;
-	## Check for each received message part and parse it
-	
 	my ($hash, $iohash, $name, $rmsg,%msg_parts) = @_;
 
 	my $protocolid;
 	my $clockidx=$msg_parts{clockidx};				
 	my $protocol=undef;
-	my $rawData=$msg_parts{rawData};
+	my $rawData;
 	my %patternListRaw;
 	my $message_dispatched=0;
 	
     Debug "$name: processing unsynced message\n" if ($debug);
 
-	my $clockabs;  #Clock will be fetched from Protocol
+	#my $clockabs;  #Clock will be fetched from Protocol
 	#$patternListRaw{$_} = floor($msg_parts{pattern}{$_}/$clockabs) for keys $msg_parts{pattern};
 	$patternListRaw{$_} = $msg_parts{pattern}{$_} for keys $msg_parts{pattern};
 
@@ -1559,36 +1552,52 @@ sub SIGNALduino_Parse_MU($$$$@)
 		
 		## Make a lookup table for our pattern index ids
 		#Debug "List of pattern:"; 		#Debug Dumper(\%patternList);		
-		my $signal_length = length($rawData);        # Length of data array
 
 		## Find matching protocols
-		my $id;
-		foreach $id ( keys %ProtocolListSIGNALduino) {
+		foreach my $id ( keys %ProtocolListSIGNALduino) {
 			if (defined($hash->{"whitelisthash"}) && !defined($hash->{"whitelisthash"}{$id})) {
-				Log3 $name, 4, "skip ID $id";
+				Log3 $name, 4, "$name: skip ID $id";
                 next;
 			}
-
+		
 			next if (exists $ProtocolListSIGNALduino{$id}{sync}); ## We can skip messages with sync defined
 			next if (defined($ProtocolListSIGNALduino{id}{format} && $ProtocolListSIGNALduino{id}{format} eq "manchester"));
 			next if (!defined($ProtocolListSIGNALduino{$id}{clockabs}));
-				
+			
+			
 			my $valid=1;
 			my $clockabs= $ProtocolListSIGNALduino{$id}{clockabs};
 			my %patternList;
+			$rawData=$msg_parts{rawData};
+			if (exists($ProtocolListSIGNALduino{$id}{filterfunc}))
+			{
+				my $method = $ProtocolListSIGNALduino{$id}{filterfunc};
+		   		if (!exists &$method)
+				{
+					Log3 $name, 5, "$name: Error: Unknown filtermethod=$method. Please define it in file $0";
+					next;
+				} else {					
+					Log3 $name, 5, "$name: applying filterfunc $method";
+
+				    no strict "refs";
+					(my $count_changes,$rawData,my %patternListRaw_tmp) = $method->($name,$id,$rawData,%patternListRaw);				
+				    use strict "refs";
+
+					%patternList = map { $_ => round($patternListRaw_tmp{$_}/$clockabs,1) } keys %patternListRaw_tmp; 
+				}
+			} else {
+				%patternList = map { $_ => round($patternListRaw{$_}/$clockabs,1) } keys %patternListRaw; 
+			}
 			
-			%patternList = map { $_ => round($patternListRaw{$_}/$clockabs,1) } keys %patternListRaw; 
+			my $signal_length = length($rawData);        # Length of data array
+			
 			my @keys = sort { $patternList{$a} <=> $patternList{$b} } keys %patternList;
 
 			#Debug Dumper(\%patternList);	
 			#Debug Dumper(@keys);	
-
 			#$debug=1;
-			
-			
+					
 			Debug "Testing against Protocol id $id -> $ProtocolListSIGNALduino{$id}{name}"  if ($debug);
-
-			
 	
 #			$valid=SIGNALduino_inTol($ProtocolListSIGNALduino{$id}{clockabs},$clockabs,$clockabs*0.30) if ($ProtocolListSIGNALduino{$id}{clockabs} > 0);
 
@@ -1630,14 +1639,14 @@ sub SIGNALduino_Parse_MU($$$$@)
 		
 			#Anything seems to be valid, we can start decoding this.			
 
-			Log3 $name, 4, "Found matched Protocol id $id -> $ProtocolListSIGNALduino{$id}{name}"  if ($valid);
+			Log3 $name, 4, "Fingerprint for Protocol id $id -> $ProtocolListSIGNALduino{$id}{name} matches, trying to demodulate"  if ($valid);
 			my $signal_width= @{$ProtocolListSIGNALduino{$id}{one}};
 			#Debug $signal_width;
 			
 			my @bit_msg=();							# array to store decoded signal bits
 			my $message_start = (index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}},\%patternList)) < index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{zero}},\%patternList)) ? index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}},\%patternList)) : index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{zero}},\%patternList)));
 			#for (my $i=index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{sync}}))+$signal_width;$i<length($rawData);$i+=$signal_width)
-			Debug "Message starts at $message_start length of data is ".length($rawData) if ($debug);
+			Debug "Message starts at $message_start - length of data is ".length($rawData) if ($debug);
 			Log3 $name, 5, "Starting demodulation at Position $message_start";
 			#my $onepos= index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}},\%patternList));
 			#my $zeropos=index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{zero}},\%patternList));
@@ -1665,7 +1674,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 						push(@bit_msg,'0');
 						Debug "$name: padding 0 bit to bit_msg array" if ($debug);
 					}
-					#Check converted message against lengths
+					#Check converted message against lengths #Todo: move length check before padding
 					$valid = $valid && $ProtocolListSIGNALduino{$id}{length_min} <= scalar @bit_msg  if (defined($ProtocolListSIGNALduino{$id}{length_min})); 
 					$valid = $valid && $ProtocolListSIGNALduino{$id}{length_max} >= scalar @bit_msg  if (defined($ProtocolListSIGNALduino{$id}{length_max}));					
 					
@@ -2070,7 +2079,89 @@ sub	SIGNALduino_Hideki()
 	return (-1,"");
 }
 
+# - - - - - - - - - - - -
+#=item SIGNALduino_filterSign()
+#This functons, will act as a filter function. It will remove the sign from the pattern, and compress message and pattern
+# 
+# Will return  $count of combined values,  modified $rawData , modified %patternListRaw,
+# =cut
 
+
+#use Data::Dumper qw(Dumper);
+#my %msg_parts;
+
+#$msg_parts{pattern}{0}=520; 
+#$msg_parts{pattern}{1}=-500;
+#$msg_parts{pattern}{2}=-350;
+#$msg_parts{pattern}{3}=370;
+#$msg_parts{rawData}="0101232301230123";
+sub SIGNALduino_filterSign($$$%)
+{
+	my ($name,$id,$rawData,%patternListRaw) = @_;
+
+
+	my %buckets;
+	# Remove Sign
+    %patternListRaw = map { $_ => abs($patternListRaw{$_})} keys %patternListRaw;  ## remove sing from all
+    
+    my $intol=0;
+    my $cnt=0;
+
+    # compress pattern hash
+    foreach my $key (keys %patternListRaw) {
+			
+		#print "chk:".$patternListRaw{$key};
+    	#print "\n";
+
+        $intol=0;
+		foreach my $b_key (keys %buckets){
+			#print "with:".$buckets{$b_key};
+			#print "\n";
+			
+			# $value  - $set <= $tolerance
+			if (SIGNALduino_inTol($patternListRaw{$key},$buckets{$b_key},$buckets{$b_key}*0.15))
+			{
+		    	print"\t". $patternListRaw{$key}."($key) is intol of ".$buckets{$b_key}."($b_key) \n";
+				$cnt++;
+				eval "\$rawData =~ tr/$key/$b_key/";
+
+				#if ($key == $msg_parts{clockidx})
+				#{
+			#		$msg_pats{syncidx} = $buckets{$key};
+			#	}
+			#	elsif ($key == $msg_parts{syncidx})
+			#	{
+			#		$msg_pats{syncidx} = $buckets{$key};
+			#	}			
+				
+				$buckets{$b_key} = ($buckets{$b_key} + $patternListRaw{$key}) /2;
+				#print"\t recalc to ". $buckets{$b_key}."\n";
+
+				delete ($patternListRaw{$key});  # deletes the compressed entry
+				$intol=1;
+				last;
+			}
+		}	
+		if ($intol == 0) {
+			$buckets{$key}=abs($patternListRaw{$key});
+		}
+	}
+
+	return ($cnt,$rawData, %patternListRaw);
+	#print "rdata: ".$msg_parts{rawData}."\n";
+
+	#print Dumper (%buckets);
+	#print Dumper (%msg_parts);
+
+	#modify msg_parts pattern hash
+	#$patternListRaw = \%buckets;
+}
+
+#print Dumper (%msg_parts);
+#print "\n";
+#SIGNALduino_filterSign(%msg_parts);
+#print Dumper (%msg_parts);
+#print "\n";
 
 1;
 
