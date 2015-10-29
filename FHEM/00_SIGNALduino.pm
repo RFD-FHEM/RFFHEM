@@ -2040,8 +2040,8 @@ sub	SIGNALduino_Hideki()
 	{
 		Debug "$name: Hideki protocol detected \n" if ($debug);
 
-		# Todo: Mindest Länge für startpunkt vorspringen 
-		# Todo: Wiederholung auch an das Modul weitergeben, damit es dort geprüft werden kann
+		# Todo: Mindest Laenge fuer startpunkt vorspringen 
+		# Todo: Wiederholung auch an das Modul weitergeben, damit es dort geprueft werden kann
 		my $message_end = index($bitData,"10101110",$message_start+18); # pruefen auf ein zweites 0x75,  mindestens 18 bit nach 1. 0x75
         $message_end = length($bitData) if ($message_end == -1);
         my $message_length = $message_end - $message_start;
