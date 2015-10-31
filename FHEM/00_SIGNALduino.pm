@@ -15,6 +15,7 @@ use strict;
 use warnings;
 use Time::HiRes qw(gettimeofday);
 use Data::Dumper qw(Dumper);
+use Scalar::Util qw(looks_like_number);
 
 use POSIX qw( floor);  # can be removed
 #use Math::Round qw();
@@ -500,6 +501,68 @@ my %ProtocolListSIGNALduino  = (
 			#modulematch     => '',  				# not used now
 			length_min      => '24',
 			length_max      => '50',				# message has only 24 bit, but we get more than one message, calculation has to be corrected
+		},
+	"26" => # some remote code send by flamingo style remote controls
+		{
+            name			=> 'remote26',	
+			id          	=> '26',
+			one				=> [1,-3],
+			zero			=> [3,-1],
+#			sync			=> [1,-6],				# Message is not provided as MS, due to small fact
+			start 			=> [1,-6],				# Message is not provided as MS, due to small fact
+			clockabs		=> 380,                 #ca 380
+			format 			=> 'twostate',	  		
+			preamble		=> 'u26#',				# prepend to converted message	
+			#clientmodule    => '',   				# not used now
+			#modulematch     => '',  				# not used now
+			length_min      => '24',
+			length_max      => '24',				# message has only 24 bit, but we get more than one message, calculation has to be corrected
+		},
+	"27" => # some remote code, send by flamingo style remote controls
+		{
+            name			=> 'remote27',	
+			id          	=> '27',
+			one				=> [1,-2],
+			zero			=> [2,-1],
+			start			=> [6,-15],				# Message is not provided as MS, worakround is start
+			clockabs		=> 480,                 #ca 480
+			format 			=> 'twostate',	  		
+			preamble		=> 'u27#',				# prepend to converted message	
+			#clientmodule    => '',   				# not used now
+			#modulematch     => '',  				# not used now
+			length_min      => '24',
+			length_max      => '24',				
+		},
+	"28" => # some remote code, send by aldi IC Ledspots
+		{
+	        name			=> 'IC Ledspot',	
+			id          	=> '28',
+			one				=> [1,-1],
+			zero			=> [1,-2],
+			start			=> [4,-5],				
+			clockabs		=> 600,                 #ca 600
+			format 			=> 'twostate',	  		
+			preamble		=> 'u28#',				# prepend to converted message
+			#clientmodule    => '',   				# not used now
+			#modulematch     => '',  				# not used now
+			length_min      => '8',
+			length_max      => '8',				
+		},
+	"29" => # some remote code, send by flamingo style remote controls
+		{
+            name			=> 'HT12e remote',	
+			id          	=> '29',
+			one				=> [2,-2],
+			zero			=> [1,-2],
+			float           => [1,-1],	
+			start			=> [1,-38],				# Message is not provided as MS, worakround is start
+			clockabs		=> 220,                 #ca 220
+			format 			=> 'tristate',	  		# there is a pause puls between words
+			preamble		=> 'u29#',				# prepend to converted message	
+			#clientmodule    => '',   				# not used now
+			#modulematch     => '',  				# not used now
+			length_min      => '10',
+			length_max      => '12',				# message has only 10 bit but is paddet to 12
 		},
 );
 
@@ -1518,6 +1581,9 @@ SIGNALduino_Parse_MS($$$$%)
 
 	}
 }
+
+
+
 ## //Todo: check list as reference
 sub SIGNALduino_padbits(\@$)
 {
@@ -1527,6 +1593,22 @@ sub SIGNALduino_padbits(\@$)
 		push(@{$_[0]},'0');
 	}
 	return " padded $i bits to bit_msg array";
+}
+
+# - - - - - - - - - - - -
+#=item SIGNALduino_getProtoProp()
+#This functons, will return a value from the Protocolist and check if it is defined
+# 
+# returns "" if the var is not defined
+# =cut
+#  $id, $propertyname,
+
+sub SIGNALduino_getProtoProp($$)
+{
+	my $id = shift;
+	my $propNameLst = shift;
+	return $ProtocolListSIGNALduino{$id}{$propNameLst} if defined($ProtocolListSIGNALduino{$id}{$propNameLst});
+	return undef;
 }
 
 sub SIGNALduino_Parse_MU($$$$@)
@@ -1632,6 +1714,14 @@ sub SIGNALduino_Parse_MU($$$$@)
 			$patternLookupHash{$pstr}="0" if ($valid); ## Append zero to our lookuptable
 			Debug "added $pstr " if ($debug && $valid);
 
+			if (defined($ProtocolListSIGNALduino{$id}{float}))
+			{
+				$valid = $valid && ($pstr=SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{float}},\%patternList)) >=0;
+				Debug "Found matched float" if ($debug && $valid);
+				$patternLookupHash{$pstr}="F" if ($valid); ## Append float to our lookuptable
+				Debug "added $pstr " if ($debug && $valid);
+			}
+
 			next if (!$valid) ;
 			#Debug "Pattern Lookup Table".Dumper(%patternLookupHash);
 			## Check somethin else
@@ -1644,10 +1734,23 @@ sub SIGNALduino_Parse_MU($$$$@)
 			#Debug $signal_width;
 			
 			my @bit_msg=();							# array to store decoded signal bits
-			my $message_start = (index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}},\%patternList)) < index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{zero}},\%patternList)) ? index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}},\%patternList)) : index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{zero}},\%patternList)));
+			
+			my $message_start ;
+			my @msgStartLst;
+			my $startStr;
+			if (@msgStartLst = SIGNALduino_getProtoProp($id,"start"))
+			{
+				$startStr=SIGNALduino_PatternExists($hash,@msgStartLst,\%patternList);
+				$message_start = index($rawData,$startStr)+$signal_width;	
+			} else {
+				undef $startStr;
+				$message_start = (index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}},\%patternList)) < index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{zero}},\%patternList)) ? index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}},\%patternList)) : index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{zero}},\%patternList)));
+			}
+			undef @msgStartLst;
+			
 			#for (my $i=index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{sync}}))+$signal_width;$i<length($rawData);$i+=$signal_width)
 			Debug "Message starts at $message_start - length of data is ".length($rawData) if ($debug);
-			Log3 $name, 5, "Starting demodulation at Position $message_start";
+			Log3 $name, 5, "$name: Starting demodulation at Position $message_start";
 			#my $onepos= index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}},\%patternList));
 			#my $zeropos=index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{zero}},\%patternList));
 			#Log3 $name, 3, "op=$onepos zp=$zeropos";
@@ -1664,7 +1767,9 @@ sub SIGNALduino_Parse_MU($$$$@)
 				#Debug $patternLookupHash{substr($rawData,$i,$signal_width)}; ## Get $signal_width number of chars from raw data string
 				if (exists $patternLookupHash{$sig_str}) 
 				{
-					push(@bit_msg,$patternLookupHash{$sig_str}) ; ## Add the bits to our bit array
+					my $bit = $patternLookupHash{$sig_str};
+					
+					push(@bit_msg,$bit) if (looks_like_number($bit)) ; ## Add the bits to our bit array
 				}
 				if (!exists $patternLookupHash{$sig_str} || $i+$signal_width>length($rawData))  ## Dispatch if last signal or unknown data
 				{
@@ -1697,8 +1802,13 @@ sub SIGNALduino_Parse_MU($$$$@)
 					@bit_msg=(); # clear bit_msg array
 					
 					#Find next position of valid signal (skip invalid pieces)
-					$i = (index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}},\%patternList),$i) < index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{zero}},\%patternList),$i) ? index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}},\%patternList),$i) : index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{zero}},\%patternList),$i));
-					$i-=$signal_width;
+					if ($startStr)
+					{
+						$i= index($rawData,$startStr,$i);	
+					} else {
+						$i = (index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}},\%patternList),$i) < index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{zero}},\%patternList),$i) ? index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}},\%patternList),$i) : index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{zero}},\%patternList),$i));
+						$i-=$signal_width;
+					}
 					last if ($i <=-1);	
 					Log3 $name, 5, "restarting demodulation at Position $i+$signal_width";												
 				
@@ -2087,14 +2197,6 @@ sub	SIGNALduino_Hideki()
 # =cut
 
 
-#use Data::Dumper qw(Dumper);
-#my %msg_parts;
-
-#$msg_parts{pattern}{0}=520; 
-#$msg_parts{pattern}{1}=-500;
-#$msg_parts{pattern}{2}=-350;
-#$msg_parts{pattern}{3}=370;
-#$msg_parts{rawData}="0101232301230123";
 sub SIGNALduino_filterSign($$$%)
 {
 	my ($name,$id,$rawData,%patternListRaw) = @_;
@@ -2121,7 +2223,7 @@ sub SIGNALduino_filterSign($$$%)
 			# $value  - $set <= $tolerance
 			if (SIGNALduino_inTol($patternListRaw{$key},$buckets{$b_key},$buckets{$b_key}*0.15))
 			{
-		    	print"\t". $patternListRaw{$key}."($key) is intol of ".$buckets{$b_key}."($b_key) \n";
+		    	#print"\t". $patternListRaw{$key}."($key) is intol of ".$buckets{$b_key}."($b_key) \n";
 				$cnt++;
 				eval "\$rawData =~ tr/$key/$b_key/";
 
