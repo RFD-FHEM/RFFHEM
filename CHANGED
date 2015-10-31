@@ -1,4 +1,8 @@
-26.10.2014
+31.10.2015
+ - Added a filter for livolo demodulation
+ - Added some demodulation support for protocols used in differnt remote sockets
+ - Optimized whitelist 
+26.10.2015
  - Firmware Update 3.1.8-HF1 due to a bug in the raw send option
  23.10.2015
  - bugfix in 90_SIGNALduino_un (caused to crash fhem)
