@@ -413,6 +413,7 @@ my %ProtocolListSIGNALduino  = (
 			id          	=> '20',
 			one				=> [2,-1],
 			zero			=> [1,-1],
+			start			=> [1,-3],				
 			#sync			=> [1,-3],				
 			clockabs		=> -1,                  #can be 140-190
 			format 			=> 'twostate',	  		
@@ -681,10 +682,9 @@ SIGNALduino_Define($$)
   $hash->{"DMSG"}="nothing";
   $hash->{"TIME"}=time();
   
-  
-  my %WhitelistIDs = map { $_ => 1 } split(",", AttrVal($name,"whitelist_IDs",""));
-  $hash->{"whitelisthash"} = \%WhitelistIDs; 
-  undef($hash->{"whitelisthash"}) if (scalar(keys %WhitelistIDs) <= 0);
+  my $whitelistIDs = AttrVal($name,"whitelist_IDs","");
+  SIGNALduino_IdList($hash ,$name, $whitelistIDs);
+
   return $ret;
 }
 
@@ -1450,13 +1450,7 @@ SIGNALduino_Parse_MS($$$$%)
 		## Find matching protocols
 		my $id;
 		my $message_dispatched=0;
-		foreach $id ( keys %ProtocolListSIGNALduino) {
-			if (defined($hash->{"whitelisthash"}) && !defined($hash->{"whitelisthash"}{$id})) {
-				Log3 $name, 4, "skip ID $id";
-                next;
-			}
-
-			next if !(exists $ProtocolListSIGNALduino{$id}{sync});
+		foreach $id (@{$hash->{msIdList}}) {
 			
 			my $valid=1;
 			#$debug=1;
@@ -1636,14 +1630,10 @@ sub SIGNALduino_Parse_MU($$$$@)
 		#Debug "List of pattern:"; 		#Debug Dumper(\%patternList);		
 
 		## Find matching protocols
-		foreach my $id ( keys %ProtocolListSIGNALduino) {
-			if (defined($hash->{"whitelisthash"}) && !defined($hash->{"whitelisthash"}{$id})) {
-				Log3 $name, 4, "$name: skip ID $id";
-                next;
-			}
+		my $id;
+		foreach $id (@{$hash->{muIdList}}) {
 		
-			next if (exists $ProtocolListSIGNALduino{$id}{sync}); ## We can skip messages with sync defined
-			next if (defined($ProtocolListSIGNALduino{id}{format} && $ProtocolListSIGNALduino{id}{format} eq "manchester"));
+			# wird dies benoetigt? Es gibt in der ProtocolListSIGNALduino keine undefinierten clockabs
 			next if (!defined($ProtocolListSIGNALduino{$id}{clockabs}));
 			
 			
@@ -1846,13 +1836,8 @@ SIGNALduino_Parse_MC($$$$@)
 	$bitData= unpack("B$blen", pack("H$hlen", $rawData)); 
 	Debug "$name: extracted data $bitData (bin)\n" if ($debug); ## Convert Message from hex to bits
 	my $id;
-	foreach $id ( keys %ProtocolListSIGNALduino) {
-		if (defined($hash->{"whitelisthash"}) && !defined($hash->{"whitelisthash"}{$id})) {
-			Log3 $name, 4, "skip ID $id";
-               next;
-		}
+	foreach $id (@{$hash->{mcIdList}}) {
 
-		next if (!defined($ProtocolListSIGNALduino{$id}{format}) or $ProtocolListSIGNALduino{$id}{format} ne "manchester");
 		Debug "Testing against Protocol id $id -> $ProtocolListSIGNALduino{$id}{name}"  if ($debug);
 
 		if ( $clock >$ProtocolListSIGNALduino{$id}{clockrange}[0] and $clock <$ProtocolListSIGNALduino{$id}{clockrange}[1] and length($rawData)*4 >= $ProtocolListSIGNALduino{$id}{length_min} )
@@ -1908,22 +1893,25 @@ SIGNALduino_Parse($$$$@)
 	}
 	if ($rmsg=~ m/^MS;(P\d=-?\d+;){4,7}D=\d+;CP=\d;SP=\d;/) 
 	{
-		$dispatched= SIGNALduino_Parse_MS($hash, $iohash, $name, $rmsg,%signal_parts);
+		if(@{$hash->{msIdList}}) {
+			$dispatched= SIGNALduino_Parse_MS($hash, $iohash, $name, $rmsg,%signal_parts);
+		}
 	}
 
 	# Message unsynced type   -> MU
   	elsif ($rmsg=~ m/^MU;(P\d=-?\d+;){4,7}D=\d+;CP=\d;/)
 	{
-		#return SIGNALduino_Parse_MU($hash, $iohash, $name, $rmsg,@msg_parts);
-		$dispatched=  SIGNALduino_Parse_MU($hash, $iohash, $name, $rmsg,%signal_parts);
-
+		if(@{$hash->{muIdList}}) {
+			$dispatched=  SIGNALduino_Parse_MU($hash, $iohash, $name, $rmsg,%signal_parts);
+		}
 	}
 	# Manchester encoded Data   -> MC
   	elsif ($rmsg=~ m/^MC;.*;/) 
 	{
 		#return SIGNALduino_Parse_MC($hash, $iohash, $name, $rmsg,@msg_parts);		
-		$dispatched=  SIGNALduino_Parse_MC($hash, $iohash, $name, $rmsg,%signal_parts);		   
-		
+		if(@{$hash->{mcIdList}}) {
+			$dispatched=  SIGNALduino_Parse_MC($hash, $iohash, $name, $rmsg,%signal_parts);		   
+		}
 	}
 	else {
 		Debug "$name: unknown Messageformat, aborting\n" if ($debug);
@@ -2000,7 +1988,7 @@ SIGNALduino_Attr(@)
 	my ($cmd,$name,$aName,$aVal) = @_;
 	my $hash = $defs{$name};
 
-	Log3 $name, 5, "Calling Getting Attr sub with args: $cmd $aName = $aVal";
+	Log3 $name, 4, "Calling Getting Attr sub with args: $cmd $aName = $aVal";
 		
 	if( $aName eq "Clients" ) {		## Change clientList
 		$hash->{Clients} = $aVal;
@@ -2033,26 +2021,68 @@ SIGNALduino_Attr(@)
 		$debug = $aVal;
 		Log3 $name, 3, "$name: setting debug to: " . $debug;
 	}
-	elsif ($aName eq "whitelist_IDs" && $cmd=="set")
+	elsif ($aName eq "whitelist_IDs")
 	{
-		
- 		my %WhitelistIDs;
- 		if (defined($aVal) && length($aVal)>0)
- 		{
- 			%WhitelistIDs = map { $_ => 1 } split(",", $aVal);
-			$hash->{"whitelisthash"} = \%WhitelistIDs;
- 		} else  {
- 			 delete $hash->{"whitelisthash"};
- 			 delete($attr{$name}{$aName});
- 			 
- 			 Log3 $name, 5, "$name: deleting $aName";
- 			 return "$name: deleting $aName";
- 		}
+		SIGNALduino_IdList($hash, $name, $aVal);
 	}
 	
   	return undef;
 }
 
+
+sub SIGNALduino_IdList($$$)
+{
+	my ($hash, $name, $aVal) = @_;
+
+	my @msIdList = ();
+	my @muIdList = ();
+	my @mcIdList = ();
+
+	my %WhitelistIDs;
+	my $wflag = 0;
+	if (defined($aVal) && length($aVal)>0)
+	{
+		%WhitelistIDs = map { $_ => 1 } split(",", $aVal);
+		#my $w = join ', ' => map "$_" => keys %WhitelistIDs;
+		#Log3 $name, 3, "Attr whitelist $w";
+		$wflag = 1;
+	}
+	my $id;
+	foreach $id (keys %ProtocolListSIGNALduino)
+	{
+		next if ($id eq 'id');
+		if ($wflag == 1 && !defined($WhitelistIDs{$id}))
+		{
+			#Log3 $name, 3, "skip ID $id";
+                	next;
+		}		
+		
+		if (defined($ProtocolListSIGNALduino{$id}{format}) && $ProtocolListSIGNALduino{$id}{format} eq "manchester")
+		{
+			push (@mcIdList, $id);
+		} 
+		elsif (exists $ProtocolListSIGNALduino{$id}{sync})
+		{
+			push (@msIdList, $id);
+		}
+		else
+		{
+			push (@muIdList, $id);
+		}
+	}
+
+	@msIdList = sort @msIdList;
+	@muIdList = sort @muIdList;
+	@mcIdList = sort @mcIdList;
+
+	Log3 $name, 3, "$name IDlist MS @msIdList";
+	Log3 $name, 3, "$name IDlist MU @muIdList";
+        Log3 $name, 3, "$name IDlist MC @mcIdList";
+	
+	$hash->{msIdList} = \@msIdList;
+        $hash->{muIdList} = \@muIdList;
+        $hash->{mcIdList} = \@mcIdList;
+}
 
 
 sub SIGNALduino_OSV2()
@@ -2159,8 +2189,8 @@ sub	SIGNALduino_Hideki()
 	{
 		Debug "$name: Hideki protocol detected \n" if ($debug);
 
-		# Todo: Mindest Länge für startpunkt vorspringen 
-		# Todo: Wiederholung auch an das Modul weitergeben, damit es dort geprüft werden kann
+		# Todo: Mindest Laenge fuer startpunkt vorspringen 
+		# Todo: Wiederholung auch an das Modul weitergeben, damit es dort geprueft werden kann
 		my $message_end = index($bitData,"10101110",$message_start+18); # pruefen auf ein zweites 0x75,  mindestens 18 bit nach 1. 0x75
         $message_end = length($bitData) if ($message_end == -1);
         my $message_length = $message_end - $message_start;
