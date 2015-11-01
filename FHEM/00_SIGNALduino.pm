@@ -565,6 +565,21 @@ my %ProtocolListSIGNALduino  = (
 			length_min      => '10',
 			length_max      => '12',				# message has only 10 bit but is paddet to 12
 		},
+	"30" => # a unitec remote door switch
+		{
+            name			=> 'unitec47031',	
+			id          	=> '30',
+			one				=> [-1,2],
+			zero			=> [-2,1],
+			start			=> [-33,1],				# Message is not provided as MS, worakround is start
+			clockabs		=> 300,                 # ca 300 us
+			format 			=> 'twostate',	  		# there is a pause puls between words
+			preamble		=> 'u30#',				# prepend to converted message	
+			#clientmodule    => '',   				# not used now
+			#modulematch     => '',  				# not used now
+			length_min      => '12',
+			length_max      => '12',				# message has only 10 bit but is paddet to 12
+		},
 );
 
 
