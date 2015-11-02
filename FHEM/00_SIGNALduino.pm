@@ -170,13 +170,11 @@ my %ProtocolListSIGNALduino  = (
 		},
     "5"    => 			## Similar protocol as intertechno, but without sync
         {
-            name			=> 'unitec',	
+            name			=> 'unitec6899',	
 			id          	=> '5',
 			one				=> [3,-1],
 			zero			=> [1,-3],
-			#float			=> [-1,3],		# not full supported now, for later use
-			#sync			=> [0,0],		# This special device has no sync
-			clockabs     	=> -1,			# -1 = auto
+			clockabs     	=> 500,			# -1 = auto
 			format 			=> 'twostate',	# tristate can't be migrated from bin into hex!
 			preamble		=> 'i',			# Append to converted message	
 			clientmodule    => 'IT',   		# not used now
