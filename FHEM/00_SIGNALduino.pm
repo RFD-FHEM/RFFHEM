@@ -222,10 +222,9 @@ my %ProtocolListSIGNALduino  = (
 			id          	=> '8',
 			one				=> [1,-2],
 			zero			=> [2,-2],
-			#float			=> [-1,3],		# not full supported now, for later use
 			#sync			=> [1,-8],		# 
-			clockabs     	=> 470,			# -1 = auto undef=noclock
-			format 			=> 'pwm',	    # tristate can't be migrated from bin into hex!
+			clockabs     	=> 470,			# 
+			format 			=> 'pwm',	    # 
 			preamble		=> 'TX',		# prepend to converted message	
 			clientmodule    => 'ittx',   	# not used now
 			modulematch     => '^TX......', # not used now
@@ -255,16 +254,8 @@ my %ProtocolListSIGNALduino  = (
 			{
             name			=> 'OSV2',	
 			id          	=> '10',
-			#one			=> [3,-2],
-			#zero			=> [1,-2],
-			#float			=> [-1,3],		# not full supported now, for later use
-			#sync			=> [1,-8],		# 
-			#clockabs     	=> 480,			# -1 = auto undef=noclock
 			clockrange     	=> [390,520],			# min , max
 			format 			=> 'manchester',	    # tristate can't be migrated from bin into hex!
-			#preamble		=> '',		# prepend to converted message	
-			#clientmodule    => '41_OREGON',   	# not used now
-			#modulematch     => '',  # not used now
 			length_min      => '64',
 			length_max      => '220',
 			method          => \&SIGNALduino_OSV2 # Call to process this message
@@ -314,7 +305,7 @@ my %ProtocolListSIGNALduino  = (
 			length_max      => '40',
 		}, 		
 	"14"    => 			## Heidemann HX
-			{
+		{
             name			=> 'Heidemann HX',	
 			id          	=> '14',
 			one				=> [1,-2],
@@ -328,7 +319,6 @@ my %ProtocolListSIGNALduino  = (
 			#modulematch     => '',  				# not used now
 			length_min      => '10',
 			length_max      => '20',
-			#method          => \&SIGNALduino_Cresta	# Call to process this message
 		}, 			
 	"15"    => 			## TCM234759
 			{
@@ -336,7 +326,6 @@ my %ProtocolListSIGNALduino  = (
 			id          	=> '15',
 			one				=> [1,-1],
 			zero			=> [1,-2],
-			#float			=> [-1,3],				# not full supported now, for later use
 			sync			=> [1,-45],				# 
 			clockabs		=> 700,
 			format 			=> 'twostate',	  		
@@ -353,7 +342,6 @@ my %ProtocolListSIGNALduino  = (
 			id          	=> '16',
 			one				=> [-3,1],
 			zero			=> [1,-3],
-			#sync			=> [18,-6],				# protocol has a sync, but is detected as MU
 			clockabs		=> 250,
 			format 			=> 'twostate',	  		
 			preamble		=> 'u16#',				# prepend to converted message	
@@ -429,7 +417,8 @@ my %ProtocolListSIGNALduino  = (
 			id          	=> '21',
 			one				=> [-3,1],
 			zero			=> [-1,3],
-			#sync			=> [-50,1],				
+			#sync			=> [-50,1],	
+			start  			=> [-50,1],	
 			clockabs		=> 400,                  #ca 400us
 			format 			=> 'twostate',	  		
 			preamble		=> 'u21#',				# prepend to converted message	
@@ -452,7 +441,7 @@ my %ProtocolListSIGNALduino  = (
 			#clientmodule    => '',   				# not used now
 			#modulematch     => '',  				# not used now
 			length_min      => '40',
-			#length_max      => '',				# must be tested
+			#length_max      => '',				    # must be tested
 
 		},
 	"23" => # Pearl Sensor
@@ -477,7 +466,6 @@ my %ProtocolListSIGNALduino  = (
 			id          	=> '24',
 			one				=> [1,-3],
 			zero			=> [3,-1],
-			#sync			=> [1,-3],				
 			clockabs		=> 150,                  #ca 150us
 			format 			=> 'twostate',	  		
 			preamble		=> 'u24#',				# prepend to converted message	
@@ -574,7 +562,7 @@ my %ProtocolListSIGNALduino  = (
 			start			=> [-33,1],				# Message is not provided as MS, worakround is start
 			clockabs		=> 300,                 # ca 300 us
 			format 			=> 'twostate',	  		# there is a pause puls between words
-			preamble		=> 'u30#',				# prepend to converted message	
+			preamble		=> 'i',				# prepend to converted message	
 			#clientmodule    => '',   				# not used now
 			#modulematch     => '',  				# not used now
 			length_min      => '12',
@@ -1779,14 +1767,15 @@ sub SIGNALduino_Parse_MU($$$$@)
 				if (!exists $patternLookupHash{$sig_str} || $i+$signal_width>length($rawData))  ## Dispatch if last signal or unknown data
 				{
 					Debug "$name: demodulated message raw (@bit_msg), ".@bit_msg." bits\n" if ($debug);;
+					#Check converted message against lengths 
+					$valid = $valid && $ProtocolListSIGNALduino{$id}{length_max} >= scalar @bit_msg  if (defined($ProtocolListSIGNALduino{$id}{length_max}));					
+					$valid = $valid && $ProtocolListSIGNALduino{$id}{length_min} <= scalar @bit_msg  if (defined($ProtocolListSIGNALduino{$id}{length_min})); 
+
 					while (scalar @bit_msg % $padwith > 0)  ## will pad up full nibbles per default or full byte if specified in protocol
 					{
 						push(@bit_msg,'0');
 						Debug "$name: padding 0 bit to bit_msg array" if ($debug);
 					}
-					#Check converted message against lengths #Todo: move length check before padding
-					$valid = $valid && $ProtocolListSIGNALduino{$id}{length_min} <= scalar @bit_msg  if (defined($ProtocolListSIGNALduino{$id}{length_min})); 
-					$valid = $valid && $ProtocolListSIGNALduino{$id}{length_max} >= scalar @bit_msg  if (defined($ProtocolListSIGNALduino{$id}{length_max}));					
 					
 					#next if (!$valid);  ## Last chance to try next protocol if there is somethin invalid
 					if ($valid) {
