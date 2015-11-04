@@ -539,10 +539,10 @@ my %ProtocolListSIGNALduino  = (
 		{
             name			=> 'HT12e remote',	
 			id          	=> '29',
-			one				=> [2,-2],
-			zero			=> [1,-2],
-			float           => [1,-1],	
-			start			=> [1,-38],				# Message is not provided as MS, worakround is start
+			one				=> [-2,1],
+			zero			=> [-1,2],
+			#float          => [1,-1],	
+			start			=> [-38,1],				# Message is not provided as MS, worakround is start
 			clockabs		=> 220,                 #ca 220
 			format 			=> 'tristate',	  		# there is a pause puls between words
 			preamble		=> 'u29#',				# prepend to converted message	
