@@ -1400,10 +1400,11 @@ sub SIGNALduno_Dispatch($$$)
 		$hash->{MSGCNT}++;
 		$hash->{TIME} = time();
 		$hash->{DMSG} = $dmsg;
-		readingsSingleUpdate($hash, "state", $hash->{READINGS}{state}{VAL}, 0);
+		readingsSingleUpdate($hash, "state", $hash->{READINGS}{state}{VAL}, 1);
 		$hash->{RAWMSG} = $rmsg;
 		my %addvals = (RAWMSG => $rmsg, DMSG => $dmsg);
 		Dispatch($hash, $dmsg, \%addvals);  ## Dispatch to other Modules 
+		
 	}	else {
 		Log3 $name, 4, "Dropped ($dmsg) due to short time or equal msg";
 	}	
