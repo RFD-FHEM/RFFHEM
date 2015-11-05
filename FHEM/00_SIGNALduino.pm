@@ -1633,10 +1633,6 @@ sub SIGNALduino_Parse_MU($$$$@)
 		## Find matching protocols
 		my $id;
 		foreach $id (@{$hash->{muIdList}}) {
-		
-			# wird dies benoetigt? Es gibt in der ProtocolListSIGNALduino keine undefinierten clockabs
-			next if (!defined($ProtocolListSIGNALduino{$id}{clockabs}));
-			
 			
 			my $valid=1;
 			my $clockabs= $ProtocolListSIGNALduino{$id}{clockabs};
@@ -1893,27 +1889,19 @@ SIGNALduino_Parse($$$$@)
 		Log3 $name, 3, "You are using an outdated version of signalduino code on your arduino. Please update";
 		return undef;
 	}
-	if ($rmsg=~ m/^MS;(P\d=-?\d+;){4,7}D=\d+;CP=\d;SP=\d;/) 
+	if (@{$hash->{msIdList}} && $rmsg=~ m/^MS;(P\d=-?\d+;){4,7}D=\d+;CP=\d;SP=\d;/) 
 	{
-		if(@{$hash->{msIdList}}) {
-			$dispatched= SIGNALduino_Parse_MS($hash, $iohash, $name, $rmsg,%signal_parts);
-		}
+		$dispatched= SIGNALduino_Parse_MS($hash, $iohash, $name, $rmsg,%signal_parts);
 	}
-
 	# Message unsynced type   -> MU
-  	elsif ($rmsg=~ m/^MU;(P\d=-?\d+;){4,7}D=\d+;CP=\d;/)
+  	elsif (@{$hash->{muIdList}} && $rmsg=~ m/^MU;(P\d=-?\d+;){4,7}D=\d+;CP=\d;/)
 	{
-		if(@{$hash->{muIdList}}) {
-			$dispatched=  SIGNALduino_Parse_MU($hash, $iohash, $name, $rmsg,%signal_parts);
-		}
+		$dispatched=  SIGNALduino_Parse_MU($hash, $iohash, $name, $rmsg,%signal_parts);
 	}
 	# Manchester encoded Data   -> MC
-  	elsif ($rmsg=~ m/^MC;.*;/) 
+  	elsif (@{$hash->{mcIdList}} && $rmsg=~ m/^MC;.*;/) 
 	{
-		#return SIGNALduino_Parse_MC($hash, $iohash, $name, $rmsg,@msg_parts);		
-		if(@{$hash->{mcIdList}}) {
-			$dispatched=  SIGNALduino_Parse_MC($hash, $iohash, $name, $rmsg,%signal_parts);		   
-		}
+		$dispatched=  SIGNALduino_Parse_MC($hash, $iohash, $name, $rmsg,%signal_parts);
 	}
 	else {
 		Debug "$name: unknown Messageformat, aborting\n" if ($debug);
@@ -2067,7 +2055,7 @@ sub SIGNALduino_IdList($$$)
 		{
 			push (@msIdList, $id);
 		}
-		else
+		elsif (defined($ProtocolListSIGNALduino{$id}{clockabs}))
 		{
 			push (@muIdList, $id);
 		}
