@@ -268,6 +268,7 @@ sub SD_WS07_Attr(@)
     <li>Eurochon EAS800z</li>
     <li>Technoline WS6750/TX70DTH</li>
     <li>TFA 30320902</li>
+    <li>FreeTec Außenmodul für Wetterstation NC-7344</li>
   </ul>
   <br>
   Neu empfangene Sensoren werden in FHEM per autocreate angelegt.

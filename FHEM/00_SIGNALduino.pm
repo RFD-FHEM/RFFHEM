@@ -536,7 +536,7 @@ my %ProtocolListSIGNALduino  = (
 			length_min      => '8',
 			length_max      => '8',				
 		},
-	"29" => # some remote code, send by flamingo style remote controls
+	"29" => # 
 		{
             name			=> 'HT12e remote',	
 			id          	=> '29',
@@ -552,7 +552,7 @@ my %ProtocolListSIGNALduino  = (
 			length_min      => '10',
 			length_max      => '12',				# message has only 10 bit but is paddet to 12
 		},
-	"30" => # a unitec remote door switch
+	"30" => # a unitec remote door reed switch
 		{
             name			=> 'unitec47031',	
 			id          	=> '30',
