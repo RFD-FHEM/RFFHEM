@@ -226,8 +226,8 @@ my %ProtocolListSIGNALduino  = (
 			preamble		=> 'TX',		# prepend to converted message	
 			clientmodule    => 'ittx',   	# not used now
 			modulematch     => '^TX......', # not used now
-			length_min      => '44',
-			length_max      => '45',
+			length_min      => '43',
+			length_max      => '44',
 			remove_zero     => 1,           # Removes leading zeros from output
 
 		}, 	
