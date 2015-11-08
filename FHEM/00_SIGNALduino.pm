@@ -113,6 +113,7 @@ my %ProtocolListSIGNALduino  = (
 			postamble		=> '',					# Append to converted message	 	
 			clientmodule    => 'SIGNALduino_RSL',   # not used now
 			modulematch     => '^r[A-Fa-f0-9]+', 	# not used now
+			length_min      => '12',
         },
 
     "2"    => 
@@ -1303,7 +1304,7 @@ sub SIGNALduno_Dispatch($$$)
 		$hash->{MSGCNT}++;
 		$hash->{TIME} = time();
 		$hash->{DMSG} = $dmsg;
-		readingsSingleUpdate($hash, "state", $hash->{READINGS}{state}{VAL}, 0);
+		readingsSingleUpdate($hash, "state", $hash->{READINGS}{state}{VAL}, 1);
 		$hash->{RAWMSG} = $rmsg;
 		my %addvals = (RAWMSG => $rmsg, DMSG => $dmsg);
 		Dispatch($hash, $dmsg, \%addvals);  ## Dispatch to other Modules 
