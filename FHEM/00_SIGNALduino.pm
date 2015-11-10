@@ -567,6 +567,23 @@ my %ProtocolListSIGNALduino  = (
 			length_min      => '12',
 			length_max      => '12',				# message has only 10 bit but is paddet to 12
 		},
+	"31" => # Pollin Isotronic
+		{
+            name			=> 'pollin isotronic',	
+			id          	=> '31',
+			one				=> [-1,2],
+			zero			=> [-2,1],
+			start			=> [-26,1],				
+			clockabs		=> 600,                  #ca 200us
+			format 			=> 'twostate',	  		
+			preamble		=> 'u31#',				# prepend to converted message	
+			#clientmodule    => '',   				# not used now
+			#modulematch     => '',  				# not used now
+			length_min      => '20',
+			length_max      => '22',				
+
+		},
+
 );
 
 
