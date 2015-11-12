@@ -1,5 +1,6 @@
-SIGNALduino - FHEM Modules rel 3.2 (Development branch WS-0101, TFA 30.3189 (wh1080) 868MHz OOK/ASK
+SIGNALduino - FHEM Modules rel 3.2 (Development branch WS-0101, TFA 30.3189 (wh1080) 868MHz OOK/ASK 
 Epmfänger RX868SH-DV elv (CTW600 ??)
+
 ======
 
 Counterpart of SIGNALDuino uC, it's the code for FHEM to work with the data received from the uC
