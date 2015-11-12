@@ -1,4 +1,6 @@
-SIGNALduino - FHEM Modules rel 3.2 (Development branch for CTW600 and wh1080
+SIGNALduino - FHEM Modules rel 3.2 (Development branch WS-0101, TFA 30.3189 (wh1080) 868MHz OOK/ASK
+Epmfänger RX868SH-DV elv 
+(CTW600 ??)
 ======
 
 Counterpart of SIGNALDuino uC, it's the code for FHEM to work with the data received from the uC
@@ -26,7 +28,7 @@ How to install
 ======
 The Perl modules can be loaded directly into your FHEM installation:
 
-```update all https://raw.githubusercontent.com/RFD-FHEM/RFFHEM/dev-rawIn/controls_signalduino.txt```
+```update all https://raw.githubusercontent.com/RFD-FHEM/RFFHEM/dev-proto9/controls_signalduino.txt```
 
 Prepare your Arduino nano. Look at http://www.fhemwiki.de/wiki/Datei:Fhemduino_schematic.png
 for hardware setup.
