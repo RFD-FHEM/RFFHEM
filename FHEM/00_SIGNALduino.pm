@@ -66,19 +66,21 @@ my $clientsSIGNALduino = ":IT:"
 						."SIGNALduino_un:"
 						."Hideki:"
 						."SD_WS07:"
+						."SD_WS09:"
 						; 
 
 ## default regex match List for dispatching message to logical modules, can be updated during runtime because it is referenced
 my %matchListSIGNALduino = (
      "1:IT"            			=> "^i......",	  				  # Intertechno Format
      "2:CUL_TCM97001"      		=> "^s[A-Fa-f0-9]+",			  # Any hex string		beginning with s
-	 "3:SIGNALduino_RSL"		=> "^rA-Fa-f0-9]+",				  # Any hex string		beginning with r
+     "3:SIGNALduino_RSL"		=> "^rA-Fa-f0-9]+",				  # Any hex string		beginning with r
      "5:CUL_TX"               	=> "^TX..........",         	  # Need TX to avoid FHTTK
-	 "6:SD_AS"       			=> "^P2#[A-Fa-f0-9]{7,8}", 		  # Arduino based Sensors, should not be default
+     "6:SD_AS"       			=> "^P2#[A-Fa-f0-9]{7,8}", 		  # Arduino based Sensors, should not be default
      "4:OREGON"            		=> "^(3[8-9A-F]|[4-6][0-9A-F]|7[0-8]).*",		
-	 "7:Hideki"					=> "^P12#75[A-F0-9]",
-	 "10:SD_WS07"				=> "^P7#[A-Fa-f0-9]{6}F[A-Fa-f0-9]{2}",
-	 "X:SIGNALduino_un"			=> '^[uP]\d+#.*',                       
+     "7:Hideki"					=> "^P12#75[A-F0-9]",
+     "10:SD_WS07"				=> "^P7#[A-Fa-f0-9]{6}F[A-Fa-f0-9]{2}",
+     "11:SD_WS09"				=> "^u9#[A-Fa-f0-9]",
+     "X:SIGNALduino_un"			=> '^[uP]\d+#.*',                       
 );
 
 
@@ -2007,8 +2009,8 @@ sub	SIGNALduino_Hideki()
 	{
 		Debug "$name: Hideki protocol detected \n" if ($debug);
 
-		# Todo: Mindest Länge für startpunkt vorspringen 
-		# Todo: Wiederholung auch an das Modul weitergeben, damit es dort geprüft werden kann
+		# Todo: Mindest LÃ¤nge fÃ¼r startpunkt vorspringen 
+		# Todo: Wiederholung auch an das Modul weitergeben, damit es dort geprÃ¼ft werden kann
 		my $message_end = index($bitData,"10101110",$message_start+18); # pruefen auf ein zweites 0x75,  mindestens 18 bit nach 1. 0x75
         $message_end = length($bitData) if ($message_end == -1);
         my $message_length = $message_end - $message_start;

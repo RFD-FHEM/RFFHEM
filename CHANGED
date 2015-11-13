@@ -1,3 +1,6 @@
+12.11.2015
+ - Addes 14_SD_WS09.pm Module for wh1080 (WS-0101, TFA30.3189) 868MHz OOK/ASK
+ 
 26.10.2014
  - Firmware Update 3.1.8-HF1 due to a bug in the raw send option
  23.10.2015
@@ -132,7 +135,7 @@
 - Updated HEX files for Arduino, due to broken sync detection for pt2262 and similar
 
 13.04.2015
-- Unterstützung für Empfang von Conrad RSL Protokoll aufgenommen, senden geht noch nicht!
+- UnterstÃ¼tzung fÃ¼r Empfang von Conrad RSL Protokoll aufgenommen, senden geht noch nicht!
 
 08.04.2015
 - Initial Version of SIGNALduino. It supports IT V1 devices an Devices defined in logical Module CUL_TCM97001 and produces a lot of debug output
