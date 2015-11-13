@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm  72788 2015-10-26  v3.2-dev
+# $Id: 00_SIGNALduino.pm  72788 2015-11-13  v3.2-dev
 # The file is taken from the FHEMduino project and modified in serval ways for processing the incomming messages
 # see http://www.fhemwiki.de/wiki/SIGNALDuino
 # It was modified also to provide support for raw message handling which it's send from the SIGNALduino
@@ -152,21 +152,20 @@ my %ProtocolListSIGNALduino  = (
 			},
     "4"    => 
         {
-            name			=> 'itv3',	
+            name			=> 'arctech2',	
 			id          	=> '4',
-			one				=> [3,-1],
-			zero			=> [1,-3],
+			one				=> [1,-5,1,-1],  
+			zero			=> [1,-1,1,-5],  
 			#float			=> [-1,3],		# not full supported now, for later use
-			sync			=> [1,-30],
+			sync			=> [1,-14],
 			clockabs     	=> -1,			# -1 = auto
-			format 			=> 'tristate',	# tristate can't be migrated from bin into hex!
+			format 			=> 'twostate',	# tristate can't be migrated from bin into hex!
 			preamble		=> 'i',			# Append to converted message	
+			postamble		=> '00',		# Append to converted message	 	
 			clientmodule    => 'IT',   		# not used now
 			modulematch     => '^i......',  # not used now
-			length_min      => '68',
+			length_min      => '32',
 			#length_max      => '76',		# Don't know maximal lenth of a valid message
-
-
 		},
     "5"    => 			## Similar protocol as intertechno, but without sync
         {
@@ -349,21 +348,22 @@ my %ProtocolListSIGNALduino  = (
 			length_min      => '30',
 			length_max      => '40',
 		}, 	
-	#"17" => # nothing known about this MS;P0=-506;P1=444;P2=12860;P3=-8923;P4=-1041;P5=12838;P6=1371;D=13101010101014141410101010101010101010101010101010101010101010101012;CP=1;SP=3;
-	#	{
-    #       name			=> 'unknown17',	
-	#		id          	=> '17',
-	#		one				=> [1,-2],
-	#		zero			=> [1,-1],
-	#		sync			=> [1,-22],	# footer [1,-50]			
-	#		clockabs		=> 400,
-	#		format 			=> 'twostate',	  		
-	#		preamble		=> 'u17#',				# prepend to converted message	
-	#		#clientmodule    => '',   				# not used now
-	#		#modulematch     => '',  				# not used now
-	#		length_min      => '30',
-	#		#length_max      => '38',
-	#	}, 	
+    "17"    => 
+        {
+            name			=> 'arctech',	
+			id          	=> '4',
+			one				=> [1,-5,1,-1],  
+			zero			=> [1,-1,1,-5],  
+			sync			=> [1,-10],
+			clockabs     	=> -1,			# -1 = auto
+			format 			=> 'twostate',	# tristate can't be migrated from bin into hex!
+			preamble		=> 'i',			# Append to converted message	
+			postamble		=> '00',		# Append to converted message	 	
+			clientmodule    => 'IT',   		# not used now
+			modulematch     => '^i......',  # not used now
+			length_min      => '32',
+			#length_max      => '76',		# Don't know maximal lenth of a valid message
+		},
 	
 	"18"    => 			## Oregon Scientific v1
 		{
