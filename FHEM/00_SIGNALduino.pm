@@ -574,7 +574,7 @@ my %ProtocolListSIGNALduino  = (
 			one				=> [-1,2],
 			zero			=> [-2,1],
 			start			=> [-26,1],				
-			clockabs		=> 600,                  #ca 200us
+			clockabs		=> 600,                  
 			format 			=> 'twostate',	  		
 			preamble		=> 'u31#',				# prepend to converted message	
 			#clientmodule    => '',   				# not used now
@@ -583,7 +583,21 @@ my %ProtocolListSIGNALduino  = (
 			length_max      => '22',				
 
 		},
-
+	"32" => #FreeTec PE-6946 -> http://www.free-tec.de/Funkklingel-mit-Voic-PE-6946-919.shtml
+    	{   
+            name			=> 'freetec 6946',	
+			id          	=> '32',
+			one				=> [4,-2],
+			zero			=> [1,-4],
+			sync			=> [1,-43],				
+			clockabs		=> 150,                 #ca 150us
+			format 			=> 'twostate',	  		
+			preamble		=> 'u32#',				# prepend to converted message	
+			#clientmodule    => '',   				# not used now
+			#modulematch     => '',  				# not used now
+			length_min      => '24',
+			length_max      => '24',				
+    	},
 );
 
 
@@ -2083,10 +2097,10 @@ sub SIGNALduino_IdList($$$)
 		if ($wflag == 1 && !defined($WhitelistIDs{$id}))
 		{
 			#Log3 $name, 3, "skip ID $id";
-                	next;
+            next;
 		}		
 		
-		if (defined($ProtocolListSIGNALduino{$id}{format}) && $ProtocolListSIGNALduino{$id}{format} eq "manchester")
+		if (exists ($ProtocolListSIGNALduino{$id}{format}) && $ProtocolListSIGNALduino{$id}{format} eq "manchester")
 		{
 			push (@mcIdList, $id);
 		} 
@@ -2094,7 +2108,7 @@ sub SIGNALduino_IdList($$$)
 		{
 			push (@msIdList, $id);
 		}
-		elsif (defined($ProtocolListSIGNALduino{$id}{clockabs}))
+		elsif (exists ($ProtocolListSIGNALduino{$id}{clockabs}))
 		{
 			push (@muIdList, $id);
 		}
@@ -2106,11 +2120,11 @@ sub SIGNALduino_IdList($$$)
 
 	Log3 $name, 3, "$name IDlist MS @msIdList";
 	Log3 $name, 3, "$name IDlist MU @muIdList";
-        Log3 $name, 3, "$name IDlist MC @mcIdList";
+    Log3 $name, 3, "$name IDlist MC @mcIdList";
 	
 	$hash->{msIdList} = \@msIdList;
-        $hash->{muIdList} = \@muIdList;
-        $hash->{mcIdList} = \@mcIdList;
+    $hash->{muIdList} = \@muIdList;
+    $hash->{mcIdList} = \@mcIdList;
 }
 
 
