@@ -218,19 +218,19 @@ SIGNALduino_un_Parse($$)
 	{
 		Log3 $hash, 4, "$name / shutter Dooya $bitData received";
 		
-		
-		my $id = oct("0b".substr($bitData,0,29));
-		my $channel = oct("0b".substr($bitData,29,3));
+		Log3 $hash,4, substr($bitData,0,28)." ".substr($bitData,28,8)." ".substr($bitData,36,4);
+		my $id = oct("0b".substr($bitData,0,28));
+		my $channel = oct("0b".substr($bitData,28,8));
 		
 		my $all = ($channel == 0) ? 1 : 0;
- 	    my $commandcode = oct("0b".substr($bitData,33,4));
+ 	    my $commandcode = oct("0b".substr($bitData,36,4));
  	    my $direction="";
  	    
- 	    if ($commandcode == 0b001) {$direction="up";}
- 	    elsif ($commandcode == 0b011) {$direction="down";}
-  	    elsif ($commandcode == 0b101) {$direction="stop";}
+ 	    if ($commandcode == 0b0001) {$direction="up";}
+ 	    elsif ($commandcode == 0b0011) {$direction="down";}
+  	    elsif ($commandcode == 0b0101) {$direction="stop";}
+  	    elsif ($commandcode == 0b1100) {$direction="stop";}
 		else  { $direction="unknown";}
- 	    
 		Log3 $hash, 4, "$name found shutter from Dooya. id=$id, channel=$channel, direction=$direction, all_shutters=$all";
 	} 
 	elsif ($protocol == "21" && length($bitData)>=32)  ##Einhell doorshutter

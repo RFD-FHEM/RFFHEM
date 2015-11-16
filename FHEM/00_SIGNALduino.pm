@@ -338,14 +338,15 @@ my %ProtocolListSIGNALduino  = (
 		{
             name			=> 'Dooya shutter',	
 			id          	=> '16',
-			one				=> [-3,1],
-			zero			=> [1,-3],
-			clockabs		=> 250,
+			one				=> [2,-1],
+			zero			=> [1,-2],
+			start           => [16,-5],
+			clockabs		=> 300,
 			format 			=> 'twostate',	  		
 			preamble		=> 'u16#',				# prepend to converted message	
 			#clientmodule    => '',   				# not used now
 			#modulematch     => '',  				# not used now
-			length_min      => '30',
+			length_min      => '36',
 			length_max      => '40',
 		}, 	
     "17"    => 
