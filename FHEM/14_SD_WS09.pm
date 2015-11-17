@@ -1,6 +1,6 @@
 ##############################################
 ##############################################
-# $Id: 14_SD_WS09.pm 1000  2015-11-11 $
+# $Id: 14_SD_WS09.pm 1017  2015-11-17 $
 # 
 # The purpose of this module is to support serval 
 # weather sensors like WS-0101  (Sender 868MHz ASK   Epmfänger RX868SH-DV elv)
@@ -75,41 +75,71 @@ SD_WS09_Parse($$)
   my $name = $iohash->{NAME};
   my (undef ,$rawData) = split("#",$msg);
   my @winddir_name=("N","NNE","NE","ENE","E","ESE","SE","SSE","S","SSW","SW","WSW","W","WNW","NW","NNW");
-  my $model = "WH1080";
+  my $model = "undef";  # 1001 -> 9=WS0101  1010 -> A=WH1080 
   my $windGust = 0;
+  my $windSpeed = 0;
+  my $windguest =0;
   my $hlen = length($rawData);
   my $blen = $hlen * 4;
   my $bitData = unpack("B$blen", pack("H$hlen", $rawData)); 
-  
+  my $rain = 0;
+  my $deviceCode = 0;
 
   Log3 $name, 4, "SD_WS09_Parse HEX=$msg length: $hlen";
   my $syncpos= index($bitData,"11111110");  #7x1 1x0 preamble
 	Log3 $iohash, 3, "SD_WS09_Parse Bin=$bitData syncp=$syncpos length:".length($bitData) ;
-  
   	
-		if ($syncpos ==-1 || length($bitData)-$syncpos < 68) 
+		if ($syncpos ==-1 || length($bitData)-$syncpos < 78) 
 		{
 			Log3 $iohash, 3, "EXIT SD_WS09_Parse msg=$rawData syncp=$syncpos length:".length($bitData) ;
 			return undef;
 		}
-        
-		my $sensdata = substr($bitData,$syncpos+8);
-    Log3 $iohash, 3, "SD_WS09_Parse Bin-Sync=$sensdata syncp=$syncpos length:".length($sensdata) ;
     
+		my $sensdata = substr($bitData,$syncpos+8);
+    my $modelid = substr($sensdata,0,4);
+    Log3 $iohash, 3, "SD_WS09_Parse Id: ".$modelid." Bin-Sync=$sensdata syncp=$syncpos length:".length($sensdata) ;
+ 
     my $bat = SD_WS09_bin2dec((substr($sensdata,0,3))) ;
     my $id = SD_WS09_bin2dec(substr($sensdata,4,6));
     my $temp = (SD_WS09_bin2dec(substr($sensdata,12,10)) - 400)/10;
 		my $hum = SD_WS09_bin2dec(substr($sensdata,22,8));
-    
-		my $windSpeed =  nearest(0.01,SD_WS09_bin2dec(substr($sensdata,30,16))/240);
-		my $rain =  nearest(0.01,SD_WS09_bin2dec(substr($sensdata,46,16)) * 0.6);	
     my $windDirection = SD_WS09_bin2dec(substr($sensdata,66,4));  
     my $windDirectionText = $winddir_name[$windDirection];
-    		
-		Log3 $iohash, 3, "SD_WS09_Parse $name : $syncpos : $sensdata id:$id bat:$bat, temp=$temp, hum=$hum, winddir=$windDirection:$windDirectionText wind=$windSpeed, rain=$rain";
     
-    my $deviceCode=$model."_".$id;
     
+    if ($modelid == "1001"){     # WS-0101 
+    $model = "WS0101";
+    $windSpeed =  nearest(0.1,SD_WS09_bin2dec(substr($sensdata,30,8)) *0.34);
+    Log3 $iohash, 3, "SD_WS09_Parse ".$model." Windspeed bit: ".substr($sensdata,30,8)." Dec: " . $windSpeed ;
+    $windguest = nearest(0.1,SD_WS09_bin2dec(substr($sensdata,38,8)) *0.34);;
+    Log3 $iohash, 3, "SD_WS09_Parse ".$model." Windguest bit: ".substr($sensdata,38,8)." Dec: " . $windguest ;
+		$rain =  nearest(0.1,SD_WS09_bin2dec(substr($sensdata,52,12)) * 0.6);	
+    Log3 $iohash, 3, "SD_WS09_Parse ".$model." Rain bit: ".substr($sensdata,52,12)." Dec: " . $rain ;
+    
+     } else { 
+    
+    $model = "WH1080";
+    $windSpeed =  SD_WS09_bin2dec(substr($sensdata,30,16))/240;
+    Log3 $iohash, 3, "SD_WS09_Parse ".$model." Windspeed bit: ".substr($sensdata,30,16)." Dec: " . $windSpeed ;
+		#my $rain =  nearest(0.01,SD_WS09_bin2dec(substr($sensdata,46,16)) * 0.6);	
+    $rain =  SD_WS09_bin2dec(substr($sensdata,46,12)) * 0.3;
+    Log3 $iohash, 3, "SD_WS09_Parse ".$model." Rain bit: ".substr($sensdata,52,12)." Dec: " . $rain ;
+    }
+    
+    Log3 $iohash, 3, "SD_WS09_Parse ".$model." id:$id :$sensdata ";
+    Log3 $iohash, 3, "SD_WS09_Parse ".$model." id:$id, bat:$bat, temp=$temp, hum=$hum, winddir=$windDirection:$windDirectionText wind=$windSpeed, rain=$rain";
+   
+   my $longids = AttrVal($iohash->{NAME},'longids',0);
+	if ( ($longids != 0) && ($longids eq "1" || $longids eq "ALL" || (",$longids," =~ m/,$model,/)))
+	{
+	 $deviceCode=$model."_".$id;
+ 		Log3 $iohash,4, "$name using longid: $longids model: $model";
+	} else {
+		$deviceCode = $model;
+	}
+   
+   
+   
     my $def = $modules{SD_WS09}{defptr}{$iohash->{NAME} . "." . $deviceCode};
     $def = $modules{SD_WS09}{defptr}{$deviceCode} if(!$def);
 
@@ -117,8 +147,6 @@ SD_WS09_Parse($$)
 		Log3 $iohash, 1, 'SD_WS09: UNDEFINED sensor ' . $model . ' detected, code ' . $deviceCode;
 		return "UNDEFINED $deviceCode SD_WS09 $deviceCode";
     }
-       
-	
 	
 	my $hash = $def;
 	$name = $hash->{NAME};
@@ -137,7 +165,7 @@ SD_WS09_Parse($$)
 	$def->{lastMSG} = $rawData;
 	#$def->{bitMSG} = $bitData2; 
 
-    my $state = "T: $temp". ($hum>0 ? " H: $hum":"")." W: $windSpeed"." Dir: $windDirectionText" ;
+    my $state = "T: $temp". ($hum>0 ? " H: $hum":"")." wS: $windSpeed"." wG: $windguest"." wD: $windDirectionText" ;
    # my $state = "T: $temp". ($hum>0 ? " H: $hum":"");
     
     readingsBeginUpdate($hash);
@@ -149,7 +177,7 @@ SD_WS09_Parse($$)
     
     #zusätzlich Daten für Wetterstation
     readingsBulkUpdate($hash, "rain", $rain );
-    readingsBulkUpdate($hash, "windGust", $windGust );
+    readingsBulkUpdate($hash, "windGust", $windguest );
     readingsBulkUpdate($hash, "windSpeed", $windSpeed );
     readingsBulkUpdate($hash, "windDirectionDegree", $windDirection );
     readingsBulkUpdate($hash, "windDirectionText", $windDirectionText );
@@ -204,14 +232,14 @@ SD_WS09_binflip($)
 =begin html
 
 <a name="SD_WS09"></a>
-<h3>Wether Sensors protocol #7</h3>
+<h3>Wether Sensors protocol #9</h3>
 <ul>
   The SD_WS09 module interprets temperature sensor messages received by a Device like CUL, CUN, SIGNALduino etc.<br>
   <br>
   <b>Known models:</b>
   <ul>
-    <li>WS-0101</li>
-    <li>TFA 30.3189 / WH1080 </li>
+    <li>WS-0101              --> Model: WS0101</li>
+    <li>TFA 30.3189 / WH1080 --> Model: WH1080</li>
   </ul>
   <br>
   New received device are add in fhem with autocreate.
@@ -220,21 +248,21 @@ SD_WS09_binflip($)
   <a name="SD_WS09_Define"></a>
   <b>Define</b> 
   <ul>The received devices created automatically.<br>
-  The ID of the defice is the cannel or, if the longid attribute is specified, it is a combination of channel and some random generated bits at powering the sensor and the channel.<br>
-  If you want to use more sensors, than channels available, you can use the longid option to differentiate them.
+  The ID of the defice is the model or, if the longid attribute is specified, it is a combination of model and some random generated bits at powering the sensor.<br>
+  If you want to use more sensors, you can use the longid option to differentiate them.
   </ul>
   <br>
   <a name="SD_WS09 Events"></a>
   <b>Generated readings:</b>
   <br>Some devices may not support all readings, so they will not be presented<br>
   <ul>
-  	 <li>State (T: H: W: Dir: )</li>
+  	 <li>State (T: H: wS: wG: wD: )  temperature,humidity,windSpeed,windGuest,windDirection</li>
      <li>Temperature (&deg;C)</li>
      <li>Humidity: (The humidity (1-100 if available)</li>
      <li>Battery: (low or ok)</li>
      <li>ID: (The ID-Number (number if)</li>
-     <li>Wind speed (km/h) and direction (N-O-S-W)</li>
-     <li>Rain (mm/m²)</li>
+     <li>Wind speed (m/s) and direction (N-O-S-W)</li>
+     <li>Rain (mm)</li>
   </ul>
   <br>
   <b>Attributes</b>
@@ -265,8 +293,8 @@ SD_WS09_binflip($)
   <br>
   <b>Unterstütze Modelle:</b>
   <ul>
-    <li>WS-0101</li>
-    <li>TFA 30.3189 / WH1080 </li>
+     <li>WS-0101             --> Model: WS0101</li>
+    <li>TFA 30.3189 / WH1080 --> Model: WH1080</li>
   </ul>
   <br>
   Neu empfangene Sensoren werden in FHEM per autocreate angelegt.
@@ -281,13 +309,13 @@ SD_WS09_binflip($)
   <a name="SD_WS09 Events"></a>
   <b>Generierte Readings:</b>
   <ul>
-  	 <li>State (T: H: W: Dir: )</li>
+  	   	 <li>State (T: H: wS: wG: wD: )  temperature,humidity,windSpeed,windGuest,windDirection</li>
      <li>Temperature (&deg;C)</li>
      <li>Humidity: (The humidity (1-100 if available)</li>
      <li>Battery: (low or ok)</li>
      <li>ID: (The ID-Number (number if)</li>
-     <li>Wind speed (km/h) and direction (N-O-S-W)</li>
-     <li>Rain (mm/m²)</li>
+     <li>Wind speed (m/s) and direction (N-O-S-W)</li>
+     <li>Rain (mm)</li>
   </ul>
   <br>
   <b>Attribute</b>
@@ -299,7 +327,7 @@ SD_WS09_binflip($)
     <li><a href="#readingFnAttributes">readingFnAttributes</a></li>
   </ul>
 
-  <a name="SD_WS091_Set"></a>
+  <a name="SD_WS09_Set"></a>
   <b>Set</b> <ul>N/A</ul><br>
 
   <a name="SD_WS09_Parse"></a>
