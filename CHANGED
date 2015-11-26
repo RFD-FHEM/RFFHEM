@@ -1,5 +1,10 @@
+26.11.2015
+ - WH1080 rain, battery, wind, temp , hum ok (auch WS-0101)
+ - DCF-77 Meldungen rausgefiltert
+ - Unterscheidung CTW600 und WH1080 (WH1080 getestet)
+ 
 12.11.2015
- - Addes 14_SD_WS09.pm Module for wh1080 (WS-0101, TFA30.3189) 868MHz OOK/ASK
+ - Addes 14_SD_WS09.pm Module for WH1080 (WS-0101, TFA30.3189) 868MHz OOK/ASK
  
 26.10.2014
  - Firmware Update 3.1.8-HF1 due to a bug in the raw send option
