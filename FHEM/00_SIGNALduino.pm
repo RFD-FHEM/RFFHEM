@@ -1433,7 +1433,11 @@ sub SIGNALduno_Dispatch($$$)
 		$hash->{MSGCNT}++;
 		$hash->{TIME} = time();
 		$hash->{DMSG} = $dmsg;
-		readingsSingleUpdate($hash, "state", $hash->{READINGS}{state}{VAL}, 1);
+		my $event = 0;
+		if (substr($dmsg,0,1) eq 'u') {
+			$event = 1;
+		}
+		readingsSingleUpdate($hash, "state", $hash->{READINGS}{state}{VAL}, $event);
 		$hash->{RAWMSG} = $rmsg;
 		my %addvals = (RAWMSG => $rmsg, DMSG => $dmsg);
 		Dispatch($hash, $dmsg, \%addvals);  ## Dispatch to other Modules 
@@ -1890,6 +1894,7 @@ SIGNALduino_Parse_MC($$$$@)
 		{
 			Debug "clock and min length matched"  if ($debug);
 
+			Log3 $name, 4, "Found manchester Protocol id $id clock $clock -> $ProtocolListSIGNALduino{$id}{name}";
 		   	my $method = $ProtocolListSIGNALduino{$id}{method};
 		    if (!exists &$method)
 			{
