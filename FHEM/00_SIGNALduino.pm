@@ -726,10 +726,8 @@ SIGNALduino_Set($@)
   	if ($clock  =~ /^\d+$/ ) {
   		$arg="ic$clock";
 	  	SIGNALduino_SimpleWrite($hash, $arg);
-	  	Log3 $name, 3, "Set - no value passed - setting ITClock to default ($clock)";
-	  	
-	  	#SIGNALduino_Get($hash,$hash->{NAME},"ITParms");
-	  	
+	  	Log3 $name, 4, "Set ITClock to $clock";
+	  		  	
   	} else {
   		return "argument $arg, is not numeric for set it base duration".$hash->{CMDS};
   	}
