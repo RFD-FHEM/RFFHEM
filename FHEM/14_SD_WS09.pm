@@ -10,7 +10,7 @@
     
     use strict;
     use warnings;
-    use Math::Round qw/nearest/;
+    #use Math::Round qw/nearest/;
     
     sub SD_WS09_Initialize($)
     {
@@ -105,7 +105,8 @@
          my $wh = substr($bitData,0,8);
          if($wh == "11111111") {
             $sensdata = substr($bitData,8);
-            if( substr($sensdata,0,4) == "1010"){ # A 
+            my $whid = substr($sensdata,0,4);
+            if(  $whid == "1010" ){ # A 
            	  Log3 $iohash, 3, "WH SD_WS09_Parse WH=$wh msg=$sensdata syncp=$syncpos length:".length($sensdata) ;
               $model = "WH1080";
               $id = SD_WS09_bin2dec(substr($sensdata,4,8));
@@ -114,15 +115,19 @@
     		      $hum = SD_WS09_bin2dec(substr($sensdata,24,8));
               $windDirection = SD_WS09_bin2dec(substr($sensdata,68,4));  
               $windDirectionText = $winddir_name[$windDirection];
-              $windSpeed =  nearest(0.1,SD_WS09_bin2dec(substr($sensdata,32,8)) *0.34);
+              #$windSpeed =  nearest(0.1,SD_WS09_bin2dec(substr($sensdata,32,8)) *0.34);
+              $windSpeed =  round((SD_WS09_bin2dec(substr($sensdata,32,8))* 34)/100,01);
               Log3 $iohash, 3, "SD_WS09_Parse ".$model." Windspeed bit: ".substr($sensdata,32,8)." Dec: " . $windSpeed ;
-              $windguest = nearest(0.1,SD_WS09_bin2dec(substr($sensdata,40,8)) *0.34);;
+              #$windguest = nearest(0.1,SD_WS09_bin2dec(substr($sensdata,40,8)) *0.34);;
+              $windguest = round((SD_WS09_bin2dec(substr($sensdata,40,8)) * 34)/100,01);
               Log3 $iohash, 3, "SD_WS09_Parse ".$model." Windguest bit: ".substr($sensdata,40,8)." Dec: " . $windguest ;
               $rain =  SD_WS09_bin2dec(substr($sensdata,56,8)) * 0.3;
               Log3 $iohash, 3, "SD_WS09_Parse ".$model." Rain bit: ".substr($sensdata,56,8)." Dec: " . $rain ;
             } else {
             
             #hrs mins secs
+            my $hrs1 = substr($sensdata,16,8);
+            Log3 $iohash, 3, "Zeitmeldung SD_WS09_Parse HRS1=$hrs1" ;
             $hrs = SD_WS09_BCD2bin(substr($sensdata,16,8) & 0x3F) ; #h
             $mins = SD_WS09_BCD2bin(substr($sensdata,24,8)); #m 
             $sec = SD_WS09_BCD2bin(substr($sensdata,32,8)); #s 
