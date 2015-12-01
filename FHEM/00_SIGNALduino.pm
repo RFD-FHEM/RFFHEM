@@ -114,6 +114,7 @@ my %ProtocolListSIGNALduino  = (
 			postamble		=> '',					# Append to converted message	 	
 			clientmodule    => 'SIGNALduino_RSL',   # not used now
 			#modulematch     => '^r[A-Fa-f0-9]+', 	# not used now
+			length_min => '12',
         },
 
     "2"    => 
@@ -249,9 +250,9 @@ my %ProtocolListSIGNALduino  = (
 		}, 	
 	"10"    => 			## Oregon Scientific 2
 			{
-            name			=> 'OSV2',	
+            name			=> 'OSV2o3',	
 			id          	=> '10',
-			clockrange     	=> [390,520],			# min , max
+			clockrange     	=> [300,520],			# min , max
 			format 			=> 'manchester',	    # tristate can't be migrated from bin into hex!
 			modulematch     => '^(3[8-9A-F]|[4-6][0-9A-F]|7[0-8]).*',
 			length_min      => '64',
@@ -464,8 +465,11 @@ my %ProtocolListSIGNALduino  = (
 		{
             name			=> 'visivon remote',	
 			id          	=> '24',
-			one				=> [1,-3],
+			one			=> [1,-3],
 			zero			=> [3,-1],
+			#one				=> [3,-2],
+			#zero			=> [1,-1],
+			#start           => [30,-1],
 			clockabs		=> 150,                  #ca 150us
 			format 			=> 'twostate',	  		
 			preamble		=> 'u24#',				# prepend to converted message	
@@ -1181,7 +1185,7 @@ SIGNALduino_Read($)
   my $name = $hash->{NAME};
 
   my $SIGNALduinodata = $hash->{PARTIAL};
-  Log3 $name, 5, "SIGNALduino/RAW READ: $SIGNALduinodata/$buf"; 
+  Log3 $name, 5, "SIGNALduino/RAW READ: $SIGNALduinodata/$buf" if ($debug); 
   $SIGNALduinodata .= $buf;
 
   while($SIGNALduinodata =~ m/\n/) {
@@ -1850,7 +1854,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 						$i-=$signal_width;
 					}
 					last if ($i <=-1);	
-					Log3 $name, 5, "restarting demodulation at Position $i+$signal_width";												
+					Log3 $name, 5, "restarting demodulation at Position $i+$signal_width" if ($debug);
 				
 				}
 			}
@@ -2138,17 +2142,21 @@ sub SIGNALduino_OSV2()
 {
 	my ($name,$bitData,$id) = @_;
 	
+	my $preamble_pos;
+	my $message_end;
+	my $message_length;
+	
 	if (index($bitData,"10011001",24) >= 24 and $bitData =~ m/^.?(10){12,16}/) 
 	{  # Valid OSV2 detected!	
 		
 		Debug "$name: OSV2 protocol detected \n" if ($debug);
-		my $preamble_pos=index($bitData,"10011001",24);
+		$preamble_pos=index($bitData,"10011001",24);
 		
 		return return (-1," sync not found") if ($preamble_pos <=24);
 		
-		my $message_end=index($bitData,"10011001",$preamble_pos+44);
-       	$message_end = length($bitData) if ($message_end == -1);
-		my $message_length = $message_end - $preamble_pos;
+		$message_end=index($bitData,"10011001",$preamble_pos+44);
+		$message_end = length($bitData) if ($message_end == -1);
+		$message_length = $message_end - $preamble_pos;
 
 		return (-1," message is to short") if (defined($ProtocolListSIGNALduino{$id}{length_min}) && $message_length < $ProtocolListSIGNALduino{$id}{length_min} );
 		return (-1," message is to long") if (defined($ProtocolListSIGNALduino{$id}{length_max}) && $message_length > $ProtocolListSIGNALduino{$id}{length_max} );
@@ -2169,7 +2177,7 @@ sub SIGNALduino_OSV2()
 
 			my $rvosv2byte="";
 			
-			for (my $p=1;$p<length($osv2byte);$p=$p+2)
+			for (my $p=0;$p<length($osv2byte);$p=$p+2)
 			{
 				$rvosv2byte = substr($osv2byte,$p,1).$rvosv2byte;
 			}
@@ -2181,7 +2189,43 @@ sub SIGNALduino_OSV2()
 		#$found=1;
 		#$dmsg=$osv2hex;
 		return (1,$osv2hex);
-	} 
+	}
+	elsif ($bitData =~ m/^.?(1){16,24}0101/)  {  # Valid OSV3 detected!	
+		$preamble_pos = index($bitData, '0101', 16);
+		$message_end = length($bitData);
+		$message_length = $message_end - $preamble_pos;
+		Log3 $name, 5, "$name: OSV3 protocol detected: preamble_pos = $preamble_pos, message_length = $message_length";
+		
+		my $idx=0;
+		my $osv3bits="";
+		my $osv3hex ="";
+		
+		for ($idx=$preamble_pos;$idx<length($bitData);$idx=$idx+4)
+		{
+			if (length($bitData)-$idx  < 4 )
+			{
+			  last;
+			}
+			my $osv3nibble = "";
+			$osv3nibble=NULL;
+			$osv3nibble=substr($bitData,$idx,4);
+
+			my $rvosv3nibble="";
+			
+			for (my $p=0;$p<length($osv3nibble);$p++)
+			{
+				$rvosv3nibble = substr($rvosv3nibble,$p,1).$rvosv3nibble;
+			}
+			$osv3hex=$osv3hex.sprintf('%02X', oct("0b$rvosv3nibble")) ;
+			$osv3bits = $osv3bits.$rvosv3nibble;
+		}
+		$osv3hex = sprintf("%02X", length($osv3hex)*4).$osv3hex;
+		Log3 $name, 5, "$name: OSV3 protocol converted to hex: ($osv3hex) with length (".(length($osv3hex)*4).") bits \n";
+		#$found=1;
+		#$dmsg=$osv2hex;
+		return (1,$osv3hex);
+		
+	}
 	return (-1,undef);
 }
 
