@@ -896,7 +896,8 @@ SIGNALduino_Get($@)
 
   if (IsDummy($name))
   {
-  	return SIGNALduino_Parse($hash, $hash, $hash->{NAME}, $arg);
+	Log3 $name, 4, "SIGNALduino/msg get raw: $arg";
+	return SIGNALduino_Parse($hash, $hash, $hash->{NAME}, $arg);
   }
   return "No $a[1] for dummies" if(IsDummy($name));
 
@@ -2181,7 +2182,7 @@ sub SIGNALduino_OSV2()
 			{
 				$rvosv2byte = substr($osv2byte,$p,1).$rvosv2byte;
 			}
-			$osv2hex=$osv2hex.sprintf('%02X', oct("0b$rvosv2byte")) ;
+			$osv2hex=$osv2hex.sprintf('%02X', oct("0b$rvosv2byte"));
 			$osv2bits = $osv2bits.$rvosv2byte;
 		}
 		$osv2hex = sprintf("%02X", length($osv2hex)*4).$osv2hex;
@@ -2197,7 +2198,7 @@ sub SIGNALduino_OSV2()
 		Log3 $name, 5, "$name: OSV3 protocol detected: preamble_pos = $preamble_pos, message_length = $message_length";
 		
 		my $idx=0;
-		my $osv3bits="";
+		#my $osv3bits="";
 		my $osv3hex ="";
 		
 		for ($idx=$preamble_pos;$idx<length($bitData);$idx=$idx+4)
@@ -2214,10 +2215,10 @@ sub SIGNALduino_OSV2()
 			
 			for (my $p=0;$p<length($osv3nibble);$p++)
 			{
-				$rvosv3nibble = substr($rvosv3nibble,$p,1).$rvosv3nibble;
+				$rvosv3nibble = substr($osv3nibble,$p,1).$rvosv3nibble;
 			}
-			$osv3hex=$osv3hex.sprintf('%02X', oct("0b$rvosv3nibble")) ;
-			$osv3bits = $osv3bits.$rvosv3nibble;
+			$osv3hex=$osv3hex.sprintf('%X', oct("0b$rvosv3nibble"));
+			#$osv3bits = $osv3bits.$rvosv3nibble;
 		}
 		$osv3hex = sprintf("%02X", length($osv3hex)*4).$osv3hex;
 		Log3 $name, 5, "$name: OSV3 protocol converted to hex: ($osv3hex) with length (".(length($osv3hex)*4).") bits \n";
@@ -2256,7 +2257,7 @@ sub	SIGNALduino_AS()
 		Debug "$name: AS protocol detected \n" if ($debug);
 		
 		my $message_end=index($bitData,"1100",$message_start+16);
-       	$message_end = length($bitData) if ($message_end == -1);
+		$message_end = length($bitData) if ($message_end == -1);
 		my $message_length = $message_end - $message_start;
 		
 		return (-1," message is to short") if (defined($ProtocolListSIGNALduino{$id}{length_min}) && $message_length < $ProtocolListSIGNALduino{$id}{length_min} );

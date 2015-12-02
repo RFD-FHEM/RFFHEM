@@ -81,7 +81,6 @@ SD_WS07_Parse($$)
   my $hlen = length($rawData);
   my $blen = $hlen * 4;
   my $bitData = unpack("B$blen", pack("H$hlen", $rawData)); 
-  
 
   Log3 $name, 4, "SD_WS07_Parse  $model ($msg) length: $hlen";
   
@@ -127,11 +126,8 @@ SD_WS07_Parse($$)
     }  
     $temp /= 10;
     
-<<<<<<< .mine
-    Log3 $iohash, 5, "$model decoded protocolid: 7 sensor id=$id, channel=$channel, temp=$temp, hum=$hum, bat=$bat" ;
-=======
-    Log3 $iohash, 4, "$model decoded protocolid: 7 sensor id=$id, channel=$channel, temp=$temp, hum=$hum, bat=$bat" ;
->>>>>>> .theirs
+    Log3 $iohash, 4, "$model decoded protocolid: 7 sensor id=$id, channel=$channel, temp=$temp, hum=$hum, bat=$bat";
+
     my $deviceCode;
     
 	my $longids = AttrVal($iohash->{NAME},'longids',0);
@@ -154,7 +150,6 @@ SD_WS07_Parse($$)
     }
         #Log3 $iohash, 3, 'SD_WS07: ' . $def->{NAME} . ' ' . $id;
 	
-	
 	my $hash = $def;
 	$name = $hash->{NAME};
 	Log3 $name, 4, "SD_WS07: $name ($rawData)";  
@@ -167,7 +162,6 @@ SD_WS07_Parse($$)
 		  	return "";
 		}
 	}
-
 
 	$def->{lastMSG} = $rawData;
 	$def->{bitMSG} = $bitData2; 
