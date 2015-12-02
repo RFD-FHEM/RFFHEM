@@ -2178,7 +2178,7 @@ sub SIGNALduino_OSV2()
 
 			my $rvosv2byte="";
 			
-			for (my $p=0;$p<length($osv2byte);$p=$p+2)
+			for (my $p=1;$p<length($osv2byte);$p=$p+2)
 			{
 				$rvosv2byte = substr($osv2byte,$p,1).$rvosv2byte;
 			}
