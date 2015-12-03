@@ -2193,14 +2193,14 @@ sub SIGNALduino_OSV2()
 	elsif ($bitData =~ m/^.?(1){16,24}0101/)  {  # Valid OSV3 detected!	
 		$preamble_pos = index($bitData, '0101', 16);
 		$message_end = length($bitData);
-		$message_length = $message_end - $preamble_pos;
+		$message_length = $message_end - ($preamble_pos+4);
 		Log3 $name, 5, "$name: OSV3 protocol detected: preamble_pos = $preamble_pos, message_length = $message_length";
 		
 		my $idx=0;
 		#my $osv3bits="";
 		my $osv3hex ="";
 		
-		for ($idx=$preamble_pos;$idx<length($bitData);$idx=$idx+4)
+		for ($idx=$preamble_pos+4;$idx<length($bitData);$idx=$idx+4)
 		{
 			if (length($bitData)-$idx  < 4 )
 			{
@@ -2219,6 +2219,20 @@ sub SIGNALduino_OSV2()
 			$osv3hex=$osv3hex.sprintf('%X', oct("0b$rvosv3nibble"));
 			#$osv3bits = $osv3bits.$rvosv3nibble;
 		}
+		# Check if nibble 1 is A
+		if (substr($osv3hex,1,1) !='A')
+		{
+			my $n1=substr($osv3hex,1,1);
+			substr($osv3hex,1,1,'A');  # nibble 1 = A
+			substr($osv3hex,3,1,$n1); # nibble 3 = nibble1
+		}
+		# Check for ending 00
+		if (substr($osv3hex,-2,2) == '00')
+		{
+			substr($osv3hex,1,-2);  # remove 00 at end
+		}
+
+		
 		$osv3hex = sprintf("%02X", length($osv3hex)*4).$osv3hex;
 		Log3 $name, 5, "$name: OSV3 protocol converted to hex: ($osv3hex) with length (".(length($osv3hex)*4).") bits \n";
 		#$found=1;
