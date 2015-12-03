@@ -469,7 +469,7 @@ my %ProtocolListSIGNALduino  = (
 			zero			=> [3,-1],
 			#one				=> [3,-2],
 			#zero			=> [1,-1],
-			#start           => [30,-1],
+			#start           => [30,1],
 			clockabs		=> 150,                  #ca 150us
 			format 			=> 'twostate',	  		
 			preamble		=> 'u24#',				# prepend to converted message	
@@ -2147,17 +2147,16 @@ sub SIGNALduino_OSV2()
 	my $message_end;
 	my $message_length;
 	
-	if (index($bitData,"10011001",24) >= 24 and $bitData =~ m/^.?(10){12,16}/) 
+	if ($bitData =~ m/^.?(10){12,16}.?10011001/) 
 	{  # Valid OSV2 detected!	
-		
-		Debug "$name: OSV2 protocol detected \n" if ($debug);
 		$preamble_pos=index($bitData,"10011001",24);
 		
+		Debug "$name: OSV2 protocol detected \n" if ($debug);
 		return return (-1," sync not found") if ($preamble_pos <=24);
 		
-		$message_end=index($bitData,"10011001",$preamble_pos+44);
-		$message_end = length($bitData) if ($message_end == -1);
-		$message_length = $message_end - $preamble_pos;
+		$message_end=index($bitData,"101010101010101010101010101010110011001",$preamble_pos+44);
+		$message_end = length($bitData) if ($message_end <$preamble_pos);
+		$message_length = ($message_end - $preamble_pos)/2;
 
 		return (-1," message is to short") if (defined($ProtocolListSIGNALduino{$id}{length_min}) && $message_length < $ProtocolListSIGNALduino{$id}{length_min} );
 		return (-1," message is to long") if (defined($ProtocolListSIGNALduino{$id}{length_max}) && $message_length > $ProtocolListSIGNALduino{$id}{length_max} );
