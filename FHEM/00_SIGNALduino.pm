@@ -465,18 +465,18 @@ my %ProtocolListSIGNALduino  = (
 		{
             name			=> 'visivon remote',	
 			id          	=> '24',
-			one			=> [1,-3],
-			zero			=> [3,-1],
-			#one				=> [3,-2],
+			one			    => [3,-2],
+			zero			=> [1,-5],
+			#one			=> [3,-2],
 			#zero			=> [1,-1],
-			#start           => [30,1],
+			start           => [30,-5],
 			clockabs		=> 150,                  #ca 150us
 			format 			=> 'twostate',	  		
 			preamble		=> 'u24#',				# prepend to converted message	
 			#clientmodule    => '',   				# not used now
 			#modulematch     => '',  				# not used now
 			length_min      => '54',
-			length_max      => '56',				
+			length_max      => '58',				
 
 		},
 		
