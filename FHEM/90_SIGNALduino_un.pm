@@ -188,13 +188,16 @@ SIGNALduino_un_Parse($$)
 		
 		Log3 $hash, 4, "$name found ctw600 syncpos at $syncpos message is: $sensdata - sensor id:$id, bat:$bat, temp=$temp, hum=$hum, wind=$wind, rain=$rain, winddir=$winddir";
 
-	} elsif ($protocol == "13"  && length($bitData)>=14)  ## RF20 Protocol 
+	} elsif ($protocol == "13"  && length($bitData)>=14)  ## RF21 Protocol 
 	{  
-		my $model=$a[3];
-		my $deviceCode = $a[5].$a[6].$a[7].$a[8].$a[9];
-		my  $Freq = $a[10].$a[11].$a[12].$a[13].$a[14];
+		#my $model=$a[3];
+		#my $deviceCode = $a[5].$a[6].$a[7].$a[8].$a[9];
+		#my  $Freq = $a[10].$a[11].$a[12].$a[13].$a[14];
+		my $deviceCode = substr($bitData,0,23);
+		my $unit= substr($bitData,23,1);
+		
 
-		Log3 $hash, 4, "$name found RF21 protocol. model=$model, devicecode=$deviceCode, freq=$Freq ";
+		Log3 $hash, 4, "$name found RF21 protocol. devicecode=$deviceCode, unit=$unit";
 	}
 	elsif ($protocol == "14" && length($bitData)>=12)  ## Heidman HX 
 	{  
