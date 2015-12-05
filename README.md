@@ -17,6 +17,7 @@ Supported Devices / Protocols
 |Hama TS33C, Bresser Thermo/Hygro Sensor  | Weather sensor |
 |Arduino Sensor | multi purpose sensor based on arduino |
 |technoline Weatherstation WS 6750/TX70DTH| Weather sensor and station |
+|FA21RF|Smoke detector|
 || Remote sockets from serval brands|
 
 
