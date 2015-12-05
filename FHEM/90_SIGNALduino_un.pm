@@ -277,7 +277,7 @@ SIGNALduino_un_Parse($$)
 		my $crc=substr($bitData,36,4);
 		
 		
-		Log3 $hash, 4, "$name decoded protocolid: 7 ($SensorTyp ) mode=$sendMode, sensor id=$id, channel=$channel, temp=$temp, hum=$hum, bat=$bat, crc=$crc\n" ;
+		Log3 $hash, 4, "$name decoded protocolid: $protocol ($SensorTyp ) mode=$sendMode, sensor id=$id, channel=$channel, temp=$temp, hum=$hum, bat=$bat, crc=$crc\n" ;
 
 
 	
