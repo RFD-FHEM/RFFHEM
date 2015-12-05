@@ -262,6 +262,25 @@ SIGNALduino_un_Parse($$)
 		Log3 $hash, 4, "$name decoded protocolid: 7 ($SensorTyp / type=$type) mode=$sendMode, sensor id=$id, channel=$channel, temp=$temp, bat=$bat\n" ;
 
 
+	} elsif ($protocol == "33" && length($bitData)>=42)  ## S014 or tcm sensor
+	{
+		my $SensorTyp = "s014/TFA 30.3200/TCM/Conrad";
+		
+		my $id = oct ("0b".substr($bitData,0,10));  
+		my $channel = SIGNALduino_un_bin2dec(substr($bitData,12,2)); 
+		#my $temp = (((oct("0b".substr($bitData,22,4))*256) + (oct("0b".substr($bitData,18,4))*16) + (oct("0b".substr($bitData,14,4)))/10) - 90 - 32) * (5/9);
+		my $temp = (((oct("0b".substr($bitData,22,4))*256 +  oct("0b".substr($bitData,18,4))*16 + oct("0b".substr($bitData,14,4))) *10 -12200) /18)/10;
+		
+		my $hum=oct("0b".substr($bitData,30,4))*16 + oct("0b".substr($bitData,26,4));
+		my $bat = int(substr($bitData,34,1)) eq "0" ? "ok" : "critical";  # Eventuell falsch!
+		my $sendMode = int(substr($bitData,35,1)) eq "1" ? "auto" : "manual";  # Eventuell falsch!
+		my $crc=substr($bitData,36,4);
+		
+		
+		Log3 $hash, 4, "$name decoded protocolid: 7 ($SensorTyp ) mode=$sendMode, sensor id=$id, channel=$channel, temp=$temp, hum=$hum, bat=$bat, crc=$crc\n" ;
+
+
+	
 	} else {
 		return $dummyreturnvalue;
 	}

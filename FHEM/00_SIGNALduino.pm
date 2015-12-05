@@ -603,6 +603,22 @@ my %ProtocolListSIGNALduino  = (
 			length_min      => '24',
 			length_max      => '24',				
     	},
+    "33" => #Thermo-/Hygrosensor S014
+    	{   
+       		name			=> 'weathe331',		# Logilink, NC, WS, TCM97001 etc.
+			id          	=> '33',
+			one				=> [1,-8],
+			zero			=> [1,-4],
+			clockabs   		=> '500',		# not used now
+			format     		=> 'twostate',  # not used now
+			preamble		=> 'u33#',				# prepend to converted message	
+			postamble		=> '',		# Append to converted message	 	
+			clientmodule    => '',      # not used now
+			#modulematch     => '',     # not used now
+			length_min      => '40',
+			length_max      => '48',
+			paddingbits     => '8',			
+    	},	
 );
 
 
