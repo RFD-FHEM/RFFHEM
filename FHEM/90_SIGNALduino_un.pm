@@ -279,8 +279,6 @@ SIGNALduino_un_Parse($$)
 		
 		Log3 $hash, 4, "$name decoded protocolid: $protocol ($SensorTyp ) mode=$sendMode, sensor id=$id, channel=$channel, temp=$temp, hum=$hum, bat=$bat, crc=$crc\n" ;
 
-
-	
 	} else {
 		return $dummyreturnvalue;
 	}

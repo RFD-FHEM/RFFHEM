@@ -617,7 +617,6 @@ my %ProtocolListSIGNALduino  = (
 			#modulematch     => '',     # not used now
 			length_min      => '40',
 			length_max      => '48',
-			paddingbits     => '8',			
     	},	
 );
 
