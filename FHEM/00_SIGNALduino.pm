@@ -347,7 +347,7 @@ my %ProtocolListSIGNALduino  = (
 			preamble		=> 'u16#',				# prepend to converted message	
 			#clientmodule    => '',   				# not used now
 			#modulematch     => '',  				# not used now
-			length_min      => '36',
+			length_min      => '40',
 			length_max      => '40',
 		}, 	
     "17"    => 
