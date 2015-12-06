@@ -605,7 +605,7 @@ my %ProtocolListSIGNALduino  = (
     	},
     "33" => #Thermo-/Hygrosensor S014
     	{   
-       		name			=> 'weathe331',		# Logilink, NC, WS, TCM97001 etc.
+       		name			=> 'weather33',		# Logilink, NC, WS, TCM97001 etc.
 			id          	=> '33',
 			one				=> [1,-8],
 			zero			=> [1,-4],
@@ -615,8 +615,8 @@ my %ProtocolListSIGNALduino  = (
 			postamble		=> '',		# Append to converted message	 	
 			clientmodule    => '',      # not used now
 			#modulematch     => '',     # not used now
-			length_min      => '40',
-			length_max      => '48',
+			length_min      => '42',
+			length_max      => '42',
     	},	
 );
 
@@ -1855,8 +1855,15 @@ sub SIGNALduino_Parse_MU($$$$@)
 							$message_dispatched=1;
 						}
 					} else {
-						Debug "$name: length ($ProtocolListSIGNALduino{$id}{length_min})/$ProtocolListSIGNALduino{$id}{length_max} does not match (@bit_msg), ".@bit_msg." bits\n" if ($debug);;
-						
+						if ($debug)
+						{
+							my $debugstr;
+							$debugstr.=$ProtocolListSIGNALduino{$id}{length_min} if defined($ProtocolListSIGNALduino{$id}{length_min});
+							$debugstr.="/";
+							$debugstr.=$ProtocolListSIGNALduino{$id}{length_max} if defined($ProtocolListSIGNALduino{$id}{length_max});
+							
+							Debug "$name: length ($debugstr) does not match (@bit_msg), ".@bit_msg." bits\n";
+						}	
 						
 					}
 					@bit_msg=(); # clear bit_msg array
