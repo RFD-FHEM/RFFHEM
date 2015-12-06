@@ -616,7 +616,7 @@ my %ProtocolListSIGNALduino  = (
 			clientmodule    => '',      # not used now
 			#modulematch     => '',     # not used now
 			length_min      => '42',
-			length_max      => '42',
+			length_max      => '44',
     	},	
 );
 
