@@ -1,6 +1,6 @@
+        ##############################################
     ##############################################
-    ##############################################
-    # $Id: 14_SD_WS09.pm 1030  2015-11-30 $
+    # $Id: 14_SD_WS09.pm 1037  2015-12-06 $
     # 
     # The purpose of this module is to support serval 
     # weather sensors like WS-0101  (Sender 868MHz ASK   Epmfänger RX868SH-DV elv)
@@ -72,11 +72,10 @@
       my $bitData = unpack("B$blen", pack("H$hlen", $rawData)); 
       my $rain = 0;
       my $deviceCode = 0;
-      my $model = "undef";  # 1001 -> 9=WS0101  1010 -> A=WH1080      1011 -> B=WH1080 
+      my $model = "undef";  # 0xFFA -> WS0101/WH1080 alles andere -> CTW600 
       my $modelid;
       my $windSpeed = 0;
       my $windguest =0;
-      my $WH1080SET = 0;
       my $sensdata;
       my $id;
       my $bat = 0;
@@ -84,12 +83,7 @@
       my $hum;
       my $windDirection ;
       my $windDirectionText;
-      my $hrs;
-      my $mins; 
-      my $sec; 
-      my $mday;
-      my $month;
-      my $year;
+      
     
       Log3 $name, 4, "SD_WS09_Parse HEX=$msg length: $hlen";
       my $syncpos= index($bitData,"11111110");  #7x1 1x0 preamble
@@ -112,21 +106,25 @@
               $id = SD_WS09_bin2dec(substr($sensdata,4,8));
               $bat = (SD_WS09_bin2dec((substr($sensdata,64,4))) == 0) ? 'ok':'low' ; # decode battery = 0 --> ok
               $temp = (SD_WS09_bin2dec(substr($sensdata,12,12)) - 400)/10;
-    		      $hum = SD_WS09_bin2dec(substr($sensdata,24,8));
+    		  $hum = SD_WS09_bin2dec(substr($sensdata,24,8));
               $windDirection = SD_WS09_bin2dec(substr($sensdata,68,4));  
               $windDirectionText = $winddir_name[$windDirection];
-              #$windSpeed =  nearest(0.1,SD_WS09_bin2dec(substr($sensdata,32,8)) *0.34);
               $windSpeed =  round((SD_WS09_bin2dec(substr($sensdata,32,8))* 34)/100,01);
               Log3 $iohash, 3, "SD_WS09_Parse ".$model." Windspeed bit: ".substr($sensdata,32,8)." Dec: " . $windSpeed ;
-              #$windguest = nearest(0.1,SD_WS09_bin2dec(substr($sensdata,40,8)) *0.34);;
               $windguest = round((SD_WS09_bin2dec(substr($sensdata,40,8)) * 34)/100,01);
               Log3 $iohash, 3, "SD_WS09_Parse ".$model." Windguest bit: ".substr($sensdata,40,8)." Dec: " . $windguest ;
               $rain =  SD_WS09_bin2dec(substr($sensdata,56,8)) * 0.3;
               Log3 $iohash, 3, "SD_WS09_Parse ".$model." Rain bit: ".substr($sensdata,56,8)." Dec: " . $rain ;
             } else {
             
-            #hrs mins secs
+            #DCF-77 Zeitmeldungen vom Sensor
             my $hrs1 = substr($sensdata,16,8);
+            my $hrs;
+            my $mins; 
+            my $sec; 
+            my $mday;
+            my $month;
+            my $year;
             Log3 $iohash, 3, "Zeitmeldung SD_WS09_Parse HRS1=$hrs1" ;
             $hrs = SD_WS09_BCD2bin(substr($sensdata,16,8) & 0x3F) ; #h
             $mins = SD_WS09_BCD2bin(substr($sensdata,24,8)); #m 
@@ -142,6 +140,7 @@
     			    return undef;
             }
          }else{
+            # eine CTW600 wurde erkannt 
             $sensdata = substr($bitData,$syncpos+8);
             Log3 $iohash, 3, "WH_2 SD_WS09_Parse WH=$wh msg=$sensdata syncp=$syncpos length:".length($sensdata) ;
             $model = "CTW600";
@@ -149,11 +148,16 @@
             Log3 $iohash, 3, "SD_WS09_Parse Id: ".$modelid." Bin-Sync=$sensdata syncp=$syncpos length:".length($sensdata) ;
             $bat = SD_WS09_bin2dec((substr($sensdata,0,3))) ;
             $id = SD_WS09_bin2dec(substr($sensdata,4,6));
-            #my $id = SD_WS09_bin2dec(substr($sensdata,4,8)); #WH1080 Id = 8 Stellen lang
             $temp = (SD_WS09_bin2dec(substr($sensdata,12,10)) - 400)/10;
-    		    $hum = SD_WS09_bin2dec(substr($sensdata,22,8));
+    	    $hum = SD_WS09_bin2dec(substr($sensdata,22,8));
             $windDirection = SD_WS09_bin2dec(substr($sensdata,66,4));  
             $windDirectionText = $winddir_name[$windDirection];
+            $windSpeed =  round(SD_WS09_bin2dec(substr($sensdata,30,16))/240,01);
+            Log3 $iohash, 3, "SD_WS09_Parse ".$model." Windspeed bit: ".substr($sensdata,32,8)." Dec: " . $windSpeed ;
+            $windguest = round((SD_WS09_bin2dec(substr($sensdata,40,8)) * 34)/100,01);
+            Log3 $iohash, 3, "SD_WS09_Parse ".$model." Windguest bit: ".substr($sensdata,40,8)." Dec: " . $windguest ;
+            $rain =  round(SD_WS09_bin2dec(substr($sensdata,66,4)) * 0.3,01);
+            Log3 $iohash, 3, "SD_WS09_Parse ".$model." Rain bit: ".substr($sensdata,56,8)." Dec: " . $rain ;
          }
         		
         Log3 $iohash, 3, "SD_WS09_Parse ".$model." id:$id :$sensdata ";
@@ -198,7 +202,7 @@
     	$def->{lastMSG} = $rawData;
     	#$def->{bitMSG} = $bitData2; 
     
-        my $state = "T: $temp". ($hum>0 ? " H: $hum":"")." wS: $windSpeed"." wG: $windguest"." wD: $windDirectionText"." R: $rain";
+        my $state = "T: $temp ". ($hum>0 ? " H: $hum ":" ")." Ws: $windSpeed "." Wg: $windguest "." Wd: $windDirectionText "." R: $rain";
        # my $state = "T: $temp". ($hum>0 ? " H: $hum":"");
         
         readingsBeginUpdate($hash);
@@ -297,7 +301,7 @@
   <b>Generated readings:</b>
   <br>Some devices may not support all readings, so they will not be presented<br>
   <ul>
-   <li>State (T: H: wS: wG: wD: R: )  temperature, humidity, windSpeed, windGuest, windDirection, Rain</li>
+   <li>State (T: H: Ws: Wg: Wd: R: )  temperature, humidity, windSpeed, windGuest, windDirection, Rain</li>
      <li>Temperature (&deg;C)</li>
      <li>Humidity: (The humidity (1-100 if available)</li>
      <li>Battery: (low or ok)</li>
@@ -346,12 +350,13 @@
   <b>Define</b> 
   <ul>Die empfangenen Sensoren werden automatisch angelegt.<br>
   Die ID der angelegten Sensoren wird nach jedem Batteriewechsel geändert, welche der Sensor beim Einschalten zufällig vergibt.<br>
+  <ul>CRC Checksumme wird zur Zeit noch nicht überprüft, deshalb werden Sensoren bei denen die Luftfeuchte < 0 oder > 100 ist, nicht angelegt.<br>
   </ul>
   <br>
   <a name="SD_WS09 Events"></a>
   <b>Generierte Readings:</b>
   <ul>
-     <li>State (T: H: wS: wG: wD: R: )  temperature, humidity, windSpeed, windGuest, windDirection, Rain</li>
+     <li>State (T: H: Ws: Wg: Wd: R: )  temperature, humidity, windSpeed, windGuest, windDirection, Rain</li>
      <li>Temperature (&deg;C)</li>
      <li>Humidity: (The humidity (1-100 if available)</li>
      <li>Battery: (low or ok)</li>
