@@ -147,7 +147,7 @@ my %types =
    },
    OREGON_type_length_key(0xda78, 72) =>
    {
-    part => 'UVN800', checksun => \&OREGON_checksum7, method => \&OREGON_uvn800,
+    part => 'UVN800', checksum => \&OREGON_checksum7, method => \&OREGON_uvn800,
    },
    OREGON_type_length_key(0xea7c, 120) =>
    {
@@ -158,7 +158,7 @@ my %types =
     part => 'THWR288A', checksum => \&OREGON_checksum1, method => \&OREGON_common_temp,
    },
    # 
-   OREGON_type_length_key(0xea4c, 68) =>
+   OREGON_type_length_key(0xea4c, 64) =>
    {
     part => 'THN132N', checksum => \&OREGON_checksum1, method => \&OREGON_common_temp,
    },
@@ -235,6 +235,15 @@ my %types =
    OREGON_type_length_key(0x2a19, 92) =>
    {
     part => 'PCR800', checksum => \&OREGON_checksum8, method => \&OREGON_rain_PCR800,
+   },
+   # THWR800
+   OREGON_type_length_key(0xca48, 68) =>
+   {
+    part => 'THWR800', checksum => \&OREGON_checksum9, method => \&OREGON_common_temp,
+   },
+   OREGON_type_length_key(0x0adc, 64) =>  # masked to ?adc due to rolling code
+   {
+     part => 'RTHN318', checksum => \&OREGON_checksum1, method => \&OREGON_common_temp,
    },
   );
 
@@ -798,7 +807,10 @@ sub OREGON_checksum1 {
 }
 
 sub OREGON_checksum2 {
-  $_[0]->[8] == ((OREGON_nibble_sum(8,$_[0]) - 0xa) & 0xff);
+  my $c = $_[0]->[8];
+  my $s = ((OREGON_nibble_sum(8,$_[0]) - 0xa) & 0xff);
+  Log 3, "OREGON: checksum2 = $c berechnet: $s";
+  $s == $c;
 }
 
 sub OREGON_checksum3 {
@@ -830,10 +842,19 @@ sub OREGON_checksum7 {
 
 sub OREGON_checksum8 {
   my $c = OREGON_hi_nibble($_[0]->[9]) + (OREGON_lo_nibble($_[0]->[10]) << 4);
-  my $s = ( ( OREGON_nibble_sum(9, $_[0]) - 0xa) & 0xff);
+  my $s = ( ( OREGON_nibble_sum(9, $_[0]) + OREGON_lo_nibble($_[0]->[9]) - 0xa) & 0xff);
+  Log 3, "OREGON: checksum8 = $c berechnet: $s";
   $s == $c;
 }
 
+sub OREGON_checksum9 {
+  my $c = OREGON_hi_nibble($_[0]->[6]) + (OREGON_lo_nibble($_[0]->[7]) << 4);
+  my $s = ((OREGON_nibble_sum(6,$_[0]) - 0xa) & 0xff);
+  Log 3, "OREGON: checksum8 = $c berechnet: $s";
+  $s == $c;
+}
+  
+  
 sub OREGON_raw {
   $_[0]->{raw} or $_[0]->{raw} = pack 'H*', $_[0]->{hex};
 }
