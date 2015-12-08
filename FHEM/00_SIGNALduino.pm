@@ -41,6 +41,7 @@ my %gets = (    # Name, Data to send to the SIGNALduino, Regexp for the answer
   "uptime"   => ["t", '^[0-9]+' ],
   "cmds"     => ["?", '.*Use one of[ 0-9A-Za-z]+[\r\n]*$' ],
   "ITParms"  => ["ip",'.*'],
+  "ping"     => ["P",'OK\r\n'],
 #  "ITClock"  => ["ic", '\d+'],
 #  "FAParms"  => ["fp", '.*' ],
 #  "TCParms"  => ["dp", '.*' ],
@@ -578,14 +579,14 @@ my %ProtocolListSIGNALduino  = (
 			id          	=> '31',
 			one				=> [-1,2],
 			zero			=> [-2,1],
-			start			=> [-26,1],				
+			start			=> [1],				
 			clockabs		=> 600,                  
 			format 			=> 'twostate',	  		
 			preamble		=> 'u31#',				# prepend to converted message	
 			#clientmodule    => '',   				# not used now
 			#modulematch     => '',  				# not used now
 			length_min      => '20',
-			length_max      => '22',				
+			length_max      => '20',				
 
 		},
 	"32" => #FreeTec PE-6946 -> http://www.free-tec.de/Funkklingel-mit-Voic-PE-6946-919.shtml
@@ -1221,8 +1222,8 @@ sub SIGNALduino_GetUpdate($){
 	my ($hash) = @_;
 	my $name = $hash->{NAME};
 	
-	Log3 $name, 4, "$name: Get freeram called ...";
-	SIGNALduino_Get($hash,$name, "freeram");	
+	Log3 $name, 4, "$name: ping ...";
+	SIGNALduino_Get($hash,$name, "ping");	
 	
 	InternalTimer(gettimeofday()+$hash->{Interval}, "SIGNALduino_GetUpdate", $hash, 1);
 }
