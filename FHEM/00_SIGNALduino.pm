@@ -2242,22 +2242,35 @@ sub SIGNALduino_OSV2()
 			$osv3hex=$osv3hex.sprintf('%X', oct("0b$rvosv3nibble"));
 			#$osv3bits = $osv3bits.$rvosv3nibble;
 		}
+		Log3 $name, 4, "$name: OSV3 protocol =                     $osv3hex";
+		my $korr = 10;
 		# Check if nibble 1 is A
 		if (substr($osv3hex,1,1) ne 'A')
 		{
 			my $n1=substr($osv3hex,1,1);
+			$korr = hex(substr($osv3hex,3,1));
 			substr($osv3hex,1,1,'A');  # nibble 1 = A
 			substr($osv3hex,3,1,$n1); # nibble 3 = nibble1
 		}
+		# Korrektur nibble
+		my $insKorr = sprintf('%X', $korr);
 		# Check for ending 00
 		if (substr($osv3hex,-2,2) eq '00')
 		{
 			#substr($osv3hex,1,-2);  # remove 00 at end
 			$osv3hex = substr($osv3hex, 0, length($osv3hex)-2);
 		}
-
-		
-		$osv3hex = sprintf("%02X", (length($osv3hex)+1)*4).$osv3hex;
+		my $osv3len = length($osv3hex);
+		$osv3hex .= '0';
+		my $turn0 = substr($osv3hex,5, $osv3len-5);
+		my $turn = '';
+		for ($idx=0; $idx<$osv3len-5; $idx=$idx+2) {
+			$turn = $turn . substr($turn0,$idx+1,1) . substr($turn0,$idx,1);
+		}
+		$osv3hex = substr($osv3hex,0,5) . $insKorr . $turn;
+		$osv3hex = substr($osv3hex,0,$osv3len+1);
+		#Log3 $name, 4, "$name: OSV3 len = $osv3len " . substr($osv3hex,0,6) . " " . $turn;
+		$osv3hex = sprintf("%02X", length($osv3hex)*4).$osv3hex;
 		Log3 $name, 4, "$name: OSV3 protocol converted to hex: ($osv3hex) with length (".(length($osv3hex)*4).") bits";
 		#$found=1;
 		#$dmsg=$osv2hex;
