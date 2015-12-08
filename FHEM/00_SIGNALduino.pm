@@ -606,7 +606,7 @@ my %ProtocolListSIGNALduino  = (
     	},
     "33" => #Thermo-/Hygrosensor S014
     	{   
-       		name			=> 'weather33',		# Logilink, NC, WS, TCM97001 etc.
+       		name			=> 'weather33',		#
 			id          	=> '33',
 			one				=> [1,-8],
 			zero			=> [1,-4],
@@ -618,7 +618,23 @@ my %ProtocolListSIGNALduino  = (
 			#modulematch     => '',     # not used now
 			length_min      => '42',
 			length_max      => '44',
-    	},	
+    	},
+    "34" =>
+     	 {   
+       		name			=> 'unknown34',		
+       		id          	=> '34',
+			one				=> [2,-1],
+			zero			=> [1,-2],
+			start			=> [3,-3,3,-3,3,-3,3,-3],
+			clockabs   		=> '240',		
+			format     		=> 'twostate',  		# not used now
+			preamble		=> 'u34#',				# prepend to converted message	
+			postamble		=> '',					# Append to converted message	 	
+			clientmodule    => '',      			# not used now
+			#modulematch     => '',     			# not used now
+			length_min      => '40',
+			length_max      => '40',
+    	},
 );
 
 
