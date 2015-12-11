@@ -747,7 +747,7 @@ SIGNALduino_Define($$)
   
   ## 
   $hash->{Interval} = "300";
-  InternalTimer(gettimeofday()+2, "SIGNALduino_GetUpdate", $hash, 0);
+  InternalTimer(gettimeofday()+$hash->{Interval}, "SIGNALduino_GetUpdate", $hash, 0);
   
   $hash->{"DMSG"}="nothing";
   $hash->{"TIME"}=time();
