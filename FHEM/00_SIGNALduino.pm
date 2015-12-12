@@ -755,6 +755,9 @@ SIGNALduino_Define($$)
   my $whitelistIDs = AttrVal($name,"whitelist_IDs","");
   SIGNALduino_IdList($hash ,$name, $whitelistIDs);
 
+  
+  Log3 $name, 3, "Firmwareversion: ".$hash->{VERSION} if ($hash->{VERSION});
+
   return $ret;
 }
 
@@ -1000,10 +1003,12 @@ SIGNALduino_DoInit($)
 
 	my ($ver, $try) = ("", 0);
 	#Dirty hack to allow initialisation of DirectIO Device for some debugging and tesing
-  	Log3 $name, 1, $hash->{DEF};
+  	Log3 $hash, 1, "define: ".$hash->{DEF};
  
-  	if ((!$hash->{DEF} =~ m/\@DirectIO/) and (!$hash->{DEF} =~ m/none/) )
+  	if (($hash->{DEF} !~ m/\@DirectIO/) and ($hash->{DEF} !~ m/none/) )
 	{
+		Log3 $hash, 1, "init: ".$hash->{DEF};
+		
 		SIGNALduino_Clear($hash);
 		
 
@@ -1015,14 +1020,15 @@ SIGNALduino_DoInit($)
 			$ver = "" if(!$ver);
 		}
 		# Check received string
-		if($ver !~ m/^V/) {
+		if($ver !~ m/SIGNALduino/) {
 			$attr{$name}{dummy} = 1;
 			$msg = "Not an SIGNALduino device, got for V:  $ver";
-			Log3 $name, 1, $msg;
+			Log3 $hash, 1, $msg;
 			return $msg;
 		}
-		$ver =~ s/[\r\n]//g;
 		$hash->{VERSION} = $ver;
+	
+		$ver =~ s/[\r\n]//g;
 	
 		#$debug = AttrVal($name, "verbose", 3) == 5;
 		#Log3 $name, 3, "$name: setting debug to: " . $debug;
@@ -1034,7 +1040,7 @@ SIGNALduino_DoInit($)
 		$cmds =~ s/$name cmds =>//g;
 		$cmds =~ s/ //g;
 		$hash->{CMDS} = $cmds;
-		Log3 $name, 3, "$name: Possible commands: " . $hash->{CMDS};
+		Log3 $hash, 3, "$name: Possible commands: " . $hash->{CMDS};
 		readingsSingleUpdate($hash, "state", "Programming", 1);
 		
 	}
