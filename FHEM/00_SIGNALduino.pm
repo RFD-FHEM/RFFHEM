@@ -610,6 +610,7 @@ my %ProtocolListSIGNALduino  = (
 			id          	=> '33',
 			one				=> [1,-8],
 			zero			=> [1,-4],
+			sync			=> [1,-15],
 			clockabs   		=> '500',		# not used now
 			format     		=> 'twostate',  # not used now
 			preamble		=> 'u33#',				# prepend to converted message	
