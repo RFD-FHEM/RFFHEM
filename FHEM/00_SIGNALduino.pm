@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm  72788 2015-11-13  v3.2-dev
+# $Id: 00_SIGNALduino.pm  72788 2015-12-15  v3.2-dev
 # The file is taken from the FHEMduino project and modified in serval ways for processing the incomming messages
 # see http://www.fhemwiki.de/wiki/SIGNALDuino
 # It was modified also to provide support for raw message handling which it's send from the SIGNALduino
@@ -2285,16 +2285,15 @@ sub SIGNALduino_OSV2()
 		}
 		my $osv3len = length($osv3hex);
 		$osv3hex .= '0';
-		my $turn0 = substr($osv3hex,5, $osv3len-5);
+		my $turn0 = substr($osv3hex,5, $osv3len-4);
 		my $turn = '';
 		for ($idx=0; $idx<$osv3len-5; $idx=$idx+2) {
 			$turn = $turn . substr($turn0,$idx+1,1) . substr($turn0,$idx,1);
 		}
 		$osv3hex = substr($osv3hex,0,5) . $insKorr . $turn;
 		$osv3hex = substr($osv3hex,0,$osv3len+1);
-		#Log3 $name, 4, "$name: OSV3 len = $osv3len " . substr($osv3hex,0,6) . " " . $turn;
 		$osv3hex = sprintf("%02X", length($osv3hex)*4).$osv3hex;
-		Log3 $name, 4, "$name: OSV3 protocol converted to hex: ($osv3hex) with length (".(length($osv3hex)*4).") bits";
+		Log3 $name, 4, "$name: OSV3 protocol converted to hex: ($osv3hex) with length (".((length($osv3hex)-2)*4).") bits";
 		#$found=1;
 		#$dmsg=$osv2hex;
 		return (1,$osv3hex);

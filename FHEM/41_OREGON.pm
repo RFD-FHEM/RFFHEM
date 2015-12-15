@@ -809,7 +809,7 @@ sub OREGON_checksum1 {
 sub OREGON_checksum2 {
   my $c = $_[0]->[8];
   my $s = ((OREGON_nibble_sum(8,$_[0]) - 0xa) & 0xff);
-  Log 3, "OREGON: checksum2 = $c berechnet: $s";
+  Log 4, "OREGON: checksum2 = $c berechnet: $s";
   $s == $c;
 }
 
@@ -843,14 +843,14 @@ sub OREGON_checksum7 {
 sub OREGON_checksum8 {
   my $c = OREGON_hi_nibble($_[0]->[9]) + (OREGON_lo_nibble($_[0]->[10]) << 4);
   my $s = ( ( OREGON_nibble_sum(9, $_[0]) + OREGON_lo_nibble($_[0]->[9]) - 0xa) & 0xff);
-  Log 3, "OREGON: checksum8 = $c berechnet: $s";
+  Log 4, "OREGON: checksum8 = $c berechnet: $s";
   $s == $c;
 }
 
 sub OREGON_checksum9 {
   my $c = OREGON_hi_nibble($_[0]->[6]) + (OREGON_lo_nibble($_[0]->[7]) << 4);
   my $s = ((OREGON_nibble_sum(6,$_[0]) - 0xa) & 0xff);
-  Log 3, "OREGON: checksum8 = $c berechnet: $s";
+  Log 4, "OREGON: checksum8 = $c berechnet: $s";
   $s == $c;
 }
   
@@ -874,10 +874,10 @@ OREGON_Parse($$)
 
   my $time = time();
   if ($time_old ==0) {
-  	Log 5, "OREGON: decoding delay=0 hex=$msg";
+  	Log3 $iohash, 5, "OREGON: decoding delay=0 hex=$msg";
   } else {
   	my $time_diff = $time - $time_old ;
-  	Log 5, "OREGON: decoding delay=$time_diff hex=$msg";
+  	Log3 $iohash, 5, "OREGON: decoding delay=$time_diff hex=$msg";
   }
   $time_old = $time;
 
@@ -906,29 +906,29 @@ OREGON_Parse($$)
   my $rec = $types{$key} || $types{$key&0xfffff};
   unless ($rec) {
     #Log 1, "OREGON: ERROR: Unknown sensor_id=$sensor_id bits=$bits message='$msg'.";
-    Log 4, "OREGON: ERROR: Unknown sensor_id=$sensor_id bits=$bits message='$msg'.";
+    Log3 $iohash, 4, "OREGON: ERROR: Unknown sensor_id=$sensor_id bits=$bits message='$msg'.";
     return "OREGON: ERROR: Unknown sensor_id=$sensor_id bits=$bits.\n";
   }
   
   # test checksum as defines in %types:
   my $checksum = $rec->{checksum};
   if ($checksum && !$checksum->(\@rfxcom_data_array) ) {
-    Log 3, "OREGON: ERROR: checksum error sensor_id=$sensor_id (bits=$bits)";
+    Log3 $iohash, 4, "OREGON: ERROR: checksum error sensor_id=$sensor_id (bits=$bits)";
     return "OREGON: ERROR: checksum error sensor_id=$sensor_id (bits=$bits)";
   }
 
   my $method = $rec->{method};
   unless ($method) {
-    Log 4, "OREGON: Possible message from Oregon part '$rec->{part}'";
-    Log 4, "OREGON: sensor_id=$sensor_id (bits=$bits)";
+    Log3 $iohash, 4, "OREGON: Possible message from Oregon part '$rec->{part}'";
+    Log3 $iohash, 4, "OREGON: sensor_id=$sensor_id (bits=$bits)";
     return;
   }
 
   my @res;
 
   if (! defined(&$method)) {
-    Log 4, "OREGON: Error: Unknown function=$method. Please define it in file $0";
-    Log 4, "OREGON: sensor_id=$sensor_id (bits=$bits)\n";
+    Log3 $iohash, 4, "OREGON: Error: Unknown function=$method. Please define it in file $0";
+    Log3 $iohash, 4, "OREGON: sensor_id=$sensor_id (bits=$bits)\n";
     return "OREGON: Error: Unknown function=$method. Please define it in file $0";
   } else {
     @res = $method->($rec->{part}, $longids, \@rfxcom_data_array);
@@ -940,7 +940,7 @@ OREGON_Parse($$)
 
   my $def = $modules{OREGON}{defptr}{"$device_name"};
   if(!$def) {
-	Log 3, "OREGON: Unknown device $device_name, please define it";
+	Log3 $iohash, 3, "OREGON: Unknown device $device_name, please define it";
     	return "UNDEFINED $device_name OREGON $device_name";
   }
   # Use $def->{NAME}, because the device may be renamed:
