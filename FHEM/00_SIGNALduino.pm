@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm  72788 2015-12-15  v3.2-dev
+# $Id: 00_SIGNALduino.pm  72788 2015-12-16  v3.2-dev
 # The file is taken from the FHEMduino project and modified in serval ways for processing the incomming messages
 # see http://www.fhemwiki.de/wiki/SIGNALDuino
 # It was modified also to provide support for raw message handling which it's send from the SIGNALduino
@@ -50,12 +50,13 @@ my %gets = (    # Name, Data to send to the SIGNALduino, Regexp for the answer
 
 
 my %sets = (
-  "raw"       => "",
-  "flash"     => "noarg",
-  "reset"     => "noarg",
+  "raw"       => '',
+  "flash"     => '',
+  "reset"     => 'noArg',
   #"disablereceiver"     => "",
-  "ITClock"  => "200,300,400",
- 
+  "ITClock"  => '200,300,400',
+  "enableMessagetype" => 'syncedMS,unsyncedMU,manchesterMC',
+  "disableMessagetype" => 'syncedMS,unsyncedMU,manchesterMC',
 );
 
 ## Supported Clients per default
@@ -75,13 +76,13 @@ my $clientsSIGNALduino = ":IT:"
 my %matchListSIGNALduino = (
      "1:IT"            			=> "^i......",	  				  # Intertechno Format
      "2:CUL_TCM97001"      		=> "^s[A-Fa-f0-9]+",			  # Any hex string		beginning with s
-     "3:SIGNALduino_RSL"		=> "^rA-Fa-f0-9]+",				  # Any hex string		beginning with r
+     "3:SIGNALduino_RSL"		=> "^r[A-Fa-f0-9]+",				  # Any hex string		beginning with r
      "5:CUL_TX"               	=> "^TX..........",         	  # Need TX to avoid FHTTK
      "6:SD_AS"       			=> "^P2#[A-Fa-f0-9]{7,8}", 		  # Arduino based Sensors, should not be default
      "4:OREGON"            		=> "^(3[8-9A-F]|[4-6][0-9A-F]|7[0-8]).*",		
-     "7:Hideki"					=> "^P12#75[A-F0-9]",
+     "7:Hideki"					=> "^P12#75[A-F0-9]+",
      "10:SD_WS07"				=> "^P7#[A-Fa-f0-9]{6}F[A-Fa-f0-9]{2}",
-     "11:SD_WS09"				=> "^u9#[A-Fa-f0-9]",
+     "11:SD_WS09"				=> "^u9#[A-Fa-f0-9]+",
      "X:SIGNALduino_un"			=> '^[uP]\d+#.*',                       
 );
 
@@ -805,8 +806,14 @@ SIGNALduino_Set($@)
   my ($hash, @a) = @_;
 
   return "\"set SIGNALduino\" needs at least one parameter" if(@a < 2);
-  return "Unknown argument $a[1], choose one of " . join(" ", sort keys %sets)
-  	if(!defined($sets{$a[1]}));
+  if (!defined($sets{$a[1]})) {
+    my $arguments = ' ';
+    foreach my $arg (sort keys %sets) {
+      $arguments.= $arg . ($sets{$arg} ? (':' . $sets{$arg}) : '') . ' ';
+    }
+    #Log3 $hash, 3, "set arg = $arguments";
+    return "Unknown argument $a[1], choose one of " . $arguments;
+  }
 
   my $name = shift @a;
   my $cmd = shift @a;
@@ -904,7 +911,14 @@ SIGNALduino_Set($@)
   	} else {
   		return "argument $arg, is not numeric for set it base duration".$hash->{CMDS};
   	}
-  
+  } elsif( $cmd eq "disableMessagetype" ) {
+	my $argm = 'CD' . substr($arg,-1,1);
+	SIGNALduino_SimpleWrite($hash, $argm);
+	Log3 $name, 4, "set $name $cmd $arg $argm";;
+  } elsif( $cmd eq "enableMessagetype" ) {
+	my $argm = 'CE' . substr($arg,-1,1);
+	SIGNALduino_SimpleWrite($hash, $argm);
+	Log3 $name, 4, "set $name $cmd $arg $argm";
   } else {
   	Log3 $name, 5, "set $name $cmd $arg";
 	#SIGNALduino_SimpleWrite($hash, $arg);
