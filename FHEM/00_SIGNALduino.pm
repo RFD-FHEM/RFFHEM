@@ -54,7 +54,7 @@ my %sets = (
   "flash"     => '',
   "reset"     => 'noArg',
   #"disablereceiver"     => "",
-  "ITClock"  => '200,300,400',
+  "ITClock"  => 'slider,100,20,700',
   "enableMessagetype" => 'syncedMS,unsyncedMU,manchesterMC',
   "disableMessagetype" => 'syncedMS,unsyncedMU,manchesterMC',
 );
@@ -745,22 +745,19 @@ SIGNALduino_Define($$)
   }
   $hash->{DeviceName} = $dev;
   
-  my $whitelistIDs = AttrVal($name,"whitelist_IDs","");
-  SIGNALduino_IdList($hash ,$name, $whitelistIDs);
+  my $ret=undef;
   
-   
-  if($dev eq "none") {
-  	return undef;
+  if($dev ne "none") {
+    $ret = DevIo_OpenDev($hash, 0, "SIGNALduino_DoInit");
+    $hash->{Interval} = "300";
+    InternalTimer(gettimeofday()+$hash->{Interval}, "SIGNALduino_GetUpdate", $hash, 0);
   }
-  my $ret = DevIo_OpenDev($hash, 0, "SIGNALduino_DoInit");
-  
-  ## 
-  $hash->{Interval} = "300";
-  InternalTimer(gettimeofday()+$hash->{Interval}, "SIGNALduino_GetUpdate", $hash, 0);
   
   $hash->{"DMSG"}="nothing";
   $hash->{"TIME"}=time();
   
+  my $whitelistIDs = AttrVal($name,"whitelist_IDs","");
+  SIGNALduino_IdList($hash ,$name, $whitelistIDs);
 
   
   Log3 $name, 3, "Firmwareversion: ".$hash->{VERSION} if ($hash->{VERSION});
@@ -951,9 +948,11 @@ SIGNALduino_Get($@)
 
   if (IsDummy($name))
   {
-  	 if ($arg =~ "^M[CSU];.*")
+  	 if ($arg =~ /^M[CSU];.*/)
   	{
 		$arg="\002$arg\003";  	## Add start end end marker if not already there
+		Log3 $name, 5, "SIGNALduino/msg adding start and endmarker to message";
+
   	}
 	Log3 $name, 4, "SIGNALduino/msg get raw: $arg";
 	
