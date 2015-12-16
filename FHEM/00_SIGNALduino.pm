@@ -68,19 +68,21 @@ my $clientsSIGNALduino = ":IT:"
 						."SIGNALduino_un:"
 						."Hideki:"
 						."SD_WS07:"
+						."SD_WS09:"
 						; 
 
 ## default regex match List for dispatching message to logical modules, can be updated during runtime because it is referenced
 my %matchListSIGNALduino = (
      "1:IT"            			=> "^i......",	  				  # Intertechno Format
      "2:CUL_TCM97001"      		=> "^s[A-Fa-f0-9]+",			  # Any hex string		beginning with s
-	 "3:SIGNALduino_RSL"		=> "^rA-Fa-f0-9]+",				  # Any hex string		beginning with r
+     "3:SIGNALduino_RSL"		=> "^rA-Fa-f0-9]+",				  # Any hex string		beginning with r
      "5:CUL_TX"               	=> "^TX..........",         	  # Need TX to avoid FHTTK
-	 "6:SD_AS"       			=> "^P2#[A-Fa-f0-9]{7,8}", 		  # Arduino based Sensors, should not be default
+     "6:SD_AS"       			=> "^P2#[A-Fa-f0-9]{7,8}", 		  # Arduino based Sensors, should not be default
      "4:OREGON"            		=> "^(3[8-9A-F]|[4-6][0-9A-F]|7[0-8]).*",		
-	 "7:Hideki"					=> "^P12#75.+",
-	 "10:SD_WS07"				=> "^P7#.{6}F.{2}",
-	 "X:SIGNALduino_un"			=> '^[uP]\d+#.*',                       
+     "7:Hideki"					=> "^P12#75[A-F0-9]",
+     "10:SD_WS07"				=> "^P7#[A-Fa-f0-9]{6}F[A-Fa-f0-9]{2}",
+     "11:SD_WS09"				=> "^u9#[A-Fa-f0-9]",
+     "X:SIGNALduino_un"			=> '^[uP]\d+#.*',                       
 );
 
 

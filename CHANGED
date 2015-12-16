@@ -1,8 +1,12 @@
-31.10.2015
- - Added a filter for livolo demodulation
- - Added some demodulation support for protocols used in differnt remote sockets
- - Optimized whitelist 
-26.10.2015
+26.11.2015
+ - WH1080 rain, battery, wind, temp , hum ok (auch WS-0101)
+ - DCF-77 Meldungen rausgefiltert
+ - Unterscheidung CTW600 und WH1080 (WH1080 getestet) eingebaut
+ 
+12.11.2015
+ - Addes 14_SD_WS09.pm Module for WH1080 (WS-0101, TFA30.3189) 868MHz OOK/ASK
+ 
+26.10.2014
  - Firmware Update 3.1.8-HF1 due to a bug in the raw send option
  23.10.2015
  - bugfix in 90_SIGNALduino_un (caused to crash fhem)
@@ -136,7 +140,7 @@
 - Updated HEX files for Arduino, due to broken sync detection for pt2262 and similar
 
 13.04.2015
-- Unterstützung für Empfang von Conrad RSL Protokoll aufgenommen, senden geht noch nicht!
+- UnterstÃ¼tzung fÃ¼r Empfang von Conrad RSL Protokoll aufgenommen, senden geht noch nicht!
 
 08.04.2015
 - Initial Version of SIGNALduino. It supports IT V1 devices an Devices defined in logical Module CUL_TCM97001 and produces a lot of debug output
