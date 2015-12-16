@@ -32,7 +32,7 @@ sub SIGNALduino_Write($$$);
 
 sub SIGNALduino_SimpleWrite(@);
 
-my $debug=0;
+#my $debug=0;
 
 my %gets = (    # Name, Data to send to the SIGNALduino, Regexp for the answer
   "version"  => ["V", '^V\s.*SIGNALduino.*'],
@@ -732,7 +732,7 @@ SIGNALduino_Define($$)
   $hash->{CMDS} = "";
   $hash->{Clients} = $clientsSIGNALduino;
   $hash->{MatchList} = \%matchListSIGNALduino;
- 
+  
 
   #if( !defined( $attr{$name}{hardware} ) ) {
   #  $attr{$name}{hardware} = "nano328";
@@ -1246,6 +1246,7 @@ SIGNALduino_Read($)
   my $buf = DevIo_SimpleRead($hash);
   return "" if(!defined($buf));
   my $name = $hash->{NAME};
+  my $debug = AttrVal($name,"debug",0);
 
   my $SIGNALduinodata = $hash->{PARTIAL};
   Log3 $name, 5, "SIGNALduino/RAW READ: $SIGNALduinodata/$buf" if ($debug); 
@@ -1310,6 +1311,7 @@ sub SIGNALduino_PatternExists
 	my $searchpattern;
 	my $valid=1;  
 	my $pstr="";
+	my $debug = AttrVal($hash->{NAME},"debug",0);
 	
 	foreach $searchpattern (@{$search}) # z.B. [1, -4] 
 	{
@@ -1368,6 +1370,8 @@ sub SIGNALduino_MatchSignalPattern($\@\%\@$){
 	#Debug Dumper($signalpattern) if ($debug);		
 	my $tol="0.2";   # Tolerance factor
 	my $found=0;
+	my $debug = AttrVal($hash->{NAME},"debug",0);
+	
 	foreach ( @{$signalpattern} )
 	{
 			#Debug " $idx check: ".$patternList->{$data_array->[$idx]}." == ".$_;		
@@ -1428,7 +1432,8 @@ sub SIGNALduino_Split_Message($$)
 	
 	my @msg_parts = SIGNALduino_splitMsg($rmsg,';');			## Split message parts by ";"
 	my %ret;
-
+	my $debug = AttrVal($name,"debug",0);
+	
 	foreach (@msg_parts)
 	{
 		#Debug "$name: checking msg part:( $_ )" if ($debug);
@@ -1532,6 +1537,7 @@ SIGNALduino_Parse_MS($$$$%)
 	#Debug "Message splitted:";
 	#Debug Dumper(\@msg_parts);
 
+	my $debug = AttrVal($iohash->{NAME},"debug",0);
 
 	
 	if (defined($clockidx) and defined($syncidx))
@@ -1727,6 +1733,8 @@ sub SIGNALduino_Parse_MU($$$$@)
 	my $rawData;
 	my %patternListRaw;
 	my $message_dispatched=0;
+	
+	my $debug = AttrVal($iohash->{NAME},"debug",0);
 	
     Debug "$name: processing unsynced message\n" if ($debug);
 
@@ -1948,6 +1956,7 @@ SIGNALduino_Parse_MC($$$$@)
 	my $bitData;
 	my $dmsg;
 	my $message_dispatched=0;
+	my $debug = AttrVal($iohash->{NAME},"debug",0);
 	
 	return undef if (!$clock);
 	#my $protocol=undef;
@@ -2007,6 +2016,9 @@ SIGNALduino_Parse($$$$@)
 	#print Dumper(\%ProtocolListSIGNALduino);
     	
 	return undef if !($rmsg=~ m/^\002M.;.*;\003/); 			## Check if a Data Message arrived and if it's complete  (start & end control char are received)
+	my $debug = AttrVal($iohash->{NAME},"debug",0);
+	
+	
 	$rmsg=~ s/^\002(M.;.*;)\003/$1/;						# cut off start end end character from message for further processing they are not needed
 	Debug "$name: incomming message: ($rmsg)\n" if ($debug);
 	
@@ -2110,6 +2122,7 @@ SIGNALduino_Attr(@)
 {
 	my ($cmd,$name,$aName,$aVal) = @_;
 	my $hash = $defs{$name};
+	my $debug = AttrVal($name,"debug",0);
 
 	Log3 $name, 4, "Calling Getting Attr sub with args: $cmd $aName = $aVal";
 		
@@ -2345,7 +2358,8 @@ sub SIGNALduino_OSV1()
 sub	SIGNALduino_AS()
 {
 	my ($name,$bitData,$id) = @_;
-
+	my $debug = AttrVal($name,"debug",0);
+	
 	if(index($bitData,"1100",16) >= 0) # $rawData =~ m/^A{2,3}/)
 	{  # Valid AS detected!	
 		my $message_start = index($bitData,"1100",16);
@@ -2372,6 +2386,8 @@ sub	SIGNALduino_AS()
 sub	SIGNALduino_Hideki()
 {
 	my ($name,$bitData,$id) = @_;
+	my $debug = AttrVal($name,"debug",0);
+	
     Debug "$name: search in $bitData \n" if ($debug);
 	my $message_start = index($bitData,"10101110");
 	if ($message_start >= 0 )   # 0x75 but in reverse order
@@ -2419,6 +2435,7 @@ sub	SIGNALduino_Hideki()
 sub SIGNALduino_filterSign($$$%)
 {
 	my ($name,$id,$rawData,%patternListRaw) = @_;
+	my $debug = AttrVal($name,"debug",0);
 
 
 	my %buckets;
