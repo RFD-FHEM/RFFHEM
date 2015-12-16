@@ -82,7 +82,7 @@ my %matchListSIGNALduino = (
      "4:OREGON"            		=> "^(3[8-9A-F]|[4-6][0-9A-F]|7[0-8]).*",		
      "7:Hideki"					=> "^P12#75[A-F0-9]+",
      "10:SD_WS07"				=> "^P7#[A-Fa-f0-9]{6}F[A-Fa-f0-9]{2}",
-     "11:SD_WS09"				=> "^u9#[A-Fa-f0-9]+",
+     "11:SD_WS09"				=> "^P9#[A-Fa-f0-9]+",
      "X:SIGNALduino_un"			=> '^[uP]\d+#.*',                       
 );
 
@@ -245,7 +245,7 @@ my %ProtocolListSIGNALduino  = (
 			#sync			=> [1,-8],		# 
 			clockabs     	=> 480,			# -1 = auto undef=noclock
 			format 			=> 'pwm',	    # tristate can't be migrated from bin into hex!
-			preamble		=> 'u9#',		# prepend to converted message	
+			preamble		=> 'P9#',		# prepend to converted message	
 			clientmodule    => 'undef',   	# not used now
 			#modulematch     => '^u9#.....',  # not used now
 			length_min      => '70',
