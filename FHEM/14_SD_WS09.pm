@@ -16,7 +16,7 @@
     {
       my ($hash) = @_;
     
-      $hash->{Match}     = "^u9#[A-Fa-f0-9]";    ## pos 7 ist aktuell immer 0xF
+      $hash->{Match}     = "^P9#[A-Fa-f0-9]+";    ## pos 7 ist aktuell immer 0xF
       $hash->{DefFn}     = "SD_WS09_Define";
       $hash->{UndefFn}   = "SD_WS09_Undef";
       $hash->{ParseFn}   = "SD_WS09_Parse";
