@@ -717,6 +717,7 @@ SIGNALduino_Define($$)
   #my $hardware=AttrVal($name,"hardware","nano328");
   #Debug "hardware: $hardware" if ($debug);
  
+ 
   if($dev eq "none") {
     Log3 $name, 1, "$name device is none, commands will be echoed only";
     $attr{$name}{dummy} = 1;
@@ -741,8 +742,12 @@ SIGNALduino_Define($$)
 #    $attr{$name}{flashCommand} = "avrdude -p atmega328P -c arduino -P [PORT] -D -U flash:w:[HEXFILE] 2>[LOGFILE]"
     $attr{$name}{flashCommand} = "avrdude -c arduino -b 57600 -P [PORT] -p atmega328p -vv -U flash:w:[HEXFILE] 2>[LOGFILE]"
   }
-  
   $hash->{DeviceName} = $dev;
+  
+  my $whitelistIDs = AttrVal($name,"whitelist_IDs","");
+  SIGNALduino_IdList($hash ,$name, $whitelistIDs);
+  
+   
   if($dev eq "none") {
   	return undef;
   }
@@ -755,8 +760,6 @@ SIGNALduino_Define($$)
   $hash->{"DMSG"}="nothing";
   $hash->{"TIME"}=time();
   
-  my $whitelistIDs = AttrVal($name,"whitelist_IDs","");
-  SIGNALduino_IdList($hash ,$name, $whitelistIDs);
 
   
   Log3 $name, 3, "Firmwareversion: ".$hash->{VERSION} if ($hash->{VERSION});
@@ -934,13 +937,18 @@ SIGNALduino_Get($@)
 
   if (IsDummy($name))
   {
+  	 if ($arg =~ "^M[CSU];.*")
+  	{
+		$arg="\002$arg\003";  	## Add start end end marker if not already there
+  	}
 	Log3 $name, 4, "SIGNALduino/msg get raw: $arg";
+	
 	return SIGNALduino_Parse($hash, $hash, $hash->{NAME}, $arg);
   }
   return "No $a[1] for dummies" if(IsDummy($name));
 
   Log3 $name, 5, "$name: command for gets: " . $gets{$a[1]}[0] . " " . $arg;
-  
+
   SIGNALduino_SimpleWrite($hash, $gets{$a[1]}[0] . $arg);
 
   ($err, $msg) = SIGNALduino_ReadAnswer($hash, $a[1], 0, $gets{$a[1]}[1]);
