@@ -22,7 +22,7 @@ Hideki_Initialize($)
   my ($hash) = @_;
 
 
-  $hash->{Match}     = "^P12#75[A-F0-9]{17,30}";   # Länge (Anhahl nibbles nach 0x75 )noch genauer zpezifiieren
+  $hash->{Match}     = "^P12#75[A-F0-9]{17,30}";   # Laenge (Anhahl nibbles nach 0x75 )noch genauer spezifizieren
   $hash->{DefFn}     = "Hideki_Define";
   $hash->{UndefFn}   = "Hideki_Undef";
   $hash->{AttrFn}    = "Hideki_Attr";
@@ -108,7 +108,7 @@ Hideki_Parse($$)
 	my $deviceCode;
 	my $model= "Hideki_$sensorTyp";
 
-	## 1. Detect what type of sensor we have, then calll specific function to decode
+	## 1. Detect what type of sensor we have, then call specific function to decode
 	if ($sensorTyp==0x1E){
 		($channel, $temp, $hum) = decodeThermoHygro(\@decodedBytes); # decodeThermoHygro($decodedString);
 		$bat = ($decodedBytes[2] >> 6 == 3) ? 'ok' : 'low';			 # decode battery
@@ -118,7 +118,7 @@ Hideki_Parse($$)
 		return "$name Sensor Typ $sensorTyp not supported, please report sensor information!";
 	}
 	my $longids = AttrVal($iohash->{NAME},'longids',0);
-	if ( ($longids != 0) && ($longids eq "1" || $longids eq "ALL" || (",$longids," =~ m/,$model,/)))
+	if ( ($longids ne "0") && ($longids eq "1" || $longids eq "ALL" || (",$longids," =~ m/,$model,/)))
 	{
 		$deviceCode = $model . "_" . $id;
 		Log3 $iohash,4, "$name using longid: $longids model: $model";
@@ -369,7 +369,7 @@ Hideki_Attr(@)
   <br><br>
   
   <a name="Hideki_define"></a>
-  <b>Unterstützte Hersteller</b>
+  <b>Unterstuetzte Hersteller</b>
   <ul>
   	<li>Hama</li>
   	<li>Bresser</li>
@@ -390,7 +390,7 @@ Hideki_Attr(@)
     &lt;code&gt; besteht aus dem Sensortyp und der Kanalnummer (1..5) oder wenn das Attribut longid im IO Device gesetzt ist aus einer Zufallsadresse, die durch den Sensor beim einlegen der
 	Batterie generiert wird (Die Adresse aendert sich bei jedem Batteriewechsel).<br>
     </li>
-    <li>Wenn autocreate aktiv ist, dann wird der Sensor automatisch in FHEM angelegt. Das ist der empfohlene Weg, neue Sensoren hinzuzufügen.</li>
+    <li>Wenn autocreate aktiv ist, dann wird der Sensor automatisch in FHEM angelegt. Das ist der empfohlene Weg, neue Sensoren hinzuzufuegen.</li>
    
   </ul>
   <br>

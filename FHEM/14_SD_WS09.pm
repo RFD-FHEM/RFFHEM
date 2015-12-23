@@ -1,4 +1,4 @@
-        ##############################################
+    ##############################################
     ##############################################
     # $Id: 14_SD_WS09.pm 1037  2015-12-06 $
     # 
@@ -169,7 +169,7 @@
          } 
           
        my $longids = AttrVal($iohash->{NAME},'longids',0);
-    	if ( ($longids != 0) && ($longids eq "1" || $longids eq "ALL" || (",$longids," =~ m/,$model,/)))
+    	if ( ($longids ne "0") && ($longids eq "1" || $longids eq "ALL" || (",$longids," =~ m/,$model,/)))
     	{
     	 $deviceCode=$model."_".$id;
      		Log3 $iohash,4, "$name using longid: $longids model: $model";
