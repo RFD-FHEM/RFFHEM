@@ -1340,7 +1340,7 @@ SIGNALduino_Parse_MS($$$$%)
 		#Debug "List of pattern:";
 		my $clockabs= $msg_parts{pattern}{$msg_parts{clockidx}};
 		return undef if ($clockabs == 0); 
-		$patternList{$_} = round($msg_parts{pattern}{$_}/$clockabs,1) for keys $msg_parts{pattern};
+		$patternList{$_} = round($msg_parts{pattern}{$_}/$clockabs,1) for keys %{$msg_parts{pattern}};
 	
 		
  		#Debug Dumper(\%patternList);		
@@ -1519,7 +1519,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 
 	my $clockabs;  #Clock will be fetched from Protocol
 	#$patternListRaw{$_} = floor($msg_parts{pattern}{$_}/$clockabs) for keys $msg_parts{pattern};
-	$patternListRaw{$_} = $msg_parts{pattern}{$_} for keys $msg_parts{pattern};
+	$patternListRaw{$_} = $msg_parts{pattern}{$_} for keys %{$msg_parts{pattern}};
 
 	
 	if (defined($clockidx))
@@ -2008,8 +2008,8 @@ sub	SIGNALduino_Hideki()
 	{
 		Debug "$name: Hideki protocol detected \n" if ($debug);
 
-		# Todo: Mindest Länge für startpunkt vorspringen 
-		# Todo: Wiederholung auch an das Modul weitergeben, damit es dort geprüft werden kann
+		# Todo: Mindest LÃ¤nge fÃ¼r startpunkt vorspringen 
+		# Todo: Wiederholung auch an das Modul weitergeben, damit es dort geprÃ¼ft werden kann
 		my $message_end = index($bitData,"10101110",$message_start+18); # pruefen auf ein zweites 0x75,  mindestens 18 bit nach 1. 0x75
         $message_end = length($bitData) if ($message_end == -1);
         my $message_length = $message_end - $message_start;
