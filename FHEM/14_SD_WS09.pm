@@ -1,6 +1,6 @@
     ##############################################
     ##############################################
-    # $Id: 14_SD_WS09.pm 1038  2016-01-01 $
+    # $Id: 14_SD_WS09.pm 1039  2016-01-01 $
     # 
     # The purpose of this module is to support serval 
     # weather sensors like WS-0101  (Sender 868MHz ASK   Epmfänger RX868SH-DV elv)
@@ -21,10 +21,11 @@
       $hash->{UndefFn}   = "SD_WS09_Undef";
       $hash->{ParseFn}   = "SD_WS09_Parse";
       $hash->{AttrFn}	 = "SD_WS09_Attr";
-      $hash->{AttrList}  = "IODev do_not_notify:1,0 ignore:0,1 showtime:1,0 " .
-                            "$readingFnAttributes ";
+      $hash->{AttrList}  = "IODev do_not_notify:1,0 ignore:0,1 showtime:1,0 "
+                            ."windKorrektur:-3,-2,-1,0,1,2,3 "
+                            ."$readingFnAttributes ";
       $hash->{AutoCreate} =
-            { "SD_WS09.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,",  autocreateThreshold => "2:180"} };
+            { "SD_WS09.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.* windKorrektur:.*:0", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,",  autocreateThreshold => "2:180"} };
     
     
     }
@@ -157,7 +158,7 @@
             $windguest = round((SD_WS09_bin2dec(substr($sensdata,40,8)) * 34)/100,01);
             Log3 $iohash, 3, "SD_WS09_Parse ".$model." Windguest bit: ".substr($sensdata,40,8)." Dec: " . $windguest ;
             $rain =  round(SD_WS09_bin2dec(substr($sensdata,46,16)) * 0.3,01);
-            Log3 $iohash, 3, "SD_WS09_Parse ".$model." Rain bit: ".substr($sensdata,56,8)." Dec: " . $rain ;
+            Log3 $iohash, 3, "SD_WS09_Parse ".$model." Rain bit: ".substr($sensdata,46,16)." Dec: " . $rain ;
          }
         		
         Log3 $iohash, 3, "SD_WS09_Parse ".$model." id:$id :$sensdata ";
@@ -188,6 +189,15 @@
     	my $hash = $def;
     	$name = $hash->{NAME};
     	Log3 $name, 4, "SD_WS09_Parse: $name ($rawData)";  
+    
+        my $windkorr = AttrVal($hash->{NAME},'windKorrektur',0);
+        if ($windkorr != 0 )      
+        {
+        my $oldwinddir = $windDirection; 
+        $windDirection = $windDirection + $windkorr; 
+        $windDirectionText = $winddir_name[$windDirection];
+        Log3 $iohash, 3, "SD_WS09_Parse ".$model." Faktor:$windkorr wD:$oldwinddir  Korrektur wD:$windDirection:$windDirectionText" ;
+        }    
     
     	if (!defined(AttrVal($hash->{NAME},"event-min-interval",undef)))
     	{
@@ -314,10 +324,16 @@
   <ul>
     <li><a href="#do_not_notify">do_not_notify</a></li>
     <li><a href="#ignore">ignore</a></li>
-    <li><a href="#model">model</a> ()</li>
     <li><a href="#showtime">showtime</a></li>
     <li><a href="#readingFnAttributes">readingFnAttributes</a></li>
-  </ul>
+    <li>model<br>
+        WH1080, CTW600
+    </li><br>
+           
+    <li>windKorrektur<br>
+      -3,-2,-1,0,1,2,3   
+    </li><br>
+   </ul>
 
   <a name="SD_WS09_Set"></a>
   <b>Set</b> <ul>N/A</ul><br>
@@ -369,10 +385,17 @@
   <ul>
     <li><a href="#do_not_notify">do_not_notify</a></li>
     <li><a href="#ignore">ignore</a></li>
-    <li><a href="#model">model</a> ()</li>
     <li><a href="#showtime">showtime</a></li>
     <li><a href="#readingFnAttributes">readingFnAttributes</a></li>
-  </ul>
+    <li>model<br>
+        WH1080, CTW600
+    </li><br>
+           
+    <li>windKorrektur<br>
+    Korrigiert die Nord-Ausrichtung des Windrichtungsmessers, wenn dieser nicht richtig nach Norden ausgerichtet ist. 
+      -3,-2,-1,0,1,2,3    
+    </li><br>
+   </ul>
 
   <a name="SD_WS09_Set"></a>
   <b>Set</b> <ul>N/A</ul><br>
