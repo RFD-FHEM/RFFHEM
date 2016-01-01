@@ -156,7 +156,7 @@
             Log3 $iohash, 3, "SD_WS09_Parse ".$model." Windspeed bit: ".substr($sensdata,32,8)." Dec: " . $windSpeed ;
             $windguest = round((SD_WS09_bin2dec(substr($sensdata,40,8)) * 34)/100,01);
             Log3 $iohash, 3, "SD_WS09_Parse ".$model." Windguest bit: ".substr($sensdata,40,8)." Dec: " . $windguest ;
-            $rain =  round(SD_WS09_bin2dec(substr($sensdata,66,4)) * 0.3,01);
+            $rain =  round(SD_WS09_bin2dec(substr($sensdata,46,16)) * 0.3,01);
             Log3 $iohash, 3, "SD_WS09_Parse ".$model." Rain bit: ".substr($sensdata,56,8)." Dec: " . $rain ;
          }
         		
