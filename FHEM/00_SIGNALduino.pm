@@ -1547,7 +1547,7 @@ SIGNALduino_Parse_MS($$$$%)
 		#Debug "List of pattern:";
 		my $clockabs= $msg_parts{pattern}{$msg_parts{clockidx}};
 		return undef if ($clockabs == 0); 
-		$patternList{$_} = round($msg_parts{pattern}{$_}/$clockabs,1) for keys $msg_parts{pattern};
+		$patternList{$_} = round($msg_parts{pattern}{$_}/$clockabs,1) for keys %{$msg_parts{pattern}};
 	
 		
  		#Debug Dumper(\%patternList);		
@@ -1740,7 +1740,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 
 	#my $clockabs;  #Clock will be fetched from Protocol
 	#$patternListRaw{$_} = floor($msg_parts{pattern}{$_}/$clockabs) for keys $msg_parts{pattern};
-	$patternListRaw{$_} = $msg_parts{pattern}{$_} for keys $msg_parts{pattern};
+	$patternListRaw{$_} = $msg_parts{pattern}{$_} for keys %{$msg_parts{pattern}};
 
 	
 	if (defined($clockidx))
