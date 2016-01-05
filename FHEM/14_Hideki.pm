@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 14_Hideki.pm 12128 2015-10-12 $
+# $Id: 14_Hideki.pm 12129 2016-01-05 10:10:10Z $
 # The file is taken from the SIGNALduino project
 # see http://www.fhemwiki.de/wiki/SIGNALduino
 # and was modified by a few additions
@@ -120,7 +120,7 @@ Hideki_Parse($$)
 	my $longids = AttrVal($iohash->{NAME},'longids',0);
 	if ( ($longids ne "0") && ($longids eq "1" || $longids eq "ALL" || (",$longids," =~ m/,$model,/)))
 	{
-		$deviceCode = $model . "_" . $id;
+		$deviceCode=$model . "_" . $id . "." . $channel;
 		Log3 $iohash,4, "$name using longid: $longids model: $model";
 	} else {
 		$deviceCode = $model . "_" . $channel;
@@ -163,6 +163,7 @@ Hideki_Parse($$)
 	readingsBulkUpdate($hash, "battery", $bat)   if ($bat ne "");
 	readingsBulkUpdate($hash, "humidity", $hum) if ($hum ne "");
 	readingsBulkUpdate($hash, "temperature", $temp) if ($temp ne "");
+	readingsBulkUpdate($hash, "channel", $channel) if ($channel ne "");
 	readingsEndUpdate($hash, 1); # Notify is done by Dispatch
 
 	return $name;
@@ -337,6 +338,7 @@ Hideki_Attr(@)
 	<li>temperature (&deg;C)</li>
 	<li>humidity (0-100)</li>
 	<li>battery (ok or low)</li>
+	<li>channel (The Channelnumber (number if)</li>
   </ul>
   
   
@@ -402,6 +404,7 @@ Hideki_Attr(@)
 	<li>temperature (&deg;C)</li>
 	<li>humidity (0-100)</li>
 	<li>battery (ok or low)</li>
+	<li>channel (Der Sensor Kanal)</li>
   </ul>
   <a name="Hideki_unset"></a>
   <b>Set</b> <ul>N/A</ul><br>
