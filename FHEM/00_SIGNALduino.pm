@@ -1,5 +1,6 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm  72788 2015-12-16  v3.2-dev
+# $Id: 00_SIGNALduino.pm  72789 2016-01-05  10:10:10Z $
+# v3.2-dev
 # The file is taken from the FHEMduino project and modified in serval ways for processing the incomming messages
 # see http://www.fhemwiki.de/wiki/SIGNALDuino
 # It was modified also to provide support for raw message handling which it's send from the SIGNALduino
@@ -670,7 +671,7 @@ SIGNALduino_Initialize($)
                       ." flashCommand"
   					  ." hardware:nano328,uno,promini328"
 					  ." debug:0,1"
-					  ." longids"
+					  ." longids:0,1"
 					  ." minsecs"
 					  ." whitelist_IDs"
                       ." $readingFnAttributes";
