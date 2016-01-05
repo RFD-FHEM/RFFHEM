@@ -1,6 +1,6 @@
     ##############################################
     ##############################################
-    # $Id: 14_SD_WS09.pm 1039  2016-01-01 $
+    # $Id: 14_SD_WS09.pm 1041 2016-01-06 10:10:10Z pejonp $
     # 
     # The purpose of this module is to support serval 
     # weather sensors like WS-0101  (Sender 868MHz ASK   Epmfänger RX868SH-DV elv)
@@ -117,8 +117,7 @@
               $rain =  SD_WS09_bin2dec(substr($sensdata,56,8)) * 0.3;
               Log3 $iohash, 3, "SD_WS09_Parse ".$model." Rain bit: ".substr($sensdata,56,8)." Dec: " . $rain ;
             } else {
-            
-            #DCF-77 Zeitmeldungen vom Sensor
+            if(  $whid == "1011" ){ # B  DCF-77 Zeitmeldungen vom Sensor
             my $hrs1 = substr($sensdata,16,8);
             my $hrs;
             my $mins; 
@@ -127,18 +126,21 @@
             my $month;
             my $year;
             Log3 $iohash, 3, "Zeitmeldung SD_WS09_Parse HRS1=$hrs1" ;
-            $hrs = SD_WS09_BCD2bin(substr($sensdata,16,8) & 0x3F) ; #h
-            $mins = SD_WS09_BCD2bin(substr($sensdata,24,8)); #m 
-            $sec = SD_WS09_BCD2bin(substr($sensdata,32,8)); #s 
+           # $hrs = SD_WS09_BCD2bin(substr($sensdata,16,8) & 0x3F) ; #h
+            $hrs = SD_WS09_BCD2bin(substr($sensdata,18,6) ) ; # Stunde
+            $mins = SD_WS09_BCD2bin(substr($sensdata,24,8)); # Minute 
+            $sec = SD_WS09_BCD2bin(substr($sensdata,32,8)); # Sekunde 
             #day month year
-            $mday = SD_WS09_BCD2bin(substr($sensdata,56,8)); #d
-            $month = SD_WS09_BCD2bin(substr($sensdata,48,8) & 0x1f); #d
-            $year = SD_WS09_BCD2bin(substr($sensdata,40,8)); #y
-  
-              Log3 $iohash, 3, "Zeitmeldung SD_WS09_Parse msg=$rawData syncp=$syncpos length:".length($bitData) ;
-              Log3 $iohash, 3, "Zeitmeldung SD_WS09_Parse HH:mm:ss - ".$hrs.":".$mins.":".$sec ;
-              Log3 $iohash, 3, "Zeitmeldung SD_WS09_Parse dd:mm:yy - ".$mday.":".$month.":".$year ;
-    			    return undef;
+            $year = SD_WS09_BCD2bin(substr($sensdata,40,8)); # Jahr
+            #$month = SD_WS09_BCD2bin(substr($sensdata,48,8) & 0x1f); #d
+            $month = SD_WS09_BCD2bin(substr($sensdata,51,5)); # Monat
+            $mday = SD_WS09_BCD2bin(substr($sensdata,56,8)); # Tag
+            Log3 $iohash, 3, "Zeitmeldung SD_WS09_Parse msg=$rawData syncp=$syncpos length:".length($bitData) ;
+            Log3 $iohash, 3, "Zeitmeldung SD_WS09_Parse HH:mm:ss - ".$hrs.":".$mins.":".$sec ;
+            Log3 $iohash, 3, "Zeitmeldung SD_WS09_Parse dd:mm:yy - ".$mday.":".$month.":".$year ;
+            }
+            Log3 $iohash, 3, "Zeitmeldung SD_WS09_Parse msg=$rawData syncp=$syncpos length:".length($sensdata) ;
+    	    return undef;
             }
          }else{
             # eine CTW600 wurde erkannt 
