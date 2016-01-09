@@ -1,5 +1,6 @@
 #################################################################################
-# $Id: 41_OREGON.pm 1041 2016-01-09 10:10:10Z $
+# $Id: 41_OREGON.pm 5598 2016-01-09 10:10:10Z wherzig $
+#
 # Module for FHEM to decode Oregon sensor messages
 #
 # derived from 18_CUL-HOERMANN.pm
@@ -38,7 +39,7 @@
 # 4: log unknown protocols
 # 5: log decoding hexlines for debugging
 #
-# $Id: 41_OREGON.pm 5597 2014-04-22 15:25:55Z wherzig $
+
 package main;
 
 use strict;
