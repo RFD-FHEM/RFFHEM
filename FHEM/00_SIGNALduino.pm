@@ -1,5 +1,6 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm  72789 2016-01-05  10:10:10Z $
+# $Id: 00_SIGNALduino.pm 72789 2016-01-05 10:10:10Z $
+#
 # v3.2-dev
 # The file is taken from the FHEMduino project and modified in serval ways for processing the incomming messages
 # see http://www.fhemwiki.de/wiki/SIGNALDuino
