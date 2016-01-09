@@ -1,5 +1,5 @@
 #################################################################################
-# 41_OREGON.pm
+# $Id: 41_OREGON.pm 1041 2016-01-09 10:10:10Z $
 # Module for FHEM to decode Oregon sensor messages
 #
 # derived from 18_CUL-HOERMANN.pm
