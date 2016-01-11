@@ -221,12 +221,13 @@ SIGNALduino_un_Parse($$)
 	{
 		Log3 $hash, 4, "$name / shutter Dooya $bitData received";
 		
-		Log3 $hash,4, substr($bitData,0,28)." ".substr($bitData,28,8)." ".substr($bitData,36,4);
-		my $id = SIGNALduino_un_binaryToNumber($bitData,0,27);
-		my $channel = SIGNALduino_un_binaryToNumber($bitData,28,4);
+		Log3 $hash,4, substr($bitData,0,23)." ".substr($bitData,24,4)." ".substr($bitData,28,4)." ".substr($bitData,32,4)." ".substr($bitData,36,4);
+		my $id = SIGNALduino_un_binaryToNumber($bitData,0,23);
+		my $remote = SIGNALduino_un_binaryToNumber($bitData,24,27);
+		my $channel = SIGNALduino_un_binaryToNumber($bitData,28,31);
 		
 		my $all = ($channel == 0) ? "true" : "false";
- 	    my $commandcode = oct("0b".substr($bitData,32,4));
+ 	    my $commandcode = SIGNALduino_un_binaryToNumber($bitData,32,35);
  	    my $direction="";
  	    
  	    if ($commandcode == 0b0001) {$direction="up";}
@@ -234,7 +235,7 @@ SIGNALduino_un_Parse($$)
   	    elsif ($commandcode == 0b0101) {$direction="stop";}
   	    elsif ($commandcode == 0b1100) {$direction="learn";}
 		else  { $direction="unknown";}
-		Log3 $hash, 4, "$name found shutter from Dooya. id=$id, channel=$channel, direction=$direction, all_shutters=$all";
+		Log3 $hash, 4, "$name found shutter from Dooya. id=$id, remotetype=$remote,  channel=$channel, direction=$direction, all_shutters=$all";
 	} 
 	elsif ($protocol == "21" && length($bitData)>=32)  ##Einhell doorshutter
 	{
