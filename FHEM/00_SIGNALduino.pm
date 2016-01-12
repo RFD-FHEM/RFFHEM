@@ -161,8 +161,10 @@ my %ProtocolListSIGNALduino  = (
         {
             name			=> 'arctech2',	
 			id          	=> '4',
-			one				=> [1,-5,1,-1],  
-			zero			=> [1,-1,1,-5],  
+			#one			=> [1,-5,1,-1],  
+			#zero			=> [1,-1,1,-5],  
+			one				=> [1,-5],  
+			zero			=> [1,-1],  
 			#float			=> [-1,3],		# not full supported now, for later use
 			sync			=> [1,-14],
 			clockabs     	=> -1,			# -1 = auto
@@ -360,8 +362,10 @@ my %ProtocolListSIGNALduino  = (
         {
             name			=> 'arctech',	
 			id          	=> '4',
-			one				=> [1,-5,1,-1],  
-			zero			=> [1,-1,1,-5],  
+			#one			=> [1,-5,1,-1],  
+			#zero			=> [1,-1,1,-5],  
+			one				=> [1,-5],  
+			zero			=> [1,-1],  
 			sync			=> [1,-10],
 			clockabs     	=> -1,			# -1 = auto
 			format 			=> 'twostate',	# tristate can't be migrated from bin into hex!
