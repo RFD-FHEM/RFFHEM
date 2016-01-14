@@ -645,6 +645,22 @@ my %ProtocolListSIGNALduino  = (
 			length_min      => '40',
 			length_max      => '40',
     	},
+     "35" =>
+     	 {   
+       		name			=> 'socket35',		
+       		id          	=> '35',
+			one				=> [1,-4],
+			zero			=> [4,-1],
+			sync			=> [1,-19],
+			clockabs   		=> '280',		
+			format     		=> 'twostate',  		# not used now
+			preamble		=> 'u35#',				# prepend to converted message	
+			postamble		=> '',					# Append to converted message	 	
+			clientmodule    => '',      			# not used now
+			#modulematch     => '',     			# not used now
+			length_min      => '28',
+			length_max      => '32',
+    	},
 );
 
 
