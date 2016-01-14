@@ -2757,7 +2757,7 @@ attr sduino longids BTHR918N
 	
 			</ul>
 		</li>
-		<li>sendMsgk<br>
+		<li>sendMsg<br>
 		This command will create the needed instructions for sending raw data via the signalduino. Insteaf of specifying the signaldata by your own you specify 
 		a protocol and the bits you want to send. The command will generate the needed command, that the signalduino will send this.
 		<br><br>
@@ -2772,7 +2772,24 @@ attr sduino longids BTHR918N
 		</p>
 		
 		</li><br>
-		
+		<li>enableMessagetype<br>
+			Allows you to enable the message processing for 
+			<ul>
+				<li>messages with sync (syncedMS),
+				<li>messages without a sync pulse (unsyncedMU) 
+				<li>manchester encoded messages (manchesterMC) 
+			</ul>
+			The new state will be saved into the eeprom of your arduino.
+		</li>
+		<li>disableMessagetype<br>
+			Allows you to disable the message processing for 
+			<ul>
+				<li>messages with sync (syncedMS),
+				<li>messages without a sync pulse (unsyncedMU) 
+				<li>manchester encoded messages (manchesterMC) 
+			</ul>
+			The new state will be saved into the eeprom of your arduino.
+		</li>
 		
 	</ul>
 
