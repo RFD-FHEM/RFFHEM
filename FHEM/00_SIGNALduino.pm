@@ -59,6 +59,7 @@ my %sets = (
   "ITClock"  => 'slider,100,20,700',
   "enableMessagetype" => 'syncedMS,unsyncedMU,manchesterMC',
   "disableMessagetype" => 'syncedMS,unsyncedMU,manchesterMC',
+  'sendMsg'		=> "",
 );
 
 ## Supported Clients per default
@@ -941,6 +942,62 @@ SIGNALduino_Set($@)
 	my $argm = 'CE' . substr($arg,-1,1);
 	SIGNALduino_SimpleWrite($hash, $argm);
 	Log3 $name, 4, "set $name $cmd $arg $argm";
+  } elsif( $cmd eq "sendMsg" ) {
+	my ($protocol,$data,$repeats) = split("#",$arg);
+	$protocol=~ s/[Pp](\d+)/$1/; # extract protocol num
+	$repeats=~ s/[rR](\d+)/$1/; # extract repeat num
+	$repeats=1 if ($repeats eq "");
+	
+	return "$name: sendmsg, unknown protocol: $protocol" if (!exists($ProtocolListSIGNALduino{$protocol}));
+	
+	Log3 $name, 5, "$name: sendmsg Preparing rawsend command for protocol=$protocol, repeats=$repeats, bits=$data";
+	 
+	#print ("data = $data \n");
+	#print ("protocol = $protocol \n");
+    #print ("repeats = $repeats \n");
+    
+	my %signalHash;
+	my %patternHash;
+	my $pattern="";
+	my $cnt=0;
+	foreach my $item (qw(sync one zero))
+	{
+	    #print ("item= $item \n");
+	    next if (!exists($ProtocolListSIGNALduino{$protocol}{$item}));
+	    
+		foreach my $p (@{$ProtocolListSIGNALduino{$protocol}{$item}})
+		{
+		    #print (" p = $p \n");
+		    
+		    if (!exists($patternHash{$p}))
+			{
+				$patternHash{$p}=$cnt;
+				$pattern.="P".$patternHash{$p}."=".$p*$ProtocolListSIGNALduino{$protocol}{clockabs}.";";
+				$cnt++;
+			}
+	    	$signalHash{$item}.=$patternHash{$p};
+		   	#print (" signalHash{$item} = $signalHash{$item} \n");
+		}
+	}
+	
+	my @bits = split("", $data);
+	
+	my %bitconv = (1=>"one", 0=>"zero");
+	my $SignalData="D=";
+	
+	$SignalData.=$signalHash{sync} if (!exists($signalHash{sync}));
+	
+	
+	foreach my $bit (@bits)
+	{
+		#Log3 $name, 5, "encoding $bit";
+		$SignalData.=$signalHash{$bitconv{$bit}}; ## Add the signal to our data string
+	}
+	
+	my $sendData = "SR;R=$repeats;$pattern$SignalData;";
+	SIGNALduino_SimpleWrite($hash, $sendData);
+	Log3 $name, 4, "$name: sending via SendMsg: $sendData";
+	
   } else {
   	Log3 $name, 5, "set $name $cmd $arg";
 	#SIGNALduino_SimpleWrite($hash, $arg);
@@ -2541,7 +2598,7 @@ sub SIGNALduino_filterSign($$$%)
 	to receive and send different protocols over different medias. Currently are 433Mhz protocols implemented.
 	<br><br>
 
-	The following devices are currently available:
+	The following device support is currently available:
 	<br><br>
 
 
@@ -2700,6 +2757,21 @@ attr sduino longids BTHR918N
 	
 			</ul>
 		</li>
+		<li>sendMsgk<br>
+		This command will create the needed instructions for sending raw data via the signalduino. Insteaf of specifying the signaldata by your own you specify 
+		a protocol and the bits you want to send. The command will generate the needed command, that the signalduino will send this.
+		<br><br>
+		Please note, that this command will work only for MU or MS protocols. You can't transmit manchester data this way.
+		<br><br>
+		Input args are:
+		<p>
+		P<protocol id>#binarydata#R<num of repeats>
+		<br>Example: P0#0101#R3
+		<br>Will generate the raw send command for the message 0101 with protocol 0 and instruct the arduino to send this three times.
+		<br>SR;R=3;P0=500;P1=-9000;P2=-4000;P3=-2000;D=03020302;
+		</p>
+		
+		</li><br>
 		
 		
 	</ul>
