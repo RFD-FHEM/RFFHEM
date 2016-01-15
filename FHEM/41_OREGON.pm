@@ -1,5 +1,5 @@
 #################################################################################
-# $Id: 41_OREGON.pm 5598 2016-01-09 10:10:10Z wherzig $
+# $Id: 41_OREGON.pm 5599 2016-01-15 19:00:00Z wherzig $
 #
 # Module for FHEM to decode Oregon sensor messages
 #
@@ -13,7 +13,8 @@
 # and highly recommend it.
 #
 # (c) 2010-2014 Copyright: Willi Herzig (Willi.Herzig@gmail.com)
-#
+# modified & fixes Ralf9 2015-2016 
+# 
 #  This script is distributed in the hope that it will be useful,
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
@@ -56,8 +57,8 @@ OREGON_Initialize($)
   $hash->{DefFn}     = "OREGON_Define";
   $hash->{UndefFn}   = "OREGON_Undef";
   $hash->{ParseFn}   = "OREGON_Parse";
-  $hash->{AttrList}  = "IODev ignore:1,0 do_not_notify:1,0 loglevel:0,1,2,3,4,5,6";
-
+  $hash->{AttrList}  = "IODev ignore:1,0 do_not_notify:1,0 loglevel:0,1,2,3,4,5,6 "
+                      ." $readingFnAttributes";
 }
 
 #####################################
@@ -1079,6 +1080,7 @@ OREGON_Parse($$)
     # remove heading and trailing space chars from $val
     $val =~ s/^\s+|\s+$//g;
 
+    Log3 $iohash, 4, "$name decoded Oregon: $val";
     $def->{STATE} = $val;
     $def->{TIME} = $tm;
     $def->{CHANGED}[$n++] = $val;
