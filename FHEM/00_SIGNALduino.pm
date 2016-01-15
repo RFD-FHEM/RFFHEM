@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 72789 2016-01-05 10:10:10Z $
+# $Id: 00_SIGNALduino.pm 72790 2016-01-15 19:00:00Z v3.2-dev$
 #
 # v3.2-dev
 # The file is taken from the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -44,6 +44,7 @@ my %gets = (    # Name, Data to send to the SIGNALduino, Regexp for the answer
   "cmds"     => ["?", '.*Use one of[ 0-9A-Za-z]+[\r\n]*$' ],
   "ITParms"  => ["ip",'.*'],
   "ping"     => ["P",'OK\r\n'],
+# "getConfig" =>["G",'.*'],
 #  "ITClock"  => ["ic", '\d+'],
 #  "FAParms"  => ["fp", '.*' ],
 #  "TCParms"  => ["dp", '.*' ],
@@ -693,7 +694,7 @@ SIGNALduino_Initialize($)
                       ." flashCommand"
   					  ." hardware:nano328,uno,promini328"
 					  ." debug:0,1"
-					  ." longids:0,1"
+					  ." longids"
 					  ." minsecs"
 					  ." whitelist_IDs"
                       ." $readingFnAttributes";
@@ -749,8 +750,9 @@ SIGNALduino_Define($$)
   }
   
 
-  $dev .= "\@57600" if( $dev ne "none" && $dev !~ m/\@/ );
-		
+  if ($dev ne "none" && $dev =~ m/[a-zA-Z]/ && $dev !~ m/\@/) {    # bei einer IP wird kein \@57600 angehaengt
+	$dev .= "\@57600";
+  }	
   
   $hash->{CMDS} = "";
   $hash->{Clients} = $clientsSIGNALduino;
@@ -1030,10 +1032,10 @@ SIGNALduino_Get($@)
   	 if ($arg =~ /^M[CSU];.*/)
   	{
 		$arg="\002$arg\003";  	## Add start end end marker if not already there
-		Log3 $name, 5, "SIGNALduino/msg adding start and endmarker to message";
+		Log3 $name, 5, "$name/msg adding start and endmarker to message";
 
   	}
-	Log3 $name, 4, "SIGNALduino/msg get raw: $arg";
+	Log3 $name, 4, "$name/msg get raw: $arg";
 	
 	return SIGNALduino_Parse($hash, $hash, $hash->{NAME}, $arg);
   }
@@ -1577,7 +1579,7 @@ sub SIGNALduno_Dispatch($$$)
 	my ($hash, $rmsg,$dmsg) = @_;
 	my $name = $hash->{NAME};
 	
-	Log3 $name, 5, "converted Data to ($dmsg)";
+	Log3 $name, 5, "$name converted Data to ($dmsg)";
 	
 	#Dispatch only if $dmsg is different from last $dmsg, or if 2 seconds are between transmits
     if ( ($hash->{DMSG} ne $dmsg) || ($hash->{TIME}+1 < time()) ) { 
@@ -1594,7 +1596,7 @@ sub SIGNALduno_Dispatch($$$)
 		Dispatch($hash, $dmsg, \%addvals);  ## Dispatch to other Modules 
 		
 	}	else {
-		Log3 $name, 4, "Dropped ($dmsg) due to short time or equal msg";
+		Log3 $name, 4, "$name Dropped ($dmsg) due to short time or equal msg";
 	}	
 }
 
@@ -2056,7 +2058,7 @@ SIGNALduino_Parse_MC($$$$@)
 		{
 			Debug "clock and min length matched"  if ($debug);
 
-			Log3 $name, 4, "Found manchester Protocol id $id clock $clock -> $ProtocolListSIGNALduino{$id}{name}";
+			Log3 $name, 4, "$name Found manchester Protocol id $id clock $clock -> $ProtocolListSIGNALduino{$id}{name}";
 		   	my $method = $ProtocolListSIGNALduino{$id}{method};
 		    if (!exists &$method)
 			{
@@ -2075,7 +2077,7 @@ SIGNALduino_Parse_MC($$$$@)
 						$message_dispatched=1;
 					}
 				} else {
-					Log3 $name, 5, "protocol does not match return from method: ($res)"  if ($debug);
+					Log3 $name, 5, "$name protocol does not match return from method: ($res)"  if ($debug);
 
 				}
 			}
