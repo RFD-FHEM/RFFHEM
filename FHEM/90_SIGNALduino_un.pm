@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 14_SIGNALduino_un.pm 12202 2015-10-17 $
+# $Id: 14_SIGNALduino_un.pm 12204 2016-01-15 20:00:00Z dev-r32 $
 # The file is part of the SIGNALduino project
 # see http://www.fhemwiki.de/wiki/SIGNALduino
 # to support debugging of unknown signal data
@@ -403,8 +403,8 @@ SIGNALduino_un_binflip($)
 <a name="SIGNALduino_un"></a>
 <h3>SIGNALduino_un</h3>
 <ul>
-  Das SIGNALduino_un module ist ein Hilfsmodul um unbekannte Nachrichten debuggen und analysieren zu können.
-  Das Modul legt keinerlei Geräte oder ähnliches an.
+  Das SIGNALduino_un module ist ein Hilfsmodul um unbekannte Nachrichten debuggen und analysieren zu koennen.
+  Das Modul legt keinerlei Geraete oder aehnliches an.
   <br><br>
 
   <a name="SIGNALduino_undefine"></a>
@@ -412,10 +412,10 @@ SIGNALduino_un_binflip($)
     <code>define &lt;name&gt; SIGNALduino_un &lt;code&gt; </code> <br>
 
     <br>
-    Es ist möglich ein Gerät manuell zu definieren, aber damit passiert überhaupt nichts.
-    Autocreate wird auch keinerlei Geräte aus diesem Modul anlegen.
+    Es ist moeglich ein Geraet manuell zu definieren, aber damit passiert ueberhaupt nichts.
+    Autocreate wird auch keinerlei Geraete aus diesem Modul anlegen.
     <br>
-    Die einzgeste Funktion dieses Modules ist, ab Verbose 4 Logmeldungen über die Empfangene Nachricht ins Log zu schreiben. Dabei kann man sich leider nicht darauf verlassen, dass die Nachricht korrekt dekodiert wurde.<br>
+    Die einzgeste Funktion dieses Modules ist, ab Verbose 4 Logmeldungen ueber die Empfangene Nachricht ins Log zu schreiben. Dabei kann man sich leider nicht darauf verlassen, dass die Nachricht korrekt dekodiert wurde.<br>
     Dieses Modul wird alle Nachrichten verarbeiten, welche von anderen Modulen nicht verarbeitet wurden.
   <a name="SIGNALduino_unset"></a>
   <b>Set</b> <ul>N/A</ul><br>
