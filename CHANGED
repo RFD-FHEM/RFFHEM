@@ -1,4 +1,7 @@
-1.1.2015
+15.01.2016
+ - new sendMsg Function
+ - Firmware 3.2.0-11b 
+01.1.2016
  - 14_SD_WS09.pm CTW-600 rain Berechung angepaßt
 26.11.2015
  - WH1080 rain, battery, wind, temp , hum ok (auch WS-0101)
