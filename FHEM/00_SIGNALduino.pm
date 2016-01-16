@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 72790 2016-01-15 19:00:00Z v3.2-dev$
+# $Id: 00_SIGNALduino.pm 72791 2016-01-16 21:00:00Z v3.2-dev$
 #
 # v3.2-dev
 # The file is taken from the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -44,7 +44,7 @@ my %gets = (    # Name, Data to send to the SIGNALduino, Regexp for the answer
   "cmds"     => ["?", '.*Use one of[ 0-9A-Za-z]+[\r\n]*$' ],
   "ITParms"  => ["ip",'.*'],
   "ping"     => ["P",'OK\r\n'],
-# "getConfig" =>["G",'.*'],
+  "config"   => ["G",'.*'],
 #  "ITClock"  => ["ic", '\d+'],
 #  "FAParms"  => ["fp", '.*' ],
 #  "TCParms"  => ["dp", '.*' ],
@@ -1172,6 +1172,7 @@ SIGNALduino_ReadAnswer($$$$)
 {
   my ($hash, $arg, $anydata, $regexp) = @_;
   my $type = $hash->{TYPE};
+  my $name = $hash->{NAME};
 
   while($hash->{TYPE} eq "SIGNALduino_RFR") {   # Look for the first "real" SIGNALduino
     $hash = $hash->{IODev};
@@ -1182,6 +1183,7 @@ SIGNALduino_ReadAnswer($$$$)
 
   my ($mSIGNALduinodata, $rin) = ("", '');
   my $buf;
+  my $idx;
   my $to = 3;                                         # 3 seconds timeout
   $to = $hash->{RA_Timeout} if($hash->{RA_Timeout});  # ...or less
   for(;;) {
@@ -1220,9 +1222,15 @@ SIGNALduino_ReadAnswer($$$$)
 
     # \n\n is socat special
     if($mSIGNALduinodata =~ m/\r\n$/ || $anydata || $mSIGNALduinodata =~ m/\n\n$/ ) {
-      if($regexp && $mSIGNALduinodata !~ m/$regexp/) {
-        SIGNALduino_Parse($hash, $hash, $hash->{NAME}, $mSIGNALduinodata);
-      } else {
+      $idx = index($mSIGNALduinodata,"\003");
+      Log3 $name, 5, "$name/RAW (ReadAnswer): $mSIGNALduinodata Idx=$idx";
+      if ($idx != -1) {
+         SIGNALduino_Parse($hash, $hash, $name, $mSIGNALduinodata);
+         Log3 $name, 3, "$name/RAW (ReadAnswerCut $idx): $mSIGNALduinodata";
+         $mSIGNALduinodata = substr($mSIGNALduinodata, $idx+2) . ' Cut';
+         Log3 $name, 3, "$name/RAW (ReadAnswerCut): $mSIGNALduinodata";
+      }
+      if(!defined($regexp) || $mSIGNALduinodata =~ m/$regexp/) {
         return (undef, $mSIGNALduinodata)
       }
     }
@@ -1330,14 +1338,14 @@ SIGNALduino_Read($)
   my $debug = AttrVal($name,"debug",0);
 
   my $SIGNALduinodata = $hash->{PARTIAL};
-  Log3 $name, 5, "SIGNALduino/RAW READ: $SIGNALduinodata/$buf" if ($debug); 
+  Log3 $name, 5, "$name/RAW READ: $SIGNALduinodata/$buf" if ($debug); 
   $SIGNALduinodata .= $buf;
 
   while($SIGNALduinodata =~ m/\n/) {
     my $rmsg;
     ($rmsg,$SIGNALduinodata) = split("\n", $SIGNALduinodata, 2);
     $rmsg =~ s/\r//;
-    Log3 $name, 4, "SIGNALduino/msg READ: $rmsg"; 
+    Log3 $name, 4, "$name/msg READ: $rmsg"; 
 
     SIGNALduino_Parse($hash, $hash, $name, $rmsg) if($rmsg);
   }
