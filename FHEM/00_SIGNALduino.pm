@@ -1955,9 +1955,10 @@ sub SIGNALduino_Parse_MU($$$$@)
 			
 			for (my $i=$message_start;$i<=length($rawData)-$signal_width;$i+=$signal_width)
 			{
-				Debug "$name: i=$i" if ($debug);
 				
 				my $sig_str= substr($rawData,$i,$signal_width);
+				Debug "$name: i=$i  search=$sig_str" if ($debug);
+
 				$valid=1; # Set valid to 1 for every loop
 				#Debug $patternLookupHash{substr($rawData,$i,$signal_width)}; ## Get $signal_width number of chars from raw data string
 				if (exists $patternLookupHash{$sig_str}) 
@@ -1966,7 +1967,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 					
 					push(@bit_msg,$bit) if (looks_like_number($bit)) ; ## Add the bits to our bit array
 				}
-				if (!exists $patternLookupHash{$sig_str} || $i+$signal_width>length($rawData))  ## Dispatch if last signal or unknown data
+				if (!exists $patternLookupHash{$sig_str} || $i+$signal_width>length($rawData)-$signal_width)  ## Dispatch if last signal or unknown data
 				{
 					Debug "$name: demodulated message raw (@bit_msg), ".@bit_msg." bits\n" if ($debug);;
 					#Check converted message against lengths 
