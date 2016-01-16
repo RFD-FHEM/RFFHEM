@@ -2124,12 +2124,12 @@ SIGNALduino_Parse($$$$@)
 		Log3 $name, 3, "You are using an outdated version of signalduino code on your arduino. Please update";
 		return undef;
 	}
-	if (@{$hash->{msIdList}} && $rmsg=~ m/^MS;(P\d=-?\d+;){4,7}D=\d+;CP=\d;SP=\d;/) 
+	if (@{$hash->{msIdList}} && $rmsg=~ m/^MS;(P\d=-?\d+;){3,6}D=\d+;CP=\d;SP=\d;/) 
 	{
 		$dispatched= SIGNALduino_Parse_MS($hash, $iohash, $name, $rmsg,%signal_parts);
 	}
 	# Message unsynced type   -> MU
-  	elsif (@{$hash->{muIdList}} && $rmsg=~ m/^MU;(P\d=-?\d+;){4,7}D=\d+;CP=\d;/)
+  	elsif (@{$hash->{muIdList}} && $rmsg=~ m/^MU;(P\d=-?\d+;){3,6}D=\d+;CP=\d;/)
 	{
 		$dispatched=  SIGNALduino_Parse_MU($hash, $iohash, $name, $rmsg,%signal_parts);
 	}
