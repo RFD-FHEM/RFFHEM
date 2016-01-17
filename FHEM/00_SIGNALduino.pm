@@ -2019,7 +2019,8 @@ sub SIGNALduino_Parse_MU($$$$@)
 						$i= index($rawData,$startStr,$i);	
 					} else {
 						$i = (index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}},\%patternList),$i) < index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{zero}},\%patternList),$i) ? index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}},\%patternList),$i) : index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{zero}},\%patternList),$i));
-						$i-=$signal_width;
+						$i-=$signal_width if ($i<length($rawData)) ;
+						
 					}
 					last if ($i <=-1);	
 					Log3 $name, 5, "restarting demodulation at Position $i+$signal_width" if ($debug);
