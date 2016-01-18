@@ -2019,7 +2019,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 						$i= index($rawData,$startStr,$i);	
 					} else {
 						$i = (index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}},\%patternList),$i) < index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{zero}},\%patternList),$i) ? index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}},\%patternList),$i) : index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{zero}},\%patternList),$i));
-						$i-=$signal_width if ($i<length($rawData)) ;
+						$i-=$signal_width if ($i<length($rawData)-$signal_width) ;
 						
 					}
 					last if ($i <=-1);	
