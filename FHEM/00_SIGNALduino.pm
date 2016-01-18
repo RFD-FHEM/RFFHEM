@@ -663,6 +663,22 @@ my %ProtocolListSIGNALduino  = (
 			length_min      => '28',
 			length_max      => '32',
     	},
+     "36" =>
+     	 {   
+       		name			=> 'socket36',		
+       		id          	=> '36',
+			one				=> [1,-3],
+			zero			=> [1,-1],
+			start		 	=> [20,-20],
+			clockabs   		=> '500',		
+			format     		=> 'twostate',  		# not used now
+			preamble		=> 'u36#',				# prepend to converted message	
+			postamble		=> '',					# Append to converted message	 	
+			clientmodule    => '',      			# not used now
+			#modulematch     => '',     			# not used now
+			length_min      => '24',
+			length_max      => '24',
+    	},
 );
 
 
@@ -2018,7 +2034,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 					{
 						$i= index($rawData,$startStr,$i);	
 					} else {
-						$i = (index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}},\%patternList),$i) < index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{zero}},\%patternList),$i) ? index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}},\%patternList),$i) : index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{zero}},\%patternList),$i));
+						$i = (index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}},\%patternList),$i+$signal_width) < index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{zero}},\%patternList),$i+$signal_width) ? index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}},\%patternList),$i+$signal_width) : index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{zero}},\%patternList),$i+$signal_width));
 						$i-=$signal_width if ($i<length($rawData)-$signal_width) ;
 						
 					}
