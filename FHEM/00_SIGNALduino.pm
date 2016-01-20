@@ -680,6 +680,22 @@ my %ProtocolListSIGNALduino  = (
 			length_min      => '24',
 			length_max      => '24',
     	},
+    "37" =>
+     	 {   
+       		name			=> 'weather37',		
+       		id          	=> '37',
+			one				=> [2,-1],
+			zero			=> [1,-2],
+			start		 	=> [3,-3,3-3],
+			clockabs   		=> '230',		
+			format     		=> 'twostate',  		# not used now
+			preamble		=> 'u37#',				# prepend to converted message	
+			postamble		=> '',					# Append to converted message	 	
+			clientmodule    => '',      			# not used now
+			#modulematch     => '',     			# not used now
+			length_min      => '40',
+			length_max      => '44',
+    	},
 );
 
 
