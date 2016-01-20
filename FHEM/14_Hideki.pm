@@ -323,7 +323,7 @@ sub decodeRain {
 	}
 	my $sensorId = $Hidekibytes[1] & 0x1f;  		# Extract random id from sensor
 	
-	my $rain = ($Hidekibytes[4] + $Hidekibytes[5]*0xff)*0.7;
+	$rain = ($Hidekibytes[4] + $Hidekibytes[5]*0xff)*0.7;
 
 	return ($channel, $rain);
 }
