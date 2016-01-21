@@ -284,7 +284,24 @@ SIGNALduino_un_Parse($$)
 		
 		
 		Log3 $hash, 4, "$name decoded protocolid: $protocol ($SensorTyp ) mode=$sendMode, sensor id=$id, channel=$channel, temp=$temp, hum=$hum, bat=$bat, crc=$crc, sync=$sync, unkown3=$unknown3\n" ;
+	} elsif ($protocol == "37" && length($bitData)>=40)  ## Bresser 7009993
+	{
+		#   ?   ?    ?      Temp    ?    Hum     ?    ?
+		# 0110 0011 0001 011000100 1110 0101101 1100 1101  19,6 45%
+		# 0110 0011 0001 011000101 0000 0101010 1100 1011  19,7 46%
+		#
+		
+		my $SensorTyp = "Bresser 7009993";
+		
+		my $id = SIGNALduino_un_binaryToNumber($bitData,0,7);  
+		my $channel = SIGNALduino_un_binaryToNumber($bitData,8,11); 
+		my $temp = SIGNALduino_un_binaryToNumber($bitData,12,20)/10;
+		my $hum=SIGNALduino_un_binaryToNumber($bitData,25,31);
+		
 
+		Log3 $hash, 4, "$name decoded protocolid: $protocol ($SensorTyp ) sensor id=$id, channel=$channel, temp=$temp, hum=$hum\n" ;
+
+	
 	} else {
 		return $dummyreturnvalue;
 	}
