@@ -1,6 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 72791 2016-01-20 21:00:00Z v3.2-dev $
-#
+# $Id: 00_SIGNALduino.pm 72792 2016-01-22 18:00:00Z v3.2-dev $
 #
 # v3.2-dev
 # The file is taken from the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -1217,6 +1216,7 @@ SIGNALduino_ReadAnswer($$$$)
   my ($mSIGNALduinodata, $rin) = ("", '');
   my $buf;
   my $idx;
+  my $cut = 0;
   my $to = 3;                                         # 3 seconds timeout
   $to = $hash->{RA_Timeout} if($hash->{RA_Timeout});  # ...or less
   for(;;) {
@@ -1253,17 +1253,28 @@ SIGNALduino_ReadAnswer($$$$)
     }
     $mSIGNALduinodata = SIGNALduino_RFR_DelPrefix($mSIGNALduinodata) if($type eq "SIGNALduino_RFR");
 
+      $idx = index($mSIGNALduinodata,"\003\n");
+      if($idx != -1) {
+        $cut = 1;
+        if($mSIGNALduinodata =~ m/\002.*\003\n/) {    # vollstaendige Signal Nachricht
+          Log3 $name, 4, "$name/RAW (ReadAnswerCut002003): $mSIGNALduinodata";
+          if(defined($regexp)) {                      # kein parse wenn von doInit aufgerufen 
+            SIGNALduino_Parse($hash, $hash, $name, $mSIGNALduinodata);
+          }
+          $mSIGNALduinodata =~ s/\002.*\003\n//;
+        } else {                                      # Signal Nachricht ohne Anfang
+          Log3 $name, 4, "$name/RAW (ReadAnswerCut003 $idx): $mSIGNALduinodata";
+          $mSIGNALduinodata = substr($mSIGNALduinodata, $idx+2);
+        }
+        Log3 $name, 4, "$name/RAW (ReadAnswerCutDone " . length($mSIGNALduinodata) . "): $mSIGNALduinodata";
+      }
+
     # \n\n is socat special
     if($mSIGNALduinodata =~ m/\r\n$/ || $anydata || $mSIGNALduinodata =~ m/\n\n$/ ) {
-      $idx = index($mSIGNALduinodata,"\003");
-      Log3 $name, 5, "$name/RAW (ReadAnswer): $mSIGNALduinodata Idx=$idx";
-      if ($idx != -1) {
-         SIGNALduino_Parse($hash, $hash, $name, $mSIGNALduinodata);
-         Log3 $name, 3, "$name/RAW (ReadAnswerCut $idx): $mSIGNALduinodata";
-         $mSIGNALduinodata = substr($mSIGNALduinodata, $idx+2) . ' Cut';
-         Log3 $name, 3, "$name/RAW (ReadAnswerCut): $mSIGNALduinodata";
-      }
       if(!defined($regexp) || $mSIGNALduinodata =~ m/$regexp/) {
+        if ($cut == 1) {
+          Log3 $name, 4, "$name/RAW (ReadAnswerCut): $mSIGNALduinodata";
+        }
         return (undef, $mSIGNALduinodata)
       }
     }
