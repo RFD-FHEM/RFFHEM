@@ -1,10 +1,9 @@
 ##############################################
-##############################################
-# $Id: 14_SD_WS07.pm 9030  2015-10-12 $
+# $Id: 14_SD_WS07.pm 9031 2016-01-23 18:00:00Z v3.2-dev $
 # 
 # The purpose of this module is to support serval eurochron
 # weather sensors like eas8007 which use the same protocol
-# Sidey79 & Ralf9  2015  
+# Sidey79 & Ralf9  2015-2016
 #
 
 package main;
@@ -163,8 +162,9 @@ SD_WS07_Parse($$)
 		}
 	}
 
-	$def->{lastMSG} = $rawData;
-	$def->{bitMSG} = $bitData2; 
+	$hash->{lastReceive} = time();
+	$hash->{lastMSG} = $rawData;
+	$hash->{bitMSG} = $bitData2; 
 
     my $state = "T: $temp". ($hum>0 ? " H: $hum":"");
     
