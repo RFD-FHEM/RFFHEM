@@ -1,5 +1,5 @@
 #################################################################################
-# $Id: 41_OREGON.pm 34474 2016-24-01 00:16:20 wherzig $
+# $Id: 41_OREGON.pm 34474 2016-24-01 00:19:59 wherzig $
 #
 # Module for FHEM to decode Oregon sensor messages
 #

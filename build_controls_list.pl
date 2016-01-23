@@ -34,7 +34,7 @@ sub listfiles2{
                 
                 #test if firmware
                 
-                if ($file =~ m/.*.pm$/)
+                if (1==2 && $file =~ m/.*.pm$/)
 				{
 					open my $in_fh, '<', $file
 						or die "Cannot open $file for reading: $!";

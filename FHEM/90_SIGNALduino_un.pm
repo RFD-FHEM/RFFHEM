@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 90_SIGNALduino_un.pm 15477 2016-24-01 00:16:20 dev-r32 $
+# $Id: 90_SIGNALduino_un.pm 15477 2016-24-01 00:19:59 dev-r32 $
 # The file is part of the SIGNALduino project
 # see http://www.fhemwiki.de/wiki/SIGNALduino
 # to support debugging of unknown signal data
