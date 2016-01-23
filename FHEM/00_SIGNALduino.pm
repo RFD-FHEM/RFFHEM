@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 72792 2016-01-22 18:00:00Z v3.2-dev $
+# $Id: 00_SIGNALduino.pm 72793 2016-01-23 18:00:00Z v3.2-dev $
 #
 # v3.2-dev
 # The file is taken from the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -765,7 +765,7 @@ SIGNALduino_Define($$)
   
   if (!exists &round)
   {
-      Log3 $name, 1, "$name Signalduino can't be activated (sub round not found). Please update Fhem via update command";
+      Log3 $name, 1, "$name: Signalduino can't be activated (sub round not found). Please update Fhem via update command";
 	  return undef;
   }
   
@@ -776,7 +776,7 @@ SIGNALduino_Define($$)
  
  
   if($dev eq "none") {
-    Log3 $name, 1, "$name device is none, commands will be echoed only";
+    Log3 $name, 1, "$name: device is none, commands will be echoed only";
     $attr{$name}{dummy} = 1;
     #return undef;
   }
@@ -818,7 +818,7 @@ SIGNALduino_Define($$)
   
 
   
-  Log3 $name, 3, "Firmwareversion: ".$hash->{VERSION} if ($hash->{VERSION});
+  Log3 $name, 3, "$name: Firmwareversion: ".$hash->{VERSION} if ($hash->{VERSION});
 
   return $ret;
 }
@@ -836,7 +836,7 @@ SIGNALduino_Undef($$)
        $defs{$d}{IODev} == $hash)
       {
         my $lev = ($reread_active ? 4 : 2);
-        Log3 $name, $lev, "deleting port for $d";
+        Log3 $name, $lev, "$name: deleting port for $d";
         delete $defs{$d}{IODev};
       }
   }
@@ -1154,7 +1154,7 @@ SIGNALduino_DoInit($)
 		# Check received string
 		if($ver !~ m/SIGNALduino/) {
 			$attr{$name}{dummy} = 1;
-			$msg = "Not an SIGNALduino device, got for V:  $ver";
+			$msg = "$name: Not an SIGNALduino device, got for V:  $ver";
 			Log3 $hash, 1, $msg;
 			return $msg;
 		}
@@ -1243,7 +1243,7 @@ SIGNALduino_ReadAnswer($$$$)
     }
 
     if($buf) {
-      Log3 $hash->{NAME}, 5, "SIGNALduino/RAW (ReadAnswer): $buf";
+      Log3 $hash->{NAME}, 5, "$name/RAW (ReadAnswer): $buf";
       $mSIGNALduinodata .= $buf;
     }
     $mSIGNALduinodata = SIGNALduino_RFR_DelPrefix($mSIGNALduinodata) if($type eq "SIGNALduino_RFR");
@@ -1253,9 +1253,9 @@ SIGNALduino_ReadAnswer($$$$)
         $cut = 1;
         if($mSIGNALduinodata =~ m/\002.*\003\n/) {    # vollstaendige Signal Nachricht
           Log3 $name, 4, "$name/RAW (ReadAnswerCut002003): $mSIGNALduinodata";
-          if(defined($regexp)) {                      # kein parse wenn von doInit aufgerufen 
+          #if(defined($regexp)) {                      # kein parse wenn von doInit aufgerufen 
             SIGNALduino_Parse($hash, $hash, $name, $mSIGNALduinodata);
-          }
+          #}
           $mSIGNALduinodata =~ s/\002.*\003\n//;
         } else {                                      # Signal Nachricht ohne Anfang
           Log3 $name, 4, "$name/RAW (ReadAnswerCut003 $idx): $mSIGNALduinodata";
@@ -1318,7 +1318,7 @@ SIGNALduino_Write($$$)
 
   my $name = $hash->{NAME};
 
-  Log3 $name, 5, "$hash->{NAME} sending $fn$msg";
+  Log3 $name, 5, "$name: sending $fn$msg";
   my $bstring = "$fn$msg";
 
   SIGNALduino_SimpleWrite($hash, $bstring);
@@ -1626,7 +1626,7 @@ sub SIGNALduno_Dispatch($$$)
 	my ($hash, $rmsg,$dmsg) = @_;
 	my $name = $hash->{NAME};
 	
-	Log3 $name, 5, "$name converted Data to ($dmsg)";
+	Log3 $name, 5, "$name: converted Data to ($dmsg)";
 	
 	#Dispatch only if $dmsg is different from last $dmsg, or if 2 seconds are between transmits
     if ( ($hash->{DMSG} ne $dmsg) || ($hash->{TIME}+1 < time()) ) { 
@@ -1643,7 +1643,7 @@ sub SIGNALduno_Dispatch($$$)
 		Dispatch($hash, $dmsg, \%addvals);  ## Dispatch to other Modules 
 		
 	}	else {
-		Log3 $name, 4, "$name Dropped ($dmsg) due to short time or equal msg";
+		Log3 $name, 4, "$name: Dropped ($dmsg) due to short time or equal msg";
 	}	
 }
 
@@ -1752,7 +1752,7 @@ SIGNALduino_Parse_MS($$$$%)
 		
 			#Anything seems to be valid, we can start decoding this.			
 
-			Log3 $name, 4, "Founded matched MS Protocol id $id -> $ProtocolListSIGNALduino{$id}{name}"  if ($valid);
+			Log3 $name, 4, "$name: Matched MS Protocol id $id -> $ProtocolListSIGNALduino{$id}{name}"  if ($valid);
 			my $signal_width= @{$ProtocolListSIGNALduino{$id}{one}};
 			#Debug $signal_width;
 			
@@ -1762,7 +1762,7 @@ SIGNALduino_Parse_MS($$$$%)
 			#for (my $i=index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{sync}}))+$signal_width;$i<length($rawData);$i+=$signal_width)
 			#for (my $i=scalar@{$ProtocolListSIGNALduino{$id}{sync}};$i<length($rawData);$i+=$signal_width)
 			my $message_start =index($rawData,$syncstr)+length($syncstr);
-			Log3 $name, 5, "Starting demodulation at Position $message_start";
+			Log3 $name, 5, "$name: Starting demodulation at Position $message_start";
 			
 			for (my $i=$message_start;$i<length($rawData);$i+=$signal_width)
 			{
@@ -1772,7 +1772,7 @@ SIGNALduino_Parse_MS($$$$%)
 				if (exists $patternLookupHash{$sig_str}) { ## Add the bits to our bit array
 					push(@bit_msg,$patternLookupHash{$sig_str})
 				} else {
-					Log3 $name, 5, "Found wrong signal, aborting demodulation";
+					Log3 $name, 5, "$name: Found wrong signal, aborting demodulation";
 					last;					
 				}
 			}
@@ -1801,7 +1801,7 @@ SIGNALduino_Parse_MS($$$$%)
 			$dmsg = "$dmsg"."$ProtocolListSIGNALduino{$id}{postamble}" if (defined($ProtocolListSIGNALduino{$id}{postamble}));
 			$dmsg = "$ProtocolListSIGNALduino{$id}{preamble}"."$dmsg" if (defined($ProtocolListSIGNALduino{$id}{preamble}));
 			
-			Log3 $name, 4, "Decoded matched MS Protocol id $id dmsg $dmsg length " . scalar @bit_msg;
+			Log3 $name, 4, "$name: Decoded MS Protocol id $id dmsg $dmsg length " . scalar @bit_msg;
 			
 			my $modulematch;
 			if (defined($ProtocolListSIGNALduino{$id}{modulematch})) {
@@ -1963,7 +1963,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 		
 			#Anything seems to be valid, we can start decoding this.			
 
-			Log3 $name, 4, "Fingerprint for MU Protocol id $id -> $ProtocolListSIGNALduino{$id}{name} matches, trying to demodulate"  if ($valid);
+			Log3 $name, 4, "$name: Fingerprint for MU Protocol id $id -> $ProtocolListSIGNALduino{$id}{name} matches, trying to demodulate"  if ($valid);
 			my $signal_width= @{$ProtocolListSIGNALduino{$id}{one}};
 			#Debug $signal_width;
 			
@@ -2030,13 +2030,13 @@ sub SIGNALduino_Parse_MU($$$$@)
 							Debug "$name: padding 0 bit to bit_msg array" if ($debug);
 						}
 			
-						Log3 $name, 5, "dispatching bits: @bit_msg";
+						Log3 $name, 5, "$name: dispatching bits: @bit_msg";
 						my $dmsg = SIGNALduino_b2h(join "", @bit_msg);
 						$dmsg =~ s/^0+//	 if (defined($ProtocolListSIGNALduino{$id}{remove_zero})); 
 						$dmsg = "$dmsg"."$ProtocolListSIGNALduino{$id}{postamble}" if (defined($ProtocolListSIGNALduino{$id}{postamble}));
 						$dmsg = "$ProtocolListSIGNALduino{$id}{preamble}"."$dmsg" if (defined($ProtocolListSIGNALduino{$id}{preamble}));
 						
-						Log3 $name, 4, "decoded matched MU Protocol id $id dmsg $dmsg length " . scalar @bit_msg;
+						Log3 $name, 4, "$name: decoded matched MU Protocol id $id dmsg $dmsg length " . scalar @bit_msg;
 						
 						my $modulematch;
 						if (defined($ProtocolListSIGNALduino{$id}{modulematch})) {
@@ -2082,7 +2082,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 				#		
 				#	}
 				#	last if ($i <=-1);	
-					Log3 $name, 5, "restarting demodulation at Position $i+$signal_width" if ($debug);
+					Log3 $name, 5, "$name: restarting demodulation at Position $i+$signal_width" if ($debug);
 				
 				}
 			}
@@ -2127,7 +2127,7 @@ SIGNALduino_Parse_MC($$$$@)
 		{
 			Debug "clock and min length matched"  if ($debug);
 
-			Log3 $name, 4, "$name Found manchester Protocol id $id clock $clock -> $ProtocolListSIGNALduino{$id}{name}";
+			Log3 $name, 4, "$name: Found manchester Protocol id $id clock $clock -> $ProtocolListSIGNALduino{$id}{name}";
 		   	my $method = $ProtocolListSIGNALduino{$id}{method};
 		    if (!exists &$method)
 			{
@@ -2146,7 +2146,7 @@ SIGNALduino_Parse_MC($$$$@)
 						$message_dispatched=1;
 					}
 				} else {
-					Log3 $name, 5, "$name protocol does not match return from method: ($res)"  if ($debug);
+					Log3 $name, 5, "$name: protocol does not match return from method: ($res)"  if ($debug);
 
 				}
 			}
@@ -2181,7 +2181,7 @@ SIGNALduino_Parse($$$$@)
 	# Message Synced type   -> M#
 	if ($rmsg=~ m/^M\d+;(P\d=-?\d+;){4,7}D=\d+;CP=\d;SP=\d;/) 
 	{
-		Log3 $name, 3, "You are using an outdated version of signalduino code on your arduino. Please update";
+		Log3 $name, 3, "$name: You are using an outdated version of signalduino code on your arduino. Please update";
 		return undef;
 	}
 	if (@{$hash->{msIdList}} && $rmsg=~ m/^MS;(P\d=-?\d+;){3,6}D=\d+;CP=\d;SP=\d;/) 
@@ -2255,7 +2255,7 @@ SIGNALduino_SimpleWrite(@)
   }
 
   my $name = $hash->{NAME};
-  Log3 $name, 5, "SW: $msg";
+  Log3 $name, 5, "$name SW: $msg";
 
   $msg .= "\n" unless($nonl);
 
@@ -2274,7 +2274,7 @@ SIGNALduino_Attr(@)
 	my $hash = $defs{$name};
 	my $debug = AttrVal($name,"debug",0);
 
-	Log3 $name, 4, "Calling Getting Attr sub with args: $cmd $aName = $aVal";
+	Log3 $name, 4, "$name: Calling Getting Attr sub with args: $cmd $aName = $aVal";
 		
 	if( $aName eq "Clients" ) {		## Change clientList
 		$hash->{Clients} = $aVal;
@@ -2361,9 +2361,9 @@ sub SIGNALduino_IdList($$$)
 	@muIdList = sort @muIdList;
 	@mcIdList = sort @mcIdList;
 
-	Log3 $name, 3, "$name IDlist MS @msIdList";
-	Log3 $name, 3, "$name IDlist MU @muIdList";
-    Log3 $name, 3, "$name IDlist MC @mcIdList";
+	Log3 $name, 3, "$name: IDlist MS @msIdList";
+	Log3 $name, 3, "$name: IDlist MU @muIdList";
+    Log3 $name, 3, "$name: IDlist MC @mcIdList";
 	
 	$hash->{msIdList} = \@msIdList;
     $hash->{muIdList} = \@muIdList;
