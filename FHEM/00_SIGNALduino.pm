@@ -1043,7 +1043,7 @@ SIGNALduino_Get($@)
   my ($hash, @a) = @_;
   my $type = $hash->{TYPE};
   my $name = $a[0];
-
+  
   Log3 $name, 5, "\"get $type\" needs at least one parameter" if(@a < 2);
   return "\"get $type\" needs at least one parameter" if(@a < 2);
   if(!defined($gets{$a[1]})) {
@@ -1052,11 +1052,13 @@ SIGNALduino_Get($@)
   }
 
   my $arg = ($a[2] ? $a[2] : "");
+  return "no command to send, get aborted." if (length($gets{$a[1]}[0]) == 0 && length($arg) == 0);
+  
   my ($msg, $err);
 
   if (IsDummy($name))
   {
-  	 if ($arg =~ /^M[CSU];.*/)
+  	if ($arg =~ /^M[CSU];.*/)
   	{
 		$arg="\002$arg\003";  	## Add start end end marker if not already there
 		Log3 $name, 5, "$name/msg adding start and endmarker to message";
@@ -1070,22 +1072,23 @@ SIGNALduino_Get($@)
 
   Log3 $name, 5, "$name: command for gets: " . $gets{$a[1]}[0] . " " . $arg;
 
+  
   SIGNALduino_SimpleWrite($hash, $gets{$a[1]}[0] . $arg);
 
   ($err, $msg) = SIGNALduino_ReadAnswer($hash, $a[1], 0, $gets{$a[1]}[1]);
   Log3 $name, 5, "$name: received message for gets: " . $msg if ($msg);
-
+  
   if(!defined($msg)) {
-    DevIo_Disconnected($hash);
-    $msg = "No answer";
+	   DevIo_Disconnected($hash);
+	   $msg = "No answer";
 
   } elsif($a[1] eq "cmds") {       # nice it up
-    $msg =~ s/.*Use one of//g;
+   	$msg =~ s/.*Use one of//g;
 
   } elsif($a[1] eq "uptime") {     # decode it
-    $msg =~ s/[\r\n]//g;
-    #$msg = hex($msg);              # /125; only for col or coc
-    $msg = sprintf("%d %02d:%02d:%02d", $msg/86400, ($msg%86400)/3600, ($msg%3600)/60, $msg%60);
+   	$msg =~ s/[\r\n]//g;
+   	#$msg = hex($msg);              # /125; only for col or coc
+    	$msg = sprintf("%d %02d:%02d:%02d", $msg/86400, ($msg%86400)/3600, ($msg%3600)/60, $msg%60);
   }
 
   $msg =~ s/[\r\n]//g;
@@ -1093,9 +1096,8 @@ SIGNALduino_Get($@)
   #$hash->{READINGS}{$a[1]}{VAL} = $msg;
   #$hash->{READINGS}{$a[1]}{TIME} = time();
   readingsSingleUpdate($hash, $a[1], $msg, 0);
-
-  
   return "$a[0] $a[1] => $msg";
+
 }
 
 sub
@@ -1156,8 +1158,18 @@ SIGNALduino_DoInit($)
 			$attr{$name}{dummy} = 1;
 			$msg = "$name: Not an SIGNALduino device, got for V:  $ver";
 			Log3 $hash, 1, $msg;
+			readingsSingleUpdate($hash, "state", "no SIGNALduino found", 1);
+			
 			return $msg;
 		}
+		elsif($ver =~ m/3.1./) {
+			$attr{$name}{dummy} = 1;
+			$msg = "$name: Version of your arduino is not compatible, pleas flash new firmware. Got for V:  $ver";
+			readingsSingleUpdate($hash, "state", "unsupported firmware found", 1);
+			Log3 $hash, 1, $msg;
+			return $msg;
+		}
+		
 		$hash->{VERSION} = $ver;
 	
 		$ver =~ s/[\r\n]//g;
