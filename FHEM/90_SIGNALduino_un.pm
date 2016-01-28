@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 90_SIGNALduino_un.pm 15478 2016-01-25 22:30:00 dev-r32 $
+# $Id: 90_SIGNALduino_un.pm 15479 2016-01-28 20:00:00 dev-r32 $
 # The file is part of the SIGNALduino project
 # see http://www.fhemwiki.de/wiki/SIGNALduino
 # to support debugging of unknown signal data
@@ -289,20 +289,22 @@ SIGNALduino_un_Parse($$)
 		
 		# 0      7 8 9 10 12        22   25    31
 		# 01011010 0 0 01 01100001110 10 0111101 11001010
-		# ID      B? T Kan Temp        ?? Hum     Pruefsumme?
+		# ID      B? T Kan Temp       ?? Hum     Pruefsumme?
 		#
 		
 		my $SensorTyp = "Bresser 7009994";
 		
 		my $id = SIGNALduino_un_binaryToNumber($bitData,0,7);  
-		my $channel = SIGNALduino_un_binaryToNumber($bitData,10,11); 
-		my $temp = (SIGNALduino_un_binaryToNumber($bitData,12,22)-590)/10;
+		my $channel = SIGNALduino_un_binaryToNumber($bitData,10,11);
 		my $hum=SIGNALduino_un_binaryToNumber($bitData,25,31);
+		my $rawTemp = SIGNALduino_un_binaryToNumber($bitData,12,22);
+		my $temp = ($rawTemp - 609.93) / 9.014;
+		$temp = sprintf("%.2f", $temp);
 		
 		my $bitData2 = substr($bitData,0,8) . ' ' . substr($bitData,8,4) . ' ' . substr($bitData,12,11);
 		$bitData2 = $bitData2 . ' ' . substr($bitData,23,2) . ' ' . substr($bitData,25,7) . ' ' . substr($bitData,32,8);
 		Log3 $hash, 4, "$name converted to bits: " . $bitData2;
-		Log3 $hash, 4, "$name decoded protocolid: $protocol ($SensorTyp ) sensor id=$id, channel=$channel, temp=$temp, hum=$hum" ;
+		Log3 $hash, 4, "$name decoded protocolid: $protocol ($SensorTyp) sensor id=$id, channel=$channel, rawTemp=$rawTemp, temp=$temp, hum=$hum";
 
 	
 	} else {
