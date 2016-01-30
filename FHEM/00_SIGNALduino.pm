@@ -186,7 +186,7 @@ my %ProtocolListSIGNALduino  = (
 			zero			=> [1,-3],
 			clockabs     	=> 500,			# -1 = auto
 			format 			=> 'twostate',	# tristate can't be migrated from bin into hex!
-			preamble		=> 'i',			# Append to converted message	
+			preamble		=> 'p5#',			# Append to converted message	
 			clientmodule    => 'IT',   		# not used now
 			modulematch     => '^i......',  # not used now
 			length_min      => '24',
@@ -364,10 +364,10 @@ my %ProtocolListSIGNALduino  = (
         {
             name			=> 'arctech',	
 			id          	=> '4',
-			#one			=> [1,-5,1,-1],  
-			#zero			=> [1,-1,1,-5],  
-			one				=> [1,-5],  
-			zero			=> [1,-1],  
+			one				=> [1,-5,1,-1],  
+			zero			=> [1,-1,1,-5],  
+			#one			=> [1,-5],  
+			#zero			=> [1,-1],  
 			sync			=> [1,-10],
 			clockabs     	=> -1,			# -1 = auto
 			format 			=> 'twostate',	# tristate can't be migrated from bin into hex!
@@ -376,7 +376,8 @@ my %ProtocolListSIGNALduino  = (
 			clientmodule    => 'IT',   		# not used now
 			modulematch     => '^i......',  # not used now
 			length_min      => '32',
-			#length_max      => '76',		# Don't know maximal lenth of a valid message
+			#length_max     => '76',		# Don't know maximal lenth of a valid message
+			postDemodulation => \&SIGNALduino_bit2Arctec,
 		},
 	
 	"18"    => 			## Oregon Scientific v1
@@ -1079,8 +1080,8 @@ SIGNALduino_Get($@)
   Log3 $name, 5, "$name: received message for gets: " . $msg if ($msg);
   
   if(!defined($msg)) {
-	   DevIo_Disconnected($hash);
-	   $msg = "No answer";
+	DevIo_Disconnected($hash);
+	$msg = "No answer";
 
   } elsif($a[1] eq "cmds") {       # nice it up
    	$msg =~ s/.*Use one of//g;
@@ -1088,7 +1089,7 @@ SIGNALduino_Get($@)
   } elsif($a[1] eq "uptime") {     # decode it
    	$msg =~ s/[\r\n]//g;
    	#$msg = hex($msg);              # /125; only for col or coc
-    	$msg = sprintf("%d %02d:%02d:%02d", $msg/86400, ($msg%86400)/3600, ($msg%3600)/60, $msg%60);
+    $msg = sprintf("%d %02d:%02d:%02d", $msg/86400, ($msg%86400)/3600, ($msg%3600)/60, $msg%60);
   }
 
   $msg =~ s/[\r\n]//g;
@@ -1784,13 +1785,21 @@ SIGNALduino_Parse_MS($$$$%)
 				if (exists $patternLookupHash{$sig_str}) { ## Add the bits to our bit array
 					push(@bit_msg,$patternLookupHash{$sig_str})
 				} else {
-					Log3 $name, 5, "$name: Found wrong signal, aborting demodulation";
-					last;					
+					Log3 $name, 5, "$name: Found wrong signalpattern, catched ".scalar @bit_msg." bits, aborting demodulation";
+					last;
 				}
 			}
+	
 			
 			Debug "$name: decoded message raw (@bit_msg), ".@bit_msg." bits\n" if ($debug);;
 			
+			my ($rcode,@retvalue) = SIGNALduino_callsub('postDemodulation',$ProtocolListSIGNALduino{$id}{postDemodulation},$name,@bit_msg);
+			next if (!$rcode);
+			#Log3 $name, 5, "$name: postdemodulation value @retvalue";
+			
+			@bit_msg = @retvalue;
+			undef(@retvalue); undef($rcode);
+
 			my $padwith = defined($ProtocolListSIGNALduino{$id}{paddingbits}) ? $ProtocolListSIGNALduino{$id}{paddingbits} : 4;
 			
 			my $i=0;
@@ -1814,6 +1823,13 @@ SIGNALduino_Parse_MS($$$$%)
 			$dmsg = "$ProtocolListSIGNALduino{$id}{preamble}"."$dmsg" if (defined($ProtocolListSIGNALduino{$id}{preamble}));
 			
 			Log3 $name, 4, "$name: Decoded MS Protocol id $id dmsg $dmsg length " . scalar @bit_msg;
+			
+			
+			#my ($rcode,@retvalue) = SIGNALduino_callsub('preDispatchfunc',$ProtocolListSIGNALduino{$id}{preDispatchfunc},$name,$dmsg);
+			#next if (!$rcode);
+			#$dmsg = @retvalue;
+			#undef(@retvalue); undef($rcode);
+			
 			
 			my $modulematch;
 			if (defined($ProtocolListSIGNALduino{$id}{modulematch})) {
@@ -2133,7 +2149,6 @@ SIGNALduino_Parse_MC($$$$@)
 	my $id;
 	foreach $id (@{$hash->{mcIdList}}) {
 
-		Debug "Testing against MC Protocol id $id -> $ProtocolListSIGNALduino{$id}{name}"  if ($debug);
 
 		if ( $clock >$ProtocolListSIGNALduino{$id}{clockrange}[0] and $clock <$ProtocolListSIGNALduino{$id}{clockrange}[1] and length($rawData)*4 >= $ProtocolListSIGNALduino{$id}{length_min} )
 		{
@@ -2381,6 +2396,43 @@ sub SIGNALduino_IdList($$$)
     $hash->{muIdList} = \@muIdList;
     $hash->{mcIdList} = \@mcIdList;
 }
+
+
+sub SIGNALduino_callsub
+{
+	my $funcname =shift;
+	my $method = shift;
+	my $name = shift;
+	my @args = @_;
+	
+	
+	if ( defined $method && defined &$method )   
+	{
+		Log3 $name, 5, "$name: applying $funcname method $method";
+		#Log3 $name, 5, "$name: value bevore $funcname: @args";
+		
+		my @returnvalues = $method->(@args) ;	
+			
+	    Log3 $name, 5, "$name: modified value after $funcname: @returnvalues";
+	    return (1,@returnvalues);
+	} elsif (defined $method ) {					
+		Log3 $name, 5, "$name: Error: Unknown method $funcname Please check definition";
+		return (0,undef);
+	}	
+	return (1,@args);			
+}
+
+sub SIGNALduino_bit2Arctec
+{
+	my $msg = join("",@_);	
+	# Convert 0 -> 01   1 -> 10 to be compatible with IT Module
+	$msg =~ s/0/z/g;
+	$msg =~ s/1/10/g;
+	$msg =~ s/z/01/g;
+	return split("",$msg);
+}
+
+
 
 
 sub SIGNALduino_OSV2()
