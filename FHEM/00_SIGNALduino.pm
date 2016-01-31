@@ -369,7 +369,7 @@ my %ProtocolListSIGNALduino  = (
 			#one			=> [1,-5],  
 			#zero			=> [1,-1],  
 			sync			=> [1,-10],
-			clockabs     	=> -1,			# -1 = auto
+			clockabs     	=> 260,			# -1 = auto
 			format 			=> 'twostate',	# tristate can't be migrated from bin into hex!
 			preamble		=> 'i',			# Append to converted message	
 			postamble		=> '00',		# Append to converted message	 	
@@ -859,6 +859,8 @@ SIGNALduino_Shutdown($)
 }
 
 #####################################
+#$hash,$name,"sendmsg","P17;R6#".substr($arg,2)
+
 sub
 SIGNALduino_Set($@)
 {
@@ -1015,7 +1017,7 @@ SIGNALduino_Set($@)
 	my %bitconv = (1=>"one", 0=>"zero");
 	my $SignalData="D=";
 	
-	$SignalData.=$signalHash{sync} if (!exists($signalHash{sync}));
+	$SignalData.=$signalHash{sync} if (exists($signalHash{sync}));
 	
 	
 	foreach my $bit (@bits)
@@ -1043,7 +1045,9 @@ SIGNALduino_Get($@)
 {
   my ($hash, @a) = @_;
   my $type = $hash->{TYPE};
-  my $name = $a[0];
+  my $name = $hash->{NAME};
+  
+  #my $name = $a[0];
   
   Log3 $name, 5, "\"get $type\" needs at least one parameter" if(@a < 2);
   return "\"get $type\" needs at least one parameter" if(@a < 2);
@@ -1053,7 +1057,6 @@ SIGNALduino_Get($@)
   }
 
   my $arg = ($a[2] ? $a[2] : "");
-  return "no command to send, get aborted." if (length($gets{$a[1]}[0]) == 0 && length($arg) == 0);
   
   my ($msg, $err);
 
@@ -1073,7 +1076,19 @@ SIGNALduino_Get($@)
 
   Log3 $name, 5, "$name: command for gets: " . $gets{$a[1]}[0] . " " . $arg;
 
-  
+  if ($a[1] eq "raw")
+  {
+  	# Dirty hack to check and modify direct communication from logical modules with hardware
+  	if ($arg =~ /^is.*/ && length($arg) == 34)
+  	{
+  		# Arctec protocol
+  		Log3 $name, 5, "$name: calling set :sendmsg P17;R6#".substr($arg,2);
+  		
+  		SIGNALduino_Set($hash,$name,"sendMsg","P17#",substr($arg,2),"#R6");
+  	    return "$a[0] $a[1] => $arg";
+  	}
+  	
+  } 
   SIGNALduino_SimpleWrite($hash, $gets{$a[1]}[0] . $arg);
 
   ($err, $msg) = SIGNALduino_ReadAnswer($hash, $a[1], 0, $gets{$a[1]}[1]);
