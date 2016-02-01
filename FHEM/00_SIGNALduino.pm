@@ -369,7 +369,7 @@ my %ProtocolListSIGNALduino  = (
 			#one			=> [1,-5],  
 			#zero			=> [1,-1],  
 			sync			=> [1,-10],
-			clockabs     	=> 260,			# -1 = auto
+			clockabs     	=> -1,			# -1 = auto
 			format 			=> 'twostate',	# tristate can't be migrated from bin into hex!
 			preamble		=> 'i',			# Append to converted message	
 			postamble		=> '00',		# Append to converted message	 	
@@ -966,6 +966,7 @@ SIGNALduino_Set($@)
 	$arg="ic$clock";
   	SIGNALduino_SimpleWrite($hash, $arg);
   	SIGNALduino_ReadAnswer($hash, "ITClock", 0, $arg); ## Receive the transmitted message
+  	$hash->{$cmd}=$clock;
   } elsif( $cmd eq "disableMessagetype" ) {
 	my $argm = 'CD' . substr($arg,-1,1);
 	SIGNALduino_SimpleWrite($hash, $argm);
@@ -992,6 +993,7 @@ SIGNALduino_Set($@)
 	my %patternHash;
 	my $pattern="";
 	my $cnt=0;
+	my $clock=$ProtocolListSIGNALduino{$protocol}{clockabs} > 1 ?$ProtocolListSIGNALduino{$protocol}{clockabs}:$hash->{ITClock};
 	foreach my $item (qw(sync one zero))
 	{
 	    #print ("item= $item \n");
@@ -1004,7 +1006,7 @@ SIGNALduino_Set($@)
 		    if (!exists($patternHash{$p}))
 			{
 				$patternHash{$p}=$cnt;
-				$pattern.="P".$patternHash{$p}."=".$p*$ProtocolListSIGNALduino{$protocol}{clockabs}.";";
+				$pattern.="P".$patternHash{$p}."=".$p*$clock.";";
 				$cnt++;
 			}
 	    	$signalHash{$item}.=$patternHash{$p};
@@ -1022,6 +1024,7 @@ SIGNALduino_Set($@)
 	
 	foreach my $bit (@bits)
 	{
+		next if (!exists($bitconv{$bit}));
 		#Log3 $name, 5, "encoding $bit";
 		$SignalData.=$signalHash{$bitconv{$bit}}; ## Add the signal to our data string
 	}
@@ -1057,6 +1060,7 @@ SIGNALduino_Get($@)
   }
 
   my $arg = ($a[2] ? $a[2] : "");
+  return "no command to send, get aborted." if (length($gets{$a[1]}[0]) == 0 && length($arg) == 0);
   
   my ($msg, $err);
 
