@@ -74,6 +74,7 @@ my $clientsSIGNALduino = ":IT:"
 						."Hideki:"
 						."SD_WS07:"
 						."SD_WS09:"
+						."SD_WS:"
 						; 
 
 ## default regex match List for dispatching message to logical modules, can be updated during runtime because it is referenced
@@ -87,7 +88,8 @@ my %matchListSIGNALduino = (
      "7:Hideki"					=> "^P12#75[A-F0-9]+",
      "10:SD_WS07"				=> "^P7#[A-Fa-f0-9]{6}F[A-Fa-f0-9]{2}",
      "11:SD_WS09"				=> "^P9#[A-Fa-f0-9]+",
-     "X:SIGNALduino_un"			=> '^[uP]\d+#.*',                       
+     "12:SD_WS"				=> '^W\d+#.*',
+     "X:SIGNALduino_un"			=> '^[uP]\d+#.*',
 );
 
 
@@ -689,7 +691,7 @@ my %ProtocolListSIGNALduino  = (
 			start		 	=> [3,-3,3,-3],
 			clockabs   		=> '230',		
 			format     		=> 'twostate',  		# not used now
-			preamble		=> 'u37#',				# prepend to converted message	
+			preamble		=> 'W37#',				# prepend to converted message	
 			postamble		=> '',					# Append to converted message	 	
 			clientmodule    => '',      			# not used now
 			#modulematch     => '',     			# not used now
