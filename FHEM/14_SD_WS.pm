@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 14_SD_WS.pm 32 2016-03-02 21:00:00 v3.2-dev $
+# $Id: 14_SD_WS.pm 32 2016-03-02 22:00:00 v3.2-dev $
 #
 # The purpose of this module is to support serval
 # weather sensors which use various protocol
@@ -95,7 +95,7 @@ sub SD_WS_Parse($$)
 		
 		# MU;P0=729;P1=-736;P2=483;P3=-251;P4=238;P5=-491;D=010101012323452323454523454545234523234545234523232345454545232345454545452323232345232340;CP=4;
 		
-		$model = "SD_WS37_T";
+		$model = "SD_WS37_TH";
 		$SensorTyp = "Bresser 7009994";
 	
 		$id = 		SD_WS_binaryToNumber($bitData,0,7);
@@ -227,7 +227,7 @@ sub SD_WS_binaryToNumber
 =begin html
 
 <a name="SD_WS"></a>
-<h3>Wether Sensors protocol #7</h3>
+<h3>Weather Sensors various protocols</h3>
 <ul>
   The SD_WS module interprets temperature sensor messages received by a Device like CUL, CUN, SIGNALduino etc.<br>
   <br>
@@ -277,10 +277,10 @@ sub SD_WS_binaryToNumber
 
 =begin html_DE
 
-<a name="SD_WS07"></a>
-<h3>SD_WS07</h3>
+<a name="SD_WS"></a>
+<h3>SD_WS</h3>
 <ul>
-  Das SD_WS07 Module verarbeitet von einem IO Geraet (CUL, CUN, SIGNALDuino, etc.) empfangene Nachrichten von Temperatur-Sensoren.<br>
+  Das SD_WS Modul verarbeitet von einem IO Geraet (CUL, CUN, SIGNALDuino, etc.) empfangene Nachrichten von Temperatur-Sensoren.<br>
   <br>
   <b>Unterstuetze Modelle:</b>
   <ul>
@@ -314,7 +314,7 @@ sub SD_WS_binaryToNumber
     <li><a href="#readingFnAttributes">readingFnAttributes</a></li>
   </ul>
 
-  <a name="SD_WS1_Set"></a>
+  <a name="SD_WS_Set"></a>
   <b>Set</b> <ul>N/A</ul><br>
 
   <a name="SD_WS_Parse"></a>
