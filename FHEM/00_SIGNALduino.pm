@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 96436 2016-27-01 17:49:00 v3.2-dev $
+# $Id: 00_SIGNALduino.pm 95487 2016-03-02 12:24:00 v3.2-dev $
 #
 # v3.2-dev
 # The file is taken from the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -19,7 +19,7 @@ use Time::HiRes qw(gettimeofday);
 use Data::Dumper qw(Dumper);
 use Scalar::Util qw(looks_like_number);
 
-use POSIX qw( floor);  # can be removed
+#use POSIX qw( floor);  # can be removed
 #use Math::Round qw();
 
 sub SIGNALduino_Attr(@);
@@ -365,7 +365,7 @@ my %ProtocolListSIGNALduino  = (
     "17"    => 
         {
             name			=> 'arctech',	
-			id          	=> '4',
+			id          	=> '17',
 			one				=> [1,-5,1,-1],  
 			zero			=> [1,-1,1,-5],  
 			#one			=> [1,-5],  
