@@ -721,6 +721,7 @@ my %ProtocolListSIGNALduino  = (
 
 
 
+
 sub
 SIGNALduino_Initialize($)
 {
@@ -1196,7 +1197,7 @@ SIGNALduino_DoInit($)
 		# Check received string
 		if($ver !~ m/SIGNALduino/) {
 			$attr{$name}{dummy} = 1;
-			$msg = "$name: Not an SIGNALduino device, got for V:  $ver";
+			$msg = "$name: Not an SIGNALduino device, setting attribute dummy=1 got for V:  $ver";
 			Log3 $hash, 1, $msg;
 			readingsSingleUpdate($hash, "state", "no SIGNALduino found", 1);
 			
@@ -1204,7 +1205,7 @@ SIGNALduino_DoInit($)
 		}
 		elsif($ver =~ m/3.1./) {
 			$attr{$name}{dummy} = 1;
-			$msg = "$name: Version of your arduino is not compatible, pleas flash new firmware. Got for V:  $ver";
+			$msg = "$name: Version of your arduino is not compatible, pleas flash new firmware. setting attribute dummy=1 Got for V:  $ver";
 			readingsSingleUpdate($hash, "state", "unsupported firmware found", 1);
 			Log3 $hash, 1, $msg;
 			return $msg;
