@@ -1093,9 +1093,11 @@ SIGNALduino_Get($@)
 		Log3 $name, 5, "$name/msg adding start and endmarker to message";
 
   	}
-	Log3 $name, 4, "$name/msg get raw: $arg";
-	
-	return SIGNALduino_Parse($hash, $hash, $hash->{NAME}, $arg);
+	if ($arg =~ /^\002.*\003$/)
+  	{
+		Log3 $name, 4, "$name/msg get raw: $arg";
+		return SIGNALduino_Parse($hash, $hash, $hash->{NAME}, $arg);
+  	}
   }
   return "No $a[1] for dummies" if(IsDummy($name));
 
@@ -1196,7 +1198,7 @@ SIGNALduino_DoInit($)
 		}
 		# Check received string
 		if($ver !~ m/SIGNALduino/) {
-			$attr{$name}{dummy} = 1;
+			$attr{$name}{dummy} = 1; ## Todo: Do not alter attribues, they belong to the user
 			$msg = "$name: Not an SIGNALduino device, setting attribute dummy=1 got for V:  $ver";
 			Log3 $hash, 1, $msg;
 			readingsSingleUpdate($hash, "state", "no SIGNALduino found", 1);
