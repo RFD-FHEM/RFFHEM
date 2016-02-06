@@ -831,6 +831,13 @@ SIGNALduino_Define($$)
   
   if($dev ne "none") {
     $ret = DevIo_OpenDev($hash, 0, "SIGNALduino_DoInit");
+    
+ 
+    if ($hash->{INACTIVE}==1){
+      DevIo_CloseDev($hash);
+      return $ret ;
+    }
+    
     $hash->{Interval} = "300";
     InternalTimer(gettimeofday()+$hash->{Interval}, "SIGNALduino_GetUpdate", $hash, 0);
   }
@@ -886,6 +893,7 @@ sub
 SIGNALduino_Set($@)
 {
   my ($hash, @a) = @_;
+  
 
   return "\"set SIGNALduino\" needs at least one parameter" if(@a < 2);
   if (!defined($sets{$a[1]})) {
@@ -896,8 +904,8 @@ SIGNALduino_Set($@)
     #Log3 $hash, 3, "set arg = $arguments";
     return "Unknown argument $a[1], choose one of " . $arguments;
   }
-
   my $name = shift @a;
+
   my $cmd = shift @a;
   my $arg = join(" ", @a);
   
@@ -1070,7 +1078,7 @@ SIGNALduino_Get($@)
   my ($hash, @a) = @_;
   my $type = $hash->{TYPE};
   my $name = $hash->{NAME};
-  
+  return "$name is not active, may firmware is not suppoted, please flash" if ($hash->{INACTIVE}==1);
   #my $name = $a[0];
   
   Log3 $name, 5, "\"get $type\" needs at least one parameter" if(@a < 2);
@@ -1198,18 +1206,19 @@ SIGNALduino_DoInit($)
 		}
 		# Check received string
 		if($ver !~ m/SIGNALduino/) {
-			$attr{$name}{dummy} = 1; ## Todo: Do not alter attribues, they belong to the user
+			#$attr{$name}{dummy} = 1; ## Todo: Do not alter attribues, they belong to the user
 			$msg = "$name: Not an SIGNALduino device, setting attribute dummy=1 got for V:  $ver";
 			Log3 $hash, 1, $msg;
 			readingsSingleUpdate($hash, "state", "no SIGNALduino found", 1);
-			
+			$hash->{INACTIVE}=1;
 			return $msg;
 		}
 		elsif($ver =~ m/3.1./) {
-			$attr{$name}{dummy} = 1;
+			#$attr{$name}{dummy} = 1;
 			$msg = "$name: Version of your arduino is not compatible, pleas flash new firmware. setting attribute dummy=1 Got for V:  $ver";
 			readingsSingleUpdate($hash, "state", "unsupported firmware found", 1);
 			Log3 $hash, 1, $msg;
+			$hash->{INACTIVE}=1;
 			return $msg;
 		}
 		
