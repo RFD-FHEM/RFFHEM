@@ -44,7 +44,7 @@ my %gets = (    # Name, Data to send to the SIGNALduino, Regexp for the answer
   "cmds"     => ["?", '.*Use one of[ 0-9A-Za-z]+[\r\n]*$' ],
   "ITParms"  => ["ip",'.*'],
   "ping"     => ["P",'OK\r\n'],
-  "config"   => ["G",'.*'],
+  "config"   => ["CG",'^MS.*MU.*MC.*\r\n'],
 #  "ITClock"  => ["ic", '\d+'],
 #  "FAParms"  => ["fp", '.*' ],
 #  "TCParms"  => ["dp", '.*' ],
@@ -1189,6 +1189,8 @@ SIGNALduino_DoInit($)
 	my ($ver, $try) = ("", 0);
 	#Dirty hack to allow initialisation of DirectIO Device for some debugging and tesing
   	Log3 $hash, 1, "define: ".$hash->{DEF};
+	undef($hash->{INACTIVE}) if exists($hash->{INACTIVE});
+	
  
   	if (($hash->{DEF} !~ m/\@DirectIO/) and ($hash->{DEF} !~ m/none/) )
 	{
@@ -1196,7 +1198,7 @@ SIGNALduino_DoInit($)
 		
 		SIGNALduino_Clear($hash);
 		
-
+		
 		# Try to get version from Arduino
 		while ($try++ < 3 && $ver !~ m/^V/) {
 			SIGNALduino_SimpleWrite($hash, "V");
@@ -1215,7 +1217,7 @@ SIGNALduino_DoInit($)
 		}
 		elsif($ver =~ m/3.1./) {
 			#$attr{$name}{dummy} = 1;
-			$msg = "$name: Version of your arduino is not compatible, pleas flash new firmware. setting attribute dummy=1 Got for V:  $ver";
+			$msg = "$name: Version of your arduino is not compatible, pleas flash new firmware. (setting device to inactive) Got for V:  $ver";
 			readingsSingleUpdate($hash, "state", "unsupported firmware found", 1);
 			Log3 $hash, 1, $msg;
 			$hash->{INACTIVE}=1;
