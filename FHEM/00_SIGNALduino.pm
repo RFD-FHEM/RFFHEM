@@ -847,7 +847,7 @@ SIGNALduino_Define($$)
   
 
   
-  Log3 $name, 3, "$name: Firmwareversion: ".$hash{READINGS}{Version}{VAL}  if ($hash{READINGS}{Version}{VAL});
+  Log3 $name, 3, "$name: Firmwareversion: ".$hash->{READINGS}{Version}{VAL}  if ($hash->{READINGS}{Version}{VAL});
 
   return $ret;
 }
