@@ -1221,8 +1221,9 @@ SIGNALduino_DoInit($)
 			$hash->{INACTIVE}=1;
 			return $msg;
 		}
+		readingsSingleUpdate($hash, "version", $ver, 0);
 		
-		$hash->{VERSION} = $ver;
+		#$hash->{VERSION} = $ver;
 	
 		$ver =~ s/[\r\n]//g;
 	
