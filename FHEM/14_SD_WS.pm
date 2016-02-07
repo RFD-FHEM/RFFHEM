@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 14_SD_WS.pm 32 2016-03-02 22:00:00 v3.2-dev $
+# $Id: 14_SD_WS.pm 32 2016-02-07 14:00:00 v3.2-dev $
 #
 # The purpose of this module is to support serval
 # weather sensors which use various protocol
@@ -27,7 +27,7 @@ sub SD_WS_Initialize($)
 	$hash->{AttrList}	= "IODev do_not_notify:1,0 ignore:0,1 showtime:1,0 " .
 				"$readingFnAttributes ";
 	$hash->{AutoCreate} =
-	{ "SD_WS.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,",  autocreateThreshold => "2:180"} };
+	{ "SD_WS37_TH.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,",  autocreateThreshold => "2:180"} };
 
 }
 
@@ -75,7 +75,7 @@ sub SD_WS_Parse($$)
 	my $bitData = unpack("B$blen", pack("H$hlen", $rawData));
 	my $bitData2;
 	
-	my $model;	# 
+	my $model;	# wenn im elsif Abschnitt definiert, dann wird der Sensor per AutoCreate angelegt
 	my $SensorTyp;
 	my $id;
 	my $bat;
@@ -104,25 +104,30 @@ sub SD_WS_Parse($$)
 		$rawTemp = 	SD_WS_binaryToNumber($bitData,12,22);
 		$hum =		SD_WS_binaryToNumber($bitData,25,31);
 		
+		$id = sprintf('%02X', $id);           # wandeln nach hex
 		$temp = ($rawTemp - 609.93) / 9.014;
 		$temp = sprintf("%.1f", $temp);
+		
+		if ($hum < 10 || $hum > 99 || $temp < -30 || $temp > 70) {
+			return "";
+		}
 	
 		$bitData2 = substr($bitData,0,8) . ' ' . substr($bitData,8,4) . ' ' . substr($bitData,12,11);
 		$bitData2 = $bitData2 . ' ' . substr($bitData,23,2) . ' ' . substr($bitData,25,7) . ' ' . substr($bitData,32,8);
 		Log3 $iohash, 4, "$name converted to bits: " . $bitData2;
 		Log3 $iohash, 4, "$name decoded protocolid: $protocol ($SensorTyp) sensor id=$id, channel=$channel, rawTemp=$rawTemp, temp=$temp, hum=$hum";
 		
-	}
-	elsif ($protocol == "38")		# Auriol
-	{
+	#}
+	#elsif ($protocol == "38")		# ist nur ein Beispiel, die 38 muss durch die jeweilige Protocol ID ersetzt werden
+	#{
 		#
 		#
 		#
 		
 		#$model = "SD_WS38_T";
-		$SensorTyp = "Auriol";
-		
-		Log3 $iohash, 4, "$name converted to bits: " . $bitData;
+	#	$SensorTyp = "Auriol";
+	#	
+	#	Log3 $iohash, 4, "$name converted to bits: " . $bitData;
 		
 	} 
 	else {
