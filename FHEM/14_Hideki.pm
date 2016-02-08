@@ -1,10 +1,10 @@
 ##############################################
-# $Id: 14_Hideki.pm 14394 2016-24-01 00:19:59 $
+# $Id: 14_Hideki.pm 14395 2016-02-08 18:00:00 $
 # The file is taken from the SIGNALduino project
 # see http://www.fhemwiki.de/wiki/SIGNALduino
 # and was modified by a few additions
 # to support Hideki Sensors
-# S. Butzek & HJGode &Ralf9 2015
+# S. Butzek & HJGode & Ralf9 2015-2016
 #
 
 package main;
@@ -91,13 +91,16 @@ Hideki_Parse($$)
 		Log3 $iohash, 4, "$name decrypt failed";
 		return undef;
 	}
+	
+	my $sensorTyp=getSensorType($decodedBytes[3]);
+	Log3 $iohash, 4, "Hideki_Parse SensorTyp = $sensorTyp decodedString = $decodedString";		
+
 	if (!Hideki_crc(\@decodedBytes))
 	{
 		Log3 $iohash, 4, "$name crc failed";
 		return undef;
 	}
-	my $sensorTyp=getSensorType($decodedBytes[3]);
-	Log3 $iohash, 4, "Hideki_Parse SensorTyp = $sensorTyp decodedString = $decodedString";
+
 	my $id=substr($decodedString,2,2);      # get the random id from the data
 	my $channel=0;
 	my $temp=0;
