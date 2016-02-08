@@ -1,5 +1,5 @@
 #################################################################################
-# $Id: 41_OREGON.pm 34474 2016-24-01 00:19:59 wherzig $
+# $Id: 41_OREGON.pm 34475 2016-02-08 18:00:00 wherzig $
 #
 # Module for FHEM to decode Oregon sensor messages
 #
@@ -57,7 +57,7 @@ OREGON_Initialize($)
   $hash->{DefFn}     = "OREGON_Define";
   $hash->{UndefFn}   = "OREGON_Undef";
   $hash->{ParseFn}   = "OREGON_Parse";
-  $hash->{AttrList}  = "IODev ignore:1,0 do_not_notify:1,0 loglevel:0,1,2,3,4,5,6 "
+  $hash->{AttrList}  = "IODev ignore:1,0 do_not_notify:1,0 loglevel:0,1,2,3,4,5,6"
                       ." $readingFnAttributes";
 }
 
@@ -127,26 +127,27 @@ sub OREGON_type_length_key {
 
 my %types =
   (
-   # THGR810
+   # THGR810 v3
    OREGON_type_length_key(0xfa28, 80) =>
    {
     part => 'THGR810', checksum => \&OREGON_checksum2, method => \&OREGON_common_temphydro,
    },
-   # WTGR800 Temp hydro
+   # WTGR800 Temp hydro v3
    OREGON_type_length_key(0xfab8, 80) =>
    {
     part => 'WTGR800_T', checksum => \&OREGON_checksum2, method => \&OREGON_alt_temphydro,
    },
-   # WTGR800 Anenometer
+   # WTGR800 Anenometer v3
    OREGON_type_length_key(0x1a99, 88) =>
    {
     part => 'WTGR800_A', checksum => \&OREGON_checksum4, method => \&OREGON_wtgr800_anemometer,
    },
-   # 
+   # WGR800 v3
    OREGON_type_length_key(0x1a89, 88) =>
    {
     part => 'WGR800', checksum => \&OREGON_checksum4, method => \&OREGON_wtgr800_anemometer,
    },
+   # UVN800 v3
    OREGON_type_length_key(0xda78, 72) =>
    {
     part => 'UVN800', checksum => \&OREGON_checksum7, method => \&OREGON_uvn800,
@@ -233,12 +234,12 @@ my %types =
    {
     part => 'RTGR328N', checksum => \&OREGON_checksum2, method => \&OREGON_common_temphydro,
    },
-   # PCR800. Commented out until fully tested.
+   # PCR800. v3
    OREGON_type_length_key(0x2a19, 92) =>
    {
     part => 'PCR800', checksum => \&OREGON_checksum8, method => \&OREGON_rain_PCR800,
    },
-   # THWR800
+   # THWR800 v3
    OREGON_type_length_key(0xca48, 68) =>
    {
     part => 'THWR800', checksum => \&OREGON_checksum9, method => \&OREGON_common_temp,
