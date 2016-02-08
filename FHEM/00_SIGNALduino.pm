@@ -70,11 +70,11 @@ my $clientsSIGNALduino = ":IT:"
 						."OREGON:"
 						."CUL_TX:"
 						."SD_AS:"
-						."SIGNALduino_un:"
 						."Hideki:"
 						."SD_WS07:"
 						."SD_WS09:"
 						."SD_WS:"
+						."SIGNALduino_un:"
 						; 
 
 ## default regex match List for dispatching message to logical modules, can be updated during runtime because it is referenced
@@ -88,7 +88,7 @@ my %matchListSIGNALduino = (
      "7:Hideki"					=> "^P12#75[A-F0-9]+",
      "10:SD_WS07"				=> "^P7#[A-Fa-f0-9]{6}F[A-Fa-f0-9]{2}",
      "11:SD_WS09"				=> "^P9#[A-Fa-f0-9]+",
-     "12:SD_WS"				=> '^W\d+#.*',
+     "12:SD_WS"					=> '^W\d+#.*',
      "X:SIGNALduino_un"			=> '^[uP]\d+#.*',
 );
 
@@ -299,7 +299,7 @@ my %ProtocolListSIGNALduino  = (
 			length_min      => '72',
 			length_max      => '104',
 			method          => \&SIGNALduino_Hideki	# Call to process this message
-		}, 			
+		}, 			 
 	"13"    => 			## FA21RF
 			{
             name			=> '21RF',	
@@ -2220,9 +2220,9 @@ SIGNALduino_Parse_MC($$$$@)
 					$dmsg=$ProtocolListSIGNALduino{$id}{preamble}.$dmsg if (defined($ProtocolListSIGNALduino{$id}{preamble})); 
 					my $modulematch;
 					if (defined($ProtocolListSIGNALduino{$id}{modulematch})) {
-		                                $modulematch = $ProtocolListSIGNALduino{$id}{modulematch};
+		                $modulematch = $ProtocolListSIGNALduino{$id}{modulematch};
 					}
-                                	if (!defined($modulematch) || $dmsg =~ m/$modulematch/) {
+					if (!defined($modulematch) || $dmsg =~ m/$modulematch/) {
 						SIGNALduno_Dispatch($hash,$rmsg,$dmsg);
 						$message_dispatched=1;
 					}
@@ -2664,7 +2664,7 @@ sub	SIGNALduino_Hideki()
 
 		# Todo: Mindest Laenge fuer startpunkt vorspringen 
 		# Todo: Wiederholung auch an das Modul weitergeben, damit es dort geprueft werden kann
-		my $message_end = index($bitData,"10101110",$message_start+18); # pruefen auf ein zweites 0x75,  mindestens 18 bit nach 1. 0x75
+		my $message_end = index($bitData,"10101110",$message_start+63); # pruefen auf ein zweites 0x75,  mindestens 64 bit nach 1. 0x75, da der Regensensor minimum 64 Bit besitzt
         $message_end = length($bitData) if ($message_end == -1);
         my $message_length = $message_end - $message_start;
 		
