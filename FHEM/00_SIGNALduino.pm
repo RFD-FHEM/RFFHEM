@@ -2664,7 +2664,7 @@ sub	SIGNALduino_Hideki()
 
 		# Todo: Mindest Laenge fuer startpunkt vorspringen 
 		# Todo: Wiederholung auch an das Modul weitergeben, damit es dort geprueft werden kann
-		my $message_end = index($bitData,"10101110",$message_start+63); # pruefen auf ein zweites 0x75,  mindestens 64 bit nach 1. 0x75, da der Regensensor minimum 64 Bit besitzt
+		my $message_end = index($bitData,"10101110",$message_start+71); # pruefen auf ein zweites 0x75,  mindestens 72 bit nach 1. 0x75, da der Regensensor minimum 8 Byte besitzt je byte haben wir 9 bit
         $message_end = length($bitData) if ($message_end == -1);
         my $message_length = $message_end - $message_start;
 		
