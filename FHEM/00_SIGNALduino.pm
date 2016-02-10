@@ -415,11 +415,10 @@ my %ProtocolListSIGNALduino  = (
 		{
             name			=> 'livolo',	
 			id          	=> '20',
-			one				=> [2,-1],
-			zero			=> [1,-1],
-			start			=> [1,-3],				
-			#sync			=> [1,-3],				
-			clockabs		=> -1,                  #can be 140-190
+			one				=> [3],
+			zero			=> [1],
+			start			=> [5],				
+			clockabs		=> 110,                  #can be 90-140
 			format 			=> 'twostate',	  		
 			preamble		=> 'u20#',				# prepend to converted message	
 			#clientmodule    => '',   				# not used now
@@ -2725,7 +2724,7 @@ sub SIGNALduino_filterSign($$$%)
 			#print "\n";
 			
 			# $value  - $set <= $tolerance
-			if (SIGNALduino_inTol($patternListRaw{$key},$buckets{$b_key},$buckets{$b_key}*0.15))
+			if (SIGNALduino_inTol($patternListRaw{$key},$buckets{$b_key},$buckets{$b_key}*0.25))
 			{
 		    	#print"\t". $patternListRaw{$key}."($key) is intol of ".$buckets{$b_key}."($b_key) \n";
 				$cnt++;
