@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 95487 2016-03-02 12:24:00 v3.2-dev $
+# $Id: 00_SIGNALduino.pm 95487 2016-03-11 22:54:00 v3.2 $
 #
 # v3.2-dev
 # The file is taken from the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -8,7 +8,7 @@
 # The purpos is to use it as addition to the SIGNALduino which runs on an arduno nano or arduino uno.
 # It routes Messages serval Modules which are already integrated in FHEM. But there are also modules which comes with it.
 # N. Butzek, S. Butzek, 2014-2015
-#
+# S.Butzek 2016
 
 
 package main;
@@ -73,7 +73,7 @@ my $clientsSIGNALduino = ":IT:"
 						."Hideki:"
 						."SD_WS07:"
 						."SD_WS09:"
-						."SD_WS:"
+#						."SD_WS:"
 						."SIGNALduino_un:"
 						; 
 
@@ -88,7 +88,7 @@ my %matchListSIGNALduino = (
      "7:Hideki"					=> "^P12#75[A-F0-9]+",
      "10:SD_WS07"				=> "^P7#[A-Fa-f0-9]{6}F[A-Fa-f0-9]{2}",
      "11:SD_WS09"				=> "^P9#[A-Fa-f0-9]+",
-     "12:SD_WS"					=> '^W\d+#.*',
+#     "12:SD_WS"					=> '^W\d+#.*',
      "X:SIGNALduino_un"			=> '^[uP]\d+#.*',
 );
 
