@@ -17,6 +17,7 @@ Supported Devices / Protocols
 |Hama TS33C, Bresser Thermo/Hygro Sensor  | Weather sensor |
 |Arduino Sensor | multi purpose sensor based on arduino |
 |technoline Weatherstation WS 6750/TX70DTH| Weather sensor and station |
+|FA21RF|Smoke detector|
 || Remote sockets from serval brands|
 
 
@@ -25,7 +26,7 @@ How to install
 ======
 The Perl modules can be loaded directly into your FHEM installation:
 
-```update all https://raw.githubusercontent.com/RFD-FHEM/RFFHEM/dev-rawIn/controls_signalduino.txt```
+```update all https://raw.githubusercontent.com/RFD-FHEM/RFFHEM/master/controls_signalduino.txt```
 
 Prepare your Arduino nano. Look at http://www.fhemwiki.de/wiki/Datei:Fhemduino_schematic.png
 for hardware setup.
