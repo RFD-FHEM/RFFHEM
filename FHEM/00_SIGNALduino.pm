@@ -700,7 +700,7 @@ my %ProtocolListSIGNALduino  = (
     "38" =>
       	 {   
        		name			=> 'weather38',		
-       		id          	=> '37',
+       		id          	=> '38',
 			one				=> [1,-10],
 			zero			=> [1,-5],
 			sync 			=> [1,-25],
@@ -2791,16 +2791,21 @@ sub SIGNALduino_filterSign($$$%)
 
 
 	Wireless switches  <br>
-	IT/Elro and other brands --> uses IT.pm<br>
+	ITv1 & ITv3/Elro and other brands using pt2263 or arctech protocol--> uses IT.pm<br>
 
 	<br><br>
+	Temperatur / humidity senso
 	<ul>
-	<li>Temperatur / humidity sensors suppored by 14_CUL_TCM97001</li>
-	<li>PEARL NC7159, LogiLink WS0002,GT-WT-02,AURIOL,TCM97001, TCM27 and many more </li>
-	<li>Oregon Scientific v2 Sensors  --> 41_OREGON.pm</li>
-	<li>Temperatur / humidity sensors suppored by 14_SD_WS07</li>
-    <li>technoline WS 6750 and TX70DTH</li>
-    <li>Eurochon EAS 800z</li>
+	<li>PEARL NC7159, LogiLink WS0002,GT-WT-02,AURIOL,TCM97001, TCM27 and many more -> 14_CUL_TCM97001 </li>
+	<li>Oregon Scientific v2 and v3 Sensors  -> 41_OREGON.pm</li>
+	<li>Temperatur / humidity sensors suppored -> 14_SD_WS07</li>
+    <li>technoline WS 6750 and TX70DTH -> 14_SD_WS07</li>
+    <li>Eurochon EAS 800z -> 14_SD_WS07</li>
+    <li>CTW600, WH1080	-> 14_SD_WS09 </li>
+    <li>Hama TS33C, Bresser Thermo/Hygro Sensor -> 14_Hideki</li>
+    <li>FreeTec Außenmodul NC-7344 -> 14_SD_WS07</li>
+    
+    
 	</ul>
 	<br><br>
 
