@@ -1022,7 +1022,7 @@ SIGNALduino_Set($@)
 	my $pattern="";
 	my $cnt=0;
 	my $clock=$ProtocolListSIGNALduino{$protocol}{clockabs} > 1 ?$ProtocolListSIGNALduino{$protocol}{clockabs}:$hash->{ITClock};
-	foreach my $item (qw(sync one zero))
+	foreach my $item (qw(sync start one zero))
 	{
 	    #print ("item= $item \n");
 	    next if (!exists($ProtocolListSIGNALduino{$protocol}{$item}));
