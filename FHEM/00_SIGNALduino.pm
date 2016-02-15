@@ -1048,6 +1048,7 @@ SIGNALduino_Set($@)
 	my $SignalData="D=";
 	
 	$SignalData.=$signalHash{sync} if (exists($signalHash{sync}));
+	$SignalData.=$signalHash{start} if (exists($signalHash{start}));
 	
 	
 	foreach my $bit (@bits)
