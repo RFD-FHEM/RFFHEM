@@ -714,7 +714,23 @@ my %ProtocolListSIGNALduino  = (
 			length_max      => '32',
 			paddingbits     => '8',			
     	},   
-
+		"39" => ## X10 Protocol
+		{
+			name => 'X10 Protocol',
+			id => '39',
+			one => [1,-3],
+			zero => [1,-1],
+			start => [16,-4],
+			clockabs => 650, 
+			format => 'twostate', 
+			preamble => '"', # prepend to converted message
+			clientmodule => 'RFXX10REC', # not used now
+			#modulematch => '^TX......', # not used now
+			length_min => '41',
+			length_max => '44',
+			#remove_zero => 1, # Removes leading zeros from output
+			
+		},    
 );
 
 
@@ -1078,7 +1094,7 @@ SIGNALduino_Get($@)
   my ($hash, @a) = @_;
   my $type = $hash->{TYPE};
   my $name = $hash->{NAME};
-  return "$name is not active, may firmware is not suppoted, please flash" if ($hash->{INACTIVE}==1);
+  return "$name is not active, may firmware is not suppoted, please flash" if (exists($hash->{INACTIVE}) && $hash->{INACTIVE}==1);
   #my $name = $a[0];
   
   Log3 $name, 5, "\"get $type\" needs at least one parameter" if(@a < 2);
