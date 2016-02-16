@@ -74,6 +74,7 @@ my $clientsSIGNALduino = ":IT:"
 						."SD_WS07:"
 						."SD_WS09:"
 						."SD_WS:"
+						."RFXX10REC:"
 						."SIGNALduino_un:"
 						; 
 
@@ -89,6 +90,7 @@ my %matchListSIGNALduino = (
      "10:SD_WS07"				=> "^P7#[A-Fa-f0-9]{6}F[A-Fa-f0-9]{2}",
      "11:SD_WS09"				=> "^P9#[A-Fa-f0-9]+",
      "12:SD_WS"					=> '^W\d+#.*',
+     "13:RFXX10REC" 			=> '^(20|29)[A-Fa-f0-9]+',
      "X:SIGNALduino_un"			=> '^[uP]\d+#.*',
 );
 
@@ -714,7 +716,7 @@ my %ProtocolListSIGNALduino  = (
 			length_max      => '32',
 			paddingbits     => '8',			
     	},   
-		"39" => ## X10 Protocol
+	"39" => ## X10 Protocol
 		{
 			name => 'X10 Protocol',
 			id => '39',
@@ -723,13 +725,13 @@ my %ProtocolListSIGNALduino  = (
 			start => [16,-4],
 			clockabs => 650, 
 			format => 'twostate', 
-			preamble => '"', # prepend to converted message
+			preamble => '', # prepend to converted message
 			clientmodule => 'RFXX10REC', # not used now
 			#modulematch => '^TX......', # not used now
 			length_min => '41',
 			length_max => '44',
-			#remove_zero => 1, # Removes leading zeros from output
-			
+			paddingbits     => '8',		
+			postDemodulation => \&SIGNALduino_lengtnPrefix,			
 		},    
 );
 
@@ -2122,6 +2124,15 @@ sub SIGNALduino_Parse_MU($$$$@)
 					
 					#next if (!$valid);  ## Last chance to try next protocol if there is somethin invalid
 					if ($valid) {
+			
+						my ($rcode,@retvalue) = SIGNALduino_callsub('postDemodulation',$ProtocolListSIGNALduino{$id}{postDemodulation},$name,@bit_msg);
+						next if (!$rcode);
+						#Log3 $name, 5, "$name: postdemodulation value @retvalue";
+			
+						@bit_msg = @retvalue;
+						undef(@retvalue); undef($rcode);
+			
+			
 						while (scalar @bit_msg % $padwith > 0)  ## will pad up full nibbles per default or full byte if specified in protocol
 						{
 							push(@bit_msg,'0');
@@ -2491,6 +2502,21 @@ sub SIGNALduino_callsub
 	}	
 	return (1,@args);			
 }
+
+
+# calculates the hex (in bits) and adds it at the beginning of the message
+# input = @list
+# output = @list
+sub SIGNALduino_lengtnPrefix
+{
+	my $msg = join("",@_);	
+
+	#$msg = unpack("B8", pack("N", length($msg))).$msg;
+	$msg=sprintf('%08b', length($msg)).$msg;
+	
+	return split("",$msg);
+}
+
 
 sub SIGNALduino_bit2Arctec
 {
