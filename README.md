@@ -1,4 +1,4 @@
-SIGNALduino - FHEM Modules rel 3.2 
+SIGNALduino - FHEM Modules rel 3.2 (dooya development) 
 
 ======
 
