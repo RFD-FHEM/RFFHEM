@@ -6,7 +6,7 @@
 #
 # Needs SIGNALduino.
 #
-# Version 0.10
+# Version 0.20
 #
 ######################################################
 
@@ -33,10 +33,10 @@ my %sets = (
 	"off" => "noArg",
 	"on" => "noArg",
 	"stop" => "noArg",
-	"go-my" => "noArg",
+#	"go-my" => "noArg",
 	"prog" => "noArg",
-	"on-for-timer" => "textField",
-	"off-for-timer" => "textField",
+#	"on-for-timer" => "textField",
+#	"off-for-timer" => "textField",
 #	"z_custom" => "textField",
 	"pos" => "0,10,20,30,40,50,60,70,80,90,100"
 );
@@ -58,6 +58,8 @@ my $dooya_defrepetition = 6;	# Default Dooya frame repeat counter
 my $dooya_updateFreq = 3;	# Interval for State update
 
 my %models = ( dooyablinds => 'blinds', dooyashutter => 'shutter', ); # supported models (blinds  and shutters)
+my %channal = (  0 => '0000', 1 => '0001', 2 => '0010', 3 => '0011', 4 => '0100', 5 => '0101', 6 => '0110', 7 => '0111', 8 => '1000', 9 => '1001', 10 => '1010', 11 => '1011', 12 => '1100', 13 => '1101', 14 => '1110', 15 => '1111', ); #Kanal
+my %SignalRepeats = ( 5 => '#R5', 10 => '#R10', 15 => '#R15', 20 => '#R20', );" # Sendungswiederholungen des Signales
 
 
 ######################################################
@@ -134,7 +136,8 @@ sub Dooya_Initialize($) {
 	$hash->{ParseFn}  	= "Dooya_Parse";
 	$hash->{AttrFn}  	= "Dooya_Attr";
 
-	$hash->{AttrList} = " chanal:0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15 "
+	$hash->{AttrList} = " channal:0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15 "
+	  . " SignalRepeats:5,10,15,20 "
 	# . " drive-down-time-to-100"
 	  . " drive-down-time-to-close"
 	# . " drive-up-time-to-100"
@@ -350,7 +353,7 @@ sub Dooya_Parse($$) {
     # get command and set new state
 	my $cmd = sprintf("%X", hex(substr($msg, 4, 2)) & 0xF0);
 	if ($cmd eq "10") {
-		$cmd = "11"; # use "stop" instead of "go-my"
+		$cmd = "01010101"; # use "stop" instead of "go-my"
   }
 
 	my $newstate = $codes{ $cmd };
