@@ -20,12 +20,12 @@ use warnings;
 
 my %codes = (
 #	"10" => "go-my",    # goto "my" position
-	"11" => "stop", 	# stop the current movement
-	"20" => "off",      # go "up"
-	"40" => "on",       # go "down"
-	"80" => "prog",     # finish pairing
-	"100" => "on-for-timer",
-	"101" => "off-for-timer",
+	"01010101" => "stop", 	# stop the current movement old 11
+	"00010001" => "off",      # go "up" old 20
+	"00110011" => "on",       # go "down" old 40
+	"11001100" => "prog",     # finish pairing old 80
+#	"100" => "on-for-timer",
+#	"101" => "off-for-timer",
 #	"XX" => "z_custom",	# custom control code
 );
 
