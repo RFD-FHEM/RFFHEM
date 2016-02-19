@@ -1066,29 +1066,34 @@ sub Dooya_CalcCurrentPos($$$$) {
   which are either senders or receivers/actuators.
   The RECIVING and SENDING of Dooya commands is implemented in the SIGNALsuino, so this module currently supports 
   devices like blinds and shutters. The Dooya protocol is used from a lot of different shutter companies in Germanyr. Examples are Rohrmotor24 or Nobily.
-   
-<code>
-4: sduino/msg READ: MU;P0=4717;P1=-1577;P2=284;P3=-786;P4=649;P5=-423;D=01232345[......]445232;CP=2;
-4: sduino: Fingerprint for MU Protocol id 16 -> Dooya shutter matches, trying to demodulate
-4: sduino: decoded matched MU Protocol id 16 dmsg u16#370658E133 length 40
-4: SIGNALduino_unknown Protocol: 16
-4: SIGNALduino_unknown converted to bits: 0011011100000110010110001110000100110011
-4: SIGNALduino_unknown / shutter Dooya 0011011100000110010110001110000100110011 received
-4: 00110111000001100101100 1110 0001 0011 0011
-4: SIGNALduino_unknown found shutter from Dooya. id=3606104, remotetype=14,  channel=1, direction=down, all_shutters=false
+  <br><br>  
 
-<code>
+
+  <pre>
+  <code>4: sduino/msg READ: MU;P0=4717;P1=-1577;P2=284;P3=-786;P4=649;P5=-423;D=01232345[......]445232;CP=2;</code> 
+  <code>4: sduino: Fingerprint for MU Protocol id 16 -> Dooya shutter matches, trying to demodulate</code>  
+  <code>4: sduino: decoded matched MU Protocol id 16 dmsg u16#370658E133 length 40</code>  
+  <code>4: SIGNALduino_unknown Protocol: 16</code> 
+  <code>4: SIGNALduino_unknown converted to bits: 0011011100000110010110001110000100110011</code>  
+  <code>4: SIGNALduino_unknown / shutter Dooya 0011011100000110010110001110000100110011 received</code>  
+  <code>4: 00110111000001100101100 1110 0001 0011 0011</code>  
+  <code>4: SIGNALduino_unknown found shutter from Dooya. id=3606104, remotetype=14,  channel=1, direction=down, all_shutters=false</code>  
+</pre>
+
   
-  a <a href="#SIGNALduino">SIGNALduino</a> device (must be defined first).
+   <br> a <a href="#SIGNALduino">SIGNALduino</a> device (must be defined first)  <br>
+ <br>
+ <br>
 
-  <br><br>
-
+   
   <a name="Dooyadefine"></a>
+   <br>
   <b>Define</b>
+   <br>
   <ul>
     <code>define &lt;name&gt; Dooya &lt;id&gt;] </code>
-    <br><br>
-
+  <br>
+ <br>
    The id is a 28-digit binaer code, that uniquely identifies a single remote control.
    <br>
    Pairing is done by setting the shutter in programming mode, either by disconnecting/reconnecting the power,
