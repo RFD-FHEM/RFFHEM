@@ -1066,17 +1066,18 @@ sub Dooya_CalcCurrentPos($$$$) {
   which are either senders or receivers/actuators.
   The RECIVING and SENDING of Dooya commands is implemented in the SIGNALsuino, so this module currently supports 
   devices like blinds and shutters. The Dooya protocol is used from a lot of different shutter companies in Germanyr. Examples are Rohrmotor24 or Nobily.
-  
-  <code>2016.02.14 17:22:17 4: sduino/msg READ: MU;P0=4717;P1=-1577;P2=284;P3=-786;P4=649;P5=-423;D=01232345452345454523232323234545232345234545232323454545232323234523234545232345450123234545234545452323232323454523234523454523232345454523232323452323454523234545012323454523454545232323232345452323452345452323234545452323232345232345454545232;CP=2;
-2016.02.14 17:22:17 4: sduino: Fingerprint for MU Protocol id 16 -> Dooya shutter matches, trying to demodulate
-2016.02.14 17:22:17 4: sduino: decoded matched MU Protocol id 16 dmsg u16#370658E133 length 40
-2016.02.14 17:22:17 4: SIGNALduino_unknown incomming msg: u16#370658E133
-2016.02.14 17:22:17 4: SIGNALduino_unknown rawData: 370658E133
-2016.02.14 17:22:17 4: SIGNALduino_unknown Protocol: 16
-2016.02.14 17:22:17 4: SIGNALduino_unknown converted to bits: 0011011100000110010110001110000100110011
-2016.02.14 17:22:17 4: SIGNALduino_unknown / shutter Dooya 0011011100000110010110001110000100110011 received
-2016.02.14 17:22:17 4: 00110111000001100101100 1110 0001 0011 0011
-2016.02.14 17:22:17 4: SIGNALduino_unknown found shutter from Dooya. id=3606104, remotetype=14,  channel=1, direction=down, all_shutters=false<code>
+   
+<code>
+4: sduino/msg READ: MU;P0=4717;P1=-1577;P2=284;P3=-786;P4=649;P5=-423;D=01232345[......]445232;CP=2;
+4: sduino: Fingerprint for MU Protocol id 16 -> Dooya shutter matches, trying to demodulate
+4: sduino: decoded matched MU Protocol id 16 dmsg u16#370658E133 length 40
+4: SIGNALduino_unknown Protocol: 16
+4: SIGNALduino_unknown converted to bits: 0011011100000110010110001110000100110011
+4: SIGNALduino_unknown / shutter Dooya 0011011100000110010110001110000100110011 received
+4: 00110111000001100101100 1110 0001 0011 0011
+4: SIGNALduino_unknown found shutter from Dooya. id=3606104, remotetype=14,  channel=1, direction=down, all_shutters=false
+
+<code>
   
   a <a href="#SIGNALduino">SIGNALduino</a> device (must be defined first).
 
