@@ -6,7 +6,7 @@
 #
 # Needs SIGNALduino.
 #
-# Version 0.20
+# Version 0.30
 #
 ######################################################
 
@@ -58,7 +58,7 @@ my $dooya_defrepetition = 6;	# Default Dooya frame repeat counter
 my $dooya_updateFreq = 3;	# Interval for State update
 
 #my %models = ( dooyablinds => 'blinds', dooyashutter => 'shutter', ); # supported models (blinds  and shutters)
-my %channal = (  0 => '0000', 1 => '0001', 2 => '0010', 3 => '0011', 4 => '0100', 5 => '0101', 6 => '0110', 7 => '0111', 8 => '1000', 9 => '1001', 10 => '1010', 11 => '1011', 12 => '1100', 13 => '1101', 14 => '1110', 15 => '1111', ); #Kanal
+my %channel = (  0 => '0000', 1 => '0001', 2 => '0010', 3 => '0011', 4 => '0100', 5 => '0101', 6 => '0110', 7 => '0111', 8 => '1000', 9 => '1001', 10 => '1010', 11 => '1011', 12 => '1100', 13 => '1101', 14 => '1110', 15 => '1111', ); #Kanal
 my %SignalRepeats = ( 5 => '#R5', 10 => '#R10', 15 => '#R15', 20 => '#R20', );  # Sendungswiederholungen des Signales
 
 
@@ -136,7 +136,7 @@ sub Dooya_Initialize($) {
 	$hash->{ParseFn}  	= "Dooya_Parse";
 	$hash->{AttrFn}  	= "Dooya_Attr";
 
-	$hash->{AttrList} = " channal:0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15 "
+	$hash->{AttrList} = " channel:0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15 "
 	  . " SignalRepeats:5,10,15,20 "
 	# . " drive-down-time-to-100"
 	  . " drive-down-time-to-close"
@@ -1060,12 +1060,14 @@ sub Dooya_CalcCurrentPos($$$$) {
 =begin html
 
 <a name="Dooya"></a>
-<h3>Dooya - Dooya protocol</h3>
+<h3>Dooya protocol</h3>
 <ul>
   The Dooya protocol is used by a wide range of devices,
   which are either senders or receivers/actuators.
-  Right now only SENDING of Dooya commands is implemented in the SIGNALsuino, so this module currently only
-  supports devices like blinds, dimmers, etc. through a <a href="#SIGNALduino">SIGNALduino</a> device (which must be defined first).
+  Right RECIVING and SENDING of Dooya commands is implemented in the SIGNALsuino, so this module currently supports 
+  devices like blinds and shutters. The Dooya protocol is used from a lot of different shutter companies in Germanyr. Examples are Rohrmotor24 or Nobily.
+  
+  a <a href="#SIGNALduino">SIGNALduino</a> device (must be defined first).
 
   <br><br>
 
@@ -1075,26 +1077,23 @@ sub Dooya_CalcCurrentPos($$$$) {
     <code>define &lt;name&gt; Dooya &lt;id&gt;] </code>
     <br><br>
 
-   The id is a 28-digit binaer code, that uniquely identifies a single remote control channel.
-   It is used to pair the remote to the blind or dimmer it should control.
+   The id is a 28-digit binaer code, that uniquely identifies a single remote control.
    <br>
-   Pairing is done by setting the blind in programming mode, either by disconnecting/reconnecting the power,
-   or by pressing the program button on an already associated remote.
+   Pairing is done by setting the shutter in programming mode, either by disconnecting/reconnecting the power,
+   and by pressing the program button on an already associated remote.
    <br>
-   Once the blind is in programming mode, send the "prog" command from within FHEM to complete the pairing.
-   The blind will move up and down shortly to indicate completion.
+   Once the shutter is in programming mode, send the "prog" command from within FHEM to complete the pairing.
+   The shutter will peep shortly to indicate completion.
    <br>
-   You are now able to control this blind from FHEM, the receiver thinks it is just another remote control.
+   You are now able to control this blind from FHEM, the receiver thinks it is just another remote control or the real exist remote. 
+   For the shutter it´s the same.
 
    <ul>
-   <li><code>&lt;id&gt;</code> is a 28 digit binaer number that uniquely identifies FHEM as a new remote control channel.
-   <br>You should use a different one for each device definition, and group them using a structure.
+   <li><code>&lt;id&gt;</code> is a 28 digit binaer number that uniquely identifies FHEM as a new remote control.
+   <br>You can use a different one for each device definition, and group them using a structure. You can use the same ID for a couple of shutters
+   and you can give every one an other channal. (0 to 15, 0 ist the MASTER and conrols all other channels.)
    </li>
-   If you set one of them, you need to pick the same address as an existing remote.
-   Be aware that the receiver might not accept commands from the remote any longer,<br>
-   if you used FHEM to clone an existing remote.
-   <br>
-   This is because the code is original remote's codes are out of sync.</li>
+   If you set one of them, you need to pick the same address as an existing remote.</li>
    </ul>
    <br>
 
@@ -1115,13 +1114,10 @@ sub Dooya_CalcCurrentPos($$$$) {
     <pre>
     on
     off
-    go-my
     stop
     pos value (0..100) # see note
     prog  # Special, see note
-    on-for-timer
-    off-for-timer
-	</pre>
+    </pre>
     Examples:
     <ul>
       <code>set rollo_1 on</code><br>
@@ -1134,13 +1130,8 @@ sub Dooya_CalcCurrentPos($$$$) {
     Notes:
     <ul>
       <li>prog is a special command used to pair the receiver to FHEM:
-      Set the receiver in programming mode (eg. by pressing the program-button on the original remote)
-      and send the "prog" command from FHEM to finish pairing.<br>
-      The blind will move up and down shortly to indicate success.
-      </li>
-      <li>on-for-timer and off-for-timer send a stop command after the specified time,
-      instead of reversing the blind.<br>
-      This can be used to go to a specific position by measuring the time it takes to close the blind completely.
+      Set the receiver in programming mode and send the "prog" command from FHEM to finish pairing.<br>
+      The shutter will peep shortly to indicate success.
       </li>
       <li>pos value<br>
 		
@@ -1174,17 +1165,27 @@ sub Dooya_CalcCurrentPos($$$$) {
     <a name="IODev"></a>
     <li>IODev<br>
         Set the IO or physical device which should be used for sending signals
-        for this "logical" device. An example for the physical device is a SIGNALduino.<br>
+        for this "logical" device. It must be the SIGNALduino.<br>
         Note: The IODev has to be set, otherwise no commands will be sent!<br>
         </li><br>
 
+  <a name="channel"></a>
+    <li>channel<br>
+        Set the channel of the remote. You can use 0 (MASTER) to 15.<br>
+        Note: The MASTER conrols all remotes with the same ID!!!<br>
+        </li><br>
+        
+          <a name="SignalRepeats"></a>
+    <li>SignalRepeats<br>
+        Set the repeats for sending signal. You can use 5, 10, 15 and 20.
+      </li><br>
+        
     <a name="setList"></a>
     <li>setList<br>
         Space separated list of commands, which will be returned upon "set name ?", 
         so the FHEMWEB frontend can construct the correct control and command dropdown. Specific controls can be added after a colon for each command
         <br>
-        Example: <code>attr shutter setList open close pos:textField</code>
-		</li><br>
+        	</li><br>
 
     <a name="additionalPosReading"></a>
     <li>additionalPosReading<br>
@@ -1223,22 +1224,7 @@ sub Dooya_CalcCurrentPos($$$$) {
     <li><a href="#showtime">showtime</a></li><br>
 
     <a name="model"></a>
-    <li>model<br>
-        The model attribute denotes the model type of the device.
-        The attributes will (currently) not be used by the fhem.pl directly.
-        It can be used by e.g. external programs or web interfaces to
-        distinguish classes of devices and send the appropriate commands
-        (e.g. "on" or "off" to a switch, "dim..%" to dimmers etc.).<br>
-        The spelling of the model names are as quoted on the printed
-        documentation which comes which each device. This name is used
-        without blanks in all lower-case letters. Valid characters should be
-        <code>a-z 0-9</code> and <code>-</code> (dash),
-        other characters should be ommited.<br>
-        Here is a list of "official" devices:<br>
-          <b>Receiver/Actor</b>: dooyablinds<br>
-    </li><br>
-
-
+    
     <a name="ignore"></a>
     <li>ignore<br>
         Ignore this device, e.g. if it belongs to your neighbour. The device
