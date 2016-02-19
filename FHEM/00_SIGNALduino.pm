@@ -728,10 +728,13 @@ my %ProtocolListSIGNALduino  = (
 			preamble => '', # prepend to converted message
 			clientmodule => 'RFXX10REC', # not used now
 			#modulematch => '^TX......', # not used now
-			length_min => '41',
+			length_min => '38',
 			length_max => '44',
 			paddingbits     => '8',		
 			postDemodulation => \&SIGNALduino_lengtnPrefix,			
+			filterfunc      => 'SIGNALduino_compPattern',
+			
+			
 		},    
 );
 
@@ -2792,6 +2795,78 @@ sub SIGNALduino_filterSign($$$%)
 		}	
 		if ($intol == 0) {
 			$buckets{$key}=abs($patternListRaw{$key});
+		}
+	}
+
+	return ($cnt,$rawData, %patternListRaw);
+	#print "rdata: ".$msg_parts{rawData}."\n";
+
+	#print Dumper (%buckets);
+	#print Dumper (%msg_parts);
+
+	#modify msg_parts pattern hash
+	#$patternListRaw = \%buckets;
+}
+
+
+# - - - - - - - - - - - -
+#=item SIGNALduino_compPattern()
+#This functons, will act as a filter function. It will remove the sign from the pattern, and compress message and pattern
+# 
+# Will return  $count of combined values,  modified $rawData , modified %patternListRaw,
+# =cut
+
+
+sub SIGNALduino_compPattern($$$%)
+{
+	my ($name,$id,$rawData,%patternListRaw) = @_;
+	my $debug = AttrVal($name,"debug",0);
+
+
+	my %buckets;
+	# Remove Sign
+    #%patternListRaw = map { $_ => abs($patternListRaw{$_})} keys %patternListRaw;  ## remove sing from all
+    
+    my $intol=0;
+    my $cnt=0;
+
+    # compress pattern hash
+    foreach my $key (keys %patternListRaw) {
+			
+		#print "chk:".$patternListRaw{$key};
+    	#print "\n";
+
+        $intol=0;
+		foreach my $b_key (keys %buckets){
+			#print "with:".$buckets{$b_key};
+			#print "\n";
+			
+			# $value  - $set <= $tolerance
+			if (SIGNALduino_inTol($patternListRaw{$key},$buckets{$b_key},$buckets{$b_key}*0.4))
+			{
+		    	#print"\t". $patternListRaw{$key}."($key) is intol of ".$buckets{$b_key}."($b_key) \n";
+				$cnt++;
+				eval "\$rawData =~ tr/$key/$b_key/";
+
+				#if ($key == $msg_parts{clockidx})
+				#{
+			#		$msg_pats{syncidx} = $buckets{$key};
+			#	}
+			#	elsif ($key == $msg_parts{syncidx})
+			#	{
+			#		$msg_pats{syncidx} = $buckets{$key};
+			#	}			
+				
+				$buckets{$b_key} = ($buckets{$b_key} + $patternListRaw{$key}) /2;
+				#print"\t recalc to ". $buckets{$b_key}."\n";
+
+				delete ($patternListRaw{$key});  # deletes the compressed entry
+				$intol=1;
+				last;
+			}
+		}	
+		if ($intol == 0) {
+			$buckets{$key}=$patternListRaw{$key};
 		}
 	}
 
