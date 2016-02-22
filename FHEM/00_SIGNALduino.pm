@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 95487 2016-03-11 22:54:00 v3.2 $
+# $Id: 00_SIGNALduino.pm 95487 2016-03-22 22:54:00 v3.2 $
 #
 # v3.2-dev
 # The file is taken from the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -74,6 +74,7 @@ my $clientsSIGNALduino = ":IT:"
 						."SD_WS07:"
 						."SD_WS09:"
 #						."SD_WS:"
+						."RFXX10REC:"
 						."SIGNALduino_un:"
 						; 
 
@@ -89,6 +90,7 @@ my %matchListSIGNALduino = (
      "10:SD_WS07"				=> "^P7#[A-Fa-f0-9]{6}F[A-Fa-f0-9]{2}",
      "11:SD_WS09"				=> "^P9#[A-Fa-f0-9]+",
 #     "12:SD_WS"					=> '^W\d+#.*',
+     "13:RFXX10REC" 			=> '^(20|29)[A-Fa-f0-9]+',
      "X:SIGNALduino_un"			=> '^[uP]\d+#.*',
 );
 
@@ -714,7 +716,26 @@ my %ProtocolListSIGNALduino  = (
 			length_max      => '32',
 			paddingbits     => '8',			
     	},   
-
+	"39" => ## X10 Protocol
+		{
+			name => 'X10 Protocol',
+			id => '39',
+			one => [1,-3],
+			zero => [1,-1],
+			start => [16,-4],
+			clockabs => 650, 
+			format => 'twostate', 
+			preamble => '', # prepend to converted message
+			clientmodule => 'RFXX10REC', # not used now
+			#modulematch => '^TX......', # not used now
+			length_min => '38',
+			length_max => '44',
+			paddingbits     => '8',		
+			postDemodulation => \&SIGNALduino_lengtnPrefix,			
+			filterfunc      => 'SIGNALduino_compPattern',
+			
+			
+		},    
 );
 
 
@@ -1022,7 +1043,7 @@ SIGNALduino_Set($@)
 	my $pattern="";
 	my $cnt=0;
 	my $clock=$ProtocolListSIGNALduino{$protocol}{clockabs} > 1 ?$ProtocolListSIGNALduino{$protocol}{clockabs}:$hash->{ITClock};
-	foreach my $item (qw(sync one zero))
+	foreach my $item (qw(sync start one zero))
 	{
 	    #print ("item= $item \n");
 	    next if (!exists($ProtocolListSIGNALduino{$protocol}{$item}));
@@ -1048,6 +1069,7 @@ SIGNALduino_Set($@)
 	my $SignalData="D=";
 	
 	$SignalData.=$signalHash{sync} if (exists($signalHash{sync}));
+	$SignalData.=$signalHash{start} if (exists($signalHash{start}));
 	
 	
 	foreach my $bit (@bits)
@@ -1077,7 +1099,7 @@ SIGNALduino_Get($@)
   my ($hash, @a) = @_;
   my $type = $hash->{TYPE};
   my $name = $hash->{NAME};
-  return "$name is not active, may firmware is not suppoted, please flash" if ($hash->{INACTIVE}==1);
+  return "$name is not active, may firmware is not suppoted, please flash" if (exists($hash->{INACTIVE}) && $hash->{INACTIVE}==1);
   #my $name = $a[0];
   
   Log3 $name, 5, "\"get $type\" needs at least one parameter" if(@a < 2);
@@ -2105,6 +2127,15 @@ sub SIGNALduino_Parse_MU($$$$@)
 					
 					#next if (!$valid);  ## Last chance to try next protocol if there is somethin invalid
 					if ($valid) {
+			
+						my ($rcode,@retvalue) = SIGNALduino_callsub('postDemodulation',$ProtocolListSIGNALduino{$id}{postDemodulation},$name,@bit_msg);
+						next if (!$rcode);
+						#Log3 $name, 5, "$name: postdemodulation value @retvalue";
+			
+						@bit_msg = @retvalue;
+						undef(@retvalue); undef($rcode);
+			
+			
 						while (scalar @bit_msg % $padwith > 0)  ## will pad up full nibbles per default or full byte if specified in protocol
 						{
 							push(@bit_msg,'0');
@@ -2475,6 +2506,21 @@ sub SIGNALduino_callsub
 	return (1,@args);			
 }
 
+
+# calculates the hex (in bits) and adds it at the beginning of the message
+# input = @list
+# output = @list
+sub SIGNALduino_lengtnPrefix
+{
+	my $msg = join("",@_);	
+
+	#$msg = unpack("B8", pack("N", length($msg))).$msg;
+	$msg=sprintf('%08b', length($msg)).$msg;
+	
+	return split("",$msg);
+}
+
+
 sub SIGNALduino_bit2Arctec
 {
 	my $msg = join("",@_);	
@@ -2749,6 +2795,78 @@ sub SIGNALduino_filterSign($$$%)
 		}	
 		if ($intol == 0) {
 			$buckets{$key}=abs($patternListRaw{$key});
+		}
+	}
+
+	return ($cnt,$rawData, %patternListRaw);
+	#print "rdata: ".$msg_parts{rawData}."\n";
+
+	#print Dumper (%buckets);
+	#print Dumper (%msg_parts);
+
+	#modify msg_parts pattern hash
+	#$patternListRaw = \%buckets;
+}
+
+
+# - - - - - - - - - - - -
+#=item SIGNALduino_compPattern()
+#This functons, will act as a filter function. It will remove the sign from the pattern, and compress message and pattern
+# 
+# Will return  $count of combined values,  modified $rawData , modified %patternListRaw,
+# =cut
+
+
+sub SIGNALduino_compPattern($$$%)
+{
+	my ($name,$id,$rawData,%patternListRaw) = @_;
+	my $debug = AttrVal($name,"debug",0);
+
+
+	my %buckets;
+	# Remove Sign
+    #%patternListRaw = map { $_ => abs($patternListRaw{$_})} keys %patternListRaw;  ## remove sing from all
+    
+    my $intol=0;
+    my $cnt=0;
+
+    # compress pattern hash
+    foreach my $key (keys %patternListRaw) {
+			
+		#print "chk:".$patternListRaw{$key};
+    	#print "\n";
+
+        $intol=0;
+		foreach my $b_key (keys %buckets){
+			#print "with:".$buckets{$b_key};
+			#print "\n";
+			
+			# $value  - $set <= $tolerance
+			if (SIGNALduino_inTol($patternListRaw{$key},$buckets{$b_key},$buckets{$b_key}*0.4))
+			{
+		    	#print"\t". $patternListRaw{$key}."($key) is intol of ".$buckets{$b_key}."($b_key) \n";
+				$cnt++;
+				eval "\$rawData =~ tr/$key/$b_key/";
+
+				#if ($key == $msg_parts{clockidx})
+				#{
+			#		$msg_pats{syncidx} = $buckets{$key};
+			#	}
+			#	elsif ($key == $msg_parts{syncidx})
+			#	{
+			#		$msg_pats{syncidx} = $buckets{$key};
+			#	}			
+				
+				$buckets{$b_key} = ($buckets{$b_key} + $patternListRaw{$key}) /2;
+				#print"\t recalc to ". $buckets{$b_key}."\n";
+
+				delete ($patternListRaw{$key});  # deletes the compressed entry
+				$intol=1;
+				last;
+			}
+		}	
+		if ($intol == 0) {
+			$buckets{$key}=$patternListRaw{$key};
 		}
 	}
 
