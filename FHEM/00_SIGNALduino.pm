@@ -1144,14 +1144,17 @@ SIGNALduino_Get($@)
   	    return "$a[0] $a[1] => $arg";
   	}
   	
-  } 
-  SIGNALduino_SimpleWrite($hash, $gets{$a[1]}[0] . $arg);
-
-  ($err, $msg) = SIGNALduino_ReadAnswer($hash, $a[1], 0, $gets{$a[1]}[1]);
+  }
+  $msg = DevIo_Expect($hash,$gets{$a[1]}[0] . $arg,3);
+   
+  #SIGNALduino_SimpleWrite($hash, $gets{$a[1]}[0] . $arg);
+  #($err, $msg) = SIGNALduino_ReadAnswer($hash, $a[1], 0, $gets{$a[1]}[1]);
+  
+  Log3 $name, 2, "$name: error receiving no answer for ".$gets{$a[1]}[0] . $arg if !defined($msg);
   Log3 $name, 5, "$name: received message for gets: " . $msg if ($msg);
   
   if(!defined($msg)) {
-	DevIo_Disconnected($hash);
+#	DevIo_Disconnected($hash);
 	$msg = "No answer";
 
   } elsif($a[1] eq "cmds") {       # nice it up
@@ -1271,12 +1274,11 @@ SIGNALduino_DoInit($)
 	#    }
 	#  }
 	#  $hash->{STATE} = "Initialized";
-	readingsSingleUpdate($hash, "state", "Initialized", 1);
+	readingsSingleUpdate($hash, "state", "opened", 1);
 
 	# Reset the counter
 	delete($hash->{XMIT_TIME});
 	delete($hash->{NR_CMD_LAST_H});
-	return undef;
 }
 
 #####################################
@@ -1325,7 +1327,7 @@ SIGNALduino_ReadAnswer($$$$)
       }
       return ("Timeout reading answer for get $arg", undef)
         if($nfound == 0);
-      $buf = DevIo_SimpleRead($hash);
+      $buf = DevIo_SimpleReadWithTimeout($hash,$to);
       return ("No data", undef) if(!defined($buf));
 
     }
@@ -1487,7 +1489,7 @@ sub SIGNALduino_GetUpdate($){
 	
 	Log3 $name, 4, "$name: ping ...";
 	SIGNALduino_Get($hash,$name, "ping");	
-	
+	DevIo_Expect($hash,"P",3);
 	InternalTimer(gettimeofday()+$hash->{Interval}, "SIGNALduino_GetUpdate", $hash, 1);
 }
 
