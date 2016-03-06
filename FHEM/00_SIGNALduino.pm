@@ -1145,7 +1145,8 @@ SIGNALduino_Get($@)
   	}
   	
   }
-  $msg = DevIo_Expect($hash,$gets{$a[1]}[0] . $arg,3);
+  $msg = DevIo_Expect($hash,$gets{$a[1]}[0] . $arg."\n",3);
+  # Todo: $msg auf ßn prüfen und ggf. weiteren read anstoßen, da expect nicht alles empfängt
    
   #SIGNALduino_SimpleWrite($hash, $gets{$a[1]}[0] . $arg);
   #($err, $msg) = SIGNALduino_ReadAnswer($hash, $a[1], 0, $gets{$a[1]}[1]);
@@ -1489,7 +1490,7 @@ sub SIGNALduino_GetUpdate($){
 	
 	Log3 $name, 4, "$name: ping ...";
 	SIGNALduino_Get($hash,$name, "ping");	
-	DevIo_Expect($hash,"P",3);
+	#DevIo_Expect($hash,"P",3);
 	InternalTimer(gettimeofday()+$hash->{Interval}, "SIGNALduino_GetUpdate", $hash, 1);
 }
 
