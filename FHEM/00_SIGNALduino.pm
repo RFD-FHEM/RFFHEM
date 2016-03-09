@@ -1132,6 +1132,8 @@ SIGNALduino_Get($@)
 
   Log3 $name, 5, "$name: command for gets: " . $gets{$a[1]}[0] . " " . $arg;
 
+  Log3 $name, 5, "cl:  ".Dumper($hash->{CL});
+	
   if ($a[1] eq "raw")
   {
   	# Dirty hack to check and modify direct communication from logical modules with hardware
@@ -1145,11 +1147,21 @@ SIGNALduino_Get($@)
   	}
   	
   }
-  $msg = DevIo_Expect($hash,$gets{$a[1]}[0] . $arg."\n",3);
+  #$msg = DevIo_Expect($hash,$gets{$a[1]}[0] . $arg."\n",3);
   # Todo: $msg auf ßn prüfen und ggf. weiteren read anstoßen, da expect nicht alles empfängt
-   
-  #SIGNALduino_SimpleWrite($hash, $gets{$a[1]}[0] . $arg);
-  #($err, $msg) = SIGNALduino_ReadAnswer($hash, $a[1], 0, $gets{$a[1]}[1]);
+  #DevIo_SimpleWrite($hash,$gets{$a[1]}[0] . $arg."\n",2);
+  #do {
+  #	$msg = DevIo_SimpleReadWithTimeout($hash,3);
+  # 
+  #} while (!$msg =~ m/\r\n/)
+  SIGNALduino_SimpleWrite($hash, $gets{$a[1]}[0] . $arg);
+  $hash->{getcmd}->{cmd}=$a[1];
+  $hash->{getcmd}->{asyncOut}=$hash->{CL};
+  
+  return undef if ($hash->{CL} && $hash->{CL}->{canAsyncOutput});    # Exit for async output here
+  
+  
+  ($err, $msg) = SIGNALduino_ReadAnswer($hash, $a[1], 0, $gets{$a[1]}[1]);
   
   Log3 $name, 2, "$name: error receiving no answer for ".$gets{$a[1]}[0] . $arg if !defined($msg);
   Log3 $name, 5, "$name: received message for gets: " . $msg if ($msg);
@@ -1305,6 +1317,11 @@ SIGNALduino_ReadAnswer($$$$)
   my $cut = 0;
   my $to = 3;                                         # 3 seconds timeout
   $to = $hash->{RA_Timeout} if($hash->{RA_Timeout});  # ...or less
+
+  my $name = $hash->{NAME};
+
+  
+
   for(;;) {
 
     if($^O =~ m/Win/ && $hash->{USBDev}) {
@@ -1476,8 +1493,11 @@ SIGNALduino_Read($)
     ($rmsg,$SIGNALduinodata) = split("\n", $SIGNALduinodata, 2);
     $rmsg =~ s/\r//;
     Log3 $name, 4, "$name/msg READ: $rmsg"; 
-
-    SIGNALduino_Parse($hash, $hash, $name, $rmsg) if($rmsg);
+	if ( $rmsg && !SIGNALduino_Parse($hash, $hash, $name, $rmsg) && $hash->{getcmd} )
+	{
+		my $ao = asyncOutput( $hash->{getcmd}->{asyncOut}, $hash->{getcmd}->{cmd}.": " . $rmsg );
+		delete($hash->{getcmd});
+	}
   }
   $hash->{PARTIAL} = $SIGNALduinodata;
 }
