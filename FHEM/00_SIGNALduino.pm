@@ -1014,7 +1014,7 @@ SIGNALduino_Set($@)
     Log3 $name, 3, "$name: Setting ITClock to $clock (sending $arg)";
 	$arg="ic$clock";
   	SIGNALduino_SimpleWrite($hash, $arg);
-  	SIGNALduino_ReadAnswer($hash, "ITClock", 0, $arg); ## Receive the transmitted message
+  	#SIGNALduino_ReadAnswer($hash, "ITClock", 0, $arg); ## Receive the transmitted message
   	$hash->{$cmd}=$clock;
   } elsif( $cmd eq "disableMessagetype" ) {
 	my $argm = 'CD' . substr($arg,-1,1);
@@ -1132,8 +1132,6 @@ SIGNALduino_Get($@)
 
   Log3 $name, 5, "$name: command for gets: " . $gets{$a[1]}[0] . " " . $arg;
 
-  Log3 $name, 5, "cl:  ".Dumper($hash->{CL});
-	
   if ($a[1] eq "raw")
   {
   	# Dirty hack to check and modify direct communication from logical modules with hardware
@@ -1147,19 +1145,11 @@ SIGNALduino_Get($@)
   	}
   	
   }
-  #$msg = DevIo_Expect($hash,$gets{$a[1]}[0] . $arg."\n",3);
-  # Todo: $msg auf ßn prüfen und ggf. weiteren read anstoßen, da expect nicht alles empfängt
-  #DevIo_SimpleWrite($hash,$gets{$a[1]}[0] . $arg."\n",2);
-  #do {
-  #	$msg = DevIo_SimpleReadWithTimeout($hash,3);
-  # 
-  #} while (!$msg =~ m/\r\n/)
   SIGNALduino_SimpleWrite($hash, $gets{$a[1]}[0] . $arg);
   $hash->{getcmd}->{cmd}=$a[1];
   $hash->{getcmd}->{asyncOut}=$hash->{CL};
   
   return undef if ($hash->{CL} && $hash->{CL}->{canAsyncOutput});    # Exit for async output here
-  
   
   ($err, $msg) = SIGNALduino_ReadAnswer($hash, $a[1], 0, $gets{$a[1]}[1]);
   
@@ -1167,25 +1157,46 @@ SIGNALduino_Get($@)
   Log3 $name, 5, "$name: received message for gets: " . $msg if ($msg);
   
   if(!defined($msg)) {
-#	DevIo_Disconnected($hash);
+	DevIo_Disconnected($hash);
 	$msg = "No answer";
 
-  } elsif($a[1] eq "cmds") {       # nice it up
-   	$msg =~ s/.*Use one of//g;
-
-  } elsif($a[1] eq "uptime") {     # decode it
-   	$msg =~ s/[\r\n]//g;
-   	#$msg = hex($msg);              # /125; only for col or coc
-    $msg = sprintf("%d %02d:%02d:%02d", $msg/86400, ($msg%86400)/3600, ($msg%3600)/60, $msg%60);
-  }
-
-  $msg =~ s/[\r\n]//g;
-
+  } else {
+  	$msg = SIGNALduino_parseResponse($hash,$hash->{getcmd},$msg);
+  } 
+  
+  delete ($hash->{getcmd});
+  
+ 
   #$hash->{READINGS}{$a[1]}{VAL} = $msg;
   #$hash->{READINGS}{$a[1]}{TIME} = time();
   readingsSingleUpdate($hash, $a[1], $msg, 0);
   return "$a[0] $a[1] => $msg";
 
+}
+
+sub SIGNALduino_parseResponse($$$)
+{
+	my $hash = shift;
+	my $cmd = shift;
+	my $msg = shift;
+
+	my $name=$hash->{NAME};
+	
+  	$msg =~ s/[\r\n]//g;
+
+	if($cmd eq "cmds") 
+	{       # nice it up
+	    $msg =~ s/$name cmds =>//g;
+		$msg =~ s/ //g;
+	
+   		$msg =~ s/.*Use one of//g;
+ 	} 
+ 	elsif($cmd eq "uptime") 
+ 	{   # decode it
+   		#$msg = hex($msg);              # /125; only for col or coc
+    	$msg = sprintf("%d %02d:%02d:%02d", $msg/86400, ($msg%86400)/3600, ($msg%3600)/60, $msg%60);
+  	}
+  	return $msg;
 }
 
 sub
@@ -1262,7 +1273,6 @@ SIGNALduino_DoInit($)
 		}
 		readingsSingleUpdate($hash, "Version", $ver, 0);
 		
-		#$hash->{VERSION} = $ver;
 	
 		$ver =~ s/[\r\n]//g;
 	
@@ -1271,10 +1281,9 @@ SIGNALduino_DoInit($)
 
 		
 		# Cmd-String feststellen
-
 		my $cmds = SIGNALduino_Get($hash, $name, "cmds", 0);
-		$cmds =~ s/$name cmds =>//g;
-		$cmds =~ s/ //g;
+		#$cmds =~ s/$name cmds =>//g;
+		#$cmds =~ s/ //g;
 		$hash->{CMDS} = $cmds;
 		Log3 $hash, 3, "$name: Possible commands: " . $hash->{CMDS};
 		readingsSingleUpdate($hash, "state", "Programming", 1);
@@ -1318,10 +1327,8 @@ SIGNALduino_ReadAnswer($$$$)
   my $to = 3;                                         # 3 seconds timeout
   $to = $hash->{RA_Timeout} if($hash->{RA_Timeout});  # ...or less
 
-  my $name = $hash->{NAME};
-
   
-
+  my $exittime = time()+($to*3);
   for(;;) {
 
     if($^O =~ m/Win/ && $hash->{USBDev}) {
@@ -1381,6 +1388,8 @@ SIGNALduino_ReadAnswer($$$$)
         return (undef, $mSIGNALduinodata)
       }
     }
+    
+    return ("timeout() bad response",undef) if ($exittime<time());  ## Abort here, if we haven't found our searched response until $to 
   }
 
 }
@@ -1495,6 +1504,8 @@ SIGNALduino_Read($)
     Log3 $name, 4, "$name/msg READ: $rmsg"; 
 	if ( $rmsg && !SIGNALduino_Parse($hash, $hash, $name, $rmsg) && $hash->{getcmd} )
 	{
+		$rmsg = SIGNALduino_parseResponse($hash,$hash->{getcmd}->{cmd},$rmsg);
+		
 		my $ao = asyncOutput( $hash->{getcmd}->{asyncOut}, $hash->{getcmd}->{cmd}.": " . $rmsg );
 		delete($hash->{getcmd});
 	}
