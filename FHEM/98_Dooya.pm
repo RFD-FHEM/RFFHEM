@@ -1,13 +1,22 @@
 ######################################################
-# $Id: 10_Dooya.pm 2016-02-16 Jarno Karsch $
+# $Id: 98_Dooya.pm 2016-02-16 Jarno Karsch $
 #
 # Dooya module for FHEM
-# 
+# Thanks for templates/coding from Somfy and SIGNALduino team
 #
 # Needs SIGNALduino.
+# Published under GNU GPL License, v2
+# History:
+# 0.10	2016-02-16	Jarno Karsch	initial template
+# 0.20	2016-03-06	darkmission		first functions, renamed from 10_ to 99_
+# 0.21	2016-03-06	darkmission		Bug default channel corrected, changed attribute repetition to SignalRepeats
+# 0.22  2016-03-10	darkmission		code cleaned, renamed from 99_ to 98_
+# 
 #
-# Version 0.30
-#
+#TODOS:
+# - automatic IOdev finding
+# - autocreate
+# - parse communication from SIGNALDUINO to Modul, neede for correct position when using remote from doooya
 ######################################################
 
 
@@ -19,26 +28,22 @@ use warnings;
 #use List::Util qw(first max maxstr min minstr reduce shuffle sum);
 
 my %codes = (
-#	"10" => "go-my",    # goto "my" position
-	"01010101" => "stop", 	# stop the current movement old 11
-	"00010001" => "off",      # go "up" old 20
-	"00110011" => "on",       # go "down" old 40
-	"11001100" => "prog",     # finish pairing old 80
-#	"100" => "on-for-timer",
-#	"101" => "off-for-timer",
-#	"XX" => "z_custom",	# custom control code
+	"01010101" => "stop", 	  # stop the current movement
+	"00010001" => "off",      # go "up"
+	"00110011" => "on",       # go "down"
+	"11001100" => "prog",     # finish pairing
 );
 
 my %sets = (
 	"off" => "noArg",
 	"on" => "noArg",
+	"down"=> "noArg",
 	"stop" => "noArg",
-#	"go-my" => "noArg",
 	"prog" => "noArg",
-#	"on-for-timer" => "textField",
-#	"off-for-timer" => "textField",
-#	"z_custom" => "textField",
+	"on-for-timer" => "textField",
+	"off-for-timer" => "textField",
 	"pos" => "0,10,20,30,40,50,60,70,80,90,100"
+#	"pos" => "slider,0,10,100"
 );
 
 my %sendCommands = (
@@ -51,66 +56,89 @@ my %sendCommands = (
 );
 
 my %dooya_c2b;
-
-my $dooya_c2b_defsymbolwidth = 1240;    # Default Dooya frame symbol width
-my $dooya_defrepetition = 6;	# Default Dooya frame repeat counter
-
 my $dooya_updateFreq = 3;	# Interval for State update
 
-#my %models = ( dooyablinds => 'blinds', dooyashutter => 'shutter', ); # supported models (blinds  and shutters)
-my %channel = (  0 => '0000', 1 => '0001', 2 => '0010', 3 => '0011', 4 => '0100', 5 => '0101', 6 => '0110', 7 => '0111', 8 => '1000', 9 => '1001', 10 => '1010', 11 => '1011', 12 => '1100', 13 => '1101', 14 => '1110', 15 => '1111', ); #Kanal
-my %SignalRepeats = ( 5 => '#R5', 10 => '#R10', 15 => '#R15', 20 => '#R20', );  # Sendungswiederholungen des Signales
+# supported models (blinds  and shutters)
+my %models = ( 
+	dooyablinds => 'blinds', 
+	dooyashutter => 'shutter' 
+); 
 
+my %channel = ( 
+	0 => '0000', 
+	1 => '0001', 
+	2 => '0010', 
+	3 => '0011', 
+	4 => '0100', 
+	5 => '0101', 
+	6 => '0110', 
+	7 => '0111', 
+	8 => '1000', 
+	9 => '1001', 
+	10 => '1010', 
+	11 => '1011', 
+	12 => '1100', 
+	13 => '1101', 
+	14 => '1110', 
+	15 => '1111' 
+);
 
-######################################################
-######################################################
+my %ProtocolListSIGNALduino  = (
+	"16" => # Rohrmotor24 und andere Funk Rolladen / Markisen Motoren
+		{
+            name			=> 'Dooya shutter',	
+			id          	=> '16',
+			one				=> [2,-1],
+			zero			=> [1,-2],
+			start           => [16,-5],
+			clockabs		=> 300,
+			format 			=> 'twostate',	  		
+			preamble		=> 'u16#',				# prepend to converted message	
+			#clientmodule    => '',   				# not used now
+			#modulematch     => '',  				# not used now
+			length_min      => '40',
+			length_max      => '40',
+		}, 	
+);		
 
 ##################################################
-# new globals for new set 
+# new globals for new set
 #
 
 my $dooya_posAccuracy = 2;
 my $dooya_maxRuntime = 50;
 
 my %positions = (
-	"moving" => "50",  
-	"open" => "0", 
-	"off" => "0", 
+	"moving" => "50", 
+	"open" => "0",
+	"off" => "0",
 	"down" => "150", 
-	"closed" => "200", 
+	"closed" => "200",
 	"on" => "200"
 );
 
-
 my %translations = (
-	"0" => "open",  
-	"10" => "10",  
-	"20" => "20",  
-	"30" => "30",  
-	"40" => "40",  
-	"50" => "50",  
-	"60" => "60",  
-	"70" => "70",  
-	"80" => "80",  
-	"90" => "90",  
-	"100" => "100",  
-	"150" => "down",  
-	"200" => "closed" 
+	"0" => "open", 
+	"10" => "10", 
+	"20" => "20", 
+	"30" => "30", 
+	"40" => "40", 
+	"50" => "50", 
+	"60" => "60", 
+	"70" => "70", 
+	"80" => "80", 
+	"90" => "90", 
+	"100" => "100", 
+	"150" => "down", 
+	"200" => "closed"
 );
 
-
-##################################################
+######################################################
 # Forward declarations
 #
 sub Dooya_CalcCurrentPos($$$$);
 
-
 ######################################################
-######################################################
-
-
-
-#############################
 sub myUtilsDooya_Initialize($) {
 	$modules{Dooya}{LOADED} = 1;
 	my $hash = $modules{Dooya};
@@ -118,7 +146,7 @@ sub myUtilsDooya_Initialize($) {
 	Dooya_Initialize($hash);
 } # end sub myUtilsDooya_initialize
 
-#############################
+######################################################
 sub Dooya_Initialize($) {
 	my ($hash) = @_;
 
@@ -127,8 +155,6 @@ sub Dooya_Initialize($) {
 		$dooya_c2b{ $codes{$k} } = $k;
 	}
 
-	#                       YsKKC0RRRRAAAAAA
-	#  $hash->{Match}	= "^YsA..0..........\$";
 	$hash->{SetFn}		= "Dooya_Set";
 	#$hash->{StateFn} 	= "Dooya_SetState";
 	$hash->{DefFn}   	= "Dooya_Define";
@@ -137,24 +163,22 @@ sub Dooya_Initialize($) {
 	$hash->{AttrFn}  	= "Dooya_Attr";
 
 	$hash->{AttrList} = " channel:0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15 "
-	  . " SignalRepeats:5,10,15,20 "
-	# . " drive-down-time-to-100"
+      . " SignalRepeats:5,10,15,20 "
+	  . " drive-down-time-to-100"
 	  . " drive-down-time-to-close"
-	# . " drive-up-time-to-100"
+	  . " drive-up-time-to-100"
 	  . " drive-up-time-to-open "
 	  . " additionalPosReading  "
 	  . " IODev"
 	  . " setList"
-	 # . " symbol-length"
-	  . " repetition"
-	 #. " ignore:0,1"
+	  . " SignalRepeats:5,10,15,20"
+	  . " ignore:0,1"
 	  . " dummy:1,0"
-	  . " model:dooyablinds,dooyashutter"
+#	  . " model:dooyablinds,dooyashutter"
 	  . " loglevel:0,1,2,3,4,5,6";
-
 }
 
-#############################
+######################################################
 sub Dooya_StartTime($) {
 	my ($d) = @_;
 
@@ -169,7 +193,7 @@ sub Dooya_StartTime($) {
 	return $dt;
 } # end sub Dooya_StartTime
 
-#############################
+######################################################
 sub Dooya_Define($$) {
 	my ( $hash, $def ) = @_;
 	my @a = split( "[ \t][ \t]*", $def );
@@ -194,7 +218,6 @@ sub Dooya_Define($$) {
 
 	my $tn = TimeNow();
 
-
 	my $code  = uc($id);
 	my $ncode = 1;
 	$hash->{CODE}{ $ncode++ } = $code;
@@ -203,7 +226,7 @@ sub Dooya_Define($$) {
 	AssignIoPort($hash);
 }
 
-#############################
+######################################################
 sub Dooya_Undef($$) {
 	my ( $hash, $name ) = @_;
 
@@ -221,71 +244,114 @@ sub Dooya_Undef($$) {
 	return undef;
 }
 
-#####################################
-sub Dooya_SendCommand($@)
-{
+######################################################
+sub Dooya_SendCommand($@){
+
 	my ($hash, @args) = @_;
 	my $ret = undef;
 	my $cmd = $args[0];
 	my $message;
+	my $chan;
+	my $channel;
+	my $SignalRepeats;
 	my $name = $hash->{NAME};
+	my $bin;
 	my $numberOfArgs  = int(@args);
 
 	Log3($name,4,"Dooya_sendCommand: $name -> cmd :$cmd: ");
-
-  # custom control needs 2 digit hex code
-  return "Bad custom control code, use 2 digit hex codes only" if($args[0] eq "z_custom"
-  	&& ($numberOfArgs == 1
-  		|| ($numberOfArgs == 2 && $args[1] !~ m/^[a-fA-F0-9]{2}$/)));
-
+ 
     my $command = $dooya_c2b{ $cmd };
+	
 	# eigentlich überflüssig, da oben schon auf Existenz geprüft wird -> %sets
 	if ( !defined($command) ) {
-
 		return "Unknown argument $cmd, choose one of "
 		  . join( " ", sort keys %dooya_c2b );
 	}
-
+	
 	my $io = $hash->{IODev};
 
-
-	## Do we need to change symbol length?
 	if (   defined( $attr{ $name } )
-		&& defined( $attr{ $name }{"symbol-length"} ) )
+		&& defined( $attr{ $name }{"SignalRepeats"} ) )
 	{
-		$message = "t" . $attr{ $name }{"symbol-length"};
-		IOWrite( $hash, "Y", $message );
+		$SignalRepeats = $attr{ $name }{"SignalRepeats"};
 		Log GetLogLevel( $name, 4 ),
-		  "Dooya set symbol-length: $message for $io->{NAME}";
+		  "Dooya set SignalRepeats: $SignalRepeats for $io->{NAME}";
+	} else {
+		$SignalRepeats = "10";
+		Log GetLogLevel( $name, 4 ),
+		  "Dooya set SignalRepeats: $SignalRepeats for $io->{NAME}";
 	}
 
-
-	## Do we need to change frame repetition?
 	if (   defined( $attr{ $name } )
-		&& defined( $attr{ $name }{"repetition"} ) )
+		&& defined( $attr{ $name }{"channel"} ) )
 	{
-		$message = "r" . $attr{ $name }{"repetition"};
-		IOWrite( $hash, "Y", $message );
+		$chan = $attr{ $name }{"channel"};
 		Log GetLogLevel( $name, 4 ),
-		  "Dooya set repetition: $message for $io->{NAME}";
-	}
-
+		  "Dooya set channel: $channel for $io->{NAME}";
+	} else {
+		$channel = "0001";
+		Log GetLogLevel( $name, 4 ),
+		  "Dooya set channel: $channel for $io->{NAME}";
+	}	
 	my $value = $name ." ". join(" ", @args);
 
+	# convert old attribute values to READINGs
+	my $timestamp = TimeNow();
 
-	# message looks like this
-	# Ys_key_ctrl_cks_rollcode_a0_a1_a2
-	# Ys ad 20 0ae3 a2 98 42
-
-
-	if($command eq "XX") {
-		# use user-supplied custom command
-		$command = $args[1];
+	$bin = 	uc( $hash->{ID} )
+			. $channel
+			. $command;
+			
+	#print ("data = $bin \n");
+	
+#--------------------------------
+	my $protocol = "16";
+	my %signalHash;
+	my %patternHash;
+	my $pattern="";
+	my $cnt=0;
+	my $clock=$ProtocolListSIGNALduino{$protocol}{clockabs} > 1 ?$ProtocolListSIGNALduino{$protocol}{clockabs}:$hash->{ITClock};
+	foreach my $item (qw(sync start one zero))
+	{
+	    #print ("item= $item \n");
+	    next if (!exists($ProtocolListSIGNALduino{$protocol}{$item}));
+	    
+		foreach my $p (@{$ProtocolListSIGNALduino{$protocol}{$item}})
+		{
+		    #print (" p = $p \n");
+		    
+		    if (!exists($patternHash{$p}))
+			{
+				$patternHash{$p}=$cnt;
+				$pattern.="P".$patternHash{$p}."=".$p*$clock.";";
+				$cnt++;
+			}
+	    	$signalHash{$item}.=$patternHash{$p};
+		   	#print (" signalHash{$item} = $signalHash{$item} \n");
+		}
 	}
+	
+	my @bits = split("", $bin);
+	
+	my %bitconv = (1=>"one", 0=>"zero");
+	my $SignalData="D=";
+	
+	$SignalData.=$signalHash{sync} if (exists($signalHash{sync}));
+	$SignalData.=$signalHash{start} if (exists($signalHash{start}));
+	
+	foreach my $bit (@bits)
+	{
+		#print ("data = $bit \n");
+		next if (!exists($bitconv{$bit}));
+		#Log3 $name, 5, "encoding $bit";
+		$SignalData.=$signalHash{$bitconv{$bit}}; ## Add the signal to our data string
+		#print ("Sdata = $SignalData \n");
+	}
+	
+	my $sendData = "SR;R=$SignalRepeats;$pattern$SignalData;";
+#--------------------------------	
 
-	$message = "s"
-	  . $command
-	  . uc( $hash->{ID} );
+	$message = $sendData;
 
 	## Log that we are going to switch Dooya
 	Log GetLogLevel( $name, 4 ), "Dooya set $value: $message";
@@ -293,23 +359,12 @@ sub Dooya_SendCommand($@)
 
 	## Send Message to IODev using IOWrite
 	Log3($name,5,"Dooya_sendCommand: $name -> message :$message: ");
-	IOWrite( $hash, "Y", $message );
+	IOWrite( $hash, "", $message );
 
-
-	##########################
-	# Look for all devices with the same id timestamp
-	my $code = "$hash->{ID}";
-	my $tn   = TimeNow();
-	foreach my $n ( keys %{ $modules{Dooya}{defptr}{$code} } ) {
-
-		my $lh = $modules{Dooya}{defptr}{$code}{$n};
-		
-	}
 	return $ret;
 } # end sub Dooya_SendCommand
 
-
-###################################
+######################################################
 sub Dooya_Runden($) {
 	my ($v) = @_;
 	if ( ( $v > 105 ) && ( $v < 195 ) ) {
@@ -321,8 +376,7 @@ sub Dooya_Runden($) {
 	return sprintf("%d", $v );
 } # end sub Dooya_Runden
 
-
-###################################
+######################################################
 sub Dooya_Translate($) {
 	my ($v) = @_;
 
@@ -333,9 +387,10 @@ sub Dooya_Translate($) {
 	return $v
 } # end sub Dooya_Runden
 
-
-#############################
+######################################################
+### Hier vielleicht die erkennung der original FBs?
 sub Dooya_Parse($$) {
+
 	my ($hash, $msg) = @_;
 
 	# Msg format:
@@ -348,13 +403,13 @@ sub Dooya_Parse($$) {
 	}
 
     # get id
-    my $id = uc(substr($msg, 14, 2).substr($msg, 12, 2).substr($msg, 10, 2));
+   my $id = uc(substr($msg, 14, 2).substr($msg, 12, 2).substr($msg, 10, 2));
 
     # get command and set new state
 	my $cmd = sprintf("%X", hex(substr($msg, 4, 2)) & 0xF0);
-	if ($cmd eq "10") {
-		$cmd = "01010101"; # use "stop" instead of "go-my"
-  }
+#	if ($cmd eq "10") {
+#		$cmd = "01010101"; # use "stop" instead of "go-my"
+#  }
 
 	my $newstate = $codes{ $cmd };
 
@@ -364,7 +419,7 @@ sub Dooya_Parse($$) {
 		my @list;
 		foreach my $name (keys %{ $def }) {
       		my $lh = $def->{$name};
-     	 	$name = $lh->{NAME};        # It may be renamed
+     		$name = $lh->{NAME};        # It may be renamed
 
       		return "" if(IsIgnored($name));   # Little strange.
 
@@ -385,7 +440,8 @@ sub Dooya_Parse($$) {
 		return "UNDEFINED Dooya_$id Dooya $id";
 	}
 }
-##############################
+
+######################################################
 sub Dooya_Attr(@) {
 	my ($cmd,$name,$aName,$aVal) = @_;
 	my $hash = $defs{$name};
@@ -422,16 +478,10 @@ sub Dooya_Attr(@) {
 
 	return undef;
 }
-#############################
-
-######################################################
-######################################################
-######################################################
-
 
 ##################################################
 ### New set (state) method (using internalset)
-### 
+###
 ### Reimplemented calculations for position readings and state
 ### Allowed sets to be done without sending actually commands to the blinds
 ### 	syntax set <name> [ <virtual|send> ] <normal set parameter>
@@ -451,7 +501,7 @@ sub Dooya_Attr(@) {
 ## might contain position or textual form of the state (same as STATE reading)
 
 
-###################################
+######################################################
 # call with hash, name, [virtual/send], set-args   (send is default if ommitted)
 sub Dooya_Set($@) {
 	my ( $hash, $name, @args ) = @_;
@@ -463,8 +513,7 @@ sub Dooya_Set($@) {
 	}
 }
 
-	
-###################################
+######################################################
 # call with hash, name, virtual/send, set-args
 sub Dooya_InternalSet($@) {
 	my ( $hash, $name, $mode, @args ) = @_;
@@ -518,14 +567,14 @@ sub Dooya_InternalSet($@) {
 
 	# read timing variables
   my ($t1down100, $t1downclose, $t1upopen, $t1up100) = Dooya_getTimingValues($hash);
-	#Log3($name,5,"Dooya_set: $name -> timings ->  td1:$t1down100: tdc :$t1downclose:  tuo :$t1upopen:  tu1 :$t1up100: ");
+	Log3($name,5,"Dooya_set: $name -> timings ->  td1:$t1down100: tdc :$t1downclose:  tuo :$t1upopen:  tu1 :$t1up100: ");
 
-	#my $model =  AttrVal($name,'model',$models{dooyablinds});
+	my $model =  AttrVal($name,'model',$models{dooyablinds});
 	
 	if($cmd eq 'pos') {
 		return "Dooya_set: No pos specification"  if(!defined($arg1));
-		return  "Dooya_set: $arg1 must be > 0 and < 100 for pos" if($arg1 < 0 || $arg1 > 100);
-		return "Dooya_set: Please set attr drive-down-time-to-100, drive-down-time-to-close, etc" 
+		return "Dooya_set: $arg1 must be > 0 and < 100 for pos" if($arg1 < 0 || $arg1 > 100);
+		return "Dooya_set: Please set attr drive-down-time-to-100, drive-down-time-to-close, etc"
 				if(!defined($t1downclose) || !defined($t1down100) || !defined($t1upopen) || !defined($t1up100));
 	}
 
@@ -536,8 +585,8 @@ sub Dooya_InternalSet($@) {
 	my $newState;
 	my $updateState;
 	
-	# get current infos 
-	my $state = $hash->{STATE}; 
+	# get current infos
+	my $state = $hash->{STATE};
 	my $pos = ReadingsVal($name,'exact',undef);
 	if ( !defined($pos) ) {
 		$pos = ReadingsVal($name,'position',undef);
@@ -575,7 +624,7 @@ sub Dooya_InternalSet($@) {
 
 	### handle commands
 	if(!defined($t1downclose) || !defined($t1down100) || !defined($t1upopen) || !defined($t1up100)) {
-		#if timings not set 
+		#if timings not set
 
 		if($cmd eq 'on') {
 			$newState = 'closed';
@@ -605,12 +654,12 @@ sub Dooya_InternalSet($@) {
 			$newState = 'moving';
 			$drivetime = $arg1;
 			if ( $drivetime == 0 ) {
-				$move = 'stop';  
+				$move = 'stop'; 
 			} else {
 				$updateState = 'moving';
 			}
 
-		} elsif($cmd =~m/stop|go-my/) { 
+		} elsif($cmd =~m/stop|go-my/) {
 			$move = 'stop';
 			$newState = $state
 
@@ -677,8 +726,8 @@ sub Dooya_InternalSet($@) {
 				my $remTime = ( $t1upopen - $t1up100 ) * ( ( $pos - $arg1) / 100 );
 				$drivetime = $remTime;
 				if ( $drivetime == 0 ) {
-					# $move = 'stop';    # avoid sending stop to move to my-pos 
-          $move = 'none';  
+					# $move = 'stop';    # avoid sending stop to move to my-pos
+          $move = 'none'; 
 				} else {
 					$updateState = $arg1;
 				}
@@ -699,7 +748,7 @@ sub Dooya_InternalSet($@) {
 			###				return "Dooya_set: Pos not currently known please open or close first";
 			}
 
-		} elsif($cmd =~m/stop|go-my/) { 
+		} elsif($cmd =~m/stop|go-my/) {
 			#		update pos according to current detail pos
 			$move = 'stop';
 			
@@ -757,14 +806,14 @@ sub Dooya_InternalSet($@) {
 		}
 	}	
 
-	### start timer 
+	### start timer
 	if ( $mode eq 'virtual' ) {
 		# in virtual mode define drivetime as updatetime only, so no commands will be send
 		if ( $updatetime == 0 ) {
 			$updatetime = $drivetime;
 		}
 		$drivetime = 0;
-	} 
+	}
 	
 	### update time stamp
 	Dooya_UpdateStartTime($hash);
@@ -795,24 +844,21 @@ sub Dooya_InternalSet($@) {
 
 	return undef;
 } # end sub Dooya_setFN
-###############################
-
-
 ######################################################
+
 ######################################################
 ###
 ### Helper for set routine
 ###
 ######################################################
 
-
-###################################
+######################################################
 sub Dooya_RoundInternal($) {
 	my ($v) = @_;
 	return sprintf("%d", ($v + ($dooya_posAccuracy/2)) / $dooya_posAccuracy) * $dooya_posAccuracy;
 } # end sub Dooya_RoundInternal
 
-#############################
+######################################################
 sub Dooya_UpdateStartTime($) {
 	my ($d) = @_;
 
@@ -827,20 +873,19 @@ sub Dooya_UpdateStartTime($) {
 	return $dt;
 } # end sub Dooya_UpdateStartTime
 
-
-###################################
+######################################################
 sub Dooya_TimedUpdate($) {
 	my ($hash) = @_;
 
 	Log3($hash->{NAME},4,"Dooya_TimedUpdate");
 	
-	# get current infos 
+	# get current infos
 	my $pos = ReadingsVal($hash->{NAME},'exact',undef);
 	Log3($hash->{NAME},5,"Dooya_TimedUpdate : pos so far : $pos");
 	
 	my $dt = Dooya_UpdateStartTime($hash);
   my $nowt = gettimeofday();
-  
+ 
 	$pos = Dooya_CalcCurrentPos( $hash, $hash->{move}, $pos, $dt );
 #	my $posRounded = Dooya_RoundInternal( $pos );
 	
@@ -875,8 +920,7 @@ sub Dooya_TimedUpdate($) {
 	Log3($hash->{NAME},5,"Dooya_TimedUpdate DONE");
 } # end sub Dooya_TimedUpdate
 
-
-###################################
+######################################################
 #	Dooya_UpdateState( $hash, $newState, $move, $updateState );
 sub Dooya_UpdateState($$$$$) {
 	my ($hash, $newState, $move, $updateState, $doTrigger) = @_;
@@ -894,7 +938,7 @@ sub Dooya_UpdateState($$$$$) {
 
 		readingsBulkUpdate($hash,"position",$positions{$newState});
 		$hash->{position} = $positions{$newState};
-    
+   
     readingsBulkUpdate($hash,$addtlPosReading,$positions{$newState}) if ( defined($addtlPosReading) );
 
   } else {
@@ -907,7 +951,7 @@ sub Dooya_UpdateState($$$$$) {
 		$hash->{position} = $rounded;
 
     readingsBulkUpdate($hash,$addtlPosReading,$rounded) if ( defined($addtlPosReading) );
-      
+     
 
   }
 
@@ -921,11 +965,10 @@ sub Dooya_UpdateState($$$$$) {
 	}
 	$hash->{move} = $move;
 	
-	readingsEndUpdate($hash,$doTrigger); 
+	readingsEndUpdate($hash,$doTrigger);
 } # end sub Dooya_UpdateState
 
-
-###################################
+######################################################
 # Return timingvalues from attr and after correction
 sub Dooya_getTimingValues($) {
 	my ($hash) = @_;
@@ -941,44 +984,39 @@ sub Dooya_getTimingValues($) {
 
   if ( ( $t1downclose < 0 ) || ( $t1down100 < 0 ) || ( $t1upopen < 0 ) || ( $t1up100 < 0 ) ) {
     Log3($name,1,"Dooya_getTimingValues: $name time values need to be positive values");
-    return (undef, undef, undef, undef); 
+    return (undef, undef, undef, undef);
   }
 
   if ( $t1downclose < $t1down100 ) {
     Log3($name,1,"Dooya_getTimingValues: $name close time needs to be higher or equal than time to pos100");
-    return (undef, undef, undef, undef); 
+    return (undef, undef, undef, undef);
   } elsif ( $t1downclose == $t1down100 ) {
     $t1up100 = 0;
   }
 
   if ( $t1upopen <= $t1up100 ) {
     Log3($name,1,"Dooya_getTimingValues: $name open time needs to be higher or equal than time to pos100");
-    return (undef, undef, undef, undef); 
+    return (undef, undef, undef, undef);
   }
 
   if ( $t1upopen < 1 ) {
     Log3($name,1,"Dooya_getTimingValues: $name time to open needs to be at least 1 second");
-    return (undef, undef, undef, undef); 
+    return (undef, undef, undef, undef);
   }
 
   if ( $t1downclose < 1 ) {
     Log3($name,1,"Dooya_getTimingValues: $name time to close needs to be at least 1 second");
-    return (undef, undef, undef, undef); 
+    return (undef, undef, undef, undef);
   }
 
-  return ($t1down100, $t1downclose, $t1upopen, $t1up100); 
+  return ($t1down100, $t1downclose, $t1upopen, $t1up100);
 }
 
-
-
-###################################
+######################################################
 # call with hash, translated state
 sub Dooya_CalcCurrentPos($$$$) {
-
 	my ($hash, $move, $pos, $dt) = @_;
-
 	my $name = $hash->{NAME};
-
 	my $newPos = $pos;
 	
 	# Attributes for calculation
@@ -990,7 +1028,7 @@ sub Dooya_CalcCurrentPos($$$$) {
 			if($move eq 'on') {
 				$newPos = min( 100, $pos );
 				if ( $pos < 100 ) {
-					# calc remaining time to 100% 
+					# calc remaining time to 100%
 					my $remTime = ( 100 - $pos ) * $t1down100 / 100;
 					if ( $remTime > $dt ) {
 						$newPos = $pos + ( $dt * 100 / $t1down100 );
@@ -1012,7 +1050,7 @@ sub Dooya_CalcCurrentPos($$$$) {
 					$newPos = $dt * 100 / ( $t1downclose - $t1down100 );
 					$newPos = min( 200, $pos + $newPos );
 				} else {
-					# calc remaining time to 100% 
+					# calc remaining time to 100%
 					my $remTime = ( 100 - $pos ) * $t1down100 / 100;
 					if ( $remTime > $dt ) {
 						$newPos = $pos + ( $dt * 100 / $t1down100 );
@@ -1028,7 +1066,7 @@ sub Dooya_CalcCurrentPos($$$$) {
 					$newPos = $dt * 100 / ( $t1upopen - $t1up100 );
 					$newPos = max( 0, $pos - $newPos );
 				} else {
-					# calc remaining time to 100% 
+					# calc remaining time to 100%
 					my $remTime = ( $pos - 100 ) * $t1up100 / 100;
 					if ( $remTime > $dt ) {
 						$newPos = $pos - ( $dt * 100 / $t1up100 );
@@ -1060,57 +1098,41 @@ sub Dooya_CalcCurrentPos($$$$) {
 =begin html
 
 <a name="Dooya"></a>
-<h3>Dooya protocol</h3>
+<h3>Dooya - Dooya protocol</h3>
 <ul>
   The Dooya protocol is used by a wide range of devices,
   which are either senders or receivers/actuators.
-  The RECIVING and SENDING of Dooya commands is implemented in the SIGNALsuino, so this module currently supports 
-  devices like blinds and shutters. The Dooya protocol is used from a lot of different shutter companies in Germanyr. Examples are Rohrmotor24 or Nobily.
-  <br><br>  
+  Right now only SENDING of Dooya commands is implemented in the SIGNALsuino, so this module currently only
+  supports devices like blinds, dimmers, etc. through a <a href="#SIGNALduino">SIGNALduino</a> device (which must be defined first).
 
+  <br><br>
 
-  <pre>
-  <code>4: sduino/msg READ: MU;P0=4717;P1=-1577;P2=284;P3=-786;P4=649;P5=-423;D=01232345[......]445232;CP=2;</code> 
-  <code>4: sduino: Fingerprint for MU Protocol id 16 -> Dooya shutter matches, trying to demodulate</code>  
-  <code>4: sduino: decoded matched MU Protocol id 16 dmsg u16#370658E133 length 40</code>  
-  <code>4: SIGNALduino_unknown Protocol: 16</code> 
-  <code>4: SIGNALduino_unknown converted to bits: 0011011100000110010110001110000100110011</code>  
-  <code>4: SIGNALduino_unknown / shutter Dooya 0011011100000110010110001110000100110011 received</code>  
-  <code>4: 00110111000001100101100 1110 0001 0011 0011</code>  
-  <code>4: SIGNALduino_unknown found shutter from Dooya. id=3606104, remotetype=14,  channel=1, direction=down, all_shutters=false</code>  
-</pre>
-
-  
-   <br> a <a href="#SIGNALduino">SIGNALduino</a> device (must be defined first)  <br>
- <br>
- <br>
-
-   
   <a name="Dooyadefine"></a>
-   <br>
   <b>Define</b>
-   <br>
   <ul>
     <code>define &lt;name&gt; Dooya &lt;id&gt;] </code>
-  <br>
- <br>
-   The id is a 28-digit binaer code, that uniquely identifies a single remote control.
+    <br><br>
+
+   The id is a 28-digit binaer code, that uniquely identifies a single remote control channel.
+   It is used to pair the remote to the blind or dimmer it should control.
    <br>
-   Pairing is done by setting the shutter in programming mode, either by disconnecting/reconnecting the power,
-   and by pressing the program button on an already associated remote.
+   Pairing is done by setting the blind in programming mode, either by disconnecting/reconnecting the power,
+   or by pressing the program button on an already associated remote.
    <br>
-   Once the shutter is in programming mode, send the "prog" command from within FHEM to complete the pairing.
-   The shutter will peep shortly to indicate completion.
+   Once the blind is in programming mode, send the "prog" command from within FHEM to complete the pairing.
+   The blind will move up and down shortly to indicate completion.
    <br>
-   You are now able to control this blind from FHEM, the receiver thinks it is just another remote control or the real exist remote. 
-   For the shutter it´s the same.
+   You are now able to control this blind from FHEM, the receiver thinks it is just another remote control.
 
    <ul>
-   <li><code>&lt;id&gt;</code> is a 28 digit binaer number that uniquely identifies FHEM as a new remote control.
-   <br>You can use a different one for each device definition, and group them using a structure. You can use the same ID for a couple of shutters
-   and you can give every one an other channal. (0 to 15, 0 ist the MASTER and conrols all other channels.)
+   <li><code>&lt;id&gt;</code> is a 28 digit binaer number that uniquely identifies FHEM as a new remote control channel.
+   <br>You should use a different one for each device definition, and group them using a structure.
    </li>
-   If you set one of them, you need to pick the same address as an existing remote.</li>
+   If you set one of them, you need to pick the same address as an existing remote.
+   Be aware that the receiver might not accept commands from the remote any longer,<br>
+   if you used FHEM to clone an existing remote.
+   <br>
+   This is because the code is original remote's codes are out of sync.</li>
    </ul>
    <br>
 
@@ -1134,7 +1156,9 @@ sub Dooya_CalcCurrentPos($$$$) {
     stop
     pos value (0..100) # see note
     prog  # Special, see note
-    </pre>
+    on-for-timer
+    off-for-timer
+	</pre>
     Examples:
     <ul>
       <code>set rollo_1 on</code><br>
@@ -1147,8 +1171,13 @@ sub Dooya_CalcCurrentPos($$$$) {
     Notes:
     <ul>
       <li>prog is a special command used to pair the receiver to FHEM:
-      Set the receiver in programming mode and send the "prog" command from FHEM to finish pairing.<br>
-      The shutter will peep shortly to indicate success.
+      Set the receiver in programming mode (eg. by pressing the program-button on the original remote)
+      and send the "prog" command from FHEM to finish pairing.<br>
+      The blind will move up and down shortly to indicate success.
+      </li>
+      <li>on-for-timer and off-for-timer send a stop command after the specified time,
+      instead of reversing the blind.<br>
+      This can be used to go to a specific position by measuring the time it takes to close the blind completely.
       </li>
       <li>pos value<br>
 		
@@ -1163,10 +1192,10 @@ sub Dooya_CalcCurrentPos($$$$) {
     <ul>
       <li>Without timing values set only generic values are used for status and position: <pre>open, closed, moving</pre> are used
       </li>
-			<li>With timing values set but drive-down-time-to-close equal to drive-down-time-to-100 and drive-up-time-to-100 equal 0 
+			<li>With timing values set but drive-down-time-to-close equal to drive-down-time-to-100 and drive-up-time-to-100 equal 0
 			the device is considered to only vary between 0 and 100 (100 being completely closed)
       </li>
-			<li>With full timing values set the device is considerd a window shutter (Rolladen) with a difference between 
+			<li>With full timing values set the device is considerd a window shutter (Rolladen) with a difference between
 			covering the full window (position 100) and being completely closed (position 200)
       </li>
 		</ul>
@@ -1182,31 +1211,21 @@ sub Dooya_CalcCurrentPos($$$$) {
     <a name="IODev"></a>
     <li>IODev<br>
         Set the IO or physical device which should be used for sending signals
-        for this "logical" device. It must be the SIGNALduino.<br>
+        for this "logical" device. An example for the physical device is a SIGNALduino.<br>
         Note: The IODev has to be set, otherwise no commands will be sent!<br>
         </li><br>
 
-  <a name="channel"></a>
-    <li>channel<br>
-        Set the channel of the remote. You can use 0 (MASTER) to 15.<br>
-        Note: The MASTER conrols all remotes with the same ID!!!<br>
-        </li><br>
-        
-          <a name="SignalRepeats"></a>
-    <li>SignalRepeats<br>
-        Set the repeats for sending signal. You can use 5, 10, 15 and 20.
-      </li><br>
-        
     <a name="setList"></a>
     <li>setList<br>
-        Space separated list of commands, which will be returned upon "set name ?", 
+        Space separated list of commands, which will be returned upon "set name ?",
         so the FHEMWEB frontend can construct the correct control and command dropdown. Specific controls can be added after a colon for each command
         <br>
-        	</li><br>
+        Example: <code>attr shutter setList open close pos:textField</code>
+		</li><br>
 
     <a name="additionalPosReading"></a>
     <li>additionalPosReading<br>
-        Position of the shutter will be stored in the reading <code>pos</code> as numeric value. 
+        Position of the shutter will be stored in the reading <code>pos</code> as numeric value.
         Additionally this attribute might specify a name for an additional reading to be updated with the same value than the pos.
 		</li><br>
 
@@ -1241,7 +1260,22 @@ sub Dooya_CalcCurrentPos($$$$) {
     <li><a href="#showtime">showtime</a></li><br>
 
     <a name="model"></a>
-    
+    <li>model<br>
+        The model attribute denotes the model type of the device.
+        The attributes will (currently) not be used by the fhem.pl directly.
+        It can be used by e.g. external programs or web interfaces to
+        distinguish classes of devices and send the appropriate commands
+        (e.g. "on" or "off" to a switch, "dim..%" to dimmers etc.).<br>
+        The spelling of the model names are as quoted on the printed
+        documentation which comes which each device. This name is used
+        without blanks in all lower-case letters. Valid characters should be
+        <code>a-z 0-9</code> and <code>-</code> (dash),
+        other characters should be ommited.<br>
+        Here is a list of "official" devices:<br>
+          <b>Receiver/Actor</b>: dooyablinds<br>
+    </li><br>
+
+
     <a name="ignore"></a>
     <li>ignore<br>
         Ignore this device, e.g. if it belongs to your neighbour. The device
@@ -1298,3 +1332,4 @@ sub Dooya_CalcCurrentPos($$$$) {
 
 =end html
 =cut
+
