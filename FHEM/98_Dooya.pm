@@ -11,6 +11,7 @@
 # 0.20	2016-03-06	darkmission		first functions, renamed from 10_ to 99_
 # 0.21	2016-03-06	darkmission		Bug default channel corrected, changed attribute repetition to SignalRepeats
 # 0.22  2016-03-10	darkmission		code cleaned, renamed from 99_ to 98_
+# 0.23  2016-03-11	Jarno Karsch		AttrList cleaned and change priority
 # 
 #
 #TODOS:
@@ -162,16 +163,15 @@ sub Dooya_Initialize($) {
 	$hash->{ParseFn}  	= "Dooya_Parse";
 	$hash->{AttrFn}  	= "Dooya_Attr";
 
-	$hash->{AttrList} = " channel:0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15 "
-      . " SignalRepeats:5,10,15,20 "
-	  . " drive-down-time-to-100"
+	$hash->{AttrList} = " IODev"
+	  . " SignalRepeats:5,10,15,20 "
+	  . " channel:0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15 "
+      	  . " drive-down-time-to-100"
 	  . " drive-down-time-to-close"
 	  . " drive-up-time-to-100"
 	  . " drive-up-time-to-open "
 	  . " additionalPosReading  "
-	  . " IODev"
 	  . " setList"
-	  . " SignalRepeats:5,10,15,20"
 	  . " ignore:0,1"
 	  . " dummy:1,0"
 #	  . " model:dooyablinds,dooyashutter"
