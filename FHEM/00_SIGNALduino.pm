@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 95487 2016-03-02 12:24:00 v3.2-dev $
+# $Id: 00_SIGNALduino.pm 95487 2016-03-12 21:00:00Z v3.2.1-dev $
 #
 # v3.2-dev
 # The file is taken from the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -30,7 +30,7 @@ sub SIGNALduino_Parse($$$$@);
 sub SIGNALduino_Read($);
 sub SIGNALduino_ReadAnswer($$$$);
 sub SIGNALduino_Ready($);
-sub SIGNALduino_Write($$$);
+sub SIGNALduino_Write($$$;$);
 
 sub SIGNALduino_SimpleWrite(@);
 
@@ -75,6 +75,7 @@ my $clientsSIGNALduino = ":IT:"
 						."SD_WS09:"
 						."SD_WS:"
 						."RFXX10REC:"
+						."Dooya:"
 						."SIGNALduino_un:"
 						; 
 
@@ -91,6 +92,7 @@ my %matchListSIGNALduino = (
      "11:SD_WS09"				=> "^P9#[A-Fa-f0-9]+",
      "12:SD_WS"					=> '^W\d+#.*',
      "13:RFXX10REC" 			=> '^(20|29)[A-Fa-f0-9]+',
+     "14:Dooya"				=> '^P16#[A-Fa-f0-9]+',
      "X:SIGNALduino_un"			=> '^[uP]\d+#.*',
 );
 
@@ -358,7 +360,7 @@ my %ProtocolListSIGNALduino  = (
 			start           => [16,-5],
 			clockabs		=> 300,
 			format 			=> 'twostate',	  		
-			preamble		=> 'u16#',				# prepend to converted message	
+			preamble		=> 'P16#',				# prepend to converted message	
 			#clientmodule    => '',   				# not used now
 			#modulematch     => '',  				# not used now
 			length_min      => '40',
@@ -728,10 +730,13 @@ my %ProtocolListSIGNALduino  = (
 			preamble => '', # prepend to converted message
 			clientmodule => 'RFXX10REC', # not used now
 			#modulematch => '^TX......', # not used now
-			length_min => '41',
+			length_min => '38',
 			length_max => '44',
 			paddingbits     => '8',		
 			postDemodulation => \&SIGNALduino_lengtnPrefix,			
+			filterfunc      => 'SIGNALduino_compPattern',
+			
+			
 		},    
 );
 
@@ -1141,10 +1146,11 @@ SIGNALduino_Get($@)
   	    return "$a[0] $a[1] => $arg";
   	}
   	
-  } 
+  }
+  
   SIGNALduino_SimpleWrite($hash, $gets{$a[1]}[0] . $arg);
-
   ($err, $msg) = SIGNALduino_ReadAnswer($hash, $a[1], 0, $gets{$a[1]}[1]);
+  
   Log3 $name, 5, "$name: received message for gets: " . $msg if ($msg);
   
   if(!defined($msg)) {
@@ -1397,17 +1403,19 @@ SIGNALduino_XmitLimitCheck($$)
 
 #####################################
 sub
-SIGNALduino_Write($$$)
+SIGNALduino_Write($$$;$)
 {
-  my ($hash,$fn,$msg) = @_;
-
+  my ($hash,$fn,$msg,$cmd) = @_;
   my $name = $hash->{NAME};
 
   Log3 $name, 5, "$name: sending $fn$msg";
   my $bstring = "$fn$msg";
 
-  SIGNALduino_SimpleWrite($hash, $bstring);
-
+  if (defined($cmd)) {
+    SIGNALduino_Set($hash,$name,$cmd,$bstring);
+  } else {
+    SIGNALduino_SimpleWrite($hash, $bstring);
+  }
 }
 
 #sub
@@ -2805,6 +2813,78 @@ sub SIGNALduino_filterSign($$$%)
 	#$patternListRaw = \%buckets;
 }
 
+
+# - - - - - - - - - - - -
+#=item SIGNALduino_compPattern()
+#This functons, will act as a filter function. It will remove the sign from the pattern, and compress message and pattern
+# 
+# Will return  $count of combined values,  modified $rawData , modified %patternListRaw,
+# =cut
+
+
+sub SIGNALduino_compPattern($$$%)
+{
+	my ($name,$id,$rawData,%patternListRaw) = @_;
+	my $debug = AttrVal($name,"debug",0);
+
+
+	my %buckets;
+	# Remove Sign
+    #%patternListRaw = map { $_ => abs($patternListRaw{$_})} keys %patternListRaw;  ## remove sing from all
+    
+    my $intol=0;
+    my $cnt=0;
+
+    # compress pattern hash
+    foreach my $key (keys %patternListRaw) {
+			
+		#print "chk:".$patternListRaw{$key};
+    	#print "\n";
+
+        $intol=0;
+		foreach my $b_key (keys %buckets){
+			#print "with:".$buckets{$b_key};
+			#print "\n";
+			
+			# $value  - $set <= $tolerance
+			if (SIGNALduino_inTol($patternListRaw{$key},$buckets{$b_key},$buckets{$b_key}*0.4))
+			{
+		    	#print"\t". $patternListRaw{$key}."($key) is intol of ".$buckets{$b_key}."($b_key) \n";
+				$cnt++;
+				eval "\$rawData =~ tr/$key/$b_key/";
+
+				#if ($key == $msg_parts{clockidx})
+				#{
+			#		$msg_pats{syncidx} = $buckets{$key};
+			#	}
+			#	elsif ($key == $msg_parts{syncidx})
+			#	{
+			#		$msg_pats{syncidx} = $buckets{$key};
+			#	}			
+				
+				$buckets{$b_key} = ($buckets{$b_key} + $patternListRaw{$key}) /2;
+				#print"\t recalc to ". $buckets{$b_key}."\n";
+
+				delete ($patternListRaw{$key});  # deletes the compressed entry
+				$intol=1;
+				last;
+			}
+		}	
+		if ($intol == 0) {
+			$buckets{$key}=$patternListRaw{$key};
+		}
+	}
+
+	return ($cnt,$rawData, %patternListRaw);
+	#print "rdata: ".$msg_parts{rawData}."\n";
+
+	#print Dumper (%buckets);
+	#print Dumper (%msg_parts);
+
+	#modify msg_parts pattern hash
+	#$patternListRaw = \%buckets;
+}
+
 #print Dumper (%msg_parts);
 #print "\n";
 #SIGNALduino_filterSign(%msg_parts);
@@ -2846,7 +2926,7 @@ sub SIGNALduino_filterSign($$$%)
     <li>Eurochon EAS 800z -> 14_SD_WS07</li>
     <li>CTW600, WH1080	-> 14_SD_WS09 </li>
     <li>Hama TS33C, Bresser Thermo/Hygro Sensor -> 14_Hideki</li>
-    <li>FreeTec Außenmodul NC-7344 -> 14_SD_WS07</li>
+    <li>FreeTec Aussenmodul NC-7344 -> 14_SD_WS07</li>
     
     
 	</ul>
@@ -3011,18 +3091,18 @@ attr sduino longids BTHR918N
 		<li>enableMessagetype<br>
 			Allows you to enable the message processing for 
 			<ul>
-				<li>messages with sync (syncedMS),
-				<li>messages without a sync pulse (unsyncedMU) 
-				<li>manchester encoded messages (manchesterMC) 
+				<li>messages with sync (syncedMS),</li>
+				<li>messages without a sync pulse (unsyncedMU) </li>
+				<li>manchester encoded messages (manchesterMC) </li>
 			</ul>
 			The new state will be saved into the eeprom of your arduino.
 		</li>
 		<li>disableMessagetype<br>
 			Allows you to disable the message processing for 
 			<ul>
-				<li>messages with sync (syncedMS),
-				<li>messages without a sync pulse (unsyncedMU) 
-				<li>manchester encoded messages (manchesterMC) 
+				<li>messages with sync (syncedMS),</li>
+				<li>messages without a sync pulse (unsyncedMU)</li> 
+				<li>manchester encoded messages (manchesterMC) </li>
 			</ul>
 			The new state will be saved into the eeprom of your arduino.
 		</li>
