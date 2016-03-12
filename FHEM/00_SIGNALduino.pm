@@ -1153,7 +1153,7 @@ SIGNALduino_Get($@)
   	
   }
   
-  SIGNALduino_SimpleWrite($hash, $gets{$a[1]}[0] . $arg);
+  #SIGNALduino_SimpleWrite($hash, $gets{$a[1]}[0] . $arg);
   SIGNALduino_AddSendQueue($hash, $gets{$a[1]}[0] . $arg);
   $hash->{getcmd}->{cmd}=$a[1];
   $hash->{getcmd}->{asyncOut}=$hash->{CL};
