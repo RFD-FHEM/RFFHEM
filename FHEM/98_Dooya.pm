@@ -1,5 +1,5 @@
 ######################################################
-# $Id: 98_Dooya.pm 2016-02-16 Jarnsen, darkmission $
+# $Id: 98_Dooya.pm 1000 2016-02-16 09:00:00Z Jarnsen, darkmission $
 #
 # Dooya module for FHEM
 # Thanks for templates/coding from Somfy and SIGNALduino team
@@ -7,17 +7,17 @@
 # Needs SIGNALduino.
 # Published under GNU GPL License, v2
 # History:
-# 0.10	2016-02-16	Jarnsen			initial template
+# 0.10	2016-02-16	Jarno Karsch	initial template
 # 0.20	2016-03-06	darkmission		first functions, renamed from 10_ to 99_
 # 0.21	2016-03-06	darkmission		Bug default channel corrected, changed attribute repetition to SignalRepeats
 # 0.22  2016-03-10	darkmission		code cleaned, renamed from 99_ to 98_
-# 0.23  2016-03-11	Jarnsen			AttrList cleaned and change priority
-# 
+# 0.23  2016-03-11	Jarno Karsch	AttrList cleaned and change priority
+# 1.00	2016-03-12	darkmission		autocreate, parse communication from SIGNALduino for correct position when using remote from doooya 
 #
 #TODOS:
-# - automatic IOdev finding
-# - autocreate
-# - parse communication from SIGNALDUINO to Modul, neede for correct position when using remote from doooya
+# - Groups, diff by channels
+#
+# 
 ######################################################
 
 
@@ -162,11 +162,11 @@ sub Dooya_Initialize($) {
 	$hash->{UndefFn}	= "Dooya_Undef";
 	$hash->{ParseFn}  	= "Dooya_Parse";
 	$hash->{AttrFn}  	= "Dooya_Attr";
-
+	$hash->{Match}     	= "^P16#[A-Fa-f0-9]+";
 	$hash->{AttrList} = " IODev"
 	  . " SignalRepeats:5,10,15,20 "
 	  . " channel:0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15 "
-      	  . " drive-down-time-to-100"
+      . " drive-down-time-to-100"
 	  . " drive-down-time-to-close"
 	  . " drive-up-time-to-100"
 	  . " drive-up-time-to-open "
@@ -176,6 +176,11 @@ sub Dooya_Initialize($) {
 	  . " dummy:1,0"
 #	  . " model:dooyablinds,dooyashutter"
 	  . " loglevel:0,1,2,3,4,5,6";
+	  
+	$hash->{AutoCreate} =
+      { "dooya.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", 
+                       FILTER => "%NAME" } };
+                       autocreateThreshold => "2:10" 
 }
 
 ######################################################
@@ -359,7 +364,7 @@ sub Dooya_SendCommand($@){
 
 	## Send Message to IODev using IOWrite
 	Log3($name,5,"Dooya_sendCommand: $name -> message :$message: ");
-	IOWrite( $hash, "", $message );
+	IOWrite( $hash, "", $message,1 );
 
 	return $ret;
 } # end sub Dooya_SendCommand
@@ -388,30 +393,30 @@ sub Dooya_Translate($) {
 } # end sub Dooya_Runden
 
 ######################################################
-### Hier vielleicht die erkennung der original FBs?
 sub Dooya_Parse($$) {
 
 	my ($hash, $msg) = @_;
+	my (undef ,$rawData) = split("#",$msg);
 
-	# Msg format:
-	# Ys AB 2C 004B 010010
-	# address needs bytes 1 and 3 swapped
+    my $hlen = length($rawData);
+    my $blen = $hlen * 4;
+    my $bitData = unpack("B$blen", pack("H$hlen", $rawData)); 
 
-	if (substr($msg, 0, 2) eq "Yr" || substr($msg, 0, 2) eq "Yt") {
-		# changed time or repetition, just return the name
-		return $hash->{NAME};
-	}
+    Log3 $hash, 4, "Dooya_Parse: rawData = $rawData length: $hlen";
+    Log3 $hash, 4, "Dooya_Parse: converted to bits: $bitData";
 
-    # get id
-   my $id = uc(substr($msg, 14, 2).substr($msg, 12, 2).substr($msg, 10, 2));
+    # get id, channel, cmd
+   my $id = substr($bitData, 0, 28);
+   my $channel = substr($bitData, 28, 4); #noch nicht benoetigt
+   my $cmd = substr($bitData, 32, 8);
 
-    # get command and set new state
-	my $cmd = sprintf("%X", hex(substr($msg, 4, 2)) & 0xF0);
-#	if ($cmd eq "10") {
-#		$cmd = "01010101"; # use "stop" instead of "go-my"
-#  }
-
+    Log3 $hash, 4, "Dooya_Parse: device ID: $id";
+    Log3 $hash, 4, "Dooya_Parse: Channel: $channel \n";
+    Log3 $hash, 4, "Dooya_Parse: Cmd: $cmd \n";
+   
+    # set new state
 	my $newstate = $codes{ $cmd };
+	Log3 $hash, 4, "Dooya_Parse: Newstate $newstate \n";
 
 	my $def = $modules{Dooya}{defptr}{$id};
 
@@ -428,7 +433,7 @@ sub Dooya_Parse($$) {
 					# readingsSingleUpdate($lh, "state", $newstate, 1);
 					readingsSingleUpdate($lh, "parsestate", $newstate, 1);
 
-			Log3 $name, 4, "Dooya $name $newstate";
+			Log3 $name, 4, "Dooya_Parse $name $newstate";
 
 			push(@list, $name);
 		}
