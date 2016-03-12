@@ -1103,41 +1103,57 @@ sub Dooya_CalcCurrentPos($$$$) {
 =begin html
 
 <a name="Dooya"></a>
-<h3>Dooya - Dooya protocol</h3>
+<h3>Dooya protocol</h3>
 <ul>
   The Dooya protocol is used by a wide range of devices,
   which are either senders or receivers/actuators.
-  Right now only SENDING of Dooya commands is implemented in the SIGNALsuino, so this module currently only
-  supports devices like blinds, dimmers, etc. through a <a href="#SIGNALduino">SIGNALduino</a> device (which must be defined first).
+  The RECIVING and SENDING of Dooya commands is implemented in the SIGNALsuino, so this module currently supports 
+  devices like blinds and shutters. The Dooya protocol is used from a lot of different shutter companies in Germanyr. Examples are Rohrmotor24 or Nobily.
+  <br><br>  
 
-  <br><br>
 
+  <pre>
+  <code>4: sduino/msg READ: MU;P0=4717;P1=-1577;P2=284;P3=-786;P4=649;P5=-423;D=01232345[......]445232;CP=2;</code> 
+  <code>4: sduino: Fingerprint for MU Protocol id 16 -> Dooya shutter matches, trying to demodulate</code>  
+  <code>4: sduino: decoded matched MU Protocol id 16 dmsg u16#370658E133 length 40</code>  
+  <code>4: SIGNALduino_unknown Protocol: 16</code> 
+  <code>4: SIGNALduino_unknown converted to bits: 0011011100000110010110001110000100110011</code>  
+  <code>4: SIGNALduino_unknown / shutter Dooya 0011011100000110010110001110000100110011 received</code>  
+  <code>4: 00110111000001100101100 1110 0001 0011 0011</code>  
+  <code>4: SIGNALduino_unknown found shutter from Dooya. id=3606104, remotetype=14,  channel=1, direction=down, all_shutters=false</code>  
+</pre>
+
+  
+   <br> a <a href="#SIGNALduino">SIGNALduino</a> device (must be defined first)  <br>
+ <br>
+ <br>
+
+   
   <a name="Dooyadefine"></a>
+   <br>
   <b>Define</b>
+   <br>
   <ul>
-    <code>define &lt;name&gt; Dooya &lt;id&gt;] </code>
-    <br><br>
-
-   The id is a 28-digit binaer code, that uniquely identifies a single remote control channel.
-   It is used to pair the remote to the blind or dimmer it should control.
+    <code>define &lt;name&gt; Dooya &lt;id&gt; </code>
+  <br>
+ <br>
+   The id is a 28-digit binar code, that uniquely identifies a single remote control.
    <br>
-   Pairing is done by setting the blind in programming mode, either by disconnecting/reconnecting the power,
-   or by pressing the program button on an already associated remote.
+   Pairing is done by setting the shutter in programming mode, either by disconnecting/reconnecting the power,
+   and by pressing the program button on an already associated remote.
    <br>
-   Once the blind is in programming mode, send the "prog" command from within FHEM to complete the pairing.
-   The blind will move up and down shortly to indicate completion.
+   Once the shutter is in programming mode, send the "prog" command from within FHEM to complete the pairing.
+   The shutter will peep shortly to indicate completion.
    <br>
-   You are now able to control this blind from FHEM, the receiver thinks it is just another remote control.
+   You are now able to control this blind from FHEM, the receiver thinks it is just another remote control or the real exist remote. 
+   For the shutter it´s the same.
 
    <ul>
-   <li><code>&lt;id&gt;</code> is a 28 digit binaer number that uniquely identifies FHEM as a new remote control channel.
-   <br>You should use a different one for each device definition, and group them using a structure.
+   <li><code>&lt;id&gt;</code> is a 28 digit binar number that uniquely identifies FHEM as a new remote control.
+   <br>You can use a different one for each device definition, and group them using a structure. You can use the same ID for a couple of shutters
+   and you can give every one an other channel. (0 to 15, 0 ist the MASTER and conrols all other channels.)
    </li>
-   If you set one of them, you need to pick the same address as an existing remote.
-   Be aware that the receiver might not accept commands from the remote any longer,<br>
-   if you used FHEM to clone an existing remote.
-   <br>
-   This is because the code is original remote's codes are out of sync.</li>
+   If you set one of them, you need to pick the same address as an existing remote.</li>
    </ul>
    <br>
 
@@ -1161,14 +1177,11 @@ sub Dooya_CalcCurrentPos($$$$) {
     stop
     pos value (0..100) # see note
     prog  # Special, see note
-    on-for-timer
-    off-for-timer
-	</pre>
+    </pre>
     Examples:
     <ul>
       <code>set rollo_1 on</code><br>
-      <code>set rollo_1,rollo_2,rollo_3 on</code><br>
-      <code>set rollo_1-rollo_3 on</code><br>
+      <code>set rollo_1 on,sleep 1,rollo_2 on,sleep 1,rollo_3 on</code><br>
       <code>set rollo_1 off</code><br>
       <code>set rollo_1 pos 50</code><br>
     </ul>
@@ -1176,13 +1189,8 @@ sub Dooya_CalcCurrentPos($$$$) {
     Notes:
     <ul>
       <li>prog is a special command used to pair the receiver to FHEM:
-      Set the receiver in programming mode (eg. by pressing the program-button on the original remote)
-      and send the "prog" command from FHEM to finish pairing.<br>
-      The blind will move up and down shortly to indicate success.
-      </li>
-      <li>on-for-timer and off-for-timer send a stop command after the specified time,
-      instead of reversing the blind.<br>
-      This can be used to go to a specific position by measuring the time it takes to close the blind completely.
+      Set the receiver in programming mode and send the "prog" command from FHEM to finish pairing.<br>
+      The shutter will peep shortly to indicate success.
       </li>
       <li>pos value<br>
 		
@@ -1197,10 +1205,10 @@ sub Dooya_CalcCurrentPos($$$$) {
     <ul>
       <li>Without timing values set only generic values are used for status and position: <pre>open, closed, moving</pre> are used
       </li>
-			<li>With timing values set but drive-down-time-to-close equal to drive-down-time-to-100 and drive-up-time-to-100 equal 0
+			<li>With timing values set but drive-down-time-to-close equal to drive-down-time-to-100 and drive-up-time-to-100 equal 0 
 			the device is considered to only vary between 0 and 100 (100 being completely closed)
       </li>
-			<li>With full timing values set the device is considerd a window shutter (Rolladen) with a difference between
+			<li>With full timing values set the device is considerd a window shutter (Rolladen) with a difference between 
 			covering the full window (position 100) and being completely closed (position 200)
       </li>
 		</ul>
@@ -1216,21 +1224,31 @@ sub Dooya_CalcCurrentPos($$$$) {
     <a name="IODev"></a>
     <li>IODev<br>
         Set the IO or physical device which should be used for sending signals
-        for this "logical" device. An example for the physical device is a SIGNALduino.<br>
+        for this "logical" device. It must be the SIGNALduino.<br>
         Note: The IODev has to be set, otherwise no commands will be sent!<br>
         </li><br>
 
+  <a name="channel"></a>
+    <li>channel<br>
+        Set the channel of the remote. You can use 0 (MASTER) to 15.<br>
+        Note: The MASTER conrols all remotes with the same ID!!!<br>
+        </li><br>
+        
+          <a name="SignalRepeats"></a>
+    <li>SignalRepeats<br>
+        Set the repeats for sending signal. You can use 5, 10, 15 and 20.
+      </li><br>
+        
     <a name="setList"></a>
     <li>setList<br>
-        Space separated list of commands, which will be returned upon "set name ?",
+        Space separated list of commands, which will be returned upon "set name ?", 
         so the FHEMWEB frontend can construct the correct control and command dropdown. Specific controls can be added after a colon for each command
         <br>
-        Example: <code>attr shutter setList open close pos:textField</code>
-		</li><br>
+        	</li><br>
 
     <a name="additionalPosReading"></a>
     <li>additionalPosReading<br>
-        Position of the shutter will be stored in the reading <code>pos</code> as numeric value.
+        Position of the shutter will be stored in the reading <code>pos</code> as numeric value. 
         Additionally this attribute might specify a name for an additional reading to be updated with the same value than the pos.
 		</li><br>
 
@@ -1265,22 +1283,7 @@ sub Dooya_CalcCurrentPos($$$$) {
     <li><a href="#showtime">showtime</a></li><br>
 
     <a name="model"></a>
-    <li>model<br>
-        The model attribute denotes the model type of the device.
-        The attributes will (currently) not be used by the fhem.pl directly.
-        It can be used by e.g. external programs or web interfaces to
-        distinguish classes of devices and send the appropriate commands
-        (e.g. "on" or "off" to a switch, "dim..%" to dimmers etc.).<br>
-        The spelling of the model names are as quoted on the printed
-        documentation which comes which each device. This name is used
-        without blanks in all lower-case letters. Valid characters should be
-        <code>a-z 0-9</code> and <code>-</code> (dash),
-        other characters should be ommited.<br>
-        Here is a list of "official" devices:<br>
-          <b>Receiver/Actor</b>: dooyablinds<br>
-    </li><br>
-
-
+    
     <a name="ignore"></a>
     <li>ignore<br>
         Ignore this device, e.g. if it belongs to your neighbour. The device
@@ -1337,4 +1340,3 @@ sub Dooya_CalcCurrentPos($$$$) {
 
 =end html
 =cut
-
