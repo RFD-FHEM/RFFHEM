@@ -1,5 +1,5 @@
 ######################################################
-# $Id: 98_Dooya.pm 2016-02-16 Jarno Karsch $
+# $Id: 98_Dooya.pm 2016-02-16 Jarnsen, darkmission $
 #
 # Dooya module for FHEM
 # Thanks for templates/coding from Somfy and SIGNALduino team
@@ -7,11 +7,11 @@
 # Needs SIGNALduino.
 # Published under GNU GPL License, v2
 # History:
-# 0.10	2016-02-16	Jarno Karsch	initial template
+# 0.10	2016-02-16	Jarnsen			initial template
 # 0.20	2016-03-06	darkmission		first functions, renamed from 10_ to 99_
 # 0.21	2016-03-06	darkmission		Bug default channel corrected, changed attribute repetition to SignalRepeats
 # 0.22  2016-03-10	darkmission		code cleaned, renamed from 99_ to 98_
-# 0.23  2016-03-11	Jarno Karsch		AttrList cleaned and change priority
+# 0.23  2016-03-11	Jarnsen			AttrList cleaned and change priority
 # 
 #
 #TODOS:
