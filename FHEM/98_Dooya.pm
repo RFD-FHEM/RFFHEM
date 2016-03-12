@@ -1151,7 +1151,7 @@ sub Dooya_CalcCurrentPos($$$$) {
    <ul>
    <li><code>&lt;id&gt;</code> is a 28 digit binar number that uniquely identifies FHEM as a new remote control.
    <br>You can use a different one for each device definition, and group them using a structure. You can use the same ID for a couple of shutters
-   and you can give every one an other channel. (0 to 15, 0 ist the MASTER and conrols all other channels.)
+   and you can give every one an other channel. (0 to 15, 0 ist the MASTER and conrols all other channels with the same ID.)
    </li>
    If you set one of them, you need to pick the same address as an existing remote.</li>
    </ul>
