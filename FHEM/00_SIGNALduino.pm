@@ -854,7 +854,7 @@ SIGNALduino_Define($$)
     $ret = DevIo_OpenDev($hash, 0, "SIGNALduino_DoInit");
     
  
-    if ($hash->{INACTIVE}==1){
+    if (defined ($hash->{INACTIVE}) && $hash->{INACTIVE}==1){
       DevIo_CloseDev($hash);
       return $ret ;
     }
@@ -863,8 +863,8 @@ SIGNALduino_Define($$)
     InternalTimer(gettimeofday()+$hash->{Interval}, "SIGNALduino_GetUpdate", $hash, 0);
   }
   
-  $hash->{"DMSG"}="nothing";
-  $hash->{"TIME"}=time();
+  $hash->{DMSG}="nothing";
+  $hash->{TIME}=time();
   
 
   
