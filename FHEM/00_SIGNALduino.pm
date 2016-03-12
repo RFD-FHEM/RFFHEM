@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 95487 2016-03-02 12:24:00 v3.2-dev $
+# $Id: 00_SIGNALduino.pm 95487 2016-03-11 12:24:00Z v3.2.1-dev $
 #
 # v3.2-dev
 # The file is taken from the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -30,7 +30,7 @@ sub SIGNALduino_Parse($$$$@);
 sub SIGNALduino_Read($);
 sub SIGNALduino_ReadAnswer($$$$);
 sub SIGNALduino_Ready($);
-sub SIGNALduino_Write($$$);
+sub SIGNALduino_Write($$$;$);
 
 sub SIGNALduino_SimpleWrite(@);
 
@@ -75,6 +75,7 @@ my $clientsSIGNALduino = ":IT:"
 						."SD_WS09:"
 						."SD_WS:"
 						."RFXX10REC:"
+						."Dooya:"
 						."SIGNALduino_un:"
 						; 
 
@@ -91,6 +92,7 @@ my %matchListSIGNALduino = (
      "11:SD_WS09"				=> "^P9#[A-Fa-f0-9]+",
      "12:SD_WS"					=> '^W\d+#.*',
      "13:RFXX10REC" 			=> '^(20|29)[A-Fa-f0-9]+',
+     "14:Dooya"				=> '^P16#[A-Fa-f0-9]+',
      "X:SIGNALduino_un"			=> '^[uP]\d+#.*',
 );
 
@@ -358,7 +360,7 @@ my %ProtocolListSIGNALduino  = (
 			start           => [16,-5],
 			clockabs		=> 300,
 			format 			=> 'twostate',	  		
-			preamble		=> 'u16#',				# prepend to converted message	
+			preamble		=> 'P16#',				# prepend to converted message	
 			#clientmodule    => '',   				# not used now
 			#modulematch     => '',  				# not used now
 			length_min      => '40',
@@ -1307,11 +1309,12 @@ SIGNALduino_DoInit($)
 	#    }
 	#  }
 	#  $hash->{STATE} = "Initialized";
-	readingsSingleUpdate($hash, "state", "opened", 1);
+	readingsSingleUpdate($hash, "state", "Initialized", 1);
 
 	# Reset the counter
 	delete($hash->{XMIT_TIME});
 	delete($hash->{NR_CMD_LAST_H});
+	return undef;
 }
 
 #####################################
@@ -1445,10 +1448,9 @@ SIGNALduino_XmitLimitCheck($$)
 
 #####################################
 sub
-SIGNALduino_Write($$$)
+SIGNALduino_Write($$$;$)
 {
-  my ($hash,$fn,$msg) = @_;
-
+  my ($hash,$fn,$msg,$isNotRaw) = @_;
   my $name = $hash->{NAME};
 
   Log3 $name, 5, "$name/write: adding to queue $fn$msg";
@@ -3010,7 +3012,7 @@ sub SIGNALduino_compPattern($$$%)
     <li>Eurochon EAS 800z -> 14_SD_WS07</li>
     <li>CTW600, WH1080	-> 14_SD_WS09 </li>
     <li>Hama TS33C, Bresser Thermo/Hygro Sensor -> 14_Hideki</li>
-    <li>FreeTec Außenmodul NC-7344 -> 14_SD_WS07</li>
+    <li>FreeTec Ausenmodul NC-7344 -> 14_SD_WS07</li>
     
     
 	</ul>
