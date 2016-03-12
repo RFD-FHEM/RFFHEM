@@ -24,13 +24,12 @@ use Scalar::Util qw(looks_like_number);
 
 sub SIGNALduino_Attr(@);
 sub SIGNALduino_Clear($);
-#sub SIGNALduino_HandleCurRequest($$);
-#sub SIGNALduino_HandleWriteQueue($);
+sub SIGNALduino_HandleWriteQueue($);
 sub SIGNALduino_Parse($$$$@);
 sub SIGNALduino_Read($);
 sub SIGNALduino_ReadAnswer($$$$);
 sub SIGNALduino_Ready($);
-sub SIGNALduino_Write($$$;$);
+sub SIGNALduino_Write($$$);
 
 sub SIGNALduino_SimpleWrite(@);
 
@@ -830,7 +829,7 @@ SIGNALduino_Define($$)
 	$dev .= "\@57600";
   }	
   
-  $hash->{CMDS} = "";
+  #$hash->{CMDS} = "";
   $hash->{Clients} = $clientsSIGNALduino;
   $hash->{MatchList} = \%matchListSIGNALduino;
   
@@ -1093,7 +1092,7 @@ SIGNALduino_Set($@)
   } else {
   	Log3 $name, 5, "$name/set: set $name $cmd $arg";
 	#SIGNALduino_SimpleWrite($hash, $arg);
-	return "Unknown argument $cmd, choose one of ".$hash->{CMDS};
+	return "Unknown argument $cmd, choose one of ". ReadingsVal($name,'cmd',' help me');
   }
 
   return undef;
@@ -1207,7 +1206,7 @@ sub SIGNALduino_parseResponse($$$)
  	{   # decode it
    		#$msg = hex($msg);              # /125; only for col or coc
     	$msg = sprintf("%d %02d:%02d:%02d", $msg/86400, ($msg%86400)/3600, ($msg%3600)/60, $msg%60);
-  	}
+  	} 
   
   	return $msg;
 }
@@ -1294,12 +1293,12 @@ SIGNALduino_DoInit($)
 
 		
 		# Cmd-String feststellen
-		my $cmds = SIGNALduino_Get($hash, $name, "cmds", 0);
+		SIGNALduino_Get($hash, $name, "cmds", 0);
 		#$cmds =~ s/$name cmds =>//g;
 		#$cmds =~ s/ //g;
-		$hash->{CMDS} = $cmds;
-		Log3 $hash, 3, "$name: Possible commands: " . $hash->{CMDS};
-		readingsSingleUpdate($hash, "state", "Programming", 1);
+		#$hash->{CMDS} = $cmds;
+		#Log3 $hash, 3, "$name: Possible commands: " . $hash->{CMDS};
+		#readingsSingleUpdate($hash, "state", "Programming", 1);
 		
 	}
 	#  if( my $initCommandsString = AttrVal($name, "initCommands", undef) ) {
@@ -1309,7 +1308,7 @@ SIGNALduino_DoInit($)
 	#    }
 	#  }
 	#  $hash->{STATE} = "Initialized";
-	readingsSingleUpdate($hash, "state", "Initialized", 1);
+	readingsSingleUpdate($hash, "state", "opened", 1);
 
 	# Reset the counter
 	delete($hash->{XMIT_TIME});
@@ -1447,17 +1446,22 @@ SIGNALduino_XmitLimitCheck($$)
 
 
 #####################################
+## API to logical modules: Provide as Hash of IO Device, type of function ; command to call ; message to send
 sub
-SIGNALduino_Write($$$;$)
+SIGNALduino_Write($$$)
 {
-  my ($hash,$fn,$msg,$isNotRaw) = @_;
+  my ($hash,$fn,$msg) = @_;
   my $name = $hash->{NAME};
 
-  Log3 $name, 5, "$name/write: adding to queue $fn$msg";
-  my $bstring = "$fn$msg";
+  $fn="RAW" if $fn eq "";
+
+  Log3 $name, 5, "$name/write: adding to queue $fn $msg";
 
   #SIGNALduino_SimpleWrite($hash, $bstring);
-  SIGNALduino_AddSendQueue($hash,$bstring);
+  
+  SIGNALduino_Set($hash,$name,$fn,$msg);
+  #SIGNALduino_AddSendQueue($hash,$bstring);
+ 
 }
 
 
