@@ -19,6 +19,7 @@ use Time::HiRes qw(gettimeofday);
 use Data::Dumper qw(Dumper);
 use Scalar::Util qw(looks_like_number);
 
+
 #use POSIX qw( floor);  # can be removed
 #use Math::Round qw();
 
@@ -859,7 +860,7 @@ SIGNALduino_Define($$)
       return $ret ;
     }
     
-    $hash->{Interval} = "300";
+    $hash->{Interval} = "20";
     InternalTimer(gettimeofday()+$hash->{Interval}, "SIGNALduino_GetUpdate", $hash, 0);
   }
   
@@ -1560,32 +1561,24 @@ sub SIGNALduino_GetUpdate($){
 	my ($hash) = @_;
 	my $name = $hash->{NAME};
 	
-	Log3 $name, 5, "$name/GetUpdate: last echo is from ".$hash->{READINGS}{ping}{TIME};
-	my $dt=$hash->{READINGS}{ping}{TIME};
-	my $dtSeconds;
+	#Log3 $name, 5, "$name/GetUpdate: last echo is from ".$hash->{READINGS}{ping}{TIME};
+
+	my $dt = ReadingsTimestamp($name,'ping',undef);
+	my $le=time_str2num($dt) if ($dt);
 	
-	if($dt =~ m{^\s*(\d{1,4})\W*0*(\d{1,2})\W*0*(\d{1,2})\W*0*
-                 (\d{0,2})\W*0*(\d{0,2})\W*0*(\d{0,2})}x) 
+	
+    if(defined($le) && $le && $le < (time() - ($hash->{Interval}*2))) 
     {
-   		my $year = $1;  my $month = $2;   my $day = $3;
-    	my $hour = $4;  my $minute = $5;  my $second = $6;
-		# $hour |= 0;  $minute |= 0;  $second |= 0;  # defaults.
-    	$dtSeconds=fhemTimeLocal($second,$minute,$hour,$day,$month-1,$year);
-     	# timelocal($second,$minute,$hour,$day,$month-1,$year);  
- 	
-    	if ($dtSeconds < (time()- ($hash->{Interval}*2)))
-		{
-			Log3 $name, 5, "$name/GetUpdate: ping was not reported in time, disconnecting device";
-			DevIo_Disconnected($hash) ;
-			return undef;
-		}
-	
-    
-    } else {
- 		Log3 $name, 5, "$name/GetUpdate: Error getting timestamp";
+		Log3 $name, 5, "$name/GetUpdate: ping was not reported in time, disconnecting device";
+		DevIo_Disconnected($hash) ;
+		return undef; 
+    } elsif (defined($le) ) {
+    	Log3 $name, 5, "$name/GetUpdate: last echo is from $le, now it is ".time();
+ 	} else {
+ 		Log3 $name, 5, "$name/GetUpdate: reading is not updated, try again next interval";
+ 		
  	}
-		
-	Log3 $name, 4, "$name/GetUpdate: sending ping ...";
+	Log3 $name, 4, "$name/GetUpdate: requesting echo..";
 	SIGNALduino_Get($hash,$name, "ping");	
 	InternalTimer(gettimeofday()+$hash->{Interval}, "SIGNALduino_GetUpdate", $hash, 1);
 }
