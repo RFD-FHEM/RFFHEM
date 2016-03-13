@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 95487 2016-03-12 21:00:00Z v3.2.1-dev $
+# $Id: 00_SIGNALduino.pm 95487 2016-03-13 10:00:00Z v3.2.1-dev $
 #
 # v3.2-dev
 # The file is taken from the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -30,7 +30,7 @@ sub SIGNALduino_Parse($$$$@);
 sub SIGNALduino_Read($);
 sub SIGNALduino_ReadAnswer($$$$);
 sub SIGNALduino_Ready($);
-sub SIGNALduino_Write($$$;$);
+sub SIGNALduino_Write($$$);
 
 sub SIGNALduino_SimpleWrite(@);
 
@@ -1400,22 +1400,18 @@ SIGNALduino_XmitLimitCheck($$)
   $hash->{NR_CMD_LAST_H} = int(@b);
 }
 
-
 #####################################
 sub
-SIGNALduino_Write($$$;$)
+SIGNALduino_Write($$$)
 {
-  my ($hash,$fn,$msg,$cmd) = @_;
+  my ($hash,$fn,$msg) = @_;
   my $name = $hash->{NAME};
 
-  Log3 $name, 5, "$name: sending $fn$msg";
-  my $bstring = "$fn$msg";
+  $fn="RAW" if $fn eq "";
 
-  if (defined($cmd)) {
-    SIGNALduino_Set($hash,$name,$cmd,$bstring);
-  } else {
-    SIGNALduino_SimpleWrite($hash, $bstring);
-  }
+  Log3 $name, 4, "$name/write: sending $fn $msg";
+  
+  SIGNALduino_Set($hash,$name,$fn,$msg);
 }
 
 #sub

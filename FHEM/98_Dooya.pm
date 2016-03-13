@@ -1,5 +1,5 @@
 ######################################################
-# $Id: 98_Dooya.pm 1000 2016-02-16 09:00:00Z Jarnsen, darkmission $
+# $Id: 98_Dooya.pm 1010 2016-03-12 09:00:00Z Jarnsen_darkmission $
 #
 # Dooya module for FHEM
 # Thanks for templates/coding from Somfy and SIGNALduino team
@@ -8,11 +8,12 @@
 # Published under GNU GPL License, v2
 # History:
 # 0.10	2016-02-16	Jarno Karsch	initial template
-# 0.20	2016-03-06	darkmission		first functions, renamed from 10_ to 99_
-# 0.21	2016-03-06	darkmission		Bug default channel corrected, changed attribute repetition to SignalRepeats
-# 0.22  2016-03-10	darkmission		code cleaned, renamed from 99_ to 98_
+# 0.20	2016-03-06	darkmission	first functions, renamed from 10_ to 99_
+# 0.21	2016-03-06	darkmission	Bug default channel corrected, changed attribute repetition to SignalRepeats
+# 0.22  2016-03-10	darkmission	code cleaned, renamed from 99_ to 98_
 # 0.23  2016-03-11	Jarno Karsch	AttrList cleaned and change priority
-# 1.00	2016-03-12	darkmission		autocreate, parse communication from SIGNALduino for correct position when using remote from doooya 
+# 1.00	2016-03-12	darkmission	autocreate, parse communication from SIGNALduino for correct position when using remote from doooya 
+# 1.10  2016-03-13	Ralf9		changed SendCommand with sendMsg
 #
 #TODOS:
 # - Groups, diff by channels
@@ -64,43 +65,7 @@ my %models = (
 	dooyablinds => 'blinds', 
 	dooyashutter => 'shutter' 
 ); 
-
-my %channel = ( 
-	0 => '0000', 
-	1 => '0001', 
-	2 => '0010', 
-	3 => '0011', 
-	4 => '0100', 
-	5 => '0101', 
-	6 => '0110', 
-	7 => '0111', 
-	8 => '1000', 
-	9 => '1001', 
-	10 => '1010', 
-	11 => '1011', 
-	12 => '1100', 
-	13 => '1101', 
-	14 => '1110', 
-	15 => '1111' 
-);
-
-my %ProtocolListSIGNALduino  = (
-	"16" => # Rohrmotor24 und andere Funk Rolladen / Markisen Motoren
-		{
-            name			=> 'Dooya shutter',	
-			id          	=> '16',
-			one				=> [2,-1],
-			zero			=> [1,-2],
-			start           => [16,-5],
-			clockabs		=> 300,
-			format 			=> 'twostate',	  		
-			preamble		=> 'u16#',				# prepend to converted message	
-			#clientmodule    => '',   				# not used now
-			#modulematch     => '',  				# not used now
-			length_min      => '40',
-			length_max      => '40',
-		}, 	
-);		
+	
 
 ##################################################
 # new globals for new set
@@ -164,19 +129,19 @@ sub Dooya_Initialize($) {
 	$hash->{AttrFn}  	= "Dooya_Attr";
 	$hash->{Match}     	= "^P16#[A-Fa-f0-9]+";
 	$hash->{AttrList} = " IODev"
-	  . " SignalRepeats:5,10,15,20 "
-	  . " channel:0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15 "
-      . " drive-down-time-to-100"
+	  . " SignalRepeats:5,10,15,20"
+	  . " channel:0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15"
+	  . " drive-down-time-to-100"
 	  . " drive-down-time-to-close"
 	  . " drive-up-time-to-100"
-	  . " drive-up-time-to-open "
-	  . " additionalPosReading  "
+	  . " drive-up-time-to-open"
+	  . " additionalPosReading"
 	  . " setList"
 	  . " ignore:0,1"
 	  . " dummy:1,0"
 #	  . " model:dooyablinds,dooyashutter"
 	  . " loglevel:0,1,2,3,4,5,6";
-	  
+	
 	$hash->{AutoCreate} =
       { "dooya.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", 
                        FILTER => "%NAME" } };
@@ -267,7 +232,7 @@ sub Dooya_SendCommand($@){
  
     my $command = $dooya_c2b{ $cmd };
 	
-	# eigentlich überflüssig, da oben schon auf Existenz geprüft wird -> %sets
+	# eigentlich ueberfluessig, da oben schon auf Existenz geprueft wird -> %sets
 	if ( !defined($command) ) {
 		return "Unknown argument $cmd, choose one of "
 		  . join( " ", sort keys %dooya_c2b );
@@ -275,96 +240,24 @@ sub Dooya_SendCommand($@){
 	
 	my $io = $hash->{IODev};
 
-	if (   defined( $attr{ $name } )
-		&& defined( $attr{ $name }{"SignalRepeats"} ) )
-	{
-		$SignalRepeats = $attr{ $name }{"SignalRepeats"};
-		Log GetLogLevel( $name, 4 ),
-		  "Dooya set SignalRepeats: $SignalRepeats for $io->{NAME}";
-	} else {
-		$SignalRepeats = "10";
-		Log GetLogLevel( $name, 4 ),
-		  "Dooya set SignalRepeats: $SignalRepeats for $io->{NAME}";
-	}
-
-	if (   defined( $attr{ $name } )
-		&& defined( $attr{ $name }{"channel"} ) )
-	{
-		$chan = $attr{ $name }{"channel"};
-		Log GetLogLevel( $name, 4 ),
-		  "Dooya set channel: $channel for $io->{NAME}";
-	} else {
-		$channel = "0001";
-		Log GetLogLevel( $name, 4 ),
-		  "Dooya set channel: $channel for $io->{NAME}";
-	}	
+	$SignalRepeats = AttrVal($name,'SignalRepeats', '10');
+	Log3 $io,4, "Dooya set SignalRepeats: $SignalRepeats for $io->{NAME}";
+	
+	$chan = AttrVal($name,'channel', 1);
+	$channel = sprintf("%04b",$chan);
+	Log3 $io,4, "Dooya set channel: $channel for $io->{NAME}";
+	
 	my $value = $name ." ". join(" ", @args);
 
-	# convert old attribute values to READINGs
-	my $timestamp = TimeNow();
-
-	$bin = 	uc( $hash->{ID} )
-			. $channel
-			. $command;
-			
+	$bin = 	uc($hash->{ID}) . $channel . $command;
 	#print ("data = $bin \n");
 	
-#--------------------------------
-	my $protocol = "16";
-	my %signalHash;
-	my %patternHash;
-	my $pattern="";
-	my $cnt=0;
-	my $clock=$ProtocolListSIGNALduino{$protocol}{clockabs} > 1 ?$ProtocolListSIGNALduino{$protocol}{clockabs}:$hash->{ITClock};
-	foreach my $item (qw(sync start one zero))
-	{
-	    #print ("item= $item \n");
-	    next if (!exists($ProtocolListSIGNALduino{$protocol}{$item}));
-	    
-		foreach my $p (@{$ProtocolListSIGNALduino{$protocol}{$item}})
-		{
-		    #print (" p = $p \n");
-		    
-		    if (!exists($patternHash{$p}))
-			{
-				$patternHash{$p}=$cnt;
-				$pattern.="P".$patternHash{$p}."=".$p*$clock.";";
-				$cnt++;
-			}
-	    	$signalHash{$item}.=$patternHash{$p};
-		   	#print (" signalHash{$item} = $signalHash{$item} \n");
-		}
-	}
-	
-	my @bits = split("", $bin);
-	
-	my %bitconv = (1=>"one", 0=>"zero");
-	my $SignalData="D=";
-	
-	$SignalData.=$signalHash{sync} if (exists($signalHash{sync}));
-	$SignalData.=$signalHash{start} if (exists($signalHash{start}));
-	
-	foreach my $bit (@bits)
-	{
-		#print ("data = $bit \n");
-		next if (!exists($bitconv{$bit}));
-		#Log3 $name, 5, "encoding $bit";
-		$SignalData.=$signalHash{$bitconv{$bit}}; ## Add the signal to our data string
-		#print ("Sdata = $SignalData \n");
-	}
-	
-	my $sendData = "SR;R=$SignalRepeats;$pattern$SignalData;";
-#--------------------------------	
-
-	$message = $sendData;
-
-	## Log that we are going to switch Dooya
-	Log GetLogLevel( $name, 4 ), "Dooya set $value: $message";
-	( undef, $value ) = split( " ", $value, 2 );    # Not interested in the name...
+	Log3 $io, 4, "Dooya set value = $value";
 
 	## Send Message to IODev using IOWrite
-	Log3($name,5,"Dooya_sendCommand: $name -> message :$message: ");
-	IOWrite( $hash, "", $message,1 );
+	$message = 'P16#' . $bin . '#R' . $SignalRepeats;
+	Log3 $io, 4, "Dooya_sendCommand: $name -> message :$message: ";
+	IOWrite($hash, 'sendMsg', $message);
 
 	return $ret;
 } # end sub Dooya_SendCommand
@@ -407,16 +300,17 @@ sub Dooya_Parse($$) {
 
     # get id, channel, cmd
    my $id = substr($bitData, 0, 28);
-   my $channel = substr($bitData, 28, 4); #noch nicht benoetigt
+   my $BitChannel = substr($bitData, 28, 4); #noch nicht benoetigt
+   my $channel = oct("0b" . $BitChannel);
    my $cmd = substr($bitData, 32, 8);
 
     Log3 $hash, 4, "Dooya_Parse: device ID: $id";
-    Log3 $hash, 4, "Dooya_Parse: Channel: $channel \n";
-    Log3 $hash, 4, "Dooya_Parse: Cmd: $cmd \n";
+    Log3 $hash, 4, "Dooya_Parse: Channel: $channel";
+    Log3 $hash, 4, "Dooya_Parse: Cmd: $cmd";
    
     # set new state
 	my $newstate = $codes{ $cmd };
-	Log3 $hash, 4, "Dooya_Parse: Newstate $newstate \n";
+	Log3 $hash, 4, "Dooya_Parse: Newstate $newstate";
 
 	my $def = $modules{Dooya}{defptr}{$id};
 
@@ -1151,7 +1045,7 @@ sub Dooya_CalcCurrentPos($$$$) {
    <ul>
    <li><code>&lt;id&gt;</code> is a 28 digit binar number that uniquely identifies FHEM as a new remote control.
    <br>You can use a different one for each device definition, and group them using a structure. You can use the same ID for a couple of shutters
-   and you can give every one an other channel. (0 to 15, 0 ist the MASTER and conrols all other channels with the same ID.)
+   and you can give every one an other channel. (0 to 15, 0 ist the MASTER and conrols all other channels.)
    </li>
    If you set one of them, you need to pick the same address as an existing remote.</li>
    </ul>
