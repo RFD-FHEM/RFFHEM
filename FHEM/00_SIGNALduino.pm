@@ -42,8 +42,8 @@ my %gets = (    # Name, Data to send to the SIGNALduino, Regexp for the answer
   "uptime"   => ["t", '^[0-9]+' ],
   "cmds"     => ["?", '.*Use one of[ 0-9A-Za-z]+[\r\n]*$' ],
   "ITParms"  => ["ip",'.*'],
-  "ping"     => ["P",'OK\r\n'],
-  "config"   => ["CG",'^MS.*MU.*MC.*\r\n'],
+  "ping"     => ["P",'^OK$'],
+  "config"   => ["CG",'^MS.*MU.*MC.*'],
 #  "ITClock"  => ["ic", '\d+'],
 #  "FAParms"  => ["fp", '.*' ],
 #  "TCParms"  => ["dp", '.*' ],
@@ -1199,7 +1199,6 @@ sub SIGNALduino_parseResponse($$$)
 	{       # nice it up
 	    $msg =~ s/$name cmds =>//g;
 		$msg =~ s/ //g;
-	
    		$msg =~ s/.*Use one of//g;
  	} 
  	elsif($cmd eq "uptime") 
@@ -1540,11 +1539,16 @@ SIGNALduino_Read($)
     Log3 $name, 4, "$name/msg READ: $rmsg"; 
 	if ( $rmsg && !SIGNALduino_Parse($hash, $hash, $name, $rmsg) && $hash->{getcmd} )
 	{
-		$rmsg = SIGNALduino_parseResponse($hash,$hash->{getcmd}->{cmd},$rmsg);
-		readingsSingleUpdate($hash, $hash->{getcmd}->{cmd}, $rmsg, 0);
-		
-		my $ao = asyncOutput( $hash->{getcmd}->{asyncOut}, $hash->{getcmd}->{cmd}.": " . $rmsg );
-		delete($hash->{getcmd});
+		my $regexp=$gets{$hash->{getcmd}->{cmd}}[1];
+		if(!defined($regexp) || $rmsg =~ m/$regexp/) {	 	
+			$rmsg = SIGNALduino_parseResponse($hash,$hash->{getcmd}->{cmd},$rmsg);
+			readingsSingleUpdate($hash, $hash->{getcmd}->{cmd}, $rmsg, 0);
+			my $ao = asyncOutput( $hash->{getcmd}->{asyncOut}, $hash->{getcmd}->{cmd}.": " . $rmsg );
+			delete($hash->{getcmd});
+		} else {
+			Log3 $name, 3, "$name/msg READ: Received answer ($rmsg) for ". $hash->{getcmd}->{cmd}." does not match $regexp"; 
+			
+		}
 	}
   }
   $hash->{PARTIAL} = $SIGNALduinodata;
