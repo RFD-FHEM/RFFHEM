@@ -13,8 +13,8 @@
 # 0.22  2016-03-10	darkmission	code cleaned, renamed from 99_ to 98_
 # 0.23  2016-03-11	Jarnsen		AttrList cleaned and change priority
 # 1.00	2016-03-12	darkmission	autocreate, parse communication from SIGNALduino for correct position when using remote from doooya 
-# 1.10  2016-03-13	ralf9		changed SendCommand with sendMsg
-# 1.11  2016-03-17	Jarnsen		ID + Channel = DeviceCode
+# 1.10  2016-03-13	Ralf9		changed SendCommand with sendMsg
+# 1.11  2016-03-17	Ralf9   	ID + Channel = DeviceCode
 #
 #TODOS:
 # - Groups, diff by channels
@@ -43,8 +43,8 @@ my %sets = (
 	"down"=> "noArg",
 	"stop" => "noArg",
 	"prog" => "noArg",
-	"on-for-timer" => "textField",
-	"off-for-timer" => "textField",
+#	"on-for-timer" => "textField",
+#	"off-for-timer" => "textField",
 	"pos" => "0,10,20,30,40,50,60,70,80,90,100"
 #	"pos" => "slider,0,10,100"
 );
@@ -312,7 +312,7 @@ sub Dooya_Parse($$) {
    my $channel = oct("0b" . $BitChannel);
    my $cmd = substr($bitData, 32, 8);
    my $newstate = $codes{ $cmd };            # set new state
-   my $deviceCode = $id . '_Channel_' . $channel;
+   my $deviceCode = $id . '_' . $channel;
 
     Log3 $hash, 4, "Dooya_Parse: device ID: $id";
     Log3 $hash, 4, "Dooya_Parse: Channel: $channel";
@@ -1054,7 +1054,7 @@ sub Dooya_CalcCurrentPos($$$$) {
    <br>You can use a different one for each device definition, and group them using a structure. You can use the same ID for a couple of shutters
    and you can give every one an other channel. (0 to 15, 0 ist the MASTER and conrols all other channels.)
    </li>
-   If you set one of them, you need to pick the same address as an existing remote.</li>
+   If you set one of them, you need to pick the same address as an existing remote. You can create the Device with autocreate with a real remote or manuel without remote control.</li>
    </ul>
    <br>
 
