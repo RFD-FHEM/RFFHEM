@@ -1,5 +1,5 @@
 ######################################################
-# $Id: 98_Dooya.pm 1010 2016-03-12 09:00:00Z Jarnsen_darkmission $
+# $Id: 98_Dooya.pm 1011 2016-03-17 20:00:00Z Jarnsen_darkmission_ralf9 $
 #
 # Dooya module for FHEM
 # Thanks for templates/coding from Somfy and SIGNALduino team
@@ -7,13 +7,14 @@
 # Needs SIGNALduino.
 # Published under GNU GPL License, v2
 # History:
-# 0.10	2016-02-16	Jarno Karsch	initial template
+# 0.10	2016-02-16	Jarnsen		initial template
 # 0.20	2016-03-06	darkmission	first functions, renamed from 10_ to 99_
 # 0.21	2016-03-06	darkmission	Bug default channel corrected, changed attribute repetition to SignalRepeats
 # 0.22  2016-03-10	darkmission	code cleaned, renamed from 99_ to 98_
-# 0.23  2016-03-11	Jarno Karsch	AttrList cleaned and change priority
+# 0.23  2016-03-11	Jarnsen		AttrList cleaned and change priority
 # 1.00	2016-03-12	darkmission	autocreate, parse communication from SIGNALduino for correct position when using remote from doooya 
-# 1.10  2016-03-13	Ralf9		changed SendCommand with sendMsg
+# 1.10  2016-03-13	ralf9		changed SendCommand with sendMsg
+# 1.11  2016-03-17	Jarnsen		ID + Channel = DeviceCode
 #
 #TODOS:
 # - Groups, diff by channels
@@ -136,6 +137,7 @@ sub Dooya_Initialize($) {
 	  . " drive-up-time-to-100"
 	  . " drive-up-time-to-open"
 	  . " additionalPosReading"
+	  . " $readingFnAttributes"
 	  . " setList"
 	  . " ignore:0,1"
 	  . " dummy:1,0"
@@ -143,9 +145,9 @@ sub Dooya_Initialize($) {
 	  . " loglevel:0,1,2,3,4,5,6";
 	
 	$hash->{AutoCreate} =
-      { "dooya.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", 
-                       FILTER => "%NAME" } };
-                       autocreateThreshold => "2:10" 
+      { "Dooya.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", 
+                       FILTER => "%NAME",
+                       autocreateThreshold => "2:10" } };
 }
 
 ######################################################
@@ -175,20 +177,23 @@ sub Dooya_Define($$) {
 		return $u;
 	}
 
+	my ($id, $channel) = split('_', $a[2]);
+	Log3 $hash,4 ,"Dooya_Define: id = $id channel = $channel";
+	
 	# check id format (28 binaer digits)
-	if ( ( $a[2] !~ m/^[0-1]{28}$/i ) ) {
+	if ( ( $id !~ m/^[0-1]{28}$/i ) ) {
 		return "Define $a[0]: wrong address format: specify a 28 binaer id value "
 	}
 
 	# group devices by their id
 	my $name  = $a[0];
-	my $id = $a[2];
 
 	$hash->{ID} = uc($id);
+	$hash->{CHANNEL} = $channel;
 
 	my $tn = TimeNow();
 
-	my $code  = uc($id);
+	my $code  = uc($a[2]);
 	my $ncode = 1;
 	$hash->{CODE}{ $ncode++ } = $code;
 	$modules{Dooya}{defptr}{$code}{$name} = $hash;
@@ -230,7 +235,7 @@ sub Dooya_SendCommand($@){
 
 	Log3($name,4,"Dooya_sendCommand: $name -> cmd :$cmd: ");
  
-    my $command = $dooya_c2b{ $cmd };
+	my $command = $dooya_c2b{ $cmd };
 	
 	# eigentlich ueberfluessig, da oben schon auf Existenz geprueft wird -> %sets
 	if ( !defined($command) ) {
@@ -243,9 +248,12 @@ sub Dooya_SendCommand($@){
 	$SignalRepeats = AttrVal($name,'SignalRepeats', '10');
 	Log3 $io,4, "Dooya set SignalRepeats: $SignalRepeats for $io->{NAME}";
 	
-	$chan = AttrVal($name,'channel', 1);
+	$chan = AttrVal($name,'channel', undef);
+	if (!defined($chan)) {
+		$chan = $hash->{CHANNEL};
+	}
 	$channel = sprintf("%04b",$chan);
-	Log3 $io,4, "Dooya set channel: $channel for $io->{NAME}";
+	Log3 $io,4, "Dooya set channel: $chan ($channel) for $io->{NAME}";
 	
 	my $value = $name ." ". join(" ", @args);
 
@@ -303,16 +311,15 @@ sub Dooya_Parse($$) {
    my $BitChannel = substr($bitData, 28, 4); #noch nicht benoetigt
    my $channel = oct("0b" . $BitChannel);
    my $cmd = substr($bitData, 32, 8);
+   my $newstate = $codes{ $cmd };            # set new state
+   my $deviceCode = $id . '_Channel_' . $channel;
 
     Log3 $hash, 4, "Dooya_Parse: device ID: $id";
     Log3 $hash, 4, "Dooya_Parse: Channel: $channel";
-    Log3 $hash, 4, "Dooya_Parse: Cmd: $cmd";
-   
-    # set new state
-	my $newstate = $codes{ $cmd };
-	Log3 $hash, 4, "Dooya_Parse: Newstate $newstate";
+    Log3 $hash, 4, "Dooya_Parse: Cmd: $cmd  Newstate: $newstate";
+    Log3 $hash, 4, "Dooya_Parse: deviceCode: $deviceCode";
 
-	my $def = $modules{Dooya}{defptr}{$id};
+	my $def = $modules{Dooya}{defptr}{$deviceCode};
 
 	if($def) {
 		my @list;
@@ -335,8 +342,8 @@ sub Dooya_Parse($$) {
 		return @list;
 
 	} else {
-		Log3 $hash, 3, "Dooya Unknown device $id, please define it";
-		return "UNDEFINED Dooya_$id Dooya $id";
+		Log3 $hash, 3, "Dooya Unknown device $deviceCode, please define it";
+		return "UNDEFINED Dooya_$deviceCode Dooya $deviceCode";
 	}
 }
 
