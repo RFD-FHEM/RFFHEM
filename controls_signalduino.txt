@@ -4,5 +4,4 @@ DEL FHEM/firmware/SIGNALduino_uno.hex
 UPD 2016_12_03_21:55:12 51858   FHEM/firmware/SIGNALduino_promini328.hex
 UPD 2016_12_03_21:55:12 51903   FHEM/firmware/SIGNALduino_nano328.hex
 UPD 2016_12_03_21:55:12 51903   FHEM/firmware/SIGNALduino_uno.hex
-UPD 2016_13_03_11:18:14 100022  FHEM/00_SIGNALduino.pm
-
+UPD 2016_18_03_21:26:40 39618   FHEM/98_Dooya.pm
