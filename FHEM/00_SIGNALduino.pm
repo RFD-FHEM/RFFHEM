@@ -1023,12 +1023,12 @@ SIGNALduino_Set($@)
   } elsif( $cmd eq "disableMessagetype" ) {
 	my $argm = 'CD' . substr($arg,-1,1);
 	#SIGNALduino_SimpleWrite($hash, $argm);
-	SIGNALduino_AddSendQueue($hash,$arg);
+	SIGNALduino_AddSendQueue($hash,$argm);
 	Log3 $name, 4, "set $name $cmd $arg $argm";;
   } elsif( $cmd eq "enableMessagetype" ) {
 	my $argm = 'CE' . substr($arg,-1,1);
 	#SIGNALduino_SimpleWrite($hash, $argm);
-	SIGNALduino_AddSendQueue($hash,$arg);
+	SIGNALduino_AddSendQueue($hash,$argm);
 	Log3 $name, 4, "set $name $cmd $arg $argm";
   } elsif( $cmd eq "sendMsg" ) {
 	my ($protocol,$data,$repeats) = split("#",$arg);
