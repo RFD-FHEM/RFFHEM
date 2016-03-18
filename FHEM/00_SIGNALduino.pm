@@ -1,7 +1,7 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 95487 2016-03-11 12:24:00Z v3.2.1-dev $
+# $Id: 00_SIGNALduino.pm 95487 2016-03-18 19:00:00Z v3.2.1-dev $
 #
-# v3.2-dev
+# v3.2.1-dev
 # The file is taken from the FHEMduino project and modified in serval ways for processing the incomming messages
 # see http://www.fhemwiki.de/wiki/SIGNALDuino
 # It was modified also to provide support for raw message handling which it's send from the SIGNALduino
@@ -1513,7 +1513,7 @@ SIGNALduino_HandleWriteQueue($)
   } else {
   	 my $name= $hash->{NAME};
   	 Log3 $name, 5, "$name/HandleWriteQueue: nothing to send, stopping timer";
-  	 RemoveInternalTimer($hash,"SIGNALduino_HandleWriteQueue");
+  	 RemoveInternalTimer($hash);
   }
 }
 
