@@ -1,4 +1,8 @@
-﻿22.02.2016
+﻿18.03.2016
+ - Back Firware 3.2.0b12 which causes less problems
+ - async communication with arduino, should not cause blocking of fhem anymore
+ -
+22.02.2016
  - Version 3.2.0 Module & Firmware
  - serval fixes and enhacements
  - improved stability
