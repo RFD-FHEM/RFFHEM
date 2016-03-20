@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 95487 2016-03-18 19:00:00Z v3.2.1-dev $
+# $Id: 00_SIGNALduino.pm 95487 2016-03-20 21:00:00Z v3.2.1-dev $
 #
 # v3.2.1-dev
 # The file is taken from the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -1031,15 +1031,14 @@ SIGNALduino_Set($@)
 	SIGNALduino_AddSendQueue($hash,$argm);
 	Log3 $name, 4, "set $name $cmd $arg $argm";
   } elsif( $cmd eq "sendMsg" ) {
-	my ($protocol,$data,$repeats) = split("#",$arg);
+	my ($protocol,$data,$repeats,$clock) = split("#",$arg);
 	$protocol=~ s/[Pp](\d+)/$1/; # extract protocol num
 	$repeats=~ s/[rR](\d+)/$1/; # extract repeat num
-	$repeats=1 if ($repeats eq "");
+	$clock=~ s/[Cc](\d+)/$1/ if (defined($clock)); # extract ITClock num
+	$repeats=1 if (!defined($repeats));
 	
 	return "$name: sendmsg, unknown protocol: $protocol" if (!exists($ProtocolListSIGNALduino{$protocol}));
 	
-	Log3 $name, 5, "$name: sendmsg Preparing rawsend command for protocol=$protocol, repeats=$repeats, bits=$data";
-	 
 	#print ("data = $data \n");
 	#print ("protocol = $protocol \n");
     #print ("repeats = $repeats \n");
@@ -1048,7 +1047,18 @@ SIGNALduino_Set($@)
 	my %patternHash;
 	my $pattern="";
 	my $cnt=0;
-	my $clock=$ProtocolListSIGNALduino{$protocol}{clockabs} > 1 ?$ProtocolListSIGNALduino{$protocol}{clockabs}:$hash->{ITClock};
+	if (!defined($clock)) {
+		$hash->{ITClock} = 250 if (!defined($hash->{ITClock}));
+		$clock=$ProtocolListSIGNALduino{$protocol}{clockabs} > 1 ?$ProtocolListSIGNALduino{$protocol}{clockabs}:$hash->{ITClock};
+	}
+	
+	Log3 $name, 5, "$name: sendmsg Preparing rawsend command for protocol=$protocol, repeats=$repeats, clock=$clock bits=$data";
+	
+	if ($protocol == 3) {
+		$data = SIGNALduino_ITV1_tristateToBit($data);
+		Log3 $name, 5, "$name: sendmsg IT V1 convertet tristate to bits=$data";
+	}
+	
 	foreach my $item (qw(sync start one zero))
 	{
 	    #print ("item= $item \n");
@@ -1468,6 +1478,8 @@ SIGNALduino_Write($$$)
 sub SIGNALduino_AddSendQueue($$)
 {
   my ($hash, $msg) = @_;
+  
+  #Log3 $hash, 3,"AddSendQueue: " . $hash->{NAME} . ": $msg";
   
   push(@{$hash->{QUEUE}}, $msg);
   
@@ -2624,6 +2636,23 @@ sub SIGNALduino_bit2Arctec
 }
 
 
+my %tristateToBit=(
+  "0" => "00",
+  "F" => "01",
+  "1" => "11"
+);
+
+sub SIGNALduino_ITV1_tristateToBit($)
+{
+	my ($tristate) = @_;
+	# Convert 0 -> 00   F -> 01   1 -> 11
+	my $msg = '';
+	foreach my $data (split //, $tristate)
+	{
+		$msg .= $tristateToBit{$data};
+	}
+	return $msg;
+}
 
 
 sub SIGNALduino_OSV2()
