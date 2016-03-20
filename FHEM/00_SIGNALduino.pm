@@ -2636,22 +2636,17 @@ sub SIGNALduino_bit2Arctec
 }
 
 
-my %tristateToBit=(
-  "0" => "00",
-  "F" => "01",
-  "1" => "11"
-);
+
 
 sub SIGNALduino_ITV1_tristateToBit($)
 {
-	my ($tristate) = @_;
-	# Convert 0 -> 00   F -> 01   1 -> 11
-	my $msg = '';
-	foreach my $data (split //, $tristate)
-	{
-		$msg .= $tristateToBit{$data};
-	}
-	return $msg;
+	my $msg = join("",@_);	
+	# Convert 0 -> 00   1 -> 11 F => 01 to be compatible with IT Module
+	$msg =~ s/0/00/g;
+	$msg =~ s/1/11/g;	
+	$msg =~ s/F/01/g;
+		
+	return split("",$msg);
 }
 
 
