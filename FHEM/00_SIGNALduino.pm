@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 95487 2016-03-20 21:00:00Z v3.2.1-dev $
+# $Id: 00_SIGNALduino.pm 95487 2016-03-21 17:00:00Z v3.2.1-dev $
 #
 # v3.2.1-dev
 # The file is taken from the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -2636,17 +2636,15 @@ sub SIGNALduino_bit2Arctec
 }
 
 
-
-
 sub SIGNALduino_ITV1_tristateToBit($)
 {
-	my $msg = join("",@_);	
+	my ($msg) = @_;
 	# Convert 0 -> 00   1 -> 11 F => 01 to be compatible with IT Module
 	$msg =~ s/0/00/g;
 	$msg =~ s/1/11/g;	
 	$msg =~ s/F/01/g;
 		
-	return split("",$msg);
+	return $msg;
 }
 
 
