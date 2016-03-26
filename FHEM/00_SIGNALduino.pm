@@ -751,6 +751,19 @@ my %ProtocolListSIGNALduino  = (
 			#modulematch => '', # not used now
 			length_min => '10',
 		},    
+	"41" => ## Elro (Smartwares) Doorbell DB200
+		{
+			name => 'elro doorbell',
+			id => '41',
+			zero => [1,-3],
+			one => [3,-1],
+			sync => [1,-15],
+			clockabs => 450, 
+			preamble => 'u41', # prepend to converted message
+			clientmodule => '', # not used now
+			#modulematch => '', # not used now
+			length_min => '20',
+		},    
 );
 
 
