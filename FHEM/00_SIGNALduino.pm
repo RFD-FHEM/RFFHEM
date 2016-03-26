@@ -738,6 +738,19 @@ my %ProtocolListSIGNALduino  = (
 			
 			
 		},    
+	"40" => ## Romotec
+		{
+			name => 'romotec',
+			id => '40',
+			one => [3,-2],
+			zero => [1,-3],
+			start => [1,-2],
+			clockabs => 250, 
+			preamble => 'u40', # prepend to converted message
+			clientmodule => '', # not used now
+			#modulematch => '', # not used now
+			length_min => '10',
+		},    
 );
 
 
