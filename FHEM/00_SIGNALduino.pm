@@ -1311,7 +1311,7 @@ SIGNALduino_DoInit($)
 			$hash->{INACTIVE}=1;
 			return $msg;
 		}
-		elsif($ver =~ m/3.1./) {
+		elsif($ver =~ m/^V 3\.1\./) {
 			#$attr{$name}{dummy} = 1;
 			$msg = "$name: Version of your arduino is not compatible, pleas flash new firmware. (setting device to inactive) Got for V:  $ver";
 			readingsSingleUpdate($hash, "state", "unsupported firmware found", 1);
