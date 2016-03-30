@@ -764,6 +764,20 @@ my %ProtocolListSIGNALduino  = (
 			#modulematch => '', # not used now
 			length_min => '20',
 		},    
+	"42" => ## MKT Multi Kon Trade
+		{
+			name => 'MKT motionsensor',
+			id => '42',
+			zero => [1,-3],
+			one => [3,-1],
+			start => [-28],
+			clockabs => 550, 
+			preamble => 'u42', # prepend to converted message
+			clientmodule => '', # not used now
+			#modulematch => '', 
+			length_min => '24',
+		},    
+
 );
 
 
