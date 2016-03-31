@@ -1035,7 +1035,7 @@ sub Dooya_CalcCurrentPos($$$$) {
   <b>Define</b>
    <br>
   <ul>
-    <code>define &lt;name&gt; Dooya &lt;id&gt; </code>
+    <code>define &lt;name&gt; Dooya &lt;id&gt;_&lt;channel&gt; </code>
   <br>
  <br>
    The id is a 28-digit binar code, that uniquely identifies a single remote control.
@@ -1060,8 +1060,10 @@ sub Dooya_CalcCurrentPos($$$$) {
 
     Examples:
     <ul>
-      <code>define rollo_1 Dooya 0011011100000110010110001110</code><br>
-      <code>define rollo_2 Dooya 0011011100000110010110101110</code><br>
+	  <code>define Rollo_Master Dooya 0011011100000110010110001110_0</code><br> Rollo_Master channel 0 controls all shutters (channel 1 - 15) with the same ID, in this case Rollo_1 and Rollo_2 <br>
+	  <br>
+      <code>define Rollo_1 Dooya 0011011100000110010110001110_1</code><br> Rollo_1 channel 1<br>
+      <code>define Rollo_2 Dooya 0011011100000110010110101110_2</code><br> Rollo_2 channel 2<br>
     </ul>
   </ul>
   <br>
