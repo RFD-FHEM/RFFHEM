@@ -900,7 +900,7 @@ SIGNALduino_Define($$)
       return $ret ;
     }
     
-    $hash->{Interval} = "20";
+    $hash->{Interval} = "300";
     InternalTimer(gettimeofday()+$hash->{Interval}, "SIGNALduino_GetUpdate", $hash, 0);
   }
   
@@ -1493,7 +1493,6 @@ SIGNALduino_XmitLimitCheck($$)
   $hash->{XMIT_TIME} = \@b;
   $hash->{NR_CMD_LAST_H} = int(@b);
 }
-
 
 #####################################
 ## API to logical modules: Provide as Hash of IO Device, type of function ; command to call ; message to send
@@ -3075,7 +3074,11 @@ sub SIGNALduino_compPattern($$$%)
     <li>Eurochon EAS 800z -> 14_SD_WS07</li>
     <li>CTW600, WH1080	-> 14_SD_WS09 </li>
     <li>Hama TS33C, Bresser Thermo/Hygro Sensor -> 14_Hideki</li>
+<<<<<<< .mine
     <li>FreeTec Ausenmodul NC-7344 -> 14_SD_WS07</li>
+=======
+    <li>FreeTec Aussenmodul NC-7344 -> 14_SD_WS07</li>
+>>>>>>> .theirs
     
     
 	</ul>
