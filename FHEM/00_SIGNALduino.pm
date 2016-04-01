@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 95487 2016-03-21 17:00:00Z v3.2.1-dev $
+# $Id: 00_SIGNALduino.pm 95487 2016-04-01 22:00:00Z v3.2.1-dev $
 #
 # v3.2.1-dev
 # The file is taken from the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -909,7 +909,7 @@ SIGNALduino_Define($$)
   
 
   
-  Log3 $name, 3, "$name: Firmwareversion: ".$hash->{READINGS}{Version}{VAL}  if ($hash->{READINGS}{Version}{VAL});
+  Log3 $name, 3, "$name: Firmwareversion: ".$hash->{READINGS}{version}{VAL}  if ($hash->{READINGS}{version}{VAL});
 
   return $ret;
 }
@@ -1312,7 +1312,7 @@ SIGNALduino_DoInit($)
 		# Try to get version from Arduino
 		while ($try++ < 3 && $ver !~ m/^V/) {
 			SIGNALduino_SimpleWrite($hash, "V");
-			($err, $ver) = SIGNALduino_ReadAnswer($hash, "Version", 0, undef);
+			($err, $ver) = SIGNALduino_ReadAnswer($hash, "version", 0, undef);
 			return "$name: $err" if($err && ($err !~ m/Timeout/ || $try == 3));
 			$ver = "" if(!$ver);
 		}
@@ -1333,7 +1333,7 @@ SIGNALduino_DoInit($)
 			$hash->{INACTIVE}=1;
 			return $msg;
 		}
-		readingsSingleUpdate($hash, "Version", $ver, 0);
+		readingsSingleUpdate($hash, "version", $ver, 0);
 		
 	
 		$ver =~ s/[\r\n]//g;
@@ -3074,13 +3074,7 @@ sub SIGNALduino_compPattern($$$%)
     <li>Eurochon EAS 800z -> 14_SD_WS07</li>
     <li>CTW600, WH1080	-> 14_SD_WS09 </li>
     <li>Hama TS33C, Bresser Thermo/Hygro Sensor -> 14_Hideki</li>
-<<<<<<< .mine
-    <li>FreeTec Ausenmodul NC-7344 -> 14_SD_WS07</li>
-=======
     <li>FreeTec Aussenmodul NC-7344 -> 14_SD_WS07</li>
->>>>>>> .theirs
-    
-    
 	</ul>
 	<br><br>
 
@@ -3233,9 +3227,9 @@ attr sduino longids BTHR918N
 		<br><br>
 		Input args are:
 		<p>
-		P<protocol id>#binarydata#R<num of repeats>
-		<br>Example: P0#0101#R3
-		<br>Will generate the raw send command for the message 0101 with protocol 0 and instruct the arduino to send this three times.
+		P<protocol id>#binarydata#R<num of repeats>#C<optional clock>   (#C is optional) 
+		<br>Example: P0#0101#R3#C500
+		<br>Will generate the raw send command for the message 0101 with protocol 0 and instruct the arduino to send this three times and the clock is 500.
 		<br>SR;R=3;P0=500;P1=-9000;P2=-4000;P3=-2000;D=03020302;
 		</p>
 		
