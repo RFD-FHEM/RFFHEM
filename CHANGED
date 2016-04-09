@@ -1,3 +1,11 @@
+09.04.2016
+ - SIGNALduino Firmware 3.20b20
+      fixed incomplete mc output (last nibble was not delivered)
+      decoding mc signals > message buffer is now possible
+	  max 340 bits are currently suppored
+      small improvement in processMessage  (if MS decoding fails, 
+	  mc or mu decoding is called)
+ - corrected readings for firmware version.
 29.03.2016
  - Updated Firmware to 3.20b19
    including various bugfixes and better mc detection
