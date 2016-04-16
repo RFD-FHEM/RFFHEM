@@ -1788,6 +1788,7 @@ sub SIGNALduino_Split_Message($$)
 	my $syncidx;
 	my $rawData;
 	my $clockabs;
+	my $mcbitnum;
 	
 	my @msg_parts = SIGNALduino_splitMsg($rmsg,';');			## Split message parts by ";"
 	my %ret;
@@ -1834,6 +1835,13 @@ sub SIGNALduino_Split_Message($$)
 			#return undef if (!defined($patternList{$clockidx}));
 			$ret{clockidx} = $clockidx;
 		}
+		elsif($_ =~ m/^L=\d/) 		#### MC bit length
+		{
+			(undef, $mcbitnum) = split(/=/,$_);
+			Debug "$name: extracted  number of $mcbitnum bits\n" if ($debug);;
+			$ret{mcbitnum} = $mcbitnum;
+		}
+		
 		elsif($_ =~ m/^C=\d+/) 		#### Message from array
 		{
 			$_ =~ s/C=//;  

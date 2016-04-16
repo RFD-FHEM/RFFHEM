@@ -1,3 +1,8 @@
+16.04.2016
+ - SIGNALduino Firmware 3.20b21
+     fixed a possible bug, that append a 0 nibble in mc message
+	 added a new information field in mc messages, providing exact number of
+	 provided bits
 09.04.2016
  - SIGNALduino Firmware 3.20b20
       fixed incomplete mc output (last nibble was not delivered)
