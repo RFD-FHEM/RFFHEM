@@ -1,14 +1,14 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 95487 2016-04-01 22:00:00Z v3.2.1-dev $
+# $Id: 00_SIGNALduino.pm 104841  2016-04-18 23:00:70Z v3.2.1-dev $
 #
 # v3.2.1-dev
-# The file is taken from the FHEMduino project and modified in serval ways for processing the incomming messages
+# The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
 # see http://www.fhemwiki.de/wiki/SIGNALDuino
-# It was modified also to provide support for raw message handling which it's send from the SIGNALduino
+# It was modified also to provide support for raw message handling which can be send from the SIGNALduino
 # The purpos is to use it as addition to the SIGNALduino which runs on an arduno nano or arduino uno.
 # It routes Messages serval Modules which are already integrated in FHEM. But there are also modules which comes with it.
 # N. Butzek, S. Butzek, 2014-2015
-#
+# S.Butzek 2016
 
 
 package main;
