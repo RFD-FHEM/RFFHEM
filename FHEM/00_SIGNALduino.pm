@@ -902,6 +902,8 @@ SIGNALduino_Define($$)
     
     $hash->{Interval} = "300";
     InternalTimer(gettimeofday()+$hash->{Interval}, "SIGNALduino_GetUpdate", $hash, 0);
+  } else {
+  		readingsSingleUpdate($hash, "state", "opened", 1);
   }
   
   $hash->{DMSG}="nothing";
@@ -2446,12 +2448,12 @@ SIGNALduino_Parse($$$$@)
 		Log3 $name, 3, "$name: You are using an outdated version of signalduino code on your arduino. Please update";
 		return undef;
 	}
-	if (@{$hash->{msIdList}} && $rmsg=~ m/^MS;(P\d=-?\d+;){3,6}D=\d+;CP=\d;SP=\d;/) 
+	if (@{$hash->{msIdList}} && $rmsg=~ m/^MS;(P\d=-?\d+;){3,8}D=\d+;CP=\d;SP=\d;/) 
 	{
 		$dispatched= SIGNALduino_Parse_MS($hash, $iohash, $name, $rmsg,%signal_parts);
 	}
 	# Message unsynced type   -> MU
-  	elsif (@{$hash->{muIdList}} && $rmsg=~ m/^MU;(P\d=-?\d+;){3,6}D=\d+;CP=\d;/)
+  	elsif (@{$hash->{muIdList}} && $rmsg=~ m/^MU;(P\d=-?\d+;){3,8}D=\d+;CP=\d;/)
 	{
 		$dispatched=  SIGNALduino_Parse_MU($hash, $iohash, $name, $rmsg,%signal_parts);
 	}
