@@ -228,7 +228,7 @@
         readingsBulkUpdate($hash, "rain", $rain );
         readingsBulkUpdate($hash, "windGust", $windguest );
         readingsBulkUpdate($hash, "windSpeed", $windSpeed );
-        readingsBulkUpdate($hash, "windDirectionDegree", $windDirection );
+        readingsBulkUpdate($hash, "windDirectionDegree", $windDirection * 360 / 16);
         readingsBulkUpdate($hash, "windDirectionText", $windDirectionText );
         readingsEndUpdate($hash, 1); # Notify is done by Dispatch
     
