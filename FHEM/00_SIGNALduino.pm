@@ -746,7 +746,7 @@ my %ProtocolListSIGNALduino  = (
 			zero => [1,-3],
 			start => [1,-2],
 			clockabs => 250, 
-			preamble => 'u40', # prepend to converted message
+			preamble => 'u40#', # prepend to converted message
 			clientmodule => '', # not used now
 			#modulematch => '', # not used now
 			length_min => '10',
@@ -759,7 +759,7 @@ my %ProtocolListSIGNALduino  = (
 			one => [3,-1],
 			sync => [1,-15],
 			clockabs => 450, 
-			preamble => 'u41', # prepend to converted message
+			preamble => 'u41#', # prepend to converted message
 			clientmodule => '', # not used now
 			#modulematch => '', # not used now
 			length_min => '20',
@@ -772,7 +772,7 @@ my %ProtocolListSIGNALduino  = (
 			one => [3,-1],
 			start => [-28],
 			clockabs => 550, 
-			preamble => 'u42', # prepend to converted message
+			preamble => 'u42#', # prepend to converted message
 			clientmodule => '', # not used now
 			#modulematch => '', 
 			length_min => '24',
@@ -1662,6 +1662,17 @@ sub SIGNALduino_inTol($$$)
 # Will return -1 if pattern is not found or a string, containing the indexes which are in tolerance and have the smallest gap to what we searched
 # =cut
 
+01
+12
+23
+32
+24
+42
+23
+
+# 01232323242423       while ($message =~ /$pstr/g) { $count++ }
+
+
 sub SIGNALduino_PatternExists
 {
 	my ($hash,$search,$patternList) = @_;
@@ -1671,9 +1682,10 @@ sub SIGNALduino_PatternExists
 
 	my $searchpattern;
 	my $valid=1;  
-	my $pstr="";
+	my @pstr;
 	my $debug = AttrVal($hash->{NAME},"debug",0);
 	
+	my $i=0;
 	foreach $searchpattern (@{$search}) # z.B. [1, -4] 
 	{
 		#my $patt_id;
@@ -1690,9 +1702,16 @@ sub SIGNALduino_PatternExists
 		{
 			Debug "index => gap in tol (+- $tol) of pulse ($searchpattern) : ".Dumper(\%pattern_gap) if($debug);
 			# Extract fist pattern, which is nearst to our searched value
-			my $closestidx = (sort {$pattern_gap{$a} <=> $pattern_gap{$b}} keys %pattern_gap)[0];
-
-			$pstr="$pstr$closestidx";
+			my @closestidx = (sort {$pattern_gap{$a} <=> $pattern_gap{$b}} keys %pattern_gap);
+			
+			my $idxstr="";
+			while (my ($item) = splice(@closestidx, 0, 1)) 
+			{
+				@pstr[$i].="$item";
+			}
+			# 1                      23 
+			# 23                    1 
+			# => 12 oder 13          =>  21 oder 31
 			$valid=1;
 			Debug "closest pattern has index: $closestidx" if($debug);
 		} else {
@@ -1700,6 +1719,7 @@ sub SIGNALduino_PatternExists
 			$valid=0;
 			last;	
 		}
+		$i++;
 		#return ($valid ? $pstr : -1);  # return $pstr if $valid or -1
 
 	
@@ -1717,6 +1737,9 @@ sub SIGNALduino_PatternExists
 		#}
 		#last if (!$valid);  ## Exit loop if a complete iteration has not found anything
 	}
+	for (my $i =0;$i<@ptr;$i++) # z.B. 23 oder 1
+	{
+	} 
 	
 	return ($valid ? $pstr : -1);  # return $pstr if $valid or -1
 }
@@ -2196,6 +2219,9 @@ sub SIGNALduino_Parse_MU($$$$@)
 			my $pstr="";
 			$valid = $valid && ($pstr=SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}},\%patternList)) >=0;
 			Debug "Found matched one" if ($debug && $valid);
+	
+
+
 			$patternLookupHash{$pstr}="1" if ($valid); ## Append one to our lookuptable
 			Debug "added $pstr " if ($debug && $valid);
 
