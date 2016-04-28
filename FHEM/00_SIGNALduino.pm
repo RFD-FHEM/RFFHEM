@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 104841  2016-04-18 23:00:70Z v3.2.1-dev $
+# $Id: 00_SIGNALduino.pm 104841  2016-04-28 20:00:00Z v3.2.1-dev $
 #
 # v3.2.1-dev
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -746,7 +746,7 @@ my %ProtocolListSIGNALduino  = (
 			zero => [1,-3],
 			start => [1,-2],
 			clockabs => 250, 
-			preamble => 'u40', # prepend to converted message
+			preamble => 'u40#', # prepend to converted message
 			clientmodule => '', # not used now
 			#modulematch => '', # not used now
 			length_min => '10',
@@ -759,7 +759,7 @@ my %ProtocolListSIGNALduino  = (
 			one => [3,-1],
 			sync => [1,-15],
 			clockabs => 450, 
-			preamble => 'u41', # prepend to converted message
+			preamble => 'u41#', # prepend to converted message
 			clientmodule => '', # not used now
 			#modulematch => '', # not used now
 			length_min => '20',
@@ -772,7 +772,7 @@ my %ProtocolListSIGNALduino  = (
 			one => [3,-1],
 			start => [-28],
 			clockabs => 550, 
-			preamble => 'u42', # prepend to converted message
+			preamble => 'u42#', # prepend to converted message
 			clientmodule => '', # not used now
 			#modulematch => '', 
 			length_min => '24',
