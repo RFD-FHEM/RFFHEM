@@ -46,7 +46,7 @@ my %sets = (
 	"prog" => "noArg",
 #	"on-for-timer" => "textField",
 #	"off-for-timer" => "textField",
-	"pos" => "0,10,20,30,40,50,60,70,80,90,100"
+	"pos" => "0,10,20,30,40,50,60,70,80,90,100"    # Todo: Warum nicht als Slider?
 #	"pos" => "slider,0,10,100"
 );
 
@@ -59,8 +59,8 @@ my %sendCommands = (
 	"stop" => "stop"
 );
 
-my %dooya_c2b;
-my $dooya_updateFreq = 3;	# Interval for State update
+my %dooya_c2b;                                           # Todo: Als internal speichern
+my $dooya_updateFreq = 3;	# Interval for State update  # Todo: Als internal speichern
 
 # supported models (blinds  and shutters)
 my %models = ( 
@@ -73,8 +73,8 @@ my %models = (
 # new globals for new set
 #
 
-my $dooya_posAccuracy = 2;
-my $dooya_maxRuntime = 50;
+my $dooya_posAccuracy = 2;            # Todo: Als internal speichern
+my $dooya_maxRuntime = 50;            # Todo: Als internal speichern
 
 my %positions = (
 	"moving" => "50", 
@@ -272,7 +272,7 @@ sub Dooya_SendCommand($@){
 } # end sub Dooya_SendCommand
 
 ######################################################
-sub Dooya_Runden($) {
+sub Dooya_Runden($) {                                  
 	my ($v) = @_;
 	if ( ( $v > 105 ) && ( $v < 195 ) ) {
 		$v = 150;
@@ -760,7 +760,7 @@ sub Dooya_InternalSet($@) {
 ######################################################
 
 ######################################################
-sub Dooya_RoundInternal($) {
+sub Dooya_RoundInternal($) {   # Todo: kann das nicht die Round Funktion von FHEM?
 	my ($v) = @_;
 	return sprintf("%d", ($v + ($dooya_posAccuracy/2)) / $dooya_posAccuracy) * $dooya_posAccuracy;
 } # end sub Dooya_RoundInternal
