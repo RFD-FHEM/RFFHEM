@@ -1,3 +1,7 @@
+08.05.2016
+ - SIGNALduino Firmware 3.20b23
+    some fixes providing more messages instad of fewer.
+	fixed some manchester realted things	
 18.04.2016
  - SIGNALduino Firmware 3.20b22
     increased number of pattern from 6 to 8 to support dooya shutter protocol better
