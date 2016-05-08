@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 104841  2016-04-28 20:00:00Z v3.2.1-dev $
+# $Id: 00_SIGNALduino.pm 104841  2016-05-08 17:00:00Z v3.2.1-dev $
 #
 # v3.2.1-dev
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -76,6 +76,7 @@ my $clientsSIGNALduino = ":IT:"
 						."SD_WS:"
 						."RFXX10REC:"
 						."Dooya:"
+						."SOMFY"
 						."SIGNALduino_un:"
 						; 
 
@@ -93,6 +94,7 @@ my %matchListSIGNALduino = (
      "12:SD_WS"					=> '^W\d+#.*',
      "13:RFXX10REC" 			=> '^(20|29)[A-Fa-f0-9]+',
      "14:Dooya"				=> '^P16#[A-Fa-f0-9]+',
+     "15:SOMFY"				=> '^YsA[0-9A-F]+',
      "X:SIGNALduino_un"			=> '^[uP]\d+#.*',
 );
 
@@ -776,8 +778,24 @@ my %ProtocolListSIGNALduino  = (
 			clientmodule => '', # not used now
 			#modulematch => '', 
 			length_min => '24',
-		},    
-
+		},
+	"43" => ## Somfy RTS
+		{
+			name 		=> 'Somfy RTS',
+			id 		=> '43',
+			zero 		=> [1,-3],
+			one 		=> [3,-1],
+			sync		=> [1,-11],		
+			start 		=> [-28],
+			clockrange     	=> [630,689],			# min , max
+			format		=> 'manchester', 
+			preamble 	=> 'Ys',
+			#clientmodule	=> '', # not used now
+			modulematch 	=> '^YsA[0-9A-F]+',
+			length_min 	=> '56',
+			length_max 	=> '56',
+			method          => \&SIGNALduino_SomfyRTS # Call to process this message
+		},
 );
 
 
@@ -2900,6 +2918,30 @@ sub	SIGNALduino_Hideki()
 		return  (1,$hidekihex); ## Return only the original bits, include length
 	}
 	return (-1,"");
+}
+
+sub SIGNALduino_SomfyRTS()
+{
+	my ($name, $bitData, $rawData) = @_;
+	
+	my $negBits = $bitData =~ tr/10/01/r;
+	my $encData = SIGNALduino_b2h($negBits);
+	my $decData = substr($encData, 0, 2);
+	
+	## decode message
+	for (my $idx=1; $idx < 7; $idx++)
+	{
+		my $high = substr($encData, $idx * 2, 2);
+		my $low = substr($encData, ($idx - 1) * 2, 2);
+		
+		my $val = hex("0x" . $low) ^ hex("0x" . $high);
+		$decData .= sprintf("%02X", $val);
+	}
+	
+	## checksum ???
+	
+	Log3 $name, 4, "$name: Somfy RTS protocol \nraw: " . SIGNALduino_b2h($bitData) . "\nenc: $encData\ndec: $decData\n";
+	return (1, $decData);
 }
 
 # - - - - - - - - - - - -
