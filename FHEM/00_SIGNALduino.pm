@@ -782,16 +782,12 @@ my %ProtocolListSIGNALduino  = (
 	"43" => ## Somfy RTS
 		{
 			name 		=> 'Somfy RTS',
-			id 		=> '43',
-			zero 		=> [1,-3],
-			one 		=> [3,-1],
-			sync		=> [1,-11],		
-			start 		=> [-28],
-			clockrange     	=> [630,689],			# min , max
+			id 			=> '43',
+			clockrange  => [630,689],			# min , max
 			format		=> 'manchester', 
 			preamble 	=> 'Ys',
 			#clientmodule	=> '', # not used now
-			modulematch 	=> '^YsA[0-9A-F]+',
+			modulematch 	=> '^YsA[0-9A-F]{13}',
 			length_min 	=> '56',
 			length_max 	=> '56',
 			method          => \&SIGNALduino_SomfyRTS # Call to process this message
@@ -2924,24 +2920,36 @@ sub SIGNALduino_SomfyRTS()
 {
 	my ($name, $bitData, $rawData) = @_;
 	
-	my $negBits = $bitData =~ tr/10/01/r;
+	my ($negBits = $bitData) =~ tr/10/01/;   # Todo: eventuell auf pack umstellen
 	my $encData = SIGNALduino_b2h($negBits);
-	my $decData = substr($encData, 0, 2);
+
+	## no Somfy RTS message
+	return (-1, "not a valid Somfy RTS message!") if ($encData !~ m/A[0-9A-F]{13}/);
 	
 	## decode message
-	for (my $idx=1; $idx < 7; $idx++)
+	my $decData = substr($encData, 0, 2);
+	for (my $idx=0; $idx < 7; $idx++)
 	{
-		my $high = substr($encData, $idx * 2, 2);
-		my $low = substr($encData, ($idx - 1) * 2, 2);
+		my $high = hex(substr($encData, $idx * 2, 2));
+		my $low = hex(substr($encData, ($idx - 1) * 2, 2));
 		
-		my $val = hex("0x" . $low) ^ hex("0x" . $high);
+		my $val = $high ^ $low;
 		$decData .= sprintf("%02X", $val);
 	}
 	
-	## checksum ???
-	
-	Log3 $name, 4, "$name: Somfy RTS protocol \nraw: " . SIGNALduino_b2h($bitData) . "\nenc: $encData\ndec: $decData\n";
-	return (1, $decData);
+	## checksum
+	my $checkSum = 0;
+	for (my $idx=0; $idx < 7; $idx++)
+	{
+		my $val = hex(substr($decData, $idx * 2, 2));
+		$val &= 0xF0 if ($idx == 1);
+		$checkSum = $checkSum ^ $val ^ ($val >> 4);
+		##Log3 $name, 4, "$name: Somfy RTS check: " . sprintf("%02X, %02X", $val, $checkSum); 
+	}
+	return (-1, "not a valid Somfy RTS message (checksum error)!") if (($checkSum & 0x0F ) != hex("0x" . substr($decData, 3, 1)));
+
+	##Log3 $name, 4, "$name: Somfy RTS protocol \nraw: " . SIGNALduino_b2h($bitData) . "\nenc: $encData\ndec: $decData\ncheck: " . sprintf("%X", $checkSum & hex("0x0F")) . "\n";
+	return (1, "Ys" . $decData);
 }
 
 # - - - - - - - - - - - -
