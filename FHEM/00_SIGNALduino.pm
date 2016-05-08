@@ -1115,43 +1115,49 @@ SIGNALduino_Set($@)
 		Log3 $name, 5, "$name: sendmsg IT V1 convertet tristate to bits=$data";
 	}
 	
-	foreach my $item (qw(sync start one zero))
+	my $sendData;
+	if  ($ProtocolListSIGNALduino{$protocol}{format} == 'manchester')
 	{
-	    #print ("item= $item \n");
-	    next if (!exists($ProtocolListSIGNALduino{$protocol}{$item}));
-	    
-		foreach my $p (@{$ProtocolListSIGNALduino{$protocol}{$item}})
+		$clock = (map { $clock += $_ } @{$ProtocolListSIGNALduino{$protocol}{clockrange}}) /  2;
+		$sendData = "SM;R=$repeats;C=$clock;D=$data"; #	SM;R=2;C=400;D=AFAFAF;
+		Log3 $name, 5, "$name: sendmsg prepared manchester signal with clock=$clock";
+	} else {
+		foreach my $item (qw(sync start one zero))
 		{
-		    #print (" p = $p \n");
+		    #print ("item= $item \n");
+		    next if (!exists($ProtocolListSIGNALduino{$protocol}{$item}));
 		    
-		    if (!exists($patternHash{$p}))
+			foreach my $p (@{$ProtocolListSIGNALduino{$protocol}{$item}})
 			{
-				$patternHash{$p}=$cnt;
-				$pattern.="P".$patternHash{$p}."=".$p*$clock.";";
-				$cnt++;
+			    #print (" p = $p \n");
+			    
+			    if (!exists($patternHash{$p}))
+				{
+					$patternHash{$p}=$cnt;
+					$pattern.="P".$patternHash{$p}."=".$p*$clock.";";
+					$cnt++;
+				}
+		    	$signalHash{$item}.=$patternHash{$p};
+			   	#print (" signalHash{$item} = $signalHash{$item} \n");
 			}
-	    	$signalHash{$item}.=$patternHash{$p};
-		   	#print (" signalHash{$item} = $signalHash{$item} \n");
 		}
+		my @bits = split("", $data);
+	
+		my %bitconv = (1=>"one", 0=>"zero");
+		my $SignalData="D=";
+		
+		$SignalData.=$signalHash{sync} if (exists($signalHash{sync}));
+		$SignalData.=$signalHash{start} if (exists($signalHash{start}));
+		foreach my $bit (@bits)
+		{
+			next if (!exists($bitconv{$bit}));
+			#Log3 $name, 5, "encoding $bit";
+			$SignalData.=$signalHash{$bitconv{$bit}}; ## Add the signal to our data string
+		}
+		$sendData = "SR;R=$repeats;$pattern$SignalData;";
 	}
+
 	
-	my @bits = split("", $data);
-	
-	my %bitconv = (1=>"one", 0=>"zero");
-	my $SignalData="D=";
-	
-	$SignalData.=$signalHash{sync} if (exists($signalHash{sync}));
-	$SignalData.=$signalHash{start} if (exists($signalHash{start}));
-	
-	
-	foreach my $bit (@bits)
-	{
-		next if (!exists($bitconv{$bit}));
-		#Log3 $name, 5, "encoding $bit";
-		$SignalData.=$signalHash{$bitconv{$bit}}; ## Add the signal to our data string
-	}
-	
-	my $sendData = "SR;R=$repeats;$pattern$SignalData;";
 	#SIGNALduino_SimpleWrite($hash, $sendData);
 	SIGNALduino_AddSendQueue($hash,$sendData);
 	Log3 $name, 4, "$name/set: sending via SendMsg: $sendData";
@@ -2920,7 +2926,7 @@ sub SIGNALduino_SomfyRTS()
 {
 	my ($name, $bitData, $rawData) = @_;
 	
-	my ($negBits = $bitData) =~ tr/10/01/;   # Todo: eventuell auf pack umstellen
+    (my $negBits = $bitData) =~ tr/10/01/;   # Todo: eventuell auf pack umstellen
 	my $encData = SIGNALduino_b2h($negBits);
 
 	## no Somfy RTS message
@@ -2938,6 +2944,7 @@ sub SIGNALduino_SomfyRTS()
 	}
 	
 	## checksum
+	
 	my $checkSum = 0;
 	for (my $idx=0; $idx < 7; $idx++)
 	{
@@ -2946,10 +2953,10 @@ sub SIGNALduino_SomfyRTS()
 		$checkSum = $checkSum ^ $val ^ ($val >> 4);
 		##Log3 $name, 4, "$name: Somfy RTS check: " . sprintf("%02X, %02X", $val, $checkSum); 
 	}
-	return (-1, "not a valid Somfy RTS message (checksum error)!") if (($checkSum & 0x0F ) != hex("0x" . substr($decData, 3, 1)));
+	#return (-1, "not a valid Somfy RTS message (checksum error)!") if (($checkSum & 0x0F ) != hex( substr($decData, 3, 1)));
 
 	##Log3 $name, 4, "$name: Somfy RTS protocol \nraw: " . SIGNALduino_b2h($bitData) . "\nenc: $encData\ndec: $decData\ncheck: " . sprintf("%X", $checkSum & hex("0x0F")) . "\n";
-	return (1, "Ys" . $decData);
+	return (1, $decData);
 }
 
 # - - - - - - - - - - - -
