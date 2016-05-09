@@ -790,7 +790,7 @@ my %ProtocolListSIGNALduino  = (
 			modulematch 	=> '^YsA[0-9A-F]{13}',
 			length_min 	=> '56',
 			length_max 	=> '56',
-			method          => \&SIGNALduino_SomfyRTS # Call to process this message
+			method          => \&SIGNALduino_SomfyRTS_Recv # Call to process this message
 		},
 );
 
@@ -1113,6 +1113,10 @@ SIGNALduino_Set($@)
 	if ($protocol == 3) {
 		$data = SIGNALduino_ITV1_tristateToBit($data);
 		Log3 $name, 5, "$name: sendmsg IT V1 convertet tristate to bits=$data";
+	} elsif ($protocol == 43) {
+	## Somfy RTS
+		my ($ret, $res) = SIGNALduino_SomfyRTS_Send($name, $data);
+		Log3 $name, 4, "$name: sendmsg Somfy RTS data: $res, clock: $clock";
 	}
 	
 	my $sendData;
@@ -2922,7 +2926,59 @@ sub	SIGNALduino_Hideki()
 	return (-1,"");
 }
 
-sub SIGNALduino_SomfyRTS()
+sub SIGNALduino_SomfyRTS_Decrypt($$)
+{
+	my ($name, $data) = @_;
+	
+	my $res = substr($data, 0, 2);
+	for (my $idx=1; $idx < 7; $idx++)
+	{
+		my $high = hex(substr($data, $idx * 2, 2));
+		my $low = hex(substr($data, ($idx - 1) * 2, 2));
+		
+		my $val = $high ^ $low;
+		$res .= sprintf("%02X", $val);
+	}
+
+	return $res;	
+}
+
+sub SIGNALduino_SomfyRTS_Encrypt($$)
+{
+	my ($name, $data) = @_;
+	
+	my $res = substr($data, 0, 2);
+	for (my $idx=1; $idx < 7; $idx++)
+	{
+		my $high = hex(substr($data, $idx * 2, 2));
+		my $low = hex(substr($res, ($idx - 1) * 2, 2));
+		
+		my $val = $high ^ $low;
+		$res .= sprintf("%02X", $val);
+	}
+
+	return $res;	
+}
+
+sub SIGNALduino_SomfyRTS_Check($$)
+{
+	my ($name, $data) = @_;
+	
+	my $checkSum = 0;
+	for (my $idx=0; $idx < 7; $idx++)
+	{
+		my $val = hex(substr($data, $idx * 2, 2));
+		$val &= 0xF0 if ($idx == 1);
+		$checkSum = $checkSum ^ $val ^ ($val >> 4);
+		##Log3 $name, 4, "$name: Somfy RTS check: " . sprintf("%02X, %02X", $val, $checkSum); 
+	}
+
+	$checkSum &= hex("0x0F");
+	
+	return $checkSum;	
+}
+
+sub SIGNALduino_SomfyRTS_Recv()
 {
 	my ($name, $bitData, $rawData) = @_;
 	
@@ -2933,30 +2989,37 @@ sub SIGNALduino_SomfyRTS()
 	return (-1, "not a valid Somfy RTS message!") if ($encData !~ m/A[0-9A-F]{13}/);
 	
 	## decode message
-	my $decData = substr($encData, 0, 2);
-	for (my $idx=0; $idx < 7; $idx++)
-	{
-		my $high = hex(substr($encData, $idx * 2, 2));
-		my $low = hex(substr($encData, ($idx - 1) * 2, 2));
-		
-		my $val = $high ^ $low;
-		$decData .= sprintf("%02X", $val);
-	}
+	my $decData = SIGNALduino_SomfyRTS_Decrypt($name, $encData);
 	
 	## checksum
-	
-	my $checkSum = 0;
-	for (my $idx=0; $idx < 7; $idx++)
-	{
-		my $val = hex(substr($decData, $idx * 2, 2));
-		$val &= 0xF0 if ($idx == 1);
-		$checkSum = $checkSum ^ $val ^ ($val >> 4);
-		##Log3 $name, 4, "$name: Somfy RTS check: " . sprintf("%02X, %02X", $val, $checkSum); 
-	}
-	#return (-1, "not a valid Somfy RTS message (checksum error)!") if (($checkSum & 0x0F ) != hex( substr($decData, 3, 1)));
+	my $checkSum = SIGNALduino_SomfyRTS_Check($name, $decData);
+	return (-1, "not a valid Somfy RTS message (checksum error)!") if ($checkSum != hex( substr($decData, 3, 1)));
 
 	##Log3 $name, 4, "$name: Somfy RTS protocol \nraw: " . SIGNALduino_b2h($bitData) . "\nenc: $encData\ndec: $decData\ncheck: " . sprintf("%X", $checkSum & hex("0x0F")) . "\n";
-	return (1, $decData);
+	return (1, "Ys" . $decData);
+}
+
+sub SIGNALduino_SomfyRTS_Send($$)
+{
+	my ($name, $data) = @_;
+	
+	## no Somfy RTS message
+	return (-1, "not a valid Somfy RTS message!") if ($data !~ m/A[0-9A-F]{13}/);
+	
+	## swap adress
+	my $decData = substr($data, 0, 8) . substr($data, 12, 2) . substr($data, 10, 2) . substr($data, 8, 2);
+	
+	## checksum
+	my $checkSum = SIGNALduino_SomfyRTS_Check($name, $decData);
+	
+	## decode message
+	my $encData = SIGNALduino_SomfyRTS_Encrypt($name, (substr($decData, 0, 3) . sprintf("%0X", $checkSum) . substr($decData, 4)));
+	
+	## negate message
+	(my $negData = $encData) =~ tr/0123456789ABCDEF/FEDCBA9876543210/;
+	
+	##Log3 $name, 4, "$name: Somfy RTS protocol \ndec: $decData\nenc: $encData\nraw: $negData\ncheck: " . sprintf("%X", $checkSum & hex("0x0F")) . "\n";
+	return (1, $negData);
 }
 
 # - - - - - - - - - - - -
