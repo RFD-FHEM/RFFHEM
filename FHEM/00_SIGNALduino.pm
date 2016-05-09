@@ -2995,7 +2995,10 @@ sub SIGNALduino_SomfyRTS_Recv()
 	my $checkSum = SIGNALduino_SomfyRTS_Check($name, $decData);
 	return (-1, "not a valid Somfy RTS message (checksum error)!") if ($checkSum != hex( substr($decData, 3, 1)));
 
-	##Log3 $name, 4, "$name: Somfy RTS protocol \nraw: " . SIGNALduino_b2h($bitData) . "\nenc: $encData\ndec: $decData\ncheck: " . sprintf("%X", $checkSum & hex("0x0F")) . "\n";
+	## remove checksum & swap adress
+	$decData = substr($decData, 0, 3) . "0" . substr($decData, 4, 4) . substr($decData, 12, 2) . substr($decData, 10, 2) . substr($decData, 8, 2);
+
+	#Log3 $name, 4, "$name: Somfy RTS protocol \nraw: " . SIGNALduino_b2h($bitData) . "\nenc: $encData\ndec: $decData\ncheck: " . sprintf("%X", $checkSum & hex("0x0F")) . "\n";
 	return (1, "Ys" . $decData);
 }
 
@@ -3018,7 +3021,7 @@ sub SIGNALduino_SomfyRTS_Send($$)
 	## negate message
 	(my $negData = $encData) =~ tr/0123456789ABCDEF/FEDCBA9876543210/;
 	
-	##Log3 $name, 4, "$name: Somfy RTS protocol \ndec: $decData\nenc: $encData\nraw: $negData\ncheck: " . sprintf("%X", $checkSum & hex("0x0F")) . "\n";
+	#Log3 $name, 4, "$name: Somfy RTS protocol \ndec: $decData\nenc: $encData\nraw: $negData\ncheck: " . sprintf("%X", $checkSum & hex("0x0F")) . "\n";
 	return (1, $negData);
 }
 
