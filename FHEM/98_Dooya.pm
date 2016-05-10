@@ -1,5 +1,5 @@
 ######################################################
-# $Id: 98_Dooya.pm 1011 2016-03-17 20:00:00Z Jarnsen_darkmission_ralf9 $
+# $Id: 98_Dooya.pm 1012 2016-04-26 23:00:00Z Jarnsen_darkmission_ralf9 $
 #
 # Dooya module for FHEM
 # Thanks for templates/coding from Somfy and SIGNALduino team
@@ -15,6 +15,7 @@
 # 1.00	2016-03-12	darkmission	autocreate, parse communication from SIGNALduino for correct position when using remote from doooya 
 # 1.10  2016-03-13	Ralf9		changed SendCommand with sendMsg
 # 1.11  2016-03-17	Ralf9   	ID + Channel = DeviceCode
+# 1.12  2016-04-26      Jarnsen         im Dooya parse cmd geändert
 #
 #TODOS:
 # - Groups, diff by channels
@@ -45,7 +46,7 @@ my %sets = (
 	"prog" => "noArg",
 #	"on-for-timer" => "textField",
 #	"off-for-timer" => "textField",
-	"pos" => "0,10,20,30,40,50,60,70,80,90,100"
+	"pos" => "0,10,20,30,40,50,60,70,80,90,100"    # Todo: Warum nicht als Slider?
 #	"pos" => "slider,0,10,100"
 );
 
@@ -58,8 +59,8 @@ my %sendCommands = (
 	"stop" => "stop"
 );
 
-my %dooya_c2b;
-my $dooya_updateFreq = 3;	# Interval for State update
+my %dooya_c2b;                                           # Todo: Als internal speichern
+my $dooya_updateFreq = 3;	# Interval for State update  # Todo: Als internal speichern
 
 # supported models (blinds  and shutters)
 my %models = ( 
@@ -72,8 +73,8 @@ my %models = (
 # new globals for new set
 #
 
-my $dooya_posAccuracy = 2;
-my $dooya_maxRuntime = 50;
+my $dooya_posAccuracy = 2;            # Todo: Als internal speichern
+my $dooya_maxRuntime = 50;            # Todo: Als internal speichern
 
 my %positions = (
 	"moving" => "50", 
@@ -271,7 +272,7 @@ sub Dooya_SendCommand($@){
 } # end sub Dooya_SendCommand
 
 ######################################################
-sub Dooya_Runden($) {
+sub Dooya_Runden($) {                                  
 	my ($v) = @_;
 	if ( ( $v > 105 ) && ( $v < 195 ) ) {
 		$v = 150;
@@ -310,8 +311,8 @@ sub Dooya_Parse($$) {
    my $id = substr($bitData, 0, 28);
    my $BitChannel = substr($bitData, 28, 4); #noch nicht benoetigt
    my $channel = oct("0b" . $BitChannel);
-   my $cmd = substr($bitData, 32, 8);
-   my $newstate = $codes{ $cmd };            # set new state
+   my $cmd = substr($bitData, 32, 4);
+   my $newstate = $codes{ $cmd . $cmd};            # set new state
    my $deviceCode = $id . '_' . $channel;
 
     Log3 $hash, 4, "Dooya_Parse: device ID: $id";
@@ -759,7 +760,7 @@ sub Dooya_InternalSet($@) {
 ######################################################
 
 ######################################################
-sub Dooya_RoundInternal($) {
+sub Dooya_RoundInternal($) {   # Todo: kann das nicht die Round Funktion von FHEM?
 	my ($v) = @_;
 	return sprintf("%d", ($v + ($dooya_posAccuracy/2)) / $dooya_posAccuracy) * $dooya_posAccuracy;
 } # end sub Dooya_RoundInternal

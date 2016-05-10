@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 104841  2016-04-18 23:00:70Z v3.2.1-dev $
+# $Id: 00_SIGNALduino.pm 104841  2016-05-08 17:00:00Z v3.2.1-dev $
 #
 # v3.2.1-dev
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -76,6 +76,7 @@ my $clientsSIGNALduino = ":IT:"
 						."SD_WS:"
 						."RFXX10REC:"
 						."Dooya:"
+						."SOMFY"
 						."SIGNALduino_un:"
 						; 
 
@@ -93,6 +94,7 @@ my %matchListSIGNALduino = (
      "12:SD_WS"					=> '^W\d+#.*',
      "13:RFXX10REC" 			=> '^(20|29)[A-Fa-f0-9]+',
      "14:Dooya"				=> '^P16#[A-Fa-f0-9]+',
+     "15:SOMFY"				=> '^YsA[0-9A-F]+',
      "X:SIGNALduino_un"			=> '^[uP]\d+#.*',
 );
 
@@ -356,14 +358,14 @@ my %ProtocolListSIGNALduino  = (
             name			=> 'Dooya shutter',	
 			id          	=> '16',
 			one				=> [2,-1],
-			zero			=> [1,-2],
-			start           => [16,-5],
-			clockabs		=> 300,
+			zero			=> [1,-3],
+			start           => [17,-5],
+			clockabs		=> 280,
 			format 			=> 'twostate',	  		
 			preamble		=> 'P16#',				# prepend to converted message	
 			#clientmodule    => '',   				# not used now
 			#modulematch     => '',  				# not used now
-			length_min      => '40',
+			length_min      => '39',
 			length_max      => '40',
 		}, 	
     "17"    => 
@@ -776,8 +778,20 @@ my %ProtocolListSIGNALduino  = (
 			clientmodule => '', # not used now
 			#modulematch => '', 
 			length_min => '24',
-		},    
-
+		},
+	"43" => ## Somfy RTS
+		{
+			name 		=> 'Somfy RTS',
+			id 			=> '43',
+			clockrange  => [630,689],			# min , max
+			format		=> 'manchester', 
+			preamble 	=> 'Ys',
+			#clientmodule	=> '', # not used now
+			modulematch 	=> '^YsA[0-9A-F]{13}',
+			length_min 	=> '56',
+			length_max 	=> '56',
+			method          => \&SIGNALduino_SomfyRTS # Call to process this message
+		},
 );
 
 
@@ -1101,43 +1115,49 @@ SIGNALduino_Set($@)
 		Log3 $name, 5, "$name: sendmsg IT V1 convertet tristate to bits=$data";
 	}
 	
-	foreach my $item (qw(sync start one zero))
+	my $sendData;
+	if  ($ProtocolListSIGNALduino{$protocol}{format} == 'manchester')
 	{
-	    #print ("item= $item \n");
-	    next if (!exists($ProtocolListSIGNALduino{$protocol}{$item}));
-	    
-		foreach my $p (@{$ProtocolListSIGNALduino{$protocol}{$item}})
+		$clock = (map { $clock += $_ } @{$ProtocolListSIGNALduino{$protocol}{clockrange}}) /  2;
+		$sendData = "SM;R=$repeats;C=$clock;D=$data"; #	SM;R=2;C=400;D=AFAFAF;
+		Log3 $name, 5, "$name: sendmsg prepared manchester signal with clock=$clock";
+	} else {
+		foreach my $item (qw(sync start one zero))
 		{
-		    #print (" p = $p \n");
+		    #print ("item= $item \n");
+		    next if (!exists($ProtocolListSIGNALduino{$protocol}{$item}));
 		    
-		    if (!exists($patternHash{$p}))
+			foreach my $p (@{$ProtocolListSIGNALduino{$protocol}{$item}})
 			{
-				$patternHash{$p}=$cnt;
-				$pattern.="P".$patternHash{$p}."=".$p*$clock.";";
-				$cnt++;
+			    #print (" p = $p \n");
+			    
+			    if (!exists($patternHash{$p}))
+				{
+					$patternHash{$p}=$cnt;
+					$pattern.="P".$patternHash{$p}."=".$p*$clock.";";
+					$cnt++;
+				}
+		    	$signalHash{$item}.=$patternHash{$p};
+			   	#print (" signalHash{$item} = $signalHash{$item} \n");
 			}
-	    	$signalHash{$item}.=$patternHash{$p};
-		   	#print (" signalHash{$item} = $signalHash{$item} \n");
 		}
+		my @bits = split("", $data);
+	
+		my %bitconv = (1=>"one", 0=>"zero");
+		my $SignalData="D=";
+		
+		$SignalData.=$signalHash{sync} if (exists($signalHash{sync}));
+		$SignalData.=$signalHash{start} if (exists($signalHash{start}));
+		foreach my $bit (@bits)
+		{
+			next if (!exists($bitconv{$bit}));
+			#Log3 $name, 5, "encoding $bit";
+			$SignalData.=$signalHash{$bitconv{$bit}}; ## Add the signal to our data string
+		}
+		$sendData = "SR;R=$repeats;$pattern$SignalData;";
 	}
+
 	
-	my @bits = split("", $data);
-	
-	my %bitconv = (1=>"one", 0=>"zero");
-	my $SignalData="D=";
-	
-	$SignalData.=$signalHash{sync} if (exists($signalHash{sync}));
-	$SignalData.=$signalHash{start} if (exists($signalHash{start}));
-	
-	
-	foreach my $bit (@bits)
-	{
-		next if (!exists($bitconv{$bit}));
-		#Log3 $name, 5, "encoding $bit";
-		$SignalData.=$signalHash{$bitconv{$bit}}; ## Add the signal to our data string
-	}
-	
-	my $sendData = "SR;R=$repeats;$pattern$SignalData;";
 	#SIGNALduino_SimpleWrite($hash, $sendData);
 	SIGNALduino_AddSendQueue($hash,$sendData);
 	Log3 $name, 4, "$name/set: sending via SendMsg: $sendData";
@@ -1693,7 +1713,7 @@ sub SIGNALduino_PatternExists
 		#my $tol=abs(abs($searchpattern)>=2 ?$searchpattern*0.3:$searchpattern*1.5);
 		my $tol=abs(abs($searchpattern)>3 ? abs($searchpattern)>16 ? $searchpattern*0.17 : $searchpattern*0.3 : 1);  #tol is minimum 1 or higer, depending on our searched pulselengh
 		
-		Debug "tol (+- $tol) for ($searchpattern)" if($debug);
+		Debug "tol: () lookik for ($searchpattern +- $tol)" if($debug);
 		
 		my %pattern_gap ; #= {};
 		# Find and store the gap of every pattern, which is in tolerance
@@ -1705,15 +1725,17 @@ sub SIGNALduino_PatternExists
 			my @closestidx = (sort {$pattern_gap{$a} <=> $pattern_gap{$b}} keys %pattern_gap);
 			
 			my $idxstr="";
-			while (my ($item) = splice(@closestidx, 0, 1)) 
+			my $r=0;
+			while (my ($item) = shift(@closestidx)) 
 			{
-				@pstr[$i].="$item";
+				@pstr[$i][$r]=$item;
+				$r++;
+				Debug "closest pattern has index: $item" if($debug);
 			}
 			# 1                      23 
 			# 23                    1 
 			# => 12 oder 13          =>  21 oder 31
 			$valid=1;
-			Debug "closest pattern has index: $closestidx" if($debug);
 		} else {
 			# search is not found, return
 			$valid=0;
@@ -1737,11 +1759,9 @@ sub SIGNALduino_PatternExists
 		#}
 		#last if (!$valid);  ## Exit loop if a complete iteration has not found anything
 	}
-	for (my $i =0;$i<@ptr;$i++) # z.B. 23 oder 1
-	{
-	} 
+
 	
-	return ($valid ? $pstr : -1);  # return $pstr if $valid or -1
+	return ($valid ? @pstr : -1);  # return @pstr if $valid or -1
 }
 
 #SIGNALduino_MatchSignalPattern{$hash,@array, %hash, @array, $scalar}; not used >v3.1.3
@@ -2926,6 +2946,43 @@ sub	SIGNALduino_Hideki()
 		return  (1,$hidekihex); ## Return only the original bits, include length
 	}
 	return (-1,"");
+}
+
+sub SIGNALduino_SomfyRTS()
+{
+	my ($name, $bitData, $rawData) = @_;
+	
+    (my $negBits = $bitData) =~ tr/10/01/;   # Todo: eventuell auf pack umstellen
+	my $encData = SIGNALduino_b2h($negBits);
+
+	## no Somfy RTS message
+	return (-1, "not a valid Somfy RTS message!") if ($encData !~ m/A[0-9A-F]{13}/);
+	
+	## decode message
+	my $decData = substr($encData, 0, 2);
+	for (my $idx=0; $idx < 7; $idx++)
+	{
+		my $high = hex(substr($encData, $idx * 2, 2));
+		my $low = hex(substr($encData, ($idx - 1) * 2, 2));
+		
+		my $val = $high ^ $low;
+		$decData .= sprintf("%02X", $val);
+	}
+	
+	## checksum
+	
+	my $checkSum = 0;
+	for (my $idx=0; $idx < 7; $idx++)
+	{
+		my $val = hex(substr($decData, $idx * 2, 2));
+		$val &= 0xF0 if ($idx == 1);
+		$checkSum = $checkSum ^ $val ^ ($val >> 4);
+		##Log3 $name, 4, "$name: Somfy RTS check: " . sprintf("%02X, %02X", $val, $checkSum); 
+	}
+	#return (-1, "not a valid Somfy RTS message (checksum error)!") if (($checkSum & 0x0F ) != hex( substr($decData, 3, 1)));
+
+	##Log3 $name, 4, "$name: Somfy RTS protocol \nraw: " . SIGNALduino_b2h($bitData) . "\nenc: $encData\ndec: $decData\ncheck: " . sprintf("%X", $checkSum & hex("0x0F")) . "\n";
+	return (1, $decData);
 }
 
 # - - - - - - - - - - - -

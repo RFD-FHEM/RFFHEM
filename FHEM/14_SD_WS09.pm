@@ -1,6 +1,6 @@
     ##############################################
     ##############################################
-    # $Id: 14_SD_WS09.pm 16013 2016-04-17 10:10:10Z pejonp $
+    # $Id: 14_SD_WS09.pm 16014 2016-05-08 10:10:10Z pejonp $
     # 
     # The purpose of this module is to support serval 
     # weather sensors like WS-0101  (Sender 868MHz ASK   Epmfänger RX868SH-DV elv)
@@ -242,7 +242,8 @@
         readingsBulkUpdate($hash, "rain", $rain );
         readingsBulkUpdate($hash, "windGust", $windguest );
         readingsBulkUpdate($hash, "windSpeed", $windSpeed );
-        readingsBulkUpdate($hash, "windDirectionDegree", $windDirection );
+        readingsBulkUpdate($hash, "windDirection", $windDirection );
+        readingsBulkUpdate($hash, "windDirectionDegree", $windDirection * 360 / 16);     
         readingsBulkUpdate($hash, "windDirectionText", $windDirectionText );
         readingsEndUpdate($hash, 1); # Notify is done by Dispatch
     
