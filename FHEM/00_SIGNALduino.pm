@@ -2928,32 +2928,17 @@ sub	SIGNALduino_Hideki()
 	return (-1,"");
 }
 
-sub SIGNALduino_SomfyRTS_Decrypt($$)
+sub SIGNALduino_SomfyRTS_Crypt($$$)
 {
-	my ($name, $data) = @_;
+	my ($operation, $name, $data) = @_;
 	
 	my $res = substr($data, 0, 2);
+	my $ref = ($operation eq "e" ? \$res : \$data);
+	
 	for (my $idx=1; $idx < 7; $idx++)
 	{
 		my $high = hex(substr($data, $idx * 2, 2));
-		my $low = hex(substr($data, ($idx - 1) * 2, 2));
-		
-		my $val = $high ^ $low;
-		$res .= sprintf("%02X", $val);
-	}
-
-	return $res;	
-}
-
-sub SIGNALduino_SomfyRTS_Encrypt($$)
-{
-	my ($name, $data) = @_;
-	
-	my $res = substr($data, 0, 2);
-	for (my $idx=1; $idx < 7; $idx++)
-	{
-		my $high = hex(substr($data, $idx * 2, 2));
-		my $low = hex(substr($res, ($idx - 1) * 2, 2));
+		my $low = hex(substr(${$ref}, ($idx - 1) * 2, 2));
 		
 		my $val = $high ^ $low;
 		$res .= sprintf("%02X", $val);
@@ -2991,7 +2976,7 @@ sub SIGNALduino_SomfyRTS_Recv()
 	return (-1, "not a valid Somfy RTS message!") if ($encData !~ m/A[0-9A-F]{13}/);
 	
 	## decode message
-	my $decData = SIGNALduino_SomfyRTS_Decrypt($name, $encData);
+	my $decData = SIGNALduino_SomfyRTS_Crypt("d", $name, $encData);
 	
 	## checksum
 	my $checkSum = SIGNALduino_SomfyRTS_Check($name, $decData);
@@ -3015,7 +3000,7 @@ sub SIGNALduino_SomfyRTS_Send($$)
 	my $checkSum = SIGNALduino_SomfyRTS_Check($name, $decData);
 	
 	## decode message
-	my $encData = SIGNALduino_SomfyRTS_Encrypt($name, (substr($decData, 0, 3) . $checkSum . substr($decData, 4)));
+	my $encData = SIGNALduino_SomfyRTS_Crypt("e", $name, (substr($decData, 0, 3) . $checkSum . substr($decData, 4)));
 	
 	## negate message
 	(my $negData = $encData) =~ tr/0123456789ABCDEF/FEDCBA9876543210/;
