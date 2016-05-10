@@ -781,15 +781,16 @@ my %ProtocolListSIGNALduino  = (
 		},
 	"43" => ## Somfy RTS
 		{
-			name 		=> 'Somfy RTS',
-			id 			=> '43',
-			clockrange  => [630,689],			# min , max
-			format		=> 'manchester', 
-			preamble 	=> 'Ys',
+			name 			=> 'Somfy RTS',
+			id 				=> '43',
+			clockrange  	=> [630,689],			# min , max
+			clockabs		=> 660,
+			format			=> 'manchester', 
+			preamble 		=> 'Ys',
 			#clientmodule	=> '', # not used now
 			modulematch 	=> '^YsA[0-9A-F]{13}',
-			length_min 	=> '56',
-			length_max 	=> '56',
+			length_min 		=> '56',
+			length_max 		=> '56',
 			method          => \&SIGNALduino_SomfyRTS_Recv # Call to process this message
 		},
 );
@@ -1116,6 +1117,7 @@ SIGNALduino_Set($@)
 	} elsif ($protocol == 43) {
 	## Somfy RTS
 		my ($ret, $res) = SIGNALduino_SomfyRTS_Send($name, $data);
+		$clock = $ProtocolListSIGNALduino{$protocol}{clockabs} if (defined($ProtocolListSIGNALduino{$protocol}{clockabs}));
 		Log3 $name, 4, "$name: sendmsg Somfy RTS data: $res, clock: $clock";
 	}
 	
@@ -2975,7 +2977,7 @@ sub SIGNALduino_SomfyRTS_Check($$)
 
 	$checkSum &= hex("0x0F");
 	
-	return $checkSum;	
+	return sprintf("%X", $checkSum);	
 }
 
 sub SIGNALduino_SomfyRTS_Recv()
@@ -2993,9 +2995,9 @@ sub SIGNALduino_SomfyRTS_Recv()
 	
 	## checksum
 	my $checkSum = SIGNALduino_SomfyRTS_Check($name, $decData);
-	return (-1, "not a valid Somfy RTS message (checksum error)!") if ($checkSum != hex( substr($decData, 3, 1)));
+	return (-1, "not a valid Somfy RTS message (checksum error)!") if ($checkSum != substr($decData, 3, 1));
 
-	#Log3 $name, 4, "$name: Somfy RTS protocol \nraw: " . SIGNALduino_b2h($bitData) . "\nenc: $encData\ndec: $decData\ncheck: " . sprintf("%X", $checkSum & hex("0x0F")) . "\n";
+	#Log3 $name, 4, "$name: Somfy RTS protocol \nraw: " . SIGNALduino_b2h($bitData) . "\nenc: $encData\ndec: $decData\ncheck: $checkSum\n";
 	return (1, "Ys" . $decData);
 }
 
@@ -3013,12 +3015,12 @@ sub SIGNALduino_SomfyRTS_Send($$)
 	my $checkSum = SIGNALduino_SomfyRTS_Check($name, $decData);
 	
 	## decode message
-	my $encData = SIGNALduino_SomfyRTS_Encrypt($name, (substr($decData, 0, 3) . sprintf("%0X", $checkSum) . substr($decData, 4)));
+	my $encData = SIGNALduino_SomfyRTS_Encrypt($name, (substr($decData, 0, 3) . $checkSum . substr($decData, 4)));
 	
 	## negate message
 	(my $negData = $encData) =~ tr/0123456789ABCDEF/FEDCBA9876543210/;
 	
-	#Log3 $name, 4, "$name: Somfy RTS protocol \ndec: $decData\nenc: $encData\nraw: $negData\ncheck: " . sprintf("%X", $checkSum & hex("0x0F")) . "\n";
+	#Log3 $name, 4, "$name: Somfy RTS protocol \ndec: $decData\nenc: $encData\nraw: $negData\ncheck: $checkSum\n";
 	return (1, $negData);
 }
 
