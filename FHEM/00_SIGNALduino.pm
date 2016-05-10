@@ -2934,7 +2934,7 @@ sub SIGNALduino_SomfyRTS()
 	
 	## decode message
 	my $decData = substr($encData, 0, 2);
-	for (my $idx=0; $idx < 7; $idx++)
+	for (my $idx=1; $idx < 7; $idx++)
 	{
 		my $high = hex(substr($encData, $idx * 2, 2));
 		my $low = hex(substr($encData, ($idx - 1) * 2, 2));
