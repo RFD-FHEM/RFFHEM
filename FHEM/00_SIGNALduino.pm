@@ -360,7 +360,7 @@ my %ProtocolListSIGNALduino  = (
 			one				=> [2,-1],
 			zero			=> [1,-3],
 			start           => [17,-5],
-			clockabs		=> 280,
+			clockabs		=> 300,
 			format 			=> 'twostate',	  		
 			preamble		=> 'P16#',				# prepend to converted message	
 			#clientmodule    => '',   				# not used now
@@ -1682,20 +1682,13 @@ sub SIGNALduino_inTol($$$)
 # Will return -1 if pattern is not found or a string, containing the indexes which are in tolerance and have the smallest gap to what we searched
 # =cut
 
-01
-12
-23
-32
-24
-42
-23
 
 # 01232323242423       while ($message =~ /$pstr/g) { $count++ }
 
 
 sub SIGNALduino_PatternExists
 {
-	my ($hash,$search,$patternList) = @_;
+	my ($hash,$search,$patternList,$data) = @_;
 	#my %patternList=$arg3;
 	#Debug "plist: ".Dumper($patternList) if($debug); 
 	#Debug "searchlist: ".Dumper($search) if($debug);
@@ -1703,9 +1696,12 @@ sub SIGNALduino_PatternExists
 	my $searchpattern;
 	my $valid=1;  
 	my @pstr;
-	my $debug = AttrVal($hash->{NAME},"debug",0);
+	my $debug =1;#AttrVal($hash->{NAME},"debug",0);
 	
 	my $i=0;
+	
+	my $maxcol=0;
+	
 	foreach $searchpattern (@{$search}) # z.B. [1, -4] 
 	{
 		#my $patt_id;
@@ -1713,7 +1709,8 @@ sub SIGNALduino_PatternExists
 		#my $tol=abs(abs($searchpattern)>=2 ?$searchpattern*0.3:$searchpattern*1.5);
 		my $tol=abs(abs($searchpattern)>3 ? abs($searchpattern)>16 ? $searchpattern*0.17 : $searchpattern*0.3 : 1);  #tol is minimum 1 or higer, depending on our searched pulselengh
 		
-		Debug "tol: () lookik for ($searchpattern +- $tol)" if($debug);
+
+		Debug "tol: looking for ($searchpattern +- $tol)" if($debug);		
 		
 		my %pattern_gap ; #= {};
 		# Find and store the gap of every pattern, which is in tolerance
@@ -1726,25 +1723,27 @@ sub SIGNALduino_PatternExists
 			
 			my $idxstr="";
 			my $r=0;
-			while (my ($item) = shift(@closestidx)) 
+			
+			while (my ($item) = splice(@closestidx, 0, 1)) 
 			{
-				@pstr[$i][$r]=$item;
+				$pstr[$i][$r]=$item; 
 				$r++;
 				Debug "closest pattern has index: $item" if($debug);
 			}
-			# 1                      23 
+			# 1                     23 
+			# => Umwandeln zu 12 und 13          
+
 			# 23                    1 
 			# => 12 oder 13          =>  21 oder 31
 			$valid=1;
 		} else {
 			# search is not found, return
-			$valid=0;
+			return -1;
 			last;	
 		}
 		$i++;
 		#return ($valid ? $pstr : -1);  # return $pstr if $valid or -1
 
-	
 		
 		#foreach $patt_id (keys %$patternList) {
 			#Debug "$patt_id. chk ->intol $patternList->{$patt_id} $searchpattern $tol"; 
@@ -1759,9 +1758,21 @@ sub SIGNALduino_PatternExists
 		#}
 		#last if (!$valid);  ## Exit loop if a complete iteration has not found anything
 	}
-
+	Debug Dumper(@pstr) if($debug);
+	my @results = ('');
 	
-	return ($valid ? @pstr : -1);  # return @pstr if $valid or -1
+	foreach my $subarray (@pstr)
+	{
+	    @results = map {my $res = $_; map $res.$_, @$subarray } @results;
+	}
+			
+	foreach my $search (@results)
+	{
+		return $search if (index( $data, $search) >= 0);
+	}
+	return -1;
+	
+	#return ($valid ? @results : -1);  # return @pstr if $valid or -1
 }
 
 #SIGNALduino_MatchSignalPattern{$hash,@array, %hash, @array, $scalar}; not used >v3.1.3
@@ -2006,7 +2017,7 @@ SIGNALduino_Parse_MS($$$$%)
 			my $pstr;
 			my %patternLookupHash=();
 
-			$valid = $valid && ($pstr=SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{sync}},\%patternList)) >=0;
+			$valid = $valid && ($pstr=SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{sync}},\%patternList,\$rawData)) >=0;
 			Debug "Found matched sync with indexes: ($pstr)" if ($debug && $valid);
 			$patternLookupHash{$pstr}="" if ($valid); ## Append Sync to our lookuptable
 			my $syncstr=$pstr; # Store for later start search
@@ -2015,14 +2026,14 @@ SIGNALduino_Parse_MS($$$$%)
 
 			next if (!$valid) ;
 
-			$valid = $valid && ($pstr=SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}},\%patternList)) >=0;
+			$valid = $valid && ($pstr=SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}},\%patternList,\$rawData)) >=0;
 			Debug "Found matched one with indexes: ($pstr)" if ($debug && $valid);
 			$patternLookupHash{$pstr}="1" if ($valid); ## Append Sync to our lookuptable
 			#Debug "added $pstr " if ($debug && $valid);
 			Debug "one pattern not found" if ($debug && !$valid);
 
 
-			$valid = $valid && ($pstr=SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{zero}},\%patternList)) >=0;
+			$valid = $valid && ($pstr=SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{zero}},\%patternList,\$rawData)) >=0;
 			Debug "Found matched zero with indexes: ($pstr)" if ($debug && $valid);
 			$patternLookupHash{$pstr}="0" if ($valid); ## Append Sync to our lookuptable
 			Debug "zero pattern not found" if ($debug && !$valid);
@@ -2237,7 +2248,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 
 			#Debug "phash:".Dumper(%patternLookupHash);
 			my $pstr="";
-			$valid = $valid && ($pstr=SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}},\%patternList)) >=0;
+			$valid = $valid && ($pstr=SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}},\%patternList,\$rawData)) >=0;
 			Debug "Found matched one" if ($debug && $valid);
 	
 
@@ -2245,14 +2256,14 @@ sub SIGNALduino_Parse_MU($$$$@)
 			$patternLookupHash{$pstr}="1" if ($valid); ## Append one to our lookuptable
 			Debug "added $pstr " if ($debug && $valid);
 
-			$valid = $valid && ($pstr=SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{zero}},\%patternList)) >=0;
+			$valid = $valid && ($pstr=SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{zero}},\%patternList,\$rawData)) >=0;
 			Debug "Found matched zero" if ($debug && $valid);
 			$patternLookupHash{$pstr}="0" if ($valid); ## Append zero to our lookuptable
 			Debug "added $pstr " if ($debug && $valid);
 
 			if (defined($ProtocolListSIGNALduino{$id}{float}))
 			{
-				$valid = $valid && ($pstr=SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{float}},\%patternList)) >=0;
+				$valid = $valid && ($pstr=SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{float}},\%patternList,\$rawData)) >=0;
 				Debug "Found matched float" if ($debug && $valid);
 				$patternLookupHash{$pstr}="F" if ($valid); ## Append float to our lookuptable
 				Debug "added $pstr " if ($debug && $valid);
