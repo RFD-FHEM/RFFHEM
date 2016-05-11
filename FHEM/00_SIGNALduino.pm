@@ -1696,7 +1696,7 @@ sub SIGNALduino_PatternExists
 	my $searchpattern;
 	my $valid=1;  
 	my @pstr;
-	my $debug =1;#AttrVal($hash->{NAME},"debug",0);
+	my $debug = AttrVal($hash->{NAME},"debug",0);
 	
 	my $i=0;
 	
@@ -1730,14 +1730,9 @@ sub SIGNALduino_PatternExists
 				$r++;
 				Debug "closest pattern has index: $item" if($debug);
 			}
-			# 1                     23 
-			# => Umwandeln zu 12 und 13          
-
-			# 23                    1 
-			# => 12 oder 13          =>  21 oder 31
 			$valid=1;
 		} else {
-			# search is not found, return
+			# search is not found, return -1
 			return -1;
 			last;	
 		}
@@ -1758,7 +1753,6 @@ sub SIGNALduino_PatternExists
 		#}
 		#last if (!$valid);  ## Exit loop if a complete iteration has not found anything
 	}
-	Debug Dumper(@pstr) if($debug);
 	my @results = ('');
 	
 	foreach my $subarray (@pstr)
@@ -1768,8 +1762,10 @@ sub SIGNALduino_PatternExists
 			
 	foreach my $search (@results)
 	{
-		return $search if (index( $data, $search) >= 0);
+		
+		return $search if (index( ${$data}, $search) >= 0);
 	}
+	
 	return -1;
 	
 	#return ($valid ? @results : -1);  # return @pstr if $valid or -1
@@ -2286,12 +2282,12 @@ sub SIGNALduino_Parse_MU($$$$@)
 			my @msgStartLst;
 			my $startStr="";
 			my $start_regex;
-			my $oneStr=SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}},\%patternList);
-			my $zeroStr=SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{zero}},\%patternList);
+			my $oneStr=SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}},\%patternList,\$rawData);
+			my $zeroStr=SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{zero}},\%patternList,\$rawData);
 
 			if (@msgStartLst = SIGNALduino_getProtoProp($id,"start"))
 			{
-				$startStr=SIGNALduino_PatternExists($hash,@msgStartLst,\%patternList);
+				$startStr=SIGNALduino_PatternExists($hash,@msgStartLst,\%patternList,\$rawData);
 			} 
 			$start_regex="$startStr($oneStr|$zeroStr)";
 			$rawData =~ /$start_regex/;
