@@ -76,7 +76,8 @@ my $clientsSIGNALduino = ":IT:"
 						."SD_WS:"
 						."RFXX10REC:"
 						."Dooya:"
-						."SOMFY"
+						."SOMFY:"
+						."SD_UT:"	## BELL 201.2 TXA
 						."SIGNALduino_un:"
 						; 
 
@@ -95,6 +96,7 @@ my %matchListSIGNALduino = (
      "13:RFXX10REC" 			=> '^(20|29)[A-Fa-f0-9]+',
      "14:Dooya"				=> '^P16#[A-Fa-f0-9]+',
      "15:SOMFY"				=> '^YsA[0-9A-F]+',
+     "16:SD_UT"            		=> '^u30#.*',	## BELL 201.2 TXA
      "X:SIGNALduino_un"			=> '^[uP]\d+#.*',
 );
 
@@ -588,7 +590,7 @@ my %ProtocolListSIGNALduino  = (
 			format 			=> 'twostate',	  		# there is a pause puls between words
 			preamble		=> 'u30#',				# prepend to converted message	
 			#clientmodule    => '',   				# not used now
-			#modulematch     => '',  				# not used now
+			modulematch     => '^u30',  				# not used now
 			length_min      => '12',
 			length_max      => '12',				# message has only 10 bit but is paddet to 12
 		},
