@@ -589,8 +589,8 @@ my %ProtocolListSIGNALduino  = (
 			clockabs		=> 300,                 # ca 300 us
 			format 			=> 'twostate',	  		# there is a pause puls between words
 			preamble		=> 'u30#',				# prepend to converted message	
-			#clientmodule    => '',   				# not used now
-			modulematch     => '^u30',  				# not used now
+			clientmodule    => 'SD_UT',   			# not used now
+			modulematch     => '^u30',  			# not used now
 			length_min      => '12',
 			length_max      => '12',				# message has only 10 bit but is paddet to 12
 		},
