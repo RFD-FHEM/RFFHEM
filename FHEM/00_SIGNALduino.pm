@@ -2983,7 +2983,7 @@ sub SIGNALduino_SomfyRTS_Recv()
 	return (-1, "not a valid Somfy RTS message (checksum error)!") if ($checkSum != substr($decData, 3, 1));
 
 	#Log3 $name, 4, "$name: Somfy RTS protocol \nraw: " . SIGNALduino_b2h($bitData) . "\nenc: $encData\ndec: $decData\ncheck: $checkSum\n";
-	return (1, "Ys" . $decData);
+	return (1, $decData);
 }
 
 sub SIGNALduino_SomfyRTS_Send($$)
