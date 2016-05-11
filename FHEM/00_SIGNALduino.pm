@@ -786,7 +786,6 @@ my %ProtocolListSIGNALduino  = (
 			name 			=> 'Somfy RTS',
 			id 				=> '43',
 			clockrange  	=> [630,689],			# min , max
-			clockabs		=> 660,
 			format			=> 'manchester', 
 			preamble 		=> 'Ys',
 			#clientmodule	=> '', # not used now
@@ -1119,7 +1118,6 @@ SIGNALduino_Set($@)
 	} elsif ($protocol == 43) {
 	## Somfy RTS
 		my ($ret, $res) = SIGNALduino_SomfyRTS_Send($name, $data);
-		$clock = $ProtocolListSIGNALduino{$protocol}{clockabs} if (defined($ProtocolListSIGNALduino{$protocol}{clockabs}));
 		Log3 $name, 4, "$name: sendmsg Somfy RTS data: $res, clock: $clock";
 	}
 	
