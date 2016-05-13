@@ -1114,10 +1114,10 @@ SIGNALduino_Set($@)
 		$clock += $_ for(@{$ProtocolListSIGNALduino{$protocol}{clockrange}});
 		$clock = round($clock/2,0);
 		if ($protocol == 43) {
-			$data =~ tr/0123456789ABCDEF/FEDCBA9876543210/;
+			#$data =~ tr/0123456789ABCDEF/FEDCBA9876543210/;
 		}
 		
-		$sendData = "SM;R=$repeats;C=$clock;D=$data"; #	SM;R=2;C=400;D=AFAFAF;
+		$sendData = "SM;R=$repeats;C=$clock;D=$data;"; #	SM;R=2;C=400;D=AFAFAF;
 		Log3 $name, 5, "$name: sendmsg Preparing manchester protocol=$protocol, repeats=$repeats, clock=$clock data=$data";
 	} else {
 		if ($protocol == 3) {
