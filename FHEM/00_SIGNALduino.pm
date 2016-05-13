@@ -1114,7 +1114,7 @@ SIGNALduino_Set($@)
 		$clock += $_ for(@{$ProtocolListSIGNALduino{$protocol}{clockrange}});
 		$clock = round($clock/2,0);
 		if ($protocol == 43) {
-			$data =~ tr/0123456789ABCDEF/FEDBCA9876543210/;
+			$data =~ tr/0123456789ABCDEF/FEDCBA9876543210/;
 		}
 		
 		$sendData = "SM;R=$repeats;C=$clock;D=$data"; #	SM;R=2;C=400;D=AFAFAF;
@@ -1123,13 +1123,12 @@ SIGNALduino_Set($@)
 		if ($protocol == 3) {
 			$data = SIGNALduino_ITV1_tristateToBit($data);
 			Log3 $name, 5, "$name: sendmsg IT V1 convertet tristate to bits=$data";
-			
-			if (!defined($clock)) {
-				$hash->{ITClock} = 250 if (!defined($hash->{ITClock}));
-				$clock=$ProtocolListSIGNALduino{$protocol}{clockabs} > 1 ?$ProtocolListSIGNALduino{$protocol}{clockabs}:$hash->{ITClock};
-			}
-			
 		}
+		if (!defined($clock)) {
+			$hash->{ITClock} = 250 if (!defined($hash->{ITClock}));   # Todo: Klären wo ITClock verwendet wird und ob wir diesen Teil nicht auf Protokoll 3,4 und 17 minimieren
+			$clock=$ProtocolListSIGNALduino{$protocol}{clockabs} > 1 ?$ProtocolListSIGNALduino{$protocol}{clockabs}:$hash->{ITClock};
+		}
+
 		Log3 $name, 5, "$name: sendmsg Preparing rawsend command for protocol=$protocol, repeats=$repeats, clock=$clock bits=$data";
 		
 		foreach my $item (qw(sync start one zero))
