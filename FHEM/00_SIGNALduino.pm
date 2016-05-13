@@ -785,14 +785,14 @@ my %ProtocolListSIGNALduino  = (
 		{
 			name 			=> 'Somfy RTS',
 			id 				=> '43',
-			clockrange  	=> [630,689],			# min , max
+			clockrange  	=> [630,690],			# min , max
 			format			=> 'manchester', 
 			preamble 		=> 'Ys',
 			#clientmodule	=> '', # not used now
 			modulematch 	=> '^YsA[0-9A-F]{13}',
 			length_min 		=> '56',
 			length_max 		=> '56',
-			method          => \&SIGNALduino_SomfyRTS_Recv # Call to process this message
+			method          => \&SIGNALduino_SomfyRTS # Call to process this message
 		},
 );
 
@@ -1105,29 +1105,33 @@ SIGNALduino_Set($@)
 	my %patternHash;
 	my $pattern="";
 	my $cnt=0;
-	if (!defined($clock)) {
-		$hash->{ITClock} = 250 if (!defined($hash->{ITClock}));
-		$clock=$ProtocolListSIGNALduino{$protocol}{clockabs} > 1 ?$ProtocolListSIGNALduino{$protocol}{clockabs}:$hash->{ITClock};
-	}
-	
-	Log3 $name, 5, "$name: sendmsg Preparing rawsend command for protocol=$protocol, repeats=$repeats, clock=$clock bits=$data";
-	
-	if ($protocol == 3) {
-		$data = SIGNALduino_ITV1_tristateToBit($data);
-		Log3 $name, 5, "$name: sendmsg IT V1 convertet tristate to bits=$data";
-	} elsif ($protocol == 43) {
-	## Somfy RTS
-		my ($ret, $res) = SIGNALduino_SomfyRTS_Send($name, $data);
-		Log3 $name, 4, "$name: sendmsg Somfy RTS data: $res, clock: $clock";
-	}
-	
+
 	my $sendData;
-	if  ($ProtocolListSIGNALduino{$protocol}{format} == 'manchester')
+	if  ($ProtocolListSIGNALduino{$protocol}{format} eq 'manchester')
 	{
-		$clock = (map { $clock += $_ } @{$ProtocolListSIGNALduino{$protocol}{clockrange}}) /  2;
+		#$clock = (map { $clock += $_ } @{$ProtocolListSIGNALduino{$protocol}{clockrange}}) /  2 if (!defined($clock));
+		$clock += $_ for(@{$ProtocolListSIGNALduino{$protocol}{clockrange}});
+		$clock = round($clock/2,0);
+
+		if ($protocol == 43) {
+			$data =~ tr/0123456789ABCDEF/FEDBCA9876543210/;
+		}
+
 		$sendData = "SM;R=$repeats;C=$clock;D=$data"; #	SM;R=2;C=400;D=AFAFAF;
-		Log3 $name, 5, "$name: sendmsg prepared manchester signal with clock=$clock";
+		Log3 $name, 5, "$name: sendmsg Preparing manchester protocol=$protocol, repeats=$repeats, clock=$clock data=$data";
 	} else {
+		if (!defined($clock)) {
+			$hash->{ITClock} = 250 if (!defined($hash->{ITClock}));
+			$clock=$ProtocolListSIGNALduino{$protocol}{clockabs} > 1 ?$ProtocolListSIGNALduino{$protocol}{clockabs}:$hash->{ITClock};
+		}
+
+		Log3 $name, 5, "$name: sendmsg Preparing rawsend command for protocol=$protocol, repeats=$repeats, clock=$clock bits=$data";
+
+		if ($protocol == 3) {
+			$data = SIGNALduino_ITV1_tristateToBit($data);
+			Log3 $name, 5, "$name: sendmsg IT V1 convertet tristate to bits=$data";
+		}
+
 		foreach my $item (qw(sync start one zero))
 		{
 		    #print ("item= $item \n");
@@ -1890,11 +1894,11 @@ sub SIGNALduino_Split_Message($$)
 # Function which dispatches a message if needed.
 sub SIGNALduno_Dispatch($$$)
 {
-	my ($hash, $rmsg,$dmsg) = @_;
+	my ($hash, $rmsg, $dmsg) = @_;
 	my $name = $hash->{NAME};
 	
 	Log3 $name, 5, "$name: converted Data to ($dmsg)";
-	
+
 	#Dispatch only if $dmsg is different from last $dmsg, or if 2 seconds are between transmits
     if ( ($hash->{DMSG} ne $dmsg) || ($hash->{TIME}+1 < time()) ) { 
 		$hash->{MSGCNT}++;
@@ -2928,85 +2932,15 @@ sub	SIGNALduino_Hideki()
 	return (-1,"");
 }
 
-sub SIGNALduino_SomfyRTS_Crypt($$$)
-{
-	my ($operation, $name, $data) = @_;
-	
-	my $res = substr($data, 0, 2);
-	my $ref = ($operation eq "e" ? \$res : \$data);
-	
-	for (my $idx=1; $idx < 7; $idx++)
-	{
-		my $high = hex(substr($data, $idx * 2, 2));
-		my $low = hex(substr(${$ref}, ($idx - 1) * 2, 2));
-		
-		my $val = $high ^ $low;
-		$res .= sprintf("%02X", $val);
-	}
-
-	return $res;	
-}
-
-sub SIGNALduino_SomfyRTS_Check($$)
-{
-	my ($name, $data) = @_;
-	
-	my $checkSum = 0;
-	for (my $idx=0; $idx < 7; $idx++)
-	{
-		my $val = hex(substr($data, $idx * 2, 2));
-		$val &= 0xF0 if ($idx == 1);
-		$checkSum = $checkSum ^ $val ^ ($val >> 4);
-		##Log3 $name, 4, "$name: Somfy RTS check: " . sprintf("%02X, %02X", $val, $checkSum); 
-	}
-
-	$checkSum &= hex("0x0F");
-	
-	return sprintf("%X", $checkSum);	
-}
-
-sub SIGNALduino_SomfyRTS_Recv()
+sub SIGNALduino_SomfyRTS()
 {
 	my ($name, $bitData, $rawData) = @_;
 	
     (my $negBits = $bitData) =~ tr/10/01/;   # Todo: eventuell auf pack umstellen
 	my $encData = SIGNALduino_b2h($negBits);
 
-	## no Somfy RTS message
-	return (-1, "not a valid Somfy RTS message!") if ($encData !~ m/A[0-9A-F]{13}/);
-	
-	## decode message
-	my $decData = SIGNALduino_SomfyRTS_Crypt("d", $name, $encData);
-	
-	## checksum
-	my $checkSum = SIGNALduino_SomfyRTS_Check($name, $decData);
-	return (-1, "not a valid Somfy RTS message (checksum error)!") if ($checkSum != substr($decData, 3, 1));
-
-	#Log3 $name, 4, "$name: Somfy RTS protocol \nraw: " . SIGNALduino_b2h($bitData) . "\nenc: $encData\ndec: $decData\ncheck: $checkSum\n";
-	return (1, $decData);
-}
-
-sub SIGNALduino_SomfyRTS_Send($$)
-{
-	my ($name, $data) = @_;
-	
-	## no Somfy RTS message
-	return (-1, "not a valid Somfy RTS message!") if ($data !~ m/A[0-9A-F]{13}/);
-	
-	## swap adress
-	my $decData = substr($data, 0, 8) . substr($data, 12, 2) . substr($data, 10, 2) . substr($data, 8, 2);
-	
-	## checksum
-	my $checkSum = SIGNALduino_SomfyRTS_Check($name, $decData);
-	
-	## decode message
-	my $encData = SIGNALduino_SomfyRTS_Crypt("e", $name, (substr($decData, 0, 3) . $checkSum . substr($decData, 4)));
-	
-	## negate message
-	(my $negData = $encData) =~ tr/0123456789ABCDEF/FEDCBA9876543210/;
-	
-	#Log3 $name, 4, "$name: Somfy RTS protocol \ndec: $decData\nenc: $encData\nraw: $negData\ncheck: $checkSum\n";
-	return (1, $negData);
+	#Log3 $name, 4, "$name: Somfy RTS protocol enc: $encData";
+	return (1, $encData);
 }
 
 # - - - - - - - - - - - -
