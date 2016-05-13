@@ -1114,7 +1114,7 @@ SIGNALduino_Set($@)
 		$clock = round($clock/2,0);
 
 		if ($protocol == 43) {
-			$data =~ tr/0123456789ABCDEF/FEDBCA9876543210/;
+			$data =~ tr/0123456789ABCDEF/FEDCBA9876543210/;
 		}
 
 		$sendData = "SM;R=$repeats;C=$clock;D=$data"; #	SM;R=2;C=400;D=AFAFAF;
