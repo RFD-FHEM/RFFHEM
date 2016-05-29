@@ -275,9 +275,8 @@ my %ProtocolListSIGNALduino  = (
 			modulematch     => '^(3[8-9A-F]|[4-6][0-9A-F]|7[0-8]).*',
 			length_min      => '64',
 			length_max      => '220',
-			method          => \&SIGNALduino_OSV2 # Call to process this message
-
-
+			method          => \&SIGNALduino_OSV2, # Call to process this message
+			polarity        => 'invert',			
 		}, 	
 	"11"    => 			## Arduino Sensor
 			{
@@ -2443,9 +2442,11 @@ SIGNALduino_Parse_MC($$$$@)
 	
 	my $hlen = length($rawData);
 	my $blen = $hlen * 4;
-	$bitData= unpack("B$blen", pack("H$hlen", $rawData)); 
-	Debug "$name: extracted data $bitData (bin)\n" if ($debug); ## Convert Message from hex to bits
 	my $id;
+	
+	my $rawDataInverted;
+	($rawDataInverted = $rawData) =~ tr/0123456789ABCDEF/FEDCBA9876543210/;   # Some Manchester Data is inverted
+	
 	foreach $id (@{$hash->{mcIdList}}) {
 
 
@@ -2454,6 +2455,16 @@ SIGNALduino_Parse_MC($$$$@)
 			Debug "clock and min length matched"  if ($debug);
 
 			Log3 $name, 4, "$name: Found manchester Protocol id $id clock $clock -> $ProtocolListSIGNALduino{$id}{name}";
+			
+			if (exists($ProtocolListSIGNALduino{$id}{polarity}) && ($ProtocolListSIGNALduino{$id}{polarity} eq 'invert'))
+			{
+		   		$bitData= unpack("B$blen", pack("H$hlen", $rawDataInverted)); 
+			} else {
+		   		$bitData= unpack("B$blen", pack("H$hlen", $rawData)); 
+			}
+			Debug "$name: extracted data $bitData (bin)\n" if ($debug); ## Convert Message from hex to bits
+		   	Log3 $name, 5, "$name: extracted data $bitData (bin)\n";
+		   	
 		   	my $method = $ProtocolListSIGNALduino{$id}{method};
 		    if (!exists &$method)
 			{
@@ -2767,6 +2778,7 @@ sub SIGNALduino_OSV2()
 	my $message_end;
 	my $message_length;
 	
+	#$bitData =~ tr/10/01/;
 	if ($bitData =~ m/^.?(10){12,16}.?10011001/) 
 	{  # Valid OSV2 detected!	
 		$preamble_pos=index($bitData,"10011001",24);
