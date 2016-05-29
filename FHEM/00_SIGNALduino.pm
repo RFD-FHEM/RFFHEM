@@ -785,14 +785,16 @@ my %ProtocolListSIGNALduino  = (
 		{
 			name 			=> 'Somfy RTS',
 			id 				=> '43',
-			clockrange  	=> [630,690],			# min , max
+			clockrange  	=> [610,670],			# min , max
 			format			=> 'manchester', 
 			preamble 		=> 'Ys',
 			#clientmodule	=> '', # not used now
 			modulematch 	=> '^YsA[0-9A-F]{13}',
 			length_min 		=> '56',
 			length_max 		=> '56',
-			method          => \&SIGNALduino_SomfyRTS # Call to process this message
+			method          => \&SIGNALduino_SomfyRTS, # Call to process this message
+			msgIntro		=> 'SR;P0=-2560;P1=2560;P2=4960;P3=-640;D=1010101010101023;',
+			msgOutro		=> 'SR;P0=-30415;D=0;',
 		},
 );
 
@@ -1116,8 +1118,20 @@ SIGNALduino_Set($@)
 		if ($protocol == 43) {
 			#$data =~ tr/0123456789ABCDEF/FEDCBA9876543210/;
 		}
+		
+		my $intro = "";
+		my $outro = "";
+		
+		$intro = $ProtocolListSIGNALduino{$protocol}{msgIntro} if ($ProtocolListSIGNALduino{$protocol}{msgIntro});
+		$outro = ";" . $ProtocolListSIGNALduino{$protocol}{msgOutro} if ($ProtocolListSIGNALduino{$protocol}{msgOutro});
 
-		$sendData = "SM;R=$repeats;C=$clock;D=$data"; #	SM;R=2;C=400;D=AFAFAF;
+		if ($intro ne "" || $outro ne "")
+		{
+			$intro = "SC;R=$repeats;" . $intro;
+			$repeats = 0;
+		}
+
+		$sendData = $intro . "SM;" . ($repeats > 0 ? "R=$repeats;" : "") . "C=$clock;D=$data" . $outro; #	SM;R=2;C=400;D=AFAFAF;
 		Log3 $name, 5, "$name: sendmsg Preparing manchester protocol=$protocol, repeats=$repeats, clock=$clock data=$data";
 	} else {
 		if (!defined($clock)) {
