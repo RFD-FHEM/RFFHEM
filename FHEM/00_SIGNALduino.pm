@@ -76,7 +76,8 @@ my $clientsSIGNALduino = ":IT:"
 						."SD_WS:"
 						."RFXX10REC:"
 						."Dooya:"
-						."SOMFY"
+						."SOMFY:"
+						."SD_UT:"	## BELL 201.2 TXA
 						."SIGNALduino_un:"
 						; 
 
@@ -95,6 +96,7 @@ my %matchListSIGNALduino = (
      "13:RFXX10REC" 			=> '^(20|29)[A-Fa-f0-9]+',
      "14:Dooya"				=> '^P16#[A-Fa-f0-9]+',
      "15:SOMFY"				=> '^YsA[0-9A-F]+',
+     "16:SD_UT"            		=> '^u30#.*',	## BELL 201.2 TXA
      "X:SIGNALduino_un"			=> '^[uP]\d+#.*',
 );
 
@@ -275,9 +277,8 @@ my %ProtocolListSIGNALduino  = (
 			modulematch     => '^(3[8-9A-F]|[4-6][0-9A-F]|7[0-8]).*',
 			length_min      => '64',
 			length_max      => '220',
-			method          => \&SIGNALduino_OSV2 # Call to process this message
-
-
+			method          => \&SIGNALduino_OSV2, # Call to process this message
+			polarity        => 'invert',			
 		}, 	
 	"11"    => 			## Arduino Sensor
 			{
@@ -587,8 +588,8 @@ my %ProtocolListSIGNALduino  = (
 			clockabs		=> 300,                 # ca 300 us
 			format 			=> 'twostate',	  		# there is a pause puls between words
 			preamble		=> 'u30#',				# prepend to converted message	
-			#clientmodule    => '',   				# not used now
-			#modulematch     => '',  				# not used now
+			clientmodule    => 'SD_UT',   			# not used now
+			modulematch     => '^u30',  			# not used now
 			length_min      => '12',
 			length_max      => '12',				# message has only 10 bit but is paddet to 12
 		},
@@ -781,16 +782,18 @@ my %ProtocolListSIGNALduino  = (
 		},
 	"43" => ## Somfy RTS
 		{
-			name 		=> 'Somfy RTS',
-			id 			=> '43',
-			clockrange  => [630,689],			# min , max
-			format		=> 'manchester', 
-			preamble 	=> 'Ys',
+			name 			=> 'Somfy RTS',
+			id 				=> '43',
+			clockrange  	=> [610,670],			# min , max
+			format			=> 'manchester', 
+			preamble 		=> 'Ys',
 			#clientmodule	=> '', # not used now
 			modulematch 	=> '^YsA[0-9A-F]{13}',
-			length_min 	=> '56',
-			length_max 	=> '56',
-			method          => \&SIGNALduino_SomfyRTS # Call to process this message
+			length_min 		=> '56',
+			length_max 		=> '56',
+			method          => \&SIGNALduino_SomfyRTS, # Call to process this message
+			msgIntro		=> 'SR;P0=-2560;P1=2560;P2=4960;P3=-640;D=1010101010101023;',
+			msgOutro		=> 'SR;P0=-30415;D=0;',
 		},
 );
 
@@ -1117,7 +1120,19 @@ SIGNALduino_Set($@)
 			#$data =~ tr/0123456789ABCDEF/FEDCBA9876543210/;
 		}
 		
-		$sendData = "SM;R=$repeats;C=$clock;D=$data;"; #	SM;R=2;C=400;D=AFAFAF;
+		my $intro = "";
+		my $outro = "";
+		
+		$intro = $ProtocolListSIGNALduino{$protocol}{msgIntro} if ($ProtocolListSIGNALduino{$protocol}{msgIntro});
+		$outro = ";" . $ProtocolListSIGNALduino{$protocol}{msgOutro} if ($ProtocolListSIGNALduino{$protocol}{msgOutro});
+
+		if ($intro ne "" || $outro ne "")
+		{
+			$intro = "SC;R=$repeats;" . $intro;
+			$repeats = 0;
+		}
+
+		$sendData = $intro . "SM;" . ($repeats > 0 ? "R=$repeats;" : "") . "C=$clock;D=$data" . $outro; #	SM;R=2;C=400;D=AFAFAF;
 		Log3 $name, 5, "$name: sendmsg Preparing manchester protocol=$protocol, repeats=$repeats, clock=$clock data=$data";
 	} else {
 		if ($protocol == 3) {
@@ -1923,11 +1938,11 @@ sub SIGNALduino_Split_Message($$)
 # Function which dispatches a message if needed.
 sub SIGNALduno_Dispatch($$$)
 {
-	my ($hash, $rmsg,$dmsg) = @_;
+	my ($hash, $rmsg, $dmsg) = @_;
 	my $name = $hash->{NAME};
 	
 	Log3 $name, 5, "$name: converted Data to ($dmsg)";
-	
+
 	#Dispatch only if $dmsg is different from last $dmsg, or if 2 seconds are between transmits
     if ( ($hash->{DMSG} ne $dmsg) || ($hash->{TIME}+1 < time()) ) { 
 		$hash->{MSGCNT}++;
@@ -2443,9 +2458,11 @@ SIGNALduino_Parse_MC($$$$@)
 	
 	my $hlen = length($rawData);
 	my $blen = $hlen * 4;
-	$bitData= unpack("B$blen", pack("H$hlen", $rawData)); 
-	Debug "$name: extracted data $bitData (bin)\n" if ($debug); ## Convert Message from hex to bits
 	my $id;
+	
+	my $rawDataInverted;
+	($rawDataInverted = $rawData) =~ tr/0123456789ABCDEF/FEDCBA9876543210/;   # Some Manchester Data is inverted
+	
 	foreach $id (@{$hash->{mcIdList}}) {
 
 
@@ -2454,6 +2471,16 @@ SIGNALduino_Parse_MC($$$$@)
 			Debug "clock and min length matched"  if ($debug);
 
 			Log3 $name, 4, "$name: Found manchester Protocol id $id clock $clock -> $ProtocolListSIGNALduino{$id}{name}";
+			
+			if (exists($ProtocolListSIGNALduino{$id}{polarity}) && ($ProtocolListSIGNALduino{$id}{polarity} eq 'invert'))
+			{
+		   		$bitData= unpack("B$blen", pack("H$hlen", $rawDataInverted)); 
+			} else {
+		   		$bitData= unpack("B$blen", pack("H$hlen", $rawData)); 
+			}
+			Debug "$name: extracted data $bitData (bin)\n" if ($debug); ## Convert Message from hex to bits
+		   	Log3 $name, 5, "$name: extracted data $bitData (bin)\n";
+		   	
 		   	my $method = $ProtocolListSIGNALduino{$id}{method};
 		    if (!exists &$method)
 			{
@@ -2767,6 +2794,7 @@ sub SIGNALduino_OSV2()
 	my $message_end;
 	my $message_length;
 	
+	#$bitData =~ tr/10/01/;
 	if ($bitData =~ m/^.?(10){12,16}.?10011001/) 
 	{  # Valid OSV2 detected!	
 		$preamble_pos=index($bitData,"10011001",24);
@@ -2968,37 +2996,11 @@ sub SIGNALduino_SomfyRTS()
 {
 	my ($name, $bitData, $rawData) = @_;
 	
-    (my $negBits = $bitData) =~ tr/10/01/;   # Todo: eventuell auf pack umstellen
-	my $encData = SIGNALduino_b2h($negBits);
+    #(my $negBits = $bitData) =~ tr/10/01/;   # Todo: eventuell auf pack umstellen
+	my $encData = SIGNALduino_b2h($bitData);
 
-	## no Somfy RTS message
-	return (-1, "not a valid Somfy RTS message!") if ($encData !~ m/A[0-9A-F]{13}/);
-	
-	## decode message
-	my $decData = substr($encData, 0, 2);
-	for (my $idx=1; $idx < 7; $idx++)
-	{
-		my $high = hex(substr($encData, $idx * 2, 2));
-		my $low = hex(substr($encData, ($idx - 1) * 2, 2));
-		
-		my $val = $high ^ $low;
-		$decData .= sprintf("%02X", $val);
-	}
-	
-	## checksum
-	
-	my $checkSum = 0;
-	for (my $idx=0; $idx < 7; $idx++)
-	{
-		my $val = hex(substr($decData, $idx * 2, 2));
-		$val &= 0xF0 if ($idx == 1);
-		$checkSum = $checkSum ^ $val ^ ($val >> 4);
-		##Log3 $name, 4, "$name: Somfy RTS check: " . sprintf("%02X, %02X", $val, $checkSum); 
-	}
-	#return (-1, "not a valid Somfy RTS message (checksum error)!") if (($checkSum & 0x0F ) != hex( substr($decData, 3, 1)));
-
-	##Log3 $name, 4, "$name: Somfy RTS protocol \nraw: " . SIGNALduino_b2h($bitData) . "\nenc: $encData\ndec: $decData\ncheck: " . sprintf("%X", $checkSum & hex("0x0F")) . "\n";
-	return (1, $decData);
+	#Log3 $name, 4, "$name: Somfy RTS protocol enc: $encData";
+	return (1, $encData);
 }
 
 # - - - - - - - - - - - -
