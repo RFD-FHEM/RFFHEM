@@ -1,7 +1,7 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 104841  2016-05-11 22:45:00Z v3.2.1-dev $
+# $Id: 00_SIGNALduino.pm 104841  2016-06-03 22:45:00Z v3.2.1-devRts $
 #
-# v3.2.1-dev
+# v3.2.1-devRts (Development for Somfy RTS / changed manchester decoder)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
 # see http://www.fhemwiki.de/wiki/SIGNALDuino
 # It was modified also to provide support for raw message handling which can be send from the SIGNALduino
