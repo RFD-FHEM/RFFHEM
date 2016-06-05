@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 104841  2016-05-11 22:45:00Z v3.2.1-dev $
+# $Id: 00_SIGNALduino.pm 104841  2016-06-05 22:00:00Z v3.2.1-dev $
 #
 # v3.2.1-dev
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -791,6 +791,20 @@ my %ProtocolListSIGNALduino  = (
 			length_min 	=> '56',
 			length_max 	=> '56',
 			method          => \&SIGNALduino_SomfyRTS # Call to process this message
+		},
+	"44" => ## Bresser 7009995
+		{
+			name 		=> 'Bresser7009995',
+			id 			=> '44',
+			clockabs	=> 2000,		
+			zero 		=> [-1,1],
+			one			=> [-2,1],
+			#start 		=> [-28],
+			preamble 	=> 'u#44',
+			clientmodule	=> '', # not used now
+			#modulematch 	=> '',
+			length_min 	=> '64',
+			length_max 	=> '80',
 		},
 );
 
@@ -1771,7 +1785,8 @@ sub SIGNALduino_PatternExists
 			
 	foreach my $search (@results)
 	{
-		
+		Debug "looking for substr $search" if($debug);
+			
 		return $search if (index( ${$data}, $search) >= 0);
 	}
 	
