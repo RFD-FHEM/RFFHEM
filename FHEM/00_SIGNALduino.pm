@@ -1353,6 +1353,8 @@ SIGNALduino_DoInit($)
 		
 		SIGNALduino_Clear($hash);
 		
+		SIGNALduino_SimpleWrite($hash, "XQ"); # Disable receiver
+		
 		
 		# Try to get version from Arduino
 		while ($try++ < 3 && $ver !~ m/^V/) {
@@ -1404,7 +1406,8 @@ SIGNALduino_DoInit($)
 	#  }
 	#  $hash->{STATE} = "Initialized";
 	readingsSingleUpdate($hash, "state", "opened", 1);
-
+	SIGNALduino_SimpleWrite($hash, "XE"); # Enable receiver
+		
 	# Reset the counter
 	delete($hash->{XMIT_TIME});
 	delete($hash->{NR_CMD_LAST_H});
