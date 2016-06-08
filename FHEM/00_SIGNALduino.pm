@@ -806,6 +806,24 @@ my %ProtocolListSIGNALduino  = (
 			length_min 	=> '64',
 			length_max 	=> '80',
 		},
+    "45"    => 
+        {
+            name			=> 'revolt',	
+			id          	=> '45',
+			one				=> [3,-1],
+			zero			=> [1,-3],
+			#float			=> [-1,3],		# not full supported now later use
+			sync			=> [1,-24],
+			clockabs     	=> -1,	# -1=auto	
+			format 			=> 'twostate',	# not used now
+			preamble		=> 'i',			
+			clientmodule    => 'IT',   # not used now
+			modulematch     => '^i......', # not used now
+			length_min      => '24',
+			},
+
+   
+
 );
 
 
