@@ -974,7 +974,7 @@ sub
 SIGNALduino_Shutdown($)
 {
   my ($hash) = @_;
-  SIGNALduino_SimpleWrite($hash, "X00");  # Switch reception off, it may hang up the SIGNALduino
+  SIGNALduino_SimpleWrite($hash, "XQ");  # Switch reception off, it may hang up the SIGNALduino
   return undef;
 }
 
