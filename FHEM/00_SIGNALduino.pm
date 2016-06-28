@@ -1124,7 +1124,7 @@ SIGNALduino_Set($@)
 		my $outro = "";
 		
 		$intro = $ProtocolListSIGNALduino{$protocol}{msgIntro} if ($ProtocolListSIGNALduino{$protocol}{msgIntro});
-		$outro = ";" . $ProtocolListSIGNALduino{$protocol}{msgOutro} if ($ProtocolListSIGNALduino{$protocol}{msgOutro});
+		$outro = $ProtocolListSIGNALduino{$protocol}{msgOutro}.";" if ($ProtocolListSIGNALduino{$protocol}{msgOutro});
 
 		if ($intro ne "" || $outro ne "")
 		{
@@ -1132,7 +1132,7 @@ SIGNALduino_Set($@)
 			$repeats = 0;
 		}
 
-		$sendData = $intro . "SM;" . ($repeats > 0 ? "R=$repeats;" : "") . "C=$clock;D=$data" . $outro; #	SM;R=2;C=400;D=AFAFAF;
+		$sendData = $intro . "SM;" . ($repeats > 0 ? "R=$repeats;" : "") . "C=$clock;D=$data;" . $outro #	SM;R=2;C=400;D=AFAFAF;
 		Log3 $name, 5, "$name: sendmsg Preparing manchester protocol=$protocol, repeats=$repeats, clock=$clock data=$data";
 	} else {
 		if ($protocol == 3) {
