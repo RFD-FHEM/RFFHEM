@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 104841  2016-06-03 22:45:00Z v3.2.1-devRts $
+# $Id: 00_SIGNALduino.pm 104841  2016-06-28 21:45:00Z v3.2.1-devRts $
 #
 # v3.2.1-devRts (Development for Somfy RTS / changed manchester decoder)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -792,8 +792,8 @@ my %ProtocolListSIGNALduino  = (
 			length_min 		=> '56',
 			length_max 		=> '56',
 			method          => \&SIGNALduino_SomfyRTS, # Call to process this message
-			msgIntro		=> 'SR;P0=-2560;P1=2560;P2=4960;P3=-640;D=1010101010101023;',
-			msgOutro		=> 'SR;P0=-30415;D=0;',
+			msgIntro		=> 'SR;P0=-2560;P1=2560;P3=-640;D=10101010101010113;',
+			#msgOutro		=> 'SR;P0=-30415;D=0;',
 		},
 );
 
