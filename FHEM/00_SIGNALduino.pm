@@ -859,7 +859,9 @@ SIGNALduino_Initialize($)
 					  ." longids:0,1"
 					  ." minsecs"
 					  ." whitelist_IDs"
-                      ." $readingFnAttributes";
+					  ." WS09_WSModel:undef,WH1080,CTW600"
+					  ." WS09_CRCAUS:0,1" 
+		                      ." $readingFnAttributes";
 
   $hash->{ShutdownFn} = "SIGNALduino_Shutdown";
 
@@ -1157,7 +1159,7 @@ SIGNALduino_Set($@)
 			Log3 $name, 5, "$name: sendmsg IT V1 convertet tristate to bits=$data";
 		}
 		if (!defined($clock)) {
-			$hash->{ITClock} = 250 if (!defined($hash->{ITClock}));   # Todo: Klären wo ITClock verwendet wird und ob wir diesen Teil nicht auf Protokoll 3,4 und 17 minimieren
+			$hash->{ITClock} = 250 if (!defined($hash->{ITClock}));   # Todo: KlÃ¤ren wo ITClock verwendet wird und ob wir diesen Teil nicht auf Protokoll 3,4 und 17 minimieren
 			$clock=$ProtocolListSIGNALduino{$protocol}{clockabs} > 1 ?$ProtocolListSIGNALduino{$protocol}{clockabs}:$hash->{ITClock};
 		}
 
@@ -3313,8 +3315,17 @@ attr sduino longids 1
 # Will generate devices names like BTHR918N_f3.
 attr sduino longids BTHR918N
 </PRE>
-    </li><br>
-
+</li><br>
+</li><br>
+   <li>WS09_Model<br>
+   WS09_WSModel:undef -> check all, WH1080 -> support WH1080/WS0101 , CTW600 -> support CTW600 
+   </li>
+   </li><br>
+   <li>WS09_CRCAUS<br>
+   WS09_CRCAUS:0,1
+   WS09_CRCAUS = 0 is default -> check CRC Calculation for WH1080      
+   </li>
+    
 	<a name="SIGNALduinoget"></a>
 	<b>Get</b>
 	<ul>
