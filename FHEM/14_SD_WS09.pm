@@ -1,6 +1,6 @@
     ##############################################
     ##############################################
-    # $Id: 14_SD_WS09.pm 16014 2016-05-08 10:10:10Z pejonp $
+    # $Id: 14_SD_WS09.pm 16015 2016-07-02 10:10:10Z pejonp $
     # 
     # The purpose of this module is to support serval 
     # weather sensors like WS-0101  (Sender 868MHz ASK   Epmfänger RX868SH-DV elv)
@@ -88,6 +88,15 @@
       my $windDirectionText;
       
       
+      $model = AttrVal($iohash->{NAME},'WS09_WSModel',0);
+      if ($model eq "0"){
+      $model = "undef";
+      }
+      
+      my $crcwh1080 = AttrVal($iohash->{NAME},'WS09_CRCAUS',0);
+      Log3 $iohash, 3, "$name: SD_WS09_Parse CRC_AUS:$crcwh1080 Model=$model" ;
+      
+      
       Log3 $name, 4, "$name: SD_WS09_Parse HEX=$msg length: $hlen";
       my $syncpos= index($bitData,"11111110");  #7x1 1x0 preamble
       
@@ -100,7 +109,9 @@
     		}
         
          my $wh = substr($bitData,0,8);
-         if($wh == "11111111") {
+         #CRC-Check bei WH1080/WS0101 WS09_CRCAUS=0 und WS09_WSModel = undef oder Wh1080 
+         if(($crcwh1080 == '0') &&  ($model eq "undef" || $model eq "WH1080")) {
+             if($wh == "11111111") {
                 my $datacheck = pack( 'H*', substr($msg,5,length($msg)-5) );
                 my $crcmein = Digest::CRC->new(width => 8, poly => 0x31);
                 my $rr2 = $crcmein->add($datacheck)->hexdigest;
@@ -113,14 +124,15 @@
                 }
             }else{
                 $model = "CTW600";         
+            }
             };
                   
-         if( ($wh == "11111111") || ($model eq "WH1080")) {
+         if( ($wh == "11111111") || ($model ne "CTW600")) {
             $sensdata = substr($bitData,8);
             my $whid = substr($sensdata,0,4);
             if(  $whid == "1010" ){ # A 
            	  Log3 $iohash, 3, "$name: SD_WS09_Parse WH=$wh msg=$sensdata syncp=$syncpos length:".length($sensdata) ;
-              #$model = "WH1080";
+              $model = "WH1080";
               $id = SD_WS09_bin2dec(substr($sensdata,4,8));
               $bat = (SD_WS09_bin2dec((substr($sensdata,64,4))) == 0) ? 'ok':'low' ; # decode battery = 0 --> ok
               $temp = (SD_WS09_bin2dec(substr($sensdata,12,12)) - 400)/10;
@@ -162,8 +174,11 @@
             # eine CTW600 wurde erkannt 
             $sensdata = substr($bitData,$syncpos+8);
             Log3 $iohash, 3, "$name: SD_WS09_Parse CTW WH=$wh msg=$sensdata syncp=$syncpos length:".length($sensdata) ;
-            #$model = "CTW600";
+            $model = "CTW600";
+            my $nn1 = substr($sensdata,10,2);  # Keine Bedeutung
+            my $nn2 = substr($sensdata,62,4);  # Keine Bedeutung
             $modelid = substr($sensdata,0,4);
+            Log3 $iohash, 3, "$name: SD_WS09_Parse Id: ".$modelid." NN1:$nn1 NN2:$nn2" ;
             Log3 $iohash, 3, "$name: SD_WS09_Parse Id: ".$modelid." Bin-Sync=$sensdata syncp=$syncpos length:".length($sensdata) ;
             $bat = SD_WS09_bin2dec((substr($sensdata,0,3))) ;
             $id = SD_WS09_bin2dec(substr($sensdata,4,6));
@@ -186,6 +201,11 @@
             	Log3 $iohash, 3, "$name: SD_WS09_Parse HUM: hum=$hum msg=$rawData " ;
     			   return undef;
          } 
+      if($temp > 60 || $temp < -40) {
+            	Log3 $iohash, 3, "$name: SD_WS09_Parse TEMP: Temp=$temp msg=$rawData " ;
+    			   return undef;
+         } 
+      
           
        my $longids = AttrVal($iohash->{NAME},'longids',0);
     	if ( ($longids ne "0") && ($longids eq "1" || $longids eq "ALL" || (",$longids," =~ m/,$model,/)))
