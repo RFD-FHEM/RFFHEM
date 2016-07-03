@@ -1,6 +1,6 @@
     ##############################################
     ##############################################
-    # $Id: 14_SD_WS09.pm 16015 2016-07-02 10:10:10Z pejonp $
+    # $Id: 14_SD_WS09.pm 16016 2016-07-03 10:10:10Z pejonp $
     # 
     # The purpose of this module is to support serval 
     # weather sensors like WS-0101  (Sender 868MHz ASK   Epmfänger RX868SH-DV elv)
@@ -76,6 +76,7 @@
       my $rain = 0;
       my $deviceCode = 0;
       my $model = "undef";  # 0xFFA -> WS0101/WH1080 alles andere -> CTW600 
+      my $modelattr ;
       my $modelid;
       my $windSpeed = 0;
       my $windguest =0;
@@ -88,13 +89,13 @@
       my $windDirectionText;
       
       
-      $model = AttrVal($iohash->{NAME},'WS09_WSModel',0);
-      if ($model eq "0"){
-      $model = "undef";
+      $modelattr = AttrVal($iohash->{NAME},'WS09_WSModel',0);
+      if ($modelattr eq '0'){
+      $modelattr = "undef";
       }
       
       my $crcwh1080 = AttrVal($iohash->{NAME},'WS09_CRCAUS',0);
-      Log3 $iohash, 3, "$name: SD_WS09_Parse CRC_AUS:$crcwh1080 Model=$model" ;
+      Log3 $iohash, 3, "$name: SD_WS09_Parse CRC_AUS:$crcwh1080 Model=$modelattr" ;
       
       
       Log3 $name, 4, "$name: SD_WS09_Parse HEX=$msg length: $hlen";
@@ -110,24 +111,29 @@
         
          my $wh = substr($bitData,0,8);
          #CRC-Check bei WH1080/WS0101 WS09_CRCAUS=0 und WS09_WSModel = undef oder Wh1080 
-         if(($crcwh1080 == '0') &&  ($model eq "undef" || $model eq "WH1080")) {
+         if(($crcwh1080 == 0) &&  ($modelattr ne "CTW600")) {
              if($wh == "11111111") {
                 my $datacheck = pack( 'H*', substr($msg,5,length($msg)-5) );
                 my $crcmein = Digest::CRC->new(width => 8, poly => 0x31);
                 my $rr2 = $crcmein->add($datacheck)->hexdigest;
                 if ($rr2 eq "0"){
                     $model = "WH1080";
-                    Log3 $iohash, 3, "$name: SD_WS09_Parse CRC_OK:  CRC=$rr2 Model=$model" ;
+                    Log3 $iohash, 3, "$name: SD_WS09_Parse CRC_OK:  CRC=$rr2 Model=$model attr=$modelattr" ;
                 }else{
                     Log3 $iohash, 3, "$name: SD_WS09_Parse CRC_Error:  CRC=$rr2 " ;
                     return undef;
                 }
             }else{
-                $model = "CTW600";         
-            }
+                $model = "CTW600";
+                 Log3 $iohash, 3, "$name: SD_WS09_Parse CTW600:   Model=$model attr=$modelattr" ; 
+                }
             };
                   
-         if( ($wh == "11111111") || ($model ne "CTW600")) {
+         if( ($wh == "11111111") || ($model eq "WH1080")) {
+          if ($modelattr eq "CTW600"){
+                    Log3 $iohash, 3, "$name: SD_WS09_WH1080 off=$modelattr Model=$model " ;
+                    return undef;
+              } 
             $sensdata = substr($bitData,8);
             my $whid = substr($sensdata,0,4);
             if(  $whid == "1010" ){ # A 
@@ -171,6 +177,10 @@
     	    return $name;
             }
          }else{
+              if ($modelattr eq "WH1080"){
+                    Log3 $iohash, 3, "$name: SD_WS09_CTW600 off=$modelattr Model=$model " ;
+                    return undef;
+              } else {
             # eine CTW600 wurde erkannt 
             $sensdata = substr($bitData,$syncpos+8);
             Log3 $iohash, 3, "$name: SD_WS09_Parse CTW WH=$wh msg=$sensdata syncp=$syncpos length:".length($sensdata) ;
@@ -192,6 +202,7 @@
             Log3 $iohash, 3, "$name: SD_WS09_Parse ".$model." Windguest bit: ".substr($sensdata,40,8)." Dec: " . $windguest ;
             $rain =  round(SD_WS09_bin2dec(substr($sensdata,46,16)) * 0.3,01);
             Log3 $iohash, 3, "$name: SD_WS09_Parse ".$model." Rain bit: ".substr($sensdata,46,16)." Dec: " . $rain ;
+            }
          }
         		
         Log3 $iohash, 3, "$name: SD_WS09_Parse ".$model." id:$id :$sensdata ";
