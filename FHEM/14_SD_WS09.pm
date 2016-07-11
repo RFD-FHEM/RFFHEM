@@ -1,6 +1,6 @@
     ##############################################
     ##############################################
-    # $Id: 14_SD_WS09.pm 16017 2016-07-10 10:10:10Z pejonp $
+    # $Id: 14_SD_WS09.pm 16018 2016-07-11 10:10:10Z pejonp $
     # 
     # The purpose of this module is to support serval 
     # weather sensors like WS-0101  (Sender 868MHz ASK   Epmfänger RX868SH-DV elv)
@@ -101,14 +101,17 @@
     
       my $syncpos= index($bitData,"11111110");  #7x1 1x0 preamble
     	Log3 $iohash, 3, "$name: SD_WS09_Parse0 Bin=$bitData syncp=$syncpos length:".length($bitData) ;
-     
-      	
+
     		if ($syncpos ==-1 || length($bitData)-$syncpos < 78) 
     		{
     			Log3 $iohash, 3, "$name: SD_WS09_Parse EXIT: msg=$rawData syncp=$syncpos length:".length($bitData) ;
     			return undef;
     		}
-        
+
+         my $wh = substr($bitData,0,8);
+         #CRC-Check bei WH1080/WS0101 WS09_CRCAUS=0 und WS09_WSModel = undef oder Wh1080 
+         if(($crcwh1080 == 0) &&  ($modelattr ne "CTW600")) {
+             if($wh == "11111111") {
         	if ($syncpos == 0) 
     		{
           $hlen = length($rawData);
@@ -133,13 +136,9 @@
           $msg = 'P9#'.unpack("H$hlen", pack("B$blen", $bitData20));
           $bitData = $bitData20;           
       	  Log3 $iohash, 3, "$name: SD_WS09_Parse sync2 msg=$msg syncp=$syncpos length:".length($bitData) ;
-       		}
-        
-        
-         my $wh = substr($bitData,0,8);
-         #CRC-Check bei WH1080/WS0101 WS09_CRCAUS=0 und WS09_WSModel = undef oder Wh1080 
-         if(($crcwh1080 == 0) &&  ($modelattr ne "CTW600")) {
-             if($wh == "11111111") {
+       		}     
+             
+             
                 my $datacheck = pack( 'H*', substr($msg,5,length($msg)-5) );
                 my $crcmein = Digest::CRC->new(width => 8, poly => 0x31);
                 my $rr2 = $crcmein->add($datacheck)->hexdigest;
