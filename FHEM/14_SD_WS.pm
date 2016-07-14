@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 14_SD_WS.pm 32 2016-02-07 14:00:00 v3.2-dev $
+# $Id: 14_SD_WS.pm 32 2016-07-14 18:00:00 v3.2-dev $
 #
 # The purpose of this module is to support serval
 # weather sensors which use various protocol
@@ -19,7 +19,7 @@ sub SD_WS_Initialize($)
 {
 	my ($hash) = @_;
 
-	$hash->{Match}		= '^[WP]\d+#.*';
+	$hash->{Match}		= '^W\d+#.*';
 	$hash->{DefFn}		= "SD_WS_Define";
 	$hash->{UndefFn}	= "SD_WS_Undef";
 	$hash->{ParseFn}	= "SD_WS_Parse";
