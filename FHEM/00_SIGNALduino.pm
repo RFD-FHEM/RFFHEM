@@ -821,7 +821,21 @@ my %ProtocolListSIGNALduino  = (
 			modulematch     => '^i......', # not used now
 			length_min      => '24',
 			},
-
+    "46"    => 
+        {
+            name			=> 'EKX1BE',	
+			id          	=> '46',
+			one				=> [1,-8],
+			zero			=> [8,-1],
+			clockabs     	=> 250,	# -1=auto	
+			format 			=> 'twostate',	# not used now
+			preamble		=> 'u#46',			
+			clientmodule    => '',   # not used now
+			#modulematch     => '', # not used now
+			length_min      => '16',
+			length_max 		=> '18',
+			
+			},
    
 
 );
