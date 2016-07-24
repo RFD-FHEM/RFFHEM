@@ -1,6 +1,6 @@
     ##############################################
     ##############################################
-    # $Id: 14_SD_WS09.pm 16014 2016-05-08 10:10:10Z pejonp $
+    # $Id: 14_SD_WS09.pm 16018 2016-07-11 10:10:10Z pejonp $
     # 
     # The purpose of this module is to support serval 
     # weather sensors like WS-0101  (Sender 868MHz ASK   Epmfänger RX868SH-DV elv)
@@ -73,9 +73,12 @@
       my $hlen = length($rawData);
       my $blen = $hlen * 4;
       my $bitData = unpack("B$blen", pack("H$hlen", $rawData)); 
+      my $bitData2;
+      my $bitData20;
       my $rain = 0;
       my $deviceCode = 0;
       my $model = "undef";  # 0xFFA -> WS0101/WH1080 alles andere -> CTW600 
+      my $modelattr ;
       my $modelid;
       my $windSpeed = 0;
       my $windguest =0;
@@ -88,39 +91,80 @@
       my $windDirectionText;
       
       
-      Log3 $name, 4, "$name: SD_WS09_Parse HEX=$msg length: $hlen";
-      my $syncpos= index($bitData,"11111110");  #7x1 1x0 preamble
+      $modelattr = AttrVal($iohash->{NAME},'WS09_WSModel',0);
+      if ($modelattr eq '0'){
+      $modelattr = "undef";
+      }
       
-    	Log3 $iohash, 3, "$name: SD_WS09_Parse Bin=$bitData syncp=$syncpos length:".length($bitData) ;
-      	
+      my $crcwh1080 = AttrVal($iohash->{NAME},'WS09_CRCAUS',0);
+      Log3 $iohash, 3, "$name: SD_WS09_Parse CRC_AUS:$crcwh1080 Model=$modelattr" ;
+    
+      my $syncpos= index($bitData,"11111110");  #7x1 1x0 preamble
+    	Log3 $iohash, 3, "$name: SD_WS09_Parse0 Bin=$bitData syncp=$syncpos length:".length($bitData) ;
+
     		if ($syncpos ==-1 || length($bitData)-$syncpos < 78) 
     		{
     			Log3 $iohash, 3, "$name: SD_WS09_Parse EXIT: msg=$rawData syncp=$syncpos length:".length($bitData) ;
     			return undef;
     		}
-        
+
          my $wh = substr($bitData,0,8);
-         if($wh == "11111111") {
+         #CRC-Check bei WH1080/WS0101 WS09_CRCAUS=0 und WS09_WSModel = undef oder Wh1080 
+         if(($crcwh1080 == 0) &&  ($modelattr ne "CTW600")) {
+             if($wh == "11111111") {
+        	if ($syncpos == 0) 
+    		{
+          $hlen = length($rawData);
+          $blen = $hlen * 4;
+    	    $bitData2 = '11'.unpack("B$blen", pack("H$hlen", $rawData));
+          $bitData20 = substr($bitData2,0,length($bitData2)-2);
+          $blen = length($bitData20);
+          $hlen = $blen / 4;
+          $msg = 'P9#'.unpack("H$hlen", pack("B$blen", $bitData20));
+          $bitData = $bitData20;
+      	  Log3 $iohash, 3, "$name: SD_WS09_Parse sync1 msg=$msg syncp=$syncpos length:".length($bitData) ;
+       		}
+        
+        	if ($syncpos == 1) 
+    		{
+          $hlen = length($rawData);
+          $blen = $hlen * 4;
+    	    $bitData2 = '1'.unpack("B$blen", pack("H$hlen", $rawData));
+          $bitData20 = substr($bitData2,0,length($bitData2)-1);
+          $blen = length($bitData20);
+          $hlen = $blen / 4;
+          $msg = 'P9#'.unpack("H$hlen", pack("B$blen", $bitData20));
+          $bitData = $bitData20;           
+      	  Log3 $iohash, 3, "$name: SD_WS09_Parse sync2 msg=$msg syncp=$syncpos length:".length($bitData) ;
+       		}     
+             
+             
                 my $datacheck = pack( 'H*', substr($msg,5,length($msg)-5) );
                 my $crcmein = Digest::CRC->new(width => 8, poly => 0x31);
                 my $rr2 = $crcmein->add($datacheck)->hexdigest;
                 if ($rr2 eq "0"){
                     $model = "WH1080";
-                    Log3 $iohash, 3, "$name: SD_WS09_Parse CRC_OK:  CRC=$rr2 Model=$model" ;
+                    Log3 $iohash, 3, "$name: SD_WS09_Parse CRC_OK:  CRC=$rr2 Model=$model attr=$modelattr" ;
                 }else{
-                    Log3 $iohash, 3, "$name: SD_WS09_Parse CRC_Error:  CRC=$rr2 " ;
+                    Log3 $iohash, 3, "$name: SD_WS09_Parse CRC_Error:  msg=$msg CRC=$rr2 " ;
                     return undef;
-                }
+                    }
             }else{
-                $model = "CTW600";         
+                $model = "CTW600";
+                 Log3 $iohash, 3, "$name: SD_WS09_Parse CTW600:   Model=$model attr=$modelattr" ; 
+                }
             };
                   
          if( ($wh == "11111111") || ($model eq "WH1080")) {
+          if ($modelattr eq "CTW600"){
+                    Log3 $iohash, 3, "$name: SD_WS09_WH1080 off=$modelattr Model=$model " ;
+                    return undef;
+              } 
             $sensdata = substr($bitData,8);
             my $whid = substr($sensdata,0,4);
             if(  $whid == "1010" ){ # A 
            	  Log3 $iohash, 3, "$name: SD_WS09_Parse WH=$wh msg=$sensdata syncp=$syncpos length:".length($sensdata) ;
-              #$model = "WH1080";
+              $model = "WH1080";
               $id = SD_WS09_bin2dec(substr($sensdata,4,8));
               $bat = (SD_WS09_bin2dec((substr($sensdata,64,4))) == 0) ? 'ok':'low' ; # decode battery = 0 --> ok
               $temp = (SD_WS09_bin2dec(substr($sensdata,12,12)) - 400)/10;
@@ -143,7 +187,7 @@
             my $month;
             my $year;
             $id = SD_WS09_bin2dec(substr($sensdata,4,8));
-            Log3 $iohash, 3, "$name: SD_WS09_Parse Zeitmeldung: HRS1=$hrs1 id:$id" ;
+            Log3 $iohash, 3, "$name: SD_WS09_Parse Zeitmeldung0: HRS1=$hrs1 id:$id" ;
             $hrs = SD_WS09_BCD2bin(substr($sensdata,18,6) ) ; # Stunde
             $mins = SD_WS09_BCD2bin(substr($sensdata,24,8)); # Minute 
             $sec = SD_WS09_BCD2bin(substr($sensdata,32,8)); # Sekunde 
@@ -151,19 +195,27 @@
             $year = SD_WS09_BCD2bin(substr($sensdata,40,8)); # Jahr
             $month = SD_WS09_BCD2bin(substr($sensdata,51,5)); # Monat
             $mday = SD_WS09_BCD2bin(substr($sensdata,56,8)); # Tag
-            Log3 $iohash, 3, "$name: SD_WS09_Parse Zeitmeldung:  msg=$rawData syncp=$syncpos length:".length($bitData) ;
-            Log3 $iohash, 3, "$name: SD_WS09_Parse Zeitmeldung: HH:mm:ss - ".$hrs.":".$mins.":".$sec ;
-            Log3 $iohash, 3, "$name: SD_WS09_Parse Zeitmeldung: dd.mm.yy - ".$mday.":".$month.":".$year ;
+            Log3 $iohash, 3, "$name: SD_WS09_Parse Zeitmeldung1:  msg=$rawData syncp=$syncpos length:".length($bitData) ;
+            Log3 $iohash, 3, "$name: SD_WS09_Parse Zeitmeldung2: HH:mm:ss - ".$hrs.":".$mins.":".$sec ;
+            Log3 $iohash, 3, "$name: SD_WS09_Parse Zeitmeldung3: dd.mm.yy - ".$mday.":".$month.":".$year ;
+            return $name;
             }
-            Log3 $iohash, 3, "$name: SD_WS09_Parse Zeitmeldung: msg=$rawData syncp=$syncpos length:".length($sensdata) ;
-    	    return $name;
+                Log3 $iohash, 3, "$name: SD_WS09_Parse Zeitmeldung4: msg=$rawData syncp=$syncpos length:".length($sensdata) ;
+    	          return undef;
             }
          }else{
+              if ($modelattr eq "WH1080"){
+                    Log3 $iohash, 3, "$name: SD_WS09_CTW600 off=$modelattr Model=$model " ;
+                    return undef;
+              } else {
             # eine CTW600 wurde erkannt 
             $sensdata = substr($bitData,$syncpos+8);
             Log3 $iohash, 3, "$name: SD_WS09_Parse CTW WH=$wh msg=$sensdata syncp=$syncpos length:".length($sensdata) ;
-            #$model = "CTW600";
+            $model = "CTW600";
+            my $nn1 = substr($sensdata,10,2);  # Keine Bedeutung
+            my $nn2 = substr($sensdata,62,4);  # Keine Bedeutung
             $modelid = substr($sensdata,0,4);
+            Log3 $iohash, 3, "$name: SD_WS09_Parse Id: ".$modelid." NN1:$nn1 NN2:$nn2" ;
             Log3 $iohash, 3, "$name: SD_WS09_Parse Id: ".$modelid." Bin-Sync=$sensdata syncp=$syncpos length:".length($sensdata) ;
             $bat = SD_WS09_bin2dec((substr($sensdata,0,3))) ;
             $id = SD_WS09_bin2dec(substr($sensdata,4,6));
@@ -177,6 +229,7 @@
             Log3 $iohash, 3, "$name: SD_WS09_Parse ".$model." Windguest bit: ".substr($sensdata,40,8)." Dec: " . $windguest ;
             $rain =  round(SD_WS09_bin2dec(substr($sensdata,46,16)) * 0.3,01);
             Log3 $iohash, 3, "$name: SD_WS09_Parse ".$model." Rain bit: ".substr($sensdata,46,16)." Dec: " . $rain ;
+            }
          }
         		
         Log3 $iohash, 3, "$name: SD_WS09_Parse ".$model." id:$id :$sensdata ";
@@ -186,6 +239,11 @@
             	Log3 $iohash, 3, "$name: SD_WS09_Parse HUM: hum=$hum msg=$rawData " ;
     			   return undef;
          } 
+      if($temp > 60 || $temp < -40) {
+            	Log3 $iohash, 3, "$name: SD_WS09_Parse TEMP: Temp=$temp msg=$rawData " ;
+    			   return undef;
+         } 
+      
           
        my $longids = AttrVal($iohash->{NAME},'longids',0);
     	if ( ($longids ne "0") && ($longids eq "1" || $longids eq "ALL" || (",$longids," =~ m/,$model,/)))

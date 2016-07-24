@@ -94,8 +94,9 @@ my %matchListSIGNALduino = (
      "11:SD_WS09"				=> "^P9#[A-Fa-f0-9]+",
      "12:SD_WS"					=> '^W\d+#.*',
      "13:RFXX10REC" 			=> '^(20|29)[A-Fa-f0-9]+',
-     "14:Dooya"				=> '^P16#[A-Fa-f0-9]+',
-     "15:SOMFY"				=> '^YsA[0-9A-F]+',
+     "14:Dooya"					=> '^P16#[A-Fa-f0-9]+',
+     "15:SOMFY"					=> '^YsA[0-9A-F]+',
+    # "16:SD_WS_Maverick"		=> '^P47#[A-Fa-f0-9]+',
      "16:SD_UT"            		=> '^u30#.*',	## BELL 201.2 TXA
      "X:SIGNALduino_un"			=> '^[uP]\d+#.*',
 );
@@ -269,7 +270,7 @@ my %ProtocolListSIGNALduino  = (
 
 		}, 	
 	"10"    => 			## Oregon Scientific 2
-			{
+		{
             name			=> 'OSV2o3',	
 			id          	=> '10',
 			clockrange     	=> [300,520],			# min , max
@@ -281,7 +282,7 @@ my %ProtocolListSIGNALduino  = (
 			polarity        => 'invert',			
 		}, 	
 	"11"    => 			## Arduino Sensor
-			{
+		{
             name			=> 'AS',	
 			id          	=> '11',
 			clockrange     	=> [380,425],			# min , max
@@ -292,10 +293,9 @@ my %ProtocolListSIGNALduino  = (
 			length_min      => '52',
 			length_max      => '56',
 			method          => \&SIGNALduino_AS # Call to process this message
-
 		}, 
 	"12"    => 			## hideki
-			{
+		{
             name			=> 'Hideki protocol',	
 			id          	=> '12',
 			clockrange     	=> [420,510],                   # min, max better for Bresser Sensors, OK for hideki/Hideki/TFA too     
@@ -306,9 +306,9 @@ my %ProtocolListSIGNALduino  = (
 			length_min      => '72',
 			length_max      => '104',
 			method          => \&SIGNALduino_Hideki	# Call to process this message
-		}, 			 
+		}, 	
 	"13"    => 			## FA21RF
-			{
+		{
             name			=> '21RF',	
 			id          	=> '13',
 			one				=> [1,-2],
@@ -795,6 +795,64 @@ my %ProtocolListSIGNALduino  = (
 			msgIntro		=> 'SR;P0=-2560;P1=2560;P3=-640;D=10101010101010113;',
 			#msgOutro		=> 'SR;P0=-30415;D=0;',
 		},
+	"44" => ## Bresser 7009995
+		{
+			name 		=> 'Bresser7009995',
+			id 			=> '44',
+			clockabs	=> 2000,		
+			zero 		=> [-1,1],
+			one			=> [-2,1],
+			#start 		=> [-28],
+			preamble 	=> 'u#44',
+			clientmodule	=> '', # not used now
+			#modulematch 	=> '',
+			length_min 	=> '64',
+			length_max 	=> '80',
+		},
+    "45"    => 
+        {
+            name			=> 'revolt',	
+			id          	=> '45',
+			one				=> [3,-1],
+			zero			=> [1,-3],
+			#float			=> [-1,3],		# not full supported now later use
+			sync			=> [1,-24],
+			clockabs     	=> -1,	# -1=auto	
+			format 			=> 'twostate',	# not used now
+			preamble		=> 'i',			
+			clientmodule    => 'IT',   # not used now
+			modulematch     => '^i......', # not used now
+			length_min      => '24',
+			},
+    "46"    => 
+        {
+            name			=> 'EKX1BE',	
+			id          	=> '46',
+			one				=> [1,-8],
+			zero			=> [8,-1],
+			clockabs     	=> 250,	# -1=auto	
+			format 			=> 'twostate',	# not used now
+			preamble		=> 'u#46',			
+			clientmodule    => '',   # not used now
+			#modulematch     => '', # not used now
+			length_min      => '16',
+			length_max 		=> '18',
+			
+			},
+   	"47"    => 			## maverick
+		{
+            name			=> 'Maverick protocol',	
+			id          	=> '12',
+			clockrange     	=> [220,260],                   
+			format 			=> 'manchester',	
+			preamble		=> 'P47#',						# prepend to converted message	
+			#clientmodule    => '',   				# not used now
+			modulematch     => '^P46#.*',  						# not used now
+			length_min      => '100',
+			length_max      => '108',
+			method          => \&SIGNALduino_Maverick	# Call to process this message
+		}, 			
+  
 );
 
 
@@ -830,7 +888,9 @@ SIGNALduino_Initialize($)
 					  ." longids:0,1"
 					  ." minsecs"
 					  ." whitelist_IDs"
-                      ." $readingFnAttributes";
+					  ." WS09_WSModel:undef,WH1080,CTW600"
+					  ." WS09_CRCAUS:0,1" 
+		                      ." $readingFnAttributes";
 
   $hash->{ShutdownFn} = "SIGNALduino_Shutdown";
 
@@ -963,7 +1023,7 @@ sub
 SIGNALduino_Shutdown($)
 {
   my ($hash) = @_;
-  SIGNALduino_SimpleWrite($hash, "X00");  # Switch reception off, it may hang up the SIGNALduino
+  SIGNALduino_SimpleWrite($hash, "XQ");  # Switch reception off, it may hang up the SIGNALduino
   return undef;
 }
 
@@ -1354,6 +1414,8 @@ SIGNALduino_DoInit($)
 		
 		SIGNALduino_Clear($hash);
 		
+		SIGNALduino_SimpleWrite($hash, "XQ"); # Disable receiver
+		
 		
 		# Try to get version from Arduino
 		while ($try++ < 3 && $ver !~ m/^V/) {
@@ -1405,7 +1467,8 @@ SIGNALduino_DoInit($)
 	#  }
 	#  $hash->{STATE} = "Initialized";
 	readingsSingleUpdate($hash, "state", "opened", 1);
-
+	SIGNALduino_SimpleWrite($hash, "XE"); # Enable receiver
+		
 	# Reset the counter
 	delete($hash->{XMIT_TIME});
 	delete($hash->{NR_CMD_LAST_H});
@@ -1786,7 +1849,8 @@ sub SIGNALduino_PatternExists
 			
 	foreach my $search (@results)
 	{
-		
+		Debug "looking for substr $search" if($debug);
+			
 		return $search if (index( ${$data}, $search) >= 0);
 	}
 	
@@ -2992,6 +3056,21 @@ sub	SIGNALduino_Hideki()
 	return (-1,"");
 }
 
+
+sub SIGNALduino_Maverick()
+{
+	my ($name,$bitData,$id) = @_;
+	my $debug = AttrVal($name,"debug",0);
+
+	## Todo: Some checks and may be a lengh filter or some checks
+	my $hex=sprintf("%02X",SIGNALduino_b2h($bitData);
+	
+
+
+	return  (1,$hex); ## Return the bits unchanged in hex
+	
+}
+
 sub SIGNALduino_SomfyRTS()
 {
 	my ($name, $bitData, $rawData) = @_;
@@ -3279,8 +3358,17 @@ attr sduino longids 1
 # Will generate devices names like BTHR918N_f3.
 attr sduino longids BTHR918N
 </PRE>
-    </li><br>
-
+</li><br>
+</li><br>
+   <li>WS09_Model<br>
+   WS09_WSModel:undef -> check all, WH1080 -> support WH1080/WS0101 , CTW600 -> support CTW600 
+   </li>
+   </li><br>
+   <li>WS09_CRCAUS<br>
+   WS09_CRCAUS:0,1
+   WS09_CRCAUS = 0 is default -> check CRC Calculation for WH1080      
+   </li>
+    
 	<a name="SIGNALduinoget"></a>
 	<b>Get</b>
 	<ul>
