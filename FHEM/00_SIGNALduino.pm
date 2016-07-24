@@ -76,7 +76,8 @@ my $clientsSIGNALduino = ":IT:"
 						."SD_WS:"
 						."RFXX10REC:"
 						."Dooya:"
-						."SOMFY"
+						."SOMFY:"
+					#	.'SD_WS_Maverick:'
 						."SIGNALduino_un:"
 						; 
 
@@ -93,8 +94,9 @@ my %matchListSIGNALduino = (
      "11:SD_WS09"				=> "^P9#[A-Fa-f0-9]+",
      "12:SD_WS"					=> '^W\d+#.*',
      "13:RFXX10REC" 			=> '^(20|29)[A-Fa-f0-9]+',
-     "14:Dooya"				=> '^P16#[A-Fa-f0-9]+',
-     "15:SOMFY"				=> '^YsA[0-9A-F]+',
+     "14:Dooya"					=> '^P16#[A-Fa-f0-9]+',
+     "15:SOMFY"					=> '^YsA[0-9A-F]+',
+    # "16:SD_WS_Maverick"		=> '^P47#[A-Fa-f0-9]+',
      "X:SIGNALduino_un"			=> '^[uP]\d+#.*',
 );
 
@@ -267,7 +269,7 @@ my %ProtocolListSIGNALduino  = (
 
 		}, 	
 	"10"    => 			## Oregon Scientific 2
-			{
+		{
             name			=> 'OSV2o3',	
 			id          	=> '10',
 			clockrange     	=> [300,520],			# min , max
@@ -276,11 +278,9 @@ my %ProtocolListSIGNALduino  = (
 			length_min      => '64',
 			length_max      => '220',
 			method          => \&SIGNALduino_OSV2 # Call to process this message
-
-
 		}, 	
 	"11"    => 			## Arduino Sensor
-			{
+		{
             name			=> 'AS',	
 			id          	=> '11',
 			clockrange     	=> [380,425],			# min , max
@@ -291,10 +291,9 @@ my %ProtocolListSIGNALduino  = (
 			length_min      => '52',
 			length_max      => '56',
 			method          => \&SIGNALduino_AS # Call to process this message
-
 		}, 
 	"12"    => 			## hideki
-			{
+		{
             name			=> 'Hideki protocol',	
 			id          	=> '12',
 			clockrange     	=> [420,510],                   # min, max better for Bresser Sensors, OK for hideki/Hideki/TFA too     
@@ -305,9 +304,9 @@ my %ProtocolListSIGNALduino  = (
 			length_min      => '72',
 			length_max      => '104',
 			method          => \&SIGNALduino_Hideki	# Call to process this message
-		}, 			 
+		}, 	
 	"13"    => 			## FA21RF
-			{
+		{
             name			=> '21RF',	
 			id          	=> '13',
 			one				=> [1,-2],
@@ -836,8 +835,20 @@ my %ProtocolListSIGNALduino  = (
 			length_max 		=> '18',
 			
 			},
-   
-
+   	"47"    => 			## maverick
+		{
+            name			=> 'Maverick protocol',	
+			id          	=> '12',
+			clockrange     	=> [220,260],                   
+			format 			=> 'manchester',	
+			preamble		=> 'P47#',						# prepend to converted message	
+			#clientmodule    => '',   				# not used now
+			modulematch     => '^P46#.*',  						# not used now
+			length_min      => '100',
+			length_max      => '108',
+			method          => \&SIGNALduino_Maverick	# Call to process this message
+		}, 			
+  
 );
 
 
@@ -3014,6 +3025,21 @@ sub	SIGNALduino_Hideki()
 		return  (1,$hidekihex); ## Return only the original bits, include length
 	}
 	return (-1,"");
+}
+
+
+sub SIGNALduino_Maverick()
+{
+	my ($name,$bitData,$id) = @_;
+	my $debug = AttrVal($name,"debug",0);
+
+	## Todo: Some checks and may be a lengh filter or some checks
+	my $hex=sprintf("%02X",SIGNALduino_b2h($bitData);
+	
+
+
+	return  (1,$hex); ## Return the bits unchanged in hex
+	
 }
 
 sub SIGNALduino_SomfyRTS()
