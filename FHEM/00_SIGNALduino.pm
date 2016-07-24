@@ -78,7 +78,8 @@ my $clientsSIGNALduino = ":IT:"
 						."Dooya:"
 						."SOMFY:"
 						."SD_UT:"	## BELL 201.2 TXA
-						."SIGNALduino_un:"
+				      # ."SD_WS_Maverick:"
+				      	."SIGNALduino_un:"
 						; 
 
 ## default regex match List for dispatching message to logical modules, can be updated during runtime because it is referenced
