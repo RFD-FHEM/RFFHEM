@@ -838,7 +838,7 @@ my %ProtocolListSIGNALduino  = (
    	"47"    => 			## maverick
 		{
             name			=> 'Maverick protocol',	
-			id          	=> '12',
+			id          	=> '47',
 			clockrange     	=> [220,260],                   
 			format 			=> 'manchester',	
 			preamble		=> 'P47#',						# prepend to converted message	
@@ -847,6 +847,21 @@ my %ProtocolListSIGNALduino  = (
 			length_min      => '100',
 			length_max      => '108',
 			method          => \&SIGNALduino_Maverick	# Call to process this message
+		}, 			
+     "48"    => 			## Joker Dostmann TFA
+		{
+            name			=> 'TFA Dostmann',	
+			id          	=> '48',
+			clockabs     	=> 250, 					# In real it is 500 but this leads to unprceise demodulation 
+			one				=> [-4,6],
+			zero			=> [-4,2],
+			start			=> [-6,2],
+			format 			=> 'twostate',	
+			preamble		=> 'U48#',					# prepend to converted message	
+			#clientmodule    => '',   					# not used now
+			modulematch     => '^U48#.*',  				# not used now
+			length_min      => '47',
+			length_max      => '48',
 		}, 			
   
 );
