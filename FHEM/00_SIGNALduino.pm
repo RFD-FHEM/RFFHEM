@@ -842,24 +842,24 @@ my %ProtocolListSIGNALduino  = (
 			clockrange     	=> [220,260],                   
 			format 			=> 'manchester',	
 			preamble		=> 'P47#',						# prepend to converted message	
-			#clientmodule    => '',   				# not used now
-			modulematch     => '^P46#.*',  						# not used now
+			#clientmodule    => '',   						# not used now
+			modulematch     => '^P46#.*',  					# not used now
 			length_min      => '100',
 			length_max      => '108',
-			method          => \&SIGNALduino_Maverick	# Call to process this message
+			method          => \&SIGNALduino_Maverick		# Call to process this message
 		}, 			
      "48"    => 			## Joker Dostmann TFA
 		{
             name			=> 'TFA Dostmann',	
 			id          	=> '48',
-			clockabs     	=> 250, 					# In real it is 500 but this leads to unprceise demodulation 
+			clockabs     	=> 250, 						# In real it is 500 but this leads to unprceise demodulation 
 			one				=> [-4,6],
 			zero			=> [-4,2],
 			start			=> [-6,2],
 			format 			=> 'twostate',	
-			preamble		=> 'U48#',					# prepend to converted message	
-			#clientmodule    => '',   					# not used now
-			modulematch     => '^U48#.*',  				# not used now
+			preamble		=> 'U48#',						# prepend to converted message	
+			#clientmodule    => '',   						# not used now
+			modulematch     => '^U48#.*',  					# not used now
 			length_min      => '47',
 			length_max      => '48',
 		}, 			
@@ -900,8 +900,8 @@ SIGNALduino_Initialize($)
 					  ." minsecs"
 					  ." whitelist_IDs"
 					  ." WS09_WSModel:undef,WH1080,CTW600"
-					  ." WS09_CRCAUS:0,1" 
-		                      ." $readingFnAttributes";
+					  ." WS09_CRCAUS:0,1"
+		              ." $readingFnAttributes";
 
   $hash->{ShutdownFn} = "SIGNALduino_Shutdown";
 
@@ -3049,7 +3049,7 @@ sub SIGNALduino_Maverick()
 	my $debug = AttrVal($name,"debug",0);
 
 	## Todo: Some checks and may be a lengh filter or some checks
-	my $hex=sprintf("%02X",SIGNALduino_b2h($bitData);
+	my $hex=sprintf("%02X",SIGNALduino_b2h($bitData));
 	
 
 
