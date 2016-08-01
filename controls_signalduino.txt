@@ -5,9 +5,9 @@ DEL FHEM/14_SIGNALduino_un.pm
 DEL FHEM/firmware/SIGNALduino_nano328.hex
 DEL FHEM/firmware/SIGNALduino_promini328.hex
 DEL FHEM/firmware/SIGNALduino_uno.hex
-UPD 2016_01_08_22:52:13 57683   FHEM/firmware/SIGNALduino_uno.hex
-UPD 2016_01_08_22:52:19 57683   FHEM/firmware/SIGNALduino_nano328.hex
-UPD 2016_01_08_22:52:29 57683   FHEM/firmware/SIGNALduino_promini328.hex
+UPD 2016_01_08_23:24:20 57683   FHEM/firmware/SIGNALduino_promini328.hex
+UPD 2016_01_08_23:24:29 57683   FHEM/firmware/SIGNALduino_nano328.hex
+UPD 2016_01_08_23:24:36 57683   FHEM/firmware/SIGNALduino_uno.hex
 UPD 2016_11_07_23:18:17 33945   FHEM/41_OREGON.pm
 UPD 2016_11_07_23:18:17 7824    FHEM/14_SIGNALduino_RSL.pm
 UPD 2016_11_07_23:18:17 9837    FHEM/14_SD_AS.pm
