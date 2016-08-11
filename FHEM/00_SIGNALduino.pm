@@ -3079,7 +3079,7 @@ sub SIGNALduino_Maverick()
 	my $debug = AttrVal($name,"debug",0);
 
 	## Todo: Some checks and may be a lengh filter or some checks
-	my $hex=sprintf("%02X",SIGNALduino_b2h($bitData));
+	my $hex=SIGNALduino_b2h($bitData);
 	
 
 
