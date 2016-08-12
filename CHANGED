@@ -1,31 +1,26 @@
-08.05.2016
- - SIGNALduino Firmware 3.20b23
-    some fixes providing more messages instad of fewer.
-	fixed some manchester realted things
- - added protocol 43 Somfy RTS
-18.04.2016
- - SIGNALduino Firmware 3.20b22
-    increased number of pattern from 6 to 8 to support dooya shutter protocol better
- - Rised the allowd numbers in protocol check
-16.04.2016
- - SIGNALduino Firmware 3.20b21
-     fixed a possible bug, that append a 0 nibble in mc message
-	 added a new information field in mc messages, providing exact number of
-	 provided bits
-- 14_SD_WS09.pm WH1080 CRC-Berechung angepaßt--> automatische Modelauswahl
-09.04.2016
- - SIGNALduino Firmware 3.20b20
-      fixed incomplete mc output (last nibble was not delivered)
-      decoding mc signals > message buffer is now possible
-	  max 340 bits are currently suppored
-      small improvement in processMessage  (if MS decoding fails, 
-	  mc or mu decoding is called)
- - corrected readings for firmware version.
+13.08.2016
+  some fixes providing more messages instad of fewer.
+  fixed some manchester realted things
+  added protocol 43 Somfy RTS
+  increased number of pattern from 6 to 8 to support dooya shutter protocol better
+  Rised the allowd numbers in protocol check
+  fixed a possible bug, that append a 0 nibble in mc message
+  added a new information field in mc messages, providing exact number of
+  provided bits
+  fixed incomplete mc output (last nibble was not delivered)
+  decoding mc signals > message buffer is now possible
+  max 340 bits are currently suppored
+  small improvement in processMessage  (if MS decoding fails, 
+  mc or mu decoding is called)
+  corrected readings for firmware version.
+  new sendMsg Function
+  14_SD_WS09.pm WH1080 CRC-Berechung angepaßt--> automatische Modelauswahl
+  
+      
 29.03.2016
  - Updated Firmware to 3.20b19
    including various bugfixes and better mc detection
 15.01.2016
- - new sendMsg Function
  - Firmware 3.2.0-11b 
 01.1.2016
  - 14_SD_WS09.pm CTW-600 rain Berechung angepaßt
