@@ -306,7 +306,9 @@ my %ProtocolListSIGNALduino  = (
 			modulematch     => '^P12#75.+',  						# not used now
 			length_min      => '72',
 			length_max      => '104',
-			method          => \&SIGNALduino_Hideki	# Call to process this message
+			method          => \&SIGNALduino_Hideki,	# Call to process this message
+			polarity        => 'invert',			
+			
 		}, 	
 	"13"    => 			## FA21RF
 		{
@@ -848,7 +850,7 @@ my %ProtocolListSIGNALduino  = (
 			format 			=> 'manchester',	
 			preamble		=> 'P47#',						# prepend to converted message	
 			#clientmodule    => '',   						# not used now
-			modulematch     => '^P46#.*',  					# not used now
+			modulematch     => '^P47#.*',  					# not used now
 			length_min      => '100',
 			length_max      => '108',
 			method          => \&SIGNALduino_Maverick		# Call to process this message
