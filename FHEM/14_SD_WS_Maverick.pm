@@ -1,9 +1,8 @@
 ##############################################
-# $Id: 14_SD_WS_Maverick.pm 9346 2016-07-14 18:00:00 v3.2-dev $
+# $Id: 14_SD_WS_Maverick.pm 9346 2016-07-14 18:00:00 v3.3-dev $
 # 
-# The purpose of this module is to support serval eurochron
-# weather sensors like eas8007 which use the same protocol
-# Sidey79 & Ralf9  2015-2016
+# The purpose of this module is to support Maverick sensors
+# Sidey79 & Cruizer 2016
 #
 
 package main;
@@ -20,7 +19,7 @@ SD_WS_Maverick_Initialize($)
 {
   my ($hash) = @_;
 
-  $hash->{Match}     = "^P7#[A-Fa-f0-9]{6}F[A-Fa-f0-9]{2}";    ## pos 7 ist aktuell immer 0xF
+  $hash->{Match}     = "^P47#[A-Fa-f0-9]+";    ## todo: Genauer spezifizieren
   $hash->{DefFn}     = "SD_WS_Maverick_Define";
   $hash->{UndefFn}   = "SD_WS_Maverick_Undef";
   $hash->{ParseFn}   = "SD_WS_Maverick_Parse";
@@ -29,7 +28,7 @@ SD_WS_Maverick_Initialize($)
                         "$readingFnAttributes ";
   $hash->{AutoCreate} =
         { "SD_WS_Maverick.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,",  autocreateThreshold => "2:180"} };
-
+## Todo: Prüfen der Autocreate Einstellungen
 
 }
 
@@ -106,25 +105,7 @@ SD_WS_Maverick_Parse($$)
     my $bit24bis27 = oct("0b".substr($bitData,24,4));
     my $hum = oct("0b" . substr($bitData,28,8));
     
-    if ($hum==0)
-    {
-    	$model=$model."_T";		
-    } else {
-    	$model=$model."_TH";		
-    	
-    	
-    }
     
-    if ($hum > 100) {
-      return '';  # Eigentlich muesste sowas wie ein skip rein, damit ggf. spaeter noch weitre Sensoren dekodiert werden koennen.
-    }
-    
-    if ($temp > 700 && $temp < 3840) {
-      return '';
-    } elsif ($temp >= 3840) {        # negative Temperaturen, muss noch ueberprueft und optimiert werden 
-      $temp -= 4095;
-    }  
-    $temp /= 10;
     
     Log3 $iohash, 4, "$model decoded protocolid: 7 sensor id=$id, channel=$channel, temp=$temp, hum=$hum, bat=$bat";
 

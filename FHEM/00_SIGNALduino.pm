@@ -78,7 +78,7 @@ my $clientsSIGNALduino = ":IT:"
 						."Dooya:"
 						."SOMFY:"
 						."SD_UT:"	## BELL 201.2 TXA
-				      # ."SD_WS_Maverick:"
+				        ."SD_WS_Maverick:"
 				      	."SIGNALduino_un:"
 						; 
 
@@ -97,7 +97,7 @@ my %matchListSIGNALduino = (
      "13:RFXX10REC" 			=> '^(20|29)[A-Fa-f0-9]+',
      "14:Dooya"					=> '^P16#[A-Fa-f0-9]+',
      "15:SOMFY"					=> '^YsA[0-9A-F]+',
-    # "16:SD_WS_Maverick"		=> '^P47#[A-Fa-f0-9]+',
+     "16:SD_WS_Maverick"		=> '^P47#[A-Fa-f0-9]+',
      "16:SD_UT"            		=> '^u30#.*',	## BELL 201.2 TXA
      "X:SIGNALduino_un"			=> '^[uP]\d+#.*',
 );
