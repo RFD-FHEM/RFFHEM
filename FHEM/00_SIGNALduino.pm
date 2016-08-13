@@ -870,7 +870,21 @@ my %ProtocolListSIGNALduino  = (
 			length_min      => '47',
 			length_max      => '48',
 		}, 			
-  
+	"49"    => 			## quigg / Aldi gt_9000
+		{
+            name			=> 'quigg_gt9000',	
+			id          	=> '49',
+			clockabs     	=> 400, 						# In real it is 500 but this leads to unprceise demodulation 
+			one				=> [2,-1],
+			zero			=> [1,-3],
+			start			=> [-15,2,-1],
+			format 			=> 'twostate',	
+			preamble		=> 'U49#',						# prepend to converted message	
+			#clientmodule    => '',   						# not used now
+			modulematch     => '^U49#.*',  					# not used now
+			length_min      => '22',
+			length_max      => '28',
+		}, 			
 );
 
 
