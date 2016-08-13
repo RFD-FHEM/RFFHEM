@@ -98,7 +98,7 @@ my %matchListSIGNALduino = (
      "14:Dooya"					=> '^P16#[A-Fa-f0-9]+',
      "15:SOMFY"					=> '^YsA[0-9A-F]+',
      "16:SD_WS_Maverick"		=> '^P47#[A-Fa-f0-9]+',
-     "16:SD_UT"            		=> '^u30#.*',	## BELL 201.2 TXA
+     "17:SD_UT"            		=> '^u30#.*',						## BELL 201.2 TXA
      "X:SIGNALduino_un"			=> '^[uP]\d+#.*',
 );
 

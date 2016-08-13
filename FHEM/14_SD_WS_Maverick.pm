@@ -19,7 +19,7 @@ SD_WS_Maverick_Initialize($)
 {
   my ($hash) = @_;
 
-  $hash->{Match}     = "^P47#[A-Fa-f0-9]+";    ## todo: Genauer spezifizieren
+  $hash->{Match}     = "^P47#AA9995[A-Fa-f0-9]+";    
   $hash->{DefFn}     = "SD_WS_Maverick_Define";
   $hash->{UndefFn}   = "SD_WS_Maverick_Undef";
   $hash->{ParseFn}   = "SD_WS_Maverick_Parse";
@@ -27,7 +27,7 @@ SD_WS_Maverick_Initialize($)
   $hash->{AttrList}  = "IODev do_not_notify:1,0 ignore:0,1 showtime:1,0 " .
                         "$readingFnAttributes ";
   $hash->{AutoCreate} =
-        { "SD_WS_Maverick.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,",  autocreateThreshold => "2:180"} };
+        { "SD_WS_Maverick.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME",  autocreateThreshold => "2:180"} };
 ## Todo: Prüfen der Autocreate Einstellungen
 
 }
@@ -39,12 +39,12 @@ SD_WS_Maverick_Define($$)
   my ($hash, $def) = @_;
   my @a = split("[ \t][ \t]*", $def);
 
-  return "wrong syntax: define <name> SD_WS_Maverick <code> ".int(@a)
+  return "wrong syntax: define <name> SD_WS_Maverick <model>  ".int(@a)
         if(int(@a) < 3 );
 
   $hash->{CODE} = $a[2];
   $hash->{lastMSG} =  "";
-  $hash->{bitMSG} =  "";
+ # $hash->{bitMSG} =  "";
 
   $modules{SD_WS_Maverick}{defptr}{$a[2]} = $hash;
   $hash->{STATE} = "Defined";
@@ -77,57 +77,65 @@ SD_WS_Maverick_Parse($$)
 
   my $model = "SD_WS_Maverick";
   my $hlen = length($rawData);
-  my $blen = $hlen * 4;
-  my $bitData = unpack("B$blen", pack("H$hlen", $rawData)); 
+  #my $blen = $hlen * 4;
+  #my $bitData = unpack("B$blen", pack("H$hlen", $rawData)); 
 
   Log3 $name, 3, "SD_WS_Maverick_Parse  $model ($msg) length: $hlen";
-  return;
   
-  #      4    8  9    12            24    28     36
-  # 0011 0110 1  010  000100000010  1111  00111000 0000  eas8007
-  # 0111 0010 1  010  000010111100  1111  00000000 0000  other device from anfichtn
-  #      ID  Bat CHN       TMP      ??   HUM
-  
+  #1      8     13    18       26 
+  #AA999559 55555 95999 A9A9A669  Sensor 1 =21 °2
+  #AA999559 95996 55555 95A65565  Sensor 2 =22 °2
+  #
+  #Header    Sen1  Sens2   
   #my $hashumidity = FALSE;
   
   ## Todo: Change decoding per model into a foreach  
    #foreach $key (keys %models) {
   #   ....
   #}
-    my $bitData2 = substr($bitData,0,8) . ' ' . substr($bitData,8,1) . ' ' . substr($bitData,9,3);
-       $bitData2 = $bitData2 . ' ' . substr($bitData,12,12) . ' ' . substr($bitData,24,4) . ' ' . substr($bitData,28,8);
-    Log3 $iohash, 5, $model . ' converted to bits: ' . $bitData2;
-    
-    my $id = substr($rawData,0,2);
-    my $bat = int(substr($bitData,8,1)) eq "1" ? "ok" : "low";
-    my $channel = oct("0b" . substr($bitData,9,3)) + 1;
-    my $temp = oct("0b" . substr($bitData,12,12));
-    my $bit24bis27 = oct("0b".substr($bitData,24,4));
-    my $hum = oct("0b" . substr($bitData,28,8));
-    
-    
-    
-    Log3 $iohash, 4, "$model decoded protocolid: 7 sensor id=$id, channel=$channel, temp=$temp, hum=$hum, bat=$bat";
 
-    my $deviceCode;
+    #
+	my $startup = substr($rawData,6,2);
+	my $temp_str1 = substr($rawData,8,5);
+	my $temp_str2 = substr($rawData,13,5);
+	my $unknown = substr($rawData,18);
+  
+    Log3 $iohash, 4, "$model decoded protocolid: 47 sensor startup=$startup, temp1=$temp_str1, temp2=$temp_str2, unknown=$unknown";
     
-	my $longids = AttrVal($iohash->{NAME},'longids',0);
-	if ( ($longids ne "0") && ($longids eq "1" || $longids eq "ALL" || (",$longids," =~ m/,$model,/)))
-	{
-		$deviceCode=$model.'_'.$id.$channel;
-		Log3 $iohash,4, "$name using longid: $longids model: $model";
-	} else {
-		$deviceCode = $model . "_" . $channel;
+    # Convert 
+    $temp_str1 =~ tr/569A/0123/;
+    $temp_str2 =~ tr/569A/0123/;
+    
+    # Calculate temp from data
+    my $c;
+	my $temp1=-532;
+	for ( my $i = 0; $i < length($temp_str1); $i++ ) { 
+	    $c = substr( $temp_str1, $i, 1);
+	    $temp1 += $c*4**(4-$i);
 	}
+    
+    my $temp2=-532;
+	for ( my $i = 0; $i < length($temp_str2); $i++ ) { 
+	    $c = substr( $temp_str2, $i, 1);
+	    $temp2 += $c*4**(4-$i);
+	}
+    
+    
+    Log3 $iohash, 4, "$model decoded protocolid: temp1=$temp1, temp2=$temp2;";
+    
+    
+    
+  
+
     
     #print Dumper($modules{SD_WS_Maverick}{defptr});
     
-    my $def = $modules{SD_WS_Maverick}{defptr}{$iohash->{NAME} . "." . $deviceCode};
-    $def = $modules{SD_WS_Maverick}{defptr}{$deviceCode} if(!$def);
+    my $def = $modules{SD_WS_Maverick}{defptr}{$iohash->{NAME} };
+    $def = $modules{SD_WS_Maverick}{defptr}{$model} if(!$def);
 
     if(!$def) {
-		Log3 $iohash, 1, 'SD_WS_Maverick: UNDEFINED sensor ' . $model . ' detected, code ' . $deviceCode;
-		return "UNDEFINED $deviceCode SD_WS_Maverick $deviceCode";
+		Log3 $iohash, 1, 'SD_WS_Maverick: UNDEFINED sensor ' . $model;
+		return "UNDEFINED $model SD_WS_Maverick $model";
     }
         #Log3 $iohash, 3, 'SD_WS_Maverick: ' . $def->{NAME} . ' ' . $id;
 	
@@ -139,24 +147,24 @@ SD_WS_Maverick_Parse($$)
 	{
 		my $minsecs = AttrVal($iohash->{NAME},'minsecs',0);
 		if($hash->{lastReceive} && (time() - $hash->{lastReceive} < $minsecs)) {
-			Log3 $hash, 4, "$deviceCode Dropped due to short time. minsecs=$minsecs";
+			Log3 $hash, 4, "$model Dropped due to short time. minsecs=$minsecs";
 		  	return "";
 		}
 	}
 
 	$hash->{lastReceive} = time();
 	$hash->{lastMSG} = $rawData;
-	$hash->{bitMSG} = $bitData2; 
+	#$hash->{bitMSG} = $bitData2; 
 
-    my $state = "T: $temp". ($hum>0 ? " H: $hum":"");
+    my $state = "T: $temp1"." T2: $temp2" ;
     
     readingsBeginUpdate($hash);
     readingsBulkUpdate($hash, "state", $state);
-    readingsBulkUpdate($hash, "temperature", $temp)  if ($temp ne"");
-    readingsBulkUpdate($hash, "humidity", $hum)  if ($hum ne "" && $hum != 0 );
-    readingsBulkUpdate($hash, "battery", $bat) if ($bat ne "");
-    readingsBulkUpdate($hash, "channel", $channel) if ($channel ne "");
-
+    readingsBulkUpdate($hash, "messageType", $startup);
+    
+    readingsBulkUpdate($hash, "temp1", $temp1)  if ($temp1 ne"");
+    readingsBulkUpdate($hash, "temp2", $temp2)  if ($temp2 ne"");
+ 
     readingsEndUpdate($hash, 1); # Notify is done by Dispatch
 
 	return $name;
