@@ -2023,6 +2023,12 @@ sub SIGNALduno_Dispatch($$$)
 	my ($hash, $rmsg, $dmsg) = @_;
 	my $name = $hash->{NAME};
 	
+	if (undef($dmsg))
+	{
+		Log3 $name, 5, "$name: (SIGNALduno_Dispatch) dmsg is undef. Skipping dispatch call";
+		return;
+	}
+	
 	Log3 $name, 5, "$name: converted Data to ($dmsg)";
 
 	#Dispatch only if $dmsg is different from last $dmsg, or if 2 seconds are between transmits
