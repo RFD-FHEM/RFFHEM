@@ -29,6 +29,7 @@ Supported Devices / Protocols
 |les led  | Remote controlled led lamp |
 |Livolo | Remote switches and sockets  |
 |Somfy RTS | Somfy blinds |
+|Maverick | Wireless BBQ thermometer |
 
 How to install
 ======
