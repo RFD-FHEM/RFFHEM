@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 104841  2016-06-28 21:45:00Z v3.2.1-devRts $
+# $Id: 00_SIGNALduino.pm 10484 2016-08-14 18:00:00Z v3.3.0-dev $
 #
 # v3.3.0 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -917,7 +917,7 @@ SIGNALduino_Initialize($)
                       ." flashCommand"
   					  ." hardware:nano328,uno,promini328"
 					  ." debug:0,1"
-					  ." longids:0,1"
+					  ." longids"
 					  ." minsecs"
 					  ." whitelist_IDs"
 					  ." WS09_WSModel:undef,WH1080,CTW600"
@@ -1001,7 +1001,7 @@ SIGNALduino_Define($$)
   SIGNALduino_IdList($hash ,$name, $whitelistIDs);
   
   if($dev ne "none") {
-    $ret = DevIo_OpenDev($hash, 0, "SIGNALduino_DoInit");
+    $ret = DevIo_OpenDev($hash, 0, "SIGNALduino_DoInit", &SIGNALduino_Connect);
     
  
     if (defined ($hash->{INACTIVE}) && $hash->{INACTIVE}==1){
@@ -1023,6 +1023,14 @@ SIGNALduino_Define($$)
   Log3 $name, 3, "$name: Firmwareversion: ".$hash->{READINGS}{version}{VAL}  if ($hash->{READINGS}{version}{VAL});
 
   return $ret;
+}
+
+###############################
+sub SIGNALduino_Connect($$)
+{
+	my ($hash, $err) = @_;
+
+	Log3($hash, 4, "SIGNALduino $hash->{NAME}: ${err}") if ($err);
 }
 
 #####################################
@@ -1152,7 +1160,7 @@ SIGNALduino_Set($@)
       $log .= "\n\nNo flashCommand found. Please define this attribute.\n\n";
     }
 
-    DevIo_OpenDev($hash, 0, "SIGNALduino_DoInit");
+    DevIo_OpenDev($hash, 0, "SIGNALduino_DoInit", &SIGNALduino_Connect);
     $log .= "$name opened\n";
 
     return $log;
@@ -1232,7 +1240,7 @@ SIGNALduino_Set($@)
 			Log3 $name, 5, "$name: sendmsg IT V1 convertet tristate to bits=$data";
 		}
 		if (!defined($clock)) {
-			$hash->{ITClock} = 250 if (!defined($hash->{ITClock}));   # Todo: Klären wo ITClock verwendet wird und ob wir diesen Teil nicht auf Protokoll 3,4 und 17 minimieren
+			$hash->{ITClock} = 250 if (!defined($hash->{ITClock}));   # Todo: Klaeren wo ITClock verwendet wird und ob wir diesen Teil nicht auf Protokoll 3,4 und 17 minimieren
 			$clock=$ProtocolListSIGNALduino{$protocol}{clockabs} > 1 ?$ProtocolListSIGNALduino{$protocol}{clockabs}:$hash->{ITClock};
 		}
 
@@ -1420,7 +1428,7 @@ SIGNALduino_ResetDevice($)
   my ($hash) = @_;
 
   DevIo_CloseDev($hash);
-  my $ret = DevIo_OpenDev($hash, 0, "SIGNALduino_DoInit");
+  my $ret = DevIo_OpenDev($hash, 0, "SIGNALduino_DoInit", &SIGNALduino_Connect);
 
   return $ret;
 }
@@ -1442,70 +1450,82 @@ SIGNALduino_DoInit($)
  
   	if (($hash->{DEF} !~ m/\@DirectIO/) and ($hash->{DEF} !~ m/none/) )
 	{
-		Log3 $hash, 1, "init: ".$hash->{DEF};
+		Log3 $hash, 1, "init_sduino: ".$hash->{DEF};
 		
 		SIGNALduino_Clear($hash);
 		
-		SIGNALduino_SimpleWrite($hash, "XQ"); # Disable receiver
+		#SIGNALduino_SimpleWrite($hash, "XQ"); # Disable receiver
 		
 		
 		# Try to get version from Arduino
-		while ($try++ < 3 && $ver !~ m/^V/) {
-			SIGNALduino_SimpleWrite($hash, "V");
-			($err, $ver) = SIGNALduino_ReadAnswer($hash, "version", 0, undef);
-			return "$name: $err" if($err && ($err !~ m/Timeout/ || $try == 3));
-			$ver = "" if(!$ver);
-		}
-		# Check received string
-		if($ver !~ m/SIGNALduino/) {
-			#$attr{$name}{dummy} = 1; ## Todo: Do not alter attribues, they belong to the user
+		#while ($try++ < 3 && $ver !~ m/^V/) {
+		#	SIGNALduino_SimpleWrite($hash, "V");
+		#	($err, $ver) = SIGNALduino_ReadAnswer($hash, "version", 0, undef);
+		#	return "$name: $err" if($err && ($err !~ m/Timeout/ || $try == 3));
+		#	$ver = "" if(!$ver);
+		#}
+		#SIGNALduino_SimpleWrite($hash, "V");
+		
+		RemoveInternalTimer($hash);
+		InternalTimer(gettimeofday()+1, "SIGNALduino_StartInit", $hash, 0);
+	}
+	# Reset the counter
+	delete($hash->{XMIT_TIME});
+	delete($hash->{NR_CMD_LAST_H});
+	return;
+	#return undef;
+}
+
+
+sub SIGNALduino_StartInit($)
+{
+	my ($hash) = @_;
+	my $name = $hash->{NAME};
+	$hash->{version} = undef;
+	
+	Log3 $name,4 , "$name: get version";
+	$hash->{getcmd}->{cmd} = "version";
+	SIGNALduino_SimpleWrite($hash, "V");
+	RemoveInternalTimer($hash);
+	InternalTimer(gettimeofday()+1, "SIGNALduino_CheckCmdResp", $hash, 0);
+}
+
+
+####################
+sub SIGNALduino_CheckCmdResp($)
+{
+	my ($hash) = @_;
+	my $name = $hash->{NAME};
+	my $msg = undef;
+	my $ver;
+	
+	if ($hash->{version}) {
+		$ver = $hash->{version};
+		if ($ver !~ m/SIGNALduino/) {
 			$msg = "$name: Not an SIGNALduino device, setting attribute dummy=1 got for V:  $ver";
 			Log3 $hash, 1, $msg;
 			readingsSingleUpdate($hash, "state", "no SIGNALduino found", 1);
 			$hash->{INACTIVE}=1;
-			return $msg;
 		}
 		elsif($ver =~ m/^V 3\.1\./) {
-			#$attr{$name}{dummy} = 1;
 			$msg = "$name: Version of your arduino is not compatible, pleas flash new firmware. (setting device to inactive) Got for V:  $ver";
 			readingsSingleUpdate($hash, "state", "unsupported firmware found", 1);
 			Log3 $hash, 1, $msg;
 			$hash->{INACTIVE}=1;
-			return $msg;
 		}
-		readingsSingleUpdate($hash, "version", $ver, 0);
-		
-	
-		$ver =~ s/[\r\n]//g;
-	
-		#$debug = AttrVal($name, "verbose", 3) == 5;
-		#Log3 $name, 3, "$name: setting debug to: " . $debug;
-
-		
-		# Cmd-String feststellen
-		SIGNALduino_Get($hash, $name, "cmds", 0);
-		#$cmds =~ s/$name cmds =>//g;
-		#$cmds =~ s/ //g;
-		#$hash->{CMDS} = $cmds;
-		#Log3 $hash, 3, "$name: Possible commands: " . $hash->{CMDS};
-		#readingsSingleUpdate($hash, "state", "Programming", 1);
-		
+		else {
+			readingsSingleUpdate($hash, "state", "opened", 1);
+			Log3 $name, 3, "$name: initialized";
+			#SIGNALduino_SimpleWrite($hash, "XE"); # Enable receiver
+		}
 	}
-	#  if( my $initCommandsString = AttrVal($name, "initCommands", undef) ) {
-	#    my @initCommands = split(' ', $initCommandsString);
-	#    foreach my $command (@initCommands) {
-	#      SIGNALduino_SimpleWrite($hash, $command);
-	#    }
-	#  }
-	#  $hash->{STATE} = "Initialized";
-	readingsSingleUpdate($hash, "state", "opened", 1);
-	SIGNALduino_SimpleWrite($hash, "XE"); # Enable receiver
-		
-	# Reset the counter
-	delete($hash->{XMIT_TIME});
-	delete($hash->{NR_CMD_LAST_H});
-	return undef;
+	else {
+		#RemoveInternalTimer($hash);
+		#InternalTimer(gettimeofday()+1, "SIGNALduino_StartInit", $hash, 0);
+	}
 }
+
+
 
 #####################################
 # This is a direct read for commands like get
@@ -1734,13 +1754,15 @@ SIGNALduino_Read($)
 	{
 		my $regexp=$gets{$hash->{getcmd}->{cmd}}[1];
 		if(!defined($regexp) || $rmsg =~ m/$regexp/) {	 	
+			if ($hash->{getcmd}->{cmd} eq 'version') {
+				$hash->{version} = $rmsg;
+			}
 			$rmsg = SIGNALduino_parseResponse($hash,$hash->{getcmd}->{cmd},$rmsg);
 			readingsSingleUpdate($hash, $hash->{getcmd}->{cmd}, $rmsg, 0);
 			my $ao = asyncOutput( $hash->{getcmd}->{asyncOut}, $hash->{getcmd}->{cmd}.": " . $rmsg );
 			delete($hash->{getcmd});
 		} else {
 			Log3 $name, 3, "$name/msg READ: Received answer ($rmsg) for ". $hash->{getcmd}->{cmd}." does not match $regexp"; 
-			
 		}
 	}
   }
@@ -2037,7 +2059,7 @@ sub SIGNALduno_Dispatch($$$)
 	my ($hash, $rmsg, $dmsg) = @_;
 	my $name = $hash->{NAME};
 	
-	if (undef($dmsg))
+	if (!defined($dmsg))
 	{
 		Log3 $name, 5, "$name: (SIGNALduno_Dispatch) dmsg is undef. Skipping dispatch call";
 		return;
@@ -2783,10 +2805,15 @@ sub SIGNALduino_IdList($$$)
 	my $wflag = 0;
 	if (defined($aVal) && length($aVal)>0)
 	{
-		%WhitelistIDs = map { $_ => 1 } split(",", $aVal);
-		#my $w = join ', ' => map "$_" => keys %WhitelistIDs;
-		#Log3 $name, 3, "Attr whitelist $w";
-		$wflag = 1;
+		if (substr($aVal,0 ,1) eq '#') {
+			Log3 $name, 3, "Attr whitelist deaktiviert: $aVal";
+		}
+		else {
+			%WhitelistIDs = map { $_ => 1 } split(",", $aVal);
+			#my $w = join ', ' => map "$_" => keys %WhitelistIDs;
+			#Log3 $name, 3, "Attr whitelist $w";
+			$wflag = 1;
+		}
 	}
 	my $id;
 	foreach $id (keys %ProtocolListSIGNALduino)
