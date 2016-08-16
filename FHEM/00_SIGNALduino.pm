@@ -79,6 +79,7 @@ my $clientsSIGNALduino = ":IT:"
 						."SOMFY:"
 						."SD_UT:"	## BELL 201.2 TXA
 				        ."SD_WS_Maverick:"
+				        ."FLAMENCO:"
 				      	."SIGNALduino_un:"
 						; 
 
@@ -98,7 +99,9 @@ my %matchListSIGNALduino = (
      "14:Dooya"					=> '^P16#[A-Fa-f0-9]+',
      "15:SOMFY"					=> '^YsA[0-9A-F]+',
      "16:SD_WS_Maverick"		=> '^P47#[A-Fa-f0-9]+',
-     "17:SD_UT"            		=> '^u30#.*',						## BELL 201.2 TXA
+     "17:SD_UT"            		=> '^u30#.*',								## BELL 201.2 TXA
+     "18:FLAMENCO"            	=> '^P13#[A-Fa-f0-9]+',						## Flamenco Smoke
+     
      "X:SIGNALduino_un"			=> '^[uP]\d+#.*',
 );
 
@@ -310,18 +313,18 @@ my %ProtocolListSIGNALduino  = (
 			polarity        => 'invert',			
 			
 		}, 	
-	"13"    => 			## FA21RF
+	"13"    => 			## FLAMENCO FA20 / FA 21
 		{
-            name			=> '21RF',	
+            name			=> 'Flamenco',	
 			id          	=> '13',
 			one				=> [1,-2],
 			zero			=> [1,-4],
 			sync			=> [10,-1],		
 			clockabs		=> 800,
 			format 			=> 'twostate',	  		
-			preamble		=> 'u13#',				# prepend to converted message	
-			#clientmodule    => '',   				# not used now
-			#modulematch     => '',  				# not used now
+			preamble		=> 'P13#',				# prepend to converted message	
+			#clientmodule    => '14_FLAMENCO',   				# not used now
+			#modulematch     => 'P13#.*',  				# not used now
 			length_min      => '20',
 			length_max      => '40',
 		}, 		
