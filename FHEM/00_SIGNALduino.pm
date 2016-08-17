@@ -2040,7 +2040,7 @@ sub SIGNALduno_Dispatch($$$)
 	my ($hash, $rmsg, $dmsg) = @_;
 	my $name = $hash->{NAME};
 	
-	if (undef($dmsg))
+	if (!defined($dmsg))
 	{
 		Log3 $name, 5, "$name: (SIGNALduno_Dispatch) dmsg is undef. Skipping dispatch call";
 		return;
@@ -2238,7 +2238,7 @@ SIGNALduino_Parse_MS($$$$%)
 			#undef(@retvalue); undef($rcode);
 			
 			
-			my $modulematch;
+			my $modulematch = undef;
 			if (defined($ProtocolListSIGNALduino{$id}{modulematch})) {
 				$modulematch = $ProtocolListSIGNALduino{$id}{modulematch};
 			}
