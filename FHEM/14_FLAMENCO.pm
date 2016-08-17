@@ -183,7 +183,7 @@ FLAMENCO_Parse($$)
 {
  	my ($iohash, $msg) = @_;
 	#my $rawData = substr($msg, 2);
-	my $name = $iohash->{NAME};
+	#my $name = $iohash->{NAME};
 	my ($protocol,$rawData) = split("#",$msg);
 	$protocol=~ s/^[P](\d+)/$1/; # extract protocol
 	
