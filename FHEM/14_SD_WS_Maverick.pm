@@ -1,9 +1,8 @@
 ##############################################
-# $Id: 14_SD_WS07.pm 9346 2016-07-14 18:00:00 v3.2-dev $
+# $Id: 14_SD_WS_Maverick.pm 9346 2016-07-14 18:00:00 v3.3-dev $
 # 
-# The purpose of this module is to support serval eurochron
-# weather sensors like eas8007 which use the same protocol
-# Sidey79 & Ralf9  2015-2016
+# The purpose of this module is to support Maverick sensors
+# Sidey79 & Cruizer 2016
 #
 
 package main;
@@ -16,38 +15,38 @@ use warnings;
 
 
 sub
-SD_WS07_Initialize($)
+SD_WS_Maverick_Initialize($)
 {
   my ($hash) = @_;
 
-  $hash->{Match}     = "^P7#[A-Fa-f0-9]{6}F[A-Fa-f0-9]{2}";    ## pos 7 ist aktuell immer 0xF
-  $hash->{DefFn}     = "SD_WS07_Define";
-  $hash->{UndefFn}   = "SD_WS07_Undef";
-  $hash->{ParseFn}   = "SD_WS07_Parse";
-  $hash->{AttrFn}	 = "SD_WS07_Attr";
+  $hash->{Match}     = "^P47#AA9995[A-Fa-f0-9]+";    
+  $hash->{DefFn}     = "SD_WS_Maverick_Define";
+  $hash->{UndefFn}   = "SD_WS_Maverick_Undef";
+  $hash->{ParseFn}   = "SD_WS_Maverick_Parse";
+  $hash->{AttrFn}	 = "SD_WS_Maverick_Attr";
   $hash->{AttrList}  = "IODev do_not_notify:1,0 ignore:0,1 showtime:1,0 " .
                         "$readingFnAttributes ";
   $hash->{AutoCreate} =
-        { "SD_WS07.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,",  autocreateThreshold => "2:180"} };
-
+        { "SD_WS_Maverick.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME",  autocreateThreshold => "2:180"} };
+## Todo: Prüfen der Autocreate Einstellungen
 
 }
 
 #############################
 sub
-SD_WS07_Define($$)
+SD_WS_Maverick_Define($$)
 {
   my ($hash, $def) = @_;
   my @a = split("[ \t][ \t]*", $def);
 
-  return "wrong syntax: define <name> SD_WS07 <code> ".int(@a)
+  return "wrong syntax: define <name> SD_WS_Maverick <model>  ".int(@a)
         if(int(@a) < 3 );
 
   $hash->{CODE} = $a[2];
   $hash->{lastMSG} =  "";
-  $hash->{bitMSG} =  "";
+ # $hash->{bitMSG} =  "";
 
-  $modules{SD_WS07}{defptr}{$a[2]} = $hash;
+  $modules{SD_WS_Maverick}{defptr}{$a[2]} = $hash;
   $hash->{STATE} = "Defined";
   
   my $name= $hash->{NAME};
@@ -56,19 +55,19 @@ SD_WS07_Define($$)
 
 #####################################
 sub
-SD_WS07_Undef($$)
+SD_WS_Maverick_Undef($$)
 {
   my ($hash, $name) = @_;
-  delete($modules{SD_WS07}{defptr}{$hash->{CODE}})
+  delete($modules{SD_WS_Maverick}{defptr}{$hash->{CODE}})
      if(defined($hash->{CODE}) &&
-        defined($modules{SD_WS07}{defptr}{$hash->{CODE}}));
+        defined($modules{SD_WS_Maverick}{defptr}{$hash->{CODE}}));
   return undef;
 }
 
 
 ###################################
 sub
-SD_WS07_Parse($$)
+SD_WS_Maverick_Parse($$)
 {
   my ($iohash, $msg) = @_;
   #my $rawData = substr($msg, 2);
@@ -76,112 +75,103 @@ SD_WS07_Parse($$)
   my (undef ,$rawData) = split("#",$msg);
   #$protocol=~ s/^P(\d+)/$1/; # extract protocol
 
-  my $model = "SD_WS07";
+  my $model = "SD_WS_Maverick";
   my $hlen = length($rawData);
-  my $blen = $hlen * 4;
-  my $bitData = unpack("B$blen", pack("H$hlen", $rawData)); 
+  #my $blen = $hlen * 4;
+  #my $bitData = unpack("B$blen", pack("H$hlen", $rawData)); 
 
-  Log3 $name, 4, "SD_WS07_Parse  $model ($msg) length: $hlen";
+  Log3 $name, 3, "SD_WS_Maverick_Parse  $model ($msg) length: $hlen";
   
-  #      4    8  9    12            24    28     36
-  # 0011 0110 1  010  000100000010  1111  00111000 0000  eas8007
-  # 0111 0010 1  010  000010111100  1111  00000000 0000  other device from anfichtn
-  #      ID  Bat CHN       TMP      ??   HUM
-  
+  #1      8     13    18       26 
+  #AA999559 55555 95999 A9A9A669  Sensor 1 =21 °2
+  #AA999559 95996 55555 95A65565  Sensor 2 =22 °2
+  #
+  #Header    Sen1  Sens2   
   #my $hashumidity = FALSE;
   
   ## Todo: Change decoding per model into a foreach  
    #foreach $key (keys %models) {
   #   ....
   #}
-    my $bitData2 = substr($bitData,0,8) . ' ' . substr($bitData,8,1) . ' ' . substr($bitData,9,3);
-       $bitData2 = $bitData2 . ' ' . substr($bitData,12,12) . ' ' . substr($bitData,24,4) . ' ' . substr($bitData,28,8);
-    Log3 $iohash, 5, $model . ' converted to bits: ' . $bitData2;
-    
-    my $id = substr($rawData,0,2);
-    my $bat = int(substr($bitData,8,1)) eq "1" ? "ok" : "low";
-    my $channel = oct("0b" . substr($bitData,9,3)) + 1;
-    my $temp = oct("0b" . substr($bitData,12,12));
-    my $bit24bis27 = oct("0b".substr($bitData,24,4));
-    my $hum = oct("0b" . substr($bitData,28,8));
-    
-    if ($hum==0)
-    {
-    	$model=$model."_T";		
-    } else {
-    	$model=$model."_TH";		
-    	
-    	
-    }
-    
-    if ($hum > 100) {
-      return '';  # Eigentlich muesste sowas wie ein skip rein, damit ggf. spaeter noch weitre Sensoren dekodiert werden koennen.
-    }
-    
-    if ($temp > 700 && $temp < 3840) {
-      return '';
-    } elsif ($temp >= 3840) {        # negative Temperaturen, muss noch ueberprueft und optimiert werden 
-      $temp -= 4095;
-    }  
-    $temp /= 10;
-    
-    Log3 $iohash, 4, "$model decoded protocolid: 7 sensor id=$id, channel=$channel, temp=$temp, hum=$hum, bat=$bat";
 
-    my $deviceCode;
+    #
+	my $startup = substr($rawData,6,2);
+	my $temp_str1 = substr($rawData,8,5);
+	my $temp_str2 = substr($rawData,13,5);
+	my $unknown = substr($rawData,18);
+  
+    Log3 $iohash, 4, "$model decoded protocolid: 47 sensor startup=$startup, temp1=$temp_str1, temp2=$temp_str2, unknown=$unknown";
     
-	my $longids = AttrVal($iohash->{NAME},'longids',0);
-	if ( ($longids ne "0") && ($longids eq "1" || $longids eq "ALL" || (",$longids," =~ m/,$model,/)))
-	{
-		$deviceCode=$model.'_'.$id.$channel;
-		Log3 $iohash,4, "$name using longid: $longids model: $model";
-	} else {
-		$deviceCode = $model . "_" . $channel;
+    # Convert 
+    $temp_str1 =~ tr/569A/0123/;
+    $temp_str2 =~ tr/569A/0123/;
+    
+    # Calculate temp from data
+    my $c;
+	my $temp1=-532;
+	for ( my $i = 0; $i < length($temp_str1); $i++ ) { 
+	    $c = substr( $temp_str1, $i, 1);
+	    $temp1 += $c*4**(4-$i);
 	}
     
-    #print Dumper($modules{SD_WS07}{defptr});
+    my $temp2=-532;
+	for ( my $i = 0; $i < length($temp_str2); $i++ ) { 
+	    $c = substr( $temp_str2, $i, 1);
+	    $temp2 += $c*4**(4-$i);
+	}
     
-    my $def = $modules{SD_WS07}{defptr}{$iohash->{NAME} . "." . $deviceCode};
-    $def = $modules{SD_WS07}{defptr}{$deviceCode} if(!$def);
+    
+    Log3 $iohash, 4, "$model decoded protocolid: temp1=$temp1, temp2=$temp2;";
+    
+    
+    
+  
+
+    
+    #print Dumper($modules{SD_WS_Maverick}{defptr});
+    
+    my $def = $modules{SD_WS_Maverick}{defptr}{$iohash->{NAME} };
+    $def = $modules{SD_WS_Maverick}{defptr}{$model} if(!$def);
 
     if(!$def) {
-		Log3 $iohash, 1, 'SD_WS07: UNDEFINED sensor ' . $model . ' detected, code ' . $deviceCode;
-		return "UNDEFINED $deviceCode SD_WS07 $deviceCode";
+		Log3 $iohash, 1, 'SD_WS_Maverick: UNDEFINED sensor ' . $model;
+		return "UNDEFINED $model SD_WS_Maverick $model";
     }
-        #Log3 $iohash, 3, 'SD_WS07: ' . $def->{NAME} . ' ' . $id;
+        #Log3 $iohash, 3, 'SD_WS_Maverick: ' . $def->{NAME} . ' ' . $id;
 	
 	my $hash = $def;
 	$name = $hash->{NAME};
-	Log3 $name, 4, "SD_WS07: $name ($rawData)";  
+	Log3 $name, 4, "SD_WS_Maverick: $name ($rawData)";  
 
 	if (!defined(AttrVal($hash->{NAME},"event-min-interval",undef)))
 	{
 		my $minsecs = AttrVal($iohash->{NAME},'minsecs',0);
 		if($hash->{lastReceive} && (time() - $hash->{lastReceive} < $minsecs)) {
-			Log3 $hash, 4, "$deviceCode Dropped due to short time. minsecs=$minsecs";
+			Log3 $hash, 4, "$model Dropped due to short time. minsecs=$minsecs";
 		  	return "";
 		}
 	}
 
 	$hash->{lastReceive} = time();
 	$hash->{lastMSG} = $rawData;
-	$hash->{bitMSG} = $bitData2; 
+	#$hash->{bitMSG} = $bitData2; 
 
-    my $state = "T: $temp". ($hum>0 ? " H: $hum":"");
+    my $state = "T: $temp1"." T2: $temp2" ;
     
     readingsBeginUpdate($hash);
     readingsBulkUpdate($hash, "state", $state);
-    readingsBulkUpdate($hash, "temperature", $temp)  if ($temp ne"");
-    readingsBulkUpdate($hash, "humidity", $hum)  if ($hum ne "" && $hum != 0 );
-    readingsBulkUpdate($hash, "battery", $bat) if ($bat ne "");
-    readingsBulkUpdate($hash, "channel", $channel) if ($channel ne "");
-
+    readingsBulkUpdate($hash, "messageType", $startup);
+    
+    readingsBulkUpdate($hash, "temp1", $temp1)  if ($temp1 ne"");
+    readingsBulkUpdate($hash, "temp2", $temp2)  if ($temp2 ne"");
+ 
     readingsEndUpdate($hash, 1); # Notify is done by Dispatch
 
 	return $name;
 
 }
 
-sub SD_WS07_Attr(@)
+sub SD_WS_Maverick_Attr(@)
 {
   my @a = @_;
 
@@ -191,8 +181,8 @@ sub SD_WS07_Attr(@)
   my $hash = $defs{$a[1]};
   my $iohash = $defs{$a[3]};
   my $cde = $hash->{CODE};
-  delete($modules{SD_WS07}{defptr}{$cde});
-  $modules{SD_WS07}{defptr}{$iohash->{NAME} . "." . $cde} = $hash;
+  delete($modules{SD_WS_Maverick}{defptr}{$cde});
+  $modules{SD_WS_Maverick}{defptr}{$iohash->{NAME} . "." . $cde} = $hash;
   return undef;
 }
 
@@ -203,10 +193,10 @@ sub SD_WS07_Attr(@)
 =pod
 =begin html
 
-<a name="SD_WS07"></a>
+<a name="SD_WS_Maverick"></a>
 <h3>Wether Sensors protocol #7</h3>
 <ul>
-  The SD_WS07 module interprets temperature sensor messages received by a Device like CUL, CUN, SIGNALduino etc.<br>
+  The SD_WS_Maverick module interprets temperature sensor messages received by a Device like CUL, CUN, SIGNALduino etc.<br>
   <br>
   <b>Known models:</b>
   <ul>
@@ -217,14 +207,14 @@ sub SD_WS07_Attr(@)
   New received device are add in fhem with autocreate.
   <br><br>
 
-  <a name="SD_WS07_Define"></a>
+  <a name="SD_WS_Maverick_Define"></a>
   <b>Define</b> 
   <ul>The received devices created automatically.<br>
   The ID of the defice is the cannel or, if the longid attribute is specified, it is a combination of channel and some random generated bits at powering the sensor and the channel.<br>
   If you want to use more sensors, than channels available, you can use the longid option to differentiate them.
   </ul>
   <br>
-  <a name="SD_WS07 Events"></a>
+  <a name="SD_WS_Maverick Events"></a>
   <b>Generated readings:</b>
   <br>Some devices may not support all readings, so they will not be presented<br>
   <ul>
@@ -244,10 +234,10 @@ sub SD_WS07_Attr(@)
     <li><a href="#readingFnAttributes">readingFnAttributes</a></li>
   </ul>
 
-  <a name="SD_WS07_Set"></a>
+  <a name="SD_WS_Maverick_Set"></a>
   <b>Set</b> <ul>N/A</ul><br>
 
-  <a name="SD_WS07_Parse"></a>
+  <a name="SD_WS_Maverick_Parse"></a>
   <b>Set</b> <ul>N/A</ul><br>
 
 </ul>
@@ -256,10 +246,10 @@ sub SD_WS07_Attr(@)
 
 =begin html_DE
 
-<a name="SD_WS07"></a>
-<h3>SD_WS07</h3>
+<a name="SD_WS_Maverick"></a>
+<h3>SD_WS_Maverick</h3>
 <ul>
-  Das SD_WS07 Module verarbeitet von einem IO Geraet (CUL, CUN, SIGNALDuino, etc.) empfangene Nachrichten von Temperatur-Sensoren.<br>
+  Das SD_WS_Maverick Module verarbeitet von einem IO Geraet (CUL, CUN, SIGNALDuino, etc.) empfangene Nachrichten von Temperatur-Sensoren.<br>
   <br>
   <b>Unterstuetze Modelle:</b>
   <ul>
@@ -272,13 +262,13 @@ sub SD_WS07_Attr(@)
   Neu empfangene Sensoren werden in FHEM per autocreate angelegt.
   <br><br>
 
-  <a name="SD_WS07_Define"></a>
+  <a name="SD_WS_Maverick_Define"></a>
   <b>Define</b> 
   <ul>Die empfangenen Sensoren werden automatisch angelegt.<br>
   Die ID der angelgten Sensoren ist entweder der Kanal des Sensors, oder wenn das Attribut longid gesetzt ist, dann wird die ID aus dem Kanal und einer Reihe von Bits erzeugt, welche der Sensor beim Einschalten zufaellig vergibt.<br>
   </ul>
   <br>
-  <a name="SD_WS07 Events"></a>
+  <a name="SD_WS_Maverick Events"></a>
   <b>Generierte Readings:</b>
   <ul>
   	 <li>State (T: H:)</li>
@@ -297,10 +287,10 @@ sub SD_WS07_Attr(@)
     <li><a href="#readingFnAttributes">readingFnAttributes</a></li>
   </ul>
 
-  <a name="SD_WS071_Set"></a>
+  <a name="SD_WS_Maverick1_Set"></a>
   <b>Set</b> <ul>N/A</ul><br>
 
-  <a name="SD_WS07_Parse"></a>
+  <a name="SD_WS_Maverick_Parse"></a>
   <b>Set</b> <ul>N/A</ul><br>
 
 </ul>

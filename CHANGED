@@ -1,9 +1,48 @@
+13.08.2016
+  some fixes providing more messages instad of fewer.
+  fixed some manchester realted things
+  added protocol 43 Somfy RTS
+  increased number of pattern from 6 to 8 to support dooya shutter protocol better
+  Rised the allowd numbers in protocol check
+  fixed a possible bug, that append a 0 nibble in mc message
+  added a new information field in mc messages, providing exact number of
+  provided bits
+  fixed incomplete mc output (last nibble was not delivered)
+  decoding mc signals > message buffer is now possible
+  max 340 bits are currently suppored
+  small improvement in processMessage  (if MS decoding fails, 
+  mc or mu decoding is called)
+  corrected readings for firmware version.
+  new sendMsg Function
+  14_SD_WS09.pm WH1080 CRC-Berechung angepaßt--> automatische Modelauswahl
+  
+      
+29.03.2016
+ - Updated Firmware to 3.20b19
+   including various bugfixes and better mc detection
+15.01.2016
+ - Firmware 3.2.0-11b 
+01.1.2016
+ - 14_SD_WS09.pm CTW-600 rain Berechung angepaßt
+26.11.2015
+ - WH1080 rain, battery, wind, temp , hum ok (auch WS-0101)
+ - DCF-77 Meldungen rausgefiltert
+ - Unterscheidung CTW600 und WH1080 (WH1080 getestet) eingebaut
+ 
+12.11.2015
+ - Addes 14_SD_WS09.pm Module for WH1080 (WS-0101, TFA30.3189) 868MHz OOK/ASK
+ 
+26.10.2014
+ - Firmware Update 3.1.8-HF1 due to a bug in the raw send option
+ 23.10.2015
+ - bugfix in 90_SIGNALduino_un (caused to crash fhem)
 20.10.2015
+ - Release 3.1
  - Firmware 3.1.8
  - some fixes and removed some warning
  - For sending IT messages, the clock can be adjusted via set <name> ITClock
  - SIGNALduino_un will catch all messages, which coul'd not be processed
-
+ 
 15.10.2015
  - Addes SD_WS07 Module for Technoline and Eurochron sensordevices
  - Bugfixes for MU messages
@@ -127,7 +166,7 @@
 - Updated HEX files for Arduino, due to broken sync detection for pt2262 and similar
 
 13.04.2015
-- Unterst�tzung f�r Empfang von Conrad RSL Protokoll aufgenommen, senden geht noch nicht!
+- Unterstützung für Empfang von Conrad RSL Protokoll aufgenommen, senden geht noch nicht!
 
 08.04.2015
 - Initial Version of SIGNALduino. It supports IT V1 devices an Devices defined in logical Module CUL_TCM97001 and produces a lot of debug output
