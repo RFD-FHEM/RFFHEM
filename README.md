@@ -1,4 +1,4 @@
-SIGNALduino - FHEM Modules rel 3.3
+SIGNALduino - FHEM Modules rel 3.3 - FLAMNINGO Development
 
 ======
 
@@ -30,7 +30,7 @@ Supported Devices / Protocols
 |Livolo | Remote switches and sockets  |
 |Somfy RTS | Somfy blinds |
 |Maverick | Wireless BBQ thermometer |
-
+|FLAMINGO | Flamningo smoke detector |
 How to install
 ======
 The Perl modules can be loaded directly into your FHEM installation:
