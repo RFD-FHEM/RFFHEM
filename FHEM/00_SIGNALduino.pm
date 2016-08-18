@@ -1493,7 +1493,6 @@ sub SIGNALduino_StartInit($)
 		SIGNALduino_SimpleWrite($hash, "V");
 		$hash->{DevState} = 'waitInit';
 		RemoveInternalTimer($hash);
-		InternalTimer(gettimeofday() + CMD_TIMEOUT, "SIGNALduino_CheckCmdResp", $hash, 0);
 	}
 }
 
@@ -1505,8 +1504,6 @@ sub SIGNALduino_CheckCmdResp($)
 	my $name = $hash->{NAME};
 	my $msg = undef;
 	my $ver;
-	
-	delete($hash->{getcmd});
 	
 	if ($hash->{version}) {
 		$ver = $hash->{version};
