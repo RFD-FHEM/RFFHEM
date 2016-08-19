@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 10484 2016-08-16 18:00:00Z v3.3.0-dev $
+# $Id: 00_SIGNALduino.pm 10484 2016-08-19 18:00:00Z v3.3.0-dev $
 #
 # v3.3.0 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -22,12 +22,14 @@ use Scalar::Util qw(looks_like_number);
 #use POSIX qw( floor);  # can be removed
 #use Math::Round qw();
 
+no strict 'refs';
+
 use constant {
-	INIT_WAIT          => 2,
-	INIT_MAXRETRY      => 3,
-	CMD_TIMEOUT        => 10,
-	KEEPALIVE_TIMEOUT  => 60,
-	KEEPALIVE_MAXRETRY => 3,
+	SDUINO_INIT_WAIT          => 2,
+	SDUINO_INIT_MAXRETRY      => 3,
+	SDUINO_CMD_TIMEOUT        => 10,
+	SDUINO_KEEPALIVE_TIMEOUT  => 60,  #20
+	SDUINO_KEEPALIVE_MAXRETRY => 3,
 };
 
 
@@ -814,7 +816,7 @@ my %ProtocolListSIGNALduino  = (
 			zero 		=> [-1,1],
 			one			=> [-2,1],
 			#start 		=> [-28],
-			preamble 	=> 'u#44',
+			preamble 	=> 'u44#',
 			clientmodule	=> '', # not used now
 			#modulematch 	=> '',
 			length_min 	=> '64',
@@ -843,7 +845,7 @@ my %ProtocolListSIGNALduino  = (
 			zero			=> [8,-1],
 			clockabs     	=> 250,	# -1=auto	
 			format 			=> 'twostate',	# not used now
-			preamble		=> 'u#46',			
+			preamble		=> 'u46#',			
 			clientmodule    => '',   # not used now
 			#modulematch     => '', # not used now
 			length_min      => '16',
@@ -1009,9 +1011,9 @@ SIGNALduino_Define($$)
   SIGNALduino_IdList($hash ,$name, $whitelistIDs);
   
   if($dev ne "none") {
-    $ret = DevIo_OpenDev($hash, 0, "SIGNALduino_DoInit", &SIGNALduino_Connect);
+    $ret = DevIo_OpenDev($hash, 0, "SIGNALduino_DoInit", 'SIGNALduino_Connect');
     
- 
+    
     if (defined ($hash->{INACTIVE}) && $hash->{INACTIVE}==1){
       DevIo_CloseDev($hash);
       return $ret ;
@@ -1035,7 +1037,11 @@ sub SIGNALduino_Connect($$)
 {
 	my ($hash, $err) = @_;
 
-	Log3($hash, 4, "SIGNALduino $hash->{NAME}: ${err}") if ($err);
+	# damit wird die err-msg nur einmal ausgegeben
+	if (!defined($hash->{disConnFlag}) && $err) {
+		Log3($hash, 3, "SIGNALduino### $hash->{NAME}: ${err}");
+		$hash->{disConnFlag} = 1;
+	}
 }
 
 #####################################
@@ -1165,7 +1171,7 @@ SIGNALduino_Set($@)
       $log .= "\n\nNo flashCommand found. Please define this attribute.\n\n";
     }
 
-    DevIo_OpenDev($hash, 0, "SIGNALduino_DoInit", &SIGNALduino_Connect);
+    DevIo_OpenDev($hash, 0, "SIGNALduino_DoInit", 'SIGNALduino_Connect');
     $log .= "$name opened\n";
 
     return $log;
@@ -1361,30 +1367,6 @@ SIGNALduino_Get($@)
   $hash->{getcmd}->{timenow}=time();
   
   return undef; # We will exit here, and give an output only, if asny output is supported. If this is not supported, only the readings are updated
-  
-  return undef if ($hash->{CL} && $hash->{CL}->{canAsyncOutput});    # Exit for async output here
-  
-  ($err, $msg) = SIGNALduino_ReadAnswer($hash, $a[1], 0, $gets{$a[1]}[1]);
-  
-  Log3 $name, 2, "$name: error receiving no answer for ".$gets{$a[1]}[0] . $arg if !defined($msg);
-  Log3 $name, 5, "$name: received message for gets: " . $msg if ($msg);
-  
-  if(!defined($msg)) {
-	DevIo_Disconnected($hash);
-	$msg = "No answer";
-
-  } else {
-  	$msg = SIGNALduino_parseResponse($hash,$hash->{getcmd},$msg);
-  } 
-  
-  delete ($hash->{getcmd});
-  
- 
-  #$hash->{READINGS}{$a[1]}{VAL} = $msg;
-  #$hash->{READINGS}{$a[1]}{TIME} = time();
-  readingsSingleUpdate($hash, $a[1], $msg, 0);
-  return "$a[0] $a[1] => $msg";
-
 }
 
 sub SIGNALduino_parseResponse($$$)
@@ -1419,10 +1401,10 @@ SIGNALduino_Clear($)
 
   # Clear the pipe
   $hash->{RA_Timeout} = 0.1;
-  for(;;) {
-    my ($err, undef) = SIGNALduino_ReadAnswer($hash, "Clear", 0, undef);
-    last if($err && $err =~ m/^Timeout/);
-  }
+  #for(;;) {
+  #  my ($err, undef) = SIGNALduino_ReadAnswer($hash, "Clear", 0, undef);
+  #  last if($err && $err =~ m/^Timeout/);
+  #}
   delete($hash->{RA_Timeout});
 }
 
@@ -1433,7 +1415,7 @@ SIGNALduino_ResetDevice($)
   my ($hash) = @_;
 
   DevIo_CloseDev($hash);
-  my $ret = DevIo_OpenDev($hash, 0, "SIGNALduino_DoInit", &SIGNALduino_Connect);
+  my $ret = DevIo_OpenDev($hash, 0, "SIGNALduino_DoInit", 'SIGNALduino_Connect');
 
   return $ret;
 }
@@ -1451,6 +1433,11 @@ SIGNALduino_DoInit($)
 	#Dirty hack to allow initialisation of DirectIO Device for some debugging and tesing
   	Log3 $hash, 1, "define: ".$hash->{DEF};
   
+	delete($hash->{disConnFlag});
+	
+	#RemoveInternalTimer("HandleWriteQueue:$name");
+	# todo:  $hash->{QUEUE} loeschen
+	
 	undef($hash->{INACTIVE}) if exists($hash->{INACTIVE});
 	
  
@@ -1465,7 +1452,7 @@ SIGNALduino_DoInit($)
 		$hash->{initretry} = 0;
 		
 		RemoveInternalTimer($hash);
-		InternalTimer(gettimeofday() + INIT_WAIT, "SIGNALduino_StartInit", $hash, 0);
+		InternalTimer(gettimeofday() + SDUINO_INIT_WAIT, "SIGNALduino_StartInit", $hash, 0);
 	}
 	# Reset the counter
 	delete($hash->{XMIT_TIME});
@@ -1482,9 +1469,10 @@ sub SIGNALduino_StartInit($)
 	$hash->{version} = undef;
 	
 	Log3 $name,3 , "$name/init: get version, retry = " . $hash->{initretry};
-	if ($hash->{initretry} >= INIT_MAXRETRY) {
+	if ($hash->{initretry} >= SDUINO_INIT_MAXRETRY) {
 		Log3 $name,2 , "$name/init retry count reached. Disonnect";
 		$hash->{INACTIVE}=1;
+		$hash->{DevState} = 'INACTIVE';
 		DevIo_Disconnected($hash);
 		return;
 	}
@@ -1493,7 +1481,7 @@ sub SIGNALduino_StartInit($)
 		SIGNALduino_SimpleWrite($hash, "V");
 		$hash->{DevState} = 'waitInit';
 		RemoveInternalTimer($hash);
-		InternalTimer(gettimeofday() + CMD_TIMEOUT, "SIGNALduino_CheckCmdResp", $hash, 0);
+		InternalTimer(gettimeofday() + SDUINO_CMD_TIMEOUT, "SIGNALduino_CheckCmdResp", $hash, 0);
 	}
 }
 
@@ -1505,6 +1493,8 @@ sub SIGNALduino_CheckCmdResp($)
 	my $name = $hash->{NAME};
 	my $msg = undef;
 	my $ver;
+	
+	#delete($hash->{getcmd});
 	
 	if ($hash->{version}) {
 		$ver = $hash->{version};
@@ -1527,16 +1517,19 @@ sub SIGNALduino_CheckCmdResp($)
 			Log3 $name, 2, "$name: initialized";
 			$hash->{DevState} = 'initialized';
 			SIGNALduino_SimpleWrite($hash, "XE"); # Enable receiver
+			delete($hash->{initretry});
 			# initialize keepalive
 			$hash->{keepalive}{ok}    = 0;
 			$hash->{keepalive}{retry} = 0;
-			InternalTimer(gettimeofday() + KEEPALIVE_TIMEOUT, "SIGNALduino_KeepAlive", $hash, 0);
+			InternalTimer(gettimeofday() + SDUINO_KEEPALIVE_TIMEOUT, "SIGNALduino_KeepAlive", $hash, 0);
 		}
 	}
 	else {
+		delete($hash->{getcmd});
 		$hash->{initretry} ++;
 		#RemoveInternalTimer($hash);
-		InternalTimer(gettimeofday()+1, "SIGNALduino_StartInit", $hash, 0);
+		#InternalTimer(gettimeofday()+1, "SIGNALduino_StartInit", $hash, 0);
+		SIGNALduino_StartInit($hash);
 	}
 }
 
@@ -1693,6 +1686,7 @@ SIGNALduino_Write($$$)
 sub SIGNALduino_AddSendQueue($$)
 {
   my ($hash, $msg) = @_;
+  my $name = $hash->{NAME};
   
   #Log3 $hash, 3,"AddSendQueue: " . $hash->{NAME} . ": $msg";
   
@@ -1700,7 +1694,7 @@ sub SIGNALduino_AddSendQueue($$)
   
   #Log3 $hash , 5, Dumper($hash->{QUEUE});
   
-  
+  #InternalTimer(gettimeofday()+0.1, "SIGNALduino_HandleWriteQueue", "HandleWriteQueue:$name", 1) if (@{$hash->{QUEUE}} == 1);
   InternalTimer(gettimeofday()+0.1, "SIGNALduino_HandleWriteQueue", $hash, 1) if (@{$hash->{QUEUE}} == 1);
 }
 
@@ -1709,6 +1703,7 @@ sub
 SIGNALduino_SendFromQueue($$)
 {
   my ($hash, $msg) = @_;
+  my $name = $hash->{NAME};
   
   if($msg ne "") {
 	SIGNALduino_XmitLimitCheck($hash,$msg);
@@ -1720,6 +1715,8 @@ SIGNALduino_SendFromQueue($$)
   ##############
   # Write the next buffer not earlier than 0.23 seconds
   # else it will be sent too early by the SIGNALduino, resulting in a collision, or may the last command is not finished
+  
+  #InternalTimer(gettimeofday()+0.3, "SIGNALduino_HandleWriteQueue", "HandleWriteQueue:$name", 1);
   InternalTimer(gettimeofday()+0.3, "SIGNALduino_HandleWriteQueue", $hash, 1);
 }
 
@@ -1729,6 +1726,8 @@ SIGNALduino_HandleWriteQueue($)
 {
   my $hash = shift;
   #my @arr = @{$hash->{QUEUE}};
+  my $name = $hash->{NAME};
+  
   if(@{$hash->{QUEUE}}) {
     my $msg= shift(@{$hash->{QUEUE}});
 
@@ -1738,9 +1737,8 @@ SIGNALduino_HandleWriteQueue($)
       SIGNALduino_SendFromQueue($hash, $msg);
     }
   } else {
-  	 my $name= $hash->{NAME};
-  	 Log3 $name, 5, "$name/HandleWriteQueue: nothing to send, stopping timer";
-  	 RemoveInternalTimer($hash);
+  	 Log3 $name, 4, "$name/HandleWriteQueue: nothing to send, stopping timer";
+  	 #RemoveInternalTimer("HandleWriteQueue:$name");
   }
 }
 
@@ -1804,7 +1802,7 @@ sub SIGNALduino_KeepAlive($){
 	Log3 $name,4 , "$name/KeepAliveOk: " . $hash->{keepalive}{ok};
 	if (!$hash->{keepalive}{ok}) {
 		delete($hash->{getcmd});
-		if ($hash->{keepalive}{retry} >= KEEPALIVE_MAXRETRY) {
+		if ($hash->{keepalive}{retry} >= SDUINO_KEEPALIVE_MAXRETRY) {
 			Log3 $name,4 , "$name/keepalive retry count reached. Disonnect";
 			$hash->{INACTIVE}=1;
 			$hash->{DevState} = 'INACTIVE';
@@ -1821,7 +1819,7 @@ sub SIGNALduino_KeepAlive($){
 	Log3 $name,4 , "$name/keepalive retry = " . $hash->{keepalive}{retry};
 	$hash->{keepalive}{ok} = 0;
 	
-	InternalTimer(gettimeofday() + KEEPALIVE_TIMEOUT, "SIGNALduino_KeepAlive", $hash, 1);
+	InternalTimer(gettimeofday() + SDUINO_KEEPALIVE_TIMEOUT, "SIGNALduino_KeepAlive", $hash, 1);
 }
 
 
@@ -2741,7 +2739,7 @@ SIGNALduino_Ready($)
 {
   my ($hash) = @_;
 
-  return DevIo_OpenDev($hash, 1, "SIGNALduino_DoInit")
+  return DevIo_OpenDev($hash, 1, "SIGNALduino_DoInit", 'SIGNALduino_Connect')
                 if($hash->{STATE} eq "disconnected");
 
   # This is relevant for windows/USB only
