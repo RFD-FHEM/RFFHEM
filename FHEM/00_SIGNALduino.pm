@@ -1493,6 +1493,7 @@ sub SIGNALduino_StartInit($)
 		SIGNALduino_SimpleWrite($hash, "V");
 		$hash->{DevState} = 'waitInit';
 		RemoveInternalTimer($hash);
+		InternalTimer(gettimeofday() + CMD_TIMEOUT, "SIGNALduino_CheckCmdResp", $hash, 0);
 	}
 }
 
