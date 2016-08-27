@@ -884,7 +884,7 @@ my %ProtocolListSIGNALduino  = (
 		{
             name			=> 'quigg_gt9000',	
 			id          	=> '49',
-			clockabs     	=> 400, 						# In real it is 500 but this leads to unprceise demodulation 
+			clockabs     	=> 400, 						
 			one				=> [2,-1],
 			zero			=> [1,-3],
 			start			=> [-15,2,-1],
@@ -894,7 +894,22 @@ my %ProtocolListSIGNALduino  = (
 			modulematch     => '^U49#.*',  					# not used now
 			length_min      => '22',
 			length_max      => '28',
-		}, 			
+		}, 
+	"50"    => 			## Opus XT300
+		{
+            name			=> 'optus_XT300',	
+			id          	=> '50',
+			clockabs     	=> 500, 						
+			one				=> [3,-2],
+			zero			=> [1,-2],
+			sync			=> [1,-25],
+			format 			=> 'twostate',	
+			preamble		=> 'U50',						# prepend to converted message	
+			#clientmodule    => '',   						# not used now
+			modulematch     => '^U50#.*',  					# not used now
+			length_min      => '47',
+			length_max      => '48',
+		}, 					
 );
 
 
