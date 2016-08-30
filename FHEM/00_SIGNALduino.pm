@@ -901,14 +901,14 @@ my %ProtocolListSIGNALduino  = (
             name			=> 'optus_XT300',	
 			id          	=> '50',
 			clockabs     	=> 500, 						
-			one				=> [3,-2],
-			zero			=> [1,-2],
-			sync			=> [1,-25],
+			zero			=> [3,-2],
+			one				=> [1,-2],
+		#	start			=> [1,-25],						# neets to be defined
 			format 			=> 'twostate',	
 			preamble		=> 'U50',						# prepend to converted message	
 			#clientmodule    => '',   						# not used now
 			modulematch     => '^U50#.*',  					# not used now
-			length_min      => '47',
+			length_min      => '24',
 			length_max      => '48',
 		}, 					
 );
