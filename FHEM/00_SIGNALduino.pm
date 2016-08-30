@@ -909,7 +909,7 @@ my %ProtocolListSIGNALduino  = (
 			#clientmodule    => '',   						# not used now
 			modulematch     => '^U50#.*',  					# not used now
 			length_min      => '24',
-			length_max      => '48',
+		#	length_max      => '48',
 		}, 					
 );
 
