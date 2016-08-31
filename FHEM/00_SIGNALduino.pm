@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 10484 2016-08-20 20:00:00Z v3.3.0-dev $
+# $Id: 00_SIGNALduino.pm 10484 2016-08-31 21:00:00Z v3.3.0-dev $
 #
 # v3.3.0 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -38,7 +38,7 @@ sub SIGNALduino_Attr(@);
 sub SIGNALduino_HandleWriteQueue($);
 sub SIGNALduino_Parse($$$$@);
 sub SIGNALduino_Read($);
-sub SIGNALduino_ReadAnswer($$$$);
+#sub SIGNALduino_ReadAnswer($$$$);  # wird nicht mehr benoetigt
 sub SIGNALduino_Ready($);
 sub SIGNALduino_Write($$$);
 
@@ -905,7 +905,7 @@ my %ProtocolListSIGNALduino  = (
 			one				=> [1,-2],
 		#	start			=> [1,-25],						# neets to be defined
 			format 			=> 'twostate',	
-			preamble		=> 'U50',						# prepend to converted message	
+			preamble		=> 'U50#',						# prepend to converted message	
 			#clientmodule    => '',   						# not used now
 			modulematch     => '^U50#.*',  					# not used now
 			length_min      => '24',
@@ -1343,6 +1343,11 @@ SIGNALduino_Get($@)
 
   if (IsDummy($name))
   {
+	if (($arg !~  m/;/) && ($arg !~  m/=/)) {
+		Log3 $name, 4, "$name/msg get dispatch: $arg";
+		Dispatch($hash, $arg, undef);
+	        return "";
+	}
   	if ($arg =~ /^M[CSU];.*/)
   	{
 		$arg="\002$arg\003";  	## Add start end end marker if not already there
@@ -1415,7 +1420,9 @@ sub
 SIGNALduino_ResetDevice($)
 {
   my ($hash) = @_;
+  my $name = $hash->{NAME};
 
+  Log3 $hash, 3, "$name reset"; 
   DevIo_CloseDev($hash);
   my $ret = DevIo_OpenDev($hash, 0, "SIGNALduino_DoInit", 'SIGNALduino_Connect');
 
@@ -1483,9 +1490,13 @@ sub SIGNALduino_StartInit($)
 	if ($hash->{initretry} >= SDUINO_INIT_MAXRETRY) {
 		Log3 $name,2 , "$name/init retry count reached. Disonnect";
 		$hash->{DevState} = 'INACTIVE';
-		DevIo_Disconnected($hash);
-		# todo: evtl ist ein einmaliger reset sinnvoll
-		# wenn danach immer noch 'init retry count reached', dann SIGNALduino_CloseDevice()
+		# einmaliger reset, wenn danach immer noch 'init retry count reached', dann SIGNALduino_CloseDevice()
+		if (!defined($hash->{initResetFlag})) {
+			$hash->{initResetFlag} = 1;
+			SIGNALduino_ResetDevice($hash);
+		} else {
+			SIGNALduino_CloseDevice($hash);
+		}
 		return;
 	}
 	else {
@@ -1513,7 +1524,7 @@ sub SIGNALduino_CheckCmdResp($)
 			Log3 $hash, 1, $msg;
 			readingsSingleUpdate($hash, "state", "no SIGNALduino found", 1);
 			$hash->{DevState} = 'INACTIVE';
-			# todo: evtl ist ein SIGNALduino_CloseDevice() sinnvoll
+			SIGNALduino_CloseDevice($hash);
 		}
 		elsif($ver =~ m/^V 3\.1\./) {
 			$msg = "$name: Version of your arduino is not compatible, pleas flash new firmware. (device closed) Got for V:  $ver";
@@ -1526,6 +1537,7 @@ sub SIGNALduino_CheckCmdResp($)
 			readingsSingleUpdate($hash, "state", "opened", 1);
 			Log3 $name, 2, "$name: initialized";
 			$hash->{DevState} = 'initialized';
+			delete($hash->{initResetFlag}) if defined($hash->{initResetFlag});
 			SIGNALduino_SimpleWrite($hash, "XE"); # Enable receiver
 			delete($hash->{initretry});
 			# initialize keepalive
@@ -1818,11 +1830,9 @@ sub SIGNALduino_KeepAlive($){
 	if (!$hash->{keepalive}{ok}) {
 		delete($hash->{getcmd});
 		if ($hash->{keepalive}{retry} >= SDUINO_KEEPALIVE_MAXRETRY) {
-			Log3 $name,4 , "$name/keepalive retry count reached. Disonnect";
+			Log3 $name,4 , "$name/keepalive retry count reached. Reset";
 			$hash->{DevState} = 'INACTIVE';
-			DevIo_Disconnected($hash);
-			# todo: evtl ist ein einmaliger reset sinnvoll
-			# wenn danach immer noch 'keepalive retry count reached', dann SIGNALduino_CloseDevice()
+			SIGNALduino_ResetDevice($hash);
 			return;
 		}
 		else {
@@ -2637,7 +2647,8 @@ SIGNALduino_Parse_MC($$$$@)
 
 			Log3 $name, 4, "$name: Found manchester Protocol id $id clock $clock -> $ProtocolListSIGNALduino{$id}{name}";
 			
-			if (exists($ProtocolListSIGNALduino{$id}{polarity}) && ($ProtocolListSIGNALduino{$id}{polarity} eq 'invert'))
+			if (exists($ProtocolListSIGNALduino{$id}{polarity}) && ($ProtocolListSIGNALduino{$id}{polarity} eq 'invert'))  
+			# todo  && substr($hash->{version},0,6) ne 'V 3.2.')   # bei version V 3.2. nicht invertieren 
 			{
 		   		$bitData= unpack("B$blen", pack("H$hlen", $rawDataInverted)); 
 			} else {
@@ -2957,8 +2968,9 @@ sub SIGNALduino_ITV1_tristateToBit($)
 	my ($msg) = @_;
 	# Convert 0 -> 00   1 -> 11 F => 01 to be compatible with IT Module
 	$msg =~ s/0/00/g;
-	$msg =~ s/1/11/g;	
+	$msg =~ s/1/11/g;
 	$msg =~ s/F/01/g;
+	$msg =~ s/D/10/g;
 		
 	return $msg;
 }
