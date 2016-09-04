@@ -24,6 +24,7 @@ use Scalar::Util qw(looks_like_number);
 
 
 use constant {
+	SDUINO_INIT_WAIT_XQ       => 1.5,  # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
 	SDUINO_CMD_TIMEOUT        => 10,
@@ -34,14 +35,13 @@ use constant {
 
 
 sub SIGNALduino_Attr(@);
-#sub SIGNALduino_Clear($);
+#sub SIGNALduino_Clear($);           # wird nicht mehr benoetigt
 sub SIGNALduino_HandleWriteQueue($);
 sub SIGNALduino_Parse($$$$@);
 sub SIGNALduino_Read($);
 #sub SIGNALduino_ReadAnswer($$$$);  # wird nicht mehr benoetigt
 sub SIGNALduino_Ready($);
 sub SIGNALduino_Write($$$);
-
 sub SIGNALduino_SimpleWrite(@);
 
 #my $debug=0;
@@ -1188,6 +1188,7 @@ SIGNALduino_Set($@)
     return $log;
 
   } elsif ($cmd =~ m/reset/i) {
+	delete($hash->{initResetFlag}) if defined($hash->{initResetFlag});
 	return SIGNALduino_ResetDevice($hash);
   } elsif( $cmd eq "close" ) {
 	$hash->{DevState} = 'closed';
@@ -1429,6 +1430,7 @@ SIGNALduino_ResetDevice($)
   return $ret;
 }
 
+#####################################
 sub
 SIGNALduino_CloseDevice($)
 {
@@ -1464,12 +1466,12 @@ SIGNALduino_DoInit($)
   	if (($hash->{DEF} !~ m/\@DirectIO/) and ($hash->{DEF} !~ m/none/) )
 	{
 		Log3 $hash, 1, "$name/init: ".$hash->{DEF};
-		
-		SIGNALduino_SimpleWrite($hash, "XQ"); # Disable receiver
-		
 		$hash->{initretry} = 0;
-		
 		RemoveInternalTimer($hash);
+		
+		#SIGNALduino_SimpleWrite($hash, "XQ"); # Disable receiver
+		InternalTimer(gettimeofday() + SDUINO_INIT_WAIT_XQ, "SIGNALduino_SimpleWrite_XQ", $hash, 0);
+		
 		InternalTimer(gettimeofday() + SDUINO_INIT_WAIT, "SIGNALduino_StartInit", $hash, 0);
 	}
 	# Reset the counter
@@ -1477,6 +1479,15 @@ SIGNALduino_DoInit($)
 	delete($hash->{NR_CMD_LAST_H});
 	return;
 	#return undef;
+}
+
+# Disable receiver
+sub SIGNALduino_SimpleWrite_XQ($) {
+	my ($hash) = @_;
+	my $name = $hash->{NAME};
+	
+	Log3 $hash, 3, "$name/init: disable receiver (XQ)";
+	SIGNALduino_SimpleWrite($hash, "XQ");
 }
 
 
@@ -1488,13 +1499,14 @@ sub SIGNALduino_StartInit($)
 	
 	Log3 $name,3 , "$name/init: get version, retry = " . $hash->{initretry};
 	if ($hash->{initretry} >= SDUINO_INIT_MAXRETRY) {
-		Log3 $name,2 , "$name/init retry count reached. Disonnect";
 		$hash->{DevState} = 'INACTIVE';
 		# einmaliger reset, wenn danach immer noch 'init retry count reached', dann SIGNALduino_CloseDevice()
 		if (!defined($hash->{initResetFlag})) {
+			Log3 $name,2 , "$name/init retry count reached. Reset";
 			$hash->{initResetFlag} = 1;
 			SIGNALduino_ResetDevice($hash);
 		} else {
+			Log3 $name,2 , "$name/init retry count reached. Closed";
 			SIGNALduino_CloseDevice($hash);
 		}
 		return;
@@ -1539,6 +1551,7 @@ sub SIGNALduino_CheckCmdResp($)
 			$hash->{DevState} = 'initialized';
 			delete($hash->{initResetFlag}) if defined($hash->{initResetFlag});
 			SIGNALduino_SimpleWrite($hash, "XE"); # Enable receiver
+			Log3 $hash, 3, "$name/init: enable receiver (XE)";
 			delete($hash->{initretry});
 			# initialize keepalive
 			$hash->{keepalive}{ok}    = 0;
@@ -1554,98 +1567,6 @@ sub SIGNALduino_CheckCmdResp($)
 	}
 }
 
-
-
-#####################################
-# This is a direct read for commands like get
-# Anydata is used by read file to get the filesize
-sub
-SIGNALduino_ReadAnswer($$$$)
-{
-  my ($hash, $arg, $anydata, $regexp) = @_;
-  my $type = $hash->{TYPE};
-  my $name = $hash->{NAME};
-
-  while($hash->{TYPE} eq "SIGNALduino_RFR") {   # Look for the first "real" SIGNALduino
-    $hash = $hash->{IODev};
-  }
-
-  return ("No FD", undef)
-        if(!$hash || ($^O !~ /Win/ && !defined($hash->{FD})));
-
-  my ($mSIGNALduinodata, $rin) = ("", '');
-  my $buf;
-  my $idx;
-  my $cut = 0;
-  my $to = 3;                                         # 3 seconds timeout
-  $to = $hash->{RA_Timeout} if($hash->{RA_Timeout});  # ...or less
-
-  
-  my $exittime = time()+($to*3);
-  for(;;) {
-
-    if($^O =~ m/Win/ && $hash->{USBDev}) {
-      $hash->{USBDev}->read_const_time($to*1000); # set timeout (ms)
-      # Read anstatt input sonst funzt read_const_time nicht.
-      $buf = $hash->{USBDev}->read(999);          
-      return ("Timeout reading answer for get $arg", undef)
-        if(length($buf) == 0);
-
-    } else {
-      return ("Device lost when reading answer for get $arg", undef)
-        if(!$hash->{FD});
-
-      vec($rin, $hash->{FD}, 1) = 1;
-      my $nfound = select($rin, undef, undef, $to);
-      if($nfound < 0) {
-        next if ($! == EAGAIN() || $! == EINTR() || $! == 0);
-        my $err = $!;
-        DevIo_Disconnected($hash);
-        return("SIGNALduino_ReadAnswer $arg: $err", undef);
-      }
-      return ("Timeout reading answer for get $arg", undef)
-        if($nfound == 0);
-      $buf = DevIo_SimpleReadWithTimeout($hash,$to);
-      return ("No data", undef) if(!defined($buf));
-
-    }
-
-    if($buf) {
-      Log3 $hash->{NAME}, 5, "$name/RAW (ReadAnswer): $buf";
-      $mSIGNALduinodata .= $buf;
-    }
-    $mSIGNALduinodata = SIGNALduino_RFR_DelPrefix($mSIGNALduinodata) if($type eq "SIGNALduino_RFR");
-
-      $idx = index($mSIGNALduinodata,"\003\n");
-      if($idx != -1) {
-        $cut = 1;
-        if($mSIGNALduinodata =~ m/\002.*\003\n/) {    # vollstaendige Signal Nachricht
-          Log3 $name, 4, "$name/RAW (ReadAnswerCut002003): $mSIGNALduinodata";
-          #if(defined($regexp)) {                      # kein parse wenn von doInit aufgerufen 
-            SIGNALduino_Parse($hash, $hash, $name, $mSIGNALduinodata);
-          #}
-          $mSIGNALduinodata =~ s/\002.*\003\n//;
-        } else {                                      # Signal Nachricht ohne Anfang
-          Log3 $name, 4, "$name/RAW (ReadAnswerCut003 $idx): $mSIGNALduinodata";
-          $mSIGNALduinodata = substr($mSIGNALduinodata, $idx+2);
-        }
-        Log3 $name, 4, "$name/RAW (ReadAnswerCutDone " . length($mSIGNALduinodata) . "): $mSIGNALduinodata";
-      }
-
-    # \n\n is socat special
-    if($mSIGNALduinodata =~ m/\r\n$/ || $anydata || $mSIGNALduinodata =~ m/\n\n$/ ) {
-      if(!defined($regexp) || $mSIGNALduinodata =~ m/$regexp/) {
-        if ($cut == 1) {
-          Log3 $name, 4, "$name/RAW (ReadAnswerCut): $mSIGNALduinodata";
-        }
-        return (undef, $mSIGNALduinodata)
-      }
-    }
-    
-    return ("timeout() bad response",undef) if ($exittime<time());  ## Abort here, if we haven't found our searched response until $to 
-  }
-
-}
 
 #####################################
 # Check if the 1% limit is reached and trigger notifies
@@ -3484,16 +3405,19 @@ attr sduino longids 1
 # Will generate devices names like BTHR918N_f3.
 attr sduino longids BTHR918N
 </PRE>
-</li><br>
+<li>whitelistIDs<br>
+Das Attribut whitelistIDs erlaubt es, anzugeben, welche Protokolle vom FHEM Modul beruecksichtigt werden. 
+Fuer Protokolle, die nicht beruecksichtigt werden, gibt es weder Logeintraege noch Events. Diese werden im Programmablauf nicht beruecksichtigt. 
+Das spart zum einen Ressourcen und traegt auch zur Uebersichtlichkeit bei. Die Angabe erfolgt durch Komma getrennt: z.B.: 0,3,7,12<br>
+Mit # am Anfang kann der whitelistIDs-Eintrag deaktiviert werden.
 </li><br>
    <li>WS09_Model<br>
    WS09_WSModel:undef -> check all, WH1080 -> support WH1080/WS0101 , CTW600 -> support CTW600 
    </li>
-   </li><br>
    <li>WS09_CRCAUS<br>
    WS09_CRCAUS:0,1
-   WS09_CRCAUS = 0 is default -> check CRC Calculation for WH1080      
-   </li>
+   WS09_CRCAUS = 0 is default -> check CRC Calculation for WH1080
+   </li><br>
     
 	<a name="SIGNALduinoget"></a>
 	<b>Get</b>
@@ -3532,6 +3456,9 @@ attr sduino longids BTHR918N
 		<li>reset<br>
 		This will do a reset of the usb port and normaly causes to reset the uC connected.
 		</li><br>
+		<li>close<br>
+		Closes the connection to the device.
+		</li><br>
 		<li>flash [hexFile]<br>
 			The SIGNALduino needs the right firmware to be able to receive and deliver the sensor data to fhem. In addition to the way using the
 			arduino IDE to flash the firmware into the SIGNALduino this provides a way to flash it directly from FHEM.
@@ -3569,7 +3496,7 @@ attr sduino longids BTHR918N
 				<li>manchester encoded messages (manchesterMC) </li>
 			</ul>
 			The new state will be saved into the eeprom of your arduino.
-		</li>
+		</li><br>
 		<li>disableMessagetype<br>
 			Allows you to disable the message processing for 
 			<ul>
