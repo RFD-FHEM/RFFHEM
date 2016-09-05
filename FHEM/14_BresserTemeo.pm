@@ -22,7 +22,7 @@ BresserTemeo_Initialize($)
   my ($hash) = @_;
 
 
-  $hash->{Match}     = "^u(44|51)#[A-F0-9]{17,19}";   # Laenge (Anzahl nibbles nach 0x75 )noch genauer spezifizieren
+  $hash->{Match}     = "^P44|x{0,1}#[A-F0-9]{18}";   # Laenge (Anzahl nibbles nach 0x75 )noch genauer spezifizieren
   $hash->{DefFn}     = "BresserTemeo_Define";
   $hash->{UndefFn}   = "BresserTemeo_Undef";
   $hash->{AttrFn}    = "BresserTemeo_Attr";
@@ -74,21 +74,19 @@ sub
 BresserTemeo_Parse($$)
 {
 	my ($iohash,$msg) = @_;
-	my (undef ,$rawData) = split("#",$msg);
+	my ($protoid ,$rawData) = split("#",$msg);
 
-	my $prefix = substr $msg, 0, 3;
-
-  my $binvalue = "";
+  	my $binvalue = "";
 	my $hexvalue =  substr $msg, 4;
     #my $bin2 = sprintf( "%b", hex( $hexvalue ) );
-  $binvalue = unpack("B*" ,pack("H*", $hexvalue));
+ 	 $binvalue = unpack("B*" ,pack("H*", $hexvalue));
 	if (length($binvalue) != 72)
     {
         Log3 $iohash, 4, "BresserTemeo_Parse length error (72 bits expected)!!!";
         return "";
     }
     # Check what Humidity Prefix (*sigh* Bresser!!!) 
-    if ($prefix eq "u44")
+    if ($protoid eq "44")
     {
       $binvalue = "0".$binvalue;
       Log3 $iohash, 4, "BresserTemeo_Parse Humidity <= 79  Flag";

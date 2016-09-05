@@ -89,10 +89,10 @@ my $clientsSIGNALduino = ":IT:"
 						."Dooya:"
 						."SOMFY:"
 						."SD_UT:"	## BELL 201.2 TXA
-				        	."SD_WS_Maverick:"
-				        	."BresserTemeo:"
-				      		."SIGNALduino_un:"
-						; 
+			        	."SD_WS_Maverick:"
+			        	."BresserTemeo:"
+			      		."SIGNALduino_un:"
+					; 
 
 ## default regex match List for dispatching message to logical modules, can be updated during runtime because it is referenced
 my %matchListSIGNALduino = (
@@ -111,8 +111,7 @@ my %matchListSIGNALduino = (
      "15:SOMFY"					=> '^YsA[0-9A-F]+',
      "16:SD_WS_Maverick"		=> '^P47#[A-Fa-f0-9]+',
      "17:SD_UT"            		=> '^u30#.*',						## BELL 201.2 TXA
-     "44:BresserTemeo"     		=> '^u44#[A-F0-9]{17,19}',			    # Bresser Temeo Trend (3CH Thermo-/Hygro)
-     "51:BresserTemeo"     		=> '^u51#[A-F0-9]{17,19}',			    # Bresser Temeo Trend (3CH Thermo-/Hygro) Workaround Humidity > 79 *sigh*
+     "44:BresserTemeo"     		=> '^P44x{0,1}#[A-F0-9]{18}',		# Bresser Temeo Trend (3CH Thermo-/Hygro)
      "X:SIGNALduino_un"			=> '^[uP]\d+#.*',
 );
 
@@ -820,10 +819,10 @@ my %ProtocolListSIGNALduino  = (
             		zero 		=> [4,-4],
             		one		=> [4,-8],
             		start 		=> [8,-8],
-            		preamble 	=> 'u44#',
+            		preamble 	=> 'P44#',
             		clientmodule	=> 'BresserTemeo',
             		length_min 	=> '64',
-            		length_max 	=> '80',
+            		length_max 	=> '72',
 		},
     "45"    => 
         {
@@ -915,16 +914,16 @@ my %ProtocolListSIGNALduino  = (
 		}, 
 	"51" => ## Bresser Temeo Trend
 		{
-            		name 		=> 'BresserTemeo',
-            		id 		=> '51',
-            		clockabs	=> 500,
-            		zero 		=> [4,-4],
-            		one		=> [4,-8],
-            		start 		=> [8,-12],
-            		preamble 	=> 'u51#',
+            		name 			=> 'BresserTemeo',
+            		id 				=> '44x',
+            		clockabs		=> 500,
+            		zero 			=> [4,-4],
+            		one				=> [4,-8],
+            		start 			=> [8,-12],
+            		preamble 		=> 'P44x#',
             		clientmodule	=> 'BresserTemeo',
-            		length_min 	=> '64',
-            		length_max 	=> '80',
+            		length_min 		=> '64',
+            		length_max 		=> '72',
 		},
 );
 
