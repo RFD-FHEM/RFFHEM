@@ -1400,10 +1400,7 @@ sub SIGNALduino_parseResponse($$$)
 
 	if($cmd eq "cmds") 
 	{       # nice it up
-	  # todo irgendwas passt nicht mehr
-	  # ?UseoneofViRtXFSPCG  frueher sah es so aus: V i R t X F S P C G 
 	    $msg =~ s/$name cmds =>//g;
-		$msg =~ s/ //g;
    		$msg =~ s/.*Use one of//g;
  	} 
  	elsif($cmd eq "uptime") 
