@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 10484 2016-08-31 21:00:00Z v3.3.0-dev $
+# $Id: 00_SIGNALduino.pm 10484 2016-09-06 08:00:00Z v3.3.0-dev $
 #
 # v3.3.0 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -83,8 +83,8 @@ my $clientsSIGNALduino = ":IT:"
 						."SD_AS:"
 						."Hideki:"
 						."SD_WS07:"
-						."SD_WS09:"
-						."SD_WS:"
+						."SD_WS09: "
+						.":SD_WS:"
 						."RFXX10REC:"
 						."Dooya:"
 						."SOMFY:"
@@ -3293,6 +3293,8 @@ sub SIGNALduino_compPattern($$$%)
 1;
 
 =pod
+=item summary    supports the same low-cost receiver for digital signals
+=item summary_DE unterstuetzt den gleichnamigen Low-Cost Empfaenger fuer digitale Signale
 =begin html
 
 <a name="SIGNALduino"></a>
@@ -3416,7 +3418,7 @@ attr sduino longids 1
 # Use longids for BTHR918N devices.
 # Will generate devices names like BTHR918N_f3.
 attr sduino longids BTHR918N
-</PRE>
+</PRE></li>
 <li>whitelistIDs<br>
 Das Attribut whitelistIDs erlaubt es, anzugeben, welche Protokolle vom FHEM Modul beruecksichtigt werden. 
 Fuer Protokolle, die nicht beruecksichtigt werden, gibt es weder Logeintraege noch Events. Diese werden im Programmablauf nicht beruecksichtigt. 
