@@ -19,7 +19,7 @@ sub SD_WS_Initialize($)
 {
 	my ($hash) = @_;
 
-	$hash->{Match}		= '^W\d+#.*';
+	$hash->{Match}		= '^WP\d+#.*';
 	$hash->{DefFn}		= "SD_WS_Define";
 	$hash->{UndefFn}	= "SD_WS_Undef";
 	$hash->{ParseFn}	= "SD_WS_Parse";
@@ -27,9 +27,16 @@ sub SD_WS_Initialize($)
 	$hash->{AttrList}	= "IODev do_not_notify:1,0 ignore:0,1 showtime:1,0 " .
 				"$readingFnAttributes ";
 	$hash->{AutoCreate} =
-	{ "SD_WS37_TH.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,",  autocreateThreshold => "2:180"} };
+	{ 
+		"SD_WS37_TH.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,",  autocreateThreshold => "2:180"},
+		"SD_WS50_SM.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,",  autocreateThreshold => "2:180"} 
+	
+	};
 
 }
+
+
+
 
 #############################
 sub SD_WS_Define($$)
@@ -85,6 +92,31 @@ sub SD_WS_Parse($$)
 	my $hum;
 	my $trend;
 	
+	my %decodingSubs  = (
+    50    => # Protocol 50
+     # FF550545FF9E
+     # FF550541FF9A 
+	 # AABCDDEEFFGG
+ 	 # A = Preamble, always FF
+ 	 # B = TX type, always 5
+ 	 # C = Address (5/6/7) > low 2 bits = 1/2/3
+ 	 # D = Soil moisture 05% 
+ 	 # E = temperature 
+ 	 # F = security code, always F
+ 	 # G = Checksum 55+05+45+FF=19E CRC value = 9E
+        {   # subs to decode this
+        	sensortype => 'XT300',
+        	model => 'SD_WS_50_SM',
+			prematch => sub {my $msg = shift; return 1 if ($msg =~ m/^FF5[0-9A-F}{5}FF[0-9A-F]{2}/); }, 		# prematch
+			crcok => sub {my $msg = shift; return 1 if ((hex(substr($msg,2,2))+hex(substr($msg,4,2))+hex(substr($msg,6,2))+hex(substr($msg,8,2))&0xFF) == (hex(substr($msg,8,2))+hex(substr($msg,10,2))) );  }, 	# crc
+			id => sub {my $msg = shift; return (hex(substr($msg,2,2)) &0x03 ); },   						#id
+			temp => sub {my $msg = shift; return  (sprintf('%x',((hex(substr($msg,6,2)) <<4)/2)))/10;  },	#temp
+			hum => sub {my $msg = shift; return (printf('%x',hex(substr($msg,4,2))));  }, 					#hum
+			channel => sub {my (undef,$bitData) = @_; return ( SD_WS_binaryToNumber($bitData,12,15) );  }, 	#channel
+        },	
+    );
+    
+    	
 	Log3 $name, 4, "SD_WS_Parse: Protocol: $protocol, rawData: $rawData";
 	
 	if ($protocol == "37")		# Bresser 7009994
@@ -116,18 +148,20 @@ sub SD_WS_Parse($$)
 		$bitData2 = $bitData2 . ' ' . substr($bitData,23,2) . ' ' . substr($bitData,25,7) . ' ' . substr($bitData,32,8);
 		Log3 $iohash, 4, "$name converted to bits: " . $bitData2;
 		Log3 $iohash, 4, "$name decoded protocolid: $protocol ($SensorTyp) sensor id=$id, channel=$channel, rawTemp=$rawTemp, temp=$temp, hum=$hum";
-		
-	#}
-	#elsif ($protocol == "38")		# ist nur ein Beispiel, die 38 muss durch die jeweilige Protocol ID ersetzt werden
-	#{
-		#
-		#
-		#
-		
-		#$model = "SD_WS38_T";
-	#	$SensorTyp = "Auriol";
-	#	
-	#	Log3 $iohash, 4, "$name converted to bits: " . $bitData;
+	}
+	elsif ($protocol != "37")		# alles was nicht Protokoll #37 ist, durch den hash decodieren
+	{
+	    	$SensorTyp=$decodingSubs{$protocol}{sensortype}->( $msg,$bitData );
+		    if ($decodingSubs{$protocol}{prematch}->( $msg ) && $decodingSubs{$protocol}{crcok}->( $msg ))
+		    {
+		    	$id=$decodingSubs{$protocol}{id}->( $msg,$bitData );
+		    	$temp=$decodingSubs{$protocol}{temp}->( $msg,$bitData );
+		    	$hum=$decodingSubs{$protocol}{hum}->( $msg,$bitData );
+		    	$channel=$decodingSubs{$protocol}{channel}->( $msg,$bitData );
+		    	$model = $decodingSubs{$protocol}{model}->( $msg,$bitData );
+		    	Log3 $iohash, 4, "$name decoded protocolid: $protocol ($SensorTyp) sensor id=$id, channel=$channel, temp=$temp, hum=$hum";
+		    }
+		   	Log3 $iohash, 4, "$name decoded protocolid: $protocol ($SensorTyp) crc or prematch error";
 		
 	} 
 	else {

@@ -907,9 +907,9 @@ my %ProtocolListSIGNALduino  = (
 			one				=> [1,-2],
 		#	start			=> [1,-25],						# neets to be defined
 			format 			=> 'twostate',	
-			preamble		=> 'U50#',						# prepend to converted message	
+			preamble		=> 'P50#',						# prepend to converted message	
 			#clientmodule    => '',   						# not used now
-			modulematch     => '^U50#.*',  					# not used now
+			modulematch     => '^P50#.*',  					# not used now
 			length_min      => '24',
 		#	length_max      => '48',
 		}, 
