@@ -114,6 +114,22 @@ sub SD_WS_Parse($$)
 			hum => sub {my $msg = shift; return (printf('%x',hex(substr($msg,4,2))));  }, 					#hum
 			channel => sub {my (undef,$bitData) = @_; return ( SD_WS_binaryToNumber($bitData,12,15) );  }, 	#channel
         },	
+     33 =>
+   	 	 {
+     		sensortype => 's014/TFA 30.3200/TCM/Conrad',
+        	model =>	'SD_WS_33_TH',
+			prematch => sub {my $msg = shift; return 1 if ($msg =~ /^[0-9A-F]{10,11}/); }, 							# prematch
+			crcok => 	sub {return SD_WS_binaryToNumber($bitData,36,39);  }, 										# crc
+			id => 		sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,0,9); },   				# id
+	#		sendmode =>	sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,10,11) eq "1" ? "manual" : "auto";  }
+			temp => 	sub {my (undef,$bitData) = @_; return (((SD_WS_binaryToNumber($bitData,22,25)*256 +  SD_WS_binaryToNumber($bitData,18,21)*16 + SD_WS_binaryToNumber($bitData,14,17)) *10 -12200) /18)/10;  },	#temp
+			hum => 		sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,30,33)*16 + SD_WS_binaryToNumber($bitData,26,29));  }, 					#hum
+			channel => 	sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,12,13)+1 );  }, 		#channel
+     		bat => 		sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,34) eq "1" ? "ok" : "critical");},
+    # 		sync => 	sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,35,35) eq "1" ? "true" : "false");},
+   	 	 }        
+        
+        
     );
     
     	
@@ -161,6 +177,8 @@ sub SD_WS_Parse($$)
 	    	$hum=$decodingSubs{$protocol}{hum}->( $rawData,$bitData );
 	    	$channel=$decodingSubs{$protocol}{channel}->( $rawData,$bitData );
 	    	$model = $decodingSubs{$protocol}{model};
+	    	$bat = $decodingSubs{$protocol}{bat};
+
 	    	Log3 $iohash, 4, "$name decoded protocolid: $protocol ($SensorTyp) sensor id=$id, channel=$channel, temp=$temp, hum=$hum";
 		
 	} 
