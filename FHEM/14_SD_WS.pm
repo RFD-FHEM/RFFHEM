@@ -19,7 +19,7 @@ sub SD_WS_Initialize($)
 {
 	my ($hash) = @_;
 
-	$hash->{Match}		= '^WP\d+#.*';
+	$hash->{Match}		= '^[WP]\d+#.*';
 	$hash->{DefFn}		= "SD_WS_Define";
 	$hash->{UndefFn}	= "SD_WS_Undef";
 	$hash->{ParseFn}	= "SD_WS_Parse";
@@ -107,8 +107,8 @@ sub SD_WS_Parse($$)
         {   # subs to decode this
         	sensortype => 'XT300',
         	model => 'SD_WS_50_SM',
-			prematch => sub {my $msg = shift; return 1 if ($msg =~ m/^FF5[0-9A-F}{5}FF[0-9A-F]{2}/); }, 		# prematch
-			crcok => sub {my $msg = shift; return 1 if ((hex(substr($msg,2,2))+hex(substr($msg,4,2))+hex(substr($msg,6,2))+hex(substr($msg,8,2))&0xFF) == (hex(substr($msg,8,2))+hex(substr($msg,10,2))) );  }, 	# crc
+			prematch => sub {my $msg = shift; return 1 if ($msg =~ /^FF5[0-9A-F]{5}FF[0-9A-F]{2}/); }, 		# prematch
+			crcok => sub {my $msg = shift; return 1 if ((hex(substr($msg,2,2))+hex(substr($msg,4,2))+hex(substr($msg,6,2))+hex(substr($msg,8,2))&0xFF) == (hex(substr($msg,10,2))) );  }, 	# crc
 			id => sub {my $msg = shift; return (hex(substr($msg,2,2)) &0x03 ); },   						#id
 			temp => sub {my $msg = shift; return  (sprintf('%x',((hex(substr($msg,6,2)) <<4)/2)))/10;  },	#temp
 			hum => sub {my $msg = shift; return (printf('%x',hex(substr($msg,4,2))));  }, 					#hum
@@ -151,17 +151,17 @@ sub SD_WS_Parse($$)
 	}
 	elsif ($protocol != "37")		# alles was nicht Protokoll #37 ist, durch den hash decodieren
 	{
-	    	$SensorTyp=$decodingSubs{$protocol}{sensortype}->( $msg,$bitData );
-		    if ($decodingSubs{$protocol}{prematch}->( $msg ) && $decodingSubs{$protocol}{crcok}->( $msg ))
-		    {
-		    	$id=$decodingSubs{$protocol}{id}->( $msg,$bitData );
-		    	$temp=$decodingSubs{$protocol}{temp}->( $msg,$bitData );
-		    	$hum=$decodingSubs{$protocol}{hum}->( $msg,$bitData );
-		    	$channel=$decodingSubs{$protocol}{channel}->( $msg,$bitData );
-		    	$model = $decodingSubs{$protocol}{model}->( $msg,$bitData );
-		    	Log3 $iohash, 4, "$name decoded protocolid: $protocol ($SensorTyp) sensor id=$id, channel=$channel, temp=$temp, hum=$hum";
-		    }
-		   	Log3 $iohash, 4, "$name decoded protocolid: $protocol ($SensorTyp) crc or prematch error";
+	    	$SensorTyp=$decodingSubs{$protocol}{sensortype};
+		    
+		    Log3 $iohash, 4, "$name decoded protocolid: $protocol ($SensorTyp) prematch error" if (!$decodingSubs{$protocol}{prematch}->( $rawData ));
+		    return "crc Error" && Log3 $iohash, 4, "$name decoded protocolid: $protocol ($SensorTyp) crc  error"  if (!$decodingSubs{$protocol}{crcok}->( $rawData ));
+		    
+	    	$id=$decodingSubs{$protocol}{id}->( $rawData,$bitData );
+	    	$temp=$decodingSubs{$protocol}{temp}->( $rawData,$bitData );
+	    	$hum=$decodingSubs{$protocol}{hum}->( $rawData,$bitData );
+	    	$channel=$decodingSubs{$protocol}{channel}->( $rawData,$bitData );
+	    	$model = $decodingSubs{$protocol}{model};
+	    	Log3 $iohash, 4, "$name decoded protocolid: $protocol ($SensorTyp) sensor id=$id, channel=$channel, temp=$temp, hum=$hum";
 		
 	} 
 	else {
