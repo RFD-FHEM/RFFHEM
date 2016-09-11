@@ -165,9 +165,10 @@ sub SD_WS_Parse($$)
 		Log3 $iohash, 4, "$name converted to bits: " . $bitData2;
 		Log3 $iohash, 4, "$name decoded protocolid: $protocol ($SensorTyp) sensor id=$id, channel=$channel, rawTemp=$rawTemp, temp=$temp, hum=$hum";
 	}
-	elsif ($protocol != "37")		# alles was nicht Protokoll #37 ist, durch den hash decodieren
+	elsif ($protocol != "37" && defined($decodingSubs{$protocol}))		# alles was nicht Protokoll #37 ist, durch den hash decodieren
 	{
-	    	$SensorTyp=$decodingSubs{$protocol}{sensortype};
+	 
+	 	   	$SensorTyp=$decodingSubs{$protocol}{sensortype};
 		    
 		    Log3 $iohash, 4, "$name decoded protocolid: $protocol ($SensorTyp) prematch error" if (!$decodingSubs{$protocol}{prematch}->( $rawData ));
 		    return "crc Error" && Log3 $iohash, 4, "$name decoded protocolid: $protocol ($SensorTyp) crc  error"  if (!$decodingSubs{$protocol}{crcok}->( $rawData ));
