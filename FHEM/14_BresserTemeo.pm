@@ -75,16 +75,15 @@ BresserTemeo_Parse($$)
 {
 	my ($iohash,$msg) = @_;
 	my ($protoid ,$rawData) = split("#",$msg);
+	$protoid=~ s/^P(\d+)/$1/; # extract protocol
 
-  	my $binvalue = "";
-	my $hexvalue =  substr $msg, 4;
-    #my $bin2 = sprintf( "%b", hex( $hexvalue ) );
- 	 $binvalue = unpack("B*" ,pack("H*", $hexvalue));
-	if (length($binvalue) != 72)
-    {
-        Log3 $iohash, 4, "BresserTemeo_Parse length error (72 bits expected)!!!";
-        return "";
-    }
+ 	my $binvalue = unpack("B*" ,pack("H*", $rawData));
+ 
+	if (length($binvalue) != 72) {
+		Log3 $iohash, 4, "BresserTemeo_Parse length error (72 bits expected)!!!";
+		return "";
+	}
+
     # Check what Humidity Prefix (*sigh* Bresser!!!) 
     if ($protoid eq "44")
     {
@@ -97,124 +96,97 @@ BresserTemeo_Parse($$)
       Log3 $iohash, 4, "BresserTemeo_Parse Humidity > 79  Flag";
     }
 
-    my $checksumOkay = 1;
-	
-	my $hum1 = substr $binvalue, 0, 4;
-	my $hum1Dec = oct( "0b$hum1" );
-	my $hum2 = substr $binvalue, 4, 4;
-	my $hum2Dec = oct( "0b$hum2" );
-	my $hum = $hum1Dec.$hum2Dec;
-
-    my $checksumHum1 = substr $binvalue, 32,4;
-    my $chum1 =oct ("0b$checksumHum1");
-    my $checkHum1 = oct ("0b$checksumHum1") ^ 0b1111;
-    if ($checkHum1 != $hum1Dec)
-    {
-        Log3 $iohash, 4, "BresserTemeo_Parse checksum error in Hum 1";
-        $checksumOkay = 0;
-    }
-    
-    my $checksumHum2 = substr $binvalue, 36,4;
-    my $checkHum2 = oct ("0b$checksumHum2") ^ 0b1111;
-    if ($checkHum2 != $hum2Dec)
-    {
-        Log3 $iohash, 4, "BresserTemeo_Parse checksum error in Hum 2";
-        $checksumOkay = 0;
-    }
-    
 	Log3 $iohash, 4, "BresserTemeo_Parse new bin $binvalue";
+	
+	my $checksumOkay = 1;
+	
+	my $hum;
+	my $hum1Dec = SD_WS_binaryToNumber($binvalue, 0, 3);
+	my $hum2Dec = SD_WS_binaryToNumber($binvalue, 4, 7);
+	my $checkHum1 = SD_WS_binaryToNumber($binvalue, 32, 35) ^ 0b1111;
+	my $checkHum2 = SD_WS_binaryToNumber($binvalue, 36, 39) ^ 0b1111;
 
-	my $temp1 = substr $binvalue, 20,4;
-	my $temp1Dec = oct( "0b$temp1" );
-	my $temp2 = substr $binvalue, 24,4;
-	my $temp2Dec = oct( "0b$temp2" );
-	my $temp3 = substr $binvalue, 28,4;
-	my $temp3Dec = oct( "0b$temp3" );
-	my $temp = $temp1Dec.$temp2Dec.".".$temp3Dec;
-
-	my $checksumTemp1 = substr $binvalue, 52,4;
-    my $checkTemp1 = oct ("0b$checksumTemp1") ^ 0b1111;
-    if ($checkTemp1 != $temp1Dec)
-    {
-        Log3 $iohash, 4, "BresserTemeo_Parse checksum error in Temp 1";
-        $checksumOkay = 0;
-    }
-
-    my $checksumTemp2 = substr $binvalue, 56,4;
-    my $checkTemp2 = oct ("0b$checksumTemp2") ^ 0b1111;
-    if ($checkTemp2 != $temp2Dec)
-    {
-        Log3 $iohash, 4, "BresserTemeo_Parse checksum error in Temp 2";
-        $checksumOkay = 0;
-    }
-    
-    my $checksumTemp3 = substr $binvalue, 60,4;
-    my $checkTemp3 = oct ("0b$checksumTemp3") ^ 0b1111;
-    if ($checkTemp3 != $temp3Dec)
-    {
-        Log3 $iohash, 4, "BresserTemeo_Parse checksum error in Temp 3";
-        $checksumOkay = 0;
-    }
-
-    if ($temp+0 > 60.)
-    {
-      Log3 $iohash, 4, "BresserTemeo_Parse Temperature Error";
-      $checksumOkay = 0;
-    }
-    
-    if ($hum+0 > 100.)
-    {
-      Log3 $iohash, 4, "BresserTemeo_Parse Humidity Error";
-      $checksumOkay = 0;
-    }
-
-    if ($checksumOkay == 0)
-    {
-        Log3 $iohash, 4, "BresserTemeo_Parse checksum error!!! These Values seem incorrect: temp=$temp, humidity=$hum";
-        return "";
-        
-    }
-    
-	my $name = $iohash->{NAME};
-	my @a = split("", $msg);
-	Log3 $iohash, 4, "BresserTemeo_Parse $name incoming $msg";
-
-	# decrypt bytes
-	my $decodedString = decryptBytes($rawData); # decrpyt hex string to hex string
-
-	#convert dectypted hex str back to array of bytes:
-	my @decodedBytes  = map { hex($_) } ($decodedString =~ /(..)/g);
-
-	if (!@decodedBytes)
+	if ($checkHum1 != $hum1Dec || $checkHum2 != $hum2Dec)
 	{
-		Log3 $iohash, 4, "$name decrypt failed";
-		return undef;
+		Log3 $iohash, 4, "BresserTemeo_Parse checksum error in Humidity";
+	}
+	else
+	{
+		$hum = $hum1Dec.$hum2Dec;
+	}
+
+	my $temp1Dec = SD_WS_binaryToNumber($binvalue, 21, 23);
+	my $temp2Dec = SD_WS_binaryToNumber($binvalue, 24, 27);
+	my $temp3Dec = SD_WS_binaryToNumber($binvalue, 28, 31);
+	my $checkTemp1 = SD_WS_binaryToNumber($binvalue, 53, 55) ^ 0b111;
+	my $checkTemp2 = SD_WS_binaryToNumber($binvalue, 56, 59) ^ 0b1111;
+	my $checkTemp3 = SD_WS_binaryToNumber($binvalue, 60, 63) ^ 0b1111;
+	my $temp = $temp1Dec.$temp2Dec.".".$temp3Dec;
+	
+	if ($checkTemp1 != $temp1Dec || $checkTemp2 != $temp2Dec || $checkTemp3 != $temp3Dec)
+	{
+		Log3 $iohash, 4, "BresserTemeo_Parse checksum error in Temperature";
+		$checksumOkay = 0;
+	}
+
+	if ($temp > 60)
+	{
+		Log3 $iohash, 4, "BresserTemeo_Parse Temperature Error. temp=$temp";
+		return "";
 	}
 	
-    my $sensorTyp=0x1E; # Fixed Value!
-	Log3 $iohash, 4, "BresserTemeo_Parse SensorTyp = $sensorTyp decodedString = $decodedString";
+	if ($hum < 1 || $hum > 100)
+	{
+		Log3 $iohash, 4, "BresserTemeo_Parse Humidity Error. Humidity=$hum";
+		return "";
+	}
+	
+	my $bat = substr($binvalue,9,1);
+	my $checkBat = substr($binvalue,41,1) ^ 0b1;
+	
+	if ($bat != $checkBat)
+	{
+		Log3 $iohash, 4, "BresserTemeo_Parse checksum error in Bat";
+		$bat = undef;
+	}
+	else
+	{
+		$bat = ($bat == 0) ? "ok" : "low";
+	}
+	
+	my $channel = SD_WS_binaryToNumber($binvalue, 10, 11);
+	my $checkChannel = SD_WS_binaryToNumber($binvalue, 42, 43) ^ 0b11;
+	my $id = SD_WS_binaryToNumber($binvalue, 12, 19);
+	my $checkId = SD_WS_binaryToNumber($binvalue, 44, 51) ^ 0b11111111;
+	
+	if ($channel != $checkChannel || $id != $checkId)
+	{
+		Log3 $iohash, 4, "BresserTemeo_Parse checksum error in Channel or Id";
+		$checksumOkay = 0;
+	}
+	
+	if ($checksumOkay == 0)
+	{
+		Log3 $iohash, 4, "BresserTemeo_Parse checksum error!!! These Values seem incorrect: temp=$temp, channel=$channel, id=$id";
+		return "";
+	}
+	
+	my $name = $iohash->{NAME};
+	my $deviceCode;
+	my $model= "BresserTemeo";
 
-	my $id=substr($decodedString,2,2);      # get the random id from the data
-	my $channel=0;
-	#my $temp=0;
-	#my $hum=0;
-	my $rain=0;
-	my $rc = 0;
-	my $val = 0;
-	my $bat = 0;
-	my $deviceCode = 0;
-	my $model= "BresserTemeo_$sensorTyp";
-	$val = "T: $temp H: $hum";
-    Log3 $iohash, 4, "$name decoded BresserTemeo protocol model=$model, temp=$temp, humidity=$hum";
+	my $val = "T: $temp H: $hum";
+	
+	$deviceCode = $model . "_" . $channel;
+	
+	Log3 $iohash, 4, "$name decoded BresserTemeo protocol model=$model, temp=$temp, hum=$hum, channel=$channel, id=$id, bat=$bat";
 	Log3 $iohash, 5, "deviceCode: $deviceCode";
-
-    $deviceCode = $model . "_" . $channel;
     
 	my $def = $modules{BresserTemeo}{defptr}{$iohash->{NAME} . "." . $deviceCode};
 	$def = $modules{BresserTemeo}{defptr}{$deviceCode} if(!$def);
     
 	if(!$def) {
-		Log3 $iohash, 1, "BresserTemeo: UNDEFINED sensor $sensorTyp detected, code $deviceCode";
+		Log3 $iohash, 1, 'BresserTemeo: UNDEFINED sensor ' . $model . ' detected, code ' . $deviceCode;
 		return "UNDEFINED $deviceCode BresserTemeo $deviceCode";
 	}
 
@@ -226,44 +198,34 @@ BresserTemeo_Parse($$)
 	{
 		my $minsecs = AttrVal($iohash->{NAME},'minsecs',0);
 		if($hash->{lastReceive} && (time() - $hash->{lastReceive} < $minsecs)) {
-			Log3 $iohash, 4, "$deviceCode Dropped ($decodedString) due to short time. minsecs=$minsecs";
+			Log3 $iohash, 4, "$deviceCode Dropped due to short time. minsecs=$minsecs";
 		  	return "";
 		}
 	}
 	$hash->{lastReceive} = time();
 
-	$def->{lastMSG} = $decodedString;
+	$def->{lastMSG} = $rawData;
 
 	readingsBeginUpdate($hash);
 	readingsBulkUpdate($hash, "state", $val);
-	readingsBulkUpdate($hash, "message", $msg);
-	readingsBulkUpdate($hash, "binvalue", $binvalue);
-	readingsBulkUpdate($hash, "humidity", $hum) if ($hum ne "");
-	readingsBulkUpdate($hash, "temperature", $temp) if ($temp ne "");
+	readingsBulkUpdate($hash, "battery", $bat) if (defined($bat));
+	readingsBulkUpdate($hash, "channel", $channel) if (defined($channel));
+	readingsBulkUpdate($hash, "humidity", $hum) if (defined($hum));
+	readingsBulkUpdate($hash, "temperature", $temp) if (defined($temp));
 	readingsEndUpdate($hash, 1); # Notify is done by Dispatch
 
 	return $name;
 }
 
-# decrypt bytes of hex string
-# in: hex string
-# out: decrypted hex string
-sub decryptBytes{
-	my $BresserTemeohex=shift;
-	#create array of hex string
-	my @BresserTemeobytes  = map { BresserTemeo_decryptByte(hex($_)) } ($BresserTemeohex =~ /(..)/g);
 
-	my $result="44";  # Byte 0 is not encrypted
-	for (my $i=1; $i<scalar (@BresserTemeobytes); $i++){
-		$result.=sprintf("%02x",$BresserTemeobytes[$i]);
-	}
-	return $result;
-}
-
-sub BresserTemeo_decryptByte{
-	my $byte = shift;
-	my $ret2 = ($byte ^ ($byte << 1) & 0xFF); #gives possible overflow to left so c3->145 instead of 45
-	return $ret2;
+sub SD_WS_binaryToNumber
+{
+	my $binstr=shift;
+	my $fbit=shift;
+	my $lbit=$fbit;
+	$lbit=shift if @_;
+	
+	return oct("0b".substr($binstr,$fbit,($lbit-$fbit)+1));
 }
 
 sub
