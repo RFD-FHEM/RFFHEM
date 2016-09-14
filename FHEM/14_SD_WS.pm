@@ -170,7 +170,7 @@ sub SD_WS_Parse($$)
 	 
 	 	   	$SensorTyp=$decodingSubs{$protocol}{sensortype};
 		    
-		    Log3 $iohash, 4, "$name decoded protocolid: $protocol ($SensorTyp) prematch error" if (!$decodingSubs{$protocol}{prematch}->( $rawData ));
+		    return "Prematch Error" && Log3 $iohash, 4, "$name decoded protocolid: $protocol ($SensorTyp) prematch error" if (!$decodingSubs{$protocol}{prematch}->( $rawData ));
 		    return "crc Error" && Log3 $iohash, 4, "$name decoded protocolid: $protocol ($SensorTyp) crc  error"  if (!$decodingSubs{$protocol}{crcok}->( $rawData ));
 		    
 	    	$id=$decodingSubs{$protocol}{id}->( $rawData,$bitData );
