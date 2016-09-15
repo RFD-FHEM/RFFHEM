@@ -30,7 +30,7 @@ Supported Devices / Protocols
 |Livolo | Remote switches and sockets  |
 |Somfy RTS | Somfy blinds |
 |Maverick | Wireless BBQ thermometer |
-|FLAMINGO | Flamningo smoke detector |
+|FLAMINGO | Flamingo smoke detector |
 How to install
 ======
 The Perl modules can be loaded directly into your FHEM installation:
