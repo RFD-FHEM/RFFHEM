@@ -814,17 +814,31 @@ my %ProtocolListSIGNALduino  = (
 		},
 	"44" => ## Bresser Temeo Trend
 		{
-            		name 		=> 'BresserTemeo',
-            		id 		=> '44',
-            		clockabs	=> 500,
-            		zero 		=> [4,-4],
-            		one		=> [4,-8],
-            		start 		=> [8,-8],
-            		preamble 	=> 'P44#',
+            		name 			=> 'BresserTemeo',
+            		id 				=> '44',
+            		clockabs		=> 500,
+            		zero 			=> [4,-4],
+            		one				=> [4,-8],
+            		start	 		=> [8,-8],
+            		preamble 		=> 'P44#',
             		clientmodule	=> 'BresserTemeo',
-            		length_min 	=> '64',
-            		length_max 	=> '72',
+            		length_min 		=> '64',
+            		length_max 		=> '72',
 		},
+	"51" => ## Bresser Temeo Trend
+		{
+            		name 			=> 'BresserTemeo',
+            		id 				=> '44x',
+            		clockabs		=> 500,
+            		zero 			=> [4,-4],
+            		one				=> [4,-8],
+            		start 			=> [8,-12],
+            		preamble 		=> 'P44x#',
+            		clientmodule	=> 'BresserTemeo',
+            		length_min 		=> '64',
+            		length_max 		=> '72',
+		},
+
     "45"    => 
         {
             name			=> 'revolt',	
@@ -913,19 +927,6 @@ my %ProtocolListSIGNALduino  = (
 			length_min      => '24',
 		#	length_max      => '48',
 		}, 
-	"51" => ## Bresser Temeo Trend
-		{
-            		name 			=> 'BresserTemeo',
-            		id 				=> '44x',
-            		clockabs		=> 500,
-            		zero 			=> [4,-4],
-            		one				=> [4,-8],
-            		start 			=> [8,-12],
-            		preamble 		=> 'P44x#',
-            		clientmodule	=> 'BresserTemeo',
-            		length_min 		=> '64',
-            		length_max 		=> '72',
-		},
 );
 
 

@@ -19,7 +19,7 @@ sub SD_WS_Initialize($)
 {
 	my ($hash) = @_;
 
-	$hash->{Match}		= '^[WP]50|33|37#.*';
+	$hash->{Match}		= '^[WP](50|33|37)#.*';
 	$hash->{DefFn}		= "SD_WS_Define";
 	$hash->{UndefFn}	= "SD_WS_Undef";
 	$hash->{ParseFn}	= "SD_WS_Parse";
@@ -75,6 +75,8 @@ sub SD_WS_Parse($$)
 	my $name = $iohash->{NAME};
 	my ($protocol,$rawData) = split("#",$msg);
 	$protocol=~ s/^[WP](\d+)/$1/; # extract protocol
+	
+	
 	
 	my $dummyreturnvalue= "Unknown, please report";
 	my $hlen = length($rawData);
