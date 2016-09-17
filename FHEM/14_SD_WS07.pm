@@ -201,6 +201,8 @@ sub SD_WS07_Attr(@)
 
 
 =pod
+=item summary    Supports weather sensors protocl 7 from SIGNALduino
+=item summary_DE Unterstützt Wettersensores mit Protokol 7 vom SIGNALduino
 =begin html
 
 <a name="SD_WS07"></a>

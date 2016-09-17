@@ -288,7 +288,10 @@ SD_AS_Attr(@)
 1;
 
 =pod
+=item summary    Supports ArduinoSensor
+=item summary_DE Unterstützt den ArduinoSensor
 =begin html
+
 
 <a name="SD_AS"></a>
 <h3>AS</h3>

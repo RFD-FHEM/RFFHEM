@@ -284,8 +284,9 @@ sub SD_WS_binaryToNumber
 
 1;
 
-
 =pod
+=item summary    Supports various weather stations
+=item summary_DE Unterstützt verschiedene funk Wetterstationen
 =begin html
 
 <a name="SD_WS"></a>

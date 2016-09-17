@@ -1002,6 +1002,8 @@ sub Dooya_CalcCurrentPos($$$$) {
 
 
 =pod
+=item summary    Supports rf shutters from dooya
+=item summary_DE Unterstützt dooya Funkrolladen
 =begin html
 
 <a name="Dooya"></a>
@@ -1009,7 +1011,7 @@ sub Dooya_CalcCurrentPos($$$$) {
 <ul>
   The Dooya protocol is used by a wide range of devices,
   which are either senders or receivers/actuators.
-  The RECIVING and SENDING of Dooya commands is implemented in the SIGNALsuino, so this module currently supports 
+  The RECIVING and SENDING of Dooya commands is implemented in the SIGNALduino, so this module currently supports 
   devices like blinds and shutters. The Dooya protocol is used from a lot of different shutter companies in Germanyr. Examples are Rohrmotor24 or Nobily.
   <br><br>  
 

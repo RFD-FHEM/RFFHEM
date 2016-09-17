@@ -382,6 +382,8 @@ SIGNALduino_un_binflip($)
 1;
 
 =pod
+=item summary    Helper module for SIGNALduino
+=item summary_DE Unterstützungsmodul für SIGNALduino
 =begin html
 
 <a name="SIGNALduino_un"></a>

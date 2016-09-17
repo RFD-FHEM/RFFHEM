@@ -359,6 +359,8 @@
     
     
 =pod
+=item summary    Supports weather sensors protocl 9 from SIGNALduino
+=item summary_DE Unterstützt Wettersensores mit Protokol 9 vom SIGNALduino
 =begin html
 
 <a name="SD_WS09"></a>

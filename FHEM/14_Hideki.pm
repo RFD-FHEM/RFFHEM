@@ -351,6 +351,8 @@ Hideki_Attr(@)
 1;
 
 =pod
+=item summary    Supports various rf sensors with hideki protocol
+=item summary_DE Unterstützt verschiedenen Funksensoren mit hideki Protokol
 =begin html
 
 <a name="Hideki"></a>
