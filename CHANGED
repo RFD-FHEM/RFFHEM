@@ -1,5 +1,8 @@
 18.09.2016
   Firmware 3.3.0
+31.08.2016
+  SIGNALduino is now nonblocking
+  improved init and keepalive
 13.08.2016
   some fixes providing more messages instad of fewer.
   fixed some manchester realted things
