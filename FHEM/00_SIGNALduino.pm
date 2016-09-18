@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 10484 2016-09-06 08:00:00Z v3.3.0-dev $
+# $Id: 00_SIGNALduino.pm 10484 2016-09-18 16:00:00Z v3.3.0-dev $
 #
 # v3.3.0 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -105,7 +105,7 @@ my %matchListSIGNALduino = (
      "7:Hideki"					=> "^P12#75[A-F0-9]+",
      "10:SD_WS07"				=> "^P7#[A-Fa-f0-9]{6}F[A-Fa-f0-9]{2}",
      "11:SD_WS09"				=> "^P9#[A-Fa-f0-9]+",
-     "12:SD_WS"					=> '^[PW]\d+#.*',
+     "12:SD_WS"					=> '^[W]\d+#.*',
      "13:RFXX10REC" 			=> '^(20|29)[A-Fa-f0-9]+',
      "14:Dooya"					=> '^P16#[A-Fa-f0-9]+',
      "15:SOMFY"					=> '^YsA[0-9A-F]+',
@@ -921,9 +921,9 @@ my %ProtocolListSIGNALduino  = (
 			one				=> [1,-2],
 		#	start			=> [1,-25],						# neets to be defined
 			format 			=> 'twostate',	
-			preamble		=> 'P50#',						# prepend to converted message	
+			preamble		=> 'W50#',						# prepend to converted message	
 			#clientmodule    => '',   						# not used now
-			modulematch     => '^P50#.*',  					# not used now
+			modulematch     => '^W50#.*',  					# not used now
 			length_min      => '24',
 		#	length_max      => '48',
 		}, 
@@ -1361,9 +1361,16 @@ SIGNALduino_Get($@)
   if (IsDummy($name))
   {
 	if (($arg !~  m/;/) && ($arg !~  m/=/)) {
-		Log3 $name, 4, "$name/msg get dispatch: $arg";
-		Dispatch($hash, $arg, undef);
-	        return "";
+		if ($arg =~ m/^V\d\.\d\..*/) {
+			Log3 $name, 4, "$name/msg get version: $arg";
+			$hash->{version} = "V " . substr($arg,1);
+			return "";
+		}
+		else {
+			Log3 $name, 4, "$name/msg get dispatch: $arg";
+			Dispatch($hash, $arg, undef);
+			return "";
+		}
 	}
   	if ($arg =~ /^M[CSU];.*/)
   	{
@@ -2581,7 +2588,7 @@ SIGNALduino_Parse_MC($$$$@)
 
 			Log3 $name, 4, "$name: Found manchester Protocol id $id clock $clock -> $ProtocolListSIGNALduino{$id}{name}";
 			
-			if (exists($ProtocolListSIGNALduino{$id}{polarity}) && ($ProtocolListSIGNALduino{$id}{polarity} eq 'invert'))  
+			if (exists($ProtocolListSIGNALduino{$id}{polarity}) && ($ProtocolListSIGNALduino{$id}{polarity} eq 'invert') && (!defined($hash->{version}) || substr($hash->{version},0,6) ne 'V 3.2.'))
 			# todo  && substr($hash->{version},0,6) ne 'V 3.2.')   # bei version V 3.2. nicht invertieren 
 			{
 		   		$bitData= unpack("B$blen", pack("H$hlen", $rawDataInverted)); 
@@ -3295,7 +3302,7 @@ sub SIGNALduino_compPattern($$$%)
 
 =pod
 =item summary    supports the same low-cost receiver for digital signals
-=item summary_DE unterstuetzt den gleichnamigen Low-Cost Empfaenger fuer digitale Signale
+=item summary_DE Unterst&uumltzt den gleichnamigen Low-Cost Empfaenger fuer digitale Signale
 =begin html
 
 <a name="SIGNALduino"></a>
