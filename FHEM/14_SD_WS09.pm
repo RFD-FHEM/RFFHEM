@@ -360,7 +360,7 @@
     
 =pod
 =item summary    Supports weather sensors protocl 9 from SIGNALduino
-=item summary_DE Unterst�tzt Wettersensores mit Protokol 9 vom SIGNALduino
+=item summary_DE Unterst&uumltzt Wettersensoren mit Protokol 9 vom SIGNALduino
 =begin html
 
 <a name="SD_WS09"></a>
@@ -453,8 +453,8 @@
   <a name="SD_WS09_Define"></a>
   <b>Define</b> 
   <ul>Die empfangenen Sensoren werden automatisch angelegt.<br>
-  Die ID der angelegten Sensoren wird nach jedem Batteriewechsel geändert, welche der Sensor beim Einschalten zufällig vergibt.<br>
-  CRC Checksumme wird zur Zeit noch nicht überprüft, deshalb werden Sensoren bei denen die Luftfeuchte < 0 oder > 100 ist, nicht angelegt.<br>
+  Die ID der angelegten Sensoren wird nach jedem Batteriewechsel ge&aumlndert, welche der Sensor beim Einschalten zuf&aumlllig vergibt.<br>
+  CRC Checksumme wird zur Zeit noch nicht überpr&uumlft, deshalb werden Sensoren bei denen die Luftfeuchte < 0 oder > 100 ist, nicht angelegt.<br>
   </ul>
   <br>
   <a name="SD_WS09 Events"></a>

@@ -352,7 +352,7 @@ Hideki_Attr(@)
 
 =pod
 =item summary    Supports various rf sensors with hideki protocol
-=item summary_DE Unterstützt verschiedenen Funksensoren mit hideki Protokol
+=item summary_DE Unterst&uumltzt verschiedenen Funksensoren mit hideki Protokol
 =begin html
 
 <a name="Hideki"></a>
@@ -448,7 +448,7 @@ Hideki_Attr(@)
     &lt;code&gt; besteht aus dem Sensortyp und der Kanalnummer (1..5) oder wenn das Attribut longid im IO Device gesetzt ist aus einer Zufallsadresse, die durch den Sensor beim einlegen der
 	Batterie generiert wird (Die Adresse aendert sich bei jedem Batteriewechsel).<br>
     </li>
-    <li>Wenn autocreate aktiv ist, dann wird der Sensor automatisch in FHEM angelegt. Das ist der empfohlene Weg, neue Sensoren hinzuzufuegen.</li>
+    <li>Wenn autocreate aktiv ist, dann wird der Sensor automatisch in FHEM angelegt. Das ist der empfohlene Weg, neue Sensoren hinzuzuf&uumlgen.</li>
    
   </ul>
   <br>

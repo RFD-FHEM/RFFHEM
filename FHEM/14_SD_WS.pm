@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 14_SD_WS.pm 32 2016-07-14 18:00:00 v3.2-dev $
+# $Id: 14_SD_WS.pm 32 2016-09-18 12:00:00 v3.2-dev $
 #
 # The purpose of this module is to support serval
 # weather sensors which use various protocol
@@ -19,7 +19,7 @@ sub SD_WS_Initialize($)
 {
 	my ($hash) = @_;
 
-	$hash->{Match}		= '^[WP](50|33|37)#.*';
+	$hash->{Match}		= '^[W]\d+#.*';
 	$hash->{DefFn}		= "SD_WS_Define";
 	$hash->{UndefFn}	= "SD_WS_Undef";
 	$hash->{ParseFn}	= "SD_WS_Parse";
@@ -286,7 +286,7 @@ sub SD_WS_binaryToNumber
 
 =pod
 =item summary    Supports various weather stations
-=item summary_DE Unterstützt verschiedene funk Wetterstationen
+=item summary_DE Unterst&uumltzt verschiedene Funk Wetterstationen
 =begin html
 
 <a name="SD_WS"></a>
@@ -343,9 +343,9 @@ sub SD_WS_binaryToNumber
 <a name="SD_WS"></a>
 <h3>SD_WS</h3>
 <ul>
-  Das SD_WS Modul verarbeitet von einem IO Geraet (CUL, CUN, SIGNALDuino, etc.) empfangene Nachrichten von Temperatur-Sensoren.<br>
+  Das SD_WS Modul verarbeitet von einem IO Ger&aumlt (CUL, CUN, SIGNALDuino, etc.) empfangene Nachrichten von Temperatur-Sensoren.<br>
   <br>
-  <b>Unterstuetze Modelle:</b>
+  <b>Unterst&uumltzte Modelle:</b>
   <ul>
     <li>Bresser 7009994</li>
   </ul>
@@ -356,7 +356,7 @@ sub SD_WS_binaryToNumber
   <a name="SD_WS_Define"></a>
   <b>Define</b> 
   <ul>Die empfangenen Sensoren werden automatisch angelegt.<br>
-  Die ID der angelgten Sensoren ist entweder der Kanal des Sensors, oder wenn das Attribut longid gesetzt ist, dann wird die ID aus dem Kanal und einer Reihe von Bits erzeugt, welche der Sensor beim Einschalten zufaellig vergibt.<br>
+  Die ID der angelgten Sensoren ist entweder der Kanal des Sensors, oder wenn das Attribut longid gesetzt ist, dann wird die ID aus dem Kanal und einer Reihe von Bits erzeugt, welche der Sensor beim Einschalten zuf&aumlllig vergibt.<br>
   </ul>
   <br>
   <a name="SD_WS Events"></a>

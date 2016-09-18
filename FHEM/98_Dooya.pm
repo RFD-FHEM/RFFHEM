@@ -1003,7 +1003,7 @@ sub Dooya_CalcCurrentPos($$$$) {
 
 =pod
 =item summary    Supports rf shutters from dooya
-=item summary_DE Unterstützt dooya Funkrolladen
+=item summary_DE Unterst&uumltzt dooya Funkrolladen
 =begin html
 
 <a name="Dooya"></a>
