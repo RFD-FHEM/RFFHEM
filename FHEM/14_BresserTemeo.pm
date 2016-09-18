@@ -22,7 +22,7 @@ BresserTemeo_Initialize($)
   my ($hash) = @_;
 
 
-  $hash->{Match}     = "^P44|x{0,1}#[A-F0-9]{18}";   # Laenge (Anzahl nibbles nach 0x75 )noch genauer spezifizieren
+  $hash->{Match}     = "^P44x{0,1}#[A-F0-9]{18}";   # Laenge (Anzahl nibbles nach 0x75 )noch genauer spezifizieren
   $hash->{DefFn}     = "BresserTemeo_Define";
   $hash->{UndefFn}   = "BresserTemeo_Undef";
   $hash->{AttrFn}    = "BresserTemeo_Attr";
@@ -113,6 +113,11 @@ BresserTemeo_Parse($$)
 	else
 	{
 		$hum = $hum1Dec.$hum2Dec;
+		if ($hum < 1 || $hum > 100)
+		{
+			Log3 $iohash, 4, "BresserTemeo_Parse Humidity Error. Humidity=$hum";
+			return "";
+		}
 	}
 
 	my $temp1Dec = SD_WS_binaryToNumber($binvalue, 21, 23);
@@ -132,12 +137,6 @@ BresserTemeo_Parse($$)
 	if ($temp > 60)
 	{
 		Log3 $iohash, 4, "BresserTemeo_Parse Temperature Error. temp=$temp";
-		return "";
-	}
-	
-	if ($hum < 1 || $hum > 100)
-	{
-		Log3 $iohash, 4, "BresserTemeo_Parse Humidity Error. Humidity=$hum";
 		return "";
 	}
 	
