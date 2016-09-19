@@ -146,9 +146,12 @@ my %ProtocolListSIGNALduino  = (
 			preamble		=> 'r',					# prepend to converted message	 	
 			postamble		=> '',					# Append to converted message	 	
 			clientmodule    => 'SIGNALduino_RSL',   # not used now
-			#modulematch     => '^r[A-Fa-f0-9]+', 	# not used now
-			length_min => '12',
+			modulematch     => '^r[A-Fa-f0-9]+', 	# not used now
+			length_min => '23',
+			length_max => '24',
+
         },
+
 
     "2"    => 
         {
@@ -919,7 +922,7 @@ my %ProtocolListSIGNALduino  = (
 			clockabs     	=> 500, 						
 			zero			=> [3,-2],
 			one				=> [1,-2],
-		#	start			=> [1,-25],						# neets to be defined
+		#	start			=> [1,-25],						# Wenn das startsignal empfangen wird, fehlt das 1 bit
 			format 			=> 'twostate',	
 			preamble		=> 'W50#',						# prepend to converted message	
 			#clientmodule    => '',   						# not used now
