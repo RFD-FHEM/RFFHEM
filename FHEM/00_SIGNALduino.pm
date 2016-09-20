@@ -147,8 +147,8 @@ my %ProtocolListSIGNALduino  = (
 			postamble		=> '',					# Append to converted message	 	
 			clientmodule    => 'SIGNALduino_RSL',   # not used now
 			modulematch     => '^r[A-Fa-f0-9]+', 	# not used now
-			length_min => '23',
-			length_max => '24',
+			length_min 		=> '23',
+			length_max 		=> '24',
 
         },
 
@@ -927,8 +927,8 @@ my %ProtocolListSIGNALduino  = (
 			preamble		=> 'W50#',						# prepend to converted message	
 			#clientmodule    => '',   						# not used now
 			modulematch     => '^W50#.*',  					# not used now
-			length_min      => '24',
-		#	length_max      => '48',
+			length_min      => '47',
+			length_max      => '48',
 		}, 
 );
 
@@ -2527,8 +2527,9 @@ sub SIGNALduino_Parse_MU($$$$@)
 					Debug "$name: searching new start with ($regex)\n" if ($debug);
 					
 					$rawData =~ /$regex/;
-					if (defined($-[0] && $-[0] > 0)) {
+					if (defined($-[0]) && ($-[0] > 0)) {
 						$i=$-[0]+ $i+ length($startStr);
+						$i=$i-$signal_width if ($i>0 && length($startStr) == 0); #Todo:
 						Debug "$name: found restart at Position $i ($regex)\n" if ($debug);
 					} else {
 						last;
