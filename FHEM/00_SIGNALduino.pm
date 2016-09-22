@@ -1484,8 +1484,7 @@ SIGNALduino_DoInit($)
 	delete($hash->{disConnFlag}) if defined($hash->{disConnFlag});
 	
 	RemoveInternalTimer("HandleWriteQueue:$name");
-	# todo:  $hash->{QUEUE} loeschen
- 
+    @{$hash->{QUEUE}} = ();
   	if (($hash->{DEF} !~ m/\@DirectIO/) and ($hash->{DEF} !~ m/none/) )
 	{
 		Log3 $hash, 1, "$name/init: ".$hash->{DEF};
@@ -1691,7 +1690,7 @@ SIGNALduino_HandleWriteQueue($)
   my $hash = $defs{$name};
   
   #my @arr = @{$hash->{QUEUE}};
-  
+	  
   if(@{$hash->{QUEUE}}) {
     my $msg= shift(@{$hash->{QUEUE}});
 
