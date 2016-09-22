@@ -3432,10 +3432,11 @@ attr sduino longids 1
 attr sduino longids BTHR918N
 </PRE></li>
 <li>whitelistIDs<br>
-Das Attribut whitelistIDs erlaubt es, anzugeben, welche Protokolle vom FHEM Modul beruecksichtigt werden. 
-Fuer Protokolle, die nicht beruecksichtigt werden, gibt es weder Logeintraege noch Events. Diese werden im Programmablauf nicht beruecksichtigt. 
-Das spart zum einen Ressourcen und traegt auch zur Uebersichtlichkeit bei. Die Angabe erfolgt durch Komma getrennt: z.B.: 0,3,7,12<br>
-Mit # am Anfang kann der whitelistIDs-Eintrag deaktiviert werden.
+This attribute allows it, to specify whichs protocos are considured from this module.
+Protocols which are not considured, will not generate logmessages or events. They are then completly ignored. 
+This makes it possible to lower ressource usage and give some better clearnes in the logs.
+You can specify multiple whitelistIDs wih a colon : 0,3,7,12<br>
+With a # at the beginnging whitelistIDs can be deactivated.
 </li><br>
    <li>WS09_Model<br>
    WS09_WSModel:undef -> check all, WH1080 -> support WH1080/WS0101 , CTW600 -> support CTW600 
