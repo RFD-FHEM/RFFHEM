@@ -13,7 +13,7 @@ Supported Devices / Protocols
 |TCM97001,Logilink, Pearl NC, and similar,Lifetec LT3594 | Weather sensor
 |PT2262 and similar Devices | Remote switches like Intertechno V1+V3, Elro, door/window sensors|
 |Conrad RSL | shutters |
-|Oregon Scientific v2 ans v3 Devices | Weather sensor |
+|Oregon Scientific v2 and v3 Devices | Weather sensor |
 |Technoline TX3  | Weather sensor |
 |Hama TS33C, Bresser Thermo/Hygro Sensor  | Weather sensor |
 |Arduino Sensor | multi purpose sensor based on arduino |
@@ -28,6 +28,8 @@ Supported Devices / Protocols
 |s014/TFA 30.3200/TCM/Conrad | Weather sensor |
 |les led  | Remote controlled led lamp |
 |Livolo | Remote switches and sockets  |
+|Dooya | Shutters and blinds from various vendors like Rohrmotor24  |
+|Somfy RTS | Shutters from Somfy|
 
 
 How to install
