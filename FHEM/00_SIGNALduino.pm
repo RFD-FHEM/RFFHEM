@@ -47,7 +47,7 @@ sub SIGNALduino_SimpleWrite(@);
 #my $debug=0;
 
 my %gets = (    # Name, Data to send to the SIGNALduino, Regexp for the answer
-  "version"  => ["V", 'V\s.*SIGNALduino.*'],
+  "version"  => ["V", 'V\s.*SIGNAL(duino|ESP).*'],
   "freeram"  => ["R", '^[0-9]+'],
   "raw"      => ["", '.*'],
   "uptime"   => ["t", '^[0-9]+' ],
@@ -1553,7 +1553,7 @@ sub SIGNALduino_CheckCmdResp($)
 	
 	if ($hash->{version}) {
 		$ver = $hash->{version};
-		if ($ver !~ m/SIGNALduino/) {
+		if ($ver !~ m/SIGNAL(duino|ESP)/) {
 			$msg = "$name: Not an SIGNALduino device, setting attribute dummy=1 got for V:  $ver";
 			Log3 $hash, 1, $msg;
 			readingsSingleUpdate($hash, "state", "no SIGNALduino found", 1);
