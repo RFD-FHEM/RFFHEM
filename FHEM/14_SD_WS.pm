@@ -111,12 +111,13 @@ sub SD_WS_Parse($$)
         	model => 'SD_WS_50_SM',
 			prematch => sub {my $msg = shift; return 1 if ($msg =~ /^FF5[0-9A-F]{5}FF[0-9A-F]{2}/); }, 		# prematch
 			crcok => sub {my $msg = shift; return 1 if ((hex(substr($msg,2,2))+hex(substr($msg,4,2))+hex(substr($msg,6,2))+hex(substr($msg,8,2))&0xFF) == (hex(substr($msg,10,2))) );  }, 	# crc
-			id => sub {my $msg = shift; return (hex(substr($msg,2,2)) &0x03 ); },   						#id
-			#temp => sub {my $msg = shift; return  (sprintf('%x',((hex(substr($msg,6,2)) <<4)/2/10)));  },	#temp
-			temp => sub {my $msg = shift; return  sprintf("%04X",((hex(substr($msg,6,2)))<<4)/2);  },	#temp
+			id => sub {my $msg = shift; return (hex(substr($msg,2,2)) &0x03 ); },   							#id
+			#temp => sub {my $msg = shift; return  (sprintf('%x',((hex(substr($msg,6,2)) <<4)/2/10)));  },		#temp
+			#temp => sub {my $msg = shift; return  sprintf("%04X",((hex(substr($msg,6,2)))<<4)/2);  },			#temp
+			temp => sub {my $msg = shift; return  ((hex(substr($msg,6,2)))<<4)/200  },							#temp
 			#hum => sub {my $msg = shift; return (printf('%02x',hex(substr($msg,4,2))));  }, 					#hum
-			hum => sub {my $msg = shift; return (substr($msg,4,2));  }, 					#hum
-			channel => sub {my (undef,$bitData) = @_; return ( SD_WS_binaryToNumber($bitData,12,15)&0x03 );  }, 	#channel
+			hum => sub {my $msg = shift; return hex(substr($msg,4,2));  }, 										#hum
+			channel => sub {my (undef,$bitData) = @_; return ( SD_WS_binaryToNumber($bitData,12,15)&0x03 );  }, #channel
         },	
      33 =>
    	 	 {
@@ -297,6 +298,7 @@ sub SD_WS_binaryToNumber
   <b>Known models:</b>
   <ul>
     <li>Bresser 7009994</li>
+    <li>Opus XT300</li>
   </ul>
   <br>
   New received device are add in fhem with autocreate.
@@ -348,6 +350,8 @@ sub SD_WS_binaryToNumber
   <b>Unterst&uumltzte Modelle:</b>
   <ul>
     <li>Bresser 7009994</li>
+    <li>Opus XT300</li>
+
   </ul>
   <br>
   Neu empfangene Sensoren werden in FHEM per autocreate angelegt.
