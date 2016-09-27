@@ -113,8 +113,8 @@ sub SD_WS_Parse($$)
 			crcok => sub {my $msg = shift; return 1 if ((hex(substr($msg,2,2))+hex(substr($msg,4,2))+hex(substr($msg,6,2))+hex(substr($msg,8,2))&0xFF) == (hex(substr($msg,10,2))) );  }, 	# crc
 			id => sub {my $msg = shift; return (hex(substr($msg,2,2)) &0x03 ); },   							#id
 			#temp => sub {my $msg = shift; return  (sprintf('%x',((hex(substr($msg,6,2)) <<4)/2/10)));  },		#temp
-			#temp => sub {my $msg = shift; return  sprintf("%04X",((hex(substr($msg,6,2)))<<4)/2);  },			#temp
-			temp => sub {my $msg = shift; return  ((hex(substr($msg,6,2)))<<4)/200  },							#temp
+			#temphex => sub {my $msg = shift; return  sprintf("%04X",((hex(substr($msg,6,2)))<<4)/2);  },			#temp
+			temp => sub {my $msg = shift; return  ((hex(substr($msg,6,2)))-40)  },								#temp
 			#hum => sub {my $msg = shift; return (printf('%02x',hex(substr($msg,4,2))));  }, 					#hum
 			hum => sub {my $msg = shift; return hex(substr($msg,4,2));  }, 										#hum
 			channel => sub {my (undef,$bitData) = @_; return ( SD_WS_binaryToNumber($bitData,12,15)&0x03 );  }, #channel
@@ -179,6 +179,8 @@ sub SD_WS_Parse($$)
 		    return "crc Error" && Log3 $iohash, 4, "$name decoded protocolid: $protocol ($SensorTyp) crc  error"  if (!$decodingSubs{$protocol}{crcok}->( $rawData ));
 		    
 	    	$id=$decodingSubs{$protocol}{id}->( $rawData,$bitData );
+	    	#my $temphex=$decodingSubs{$protocol}{temphex}->( $rawData,$bitData );
+	    	
 	    	$temp=$decodingSubs{$protocol}{temp}->( $rawData,$bitData );
 	    	$hum=$decodingSubs{$protocol}{hum}->( $rawData,$bitData );
 	    	$channel=$decodingSubs{$protocol}{channel}->( $rawData,$bitData );
