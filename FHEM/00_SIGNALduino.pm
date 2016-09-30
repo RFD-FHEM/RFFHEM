@@ -77,20 +77,20 @@ my %sets = (
 ## Supported Clients per default
 my $clientsSIGNALduino = ":IT:"
 						."CUL_TCM97001:"
-						."SIGNALduino_RSL:"
+#						."SIGNALduino_RSL:"
 						."OREGON:"
 						."CUL_TX:"
-						."SD_AS:"
+#						."SD_AS:"
 						."Hideki:"
 						."SD_WS07:"
-						."SD_WS09: "
-						.":SD_WS:"
+						."SD_WS09:"
+						."SD_WS:"
 						."RFXX10REC:"
 						."Dooya:"
 						."SOMFY:"
-						."SD_UT:"	## BELL 201.2 TXA
+#						."SD_UT:"	## BELL 201.2 TXA
 			        	."SD_WS_Maverick:"
-			        	."BresserTemeo:"
+#			        	."BresserTemeo:"
 			      		."SIGNALduino_un:"
 					; 
 
@@ -98,20 +98,20 @@ my $clientsSIGNALduino = ":IT:"
 my %matchListSIGNALduino = (
      "1:IT"            			=> "^i......",	  				  # Intertechno Format
      "2:CUL_TCM97001"      		=> "^s[A-Fa-f0-9]+",			  # Any hex string		beginning with s
-     "3:SIGNALduino_RSL"		=> "^r[A-Fa-f0-9]+",				  # Any hex string		beginning with r
+#     "3:SIGNALduino_RSL"		=> "^r[A-Fa-f0-9]+",				  # Any hex string		beginning with r
      "5:CUL_TX"               	=> "^TX..........",         	  # Need TX to avoid FHTTK
-     "6:SD_AS"       			=> "^P2#[A-Fa-f0-9]{7,8}", 		  # Arduino based Sensors, should not be default
+#     "6:SD_AS"       			=> "^P2#[A-Fa-f0-9]{7,8}", 		  # Arduino based Sensors, should not be default
      "4:OREGON"            		=> "^(3[8-9A-F]|[4-6][0-9A-F]|7[0-8]).*",		
      "7:Hideki"					=> "^P12#75[A-F0-9]+",
      "10:SD_WS07"				=> "^P7#[A-Fa-f0-9]{6}F[A-Fa-f0-9]{2}",
      "11:SD_WS09"				=> "^P9#[A-Fa-f0-9]+",
-     "12:SD_WS"					=> '^[W]\d+#.*',
+     "12:SD_WS"					=> '^W\d+#.*',
      "13:RFXX10REC" 			=> '^(20|29)[A-Fa-f0-9]+',
      "14:Dooya"					=> '^P16#[A-Fa-f0-9]+',
      "15:SOMFY"					=> '^YsA[0-9A-F]+',
      "16:SD_WS_Maverick"		=> '^P47#[A-Fa-f0-9]+',
-     "17:SD_UT"            		=> '^u30#.*',						## BELL 201.2 TXA
-     "44:BresserTemeo"     		=> '^P44x{0,1}#[A-F0-9]{18}',		# Bresser Temeo Trend (3CH Thermo-/Hygro)
+#     "17:SD_UT"            		=> '^u30#.*',						## BELL 201.2 TXA
+#     "44:BresserTemeo"     		=> '^P44x{0,1}#[A-F0-9]{18}',		# Bresser Temeo Trend (3CH Thermo-/Hygro)
      "X:SIGNALduino_un"			=> '^[uP]\d+#.*',
 );
 
