@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 14_Hideki.pm 14395 2016-02-08 18:00:00 $
+# $Id: 14_Hideki.pm 14395 2016-07-14 18:00:00Z v3.2-dev $
 # The file is taken from the SIGNALduino project
 # see http://www.fhemwiki.de/wiki/SIGNALduino
 # and was modified by a few additions
@@ -89,7 +89,7 @@ Hideki_Parse($$)
 	if (!@decodedBytes)
 	{
 		Log3 $iohash, 4, "$name decrypt failed";
-		return undef;
+		return '';
 	}
 	
 	my $sensorTyp=getSensorType($decodedBytes[3]);
@@ -98,7 +98,7 @@ Hideki_Parse($$)
 	if (!Hideki_crc(\@decodedBytes))
 	{
 		Log3 $iohash, 4, "$name crc failed";
-		return undef;
+		return '';
 	}
 
 	my $id=substr($decodedString,2,2);      # get the random id from the data
@@ -351,6 +351,8 @@ Hideki_Attr(@)
 1;
 
 =pod
+=item summary    Supports various rf sensors with hideki protocol
+=item summary_DE Unterst&uumltzt verschiedenen Funksensoren mit hideki Protokol
 =begin html
 
 <a name="Hideki"></a>
@@ -446,7 +448,7 @@ Hideki_Attr(@)
     &lt;code&gt; besteht aus dem Sensortyp und der Kanalnummer (1..5) oder wenn das Attribut longid im IO Device gesetzt ist aus einer Zufallsadresse, die durch den Sensor beim einlegen der
 	Batterie generiert wird (Die Adresse aendert sich bei jedem Batteriewechsel).<br>
     </li>
-    <li>Wenn autocreate aktiv ist, dann wird der Sensor automatisch in FHEM angelegt. Das ist der empfohlene Weg, neue Sensoren hinzuzufuegen.</li>
+    <li>Wenn autocreate aktiv ist, dann wird der Sensor automatisch in FHEM angelegt. Das ist der empfohlene Weg, neue Sensoren hinzuzuf&uumlgen.</li>
    
   </ul>
   <br>

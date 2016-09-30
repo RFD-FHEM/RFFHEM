@@ -1,16 +1,24 @@
-﻿18.03.2016
- - Back Firware 3.2.0b12 which causes less problems
- - async communication with arduino, should not cause blocking of fhem anymore
- -
-22.02.2016
- - Version 3.2.0 Module & Firmware
- - serval fixes and enhacements
- - improved stability
- - many new protocols
- - Supports ITv3 sockets and switches
- - new sendMsg Function
+30.09.2016
+  SIGNALduino is now nonblocking
+  improved init and keepalive
+  some fixes providing more messages instad of fewer.
+  fixed some manchester realted things
+  added protocol 43 Somfy RTS
+  increased number of pattern from 6 to 8 to support dooya shutter protocol better
+  Rised the allowd numbers in protocol check
+  fixed a possible bug, that append a 0 nibble in mc message
+  added a new information field in mc messages, providing exact number of
+  provided bits
+  fixed incomplete mc output (last nibble was not delivered)
+  decoding mc signals > message buffer is now possible
+  max 340 bits are currently suppored
+  small improvement in processMessage  (if MS decoding fails, 
+  mc or mu decoding is called)
+  corrected readings for firmware version.
+  new sendMsg Function
+  14_SD_WS09.pm WH1080 CRC-Berechung angepaßt--> automatische Modelauswahl
+15.01.2016
  - Added 14_SD_WS09.pm Module for WH1080 (WS-0101, TFA30.3189) & CTW600 868MHz OOK/AS
- -
 08.11.2015
  - Firmware Update 3.1.8-HF2 fixes a possible crash
  - Fixes missing event when DMSG is updated
