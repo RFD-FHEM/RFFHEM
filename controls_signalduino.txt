@@ -5,6 +5,7 @@ DEL FHEM/14_SIGNALduino_un.pm
 DEL FHEM/firmware/SIGNALduino_nano328.hex
 DEL FHEM/firmware/SIGNALduino_promini328.hex
 DEL FHEM/firmware/SIGNALduino_uno.hex
+UPD 2016_27_09_23:19:45 13075   FHEM/14_SD_WS.pm
 UPD 2016_30_09_22:37:55 14080   FHEM/14_Hideki.pm
 UPD 2016_30_09_22:37:55 15483   FHEM/90_SIGNALduino_un.pm
 UPD 2016_30_09_22:37:55 19431   FHEM/14_SD_WS09.pm
