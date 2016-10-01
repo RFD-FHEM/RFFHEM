@@ -1,9 +1,6 @@
-18.09.2016
-  Firmware 3.3.0
-31.08.2016
+30.09.2016
   SIGNALduino is now nonblocking
   improved init and keepalive
-13.08.2016
   some fixes providing more messages instad of fewer.
   fixed some manchester realted things
   added protocol 43 Somfy RTS
@@ -20,25 +17,12 @@
   corrected readings for firmware version.
   new sendMsg Function
   14_SD_WS09.pm WH1080 CRC-Berechung angepaßt--> automatische Modelauswahl
-  
-      
-29.03.2016
- - Updated Firmware to 3.20b19
-   including various bugfixes and better mc detection
 15.01.2016
- - Firmware 3.2.0-11b 
-01.1.2016
- - 14_SD_WS09.pm CTW-600 rain Berechung angepaßt
-26.11.2015
- - WH1080 rain, battery, wind, temp , hum ok (auch WS-0101)
- - DCF-77 Meldungen rausgefiltert
- - Unterscheidung CTW600 und WH1080 (WH1080 getestet) eingebaut
- 
-12.11.2015
- - Addes 14_SD_WS09.pm Module for WH1080 (WS-0101, TFA30.3189) 868MHz OOK/ASK
- 
-26.10.2014
- - Firmware Update 3.1.8-HF1 due to a bug in the raw send option
+ - Added 14_SD_WS09.pm Module for WH1080 (WS-0101, TFA30.3189) & CTW600 868MHz OOK/AS
+08.11.2015
+ - Firmware Update 3.1.8-HF2 fixes a possible crash
+ - Fixes missing event when DMSG is updated
+26.10.2015 - Firmware Update 3.1.8-HF1 due to a bug in the raw send option
  23.10.2015
  - bugfix in 90_SIGNALduino_un (caused to crash fhem)
 20.10.2015
