@@ -15,7 +15,7 @@
 # 1.00	2016-03-12	darkmission	autocreate, parse communication from SIGNALduino for correct position when using remote from doooya 
 # 1.10  2016-03-13	Ralf9		changed SendCommand with sendMsg
 # 1.11  2016-03-17	Ralf9   	ID + Channel = DeviceCode
-# 1.12  2016-04-26      Jarnsen         im Dooya parse cmd geändert
+# 1.12  2016-04-26  Jarnsen     im Dooya parse cmd geändert
 #
 #TODOS:
 # - Groups, diff by channels
@@ -1025,7 +1025,7 @@ sub Dooya_CalcCurrentPos($$$$) {
   <code>4: SIGNALduino_unknown / shutter Dooya 0011011100000110010110001110000100110011 received</code>  
   <code>4: 00110111000001100101100 1110 0001 0011 0011</code>  
   <code>4: SIGNALduino_unknown found shutter from Dooya. id=3606104, remotetype=14,  channel=1, direction=down, all_shutters=false</code>  
-</pre>
+  </pre>
 
   
    <br> a <a href="#SIGNALduino">SIGNALduino</a> device (must be defined first)  <br>
@@ -1056,7 +1056,6 @@ sub Dooya_CalcCurrentPos($$$$) {
    <li><code>&lt;id&gt;</code> is a 28 digit binar number that uniquely identifies FHEM as a new remote control.
    <br>You can use a different one for each device definition, and group them using a structure. You can use the same ID for a couple of shutters
    and you can give every one an other channel. (0 to 15, 0 ist the MASTER and conrols all other channels.)
-   </li>
    If you set one of them, you need to pick the same address as an existing remote. You can create the Device with autocreate with a real remote or manuel without remote control.</li>
    </ul>
    <br>
@@ -1104,25 +1103,26 @@ sub Dooya_CalcCurrentPos($$$$) {
 			The position must be between 0 and 100 and the appropriate
 			attributes drive-down-time-to-100, drive-down-time-to-close,
 			drive-up-time-to-100 and drive-up-time-to-open must be set.<br>
-			</li>
-			</ul>
+	  </li>
+	</ul>
 
 		The position reading distinuishes between multiple cases
     <ul>
       <li>Without timing values set only generic values are used for status and position: <pre>open, closed, moving</pre> are used
       </li>
-			<li>With timing values set but drive-down-time-to-close equal to drive-down-time-to-100 and drive-up-time-to-100 equal 0 
+	  <li>With timing values set but drive-down-time-to-close equal to drive-down-time-to-100 and drive-up-time-to-100 equal 0 
 			the device is considered to only vary between 0 and 100 (100 being completely closed)
       </li>
-			<li>With full timing values set the device is considerd a window shutter (Rolladen) with a difference between 
+	  <li>With full timing values set the device is considerd a window shutter (Rolladen) with a difference between 
 			covering the full window (position 100) and being completely closed (position 200)
       </li>
-		</ul>
+	</ul>
 
   </ul>
   <br>
 
-  <b>Get</b> <ul>N/A</ul><br>
+  <b>Get</b> 
+  <ul>N/A</ul><br>
 
   <a name="Dooyaattr"></a>
   <b>Attributes</b>
@@ -1132,31 +1132,31 @@ sub Dooya_CalcCurrentPos($$$$) {
         Set the IO or physical device which should be used for sending signals
         for this "logical" device. It must be the SIGNALduino.<br>
         Note: The IODev has to be set, otherwise no commands will be sent!<br>
-        </li><br>
+    </li><br>
 
   <a name="channel"></a>
     <li>channel<br>
         Set the channel of the remote. You can use 0 (MASTER) to 15.<br>
         Note: The MASTER conrols all remotes with the same ID!!!<br>
-        </li><br>
+    </li><br>
         
           <a name="SignalRepeats"></a>
     <li>SignalRepeats<br>
         Set the repeats for sending signal. You can use 5, 10, 15 and 20.
-      </li><br>
+    </li><br>
         
     <a name="setList"></a>
     <li>setList<br>
         Space separated list of commands, which will be returned upon "set name ?", 
         so the FHEMWEB frontend can construct the correct control and command dropdown. Specific controls can be added after a colon for each command
         <br>
-        	</li><br>
+    </li><br>
 
     <a name="additionalPosReading"></a>
     <li>additionalPosReading<br>
         Position of the shutter will be stored in the reading <code>pos</code> as numeric value. 
         Additionally this attribute might specify a name for an additional reading to be updated with the same value than the pos.
-		</li><br>
+	</li><br>
 
 
 
@@ -1168,12 +1168,15 @@ sub Dooya_CalcCurrentPos($$$$) {
         separated pair. The first part specifies the "old" value, the second
         the new/desired value. If the first character is slash(/) or comma(,)
         then split not by space but by this character, enabling to embed spaces.
-        Examples:<ul><code>
+        Examples:
+        <ul><code>
         attr store eventMap on:open off:closed<br>
         attr store eventMap /on-for-timer 10:open/off:closed/<br>
         set store open
-        </code></ul>
-        </li><br>
+        </code>
+        </ul>
+    </li>
+    <br>
 
     <li><a href="#do_not_notify">do_not_notify</a></li><br>
     <a name="attrdummy"></a>
@@ -1200,32 +1203,32 @@ sub Dooya_CalcCurrentPos($$$$) {
         appear in commands which use some wildcard/attribute as name specifiers
         (see <a href="#devspec">devspec</a>). You still get them with the
         "ignored=1" special devspec.
-        </li><br>
+    </li><br>
 
     <a name="drive-down-time-to-100"></a>
     <li>drive-down-time-to-100<br>
         The time the blind needs to drive down from "open" (pos 0) to pos 100.<br>
 		In this position, the lower edge touches the window frame, but it is not completely shut.<br>
 		For a mid-size window this time is about 12 to 15 seconds.
-        </li><br>
+    </li><br>
 
     <a name="drive-down-time-to-close"></a>
     <li>drive-down-time-to-close<br>
         The time the blind needs to drive down from "open" (pos 0) to "close", the end position of the blind.<br>
 		This is about 3 to 5 seonds more than the "drive-down-time-to-100" value.
-        </li><br>
+    </li><br>
 
     <a name="drive-up-time-to-100"></a>
     <li>drive-up-time-to-100<br>
         The time the blind needs to drive up from "close" (endposition) to "pos 100".<br>
 		This usually takes about 3 to 5 seconds.
-        </li><br>
+    </li><br>
 
     <a name="drive-up-time-to-open"></a>
     <li>drive-up-time-to-open<br>
         The time the blind needs drive up from "close" (endposition) to "open" (upper endposition).<br>
 		This value is usually a bit higher than "drive-down-time-to-close", due to the blind's weight.
-        </li><br>
+    </li><br>
 
   </ul>
   <br>
