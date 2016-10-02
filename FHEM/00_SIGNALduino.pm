@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 10484 2016-09-18 16:00:00Z v3.3.0-dev $
+# $Id: 00_SIGNALduino.pm 10484 2016-10-02 12:00:00Z v3.3.1-dev $
 #
 # v3.3.0 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -83,14 +83,15 @@ my $clientsSIGNALduino = ":IT:"
 						."SD_AS:"
 						."Hideki:"
 						."SD_WS07:"
-						."SD_WS09: "
-						.":SD_WS:"
+						."SD_WS09:"
+						." :"		# Zeilenumbruch
+						."SD_WS:"
 						."RFXX10REC:"
 						."Dooya:"
 						."SOMFY:"
 						."SD_UT:"	## BELL 201.2 TXA
 			        	."SD_WS_Maverick:"
-			        	."BresserTemeo:"
+#			        	."BresserTemeo:"
 			      		."SIGNALduino_un:"
 					; 
 
@@ -105,7 +106,7 @@ my %matchListSIGNALduino = (
      "7:Hideki"					=> "^P12#75[A-F0-9]+",
      "10:SD_WS07"				=> "^P7#[A-Fa-f0-9]{6}F[A-Fa-f0-9]{2}",
      "11:SD_WS09"				=> "^P9#[A-Fa-f0-9]+",
-     "12:SD_WS"					=> '^[W]\d+#.*',
+     "12:SD_WS"					=> '^W\d+x{0,1}#.*',
      "13:RFXX10REC" 			=> '^(20|29)[A-Fa-f0-9]+',
      "14:Dooya"					=> '^P16#[A-Fa-f0-9]+',
      "15:SOMFY"					=> '^YsA[0-9A-F]+',
@@ -823,8 +824,9 @@ my %ProtocolListSIGNALduino  = (
             		zero 			=> [4,-4],
             		one				=> [4,-8],
             		start	 		=> [8,-8],
-            		preamble 		=> 'P44#',
-            		clientmodule	=> 'BresserTemeo',
+            		preamble 		=> 'W44#',
+            		clientmodule		=> 'SD_WS',
+            		modulematch		=> '^W44#[A-F0-9]{18}',
             		length_min 		=> '64',
             		length_max 		=> '72',
 		},
@@ -836,8 +838,9 @@ my %ProtocolListSIGNALduino  = (
             		zero 			=> [4,-4],
             		one				=> [4,-8],
             		start 			=> [8,-12],
-            		preamble 		=> 'P44x#',
-            		clientmodule	=> 'BresserTemeo',
+            		preamble 		=> 'W44x#',
+            		clientmodule		=> 'SD_WS',
+            		modulematch		=> '^W44x#[A-F0-9]{18}',
             		length_min 		=> '64',
             		length_max 		=> '72',
 		},
