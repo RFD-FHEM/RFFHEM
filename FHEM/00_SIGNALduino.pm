@@ -678,7 +678,7 @@ my %ProtocolListSIGNALduino  = (
 			format     		=> 'twostate',  		# not used now
 			preamble		=> 'u34#',				# prepend to converted message	
 			postamble		=> '',					# Append to converted message	 	
-			clientmodule    => '',      			# not used now
+			#clientmodule    => '',      			# not used now
 			#modulematch     => '',     			# not used now
 			length_min      => '40',
 			length_max      => '40',
@@ -694,7 +694,7 @@ my %ProtocolListSIGNALduino  = (
 			format     		=> 'twostate',  		# not used now
 			preamble		=> 'u35#',				# prepend to converted message	
 			postamble		=> '',					# Append to converted message	 	
-			clientmodule    => '',      			# not used now
+			#clientmodule    => '',      			# not used now
 			#modulematch     => '',     			# not used now
 			length_min      => '28',
 			length_max      => '32',
@@ -710,7 +710,7 @@ my %ProtocolListSIGNALduino  = (
 			format     		=> 'twostate',  		# not used now
 			preamble		=> 'u36#',				# prepend to converted message	
 			postamble		=> '',					# Append to converted message	 	
-			clientmodule    => '',      			# not used now
+			#clientmodule    => '',      			# not used now
 			#modulematch     => '',     			# not used now
 			length_min      => '24',
 			length_max      => '24',
@@ -777,7 +777,7 @@ my %ProtocolListSIGNALduino  = (
 			start => [1,-2],
 			clockabs => 250, 
 			preamble => 'u40#', # prepend to converted message
-			clientmodule => '', # not used now
+			#clientmodule => '', # not used now
 			#modulematch => '', # not used now
 			length_min => '10',
 		},    
@@ -791,7 +791,7 @@ my %ProtocolListSIGNALduino  = (
 			sync => [1,-15],
 			clockabs => 450, 
 			preamble => 'u41#', # prepend to converted message
-			clientmodule => '', # not used now
+			#clientmodule => '', # not used now
 			#modulematch => '', # not used now
 			length_min => '20',
 		},    
@@ -804,7 +804,7 @@ my %ProtocolListSIGNALduino  = (
 			start => [-28],
 			clockabs => 550, 
 			preamble => 'u42#', # prepend to converted message
-			clientmodule => '', # not used now
+			#clientmodule => '', # not used now
 			#modulematch => '', 
 			length_min => '24',
 		},
@@ -876,7 +876,7 @@ my %ProtocolListSIGNALduino  = (
 			clockabs     	=> 250,	# -1=auto	
 			format 			=> 'twostate',	# not used now
 			preamble		=> 'u46#',			
-			clientmodule    => '',   # not used now
+			#clientmodule    => '',   # not used now
 			#modulematch     => '', # not used now
 			length_min      => '16',
 			length_max 		=> '18',
@@ -1428,6 +1428,8 @@ SIGNALduino_Get($@)
 		push (@IdList, $id);
 	}
 	@IdList = sort { $a <=> $b } @IdList;
+	
+	$ret = " ID    modulname       protocolname # comment\n\n";
 	
 	foreach $id (@IdList)
 	{
