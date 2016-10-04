@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 10484 2016-10-02 12:00:00Z v3.3.1-dev $
+# $Id: 00_SIGNALduino.pm 10484 2016-10-04 20:00:00Z v3.3.1-dev $
 #
 # v3.3.0 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -55,6 +55,7 @@ my %gets = (    # Name, Data to send to the SIGNALduino, Regexp for the answer
   "ITParms"  => ["ip",'.*'],
   "ping"     => ["P",'^OK$'],
   "config"   => ["CG",'^MS.*MU.*MC.*'],
+  "protocolIDs"   => ["none",'none'],
 #  "ITClock"  => ["ic", '\d+'],
 #  "FAParms"  => ["fp", '.*' ],
 #  "TCParms"  => ["dp", '.*' ],
@@ -112,7 +113,7 @@ my %matchListSIGNALduino = (
      "15:SOMFY"					=> '^YsA[0-9A-F]+',
      "16:SD_WS_Maverick"		=> '^P47#[A-Fa-f0-9]+',
      "17:SD_UT"            		=> '^u30#.*',						## BELL 201.2 TXA
-     "44:BresserTemeo"     		=> '^P44x{0,1}#[A-F0-9]{18}',		# Bresser Temeo Trend (3CH Thermo-/Hygro)
+     #"44:BresserTemeo"     		=> '^P44x{0,1}#[A-F0-9]{18}',		# Bresser Temeo Trend (3CH Thermo-/Hygro)
      "X:SIGNALduino_un"			=> '^[uP]\d+#.*',
 );
 
@@ -121,6 +122,7 @@ my %ProtocolListSIGNALduino  = (
     "0"    => 
         {
             name			=> 'weather1',		# Logilink, NC, WS, TCM97001 etc.
+			comment		=> 'Logilink, NC, WS, TCM97001 etc',
 			id          	=> '0',
 			one				=> [1,-8],
 			zero			=> [1,-4],
@@ -157,6 +159,7 @@ my %ProtocolListSIGNALduino  = (
     "2"    => 
         {
             name			=> 'AS',		# Self build arduino sensor
+			comment		=> 'Self build arduino sensor',
 			id          	=> '2',
 			one				=> [1,-2],
 			zero			=> [1,-1],
@@ -232,7 +235,7 @@ my %ProtocolListSIGNALduino  = (
 			clockabs     	=> 220,			# -1 = auto
 			format 			=> 'twostate',	# tristate can't be migrated from bin into hex!
 			preamble		=> 'u6#',			# Append to converted message	
-			clientmodule    => 'undef',   	# not used now
+			#clientmodule    => '',   	# not used now
 			#modulematch     => '^u......',  # not used now
 			length_min      => '24',
 
@@ -240,6 +243,7 @@ my %ProtocolListSIGNALduino  = (
 	"7"    => 			## weather sensors like EAS800z
         {
             name			=> 'weatherID7',	
+			comment		=> 'EAS800z, FreeTec NC-7344',
 			id          	=> '7',
 			one				=> [1,-4],
 			zero			=> [1,-2],
@@ -247,7 +251,7 @@ my %ProtocolListSIGNALduino  = (
 			clockabs     	=> 484,			
 			format 			=> 'twostate',	
 			preamble		=> 'P7#',		# prepend to converted message	
-			clientmodule    => 'undef',   	# not used now
+			clientmodule    => 'SD_WS07',   	# not used now
 			modulematch     => '^P7#.{6}F.{2}', # not used now
 			length_min      => '35',
 			length_max      => '40',
@@ -263,7 +267,7 @@ my %ProtocolListSIGNALduino  = (
 			clockabs     	=> 470,			# 
 			format 			=> 'pwm',	    # 
 			preamble		=> 'TX',		# prepend to converted message	
-			clientmodule    => 'ittx',   	# not used now
+			clientmodule    => 'CUL_TX',   	# not used now
 			modulematch     => '^TX......', # not used now
 			length_min      => '43',
 			length_max      => '44',
@@ -273,6 +277,7 @@ my %ProtocolListSIGNALduino  = (
 	"9"    => 			## Funk Wetterstation CTW600
 			{
             name			=> 'CTW 600',	
+			comment		=> 'Funk Wetterstation CTW600',
 			id          	=> '9',
 			zero			=> [3,-2],
 			one				=> [1,-2],
@@ -281,7 +286,7 @@ my %ProtocolListSIGNALduino  = (
 			clockabs     	=> 480,			# -1 = auto undef=noclock
 			format 			=> 'pwm',	    # tristate can't be migrated from bin into hex!
 			preamble		=> 'P9#',		# prepend to converted message	
-			clientmodule    => 'undef',   	# not used now
+			clientmodule    => 'SD_WS09',   	# not used now
 			#modulematch     => '^u9#.....',  # not used now
 			length_min      => '70',
 			length_max      => '120',
@@ -293,6 +298,7 @@ my %ProtocolListSIGNALduino  = (
 			id          	=> '10',
 			clockrange     	=> [300,520],			# min , max
 			format 			=> 'manchester',	    # tristate can't be migrated from bin into hex!
+			clientmodule    => 'OREGON',
 			modulematch     => '^(3[8-9A-F]|[4-6][0-9A-F]|7[0-8]).*',
 			length_min      => '64',
 			length_max      => '220',
@@ -306,7 +312,7 @@ my %ProtocolListSIGNALduino  = (
 			clockrange     	=> [380,425],			# min , max
 			format 			=> 'manchester',	    # tristate can't be migrated from bin into hex!
 			preamble		=> 'P2#',		# prepend to converted message	
-			#clientmodule    => '14_SD_AS',   	# not used now
+			clientmodule    => 'SD_AS',   	# not used now
 			modulematch     => '^P2#.{7,8}',
 			length_min      => '52',
 			length_max      => '56',
@@ -319,7 +325,7 @@ my %ProtocolListSIGNALduino  = (
 			clockrange     	=> [420,510],                   # min, max better for Bresser Sensors, OK for hideki/Hideki/TFA too     
 			format 			=> 'manchester',	
 			preamble		=> 'P12#',						# prepend to converted message	
-			#clientmodule    => '14_hideki',   				# not used now
+			clientmodule    => 'hideki',   				# not used now
 			modulematch     => '^P12#75.+',  						# not used now
 			length_min      => '72',
 			length_max      => '104',
@@ -384,7 +390,7 @@ my %ProtocolListSIGNALduino  = (
 			clockabs		=> 280,
 			format 			=> 'twostate',	  		
 			preamble		=> 'P16#',				# prepend to converted message	
-			#clientmodule    => '',   				# not used now
+			clientmodule    => 'Dooya',   				# not used now
 			#modulematch     => '',  				# not used now
 			length_min      => '39',
 			length_max      => '40',
@@ -656,7 +662,7 @@ my %ProtocolListSIGNALduino  = (
 			format     		=> 'twostate',  		# not used now
 			preamble		=> 'W33#',				# prepend to converted message	
 			postamble		=> '',					# Append to converted message	 	
-			clientmodule    => '',      			# not used now
+			clientmodule    => 'SD_WS',      			# not used now
 			#modulematch     => '',     			# not used now
 			length_min      => '42',
 			length_max      => '44',
@@ -720,7 +726,7 @@ my %ProtocolListSIGNALduino  = (
 			format     		=> 'twostate',  		# not used now
 			preamble		=> 'W37#',				# prepend to converted message	
 			postamble		=> '',					# Append to converted message	 	
-			clientmodule    => '',      			# not used now
+			clientmodule    => 'SD_WS',      			# not used now
 			#modulematch     => '',     			# not used now
 			length_min      => '40',
 			length_max      => '44',
@@ -778,6 +784,7 @@ my %ProtocolListSIGNALduino  = (
 	"41" => ## Elro (Smartwares) Doorbell DB200
 		{
 			name => 'elro doorbell',
+			comment => 'Elro (Smartwares) Doorbell DB200',
 			id => '41',
 			zero => [1,-3],
 			one => [3,-1],
@@ -808,7 +815,7 @@ my %ProtocolListSIGNALduino  = (
 			clockrange  	=> [610,670],			# min , max
 			format			=> 'manchester', 
 			preamble 		=> 'Ys',
-			#clientmodule	=> '', # not used now
+			clientmodule	=> 'SOMFY', # not used now
 			modulematch 	=> '^YsA[0-9A-F]{13}',
 			length_min 		=> '56',
 			length_max 		=> '56',
@@ -882,7 +889,7 @@ my %ProtocolListSIGNALduino  = (
 			clockrange     	=> [220,260],                   
 			format 			=> 'manchester',	
 			preamble		=> 'P47#',						# prepend to converted message	
-			#clientmodule    => '',   						# not used now
+			clientmodule    => 'SD_WS_Maverick',   						# not used now
 			modulematch     => '^P47#.*',  					# not used now
 			length_min      => '100',
 			length_max      => '108',
@@ -928,7 +935,7 @@ my %ProtocolListSIGNALduino  = (
 		#	start			=> [1,-25],						# Wenn das startsignal empfangen wird, fehlt das 1 bit
 			format 			=> 'twostate',	
 			preamble		=> 'W50#',						# prepend to converted message	
-			#clientmodule    => '',   						# not used now
+			clientmodule    => 'SD_WS',   						# not used now
 			modulematch     => '^W50#.*',  					# not used now
 			length_min      => '47',
 			length_max      => '48',
@@ -1406,6 +1413,68 @@ SIGNALduino_Get($@)
   	    return "$a[0] $a[1] => $arg";
   	}
   	
+  }
+  elsif ($a[1] eq "protocolIDs")
+  {
+	my $id;
+	my $ret;
+	my $s;
+	my $moduleId;
+	my @IdList = ();
+	
+	foreach $id (keys %ProtocolListSIGNALduino)
+	{
+		next if ($id eq 'id');
+		push (@IdList, $id);
+	}
+	@IdList = sort { $a <=> $b } @IdList;
+	
+	foreach $id (@IdList)
+	{
+		$ret .= sprintf("%3s",$id) . " ";
+		
+		if (exists ($ProtocolListSIGNALduino{$id}{format}) && $ProtocolListSIGNALduino{$id}{format} eq "manchester")
+		{
+			$ret .= "MC";
+		}
+		elsif (exists $ProtocolListSIGNALduino{$id}{sync})
+		{
+			$ret .= "MS";
+		}
+		elsif (exists ($ProtocolListSIGNALduino{$id}{clockabs}))
+		{
+			$ret .= "MU";
+		}
+		
+		if (exists ($ProtocolListSIGNALduino{$id}{clientmodule}))
+		{
+			$moduleId .= "$id,";
+			$s = $ProtocolListSIGNALduino{$id}{clientmodule};
+			if (length($s) < 15)
+			{
+				$s .= substr("               ",length($s) - 15);
+			}
+			$ret .= " $s";
+		}
+		else
+		{
+			$ret .= "                ";
+		}
+		
+		if (exists ($ProtocolListSIGNALduino{$id}{name}))
+		{
+			$ret .= " $ProtocolListSIGNALduino{$id}{name}";
+		}
+		
+		if (exists ($ProtocolListSIGNALduino{$id}{comment}))
+		{
+			$ret .= " # $ProtocolListSIGNALduino{$id}{comment}";
+		}
+		
+		$ret .= "\n";
+	}
+	
+	return "$a[1]: \n\n$ret\nIds with modules: $moduleId";
   }
   
   #SIGNALduino_SimpleWrite($hash, $gets{$a[1]}[0] . $arg);
