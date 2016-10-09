@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 10484 2016-10-04 20:00:00Z v3.3.1-dev $
+# $Id: 00_SIGNALduino.pm 10484 2016-10-09 17:00:00Z v3.3.1-dev $
 #
 # v3.3.0 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -31,6 +31,7 @@ use constant {
 	SDUINO_KEEPALIVE_TIMEOUT  => 60,
 	SDUINO_KEEPALIVE_MAXRETRY => 3,
 	SDUINO_WRITEQUEUE_NEXT    => 0.3,
+	SDUINO_WRITEQUEUE_TIMEOUT => 2,
 };
 
 
@@ -1475,6 +1476,7 @@ SIGNALduino_Get($@)
 		
 		$ret .= "\n";
 	}
+	$moduleId =~ s/,$//;
 	
 	return "$a[1]: \n\n$ret\nIds with modules: $moduleId";
   }
@@ -1746,13 +1748,21 @@ SIGNALduino_SendFromQueue($$)
 	SIGNALduino_XmitLimitCheck($hash,$msg);
     #DevIo_SimpleWrite($hash, $msg,2);
     SIGNALduino_SimpleWrite($hash,$msg);
+    if ($msg =~ m/^S(R|C|M);/) {
+       $hash->{getcmd}->{cmd} = 'sendraw';
+       Log3 $hash, 4, "$name SendFromQueue: msg=$msg"; # zu testen der Queue, kann wenn es funktioniert auskommentiert werden
+    }
   }
 
   ##############
   # Write the next buffer not earlier than 0.23 seconds
   # else it will be sent too early by the SIGNALduino, resulting in a collision, or may the last command is not finished
   
-  InternalTimer(gettimeofday() + SDUINO_WRITEQUEUE_NEXT, "SIGNALduino_HandleWriteQueue", "HandleWriteQueue:$name", 1);
+  if (defined($hash->{getcmd}->{cmd}) && $hash->{getcmd}->{cmd} eq 'sendraw') {
+     InternalTimer(gettimeofday() + SDUINO_WRITEQUEUE_TIMEOUT, "SIGNALduino_HandleWriteQueue", "HandleWriteQueue:$name", 1);
+  } else {
+     InternalTimer(gettimeofday() + SDUINO_WRITEQUEUE_NEXT, "SIGNALduino_HandleWriteQueue", "HandleWriteQueue:$name", 1);
+  }
 }
 
 ####################################
@@ -1764,6 +1774,11 @@ SIGNALduino_HandleWriteQueue($)
   my $hash = $defs{$name};
   
   #my @arr = @{$hash->{QUEUE}};
+  
+  if (defined($hash->{getcmd}->{cmd}) && $hash->{getcmd}->{cmd} eq 'sendraw') {
+    Log3 $name, 4, "$name/HandleWriteQueue: sendraw no answer (timeout)";
+    delete($hash->{getcmd});
+  }
 	  
   if(@{$hash->{QUEUE}}) {
     my $msg= shift(@{$hash->{QUEUE}});
@@ -1800,14 +1815,22 @@ SIGNALduino_Read($)
     ($rmsg,$SIGNALduinodata) = split("\n", $SIGNALduinodata, 2);
     $rmsg =~ s/\r//;
     Log3 $name, 4, "$name/msg READ: $rmsg"; 
-	if ( $rmsg && !SIGNALduino_Parse($hash, $hash, $name, $rmsg) && $hash->{getcmd} )
+	if ( $rmsg && !SIGNALduino_Parse($hash, $hash, $name, $rmsg) && defined($hash->{getcmd}) && defined($hash->{getcmd}->{cmd}))
 	{
-		my $regexp=$gets{$hash->{getcmd}->{cmd}}[1];
+		my $regexp;
+		if ($hash->{getcmd}->{cmd} eq 'sendraw') {
+			$regexp = '^S(R|C|M);';
+		}
+		else {
+			$regexp = $gets{$hash->{getcmd}->{cmd}}[1];
+		}
 		if(!defined($regexp) || $rmsg =~ m/$regexp/) {
 			if (defined($hash->{keepalive})) {
 				$hash->{keepalive}{ok}    = 1;
 				$hash->{keepalive}{retry} = 0;
 			}
+			Log3 $name, 5, "$name/msg READ: regexp=$regexp cmd=$hash->{getcmd}->{cmd} msg=$rmsg";
+			
 			if ($hash->{getcmd}->{cmd} eq 'version') {
 				my $msg_start = index($rmsg, 'V 3.');
 				if ($msg_start > 0) {
@@ -1820,13 +1843,22 @@ SIGNALduino_Read($)
 					SIGNALduino_CheckCmdResp($hash);
 				}
 			}
-			$rmsg = SIGNALduino_parseResponse($hash,$hash->{getcmd}->{cmd},$rmsg);
-			readingsSingleUpdate($hash, $hash->{getcmd}->{cmd}, $rmsg, 0);
-			if (defined($hash->{getcmd}->{asyncOut})) {
-				#Log3 $name, 4, "$name/msg READ: asyncOutput";
-				my $ao = asyncOutput( $hash->{getcmd}->{asyncOut}, $hash->{getcmd}->{cmd}.": " . $rmsg );
+			if ($hash->{getcmd}->{cmd} eq 'sendraw') {
+				# zu testen der sendeQueue, kann wenn es funktioniert auf verbose 5
+				Log3 $name, 4, "$name/read sendraw answer: $rmsg";
+				delete($hash->{getcmd});
+				RemoveInternalTimer("HandleWriteQueue:$name");
+				SIGNALduino_HandleWriteQueue("x:$name");
 			}
-			delete($hash->{getcmd});
+			else {
+				$rmsg = SIGNALduino_parseResponse($hash,$hash->{getcmd}->{cmd},$rmsg);
+				readingsSingleUpdate($hash, $hash->{getcmd}->{cmd}, $rmsg, 0);
+				if (defined($hash->{getcmd}->{asyncOut})) {
+					#Log3 $name, 4, "$name/msg READ: asyncOutput";
+					my $ao = asyncOutput( $hash->{getcmd}->{asyncOut}, $hash->{getcmd}->{cmd}.": " . $rmsg );
+				}
+				delete($hash->{getcmd});
+			}
 		} else {
 			Log3 $name, 4, "$name/msg READ: Received answer ($rmsg) for ". $hash->{getcmd}->{cmd}." does not match $regexp"; 
 		}
