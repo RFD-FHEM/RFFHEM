@@ -1,4 +1,4 @@
-SIGNALduino - FHEM Modules rel 3.3.0
+SIGNALduino - FHEM Modules development Version 3.3.1 
 
 ======
 
