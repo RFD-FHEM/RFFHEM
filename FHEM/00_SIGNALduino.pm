@@ -321,9 +321,9 @@ my %ProtocolListSIGNALduino  = (
 			polarity        => 'invert',			
 			
 		}, 	
-	"13"    => 			## FLAMINGO FA20 / FA 21
+	"13"    => 			## FLAMINGO  FA 21
 		{
-            name			=> 'FLAMINGO',	
+            name			=> 'FLAMINGO FA21',	
 			id          	=> '13',
 			one				=> [1,-2],
 			zero			=> [1,-4],
@@ -336,6 +336,22 @@ my %ProtocolListSIGNALduino  = (
 			length_min      => '20',
 			length_max      => '40',
 		}, 		
+	"19"    => 			## FLAMINGO FA20 
+		{
+            name			=> 'FLAMINGO FA21 b',	
+			id          	=> '13b',
+			one				=> [1,-2],
+			zero			=> [1,-4],
+			start			=> [10,-1],		
+			clockabs		=> 800,
+			format 			=> 'twostate',	  		
+			preamble		=> 'P13#',				# prepend to converted message	
+			#clientmodule    => '14_FLAMINGO',   				# not used now
+			#modulematch     => 'P13#.*',  				# not used now
+			length_min      => '20',
+			length_max      => '40',
+		}, 		
+	
 	"14"    => 			## Heidemann HX
 		{
             name			=> 'Heidemann HX',	
