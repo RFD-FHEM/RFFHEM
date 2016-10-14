@@ -28,7 +28,7 @@ SD_WS_Maverick_Initialize($)
                         "$readingFnAttributes ";
   $hash->{AutoCreate} =
         { "SD_WS_Maverick.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME",  autocreateThreshold => "2:180"} };
-## Todo: Prüfen der Autocreate Einstellungen
+## Todo: Pruefen der Autocreate Einstellungen
 
 }
 
@@ -83,8 +83,8 @@ SD_WS_Maverick_Parse($$)
   Log3 $name, 3, "SD_WS_Maverick_Parse  $model ($msg) length: $hlen";
   
   #1      8     13    18       26 
-  #AA999559 55555 95999 A9A9A669  Sensor 1 =21 °2
-  #AA999559 95996 55555 95A65565  Sensor 2 =22 °2
+  #AA999559 55555 95999 A9A9A669  Sensor 1 =21 2Grad
+  #AA999559 95996 55555 95A65565  Sensor 2 =22 2Grad
   #
   #Header    Sen1  Sens2   
   #my $hashumidity = FALSE;
@@ -191,6 +191,8 @@ sub SD_WS_Maverick_Attr(@)
 
 
 =pod
+=item summary    Supports maverick temperature sensors protocl 47 from SIGNALduino
+=item summary_DE Unterst&uumltzt Maverick Temperatursensoren mit Protokol 47 vom SIGNALduino
 =begin html
 
 <a name="SD_WS_Maverick"></a>
@@ -251,12 +253,9 @@ sub SD_WS_Maverick_Attr(@)
 <ul>
   Das SD_WS_Maverick Module verarbeitet von einem IO Geraet (CUL, CUN, SIGNALDuino, etc.) empfangene Nachrichten von Temperatur-Sensoren.<br>
   <br>
-  <b>Unterstuetze Modelle:</b>
+  <b>Unterst&uumltzte Modelle:</b>
   <ul>
-    <li>Eurochon EAS800z</li>
-    <li>Technoline WS6750/TX70DTH</li>
-    <li>TFA 30320902</li>
-    <li>FreeTec Aussenmodul fuer Wetterstation NC-7344</li>
+    <li>Maverick</li>
   </ul>
   <br>
   Neu empfangene Sensoren werden in FHEM per autocreate angelegt.
@@ -265,7 +264,7 @@ sub SD_WS_Maverick_Attr(@)
   <a name="SD_WS_Maverick_Define"></a>
   <b>Define</b> 
   <ul>Die empfangenen Sensoren werden automatisch angelegt.<br>
-  Die ID der angelgten Sensoren ist entweder der Kanal des Sensors, oder wenn das Attribut longid gesetzt ist, dann wird die ID aus dem Kanal und einer Reihe von Bits erzeugt, welche der Sensor beim Einschalten zufaellig vergibt.<br>
+  Die ID der angelegten Sensoren ist entweder der Kanal des Sensors, oder wenn das Attribut longid gesetzt ist, dann wird die ID aus dem Kanal und einer Reihe von Bits erzeugt, welche der Sensor beim Einschalten zuf&aumlllig vergibt.<br>
   </ul>
   <br>
   <a name="SD_WS_Maverick Events"></a>

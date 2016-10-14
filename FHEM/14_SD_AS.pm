@@ -174,7 +174,7 @@ SD_AS_Parse($$)
 	elsif ($model eq "temp") {
 	  $Sigval = ($Sigval-0x8000) /10;
 	  return "temp out of range" if ($Sigval > 100 || $Sigval < -60);
-	  $Sigval = sprintf( "%.1f", $Sigval); #temp is send 10*°C
+	  $Sigval = sprintf( "%.1f", $Sigval); #temp is send 10*C
 	}
 	elsif ($model eq "door") {
 	  $Sigval = (($Sigval==255)? 1:0); 
@@ -288,7 +288,10 @@ SD_AS_Attr(@)
 1;
 
 =pod
+=item summary    Supports ArduinoSensor
+=item summary_DE Unterst&uumltzt den ArduinoSensor
 =begin html
+
 
 <a name="SD_AS"></a>
 <h3>AS</h3>
