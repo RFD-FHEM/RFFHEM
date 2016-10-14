@@ -333,10 +333,10 @@ my %ProtocolListSIGNALduino  = (
 			preamble		=> 'P13#',				# prepend to converted message	
 			#clientmodule    => '14_FLAMINGO',   				# not used now
 			#modulematch     => 'P13#.*',  				# not used now
-			length_min      => '20',
-			length_max      => '40',
+			length_min      => '24',
+			length_max      => '24',
 		}, 		
-	"19"    => 			## FLAMINGO FA20 
+	"13b"    => 			## FLAMINGO FA20 
 		{
             name			=> 'FLAMINGO FA21 b',	
 			id          	=> '13b',
@@ -348,8 +348,8 @@ my %ProtocolListSIGNALduino  = (
 			preamble		=> 'P13#',				# prepend to converted message	
 			#clientmodule    => '14_FLAMINGO',   				# not used now
 			#modulematch     => 'P13#.*',  				# not used now
-			length_min      => '20',
-			length_max      => '40',
+			length_min      => '24',
+			length_max      => '24',
 		}, 		
 	
 	"14"    => 			## Heidemann HX
@@ -2442,14 +2442,13 @@ sub SIGNALduino_Parse_MU($$$$@)
 			my $pstr="";
 			$valid = $valid && ($pstr=SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}},\%patternList,\$rawData)) >=0;
 			Debug "Found matched one" if ($debug && $valid);
-	
-
-
+			my $oneStr=$pstr if ($valid);
 			$patternLookupHash{$pstr}="1" if ($valid); ## Append one to our lookuptable
 			Debug "added $pstr " if ($debug && $valid);
 
 			$valid = $valid && ($pstr=SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{zero}},\%patternList,\$rawData)) >=0;
 			Debug "Found matched zero" if ($debug && $valid);
+			my $zeroStr=$pstr if ($valid);
 			$patternLookupHash{$pstr}="0" if ($valid); ## Append zero to our lookuptable
 			Debug "added $pstr " if ($debug && $valid);
 
@@ -2478,14 +2477,23 @@ sub SIGNALduino_Parse_MU($$$$@)
 			my @msgStartLst;
 			my $startStr="";
 			my $start_regex;
-			my $oneStr=SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}},\%patternList,\$rawData);
-			my $zeroStr=SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{zero}},\%patternList,\$rawData);
+			#my $oneStr=SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}},\%patternList,\$rawData);
+			#my $zeroStr=SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{zero}},\%patternList,\$rawData);
 
 			if (@msgStartLst = SIGNALduino_getProtoProp($id,"start"))
 			{
+				Debug "msgStartLst: ".Dumper(@msgStartLst)  if ($debug);
 				$startStr=SIGNALduino_PatternExists($hash,@msgStartLst,\%patternList,\$rawData);
+				if ($startStr == -1 )
+				{
+					Log3 $name, 5, "$name: start pattern for MU Protocol id $id -> $ProtocolListSIGNALduino{$id}{name} mismatches, aborting"  ;
+					$valid=0;
+					next;
+				};
 			} 
 			$start_regex="$startStr($oneStr|$zeroStr)";
+			Debug "Regex is: $start_regex" if ($debug);
+
 			$rawData =~ /$start_regex/;
 			if (defined($-[0] && $-[0] > 0)) {
 				$message_start=$-[0]+ length($startStr);
