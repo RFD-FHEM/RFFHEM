@@ -2553,8 +2553,8 @@ sub SIGNALduino_Parse_MU($$$$@)
 			if (@msgStartLst = SIGNALduino_getProtoProp($id,"start"))
 			{
 				Debug "msgStartLst: ".Dumper(@msgStartLst)  if ($debug);
-				$startStr=SIGNALduino_PatternExists($hash,@msgStartLst,\%patternList,\$rawData);
-				if ($startStr == -1 )
+			
+				if ( ($startStr=SIGNALduino_PatternExists($hash,@msgStartLst,\%patternList,\$rawData)) eq -1)
 				{
 					Log3 $name, 5, "$name: start pattern for MU Protocol id $id -> $ProtocolListSIGNALduino{$id}{name} mismatches, aborting"  ;
 					$valid=0;
@@ -2659,7 +2659,8 @@ sub SIGNALduino_Parse_MU($$$$@)
 					
 					$rawData =~ /$regex/;
 					if (defined($-[0]) && ($-[0] > 0)) {
-						$i=$-[0]+ $i+ length($startStr);
+						#$i=$-[0]+ $i+ length($startStr);
+						$i=$-[0]+ $i;
 						$i=$i-$signal_width if ($i>0 && length($startStr) == 0); #Todo:
 						Debug "$name: found restart at Position $i ($regex)\n" if ($debug);
 					} else {
