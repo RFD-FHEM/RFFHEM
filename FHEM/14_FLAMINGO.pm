@@ -39,7 +39,12 @@ FLAMINGO_Initialize($)
   $hash->{AttrFn}    = "FLAMINGO_Attr";
   $hash->{ParseFn}   = "FLAMINGO_Parse";
   $hash->{AttrList}  = "IODev FA20RFrepetition do_not_notify:0,1 showtime:0,1 ignore:0,1 model:FA20RF,FA21RF ".
-  $readingFnAttributes;
+ 						$readingFnAttributes;
+   $hash->{AutoCreate}=
+    { 
+        "FLAMINGO.*" => {  FILTER => "%NAME", autocreateThreshold => "2:180"},
+    };
+ 
 }
 
 sub FLAMINGO_SetState($$$$){ ###################################################
