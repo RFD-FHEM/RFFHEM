@@ -18,6 +18,7 @@ use warnings;
 use Time::HiRes qw(gettimeofday);
 use Data::Dumper qw(Dumper);
 use Scalar::Util qw(looks_like_number);
+no warnings 'portable';
 
 #use POSIX qw( floor);  # can be removed
 #use Math::Round qw();
