@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 14_SD_WS.pm 33 2016-10-02 12:00:00Z v3.3-dev $
+# $Id: 14_SD_WS.pm 33 2016-10-21 18:00:00Z v3.3-dev $
 #
 # The purpose of this module is to support serval
 # weather sensors which use various protocol
@@ -338,6 +338,8 @@ sub SD_WS_Parse($$)
 	
 	my $hash = $def;
 	$name = $hash->{NAME};
+	return "" if(IsIgnored($name));
+	
 	Log3 $name, 4, "SD_WS: $name ($rawData)";  
 
 	if (!defined(AttrVal($hash->{NAME},"event-min-interval",undef)))
