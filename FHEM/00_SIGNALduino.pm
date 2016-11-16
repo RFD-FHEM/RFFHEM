@@ -2761,7 +2761,6 @@ SIGNALduino_Parse($$$$@)
 	#Debug "raw data ". $signal_parts{rawData};
 	
 	
-	my @msg_parts = SIGNALduino_splitMsg($rmsg,';');			## Split message parts by ";"
 	my $dispatched;
 	# Message Synced type   -> M#
 
