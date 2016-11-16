@@ -2745,8 +2745,8 @@ SIGNALduino_Parse($$$$@)
 
 	#print Dumper(\%ProtocolListSIGNALduino);
     	
-	return undef if !($rmsg=~ m/^\002M.;.*;\003/); 			## Check if a Data Message arrived and if it's complete  (start & end control char are received)
-	
+	return undef if !($rmsg=~ s/^\002(M.;.*;)\003/$1/); 			## Check if a Data Message arrived and if it's complete  (start & end control char are received)
+																    # cut off start end end character from message for further processing they are not needed
 	if (defined($hash->{keepalive})) {
 		$hash->{keepalive}{ok}    = 1;
 		$hash->{keepalive}{retry} = 0;
@@ -2755,7 +2755,6 @@ SIGNALduino_Parse($$$$@)
 	my $debug = AttrVal($iohash->{NAME},"debug",0);
 	
 	
-	$rmsg=~ s/^\002(M.;.*;)\003/$1/;						# cut off start end end character from message for further processing they are not needed
 	Debug "$name: incomming message: ($rmsg)\n" if ($debug);
 	
 	my %signal_parts=SIGNALduino_Split_Message($rmsg,$name);   ## Split message and save anything in an hash %signal_parts
@@ -2765,11 +2764,7 @@ SIGNALduino_Parse($$$$@)
 	my @msg_parts = SIGNALduino_splitMsg($rmsg,';');			## Split message parts by ";"
 	my $dispatched;
 	# Message Synced type   -> M#
-	if ($rmsg=~ m/^M\d+;(P\d=-?\d+;){4,7}D=\d+;CP=\d;SP=\d;/) 
-	{
-		Log3 $name, 3, "$name: You are using an outdated version of signalduino code on your arduino. Please update";
-		return undef;
-	}
+
 	if (@{$hash->{msIdList}} && $rmsg=~ m/^MS;(P\d=-?\d+;){3,8}D=\d+;CP=\d;SP=\d;/) 
 	{
 		$dispatched= SIGNALduino_Parse_MS($hash, $iohash, $name, $rmsg,%signal_parts);
