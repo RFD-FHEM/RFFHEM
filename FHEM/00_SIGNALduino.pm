@@ -3050,7 +3050,7 @@ sub SIGNALduino_OSV2()
 		
 		for ($idx=$preamble_pos;$idx<length($bitData);$idx=$idx+16)
 		{
-			if (length($bitData)-$idx  < 16 )
+			if (length($bitData)-$idx  < 8 )
 			{
 			  last;
 			}
