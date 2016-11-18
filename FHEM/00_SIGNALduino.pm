@@ -3060,11 +3060,17 @@ sub SIGNALduino_OSV2()
 
 			my $rvosv2byte="";
 			
-			for (my $p=1;$p<length($osv2byte);$p=$p+2)
+			for (my $p=0;$p<length($osv2byte);$p=$p+2)
 			{
 				$rvosv2byte = substr($osv2byte,$p,1).$rvosv2byte;
 			}
-			$osv2hex=$osv2hex.sprintf('%02X', oct("0b$rvosv2byte"));
+			$rvosv2byte =~ tr/10/01/;
+			
+			if (length($rvosv2byte) eq 8) {
+				$osv2hex=$osv2hex.sprintf('%02X', oct("0b$rvosv2byte"))  ;
+			} else {
+				$osv2hex=$osv2hex.sprintf('%X', oct("0b$rvosv2byte"))  ;
+			}
 			$osv2bits = $osv2bits.$rvosv2byte;
 		}
 		$osv2hex = sprintf("%02X", length($osv2hex)*4).$osv2hex;
