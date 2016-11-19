@@ -1,5 +1,5 @@
 #################################################################################
-# $Id: 41_OREGON.pm 34476 2016-02-09 21:00:00 wherzig $
+# $Id: 41_OREGON.pm 34476 2016-11-20 09:00:00Z dev $
 #
 # Module for FHEM to decode Oregon sensor messages
 #
@@ -165,10 +165,6 @@ my %types =
    {
     part => 'THN132N', checksum => \&OREGON_checksum1, method => \&OREGON_common_temp,
    },
-   OREGON_type_length_key(0xea4c, 68) =>
-   {
-    part => 'THN132N', checksum => \&OREGON_checksum1, method => \&OREGON_common_temp,
-   },
    # 
    OREGON_type_length_key(0x9aec, 104) =>
    {
@@ -192,10 +188,10 @@ my %types =
    # BTHR918
    OREGON_type_length_key(0x5a5d, 88) =>
    {
-    part => 'BTHR918', checksum => \&OREGON_checksum5, method => \&OREGON_common_temphydrobaro,
+    part => 'BTHR918', checksum => \&OREGON_checksum5plus, method => \&OREGON_common_temphydrobaro,
    },
    # BTHR918N, BTHR968
-   OREGON_type_length_key(0x5a6d, 96) =>
+   OREGON_type_length_key(0x5a6d, 88) =>
    {
     part => 'BTHR918N', checksum => \&OREGON_checksum5, method => \&OREGON_alt_temphydrobaro,
    },
@@ -204,17 +200,8 @@ my %types =
    {
     part => 'WGR918',  checksum => \&OREGON_checksum4, method => \&OREGON_wgr918_anemometer,
    },
-   # 
-   OREGON_type_length_key(0x3a0d, 88) =>
-   {
-    part => 'WGR918',  checksum => \&OREGON_checksum4, method => \&OREGON_wgr918_anemometer,
-   },
    # RGR126, RGR682, RGR918:
    OREGON_type_length_key(0x2a1d, 80) =>
-   {
-    part => 'RGR918', checksum => \&OREGON_checksum6plus, method => \&OREGON_common_rain,
-   },
-   OREGON_type_length_key(0x2a1d, 84) =>
    {
     part => 'RGR918', checksum => \&OREGON_checksum6plus, method => \&OREGON_common_rain,
    },
@@ -835,6 +822,15 @@ sub OREGON_checksum5 {
   $_[0]->[10] == ((OREGON_nibble_sum(10,$_[0]) - 0xa) & 0xff);
 }
 
+sub OREGON_checksum5plus {
+  my $hash = $_[1];
+  my $c = ($_[0]->[10]);
+  
+  my $s = ((OREGON_nibble_sum(10,$_[0]) - 0xa) & 0xff);
+  Log3 $hash, 5, "OREGON: checksum5plus = $c berechnet: $s";
+  $s == $c;
+}
+
 sub OREGON_checksum6 {
   OREGON_hi_nibble($_[0]->[8]) + (OREGON_lo_nibble($_[0]->[9]) << 4) ==
     ((OREGON_nibble_sum(8,$_[0]) - 0xa) & 0xff);
@@ -905,6 +901,7 @@ OREGON_Parse($$)
   }
 
   my $bits = ord($bin_msg);
+  my $bitsMsg = $bits;
   my $num_bytes = $bits >> 3; if (($bits & 0x7) != 0) { $num_bytes++; }
 
   my $type1 = $rfxcom_data_array[0];
@@ -913,17 +910,25 @@ OREGON_Parse($$)
   my $type = ($type1 << 8) + $type2;
 
   my $sensor_id = unpack('H*', chr $type1) . unpack('H*', chr $type2);
-  #Log 1, "OREGON: sensor_id=$sensor_id";
 
   my $key = OREGON_type_length_key($type, $bits);
-
   my $rec = $types{$key} || $types{$key&0xfffff};
-  unless ($rec) {
-    #Log 1, "OREGON: ERROR: Unknown sensor_id=$sensor_id bits=$bits message='$msg'.";
-    Log3 $iohash, 4, "OREGON: ERROR: Unknown sensor_id=$sensor_id bits=$bits message='$msg'.";
-    return "OREGON: ERROR: Unknown sensor_id=$sensor_id bits=$bits.\n";
+  if (!$rec) {
+     $bits -= 4;
+     $key = OREGON_type_length_key($type, $bits);
+     $rec = $types{$key} || $types{$key&0xfffff};
+     if (!$rec) {
+          $bits -= 4;
+          $key = OREGON_type_length_key($type, $bits);
+          $rec = $types{$key} || $types{$key&0xfffff};
+          if (!$rec) {
+               Log3 $iohash, 4, "OREGON: ERROR: Unknown sensor_id=$sensor_id bits=$bitsMsg message='$msg'.";
+               return "OREGON: ERROR: Unknown sensor_id=$sensor_id bits=$bitsMsg.\n";
+          }
+     }
   }
-  
+  Log3 $iohash, 5, "OREGON: sensor_id=$sensor_id BitsMsg=$bitsMsg Bits=$bits";
+
   # test checksum as defines in %types:
   my $checksum = $rec->{checksum};
   if ($checksum && !$checksum->(\@rfxcom_data_array, $iohash) ) {
@@ -1002,7 +1007,7 @@ OREGON_Parse($$)
 	elsif ($i->{type} eq "pressure") { 
 			#printf "Luftdruck %d %s, Vorhersage=%s ; ",$i->{current},$i->{units},$i->{forecast};
 			# do not add it due to problems with hms.gplot
-			#$val .= "P: ".$i->{current}."  ";
+			$val .= "P: ".$i->{current}."  ";
 
 			$sensor = "pressure";			
 			$def->{READINGS}{$sensor}{TIME} = $tm;
