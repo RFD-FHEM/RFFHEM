@@ -1111,6 +1111,8 @@ OREGON_Parse($$)
 1;
 
 =pod
+=item summary    interprets Oregon sensor messages received by a RFXCOM or SIGNALduino receiver
+=item summary_DE interpretiert Oregon Sensor Nachrichten von RFXCOM oder SIGNALduino Empf&aumlngern
 =begin html
 
 <a name="OREGON"></a>
