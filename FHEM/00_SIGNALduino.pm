@@ -3032,13 +3032,14 @@ sub SIGNALduino_OSV2()
 	#$bitData =~ tr/10/01/;
 	if ($bitData =~ m/^.?(10){12,16}.?10011001/) 
 	{  # Valid OSV2 detected!	
-		$preamble_pos=index($bitData,"10011001",24);
+		#$preamble_pos=index($bitData,"10011001",24);
+		$preamble_pos=$+[1];
 		
 		Log3 $name, 4, "$name: OSV2 protocol detected: preamble_pos = $preamble_pos";
 		return return (-1," sync not found") if ($preamble_pos <=24);
 		
-		$message_end=index($bitData,"101010101010101010101010101010110011001",$preamble_pos+44);
-		$message_end = length($bitData) if ($message_end <$preamble_pos);
+		$message_end=$-[1] if ($bitData =~ m/^.{44,}(01){16,17}.?10011001/); #Todo regex .{44,} 44 should be calculated from $preamble_pos+ min message lengh (44)
+		$message_end = length($bitData) if (!defined($message_end) || $message_end <$preamble_pos);
 		$message_length = ($message_end - $preamble_pos)/2;
 
 		return (-1," message is to short") if (defined($ProtocolListSIGNALduino{$id}{length_min}) && $message_length < $ProtocolListSIGNALduino{$id}{length_min} );
@@ -3081,6 +3082,7 @@ sub SIGNALduino_OSV2()
 	}
 	elsif ($bitData =~ m/^.?(1){16,24}0101/)  {  # Valid OSV3 detected!	
 		$preamble_pos = index($bitData, '0101', 16);
+		
 		$message_end = length($bitData);
 		$message_length = $message_end - ($preamble_pos+4);
 		Log3 $name, 4, "$name: OSV3 protocol detected: preamble_pos = $preamble_pos, message_length = $message_length";
