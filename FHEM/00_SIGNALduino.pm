@@ -3030,7 +3030,7 @@ sub SIGNALduino_OSV2()
 	my $message_length;
 	
 	#$bitData =~ tr/10/01/;
-	if ($bitData =~ m/^.?(10){12,16}.?10011001/) 
+	if ($bitData =~ m/^.?(01){12,17}.?10011001/) 
 	{  # Valid OSV2 detected!	
 		#$preamble_pos=index($bitData,"10011001",24);
 		$preamble_pos=$+[1];
