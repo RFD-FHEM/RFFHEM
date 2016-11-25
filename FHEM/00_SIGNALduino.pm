@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 10484 2016-10-21 18:00:00Z v3.3.1-dev $
+# $Id: 00_SIGNALduino.pm 10484 2016-11-25 18:00:00Z v3.3.1-dev $
 #
 # v3.3.0 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -2706,7 +2706,7 @@ SIGNALduino_Parse_MC($$$$@)
 		   		$bitData= unpack("B$blen", pack("H$hlen", $rawData)); 
 			}
 			Debug "$name: extracted data $bitData (bin)\n" if ($debug); ## Convert Message from hex to bits
-		   	Log3 $name, 5, "$name: extracted data $bitData (bin)\n";
+		   	Log3 $name, 5, "$name: extracted data $bitData (bin)";
 		   	
 		   	my $method = $ProtocolListSIGNALduino{$id}{method};
 		    if (!exists &$method)
@@ -3039,7 +3039,12 @@ sub SIGNALduino_OSV2()
 		return return (-1," sync not found") if ($preamble_pos <=24);
 		
 		$message_end=$-[1] if ($bitData =~ m/^.{44,}(01){16,17}.?10011001/); #Todo regex .{44,} 44 should be calculated from $preamble_pos+ min message lengh (44)
-		$message_end = length($bitData) if (!defined($message_end) || $message_end <$preamble_pos);
+		if (!defined($message_end) || $message_end < $preamble_pos) {
+			$message_end = length($bitData);
+		} else {
+			$message_end += 16;
+			Log3 $name, 4, "$name: OSV2 message end pattern found at pos $message_end  lengthBitData=".length($bitData);
+		}
 		$message_length = ($message_end - $preamble_pos)/2;
 
 		return (-1," message is to short") if (defined($ProtocolListSIGNALduino{$id}{length_min}) && $message_length < $ProtocolListSIGNALduino{$id}{length_min} );
@@ -3049,9 +3054,9 @@ sub SIGNALduino_OSV2()
 		my $osv2bits="";
 		my $osv2hex ="";
 		
-		for ($idx=$preamble_pos;$idx<length($bitData);$idx=$idx+16)
+		for ($idx=$preamble_pos;$idx<$message_end;$idx=$idx+16)
 		{
-			if (length($bitData)-$idx  < 8 )
+			if ($message_end-$idx < 8 )
 			{
 			  last;
 			}
@@ -3082,7 +3087,6 @@ sub SIGNALduino_OSV2()
 	}
 	elsif ($bitData =~ m/^.?(1){16,24}0101/)  {  # Valid OSV3 detected!	
 		$preamble_pos = index($bitData, '0101', 16);
-		
 		$message_end = length($bitData);
 		$message_length = $message_end - ($preamble_pos+4);
 		Log3 $name, 4, "$name: OSV3 protocol detected: preamble_pos = $preamble_pos, message_length = $message_length";
