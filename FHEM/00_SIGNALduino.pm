@@ -3245,13 +3245,20 @@ sub SIGNALduino_Maverick()
 	my ($name,$bitData,$id) = @_;
 	my $debug = AttrVal($name,"debug",0);
 
-	## Todo: Some checks and may be a lengh filter or some checks
-	my $hex=SIGNALduino_b2h($bitData);
-	
 
+	if ($bitData =~ m/^.*(101010101001100110010101).*/) 
+	{  # Valid Maverick header detected	
+		my $header_pos=$+[1];
+		
+		Log3 $name, 4, "$name: Maverick protocol detected: header_pos = $header_pos";
 
-	return  (1,$hex); ## Return the bits unchanged in hex
+		my $hex=SIGNALduino_b2h(substr($bitData,$header_pos,26*4));
 	
+		return  (1,$hex); ## Return the bits unchanged in hex
+		my $message_start = index($bitData,"");
+	} else {
+		return return (-1," header not found");
+	}	
 }
 
 sub SIGNALduino_SomfyRTS()
