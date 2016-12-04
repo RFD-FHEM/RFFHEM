@@ -1,5 +1,5 @@
 #################################################################################
-# $Id: 41_OREGON.pm 34476 2016-11-20 09:00:00Z dev $
+# $Id: 41_OREGON.pm 34476 2016-12-04 13:00:00Z dev $
 #
 # Module for FHEM to decode Oregon sensor messages
 #
@@ -923,7 +923,7 @@ OREGON_Parse($$)
           $rec = $types{$key} || $types{$key&0xfffff};
           if (!$rec) {
                Log3 $iohash, 4, "OREGON: ERROR: Unknown sensor_id=$sensor_id bits=$bitsMsg message='$msg'.";
-               return "OREGON: ERROR: Unknown sensor_id=$sensor_id bits=$bitsMsg.\n";
+               return "";
           }
      }
   }
@@ -933,14 +933,14 @@ OREGON_Parse($$)
   my $checksum = $rec->{checksum};
   if ($checksum && !$checksum->(\@rfxcom_data_array, $iohash) ) {
     Log3 $iohash, 4, "OREGON: ERROR: checksum error sensor_id=$sensor_id (bits=$bits)";
-    return "OREGON: ERROR: checksum error sensor_id=$sensor_id (bits=$bits)";
+    return "";
   }
 
   my $method = $rec->{method};
   unless ($method) {
     Log3 $iohash, 4, "OREGON: Possible message from Oregon part '$rec->{part}'";
     Log3 $iohash, 4, "OREGON: sensor_id=$sensor_id (bits=$bits)";
-    return;
+    return "";
   }
 
   my @res;
@@ -948,7 +948,7 @@ OREGON_Parse($$)
   if (! defined(&$method)) {
     Log3 $iohash, 4, "OREGON: Error: Unknown function=$method. Please define it in file $0";
     Log3 $iohash, 4, "OREGON: sensor_id=$sensor_id (bits=$bits)\n";
-    return "OREGON: Error: Unknown function=$method. Please define it in file $0";
+    return "";
   } else {
     @res = $method->($rec->{part}, $longids, \@rfxcom_data_array);
   }
@@ -1110,7 +1110,7 @@ OREGON_Parse($$)
 
   DoTrigger($name, undef);
 
-  return $val;
+  return $name;
 }
 
 1;
