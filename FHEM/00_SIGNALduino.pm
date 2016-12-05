@@ -2855,7 +2855,8 @@ SIGNALduino_Attr(@)
 	my ($cmd,$name,$aName,$aVal) = @_;
 	my $hash = $defs{$name};
 	my $debug = AttrVal($name,"debug",0);
-
+	
+	$aVal= "" if (!defined($aVal));
 	Log3 $name, 4, "$name: Calling Getting Attr sub with args: $cmd $aName = $aVal";
 		
 	if( $aName eq "Clients" ) {		## Change clientList
