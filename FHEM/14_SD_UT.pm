@@ -94,7 +94,9 @@ sub SD_UT_Parse($$)
 	Log3 $name, 3, "$name Heidemann/FAAC devicecode=$deviceCode, sound=$sound";
 	
 	if (!defined($model)) {
-		return $dummyreturnvalue;
+		Log3 $name, 4, "SD_UT: $dummyreturnvalue ($rawData)";  
+		
+		return "";
 	}
 	
 	my $longids = AttrVal($iohash->{NAME},'longids',0);
