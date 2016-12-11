@@ -3599,6 +3599,17 @@ With a # at the beginnging whitelistIDs can be deactivated.
 		Issue a SIGNALduino firmware command, without waiting data returned by
 		the SIGNALduino. See the SIGNALduino firmware code  for details on SIGNALduino
 		commands. With this line, you can send almost any signal via a transmitter connected
+
+        To send some raw data look at these examples:
+		P<protocol id>#binarydata#R<num of repeats>#C<optional clock>   (#C is optional) 
+		<br>Example 1: set sduino raw SR;R=3;P0=500;P1=-9000;P2=-4000;P3=-2000;D=0302030  sends the data in raw mode 3 times repeated
+        <br>Example 2: set sduino raw SM;R=3;P0=500;C=250;D=A4F7FDDE  sends the data manchester encoded with a clock of 250uS
+        <br>Example 3: set sduino raw SC;R=3;SR;P0=5000;SM;P0=500;C=250;D=A4F7FDDE  sends a combined message of raw and manchester encoded repeated 3 times
+
+		<br>;
+		</p>
+
+
 		</li><br>
 		<li>reset<br>
 		This will do a reset of the usb port and normaly causes to reset the uC connected.
@@ -3633,6 +3644,7 @@ With a # at the beginnging whitelistIDs can be deactivated.
 		<br>Will generate the raw send command for the message 0101 with protocol 0 and instruct the arduino to send this three times and the clock is 500.
 		<br>SR;R=3;P0=500;P1=-9000;P2=-4000;P3=-2000;D=03020302;
 		</p>
+
 		
 		</li><br>
 		<li>enableMessagetype<br>
