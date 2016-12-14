@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 10484 2016-11-25 18:00:00Z v3.3.1-dev $
+# $Id: 00_SIGNALduino.pm 10484 2016-12-14 22:00:00Z v3.3.1-dev $
 #
 # v3.3.0 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -25,7 +25,8 @@ no warnings 'portable';
 
 
 use constant {
-	SDUINO_INIT_WAIT_XQ       => 1.5,  # wait disable device
+	SDUINO_VERSION            => "v3.3.1-dev",
+	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
 	SDUINO_CMD_TIMEOUT        => 10,
@@ -1116,6 +1117,7 @@ sub
 SIGNALduino_Shutdown($)
 {
   my ($hash) = @_;
+  #DevIo_SimpleWrite($hash, "XQ\n",2);
   SIGNALduino_SimpleWrite($hash, "XQ");  # Switch reception off, it may hang up the SIGNALduino
   return undef;
 }
@@ -1375,28 +1377,66 @@ SIGNALduino_Get($@)
 
   if (IsDummy($name))
   {
-	if (($arg !~  m/;/) && ($arg !~  m/=/)) {
-		if ($arg =~ m/^V\d\.\d\..*/) {
-			Log3 $name, 4, "$name/msg get version: $arg";
-			$hash->{version} = "V " . substr($arg,1);
-			return "";
-		}
-		else {
-			Log3 $name, 4, "$name/msg get dispatch: $arg";
-			Dispatch($hash, $arg, undef);
-			return "";
-		}
-	}
   	if ($arg =~ /^M[CSU];.*/)
   	{
 		$arg="\002$arg\003";  	## Add start end end marker if not already there
 		Log3 $name, 5, "$name/msg adding start and endmarker to message";
-
-  	}
-	if ($arg =~ /^\002.*\003$/)
-  	{
+	
+	}
+	if ($arg =~ /\002M.;.*;\003$/)
+	{
 		Log3 $name, 4, "$name/msg get raw: $arg";
 		return SIGNALduino_Parse($hash, $hash, $hash->{NAME}, $arg);
+  	}
+  	else {
+		my $arg2 = "";
+		if ($arg =~ m/^version=/) {           # set version
+			$arg2 = substr($arg,8);
+			$hash->{version} = "V " . $arg2;
+		}
+		elsif ($arg =~ m/^regexp=/) {         # set fileRegexp for get raw messages from file
+			$arg2 = substr($arg,7);
+			$hash->{fileRegexp} = $arg2;
+			delete($hash->{fileRegexp}) if (!$arg2);
+		}
+		elsif ($arg =~ m/^file=/) {
+			$arg2 = substr($arg,5);
+			my $n = 0;
+			if (open(my $fh, '<', $arg2)) {
+				my $fileRegexp = $hash->{fileRegexp};
+				while (my $row = <$fh>) {
+					if ($row =~ /.*\002M.;.*;\003$/) {
+						chomp $row;
+						$row =~ s/.*\002(M.;.*;)\003/$1/;
+						if (!defined($fileRegexp) || $row =~ m/$fileRegexp/) {
+							$n += 1;
+							$row="\002$row\003";
+							Log3 $name, 4, "$name/msg fileGetRaw: $row";
+							SIGNALduino_Parse($hash, $hash, $hash->{NAME}, $row);
+						}
+					}
+				}
+				return $n . " raw Nachrichten eingelesen";
+			} else {
+				return "Could not open file $arg2";
+			}
+		}
+		elsif ($arg eq '?') {
+			my $ret;
+			
+			$ret = "dummy get raw\n\n";
+			$ret .= "raw message       e.g. MS;P0=-392;P1=...\n";
+			$ret .= "dispatch message  e.g. P7#6290DCF37\n";
+			$ret .= "version=x.x.x     sets version. e.g. (version=3.2.0) to get old MC messages\n";
+			$ret .= "regexp=           set fileRegexp for get raw messages from file. e.g. regexp=^MC\n";
+			$ret .= "file=             gets raw messages from file in the fhem directory\n";
+			return $ret;
+		}
+		else {
+			Log3 $name, 4, "$name/msg get dispatch: $arg";
+			Dispatch($hash, $arg, undef);
+		}
+		return "";
   	}
   }
   return "No $a[1] for dummies" if(IsDummy($name));
@@ -1587,6 +1627,7 @@ sub SIGNALduino_SimpleWrite_XQ($) {
 	
 	Log3 $hash, 3, "$name/init: disable receiver (XQ)";
 	SIGNALduino_SimpleWrite($hash, "XQ");
+	#DevIo_SimpleWrite($hash, "XQ\n",2);
 }
 
 
@@ -1613,6 +1654,7 @@ sub SIGNALduino_StartInit($)
 	else {
 		$hash->{getcmd}->{cmd} = "version";
 		SIGNALduino_SimpleWrite($hash, "V");
+		#DevIo_SimpleWrite($hash, "V\n",2);
 		$hash->{DevState} = 'waitInit';
 		RemoveInternalTimer($hash);
 		InternalTimer(gettimeofday() + SDUINO_CMD_TIMEOUT, "SIGNALduino_CheckCmdResp", $hash, 0);
@@ -1646,10 +1688,11 @@ sub SIGNALduino_CheckCmdResp($)
 		}
 		else {
 			readingsSingleUpdate($hash, "state", "opened", 1);
-			Log3 $name, 2, "$name: initialized";
+			Log3 $name, 2, "$name: initialized. " . SDUINO_VERSION;
 			$hash->{DevState} = 'initialized';
 			delete($hash->{initResetFlag}) if defined($hash->{initResetFlag});
 			SIGNALduino_SimpleWrite($hash, "XE"); # Enable receiver
+			#DevIo_SimpleWrite($hash, "XE\n",2);
 			Log3 $hash, 3, "$name/init: enable receiver (XE)";
 			delete($hash->{initretry});
 			# initialize keepalive
@@ -1747,7 +1790,7 @@ SIGNALduino_SendFromQueue($$)
   
   if($msg ne "") {
 	SIGNALduino_XmitLimitCheck($hash,$msg);
-    #DevIo_SimpleWrite($hash, $msg,2);
+    #DevIo_SimpleWrite($hash, $msg . "\n", 2);
     SIGNALduino_SimpleWrite($hash,$msg);
     if ($msg =~ m/^S(R|C|M);/) {
        $hash->{getcmd}->{cmd} = 'sendraw';
@@ -1887,9 +1930,10 @@ sub SIGNALduino_KeepAlive($){
 		}
 		else {
 			$hash->{keepalive}{retry} ++;
-			Log3 $name,4 , "$name/KeepAlive: get ping";
+			Log3 $name,3 , "$name/KeepAliveOk: " . $hash->{keepalive}{ok} . " retry = " . $hash->{keepalive}{retry} . " -> get ping";
 			$hash->{getcmd}->{cmd} = "ping";
-			SIGNALduino_SimpleWrite($hash, "P");
+			SIGNALduino_AddSendQueue($hash, "P");
+			#SIGNALduino_SimpleWrite($hash, "P");
 		}
 	}
 	Log3 $name,4 , "$name/keepalive retry = " . $hash->{keepalive}{retry};
