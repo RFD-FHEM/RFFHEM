@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 10484 2016-12-14 22:00:00Z v3.3.1-dev $
+# $Id: 00_SIGNALduino.pm 10484 2016-12-14 23:00:00Z v3.3.1-dev $
 #
 # v3.3.0 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -59,6 +59,8 @@ my %gets = (    # Name, Data to send to the SIGNALduino, Regexp for the answer
   "ping"     => ["P",'^OK$'],
   "config"   => ["CG",'^MS.*MU.*MC.*'],
   "protocolIDs"   => ["none",'none'],
+  "ccconf"   => ["C0DnF", 'C0Dn11.*'],
+  "ccreg"    => ["C", '^C.* = .*'],
 #  "ITClock"  => ["ic", '\d+'],
 #  "FAParms"  => ["fp", '.*' ],
 #  "TCParms"  => ["dp", '.*' ],
@@ -76,7 +78,13 @@ my %sets = (
   "enableMessagetype" => 'syncedMS,unsyncedMU,manchesterMC',
   "disableMessagetype" => 'syncedMS,unsyncedMU,manchesterMC',
   'sendMsg'		=> "",
+  "freq"      => '',
+  "bWidth"    => '',
+  "rAmpl"     => '',
+  "sens"      => '',
 );
+
+my @ampllist = (24, 27, 30, 33, 36, 38, 40, 42); # rAmpl(dB)
 
 ## Supported Clients per default
 my $clientsSIGNALduino = ":IT:"
@@ -1144,6 +1152,10 @@ SIGNALduino_Set($@)
   my $cmd = shift @a;
   my $arg = join(" ", @a);
   
+  if (($cmd eq "freq" || $cmd eq "bWidth" || $cmd eq "rAmpl" || $cmd eq "sens") && $hash->{version} && $hash->{version} !~ m/cc1101/) {
+    return "This command is only available with a cc1101 receiver";
+  }
+  
   return "$name is not active, may firmware is not suppoted, please flash or reset" if ($cmd ne 'reset' && $cmd ne 'flash' && exists($hash->{DevState}) && $hash->{DevState} ne 'initialized');
 
   if($cmd eq "raw") {
@@ -1247,6 +1259,39 @@ SIGNALduino_Set($@)
 	#SIGNALduino_SimpleWrite($hash, $argm);
 	SIGNALduino_AddSendQueue($hash,$argm);
 	Log3 $name, 4, "set $name $cmd $arg $argm";
+  } elsif( $cmd eq "freq" ) {
+	my $f = $arg/26*65536;
+	my $f2 = sprintf("%02x", $f / 65536);
+	my $f1 = sprintf("%02x", int($f % 65536) / 256);
+	my $f0 = sprintf("%02x", $f % 256);
+	$arg = sprintf("%.3f", (hex($f2)*65536+hex($f1)*256+hex($f0))/65536*26);
+	Log3 $name, 3, "Setting FREQ2..0 (0D,0E,0F) to $f2 $f1 $f0 = $arg MHz";
+	SIGNALduino_AddSendQueue($hash,"W0F$f2");
+	SIGNALduino_AddSendQueue($hash,"W10$f1");
+	SIGNALduino_AddSendQueue($hash,"W11$f0");
+	SIGNALduino_WriteInit($hash);
+  } elsif( $cmd eq "bWidth" ) {
+	SIGNALduino_AddSendQueue($hash,"C10");
+	$hash->{getcmd}->{cmd} = "bWidth";
+	$hash->{getcmd}->{arg} = $arg;
+  } elsif( $cmd eq "rAmpl" ) {
+	return "a numerical value between 24 and 42 is expected" if($arg !~ m/^\d+$/ || $arg < 24 || $arg > 42);
+	my ($v, $w);
+	for($v = 0; $v < @ampllist; $v++) {
+		last if($ampllist[$v] > $arg);
+	}
+	$v = sprintf("%02d", $v-1);
+	$w = $ampllist[$v];
+	Log3 $name, 3, "Setting AGCCTRL2 (1B) to $v / $w dB";
+	SIGNALduino_AddSendQueue($hash,"W1D$v");
+	SIGNALduino_WriteInit($hash);
+  } elsif( $cmd eq "sens" ) {
+	return "a numerical value between 4 and 16 is expected" if($arg !~ m/^\d+$/ || $arg < 4 || $arg > 16);
+	my $w = int($arg/4)*4;
+	my $v = sprintf("9%d",$arg/4-1);
+	Log3 $name, 3, "Setting AGCCTRL0 (1D) to $v / $w dB";
+	SIGNALduino_AddSendQueue($hash,"W1F$v");
+	SIGNALduino_WriteInit($hash);
   } elsif( $cmd eq "sendMsg" ) {
 	my ($protocol,$data,$repeats,$clock) = split("#",$arg);
 	$protocol=~ s/[Pp](\d+)/$1/; # extract protocol num
@@ -1366,12 +1411,16 @@ SIGNALduino_Get($@)
   Log3 $name, 5, "\"get $type\" needs at least one parameter" if(@a < 2);
   return "\"get $type\" needs at least one parameter" if(@a < 2);
   if(!defined($gets{$a[1]})) {
-    my @cList = map { $_ =~ m/^(file|raw)$/ ? $_ : "$_:noArg" } sort keys %gets;
+    my @cList = map { $_ =~ m/^(file|raw|ccreg)$/ ? $_ : "$_:noArg" } sort keys %gets;
     return "Unknown argument $a[1], choose one of " . join(" ", @cList);
   }
 
   my $arg = ($a[2] ? $a[2] : "");
   return "no command to send, get aborted." if (length($gets{$a[1]}[0]) == 0 && length($arg) == 0);
+  
+  if (($a[1] eq "ccconf" || $a[1] eq "ccreg") && $hash->{version} && $hash->{version} !~ m/cc1101/) {
+    return "This command is only available with a cc1101 receiver";
+  }
   
   my ($msg, $err);
 
@@ -1550,8 +1599,51 @@ sub SIGNALduino_parseResponse($$$)
  	{   # decode it
    		#$msg = hex($msg);              # /125; only for col or coc
     	$msg = sprintf("%d %02d:%02d:%02d", $msg/86400, ($msg%86400)/3600, ($msg%3600)/60, $msg%60);
-  	} 
-  
+  	}
+  	elsif($cmd eq "ccregAll")
+  	{
+		$msg =~ s/  /\n/g;
+		$msg = "\n\n" . $msg
+  	}
+  	elsif($cmd eq "ccconf")
+  	{
+		my (undef,$str) = split('=', $msg);
+		my $var;
+		my %r = ( "0D"=>1,"0E"=>1,"0F"=>1,"10"=>1,"1B"=>1,"1D"=>1 );
+		$msg = "";
+		foreach my $a (sort keys %r) {
+			$var = substr($str,(hex($a)-13)*2, 2);
+			$r{$a} = hex($var);
+		}
+		$msg = sprintf("freq:%.3fMHz bWidth:%dKHz rAmpl:%ddB sens:%ddB",
+		26*(($r{"0D"}*256+$r{"0E"})*256+$r{"0F"})/65536,                #Freq
+		26000/(8 * (4+(($r{"10"}>>4)&3)) * (1 << (($r{"10"}>>6)&3))),   #Bw
+		$ampllist[$r{"1B"}&7],
+		4+4*($r{"1D"}&3)                                                #Sens
+		);
+	}
+	elsif($cmd eq "bWidth") {
+		my $val = substr($msg,6);
+		my $arg = $hash->{getcmd}->{arg};
+		my $ob = $arg & 0x0f;
+		
+		my ($bits, $bw) = (0,0);
+		OUTERLOOP:
+		for (my $e = 0; $e < 4; $e++) {
+			for (my $m = 0; $m < 4; $m++) {
+				$bits = ($e<<6)+($m<<4);
+				$bw  = int(26000/(8 * (4+$m) * (1 << $e))); # KHz
+				last OUTERLOOP if($arg >= $bw);
+			}
+		}
+
+		$ob = sprintf("%02x", $ob+$bits);
+		$msg = "Setting MDMCFG4 (10) to $ob = $bw KHz";
+		Log3 $name, 3, "$name/msg parseResponse bWidth: Setting MDMCFG4 (10) to $ob = $bw KHz";
+		delete($hash->{getcmd});
+		SIGNALduino_AddSendQueue($hash,"W12$ob");
+		SIGNALduino_WriteInit($hash);
+	}
   	return $msg;
 }
 
@@ -1795,6 +1887,9 @@ SIGNALduino_SendFromQueue($$)
     if ($msg =~ m/^S(R|C|M);/) {
        $hash->{getcmd}->{cmd} = 'sendraw';
        Log3 $hash, 4, "$name SendFromQueue: msg=$msg"; # zu testen der Queue, kann wenn es funktioniert auskommentiert werden
+    } 
+    elsif ($msg eq "C99") {
+       $hash->{getcmd}->{cmd} = 'ccregAll';
     }
   }
 
@@ -1865,6 +1960,12 @@ SIGNALduino_Read($)
 		if ($hash->{getcmd}->{cmd} eq 'sendraw') {
 			$regexp = '^S(R|C|M);';
 		}
+		elsif ($hash->{getcmd}->{cmd} eq 'ccregAll') {
+			$regexp = '^ccreg 00:';
+		}
+		elsif ($hash->{getcmd}->{cmd} eq 'bWidth') {
+			$regexp = '^C.* = .*';
+		}
 		else {
 			$regexp = $gets{$hash->{getcmd}->{cmd}}[1];
 		}
@@ -1896,7 +1997,9 @@ SIGNALduino_Read($)
 			}
 			else {
 				$rmsg = SIGNALduino_parseResponse($hash,$hash->{getcmd}->{cmd},$rmsg);
-				readingsSingleUpdate($hash, $hash->{getcmd}->{cmd}, $rmsg, 0);
+				if (defined($hash->{getcmd}) && $hash->{getcmd}->{cmd} ne 'ccregAll') {
+					readingsSingleUpdate($hash, $hash->{getcmd}->{cmd}, $rmsg, 0);
+				}
 				if (defined($hash->{getcmd}->{asyncOut})) {
 					#Log3 $name, 4, "$name/msg READ: asyncOutput";
 					my $ao = asyncOutput( $hash->{getcmd}->{asyncOut}, $hash->{getcmd}->{cmd}.": " . $rmsg );
@@ -2869,6 +2972,17 @@ SIGNALduino_Ready($)
   return ($InBytes && $InBytes>0);
 }
 
+
+sub
+SIGNALduino_WriteInit($)
+{
+  my ($hash) = @_;
+  
+  # todo: ist dies so ausreichend, damit die Aenderungen uebernommen werden?
+  SIGNALduino_AddSendQueue($hash,"WS36");   # SIDLE, Exit RX / TX, turn off frequency synthesizer 
+  SIGNALduino_AddSendQueue($hash,"WS34");   # SRX, Enable RX. Perform calibration first if coming from IDLE and MCSM0.FS_AUTOCAL=1.
+}
+
 ########################
 sub
 SIGNALduino_SimpleWrite(@)
@@ -3631,7 +3745,17 @@ With a # at the beginnging whitelistIDs can be deactivated.
 		For sending IT Signals for wireless switches, the number of repeats and the base duration can be set.
 		With the get command, you can verify what is programmed into the uC.
 		</li><br>
-		
+		<li>protocolIDs<br>
+		display a list of the protocol IDs
+		</li><br>
+		<li>ccconf<br>
+		Only with cc1101 receiver.
+		Read some CUL radio-chip (cc1101) registers (frequency, bandwidth, etc.),
+		and display them in human readable form.
+		</li><br>
+		<li>ccreg<br>
+		read cc1101 registers (99 reads all cc1101 registers)
+		</li><br>
 	</ul>
 	<a name="SIGNALduinoset"></a>
 	<b>SET</b>
@@ -3708,13 +3832,36 @@ With a # at the beginnging whitelistIDs can be deactivated.
 				<li>manchester encoded messages (manchesterMC) </li>
 			</ul>
 			The new state will be saved into the eeprom of your arduino.
+		</li><br><br>
+		
+		<li>freq / bWidth / rAmpl / sens<br>
+		Only with CC1101 receiver.<br>
+		Set the CUL frequency / bandwidth / receiver-amplitude / sensitivity<br>
+		
+		Use it with care, it may destroy your hardware and it even may be
+		illegal to do so. Note: The parameters used for RFR transmission are
+		not affected.<br>
+		<ul>
+		<li>freq sets both the reception and transmission frequency. Note:
+		    Although the CC1101 can be set to frequencies between 315 and 915
+		    MHz, the antenna interface and the antenna of the CUL is tuned for
+		    exactly one frequency. Default is 868.3 MHz (or 433 MHz)</li>
+		<li>bWidth can be set to values between 58 kHz and 812 kHz. Large values
+		    are susceptible to interference, but make possible to receive
+		    inaccurately calibrated transmitters. It affects tranmission too.
+		    Default is 325 kHz.</li>
+		<li>rAmpl is receiver amplification, with values between 24 and 42 dB.
+		    Bigger values allow reception of weak signals. Default is 42.
 		</li>
+		<li>sens is the decision boundary between the on and off values, and it
+		    is 4, 8, 12 or 16 dB.  Smaller values allow reception of less clear
+		    signals. Default is 4 dB.</li>
+		</ul>
+		</li><br>
 		
 	</ul>
 
-	
 
-	
 
 
 =end html
