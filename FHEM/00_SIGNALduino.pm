@@ -981,7 +981,7 @@ SIGNALduino_Initialize($)
 					  ." hexFile"
                       ." initCommands"
                       ." flashCommand"
-  					  ." hardware:nano328,uno,promini328"
+  					  ." hardware:nano328,uno,promini328,nanoCC1101"
 					  ." debug:0,1"
 					  ." longids"
 					  ." minsecs"
