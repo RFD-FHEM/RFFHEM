@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 10484 2016-12-14 23:00:00Z v3.3.1-dev $
+# $Id: 00_SIGNALduino.pm 10484 2016-12-26 10:00:00Z v3.3.1-dev $
 #
 # v3.3.0 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -1625,23 +1625,24 @@ sub SIGNALduino_parseResponse($$$)
   	{
 		my (undef,$str) = split('=', $msg);
 		my $var;
-		my %r = ( "0D"=>1,"0E"=>1,"0F"=>1,"10"=>1,"1B"=>1,"1D"=>1 );
+		my %r = ( "0D"=>1,"0E"=>1,"0F"=>1,"10"=>1,"11"=>1,"1B"=>1,"1D"=>1 );
 		$msg = "";
 		foreach my $a (sort keys %r) {
 			$var = substr($str,(hex($a)-13)*2, 2);
 			$r{$a} = hex($var);
 		}
-		$msg = sprintf("freq:%.3fMHz bWidth:%dKHz rAmpl:%ddB sens:%ddB",
+		$msg = sprintf("freq:%.3fMHz bWidth:%dKHz rAmpl:%ddB sens:%ddB  (DataRate:%.2fBaud)",
 		26*(($r{"0D"}*256+$r{"0E"})*256+$r{"0F"})/65536,                #Freq
 		26000/(8 * (4+(($r{"10"}>>4)&3)) * (1 << (($r{"10"}>>6)&3))),   #Bw
-		$ampllist[$r{"1B"}&7],
-		4+4*($r{"1D"}&3)                                                #Sens
+		$ampllist[$r{"1B"}&7],                                          #rAmpl
+		4+4*($r{"1D"}&3),                                               #Sens
+		((256+$r{"11"})*(2**($r{"10"} & 15 )))*26000000/(2**28)         #DataRate
 		);
 	}
 	elsif($cmd eq "bWidth") {
-		my $val = substr($msg,6);
+		my $val = hex(substr($msg,6));
 		my $arg = $hash->{getcmd}->{arg};
-		my $ob = $arg & 0x0f;
+		my $ob = $val & 0x0f;
 		
 		my ($bits, $bw) = (0,0);
 		OUTERLOOP:
@@ -2247,6 +2248,7 @@ sub SIGNALduino_Split_Message($$)
 	my $rawData;
 	my $clockabs;
 	my $mcbitnum;
+	my $rssi;
 	
 	my @msg_parts = SIGNALduino_splitMsg($rmsg,';');			## Split message parts by ";"
 	my %ret;
@@ -2306,6 +2308,13 @@ sub SIGNALduino_Split_Message($$)
 			$clockabs = $_ ;
 			Debug "$name: extracted absolute clock $clockabs \n" if ($debug);
 			$ret{clockabs} = $clockabs;
+		}
+		elsif($_ =~ m/^R=\d+/)		### RSSI ###
+		{
+			$_ =~ s/R=//;
+			$rssi = $_ ;
+			Debug "$name: extracted RSSI $rssi \n" if ($debug);
+			$ret{rssi} = $rssi;
 		}  else {
 			Debug "$name: unknown Message part $_" if ($debug);;
 		}
@@ -2358,6 +2367,7 @@ SIGNALduino_Parse_MS($$$$%)
 	my $protocolid;
 	my $syncidx=$msg_parts{syncidx};			
 	my $clockidx=$msg_parts{clockidx};				
+	my $rssi=$msg_parts{rssi};
 	my $protocol=undef;
 	my $rawData=$msg_parts{rawData};
 	my %patternList;
@@ -2512,8 +2522,12 @@ SIGNALduino_Parse_MS($$$$%)
 			$dmsg = "$dmsg"."$ProtocolListSIGNALduino{$id}{postamble}" if (defined($ProtocolListSIGNALduino{$id}{postamble}));
 			$dmsg = "$ProtocolListSIGNALduino{$id}{preamble}"."$dmsg" if (defined($ProtocolListSIGNALduino{$id}{preamble}));
 			
-			Log3 $name, 4, "$name: Decoded MS Protocol id $id dmsg $dmsg length " . scalar @bit_msg;
-			
+			if (defined($rssi)) {
+				my $rssiDB = ($rssi>=128 ? (($rssi-256)/2-74) : ($rssi/2-74)); # todo: passt dies so? habe ich vom 00_cul.pm
+				Log3 $name, 4, "$name: Decoded MS Protocol id $id dmsg $dmsg length " . scalar @bit_msg . " RSSI = $rssiDB";
+			} else {
+				Log3 $name, 4, "$name: Decoded MS Protocol id $id dmsg $dmsg length " . scalar @bit_msg;
+			}
 			
 			#my ($rcode,@retvalue) = SIGNALduino_callsub('preDispatchfunc',$ProtocolListSIGNALduino{$id}{preDispatchfunc},$name,$dmsg);
 			#next if (!$rcode);
