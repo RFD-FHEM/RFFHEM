@@ -950,7 +950,23 @@ my %ProtocolListSIGNALduino  = (
 			modulematch     => '^W50#.*',  					# not used now
 			length_min      => '47',
 			length_max      => '48',
-		}, 
+		},
+	"55"  => ##quigg gt1000
+		{
+            name			=> 'quigg_gt1000',	
+			id          	=> '55',
+			clockabs     	=> 300, 						
+			zero			=> [1,-4],
+			one				=> [4,-2],
+			sync			=> [1,-8],						
+			format 			=> 'twostate',	
+			preamble		=> 'i',						# prepend to converted message	
+			clientmodule    => '',   					# not used now
+			modulematch     => '^i.*',  					# not used now
+			length_min      => '24',
+			length_max      => '24',
+		},	
+		 
 );
 
 
