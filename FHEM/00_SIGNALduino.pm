@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 10484 2016-12-27 10:00:00Z v3.3.1-dev $
+# $Id: 00_SIGNALduino.pm 10484 2016-12-27 19:00:00Z v3.3.1-dev $
 #
 # v3.3.0 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -961,7 +961,7 @@ my %ProtocolListSIGNALduino  = (
 			sync			=> [1,-8],						
 			format 			=> 'twostate',	
 			preamble		=> 'i',						# prepend to converted message	
-			clientmodule    => '',   					# not used now
+			clientmodule    => 'IT',   					# not used now
 			modulematch     => '^i.*',  					# not used now
 			length_min      => '24',
 			length_max      => '24',
@@ -2405,6 +2405,8 @@ SIGNALduino_Parse_MS($$$$%)
 		my $message_dispatched=0;
 		foreach $id (@{$hash->{msIdList}}) {
 			
+			my $postamble = $ProtocolListSIGNALduino{$id}{postamble};
+			
 			my $valid=1;
 			#$debug=1;
 			Debug "Testing against Protocol id $id -> $ProtocolListSIGNALduino{$id}{name}"  if ($debug);
@@ -2519,11 +2521,19 @@ SIGNALduino_Parse_MS($$$$%)
 			
 			#my $dmsg = sprintf "%02x", oct "0b" . join "", @bit_msg;			## Array -> String -> bin -> hex
 			my $dmsg = SIGNALduino_b2h(join "", @bit_msg);
-			$dmsg = "$dmsg"."$ProtocolListSIGNALduino{$id}{postamble}" if (defined($ProtocolListSIGNALduino{$id}{postamble}));
+			if (defined($rssi)) {
+				if (defined($ProtocolListSIGNALduino{$id}{preamble} && $ProtocolListSIGNALduino{$id}{preamble} eq "s")) {
+					$postamble = sprintf("%02X", $rssi);
+				} elsif ($id == 7) {
+				        #$postamble = "#R" . sprintf("%02x", $rssi);
+				}
+			}
+			$dmsg = "$dmsg".$postamble if (defined($postamble));
 			$dmsg = "$ProtocolListSIGNALduino{$id}{preamble}"."$dmsg" if (defined($ProtocolListSIGNALduino{$id}{preamble}));
 			
 			if (defined($rssi)) {
 				my $rssiDB = ($rssi>=128 ? (($rssi-256)/2-74) : ($rssi/2-74)); # todo: passt dies so? habe ich vom 00_cul.pm
+				
 				Log3 $name, 4, "$name: Decoded MS Protocol id $id dmsg $dmsg length " . scalar @bit_msg . " RSSI = $rssiDB";
 			} else {
 				Log3 $name, 4, "$name: Decoded MS Protocol id $id dmsg $dmsg length " . scalar @bit_msg;
