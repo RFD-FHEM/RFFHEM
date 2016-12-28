@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 14_SD_WS07.pm 9346 2016-10-21 18:00:00 v3.2-dev $
+# $Id: 14_SD_WS07.pm 9346 2016-12-28 20:00:00Z v3.3.1-dev $
 # 
 # The purpose of this module is to support serval eurochron
 # weather sensors like eas8007 which use the same protocol
@@ -73,7 +73,11 @@ SD_WS07_Parse($$)
   my ($iohash, $msg) = @_;
   #my $rawData = substr($msg, 2);
   my $name = $iohash->{NAME};
-  my (undef ,$rawData) = split("#",$msg);
+  my (undef ,$rawData, $rssi) = split("#",$msg);
+  if (defined($rssi)) {
+	$rssi = hex(substr($rssi,1));
+	$rssi = ($rssi>=128 ? (($rssi-256)/2-74) : ($rssi/2-74));
+  }
   #$protocol=~ s/^P(\d+)/$1/; # extract protocol
 
   my $model = "SD_WS07";
@@ -81,7 +85,12 @@ SD_WS07_Parse($$)
   my $blen = $hlen * 4;
   my $bitData = unpack("B$blen", pack("H$hlen", $rawData)); 
 
-  Log3 $name, 4, "SD_WS07_Parse  $model ($msg) length: $hlen";
+  if (defined($rssi)) {
+	Log3 $name, 4, "SD_WS07_Parse  $model ($msg) length: $hlen RSSI = $rssi";
+  } else {
+	Log3 $name, 4, "SD_WS07_Parse  $model ($msg) length: $hlen";
+  }
+  
   
   #      4    8  9    12            24    28     36
   # 0011 0110 1  010  000100000010  1111  00111000 0000  eas8007
@@ -178,6 +187,10 @@ SD_WS07_Parse($$)
     readingsBulkUpdate($hash, "channel", $channel) if ($channel ne "");
 
     readingsEndUpdate($hash, 1); # Notify is done by Dispatch
+
+    if(defined($rssi)) {
+	$hash->{RSSI} = $rssi;
+    }
 
 	return $name;
 

@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 10484 2016-12-27 19:00:00Z v3.3.1-dev $
+# $Id: 00_SIGNALduino.pm 10484 2016-12-28 22:00:00Z v3.3.1-dev $
 #
 # v3.3.0 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -116,7 +116,7 @@ my %matchListSIGNALduino = (
      "6:SD_AS"       			=> "^P2#[A-Fa-f0-9]{7,8}", 		  # Arduino based Sensors, should not be default
      "4:OREGON"            		=> "^(3[8-9A-F]|[4-6][0-9A-F]|7[0-8]).*",		
      "7:Hideki"					=> "^P12#75[A-F0-9]+",
-     "10:SD_WS07"				=> "^P7#[A-Fa-f0-9]{6}F[A-Fa-f0-9]{2}",
+     "10:SD_WS07"				=> "^P7#[A-Fa-f0-9]{6}F[A-Fa-f0-9]{2}(#R[A-F0-9][A-F0-9]){0,1}\$",
      "11:SD_WS09"				=> "^P9#[A-Fa-f0-9]+",
      "12:SD_WS"					=> '^W\d+x{0,1}#.*',
      "13:RFXX10REC" 			=> '^(20|29)[A-Fa-f0-9]+',
@@ -125,7 +125,7 @@ my %matchListSIGNALduino = (
      "16:SD_WS_Maverick"		=> '^P47#[A-Fa-f0-9]+',
      "17:SD_UT"            		=> '^u30#.*',						## BELL 201.2 TXA
      #"44:BresserTemeo"     		=> '^P44x{0,1}#[A-F0-9]{18}',		# Bresser Temeo Trend (3CH Thermo-/Hygro)
-     "X:SIGNALduino_un"			=> '^[uP]\d+#.*',
+     "X:SIGNALduino_un"			=> '^[u]\d+#.*',
 );
 
 
@@ -2522,10 +2522,10 @@ SIGNALduino_Parse_MS($$$$%)
 			#my $dmsg = sprintf "%02x", oct "0b" . join "", @bit_msg;			## Array -> String -> bin -> hex
 			my $dmsg = SIGNALduino_b2h(join "", @bit_msg);
 			if (defined($rssi)) {
-				if (defined($ProtocolListSIGNALduino{$id}{preamble} && $ProtocolListSIGNALduino{$id}{preamble} eq "s")) {
+				if (defined($ProtocolListSIGNALduino{$id}{preamble}) && $ProtocolListSIGNALduino{$id}{preamble} eq "s") {
 					$postamble = sprintf("%02X", $rssi);
-				} elsif ($id == 7) {
-				        #$postamble = "#R" . sprintf("%02x", $rssi);
+				} elsif ($id eq "7") {
+				        $postamble = "#R" . sprintf("%02X", $rssi);
 				}
 			}
 			$dmsg = "$dmsg".$postamble if (defined($postamble));
@@ -2533,7 +2533,6 @@ SIGNALduino_Parse_MS($$$$%)
 			
 			if (defined($rssi)) {
 				my $rssiDB = ($rssi>=128 ? (($rssi-256)/2-74) : ($rssi/2-74)); # todo: passt dies so? habe ich vom 00_cul.pm
-				
 				Log3 $name, 4, "$name: Decoded MS Protocol id $id dmsg $dmsg length " . scalar @bit_msg . " RSSI = $rssiDB";
 			} else {
 				Log3 $name, 4, "$name: Decoded MS Protocol id $id dmsg $dmsg length " . scalar @bit_msg;
@@ -2598,7 +2597,8 @@ sub SIGNALduino_Parse_MU($$$$@)
 	my ($hash, $iohash, $name, $rmsg,%msg_parts) = @_;
 
 	my $protocolid;
-	my $clockidx=$msg_parts{clockidx};				
+	my $clockidx=$msg_parts{clockidx};
+	my $rssi=$msg_parts{rssi};
 	my $protocol=undef;
 	my $rawData;
 	my %patternListRaw;
@@ -2790,7 +2790,12 @@ sub SIGNALduino_Parse_MU($$$$@)
 						$dmsg = "$dmsg"."$ProtocolListSIGNALduino{$id}{postamble}" if (defined($ProtocolListSIGNALduino{$id}{postamble}));
 						$dmsg = "$ProtocolListSIGNALduino{$id}{preamble}"."$dmsg" if (defined($ProtocolListSIGNALduino{$id}{preamble}));
 						
-						Log3 $name, 4, "$name: decoded matched MU Protocol id $id dmsg $dmsg length " . scalar @bit_msg;
+						if (defined($rssi)) {
+							my $rssiDB = ($rssi>=128 ? (($rssi-256)/2-74) : ($rssi/2-74)); # todo: passt dies so? habe ich vom 00_cul.pm
+							Log3 $name, 4, "$name: decoded matched MU Protocol id $id dmsg $dmsg length " . scalar @bit_msg . " RSSI = $rssiDB";
+						} else {
+							Log3 $name, 4, "$name: decoded matched MU Protocol id $id dmsg $dmsg length " . scalar @bit_msg;
+						}
 						
 						my $modulematch;
 						if (defined($ProtocolListSIGNALduino{$id}{modulematch})) {
@@ -2858,6 +2863,7 @@ SIGNALduino_Parse_MC($$$$@)
 	my ($hash, $iohash, $name, $rmsg,%msg_parts) = @_;
 	my $clock=$msg_parts{clockabs};	     ## absolute clock
 	my $rawData=$msg_parts{rawData};
+	my $rssi=$msg_parts{rssi};
 	my $bitData;
 	my $dmsg;
 	my $message_dispatched=0;
@@ -2883,7 +2889,12 @@ SIGNALduino_Parse_MC($$$$@)
 		{
 			Debug "clock and min length matched"  if ($debug);
 
-			Log3 $name, 4, "$name: Found manchester Protocol id $id clock $clock -> $ProtocolListSIGNALduino{$id}{name}";
+			if (defined($rssi)) {
+				my $rssiDB = ($rssi>=128 ? (($rssi-256)/2-74) : ($rssi/2-74)); # todo: passt dies so? habe ich vom 00_cul.pm
+				Log3 $name, 4, "$name: Found manchester Protocol id $id clock $clock RSSI $rssiDB -> $ProtocolListSIGNALduino{$id}{name}";
+			} else {
+				Log3 $name, 4, "$name: Found manchester Protocol id $id clock $clock -> $ProtocolListSIGNALduino{$id}{name}";
+			}
 			
 			if (exists($ProtocolListSIGNALduino{$id}{polarity}) && ($ProtocolListSIGNALduino{$id}{polarity} eq 'invert') && (!defined($hash->{version}) || substr($hash->{version},0,6) ne 'V 3.2.'))
 			# todo  && substr($hash->{version},0,6) ne 'V 3.2.')   # bei version V 3.2. nicht invertieren 
