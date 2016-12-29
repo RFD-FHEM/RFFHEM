@@ -22,7 +22,7 @@ Hideki_Initialize($)
   my ($hash) = @_;
 
 
-  $hash->{Match}     = "^P12#75[A-F0-9]{17,30}";   # Laenge (Anhahl nibbles nach 0x75 )noch genauer spezifizieren
+  $hash->{Match}     = "^P12#75[A-F0-9]{17,30}";   # Laenge (Anhahl nibbles nach 0x75 )noch genauer zpezifiieren
   $hash->{DefFn}     = "Hideki_Define";
   $hash->{UndefFn}   = "Hideki_Undef";
   $hash->{AttrFn}    = "Hideki_Attr";

@@ -1,4 +1,4 @@
-SIGNALduino - FHEM Modules development Version 3.3.1 
+SIGNALduino - FHEM Modules rel 3.3 - FLAMNINGO Development
 
 ======
 
@@ -28,16 +28,14 @@ Supported Devices / Protocols
 |s014/TFA 30.3200/TCM/Conrad | Weather sensor |
 |les led  | Remote controlled led lamp |
 |Livolo | Remote switches and sockets  |
+|Somfy RTS | Somfy blinds |
 |Maverick | Wireless BBQ thermometer |
-|Dooya | Shutters and blinds from various vendors like Rohrmotor24  |
-|Somfy RTS | Shutters from Somfy|
-|Opus XT300 | Soil moisture sensor |
-
+|FLAMINGO | Flamingo smoke detector |
 How to install
 ======
 The Perl modules can be loaded directly into your FHEM installation:
 
-```update all https://raw.githubusercontent.com/RFD-FHEM/RFFHEM/dev-r33/controls_signalduino.txt```
+```update all https://raw.githubusercontent.com/RFD-FHEM/RFFHEM/dev-r33_flamenco/controls_signalduino.txt```
 
 Prepare your Arduino nano. Look at http://www.fhemwiki.de/wiki/Datei:Fhemduino_schematic.png
 for hardware setup.
