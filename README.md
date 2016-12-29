@@ -28,11 +28,12 @@ Supported Devices / Protocols
 |s014/TFA 30.3200/TCM/Conrad | Weather sensor |
 |les led  | Remote controlled led lamp |
 |Livolo | Remote switches and sockets  |
+|Somfy RTS | Somfy blinds |
 |Maverick | Wireless BBQ thermometer |
+|FLAMINGO | Flamingo smoke detector |
 |Dooya | Shutters and blinds from various vendors like Rohrmotor24  |
 |Somfy RTS | Shutters from Somfy|
 |Opus XT300 | Soil moisture sensor |
-
 How to install
 ======
 The Perl modules can be loaded directly into your FHEM installation:
