@@ -3,6 +3,7 @@ DEL FHEM/14_SIGNALduino_AS.pm
 DEL FHEM/14_SIGNALduino_ID7.pm
 DEL FHEM/14_SIGNALduino_un.pm
 DEL FHEM/firmware/SIGNALduino_nano328.hex
+DEL FHEM/firmware/SIGNALduino_nanoCC1101.hex
 DEL FHEM/firmware/SIGNALduino_promini328.hex
 DEL FHEM/firmware/SIGNALduino_uno.hex
 UPD 2016_02_10_00:49:52 7824    FHEM/14_SIGNALduino_RSL.pm

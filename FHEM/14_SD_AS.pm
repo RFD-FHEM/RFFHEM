@@ -173,7 +173,8 @@ SD_AS_Parse($$)
 	}
 	elsif ($model eq "temp") {
 	  $Sigval = ($Sigval-0x8000) /10;
-	  return "temp out of range" if ($Sigval > 100 || $Sigval < -60);
+	  Log3 $iohash, 4, "SD_AS: temp out of range" if ($Sigval > 100 || $Sigval < -60);
+	  return "" if ($Sigval > 100 || $Sigval < -60);
 	  $Sigval = sprintf( "%.1f", $Sigval); #temp is send 10*C
 	}
 	elsif ($model eq "door") {
@@ -184,7 +185,9 @@ SD_AS_Parse($$)
 	}
 	elsif ($model eq "humidity") {
 	  $Sigval = ($Sigval-0x8000) /10;
-	  return "humidity out of range" if ($Sigval > 100 || $Sigval < 0);
+	  Log3 $iohash, 4, "SD_AS: humidity out of range" if ($Sigval > 100 || $Sigval < 0);
+	  return "" if ($Sigval > 100 || $Sigval < 0);
+	  
 	  $Sigval = sprintf( "%i %%", $Sigval); #hum is send 10*%
 	  
 	}

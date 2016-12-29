@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 14_SD_WS07.pm 9346 2016-07-14 18:00:00 v3.2-dev $
+# $Id: 14_SD_WS07.pm 9346 2016-12-28 20:00:00Z v3.3.1-dev $
 # 
 # The purpose of this module is to support serval eurochron
 # weather sensors like eas8007 which use the same protocol
@@ -20,7 +20,7 @@ SD_WS07_Initialize($)
 {
   my ($hash) = @_;
 
-  $hash->{Match}     = "^P7#[A-Fa-f0-9]{6}F[A-Fa-f0-9]{2}";    ## pos 7 ist aktuell immer 0xF
+  $hash->{Match}     = "^P7#[A-Fa-f0-9]{6}F[A-Fa-f0-9]{2}(#R[A-F0-9][A-F0-9]){0,1}\$";    ## pos 7 ist aktuell immer 0xF
   $hash->{DefFn}     = "SD_WS07_Define";
   $hash->{UndefFn}   = "SD_WS07_Undef";
   $hash->{ParseFn}   = "SD_WS07_Parse";
@@ -73,7 +73,11 @@ SD_WS07_Parse($$)
   my ($iohash, $msg) = @_;
   #my $rawData = substr($msg, 2);
   my $name = $iohash->{NAME};
-  my (undef ,$rawData) = split("#",$msg);
+  my (undef ,$rawData, $rssi) = split("#",$msg);
+  if (defined($rssi)) {
+	$rssi = hex(substr($rssi,1));
+	$rssi = ($rssi>=128 ? (($rssi-256)/2-74) : ($rssi/2-74));
+  }
   #$protocol=~ s/^P(\d+)/$1/; # extract protocol
 
   my $model = "SD_WS07";
@@ -81,7 +85,12 @@ SD_WS07_Parse($$)
   my $blen = $hlen * 4;
   my $bitData = unpack("B$blen", pack("H$hlen", $rawData)); 
 
-  Log3 $name, 4, "SD_WS07_Parse  $model ($msg) length: $hlen";
+  if (defined($rssi)) {
+	Log3 $name, 4, "SD_WS07_Parse  $model ($msg) length: $hlen RSSI = $rssi";
+  } else {
+	Log3 $name, 4, "SD_WS07_Parse  $model ($msg) length: $hlen";
+  }
+  
   
   #      4    8  9    12            24    28     36
   # 0011 0110 1  010  000100000010  1111  00111000 0000  eas8007
@@ -151,6 +160,8 @@ SD_WS07_Parse($$)
 	
 	my $hash = $def;
 	$name = $hash->{NAME};
+	return "" if(IsIgnored($name));
+	
 	Log3 $name, 4, "SD_WS07: $name ($rawData)";  
 
 	if (!defined(AttrVal($hash->{NAME},"event-min-interval",undef)))
@@ -176,6 +187,10 @@ SD_WS07_Parse($$)
     readingsBulkUpdate($hash, "channel", $channel) if ($channel ne "");
 
     readingsEndUpdate($hash, 1); # Notify is done by Dispatch
+
+    if(defined($rssi)) {
+	$hash->{RSSI} = $rssi;
+    }
 
 	return $name;
 
