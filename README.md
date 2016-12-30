@@ -34,6 +34,9 @@ Supported Devices / Protocols
 |Dooya | Shutters and blinds from various vendors like Rohrmotor24  |
 |Somfy RTS | Shutters from Somfy|
 |Opus XT300 | Soil moisture sensor |
+|Oregon NR868 | Motion sensor |
+|IAN 275901 Lidl | Weatherstation |
+
 How to install
 ======
 The Perl modules can be loaded directly into your FHEM installation:
