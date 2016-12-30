@@ -964,11 +964,28 @@ my %ProtocolListSIGNALduino  = (
 		#	start			=> [1,-25],						# Wenn das startsignal empfangen wird, fehlt das 1 bit
 			format 			=> 'twostate',	
 			preamble		=> 'W50#',						# prepend to converted message	
-			clientmodule    => 'SD_WS',   						# not used now
+			clientmodule    => 'SD_WS',   					# not used now
 			modulematch     => '^W50#.*',  					# not used now
 			length_min      => '47',
 			length_max      => '48',
 		},
+	 "51"    => 
+        {
+            name			=> 'weather51',		# Logilink, NC, WS, TCM97001 etc.
+			comment			=> 'IAN 275901 Wetterstation Lidl',
+			id          	=> '51',
+			one				=> [1,-8],
+			zero			=> [1,-4],
+			sync			=> [1,-13],		
+			clockabs   		=> '560',		# not used now
+			format     		=> 'twostate',  # not used now
+			preamble		=> 'W51#',		# prepend to converted message	 	
+			postamble		=> '',			# Append to converted message	 	
+			clientmodule    => 'SD_WS',   
+			modulematch     => '^W51#.*',
+			length_min      => '40',
+			length_max      => '48',
+        },
 	"55"  => ##quigg gt1000
 		{
             name			=> 'quigg_gt1000',	
@@ -984,6 +1001,7 @@ my %ProtocolListSIGNALduino  = (
 			length_min      => '24',
 			length_max      => '24',
 		},	
+
 		 
 );
 
@@ -2131,7 +2149,7 @@ sub SIGNALduino_PatternExists
 		#my $patt_id;
 		# Calculate tolernace for search
 		#my $tol=abs(abs($searchpattern)>=2 ?$searchpattern*0.3:$searchpattern*1.5);
-		my $tol=abs(abs($searchpattern)>3 ? abs($searchpattern)>16 ? $searchpattern*0.17 : $searchpattern*0.3 : 1);  #tol is minimum 1 or higer, depending on our searched pulselengh
+		my $tol=abs(abs($searchpattern)>3 ? abs($searchpattern)>16 ? $searchpattern*0.18 : $searchpattern*0.3 : 1);  #tol is minimum 1 or higer, depending on our searched pulselengh
 		
 
 		Debug "tol: looking for ($searchpattern +- $tol)" if($debug);		
@@ -2443,7 +2461,7 @@ SIGNALduino_Parse_MS($$$$%)
 			$valid = $valid && $ProtocolListSIGNALduino{$id}{length_max} >= $bit_length if (exists $ProtocolListSIGNALduino{$id}{length_max});
 
 			next if (!$valid) ;
-			Debug "expecting $bit_length bits in signal" if ($debug && $valid);
+			Debug "expecting $bit_length bits in signal" if ($debug);
 
 			#Debug Dumper(@{$ProtocolListSIGNALduino{$id}{sync}});
 			Debug "Searching in patternList: ".Dumper(\%patternList) if($debug);
