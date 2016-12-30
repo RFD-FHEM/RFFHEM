@@ -986,6 +986,21 @@ my %ProtocolListSIGNALduino  = (
 			length_min      => '40',
 			length_max      => '48',
         },
+    "52"    => 			## Oregon PIR Protocol
+		{
+            name			=> 'OS_PIR',	
+			id          	=> '52',
+			clockrange     	=> [470,640],			# min , max
+			format 			=> 'manchester',	    # tristate can't be migrated from bin into hex!
+			clientmodule    => 'OREGON',
+			modulematch     => '^u52#F{3}|0{3}.*',
+			preamble		=> 'u52#',
+			length_min      => '30',
+			length_max      => '30',
+			method          => \&SIGNALduino_OSPIR, # Call to process this message
+			polarity        => 'invert',			
+		}, 	
+    
 	"55"  => ##quigg gt1000
 		{
             name			=> 'quigg_gt1000',	
@@ -3510,12 +3525,30 @@ sub SIGNALduino_Maverick()
 		my $hex=SIGNALduino_b2h(substr($bitData,$header_pos,26*4));
 	
 		return  (1,$hex); ## Return the bits unchanged in hex
-		my $message_start = index($bitData,"");
 	} else {
 		return return (-1," header not found");
 	}	
 }
 
+sub SIGNALduino_OSPIR()
+{
+	my ($name,$bitData,$id) = @_;
+	my $debug = AttrVal($name,"debug",0);
+
+
+	if ($bitData =~ m/^.*(1{14}|0{14}).*/) 
+	{  # Valid Oregon PIR detected	
+		my $header_pos=$+[1];
+		
+		Log3 $name, 4, "$name: Oregon PIR protocol detected: header_pos = $header_pos";
+
+		my $hex=SIGNALduino_b2h($bitData);
+	
+		return  (1,$hex); ## Return the bits unchanged in hex
+	} else {
+		return return (-1," header not found");
+	}	
+}
 sub SIGNALduino_SomfyRTS()
 {
 	my ($name, $bitData, $rawData) = @_;
