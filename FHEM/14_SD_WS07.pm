@@ -189,7 +189,7 @@ SD_WS07_Parse($$)
     readingsEndUpdate($hash, 1); # Notify is done by Dispatch
 
     if(defined($rssi)) {
-	$hash->{RSSI} = $rssi;
+		$hash->{RSSI} = $rssi;
     }
 
 	return $name;

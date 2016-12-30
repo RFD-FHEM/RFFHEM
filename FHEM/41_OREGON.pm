@@ -14,7 +14,7 @@
 #
 # (c) 2010-2014 Copyright: Willi Herzig (Willi.Herzig@gmail.com)
 # modified & fixes Ralf9 2015-2016 
-# 
+# fixes Sidey79 2016
 #  This script is distributed in the hope that it will be useful,
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
@@ -973,118 +973,139 @@ OREGON_Parse($$)
   my $i;
   my $val = "";
   my $sensor = "";
+  readingsBeginUpdate($def);
+
   foreach $i (@res){
+  	
  	#print "!> i=".$i."\n";
 	#printf "%s\t",$i->{device};
 	if ($i->{type} eq "temp") { 
 			#printf "Temperatur %2.1f %s ; ",$i->{current},$i->{units};
 			$val .= "T: ".$i->{current}." ";
-
-			$sensor = "temperature";			
-			$def->{READINGS}{$sensor}{TIME} = $tm;
-			$def->{READINGS}{$sensor}{VAL} = $i->{current};
-			$def->{CHANGED}[$n++] = $sensor . ": " . $i->{current};
+			
+			readingsBulkUpdate($def,"temperature",$i->{current});
+			
+			##$sensor = "temperature";		
+				
+			##$def->{READINGS}{$sensor}{TIME} = $tm;
+			##$def->{READINGS}{$sensor}{VAL} = $i->{current};
+			##$def->{CHANGED}[$n++] = $sensor . ": " . $i->{current};*/
   	} 
 	elsif ($i->{type} eq "humidity") { 
 			#printf "Luftfeuchtigkeit %d%s, %s ;",$i->{current},$i->{units},$i->{string};
 			$val .= "H: ".$i->{current}." ";
+			readingsBulkUpdate($def,"humidity",$i->{current});
 
-			$sensor = "humidity";			
-			$def->{READINGS}{$sensor}{TIME} = $tm;
-			$def->{READINGS}{$sensor}{VAL} = $i->{current};
-			$def->{CHANGED}[$n++] = $sensor . ": " . $i->{current};
+			##$sensor = "humidity";			
+			##$def->{READINGS}{$sensor}{TIME} = $tm;
+			##$def->{READINGS}{$sensor}{VAL} = $i->{current};
+			##$def->{CHANGED}[$n++] = $sensor . ": " . $i->{current};
 	}
 	elsif ($i->{type} eq "battery") { 
 			#printf "Batterie %d%s; ",$i->{current},$i->{units};
 			my @words = split(/\s+/,$i->{current});
 			$val .= "BAT: ".$words[0]." "; #use only first word
+			
+			readingsBulkUpdate($def,"battery",$i->{current});
 
-			$sensor = "battery";			
-			$def->{READINGS}{$sensor}{TIME} = $tm;
-			$def->{READINGS}{$sensor}{VAL} = $i->{current};
-			$def->{CHANGED}[$n++] = $sensor . ": " . $i->{current};;
+			##$sensor = "battery";			
+			##$def->{READINGS}{$sensor}{TIME} = $tm;
+			##$def->{READINGS}{$sensor}{VAL} = $i->{current};
+			##$def->{CHANGED}[$n++] = $sensor . ": " . $i->{current};;
 	}
 	elsif ($i->{type} eq "pressure") { 
 			#printf "Luftdruck %d %s, Vorhersage=%s ; ",$i->{current},$i->{units},$i->{forecast};
 			# do not add it due to problems with hms.gplot
 			$val .= "P: ".$i->{current}."  ";
+			readingsBulkUpdate($def,"pressure",$i->{current});
+			readingsBulkUpdate($def,"forecast",$i->{forecast});
+			
+			#$sensor = "pressure";			
+			#$def->{READINGS}{$sensor}{TIME} = $tm;
+			#$def->{READINGS}{$sensor}{VAL} = $i->{current};
+			#$def->{CHANGED}[$n++] = $sensor . ": " . $i->{current};;
 
-			$sensor = "pressure";			
-			$def->{READINGS}{$sensor}{TIME} = $tm;
-			$def->{READINGS}{$sensor}{VAL} = $i->{current};
-			$def->{CHANGED}[$n++] = $sensor . ": " . $i->{current};;
-
-			$sensor = "forecast";			
-			$def->{READINGS}{$sensor}{TIME} = $tm;
-			$def->{READINGS}{$sensor}{VAL} = $i->{forecast};
-			$def->{CHANGED}[$n++] = $sensor . ": " . $i->{forecast};;
+			#$sensor = "forecast";			
+			#$def->{READINGS}{$sensor}{TIME} = $tm;
+			#$def->{READINGS}{$sensor}{VAL} = $i->{forecast};
+			#$def->{CHANGED}[$n++] = $sensor . ": " . $i->{forecast};;
 	}
 	elsif ($i->{type} eq "speed") { 
 			$val .= "W: ".$i->{current}." ";
 			$val .= "WA: ".$i->{average}." ";
+			readingsBulkUpdate($def,"wind_speed",$i->{current});
+			readingsBulkUpdate($def,"wind_avspeed",$i->{average});
 
-			$sensor = "wind_speed";			
-			$def->{READINGS}{$sensor}{TIME} = $tm;
-			$def->{READINGS}{$sensor}{VAL} = $i->{current};
-			$def->{CHANGED}[$n++] = $sensor . ": " . $i->{current};;
+			#$sensor = "wind_speed";			
+			#$def->{READINGS}{$sensor}{TIME} = $tm;
+			#$def->{READINGS}{$sensor}{VAL} = $i->{current};
+			#$def->{CHANGED}[$n++] = $sensor . ": " . $i->{current};;
 
-			$sensor = "wind_avspeed";			
-			$def->{READINGS}{$sensor}{TIME} = $tm;
-			$def->{READINGS}{$sensor}{VAL} = $i->{average};
-			$def->{CHANGED}[$n++] = $sensor . ": " . $i->{average};;
+			#$sensor = "wind_avspeed";			
+			#$def->{READINGS}{$sensor}{TIME} = $tm;
+			#$def->{READINGS}{$sensor}{VAL} = $i->{average};
+			#$def->{CHANGED}[$n++] = $sensor . ": " . $i->{average};;
 	}
 	elsif ($i->{type} eq "direction") { 
 			$val .= "WD: ".$i->{current}."  ";
 			$val .= "WDN: ".$i->{string}."  ";
+			readingsBulkUpdate($def,"wind_dir",$i->{current} . " " . $i->{string});
 
-			$sensor = "wind_dir";			
-			$def->{READINGS}{$sensor}{TIME} = $tm;
-			$def->{READINGS}{$sensor}{VAL} = $i->{current} . " " . $i->{string};
-			$def->{CHANGED}[$n++] = $sensor . ": " . $i->{current} . " " . $i->{string};;
+			#$sensor = "wind_dir";			
+			#$def->{READINGS}{$sensor}{TIME} = $tm;
+			#$def->{READINGS}{$sensor}{VAL} = $i->{current} . " " . $i->{string};
+			#$def->{CHANGED}[$n++] = $sensor . ": " . $i->{current} . " " . $i->{string};;
 	}
 	elsif ($i->{type} eq "rain") { 
 			$val .= "RR: ".$i->{current}." ";
+			readingsBulkUpdate($def,"rain_rate",$i->{current});
 
-			$sensor = "rain_rate";			
-			$def->{READINGS}{$sensor}{TIME} = $tm;
-			$def->{READINGS}{$sensor}{VAL} = $i->{current};
-			$def->{CHANGED}[$n++] = $sensor . ": " . $i->{current};;
+			#$sensor = "rain_rate";			
+			#$def->{READINGS}{$sensor}{TIME} = $tm;
+			#$def->{READINGS}{$sensor}{VAL} = $i->{current};
+			#$def->{CHANGED}[$n++] = $sensor . ": " . $i->{current};;
 	}
 	elsif ($i->{type} eq "train") { 
 			$val .= "TR: ".$i->{current}."  ";
+			readingsBulkUpdate($def,"rain_total",$i->{current});
 
-			$sensor = "rain_total";			
-			$def->{READINGS}{$sensor}{TIME} = $tm;
-			$def->{READINGS}{$sensor}{VAL} = $i->{current};
-			$def->{CHANGED}[$n++] = $sensor . ": " . $i->{current};;
+			#$sensor = "rain_total";			
+			#$def->{READINGS}{$sensor}{TIME} = $tm;
+			#$def->{READINGS}{$sensor}{VAL} = $i->{current};
+			#$def->{CHANGED}[$n++] = $sensor . ": " . $i->{current};;
 	}
 	elsif ($i->{type} eq "flip") { 
 			#$val .= "F: ".$i->{current}." ";
+			readingsBulkUpdate($def,"rain_flip",$i->{current});
 
-			$sensor = "rain_flip";			
-			$def->{READINGS}{$sensor}{TIME} = $tm;
-			$def->{READINGS}{$sensor}{VAL} = $i->{current};
-			$def->{CHANGED}[$n++] = $sensor . ": " . $i->{current};;
+			#$sensor = "rain_flip";			
+			#$def->{READINGS}{$sensor}{TIME} = $tm;
+			#$def->{READINGS}{$sensor}{VAL} = $i->{current};
+			#$def->{CHANGED}[$n++] = $sensor . ": " . $i->{current};;
 	}
 	elsif ($i->{type} eq "uv") { 
 			$val .= "UV: ".$i->{current}."  ";
 			$val .= "UVR: ".$i->{risk}."  ";
+			readingsBulkUpdate($def,"uv_val",$i->{current});
+			readingsBulkUpdate($def,"uv_risk",$i->{risk});
 
-			$sensor = "uv_val";			
-			$def->{READINGS}{$sensor}{TIME} = $tm;
-			$def->{READINGS}{$sensor}{VAL} = $i->{current};
-			$def->{CHANGED}[$n++] = $sensor . ": " . $i->{current};;
+			#$sensor = "uv_val";			
+			#$def->{READINGS}{$sensor}{TIME} = $tm;
+			#$def->{READINGS}{$sensor}{VAL} = $i->{current};
+			#$def->{CHANGED}[$n++] = $sensor . ": " . $i->{current};;
 
-			$sensor = "uv_risk";			
-			$def->{READINGS}{$sensor}{TIME} = $tm;
-			$def->{READINGS}{$sensor}{VAL} = $i->{risk};
-			$def->{CHANGED}[$n++] = $sensor . ": " . $i->{risk};;
+			#$sensor = "uv_risk";			
+			#$def->{READINGS}{$sensor}{TIME} = $tm;
+			#$def->{READINGS}{$sensor}{VAL} = $i->{risk};
+			#$def->{CHANGED}[$n++] = $sensor . ": " . $i->{risk};;
 	}
 	elsif ($i->{type} eq "hexline") { 
-			$sensor = "hexline";			
-			$def->{READINGS}{$sensor}{TIME} = $tm;
-			$def->{READINGS}{$sensor}{VAL} = $i->{current};
-			$def->{CHANGED}[$n++] = $sensor . ": " . $i->{current};;
+			readingsBulkUpdate($def,"hexline",$i->{current});
+		
+			#$sensor = "hexline";			
+			#$def->{READINGS}{$sensor}{TIME} = $tm;
+			#$def->{READINGS}{$sensor}{VAL} = $i->{current};
+			#$def->{CHANGED}[$n++] = $sensor . ": " . $i->{current};;
 	}
 	else { 
 			print "\nOREGON: Unknown: "; 
@@ -1098,17 +1119,21 @@ OREGON_Parse($$)
     $val =~ s/^\s+|\s+$//g;
 
     Log3 $iohash, 4, "$name decoded Oregon: $val";
+    readingsBulkUpdate($def, "state", $val);
+    
     $def->{STATE} = $val;
-    $def->{TIME} = $tm;
-    $def->{CHANGED}[$n++] = $val;
+    #$def->{TIME} = $tm;
+    #$def->{CHANGED}[$n++] = $val;
   }
+  
 
   #
   #$def->{READINGS}{state}{TIME} = $tm;
   #$def->{READINGS}{state}{VAL} = $val;
   #$def->{CHANGED}[$n++] = "state: ".$val;
+  readingsEndUpdate($def, 1);
 
-  DoTrigger($name, undef);
+  #DoTrigger($name, undef);
 
   return $name;
 }
