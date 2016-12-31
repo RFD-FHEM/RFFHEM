@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 10484 2016-12-28 22:00:00Z v3.3.1-dev $
+# $Id: 00_SIGNALduino.pm 10484 2016-12-30 23:00:00Z v3.3.1-dev $
 #
 # v3.3.0 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -55,7 +55,7 @@ my %gets = (    # Name, Data to send to the SIGNALduino, Regexp for the answer
   "raw"      => ["", '.*'],
   "uptime"   => ["t", '^[0-9]+' ],
   "cmds"     => ["?", '.*Use one of[ 0-9A-Za-z]+[\r\n]*$' ],
-  "ITParms"  => ["ip",'.*'],
+# "ITParms"  => ["ip",'.*'],
   "ping"     => ["P",'^OK$'],
   "config"   => ["CG",'^MS.*MU.*MC.*'],
   "protocolIDs"   => ["none",'none'],
@@ -74,14 +74,24 @@ my %sets = (
   "reset"     => 'noArg',
   "close"     => 'noArg',
   #"disablereceiver"     => "",
-  "ITClock"  => 'slider,100,20,700',
+  #"ITClock"  => 'slider,100,20,700',
   "enableMessagetype" => 'syncedMS,unsyncedMU,manchesterMC',
   "disableMessagetype" => 'syncedMS,unsyncedMU,manchesterMC',
-  'sendMsg'		=> "",
-  "freq"      => '',
-  "bWidth"    => '',
-  "rAmpl"     => '',
-  "sens"      => '',
+  "sendMsg"		=> "",
+  "cc1101_freq"    => '',
+  "cc1101_bWidth"  => '',
+  "cc1101_rAmpl"   => '',
+  "cc1101_sens"    => '',
+  "cc1101_patable" => '-10_dBm,-5_dBm,0_dBm,5_dBm,7_dBm,10_dBm',
+);
+
+my %patable433 = (
+  "-10_dBm"  => '34',
+  "-5_dBm"   => '68',
+  "0_dBm"    => '60',
+  "5_dBm"    => '84',
+  "7_dBm"    => 'C8',
+  "10_dBm"   => 'C0',
 );
 
 my @ampllist = (24, 27, 30, 33, 36, 38, 40, 42); # rAmpl(dB)
@@ -1206,9 +1216,14 @@ SIGNALduino_Set($@)
   my ($hash, @a) = @_;
   
   return "\"set SIGNALduino\" needs at least one parameter" if(@a < 2);
+  my $hasCC1101 = 0;
+  if ($hash->{version} && $hash->{version} =~ m/cc1101/) {
+    $hasCC1101 = 1;
+  }
   if (!defined($sets{$a[1]})) {
     my $arguments = ' ';
     foreach my $arg (sort keys %sets) {
+      next if ($arg =~ m/cc1101/ && $hasCC1101 == 0);
       $arguments.= $arg . ($sets{$arg} ? (':' . $sets{$arg}) : '') . ' ';
     }
     #Log3 $hash, 3, "set arg = $arguments";
@@ -1219,12 +1234,16 @@ SIGNALduino_Set($@)
   my $cmd = shift @a;
   my $arg = join(" ", @a);
   
-  if (($cmd eq "freq" || $cmd eq "bWidth" || $cmd eq "rAmpl" || $cmd eq "sens") && $hash->{version} && $hash->{version} !~ m/cc1101/) {
+  if ($cmd =~ m/cc1101/ && $hasCC1101 == 0) {
     return "This command is only available with a cc1101 receiver";
   }
   
   return "$name is not active, may firmware is not suppoted, please flash or reset" if ($cmd ne 'reset' && $cmd ne 'flash' && exists($hash->{DevState}) && $hash->{DevState} ne 'initialized');
 
+  if ($cmd =~ m/^cc1101_/) {
+     $cmd = substr($cmd,7);
+  }
+  
   if($cmd eq "raw") {
     Log3 $name, 4, "set $name $cmd $arg";
     #SIGNALduino_SimpleWrite($hash, $arg);
@@ -1332,7 +1351,7 @@ SIGNALduino_Set($@)
 	my $f1 = sprintf("%02x", int($f % 65536) / 256);
 	my $f0 = sprintf("%02x", $f % 256);
 	$arg = sprintf("%.3f", (hex($f2)*65536+hex($f1)*256+hex($f0))/65536*26);
-	Log3 $name, 3, "Setting FREQ2..0 (0D,0E,0F) to $f2 $f1 $f0 = $arg MHz";
+	Log3 $name, 3, "$name: Setting FREQ2..0 (0D,0E,0F) to $f2 $f1 $f0 = $arg MHz";
 	SIGNALduino_AddSendQueue($hash,"W0F$f2");
 	SIGNALduino_AddSendQueue($hash,"W10$f1");
 	SIGNALduino_AddSendQueue($hash,"W11$f0");
@@ -1349,15 +1368,20 @@ SIGNALduino_Set($@)
 	}
 	$v = sprintf("%02d", $v-1);
 	$w = $ampllist[$v];
-	Log3 $name, 3, "Setting AGCCTRL2 (1B) to $v / $w dB";
+	Log3 $name, 3, "$name: Setting AGCCTRL2 (1B) to $v / $w dB";
 	SIGNALduino_AddSendQueue($hash,"W1D$v");
 	SIGNALduino_WriteInit($hash);
   } elsif( $cmd eq "sens" ) {
 	return "a numerical value between 4 and 16 is expected" if($arg !~ m/^\d+$/ || $arg < 4 || $arg > 16);
 	my $w = int($arg/4)*4;
 	my $v = sprintf("9%d",$arg/4-1);
-	Log3 $name, 3, "Setting AGCCTRL0 (1D) to $v / $w dB";
+	Log3 $name, 3, "$name: Setting AGCCTRL0 (1D) to $v / $w dB";
 	SIGNALduino_AddSendQueue($hash,"W1F$v");
+	SIGNALduino_WriteInit($hash);
+  } elsif( $cmd eq "patable" ) {
+	my $pa = "x" . $patable433{$arg};
+	Log3 $name, 3, "$name: Setting patable $arg $pa";
+	SIGNALduino_AddSendQueue($hash,$pa);
 	SIGNALduino_WriteInit($hash);
   } elsif( $cmd eq "sendMsg" ) {
 	my ($protocol,$data,$repeats,$clock) = split("#",$arg);
