@@ -1141,14 +1141,14 @@ OREGON_Parse($$)
 1;
 
 =pod
-=item summary    interprets Oregon sensor messages received by a RFXCOM or SIGNALduino receiver
-=item summary_DE interpretiert Oregon Sensor Nachrichten von RFXCOM oder SIGNALduino Empf&aumlngern
+=item summary    interprets Oregon sensors received by a rf receiver
+=item summary_DE interpretiert Oregon Sensoren von einem Funkempf&aumlngern
 =begin html
 
 <a name="OREGON"></a>
 <h3>OREGON</h3>
 <ul>
-  The OREGON module interprets Oregon sensor messages received by a RFXCOM or SIGNALduino receiver. You need to define a receiver (RFXCOM or SIGNALduino) first.
+  The OREGON module interprets Oregon sensor messages received by a RFXCOM or SIGNALduino or CUx receiver. You need to define a receiver (RFXCOM, SIGNALduino or CUx) first.
   See <a href="#RFXCOM">RFXCOM</a>.
   See <a href="#SIGNALduino">SIGNALduino</a>.
   <br><br>
