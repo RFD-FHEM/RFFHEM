@@ -157,7 +157,7 @@ my %ProtocolListSIGNALduino  = (
 			clientmodule    => 'CUL_TCM97001',   # not used now
 			#modulematch     => '^s[A-Fa-f0-9]+', # not used now
 			length_min      => '24',
-			length_max      => '40',
+			length_max      => '42',
 			paddingbits     => '8',				 # pad up to 8 bits, default is 4
         },
     "1"    => 
