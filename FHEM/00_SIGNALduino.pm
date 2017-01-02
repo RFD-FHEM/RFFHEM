@@ -1,14 +1,14 @@
 ##############################################
 # $Id: 00_SIGNALduino.pm 10484 2016-12-30 23:00:00Z v3.3.1-dev $
 #
-# v3.3.0 (Development release 3.3)
+# v3.3.1 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
 # see http://www.fhemwiki.de/wiki/SIGNALDuino
 # It was modified also to provide support for raw message handling which can be send from the SIGNALduino
 # The purpos is to use it as addition to the SIGNALduino which runs on an arduno nano or arduino uno.
 # It routes Messages serval Modules which are already integrated in FHEM. But there are also modules which comes with it.
 # N. Butzek, S. Butzek, 2014-2015
-# S.Butzek 2016
+# S.Butzek&Ralf9 2016-2017
 
 
 package main;
@@ -459,13 +459,13 @@ my %ProtocolListSIGNALduino  = (
 		{
             name			=> 'OSV1',	
 			id          	=> '18',
-			clockrange     	=> [1550,1650],			# min , max
+			clockrange     	=> [1400,1500],			# min , max
 			format 			=> 'manchester',	    # tristate can't be migrated from bin into hex!
 			#preamble		=> '',					# prepend to converted message	
 			#clientmodule    => 'to be written',   	# not used now
-			modulematch     => '^(3[8-9A-F]|[4-6][0-9A-F]|7[0-8]).*',
-			length_min      => '8',
-			length_max      => '8',
+			modulematch     => '^[0-9A-F].*',
+			length_min      => '31',
+			length_max      => '32',
 			method          => \&SIGNALduino_OSV1 # Call to process this message
 		},
 	#"19" => # nothing knowing about this 2015-09-28 01:25:40-MS;P0=-8916;P1=-19904;P2=390;P3=-535;P4=-1020;P5=12846;P6=1371;D=2120232323232324242423232323232323232320239;CP=2;SP=1;
