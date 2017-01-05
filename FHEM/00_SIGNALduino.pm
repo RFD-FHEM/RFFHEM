@@ -1026,8 +1026,21 @@ my %ProtocolListSIGNALduino  = (
 			length_min      => '24',
 			length_max      => '24',
 		},	
-
-		 
+	"56" => ##  Celexon
+		{
+			name			=> 'Celexon',	
+			id          	=> '56',
+			clockabs     	=> 200, 						
+			zero			=> [1,-3],
+			one				=> [3,-1],
+			start			=> [25,-3],						
+			format 			=> 'twostate',	
+			preamble		=> 'u56',						# prepend to converted message	
+			clientmodule    => ''	,   					# not used now
+			modulematch     => '',  						# not used now
+			length_min      => '56',
+			length_max      => '68',
+		},		 
 );
 
 
