@@ -369,7 +369,7 @@ my %ProtocolListSIGNALduino  = (
 			#clientmodule    => '14_FLAMINGO',   				# not used now
 			#modulematch     => 'P13#.*',  				# not used now
 			length_min      => '24',
-			length_max      => '24',
+			length_max      => '25',
 		}, 		
 	"13b"    => 			## FLAMINGO FA20 
 		{
@@ -2499,8 +2499,8 @@ SIGNALduino_Parse_MS($$$$%)
 			#Check calculated max length
 			$valid = $valid && $ProtocolListSIGNALduino{$id}{length_max} >= $bit_length if (exists $ProtocolListSIGNALduino{$id}{length_max});
 
-			next if (!$valid) ;
 			Debug "expecting $bit_length bits in signal" if ($debug);
+			next if (!$valid) ;
 
 			#Debug Dumper(@{$ProtocolListSIGNALduino{$id}{sync}});
 			Debug "Searching in patternList: ".Dumper(\%patternList) if($debug);
