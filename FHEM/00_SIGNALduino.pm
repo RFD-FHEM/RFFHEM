@@ -1040,7 +1040,22 @@ my %ProtocolListSIGNALduino  = (
 			modulematch     => '',  						# not used now
 			length_min      => '56',
 			length_max      => '68',
-		},		 
+		},		
+ 		"57"    => 			## m-e doorbell
+		{
+            name			=> 'm-e',	
+			id          	=> '57',
+			clockrange     	=> [300,360],			# min , max
+			format 			=> 'manchester',	    # tristate can't be migrated from bin into hex!
+			clientmodule    => '',
+			modulematch     => '^u57*',
+			preamble		=> 'u57#',
+			length_min      => '21',
+			length_max      => '24',
+			method          => \&SIGNALduino_MCRAW, # Call to process this message
+			polarity        => 'invert',			
+		}, 	 
+ 
 );
 
 
@@ -3586,6 +3601,16 @@ sub SIGNALduino_OSPIR()
 		return return (-1," header not found");
 	}	
 }
+sub SIGNALduino_MCRAW()
+{
+	my ($name,$bitData,$id) = @_;
+	my $debug = AttrVal($name,"debug",0);
+
+
+	my $hex=SIGNALduino_b2h($bitData);
+	return  (1,$hex); ## Return the bits unchanged in hex
+}
+
 sub SIGNALduino_SomfyRTS()
 {
 	my ($name, $bitData, $rawData) = @_;
