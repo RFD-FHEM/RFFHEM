@@ -37,6 +37,7 @@ Supported Devices / Protocols
 |Opus XT300 | Soil moisture sensor |
 |Oregon NR868 | Motion sensor |
 |IAN 275901 Lidl | Weatherstation |
+|m-e VTX and BASIC | wireless bell |
 
 How to install
 ======
