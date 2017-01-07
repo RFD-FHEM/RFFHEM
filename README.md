@@ -32,7 +32,6 @@ Supported Devices / Protocols
 |Dooya | Shutters and blinds from various vendors like Rohrmotor24  |
 |Somfy RTS | Shutters from Somfy|
 |Opus XT300 | Soil moisture sensor |
-|m-e VTX and BASIC | wireless bell |
 
 How to install
 ======
