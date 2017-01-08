@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 10484 2016-12-30 23:00:00Z v3.3.1-dev $
+# $Id: 00_SIGNALduino.pm 10484 2017-01-08 16:00:00Z v3.3.1-dev $
 #
 # v3.3.1 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -861,6 +861,7 @@ my %ProtocolListSIGNALduino  = (
 			method          => \&SIGNALduino_SomfyRTS, # Call to process this message
 			msgIntro		=> 'SR;P0=-2560;P1=2560;P3=-640;D=10101010101010113;',
 			#msgOutro		=> 'SR;P0=-30415;D=0;',
+			frequency		=> '10AB85550A',
 		},
 	"44" => ## Bresser Temeo Trend
 		{
@@ -1412,11 +1413,26 @@ SIGNALduino_Set($@)
 	SIGNALduino_AddSendQueue($hash,$pa);
 	SIGNALduino_WriteInit($hash);
   } elsif( $cmd eq "sendMsg" ) {
-	my ($protocol,$data,$repeats,$clock) = split("#",$arg);
+	Log3 $name, 5, "$name: sendmsg msg=$arg";
+	my ($protocol,$data,$repeats,$clock,$frequency) = split("#",$arg);
 	$protocol=~ s/[Pp](\d+)/$1/; # extract protocol num
 	$repeats=~ s/[rR](\d+)/$1/; # extract repeat num
-	$clock=~ s/[Cc](\d+)/$1/ if (defined($clock)); # extract ITClock num
 	$repeats=1 if (!defined($repeats));
+	if (defined($clock) && substr($clock,0,1) eq "F") {   # wenn es kein clock gibt, pruefen ob im clock eine frequency ist
+		$frequency = substr($clock,1);
+		$clock = undef;
+	} else {
+		$clock=~ s/[Cc](\d+)/$1/ if (defined($clock)); # extract ITClock num
+		$frequency=~ s/[Ff](\.+)/$1/ if (defined($frequency));
+	}
+	if (exists($ProtocolListSIGNALduino{$protocol}{frequency}) && $hasCC1101 && !defined($frequency)) {
+		$frequency = $ProtocolListSIGNALduino{$protocol}{frequency};
+	}
+	if (defined($frequency) && $hasCC1101) {
+		$frequency="F=$frequency;";
+	} else {
+		$frequency="";
+	}
 	
 	return "$name: sendmsg, unknown protocol: $protocol" if (!exists($ProtocolListSIGNALduino{$protocol}));
 	
@@ -1428,8 +1444,6 @@ SIGNALduino_Set($@)
 	my %patternHash;
 	my $pattern="";
 	my $cnt=0;
-
-	
 	
 	my $sendData;
 	if  ($ProtocolListSIGNALduino{$protocol}{format} eq 'manchester')
@@ -1454,7 +1468,7 @@ SIGNALduino_Set($@)
 			$repeats = 0;
 		}
 
-		$sendData = $intro . "SM;" . ($repeats > 0 ? "R=$repeats;" : "") . "C=$clock;D=$data;" . $outro; #	SM;R=2;C=400;D=AFAFAF;
+		$sendData = $intro . "SM;" . ($repeats > 0 ? "R=$repeats;" : "") . "C=$clock;D=$data;" . $outro . $frequency; #	SM;R=2;C=400;D=AFAFAF;
 		Log3 $name, 5, "$name: sendmsg Preparing manchester protocol=$protocol, repeats=$repeats, clock=$clock data=$data";
 	} else {
 		if ($protocol == 3) {
@@ -1500,7 +1514,7 @@ SIGNALduino_Set($@)
 			#Log3 $name, 5, "encoding $bit";
 			$SignalData.=$signalHash{$bitconv{$bit}}; ## Add the signal to our data string
 		}
-		$sendData = "SR;R=$repeats;$pattern$SignalData;";
+		$sendData = "SR;R=$repeats;$pattern$SignalData;$frequency";
 	}
 
 	
