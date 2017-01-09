@@ -30,8 +30,8 @@ sub SD_WS_Initialize($)
 	{ 
 		"SD_WS37_TH.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,",  autocreateThreshold => "2:180"},
 		"SD_WS50_SM.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,",  autocreateThreshold => "2:180"},
-		"BresserTemeo.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "2:180"}
-
+		"BresserTemeo.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "2:180"},
+		"SD_WS51_TH.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "2:180"},
 	};
 
 }
@@ -133,8 +133,21 @@ sub SD_WS_Parse($$)
 			channel => 	sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,12,13)+1 );  }, 		#channel
      		bat => 		sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,34) eq "1" ? "ok" : "critical");},
     # 		sync => 	sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,35,35) eq "1" ? "true" : "false");},
-   	 	 }        
-        
+   	 	 } ,       
+     51 =>
+   	 	 {
+     		sensortype => 'Lidl Wetterstation 275901',
+        	model =>	'SD_WS_51_TH', 
+			prematch => sub {my $msg = shift; return 1 if ($msg =~ /^[0-9A-F]{10}/); }, 							# prematch
+			crcok => 	sub {return 1;  }, 																			# crc is unknown
+			id => 		sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,0,7); },   				# random id?
+	#		sendmode =>	sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,10,11) eq "1" ? "manual" : "auto";  }
+			temp => 	sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,20,23)+2) +  (SD_WS_binaryToNumber($bitData,24,27)/10)+0.2;  },	#temp
+			hum => 		sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,28,31)*10) + (SD_WS_binaryToNumber($bitData,32,35));  }, 		#hum
+			channel => 	sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,36,39) );  }, 		#channel
+     		bat => 		sub {my (undef,$bitData) = @_; return  "unknown"; },
+    # 		sync => 	sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,35,35) eq "1" ? "true" : "false");},
+   	 	 }   ,  
         
     );
     
