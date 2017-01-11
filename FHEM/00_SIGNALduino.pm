@@ -1056,6 +1056,7 @@ my %ProtocolListSIGNALduino  = (
 			method          => \&SIGNALduino_MCRAW, # Call to process this message
 			polarity        => 'invert',			
 		}, 	 
+  
  
 );
 
