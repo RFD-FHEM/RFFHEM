@@ -142,10 +142,10 @@ sub SD_WS_Parse($$)
 			crcok => 	sub {return 1;  }, 																			# crc is unknown
 			id => 		sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,0,7); },   				# random id?
 	#		sendmode =>	sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,10,11) eq "1" ? "manual" : "auto";  }
-			temp => 	sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,20,23)+2) +  (SD_WS_binaryToNumber($bitData,24,27)/10)+0.2;  },	#temp
+			temp => 	sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,18)*17) + (SD_WS_binaryToNumber($bitData,20,23)+2) +  (SD_WS_binaryToNumber($bitData,24,27)/10)+0.2;  },	#temp
 			hum => 		sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,28,31)*10) + (SD_WS_binaryToNumber($bitData,32,35));  }, 		#hum
 			channel => 	sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,36,39) );  }, 		#channel
-     		bat => 		sub {my (undef,$bitData) = @_; return  "unknown"; },
+     		bat => 		sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,13) eq "1" ? "ok" : "critical");}
     # 		sync => 	sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,35,35) eq "1" ? "true" : "false");},
    	 	 }   ,  
         
