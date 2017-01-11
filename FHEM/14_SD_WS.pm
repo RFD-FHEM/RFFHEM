@@ -140,7 +140,7 @@ sub SD_WS_Parse($$)
         	model =>	'SD_WS_51_TH', 
 			prematch => sub {my $msg = shift; return 1 if ($msg =~ /^[0-9A-F]{10}/); }, 							# prematch
 			crcok => 	sub {return 1;  }, 																			# crc is unknown
-			id => 		sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,0,7); },   				# random id?
+			id => 		sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,0,12); },   				# random id?
 	#		sendmode =>	sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,10,11) eq "1" ? "manual" : "auto";  }
 			temp => 	sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,18)*17) + (SD_WS_binaryToNumber($bitData,20,23)+2) +  (SD_WS_binaryToNumber($bitData,24,27)/10)+0.2;  },	#temp
 			hum => 		sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,28,31)*10) + (SD_WS_binaryToNumber($bitData,32,35));  }, 		#hum
