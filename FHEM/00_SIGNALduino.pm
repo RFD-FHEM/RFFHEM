@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 10484 2017-01-08 16:00:00Z v3.3.1-dev $
+# $Id: 00_SIGNALduino.pm 10484 2017-01-12 20:00:00Z v3.3.1-dev $
 #
 # v3.3.1 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -1056,7 +1056,6 @@ my %ProtocolListSIGNALduino  = (
 			method          => \&SIGNALduino_MCRAW, # Call to process this message
 			polarity        => 'invert',			
 		}, 	 
-  
  
 );
 
@@ -1420,11 +1419,12 @@ SIGNALduino_Set($@)
 	$repeats=~ s/[rR](\d+)/$1/; # extract repeat num
 	$repeats=1 if (!defined($repeats));
 	if (defined($clock) && substr($clock,0,1) eq "F") {   # wenn es kein clock gibt, pruefen ob im clock eine frequency ist
-		$frequency = substr($clock,1);
+		$clock=~ s/[F]([0-9a-fA-F]+$)/$1/;
+		$frequency = $clock;
 		$clock = undef;
 	} else {
 		$clock=~ s/[Cc](\d+)/$1/ if (defined($clock)); # extract ITClock num
-		$frequency=~ s/[Ff](\.+)/$1/ if (defined($frequency));
+		$frequency=~ s/[Ff]([0-9a-fA-F]+$)/$1/ if (defined($frequency));
 	}
 	if (exists($ProtocolListSIGNALduino{$protocol}{frequency}) && $hasCC1101 && !defined($frequency)) {
 		$frequency = $ProtocolListSIGNALduino{$protocol}{frequency};
