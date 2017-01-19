@@ -1,9 +1,9 @@
 ##############################################
-# $Id: 14_SD_WS.pm 33 2016-10-21 18:00:00Z v3.3-dev $
+# $Id: 14_SD_WS.pm 33 2017-01-19 18:00:00Z v3.3-dev $
 #
 # The purpose of this module is to support serval
 # weather sensors which use various protocol
-# Sidey79 & Ralf9  2016
+# Sidey79 & Ralf9  2016 - 2017
 #
 
 package main;
@@ -188,12 +188,13 @@ sub SD_WS_Parse($$)
 	{
 		# 0    4    8    12       20   24   28   32   36   40   44       52   56   60
 		# 0101 0111 1001 00010101 0010 0100 0001 1010 1000 0110 11101010 1101 1011 1110 110110010
-		# hhhh hhhh ?bcc iiiiiiii sttt tttt tttt xxxx xxxx ?BCC IIIIIIII Syyy yyyy yyyy
+		# hhhh hhhh ?bcc viiiiiii sttt tttt tttt xxxx xxxx ?BCC VIIIIIII Syyy yyyy yyyy
 
 		# - h humidity / -x checksum
 		# - t temp     / -y checksum
-		# - c Channel  /  C checksum
-		# - i 8 bit random id (aendert sich beim Batterie- und Kanalwechsel)  / - I checksum
+		# - c Channel  / -C checksum
+		# - V sign     / -V checksum
+		# - i 7 bit random id (aendert sich beim Batterie- und Kanalwechsel)  / - I checksum
 		# - b battery indicator (0=>OK, 1=>LOW)               / - B checksum
 		# - s Test/Sync (0=>Normal, 1=>Test-Button pressed)   / - S checksum
 	
@@ -263,6 +264,22 @@ sub SD_WS_Parse($$)
 			return "";
 		}
 		
+		my $sign = substr($binvalue,12,1);
+		my $checkSign = substr($binvalue,44,1) ^ 0b1;
+		
+		if ($sign != $checkSign) 
+		{
+			Log3 $iohash, 4, "SD_WS_Parse BresserTemeo: checksum error in Sign";
+			$checksumOkay = 0;
+		}
+		else
+		{
+			if ($sign)
+			{
+				$temp = 0 - $temp
+			}
+		}
+		
 		$bat = substr($binvalue,9,1);
 		my $checkBat = substr($binvalue,41,1) ^ 0b1;
 		
@@ -278,8 +295,8 @@ sub SD_WS_Parse($$)
 		
 		$channel = SD_WS_binaryToNumber($binvalue, 10, 11);
 		my $checkChannel = SD_WS_binaryToNumber($binvalue, 42, 43) ^ 0b11;
-		$id = SD_WS_binaryToNumber($binvalue, 12, 19);
-		my $checkId = SD_WS_binaryToNumber($binvalue, 44, 51) ^ 0b11111111;
+		$id = SD_WS_binaryToNumber($binvalue, 13, 19);
+		my $checkId = SD_WS_binaryToNumber($binvalue, 45, 51) ^ 0b1111111;
 		
 		if ($channel != $checkChannel || $id != $checkId)
 		{
