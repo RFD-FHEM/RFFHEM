@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 10484 2017-01-12 20:00:00Z v3.3.1-dev $
+# $Id: 00_SIGNALduino.pm 10484 2017-01-19 17:00:00Z v3.3.1-dev $
 #
 # v3.3.1 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -113,7 +113,7 @@ my $clientsSIGNALduino = ":IT:"
 						."SOMFY:"
 						."SD_UT:"	## BELL 201.2 TXA
 			        	."SD_WS_Maverick:"
-#			        	."BresserTemeo:"
+			        	."FLAMINGO:"
 			      		."SIGNALduino_un:"
 					; 
 
@@ -135,8 +135,6 @@ my %matchListSIGNALduino = (
      "16:SD_WS_Maverick"		=> '^P47#[A-Fa-f0-9]+',
      "17:SD_UT"            		=> '^u30#.*',								## BELL 201.2 TXA
      "18:FLAMINGO"            	=> '^P13#[A-Fa-f0-9]+',						## Flamingo Smoke
-     
-     #"44:BresserTemeo"     		=> '^P44x{0,1}#[A-F0-9]{18}',		# Bresser Temeo Trend (3CH Thermo-/Hygro)
      "X:SIGNALduino_un"			=> '^[u]\d+#.*',
 );
 
@@ -366,22 +364,22 @@ my %ProtocolListSIGNALduino  = (
 			clockabs		=> 800,
 			format 			=> 'twostate',	  		
 			preamble		=> 'P13#',				# prepend to converted message	
-			#clientmodule    => '14_FLAMINGO',   				# not used now
+			clientmodule    => 'FLAMINGO',   				# not used now
 			#modulematch     => 'P13#.*',  				# not used now
 			length_min      => '24',
 			length_max      => '25',
 		}, 		
-	"13b"    => 			## FLAMINGO FA20 
+	"13.1"    => 			## FLAMINGO FA20 
 		{
             name			=> 'FLAMINGO FA21 b',	
-			id          	=> '13b',
+			id          	=> '13',
 			one				=> [1,-2],
 			zero			=> [1,-4],
 			start			=> [10,-1],		
 			clockabs		=> 800,
 			format 			=> 'twostate',	  		
 			preamble		=> 'P13#',				# prepend to converted message	
-			#clientmodule    => '14_FLAMINGO',   				# not used now
+			clientmodule    => 'FLAMINGO',   				# not used now
 			#modulematch     => 'P13#.*',  				# not used now
 			length_min      => '24',
 			length_max      => '24',
@@ -866,7 +864,7 @@ my %ProtocolListSIGNALduino  = (
 	"44" => ## Bresser Temeo Trend
 		{
             		name 			=> 'BresserTemeo',
-            		id 				=> '44',
+            		id 			=> '44',
             		clockabs		=> 500,
             		zero 			=> [4,-4],
             		one				=> [4,-8],
@@ -877,10 +875,10 @@ my %ProtocolListSIGNALduino  = (
             		length_min 		=> '64',
             		length_max 		=> '72',
 		},
-	"51" => ## Bresser Temeo Trend
+	"44.1" => ## Bresser Temeo Trend
 		{
             		name 			=> 'BresserTemeo',
-            		id 				=> '44x',
+            		id 			=> '44',
             		clockabs		=> 500,
             		zero 			=> [4,-4],
             		one				=> [4,-8],
@@ -2445,9 +2443,9 @@ sub SIGNALduino_Split_Message($$)
 
 
 # Function which dispatches a message if needed.
-sub SIGNALduno_Dispatch($$$)
+sub SIGNALduno_Dispatch($$$$)
 {
-	my ($hash, $rmsg, $dmsg) = @_;
+	my ($hash, $rmsg, $dmsg, $rssi) = @_;
 	my $name = $hash->{NAME};
 	
 	if (!defined($dmsg))
@@ -2470,6 +2468,10 @@ sub SIGNALduno_Dispatch($$$)
 		readingsSingleUpdate($hash, "state", $hash->{READINGS}{state}{VAL}, $event);
 		$hash->{RAWMSG} = $rmsg;
 		my %addvals = (RAWMSG => $rmsg, DMSG => $dmsg);
+		if(defined($rssi)) {
+			$hash->{RSSI} = $rssi;
+			$addvals{RSSI} = $rssi;
+		}
 		Dispatch($hash, $dmsg, \%addvals);  ## Dispatch to other Modules 
 		
 	}	else {
@@ -2522,8 +2524,6 @@ SIGNALduino_Parse_MS($$$$%)
 		my $id;
 		my $message_dispatched=0;
 		foreach $id (@{$hash->{msIdList}}) {
-			
-			my $postamble = $ProtocolListSIGNALduino{$id}{postamble};
 			
 			my $valid=1;
 			#$debug=1;
@@ -2639,6 +2639,7 @@ SIGNALduino_Parse_MS($$$$%)
 			
 			#my $dmsg = sprintf "%02x", oct "0b" . join "", @bit_msg;			## Array -> String -> bin -> hex
 			my $dmsg = SIGNALduino_b2h(join "", @bit_msg);
+			my $postamble = $ProtocolListSIGNALduino{$id}{postamble};
 			if (defined($rssi)) {
 				if (defined($ProtocolListSIGNALduino{$id}{preamble}) && $ProtocolListSIGNALduino{$id}{preamble} eq "s") {
 					$postamble = sprintf("%02X", $rssi);
@@ -2650,8 +2651,8 @@ SIGNALduino_Parse_MS($$$$%)
 			$dmsg = "$ProtocolListSIGNALduino{$id}{preamble}"."$dmsg" if (defined($ProtocolListSIGNALduino{$id}{preamble}));
 			
 			if (defined($rssi)) {
-				my $rssiDB = ($rssi>=128 ? (($rssi-256)/2-74) : ($rssi/2-74)); # todo: passt dies so? habe ich vom 00_cul.pm
-				Log3 $name, 4, "$name: Decoded MS Protocol id $id dmsg $dmsg length " . scalar @bit_msg . " RSSI = $rssiDB";
+				$rssi = ($rssi>=128 ? (($rssi-256)/2-74) : ($rssi/2-74)); # todo: passt dies so? habe ich vom 00_cul.pm
+				Log3 $name, 4, "$name: Decoded MS Protocol id $id dmsg $dmsg length " . scalar @bit_msg . " RSSI = $rssi";
 			} else {
 				Log3 $name, 4, "$name: Decoded MS Protocol id $id dmsg $dmsg length " . scalar @bit_msg;
 			}
@@ -2668,7 +2669,7 @@ SIGNALduino_Parse_MS($$$$%)
 			}
 			if (!defined($modulematch) || $dmsg =~ m/$modulematch/) {
 				Debug "$name: dispatching now msg: $dmsg" if ($debug);
-				SIGNALduno_Dispatch($hash,$rmsg,$dmsg);
+				SIGNALduno_Dispatch($hash,$rmsg,$dmsg,$rssi);
 				$message_dispatched=1;
 			}
 		}
@@ -2917,8 +2918,8 @@ sub SIGNALduino_Parse_MU($$$$@)
 						$dmsg = "$ProtocolListSIGNALduino{$id}{preamble}"."$dmsg" if (defined($ProtocolListSIGNALduino{$id}{preamble}));
 						
 						if (defined($rssi)) {
-							my $rssiDB = ($rssi>=128 ? (($rssi-256)/2-74) : ($rssi/2-74)); # todo: passt dies so? habe ich vom 00_cul.pm
-							Log3 $name, 4, "$name: decoded matched MU Protocol id $id dmsg $dmsg length " . scalar @bit_msg . " RSSI = $rssiDB";
+							$rssi = ($rssi>=128 ? (($rssi-256)/2-74) : ($rssi/2-74)); # todo: passt dies so? habe ich vom 00_cul.pm
+							Log3 $name, 4, "$name: decoded matched MU Protocol id $id dmsg $dmsg length " . scalar @bit_msg . " RSSI = $rssi";
 						} else {
 							Log3 $name, 4, "$name: decoded matched MU Protocol id $id dmsg $dmsg length " . scalar @bit_msg;
 						}
@@ -2929,7 +2930,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 						}
 						if (!defined($modulematch) || $dmsg =~ m/$modulematch/) {
 							Debug "$name: dispatching now msg: $dmsg" if ($debug);
-							SIGNALduno_Dispatch($hash,$rmsg,$dmsg);
+							SIGNALduno_Dispatch($hash,$rmsg,$dmsg,$rssi);
 							$message_dispatched=1;
 						}
 					} else {
@@ -3017,8 +3018,8 @@ SIGNALduino_Parse_MC($$$$@)
 			Debug "clock and min length matched"  if ($debug);
 
 			if (defined($rssi)) {
-				my $rssiDB = ($rssi>=128 ? (($rssi-256)/2-74) : ($rssi/2-74)); # todo: passt dies so? habe ich vom 00_cul.pm
-				Log3 $name, 4, "$name: Found manchester Protocol id $id clock $clock RSSI $rssiDB -> $ProtocolListSIGNALduino{$id}{name}";
+				$rssi = ($rssi>=128 ? (($rssi-256)/2-74) : ($rssi/2-74)); # todo: passt dies so? habe ich vom 00_cul.pm
+				Log3 $name, 4, "$name: Found manchester Protocol id $id clock $clock RSSI $rssi -> $ProtocolListSIGNALduino{$id}{name}";
 			} else {
 				Log3 $name, 4, "$name: Found manchester Protocol id $id clock $clock -> $ProtocolListSIGNALduino{$id}{name}";
 			}
@@ -3047,7 +3048,7 @@ SIGNALduino_Parse_MC($$$$@)
 		                $modulematch = $ProtocolListSIGNALduino{$id}{modulematch};
 					}
 					if (!defined($modulematch) || $dmsg =~ m/$modulematch/) {
-						SIGNALduno_Dispatch($hash,$rmsg,$dmsg);
+						SIGNALduno_Dispatch($hash,$rmsg,$dmsg,$rssi);
 						$message_dispatched=1;
 					}
 				} else {
