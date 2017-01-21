@@ -121,6 +121,11 @@ Hideki_Parse($$)
 		($channel, $rain) = decodeRain(\@decodedBytes); # decodeThermoHygro($decodedString);
 		$bat = ($decodedBytes[2] >> 6 == 3) ? 'ok' : 'low';			 # decode battery
 		$val = "R: $rain Bat: $bat";
+	}elsif($sensorTyp==13 || $sensorTyp==12){
+		($channel, $temp, $hum) = decodeThermoHygro(\@decodedBytes); # decodeThermoHygro($decodedString);
+		$bat = ($decodedBytes[2] >> 6 == 3) ? 'ok' : 'low';			 # decode battery
+		$val = "T: $temp H: $hum Bat: $bat";
+		Log3 $iohash, 5, "$name Sensor Typ $sensorTyp currently not full supported, please report sensor information!";
 	}
 	else{
 		Log3 $iohash, 4, "$name Sensor Typ $sensorTyp not supported, please report sensor information!";

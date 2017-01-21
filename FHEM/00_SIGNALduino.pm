@@ -348,8 +348,8 @@ my %ProtocolListSIGNALduino  = (
 			preamble		=> 'P12#',						# prepend to converted message	
 			clientmodule    => 'hideki',   				# not used now
 			modulematch     => '^P12#75.+',  						# not used now
-			length_min      => '72',
-			length_max      => '104',
+			length_min      => '71',
+			length_max      => '128',
 			method          => \&SIGNALduino_Hideki,	# Call to process this message
 			polarity        => 'invert',			
 			
