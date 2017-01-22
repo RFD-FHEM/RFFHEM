@@ -1,14 +1,14 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 10484 2016-12-14 22:00:00Z v3.3.1-dev $
+# $Id: 00_SIGNALduino.pm 10484 2017-01-22 22:00:00Z v3.3.1 $
 #
-# v3.3.0 (Development release 3.3)
+# v3.3.1 (release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
 # see http://www.fhemwiki.de/wiki/SIGNALDuino
 # It was modified also to provide support for raw message handling which can be send from the SIGNALduino
 # The purpos is to use it as addition to the SIGNALduino which runs on an arduno nano or arduino uno.
 # It routes Messages serval Modules which are already integrated in FHEM. But there are also modules which comes with it.
 # N. Butzek, S. Butzek, 2014-2015
-# S.Butzek 2016
+# S.Butzek,Ralf9 2016-2017
 
 
 package main;
@@ -25,7 +25,7 @@ no warnings 'portable';
 
 
 use constant {
-	SDUINO_VERSION            => "v3.3.1-dev",
+	SDUINO_VERSION            => "v3.3.1",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -1293,7 +1293,10 @@ SIGNALduino_Set($@)
 		$sendData = $intro . "SM;" . ($repeats > 0 ? "R=$repeats;" : "") . "C=$clock;D=$data;" . $outro; #	SM;R=2;C=400;D=AFAFAF;
 		Log3 $name, 5, "$name: sendmsg Preparing manchester protocol=$protocol, repeats=$repeats, clock=$clock data=$data";
 	} else {
-		if ($protocol == 3) {
+		if ($protocol == 3 || substr($data,0,2) eq "is") {
+			if (substr($data,0,2) eq "is") {
+				$data = substr($data,2);   # is am Anfang entfernen
+			}
 			$data = SIGNALduino_ITV1_tristateToBit($data);
 			Log3 $name, 5, "$name: sendmsg IT V1 convertet tristate to bits=$data";
 		}
@@ -1993,7 +1996,7 @@ sub SIGNALduino_PatternExists
 		#my $patt_id;
 		# Calculate tolernace for search
 		#my $tol=abs(abs($searchpattern)>=2 ?$searchpattern*0.3:$searchpattern*1.5);
-		my $tol=abs(abs($searchpattern)>3 ? abs($searchpattern)>16 ? $searchpattern*0.17 : $searchpattern*0.3 : 1);  #tol is minimum 1 or higer, depending on our searched pulselengh
+		my $tol=abs(abs($searchpattern)>3 ? abs($searchpattern)>16 ? $searchpattern*0.18 : $searchpattern*0.3 : 1);  #tol is minimum 1 or higer, depending on our searched pulselengh
 		
 
 		Debug "tol: looking for ($searchpattern +- $tol)" if($debug);		
@@ -2541,12 +2544,13 @@ sub SIGNALduino_Parse_MU($$$$@)
 			Debug "Found matched one" if ($debug && $valid);
 	
 
-
+			my $oneStr=$pstr if ($valid);
 			$patternLookupHash{$pstr}="1" if ($valid); ## Append one to our lookuptable
 			Debug "added $pstr " if ($debug && $valid);
 
 			$valid = $valid && ($pstr=SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{zero}},\%patternList,\$rawData)) >=0;
 			Debug "Found matched zero" if ($debug && $valid);
+			my $zeroStr=$pstr if ($valid);
 			$patternLookupHash{$pstr}="0" if ($valid); ## Append zero to our lookuptable
 			Debug "added $pstr " if ($debug && $valid);
 
@@ -2575,14 +2579,23 @@ sub SIGNALduino_Parse_MU($$$$@)
 			my @msgStartLst;
 			my $startStr="";
 			my $start_regex;
-			my $oneStr=SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}},\%patternList,\$rawData);
-			my $zeroStr=SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{zero}},\%patternList,\$rawData);
+			#my $oneStr=SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}},\%patternList,\$rawData);
+			#my $zeroStr=SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{zero}},\%patternList,\$rawData);
 
 			if (@msgStartLst = SIGNALduino_getProtoProp($id,"start"))
 			{
-				$startStr=SIGNALduino_PatternExists($hash,@msgStartLst,\%patternList,\$rawData);
+				Debug "msgStartLst: ".Dumper(@msgStartLst)  if ($debug);
+ 			
+ 				if ( ($startStr=SIGNALduino_PatternExists($hash,@msgStartLst,\%patternList,\$rawData)) eq -1)
+ 				{
+ 					Log3 $name, 5, "$name: start pattern for MU Protocol id $id -> $ProtocolListSIGNALduino{$id}{name} mismatches, aborting"  ;
+ 					$valid=0;
+ 					next;
+ 				};
 			} 
 			$start_regex="$startStr($oneStr|$zeroStr)";
+			Debug "Regex is: $start_regex" if ($debug);
+			
 			$rawData =~ /$start_regex/;
 			if (defined($-[0] && $-[0] > 0)) {
 				$message_start=$-[0]+ length($startStr);
@@ -2678,7 +2691,9 @@ sub SIGNALduino_Parse_MU($$$$@)
 					
 					$rawData =~ /$regex/;
 					if (defined($-[0]) && ($-[0] > 0)) {
-						$i=$-[0]+ $i+ length($startStr);
+						#$i=$-[0]+ $i+ length($startStr);
+						$i=$-[0]+ $i;
+						
 						$i=$i-$signal_width if ($i>0 && length($startStr) == 0); #Todo:
 						Debug "$name: found restart at Position $i ($regex)\n" if ($debug);
 					} else {
@@ -3300,7 +3315,6 @@ sub SIGNALduino_Maverick()
 		my $hex=SIGNALduino_b2h(substr($bitData,$header_pos,26*4));
 	
 		return  (1,$hex); ## Return the bits unchanged in hex
-		my $message_start = index($bitData,"");
 	} else {
 		return return (-1," header not found");
 	}	
@@ -3631,7 +3645,9 @@ With a # at the beginnging whitelistIDs can be deactivated.
 		For sending IT Signals for wireless switches, the number of repeats and the base duration can be set.
 		With the get command, you can verify what is programmed into the uC.
 		</li><br>
-		
+		<li>protocolIDs<br>
+ 		display a list of the protocol IDs
+ 		</li><br>
 	</ul>
 	<a name="SIGNALduinoset"></a>
 	<b>SET</b>
