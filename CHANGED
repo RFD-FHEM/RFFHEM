@@ -1,5 +1,7 @@
 05.12.2016
   Bugfix weong return in SIGNALduino_un ParseFn  
+09.10.2016
+  improve Send queue: Send not before response of previous
 30.09.2016
   SIGNALduino is now nonblocking
   improved init and keepalive

@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 14_SD_WS07.pm 9346 2016-07-14 18:00:00 v3.2-dev $
+# $Id: 14_SD_WS07.pm 9346 2016-10-21 18:00:00 v3.2-dev $
 # 
 # The purpose of this module is to support serval eurochron
 # weather sensors like eas8007 which use the same protocol
@@ -151,6 +151,8 @@ SD_WS07_Parse($$)
 	
 	my $hash = $def;
 	$name = $hash->{NAME};
+	return "" if(IsIgnored($name));
+	
 	Log3 $name, 4, "SD_WS07: $name ($rawData)";  
 
 	if (!defined(AttrVal($hash->{NAME},"event-min-interval",undef)))
