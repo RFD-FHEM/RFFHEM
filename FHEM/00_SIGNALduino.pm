@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 10484 2017-01-19 17:00:00Z v3.3.1-dev $
+# $Id: 00_SIGNALduino.pm 10484 2017-01-22 15:00:00Z v3.3.1-dev $
 #
 # v3.3.1 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -1470,7 +1470,10 @@ SIGNALduino_Set($@)
 		$sendData = $intro . "SM;" . ($repeats > 0 ? "R=$repeats;" : "") . "C=$clock;D=$data;" . $outro . $frequency; #	SM;R=2;C=400;D=AFAFAF;
 		Log3 $name, 5, "$name: sendmsg Preparing manchester protocol=$protocol, repeats=$repeats, clock=$clock data=$data";
 	} else {
-		if ($protocol == 3) {
+		if ($protocol == 3 || substr($data,0,2) eq "is") {
+			if (substr($data,0,2) eq "is") {
+				$data = substr($data,2);   # is am Anfang entfernen
+			}
 			$data = SIGNALduino_ITV1_tristateToBit($data);
 			Log3 $name, 5, "$name: sendmsg IT V1 convertet tristate to bits=$data";
 		}
