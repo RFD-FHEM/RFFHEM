@@ -121,7 +121,7 @@ Hideki_Parse($$)
 		($channel, $rain) = decodeRain(\@decodedBytes); # decodeThermoHygro($decodedString);
 		$bat = ($decodedBytes[2] >> 6 == 3) ? 'ok' : 'low';			 # decode battery
 		$val = "R: $rain Bat: $bat";
-	}elsif($sensorTyp==13 || $sensorTyp==12){
+	}elsif($sensorTyp==31 || $sensorTyp==12){
 		($channel, $temp, $hum) = decodeThermoHygro(\@decodedBytes); # decodeThermoHygro($decodedString);
 		$bat = ($decodedBytes[2] >> 6 == 3) ? 'ok' : 'low';			 # decode battery
 		$val = "T: $temp H: $hum Bat: $bat";
