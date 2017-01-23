@@ -360,14 +360,14 @@ my %ProtocolListSIGNALduino  = (
 			id          	=> '13',
 			one				=> [1,-2],
 			zero			=> [1,-4],
-			sync			=> [10,-1],		
+			sync			=> [1,-20,10,-1],		
 			clockabs		=> 800,
 			format 			=> 'twostate',	  		
 			preamble		=> 'P13#',				# prepend to converted message	
 			clientmodule    => 'FLAMINGO',   				# not used now
 			#modulematch     => 'P13#.*',  				# not used now
 			length_min      => '24',
-			length_max      => '25',
+			length_max      => '26',
 		}, 		
 	"13.1"    => 			## FLAMINGO FA20 
 		{
@@ -375,7 +375,7 @@ my %ProtocolListSIGNALduino  = (
 			id          	=> '13',
 			one				=> [1,-2],
 			zero			=> [1,-4],
-			start			=> [10,-1],		
+			start			=> [20,-1],		
 			clockabs		=> 800,
 			format 			=> 'twostate',	  		
 			preamble		=> 'P13#',				# prepend to converted message	
