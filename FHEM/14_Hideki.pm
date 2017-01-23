@@ -1,10 +1,10 @@
 ##############################################
-# $Id: 14_Hideki.pm 14395 2016-07-14 18:00:00Z v3.2-dev $
+# $Id: 14_Hideki.pm 14395 2017-01-23 18:00:00Z v3.3.1-dev $
 # The file is taken from the SIGNALduino project
 # see http://www.fhemwiki.de/wiki/SIGNALduino
 # and was modified by a few additions
 # to support Hideki Sensors
-# S. Butzek & HJGode & Ralf9 2015-2016
+# S. Butzek & HJGode & Ralf9 2015-2017
 #
 
 package main;
@@ -106,6 +106,10 @@ Hideki_Parse($$)
 	my $temp=0;
 	my $hum=0;
 	my $rain=0;
+	my $windchill=0;
+	my $windspeed=0;
+	my $windgust=0;
+	my $winddir=0;
 	my $rc;
 	my $val;
 	my $bat;
@@ -121,10 +125,16 @@ Hideki_Parse($$)
 		($channel, $rain) = decodeRain(\@decodedBytes); # decodeThermoHygro($decodedString);
 		$bat = ($decodedBytes[2] >> 6 == 3) ? 'ok' : 'low';			 # decode battery
 		$val = "R: $rain Bat: $bat";
-	}elsif($sensorTyp==31 || $sensorTyp==12){
+	}elsif($sensorTyp==12){
+		($channel, $temp, $hum) = decodeThermoHygro(\@decodedBytes); # decodeThermoHygro($decodedString);
+		($windchill,$windspeed,$windgust,$winddir) = wind(\@decodedBytes);
+		$bat = ($decodedBytes[2] >> 6 == 3) ? 'ok' : 'low';			 # decode battery
+		$val = "T: $temp WS: $windspeed WG: $windgust WDir: $winddir Bat: $bat";
+		Log3 $iohash, 5, "$name Sensor Typ $sensorTyp currently not full supported, please report sensor information!";
+	}elsif($sensorTyp==13 || $sensorTyp==31){
 		($channel, $temp, $hum) = decodeThermoHygro(\@decodedBytes); # decodeThermoHygro($decodedString);
 		$bat = ($decodedBytes[2] >> 6 == 3) ? 'ok' : 'low';			 # decode battery
-		$val = "T: $temp H: $hum Bat: $bat";
+		$val = "T: $temp Bat: $bat";
 		Log3 $iohash, 5, "$name Sensor Typ $sensorTyp currently not full supported, please report sensor information!";
 	}
 	else{
@@ -334,6 +344,23 @@ sub decodeRain {
 	$rain = ($Hidekibytes[4] + $Hidekibytes[5]*0xff)*0.7;
 
 	return ($channel, $rain);
+}
+
+sub wind {
+	my @Hidekibytes = @{$_[0]};
+	
+	my $windspeed;
+	my $windchill;
+	my $windgust;
+	my $winddir;
+	
+	$windchill = 0;
+	$windspeed = ($Hidekibytes[9] & 0x0f ) * 100 + ($Hidekibytes[8] & 0x0f) * 10 + ($Hidekibytes[8] >> 4);
+	$windspeed = sprintf("%.2f", $windspeed * 1.609);
+	$windgust = ($Hidekibytes[10] >> 4) * 100 + ($Hidekibytes[10] & 0x0f) * 10 + ($Hidekibytes[9] >> 4);
+	$winddir = ($Hidekibytes[11] >> 4) * 22.5;
+	
+	return ($windchill,$windspeed,$windgust,$winddir);
 }
 
 sub
