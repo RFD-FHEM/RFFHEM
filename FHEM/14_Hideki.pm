@@ -102,7 +102,7 @@ Hideki_Parse($$)
 	}
 
 	my $id=substr($decodedString,2,2);      # get the random id from the data
-	my $channel=0;
+ 	my $channel=0;
 	my $temp=0;
 	my $hum=0;
 	my $rain=0;
@@ -110,7 +110,8 @@ Hideki_Parse($$)
 	my $windspeed=0;
 	my $windgust=0;
 	my $winddir=0;
-	my $rc;
+  my $winddirtext;
+  my $rc;
 	my $val;
 	my $bat;
 	my $deviceCode;
@@ -127,9 +128,10 @@ Hideki_Parse($$)
 		$val = "R: $rain Bat: $bat";
 	}elsif($sensorTyp==12){
 		($channel, $temp, $hum) = decodeThermoHygro(\@decodedBytes); # decodeThermoHygro($decodedString);
-		($windchill,$windspeed,$windgust,$winddir) = wind(\@decodedBytes);
+		($windchill,$windspeed,$windgust,$winddir,$winddirtext) = wind(\@decodedBytes);
 		$bat = ($decodedBytes[2] >> 6 == 3) ? 'ok' : 'low';			 # decode battery
-		$val = "T: $temp WS: $windspeed WG: $windgust WDir: $winddir Bat: $bat";
+		#$val = "T: $temp WS: $windspeed WG: $windgust WDir: $winddir Bat: $bat";
+    $val = "T: $temp  Ws: $windspeed  Wg: $windgust  Wd: $winddirtext Bat: $bat";
 		Log3 $iohash, 5, "$name Sensor Typ $sensorTyp currently not full supported, please report sensor information!";
 	}elsif($sensorTyp==13 || $sensorTyp==31){
 		($channel, $temp, $hum) = decodeThermoHygro(\@decodedBytes); # decodeThermoHygro($decodedString);
@@ -192,7 +194,20 @@ Hideki_Parse($$)
 	}
 	elsif($sensorTyp==0x0E){
 	  readingsBulkUpdate($hash, "rain", $rain) if ($rain ne "");
-	}
+	}elsif($sensorTyp==12){
+      #zusätzlich Daten für Wetterstation
+      #	$val = "T: $temp WS: $windspeed WG: $windgust WDir: $winddir Bat: $bat";
+      # readingsBulkUpdate($hash, "rain", $rain );
+      # readingsBulkUpdate($hash, "humidity", $hum) if ($hum ne "");
+	      readingsBulkUpdate($hash, "temperature", $temp) if ($temp ne "");
+        readingsBulkUpdate($hash, "windGust", $windgust );
+        readingsBulkUpdate($hash, "windSpeed", $windspeed );
+        readingsBulkUpdate($hash, "windDirection", $winddir );
+        readingsBulkUpdate($hash, "windDirectionDegree", $winddir);
+        readingsBulkUpdate($hash, "windDirectionText", $winddirtext);
+  
+  }
+  
 	readingsEndUpdate($hash, 1); # Notify is done by Dispatch
 
 	return $name;
@@ -348,19 +363,23 @@ sub decodeRain {
 
 sub wind {
 	my @Hidekibytes = @{$_[0]};
-	
+  my @winddir_name=("N","NNE","NE","ENE","E","ESE","SE","SSE","S","SSW","SW","WSW","W","WNW","NW","NNW");
 	my $windspeed;
 	my $windchill;
 	my $windgust;
 	my $winddir;
+  my $winddirtext;
+  my $windDirection;
 	
 	$windchill = 0;
 	$windspeed = ($Hidekibytes[9] & 0x0f ) * 100 + ($Hidekibytes[8] & 0x0f) * 10 + ($Hidekibytes[8] >> 4);
 	$windspeed = sprintf("%.2f", $windspeed * 1.609);
 	$windgust = ($Hidekibytes[10] >> 4) * 100 + ($Hidekibytes[10] & 0x0f) * 10 + ($Hidekibytes[9] >> 4);
-	$winddir = ($Hidekibytes[11] >> 4) * 22.5;
-	
-	return ($windchill,$windspeed,$windgust,$winddir);
+  $windDirection = ($Hidekibytes[11] >> 4); 
+  $winddirtext = $winddir_name[$windDirection]; 
+	$winddir = $windDirection * 22.5;
+  	
+	return ($windchill,$windspeed,$windgust,$winddir,$winddirtext);
 }
 
 sub
