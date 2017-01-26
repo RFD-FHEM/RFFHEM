@@ -135,7 +135,7 @@ Hideki_Parse($$)
 		($channel, $rain) = decodeRain(\@decodedBytes); # decodeThermoHygro($decodedString);
 		$bat = ($decodedBytes[2] >> 6 == 3) ? 'ok' : 'low';			 # decode battery
 		$val = "R: $rain";
-		og3 $iohash, 4, "$name decoded Hideki protocol model=$model, sensor id=$id, channel=$channel, bat=$bat, rain=$rain, unknown=$unknown";
+		Log3 $iohash, 4, "$name decoded Hideki protocol model=$model, sensor id=$id, channel=$channel, bat=$bat, rain=$rain, unknown=$unknown";
 	}elsif($sensorTyp==12){
 		($channel, $temp) = decodeThermo(\@decodedBytes); # decodeThermoHygro($decodedString);
 		($windchill,$windspeed,$windgust,$winddir,$winddirdeg,$winddirtext) = wind(\@decodedBytes);
