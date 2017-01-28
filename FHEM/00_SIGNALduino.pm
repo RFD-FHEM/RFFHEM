@@ -278,24 +278,6 @@ my %ProtocolListSIGNALduino  = (
 			length_max      => '40',
 
 		}, 
-	"7.1"    => 			## weather sensors like EAS800z
-        {
-            name			=> 'test-tfa 30.3208.02',	
-			comment		    => 'unknown sensor,report',
-			id          	=> '7.1',
-			one				=> [1,-4],
-			zero			=> [1,-2],
-			start			=> [1,-8],		 
-			clockabs     	=> 484,			
-			format 			=> 'twostate',	
-			preamble		=> 'P7#',		# prepend to converted message	
-			clientmodule    => 'SD_WS07',   	# not used now
-			modulematch     => '^P7#.{6}F.{2}', # not used now
-			length_min      => '35',
-			length_max      => '40',
-
-		}, 
-
 	"8"    => 			## TX3 (ITTX) Protocol
         {
             name			=> 'TX3 Protocol',	
@@ -1071,23 +1053,6 @@ my %ProtocolListSIGNALduino  = (
 			length_max      => '24',
 			method          => \&SIGNALduino_MCRAW, # Call to process this message
 			polarity        => 'invert',			
-		}, 	 
-  		"58"    => 			##tfa 30.3208.02 vielleicht?
-		{
-            name			=> 'test-tfa 30.3208.02',	
-			comment		    => 'unknown sensor,report',
-			id          	=> '58',
-			clockabs     	=> 170, 						
-			zero			=> [3,-6],
-			one				=> [8,-6],
-			start			=> [1,-1],	
-			#stop 			=> [3,-170],					
-			format 			=> 'twostate',	
-			preamble		=> 'u58',						# prepend to converted message	
-			clientmodule    => ''	,   					# not used now
-			modulematch     => '',  						# not used now
-			length_min      => '43',
-			length_max      => '44',
 		}, 	 
  
 );
