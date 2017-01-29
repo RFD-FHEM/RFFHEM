@@ -1054,6 +1054,20 @@ my %ProtocolListSIGNALduino  = (
 			method          => \&SIGNALduino_MCRAW, # Call to process this message
 			polarity        => 'invert',			
 		}, 	 
+  		"58"    => 			## tfa 30.3208.0 
+		{
+            name			=> 'tfa 30.3208.0 ',	
+			id          	=> '58',
+			clockrange     	=> [460,520],			# min , max
+			format 			=> 'manchester',	    # tristate can't be migrated from bin into hex!
+			clientmodule    => '',
+			modulematch     => '^u58*',
+			preamble		=> 'u58#',
+			length_min      => '64',
+			length_max      => '136',
+			method          => \&SIGNALduino_MCTFA, # Call to process this message
+			polarity        => 'invert',			
+		}, 	 
  
 );
 
@@ -3361,6 +3375,40 @@ sub SIGNALduino_ITV1_tristateToBit($)
 	return $msg;
 }
 
+sub SIGNALduino_MCTFA()
+{
+	my ($name,$bitData,$id) = @_;
+	my $debug = AttrVal($name,"debug",0);
+	
+	my $preamble_pos;
+	my $message_end;
+	my $message_length;
+		
+	#if ($bitData =~ m/^.?(1){16,24}0101/)  {  
+	if ($bitData =~ m/(1{10,11}|0{10,11})/ )
+	{ 
+	
+		$preamble_pos=$+[1];
+		Log3 $name, 4, "$name: TFA 30.3208.0 preamble_pos = $preamble_pos";
+		return return (-1," sync not found") if ($preamble_pos <=0);
+		$message_end=$-[1] if ($bitData =~ m/^.{44,}(1{10,11}|0{10,11}).*/); #Todo 44 anpassen
+		if (!defined($message_end) || $message_end < $preamble_pos) {
+			$message_end = length($bitData);
+		} else {
+			$message_end += 11;
+			Log3 $name, 4, "$name: TFA message end pattern found at pos $message_end  lengthBitData=".length($bitData);
+		}
+		$message_length = ($message_end - $preamble_pos);
+
+		return (-1," message is to short") if (defined($ProtocolListSIGNALduino{$id}{length_min}) && $message_length < $ProtocolListSIGNALduino{$id}{length_min} );
+		return (-1," message is to long") if (defined($ProtocolListSIGNALduino{$id}{length_max}) && $message_length > $ProtocolListSIGNALduino{$id}{length_max} );
+		
+		my $hex=SIGNALduino_b2h(substr($bitData,$preamble_pos,$message_length));
+		return  (1,$hex); ## Return the bits unchanged in hex
+	}
+	return (-1,undef);
+	
+}
 
 sub SIGNALduino_OSV2()
 {
@@ -3629,6 +3677,8 @@ sub SIGNALduino_MCRAW()
 	my $hex=SIGNALduino_b2h($bitData);
 	return  (1,$hex); ## Return the bits unchanged in hex
 }
+
+
 
 sub SIGNALduino_SomfyRTS()
 {
