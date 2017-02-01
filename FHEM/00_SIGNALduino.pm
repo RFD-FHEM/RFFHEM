@@ -1063,7 +1063,7 @@ my %ProtocolListSIGNALduino  = (
 			clientmodule    => '',
 			modulematch     => '^u58*',
 			preamble		=> 'u58#',
-			length_min      => '64',
+			length_min      => '54',
 			length_max      => '136',
 			method          => \&SIGNALduino_MCTFA, # Call to process this message
 			polarity        => 'invert',			
@@ -3399,6 +3399,7 @@ sub SIGNALduino_MCTFA()
 			Log3 $name, 4, "$name: TFA message end pattern found at pos $message_end  lengthBitData=".length($bitData);
 		}
 		$message_length = ($message_end - $preamble_pos);
+		Log3 $name, 4, "$name: TFA message new length=".$message_length;
 
 		return (-1," message is to short") if (defined($ProtocolListSIGNALduino{$id}{length_min}) && $message_length < $ProtocolListSIGNALduino{$id}{length_min} );
 		return (-1," message is to long") if (defined($ProtocolListSIGNALduino{$id}{length_max}) && $message_length > $ProtocolListSIGNALduino{$id}{length_max} );
