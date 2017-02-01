@@ -3385,17 +3385,17 @@ sub SIGNALduino_MCTFA()
 	my $message_length;
 		
 	#if ($bitData =~ m/^.?(1){16,24}0101/)  {  
-	if ($bitData =~ m/(1{10,11}|0{10,11})/ )
+	if ($bitData =~ m/(1{9})/ )
 	{ 
 	
 		$preamble_pos=$+[1];
 		Log3 $name, 4, "$name: TFA 30.3208.0 preamble_pos = $preamble_pos";
 		return return (-1," sync not found") if ($preamble_pos <=0);
-		$message_end=$-[1] if ($bitData =~ m/^.{44,}(1{10,11}|0{10,11}).*/); #Todo 44 anpassen
+		$message_end=$-[1] if ($bitData =~ m/^.{44,}(1{9}).*/); #Todo 44 anpassen
 		if (!defined($message_end) || $message_end < $preamble_pos) {
 			$message_end = length($bitData);
 		} else {
-			$message_end += 11;
+			#$message_end += 11;
 			Log3 $name, 4, "$name: TFA message end pattern found at pos $message_end  lengthBitData=".length($bitData);
 		}
 		$message_length = ($message_end - $preamble_pos);
