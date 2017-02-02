@@ -136,17 +136,18 @@ sub SD_WS_Parse($$)
    	 	 } ,       
      51 =>
    	 	 {
-     		sensortype => 'Lidl Wetterstation 275901',
+     		sensortype => 'Lidl Wetterstation 2759001/IAN114324',
         	model =>	'SD_WS_51_TH', 
 			prematch => sub {my $msg = shift; return 1 if ($msg =~ /^[0-9A-F]{10}/); }, 							# prematch
 			crcok => 	sub {return 1;  }, 																			# crc is unknown
 			id => 		sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,0,12); },   				# random id?
 	#		sendmode =>	sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,10,11) eq "1" ? "manual" : "auto";  }
-			temp => 	sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,18)*17) + (SD_WS_binaryToNumber($bitData,20,23)+2) +  (SD_WS_binaryToNumber($bitData,24,27)/10)+0.2;  },	#temp
+			temp => 	sub {my (undef,$bitData) = @_; return ((SD_WS_binaryToNumber($bitData,18,27)) -1220) *5 /90.0; },	#temp
 			hum => 		sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,28,31)*10) + (SD_WS_binaryToNumber($bitData,32,35));  }, 		#hum
 			channel => 	sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,36,39) );  }, 		#channel
-     		bat => 		sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,13) eq "1" ? "ok" : "critical");}
-    # 		sync => 	sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,35,35) eq "1" ? "true" : "false");},
+     		bat => 		sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,13) eq "1" ? "ok" : "critical");},
+      		trend => 	sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,16,17));},
+     # 		sync => 	sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,35,35) eq "1" ? "true" : "false");},
    	 	 }   ,  
         
     );
@@ -330,6 +331,7 @@ sub SD_WS_Parse($$)
 	    	$channel=$decodingSubs{$protocol}{channel}->( $rawData,$bitData );
 	    	$model = $decodingSubs{$protocol}{model};
 	    	$bat = $decodingSubs{$protocol}{bat};
+	    	$trend = $decodingSubs{$protocol}{trend} if (defined($decodingSubs{$protocol}{trend}));
 
 	    	Log3 $iohash, 4, "$name decoded protocolid: $protocol ($SensorTyp) sensor id=$id, channel=$channel, temp=$temp, hum=$hum";
 		
