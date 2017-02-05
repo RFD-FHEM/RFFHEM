@@ -131,7 +131,7 @@ sub SD_WS_Parse($$)
 			temp => 	sub {my (undef,$bitData) = @_; return (((SD_WS_binaryToNumber($bitData,22,25)*256 +  SD_WS_binaryToNumber($bitData,18,21)*16 + SD_WS_binaryToNumber($bitData,14,17)) *10 -12200) /18)/10;  },	#temp
 			hum => 		sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,30,33)*16 + SD_WS_binaryToNumber($bitData,26,29));  }, 					#hum
 			channel => 	sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,12,13)+1 );  }, 		#channel
-     		bat => 		sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,34) eq "1" ? "ok" : "critical");},
+     		bat => 		sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,34) eq "1" ? "ok" : "critical";},
     # 		sync => 	sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,35,35) eq "1" ? "true" : "false");},
    	 	 } ,       
      51 =>
@@ -145,8 +145,8 @@ sub SD_WS_Parse($$)
 			temp => 	sub {my (undef,$bitData) = @_; return round(((SD_WS_binaryToNumber($bitData,16,27)) -1220) *5 /90.0,1); },	#temp
 			hum => 		sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,28,31)*10) + (SD_WS_binaryToNumber($bitData,32,35));  }, 		#hum
 			channel => 	sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,36,39) );  }, 		#channel
-     		bat => 		sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,13) eq "1" ? "ok" : "critical");},
-      		trend => 	sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,16,17));},
+     		bat => 		sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,13) eq "1" ? "crititcal" : "ok";},
+      		trend => 	sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,14,15) eq "01" ? "falling" : SD_WS_binaryToNumber($bitData,14,15) eq "00" ? "neutral" : "rising";},
      # 		sync => 	sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,35,35) eq "1" ? "true" : "false");},
    	 	 }   ,  
         
@@ -330,10 +330,10 @@ sub SD_WS_Parse($$)
 	    	$hum=$decodingSubs{$protocol}{hum}->( $rawData,$bitData );
 	    	$channel=$decodingSubs{$protocol}{channel}->( $rawData,$bitData );
 	    	$model = $decodingSubs{$protocol}{model};
-	    	$bat = $decodingSubs{$protocol}{bat};
-	    	$trend = $decodingSubs{$protocol}{trend} if (defined($decodingSubs{$protocol}{trend}));
+	    	$bat = $decodingSubs{$protocol}{bat}->( $rawData,$bitData );
+	    	$trend = $decodingSubs{$protocol}{trend}->( $rawData,$bitData ) if (defined($decodingSubs{$protocol}{trend}));
 
-	    	Log3 $iohash, 4, "$name decoded protocolid: $protocol ($SensorTyp) sensor id=$id, channel=$channel, temp=$temp, hum=$hum";
+	    	Log3 $iohash, 4, "$name decoded protocolid: $protocol ($SensorTyp) sensor id=$id, channel=$channel, temp=$temp, hum=$hum, bat=$bat";
 		
 	} 
 	else {
