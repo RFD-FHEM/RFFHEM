@@ -3385,7 +3385,7 @@ sub SIGNALduino_MCTFA()
 	my $message_length;
 		
 	#if ($bitData =~ m/^.?(1){16,24}0101/)  {  
-	if ($bitData =~ m/(1{9})/ )
+	if ($bitData =~ m/(1{11})/ )
 	{ 
 	
 		$preamble_pos=$+[1];
