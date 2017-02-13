@@ -146,7 +146,7 @@ sub SD_WS_Parse($$)
 			hum => 		sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,28,31)*10) + (SD_WS_binaryToNumber($bitData,32,35));  }, 		#hum
 			channel => 	sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,36,39) );  }, 		#channel
      		bat => 		sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,13) eq "1" ? "crititcal" : "ok";},
-      		trend => 	sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,14,15) eq "01" ? "falling" : SD_WS_binaryToNumber($bitData,14,15) eq "00" ? "neutral" : "rising";},
+      		trend => 	sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,15,16) eq "01" ? "rising" : SD_WS_binaryToNumber($bitData,14,15) eq "00" ? "neutral" : "rising";},
      # 		sync => 	sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,35,35) eq "1" ? "true" : "false");},
    	 	 }   ,  
         
