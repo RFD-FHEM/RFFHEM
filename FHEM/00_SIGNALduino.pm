@@ -1068,6 +1068,22 @@ my %ProtocolListSIGNALduino  = (
 			method          => \&SIGNALduino_MCTFA, # Call to process this message
 			polarity        => 'invert',			
 		}, 	 
+		"59" => ##  AK-HD-4 remote
+		{
+			name			=> 'AK-HD-4',	
+			id          	=> '59',
+			clockabs     	=> 230, 						
+			zero			=> [-4,1],
+			one				=> [-1,4],
+			start			=> [-1,37],						
+			format 			=> 'twostate',	# tristate can't be migrated from bin into hex!
+			preamble		=> 'u59',			# Append to converted message	
+			postamble		=> '',		# Append to converted message	 	
+			clientmodule    => '',   		# not used now
+			modulematch     => '',  # not used now
+			length_min      => '24',
+			length_max      => '24',
+		},			
  
 );
 
