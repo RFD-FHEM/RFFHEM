@@ -149,7 +149,23 @@ sub SD_WS_Parse($$)
       		trend => 	sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,15,16) eq "01" ? "rising" : SD_WS_binaryToNumber($bitData,14,15) eq "00" ? "neutral" : "rising";},
      # 		sync => 	sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,35,35) eq "1" ? "true" : "false");},
    	 	 }   ,  
-        
+       58 => 
+   	 	 {
+     		sensortype => 'TFA 3032080 ',
+        	model =>	'SD_WS_58_TH', 
+			prematch => sub {my $msg = shift; return 1 if ($msg =~ /^[0-9A-F]{10}/); }, 							# prematch
+			crcok => 	sub {return 1;  }, 																			# crc is unknown
+			id => 		sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,12,19); },   			# random id
+			bat => 		sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,20) eq "1" ? "crititcal" : "ok";},  # bat?
+			
+			channel => 	sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,21,23)+1 );  },		# channel
+			temp => 	sub {my (undef,$bitData) = @_; return ((((SD_WS_binaryToNumber($bitData,24,35)-400)/10)-32)/1,8); },  #temp
+			hum => 		sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,36,43));  }, 		#hum
+
+	 #		sendmode =>	sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,10,11) eq "1" ? "manual" : "auto";  }
+     # 		trend => 	sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,15,16) eq "01" ? "rising" : SD_WS_binaryToNumber($bitData,14,15) eq "00" ? "neutral" : "rising";},
+     # 		sync => 	sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,35,35) eq "1" ? "true" : "false");},
+   	 	 }   ,     
     );
     
     	
