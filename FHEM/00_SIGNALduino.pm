@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 10484 2017-01-22 15:00:00Z v3.3.1-dev $
+# $Id: 00_SIGNALduino.pm 10484 2017-02-16 22:00:00Z v3.3.1-dev $
 #
 # v3.3.1 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -2119,7 +2119,72 @@ SIGNALduino_Read($)
     my $rmsg;
     ($rmsg,$SIGNALduinodata) = split("\n", $SIGNALduinodata, 2);
     $rmsg =~ s/\r//;
-    Log3 $name, 4, "$name/msg READ: $rmsg"; 
+    
+    	if ($rmsg =~ m/^\002(M(s|u);.*;)\003/) {
+		$rmsg =~ s/^\002//;                # \002 am Anfang entfernen
+		my @msg_parts = split(";",$rmsg);
+		my $m0;
+		my $mnr0;
+		my $m1;
+		my $mL;
+		my $mH;
+		my $part = "";
+		foreach my $msgPart (@msg_parts) {
+			$m0 = substr($msgPart,0,1);
+			$mnr0 = ord($m0);
+			$m1 = substr($msgPart,1);
+			if ($m0 eq "M") {
+				$part .= "M" . uc($m1) . ";";
+			}
+			elsif ($mnr0 > 127) {
+				$part .= "P" . sprintf("%u", ($mnr0 & 7)) . "=";
+				if (length($m1) == 2) {
+					$mL = ord(substr($m1,0,1)) & 127;        # Pattern low
+					$mH = ord(substr($m1,1,1)) & 127;        # Pattern high
+					if (($mnr0 & 0b00100000) != 0) {           # Vorzeichen  0b00100000 = 32
+						$part .= "-";
+					}
+					if ($mnr0 & 0b00010000) {                # Bit 7 von Pattern low
+						$mL += 128;
+					}
+					$part .= ($mH * 256) + $mL;
+				}
+				$part .= ";";
+			}
+			elsif (($m0 eq "D" || $m0 eq "d") && length($m1) > 0) {
+				my @arrayD = split(//, $m1);
+				$part .= "D=";
+				foreach my $D (@arrayD) {
+					$mH = (ord($D) >> 4) & 7;
+					$mL = ord($D) & 7;
+					$part .= "$mH$mL";
+				}
+				if ($m0 eq "d") {
+					$part =~ s/.$//;	   # letzte Ziffer entfernen wenn Anzahl der Ziffern ungerade
+				}
+				$part .= ";";
+			}
+			elsif (($m0 eq "C" || $m0 eq "S") && length($m1) == 1) {
+				$part .= "$m0" . "P=$m1;";
+			}
+			elsif ($m1 =~ m/^[0-9A-Z]{1,2}$/) {        # bei 1 oder 2 Hex Ziffern nach Dez wandeln 
+				$part .= "$m0=" . hex($m1) . ";";
+			}
+			elsif ($m0 =~m/[0-9a-zA-Z]/) {
+				$part .= "$m0";
+				if ($m1 ne "") {
+					$part .= "=$m1";
+				}
+				$part .= ";";
+			}
+		}
+		Log3 $name, 4, "$name/msg READredu: $part";
+		$rmsg = "\002$part\003";
+	}
+	else {
+		Log3 $name, 4, "$name/msg READ: $rmsg";
+	}
+
 	if ( $rmsg && !SIGNALduino_Parse($hash, $hash, $name, $rmsg) && defined($hash->{getcmd}) && defined($hash->{getcmd}->{cmd}))
 	{
 		my $regexp;
