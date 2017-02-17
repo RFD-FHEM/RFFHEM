@@ -25,13 +25,14 @@ sub SD_WS_Initialize($)
 	$hash->{ParseFn}	= "SD_WS_Parse";
 	$hash->{AttrFn}		= "SD_WS_Attr";
 	$hash->{AttrList}	= "IODev do_not_notify:1,0 ignore:0,1 showtime:1,0 " .
-				"$readingFnAttributes ";
+						  "$readingFnAttributes ";
 	$hash->{AutoCreate} =
 	{ 
 		"SD_WS37_TH.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,",  autocreateThreshold => "2:180"},
 		"SD_WS50_SM.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,",  autocreateThreshold => "2:180"},
 		"BresserTemeo.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "2:180"},
 		"SD_WS51_TH.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "2:180"},
+		"SD_WS58_TH.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "2:90"},
 	};
 
 }
@@ -63,7 +64,7 @@ sub SD_WS_Undef($$)
 {
 	my ($hash, $name) = @_;
 	delete($modules{SD_WS}{defptr}{$hash->{CODE}})
-		if(defined($hash->{CODE}) && defined($modules{SD_WS}{defptr}{$hash->{CODE}}));
+	if(defined($hash->{CODE}) && defined($modules{SD_WS}{defptr}{$hash->{CODE}}));
 	return undef;
 }
 
@@ -77,8 +78,7 @@ sub SD_WS_Parse($$)
 	my ($protocol,$rawData) = split("#",$msg);
 	$protocol=~ s/^[WP](\d+)/$1/; # extract protocol
 	
-	
-	
+
 	my $dummyreturnvalue= "Unknown, please report";
 	my $hlen = length($rawData);
 	my $blen = $hlen * 4;
@@ -159,7 +159,7 @@ sub SD_WS_Parse($$)
 			bat => 		sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,20) eq "1" ? "crititcal" : "ok";},  # bat?
 			
 			channel => 	sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,21,23)+1 );  },		# channel
-			temp => 	sub {my (undef,$bitData) = @_; return ((((SD_WS_binaryToNumber($bitData,24,35)-400)/10)-32)/1,8); },  #temp
+			temp => 	sub {my (undef,$bitData) = @_; return round(((((SD_WS_binaryToNumber($bitData,24,35)-400)/10)-32)/1.8),1); },  #temp
 			hum => 		sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,36,43));  }, 		#hum
 
 	 #		sendmode =>	sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,10,11) eq "1" ? "manual" : "auto";  }
