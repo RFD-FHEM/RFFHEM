@@ -21,7 +21,7 @@ Supported Devices / Protocols
 |technoline Weatherstation WS 6750/TX70DTH| Weather sensor and station |
 ||Remote sockets from serval brands|
 |CTW600 WH1080 | Weather station |
-|TFA 30320902 | Weather sensor |
+|TFA 30320902,30320802  | Weather sensor |
 |Visivon remote PT4450  | Remote control |
 |Einhel - HS 434/6 | Garagedoor opener |
 |FA21RF | Smoke detector | 
