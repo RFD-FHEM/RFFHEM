@@ -114,6 +114,7 @@ my $clientsSIGNALduino = ":IT:"
 						."SD_UT:"	## BELL 201.2 TXA
 			        	."SD_WS_Maverick:"
 			        	."FLAMINGO:"
+			        	."CUL_WS:"
 			      		."SIGNALduino_un:"
 					; 
 
@@ -135,6 +136,7 @@ my %matchListSIGNALduino = (
      "16:SD_WS_Maverick"		=> '^P47#[A-Fa-f0-9]+',
      "17:SD_UT"            		=> '^u30#.*',								## BELL 201.2 TXA
      "18:FLAMINGO"            	=> '^P13#[A-Fa-f0-9]+',						## Flamingo Smoke
+     "19:CUL_WS"				=> '^K[A-Fa-f0-9]{5,}',
      "X:SIGNALduino_un"			=> '^[u]\d+#.*',
 );
 
@@ -1084,7 +1086,20 @@ my %ProtocolListSIGNALduino  = (
 			length_min      => '24',
 			length_max      => '24',
 		},			
- 
+ "60" => ##  WS7000 #############################################################################
+     # MU;P0=3472;P1=-449;P2=773;P3=280;P4=-941;D=01212121212121212121342121342134343434213434212134342121212134213421213421343421342121212134212134213421343421342121213434343434213421212134343434213434342134343;CP=3;R=52;
+      {
+         name   		 => 'WS7000',   
+         id				 => '60',
+         one             => [2,-4],            
+         zero        	 => [4,-2],          
+         clockabs     	 => 200,                
+         preamble      	 => 'K',                # prepend to converted message
+         postamble     	 => '',                  # Append to converted message       
+         clientmodule  	 => 'CUL_WS',
+         #length_min     => '78',
+         #length_max     => '80',
+      }, 
 );
 
 
