@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 10484 2017-02-16 22:00:00Z v3.3.1-dev $
+# $Id: 00_SIGNALduino.pm 10484 2017-02-26 11:00:00Z v3.3.1-dev $
 #
 # v3.3.1 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -1137,6 +1137,7 @@ SIGNALduino_Initialize($)
 					  ." whitelist_IDs"
 					  ." WS09_WSModel:undef,WH1080,CTW600"
 					  ." WS09_CRCAUS:0,1"
+					  ." addvaltrigger"
 		              ." $readingFnAttributes";
 
   $hash->{ShutdownFn} = "SIGNALduino_Shutdown";
@@ -2268,24 +2269,30 @@ sub SIGNALduino_KeepAlive($){
 	
 	return if ($hash->{DevState} eq 'disconnected');
 	
-	Log3 $name,4 , "$name/KeepAliveOk: " . $hash->{keepalive}{ok};
+	#Log3 $name,4 , "$name/KeepAliveOk: " . $hash->{keepalive}{ok};
 	if (!$hash->{keepalive}{ok}) {
 		delete($hash->{getcmd});
 		if ($hash->{keepalive}{retry} >= SDUINO_KEEPALIVE_MAXRETRY) {
-			Log3 $name,4 , "$name/keepalive retry count reached. Reset";
+			Log3 $name,3 , "$name/keepalive not ok, retry count reached. Reset";
 			$hash->{DevState} = 'INACTIVE';
 			SIGNALduino_ResetDevice($hash);
 			return;
 		}
 		else {
+			my $logLevel = 3;
 			$hash->{keepalive}{retry} ++;
-			Log3 $name,3 , "$name/KeepAliveOk: " . $hash->{keepalive}{ok} . " retry = " . $hash->{keepalive}{retry} . " -> get ping";
+			if ($hash->{keepalive}{retry} == 1) {
+				$logLevel = 4;
+			}
+			Log3 $name, $logLevel, "$name/KeepAlive not ok, retry = " . $hash->{keepalive}{retry} . " -> get ping";
 			$hash->{getcmd}->{cmd} = "ping";
 			SIGNALduino_AddSendQueue($hash, "P");
 			#SIGNALduino_SimpleWrite($hash, "P");
 		}
 	}
-	Log3 $name,4 , "$name/keepalive retry = " . $hash->{keepalive}{retry};
+	else {
+		Log3 $name,4 , "$name/keepalive ok, retry = " . $hash->{keepalive}{retry};
+	}
 	$hash->{keepalive}{ok} = 0;
 	
 	InternalTimer(gettimeofday() + SDUINO_KEEPALIVE_TIMEOUT, "SIGNALduino_KeepAlive", $hash);
@@ -3987,6 +3994,7 @@ sub SIGNALduino_compPattern($$$%)
 	</td>
 	</tr>
 	</table>
+	<br>
 	<a name="SIGNALduinodefine"></a>
 	<b>Define</b><br>
 	<code>define &lt;name&gt; SIGNALduino &lt;device&gt; </code> <br>
@@ -4020,15 +4028,19 @@ sub SIGNALduino_compPattern($$$%)
 		</li>
 
 	</ul>
-	<br>
 
-	  
+	<a name="SIGNALduinoattr"></a>
+	<b>Attributes</b>
+	<ul>
+	<li><a name="addvaltrigger">addvaltrigger</a><br>
+        Create triggers for additional device values. Right now these are RSSI, RAWMSG and DMSG.
+        </li>
 	<li><a href="#do_not_notify">do_not_notify</a></li>
-    <li><a href="#attrdummy">dummy</a></li>
-    <li>debug<br>
-    This will bring the module in a very verbose debug output. Usefull to find new signals and verify if the demodulation works correctly.
-    </li>
-    <li>flashCommand<br>
+	<li><a href="#attrdummy">dummy</a></li>
+	<li>debug<br>
+	This will bring the module in a very verbose debug output. Usefull to find new signals and verify if the demodulation works correctly.
+	</li>
+	<li>flashCommand<br>
     	This is the command, that is executed to performa the firmware flash. Do not edit, if you don't know what you are doing.<br>
     	The default is: avrdude -p atmega328P -c arduino -P [PORT] -D -U flash:w:[HEXFILE] 2>[LOGFILE]<br>
 		It contains some place-holders that automatically get filled with the according values:<br>
@@ -4080,6 +4092,7 @@ With a # at the beginnging whitelistIDs can be deactivated.
    WS09_CRCAUS:0,1
    WS09_CRCAUS = 0 is default -> check CRC Calculation for WH1080
    </li><br>
+   </ul>
     
 	<a name="SIGNALduinoget"></a>
 	<b>Get</b>
@@ -4098,10 +4111,6 @@ With a # at the beginnging whitelistIDs can be deactivated.
 		SIGNALduino to interpret the response of this command. See also the raw-
 		command.
 		</li><br>
-		<li>ITParms<br>
-		For sending IT Signals for wireless switches, the number of repeats and the base duration can be set.
-		With the get command, you can verify what is programmed into the uC.
-		</li><br>
 		<li>protocolIDs<br>
 		display a list of the protocol IDs
 		</li><br>
@@ -4117,9 +4126,6 @@ With a # at the beginnging whitelistIDs can be deactivated.
 	<a name="SIGNALduinoset"></a>
 	<b>SET</b>
 	<ul>
-		<li>ITClock<br>
-		Sets the clock which is used to send the signal for IT switches. (Default is 300)
-		</li><br>
 		<li>raw<br>
 		Issue a SIGNALduino firmware command, without waiting data returned by
 		the SIGNALduino. See the SIGNALduino firmware code  for details on SIGNALduino
