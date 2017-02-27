@@ -3481,8 +3481,6 @@ sub SIGNALduino_ITV1_tristateToBit($)
 sub SIGNALduino_MCTFA()
 {
 	my ($name,$bitData,$id) = @_;
-	my $debug = AttrVal($name,"debug",0);
-	
 	my $preamble_pos;
 	my $message_end;
 	my $message_length;
@@ -3490,25 +3488,37 @@ sub SIGNALduino_MCTFA()
 	#if ($bitData =~ m/^.?(1){16,24}0101/)  {  
 	if ($bitData =~ m/(1{9})/ )
 	{ 
-	
 		$preamble_pos=$+[1];
 		Log3 $name, 4, "$name: TFA 30.3208.0 preamble_pos = $preamble_pos";
 		return return (-1," sync not found") if ($preamble_pos <=0);
-		$message_end=$-[1] if ($bitData =~ m/^.{44,}(1{11}).*/); #Todo 44 anpassen
-		if (!defined($message_end) || $message_end < $preamble_pos) {
-			$message_end = length($bitData);
-		} else {
-			#$message_end += 11;
-			Log3 $name, 4, "$name: TFA message end pattern found at pos $message_end  lengthBitData=".length($bitData);
-		}
-		$message_length = ($message_end - $preamble_pos);
-		Log3 $name, 4, "$name: TFA message new length=".$message_length;
-
-		return (-1," message is to short") if (defined($ProtocolListSIGNALduino{$id}{length_min}) && $message_length < $ProtocolListSIGNALduino{$id}{length_min} );
-		return (-1," message is to long") if (defined($ProtocolListSIGNALduino{$id}{length_max}) && $message_length > $ProtocolListSIGNALduino{$id}{length_max} );
+		my @messages;
 		
-		my $hex=SIGNALduino_b2h(substr($bitData,$preamble_pos,$message_length));
-		return  (1,$hex); ## Return the bits unchanged in hex
+		do 
+		{
+			$message_end = index($bitData,"1111111111010",$preamble_pos); 
+			
+			if ($message_end < $preamble_pos)
+			{
+				$message_end=length($bitData);
+			} 
+			$message_length = ($message_end - $preamble_pos);
+			
+			my $part_str=substr($bitData,$preamble_pos,$message_length);
+			Log3 $name, 4, "$name: TFA message start=$preamble_pos end=$message_end with length".$message_length;
+			Log3 $name, 5, "$name: part $part_str";
+			my $hex=SIGNALduino_b2h($part_str);
+			push (@messages,$hex);
+			Log3 $name, 4, "$name: ".$hex;
+			$preamble_pos=$message_end + 9;
+		}  while ( $message_end < length($bitData) );
+		
+		my %seen;
+		my @dupmessages = map { 1==$seen{$_}++ ? $_ : () } @messages;
+	
+		if (scalar(@dupmessages) > 0 ) {
+			Log3 $name, 4, "$name: repeated hex ".$dupmessages[0]." found ".$seen{$dupmessages[0]}." times";
+			return  (1,$dupmessages[0]);
+		}
 	}
 	return (-1,undef);
 	
