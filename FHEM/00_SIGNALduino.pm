@@ -3478,17 +3478,19 @@ sub SIGNALduino_ITV1_tristateToBit($)
 	return $msg;
 }
 
-sub SIGNALduino_MCTFA()
+
+sub SIGNALduino_MCTFA
 {
 	my ($name,$bitData,$id) = @_;
+	
 	my $preamble_pos;
 	my $message_end;
 	my $message_length;
 		
 	#if ($bitData =~ m/^.?(1){16,24}0101/)  {  
-	if ($bitData =~ m/(1{9})/ )
+	if ($bitData =~ m/(1{9}101)/ )
 	{ 
-		$preamble_pos=$+[1];
+		$preamble_pos=$+[1]-4;
 		Log3 $name, 4, "$name: TFA 30.3208.0 preamble_pos = $preamble_pos";
 		return return (-1," sync not found") if ($preamble_pos <=0);
 		my @messages;
@@ -3496,20 +3498,25 @@ sub SIGNALduino_MCTFA()
 		do 
 		{
 			$message_end = index($bitData,"1111111111010",$preamble_pos); 
-			
 			if ($message_end < $preamble_pos)
 			{
 				$message_end=length($bitData);
 			} 
-			$message_length = ($message_end - $preamble_pos);
+			$message_length = ($message_end - $preamble_pos);			
 			
 			my $part_str=substr($bitData,$preamble_pos,$message_length);
+			$part_str = substr($part_str,0,56) if (length($part_str)) > 56;
+			
+			#while (length($part_str) % 4 > 0)
+			#{
+		#		$part_str .= "0";
+		#	}
 			Log3 $name, 4, "$name: TFA message start=$preamble_pos end=$message_end with length".$message_length;
 			Log3 $name, 5, "$name: part $part_str";
 			my $hex=SIGNALduino_b2h($part_str);
 			push (@messages,$hex);
 			Log3 $name, 4, "$name: ".$hex;
-			$preamble_pos=$message_end + 9;
+			$preamble_pos=index($bitData,"11010",$message_end);
 		}  while ( $message_end < length($bitData) );
 		
 		my %seen;
@@ -3518,11 +3525,14 @@ sub SIGNALduino_MCTFA()
 		if (scalar(@dupmessages) > 0 ) {
 			Log3 $name, 4, "$name: repeated hex ".$dupmessages[0]." found ".$seen{$dupmessages[0]}." times";
 			return  (1,$dupmessages[0]);
+		} else {  
+			return (-1," no duplicate found");
 		}
 	}
 	return (-1,undef);
 	
 }
+
 
 sub SIGNALduino_OSV2()
 {
