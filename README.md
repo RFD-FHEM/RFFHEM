@@ -38,6 +38,7 @@ Supported Devices / Protocols
 |Oregon NR868 | Motion sensor |
 |IAN 275901 Lidl | Weatherstation |
 |m-e VTX and BASIC | wireless bell |
+|FT0073 | Weather sensors|
 
 How to install
 ======
