@@ -113,12 +113,10 @@ sub SD_WS_Parse($$)
 			prematch => sub {my $msg = shift; return 1 if ($msg =~ /^FF5[0-9A-F]{5}FF[0-9A-F]{2}/); }, 		# prematch
 			crcok => sub {my $msg = shift; return 1 if ((hex(substr($msg,2,2))+hex(substr($msg,4,2))+hex(substr($msg,6,2))+hex(substr($msg,8,2))&0xFF) == (hex(substr($msg,10,2))) );  }, 	# crc
 			id => sub {my $msg = shift; return (hex(substr($msg,2,2)) &0x03 ); },   							#id
-			#temp => sub {my $msg = shift; return  (sprintf('%x',((hex(substr($msg,6,2)) <<4)/2/10)));  },		#temp
-			#temphex => sub {my $msg = shift; return  sprintf("%04X",((hex(substr($msg,6,2)))<<4)/2);  },			#temp
 			temp => sub {my $msg = shift; return  ((hex(substr($msg,6,2)))-40)  },								#temp
-			#hum => sub {my $msg = shift; return (printf('%02x',hex(substr($msg,4,2))));  }, 					#hum
 			hum => sub {my $msg = shift; return hex(substr($msg,4,2));  }, 										#hum
 			channel => sub {my (undef,$bitData) = @_; return ( SD_WS_binaryToNumber($bitData,12,15)&0x03 );  }, #channel
+			bat 	=> sub { return "";},
         },	
      33 =>
    	 	 {
@@ -151,7 +149,7 @@ sub SD_WS_Parse($$)
    	 	 }   ,  
        58 => 
    	 	 {
-     		sensortype => 'TFA 3032080 ',
+     		sensortype => 'TFA 3032080',
         	model =>	'SD_WS_58_TH', 
 			prematch => sub {my $msg = shift; return 1 if ($msg =~ /^[0-9A-F]{10}/); }, 							# prematch
 			crcok => 	sub {return 1;  }, 																			# crc is unknown
@@ -413,9 +411,9 @@ sub SD_WS_Parse($$)
 	readingsBulkUpdate($hash, "state", $state);
 	readingsBulkUpdate($hash, "temperature", $temp)  if (defined($temp));
 	readingsBulkUpdate($hash, "humidity", $hum)  if (defined($hum) && $hum > 0);
-	readingsBulkUpdate($hash, "battery", $bat) if (defined($bat));
-	readingsBulkUpdate($hash, "channel", $channel) if (defined($channel));
-	readingsBulkUpdate($hash, "trend", $trend) if (defined($trend));
+	readingsBulkUpdate($hash, "battery", $bat) if (defined($bat) && length($bat) > 0) ;
+	readingsBulkUpdate($hash, "channel", $channel) if (defined($channel)&& length($channel) > 0);
+	readingsBulkUpdate($hash, "trend", $trend) if (defined($trend) && length($trend) > 0);
 	
 	readingsEndUpdate($hash, 1); # Notify is done by Dispatch
 	
