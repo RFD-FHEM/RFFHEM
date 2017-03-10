@@ -151,18 +151,52 @@ sub SD_WS_Parse($$)
    	 	 {
      		sensortype => 'TFA 3032080',
         	model =>	'SD_WS_58_TH', 
-			prematch => sub {my $msg = shift; return 1 if ($msg =~ /^[0-9A-F]{10}/); }, 							# prematch
-			crcok => 	sub {return 1;  }, 																			# crc is unknown
-			id => 		sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,12,19); },   			# random id
-			bat => 		sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,20) eq "1" ? "crititcal" : "ok";},  # bat?
-			
-			channel => 	sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,21,23)+1 );  },		# channel
-			temp => 	sub {my (undef,$bitData) = @_; return round(((((SD_WS_binaryToNumber($bitData,24,35)-400)/10)-32)/1.8),1); },  #temp
-			hum => 		sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,36,43));  }, 		#hum
-
-	 #		sendmode =>	sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,10,11) eq "1" ? "manual" : "auto";  }
-     # 		trend => 	sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,15,16) eq "01" ? "rising" : SD_WS_binaryToNumber($bitData,14,15) eq "00" ? "neutral" : "rising";},
-     # 		sync => 	sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,35,35) eq "1" ? "true" : "false");},
+			prematch => sub {my $msg = shift; return 1 if ($msg =~ /^45[0-9A-F]{11}/); }, 							# prematch
+			crcok => 	sub {   my $msg = shift;
+							    my @buff = split(//,substr($msg,index($msg,"45"),10));
+							    my $crc_check = substr($msg,index($msg,"45")+10,2);
+							    my $mask = 0x7C;
+							    my $checksum = 0x64;
+							    my $data;
+							    my $nibbleCount;
+							    for ( $nibbleCount=0; $nibbleCount < scalar @buff; $nibbleCount+=2)
+							    {
+							        my $bitCnt;
+							        if ($nibbleCount+1 <scalar @buff)
+							        {
+							        	$data = hex($buff[$nibbleCount].$buff[$nibbleCount+1]);
+							        } else  {
+							        	$data = hex($buff[$nibbleCount]);	
+							        }
+							        for ( my $bitCnt= 7; $bitCnt >= 0 ; $bitCnt-- )
+							        {
+							            my $bit;
+							            # Rotate mask right
+							            $bit = $mask & 1;
+							            $mask = ($mask >> 1 ) | ($mask << 7) & 0xFF;
+							            if ( $bit )
+							            {
+							                $mask ^= 0x18 & 0xFF;
+							            }
+							            # XOR mask into checksum if data bit is 1
+							            if ( $data & 0x80 )
+							            {
+							                $checksum ^= $mask & 0xFF;
+							            }
+							            $data <<= 1 & 0xFF;
+							        }
+							    }
+							    if ($checksum == hex($crc_check)) {
+								    return 1;
+							    } else {
+							    	return 0;
+							    }
+							}, 																			
+			id => 		sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,8,15); },   							   # random id
+			bat => 		sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,16) eq "1" ? "crititcal" : "ok";},  	   # bat?
+			channel => 	sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,17,19)+1 );  },						   # channel
+			temp => 	sub {my (undef,$bitData) = @_; return round((SD_WS_binaryToNumber($bitData,20,31)-720)*0.0556,1); }, 		   # temp
+			hum => 		sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,32,39));  }, 							   # hum
    	 	 }   ,     
     );
     
@@ -335,7 +369,7 @@ sub SD_WS_Parse($$)
 	 	   	$SensorTyp=$decodingSubs{$protocol}{sensortype};
 		    
 		    return "" && Log3 $iohash, 4, "$name decoded protocolid: $protocol ($SensorTyp) prematch error" if (!$decodingSubs{$protocol}{prematch}->( $rawData ));
-		    return "" && Log3 $iohash, 4, "$name decoded protocolid: $protocol ($SensorTyp) crc  error"  if (!$decodingSubs{$protocol}{crcok}->( $rawData ));
+		    return "" && Log3 $iohash, 4, "$name decoded protocolid: $protocol ($SensorTyp) crc error"  if (!$decodingSubs{$protocol}{crcok}->( $rawData ));
 		    
 	    	$id=$decodingSubs{$protocol}{id}->( $rawData,$bitData );
 	    	#my $temphex=$decodingSubs{$protocol}{temphex}->( $rawData,$bitData );

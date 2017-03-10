@@ -1097,7 +1097,7 @@ my %ProtocolListSIGNALduino  = (
          preamble      	 => 'K',                # prepend to converted message
          postamble     	 => '',                  # Append to converted message       
          clientmodule  	 => 'CUL_WS',
-         #length_min     => '78',
+         length_min      => '58',
          #length_max     => '80',
       }, 
 );
@@ -3488,16 +3488,16 @@ sub SIGNALduino_MCTFA
 	my $message_length;
 		
 	#if ($bitData =~ m/^.?(1){16,24}0101/)  {  
-	if ($bitData =~ m/(1{9}101)/ )
+	if ($bitData =~ m/(1{10}101)/ )
 	{ 
-		$preamble_pos=$+[1]-4;
+		$preamble_pos=$+[1];
 		Log3 $name, 4, "$name: TFA 30.3208.0 preamble_pos = $preamble_pos";
 		return return (-1," sync not found") if ($preamble_pos <=0);
 		my @messages;
 		
 		do 
 		{
-			$message_end = index($bitData,"1111111111010",$preamble_pos); 
+			$message_end = index($bitData,"1111111111101",$preamble_pos); 
 			if ($message_end < $preamble_pos)
 			{
 				$message_end=length($bitData);
@@ -3505,18 +3505,14 @@ sub SIGNALduino_MCTFA
 			$message_length = ($message_end - $preamble_pos);			
 			
 			my $part_str=substr($bitData,$preamble_pos,$message_length);
-			$part_str = substr($part_str,0,56) if (length($part_str)) > 56;
-			
-			#while (length($part_str) % 4 > 0)
-			#{
-		#		$part_str .= "0";
-		#	}
+			$part_str = substr($part_str,0,52) if (length($part_str)) > 52;
+
 			Log3 $name, 4, "$name: TFA message start=$preamble_pos end=$message_end with length".$message_length;
 			Log3 $name, 5, "$name: part $part_str";
 			my $hex=SIGNALduino_b2h($part_str);
 			push (@messages,$hex);
 			Log3 $name, 4, "$name: ".$hex;
-			$preamble_pos=index($bitData,"11010",$message_end);
+			$preamble_pos=index($bitData,"1101",$message_end)+4;
 		}  while ( $message_end < length($bitData) );
 		
 		my %seen;
