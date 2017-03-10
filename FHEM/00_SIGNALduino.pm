@@ -833,20 +833,20 @@ my %ProtocolListSIGNALduino  = (
 			#clientmodule => '', # not used now
 			#modulematch => '', # not used now
 			length_min => '20',
-		},    
-	"42" => ## MKT Multi Kon Trade
-		{
-			name => 'MKT motionsensor',
-			id => '42',
-			zero => [1,-3],
-			one => [3,-1],
-			start => [-28],
-			clockabs => 550, 
-			preamble => 'u42#', # prepend to converted message
-			#clientmodule => '', # not used now
-			#modulematch => '', 
-			length_min => '24',
-		},
+		},     
+	#"42" => ## MKT Multi Kon Trade  // Sollte eigentlich als MS ITv1 erkannt werden
+	#	{
+	#		name => 'MKT motionsensor',
+	#		id => '42',
+	#		zero => [1,-3],
+	#		one => [3,-1],
+	#		sync => [-28],
+	#		clockabs => 550, 
+	#		preamble => 'u42#', # prepend to converted message
+	#		#clientmodule => '', # not used now
+	#		#modulematch => '', 
+	#		length_min => '24',
+	#	},
 	"43" => ## Somfy RTS
 		{
 			name 			=> 'Somfy RTS',
