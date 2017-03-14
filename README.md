@@ -39,6 +39,8 @@ Supported Devices / Protocols
 |IAN 275901 Lidl | Weatherstation |
 |m-e VTX and BASIC | wireless bell |
 |FT0073 | Weather sensors|
+|revolt | Energy sensors|
+|Clarus | remote power socket|
 
 How to install
 ======

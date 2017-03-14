@@ -115,6 +115,7 @@ my $clientsSIGNALduino = ":IT:"
 			        	."SD_WS_Maverick:"
 			        	."FLAMINGO:"
 			        	."CUL_WS:"
+			        	."Revolt:"
 			      		."SIGNALduino_un:"
 					; 
 
@@ -122,7 +123,7 @@ my $clientsSIGNALduino = ":IT:"
 my %matchListSIGNALduino = (
      "1:IT"            			=> "^i......",	  				  # Intertechno Format
      "2:CUL_TCM97001"      		=> "^s[A-Fa-f0-9]+",			  # Any hex string		beginning with s
-     "3:SIGNALduino_RSL"		=> "^r[A-Fa-f0-9]+",				  # Any hex string		beginning with r
+     "3:SIGNALduino_RSL"		=> "^r[A-Fa-f0-9]{6}",				  # Any hex string		beginning with r
      "5:CUL_TX"               	=> "^TX..........",         	  # Need TX to avoid FHTTK
      "6:SD_AS"       			=> "^P2#[A-Fa-f0-9]{7,8}", 		  # Arduino based Sensors, should not be default
      "4:OREGON"            		=> "^(3[8-9A-F]|[4-6][0-9A-F]|7[0-8]).*",		
@@ -137,6 +138,7 @@ my %matchListSIGNALduino = (
      "17:SD_UT"            		=> '^u30#.*',								## BELL 201.2 TXA
      "18:FLAMINGO"            	=> '^P13#[A-Fa-f0-9]+',						## Flamingo Smoke
      "19:CUL_WS"				=> '^K[A-Fa-f0-9]{5,}',
+     "20:Revolt"				=> '^r[A-Fa-f0-9]{22}',
      "X:SIGNALduino_un"			=> '^[u]\d+#.*',
 );
 
@@ -172,7 +174,7 @@ my %ProtocolListSIGNALduino  = (
 			preamble		=> 'r',					# prepend to converted message	 	
 			postamble		=> '',					# Append to converted message	 	
 			clientmodule    => 'SIGNALduino_RSL',   # not used now
-			modulematch     => '^r[A-Fa-f0-9]+', 	# not used now
+			modulematch     => '^r[A-Fa-f0-9]{6}', 	# not used now
 			length_min 		=> '23',
 			length_max 		=> '24',
 
@@ -819,6 +821,8 @@ my %ProtocolListSIGNALduino  = (
 			#clientmodule => '', # not used now
 			#modulematch => '', # not used now
 			length_min => '10',
+			length_min => '12',
+			
 		},    
 	"41" => ## Elro (Smartwares) Doorbell DB200
 		{
@@ -892,21 +896,22 @@ my %ProtocolListSIGNALduino  = (
             		length_max 		=> '72',
 		},
 
-    "45"    => 
-        {
-            name			=> 'revolt',	
-			id          	=> '45',
-			one				=> [3,-1],
-			zero			=> [1,-3],
-			#float			=> [-1,3],		# not full supported now later use
-			sync			=> [1,-24],
-			clockabs     	=> -1,	# -1=auto	
-			format 			=> 'twostate',	# not used now
-			preamble		=> 'i',			
-			clientmodule    => 'IT',   # not used now
-			modulematch     => '^i......', # not used now
-			length_min      => '24',
-			},
+    "45"  => #  Revolt 
+			 #	MU;P0=-8320;P1=9972;P2=-376;P3=117;P4=-251;P5=232;D=012345434345434345454545434345454545454543454343434343434343434343434543434345434343434545434345434343434343454343454545454345434343454345434343434343434345454543434343434345434345454543454343434543454345434545;CP=3;R=2
+		{
+			name         => 'Revolt',
+			id           => '45',
+			one          => [2,-2],
+			zero         => [1,-2],
+			start        => [83,-3], 
+			clockabs     => 120, 
+			preamble     => 'r', # prepend to converted message
+			clientmodule => 'Revolt', 
+			modulematch  => '^r[A-Fa-f0-9]{22}', 
+			length_min   => '84',
+			length_max   => '120',	
+			postDemodulation => sub {	my @bitmsg = splice @_, 0,88;	return @bitmsg; },
+		},    
     "46"    => 
         {
             name			=> 'EKX1BE',	
@@ -1100,6 +1105,22 @@ my %ProtocolListSIGNALduino  = (
          length_min      => '58',
          #length_max     => '80',
       }, 
+	
+	"62" => ## Clarus_Switch  
+		{    #MU;P0=-5893;P4=-634;P5=498;P6=-257;P7=116;D=45656567474747474745656707456747474747456745674567456565674747474747456567074567474747474567456745674565656747474747474565670745674747474745674567456745656567474747474745656707456747474747456745674567456565674747474747456567074567474747474567456745674567;CP=7;O;
+			name         => 'Clarus_Switch',
+			id           => '62',
+			one          => [3,-1],
+			zero         => [1,-3],
+			start        => [1,-35], # ca 30-40
+			clockabs     => 189, 
+			preamble     => 'i', # prepend to converted message
+			clientmodule => 'IT', 
+			#modulematch => '', 
+			length_min   => '24',
+			length_min   => '24',		
+		},    
+		
 );
 
 

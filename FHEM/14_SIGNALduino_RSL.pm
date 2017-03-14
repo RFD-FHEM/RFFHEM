@@ -55,7 +55,7 @@ sub SIGNALduino_RSL_Initialize($)
 { 
   my ($hash) = @_;
 
-  $hash->{Match}     = "^r[A-Fa-f0-9]+";
+  $hash->{Match}     = "^r[A-Fa-f0-9]6{6}";
   $hash->{SetFn}     = "SIGNALduino_RSL_Set";
   $hash->{DefFn}     = "SIGNALduino_RSL_Define";
   $hash->{UndefFn}   = "SIGNALduino_RSL_Undef";
