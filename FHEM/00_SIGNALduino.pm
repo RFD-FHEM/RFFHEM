@@ -1091,7 +1091,7 @@ my %ProtocolListSIGNALduino  = (
 			length_min      => '24',
 			length_max      => '24',
 		},			
- "60" => ##  WS7000 #############################################################################
+	 "60" => ##  WS7000 #############################################################################
      # MU;P0=3472;P1=-449;P2=773;P3=280;P4=-941;D=01212121212121212121342121342134343434213434212134342121212134213421213421343421342121212134212134213421343421342121213434343434213421212134343434213434342134343;CP=3;R=52;
       {
          name   		 => 'WS7000',   
@@ -1118,9 +1118,22 @@ my %ProtocolListSIGNALduino  = (
 			clientmodule => 'IT', 
 			#modulematch => '', 
 			length_min   => '24',
-			length_min   => '24',		
+			length_max   => '24',		
 		},    
-		
+	"63" => ## Warema MU
+		{    #MU;P0=-2988;P1=1762;P2=-1781;P3=-902;P4=871;P5=6762;P6=5012;D=0121342434343434352434313434243521342134343436;
+			name         => 'Warema',
+			id           => '62',
+			one          => [1],
+			zero         => [0],
+			clockabs     => 800, 
+			syncabs		 => '6700',# Special field for filterMC function
+			preamble     => 'u63', # prepend to converted message
+			clientmodule => '', 
+			#modulematch => '', 
+			length_min   => '24',
+			filterfunc   => 'SIGNALduino_filterMC',
+		},    
 );
 
 
@@ -3833,6 +3846,77 @@ sub SIGNALduino_SomfyRTS()
 }
 
 # - - - - - - - - - - - -
+#=item SIGNALduino_filterMC()
+#This functons, will act as a filter function. It will decode MU data via Manchester encoding
+# 
+# Will return  $count of ???,  modified $rawData , modified %patternListRaw,
+# =cut
+
+
+sub SIGNALduino_filterMC($$$%)
+{
+	
+	## Warema Implementierung : Todo variabel gestalten
+	my ($name,$id,$rawData,%patternListRaw) = @_;
+	my $debug = AttrVal($name,"debug",0);
+	
+	my ($ht, $hasbit, $value) = 0;
+	my @bitData;
+	my @sigData = split "",$rawData;
+
+	foreach my $pulse (@sigData)
+	{
+	  Log3 $name, 4, "$name: pulese: ".$patternListRaw{$pulse};
+		
+	  if (SIGNALduino_inTol($ProtocolListSIGNALduino{$id}{clockabs},abs($patternListRaw{$pulse}),$ProtocolListSIGNALduino{$id}{clockabs}*0.5))
+	  {
+		# Short	
+		$hasbit=$ht;
+		$ht = $ht ^ 0b00000001;
+		$value='S' if($debug);
+		#Log3 $name, 4, "$name: filter S ";
+	  } elsif ( SIGNALduino_inTol($ProtocolListSIGNALduino{$id}{clockabs}*2,abs($patternListRaw{$pulse}),$ProtocolListSIGNALduino{$id}{clockabs}*0.5)) {
+	  	# Long
+	  	$hasbit=1;
+		$ht=1;
+		$value='L' if($debug);
+		#Log3 $name, 4, "$name: filter L ";
+		
+			
+	  } elsif ( SIGNALduino_inTol($ProtocolListSIGNALduino{$id}{syncabs}+(2*$ProtocolListSIGNALduino{$id}{clockabs}),abs($patternListRaw{$pulse}),$ProtocolListSIGNALduino{$id}{clockabs}*0.5))  {
+	  	$hasbit=1;
+		$ht=1;
+		$value='L' if($debug);
+	  	Log3 $name, 4, "$name: sync L ";
+	
+	  } else {
+	  	# No Manchester Data
+	  	$ht=0;
+	  	$hasbit=0;
+	  	Log3 $name, 4, "$name: filter n ";
+	  }
+	  
+	  if ($hasbit && $value) {
+	  	$value = lc($value) if($debug && $patternListRaw{$pulse} < 0);
+	  	my $bit=$patternListRaw{$pulse} > 0 ? 1 : 0;
+	  	Log3 $name, 5, "$name: adding value: ".$bit;
+	  	
+	  	push @bitData, $bit ;
+	  }
+	}
+
+	my %patternListRawFilter;
+	
+	$patternListRawFilter{0} = 0;
+	$patternListRawFilter{1} = $ProtocolListSIGNALduino{$id}{clockabs};
+	
+	Log3 $name, 4, "$name: filterbits: ".@bitData;
+	$rawData = join "", @bitData;
+	return (undef ,$rawData, %patternListRawFilter);
+	
+}
+
+# - - - - - - - - - - - -
 #=item SIGNALduino_filterSign()
 #This functons, will act as a filter function. It will remove the sign from the pattern, and compress message and pattern
 # 
@@ -3848,7 +3932,7 @@ sub SIGNALduino_filterSign($$$%)
 
 	my %buckets;
 	# Remove Sign
-    %patternListRaw = map { $_ => abs($patternListRaw{$_})} keys %patternListRaw;  ## remove sing from all
+    %patternListRaw = map { $_ => abs($patternListRaw{$_})} keys %patternListRaw;  ## remove sign from all
     
     my $intol=0;
     my $cnt=0;
