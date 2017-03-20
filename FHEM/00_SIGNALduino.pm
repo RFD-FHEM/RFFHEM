@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 10484 2017-02-26 11:00:00Z v3.3.1-dev $
+# $Id: 00_SIGNALduino.pm 10484 2017-03-19 11:00:00Z v3.3.1-dev $
 #
 # v3.3.1 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -1041,7 +1041,7 @@ my %ProtocolListSIGNALduino  = (
 			one				=> [3,-1],
 			start			=> [25,-3],						
 			format 			=> 'twostate',	
-			preamble		=> 'u56',						# prepend to converted message	
+			preamble		=> 'u56#',						# prepend to converted message	
 			clientmodule    => ''	,   					# not used now
 			modulematch     => '',  						# not used now
 			length_min      => '56',
@@ -1084,7 +1084,7 @@ my %ProtocolListSIGNALduino  = (
 			one				=> [-1,4],
 			start			=> [-1,37],						
 			format 			=> 'twostate',	# tristate can't be migrated from bin into hex!
-			preamble		=> 'u59',			# Append to converted message	
+			preamble		=> 'u59#',			# Append to converted message	
 			postamble		=> '',		# Append to converted message	 	
 			clientmodule    => '',   		# not used now
 			modulematch     => '',  # not used now
@@ -1105,7 +1105,23 @@ my %ProtocolListSIGNALduino  = (
          length_min      => '58',
          #length_max     => '80',
       }, 
-	
+	"61" =>	## ELV FS10
+		# tested remote control: FS10-S8
+		# das letzte Bit 1 und 1 x 0 Preambel fehlt immer
+		{
+			name   		=> 'FS10',
+			id		=> '61',
+			one		=> [1,-2],
+			zero		=> [1,-1],
+			clockabs	=> 390,  
+			preamble	=> 'u61#',      # prepend to converted message
+			postamble	=> '',         # Append to converted message
+			#clientmodule	=> 'FS10',
+			#modulematch	=> '',
+			length_min	=> '40',	# eigentlich 46
+			length_max      => '48',	# eigentlich 46
+			#postDemodulation	=> \&SIGNALduino_postDemo_FS10,
+		}, 
 	"62" => ## Clarus_Switch  
 		{    #MU;P0=-5893;P4=-634;P5=498;P6=-257;P7=116;D=45656567474747474745656707456747474747456745674567456565674747474747456567074567474747474567456745674565656747474747474565670745674747474745674567456745656567474747474745656707456747474747456745674567456565674747474747456567074567474747474567456745674567;CP=7;O;
 			name         => 'Clarus_Switch',
@@ -1119,7 +1135,7 @@ my %ProtocolListSIGNALduino  = (
 			#modulematch => '', 
 			length_min   => '24',
 			length_max   => '24',		
-		},    
+		},
 	"63" => ## Warema MU
 		{    #MU;P0=-2988;P1=1762;P2=-1781;P3=-902;P4=871;P5=6762;P6=5012;D=0121342434343434352434313434243521342134343436;
 			name         => 'Warema',
@@ -2179,6 +2195,8 @@ SIGNALduino_Read($)
 		my $mL;
 		my $mH;
 		my $part = "";
+		my $partD;
+		
 		foreach my $msgPart (@msg_parts) {
 			$m0 = substr($msgPart,0,1);
 			$mnr0 = ord($m0);
@@ -2204,15 +2222,19 @@ SIGNALduino_Read($)
 			elsif (($m0 eq "D" || $m0 eq "d") && length($m1) > 0) {
 				my @arrayD = split(//, $m1);
 				$part .= "D=";
+				$partD = "";
 				foreach my $D (@arrayD) {
-					$mH = (ord($D) >> 4) & 7;
+					$mH = ord($D) >> 4;
 					$mL = ord($D) & 7;
-					$part .= "$mH$mL";
+					$partD .= "$mH$mL";
 				}
+				#Log3 $name, 3, "$name/msg READredu1$m0: $partD";
 				if ($m0 eq "d") {
-					$part =~ s/.$//;	   # letzte Ziffer entfernen wenn Anzahl der Ziffern ungerade
+					$partD =~ s/.$//;	   # letzte Ziffer entfernen wenn Anzahl der Ziffern ungerade
 				}
-				$part .= ";";
+				$partD =~ s/^8//;	           # 8 am Anfang entfernen
+				#Log3 $name, 3, "$name/msg READredu2$m0: $partD";
+				$part = $part . $partD . ';';
 			}
 			elsif (($m0 eq "C" || $m0 eq "S") && length($m1) == 1) {
 				$part .= "$m0" . "P=$m1;";
@@ -2641,10 +2663,14 @@ SIGNALduino_Parse_MS($$$$%)
 	my $protocolid;
 	my $syncidx=$msg_parts{syncidx};			
 	my $clockidx=$msg_parts{clockidx};				
-	my $rssi=$msg_parts{rssi};
+	my $rawRssi=$msg_parts{rssi};
 	my $protocol=undef;
 	my $rawData=$msg_parts{rawData};
 	my %patternList;
+	my $rssi;
+	if (defined($rawRssi)) {
+		$rssi = ($rawRssi>=128 ? (($rawRssi-256)/2-74) : ($rawRssi/2-74)); # todo: passt dies so? habe ich vom 00_cul.pm
+	}
     #$patternList{$_} = $msg_parts{rawData}{$_] for keys %msg_parts{rawData};
 
 	#$patternList = \%msg_parts{pattern};
@@ -2794,18 +2820,17 @@ SIGNALduino_Parse_MS($$$$%)
 			#my $dmsg = sprintf "%02x", oct "0b" . join "", @bit_msg;			## Array -> String -> bin -> hex
 			my $dmsg = SIGNALduino_b2h(join "", @bit_msg);
 			my $postamble = $ProtocolListSIGNALduino{$id}{postamble};
-			if (defined($rssi)) {
+			if (defined($rawRssi)) {
 				if (defined($ProtocolListSIGNALduino{$id}{preamble}) && $ProtocolListSIGNALduino{$id}{preamble} eq "s") {
-					$postamble = sprintf("%02X", $rssi);
+					$postamble = sprintf("%02X", $rawRssi);
 				} elsif ($id eq "7") {
-				        $postamble = "#R" . sprintf("%02X", $rssi);
+				        $postamble = "#R" . sprintf("%02X", $rawRssi);
 				}
 			}
 			$dmsg = "$dmsg".$postamble if (defined($postamble));
 			$dmsg = "$ProtocolListSIGNALduino{$id}{preamble}"."$dmsg" if (defined($ProtocolListSIGNALduino{$id}{preamble}));
 			
 			if (defined($rssi)) {
-				$rssi = ($rssi>=128 ? (($rssi-256)/2-74) : ($rssi/2-74)); # todo: passt dies so? habe ich vom 00_cul.pm
 				Log3 $name, 4, "$name: Decoded MS Protocol id $id dmsg $dmsg length " . scalar @bit_msg . " RSSI = $rssi";
 			} else {
 				Log3 $name, 4, "$name: Decoded MS Protocol id $id dmsg $dmsg length " . scalar @bit_msg;
@@ -2876,8 +2901,11 @@ sub SIGNALduino_Parse_MU($$$$@)
 	my $rawData;
 	my %patternListRaw;
 	my $message_dispatched=0;
-	
 	my $debug = AttrVal($iohash->{NAME},"debug",0);
+	
+	if (defined($rssi)) {
+		$rssi = ($rssi>=128 ? (($rssi-256)/2-74) : ($rssi/2-74)); # todo: passt dies so? habe ich vom 00_cul.pm
+	}
 	
     Debug "$name: processing unsynced message\n" if ($debug);
 
@@ -3072,7 +3100,6 @@ sub SIGNALduino_Parse_MU($$$$@)
 						$dmsg = "$ProtocolListSIGNALduino{$id}{preamble}"."$dmsg" if (defined($ProtocolListSIGNALduino{$id}{preamble}));
 						
 						if (defined($rssi)) {
-							$rssi = ($rssi>=128 ? (($rssi-256)/2-74) : ($rssi/2-74)); # todo: passt dies so? habe ich vom 00_cul.pm
 							Log3 $name, 4, "$name: decoded matched MU Protocol id $id dmsg $dmsg length " . scalar @bit_msg . " RSSI = $rssi";
 						} else {
 							Log3 $name, 4, "$name: decoded matched MU Protocol id $id dmsg $dmsg length " . scalar @bit_msg;
@@ -3150,6 +3177,9 @@ SIGNALduino_Parse_MC($$$$@)
 	my $dmsg;
 	my $message_dispatched=0;
 	my $debug = AttrVal($iohash->{NAME},"debug",0);
+	if (defined($rssi)) {
+		$rssi = ($rssi>=128 ? (($rssi-256)/2-74) : ($rssi/2-74)); # todo: passt dies so? habe ich vom 00_cul.pm
+	}
 	
 	return undef if (!$clock);
 	#my $protocol=undef;
@@ -3172,7 +3202,6 @@ SIGNALduino_Parse_MC($$$$@)
 			Debug "clock and min length matched"  if ($debug);
 
 			if (defined($rssi)) {
-				$rssi = ($rssi>=128 ? (($rssi-256)/2-74) : ($rssi/2-74)); # todo: passt dies so? habe ich vom 00_cul.pm
 				Log3 $name, 4, "$name: Found manchester Protocol id $id clock $clock RSSI $rssi -> $ProtocolListSIGNALduino{$id}{name}";
 			} else {
 				Log3 $name, 4, "$name: Found manchester Protocol id $id clock $clock -> $ProtocolListSIGNALduino{$id}{name}";
