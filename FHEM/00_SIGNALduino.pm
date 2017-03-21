@@ -313,7 +313,7 @@ my %ProtocolListSIGNALduino  = (
 			preamble		=> 'P9#',		# prepend to converted message	
 			clientmodule    => 'SD_WS09',   	# not used now
 			#modulematch     => '^u9#.....',  # not used now
-			length_min      => '70',
+			length_min      => '60',
 			length_max      => '120',
 
 		}, 	
@@ -1182,7 +1182,7 @@ SIGNALduino_Initialize($)
                       ." flashCommand"
   					  ." hardware:nano328,uno,promini328,nanoCC1101"
 					  ." debug:0,1"
-					  ." longids"
+					  ." longids:0,1"
 					  ." minsecs"
 					  ." whitelist_IDs"
 					  ." WS09_WSModel:undef,WH1080,CTW600"
