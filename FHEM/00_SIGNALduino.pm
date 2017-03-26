@@ -3895,7 +3895,8 @@ sub SIGNALduino_filterMC($$$%)
 
 	foreach my $pulse (@sigData)
 	{
-	  Log3 $name, 4, "$name: pulese: ".$patternListRaw{$pulse};
+	  next if (!defined($patternListRaw{$pulse})); 
+	  #Log3 $name, 4, "$name: pulese: ".$patternListRaw{$pulse};
 		
 	  if (SIGNALduino_inTol($ProtocolListSIGNALduino{$id}{clockabs},abs($patternListRaw{$pulse}),$ProtocolListSIGNALduino{$id}{clockabs}*0.5))
 	  {
@@ -3909,26 +3910,24 @@ sub SIGNALduino_filterMC($$$%)
 	  	$hasbit=1;
 		$ht=1;
 		$value='L' if($debug);
-		#Log3 $name, 4, "$name: filter L ";
-		
-			
+		#Log3 $name, 4, "$name: filter L ";	
 	  } elsif ( SIGNALduino_inTol($ProtocolListSIGNALduino{$id}{syncabs}+(2*$ProtocolListSIGNALduino{$id}{clockabs}),abs($patternListRaw{$pulse}),$ProtocolListSIGNALduino{$id}{clockabs}*0.5))  {
 	  	$hasbit=1;
 		$ht=1;
 		$value='L' if($debug);
-	  	Log3 $name, 4, "$name: sync L ";
+	  	#Log3 $name, 4, "$name: sync L ";
 	
 	  } else {
 	  	# No Manchester Data
 	  	$ht=0;
 	  	$hasbit=0;
-	  	Log3 $name, 4, "$name: filter n ";
+	  	#Log3 $name, 4, "$name: filter n ";
 	  }
 	  
 	  if ($hasbit && $value) {
 	  	$value = lc($value) if($debug && $patternListRaw{$pulse} < 0);
 	  	my $bit=$patternListRaw{$pulse} > 0 ? 1 : 0;
-	  	Log3 $name, 5, "$name: adding value: ".$bit;
+	  	#Log3 $name, 5, "$name: adding value: ".$bit;
 	  	
 	  	push @bitData, $bit ;
 	  }
@@ -3939,7 +3938,7 @@ sub SIGNALduino_filterMC($$$%)
 	$patternListRawFilter{0} = 0;
 	$patternListRawFilter{1} = $ProtocolListSIGNALduino{$id}{clockabs};
 	
-	Log3 $name, 4, "$name: filterbits: ".@bitData;
+	#Log3 $name, 5, "$name: filterbits: ".@bitData;
 	$rawData = join "", @bitData;
 	return (undef ,$rawData, %patternListRawFilter);
 	

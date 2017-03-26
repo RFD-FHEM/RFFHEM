@@ -123,7 +123,7 @@ sub SD_WS_Parse($$)
      		sensortype => 's014/TFA 30.3200/TCM/Conrad',
         	model =>	'SD_WS_33_TH',
 			prematch => sub {my $msg = shift; return 1 if ($msg =~ /^[0-9A-F]{10,11}/); }, 							# prematch
-			crcok => 	sub {return SD_WS_binaryToNumber($bitData,36,39);  }, 										# crc
+			crcok => 	sub {return SD_WS_binaryToNumber($bitData,36,39)+1;  }, 									# crc currently not calculated
 			id => 		sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,0,9); },   				# id
 	#		sendmode =>	sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,10,11) eq "1" ? "manual" : "auto";  }
 			temp => 	sub {my (undef,$bitData) = @_; return (((SD_WS_binaryToNumber($bitData,22,25)*256 +  SD_WS_binaryToNumber($bitData,18,21)*16 + SD_WS_binaryToNumber($bitData,14,17)) *10 -12200) /18)/10;  },	#temp
@@ -365,12 +365,17 @@ sub SD_WS_Parse($$)
 	}
 	elsif (defined($decodingSubs{$protocol}))		# durch den hash decodieren
 	{
-	 
 	 	   	$SensorTyp=$decodingSubs{$protocol}{sensortype};
-		    
-		    return "" && Log3 $iohash, 4, "$name decoded protocolid: $protocol ($SensorTyp) prematch error" if (!$decodingSubs{$protocol}{prematch}->( $rawData ));
-		    return "" && Log3 $iohash, 4, "$name decoded protocolid: $protocol ($SensorTyp) crc error"  if (!$decodingSubs{$protocol}{crcok}->( $rawData ));
-		    
+		    if (!$decodingSubs{$protocol}{prematch}->( $rawData ))
+		    { 
+		   		Log3 $iohash, 4, "$name decoded protocolid: $protocol ($SensorTyp) prematch error" ;
+		    	return "";  
+	    	}
+		    my $retcrc=$decodingSubs{$protocol}{crcok}->( $rawData );
+		    if (!$retcrc)		    { 
+		    	Log3 $iohash, 4, "$name decoded protocolid: $protocol ($SensorTyp) crc error: $retcrc";
+		    	return "";  
+	    	}
 	    	$id=$decodingSubs{$protocol}{id}->( $rawData,$bitData );
 	    	#my $temphex=$decodingSubs{$protocol}{temphex}->( $rawData,$bitData );
 	    	
