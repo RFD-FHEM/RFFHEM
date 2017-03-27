@@ -33,6 +33,7 @@ sub SD_WS_Initialize($)
 		"BresserTemeo.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "2:180"},
 		"SD_WS51_TH.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "2:180"},
 		"SD_WS58_TH.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "2:90"},
+    "SD_WH2.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "2:90"},
 	};
 
 }
@@ -362,7 +363,71 @@ sub SD_WS_Parse($$)
 		$id = sprintf('%02X', $id);           # wandeln nach hex
 		Log3 $iohash, 4, "$name SD_WS_Parse: model=$model, temp=$temp, hum=$hum, channel=$channel, id=$id, bat=$bat";
 		
-	}
+	}   elsif  ($protocol eq "64")	# WH2
+  {
+  #* Fine Offset Electronics WH2 Temperature/Humidity sensor protocol
+ #* aka Agimex Rosenborg 66796 (sold in Denmark)
+ #* aka ClimeMET CM9088 (Sold in UK)
+ #* aka TFA Dostmann/Wertheim 30.3157 (Temperature only!) (sold in Germany)
+ #* aka ...
+ #*
+ #* The sensor sends two identical packages of 48 bits each ~48s. The bits are PWM modulated with On Off Keying
+ # * The data is grouped in 6 bytes / 12 nibbles
+ #* [pre] [pre] [type] [id] [id] [temp] [temp] [temp] [humi] [humi] [crc] [crc]
+ #*
+ #* pre is always 0xFF
+ #* type is always 0x4 (may be different for different sensor type?)
+ #* id is a random id that is generated when the sensor starts
+ #* temp is 12 bit signed magnitude scaled by 10 celcius
+ #* humi is 8 bit relative humidity percentage
+ #* Based on reverse engineering with gnu-radio and the nice article here:
+ #*  http://lucsmall.com/2012/04/29/weather-station-hacking-part-2/
+ 
+        #* Message Format:
+       #* .- [0] -. .- [1] -. .- [2] -. .- [3] -. .- [4] -.
+       #* |       | |       | |       | |       | |       |
+       #* SSSS.DDDD DDN_.TTTT TTTT.TTTT WHHH.HHHH CCCC.CCCC
+       #* |  | |     ||  |  | |  | |  | ||      | |       |
+       #* |  | |     ||  |  | |  | |  | ||      | `--------- CRC
+       #* |  | |     ||  |  | |  | |  | |`-------- Humidity
+       #* |  | |     ||  |  | |  | |  | |
+       #* |  | |     ||  |  | |  | |  | `---- weak battery
+       #* |  | |     ||  |  | |  | |  |
+       #* |  | |     ||  |  | |  | `----- Temperature T * 0.1
+       #* |  | |     ||  |  | |  |
+       #* |  | |     ||  |  | `---------- Temperature T * 1
+       #* |  | |     ||  |  |
+       #* |  | |     ||  `--------------- Temperature T * 10
+       #* |  | |     | `--- new battery
+       #* |  | `---------- ID
+       #* `---- START = 9
+       #*
+       #*/ 
+       
+       
+   	Log3 $iohash, 4, "$name converted to bits: WH2 " . $bitData;    
+    $model = "SD_WS_WH2";
+		$SensorTyp = "WH2";
+	  $id = 		SD_WS_bin2dec(substr($bitData,0,4));
+	#	$bat = 	int(substr($bitData,11,1)) eq "1" ? "ok" : "low";
+		$channel = 	SD_WS_bin2dec(substr($bitData,5,6));
+   	my $temp10Dec = SD_WS_bin2dec(substr($bitData, 13, 4));
+		my $temp1Dec = SD_WS_bin2dec(substr($bitData, 17, 4));
+    my $temp01Dec = SD_WS_bin2dec(substr($bitData, 21, 4)) / 10;
+    #$temp = 	$temp10Dec + $temp1Dec + $temp01Dec - 40 ;
+    $temp = 	$temp10Dec + $temp1Dec + $temp01Dec ;
+    my $hum10 =  SD_WS_bin2dec(substr($bitData,25,4))*10;
+    my $hum01 =  SD_WS_bin2dec(substr($bitData,29,4)) ;
+		$hum =		$hum10 + $hum01;
+    
+   # Log3 $iohash, 4, "$name decoded protocolid: $protocol ($SensorTyp) sensor id=$id, Temp10=$temp10Dec, Temp1=$temp1Dec, Temp01=$temp01Dec";
+		Log3 $iohash, 4, "$name decoded protocolid: $protocol ($SensorTyp) sensor id=$id, channel=$channel, temp=$temp, hum=$hum";
+    	
+  #if ($hum < 0 || $hum > 100 || $temp < -40 || $temp > 70) {
+	#		return "";
+	#	}
+	
+ 	 }
 	elsif (defined($decodingSubs{$protocol}))		# durch den hash decodieren
 	{
 	 	   	$SensorTyp=$decodingSubs{$protocol}{sensortype};
@@ -474,6 +539,13 @@ sub SD_WS_Attr(@)
 	$modules{SD_WS}{defptr}{$iohash->{NAME} . "." . $cde} = $hash;
 	return undef;
 }
+
+sub SD_WS_bin2dec($)
+    {
+      my $h = shift;
+      my $int = unpack("N", pack("B32",substr("0" x 32 . $h, -32))); 
+      return sprintf("%d", $int); 
+    }
 
 
 sub SD_WS_binaryToNumber

@@ -112,34 +112,34 @@ my $clientsSIGNALduino = ":IT:"
 						."Dooya:"
 						."SOMFY:"
 						."SD_UT:"	## BELL 201.2 TXA
-			        	."SD_WS_Maverick:"
-			        	."FLAMINGO:"
-			        	."CUL_WS:"
-			        	."Revolt:"
-			      		."SIGNALduino_un:"
-					; 
+						."SD_WS_Maverick:"
+						."FLAMINGO:"
+						."CUL_WS:"
+						."Revolt:"
+						."SIGNALduino_un:"
+						;
 
 ## default regex match List for dispatching message to logical modules, can be updated during runtime because it is referenced
 my %matchListSIGNALduino = (
-     "1:IT"            			=> "^i......",	  				  # Intertechno Format
-     "2:CUL_TCM97001"      		=> "^s[A-Fa-f0-9]+",			  # Any hex string		beginning with s
-     "3:SIGNALduino_RSL"		=> "^r[A-Fa-f0-9]{6}",				  # Any hex string		beginning with r
-     "5:CUL_TX"               	=> "^TX..........",         	  # Need TX to avoid FHTTK
-     "6:SD_AS"       			=> "^P2#[A-Fa-f0-9]{7,8}", 		  # Arduino based Sensors, should not be default
-     "4:OREGON"            		=> "^(3[8-9A-F]|[4-6][0-9A-F]|7[0-8]).*",		
-     "7:Hideki"					=> "^P12#75[A-F0-9]+",
-     "10:SD_WS07"				=> "^P7#[A-Fa-f0-9]{6}F[A-Fa-f0-9]{2}(#R[A-F0-9][A-F0-9]){0,1}\$",
-     "11:SD_WS09"				=> "^P9#[A-Fa-f0-9]+",
-     "12:SD_WS"					=> '^W\d+x{0,1}#.*',
-     "13:RFXX10REC" 			=> '^(20|29)[A-Fa-f0-9]+',
-     "14:Dooya"					=> '^P16#[A-Fa-f0-9]+',
-     "15:SOMFY"					=> '^YsA[0-9A-F]+',
-     "16:SD_WS_Maverick"		=> '^P47#[A-Fa-f0-9]+',
-     "17:SD_UT"            		=> '^u30#.*',								## BELL 201.2 TXA
-     "18:FLAMINGO"            	=> '^P13#[A-Fa-f0-9]+',						## Flamingo Smoke
-     "19:CUL_WS"				=> '^K[A-Fa-f0-9]{5,}',
-     "20:Revolt"				=> '^r[A-Fa-f0-9]{22}',
-     "X:SIGNALduino_un"			=> '^[u]\d+#.*',
+     "1:IT"										=> "^i......",										# Intertechno Format
+     "2:CUL_TCM97001"					=> "^s[A-Fa-f0-9]+",							# Any hex string		beginning with s
+     "3:SIGNALduino_RSL"			=> "^r[A-Fa-f0-9]{6}",						# Any hex string		beginning with r
+     "5:CUL_TX"								=> "^TX..........",								# Need TX to avoid FHTTK
+     "6:SD_AS"								=> "^P2#[A-Fa-f0-9]{7,8}",				# Arduino based Sensors, should not be default
+     "4:OREGON"								=> "^(3[8-9A-F]|[4-6][0-9A-F]|7[0-8]).*",
+     "7:Hideki"								=> "^P12#75[A-F0-9]+",
+     "10:SD_WS07"							=> "^P7#[A-Fa-f0-9]{6}F[A-Fa-f0-9]{2}(#R[A-F0-9][A-F0-9]){0,1}\$",
+     "11:SD_WS09"							=> "^P9#[A-Fa-f0-9]+",
+     "12:SD_WS"								=> '^W\d+x{0,1}#.*',
+     "13:RFXX10REC"						=> '^(20|29)[A-Fa-f0-9]+',
+     "14:Dooya"								=> '^P16#[A-Fa-f0-9]+',
+     "15:SOMFY"								=> '^YsA[0-9A-F]+',
+     "16:SD_WS_Maverick"			=> '^P47#[A-Fa-f0-9]+',
+     "17:SD_UT"								=> '^u30#.*',											# BELL 201.2 TXA
+     "18:FLAMINGO"						=> '^P13#[A-Fa-f0-9]+',						# Flamingo Smoke
+     "19:CUL_WS"							=> '^K[A-Fa-f0-9]{5,}',
+     "20:Revolt"							=> '^r[A-Fa-f0-9]{22}',
+     "X:SIGNALduino_un"				=> '^[u]\d+#.*',
 );
 
 
@@ -1149,7 +1149,23 @@ my %ProtocolListSIGNALduino  = (
 			#modulematch => '', 
 			length_min   => '24',
 			filterfunc   => 'SIGNALduino_filterMC',
-		},    
+		},
+	"64" => ##  WH2 #############################################################################
+		{
+			name         => 'WH2',
+			id           => '64',
+			one          => [-2,3],
+			zero         => [1,-2],
+			# sync       => [-46,1],
+			clockabs     => 500,          #-1=auto
+      clientmodule    => 'SD_WS',  
+			modulematch  => '^W64*',
+			preamble     => 'W64#',       # prepend to converted message
+			postamble    => '',           # Append to converted message       
+			clientmodule => '',
+			length_min   => '50',
+			length_max   => '80',
+		},
 );
 
 
@@ -1170,25 +1186,24 @@ SIGNALduino_Initialize($)
 
 # Normal devices
   $hash->{DefFn}  		 	= "SIGNALduino_Define";
-  $hash->{FingerprintFn} 	= "SIGNALduino_FingerprintFn";
+  $hash->{FingerprintFn}= "SIGNALduino_FingerprintFn";
   $hash->{UndefFn} 		 	= "SIGNALduino_Undef";
   $hash->{GetFn}   			= "SIGNALduino_Get";
   $hash->{SetFn}   			= "SIGNALduino_Set";
   $hash->{AttrFn}  			= "SIGNALduino_Attr";
-  $hash->{AttrList}			= 
-                       "Clients MatchList do_not_notify:1,0 dummy:1,0"
-					  ." hexFile"
-                      ." initCommands"
-                      ." flashCommand"
-  					  ." hardware:nano328,uno,promini328,nanoCC1101"
-					  ." debug:0,1"
-					  ." longids:0,1"
-					  ." minsecs"
-					  ." whitelist_IDs"
-					  ." WS09_WSModel:undef,WH1080,CTW600"
-					  ." WS09_CRCAUS:0,1"
-					  ." addvaltrigger"
-		              ." $readingFnAttributes";
+  $hash->{AttrList}			="Clients MatchList do_not_notify:1,0 dummy:1,0"
+												." hexFile"
+												." initCommands"
+												." flashCommand"
+												." hardware:nano328,uno,promini328,nanoCC1101"
+												." debug:0,1"
+												." longids:0,1"
+												." minsecs"
+												." whitelist_IDs"
+												." WS09_WSModel:undef,WH1080,CTW600"
+												." WS09_CRCAUS:0,1"
+												." addvaltrigger"
+												." $readingFnAttributes";
 
   $hash->{ShutdownFn} = "SIGNALduino_Shutdown";
 
