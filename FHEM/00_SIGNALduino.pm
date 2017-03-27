@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 10484 2017-03-19 11:00:00Z v3.3.1-dev $
+# $Id: 00_SIGNALduino.pm 10485 2017-03-27 11:00:00Z v3.3.1-dev $
 #
 # v3.3.1 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
