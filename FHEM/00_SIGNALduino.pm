@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 10485 2017-03-27 11:00:00Z v3.3.1-dev $
+# $Id: 00_SIGNALduino.pm 10486 2017-03-28 11:00:00Z v3.3.1-dev $
 #
 # v3.3.1 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -9,7 +9,6 @@
 # It routes Messages serval Modules which are already integrated in FHEM. But there are also modules which comes with it.
 # N. Butzek, S. Butzek, 2014-2015
 # S.Butzek&Ralf9 2016-2017
-
 
 package main;
 
@@ -301,8 +300,8 @@ my %ProtocolListSIGNALduino  = (
 		}, 	
 	"9"    => 			## Funk Wetterstation CTW600
 			{
-            name			=> 'CTW 600',	
-			comment		=> 'Funk Wetterstation CTW600',
+      name			=> 'CTW 600',	
+			comment		=> 'FunkWS WH1080/WH3080/CTW600',
 			id          	=> '9',
 			zero			=> [3,-2],
 			one				=> [1,-2],
