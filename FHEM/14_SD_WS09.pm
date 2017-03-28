@@ -191,7 +191,7 @@
                   # symbol FOluxLo = 6 ; Lux Low byte, Unit = 0.1 Lux (binary)
                   # symbol FOcksumo= 7 ; CRC checksum (CRC-8 shifting left)
                   $id = SD_WS09_bin2dec(substr($sensdata,8,8));
-                  $FOuvo = SD_WS09_bin2dec(substr($sensdata,16,4));
+                  $FOuvo = SD_WS09_bin2dec(substr($sensdata,12,4));
                   $FOlux = SD_WS09_bin2dec(substr($sensdata,24,24))/10;
                   Log3 $iohash, 3, "$name: SD_WS09_Parse7 UV-Solar1:  ID:".$id." UV:".$FOuvo." Lux:".$FOlux ;
                  } 
