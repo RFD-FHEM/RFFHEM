@@ -114,6 +114,7 @@ my $clientsSIGNALduino = ":IT:"
 						."SD_WS_Maverick:"
 						."FLAMINGO:"
 						."CUL_WS:"
+						."FS10:"
 						."Revolt:"
 						."SIGNALduino_un:"
 					#	."SD_UT:"	## BELL 201.2 TXA
@@ -139,6 +140,8 @@ my %matchListSIGNALduino = (
      "15:SOMFY"					=> '^YsA[0-9A-F]+',
      "16:SD_WS_Maverick"		=> '^P47#[A-Fa-f0-9]+',
 #     "17:SD_UT"         		=> '^u30#.*',						## BELL 201.2 TXA
+     "19:CUL_WS"					=> '^K[A-Fa-f0-9]{5,}',
+	  "21:FS10"      				=> "^FS10[a-fA-F0-9]{6}",
 #     "44:BresserTemeo"  		=> '^P44x{0,1}#[A-F0-9]{18}',		# Bresser Temeo Trend (3CH Thermo-/Hygro)
      "X:SIGNALduino_un"			=> '^[uP]\d+#.*',
 );
@@ -1092,36 +1095,47 @@ my %ProtocolListSIGNALduino  = (
 			length_min      => '24',
 			length_max      => '24',
 		},			
-	 "60" => ##  WS7000 #############################################################################
-     # MU;P0=3472;P1=-449;P2=773;P3=280;P4=-941;D=01212121212121212121342121342134343434213434212134342121212134213421213421343421342121212134212134213421343421342121213434343434213421212134343434213434342134343;CP=3;R=52;
-      {
-         name   		 => 'WS7000',   
-         id				 => '60',
-         one             => [2,-4],            
-         zero        	 => [4,-2],          
-         clockabs     	 => 200,                
-         preamble      	 => 'K',                # prepend to converted message
-         postamble     	 => '',                  # Append to converted message       
-         clientmodule  	 => 'CUL_WS',
-         length_min      => '58',
-         #length_max     => '80',
-      }, 
-	"61" =>	## ELV FS10
-		# tested remote control: FS10-S8
-		# das letzte Bit 1 und 1 x 0 Preambel fehlt immer
+		"60" =>	## ELV, LA CROSSE
 		{
-			name   		=> 'FS10',
-			id		=> '61',
-			one		=> [1,-2],
-			zero		=> [1,-1],
-			clockabs	=> 390,  
-			preamble	=> 'u61#',      # prepend to converted message
-			postamble	=> '',         # Append to converted message
-			#clientmodule	=> 'FS10',
-			#modulematch	=> '',
-			length_min	=> '40',	# eigentlich 46
-			length_max      => '48',	# eigentlich 46
-			#postDemodulation	=> \&SIGNALduino_postDemo_FS10,
+			# tested sensors:  	WS-7000-20, AS2000, ASH2000, S2000, S2000I, S2001A, S2001IA,
+			#							ASH2200, S300IA, S2001I, S2000ID, S2001ID, S2500H 
+			# not tested:			AS3, S2000W, S2000R, WS7000-15, WS7000-16, WS2500-19, S300TH, S555TH
+			# das letzte Bit 1 und 1 x 0 Preambel fehlt meistens
+			#  ___      _
+			# |   |_   | |___
+			#   0        1
+			# 366 µSek / 854 µSek - Sollzeiten 
+			name   			 		=> 'WS2000',
+			id					 		=> '60',
+			one             		=> [2,-4],	
+			zero        	 		=> [4,-2],
+			clockabs     	 		=> 200,
+			preamble      	 		=> 'K',        # prepend to converted message
+			postamble     	 		=> '',         # Append to converted message
+			clientmodule  	 		=> 'CUL_WS',
+			length_min		 		=> '44',			# eigentlich 46
+			length_max      		=> '83',			# eigentlich 81
+			postDemodulation		=> \&SIGNALduino_postDemo_WS2000,
+		}, 
+		"61" =>	## ELV FS10
+		{
+			# tested transmitter:	FS10-S8, FS10-S4, FS10-ZE
+			# tested receiver:		FS10-ST, WS3000-TV, PC-Wettersensor-Empfänger
+			# das letzte Bit 1 und 1 x 0 Preambel fehlt meistens
+			#  ____        	 ____
+			# |    |____		|    |________
+			#    Bit 0          	 Bit 1
+			# 400µS 400µS  	400µS  800µS - Sollzeiten 
+			name   			 		=> 'FS10',
+			id					 		=> '61',
+			one           			=> [1,-2],            
+			zero        	 		=> [1,-1],
+			clockabs     	 		=> 390,  
+			preamble      	 		=> 'FS10',     # prepend to converted message
+			postamble     	 		=> '',         # Append to converted message
+			clientmodule  	 		=> 'FS10',		# xx_FS10.pm
+			length_min		 		=> '40',			# eigentlich 46
+			length_max      		=> '48',			# eigentlich 46
 		}, 
 	"62" => ## Clarus_Switch  
 		{    #MU;P0=-5893;P4=-634;P5=498;P6=-257;P7=116;D=45656567474747474745656707456747474747456745674567456565674747474747456567074567474747474567456745674565656747474747474565670745674747474745674567456745656567474747474745656707456747474747456745674567456565674747474747456567074567474747474567456745674567;CP=7;O;
@@ -1169,9 +1183,128 @@ my %ProtocolListSIGNALduino  = (
 		},
 );
 
+sub SIGNALduino_postDemo_WS2000($@) {
+	my ($name, @bit_msg) = @_;
+	my $debug = AttrVal($name,"debug",0);
+	my @new_bit_msg = "";
+	my $protolength = scalar @bit_msg;
+	my @datalenghtws = (35,50,35,50,70,40,40,85);
+	my $datastart = 0;
+	my $datalength = 0;
+	my $datalength1 = 0;
+	my $index = 0;
+	my $data = 0;
+	my $dataindex = 0;
+	my $sumindex = 0;
+	my $error = 0;
+	my $check = 0;
+	my $sum = 5;
+	my $typ = 0;
+	my $adr = 0;
+	my @sensors = (
+		"Thermo",
+		"Thermo/Hygro",
+		"Rain",
+		"Wind",
+		"Thermo/Hygro/Baro",
+		"Brightness",
+		"Pyrano",
+		"Kombi"
+		);
 
-
-
+	while ($bit_msg[$datastart] == 0) { $datastart++; }	# Start bei erstem Bit mit Wert 1 suchen
+	$datalength = $protolength - $datastart;
+	$datalength1 = $datalength - ($datalength % 5);  		# modulo 5
+	Log3 $name, 5, "$name: WS2000 protolength: $protolength, datastart: $datastart, datalength $datalength";
+	$typ = oct( "0b".(join "", reverse @bit_msg[$datastart + 1.. $datastart + 4]));		# Sensortyp
+	if ($typ > 7) {
+		Log3 $name, 1, "$name: WS2000 Sensortyp $typ - ERROR typ to big";
+		#return (0, @bit_msg);
+		#return 1;
+		#return 0;
+		return "";
+	}
+	if ($typ == 1 && ($datalength == 45 || $datalength == 46)) {$datalength1 += 5;}		# Typ 1 ohne Summe
+	if ($datalenghtws[$typ] != $datalength1) {												# check lenght of message
+		Log3 $name, 1, "$name: WS2000 Sensortyp $typ - ERROR lenght of message $datalength1 ($datalenghtws[$typ])";
+		#return (0, @bit_msg);
+		#return 1;
+		#return 0;
+		return "";
+	} elsif ($datastart > 10) {									# max 10 Bit preamble
+		Log3 $name, 1, "$name: WS2000 ERROR preamble > 10 ($datastart)";
+		#return (0, @bit_msg);
+		#return 1;
+		#return 0;
+		return "";
+	} else {
+		do {
+			$error += !$bit_msg[$index + $datastart];			# jedes 5. Bit muss 1 sein
+			$dataindex = $index + $datastart + 1;				 
+			$data = oct( "0b".(join "", reverse @bit_msg[$dataindex .. $dataindex + 3]));
+			if ($index == 5) {$adr = ($data & 0x07)}			# Sensoradresse
+			if ($datalength == 45 || $datalength == 46) { 	# Typ 1 ohne Summe
+				if ($index <= $datalength - 5) {
+					$check = $check ^ $data;		# Check - Typ XOR Adresse XOR … bis XOR Check muss 0 ergeben
+				}
+			} else {
+				if ($index <= $datalength - 10) {
+					$check = $check ^ $data;		# Check - Typ XOR Adresse XOR … bis XOR Check muss 0 ergeben
+					$sum += $data;
+					$sumindex = $index + $datastart + 6;		# Position Summe
+				}
+			}
+			$index += 5;
+		} until ($index >= $datalength);
+	}
+	if ($error != 0) {
+		Log3 $name, 1, "$name: WS2000 Sensortyp $typ Adr $adr - ERROR examination bit";
+		#return (0, @bit_msg);
+		#return 1;
+		#return 0;
+		return "";
+	} elsif ($check != 0) {
+		Log3 $name, 1, "$name: WS2000 Sensortyp $typ Adr $adr - ERROR check XOR";
+		#return (0, @bit_msg);
+		#return 1;
+		#return 0;
+		return "";
+	} else {
+		if ($datalength < 45 || $datalength > 46) { 			# Summe prüfen, außer Typ 1 ohne Summe
+			$data = oct( "0b".(join "", reverse @bit_msg[$dataindex .. $dataindex + 3]));
+			if ($data != ($sum & 0x0F)) {
+				Log3 $name, 1, "$name: WS2000 Sensortyp $typ Adr $adr - ERROR sum";
+				#return (0, @bit_msg);
+				#return 1;
+				#return 0;
+				return "";
+			}
+		}
+		Log3 $name, 4, "$name: WS2000 Sensortyp $typ Adr $adr - $sensors[$typ]";
+		$datastart += 1;																							# [x] - 14_CUL_WS
+		@new_bit_msg[4 .. 7] = reverse @bit_msg[$datastart .. $datastart+3];						# [2]  Sensortyp
+		@new_bit_msg[0 .. 3] = reverse @bit_msg[$datastart+5 .. $datastart+8];					# [1]  Sensoradresse
+		@new_bit_msg[12 .. 15] = reverse @bit_msg[$datastart+10 .. $datastart+13];				# [4]  T 0.1, R LSN, Wi 0.1, B   1, Py   1
+		@new_bit_msg[8 .. 11] = reverse @bit_msg[$datastart+15 .. $datastart+18];				# [3]  T   1, R MID, Wi   1, B  10, Py  10
+		if ($typ == 0 || $typ == 2) {		# Thermo (AS3), Rain (S2000R, WS7000-16)
+			@new_bit_msg[16 .. 19] = reverse @bit_msg[$datastart+20 .. $datastart+23];			# [5]  T  10, R MSN
+		} else {
+			@new_bit_msg[20 .. 23] = reverse @bit_msg[$datastart+20 .. $datastart+23];			# [6]  T  10, 			Wi  10, B 100, Py 100
+			@new_bit_msg[16 .. 19] = reverse @bit_msg[$datastart+25 .. $datastart+28];			# [5]  H 0.1, 			Wr   1, B Fak, Py Fak
+			if ($typ == 1 || $typ == 3 || $typ == 4 || $typ == 7) {	# Thermo/Hygro, Wind, Thermo/Hygro/Baro, Kombi
+				@new_bit_msg[28 .. 31] = reverse @bit_msg[$datastart+30 .. $datastart+33];		# [8]  H   1,			Wr  10
+				@new_bit_msg[24 .. 27] = reverse @bit_msg[$datastart+35 .. $datastart+38];		# [7]  H  10,			Wr 100
+				if ($typ == 4) {	# Thermo/Hygro/Baro (S2001I, S2001ID)
+					@new_bit_msg[36 .. 39] = reverse @bit_msg[$datastart+40 .. $datastart+43];	# [10] P    1
+					@new_bit_msg[32 .. 35] = reverse @bit_msg[$datastart+45 .. $datastart+48];	# [9]  P   10
+					@new_bit_msg[44 .. 47] = reverse @bit_msg[$datastart+50 .. $datastart+53];	# [12] P  100
+					@new_bit_msg[40 .. 43] = reverse @bit_msg[$datastart+55 .. $datastart+58];	# [11] P Null
+				}
+			}
+		}
+		return (1, @new_bit_msg);
+	}
+}
 
 sub
 SIGNALduino_Initialize($)
@@ -3502,16 +3635,19 @@ sub SIGNALduino_callsub
 	my $name = shift;
 	my @args = @_;
 	
-	
 	if ( defined $method && defined &$method )   
 	{
 		Log3 $name, 5, "$name: applying $funcname method $method";
 		#Log3 $name, 5, "$name: value bevore $funcname: @args";
 		
-		my @returnvalues = $method->(@args) ;	
+		##### elektron-bbs #####
+		#my @returnvalues = $method->(@args) ;	
+		my ($rcode, @returnvalues) = $method->($name, @args) ;	
 			
-	    Log3 $name, 5, "$name: modified value after $funcname: @returnvalues";
-	    return (1,@returnvalues);
+	   Log3 $name, 5, "$name: modified value after $funcname: @returnvalues";
+		##### elektron-bbs #####
+		#return (1,@returnvalues);
+	   return ($rcode, @returnvalues);
 	} elsif (defined $method ) {					
 		Log3 $name, 5, "$name: Error: Unknown method $funcname Please check definition";
 		return (0,undef);
