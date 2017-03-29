@@ -1,25 +1,14 @@
 ##############################################
-<<<<<<< HEAD
 # $Id: 00_SIGNALduino.pm 10486 2017-03-28 11:00:00Z v3.3.1-dev $
 #
 # v3.3.1 (Development release 3.3)
-=======
-# $Id: 00_SIGNALduino.pm 10484 2017-01-22 22:00:00Z v3.3.1 $
-#
-# v3.3.1 (release 3.3)
->>>>>>> refs/remotes/origin/master
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
 # see http://www.fhemwiki.de/wiki/SIGNALDuino
 # It was modified also to provide support for raw message handling which can be send from the SIGNALduino
 # The purpos is to use it as addition to the SIGNALduino which runs on an arduno nano or arduino uno.
 # It routes Messages serval Modules which are already integrated in FHEM. But there are also modules which comes with it.
 # N. Butzek, S. Butzek, 2014-2015
-<<<<<<< HEAD
-# S.Butzek&Ralf9 2016-2017
-=======
 # S.Butzek,Ralf9 2016-2017
-
->>>>>>> refs/remotes/origin/master
 
 package main;
 
@@ -35,7 +24,7 @@ no warnings 'portable';
 
 
 use constant {
-	SDUINO_VERSION            => "v3.3.1",
+	SDUINO_VERSION            => "v3.3.1-dev",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -109,10 +98,10 @@ my @ampllist = (24, 27, 30, 33, 36, 38, 40, 42); # rAmpl(dB)
 ## Supported Clients per default
 my $clientsSIGNALduino = ":IT:"
 						."CUL_TCM97001:"
-#						."SIGNALduino_RSL:"
+						."SIGNALduino_RSL:"
 						."OREGON:"
 						."CUL_TX:"
-#						."SD_AS:"
+						."SD_AS:"
 						."Hideki:"
 						."SD_WS07:"
 						."SD_WS09:"
@@ -121,63 +110,37 @@ my $clientsSIGNALduino = ":IT:"
 						."RFXX10REC:"
 						."Dooya:"
 						."SOMFY:"
-<<<<<<< HEAD
 						."SD_UT:"	## BELL 201.2 TXA
 						."SD_WS_Maverick:"
 						."FLAMINGO:"
 						."CUL_WS:"
 						."Revolt:"
 						."SIGNALduino_un:"
-						;
-
-## default regex match List for dispatching message to logical modules, can be updated during runtime because it is referenced
-my %matchListSIGNALduino = (
-     "1:IT"										=> "^i......",										# Intertechno Format
-     "2:CUL_TCM97001"					=> "^s[A-Fa-f0-9]+",							# Any hex string		beginning with s
-     "3:SIGNALduino_RSL"			=> "^r[A-Fa-f0-9]{6}",						# Any hex string		beginning with r
-     "5:CUL_TX"								=> "^TX..........",								# Need TX to avoid FHTTK
-     "6:SD_AS"								=> "^P2#[A-Fa-f0-9]{7,8}",				# Arduino based Sensors, should not be default
-     "4:OREGON"								=> "^(3[8-9A-F]|[4-6][0-9A-F]|7[0-8]).*",
-     "7:Hideki"								=> "^P12#75[A-F0-9]+",
-     "10:SD_WS07"							=> "^P7#[A-Fa-f0-9]{6}F[A-Fa-f0-9]{2}(#R[A-F0-9][A-F0-9]){0,1}\$",
-     "11:SD_WS09"							=> "^P9#[A-Fa-f0-9]+",
-     "12:SD_WS"								=> '^W\d+x{0,1}#.*',
-     "13:RFXX10REC"						=> '^(20|29)[A-Fa-f0-9]+',
-     "14:Dooya"								=> '^P16#[A-Fa-f0-9]+',
-     "15:SOMFY"								=> '^YsA[0-9A-F]+',
-     "16:SD_WS_Maverick"			=> '^P47#[A-Fa-f0-9]+',
-     "17:SD_UT"								=> '^u30#.*',											# BELL 201.2 TXA
-     "18:FLAMINGO"						=> '^P13#[A-Fa-f0-9]+',						# Flamingo Smoke
-     "19:CUL_WS"							=> '^K[A-Fa-f0-9]{5,}',
-     "20:Revolt"							=> '^r[A-Fa-f0-9]{22}',
-     "X:SIGNALduino_un"				=> '^[u]\d+#.*',
-=======
-#						."SD_UT:"	## BELL 201.2 TXA
-			        	."SD_WS_Maverick:"
-#			        	."BresserTemeo:"
-			      		."SIGNALduino_un:"
+					#	."SD_UT:"	## BELL 201.2 TXA
+			      ."SD_WS_Maverick:"
+#			      ."BresserTemeo:"
+			      ."SIGNALduino_un:"
 					; 
 
 ## default regex match List for dispatching message to logical modules, can be updated during runtime because it is referenced
 my %matchListSIGNALduino = (
-     "1:IT"            			=> "^i......",	  				  # Intertechno Format
-     "2:CUL_TCM97001"      		=> "^s[A-Fa-f0-9]+",			  # Any hex string		beginning with s
+     "1:IT"            		 	=> "^i......",	  				  # Intertechno Format
+     "2:CUL_TCM97001"      	=> "^s[A-Fa-f0-9]+",			  # Any hex string		beginning with s
 #     "3:SIGNALduino_RSL"		=> "^r[A-Fa-f0-9]+",				  # Any hex string		beginning with r
-     "5:CUL_TX"               	=> "^TX..........",         	  # Need TX to avoid FHTTK
+     "5:CUL_TX"            	=> "^TX..........",         	  # Need TX to avoid FHTTK
 #     "6:SD_AS"       			=> "^P2#[A-Fa-f0-9]{7,8}", 		  # Arduino based Sensors, should not be default
-     "4:OREGON"            		=> "^(3[8-9A-F]|[4-6][0-9A-F]|7[0-8]).*",		
+     "4:OREGON"            	=> "^(3[8-9A-F]|[4-6][0-9A-F]|7[0-8]).*",		
      "7:Hideki"					=> "^P12#75[A-F0-9]+",
      "10:SD_WS07"				=> "^P7#[A-Fa-f0-9]{6}F[A-Fa-f0-9]{2}",
      "11:SD_WS09"				=> "^P9#[A-Fa-f0-9]+",
      "12:SD_WS"					=> '^W\d+x{0,1}#.*',
-     "13:RFXX10REC" 			=> '^(20|29)[A-Fa-f0-9]+',
+     "13:RFXX10REC" 		=> '^(20|29)[A-Fa-f0-9]+',
      "14:Dooya"					=> '^P16#[A-Fa-f0-9]+',
      "15:SOMFY"					=> '^YsA[0-9A-F]+',
      "16:SD_WS_Maverick"		=> '^P47#[A-Fa-f0-9]+',
-#     "17:SD_UT"            		=> '^u30#.*',						## BELL 201.2 TXA
-#     "44:BresserTemeo"     		=> '^P44x{0,1}#[A-F0-9]{18}',		# Bresser Temeo Trend (3CH Thermo-/Hygro)
+#     "17:SD_UT"         		=> '^u30#.*',						## BELL 201.2 TXA
+#     "44:BresserTemeo"  		=> '^P44x{0,1}#[A-F0-9]{18}',		# Bresser Temeo Trend (3CH Thermo-/Hygro)
      "X:SIGNALduino_un"			=> '^[uP]\d+#.*',
->>>>>>> refs/remotes/origin/master
 );
 
 
@@ -3036,11 +2999,6 @@ sub SIGNALduino_Parse_MU($$$$@)
 			my $pstr="";
 			$valid = $valid && ($pstr=SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}},\%patternList,\$rawData)) >=0;
 			Debug "Found matched one" if ($debug && $valid);
-<<<<<<< HEAD
-=======
-	
-
->>>>>>> refs/remotes/origin/master
 			my $oneStr=$pstr if ($valid);
 			$patternLookupHash{$pstr}="1" if ($valid); ## Append one to our lookuptable
 			Debug "added $pstr " if ($debug && $valid);
@@ -3082,7 +3040,6 @@ sub SIGNALduino_Parse_MU($$$$@)
 			if (@msgStartLst = SIGNALduino_getProtoProp($id,"start"))
 			{
 				Debug "msgStartLst: ".Dumper(@msgStartLst)  if ($debug);
-<<<<<<< HEAD
 			
 				if ( ($startStr=SIGNALduino_PatternExists($hash,@msgStartLst,\%patternList,\$rawData)) eq -1)
 				{
@@ -3094,19 +3051,6 @@ sub SIGNALduino_Parse_MU($$$$@)
 			$start_regex="$startStr($oneStr|$zeroStr)";
 			Debug "Regex is: $start_regex" if ($debug);
 
-=======
- 			
- 				if ( ($startStr=SIGNALduino_PatternExists($hash,@msgStartLst,\%patternList,\$rawData)) eq -1)
- 				{
- 					Log3 $name, 5, "$name: start pattern for MU Protocol id $id -> $ProtocolListSIGNALduino{$id}{name} mismatches, aborting"  ;
- 					$valid=0;
- 					next;
- 				};
-			} 
-			$start_regex="$startStr($oneStr|$zeroStr)";
-			Debug "Regex is: $start_regex" if ($debug);
-			
->>>>>>> refs/remotes/origin/master
 			$rawData =~ /$start_regex/;
 			if (defined($-[0] && $-[0] > 0)) {
 				$message_start=$-[0]+ length($startStr);
@@ -3208,10 +3152,6 @@ sub SIGNALduino_Parse_MU($$$$@)
 					if (defined($-[0]) && ($-[0] > 0)) {
 						#$i=$-[0]+ $i+ length($startStr);
 						$i=$-[0]+ $i;
-<<<<<<< HEAD
-=======
-						
->>>>>>> refs/remotes/origin/master
 						$i=$i-$signal_width if ($i>0 && length($startStr) == 0); #Todo:
 						Debug "$name: found restart at Position $i ($regex)\n" if ($debug);
 					} else {
@@ -4347,12 +4287,6 @@ With a # at the beginnging whitelistIDs can be deactivated.
 		<li>ccreg<br>
 		read cc1101 registers (99 reads all cc1101 registers)
 		</li><br>
-<<<<<<< HEAD
-=======
-		<li>protocolIDs<br>
- 		display a list of the protocol IDs
- 		</li><br>
->>>>>>> refs/remotes/origin/master
 	</ul>
 	<a name="SIGNALduinoset"></a>
 	<b>SET</b>
