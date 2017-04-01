@@ -1202,7 +1202,7 @@ SIGNALduino_Initialize($)
 												." minsecs"
 												." whitelist_IDs"
 												." WS09_WSModel:undef,WH1080,CTW600"
-												." WS09_CRCAUS:0,1"
+												." WS09_CRCAUS:0,1,2"
 												." addvaltrigger"
 												." $readingFnAttributes";
 
