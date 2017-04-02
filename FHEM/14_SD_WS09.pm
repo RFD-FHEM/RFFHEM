@@ -1,6 +1,6 @@
     ##############################################
     ##############################################
-    # $Id: 14_SD_WS09.pm 16104 2017-04-01 10:10:10Z pejonp $
+    # $Id: 14_SD_WS09.pm 16105 2017-04-02 10:10:10Z pejonp $
     # 
     # The purpose of this module is to support serval 
     # weather sensors like WS-0101  (Sender 868MHz ASK   Epmfänger RX868SH-DV elv)
@@ -234,9 +234,19 @@
                     return undef;
               } else {
             # eine CTW600 wurde erkannt 
+            $wh = substr($bitData,0,8);
+            if ( $wh == "11111110" && length($bitData) > $minL1 )
+            {
+    	            Log3 $iohash, 3, "$name: SD_WS09_Parse CTW600 EXIT: msg=$bitData wh:$wh length:".length($bitData) ;            
+            }else{
+                	Log3 $iohash, 3, "$name: SD_WS09_Parse CTW600 EXIT: msg=$bitData wh:$wh length:".length($bitData) ;
+                  return undef;
+            }
+            
             $sensdata = substr($bitData,$syncpos+8);
             Log3 $iohash, 3, "$name: SD_WS09_Parse CTW WH=$wh msg=$sensdata syncp=$syncpos length:".length($sensdata) ;
             $model = "CTW600";
+            $whid = "0000";
             my $nn1 = substr($sensdata,10,2);  # Keine Bedeutung
             my $nn2 = substr($sensdata,62,4);  # Keine Bedeutung
             $modelid = substr($sensdata,0,4);
@@ -447,20 +457,16 @@
     <li><a href="#ignore">ignore</a></li>
     <li><a href="#showtime">showtime</a></li>
     <li><a href="#readingFnAttributes">readingFnAttributes</a></li>
-    <li>Model<br>
-        WH1080, CTW600
-    </li><br>
-    <li>windKorrektur<br>
-      -3,-2,-1,0,1,2,3   
-    </li><br>
-   </ul>
-    <li>WS09_CRCAUS<br>
-    set in Signalduino-Modul (00_SIGNALduino.pm) 
-       <li>0: CRC-Prüfung WH1080 on, default</li>   
-       <li>1: CRC-Prüfung WH1080 off</li>
-       <li>2: CRC-Summe = 49 (x031) WH1080, set OK</li>
-    </li><br>
-
+    <li>Model: WH1080, CTW600
+    </li>
+    <li>windKorrektur: -3,-2,-1,0,1,2,3   
+    </li>
+    <li>WS09_CRCAUS (set in Signalduino-Modul 00_SIGNALduino.pm)
+       <br>0: CRC-Prüfung WH1080 on, default   
+       <br>1: CRC-Prüfung WH1080 off
+       <br>2: CRC-Summe = 49 (x031) WH1080, set OK
+    </li>
+   </ul> <br>
   <a name="SD_WS09_Set"></a>
   <b>Set</b> <ul>N/A</ul><br>
 
@@ -527,11 +533,12 @@
     Korrigiert die Nord-Ausrichtung des Windrichtungsmessers, wenn dieser nicht richtig nach Norden ausgerichtet ist. 
       -3,-2,-1,0,1,2,3    
     </li><br>
+    
     <li>WS09_CRCAUS<br>
     Wird im Signalduino-Modul (00_SIGNALduino.pm) gesetzt 
-       <li>0: CRC-Prüfung bei WH1080</li>   
-       <li>1: keine CRC-Prüfung bei WH1080, es werden auch fehlerhafte WS angelegt</li>
-       <li>2: CRC-Summe = 49 (x031) bei WH1080 wird als OK verarbeitet</li>
+       <br>0: CRC-Prüfung bei WH1080   
+       <br>1: keine CRC-Prüfung bei WH1080, es werden auch fehlerhafte WS angelegt
+       <br>2: CRC-Summe = 49 (x031) bei WH1080 wird als OK verarbeitet
     </li><br>
     
    </ul>
@@ -546,3 +553,4 @@
 
 =end html_DE
 =cut
+
