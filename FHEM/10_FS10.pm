@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 10_FS10.pm 331 2017-03-30 20:00:00Z v3.3-dev $
+# $Id: 10_FS10.pm 331 2017-04-04 22:00:00Z v3.3-dev $
 #
 # FS10 basierend auf dem FS20 Modul (FHEM 5.3), elektron-bbs
 
@@ -9,12 +9,12 @@ use strict;
 use warnings;
 
 my %codes = (
-  "0" => "off",
-  "2" => "off",
-  "1" => "on",
-  "3" => "on",
-  "4" => "dimdown",
-  "5" => "dimup",
+  "0" => "off_1",
+  "2" => "off_2",
+  "1" => "on_1",
+  "3" => "on_2",
+  "4" => "dimdown_1",
+  "5" => "dimup_1",
 );
 
 
@@ -25,8 +25,11 @@ my %models = (
     FS10_DI      => 'dimmer',
     FS10_HD      => 'dimmer',
     FS10_SA      => 'timer',
-    
+    FS10_MS      => 'simple',
+    FS10_S4      => 'remote',
+    FS10_S8      => 'remote',
 );
+
 
 sub
 FS10_Initialize($)
@@ -37,7 +40,7 @@ FS10_Initialize($)
     $fs10_c2b{$codes{$k}} = $k;
   }
 
-  $hash->{Match}     = "^FS10[a-fA-F0-9]{8}";
+  $hash->{Match}     = "^P\d+#[a-fA-F0-9]{8,12}";
   $hash->{SetFn}     = "FS10_Set";
   $hash->{DefFn}     = "FS10_Define";
   $hash->{UndefFn}   = "FS10_Undef";
@@ -60,16 +63,15 @@ FS10_Set($@)
   # Log GetLogLevel($name,2), "FS10: a    @a";			# FS10_0111 dimdown 10
   my $ret = undef;
   my $na = int(@a);						# Anzahl in Array 
-  Log3 $name, 3, "FS10: na   $na";		# 2 oder 3
+  #Log3 $name, 3, "FS10: na   $na";
 
   return "no set value specified" if ($na < 1);    # if($na < 2 || $na > 3);
   return "Dummydevice $hash->{NAME}: will not set data" if(IsDummy($hash->{NAME}));
 
-  my $list .= "off:noArg on:noArg ";
   my $model = AttrVal($name, "model", "FS10_ST");
   my $modelType = $models{$model};
   
-  Log3 $name, 3, "FS10_Set: $name, a0=$a[0]";
+  my $list .= "off:noArg on:noArg " if ($modelType ne "remote" );
   
   $list .= "dimup:noArg dimdown:noArg " if ($modelType eq "dimmer" );
   
@@ -94,82 +96,47 @@ FS10_Set($@)
   my $temp = "";
   my $ebenel = substr($hash->{BTN}, 0, 1);
   my $ebeneh = substr($hash->{BTN}, 1, 1);
-  my $housecode = $hash->{XMIT} - 1;
+  my $housecode = $hash->{HC} - 1;
+  my $kc;
   
-  Log3 $name, 3, "$name: set housecode=$housecode ebeneLH=$ebenel $ebeneh setstate=$setstate";
-
-  # Nachricht 1, Taste druecken
-  my $newmsg = "P61#0000000000001";		# 12 Bit Praeambel, 1 Pruefbit
-  if ($setstate eq "on") {
-	$newmsg .= "00011";			# 1. Kommando on, Wiederholbit 1 nicht gesetzt
-	$sum = 1;
-  } else {
-	$newmsg .= "10001";			# 1. Kommando off, Wiederholbit 1 nicht gesetzt
-  }
-
-  $temp = $ebenel;				# 2. Ebene low
-  $newmsg .= dec2nibble($temp);		
-  $sum += $temp;
-
-  $temp = $ebeneh;				# 3. Ebene high
-  $newmsg .= dec2nibble($temp);		
-  $sum += $temp;
-
-  $newmsg .= "10001";				# 4. unused
-
-  $temp = $housecode;				# 5. Hauscode
-  $newmsg .= dec2nibble($temp);		
-  $sum += $temp;
-
-  if ($sum >= 11) {				# 6. Summe
-	$temp = 18 - $sum;
-  } else {
-	$temp = 10 - $sum;
-  }
-  $newmsg .= dec2nibble($temp);
-
-  $newmsg .= "#R1";
-
-  IOWrite($hash, 'sendMsg', $newmsg);
-  #select(undef, undef, undef, 0.2); 
-  Log3 $name, 3, "$name: Send message #1 $newmsg";
-  #Log3 $name, 3, "$name: wait 200 mS";
+  Log3 $name, 3, "FS10_set $name: housecode=$housecode ebeneLH=$ebenel $ebeneh setstate=$setstate";
   
-  # Nachricht 2, Taste loslassen
-  $sum = 0;
-  $newmsg = "P61#0000000000001";		# 12 Bit Praeambel, 1 Pruefbit
-  if ($setstate eq "on") {
-	$newmsg .= "10111";			# 1. Kommando on, Wiederholbit 1 gesetzt
-	$sum = 3;
-  } else {
-	$newmsg .= "00101";			# 1. Kommando off, Wiederholbit 1 gesetzt
-	$sum = 2;
+  for my $i (1..2) {
+     $kc = $fs10_c2b{$setstate."_".$i};
+     
+     if (defined($kc)) {
+        Log3 $name, 3, "FS10_set $name: $i. setstate=$setstate kc=$kc";
+        
+        my $newmsg = "P61#0000000000001";	# 12 Bit Praeambel, 1 Pruefbit
+        
+        $newmsg .= dec2nibble($kc);	   	# 1. setstate
+        $sum += $kc;
+        
+        $newmsg .= dec2nibble($ebenel);		# 2. Ebene low
+        $sum += $ebenel;
+        
+        $newmsg .= dec2nibble($ebeneh);		# 3. Ebene high
+        $sum += $ebeneh;
+        
+        $newmsg .= "10001";			# 4. unused
+        
+        $newmsg .= dec2nibble($housecode);	# 5. Ebene high
+        $sum += $housecode;
+        
+        if ($sum >= 11) {			# 6. Summe
+           $temp = 18 - $sum;
+        } else {
+           $temp = 10 - $sum;
+        }
+        $newmsg .= dec2nibble($temp);
+
+        $newmsg .= "#R1";
+        
+        IOWrite($hash, 'sendMsg', $newmsg);
+        
+        Log3 $name, 3, "$name: Send $i.message $newmsg";
+     }
   }
-
-  $temp = $ebenel;				# 2. Ebene low
-  $newmsg .= dec2nibble($temp);
-  $sum += $temp;
-
-  $temp = $ebeneh;				# 3. Ebene high
-  $newmsg .= dec2nibble($temp);		
-  $sum += $temp;
-
-  $newmsg .= "10001";				# 4. unused
-
-  $temp = $housecode;				# 5. Hauscode
-  $newmsg .= dec2nibble($temp);		
-  $sum += $temp;
-
-  if ($sum >= 11) {				# 6. Summe
-	$temp = 18 - $sum;
-  } else {
-	$temp = 10 - $sum;
-  }
-  $newmsg .= dec2nibble($temp);		
-
-  $newmsg .= "#R1";
-  Log3 $name, 3, "$name: Send message #2 $newmsg";
-  IOWrite($hash, 'sendMsg', $newmsg);
   
   ###########################################
   # Set the state of a device to off if on-for-timer is called
@@ -178,19 +145,17 @@ FS10_Set($@)
     delete $modules{FS10}{ldata}{$name};
   }
 
-  my $newState="";
-  my $onTime = AttrVal($name, "follow-on-timer", undef);
-
   ####################################
   # following timers
-  if($setstate eq "on" && $onTime) {
-    $newState = "off";
-    $val = $onTime;
-    my $to = sprintf("%02d:%02d:%02d", $val/3600, ($val%3600)/60, $val%60);
-    $modules{FS10}{ldata}{$name} = $to;
-    Log 4, "Follow: +$to setstate $name $newState";
-    CommandDefine(undef, $name."_timer at +$to ".
-    "setstate $name $newState; trigger $name $newState");
+  if ($setstate eq "on" && AttrVal($name, "follow-on-for-timer", 0)) {
+      my $dur = AttrVal($name, "follow-on-timer", 0);
+      if ($dur > 0) {
+         my $newState = "off";
+         my $to = sprintf("%02d:%02d:%02d", $dur/3600, ($dur%3600)/60, $dur%60);
+         Log3 $name, 3, "Set_Follow: +$to setstate $newState";
+         CommandDefine(undef, $name."_timer at +$to "."setstate $name $newState; trigger $name $newState");
+         $modules{FS10}{ldata}{$name} = $to;
+      }
   }
 
   readingsBeginUpdate($hash);
@@ -222,7 +187,7 @@ FS10_Define($$)
   #       "or a 4 digit quad value"
   #		if( $a[3] !~ m/^[a-f0-9]{2}$/i ); # Ebene Low, Ebene High
 
-  $hash->{XMIT} = $housecode;
+  $hash->{HC} = $housecode;
   $hash->{BTN}  = $btncode;
 
   #my $name = $a[0];
@@ -259,14 +224,13 @@ FS10_Parse($$)
   my $dev;
   my $sum;
   my $rsum;
-  my $cde;
   
   my $hlen = length($rawData);
   my $blen = $hlen * 4;
   $protocol=~ s/^[P](\d+)/$1/; # extract protocol
   my $bitData = unpack("B$blen", pack("H$hlen", $rawData));
 
-  Log3 $name, 4, "FS10_Parse: Protocol: $protocol, rawData: $rawData";
+  Log3 $name, 3, "FS10_Parse: Protocol: $protocol, rawData: $rawData";
   Log3 $name, 3, "FS10_Parse: rawBitData: $bitData ($blen)";
   
   my $datastart = 0;
@@ -274,7 +238,7 @@ FS10_Parse($$)
   return "" if ($datastart < 0 || $datastart > 10);
   
   $bitData = substr($bitData, $datastart+6);
-  my $blen = length($bitData);
+  $blen = length($bitData);
   
   Log3 $name, 4, "FS10_Parse: datastart: $datastart, blen: $blen bitData=$bitData ($blen)";
   return "" if ($blen < 30);
@@ -329,6 +293,8 @@ FS10_Parse($$)
   
   Log3 $name, 3, "FS10_Parse: cde=$cde $v ebeneLH=$btn u=$u hc=$dev rsum=$rsum";
   
+  $v =~ s/_[1,2]$//;
+  
   my $def = $modules{FS10}{defptr}{$iohash->{NAME} . "." . $deviceCode};
   $def = $modules{FS10}{defptr}{$deviceCode} if(!$def);
 
@@ -342,19 +308,16 @@ FS10_Parse($$)
   return "" if(IsIgnored($name));
   Log3 $name, 3, "FS10_Parse: $name $v";
   
-  my $dur = 0;
-  #$v .= " $dur" if($dur);
-  
-   my $newState = "";
-   if ($v eq "on" && (my $d = AttrVal($name, "follow-on-timer", undef))) {
-      $dur = $d;
-      $newState = "off";
-      my $to = sprintf("%02d:%02d:%02d", $dur/3600, ($dur%3600)/60, $dur%60);
-      Log3 $name, 3, "Set_Follow: +$to setstate $newState";
-      CommandDefine(undef, $name."_timer at +$to "."setstate $name $newState; trigger $name $newState");
-      $modules{FS10}{ldata}{$name} = $to;
-   }
-
+  if ($v eq "on" && AttrVal($name, "follow-on-for-timer", 0)) {
+      my $dur = AttrVal($name, "follow-on-timer", 0);
+      if ($dur > 0) {
+         my $newState = "off";
+         my $to = sprintf("%02d:%02d:%02d", $dur/3600, ($dur%3600)/60, $dur%60);
+         Log3 $name, 3, "Set_Follow: +$to setstate $newState";
+         CommandDefine(undef, $name."_timer at +$to "."setstate $name $newState; trigger $name $newState");
+         $modules{FS10}{ldata}{$name} = $to;
+      }
+  }
  
   readingsBeginUpdate($hash);
   readingsBulkUpdate($hash, "state", $v);
@@ -424,15 +387,20 @@ SIGNALduino oder CUL verarbeitet werden. Unterst&uuml;tzt werden z.Z. folgende G
 </ul>   
 <a name="FS10set"></a>
 <b>Set</b>
-<ul>
+	<ul>
 	<code>set &lt;name&gt; &lt;value&gt;;</code>
 	<br /><br />
 	<code>&lt;value&gt;</code> kann einer der folgenden Werte sein:
 	<ul>
-		on<br />
-		off
+	<pre>
+	dimdown
+	dimup
+	off
+	on
+	<li>Die <a href="#setExtensions">set extensions</a> werden unterst&uuml;tzt.</li>
+	</pre>
 	</ul>
-</ul>
+	</ul>
 <a name="FS10get"></a>
 <b>Get</b>
 <ul>
@@ -443,6 +411,8 @@ SIGNALduino oder CUL verarbeitet werden. Unterst&uuml;tzt werden z.Z. folgende G
 <ul>
 	<li><a href="#do_not_notify">do_not_notify</a></li>
 	<li><a href="#eventMap">eventMap</a></li>
+	<li>follow-on-for-timer (enable/disable follow-on-timer)</li>
+	<li>follow-on-timer</li>
 	<li><a href="#ignore">ignore</a></li>
 	<li><a href="#model">model</a> (fs10di, fs10s4, fs10s8, fs10st)</li>
 	<li><a href="#readingFnAttributes">readingFnAttributes</a></li>
