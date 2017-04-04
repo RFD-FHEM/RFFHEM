@@ -25,6 +25,7 @@ my %models = (
     FS10_DI      => 'dimmer',
     FS10_HD      => 'dimmer',
     FS10_SA      => 'timer',
+    
 );
 
 sub
