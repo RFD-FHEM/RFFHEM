@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 10_FS10.pm 331 2017-04-04 22:00:00Z v3.3-dev $
+# $Id: 10_FS10.pm 331 2017-04-05 18:00:00Z v3.3-dev $
 #
 # FS10 basierend auf dem FS20 Modul (FHEM 5.3), elektron-bbs
 
@@ -172,23 +172,23 @@ FS10_Define($$)
   my ($hash, $def) = @_;
   my @a = split("[ \t][ \t]*", $def);
 
-  my $u = "wrong syntax: define <name> FS10 housecode_addr";
+  my $u = "wrong syntax: define <name> FS10 housecode_button";
 
   return $u if(int(@a) < 3);
   
-  my $housecode = substr($a[2], 0, 1);
-  my $btncode = substr($a[2], 2, 2);
+  my ($housecode, $btncode) = split("_", $a[2], 2);
   
-  #return "Define $a[0]: wrong housecode format: specify a 1 digit value [0-7]"
-  #		if( $a[2] !~ m/^[0-7]$/i ); # U, Hauscode
-  #		#if( $a[2] !~ m/^[a-f0-9]{3}$/i ); # 
-
-  #return "Define $a[0]: wrong btn format: specify a 2 digit hex value " .
-  #       "or a 4 digit quad value"
-  #		if( $a[3] !~ m/^[a-f0-9]{2}$/i ); # Ebene Low, Ebene High
+  return "Define $a[0]: wrong syntax: housecode_button"
+     if (!defined($housecode) || !defined($btncode));
+  
+  return "Define $a[0]: wrong housecode format: specify a 1 digit value [1-8]"
+     if ($housecode !~ m/^[1-8]$/i );
+  
+  return "Define $a[0]: wrong button format: specify a 2 digit value [0-7]"
+     if ($btncode !~ m/^[0-7]{2}$/i ); # Ebene Low, Ebene High
 
   $hash->{HC} = $housecode;
-  $hash->{BTN}  = $btncode;
+  $hash->{BTN} = $btncode;
 
   #my $name = $a[0];
   $hash->{CODE} = $a[2];
@@ -374,7 +374,7 @@ SIGNALduino oder CUL verarbeitet werden. Unterst&uuml;tzt werden z.Z. folgende G
 <a name="FS10define"></a>
 <b>Define</b>
 <ul>
-	<p><code>define &lt;name&gt; FS10_&lt;hauscode&gt;_&lt;button&gt;</code>
+	<p><code>define &lt;name&gt; FS10 &lt;hauscode&gt;_&lt;button&gt;</code>
 	<br>
 	<br>
 	<code>&lt;name&gt;</code> ist ein beliebiger Name, der dem Ger&auml;t zugewiesen wird.
