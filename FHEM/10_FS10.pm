@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 10_FS10.pm 331 2017-04-05 18:00:00Z v3.3-dev $
+# $Id: 10_FS10.pm 331 2017-04-06 20:00:00Z v3.3-dev $
 #
 # FS10 basierend auf dem FS20 Modul (FHEM 5.3), elektron-bbs
 
@@ -46,7 +46,7 @@ FS10_Initialize($)
   $hash->{UndefFn}   = "FS10_Undef";
   $hash->{ParseFn}   = "FS10_Parse";
   $hash->{AttrList}  = "IODev follow-on-for-timer:1,0 follow-on-timer ".
-                       "do_not_notify:1,0 ".
+                       "do_not_notify:1,0 repetition ".
                        "ignore:1,0 dummy:1,0 showtime:1,0 ".
                        "$readingFnAttributes " .
                        "model:".join(",", sort keys %models);
@@ -98,14 +98,17 @@ FS10_Set($@)
   my $ebeneh = substr($hash->{BTN}, 1, 1);
   my $housecode = $hash->{HC} - 1;
   my $kc;
+  my $SignalRepeats = AttrVal($name,'repetition', '1');
+  my $io = $hash->{IODev};
   
-  Log3 $name, 3, "FS10_set $name: housecode=$housecode ebeneLH=$ebenel $ebeneh setstate=$setstate";
+  Log3 $name, 3, "$io->{NAME} FS10_set: $name $setstate";
+  Log3 $name, 4, "$io->{NAME} FS10_set: $name: hc=$housecode ebeneLH=$ebenel $ebeneh setstate=$setstate";
   
   for my $i (1..2) {
      $kc = $fs10_c2b{$setstate."_".$i};
      
      if (defined($kc)) {
-        Log3 $name, 3, "FS10_set $name: $i. setstate=$setstate kc=$kc";
+        Log3 $name, 4, "$io->{NAME} FS10_set: $name $i. setstate=$setstate kc=$kc";
         
         my $newmsg = "P61#0000000000001";	# 12 Bit Praeambel, 1 Pruefbit
         
@@ -130,11 +133,12 @@ FS10_Set($@)
         }
         $newmsg .= dec2nibble($temp);
 
-        $newmsg .= "#R1";
+        $newmsg .= "#R" . $SignalRepeats;
         
         IOWrite($hash, 'sendMsg', $newmsg);
         
-        Log3 $name, 3, "$name: Send $i.message $newmsg";
+        Log3 $name, 4, "$io->{NAME} FS10_set: $i.sendMsg=$newmsg";
+        
      }
   }
   
@@ -152,7 +156,7 @@ FS10_Set($@)
       if ($dur > 0) {
          my $newState = "off";
          my $to = sprintf("%02d:%02d:%02d", $dur/3600, ($dur%3600)/60, $dur%60);
-         Log3 $name, 3, "Set_Follow: +$to setstate $newState";
+         Log3 $name, 3, "$io->{NAME} FS10_set: $name Set_Follow +$to setstate $newState";
          CommandDefine(undef, $name."_timer at +$to "."setstate $name $newState; trigger $name $newState");
          $modules{FS10}{ldata}{$name} = $to;
       }
@@ -213,7 +217,7 @@ sub
 FS10_Parse($$)
 {
   my ($iohash, $msg) = @_;
-  my $name = $iohash->{NAME};
+  my $ioname = $iohash->{NAME};
   my ($protocol,$rawData) = split("#",$msg);
   my $err;
   my $gesErr;
@@ -230,8 +234,8 @@ FS10_Parse($$)
   $protocol=~ s/^[P](\d+)/$1/; # extract protocol
   my $bitData = unpack("B$blen", pack("H$hlen", $rawData));
 
-  Log3 $name, 3, "FS10_Parse: Protocol: $protocol, rawData: $rawData";
-  Log3 $name, 3, "FS10_Parse: rawBitData: $bitData ($blen)";
+  Log3 $ioname, 4, "$ioname FS10_Parse: Protocol: $protocol, rawData: $rawData";
+  Log3 $ioname, 4, "$ioname FS10_Parse: rawBitData: $bitData ($blen)";
   
   my $datastart = 0;
   $datastart = index($bitData, "0000001");
@@ -240,7 +244,7 @@ FS10_Parse($$)
   $bitData = substr($bitData, $datastart+6);
   $blen = length($bitData);
   
-  Log3 $name, 4, "FS10_Parse: datastart: $datastart, blen: $blen bitData=$bitData ($blen)";
+  Log3 $ioname, 4, "$ioname FS10_Parse: datastart: $datastart, blen: $blen bitData=$bitData ($blen)";
   return "" if ($blen < 30);
   
   ($err, $cde) = nibble2dec(substr($bitData, 0, 5));    # Command Code
@@ -277,11 +281,11 @@ FS10_Parse($$)
   }
   $sum = $sum & 7;
   if ($sum != $rsum) {
-    Log3 $name, 3, "FS10_Parse: error ### sum=$sum rsum=$rsum bitData=$bitData";
+    Log3 $ioname, 3, "$ioname FS10_Parse: error sum=$sum rsum=$rsum bitData=$bitData";
     return "";
   }
   if ($gesErr > 0) {
-    Log3 $name, 3, "FS10_Parse: $gesErr errors ### bitData=$bitData";
+    Log3 $ioname, 3, "$ioname FS10_Parse: $gesErr errors bitData=$bitData";
     return "";
   }
   
@@ -291,7 +295,7 @@ FS10_Parse($$)
   my $btn = $ebenel . $ebeneh;
   my $deviceCode = $dev . "_" . $btn;
   
-  Log3 $name, 3, "FS10_Parse: cde=$cde $v ebeneLH=$btn u=$u hc=$dev rsum=$rsum";
+  Log3 $ioname, 4, "$ioname FS10_Parse: cde=$cde $v ebeneLH=$btn u=$u hc=$dev rsum=$rsum";
   
   $v =~ s/_[1,2]$//;
   
@@ -299,21 +303,21 @@ FS10_Parse($$)
   $def = $modules{FS10}{defptr}{$deviceCode} if(!$def);
 
   if(!$def) {
-    Log3 $name, 3, "FS10_Parse: Unknown device $dev, " . "Button $btn Code $cde ($v), please define it";
+    Log3 $ioname, 3, "$ioname FS10_Parse: Unknown device $dev, " . "Button $btn Code $cde ($v), please define it";
     return "UNDEFINED FS10_$deviceCode FS10 $deviceCode";
   }
   
   my $hash = $def;
-  $name = $hash->{NAME};
+  my $name = $hash->{NAME};
   return "" if(IsIgnored($name));
-  Log3 $name, 3, "FS10_Parse: $name $v";
+  Log3 $name, 3, "$ioname FS10_Parse: $name $v";
   
   if ($v eq "on" && AttrVal($name, "follow-on-for-timer", 0)) {
       my $dur = AttrVal($name, "follow-on-timer", 0);
       if ($dur > 0) {
          my $newState = "off";
          my $to = sprintf("%02d:%02d:%02d", $dur/3600, ($dur%3600)/60, $dur%60);
-         Log3 $name, 3, "Set_Follow: +$to setstate $newState";
+         Log3 $name, 4, "$ioname FS10_Parse: $name Set_Follow +$to setstate $newState";
          CommandDefine(undef, $name."_timer at +$to "."setstate $name $newState; trigger $name $newState");
          $modules{FS10}{ldata}{$name} = $to;
       }
@@ -368,7 +372,7 @@ sub dec2nibble {
 <a name="FS10"></a>
 <h3>FS10</h3>
 Das FS10-Modul entschl&uuml;sselt und sendet Nachrichten vom Typ FS10, die vom
-SIGNALduino oder CUL verarbeitet werden. Unterst&uuml;tzt werden z.Z. folgende Ger&auml;te:
+SIGNALduino verarbeitet werden. Unterst&uuml;tzt werden z.Z. folgende Ger&auml;te:
  FS10-S8, FS10-S4, FS10-ZE, FS10-ST die Wetterstation WS3000-TV.<br>
 <br>
 <a name="FS10define"></a>
@@ -409,10 +413,11 @@ SIGNALduino oder CUL verarbeitet werden. Unterst&uuml;tzt werden z.Z. folgende G
 <a name="FS10attr"></a>
 <b>Attribute</b>
 <ul>
+        <li><a href="#IODev">IODev</a></li>
 	<li><a href="#do_not_notify">do_not_notify</a></li>
 	<li><a href="#eventMap">eventMap</a></li>
 	<li>follow-on-for-timer (enable/disable follow-on-timer)</li>
-	<li>follow-on-timer</li>
+	<li>follow-on-timer (Anzahl Sekunden nachdem beim Timer des FS10_SA der state automatisch wieder auf off geht)</li>
 	<li><a href="#ignore">ignore</a></li>
 	<li><a href="#model">model</a> (fs10di, fs10s4, fs10s8, fs10st)</li>
 	<li><a href="#readingFnAttributes">readingFnAttributes</a></li>
