@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 10_FS10.pm 331 2017-04-06 20:00:00Z v3.3-dev $
+# $Id: 10_FS10.pm 331 2017-04-08 17:00:00Z v3.3-dev $
 #
 # FS10 basierend auf dem FS20 Modul (FHEM 5.3), elektron-bbs
 
@@ -40,7 +40,7 @@ FS10_Initialize($)
     $fs10_c2b{$codes{$k}} = $k;
   }
 
-  $hash->{Match}     = "^P\d+#[a-fA-F0-9]{8,12}";
+  $hash->{Match}     = '^P\d+#[a-fA-F0-9]{8,12}';
   $hash->{SetFn}     = "FS10_Set";
   $hash->{DefFn}     = "FS10_Define";
   $hash->{UndefFn}   = "FS10_Undef";
@@ -94,8 +94,8 @@ FS10_Set($@)
 
   my $sum = 0;
   my $temp = "";
-  my $ebenel = substr($hash->{BTN}, 0, 1);
-  my $ebeneh = substr($hash->{BTN}, 1, 1);
+  my $ebeneh = substr($hash->{BTN}, 0, 1);
+  my $ebenel = substr($hash->{BTN}, 1, 1);
   my $housecode = $hash->{HC} - 1;
   my $kc;
   my $SignalRepeats = AttrVal($name,'repetition', '1');
@@ -292,7 +292,7 @@ FS10_Parse($$)
   $dev++;
   my $v = $codes{$cde};
   $v = "unknown_$cde" if(!defined($v));
-  my $btn = $ebenel . $ebeneh;
+  my $btn = $ebeneh . $ebenel;
   my $deviceCode = $dev . "_" . $btn;
   
   Log3 $ioname, 4, "$ioname FS10_Parse: cde=$cde $v ebeneLH=$btn u=$u hc=$dev rsum=$rsum";
