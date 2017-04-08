@@ -40,7 +40,7 @@ FS10_Initialize($)
     $fs10_c2b{$codes{$k}} = $k;
   }
 
-  $hash->{Match}     = '^P\d+#[a-fA-F0-9]{8,12}';
+  $hash->{Match}     = '^P61#[a-fA-F0-9]{8,12}';
   $hash->{SetFn}     = "FS10_Set";
   $hash->{DefFn}     = "FS10_Define";
   $hash->{UndefFn}   = "FS10_Undef";
