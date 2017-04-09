@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 10_FS10.pm 331 2017-04-08 17:00:00Z v3.3-dev $
+# $Id: 10_FS10.pm 331 2017-04-09 18:00:00Z v3.3-dev $
 #
 # FS10 basierend auf dem FS20 Modul (FHEM 5.3), elektron-bbs
 
@@ -13,8 +13,10 @@ my %codes = (
   "2" => "off_2",
   "1" => "on_1",
   "3" => "on_2",
-  "4" => "dimdown_1",
-  "5" => "dimup_1",
+  "8" => "dimdown_1",  # 0 | 8 = 8
+  "4" => "dimdown_2",
+  "9" => "dimup_1",    # 1 | 8 = 9
+  "5" => "dimup_2",
 );
 
 
@@ -57,10 +59,7 @@ sub
 FS10_Set($@)
 {
   my ($hash, $name, @a) = @_;
-  #my $name = $a[0];						# z.B. FS10_0111
-  # Log GetLogLevel($name,2), "FS10_Set: name $name";		# FS10_0111
-  # Log GetLogLevel($name,2), "FS10: hash $hash";		# HASH(0xab56a2c)
-  # Log GetLogLevel($name,2), "FS10: a    @a";			# FS10_0111 dimdown 10
+  
   my $ret = undef;
   my $na = int(@a);						# Anzahl in Array 
   #Log3 $name, 3, "FS10: na   $na";
@@ -73,25 +72,12 @@ FS10_Set($@)
   
   my $list .= "off:noArg on:noArg " if ($modelType ne "remote" );
   
-  $list .= "dimup:noArg dimdown:noArg " if ($modelType eq "dimmer" );
+  $list .= "dimup dimdown " if ($modelType eq "dimmer" );
   
   return SetExtensions($hash, $list, $name, @a) if( $a[0] eq "?" );
   return SetExtensions($hash, $list, $name, @a) if( !grep( $_ =~ /^\Q$a[0]\E($|:)/, split( ' ', $list ) ) );
   
- # if($na > 2 && $a[1] eq "dim") {
- #    my $dimvalue = $a[2];
- #    #Log GetLogLevel($name,2), "FS10: dimvalue    $dimvalue";
- #    $a[1] = ($a[2] eq "0" ? "off" : sprintf("dim%02d%%",$a[2]) );
- #    splice @a, 2, 1;
- #    $na = int(@a);
- # }
- 
-  #my $v = join(" ", @a);	# FS10_0111 off
-  #(undef, $v) = split(" ", $v, 2);	# Not interested in the name...
-
   my $setstate = $a[0];
-  my $val;
-
   my $sum = 0;
   my $temp = "";
   my $ebeneh = substr($hash->{BTN}, 0, 1);
@@ -100,13 +86,25 @@ FS10_Set($@)
   my $kc;
   my $SignalRepeats = AttrVal($name,'repetition', '1');
   my $io = $hash->{IODev};
+  my $iNum = 2;
   
-  Log3 $name, 3, "$io->{NAME} FS10_set: $name $setstate";
-  Log3 $name, 4, "$io->{NAME} FS10_set: $name: hc=$housecode ebeneLH=$ebenel $ebeneh setstate=$setstate";
+  if ($na > 1 && $setstate =~ m/dim/) {		# Anzahl dimup / dimdown
+    $iNum += $a[1];
+    Log3 $name, 3, "$io->{NAME} FS10_set: $name $setstate $a[1]";
+  }
+  else {
+    Log3 $name, 3, "$io->{NAME} FS10_set: $name $setstate";
+  }
+  Log3 $name, 4, "$io->{NAME} FS10_set: $name: hc=$housecode ebeneHL=$ebeneh $ebenel setstate=$setstate";
   
-  for my $i (1..2) {
-     $kc = $fs10_c2b{$setstate."_".$i};
-     
+  for my $i (1..$iNum) {
+     if ($i == 1) {
+       $kc = $fs10_c2b{$setstate."_1"};
+     }
+     else {
+       $kc = $fs10_c2b{$setstate."_2"};
+     }
+     $kc &= 7;
      if (defined($kc)) {
         Log3 $name, 4, "$io->{NAME} FS10_set: $name $i. setstate=$setstate kc=$kc";
         
@@ -123,7 +121,7 @@ FS10_Set($@)
         
         $newmsg .= "10001";			# 4. unused
         
-        $newmsg .= dec2nibble($housecode);	# 5. Ebene high
+        $newmsg .= dec2nibble($housecode);	# 5. housecode
         $sum += $housecode;
         
         if ($sum >= 11) {			# 6. Summe
@@ -295,9 +293,9 @@ FS10_Parse($$)
   my $btn = $ebeneh . $ebenel;
   my $deviceCode = $dev . "_" . $btn;
   
-  Log3 $ioname, 4, "$ioname FS10_Parse: cde=$cde $v ebeneLH=$btn u=$u hc=$dev rsum=$rsum";
+  Log3 $ioname, 4, "$ioname FS10_Parse: cde=$cde $v ebeneHL=$btn u=$u hc=$dev rsum=$rsum";
   
-  $v =~ s/_[1,2]$//;
+  $v =~ s/_[1,2]$//;      # _1 oder _2 am Ende abschneiden
   
   my $def = $modules{FS10}{defptr}{$iohash->{NAME} . "." . $deviceCode};
   $def = $modules{FS10}{defptr}{$deviceCode} if(!$def);
@@ -372,8 +370,7 @@ sub dec2nibble {
 <a name="FS10"></a>
 <h3>FS10</h3>
 Das FS10-Modul entschl&uuml;sselt und sendet Nachrichten vom Typ FS10, die vom
-SIGNALduino verarbeitet werden. Unterst&uuml;tzt werden z.Z. folgende Ger&auml;te:
- FS10-S8, FS10-S4, FS10-ZE, FS10-ST die Wetterstation WS3000-TV.<br>
+SIGNALduino verarbeitet werden. Unterst&uuml;tzt werden z.Z. folgende Typen: simple, dimmer, timer, remote<br>
 <br>
 <a name="FS10define"></a>
 <b>Define</b>
@@ -391,20 +388,21 @@ SIGNALduino verarbeitet werden. Unterst&uuml;tzt werden z.Z. folgende Ger&auml;t
 </ul>   
 <a name="FS10set"></a>
 <b>Set</b>
-	<ul>
-	<code>set &lt;name&gt; &lt;value&gt;;</code>
-	<br /><br />
-	<code>&lt;value&gt;</code> kann einer der folgenden Werte sein:
-	<ul>
-	<pre>
-	dimdown
-	dimup
-	off
-	on
-	<li>Die <a href="#setExtensions">set extensions</a> werden unterst&uuml;tzt.</li>
-	</pre>
-	</ul>
-	</ul>
+<ul>
+  <code>set &lt;name&gt; &lt;value&gt; [&lt;anz&gt;]</code>
+  <br /><br />
+  <code>&lt;value&gt;</code> kann einer der folgenden Werte sein<br>
+  <pre>
+  dimdown
+  dimup
+  off
+  on
+  
+  Bei dimup und dimdown kann optional mit &lt;anz&gt; die Anzahl der Wiederholungen angegeben werden.
+	
+  <li>Die <a href="#setExtensions">set extensions</a> werden unterst&uuml;tzt.</li>
+  </pre>
+</ul>
 <a name="FS10get"></a>
 <b>Get</b>
 <ul>
@@ -419,7 +417,16 @@ SIGNALduino verarbeitet werden. Unterst&uuml;tzt werden z.Z. folgende Ger&auml;t
 	<li>follow-on-for-timer (enable/disable follow-on-timer)</li>
 	<li>follow-on-timer (Anzahl Sekunden nachdem beim Timer des FS10_SA der state automatisch wieder auf off geht)</li>
 	<li><a href="#ignore">ignore</a></li>
-	<li><a href="#model">model</a> (fs10di, fs10s4, fs10s8, fs10st)</li>
+	<li>model</li>
+    <pre>
+    FS10_ST  simple
+    FS10_DI  dimmer
+    FS10_HD  dimmer
+    FS10_SA  timer
+    FS10_MS  simple
+    FS10_S4  remote
+    FS10_S8  remote
+    </pre>
 	<li><a href="#readingFnAttributes">readingFnAttributes</a></li>
 </ul>
 =end html_DE
