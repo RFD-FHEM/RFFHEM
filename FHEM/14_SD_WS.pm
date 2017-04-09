@@ -382,7 +382,9 @@ sub SD_WS_Parse($$)
  #* humi is 8 bit relative humidity percentage
  #* Based on reverse engineering with gnu-radio and the nice article here:
  #*  http://lucsmall.com/2012/04/29/weather-station-hacking-part-2/
- 
+ # 0x4A/74 0x70/112 0xEF/239 0xFF/255 0x97/151 | Sensor ID: 0x4A7 | 255% | 239 | OK
+ #{ Dispatch($defs{sduino}, "W64#4A70EFFF97", undef) }
+
         #* Message Format:
        #* .- [0] -. .- [1] -. .- [2] -. .- [3] -. .- [4] -.
        #* |       | |       | |       | |       | |       |
@@ -408,20 +410,16 @@ sub SD_WS_Parse($$)
    	Log3 $iohash, 4, "$name converted to bits: WH2 " . $bitData;    
     $model = "SD_WS_WH2";
 		$SensorTyp = "WH2";
-	  $id = 		SD_WS_bin2dec(substr($bitData,0,4));
-	#	$bat = 	int(substr($bitData,11,1)) eq "1" ? "ok" : "low";
-		$channel = 	SD_WS_bin2dec(substr($bitData,5,6));
-   	my $temp10Dec = SD_WS_bin2dec(substr($bitData, 13, 4));
-		my $temp1Dec = SD_WS_bin2dec(substr($bitData, 17, 4));
-    my $temp01Dec = SD_WS_bin2dec(substr($bitData, 21, 4)) / 10;
-    #$temp = 	$temp10Dec + $temp1Dec + $temp01Dec - 40 ;
-    $temp = 	$temp10Dec + $temp1Dec + $temp01Dec ;
-    my $hum10 =  SD_WS_bin2dec(substr($bitData,25,4))*10;
-    my $hum01 =  SD_WS_bin2dec(substr($bitData,29,4)) ;
-		$hum =		$hum10 + $hum01;
-    
-   # Log3 $iohash, 4, "$name decoded protocolid: $protocol ($SensorTyp) sensor id=$id, Temp10=$temp10Dec, Temp1=$temp1Dec, Temp01=$temp01Dec";
-		Log3 $iohash, 4, "$name decoded protocolid: $protocol ($SensorTyp) sensor id=$id, channel=$channel, temp=$temp, hum=$hum";
+	  $id = 	SD_WS_bin2dec(substr($bitData,0,12));
+    $id = sprintf('%03X', $id); 
+	 	$channel = 	0;
+    $bat =  	SD_WS_bin2dec(substr($bitData,20,1));
+   	$temp = (SD_WS_bin2dec(substr($bitData,12,12))) / 10;
+    Log3 $iohash, 4, "$name decoded protocolid: $protocol ($SensorTyp) sensor id=$id, Data:".substr($bitData,12,12)." temp=$temp";
+    $hum =  SD_WS_bin2dec(substr($bitData,24,8));
+    Log3 $iohash, 4, "$name decoded protocolid: $protocol ($SensorTyp) sensor id=$id, Data:".substr($bitData,24,8)." hum=$hum";
+       
+    Log3 $iohash, 4, "$name decoded protocolid: $protocol ($SensorTyp) sensor id=$id, channel=$channel, temp=$temp, hum=$hum";
     	
   #if ($hum < 0 || $hum > 100 || $temp < -40 || $temp > 70) {
 	#		return "";
@@ -509,12 +507,12 @@ sub SD_WS_Parse($$)
 		$hash->{bitMSG} = $bitData;
 	}
 
-	my $state = "T: $temp" . ($hum > 0 ? " H: $hum":"");
+	my $state = "T: $temp" . (($hum > 0 && $hum < 100) ? " H: $hum":"");
 
 	readingsBeginUpdate($hash);
 	readingsBulkUpdate($hash, "state", $state);
 	readingsBulkUpdate($hash, "temperature", $temp)  if (defined($temp));
-	readingsBulkUpdate($hash, "humidity", $hum)  if (defined($hum) && $hum > 0);
+	readingsBulkUpdate($hash, "humidity", $hum)  if (defined($hum) && ($hum > 0 && $hum < 100 )) ;
 	readingsBulkUpdate($hash, "battery", $bat) if (defined($bat) && length($bat) > 0) ;
 	readingsBulkUpdate($hash, "channel", $channel) if (defined($channel)&& length($channel) > 0);
 	readingsBulkUpdate($hash, "trend", $trend) if (defined($trend) && length($trend) > 0);

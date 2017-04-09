@@ -1153,19 +1153,22 @@ my %ProtocolListSIGNALduino  = (
 		},
 	"64" => ##  WH2 #############################################################################
 		{
+    # MU;P0=-32001;P1=457;P2=-1064;P3=1438;D=0123232323212121232123232321212121212121212323212121232321;CP=1;R=63;
+    # MU;P0=-32001;P1=473;P2=-1058;P3=1454;D=0123232323212121232123232121212121212121212121232321212321;CP=1;R=51;
+
 			name         => 'WH2',
 			id           => '64',
-			one          => [-2,3],
+      #start			=> [70,-1],
+			one			    	=> [3,-2],
 			zero         => [1,-2],
-			# sync       => [-46,1],
-			clockabs     => 500,          #-1=auto
+			clockabs     => 460,          #-1=auto
       clientmodule    => 'SD_WS',  
 			modulematch  => '^W64*',
 			preamble     => 'W64#',       # prepend to converted message
 			postamble    => '',           # Append to converted message       
 			clientmodule => '',
-			length_min   => '50',
-			length_max   => '80',
+			length_min   => '36',
+			length_max   => '42',
 		},
 );
 
