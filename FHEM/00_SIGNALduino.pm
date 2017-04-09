@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 10486 2017-03-28 11:00:00Z v3.3.1-dev $
+# $Id: 00_SIGNALduino.pm 10486 2017-04-09 22:00:00Z v3.3.1-dev $
 #
 # v3.3.1 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -119,6 +119,7 @@ my $clientsSIGNALduino = ":IT:"
 					#	."SD_UT:"	## BELL 201.2 TXA
 			      ."SD_WS_Maverick:"
 #			      ."BresserTemeo:"
+			        	."FS10:"
 			      ."SIGNALduino_un:"
 					; 
 
@@ -140,6 +141,7 @@ my %matchListSIGNALduino = (
      "16:SD_WS_Maverick"		=> '^P47#[A-Fa-f0-9]+',
 #     "17:SD_UT"         		=> '^u30#.*',						## BELL 201.2 TXA
 #     "44:BresserTemeo"  		=> '^P44x{0,1}#[A-F0-9]{18}',		# Bresser Temeo Trend (3CH Thermo-/Hygro)
+     "21:FS10"				=> '^P61#[A-F0-9]+',
      "X:SIGNALduino_un"			=> '^[uP]\d+#.*',
 );
 
@@ -1114,14 +1116,14 @@ my %ProtocolListSIGNALduino  = (
 			id		=> '61',
 			one		=> [1,-2],
 			zero		=> [1,-1],
-			clockabs	=> 390,  
-			preamble	=> 'u61#',      # prepend to converted message
+			clockabs	=> 390,
+			format 		=> 'twostate',
+			preamble	=> 'P61#',      # prepend to converted message
 			postamble	=> '',         # Append to converted message
-			#clientmodule	=> 'FS10',
+			clientmodule	=> 'FS10',
 			#modulematch	=> '',
-			length_min	=> '40',	# eigentlich 46
+			length_min	=> '38',	# eigentlich 46
 			length_max      => '48',	# eigentlich 46
-			#postDemodulation	=> \&SIGNALduino_postDemo_FS10,
 		}, 
 	"62" => ## Clarus_Switch  
 		{    #MU;P0=-5893;P4=-634;P5=498;P6=-257;P7=116;D=45656567474747474745656707456747474747456745674567456565674747474747456567074567474747474567456745674565656747474747474565670745674747474745674567456745656567474747474745656707456747474747456745674567456565674747474747456567074567474747474567456745674567;CP=7;O;
