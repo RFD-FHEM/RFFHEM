@@ -3911,6 +3911,7 @@ sub SIGNALduino_filterMC($$$%)
 	my $debug = AttrVal($name,"debug",0);
 	
 	my ($ht, $hasbit, $value) = 0;
+	$value=1 if (!$debug);
 	my @bitData;
 	my @sigData = split "",$rawData;
 
