@@ -1,9 +1,9 @@
 ##############################################
-# $Id: 14_SD_WS07.pm 9346 2016-12-28 20:00:00Z v3.3.1-dev $
+# $Id: 14_SD_WS07.pm 9346 2017-04-16 16:00:00Z v3.3.1-dev $
 # 
 # The purpose of this module is to support serval eurochron
 # weather sensors like eas8007 which use the same protocol
-# Sidey79 & Ralf9  2015-2016
+# Sidey79, Ralf9  2015-2017
 #
 
 package main;
@@ -86,9 +86,9 @@ SD_WS07_Parse($$)
   my $bitData = unpack("B$blen", pack("H$hlen", $rawData)); 
 
   if (defined($rssi)) {
-	Log3 $name, 4, "SD_WS07_Parse  $model ($msg) length: $hlen RSSI = $rssi";
+	Log3 $name, 4, "$name SD_WS07_Parse  $model ($msg) length: $hlen RSSI = $rssi";
   } else {
-	Log3 $name, 4, "SD_WS07_Parse  $model ($msg) length: $hlen";
+	Log3 $name, 4, "$name SD_WS07_Parse  $model ($msg) length: $hlen";
   }
   
   
@@ -119,12 +119,9 @@ SD_WS07_Parse($$)
     	$model=$model."_T";		
     } else {
     	$model=$model."_TH";		
-    	
-    	
-    }
-    
-    if ($hum > 100) {
-      return '';  # Eigentlich muesste sowas wie ein skip rein, damit ggf. spaeter noch weitre Sensoren dekodiert werden koennen.
+    	if ($hum < 10 || $hum > 99) {
+    	    return '';
+    	}
     }
     
     if ($temp > 700 && $temp < 3840) {
@@ -134,7 +131,7 @@ SD_WS07_Parse($$)
     }  
     $temp /= 10;
     
-    Log3 $iohash, 4, "$model decoded protocolid: 7 sensor id=$id, channel=$channel, temp=$temp, hum=$hum, bat=$bat";
+    Log3 $iohash, 4, "$name $model decoded protocolid: 7 sensor id=$id, channel=$channel, temp=$temp, hum=$hum, bat=$bat";
 
     my $deviceCode;
     
@@ -153,7 +150,7 @@ SD_WS07_Parse($$)
     $def = $modules{SD_WS07}{defptr}{$deviceCode} if(!$def);
 
     if(!$def) {
-		Log3 $iohash, 1, 'SD_WS07: UNDEFINED sensor ' . $model . ' detected, code ' . $deviceCode;
+		Log3 $iohash, 1, "$name SD_WS07: UNDEFINED sensor $model detected, code $deviceCode";
 		return "UNDEFINED $deviceCode SD_WS07 $deviceCode";
     }
         #Log3 $iohash, 3, 'SD_WS07: ' . $def->{NAME} . ' ' . $id;
@@ -162,7 +159,7 @@ SD_WS07_Parse($$)
 	$name = $hash->{NAME};
 	return "" if(IsIgnored($name));
 	
-	Log3 $name, 4, "SD_WS07: $name ($rawData)";  
+	Log3 $name, 4, "$iohash->{NAME} SD_WS07: $name ($rawData)";  
 
 	if (!defined(AttrVal($hash->{NAME},"event-min-interval",undef)))
 	{
