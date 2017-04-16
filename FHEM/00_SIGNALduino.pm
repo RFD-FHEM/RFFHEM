@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 10486 2017-04-09 22:00:00Z v3.3.1-dev $
+# $Id: 00_SIGNALduino.pm 10484 2017-04-16 15:00:00Z v3.3.1-dev $
 #
 # v3.3.1 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -111,38 +111,36 @@ my $clientsSIGNALduino = ":IT:"
 						."Dooya:"
 						."SOMFY:"
 						."SD_UT:"	## BELL 201.2 TXA
-						."SD_WS_Maverick:"
-						."FLAMINGO:"
-						."CUL_WS:"
-						."Revolt:"
-						."SIGNALduino_un:"
-					#	."SD_UT:"	## BELL 201.2 TXA
-			      ."SD_WS_Maverick:"
-#			      ."BresserTemeo:"
+			        	."SD_WS_Maverick:"
+			        	."FLAMINGO:"
+			        	."CUL_WS:"
+			        	."Revolt:"
 			        	."FS10:"
-			      ."SIGNALduino_un:"
+			      		."SIGNALduino_un:"
 					; 
 
 ## default regex match List for dispatching message to logical modules, can be updated during runtime because it is referenced
 my %matchListSIGNALduino = (
-     "1:IT"            		 	=> "^i......",	  				  # Intertechno Format
-     "2:CUL_TCM97001"      	=> "^s[A-Fa-f0-9]+",			  # Any hex string		beginning with s
-#     "3:SIGNALduino_RSL"		=> "^r[A-Fa-f0-9]+",				  # Any hex string		beginning with r
-     "5:CUL_TX"            	=> "^TX..........",         	  # Need TX to avoid FHTTK
-#     "6:SD_AS"       			=> "^P2#[A-Fa-f0-9]{7,8}", 		  # Arduino based Sensors, should not be default
-     "4:OREGON"            	=> "^(3[8-9A-F]|[4-6][0-9A-F]|7[0-8]).*",		
+     "1:IT"            			=> "^i......",	  				  # Intertechno Format
+     "2:CUL_TCM97001"      		=> "^s[A-Fa-f0-9]+",			  # Any hex string		beginning with s
+     "3:SIGNALduino_RSL"		=> "^r[A-Fa-f0-9]{6}",				  # Any hex string		beginning with r
+     "5:CUL_TX"               	=> "^TX..........",         	  # Need TX to avoid FHTTK
+     "6:SD_AS"       			=> "^P2#[A-Fa-f0-9]{7,8}", 		  # Arduino based Sensors, should not be default
+     "4:OREGON"            		=> "^(3[8-9A-F]|[4-6][0-9A-F]|7[0-8]).*",		
      "7:Hideki"					=> "^P12#75[A-F0-9]+",
-     "10:SD_WS07"				=> "^P7#[A-Fa-f0-9]{6}F[A-Fa-f0-9]{2}",
+     "10:SD_WS07"				=> "^P7#[A-Fa-f0-9]{6}F[A-Fa-f0-9]{2}(#R[A-F0-9][A-F0-9]){0,1}\$",
      "11:SD_WS09"				=> "^P9#[A-Fa-f0-9]+",
      "12:SD_WS"					=> '^W\d+x{0,1}#.*',
-     "13:RFXX10REC" 		=> '^(20|29)[A-Fa-f0-9]+',
+     "13:RFXX10REC" 			=> '^(20|29)[A-Fa-f0-9]+',
      "14:Dooya"					=> '^P16#[A-Fa-f0-9]+',
      "15:SOMFY"					=> '^YsA[0-9A-F]+',
      "16:SD_WS_Maverick"		=> '^P47#[A-Fa-f0-9]+',
-#     "17:SD_UT"         		=> '^u30#.*',						## BELL 201.2 TXA
-#     "44:BresserTemeo"  		=> '^P44x{0,1}#[A-F0-9]{18}',		# Bresser Temeo Trend (3CH Thermo-/Hygro)
+     "17:SD_UT"            		=> '^u30#.*',						## BELL 201.2 TXA
+     "18:FLAMINGO"            	=> '^P13#[A-Fa-f0-9]+',						## Flamingo Smoke
+     "19:CUL_WS"				=> '^K[A-Fa-f0-9]{5,}',
+     "20:Revolt"				=> '^r[A-Fa-f0-9]{22}',
      "21:FS10"				=> '^P61#[A-F0-9]+',
-     "X:SIGNALduino_un"			=> '^[uP]\d+#.*',
+     "X:SIGNALduino_un"			=> '^[u]\d+#.*',
 );
 
 
@@ -1192,24 +1190,26 @@ SIGNALduino_Initialize($)
 
 # Normal devices
   $hash->{DefFn}  		 	= "SIGNALduino_Define";
-  $hash->{FingerprintFn}= "SIGNALduino_FingerprintFn";
+  $hash->{FingerprintFn} 	= "SIGNALduino_FingerprintFn";
   $hash->{UndefFn} 		 	= "SIGNALduino_Undef";
   $hash->{GetFn}   			= "SIGNALduino_Get";
   $hash->{SetFn}   			= "SIGNALduino_Set";
   $hash->{AttrFn}  			= "SIGNALduino_Attr";
-  $hash->{AttrList}			="Clients MatchList do_not_notify:1,0 dummy:1,0"
-												." hexFile"
-												." initCommands"
-												." flashCommand"
-												." hardware:nano328,uno,promini328,nanoCC1101"
-												." debug:0,1"
-												." longids:0,1"
-												." minsecs"
-												." whitelist_IDs"
-												." WS09_WSModel:undef,WH1080,CTW600"
-												." WS09_CRCAUS:0,1,2"
-												." addvaltrigger"
-												." $readingFnAttributes";
+  $hash->{AttrList}			= 
+                       "Clients MatchList do_not_notify:1,0 dummy:1,0"
+					  ." hexFile"
+                      ." initCommands"
+                      ." flashCommand"
+  					  ." hardware:nano328,uno,promini328,nanoCC1101"
+					  ." debug:0,1"
+					  ." longids"
+					  ." minsecs"
+					  ." whitelist_IDs"
+					  ." WS09_WSModel:undef,WH1080,CTW600"
+					  ." WS09_CRCAUS:0,1,2"
+					  ." addvaltrigger"
+					  ." rawmsgEvent:1,0"
+		              ." $readingFnAttributes";
 
   $hash->{ShutdownFn} = "SIGNALduino_Shutdown";
 
@@ -3286,6 +3286,10 @@ SIGNALduino_Parse($$$$@)
 	
 	
 	Debug "$name: incomming message: ($rmsg)\n" if ($debug);
+	
+	if (AttrVal($name, "rawmsgEvent", 0)) {
+		DoTrigger($name, "RAWMSG " . $rmsg);
+	}
 	
 	my %signal_parts=SIGNALduino_Split_Message($rmsg,$name);   ## Split message and save anything in an hash %signal_parts
 	#Debug "raw data ". $signal_parts{rawData};
