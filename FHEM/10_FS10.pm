@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 10_FS10.pm 331 2017-04-09 18:00:00Z v3.3-dev $
+# $Id: 10_FS10.pm 331 2017-04-16 16:00:00Z v3.3-dev $
 #
 # FS10 basierend auf dem FS20 Modul (FHEM 5.3), elektron-bbs
 
@@ -104,7 +104,7 @@ FS10_Set($@)
      else {
        $kc = $fs10_c2b{$setstate."_2"};
      }
-     $kc &= 7;
+     $kc = $kc & 7;
      if (defined($kc)) {
         Log3 $name, 4, "$io->{NAME} FS10_set: $name $i. setstate=$setstate kc=$kc";
         
@@ -137,6 +137,9 @@ FS10_Set($@)
         
         Log3 $name, 4, "$io->{NAME} FS10_set: $i.sendMsg=$newmsg";
         
+        #if ($i < $iNum) {
+        #   IOWrite($hash, 'raw', 'SR;R=1;P0=-32000;D=0000;')
+        #}
      }
   }
   
