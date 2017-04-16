@@ -1,10 +1,10 @@
 ##############################################
-# $Id: 14_Hideki.pm 14395 2017-01-25 18:00:00Z v3.3.1-dev $
+# $Id: 14_Hideki.pm 14395 2017-04-16 16:00:00Z v3.3.1-dev $
 # The file is taken from the SIGNALduino project
 # see http://www.fhemwiki.de/wiki/SIGNALduino
 # and was modified by a few additions
 # to support Hideki Sensors
-# S. Butzek & HJGode & Ralf9 2015-2017
+# S. Butzek, HJGode, Ralf9 2015-2017
 #
 
 package main;
@@ -168,7 +168,7 @@ Hideki_Parse($$)
 	$def = $modules{Hideki}{defptr}{$deviceCode} if(!$def);
 
 	if(!$def) {
-		Log3 $iohash, 1, "Hideki: UNDEFINED sensor $sensorTyp detected, code $deviceCode";
+		Log3 $iohash, 1, "$name Hideki: UNDEFINED sensor $sensorTyp detected, code $deviceCode";
 		return "UNDEFINED $deviceCode Hideki $deviceCode";
 	}
 
@@ -383,8 +383,7 @@ sub wind {
 		$windchill = -$windchill;
 	}
 	$windchill = $windchill / 10;
-	$windspeed = ($Hidekibytes[9] & 0x0f ) * 100 + ($Hidekibytes[8] & 0x0f) * 10 + ($Hidekibytes[8] >> 4);
-	$windspeed = sprintf("%.2f", $windspeed * 1.609);
+	$windspeed = ($Hidekibytes[9] & 0x0f ) * 100 + ($Hidekibytes[8] >> 4) * 10 + ($Hidekibytes[8] & 0x0f);
 	$windgust = ($Hidekibytes[10] >> 4) * 100 + ($Hidekibytes[10] & 0x0f) * 10 + ($Hidekibytes[9] >> 4);
 	$winddir = ($Hidekibytes[11] >> 4); 
 	$winddirtext = $winddir_name[$winddir]; 
