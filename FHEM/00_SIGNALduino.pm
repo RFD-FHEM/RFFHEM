@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 10486 2017-03-28 11:00:00Z v3.3.1-dev $
+# $Id: 00_SIGNALduino.pm 10486 2017-04-09 22:00:00Z v3.3.1-dev $
 #
 # v3.3.1 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -114,12 +114,12 @@ my $clientsSIGNALduino = ":IT:"
 						."SD_WS_Maverick:"
 						."FLAMINGO:"
 						."CUL_WS:"
-						."FS10:"
 						."Revolt:"
 						."SIGNALduino_un:"
 					#	."SD_UT:"	## BELL 201.2 TXA
 			      ."SD_WS_Maverick:"
 #			      ."BresserTemeo:"
+			        	."FS10:"
 			      ."SIGNALduino_un:"
 					; 
 
@@ -141,8 +141,8 @@ my %matchListSIGNALduino = (
      "16:SD_WS_Maverick"		=> '^P47#[A-Fa-f0-9]+',
 #     "17:SD_UT"         		=> '^u30#.*',						## BELL 201.2 TXA
      "19:CUL_WS"					=> '^K[A-Fa-f0-9]{5,}',
-	  "21:FS10"      				=> "^FS10[a-fA-F0-9]{6}",
 #     "44:BresserTemeo"  		=> '^P44x{0,1}#[A-F0-9]{18}',		# Bresser Temeo Trend (3CH Thermo-/Hygro)
+     "21:FS10"				=> '^P61#[A-F0-9]+',
      "X:SIGNALduino_un"			=> '^[uP]\d+#.*',
 );
 
@@ -1101,9 +1101,9 @@ my %ProtocolListSIGNALduino  = (
 			#							ASH2200, S300IA, S2001I, S2000ID, S2001ID, S2500H 
 			# not tested:			AS3, S2000W, S2000R, WS7000-15, WS7000-16, WS2500-19, S300TH, S555TH
 			# das letzte Bit 1 und 1 x 0 Preambel fehlt meistens
-			#  ___      _
-			# |   |_   | |___
-			#   0        1
+			#  ___        _
+			# |   |_     | |___
+			#  Bit 0      Bit 1
 			# 366 µSek / 854 µSek - Sollzeiten 
 			name   			 		=> 'WS2000',
 			id					 		=> '60',
@@ -1120,7 +1120,7 @@ my %ProtocolListSIGNALduino  = (
 		"61" =>	## ELV FS10
 		{
 			# tested transmitter:	FS10-S8, FS10-S4, FS10-ZE
-			# tested receiver:		FS10-ST, WS3000-TV, PC-Wettersensor-Empfänger
+			# tested receiver:		FS10-ST, FS10-MS, WS3000-TV, PC-Wettersensor-Empfänger
 			# das letzte Bit 1 und 1 x 0 Preambel fehlt meistens
 			#  ____        	 ____
 			# |    |____		|    |________
@@ -1131,10 +1131,11 @@ my %ProtocolListSIGNALduino  = (
 			one           			=> [1,-2],            
 			zero        	 		=> [1,-1],
 			clockabs     	 		=> 390,  
-			preamble      	 		=> 'FS10',     # prepend to converted message
+			format 					=> 'twostate',
+			preamble					=> 'P61#',     # prepend to converted message
 			postamble     	 		=> '',         # Append to converted message
 			clientmodule  	 		=> 'FS10',		# xx_FS10.pm
-			length_min		 		=> '40',			# eigentlich 46
+			length_min		 		=> '38',			# eigentlich 46
 			length_max      		=> '48',			# eigentlich 46
 		}, 
 	"62" => ## Clarus_Switch  
@@ -1167,19 +1168,22 @@ my %ProtocolListSIGNALduino  = (
 		},
 	"64" => ##  WH2 #############################################################################
 		{
+    # MU;P0=-32001;P1=457;P2=-1064;P3=1438;D=0123232323212121232123232321212121212121212323212121232321;CP=1;R=63;
+    # MU;P0=-32001;P1=473;P2=-1058;P3=1454;D=0123232323212121232123232121212121212121212121232321212321;CP=1;R=51;
+
 			name         => 'WH2',
 			id           => '64',
-			one          => [-2,3],
+      #start			=> [70,-1],
+			one			    	=> [3,-2],
 			zero         => [1,-2],
-			# sync       => [-46,1],
-			clockabs     => 500,          #-1=auto
+			clockabs     => 460,          #-1=auto
       clientmodule    => 'SD_WS',  
 			modulematch  => '^W64*',
 			preamble     => 'W64#',       # prepend to converted message
 			postamble    => '',           # Append to converted message       
 			clientmodule => '',
-			length_min   => '50',
-			length_max   => '80',
+			length_min   => '36',
+			length_max   => '42',
 		},
 );
 
@@ -1222,7 +1226,8 @@ sub SIGNALduino_postDemo_WS2000($@) {
 		#return (0, @bit_msg);
 		#return 1;
 		#return 0;
-		return "";
+		#return "";
+		return 0, undef;
 	}
 	if ($typ == 1 && ($datalength == 45 || $datalength == 46)) {$datalength1 += 5;}		# Typ 1 ohne Summe
 	if ($datalenghtws[$typ] != $datalength1) {												# check lenght of message
@@ -1230,13 +1235,15 @@ sub SIGNALduino_postDemo_WS2000($@) {
 		#return (0, @bit_msg);
 		#return 1;
 		#return 0;
-		return "";
+		#return "";
+		return 0, undef;
 	} elsif ($datastart > 10) {									# max 10 Bit preamble
 		Log3 $name, 1, "$name: WS2000 ERROR preamble > 10 ($datastart)";
 		#return (0, @bit_msg);
 		#return 1;
 		#return 0;
-		return "";
+		#return "";
+		return 0, undef;
 	} else {
 		do {
 			$error += !$bit_msg[$index + $datastart];			# jedes 5. Bit muss 1 sein
@@ -1306,6 +1313,9 @@ sub SIGNALduino_postDemo_WS2000($@) {
 	}
 }
 
+
+
+
 sub
 SIGNALduino_Initialize($)
 {
@@ -1335,7 +1345,7 @@ SIGNALduino_Initialize($)
 												." minsecs"
 												." whitelist_IDs"
 												." WS09_WSModel:undef,WH1080,CTW600"
-												." WS09_CRCAUS:0,1"
+												." WS09_CRCAUS:0,1,2"
 												." addvaltrigger"
 												." $readingFnAttributes";
 
