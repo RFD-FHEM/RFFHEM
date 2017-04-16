@@ -3833,7 +3833,7 @@ sub	SIGNALduino_Hideki()
 
 		return  (1,$hidekihex); ## Return only the original bits, include length
 	}
-	return (-1,"");
+	return (-1,"Start pattern (10101110) not found");
 }
 
 
