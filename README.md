@@ -20,7 +20,7 @@ Supported Devices / Protocols
 |Arduino Sensor | multi purpose sensor based on arduino |
 |technoline Weatherstation WS 6750/TX70DTH| Weather sensor and station |
 ||Remote sockets from serval brands|
-|CTW600 WH1080 | Weather station |
+|CTW600 WH1080 | Weather station WH3080 UV/Lux Sensor |
 |TFA 30320902,30320802  | Weather sensor |
 |Visivon remote PT4450  | Remote control |
 |Einhel - HS 434/6 | Garagedoor opener |
@@ -41,6 +41,7 @@ Supported Devices / Protocols
 |FT0073 | Weather sensors|
 |revolt | Energy sensors|
 |Clarus | remote power socket|
+|WH2 | (TFA 30.3157 nur Temp, Hum = 255 -> nicht angezeigt)|
 
 How to install
 ======
