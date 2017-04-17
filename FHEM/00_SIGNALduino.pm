@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 10484 2017-04-16 15:00:00Z v3.3.1-dev $
+# $Id: 00_SIGNALduino.pm 10485 2017-04-17 15:00:00Z v3.3.1-dev $
 #
 # v3.3.1 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -1163,7 +1163,7 @@ my %ProtocolListSIGNALduino  = (
 			#zero        => [1,-2],   # 1.Versuch
       one          => [1,-2],   # 2.Versuch
       zero			   => [3,-2], # 2.Versuch
-			clockabs     => 460,          #-1=auto
+			clockabs     => 490,          #-1=auto
       clientmodule    => 'SD_WS',  
 			modulematch  => '^W64*',
 			preamble     => 'W64#',       # prepend to converted message

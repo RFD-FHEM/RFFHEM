@@ -1,16 +1,18 @@
 ##############################################
-# $Id: 14_SD_WS.pm 33 2017-01-19 18:00:00Z v3.3-dev $
+# $Id: 14_SD_WS.pm 34 2017-04-17 18:00:00Z v3.3-dev $
 #
 # The purpose of this module is to support serval
 # weather sensors which use various protocol
 # Sidey79 & Ralf9  2016 - 2017
-#
+# Jörg 2017
+# 17.4.2017 WH2 (TFA 30.3157 nur Temp, Hum = 255),es wird das Perlmodul Digest:CRC benötigt für CRC-Prüfung benötigt
 
 package main;
 
 
 use strict;
 use warnings;
+use Digest::CRC qw(crc);
 
 #use Data::Dumper;
 
@@ -363,7 +365,7 @@ sub SD_WS_Parse($$)
 		$id = sprintf('%02X', $id);           # wandeln nach hex
 		Log3 $iohash, 4, "$name SD_WS_Parse: model=$model, temp=$temp, hum=$hum, channel=$channel, id=$id, bat=$bat";
 		
-	}   elsif  ($protocol eq "64")	# WH2
+	}   elsif  ($protocol eq "64" || $protocol eq "50" )	# WH2
   {
   #* Fine Offset Electronics WH2 Temperature/Humidity sensor protocol
  #* aka Agimex Rosenborg 66796 (sold in Denmark)
@@ -383,7 +385,7 @@ sub SD_WS_Parse($$)
  #* Based on reverse engineering with gnu-radio and the nice article here:
  #*  http://lucsmall.com/2012/04/29/weather-station-hacking-part-2/
  # 0x4A/74 0x70/112 0xEF/239 0xFF/255 0x97/151 | Sensor ID: 0x4A7 | 255% | 239 | OK
- #{ Dispatch($defs{sduino}, "W64#4A70EFFF97", undef) }
+ #{ Dispatch($defs{sduino}, "W50#FF48D0C9FFBA", undef) }
 
         #* Message Format:
        #* .- [0] -. .- [1] -. .- [2] -. .- [3] -. .- [4] -.
@@ -405,25 +407,34 @@ sub SD_WS_Parse($$)
        #* `---- START = 9
        #*
        #*/ 
-       
-       
+    
+    Log3 $iohash, 3, "$name: SD_WS_Parse msg: $msg" ;
+    # my $hlen = length($rawData);
+    # my $blen = $hlen * 4;
+    # my $msg = uc (unpack("H$hlen", pack("B$blen", $bitData)));
+     my $datacheck = pack( 'H*', substr($msg,6,length($msg)-6) );
+     my $crcmein = Digest::CRC->new(width => 8, poly => 0x31);
+     my $rr2 = $crcmein->add($datacheck)->hexdigest;
+     $rr2 = sprintf("%d", hex($rr2));
+     if ($rr2 == 0 ){
+            Log3 $iohash, 3, "$name: SD_WS_Parse CRC_OK   : CRC=$rr2 msg: $msg check:".substr($msg,6,length($msg)-6) ;
+          }else{
+            Log3 $iohash, 3, "$name: SD_WS_Parse CRC_Error: CRC=$rr2 msg: $msg check:".substr($msg,6,length($msg)-6) ;
+            return "";
+         }
+    my $vorpre = 8;   
    	Log3 $iohash, 4, "$name converted to bits: WH2 " . $bitData;    
     $model = "SD_WS_WH2";
 		$SensorTyp = "WH2";
-	  $id = 	SD_WS_bin2dec(substr($bitData,0,12));
+	  $id = 	SD_WS_bin2dec(substr($bitData,$vorpre + 0,12));
     $id = sprintf('%03X', $id); 
 	 	$channel = 	0;
-    $bat =  	SD_WS_bin2dec(substr($bitData,20,1));
-   	$temp = (SD_WS_bin2dec(substr($bitData,12,12))) / 10;
-    Log3 $iohash, 4, "$name decoded protocolid: $protocol ($SensorTyp) sensor id=$id, Data:".substr($bitData,12,12)." temp=$temp";
-    $hum =  SD_WS_bin2dec(substr($bitData,24,8));
-    Log3 $iohash, 4, "$name decoded protocolid: $protocol ($SensorTyp) sensor id=$id, Data:".substr($bitData,24,8)." hum=$hum";
-       
+    $bat =  	SD_WS_bin2dec(substr($bitData,$vorpre + 20,1));
+   	$temp = (SD_WS_bin2dec(substr($bitData,$vorpre + 12,12))) / 10;
+    Log3 $iohash, 4, "$name decoded protocolid: $protocol ($SensorTyp) sensor id=$id, Data:".substr($bitData,$vorpre + 12,12)." temp=$temp";
+    $hum =  SD_WS_bin2dec(substr($bitData,$vorpre + 24,8));   # TFA 30.3157 nur Temp, Hum = 255
+    Log3 $iohash, 4, "$name decoded protocolid: $protocol ($SensorTyp) sensor id=$id, Data:".substr($bitData,$vorpre + 24,8)." hum=$hum";
     Log3 $iohash, 4, "$name decoded protocolid: $protocol ($SensorTyp) sensor id=$id, channel=$channel, temp=$temp, hum=$hum";
-    	
-  #if ($hum < 0 || $hum > 100 || $temp < -40 || $temp > 70) {
-	#		return "";
-	#	}
 	
  	 }
 	elsif (defined($decodingSubs{$protocol}))		# durch den hash decodieren
