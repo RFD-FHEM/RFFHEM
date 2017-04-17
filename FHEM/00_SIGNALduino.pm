@@ -911,7 +911,7 @@ my %ProtocolListSIGNALduino  = (
 			modulematch  => '^r[A-Fa-f0-9]{22}', 
 			length_min   => '84',
 			length_max   => '120',	
-			postDemodulation => sub {	my @bitmsg = splice @_, 0,88;	return @bitmsg; },
+			postDemodulation => sub {	my ($name, @bit_msg) = @_;	my @new_bitmsg = splice @bit_msg, 0,88;	return 1,@new_bitmsg; },
 		},    
     "46"    => 
         {
@@ -1095,7 +1095,7 @@ my %ProtocolListSIGNALduino  = (
 	 "60" => ##  WS7000 #############################################################################
      # MU;P0=3472;P1=-449;P2=773;P3=280;P4=-941;D=01212121212121212121342121342134343434213434212134342121212134213421213421343421342121212134212134213421343421342121213434343434213421212134343434213434342134343;CP=3;R=52;
       {
-         name   		 => 'WS7000',   
+         name   		 => 'WS2000/WS7000...',   
          id				 => '60',
          one             => [2,-4],            
          zero        	 => [4,-2],          
@@ -1103,8 +1103,10 @@ my %ProtocolListSIGNALduino  = (
          preamble      	 => 'K',                # prepend to converted message
          postamble     	 => '',                  # Append to converted message       
          clientmodule  	 => 'CUL_WS',
-         length_min      => '58',
-         #length_max     => '80',
+         length_min      => '44',
+         length_max      => '84',
+         postDemodulation=> \&SIGNALduino_postDemo_WS2000,
+         
       }, 
 	"61" =>	## ELV FS10
 		# tested remote control: FS10-S8
@@ -1122,6 +1124,7 @@ my %ProtocolListSIGNALduino  = (
 			#modulematch	=> '',
 			length_min	=> '38',	# eigentlich 46
 			length_max      => '48',	# eigentlich 46
+			
 		}, 
 	"62" => ## Clarus_Switch  
 		{    #MU;P0=-5893;P4=-634;P5=498;P6=-257;P7=116;D=45656567474747474745656707456747474747456745674567456565674747474747456567074567474747474567456745674565656747474747474565670745674747474745674567456745656567474747474745656707456747474747456745674567456565674747474747456567074567474747474567456745674567;CP=7;O;
@@ -2817,7 +2820,7 @@ SIGNALduino_Parse_MS($$$$%)
 			Debug "$name: decoded message raw (@bit_msg), ".@bit_msg." bits\n" if ($debug);;
 			
 			my ($rcode,@retvalue) = SIGNALduino_callsub('postDemodulation',$ProtocolListSIGNALduino{$id}{postDemodulation},$name,@bit_msg);
-			next if (!$rcode);
+			next if ($rcode < 1 );
 			#Log3 $name, 5, "$name: postdemodulation value @retvalue";
 			
 			@bit_msg = @retvalue;
@@ -3516,13 +3519,14 @@ sub SIGNALduino_callsub
 	
 	if ( defined $method && defined &$method )   
 	{
-		Log3 $name, 5, "$name: applying $funcname method $method";
+		my $subname = @{[eval {&$method}, $@ =~ /.*/]};
+		Log3 $name, 5, "$name: applying $funcname method $subname";
 		#Log3 $name, 5, "$name: value bevore $funcname: @args";
 		
-		my @returnvalues = $method->(@args) ;	
+		my ($rcode, @returnvalues) = $method->($name, @args) ;	
 			
 	    Log3 $name, 5, "$name: modified value after $funcname: @returnvalues";
-	    return (1,@returnvalues);
+	    return ($rcode, @returnvalues);
 	} elsif (defined $method ) {					
 		Log3 $name, 5, "$name: Error: Unknown method $funcname Please check definition";
 		return (0,undef);
@@ -3536,18 +3540,21 @@ sub SIGNALduino_callsub
 # output = @list
 sub SIGNALduino_lengtnPrefix
 {
-	my $msg = join("",@_);	
+	my ($name, @bit_msg) = @_;
+	
+	my $msg = join("",@bit_msg);	
 
 	#$msg = unpack("B8", pack("N", length($msg))).$msg;
 	$msg=sprintf('%08b', length($msg)).$msg;
 	
-	return split("",$msg);
+	return (1,split("",$msg));
 }
 
 
 sub SIGNALduino_bit2Arctec
 {
-	my $msg = join("",@_);	
+	my ($name, @bit_msg) = @_;
+	my $msg = join("",@bit_msg);	
 	# Convert 0 -> 01   1 -> 10 to be compatible with IT Module
 	$msg =~ s/0/z/g;
 	$msg =~ s/1/10/g;
@@ -3565,7 +3572,112 @@ sub SIGNALduino_ITV1_tristateToBit($)
 	$msg =~ s/F/01/g;
 	$msg =~ s/D/10/g;
 		
-	return $msg;
+	return (1,$msg);
+}
+
+sub SIGNALduino_postDemo_WS2000($@) {
+	my ($name, @bit_msg) = @_;
+	my $debug = AttrVal($name,"debug",0);
+	my @new_bit_msg = "";
+	my $protolength = scalar @bit_msg;
+	my @datalenghtws = (35,50,35,50,70,40,40,85);
+	my $datastart = 0;
+	my $datalength = 0;
+	my $datalength1 = 0;
+	my $index = 0;
+	my $data = 0;
+	my $dataindex = 0;
+	my $sumindex = 0;
+	my $error = 0;
+	my $check = 0;
+	my $sum = 5;
+	my $typ = 0;
+	my $adr = 0;
+	my @sensors = (
+		"Thermo",
+		"Thermo/Hygro",
+		"Rain",
+		"Wind",
+		"Thermo/Hygro/Baro",
+		"Brightness",
+		"Pyrano",
+		"Kombi"
+		);
+
+	while ($bit_msg[$datastart] == 0) { $datastart++; }	# Start bei erstem Bit mit Wert 1 suchen
+	$datalength = $protolength - $datastart;
+	$datalength1 = $datalength - ($datalength % 5);  		# modulo 5
+	Log3 $name, 5, "$name: WS2000 protolength: $protolength, datastart: $datastart, datalength $datalength";
+	$typ = oct( "0b".(join "", reverse @bit_msg[$datastart + 1.. $datastart + 4]));		# Sensortyp
+	if ($typ > 7) {
+		Log3 $name, 4, "$name: WS2000 Sensortyp $typ - ERROR typ to big";
+		return 0, undef;
+	}
+	if ($typ == 1 && ($datalength == 45 || $datalength == 46)) {$datalength1 += 5;}		# Typ 1 ohne Summe
+	if ($datalenghtws[$typ] != $datalength1) {												# check lenght of message
+		Log3 $name, 4, "$name: WS2000 Sensortyp $typ - ERROR lenght of message $datalength1 ($datalenghtws[$typ])";
+		return 0, undef;
+	} elsif ($datastart > 10) {									# max 10 Bit preamble
+		Log3 $name, 4, "$name: WS2000 ERROR preamble > 10 ($datastart)";
+		return 0, undef;
+	} else {
+		do {
+			$error += !$bit_msg[$index + $datastart];			# jedes 5. Bit muss 1 sein
+			$dataindex = $index + $datastart + 1;				 
+			$data = oct( "0b".(join "", reverse @bit_msg[$dataindex .. $dataindex + 3]));
+			if ($index == 5) {$adr = ($data & 0x07)}			# Sensoradresse
+			if ($datalength == 45 || $datalength == 46) { 	# Typ 1 ohne Summe
+				if ($index <= $datalength - 5) {
+					$check = $check ^ $data;		# Check - Typ XOR Adresse XOR  bis XOR Check muss 0 ergeben
+				}
+			} else {
+				if ($index <= $datalength - 10) {
+					$check = $check ^ $data;		# Check - Typ XOR Adresse XOR  bis XOR Check muss 0 ergeben
+					$sum += $data;
+					$sumindex = $index + $datastart + 6;		# Position Summe
+				}
+			}
+			$index += 5;
+		} until ($index >= $datalength);
+	}
+	if ($error != 0) {
+		Log3 $name, 4, "$name: WS2000 Sensortyp $typ Adr $adr - ERROR examination bit";
+		return (0, undef);
+	} elsif ($check != 0) {
+		Log3 $name, 4, "$name: WS2000 Sensortyp $typ Adr $adr - ERROR check XOR";
+		return (0, undef);
+	} else {
+		if ($datalength < 45 || $datalength > 46) { 			# Summe prüfen, außer Typ 1 ohne Summe
+			$data = oct( "0b".(join "", reverse @bit_msg[$dataindex .. $dataindex + 3]));
+			if ($data != ($sum & 0x0F)) {
+				Log3 $name, 4, "$name: WS2000 Sensortyp $typ Adr $adr - ERROR sum";
+				return (0, undef);
+			}
+		}
+		Log3 $name, 4, "$name: WS2000 Sensortyp $typ Adr $adr - $sensors[$typ]";
+		$datastart += 1;																							# [x] - 14_CUL_WS
+		@new_bit_msg[4 .. 7] = reverse @bit_msg[$datastart .. $datastart+3];						# [2]  Sensortyp
+		@new_bit_msg[0 .. 3] = reverse @bit_msg[$datastart+5 .. $datastart+8];					# [1]  Sensoradresse
+		@new_bit_msg[12 .. 15] = reverse @bit_msg[$datastart+10 .. $datastart+13];				# [4]  T 0.1, R LSN, Wi 0.1, B   1, Py   1
+		@new_bit_msg[8 .. 11] = reverse @bit_msg[$datastart+15 .. $datastart+18];				# [3]  T   1, R MID, Wi   1, B  10, Py  10
+		if ($typ == 0 || $typ == 2) {		# Thermo (AS3), Rain (S2000R, WS7000-16)
+			@new_bit_msg[16 .. 19] = reverse @bit_msg[$datastart+20 .. $datastart+23];			# [5]  T  10, R MSN
+		} else {
+			@new_bit_msg[20 .. 23] = reverse @bit_msg[$datastart+20 .. $datastart+23];			# [6]  T  10, 			Wi  10, B 100, Py 100
+			@new_bit_msg[16 .. 19] = reverse @bit_msg[$datastart+25 .. $datastart+28];			# [5]  H 0.1, 			Wr   1, B Fak, Py Fak
+			if ($typ == 1 || $typ == 3 || $typ == 4 || $typ == 7) {	# Thermo/Hygro, Wind, Thermo/Hygro/Baro, Kombi
+				@new_bit_msg[28 .. 31] = reverse @bit_msg[$datastart+30 .. $datastart+33];		# [8]  H   1,			Wr  10
+				@new_bit_msg[24 .. 27] = reverse @bit_msg[$datastart+35 .. $datastart+38];		# [7]  H  10,			Wr 100
+				if ($typ == 4) {	# Thermo/Hygro/Baro (S2001I, S2001ID)
+					@new_bit_msg[36 .. 39] = reverse @bit_msg[$datastart+40 .. $datastart+43];	# [10] P    1
+					@new_bit_msg[32 .. 35] = reverse @bit_msg[$datastart+45 .. $datastart+48];	# [9]  P   10
+					@new_bit_msg[44 .. 47] = reverse @bit_msg[$datastart+50 .. $datastart+53];	# [12] P  100
+					@new_bit_msg[40 .. 43] = reverse @bit_msg[$datastart+55 .. $datastart+58];	# [11] P Null
+				}
+			}
+		}
+		return (1, @new_bit_msg);
+	}
 }
 
 
