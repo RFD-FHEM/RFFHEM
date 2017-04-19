@@ -3106,7 +3106,8 @@ sub SIGNALduino_Parse_MU($$$$@)
 					if ($valid) {
 			
 						my ($rcode,@retvalue) = SIGNALduino_callsub('postDemodulation',$ProtocolListSIGNALduino{$id}{postDemodulation},$name,@bit_msg);
-						next if (!$rcode);
+						next if ($rcode < 1 );
+
 						#Log3 $name, 5, "$name: postdemodulation value @retvalue";
 			
 						@bit_msg = @retvalue;
