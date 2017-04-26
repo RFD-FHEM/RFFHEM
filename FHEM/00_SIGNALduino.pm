@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 10485 2017-04-17 15:00:00Z v3.3.1-dev $
+# $Id: 00_SIGNALduino.pm 10485 2017-04-26 21:00:00Z v3.3.1-dev $
 #
 # v3.3.1 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -1174,6 +1174,19 @@ my %ProtocolListSIGNALduino  = (
 			clientmodule => '',
 			length_min   => '48',
 			length_max   => '48',
+		},
+	"65" => ## Homeeasy
+		{
+			name         => 'Homeeasy',
+			id           => '65',
+			one          => [1,-5],
+			zero         => [1,-1],
+			start        => [1,-40],
+			clockabs     => 250,
+			format       => 'twostate',  # not used now
+			preamble     => 'U65#',
+			length_min   => '50',
+			postDemodulation => \&SIGNALduino_HE,
 		},
 );
 
@@ -3575,6 +3588,17 @@ sub SIGNALduino_ITV1_tristateToBit($)
 		
 	return (1,$msg);
 }
+
+sub SIGNALduino_HE($@) {
+	my ($name, @bit_msg) = @_;
+	my $msg = join("",@bit_msg);
+	
+	#Log3 $name, 4, "$name HE: $msg";
+	Log3 $name, 4, "$name HE: " . substr($msg,0,11) ." ". substr($msg,11,32) ." ". substr($msg,43,4) ." ". substr($msg,47,2) ." ". substr($msg,49,2) ." ". substr($msg,51);
+	
+	return (1,split("",$msg));
+}
+
 
 sub SIGNALduino_postDemo_WS2000($@) {
 	my ($name, @bit_msg) = @_;
