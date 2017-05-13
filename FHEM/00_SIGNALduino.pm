@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 10485 2017-04-26 21:00:00Z v3.3.1-dev $
+# $Id: 00_SIGNALduino.pm 10485 2017-05-13 23:00:00Z v3.3.1-dev $
 #
 # v3.3.1 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -1186,6 +1186,7 @@ my %ProtocolListSIGNALduino  = (
 			format       => 'twostate',  # not used now
 			preamble     => 'U65#',
 			length_min   => '50',
+			#msgOutro     => 'SR;P0=275;P1=-7150;D=01;',
 			postDemodulation => \&SIGNALduino_HE,
 		},
 );
@@ -1965,6 +1966,7 @@ SIGNALduino_DoInit($)
 	
 	RemoveInternalTimer("HandleWriteQueue:$name");
     @{$hash->{QUEUE}} = ();
+    $hash->{sendrawworking} = 0;
   	if (($hash->{DEF} !~ m/\@DirectIO/) and ($hash->{DEF} !~ m/none/) )
 	{
 		Log3 $hash, 1, "$name/init: ".$hash->{DEF};
@@ -2135,13 +2137,12 @@ sub SIGNALduino_AddSendQueue($$)
   my ($hash, $msg) = @_;
   my $name = $hash->{NAME};
   
-  #Log3 $hash, 3,"AddSendQueue: " . $hash->{NAME} . ": $msg";
-  
   push(@{$hash->{QUEUE}}, $msg);
   
   #Log3 $hash , 5, Dumper($hash->{QUEUE});
   
-  InternalTimer(gettimeofday() + 0.1, "SIGNALduino_HandleWriteQueue", "HandleWriteQueue:$name") if (@{$hash->{QUEUE}} == 1);
+  Log3 $hash, 5,"AddSendQueue: " . $hash->{NAME} . ": $msg (" . @{$hash->{QUEUE}} . ")";
+  InternalTimer(gettimeofday() + 0.1, "SIGNALduino_HandleWriteQueue", "HandleWriteQueue:$name") if (@{$hash->{QUEUE}} == 1 && $hash->{sendrawworking} == 0);
 }
 
 
@@ -2157,7 +2158,8 @@ SIGNALduino_SendFromQueue($$)
     SIGNALduino_SimpleWrite($hash,$msg);
     if ($msg =~ m/^S(R|C|M);/) {
        $hash->{getcmd}->{cmd} = 'sendraw';
-       Log3 $hash, 4, "$name SendFromQueue: msg=$msg"; # zu testen der Queue, kann wenn es funktioniert auskommentiert werden
+       $hash->{sendrawworking} = 1;
+       Log3 $hash, 4, "$name SendrawFromQueue: msg=$msg"; # zu testen der Queue, kann wenn es funktioniert auskommentiert werden
     } 
     elsif ($msg eq "C99") {
        $hash->{getcmd}->{cmd} = 'ccregAll';
@@ -2184,6 +2186,8 @@ SIGNALduino_HandleWriteQueue($)
   my $hash = $defs{$name};
   
   #my @arr = @{$hash->{QUEUE}};
+  
+  $hash->{sendrawworking} = 0;       # sendraw wurde gesendet
   
   if (defined($hash->{getcmd}->{cmd}) && $hash->{getcmd}->{cmd} eq 'sendraw') {
     Log3 $name, 4, "$name/HandleWriteQueue: sendraw no answer (timeout)";
@@ -2679,8 +2683,10 @@ sub SIGNALduno_Dispatch($$$$)
 		my $event = 0;
 		if (substr($dmsg,0,1) eq 'u') {
 			$event = 1;
+			#DoTrigger($name, "DMSG " . $dmsg);
 		}
 		readingsSingleUpdate($hash, "state", $hash->{READINGS}{state}{VAL}, $event);
+		
 		$hash->{RAWMSG} = $rmsg;
 		my %addvals = (RAWMSG => $rmsg, DMSG => $dmsg);
 		if(defined($rssi)) {
