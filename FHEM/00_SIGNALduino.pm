@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 10485 2017-05-13 23:00:00Z v3.3.1-dev $
+# $Id: 00_SIGNALduino.pm 10485 2017-05-14 17:00:00Z v3.3.1-dev $
 #
 # v3.3.1 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -81,17 +81,31 @@ my %sets = (
   "cc1101_bWidth"  => '',
   "cc1101_rAmpl"   => '',
   "cc1101_sens"    => '',
-  "cc1101_patable" => '-10_dBm,-5_dBm,0_dBm,5_dBm,7_dBm,10_dBm',
+  "cc1101_patable_433" => '-10_dBm,-5_dBm,0_dBm,5_dBm,7_dBm,10_dBm',
+  "cc1101_patable_868" => '-10_dBm,-5_dBm,0_dBm,5_dBm,7_dBm,10_dBm',
 );
 
-my %patable433 = (
-  "-10_dBm"  => '34',
-  "-5_dBm"   => '68',
-  "0_dBm"    => '60',
-  "5_dBm"    => '84',
-  "7_dBm"    => 'C8',
-  "10_dBm"   => 'C0',
+my %patable = (
+  "433" =>
+  {
+    "-10_dBm"  => '34',
+    "-5_dBm"   => '68',
+    "0_dBm"    => '60',
+    "5_dBm"    => '84',
+    "7_dBm"    => 'C8',
+    "10_dBm"   => 'C0',
+  },
+  "868" =>
+  {
+    "-10_dBm"  => '27',
+    "-5_dBm"   => '67',
+    "0_dBm"    => '50',
+    "5_dBm"    => '81',
+    "7_dBm"    => 'CB',
+    "10_dBm"   => 'C2',
+  },
 );
+
 
 my @ampllist = (24, 27, 30, 33, 36, 38, 40, 42); # rAmpl(dB)
 
@@ -1228,6 +1242,7 @@ SIGNALduino_Initialize($)
 					  ." WS09_CRCAUS:0,1,2"
 					  ." addvaltrigger"
 					  ." rawmsgEvent:1,0"
+					  ." cc1101_frequency"
 		              ." $readingFnAttributes";
 
   $hash->{ShutdownFn} = "SIGNALduino_Shutdown";
@@ -1380,13 +1395,22 @@ SIGNALduino_Set($@)
   
   return "\"set SIGNALduino\" needs at least one parameter" if(@a < 2);
   my $hasCC1101 = 0;
+  my $CC1101Frequency;
   if ($hash->{version} && $hash->{version} =~ m/cc1101/) {
     $hasCC1101 = 1;
+    if (!defined($hash->{cc1101_frequency})) {
+       $CC1101Frequency = "433";
+    } else {
+       $CC1101Frequency = $hash->{cc1101_frequency};
+    }
   }
   if (!defined($sets{$a[1]})) {
     my $arguments = ' ';
     foreach my $arg (sort keys %sets) {
       next if ($arg =~ m/cc1101/ && $hasCC1101 == 0);
+      if ($arg =~ m/patable/) {
+        next if (substr($arg, -3) ne $CC1101Frequency);
+      }
       $arguments.= $arg . ($sets{$arg} ? (':' . $sets{$arg}) : '') . ' ';
     }
     #Log3 $hash, 3, "set arg = $arguments";
@@ -1487,17 +1511,6 @@ SIGNALduino_Set($@)
   } elsif( $cmd eq "close" ) {
 	$hash->{DevState} = 'closed';
 	return SIGNALduino_CloseDevice($hash);
-  } elsif( $cmd eq "ITClock" ) {
-  	Log3 $name, 4, "set $name $cmd $arg";
-  	my $clock = shift @a;
-  	
-  	$clock=250 	if ($clock  eq "" );
-  	return "argument $arg is not numeric" if($clock !~ /^\d+$/);
-    Log3 $name, 3, "$name: Setting ITClock to $clock (sending $arg)";
-	$arg="ic$clock";
-  	#SIGNALduino_SimpleWrite($hash, $arg);
-  	SIGNALduino_AddSendQueue($hash,$arg);
-  	$hash->{$cmd}=$clock;
   } elsif( $cmd eq "disableMessagetype" ) {
 	my $argm = 'CD' . substr($arg,-1,1);
 	#SIGNALduino_SimpleWrite($hash, $argm);
@@ -1509,6 +1522,9 @@ SIGNALduino_Set($@)
 	SIGNALduino_AddSendQueue($hash,$argm);
 	Log3 $name, 4, "set $name $cmd $arg $argm";
   } elsif( $cmd eq "freq" ) {
+	if ($arg eq "") {
+		$arg = AttrVal($name,"cc1101_frequency", 433.92);
+	}
 	my $f = $arg/26*65536;
 	my $f2 = sprintf("%02x", $f / 65536);
 	my $f1 = sprintf("%02x", int($f % 65536) / 256);
@@ -1541,9 +1557,10 @@ SIGNALduino_Set($@)
 	Log3 $name, 3, "$name: Setting AGCCTRL0 (1D) to $v / $w dB";
 	SIGNALduino_AddSendQueue($hash,"W1F$v");
 	SIGNALduino_WriteInit($hash);
-  } elsif( $cmd eq "patable" ) {
-	my $pa = "x" . $patable433{$arg};
-	Log3 $name, 3, "$name: Setting patable $arg $pa";
+  } elsif( substr($cmd,0,7) eq "patable" ) {
+	my $paFreq = substr($cmd,8);
+	my $pa = "x" . $patable{$paFreq}{$arg};
+	Log3 $name, 3, "$name: Setting patable $paFreq $arg $pa";
 	SIGNALduino_AddSendQueue($hash,$pa);
 	SIGNALduino_WriteInit($hash);
   } elsif( $cmd eq "sendMsg" ) {
@@ -1966,7 +1983,7 @@ SIGNALduino_DoInit($)
 	
 	RemoveInternalTimer("HandleWriteQueue:$name");
     @{$hash->{QUEUE}} = ();
-    $hash->{sendrawworking} = 0;
+    $hash->{sendworking} = 0;
   	if (($hash->{DEF} !~ m/\@DirectIO/) and ($hash->{DEF} !~ m/none/) )
 	{
 		Log3 $hash, 1, "$name/init: ".$hash->{DEF};
@@ -2142,7 +2159,7 @@ sub SIGNALduino_AddSendQueue($$)
   #Log3 $hash , 5, Dumper($hash->{QUEUE});
   
   Log3 $hash, 5,"AddSendQueue: " . $hash->{NAME} . ": $msg (" . @{$hash->{QUEUE}} . ")";
-  InternalTimer(gettimeofday() + 0.1, "SIGNALduino_HandleWriteQueue", "HandleWriteQueue:$name") if (@{$hash->{QUEUE}} == 1 && $hash->{sendrawworking} == 0);
+  InternalTimer(gettimeofday() + 0.1, "SIGNALduino_HandleWriteQueue", "HandleWriteQueue:$name") if (@{$hash->{QUEUE}} == 1 && $hash->{sendworking} == 0);
 }
 
 
@@ -2155,10 +2172,10 @@ SIGNALduino_SendFromQueue($$)
   if($msg ne "") {
 	SIGNALduino_XmitLimitCheck($hash,$msg);
     #DevIo_SimpleWrite($hash, $msg . "\n", 2);
+    $hash->{sendworking} = 1;
     SIGNALduino_SimpleWrite($hash,$msg);
     if ($msg =~ m/^S(R|C|M);/) {
        $hash->{getcmd}->{cmd} = 'sendraw';
-       $hash->{sendrawworking} = 1;
        Log3 $hash, 4, "$name SendrawFromQueue: msg=$msg"; # zu testen der Queue, kann wenn es funktioniert auskommentiert werden
     } 
     elsif ($msg eq "C99") {
@@ -2187,7 +2204,7 @@ SIGNALduino_HandleWriteQueue($)
   
   #my @arr = @{$hash->{QUEUE}};
   
-  $hash->{sendrawworking} = 0;       # sendraw wurde gesendet
+  $hash->{sendworking} = 0;       # es wurde gesendet
   
   if (defined($hash->{getcmd}->{cmd}) && $hash->{getcmd}->{cmd} eq 'sendraw') {
     Log3 $name, 4, "$name/HandleWriteQueue: sendraw no answer (timeout)";
@@ -2680,12 +2697,12 @@ sub SIGNALduno_Dispatch($$$$)
 		$hash->{MSGCNT}++;
 		$hash->{TIME} = time();
 		$hash->{DMSG} = $dmsg;
-		my $event = 0;
-		if (substr($dmsg,0,1) eq 'u') {
-			$event = 1;
-			#DoTrigger($name, "DMSG " . $dmsg);
+		#my $event = 0;
+		if (substr(ucfirst($dmsg),0,1) eq 'U') {
+			#$event = 1;
+			DoTrigger($name, "DMSG " . $dmsg);
 		}
-		readingsSingleUpdate($hash, "state", $hash->{READINGS}{state}{VAL}, $event);
+		#readingsSingleUpdate($hash, "state", $hash->{READINGS}{state}{VAL}, $event);
 		
 		$hash->{RAWMSG} = $rmsg;
 		my %addvals = (RAWMSG => $rmsg, DMSG => $dmsg);
@@ -3464,6 +3481,16 @@ SIGNALduino_Attr(@)
 	{
 		SIGNALduino_IdList($hash, $name, $aVal);
 	}
+	elsif ($aName eq "cc1101_frequency")
+	{
+		if ($aVal eq "" || $aVal < 800) {
+			Log3 $name, 3, "$name: delete cc1101_frequeny";
+			delete ($hash->{cc1101_frequency}) if (defined($hash->{cc1101_frequency}));
+		} else {
+			Log3 $name, 3, "$name: setting cc1101_frequency to 868";
+			$hash->{cc1101_frequency} = 868;
+		}
+	}
 	
   	return undef;
 }
@@ -3579,7 +3606,7 @@ sub SIGNALduino_bit2Arctec
 	$msg =~ s/0/z/g;
 	$msg =~ s/1/10/g;
 	$msg =~ s/z/01/g;
-	return split("",$msg);
+	return split("",$msg); 
 }
 
 
@@ -4519,7 +4546,7 @@ With a # at the beginnging whitelistIDs can be deactivated.
 		
 		<li>freq / bWidth / rAmpl / sens<br>
 		Only with CC1101 receiver.<br>
-		Set the CUL frequency / bandwidth / receiver-amplitude / sensitivity<br>
+		Set the sduino frequency / bandwidth / receiver-amplitude / sensitivity<br>
 		
 		Use it with care, it may destroy your hardware and it even may be
 		illegal to do so. Note: The parameters used for RFR transmission are
