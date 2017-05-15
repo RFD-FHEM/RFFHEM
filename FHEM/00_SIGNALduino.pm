@@ -3606,7 +3606,7 @@ sub SIGNALduino_bit2Arctec
 	$msg =~ s/0/z/g;
 	$msg =~ s/1/10/g;
 	$msg =~ s/z/01/g;
-	return split("",$msg); 
+	return split(1,$msg); 
 }
 
 
