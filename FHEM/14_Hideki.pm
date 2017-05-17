@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 14_Hideki.pm 14395 2017-04-16 16:00:00Z v3.3.1-dev $
+# $Id: 14_Hideki.pm 14395 2017-05-17 21:00:00Z v3.3.1-dev $
 # The file is taken from the SIGNALduino project
 # see http://www.fhemwiki.de/wiki/SIGNALduino
 # and was modified by a few additions
@@ -53,7 +53,7 @@ Hideki_Define($$)
   my $name= $hash->{NAME};
 
   $modules{Hideki}{defptr}{$a[2]} = $hash;
-  $hash->{STATE} = "Defined";
+  #$hash->{STATE} = "Defined";
 
   #AssignIoPort($hash);
   return undef;
