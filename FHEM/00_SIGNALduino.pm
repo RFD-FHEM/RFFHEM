@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 10485 2017-05-14 17:00:00Z v3.3.1-dev $
+# $Id: 00_SIGNALduino.pm 10485 2017-05-17 21:00:00Z v3.3.1-dev $
 #
 # v3.3.1 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -60,6 +60,7 @@ my %gets = (    # Name, Data to send to the SIGNALduino, Regexp for the answer
   "protocolIDs"   => ["none",'none'],
   "ccconf"   => ["C0DnF", 'C0Dn11.*'],
   "ccreg"    => ["C", '^C.* = .*'],
+  "ccpatable" => ["C3E", '^C3E = .*'],
 #  "ITClock"  => ["ic", '\d+'],
 #  "FAParms"  => ["fp", '.*' ],
 #  "TCParms"  => ["dp", '.*' ],
@@ -1706,7 +1707,7 @@ SIGNALduino_Get($@)
   my $arg = ($a[2] ? $a[2] : "");
   return "no command to send, get aborted." if (length($gets{$a[1]}[0]) == 0 && length($arg) == 0);
   
-  if (($a[1] eq "ccconf" || $a[1] eq "ccreg") && $hash->{version} && $hash->{version} !~ m/cc1101/) {
+  if (($a[1] eq "ccconf" || $a[1] eq "ccreg" || $a[1] eq "ccpatable") && $hash->{version} && $hash->{version} !~ m/cc1101/) {
     return "This command is only available with a cc1101 receiver";
   }
   
@@ -1933,6 +1934,18 @@ sub SIGNALduino_parseResponse($$$)
 		SIGNALduino_AddSendQueue($hash,"W12$ob");
 		SIGNALduino_WriteInit($hash);
 	}
+	elsif($cmd eq "ccpatable") {
+		my $CC1101Frequency = "433";
+		if (defined($hash->{cc1101_frequency})) {
+			$CC1101Frequency = $hash->{cc1101_frequency};
+		}
+	#	$msg .=  "\n\n$CC1101Frequency MHz\n\n";
+	#	foreach my $dB (keys $patable{$CC1101Frequency})
+	#	{
+	#		$msg .= "$patable{$CC1101Frequency}{$dB}  $dB\n";
+	#	}
+	}
+	
   	return $msg;
 }
 
@@ -2690,10 +2703,10 @@ sub SIGNALduno_Dispatch($$$$)
 		return;
 	}
 	
-	Log3 $name, 5, "$name: converted Data to ($dmsg)";
+	Log3 $name, 5, "$name: Dispatch DMSG: $dmsg";
 
 	#Dispatch only if $dmsg is different from last $dmsg, or if 2 seconds are between transmits
-    if ( ($hash->{DMSG} ne $dmsg) || ($hash->{TIME}+1 < time()) ) { 
+    if ( ($hash->{DMSG} ne $dmsg) || ($hash->{TIME}+2 < time()) ) { 
 		$hash->{MSGCNT}++;
 		$hash->{TIME} = time();
 		$hash->{DMSG} = $dmsg;
@@ -2885,8 +2898,8 @@ SIGNALduino_Parse_MS($$$$%)
 			if (defined($rawRssi)) {
 				if (defined($ProtocolListSIGNALduino{$id}{preamble}) && $ProtocolListSIGNALduino{$id}{preamble} eq "s") {
 					$postamble = sprintf("%02X", $rawRssi);
-				} elsif ($id eq "7") {
-				        $postamble = "#R" . sprintf("%02X", $rawRssi);
+				#} elsif ($id eq "7") {
+				#        $postamble = "#R" . sprintf("%02X", $rawRssi);
 				}
 			}
 			$dmsg = "$dmsg".$postamble if (defined($postamble));
@@ -3606,7 +3619,7 @@ sub SIGNALduino_bit2Arctec
 	$msg =~ s/0/z/g;
 	$msg =~ s/1/10/g;
 	$msg =~ s/z/01/g;
-	return split(1,$msg); 
+	return (1,split("",$msg)); 
 }
 
 
