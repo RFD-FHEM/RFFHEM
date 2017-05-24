@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 10486 2017-04-09 22:00:00Z v3.3.1-dev $
+# $Id: 00_SIGNALduino.pm 10485 2017-05-17 21:00:00Z v3.3.1-dev $
 #
 # v3.3.1 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -60,6 +60,7 @@ my %gets = (    # Name, Data to send to the SIGNALduino, Regexp for the answer
   "protocolIDs"   => ["none",'none'],
   "ccconf"   => ["C0DnF", 'C0Dn11.*'],
   "ccreg"    => ["C", '^C.* = .*'],
+  "ccpatable" => ["C3E", '^C3E = .*'],
 #  "ITClock"  => ["ic", '\d+'],
 #  "FAParms"  => ["fp", '.*' ],
 #  "TCParms"  => ["dp", '.*' ],
@@ -81,17 +82,31 @@ my %sets = (
   "cc1101_bWidth"  => '',
   "cc1101_rAmpl"   => '',
   "cc1101_sens"    => '',
-  "cc1101_patable" => '-10_dBm,-5_dBm,0_dBm,5_dBm,7_dBm,10_dBm',
+  "cc1101_patable_433" => '-10_dBm,-5_dBm,0_dBm,5_dBm,7_dBm,10_dBm',
+  "cc1101_patable_868" => '-10_dBm,-5_dBm,0_dBm,5_dBm,7_dBm,10_dBm',
 );
 
-my %patable433 = (
-  "-10_dBm"  => '34',
-  "-5_dBm"   => '68',
-  "0_dBm"    => '60',
-  "5_dBm"    => '84',
-  "7_dBm"    => 'C8',
-  "10_dBm"   => 'C0',
+my %patable = (
+  "433" =>
+  {
+    "-10_dBm"  => '34',
+    "-5_dBm"   => '68',
+    "0_dBm"    => '60',
+    "5_dBm"    => '84',
+    "7_dBm"    => 'C8',
+    "10_dBm"   => 'C0',
+  },
+  "868" =>
+  {
+    "-10_dBm"  => '27',
+    "-5_dBm"   => '67',
+    "0_dBm"    => '50',
+    "5_dBm"    => '81',
+    "7_dBm"    => 'CB',
+    "10_dBm"   => 'C2',
+  },
 );
+
 
 my @ampllist = (24, 27, 30, 33, 36, 38, 40, 42); # rAmpl(dB)
 
@@ -111,39 +126,36 @@ my $clientsSIGNALduino = ":IT:"
 						."Dooya:"
 						."SOMFY:"
 						."SD_UT:"	## BELL 201.2 TXA
-						."SD_WS_Maverick:"
-						."FLAMINGO:"
-						."CUL_WS:"
-						."Revolt:"
-						."SIGNALduino_un:"
-					#	."SD_UT:"	## BELL 201.2 TXA
-			      ."SD_WS_Maverick:"
-#			      ."BresserTemeo:"
+			        	."SD_WS_Maverick:"
+			        	."FLAMINGO:"
+			        	."CUL_WS:"
+			        	."Revolt:"
 			        	."FS10:"
-			      ."SIGNALduino_un:"
+			      		."SIGNALduino_un:"
 					; 
 
 ## default regex match List for dispatching message to logical modules, can be updated during runtime because it is referenced
 my %matchListSIGNALduino = (
-     "1:IT"            		 	=> "^i......",	  				  # Intertechno Format
-     "2:CUL_TCM97001"      	=> "^s[A-Fa-f0-9]+",			  # Any hex string		beginning with s
-#     "3:SIGNALduino_RSL"		=> "^r[A-Fa-f0-9]+",				  # Any hex string		beginning with r
-     "5:CUL_TX"            	=> "^TX..........",         	  # Need TX to avoid FHTTK
-#     "6:SD_AS"       			=> "^P2#[A-Fa-f0-9]{7,8}", 		  # Arduino based Sensors, should not be default
-     "4:OREGON"            	=> "^(3[8-9A-F]|[4-6][0-9A-F]|7[0-8]).*",		
+     "1:IT"            			=> "^i......",	  				  # Intertechno Format
+     "2:CUL_TCM97001"      		=> "^s[A-Fa-f0-9]+",			  # Any hex string		beginning with s
+     "3:SIGNALduino_RSL"		=> "^r[A-Fa-f0-9]{6}",				  # Any hex string		beginning with r
+     "5:CUL_TX"               	=> "^TX..........",         	  # Need TX to avoid FHTTK
+     "6:SD_AS"       			=> "^P2#[A-Fa-f0-9]{7,8}", 		  # Arduino based Sensors, should not be default
+     "4:OREGON"            		=> "^(3[8-9A-F]|[4-6][0-9A-F]|7[0-8]).*",		
      "7:Hideki"					=> "^P12#75[A-F0-9]+",
-     "10:SD_WS07"				=> "^P7#[A-Fa-f0-9]{6}F[A-Fa-f0-9]{2}",
+     "10:SD_WS07"				=> "^P7#[A-Fa-f0-9]{6}F[A-Fa-f0-9]{2}(#R[A-F0-9][A-F0-9]){0,1}\$",
      "11:SD_WS09"				=> "^P9#[A-Fa-f0-9]+",
      "12:SD_WS"					=> '^W\d+x{0,1}#.*',
-     "13:RFXX10REC" 		=> '^(20|29)[A-Fa-f0-9]+',
+     "13:RFXX10REC" 			=> '^(20|29)[A-Fa-f0-9]+',
      "14:Dooya"					=> '^P16#[A-Fa-f0-9]+',
      "15:SOMFY"					=> '^YsA[0-9A-F]+',
      "16:SD_WS_Maverick"		=> '^P47#[A-Fa-f0-9]+',
-#     "17:SD_UT"         		=> '^u30#.*',						## BELL 201.2 TXA
-     "19:CUL_WS"					=> '^K[A-Fa-f0-9]{5,}',
-#     "44:BresserTemeo"  		=> '^P44x{0,1}#[A-F0-9]{18}',		# Bresser Temeo Trend (3CH Thermo-/Hygro)
+     "17:SD_UT"            		=> '^u30#.*',						## BELL 201.2 TXA
+     "18:FLAMINGO"            	=> '^P13#[A-Fa-f0-9]+',						## Flamingo Smoke
+     "19:CUL_WS"				=> '^K[A-Fa-f0-9]{5,}',
+     "20:Revolt"				=> '^r[A-Fa-f0-9]{22}',
      "21:FS10"				=> '^P61#[A-F0-9]+',
-     "X:SIGNALduino_un"			=> '^[uP]\d+#.*',
+     "X:SIGNALduino_un"			=> '^[u]\d+#.*',
 );
 
 
@@ -813,21 +825,21 @@ my %ProtocolListSIGNALduino  = (
 			
 			
 		},    
-	"40" => ## Romotec
-		{
-			name => 'romotec',
-			id => '40',
-			one => [3,-2],
-			zero => [1,-3],
-			start => [1,-2],
-			clockabs => 250, 
-			preamble => 'u40#', # prepend to converted message
-			#clientmodule => '', # not used now
-			#modulematch => '', # not used now
-			length_min => '10',
-			length_min => '12',
+	# "40" => ## Romotec
+		# {
+			# name => 'romotec',
+			# id => '40',
+			# one => [3,-2],
+			# zero => [1,-3],
+			# start => [1,-2],
+			# clockabs => 250, 
+			# preamble => 'u40#', # prepend to converted message
+			# #clientmodule => '', # not used now
+			# #modulematch => '', # not used now
+			# length_min => '10',
+			# length_min => '12',
 			
-		},    
+		# },    
 	"41" => ## Elro (Smartwares) Doorbell DB200
 		{
 			name => 'elro doorbell',
@@ -914,7 +926,7 @@ my %ProtocolListSIGNALduino  = (
 			modulematch  => '^r[A-Fa-f0-9]{22}', 
 			length_min   => '84',
 			length_max   => '120',	
-			postDemodulation => sub {	my @bitmsg = splice @_, 0,88;	return @bitmsg; },
+			postDemodulation => sub {	my ($name, @bit_msg) = @_;	my @new_bitmsg = splice @bit_msg, 0,88;	return 1,@new_bitmsg; },
 		},    
     "46"    => 
         {
@@ -1095,49 +1107,48 @@ my %ProtocolListSIGNALduino  = (
 			length_min      => '24',
 			length_max      => '24',
 		},			
-		"60" =>	## ELV, LA CROSSE
-		{
-			# tested sensors:  	WS-7000-20, AS2000, ASH2000, S2000, S2000I, S2001A, S2001IA,
-			#							ASH2200, S300IA, S2001I, S2000ID, S2001ID, S2500H 
-			# not tested:			AS3, S2000W, S2000R, WS7000-15, WS7000-16, WS2500-19, S300TH, S555TH
-			# das letzte Bit 1 und 1 x 0 Preambel fehlt meistens
-			#  ___        _
-			# |   |_     | |___
-			#  Bit 0      Bit 1
-			# 366 µSek / 854 µSek - Sollzeiten 
-			name   			 		=> 'WS2000',
-			id					 		=> '60',
-			one             		=> [2,-4],	
-			zero        	 		=> [4,-2],
-			clockabs     	 		=> 200,
-			preamble      	 		=> 'K',        # prepend to converted message
-			postamble     	 		=> '',         # Append to converted message
-			clientmodule  	 		=> 'CUL_WS',
-			length_min		 		=> '44',			# eigentlich 46
-			length_max      		=> '83',			# eigentlich 81
-			postDemodulation		=> \&SIGNALduino_postDemo_WS2000,
+      "60" =>	## ELV, LA CROSSE (WS2000/WS7000)
+      {
+         # MU;P0=32001;P1=-381;P2=835;P3=354;P4=-857;D=01212121212121212121343421212134342121213434342121343421212134213421213421212121342121212134212121213421212121343421343430;CP=2;R=53;			# tested sensors:  	WS-7000-20, AS2000, ASH2000, S2000, S2000I, S2001A, S2001IA,
+         #                    ASH2200, S300IA, S2001I, S2000ID, S2001ID, S2500H 
+         # not tested:        AS3, S2000W, S2000R, WS7000-15, WS7000-16, WS2500-19, S300TH, S555TH
+         # das letzte Bit 1 und 1 x 0 Preambel fehlt meistens
+         #  ___        _
+         # |   |_     | |___
+         #  Bit 0      Bit 1
+         # kurz 366 ¬µSek / lang 854 ¬µSek / gesamt 1220 ¬µSek - Sollzeiten 
+         name                 => 'WS2000',
+         id                   => '60',
+         one                  => [3,-7],	
+         zero                 => [7,-3],
+         clockabs             => 122,
+         preamble      	 	   => 'K',        # prepend to converted message
+         postamble     	 	   => '',         # Append to converted message
+         clientmodule         => 'CUL_WS',   
+         length_min           => '44',	      # eigentlich 46
+         length_max           => '82',	      # eigentlich 81
+			postDemodulation     => \&SIGNALduino_postDemo_WS2000,
 		}, 
-		"61" =>	## ELV FS10
-		{
-			# tested transmitter:	FS10-S8, FS10-S4, FS10-ZE
-			# tested receiver:		FS10-ST, FS10-MS, WS3000-TV, PC-Wettersensor-Empf‰nger
-			# das letzte Bit 1 und 1 x 0 Preambel fehlt meistens
-			#  ____        	 ____
-			# |    |____		|    |________
-			#    Bit 0          	 Bit 1
-			# 400µS 400µS  	400µS  800µS - Sollzeiten 
-			name   			 		=> 'FS10',
-			id					 		=> '61',
-			one           			=> [1,-2],            
-			zero        	 		=> [1,-1],
-			clockabs     	 		=> 390,  
-			format 					=> 'twostate',
-			preamble					=> 'P61#',     # prepend to converted message
-			postamble     	 		=> '',         # Append to converted message
-			clientmodule  	 		=> 'FS10',		# xx_FS10.pm
-			length_min		 		=> '38',			# eigentlich 46
-			length_max      		=> '48',			# eigentlich 46
-		}, 
+      "61" =>	## ELV FS10
+      {
+         # tested transmitter:   FS10-S8, FS10-S4, FS10-ZE
+         # tested receiver:      FS10-ST, FS10-MS, WS3000-TV, PC-Wettersensor-Empf√§nger
+         # das letzte Bit 1 und 1 x 0 Preambel fehlt meistens
+         #  ____            ____
+         # |    |____      |    |________
+         #    Bit 0            Bit 1
+         # 400¬µS 400¬µS     400¬µS  800¬µS - Sollzeiten 
+         name                 => 'FS10',
+         id                   => '61',
+         one                  => [1,-2],            
+         zero                 => [1,-1],
+         clockabs             => 400,  
+         preamble             => 'P61#',     # prepend to converted message
+         postamble            => '',         # Append to converted message
+         clientmodule         => 'FS10',     # xx_FS10.pm
+         length_min           => '38',       # eigentlich 41 oder 46 (Pr√ºfsumme nicht bei allen)
+         length_max           => '48',       # eigentlich 46
+      }, 
 	"62" => ## Clarus_Switch  
 		{    #MU;P0=-5893;P4=-634;P5=498;P6=-257;P7=116;D=45656567474747474745656707456747474747456745674567456565674747474747456567074567474747474567456745674565656747474747474565670745674747474745674567456745656567474747474745656707456747474747456745674567456565674747474747456567074567474747474567456745674567;CP=7;O;
 			name         => 'Clarus_Switch',
@@ -1152,20 +1163,20 @@ my %ProtocolListSIGNALduino  = (
 			length_min   => '24',
 			length_max   => '24',		
 		},
-	"63" => ## Warema MU
-		{    #MU;P0=-2988;P1=1762;P2=-1781;P3=-902;P4=871;P5=6762;P6=5012;D=0121342434343434352434313434243521342134343436;
-			name         => 'Warema',
-			id           => '62',
-			one          => [1],
-			zero         => [0],
-			clockabs     => 800, 
-			syncabs		 => '6700',# Special field for filterMC function
-			preamble     => 'u63', # prepend to converted message
-			clientmodule => '', 
-			#modulematch => '', 
-			length_min   => '24',
-			filterfunc   => 'SIGNALduino_filterMC',
-		},
+	# "63" => ## Warema MU
+		# {    #MU;P0=-2988;P1=1762;P2=-1781;P3=-902;P4=871;P5=6762;P6=5012;D=0121342434343434352434313434243521342134343436;
+			# name         => 'Warema',
+			# id           => '63',
+			# one          => [1],
+			# zero         => [0],
+			# clockabs     => 800, 
+			# syncabs		 => '6700',# Special field for filterMC function
+			# preamble     => 'u63', # prepend to converted message
+			# clientmodule => '', 
+			# #modulematch => '', 
+			# length_min   => '24',
+			# filterfunc   => 'SIGNALduino_filterMC',
+		# },
 	"64" => ##  WH2 #############################################################################
 		{
     # MU;P0=-32001;P1=457;P2=-1064;P3=1438;D=0123232323212121232123232321212121212121212323212121232321;CP=1;R=63;
@@ -1173,143 +1184,76 @@ my %ProtocolListSIGNALduino  = (
 
 			name         => 'WH2',
 			id           => '64',
-      #start			=> [70,-1],
-			one			    	=> [3,-2],
-			zero         => [1,-2],
-			clockabs     => 460,          #-1=auto
+      #start			 => [70,-1],
+			#one			   => [3,-2], # 1.Versuch
+			#zero        => [1,-2],   # 1.Versuch
+      one          => [1,-2],   # 2.Versuch
+      zero			   => [3,-2], # 2.Versuch
+			clockabs     => 490,          #-1=auto
       clientmodule    => 'SD_WS',  
 			modulematch  => '^W64*',
 			preamble     => 'W64#',       # prepend to converted message
 			postamble    => '',           # Append to converted message       
 			clientmodule => '',
-			length_min   => '36',
-			length_max   => '42',
+			length_min   => '48',
+			length_max   => '48',
 		},
+	"65" => ## Homeeasy
+		{
+			name         => 'Homeeasy',
+			id           => '65',
+			one          => [1,-5],
+			zero         => [1,-1],
+			start        => [1,-40],
+			clockabs     => 250,
+			format       => 'twostate',  # not used now
+			preamble     => 'U65#',
+			length_min   => '50',
+			#msgOutro     => 'SR;P0=275;P1=-7150;D=01;',
+			postDemodulation => \&SIGNALduino_HE,
+		},
+   "66" => ## TX2 Protocol (Remote Temp Transmitter & Remote Thermo Model 7035)
+            # MU;P0=13312;P1=-2785;P2=4985;P3=1124;P4=-6442;P5=3181;P6=-31980;D=0121345434545454545434545454543454545434343454543434545434545454545454343434545434343434545621213454345454545454345454545434545454343434545434345454345454545454543434345454343434345456212134543454545454543454545454345454543434345454343454543454545454545;CP=3;R=73;O;
+            # MU;P0=32001;P1=-2783;P2=4976;P3=1129;P4=-6455;P5=3181;P6=-31980;D=0121345434545454545434545454543454545434343454543434545434545454545454343434545434343434545621213454345454545454345454545434545454343434545434345454345454545454543434345454343434345456212134543454545454543454545454345454543434345454343454543454545454545;CP=3;R=73;O;
+            # MU;P0=10080;P1=-2787;P2=4981;P3=1136;P4=-6447;P5=3177;P6=-31972;D=0121345434545454545434545454543454545434343454543434545434545454545454343434545434343434545621213454345454545454345454545434545454343434545434345454345454545454543434345454343434345456212134543454545454543454545454345454543434345454343454543454545454545;CP=3;R=73;O;
+      {
+         name           => 'WS7035',	
+         id             => '66',
+         zero           => [8,-16],
+         one            => [3,-16],
+         clockabs       => 400,
+         preamble	      => 'TX',	      # prepend to converted message
+         clientmodule   => 'CUL_TX',
+         modulematch    => '^TX......',
+         length_min     => '43',
+         length_max     => '44',
+         remove_zero    => 1,	         # Removes leading zeros from output
+         postDemodulation => \&SIGNALduino_postDemo_WS7035,
+      }, 	
 );
 
-sub SIGNALduino_postDemo_WS2000($@) {
+sub SIGNALduino_postDemo_WS7035($@) {
 	my ($name, @bit_msg) = @_;
-	my $debug = AttrVal($name,"debug",0);
-	my @new_bit_msg = "";
-	my $protolength = scalar @bit_msg;
-	my @datalenghtws = (35,50,35,50,70,40,40,85);
-	my $datastart = 0;
-	my $datalength = 0;
-	my $datalength1 = 0;
-	my $index = 0;
-	my $data = 0;
-	my $dataindex = 0;
-	my $sumindex = 0;
-	my $error = 0;
-	my $check = 0;
-	my $sum = 5;
-	my $typ = 0;
-	my $adr = 0;
-	my @sensors = (
-		"Thermo",
-		"Thermo/Hygro",
-		"Rain",
-		"Wind",
-		"Thermo/Hygro/Baro",
-		"Brightness",
-		"Pyrano",
-		"Kombi"
-		);
+	my $msg = join("",@bit_msg);
+	my $parity = 0;									# Parity even
 
-	while ($bit_msg[$datastart] == 0) { $datastart++; }	# Start bei erstem Bit mit Wert 1 suchen
-	$datalength = $protolength - $datastart;
-	$datalength1 = $datalength - ($datalength % 5);  		# modulo 5
-	Log3 $name, 5, "$name: WS2000 protolength: $protolength, datastart: $datastart, datalength $datalength";
-	$typ = oct( "0b".(join "", reverse @bit_msg[$datastart + 1.. $datastart + 4]));		# Sensortyp
-	if ($typ > 7) {
-		Log3 $name, 1, "$name: WS2000 Sensortyp $typ - ERROR typ to big";
-		#return (0, @bit_msg);
-		#return 1;
-		#return 0;
-		#return "";
-		return 0, undef;
-	}
-	if ($typ == 1 && ($datalength == 45 || $datalength == 46)) {$datalength1 += 5;}		# Typ 1 ohne Summe
-	if ($datalenghtws[$typ] != $datalength1) {												# check lenght of message
-		Log3 $name, 1, "$name: WS2000 Sensortyp $typ - ERROR lenght of message $datalength1 ($datalenghtws[$typ])";
-		#return (0, @bit_msg);
-		#return 1;
-		#return 0;
-		#return "";
-		return 0, undef;
-	} elsif ($datastart > 10) {									# max 10 Bit preamble
-		Log3 $name, 1, "$name: WS2000 ERROR preamble > 10 ($datastart)";
-		#return (0, @bit_msg);
-		#return 1;
-		#return 0;
-		#return "";
+	if (substr($msg,0,8) ne "10100000") {		# check ident
+		Log3 $name, 3, "$name: WS7035 ERROR - Ident not 1010 0000";
 		return 0, undef;
 	} else {
-		do {
-			$error += !$bit_msg[$index + $datastart];			# jedes 5. Bit muss 1 sein
-			$dataindex = $index + $datastart + 1;				 
-			$data = oct( "0b".(join "", reverse @bit_msg[$dataindex .. $dataindex + 3]));
-			if ($index == 5) {$adr = ($data & 0x07)}			# Sensoradresse
-			if ($datalength == 45 || $datalength == 46) { 	# Typ 1 ohne Summe
-				if ($index <= $datalength - 5) {
-					$check = $check ^ $data;		# Check - Typ XOR Adresse XOR Ö bis XOR Check muss 0 ergeben
-				}
-			} else {
-				if ($index <= $datalength - 10) {
-					$check = $check ^ $data;		# Check - Typ XOR Adresse XOR Ö bis XOR Check muss 0 ergeben
-					$sum += $data;
-					$sumindex = $index + $datastart + 6;		# Position Summe
-				}
-			}
-			$index += 5;
-		} until ($index >= $datalength);
-	}
-	if ($error != 0) {
-		Log3 $name, 1, "$name: WS2000 Sensortyp $typ Adr $adr - ERROR examination bit";
-		#return (0, @bit_msg);
-		#return 1;
-		#return 0;
-		return "";
-	} elsif ($check != 0) {
-		Log3 $name, 1, "$name: WS2000 Sensortyp $typ Adr $adr - ERROR check XOR";
-		#return (0, @bit_msg);
-		#return 1;
-		#return 0;
-		return "";
-	} else {
-		if ($datalength < 45 || $datalength > 46) { 			# Summe pr¸fen, auﬂer Typ 1 ohne Summe
-			$data = oct( "0b".(join "", reverse @bit_msg[$dataindex .. $dataindex + 3]));
-			if ($data != ($sum & 0x0F)) {
-				Log3 $name, 1, "$name: WS2000 Sensortyp $typ Adr $adr - ERROR sum";
-				#return (0, @bit_msg);
-				#return 1;
-				#return 0;
-				return "";
-			}
+		for(my $i = 15; $i < 28; $i++) {			# Parity over bit 15 and 12 bit temperature
+	      $parity += substr($msg, $i, 1);
 		}
-		Log3 $name, 4, "$name: WS2000 Sensortyp $typ Adr $adr - $sensors[$typ]";
-		$datastart += 1;																							# [x] - 14_CUL_WS
-		@new_bit_msg[4 .. 7] = reverse @bit_msg[$datastart .. $datastart+3];						# [2]  Sensortyp
-		@new_bit_msg[0 .. 3] = reverse @bit_msg[$datastart+5 .. $datastart+8];					# [1]  Sensoradresse
-		@new_bit_msg[12 .. 15] = reverse @bit_msg[$datastart+10 .. $datastart+13];				# [4]  T 0.1, R LSN, Wi 0.1, B   1, Py   1
-		@new_bit_msg[8 .. 11] = reverse @bit_msg[$datastart+15 .. $datastart+18];				# [3]  T   1, R MID, Wi   1, B  10, Py  10
-		if ($typ == 0 || $typ == 2) {		# Thermo (AS3), Rain (S2000R, WS7000-16)
-			@new_bit_msg[16 .. 19] = reverse @bit_msg[$datastart+20 .. $datastart+23];			# [5]  T  10, R MSN
+		if ($parity % 2 != 0) {
+			Log3 $name, 3, "$name: WS7035 ERROR - Parity not even";
+			return 0, undef;
 		} else {
-			@new_bit_msg[20 .. 23] = reverse @bit_msg[$datastart+20 .. $datastart+23];			# [6]  T  10, 			Wi  10, B 100, Py 100
-			@new_bit_msg[16 .. 19] = reverse @bit_msg[$datastart+25 .. $datastart+28];			# [5]  H 0.1, 			Wr   1, B Fak, Py Fak
-			if ($typ == 1 || $typ == 3 || $typ == 4 || $typ == 7) {	# Thermo/Hygro, Wind, Thermo/Hygro/Baro, Kombi
-				@new_bit_msg[28 .. 31] = reverse @bit_msg[$datastart+30 .. $datastart+33];		# [8]  H   1,			Wr  10
-				@new_bit_msg[24 .. 27] = reverse @bit_msg[$datastart+35 .. $datastart+38];		# [7]  H  10,			Wr 100
-				if ($typ == 4) {	# Thermo/Hygro/Baro (S2001I, S2001ID)
-					@new_bit_msg[36 .. 39] = reverse @bit_msg[$datastart+40 .. $datastart+43];	# [10] P    1
-					@new_bit_msg[32 .. 35] = reverse @bit_msg[$datastart+45 .. $datastart+48];	# [9]  P   10
-					@new_bit_msg[44 .. 47] = reverse @bit_msg[$datastart+50 .. $datastart+53];	# [12] P  100
-					@new_bit_msg[40 .. 43] = reverse @bit_msg[$datastart+55 .. $datastart+58];	# [11] P Null
-				}
-			}
+			Log3 $name, 4, "$name: WS7035 $msg";
+			Log3 $name, 5, "$name: WS7035 before: " . substr($msg,0,4) ." ". substr($msg,4,4) ." ". substr($msg,8,4) ." ". substr($msg,12,4) ." ". substr($msg,16,4) ." ". substr($msg,20,4) ." ". substr($msg,24,4) ." ". substr($msg,28,4) ." ". substr($msg,32,4) ." ". substr($msg,36,4) ." ". substr($msg,40,4);
+			substr($msg, 27, 4, '');				# delete nibble 8
+			Log3 $name, 5, "$name: WS7035 after:  " . substr($msg,0,4) ." ". substr($msg,4,4) ." ". substr($msg,8,4) ." ". substr($msg,12,4) ." ". substr($msg,16,4) ." ". substr($msg,20,4) ." ". substr($msg,24,4) ." ". substr($msg,28,4) ." ". substr($msg,32,4) ." ". substr($msg,36,4);
+			return (1,split("",$msg));
 		}
-		return (1, @new_bit_msg);
 	}
 }
 
@@ -1330,24 +1274,27 @@ SIGNALduino_Initialize($)
 
 # Normal devices
   $hash->{DefFn}  		 	= "SIGNALduino_Define";
-  $hash->{FingerprintFn}= "SIGNALduino_FingerprintFn";
+  $hash->{FingerprintFn} 	= "SIGNALduino_FingerprintFn";
   $hash->{UndefFn} 		 	= "SIGNALduino_Undef";
   $hash->{GetFn}   			= "SIGNALduino_Get";
   $hash->{SetFn}   			= "SIGNALduino_Set";
   $hash->{AttrFn}  			= "SIGNALduino_Attr";
-  $hash->{AttrList}			="Clients MatchList do_not_notify:1,0 dummy:1,0"
-												." hexFile"
-												." initCommands"
-												." flashCommand"
-												." hardware:nano328,uno,promini328,nanoCC1101"
-												." debug:0,1"
-												." longids:0,1"
-												." minsecs"
-												." whitelist_IDs"
-												." WS09_WSModel:undef,WH1080,CTW600"
-												." WS09_CRCAUS:0,1,2"
-												." addvaltrigger"
-												." $readingFnAttributes";
+  $hash->{AttrList}			= 
+                       "Clients MatchList do_not_notify:1,0 dummy:1,0"
+					  ." hexFile"
+                      ." initCommands"
+                      ." flashCommand"
+  					  ." hardware:nano328,uno,promini328,nanoCC1101"
+					  ." debug:0,1"
+					  ." longids"
+					  ." minsecs"
+					  ." whitelist_IDs"
+					  ." WS09_WSModel:undef,WH1080,CTW600"
+					  ." WS09_CRCAUS:0,1,2"
+					  ." addvaltrigger"
+					  ." rawmsgEvent:1,0"
+					  ." cc1101_frequency"
+		              ." $readingFnAttributes";
 
   $hash->{ShutdownFn} = "SIGNALduino_Shutdown";
 
@@ -1499,13 +1446,22 @@ SIGNALduino_Set($@)
   
   return "\"set SIGNALduino\" needs at least one parameter" if(@a < 2);
   my $hasCC1101 = 0;
+  my $CC1101Frequency;
   if ($hash->{version} && $hash->{version} =~ m/cc1101/) {
     $hasCC1101 = 1;
+    if (!defined($hash->{cc1101_frequency})) {
+       $CC1101Frequency = "433";
+    } else {
+       $CC1101Frequency = $hash->{cc1101_frequency};
+    }
   }
   if (!defined($sets{$a[1]})) {
     my $arguments = ' ';
     foreach my $arg (sort keys %sets) {
       next if ($arg =~ m/cc1101/ && $hasCC1101 == 0);
+      if ($arg =~ m/patable/) {
+        next if (substr($arg, -3) ne $CC1101Frequency);
+      }
       $arguments.= $arg . ($sets{$arg} ? (':' . $sets{$arg}) : '') . ' ';
     }
     #Log3 $hash, 3, "set arg = $arguments";
@@ -1606,17 +1562,6 @@ SIGNALduino_Set($@)
   } elsif( $cmd eq "close" ) {
 	$hash->{DevState} = 'closed';
 	return SIGNALduino_CloseDevice($hash);
-  } elsif( $cmd eq "ITClock" ) {
-  	Log3 $name, 4, "set $name $cmd $arg";
-  	my $clock = shift @a;
-  	
-  	$clock=250 	if ($clock  eq "" );
-  	return "argument $arg is not numeric" if($clock !~ /^\d+$/);
-    Log3 $name, 3, "$name: Setting ITClock to $clock (sending $arg)";
-	$arg="ic$clock";
-  	#SIGNALduino_SimpleWrite($hash, $arg);
-  	SIGNALduino_AddSendQueue($hash,$arg);
-  	$hash->{$cmd}=$clock;
   } elsif( $cmd eq "disableMessagetype" ) {
 	my $argm = 'CD' . substr($arg,-1,1);
 	#SIGNALduino_SimpleWrite($hash, $argm);
@@ -1628,6 +1573,9 @@ SIGNALduino_Set($@)
 	SIGNALduino_AddSendQueue($hash,$argm);
 	Log3 $name, 4, "set $name $cmd $arg $argm";
   } elsif( $cmd eq "freq" ) {
+	if ($arg eq "") {
+		$arg = AttrVal($name,"cc1101_frequency", 433.92);
+	}
 	my $f = $arg/26*65536;
 	my $f2 = sprintf("%02x", $f / 65536);
 	my $f1 = sprintf("%02x", int($f % 65536) / 256);
@@ -1660,9 +1608,10 @@ SIGNALduino_Set($@)
 	Log3 $name, 3, "$name: Setting AGCCTRL0 (1D) to $v / $w dB";
 	SIGNALduino_AddSendQueue($hash,"W1F$v");
 	SIGNALduino_WriteInit($hash);
-  } elsif( $cmd eq "patable" ) {
-	my $pa = "x" . $patable433{$arg};
-	Log3 $name, 3, "$name: Setting patable $arg $pa";
+  } elsif( substr($cmd,0,7) eq "patable" ) {
+	my $paFreq = substr($cmd,8);
+	my $pa = "x" . $patable{$paFreq}{$arg};
+	Log3 $name, 3, "$name: Setting patable $paFreq $arg $pa";
 	SIGNALduino_AddSendQueue($hash,$pa);
 	SIGNALduino_WriteInit($hash);
   } elsif( $cmd eq "sendMsg" ) {
@@ -1808,7 +1757,7 @@ SIGNALduino_Get($@)
   my $arg = ($a[2] ? $a[2] : "");
   return "no command to send, get aborted." if (length($gets{$a[1]}[0]) == 0 && length($arg) == 0);
   
-  if (($a[1] eq "ccconf" || $a[1] eq "ccreg") && $hash->{version} && $hash->{version} !~ m/cc1101/) {
+  if (($a[1] eq "ccconf" || $a[1] eq "ccreg" || $a[1] eq "ccpatable") && $hash->{version} && $hash->{version} !~ m/cc1101/) {
     return "This command is only available with a cc1101 receiver";
   }
   
@@ -2035,6 +1984,18 @@ sub SIGNALduino_parseResponse($$$)
 		SIGNALduino_AddSendQueue($hash,"W12$ob");
 		SIGNALduino_WriteInit($hash);
 	}
+	elsif($cmd eq "ccpatable") {
+		my $CC1101Frequency = "433";
+		if (defined($hash->{cc1101_frequency})) {
+			$CC1101Frequency = $hash->{cc1101_frequency};
+		}
+	#	$msg .=  "\n\n$CC1101Frequency MHz\n\n";
+	#	foreach my $dB (keys $patable{$CC1101Frequency})
+	#	{
+	#		$msg .= "$patable{$CC1101Frequency}{$dB}  $dB\n";
+	#	}
+	}
+	
   	return $msg;
 }
 
@@ -2085,6 +2046,7 @@ SIGNALduino_DoInit($)
 	
 	RemoveInternalTimer("HandleWriteQueue:$name");
     @{$hash->{QUEUE}} = ();
+    $hash->{sendworking} = 0;
   	if (($hash->{DEF} !~ m/\@DirectIO/) and ($hash->{DEF} !~ m/none/) )
 	{
 		Log3 $hash, 1, "$name/init: ".$hash->{DEF};
@@ -2255,13 +2217,12 @@ sub SIGNALduino_AddSendQueue($$)
   my ($hash, $msg) = @_;
   my $name = $hash->{NAME};
   
-  #Log3 $hash, 3,"AddSendQueue: " . $hash->{NAME} . ": $msg";
-  
   push(@{$hash->{QUEUE}}, $msg);
   
   #Log3 $hash , 5, Dumper($hash->{QUEUE});
   
-  InternalTimer(gettimeofday() + 0.1, "SIGNALduino_HandleWriteQueue", "HandleWriteQueue:$name") if (@{$hash->{QUEUE}} == 1);
+  Log3 $hash, 5,"AddSendQueue: " . $hash->{NAME} . ": $msg (" . @{$hash->{QUEUE}} . ")";
+  InternalTimer(gettimeofday() + 0.1, "SIGNALduino_HandleWriteQueue", "HandleWriteQueue:$name") if (@{$hash->{QUEUE}} == 1 && $hash->{sendworking} == 0);
 }
 
 
@@ -2274,10 +2235,11 @@ SIGNALduino_SendFromQueue($$)
   if($msg ne "") {
 	SIGNALduino_XmitLimitCheck($hash,$msg);
     #DevIo_SimpleWrite($hash, $msg . "\n", 2);
+    $hash->{sendworking} = 1;
     SIGNALduino_SimpleWrite($hash,$msg);
     if ($msg =~ m/^S(R|C|M);/) {
        $hash->{getcmd}->{cmd} = 'sendraw';
-       Log3 $hash, 4, "$name SendFromQueue: msg=$msg"; # zu testen der Queue, kann wenn es funktioniert auskommentiert werden
+       Log3 $hash, 4, "$name SendrawFromQueue: msg=$msg"; # zu testen der Queue, kann wenn es funktioniert auskommentiert werden
     } 
     elsif ($msg eq "C99") {
        $hash->{getcmd}->{cmd} = 'ccregAll';
@@ -2304,6 +2266,8 @@ SIGNALduino_HandleWriteQueue($)
   my $hash = $defs{$name};
   
   #my @arr = @{$hash->{QUEUE}};
+  
+  $hash->{sendworking} = 0;       # es wurde gesendet
   
   if (defined($hash->{getcmd}->{cmd}) && $hash->{getcmd}->{cmd} eq 'sendraw') {
     Log3 $name, 4, "$name/HandleWriteQueue: sendraw no answer (timeout)";
@@ -2789,18 +2753,20 @@ sub SIGNALduno_Dispatch($$$$)
 		return;
 	}
 	
-	Log3 $name, 5, "$name: converted Data to ($dmsg)";
+	Log3 $name, 5, "$name: Dispatch DMSG: $dmsg";
 
 	#Dispatch only if $dmsg is different from last $dmsg, or if 2 seconds are between transmits
-    if ( ($hash->{DMSG} ne $dmsg) || ($hash->{TIME}+1 < time()) ) { 
+    if ( ($hash->{DMSG} ne $dmsg) || ($hash->{TIME}+2 < time()) ) { 
 		$hash->{MSGCNT}++;
 		$hash->{TIME} = time();
 		$hash->{DMSG} = $dmsg;
-		my $event = 0;
-		if (substr($dmsg,0,1) eq 'u') {
-			$event = 1;
+		#my $event = 0;
+		if (substr(ucfirst($dmsg),0,1) eq 'U') {
+			#$event = 1;
+			DoTrigger($name, "DMSG " . $dmsg);
 		}
-		readingsSingleUpdate($hash, "state", $hash->{READINGS}{state}{VAL}, $event);
+		#readingsSingleUpdate($hash, "state", $hash->{READINGS}{state}{VAL}, $event);
+		
 		$hash->{RAWMSG} = $rmsg;
 		my %addvals = (RAWMSG => $rmsg, DMSG => $dmsg);
 		if(defined($rssi)) {
@@ -2953,7 +2919,7 @@ SIGNALduino_Parse_MS($$$$%)
 			Debug "$name: decoded message raw (@bit_msg), ".@bit_msg." bits\n" if ($debug);;
 			
 			my ($rcode,@retvalue) = SIGNALduino_callsub('postDemodulation',$ProtocolListSIGNALduino{$id}{postDemodulation},$name,@bit_msg);
-			next if (!$rcode);
+			next if ($rcode < 1 );
 			#Log3 $name, 5, "$name: postdemodulation value @retvalue";
 			
 			@bit_msg = @retvalue;
@@ -2982,8 +2948,8 @@ SIGNALduino_Parse_MS($$$$%)
 			if (defined($rawRssi)) {
 				if (defined($ProtocolListSIGNALduino{$id}{preamble}) && $ProtocolListSIGNALduino{$id}{preamble} eq "s") {
 					$postamble = sprintf("%02X", $rawRssi);
-				} elsif ($id eq "7") {
-				        $postamble = "#R" . sprintf("%02X", $rawRssi);
+				#} elsif ($id eq "7") {
+				#        $postamble = "#R" . sprintf("%02X", $rawRssi);
 				}
 			}
 			$dmsg = "$dmsg".$postamble if (defined($postamble));
@@ -3068,7 +3034,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 	
     Debug "$name: processing unsynced message\n" if ($debug);
 
-	#my $clockabs;  #Clock will be fetched from Protocol
+	my $clockabs = 1;  #Clock will be fetched from Protocol
 	#$patternListRaw{$_} = floor($msg_parts{pattern}{$_}/$clockabs) for keys $msg_parts{pattern};
 	$patternListRaw{$_} = $msg_parts{pattern}{$_} for keys %{$msg_parts{pattern}};
 
@@ -3084,7 +3050,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 		foreach $id (@{$hash->{muIdList}}) {
 			
 			my $valid=1;
-			my $clockabs= $ProtocolListSIGNALduino{$id}{clockabs};
+			$clockabs = $ProtocolListSIGNALduino{$id}{clockabs};
 			my %patternList;
 			$rawData=$msg_parts{rawData};
 			if (exists($ProtocolListSIGNALduino{$id}{filterfunc}))
@@ -3239,7 +3205,8 @@ sub SIGNALduino_Parse_MU($$$$@)
 					if ($valid) {
 			
 						my ($rcode,@retvalue) = SIGNALduino_callsub('postDemodulation',$ProtocolListSIGNALduino{$id}{postDemodulation},$name,@bit_msg);
-						next if (!$rcode);
+						next if ($rcode < 1 );
+
 						#Log3 $name, 5, "$name: postdemodulation value @retvalue";
 			
 						@bit_msg = @retvalue;
@@ -3425,6 +3392,10 @@ SIGNALduino_Parse($$$$@)
 	
 	Debug "$name: incomming message: ($rmsg)\n" if ($debug);
 	
+	if (AttrVal($name, "rawmsgEvent", 0)) {
+		DoTrigger($name, "RAWMSG " . $rmsg);
+	}
+	
 	my %signal_parts=SIGNALduino_Split_Message($rmsg,$name);   ## Split message and save anything in an hash %signal_parts
 	#Debug "raw data ". $signal_parts{rawData};
 	
@@ -3573,6 +3544,16 @@ SIGNALduino_Attr(@)
 	{
 		SIGNALduino_IdList($hash, $name, $aVal);
 	}
+	elsif ($aName eq "cc1101_frequency")
+	{
+		if ($aVal eq "" || $aVal < 800) {
+			Log3 $name, 3, "$name: delete cc1101_frequeny";
+			delete ($hash->{cc1101_frequency}) if (defined($hash->{cc1101_frequency}));
+		} else {
+			Log3 $name, 3, "$name: setting cc1101_frequency to 868";
+			$hash->{cc1101_frequency} = 868;
+		}
+	}
 	
   	return undef;
 }
@@ -3645,19 +3626,17 @@ sub SIGNALduino_callsub
 	my $name = shift;
 	my @args = @_;
 	
+	
 	if ( defined $method && defined &$method )   
 	{
-		Log3 $name, 5, "$name: applying $funcname method $method";
+		#my $subname = @{[eval {&$method}, $@ =~ /.*/]};
+		#Log3 $name, 5, "$name: applying $funcname method $subname";
 		#Log3 $name, 5, "$name: value bevore $funcname: @args";
 		
-		##### elektron-bbs #####
-		#my @returnvalues = $method->(@args) ;	
 		my ($rcode, @returnvalues) = $method->($name, @args) ;	
 			
-	   Log3 $name, 5, "$name: modified value after $funcname: @returnvalues";
-		##### elektron-bbs #####
-		#return (1,@returnvalues);
-	   return ($rcode, @returnvalues);
+	    Log3 $name, 5, "$name: modified value after $funcname: @returnvalues";
+	    return ($rcode, @returnvalues);
 	} elsif (defined $method ) {					
 		Log3 $name, 5, "$name: Error: Unknown method $funcname Please check definition";
 		return (0,undef);
@@ -3671,23 +3650,26 @@ sub SIGNALduino_callsub
 # output = @list
 sub SIGNALduino_lengtnPrefix
 {
-	my $msg = join("",@_);	
+	my ($name, @bit_msg) = @_;
+	
+	my $msg = join("",@bit_msg);	
 
 	#$msg = unpack("B8", pack("N", length($msg))).$msg;
 	$msg=sprintf('%08b', length($msg)).$msg;
 	
-	return split("",$msg);
+	return (1,split("",$msg));
 }
 
 
 sub SIGNALduino_bit2Arctec
 {
-	my $msg = join("",@_);	
+	my ($name, @bit_msg) = @_;
+	my $msg = join("",@bit_msg);	
 	# Convert 0 -> 01   1 -> 10 to be compatible with IT Module
 	$msg =~ s/0/z/g;
 	$msg =~ s/1/10/g;
 	$msg =~ s/z/01/g;
-	return split("",$msg);
+	return (1,split("",$msg)); 
 }
 
 
@@ -3700,7 +3682,121 @@ sub SIGNALduino_ITV1_tristateToBit($)
 	$msg =~ s/F/01/g;
 	$msg =~ s/D/10/g;
 		
-	return $msg;
+	return (1,$msg);
+}
+
+sub SIGNALduino_HE($@) {
+	my ($name, @bit_msg) = @_;
+	my $msg = join("",@bit_msg);
+	
+	#Log3 $name, 4, "$name HE: $msg";
+	Log3 $name, 4, "$name HE: " . substr($msg,0,11) ." ". substr($msg,11,32) ." ". substr($msg,43,4) ." ". substr($msg,47,2) ." ". substr($msg,49,2) ." ". substr($msg,51);
+	
+	return (1,split("",$msg));
+}
+
+
+sub SIGNALduino_postDemo_WS2000($@) {
+	my ($name, @bit_msg) = @_;
+	my $debug = AttrVal($name,"debug",0);
+	my @new_bit_msg = "";
+	my $protolength = scalar @bit_msg;
+	my @datalenghtws = (35,50,35,50,70,40,40,85);
+	my $datastart = 0;
+	my $datalength = 0;
+	my $datalength1 = 0;
+	my $index = 0;
+	my $data = 0;
+	my $dataindex = 0;
+	my $error = 0;
+	my $check = 0;
+	my $sum = 5;
+	my $typ = 0;
+	my $adr = 0;
+	my @sensors = (
+		"Thermo",
+		"Thermo/Hygro",
+		"Rain",
+		"Wind",
+		"Thermo/Hygro/Baro",
+		"Brightness",
+		"Pyrano",
+		"Kombi"
+		);
+
+	while ($bit_msg[$datastart] == 0) { $datastart++; }	# Start bei erstem Bit mit Wert 1 suchen
+	$datalength = $protolength - $datastart;
+	$datalength1 = $datalength - ($datalength % 5);  		# modulo 5
+	Log3 $name, 5, "$name: WS2000 protolength: $protolength, datastart: $datastart, datalength $datalength";
+	$typ = oct( "0b".(join "", reverse @bit_msg[$datastart + 1.. $datastart + 4]));		# Sensortyp
+	if ($typ > 7) {
+		Log3 $name, 3, "$name: WS2000 Sensortyp $typ - ERROR typ to big";
+		return 0, undef;
+	}
+	if ($typ == 1 && ($datalength == 45 || $datalength == 46)) {$datalength1 += 5;}		# Typ 1 ohne Summe
+	if ($datalenghtws[$typ] != $datalength1) {												# check lenght of message
+		Log3 $name, 3, "$name: WS2000 Sensortyp $typ - ERROR lenght of message $datalength1 ($datalenghtws[$typ])";
+		return 0, undef;
+	} elsif ($datastart > 10) {									# max 10 Bit preamble
+		Log3 $name, 3, "$name: WS2000 ERROR preamble > 10 ($datastart)";
+		return 0, undef;
+	} else {
+		do {
+			$error += !$bit_msg[$index + $datastart];			# jedes 5. Bit muss 1 sein
+			$dataindex = $index + $datastart + 1;				 
+			$data = oct( "0b".(join "", reverse @bit_msg[$dataindex .. $dataindex + 3]));
+			if ($index == 5) {$adr = ($data & 0x07)}			# Sensoradresse
+			if ($datalength == 45 || $datalength == 46) { 	# Typ 1 ohne Summe
+				if ($index <= $datalength - 5) {
+					$check = $check ^ $data;		# Check - Typ XOR Adresse XOR ¬Ö bis XOR Check muss 0 ergeben
+				}
+			} else {
+				if ($index <= $datalength - 10) {
+					$check = $check ^ $data;		# Check - Typ XOR Adresse XOR ¬Ö bis XOR Check muss 0 ergeben
+					$sum += $data;
+				}
+			}
+			$index += 5;
+		} until ($index >= $datalength);
+	}
+	if ($error != 0) {
+		Log3 $name, 3, "$name: WS2000 Sensortyp $typ Adr $adr - ERROR examination bit";
+		return (0, undef);
+	} elsif ($check != 0) {
+		Log3 $name, 3, "$name: WS2000 Sensortyp $typ Adr $adr - ERROR check XOR";
+		return (0, undef);
+	} else {
+		if ($datalength < 45 || $datalength > 46) { 			# Summe pr√ºfen, au√üer Typ 1 ohne Summe
+			$data = oct( "0b".(join "", reverse @bit_msg[$dataindex .. $dataindex + 3]));
+			if ($data != ($sum & 0x0F)) {
+				Log3 $name, 3, "$name: WS2000 Sensortyp $typ Adr $adr - ERROR sum";
+				return (0, undef);
+			}
+		}
+		Log3 $name, 4, "$name: WS2000 Sensortyp $typ Adr $adr - $sensors[$typ]";
+		$datastart += 1;																							# [x] - 14_CUL_WS
+		@new_bit_msg[4 .. 7] = reverse @bit_msg[$datastart .. $datastart+3];						# [2]  Sensortyp
+		@new_bit_msg[0 .. 3] = reverse @bit_msg[$datastart+5 .. $datastart+8];					# [1]  Sensoradresse
+		@new_bit_msg[12 .. 15] = reverse @bit_msg[$datastart+10 .. $datastart+13];				# [4]  T 0.1, R LSN, Wi 0.1, B   1, Py   1
+		@new_bit_msg[8 .. 11] = reverse @bit_msg[$datastart+15 .. $datastart+18];				# [3]  T   1, R MID, Wi   1, B  10, Py  10
+		if ($typ == 0 || $typ == 2) {		# Thermo (AS3), Rain (S2000R, WS7000-16)
+			@new_bit_msg[16 .. 19] = reverse @bit_msg[$datastart+20 .. $datastart+23];			# [5]  T  10, R MSN
+		} else {
+			@new_bit_msg[20 .. 23] = reverse @bit_msg[$datastart+20 .. $datastart+23];			# [6]  T  10, 			Wi  10, B 100, Py 100
+			@new_bit_msg[16 .. 19] = reverse @bit_msg[$datastart+25 .. $datastart+28];			# [5]  H 0.1, 			Wr   1, B Fak, Py Fak
+			if ($typ == 1 || $typ == 3 || $typ == 4 || $typ == 7) {	# Thermo/Hygro, Wind, Thermo/Hygro/Baro, Kombi
+				@new_bit_msg[28 .. 31] = reverse @bit_msg[$datastart+30 .. $datastart+33];		# [8]  H   1,			Wr  10
+				@new_bit_msg[24 .. 27] = reverse @bit_msg[$datastart+35 .. $datastart+38];		# [7]  H  10,			Wr 100
+				if ($typ == 4) {	# Thermo/Hygro/Baro (S2001I, S2001ID)
+					@new_bit_msg[36 .. 39] = reverse @bit_msg[$datastart+40 .. $datastart+43];	# [10] P    1
+					@new_bit_msg[32 .. 35] = reverse @bit_msg[$datastart+45 .. $datastart+48];	# [9]  P   10
+					@new_bit_msg[44 .. 47] = reverse @bit_msg[$datastart+50 .. $datastart+53];	# [12] P  100
+					@new_bit_msg[40 .. 43] = reverse @bit_msg[$datastart+55 .. $datastart+58];	# [11] P Null
+				}
+			}
+		}
+		return (1, @new_bit_msg);
+	}
 }
 
 
@@ -3970,7 +4066,7 @@ sub	SIGNALduino_Hideki()
 
 		return  (1,$hidekihex); ## Return only the original bits, include length
 	}
-	return (-1,"");
+	return (-1,"Start pattern (10101110) not found");
 }
 
 
@@ -4052,6 +4148,7 @@ sub SIGNALduino_filterMC($$$%)
 	my $debug = AttrVal($name,"debug",0);
 	
 	my ($ht, $hasbit, $value) = 0;
+	$value=1 if (!$debug);
 	my @bitData;
 	my @sigData = split "",$rawData;
 
@@ -4510,7 +4607,7 @@ With a # at the beginnging whitelistIDs can be deactivated.
 		
 		<li>freq / bWidth / rAmpl / sens<br>
 		Only with CC1101 receiver.<br>
-		Set the CUL frequency / bandwidth / receiver-amplitude / sensitivity<br>
+		Set the sduino frequency / bandwidth / receiver-amplitude / sensitivity<br>
 		
 		Use it with care, it may destroy your hardware and it even may be
 		illegal to do so. Note: The parameters used for RFR transmission are
