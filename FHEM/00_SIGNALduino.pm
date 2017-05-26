@@ -1313,7 +1313,8 @@ SIGNALduino_Define($$)
 
   if( !defined( $attr{$name}{flashCommand} ) ) {
 #    $attr{$name}{flashCommand} = "avrdude -p atmega328P -c arduino -P [PORT] -D -U flash:w:[HEXFILE] 2>[LOGFILE]"
-    $attr{$name}{flashCommand} = "avrdude -c arduino -b 57600 -P [PORT] -p atmega328p -vv -U flash:w:[HEXFILE] 2>[LOGFILE]"
+     $attr{$name}{flashCommand} = "avrdude -c arduino -b [BAUDRATE] -P [PORT] -p atmega328p -vv -U flash:w:[HEXFILE] 2>[LOGFILE]"; 
+    
   }
   $hash->{DeviceName} = $dev;
   
@@ -1443,7 +1444,7 @@ SIGNALduino_Set($@)
     my @deviceName = split('@', $hash->{DeviceName});
     my $port = $deviceName[0];
 	my $hardware=AttrVal($name,"hardware","nano328");
-
+	my $baudrate=$hardware eq "uno" ? 115200 : 57600;
     my $defaultHexFile = "./FHEM/firmware/$hash->{TYPE}_$hardware.hex";
     my $logFile = AttrVal("global", "logdir", "./log/") . "$hash->{TYPE}-Flash.log";
 
@@ -1477,6 +1478,7 @@ SIGNALduino_Set($@)
 
       my $avrdude = $flashCommand;
       $avrdude =~ s/\Q[PORT]\E/$port/g;
+      $avrdude =~ s/\Q[BAUDRATE]\E/$baudrate/g;
       $avrdude =~ s/\Q[HEXFILE]\E/$hexFile/g;
       $avrdude =~ s/\Q[LOGFILE]\E/$logFile/g;
 
