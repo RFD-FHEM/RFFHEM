@@ -24,7 +24,7 @@ SD_WS07_Initialize($)
   $hash->{DefFn}     = "SD_WS07_Define";
   $hash->{UndefFn}   = "SD_WS07_Undef";
   $hash->{ParseFn}   = "SD_WS07_Parse";
-  $hash->{AttrFn}	 = "SD_WS07_Attr";
+  $hash->{AttrFn}    = "SD_WS07_Attr";
   $hash->{AttrList}  = "IODev do_not_notify:1,0 ignore:0,1 showtime:1,0 " .
                         "$readingFnAttributes ";
   $hash->{AutoCreate} =
@@ -218,7 +218,7 @@ sub SD_WS07_Attr(@)
 =begin html
 
 <a name="SD_WS07"></a>
-<h3>Wether Sensors protocol #7</h3>
+<h3>Weather Sensors protocol #7</h3>
 <ul>
   The SD_WS07 module interprets temperature sensor messages received by a Device like CUL, CUN, SIGNALduino etc.<br>
   <br>
@@ -228,12 +228,12 @@ sub SD_WS07_Attr(@)
     <li>Technoline WS6750/TX70DTH</li>
   </ul>
   <br>
-  New received device are add in fhem with autocreate.
+  New received devices are added in FHEM with autocreate.
   <br><br>
 
   <a name="SD_WS07_Define"></a>
   <b>Define</b> 
-  <ul>The received devices created automatically.<br>
+  <ul>The received devices are created automatically.<br>
   The ID of the defice is the cannel or, if the longid attribute is specified, it is a combination of channel and some random generated bits at powering the sensor and the channel.<br>
   If you want to use more sensors, than channels available, you can use the longid option to differentiate them.
   </ul>
@@ -242,18 +242,17 @@ sub SD_WS07_Attr(@)
   <b>Generated readings:</b>
   <br>Some devices may not support all readings, so they will not be presented<br>
   <ul>
-  	 <li>State (T: H:)</li>
+  	 <li>state (T: H:)</li>
      <li>temperature (&deg;C)</li>
-     <li>humidity: (The humidity (1-100 if available)</li>
+     <li>humidity: (the humidity 1-100)</li>
      <li>battery: (low or ok)</li>
-     <li>channel: (The Channelnumber (number if)</li>
+     <li>channel: (the channelnumberf)</li>
   </ul>
   <br>
   <b>Attributes</b>
   <ul>
     <li><a href="#do_not_notify">do_not_notify</a></li>
     <li><a href="#ignore">ignore</a></li>
-    <li><a href="#model">model</a> ()</li>
     <li><a href="#showtime">showtime</a></li>
     <li><a href="#readingFnAttributes">readingFnAttributes</a></li>
   </ul>
@@ -261,8 +260,8 @@ sub SD_WS07_Attr(@)
   <a name="SD_WS07_Set"></a>
   <b>Set</b> <ul>N/A</ul><br>
 
-  <a name="SD_WS07_Parse"></a>
-  <b>Set</b> <ul>N/A</ul><br>
+  <a name="SD_WS07_Get"></a>
+  <b>Get</b> <ul>N/A</ul><br>
 
 </ul>
 
@@ -273,7 +272,7 @@ sub SD_WS07_Attr(@)
 <a name="SD_WS07"></a>
 <h3>SD_WS07</h3>
 <ul>
-  Das SD_WS07 Module verarbeitet von einem IO Geraet (CUL, CUN, SIGNALDuino, etc.) empfangene Nachrichten von Temperatur-Sensoren.<br>
+  Das SD_WS07 Modul verarbeitet von einem IO Geraet (CUL, CUN, SIGNALDuino, etc.) empfangene Nachrichten von Temperatur-Sensoren.<br>
   <br>
   <b>Unterst&uumltzte Modelle:</b>
   <ul>
@@ -289,14 +288,14 @@ sub SD_WS07_Attr(@)
   <a name="SD_WS07_Define"></a>
   <b>Define</b> 
   <ul>Die empfangenen Sensoren werden automatisch angelegt.<br>
-  Die ID der angelgten Sensoren ist entweder der Kanal des Sensors, oder wenn das Attribut longid gesetzt ist, dann wird die ID aus dem Kanal und einer Reihe von Bits erzeugt, welche der Sensor beim Einschalten zufaellig vergibt.<br>
+  Die ID der angelegten Sensoren ist entweder der Kanal des Sensors, oder wenn das Attribut longid gesetzt ist, dann wird die ID aus dem Kanal und einer Reihe von Bits erzeugt, welche der Sensor beim Einschalten zufaellig vergibt.<br>
   </ul>
   <br>
   <a name="SD_WS07 Events"></a>
   <b>Generierte Readings:</b>
   <ul>
-  	 <li>State (T: H:)</li>
-     <li>temperature (&deg;C)</li>
+     <li>state: (T: H:)</li>
+     <li>temperature: (&deg;C)</li>
      <li>humidity: (Luftfeuchte (1-100)</li>
      <li>battery: (low oder ok)</li>
      <li>channel: (Der Sensor Kanal)</li>
@@ -306,7 +305,6 @@ sub SD_WS07_Attr(@)
   <ul>
     <li><a href="#do_not_notify">do_not_notify</a></li>
     <li><a href="#ignore">ignore</a></li>
-    <li><a href="#model">model</a> ()</li>
     <li><a href="#showtime">showtime</a></li>
     <li><a href="#readingFnAttributes">readingFnAttributes</a></li>
   </ul>
@@ -314,8 +312,9 @@ sub SD_WS07_Attr(@)
   <a name="SD_WS071_Set"></a>
   <b>Set</b> <ul>N/A</ul><br>
 
-  <a name="SD_WS07_Parse"></a>
-  <b>Set</b> <ul>N/A</ul><br>
+  <a name="SD_WS07_Get"></a>
+  <b>Get</b> <ul>N/A</ul><br>
+
 
 </ul>
 
