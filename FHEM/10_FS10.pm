@@ -311,7 +311,7 @@ FS10_Parse($$)
   my $hash = $def;
   my $name = $hash->{NAME};
   return "" if(IsIgnored($name));
-  Log3 $name, 3, "$ioname FS10_Parse: $name $v";
+  Log3 $name, 4, "$ioname FS10_Parse: $name $v";
   
   if ($v eq "on" && AttrVal($name, "follow-on-for-timer", 0)) {
       my $dur = AttrVal($name, "follow-on-timer", 0);
