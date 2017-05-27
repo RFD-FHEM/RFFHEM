@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 10485 2017-05-17 21:00:00Z v3.3.1-dev $
+# $Id: 00_SIGNALduino.pm 10485 2017-05-27 23:00:00Z v3.3.1-dev $
 #
 # v3.3.1 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -1124,20 +1124,21 @@ my %ProtocolListSIGNALduino  = (
          
       }, 
 	"61" =>	## ELV FS10
-		# tested remote control: FS10-S8
+		# tested transmitter:   FS10-S8, FS10-S4, FS10-ZE
+		# tested receiver:      FS10-ST, FS10-MS, WS3000-TV, PC-Wettersensor-Empfaenger
 		# das letzte Bit 1 und 1 x 0 Preambel fehlt immer
 		{
 			name   		=> 'FS10',
 			id		=> '61',
 			one		=> [1,-2],
 			zero		=> [1,-1],
-			clockabs	=> 390,
+			clockabs	=> 400,
 			format 		=> 'twostate',
 			preamble	=> 'P61#',      # prepend to converted message
 			postamble	=> '',         # Append to converted message
 			clientmodule	=> 'FS10',
 			#modulematch	=> '',
-			length_min	=> '38',	# eigentlich 46
+			length_min	=> '38',	# eigentlich 41 oder 46 (Pruefsumme nicht bei allen)
 			length_max      => '48',	# eigentlich 46
 			
 		}, 
@@ -1203,6 +1204,24 @@ my %ProtocolListSIGNALduino  = (
 			length_min   => '50',
 			#msgOutro     => 'SR;P0=275;P1=-7150;D=01;',
 			postDemodulation => \&SIGNALduino_HE,
+		},
+	"66" => ## TX2 Protocol (Remote Temp Transmitter & Remote Thermo Model 7035)
+	# MU;P0=13312;P1=-2785;P2=4985;P3=1124;P4=-6442;P5=3181;P6=-31980;D=0121345434545454545434545454543454545434343454543434545434545454545454343434545434343434545621213454345454545454345454545434545454343434545434345454345454545454543434345454343434345456212134543454545454543454545454345454543434345454343454543454545454545;CP=3;R=73;O;
+		{
+			name         => 'WS7035',
+			id           => '66',
+			zero         => [8,-16],
+			one          => [3,-16],
+			start        => [-7,12,-7],
+			clockabs     => 400,
+			format       => 'pwm',  # not used now
+			preamble     => 'TX',
+			clientmodule => 'CUL_TX',
+			modulematch  => '^TX......',
+			length_min   => '43',
+			length_max   => '44',
+			remove_zero  => 1,      # Removes leading zeros from output
+			postDemodulation => \&SIGNALduino_postDemo_WS7035,
 		},
 );
 
@@ -3581,8 +3600,8 @@ sub SIGNALduino_callsub
 	
 	if ( defined $method && defined &$method )   
 	{
-		my $subname = @{[eval {&$method}, $@ =~ /.*/]};
-		Log3 $name, 5, "$name: applying $funcname method $subname";
+		#my $subname = @{[eval {&$method}, $@ =~ /.*/]};
+		Log3 $name, 5, "$name: applying $funcname"; # method $subname";
 		#Log3 $name, 5, "$name: value bevore $funcname: @args";
 		
 		my ($rcode, @returnvalues) = $method->($name, @args) ;	
@@ -3647,6 +3666,29 @@ sub SIGNALduino_HE($@) {
 	return (1,split("",$msg));
 }
 
+sub SIGNALduino_postDemo_WS7035($@) {
+	my ($name, @bit_msg) = @_;
+	my $msg = join("",@bit_msg);
+	my $parity = 0;					# Parity even
+
+	Log3 $name, 4, "$name: WS7035 $msg";
+	if (substr($msg,0,8) ne "10100000") {		# check ident
+		Log3 $name, 3, "$name: WS7035 ERROR - Ident not 1010 0000";
+		return 0, undef;
+	} else {
+		for(my $i = 15; $i < 28; $i++) {			# Parity over bit 15 and 12 bit temperature
+	      $parity += substr($msg, $i, 1);
+		}
+		if ($parity % 2 != 0) {
+			Log3 $name, 3, "$name: WS7035 ERROR - Parity not even";
+			return 0, undef;
+		} else {
+			Log3 $name, 4, "$name: WS7035 " . substr($msg,0,4) ." ". substr($msg,4,4) ." ". substr($msg,8,4) ." ". substr($msg,12,4) ." ". substr($msg,16,4) ." ". substr($msg,20,4) ." ". substr($msg,24,4) ." ". substr($msg,28,4) ." ". substr($msg,32,4) ." ". substr($msg,36,4) ." ". substr($msg,40);
+			substr($msg, 27, 4, '');			# delete nibble 8
+			return (1,split("",$msg));
+		}
+	}
+}
 
 sub SIGNALduino_postDemo_WS2000($@) {
 	my ($name, @bit_msg) = @_;
@@ -4331,8 +4373,15 @@ sub SIGNALduino_compPattern($$$%)
 
 
 	Wireless switches  <br>
-	ITv1 & ITv3/Elro and other brands using pt2263 or arctech protocol--> uses IT.pm<br>
+	ITv1 & ITv3/Elro and other brands using pt2263 or arctech protocol--> uses IT.pm<br><br>
 
+	In the ITv1 protocol is used to sent a default ITclock from 250 and it may be necessary in the IT-Modul to define the attribute ITclock<br>
+	Here is a description to find out the ITclock<br>
+	After pressing a button on the remote control, the received raw message is displayed in the log and in the device view of the IT-device<br>
+        e.g.:<br>
+        MS;P0=357;P2=-1128;P3=1155;P4=-428;P5=-11420;D=05023402020202020202020202020202020202023402340234;CP=0;SP=5;<br>
+        The number behind "CP=" indicates the PatternNr from the clock (here P0).
+        Here is the ITclock 357
 	<br><br>
 	Temperatur / humidity senso
 	<ul>
@@ -4396,6 +4445,9 @@ sub SIGNALduino_compPattern($$$%)
 	<ul>
 	<li><a name="addvaltrigger">addvaltrigger</a><br>
         Create triggers for additional device values. Right now these are RSSI, RAWMSG and DMSG.
+        </li>
+        <li>cc1101_frequency<br>
+        Since the PA table values ​​are frequency-dependent, is at 868 MHz a value greater 800 required.
         </li>
 	<li><a href="#do_not_notify">do_not_notify</a></li>
 	<li><a href="#attrdummy">dummy</a></li>
@@ -4481,6 +4533,9 @@ With a # at the beginnging whitelistIDs can be deactivated.
 		Read some CUL radio-chip (cc1101) registers (frequency, bandwidth, etc.),
 		and display them in human readable form.
 		</li><br>
+		<li>ccpatable<br>
+		read cc1101 PA table (power amplification for RF sending)
+		</li><br>
 		<li>ccreg<br>
 		read cc1101 registers (99 reads all cc1101 registers)
 		</li><br>
@@ -4559,9 +4614,9 @@ With a # at the beginnging whitelistIDs can be deactivated.
 			The new state will be saved into the eeprom of your arduino.
 		</li><br><br>
 		
-		<li>freq / bWidth / rAmpl / sens<br>
+		<li>freq / bWidth / patable / rAmpl / sens<br>
 		Only with CC1101 receiver.<br>
-		Set the sduino frequency / bandwidth / receiver-amplitude / sensitivity<br>
+		Set the sduino frequency / bandwidth / PA table / receiver-amplitude / sensitivity<br>
 		
 		Use it with care, it may destroy your hardware and it even may be
 		illegal to do so. Note: The parameters used for RFR transmission are
@@ -4575,6 +4630,8 @@ With a # at the beginnging whitelistIDs can be deactivated.
 		    are susceptible to interference, but make possible to receive
 		    inaccurately calibrated transmitters. It affects tranmission too.
 		    Default is 325 kHz.</li>
+		<li>patable change the PA table (power amplification for RF sending) 
+		</li>
 		<li>rAmpl is receiver amplification, with values between 24 and 42 dB.
 		    Bigger values allow reception of weak signals. Default is 42.
 		</li>
