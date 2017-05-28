@@ -1,6 +1,7 @@
 DEL FHEM/14_Cresta.pm
 DEL FHEM/14_SIGNALduino_AS.pm
 DEL FHEM/14_SIGNALduino_ID7.pm
+DEL FHEM/14_SIGNALduino_RSL.pm
 DEL FHEM/14_SIGNALduino_un.pm
 DEL FHEM/firmware/SIGNALDuino_radinoCC1101.hex
 DEL FHEM/firmware/SIGNALduino_nano328.hex

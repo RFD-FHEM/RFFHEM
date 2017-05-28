@@ -93,7 +93,8 @@ sub listfiles2{
         push @lines, "DEL FHEM/14_SIGNALduino_AS.pm\n";
         push @lines, "DEL FHEM/14_SIGNALduino_un.pm\n";
         push @lines, "DEL FHEM/14_SIGNALduino_ID7.pm\n";
-        
+        push @lines, "DEL FHEM/14_SIGNALduino_RSL.pm\n";
+
         open(my $fh, '>:raw', 'controls_signalduino.txt');
         
         foreach my $l (sort @lines){
