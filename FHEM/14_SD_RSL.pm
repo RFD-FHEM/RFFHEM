@@ -1,7 +1,7 @@
 ###########################################
 # SIGNALduini RSL Modul. Modified version of FHEMduino Modul by Wzut
 #  
-# $Id: 14_SD_RSL.pm 7779 2017-05-28 19:00:00Z v3.3.1-dev $
+# $Id: 14_SD_RSL.pm 7779 2017-05-28 22:00:00Z v3.3.1-dev $
 # Supports following devices:
 # - Conrad RSL Funk-Jalousieaktor Unterputz RSL 1-Kanal Bestell-Nr.: 640579 - 62 
 #####################################
@@ -51,29 +51,29 @@ my @RSLCodes;
     $RSLCodes[4][4][0] =  35;   # 4 / IV   off - nicht auf 12 Kanal FB
     $RSLCodes[4][4][1] =  19;   # 4 / IV   on  - nicht auf 12 Kanal FB
 
-sub SIGNALduino_RSL_Initialize($)
+sub SD_RSL_Initialize($)
 { 
   my ($hash) = @_;
 
-  $hash->{Match}     = "^r[A-Fa-f0-9]+";
-  $hash->{SetFn}     = "SIGNALduino_RSL_Set";
-  $hash->{DefFn}     = "SIGNALduino_RSL_Define";
-  $hash->{UndefFn}   = "SIGNALduino_RSL_Undef";
-  $hash->{AttrFn}    = "SIGNALduino_RSL_Attr";
-  $hash->{ParseFn}   = "SIGNALduino_RSL_Parse";
+  $hash->{Match}     = "^P1#[A-Fa-f0-9]+";
+  $hash->{SetFn}     = "SD_RSL_Set";
+  $hash->{DefFn}     = "SD_RSL_Define";
+  $hash->{UndefFn}   = "SD_RSL_Undef";
+  $hash->{AttrFn}    = "SD_RSL_Attr";
+  $hash->{ParseFn}   = "SD_RSL_Parse";
   $hash->{AttrList}  = "IODev RSLrepetition ignore:0,1 ".$readingFnAttributes;
 }
 
 #####################################
 
-sub SIGNALduino_RSL_Define($$)
+sub SD_RSL_Define($$)
 { 
 
   my ($hash, $def) = @_;
 
   my @a = split("[ \t][ \t]*", $def);
 
-  return "wrong syntax: define <name> SIGNALduino_RSL <code (00000-FFFFFF)_channel (1-4)_button (1-4)>"  if(int(@a) != 3);
+  return "wrong syntax: define <name> SD_RSL <code (00000-FFFFFF)_channel (1-4)_button (1-4)>"  if(int(@a) != 3);
 
   my $name = $a[0];
   my ($device,$channel,$button) = split("_",$a[2]);
@@ -85,19 +85,21 @@ sub SIGNALduino_RSL_Define($$)
   my $code = uc($a[2]);
   $hash->{DEF}   = $code;
 
-  $modules{SIGNALduino_RSL}{defptr}{$code} = $hash;
-  $modules{SIGNALduino_RSL}{defptr}{$code}{$name} = $hash;
+  $modules{SD_RSL}{defptr}{$code} = $hash;
+  $modules{SD_RSL}{defptr}{$code}{$name} = $hash;
   # code auf 32Bit umrechnen  int 16777216 = 0x1000000
-  $hash->{OnCode}  = ($RSLCodes[$channel][$button][1]*16777216) + hex($device);
-  $hash->{OffCode} = ($RSLCodes[$channel][$button][0]*16777216) + hex($device);
-
-   AssignIoPort($hash);
+  #$hash->{OnCode}  = ($RSLCodes[$channel][$button][1]*16777216) + hex($device);
+  #$hash->{OffCode} = ($RSLCodes[$channel][$button][0]*16777216) + hex($device);
+  $hash->{OnCode}  = "10" . sprintf('%06b', ($RSLCodes[$channel][$button][1])) . sprintf('%24b',hex($device));
+  $hash->{OffCode} = "10" . sprintf('%06b', ($RSLCodes[$channel][$button][0])) . sprintf('%24b',hex($device));
+  
+  AssignIoPort($hash);
 
    return undef;
 }
 
 ##########################################################
-sub SIGNALduino_RSL_Set($@)
+sub SD_RSL_Set($@)
 { 
   my ($hash, @a) = @_;
   my $name = $hash->{NAME};
@@ -120,8 +122,8 @@ sub SIGNALduino_RSL_Set($@)
   #my $ret = IOWrite($hash, 'sendMsg', $c."_".AttrVal($name, "RSLrepetition", 6));
   #Log3 $hash, 5, "$name Set return : $ret";
 
-  if (($cmd eq "on")  && ($hash->{STATE} eq "off")){$cmd = "stop";}
-  if (($cmd eq "off") && ($hash->{STATE} eq "on")) {$cmd = "stop";}
+  #if (($cmd eq "on")  && ($hash->{STATE} eq "off")){$cmd = "stop";}
+  #if (($cmd eq "off") && ($hash->{STATE} eq "on")) {$cmd = "stop";}
 
   $hash->{CHANGED}[0] = $cmd;
   $hash->{STATE} = $cmd;
@@ -144,12 +146,12 @@ sub RSL_getButtonCode($$)
   my $channel            = -1;
 
   ## Groupcode
-  $DeviceCode  = substr($msg,3,6);
-  $receivedButtonCode  = substr($msg,1,2);
-  Log3 $hash, 5, "SIGNALduino_RSL Message Devicecode: $DeviceCode Buttoncode: $receivedButtonCode";
+  $DeviceCode  = substr($msg,2,6);
+  $receivedButtonCode  = substr($msg,0,2);
+  Log3 $hash, 5, "SD_RSL Message Devicecode: $DeviceCode Buttoncode: $receivedButtonCode";
 
   $parsedButtonCode  = hex($receivedButtonCode) & 63; # nur 6 Bit bitte
-  Log3 $hash, 5, "SIGNALduino_RSL Message parsed Devicecode: $DeviceCode Buttoncode: $parsedButtonCode";
+  Log3 $hash, 5, "SD_RSL Message parsed Devicecode: $DeviceCode Buttoncode: $parsedButtonCode";
 
   for (my $i=1; $i<5; $i++)
   {
@@ -172,27 +174,30 @@ sub RSL_getButtonCode($$)
 }
 
 ########################################################
-sub SIGNALduino_RSL_Parse($$)
+sub SD_RSL_Parse($$)
 { 
 
   my ($hash,$msg) = @_;
-  Log3 $hash, 4, "RSL Message: $msg";
+  my $name = $hash->{NAME};
+  my (undef ,$rawData) = split("#",$msg);
+  
+  Log3 $hash, 4, "$name RSL_Parse Message: $rawData";
 
-  my $result = RSL_getButtonCode($hash,$msg);
+  my $result = RSL_getButtonCode($hash,$rawData);
 
   if ($result ne "") 
   {
     my ($deviceCode,$action) = split m/ /, $result, 2;
 
-    Log3 $hash, 4, "Parse: Device: $deviceCode  Action: $action";
+    Log3 $hash, 4, "$name Parse: Device: $deviceCode  Action: $action";
 
-    my $def = $modules{SIGNALduino_RSL}{defptr}{$hash->{NAME} . "." . $deviceCode};
-    $def = $modules{SIGNALduino_RSL}{defptr}{$deviceCode} if(!$def);
+    my $def = $modules{SD_RSL}{defptr}{$hash->{NAME} . "." . $deviceCode};
+    $def = $modules{SD_RSL}{defptr}{$deviceCode} if(!$def);
 
     if(!$def) 
     {
       Log3 $hash, 5, "UNDEFINED Remotebutton send to define: $deviceCode";
-      return "UNDEFINED RSL_$deviceCode SIGNALduino_RSL $deviceCode";
+      return "UNDEFINED RSL_$deviceCode SD_RSL $deviceCode";
     }
 
     $hash = $def;
@@ -202,14 +207,14 @@ sub SIGNALduino_RSL_Parse($$)
 
     if(!$action) 
     {
-      Log3 $name, 5, "SIGNALduino_RSL can't decode $msg";
+      Log3 $name, 5, "$name SD_RSL_Parse: can't decode $msg";
       return "";
     }
 
-    Log3 $name, 5, "SIGNALduino_RSL actioncode: $action";
+    Log3 $name, 5, "$name SD_RSL_Parse actioncode: $action";
 
-    if (($action eq "on")  && ($hash->{STATE} eq "off")){$action = "stop";}
-    if (($action eq "off") && ($hash->{STATE} eq "on")) {$action = "stop";}
+    #if (($action eq "on")  && ($hash->{STATE} eq "off")){$action = "stop";}
+    #if (($action eq "off") && ($hash->{STATE} eq "on")) {$action = "stop";}
 
    $hash->{CHANGED}[0] = $action;
    $hash->{STATE} = $action;
@@ -221,14 +226,14 @@ sub SIGNALduino_RSL_Parse($$)
 }
 
 ########################################################
-sub SIGNALduino_RSL_Undef($$)
+sub SD_RSL_Undef($$)
 { 
   my ($hash, $name) = @_;
   delete($modules{SIGNALduino_RSL}{defptr}{$hash->{DEF}}) if($hash && $hash->{DEF});
   return undef;
 }
 
-sub SIGNALduino_RSL_Attr(@)
+sub SD_RSL_Attr(@)
 {
   my @a = @_;
 
