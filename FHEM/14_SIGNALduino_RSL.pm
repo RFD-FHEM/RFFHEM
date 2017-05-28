@@ -1,7 +1,7 @@
 ###########################################
 # SIGNALduini RSL Modul. Modified version of FHEMduino Modul by Wzut
 #  
-# $Id: 14_SIGNALduino_RSL.pm 7779 2016-24-01 00:16:11
+# $Id: 14_SIGNALduino_RSL.pm 7779 2017-05-28 19:00:00Z v3.3.1-dev $
 # Supports following devices:
 # - Conrad RSL Funk-Jalousieaktor Unterputz RSL 1-Kanal Bestell-Nr.: 640579 - 62 
 #####################################
@@ -55,7 +55,7 @@ sub SIGNALduino_RSL_Initialize($)
 { 
   my ($hash) = @_;
 
-  $hash->{Match}     = "^r[A-Fa-f0-9]6{6}";
+  $hash->{Match}     = "^r[A-Fa-f0-9]+";
   $hash->{SetFn}     = "SIGNALduino_RSL_Set";
   $hash->{DefFn}     = "SIGNALduino_RSL_Define";
   $hash->{UndefFn}   = "SIGNALduino_RSL_Undef";
@@ -103,6 +103,7 @@ sub SIGNALduino_RSL_Set($@)
   my $name = $hash->{NAME};
   my $cmd  = $a[1];
   my $c;
+  my $message;
 
   return join(" ", sort keys %sets) if((@a < 2) || ($cmd eq "?"));
 
@@ -111,8 +112,13 @@ sub SIGNALduino_RSL_Set($@)
 
   return "Unknown argument $cmd, choose  on or off" if(!$c);
 
-  my $ret = IOWrite($hash, "ss", $c."_".AttrVal($name, "RSLrepetition", 6));
-  Log3 $hash, 5, "$name Set return : $ret";
+  my $io = $hash->{IODev};
+  ## Send Message to IODev using IOWrite
+  $message = 'P1#' . $c . '#R' . AttrVal($name, "RSLrepetition", 6);
+  Log3 $name, 4, $io->{NAME} . " RSL_SET_sendCommand: $name -> message: $message";
+  IOWrite($hash, 'sendMsg', $message);
+  #my $ret = IOWrite($hash, 'sendMsg', $c."_".AttrVal($name, "RSLrepetition", 6));
+  #Log3 $hash, 5, "$name Set return : $ret";
 
   if (($cmd eq "on")  && ($hash->{STATE} eq "off")){$cmd = "stop";}
   if (($cmd eq "off") && ($hash->{STATE} eq "on")) {$cmd = "stop";}
@@ -138,8 +144,8 @@ sub RSL_getButtonCode($$)
   my $channel            = -1;
 
   ## Groupcode
-  $DeviceCode  = substr($msg,4,6);
-  $receivedButtonCode  = substr($msg,2,2);
+  $DeviceCode  = substr($msg,3,6);
+  $receivedButtonCode  = substr($msg,1,2);
   Log3 $hash, 5, "SIGNALduino_RSL Message Devicecode: $DeviceCode Buttoncode: $receivedButtonCode";
 
   $parsedButtonCode  = hex($receivedButtonCode) & 63; # nur 6 Bit bitte
