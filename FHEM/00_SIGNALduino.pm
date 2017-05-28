@@ -113,7 +113,7 @@ my @ampllist = (24, 27, 30, 33, 36, 38, 40, 42); # rAmpl(dB)
 ## Supported Clients per default
 my $clientsSIGNALduino = ":IT:"
 						."CUL_TCM97001:"
-						."SIGNALduino_RSL:"
+						."SD_RSL:"
 						."OREGON:"
 						."CUL_TX:"
 						."SD_AS:"
@@ -138,7 +138,7 @@ my $clientsSIGNALduino = ":IT:"
 my %matchListSIGNALduino = (
      "1:IT"            			=> "^i......",	  				  # Intertechno Format
      "2:CUL_TCM97001"      		=> "^s[A-Fa-f0-9]+",			  # Any hex string		beginning with s
-     "3:SIGNALduino_RSL"		=> "^r[A-Fa-f0-9]{6}",				  # Any hex string		beginning with r
+     "3:SD_RSL"					=> "^P1#[A-Fa-f0-9]{6}",				  # Any hex string		beginning with r
      "5:CUL_TX"               	=> "^TX..........",         	  # Need TX to avoid FHTTK
      "6:SD_AS"       			=> "^P2#[A-Fa-f0-9]{7,8}", 		  # Arduino based Sensors, should not be default
      "4:OREGON"            		=> "^(3[8-9A-F]|[4-6][0-9A-F]|7[0-8]).*",		
@@ -189,8 +189,8 @@ my %ProtocolListSIGNALduino  = (
 			format     		=> 'twostate',  		# not used now
 			preamble		=> 'r',					# prepend to converted message	 	
 			postamble		=> '',					# Append to converted message	 	
-			clientmodule    => 'SIGNALduino_RSL',   # not used now
-			modulematch     => '^r[A-Fa-f0-9]{6}', 	# not used now
+			clientmodule    => 'SD_RSL',   # not used now
+			modulematch     => '^P1#[A-Fa-f0-9]{6}', 	# not used now
 			length_min 		=> '20',   # 23
 			length_max 		=> '40',   # 24
 

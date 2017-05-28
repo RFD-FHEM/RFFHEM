@@ -1,7 +1,7 @@
 ###########################################
 # SIGNALduini RSL Modul. Modified version of FHEMduino Modul by Wzut
 #  
-# $Id: 14_SIGNALduino_RSL.pm 7779 2017-05-28 19:00:00Z v3.3.1-dev $
+# $Id: 14_SD_RSL.pm 7779 2017-05-28 19:00:00Z v3.3.1-dev $
 # Supports following devices:
 # - Conrad RSL Funk-Jalousieaktor Unterputz RSL 1-Kanal Bestell-Nr.: 640579 - 62 
 #####################################
