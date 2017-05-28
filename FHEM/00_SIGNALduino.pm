@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 10485 2017-05-27 23:00:00Z v3.3.1-dev $
+# $Id: 00_SIGNALduino.pm 10485 2017-05-28 19:00:00Z v3.3.1-dev $
 #
 # v3.3.1 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -191,8 +191,8 @@ my %ProtocolListSIGNALduino  = (
 			postamble		=> '',					# Append to converted message	 	
 			clientmodule    => 'SIGNALduino_RSL',   # not used now
 			modulematch     => '^r[A-Fa-f0-9]{6}', 	# not used now
-			length_min 		=> '23',
-			length_max 		=> '24',
+			length_min 		=> '20',   # 23
+			length_max 		=> '40',   # 24
 
         },
 
@@ -2916,13 +2916,13 @@ SIGNALduino_Parse_MS($$$$%)
 			#my $dmsg = sprintf "%02x", oct "0b" . join "", @bit_msg;			## Array -> String -> bin -> hex
 			my $dmsg = SIGNALduino_b2h(join "", @bit_msg);
 			my $postamble = $ProtocolListSIGNALduino{$id}{postamble};
-			if (defined($rawRssi)) {
-				if (defined($ProtocolListSIGNALduino{$id}{preamble}) && $ProtocolListSIGNALduino{$id}{preamble} eq "s") {
-					$postamble = sprintf("%02X", $rawRssi);
+			#if (defined($rawRssi)) {
+				#if (defined($ProtocolListSIGNALduino{$id}{preamble}) && $ProtocolListSIGNALduino{$id}{preamble} eq "s") {
+				#	$postamble = sprintf("%02X", $rawRssi);
 				#} elsif ($id eq "7") {
 				#        $postamble = "#R" . sprintf("%02X", $rawRssi);
-				}
-			}
+				#}
+			#}
 			$dmsg = "$dmsg".$postamble if (defined($postamble));
 			$dmsg = "$ProtocolListSIGNALduino{$id}{preamble}"."$dmsg" if (defined($ProtocolListSIGNALduino{$id}{preamble}));
 			
