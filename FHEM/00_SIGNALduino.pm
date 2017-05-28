@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 10485 2017-05-28 19:00:00Z v3.3.1-dev $
+# $Id: 00_SIGNALduino.pm 10485 2017-05-28 23:00:00Z v3.3.1-dev $
 #
 # v3.3.1 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -138,7 +138,7 @@ my $clientsSIGNALduino = ":IT:"
 my %matchListSIGNALduino = (
      "1:IT"            			=> "^i......",	  				  # Intertechno Format
      "2:CUL_TCM97001"      		=> "^s[A-Fa-f0-9]+",			  # Any hex string		beginning with s
-     "3:SD_RSL"					=> "^P1#[A-Fa-f0-9]{6}",				  # Any hex string		beginning with r
+     "3:SD_RSL"					=> "^P1#[A-Fa-f0-9]{8}",				  # Any hex string		beginning with r
      "5:CUL_TX"               	=> "^TX..........",         	  # Need TX to avoid FHTTK
      "6:SD_AS"       			=> "^P2#[A-Fa-f0-9]{7,8}", 		  # Arduino based Sensors, should not be default
      "4:OREGON"            		=> "^(3[8-9A-F]|[4-6][0-9A-F]|7[0-8]).*",		
@@ -187,10 +187,10 @@ my %ProtocolListSIGNALduino  = (
 			sync			=> [1,-11],		
 			clockabs   		=> '560',				# not used now
 			format     		=> 'twostate',  		# not used now
-			preamble		=> 'r',					# prepend to converted message	 	
+			preamble		=> 'P1#',					# prepend to converted message	 	
 			postamble		=> '',					# Append to converted message	 	
 			clientmodule    => 'SD_RSL',   # not used now
-			modulematch     => '^P1#[A-Fa-f0-9]{6}', 	# not used now
+			modulematch     => '^P1#[A-Fa-f0-9]{8}', 	# not used now
 			length_min 		=> '20',   # 23
 			length_max 		=> '40',   # 24
 
