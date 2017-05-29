@@ -413,6 +413,17 @@ sub SD_WS_Parse($$)
     # my $blen = $hlen * 4;
     # my $msg = uc (unpack("H$hlen", pack("B$blen", $bitData)));
      my $datacheck = pack( 'H*', substr($msg,6,length($msg)-6) );
+     my $rc = eval
+     {
+      require Digest::CRC;
+      Digest::CRC->import();
+      1;
+     };
+
+    if($rc)
+    {
+    # Digest::CRC loaded and imported successfully
+     Log3 $iohash, 3, "$name: SD_WS_Parse CRC_load: OK" ;
      my $crcmein = Digest::CRC->new(width => 8, poly => 0x31);
      my $rr2 = $crcmein->add($datacheck)->hexdigest;
      $rr2 = sprintf("%d", hex($rr2));
@@ -422,6 +433,10 @@ sub SD_WS_Parse($$)
             Log3 $iohash, 3, "$name: SD_WS_Parse CRC_Error: CRC=$rr2 msg: $msg check:".substr($msg,6,length($msg)-6) ;
             return "";
          }
+   }else {
+      Log3 $iohash, 3, "$name: SD_WS_Parse CRC_not_load: Modul Digest::CRC fehlt" ;
+   }  
+   
     my $vorpre = 8;   
    	Log3 $iohash, 4, "$name converted to bits: WH2 " . $bitData;    
     $model = "SD_WS_WH2";
