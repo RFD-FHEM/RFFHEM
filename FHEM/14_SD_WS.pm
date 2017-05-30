@@ -1,20 +1,19 @@
 ##############################################
-# $Id: 14_SD_WS.pm 34 2017-04-17 18:00:00Z v3.3-dev $
+# $Id: 14_SD_WS.pm 35 2017-05-30 07:00:00Z v3.3-dev $
 #
 # The purpose of this module is to support serval
 # weather sensors which use various protocol
 # Sidey79 & Ralf9  2016 - 2017
 # Jörg 2017
-# 17.4.2017 WH2 (TFA 30.3157 nur Temp, Hum = 255),es wird das Perlmodul Digest:CRC benötigt für CRC-Prüfung benötigt
-
+# 17.04.2017 WH2 (TFA 30.3157 nur Temp, Hum = 255),es wird das Perlmodul Digest:CRC benötigt für CRC-Prüfung benötigt
+# 29.05.2017 Test ob Digest::CRC installiert
 package main;
 
 
 use strict;
 use warnings;
-use Digest::CRC qw(crc);
-
-#use Data::Dumper;
+# use Digest::CRC qw(crc);
+# use Data::Dumper;
 
 
 sub SD_WS_Initialize($)
