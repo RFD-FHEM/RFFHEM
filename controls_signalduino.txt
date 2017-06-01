@@ -1,13 +1,13 @@
-DEL FHEM/14_Cresta.pm
-DEL FHEM/14_SIGNALduino_AS.pm
-DEL FHEM/14_SIGNALduino_ID7.pm
-DEL FHEM/14_SIGNALduino_RSL.pm
-DEL FHEM/14_SIGNALduino_un.pm
-DEL FHEM/firmware/SIGNALDuino_radinoCC1101.hex
-DEL FHEM/firmware/SIGNALduino_nano328.hex
-DEL FHEM/firmware/SIGNALduino_nanoCC1101.hex
-DEL FHEM/firmware/SIGNALduino_promini328.hex
-DEL FHEM/firmware/SIGNALduino_uno.hex
+MOV FHEM/14_Cresta.pm unused
+MOV FHEM/14_SIGNALduino_AS.pm unused
+MOV FHEM/14_SIGNALduino_ID7.pm unused
+MOV FHEM/14_SIGNALduino_RSL.pm unused
+MOV FHEM/14_SIGNALduino_un.pm unsed
+MOV FHEM/firmware/SIGNALDuino_radinoCC1101.hex unused
+MOV FHEM/firmware/SIGNALduino_nano328.hex unused
+MOV FHEM/firmware/SIGNALduino_nanoCC1101.hex unused
+MOV FHEM/firmware/SIGNALduino_promini328.hex unused
+MOV FHEM/firmware/SIGNALduino_uno.hex unused
 UPD 2016_14_10_23:50:13 40341   FHEM/98_Dooya.pm
 UPD 2016_14_10_23:50:13 8292    FHEM/14_SD_WS_Maverick.pm
 UPD 2016_31_12_00:55:38 15484   FHEM/90_SIGNALduino_un.pm

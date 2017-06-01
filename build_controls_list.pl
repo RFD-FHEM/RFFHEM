@@ -84,16 +84,17 @@ sub listfiles2{
 	              
                 if ( $file =~ /(firmware|\.hex|\.HEX)/ ){
 #                    print "$file is a firmware\n";
-                    push @lines, sprintf("DEL %s\n", $fi->{path});
+                    push @lines, sprintf("MOV %s unused\n", $fi->{path});
                 }
                 push @lines, sprintf("UPD %s %-7s %s\n", $date_time, $fi->{size}, $fi->{path});
             }
         }
-        push @lines, "DEL FHEM/14_Cresta.pm\n";
-        push @lines, "DEL FHEM/14_SIGNALduino_AS.pm\n";
-        push @lines, "DEL FHEM/14_SIGNALduino_un.pm\n";
-        push @lines, "DEL FHEM/14_SIGNALduino_ID7.pm\n";
-        push @lines, "DEL FHEM/14_SIGNALduino_RSL.pm\n";
+        push @lines, "MOV FHEM/14_Cresta.pm unused\n";
+        push @lines, "MOV FHEM/14_SIGNALduino_AS.pm unused\n";
+        push @lines, "MOV FHEM/14_SIGNALduino_un.pm unsed\n";
+        push @lines, "MOV FHEM/14_SIGNALduino_ID7.pm unused\n";
+        push @lines, "MOV FHEM/14_SIGNALduino_RSL.pm unused\n";
+
 
         open(my $fh, '>:raw', 'controls_signalduino.txt');
         
