@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 10485 2017-05-28 23:00:00Z v3.3.1-dev $
+# $Id: 00_SIGNALduino.pm 10485 2017-06-03 14:00:00Z v3.3.1-dev $
 #
 # v3.3.1 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -148,7 +148,7 @@ my %matchListSIGNALduino = (
      "12:SD_WS"					=> '^W\d+x{0,1}#.*',
      "13:RFXX10REC" 			=> '^(20|29)[A-Fa-f0-9]+',
      "14:Dooya"					=> '^P16#[A-Fa-f0-9]+',
-     "15:SOMFY"					=> '^YsA[0-9A-F]+',
+     "15:SOMFY"					=> '^Ys[0-9A-F]+',
      "16:SD_WS_Maverick"		=> '^P47#[A-Fa-f0-9]+',
      "17:SD_UT"            		=> '^u30#.*',						## BELL 201.2 TXA
      "18:FLAMINGO"            	=> '^P13#[A-Fa-f0-9]+',						## Flamingo Smoke
@@ -871,13 +871,13 @@ my %ProtocolListSIGNALduino  = (
 		{
 			name 			=> 'Somfy RTS',
 			id 				=> '43',
-			clockrange  	=> [610,670],			# min , max
+			clockrange  	=> [610,680],			# min , max
 			format			=> 'manchester', 
 			preamble 		=> 'Ys',
 			clientmodule	=> 'SOMFY', # not used now
-			modulematch 	=> '^YsA[0-9A-F]{13}',
+			modulematch 	=> '^Ys[0-9A-F]{14}',
 			length_min 		=> '56',
-			length_max 		=> '56',
+			length_max 		=> '57',
 			method          => \&SIGNALduino_SomfyRTS, # Call to process this message
 			msgIntro		=> 'SR;P0=-2560;P1=2560;P3=-640;D=10101010101010113;',
 			#msgOutro		=> 'SR;P0=-30415;D=0;',
@@ -3270,6 +3270,7 @@ SIGNALduino_Parse_MC($$$$@)
 	my $clock=$msg_parts{clockabs};	     ## absolute clock
 	my $rawData=$msg_parts{rawData};
 	my $rssi=$msg_parts{rssi};
+	my $mcbitnum=$msg_parts{mcbitnum};
 	my $bitData;
 	my $dmsg;
 	my $message_dispatched=0;
@@ -3285,7 +3286,12 @@ SIGNALduino_Parse_MC($$$$@)
 	Debug "$name: processing manchester messag len:".length($rawData) if ($debug);
 	
 	my $hlen = length($rawData);
-	my $blen = $hlen * 4;
+	my $blen;
+	#if (defined($mcbitnum)) {
+	#	$blen = $mcbitnum;
+	#} else {
+		$blen = $hlen * 4;
+	#}
 	my $id;
 	
 	my $rawDataInverted;
@@ -3293,7 +3299,8 @@ SIGNALduino_Parse_MC($$$$@)
 	
 	foreach $id (@{$hash->{mcIdList}}) {
 
-
+		#next if ($blen < $ProtocolListSIGNALduino{$id}{length_min} || $blen > $ProtocolListSIGNALduino{$id}{length_max});
+		#if ( $clock >$ProtocolListSIGNALduino{$id}{clockrange}[0] and $clock <$ProtocolListSIGNALduino{$id}{clockrange}[1]);
 		if ( $clock >$ProtocolListSIGNALduino{$id}{clockrange}[0] and $clock <$ProtocolListSIGNALduino{$id}{clockrange}[1] and length($rawData)*4 >= $ProtocolListSIGNALduino{$id}{length_min} )
 		{
 			Debug "clock and min length matched"  if ($debug);
@@ -3319,7 +3326,7 @@ SIGNALduino_Parse_MC($$$$@)
 			{
 				Log3 $name, 5, "$name: Error: Unknown function=$method. Please define it in file $0";
 			} else {
-				my ($rcode,$res) = $method->($name,$bitData,$id);
+				my ($rcode,$res) = $method->($name,$bitData,$id,$mcbitnum);
 				if ($rcode != -1) {
 					$dmsg = $res;
 					$dmsg=$ProtocolListSIGNALduino{$id}{preamble}.$dmsg if (defined($ProtocolListSIGNALduino{$id}{preamble})); 
@@ -3798,7 +3805,7 @@ sub SIGNALduino_postDemo_WS2000($@) {
 
 sub SIGNALduino_MCTFA
 {
-	my ($name,$bitData,$id) = @_;
+	my ($name,$bitData,$id,$mcbitnum) = @_;
 	
 	my $preamble_pos;
 	my $message_end;
@@ -3849,7 +3856,7 @@ sub SIGNALduino_MCTFA
 
 sub SIGNALduino_OSV2()
 {
-	my ($name,$bitData,$id) = @_;
+	my ($name,$bitData,$id,$mcbitnum) = @_;
 	
 	my $preamble_pos;
 	my $message_end;
@@ -3979,7 +3986,7 @@ sub SIGNALduino_OSV2()
 
 sub SIGNALduino_OSV1()
 {
-	my ($name,$bitData,$rawData) = @_;
+	my ($name,$bitData,$id,$mcbitnum) = @_;
 	
 	my $idx=0;
 	
@@ -3988,17 +3995,17 @@ sub SIGNALduino_OSV1()
 	my $osv1bit;
     ($osv1bit = $bitData) =~ tr/10/01/;
 	#Log3 $name, 5, "$name: OSV1 protocol converted from ($bitData) to bit: ($osv1bit)" ;
-	$osv1hex=sprintf("%02X", length($rawData)*4, $osv1hex).SIGNALduino_b2h($osv1bit);
+	$osv1hex=sprintf("%02X", $mcbitnum).SIGNALduino_b2h($osv1bit);
 
 
-	Log3 $name, 5, "$name: OSV1 protocol converted to hex: ($osv1hex) with length (".(length($rawData)*4).") bits \n";
+	Log3 $name, 5, "$name: OSV1 protocol converted to hex: ($osv1hex) with length ($mcbitnum) bits \n";
 	return (1,$osv1hex);
 
 }
 
 sub	SIGNALduino_AS()
 {
-	my ($name,$bitData,$id) = @_;
+	my ($name,$bitData,$id,$mcbitnum) = @_;
 	my $debug = AttrVal($name,"debug",0);
 	
 	if(index($bitData,"1100",16) >= 0) # $rawData =~ m/^A{2,3}/)
@@ -4026,7 +4033,7 @@ sub	SIGNALduino_AS()
 
 sub	SIGNALduino_Hideki()
 {
-	my ($name,$bitData,$id) = @_;
+	my ($name,$bitData,$id,$mcbitnum) = @_;
 	my $debug = AttrVal($name,"debug",0);
 	
     Debug "$name: search in $bitData \n" if ($debug);
@@ -4068,7 +4075,7 @@ sub	SIGNALduino_Hideki()
 
 sub SIGNALduino_Maverick()
 {
-	my ($name,$bitData,$id) = @_;
+	my ($name,$bitData,$id,$mcbitnum) = @_;
 	my $debug = AttrVal($name,"debug",0);
 
 
@@ -4088,7 +4095,7 @@ sub SIGNALduino_Maverick()
 
 sub SIGNALduino_OSPIR()
 {
-	my ($name,$bitData,$id) = @_;
+	my ($name,$bitData,$id,$mcbitnum) = @_;
 	my $debug = AttrVal($name,"debug",0);
 
 
@@ -4107,7 +4114,7 @@ sub SIGNALduino_OSPIR()
 }
 sub SIGNALduino_MCRAW()
 {
-	my ($name,$bitData,$id) = @_;
+	my ($name,$bitData,$id,$mcbitnum) = @_;
 	my $debug = AttrVal($name,"debug",0);
 
 
@@ -4119,9 +4126,17 @@ sub SIGNALduino_MCRAW()
 
 sub SIGNALduino_SomfyRTS()
 {
-	my ($name, $bitData, $rawData) = @_;
+	my ($name, $bitData,$id,$mcbitnum) = @_;
 	
     #(my $negBits = $bitData) =~ tr/10/01/;   # Todo: eventuell auf pack umstellen
+
+	if (defined($mcbitnum)) {
+		Log3 $name, 4, "$name: Somfy bitdata: $bitData ($mcbitnum)";
+		if ($mcbitnum == 57) {
+			$bitData = substr($bitData, 1, 56);
+			Log3 $name, 4, "$name: Somfy bitdata: _$bitData (" . length($bitData) . "). Bit am Anfang entfernt";
+		}
+	}
 	my $encData = SIGNALduino_b2h($bitData);
 
 	#Log3 $name, 4, "$name: Somfy RTS protocol enc: $encData";
