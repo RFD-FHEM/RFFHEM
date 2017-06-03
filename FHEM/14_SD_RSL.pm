@@ -1,7 +1,7 @@
 ###########################################
 # SIGNALduini RSL Modul. Modified version of FHEMduino Modul by Wzut
 #  
-# $Id: 14_SD_RSL.pm 7779 2017-05-28 22:00:00Z v3.3.1-dev $
+# $Id: 14_SD_RSL.pm 7779 2017-05-30 19:00:00Z v3.3.1-dev $
 # Supports following devices:
 # - Conrad RSL Funk-Jalousieaktor Unterputz RSL 1-Kanal Bestell-Nr.: 640579 - 62 
 #####################################
@@ -62,6 +62,9 @@ sub SD_RSL_Initialize($)
   $hash->{AttrFn}    = "SD_RSL_Attr";
   $hash->{ParseFn}   = "SD_RSL_Parse";
   $hash->{AttrList}  = "IODev RSLrepetition ignore:0,1 ".$readingFnAttributes;
+  
+  $hash->{AutoCreate}=
+        { "RSL.*" => { GPLOT => "", FILTER => "%NAME",  autocreateThreshold => "2:30"} };
 }
 
 #####################################
@@ -125,8 +128,8 @@ sub SD_RSL_Set($@)
   #if (($cmd eq "on")  && ($hash->{STATE} eq "off")){$cmd = "stop";}
   #if (($cmd eq "off") && ($hash->{STATE} eq "on")) {$cmd = "stop";}
 
-  $hash->{CHANGED}[0] = $cmd;
-  $hash->{STATE} = $cmd;
+  #$hash->{CHANGED}[0] = $cmd;
+  #$hash->{STATE} = $cmd;
   readingsSingleUpdate($hash,"state",$cmd,1); 
   return undef;
 }
@@ -150,8 +153,12 @@ sub RSL_getButtonCode($$)
   $receivedButtonCode  = substr($msg,0,2);
   Log3 $hash, 5, "SD_RSL Message Devicecode: $DeviceCode Buttoncode: $receivedButtonCode";
 
+  if ((hex($receivedButtonCode) & 0xc0) != 0x80) {
+    Log3 $hash, 4, "SD_RSL Message Error: received Buttoncode $receivedButtonCode begins not with bin 10";
+    return "";
+  }
   $parsedButtonCode  = hex($receivedButtonCode) & 63; # nur 6 Bit bitte
-  Log3 $hash, 5, "SD_RSL Message parsed Devicecode: $DeviceCode Buttoncode: $parsedButtonCode";
+  Log3 $hash, 4, "SD_RSL Message parsed Devicecode: $DeviceCode Buttoncode: $parsedButtonCode";
 
   for (my $i=1; $i<5; $i++)
   {
@@ -216,9 +223,9 @@ sub SD_RSL_Parse($$)
     #if (($action eq "on")  && ($hash->{STATE} eq "off")){$action = "stop";}
     #if (($action eq "off") && ($hash->{STATE} eq "on")) {$action = "stop";}
 
-   $hash->{CHANGED}[0] = $action;
-   $hash->{STATE} = $action;
-   readingsSingleUpdate($hash,"state",$action,1); 
+    #$hash->{CHANGED}[0] = $action;
+    #$hash->{STATE} = $action;
+    readingsSingleUpdate($hash,"state",$action,1); 
 
     return $name;
   }
