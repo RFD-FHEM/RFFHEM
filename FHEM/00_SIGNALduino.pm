@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 10485 2017-06-03 14:00:00Z v3.3.1-dev $
+# $Id: 00_SIGNALduino.pm 10485 2017-06-09 17:00:00Z v3.3.1-dev $
 #
 # v3.3.1 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -33,6 +33,8 @@ use constant {
 	SDUINO_KEEPALIVE_MAXRETRY => 3,
 	SDUINO_WRITEQUEUE_NEXT    => 0.3,
 	SDUINO_WRITEQUEUE_TIMEOUT => 2,
+	
+	SDUINO_DISPATCH_VERBOSE   => 5,       # default 5
 };
 
 
@@ -1263,6 +1265,7 @@ SIGNALduino_Initialize($)
 					  ." addvaltrigger"
 					  ." rawmsgEvent:1,0"
 					  ." cc1101_frequency"
+					  ." doubleMsgCheck_IDs"
 		              ." $readingFnAttributes";
 
   $hash->{ShutdownFn} = "SIGNALduino_Shutdown";
@@ -1350,6 +1353,7 @@ SIGNALduino_Define($$)
   }
   
   $hash->{DMSG}="nothing";
+  $hash->{LASTDMSG} = "nothing";
   $hash->{TIME}=time();
   
 
@@ -1959,6 +1963,15 @@ sub SIGNALduino_parseResponse($$$)
 		my $CC1101Frequency = "433";
 		if (defined($hash->{cc1101_frequency})) {
 			$CC1101Frequency = $hash->{cc1101_frequency};
+		}
+		my $dBn = substr($msg,9,2);
+		Log3 $name, 3, "$name/msg parseResponse patable: $dBn";
+		foreach my $dB (keys $patable{$CC1101Frequency}) {
+			if ($dBn eq $patable{$CC1101Frequency}{$dB}) {
+				Log3 $name, 5, "$name/msg parseResponse patable: $dB";
+				$msg .= " => $dB";
+				last;
+			}
 		}
 	#	$msg .=  "\n\n$CC1101Frequency MHz\n\n";
 	#	foreach my $dB (keys $patable{$CC1101Frequency})
@@ -2713,21 +2726,36 @@ sub SIGNALduino_Split_Message($$)
 
 
 # Function which dispatches a message if needed.
-sub SIGNALduno_Dispatch($$$$)
+sub SIGNALduno_Dispatch($$$$$)
 {
-	my ($hash, $rmsg, $dmsg, $rssi) = @_;
+	my ($hash, $rmsg, $dmsg, $rssi, $id) = @_;
 	my $name = $hash->{NAME};
 	
 	if (!defined($dmsg))
 	{
-		Log3 $name, 5, "$name: (SIGNALduno_Dispatch) dmsg is undef. Skipping dispatch call";
+		Log3 $name, 5, "$name Dispatch: dmsg is undef. Skipping dispatch call";
 		return;
 	}
 	
-	Log3 $name, 5, "$name: Dispatch DMSG: $dmsg";
+	#Log3 $name, 5, "$name: Dispatch DMSG: $dmsg";
+	
+	my $DMSGgleich = 1;
+	if ($dmsg eq $hash->{LASTDMSG}) {
+		Log3 $name, SDUINO_DISPATCH_VERBOSE, "$name Dispatch: $dmsg, test gleich";
+	} else {
+		if (defined($hash->{DoubleMsgIDs}{$id})) {
+			$DMSGgleich = 0;
+			Log3 $name, SDUINO_DISPATCH_VERBOSE, "$name Dispatch: $dmsg, test ungleich";
+		}
+		else {
+			Log3 $name, SDUINO_DISPATCH_VERBOSE, "$name Dispatch: $dmsg, test ungleich: disabled";
+		}
+		$hash->{LASTDMSG} = $dmsg;
+	}
 
+   if ($DMSGgleich) {
 	#Dispatch only if $dmsg is different from last $dmsg, or if 2 seconds are between transmits
-    if ( ($hash->{DMSG} ne $dmsg) || ($hash->{TIME}+2 < time()) ) { 
+	if ( ($hash->{DMSG} ne $dmsg) || ($hash->{TIME}+2 < time()) ) { 
 		$hash->{MSGCNT}++;
 		$hash->{TIME} = time();
 		$hash->{DMSG} = $dmsg;
@@ -2743,12 +2771,18 @@ sub SIGNALduno_Dispatch($$$$)
 		if(defined($rssi)) {
 			$hash->{RSSI} = $rssi;
 			$addvals{RSSI} = $rssi;
+			$rssi .= " dB,"
 		}
+		else {
+			$rssi = "";
+		}
+		Log3 $name, SDUINO_DISPATCH_VERBOSE, "$name Dispatch: $dmsg, $rssi dispatch";
 		Dispatch($hash, $dmsg, \%addvals);  ## Dispatch to other Modules 
 		
 	}	else {
-		Log3 $name, 4, "$name: Dropped ($dmsg) due to short time or equal msg";
-	}	
+		Log3 $name, 4, "$name Dispatch: $dmsg, Dropped due to short time or equal msg";
+	}
+   }
 }
 
 sub
@@ -2944,7 +2978,7 @@ SIGNALduino_Parse_MS($$$$%)
 			}
 			if (!defined($modulematch) || $dmsg =~ m/$modulematch/) {
 				Debug "$name: dispatching now msg: $dmsg" if ($debug);
-				SIGNALduno_Dispatch($hash,$rmsg,$dmsg,$rssi);
+				SIGNALduno_Dispatch($hash,$rmsg,$dmsg,$rssi,$id);
 				$message_dispatched=1;
 			}
 		}
@@ -3208,7 +3242,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 						}
 						if (!defined($modulematch) || $dmsg =~ m/$modulematch/) {
 							Debug "$name: dispatching now msg: $dmsg" if ($debug);
-							SIGNALduno_Dispatch($hash,$rmsg,$dmsg,$rssi);
+							SIGNALduno_Dispatch($hash,$rmsg,$dmsg,$rssi,$id);
 							$message_dispatched=1;
 						}
 					} else {
@@ -3335,7 +3369,7 @@ SIGNALduino_Parse_MC($$$$@)
 		                $modulematch = $ProtocolListSIGNALduino{$id}{modulematch};
 					}
 					if (!defined($modulematch) || $dmsg =~ m/$modulematch/) {
-						SIGNALduno_Dispatch($hash,$rmsg,$dmsg,$rssi);
+						SIGNALduno_Dispatch($hash,$rmsg,$dmsg,$rssi,$id);
 						$message_dispatched=1;
 					}
 				} else {
@@ -3522,6 +3556,27 @@ SIGNALduino_Attr(@)
 	{
 		SIGNALduino_IdList($hash, $name, $aVal);
 	}
+	elsif ($aName eq "doubleMsgCheck_IDs")
+	{
+		if (defined($aVal)) {
+			if (length($aVal)>0) {
+				if (substr($aVal,0 ,1) eq '#') {
+					Log3 $name, 3, "Attr doubleMsgCheck_IDs disabled: $aVal";
+					delete $hash->{DoubleMsgIDs};
+				}
+				else {
+					Log3 $name, 3, "Attr doubleMsgCheck_IDs enabled: $aVal";
+					my %DoubleMsgiD = map { $_ => 1 } split(",", $aVal);
+					$hash->{DoubleMsgIDs} = \%DoubleMsgiD;
+					#print Dumper $hash->{DoubleMsgIDs};
+				}
+			}
+			else {
+				Log3 $name, 3, "delete Attr doubleMsgCheck_IDs";
+				delete $hash->{DoubleMsgIDs};
+			}
+		}
+	}
 	elsif ($aName eq "cc1101_frequency")
 	{
 		if ($aVal eq "" || $aVal < 800) {
@@ -3550,7 +3605,7 @@ sub SIGNALduino_IdList($$$)
 	if (defined($aVal) && length($aVal)>0)
 	{
 		if (substr($aVal,0 ,1) eq '#') {
-			Log3 $name, 3, "Attr whitelist deaktiviert: $aVal";
+			Log3 $name, 3, "Attr whitelist disabled: $aVal";
 		}
 		else {
 			%WhitelistIDs = map { $_ => 1 } split(",", $aVal);
@@ -4469,6 +4524,10 @@ sub SIGNALduino_compPattern($$$%)
 	<li>debug<br>
 	This will bring the module in a very verbose debug output. Usefull to find new signals and verify if the demodulation works correctly.
 	</li>
+	<li>doubleMsgCheck_IDs<br>
+	This attribute allows it, to specify protocols which must be received two equal messages to call dispatch to the modules.<br>
+	You can specify multiple IDs wih a colon : 0,3,7,12<br>
+	</li>
 	<li>flashCommand<br>
     	This is the command, that is executed to performa the firmware flash. Do not edit, if you don't know what you are doing.<br>
     	The default is: avrdude -p atmega328P -c arduino -P [PORT] -D -U flash:w:[HEXFILE] 2>[LOGFILE]<br>
@@ -4507,6 +4566,9 @@ attr sduino longids 1
 # Will generate devices names like BTHR918N_f3.
 attr sduino longids BTHR918N
 </PRE></li>
+<li>rawmsgEvent<br>
+When set to "1" received raw messages triggers events
+</li>
 <li>whitelistIDs<br>
 This attribute allows it, to specify whichs protocos are considured from this module.
 Protocols which are not considured, will not generate logmessages or events. They are then completly ignored. 
