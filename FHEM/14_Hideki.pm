@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 14_Hideki.pm 14395 2017-05-17 21:00:00Z v3.3.1-dev $
+# $Id: 14_Hideki.pm 14395 2017-06-09 19:00:00Z v3.3.1-dev $
 # The file is taken from the SIGNALduino project
 # see http://www.fhemwiki.de/wiki/SIGNALduino
 # and was modified by a few additions
@@ -27,8 +27,9 @@ Hideki_Initialize($)
   $hash->{UndefFn}   = "Hideki_Undef";
   $hash->{AttrFn}    = "Hideki_Attr";
   $hash->{ParseFn}   = "Hideki_Parse";
-  $hash->{AttrList}  = "IODev do_not_notify:0,1 showtime:0,1 "
-                       ."ignore:0,1 "
+  $hash->{AttrList}  = "IODev do_not_notify:0,1 showtime:0,1"
+                       ." ignore:0,1"
+                       ." windDirCorr windSpeedCorr"
                       ." $readingFnAttributes";
                       
   $hash->{AutoCreate}=
@@ -178,6 +179,11 @@ Hideki_Parse($$)
 
 	#Log3 $name, 4, "Hideki: $name ($msg)";
 	
+	my $WindSpeedCorr = AttrVal($name,"windSpeedCorr",0);
+	if ($WindSpeedCorr > 0 && $sensorTyp == 12) {
+		$windspeed = sprintf("%.2f", $windspeed * $WindSpeedCorr);
+		Log3 $name, 4, "$name Hideki_Parse: WindSpeedCorr=$WindSpeedCorr, WindSpeed=$windspeed, WindGust=$windgust";
+	}
 	
 	if (!defined(AttrVal($hash->{NAME},"event-min-interval",undef)))
 	{
@@ -367,6 +373,7 @@ sub decodeRain {
 	return ($channel, $rain, $unknown);
 }
 
+# P12#758BB244074007400F00001C6E7A01
 sub wind {
 	my @Hidekibytes = @{$_[0]};
 	my @winddir_name=("N","NNE","NE","ENE","E","ESE","SE","SSE","S","SSW","SW","WSW","W","WNW","NW","NNW");
