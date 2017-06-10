@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 14_Hideki.pm 14395 2017-06-09 19:00:00Z v3.3.1-dev $
+# $Id: 14_Hideki.pm 14395 2017-06-10 19:00:00Z v3.3.1-dev $
 # The file is taken from the SIGNALduino project
 # see http://www.fhemwiki.de/wiki/SIGNALduino
 # and was modified by a few additions
@@ -182,6 +182,7 @@ Hideki_Parse($$)
 	my $WindSpeedCorr = AttrVal($name,"windSpeedCorr",0);
 	if ($WindSpeedCorr > 0 && $sensorTyp == 12) {
 		$windspeed = sprintf("%.2f", $windspeed * $WindSpeedCorr);
+		$windgust  = sprintf("%.2f", $windgust * $WindSpeedCorr);
 		Log3 $name, 4, "$name Hideki_Parse: WindSpeedCorr=$WindSpeedCorr, WindSpeed=$windspeed, WindGust=$windgust";
 	}
 	
