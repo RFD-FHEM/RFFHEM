@@ -3043,7 +3043,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 	
     Debug "$name: processing unsynced message\n" if ($debug);
 
-	#my $clockabs;  #Clock will be fetched from Protocol
+	my $clockabs = 1;  #Clock will be fetched from Protocol if possible
 	#$patternListRaw{$_} = floor($msg_parts{pattern}{$_}/$clockabs) for keys $msg_parts{pattern};
 	$patternListRaw{$_} = $msg_parts{pattern}{$_} for keys %{$msg_parts{pattern}};
 
@@ -3059,7 +3059,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 		foreach $id (@{$hash->{muIdList}}) {
 			
 			my $valid=1;
-			my $clockabs= $ProtocolListSIGNALduino{$id}{clockabs};
+			$clockabs= $ProtocolListSIGNALduino{$id}{clockabs};
 			my %patternList;
 			$rawData=$msg_parts{rawData};
 			if (exists($ProtocolListSIGNALduino{$id}{filterfunc}))
