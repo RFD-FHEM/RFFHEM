@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 10485 2017-06-09 17:00:00Z v3.3.1-dev $
+# $Id: 00_SIGNALduino.pm 10485 2017-06-10 19:00:00Z v3.3.1-dev $
 #
 # v3.3.1 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -1266,6 +1266,7 @@ SIGNALduino_Initialize($)
 					  ." rawmsgEvent:1,0"
 					  ." cc1101_frequency"
 					  ." doubleMsgCheck_IDs"
+					  ." suppressDeviceRawmsg:1,0"
 		              ." $readingFnAttributes";
 
   $hash->{ShutdownFn} = "SIGNALduino_Shutdown";
@@ -1966,7 +1967,7 @@ sub SIGNALduino_parseResponse($$$)
 		}
 		my $dBn = substr($msg,9,2);
 		Log3 $name, 3, "$name/msg parseResponse patable: $dBn";
-		foreach my $dB (keys $patable{$CC1101Frequency}) {
+		foreach my $dB (keys %{ $patable{$CC1101Frequency} }) {
 			if ($dBn eq $patable{$CC1101Frequency}{$dB}) {
 				Log3 $name, 5, "$name/msg parseResponse patable: $dB";
 				$msg .= " => $dB";
@@ -2767,7 +2768,10 @@ sub SIGNALduno_Dispatch($$$$$)
 		#readingsSingleUpdate($hash, "state", $hash->{READINGS}{state}{VAL}, $event);
 		
 		$hash->{RAWMSG} = $rmsg;
-		my %addvals = (RAWMSG => $rmsg, DMSG => $dmsg);
+		my %addvals = (DMSG => $dmsg);
+		if (AttrVal($name,"suppressDeviceRawmsg",0) == 0) {
+			$addvals{RAWMSG} = $rmsg
+		}
 		if(defined($rssi)) {
 			$hash->{RSSI} = $rssi;
 			$addvals{RSSI} = $rssi;
