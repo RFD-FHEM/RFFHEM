@@ -1109,22 +1109,29 @@ my %ProtocolListSIGNALduino  = (
 			length_min      => '24',
 			length_max      => '24',
 		},			
-	 "60" => ##  WS7000 #############################################################################
-     # MU;P0=3472;P1=-449;P2=773;P3=280;P4=-941;D=01212121212121212121342121342134343434213434212134342121212134213421213421343421342121212134212134213421343421342121213434343434213421212134343434213434342134343;CP=3;R=52;
-      {
-         name   		 => 'WS2000/WS7000...',   
-         id				 => '60',
-         one             => [2,-4],            
-         zero        	 => [4,-2],          
-         clockabs     	 => 200,                
-         preamble      	 => 'K',                # prepend to converted message
-         postamble     	 => '',                  # Append to converted message       
-         clientmodule  	 => 'CUL_WS',
-         length_min      => '44',
-         length_max      => '84',
-         postDemodulation=> \&SIGNALduino_postDemo_WS2000,
-         
-      }, 
+  "60" =>	## ELV, LA CROSSE (WS2000/WS7000)
+  {
+     	# MU;P0=32001;P1=-381;P2=835;P3=354;P4=-857;D=01212121212121212121343421212134342121213434342121343421212134213421213421212121342121212134212121213421212121343421343430;CP=2;R=53;			# tested sensors:  	WS-7000-20, AS2000, ASH2000, S2000, S2000I, S2001A, S2001IA,
+     	#                    ASH2200, S300IA, S2001I, S2000ID, S2001ID, S2500H 
+     	# not tested:        AS3, S2000W, S2000R, WS7000-15, WS7000-16, WS2500-19, S300TH, S555TH
+     	# das letzte Bit 1 und 1 x 0 Preambel fehlt meistens
+	    #  ___        _
+	    # |   |_     | |___
+	    #  Bit 0      Bit 1
+	    # kurz 366 µSek / lang 854 µSek / gesamt 1220 µSek - Sollzeiten 
+	  		name                 => 'WS2000',
+     		id                   => '60',
+     		one                  => [3,-7],	
+     		zero                 => [7,-3],
+	     	clockabs             => 122,
+     		preamble      	 	   => 'K',        # prepend to converted message
+     		postamble     	 	   => '',         # Append to converted message
+     		clientmodule         => 'CUL_WS',   
+     		length_min           => '44',	      # eigentlich 46
+     		length_max           => '82',	      # eigentlich 81
+			postDemodulation     => \&SIGNALduino_postDemo_WS2000,
+	}, 
+
 	"61" =>	## ELV FS10
 		# tested transmitter:   FS10-S8, FS10-S4, FS10-ZE
 		# tested receiver:      FS10-ST, FS10-MS, WS3000-TV, PC-Wettersensor-Empfaenger
@@ -3768,7 +3775,6 @@ sub SIGNALduino_postDemo_WS2000($@) {
 	my $index = 0;
 	my $data = 0;
 	my $dataindex = 0;
-	my $sumindex = 0;
 	my $error = 0;
 	my $check = 0;
 	my $sum = 5;
@@ -3809,13 +3815,12 @@ sub SIGNALduino_postDemo_WS2000($@) {
 			if ($index == 5) {$adr = ($data & 0x07)}			# Sensoradresse
 			if ($datalength == 45 || $datalength == 46) { 	# Typ 1 ohne Summe
 				if ($index <= $datalength - 5) {
-					$check = $check ^ $data;		# Check - Typ XOR Adresse XOR  bis XOR Check muss 0 ergeben
+					$check = $check ^ $data;		# Check - Typ XOR Adresse XOR  bis XOR Check muss 0 ergeben
 				}
 			} else {
 				if ($index <= $datalength - 10) {
-					$check = $check ^ $data;		# Check - Typ XOR Adresse XOR  bis XOR Check muss 0 ergeben
+					$check = $check ^ $data;		# Check - Typ XOR Adresse XOR  bis XOR Check muss 0 ergeben
 					$sum += $data;
-					$sumindex = $index + $datastart + 6;		# Position Summe
 				}
 			}
 			$index += 5;
@@ -3859,6 +3864,7 @@ sub SIGNALduino_postDemo_WS2000($@) {
 		}
 		return (1, @new_bit_msg);
 	}
+
 }
 
 
