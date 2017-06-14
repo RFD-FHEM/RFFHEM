@@ -1,6 +1,6 @@
     ##############################################
     ##############################################
-    # $Id: 14_SD_WS09.pm 16105 2017-04-02 10:10:10Z pejonp $
+    # $Id: 14_SD_WS09.pm 16106 2017-06-14 10:10:10Z pejonp $
     # 
     # The purpose of this module is to support serval 
     # weather sensors like WS-0101  (Sender 868MHz ASK   Epmfänger RX868SH-DV elv)
@@ -96,6 +96,7 @@
       my $msg_vor = 'P9#';
       my $minL1 = 70;
       my $minL2 = 60;
+      my $minL3 = 64;
       my $whid;
       
       $modelattr = AttrVal($iohash->{NAME},'WS09_WSModel',0);
@@ -114,7 +115,27 @@
     			Log3 $iohash, 3, "$name: SD_WS09_Parse EXIT: msg=$rawData syncp=$syncpos length:".length($bitData) ;
     			return undef;
     		}
-
+        
+        
+       if ( length($bitData)-$syncpos == $minL3)
+    		{
+          my $temptyp = substr($bitData,0,8);
+           if( $temptyp == "11111110" ) {
+          $hlen = length($rawData);
+          $blen = $hlen * 4;
+    	    $bitData2 = '1'.unpack("B$blen", pack("H$hlen", $rawData));
+          $bitData20 = substr($bitData2,0,length($bitData2)-1);
+          $blen = length($bitData20);
+          $hlen = $blen / 4;
+          $msg = $msg_vor.uc (unpack("H$hlen", pack("B$blen", $bitData20)));
+          $bitData = $bitData20;
+          $syncpos= index($bitData,"11111110");  #7x1 1x0 preamble
+      	  Log3 $iohash, 3, "$name: SD_WS09_Parse sync2 msg=$msg syncp=$syncpos length:".length($bitData) ;
+          Log3 $iohash, 3, "$name: SD_WS09_Parse sync2 bitdata: $bitData" ;
+          } 
+    		}
+       
+       
          my $wh = substr($bitData,0,8);
          #CRC-Check bei WH1080/WS0101 WS09_CRCAUS=0 und WS09_WSModel = undef oder Wh1080 
          if((($crcwh1080 == 0) || ($crcwh1080 == 2)) &&  ($modelattr ne "CTW600")) {
@@ -131,7 +152,7 @@
           $bitData = $bitData20;
       	  Log3 $iohash, 3, "$name: SD_WS09_Parse sync1 msg=$msg syncp=$syncpos length:".length($bitData) ;
        		}
-        
+              
         	if ($syncpos == 1 && length($bitData)-$syncpos > $minL1 ) 
     		{
           $hlen = length($rawData);
@@ -142,7 +163,7 @@
           $hlen = $blen / 4;
           $msg = $msg_vor.uc (unpack("H$hlen", pack("B$blen", $bitData20)));
           $bitData = $bitData20;           
-      	  Log3 $iohash, 3, "$name: SD_WS09_Parse sync2 msg=$msg syncp=$syncpos length:".length($bitData) ;
+      	  Log3 $iohash, 3, "$name: SD_WS09_Parse sync3 msg=$msg syncp=$syncpos length:".length($bitData) ;
        		}     
              
              
