@@ -1,6 +1,6 @@
     ##############################################
     ##############################################
-    # $Id: 14_SD_WS09.pm 16106 2017-06-14 10:10:10Z pejonp $
+    # $Id: 14_SD_WS09.pm 16107 2017-06-20 10:10:10Z pejonp $
     # 
     # The purpose of this module is to support serval 
     # weather sensors like WS-0101  (Sender 868MHz ASK   Epmfänger RX868SH-DV elv)
@@ -427,8 +427,8 @@
     
     
 =pod
-=item summary    Supports weather sensors protocl 9 from SIGNALduino
-=item summary_DE Unterst&uumltzt Wettersensoren mit Protokol 9 vom SIGNALduino
+=item summary    Supports weather sensors (WH1080/3080/CTW-600) protocl 9 from SIGNALduino
+=item summary_DE Unterst&uumltzt Wettersensoren (WH1080/3080/CTW-600) mit Protokol 9 vom SIGNALduino
 =begin html
 
 <a name="SD_WS09"></a>
@@ -470,6 +470,9 @@
      <li>ID: (The ID-Number (number if)</li>
      <li>windSpeed (m/s) and windDirection (N-O-S-W)</li>
      <li>Rain (mm)</li>
+     <b>WH3080:</b>
+     <li>UV Index</li>
+     <li>Lux</li>
   </ul>
   <br>
   <b>Attributes</b>
@@ -492,7 +495,7 @@
   <b>Set</b> <ul>N/A</ul><br>
 
   <a name="SD_WS09_Parse"></a>
-  <b>Set</b> <ul>N/A</ul><br>
+  <b>Parse</b> <ul>N/A</ul><br>
 
 </ul>
 
@@ -539,6 +542,9 @@
      <li>ID: (The ID-Number (number if)</li>
      <li>windSpeed (m/s) and windDirection (N-O-S-W)</li>
      <li>Rain (mm)</li>
+     <b>WH3080:</b>
+     <li>UV Index</li>
+     <li>Lux</li>
   </ul>
   <br>
   <b>Attribute</b>
@@ -568,7 +574,7 @@
   <b>Set</b> <ul>N/A</ul><br>
 
   <a name="SD_WS09_Parse"></a>
-  <b>Set</b> <ul>N/A</ul><br>
+  <b>Parse</b> <ul>N/A</ul><br>
 
 </ul>
 
