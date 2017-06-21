@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 10_FS10.pm 331 2017-04-16 16:00:00Z v3.3-dev $
+# $Id: 10_FS10.pm 331 2017-06-21 17:00:00Z v3.3-dev $
 #
 # FS10 basierend auf dem FS20 Modul (FHEM 5.3), elektron-bbs
 
@@ -369,7 +369,74 @@ sub dec2nibble {
 =pod
 =item summary    devices communicating via the ELV FS10 protocol
 =item summary_DE Anbindung von FS10 Ger&auml;ten
+=begin html
+
+<a name="FS10"></a>
+<h3>FS10</h3>
+Das FS10-Modul entschl&uuml;sselt und sendet Nachrichten vom Typ FS10, die vom
+SIGNALduino verarbeitet werden. Unterst&uuml;tzt werden z.Z. folgende Typen: simple, dimmer, timer, remote<br>
+<br>
+<a name="FS10define"></a>
+<b>Define</b>
+<ul>
+	<p><code>define &lt;name&gt; FS10 &lt;hauscode&gt;_&lt;button&gt;</code>
+	<br>
+	<br>
+	<code>&lt;name&gt;</code> ist ein beliebiger Name, der dem Ger&auml;t zugewiesen wird.
+	 Zur besseren &Uuml;bersicht wird empfohlen einen Namen in der Form &quot; FS10_6_12&quot; zu verwenden,
+	  wobei &quot;6&quot; der verwendete Hauscode und &quot;12&quot; die Adresse darstellt.
+	<br /><br />
+	<code>&lt;hauscode&gt;</code> entspricht dem Hauscode der verwendeten Fernbedienung bzw. des Ger&auml;tes, das gesteuert werden soll. Als Hauscode wird 1-8 verwendet.
+	<br /><br />
+	<code>&lt;button&gt;</code> stellt die Tastaturebene bzw. Adresse der verwendeten Ger&auml;te dar. Adresse &quot;11&quot; entspricht auf der Fernbedienung FS10-S8 z.B. den beiden Tasten der obersten Reihe.<br />  
+</ul>   
+<a name="FS10set"></a>
+<b>Set</b>
+<ul>
+  <code>set &lt;name&gt; &lt;value&gt; [&lt;anz&gt;]</code>
+  <br /><br />
+  <code>&lt;value&gt;</code> kann einer der folgenden Werte sein<br>
+  <pre>
+  dimdown
+  dimup
+  off
+  on
+  
+  Bei dimup und dimdown kann optional mit &lt;anz&gt; die Anzahl der Wiederholungen angegeben werden.
+	
+  <li>Die <a href="#setExtensions">set extensions</a> werden unterst&uuml;tzt.</li>
+  </pre>
+</ul>
+<a name="FS10get"></a>
+<b>Get</b>
+<ul>
+	N/A
+</ul>
+<a name="FS10attr"></a>
+<b>Attribute</b>
+<ul>
+        <li><a href="#IODev">IODev</a></li>
+	<li><a href="#do_not_notify">do_not_notify</a></li>
+	<li><a href="#eventMap">eventMap</a></li>
+	<li>follow-on-for-timer (enable/disable follow-on-timer)</li>
+	<li>follow-on-timer (Anzahl Sekunden nachdem beim Timer des FS10_SA der state automatisch wieder auf off geht)</li>
+	<li><a href="#ignore">ignore</a></li>
+	<li>model</li>
+    <pre>
+    FS10_ST  simple
+    FS10_DI  dimmer
+    FS10_HD  dimmer
+    FS10_SA  timer
+    FS10_MS  simple
+    FS10_S4  remote
+    FS10_S8  remote
+    </pre>
+	<li><a href="#readingFnAttributes">readingFnAttributes</a></li>
+</ul>
+=end html
+
 =begin html_DE
+
 <a name="FS10"></a>
 <h3>FS10</h3>
 Das FS10-Modul entschl&uuml;sselt und sendet Nachrichten vom Typ FS10, die vom
