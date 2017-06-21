@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 10485 2017-06-10 19:00:00Z v3.3.1-dev $
+# $Id: 00_SIGNALduino.pm 10485 2017-06-21 17:00:00Z v3.3.1-dev $
 #
 # v3.3.1 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -667,7 +667,9 @@ my %ProtocolListSIGNALduino  = (
 	"30" => # a unitec remote door reed switch
 		{
             name			=> 'unitec47031',	
+			comment         => 'developId',
 			id          	=> '30',
+			developId       => 'y',
 			one				=> [-1,2],
 			zero			=> [-2,1],
 			start			=> [-33,1],				# Message is not provided as MS, worakround is start
@@ -1060,7 +1062,7 @@ my %ProtocolListSIGNALduino  = (
 			start			=> [25,-3],						
 			format 			=> 'twostate',	
 			preamble		=> 'u56#',						# prepend to converted message	
-			clientmodule    => ''	,   					# not used now
+			#clientmodule    => ''	,   					# not used now
 			modulematch     => '',  						# not used now
 			length_min      => '56',
 			length_max      => '68',
@@ -1104,7 +1106,7 @@ my %ProtocolListSIGNALduino  = (
 			format 			=> 'twostate',	# tristate can't be migrated from bin into hex!
 			preamble		=> 'u59#',			# Append to converted message	
 			postamble		=> '',		# Append to converted message	 	
-			clientmodule    => '',   		# not used now
+			#clientmodule    => '',   		# not used now
 			modulematch     => '',  # not used now
 			length_min      => '24',
 			length_max      => '24',
@@ -1168,13 +1170,15 @@ my %ProtocolListSIGNALduino  = (
 	"63" => ## Warema MU
 		{    #MU;P0=-2988;P1=1762;P2=-1781;P3=-902;P4=871;P5=6762;P6=5012;D=0121342434343434352434313434243521342134343436;
 			name         => 'Warema',
+			comment      => 'developId, is still experimental',
 			id           => '63',
+			developId    => 'y',
 			one          => [1],
 			zero         => [0],
 			clockabs     => 800, 
 			syncabs		 => '6700',# Special field for filterMC function
 			preamble     => 'u63', # prepend to converted message
-			clientmodule => '', 
+			#clientmodule => '', 
 			#modulematch => '', 
 			length_min   => '24',
 			filterfunc   => 'SIGNALduino_filterMC',
@@ -1196,7 +1200,7 @@ my %ProtocolListSIGNALduino  = (
 			modulematch  => '^W64*',
 			preamble     => 'W64#',       # prepend to converted message
 			postamble    => '',           # Append to converted message       
-			clientmodule => '',
+			#clientmodule => '',
 			length_min   => '48',
 			length_max   => '48',
 		},
