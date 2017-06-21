@@ -256,6 +256,8 @@ FLAMINGO_Attr(@)
 1;
 
 =pod
+=item summary    Supports flamingo fa20rf/fa21 smoke detectors
+=item summary_DE Unterst&uumltzt Flamingo FA20RF/FA21 Rauchmelder
 =begin html
 
 <a name="FLAMINGO"></a>
@@ -310,7 +312,7 @@ FLAMINGO_Attr(@)
     <code>define &lt;name&gt; FLAMINGO &lt;code&gt; </code> <br>
 
     <br>
-    &lt;code&gt; ist der automatisch angelegte eindeutige code  des FLAMINGO Rauchmelders. Dieser ändern sich nach
+    &lt;code&gt; ist der automatisch angelegte eindeutige code  des FLAMINGO Rauchmelders. Dieser Ã¤ndern sich nach
 	dem Pairing mit einem Master.<br>
   </ul>
   <br>
