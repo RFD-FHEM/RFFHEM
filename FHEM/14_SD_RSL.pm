@@ -1,9 +1,9 @@
 ###########################################
 # SIGNALduini RSL Modul. Modified version of FHEMduino Modul by Wzut
 #  
-# $Id: 14_SD_RSL.pm 7779 2017-05-30 19:00:00Z v3.3.1-dev $
+# $Id: 14_SD_RSL.pm 7779 2017-06-24 20:00:00Z v3.3.1-dev $
 # Supports following devices:
-# - Conrad RSL Funk-Jalousieaktor Unterputz RSL 1-Kanal Bestell-Nr.: 640579 - 62 
+# - Conrad RSL 
 #####################################
 
 package main;
@@ -256,3 +256,60 @@ sub SD_RSL_Attr(@)
 }
 
 1;
+
+=pod
+=item summary devices communicating using the Conrad RSL protocol
+=item summary_DE Anbindung von Conrad RSL Ger&auml;ten
+
+=begin html
+
+<a name="SD_RSL"></a>
+<h3>RSL</h3>
+The SD_RSL module decrypts and sends Conrad RSL messages sent by the SIGNALduino.<br>
+<br>
+<a name="SD_RSL_Define"></a>
+<b>Define</b>
+<ul>
+	<p><code>define &lt;name&gt; SD_RSL &lt;code&gt;_&lt;channel&gt;_&lt;button&gt;</code>
+	<br>
+	<br>
+	<code>&lt;name&gt;</code> is any name assigned to the device.
+	For a better overview it is recommended to use a name in the form &quot;RSL_B1A800_1_2&quot;
+	<br /><br />
+	<code>&lt;code&gt;</code> The code is 00000-FFFFFF
+	<br /><br />
+	<code>&lt;channel&gt;</code> The channel is 1-4
+	<br /><br />
+	<code>&lt;button&gt;</code> The button is 1-4
+	<br /><br />
+</ul>   
+<a name="SD_RSL_Set"></a>
+<b>Set</b>
+<ul>
+  <code>set &lt;name&gt; &lt;value&gt;</code>
+  <br /><br />
+  <code>&lt;value&gt;</code> can be one of the following values:<br>
+  <pre>
+  off
+  on
+  </pre>
+</ul>
+<a name="SD_RSL_Get"></a>
+<b>Get</b>
+<ul>
+	N/A
+</ul>
+<a name="SD_RSL_Attr"></a>
+<b>Attribute</b>
+<ul>
+        <li><a href="#IODev">IODev</a></li>
+	<li><a href="#do_not_notify">do_not_notify</a></li>
+	<li><a href="#eventMap">eventMap</a></li>
+	<li><a href="#ignore">ignore</a></li>
+	<li><a href="#readingFnAttributes">readingFnAttributes</a></li>
+	<li>RSLrepetition<br>
+	Set the repeats for sending signal. 
+	</li>
+</ul>
+=end html
+=cut
