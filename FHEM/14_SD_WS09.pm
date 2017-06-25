@@ -1,6 +1,6 @@
     ##############################################
     ##############################################
-    # $Id: 14_SD_WS09.pm 16107 2017-06-20 10:10:10Z pejonp $
+    # $Id: 14_SD_WS09.pm 16108 2017-06-25 10:10:10Z pejonp $
     # 
     # The purpose of this module is to support serval 
     # weather sensors like WS-0101  (Sender 868MHz ASK   Epmfänger RX868SH-DV elv)
@@ -18,7 +18,7 @@
     {
       my ($hash) = @_;
     
-      $hash->{Match}     = "^P9#[A-Fa-f0-9]+";    ## pos 7 ist aktuell immer 0xF
+      $hash->{Match}     = "^P9#F[A-Fa-f0-9]+";    ## pos 7 ist aktuell immer 0xF
       $hash->{DefFn}     = "SD_WS09_Define";
       $hash->{UndefFn}   = "SD_WS09_Undef";
       $hash->{ParseFn}   = "SD_WS09_Parse";
