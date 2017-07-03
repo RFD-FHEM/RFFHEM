@@ -1236,6 +1236,27 @@ my %ProtocolListSIGNALduino  = (
 			remove_zero  => 1,      # Removes leading zeros from output
 			postDemodulation => \&SIGNALduino_postDemo_WS7035,
 		},
+ 	"67" => ## TX2 Protocol (Remote Datalink & Remote Thermo Model 7053)
+            # MU;P0=3381;P1=-672;P2=-4628;P3=1142;P4=-30768;D=0102320232020202020232020232020202320232323202323202020202020202020401023202320202020202320202320202023202323232023232020202020202020200;CP=0;R=45;
+            # MU;P0=1148;P1=3421;P6=-664;P7=-4631;D=16170717071717171717071717071717171717070707170717171717070717171710;CP=1;R=29;
+            # MU;P0=3389;P3=2560;P4=-720;P5=1149;P7=-4616;D=345407570757070707070757070757070707070757570707075707070707570757575;CP=5;R=253;
+            #           __               ____
+            #  ________|  |     ________|    |
+            #      Bit 1             Bit 0
+            #    4630  1220       4630   3420   µSek - mit Oszi gemessene Zeiten
+      {
+			name           => 'WS7053',	
+			id             => '67',
+         	one            => [-38,10],
+         	zero           => [-38,28],      
+         	clockabs       => 122,
+         	preamble	      => 'TX', 	      # prepend to converted message
+         	clientmodule   => 'CUL_TX',
+         	modulematch    => '^TX......',
+         	length_min     => '32',
+         	length_max     => '34',
+         	postDemodulation => \&SIGNALduino_postDemo_WS7053,
+      }, 	
 );
 
 
@@ -3869,6 +3890,37 @@ sub SIGNALduino_postDemo_WS2000($@) {
 		return (1, @new_bit_msg);
 	}
 
+}
+
+
+sub SIGNALduino_postDemo_WS7053($@) {
+	my ($name, @bit_msg) = @_;
+	my $msg = join("",@bit_msg);
+	my $new_msg ="";
+	my $parity = 0;									# Parity even
+   if (length($msg) > 32) {                  # start not correct
+      $msg = substr($msg,1)
+   }
+	Log3 $name, 4, "$name: WS7053 MSG = $msg";
+	if (substr($msg,0,8) ne "10100000") {		# check ident
+		Log3 $name, 3, "$name: WS7053 ERROR - Ident not 1010 0000 - " . substr($msg,0,8);
+		return 0, undef;
+	} else {
+		for(my $i = 15; $i < 28; $i++) {			# Parity over bit 15 and 12 bit temperature
+	      $parity += substr($msg, $i, 1);
+		}
+		if ($parity % 2 != 0) {
+			Log3 $name, 3, "$name: WS7053 ERROR - Parity not even";
+			return 0, undef;
+		} else {
+			Log3 $name, 5, "$name: WS7053 before: " . substr($msg,0,4) ." ". substr($msg,4,4) ." ". substr($msg,8,4) ." ". substr($msg,12,4) ." ". substr($msg,16,4) ." ". substr($msg,20,4) ." ". substr($msg,24,4) ." ". substr($msg,28,4);
+         # Format from 7053:  Bit 0-7 Ident, Bit 8-15 Rolling Code/Parity, Bit 16-27 Temperature (12.3), Bit 28-31 Zero
+			$new_msg = substr($msg,0,28) . substr($msg,16,8) . substr($msg,28,4);
+         # Format for CUL_TX: Bit 0-7 Ident, Bit 8-15 Rolling Code/Parity, Bit 16-27 Temperature (12.3), Bit 28 - 35 Temperature (12), Bit 36-39 Zero
+			Log3 $name, 5, "$name: WS7053 after:  " . substr($new_msg,0,4) ." ". substr($new_msg,4,4) ." ". substr($new_msg,8,4) ." ". substr($new_msg,12,4) ." ". substr($new_msg,16,4) ." ". substr($new_msg,20,4) ." ". substr($new_msg,24,4) ." ". substr($new_msg,28,4) ." ". substr($new_msg,32,4) ." ". substr($new_msg,36,4);
+			return (1,split("",$new_msg));
+		}
+	}
 }
 
 
