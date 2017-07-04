@@ -4173,6 +4173,7 @@ sub SIGNALduino_OSV1()
 	Log3 $name, 4, "$name: converted to hex: ($osv1hex)";
 	return (1,$osv1hex);
 }
+}
 
 sub	SIGNALduino_AS()
 {
