@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 10486 2017-06-25 17:00:00Z v3.3.1-dev $
+# $Id: 00_SIGNALduino.pm 10487 2017-07-05 17:00:00Z v3.3.1-dev $
 #
 # v3.3.1 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -1257,7 +1257,24 @@ my %ProtocolListSIGNALduino  = (
          	length_min     => '32',
          	length_max     => '34',
          	postDemodulation => \&SIGNALduino_postDemo_WS7053,
-      }, 	
+      },
+  "68" => ##  PFR-130 ###########################################################################
+		{
+    # MS;P0=-3890;P1=386;P2=-2191;P3=-8184;D=1312121212121012121212121012121212101012101010121012121210121210101210101012;CP=1;SP=3;R=20;O;
+    # MS;P0=-2189;P1=371;P2=-3901;P3=-8158;D=1310101010101210101010101210101010121210121212101210101012101012121012121210;CP=1;SP=3;R=20;O;
+			name         => 'PFR-130',
+			id           => '68',
+      one				=> [1,-10],
+			zero			=> [1,-5],
+      sync			=> [1,-21],	
+			clockabs   		=> 380,		# not used now
+      preamble		=> 's',			# prepend to converted message	 	
+			postamble		=> '00',		# Append to converted message	 	
+			clientmodule    => 'CUL_TCM97001',   # not used now
+      length_min      => '24',
+			length_max      => '42',
+			paddingbits     => '8',				 # pad up to 8 bits, default is 4
+		}, 	
 );
 
 
