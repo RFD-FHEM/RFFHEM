@@ -481,12 +481,13 @@ my %ProtocolListSIGNALduino  = (
 			id          	=> '18',
 			clockrange     	=> [1400,1500],			# min , max
 			format 			=> 'manchester',	    # tristate can't be migrated from bin into hex!
-			#preamble		=> '',					# prepend to converted message	
+			preamble		=> '50B208',			# prepend to converted message, may works only for THR128
 			#clientmodule    => 'to be written',   	# not used now
 			modulematch     => '^[0-9A-F].*',
 			length_min      => '31',
 			length_max      => '32',
-			method          => \&SIGNALduino_OSV1 # Call to process this message
+			polarity        => 'invert',		    # invert bits
+			method          => \&SIGNALduino_OSV1   # Call to process this message
 		},
 	#"19" => # nothing knowing about this 2015-09-28 01:25:40-MS;P0=-8916;P1=-19904;P2=390;P3=-535;P4=-1020;P5=12846;P6=1371;D=2120232323232324242423232323232323232320239;CP=2;SP=1;
 	#
@@ -4109,19 +4110,51 @@ sub SIGNALduino_OSV1()
 {
 	my ($name,$bitData,$id,$mcbitnum) = @_;
 	
-	my $idx=0;
+	return (-1," message is to short") if (defined($ProtocolListSIGNALduino{$id}{length_min}) && $mcbitnum < $ProtocolListSIGNALduino{$id}{length_min} );
+	return (-1," message is to long") if (defined($ProtocolListSIGNALduino{$id}{length_max}) && $mcbitnum > $ProtocolListSIGNALduino{$id}{length_max} );
 	
-	my $osv1hex ;# ~hex('0x'.$rawData);
-	#my $osv1bit = $bitData =~ tr/10/01/r;
-	my $osv1bit;
-    ($osv1bit = $bitData) =~ tr/10/01/;
-	#Log3 $name, 5, "$name: OSV1 protocol converted from ($bitData) to bit: ($osv1bit)" ;
-	$osv1hex=sprintf("%02X", $mcbitnum).SIGNALduino_b2h($osv1bit);
-
-
-	Log3 $name, 5, "$name: OSV1 protocol converted to hex: ($osv1hex) with length ($mcbitnum) bits \n";
+	
+	my $calcsum = oct( "0b" . reverse substr($bitData,0,8));
+	$calcsum += oct( "0b" . reverse substr($bitData,8,8));
+	$calcsum += oct( "0b" . reverse substr($bitData,16,8));
+	$calcsum = ($calcsum & 0xFF) + ($calcsum >> 8);
+	my $checksum = oct( "0b" . reverse substr($bitData,24,8));
+	if ($calcsum != $checksum) {	# Checksum
+		return (-1,"OSV1 - ERROR checksum not equal: $calcsum != $checksum");
+	} else {
+		Log3 $name, 4, "$name: OSV1 input data: $bitData";
+		my $newBitData;
+		# Todo: Sensortyp automtisch erkennen und Premable damit setzen.
+		
+		# preamble	=> '50B208',	# THR128 ohne Checksumme
+		# 50 - Length
+		# B2 - Byte 0: Id1
+		# 08 - Byte 1: Id2
+		my $channel = substr($bitData,6,2); # Byte 2 h: Channel
+		if ($channel == "00") { # in 0 LSB first
+		$newBitData .= "0001"; # out 1 MSB first
+	} elsif ($channel == "10") { # in 4 LSB first
+		$newBitData .= "0010"; # out 2 MSB first
+	} else { # in 8 LSB first
+		$newBitData .= "0100"; # out 4 MSB first
+	}
+	$newBitData .= "0000"; # Byte 2 l: ????
+	$newBitData .= "0000"; # Byte 3 h: address
+	$newBitData .= reverse substr($bitData,0,4); # Byte 3 l: address (Rolling Code)
+	$newBitData .= reverse substr($bitData,8,4); # Byte 4 h: T 0,1
+	$newBitData .= "0" . substr($bitData,23,1) . "00"; # Byte 4 l: Bit 2 - Batterie 0=ok, 1=low (< 2,5 Volt)
+	$newBitData .= reverse substr($bitData,16,4); # Byte 5 h: T 10
+	$newBitData .= reverse substr($bitData,12,4); # Byte 5 l: T 1
+	$newBitData .= "0000"; # Byte 6 h: immer 0000
+	$newBitData .= substr($bitData,21,1) . "000"; # Byte 6 l: Bit 3 - Temperatur 0=pos | 1=neg, Rest 0
+	$newBitData .= "00000000"; # Byte 7: immer 0000 0000
+	$newBitData .= reverse substr($bitData,24,4); # Byte 8 h: Checksum
+	$newBitData .= reverse substr($bitData,28,4); # Byte 8 l: Checksum
+	$newBitData .= "00000000"; # Byte 9: immer 0000 0000
+	my $osv1hex = SIGNALduino_b2h($newBitData);
+	Log3 $name, 4, "$name: OSV1 protocol id ($id) translated to RFXSensor format";
+	Log3 $name, 4, "$name: converted to hex: ($osv1hex)";
 	return (1,$osv1hex);
-
 }
 
 sub	SIGNALduino_AS()
