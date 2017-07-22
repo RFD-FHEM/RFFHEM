@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 10487 2017-07-05 17:00:00Z v3.3.1-dev $
+# $Id: 00_SIGNALduino.pm 10488 2017-07-22 17:00:00Z v3.3.1-dev $
 #
 # v3.3.1 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -993,7 +993,7 @@ my %ProtocolListSIGNALduino  = (
 		}, 
 	"50"    => 			## Opus XT300
 		{
-            name			=> 'optus_XT300',	
+      name			=> 'optus_XT300',	
 			id          	=> '50',
 			clockabs     	=> 500, 						
 			zero			=> [3,-2],
@@ -1188,22 +1188,20 @@ my %ProtocolListSIGNALduino  = (
 		{
     # MU;P0=-32001;P1=457;P2=-1064;P3=1438;D=0123232323212121232123232321212121212121212323212121232321;CP=1;R=63;
     # MU;P0=-32001;P1=473;P2=-1058;P3=1454;D=0123232323212121232123232121212121212121212121232321212321;CP=1;R=51;
+    #MU;P0=134;P1=-113;P3=412;P4=-1062;P5=1379;D=01010101013434343434343454345454345454545454345454545454343434545434345454345454545454543454543454345454545434545454345;CP=3;
 
 			name         => 'WH2',
 			id           => '64',
-      #start			 => [70,-1],
-			#one			   => [3,-2], # 1.Versuch
-			#zero        => [1,-2],   # 1.Versuch
-      one          => [1,-2],   # 2.Versuch
-      zero			   => [3,-2], # 2.Versuch
-			clockabs     => 490,          #-1=auto
+      one          => [1,-2],   
+      zero			   => [3,-2], 
+      clockabs     => 490,
       clientmodule    => 'SD_WS',  
 			modulematch  => '^W64*',
 			preamble     => 'W64#',       # prepend to converted message
 			postamble    => '',           # Append to converted message       
 			#clientmodule => '',
 			length_min   => '48',
-			length_max   => '48',
+			length_max   => '54',
 		},
 	"65" => ## Homeeasy
 		{
@@ -1310,7 +1308,6 @@ SIGNALduino_Initialize($)
 					  ." longids"
 					  ." minsecs"
 					  ." whitelist_IDs"
-					  ." WS09_WSModel:undef,WH1080,CTW600"
 					  ." WS09_CRCAUS:0,1,2"
 					  ." addvaltrigger"
 					  ." rawmsgEvent:1,0"
@@ -2082,7 +2079,9 @@ SIGNALduino_DoInit($)
 	RemoveInternalTimer("HandleWriteQueue:$name");
     @{$hash->{QUEUE}} = ();
     $hash->{sendworking} = 0;
-  	if (($hash->{DEF} !~ m/\@DirectIO/) and ($hash->{DEF} !~ m/none/) )
+    
+ # 	if (($hash->{DEF} !~ m/\@DirectIO/) and ($hash->{DEF} !~ m/none/) )
+ if (($hash->{DEF} !~ m/\@directio/) and ($hash->{DEF} !~ m/none/) )
 	{
 		Log3 $hash, 1, "$name/init: ".$hash->{DEF};
 		$hash->{initretry} = 0;
@@ -2097,7 +2096,7 @@ SIGNALduino_DoInit($)
 	delete($hash->{XMIT_TIME});
 	delete($hash->{NR_CMD_LAST_H});
 	return;
-	#return undef;
+	return undef;
 }
 
 # Disable receiver
@@ -4693,14 +4692,14 @@ This makes it possible to lower ressource usage and give some better clearnes in
 You can specify multiple whitelistIDs wih a colon : 0,3,7,12<br>
 With a # at the beginnging whitelistIDs can be deactivated.
 </li><br>
-   <li>WS09_Model<br>
-   WS09_WSModel:undef -> check all, WH1080 -> support WH1080/WS0101 , CTW600 -> support CTW600 
-   </li>
    <li>WS09_CRCAUS<br>
-   WS09_CRCAUS:0,1
-   WS09_CRCAUS = 0 is default -> check CRC Calculation for WH1080
-   </li><br>
+       <br>0: CRC-Check WH1080 CRC = 0  on, default   
+       <br>2: CRC = 49 (x031) WH1080, set OK
+    </li>
+    </li><br>
    </ul>
+   
+   
     
 	<a name="SIGNALduinoget"></a>
 	<b>Get</b>

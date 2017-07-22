@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 14_SD_WS.pm 35 2017-05-30 07:00:00Z v3.3-dev $
+# $Id: 14_SD_WS.pm 36 2017-07-22 08:00:00Z v3.3-dev $
 #
 # The purpose of this module is to support serval
 # weather sensors which use various protocol
@@ -7,6 +7,7 @@
 # Jörg 2017
 # 17.04.2017 WH2 (TFA 30.3157 nur Temp, Hum = 255),es wird das Perlmodul Digest:CRC benötigt für CRC-Prüfung benötigt
 # 29.05.2017 Test ob Digest::CRC installiert
+# 22.07.2017 WH2 angepaßt
 package main;
 
 
@@ -364,7 +365,7 @@ sub SD_WS_Parse($$)
 		$id = sprintf('%02X', $id);           # wandeln nach hex
 		Log3 $iohash, 4, "$name SD_WS_Parse: model=$model, temp=$temp, hum=$hum, channel=$channel, id=$id, bat=$bat";
 		
-	}   elsif  ($protocol eq "64" || $protocol eq "50" )	# WH2
+	}   elsif  ($protocol eq "64")	# WH2
   {
   #* Fine Offset Electronics WH2 Temperature/Humidity sensor protocol
  #* aka Agimex Rosenborg 66796 (sold in Denmark)
@@ -384,7 +385,7 @@ sub SD_WS_Parse($$)
  #* Based on reverse engineering with gnu-radio and the nice article here:
  #*  http://lucsmall.com/2012/04/29/weather-station-hacking-part-2/
  # 0x4A/74 0x70/112 0xEF/239 0xFF/255 0x97/151 | Sensor ID: 0x4A7 | 255% | 239 | OK
- #{ Dispatch($defs{sduino}, "W50#FF48D0C9FFBA", undef) }
+ #{ Dispatch($defs{sduino}, "W64#FF48D0C9FFBA", undef) }
 
         #* Message Format:
        #* .- [0] -. .- [1] -. .- [2] -. .- [3] -. .- [4] -.
@@ -406,11 +407,30 @@ sub SD_WS_Parse($$)
        #* `---- START = 9
        #*
        #*/ 
+      $msg =  substr($msg,0,16);
+      Log3 $iohash, 4, "$name: SD_WS_WH2_0 msg: $msg raw: $rawData BIT:$bitData " ;
+      my (undef ,$rawData) = split("#",$msg);
+      my $hlen = length($rawData);
+      my $blen = $hlen * 4;
+      my $msg_vor ="W64#";
+      my $bitData20;
+      my $bitData = unpack("B$blen", pack("H$hlen", $rawData)); 
+      Log3 $iohash, 4, "$name: SD_WS_WH2_1 msg: $msg raw: $rawData BIT:$bitData " ;
+      
+      my $temptyp = substr($bitData,0,8);
+      if( $temptyp == "11111110" ) {
+              $hlen = length($rawData);
+              $blen = $hlen * 4;
+    	        $bitData2 = '1'.unpack("B$blen", pack("H$hlen", $rawData));
+              $bitData20 = substr($bitData2,0,length($bitData2)-1);
+              $blen = length($bitData20);
+              $hlen = $blen / 4;
+              $msg = $msg_vor.uc (unpack("H$hlen", pack("B$blen", $bitData20)));
+              $bitData = $bitData20;
+       	      Log3 $iohash, 4, "$name: SD_WS09_WH2_3 sync2 msg=$msg length:".length($bitData) ;
+              Log3 $iohash, 4, "$name: SD_WS09_WH2_4 sync2 bitdata: $bitData" ;
+      }
     
-    Log3 $iohash, 3, "$name: SD_WS_Parse msg: $msg" ;
-    # my $hlen = length($rawData);
-    # my $blen = $hlen * 4;
-    # my $msg = uc (unpack("H$hlen", pack("B$blen", $bitData)));
      my $datacheck = pack( 'H*', substr($msg,6,length($msg)-6) );
      my $rc = eval
      {
@@ -422,35 +442,37 @@ sub SD_WS_Parse($$)
     if($rc)
     {
     # Digest::CRC loaded and imported successfully
-     Log3 $iohash, 3, "$name: SD_WS_Parse CRC_load: OK" ;
+     Log3 $iohash, 4, "$name: SD_WS_Parse CRC_load: OK" ;
      my $crcmein = Digest::CRC->new(width => 8, poly => 0x31);
      my $rr2 = $crcmein->add($datacheck)->hexdigest;
      $rr2 = sprintf("%d", hex($rr2));
      if ($rr2 == 0 ){
-            Log3 $iohash, 3, "$name: SD_WS_Parse CRC_OK   : CRC=$rr2 msg: $msg check:".substr($msg,6,length($msg)-6) ;
+            Log3 $iohash, 4, "$name: SD_WS_WH2_5 CRC_OK   : CRC=$rr2 msg: $msg check:".substr($msg,6,length($msg)-6) ;
           }else{
-            Log3 $iohash, 3, "$name: SD_WS_Parse CRC_Error: CRC=$rr2 msg: $msg check:".substr($msg,6,length($msg)-6) ;
+            Log3 $iohash, 4, "$name: SD_WS_WH2_6 CRC_Error: CRC=$rr2 msg: $msg check:".substr($msg,6,length($msg)-6) ;
             return "";
          }
    }else {
-      Log3 $iohash, 3, "$name: SD_WS_Parse CRC_not_load: Modul Digest::CRC fehlt" ;
+      Log3 $iohash, 2, "$name: SD_WS_WH2 CRC_not_load: Modul Digest::CRC fehlt" ;
+      return "";
    }  
    
     my $vorpre = 8;   
    	Log3 $iohash, 4, "$name converted to bits: WH2 " . $bitData;    
     $model = "SD_WS_WH2";
-		$SensorTyp = "WH2";
-	  $id = 	SD_WS_bin2dec(substr($bitData,$vorpre + 0,12));
+	  $SensorTyp = "WH2";
+	  $id = 	SD_WS_bin2dec(substr($bitData,$vorpre + 4,6));
     $id = sprintf('%03X', $id); 
 	 	$channel = 	0;
     $bat =  	SD_WS_bin2dec(substr($bitData,$vorpre + 20,1));
    	$temp = (SD_WS_bin2dec(substr($bitData,$vorpre + 12,12))) / 10;
     Log3 $iohash, 4, "$name decoded protocolid: $protocol ($SensorTyp) sensor id=$id, Data:".substr($bitData,$vorpre + 12,12)." temp=$temp";
     $hum =  SD_WS_bin2dec(substr($bitData,$vorpre + 24,8));   # TFA 30.3157 nur Temp, Hum = 255
-    Log3 $iohash, 4, "$name decoded protocolid: $protocol ($SensorTyp) sensor id=$id, Data:".substr($bitData,$vorpre + 24,8)." hum=$hum";
-    Log3 $iohash, 4, "$name decoded protocolid: $protocol ($SensorTyp) sensor id=$id, channel=$channel, temp=$temp, hum=$hum";
+    Log3 $iohash, 4, "$name SD_WS_WH2_8: $protocol ($SensorTyp) sensor id=$id, Data:".substr($bitData,$vorpre + 24,8)." hum=$hum";
+    Log3 $iohash, 4, "$name SD_WS_WH2_9: $protocol ($SensorTyp) sensor id=$id, channel=$channel, temp=$temp, hum=$hum";
 	
  	 }
+   
 	elsif (defined($decodingSubs{$protocol}))		# durch den hash decodieren
 	{
 	 	   	$SensorTyp=$decodingSubs{$protocol}{sensortype};
@@ -478,7 +500,7 @@ sub SD_WS_Parse($$)
 		
 	} 
 	else {
-		Log3 $iohash, 4, "SD_WS_Parse: unknown message, please report. converted to bits: $bitData";
+		Log3 $iohash, 4, "SD_WS_WH2: unknown message, please report. converted to bits: $bitData";
 		return undef;
 	}
 
