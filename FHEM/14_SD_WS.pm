@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 14_SD_WS.pm 36 2017-07-22 08:00:00Z v3.3-dev $
+# $Id: 14_SD_WS.pm 37 2017-07-23 21:00:00Z v3.3-dev $
 #
 # The purpose of this module is to support serval
 # weather sensors which use various protocol
@@ -408,30 +408,33 @@ sub SD_WS_Parse($$)
        #*
        #*/ 
       $msg =  substr($msg,0,16);
-      Log3 $iohash, 4, "$name: SD_WS_WH2_0 msg: $msg raw: $rawData BIT:$bitData " ;
       my (undef ,$rawData) = split("#",$msg);
       my $hlen = length($rawData);
       my $blen = $hlen * 4;
       my $msg_vor ="W64#";
       my $bitData20;
-      my $bitData = unpack("B$blen", pack("H$hlen", $rawData)); 
-      Log3 $iohash, 4, "$name: SD_WS_WH2_1 msg: $msg raw: $rawData BIT:$bitData " ;
-      
+      my $sign = 0;
+      my $rr2;
+      my $bitData = unpack("B$blen", pack("H$hlen", $rawData));
+     # my $bitData;  
       my $temptyp = substr($bitData,0,8);
       if( $temptyp == "11111110" ) {
-              $hlen = length($rawData);
-              $blen = $hlen * 4;
-    	        $bitData2 = '1'.unpack("B$blen", pack("H$hlen", $rawData));
-              $bitData20 = substr($bitData2,0,length($bitData2)-1);
-              $blen = length($bitData20);
-              $hlen = $blen / 4;
-              $msg = $msg_vor.uc (unpack("H$hlen", pack("B$blen", $bitData20)));
-              $bitData = $bitData20;
-       	      Log3 $iohash, 4, "$name: SD_WS09_WH2_3 sync2 msg=$msg length:".length($bitData) ;
-              Log3 $iohash, 4, "$name: SD_WS09_WH2_4 sync2 bitdata: $bitData" ;
+          $rawData = SD_WS_WH2SHIFT($rawData);
+          $msg = $msg_vor.$rawData;
+          $bitData = unpack("B$blen", pack("H$hlen", $rawData));
+          Log3 $iohash, 4, "$name: SD_WS09_WH2_1 msg=$msg length:".length($bitData) ;
+          Log3 $iohash, 4, "$name: SD_WS09_WH2_1 bitdata: $bitData" ;
+        } else{
+        if ( $temptyp == "11111101" ) {
+          $rawData = SD_WS_WH2SHIFT($rawData);
+          $rawData = SD_WS_WH2SHIFT($rawData);
+          $msg = $msg_vor.$rawData;
+          $bitData = unpack("B$blen", pack("H$hlen", $rawData));
+          Log3 $iohash, 4, "$name: SD_WS09_WH2_2 msg=$msg length:".length($bitData) ;
+          Log3 $iohash, 4, "$name: SD_WS09_WH2_2 bitdata: $bitData" ;
+          }
       }
-    
-     my $datacheck = pack( 'H*', substr($msg,6,length($msg)-6) );
+
      my $rc = eval
      {
       require Digest::CRC;
@@ -442,21 +445,25 @@ sub SD_WS_Parse($$)
     if($rc)
     {
     # Digest::CRC loaded and imported successfully
-     Log3 $iohash, 4, "$name: SD_WS_Parse CRC_load: OK" ;
-     my $crcmein = Digest::CRC->new(width => 8, poly => 0x31);
-     my $rr2 = $crcmein->add($datacheck)->hexdigest;
-     $rr2 = sprintf("%d", hex($rr2));
+     Log3 $iohash, 4, "$name: SD_WS_WH2_1 msg: $msg raw: $rawData " ;
+    # Log3 $iohash, 4, "$name: SD_WS_Parse CRC_load: OK" ;
+    # my $crcmein = Digest::CRC->new(width => 8, poly => 0x31);
+    # my $rr2 = $crcmein->add($datacheck)->hexdigest;
+    # $rr2 = sprintf("%d", hex($rr2));
+    $rr2 = SD_WS_WH2CRCCHECK($rawData);
      if ($rr2 == 0 ){
-            Log3 $iohash, 4, "$name: SD_WS_WH2_5 CRC_OK   : CRC=$rr2 msg: $msg check:".substr($msg,6,length($msg)-6) ;
+            # 1.CRC OK 
+            Log3 $iohash, 4, "$name: SD_WS_WH2_1 CRC_OK   : CRC=$rr2 msg: $msg check:".$rawData ;
           }else{
-            Log3 $iohash, 4, "$name: SD_WS_WH2_6 CRC_Error: CRC=$rr2 msg: $msg check:".substr($msg,6,length($msg)-6) ;
+             Log3 $iohash, 4, "$name: SD_WS_WH2_4 CRC_Error: CRC=$rr2 msg: $msg check:".$rawData ;
             return "";
-         }
+          }
    }else {
-      Log3 $iohash, 2, "$name: SD_WS_WH2 CRC_not_load: Modul Digest::CRC fehlt" ;
+      Log3 $iohash, 2, "$name: SD_WS_WH2_3 CRC_not_load: Modul Digest::CRC fehlt" ;
       return "";
    }  
    
+    $bitData = unpack("B$blen", pack("H$hlen", $rawData)); 
     my $vorpre = 8;   
    	Log3 $iohash, 4, "$name converted to bits: WH2 " . $bitData;    
     $model = "SD_WS_WH2";
@@ -465,7 +472,15 @@ sub SD_WS_Parse($$)
     $id = sprintf('%03X', $id); 
 	 	$channel = 	0;
     $bat =  	SD_WS_bin2dec(substr($bitData,$vorpre + 20,1));
-   	$temp = (SD_WS_bin2dec(substr($bitData,$vorpre + 12,12))) / 10;
+    $sign = 	SD_WS_bin2dec(substr($bitData,$vorpre + 12,1)); 
+    
+    if ($sign == 0) {
+    # Temp positiv
+      	$temp = (SD_WS_bin2dec(substr($bitData,$vorpre + 13,11))) / 10;
+    }else{
+    # Temp negativ
+     	$temp = -(SD_WS_bin2dec(substr($bitData,$vorpre + 13,11))) / 10;
+    }
     Log3 $iohash, 4, "$name decoded protocolid: $protocol ($SensorTyp) sensor id=$id, Data:".substr($bitData,$vorpre + 12,12)." temp=$temp";
     $hum =  SD_WS_bin2dec(substr($bitData,$vorpre + 24,8));   # TFA 30.3157 nur Temp, Hum = 255
     Log3 $iohash, 4, "$name SD_WS_WH2_8: $protocol ($SensorTyp) sensor id=$id, Data:".substr($bitData,$vorpre + 24,8)." hum=$hum";
@@ -602,6 +617,31 @@ sub SD_WS_binaryToNumber
 	
 	return oct("0b".substr($binstr,$fbit,($lbit-$fbit)+1));
 }
+
+ sub SD_WS_WH2CRCCHECK($) {
+       my $rawData = shift;
+       my $datacheck1 = pack( 'H*', substr($rawData,2,length($rawData)-2) );
+       my $crcmein1 = Digest::CRC->new(width => 8, poly => 0x31);
+       my $rr3 = $crcmein1->add($datacheck1)->hexdigest;
+       $rr3 = sprintf("%d", hex($rr3));
+       Log3 "SD_WS_CRCCHECK", 4, "SD_WS_WH2CRCCHECK :  raw:$rawData CRC=$rr3 " ;
+       return $rr3 ;
+    }
+sub SD_WS_WH2SHIFT($){
+         my $rawData = shift;
+         my $hlen = length($rawData);
+         my $blen = $hlen * 4;
+         my $bitData = unpack("B$blen", pack("H$hlen", $rawData));
+    	   my $bitData2 = '1'.unpack("B$blen", pack("H$hlen", $rawData));
+         my $bitData20 = substr($bitData2,0,length($bitData2)-1);
+          $blen = length($bitData20);
+          $hlen = $blen / 4;
+          $rawData = uc(unpack("H$hlen", pack("B$blen", $bitData20)));
+          $bitData = $bitData20;
+          Log3 "SD_WS09_SHIFT", 3, "SD_WS09_SHIFT_0  raw: $rawData length:".length($bitData) ;
+          Log3 "SD_WS09_SHIFT", 3, "SD_WS09_SHIFT_1  bitdata: $bitData" ;
+        return $rawData;  
+    }
 
 1;
 
