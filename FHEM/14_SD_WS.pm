@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 14_SD_WS.pm 37 2017-07-23 21:00:00Z v3.3-dev $
+# $Id: 14_SD_WS.pm 38 2017-07-25 23:00:00Z v3.3-dev $
 #
 # The purpose of this module is to support serval
 # weather sensors which use various protocol
@@ -422,16 +422,16 @@ sub SD_WS_Parse($$)
           $rawData = SD_WS_WH2SHIFT($rawData);
           $msg = $msg_vor.$rawData;
           $bitData = unpack("B$blen", pack("H$hlen", $rawData));
-          Log3 $iohash, 4, "$name: SD_WS09_WH2_1 msg=$msg length:".length($bitData) ;
-          Log3 $iohash, 4, "$name: SD_WS09_WH2_1 bitdata: $bitData" ;
+          Log3 $iohash, 4, "$name: SD_WS_WH2_1 msg=$msg length:".length($bitData) ;
+          Log3 $iohash, 4, "$name: SD_WS_WH2_1 bitdata: $bitData" ;
         } else{
         if ( $temptyp == "11111101" ) {
           $rawData = SD_WS_WH2SHIFT($rawData);
           $rawData = SD_WS_WH2SHIFT($rawData);
           $msg = $msg_vor.$rawData;
           $bitData = unpack("B$blen", pack("H$hlen", $rawData));
-          Log3 $iohash, 4, "$name: SD_WS09_WH2_2 msg=$msg length:".length($bitData) ;
-          Log3 $iohash, 4, "$name: SD_WS09_WH2_2 bitdata: $bitData" ;
+          Log3 $iohash, 4, "$name: SD_WS_WH2_2 msg=$msg length:".length($bitData) ;
+          Log3 $iohash, 4, "$name: SD_WS_WH2_2 bitdata: $bitData" ;
           }
       }
 
@@ -446,10 +446,6 @@ sub SD_WS_Parse($$)
     {
     # Digest::CRC loaded and imported successfully
      Log3 $iohash, 4, "$name: SD_WS_WH2_1 msg: $msg raw: $rawData " ;
-    # Log3 $iohash, 4, "$name: SD_WS_Parse CRC_load: OK" ;
-    # my $crcmein = Digest::CRC->new(width => 8, poly => 0x31);
-    # my $rr2 = $crcmein->add($datacheck)->hexdigest;
-    # $rr2 = sprintf("%d", hex($rr2));
     $rr2 = SD_WS_WH2CRCCHECK($rawData);
      if ($rr2 == 0 ){
             # 1.CRC OK 
@@ -459,7 +455,7 @@ sub SD_WS_Parse($$)
             return "";
           }
    }else {
-      Log3 $iohash, 2, "$name: SD_WS_WH2_3 CRC_not_load: Modul Digest::CRC fehlt" ;
+      Log3 $iohash, 1, "$name: SD_WS_WH2_3 CRC_not_load: Modul Digest::CRC fehlt" ;
       return "";
    }  
    
@@ -515,7 +511,7 @@ sub SD_WS_Parse($$)
 		
 	} 
 	else {
-		Log3 $iohash, 4, "SD_WS_WH2: unknown message, please report. converted to bits: $bitData";
+		Log3 $iohash, 2, "SD_WS_WH2: unknown message, please report. converted to bits: $bitData";
 		return undef;
 	}
 
@@ -544,8 +540,7 @@ sub SD_WS_Parse($$)
 		Log3 $iohash, 1, 'SD_WS: UNDEFINED sensor ' . $model . ' detected, code ' . $deviceCode;
 		return "UNDEFINED $deviceCode SD_WS $deviceCode";
 	}
-	#Log3 $iohash, 3, 'SD_WS: ' . $def->{NAME} . ' ' . $id;
-	
+		
 	my $hash = $def;
 	$name = $hash->{NAME};
 	return "" if(IsIgnored($name));
@@ -638,8 +633,8 @@ sub SD_WS_WH2SHIFT($){
           $hlen = $blen / 4;
           $rawData = uc(unpack("H$hlen", pack("B$blen", $bitData20)));
           $bitData = $bitData20;
-          Log3 "SD_WS09_SHIFT", 3, "SD_WS09_SHIFT_0  raw: $rawData length:".length($bitData) ;
-          Log3 "SD_WS09_SHIFT", 3, "SD_WS09_SHIFT_1  bitdata: $bitData" ;
+          Log3 "SD_WS_WH2SHIFT", 4, "SD_WS_WH2SHIFT_0  raw: $rawData length:".length($bitData) ;
+          Log3 "SD_WS_WH2SHIFT", 4, "SD_WS_WH2SHIFT_1  bitdata: $bitData" ;
         return $rawData;  
     }
 
@@ -659,6 +654,8 @@ sub SD_WS_WH2SHIFT($){
   <ul>
     <li>Bresser 7009994</li>
     <li>Opus XT300</li>
+    <li>BresserTemeo</li>
+    <li>WH2 (TFA Dostmann/Wertheim 30.3157(Temperature only!) (sold in Germany), Agimex Rosenborg 66796 (sold in Denmark),ClimeMET CM9088 (Sold in UK)</li>
   </ul>
   <br>
   New received device are add in fhem with autocreate.
@@ -712,6 +709,7 @@ sub SD_WS_WH2SHIFT($){
     <li>Bresser 7009994</li>
     <li>Opus XT300</li>
     <li>BresserTemeo</li>
+    <li>WH2 (TFA Dostmann/Wertheim 30.3157(Temperatur!) (Deutschland), Agimex Rosenborg 66796 (Denmark),ClimeMET CM9088 (UK)</li>
   </ul>
   <br>
   Neu empfangene Sensoren werden in FHEM per autocreate angelegt.
