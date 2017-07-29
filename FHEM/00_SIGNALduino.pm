@@ -3426,6 +3426,7 @@ SIGNALduino_Parse_MC($$$$@)
 						$message_dispatched=1;
 					}
 				} else {
+					$res="undef" if (!defined($res));
 					Log3 $name, 5, "$name: protocol does not match return from method: ($res)" ; 
 
 				}
