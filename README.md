@@ -32,6 +32,7 @@ Supported Devices / Protocols
 |Dooya | Shutters and blinds from various vendors like Rohrmotor24  |
 |Somfy RTS | Shutters from Somfy|
 |Opus XT300 | Soil moisture sensor |
+|TS-K108W11 | Doorbell |
 
 How to install
 ======
