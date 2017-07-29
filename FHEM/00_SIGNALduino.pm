@@ -481,7 +481,7 @@ my %ProtocolListSIGNALduino  = (
 			id          	=> '18',
 			clockrange     	=> [1400,1500],			# min , max
 			format 			=> 'manchester',	    # tristate can't be migrated from bin into hex!
-			preamble		=> '50B208',			# prepend to converted message, may works only for THR128
+			preamble		=> '',					
 			#clientmodule    => 'to be written',   	# not used now
 			modulematch     => '^[0-9A-F].*',
 			length_min      => '31',
@@ -4139,7 +4139,8 @@ sub SIGNALduino_OSV1()
 		return (-1,"OSV1 - ERROR checksum not equal: $calcsum != $checksum");
 	} else {
 		Log3 $name, 4, "$name: OSV1 input data: $bitData";
-		my $newBitData;
+		my $newBitData = "00001010";                       # Byte 0:   Id1 = 0x0A
+        $newBitData .= "01001101";                         # Byte 1:   Id2 = 0x4D
 		# Todo: Sensortyp automtisch erkennen und Premable damit setzen.
 		
 		# preamble	=> '50B208',	# THR128 ohne Checksumme
@@ -4164,10 +4165,16 @@ sub SIGNALduino_OSV1()
 	$newBitData .= "0000"; # Byte 6 h: immer 0000
 	$newBitData .= substr($bitData,21,1) . "000"; # Byte 6 l: Bit 3 - Temperatur 0=pos | 1=neg, Rest 0
 	$newBitData .= "00000000"; # Byte 7: immer 0000 0000
-	$newBitData .= reverse substr($bitData,24,4); # Byte 8 h: Checksum
-	$newBitData .= reverse substr($bitData,28,4); # Byte 8 l: Checksum
-	$newBitData .= "00000000"; # Byte 9: immer 0000 0000
-	my $osv1hex = SIGNALduino_b2h($newBitData);
+	# calculate new checksum over first 16 nibbles
+    $checksum = 0;       
+    for (my $i = 0; $i < 64; $i = $i + 4) {
+    	checksum += oct( "0b" . substr($newBitData, $i, 4));
+    }
+    $checksum = ($checksum - 0xa) & 0xff;
+	$newBitData .= sprintf("%08b",$checksum);          # Byte 8:   new Checksum 
+    $newBitData .= "00000000";                         # Byte 9:   immer 0000 0000
+
+	my $osv1hex = "50" . SIGNALduino_b2h($newBitData); # output with length before  #todo: Länge berechnen
 	Log3 $name, 4, "$name: OSV1 protocol id ($id) translated to RFXSensor format";
 	Log3 $name, 4, "$name: converted to hex: ($osv1hex)";
 	return (1,$osv1hex);
