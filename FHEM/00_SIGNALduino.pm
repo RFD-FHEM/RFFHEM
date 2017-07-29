@@ -4168,7 +4168,7 @@ sub SIGNALduino_OSV1()
 	# calculate new checksum over first 16 nibbles
     $checksum = 0;       
     for (my $i = 0; $i < 64; $i = $i + 4) {
-    	checksum += oct( "0b" . substr($newBitData, $i, 4));
+    	$checksum += oct( "0b" . substr($newBitData, $i, 4));
     }
     $checksum = ($checksum - 0xa) & 0xff;
 	$newBitData .= sprintf("%08b",$checksum);          # Byte 8:   new Checksum 
