@@ -4661,7 +4661,7 @@ sub SIGNALduino_compPattern($$$%)
 			is the port the Signalduino is connectd to (e.g. /dev/ttyUSB0) and will be used from the defenition</li>
 			<li>[HEXFILE]<br>
 			is the .hex file that shall get flashed. There are three options (applied in this order):<br>
-			- passed in set flash<br>
+			- passed in set flash as first argument<br>
 			- taken from the hexFile attribute<br>
 			- the default value defined in the module<br>
 			</li>
@@ -4671,7 +4671,7 @@ sub SIGNALduino_compPattern($$$%)
     
     </li>
     <li>hardware<br>
-    When using the flash command, you should specify whar hardware you have connected to the usbport. Doing not, can cause failures of the device.
+    When using the flash command, you should specify what hardware you have connected to the usbport. Doing not, can cause failures of the device.
     </li>
     <li>minsecs<br>
     This is a very special attribute. It is provided to other modules. minsecs should act like a threshold. All logic must be done in the logical module. 
