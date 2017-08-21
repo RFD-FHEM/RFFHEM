@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 14_SD_WS.pm 38 2017-07-25 23:00:00Z v3.3-dev $
+# $Id: 14_SD_WS.pm 39 2017-08-21 23:00:00Z v3.3-dev $
 #
 # The purpose of this module is to support serval
 # weather sensors which use various protocol
@@ -8,6 +8,7 @@
 # 17.04.2017 WH2 (TFA 30.3157 nur Temp, Hum = 255),es wird das Perlmodul Digest:CRC benötigt für CRC-Prüfung benötigt
 # 29.05.2017 Test ob Digest::CRC installiert
 # 22.07.2017 WH2 angepaßt
+# 21.08.2017 WH2 Abbruch wenn kein "FF" am Anfang
 package main;
 
 
@@ -415,8 +416,9 @@ sub SD_WS_Parse($$)
       my $bitData20;
       my $sign = 0;
       my $rr2;
+      my $vorpre = -1; 
       my $bitData = unpack("B$blen", pack("H$hlen", $rawData));
-     # my $bitData;  
+     
       my $temptyp = substr($bitData,0,8);
       if( $temptyp == "11111110" ) {
           $rawData = SD_WS_WH2SHIFT($rawData);
@@ -434,6 +436,13 @@ sub SD_WS_Parse($$)
           Log3 $iohash, 4, "$name: SD_WS_WH2_2 bitdata: $bitData" ;
           }
       }
+
+      if( $temptyp == "11111111" ) {
+            $vorpre = 8;
+          }else{
+            Log3 $iohash, 4, "$name: SD_WS_WH2_4 Error kein WH2: Typ: $temptyp" ;
+            return "";
+          }
 
      my $rc = eval
      {
@@ -460,7 +469,6 @@ sub SD_WS_Parse($$)
    }  
    
     $bitData = unpack("B$blen", pack("H$hlen", $rawData)); 
-    my $vorpre = 8;   
    	Log3 $iohash, 4, "$name converted to bits: WH2 " . $bitData;    
     $model = "SD_WS_WH2";
 	  $SensorTyp = "WH2";
@@ -564,11 +572,11 @@ sub SD_WS_Parse($$)
 		$hash->{bitMSG} = $bitData;
 	}
 
-	my $state = "T: $temp" . (($hum > 0 && $hum < 100) ? " H: $hum":"");
+	my $state = (($temp > -60 && $hum < 70) ? "T: $temp":"T:nn" . (($hum > 0 && $hum < 100) ? " H: $hum":"H:nn");
 
 	readingsBeginUpdate($hash);
 	readingsBulkUpdate($hash, "state", $state);
-	readingsBulkUpdate($hash, "temperature", $temp)  if (defined($temp));
+	readingsBulkUpdate($hash, "temperature", $temp)  if (defined($temp)&& ($temp > -60 && $temp < 70 ));
 	readingsBulkUpdate($hash, "humidity", $hum)  if (defined($hum) && ($hum > 0 && $hum < 100 )) ;
 	readingsBulkUpdate($hash, "battery", $bat) if (defined($bat) && length($bat) > 0) ;
 	readingsBulkUpdate($hash, "channel", $channel) if (defined($channel)&& length($channel) > 0);
