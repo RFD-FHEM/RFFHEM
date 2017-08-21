@@ -572,7 +572,7 @@ sub SD_WS_Parse($$)
 		$hash->{bitMSG} = $bitData;
 	}
 
-	my $state = (($temp > -60 && $hum < 70) ? "T: $temp":"T:nn" . (($hum > 0 && $hum < 100) ? " H: $hum":"H:nn");
+	my $state = (($temp > -60 && $hum < 70) ? "T: $temp":"T:nn") . (($hum > 0 && $hum < 100) ? " H: $hum":"H:nn");
 
 	readingsBeginUpdate($hash);
 	readingsBulkUpdate($hash, "state", $state);
