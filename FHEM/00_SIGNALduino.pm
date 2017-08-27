@@ -1222,17 +1222,16 @@ my %ProtocolListSIGNALduino  = (
 		{
 			name         => 'WS7035',
 			id           => '66',
-			zero         => [8,-16],
-			one          => [3,-16],
-			start        => [-7,12,-7],
-			clockabs     => 400,
+			one          => [10,-52],
+			zero         => [27,-52],
+			start        => [-21,42,-21],
+			clockabs     => 122,
 			format       => 'pwm',  # not used now
 			preamble     => 'TX',
 			clientmodule => 'CUL_TX',
 			modulematch  => '^TX......',
 			length_min   => '43',
 			length_max   => '44',
-			remove_zero  => 1,      # Removes leading zeros from output
 			postDemodulation => \&SIGNALduino_postDemo_WS7035,
 		},
  	"67" => ## TX2 Protocol (Remote Datalink & Remote Thermo Model 7053)
@@ -1262,14 +1261,14 @@ my %ProtocolListSIGNALduino  = (
     # MS;P0=-2189;P1=371;P2=-3901;P3=-8158;D=1310101010101210101010101210101010121210121212101210101012101012121012121210;CP=1;SP=3;R=20;O;
 			name         => 'PFR-130',
 			id           => '68',
-      one				=> [1,-10],
+      		one				=> [1,-10],
 			zero			=> [1,-5],
-      sync			=> [1,-21],	
+      		sync			=> [1,-21],	
 			clockabs   		=> 380,		# not used now
-      preamble		=> 's',			# prepend to converted message	 	
+      		preamble		=> 's',			# prepend to converted message	 	
 			postamble		=> '00',		# Append to converted message	 	
 			clientmodule    => 'CUL_TCM97001',   # not used now
-      length_min      => '24',
+     		length_min      => '24',
 			length_max      => '42',
 			paddingbits     => '8',				 # pad up to 8 bits, default is 4
 		}, 	
