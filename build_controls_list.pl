@@ -30,7 +30,7 @@ sub listfiles2{
             if( (-e $file) && (! -d $file) ){ #test exist and is not a dir name
                 #print "$dir contains $file\n";
                 my $fi = file_info($file);
-                my $date_time = POSIX::strftime("%Y_%d_%m_%H:%M:%S", localtime( $fi->{mtime} ));
+                my $date_time = POSIX::strftime("%Y_%m_%d_%H:%M:%S", localtime( $fi->{mtime} ));
                 
                 #test if firmware
                 
@@ -58,7 +58,7 @@ sub listfiles2{
 							
 						print ("changing $modifiy_line");
 	
-					    my $date = POSIX::strftime("%Y-%d-%m", localtime( $fi->{mtime} ));
+					    my $date = POSIX::strftime("%Y-%m-%d", localtime( $fi->{mtime} ));
 	                	my $time = POSIX::strftime("%H:%M:%S", localtime( $fi->{mtime} ));
 					
 						my @line_parts = split (" ",$modifiy_line);
@@ -91,7 +91,7 @@ sub listfiles2{
         }
         push @lines, "MOV FHEM/14_Cresta.pm unused\n";
         push @lines, "MOV FHEM/14_SIGNALduino_AS.pm unused\n";
-        push @lines, "MOV FHEM/14_SIGNALduino_un.pm unsed\n";
+        push @lines, "MOV FHEM/14_SIGNALduino_un.pm unused\n";
         push @lines, "MOV FHEM/14_SIGNALduino_ID7.pm unused\n";
         push @lines, "MOV FHEM/14_SIGNALduino_RSL.pm unused\n";
 
