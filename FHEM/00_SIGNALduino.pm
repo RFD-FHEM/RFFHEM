@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 10488 2017-07-22 17:00:00Z v3.3.1-dev $
+# $Id: 00_SIGNALduino.pm 10488 2017-08-28 20:00:00Z v3.3.1-dev $
 #
 # v3.3.1 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -234,6 +234,24 @@ my %ProtocolListSIGNALduino  = (
 			#length_max      => '800',		# Don't know maximal lenth of a valid message
 
 			},
+    "3.1"    => 
+        {
+            name			=> 'itv1_sync40',	
+			comment		=> 'IT remote Control PAR 1000',
+			id          	=> '3',
+			one				=> [3,-1],
+			zero			=> [1,-3],
+			#float			=> [-1,3],		# not full supported now later use
+			sync			=> [1,-40],
+			clockabs     	=> -1,	# -1=auto	
+			format 			=> 'twostate',	# not used now
+			preamble		=> 'i',			
+			clientmodule    => 'IT',   # not used now
+			modulematch     => '^i......', # not used now
+			length_min      => '24',
+			#length_max      => '800',		# Don't know maximal lenth of a valid message
+
+			},
     "4"    => 
         {
             name			=> 'arctech2',	
@@ -376,6 +394,22 @@ my %ProtocolListSIGNALduino  = (
 			polarity        => 'invert',			
 			
 		}, 	
+	"12.1"    => 			## hideki
+		{
+            name			=> 'Hideki protocol not invert',
+			comment		=> 'only for test of the firmware dev-r33_fixmc',
+			id          	=> '12',
+			clockrange     	=> [420,510],                   # min, max better for Bresser Sensors, OK for hideki/Hideki/TFA too     
+			format 			=> 'manchester',	
+			preamble		=> 'P12#',						# prepend to converted message	
+			clientmodule    => 'hideki',   				# not used now
+			modulematch     => '^P12#75.+',  						# not used now
+			length_min      => '71',
+			length_max      => '128',
+			method          => \&SIGNALduino_Hideki,	# Call to process this message
+			#polarity        => 'invert',			
+			
+		}, 	
 	"13"    => 			## FLAMINGO  FA 21
 		{
             name			=> 'FLAMINGO FA21',	
@@ -482,7 +516,7 @@ my %ProtocolListSIGNALduino  = (
 			clockrange     	=> [1400,1500],			# min , max
 			format 			=> 'manchester',	    # tristate can't be migrated from bin into hex!
 			preamble		=> '',					
-			#clientmodule    => 'to be written',   	# not used now
+			clientmodule    => 'OREGON',
 			modulematch     => '^[0-9A-F].*',
 			length_min      => '31',
 			length_max      => '32',
@@ -668,7 +702,7 @@ my %ProtocolListSIGNALduino  = (
 	"30" => # a unitec remote door reed switch
 		{
             name			=> 'unitec47031',	
-			comment         => 'developId',
+			comment         => 'developId. SD_UT Module is only in github available',
 			id          	=> '30',
 			developId       => 'y',
 			one				=> [-1,2],
@@ -1272,6 +1306,23 @@ my %ProtocolListSIGNALduino  = (
 			length_max      => '42',
 			paddingbits     => '8',				 # pad up to 8 bits, default is 4
 		}, 	
+	"69"    => ## Hoermann
+	# MU;P0=-508;P1=1029;P2=503;P3=-1023;P4=12388;D=01010232323232310104010101010101010102323231010232310231023232323231023101023101010231010101010232323232310104010101010101010102323231010232310231023232323231023101023101010231010101010232323232310104010101010101010102323231010232310231023232323231023101;CP=2;R=37;O;
+		{
+			name            => 'Hoermann',
+			id              => '69',
+			zero            => [2,-1],
+			one             => [1,-2],
+			start           => [24,-1],
+			clockabs        => 510,
+			format          => 'twostate',  # not used now
+			#clientmodule    => '',
+			#modulematch     => '^U69*',
+			preamble        => 'U69#',
+			length_min      => '40',
+			#length_max      => '90',
+			postDemodulation => \&SIGNALduino_postDemo_Hoermann,	# Call to process this message
+		},
 );
 
 
@@ -3781,6 +3832,20 @@ sub SIGNALduino_HE($@) {
 	return (1,split("",$msg));
 }
 
+sub SIGNALduino_postDemo_Hoermann($@) {
+	my ($name, @bit_msg) = @_;
+	my $msg = join("",@bit_msg);
+	
+	if (substr($msg,0,9) ne "000000001") {		# check ident
+		Log3 $name, 4, "$name: Hoermann ERROR - Ident not 000000001";
+		return 0, undef;
+	} else {
+		Log3 $name, 5, "$name: Hoermann $msg";
+		$msg = substr($msg,9);
+		return (1,split("",$msg));
+	}
+}
+
 sub SIGNALduino_postDemo_WS7035($@) {
 	my ($name, @bit_msg) = @_;
 	my $msg = join("",@bit_msg);
@@ -3940,6 +4005,8 @@ sub SIGNALduino_postDemo_WS7053($@) {
 	}
 }
 
+
+# manchester method
 
 sub SIGNALduino_MCTFA
 {
@@ -4569,12 +4636,6 @@ sub SIGNALduino_compPattern($$$%)
 	ITv1 & ITv3/Elro and other brands using pt2263 or arctech protocol--> uses IT.pm<br><br>
 
 	In the ITv1 protocol is used to sent a default ITclock from 250 and it may be necessary in the IT-Modul to define the attribute ITclock<br>
-	Here is a description to find out the ITclock<br>
-	After pressing a button on the remote control, the received raw message is displayed in the log and in the device view of the IT-device<br>
-        e.g.:<br>
-        MS;P0=357;P2=-1128;P3=1155;P4=-428;P5=-11420;D=05023402020202020202020202020202020202023402340234;CP=0;SP=5;<br>
-        The number behind "CP=" indicates the PatternNr from the clock (here P0).
-        Here is the ITclock 357
 	<br><br>
 	Temperatur / humidity senso
 	<ul>
