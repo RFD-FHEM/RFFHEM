@@ -133,7 +133,8 @@ my $clientsSIGNALduino = ":IT:"
 			        	."CUL_WS:"
 			        	."Revolt:"
 			        	."FS10:"
-			      		."SIGNALduino_un:"
+			      		."CUL_FHTTK:"
+						."SIGNALduino_un:"
 					; 
 
 ## default regex match List for dispatching message to logical modules, can be updated during runtime because it is referenced
@@ -145,7 +146,8 @@ my %matchListSIGNALduino = (
      "6:SD_AS"       			=> "^P2#[A-Fa-f0-9]{7,8}", 		  # Arduino based Sensors, should not be default
      "4:OREGON"            		=> "^(3[8-9A-F]|[4-6][0-9A-F]|7[0-8]).*",		
      "7:Hideki"					=> "^P12#75[A-F0-9]+",
-     "10:SD_WS07"				=> "^P7#[A-Fa-f0-9]{6}F[A-Fa-f0-9]{2}(#R[A-F0-9][A-F0-9]){0,1}\$",
+     "9:CUL_FHTTK"          => "^T[A-F0-9]{8}",
+	 "10:SD_WS07"				=> "^P7#[A-Fa-f0-9]{6}F[A-Fa-f0-9]{2}(#R[A-F0-9][A-F0-9]){0,1}\$",
      "11:SD_WS09"				=> "^P9#F[A-Fa-f0-9]+",
      "12:SD_WS"					=> '^W\d+x{0,1}#.*',
      "13:RFXX10REC" 			=> '^(20|29)[A-Fa-f0-9]+',
@@ -1322,6 +1324,23 @@ my %ProtocolListSIGNALduino  = (
 			length_min      => '40',
 			#length_max      => '90',
 			postDemodulation => \&SIGNALduino_postDemo_Hoermann,	# Call to process this message
+		},
+	"70" => ## FHT80TF (Funk-Tür-Fenster-Melder FHT 80TF und FHT 80TF-2)
+			# MU;P0=-24396;P1=417;P2=-376;P3=610;P4=-582;D=012121212121212121212121234123434121234341212343434121234123434343412343434121234341212121212341212341234341234123434;CP=1;R=35;
+			# MU;P0=-21652;P1=429;P2=-367;P4=634;P5=-555;D=012121212121212121212121245124545121245451212454545121245124545454512454545121245451212121212124512451245451245121212;CP=1;R=38;
+			# 0 – 400 us of carrier, 400 us of silence
+    		# 1 – 600 us of carrier, 600 us of silence
+		{
+			name         	=> 'FHT80TF',
+			id           	=> '70',
+			one         	=> [3,-3],
+			zero         	=> [2,-2],
+			clockabs     	=> 200,
+			clientmodule    => 'CUL_FHTTK',
+			preamble     	=> 'T',
+			length_min     => '48',
+			length_max     => '58',
+			postDemodulation => \&SIGNALduino_postDemo_FHT80TF,
 		},
 );
 
@@ -3844,6 +3863,41 @@ sub SIGNALduino_postDemo_Hoermann($@) {
 		$msg = substr($msg,9);
 		return (1,split("",$msg));
 	}
+}
+
+sub SIGNALduino_postDemo_FHT80TF($@) {
+	my ($name, @bit_msg) = @_;
+	my $datastart = 0;
+	my $sum = 12;
+   while ($bit_msg[$datastart] == 0) { $datastart++; }	      	# Start bei erstem Bit mit Wert 1 suchen
+   splice(@bit_msg, 0, $datastart + 1);                        	# delete preamble + 1 bit
+   if (@bit_msg < 45) {                                        	# check count of databits
+		Log3 $name, 3, "$name: FHT80TF - ERROR lenght of message";
+		return 0, undef;
+   }
+   for(my $b = 0; $b < 45; $b += 9) {	                        # check parity over 5 byte
+      my $parity = 0;					                           # Parity even
+      for(my $i = $b; $i < $b + 9; $i++) {			            # Parity over 1 byte + 1 bit
+         $parity += @bit_msg[$i];
+      }
+      if ($parity % 2 != 0) {
+         Log3 $name, 3, "$name: FHT80TF ERROR - Parity not even";
+         return 0, undef;
+      }
+   }
+   for(my $b = 0; $b < 36; $b += 9) {	                        # build sum over first 4 bytes
+      $sum += oct( "0b".(join "", @bit_msg[$b .. $b + 7]));
+   }
+   my $checksum = oct( "0b".(join "", @bit_msg[36 .. 43]));    	# Checksum Byte 5
+   if (($sum & 0xFF) != $checksum) {
+      Log3 $name, 3, "$name: FHT80TF ERROR - Checksum $checksum != $sum";
+      return 0, undef;
+   }
+   for(my $b = 44; $b > 0; $b -= 9) {	                        # delete 5 parity bits
+      splice(@bit_msg, $b, 1);
+   }
+   splice(@bit_msg, 32, 8);                                    	# delete checksum
+   return (1, @bit_msg);
 }
 
 sub SIGNALduino_postDemo_WS7035($@) {
