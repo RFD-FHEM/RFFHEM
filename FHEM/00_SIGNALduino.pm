@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 10488 2017-08-28 20:00:00Z v3.3.1-dev $
+# $Id: 00_SIGNALduino.pm 10488 2017-09-08 19:00:00Z v3.3.1-dev $
 #
 # v3.3.1 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -133,6 +133,7 @@ my $clientsSIGNALduino = ":IT:"
 			        	."CUL_WS:"
 			        	."Revolt:"
 			        	."FS10:"
+			        	."CUL_FHTTK:"
 			      		."SIGNALduino_un:"
 					; 
 
@@ -145,6 +146,7 @@ my %matchListSIGNALduino = (
      "6:SD_AS"       			=> "^P2#[A-Fa-f0-9]{7,8}", 		  # Arduino based Sensors, should not be default
      "4:OREGON"            		=> "^(3[8-9A-F]|[4-6][0-9A-F]|7[0-8]).*",		
      "7:Hideki"					=> "^P12#75[A-F0-9]+",
+     "9:CUL_FHTTK"			=> "^T[A-F0-9]{8}",
      "10:SD_WS07"				=> "^P7#[A-Fa-f0-9]{6}F[A-Fa-f0-9]{2}(#R[A-F0-9][A-F0-9]){0,1}\$",
      "11:SD_WS09"				=> "^P9#F[A-Fa-f0-9]+",
      "12:SD_WS"					=> '^W\d+x{0,1}#.*',
@@ -1322,6 +1324,39 @@ my %ProtocolListSIGNALduino  = (
 			length_min      => '40',
 			#length_max      => '90',
 			postDemodulation => \&SIGNALduino_postDemo_Hoermann,	# Call to process this message
+		},
+	"70" => ## FHT80TF (Funk-Tuer-Fenster-Melder FHT 80TF und FHT 80TF-2)
+	# closed MU;P0=-24396;P1=417;P2=-376;P3=610;P4=-582;D=012121212121212121212121234123434121234341212343434121234123434343412343434121234341212121212341212341234341234123434;CP=1;R=35;
+	# open   MU;P0=-21652;P1=429;P2=-367;P4=634;P5=-555;D=012121212121212121212121245124545121245451212454545121245124545454512454545121245451212121212124512451245451245121212;CP=1;R=38;
+		{
+			name         	=> 'FHT80TF',
+			comment		=> 'Funk-Tuer-Fenster-Melder 868Mhz',
+			id           	=> '70',
+			one         	=> [1.5,-1.5],	# 600
+			zero         	=> [1,-1],	# 400
+			clockabs     	=> 400,
+			format          => 'twostate',  # not used now
+			clientmodule    => 'CUL_FHTTK',
+			preamble     	=> 'T',
+			length_min     => '48',
+			length_max     => '58',
+			postDemodulation => \&SIGNALduino_postDemo_FHT80TF,
+		},
+	"71" => ## PV-8644 infactory Poolthermometer
+		# MU;P0=1735;P1=-1160;P2=591;P3=-876;D=0123012323010101230101232301230123010101010123012301012323232323232301232323232323232323012301012;CP=2;R=97;
+		{
+			name		=> 'PV-8644',
+			comment		=> 'infactory Poolthermometer',
+			id         	=> '71',
+			clockabs	=> 580,
+			zero		=> [3,-2],
+			one		=> [1,-1.5],
+			format		=> 'twostate',	
+			preamble	=> 'W71#',		# prepend to converted message	
+			clientmodule    => 'SD_WS',
+			#modulematch     => '^W71#.*'
+			length_min      => '48',
+			length_max      => '48',
 		},
 );
 
@@ -3844,6 +3879,41 @@ sub SIGNALduino_postDemo_Hoermann($@) {
 		$msg = substr($msg,9);
 		return (1,split("",$msg));
 	}
+}
+
+sub SIGNALduino_postDemo_FHT80TF($@) {
+	my ($name, @bit_msg) = @_;
+	my $datastart = 0;
+	my $sum = 12;
+   while ($bit_msg[$datastart] == 0) { $datastart++; }	      	# Start bei erstem Bit mit Wert 1 suchen
+   splice(@bit_msg, 0, $datastart + 1);                        	# delete preamble + 1 bit
+   if (@bit_msg < 45) {                                        	# check count of databits
+		Log3 $name, 3, "$name: FHT80TF - ERROR lenght of message";
+		return 0, undef;
+   }
+   for(my $b = 0; $b < 45; $b += 9) {	                        # check parity over 5 byte
+      my $parity = 0;					                           # Parity even
+      for(my $i = $b; $i < $b + 9; $i++) {			            # Parity over 1 byte + 1 bit
+         $parity += @bit_msg[$i];
+      }
+      if ($parity % 2 != 0) {
+         Log3 $name, 3, "$name: FHT80TF ERROR - Parity not even";
+         return 0, undef;
+      }
+   }
+   for(my $b = 0; $b < 36; $b += 9) {	                        # build sum over first 4 bytes
+      $sum += oct( "0b".(join "", @bit_msg[$b .. $b + 7]));
+   }
+   my $checksum = oct( "0b".(join "", @bit_msg[36 .. 43]));    	# Checksum Byte 5
+   if (($sum & 0xFF) != $checksum) {
+      Log3 $name, 3, "$name: FHT80TF ERROR - Checksum $checksum != $sum";
+      return 0, undef;
+   }
+   for(my $b = 44; $b > 0; $b -= 9) {	                        # delete 5 parity bits
+      splice(@bit_msg, $b, 1);
+   }
+   splice(@bit_msg, 32, 8);                                    	# delete checksum
+   return (1, @bit_msg);
 }
 
 sub SIGNALduino_postDemo_WS7035($@) {
