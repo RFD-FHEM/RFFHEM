@@ -1,13 +1,13 @@
 ##############################################
-# $Id: 14_SD_WS.pm 39 2017-08-21 23:00:00Z v3.3-dev $
+# $Id: 14_SD_WS.pm 39 2017-09-08 22:00:00Z v3.3-dev $
 #
 # The purpose of this module is to support serval
 # weather sensors which use various protocol
 # Sidey79 & Ralf9  2016 - 2017
-# Jörg 2017
-# 17.04.2017 WH2 (TFA 30.3157 nur Temp, Hum = 255),es wird das Perlmodul Digest:CRC benötigt für CRC-Prüfung benötigt
+# Joerg 2017
+# 17.04.2017 WH2 (TFA 30.3157 nur Temp, Hum = 255),es wird das Perlmodul Digest:CRC benoetigt fuer CRC-Pruefung benoetigt
 # 29.05.2017 Test ob Digest::CRC installiert
-# 22.07.2017 WH2 angepaßt
+# 22.07.2017 WH2 angepasst
 # 21.08.2017 WH2 Abbruch wenn kein "FF" am Anfang
 package main;
 
@@ -37,6 +37,7 @@ sub SD_WS_Initialize($)
 		"SD_WS51_TH.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "2:180"},
 		"SD_WS58_TH.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "2:90"},
     "SD_WH2.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "2:90"},
+		"SD_WS71_T.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "2:180"},
 	};
 
 }
@@ -122,6 +123,27 @@ sub SD_WS_Parse($$)
 			channel => sub {my (undef,$bitData) = @_; return ( SD_WS_binaryToNumber($bitData,12,15)&0x03 );  }, #channel
 			bat 	=> sub { return "";},
         },	
+     71 =>	
+	# 5C2A909F792F
+	# 589A829FDFF4
+	# PiiTTTK?CCCC
+	# P = Preamble (immer 5 ?)
+	# i = ID
+	# T = Temperatur
+	# K = Kanal (B/A/9)
+	# ? = immer F ?
+	# C = Checksum ?
+		  {
+     		sensortype => 'PV-8644',
+        	model =>	'SD_WS71_T',
+			prematch => sub {my $msg = shift; return 1 if ($msg =~ /^5[A-F0-9]{6}F[A-F0-9]{2}/); }, 			# prematch
+			crcok => 	sub {return 1; }, 										# crc is unknown
+			id => 		sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,4,11); },   		# id
+			temp => 	sub {my (undef,$bitData) = @_; return ((SD_WS_binaryToNumber($bitData,12,23) - 2448) / 10); },	#temp
+			channel => 	sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,26,27); },			#channel
+			hum => 		sub {return undef;},
+			bat => 		sub {return undef;},
+    	 	 },
      33 =>
    	 	 {
      		sensortype => 's014/TFA 30.3200/TCM/Conrad',
@@ -664,6 +686,7 @@ sub SD_WS_WH2SHIFT($){
     <li>Opus XT300</li>
     <li>BresserTemeo</li>
     <li>WH2 (TFA Dostmann/Wertheim 30.3157(Temperature only!) (sold in Germany), Agimex Rosenborg 66796 (sold in Denmark),ClimeMET CM9088 (Sold in UK)</li>
+    <li>PV-8644 infactory Poolthermometer</li>
   </ul>
   <br>
   New received device are add in fhem with autocreate.
@@ -718,6 +741,7 @@ sub SD_WS_WH2SHIFT($){
     <li>Opus XT300</li>
     <li>BresserTemeo</li>
     <li>WH2 (TFA Dostmann/Wertheim 30.3157(Temperatur!) (Deutschland), Agimex Rosenborg 66796 (Denmark),ClimeMET CM9088 (UK)</li>
+    <li>PV-8644 infactory Poolthermometer</li>
   </ul>
   <br>
   Neu empfangene Sensoren werden in FHEM per autocreate angelegt.
