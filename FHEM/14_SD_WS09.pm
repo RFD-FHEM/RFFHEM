@@ -1,6 +1,6 @@
     ##############################################
     ##############################################
-    # $Id: 14_SD_WS09.pm 16111 2017-07-25 22:00:00Z pejonp $
+    # $Id: 14_SD_WS09.pm 16114 2017-09-09 22:00:00Z pejonp $
     # 
     # The purpose of this module is to support serval 
     # weather sensors like WS-0101  (Sender 868MHz ASK   Epmfänger RX868SH-DV elv)
@@ -10,8 +10,7 @@
     
     use strict;
     use warnings;
-    use Digest::CRC qw(crc);
-    
+    #use Digest::CRC qw(crc);
     #use Math::Round qw/nearest/;
     
     sub SD_WS09_Initialize($)
@@ -26,6 +25,7 @@
       $hash->{AttrList}  = "IODev do_not_notify:1,0 ignore:0,1 showtime:1,0 "
                            ."model:CTW600,WH1080 ignore:0,1 "
                             ."windKorrektur:-3,-2,-1,0,1,2,3 "
+                            ."Unit_of_Wind:m/s,km/h,ft/s,mph,bft,knot "
                             ."$readingFnAttributes ";
       $hash->{AutoCreate} =
             { "SD_WS09.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.* windKorrektur:.*:0 " , FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,",  autocreateThreshold => "2:180"} };
@@ -75,6 +75,9 @@
       my $name = $iohash->{NAME};
       my (undef ,$rawData) = split("#",$msg);
       my @winddir_name=("N","NNE","NE","ENE","E","ESE","SE","SSE","S","SSW","SW","WSW","W","WNW","NW","NNW");
+      #my %Unit_of_Wind = ("m/s","km/h","ft/s","mph","bft","knot");
+      my %uowind_unit= ("m/s",'1',"km/h",'3.6',"ft/s",'3.28',"bft",'-1',"mph",'2.24',"knot",'1.94');
+      my %uowind_index = ("m/s",'0',"km/h",'1',"ft/s",'2',"mph",'3',"knot",'4',"bft",'5');
       my $hlen = length($rawData);
       my $blen = $hlen * 4;
       my $bitData = unpack("B$blen", pack("H$hlen", $rawData)); 
@@ -84,8 +87,18 @@
       my $deviceCode = 0;
       my $model = "undef";  # 0xFFA -> WS0101/WH1080 alles andere -> CTW600 
       my $modelid;
-      my $windSpeed =0;
-      my $windguest =0;
+      my $windSpeed;
+      my $windSpeed_kmh;
+      my $windSpeed_fts;
+      my $windSpeed_bft;
+      my $windSpeed_mph;
+      my $windSpeed_kn;
+      my $windguest;
+      my $windguest_kmh;
+      my $windguest_fts;
+      my $windguest_bft;
+      my $windguest_mph;
+      my$ windguest_kn;
       my $sensdata;
       my $id;
       my $bat = 0;
@@ -103,6 +116,11 @@
       my $whid;
       my $wh;
       my $rawData_merk;
+      my $wfaktor = 1;
+      my @windstat;
+      
+      
+      
       
       my $syncpos= index($bitData,"11111110");  #7x1 1x0 preamble
     	Log3 $iohash, 4, "$name: SD_WS09_Parse0 msg=$rawData Bin=$bitData syncp=$syncpos length:".length($bitData) ;
@@ -118,6 +136,16 @@
     
       $rawData_merk = $rawData;
       #CRC-Check WH1080/WS0101 WS09_CRCAUS=2
+      
+       my $rc = eval
+     {
+      require Digest::CRC;
+      Digest::CRC->import();
+      1;
+     };
+
+    if($rc) # test ob  Digest::CRC geladen wurde
+    {
       $rr2 = SD_WS09_CRCCHECK($rawData);
       if ($rr2 == 0 || (($rr2 == 49) && ($crcwh1080 == 2)) ) {
       # 1. OK
@@ -151,6 +179,10 @@
              }
          }
       }
+     }else {
+      Log3 $iohash, 1, "$name: SD_WS09 CRC_not_load: Modul Digest::CRC fehlt: cpan install Digest::CRC or sudo apt-get install libdigest-crc-perl" ;
+      return "";
+   }  
     
      $hlen = length($rawData);
      $blen = $hlen * 4;
@@ -174,8 +206,8 @@
                   Log3 $iohash, 4, "$name: SD_WS09_Parse ".$model." id:$id, Windspeed bit: ".substr($sensdata,32,8)." Dec: " . $windSpeed ;
                   $windguest = round((SD_WS09_bin2dec(substr($sensdata,40,8)) * 34)/100,01);
                   Log3 $iohash, 4, "$name: SD_WS09_Parse ".$model." id:$id, Windguest bit: ".substr($sensdata,40,8)." Dec: " . $windguest ;
-                  $rain =  SD_WS09_bin2dec(substr($sensdata,56,8)) * 0.3;
-                  Log3 $iohash, 4, "$name: SD_WS09_Parse ".$model." id:$id, Rain bit: ".substr($sensdata,56,8)." Dec: " . $rain ;
+                  $rain =  SD_WS09_bin2dec(substr($sensdata,52,12)) * 0.3;
+                  Log3 $iohash, 4, "$name: SD_WS09_Parse ".$model." id:$id, Rain bit: ".substr($sensdata,52,12)." Dec: " . $rain ;
                   Log3 $iohash, 4, "$name: SD_WS09_Parse ".$model." id:$id, bat:$bat, temp=$temp, hum=$hum, winddir=$windDirection:$windDirectionText wS=$windSpeed, wG=$windguest, rain=$rain";
             } elsif(  $whid == "1011" ){ # B  DCF-77 Zeitmeldungen vom Sensor
                   my $hrs1 = substr($sensdata,16,8);
@@ -282,8 +314,8 @@
     		Log3 $iohash, 1, 'SD_WS09_Parse UNDEFINED sensor ' . $model . ' detected, code ' . $deviceCode;
     		return "UNDEFINED $deviceCode SD_WS09 $deviceCode";
         }
-    
-      my $hash = $def;
+        
+    my $hash = $def;
     	$name = $hash->{NAME};	    	
     	Log3 $name, 4, "SD_WS09_Parse: $name ($rawData)";  
     
@@ -296,6 +328,8 @@
     		}
     	}
     
+    
+    
        my $windkorr = AttrVal($hash->{NAME},'windKorrektur',0);
         if ($windkorr != 0 )      
         {
@@ -305,13 +339,62 @@
         Log3 $iohash, 4, "SD_WS09_Parse ".$model." Faktor:$windkorr wD:$oldwinddir  Korrektur wD:$windDirection:$windDirectionText" ;
         } 
       
+       # "Unit_of_Wind:m/s,km/h,ft/s,bft,knot "
+       # my %uowind_unit= ("m/s",'1',"km/h",'3.6',"ft/s",'3.28',"bft",'-1',"mph",'2.24',"knot",'1.94');
+       # B  =  Wurzel aus ( 9  +  6 * V )  -  3
+       # V = 17 Meter pro Sekunde ergibt:  B =  Wurzel aus( 9 + 6 * 17 )  -  3 
+       # Das ergibt : 7,53   Beaufort
+       
+        $windstat[0]= " Ws:$windSpeed  Wg:$windguest m/s";
+        #Log3 $iohash, 4, "SD_WS09_Wind m/s  : Ws:$windSpeed  Wg:$windguest : Faktor:$wfaktor" ;
+        Log3 $iohash, 4, "SD_WS09_Wind $windstat[0] : Faktor:$wfaktor" ;
+       
+        $wfaktor = $uowind_unit{"km/h"};
+        $windguest_kmh = round ($windguest * $wfaktor,01);
+        $windSpeed_kmh = round ($windSpeed * $wfaktor,01);
+        $windstat[1]= " Ws:$windSpeed_kmh  Wg:$windguest_kmh km/h";
+        Log3 $iohash, 4, "SD_WS09_Wind $windstat[1] : Faktor:$wfaktor" ;
+        
+        $wfaktor = $uowind_unit{"ft/s"};
+        $windguest_fts = round ($windguest * $wfaktor,01);
+        $windSpeed_fts = round ($windSpeed * $wfaktor,01);
+        $windstat[2]= " Ws:$windSpeed_fts  Wg:$windguest_fts ft/s";
+        #Log3 $iohash, 4, "SD_WS09_Wind ft/s : Ws:$windSpeed_fts  Wg:$windguest_fts : Faktor:$wfaktor" ;
+        Log3 $iohash, 4, "SD_WS09_Wind $windstat[2] : Faktor:$wfaktor" ;
+        
+        $wfaktor = $uowind_unit{"mph"};
+        $windguest_mph = round ($windguest * $wfaktor,01);
+        $windSpeed_mph = round ($windSpeed * $wfaktor,01);
+        $windstat[3]= " Ws:$windSpeed_mph  Wg:$windguest_mph mph";
+        #Log3 $iohash, 4, "SD_WS09_Wind mph : Ws:$windSpeed_mph  Wg:$windguest_mph : Faktor:$wfaktor" ;
+        Log3 $iohash, 4, "SD_WS09_Wind $windstat[3] : Faktor:$wfaktor" ;
+        
+        $wfaktor = $uowind_unit{"knot"};
+        $windguest_kn = round ($windguest * $wfaktor,01);
+        $windSpeed_kn = round ($windSpeed * $wfaktor,01);
+        $windstat[4]= " Ws:$windSpeed_kn  Wg:$windguest_kn kn" ;
+        #Log3 $iohash, 4, "SD_WS09_Wind kn  : Ws:$windSpeed_kn   Wg:$windguest_kn : Faktor:$wfaktor" ;
+        Log3 $iohash, 4, "SD_WS09_Wind $windstat[4] : Faktor:$wfaktor" ;
+        
+        $windguest_bft = round(sqrt( 9 + (6 * $windguest)) - 3,0) ;
+        $windSpeed_bft = round(sqrt( 9 + (6 * $windSpeed)) - 3,0) ;
+        $windstat[5]= " Ws:$windSpeed_bft  Wg:$windguest_bft bft";
+        #Log3 $iohash, 4, "SD_WS09_Wind bft : Ws:$windSpeed_bft  Wg:$windguest_bft " ;
+        Log3 $iohash, 4, "SD_WS09_Wind $windstat[5] " ;
+         
+           
+      
       $hash->{lastReceive} = time();
     	$def->{lastMSG} = $rawData;
       readingsBeginUpdate($hash);
       
         if($whid ne "0111") 
          {
-          $state = "T: $temp ". ($hum>0 ? " H: $hum ":" ")." Ws: $windSpeed "." Wg: $windguest "." Wd: $windDirectionText "." R: $rain";
+          my $uowind = AttrVal($hash->{NAME},'Unit_of_Wind',0) ; 
+          my $windex = $uowind_index{$uowind} ;
+          
+          #$state = "T: $temp ". ($hum>0 ? " H: $hum ":" ")." Ws: $windSpeed "." Wg: $windguest "." Wd: $windDirectionText "." R: $rain";
+          $state = "T: $temp ". ($hum>0 ? " H: $hum ":" "). $windstat[$windex]." Wd: $windDirectionText "." R: $rain";
           readingsBulkUpdate($hash, "id", $id) if ($id ne "");
           readingsBulkUpdate($hash, "state", $state);
           readingsBulkUpdate($hash, "temperature", $temp)  if ($temp ne"");
@@ -321,6 +404,14 @@
           readingsBulkUpdate($hash, "rain", $rain );
           readingsBulkUpdate($hash, "windGust", $windguest );
           readingsBulkUpdate($hash, "windSpeed", $windSpeed );
+          readingsBulkUpdate($hash, "windGust_kmh", $windguest_kmh );
+          readingsBulkUpdate($hash, "windSpeed_kmh", $windSpeed_kmh );
+          readingsBulkUpdate($hash, "windGust_fts", $windguest_fts );
+          readingsBulkUpdate($hash, "windSpeed_fts", $windSpeed_fts );
+          readingsBulkUpdate($hash, "windGust_mph", $windguest_mph );
+          readingsBulkUpdate($hash, "windSpeed_mph", $windSpeed_mph );
+          readingsBulkUpdate($hash, "windGust_kn", $windguest_kn );
+          readingsBulkUpdate($hash, "windSpeed_kn", $windSpeed_kn );
           readingsBulkUpdate($hash, "windDirection", $windDirection );
           readingsBulkUpdate($hash, "windDirectionDegree", $windDirection * 360 / 16);     
           readingsBulkUpdate($hash, "windDirectionText", $windDirectionText );
@@ -456,7 +547,7 @@
      <li>Humidity: (The humidity (1-100 if available)</li>
      <li>Battery: (low or ok)</li>
      <li>ID: (The ID-Number (number if)</li>
-     <li>windSpeed (m/s) and windDirection (N-O-S-W)</li>
+     <li>windSpeed/windGuest (Unit_of_Wind)) and windDirection (N-O-S-W)</li>
      <li>Rain (mm)</li>
      <b>WH3080:</b>
      <li>UV Index</li>
@@ -473,6 +564,10 @@
     </li>
     <li>windKorrektur: -3,-2,-1,0,1,2,3   
     </li>
+    <li>Unit_of_Wind<br>
+    Unit of windSpeed and windGuest. State-Format: Value + Unit.
+       <br>m/s,km/h,ft/s,mph,bft,knot 
+    </li><br>
     <li>WS09_CRCAUS (set in Signalduino-Modul 00_SIGNALduino.pm)
        <br>0: CRC-Check WH1080 CRC-Summe = 0  on, default   
        <br>2: CRC-Summe = 49 (x031) WH1080, set OK
@@ -522,12 +617,12 @@
   <a name="SD_WS09 Events"></a>
   <b>Generierte Readings:</b>
   <ul>
-     <li>State (T: H: Ws: Wg: Wd: R: )  temperature, humidity, windSpeed, windGuest, windDirection, Rain</li>
+     <li>State (T: H: Ws: Wg: Wd: R: )  temperature, humidity, windSpeed, windGuest, Einheit, windDirection, Rain</li>
      <li>Temperature (&deg;C)</li>
      <li>Humidity: (The humidity (1-100 if available)</li>
      <li>Battery: (low or ok)</li>
      <li>ID: (The ID-Number (number if)</li>
-     <li>windSpeed (m/s) and windDirection (N-O-S-W)</li>
+     <li>windSpeed/windgust (Einheit siehe Unit_of_Wind)  and windDirection (N-O-S-W)</li>
      <li>Rain (mm)</li>
      <b>WH3080:</b>
      <li>UV Index</li>
@@ -546,6 +641,10 @@
     <li>windKorrektur<br>
     Korrigiert die Nord-Ausrichtung des Windrichtungsmessers, wenn dieser nicht richtig nach Norden ausgerichtet ist. 
       -3,-2,-1,0,1,2,3    
+    </li><br>
+    <li>Unit_of_Wind<br>
+    Hiermit wird der Einheit eingestellt und im State die entsprechenden Werte + Einheit angezeigt.
+       <br>m/s,km/h,ft/s,mph,bft,knot 
     </li><br>
     
     <li>WS09_CRCAUS<br>
