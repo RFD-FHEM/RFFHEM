@@ -42,6 +42,7 @@ Supported Devices / Protocols
 |revolt | Energy sensors|
 |Clarus | remote power socket|
 |WH2 | (TFA 30.3157 nur Temp, Hum = 255 -> nicht angezeigt)|
+|TS-K108W11 | Doorbell |
 
 How to install
 ======
