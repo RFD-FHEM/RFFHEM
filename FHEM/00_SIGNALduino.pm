@@ -3894,7 +3894,7 @@ sub SIGNALduino_postDemo_FHT80TF($@) {
    for(my $b = 0; $b < 45; $b += 9) {	                        # check parity over 5 byte
       my $parity = 0;					                           # Parity even
       for(my $i = $b; $i < $b + 9; $i++) {			            # Parity over 1 byte + 1 bit
-         $parity += @bit_msg[$i];
+         $parity += $bit_msg[$i];
       }
       if ($parity % 2 != 0) {
          Log3 $name, 3, "$name: FHT80TF ERROR - Parity not even";
