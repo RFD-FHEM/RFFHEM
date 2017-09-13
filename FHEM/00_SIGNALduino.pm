@@ -3884,17 +3884,26 @@ sub SIGNALduino_postDemo_Hoermann($@) {
 sub SIGNALduino_postDemo_FHT80TF($@) {
 	my ($name, @bit_msg) = @_;
 	my $datastart = 0;
+	my $protolength = scalar @bit_msg;								 
 	my $sum = 12;
-   while ($bit_msg[$datastart] == 0) { $datastart++; }	      	# Start bei erstem Bit mit Wert 1 suchen
-   splice(@bit_msg, 0, $datastart + 1);                        	# delete preamble + 1 bit
-   if (@bit_msg < 45) {                                        	# check count of databits
-		Log3 $name, 3, "$name: FHT80TF - ERROR lenght of message";
+   if ($protolength < 46) {                                        	# min 5 bytes + 6 bits
+																						 
+																						 
+		Log3 $name, 3, "$name: FHT80TF - ERROR lenght of message < 45";
 		return 0, undef;
    }
+for ($datastart = 0; $datastart < $protolength; $datastart++) {   # Start bei erstem Bit mit Wert 1 suchen
+      last if $bit_msg[$datastart] eq "1";
+   }
+   if ($datastart == $protolength) {                                 # all bits are 0
+		Log3 $name, 3, "$name: FHT80TF - ERROR message all zeros";
+		return 0, undef;
+   }
+   splice(@bit_msg, 0, $datastart + 1);                             	# delete preamble + 1 bit
    for(my $b = 0; $b < 45; $b += 9) {	                        # check parity over 5 byte
       my $parity = 0;					                           # Parity even
       for(my $i = $b; $i < $b + 9; $i++) {			            # Parity over 1 byte + 1 bit
-         $parity += @bit_msg[$i];
+         $parity += $bit_msg[$i];
       }
       if ($parity % 2 != 0) {
          Log3 $name, 3, "$name: FHT80TF ERROR - Parity not even";
