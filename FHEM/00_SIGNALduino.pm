@@ -3977,7 +3977,13 @@ sub SIGNALduino_postDemo_WS2000($@) {
 		"Kombi"
 		);
 
-	while ($bit_msg[$datastart] == 0) { $datastart++; }	# Start bei erstem Bit mit Wert 1 suchen
+	for ($datastart = 0; $datastart < $protolength; $datastart++) {   # Start bei erstem Bit mit Wert 1 suchen
+		last if $bit_msg[$datastart] eq "1";
+	}
+	if ($datastart == $protolength) {                                 # all bits are 0
+		Log3 $name, 3, "$name: WS2000 - ERROR message all bit are zeros";
+		return 0, undef;
+	}
 	$datalength = $protolength - $datastart;
 	$datalength1 = $datalength - ($datalength % 5);  		# modulo 5
 	Log3 $name, 5, "$name: WS2000 protolength: $protolength, datastart: $datastart, datalength $datalength";
