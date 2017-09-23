@@ -813,21 +813,24 @@ my %ProtocolListSIGNALduino  = (
 			length_min      => '24',
 			length_max      => '24',
     	},
-    "37" =>
+    "37" =>	## Bresser 7009994
+			# MU;P0=729;P1=-736;P2=483;P3=-251;P4=238;P5=-491;D=010101012323452323454523454545234523234545234523232345454545232345454545452323232345232340;CP=4;
+			# MU;P0=-790;P1=-255;P2=474;P4=226;P6=722;P7=-510;D=721060606060474747472121212147472121472147212121214747212147474721214747212147214721212147214060606060474747472121212140;CP=4;R=216;
+			# short pulse of 250 us followed by a 500 us gap is a 0 bit
+			# long pulse of 500 us followed by a 250 us gap is a 1 bit
+			# sync preamble of pulse, gap, 750 us each, repeated 4 times
      	 {   
-       		name			=> 'weather37',		
+       		name			=> 'Bresser 7009994',		
        		id          	=> '37',
 			one				=> [2,-1],
 			zero			=> [1,-2],
 			start		 	=> [3,-3,3,-3],
-			clockabs   		=> '230',		
+			clockabs   		=> '250',		
 			format     		=> 'twostate',  		# not used now
 			preamble		=> 'W37#',				# prepend to converted message	
-			postamble		=> '',					# Append to converted message	 	
-			clientmodule    => 'SD_WS',      			# not used now
-			#modulematch     => '',     			# not used now
+			clientmodule    => 'SD_WS', 
 			length_min      => '40',
-			length_max      => '44',
+			length_max      => '40',
     	},
     "38" =>
       	 {   
@@ -3977,7 +3980,13 @@ sub SIGNALduino_postDemo_WS2000($@) {
 		"Kombi"
 		);
 
-	while ($bit_msg[$datastart] == 0) { $datastart++; }	# Start bei erstem Bit mit Wert 1 suchen
+	for ($datastart = 0; $datastart < $protolength; $datastart++) {   # Start bei erstem Bit mit Wert 1 suchen
+		last if $bit_msg[$datastart] eq "1";
+	}
+	if ($datastart == $protolength) {                                 # all bits are 0
+		Log3 $name, 3, "$name: WS2000 - ERROR message all bit are zeros";
+		return 0, undef;
+	}
 	$datalength = $protolength - $datastart;
 	$datalength1 = $datalength - ($datalength % 5);  		# modulo 5
 	Log3 $name, 5, "$name: WS2000 protolength: $protolength, datastart: $datastart, datalength $datalength";

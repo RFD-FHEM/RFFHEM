@@ -229,35 +229,43 @@ sub SD_WS_Parse($$)
     	
 	Log3 $name, 4, "SD_WS_Parse: Protocol: $protocol, rawData: $rawData";
 	
-	if ($protocol eq "37")		# Bresser 7009994
-	{
-		# 0      7 8 9 10 12        22   25    31
-		# 01011010 0 0 01 01100001110 10 0111101 11001010
-		# ID      B? T Kan Temp       ?? Hum     Pruefsumme?
-		
-		# MU;P0=729;P1=-736;P2=483;P3=-251;P4=238;P5=-491;D=010101012323452323454523454545234523234545234523232345454545232345454545452323232345232340;CP=4;
-		
+	if ($protocol eq "37") {		# Bresser 7009994
+		# Protokollbeschreibung:
+		# https://github.com/merbanan/rtl_433_tests/tree/master/tests/bresser_3ch
+		# The data is grouped in 5 bytes / 10 nibbles
+		# ------------------------------------------------------------------------
+		# 0         | 8    12   | 16        | 24        | 32
+		# 1111 1100 | 0001 0110 | 0001 0000 | 0011 0111 | 0101 1001 0  65.1 F 55 %
+		# iiii iiii | bscc tttt | tttt tttt | hhhh hhhh | xxxx xxxx
+		# i: 8 bit random id (changes on power-loss)
+		# b: battery indicator (0=>OK, 1=>LOW)
+		# s: Test/Sync (0=>Normal, 1=>Test-Button pressed / Sync)
+		# c: Channel (MSB-first, valid channels are 1-3)
+		# t: Temperature (MSB-first, Big-endian)
+		#    12 bit unsigned fahrenheit offset by 90 and scaled by 10
+		# h: Humidity (MSB-first) 8 bit relative humidity percentage
+		# x: checksum (byte1 + byte2 + byte3 + byte4) % 256
+		#    Check with e.g. (byte1 + byte2 + byte3 + byte4 - byte5) % 256) = 0
 		$model = "SD_WS37_TH";
 		$SensorTyp = "Bresser 7009994";
-	
-		$id = 		SD_WS_binaryToNumber($bitData,0,7);
-		#$bat = 	int(substr($bitData,8,1)) eq "1" ? "ok" : "low";
-		$channel = 	SD_WS_binaryToNumber($bitData,10,11);
-		$rawTemp = 	SD_WS_binaryToNumber($bitData,12,22);
-		$hum =		SD_WS_binaryToNumber($bitData,25,31);
-		
-		$id = sprintf('%02X', $id);           # wandeln nach hex
-		$temp = ($rawTemp - 609.93) / 9.014;
-		$temp = sprintf("%.1f", $temp);
-		
-		if ($hum < 10 || $hum > 99 || $temp < -30 || $temp > 70) {
+		my $checksum = (SD_WS_binaryToNumber($bitData,0,7) + SD_WS_binaryToNumber($bitData,8,15) + SD_WS_binaryToNumber($bitData,16,23) + SD_WS_binaryToNumber($bitData,24,31)) & 0xFF;
+		if ($checksum != SD_WS_binaryToNumber($bitData,32,39)) {
+			Log3 $name, 3, "$name: SD_WS37 ERROR - checksum $checksum != ".SD_WS_binaryToNumber($bitData,32,39);
 			return "";
+		} else {
+			Log3 $name, 4, "$name: SD_WS37 checksum ok $checksum = ".SD_WS_binaryToNumber($bitData,32,39);
+			$id = SD_WS_binaryToNumber($bitData,0,7);
+			$id = sprintf('%02X', $id);           # wandeln nach hex
+			$bat = int(substr($bitData,8,1)) eq "0" ? "ok" : "low";		# Batterie-Bit konnte nicht geprueft werden
+			$channel = SD_WS_binaryToNumber($bitData,10,11);
+			$rawTemp = 	SD_WS_binaryToNumber($bitData,12,23);
+			$hum = SD_WS_binaryToNumber($bitData,24,31);
+			my $tempFh = $rawTemp / 10 - 90;							# Grad Fahrenheit
+			$temp = (($tempFh - 32) * 5 / 9);							# Grad Celsius
+ 			$temp = sprintf("%.1f", $temp + 0.05);						# round
+			Log3 $name, 4, "$name: SD_WS37 tempraw = $rawTemp, temp = $tempFh F, temp = $temp C, Hum = $hum";
+			Log3 $name, 4, "$name: SD_WS37 decoded protocol = $protocol ($SensorTyp), sensor id = $id, channel = $channel";
 		}
-	
-		$bitData2 = substr($bitData,0,8) . ' ' . substr($bitData,8,4) . ' ' . substr($bitData,12,11);
-		$bitData2 = $bitData2 . ' ' . substr($bitData,23,2) . ' ' . substr($bitData,25,7) . ' ' . substr($bitData,32,8);
-		Log3 $iohash, 4, "$name converted to bits: " . $bitData2;
-		Log3 $iohash, 4, "$name decoded protocolid: $protocol ($SensorTyp) sensor id=$id, channel=$channel, rawTemp=$rawTemp, temp=$temp, hum=$hum";
 	}
 	elsif  ($protocol eq "44" || $protocol eq "44x")	# BresserTemeo
 	{
