@@ -134,6 +134,7 @@ my $clientsSIGNALduino = ":IT:"
 			        	."Revolt:"
 			        	."FS10:"
 			        	."CUL_FHTTK:"
+			        	."Siro:"
 			      		."SIGNALduino_un:"
 					; 
 
@@ -159,6 +160,7 @@ my %matchListSIGNALduino = (
      "19:CUL_WS"				=> '^K[A-Fa-f0-9]{5,}',
      "20:Revolt"				=> '^r[A-Fa-f0-9]{22}',
      "21:FS10"				=> '^P61#[A-F0-9]+',
+     "22:Siro"					=> '^P72#[A-Fa-f0-9]+',
      "X:SIGNALduino_un"			=> '^[u]\d+#.*',
 );
 
@@ -1360,6 +1362,23 @@ my %ProtocolListSIGNALduino  = (
 			#modulematch     => '^W71#.*'
 			length_min      => '48',
 			length_max      => '48',
+		},
+	"72" => # Siro blinds
+		{
+			name		=> 'Siro shutter',
+			id		=> '72',
+			developId	=> 'm72',
+			one		=> [28,-15],
+			zero		=> [14,-29],
+			start   	=> [186,-60],
+			clockabs	=> 25,
+			format 		=> 'twostate',	  		
+			preamble	=> 'P72#',		# prepend to converted message	
+			clientmodule	=> 'Siro',
+			#modulematch => '',  			# not used now
+			length_min   	=> '39',
+			length_max   	=> '40',
+			msgOutro	=> 'SR;P0=-8500;D=0;',
 		},
 );
 
