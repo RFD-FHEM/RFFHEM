@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 10488 2017-09-08 19:00:00Z v3.3.1-dev $
+# $Id: 00_SIGNALduino.pm 10488 2017-09-28 21:00:00Z v3.3.1-dev $
 #
 # v3.3.1 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -708,7 +708,7 @@ my %ProtocolListSIGNALduino  = (
             name			=> 'unitec47031',	
 			comment         => 'developId. SD_UT Module is only in github available',
 			id          	=> '30',
-			developId       => 'y',
+			developId       => 'm',
 			one				=> [-1,2],
 			zero			=> [-2,1],
 			start			=> [-33,1],				# Message is not provided as MS, worakround is start
@@ -1367,7 +1367,7 @@ my %ProtocolListSIGNALduino  = (
 		{
 			name		=> 'Siro shutter',
 			id		=> '72',
-			developId	=> 'm72',
+			developId	=> 'm',
 			one		=> [28,-15],
 			zero		=> [14,-29],
 			start   	=> [186,-60],
@@ -1379,6 +1379,38 @@ my %ProtocolListSIGNALduino  = (
 			length_min   	=> '39',
 			length_max   	=> '40',
 			msgOutro	=> 'SR;P0=-8500;D=0;',
+		},
+	"73" => ## FHT80 - Raumthermostat (868Mhz),  @HomeAutoUser
+		{
+			name		=> 'FHT80',
+			comment 	=> 'reserviert, Roomthermostat (868Mhz only receive)',
+			id		=> '73',
+			developId	=> 'p',
+			one		=> [1.5,-1.5], # 600
+			zero		=> [1,-1], # 400
+			clockabs	=> 400,
+			format		=> 'twostate', # not used now
+			clientmodule	=> 'FHT',
+			preamble	=> '810c04xx0909a001',
+			length_min	=> '59',
+			length_max	=> '67',
+			#postDemodulation => &SIGNALduino_postDemo_FHT80,
+		},
+	"74" => ## FS20 - 'Remote Control (868Mhz),  @HomeAutoUser
+		{
+			name		=> 'FS20',
+			comment		=> 'reserviert, Remote Control (868Mhz)',
+			id		=> '74',
+			developId	=> 'p',
+			one		=> [1.5,-1.5], # 600
+			zero		=> [1,-1], # 400
+			clockabs	=> 400,
+			format		=> 'twostate', # not used now
+			clientmodule	=> 'FS20',
+			preamble	=> '810b04f70101a001',
+			length_min	=> '50',
+			length_max	=> '67',
+			#postDemodulation => &SIGNALduino_postDemo_FS20,
 		},
 );
 
@@ -1415,12 +1447,14 @@ SIGNALduino_Initialize($)
 					  ." longids"
 					  ." minsecs"
 					  ." whitelist_IDs"
+					  ." blacklist_IDs"
 					  ." WS09_CRCAUS:0,1,2"
 					  ." addvaltrigger"
 					  ." rawmsgEvent:1,0"
 					  ." cc1101_frequency"
 					  ." doubleMsgCheck_IDs"
 					  ." suppressDeviceRawmsg:1,0"
+					  ." development"
 		              ." $readingFnAttributes";
 
   $hash->{ShutdownFn} = "SIGNALduino_Shutdown";
@@ -1496,9 +1530,8 @@ SIGNALduino_Define($$)
   $hash->{DeviceName} = $dev;
   
   my $ret=undef;
-
-  my $whitelistIDs = AttrVal($name,"whitelist_IDs","");
-  SIGNALduino_IdList($hash ,$name, $whitelistIDs);
+  
+  InternalTimer(gettimeofday(), 'SIGNALduino_IdList',$hash,0);       # verzoegern bis alle Attribute eingelesen sind
   
   if($dev ne "none") {
     $ret = DevIo_OpenDev($hash, 0, "SIGNALduino_DoInit", 'SIGNALduino_Connect');
@@ -3715,7 +3748,24 @@ SIGNALduino_Attr(@)
 	}
 	elsif ($aName eq "whitelist_IDs")
 	{
-		SIGNALduino_IdList($hash, $name, $aVal);
+		Log3 $name, 3, "$name Attr: whitelist_IDs###";
+		if (defined($hash->{msIdList})) {		# beim fhem Start wird das SIGNALduino_IdList nicht aufgerufen, da es beim define aufgerufen wird
+			SIGNALduino_IdList($hash,$aVal);
+		}
+	}
+	elsif ($aName eq "blacklist_IDs")
+	{
+		Log3 $name, 3, "$name Attr: blacklist_IDs###";
+		if (defined($hash->{msIdList})) {		# beim fhem Start wird das SIGNALduino_IdList nicht aufgerufen, da es beim define aufgerufen wird
+			SIGNALduino_IdList($hash,undef,$aVal);
+		}
+	}
+	elsif ($aName eq "development")
+	{
+		Log3 $name, 3, "$name Attr: development###";
+		if (defined($hash->{msIdList})) {		# beim fhem Start wird das SIGNALduino_IdList nicht aufgerufen, da es beim define aufgerufen wird
+			SIGNALduino_IdList($hash,undef,undef,$aVal);
+		}
 	}
 	elsif ($aName eq "doubleMsgCheck_IDs")
 	{
@@ -3753,20 +3803,39 @@ SIGNALduino_Attr(@)
 }
 
 
-sub SIGNALduino_IdList($$$)
+sub SIGNALduino_IdList($@)
 {
-	my ($hash, $name, $aVal) = @_;
+	my ($hash, $aVal, $blacklist, $develop) = @_;
+	my $name = $hash->{NAME};
 
 	my @msIdList = ();
 	my @muIdList = ();
 	my @mcIdList = ();
 
+	if (!defined($aVal)) {
+		$aVal = AttrVal($name,"whitelist_IDs","");
+	}
+	Log3 $name, 3, "$name sduinoIdList: whitelistIds=$aVal";
+	
+	if (!defined($blacklist)) {
+		$blacklist = AttrVal($name,"blacklist_IDs","");
+	}
+	Log3 $name, 3, "$name sduinoIdList: blacklistIds=$blacklist";
+	
+	if (!defined($develop)) {
+		$develop = AttrVal($name,"development","");
+	}
+	$develop = lc($develop);
+	Log3 $name, 3, "$name sduinoIdList: development=$develop";
+
 	my %WhitelistIDs;
-	my $wflag = 0;
+	my %BlacklistIDs;
+	my $wflag = 0;		# whitelist flag, 0=disabled
+	my $bflag = 0;		# blacklist flag, 0=disabled
 	if (defined($aVal) && length($aVal)>0)
 	{
 		if (substr($aVal,0 ,1) eq '#') {
-			Log3 $name, 3, "Attr whitelist disabled: $aVal";
+			Log3 $name, 3, "$name Attr whitelist disabled: $aVal";
 		}
 		else {
 			%WhitelistIDs = map { $_ => 1 } split(",", $aVal);
@@ -3775,6 +3844,15 @@ sub SIGNALduino_IdList($$$)
 			$wflag = 1;
 		}
 	}
+	if ($wflag == 0) {		# whitelist disabled
+		if (defined($blacklist) && length($blacklist)>0) {
+			%BlacklistIDs = map { $_ => 1 } split(",", $blacklist);
+			my $w = join ', ' => map "$_" => keys %BlacklistIDs;
+			Log3 $name, 3, "$name Attr blacklist $w";
+			$bflag = 1;
+		}
+	}
+	
 	my $id;
 	foreach $id (keys %ProtocolListSIGNALduino)
 	{
@@ -3782,8 +3860,28 @@ sub SIGNALduino_IdList($$$)
 		if ($wflag == 1 && !defined($WhitelistIDs{$id}))
 		{
 			#Log3 $name, 3, "skip ID $id";
-            next;
-		}		
+			next;
+		}
+		if ($bflag == 1 && defined($BlacklistIDs{$id}))
+		{
+			Log3 $name, 3, "$name skip Blacklist ID $id";
+			next;
+		}
+		
+		if (defined($ProtocolListSIGNALduino{$id}{developId}) && substr($ProtocolListSIGNALduino{$id}{developId},0,1) eq "p") {
+			my $devid = "p$id";
+			if ($develop !~ m/$devid/) {		# skip wenn die Id nicht im Attribut development steht
+				Log3 $name, 3, "$name: ID=$devid skiped (developId=p)";
+				next;
+			}
+		}
+		
+		if (defined($ProtocolListSIGNALduino{$id}{developId}) && substr($ProtocolListSIGNALduino{$id}{developId},0,1) eq "y") {
+			if ($develop !~ m/y/) {			# skip wenn y nicht im Attribut development steht
+				Log3 $name, 3, "$name: ID=$id skiped (developId=y)";
+				next;
+			}
+		}
 		
 		if (exists ($ProtocolListSIGNALduino{$id}{format}) && $ProtocolListSIGNALduino{$id}{format} eq "manchester")
 		{
