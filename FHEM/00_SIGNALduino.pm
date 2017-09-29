@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 10488 2017-09-28 21:00:00Z v3.3.1-dev $
+# $Id: 00_SIGNALduino.pm 10488 2017-09-29 17:00:00Z v3.3.1-dev $
 #
 # v3.3.1 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -142,7 +142,7 @@ my $clientsSIGNALduino = ":IT:"
 my %matchListSIGNALduino = (
      "1:IT"            			=> "^i......",	  				  # Intertechno Format
      "2:CUL_TCM97001"      		=> "^s[A-Fa-f0-9]+",			  # Any hex string		beginning with s
-     "3:SD_RSL"					=> "^P1#[A-Fa-f0-9]{8}",				  # Any hex string		beginning with r
+     "3:SD_RSL"					=> "^P1#[A-Fa-f0-9]{8}",
      "5:CUL_TX"               	=> "^TX..........",         	  # Need TX to avoid FHTTK
      "6:SD_AS"       			=> "^P2#[A-Fa-f0-9]{7,8}", 		  # Arduino based Sensors, should not be default
      "4:OREGON"            		=> "^(3[8-9A-F]|[4-6][0-9A-F]|7[0-8]).*",		
@@ -1363,7 +1363,7 @@ my %ProtocolListSIGNALduino  = (
 			length_min      => '48',
 			length_max      => '48',
 		},
-	"72" => # Siro blinds
+	"72" => # Siro blinds     @Dr. Smag
 		{
 			name		=> 'Siro shutter',
 			id		=> '72',
@@ -2068,9 +2068,10 @@ SIGNALduino_Get($@)
 		
 		$ret .= "\n";
 	}
-	$moduleId =~ s/,$//;
+	#$moduleId =~ s/,$//;
 	
-	return "$a[1]: \n\n$ret\nIds with modules: $moduleId";
+	return "$a[1]: \n\n$ret\n";
+	#return "$a[1]: \n\n$ret\nIds with modules: $moduleId";
   }
   
   #SIGNALduino_SimpleWrite($hash, $gets{$a[1]}[0] . $arg);
@@ -3164,13 +3165,20 @@ SIGNALduino_Parse_MS($$$$%)
 			#$dmsg = @retvalue;
 			#undef(@retvalue); undef($rcode);
 			
-			
 			my $modulematch = undef;
 			if (defined($ProtocolListSIGNALduino{$id}{modulematch})) {
 				$modulematch = $ProtocolListSIGNALduino{$id}{modulematch};
 			}
 			if (!defined($modulematch) || $dmsg =~ m/$modulematch/) {
 				Debug "$name: dispatching now msg: $dmsg" if ($debug);
+				if (defined($ProtocolListSIGNALduino{$id}{developId}) && substr($ProtocolListSIGNALduino{$id}{developId},0,1) eq "m") {
+					my $devid = "m$id";
+					my $develop = lc(AttrVal($name,"development",""));
+					if ($develop !~ m/$devid/) {		# kein dispatch wenn die Id nicht im Attribut development steht
+						Log3 $name, 3, "$name: ID=$devid skiped dispatch (developId=m). To use, please add m$id to the attr development";
+						next;
+					}
+				}
 				SIGNALduno_Dispatch($hash,$rmsg,$dmsg,$rssi,$id);
 				$message_dispatched=1;
 			}
@@ -3435,6 +3443,15 @@ sub SIGNALduino_Parse_MU($$$$@)
 						}
 						if (!defined($modulematch) || $dmsg =~ m/$modulematch/) {
 							Debug "$name: dispatching now msg: $dmsg" if ($debug);
+							if (defined($ProtocolListSIGNALduino{$id}{developId}) && substr($ProtocolListSIGNALduino{$id}{developId},0,1) eq "m") {
+								my $devid = "m$id";
+								my $develop = lc(AttrVal($name,"development",""));
+								if ($develop !~ m/$devid/) {		# kein dispatch wenn die Id nicht im Attribut development steht
+									Log3 $name, 3, "$name: ID=$devid skiped dispatch (developId=m). To use, please add m$id to the attr development";
+									next;
+								}
+							}
+	
 							SIGNALduno_Dispatch($hash,$rmsg,$dmsg,$rssi,$id);
 							$message_dispatched=1;
 						}
@@ -3562,6 +3579,14 @@ SIGNALduino_Parse_MC($$$$@)
 		                $modulematch = $ProtocolListSIGNALduino{$id}{modulematch};
 					}
 					if (!defined($modulematch) || $dmsg =~ m/$modulematch/) {
+						if (defined($ProtocolListSIGNALduino{$id}{developId}) && substr($ProtocolListSIGNALduino{$id}{developId},0,1) eq "m") {
+							my $devid = "m$id";
+							my $develop = lc(AttrVal($name,"development",""));
+							if ($develop !~ m/$devid/) {		# kein dispatch wenn die Id nicht im Attribut development steht
+								Log3 $name, 3, "$name: ID=$devid skiped dispatch (developId=m). To use, please add m$id to the attr development";
+								next;
+							}
+						}
 						SIGNALduno_Dispatch($hash,$rmsg,$dmsg,$rssi,$id);
 						$message_dispatched=1;
 					}
@@ -3748,21 +3773,21 @@ SIGNALduino_Attr(@)
 	}
 	elsif ($aName eq "whitelist_IDs")
 	{
-		Log3 $name, 3, "$name Attr: whitelist_IDs###";
+		Log3 $name, 3, "$name Attr: whitelist_IDs";
 		if (defined($hash->{msIdList})) {		# beim fhem Start wird das SIGNALduino_IdList nicht aufgerufen, da es beim define aufgerufen wird
 			SIGNALduino_IdList($hash,$aVal);
 		}
 	}
 	elsif ($aName eq "blacklist_IDs")
 	{
-		Log3 $name, 3, "$name Attr: blacklist_IDs###";
+		Log3 $name, 3, "$name Attr: blacklist_IDs";
 		if (defined($hash->{msIdList})) {		# beim fhem Start wird das SIGNALduino_IdList nicht aufgerufen, da es beim define aufgerufen wird
 			SIGNALduino_IdList($hash,undef,$aVal);
 		}
 	}
 	elsif ($aName eq "development")
 	{
-		Log3 $name, 3, "$name Attr: development###";
+		Log3 $name, 3, "$name Attr: development";
 		if (defined($hash->{msIdList})) {		# beim fhem Start wird das SIGNALduino_IdList nicht aufgerufen, da es beim define aufgerufen wird
 			SIGNALduino_IdList($hash,undef,undef,$aVal);
 		}
