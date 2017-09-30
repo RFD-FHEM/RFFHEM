@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 10488 2017-09-29 17:00:00Z v3.3.1-dev $
+# $Id: 00_SIGNALduino.pm 10488 2017-09-30 17:00:00Z v3.3.1-dev $
 #
 # v3.3.1 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -132,6 +132,7 @@ my $clientsSIGNALduino = ":IT:"
 			        	."FLAMINGO:"
 			        	."CUL_WS:"
 			        	."Revolt:"
+					." :"		# Zeilenumbruch
 			        	."FS10:"
 			        	."CUL_FHTTK:"
 			        	."Siro:"
@@ -1363,7 +1364,7 @@ my %ProtocolListSIGNALduino  = (
 			length_min      => '48',
 			length_max      => '48',
 		},
-	"72" => # Siro blinds     @Dr. Smag
+	"72" => # Siro blinds MU    @Dr. Smag
 		{
 			name		=> 'Siro shutter',
 			id		=> '72',
@@ -1379,6 +1380,23 @@ my %ProtocolListSIGNALduino  = (
 			length_min   	=> '39',
 			length_max   	=> '40',
 			msgOutro	=> 'SR;P0=-8500;D=0;',
+		},
+	"72.1" => # Siro blinds MS     @Dr. Smag
+		{
+			name		=> 'Siro shutter',
+			id		=> '72',
+			developId	=> 'm',
+			one		=> [2,-1.1],
+			zero		=> [1,-2.1],
+			sync		=> [13.3,-4.3],
+			clockabs	=> 350,
+			format 		=> 'twostate',	  		
+			preamble	=> 'P72#',		# prepend to converted message	
+			clientmodule	=> 'Siro',
+			#modulematch => '',  			# not used now
+			length_min   	=> '39',
+			length_max   	=> '40',
+			#msgOutro	=> 'SR;P0=-8500;D=0;',
 		},
 	"73" => ## FHT80 - Raumthermostat (868Mhz),  @HomeAutoUser
 		{
