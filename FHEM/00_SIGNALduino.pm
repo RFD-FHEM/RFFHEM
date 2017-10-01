@@ -2973,7 +2973,7 @@ sub SIGNALduno_Dispatch($$$$$)
 
    if ($DMSGgleich) {
 	#Dispatch if dispatchequals is provided in protocol definition or only if $dmsg is different from last $dmsg, or if 2 seconds are between transmits
-	if ( SIGNALduino_getProtoProp($id,'dispatchequals',0) == 'true' || $hash->{DMSG} ne $dmsg) || ($hash->{TIME}+2 < time()) ) { 
+	if ( (SIGNALduino_getProtoProp($id,'dispatchequals',0) eq 'true') || ($hash->{DMSG} ne $dmsg) || ($hash->{TIME}+2 < time() ) )   { 
 		$hash->{MSGCNT}++;
 		$hash->{TIME} = time();
 		$hash->{DMSG} = $dmsg;
