@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 10488 2017-10-01 17:00:00Z v3.3.1-dev $
+# $Id: 00_SIGNALduino.pm 10488 2017-10-01 22:00:00Z v3.3.1-dev $
 #
 # v3.3.1 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -1370,10 +1370,10 @@ my %ProtocolListSIGNALduino  = (
 			comment         => 'developModule. Siro is not in github or SVN available',
 			id		=> '72',
 			developId	=> 'm',
-			one		=> [28,-15],
-			zero		=> [14,-29],
-			start   	=> [186,-60],
-			clockabs	=> 25,
+			one		=> [2,-1.2],    # 680, -400
+			zero		=> [1,-2.2],    # 340, -750
+			start		=> [14,-4.4],   # 4800,-1520
+			clockabs	=> 340,
 			format 		=> 'twostate',	  		
 			preamble	=> 'P72#',		# prepend to converted message	
 			clientmodule	=> 'Siro',
@@ -1388,10 +1388,10 @@ my %ProtocolListSIGNALduino  = (
 			comment         => 'developModule. Siro is not in github or SVN available',
 			id		=> '72',
 			developId	=> 'm',
-			one		=> [2,-1.1],
-			zero		=> [1,-2.1],
-			sync		=> [13.3,-4.3],
-			clockabs	=> 350,
+			one		=> [2,-1.2],    # 680, -400
+			zero		=> [1,-2.2],    # 340, -750
+			sync		=> [14,-4.4],   # 4800,-1520
+			clockabs	=> 340,
 			format 		=> 'twostate',	  		
 			preamble	=> 'P72#',		# prepend to converted message	
 			clientmodule	=> 'Siro',
