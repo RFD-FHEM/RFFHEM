@@ -2892,8 +2892,8 @@ sub SIGNALduno_Dispatch($$$$$)
 	}
 
    if ($DMSGgleich) {
-	#Dispatch only if $dmsg is different from last $dmsg, or if 2 seconds are between transmits
-	if ( ($hash->{DMSG} ne $dmsg) || ($hash->{TIME}+2 < time()) ) { 
+	#Dispatch if dispatchequals is provided in protocol definition or only if $dmsg is different from last $dmsg, or if 2 seconds are between transmits
+	if ( SIGNALduino_getProtoProp($id,'dispatchequals',0) == 'true' || $hash->{DMSG} ne $dmsg) || ($hash->{TIME}+2 < time()) ) { 
 		$hash->{MSGCNT}++;
 		$hash->{TIME} = time();
 		$hash->{DMSG} = $dmsg;
@@ -3147,18 +3147,21 @@ sub SIGNALduino_padbits(\@$)
 
 # - - - - - - - - - - - -
 #=item SIGNALduino_getProtoProp()
-#This functons, will return a value from the Protocolist and check if it is defined
+#This functons, will return a value from the Protocolist and check if it is defined optional you can specify a optional default value that will be reurned
 # 
 # returns "" if the var is not defined
 # =cut
 #  $id, $propertyname,
 
-sub SIGNALduino_getProtoProp($$)
+sub SIGNALduino_getProtoProp
 {
-	my $id = shift;
-	my $propNameLst = shift;
+	my ($id,$propNameLst,$default) = @_;
+	
+	#my $id = shift;
+	#my $propNameLst = shift;
 	return $ProtocolListSIGNALduino{$id}{$propNameLst} if defined($ProtocolListSIGNALduino{$id}{$propNameLst});
-	return undef;
+	return $default; # Will return undef if $default is not provided
+	#return undef;
 }
 
 sub SIGNALduino_Parse_MU($$$$@)
@@ -4852,7 +4855,6 @@ With a # at the beginnging whitelistIDs can be deactivated.
        <br>0: CRC-Check WH1080 CRC = 0  on, default   
        <br>2: CRC = 49 (x031) WH1080, set OK
     </li>
-    </li><br>
    </ul>
    
    
