@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 10488 2017-09-30 17:00:00Z v3.3.1-dev $
+# $Id: 00_SIGNALduino.pm 10488 2017-10-01 17:00:00Z v3.3.1-dev $
 #
 # v3.3.1 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -707,7 +707,7 @@ my %ProtocolListSIGNALduino  = (
 	"30" => # a unitec remote door reed switch
 		{
             name			=> 'unitec47031',	
-			comment         => 'developId. SD_UT Module is only in github available',
+			comment         => 'developModule. SD_UT module is only in github available',
 			id          	=> '30',
 			developId       => 'm',
 			one				=> [-1,2],
@@ -1367,6 +1367,7 @@ my %ProtocolListSIGNALduino  = (
 	"72" => # Siro blinds MU    @Dr. Smag
 		{
 			name		=> 'Siro shutter',
+			comment         => 'developModule. Siro is not in github or SVN available',
 			id		=> '72',
 			developId	=> 'm',
 			one		=> [28,-15],
@@ -1384,6 +1385,7 @@ my %ProtocolListSIGNALduino  = (
 	"72.1" => # Siro blinds MS     @Dr. Smag
 		{
 			name		=> 'Siro shutter',
+			comment         => 'developModule. Siro is not in github or SVN available',
 			id		=> '72',
 			developId	=> 'm',
 			one		=> [2,-1.1],
@@ -3023,7 +3025,7 @@ SIGNALduino_Parse_MS($$$$%)
 	my $debug = AttrVal($iohash->{NAME},"debug",0);
 
 	
-	if (defined($clockidx) and defined($syncidx))
+	if (defined($clockidx) and defined($syncidx) and defined($hash->{msIdList}))
 	{
 		
 		## Make a lookup table for our pattern index ids
@@ -3263,7 +3265,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 	$patternListRaw{$_} = $msg_parts{pattern}{$_} for keys %{$msg_parts{pattern}};
 
 	
-	if (defined($clockidx))
+	if (defined($clockidx) and defined($hash->{muIdList}))
 	{
 		
 		## Make a lookup table for our pattern index ids
@@ -3541,7 +3543,7 @@ SIGNALduino_Parse_MC($$$$@)
 		$rssi = ($rssi>=128 ? (($rssi-256)/2-74) : ($rssi/2-74)); # todo: passt dies so? habe ich vom 00_cul.pm
 	}
 	
-	return undef if (!$clock);
+	return undef if (!$clock || !defined($hash->{mcIdList}));
 	#my $protocol=undef;
 	#my %patternListRaw = %msg_parts{patternList};
 	
