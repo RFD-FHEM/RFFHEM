@@ -1364,38 +1364,45 @@ my %ProtocolListSIGNALduino  = (
 			length_min      => '48',
 			length_max      => '48',
 		},
+	# MU;P0=-760;P1=334;P2=693;P3=-399;P4=-8942;P5=4796;P6=-1540;D=01010102310232310101010102310232323101010102310101010101023102323102323102323102310101010102310232323101010102310101010101023102310231023102456102310232310232310231010101010231023232310101010231010101010102310231023102310245610231023231023231023101010101;CP=1;R=45;O;
+    # MU;P0=-8848;P1=4804;P2=-1512;P3=336;P4=-757;P5=695;P6=-402;D=0123456345656345656345634343434345634565656343434345634343434343456345634563456345;CP=3;R=49;
+    		
 	"72" => # Siro blinds MU    @Dr. Smag
 		{
-			name		=> 'Siro shutter',
+			name			=> 'Siro shutter',
 			comment         => 'developModule. Siro is not in github or SVN available',
-			id		=> '72',
-			developId	=> 'm',
-			one		=> [2,-1.2],    # 680, -400
-			zero		=> [1,-2.2],    # 340, -750
-			start		=> [14,-4.4],   # 4800,-1520
-			clockabs	=> 340,
-			format 		=> 'twostate',	  		
-			preamble	=> 'P72#',		# prepend to converted message	
+			id				=> '72',
+			developId		=> 'm',
+			dispatchequals  =>  'true',
+			one				=> [2,-1.2],    # 680, -400
+			zero			=> [1,-2.2],    # 340, -750
+			start			=> [14,-4.4],   # 4800,-1520
+			clockabs		=> 340,
+			format 			=> 'twostate',	  		
+			preamble		=> 'P72#',		# prepend to converted message	
 			clientmodule	=> 'Siro',
-			#modulematch => '',  			# not used now
+			#modulematch 	=> '',  			
 			length_min   	=> '39',
 			length_max   	=> '40',
-			msgOutro	=> 'SR;P0=-8500;D=0;',
+			msgOutro		=> 'SR;P0=-8500;D=0;',
 		},
-	"72.1" => # Siro blinds MS     @Dr. Smag
+ 	
+ 	# MS;P0=4803;P1=-1522;P2=333;P3=-769;P4=699;P5=-393;P6=-9190;D=2601234523454523454523452323232323452345454523232323452323232323234523232345454545;CP=2;SP=6;R=61;
+ 	"72.1" => # Siro blinds MS     @Dr. Smag
 		{
-			name		=> 'Siro shutter',
-			comment         => 'developModule. Siro is not in github or SVN available',
-			id		=> '72',
-			developId	=> 'm',
-			one		=> [2,-1.2],    # 680, -400
-			zero		=> [1,-2.2],    # 340, -750
-			sync		=> [14,-4.4],   # 4800,-1520
-			clockabs	=> 340,
-			format 		=> 'twostate',	  		
-			preamble	=> 'P72#',		# prepend to converted message	
+			name			=> 'Siro shutter',
+			comment     	=> 'developModule. Siro is not in github or SVN available',
+			id				=> '72',
+			developId		=> 'm',
+			dispatchequals  =>  'true',
+			one				=> [2,-1.2],    # 680, -400
+			zero			=> [1,-2.2],    # 340, -750
+			sync			=> [14,-4.4],   # 4800,-1520
+			clockabs		=> 340,
+			format 			=> 'twostate',	  		
+			preamble		=> 'P72#',		# prepend to converted message	
 			clientmodule	=> 'Siro',
-			#modulematch => '',  			# not used now
+			#modulematch 	=> '',  			
 			length_min   	=> '39',
 			length_max   	=> '40',
 			#msgOutro	=> 'SR;P0=-8500;D=0;',
