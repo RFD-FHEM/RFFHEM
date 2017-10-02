@@ -1485,7 +1485,11 @@ SIGNALduino_Initialize($)
 		              ." $readingFnAttributes";
 
   $hash->{ShutdownFn} = "SIGNALduino_Shutdown";
-
+  
+  $hash->{msIdList} = ();
+  $hash->{muIdList} = ();
+  $hash->{mcIdList} = ();
+  
 }
 
 sub
@@ -3641,7 +3645,6 @@ SIGNALduino_Parse($$$$@)
 
 	#print Dumper(\%ProtocolListSIGNALduino);
 	
-	return undef if !defined($hash->{msIdList});
     	
 	return undef if !($rmsg=~ s/^\002(M.;.*;)\003/$1/); 			## Check if a Data Message arrived and if it's complete  (start & end control char are received)
 																    # cut off start end end character from message for further processing they are not needed
@@ -3806,22 +3809,22 @@ SIGNALduino_Attr(@)
 	elsif ($aName eq "whitelist_IDs")
 	{
 		Log3 $name, 3, "$name Attr: whitelist_IDs";
-		if (defined($hash->{msIdList})) {		# beim fhem Start wird das SIGNALduino_IdList nicht aufgerufen, da es beim define aufgerufen wird
-			SIGNALduino_IdList("x:$name",$aVal);
+		if ($init_done) {		# beim fhem Start wird das SIGNALduino_IdList nicht aufgerufen, da es beim define aufgerufen wird
+			SIGNALduino_IdList($hash,$aVal);
 		}
 	}
 	elsif ($aName eq "blacklist_IDs")
 	{
 		Log3 $name, 3, "$name Attr: blacklist_IDs";
-		if (defined($hash->{msIdList})) {		# beim fhem Start wird das SIGNALduino_IdList nicht aufgerufen, da es beim define aufgerufen wird
-			SIGNALduino_IdList("x:$name",undef,$aVal);
+		if ($init_done) {		# beim fhem Start wird das SIGNALduino_IdList nicht aufgerufen, da es beim define aufgerufen wird
+			SIGNALduino_IdList($hash,undef,$aVal);
 		}
 	}
 	elsif ($aName eq "development")
 	{
 		Log3 $name, 3, "$name Attr: development";
-		if (defined($hash->{msIdList})) {		# beim fhem Start wird das SIGNALduino_IdList nicht aufgerufen, da es beim define aufgerufen wird
-			SIGNALduino_IdList("x:$name",undef,undef,$aVal);
+		if ($init_done) {		# beim fhem Start wird das SIGNALduino_IdList nicht aufgerufen, da es beim define aufgerufen wird
+			SIGNALduino_IdList($hash,undef,undef,$aVal);
 		}
 	}
 	elsif ($aName eq "doubleMsgCheck_IDs")
