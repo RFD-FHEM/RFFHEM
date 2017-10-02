@@ -1485,7 +1485,11 @@ SIGNALduino_Initialize($)
 		              ." $readingFnAttributes";
 
   $hash->{ShutdownFn} = "SIGNALduino_Shutdown";
-
+  
+  $hash->{msIdList} = ();
+  $hash->{muIdList} = ();
+  $hash->{mcIdList} = ();
+  
 }
 
 sub
@@ -3641,7 +3645,6 @@ SIGNALduino_Parse($$$$@)
 
 	#print Dumper(\%ProtocolListSIGNALduino);
 	
-	return undef if !defined($hash->{msIdList});
     	
 	return undef if !($rmsg=~ s/^\002(M.;.*;)\003/$1/); 			## Check if a Data Message arrived and if it's complete  (start & end control char are received)
 																    # cut off start end end character from message for further processing they are not needed
