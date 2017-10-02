@@ -1,3 +1,8 @@
+MOV ./FHEM/firmware/SIGNALDuino_radinoCC1101.hex unused
+MOV ./FHEM/firmware/SIGNALduino_nano328.hex unused
+MOV ./FHEM/firmware/SIGNALduino_nanoCC1101.hex unused
+MOV ./FHEM/firmware/SIGNALduino_promini328.hex unused
+MOV ./FHEM/firmware/SIGNALduino_uno.hex unused
 MOV FHEM/14_Cresta.pm unused
 MOV FHEM/14_SIGNALduino_AS.pm unused
 MOV FHEM/14_SIGNALduino_ID7.pm unused

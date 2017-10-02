@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 10488 2017-10-02 18:00:00Z v3.3.1-dev $
+# $Id: 00_SIGNALduino.pm 10488 2017-10-02 21:00:00Z v3.3.1-dev $
 #
 # v3.3.1 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -1562,7 +1562,7 @@ SIGNALduino_Define($$)
   
   my $ret=undef;
   
-  InternalTimer(gettimeofday(), 'SIGNALduino_IdList',$hash,0);       # verzoegern bis alle Attribute eingelesen sind
+  InternalTimer(gettimeofday(), 'SIGNALduino_IdList',"sduino_IdList:$name",0);       # verzoegern bis alle Attribute eingelesen sind
   
   if($dev ne "none") {
     $ret = DevIo_OpenDev($hash, 0, "SIGNALduino_DoInit", 'SIGNALduino_Connect');
@@ -3865,8 +3865,9 @@ SIGNALduino_Attr(@)
 
 sub SIGNALduino_IdList($@)
 {
-	my ($hash, $aVal, $blacklist, $develop) = @_;
-	my $name = $hash->{NAME};
+	my ($param, $aVal, $blacklist, $develop) = @_;
+	my (undef,$name) = split(':', $param);
+	my $hash = $defs{$name};
 
 	my @msIdList = ();
 	my @muIdList = ();
