@@ -1,8 +1,3 @@
-MOV ./FHEM/firmware/SIGNALDuino_radinoCC1101.hex unused
-MOV ./FHEM/firmware/SIGNALduino_nano328.hex unused
-MOV ./FHEM/firmware/SIGNALduino_nanoCC1101.hex unused
-MOV ./FHEM/firmware/SIGNALduino_promini328.hex unused
-MOV ./FHEM/firmware/SIGNALduino_uno.hex unused
 MOV FHEM/14_Cresta.pm unused
 MOV FHEM/14_SIGNALduino_AS.pm unused
 MOV FHEM/14_SIGNALduino_ID7.pm unused
@@ -30,6 +25,6 @@ UPD 2017_06_10_21:27:21 17265   FHEM/14_Hideki.pm
 UPD 2017_06_27_20:29:40 14541   FHEM/10_FS10.pm
 UPD 2017_06_27_20:29:40 8569    FHEM/14_FLAMINGO.pm
 UPD 2017_06_27_20:29:40 9935    FHEM/14_SD_RSL.pm
-UPD 2017_09_27_21:13:57 27941   FHEM/14_SD_WS09.pm
 UPD 2017_09_27_21:13:57 30325   FHEM/14_SD_WS.pm
-UPD 2017_10_02_23:09:27 173501  FHEM/00_SIGNALduino.pm
+UPD 2017_10_02_23:31:05 173557  FHEM/00_SIGNALduino.pm
+UPD 2017_10_02_23:31:05 36947   FHEM/14_SD_WS09.pm
