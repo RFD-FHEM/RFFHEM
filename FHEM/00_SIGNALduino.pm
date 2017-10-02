@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 10488 2017-10-01 22:00:00Z v3.3.1-dev $
+# $Id: 00_SIGNALduino.pm 10488 2017-10-02 18:00:00Z v3.3.1-dev $
 #
 # v3.3.1 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -3032,7 +3032,7 @@ SIGNALduino_Parse_MS($$$$%)
 	my $debug = AttrVal($iohash->{NAME},"debug",0);
 
 	
-	if (defined($clockidx) and defined($syncidx) and defined($hash->{msIdList}))
+	if (defined($clockidx) and defined($syncidx))
 	{
 		
 		## Make a lookup table for our pattern index ids
@@ -3275,7 +3275,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 	$patternListRaw{$_} = $msg_parts{pattern}{$_} for keys %{$msg_parts{pattern}};
 
 	
-	if (defined($clockidx) and defined($hash->{muIdList}))
+	if (defined($clockidx))
 	{
 		
 		## Make a lookup table for our pattern index ids
@@ -3553,7 +3553,7 @@ SIGNALduino_Parse_MC($$$$@)
 		$rssi = ($rssi>=128 ? (($rssi-256)/2-74) : ($rssi/2-74)); # todo: passt dies so? habe ich vom 00_cul.pm
 	}
 	
-	return undef if (!$clock || !defined($hash->{mcIdList}));
+	return undef if (!$clock);
 	#my $protocol=undef;
 	#my %patternListRaw = %msg_parts{patternList};
 	
@@ -3640,6 +3640,8 @@ SIGNALduino_Parse($$$$@)
   my ($hash, $iohash, $name, $rmsg, $initstr) = @_;
 
 	#print Dumper(\%ProtocolListSIGNALduino);
+	
+	return undef if !defined($hash->{msIdList});
     	
 	return undef if !($rmsg=~ s/^\002(M.;.*;)\003/$1/); 			## Check if a Data Message arrived and if it's complete  (start & end control char are received)
 																    # cut off start end end character from message for further processing they are not needed
