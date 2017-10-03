@@ -1600,6 +1600,9 @@ SIGNALduino_Undef($$)
 {
   my ($hash, $arg) = @_;
   my $name = $hash->{NAME};
+  
+  
+ 
 
   foreach my $d (sort keys %defs) {
     if(defined($defs{$d}) &&
@@ -1638,6 +1641,10 @@ SIGNALduino_Set($@)
   my ($hash, @a) = @_;
   
   return "\"set SIGNALduino\" needs at least one parameter" if(@a < 2);
+
+  Log3 $hash, 3, "SIGNALduino_Set called with params @a";
+
+
   my $hasCC1101 = 0;
   my $CC1101Frequency;
   if ($hash->{version} && $hash->{version} =~ m/cc1101/) {
@@ -1696,10 +1703,23 @@ SIGNALduino_Set($@)
         $hexFile = $defaultHexFile;
       }
     }
-    else {
+    elsif ($args[0] =~ m/^https?:\/\// ) {
+		my $http_param = {
+		                    url        => $args[0],
+		                    timeout    => 5,
+		                    hash       => $hash,                                  # Muss gesetzt werden, damit die Callback funktion wieder $hash hat
+		                    method     => "GET",                                  # Lesen von Inhalten
+		                    callback   =>  \&SIGNALduino_ParseHttpResponse,        # Diese Funktion soll das Ergebnis dieser HTTP Anfrage bearbeiten
+		                    command    => 'flash',
+		                };
+		
+		HttpUtils_NonblockingGet($http_param);       
+		return;  	
+    } else {
       $hexFile = $args[0];
     }
-
+	Log3 $name, 3, "$name: filename $hexFile provided, trying to flash";
+ 
     return "Usage: set $name flash [filename]\n\nor use the hexFile attribute" if($hexFile !~ m/^(\w|\/|.)+$/);
 
     $log .= "flashing Arduino $name\n";
@@ -2685,6 +2705,50 @@ sub SIGNALduino_KeepAlive($){
 
 
 ### Helper Subs >>>
+
+
+## Parses a HTTP Response for example for flash via http download
+sub SIGNALduino_ParseHttpResponse
+{
+	
+	my ($param, $err, $data) = @_;
+    my $hash = $param->{hash};
+    my $name = $hash->{NAME};
+
+    if($err ne "")               											 		# wenn ein Fehler bei der HTTP Abfrage aufgetreten ist
+    {
+        Log3 $name, 3, "error while requesting ".$param->{url}." - $err";    		# Eintrag fürs Log
+    }
+    elsif($param->{code} eq "200" && $data ne "")                                                       		# wenn die Abfrage erfolgreich war ($data enthält die Ergebnisdaten des HTTP Aufrufes)
+    {
+    	
+        Log3 $name, 3, "url ".$param->{url}." returned: ".length($data)." bytes Data";  # Eintrag fürs Log
+
+        # An dieser Stelle die Antwort parsen / verarbeiten mit $data
+		#my $firmware = GetFileFromURL($args[0], 10);
+		    	
+    	if ($param->{command} eq "flash")
+    	{
+	    	(my $filename = $param->{path}) =~s/.*\///;
+	    	
+	    	Log3 $name, 3, "$name: Downloaded $filename firmware from ".$param->{host};
+	    	Log3 $name, 5, "$name: Header = ".$param->{httpheader};
+	
+		   	$filename = "FHEM/firmware/" . $filename;
+			open(my $file, ">", $filename) or die $!;
+			print $file $data;
+			close $file;
+	
+			# Den Flash Befehl mit der soebene heruntergeladenen Datei ausführen
+			Log3 $name, 3, "calling set ".$param->{command}." $filename";    		# Eintrag fürs Log
+
+			SIGNALduino_Set($hash,$name,$param->{command},$filename); # $hash->{SetFn}
+			
+    	}
+    } else {
+    	Log3 $name, 3, "undefined error while requesting ".$param->{url}." - $err - code=".$param->{code};    		# Eintrag fürs Log
+    }
+}
 
 sub SIGNALduino_splitMsg
 {
@@ -5091,9 +5155,10 @@ With a # at the beginnging whitelistIDs can be deactivated.
 		<li>close<br>
 		Closes the connection to the device.
 		</li><br>
-		<li>flash [hexFile]<br>
+		<li>flash [hexFile|url]<br>
 			The SIGNALduino needs the right firmware to be able to receive and deliver the sensor data to fhem. In addition to the way using the
 			arduino IDE to flash the firmware into the SIGNALduino this provides a way to flash it directly from FHEM.
+			You can specify a file on your fhem server or specify a url from which the firmware is downloaded
 
 			There are some requirements:
 			<ul>
