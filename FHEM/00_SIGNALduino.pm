@@ -1642,7 +1642,7 @@ SIGNALduino_Set($@)
   
   return "\"set SIGNALduino\" needs at least one parameter" if(@a < 2);
 
-  Log3 $hash, 3, "SIGNALduino_Set called with params @a";
+  #Log3 $hash, 3, "SIGNALduino_Set called with params @a";
 
 
   my $hasCC1101 = 0;
@@ -2723,24 +2723,29 @@ sub SIGNALduino_ParseHttpResponse
     {
     	
         Log3 $name, 3, "url ".$param->{url}." returned: ".length($data)." bytes Data";  # Eintrag fürs Log
-
-        # An dieser Stelle die Antwort parsen / verarbeiten mit $data
-		#my $firmware = GetFileFromURL($args[0], 10);
 		    	
     	if ($param->{command} eq "flash")
     	{
-	    	(my $filename = $param->{path}) =~s/.*\///;
+	    	my $filename;
 	    	
+	    	if ($param->{httpheader} =~ /Content-Disposition: attachment;filename=\"?([-+.\w]+)?\"/)
+			{ 
+				$filename = $1;
+			} else {  # Filename via path if not specifyied via Content-Disposition
+	    		($filename = $param->{path}) =~s/.*\///;
+			}
+			
 	    	Log3 $name, 3, "$name: Downloaded $filename firmware from ".$param->{host};
 	    	Log3 $name, 5, "$name: Header = ".$param->{httpheader};
 	
+			
 		   	$filename = "FHEM/firmware/" . $filename;
 			open(my $file, ">", $filename) or die $!;
 			print $file $data;
 			close $file;
 	
 			# Den Flash Befehl mit der soebene heruntergeladenen Datei ausführen
-			Log3 $name, 3, "calling set ".$param->{command}." $filename";    		# Eintrag fürs Log
+			#Log3 $name, 3, "calling set ".$param->{command}." $filename";    		# Eintrag fürs Log
 
 			SIGNALduino_Set($hash,$name,$param->{command},$filename); # $hash->{SetFn}
 			
