@@ -3874,21 +3874,21 @@ SIGNALduino_Attr(@)
 	{
 		Log3 $name, 3, "$name Attr: whitelist_IDs";
 		if ($init_done) {		# beim fhem Start wird das SIGNALduino_IdList nicht aufgerufen, da es beim define aufgerufen wird
-			SIGNALduino_IdList($hash,$aVal);
+			SIGNALduino_IdList("x:$name",$aVal);
 		}
 	}
 	elsif ($aName eq "blacklist_IDs")
 	{
 		Log3 $name, 3, "$name Attr: blacklist_IDs";
 		if ($init_done) {		# beim fhem Start wird das SIGNALduino_IdList nicht aufgerufen, da es beim define aufgerufen wird
-			SIGNALduino_IdList($hash,undef,$aVal);
+			SIGNALduino_IdList("x:$name",undef,$aVal);
 		}
 	}
 	elsif ($aName eq "development")
 	{
 		Log3 $name, 3, "$name Attr: development";
 		if ($init_done) {		# beim fhem Start wird das SIGNALduino_IdList nicht aufgerufen, da es beim define aufgerufen wird
-			SIGNALduino_IdList($hash,undef,undef,$aVal);
+			SIGNALduino_IdList("x:$name",undef,undef,$aVal);
 		}
 	}
 	elsif ($aName eq "doubleMsgCheck_IDs")
