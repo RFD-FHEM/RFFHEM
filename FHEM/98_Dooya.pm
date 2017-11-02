@@ -15,7 +15,7 @@
 # 1.00	2016-03-12	darkmission	autocreate, parse communication from SIGNALduino for correct position when using remote from doooya 
 # 1.10  2016-03-13	Ralf9		changed SendCommand with sendMsg
 # 1.11  2016-03-17	Ralf9   	ID + Channel = DeviceCode
-# 1.12  2016-04-26  Jarnsen     im Dooya parse cmd geändert
+# 1.12  2016-04-26      Jarnsen     im Dooya parse cmd geändert
 # 1.13	2017-08-26	darkmission	Update state when called by remote, little code cleaning (setlist and go-my deleted), some more debug messages
 
 #TODOS:
@@ -46,8 +46,8 @@ my %sets = (
 	"prog" => "noArg",
 #	"on-for-timer" => "textField",
 #	"off-for-timer" => "textField",
-	"pos" => "0,10,20,30,40,50,60,70,80,90,100"    # Todo: Warum nicht als Slider?
-#	"pos" => "slider,0,10,100"
+#	"pos" => "0,10,20,30,40,50,60,70,80,90,100"    # Todo: Warum nicht als Slider?
+	"pos" => "slider,0,10,100"
 );
 
 my %sendCommands = (
