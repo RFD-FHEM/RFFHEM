@@ -15,7 +15,7 @@
 # 1.00	2016-03-12	darkmission	autocreate, parse communication from SIGNALduino for correct position when using remote from doooya 
 # 1.10  2016-03-13	Ralf9		changed SendCommand with sendMsg
 # 1.11  2016-03-17	Ralf9   	ID + Channel = DeviceCode
-# 1.12  2016-04-26  	Jarnsen     	im Dooya parse cmd geändert
+# 1.12  2016-04-26  Jarnsen     im Dooya parse cmd geändert
 # 1.13	2017-08-26	darkmission	Update state when called by remote, little code cleaning (setlist and go-my deleted), some more debug messages
 
 #TODOS:
@@ -46,8 +46,8 @@ my %sets = (
 	"prog" => "noArg",
 #	"on-for-timer" => "textField",
 #	"off-for-timer" => "textField",
-#	"pos" => "0,10,20,30,40,50,60,70,80,90,100"    # Todo: Warum nicht als Slider?
-	"pos" => "slider,0,10,100"
+	"pos" => "0,10,20,30,40,50,60,70,80,90,100"    # Todo: Warum nicht als Slider?
+#	"pos" => "slider,0,10,100"
 );
 
 my %sendCommands = (
@@ -415,7 +415,7 @@ sub Dooya_Set($@) {
 	Log3 $name, 4, "Dooya_Set: Called";
 	
 	if ( lc($args[0]) =~m/(virtual|send)/ ) {
-		Log3 $name, 4, "Dooya_InternalSet call send or virtual ( s: lc($args[0])";
+		Log3 $name, 4, "Dooya_InternalSet call $args[0] ";
 		Dooya_InternalSet( $hash, $name, @args );
 
 	} else {
@@ -1144,13 +1144,6 @@ sub Dooya_CalcCurrentPos($$$$) {
         Set the repeats for sending signal. You can use 5, 10, 15 and 20.
     </li><br>
         
-    <a name="setList"></a>
-    <li>setList<br>
-        Space separated list of commands, which will be returned upon "set name ?", 
-        so the FHEMWEB frontend can construct the correct control and command dropdown. Specific controls can be added after a colon for each command
-        <br>
-    </li><br>
-
     <a name="additionalPosReading"></a>
     <li>additionalPosReading<br>
         Position of the shutter will be stored in the reading <code>pos</code> as numeric value. 
