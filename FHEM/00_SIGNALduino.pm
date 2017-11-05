@@ -1425,20 +1425,53 @@ my %ProtocolListSIGNALduino  = (
 		},
 	"74" => ## FS20 - 'Remote Control (868Mhz),  @HomeAutoUser
 		{
-			name		=> 'FS20',
-			comment		=> 'reserviert, Remote Control (868Mhz)',
-			id		=> '74',
-			developId	=> 'p',
-			one		=> [1.5,-1.5], # 600
-			zero		=> [1,-1], # 400
-			clockabs	=> 400,
-			format		=> 'twostate', # not used now
+			name			=> 'FS20',
+			comment			=> 'reserviert, Remote Control (868Mhz)',
+			id				=> '74',
+			developId		=> 'p',
+			one				=> [1.5,-1.5], # 600
+			zero			=> [1,-1], # 400
+			clockabs		=> 400,
+			format			=> 'twostate', # not used now
 			clientmodule	=> 'FS20',
-			preamble	=> '810b04f70101a001',
-			length_min	=> '50',
-			length_max	=> '67',
+			preamble		=> '810b04f70101a001',
+			length_min		=> '50',
+			length_max		=> '67',
 			#postDemodulation => &SIGNALduino_postDemo_FS20,
 		},
+	"76" => ##  Kabellose LED-Weihnachtskerzen XM21-0
+		{
+			name			=> 'xm21',
+			comment			=> 'reserviert, LED Lichtrekette on',
+			id				=> '76',
+			developId		=> 'p',
+			one				=> [1.2,-2], # 120,-200
+			zero			=> [],   # existiert nicht
+			start           => [4.5,-2], # 450,-200 Starsequenz
+			clockabs		=> 100,
+			format			=> 'twostate', # not used now
+			clientmodule	=> '',
+			preamble		=> 'P76',
+			length_min		=> 64,
+			length_max		=> 64,
+		},
+	"76.1" => ##  Kabellose LED-Weihnachtskerzen XM21-0
+		{
+			name			=> 'xm21',
+			comment			=> 'reserviert, LED Lichtrekette off',
+			id				=> '76.1',
+			developId		=> 'p', 
+			one				=> [1.2,-2], # 120,-200
+			zero			=> [],   # existiert nicht
+			start           => [4.5,-2], # 450,-200 Starsequenz
+			clockabs		=> 100,
+			format			=> 'twostate', # not used now
+			clientmodule	=> '',
+			preamble		=> 'P76',
+			length_min		=> 58,
+			length_max		=> 58,
+		},
+
 );
 
 
@@ -2789,6 +2822,8 @@ sub SIGNALduino_PatternExists
 	#Debug "plist: ".Dumper($patternList) if($debug); 
 	#Debug "searchlist: ".Dumper($search) if($debug);
 
+
+	
 	my $searchpattern;
 	my $valid=1;  
 	my @pstr;
@@ -3421,11 +3456,14 @@ sub SIGNALduino_Parse_MU($$$$@)
 			$patternLookupHash{$pstr}="1" if ($valid); ## Append one to our lookuptable
 			Debug "added $pstr " if ($debug && $valid);
 
-			$valid = $valid && ($pstr=SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{zero}},\%patternList,\$rawData)) >=0;
-			Debug "Found matched zero" if ($debug && $valid);
-			my $zeroStr=$pstr if ($valid);
-			$patternLookupHash{$pstr}="0" if ($valid); ## Append zero to our lookuptable
-			Debug "added $pstr " if ($debug && $valid);
+			my $zeroStr ="";
+			if (scalar @{$ProtocolListSIGNALduino{$id}{zero}} >0) {
+				$valid = $valid && ($pstr=SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{zero}},\%patternList,\$rawData)) >=0;
+				Debug "Found matched zero" if ($debug && $valid);
+				$zeroStr=$pstr if ($valid);
+				$patternLookupHash{$pstr}="0" if ($valid); ## Append zero to our lookuptable
+				Debug "added $pstr " if ($debug && $valid);
+			}
 
 			if (defined($ProtocolListSIGNALduino{$id}{float}))
 			{
@@ -3466,7 +3504,11 @@ sub SIGNALduino_Parse_MU($$$$@)
 					next;
 				};
 			} 
-			$start_regex="$startStr($oneStr|$zeroStr)";
+			
+			
+			if (length ($zeroStr) > 0 ){  $start_regex = "$startStr\($oneStr\|$zeroStr\)";}
+			else {$start_regex  = $startStr.$oneStr; }
+			
 			Debug "Regex is: $start_regex" if ($debug);
 
 			$rawData =~ /$start_regex/;
