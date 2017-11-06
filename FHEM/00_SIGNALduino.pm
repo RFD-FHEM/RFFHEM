@@ -136,6 +136,8 @@ my $clientsSIGNALduino = ":IT:"
 			        	."FS10:"
 			        	."CUL_FHTTK:"
 			        	."Siro:"
+						."FHT:"
+						."FS20:"
 			      		."SIGNALduino_un:"
 					; 
 
@@ -162,6 +164,8 @@ my %matchListSIGNALduino = (
      "20:Revolt"				=> '^r[A-Fa-f0-9]{22}',
      "21:FS10"				=> '^P61#[A-F0-9]+',
      "22:Siro"					=> '^P72#[A-Fa-f0-9]+',
+     "23:FHT"       => "^81..(04|09|0d)..(0909a001|83098301|c409c401)..",
+     "24:FS20"      => "^81..(04|0c)..0101a001",											   																		 
      "X:SIGNALduino_un"			=> '^[u]\d+#.*',
 );
 
@@ -1063,7 +1067,7 @@ my %ProtocolListSIGNALduino  = (
 			clientmodule    => 'SD_WS',   
 			modulematch     => '^W51#.*',
 			length_min      => '40',
-			length_max      => '48',
+			length_max      => '40',
         },
     "52"    => 			## Oregon PIR Protocol
 		{
@@ -1336,7 +1340,7 @@ my %ProtocolListSIGNALduino  = (
 	# open   MU;P0=-21652;P1=429;P2=-367;P4=634;P5=-555;D=012121212121212121212121245124545121245451212454545121245124545454512454545121245451212121212124512451245451245121212;CP=1;R=38;
 		{
 			name         	=> 'FHT80TF',
-			comment		=> 'Funk-Tuer-Fenster-Melder 868Mhz',
+			comment		   => 'Door/Window switch (868Mhz)',
 			id           	=> '70',
 			one         	=> [1.5,-1.5],	# 600
 			zero         	=> [1,-1],	# 400
@@ -1344,7 +1348,7 @@ my %ProtocolListSIGNALduino  = (
 			format          => 'twostate',  # not used now
 			clientmodule    => 'CUL_FHTTK',
 			preamble     	=> 'T',
-			length_min     => '48',
+			length_min     => '50',
 			length_max     => '58',
 			postDemodulation => \&SIGNALduino_postDemo_FHT80TF,
 		},
@@ -1410,9 +1414,9 @@ my %ProtocolListSIGNALduino  = (
 	"73" => ## FHT80 - Raumthermostat (868Mhz),  @HomeAutoUser
 		{
 			name		=> 'FHT80',
-			comment 	=> 'reserviert, Roomthermostat (868Mhz only receive)',
+			comment 	=> 'Roomthermostat (868Mhz only receive)',
 			id		=> '73',
-			developId	=> 'p',
+			#developId	=> 'p',
 			one		=> [1.5,-1.5], # 600
 			zero		=> [1,-1], # 400
 			clockabs	=> 400,
@@ -1421,14 +1425,14 @@ my %ProtocolListSIGNALduino  = (
 			preamble	=> '810c04xx0909a001',
 			length_min	=> '59',
 			length_max	=> '67',
-			#postDemodulation => &SIGNALduino_postDemo_FHT80,
+			postDemodulation => \&SIGNALduino_postDemo_FHT80,
 		},
 	"74" => ## FS20 - 'Remote Control (868Mhz),  @HomeAutoUser
 		{
 			name			=> 'FS20',
-			comment			=> 'reserviert, Remote Control (868Mhz)',
+			comment			=> 'Remote Control (868Mhz only receive)',
 			id				=> '74',
-			developId		=> 'p',
+			#developId	=> 'p',
 			one				=> [1.5,-1.5], # 600
 			zero			=> [1,-1], # 400
 			clockabs		=> 400,
@@ -1437,7 +1441,7 @@ my %ProtocolListSIGNALduino  = (
 			preamble		=> '810b04f70101a001',
 			length_min		=> '50',
 			length_max		=> '67',
-			#postDemodulation => &SIGNALduino_postDemo_FS20,
+			postDemodulation => \&SIGNALduino_postDemo_FS20,
 		},
 	"76" => ##  Kabellose LED-Weihnachtskerzen XM21-0
 		{
@@ -4173,48 +4177,176 @@ sub SIGNALduino_postDemo_Hoermann($@) {
 	}
 }
 
-sub SIGNALduino_postDemo_FHT80TF($@) {
+sub SIGNALduino_postDemo_FS20($@) {
 	my ($name, @bit_msg) = @_;
 	my $datastart = 0;
-	my $protolength = scalar @bit_msg;								 
-	my $sum = 12;
-   if ($protolength < 46) {                                        	# min 5 bytes + 6 bits
-																						 
-																						 
-		Log3 $name, 3, "$name: FHT80TF - ERROR lenght of message < 45";
-		return 0, undef;
-   }
-for ($datastart = 0; $datastart < $protolength; $datastart++) {   # Start bei erstem Bit mit Wert 1 suchen
+   my $protolength = scalar @bit_msg;
+	my $sum = 0;
+	my $b = 0;
+	my $i = 0;
+   for ($datastart = 0; $datastart < $protolength; $datastart++) {   # Start bei erstem Bit mit Wert 1 suchen
       last if $bit_msg[$datastart] eq "1";
    }
    if ($datastart == $protolength) {                                 # all bits are 0
-		Log3 $name, 3, "$name: FHT80TF - ERROR message all zeros";
+		Log3 $name, 3, "$name: FS20 - ERROR message all bit are zeros";
 		return 0, undef;
    }
    splice(@bit_msg, 0, $datastart + 1);                             	# delete preamble + 1 bit
-   for(my $b = 0; $b < 45; $b += 9) {	                        # check parity over 5 byte
-      my $parity = 0;					                           # Parity even
-      for(my $i = $b; $i < $b + 9; $i++) {			            # Parity over 1 byte + 1 bit
-         $parity += $bit_msg[$i];
+   $protolength = scalar @bit_msg;
+         
+   if ($protolength == 45) {                       		      ### FS20 length 45 or 54
+      for(my $b = 0; $b < 36; $b += 9) {	                             # build sum over first 4 bytes
+         $sum += oct( "0b".(join "", @bit_msg[$b .. $b + 7]));
       }
-      if ($parity % 2 != 0) {
-         Log3 $name, 3, "$name: FHT80TF ERROR - Parity not even";
-         return 0, undef;
+      my $checksum = oct( "0b".(join "", @bit_msg[36 .. 43]));          # Checksum Byte 5
+      if (((($sum + 6) & 0xFF) - $checksum) == 0) {				## FHT80TF Tuer-/Fensterkontakt
+			for(my $b = 0; $b < 45; $b += 9) {	                              # check parity over 5 byte
+				my $parity = 0;					                                 # Parity even
+				for(my $i = $b; $i < $b + 9; $i++) {			                  # Parity over 1 byte + 1 bit
+					$parity += $bit_msg[$i];
+				}
+				if ($parity % 2 != 0) {
+					Log3 $name, 3, "$name: FS20 ERROR - Parity not even";
+					return 0, undef;
+				}
+			}																						# parity ok
+			for(my $b = 44; $b > 0; $b -= 9) {	                               # delete 5 parity bits
+				splice(@bit_msg, $b, 1);
+			}
+			splice(@bit_msg, 32, 8);                                         	# delete checksum
+         splice(@bit_msg, 24, 0, (0,0,0,0,0,0,0,0));                    # insert Byte 3
+         Log3 $name, 4, "$name: FS20 - remote control protolength $protolength";
+			return (1, @bit_msg);											## FHT80TF ok
+      } 
+   } 
+
+   if ($protolength == 54) {                       		### FS20 length 45 or 54
+      for($b = 0; $b < 45; $b += 9) {	                             # build sum over first 5 bytes
+         $sum += oct( "0b".(join "", @bit_msg[$b .. $b + 7]));
+      }
+      my $checksum = oct( "0b".(join "", @bit_msg[45 .. 52]));          # Checksum Byte 6
+      if (((($sum + 6) & 0xFF) - $checksum) == 0) {				## FHT80 Raumthermostat
+         for($b = 0; $b < 55; $b += 9) {	                              # check parity over 6 byte
+            my $parity = 0;					                              # Parity even
+            for($i = $b; $i < $b + 9; $i++) {			                  # Parity over 1 byte + 1 bit
+               $parity += $bit_msg[$i];
+            }
+            if ($parity % 2 != 0) {
+               Log3 $name, 3, "$name: FHT80 ERROR - Parity not even";
+               return 0, undef;
+            }
+         }																					# parity ok
+         for($b = 53; $b > 0; $b -= 9) {	                              # delete 6 parity bits
+            splice(@bit_msg, $b, 1);
+         }
+         splice(@bit_msg, 40, 8);                                       # delete checksum
+         Log3 $name, 4, "$name: FS20 - remote control protolength $protolength";
+         return (1, @bit_msg);											## FHT80 ok
       }
    }
-   for(my $b = 0; $b < 36; $b += 9) {	                        # build sum over first 4 bytes
-      $sum += oct( "0b".(join "", @bit_msg[$b .. $b + 7]));
+   return 0, undef;
+}
+
+sub SIGNALduino_postDemo_FHT80($@) {
+	my ($name, @bit_msg) = @_;
+	my $datastart = 0;
+   my $protolength = scalar @bit_msg;
+	my $sum = 0;
+	my $b = 0;
+	my $i = 0;
+   # if ($protolength < 66) {                                        	# min 6 bytes + 6 bits
+		# Log3 $name, 3, "$name: FHT80 - ERROR lenght of message < 66";
+		# return 0, undef;
+   # }
+   for ($datastart = 0; $datastart < $protolength; $datastart++) {   # Start bei erstem Bit mit Wert 1 suchen
+      last if $bit_msg[$datastart] eq "1";
    }
-   my $checksum = oct( "0b".(join "", @bit_msg[36 .. 43]));    	# Checksum Byte 5
-   if (($sum & 0xFF) != $checksum) {
-      Log3 $name, 3, "$name: FHT80TF ERROR - Checksum $checksum != $sum";
-      return 0, undef;
+   if ($datastart == $protolength) {                                 # all bits are 0
+		Log3 $name, 3, "$name: FHT80 - ERROR message all bit are zeros";
+		return 0, undef;
    }
-   for(my $b = 44; $b > 0; $b -= 9) {	                        # delete 5 parity bits
-      splice(@bit_msg, $b, 1);
+   splice(@bit_msg, 0, $datastart + 1);                             	# delete preamble + 1 bit
+   $protolength = scalar @bit_msg;
+   if ($protolength == 54) {                       		### FHT80 fixed length
+      for($b = 0; $b < 45; $b += 9) {	                             # build sum over first 5 bytes
+         $sum += oct( "0b".(join "", @bit_msg[$b .. $b + 7]));
+      }
+      my $checksum = oct( "0b".(join "", @bit_msg[45 .. 52]));          # Checksum Byte 6
+      if (((($sum + 12) & 0xFF) - $checksum) == 0) {				## FHT80 Raumthermostat
+         for($b = 0; $b < 55; $b += 9) {	                              # check parity over 6 byte
+            my $parity = 0;					                              # Parity even
+            for($i = $b; $i < $b + 9; $i++) {			                  # Parity over 1 byte + 1 bit
+               $parity += $bit_msg[$i];
+            }
+            if ($parity % 2 != 0) {
+               Log3 $name, 3, "$name: FHT80 ERROR - Parity not even";
+               return 0, undef;
+            }
+         }																					# parity ok
+         for($b = 53; $b > 0; $b -= 9) {	                              # delete 6 parity bits
+            splice(@bit_msg, $b, 1);
+         }
+         if ($bit_msg[26] != 1) {                                       # Bit 5 Byte 3 must 1
+            Log3 $name, 3, "$name: FHT80 ERROR - byte 3 bit 5 not 1";
+            return 0, undef;
+         }
+         splice(@bit_msg, 40, 8);                                       # delete checksum
+         splice(@bit_msg, 24, 0, (0,0,0,0,0,0,0,0));                    # insert Byte 3
+         Log3 $name, 4, "$name: FHT80 - roomthermostat protolength $protolength";
+         return (1, @bit_msg);											## FHT80 ok
+      }
    }
-   splice(@bit_msg, 32, 8);                                    	# delete checksum
-   return (1, @bit_msg);
+   return 0, undef;
+}
+
+sub SIGNALduino_postDemo_FHT80TF($@) {
+	my ($name, @bit_msg) = @_;
+	my $datastart = 0;
+   my $protolength = scalar @bit_msg;
+	my $sum = 0;			
+	my $b = 0;
+   if ($protolength < 46) {                                        	# min 5 bytes + 6 bits
+		Log3 $name, 4, "$name: FHT80TF or FS20 - ERROR lenght of message < 46";
+		return 0, undef;
+   }
+   for ($datastart = 0; $datastart < $protolength; $datastart++) {   # Start bei erstem Bit mit Wert 1 suchen
+      last if $bit_msg[$datastart] eq "1";
+   }
+   if ($datastart == $protolength) {                                 # all bits are 0
+		Log3 $name, 3, "$name: FHTTF or FS20 - ERROR message all bit are zeros";
+		return 0, undef;
+   }
+   splice(@bit_msg, 0, $datastart + 1);                             	# delete preamble + 1 bit
+   $protolength = scalar @bit_msg;
+   if ($protolength == 45) {                       		      ### FHT80TF fixed length
+      for(my $b = 0; $b < 36; $b += 9) {	                             # build sum over first 4 bytes
+         $sum += oct( "0b".(join "", @bit_msg[$b .. $b + 7]));
+      }
+      my $checksum = oct( "0b".(join "", @bit_msg[36 .. 43]));          # Checksum Byte 5
+      if (((($sum + 12) & 0xFF) - $checksum) == 0) {				## FHT80TF Tuer-/Fensterkontakt
+			for(my $b = 0; $b < 45; $b += 9) {	                              # check parity over 5 byte
+				my $parity = 0;					                                 # Parity even
+				for(my $i = $b; $i < $b + 9; $i++) {			                  # Parity over 1 byte + 1 bit
+					$parity += $bit_msg[$i];
+				}
+				if ($parity % 2 != 0) {
+					Log3 $name, 4, "$name: FHT80TF ERROR - Parity not even";
+					return 0, undef;
+				}
+			}																						# parity ok
+			for(my $b = 44; $b > 0; $b -= 9) {	                               # delete 5 parity bits
+				splice(@bit_msg, $b, 1);
+			}
+         if ($bit_msg[26] != 0) {                                       # Bit 5 Byte 3 must 0
+            Log3 $name, 3, "$name: FHT80 ERROR - byte 3 bit 5 not 0";
+            return 0, undef;
+         }
+			splice(@bit_msg, 32, 8);                                         	# delete checksum
+      Log3 $name, 4, "$name: FHT80TF - door/window switch protolength $protolength";
+			return (1, @bit_msg);											## FHT80TF ok
+      } 
+   } 
+   return 0, undef;
 }
 
 sub SIGNALduino_postDemo_WS7035($@) {
