@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 10488 2017-10-02 21:00:00Z v3.3.1-dev $
+# $Id: 00_SIGNALduino.pm 10488 2017-11-22 23:00:00Z v3.3.1-dev $
 #
 # v3.3.1 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -1416,7 +1416,7 @@ my %ProtocolListSIGNALduino  = (
 			name		=> 'FHT80',
 			comment 	=> 'Roomthermostat (868Mhz only receive)',
 			id		=> '73',
-			#developId	=> 'p',
+			developId	=> 'y',
 			one		=> [1.5,-1.5], # 600
 			zero		=> [1,-1], # 400
 			clockabs	=> 400,
@@ -1431,13 +1431,13 @@ my %ProtocolListSIGNALduino  = (
 		{
 			name			=> 'FS20',
 			comment			=> 'Remote Control (868Mhz only receive)',
-			id				=> '74',
-			#developId	=> 'p',
-			one				=> [1.5,-1.5], # 600
+			id			=> '74',
+			developId		=> 'y',
+			one			=> [1.5,-1.5], # 600
 			zero			=> [1,-1], # 400
 			clockabs		=> 400,
 			format			=> 'twostate', # not used now
-			clientmodule	=> 'FS20',
+			clientmodule		=> 'FS20',
 			preamble		=> '810b04f70101a001',
 			length_min		=> '50',
 			length_max		=> '67',
@@ -1519,6 +1519,7 @@ SIGNALduino_Initialize($)
 					  ." doubleMsgCheck_IDs"
 					  ." suppressDeviceRawmsg:1,0"
 					  ." development"
+					  ." noMsgVerbose"
 		              ." $readingFnAttributes";
 
   $hash->{ShutdownFn} = "SIGNALduino_Shutdown";
@@ -3761,8 +3762,15 @@ SIGNALduino_Parse($$$$@)
 	#print Dumper(\%ProtocolListSIGNALduino);
 	
     	
-	return undef if !($rmsg=~ s/^\002(M.;.*;)\003/$1/); 			## Check if a Data Message arrived and if it's complete  (start & end control char are received)
-																    # cut off start end end character from message for further processing they are not needed
+	if (!($rmsg=~ s/^\002(M.;.*;)\003/$1/)) 			# Check if a Data Message arrived and if it's complete  (start & end control char are received)
+	{							# cut off start end end character from message for further processing they are not needed
+		if (defined($hash->{noMsgVerbose}))
+		{
+			Log3 $name, $hash->{noMsgVerbose}, "$name/noMsg Parse: $rmsg";
+		}
+		return undef;
+	}
+
 	if (defined($hash->{keepalive})) {
 		$hash->{keepalive}{ok}    = 1;
 		$hash->{keepalive}{retry} = 0;
@@ -3947,18 +3955,18 @@ SIGNALduino_Attr(@)
 		if (defined($aVal)) {
 			if (length($aVal)>0) {
 				if (substr($aVal,0 ,1) eq '#') {
-					Log3 $name, 3, "Attr doubleMsgCheck_IDs disabled: $aVal";
+					Log3 $name, 3, "$name Attr: doubleMsgCheck_IDs disabled: $aVal";
 					delete $hash->{DoubleMsgIDs};
 				}
 				else {
-					Log3 $name, 3, "Attr doubleMsgCheck_IDs enabled: $aVal";
+					Log3 $name, 3, "$name Attr: doubleMsgCheck_IDs enabled: $aVal";
 					my %DoubleMsgiD = map { $_ => 1 } split(",", $aVal);
 					$hash->{DoubleMsgIDs} = \%DoubleMsgiD;
 					#print Dumper $hash->{DoubleMsgIDs};
 				}
 			}
 			else {
-				Log3 $name, 3, "delete Attr doubleMsgCheck_IDs";
+				Log3 $name, 3, "$name delete Attr: doubleMsgCheck_IDs";
 				delete $hash->{DoubleMsgIDs};
 			}
 		}
@@ -3971,6 +3979,19 @@ SIGNALduino_Attr(@)
 		} else {
 			Log3 $name, 3, "$name: setting cc1101_frequency to 868";
 			$hash->{cc1101_frequency} = 868;
+		}
+	}
+	elsif ($aName eq "noMsgVerbose")
+	{
+		if (defined($aVal)) {
+			if (length($aVal)>0) {
+				Log3 $name, 3, "$name Attr: noMsgVerbose: $aVal";
+				$hash->{noMsgVerbose} = $aVal;
+			}
+			else {
+				Log3 $name, 3, "$name delete Attr: noMsgVerbose: $aVal";
+				delete $hash->{noMsgVerbose};
+			}
 		}
 	}
 	
