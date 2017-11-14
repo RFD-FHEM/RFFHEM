@@ -1,7 +1,7 @@
 ###########################################
 # SIGNALduini RSL Modul. Modified version of FHEMduino Modul by Wzut
 #  
-# $Id: 14_SD_RSL.pm 7779 2017-06-24 20:00:00Z v3.3.1-dev $
+# $Id: 14_SD_RSL.pm 7779 2017-11-14 18:00:00Z v3.3.1-dev $
 # Supports following devices:
 # - Conrad RSL 
 #####################################
@@ -80,8 +80,8 @@ sub SD_RSL_Define($$)
 
   my $name = $a[0];
   my ($device,$channel,$button) = split("_",$a[2]);
-  return "wrong syntax: use channel 1 - 4"  if(($channel > 4) || ($channel < 1 ));
-  return "wrong syntax: use button 1 - 4"  if(($button > 4) || ($button < 1));
+  return "wrong syntax: use channel 1 - 4"  if(($channel > 4)); # || ($channel < 1 ));
+  return "wrong syntax: use button 1 - 4"  if(($button > 4));   # || ($button < 1));
   return "wrong syntax: use code 000000 - FFFFFF" if (length($device) != 6);
   return "wrong Device Code $device , please use 000000 - FFFFFF" if ((hex($device) < 0) || (hex($device) > 16777215));
 
@@ -151,7 +151,7 @@ sub RSL_getButtonCode($$)
   ## Groupcode
   $DeviceCode  = substr($msg,2,6);
   $receivedButtonCode  = substr($msg,0,2);
-  Log3 $hash, 5, "SD_RSL Message Devicecode: $DeviceCode Buttoncode: $receivedButtonCode";
+  Log3 $hash, 3, "SD_RSL Message Devicecode: $DeviceCode Buttoncode: $receivedButtonCode";
 
   if ((hex($receivedButtonCode) & 0xc0) != 0x80) {
     Log3 $hash, 4, "SD_RSL Message Error: received Buttoncode $receivedButtonCode begins not with bin 10";
@@ -160,10 +160,12 @@ sub RSL_getButtonCode($$)
   $parsedButtonCode  = hex($receivedButtonCode) & 63; # nur 6 Bit bitte
   Log3 $hash, 4, "SD_RSL Message parsed Devicecode: $DeviceCode Buttoncode: $parsedButtonCode";
 
-  for (my $i=1; $i<5; $i++)
+  for (my $i=0; $i<5; $i++)
   {
-    for (my $j=1; $j<5; $j++)
+    for (my $j=0; $j<5; $j++)
     {
+      next if ($i == 0 && $j != 0);
+      next if ($i != 0 && $j == 0);
       if ($RSLCodes[$i][$j][0] == $parsedButtonCode) 
         {$action ="off"; $button = $j; $channel = $i;}
       if ($RSLCodes[$i][$j][1] == $parsedButtonCode) 
