@@ -151,7 +151,7 @@ sub RSL_getButtonCode($$)
   ## Groupcode
   $DeviceCode  = substr($msg,2,6);
   $receivedButtonCode  = substr($msg,0,2);
-  Log3 $hash, 3, "SD_RSL Message Devicecode: $DeviceCode Buttoncode: $receivedButtonCode";
+  Log3 $hash, 5, "SD_RSL Message Devicecode: $DeviceCode Buttoncode: $receivedButtonCode";
 
   if ((hex($receivedButtonCode) & 0xc0) != 0x80) {
     Log3 $hash, 4, "SD_RSL Message Error: received Buttoncode $receivedButtonCode begins not with bin 10";
@@ -205,7 +205,7 @@ sub SD_RSL_Parse($$)
 
     if(!$def) 
     {
-      Log3 $hash, 5, "UNDEFINED Remotebutton send to define: $deviceCode";
+      Log3 $hash, 3, "UNDEFINED Remotebutton send to define: $deviceCode";
       return "UNDEFINED RSL_$deviceCode SD_RSL $deviceCode";
     }
 

@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 10488 2017-11-22 23:00:00Z v3.3.1-dev $
+# $Id: 00_SIGNALduino.pm 10488 2017-11-14 19:00:00Z v3.3.1-dev $
 #
 # v3.3.1 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -165,7 +165,7 @@ my %matchListSIGNALduino = (
      "21:FS10"				=> '^P61#[A-F0-9]+',
      "22:Siro"					=> '^P72#[A-Fa-f0-9]+',
      "23:FHT"       => "^81..(04|09|0d)..(0909a001|83098301|c409c401)..",
-     "24:FS20"      => "^81..(04|0c)..0101a001",											   																		 
+     "24:FS20"      => "^81..(04|0c)..0101a001", 
      "X:SIGNALduino_un"			=> '^[u]\d+#.*',
 );
 
@@ -5245,6 +5245,9 @@ sub SIGNALduino_compPattern($$$%)
 	<li><a name="addvaltrigger">addvaltrigger</a><br>
         Create triggers for additional device values. Right now these are RSSI, RAWMSG and DMSG.
         </li>
+        <li>blacklist_IDs<br>
+        The blacklist works only if a whitelist not exist.
+        </li>
         <li>cc1101_frequency<br>
         Since the PA table values ​​are frequency-dependent, is at 868 MHz a value greater 800 required.
         </li>
@@ -5252,6 +5255,14 @@ sub SIGNALduino_compPattern($$$%)
 	<li><a href="#attrdummy">dummy</a></li>
 	<li>debug<br>
 	This will bring the module in a very verbose debug output. Usefull to find new signals and verify if the demodulation works correctly.
+	</li>
+	<li>development<br>
+	Es gibt jetzt auch develop Ids. Die develop Ids sind noch in Entwicklung oder sind noch nicht ausgiebig getestet, sie können noch fehlerhaft sein (z.B. die ID 63).<br>
+	Wenn developId => 'y' in der Protokolldefinition steht, dann ist dies eine deveplop Id.<br>
+	Damit wird diese Id nur verwendet, wenn sie in die whitelist oder "y" in dem neuen Attribut "development" eingetragen ist.<br>
+
+	Für Module die noch in Entwicklung sind und nicht im SVN sind, steht in der Protokolldefinition "developId => 'm' "<br>
+	Damit bei diesen Modulen ein dispatch ausgeführt wird, muß "mxx" (xx = id) im Attribut "development" eingetragen sein.<br>
 	</li>
 	<li>doubleMsgCheck_IDs<br>
 	This attribute allows it, to specify protocols which must be received two equal messages to call dispatch to the modules.<br>
@@ -5281,6 +5292,10 @@ sub SIGNALduino_compPattern($$$%)
     <li>minsecs<br>
     This is a very special attribute. It is provided to other modules. minsecs should act like a threshold. All logic must be done in the logical module. 
     If specified, then supported modules will discard new messages if minsecs isn't past.
+    </li>
+    
+    <li>noMsgVerbose<br>
+    Wenn es z.B. auf 3 gesetzt wird, dann werden Nachrichten die keine MU/MS oder MC-Nachrichten sind mit verbose 3 ausgegeben. Damit können auch debug Ausgaben mit verbose 3 ausgegeben werden.
     </li>
     <li>longids<br>
         Comma separated list of device-types for SIGNALduino that should be handled using long IDs. This additional ID allows it to differentiate some weather sensors, if they are sending on the same channel. Therfor a random generated id is added. If you choose to use longids, then you'll have to define a different device after battery change.<br>
