@@ -1443,6 +1443,21 @@ my %ProtocolListSIGNALduino  = (
 			length_max		=> '67',
 			postDemodulation => \&SIGNALduino_postDemo_FS20,
 		},
+	"75" => ## ConradRSL2 @litronics https://github.com/RFD-FHEM/SIGNALDuino/issues/69
+		# MU;P0=-1365;P1=477;P2=1145;P3=-734;P4=-6332;D=01023202310102323102423102323102323101023232323101010232323231023102323102310102323102423102323102323101023232323101010232323231023102323102310102323102;CP=1;R=12;
+		{
+			name			=> 'ConradRSL2', 
+			id			=> '75',
+			one			=> [3,-1],
+			zero			=> [1,-3],
+			clockabs		=> 500, 
+			format			=> 'twostate', 
+			clientmodule		=> 'SD_RSL',
+			preamble		=> 'P1#',  
+			modulematch		=> '^P1#[A-Fa-f0-9]{8}', 
+			length_min		=> '32',
+			length_max 		=> '40',
+		},
 	"76" => ##  Kabellose LED-Weihnachtskerzen XM21-0
 		{
 			name			=> 'xm21',
