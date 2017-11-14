@@ -119,14 +119,22 @@ Hideki_Parse($$)
 	my $bat;
 	my $deviceCode;
 	my $model= "Hideki_$sensorTyp";
-
+	my $count=0;
+	my $comfort=0;
 	## 1. Detect what type of sensor we have, then call specific function to decode
 	if ($sensorTyp==30){
 		($channel, $temp) = decodeThermo(\@decodedBytes); # decodeThermoHygro($decodedString);
 		$hum = 10 * ($decodedBytes[6] >> 4) + ($decodedBytes[6] & 0x0f);
 		$bat = ($decodedBytes[2] >> 6 == 3) ? 'ok' : 'low';			 # decode battery
+		$count = $decodedBytes[3] >> 6;
+     
+		$comfort = ($decodedBytes[7] >> 2 & 0x03);   # comfort level
+		if ($comfort == 0) { $comfort = 'Humidity OK. Temperature uncomfortable. More than 24.9°C or less than 20°C' }
+		elsif ($comfort == 1) { $comfort = 'Wet. More than 69% RH' }
+		elsif ($comfort == 2) { $comfort = 'Dry. Less than 40% RH' }
+		elsif ($comfort == 3) { $comfort = 'Temperature and humidity comfortable' }
 		$val = "T: $temp H: $hum";
-		Log3 $iohash, 4, "$name decoded Hideki protocol model=$model, sensor id=$id, channel=$channel, bat=$bat, temp=$temp, humidity=$hum";
+		Log3 $iohash, 4, "$name decoded Hideki protocol model=$model, sensor id=$id, channel=$channel, bat=$bat, temp=$temp, humidity=$hum, comfort=$comfort";
 	}elsif($sensorTyp==31){
 		($channel, $temp) = decodeThermo(\@decodedBytes);
 		$bat = ($decodedBytes[2] >> 6 == 3) ? 'ok' : 'low';			 # decode battery
@@ -207,6 +215,8 @@ Hideki_Parse($$)
 	readingsBulkUpdate($hash, "temperature", $temp) if ($temp ne "");
 	if ($sensorTyp == 30) { # temperature, humidity
 		readingsBulkUpdate($hash, "humidity", $hum) if ($hum ne "");
+		readingsBulkUpdate($hash, "comfort_level", $comfort) if ($comfort ne "");
+		readingsBulkUpdate($hash, "package_number", $count) if ($count ne "");
 	}
 	elsif ($sensorTyp == 14) {  # rain
 		readingsBulkUpdate($hash, "rain", $rain);
@@ -438,7 +448,7 @@ Hideki_Attr(@)
   	<li>TFA Dostman</li>
   	<li>Arduinos with remote Sensor lib from Randy Simons</li>
   	<li>Cresta</li>
-  	<li>Hideki</li>
+  	<li>Hideki (Anemometer | UV sensor | Rain level meter | Thermo/hygro-sensor)</li>
   	<li>all other devices, which use the Hideki protocol</li>
   </ul>
   Please note, currently temp/hum devices are implemented. Please report data for other sensortypes.
@@ -464,6 +474,9 @@ Hideki_Attr(@)
 	<li>humidity (0-100)</li>
 	<li>battery (ok or low)</li>
 	<li>channel (The Channelnumber (number if)</li>
+	<br><i>- Hideki only -</i>
+	<li>comfort_level (Status: Humidity OK... , Wet. More than 69% RH, Dry. Less than 40% RH, Temperature and humidity comfortable)</li>
+	<li>package_number (reflect the package number in the stream starting at 1)</li><br>
   </ul>
   
   
@@ -503,7 +516,7 @@ Hideki_Attr(@)
   	<li>TFA Dostman</li>
   	<li>Arduinos with remote Sensor lib from Randy Simons</li>
   	<li>Cresta</li>
-  	<li>Hideki</li>
+  	<li>Hideki (Anemometer | UV sensor | Rain level meter | Thermo/hygro-sensor)</li>
   	<li>Alle anderen, welche das Hideki Protokoll verwenden</li>
   </ul>
   Hinweis, Aktuell sind nur temp/feuchte Sensoren implementiert. Bitte sendet uns Daten zu anderen Sensoren.
@@ -528,8 +541,11 @@ Hideki_Attr(@)
   	<li>state (T:x H:y B:z)</li>
 	<li>temperature (&deg;C)</li>
 	<li>humidity (0-100)</li>
-	<li>battery (ok or low)</li>
+	<li>battery (ok oder low)</li>
 	<li>channel (Der Sensor Kanal)</li>
+	<br><i>- Hideki spezifisch -</i>
+	<li>comfort_level (Status: Humidity OK... , Wet. More than 69% RH, Dry. Less than 40% RH, Temperature and humidity comfortable)</li>
+	<li>package_number (Paketnummer in der letzten Signalfolge, startet bei 1)</li><br>
   </ul>
   <a name="Hideki_unset"></a>
   <b>Set</b> <ul>N/A</ul><br>
