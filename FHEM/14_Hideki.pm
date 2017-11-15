@@ -126,34 +126,39 @@ Hideki_Parse($$)
 		($channel, $temp) = decodeThermo(\@decodedBytes); # decodeThermoHygro($decodedString);
 		$hum = 10 * ($decodedBytes[6] >> 4) + ($decodedBytes[6] & 0x0f);
 		$bat = ($decodedBytes[2] >> 6 == 3) ? 'ok' : 'low';			 # decode battery
-		$count = $decodedBytes[3] >> 6;
-     
+		$count = $decodedBytes[3] >> 6;		# verifiziert, MSG_Counter
 		$comfort = ($decodedBytes[7] >> 2 & 0x03);   # comfort level
-		if ($comfort == 0) { $comfort = 'Humidity OK. Temperature uncomfortable. More than 24.9°C or less than 20°C' }
+
+		Log3 $iohash, 3, "$name: model=$model, id=$id, ch=$channel, cnt=$count, bat=$bat, temp=$temp, hum=$hum, comfort=$comfort";
+		if ($comfort == 0) { $comfort = 'Hum. OK. Temp. uncomfortable' }
 		elsif ($comfort == 1) { $comfort = 'Wet. More than 69% RH' }
 		elsif ($comfort == 2) { $comfort = 'Dry. Less than 40% RH' }
-		elsif ($comfort == 3) { $comfort = 'Temperature and humidity comfortable' }
+		elsif ($comfort == 3) { $comfort = 'Temp. and Hum. comfortable' }
 		$val = "T: $temp H: $hum";
 		Log3 $iohash, 4, "$name decoded Hideki protocol model=$model, sensor id=$id, channel=$channel, bat=$bat, temp=$temp, humidity=$hum, comfort=$comfort";
 	}elsif($sensorTyp==31){
 		($channel, $temp) = decodeThermo(\@decodedBytes);
 		$bat = ($decodedBytes[2] >> 6 == 3) ? 'ok' : 'low';			 # decode battery
+		$count = $decodedBytes[3] >> 6;		# verifiziert, MSG_Counter
 		$val = "T: $temp";
-		Log3 $iohash, 4, "$name decoded Hideki protocol model=$model, sensor id=$id, channel=$channel, bat=$bat, temp=$temp";
+		Log3 $iohash, 4, "$name decoded Hideki protocol model=$model, sensor id=$id, channel=$channel, , cnt=$count, bat=$bat, temp=$temp";
 	}elsif($sensorTyp==14){
 		($channel, $rain) = decodeRain(\@decodedBytes); # decodeThermoHygro($decodedString);
 		$bat = ($decodedBytes[2] >> 6 == 3) ? 'ok' : 'low';			 # decode battery
+		$count = $decodedBytes[3] >> 6;		# UNVERIFIZIERT, MSG_Counter
 		$val = "R: $rain";
 		Log3 $iohash, 4, "$name decoded Hideki protocol model=$model, sensor id=$id, channel=$channel, bat=$bat, rain=$rain, unknown=$unknown";
 	}elsif($sensorTyp==12){
 		($channel, $temp) = decodeThermo(\@decodedBytes); # decodeThermoHygro($decodedString);
 		($windchill,$windspeed,$windgust,$winddir,$winddirdeg,$winddirtext) = wind(\@decodedBytes);
 		$bat = ($decodedBytes[2] >> 6 == 3) ? 'ok' : 'low';			 # decode battery
+		$count = $decodedBytes[3] >> 6;		# UNVERIFIZIERT, MSG_Counter
 		$val = "T: $temp  Ws: $windspeed  Wg: $windgust  Wd: $winddirtext";
 		Log3 $iohash, 4, "$name decoded Hideki protocol model=$model, sensor id=$id, channel=$channel, bat=$bat, temp=$temp, Wc=$windchill, Ws=$windspeed, Wg=$windgust, Wd=$winddir, WdDeg=$winddirdeg, Wdtxt=$winddirtext";
 	}elsif($sensorTyp==13){
 		($channel, $temp) = decodeThermo(\@decodedBytes); # decodeThermoHygro($decodedString);
 		$bat = ($decodedBytes[2] >> 6 == 3) ? 'ok' : 'low';			 # decode battery
+		$count = $decodedBytes[3] >> 6;		# UNVERIFIZIERT, MSG_Counter
 		$val = "T: $temp";
 		Log3 $iohash, 4, "$name decoded Hideki protocol model=$model, sensor id=$id, channel=$channel, bat=$bat, temp=$temp";
 		Log3 $iohash, 4, "$name Sensor Typ $sensorTyp currently not full supported, please report sensor information!";
@@ -213,10 +218,10 @@ Hideki_Parse($$)
 	readingsBulkUpdate($hash, "battery", $bat)   if ($bat ne "");
 	readingsBulkUpdate($hash, "channel", $channel) if ($channel ne "");
 	readingsBulkUpdate($hash, "temperature", $temp) if ($temp ne "");
+	readingsBulkUpdate($hash, "package_number", $count) if ($count ne "");
 	if ($sensorTyp == 30) { # temperature, humidity
 		readingsBulkUpdate($hash, "humidity", $hum) if ($hum ne "");
 		readingsBulkUpdate($hash, "comfort_level", $comfort) if ($comfort ne "");
-		readingsBulkUpdate($hash, "package_number", $count) if ($count ne "");
 	}
 	elsif ($sensorTyp == 14) {  # rain
 		readingsBulkUpdate($hash, "rain", $rain);
