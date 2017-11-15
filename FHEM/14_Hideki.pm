@@ -127,19 +127,20 @@ Hideki_Parse($$)
 		$hum = 10 * ($decodedBytes[6] >> 4) + ($decodedBytes[6] & 0x0f);
 		$bat = ($decodedBytes[2] >> 6 == 3) ? 'ok' : 'low';			 # decode battery
 		$count = $decodedBytes[3] >> 6;
-     
 		$comfort = ($decodedBytes[7] >> 2 & 0x03);   # comfort level
-		if ($comfort == 0) { $comfort = 'Humidity OK. Temperature uncomfortable. More than 24.9°C or less than 20°C' }
+
+		Log3 $iohash, 3, "$name: model=$model, id=$id, ch=$channel, cnt=$count, bat=$bat, temp=$temp, hum=$hum, comfort=$comfort";
+		if ($comfort == 0) { $comfort = 'Hum. OK. Temp. uncomfortable' }
 		elsif ($comfort == 1) { $comfort = 'Wet. More than 69% RH' }
 		elsif ($comfort == 2) { $comfort = 'Dry. Less than 40% RH' }
-		elsif ($comfort == 3) { $comfort = 'Temperature and humidity comfortable' }
+		elsif ($comfort == 3) { $comfort = 'Temp. and Hum. comfortable' }
 		$val = "T: $temp H: $hum";
 		Log3 $iohash, 4, "$name decoded Hideki protocol model=$model, sensor id=$id, channel=$channel, bat=$bat, temp=$temp, humidity=$hum, comfort=$comfort";
 	}elsif($sensorTyp==31){
 		($channel, $temp) = decodeThermo(\@decodedBytes);
 		$bat = ($decodedBytes[2] >> 6 == 3) ? 'ok' : 'low';			 # decode battery
 		$val = "T: $temp";
-		Log3 $iohash, 4, "$name decoded Hideki protocol model=$model, sensor id=$id, channel=$channel, bat=$bat, temp=$temp";
+		Log3 $iohash, 4, "$name decoded Hideki protocol model=$model, sensor id=$id, channel=$channel, , cnt=$count, bat=$bat, temp=$temp";
 	}elsif($sensorTyp==14){
 		($channel, $rain) = decodeRain(\@decodedBytes); # decodeThermoHygro($decodedString);
 		$bat = ($decodedBytes[2] >> 6 == 3) ? 'ok' : 'low';			 # decode battery
@@ -213,10 +214,10 @@ Hideki_Parse($$)
 	readingsBulkUpdate($hash, "battery", $bat)   if ($bat ne "");
 	readingsBulkUpdate($hash, "channel", $channel) if ($channel ne "");
 	readingsBulkUpdate($hash, "temperature", $temp) if ($temp ne "");
+	readingsBulkUpdate($hash, "package_number", $count) if ($count ne "");
 	if ($sensorTyp == 30) { # temperature, humidity
 		readingsBulkUpdate($hash, "humidity", $hum) if ($hum ne "");
 		readingsBulkUpdate($hash, "comfort_level", $comfort) if ($comfort ne "");
-		readingsBulkUpdate($hash, "package_number", $count) if ($count ne "");
 	}
 	elsif ($sensorTyp == 14) {  # rain
 		readingsBulkUpdate($hash, "rain", $rain);
