@@ -5303,7 +5303,7 @@ attr sduino longids BTHR918N
 When set to "1" received raw messages triggers events
 </li>
 <li>suppressDeviceRawmsg<br>
-When set to 1, wird der RAWMSG Eintrag in den internals vom device nicht mehr eingetragen
+When set to 1, the internal "RAWMSG" will not be updated with the received messages
 </li>
 <li>whitelistIDs<br>
 This attribute allows it, to specify whichs protocos are considured from this module.
