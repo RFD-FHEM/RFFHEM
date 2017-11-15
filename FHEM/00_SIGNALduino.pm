@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 10488 2017-11-14 19:00:00Z v3.3.1-dev $
+# $Id: 00_SIGNALduino.pm 10488 2017-11-15 19:00:00Z v3.3.1-dev $
 #
 # v3.3.1 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -1534,7 +1534,7 @@ SIGNALduino_Initialize($)
 					  ." doubleMsgCheck_IDs"
 					  ." suppressDeviceRawmsg:1,0"
 					  ." development"
-					  ." noMsgVerbose"
+					  ." noMsgVerbose:0,1,2,3,4,5"
 		              ." $readingFnAttributes";
 
   $hash->{ShutdownFn} = "SIGNALduino_Shutdown";
@@ -3779,10 +3779,7 @@ SIGNALduino_Parse($$$$@)
     	
 	if (!($rmsg=~ s/^\002(M.;.*;)\003/$1/)) 			# Check if a Data Message arrived and if it's complete  (start & end control char are received)
 	{							# cut off start end end character from message for further processing they are not needed
-		if (defined($hash->{noMsgVerbose}))
-		{
-			Log3 $name, $hash->{noMsgVerbose}, "$name/noMsg Parse: $rmsg";
-		}
+		Log3 $name, AttrVal($name,"noMsgVerbose",5), "$name/noMsg Parse: $rmsg";
 		return undef;
 	}
 
@@ -3994,19 +3991,6 @@ SIGNALduino_Attr(@)
 		} else {
 			Log3 $name, 3, "$name: setting cc1101_frequency to 868";
 			$hash->{cc1101_frequency} = 868;
-		}
-	}
-	elsif ($aName eq "noMsgVerbose")
-	{
-		if (defined($aVal)) {
-			if (length($aVal)>0) {
-				Log3 $name, 3, "$name Attr: noMsgVerbose: $aVal";
-				$hash->{noMsgVerbose} = $aVal;
-			}
-			else {
-				Log3 $name, 3, "$name delete Attr: noMsgVerbose: $aVal";
-				delete $hash->{noMsgVerbose};
-			}
 		}
 	}
 	
@@ -5257,7 +5241,7 @@ sub SIGNALduino_compPattern($$$%)
 	This will bring the module in a very verbose debug output. Usefull to find new signals and verify if the demodulation works correctly.
 	</li>
 	<li>development<br>
-	With development you can enable protocol decoding for protocolls witch are still in development and may not be vera accurate implemented. 
+	With development you can enable protocol decoding for protocolls witch are still in development and may not be very accurate implemented. 
 	This can result in crashes or throw high amount of log entrys in your logfile, so be careful to use this. <br><br>
 	
 	Protocols flagged with a developID flag are not loaded unless specified to do so.<br>
@@ -5317,6 +5301,9 @@ attr sduino longids BTHR918N
 </PRE></li>
 <li>rawmsgEvent<br>
 When set to "1" received raw messages triggers events
+</li>
+<li>suppressDeviceRawmsg<br>
+When set to 1, wird der RAWMSG Eintrag in den internals vom device nicht mehr eingetragen
 </li>
 <li>whitelistIDs<br>
 This attribute allows it, to specify whichs protocos are considured from this module.
