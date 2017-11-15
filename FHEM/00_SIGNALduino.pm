@@ -5299,7 +5299,8 @@ sub SIGNALduino_compPattern($$$%)
     </li>
     
     <li>noMsgVerbose<br>
-    Wenn es z.B. auf 3 gesetzt wird, dann werden Nachrichten die keine MU/MS oder MC-Nachrichten sind mit verbose 3 ausgegeben. Damit können auch debug Ausgaben mit verbose 3 ausgegeben werden.
+    With this attribute you can control the logging of debug messages from the io device.
+    If set to 3, this messages are logged if global verbose is set to 3 or higher.
     </li>
     <li>longids<br>
         Comma separated list of device-types for SIGNALduino that should be handled using long IDs. This additional ID allows it to differentiate some weather sensors, if they are sending on the same channel. Therfor a random generated id is added. If you choose to use longids, then you'll have to define a different device after battery change.<br>
