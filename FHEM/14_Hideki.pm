@@ -540,7 +540,7 @@ Hideki_Attr(@)
   <br>
 
   <a name="Hideki_readings"></a>
-  <b>Erzeugte Readings</b>
+  <b>Generated Readings</b>
   <ul>
   	<li>state (T:x H:y B:z)</li>
 	<li>temperature (&deg;C)</li>
@@ -548,7 +548,7 @@ Hideki_Attr(@)
 	<li>battery (ok oder low)</li>
 	<li>channel (Der Sensor Kanal)</li>
 	<br><i>- Hideki spezifisch -</i>
-	<li>comfort_level (Status: Humidity OK... , Wet. More than 69% RH, Dry. Less than 40% RH, Temperature and humidity comfortable)</li>
+	<li>comfort_level (Status: Humidity OK... , Wet größer 69% RH, Dry weiniger als 40% RH, Temperature and humidity comfortable)</li>
 	<li>package_number (Paketnummer in der letzten Signalfolge, startet bei 1)</li><br>
   </ul>
   <a name="Hideki_unset"></a>
