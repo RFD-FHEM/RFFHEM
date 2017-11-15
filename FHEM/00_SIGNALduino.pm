@@ -210,8 +210,9 @@ my %ProtocolListSIGNALduino  = (
 
     "2"    => 
         {
-            name			=> 'AS',		# Self build arduino sensor
-			comment		=> 'Self build arduino sensor',
+			name			=> 'AS, Self build arduino sensor',
+			comment         => 'developModule. SD_AS module is only in github available',
+			developId 		=> 'm',
 			id          	=> '2',
 			one				=> [1,-2],
 			zero			=> [1,-1],
