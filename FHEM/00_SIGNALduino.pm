@@ -5257,12 +5257,16 @@ sub SIGNALduino_compPattern($$$%)
 	This will bring the module in a very verbose debug output. Usefull to find new signals and verify if the demodulation works correctly.
 	</li>
 	<li>development<br>
-	Es gibt jetzt auch develop Ids. Die develop Ids sind noch in Entwicklung oder sind noch nicht ausgiebig getestet, sie können noch fehlerhaft sein (z.B. die ID 63).<br>
-	Wenn developId => 'y' in der Protokolldefinition steht, dann ist dies eine deveplop Id.<br>
-	Damit wird diese Id nur verwendet, wenn sie in die whitelist oder "y" in dem neuen Attribut "development" eingetragen ist.<br>
-
-	Für Module die noch in Entwicklung sind und nicht im SVN sind, steht in der Protokolldefinition "developId => 'm' "<br>
-	Damit bei diesen Modulen ein dispatch ausgeführt wird, muß "mxx" (xx = id) im Attribut "development" eingetragen sein.<br>
+	With development you can enable protocol decoding for protocolls witch are still in development and may not be vera accurate implemented. 
+	This can result in crashes or throw high amount of log entrys in your logfile, so be careful to use this. <br><br>
+	
+	Protocols flagged with a developID flag are not loaded unless specified to do so.<br>
+	
+	If the flag developId => 'y' is set in the protocol defintion then the protocol is still in development. You can enable it with the attribute:<br>
+	Specify "y" followed with the protocol id to enable it.<br><br>
+    If the protocoll is developed well, but the logical module is not ready, developId => 'm' is set.<br> 
+    You can enable it with the attribute:<br>
+	Specify "m" followed with the protocol id to enable it.<br>
 	</li>
 	<li>doubleMsgCheck_IDs<br>
 	This attribute allows it, to specify protocols which must be received two equal messages to call dispatch to the modules.<br>
