@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 10488 2017-11-15 19:00:00Z v3.3.1-dev $
+# $Id: 00_SIGNALduino.pm 10488 2017-10-02 21:00:00Z v3.3.1-dev $
 #
 # v3.3.1 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -165,7 +165,7 @@ my %matchListSIGNALduino = (
      "21:FS10"				=> '^P61#[A-F0-9]+',
      "22:Siro"					=> '^P72#[A-Fa-f0-9]+',
      "23:FHT"       => "^81..(04|09|0d)..(0909a001|83098301|c409c401)..",
-     "24:FS20"      => "^81..(04|0c)..0101a001", 
+     "24:FS20"      => "^81..(04|0c)..0101a001",											   																		 
      "X:SIGNALduino_un"			=> '^[u]\d+#.*',
 );
 
@@ -210,9 +210,8 @@ my %ProtocolListSIGNALduino  = (
 
     "2"    => 
         {
-			name			=> 'AS, Self build arduino sensor',
-			comment         => 'developModule. SD_AS module is only in github available',
-			developId 		=> 'm',
+            name			=> 'AS',		# Self build arduino sensor
+			comment		=> 'Self build arduino sensor',
 			id          	=> '2',
 			one				=> [1,-2],
 			zero			=> [1,-1],
@@ -1423,7 +1422,7 @@ my %ProtocolListSIGNALduino  = (
 			name		=> 'FHT80',
 			comment 	=> 'Roomthermostat (868Mhz only receive)',
 			id		=> '73',
-			developId	=> 'y',
+			#developId	=> 'p',
 			one		=> [1.5,-1.5], # 600
 			zero		=> [1,-1], # 400
 			clockabs	=> 400,
@@ -1438,32 +1437,17 @@ my %ProtocolListSIGNALduino  = (
 		{
 			name			=> 'FS20',
 			comment			=> 'Remote Control (868Mhz only receive)',
-			id			=> '74',
-			developId		=> 'y',
-			one			=> [1.5,-1.5], # 600
+			id				=> '74',
+			#developId	=> 'p',
+			one				=> [1.5,-1.5], # 600
 			zero			=> [1,-1], # 400
 			clockabs		=> 400,
 			format			=> 'twostate', # not used now
-			clientmodule		=> 'FS20',
+			clientmodule	=> 'FS20',
 			preamble		=> '810b04f70101a001',
 			length_min		=> '50',
 			length_max		=> '67',
 			postDemodulation => \&SIGNALduino_postDemo_FS20,
-		},
-	"75" => ## ConradRSL2 @litronics https://github.com/RFD-FHEM/SIGNALDuino/issues/69
-		# MU;P0=-1365;P1=477;P2=1145;P3=-734;P4=-6332;D=01023202310102323102423102323102323101023232323101010232323231023102323102310102323102423102323102323101023232323101010232323231023102323102310102323102;CP=1;R=12;
-		{
-			name			=> 'ConradRSL2', 
-			id			=> '75',
-			one			=> [3,-1],
-			zero			=> [1,-3],
-			clockabs		=> 500, 
-			format			=> 'twostate', 
-			clientmodule		=> 'SD_RSL',
-			preamble		=> 'P1#',  
-			modulematch		=> '^P1#[A-Fa-f0-9]{8}', 
-			length_min		=> '32',
-			length_max 		=> '40',
 		},
 	"76" => ##  Kabellose LED-Weihnachtskerzen XM21-0
 		{
@@ -1541,7 +1525,6 @@ SIGNALduino_Initialize($)
 					  ." doubleMsgCheck_IDs"
 					  ." suppressDeviceRawmsg:1,0"
 					  ." development"
-					  ." noMsgVerbose:0,1,2,3,4,5"
 		              ." $readingFnAttributes";
 
   $hash->{ShutdownFn} = "SIGNALduino_Shutdown";
@@ -3784,12 +3767,8 @@ SIGNALduino_Parse($$$$@)
 	#print Dumper(\%ProtocolListSIGNALduino);
 	
     	
-	if (!($rmsg=~ s/^\002(M.;.*;)\003/$1/)) 			# Check if a Data Message arrived and if it's complete  (start & end control char are received)
-	{							# cut off start end end character from message for further processing they are not needed
-		Log3 $name, AttrVal($name,"noMsgVerbose",5), "$name/noMsg Parse: $rmsg";
-		return undef;
-	}
-
+	return undef if !($rmsg=~ s/^\002(M.;.*;)\003/$1/); 			## Check if a Data Message arrived and if it's complete  (start & end control char are received)
+																    # cut off start end end character from message for further processing they are not needed
 	if (defined($hash->{keepalive})) {
 		$hash->{keepalive}{ok}    = 1;
 		$hash->{keepalive}{retry} = 0;
@@ -3974,18 +3953,18 @@ SIGNALduino_Attr(@)
 		if (defined($aVal)) {
 			if (length($aVal)>0) {
 				if (substr($aVal,0 ,1) eq '#') {
-					Log3 $name, 3, "$name Attr: doubleMsgCheck_IDs disabled: $aVal";
+					Log3 $name, 3, "Attr doubleMsgCheck_IDs disabled: $aVal";
 					delete $hash->{DoubleMsgIDs};
 				}
 				else {
-					Log3 $name, 3, "$name Attr: doubleMsgCheck_IDs enabled: $aVal";
+					Log3 $name, 3, "Attr doubleMsgCheck_IDs enabled: $aVal";
 					my %DoubleMsgiD = map { $_ => 1 } split(",", $aVal);
 					$hash->{DoubleMsgIDs} = \%DoubleMsgiD;
 					#print Dumper $hash->{DoubleMsgIDs};
 				}
 			}
 			else {
-				Log3 $name, 3, "$name delete Attr: doubleMsgCheck_IDs";
+				Log3 $name, 3, "delete Attr doubleMsgCheck_IDs";
 				delete $hash->{DoubleMsgIDs};
 			}
 		}
@@ -5215,9 +5194,6 @@ sub SIGNALduino_compPattern($$$%)
 	<li><a name="addvaltrigger">addvaltrigger</a><br>
         Create triggers for additional device values. Right now these are RSSI, RAWMSG and DMSG.
         </li>
-        <li>blacklist_IDs<br>
-        The blacklist works only if a whitelist not exist.
-        </li>
         <li>cc1101_frequency<br>
         Since the PA table values ​​are frequency-dependent, is at 868 MHz a value greater 800 required.
         </li>
@@ -5225,18 +5201,6 @@ sub SIGNALduino_compPattern($$$%)
 	<li><a href="#attrdummy">dummy</a></li>
 	<li>debug<br>
 	This will bring the module in a very verbose debug output. Usefull to find new signals and verify if the demodulation works correctly.
-	</li>
-	<li>development<br>
-	With development you can enable protocol decoding for protocolls witch are still in development and may not be very accurate implemented. 
-	This can result in crashes or throw high amount of log entrys in your logfile, so be careful to use this. <br><br>
-	
-	Protocols flagged with a developID flag are not loaded unless specified to do so.<br>
-	
-	If the flag developId => 'y' is set in the protocol defintion then the protocol is still in development. You can enable it with the attribute:<br>
-	Specify "y" followed with the protocol id to enable it.<br><br>
-    If the protocoll is developed well, but the logical module is not ready, developId => 'm' is set.<br> 
-    You can enable it with the attribute:<br>
-	Specify "m" followed with the protocol id to enable it.<br>
 	</li>
 	<li>doubleMsgCheck_IDs<br>
 	This attribute allows it, to specify protocols which must be received two equal messages to call dispatch to the modules.<br>
@@ -5267,11 +5231,6 @@ sub SIGNALduino_compPattern($$$%)
     This is a very special attribute. It is provided to other modules. minsecs should act like a threshold. All logic must be done in the logical module. 
     If specified, then supported modules will discard new messages if minsecs isn't past.
     </li>
-    
-    <li>noMsgVerbose<br>
-    With this attribute you can control the logging of debug messages from the io device.
-    If set to 3, this messages are logged if global verbose is set to 3 or higher.
-    </li>
     <li>longids<br>
         Comma separated list of device-types for SIGNALduino that should be handled using long IDs. This additional ID allows it to differentiate some weather sensors, if they are sending on the same channel. Therfor a random generated id is added. If you choose to use longids, then you'll have to define a different device after battery change.<br>
 		Default is to not to use long IDs for all devices.
@@ -5287,9 +5246,6 @@ attr sduino longids BTHR918N
 </PRE></li>
 <li>rawmsgEvent<br>
 When set to "1" received raw messages triggers events
-</li>
-<li>suppressDeviceRawmsg<br>
-When set to 1, the internal "RAWMSG" will not be updated with the received messages
 </li>
 <li>whitelistIDs<br>
 This attribute allows it, to specify whichs protocos are considured from this module.
