@@ -5,6 +5,23 @@
 # weather sensors like eas8007 which use the same protocol
 # Sidey79, Ralf9  2015-2017
 #
+#  Nexus sensor protocol with ID, temperature and optional humidity 
+#  also FreeTec NC-7345 sensors for FreeTec Weatherstation NC-7344. 
+#  
+#  the sensor sends 36 bits 12 times, 
+#  the packets are ppm modulated (distance coding) with a pulse of ~500 us 
+#  followed by a short gap of ~1000 us for a 0 bit or a long ~2000 us gap for a 
+#  1 bit, the sync gap is ~4000 us. 
+#  
+#  the data is grouped in 9 nibbles 
+#  [id0] [id1] [flags] [temp0] [temp1] [temp2] [const] [humi0] [humi1] 
+#  
+#  The 8-bit id changes when the battery is changed in the sensor. 
+#  flags are 4 bits B 0 C C, where B is the battery status: 1=OK, 0=LOW 
+#  and CC is the channel: 0=CH1, 1=CH2, 2=CH3 
+#  temp is 12 bit signed scaled by 10 
+#  const is always 1111 (0x0F) 
+#  humiditiy is 8 bits 																	
 
 package main;
 
@@ -26,11 +43,14 @@ SD_WS07_Initialize($)
   $hash->{ParseFn}   = "SD_WS07_Parse";
   $hash->{AttrFn}    = "SD_WS07_Attr";
   $hash->{AttrList}  = "IODev do_not_notify:1,0 ignore:0,1 showtime:1,0 " .
-                        "$readingFnAttributes ";
+                       "max-deviation-temp:1,2,3,4,5,6,7,8,9,10,15,20,25,30,35,40,45,50 ".
+                       "max-deviation-hum:1,2,3,4,5,6,7,8,9,10,15,20,25,30,35,40,45,50 ".
+                       "$readingFnAttributes ";
   $hash->{AutoCreate} =
-        { "SD_WS07.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,",  autocreateThreshold => "2:180"} };
-
-
+        {
+			"SD_WS07_TH_.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,",  autocreateThreshold => "2:180"},
+			"SD_WS07_T_.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4:Temp,",  autocreateThreshold => "2:180"}
+			};
 }
 
 #############################
@@ -95,6 +115,7 @@ SD_WS07_Parse($$)
   #      4    8  9    12            24    28     36
   # 0011 0110 1  010  000100000010  1111  00111000 0000  eas8007
   # 0111 0010 1  010  000010111100  1111  00000000 0000  other device from anfichtn
+  # 0111 0010 1  010  000010111100  1111  00000000       other device from elektron-bbs																					   
   #      ID  Bat CHN       TMP      ??   HUM
   
   #my $hashumidity = FALSE;
@@ -119,19 +140,21 @@ SD_WS07_Parse($$)
     	$model=$model."_T";		
     } else {
     	$model=$model."_TH";		
-    	if ($hum < 10 || $hum > 99) {
-    	    return '';
+    	if ($hum > 99) {
+			Log3 $name, 3, "$iohash->{NAME}: $model ERROR - Humidity unknown ($hum)";
+			return "";
     	}
     }
     
     if ($temp > 700 && $temp < 3840) {
-      return '';
+		Log3 $name, 3, "$iohash->{NAME}: $model: ERROR - Temperature unknown ($temp)";																				
+		return "";
     } elsif ($temp >= 3840) {        # negative Temperaturen, muss noch ueberprueft und optimiert werden 
-      $temp -= 4095;
+      $temp -= 4096;
     }  
     $temp /= 10;
     
-    Log3 $iohash, 4, "$name $model decoded protocolid: 7 sensor id=$id, channel=$channel, temp=$temp, hum=$hum, bat=$bat";
+    Log3 $iohash, 4, "$name: $model id $id, channel $channel, temp $temp, hum $hum, bat $bat";
 
     my $deviceCode;
     
@@ -139,7 +162,7 @@ SD_WS07_Parse($$)
 	if ( ($longids ne "0") && ($longids eq "1" || $longids eq "ALL" || (",$longids," =~ m/,$model,/)))
 	{
 		$deviceCode=$model.'_'.$id.$channel;
-		Log3 $iohash,4, "$name using longid: $longids model: $model";
+		Log3 $iohash,4, "$name: using longid $longids model $model";
 	} else {
 		$deviceCode = $model . "_" . $channel;
 	}
@@ -150,7 +173,7 @@ SD_WS07_Parse($$)
     $def = $modules{SD_WS07}{defptr}{$deviceCode} if(!$def);
 
     if(!$def) {
-		Log3 $iohash, 1, "$name SD_WS07: UNDEFINED sensor $model detected, code $deviceCode";
+		Log3 $iohash, 1, "$name: $model: UNDEFINED sensor $model detected, code $deviceCode";
 		return "UNDEFINED $deviceCode SD_WS07 $deviceCode";
     }
         #Log3 $iohash, 3, 'SD_WS07: ' . $def->{NAME} . ' ' . $id;
@@ -159,7 +182,7 @@ SD_WS07_Parse($$)
 	$name = $hash->{NAME};
 	return "" if(IsIgnored($name));
 	
-	Log3 $name, 4, "$iohash->{NAME} SD_WS07: $name ($rawData)";  
+	Log3 $name, 4, "$iohash->{NAME}: $name ($rawData)";
 
 	if (!defined(AttrVal($hash->{NAME},"event-min-interval",undef)))
 	{
@@ -168,7 +191,52 @@ SD_WS07_Parse($$)
 			Log3 $hash, 4, "$deviceCode Dropped due to short time. minsecs=$minsecs";
 		  	return "";
 		}
+}
+
+	# Sanity check temperature and humidity
+   if($def) {
+	my $timeSinceLastUpdate = ReadingsAge($hash->{NAME}, "state", 0);
+	if ($timeSinceLastUpdate < 0) {
+		$timeSinceLastUpdate *= -1;
 	}
+	if (defined($hash->{READINGS}{temperature}{VAL})) {
+		my $diffTemp = 0;
+		my $oldTemp = $hash->{READINGS}{temperature}{VAL};
+		my $maxdeviation = AttrVal($name, "max-deviation-temp", 1);				# default 1 K
+		if ($temp > $oldTemp) {
+			$diffTemp = ($temp - $oldTemp);
+		} else {
+			$diffTemp = ($oldTemp - $temp);
+		}
+		$diffTemp = sprintf("%.1f", $diffTemp);				
+		Log3 $name, 4, "$iohash->{NAME}: $name old temp $oldTemp, age $timeSinceLastUpdate, new temp $temp, diff temp $diffTemp";
+		my $maxDiffTemp = $timeSinceLastUpdate / 60 + $maxdeviation; 			# maxdeviation + 1.0 Kelvin/Minute
+		$maxDiffTemp = sprintf("%.1f", $maxDiffTemp + 0.05);						# round 0.1
+		Log3 $name, 4, "$iohash->{NAME}: $name max difference temperature $maxDiffTemp K";
+		if ($diffTemp > $maxDiffTemp) {
+			Log3 $name, 3, "$iohash->{NAME}: $name ERROR - Temp diff too large (old $oldTemp, new $temp, diff $diffTemp)";
+			return "";
+		}
+   }
+	if (defined($hash->{READINGS}{humidity}{VAL})) {
+		my $diffHum = 0;
+		my $oldHum = $hash->{READINGS}{humidity}{VAL};
+		my $maxdeviation = AttrVal($name, "max-deviation-hum", 1);				# default 1 %
+		if ($hum > $oldHum) {
+			$diffHum = ($hum - $oldHum);
+		} else {
+			$diffHum = ($oldHum - $hum);
+		}
+		Log3 $name, 4, "$iohash->{NAME}: $name old hum $oldHum, age $timeSinceLastUpdate, new hum $hum, diff hum $diffHum";
+		my $maxDiffHum = $timeSinceLastUpdate / 60 + $maxdeviation;				# maxdeviation + 1.0 %/Minute
+		$maxDiffHum = sprintf("%1.f", $maxDiffHum + 0.5);							# round 1
+		Log3 $name, 4, "$iohash->{NAME}: $name max difference humidity $maxDiffHum %";
+		if ($diffHum > $maxDiffHum) {
+			Log3 $name, 3, "$iohash->{NAME}: $name ERROR - Hum diff too large (old $oldHum, new $hum, diff $diffHum)";
+			return "";
+		}
+	}
+   }
 
 	$hash->{lastReceive} = time();
 	$hash->{lastMSG} = $rawData;
@@ -305,6 +373,19 @@ sub SD_WS07_Attr(@)
   <ul>
     <li><a href="#do_not_notify">do_not_notify</a></li>
     <li><a href="#ignore">ignore</a></li>
+    <li>max-deviation-hum (Default:1, erlaubte Werte: 1,2,3,4,5,6,7,8,9,10,15,20,25,30,35,40,45,50)<br>
+		Maximal erlaubte Abweichung der gemessenen Feuchte zum vorhergehenden Wert in Prozent.<br>
+		Da diese Sensoren keine Checksummen o.&auml;. senden, kann es leicht zum Empfang von unplausiblen Werten kommen. 
+		Um diese abzufangen, kann eine maximale Abweichung zum letzten korrekt empfangenen Wert festgelegt werden.
+		Gr&ouml&szlig;ere Abweichungen werden dann ignoriert und f&uuml;hren zu einer Fehlermeldung im Logfile, wie z.B. dieser:<br>
+		<code>SD_WS07_TH_1 ERROR - Hum diff too large (old 60, new 68, diff 8)</code><br>
+		Zus&auml;tzlich zum eingestellten Wert wird ein von der Differenz der Empfangszeiten abh&auml;ngiger Wert addiert.
+		Dieser betr&auml;gt 1.0 % relative Feuchte pro Minute. Das bedeutet z.B. wenn eine Differenz von 8 eingestellt ist
+		und der zeitliche Abstand des Empfangs der Nachrichten betr&auml;gt 3 Minuten, ist die maximal erlaubte Differenz 11.
+    </li>
+    <li>max-deviation-temp (Default:1, erlaubte Werte: 1,2,3,4,5,6,7,8,9,10,15,20,25,30,35,40,45,50)<br>
+		Maximal erlaubte Abweichung der gemessenen Temperatur zum vorhergehenden Wert in Kelvin.<br>
+		siehe max-deviation-hum
     <li><a href="#showtime">showtime</a></li>
     <li><a href="#readingFnAttributes">readingFnAttributes</a></li>
   </ul>
