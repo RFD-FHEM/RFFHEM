@@ -1,9 +1,16 @@
-20.01.2017
-  needs less cpu time for parsing messages
-  new command to query protocolids
-  Bugfix weong return in SIGNALduino_un ParseFn  
+18.11.2017
+ support of blacklisting of protocols via new attribute
+ serval new protocols are added
+ many stacktraces and race conditions are fixed
+ firmware can now be also updated via http source 
+ commands (sending) are now placed in a queue, so switching multiple 
+ sockets for example is now possible withoud manual added delay
+ many more fixes
+ support for cc1101 based uC like radino or nanocul added
+05.12.2016
+  Bugfix wrong return in SIGNALduino_un ParseFn  
+09.10.2016
   improve Send queue: Send not before response of previous
-  warnings and errors fixed
 30.09.2016
   SIGNALduino is now nonblocking
   improved init and keepalive

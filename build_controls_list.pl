@@ -30,7 +30,7 @@ sub listfiles2{
             if( (-e $file) && (! -d $file) ){ #test exist and is not a dir name
                 #print "$dir contains $file\n";
                 my $fi = file_info($file);
-                my $date_time = POSIX::strftime("%Y_%d_%m_%H:%M:%S", localtime( $fi->{mtime} ));
+                my $date_time = POSIX::strftime("%Y_%m_%d_%H:%M:%S", localtime( $fi->{mtime} ));
                 
                 #test if firmware
                 
@@ -58,7 +58,7 @@ sub listfiles2{
 							
 						print ("changing $modifiy_line");
 	
-					    my $date = POSIX::strftime("%Y-%d-%m", localtime( $fi->{mtime} ));
+					    my $date = POSIX::strftime("%Y-%m-%d", localtime( $fi->{mtime} ));
 	                	my $time = POSIX::strftime("%H:%M:%S", localtime( $fi->{mtime} ));
 					
 						my @line_parts = split (" ",$modifiy_line);
@@ -84,16 +84,18 @@ sub listfiles2{
 	              
                 if ( $file =~ /(firmware|\.hex|\.HEX)/ ){
 #                    print "$file is a firmware\n";
-                    push @lines, sprintf("DEL %s\n", $fi->{path});
+                    push @lines, sprintf("MOV %s unused\n", $fi->{path});
                 }
                 push @lines, sprintf("UPD %s %-7s %s\n", $date_time, $fi->{size}, $fi->{path});
             }
         }
-        push @lines, "DEL FHEM/14_Cresta.pm\n";
-        push @lines, "DEL FHEM/14_SIGNALduino_AS.pm\n";
-        push @lines, "DEL FHEM/14_SIGNALduino_un.pm\n";
-        push @lines, "DEL FHEM/14_SIGNALduino_ID7.pm\n";
-        
+        push @lines, "MOV FHEM/14_Cresta.pm unused\n";
+        push @lines, "MOV FHEM/14_SIGNALduino_AS.pm unused\n";
+        push @lines, "MOV FHEM/14_SIGNALduino_un.pm unused\n";
+        push @lines, "MOV FHEM/14_SIGNALduino_ID7.pm unused\n";
+        push @lines, "MOV FHEM/14_SIGNALduino_RSL.pm unused\n";
+
+
         open(my $fh, '>:raw', 'controls_signalduino.txt');
         
         foreach my $l (sort @lines){

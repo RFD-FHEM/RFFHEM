@@ -1,4 +1,4 @@
-SIGNALduino - FHEM Modules Version 3.3.1 
+SIGNALduino - FHEM Modules stable Version 3.3.2
 
 ======
 
@@ -14,13 +14,14 @@ Supported Devices / Protocols
 |PT2262 and similar Devices | Remote switches like Intertechno V1+V3, Elro, door/window sensors|
 |Conrad RSL | shutters |
 |Oregon Scientific v2 and v3 Devices | Weather sensor |
+|Oregon PIR sensor | motion sensor |
 |Technoline TX3  | Weather sensor |
 |Hama TS33C, Bresser Thermo/Hygro Sensor  | Weather sensor |
 |Arduino Sensor | multi purpose sensor based on arduino |
 |technoline Weatherstation WS 6750/TX70DTH| Weather sensor and station |
 ||Remote sockets from serval brands|
-|CTW600 WH1080 | Weather station |
-|TFA 30320902 | Weather sensor |
+|CTW600 WH1080 | Weather station WH3080 UV/Lux Sensor |
+|TFA 30320902,30320802  | Weather sensor |
 |Visivon remote PT4450  | Remote control |
 |Einhel - HS 434/6 | Garagedoor opener |
 |FA21RF | Smoke detector | 
@@ -28,17 +29,26 @@ Supported Devices / Protocols
 |s014/TFA 30.3200/TCM/Conrad | Weather sensor |
 |les led  | Remote controlled led lamp |
 |Livolo | Remote switches and sockets  |
+|Somfy RTS | Somfy blinds |
 |Maverick | Wireless BBQ thermometer |
+|FLAMINGO | Flamingo smoke detector |
 |Dooya | Shutters and blinds from various vendors like Rohrmotor24  |
 |Somfy RTS | Shutters from Somfy|
 |Opus XT300 | Soil moisture sensor |
+|Oregon NR868 | Motion sensor |
+|IAN 275901 Lidl | Weatherstation |
+|m-e VTX and BASIC | wireless bell |
+|FT0073 | Weather sensors|
+|revolt | Energy sensors|
+|Clarus | remote power socket|
+|WH2 | (TFA 30.3157 nur Temp, Hum = 255 -> nicht angezeigt)|
 |TS-K108W11 | Doorbell |
 
 How to install
 ======
 The Perl modules can be loaded directly into your FHEM installation:
 
-```update all https://raw.githubusercontent.com/RFD-FHEM/RFFHEM/master/controls_signalduino.txt```
+```update all https://raw.githubusercontent.com/RFD-FHEM/RFFHEM/dev-r33/controls_signalduino.txt```
 
 Prepare your Arduino nano. Look at http://www.fhemwiki.de/wiki/Datei:Fhemduino_schematic.png
 for hardware setup.
