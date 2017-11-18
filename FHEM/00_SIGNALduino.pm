@@ -773,22 +773,22 @@ my %ProtocolListSIGNALduino  = (
 			length_min      => '42',
 			length_max      => '44',
     	},
-    "34" =>
-     	 {   
-       		name			=> 'unknown34',		
-       		id          	=> '34',
-			one				=> [2,-1],
-			zero			=> [1,-2],
-			start			=> [3,-3,3,-3,3,-3,3,-3],
-			clockabs   		=> '240',		
-			format     		=> 'twostate',  		# not used now
-			preamble		=> 'u34#',				# prepend to converted message	
-			postamble		=> '',					# Append to converted message	 	
-			#clientmodule    => '',      			# not used now
-			#modulematch     => '',     			# not used now
-			length_min      => '40',
-			length_max      => '40',
-    	},
+#    "34" =>   # replaced by 37
+#     	 {   
+#       		name			=> 'unknown34',		
+#       		id          	=> '34',
+#			one				=> [2,-1],
+#			zero			=> [1,-2],
+#			start			=> [3,-3,3,-3,3,-3,3,-3],
+#			clockabs   		=> '240',		
+#			format     		=> 'twostate',  		# not used now
+#			preamble		=> 'u34#',				# prepend to converted message	
+#			postamble		=> '',					# Append to converted message	 	
+#			#clientmodule    => '',      			# not used now
+#			#modulematch     => '',     			# not used now
+#			length_min      => '40',
+#			length_max      => '40',
+ #   	},
      "35" =>
      	 {   
        		name			=> 'socket35',		
