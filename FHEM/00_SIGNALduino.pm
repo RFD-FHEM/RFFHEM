@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 10488 2017-11-15 19:00:00Z v3.3.1-dev $
+# $Id: 00_SIGNALduino.pm 10488 2017-11-19 11:00:00Z v3.3.1-dev $
 #
 # v3.3.1 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -34,7 +34,9 @@ use constant {
 	SDUINO_WRITEQUEUE_NEXT    => 0.3,
 	SDUINO_WRITEQUEUE_TIMEOUT => 2,
 	
-	SDUINO_DISPATCH_VERBOSE   => 5,       # default 5
+	SDUINO_DISPATCH_VERBOSE     => 5,      # default 5
+	SDUINO_MC_DISPATCH_VERBOSE  => 5,      # wenn kleiner 5, z.B. 3 dann wird vor dem dispatch mit loglevel 3 die ID und rmsg ausgegeben
+	SDUINO_MC_DISPATCH_LOG_ID   => '12.1'  # die o.g. Ausgabe erfolgt nur wenn der Wert mit der ID übereinstimmt
 };
 
 
@@ -2033,7 +2035,7 @@ SIGNALduino_Get($@)
 
   if (IsDummy($name))
   {
-  	if ($arg =~ /^M[CSU];.*/)
+  	if ($arg =~ /^M[CcSU];.*/)
   	{
 		$arg="\002$arg\003";  	## Add start end end marker if not already there
 		Log3 $name, 5, "$name/msg adding start and endmarker to message";
@@ -3004,7 +3006,8 @@ sub SIGNALduino_Split_Message($$)
 	{
 		#Debug "$name: checking msg part:( $_ )" if ($debug);
 
-		if ($_ =~ m/^MS/ or $_ =~ m/^MC/ or $_ =~ m/^MU/) 		#### Synced Message start
+		#if ($_ =~ m/^MS/ or $_ =~ m/^MC/ or $_ =~ m/^Mc/ or $_ =~ m/^MU/) 		#### Synced Message start
+		if ($_ =~ m/^M./)
 		{
 			$ret{messagetype} = $_;
 		}
@@ -3681,6 +3684,7 @@ SIGNALduino_Parse_MC($$$$@)
 	my $rawData=$msg_parts{rawData};
 	my $rssi=$msg_parts{rssi};
 	my $mcbitnum=$msg_parts{mcbitnum};
+	my $messagetype=$msg_parts{messagetype};
 	my $bitData;
 	my $dmsg;
 	my $message_dispatched=0;
@@ -3721,8 +3725,16 @@ SIGNALduino_Parse_MC($$$$@)
 				Log3 $name, 4, "$name: Found manchester Protocol id $id clock $clock -> $ProtocolListSIGNALduino{$id}{name}";
 			}
 			
-			if (exists($ProtocolListSIGNALduino{$id}{polarity}) && ($ProtocolListSIGNALduino{$id}{polarity} eq 'invert') && (!defined($hash->{version}) || substr($hash->{version},0,6) ne 'V 3.2.'))
-			# todo  && substr($hash->{version},0,6) ne 'V 3.2.')   # bei version V 3.2. nicht invertieren 
+			my $polarityInvert = 0;
+			if (exists($ProtocolListSIGNALduino{$id}{polarity}) && ($ProtocolListSIGNALduino{$id}{polarity} eq 'invert'))
+			{
+				$polarityInvert = 1;
+			}
+			if ($messagetype eq 'Mc' || (defined($hash->{version}) && substr($hash->{version},0,6) eq 'V 3.2.'))
+			{
+				$polarityInvert = $polarityInvert ^ 1;
+			}
+			if ($polarityInvert == 1)
 			{
 		   		$bitData= unpack("B$blen", pack("H$hlen", $rawDataInverted)); 
 			} else {
@@ -3751,6 +3763,15 @@ SIGNALduino_Parse_MC($$$$@)
 							if ($develop !~ m/$devid/) {		# kein dispatch wenn die Id nicht im Attribut development steht
 								Log3 $name, 3, "$name: ID=$devid skiped dispatch (developId=m). To use, please add m$id to the attr development";
 								next;
+							}
+						}
+						if (SDUINO_MC_DISPATCH_VERBOSE < 5 && (SDUINO_MC_DISPATCH_LOG_ID eq '' || SDUINO_MC_DISPATCH_LOG_ID eq $id))
+						{
+							if (defined($rssi)) {
+								Log3 $name, SDUINO_MC_DISPATCH_VERBOSE, "$name $id, $rmsg RSSI=$rssi";
+							} else
+							{
+								Log3 $name, SDUINO_MC_DISPATCH_VERBOSE, "$name $id, $rmsg";
 							}
 						}
 						SIGNALduno_Dispatch($hash,$rmsg,$dmsg,$rssi,$id);
@@ -3815,7 +3836,7 @@ SIGNALduino_Parse($$$$@)
 		$dispatched=  SIGNALduino_Parse_MU($hash, $iohash, $name, $rmsg,%signal_parts);
 	}
 	# Manchester encoded Data   -> MC
-  	elsif (@{$hash->{mcIdList}} && $rmsg=~ m/^MC;.*;/) 
+  	elsif (@{$hash->{mcIdList}} && $rmsg=~ m/^M[cC];.*;/) 
 	{
 		$dispatched=  SIGNALduino_Parse_MC($hash, $iohash, $name, $rmsg,%signal_parts);
 	}
