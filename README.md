@@ -13,7 +13,7 @@ Supported Devices / Protocols
 |TCM97001,Logilink, Pearl NC, and similar,Lifetec LT3594 | Weather sensor
 |PT2262 and similar Devices | Remote switches like Intertechno V1+V3, Elro, door/window sensors|
 |Conrad RSL | shutters |
-|Oregon Scientific v2 and v3 Devices | Weather sensor |
+|Oregon Scientific v1, v2 and v3 Devices | Weather sensor |
 |Oregon PIR sensor | motion sensor |
 |Technoline TX3  | Weather sensor |
 |Hama TS33C, Bresser Thermo/Hygro Sensor  | Weather sensor |
@@ -41,14 +41,15 @@ Supported Devices / Protocols
 |FT0073 | Weather sensors|
 |revolt | Energy sensors|
 |Clarus | remote power socket|
-|WH2 | (TFA 30.3157 nur Temp, Hum = 255 -> nicht angezeigt)|
+|WH2 | (TFA 30.3157 nur Temp, Hum = 255 -> nicht angezeigt)|#
 |TS-K108W11 | Doorbell |
+|Bresser 7009994| Temp/Hum Sensor |
 
 How to install
 ======
 The Perl modules can be loaded directly into your FHEM installation:
 
-```update all https://raw.githubusercontent.com/RFD-FHEM/RFFHEM/dev-r33/controls_signalduino.txt```
+```update all https://raw.githubusercontent.com/RFD-FHEM/RFFHEM/master/controls_signalduino.txt```
 
 Prepare your Arduino nano. Look at http://www.fhemwiki.de/wiki/Datei:Fhemduino_schematic.png
 for hardware setup.
