@@ -1056,7 +1056,7 @@ my %ProtocolListSIGNALduino  = (
 			length_max      => '48',
 		},
 	 "51"    => 
-        {
+        {  # MS;P0=-16046;P1=552;P2=-1039;P3=983;P5=-7907;P6=-1841;P7=-4129;D=15161716171616161717171716161616161617161717171717171617171617161716161616161616171032323232;CP=1;SP=5;O;
             name			=> 'weather51',		# Logilink, NC, WS, TCM97001 etc.
 			comment			=> 'IAN 275901 Wetterstation Lidl',
 			id          	=> '51',
@@ -1070,7 +1070,7 @@ my %ProtocolListSIGNALduino  = (
 			clientmodule    => 'SD_WS',   
 			modulematch     => '^W51#.*',
 			length_min      => '40',
-			length_max      => '40',
+			length_max      => '45',
         },
     "52"    => 			## Oregon PIR Protocol
 		{

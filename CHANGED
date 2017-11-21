@@ -1,4 +1,6 @@
-﻿21.11.2017
+22.11.2017
+ Fix max length (Proto 51) is to small (#79929 #msg719499)
+21.11.2017
  Fix Bresser (Proto 37) max length to small (#79929)
 18.11.2017
  support of blacklisting of protocols via new attribute
