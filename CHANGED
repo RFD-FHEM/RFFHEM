@@ -1,3 +1,5 @@
+﻿21.11.2017
+ Fix Bresser (Proto 37) max length to small (#79929)
 18.11.2017
  support of blacklisting of protocols via new attribute
  serval new protocols are added
