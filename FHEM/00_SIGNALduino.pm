@@ -1,7 +1,7 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 10488 2017-11-19 11:00:00Z v3.3.1-dev $
+# $Id: 00_SIGNALduino.pm 10488 2017-11-19 11:00:00Z v3.3.3-dev $
 #
-# v3.3.1 (Development release 3.3)
+# v3.3.3 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
 # see http://www.fhemwiki.de/wiki/SIGNALDuino
 # It was modified also to provide support for raw message handling which can be send from the SIGNALduino
@@ -24,7 +24,7 @@ no warnings 'portable';
 
 
 use constant {
-	SDUINO_VERSION            => "v3.3.1-dev",
+	SDUINO_VERSION            => "v3.3.3-dev",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -840,7 +840,7 @@ my %ProtocolListSIGNALduino  = (
 			preamble		=> 'W37#',				# prepend to converted message	
 			clientmodule    => 'SD_WS', 
 			length_min      => '40',
-			length_max      => '40',
+			length_max      => '41',
     	},
     "38" =>
       	 {   
