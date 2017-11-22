@@ -1548,6 +1548,12 @@ SIGNALduino_Initialize($)
   
 }
 
+#pre declaration
+sub SIGNALduino_Log3($$$);
+
+
+
+
 sub
 SIGNALduino_FingerprintFn($$)
 {
