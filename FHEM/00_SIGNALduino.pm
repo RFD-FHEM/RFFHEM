@@ -1568,7 +1568,7 @@ SIGNALduino_Define($$)
 
   if(@a != 3) {
     my $msg = "wrong syntax: define <name> SIGNALduino {none | devicename[\@baudrate] | devicename\@directio | hostname:port}";
-    SIGNALduino_Log3 undef, 2, $msg;
+    Log3 undef, 2, $msg;
     return $msg;
   }
   
@@ -1578,7 +1578,7 @@ SIGNALduino_Define($$)
   
   if (!exists &round)
   {
-      SIGNALduino_Log3 $name, 1, "$name: Signalduino can't be activated (sub round not found). Please update Fhem via update command";
+      Log3 $name, 1, "$name: Signalduino can't be activated (sub round not found). Please update Fhem via update command";
 	  return undef;
   }
   
@@ -1589,7 +1589,7 @@ SIGNALduino_Define($$)
  
  
   if($dev eq "none") {
-    SIGNALduino_Log3 $name, 1, "$name: device is none, commands will be echoed only";
+    Log3 $name, 1, "$name: device is none, commands will be echoed only";
     $attr{$name}{dummy} = 1;
     #return undef;
   }
@@ -5157,12 +5157,12 @@ sub SIGNALduino_compPattern($$$%)
 
 ################################################
 # the new Log with integrated loglevel checking
-sub SIGNALduino_SIGNALduino_Log3($$$)
+sub SIGNALduino_Log3($$$)
 {
   
   my ($dev, $loglevel, $text) = @_;
   
-  return SIGNALduino_Log3($dev,$loglevel,$text);
+  return Log3($dev,$loglevel,$text);
   
 
   $dev = $dev->{NAME} if(defined($dev) && ref($dev) eq "HASH");
