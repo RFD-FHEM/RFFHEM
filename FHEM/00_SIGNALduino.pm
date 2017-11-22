@@ -5165,46 +5165,6 @@ sub SIGNALduino_Log3($$$)
   return Log3($dev,$loglevel,$text);
   
 
-  $dev = $dev->{NAME} if(defined($dev) && ref($dev) eq "HASH");
-     
-  if(defined($dev) &&
-     defined($attr{$dev}) &&
-     defined (my $devlevel = $attr{$dev}{verbose})) {
-    return if($loglevel > $devlevel);
-
-  } else {
-    return if($loglevel > $attr{global}{verbose});
-
-  }
-
-  my ($seconds, $microseconds) = gettimeofday();
-  my @t = localtime($seconds);
-  my $nfile = ResolveDateWildcards($attr{global}{logfile}, @t);
-  OpenLogfile($nfile) if(!$currlogfile || $currlogfile ne $nfile);
-
-  my $tim = sprintf("%04d.%02d.%02d %02d:%02d:%02d",
-          $t[5]+1900,$t[4]+1,$t[3], $t[2],$t[1],$t[0]);
-  if($attr{global}{mseclog}) {
-    $tim .= sprintf(".%03d", $microseconds/1000);
-  }
-
-  if($logopened) {
-    print LOG "$tim $loglevel: $text\n";
-  } else {
-    print "$tim $loglevel: $text\n";
-  }
-
-  no strict "refs";
-  foreach my $li (keys %logInform) {
-    if($defs{$li}) {
-      &{$logInform{$li}}($li, "$tim $loglevel : $text");
-    } else {
-      delete $logInform{$li};
-    }
-  }
-  use strict "refs";
-
-  return undef;
 }
 
 #print Dumper (%msg_parts);
