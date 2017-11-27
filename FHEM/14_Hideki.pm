@@ -30,6 +30,8 @@ Hideki_Initialize($)
   $hash->{AttrList}  = "IODev do_not_notify:0,1 showtime:0,1"
                        ." ignore:0,1"
                        ." windDirCorr windSpeedCorr"
+					   ." max-deviation-temp:1,2,3,4,5,6,7,8,9,10,15,20,25,30,35,40,45,50"
+                       ." max-deviation-hum:1,2,3,4,5,6,7,8,9,10,15,20,25,30,35,40,45,50"
                       ." $readingFnAttributes";
                       
   $hash->{AutoCreate}=
@@ -78,6 +80,7 @@ Hideki_Parse($$)
 	my (undef ,$rawData) = split("#",$msg);
 
 	my $name = $iohash->{NAME};
+	my $device = $name;
 	my @a = split("", $msg);
 	Log3 $iohash, 4, "Hideki_Parse $name incomming $msg";
 
@@ -197,6 +200,54 @@ Hideki_Parse($$)
 		$windgust  = sprintf("%.2f", $windgust * $WindSpeedCorr);
 		Log3 $name, 4, "$name Hideki_Parse: WindSpeedCorr=$WindSpeedCorr, WindSpeed=$windspeed, WindGust=$windgust";
 	}
+	
+	# Sanity checks
+   if($def) {
+		my $timeSinceLastUpdate = ReadingsAge($name, "state", 0);
+		if ($timeSinceLastUpdate < 0) {
+			$timeSinceLastUpdate *= -1;
+		}
+		# temperature
+		if($temp && $hash->{READINGS}{temperature} && $hash->{READINGS}{temperature}{VAL}) {
+			my $diffTemp = 0;
+			my $oldTemp = $hash->{READINGS}{temperature}{VAL};
+			my $maxdeviation = AttrVal($name, "max-deviation-temp", 1);				# default 1 K
+			if ($temp > $oldTemp) {
+				$diffTemp = ($temp - $oldTemp);
+			} else {
+				$diffTemp = ($oldTemp - $temp);
+			}
+			$diffTemp = sprintf("%.1f", $diffTemp);				
+			Log3 $name, 4, "$device: $name old temp $oldTemp, age $timeSinceLastUpdate, new temp $temp, diff temp $diffTemp";
+			my $maxDiffTemp = $timeSinceLastUpdate / 60 + $maxdeviation; 			# maxdeviation + 1.0 Kelvin/Minute
+			$maxDiffTemp = sprintf("%.1f", $maxDiffTemp + 0.05);						# round 0.1
+			Log3 $name, 4, "$device: $name max difference temperature $maxDiffTemp K";
+			if ($diffTemp > $maxDiffTemp) {
+				Log3 $name, 3, "$device: $name ERROR - Temp diff too large (old $oldTemp, new $temp, diff $diffTemp)";
+				return "";
+			}
+		}
+		# humidity
+		if($hum && $hash->{READINGS}{humidity} && $hash->{READINGS}{humidity}{VAL}) {
+			my $diffHum = 0;
+			my $oldHum = $hash->{READINGS}{humidity}{VAL};
+			my $maxdeviation = AttrVal($name, "max-deviation-hum", 1);				# default 1 %
+			if ($hum > $oldHum) {
+				$diffHum = ($hum - $oldHum);
+			} else {
+				$diffHum = ($oldHum - $hum);
+			}
+			$diffHum = sprintf("%.1f", $diffHum);				
+			Log3 $name, 4, "$device: $name old hum $oldHum, age $timeSinceLastUpdate, new hum $hum, diff hum $diffHum";
+			my $maxDiffHum = $timeSinceLastUpdate / 60 + $maxdeviation; 			# $maxdeviation + 1.0 %/Minute
+			$maxDiffHum = sprintf("%1.f", $maxDiffHum + 0.5);							# round 1
+			Log3 $name, 4, "$device: $name max difference humidity $maxDiffHum %";
+			if ($diffHum > $maxDiffHum) {
+				Log3 $name, 3, "$device: $name ERROR - Hum diff too large (old $oldHum, new $hum, diff $diffHum)";
+				return "";
+			}
+		}
+   }
 	
 	if (!defined(AttrVal($hash->{NAME},"event-min-interval",undef)))
 	{
@@ -496,7 +547,9 @@ Hideki_Attr(@)
     <li><a href="#do_not_notify">do_not_notify</a></li>
     <li><a href="#eventMap">eventMap</a></li>
     <li><a href="#ignore">ignore</a></li>
-    <li><a href="#showtime">showtime</a></li>
+    <li>max-deviation-hum (default:1, allowed values: 1,2,3,4,5,6,7,8,9,10,15,20,25,30,35,40,45,50)</li>
+    <li>max-deviation-temp (default:1, allowed values: 1,2,3,4,5,6,7,8,9,10,15,20,25,30,35,40,45,50)</li>
+	<li><a href="#showtime">showtime</a></li>
     <li><a href="#readingFnAttributes">readingFnAttributes</a></li>
   </ul>
   <br>
@@ -532,7 +585,7 @@ Hideki_Attr(@)
 	<li>
     <br>
     &lt;code&gt; besteht aus dem Sensortyp und der Kanalnummer (1..5) oder wenn das Attribut longid im IO Device gesetzt ist aus einer Zufallsadresse, die durch den Sensor beim einlegen der
-	Batterie generiert wird (Die Adresse aendert sich bei jedem Batteriewechsel).<br>
+	Batterie generiert wird <br>(Die Adresse &auml;ndert sich bei jedem Batteriewechsel).<br>
     </li>
     <li>Wenn autocreate aktiv ist, dann wird der Sensor automatisch in FHEM angelegt. Das ist der empfohlene Weg, neue Sensoren hinzuzuf&uumlgen.</li>
    
@@ -540,7 +593,7 @@ Hideki_Attr(@)
   <br>
 
   <a name="Hideki_readings"></a>
-  <b>Generated Readings</b>
+  <b>Erzeugte Readings</b>
   <ul>
   	<li>state (T:x H:y B:z)</li>
 	<li>temperature (&deg;C)</li>
@@ -548,7 +601,7 @@ Hideki_Attr(@)
 	<li>battery (ok oder low)</li>
 	<li>channel (Der Sensor Kanal)</li>
 	<br><i>- Hideki spezifisch -</i>
-	<li>comfort_level (Status: Humidity OK... , Wet größer 69% RH, Dry weiniger als 40% RH, Temperature and humidity comfortable)</li>
+	<li>comfort_level (Status: Humidity OK... , Wet gr&ouml;&szlig;er 69% RH, Dry weiniger als 40% RH, Temperature and humidity comfortable)</li>
 	<li>package_number (Paketnummer in der letzten Signalfolge, startet bei 1)</li><br>
   </ul>
   <a name="Hideki_unset"></a>
@@ -563,7 +616,18 @@ Hideki_Attr(@)
     <li><a href="#do_not_notify">do_not_notify</a></li>
     <li><a href="#eventMap">eventMap</a></li>
     <li><a href="#ignore">ignore</a></li>
-    <li><a href="#showtime">showtime</a></li>
+    <li>max-deviation-hum (Default:1, erlaubte Werte: 1,2,3,4,5,6,7,8,9,10,15,20,25,30,35,40,45,50)<br>
+		Maximal erlaubte Abweichung der gemessenen Feuchte zum vorhergehenden Wert in Prozent.<br>
+		Da diese Sensoren keine Checksummen o.&auml;. senden, kann es leicht zum Empfang von unplausiblen Werten kommen. 
+		Um diese abzufangen, kann eine maximale Abweichung zum letzten korrekt empfangenen Wert festgelegt werden.
+		Gr&ouml&szlig;ere Abweichungen werden dann ignoriert und f&uuml;hren zu einer Fehlermeldung im Logfile, wie z.B. dieser:<br>
+		<code>SD_WS07_TH_1 ERROR - Hum diff too large (old 60, new 68, diff 8)</code><br>
+		Zus&auml;tzlich zum eingestellten Wert wird ein von der Differenz der Empfangszeiten abh&auml;ngiger Wert addiert.
+		Dieser betr&auml;gt 1.0 % relative Feuchte pro Minute. Das bedeutet z.B. wenn eine Differenz von 8 eingestellt ist
+		und der zeitliche Abstand des Empfangs der Nachrichten betr&auml;gt 3 Minuten, ist die maximal erlaubte Differenz 11.</li>
+    <li>max-deviation-temp (Default:1, erlaubte Werte: 1,2,3,4,5,6,7,8,9,10,15,20,25,30,35,40,45,50)<br>
+		Maximal erlaubte Abweichung der gemessenen Temperatur zum vorhergehenden Wert in Kelvin.</li>
+	<li><a href="#showtime">showtime</a></li>
     <li><a href="#readingFnAttributes">readingFnAttributes</a></li>
   </ul>
   <br>
