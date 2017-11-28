@@ -5502,4 +5502,94 @@ With a # at the beginnging whitelistIDs can be deactivated.
 
 
 =end html
+=begin html_DE
+
+<a name="SIGNALduino"></a>
+<h3>SIGNALduino</h3>
+
+	<table>
+	<tr><td>
+	Der SIGNALduino ist basierend auf eine Idee von "mdorenka" und veröffentlicht im <a
+	href="http://forum.fhem.de/index.php/topic,17196.0.html">FHEM Forum</a>.<br>
+
+	Mit der OpenSource-Firmware (hier der <a
+	href="https://github.com/RFD-FHEM/SIGNALduino">Link</a>) ist dieser fähig
+	für den Empfang und zum Senden verschiedener Protokolle von diversen Medien. Derzeit sind 433Mhz / 868Mhz Protokolle implementiert.
+	<br><br>
+	
+	Folgende Geräteunterstützung sind ist derzeit verfügbar:
+	<br><br>
+	
+	Funk-Schalter<br>
+	ITv1 & ITv3/Elro und andere Marken mit dem pt2263-Chip oder welche das arctech Protokoll nutzen --> IT.pm<br><br>
+	
+	Das ITv1 Protokoll benutzt einen Standard ITclock von 250 und es kann vorkommen, in dem IT-Modul das Attribut "ITclock" zu setzen.<br>
+	<br><br>
+	Temperatur / Feuchtigkeits Sensoren:
+	<ul>
+	<li>PEARL NC7159, LogiLink WS0002,GT-WT-02,AURIOL,TCM97001, TCM27 und viele anderen -> 14_CUL_TCM97001.pm</li>
+	<li>Oregon Scientific v2 und v3 Sensoren  -> 41_OREGON.pm</li>
+	<li>Temperatur / Feuchtigkeits Sensoren unterstützt -> 14_SD_WS07.pm</li>
+    <li>technoline WS 6750 und TX70DTH -> 14_SD_WS07.pm</li>
+    <li>Eurochon EAS 800z -> 14_SD_WS07.pm</li>
+    <li>CTW600, WH1080	-> 14_SD_WS09.pm</li>
+    <li>Hama TS33C, Bresser Thermo/Hygro Sensoren -> 14_Hideki.pm</li>
+    <li>FreeTec Aussenmodul NC-7344 -> 14_SD_WS07.pm</li>
+	</ul>
+	<br><br>
+
+	Es ist möglich, mehr als ein Gerät anzuschließen, um beispielsweise besseren Empfang zu erhalten. FHEM wird doppelte Nachrichten herausfiltern.<br><br>
+
+	Hinweis: Dieses Modul erfordert das Device::SerialPort oder Win32::SerialPort
+	Modul. Es kann derzeit nur über USB angeschlossen werden.
+	</td>
+	</tr>
+	</table>
+	<br>
+	<a name="SIGNALduinodefine"></a>
+	<b>Define</b><br>
+	<code>define &lt;name&gt; SIGNALduino &lt;device&gt; </code> <br>
+	<br>
+	USB-connected devices (SIGNALduino):<br>
+	<ul><li>
+		&lt;device&gt; spezifiziert den seriellen Port für die Kommunikation mit dem SIGNALduino.
+		Der Name des seriellen Geräts hängt von Ihrer Distribution ab. In
+		Linux ist das <code>cdc_acm</code> Kernel_Modul dafür verantwortlich und es wird ein <code>/dev/ttyACM0</code> oder <code>/dev/ttyUSB0</code> Gerät angelegt. Wenn deine Distribution kein <code>cdc_acm</code> Module besitzt, kannst du usbserial nutzen um den SIGNALduino zu betreiben mit folgenden Kommandos:
+		<ul>
+		<li>modprobe usbserial</li>
+		<li>vendor=0x03eb</li>
+		<li>product=0x204b</li>
+		</ul>In diesem Fall ist das Gerät höchstwahrscheinlich
+		<code>/dev/ttyUSB0</code>.<br><br>
+
+		Sie können auch eine Baudrate angeben, wenn der Gerätename das @ enthält, Beispiel: <code>/dev/ttyACM0@57600</code><br>Dies ist auch die Standard-Baudrate.<br><br>
+
+		Es wird empfohlen, das Gerät über einen Namen anzugeben, der sich nicht ändert. Beispiel via by-id devicename: <code>/dev/serial/by-id/usb-1a86_USB2.0-Serial-if00-port0@57600</code><br>
+
+		Wenn die Baudrate "directio" (Bsp: <code>/dev/ttyACM0@directio</code>), dann benutzt das Perl Modul nicht Device::SerialPort und FHEM öffnet das Gerät mit einem file io. <br> Dies kann funktionieren, wenn das Betriebssystem die Standardwerte für die seriellen Parameter verwendet. Bsp: einige Linux Distributionen und
+		OSX.  <br><br>
+		</li>
+	</ul>
+	<a name="SIGNALduinoattr"></a>
+	<b>Attributes</b>
+	<ul>
+	<li><a name="addvaltrigger">addvaltrigger</a><br></li>
+	<li>blacklist_IDs<br></li>
+	<li>cc1101_frequency<br></li>
+	<li><a href="#do_not_notify">do_not_notify</a></li>
+	<li><a href="#attrdummy">dummy</a></li>
+	<li>debug<br></li>
+	<li>development<br></li>
+	<li>doubleMsgCheck_IDs<br></li>
+	<li>flashCommand<br></li>
+	<li>hardware<br></li>
+	<li>minsecs<br></li>
+	<li>noMsgVerbose<br></li>
+    <li>longids<br></li>
+	<li>rawmsgEvent<br></li>
+	<li>suppressDeviceRawmsg</li>
+	<li>whitelistIDs<br></li>
+	</ul>
+=end html_DE
+
 =cut
