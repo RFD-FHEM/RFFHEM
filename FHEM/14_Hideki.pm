@@ -259,14 +259,17 @@ Hideki_Parse($$)
 sub Hideki_SecondCheck{
     my $b = shift;
     my $c = 0;
-    if ($b & 0x80)
+    if (($b & 0x80) == 0x80){
         $b^=0x95;
+    }
     $c = $b^($b>>1);
-    if ($b & 1)
+    if ($b & 1 == 1){
         $c^=0x5f;
-    if ($c & 1)
+    }
+    if ($c & 1 == 1){
         $b^=0x5f;
-    return (b^(c>>1);
+    }
+    return ($b^($c>>1));
 }
 
 # check crc for incoming message
@@ -286,10 +289,13 @@ sub Hideki_crc{
 	#}
 
 	my $cs1=0; #will be zero for xor over all (bytes>>1)&0x1F except first byte (always 0x75)
+    my $cs2=0;
 	#my $rawData=shift;
 
 	my $count=($Hidekibytes[2]>>1) & 0x1f;
 	my $b;
+	Log3 "Hideki_crc", 4, "count:". $count;
+
 	#iterate over data only, first byte is 0x75 always
 	for (my $i=1; $i<$count+2 && $i<scalar @Hidekibytes; $i++) {
 		$b =  $Hidekibytes[$i];
@@ -298,11 +304,14 @@ sub Hideki_crc{
         $Hidekibytes[$i] ^= $Hidekibytes[$i] << 1;
 	}
 	if($cs1!=0){
+        Log3 "Hideki_crc", 4, "cs1 failed!";
 		return 0;
 	}
     if($cs2 != $Hidekibytes[$count+2]){
+        Log3 "Hideki_crc", 4, "cs2 failed!";
         return 0;
     }
+    Log3 "Hideki_crc", 4, "crc OK";
     return 1;
 }
 
