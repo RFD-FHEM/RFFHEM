@@ -1,3 +1,5 @@
+02.12.2017
+ 14_Hideki.pm implementing check againts second checksum to reduce wrong data
 22.11.2017
  Fix max length (Proto 51) is to small (#79929 #msg719499)
 21.11.2017
