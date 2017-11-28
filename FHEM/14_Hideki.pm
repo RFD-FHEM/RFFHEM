@@ -239,6 +239,36 @@ Hideki_Parse($$)
 	return $name;
 }
 
+# cs1=0,cs2=0
+#	for (i=1; i<packageLength+2; i++) { 
+#		cs1^=data[i]; 
+#		cs2 = secondCheck(data[i]^cs2); 
+#		data[i] ^= data[i] << 1; 
+#	} 
+
+# /* The second checksum. Input is OldChecksum^NewByte */
+# BYTE SecondCheck(BYTE b)
+# {
+#  BYTE c;
+#  if (b&0x80) b^=0x95; // ^ is bitwise xor
+#  c = b^(b>>1);
+#  if (b&1) c^=0x5f;
+#  if (c&1) b^=0x5f;
+#   return b^(c>>1);
+# }
+sub Hideki_SecondCheck{
+    my $b = shift;
+    my $c = 0;
+    if ($b & 0x80)
+        $b^=0x95;
+    $c = $b^($b>>1);
+    if ($b & 1)
+        $c^=0x5f;
+    if ($c & 1)
+        $b^=0x5f;
+    return (b^(c>>1);
+}
+
 # check crc for incoming message
 # in: hex string with encrypted, raw data, starting with 75
 # out: 1 for OK, 0 for failed
@@ -257,7 +287,6 @@ sub Hideki_crc{
 
 	my $cs1=0; #will be zero for xor over all (bytes>>1)&0x1F except first byte (always 0x75)
 	#my $rawData=shift;
-	#todo add the crc check here
 
 	my $count=($Hidekibytes[2]>>1) & 0x1f;
 	my $b;
@@ -265,13 +294,16 @@ sub Hideki_crc{
 	for (my $i=1; $i<$count+2 && $i<scalar @Hidekibytes; $i++) {
 		$b =  $Hidekibytes[$i];
 		$cs1 = $cs1 ^ $b; # calc first chksum
+        $cs2 = Hideki_SecondCheck($Hidekibytes[$i] ^ $cs2);
+        $Hidekibytes[$i] ^= $Hidekibytes[$i] << 1;
 	}
-	if($cs1==0){
-		return 1;
-	}
-	else{
+	if($cs1!=0){
 		return 0;
 	}
+    if($cs2 != $Hidekibytes[$count+2]){
+        return 0;
+    }
+    return 1;
 }
 
 # return decoded sensor type
