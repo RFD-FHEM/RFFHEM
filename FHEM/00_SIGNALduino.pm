@@ -5509,15 +5509,15 @@ With a # at the beginnging whitelistIDs can be deactivated.
 
 	<table>
 	<tr><td>
-	Der SIGNALduino ist basierend auf eine Idee von "mdorenka" und veröffentlicht im <a
+	Der <a href="https://wiki.fhem.de/wiki/SIGNALduino">SIGNALduino</a> ist basierend auf eine Idee von "mdorenka" und ver&ouml;ffentlicht im <a
 	href="http://forum.fhem.de/index.php/topic,17196.0.html">FHEM Forum</a>.<br>
 
 	Mit der OpenSource-Firmware (hier der <a
-	href="https://github.com/RFD-FHEM/SIGNALduino">Link</a>) ist dieser fähig
-	für den Empfang und zum Senden verschiedener Protokolle von diversen Medien. Derzeit sind 433Mhz / 868Mhz Protokolle implementiert.
+	href="https://github.com/RFD-FHEM/SIGNALduino">Link</a>) ist dieser f&auml;hig
+	f&uuml;r den Empfang und zum Senden verschiedener Protokolle von diversen Medien. Derzeit sind 433Mhz / 868Mhz Protokolle implementiert.
 	<br><br>
 	
-	Folgende Geräteunterstützung sind ist derzeit verfügbar:
+	Folgende Ger&auml;teunterst&uuml;tzung sind ist derzeit verf&uuml;gbar:
 	<br><br>
 	
 	Funk-Schalter<br>
@@ -5529,7 +5529,7 @@ With a # at the beginnging whitelistIDs can be deactivated.
 	<ul>
 	<li>PEARL NC7159, LogiLink WS0002,GT-WT-02,AURIOL,TCM97001, TCM27 und viele anderen -> 14_CUL_TCM97001.pm</li>
 	<li>Oregon Scientific v2 und v3 Sensoren  -> 41_OREGON.pm</li>
-	<li>Temperatur / Feuchtigkeits Sensoren unterstützt -> 14_SD_WS07.pm</li>
+	<li>Temperatur / Feuchtigkeits Sensoren unterst&uuml;tzt -> 14_SD_WS07.pm</li>
     <li>technoline WS 6750 und TX70DTH -> 14_SD_WS07.pm</li>
     <li>Eurochon EAS 800z -> 14_SD_WS07.pm</li>
     <li>CTW600, WH1080	-> 14_SD_WS09.pm</li>
@@ -5538,10 +5538,10 @@ With a # at the beginnging whitelistIDs can be deactivated.
 	</ul>
 	<br><br>
 
-	Es ist möglich, mehr als ein Gerät anzuschließen, um beispielsweise besseren Empfang zu erhalten. FHEM wird doppelte Nachrichten herausfiltern.<br><br>
+	Es ist m&ouml;glich, mehr als ein Ger&auml;t anzuschließen, um beispielsweise besseren Empfang zu erhalten. FHEM wird doppelte Nachrichten herausfiltern.<br><br>
 
 	Hinweis: Dieses Modul erfordert das Device::SerialPort oder Win32::SerialPort
-	Modul. Es kann derzeit nur über USB angeschlossen werden.
+	Modul. Es kann derzeit nur &uuml;ber USB angeschlossen werden.
 	</td>
 	</tr>
 	</table>
@@ -5552,44 +5552,190 @@ With a # at the beginnging whitelistIDs can be deactivated.
 	<br>
 	USB-connected devices (SIGNALduino):<br>
 	<ul><li>
-		&lt;device&gt; spezifiziert den seriellen Port für die Kommunikation mit dem SIGNALduino.
-		Der Name des seriellen Geräts hängt von Ihrer Distribution ab. In
-		Linux ist das <code>cdc_acm</code> Kernel_Modul dafür verantwortlich und es wird ein <code>/dev/ttyACM0</code> oder <code>/dev/ttyUSB0</code> Gerät angelegt. Wenn deine Distribution kein <code>cdc_acm</code> Module besitzt, kannst du usbserial nutzen um den SIGNALduino zu betreiben mit folgenden Kommandos:
+		&lt;device&gt; spezifiziert den seriellen Port f&uuml;r die Kommunikation mit dem SIGNALduino.
+		Der Name des seriellen Ger&auml;ts h&auml;ngt von Ihrer  Distribution ab. In
+		Linux ist das <code>cdc_acm</code> Kernel_Modul daf&uuml;r verantwortlich und es wird ein <code>/dev/ttyACM0</code> oder <code>/dev/ttyUSB0</code> Ger&auml;t angelegt. Wenn deine Distribution kein <code>cdc_acm</code> Module besitzt, kannst du usbserial nutzen um den SIGNALduino zu betreiben mit folgenden Kommandos:
 		<ul>
 		<li>modprobe usbserial</li>
 		<li>vendor=0x03eb</li>
 		<li>product=0x204b</li>
-		</ul>In diesem Fall ist das Gerät höchstwahrscheinlich
+		</ul>In diesem Fall ist das Ger&auml;t h&ouml;chstwahrscheinlich
 		<code>/dev/ttyUSB0</code>.<br><br>
 
-		Sie können auch eine Baudrate angeben, wenn der Gerätename das @ enthält, Beispiel: <code>/dev/ttyACM0@57600</code><br>Dies ist auch die Standard-Baudrate.<br><br>
+		Sie k&ouml;nnen auch eine Baudrate angeben, wenn der Ger&auml;tename das @ enth&auml;lt, Beispiel: <code>/dev/ttyACM0@57600</code><br>Dies ist auch die Standard-Baudrate.<br><br>
 
-		Es wird empfohlen, das Gerät über einen Namen anzugeben, der sich nicht ändert. Beispiel via by-id devicename: <code>/dev/serial/by-id/usb-1a86_USB2.0-Serial-if00-port0@57600</code><br>
+		Es wird empfohlen, das Ger&auml;t &uuml;ber einen Namen anzugeben, der sich nicht &auml;ndert. Beispiel via by-id devicename: <code>/dev/serial/by-id/usb-1a86_USB2.0-Serial-if00-port0@57600</code><br>
 
-		Wenn die Baudrate "directio" (Bsp: <code>/dev/ttyACM0@directio</code>), dann benutzt das Perl Modul nicht Device::SerialPort und FHEM öffnet das Gerät mit einem file io. <br> Dies kann funktionieren, wenn das Betriebssystem die Standardwerte für die seriellen Parameter verwendet. Bsp: einige Linux Distributionen und
+		Wenn die Baudrate "directio" (Bsp: <code>/dev/ttyACM0@directio</code>), dann benutzt das Perl Modul nicht Device::SerialPort und FHEM &ouml;ffnet das Ger&auml;t mit einem file io. <br> Dies kann funktionieren, wenn das Betriebssystem die Standardwerte f&uuml;r die seriellen Parameter verwendet. Bsp: einige Linux Distributionen und
 		OSX.  <br><br>
 		</li>
 	</ul>
 	<a name="SIGNALduinoattr"></a>
 	<b>Attributes</b>
 	<ul>
-	<li><a name="addvaltrigger">addvaltrigger</a><br></li>
+	<li><a href="#dummy">dummy</a><br><br></li>
+	<li><a href="#addvaltrigger">addvaltrigger</a><br></li>
+	Generiert Trigger f&uuml;r zus&auml;tzliche Werte. Momentan werden DMSG , RAWMSG und RSSI unterst&uuml;zt.<br><br>
 	<li>blacklist_IDs<br></li>
+	Dies ist eine durch Komma getrennte Liste. Die Blacklist funktioniert nur, wenn keine Whitelist existiert! Hier kann man ID´s eintragen welche man nicht ausgewertet haben m&ouml;chte.<br><br>
 	<li>cc1101_frequency<br></li>
-	<li><a href="#do_not_notify">do_not_notify</a></li>
-	<li><a href="#attrdummy">dummy</a></li>
-	<li>debug<br></li>
-	<li>development<br></li>
+	Frequenzeinstellung des cc1101. Bsp: 433.920Mhz | 868.350Mhz<br><br>
+	<li>debug<br>
+	Dies bringt das Modul in eine sehr ausf&uuml;hrliche Debug-Ausgabe im Logfile. Somit lassen sich neue Signale finden und Signale &uuml;berpr&uuml;fen, ob die Demodulation korrekt funktioniert.</li><br>
+	<li>development<br>
+	Mit development k&ouml;nnen Sie die Protokolldekodierung f&uuml;r Protokolle aktivieren, die sich noch in der Entwicklung befinden und m&ouml;glicherweise nicht sehr genau implementiert sind.
+	Dies kann zu Abst&uuml;rzen oder zu einer hohen Anzahl an Log-Eintr&auml;gen in Ihrer Logdatei f&uuml;hren. Protokolle, die mit einem developmentID-Flag gekennzeichnet sind, werden nicht geladen, sofern dies nicht angegeben ist.
+	Wenn das Flag developId => 'y' in der Protokolldefinition gesetzt ist, befindet sich das Protokoll noch in der Entwicklung. Wenn Sie es aktivieren wollen, so geben Sie "y" gefolgt von der Protokoll-ID an.</li><br>
+	<li><a href="#do_not_notify">do_not_notify</a></li><br>
 	<li>doubleMsgCheck_IDs<br></li>
-	<li>flashCommand<br></li>
-	<li>hardware<br></li>
+	Dieses Attribut erlaubt es, Protokolle anzugeben, die zwei gleiche Nachrichten enthalten m&uuml;ssen, um diese an die Module zu &uuml;bergeben. Sie k&ouml;nnen mehrere IDs mit einem Komma angeben: 0,3,7,12<br><br>
+	<li>flashCommand<br>
+	Dies ist der Befehl, der ausgef&uuml;hrt wird, um den Firmware-Flash auszuf&uuml;hren. Nutzen Sie dies nicht, wenn Sie nicht wissen, was Sie tun.<br>
+	Standard: <code>avrdude -p atmega328P -c arduino -P [PORT] -D -U flash:w:[HEXFILE] 2>[LOGFILE]</code><br><br>
+	Es enth&auml;lt einige Platzhalter, die automatisch mit den entsprechenden Werten gef&uuml;llt werden:
+		<ul>
+			<li>[PORT]<br>
+			Ist der Port, an den der SIGNALduino angeschlossen ist (z.Bsp: /dev/ttyUSB0) und wird von der Defenition verwendet.</li>
+			<li>[HEXFILE]<br>
+			Ist die .hex-Datei, die geflasht werden soll. Es gibt drei Optionen (angewendet in dieser Reihenfolge):<br>
+			&nbsp;&nbsp;- in <code>set SIGNALduino flash</code> als erstes Argument &uuml;bergeben<br>
+			&nbsp;&nbsp;- aus dem Hardware-Attribut genommen<br>
+			&nbsp;&nbsp;- der im Modul definierte Standardwert<br>
+			</li>
+			<li>[LOGFILE]<br>
+			Die Logdatei, die Informationen &uuml;ber den Flash-Prozess sammelt. Es wird nach Abschluss des Flash-Prozesses in FHEM angezeigt</li>
+		</ul>
+	</li><br>
+	<li>hardware<br>
+		Derzeit m&ouml;gliche Hardware Varianten:
+		<ul>
+			<li>nano328: Arduino Nano f&uuml;r "Billig"-Empf&auml;nger</li>
+			<li>nanoCC1101: Arduino Nano f&uuml;r einen CC110x-Empf&auml;nger</li>
+			<li>promini328: Arduino Pro Mini f&uuml;r "Billig"-Empf&auml;nger</li>
+			<li>uno: Arudino Uno</li>
+		</ul>
+	</li><br>
+	Notwendig f&uuml;r den Befehl <code>flash</code>. Hier sollten Sie angeben, welche Hardware Sie mit dem usbport verbunden haben. Andernfalls kann es zu Fehlfunktionen des Ger&auml;ts kommen.<br><br>
+	<li>longids<br></li>
+	Durch Komma getrennte Liste von Device-Typen f&uuml;r Empfang von langen IDs mit dem SIGNALduino. Diese zus&auml;tzliche ID erlaubt es Wettersensoren, welche auf dem gleichen Kanal senden zu unterscheiden. Hierzu wird eine zuf&auml;llig generierte ID hinzugef&uuml;gt. Wenn Sie longids verwenden, dann wird in den meisten F&auml;llen nach einem Batteriewechsel ein neuer Sensor angelegt. Standardm&auml;ßig werden keine langen IDs verwendet.
+	Folgende Module verwenden diese Funktionalit&auml;t: 14_Hideki, 41_OREGON, 14_CUL_TCM97001, 14_SD_WS07.<br>
+	Beispiele:<br>
+	<br>
+    # Keine langen IDs verwenden (Default Einstellung):<br>
+    attr SIGNALduino longids 0<br>
+    # Immer lange IDs verwenden:<br>
+    attr SIGNALduino longids 1<br>
+    # Verwende lange IDs f&uuml;r SD_WS07 Devices.<br>
+    # Device Namen sehen z.B. so aus: SD_WS07_TH_3 for channel 3.<br>
+    attr SIGNALduino longids SD_WS07<br><br>
 	<li>minsecs<br></li>
+	Es wird von anderen Modulen bereitgestellt. Minsecs sollte wie eine Schwelle wirken. Wenn angegeben, werden unterst&uuml;tzte Module neue Nachrichten verworfen, wenn minsecs nicht vergangen sind.<br><br>
 	<li>noMsgVerbose<br></li>
-    <li>longids<br></li>
-	<li>rawmsgEvent<br></li>
+	Mit diesem Attribut k&ouml;nnen Sie die Protokollierung von Debug-Nachrichten vom io-Ger&auml;t steuern. Wenn dieser Wert auf 3 festgelegt ist, werden diese Nachrichten protokolliert, wenn der globale Verbose auf 3 oder h&ouml;her eingestellt ist.<br><br>
+    <li>rawmsgEvent<br></li>
+	Bei der Einstellung "1", l&ouml;sen empfangene Rohnachrichten Ereignisse aus.<br><br>
 	<li>suppressDeviceRawmsg</li>
-	<li>whitelistIDs<br></li>
+	Bei der Einstellung "1" wird das interne "RAWMSG" nicht mit den empfangenen Nachrichten aktualisiert.<br><br>
+	<li>whitelist_IDs<br></li>
+	Dieses Attribut erlaubt es, festzulegen, welche Protokolle von diesem Modul aus verwendet werden. Protokolle, die nicht beachtet werden, erzeugen keine Logmeldungen oder Ereignisse. Sie werden dann vollst&auml;ndig ignoriert.
+	Dies erm&ouml;glicht es, die Ressourcennutzung zu reduzieren und bessere Klarheit in den Protokollen zu erzielen. Sie k&ouml;nnen mehrere WhitelistIDs mit einem Komma angeben: 0,3,7,12. Mit einer # am Anfang k&ouml;nnen WhitelistIDs deaktiviert werden.<br><br>
+	<li>WS09_CRCAUS<br>
+		<ul>
+			<li>0: CRC-Check WH1080 CRC = 0 on, Standard</li>
+			<li>2: CRC = 49 (x031) WH1080, set OK</li>
+		</ul>
+	</li><br>
 	</ul>
+	
+	<a name="SIGNALduinoget"></a>
+	<b>Get</b>
+	<ul>
+	<li>ccconf<br></li>
+   Liest s&auml;mtliche radio-chip (cc1101) Register (Frequenz, Bandbreite, etc.) aus und zeigt die aktuelle Konfiguration an.<br>
+   (NUR bei Verwendung eines cc1101 Empf&auml;nger)<br><br>
+	<li>ccpatable<br></li>
+   Liest die cc1101 PA Tabelle aus (power amplification for RF sending).<br><br>
+	<li>ccreg<br></li>
+   Liest das cc1101 Register aus (99 reads all cc1101 registers).<br><br>
+	<li>cmds<br></li>
+	Abh&auml;ngig von der installierten Firmware besitzt der SIGNALduino verschiedene Befehle. Bitte beachten Sie den Quellcode der Firmware Ihres SIGNALduino, um die Antwort dieses Befehls zu interpretieren.<br><br>
+	<li>config<br></li>
+	Zeigt Ihnen die aktuelle Konfiguration der SIGNALduino Protokollkathegorie.<br><br>
+	<li>freeram<br></li>
+   Zeigt den freien RAM an.<br><br>
+	<li>ping<br></li>
+	Pr&uuml;ft die Kommunikation mit dem SIGNALduino.<br><br>
+	<li>protocolIDs<br></li>
+	Zeigt Ihnen die aktuell implementierten Protokolle des SIGNALduino und an welches FHEM Modul Sie &uuml;bergeben werden.<br><br>
+	<li>raw<br></li>
+	Abh&auml;ngig von der installierten Firmware! Somit k&ouml;nnen Sie einen SIGNALduino-Firmware-Befehl direkt ausf&uuml;hren.<br><br>
+	<li>uptime<br></li>
+	Zeigt Ihnen die Information, wie lange der SIGNALduino l&auml;uft. Ein FHEM Neustart setzt den Timer zur&uuml;ck.<br><br>
+	<li>version<br></li>
+	Zeigt Ihnen die Information, welche aktuell genutzte Software Sie mit dem SIGNALduino verwenden.<br><br>
+	</ul>
+	
+	<a name="SIGNALduinoset"></a>
+	<b>SET</b>
+	<ul>
+	<li>cc1101_freq / cc1101_bWidth / cc1101_patable / cc1101_rAmpl / cc1101_sens<br></li>
+	!!! Nur mit einem CC110x Receiver !!!<br><br>
+	Stellt die SIGNALduino-Frequenz / Bandbreite / PA-Tabelle / Empf&auml;nger-Amplitude / Empfindlichkeit ein.<br>
+	Verwenden Sie es mit Vorsicht. Es kann Ihre Hardware zerst&ouml;ren und es kann sogar illegal sein, dies zu tun.<br>
+	Hinweis: Die f&uuml;r die RFR-&Uuml;bertragung verwendeten Parameter sind nicht betroffen.<br>
+			<ul>
+				<li><code>freq</code> , legt sowohl die Empfangsfrequenz als auch die &Uuml;bertragungsfrequenz fest.<br>
+				Hinweis: Obwohl der CC1101 auf Frequenzen zwischen 315 und 915 MHz eingestellt werden kann, ist die Antennenschnittstelle und die Antenne des CUL auf genau eine Frequenz abgestimmt. Standard ist 868,3 MHz (oder 433 MHz)</li>
+				<li><code>bWidth</code> , kann auf Werte zwischen 58 kHz und 812 kHz eingestellt werden. Große Werte sind st&ouml;ranf&auml;llig, erm&ouml;glichen jedoch den Empfang von ungenau kalibrierten Sendern. Es wirkt sich auch auf die &Uuml;bertragung aus. Standard ist 325 kHz.</li>
+				<li><code>patable</code> , &Auml;nderung der PA-Tabelle (Leistungsverst&auml;rkung f&uuml;r HF-Senden)</li>
+				<li><code>rAmpl</code> , ist die Empf&auml;ngerverst&auml;rkung mit Werten zwischen 24 und 42 dB. Gr&ouml;ßere Werte erlauben den Empfang schwacher Signale. Der Standardwert ist 42.</li>
+				<li><code>sens</code> , ist die Entscheidungsgrenze zwischen den Ein- und Aus-Werten und betr&auml;gt 4, 8, 12 oder 16 dB. Kleinere Werte erlauben den Empfang von weniger klaren Signalen. Standard ist 4 dB.</li>
+			</ul><br>
+	<li>close<br></li>
+	Beendet die Verbindung zum Ger&auml;t.<br><br>
+	<li>enableMessagetype<br>
+			Erm&ouml;glicht die Aktivierung der Nachrichtenverarbeitung f&uuml;r
+			<ul>
+				<li>Nachrichten mit sync (syncedMS),</li>
+				<li>Nachrichten ohne einen sync pulse (unsyncedMU) </li>
+				<li>Manchester codierte Nachrichten (manchesterMC) </li>
+			</ul>
+			Der neue Status wird in den eeprom vom Arduino geschrieben.
+		</li><br>
+	<li>disableMessagetype<br>
+			Erm&ouml;glicht das Deaktivieren der Nachrichtenverarbeitung f&uuml;r
+			<ul>
+				<li>Nachrichten mit sync (syncedMS),</li>
+				<li>Nachrichten ohne einen sync pulse (unsyncedMU)</li> 
+				<li>Manchester codierte Nachrichten (manchesterMC) </li>
+			</ul>
+			Der neue Status wird in den eeprom vom Arduino geschrieben.
+		</li><br>
+	<li>flash [hexFile|url]<br>
+	Der SIGNALduino ben&ouml;tigt die richtige Firmware, um die Sensordaten zu empfangen und zu liefern. Unter Verwendung der Arduino IDE zum Flashen der Firmware in den SIGNALduino bietet dies eine M&ouml;glichkeit, ihn direkt von FHEM aus zu flashen. Sie k&ouml;nnen eine Datei auf Ihrem fhem-Server angeben oder eine URL angeben, von der die Firmware heruntergeladen wird.
+	Es gibt einige Anforderungen:
+			<ul>
+				<li><code>avrdude</code> muss auf dem Host installiert sein. Auf einem Raspberry PI kann dies getan werden mit: <code>sudo apt-get install avrdude</code></li>
+				<li>Das Hardware-Attribut muss festgelegt werden, wenn eine andere Hardware als Arduino Nano verwendet wird. Dieses Attribut definiert den Befehl, der an avrdude gesendet wird, um den uC zu flashen.</li>
+			</ul><br>
+	</li>
+	<li>raw<br></li>
+	Geben Sie einen SIGNALduino-Firmware-Befehl aus, ohne auf die vom SIGNALduino zur&uuml;ckgegebenen Daten zu warten. Ausf&uuml;hrliche Informationen zu SIGNALduino-Befehlen finden Sie im SIGNALduino-Firmware-Code. Mit dieser Linie k&ouml;nnen Sie fast jedes Signal &uuml;ber einen angeschlossenen Sender senden.<br>
+	Um einige Rohdaten zu senden, schauen Sie sich diese Beispiele an: P#binarydata#R#C (#C is optional)
+			<ul>
+				<li>Beispiel 1: <code>set sduino raw SR;R=3;P0=500;P1=-9000;P2=-4000;P3=-2000;D=0302030</code> , sendet die Daten im Raw-Modus dreimal wiederholt</li>
+				<li>Beispiel 2: <code>set sduino raw SM;R=3;P0=500;C=250;D=A4F7FDDE</code> , sendet die Daten Manchester codiert mit einem clock von 250&micro;S</li>
+				<li>Beispiel 3: <code>set sduino raw SC;R=3;SR;P0=5000;SM;P0=500;C=250;D=A4F7FDDE</code> , sendet eine kombinierte Nachricht von Raw und Manchester codiert 3 mal wiederholt</li>
+			</ul><br>
+			<ul>
+			<li>CER: Einschalten der Datenkomprimierung</li>
+			<li>CDR: Abschalten der Datenkomprimierung</li>
+			</ul><br>
+	<li>reset<br></li>
+	&Ouml;ffnet die Verbindung zum Ger&auml;t neu und initialisiert es. <br><br>
+	<li>sendMsg<br></li>
+	Dieser Befehl erstellt die erforderlichen Anweisungen zum Senden von Rohdaten &uuml;ber den SIGNALduino. Sie k&ouml;nnen die Signaldaten wie Protokoll und die Bits angeben, die Sie senden m&ouml;chten.<br>
+	</ul>
+	
 =end html_DE
-
 =cut
