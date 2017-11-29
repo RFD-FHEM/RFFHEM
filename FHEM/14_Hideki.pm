@@ -7,6 +7,8 @@
 # S. Butzek, HJGode, Ralf9 2015-2017
 #
 
+# changed the way crc and decrypt is used hjgode 20171129
+
 package main;
 
 use strict;
@@ -82,11 +84,14 @@ Hideki_Parse($$)
 	Log3 $iohash, 4, "Hideki_Parse $name incomming $msg";
 
     # check crc1 and crc2 and decryt
-    my @data=map { hex($_) } ($rawData =~ /(..)/g); #byte array from raw hex data string
+    my @data;
+    @data=map { hex($_) } ($rawData =~ /(..)/g); #byte array from raw hex data string
     
-    my ($crc1crc2OK, $decodedData) = decryptAndCheck(\@data);
+    my @decodedData;
+    my $crc1crc2OK=0;
+    ($crc1crc2OK, @decodedData) = decryptAndCheck(\@data); # use unencrypted raw data
     if($crc1crc2OK==1){
-        #result OK, $decodedData has decoded bytes
+        #result OK, $decodedData has decrypted bytes
         Log3 $iohash, 4, "$name decryptAndCheck OK";
     }
     else{
@@ -97,26 +102,30 @@ Hideki_Parse($$)
 
     # decrypt and decodedBytes are now done with decryptAndCheck
 	# decrypt bytes
-	my $decodedString = decryptBytes($rawData); # decrpyt hex string to hex string
+	# my $decodedString = decryptBytes($rawData); # decrypt hex string to hex string
+	my $decodedString = join '', unpack('H*', pack('c*',@decodedData)); # get hex string
+	Log3 $iohash, 4, "raw=$rawData, decoded=$decodedString";
+	 
 	#convert dectypted hex str back to array of bytes:
 #	my @decodedBytes  = map { hex($_) } ($decodedString =~ /(..)/g);
-    my @decodedBytes = $decodedData;
+#    my @decodedBytes = @decodedData;
 
-	if (!@decodedBytes)
+	if (!@decodedData)
 	{
 		Log3 $iohash, 4, "$name decrypt failed";
 		return '';
 	}
 	
-	my $sensorTyp=getSensorType($decodedBytes[3]);
+	Log3 $iohash, 4, "getSensorType for ".$decodedData[3];
+	my $sensorTyp=($decodedData[3] & 0x1F);
 	Log3 $iohash, 4, "Hideki_Parse SensorTyp = $sensorTyp decodedString = $decodedString";		
 
     #no more needed as already checked
-	if (!Hideki_crc(\@decodedBytes))
-	{
-		Log3 $iohash, 4, "$name crc failed";
-		return '';
-	}
+#	if (!Hideki_crc(\@decodedBytes))
+#	{
+#		Log3 $iohash, 4, "$name crc failed";
+#		return '';
+#	}
 
 	my $id=substr($decodedString,2,2);      # get the random id from the data
  	my $channel=0;
@@ -139,11 +148,11 @@ Hideki_Parse($$)
 	my $comfort=0;
 	## 1. Detect what type of sensor we have, then call specific function to decode
 	if ($sensorTyp==30){
-		($channel, $temp) = decodeThermo(\@decodedBytes); # decodeThermoHygro($decodedString);
-		$hum = 10 * ($decodedBytes[6] >> 4) + ($decodedBytes[6] & 0x0f);
-		$bat = ($decodedBytes[2] >> 6 == 3) ? 'ok' : 'low';			 # decode battery
-		$count = $decodedBytes[3] >> 6;		# verifiziert, MSG_Counter
-		$comfort = ($decodedBytes[7] >> 2 & 0x03);   # comfort level
+		($channel, $temp) = decodeThermo(\@decodedData); # decodeThermoHygro($decodedString);
+		$hum = 10 * ($decodedData[6] >> 4) + ($decodedData[6] & 0x0f);
+		$bat = ($decodedData[2] >> 6 == 3) ? 'ok' : 'low';			 # decode battery
+		$count = $decodedData[3] >> 6;		# verifiziert, MSG_Counter
+		$comfort = ($decodedData[7] >> 2 & 0x03);   # comfort level
 
 		if ($comfort == 0) { $comfort = 'Hum. OK. Temp. uncomfortable (>24.9 or <20)' }
 		elsif ($comfort == 1) { $comfort = 'Wet. More than 69% RH' }
@@ -152,28 +161,28 @@ Hideki_Parse($$)
 		$val = "T: $temp H: $hum";
 		Log3 $iohash, 4, "$name decoded Hideki protocol model=$model, sensor id=$id, channel=$channel, cnt=$count, bat=$bat, temp=$temp, humidity=$hum, comfort=$comfort";
 	}elsif($sensorTyp==31){
-		($channel, $temp) = decodeThermo(\@decodedBytes);
-		$bat = ($decodedBytes[2] >> 6 == 3) ? 'ok' : 'low';			 # decode battery
-		$count = $decodedBytes[3] >> 6;		# verifiziert, MSG_Counter
+		($channel, $temp) = decodeThermo(\@decodedData);
+		$bat = ($decodedData[2] >> 6 == 3) ? 'ok' : 'low';			 # decode battery
+		$count = $decodedData[3] >> 6;		# verifiziert, MSG_Counter
 		$val = "T: $temp";
 		Log3 $iohash, 4, "$name decoded Hideki protocol model=$model, sensor id=$id, channel=$channel, cnt=$count, bat=$bat, temp=$temp";
 	}elsif($sensorTyp==14){
-		($channel, $rain) = decodeRain(\@decodedBytes); # decodeThermoHygro($decodedString);
-		$bat = ($decodedBytes[2] >> 6 == 3) ? 'ok' : 'low';			 # decode battery
-		$count = $decodedBytes[3] >> 6;		# UNVERIFIZIERT, MSG_Counter
+		($channel, $rain) = decodeRain(\@decodedData); # decodeThermoHygro($decodedString);
+		$bat = ($decodedData[2] >> 6 == 3) ? 'ok' : 'low';			 # decode battery
+		$count = $decodedData[3] >> 6;		# UNVERIFIZIERT, MSG_Counter
 		$val = "R: $rain";
 		Log3 $iohash, 4, "$name decoded Hideki protocol model=$model, sensor id=$id, channel=$channel, cnt=$count, bat=$bat, rain=$rain, unknown=$unknown";
 	}elsif($sensorTyp==12){
-		($channel, $temp) = decodeThermo(\@decodedBytes); # decodeThermoHygro($decodedString);
-		($windchill,$windspeed,$windgust,$winddir,$winddirdeg,$winddirtext) = wind(\@decodedBytes);
-		$bat = ($decodedBytes[2] >> 6 == 3) ? 'ok' : 'low';			 # decode battery
-		$count = $decodedBytes[3] >> 6;		# UNVERIFIZIERT, MSG_Counter
+		($channel, $temp) = decodeThermo(\@decodedData); # decodeThermoHygro($decodedString);
+		($windchill,$windspeed,$windgust,$winddir,$winddirdeg,$winddirtext) = wind(\@decodedData);
+		$bat = ($decodedData[2] >> 6 == 3) ? 'ok' : 'low';			 # decode battery
+		$count = $decodedData[3] >> 6;		# UNVERIFIZIERT, MSG_Counter
 		$val = "T: $temp  Ws: $windspeed  Wg: $windgust  Wd: $winddirtext";
 		Log3 $iohash, 4, "$name decoded Hideki protocol model=$model, sensor id=$id, channel=$channel, cnt=$count, bat=$bat, temp=$temp, Wc=$windchill, Ws=$windspeed, Wg=$windgust, Wd=$winddir, WdDeg=$winddirdeg, Wdtxt=$winddirtext";
 	}elsif($sensorTyp==13){
-		($channel, $temp) = decodeThermo(\@decodedBytes); # decodeThermoHygro($decodedString);
-		$bat = ($decodedBytes[2] >> 6 == 3) ? 'ok' : 'low';			 # decode battery
-		$count = $decodedBytes[3] >> 6;		# UNVERIFIZIERT, MSG_Counter
+		($channel, $temp) = decodeThermo(\@decodedData); # decodeThermoHygro($decodedString);
+		$bat = ($decodedData[2] >> 6 == 3) ? 'ok' : 'low';			 # decode battery
+		$count = $decodedData[3] >> 6;		# UNVERIFIZIERT, MSG_Counter
 		$val = "T: $temp";
 		Log3 $iohash, 4, "$name decoded Hideki protocol model=$model, sensor id=$id, channel=$channel, cnt=$count, bat=$bat, temp=$temp";
 		Log3 $iohash, 4, "$name Sensor Typ $sensorTyp currently not full supported, please report sensor information!";
@@ -259,22 +268,36 @@ Hideki_Parse($$)
 # input is raw data (array of bytes)
 # output is true if check1 and check2 OK
 # data will then hold the decrypted data
-sub decryptAndCheck() { 
+sub decryptAndCheck { 
 	my $cs1;
     my $cs2;
     my $i; 
     my @data = @{$_[0]};
-	$cs1=0; 
+	$cs1=0; #will be zero for xor over all (bytes[2]>>1)&0x1F except first byte (always 0x75)
 	$cs2=0; 
-	my $count=($data[2]>>1) & 0x1f;
-
-	#iterate over data only, first byte is 0x75 always
-	for ($i=1; $i<$count+2 && $i<scalar @data; $i++) {
-		$b =  $data[$i];
-		$cs1 = $cs1 ^ $b; # calc first chksum
-        $cs2 = Hideki_SecondCheck($data[$i] ^ $cs2);
-        $data[$i] ^= $data[$i] << 1;
+	
+	#/* Decrypt raw received data byte */ BYTE DecryptByte(BYTE b) { return b ^ (b << 1); }
+	my $count=( ($data[2] ^ ($data[2]<<1)) >>1 ) & 0x1f;
+	Log3 "Hideki_crc", 4, "count=$count, data length=".@data;
+	
+	#my $string = join(',', @data); #gives decimals of array vals
+	my $string = join '', unpack('H*', pack('c*',@data)); # get hex string
+	Log3 "Hideki_crc", 4, "data=".$string;
+	
+	if($data[0] != 0x75){
+		return (0,@data);
 	}
+		
+	#iterate over data only, first byte is 0x75 always
+	# read bytes 1 to n-2 , just before checksum
+	for ($i=1; $i<($count+2) && ($i<scalar @data); $i++) {
+		$cs1 ^= $data[$i]; # calc first chksum
+        $cs2 = Hideki_SecondCheck($data[$i] ^ $cs2);
+        $data[$i] ^= $data[$i] << 1; # decrypt byte at $i
+	}
+	$string = join '', unpack('H*', pack('c*',@data)); # get hex string
+	Log3 "Hideki_crc", 4, "data decrypted=".$string;
+	
 	if($cs1!=0){
         Log3 "Hideki_crc", 4, "cs1 failed!";
 		return (0, @data);
@@ -326,20 +349,11 @@ sub Hideki_SecondCheck{
 # out: 1 for OK, 0 for failed
 # sample "75BDBA4AC2BEC855AC0A00"
 sub Hideki_crc{
-	#my $Hidekihex=shift;
-	#my @Hidekibytes=shift;
-
-	my @Hidekibytes = @{$_[0]};
-	#push @Hidekibytes,0x75; #first byte always 75 and will not be included in decrypt/encrypt!
-	#convert to array except for first hex
-	#for (my $i=1; $i<(length($Hidekihex))/2; $i++){
-    #	my $hex=Hideki_decryptByte(hex(substr($Hidekihex, $i*2, 2)));
-	#	push (@Hidekibytes, $hex);
-	#}
+	my @Hidekibytes = {};
+	@Hidekibytes = @{$_[0]};
 
 	my $cs1=0; #will be zero for xor over all (bytes>>1)&0x1F except first byte (always 0x75)
     my $cs2=0;
-	#my $rawData=shift;
 
 	my $count=($Hidekibytes[2]>>1) & 0x1f;
 	my $b;
@@ -375,7 +389,7 @@ sub Hideki_crc{
 # 0x1E	      Thermo/hygro-sensor
 # 0x1F	      Thermo sensor
 sub getSensorType{
-	return $_[0] & 0x1F;
+	return ($_[0] & 0x1F);
 }
 
 # decrypt bytes of hex string
@@ -638,7 +652,7 @@ Hideki_Attr(@)
 	<li>battery (ok oder low)</li>
 	<li>channel (Der Sensor Kanal)</li>
 	<br><i>- Hideki spezifisch -</i>
-	<li>comfort_level (Status: Humidity OK... , Wet größer 69% RH, Dry weiniger als 40% RH, Temperature and humidity comfortable)</li>
+	<li>comfort_level (Status: Humidity OK... , Wet grÃ¶ÃŸer 69% RH, Dry weiniger als 40% RH, Temperature and humidity comfortable)</li>
 	<li>package_number (Paketnummer in der letzten Signalfolge, startet bei 1)</li><br>
   </ul>
   <a name="Hideki_unset"></a>
