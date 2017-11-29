@@ -81,11 +81,26 @@ Hideki_Parse($$)
 	my @a = split("", $msg);
 	Log3 $iohash, 4, "Hideki_Parse $name incomming $msg";
 
+    # check crc1 and crc2 and decryt
+    my @data=map { hex($_) } ($rawData =~ /(..)/g); #byte array from raw hex data string
+    
+    my ($crc1crc2OK, $decodedData) = decryptAndCheck(\@data);
+    if($crc1crc2OK==1){
+        #result OK, $decodedData has decoded bytes
+        Log3 $iohash, 4, "$name decryptAndCheck OK";
+    }
+    else{
+        #crc1 or crc2 failed
+        Log3 $iohash, 4, "$name decryptAndCheck FAILED";
+        return '';
+    }
+
+    # decrypt and decodedBytes are now done with decryptAndCheck
 	# decrypt bytes
 	my $decodedString = decryptBytes($rawData); # decrpyt hex string to hex string
-
 	#convert dectypted hex str back to array of bytes:
-	my @decodedBytes  = map { hex($_) } ($decodedString =~ /(..)/g);
+#	my @decodedBytes  = map { hex($_) } ($decodedString =~ /(..)/g);
+    my @decodedBytes = $decodedData;
 
 	if (!@decodedBytes)
 	{
@@ -96,6 +111,7 @@ Hideki_Parse($$)
 	my $sensorTyp=getSensorType($decodedBytes[3]);
 	Log3 $iohash, 4, "Hideki_Parse SensorTyp = $sensorTyp decodedString = $decodedString";		
 
+    #no more needed as already checked
 	if (!Hideki_crc(\@decodedBytes))
 	{
 		Log3 $iohash, 4, "$name crc failed";
@@ -239,6 +255,39 @@ Hideki_Parse($$)
 	return $name;
 }
 
+# decryptAndCheck
+# input is raw data (array of bytes)
+# output is true if check1 and check2 OK
+# data will then hold the decrypted data
+sub decryptAndCheck() { 
+	my $cs1;
+    my $cs2;
+    my $i; 
+    my @data = @{$_[0]};
+	$cs1=0; 
+	$cs2=0; 
+	my $count=($data[2]>>1) & 0x1f;
+
+	#iterate over data only, first byte is 0x75 always
+	for ($i=1; $i<$count+2 && $i<scalar @data; $i++) {
+		$b =  $data[$i];
+		$cs1 = $cs1 ^ $b; # calc first chksum
+        $cs2 = Hideki_SecondCheck($data[$i] ^ $cs2);
+        $data[$i] ^= $data[$i] << 1;
+	}
+	if($cs1!=0){
+        Log3 "Hideki_crc", 4, "cs1 failed!";
+		return (0, @data);
+	}
+    if($cs2 != $data[$count+2]){
+        Log3 "Hideki_crc", 4, "cs2 failed!";
+        return (0, @data);
+    }
+    Log3 "Hideki_crc", 4, "crc OK";
+    #TOOD return decryped data too
+    return (1,@data); 
+}
+
 # cs1=0,cs2=0
 #	for (i=1; i<packageLength+2; i++) { 
 #		cs1^=data[i]; 
@@ -263,10 +312,10 @@ sub Hideki_SecondCheck{
         $b^=0x95;
     }
     $c = $b^($b>>1);
-    if ($b & 1 == 1){
+    if (($b & 1) == 1){
         $c^=0x5f;
     }
-    if ($c & 1 == 1){
+    if (($c & 1) == 1){
         $b^=0x5f;
     }
     return ($b^($c>>1));
