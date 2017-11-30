@@ -5566,7 +5566,7 @@ With a # at the beginnging whitelistIDs can be deactivated.
 
 		Es wird empfohlen, das Ger&auml;t &uuml;ber einen Namen anzugeben, der sich nicht &auml;ndert. Beispiel via by-id devicename: <code>/dev/serial/by-id/usb-1a86_USB2.0-Serial-if00-port0@57600</code><br>
 
-		Wenn die Baudrate "directio" (Bsp: <code>/dev/ttyACM0@directio</code>), dann benutzt das Perl Modul nicht Device::SerialPort und FHEM &ouml;ffnet das Ger&auml;t mit einem file io. <br> Dies kann funktionieren, wenn das Betriebssystem die Standardwerte f&uuml;r die seriellen Parameter verwendet. Bsp: einige Linux Distributionen und
+		Wenn die Baudrate "directio" (Bsp: <code>/dev/ttyACM0@directio</code>), dann benutzt das Perl Modul nicht Device::SerialPort und FHEM &ouml;ffnet das Ger&auml;t mit einem file io. Dies kann funktionieren, wenn das Betriebssystem die Standardwerte f&uuml;r die seriellen Parameter verwendet. Bsp: einige Linux Distributionen und
 		OSX.  <br><br>
 		</li>
 	</ul>
@@ -5579,7 +5579,7 @@ With a # at the beginnging whitelistIDs can be deactivated.
 	<li>blacklist_IDs<br></li>
 	Dies ist eine durch Komma getrennte Liste. Die Blacklist funktioniert nur, wenn keine Whitelist existiert! Hier kann man ID´s eintragen welche man nicht ausgewertet haben m&ouml;chte.<br><br>
 	<li>cc1101_frequency<br></li>
-	Frequenzeinstellung des cc1101. Bsp: 433.920Mhz | 868.350Mhz<br><br>
+	Frequenzeinstellung des cc1101. | Bsp: 433.920Mhz / 868.350Mhz<br><br>
 	<li>debug<br>
 	Dies bringt das Modul in eine sehr ausf&uuml;hrliche Debug-Ausgabe im Logfile. Somit lassen sich neue Signale finden und Signale &uuml;berpr&uuml;fen, ob die Demodulation korrekt funktioniert.</li><br>
 	<li>development<br>
@@ -5660,26 +5660,26 @@ With a # at the beginnging whitelistIDs can be deactivated.
 	<li>cmds<br></li>
 	Abh&auml;ngig von der installierten Firmware besitzt der SIGNALduino verschiedene Befehle. Bitte beachten Sie den Quellcode der Firmware Ihres SIGNALduino, um die Antwort dieses Befehls zu interpretieren.<br><br>
 	<li>config<br></li>
-	Zeigt Ihnen die aktuelle Konfiguration der SIGNALduino Protokollkathegorie.<br><br>
+	Zeigt Ihnen die aktuelle Konfiguration der SIGNALduino Protokollkathegorie an. | Bsp: <code>MS=1;MU=1;MC=1;Mred=0</code><br><br>
 	<li>freeram<br></li>
    Zeigt den freien RAM an.<br><br>
 	<li>ping<br></li>
 	Pr&uuml;ft die Kommunikation mit dem SIGNALduino.<br><br>
 	<li>protocolIDs<br></li>
-	Zeigt Ihnen die aktuell implementierten Protokolle des SIGNALduino und an welches FHEM Modul Sie &uuml;bergeben werden.<br><br>
+	Zeigt Ihnen die aktuell implementierten Protokolle des SIGNALduino an und an welches FHEM Modul Sie &uuml;bergeben werden.<br><br>
 	<li>raw<br></li>
 	Abh&auml;ngig von der installierten Firmware! Somit k&ouml;nnen Sie einen SIGNALduino-Firmware-Befehl direkt ausf&uuml;hren.<br><br>
 	<li>uptime<br></li>
-	Zeigt Ihnen die Information, wie lange der SIGNALduino l&auml;uft. Ein FHEM Neustart setzt den Timer zur&uuml;ck.<br><br>
+	Zeigt Ihnen die Information an, wie lange der SIGNALduino l&auml;uft. Ein FHEM Neustart setzt den Timer zur&uuml;ck.<br><br>
 	<li>version<br></li>
-	Zeigt Ihnen die Information, welche aktuell genutzte Software Sie mit dem SIGNALduino verwenden.<br><br>
+	Zeigt Ihnen die Information an, welche aktuell genutzte Software Sie mit dem SIGNALduino verwenden.<br><br>
 	</ul>
 	
 	<a name="SIGNALduinoset"></a>
 	<b>SET</b>
 	<ul>
 	<li>cc1101_freq / cc1101_bWidth / cc1101_patable / cc1101_rAmpl / cc1101_sens<br></li>
-	!!! Nur mit einem CC110x Receiver !!!<br><br>
+	(NUR bei Verwendung eines cc110x Empf&auml;nger)<br><br>
 	Stellt die SIGNALduino-Frequenz / Bandbreite / PA-Tabelle / Empf&auml;nger-Amplitude / Empfindlichkeit ein.<br>
 	Verwenden Sie es mit Vorsicht. Es kann Ihre Hardware zerst&ouml;ren und es kann sogar illegal sein, dies zu tun.<br>
 	Hinweis: Die f&uuml;r die RFR-&Uuml;bertragung verwendeten Parameter sind nicht betroffen.<br>
@@ -5728,9 +5728,19 @@ With a # at the beginnging whitelistIDs can be deactivated.
 				<li>Beispiel 3: <code>set sduino raw SC;R=3;SR;P0=5000;SM;P0=500;C=250;D=A4F7FDDE</code> , sendet eine kombinierte Nachricht von Raw und Manchester codiert 3 mal wiederholt</li>
 			</ul><br>
 			<ul>
-			<li>CER: Einschalten der Datenkomprimierung</li>
-			<li>CDR: Abschalten der Datenkomprimierung</li>
-			</ul><br>
+         <u>NUR für DEBUG Nutzung | <small>Befehle sind abhänging vom Firmwarestand!</small></u><br>
+         <small>(Hinweis: Die falsche Benutzung kann zu Fehlfunktionen des SIGNALduino´s f&uuml;hren!)</small>
+            <li>CED -> Debugausgaben ein</li>
+            <li>CDD -> Debugausgaben aus</li>
+            <li>CDL -> LED aus</li>
+            <li>CEL -> LED ein</li>
+            <li>CER -> Einschalten der Datenkomprimierung (config: Mred=1)</li>
+            <li>CDR -> Abschalten der Datenkomprimierung (config: Mred=0)</li>
+            <li>CSmscnt=[Wert] -> Wiederholungszähler für den split von MS Nachrichten</li>
+            <li>CSmuthresh=[Wert] -> Schwellwert für den split von MU Nachrichten (0=aus)</li>
+            <li>CSmcmbl=[Wert] -> minbitlen für MC-Nachrichten</li>
+            <li>CSfifolimit=[Wert] -> Schwellwert für debug Ausgabe der Pulsanzahl im FIFO Puffer</li>
+         </ul><br>
 	<li>reset<br></li>
 	&Ouml;ffnet die Verbindung zum Ger&auml;t neu und initialisiert es. <br><br>
 	<li>sendMsg<br></li>
