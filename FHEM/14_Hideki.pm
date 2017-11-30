@@ -292,7 +292,7 @@ sub decryptAndCheck {
 	for ($i=1; $i<($count+2); $i++) {
 		$cs1 ^= $data[$i]; # calc first chksum
         $cs2 = Hideki_SecondCheck($data[$i] ^ $cs2);
-        $data[$i] ^= $data[$i] << 1; # decrypt byte at $i
+        $data[$i] ^= (($data[$i] << 1) & 0xFF); # decrypt byte at $i without overflow
 	}
 	#$string = join '', unpack('H*', pack('c*',@data)); # get hex string
 	Log3 undef, 3, "Hidekicrc: rawData=$string cs1=$cs1 cs2=$cs2 checksum2=$data[$count+2] count=$count data length=$L";
