@@ -8,6 +8,8 @@
 #
 # changed the way crc and decrypt is used hjgode 20171129
 
+# changed the way crc and decrypt is used hjgode 20171129
+
 package main;
 
 use strict;
