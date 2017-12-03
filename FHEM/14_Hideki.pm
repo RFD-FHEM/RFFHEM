@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 14_Hideki.pm 14395 2017-12-02 14:00:00Z v3.3.1-dev $
+# $Id: 14_Hideki.pm 14395 2017-12-03 21:00:00Z v3.3.1-dev $
 # The file is taken from the SIGNALduino project
 # see http://www.fhemwiki.de/wiki/SIGNALduino
 # and was modified by a few additions
@@ -263,7 +263,7 @@ sub decryptAndCheck {
 	}
 	
 	if($data[0] != 0x75) {
-		Log3 $iohash, 3, "$name Hideki_Parse: rawData=$rawData is no Hideki";
+		Log3 $iohash, 4, "$name Hideki_Parse: rawData=$rawData is no Hideki";
 		return (0,@data);
 	}
 	
@@ -275,11 +275,12 @@ sub decryptAndCheck {
         $data[$i] ^= (($data[$i] << 1) & 0xFF); # decrypt byte at $i without overflow
 	}
 	
-	if ($cs1 != 0 || $cs2 != $data[$count+2]) {
-		Log3 $iohash, 3, "$name Hideki crcCheck FAILED: rawData=$rawData, cs1 / cs2/checksum2 $cs1 / $cs2/$data[$count+2], count=$count, length=$L";
+	$count += 2;
+	if ($cs1 != 0 || $cs2 != $data[$count]) {
+		Log3 $iohash, 4, "$name Hideki crcCheck FAILED: cs1 / cs2/checksum2 $cs1 / $cs2/$data[$count], rawData=$rawData, count+2=$count, length=$L";
 		return (0, @data);
 	} else {
-		Log3 $iohash, 4, "$name Hideki crcCheck ok: rawData=$rawData, cs1/cs2 $cs1/$cs2, count=$count, length=$L";
+		Log3 $iohash, 4, "$name Hideki crcCheck ok: cs1/cs2 $cs1/$cs2, rawData=$rawData, count+2=$count, length=$L";
 	}
 	return (1, @data); 
 }
