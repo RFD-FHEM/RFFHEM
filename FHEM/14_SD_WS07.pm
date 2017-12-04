@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 14_SD_WS07.pm 9346 2017-04-16 16:00:00Z v3.3.1-dev $
+# $Id: 14_SD_WS07.pm 9346 2017-12-04 17:00:00Z v3.3.1-dev $
 # 
 # The purpose of this module is to support serval eurochron
 # weather sensors like eas8007 which use the same protocol
@@ -86,9 +86,9 @@ SD_WS07_Parse($$)
   my $bitData = unpack("B$blen", pack("H$hlen", $rawData)); 
 
   if (defined($rssi)) {
-	Log3 $name, 4, "$name SD_WS07_Parse  $model ($msg) length: $hlen RSSI = $rssi";
+	Log3 $name, 4, "$name SD_WS07: $msg, length=$hlen RSSI=$rssi";
   } else {
-	Log3 $name, 4, "$name SD_WS07_Parse  $model ($msg) length: $hlen";
+	Log3 $name, 4, "$name SD_WS07: $msg, length=$hlen";
   }
   
   
@@ -105,7 +105,7 @@ SD_WS07_Parse($$)
   #}
     my $bitData2 = substr($bitData,0,8) . ' ' . substr($bitData,8,1) . ' ' . substr($bitData,9,3);
        $bitData2 = $bitData2 . ' ' . substr($bitData,12,12) . ' ' . substr($bitData,24,4) . ' ' . substr($bitData,28,8);
-    Log3 $iohash, 5, $model . ' converted to bits: ' . $bitData2;
+    Log3 $iohash, 5, "$name SD_WS07: converted to bits: $bitData2";
     
     my $id = substr($rawData,0,2);
     my $bat = int(substr($bitData,8,1)) eq "1" ? "ok" : "low";
@@ -120,18 +120,20 @@ SD_WS07_Parse($$)
     } else {
     	$model=$model."_TH";		
     	if ($hum < 10 || $hum > 99) {
+    	    Log3 $iohash, 4, "$name: SD_WS07: err HUM: hum=$hum, msg=$msg" ;
     	    return '';
     	}
     }
     
     if ($temp > 700 && $temp < 3840) {
+      Log3 $iohash, 4, "$name: SD_WS07: err TEMP: temp=$temp, msg=$msg" ;
       return '';
     } elsif ($temp >= 3840) {        # negative Temperaturen, muss noch ueberprueft und optimiert werden 
-      $temp -= 4095;
+      $temp -= 4096;
     }  
     $temp /= 10;
     
-    Log3 $iohash, 4, "$name $model decoded protocolid: 7 sensor id=$id, channel=$channel, temp=$temp, hum=$hum, bat=$bat";
+    Log3 $iohash, 4, "$name SD_WS07: model=$model, id=$id, channel=$channel, temp=$temp, hum=$hum, bat=$bat";
 
     my $deviceCode;
     
@@ -139,7 +141,7 @@ SD_WS07_Parse($$)
 	if ( ($longids ne "0") && ($longids eq "1" || $longids eq "ALL" || (",$longids," =~ m/,$model,/)))
 	{
 		$deviceCode=$model.'_'.$id.$channel;
-		Log3 $iohash,4, "$name using longid: $longids model: $model";
+		Log3 $iohash,4, "$name SD_WS07: using longid=$longids model=$model";
 	} else {
 		$deviceCode = $model . "_" . $channel;
 	}
@@ -150,7 +152,7 @@ SD_WS07_Parse($$)
     $def = $modules{SD_WS07}{defptr}{$deviceCode} if(!$def);
 
     if(!$def) {
-		Log3 $iohash, 1, "$name SD_WS07: UNDEFINED sensor $model detected, code $deviceCode";
+		Log3 $iohash, 1, "$name SD_WS07: UNDEFINED sensor $deviceCode detected, code $msg";
 		return "UNDEFINED $deviceCode SD_WS07 $deviceCode";
     }
         #Log3 $iohash, 3, 'SD_WS07: ' . $def->{NAME} . ' ' . $id;
@@ -165,7 +167,7 @@ SD_WS07_Parse($$)
 	{
 		my $minsecs = AttrVal($iohash->{NAME},'minsecs',0);
 		if($hash->{lastReceive} && (time() - $hash->{lastReceive} < $minsecs)) {
-			Log3 $hash, 4, "$deviceCode Dropped due to short time. minsecs=$minsecs";
+			Log3 $hash, 4, "$iohash->{NAME} SD_WS07: $name $deviceCode dropped due to short time. minsecs=$minsecs";
 		  	return "";
 		}
 	}
