@@ -539,9 +539,9 @@ Hideki_Attr(@)
 	<li>
     <br>
     &lt;code&gt; besteht aus dem Sensortyp und der Kanalnummer (1..5) oder wenn das Attribut longid im IO Device gesetzt ist aus einer Zufallsadresse, die durch den Sensor beim einlegen der
-	Batterie generiert wird (Die Adresse aendert sich bei jedem Batteriewechsel).<br>
+	Batterie generiert wird (Die Adresse &auml;ndert sich bei jedem Batteriewechsel).<br>
     </li>
-    <li>Wenn autocreate aktiv ist, dann wird der Sensor automatisch in FHEM angelegt. Das ist der empfohlene Weg, neue Sensoren hinzuzuf&uuml;gen.</li>
+    <li>Wenn autocreate aktiv ist, dann wird der Sensor automatisch in FHEM angelegt. Das ist der empfohlene Weg, neue Sensoren hinzuzuf&uumlgen.</li>
    
   </ul>
   <br>
@@ -555,7 +555,7 @@ Hideki_Attr(@)
 	<li>battery (ok oder low)</li>
 	<li>channel (Der Sensor Kanal)</li>
 	<br><i>- Hideki spezifisch -</i>
-	<li>comfort_level (Status: Humidity OK... , Wet gr&ouml;&szlig;er 69% RH, Dry weiniger als 40% RH, Temperature and humidity comfortable)</li>
+	<li>comfort_level (Status: Humidity OK... , Wet gr&ouml;&szlig;er 69% RH, Dry weniger als 40% RH, Temperature and humidity comfortable)</li>
 	<li>package_number (Paketnummer in der letzten Signalfolge, startet bei 1)</li><br>
   </ul>
   <a name="Hideki_unset"></a>
