@@ -1,11 +1,13 @@
 ##############################################
-# $Id: 14_Hideki.pm 14395 2017-12-03 21:00:00Z v3.3.1-dev $
+# $Id: 14_Hideki.pm 14395 2017-11-29 19:00:00Z v3.3.1-dev $
 # The file is taken from the SIGNALduino project
 # see http://www.fhemwiki.de/wiki/SIGNALduino
 # and was modified by a few additions
 # to support Hideki Sensors
 # S. Butzek, HJGode, Ralf9 2015-2017
 #
+# changed the way crc and decrypt is used hjgode 20171129
+
 # changed the way crc and decrypt is used hjgode 20171129
 
 package main;
@@ -82,19 +84,35 @@ Hideki_Parse($$)
 	my @a = split("", $msg);
 	Log3 $iohash, 4, "$name Hideki_Parse: incomming $msg";
 
-	my @decodedData;
-	my $crc1crc2OK = 0;
-	($crc1crc2OK, @decodedData) = decryptAndCheck($iohash, $rawData); # use unencrypted rawdata
-	
-	if ($crc1crc2OK == 0) {
-		return '';	#crc1 or crc2 failed
-	}
+    # check crc1 and crc2 and decryt
+    my @data;
+    @data=map { hex($_) } ($rawData =~ /(..)/g); #byte array from raw hex data string
+    
+    my @decodedData;
+    my $crc1crc2OK=0;
+    ($crc1crc2OK, @decodedData) = decryptAndCheck(\@data); # use unencrypted raw data
+    if($crc1crc2OK==1){
+        #result OK, $decodedData has decrypted bytes
+        Log3 $iohash, 4, "$name Hideki_Parse: decryptAndCheck OK";
+    }
+    else{
+        #crc1 or crc2 failed
+        Log3 $iohash, 4, "$name Hideki_Parse: decryptAndCheck FAILED";
+        return '';
+    }
 
-	# decrypt and decodedBytes are now done with decryptAndCheck
-	my $decodedString = join '', unpack('H*', pack('C*',@decodedData)); # get hex string
+    # decrypt and decodedBytes are now done with decryptAndCheck
+	# decrypt bytes
+	# my $decodedString = decryptBytes($rawData); # decrypt hex string to hex string
+	my $decodedString = join '', unpack('H*', pack('c*',@decodedData)); # get hex string
 	Log3 $iohash, 4, "$name Hideki_Parse: raw=$rawData, decoded=$decodedString";
 	 
-	if (!@decodedData) {
+	#convert dectypted hex str back to array of bytes:
+#	my @decodedBytes  = map { hex($_) } ($decodedString =~ /(..)/g);
+#    my @decodedBytes = @decodedData;
+
+	if (!@decodedData)
+	{
 		Log3 $iohash, 4, "$name Hideki_Parse: decrypt failed";
 		return '';
 	}
@@ -103,8 +121,15 @@ Hideki_Parse($$)
 	my $sensorTyp=($decodedData[3] & 0x1F);
 	Log3 $iohash, 4, "$name Hideki_Parse: SensorTyp = $sensorTyp decodedString = $decodedString";
 
+    #no more needed as already checked
+#	if (!Hideki_crc(\@decodedBytes))
+#	{
+#		Log3 $iohash, 4, "$name crc failed";
+#		return '';
+#	}
+
 	my $id=substr($decodedString,2,2);      # get the random id from the data
-	my $channel=0;
+ 	my $channel=0;
 	my $temp="";
 	my $hum=0;
 	my $rain=0;
@@ -244,26 +269,23 @@ Hideki_Parse($$)
 # input is raw data (array of bytes)
 # output is true if check1 and check2 OK
 # data will then hold the decrypted data
-sub decryptAndCheck {
-	my $iohash = shift;
-	my $rawData = shift;
-	my $name = $iohash->{NAME};
+sub decryptAndCheck { 
 	my $cs1=0; #will be zero for xor over all (bytes[2]>>1)&0x1F except first byte (always 0x75)
 	my $cs2=0;
 	my $i; 
-	my @data;
-	@data=map { hex($_) } ($rawData =~ /(..)/g); #byte array from raw hex data string
+	my @data = @{$_[0]};
 	
+	my $string = join '', unpack('H*', pack('c*',@data)); # get hex string
 	#/* Decrypt raw received data byte */ BYTE DecryptByte(BYTE b) { return b ^ (b << 1); }
 	my $count=( ($data[2] ^ ($data[2]<<1)) >>1 ) & 0x1f;
 	my $L = scalar @data;
 	if ($L <= $count+2) {
-		Log3 $iohash, 4, "$name Hideki_crc: rawdata=$rawData to short, count=$count data length=$L";
+		Log3 undef, 3, "Hideki_crc rawdata=$string zu kurz, count=$count L=$L";
 		return (0,@data);
 	}
+	Log3 "Hideki_crc", 4, "rawData=$string count=$count, data length=$L";
 	
-	if($data[0] != 0x75) {
-		Log3 $iohash, 4, "$name Hideki_Parse: rawData=$rawData is no Hideki";
+	if($data[0] != 0x75){
 		return (0,@data);
 	}
 	
@@ -274,14 +296,18 @@ sub decryptAndCheck {
         $cs2 = Hideki_SecondCheck($data[$i] ^ $cs2);
         $data[$i] ^= (($data[$i] << 1) & 0xFF); # decrypt byte at $i without overflow
 	}
+	#$string = join '', unpack('H*', pack('c*',@data)); # get hex string
+	Log3 undef, 3, "Hidekicrc: rawData=$string cs1=$cs1 cs2=$cs2 checksum2=$data[$count+2] count=$count data length=$L";
 	
-	$count += 2;
-	if ($cs1 != 0 || $cs2 != $data[$count]) {
-		Log3 $iohash, 4, "$name Hideki crcCheck FAILED: cs1 / cs2/checksum2 $cs1 / $cs2/$data[$count], rawData=$rawData, count+2=$count, length=$L";
+	if($cs1!=0){
+	Log3 "Hideki_crc", 4, "cs1 failed!";
 		return (0, @data);
-	} else {
-		Log3 $iohash, 4, "$name Hideki crcCheck ok: cs1/cs2 $cs1/$cs2, rawData=$rawData, count+2=$count, length=$L";
 	}
+	if($cs2 != $data[$count+2]){
+		Log3 "Hideki_crc", 4, "cs2 failed!";
+		return (0, @data);
+	}
+	Log3 "Hideki_crc", 4, "crc OK";
 	return (1, @data); 
 }
 
@@ -302,6 +328,39 @@ sub Hideki_SecondCheck{
     return ($b^($c>>1));
 }
 
+# check crc for incoming message
+# in: hex string with encrypted, raw data, starting with 75
+# out: 1 for OK, 0 for failed
+# sample "75BDBA4AC2BEC855AC0A00"
+sub Hideki_crc{
+	my @Hidekibytes = {};
+	@Hidekibytes = @{$_[0]};
+
+	my $cs1=0; #will be zero for xor over all (bytes>>1)&0x1F except first byte (always 0x75)
+	my $cs2=0;
+
+	my $count=($Hidekibytes[2]>>1) & 0x1f;
+	my $b;
+	Log3 "Hideki_crc", 4, "count:". $count;
+
+	#iterate over data only, first byte is 0x75 always
+	for (my $i=1; $i<$count+2 && $i<scalar @Hidekibytes; $i++) {
+		$b =  $Hidekibytes[$i];
+		$cs1 = $cs1 ^ $b; # calc first chksum
+        $cs2 = Hideki_SecondCheck($Hidekibytes[$i] ^ $cs2);
+        $Hidekibytes[$i] ^= $Hidekibytes[$i] << 1;
+	}
+	if($cs1!=0){
+        Log3 "Hideki_crc", 4, "cs1 failed!";
+		return 0;
+	}
+    if($cs2 != $Hidekibytes[$count+2]){
+        Log3 "Hideki_crc", 4, "cs2 failed!";
+        return 0;
+    }
+    Log3 "Hideki_crc", 4, "crc OK";
+    return 1;
+}
 
 # return decoded sensor type
 # in: one byte
@@ -317,6 +376,28 @@ sub getSensorType{
 	return ($_[0] & 0x1F);
 }
 
+# decrypt bytes of hex string
+# in: hex string
+# out: decrypted hex string
+sub decryptBytes{
+	my $Hidekihex=shift;
+	#create array of hex string
+	my @Hidekibytes  = map { Hideki_decryptByte(hex($_)) } ($Hidekihex =~ /(..)/g);
+
+	my $result="75";  # Byte 0 is not encrypted
+	for (my $i=1; $i<scalar (@Hidekibytes); $i++){
+		$result.=sprintf("%02x",$Hidekibytes[$i]);
+	}
+	return $result;
+}
+
+sub Hideki_decryptByte{
+	my $byte = shift;
+	#printf("\ndecryptByte 0x%02x >>",$byte);
+	my $ret2 = ($byte ^ ($byte << 1) & 0xFF); #gives possible overflow to left so c3->145 instead of 45
+	#printf(" %02x\n",$ret2);
+	return $ret2;
+}
 
 # decode byte array and return channel, temperature
 # input: decrypted byte array starting with 0x75, passed by reference as in mysub(\@array);
