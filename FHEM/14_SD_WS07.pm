@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 14_SD_WS07.pm 9346 2017-12-05 17:00:00Z v3.3.1-dev $
+# $Id: 14_SD_WS07.pm 9346 2017-12-12 17:00:00Z v3.3.1-dev $
 # 
 # The purpose of this module is to support serval eurochron
 # weather sensors like eas8007 which use the same protocol
@@ -37,15 +37,12 @@ SD_WS07_Initialize($)
 {
   my ($hash) = @_;
 
-  $hash->{Match}     = "^P7#[A-Fa-f0-9]{6}F[A-Fa-f0-9]{2}(#R[A-F0-9][A-F0-9]){0,1}\$";    ## pos 7 ist aktuell immer 0xF
+  $hash->{Match}     = "^P7#[A-Fa-f0-9]{6}F[A-Fa-f0-9]{2}";    ## pos 7 ist aktuell immer 0xF
   $hash->{DefFn}     = "SD_WS07_Define";
   $hash->{UndefFn}   = "SD_WS07_Undef";
   $hash->{ParseFn}   = "SD_WS07_Parse";
   $hash->{AttrFn}    = "SD_WS07_Attr";
   $hash->{AttrList}  = "IODev do_not_notify:1,0 ignore:0,1 showtime:1,0 " .
-                       "sanity-check:1,0 ".
-                       "max-deviation-temp:1,2,3,4,5,6,7,8,9,10,15,20,25,30,35,40,45,50 ".
-                       "max-deviation-hum:1,2,3,4,5,6,7,8,9,10,15,20,25,30,35,40,45,50 ".
                        "correction-hum correction-temp ".
                         "$readingFnAttributes ";
   $hash->{AutoCreate} =
@@ -95,11 +92,8 @@ SD_WS07_Parse($$)
   my ($iohash, $msg) = @_;
   #my $rawData = substr($msg, 2);
   my $name = $iohash->{NAME};
-  my (undef ,$rawData, $rssi) = split("#",$msg);
-  if (defined($rssi)) {
-	$rssi = hex(substr($rssi,1));
-	$rssi = ($rssi>=128 ? (($rssi-256)/2-74) : ($rssi/2-74));
-  }
+  my (undef ,$rawData) = split("#",$msg);
+
   #$protocol=~ s/^P(\d+)/$1/; # extract protocol
 
   my $model = "SD_WS07";
@@ -107,12 +101,7 @@ SD_WS07_Parse($$)
   my $blen = $hlen * 4;
   my $bitData = unpack("B$blen", pack("H$hlen", $rawData)); 
 
-  if (defined($rssi)) {
-	Log3 $name, 4, "$name SD_WS07: $msg, length=$hlen RSSI=$rssi";
-  } else {
-	Log3 $name, 4, "$name SD_WS07: $msg, length=$hlen";
-  }
-  
+  Log3 $name, 4, "$name SD_WS07: $msg, length=$hlen";
   
   #      4    8  9    12            24    28     36
   # 0011 0110 1  010  000100000010  1111  00111000 0000  eas8007
@@ -183,7 +172,7 @@ SD_WS07_Parse($$)
 	$name = $hash->{NAME};
 	return "" if(IsIgnored($name));
 	
-	Log3 $name, 4, "$iohash->{NAME} SD_WS07: $name ($rawData)";  
+	#Log3 $name, 4, "$iohash->{NAME} SD_WS07: $name ($rawData)";  
 
 	if (!defined(AttrVal($hash->{NAME},"event-min-interval",undef)))
 	{
@@ -201,52 +190,8 @@ SD_WS07_Parse($$)
 	}
 	
 	$temp += AttrVal($name, "correction-temp", 0);				# correction value for temperature (default 0 K)
-	Log3 $iohash, 4, "$iohash->{NAME} SD_WS07: $name id=$id, channel=$channel, temp=$temp, hum=$hum, bat=$bat";
+	Log3 $name, 4, "$iohash->{NAME} SD_WS07: $name id=$id, channel=$channel, temp=$temp, hum=$hum, bat=$bat";
 
-	if (AttrVal($name, "sanity-check", 0) || AttrVal($iohash->{NAME}, "sanity-check", 0))
-	{
-		my $timeSinceLastUpdate = ReadingsAge($hash->{NAME}, "state", 0);
-		if ($timeSinceLastUpdate < 0) {
-			$timeSinceLastUpdate *= -1;
-		}
-		if (defined($hash->{READINGS}{temperature}{VAL})) {
-			my $diffTemp = 0;
-			my $oldTemp = $hash->{READINGS}{temperature}{VAL};
-			my $maxdeviation = AttrVal($name, "max-deviation-temp", 1);				# default 1 K
-			if ($temp > $oldTemp) {
-				$diffTemp = ($temp - $oldTemp);
-			} else {
-				$diffTemp = ($oldTemp - $temp);
-			}
-			$diffTemp = sprintf("%.1f", $diffTemp);				
-			Log3 $name, 4, "$iohash->{NAME}: $name old temp $oldTemp, age $timeSinceLastUpdate, new temp $temp, diff temp $diffTemp";
-			my $maxDiffTemp = $timeSinceLastUpdate / 60 + $maxdeviation; 			# maxdeviation + 1.0 Kelvin/Minute
-			$maxDiffTemp = sprintf("%.1f", $maxDiffTemp + 0.05);						# round 0.1
-			Log3 $name, 4, "$iohash->{NAME} SD_WS07: $name max difference temperature $maxDiffTemp K";
-			if ($diffTemp > $maxDiffTemp) {
-				Log3 $name, 3, "$iohash->{NAME} SD_WS07: $name ERROR - Temp diff too large (old $oldTemp, new $temp, diff $diffTemp)";
-			return "";
-			}
-		}
-		if (defined($hash->{READINGS}{humidity}{VAL})) {
-			my $diffHum = 0;
-			my $oldHum = $hash->{READINGS}{humidity}{VAL};
-			my $maxdeviation = AttrVal($name, "max-deviation-hum", 1);				# default 1 %
-			if ($hum > $oldHum) {
-				$diffHum = ($hum - $oldHum);
-			} else {
-				$diffHum = ($oldHum - $hum);
-			}
-			Log3 $name, 4, "$iohash->{NAME} SD_WS07: $name old hum $oldHum, age $timeSinceLastUpdate, new hum $hum, diff hum $diffHum";
-			my $maxDiffHum = $timeSinceLastUpdate / 60 + $maxdeviation;				# maxdeviation + 1.0 %/Minute
-			$maxDiffHum = sprintf("%1.f", $maxDiffHum + 0.5);							# round 1
-			Log3 $name, 4, "$iohash->{NAME} SD_WS07: $name max difference humidity $maxDiffHum %";
-			if ($diffHum > $maxDiffHum) {
-				Log3 $name, 3, "$iohash->{NAME} SD_WS07: $name ERROR - Hum diff too large (old $oldHum, new $hum, diff $diffHum)";
-				return "";
-			}
-		}
-	}
 	
 	$hash->{lastReceive} = time();
 	$hash->{lastMSG} = $rawData;
@@ -259,18 +204,14 @@ SD_WS07_Parse($$)
     readingsBulkUpdate($hash, "temperature", $temp)  if ($temp ne"");
     readingsBulkUpdate($hash, "humidity", $hum)  if ($hum ne "" && $hum != 0 );
     if ($bat ne "") {
-        my $battery = ReadingsVal($name, "battery", "unknown");
-        if ($bat ne $battery) {
+        #my $battery = ReadingsVal($name, "battery", "unknown");
+        #if ($bat ne $battery) {
            readingsBulkUpdate($hash, "battery", $bat);
-        }
+        #}
     }
     readingsBulkUpdate($hash, "channel", $channel) if ($channel ne "");
 
     readingsEndUpdate($hash, 1); # Notify is done by Dispatch
-
-    if(defined($rssi)) {
-		$hash->{RSSI} = $rssi;
-    }
 
 	return $name;
 }
@@ -326,13 +267,19 @@ sub SD_WS07_Attr(@)
   <ul>
   	 <li>state (T: H:)</li>
      <li>temperature (&deg;C)</li>
-     <li>humidity: (the humidity 1-100)</li>
+     <li>humidity: (the humidity 10-99)</li>
      <li>battery: (low or ok)</li>
      <li>channel: (the channelnumberf)</li>
   </ul>
   <br>
   <b>Attributes</b>
   <ul>
+    <li>correction-temp<br>
+       Damit kann die Temperatur korrigiert werden. Z.B. mit 10 wird eine um 10 Grad hoehere Temperatur angezeigt.
+    </li>
+    <li>correction-hum<br>
+       Damit kann die Luftfeuchtigkeit korrigiert werden.
+    </li>
     <li><a href="#do_not_notify">do_not_notify</a></li>
     <li><a href="#ignore">ignore</a></li>
     <li><a href="#showtime">showtime</a></li>
@@ -370,7 +317,7 @@ sub SD_WS07_Attr(@)
   <a name="SD_WS07_Define"></a>
   <b>Define</b> 
   <ul>Die empfangenen Sensoren werden automatisch angelegt.<br>
-  Die ID der angelegten Sensoren ist entweder der Kanal des Sensors, oder wenn das Attribut longid gesetzt ist, dann wird die ID aus dem Kanal und einer Reihe von Bits erzeugt, welche der Sensor beim Einschalten zufaellig vergibt.<br>
+  Die ID der angelegten Sensoren ist entweder der Kanal des Sensors, oder wenn das Attribut longid gesetzt ist, dann wird die ID aus dem Kanal und einer Reihe von Bits erzeugt, welche der Sensor beim Einschalten zuf&auml;llig vergibt.<br>
   </ul>
   <br>
   <a name="SD_WS07 Events"></a>
@@ -378,28 +325,21 @@ sub SD_WS07_Attr(@)
   <ul>
      <li>state: (T: H:)</li>
      <li>temperature: (&deg;C)</li>
-     <li>humidity: (Luftfeuchte (1-100)</li>
+     <li>humidity: (Luftfeuchte (10-99)</li>
      <li>battery: (low oder ok)</li>
      <li>channel: (Der Sensor Kanal)</li>
   </ul>
   <br>
   <b>Attribute</b>
   <ul>
+    <li>correction-temp<br>
+       Damit kann die Temperatur korrigiert werden. Z.B. mit 10 wird eine um 10 Grad h&ouml;here Temperatur angezeigt.
+    </li>
+    <li>correction-hum<br>
+       Damit kann die Luftfeuchtigkeit korrigiert werden.
+    </li>
     <li><a href="#do_not_notify">do_not_notify</a></li>
     <li><a href="#ignore">ignore</a></li>
-    <li>max-deviation-hum (Default:1, erlaubte Werte: 1,2,3,4,5,6,7,8,9,10,15,20,25,30,35,40,45,50)<br>
-		Maximal erlaubte Abweichung der gemessenen Feuchte zum vorhergehenden Wert in Prozent.<br>
-		Da diese Sensoren keine Checksummen o.&auml;. senden, kann es leicht zum Empfang von unplausiblen Werten kommen. 
-		Um diese abzufangen, kann eine maximale Abweichung zum letzten korrekt empfangenen Wert festgelegt werden.
-		Gr&ouml&szlig;ere Abweichungen werden dann ignoriert und f&uuml;hren zu einer Fehlermeldung im Logfile, wie z.B. dieser:<br>
-		<code>SD_WS07_TH_1 ERROR - Hum diff too large (old 60, new 68, diff 8)</code><br>
-		Zus&auml;tzlich zum eingestellten Wert wird ein von der Differenz der Empfangszeiten abh&auml;ngiger Wert addiert.
-		Dieser betr&auml;gt 1.0 % relative Feuchte pro Minute. Das bedeutet z.B. wenn eine Differenz von 8 eingestellt ist
-		und der zeitliche Abstand des Empfangs der Nachrichten betr&auml;gt 3 Minuten, ist die maximal erlaubte Differenz 11.
-    </li>
-    <li>max-deviation-temp (Default:1, erlaubte Werte: 1,2,3,4,5,6,7,8,9,10,15,20,25,30,35,40,45,50)<br>
-		Maximal erlaubte Abweichung der gemessenen Temperatur zum vorhergehenden Wert in Kelvin.<br>
-		siehe max-deviation-hum
     <li><a href="#showtime">showtime</a></li>
     <li><a href="#readingFnAttributes">readingFnAttributes</a></li>
   </ul>
