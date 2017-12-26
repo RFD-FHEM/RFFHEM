@@ -1,5 +1,5 @@
 #################################################################################
-# $Id: 41_OREGON.pm 34476 2016-12-04 13:00:00Z dev $
+# $Id: 41_OREGON.pm 34476 2017-12-26 13:23:00Z dev $
 #
 # Module for FHEM to decode Oregon sensor messages
 #
@@ -968,7 +968,7 @@ OREGON_Parse($$)
   return "" if(IsIgnored($name));
 
   my $n = 0;
-  my $tm = TimeNow();
+  my $tm = TimeNow();  # todo: wird dies noch benoetigt?
 
   my $i;
   my $val = "";
@@ -1108,6 +1108,7 @@ OREGON_Parse($$)
 			#$def->{CHANGED}[$n++] = $sensor . ": " . $i->{current};;
 	}
 	else { 
+			#todo: ist es so ok, oder ist es mit Log3 besser? Log3 $iohash, 4, "...."
 			print "\nOREGON: Unknown: "; 
 			print "Type: ".$i->{type}.", ";
 			print "Value: ".$i->{current}."\n";
@@ -1118,7 +1119,7 @@ OREGON_Parse($$)
     # remove heading and trailing space chars from $val
     $val =~ s/^\s+|\s+$//g;
 
-    Log3 $iohash, 4, "$name decoded Oregon: $val";
+    Log3 $def, 4, "$name decoded Oregon: $val";
     readingsBulkUpdate($def, "state", $val);
     
     $def->{STATE} = $val;
