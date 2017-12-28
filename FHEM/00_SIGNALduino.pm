@@ -3743,6 +3743,7 @@ SIGNALduino_Parse_MC($$$$@)
 			if ($polarityInvert == 1)
 			{
 		   		$bitData= unpack("B$blen", pack("H$hlen", $rawDataInverted)); 
+		   		
 			} else {
 		   		$bitData= unpack("B$blen", pack("H$hlen", $rawData)); 
 			}
@@ -4611,7 +4612,7 @@ sub SIGNALduino_OSV2()
 		$preamble_pos=$+[1];
 		
 		SIGNALduino_Log3 $name, 4, "$name: OSV2 protocol detected: preamble_pos = $preamble_pos";
-		return return (-1," sync not found") if ($preamble_pos <=24);
+		return return (-1," sync not found") if ($preamble_pos <24);
 		
 		$message_end=$-[1] if ($bitData =~ m/^.{44,}(01){16,17}.?10011001/); #Todo regex .{44,} 44 should be calculated from $preamble_pos+ min message lengh (44)
 		if (!defined($message_end) || $message_end < $preamble_pos) {
@@ -5147,8 +5148,12 @@ sub SIGNALduino_Log3($$$)
 {
   
   my ($dev, $loglevel, $text) = @_;
+  my $name =$dev;
+  $name= $dev->{NAME} if(defined($dev) && ref($dev) eq "HASH");
   
-  return Log3($dev,$loglevel,$text);
+  DoTrigger($dev,"$name $loglevel: $text");
+  
+  return Log3($name,$loglevel,$text);
   
 
 }
