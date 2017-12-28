@@ -1,8 +1,14 @@
 ##############################################
-# $Id: 10_FS10.pm 331 2017-06-23 17:00:00Z v3.3-dev $
+# $Id: 10_FS10.pm 331 2017-12-28 17:40:00Z v3.3-dev $
 #
-# FS10 basierend auf dem FS20 Modul (FHEM 5.3), elektron-bbs
-
+# FS10 basierend auf dem FS20 Modul angepasst für SIGNALduino, elektron-bbs
+#
+# 2017-11-25  FS10_Set          Checksumme für Wiederholung wurde falsch berechnet
+#                               Pause zwischen Wiederholung jetzt immer 200 mS
+#                               SignalRepeats jetzt auch im Abstand von 200 mS
+#                               Anzahl Wiederholungen bei Dimm-Befehlen korrigiert
+#                               Anzahl Dimup/Dimdown auf 1-10 begrenzt
+#             FS10_Initialize   Anzahl Wiederholungen auf 1 bis 9 begrenzt
 package main;
 
 use strict;
@@ -48,7 +54,7 @@ FS10_Initialize($)
   $hash->{UndefFn}   = "FS10_Undef";
   $hash->{ParseFn}   = "FS10_Parse";
   $hash->{AttrList}  = "IODev follow-on-for-timer:1,0 follow-on-timer ".
-                       "do_not_notify:1,0 repetition ".
+                       "do_not_notify:1,0 repetition:1,2,3,4,5,6,7,8,9 ".
                        "ignore:1,0 dummy:1,0 showtime:1,0 ".
                        "$readingFnAttributes " .
                        "model:".join(",", sort keys %models);
@@ -59,90 +65,109 @@ sub
 FS10_Set($@)
 {
   my ($hash, $name, @a) = @_;
-  
+  my $ioname = $hash->{IODev}{NAME};
   my $ret = undef;
   my $na = int(@a);						# Anzahl in Array 
-  #Log3 $name, 3, "FS10: na   $na";
 
   return "no set value specified" if ($na < 1);    # if($na < 2 || $na > 3);
   return "Dummydevice $hash->{NAME}: will not set data" if(IsDummy($hash->{NAME}));
 
   my $model = AttrVal($name, "model", "FS10_ST");
   my $modelType = $models{$model};
-  
   my $list .= "off:noArg on:noArg " if ($modelType ne "remote" );
-  
-  $list .= "dimup dimdown " if ($modelType eq "dimmer" );
+  $list .= "dimup:1,2,3,4,5,6,7,8,9,10 dimdown:1,2,3,4,5,6,7,8,9,10 " if ($modelType eq "dimmer" );
   
   return SetExtensions($hash, $list, $name, @a) if( $a[0] eq "?" );
   return SetExtensions($hash, $list, $name, @a) if( !grep( $_ =~ /^\Q$a[0]\E($|:)/, split( ' ', $list ) ) );
   
   my $setstate = $a[0];
-  my $sum = 0;
   my $temp = "";
   my $ebeneh = substr($hash->{BTN}, 0, 1);
   my $ebenel = substr($hash->{BTN}, 1, 1);
   my $housecode = $hash->{HC} - 1;
   my $kc;
-  my $SignalRepeats = AttrVal($name,'repetition', '1');
-  my $io = $hash->{IODev};
-  my $iNum = 2;
+  my $SignalRepeats = AttrVal($name,'repetition', '0') + 1;
+  my $dimm = 0;
+	my $newmsg = "P61#";
+  
+	if ($model eq "FS10_MS") {
+		$SignalRepeats = 1;
+	}
+	
+  if ($SignalRepeats > 10) {
+		$SignalRepeats = 10;
+  }
   
   if ($na > 1 && $setstate =~ m/dim/) {		# Anzahl dimup / dimdown
-    $iNum += $a[1];
-    Log3 $name, 3, "$io->{NAME} FS10_set: $name $setstate $a[1]";
+		$dimm += $a[1];
+		if ($dimm < 1 || $dimm >10) {
+			Log3 $name, 1, "$ioname: FS10 set $name $setstate $dimm - ERROR dimm value too low or high (1-10)";
+			return "FS10 set $name $setstate $dimm - ERROR: dimm value too low or high (1-10)";
+		} else {
+			Log3 $name, 3, "$ioname: FS10 set $name $setstate $dimm";
+			$newmsg .= "R1#";							# 1 Repeat
+		}
+  } else {
+    Log3 $name, 3, "$ioname: FS10 set $name $setstate";
   }
-  else {
-    Log3 $name, 3, "$io->{NAME} FS10_set: $name $setstate";
-  }
-  Log3 $name, 4, "$io->{NAME} FS10_set: $name: hc=$housecode ebeneHL=$ebeneh $ebenel setstate=$setstate";
-  
-  for my $i (1..$iNum) {
-     if ($i == 1) {
-       $kc = $fs10_c2b{$setstate."_1"};
-     }
-     else {
-       $kc = $fs10_c2b{$setstate."_2"};
-     }
-     $kc = $kc & 7;
-     if (defined($kc)) {
-        Log3 $name, 4, "$io->{NAME} FS10_set: $name $i. setstate=$setstate kc=$kc";
-        
-        my $newmsg = "P61#0000000000001";	# 12 Bit Praeambel, 1 Pruefbit
-        
-        $newmsg .= dec2nibble($kc);	   	# 1. setstate
-        $sum += $kc;
-        
-        $newmsg .= dec2nibble($ebenel);		# 2. Ebene low
-        $sum += $ebenel;
-        
-        $newmsg .= dec2nibble($ebeneh);		# 3. Ebene high
-        $sum += $ebeneh;
-        
-        $newmsg .= "10001";			# 4. unused
-        
-        $newmsg .= dec2nibble($housecode);	# 5. housecode
-        $sum += $housecode;
-        
-        if ($sum >= 11) {			# 6. Summe
-           $temp = 18 - $sum;
-        } else {
-           $temp = 10 - $sum;
-        }
-        $newmsg .= dec2nibble($temp);
+  Log3 $name, 4, "$ioname: FS10 set $name hc=$housecode ebeneHL=$ebeneh$ebenel setstate=$setstate";
 
-        $newmsg .= "#R" . $SignalRepeats;
-        
-        IOWrite($hash, 'sendMsg', $newmsg);
-        
-        Log3 $name, 4, "$io->{NAME} FS10_set: $i.sendMsg=$newmsg";
-        
-        #if ($i < $iNum) {
-        #   IOWrite($hash, 'raw', 'SR;R=1;P0=-32000;D=0000;')
-        #}
-     }
-  }
-  
+   for my $i (1..2) {
+      my $sum = 0;
+      if ($i == 1) {
+        $kc = $fs10_c2b{$setstate."_1"};
+      }
+      else {
+        $kc = $fs10_c2b{$setstate."_2"};
+      }
+      $kc = $kc & 7;
+      if (defined($kc)) {
+			Log3 $name, 4, "$ioname: FS10 set $name setstate$i=$setstate command=$kc";
+			$newmsg .= "0000000000001";				# 12 Bit Praeambel, 1 Pruefbit
+			$newmsg .= dec2nibble($kc);				# 1. setstate
+			$sum += $kc;
+			$newmsg .= dec2nibble($ebenel);			# 2. Ebene low
+			$sum += $ebenel;
+			$newmsg .= dec2nibble($ebeneh);			# 3. Ebene high
+			$sum += $ebeneh;
+			$newmsg .= "10001";							# 4. unused
+			$newmsg .= dec2nibble($housecode);		# 5. housecode
+			$sum += $housecode;
+			if ($sum >= 11) {
+				$temp = 18 - $sum;
+			} else {
+				$temp = 10 - $sum;
+			}
+			$newmsg .= dec2nibble($temp);				# 6. Summe
+			if ($dimm == 0) {									# ein / aus
+				if ($i == 1) {										# 1. Teil Nachricht
+					$newmsg .= "PPPP";								# 4*32400=129600 Pause
+				} else {												# 2. Teil Nachricht
+					if ($SignalRepeats == 1) {
+						$newmsg .= "#R1";         						# 1 Repeat
+					} else {										
+						$newmsg .= "PPPPPP#R" . $SignalRepeats;	# 6*32400=194400 Pause . Repeats
+					}
+					Log3 $name, 5, "$ioname: FS10 set sendMsg=$newmsg";
+					IOWrite($hash, 'sendMsg', $newmsg);
+				}
+			} else {												# dimmen
+				if ($i == 1) {										# 1. Nachricht
+					$newmsg .= "PPPPPPPPPPPPPPPPPPPP#R1#";		# 20*32400=648000 Pause . 1 Repeat (original remote control)
+					#$newmsg .= "PPPPPP#R1#";						# 6*32400=194400 Pause . 1 Repeat
+				} else {												# 2. Nachricht
+					if ($dimm == 1) {
+						$newmsg .= "#R1";         						# 1 Repeat
+					} else {										
+						$newmsg .= "PPPPPP#R" . $dimm;				# 6*32400=194400 Pause . Repeats
+					}
+					Log3 $name, 5, "$ioname: FS10 set sendMsgCombined=$newmsg";
+					IOWrite($hash, 'sendMsgCombined', $newmsg);
+				}
+			}
+      }
+   }
+ 
   ###########################################
   # Set the state of a device to off if on-for-timer is called
   if($modules{FS10}{ldata}{$name}) {
@@ -157,7 +182,7 @@ FS10_Set($@)
       if ($dur > 0) {
          my $newState = "off";
          my $to = sprintf("%02d:%02d:%02d", $dur/3600, ($dur%3600)/60, $dur%60);
-         Log3 $name, 3, "$io->{NAME} FS10_set: $name Set_Follow +$to setstate $newState";
+         Log3 $name, 3, "$ioname FS10_set: $name Set_Follow +$to setstate $newState";
          CommandDefine(undef, $name."_timer at +$to "."setstate $name $newState; trigger $name $newState");
          $modules{FS10}{ldata}{$name} = $to;
       }
@@ -194,10 +219,7 @@ FS10_Define($$)
 
   $hash->{HC} = $housecode;
   $hash->{BTN} = $btncode;
-
-  #my $name = $a[0];
   $hash->{CODE} = $a[2];
-  #$hash->{lastMSG} =  "";
   $modules{FS10}{defptr}{$a[2]} = $hash;
 
   AssignIoPort($hash);
@@ -239,14 +261,14 @@ FS10_Parse($$)
   Log3 $ioname, 4, "$ioname FS10_Parse: rawBitData: $bitData ($blen)";
   
   my $datastart = 0;
-  $datastart = index($bitData, "0000001");
-  return "" if ($datastart < 0 || $datastart > 10);
+  $datastart = index($bitData, "001");						# datastart 10 = 12 bit preamble
+  return "" if ($datastart < 0 || $datastart > 10);	# -1 if not found || max. 12 bit preamble
   
-  $bitData = substr($bitData, $datastart+6);
+  $bitData = substr($bitData, $datastart+2);
   $blen = length($bitData);
   
-  Log3 $ioname, 4, "$ioname FS10_Parse: datastart: $datastart, blen: $blen bitData=$bitData ($blen)";
-  return "" if ($blen < 30);
+  Log3 $ioname, 4, "$ioname FS10_Parse: datastart: $datastart, blen: $blen, bitData=$bitData";
+  return "" if ($blen < 30 || $blen > 38);
   
   ($err, $cde) = nibble2dec(substr($bitData, 0, 5));    # Command Code
   $gesErr = $err;
@@ -468,7 +490,7 @@ SIGNALduino verarbeitet werden. Unterst&uuml;tzt werden z.Z. folgende Typen: sim
   on
   </pre>
   
-  Bei dimup und dimdown kann optional mit &lt;anz&gt; die Anzahl der Wiederholungen angegeben werden.
+  Bei dimup und dimdown kann optional mit &lt;anz&gt; die Anzahl der Wiederholungen im Bereich von 1 bis 10 angegeben werden.
   <br /><br />
   Die <a href="#setExtensions">set extensions</a> werden unterst&uuml;tzt.
 </ul>
@@ -496,6 +518,7 @@ SIGNALduino verarbeitet werden. Unterst&uuml;tzt werden z.Z. folgende Typen: sim
     FS10_S4  remote
     FS10_S8  remote
     </pre>
+	<li>repetition (Anzahl Wiederholungen der Sendebefehle)</li>
 	<li><a href="#readingFnAttributes">readingFnAttributes</a></li>
 </ul>
 =end html_DE
