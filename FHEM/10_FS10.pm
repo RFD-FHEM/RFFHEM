@@ -3,12 +3,13 @@
 #
 # FS10 basierend auf dem FS20 Modul angepasst für SIGNALduino, elektron-bbs
 #
-# 2017-11-25  FS10_Set          Checksumme für Wiederholung wurde falsch berechnet
-#                               Pause zwischen Wiederholung jetzt immer 200 mS
-#                               SignalRepeats jetzt auch im Abstand von 200 mS
-#                               Anzahl Wiederholungen bei Dimm-Befehlen korrigiert
-#                               Anzahl Dimup/Dimdown auf 1-10 begrenzt
-#             FS10_Initialize   Anzahl Wiederholungen auf 1 bis 9 begrenzt
+# 2017-12-28  FS10_Set          	Checksumme für Wiederholung wurde falsch berechnet
+#                               	Pause zwischen Wiederholung jetzt immer 200 mS
+#                               	SignalRepeats jetzt auch im Abstand von 200 mS
+#                               	Anzahl Wiederholungen bei Dimm-Befehlen korrigiert
+#                               	Anzahl Dimup/Dimdown auf 1-10 begrenzt
+#											keine Wiederholungen bei Markisensteuerung	
+#             FS10_Initialize   	Anzahl Wiederholungen auf 1 bis 9 begrenzt
 package main;
 
 use strict;
