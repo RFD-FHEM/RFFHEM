@@ -4288,8 +4288,6 @@ sub SIGNALduino_postDemo_FS20($@) {
 	my $sum = 6;
 	my $b = 0;
 	my $i = 0;
-	
-	
    for ($datastart = 0; $datastart < $protolength; $datastart++) {   # Start bei erstem Bit mit Wert 1 suchen
       last if $bit_msg[$datastart] eq "1";
    }
@@ -4305,7 +4303,7 @@ sub SIGNALduino_postDemo_FS20($@) {
       }
       my $checksum = oct( "0b".(join "", @bit_msg[$protolength - 9 .. $protolength - 2]));   # Checksum Byte 5 or 6
       if (($sum & 0xFF) == $checksum) {				            ## FH20 remote control
-			for(my $b = 0; $b < $protolength - 9; $b += 9) {	            # check parity over 5 or 6 bytes
+			for(my $b = 0; $b < $protolength; $b += 9) {	            # check parity over 5 or 6 bytes
 				my $parity = 0;					                                 # Parity even
 				for(my $i = $b; $i < $b + 9; $i++) {			                  # Parity over 1 byte + 1 bit
 					$parity += $bit_msg[$i];
@@ -4339,7 +4337,6 @@ sub SIGNALduino_postDemo_FHT80($@) {
 	my $sum = 12;
 	my $b = 0;
 	my $i = 0;
-
    for ($datastart = 0; $datastart < $protolength; $datastart++) {   # Start bei erstem Bit mit Wert 1 suchen
       last if $bit_msg[$datastart] eq "1";
    }
@@ -4355,7 +4352,7 @@ sub SIGNALduino_postDemo_FHT80($@) {
       }
       my $checksum = oct( "0b".(join "", @bit_msg[45 .. 52]));          # Checksum Byte 6
       if (($sum & 0xFF) == $checksum) {								## FHT80 Raumthermostat
-         for($b = 0; $b < 55; $b += 9) {	                              # check parity over 6 byte
+         for($b = 0; $b < 54; $b += 9) {	                              # check parity over 6 byte
             my $parity = 0;					                              # Parity even
             for($i = $b; $i < $b + 9; $i++) {			                  # Parity over 1 byte + 1 bit
                $parity += $bit_msg[$i];
@@ -4396,7 +4393,7 @@ sub SIGNALduino_postDemo_FHT80TF($@) {
       last if $bit_msg[$datastart] eq "1";
    }
    if ($datastart == $protolength) {                                 # all bits are 0
-		SIGNALduino_Log3 $name, 3, "$name: FHTTF - ERROR message all bit are zeros";
+		SIGNALduino_Log3 $name, 3, "$name: FHT80TF - ERROR message all bit are zeros";
 		return 0, undef;
    }
    splice(@bit_msg, 0, $datastart + 1);                             	# delete preamble + 1 bit
@@ -4426,7 +4423,7 @@ sub SIGNALduino_postDemo_FHT80TF($@) {
          }
 			splice(@bit_msg, 32, 8);                                       # delete checksum
 				my $dmsg = SIGNALduino_b2h(join "", @bit_msg);
-				SIGNALduino_Log3 $name, 4, "$name: FHT80 - roomthermostat post demodulation $dmsg";
+				SIGNALduino_Log3 $name, 4, "$name: FHT80TF - door/window switch post demodulation $dmsg";
 			return (1, @bit_msg);											## FHT80TF ok
       } 
    } 
