@@ -4742,6 +4742,8 @@ sub SIGNALduino_OSV1()
 	my $checksum = oct( "0b" . reverse substr($bitData,24,8));
 	if ($calcsum != $checksum) {	# Checksum
 		return (-1,"OSV1 - ERROR checksum not equal: $calcsum != $checksum");
+	} elsif (substr($bitData,21,1) == 1) {
+			return (-1,"OSV1 - ERROR bit 21 must be 0 but is 1.");
 	} else {
 		SIGNALduino_Log3 $name, 4, "$name: OSV1 input data: $bitData";
 		my $newBitData = "00001010";                       # Byte 0:   Id1 = 0x0A
