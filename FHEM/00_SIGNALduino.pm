@@ -1163,7 +1163,8 @@ my %ProtocolListSIGNALduino  = (
 		},			
   "60" =>	## ELV, LA CROSSE (WS2000/WS7000)
   {
-     	# MU;P0=32001;P1=-381;P2=835;P3=354;P4=-857;D=01212121212121212121343421212134342121213434342121343421212134213421213421212121342121212134212121213421212121343421343430;CP=2;R=53;			# tested sensors:  	WS-7000-20, AS2000, ASH2000, S2000, S2000I, S2001A, S2001IA,
+     	# MU;P0=32001;P1=-381;P2=835;P3=354;P4=-857;D=01212121212121212121343421212134342121213434342121343421212134213421213421212121342121212134212121213421212121343421343430;CP=2;R=53;
+		# tested sensors:  	WS-7000-20, AS2000, ASH2000, S2000, S2000I, S2001A, S2001IA,
      	#                    ASH2200, S300IA, S2001I, S2000ID, S2001ID, S2500H 
      	# not tested:        AS3, S2000W, S2000R, WS7000-15, WS7000-16, WS2500-19, S300TH, S555TH
      	# das letzte Bit 1 und 1 x 0 Preambel fehlt meistens
@@ -4727,14 +4728,10 @@ sub SIGNALduino_OSV2()
 	return (-1,undef);
 }
 
-sub SIGNALduino_OSV1()
-{
+sub SIGNALduino_OSV1() {
 	my ($name,$bitData,$id,$mcbitnum) = @_;
-	
 	return (-1," message is to short") if (defined($ProtocolListSIGNALduino{$id}{length_min}) && $mcbitnum < $ProtocolListSIGNALduino{$id}{length_min} );
 	return (-1," message is to long") if (defined($ProtocolListSIGNALduino{$id}{length_max}) && $mcbitnum > $ProtocolListSIGNALduino{$id}{length_max} );
-	
-	
 	my $calcsum = oct( "0b" . reverse substr($bitData,0,8));
 	$calcsum += oct( "0b" . reverse substr($bitData,8,8));
 	$calcsum += oct( "0b" . reverse substr($bitData,16,8));
@@ -4748,44 +4745,40 @@ sub SIGNALduino_OSV1()
 		SIGNALduino_Log3 $name, 4, "$name: OSV1 input data: $bitData";
 		my $newBitData = "00001010";                       # Byte 0:   Id1 = 0x0A
         $newBitData .= "01001101";                         # Byte 1:   Id2 = 0x4D
-		# Todo: Sensortyp automtisch erkennen und Premable damit setzen.
-		
-		# preamble	=> '50B208',	# THR128 ohne Checksumme
-		# 50 - Length
-		# B2 - Byte 0: Id1
-		# 08 - Byte 1: Id2
-		my $channel = substr($bitData,6,2); # Byte 2 h: Channel
-		if ($channel == "00") { # in 0 LSB first
-		$newBitData .= "0001"; # out 1 MSB first
-	} elsif ($channel == "10") { # in 4 LSB first
-		$newBitData .= "0010"; # out 2 MSB first
-	} else { # in 8 LSB first
-		$newBitData .= "0100"; # out 4 MSB first
-	}
-	$newBitData .= "0000"; # Byte 2 l: ????
-	$newBitData .= "0000"; # Byte 3 h: address
-	$newBitData .= reverse substr($bitData,0,4); # Byte 3 l: address (Rolling Code)
-	$newBitData .= reverse substr($bitData,8,4); # Byte 4 h: T 0,1
-	$newBitData .= "0" . substr($bitData,23,1) . "00"; # Byte 4 l: Bit 2 - Batterie 0=ok, 1=low (< 2,5 Volt)
-	$newBitData .= reverse substr($bitData,16,4); # Byte 5 h: T 10
-	$newBitData .= reverse substr($bitData,12,4); # Byte 5 l: T 1
-	$newBitData .= "0000"; # Byte 6 h: immer 0000
-	$newBitData .= substr($bitData,21,1) . "000"; # Byte 6 l: Bit 3 - Temperatur 0=pos | 1=neg, Rest 0
-	$newBitData .= "00000000"; # Byte 7: immer 0000 0000
-	# calculate new checksum over first 16 nibbles
-    $checksum = 0;       
-    for (my $i = 0; $i < 64; $i = $i + 4) {
-    	$checksum += oct( "0b" . substr($newBitData, $i, 4));
-    }
-    $checksum = ($checksum - 0xa) & 0xff;
-	$newBitData .= sprintf("%08b",$checksum);          # Byte 8:   new Checksum 
-    $newBitData .= "00000000";                         # Byte 9:   immer 0000 0000
-
-	my $osv1hex = "50" . SIGNALduino_b2h($newBitData); # output with length before  #todo: Länge berechnen
-	SIGNALduino_Log3 $name, 4, "$name: OSV1 protocol id ($id) translated to RFXSensor format";
-	SIGNALduino_Log3 $name, 4, "$name: converted to hex: ($osv1hex)";
-	return (1,$osv1hex);
-}
+		$newBitData .= "01001101";                         # Byte 1:   Id2 = 0x4D
+		my $channel = substr($bitData,4,4);                # Byte 2 h: Channel
+		if ($channel == "0000") {                          # in 0 LSB first		
+		$newBitData .= "0001";                             # out 1 MSB first
+      } elsif ($channel == "0010") {                     # in 4 LSB first
+		$newBitData .= "0010";                          # out 2 MSB first
+		} elsif ($channel == "0001") {                     # in 8 LSB first
+			$newBitData .= "0100";                          # out 4 MSB first
+		} else {                                           # ERROR
+			return (-1,$name: OSV1 - ERROR channel not valid: $channel);
+      }
+      $newBitData .= "0000";                             # Byte 2 l: ????
+      $newBitData .= "0000";                             # Byte 3 h: address
+      $newBitData .= reverse substr($bitData,0,4);       # Byte 3 l: address (Rolling Code)
+      $newBitData .= reverse substr($bitData,8,4);       # Byte 4 h: T 0,1
+      $newBitData .= "0" . substr($bitData,23,1) . "00"; # Byte 4 l: Bit 2 - Batterie 0=ok, 1=low (< 2,5 Volt)
+      $newBitData .= reverse substr($bitData,16,4);      # Byte 5 h: T 10
+      $newBitData .= reverse substr($bitData,12,4);      # Byte 5 l: T 1
+      $newBitData .= "0000";                             # Byte 6 h: immer 0000
+      $newBitData .= substr($bitData,21,1) . "000";      # Byte 6 l: Bit 3 - Temperatur 0=pos | 1=neg, Rest 0
+      $newBitData .= "00000000";                         # Byte 7: immer 0000 0000
+      # calculate new checksum over first 16 nibbles
+      $checksum = 0;       
+      for (my $i = 0; $i < 64; $i = $i + 4) {
+         $checksum += oct( "0b" . substr($newBitData, $i, 4));
+      }
+      $checksum = ($checksum - 0xa) & 0xff;
+      $newBitData .= sprintf("%08b",$checksum);          # Byte 8:   new Checksum 
+      $newBitData .= "00000000";                         # Byte 9:   immer 0000 0000
+      my $osv1hex = "50" . SIGNALduino_b2h($newBitData); # output with length before
+      SIGNALduino_Log3 $name, 4, "$name: OSV1 protocol id $id translated to RFXSensor format";
+      SIGNALduino_Log3 $name, 4, "$name: converted to hex: $osv1hex";
+      return (1,$osv1hex);
+   }
 }
 
 sub	SIGNALduino_AS()
