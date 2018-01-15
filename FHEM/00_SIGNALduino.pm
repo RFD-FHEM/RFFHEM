@@ -524,14 +524,14 @@ my %ProtocolListSIGNALduino  = (
 	
 	"18"    => 			## Oregon Scientific v1
 		{
-            name			=> 'OSV1',	
+			name				=> 'OSV1',	
 			id          	=> '18',
-			clockrange     	=> [1400,1500],			# min , max
+			clockrange    	=> [1400,1500],			# min , max
 			format 			=> 'manchester',	    # tristate can't be migrated from bin into hex!
-			preamble		=> '',					
+			preamble			=> '',					
 			clientmodule    => 'OREGON',
 			modulematch     => '^[0-9A-F].*',
-			length_min      => '31',
+			length_min      => '32',
 			length_max      => '32',
 			method          => \&SIGNALduino_OSV1   # Call to process this message
 		},
@@ -4788,9 +4788,9 @@ sub SIGNALduino_OSV1() {
 	my ($name,$bitData,$id,$mcbitnum) = @_;
 	return (-1," message is to short") if (defined($ProtocolListSIGNALduino{$id}{length_min}) && $mcbitnum < $ProtocolListSIGNALduino{$id}{length_min} );
 	return (-1," message is to long") if (defined($ProtocolListSIGNALduino{$id}{length_max}) && $mcbitnum > $ProtocolListSIGNALduino{$id}{length_max} );
-	if (substr($bitData,20,1) != 0) {                     # Not used
-      $bitData =~ tr/01/10/;                             # invert message
-   }
+	if (substr($bitData,20,1) != 0) {							# Bit not used, must be 0
+		$bitData =~ tr/01/10/;										# invert message
+	}
 	my $calcsum = oct( "0b" . reverse substr($bitData,0,8));
 	$calcsum += oct( "0b" . reverse substr($bitData,8,8));
 	$calcsum += oct( "0b" . reverse substr($bitData,16,8));
@@ -4803,17 +4803,17 @@ sub SIGNALduino_OSV1() {
 		SIGNALduino_Log3 $name, 4, "$name: OSV1 input data: $bitData";
 		my $newBitData = "00001010";                       # Byte 0:   Id1 = 0x0A
       $newBitData .= "01001101";                         # Byte 1:   Id2 = 0x4D
-		my $channel = substr($bitData,4,4);                # Byte 2 h: Channel
-		if ($channel == "0000") {                          # in 0 LSB first
-         $newBitData .= "0001";                          # out 1 MSB first
-      } elsif ($channel == "0010") {                     # in 4 LSB first
-         $newBitData .= "0010";                          # out 2 MSB first
-      } elsif ($channel == "0001") {                     # in 8 LSB first
-         $newBitData .= "0100";                          # out 4 MSB first
-      } else {                                           # ERROR
+		my $channel = substr($bitData,6,2);						# Byte 2 h: Channel
+		if ($channel == "00") {										# in 0 LSB first
+			$newBitData .= "0001";									# out 1 MSB first
+		} elsif ($channel == "10") {								# in 4 LSB first
+			$newBitData .= "0010";									# out 2 MSB first
+		} elsif ($channel == "01") {								# in 4 LSB first
+			$newBitData .= "0011";									# out 3 MSB first
+		} else {															# in 8 LSB first
 			SIGNALduino_Log3 $name, 3, "$name: OSV1 - ERROR channel not valid: $channel";
 			return (-1,undef);
-      }
+		}
       $newBitData .= "0000";                             # Byte 2 l: ????
       $newBitData .= "0000";                             # Byte 3 h: address
       $newBitData .= reverse substr($bitData,0,4);       # Byte 3 l: address (Rolling Code)
