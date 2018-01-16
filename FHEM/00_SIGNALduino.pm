@@ -19,6 +19,8 @@ use Data::Dumper qw(Dumper);
 use Scalar::Util qw(looks_like_number);
 no warnings 'portable';
 
+#$| = 1;		#Puffern abschalten, Hilfreich für PEARL WARNINGS Search
+
 #use POSIX qw( floor);  # can be removed
 #use Math::Round qw();
 
@@ -4277,7 +4279,7 @@ sub SIGNALduino_postDemo_FS20($@) {
       }
       my $checksum = oct( "0b".(join "", @bit_msg[$protolength - 9 .. $protolength - 2]));   # Checksum Byte 5 or 6
       if (($sum & 0xFF) == $checksum) {				            ## FH20 remote control
-			for(my $b = 0; $b < $protolength - 9; $b += 9) {	            # check parity over 5 or 6 bytes
+			for(my $b = 0; $b < $protolength; $b += 9) {	            # check parity over 5 or 6 bytes
 				my $parity = 0;					                                 # Parity even
 				for(my $i = $b; $i < $b + 9; $i++) {			                  # Parity over 1 byte + 1 bit
 					$parity += $bit_msg[$i];
@@ -4327,11 +4329,8 @@ sub SIGNALduino_postDemo_FHT80($@) {
       }
       my $checksum = oct( "0b".(join "", @bit_msg[45 .. 52]));          # Checksum Byte 6
       if (($sum & 0xFF) == $checksum) {								## FHT80 Raumthermostat
-         for($b = 0; $b < 55; $b += 9) {	                              # check parity over 6 byte
+         for($b = 0; $b < 54; $b += 9) {	                              # check parity over 6 byte
             my $parity = 0;					                              # Parity even
-            for($i = $b; $i < $b + 9; $i++) {			                  # Parity over 1 byte + 1 bit
-               $parity += $bit_msg[$i];
-            }
             if ($parity % 2 != 0) {
                SIGNALduino_Log3 $name, 3, "$name: FHT80 ERROR - Parity not even";
                return 0, undef;
