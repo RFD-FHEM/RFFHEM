@@ -397,7 +397,7 @@ SIGNALduino_un_binflip($)
   <a name="SIGNALduino_undefine"></a>
   <b>Define</b>
   <ul>
-    <code>define &lt;name&gt; SIGNALduino_un &lt;code&gt; ]</code> <br>
+    <code>define &lt;name&gt; SIGNALduino_un &lt;code&gt; </code> <br>
 
     <br>
     You can define a Device, but currently you can do nothing with it.
@@ -429,20 +429,22 @@ SIGNALduino_un_binflip($)
 <a name="SIGNALduino_un"></a>
 <h3>SIGNALduino_un</h3>
 <ul>
-  Das SIGNALduino_un module ist ein Hilfsmodul um unbekannte Nachrichten debuggen und analysieren zu koennen.
+  Das SIGNALduino_un Modul ist ein Hilfsmodul um unbekannte Nachrichten zu debuggen und analysieren zu k&ouml;nnen.
   Das Modul legt keinerlei Ger&aumlte oder &aumlhnliches an.
   <br><br>
 
   <a name="SIGNALduino_undefine"></a>
   <b>Define</b>
+  <ul>
     <code>define &lt;name&gt; SIGNALduino_un &lt;code&gt; </code> <br>
 
     <br>
-    Es ist moeglich ein Geraet manuell zu definieren, aber damit passiert ueberhaupt nichts.
-    Autocreate wird auch keinerlei Geraete aus diesem Modul anlegen.
+    Es ist m&ouml;glich ein Ger&auml;t manuell zu definieren, aber damit passiert &uuml;berhaupt nichts.
+    Autocreate wird auch keinerlei Ger&auml;te aus diesem Modul anlegen.
     <br>
-    Die einzgeste Funktion dieses Modules ist, ab Verbose 4 Logmeldungen &uumlber die Empfangene Nachricht ins Log zu schreiben. Dabei kann man sich leider nicht darauf verlassen, dass die Nachricht korrekt dekodiert wurde.<br>
+    Die einzigeste Funktion dieses Modules ist, ab Verbose 4 Logmeldungen &uumlber die Empfangene Nachricht ins Log zu schreiben. Dabei kann man sich leider nicht darauf verlassen, dass die Nachricht korrekt dekodiert wurde.<br>
     Dieses Modul wird alle Nachrichten verarbeiten, welche von anderen Modulen nicht verarbeitet wurden.
+  <ul><br>
   <a name="SIGNALduino_unset"></a>
   <b>Set</b> <ul>N/A</ul><br>
 
