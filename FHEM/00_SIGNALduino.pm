@@ -4771,6 +4771,7 @@ sub SIGNALduino_OSV1() {
 		$bitData =~ tr/01/10/; # invert message and check if it is possible to deocde now
 	} 
 	my $channel = substr($bitData,4,4);                # Byte 2 h: Channel
+	my $newBitData;
 	if ($channel == "0000") {                          # in 0 LSB first
 		$newBitData .= "0001";                          # out 1 MSB first
 	} elsif ($channel == "0010") {                     # in 4 LSB first
