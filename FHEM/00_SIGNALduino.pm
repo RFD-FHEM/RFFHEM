@@ -19,8 +19,6 @@ use Data::Dumper qw(Dumper);
 use Scalar::Util qw(looks_like_number);
 no warnings 'portable';
 
-#$| = 1;		#Puffern abschalten, Hilfreich für PEARL WARNINGS Search
-
 #use POSIX qw( floor);  # can be removed
 #use Math::Round qw();
 
@@ -1165,8 +1163,7 @@ my %ProtocolListSIGNALduino  = (
 		},			
   "60" =>	## ELV, LA CROSSE (WS2000/WS7000)
   {
-     	# MU;P0=32001;P1=-381;P2=835;P3=354;P4=-857;D=01212121212121212121343421212134342121213434342121343421212134213421213421212121342121212134212121213421212121343421343430;CP=2;R=53;
-		# tested sensors:  	WS-7000-20, AS2000, ASH2000, S2000, S2000I, S2001A, S2001IA,
+     	# MU;P0=32001;P1=-381;P2=835;P3=354;P4=-857;D=01212121212121212121343421212134342121213434342121343421212134213421213421212121342121212134212121213421212121343421343430;CP=2;R=53;			# tested sensors:  	WS-7000-20, AS2000, ASH2000, S2000, S2000I, S2001A, S2001IA,
      	#                    ASH2200, S300IA, S2001I, S2000ID, S2001ID, S2500H 
      	# not tested:        AS3, S2000W, S2000R, WS7000-15, WS7000-16, WS2500-19, S300TH, S555TH
      	# das letzte Bit 1 und 1 x 0 Preambel fehlt meistens
@@ -1495,31 +1492,6 @@ my %ProtocolListSIGNALduino  = (
 			preamble		=> 'P76',
 			length_min		=> 58,
 			length_max		=> 58,
-		},
-		#.MU;P0=102;P1=236;P2=-2192;P3=971;P6=-21542;D=01230303030103010303030303010103010303010303010101030301030103030303010101030301030303010163030303010301030303030301010301030301030301010103030103010303030301010103030103030301016303030301030103030303030101030103030103030101010303010301030303030101010303;CP=0;O;.
-		#.MU;P0=-1483;P1=239;P2=970;P3=-21544;D=01020202010132020202010201020202020201010201020201020201010102020102010202020201010102020102020201013202020201020102020202020101020102020102020101010202010201020202020101010202010202020101;CP=1;.
-		#.MU;P0=-168;P1=420;P2=-416;P3=968;P4=-1491;P5=242;P6=-21536;D=01234343434543454343434343454543454345434543454345434343434343434343454345434343434345454363434343454345434343434345454345434543454345434543434343434343434345434543434343434545436343434345434543434343434545434543454345434543454343434343434343434543454343;CP=3;O;.
-		#.MU;P0=-1483;P1=969;P2=236;P3=-21542;D=01010102020131010101020102010101010102020102010201020102010201010101010101010102010201010101010202013101010102010201010101010202010201020102010201020101010101010101010201020101010101020201;CP=1;.
-		#.MU;P0=-32001;P1=112;P2=-8408;P3=968;P4=-1490;P5=239;P6=-21542;D=01234343434543454343434343454543454345454343454345434343434343434343454345434343434345454563434343454345434343434345454345434545434345434543434343434343434345434543434343434545456343434345434543434343434545434543454543434543454343434343434343434543454343;CP=3;O;.
-		#.MU;P0=-1483;P1=968;P2=240;P3=-21542;D=01010102020231010101020102010101010102020102010202010102010201010101010101010102010201010101010202023101010102010201010101010202010201020201010201020101010101010101010201020101010101020202;CP=1;.
-		#.MU;P0=-32001;P1=969;P2=-1483;P3=237;P4=-21542;D=01212121232123212121212123232123232121232123212321212121212121212123212321212121232123214121212123212321212121212323212323212123212321232121212121212121212321232121212123212321412121212321232121212121232321232321212321232123212121212121212121232123212121;CP=1;O;.
-		#.MU;P0=-1485;P1=967;P2=236;P3=-21536;D=010201020131010101020102010101010102020102020101020102010201010101010101010102010201010101020102013101010102010201010101010202010202010102010201020101010101010101010201020101010102010201;CP=1;.
-	"77" => ##  https://github.com/juergs/NANO_DS1820_4Fach		
-		{
-			name			=> 'NANO_DS1820_4Fach',
-			comment			=> 'Seltbau Sensor',
-			id				=> '77',
-			developId		=> 'y', 
-			zero			=> [4,-6], 		#
-			one				=> [1,-6],   	# 
-			clockabs     	=> 250,			# 
-			format 			=> 'pwm',	    # 
-			preamble		=> 'TX',		# prepend to converted message	
-			clientmodule    => 'CUL_TX',   	# not used now
-			modulematch     => '^TX......', # not used now
-			length_min      => '43',
-			length_max      => '44',
-			remove_zero     => 1,           # Removes leading zeros from output
 		},
 
 );
@@ -2637,7 +2609,6 @@ SIGNALduino_Read($)
 		my $partD;
 		
 		foreach my $msgPart (@msg_parts) {
-			next if (length($msgPart) le 1 ) ;
 			$m0 = substr($msgPart,0,1);
 			$mnr0 = ord($m0);
 			$m1 = substr($msgPart,1);
@@ -3772,7 +3743,6 @@ SIGNALduino_Parse_MC($$$$@)
 			if ($polarityInvert == 1)
 			{
 		   		$bitData= unpack("B$blen", pack("H$hlen", $rawDataInverted)); 
-				
 			} else {
 		   		$bitData= unpack("B$blen", pack("H$hlen", $rawData)); 
 			}
@@ -4279,7 +4249,7 @@ sub SIGNALduino_postDemo_FS20($@) {
       }
       my $checksum = oct( "0b".(join "", @bit_msg[$protolength - 9 .. $protolength - 2]));   # Checksum Byte 5 or 6
       if (($sum & 0xFF) == $checksum) {				            ## FH20 remote control
-		for(my $b = 0; $b < $protolength; $b += 9) {                        	 #check parity over 5 or 6 bytes
+			for(my $b = 0; $b < $protolength - 9; $b += 9) {	            # check parity over 5 or 6 bytes
 				my $parity = 0;					                                 # Parity even
 				for(my $i = $b; $i < $b + 9; $i++) {			                  # Parity over 1 byte + 1 bit
 					$parity += $bit_msg[$i];
@@ -4329,8 +4299,11 @@ sub SIGNALduino_postDemo_FHT80($@) {
       }
       my $checksum = oct( "0b".(join "", @bit_msg[45 .. 52]));          # Checksum Byte 6
       if (($sum & 0xFF) == $checksum) {								## FHT80 Raumthermostat
-		for($b = 0; $b < 54; $b += 9) {            # check parity over 6 byte
-            my $parity = 0; 				                              # Parity even
+         for($b = 0; $b < 55; $b += 9) {	                              # check parity over 6 byte
+            my $parity = 0;					                              # Parity even
+            for($i = $b; $i < $b + 9; $i++) {			                  # Parity over 1 byte + 1 bit
+               $parity += $bit_msg[$i];
+            }
             if ($parity % 2 != 0) {
                SIGNALduino_Log3 $name, 3, "$name: FHT80 ERROR - Parity not even";
                return 0, undef;
@@ -4638,7 +4611,7 @@ sub SIGNALduino_OSV2()
 		$preamble_pos=$+[1];
 		
 		SIGNALduino_Log3 $name, 4, "$name: OSV2 protocol detected: preamble_pos = $preamble_pos";
-		return return (-1," sync not found") if ($preamble_pos <24);
+		return return (-1," sync not found") if ($preamble_pos <=24);
 		
 		$message_end=$-[1] if ($bitData =~ m/^.{44,}(01){16,17}.?10011001/); #Todo regex .{44,} 44 should be calculated from $preamble_pos+ min message lengh (44)
 		if (!defined($message_end) || $message_end < $preamble_pos) {
@@ -4753,31 +4726,38 @@ sub SIGNALduino_OSV2()
 	return (-1,undef);
 }
 
-sub SIGNALduino_OSV1() {
+sub SIGNALduino_OSV1()
+{
 	my ($name,$bitData,$id,$mcbitnum) = @_;
+	
 	return (-1," message is to short") if (defined($ProtocolListSIGNALduino{$id}{length_min}) && $mcbitnum < $ProtocolListSIGNALduino{$id}{length_min} );
 	return (-1," message is to long") if (defined($ProtocolListSIGNALduino{$id}{length_max}) && $mcbitnum > $ProtocolListSIGNALduino{$id}{length_max} );
+	
+	
 	my $calcsum = oct( "0b" . reverse substr($bitData,0,8));
 	$calcsum += oct( "0b" . reverse substr($bitData,8,8));
 	$calcsum += oct( "0b" . reverse substr($bitData,16,8));
 	$calcsum = ($calcsum & 0xFF) + ($calcsum >> 8);
 	my $checksum = oct( "0b" . reverse substr($bitData,24,8));
-	
 	if ($calcsum != $checksum) {	# Checksum
 		return (-1,"OSV1 - ERROR checksum not equal: $calcsum != $checksum");
-	} 
-	if (substr($bitData,20,1) == 0) {
-		$bitData =~ tr/01/10/; # invert message and check if it is possible to deocde now
-	} 
-	my $channel = substr($bitData,4,4);                # Byte 2 h: Channel
-	if ($channel == "0000") {                          # in 0 LSB first
-		$newBitData .= "0001";                          # out 1 MSB first
-	} elsif ($channel == "0010") {                     # in 4 LSB first
-		$newBitData .= "0010";                          # out 2 MSB first
-	} elsif ($channel == "0001") {                     # in 8 LSB first
-		$newBitData .= "0100";                          # out 4 MSB first	
-	} else {                                           # ERROR
-		return (-1,"$name: OSV1 - ERROR channel not valid: $channel");
+	} else {
+		SIGNALduino_Log3 $name, 4, "$name: OSV1 input data: $bitData";
+		my $newBitData = "00001010";                       # Byte 0:   Id1 = 0x0A
+        $newBitData .= "01001101";                         # Byte 1:   Id2 = 0x4D
+		# Todo: Sensortyp automtisch erkennen und Premable damit setzen.
+		
+		# preamble	=> '50B208',	# THR128 ohne Checksumme
+		# 50 - Length
+		# B2 - Byte 0: Id1
+		# 08 - Byte 1: Id2
+		my $channel = substr($bitData,6,2); # Byte 2 h: Channel
+		if ($channel == "00") { # in 0 LSB first
+		$newBitData .= "0001"; # out 1 MSB first
+	} elsif ($channel == "10") { # in 4 LSB first
+		$newBitData .= "0010"; # out 2 MSB first
+	} else { # in 8 LSB first
+		$newBitData .= "0100"; # out 4 MSB first
 	}
 	$newBitData .= "0000"; # Byte 2 l: ????
 	$newBitData .= "0000"; # Byte 3 h: address
@@ -4797,11 +4777,12 @@ sub SIGNALduino_OSV1() {
     $checksum = ($checksum - 0xa) & 0xff;
 	$newBitData .= sprintf("%08b",$checksum);          # Byte 8:   new Checksum 
     $newBitData .= "00000000";                         # Byte 9:   immer 0000 0000
-    my $osv1hex = "50" . SIGNALduino_b2h($newBitData); # output with length before
-    SIGNALduino_Log3 $name, 4, "$name: OSV1 protocol id $id translated to RFXSensor format";
-    SIGNALduino_Log3 $name, 4, "$name: converted to hex: $osv1hex";
-    return (1,$osv1hex);
-   
+
+	my $osv1hex = "50" . SIGNALduino_b2h($newBitData); # output with length before  #todo: Länge berechnen
+	SIGNALduino_Log3 $name, 4, "$name: OSV1 protocol id ($id) translated to RFXSensor format";
+	SIGNALduino_Log3 $name, 4, "$name: converted to hex: ($osv1hex)";
+	return (1,$osv1hex);
+}
 }
 
 sub	SIGNALduino_AS()
@@ -5166,12 +5147,8 @@ sub SIGNALduino_Log3($$$)
 {
   
   my ($dev, $loglevel, $text) = @_;
-  my $name =$dev;
-  $name= $dev->{NAME} if(defined($dev) && ref($dev) eq "HASH");
   
-  DoTrigger($dev,"$name $loglevel: $text");
-  
-  return Log3($name,$loglevel,$text);
+  return Log3($dev,$loglevel,$text);
   
 
 }
