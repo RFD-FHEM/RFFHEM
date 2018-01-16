@@ -4770,17 +4770,20 @@ sub SIGNALduino_OSV1() {
 	if (substr($bitData,20,1) == 0) {
 		$bitData =~ tr/01/10/; # invert message and check if it is possible to deocde now
 	} 
+	
+	SIGNALduino_Log3 $name, 4, "$name: OSV1 input data: $bitData";
+	my $newBitData = "00001010";                       # Byte 0:   Id1 = 0x0A
+    $newBitData .= "01001101";                         # Byte 1:   Id2 = 0x4D
 	my $channel = substr($bitData,4,4);                # Byte 2 h: Channel
-	my $newBitData;
-	if ($channel == "0000") {                          # in 0 LSB first
-		$newBitData .= "0001";                          # out 1 MSB first
-	} elsif ($channel == "0010") {                     # in 4 LSB first
+	if ($channel == "0000") {                          # in 0 LSB first		
+		$newBitData .= "0001";                             # out 1 MSB first
+    } elsif ($channel == "0010") {                     # in 4 LSB first
 		$newBitData .= "0010";                          # out 2 MSB first
 	} elsif ($channel == "0001") {                     # in 8 LSB first
-		$newBitData .= "0100";                          # out 4 MSB first	
+		$newBitData .= "0100";                          # out 4 MSB first
 	} else {                                           # ERROR
 		return (-1,"$name: OSV1 - ERROR channel not valid: $channel");
-	}
+    }
     $newBitData .= "0000";                             # Byte 2 l: ????
     $newBitData .= "0000";                             # Byte 3 h: address
     $newBitData .= reverse substr($bitData,0,4);       # Byte 3 l: address (Rolling Code)
