@@ -4774,14 +4774,14 @@ sub SIGNALduino_OSV1() {
 	SIGNALduino_Log3 $name, 4, "$name: OSV1 input data: $bitData";
 	my $newBitData = "00001010";                       # Byte 0:   Id1 = 0x0A
     $newBitData .= "01001101";                         # Byte 1:   Id2 = 0x4D
-	my $channel = substr($bitData,4,4);                # Byte 2 h: Channel
-	if ($channel == "0000") {                          # in 0 LSB first		
-		$newBitData .= "0001";                             # out 1 MSB first
-    } elsif ($channel == "0010") {                     # in 4 LSB first
-		$newBitData .= "0010";                          # out 2 MSB first
-	} elsif ($channel == "0001") {                     # in 8 LSB first
-		$newBitData .= "0100";                          # out 4 MSB first
-	} else {                                           # ERROR
+	my $channel = substr($bitData,6,2);						# Byte 2 h: Channel
+	if ($channel == "00") {										# in 0 LSB first
+		$newBitData .= "0001";									# out 1 MSB first
+	} elsif ($channel == "10") {								# in 4 LSB first
+		$newBitData .= "0010";									# out 2 MSB first
+	} elsif ($channel == "01") {								# in 4 LSB first
+		$newBitData .= "0011";									# out 3 MSB first
+	} else {															# in 8 LSB first
 		return (-1,"$name: OSV1 - ERROR channel not valid: $channel");
     }
     $newBitData .= "0000";                             # Byte 2 l: ????
