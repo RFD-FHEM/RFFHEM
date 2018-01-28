@@ -1544,8 +1544,23 @@ my %ProtocolListSIGNALduino  = (
 			length_max      => '18',
 			paddingbits     => '2'				 # pad 1 bit, default is 4
 		},
-
-
+	"79" => ##  MU;P0=656;P1=-656;P2=335;P3=-326;P4=-5024;D=01230121230123030303012423012301212301230303030124230123012123012303030301242301230121230123030303012423012301212301230303030124230123012123012303030301242301230121230123030303012423012301212301230303030124230123012123012303030301242301230121230123030303;CP=2;O;
+			# https://github.com/RFD-FHEM/SIGNALDuino/issues/84
+		{
+			name		=> 'VTX-BELL_Funkklingel',
+			#comment	=> '',
+			id		=> '79',
+			zero		=> [-2,1], 	#
+			one		=> [-1,2],   	# 
+			start  		=> [-15,1],	#
+			clockabs     	=> 330,
+			format 		=> 'twostate',	    # 
+			preamble	=> 'U79#',	# prepend to converted message	
+			#clientmodule    => '',   	# not used now
+			#modulematch     => '^TX......', # not used now
+			length_min      => '12',
+			#length_max      => '44',
+		},
 );
 
 
@@ -3173,6 +3188,7 @@ sub SIGNALduno_Dispatch($$$$$)
 		if (substr(ucfirst($dmsg),0,1) eq 'U') {
 			#$event = 1;
 			DoTrigger($name, "DMSG " . $dmsg);
+			return;				# Fuer $dmsg die mit U anfangen ist kein Dispatch notwendig, da es dafuer kein Modul gibt klein u wird dagegen dispatcht
 		}
 		#readingsSingleUpdate($hash, "state", $hash->{READINGS}{state}{VAL}, $event);
 		
