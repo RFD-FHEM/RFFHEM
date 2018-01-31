@@ -248,14 +248,15 @@ my %ProtocolListSIGNALduino  = (
 			#length_max      => '800',		# Don't know maximal lenth of a valid message
 
 			},
-    "3.1"    => 
+    "3.1"    => 	# MS;P0=-11440;P1=-1121;P2=-416;P5=309;P6=1017;D=150516251515162516251625162516251515151516251625151;CP=5;SP=0;R=66;
+			# MS;P1=309;P2=-1130;P3=1011;P4=-429;P5=-11466;D=15123412121234123412141214121412141212123412341234;CP=1;SP=5;R=38;  Gruppentaste, siehe Kommentar in sub SIGNALduino_bit2itv1
         {
             name			=> 'itv1_sync40',	
 			comment		=> 'IT remote Control PAR 1000',
 			id          	=> '3',
-			one				=> [3,-1],
+			one			=> [3,-1],
 			zero			=> [1,-3],
-			#float			=> [-1,3],		# not full supported now later use
+			float			=> [1,-1],	# siehe Kommentar in sub SIGNALduino_bit2itv1
 			sync			=> [1,-40],
 			clockabs     	=> -1,	# -1=auto	
 			format 			=> 'twostate',	# not used now
@@ -264,7 +265,7 @@ my %ProtocolListSIGNALduino  = (
 			modulematch     => '^i......', # not used now
 			length_min      => '24',
 			#length_max      => '800',		# Don't know maximal lenth of a valid message
-
+			postDemodulation => \&SIGNALduino_bit2itv1,
 			},
     "4"    => 
         {
@@ -3295,6 +3296,11 @@ SIGNALduino_Parse_MS($$$$%)
 			Debug "Found matched zero with indexes: ($pstr)" if ($debug && $valid);
 			$patternLookupHash{$pstr}="0" if ($valid); ## Append Sync to our lookuptable
 			Debug "zero pattern not found" if ($debug && !$valid);
+			
+			my $floatValid = ($pstr=SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{float}},\%patternList,\$rawData)) >=0;
+			Debug "Found matched float with indexes: ($pstr)" if ($debug && $floatValid);
+			$patternLookupHash{$pstr}="F" if ($floatValid); ## Append Sync to our lookuptable
+			Debug "float pattern not found" if ($debug && !$floatValid);
 
 			#Debug "added $pstr " if ($debug && $valid);
 
@@ -4199,12 +4205,13 @@ sub SIGNALduino_callsub
 	if ( defined $method && defined &$method )   
 	{
 		#my $subname = @{[eval {&$method}, $@ =~ /.*/]};
-		SIGNALduino_Log3 $name, 5, "$name: applying $funcname"; # method $subname";
+		SIGNALduino_Log3 $name, 5, "$name: applying $funcname, value before: @args"; # method $subname";
+
 		#SIGNALduino_Log3 $name, 5, "$name: value bevore $funcname: @args";
 		
 		my ($rcode, @returnvalues) = $method->($name, @args) ;	
 			
-	    SIGNALduino_Log3 $name, 5, "$name: modified value after $funcname:".@returnvalues;
+	    SIGNALduino_Log3 $name, 5, "$name: rcode=$rcode, modified value after $funcname: @returnvalues";
 	    return ($rcode, @returnvalues);
 	} elsif (defined $method ) {					
 		SIGNALduino_Log3 $name, 5, "$name: Error: Unknown method $funcname Please check definition";
@@ -4239,6 +4246,20 @@ sub SIGNALduino_bit2Arctec
 	$msg =~ s/1/10/g;
 	$msg =~ s/z/01/g;
 	return (1,split("",$msg)); 
+}
+
+sub SIGNALduino_bit2itv1
+{
+	my ($name, @bit_msg) = @_;
+	my $msg = join("",@bit_msg);	
+
+	$msg =~ s/0F/01/g;		# Convert 0F -> 01 (F) to be compatible with CUL
+#	$msg =~ s/0F/11/g;		# Convert 0F -> 11 (1) float
+	if (index($msg,'F') == -1) {
+		return (1,split("",$msg));
+	} else {
+		return (0,0);
+	}
 }
 
 
