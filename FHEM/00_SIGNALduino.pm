@@ -532,7 +532,7 @@ my %ProtocolListSIGNALduino  = (
 			preamble		=> '',					
 			clientmodule    => 'OREGON',
 			modulematch     => '^[0-9A-F].*',
-			length_min      => '31',
+			length_min      => '32',
 			length_max      => '32',
 			polarity        => 'invert',		    # invert bits
 			method          => \&SIGNALduino_OSV1   # Call to process this message
@@ -4781,11 +4781,11 @@ sub SIGNALduino_OSV1() {
 	$calcsum = ($calcsum & 0xFF) + ($calcsum >> 8);
 	my $checksum = oct( "0b" . reverse substr($bitData,24,8));
 	
-	if ($calcsum != $checksum) {	# Checksum
-		return (-1,"OSV1 - ERROR checksum not equal: $calcsum != $checksum");
-	} 
 	if (substr($bitData,20,1) != 0) {
 		$bitData =~ tr/01/10/; # invert message and check if it is possible to deocde now
+	} 
+	if ($calcsum != $checksum) {	# Checksum
+		return (-1,"OSV1 - ERROR checksum not equal: $calcsum != $checksum");
 	} 
 	
 	SIGNALduino_Log3 $name, 4, "$name: OSV1 input data: $bitData";
