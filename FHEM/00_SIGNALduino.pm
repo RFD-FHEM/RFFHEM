@@ -1190,21 +1190,23 @@ my %ProtocolListSIGNALduino  = (
 	"61" =>	## ELV FS10
 		# tested transmitter:   FS10-S8, FS10-S4, FS10-ZE
 		# tested receiver:      FS10-ST, FS10-MS, WS3000-TV, PC-Wettersensor-Empfaenger
-		# das letzte Bit 1 und 1 x 0 Preambel fehlt immer
+		# sends 2 messages with 43 or 48 bits in distance of 100 mS (on/off) , last bit 1 is missing
+		# sends x messages with 43 or 48 bits in distance of 200 mS (dimm) , repeats second message
+		# MU;P0=1776;P1=-410;P2=383;P3=-820;D=01212121212121212121212123212121232323212323232121212323232121212321212123232123212120;CP=2;R=74;
 		{
 			name   		=> 'FS10',
+			comment        => 'Remote Control (434Mhz)',
 			id		=> '61',
 			one		=> [1,-2],
 			zero		=> [1,-1],
 			clockabs	=> 400,
-			format 		=> 'twostate',
+			pause			   => [-81],   # 400*81=32400*6=194400 - pause between repeats of send messages (clockabs*pause must be < 32768)
 			preamble	=> 'P61#',      # prepend to converted message
 			postamble	=> '',         # Append to converted message
 			clientmodule	=> 'FS10',
 			#modulematch	=> '',
-			length_min	=> '38',	# eigentlich 41 oder 46 (Pruefsumme nicht bei allen)
-			length_max      => '48',	# eigentlich 46
-			
+			length_min	=> '32',
+			length_max      => '48',
 		}, 
 	"62" => ## Clarus_Switch  
 		{    #MU;P0=-5893;P4=-634;P5=498;P6=-257;P7=116;D=45656567474747474745656707456747474747456745674567456565674747474747456567074567474747474567456745674565656747474747474565670745674747474745674567456745656567474747474745656707456747474747456745674567456565674747474747456567074567474747474567456745674567;CP=7;O;
@@ -2033,7 +2035,7 @@ SIGNALduino_Set($@)
 		}
 		my @bits = split("", $data);
 	
-		my %bitconv = (1=>"one", 0=>"zero", 'D'=> "float");
+		my %bitconv = (1=>"one", 0=>"zero", 'D'=> "float", 'P'=> "pause");
 		my $SignalData="D=";
 		
 		$SignalData.=$signalHash{sync} if (exists($signalHash{sync}));
@@ -2052,6 +2054,59 @@ SIGNALduino_Set($@)
 	SIGNALduino_AddSendQueue($hash,$sendData);
 	SIGNALduino_Log3 $name, 4, "$name/set: sending via SendMsg: $sendData";
 	
+} elsif ( $cmd eq "sendMsgCombined" ) {
+		######### NEW Send Combined #########
+		# in:  Protokoll#Ra#          Data 0            #R0#          Data 1            #R1
+		# $newmsg = "P61#R2#0000000000001101010101PPPPPP#R0#0000000000001101010101PPPPPP#R1"
+		# out: $newmsg="SC;R=2;SR;R=1;P0=400;P1=-800;P2=-400;P3=-32400;D=0202...33;SR;R=3;P0=400;P1=-800;P2=-400;P3=-32400;D=0202...33;";
+		SIGNALduino_Log3 $name, 5, "$name: sendmsg msg=$arg";
+		my $protocol;
+		my @repeats;
+		my @data;
+      ($protocol,$repeats[2],$data[0],$repeats[0],$data[1],$repeats[1]) = split("#",$arg);
+      $protocol=~ s/[Pp](\d+)/$1/; # extract protocol num
+      return "$name: sendmsg, unknown protocol: $protocol" if (!exists($ProtocolListSIGNALduino{$protocol}));
+      $repeats[2]=~ s/[rR](\d+)/$1/; # extract repeat num
+      $repeats[2]=1 if (!defined($repeats[2]));
+      my %signalHash;
+      my %patternHash;
+      my $pattern="";
+      my $cnt=0;
+      my $sendData;
+		my	$clock=$ProtocolListSIGNALduino{$protocol}{clockabs};
+		SIGNALduino_Log3 $name, 5, "$name: sendmsg Preparing combined rawsend command for protocol=$protocol, repeats=$repeats[2], clock=$clock";
+		SIGNALduino_Log3 $name, 5, "$name: sendmsg msg 0 bits=$data[0]";
+		SIGNALduino_Log3 $name, 5, "$name: sendmsg msg 1 bits=$data[1]";
+		foreach my $item (qw(sync start one zero float pause)) {
+         next if (!exists($ProtocolListSIGNALduino{$protocol}{$item}));
+			foreach my $p (@{$ProtocolListSIGNALduino{$protocol}{$item}}) {
+            if (!exists($patternHash{$p})) {
+					$patternHash{$p}=$cnt;
+					$pattern.="P".$patternHash{$p}."=".$p*$clock.";";
+					$cnt++;
+				}
+		    	$signalHash{$item}.=$patternHash{$p};
+			}
+		}
+		SIGNALduino_Log3 $name, 5, "$name: sendmsg combined pattern $pattern";
+		my @SignalData;
+		my %bitconv = (1=>"one", 0=>"zero", 'D'=> "float", 'P'=> "pause");
+		for my $i (0..1) {
+			$repeats[$i]=~ s/[rR](\d+)/$1/; # extract repeat num
+			$repeats[$i]=1 if (!defined($repeats[0]));
+			my @bits = split("", $data[$i]);
+			$SignalData[$i]="D=";
+			$SignalData[$i].=$signalHash{sync} if (exists($signalHash{sync}));
+			$SignalData[$i].=$signalHash{start} if (exists($signalHash{start}));
+			foreach my $bit (@bits) {
+				next if (!exists($bitconv{$bit}));
+				$SignalData[$i].=$signalHash{$bitconv{$bit}}; ## Add the signal to our data string
+			}
+		}
+      SIGNALduino_Log3 $name, 5, "$name: sendmsg msg 0 repeats=$repeats[0], msg 1 repeats=$repeats[1]";
+		$sendData = "SC;R=$repeats[2];SR;R=$repeats[0];$pattern$SignalData[0];SR;R=$repeats[1];$pattern$SignalData[1];";
+      SIGNALduino_AddSendQueue($hash,$sendData);
+      SIGNALduino_Log3 $name, 4, "$name/set: sending via SendMsgCombined: $sendData";
   } else {
   	SIGNALduino_Log3 $name, 5, "$name/set: set $name $cmd $arg";
 	#SIGNALduino_SimpleWrite($hash, $arg);
@@ -4349,6 +4404,9 @@ sub SIGNALduino_postDemo_FHT80($@) {
       if (($sum & 0xFF) == $checksum) {								## FHT80 Raumthermostat
          for($b = 0; $b < 54; $b += 9) {	                              # check parity over 6 byte
             my $parity = 0;					                              # Parity even
+            for($i = $b; $i < $b + 9; $i++) {			                  # Parity over 1 byte + 1 bit
+               $parity += $bit_msg[$i];
+            }
             if ($parity % 2 != 0) {
                SIGNALduino_Log3 $name, 3, "$name: FHT80 ERROR - Parity not even";
                return 0, undef;
