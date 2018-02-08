@@ -1,7 +1,7 @@
 ##############################################
 # $Id: 00_SIGNALduino.pm 10488 2018-01-24 21:00:00Z v3.3.3-dev $
 #
-# v3.4.4 (Development release 3.3)
+# v3.3.3 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
 # see http://www.fhemwiki.de/wiki/SIGNALDuino
 # It was modified also to provide support for raw message handling which can be send from the SIGNALduino
@@ -5838,7 +5838,7 @@ With a # at the beginnging whitelistIDs can be deactivated.
 	<li>#define ARDUINO_AVR_ICT_BOARDS_ICT_BOARDS_AVR_RADINOCC1101<br>
 	Compilierung für den radinoCC1101 bestimmen</li>
 	<li>#define CMP_CC1101<br>
-	Darf NICHT nur bei Verwendung eines CC1101 Receiver´s aktiviert werden. Bei einem Low-Budget Receiver muss dies auskommentiert bleiben!</li>
+	Darf nur bei Verwendung eines CC1101 Receiver´s aktiviert werden. Bei einem Low-Budget Receiver muss dies auskommentiert bleiben!</li>
 	</ul>
 	
 =end html_DE
