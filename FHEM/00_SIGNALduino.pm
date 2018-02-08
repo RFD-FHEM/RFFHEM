@@ -4349,6 +4349,9 @@ sub SIGNALduino_postDemo_FHT80($@) {
       if (($sum & 0xFF) == $checksum) {								## FHT80 Raumthermostat
          for($b = 0; $b < 54; $b += 9) {	                              # check parity over 6 byte
             my $parity = 0;					                              # Parity even
+			            for($i = $b; $i < $b + 9; $i++) {			                  # Parity over 1 byte + 1 bit
+               $parity += $bit_msg[$i];
+            }
             if ($parity % 2 != 0) {
                SIGNALduino_Log3 $name, 3, "$name: FHT80 ERROR - Parity not even";
                return 0, undef;
