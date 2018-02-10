@@ -178,4 +178,19 @@ sub SD_UT_binaryToNumber
 
 1;
 
+=pod
+=item summary    ...
+=item summary_DE ...
+=begin html
 
+<a name="SD_UT"></a>
+<h3>SD_UT</h3>
+
+=end html
+=begin html_DE
+
+<a name="SD_UT"></a>
+<h3>SD_UT</h3>
+
+=end html_DE
+=cut
