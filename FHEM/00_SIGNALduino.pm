@@ -408,22 +408,6 @@ my %ProtocolListSIGNALduino  = (
 			polarity        => 'invert',			
 			
 		}, 	
-	"12.1"    => 			## hideki
-		{
-            name			=> 'Hideki protocol not invert',
-			comment		=> 'only for test of the firmware dev-r33_fixmc',
-			id          	=> '12',
-			clockrange     	=> [420,510],                   # min, max better for Bresser Sensors, OK for hideki/Hideki/TFA too     
-			format 			=> 'manchester',	
-			preamble		=> 'P12#',						# prepend to converted message	
-			clientmodule    => 'hideki',   				# not used now
-			modulematch     => '^P12#75.+',  						# not used now
-			length_min      => '71',
-			length_max      => '128',
-			method          => \&SIGNALduino_Hideki,	# Call to process this message
-			#polarity        => 'invert',			
-			
-		}, 	
 	"13"    => 			## FLAMINGO  FA 21
 		{
             name			=> 'FLAMINGO FA21',	
@@ -4864,6 +4848,12 @@ sub	SIGNALduino_Hideki()
 	
     Debug "$name: search in $bitData \n" if ($debug);
 	my $message_start = index($bitData,"10101110");
+
+	if ($message_start < 0) {
+	$bitData =~ tr/01/10/;									# invert message
+	$message_start = index($bitData,"10101110");			# 0x75 but in reverse order
+	}
+
 	if ($message_start >= 0 )   # 0x75 but in reverse order
 	{
 		Debug "$name: Hideki protocol detected \n" if ($debug);
