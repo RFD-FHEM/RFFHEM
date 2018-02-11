@@ -393,9 +393,10 @@ my %ProtocolListSIGNALduino  = (
 			length_max      => '56',
 			method          => \&SIGNALduino_AS # Call to process this message
 		}, 
-	"12"    => 			## hideki
+	"12"    => 			## Hideki
 		{
             name			=> 'Hideki protocol',	
+			comment         => 'Hideki messages are received inverted or not inverted from Decoder',
 			id          	=> '12',
 			clockrange     	=> [420,510],                   # min, max better for Bresser Sensors, OK for hideki/Hideki/TFA too     
 			format 			=> 'manchester',	
@@ -4852,6 +4853,9 @@ sub	SIGNALduino_Hideki()
 	if ($message_start < 0) {
 	$bitData =~ tr/01/10/;									# invert message
 	$message_start = index($bitData,"10101110");			# 0x75 but in reverse order
+	SIGNALduino_Log3 $name, 4, "$name: Hideki protocol invert message";
+	} else {
+	SIGNALduino_Log3 $name, 4, "$name: Hideki protocol not invert message";
 	}
 
 	if ($message_start >= 0 )   # 0x75 but in reverse order
@@ -4881,7 +4885,7 @@ sub	SIGNALduino_Hideki()
 
 			$hidekihex=$hidekihex.sprintf('%02X', oct("0b$byte"));
 		}
-		SIGNALduino_Log3 $name, 4, "$name: hideki protocol converted to hex: $hidekihex with " .$message_length ." bits, messagestart $message_start";
+		SIGNALduino_Log3 $name, 4, "$name: Hideki protocol converted to hex: $hidekihex with " .$message_length ." bits, messagestart $message_start";
 
 		return  (1,$hidekihex); ## Return only the original bits, include length
 	}
