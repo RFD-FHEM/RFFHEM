@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 10488 2018-01-24 21:00:00Z v3.3.3-dev $
+# $Id: 00_SIGNALduino.pm 10488 2018-02-14 14:32:00Z v3.3.3-dev $
 #
 # v3.3.3 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -8,7 +8,7 @@
 # The purpos is to use it as addition to the SIGNALduino which runs on an arduno nano or arduino uno.
 # It routes Messages serval Modules which are already integrated in FHEM. But there are also modules which comes with it.
 # N. Butzek, S. Butzek, 2014-2015
-# S.Butzek,Ralf9 2016-2017
+# S.Butzek,Ralf9 2016-2018
 
 package main;
 
@@ -1586,6 +1586,7 @@ SIGNALduino_Initialize($)
 					  ." suppressDeviceRawmsg:1,0"
 					  ." development"
 					  ." noMsgVerbose:0,1,2,3,4,5"
+					  ." eventlogging:0,1"
 		              ." $readingFnAttributes";
 
   $hash->{ShutdownFn} = "SIGNALduino_Shutdown";
@@ -5194,11 +5195,11 @@ sub SIGNALduino_Log3($$$)
   my $name =$dev;
   $name= $dev->{NAME} if(defined($dev) && ref($dev) eq "HASH");
   
-  DoTrigger($dev,"$name $loglevel: $text");
+  if (AttrVal($name,"eventlogging",0)) {
+	  DoTrigger($dev,"$name $loglevel: $text");
+  }
   
   return Log3($name,$loglevel,$text);
-  
-
 }
 
 #print Dumper (%msg_parts);
@@ -5350,6 +5351,12 @@ sub SIGNALduino_Log3($$$)
     <li>minsecs<br>
     This is a very special attribute. It is provided to other modules. minsecs should act like a threshold. All logic must be done in the logical module. 
     If specified, then supported modules will discard new messages if minsecs isn't past.
+    </li>
+    
+    <li>eventlogging<br>
+    With this attribute you can control if every logmessage is also provided as event. This allows to generate event for every log messages.
+    Set this to 0 and logmessages are only saved to the global fhem logfile if the loglevel is higher or equal to the verbose attribute.
+    Set this to 1 and every logmessages is also dispatched as event. This allows you to log the events in a seperate logfile.
     </li>
     
     <li>noMsgVerbose<br>
@@ -5660,6 +5667,11 @@ With a # at the beginnging whitelistIDs can be deactivated.
 	Es wird von anderen Modulen bereitgestellt. Minsecs sollte wie eine Schwelle wirken. Wenn angegeben, werden unterst&uuml;tzte Module neue Nachrichten verworfen, wenn minsecs nicht vergangen sind.<br><br>
 	<li>noMsgVerbose<br></li>
 	Mit diesem Attribut k&ouml;nnen Sie die Protokollierung von Debug-Nachrichten vom io-Ger&auml;t steuern. Wenn dieser Wert auf 3 festgelegt ist, werden diese Nachrichten protokolliert, wenn der globale Verbose auf 3 oder h&ouml;her eingestellt ist.<br><br>
+    <li>eventlogging<br>
+    With this attribute you can control if every logmessage is also provided as event. This allows to generate event for every log messages.
+    Set this to 0 and logmessages are only saved to the global fhem logfile if the loglevel is higher or equal to the verbose attribute.
+    Set this to 1 and every logmessages is also dispatched as event. This allows you to log the events in a seperate logfile.
+    </li>
     <li>rawmsgEvent<br></li>
 	Bei der Einstellung "1", l&ouml;sen empfangene Rohnachrichten Ereignisse aus.<br><br>
 	<li>suppressDeviceRawmsg</li>
