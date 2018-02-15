@@ -1003,14 +1003,15 @@ my %ProtocolListSIGNALduino  = (
 		{
             name			=> 'Maverick protocol',	
 			id          	=> '47',
-			clockrange     	=> [220,260],                   
+			clockrange     	=> [180,260],                   
 			format 			=> 'manchester',	
 			preamble		=> 'P47#',						# prepend to converted message	
-			clientmodule    => 'SD_WS_Maverick',   						# not used now
-			modulematch     => '^P47#.*',  					# not used now
+			clientmodule    => 'SD_WS_Maverick',   					
+			modulematch     => '^P47#.*',  					
 			length_min      => '100',
 			length_max      => '108',
-			method          => \&SIGNALduino_Maverick		# Call to process this message
+			method          => \&SIGNALduino_Maverick,		# Call to process this message
+			polarity		=> 'invert'
 		}, 			
      "48"    => 			## Joker Dostmann TFA
 		{
@@ -4908,7 +4909,7 @@ sub SIGNALduino_Maverick()
 
 	if ($bitData =~ m/^.*(101010101001100110010101).*/) 
 	{  # Valid Maverick header detected	
-		my $header_pos=$+[1];
+		my $header_pos=$-[1];
 		
 		SIGNALduino_Log3 $name, 4, "$name: Maverick protocol detected: header_pos = $header_pos";
 
