@@ -406,7 +406,7 @@ my %ProtocolListSIGNALduino  = (
 			length_min      => '71',
 			length_max      => '128',
 			method          => \&SIGNALduino_Hideki,	# Call to process this message
-			polarity        => 'invert',			
+			#polarity        => 'invert',			
 			
 		}, 	
 	"13"    => 			## FLAMINGO  FA 21
@@ -4853,14 +4853,12 @@ sub	SIGNALduino_Hideki()
 	if ($message_start < 0) {
 	$bitData =~ tr/01/10/;									# invert message
 	$message_start = index($bitData,"10101110");			# 0x75 but in reverse order
-	SIGNALduino_Log3 $name, 4, "$name: Hideki protocol invert message";
-	} else {
-	SIGNALduino_Log3 $name, 4, "$name: Hideki protocol not invert message";
+	my $invert = 0;
 	}
 
 	if ($message_start >= 0 )   # 0x75 but in reverse order
 	{
-		Debug "$name: Hideki protocol detected \n" if ($debug);
+		Debug "$name: Hideki protocol (invert=$invert) detected \n" if ($debug);
 
 		# Todo: Mindest Laenge fuer startpunkt vorspringen 
 		# Todo: Wiederholung auch an das Modul weitergeben, damit es dort geprueft werden kann
@@ -4884,6 +4882,12 @@ sub	SIGNALduino_Hideki()
 			Debug "$name: byte reversed $byte , as hex: ".sprintf('%X', oct("0b$byte"))."\n" if ($debug);
 
 			$hidekihex=$hidekihex.sprintf('%02X', oct("0b$byte"));
+		}
+		
+		if ($invert == 0) {
+			SIGNALduino_Log3 $name, 4, "$name: receive Hideki protocol not inverted";
+		} else {
+			SIGNALduino_Log3 $name, 4, "$name: receive Hideki protocol inverted";
 		}
 		SIGNALduino_Log3 $name, 4, "$name: Hideki protocol converted to hex: $hidekihex with " .$message_length ." bits, messagestart $message_start";
 
