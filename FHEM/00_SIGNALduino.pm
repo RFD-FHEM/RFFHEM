@@ -4892,11 +4892,12 @@ sub	SIGNALduino_Hideki()
 	
     Debug "$name: search in $bitData \n" if ($debug);
 	my $message_start = index($bitData,"10101110");
-
+	my $invert = 0;
+	
 	if ($message_start < 0) {
 	$bitData =~ tr/01/10/;									# invert message
 	$message_start = index($bitData,"10101110");			# 0x75 but in reverse order
-	my $invert = 0;
+	my $invert = 1;
 	}
 
 	if ($message_start >= 0 )   # 0x75 but in reverse order
@@ -4936,6 +4937,7 @@ sub	SIGNALduino_Hideki()
 
 		return  (1,$hidekihex); ## Return only the original bits, include length
 	}
+	SIGNALduino_Log3 $name, 4, "$name: hideki start pattern (10101110) not found";
 	return (-1,"Start pattern (10101110) not found");
 }
 
