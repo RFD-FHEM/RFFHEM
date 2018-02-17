@@ -4856,7 +4856,7 @@ sub	SIGNALduino_Hideki()
 	if ($message_start < 0) {
 	$bitData =~ tr/01/10/;									# invert message
 	$message_start = index($bitData,"10101110");			# 0x75 but in reverse order
-	my $invert = 1;
+	$invert = 1;
 	}
 
 	if ($message_start >= 0 )   # 0x75 but in reverse order
