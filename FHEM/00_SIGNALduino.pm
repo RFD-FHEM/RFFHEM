@@ -396,7 +396,7 @@ my %ProtocolListSIGNALduino  = (
 	"12"    => 			## Hideki
 		{
             name			=> 'Hideki protocol',	
-			comment         => 'Hideki messages are received inverted or not inverted from Decoder',
+			comment         => 'Hideki messages are sometimes received as inverted (check in sub)',
 			id          	=> '12',
 			clockrange     	=> [420,510],                   # min, max better for Bresser Sensors, OK for hideki/Hideki/TFA too     
 			format 			=> 'manchester',	
