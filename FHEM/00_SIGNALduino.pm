@@ -1180,9 +1180,12 @@ my %ProtocolListSIGNALduino  = (
 	"61" =>	## ELV FS10
 		# tested transmitter:   FS10-S8, FS10-S4, FS10-ZE
 		# tested receiver:      FS10-ST, FS10-MS, WS3000-TV, PC-Wettersensor-Empfaenger
-		# das letzte Bit 1 und 1 x 0 Preambel fehlt immer
+		# sends 2 messages with 43 or 48 bits in distance of 100 mS (on/off) , last bit 1 is missing
+		# sends x messages with 43 or 48 bits in distance of 200 mS (dimm) , repeats second message
+		# MU;P0=1776;P1=-410;P2=383;P3=-820;D=01212121212121212121212123212121232323212323232121212323232121212321212123232123212120;CP=2;R=74;
 		{
 			name   		=> 'FS10',
+			comment        => 'Remote Control (434Mhz)',
 			id		=> '61',
 			one		=> [1,-2],
 			zero		=> [1,-1],
@@ -4927,7 +4930,7 @@ sub	SIGNALduino_Hideki()
 
 			$hidekihex=$hidekihex.sprintf('%02X', oct("0b$byte"));
 		}
-		
+		SIGNALduino_Log3 $name, 4, "$name: Hideki protocol converted to hex: $hidekihex with " .$message_length ." bits, messagestart $message_start";
 		if ($invert == 0) {
 			SIGNALduino_Log3 $name, 4, "$name: receive Hideki protocol not inverted";
 		} else {
@@ -5710,9 +5713,9 @@ With a # at the beginnging whitelistIDs can be deactivated.
 	<li>noMsgVerbose<br></li>
 	Mit diesem Attribut k&ouml;nnen Sie die Protokollierung von Debug-Nachrichten vom io-Ger&auml;t steuern. Wenn dieser Wert auf 3 festgelegt ist, werden diese Nachrichten protokolliert, wenn der globale Verbose auf 3 oder h&ouml;her eingestellt ist.<br><br>
     <li>eventlogging<br>
-    With this attribute you can control if every logmessage is also provided as event. This allows to generate event for every log messages.
-    Set this to 0 and logmessages are only saved to the global fhem logfile if the loglevel is higher or equal to the verbose attribute.
-    Set this to 1 and every logmessages is also dispatched as event. This allows you to log the events in a seperate logfile.
+Mit diesem Attribut können Sie steuern, ob jede Logmeldung auch als Ereignis bereitgestellt wird. Dies ermöglicht das Erzeugen eines Ereignisses für jede Protokollnachricht.
+    Setze dies auf 0 und Logmeldungen werden nur in der globalen Fhem-Logdatei gespeichert, wenn der Loglevel höher oder gleich dem Verbose-Attribut ist.
+    Setze dies auf 1 und jede Logmeldung wird auch als Ereignis versendet. Dadurch können Sie die Ereignisse in einer separaten Protokolldatei protokollieren.<br><br>
     </li>
     <li>rawmsgEvent<br></li>
 	Bei der Einstellung "1", l&ouml;sen empfangene Rohnachrichten Ereignisse aus.<br><br>
@@ -5829,15 +5832,6 @@ With a # at the beginnging whitelistIDs can be deactivated.
 	Dieser Befehl erstellt die erforderlichen Anweisungen zum Senden von Rohdaten &uuml;ber den SIGNALduino. Sie k&ouml;nnen die Signaldaten wie Protokoll und die Bits angeben, die Sie senden m&ouml;chten.<br>
 	</ul><br><br>
 	
-	<small><u><b>Arduino IDE - Firmware - Hinweis:</b></small></u><br>
-	<small>(Hinweis: Die falsche Benutzung kann zu Fehlfunktionen des SIGNALduino´s f&uuml;hren!)</small>
-	<ul>
-	<li>#define DEBUGMUREPEAT 1<br>
-	Es wird jetzt im pattern Array geschaut ob es ein Wiederholungstrenner gibt der MU Nachrichten. Mit der o.g. Zeile werden debug Ausgaben aktiviert.</li>
-	<li>#define ARDUINO_AVR_ICT_BOARDS_ICT_BOARDS_AVR_RADINOCC1101<br>
-	Compilierung für den radinoCC1101 bestimmen</li>
-	<li>#define CMP_CC1101<br>
-	Darf nur bei Verwendung eines CC1101 Receiver´s aktiviert werden. Bei einem Low-Budget Receiver muss dies auskommentiert bleiben!</li>
 	</ul>
 	
 =end html_DE
