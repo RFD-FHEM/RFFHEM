@@ -515,6 +515,7 @@ my %ProtocolListSIGNALduino  = (
 			#zero			=> [1,-1],  
 			sync			=> [1,-10],
 			float			=> [1,-1,1,-1],
+			end			=> [1,-40],
 			clockabs     	=> -1,			# -1 = auto
 			format 			=> 'twostate',	# tristate can't be migrated from bin into hex!
 			preamble		=> 'i',			# Append to converted message	
@@ -2031,7 +2032,7 @@ SIGNALduino_Set($@)
 
 		SIGNALduino_Log3 $name, 5, "$name: sendmsg Preparing rawsend command for protocol=$protocol, repeats=$repeats, clock=$clock bits=$data";
 		
-		foreach my $item (qw(sync start one zero float))
+		foreach my $item (qw(sync start one zero float pause end))
 		{
 		    #print ("item= $item \n");
 		    next if (!exists($ProtocolListSIGNALduino{$protocol}{$item}));
@@ -2063,6 +2064,7 @@ SIGNALduino_Set($@)
 			#SIGNALduino_Log3 $name, 5, "encoding $bit";
 			$SignalData.=$signalHash{$bitconv{$bit}}; ## Add the signal to our data string
 		}
+		$SignalData.=$signalHash{end} if (exists($signalHash{end}));
 		$sendData = "SR;R=$repeats;$pattern$SignalData;$frequency";
 	}
 
