@@ -1704,8 +1704,7 @@ SIGNALduino_Define($$)
   $hash->{DMSG}="nothing";
   $hash->{LASTDMSG} = "nothing";
   $hash->{TIME}=time();
-  
-
+  $hash->{versionmodul} = SDUINO_VERSION;
   
   Log3 $name, 3, "$name: Firmwareversion: ".$hash->{READINGS}{version}{VAL}  if ($hash->{READINGS}{version}{VAL});
 
