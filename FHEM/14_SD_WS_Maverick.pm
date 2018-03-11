@@ -108,7 +108,7 @@ SD_WS_Maverick_Parse($$)
 	my $temp_str2 = substr($rawData,7,5);
 	my $unknown = substr($rawData,12);
   
-  Log3 $iohash, 4, "$name $model decoded protocolid: 47 sensor startup=$startup, temp1=$temp_str1, temp2=$temp_str2, unknown=$unknown";
+  Log3 $iohash, 4, "$name $model decoded protocolid: 47 sensor startup=$startup, temp-bbq=$temp_str1, temp-food=$temp_str2, unknown=$unknown";
   
   if ($startup ne '59' && $startup ne '6A') {
       Log3 $iohash, 4, "$name $model ERROR: wrong startup=$startup (must be 59 or 6A)";
@@ -127,7 +127,7 @@ SD_WS_Maverick_Parse($$)
         $temp1 += $c*4**(4-$i);
     }
     if ($temp1 <= 0 || $temp1 > 300) {
-        Log3 $iohash, 4, "$name $model ERROR: wrong temp1=$temp1";
+        Log3 $iohash, 4, "$name $model ERROR: wrong temp-bbq=$temp1";
         $temp1 = "";
     }
   } else {
@@ -141,7 +141,7 @@ SD_WS_Maverick_Parse($$)
         $temp2 += $c*4**(4-$i);
     }
     if ($temp2 <= 0 || $temp2 > 300) {
-        Log3 $iohash, 4, "$name $model ERROR: wrong temp2=$temp2";
+        Log3 $iohash, 4, "$name $model ERROR: wrong temp-food=$temp2";
         $temp2 = "";
     }
   } else {
@@ -152,7 +152,7 @@ SD_WS_Maverick_Parse($$)
        return '';
   }
   
-  Log3 $iohash, 4, "$name $model decoded protocolid: temp1=$temp1, temp2=$temp2;";
+  Log3 $iohash, 4, "$name $model decoded protocolid: temp-bbq=$temp1, temp-food=$temp2;";
   
   #print Dumper($modules{SD_WS_Maverick}{defptr});
     
@@ -183,12 +183,12 @@ SD_WS_Maverick_Parse($$)
     #$hash->{bitMSG} = $bitData2; 
     my $inaktivityInterval=int(AttrVal($name,"inaktivityInterval",5));
     if ($temp1 ne "") {
-        RemoveInternalTimer($hash, 'SD_WS_Maverick_ClearTemp1');
-        InternalTimer(time()+($inaktivityInterval*60), 'SD_WS_Maverick_ClearTemp1', $hash, 0);
+        RemoveInternalTimer($hash, 'SD_WS_Maverick_ClearTempBBQ');
+        InternalTimer(time()+($inaktivityInterval*60), 'SD_WS_Maverick_ClearTempBBQ', $hash, 0);
     }
     if ($temp2 ne "") {
-        RemoveInternalTimer($hash, 'SD_WS_Maverick_ClearTemp2');
-        InternalTimer(time()+($inaktivityInterval*60), 'SD_WS_Maverick_ClearTemp2', $hash, 0);
+        RemoveInternalTimer($hash, 'SD_WS_Maverick_ClearTempFood');
+        InternalTimer(time()+($inaktivityInterval*60), 'SD_WS_Maverick_ClearTempFood', $hash, 0);
     }
 
     SD_WS_Maverick_updateReadings($hash, $temp1, $temp2, $startup);
@@ -226,43 +226,43 @@ sub SD_WS_Maverick_Attr(@)
   return undef;
 }
 
-sub SD_WS_Maverick_ClearTemp1($){
+sub SD_WS_Maverick_ClearTempBBQ($){
   my ($hash) = @_;
   my $name = $hash->{NAME};
-  Log3 $hash, 4, "$name ClearTemp1";
+  Log3 $hash, 4, "$name ClearTempBBQ";
   
   my $temp1=-1;
-  my $temp2=ReadingsVal($name,"temp2",-1);
-  SD_WS_Maverick_updateReadings($hash, $temp1, $temp2,"ClearTemp1");
+  my $temp2=ReadingsVal($name,"temp-food",-1);
+  SD_WS_Maverick_updateReadings($hash, $temp1, $temp2,"ClearTempBBQ");
 }
 
-sub SD_WS_Maverick_ClearTemp2($){
+sub SD_WS_Maverick_ClearTempFood($){
   my ($hash) = @_;
   my $name = $hash->{NAME};
-  Log3 $hash, 4, "$name ClearTemp2";
+  Log3 $hash, 4, "$name ClearTempFood";
 
-  my $temp1=ReadingsVal($name,"temp1",-1);  
+  my $temp1=ReadingsVal($name,"temp-bbq",-1);  
   my $temp2=-1;
-  SD_WS_Maverick_updateReadings($hash, $temp1, $temp2,"ClearTemp2");
+  SD_WS_Maverick_updateReadings($hash, $temp1, $temp2,"ClearTempFood");
 }
 
 sub SD_WS_Maverick_updateReadings($$$$){
   my ($hash, $temp1, $temp2, $startup) = @_;
   my $state = "";
   if ($temp1 ne "") {
-     $state = "T1: $temp1 ";
+     $state = "BBQ: $temp1 ";
   }
   if ($temp2 ne "") {
-     $state .= "T2: $temp2 ";
+     $state .= "Food: $temp2 ";
   }
-  $state .= "S: $startup";
+  #$state .= "S: $startup";
   
   readingsBeginUpdate($hash);
   readingsBulkUpdate($hash, "state", $state);
   readingsBulkUpdate($hash, "messageType", $startup);
   
-  readingsBulkUpdate($hash, "temp1", $temp1)  if ($temp1 ne"");
-  readingsBulkUpdate($hash, "temp2", $temp2)  if ($temp2 ne"");
+  readingsBulkUpdate($hash, "temp-bbq", $temp1)  if ($temp1 ne"");
+  readingsBulkUpdate($hash, "temp-food", $temp2)  if ($temp2 ne"");
 
   readingsEndUpdate($hash, 1); # Notify is done by Dispatch
   return undef;
@@ -299,15 +299,16 @@ sub SD_WS_Maverick_updateReadings($$$$){
   <a name="SD_WS_Maverick Events"></a>
   <b>Generated readings:</b>
   <ul>
-  	 <li>State (T1: T2: S:)</li>
-     <li>temp1 (&deg;C)</li>
-     <li>temp2 (&deg;C)</li>
+  	 <li>State (BBQ: Food: )</li>
+     <li>temp-bbq (&deg;C)</li>
+     <li>temp-food (&deg;C)</li>
+     <li>messageType (6A at startup or rsync, otherwise 59)</li>
   </ul>
   <br>
   <b>Attributes</b>
   <ul>
     <li>inaktivityInterval <minutes (1-60)><br>
-    The Interval to set temp1 and/or temp2 to -1 after defined minutes. Empty batteries or the malfunction of a tempertature-sensor could be recognized.<br> 
+    The Interval to set temp-bbq and/or temp-food to -1 after defined minutes. Empty batteries or the malfunction of a tempertature-sensor could be recognized.<br> 
     <code>default: 5</code></li>
     <li><a href="#do_not_notify">do_not_notify</a></li>
     <li><a href="#ignore">ignore </a></li>
@@ -350,15 +351,16 @@ sub SD_WS_Maverick_updateReadings($$$$){
   <a name="SD_WS_Maverick Events"></a>
   <b>Generierte Readings:</b>
   <ul>
-  	 <li>State (T1: T2: S:)</li>
-     <li>temp1 (&deg;C)</li>
-     <li>temp2 (&deg;C)</li>
+  	 <li>State (BBQ: Food: )</li>
+     <li>temp-bbq (&deg;C)</li>
+     <li>temp-food (&deg;C)</li>
+     <li>messageType (6A bei Start oder rsync, sonst 59)</li>
   </ul>
   <br>
   <b>Attribute</b>
   <ul>
     <li>inaktivityInterval <minutes (1-60)><br>
-    Das Interval nach dem temp1 und/oder temp2 auf -1 gesetzt werden, wenn keine Signale mehr empfangen werden.
+    Das Interval nach dem temp-bbq und/oder temp-food auf -1 gesetzt werden, wenn keine Signale mehr empfangen werden.
     Hilfreich zum erkennen einer leeren Batterie oder eines defekten Termperaturfühlers.<br> 
     <code>default: 5</code></li>
     <li><a href="#do_not_notify">do_not_notify</a></li>
