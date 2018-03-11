@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 10488 2018-02-14 14:32:00Z v3.3.3-dev $
+# $Id: 00_SIGNALduino.pm 10488 2018-03-12 00:00:00Z v3.3.3-dev $
 #
 # v3.3.3 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -1015,7 +1015,7 @@ my %ProtocolListSIGNALduino  = (
 			length_min      => '100',
 			length_max      => '108',
 			method          => \&SIGNALduino_Maverick,		# Call to process this message
-			polarity		=> 'invert'
+			#polarity		=> 'invert'
 		}, 			
      "48"    => 			## Joker Dostmann TFA
 		{
