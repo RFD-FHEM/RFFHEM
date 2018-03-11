@@ -24,7 +24,7 @@ SD_WS_Maverick_Initialize($)
   $hash->{UndefFn}   = "SD_WS_Maverick_Undef";
   $hash->{ParseFn}   = "SD_WS_Maverick_Parse";
   $hash->{AttrFn}	 = "SD_WS_Maverick_Attr";
-  $hash->{AttrList}  = "IODev do_not_notify:1,0 ignore:0,1 showtime:1,0 " .
+  $hash->{AttrList}  = "IODev do_not_notify:1,0 ignore:0,1 showtime:1,0 inaktivityInterval " .
                         "$readingFnAttributes ";
   $hash->{AutoCreate} =
         { "SD_WS_Maverick.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME",  autocreateThreshold => "2:180"} };
@@ -108,117 +108,165 @@ SD_WS_Maverick_Parse($$)
 	my $temp_str2 = substr($rawData,7,5);
 	my $unknown = substr($rawData,12);
   
-    Log3 $iohash, 4, "$name $model decoded protocolid: 47 sensor startup=$startup, temp1=$temp_str1, temp2=$temp_str2, unknown=$unknown";
-    
-    if ($startup ne '59' && $startup ne '6A') {
-        Log3 $iohash, 4, "$name $model ERROR: wrong startup=$startup (must be 59 or 6A)";
-        return '';
+  Log3 $iohash, 4, "$name $model decoded protocolid: 47 sensor startup=$startup, temp1=$temp_str1, temp2=$temp_str2, unknown=$unknown";
+  
+  if ($startup ne '59' && $startup ne '6A') {
+      Log3 $iohash, 4, "$name $model ERROR: wrong startup=$startup (must be 59 or 6A)";
+      return '';
+  }
+  
+  # Calculate temp from data
+  my $c;
+  my $temp1=-532;
+  my $temp2=-532;
+  
+  if ($temp_str1 ne '55555') {
+    $temp_str1 =~ tr/569A/0123/;
+    for ( my $i = 0; $i < length($temp_str1); $i++ ) { 
+        $c = substr( $temp_str1, $i, 1);
+        $temp1 += $c*4**(4-$i);
     }
-    
-    # Calculate temp from data
-    my $c;
-    my $temp1=-532;
-    my $temp2=-532;
-    
-    if ($temp_str1 ne '55555') {
-	$temp_str1 =~ tr/569A/0123/;
-	for ( my $i = 0; $i < length($temp_str1); $i++ ) { 
-	    $c = substr( $temp_str1, $i, 1);
-	    $temp1 += $c*4**(4-$i);
-	}
-	if ($temp1 <= 0 || $temp1 > 300) {
-	    Log3 $iohash, 4, "$name $model ERROR: wrong temp1=$temp1";
-	    $temp1 = "";
-	}
-    } else {
+    if ($temp1 <= 0 || $temp1 > 300) {
+        Log3 $iohash, 4, "$name $model ERROR: wrong temp1=$temp1";
         $temp1 = "";
     }
-    
-    if ($temp_str2 ne '55555') {
-	$temp_str2 =~ tr/569A/0123/;
-	for ( my $i = 0; $i < length($temp_str2); $i++ ) { 
-	    $c = substr( $temp_str2, $i, 1);
-	    $temp2 += $c*4**(4-$i);
-	}
-	if ($temp2 <= 0 || $temp2 > 300) {
-	    Log3 $iohash, 4, "$name $model ERROR: wrong temp2=$temp2";
-	    $temp2 = "";
-	}
-    } else {
+  } else {
+      $temp1 = "";
+  }
+  
+  if ($temp_str2 ne '55555') {
+    $temp_str2 =~ tr/569A/0123/;
+    for ( my $i = 0; $i < length($temp_str2); $i++ ) { 
+        $c = substr( $temp_str2, $i, 1);
+        $temp2 += $c*4**(4-$i);
+    }
+    if ($temp2 <= 0 || $temp2 > 300) {
+        Log3 $iohash, 4, "$name $model ERROR: wrong temp2=$temp2";
         $temp2 = "";
     }
+  } else {
+      $temp2 = "";
+  }
+  
+  if ($temp1 eq "" && $temp2 eq "") {
+       return '';
+  }
+  
+  Log3 $iohash, 4, "$name $model decoded protocolid: temp1=$temp1, temp2=$temp2;";
+  
+  #print Dumper($modules{SD_WS_Maverick}{defptr});
     
-    if ($temp1 eq "" && $temp2 eq "") {
-         return '';
+  my $def = $modules{SD_WS_Maverick}{defptr}{$iohash->{NAME} };
+  $def = $modules{SD_WS_Maverick}{defptr}{$model} if(!$def);
+
+  if(!$def) {
+      Log3 $iohash, 1, "$name SD_WS_Maverick: UNDEFINED sensor $model";
+      return "UNDEFINED $model SD_WS_Maverick $model";
+  }
+      #Log3 $iohash, 3, 'SD_WS_Maverick: ' . $def->{NAME} . ' ' . $id;
+
+    my $hash = $def;
+    $name = $hash->{NAME};
+    Log3 $name, 4, "SD_WS_Maverick: $name ($rawData)";  
+
+    if (!defined(AttrVal($hash->{NAME},"event-min-interval",undef)))
+    {
+        my $minsecs = AttrVal($iohash->{NAME},'minsecs',0);
+        if($hash->{lastReceive} && (time() - $hash->{lastReceive} < $minsecs)) {
+            Log3 $hash, 4, "$model Dropped due to short time. minsecs=$minsecs";
+            return "";
+        }
     }
-    
-    Log3 $iohash, 4, "$name $model decoded protocolid: temp1=$temp1, temp2=$temp2;";
-    
-    #print Dumper($modules{SD_WS_Maverick}{defptr});
-    
-    my $def = $modules{SD_WS_Maverick}{defptr}{$iohash->{NAME} };
-    $def = $modules{SD_WS_Maverick}{defptr}{$model} if(!$def);
 
-    if(!$def) {
-		Log3 $iohash, 1, "$name SD_WS_Maverick: UNDEFINED sensor $model";
-		return "UNDEFINED $model SD_WS_Maverick $model";
-    }
-        #Log3 $iohash, 3, 'SD_WS_Maverick: ' . $def->{NAME} . ' ' . $id;
-	
-	my $hash = $def;
-	$name = $hash->{NAME};
-	Log3 $name, 4, "SD_WS_Maverick: $name ($rawData)";  
-
-	if (!defined(AttrVal($hash->{NAME},"event-min-interval",undef)))
-	{
-		my $minsecs = AttrVal($iohash->{NAME},'minsecs',0);
-		if($hash->{lastReceive} && (time() - $hash->{lastReceive} < $minsecs)) {
-			Log3 $hash, 4, "$model Dropped due to short time. minsecs=$minsecs";
-		  	return "";
-		}
-	}
-
-	$hash->{lastReceive} = time();
-	$hash->{lastMSG} = $rawData;
-	#$hash->{bitMSG} = $bitData2; 
-
-    my $state = "";
+    $hash->{lastReceive} = time();
+    $hash->{lastMSG} = $rawData;
+    #$hash->{bitMSG} = $bitData2; 
+    my $inaktivityInterval=int(AttrVal($name,"inaktivityInterval",5));
     if ($temp1 ne "") {
-       $state = "T1: $temp1 ";
+        RemoveInternalTimer($hash, 'SD_WS_Maverick_ClearTemp1');
+        InternalTimer(time()+($inaktivityInterval*60), 'SD_WS_Maverick_ClearTemp1', $hash, 0);
     }
     if ($temp2 ne "") {
-       $state .= "T2: $temp2 ";
+        RemoveInternalTimer($hash, 'SD_WS_Maverick_ClearTemp2');
+        InternalTimer(time()+($inaktivityInterval*60), 'SD_WS_Maverick_ClearTemp2', $hash, 0);
     }
-    $state .= "S: $startup";
-    
-    readingsBeginUpdate($hash);
-    readingsBulkUpdate($hash, "state", $state);
-    readingsBulkUpdate($hash, "messageType", $startup);
-    
-    readingsBulkUpdate($hash, "temp1", $temp1)  if ($temp1 ne"");
-    readingsBulkUpdate($hash, "temp2", $temp2)  if ($temp2 ne"");
- 
-    readingsEndUpdate($hash, 1); # Notify is done by Dispatch
 
-	return $name;
+    SD_WS_Maverick_updateReadings($hash, $temp1, $temp2, $startup);
+
+    return $name;
 
 }
 
 sub SD_WS_Maverick_Attr(@)
 {
-  my @a = @_;
-
-  # Make possible to use the same code for different logical devices when they
-  # are received through different physical devices.
-  return  if($a[0] ne "set" || $a[2] ne "IODev");
-  my $hash = $defs{$a[1]};
-  my $iohash = $defs{$a[3]};
-  my $cde = $hash->{CODE};
-  delete($modules{SD_WS_Maverick}{defptr}{$cde});
-  $modules{SD_WS_Maverick}{defptr}{$iohash->{NAME} . "." . $cde} = $hash;
+  my ($cmd,$name,$attr_name,$attr_value) = @_;
+  my $hash = $defs{$name};
+  if($cmd eq "set") {
+    if($attr_name eq "IODev") {
+      # Make possible to use the same code for different logical devices when they
+      # are received through different physical devices.
+      my $iohash = $defs{$attr_value};
+      my $cde = $hash->{CODE};
+      delete($modules{SD_WS_Maverick}{defptr}{$cde});
+      $modules{SD_WS_Maverick}{defptr}{$iohash->{NAME} . "." . $cde} = $hash;
+    }
+    elsif($attr_name eq "inaktivityInterval") {
+      if (!looks_like_number($attr_value) || int($attr_value) < 1 || int($attr_value) > 60) {
+          return "$name: Value \"$attr_value\" is not allowed.\n"
+                 ."inaktivityInterval must be a number between 1 and 60."
+      }
+  #    $hash->{inaktivityInterval} = int($attr_value);
+    }
+  }
+  #elsif($cmd eq "del") {
+  #  if($attr_name eq "inaktivityInterval") {
+  #    delete($hash->{inaktivityInterval});    
+  #  }
+  #}
   return undef;
 }
 
+sub SD_WS_Maverick_ClearTemp1($){
+  my ($hash) = @_;
+  my $name = $hash->{NAME};
+  Log3 $hash, 4, "$name ClearTemp1";
+  
+  my $temp1=-1;
+  my $temp2=ReadingsVal($name,"temp2",-1);
+  SD_WS_Maverick_updateReadings($hash, $temp1, $temp2,"ClearTemp1");
+}
+
+sub SD_WS_Maverick_ClearTemp2($){
+  my ($hash) = @_;
+  my $name = $hash->{NAME};
+  Log3 $hash, 4, "$name ClearTemp2";
+
+  my $temp1=ReadingsVal($name,"temp1",-1);  
+  my $temp2=-1;
+  SD_WS_Maverick_updateReadings($hash, $temp1, $temp2,"ClearTemp2");
+}
+
+sub SD_WS_Maverick_updateReadings($$$$){
+  my ($hash, $temp1, $temp2, $startup) = @_;
+  my $state = "";
+  if ($temp1 ne "") {
+     $state = "T1: $temp1 ";
+  }
+  if ($temp2 ne "") {
+     $state .= "T2: $temp2 ";
+  }
+  $state .= "S: $startup";
+  
+  readingsBeginUpdate($hash);
+  readingsBulkUpdate($hash, "state", $state);
+  readingsBulkUpdate($hash, "messageType", $startup);
+  
+  readingsBulkUpdate($hash, "temp1", $temp1)  if ($temp1 ne"");
+  readingsBulkUpdate($hash, "temp2", $temp2)  if ($temp2 ne"");
+
+  readingsEndUpdate($hash, 1); # Notify is done by Dispatch
+  return undef;
+}
 
 1;
 
@@ -235,37 +283,35 @@ sub SD_WS_Maverick_Attr(@)
   <br>
   <b>Known models:</b>
   <ul>
-    <li>Eurochon EAS800z</li>
-    <li>Technoline WS6750/TX70DTH</li>
+    <li>Maverick 732/733</li>
   </ul>
   <br>
-  New received device are add in fhem with autocreate.
+  New received device will be added in fhem with autocreate.
   <br><br>
 
   <a name="SD_WS_Maverick_Define"></a>
   <b>Define</b> 
   <ul>The received devices created automatically.<br>
-  The ID of the defice is the cannel or, if the longid attribute is specified, it is a combination of channel and some random generated bits at powering the sensor and the channel.<br>
-  If you want to use more sensors, than channels available, you can use the longid option to differentiate them.
+  Maverick generates a new ID on each time turned on. So it is not possible to link the hardware with the fhem-device. 
+  The consequence is, that only one Maverick could be defined in fhem.
   </ul>
   <br>
   <a name="SD_WS_Maverick Events"></a>
   <b>Generated readings:</b>
-  <br>Some devices may not support all readings, so they will not be presented<br>
   <ul>
-  	 <li>State (T: H:)</li>
-     <li>temperature (&deg;C)</li>
-     <li>humidity: (The humidity (1-100 if available)</li>
-     <li>battery: (low or ok)</li>
-     <li>channel: (The Channelnumber (number if)</li>
+  	 <li>State (T1: T2: S:)</li>
+     <li>temp1 (&deg;C)</li>
+     <li>temp2 (&deg;C)</li>
   </ul>
   <br>
   <b>Attributes</b>
   <ul>
+    <li>inaktivityInterval <minutes (1-60)><br>
+    The Interval to set temp1 and/or temp2 to -1 after defined minutes. Empty batteries or the malfunction of a tempertature-sensor could be recognized.<br> 
+    <code>default: 5</code></li>
     <li><a href="#do_not_notify">do_not_notify</a></li>
-    <li><a href="#ignore">ignore</a></li>
-    <li><a href="#model">model</a> ()</li>
-    <li><a href="#showtime">showtime</a></li>
+    <li><a href="#ignore">ignore </a></li>
+    <li><a href="#showtime">showtime (see FHEMWEB)</a></li>
     <li><a href="#readingFnAttributes">readingFnAttributes</a></li>
   </ul>
 
@@ -273,7 +319,7 @@ sub SD_WS_Maverick_Attr(@)
   <b>Set</b> <ul>N/A</ul><br>
 
   <a name="SD_WS_Maverick_Parse"></a>
-  <b>Set</b> <ul>N/A</ul><br>
+  <b>Parse</b> <ul>N/A</ul><br>
 
 </ul>
 
@@ -288,7 +334,7 @@ sub SD_WS_Maverick_Attr(@)
   <br>
   <b>Unterst&uumltzte Modelle:</b>
   <ul>
-    <li>Maverick</li>
+    <li>Maverick 732/733</li>
   </ul>
   <br>
   Neu empfangene Sensoren werden in FHEM per autocreate angelegt.
@@ -297,24 +343,26 @@ sub SD_WS_Maverick_Attr(@)
   <a name="SD_WS_Maverick_Define"></a>
   <b>Define</b> 
   <ul>Die empfangenen Sensoren werden automatisch angelegt.<br>
-  Die ID der angelegten Sensoren ist entweder der Kanal des Sensors, oder wenn das Attribut longid gesetzt ist, dann wird die ID aus dem Kanal und einer Reihe von Bits erzeugt, welche der Sensor beim Einschalten zuf&aumlllig vergibt.<br>
+  Da das Maverick bei jedem Start eine neue zufällige ID erzeugt kann das Gerät nicht mit dem fhem-device gekoppelt werden. 
+  Das bedeutet, dass es nicht möglich ist in fhem zwei Mavericks parallel zu betreiben.
   </ul>
   <br>
   <a name="SD_WS_Maverick Events"></a>
   <b>Generierte Readings:</b>
   <ul>
-  	 <li>State (T: H:)</li>
-     <li>temperature (&deg;C)</li>
-     <li>humidity: (Luftfeuchte (1-100)</li>
-     <li>battery: (low oder ok)</li>
-     <li>channel: (Der Sensor Kanal)</li>
+  	 <li>State (T1: T2: S:)</li>
+     <li>temp1 (&deg;C)</li>
+     <li>temp2 (&deg;C)</li>
   </ul>
   <br>
   <b>Attribute</b>
   <ul>
+    <li>inaktivityInterval <minutes (1-60)><br>
+    Das Interval nach dem temp1 und/oder temp2 auf -1 gesetzt werden, wenn keine Signale mehr empfangen werden.
+    Hilfreich zum erkennen einer leeren Batterie oder eines defekten Termperaturfühlers.<br> 
+    <code>default: 5</code></li>
     <li><a href="#do_not_notify">do_not_notify</a></li>
     <li><a href="#ignore">ignore</a></li>
-    <li><a href="#model">model</a> ()</li>
     <li><a href="#showtime">showtime</a></li>
     <li><a href="#readingFnAttributes">readingFnAttributes</a></li>
   </ul>
@@ -323,7 +371,7 @@ sub SD_WS_Maverick_Attr(@)
   <b>Set</b> <ul>N/A</ul><br>
 
   <a name="SD_WS_Maverick_Parse"></a>
-  <b>Set</b> <ul>N/A</ul><br>
+  <b>Parse</b> <ul>N/A</ul><br>
 
 </ul>
 
