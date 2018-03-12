@@ -12,7 +12,14 @@ use strict;
 use warnings;
 
 #use Data::Dumper;
-
+sub SD_WS_Maverick_Initialize($);
+sub SD_WS_Maverick_Define($$);
+sub SD_WS_Maverick_Undef($$);
+sub SD_WS_Maverick_Parse($$);
+sub SD_WS_Maverick_Attr(@);
+sub SD_WS_Maverick_ClearTempBBQ($);
+sub SD_WS_Maverick_ClearTempFood($);
+sub SD_WS_Maverick_updateReadings($$$$);
 
 sub
 SD_WS_Maverick_Initialize($)
@@ -106,9 +113,9 @@ SD_WS_Maverick_Parse($$)
 	my $startup = substr($rawData,0,2);   # 0x6A upon startup, 0x59 otherwise
 	my $temp_str1 = substr($rawData,2,5);
 	my $temp_str2 = substr($rawData,7,5);
-	my $unknown = substr($rawData,12);
+	my $checksum_str = substr($rawData,12);
   
-  Log3 $iohash, 4, "$name $model decoded protocolid: 47 sensor startup=$startup, temp-bbq=$temp_str1, temp-food=$temp_str2, unknown=$unknown";
+  Log3 $iohash, 4, "$name $model decoded protocolid: 47 sensor startup=$startup, temp-f=$temp_str1, temp-b=$temp_str2, checksum-s=$checksum_str";
   
   if ($startup ne '59' && $startup ne '6A') {
       Log3 $iohash, 4, "$name $model ERROR: wrong startup=$startup (must be 59 or 6A)";
@@ -117,42 +124,42 @@ SD_WS_Maverick_Parse($$)
   
   # Calculate temp from data
   my $c;
-  my $temp1=-532;
-  my $temp2=-532;
+  my $temp_food=-532;
+  my $temp_bbq=-532;
   
-  if ($temp_str1 ne '55555') {
+  if ($temp_str1 ne '55555') { # wenn 55555 könnte man auch disconnected setzen
     $temp_str1 =~ tr/569A/0123/;
     for ( my $i = 0; $i < length($temp_str1); $i++ ) { 
         $c = substr( $temp_str1, $i, 1);
-        $temp1 += $c*4**(4-$i);
+        $temp_food += $c*4**(4-$i);
     }
-    if ($temp1 <= 0 || $temp1 > 300) {
-        Log3 $iohash, 4, "$name $model ERROR: wrong temp-bbq=$temp1";
-        $temp1 = "";
+    if ($temp_food <= 0 || $temp_food > 300) {
+        Log3 $iohash, 4, "$name $model ERROR: wrong temp-food=$temp_food";
+        $temp_food = "";
     }
   } else {
-      $temp1 = "";
+      $temp_food = "";
   }
-  
-  if ($temp_str2 ne '55555') {
+    
+  if ($temp_str2 ne '55555') { # wenn 55555 könnte man auch disconnected setzen
     $temp_str2 =~ tr/569A/0123/;
     for ( my $i = 0; $i < length($temp_str2); $i++ ) { 
         $c = substr( $temp_str2, $i, 1);
-        $temp2 += $c*4**(4-$i);
+        $temp_bbq += $c*4**(4-$i);
     }
-    if ($temp2 <= 0 || $temp2 > 300) {
-        Log3 $iohash, 4, "$name $model ERROR: wrong temp-food=$temp2";
-        $temp2 = "";
+    if ($temp_bbq <= 0 || $temp_bbq > 300) {
+        Log3 $iohash, 4, "$name $model ERROR: wrong temp-bbq=$temp_bbq";
+        $temp_bbq = "";
     }
   } else {
-      $temp2 = "";
+      $temp_bbq = "";
   }
   
-  if ($temp1 eq "" && $temp2 eq "") {
+  if ($temp_bbq eq "" && $temp_food eq "") {
        return '';
   }
   
-  Log3 $iohash, 4, "$name $model decoded protocolid: temp-bbq=$temp1, temp-food=$temp2;";
+  Log3 $iohash, 4, "$name $model decoded protocolid: temp-food=$temp_food, temp-bbq=$temp_bbq;";
   
   #print Dumper($modules{SD_WS_Maverick}{defptr});
     
@@ -182,16 +189,26 @@ SD_WS_Maverick_Parse($$)
     $hash->{lastMSG} = $rawData;
     #$hash->{bitMSG} = $bitData2; 
     my $inaktivityInterval=int(AttrVal($name,"inaktivityInterval",5));
-    if ($temp1 ne "") {
+    if ($temp_bbq ne "") {
         RemoveInternalTimer($hash, 'SD_WS_Maverick_ClearTempBBQ');
         InternalTimer(time()+($inaktivityInterval*60), 'SD_WS_Maverick_ClearTempBBQ', $hash, 0);
     }
-    if ($temp2 ne "") {
+    if ($temp_food ne "") {
         RemoveInternalTimer($hash, 'SD_WS_Maverick_ClearTempFood');
         InternalTimer(time()+($inaktivityInterval*60), 'SD_WS_Maverick_ClearTempFood', $hash, 0);
     }
-
-    SD_WS_Maverick_updateReadings($hash, $temp1, $temp2, $startup);
+    $checksum_str =~ tr/569A/0123/;
+    my $checksum="";
+    #for ( my $i = 0; $i < length($checksum_str); $i++ ) { 
+    #    $c = substr( $checksum_str, $i, 1);
+    #    $checksum += $c*4**(4-$i);
+    #}
+    $checksum=$checksum_str;
+    $hash->{checksum}=$checksum;
+    
+  
+    Log3 $iohash, 5, "$name $model statistic: checksum=$checksum, t1=$temp_str1, temp-food=$temp_food, t2_$temp_str2, temp-bbq=$temp_bbq;";
+    SD_WS_Maverick_updateReadings($hash, $temp_food, $temp_bbq, $startup);
 
     return $name;
 
@@ -215,14 +232,8 @@ sub SD_WS_Maverick_Attr(@)
           return "$name: Value \"$attr_value\" is not allowed.\n"
                  ."inaktivityInterval must be a number between 1 and 60."
       }
-  #    $hash->{inaktivityInterval} = int($attr_value);
     }
   }
-  #elsif($cmd eq "del") {
-  #  if($attr_name eq "inaktivityInterval") {
-  #    delete($hash->{inaktivityInterval});    
-  #  }
-  #}
   return undef;
 }
 
@@ -231,9 +242,9 @@ sub SD_WS_Maverick_ClearTempBBQ($){
   my $name = $hash->{NAME};
   Log3 $hash, 4, "$name ClearTempBBQ";
   
-  my $temp1=-1;
-  my $temp2=ReadingsVal($name,"temp-food",-1);
-  SD_WS_Maverick_updateReadings($hash, $temp1, $temp2,"ClearTempBBQ");
+  my $temp_bbq=-1;
+  my $temp_food=ReadingsVal($name,"temp-food",-1);
+  SD_WS_Maverick_updateReadings($hash, $temp_food, $temp_bbq,"ClearTempBBQ");
 }
 
 sub SD_WS_Maverick_ClearTempFood($){
@@ -241,28 +252,29 @@ sub SD_WS_Maverick_ClearTempFood($){
   my $name = $hash->{NAME};
   Log3 $hash, 4, "$name ClearTempFood";
 
-  my $temp1=ReadingsVal($name,"temp-bbq",-1);  
-  my $temp2=-1;
-  SD_WS_Maverick_updateReadings($hash, $temp1, $temp2,"ClearTempFood");
+  my $temp_bbq=ReadingsVal($name,"temp-bbq",-1);  
+  my $temp_food=-1;
+  SD_WS_Maverick_updateReadings($hash, $temp_food, $temp_bbq,"ClearTempFood");
 }
 
 sub SD_WS_Maverick_updateReadings($$$$){
-  my ($hash, $temp1, $temp2, $startup) = @_;
+  my ($hash, $temp_food, $temp_bbq, $startup) = @_;
   my $state = "";
-  if ($temp1 ne "") {
-     $state = "BBQ: $temp1 ";
+  if ($temp_food ne "") {
+     $state = "Food: $temp_food ";
   }
-  if ($temp2 ne "") {
-     $state .= "Food: $temp2 ";
+  if ($temp_bbq ne "") {
+     $state .= "BBQ: $temp_bbq ";
   }
   #$state .= "S: $startup";
   
   readingsBeginUpdate($hash);
   readingsBulkUpdate($hash, "state", $state);
   readingsBulkUpdate($hash, "messageType", $startup);
+  readingsBulkUpdate($hash, "checksum", $hash->{checksum});
   
-  readingsBulkUpdate($hash, "temp-bbq", $temp1)  if ($temp1 ne"");
-  readingsBulkUpdate($hash, "temp-food", $temp2)  if ($temp2 ne"");
+  readingsBulkUpdate($hash, "temp-food", $temp_food)  if ($temp_food ne"");
+  readingsBulkUpdate($hash, "temp-bbq", $temp_bbq)  if ($temp_bbq ne"");
 
   readingsEndUpdate($hash, 1); # Notify is done by Dispatch
   return undef;
@@ -303,6 +315,7 @@ sub SD_WS_Maverick_updateReadings($$$$){
      <li>temp-bbq (&deg;C)</li>
      <li>temp-food (&deg;C)</li>
      <li>messageType (6A at startup or rsync, otherwise 59)</li>
+     <li>checksum (experimental)</li>
   </ul>
   <br>
   <b>Attributes</b>
@@ -355,6 +368,7 @@ sub SD_WS_Maverick_updateReadings($$$$){
      <li>temp-bbq (&deg;C)</li>
      <li>temp-food (&deg;C)</li>
      <li>messageType (6A bei Start oder rsync, sonst 59)</li>
+     <li>checksum (experimentell)</li>
   </ul>
   <br>
   <b>Attribute</b>
