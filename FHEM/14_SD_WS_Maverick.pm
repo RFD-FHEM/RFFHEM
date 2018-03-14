@@ -36,7 +36,7 @@ SD_WS_Maverick_Initialize($)
   $hash->{UndefFn}   = "SD_WS_Maverick_Undef";
   $hash->{ParseFn}   = "SD_WS_Maverick_Parse";
   $hash->{AttrFn}	   = "SD_WS_Maverick_Attr";
-  $hash->{AttrList}  = "IODev do_not_notify:1,0 ignore:0,1 showtime:1,0 inaktivityInterval " .
+  $hash->{AttrList}  = "IODev do_not_notify:1,0 ignore:0,1 showtime:1,0 inactivityinterval " .
                         "$readingFnAttributes ";
   $hash->{AutoCreate} =
         { "SD_WS_Maverick.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME",  autocreateThreshold => "2:180"} };
@@ -62,6 +62,13 @@ SD_WS_Maverick_Define($$)
   $hash->{STATE} = "Defined";
   
   my $name= $hash->{NAME};
+  # prüfen, ob eine neue Definition angelegt wird 
+	if($init_done && !defined($hash->{OLDDEF}))
+	{
+		# setzen von stateFormat
+	 	$attr{$name}{"stateFormat"} = "Food: {ReadingsVal(\$name,\"temp-food\",-1). BBQ: {ReadingsVal(\$name,\"temp-bbq\",-1)}";
+
+ 	}
   return undef;
 }
 
@@ -195,14 +202,14 @@ SD_WS_Maverick_Parse($$)
   #$hash->{bitMSG} = $bitData2; 
   
   # Die Temperaturen bei Inaktivität zurücksetzen lassen durch Timer ...
-  my $inaktivityInterval=int(AttrVal($name,"inaktivityInterval",6));
+  my $inactivityinterval=int(AttrVal($name,"inactivityinterval",360));
   if ($temp_bbq ne "") {
       RemoveInternalTimer($hash, 'SD_WS_Maverick_ClearTempBBQ');
-      InternalTimer(time()+($inaktivityInterval*60), 'SD_WS_Maverick_ClearTempBBQ', $hash, 0);
+      InternalTimer(time()+($inactivityinterval*60), 'SD_WS_Maverick_ClearTempBBQ', $hash, 0);
   }
   if ($temp_food ne "") {
       RemoveInternalTimer($hash, 'SD_WS_Maverick_ClearTempFood');
-      InternalTimer(time()+($inaktivityInterval*60), 'SD_WS_Maverick_ClearTempFood', $hash, 0);
+      InternalTimer(time()+($inactivityinterval*60), 'SD_WS_Maverick_ClearTempFood', $hash, 0);
   }
   
   # Checksum auswerten
@@ -236,10 +243,10 @@ sub SD_WS_Maverick_Attr(@)
       delete($modules{SD_WS_Maverick}{defptr}{$cde});
       $modules{SD_WS_Maverick}{defptr}{$iohash->{NAME} . "." . $cde} = $hash;
     }
-    elsif($attr_name eq "inaktivityInterval") {
-      if (!looks_like_number($attr_value) || int($attr_value) < 1 || int($attr_value) > 60) {
+    elsif($attr_name eq "inactivityinterval") {
+      if (!looks_like_number($attr_value) || int($attr_value) < 60 || int($attr_value) > 3600) {
           return "$name: Value \"$attr_value\" is not allowed.\n"
-                 ."inaktivityInterval must be a number between 1 and 60."
+                 ."inactivityinterval must be a number between 60 and 3600."
       }
     }
   }
@@ -268,18 +275,18 @@ sub SD_WS_Maverick_ClearTempFood($){
 
 sub SD_WS_Maverick_updateReadings($$$$){
   my ($hash, $temp_food, $temp_bbq, $startup) = @_;
-  my $state = "";
-  if ($temp_food ne "") {
-     $state = "Food: $temp_food ";
-  }
-  if ($temp_bbq ne "") {
-     $state .= "BBQ: $temp_bbq ";
-  }
+  #my $state = "";
+  #if ($temp_food ne "") {
+  #    $state = "Food: $temp_food ";
+  #}
+  #if ($temp_bbq ne "") {
+  #   $state .= "BBQ: $temp_bbq ";
+  #}
   #$state .= "S: $startup";
   
   readingsBeginUpdate($hash);
-  readingsBulkUpdate($hash, "state", $state);
-  readingsBulkUpdate($hash, "messageType", $startup);
+  #readingsBulkUpdate($hash, "state", $state);
+  readingsBulkUpdate($hash, "startup ", $startup);
   readingsBulkUpdate($hash, "checksum", $hash->{checksum});
   
   readingsBulkUpdate($hash, "temp-food", $temp_food)  if ($temp_food ne"");
@@ -298,7 +305,7 @@ sub SD_WS_Maverick_updateReadings($$$$){
 =begin html
 
 <a name="SD_WS_Maverick"></a>
-<h3>Weather Sensors protocol #47</h3>
+<h3>BBQ Sensors protocol #47</h3>
 <ul>
   The SD_WS_Maverick module interprets temperature sensor messages received by a Device like CUL, CUN, SIGNALduino etc.<br>
   <br>
@@ -307,14 +314,14 @@ sub SD_WS_Maverick_updateReadings($$$$){
     <li>Maverick 732/733</li>
   </ul>
   <br>
-  New received device will be added in fhem with autocreate.
+  New received device will be added in fhem with autocreate (if autocreate is enabled on global).
   <br><br>
 
   <a name="SD_WS_Maverick_Define"></a>
   <b>Define</b> 
   <ul>The received devices created automatically.<br>
   Maverick generates a new ID on each time turned on. So it is not possible to link the hardware with the fhem-device. 
-  The consequence is, that only one Maverick could be defined in fhem.
+  The consequence is, that only one Maverick can be defined in fhem.
   </ul>
   <br>
   <a name="SD_WS_Maverick Events"></a>
@@ -323,15 +330,15 @@ sub SD_WS_Maverick_updateReadings($$$$){
   	 <li>State (Food: BBQ: )</li>
      <li>temp-bbq (&deg;C)</li>
      <li>temp-food (&deg;C)</li>
-     <li>messageType (6A at startup or rsync, otherwise 59)</li>
+     <li>startup (6A at startup or rsync, otherwise 59)</li>
      <li>checksum (experimental)</li>
   </ul>
   <br>
   <b>Attributes</b>
   <ul>
-    <li>inaktivityInterval <minutes (1-60)><br>
-    The Interval to set temp-bbq and/or temp-food to -1 after defined minutes. Empty batteries or the malfunction of a tempertature-sensor could be recognized.<br> 
-    <code>default: 6</code></li>
+    <li>inactivityinterval <seconds (60-3600)><br>
+    The Interval to set temp-bbq and/or temp-food to -1 after defined minutes. This can help to detect empty batteries or the malfunction of a tempertature-sensor.<br> 
+    <code>default: 360</code></li>
     <li><a href="#do_not_notify">do_not_notify</a></li>
     <li><a href="#ignore">ignore </a></li>
     <li><a href="#showtime">showtime (see FHEMWEB)</a></li>
@@ -351,7 +358,7 @@ sub SD_WS_Maverick_updateReadings($$$$){
 =begin html_DE
 
 <a name="SD_WS_Maverick"></a>
-<h3>SD_WS_Maverick</h3>
+<h3>BBQ Sensors protocol #47</h3>
 <ul>
   Das SD_WS_Maverick Module verarbeitet von einem IO Geraet (CUL, CUN, SIGNALDuino, etc.) empfangene Nachrichten von Temperatur-Sensoren.<br>
   <br>
@@ -360,7 +367,7 @@ sub SD_WS_Maverick_updateReadings($$$$){
     <li>Maverick 732/733</li>
   </ul>
   <br>
-  Neu empfangene Sensoren werden in FHEM per autocreate angelegt.
+  Neu empfangene Sensoren werden in FHEM per autocreate angelegt (sofern autocreate in global aktiv ist).
   <br><br>
 
   <a name="SD_WS_Maverick_Define"></a>
@@ -376,16 +383,16 @@ sub SD_WS_Maverick_updateReadings($$$$){
   	 <li>State (Food: BBQ: )</li>
      <li>temp-bbq (&deg;C)</li>
      <li>temp-food (&deg;C)</li>
-     <li>messageType (6A bei Start oder rsync, sonst 59)</li>
+     <li>startup (6A bei Start oder rsync, sonst 59)</li>
      <li>checksum (experimentell)</li>
   </ul>
   <br>
   <b>Attribute</b>
   <ul>
-    <li>inaktivityInterval <minutes (1-60)><br>
+    <li>inactivityinterval <Sekunden (60-3600)><br>
     Das Interval nach dem temp-bbq und/oder temp-food auf -1 gesetzt werden, wenn keine Signale mehr empfangen werden.
     Hilfreich zum erkennen einer leeren Batterie oder eines defekten Termperaturf&uumlhlers.<br> 
-    <code>default: 6</code></li>
+    <code>default: 360</code></li>
     <li><a href="#do_not_notify">do_not_notify</a></li>
     <li><a href="#ignore">ignore</a></li>
     <li><a href="#showtime">showtime</a></li>
