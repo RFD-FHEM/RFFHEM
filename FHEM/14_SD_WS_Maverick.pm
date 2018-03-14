@@ -8,7 +8,7 @@
 # CHANGED
 ##############################################################################
 # Version 1.1
-#  - feature: 14_SD_WS_Maverick: rename Readings, fit to Maverick_RFXTRX now
+#  - changed: 14_SD_WS_Maverick: rename Readings, fit to Maverick_RFXTRX now
 
 package main;
 
