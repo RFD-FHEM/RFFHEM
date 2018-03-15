@@ -346,7 +346,7 @@ sub SD_WS_Maverick_updateReadings($){
     <li>Maverick 732/733</li>
   </ul>
   <br>
-  New received device will be added in fhem with autocreate (if autocreate is enabled on global).
+  New received device will be added in fhem with autocreate (if autocreate is globally enabled).
   <br><br>
 
   <a name="SD_WS_Maverick_Define"></a>
