@@ -352,7 +352,7 @@ sub SD_WS_Maverick_updateReadings($){
   <a name="SD_WS_Maverick_Define"></a>
   <b>Define</b> 
   <ul>The received devices created automatically.<br>
-  Maverick generates a new ID on each time turned on. So it is not possible to link the hardware with the fhem-device. 
+  Maverick generates a random ID each time turned on. So it is not possible to link the hardware with the fhem-device. 
   The consequence is, that only one Maverick can be defined in fhem.
   </ul>
   <br>
