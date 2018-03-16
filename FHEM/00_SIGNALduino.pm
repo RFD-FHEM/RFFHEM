@@ -4930,7 +4930,7 @@ sub	SIGNALduino_Hideki()
 
 			$hidekihex=$hidekihex.sprintf('%02X', oct("0b$byte"));
 		}
-		SIGNALduino_Log3 $name, 4, "$name: Hideki protocol converted to hex: $hidekihex with " .$message_length ." bits, messagestart $message_start";
+		
 		if ($invert == 0) {
 			SIGNALduino_Log3 $name, 4, "$name: receive Hideki protocol not inverted";
 		} else {

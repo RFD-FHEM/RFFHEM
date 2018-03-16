@@ -4,15 +4,17 @@
 15.02.02018
  00_SIGNALduino.pm 
       attribut zum Aktivieren aller Log Eintrage auch als Event
-      maverick dekodierung, clockrange und polarität korrigiert
 08.02.2018
  00_SIGNALduino.pm Anpassung FHT80 Sub - Parity
+12.12.2017
+ 14_SD_WS07.pm implementing correction factor temperature and humidity. logs revised
 05.12.2017
  00_SIGNALduino.pm commandref ins deutsche übersetzte und fs20 Demodulation verbessert
  14_Hideki.pm: commandref überarbeitet
  41_Oregon.pm: Deutsche commandref ergänzt
 02.12.2017
- 14_Hideki.pm implementing check againts second checksum to reduce wrong data
+ 14_Hideki.pm implementing Hideki SecondChecksum
+
 22.11.2017
  Fix max length (Proto 51) is to small (#79929 #msg719499)
 21.11.2017
