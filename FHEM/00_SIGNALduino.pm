@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 10488 2018-03-12 00:00:00Z v3.3.3-dev $
+# $Id: 00_SIGNALduino.pm 10488 2018-03-16 23:00:00Z v3.3.3-dev $
 #
 # v3.3.3 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -1418,6 +1418,7 @@ my %ProtocolListSIGNALduino  = (
 			developId	=> 'y',
 			one		=> [1.5,-1.5], # 600
 			zero		=> [1,-1], # 400
+			pause			=> [-25],
 			clockabs	=> 400,
 			format		=> 'twostate', # not used now
 			clientmodule	=> 'FHT',
@@ -1434,6 +1435,7 @@ my %ProtocolListSIGNALduino  = (
 			developId		=> 'y',
 			one			=> [1.5,-1.5], # 600
 			zero			=> [1,-1], # 400
+			pause			=> [-25],
 			clockabs		=> 400,
 			format			=> 'twostate', # not used now
 			clientmodule		=> 'FS20',
@@ -2041,7 +2043,7 @@ SIGNALduino_Set($@)
 		}
 		my @bits = split("", $data);
 	
-		my %bitconv = (1=>"one", 0=>"zero", 'D'=> "float");
+		my %bitconv = (1=>"one", 0=>"zero", 'D'=> "float", 'P'=> "pause");
 		my $SignalData="D=";
 		
 		$SignalData.=$signalHash{sync} if (exists($signalHash{sync}));
@@ -2545,15 +2547,22 @@ SIGNALduino_Write($$$)
   my ($hash,$fn,$msg) = @_;
   my $name = $hash->{NAME};
 
-  $fn="RAW" if $fn eq "";
-
-  SIGNALduino_Log3 $name, 5, "$name/write: adding to queue $fn $msg";
-
-  #SIGNALduino_SimpleWrite($hash, $bstring);
+  if ($fn eq "") {
+    $fn="RAW" ;
+  }
+  elsif($fn eq "04" && substr($msg,0,6) eq "010101") {   # FS20
+    $fn="sendMsg";
+    $msg = substr($msg,6);
+    $msg = SIGNALduino_PreparingSend_FS20_FHT(74, 6, $msg);
+  }
+  elsif($fn eq "04" && substr($msg,0,6) eq "020183") {   # FHT
+    $fn="sendMsg";
+    $msg = substr($msg,6,4) . substr($msg,10);     # was ist der Unterschied zu "$msg = substr($msg,6);" ?
+    $msg = SIGNALduino_PreparingSend_FS20_FHT(73, 12, $msg);
+  }
+  SIGNALduino_Log3 $name, 5, "$name/write: sending via Set $fn $msg";
   
   SIGNALduino_Set($hash,$name,$fn,$msg);
-  #SIGNALduino_AddSendQueue($hash,$bstring);
- 
 }
 
 
@@ -4245,6 +4254,35 @@ sub SIGNALduino_lengtnPrefix
 }
 
 
+sub SIGNALduino_PreparingSend_FS20_FHT($$$) {
+	my ($id, $sum, $msg) = @_;
+	my $temp = 0;
+	my $newmsg = "P$id#0000000000001";	  # 12 Bit Praeambel, 1 bit
+	
+	for (my $i=0; $i<length($msg); $i+=2) {
+		$temp = hex(substr($msg, $i, 2));
+		$sum += $temp;
+		$newmsg .= dec2binppari($temp);
+	}
+	
+	$newmsg .= dec2binppari($sum & 0xFF);   # Checksum		
+	$newmsg .= "0P#R3";            		# EOT, Pause, 3 Repeats    
+	
+	return $newmsg;
+}
+
+sub dec2binppari {      # dec to bin . parity
+	my $num = shift;
+	my $parity = 0;
+	my $nbin = sprintf("%08b",$num);
+	foreach my $c (split //, $nbin) {
+		$parity ^= $c;
+	}
+	my $result = $nbin . $parity;		# bin(num) . paritybit
+	return $result;
+}
+
+
 sub SIGNALduino_bit2Arctec
 {
 	my ($name, @bit_msg) = @_;
@@ -4323,6 +4361,11 @@ sub SIGNALduino_postDemo_FS20($@) {
    }
    splice(@bit_msg, 0, $datastart + 1);                             	# delete preamble + 1 bit
    $protolength = scalar @bit_msg;
+   SIGNALduino_Log3 $name, 5, "$name: FS20 - pos=$datastart length=$protolength";
+   if ($protolength == 46 || $protolength == 55) {
+      pop(@bit_msg);
+      $protolength--;
+   }
    if ($protolength == 45 || $protolength == 54) {          ### FS20 length 45 or 54
       for(my $b = 0; $b < $protolength - 9; $b += 9) {	                  # build sum over first 4 or 5 bytes
          $sum += oct( "0b".(join "", @bit_msg[$b .. $b + 7]));
@@ -4351,8 +4394,14 @@ sub SIGNALduino_postDemo_FS20($@) {
 			my $dmsg = SIGNALduino_b2h(join "", @bit_msg);
 			SIGNALduino_Log3 $name, 4, "$name: FS20 - remote control post demodulation $dmsg length $protolength";
 			return (1, @bit_msg);											## FHT80TF ok
-      } 
-   } 
+      }
+      else {
+         SIGNALduino_Log3 $name, 4, "$name: FS20 ERROR - wrong checksum";
+      }
+   }
+   else {
+      SIGNALduino_Log3 $name, 4, "$name: FS20 ERROR - wrong length=$protolength (must be 45 or 54)";
+   }
    return 0, undef;
 }
 
@@ -4372,6 +4421,11 @@ sub SIGNALduino_postDemo_FHT80($@) {
    }
    splice(@bit_msg, 0, $datastart + 1);                             	# delete preamble + 1 bit
    $protolength = scalar @bit_msg;
+   SIGNALduino_Log3 $name, 5, "$name: FHT80 - pos=$datastart length=$protolength";
+   if ($protolength == 55) {
+      pop(@bit_msg);
+      $protolength--;
+   }
    if ($protolength == 54) {                       		### FHT80 fixed length
       for($b = 0; $b < 45; $b += 9) {	                             # build sum over first 5 bytes
          $sum += oct( "0b".(join "", @bit_msg[$b .. $b + 7]));
@@ -4401,6 +4455,12 @@ sub SIGNALduino_postDemo_FHT80($@) {
          SIGNALduino_Log3 $name, 4, "$name: FHT80 - roomthermostat post demodulation $dmsg";
          return (1, @bit_msg);											## FHT80 ok
       }
+      else {
+         SIGNALduino_Log3 $name, 4, "$name: FHT80 ERROR - wrong checksum";
+      }
+   }
+   else {
+      SIGNALduino_Log3 $name, 4, "$name: FHT80 ERROR - wrong length=$protolength (must be 54)";
    }
    return 0, undef;
 }
