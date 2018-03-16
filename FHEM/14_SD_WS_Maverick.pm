@@ -4,6 +4,12 @@
 # The purpose of this module is to support Maverick sensors
 # Sidey79 & Cruizer 2016
 # Ralf9 2018
+#
+# CHANGED
+##############################################################################
+# Version 1.1
+#  - changed: 14_SD_WS_Maverick: rename Readings for Temperatures
+#  - feature: 14_SD_WS_Maverick: added Readings for Sensor-states
 
 package main;
 
@@ -12,7 +18,14 @@ use strict;
 use warnings;
 
 #use Data::Dumper;
-
+sub SD_WS_Maverick_Initialize($);
+sub SD_WS_Maverick_Define($$);
+sub SD_WS_Maverick_Undef($$);
+sub SD_WS_Maverick_Parse($$);
+sub SD_WS_Maverick_Attr(@);
+sub SD_WS_Maverick_SetSensor1Inaktiv($);
+sub SD_WS_Maverick_SetSensor2Inaktiv($);
+sub SD_WS_Maverick_updateReadings($);
 
 sub
 SD_WS_Maverick_Initialize($)
@@ -23,8 +36,8 @@ SD_WS_Maverick_Initialize($)
   $hash->{DefFn}     = "SD_WS_Maverick_Define";
   $hash->{UndefFn}   = "SD_WS_Maverick_Undef";
   $hash->{ParseFn}   = "SD_WS_Maverick_Parse";
-  $hash->{AttrFn}	 = "SD_WS_Maverick_Attr";
-  $hash->{AttrList}  = "IODev do_not_notify:1,0 ignore:0,1 showtime:1,0 inaktivityInterval " .
+  $hash->{AttrFn}	   = "SD_WS_Maverick_Attr";
+  $hash->{AttrList}  = "IODev do_not_notify:1,0 ignore:0,1 showtime:1,0 inactivityinterval " .
                         "$readingFnAttributes ";
   $hash->{AutoCreate} =
         { "SD_WS_Maverick.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME",  autocreateThreshold => "2:180"} };
@@ -50,6 +63,35 @@ SD_WS_Maverick_Define($$)
   $hash->{STATE} = "Defined";
   
   my $name= $hash->{NAME};
+  # prüfen, ob eine neue Definition angelegt wird 
+	if($init_done && !defined($hash->{OLDDEF}))
+	{
+		# setzen von stateFormat
+	 	$attr{$name}{"stateFormat"} = '{
+  my $s1=ReadingsVal($name,"Sensor-1-food_state",-1);
+  my $s2=ReadingsVal($name,"Sensor-2-bbq_state",-1);
+  if ($s1 ne "connected" && $s1 eq $s2 ) {
+    return $s1;
+  }else{
+    my $state="Food: ";
+    my $temp_food=ReadingsVal($name,"temp-food","");
+    my $temp_bbq=ReadingsVal($name,"temp-bbq","");
+    if($s1 eq "connected"){
+        $state .=$temp_food;
+    }else{
+        $state .=$s1;
+    }
+    $state .=" BBQ: ";
+    if($s2 eq "connected"){
+        $state .=$temp_bbq;
+    }else{
+        $state .=$s2;
+    }
+    return $state;
+  }
+}';
+
+ 	}
   return undef;
 }
 
@@ -103,56 +145,69 @@ SD_WS_Maverick_Parse($$)
   # 59 9599A 95999 6699A969
   # 
 
-	my $startup = substr($rawData,0,2);   # 0x6A upon startup, 0x59 otherwise
+	my $messageType = substr($rawData,0,2);   # 0x6A upon startup, 0x59 otherwise
 	my $temp_str1 = substr($rawData,2,5);
 	my $temp_str2 = substr($rawData,7,5);
-	my $unknown = substr($rawData,12);
+	my $checksum_str = substr($rawData,12);
   
-  Log3 $iohash, 4, "$name $model decoded protocolid: 47 sensor startup=$startup, temp-bbq=$temp_str1, temp-food=$temp_str2, unknown=$unknown";
+  Log3 $iohash, 4, "$name $model decoded protocolid: 47 sensor messageType=$messageType, temp-f=$temp_str1, temp-b=$temp_str2, checksum-s=$checksum_str";
   
-  if ($startup ne '59' && $startup ne '6A') {
-      Log3 $iohash, 4, "$name $model ERROR: wrong startup=$startup (must be 59 or 6A)";
-      return '';
+  if ($messageType eq '59'){
+    $messageType="normal";
+  }elsif ($messageType eq '6A') {
+    $messageType="sync";  
+  }else{
+    Log3 $iohash, 4, "$name $model ERROR: wrong messageType=$messageType (must be 59 or 6A)";
+    return '';
   }
   
   # Calculate temp from data
   my $c;
-  my $temp1=-532;
-  my $temp2=-532;
+  my $temp_food=-532;
+  my $temp_bbq=-532;
+  my $sensor_1_state="unknown";
+  my $sensor_2_state="unknown";;
   
   if ($temp_str1 ne '55555') {
     $temp_str1 =~ tr/569A/0123/;
     for ( my $i = 0; $i < length($temp_str1); $i++ ) { 
-        $c = substr( $temp_str1, $i, 1);
-        $temp1 += $c*4**(4-$i);
+      $c = substr( $temp_str1, $i, 1);
+      $temp_food += $c*4**(4-$i);
     }
-    if ($temp1 <= 0 || $temp1 > 300) {
-        Log3 $iohash, 4, "$name $model ERROR: wrong temp-bbq=$temp1";
-        $temp1 = "";
+    if ($temp_food <= 0 || $temp_food > 300) {
+      Log3 $iohash, 4, "$name $model ERROR: wrong temp-food=$temp_food";
+      $temp_food = "";
+    }else{
+      $sensor_1_state="connected"; 
     }
   } else {
-      $temp1 = "";
+    $sensor_1_state="disconnected"  if ($temp_str1 eq '55555');
+    $temp_food = "";
   }
+    
   
-  if ($temp_str2 ne '55555') {
+  if ($temp_str2 ne '55555') { 
     $temp_str2 =~ tr/569A/0123/;
     for ( my $i = 0; $i < length($temp_str2); $i++ ) { 
-        $c = substr( $temp_str2, $i, 1);
-        $temp2 += $c*4**(4-$i);
+      $c = substr( $temp_str2, $i, 1);
+      $temp_bbq += $c*4**(4-$i);
     }
-    if ($temp2 <= 0 || $temp2 > 300) {
-        Log3 $iohash, 4, "$name $model ERROR: wrong temp-food=$temp2";
-        $temp2 = "";
+    if ($temp_bbq <= 0 || $temp_bbq > 300) {
+      Log3 $iohash, 4, "$name $model ERROR: wrong temp-bbq=$temp_bbq";
+      $temp_bbq = "";
+    }else{
+      $sensor_2_state="connected"; 
     }
   } else {
-      $temp2 = "";
+    $sensor_2_state="disconnected"  if ($temp_str2 eq '55555');
+    $temp_bbq = "";
   }
   
-  if ($temp1 eq "" && $temp2 eq "") {
-       return '';
-  }
+  #if ($temp_bbq eq "" && $temp_food eq "") {
+  #  return '';
+  #}
   
-  Log3 $iohash, 4, "$name $model decoded protocolid: temp-bbq=$temp1, temp-food=$temp2;";
+  Log3 $iohash, 4, "$name $model decoded protocolid: temp-food=$temp_food, temp-bbq=$temp_bbq;";
   
   #print Dumper($modules{SD_WS_Maverick}{defptr});
     
@@ -160,40 +215,59 @@ SD_WS_Maverick_Parse($$)
   $def = $modules{SD_WS_Maverick}{defptr}{$model} if(!$def);
 
   if(!$def) {
-      Log3 $iohash, 1, "$name SD_WS_Maverick: UNDEFINED sensor $model";
-      return "UNDEFINED $model SD_WS_Maverick $model";
+    Log3 $iohash, 1, "$name SD_WS_Maverick: UNDEFINED sensor $model";
+    return "UNDEFINED $model SD_WS_Maverick $model";
   }
-      #Log3 $iohash, 3, 'SD_WS_Maverick: ' . $def->{NAME} . ' ' . $id;
+  #Log3 $iohash, 3, 'SD_WS_Maverick: ' . $def->{NAME} . ' ' . $id;
 
-    my $hash = $def;
-    $name = $hash->{NAME};
-    Log3 $name, 4, "SD_WS_Maverick: $name ($rawData)";  
+  my $hash = $def;
+  $name = $hash->{NAME};
+  Log3 $name, 4, "SD_WS_Maverick: $name ($rawData)";  
 
-    if (!defined(AttrVal($hash->{NAME},"event-min-interval",undef)))
-    {
-        my $minsecs = AttrVal($iohash->{NAME},'minsecs',0);
-        if($hash->{lastReceive} && (time() - $hash->{lastReceive} < $minsecs)) {
-            Log3 $hash, 4, "$model Dropped due to short time. minsecs=$minsecs";
-            return "";
-        }
+  if (!defined(AttrVal($hash->{NAME},"event-min-interval",undef)))
+  {
+    my $minsecs = AttrVal($iohash->{NAME},'minsecs',0);
+    if($hash->{lastReceive} && (time() - $hash->{lastReceive} < $minsecs)) {
+      Log3 $hash, 4, "$model Dropped due to short time. minsecs=$minsecs";
+      return "";
     }
+  }
 
-    $hash->{lastReceive} = time();
-    $hash->{lastMSG} = $rawData;
-    #$hash->{bitMSG} = $bitData2; 
-    my $inaktivityInterval=int(AttrVal($name,"inaktivityInterval",5));
-    if ($temp1 ne "") {
-        RemoveInternalTimer($hash, 'SD_WS_Maverick_ClearTempBBQ');
-        InternalTimer(time()+($inaktivityInterval*60), 'SD_WS_Maverick_ClearTempBBQ', $hash, 0);
-    }
-    if ($temp2 ne "") {
-        RemoveInternalTimer($hash, 'SD_WS_Maverick_ClearTempFood');
-        InternalTimer(time()+($inaktivityInterval*60), 'SD_WS_Maverick_ClearTempFood', $hash, 0);
-    }
+  $hash->{lastReceive} = time();
+  $hash->{lastMSG} = $rawData;
+  #$hash->{bitMSG} = $bitData2; 
+  
+  # Den SensorState bei Inaktivität zurücksetzen lassen durch Timer 
+  my $inactivityinterval=int(AttrVal($name,"inactivityinterval",360));
+  if ($sensor_1_state ne "unknown") {
+    $hash->{sensor_1_state}=$sensor_1_state;
+    RemoveInternalTimer($hash, 'SD_WS_Maverick_SetSensor1Inaktiv');
+    InternalTimer(time()+($inactivityinterval), 'SD_WS_Maverick_SetSensor1Inaktiv', $hash, 0);
+  }
+  if ( $sensor_2_state ne "unknown") {
+    $hash->{sensor_2_state}=$sensor_2_state;
+    RemoveInternalTimer($hash, 'SD_WS_Maverick_SetSensor2Inaktiv');
+    InternalTimer(time()+($inactivityinterval), 'SD_WS_Maverick_SetSensor2Inaktiv', $hash, 0);
+  }
+  
+  # Checksum auswerten
+  $checksum_str =~ tr/569A/0123/;
+  my $checksum="";
+  $checksum=$checksum_str; 
+  # TODO: Die eigentliche Checksum errechnen. Diese ändert sich bei jedem Temperaturwechsel
+  # TODO: Evtl. ist in den checksum-bits auch noch eine Info zur Batterie enthalten
+  #       ggf. ist es möglich die checksum als ID zu verwenden und so mehrere Mavericks in fhem einbinden zu können.
+  $hash->{checksum}=$checksum;
+  $hash->{temp_food}=$temp_food if ($temp_food ne"");
+  $hash->{temp_bbq}=$temp_bbq if ($temp_bbq ne"");
+  $hash->{messageType}=$messageType;
+  
+  # TODO: Logging kann entfernt werden, wenn checksum entschlüsselt ist. Wird zur Analyse verwendet.
+  Log3 $hash, 4, "$name statistic: checksum=$checksum, t1=$temp_str1, temp-food=$temp_food, t2_$temp_str2, temp-bbq=$temp_bbq;";
+  
+  SD_WS_Maverick_updateReadings($hash);
 
-    SD_WS_Maverick_updateReadings($hash, $temp1, $temp2, $startup);
-
-    return $name;
+  return $name;
 
 }
 
@@ -210,60 +284,46 @@ sub SD_WS_Maverick_Attr(@)
       delete($modules{SD_WS_Maverick}{defptr}{$cde});
       $modules{SD_WS_Maverick}{defptr}{$iohash->{NAME} . "." . $cde} = $hash;
     }
-    elsif($attr_name eq "inaktivityInterval") {
-      if (!looks_like_number($attr_value) || int($attr_value) < 1 || int($attr_value) > 60) {
+    elsif($attr_name eq "inactivityinterval") {
+      if (!looks_like_number($attr_value) || int($attr_value) < 60 || int($attr_value) > 3600) {
           return "$name: Value \"$attr_value\" is not allowed.\n"
-                 ."inaktivityInterval must be a number between 1 and 60."
+                 ."inactivityinterval must be a number between 60 and 3600."
       }
-  #    $hash->{inaktivityInterval} = int($attr_value);
     }
   }
-  #elsif($cmd eq "del") {
-  #  if($attr_name eq "inaktivityInterval") {
-  #    delete($hash->{inaktivityInterval});    
-  #  }
-  #}
   return undef;
 }
 
-sub SD_WS_Maverick_ClearTempBBQ($){
+sub SD_WS_Maverick_SetSensor1Inaktiv($){
   my ($hash) = @_;
   my $name = $hash->{NAME};
-  Log3 $hash, 4, "$name ClearTempBBQ";
+  Log3 $hash, 5, "$name SD_WS_Maverick_SetSensor1Inaktiv";
   
-  my $temp1=-1;
-  my $temp2=ReadingsVal($name,"temp-food",-1);
-  SD_WS_Maverick_updateReadings($hash, $temp1, $temp2,"ClearTempBBQ");
+  $hash->{sensor_1_state}="inactiv";
+  SD_WS_Maverick_updateReadings($hash);
 }
 
-sub SD_WS_Maverick_ClearTempFood($){
+sub SD_WS_Maverick_SetSensor2Inaktiv($){
   my ($hash) = @_;
   my $name = $hash->{NAME};
-  Log3 $hash, 4, "$name ClearTempFood";
+  Log3 $hash, 5, "$name SD_WS_Maverick_SetSensor2Inaktiv";
 
-  my $temp1=ReadingsVal($name,"temp-bbq",-1);  
-  my $temp2=-1;
-  SD_WS_Maverick_updateReadings($hash, $temp1, $temp2,"ClearTempFood");
+  $hash->{sensor_2_state}="inactiv";
+  SD_WS_Maverick_updateReadings($hash);
 }
 
-sub SD_WS_Maverick_updateReadings($$$$){
-  my ($hash, $temp1, $temp2, $startup) = @_;
-  my $state = "";
-  if ($temp1 ne "") {
-     $state = "BBQ: $temp1 ";
-  }
-  if ($temp2 ne "") {
-     $state .= "Food: $temp2 ";
-  }
-  #$state .= "S: $startup";
+sub SD_WS_Maverick_updateReadings($){
+  my ($hash) = @_;
+  my $name = $hash->{NAME};
+  Log3 $hash, 5, "$name SD_WS_Maverick_updateReadings";
   
   readingsBeginUpdate($hash);
-  readingsBulkUpdate($hash, "state", $state);
-  readingsBulkUpdate($hash, "messageType", $startup);
-  
-  readingsBulkUpdate($hash, "temp-bbq", $temp1)  if ($temp1 ne"");
-  readingsBulkUpdate($hash, "temp-food", $temp2)  if ($temp2 ne"");
-
+    readingsBulkUpdate($hash, "temp-food", $hash->{temp_food});
+    readingsBulkUpdate($hash, "temp-bbq", $hash->{temp_bbq});
+    readingsBulkUpdate($hash, "messageType ", $hash->{messageType});
+    readingsBulkUpdate($hash, "checksum", $hash->{checksum});
+    readingsBulkUpdate($hash, "Sensor-1-food_state", $hash->{sensor_1_state});
+    readingsBulkUpdate($hash, "Sensor-2-bbq_state", $hash->{sensor_2_state});
   readingsEndUpdate($hash, 1); # Notify is done by Dispatch
   return undef;
 }
@@ -277,7 +337,7 @@ sub SD_WS_Maverick_updateReadings($$$$){
 =begin html
 
 <a name="SD_WS_Maverick"></a>
-<h3>Wether Sensors protocol #7</h3>
+<h3>BBQ Sensors protocol #47</h3>
 <ul>
   The SD_WS_Maverick module interprets temperature sensor messages received by a Device like CUL, CUN, SIGNALduino etc.<br>
   <br>
@@ -286,30 +346,33 @@ sub SD_WS_Maverick_updateReadings($$$$){
     <li>Maverick 732/733</li>
   </ul>
   <br>
-  New received device will be added in fhem with autocreate.
+  New received device will be added in fhem with autocreate (if autocreate is globally enabled).
   <br><br>
 
   <a name="SD_WS_Maverick_Define"></a>
   <b>Define</b> 
   <ul>The received devices created automatically.<br>
-  Maverick generates a new ID on each time turned on. So it is not possible to link the hardware with the fhem-device. 
-  The consequence is, that only one Maverick could be defined in fhem.
+  Maverick generates a random ID each time turned on. So it is not possible to link the hardware with the fhem-device. 
+  The consequence is, that only one Maverick can be defined in fhem.
   </ul>
   <br>
   <a name="SD_WS_Maverick Events"></a>
   <b>Generated readings:</b>
   <ul>
-  	 <li>State (BBQ: Food: )</li>
-     <li>temp-bbq (&deg;C)</li>
+  	 <li>State (Food: BBQ: )</li>
      <li>temp-food (&deg;C)</li>
-     <li>messageType (6A at startup or rsync, otherwise 59)</li>
+     <li>temp-bbq (&deg;C)</li>
+     <li>Sensor-1-food_state (connected, disconnected or inactiv)</li>
+     <li>Sensor-2-bbq_state (connected, disconnected or inactiv)</li>
+     <li>messageType (sync at startup or resync, otherwise normal)</li>
+     <li>checksum (experimental)</li>
   </ul>
   <br>
   <b>Attributes</b>
   <ul>
-    <li>inaktivityInterval <minutes (1-60)><br>
-    The Interval to set temp-bbq and/or temp-food to -1 after defined minutes. Empty batteries or the malfunction of a tempertature-sensor could be recognized.<br> 
-    <code>default: 5</code></li>
+    <li>inactivityinterval <seconds (60-3600)><br>
+    The Interval to set Sensor-1-food_state and/or Sensor-2-bbq_state to inactiv after defined minutes. This can help to detect empty batteries or the malfunction of a tempertature-sensor.<br> 
+    <code>default: 360</code></li>
     <li><a href="#do_not_notify">do_not_notify</a></li>
     <li><a href="#ignore">ignore </a></li>
     <li><a href="#showtime">showtime (see FHEMWEB)</a></li>
@@ -329,7 +392,7 @@ sub SD_WS_Maverick_updateReadings($$$$){
 =begin html_DE
 
 <a name="SD_WS_Maverick"></a>
-<h3>SD_WS_Maverick</h3>
+<h3>BBQ Sensors protocol #47</h3>
 <ul>
   Das SD_WS_Maverick Module verarbeitet von einem IO Geraet (CUL, CUN, SIGNALDuino, etc.) empfangene Nachrichten von Temperatur-Sensoren.<br>
   <br>
@@ -338,31 +401,34 @@ sub SD_WS_Maverick_updateReadings($$$$){
     <li>Maverick 732/733</li>
   </ul>
   <br>
-  Neu empfangene Sensoren werden in FHEM per autocreate angelegt.
+  Neu empfangene Sensoren werden in FHEM per autocreate angelegt (sofern autocreate in global aktiv ist).
   <br><br>
 
   <a name="SD_WS_Maverick_Define"></a>
   <b>Define</b> 
   <ul>Die empfangenen Sensoren werden automatisch angelegt.<br>
-  Da das Maverick bei jedem Start eine neue zufällige ID erzeugt kann das Gerät nicht mit dem fhem-device gekoppelt werden. 
-  Das bedeutet, dass es nicht möglich ist in fhem zwei Mavericks parallel zu betreiben.
+  Da das Maverick bei jedem Start eine neue zufällige ID erzeugt kann das Ger&aumlt nicht mit dem fhem-device gekoppelt werden. 
+  Das bedeutet, dass es nicht m&oumlglich ist in fhem zwei Mavericks parallel zu betreiben.
   </ul>
   <br>
   <a name="SD_WS_Maverick Events"></a>
   <b>Generierte Readings:</b>
   <ul>
-  	 <li>State (BBQ: Food: )</li>
-     <li>temp-bbq (&deg;C)</li>
+  	 <li>State (Food: BBQ: )</li>
      <li>temp-food (&deg;C)</li>
-     <li>messageType (6A bei Start oder rsync, sonst 59)</li>
+     <li>temp-bbq (&deg;C)</li>
+     <li>Sensor-1-food_state (connected, disconnected oder inactiv)</li>
+     <li>Sensor-2-bbq_state (connected, disconnected oder inactiv)</li>
+     <li>messageType (sync bei Start oder resync, sonst normal)</li>
+     <li>checksum (experimentell)</li>
   </ul>
   <br>
   <b>Attribute</b>
   <ul>
-    <li>inaktivityInterval <minutes (1-60)><br>
-    Das Interval nach dem temp-bbq und/oder temp-food auf -1 gesetzt werden, wenn keine Signale mehr empfangen werden.
-    Hilfreich zum erkennen einer leeren Batterie oder eines defekten Termperaturfühlers.<br> 
-    <code>default: 5</code></li>
+    <li>inactivityinterval <Sekunden (60-3600)><br>
+    Das Interval nach dem Sensor-1-food_state und/oder Sensor-2-bbq_state auf inactiv gesetzt werden, wenn keine Signale mehr empfangen werden.
+    Hilfreich zum erkennen einer leeren Batterie oder eines defekten Termperaturf&uumlhlers.<br> 
+    <code>default: 360</code></li>
     <li><a href="#do_not_notify">do_not_notify</a></li>
     <li><a href="#ignore">ignore</a></li>
     <li><a href="#showtime">showtime</a></li>
