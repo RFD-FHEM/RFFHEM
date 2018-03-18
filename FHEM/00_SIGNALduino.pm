@@ -4396,11 +4396,11 @@ sub SIGNALduino_postDemo_FS20($@) {
 			return (1, @bit_msg);											## FHT80TF ok
       }
       else {
-         SIGNALduino_Log3 $name, 4, "$name: FS20 ERROR - wrong checksum";
+         SIGNALduino_Log3 $name, 5, "$name: FS20 ERROR - wrong checksum";
       }
    }
    else {
-      SIGNALduino_Log3 $name, 4, "$name: FS20 ERROR - wrong length=$protolength (must be 45 or 54)";
+      SIGNALduino_Log3 $name, 5, "$name: FS20 ERROR - wrong length=$protolength (must be 45 or 54)";
    }
    return 0, undef;
 }
@@ -4456,11 +4456,11 @@ sub SIGNALduino_postDemo_FHT80($@) {
          return (1, @bit_msg);											## FHT80 ok
       }
       else {
-         SIGNALduino_Log3 $name, 4, "$name: FHT80 ERROR - wrong checksum";
+         SIGNALduino_Log3 $name, 5, "$name: FHT80 ERROR - wrong checksum";
       }
    }
    else {
-      SIGNALduino_Log3 $name, 4, "$name: FHT80 ERROR - wrong length=$protolength (must be 54)";
+      SIGNALduino_Log3 $name, 5, "$name: FHT80 ERROR - wrong length=$protolength (must be 54)";
    }
    return 0, undef;
 }
