@@ -8,7 +8,7 @@
 # The purpos is to use it as addition to the SIGNALduino which runs on an arduno nano or arduino uno.
 # It routes Messages serval Modules which are already integrated in FHEM. But there are also modules which comes with it.
 # N. Butzek, S. Butzek, 2014-2015
-# S.Butzek,Ralf9 2016-2017
+# S.Butzek,Ralf9 2016-2018
 
 package main;
 
@@ -19,6 +19,7 @@ use Data::Dumper qw(Dumper);
 use Scalar::Util qw(looks_like_number);
 no warnings 'portable';
 
+#$| = 1;		#Puffern abschalten, Hilfreich für PEARL WARNINGS Search
 #use POSIX qw( floor);  # can be removed
 #use Math::Round qw();
 
@@ -984,14 +985,15 @@ my %ProtocolListSIGNALduino  = (
 		{
             name			=> 'Maverick protocol',	
 			id          	=> '47',
-			clockrange     	=> [220,260],                   
+			clockrange     	=> [180,260],                   
 			format 			=> 'manchester',	
 			preamble		=> 'P47#',						# prepend to converted message	
-			clientmodule    => 'SD_WS_Maverick',   						# not used now
-			modulematch     => '^P47#.*',  					# not used now
+			clientmodule    => 'SD_WS_Maverick',   					
+			modulematch     => '^P47#[569A]{12}.*',  					
 			length_min      => '100',
 			length_max      => '108',
-			method          => \&SIGNALduino_Maverick		# Call to process this message
+			method          => \&SIGNALduino_Maverick,		# Call to process this message
+			#polarity		=> 'invert'
 		}, 			
      "48"    => 			## Joker Dostmann TFA
 		{
@@ -1628,6 +1630,7 @@ sub SIGNALduino_Connect($$)
 
 	# damit wird die err-msg nur einmal ausgegeben
 	if (!defined($hash->{disConnFlag}) && $err) {
+		SIGNALduino_Log3($hash, 3, "SIGNALduino $hash->{NAME}: ${err}");
 		Log3($hash, 3, "SIGNALduino $hash->{NAME}: ${err}");
 		$hash->{disConnFlag} = 1;
 	}
