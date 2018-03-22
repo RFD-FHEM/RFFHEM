@@ -92,8 +92,11 @@ SD_WS07_Parse($$)
   my ($iohash, $msg) = @_;
   #my $rawData = substr($msg, 2);
   my $name = $iohash->{NAME};
-  my (undef ,$rawData) = split("#",$msg);
-
+  my (undef ,$rawData, $rssi) = split("#",$msg);	
+  if (defined($rssi)) {	
+	$rssi = hex(substr($rssi,1));	
+	$rssi = ($rssi>=128 ? (($rssi-256)/2-74) : ($rssi/2-74));	
+  }
   #$protocol=~ s/^P(\d+)/$1/; # extract protocol
 
   my $model = "SD_WS07";
