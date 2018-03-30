@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 10488 2018-03-18 22:00:00Z v3.3.3-dev $
+# $Id: 00_SIGNALduino.pm 10488 2018-03-30 22:00:00Z v3.3.3-dev $
 #
 # v3.3.3 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -26,7 +26,7 @@ no warnings 'portable';
 
 
 use constant {
-	SDUINO_VERSION            => "v3.3.3-dev_18.03.",
+	SDUINO_VERSION            => "v3.3.3-dev_30.03.",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -4362,7 +4362,7 @@ sub SIGNALduino_postDemo_FS20($@) {
    splice(@bit_msg, 0, $datastart + 1);                             	# delete preamble + 1 bit
    $protolength = scalar @bit_msg;
    SIGNALduino_Log3 $name, 5, "$name: FS20 - pos=$datastart length=$protolength";
-   if ($protolength == 46 || $protolength == 55) {
+   if ($protolength == 46 || $protolength == 55) {			# If it 1 bit too long, then it will be removed (EOT-Bit)
       pop(@bit_msg);
       $protolength--;
    }
@@ -4371,6 +4371,10 @@ sub SIGNALduino_postDemo_FS20($@) {
          $sum += oct( "0b".(join "", @bit_msg[$b .. $b + 7]));
       }
       my $checksum = oct( "0b".(join "", @bit_msg[$protolength - 9 .. $protolength - 2]));   # Checksum Byte 5 or 6
+      if ((($sum + 6) & 0xFF) == $checksum) {			# Message from FHT80 roothermostat
+         SIGNALduino_Log3 $name, 5, "$name: FS20 - Detection aborted, checksum matches FHT code";
+         return 0, undef;
+      }
       if (($sum & 0xFF) == $checksum) {				            ## FH20 remote control
 			for(my $b = 0; $b < $protolength; $b += 9) {	            # check parity over 5 or 6 bytes
 				my $parity = 0;					                                 # Parity even
@@ -4396,7 +4400,7 @@ sub SIGNALduino_postDemo_FS20($@) {
 			return (1, @bit_msg);											## FHT80TF ok
       }
       else {
-         SIGNALduino_Log3 $name, 5, "$name: FS20 ERROR - wrong checksum";
+         SIGNALduino_Log3 $name, 4, "$name: FS20 ERROR - wrong checksum";
       }
    }
    else {
@@ -4422,7 +4426,7 @@ sub SIGNALduino_postDemo_FHT80($@) {
    splice(@bit_msg, 0, $datastart + 1);                             	# delete preamble + 1 bit
    $protolength = scalar @bit_msg;
    SIGNALduino_Log3 $name, 5, "$name: FHT80 - pos=$datastart length=$protolength";
-   if ($protolength == 55) {
+   if ($protolength == 55) {						# If it 1 bit too long, then it will be removed (EOT-Bit)
       pop(@bit_msg);
       $protolength--;
    }
@@ -4431,6 +4435,10 @@ sub SIGNALduino_postDemo_FHT80($@) {
          $sum += oct( "0b".(join "", @bit_msg[$b .. $b + 7]));
       }
       my $checksum = oct( "0b".(join "", @bit_msg[45 .. 52]));          # Checksum Byte 6
+      if ((($sum - 6) & 0xFF) == $checksum) {		## Message from FS20 remote control
+         SIGNALduino_Log3 $name, 5, "$name: FHT80 - Detection aborted, checksum matches FS20 code";
+         return 0, undef;
+      }
       if (($sum & 0xFF) == $checksum) {								## FHT80 Raumthermostat
          for($b = 0; $b < 54; $b += 9) {	                              # check parity over 6 byte
             my $parity = 0;					                              # Parity even
@@ -4456,7 +4464,7 @@ sub SIGNALduino_postDemo_FHT80($@) {
          return (1, @bit_msg);											## FHT80 ok
       }
       else {
-         SIGNALduino_Log3 $name, 5, "$name: FHT80 ERROR - wrong checksum";
+         SIGNALduino_Log3 $name, 4, "$name: FHT80 ERROR - wrong checksum";
       }
    }
    else {
