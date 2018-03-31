@@ -4229,8 +4229,12 @@ sub SIGNALduino_callsub
 		#SIGNALduino_Log3 $name, 5, "$name: value bevore $funcname: @args";
 		
 		my ($rcode, @returnvalues) = $method->($name, @args) ;	
-			
-	    SIGNALduino_Log3 $name, 5, "$name: rcode=$rcode, modified value after $funcname: @returnvalues";
+		
+		if (@returnvalues) {
+	    	SIGNALduino_Log3 $name, 5, "$name: rcode=$rcode, modified value after $funcname: @returnvalues";
+		} else {
+	   		SIGNALduino_Log3 $name, 5, "$name: rcode=$rcode, after calling $funcname";
+	    } 
 	    return ($rcode, @returnvalues);
 	} elsif (defined $method ) {					
 		SIGNALduino_Log3 $name, 5, "$name: Error: Unknown method $funcname Please check definition";

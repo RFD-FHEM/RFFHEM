@@ -252,8 +252,8 @@ sub SD_RSL_Attr(@)
   my $hash = $defs{$a[1]};
   my $iohash = $defs{$a[3]};
   my $cde = $hash->{DEF};
-  delete($modules{SIGNALduino_FA20RF}{defptr}{$cde});
-  $modules{SIGNALduino_FA20RF}{defptr}{$iohash->{NAME} . "." . $cde} = $hash;
+  delete($modules{SD_RSL}{defptr}{$cde});
+  $modules{SD_RSL}{defptr}{$iohash->{NAME} . "." . $cde} = $hash;
   return undef;
 }
 
