@@ -4166,7 +4166,7 @@ sub SIGNALduino_IdList($@)
 		}
 		if ($bflag == 1 && defined($BlacklistIDs{$id}))
 		{
-			SIGNALduino_Log3 $name, 3, "$name skip Blacklist ID $id";
+			SIGNALduino_Log3 $name, 4, "$name skip Blacklist ID $id";
 			next;
 		}
 		
