@@ -4230,7 +4230,7 @@ sub SIGNALduino_callsub
 		
 		my ($rcode, @returnvalues) = $method->($name, @args) ;	
 		
-		if (@returnvalues) {
+		if (@returnvalues && defined($returnvalues[0])) {
 	    	SIGNALduino_Log3 $name, 5, "$name: rcode=$rcode, modified value after $funcname: @returnvalues";
 		} else {
 	   		SIGNALduino_Log3 $name, 5, "$name: rcode=$rcode, after calling $funcname";
