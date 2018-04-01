@@ -4827,7 +4827,6 @@ sub	SIGNALduino_Hideki()
 		my $idx;
 		
 		for ($idx=$message_start; $idx<$message_end; $idx=$idx+9)
-		{
 			my $byte = "";
 			$byte= substr($bitData,$idx,8); ## Ignore every 9th bit
 			Debug "$name: byte in order $byte " if ($debug);
@@ -5133,6 +5132,16 @@ sub SIGNALduino_compPattern($$$%)
 
 	#modify msg_parts pattern hash
 	#$patternListRaw = \%buckets;
+}
+
+################################################
+# the new Log with integrated loglevel checking
+sub SIGNALduino_Log3($$$)
+{
+  
+  my ($dev, $loglevel, $text) = @_;
+  
+  return Log3($dev,$loglevel,$text);
 }
 
 #print Dumper (%msg_parts);
