@@ -48,6 +48,7 @@ sub SIGNALduino_Read($);
 sub SIGNALduino_Ready($);
 sub SIGNALduino_Write($$$);
 sub SIGNALduino_SimpleWrite(@);
+sub SIGNALduino_Log3($$$);
 
 #my $debug=0;
 
@@ -4827,6 +4828,7 @@ sub	SIGNALduino_Hideki()
 		my $idx;
 		
 		for ($idx=$message_start; $idx<$message_end; $idx=$idx+9)
+		{
 			my $byte = "";
 			$byte= substr($bitData,$idx,8); ## Ignore every 9th bit
 			Debug "$name: byte in order $byte " if ($debug);
