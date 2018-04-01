@@ -4608,7 +4608,7 @@ sub SIGNALduino_postDemo_WS2000($@) {
 		do {
 			$error += !$bit_msg[$index + $datastart];			# jedes 5. Bit muss 1 sein
 			$dataindex = $index + $datastart + 1;				 
-			$data = oct( "0b".(join "", reverse @bit_msg[$dataindex .. $dataindex + 3]));
+			$data = oct( "0b".(join "", reverse @bit_msg[$dataindex .. $dataindex + 3])) if ($dataindex <= $datalength);
 			if ($index == 5) {$adr = ($data & 0x07)}			# Sensoradresse
 			if ($datalength == 45 || $datalength == 46) { 	# Typ 1 ohne Summe
 				if ($index <= $datalength - 5) {
@@ -4631,7 +4631,7 @@ sub SIGNALduino_postDemo_WS2000($@) {
 		return (0, undef);
 	} else {
 		if ($datalength < 45 || $datalength > 46) { 			# Summe prüfen, außer Typ 1 ohne Summe
-			$data = oct( "0b".(join "", reverse @bit_msg[$dataindex .. $dataindex + 3]));
+			$data = oct( "0b".(join "", reverse @bit_msg[$dataindex .. $dataindex + 3])) if ($dataindex <= $datalength);
 			if ($data != ($sum & 0x0F)) {
 				SIGNALduino_Log3 $name, 4, "$name: WS2000 Sensortyp $typ Adr $adr - ERROR sum";
 				return (0, undef);
