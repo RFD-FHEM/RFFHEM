@@ -4150,7 +4150,7 @@ sub SIGNALduino_IdList($@)
 		if (defined($blacklist) && length($blacklist)>0) {
 			%BlacklistIDs = map { $_ => 1 } split(",", $blacklist);
 			my $w = join ', ' => map "$_" => keys %BlacklistIDs;
-			SIGNALduino_Log3 $name, 3, "$name Attr blacklist $w";
+			SIGNALduino_Log3 $name, 4, "$name Attr blacklist $w";
 			$bflag = 1;
 		}
 	}
