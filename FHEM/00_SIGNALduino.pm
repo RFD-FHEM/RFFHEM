@@ -3188,10 +3188,10 @@ sub SIGNALduno_Dispatch($$$$$)
 		$hash->{TIME} = time();
 		$hash->{DMSG} = $dmsg;
 		#my $event = 0;
-		if (substr(ucfirst($dmsg),0,1) eq 'U') {
+		if (substr(ucfirst($dmsg),0,1) eq 'U') { #u oder U
 			#$event = 1;
 			DoTrigger($name, "DMSG " . $dmsg);
-			return;				# Fuer $dmsg die mit U anfangen ist kein Dispatch notwendig, da es dafuer kein Modul gibt klein u wird dagegen dispatcht
+			return if (substr($dmsg,0,1) eq 'U'); # Fuer $dmsg die mit U anfangen ist kein Dispatch notwendig, da es dafuer kein Modul gibt klein u wird dagegen dispatcht
 		}
 		#readingsSingleUpdate($hash, "state", $hash->{READINGS}{state}{VAL}, $event);
 		
