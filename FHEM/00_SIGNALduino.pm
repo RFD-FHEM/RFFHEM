@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_SIGNALduino.pm 10488 2018-04-01 23:00:00Z v3.3.3-dev $
+# $Id: 00_SIGNALduino.pm 10488 2018-04-11 23:00:00Z v3.3.3-dev $
 #
 # v3.3.3 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -26,7 +26,7 @@ no warnings 'portable';
 
 
 use constant {
-	SDUINO_VERSION            => "v3.3.3-dev_01.04.",
+	SDUINO_VERSION            => "v3.3.3-dev_11.04.",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -3362,13 +3362,6 @@ SIGNALduino_Parse_MS($$$$%)
 	
 			
 			Debug "$name: decoded message raw (@bit_msg), ".@bit_msg." bits\n" if ($debug);;
-			
-			my ($rcode,@retvalue) = SIGNALduino_callsub('postDemodulation',$ProtocolListSIGNALduino{$id}{postDemodulation},$name,@bit_msg);
-			next if ($rcode < 1 );
-			#SIGNALduino_Log3 $name, 5, "$name: postdemodulation value @retvalue";
-			
-			@bit_msg = @retvalue;
-			undef(@retvalue); undef($rcode);
 
 			my $padwith = defined($ProtocolListSIGNALduino{$id}{paddingbits}) ? $ProtocolListSIGNALduino{$id}{paddingbits} : 4;
 			
@@ -3386,6 +3379,13 @@ SIGNALduino_Parse_MS($$$$%)
 			$valid = $valid && $ProtocolListSIGNALduino{$id}{length_min} <= scalar @bit_msg  if (defined($ProtocolListSIGNALduino{$id}{length_min})); 
 			$valid = $valid && $ProtocolListSIGNALduino{$id}{length_max} >= scalar @bit_msg  if (defined($ProtocolListSIGNALduino{$id}{length_max}));
 			next if (!$valid);  
+			
+			my ($rcode,@retvalue) = SIGNALduino_callsub('postDemodulation',$ProtocolListSIGNALduino{$id}{postDemodulation},$name,@bit_msg);
+			next if ($rcode < 1 );
+			#SIGNALduino_Log3 $name, 5, "$name: postdemodulation value @retvalue";
+			
+			@bit_msg = @retvalue;
+			undef(@retvalue); undef($rcode);
 			
 			#my $dmsg = sprintf "%02x", oct "0b" . join "", @bit_msg;			## Array -> String -> bin -> hex
 			my $dmsg = SIGNALduino_b2h(join "", @bit_msg);
