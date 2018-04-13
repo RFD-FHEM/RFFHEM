@@ -37,13 +37,15 @@ SD_WS07_Initialize($)
 {
   my ($hash) = @_;
 
-  $hash->{Match}     = "^P7#[A-Fa-f0-9]{6}F[A-Fa-f0-9]{2}";    ## pos 7 ist aktuell immer 0xF
+  $hash->{Match}     = "^P7#[A-Fa-f0-9]{6}F[A-Fa-f0-9]{2}(#R[A-F0-9][A-F0-9]){0,1}\$";    ## pos 7 ist aktuell immer 0xF
   $hash->{DefFn}     = "SD_WS07_Define";
   $hash->{UndefFn}   = "SD_WS07_Undef";
   $hash->{ParseFn}   = "SD_WS07_Parse";
   $hash->{AttrFn}    = "SD_WS07_Attr";
   $hash->{AttrList}  = "IODev do_not_notify:1,0 ignore:0,1 showtime:1,0 " .
-                       "correction-hum correction-temp ".
+                         "max-deviation-temp:1,2,3,4,5,6,7,8,9,10,15,20,25,30,35,40,45,50 ".
+                       "max-deviation-hum:1,2,3,4,5,6,7,8,9,10,15,20,25,30,35,40,45,50 ".
+                       "correction-hum correction-temp negation-batt:no,yes ".
                         "$readingFnAttributes ";
   $hash->{AutoCreate} =
         {
@@ -105,14 +107,15 @@ SD_WS07_Parse($$)
   my $bitData = unpack("B$blen", pack("H$hlen", $rawData)); 
 
   if (defined($rssi)) {
-	Log3 $name, 4, "$name SD_WS07: $msg, length=$hlen RSSI=$rssi";
+	Log3 $iohash, 4, "$name: SD_WS07_Parse $model ($msg) length: $hlen RSSI = $rssi";
   } else {
-	Log3 $name, 4, "$name SD_WS07: $msg, length=$hlen";
+	Log3 $iohash, 4, "$name: SD_WS07_Parse $model ($msg) length: $hlen";
   }
   
   #      4    8  9    12            24    28     36
   # 0011 0110 1  010  000100000010  1111  00111000 0000  eas8007
   # 0111 0010 1  010  000010111100  1111  00000000 0000  other device from anfichtn
+  # 1101 0010 0  000  000000010001  1111  00101000       other device from elektron-bbs
   #      ID  Bat CHN       TMP      ??   HUM
   
   #my $hashumidity = FALSE;
@@ -121,45 +124,27 @@ SD_WS07_Parse($$)
    #foreach $key (keys %models) {
   #   ....
   #}
-    my $bitData2 = substr($bitData,0,8) . ' ' . substr($bitData,8,1) . ' ' . substr($bitData,9,3);
-       $bitData2 = $bitData2 . ' ' . substr($bitData,12,12) . ' ' . substr($bitData,24,4) . ' ' . substr($bitData,28,8);
-    Log3 $iohash, 5, "$name SD_WS07: converted to bits: $bitData2";
+    my $bitData2 = substr($bitData,0,8) . ' ' . substr($bitData,8,4) . ' ' . substr($bitData,12,12) . ' ' . substr($bitData,24,4) . ' ' . substr($bitData,28,8);
+    Log3 $iohash, 4, "$name: SD_WS07_Parse $model converted to bits " . $bitData2;
     
     my $id = substr($rawData,0,2);
-    my $bat = int(substr($bitData,8,1)) eq "1" ? "ok" : "low";
+	 my $bat = substr($bitData,8,1);
     my $channel = oct("0b" . substr($bitData,9,3)) + 1;
     my $temp = oct("0b" . substr($bitData,12,12));
     my $bit24bis27 = oct("0b".substr($bitData,24,4));
     my $hum = oct("0b" . substr($bitData,28,8));
     
-    if ($hum==0)
-    {
+	if ($hum==0) {
     	$model=$model."_T";		
     } else {
     	$model=$model."_TH";		
-    	if ($hum < 10 || $hum > 99) {
-    	    Log3 $iohash, 4, "$name: SD_WS07: err HUM: hum=$hum, msg=$msg" ;
-    	    return '';
-    	}
-    }
-    
-    if ($temp > 700 && $temp < 3840) {
-      Log3 $iohash, 4, "$name: SD_WS07: err TEMP: temp=$temp, msg=$msg" ;
-      return '';
-    } elsif ($temp >= 3840) {        # negative Temperaturen, muss noch ueberprueft und optimiert werden 
-      $temp -= 4096;
     }  
-    $temp /= 10;
     
-    Log3 $iohash, 4, "$name SD_WS07: model=$model, id=$id, channel=$channel, temp=$temp, hum=$hum, bat=$bat";
-
     my $deviceCode;
-    
 	my $longids = AttrVal($iohash->{NAME},'longids',0);
-	if ( ($longids ne "0") && ($longids eq "1" || $longids eq "ALL" || (",$longids," =~ m/,$model,/)))
-	{
+	if ( ($longids ne "0") && ($longids eq "1" || $longids eq "ALL" || (",$longids," =~ m/,$model,/)))	{
 		$deviceCode=$model.'_'.$id.$channel;
-		Log3 $iohash,4, "$name SD_WS07: using longid=$longids model=$model";
+		Log3 $iohash,4, "$name: using longid $longids model $model";
 	} else {
 		$deviceCode = $model . "_" . $channel;
 	}
@@ -170,7 +155,7 @@ SD_WS07_Parse($$)
     $def = $modules{SD_WS07}{defptr}{$deviceCode} if(!$def);
 
     if(!$def) {
-		Log3 $iohash, 1, "$name SD_WS07: UNDEFINED sensor $deviceCode detected, code $msg";
+		Log3 $iohash, 1, "$name: UNDEFINED sensor $model detected, code $deviceCode";
 		return "UNDEFINED $deviceCode SD_WS07 $deviceCode";
     }
         #Log3 $iohash, 3, 'SD_WS07: ' . $def->{NAME} . ' ' . $id;
@@ -181,45 +166,100 @@ SD_WS07_Parse($$)
 	
 	#Log3 $name, 4, "$iohash->{NAME} SD_WS07: $name ($rawData)";  
 
-	if (!defined(AttrVal($hash->{NAME},"event-min-interval",undef)))
-	{
+	if (!defined(AttrVal($hash->{NAME},"event-min-interval",undef))) {
 		my $minsecs = AttrVal($iohash->{NAME},'minsecs',0);
 		if($hash->{lastReceive} && (time() - $hash->{lastReceive} < $minsecs)) {
-			Log3 $hash, 4, "$iohash->{NAME} SD_WS07: $name $deviceCode dropped due to short time. minsecs=$minsecs";
+			Log3 $hash, 4, "$deviceCode Dropped due to short time. minsecs=$minsecs";
 		  	return "";
 		}
 	}
 	
 	$hum += AttrVal($name, "correction-hum", 0);				# correction value for humidity (default 0 %)
 	if ($hum > 99) {
-		Log3 $name, 4, "$iohash->{NAME} SD_WS07: $name ERROR - Humidity unknown ($hum)";
+		Log3 $name, 3, "$iohash->{NAME}: $name ERROR - Humidity unknown ($hum)";
 		return "";
 	}
 	
+   if ($temp > 700 && $temp < 3840) {								# -25,6 .. 70,0 °C
+		Log3 $name, 3, "$iohash->{NAME}: $name: ERROR - Temperature unknown ($temp)";
+		return "";
+   } elsif ($temp >= 3840) {        # negative Temperaturen, ist ueberprueft worden
+      $temp -= 4096;
+   }  
+   $temp /= 10;
 	$temp += AttrVal($name, "correction-temp", 0);				# correction value for temperature (default 0 K)
-	Log3 $name, 4, "$iohash->{NAME} SD_WS07: $name id=$id, channel=$channel, temp=$temp, hum=$hum, bat=$bat";
+   Log3 $iohash, 4, "$iohash->{NAME}: $name id=$id, channel=$channel, temp=$temp, hum=$hum, bat=$bat";
 
+	# Sanity check temperature and humidity
+   if($def) {
+		my $timeSinceLastUpdate = ReadingsAge($hash->{NAME}, "state", 0);
+		if ($timeSinceLastUpdate < 0) {
+			$timeSinceLastUpdate *= -1;
+		}
+		if (defined($hash->{READINGS}{temperature}{VAL}) && (defined(AttrVal($hash->{NAME},"max-deviation-temp",undef)))) {
+			my $diffTemp = 0;
+			my $oldTemp = ReadingsVal($name, "temperature", undef);
+			my $maxdeviation = AttrVal($name, "max-deviation-temp", 1);				# default 1 K
+			if ($temp > $oldTemp) {
+				$diffTemp = ($temp - $oldTemp);
+			} else {
+				$diffTemp = ($oldTemp - $temp);
+			}
+			$diffTemp = sprintf("%.1f", $diffTemp);				
+			Log3 $name, 4, "$iohash->{NAME}: $name old temp $oldTemp, age $timeSinceLastUpdate, new temp $temp, diff temp $diffTemp";
+			my $maxDiffTemp = $timeSinceLastUpdate / 60 + $maxdeviation; 			# maxdeviation + 1.0 Kelvin/Minute
+			$maxDiffTemp = sprintf("%.1f", $maxDiffTemp + 0.05);						# round 0.1
+			Log3 $name, 4, "$iohash->{NAME}: $name max difference temperature $maxDiffTemp K";
+			if ($diffTemp > $maxDiffTemp) {
+				Log3 $name, 3, "$iohash->{NAME}: $name ERROR - Temp diff too large (old $oldTemp, new $temp, diff $diffTemp)";
+			return "";
+			}
+		}
+		if (defined($hash->{READINGS}{humidity}{VAL}) && defined(AttrVal($hash->{NAME},"max-deviation-hum",undef))) {
+			my $diffHum = 0;
+			my $oldHum = ReadingsVal($name, "humidity", undef);
+			my $maxdeviation = AttrVal($name, "max-deviation-hum", 1);				# default 1 %
+			if ($hum > $oldHum) {
+				$diffHum = ($hum - $oldHum);
+			} else {
+				$diffHum = ($oldHum - $hum);
+			}
+			Log3 $name, 4, "$iohash->{NAME}: $name old hum $oldHum, age $timeSinceLastUpdate, new hum $hum, diff hum $diffHum";
+			my $maxDiffHum = $timeSinceLastUpdate / 60 + $maxdeviation;				# maxdeviation + 1.0 %/Minute
+			$maxDiffHum = sprintf("%1.f", $maxDiffHum + 0.5);							# round 1
+			Log3 $name, 4, "$iohash->{NAME}: $name max difference humidity $maxDiffHum %";
+			if ($diffHum > $maxDiffHum) {
+				Log3 $name, 3, "$iohash->{NAME}: $name ERROR - Hum diff too large (old $oldHum, new $hum, diff $diffHum)";
+				return "";
+			}
+		}
+   }
 	
 	$hash->{lastReceive} = time();
 	$hash->{lastMSG} = $rawData;
 	$hash->{bitMSG} = $bitData2; 
 
+	if (AttrVal($name, "negation-batt", "no") eq "no") {		# default no negation batt bit
+		$bat = "0" eq "1" ? "ok" : "low";							# 1 = ok
+	} else {
+		$bat = "0" eq "0" ? "ok" : "low";							# 0 = ok
+	}
     my $state = "T: $temp". ($hum>0 ? " H: $hum":"");
     
     readingsBeginUpdate($hash);
     readingsBulkUpdate($hash, "state", $state);
     readingsBulkUpdate($hash, "temperature", $temp)  if ($temp ne"");
     readingsBulkUpdate($hash, "humidity", $hum)  if ($hum ne "" && $hum != 0 );
-    if ($bat ne "") {
         #my $battery = ReadingsVal($name, "battery", "unknown");
         #if ($bat ne $battery) {
-           readingsBulkUpdate($hash, "battery", $bat);
+		readingsBulkUpdate($hash, "battery", $bat) if ($bat ne "");
         #}
-    }
     readingsBulkUpdate($hash, "channel", $channel) if ($channel ne "");
-
     readingsEndUpdate($hash, 1); # Notify is done by Dispatch
 
+   if(defined($rssi)) {
+		$hash->{RSSI} = $rssi;
+   }
 	return $name;
 }
 
@@ -274,7 +314,7 @@ sub SD_WS07_Attr(@)
   <ul>
   	 <li>state (T: H:)</li>
      <li>temperature (&deg;C)</li>
-     <li>humidity: (the humidity 10-99)</li>
+     <li>humidity: (the humidity 1-100)</li>
      <li>battery: (low or ok)</li>
      <li>channel: (the channelnumberf)</li>
   </ul>
@@ -282,16 +322,37 @@ sub SD_WS07_Attr(@)
   <b>Attributes</b>
   <ul>
     <li>correction-temp<br>
-       Damit kann die Temperatur korrigiert werden. Z.B. mit 10 wird eine um 10 Grad hoehere Temperatur angezeigt.
+       This can be used to correct the temperature. for example: at 10, the temperature is 10 degrees higher.
     </li>
     <li>correction-hum<br>
-       Damit kann die Luftfeuchtigkeit korrigiert werden.
+       This can be used to corrected the humidity.
     </li>
     <li><a href="#do_not_notify">do_not_notify</a></li>
     <li><a href="#ignore">ignore</a></li>
     <li><a href="#showtime">showtime</a></li>
+	<li>max-deviation-hum (Default:1, allowed values: 1,2,3,4,5,6,7,8,9,10,15,20,25,30,35,40,45,50)<br>  
+		Maximum permissible deviation of the measured humidity from the previous value in percent.<br>  
+		Since these sensors do not send checksums, it can easily lead to the reception of implausible values.   
+		To intercept these, a maximum deviation from the last correctly received value can be set.
+		Larger deviations are then ignored and lead to an error message in the log file, such as this:<br>  
+		<code>SD_WS07_TH_1 ERROR - Hum diff too large (old 60, new 68, diff 8)</code><br>  
+		In addition to the set value, a value dependent on the difference of the reception times is added.
+		This is 1.0% relative humidity per minute. This means e.g. if a difference of 8 is set and the time
+		interval of receiving the messages is 3 minutes, the maximum allowed difference is 11.  
+	</li>
+	<li>max-deviation-temp (Default:1, allowed values: 1,2,3,4,5,6,7,8,9,10,15,20,25,30,35,40,45,50)<br>  
+		Maximum permissible deviation of the measured temperature from the previous value in Kelvin.<br>  
+		please refer max-deviation-hum  
+	</li>
     <li><a href="#readingFnAttributes">readingFnAttributes</a></li>
   </ul>
+  <br>
+  <ul>
+	Instead of the attributes <code>max-deviation-hum</code> and <code>max-deviation-hum</code>, 
+	the <code>doubleMsgCheck_IDs</code> attribute of the SIGNALduino can also be used if the sensor is well received.
+	An update of the readings is only executed if the same values ??have been received at least twice.
+  </ul>
+  <br>
 
   <a name="SD_WS07_Set"></a>
   <b>Set</b> <ul>N/A</ul><br>
@@ -308,7 +369,7 @@ sub SD_WS07_Attr(@)
 <a name="SD_WS07"></a>
 <h3>SD_WS07</h3>
 <ul>
-  Das SD_WS07 Modul verarbeitet von einem IO Geraet (CUL, CUN, SIGNALDuino, etc.) empfangene Nachrichten von Temperatur-Sensoren.<br>
+  Das SD_WS07 Modul verarbeitet von einem IO Geraet (SIGNALDuino, Signal-ESP, etc.) empfangene Nachrichten von Temperatur-/Feuchte-Sensoren.<br>
   <br>
   <b>Unterst&uumltzte Modelle:</b>
   <ul>
@@ -324,7 +385,8 @@ sub SD_WS07_Attr(@)
   <a name="SD_WS07_Define"></a>
   <b>Define</b> 
   <ul>Die empfangenen Sensoren werden automatisch angelegt.<br>
-  Die ID der angelegten Sensoren ist entweder der Kanal des Sensors, oder wenn das Attribut longid gesetzt ist, dann wird die ID aus dem Kanal und einer Reihe von Bits erzeugt, welche der Sensor beim Einschalten zuf&auml;llig vergibt.<br>
+	Die ID der angelegten Sensoren ist entweder der Kanal des Sensors, oder wenn das Attribut longid gesetzt ist, 
+	dann wird die ID aus dem Kanal und einer Reihe von Bits erzeugt, welche der Sensor beim Einschalten zufaellig vergibt.<br>
   </ul>
   <br>
   <a name="SD_WS07 Events"></a>
@@ -332,7 +394,7 @@ sub SD_WS07_Attr(@)
   <ul>
      <li>state: (T: H:)</li>
      <li>temperature: (&deg;C)</li>
-     <li>humidity: (Luftfeuchte (10-99)</li>
+     <li>humidity: (Luftfeuchte (1-100)</li>
      <li>battery: (low oder ok)</li>
      <li>channel: (Der Sensor Kanal)</li>
   </ul>
@@ -347,9 +409,30 @@ sub SD_WS07_Attr(@)
     </li>
     <li><a href="#do_not_notify">do_not_notify</a></li>
     <li><a href="#ignore">ignore</a></li>
+    <li>max-deviation-hum (Default:1, erlaubte Werte: 1,2,3,4,5,6,7,8,9,10,15,20,25,30,35,40,45,50)<br>
+		Maximal erlaubte Abweichung der gemessenen Feuchte zum vorhergehenden Wert in Prozent.<br>
+		Da diese Sensoren keine Checksummen o.&auml;. senden, kann es leicht zum Empfang von unplausiblen Werten kommen. 
+		Um diese abzufangen, kann eine maximale Abweichung zum letzten korrekt empfangenen Wert festgelegt werden.
+		Gr&ouml&szlig;ere Abweichungen werden dann ignoriert und f&uuml;hren zu einer Fehlermeldung im Logfile, wie z.B. dieser:<br>
+		<code>SD_WS07_TH_1 ERROR - Hum diff too large (old 60, new 68, diff 8)</code><br>
+		Zus&auml;tzlich zum eingestellten Wert wird ein von der Differenz der Empfangszeiten abh&auml;ngiger Wert addiert.
+		Dieser betr&auml;gt 1.0 % relative Feuchte pro Minute. Das bedeutet z.B. wenn eine Differenz von 8 eingestellt ist
+		und der zeitliche Abstand des Empfangs der Nachrichten betr&auml;gt 3 Minuten, ist die maximal erlaubte Differenz 11.
+    </li>
+    <li>max-deviation-temp (Default:1, erlaubte Werte: 1,2,3,4,5,6,7,8,9,10,15,20,25,30,35,40,45,50)<br>
+		Maximal erlaubte Abweichung der gemessenen Temperatur zum vorhergehenden Wert in Kelvin.<br>
+		siehe max-deviation-hum
+    </li>
     <li><a href="#showtime">showtime</a></li>
     <li><a href="#readingFnAttributes">readingFnAttributes</a></li>
   </ul>
+  <br>
+  <ul>
+	Anstelle der Attribute <code>max-deviation-hum</code> und <code>max-deviation-temp</code> kann bei gutem Empfang des Sensors 
+	auch das Attribut <code>doubleMsgCheck_IDs</code> des SIGNALduino verwendet werden. Dabei wird ein Update der Readings erst
+	ausgef&uuml;hrt, wenn mindestens zweimal die gleichen Werte empfangen wurden.
+  </ul>
+  <br>
 
   <a name="SD_WS071_Set"></a>
   <b>Set</b> <ul>N/A</ul><br>
