@@ -1,4 +1,3 @@
-##############################################
 # $Id: 00_SIGNALduino.pm 10488 2018-04-11 23:00:00Z v3.3.3-dev $
 #
 # v3.3.3 (Development release 3.3)
@@ -1955,18 +1954,31 @@ SIGNALduino_Set($@)
 	SIGNALduino_WriteInit($hash);
   } elsif( $cmd eq "sendMsg" ) {
 	SIGNALduino_Log3 $name, 5, "$name: sendmsg msg=$arg";
-	my ($protocol,$data,$repeats,$clock,$frequency) = split("#",$arg);
-	$protocol=~ s/[Pp](\d+)/$1/; # extract protocol num
-	$repeats=~ s/[rR](\d+)/$1/; # extract repeat num
-	$repeats=1 if (!defined($repeats));
-	if (defined($clock) && substr($clock,0,1) eq "F") {   # wenn es kein clock gibt, pruefen ob im clock eine frequency ist
-		$clock=~ s/[F]([0-9a-fA-F]+$)/$1/;
-		$frequency = $clock;
-		$clock = undef;
-	} else {
-		$clock=~ s/[Cc](\d+)/$1/ if (defined($clock)); # extract ITClock num
-		$frequency=~ s/[Ff]([0-9a-fA-F]+$)/$1/ if (defined($frequency));
+	
+	# Split args in serval variables
+	my ($protocol,$data,$repeats,$clock,$frequency,$datalength,$dataishex);
+	my $n=0;
+	foreach my $s (split "#", $arg) {
+	    my $c = substr($s,0,1);
+	    if ($n == 0 ) {  #  protocol
+			$protocol = substr($s,1);
+	    } elsif ($n == 1) { # Data
+	        $data = $s;
+	        if   ( substr($s,0,2) eq "0x" ) { $dataishex=1; $data=substr($data,2); }
+	        else { $dataishex=0; }
+	        
+	    } else {
+	    	    if ($c eq 'R') { $repeats = substr($s,1);  }
+	    		elsif ($c eq 'C') { $clock = substr($s,1);   }
+	    		elsif ($c eq 'F') { $frequency = substr($s,1);  }
+	    		elsif ($c eq 'L') { $datalength = substr($s,1);   }
+	    }
+	    $n++;
 	}
+	return "$name: sendmsg, unknown protocol: $protocol" if (!exists($ProtocolListSIGNALduino{$protocol}));
+
+	$repeats=1 if (!defined($repeats));
+
 	if (exists($ProtocolListSIGNALduino{$protocol}{frequency}) && $hasCC1101 && !defined($frequency)) {
 		$frequency = $ProtocolListSIGNALduino{$protocol}{frequency};
 	}
@@ -1975,8 +1987,6 @@ SIGNALduino_Set($@)
 	} else {
 		$frequency="";
 	}
-	
-	return "$name: sendmsg, unknown protocol: $protocol" if (!exists($ProtocolListSIGNALduino{$protocol}));
 	
 	#print ("data = $data \n");
 	#print ("protocol = $protocol \n");
@@ -2023,6 +2033,14 @@ SIGNALduino_Set($@)
 		if (!defined($clock)) {
 			$hash->{ITClock} = 250 if (!defined($hash->{ITClock}));   # Todo: Klaeren wo ITClock verwendet wird und ob wir diesen Teil nicht auf Protokoll 3,4 und 17 minimieren
 			$clock=$ProtocolListSIGNALduino{$protocol}{clockabs} > 1 ?$ProtocolListSIGNALduino{$protocol}{clockabs}:$hash->{ITClock};
+		}
+		
+		if ($dataishex == 1)	
+		{
+			# convert hex to bits
+	        my $hlen = length($data);
+	        my $blen = $hlen * 4;
+	        $data = unpack("B$blen", pack("H$hlen", $data));
 		}
 
 		SIGNALduino_Log3 $name, 5, "$name: sendmsg Preparing rawsend command for protocol=$protocol, repeats=$repeats, clock=$clock bits=$data";
@@ -4273,16 +4291,16 @@ sub SIGNALduino_PreparingSend_FS20_FHT($$$) {
 	for (my $i=0; $i<length($msg); $i+=2) {
 		$temp = hex(substr($msg, $i, 2));
 		$sum += $temp;
-		$newmsg .= dec2binppari($temp);
+		$newmsg .= SIGNALduino_dec2binppari($temp);
 	}
 	
-	$newmsg .= dec2binppari($sum & 0xFF);   # Checksum		
+	$newmsg .= SIGNALduino_dec2binppari($sum & 0xFF);   # Checksum		
 	$newmsg .= "0P#R3";            		# EOT, Pause, 3 Repeats    
 	
 	return $newmsg;
 }
 
-sub dec2binppari {      # dec to bin . parity
+sub SIGNALduino_dec2binppari {      # dec to bin . parity
 	my $num = shift;
 	my $parity = 0;
 	my $nbin = sprintf("%08b",$num);
@@ -5612,15 +5630,21 @@ With a # at the beginnging whitelistIDs can be deactivated.
 		<li>sendMsg<br>
 		This command will create the needed instructions for sending raw data via the signalduino. Insteaf of specifying the signaldata by your own you specify 
 		a protocol and the bits you want to send. The command will generate the needed command, that the signalduino will send this.
+		It is also supported to specify the data in hex. prepend 0x in front of the data part.
 		<br><br>
 		Please note, that this command will work only for MU or MS protocols. You can't transmit manchester data this way.
 		<br><br>
 		Input args are:
 		<p>
 		P<protocol id>#binarydata#R<num of repeats>#C<optional clock>   (#C is optional) 
+		O<protocol id>#0xhexdata#R<num of repeats>#C<optional clock>    (#C is optional) 
+		
 		<br>Example: P0#0101#R3#C500
 		<br>Will generate the raw send command for the message 0101 with protocol 0 and instruct the arduino to send this three times and the clock is 500.
 		<br>SR;R=3;P0=500;P1=-9000;P2=-4000;P3=-2000;D=03020302;
+		<br>Example: P29#0xF7E#R4
+		<br>Generates the raw send command with the hex message F7E with protocl id 29 . The message will be send four times.
+		<br>SR;R=4;P0=-8360;P1=220;P2=-440;P3=-220;P4=440;D=01212121213421212121212134;
 		</p>
 
 		
@@ -5925,6 +5949,25 @@ Mit diesem Attribut können Sie steuern, ob jede Logmeldung auch als Ereignis be
 	&Ouml;ffnet die Verbindung zum Ger&auml;t neu und initialisiert es. <br><br>
 	<li>sendMsg<br></li>
 	Dieser Befehl erstellt die erforderlichen Anweisungen zum Senden von Rohdaten &uuml;ber den SIGNALduino. Sie k&ouml;nnen die Signaldaten wie Protokoll und die Bits angeben, die Sie senden m&ouml;chten.<br>
+	Alternativ ist es auch möglich, die zu sendenden Daten in hexadezimaler Form zu übergeben. Dazu muss ein 0x vor den Datenteil geschrieben werden.
+	<br><br>
+	Bitte beachte, dieses Kommando funktioniert nur für MU oder MS Protokolle nach dieser Vorgehensweise:
+		<br><br>
+		Argumente sind:
+		<p>
+		P<protocol id>#binarydata#R<anzahl der wiederholungen>#C<optional taktrate>   (#C is optional) 
+		O<protocol id>#0xhexdata#R<anzahl der wiederholungen>#C<optional taktrate>    (#C is optional) 
+		
+		<br>Beispiel: P29#0101#R3#C500
+		<br>Wird eine sende Kommando für die Bitfolge 0101 anhand der protocol id 0 erzeugen. Als Takt wird 500 verwendet.
+		<br>SR;R=3;P0=500;P1=-9000;P2=-4000;P3=-2000;D=03020302;
+		<br>Beispiel: P29#0xF7E#R4
+		<br>Wird eine sende Kommando für die Hexfolge F7E anhand der protocol id 29 erzeugen. Die Nachricht soll 4x gesenset werden.
+		<br>SR;R=4;P0=-8360;P1=220;P2=-440;P3=-220;P4=440;D=01212121213421212121212134;
+		</p>
+
+		
+	
 	</ul><br><br>
 	
 	</ul>
