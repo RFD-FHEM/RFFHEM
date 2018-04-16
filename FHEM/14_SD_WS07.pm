@@ -43,9 +43,9 @@ SD_WS07_Initialize($)
   $hash->{ParseFn}   = "SD_WS07_Parse";
   $hash->{AttrFn}    = "SD_WS07_Attr";
   $hash->{AttrList}  = "IODev do_not_notify:1,0 ignore:0,1 showtime:1,0 " .
-                         "max-deviation-temp:1,2,3,4,5,6,7,8,9,10,15,20,25,30,35,40,45,50 ".
+                       "max-deviation-temp:1,2,3,4,5,6,7,8,9,10,15,20,25,30,35,40,45,50 ".
                        "max-deviation-hum:1,2,3,4,5,6,7,8,9,10,15,20,25,30,35,40,45,50 ".
-                       "correction-hum correction-temp negation-batt:no,yes ".
+                       "offset-hum:slider,1,1.0,100 offset-temp:slider,1,1.0,100 negation-batt:no,yes ".
                         "$readingFnAttributes ";
   $hash->{AutoCreate} =
         {
@@ -174,7 +174,7 @@ SD_WS07_Parse($$)
 		}
 	}
 	
-	$hum += AttrVal($name, "correction-hum", 0);				# correction value for humidity (default 0 %)
+	$hum += AttrVal($name, "offset-hum", 0);				# correction value for humidity (default 0 %)
 	if ($hum > 99) {
 		Log3 $name, 3, "$iohash->{NAME}: $name ERROR - Humidity unknown ($hum)";
 		return "";
@@ -187,7 +187,7 @@ SD_WS07_Parse($$)
       $temp -= 4096;
    }  
    $temp /= 10;
-	$temp += AttrVal($name, "correction-temp", 0);				# correction value for temperature (default 0 K)
+	$temp += AttrVal($name, "offset-temp", 0);				# correction value for temperature (default 0 K)
    Log3 $iohash, 4, "$iohash->{NAME}: $name id=$id, channel=$channel, temp=$temp, hum=$hum, bat=$bat";
 
 	# Sanity check temperature and humidity
@@ -321,11 +321,11 @@ sub SD_WS07_Attr(@)
   <br>
   <b>Attributes</b>
   <ul>
-    <li>correction-temp<br>
+    <li>offset-temp<br>
        This can be used to correct the temperature. for example: at 10, the temperature is 10 degrees higher.
     </li>
-    <li>correction-hum<br>
-       This can be used to corrected the humidity.
+    <li>offset-hum<br>
+       Works the same way as offset-temp.
     </li>
     <li><a href="#do_not_notify">do_not_notify</a></li>
     <li><a href="#ignore">ignore</a></li>
@@ -401,10 +401,10 @@ sub SD_WS07_Attr(@)
   <br>
   <b>Attribute</b>
   <ul>
-    <li>correction-temp<br>
+    <li>offset-temp<br>
        Damit kann die Temperatur korrigiert werden. Z.B. mit 10 wird eine um 10 Grad h&ouml;here Temperatur angezeigt.
     </li>
-    <li>correction-hum<br>
+    <li>offset-hum<br>
        Damit kann die Luftfeuchtigkeit korrigiert werden.
     </li>
     <li><a href="#do_not_notify">do_not_notify</a></li>
