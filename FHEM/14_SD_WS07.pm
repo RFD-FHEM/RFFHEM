@@ -206,12 +206,12 @@ SD_WS07_Parse($$)
 				$diffTemp = ($oldTemp - $temp);
 			}
 			$diffTemp = sprintf("%.1f", $diffTemp);				
-			Log3 $name, 4, "$iohash->{NAME}: $name old temp $oldTemp, age $timeSinceLastUpdate, new temp $temp, diff temp $diffTemp";
+			Log3 $name, 4, "$name: old temp $oldTemp, age $timeSinceLastUpdate, new temp $temp, diff temp $diffTemp";
 			my $maxDiffTemp = $timeSinceLastUpdate / 60 + $maxdeviation; 			# maxdeviation + 1.0 Kelvin/Minute
 			$maxDiffTemp = sprintf("%.1f", $maxDiffTemp + 0.05);						# round 0.1
-			Log3 $name, 4, "$iohash->{NAME}: $name max difference temperature $maxDiffTemp K";
+			Log3 $name, 4, "$name: max difference temperature $maxDiffTemp K";
 			if ($diffTemp > $maxDiffTemp) {
-				Log3 $name, 3, "$iohash->{NAME}: $name ERROR - Temp diff too large (old $oldTemp, new $temp, diff $diffTemp)";
+				Log3 $name, 3, "$name: ERROR - Temp diff too large (old $oldTemp, new $temp, diff $diffTemp)";
 			return "";
 			}
 		}
@@ -224,12 +224,12 @@ SD_WS07_Parse($$)
 			} else {
 				$diffHum = ($oldHum - $hum);
 			}
-			Log3 $name, 4, "$iohash->{NAME}: $name old hum $oldHum, age $timeSinceLastUpdate, new hum $hum, diff hum $diffHum";
+			Log3 $name, 4, "$name: old hum $oldHum, age $timeSinceLastUpdate, new hum $hum, diff hum $diffHum";
 			my $maxDiffHum = $timeSinceLastUpdate / 60 + $maxdeviation;				# maxdeviation + 1.0 %/Minute
 			$maxDiffHum = sprintf("%1.f", $maxDiffHum + 0.5);							# round 1
-			Log3 $name, 4, "$iohash->{NAME}: $name max difference humidity $maxDiffHum %";
+			Log3 $name, 4, "$name: max difference humidity $maxDiffHum %";
 			if ($diffHum > $maxDiffHum) {
-				Log3 $name, 3, "$iohash->{NAME}: $name ERROR - Hum diff too large (old $oldHum, new $hum, diff $diffHum)";
+				Log3 $name, 3, "$name: ERROR - Hum diff too large (old $oldHum, new $hum, diff $diffHum)";
 				return "";
 			}
 		}
