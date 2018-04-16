@@ -322,7 +322,7 @@ sub SD_WS07_Attr(@)
   <b>Attributes</b>
   <ul>
     <li>offset-temp<br>
-       This can be used to correct the temperature. for example: at 10, the temperature is 10 degrees higher.
+       This offset can be used to correct the temperature. For example: 10 means, that the temperature is 10 &deg;C higher.
     </li>
     <li>offset-hum<br>
        Works the same way as offset-temp.
