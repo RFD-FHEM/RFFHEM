@@ -4922,19 +4922,21 @@ sub SIGNALduino_OSV1() {
 	my ($name,$bitData,$id,$mcbitnum) = @_;
 	return (-1," message is to short") if (defined($ProtocolListSIGNALduino{$id}{length_min}) && $mcbitnum < $ProtocolListSIGNALduino{$id}{length_min} );
 	return (-1," message is to long") if (defined($ProtocolListSIGNALduino{$id}{length_max}) && $mcbitnum > $ProtocolListSIGNALduino{$id}{length_max} );
+
+	if (substr($bitData,20,1) != 0) {
+		$bitData =~ tr/01/10/; # invert message and check if it is possible to deocde now
+	}
+	
 	my $calcsum = oct( "0b" . reverse substr($bitData,0,8));
 	$calcsum += oct( "0b" . reverse substr($bitData,8,8));
 	$calcsum += oct( "0b" . reverse substr($bitData,16,8));
 	$calcsum = ($calcsum & 0xFF) + ($calcsum >> 8);
 	my $checksum = oct( "0b" . reverse substr($bitData,24,8));
-	
-	if (substr($bitData,20,1) != 0) {
-		$bitData =~ tr/01/10/; # invert message and check if it is possible to deocde now
-	} 
-	if ($calcsum != $checksum) {	# Checksum
+ 
+	if ($calcsum != $checksum) {	                        # Checksum
 		return (-1,"OSV1 - ERROR checksum not equal: $calcsum != $checksum");
 	} 
-	
+ 
 	SIGNALduino_Log3 $name, 4, "$name: OSV1 input data: $bitData";
 	my $newBitData = "00001010";                       # Byte 0:   Id1 = 0x0A
     $newBitData .= "01001101";                         # Byte 1:   Id2 = 0x4D
