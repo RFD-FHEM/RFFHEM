@@ -1,4 +1,4 @@
-# $Id: 00_SIGNALduino.pm 10488 2018-04-11 23:00:00Z v3.3.3-dev $
+# $Id: 00_SIGNALduino.pm 10488 2018-04-17 18:00:00Z v3.3.3-dev $
 #
 # v3.3.3 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -25,7 +25,7 @@ no warnings 'portable';
 
 
 use constant {
-	SDUINO_VERSION            => "v3.3.3-dev_11.04.",
+	SDUINO_VERSION            => "v3.3.3-dev_17.04.",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -1554,6 +1554,23 @@ my %ProtocolListSIGNALduino  = (
 			#clientmodule    => '',   	# not used now
 			#modulematch     => '^TX......', # not used now
 			length_min      => '12',
+			#length_max      => '44',
+		},
+	"80" => ##  MS;P1=-2708;P2=796;P3=-1387;P4=-8477;P5=8136;P6=-904;D=2456212321212323232321212121212121212123212321212121;CP=2;SP=4;
+			# https://github.com/RFD-FHEM/SIGNALDuino/issues/233
+		{
+			name		=> 'LM-101LD Rauchm',
+			comment		=> 'Unitec Rauchmelder',
+			id		=> '80',
+			zero		=> [1,-1.8], 	#
+			one		=> [1,-3.5],   	# 
+			sync		=> [1,-11,10,-1.2],	#
+			clockabs     	=> 790,
+			format 		=> 'twostate',	    # 
+			preamble	=> 'U80#',	# prepend to converted message	
+			#clientmodule    => '',   	# not used now
+			#modulematch     => '', # not used now
+			#length_min      => '12',
 			#length_max      => '44',
 		},
 );
@@ -3206,7 +3223,7 @@ sub SIGNALduno_Dispatch($$$$$)
 		$hash->{TIME} = time();
 		$hash->{DMSG} = $dmsg;
 		#my $event = 0;
-		if (substr(ucfirst($dmsg),0,1) eq 'U') { #u oder U
+		if (substr(ucfirst($dmsg),0,1) eq 'U') { # u oder U
 			#$event = 1;
 			DoTrigger($name, "DMSG " . $dmsg);
 			return if (substr($dmsg,0,1) eq 'U'); # Fuer $dmsg die mit U anfangen ist kein Dispatch notwendig, da es dafuer kein Modul gibt klein u wird dagegen dispatcht
