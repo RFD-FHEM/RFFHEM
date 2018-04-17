@@ -37,7 +37,7 @@ SD_WS07_Initialize($)
 {
   my ($hash) = @_;
 
-  $hash->{Match}     = "^P7#[A-Fa-f0-9]{6}F[A-Fa-f0-9]{2}(#R[A-F0-9][A-F0-9]){0,1}\$";    ## pos 7 ist aktuell immer 0xF
+  $hash->{Match}     = "^P7#[A-Fa-f0-9]{6}F[A-Fa-f0-9]{2}";    ## pos 7 ist aktuell immer 0xF
   $hash->{DefFn}     = "SD_WS07_Define";
   $hash->{UndefFn}   = "SD_WS07_Undef";
   $hash->{ParseFn}   = "SD_WS07_Parse";
@@ -45,7 +45,7 @@ SD_WS07_Initialize($)
   $hash->{AttrList}  = "IODev do_not_notify:1,0 ignore:0,1 showtime:1,0 " .
                        "max-deviation-temp:1,2,3,4,5,6,7,8,9,10,15,20,25,30,35,40,45,50 ".
                        "max-deviation-hum:1,2,3,4,5,6,7,8,9,10,15,20,25,30,35,40,45,50 ".
-                       "offset-hum:slider,1,1.0,100 offset-temp:slider,1,1.0,100 negation-batt:no,yes ".
+                       "offset-hum:slider,-50,1.0,50 offset-temp:slider,-25,1.0,25 negation-batt:no,yes ".
                         "$readingFnAttributes ";
   $hash->{AutoCreate} =
         {
@@ -175,7 +175,7 @@ SD_WS07_Parse($$)
 	}
 	
 	$hum += AttrVal($name, "offset-hum", 0);				# correction value for humidity (default 0 %)
-	if ($hum > 99) {
+	if ($hum > 99 || $hum < 1) {
 		Log3 $name, 3, "$iohash->{NAME}: $name ERROR - Humidity unknown ($hum)";
 		return "";
 	}
