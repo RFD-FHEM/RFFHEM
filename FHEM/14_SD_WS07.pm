@@ -155,7 +155,7 @@ SD_WS07_Parse($$)
     $def = $modules{SD_WS07}{defptr}{$deviceCode} if(!$def);
 
     if(!$def) {
-		Log3 $iohash, 1, "$name: UNDEFINED sensor $model detected, code $deviceCode";
+		Log3 $iohash, 1, "$name: UNDEFINED Sensor $model detected, code $deviceCode";
 		return "UNDEFINED $deviceCode SD_WS07 $deviceCode";
     }
         #Log3 $iohash, 3, 'SD_WS07: ' . $def->{NAME} . ' ' . $id;
@@ -249,7 +249,7 @@ SD_WS07_Parse($$)
     readingsBeginUpdate($hash);
     readingsBulkUpdate($hash, "state", $state);
     readingsBulkUpdate($hash, "temperature", $temp)  if ($temp ne"");
-    readingsBulkUpdate($hash, "humidity", $hum)  if ($hum ne "" && $hum != 0 );
+    readingsBulkUpdate($hash, "humidity", $hum)  if ($model ne "SD_WS07_T" && $hum != 0 );
         #my $battery = ReadingsVal($name, "battery", "unknown");
         #if ($bat ne $battery) {
 		readingsBulkUpdate($hash, "battery", $bat) if ($bat ne "");
