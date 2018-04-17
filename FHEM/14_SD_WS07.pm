@@ -175,7 +175,7 @@ SD_WS07_Parse($$)
 	}
 	
 	$hum += AttrVal($name, "offset-hum", 0);				# correction value for humidity (default 0 %)
-	if ($hum > 99 || $hum < 1) {
+	if ($model ne "SD_WS07_T" && $hum > 99 || $model ne "SD_WS07_T" && $hum < 1) {
 		Log3 $name, 3, "$iohash->{NAME}: $name ERROR - Humidity unknown ($hum)";
 		return "";
 	}
