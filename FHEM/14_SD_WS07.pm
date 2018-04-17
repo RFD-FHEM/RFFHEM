@@ -116,6 +116,8 @@ SD_WS07_Parse($$)
   # 0011 0110 1  010  000100000010  1111  00111000 0000  eas8007
   # 0111 0010 1  010  000010111100  1111  00000000 0000  other device from anfichtn
   # 1101 0010 0  000  000000010001  1111  00101000       other device from elektron-bbs
+  # 0110 0011 1  000  000010000001  1111  00000110		 other device from HomeAuto_User
+  # 1110 1011 1  000  000010001101  1111  00000000		 other device from HomeAuto_User
   #      ID  Bat CHN       TMP      ??   HUM
   
   #my $hashumidity = FALSE;
@@ -175,7 +177,7 @@ SD_WS07_Parse($$)
 	}
 	
 	$hum += AttrVal($name, "offset-hum", 0);				# correction value for humidity (default 0 %)
-	if ($model ne "SD_WS07_T" && $hum > 99 || $model ne "SD_WS07_T" && $hum < 1) {
+	if ($model ne "SD_WS07_T" && $hum > 100 || $model ne "SD_WS07_T" && $hum < 0) {
 		Log3 $name, 3, "$iohash->{NAME}: $name ERROR - Humidity unknown ($hum)";
 		return "";
 	}
@@ -194,7 +196,7 @@ SD_WS07_Parse($$)
    if($def) {
 		my $timeSinceLastUpdate = ReadingsAge($hash->{NAME}, "state", 0);
 		if ($timeSinceLastUpdate < 0) {
-			$timeSinceLastUpdate *= -1;
+			$timeSinceLastUpdate = -$timeSinceLastUpdate;
 		}
 		if (defined($hash->{READINGS}{temperature}{VAL}) && (defined(AttrVal($hash->{NAME},"max-deviation-temp",undef)))) {
 			my $diffTemp = 0;
@@ -249,7 +251,7 @@ SD_WS07_Parse($$)
     readingsBeginUpdate($hash);
     readingsBulkUpdate($hash, "state", $state);
     readingsBulkUpdate($hash, "temperature", $temp)  if ($temp ne"");
-    readingsBulkUpdate($hash, "humidity", $hum)  if ($model ne "SD_WS07_T" && $hum != 0 );
+    readingsBulkUpdate($hash, "humidity", $hum)  if ($model ne "SD_WS07_T" && $hum ne "" && $hum != 0);
         #my $battery = ReadingsVal($name, "battery", "unknown");
         #if ($bat ne $battery) {
 		readingsBulkUpdate($hash, "battery", $bat) if ($bat ne "");
