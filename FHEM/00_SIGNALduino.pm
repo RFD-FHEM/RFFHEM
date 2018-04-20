@@ -1,4 +1,4 @@
-# $Id: 00_SIGNALduino.pm 10488 2018-04-17 18:00:00Z v3.3.3-dev $
+# $Id: 00_SIGNALduino.pm 10488 2018-04-20 23:00:00Z v3.3.3-dev $
 #
 # v3.3.3 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -25,7 +25,7 @@ no warnings 'portable';
 
 
 use constant {
-	SDUINO_VERSION            => "v3.3.3-dev_17.04.",
+	SDUINO_VERSION            => "v3.3.3-dev_20.04.",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -410,6 +410,8 @@ my %ProtocolListSIGNALduino  = (
 			
 		}, 	
 	"13"    => 			## FLAMINGO  FA 21
+			# https://github.com/RFD-FHEM/RFFHEM/issues/21
+			# https://github.com/RFD-FHEM/RFFHEM/issues/233
 		{
             name			=> 'FLAMINGO FA21',	
 			id          	=> '13',
@@ -428,11 +430,12 @@ my %ProtocolListSIGNALduino  = (
 	# MU;P0=-17201;P1=112;P2=-1419;P3=-28056;P4=8092;P5=-942;P6=777;P7=-2755;D=12134567676762626762626762626767676762626762626267626260456767676262676262676262676767676262676262626762626045676767626267626267626267676767626267626262676262604567676762626762626762626767676762626762626267626260456767676262676262676262676767676262676262;CP=6;O;
 	"13.1"    => 			## FLAMINGO FA20 
 		{
-            name			=> 'FLAMINGO FA21 b',	
+            name			=> 'FLAMINGO FA21 / LM-101LD',
+			comment		=> 'FLAMINGO oder Unitec Rauchmelder',
 			id          	=> '13',
 			one				=> [1,-1.8],
 			zero			=> [1,-3.5],
-			start			=> [-22,10,-1],
+			start			=> [-23.5,10,-1],
 			clockabs		=> 800,
 			format 			=> 'twostate',	  		
 			preamble		=> 'P13#',				# prepend to converted message	
@@ -441,7 +444,22 @@ my %ProtocolListSIGNALduino  = (
 			length_min      => '24',
 			length_max      => '24',
 		}, 		
-	
+	"13.2" => ##  MS;P1=-2708;P2=796;P3=-1387;P4=-8477;P5=8136;P6=-904;D=2456212321212323232321212121212121212123212321212121;CP=2;SP=4;
+		{
+			name		=> 'LM-101LD Rauchm',
+			comment		=> 'Unitec Rauchmelder',
+			id		=> '13',
+			zero		=> [1,-1.8], 	#
+			one		=> [1,-3.5],   	# 
+			sync		=> [1,-11,10,-1.2],	#
+			clockabs     	=> 790,
+			format 		=> 'twostate',	    # 
+			preamble	=> 'P13#',	# prepend to converted message	
+			clientmodule    => 'FLAMINGO',
+			#modulematch     => '', # not used now
+			length_min      => '24',
+			length_max      => '24',
+		},
 	"14"    => 			## Heidemann HX
 		{
             name			=> 'Heidemann HX',	
@@ -1051,6 +1069,7 @@ my %ProtocolListSIGNALduino  = (
 		},
 	 "51"    => 
         {  # MS;P0=-16046;P1=552;P2=-1039;P3=983;P5=-7907;P6=-1841;P7=-4129;D=15161716171616161717171716161616161617161717171717171617171617161716161616161616171032323232;CP=1;SP=5;O;
+		# https://github.com/RFD-FHEM/RFFHEM/issues/118
             name			=> 'weather51',		# Logilink, NC, WS, TCM97001 etc.
 			comment			=> 'IAN 275901 Wetterstation Lidl',
 			id          	=> '51',
@@ -1554,23 +1573,6 @@ my %ProtocolListSIGNALduino  = (
 			#clientmodule    => '',   	# not used now
 			#modulematch     => '^TX......', # not used now
 			length_min      => '12',
-			#length_max      => '44',
-		},
-	"80" => ##  MS;P1=-2708;P2=796;P3=-1387;P4=-8477;P5=8136;P6=-904;D=2456212321212323232321212121212121212123212321212121;CP=2;SP=4;
-			# https://github.com/RFD-FHEM/SIGNALDuino/issues/233
-		{
-			name		=> 'LM-101LD Rauchm',
-			comment		=> 'Unitec Rauchmelder',
-			id		=> '80',
-			zero		=> [1,-1.8], 	#
-			one		=> [1,-3.5],   	# 
-			sync		=> [1,-11,10,-1.2],	#
-			clockabs     	=> 790,
-			format 		=> 'twostate',	    # 
-			preamble	=> 'U80#',	# prepend to converted message	
-			#clientmodule    => '',   	# not used now
-			#modulematch     => '', # not used now
-			#length_min      => '12',
 			#length_max      => '44',
 		},
 );
