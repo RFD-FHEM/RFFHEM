@@ -107,9 +107,9 @@ SD_WS07_Parse($$)
   my $bitData = unpack("B$blen", pack("H$hlen", $rawData)); 
 
   if (defined($rssi)) {
-	Log3 $iohash, 4, "$name: SD_WS07_Parse $model ($msg) length: $hlen RSSI = $rssi";
+	Log3 $iohash, 4, "$iohash->{NAME}: $name SD_WS07_Parse $model ($msg) length: $hlen RSSI = $rssi";
   } else {
-	Log3 $iohash, 4, "$name: SD_WS07_Parse $model ($msg) length: $hlen";
+	Log3 $iohash, 4, "$iohash->{NAME}: $name SD_WS07_Parse $model ($msg) length: $hlen";
   }
   
   #      4    8  9    12            24    28     36
@@ -127,7 +127,7 @@ SD_WS07_Parse($$)
   #   ....
   #}
     my $bitData2 = substr($bitData,0,8) . ' ' . substr($bitData,8,4) . ' ' . substr($bitData,12,12) . ' ' . substr($bitData,24,4) . ' ' . substr($bitData,28,8);
-    Log3 $iohash, 4, "$name: SD_WS07_Parse $model converted to bits " . $bitData2;
+    Log3 $iohash, 4, "$iohash->{NAME}: $name SD_WS07_Parse $model converted to bits " . $bitData2;
     
     my $id = substr($rawData,0,2);
 	 my $bat = substr($bitData,8,1);
@@ -146,7 +146,7 @@ SD_WS07_Parse($$)
 	my $longids = AttrVal($iohash->{NAME},'longids',0);
 	if ( ($longids ne "0") && ($longids eq "1" || $longids eq "ALL" || (",$longids," =~ m/,$model,/)))	{
 		$deviceCode=$model.'_'.$id.$channel;
-		Log3 $iohash,4, "$name: using longid $longids model $model";
+		Log3 $iohash,4, "$iohash->{NAME}: $name using longid $longids model $model";
 	} else {
 		$deviceCode = $model . "_" . $channel;
 	}
@@ -157,7 +157,7 @@ SD_WS07_Parse($$)
     $def = $modules{SD_WS07}{defptr}{$deviceCode} if(!$def);
 
     if(!$def) {
-		Log3 $iohash, 1, "$name: UNDEFINED Sensor $model detected, code $deviceCode";
+		Log3 $iohash, 1, "$iohash->{NAME}: $name UNDEFINED Sensor $model detected, code $deviceCode";
 		return "UNDEFINED $deviceCode SD_WS07 $deviceCode";
     }
         #Log3 $iohash, 3, 'SD_WS07: ' . $def->{NAME} . ' ' . $id;
@@ -171,7 +171,7 @@ SD_WS07_Parse($$)
 	if (!defined(AttrVal($hash->{NAME},"event-min-interval",undef))) {
 		my $minsecs = AttrVal($iohash->{NAME},'minsecs',0);
 		if($hash->{lastReceive} && (time() - $hash->{lastReceive} < $minsecs)) {
-			Log3 $hash, 4, "$deviceCode Dropped due to short time. minsecs=$minsecs";
+			Log3 $hash, 4, "$iohash->{NAME}: $deviceCode Dropped due to short time. minsecs=$minsecs";
 		  	return "";
 		}
 	}
@@ -183,7 +183,7 @@ SD_WS07_Parse($$)
 	}
 	
    if ($temp > 700 && $temp < 3840) {								# -25,6 .. 70,0 °C
-		Log3 $name, 3, "$iohash->{NAME}: $name: ERROR - Temperature unknown ($temp)";
+		Log3 $name, 3, "$iohash->{NAME}: $name ERROR - Temperature unknown ($temp)";
 		return "";
    } elsif ($temp >= 3840) {        # negative Temperaturen, ist ueberprueft worden
       $temp -= 4096;
@@ -208,12 +208,12 @@ SD_WS07_Parse($$)
 				$diffTemp = ($oldTemp - $temp);
 			}
 			$diffTemp = sprintf("%.1f", $diffTemp);				
-			Log3 $name, 4, "$name: old temp $oldTemp, age $timeSinceLastUpdate, new temp $temp, diff temp $diffTemp";
+			Log3 $name, 4, "$iohash->{NAME}: $name old temp $oldTemp, age $timeSinceLastUpdate, new temp $temp, diff temp $diffTemp";
 			my $maxDiffTemp = $timeSinceLastUpdate / 60 + $maxdeviation; 			# maxdeviation + 1.0 Kelvin/Minute
 			$maxDiffTemp = sprintf("%.1f", $maxDiffTemp + 0.05);						# round 0.1
-			Log3 $name, 4, "$name: max difference temperature $maxDiffTemp K";
+			Log3 $name, 4, "$iohash->{NAME}: $name max difference temperature $maxDiffTemp K";
 			if ($diffTemp > $maxDiffTemp) {
-				Log3 $name, 3, "$name: ERROR - Temp diff too large (old $oldTemp, new $temp, diff $diffTemp)";
+				Log3 $name, 3, "$iohash->{NAME}: $name ERROR - Temp diff too large (old $oldTemp, new $temp, diff $diffTemp)";
 			return "";
 			}
 		}
@@ -226,12 +226,12 @@ SD_WS07_Parse($$)
 			} else {
 				$diffHum = ($oldHum - $hum);
 			}
-			Log3 $name, 4, "$name: old hum $oldHum, age $timeSinceLastUpdate, new hum $hum, diff hum $diffHum";
+			Log3 $name, 4, "$iohash->{NAME}: $name old hum $oldHum, age $timeSinceLastUpdate, new hum $hum, diff hum $diffHum";
 			my $maxDiffHum = $timeSinceLastUpdate / 60 + $maxdeviation;				# maxdeviation + 1.0 %/Minute
 			$maxDiffHum = sprintf("%1.f", $maxDiffHum + 0.5);							# round 1
-			Log3 $name, 4, "$name: max difference humidity $maxDiffHum %";
+			Log3 $name, 4, "$iohash->{NAME}: $name max difference humidity $maxDiffHum %";
 			if ($diffHum > $maxDiffHum) {
-				Log3 $name, 3, "$name: ERROR - Hum diff too large (old $oldHum, new $hum, diff $diffHum)";
+				Log3 $name, 3, "$iohash->{NAME}: $name ERROR - Hum diff too large (old $oldHum, new $hum, diff $diffHum)";
 				return "";
 			}
 		}
