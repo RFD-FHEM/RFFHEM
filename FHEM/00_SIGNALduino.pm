@@ -528,7 +528,28 @@ my %ProtocolListSIGNALduino  = (
 			#length_max     => '76',		# Don't know maximal lenth of a valid message
 			postDemodulation => \&SIGNALduino_bit2Arctec,
 		},
-	
+    "17.1"	=> # intertechno
+			# MS;P0=244;P1=-1079;P2=-315;P5=-2596;D=050201020102010102010202010102010202010102020101020201020101020201020102010102020102010201020101020102020102010102010202010201010204;CP=0;SP=5;R=35;m=2;
+			# MS;P0=-1099;P1=252;P2=-288;P4=-2601;D=141210121012101012101212101012101212101012121010121210121010121210121012101012121012101210121010121012121012101210101212101210101213;CP=1;SP=4;R=35;m=1;
+			# https://www.sweetpi.de/blog/329/ein-ueberblick-ueber-433mhz-funksteckdosen-und-deren-protokolle
+        {
+            name			=> 'intertechno',
+			comment 		=> 'PIR-1000',
+			id          	=> '17.1',
+			one				=> [1,-1,1,-4.5],  #275,-275,275,-1225 
+			zero			=> [1,-4.5,1,-1],  #275,-1225,275,-275
+			sync			=> [1,-10],
+			end				=> [1,-40],
+			clockabs     	=> 275,			# -1 = auto
+			format 			=> 'twostate',	# tristate can't be migrated from bin into hex!
+			preamble		=> 'i',			# Append to converted message	
+			postamble		=> '00',		# Append to converted message	 	
+			clientmodule    => 'IT',   		# not used now
+			modulematch     => '^i......',  # not used now
+			length_min      => '32',
+			length_max     	=> '34',		# Don't know maximal lenth of a valid message
+			postDemodulation => \&SIGNALduino_bit2Arctec,
+		},
 	"18"    => 			## Oregon Scientific v1
 		{
             name			=> 'OSV1',	
