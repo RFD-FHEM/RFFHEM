@@ -43,9 +43,7 @@ SD_WS07_Initialize($)
   $hash->{ParseFn}   = "SD_WS07_Parse";
   $hash->{AttrFn}    = "SD_WS07_Attr";
   $hash->{AttrList}  = "IODev do_not_notify:1,0 ignore:0,1 showtime:1,0 " .
-                       "max-deviation-temp:1,2,3,4,5,6,7,8,9,10,15,20,25,30,35,40,45,50 ".
-                       "max-deviation-hum:1,2,3,4,5,6,7,8,9,10,15,20,25,30,35,40,45,50 ".
-                       "offset-hum:slider,-50,1.0,50 offset-temp:slider,-25,1.0,25 negation-batt:no,yes ".
+                       "negation-batt:no,yes ".
                         "$readingFnAttributes ";
   $hash->{AutoCreate} =
         {
@@ -93,7 +91,6 @@ SD_WS07_Parse($$)
 {
   my ($iohash, $msg) = @_;
   #my $rawData = substr($msg, 2);
-  my $name = $iohash->{NAME};
   my (undef ,$rawData, $rssi) = split("#",$msg);	
   if (defined($rssi)) {	
 	$rssi = hex(substr($rssi,1));	
@@ -102,32 +99,34 @@ SD_WS07_Parse($$)
   #$protocol=~ s/^P(\d+)/$1/; # extract protocol
 
   my $model = "SD_WS07";
+  my $typ = $model;
   my $hlen = length($rawData);
   my $blen = $hlen * 4;
   my $bitData = unpack("B$blen", pack("H$hlen", $rawData)); 
 
   if (defined($rssi)) {
-	Log3 $iohash, 4, "$iohash->{NAME}: $name SD_WS07_Parse $model ($msg) length: $hlen RSSI = $rssi";
+	Log3 $iohash, 4, "$iohash->{NAME}: SD_WS07_Parse $model ($msg) length: $hlen RSSI = $rssi";
   } else {
-	Log3 $iohash, 4, "$iohash->{NAME}: $name SD_WS07_Parse $model ($msg) length: $hlen";
+	Log3 $iohash, 4, "$iohash->{NAME}: SD_WS07_Parse $model ($msg) length: $hlen";
   }
   
   #      4    8  9    12            24    28     36
   # 0011 0110 1  010  000100000010  1111  00111000 0000  eas8007
   # 0111 0010 1  010  000010111100  1111  00000000 0000  other device from anfichtn
   # 1101 0010 0  000  000000010001  1111  00101000       other device from elektron-bbs
-  # 0110 0011 1  000  000010000001  1111  00000110		 other device from HomeAuto_User
-  # 1110 1011 1  000  000010001101  1111  00000000		 other device from HomeAuto_User
+  # 0110 0011 1  000  000011101010  1111  00001010		 other device from HomeAuto_User SD_WS07_TH_631
+  # 1110 1011 1  000  000010111000  1111  00000000		 other device from HomeAuto_User SD_WS07_T_EB1
+  # 1100 0100 1  000  000100100010  1111  00000000		 other device from HomeAuto_User SD_WS07_T_C41
   #      ID  Bat CHN       TMP      ??   HUM
   
-  #my $hashumidity = FALSE;
-  
-  ## Todo: Change decoding per model into a foreach  
-   #foreach $key (keys %models) {
-  #   ....
-  #}
+	# Modelliste
+	my %models = (
+		"0" => "T",
+		"1" => "TH",
+	);
+	
     my $bitData2 = substr($bitData,0,8) . ' ' . substr($bitData,8,4) . ' ' . substr($bitData,12,12) . ' ' . substr($bitData,24,4) . ' ' . substr($bitData,28,8);
-    Log3 $iohash, 4, "$iohash->{NAME}: $name SD_WS07_Parse $model converted to bits " . $bitData2;
+    Log3 $iohash, 4, "$iohash->{NAME}: SD_WS07_Parse $model converted to bits " . $bitData2;
     
     my $id = substr($rawData,0,2);
 	 my $bat = substr($bitData,8,1);
@@ -135,35 +134,46 @@ SD_WS07_Parse($$)
     my $temp = oct("0b" . substr($bitData,12,12));
     my $bit24bis27 = oct("0b".substr($bitData,24,4));
     my $hum = oct("0b" . substr($bitData,28,8));
+	my $modelkey;
     
-	if ($hum==0) {
-    	$model=$model."_T";		
-    } else {
-    	$model=$model."_TH";		
-    }  
+	if ($hum == 0) {
+		$modelkey = $hum;
+	} elsif ($hum != 0) {
+		$modelkey = 1;
+	}
     
+	$model = $model."_".$models{$modelkey};
     my $deviceCode;
 	my $longids = AttrVal($iohash->{NAME},'longids',0);
 	if ( ($longids ne "0") && ($longids eq "1" || $longids eq "ALL" || (",$longids," =~ m/,$model,/)))	{
-		$deviceCode=$model.'_'.$id.$channel;
-		Log3 $iohash,4, "$iohash->{NAME}: $name using longid $longids model $model";
+		$deviceCode = $id.$channel;
+		Log3 $iohash,4, "$iohash->{NAME}: using longid $longids model $model";
 	} else {
-		$deviceCode = $model . "_" . $channel;
+		$deviceCode = $channel;
 	}
     
+	### Model specific attributes
+	if ($models{$modelkey} eq "T") {
+		addToDevAttrList($model."_".$deviceCode,"max-deviation-temp:1,2,3,4,5,6,7,8,9,10,15,20,25,30,35,40,45,50 ");
+		addToDevAttrList($model."_".$deviceCode,"offset-temp:slider,-25,1.0,25");
+	} elsif ($models{$modelkey} eq "TH") {
+		addToDevAttrList($model."_".$deviceCode,"max-deviation-hum:1,2,3,4,5,6,7,8,9,10,15,20,25,30,35,40,45,50 ");
+		addToDevAttrList($model."_".$deviceCode,"offset-hum:slider,-50,1.0,50");
+	}
     #print Dumper($modules{SD_WS07}{defptr});
     
     my $def = $modules{SD_WS07}{defptr}{$iohash->{NAME} . "." . $deviceCode};
     $def = $modules{SD_WS07}{defptr}{$deviceCode} if(!$def);
 
+	my $device = $model."_".$deviceCode;
     if(!$def) {
-		Log3 $iohash, 1, "$iohash->{NAME}: $name UNDEFINED Sensor $model detected, code $deviceCode";
-		return "UNDEFINED $deviceCode SD_WS07 $deviceCode";
+		Log3 $iohash, 1, "$iohash->{NAME}: UNDEFINED Sensor $model detected, code $deviceCode $bitData $hum";
+		return "UNDEFINED $device SD_WS07 $deviceCode";
     }
         #Log3 $iohash, 3, 'SD_WS07: ' . $def->{NAME} . ' ' . $id;
 	
 	my $hash = $def;
-	$name = $hash->{NAME};
+	my $name = $hash->{NAME};
 	return "" if(IsIgnored($name));
 	
 	#Log3 $name, 4, "$iohash->{NAME} SD_WS07: $name ($rawData)";  
@@ -217,7 +227,7 @@ SD_WS07_Parse($$)
 			return "";
 			}
 		}
-		if (defined($hash->{READINGS}{humidity}{VAL}) && defined(AttrVal($hash->{NAME},"max-deviation-hum",undef))) {
+		if (defined($hash->{READINGS}{humidity}{VAL}) && defined(AttrVal($hash->{NAME},"max-deviation-hum",undef)) && $model eq "SD_WS07_TH") {
 			my $diffHum = 0;
 			my $oldHum = ReadingsVal($name, "humidity", undef);
 			my $maxdeviation = AttrVal($name, "max-deviation-hum", 1);				# default 1 %
@@ -249,9 +259,10 @@ SD_WS07_Parse($$)
     my $state = "T: $temp". ($hum>0 ? " H: $hum":"");
     
     readingsBeginUpdate($hash);
+	readingsBulkUpdate($hash, "model", $models{$modelkey});
     readingsBulkUpdate($hash, "state", $state);
     readingsBulkUpdate($hash, "temperature", $temp)  if ($temp ne"");
-    readingsBulkUpdate($hash, "humidity", $hum)  if ($model ne "SD_WS07_T" && $hum ne "" && $hum != 0);
+    readingsBulkUpdate($hash, "humidity", $hum)  if ($models{$modelkey} eq "TH");
         #my $battery = ReadingsVal($name, "battery", "unknown");
         #if ($bat ne $battery) {
 		readingsBulkUpdate($hash, "battery", $bat) if ($bat ne "");
