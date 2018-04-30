@@ -157,7 +157,9 @@ SD_WS07_Parse($$)
 		addToDevAttrList($model."_".$deviceCode,"max-deviation-temp:1,2,3,4,5,6,7,8,9,10,15,20,25,30,35,40,45,50 ");
 		addToDevAttrList($model."_".$deviceCode,"offset-temp:slider,-25,1.0,25");
 	} elsif ($models{$modelkey} eq "TH") {
+		addToDevAttrList($model."_".$deviceCode,"max-deviation-temp:1,2,3,4,5,6,7,8,9,10,15,20,25,30,35,40,45,50 ");
 		addToDevAttrList($model."_".$deviceCode,"max-deviation-hum:1,2,3,4,5,6,7,8,9,10,15,20,25,30,35,40,45,50 ");
+		addToDevAttrList($model."_".$deviceCode,"offset-temp:slider,-25,1.0,25");
 		addToDevAttrList($model."_".$deviceCode,"offset-hum:slider,-50,1.0,50");
 	}
     #print Dumper($modules{SD_WS07}{defptr});
@@ -167,7 +169,7 @@ SD_WS07_Parse($$)
 
 	my $device = $model."_".$deviceCode;
     if(!$def) {
-		Log3 $iohash, 1, "$iohash->{NAME}: UNDEFINED Sensor $model detected, code $deviceCode $bitData $hum";
+		Log3 $iohash, 1, "$iohash->{NAME}: UNDEFINED Sensor $model detected, code $deviceCode";
 		return "UNDEFINED $device SD_WS07 $deviceCode";
     }
         #Log3 $iohash, 3, 'SD_WS07: ' . $def->{NAME} . ' ' . $id;
@@ -227,7 +229,7 @@ SD_WS07_Parse($$)
 			return "";
 			}
 		}
-		if (defined($hash->{READINGS}{humidity}{VAL}) && defined(AttrVal($hash->{NAME},"max-deviation-hum",undef)) && $model eq "SD_WS07_TH") {
+		if (exists($hash->{READINGS}{humidity}{VAL}) && defined(AttrVal($hash->{NAME},"max-deviation-hum",undef)) && $model eq "SD_WS07_TH") {
 			my $diffHum = 0;
 			my $oldHum = ReadingsVal($name, "humidity", undef);
 			my $maxdeviation = AttrVal($name, "max-deviation-hum", 1);				# default 1 %
