@@ -340,10 +340,12 @@ sub SD_WS07_Attr(@)
   <b>Attributes</b>
   <ul>
     <li>offset-temp<br>
-       This offset can be used to correct the temperature. For example: 10 means, that the temperature is 10 &deg;C higher.
+       This offset can be used to correct the temperature. For example: 10 means, that the temperature is 10 &deg;C higher.<br>
+	   Values from -25 to +25 can be set via Slider.
     </li>
     <li>offset-hum<br>
-       Works the same way as offset-temp.
+       Works the same way as offset-temp.<br>
+	   Values from -50 to +50 can be set via Slider.
     </li>
     <li><a href="#do_not_notify">do_not_notify</a></li>
     <li><a href="#ignore">ignore</a></li>
@@ -420,10 +422,12 @@ sub SD_WS07_Attr(@)
   <b>Attribute</b>
   <ul>
     <li>offset-temp<br>
-       Damit kann die Temperatur korrigiert werden. Z.B. mit 10 wird eine um 10 Grad h&ouml;here Temperatur angezeigt.
+       Damit kann die Temperatur korrigiert werden. z.B. mit 10 wird eine um 10 Grad h&ouml;here Temperatur angezeigt.<br>
+	   Werte von -25 bis +25 k&ouml;nnen via Slider eingestellt werden.
     </li>
     <li>offset-hum<br>
-       Damit kann die Luftfeuchtigkeit korrigiert werden.
+       Damit kann die Luftfeuchtigkeit korrigiert werden.<br>
+	   Werte von -50 bis +50 k&ouml;nnen via Slider eingestellt werden.
     </li>
     <li><a href="#do_not_notify">do_not_notify</a></li>
     <li><a href="#ignore">ignore</a></li>
