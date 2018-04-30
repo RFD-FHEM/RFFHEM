@@ -229,7 +229,7 @@ SD_WS07_Parse($$)
 			return "";
 			}
 		}
-		if (exists($hash->{READINGS}{humidity}{VAL}) && defined(AttrVal($hash->{NAME},"max-deviation-hum",undef)) && $model eq "SD_WS07_TH") {
+		if (defined($hash->{READINGS}{humidity}{VAL}) && defined(AttrVal($hash->{NAME},"max-deviation-hum",undef)) && $models{$modelkey} eq "TH") {
 			my $diffHum = 0;
 			my $oldHum = ReadingsVal($name, "humidity", undef);
 			my $maxdeviation = AttrVal($name, "max-deviation-hum", 1);				# default 1 %
@@ -272,6 +272,9 @@ SD_WS07_Parse($$)
     readingsBulkUpdate($hash, "channel", $channel) if ($channel ne "");
     readingsEndUpdate($hash, 1); # Notify is done by Dispatch
 
+	### ZusatzCheck | Beauty - humidity wird einmal definiert obwohl Typ T ###
+	delete $hash->{READINGS}{"humidity"} if($hash->{READINGS} && $models{$modelkey} eq "T");
+	
    if(defined($rssi)) {
 		$hash->{RSSI} = $rssi;
    }
