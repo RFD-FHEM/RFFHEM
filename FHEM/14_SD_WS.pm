@@ -155,7 +155,7 @@ sub SD_WS_Parse($$)
 			temp => 	sub {my (undef,$bitData) = @_; return (((SD_WS_binaryToNumber($bitData,22,25)*256 +  SD_WS_binaryToNumber($bitData,18,21)*16 + SD_WS_binaryToNumber($bitData,14,17)) *10 -12200) /18)/10;  },	#temp
 			hum => 		sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,30,33)*16 + SD_WS_binaryToNumber($bitData,26,29));  }, 					#hum
 			channel => 	sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,12,13)+1 );  }, 		#channel
-     		bat => 		sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,34) eq "1" ? "ok" : "critical";},
+     		bat => 		sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,34) eq "1" ? "ok" : "low";},
     # 		sync => 	sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,35,35) eq "1" ? "true" : "false");},
    	 	 } ,       
      51 =>
@@ -169,7 +169,7 @@ sub SD_WS_Parse($$)
 			temp => 	sub {my (undef,$bitData) = @_; return round(((SD_WS_binaryToNumber($bitData,16,27)) -1220) *5 /90.0,1); },	#temp
 			hum => 		sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,28,31)*10) + (SD_WS_binaryToNumber($bitData,32,35));  }, 		#hum
 			channel => 	sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,36,39) );  }, 		#channel
-     		bat => 		sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,13) eq "1" ? "crititcal" : "ok";},
+     		bat => 		sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,13) eq "1" ? "low" : "ok";},
       		trend => 	sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,15,16) eq "01" ? "rising" : SD_WS_binaryToNumber($bitData,14,15) eq "00" ? "neutral" : "rising";},
      # 		sync => 	sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,35,35) eq "1" ? "true" : "false");},
    	 	 }   ,  
@@ -219,7 +219,7 @@ sub SD_WS_Parse($$)
 							    }
 							}, 																			
 			id => 		sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,8,15); },   							   # random id
-			bat => 		sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,16) eq "1" ? "crititcal" : "ok";},  	   # bat?
+			bat => 		sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,16) eq "1" ? "low" : "ok";},  	   # bat?
 			channel => 	sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,17,19)+1 );  },						   # channel
 			temp => 	sub {my (undef,$bitData) = @_; return round((SD_WS_binaryToNumber($bitData,20,31)-720)*0.0556,1); }, 		   # temp
 			hum => 		sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,32,39));  }, 							   # hum
@@ -501,11 +501,12 @@ sub SD_WS_Parse($$)
     $bitData = unpack("B$blen", pack("H$hlen", $rawData)); 
    	Log3 $iohash, 4, "$name converted to bits: WH2 " . $bitData;    
     $model = "SD_WS_WH2";
-	  $SensorTyp = "WH2";
-	  $id = 	SD_WS_bin2dec(substr($bitData,$vorpre + 4,6));
+	$SensorTyp = "WH2";
+	$id = 	SD_WS_bin2dec(substr($bitData,$vorpre + 4,6));
     $id = sprintf('%03X', $id); 
-	 	$channel = 	0;
-    $bat =  	SD_WS_bin2dec(substr($bitData,$vorpre + 20,1));
+	$channel = 	0;
+    $bat = SD_WS_binaryToNumber($bitData,$vorpre + 20) eq "1" ? "low" : "ok";},
+     
     $sign = 	SD_WS_bin2dec(substr($bitData,$vorpre + 12,1)); 
     
     if ($sign == 0) {
@@ -609,6 +610,7 @@ sub SD_WS_Parse($$)
 	readingsBulkUpdate($hash, "temperature", $temp)  if (defined($temp)&& ($temp > -60 && $temp < 70 ));
 	readingsBulkUpdate($hash, "humidity", $hum)  if (defined($hum) && ($hum > 0 && $hum < 100 )) ;
 	readingsBulkUpdate($hash, "battery", $bat) if (defined($bat) && length($bat) > 0) ;
+	readingsBulkUpdate($hash, "batteryState", $bat) if (defined($bat) && length($bat) > 0) ;
 	readingsBulkUpdate($hash, "channel", $channel) if (defined($channel)&& length($channel) > 0);
 	readingsBulkUpdate($hash, "trend", $trend) if (defined($trend) && length($trend) > 0);
 	
