@@ -593,8 +593,10 @@
 			length_max      => '24',				
     	},
     "33" => #Thermo-/Hygrosensor S014
+	# MS;P0=-7871;P2=-1960;P3=578;P4=-3954;D=030323232323434343434323232323234343434323234343234343234343232323432323232323232343234;CP=3;SP=0;R=0;m=0;
+    # sensor id=62, channel=1, temp=21.0555555555556, hum=76, bat=ok
     	{   
-       		name			=> 'weather33',		#
+       		name			=> 'weather33',		
 			id          	=> '33',
 			one				=> [1,-8],
 			zero			=> [1,-4],
@@ -603,7 +605,7 @@
 			format     		=> 'twostate',  		# not used now
 			preamble		=> 'W33#',				# prepend to converted message	
 			postamble		=> '',					# Append to converted message	 	
-			clientmodule    => 'SD_WS',      			# not used now
+			clientmodule    => 'SD_WS',      		# not used now
 			#modulematch     => '',     			# not used now
 			length_min      => '42',
 			length_max      => '44',
