@@ -3331,29 +3331,36 @@ sub SIGNALduino_postDemo_WS2000($@) {
 sub SIGNALduino_postDemo_WS7053($@) {
 	my ($name, @bit_msg) = @_;
 	my $msg = join("",@bit_msg);
-	my $new_msg ="";
-	my $parity = 0;									# Parity even
-   if (length($msg) > 32) {                  # start not correct
-      $msg = substr($msg,1)
-   }
-	SIGNALduino_Log3 $name, 4, "$name: WS7053 MSG = $msg";
-	if (substr($msg,0,8) ne "10100000") {		# check ident
-		SIGNALduino_Log3 $name, 3, "$name: WS7053 ERROR - Ident not 1010 0000 - " . substr($msg,0,8);
+	my $parity = 0;	                       # Parity even
+	SIGNALduino_Log3 $name, 4, "$name: WS7053 - MSG = $msg";
+	my $msg_start = index($msg, "10100000");
+	if ($msg_start > 0) {                  # start not correct
+		$msg = substr($msg, $msg_start);
+		$msg .= "0";
+		SIGNALduino_Log3 $name, 5, "$name: WS7053 - cut $msg_start char(s) at begin";
+	}
+	if ($msg_start < 0) {                  # start not found
+		SIGNALduino_Log3 $name, 3, "$name: WS7053 ERROR - Ident 10100000 not found";
 		return 0, undef;
 	} else {
-		for(my $i = 15; $i < 28; $i++) {			# Parity over bit 15 and 12 bit temperature
-	      $parity += substr($msg, $i, 1);
-		}
-		if ($parity % 2 != 0) {
-			SIGNALduino_Log3 $name, 3, "$name: WS7053 ERROR - Parity not even";
-			return 0, undef;
+		if (length($msg) < 32) {             # msg too short
+			SIGNALduino_Log3 $name, 3, "$name: WS7053 ERROR - msg too short, length " . length($msg);
+		return 0, undef;
 		} else {
-			SIGNALduino_Log3 $name, 5, "$name: WS7053 before: " . substr($msg,0,4) ." ". substr($msg,4,4) ." ". substr($msg,8,4) ." ". substr($msg,12,4) ." ". substr($msg,16,4) ." ". substr($msg,20,4) ." ". substr($msg,24,4) ." ". substr($msg,28,4);
-         # Format from 7053:  Bit 0-7 Ident, Bit 8-15 Rolling Code/Parity, Bit 16-27 Temperature (12.3), Bit 28-31 Zero
-			$new_msg = substr($msg,0,28) . substr($msg,16,8) . substr($msg,28,4);
-         # Format for CUL_TX: Bit 0-7 Ident, Bit 8-15 Rolling Code/Parity, Bit 16-27 Temperature (12.3), Bit 28 - 35 Temperature (12), Bit 36-39 Zero
-			SIGNALduino_Log3 $name, 5, "$name: WS7053 after:  " . substr($new_msg,0,4) ." ". substr($new_msg,4,4) ." ". substr($new_msg,8,4) ." ". substr($new_msg,12,4) ." ". substr($new_msg,16,4) ." ". substr($new_msg,20,4) ." ". substr($new_msg,24,4) ." ". substr($new_msg,28,4) ." ". substr($new_msg,32,4) ." ". substr($new_msg,36,4);
-			return (1,split("",$new_msg));
+			for(my $i = 15; $i < 28; $i++) {   # Parity over bit 15 and 12 bit temperature
+				$parity += substr($msg, $i, 1);
+			}
+			if ($parity % 2 != 0) {
+				SIGNALduino_Log3 $name, 3, "$name: WS7053 ERROR - Parity not even";
+				return 0, undef;
+			} else {
+				SIGNALduino_Log3 $name, 5, "$name: WS7053 before: " . substr($msg,0,4) ." ". substr($msg,4,4) ." ". substr($msg,8,4) ." ". substr($msg,12,4) ." ". substr($msg,16,4) ." ". substr($msg,20,4) ." ". substr($msg,24,4) ." ". substr($msg,28,4);
+				# Format from 7053:  Bit 0-7 Ident, Bit 8-15 Rolling Code/Parity, Bit 16-27 Temperature (12.3), Bit 28-31 Zero
+				my $new_msg = substr($msg,0,28) . substr($msg,16,8) . substr($msg,28,4);
+				# Format for CUL_TX: Bit 0-7 Ident, Bit 8-15 Rolling Code/Parity, Bit 16-27 Temperature (12.3), Bit 28 - 35 Temperature (12), Bit 36-39 Zero
+				SIGNALduino_Log3 $name, 5, "$name: WS7053 after:  " . substr($new_msg,0,4) ." ". substr($new_msg,4,4) ." ". substr($new_msg,8,4) ." ". substr($new_msg,12,4) ." ". substr($new_msg,16,4) ." ". substr($new_msg,20,4) ." ". substr($new_msg,24,4) ." ". substr($new_msg,28,4) ." ". substr($new_msg,32,4) ." ". substr($new_msg,36,4);
+				return (1,split("",$new_msg));
+			}
 		}
 	}
 }
