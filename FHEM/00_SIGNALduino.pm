@@ -4038,6 +4038,7 @@ sub SIGNALduino_Log3($$$)
     <li>CTW600, WH1080	-> 14_SD_WS09 </li>
     <li>Hama TS33C, Bresser Thermo/Hygro Sensor -> 14_Hideki</li>
     <li>FreeTec Aussenmodul NC-7344 -> 14_SD_WS07</li>
+    <li>La Crosse WS-7035, WS-7053, WS-7054 -> 14_CUL_TX</li>
 	</ul>
 	<br><br>
 
@@ -4367,6 +4368,7 @@ With a # at the beginnging whitelistIDs can be deactivated.
     <li>CTW600, WH1080	-> 14_SD_WS09.pm</li>
     <li>Hama TS33C, Bresser Thermo/Hygro Sensoren -> 14_Hideki.pm</li>
     <li>FreeTec Aussenmodul NC-7344 -> 14_SD_WS07.pm</li>
+    <li>La Crosse WS-7035, WS-7053, WS-7054 -> 14_CUL_TX</li>
 	</ul>
 	<br><br>
 
