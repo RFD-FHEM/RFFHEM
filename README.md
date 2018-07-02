@@ -43,6 +43,7 @@ Supported Devices / Protocols
 |Clarus | remote power socket|
 |WH2 | (TFA 30.3157 nur Temp, Hum = 255 -> nicht angezeigt)|
 |TS-K108W11 | Doorbell |
+|WS-7035, WS-7053, WS7054 | Temperature sensor 433MHz |
 
 How to install
 ======

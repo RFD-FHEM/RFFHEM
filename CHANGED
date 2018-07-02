@@ -1,5 +1,6 @@
-02.07.2018
-SD_WS_07: fix for weather trend 2759001)
+02.06.2018
+  00_SIGNALduino.pm update postdemodulation WS7053, WS7054 - better processing start of message
+  SD_WS_07: fix for weather trend 2759001)
 16.03.2018
 14_SD_WS_Maverick: rename Readings, fit to Maverick_RFXTRX now
         added attribute inactivityInterval and updated commandref
