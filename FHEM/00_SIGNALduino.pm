@@ -2771,22 +2771,24 @@ sub SIGNALduino_IdList($@)
 	my @msIdList = ();
 	my @muIdList = ();
 	my @mcIdList = ();
+	my @skipedId_p = ();
+	my @skipedId_y = ();
 
 	if (!defined($aVal)) {
 		$aVal = AttrVal($name,"whitelist_IDs","");
 	}
-	SIGNALduino_Log3 $name, 3, "$name sduinoIdList: whitelistIds=$aVal";
+	SIGNALduino_Log3 $name, 3, "$name: ID whitelist=$aVal" if ($aVal);
 	
 	if (!defined($blacklist)) {
 		$blacklist = AttrVal($name,"blacklist_IDs","");
 	}
-	SIGNALduino_Log3 $name, 3, "$name sduinoIdList: blacklistIds=$blacklist";
+	SIGNALduino_Log3 $name, 3, "$name: ID blacklist=$blacklist" if ($blacklist);
 	
 	if (!defined($develop)) {
 		$develop = AttrVal($name,"development","");
 	}
 	$develop = lc($develop);
-	SIGNALduino_Log3 $name, 3, "$name sduinoIdList: development=$develop";
+	SIGNALduino_Log3 $name, 3, "$name: IDlist development=$develop" if ($develop);
 
 	my %WhitelistIDs;
 	my %BlacklistIDs;
@@ -2831,14 +2833,17 @@ sub SIGNALduino_IdList($@)
 		if (defined($ProtocolListSIGNALduino{$id}{developId}) && substr($ProtocolListSIGNALduino{$id}{developId},0,1) eq "p") {
 			my $devid = "p$id";
 			if ($develop !~ m/$devid/) {		# skip wenn die Id nicht im Attribut development steht
-				SIGNALduino_Log3 $name, 3, "$name: ID=$devid skiped (developId=p)";
+				#SIGNALduino_Log3 $name, 3, "$name: ID=$devid skiped (developId=p)";
+				push (@skipedId_p, $devid);
 				next;
 			}
 		}
 		
 		if (defined($ProtocolListSIGNALduino{$id}{developId}) && substr($ProtocolListSIGNALduino{$id}{developId},0,1) eq "y") {
+			my $devid = "y$id";
 			if ($develop !~ m/y/) {			# skip wenn y nicht im Attribut development steht
-				SIGNALduino_Log3 $name, 3, "$name: ID=$id skiped (developId=y)";
+				#SIGNALduino_Log3 $name, 3, "$name: ID=$id skiped (developId=y)";
+				push (@skipedId_y, $devid);
 				next;
 			}
 		}
@@ -2857,13 +2862,17 @@ sub SIGNALduino_IdList($@)
 		}
 	}
 
-	@msIdList = sort @msIdList;
-	@muIdList = sort @muIdList;
-	@mcIdList = sort @mcIdList;
+	@msIdList = sort {$a <=> $b} @msIdList;
+	@muIdList = sort {$a <=> $b} @muIdList;
+	@mcIdList = sort {$a <=> $b} @mcIdList;
+	@skipedId_p = sort @skipedId_p;
+	@skipedId_y = sort @skipedId_y;
 
 	SIGNALduino_Log3 $name, 3, "$name: IDlist MS @msIdList";
 	SIGNALduino_Log3 $name, 3, "$name: IDlist MU @muIdList";
     SIGNALduino_Log3 $name, 3, "$name: IDlist MC @mcIdList";
+	SIGNALduino_Log3 $name, 3, "$name: IDlist skiped (developID=p) @skipedId_p" if (scalar @skipedId_p > 0);
+	SIGNALduino_Log3 $name, 3, "$name: IDlist skiped (developID=y) @skipedId_y" if (scalar @skipedId_y > 0);
 	
 	$hash->{msIdList} = \@msIdList;
     $hash->{muIdList} = \@muIdList;
