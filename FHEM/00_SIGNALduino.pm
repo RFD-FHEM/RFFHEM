@@ -2768,18 +2768,18 @@ sub SIGNALduino_IdList($@)
 	if (!defined($aVal)) {
 		$aVal = AttrVal($name,"whitelist_IDs","");
 	}
-	SIGNALduino_Log3 $name, 3, "$name sduinoIdList: whitelistIds=$aVal";
+	SIGNALduino_Log3 $name, 3, "$name: ID whitelist=$aVal" if ($aVal);
 	
 	if (!defined($blacklist)) {
 		$blacklist = AttrVal($name,"blacklist_IDs","");
 	}
-	SIGNALduino_Log3 $name, 3, "$name sduinoIdList: blacklistIds=$blacklist";
+	SIGNALduino_Log3 $name, 3, "$name: ID blacklist=$blacklist" if ($blacklist);
 	
 	if (!defined($develop)) {
 		$develop = AttrVal($name,"development","");
 	}
 	$develop = lc($develop);
-	SIGNALduino_Log3 $name, 3, "$name sduinoIdList: development=$develop";
+	SIGNALduino_Log3 $name, 3, "$name: IDlist development=$develop" if ($develop);
 
 	my %WhitelistIDs;
 	my %BlacklistIDs;
