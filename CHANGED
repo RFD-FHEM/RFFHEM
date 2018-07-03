@@ -1,3 +1,5 @@
+03.07.2018
+  14_SD_WS07: Support batteryState reading + mod Code for models
 16.03.2018
 14_SD_WS_Maverick: rename Readings, fit to Maverick_RFXTRX now
         added attribute inactivityInterval and updated commandref
