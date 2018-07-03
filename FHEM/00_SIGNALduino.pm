@@ -2195,7 +2195,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 			my $message_start=0 ;
 			my $startLogStr="";
 			
-			if (defined($ProtocolListSIGNALduino{$id}{start}))
+			if (defined($ProtocolListSIGNALduino{$id}{start}))	# wenn start definiert ist, dann startStr ermitteln und in rawData suchen und in der rawData alles bis zum startStr abschneiden
 			{
 				@msgStartLst = $ProtocolListSIGNALduino{$id}{start};
 				Debug "msgStartLst: ".Dumper(@msgStartLst)  if ($debug);
@@ -2283,6 +2283,9 @@ sub SIGNALduino_Parse_MU($$$$@)
 			#Debug $signal_width;
 			
 			my @bit_msg=();			# array to store decoded signal bits
+			
+			my $repeat=0;
+			my $repeatStr="";
 			 
 			#undef @msgStartLst;
 			
@@ -2344,10 +2347,14 @@ sub SIGNALduino_Parse_MU($$$$@)
 						$dmsg = "$ProtocolListSIGNALduino{$id}{preamble}"."$dmsg" if (defined($ProtocolListSIGNALduino{$id}{preamble}));
 						
 						if (defined($rssi)) {
-							SIGNALduino_Log3 $name, 4, "$name: decoded matched MU Protocol id $id dmsg $dmsg length " . scalar @bit_msg . " RSSI = $rssi";
+							SIGNALduino_Log3 $name, 4, "$name: decoded matched MU Protocol id $id dmsg $dmsg length " . scalar @bit_msg . $repeatStr . " RSSI = $rssi";
 						} else {
-							SIGNALduino_Log3 $name, 4, "$name: decoded matched MU Protocol id $id dmsg $dmsg length " . scalar @bit_msg;
+							SIGNALduino_Log3 $name, 4, "$name: decoded matched MU Protocol id $id dmsg $dmsg length " . scalar @bit_msg . $repeatStr;
 						}
+						
+						$repeat += 1;
+						$repeatStr = " repeat $repeat"; 
+						next if ($repeat > 20);		# zur Sicherheit, damit es auf gar keinen Fall zu einer Endlosschleife kommen kann
 						
 						my $modulematch;
 						if (defined($ProtocolListSIGNALduino{$id}{modulematch})) {
