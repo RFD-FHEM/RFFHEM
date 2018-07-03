@@ -1,3 +1,6 @@
+03.07.2018
+ 00_SIGNALduino.pm 
+      Log Eintrage beim RESTART geordnet / vereinfacht
 16.03.2018
 14_SD_WS_Maverick: rename Readings, fit to Maverick_RFXTRX now
         added attribute inactivityInterval and updated commandref
