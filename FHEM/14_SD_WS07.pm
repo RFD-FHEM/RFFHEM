@@ -210,7 +210,7 @@ SD_WS07_Parse($$)
 		if ($timeSinceLastUpdate < 0) {
 			$timeSinceLastUpdate = -$timeSinceLastUpdate;
 		}
-		if (defined($hash->{READINGS}{temperature}{VAL}) && (defined(AttrVal($hash->{NAME},"max-deviation-temp",undef)))) {
+		if (ReadingsVal($name, "temperature", undef) && (defined(AttrVal($hash->{NAME},"max-deviation-temp",undef)))) {
 			my $diffTemp = 0;
 			my $oldTemp = ReadingsVal($name, "temperature", undef);
 			my $maxdeviation = AttrVal($name, "max-deviation-temp", 1);				# default 1 K
@@ -274,7 +274,8 @@ SD_WS07_Parse($$)
     readingsEndUpdate($hash, 1); # Notify is done by Dispatch
 
 	### ZusatzCheck | Beauty - humidity wird einmal definiert obwohl Typ T ###
-	delete $hash->{READINGS}{"humidity"} if($hash->{READINGS} && $models{$modelkey} eq "T");
+	#delete $hash->{READINGS}{"humidity"} if($hash->{READINGS} && $models{$modelkey} eq "T");
+	delete $hash->{READINGS}{humidity} if($hash->{READINGS}{humidity} && $models{$modelkey} eq "T");
 	
    if(defined($rssi)) {
 		$hash->{RSSI} = $rssi;
