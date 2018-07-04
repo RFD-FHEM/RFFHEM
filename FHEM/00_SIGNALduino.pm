@@ -4024,23 +4024,28 @@ sub SIGNALduino_Log3($$$)
 
 
 	Wireless switches  <br>
-	ITv1 & ITv3/Elro and other brands using pt2263 or arctech protocol--> uses IT.pm<br><br>
-
-	In the ITv1 protocol is used to sent a default ITclock from 250 and it may be necessary in the IT-Modul to define the attribute ITclock<br>
-	<br><br>
-	Temperatur / humidity senso
 	<ul>
-	<li>PEARL NC7159, LogiLink WS0002,GT-WT-02,AURIOL,TCM97001, TCM27 and many more -> 14_CUL_TCM97001 </li>
-	<li>Oregon Scientific v2 and v3 Sensors  -> 41_OREGON.pm</li>
-	<li>Temperatur / humidity sensors suppored -> 14_SD_WS07</li>
+		<li>ITv1 & ITv3/Elro and other brands using pt2263 or arctech protocol--> uses IT.pm<br>
+				In the ITv1 protocol is used to sent a default ITclock from 250 and it may be necessary in the IT-Modul to define the attribute ITclock</li>
+    <li>ELV FS10 -> 10_FS10</li>
+    <li>ELV FS20 -> 10_FS20</li>
+	</ul>
+	<br>
+	
+	Temperatur / humidity sensors
+	<ul>
+		<li>PEARL NC7159, LogiLink WS0002,GT-WT-02,AURIOL,TCM97001, TCM27 and many more -> 14_CUL_TCM97001 </li>
+		<li>Oregon Scientific v2 and v3 Sensors  -> 41_OREGON.pm</li>
+		<li>Temperatur / humidity sensors suppored -> 14_SD_WS07</li>
     <li>technoline WS 6750 and TX70DTH -> 14_SD_WS07</li>
     <li>Eurochon EAS 800z -> 14_SD_WS07</li>
     <li>CTW600, WH1080	-> 14_SD_WS09 </li>
     <li>Hama TS33C, Bresser Thermo/Hygro Sensor -> 14_Hideki</li>
     <li>FreeTec Aussenmodul NC-7344 -> 14_SD_WS07</li>
     <li>La Crosse WS-7035, WS-7053, WS-7054 -> 14_CUL_TX</li>
+    <li>ELV WS-2000, La Crosse WS-7000 -> 14_CUL_WS</li>
 	</ul>
-	<br><br>
+	<br>
 
 	It is possible to attach more than one device in order to get better
 	reception, fhem will filter out duplicate messages.<br><br>
@@ -4342,35 +4347,36 @@ With a # at the beginnging whitelistIDs can be deactivated.
 
 	<table>
 	<tr><td>
-	Der <a href="https://wiki.fhem.de/wiki/SIGNALduino">SIGNALduino</a> ist basierend auf eine Idee von "mdorenka" und ver&ouml;ffentlicht im <a
-	href="http://forum.fhem.de/index.php/topic,17196.0.html">FHEM Forum</a>.<br>
+	Der <a href="https://wiki.fhem.de/wiki/SIGNALduino">SIGNALduino</a> ist basierend auf einer Idee von "mdorenka" und ver&ouml;ffentlicht im <a href="http://forum.fhem.de/index.php/topic,17196.0.html">FHEM Forum</a>.<br>
 
-	Mit der OpenSource-Firmware (hier der <a
-	href="https://github.com/RFD-FHEM/SIGNALduino">Link</a>) ist dieser f&auml;hig
-	f&uuml;r den Empfang und zum Senden verschiedener Protokolle von diversen Medien. Derzeit sind 433Mhz / 868Mhz Protokolle implementiert.
+	Mit der OpenSource-Firmware (<a href="https://github.com/RFD-FHEM/SIGNALduino">GitHub</a>) ist dieser f&auml;hig zum Empfangen und Senden verschiedener Protokolle auf 433 und 868 Mhz.
 	<br><br>
 	
-	Folgende Ger&auml;teunterst&uuml;tzung sind ist derzeit verf&uuml;gbar:
+	Folgende Ger&auml;te werden zur Zeit unterst&uuml;tzt:
 	<br><br>
 	
 	Funk-Schalter<br>
-	ITv1 & ITv3/Elro und andere Marken mit dem pt2263-Chip oder welche das arctech Protokoll nutzen --> IT.pm<br><br>
-	
-	Das ITv1 Protokoll benutzt einen Standard ITclock von 250 und es kann vorkommen, in dem IT-Modul das Attribut "ITclock" zu setzen.<br>
-	<br><br>
-	Temperatur / Feuchtigkeits Sensoren:
 	<ul>
-	<li>PEARL NC7159, LogiLink WS0002,GT-WT-02,AURIOL,TCM97001, TCM27 und viele anderen -> 14_CUL_TCM97001.pm</li>
-	<li>Oregon Scientific v2 und v3 Sensoren  -> 41_OREGON.pm</li>
-	<li>Temperatur / Feuchtigkeits Sensoren unterst&uuml;tzt -> 14_SD_WS07.pm</li>
+		<li>ITv1 & ITv3/Elro und andere Marken mit dem pt2263-Chip oder welche das arctech Protokoll nutzen --> IT.pm<br>
+				Das ITv1 Protokoll benutzt einen Standard ITclock von 250 und es kann vorkommen, das in dem IT-Modul das Attribut "ITclock" zu setzen ist.</li>
+    <li>ELV FS10 -> 10_FS10</li>
+    <li>ELV FS20 -> 10_FS20</li>
+	</ul>
+	
+	Temperatur-, Luftfeuchtigkeits-, Luftdruck-, Helligkeits-, Regen- und Windsensoren:
+	<ul>
+		<li>PEARL NC7159, LogiLink WS0002,GT-WT-02,AURIOL,TCM97001, TCM27 und viele anderen -> 14_CUL_TCM97001.pm</li>
+		<li>Oregon Scientific v2 und v3 Sensoren  -> 41_OREGON.pm</li>
+		<li>Temperatur / Feuchtigkeits Sensoren unterst&uuml;tzt -> 14_SD_WS07.pm</li>
     <li>technoline WS 6750 und TX70DTH -> 14_SD_WS07.pm</li>
     <li>Eurochon EAS 800z -> 14_SD_WS07.pm</li>
     <li>CTW600, WH1080	-> 14_SD_WS09.pm</li>
     <li>Hama TS33C, Bresser Thermo/Hygro Sensoren -> 14_Hideki.pm</li>
     <li>FreeTec Aussenmodul NC-7344 -> 14_SD_WS07.pm</li>
     <li>La Crosse WS-7035, WS-7053, WS-7054 -> 14_CUL_TX</li>
+    <li>ELV WS-2000, La Crosse WS-7000 -> 14_CUL_WS</li>
 	</ul>
-	<br><br>
+	<br>
 
 	Es ist m&ouml;glich, mehr als ein Ger&auml;t anzuschließen, um beispielsweise besseren Empfang zu erhalten. FHEM wird doppelte Nachrichten herausfiltern.<br><br>
 

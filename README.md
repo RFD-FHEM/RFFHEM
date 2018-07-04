@@ -44,6 +44,7 @@ Supported Devices / Protocols
 |WH2 | (TFA 30.3157 nur Temp, Hum = 255 -> nicht angezeigt)|
 |TS-K108W11 | Doorbell |
 |WS-7035, WS-7053, WS7054 | Temperature sensor 433MHz |
+|WS-2000, WS-7000 | Series of various sensors |
 
 How to install
 ======
