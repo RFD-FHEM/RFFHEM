@@ -2760,22 +2760,20 @@ sub SIGNALduino_IdList($@)
 	my @msIdList = ();
 	my @muIdList = ();
 	my @mcIdList = ();
+	my @skipedId = ();
 
 	if (!defined($aVal)) {
 		$aVal = AttrVal($name,"whitelist_IDs","");
 	}
-	SIGNALduino_Log3 $name, 3, "$name sduinoIdList: whitelistIds=$aVal";
 	
 	if (!defined($blacklist)) {
 		$blacklist = AttrVal($name,"blacklist_IDs","");
 	}
-	SIGNALduino_Log3 $name, 3, "$name sduinoIdList: blacklistIds=$blacklist";
 	
 	if (!defined($develop)) {
 		$develop = AttrVal($name,"development","");
 	}
 	$develop = lc($develop);
-	SIGNALduino_Log3 $name, 3, "$name sduinoIdList: development=$develop";
 
 	my %WhitelistIDs;
 	my %BlacklistIDs;
@@ -2820,14 +2818,17 @@ sub SIGNALduino_IdList($@)
 		if (defined($ProtocolListSIGNALduino{$id}{developId}) && substr($ProtocolListSIGNALduino{$id}{developId},0,1) eq "p") {
 			my $devid = "p$id";
 			if ($develop !~ m/$devid/) {		# skip wenn die Id nicht im Attribut development steht
-				SIGNALduino_Log3 $name, 3, "$name: ID=$devid skiped (developId=p)";
+				#SIGNALduino_Log3 $name, 3, "$name: ID=$devid skiped (developId=p)";
+				push (@skipedId, $devid);
 				next;
 			}
 		}
 		
 		if (defined($ProtocolListSIGNALduino{$id}{developId}) && substr($ProtocolListSIGNALduino{$id}{developId},0,1) eq "y") {
-			if ($develop !~ m/y/) {			# skip wenn y nicht im Attribut development steht
-				SIGNALduino_Log3 $name, 3, "$name: ID=$id skiped (developId=y)";
+			my $devid = "y$id";
+			if ($develop !~ m/$devid/) {		# skip wenn die Id nicht im Attribut development steht
+				#SIGNALduino_Log3 $name, 3, "$name: ID=$id skiped (developId=y)";
+				push (@skipedId, $devid);
 				next;
 			}
 		}
@@ -2846,13 +2847,18 @@ sub SIGNALduino_IdList($@)
 		}
 	}
 
-	@msIdList = sort @msIdList;
-	@muIdList = sort @muIdList;
-	@mcIdList = sort @mcIdList;
+	@msIdList = sort {$a <=> $b} @msIdList;
+	@muIdList = sort {$a <=> $b} @muIdList;
+	@mcIdList = sort {$a <=> $b} @mcIdList;
+	@skipedId = sort @skipedId;
 
 	SIGNALduino_Log3 $name, 3, "$name: IDlist MS @msIdList";
 	SIGNALduino_Log3 $name, 3, "$name: IDlist MU @muIdList";
     SIGNALduino_Log3 $name, 3, "$name: IDlist MC @mcIdList";
+	SIGNALduino_Log3 $name, 3, "$name: IDlist development = $develop" if ($develop);
+	SIGNALduino_Log3 $name, 3, "$name: IDlist development skiped = @skipedId" if (scalar @skipedId > 0);
+	SIGNALduino_Log3 $name, 3, "$name: IDlist blacklist = $blacklist" if ($blacklist);
+	SIGNALduino_Log3 $name, 3, "$name: IDlist whitelist = $aVal" if ($aVal);
 	
 	$hash->{msIdList} = \@msIdList;
     $hash->{muIdList} = \@muIdList;
