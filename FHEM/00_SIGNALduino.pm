@@ -1,4 +1,4 @@
-# $Id: 00_SIGNALduino.pm 10488 2018-06-21 22:00:00Z v3.3.3-dev $
+# $Id: 00_SIGNALduino.pm 10488 2018-07-05 18:00:00Z v3.3.3-dev $
 #
 # v3.3.3 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -25,7 +25,7 @@ no warnings 'portable';
 
 
 use constant {
-	SDUINO_VERSION            => "v3.3.3-dev_21.06.",
+	SDUINO_VERSION            => "v3.3.3-dev_05.07.",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -2354,7 +2354,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 						
 						$repeat += 1;
 						$repeatStr = " repeat $repeat"; 
-						next if ($repeat > 20);		# zur Sicherheit, damit es auf gar keinen Fall zu einer Endlosschleife kommen kann
+						last if ($repeat > 20);		# zur Sicherheit, damit es auf gar keinen Fall zu einer Endlosschleife kommen kann
 						
 						my $modulematch;
 						if (defined($ProtocolListSIGNALduino{$id}{modulematch})) {
