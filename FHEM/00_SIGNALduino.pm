@@ -1,4 +1,4 @@
-# $Id: 00_SIGNALduino.pm 10488 2018-07-05 18:00:00Z v3.3.3-dev $
+# $Id: 00_SIGNALduino.pm 10488 2018-07-06 18:00:00Z v3.3.3-dev $
 #
 # v3.3.3 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -25,7 +25,7 @@ no warnings 'portable';
 
 
 use constant {
-	SDUINO_VERSION            => "v3.3.3-dev_05.07.",
+	SDUINO_VERSION            => "v3.3.3-dev_06.07.",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -2314,15 +2314,14 @@ sub SIGNALduino_Parse_MU($$$$@)
 					
 					push(@bit_msg,$bit) if (looks_like_number($bit)) ; ## Add the bits to our bit array
 				}
-				if (!exists $patternLookupHash{$sig_str} || $i+$signal_width>length($rawData)-$signal_width)  ## Dispatch if last signal or unknown data
+				my $lastSignal = $i+$signal_width>length($rawData)-$signal_width;	# last signal
+				if (!exists $patternLookupHash{$sig_str} || $lastSignal)  		## Dispatch if last signal or unknown data
 				{
 					Debug "$name: demodulated message raw (@bit_msg), ".@bit_msg." bits\n" if ($debug);
 					#Check converted message against lengths 
 					$valid = $valid && $ProtocolListSIGNALduino{$id}{length_max} >= scalar @bit_msg  if (defined($ProtocolListSIGNALduino{$id}{length_max}));					
 					$valid = $valid && $ProtocolListSIGNALduino{$id}{length_min} <= scalar @bit_msg  if (defined($ProtocolListSIGNALduino{$id}{length_min})); 
 
-					
-					#next if (!$valid);  ## Last chance to try next protocol if there is somethin invalid
 					if ($valid) {
 			
 						my ($rcode,@retvalue) = SIGNALduino_callsub('postDemodulation',$ProtocolListSIGNALduino{$id}{postDemodulation},$name,@bit_msg);
@@ -2367,7 +2366,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 								my $develop = lc(AttrVal($name,"development",""));
 								if ($develop !~ m/$devid/) {		# kein dispatch wenn die Id nicht im Attribut development steht
 									SIGNALduino_Log3 $name, 3, "$name: ID=$devid skiped dispatch (developId=m). To use, please add m$id to the attr development";
-									next;
+									last;
 								}
 							}
 	
@@ -2387,6 +2386,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 						
 					}
 					@bit_msg=(); # clear bit_msg array
+					last if ($lastSignal);
 					
 					#Find next position of valid signal (skip invalid pieces)
 					my $regex=".{$i}".$startStr.$signal_regex;
@@ -2397,7 +2397,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 						$i=$-[0] + $i + length($startStr);
 						$i=$i-$signal_width if ($i >= $signal_width);
 						Debug "$name: found restart at Position $i ($regex)\n" if ($debug);
-						last if ((length($rawData) - $i) < 10);
+						last if ((length($rawData) - $i) <  (8 * $signal_width));		# Mindestlaenge 8 Bit
 					} else {
 						last;
 					}
