@@ -1011,7 +1011,7 @@
 	    #  ___        _
 	    # |   |_     | |___
 	    #  Bit 0      Bit 1
-	    # kurz 366 µSek / lang 854 µSek / gesamt 1220 µSek - Sollzeiten 
+	    # kurz 366 uSek / lang 854 uSek / gesamt 1220 uSek - Sollzeiten 
 	  		name                 => 'WS2000',
      		id                   => '60',
      		one                  => [3,-7],	
@@ -1136,7 +1136,7 @@
             #           __               ____
             #  ________|  |     ________|    |
             #      Bit 1             Bit 0
-            #    4630  1220       4630   3420   µSek - mit Oszi gemessene Zeiten
+            #    4630  1220       4630   3420   uSek - mit Oszi gemessene Zeiten
       {
 			name           => 'WS7053',	
 			id             => '67',
