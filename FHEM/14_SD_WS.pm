@@ -31,13 +31,15 @@ sub SD_WS_Initialize($)
 						  "$readingFnAttributes ";
 	$hash->{AutoCreate} =
 	{ 
-		"SD_WS37_TH.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,",  autocreateThreshold => "2:180"},
-		"SD_WS50_SM.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,",  autocreateThreshold => "2:180"},
+		"SD_WS37_TH.*"	=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,",  autocreateThreshold => "2:180"},
+		"SD_WS50_SM.*"	=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,",  autocreateThreshold => "2:180"},
 		"BresserTemeo.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "2:180"},
-		"SD_WS51_TH.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "2:180"},
-		"SD_WS58_TH.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "2:90"},
-    "SD_WH2.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "2:90"},
-		"SD_WS71_T.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "2:180"},
+		"SD_WS51_TH.*"	=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "2:180"},
+		"SD_WS58_TH.*"	=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "2:90"},
+		"SD_WH2.*"		=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "2:90"},
+		"SD_WS71_T.*"	=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4:Temp,", autocreateThreshold => "2:180"},
+		"SD_WS_33_T.*" 	=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4:Temp,", autocreateThreshold => "2:180"},
+		"SD_WS_33_TH.*"	=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "2:180"},
 	};
 
 }
@@ -146,13 +148,13 @@ sub SD_WS_Parse($$)
     	 	 },
      33 =>
    	 	 {
-     		sensortype => 's014/TFA 30.3200/TCM/Conrad',
-        	model =>	'SD_WS_33_TH',
+     		sensortype => 's014/TFA 30.3200/TCM/Conrad (example: S522 ...)',
+        	model =>	'SD_WS_33_T',
 			prematch => sub {my $msg = shift; return 1 if ($msg =~ /^[0-9A-F]{10,11}/); }, 							# prematch
 			crcok => 	sub {return SD_WS_binaryToNumber($bitData,36,39)+1;  }, 									# crc currently not calculated
 			id => 		sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,0,9); },   				# id
 	#		sendmode =>	sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,10,11) eq "1" ? "manual" : "auto";  }
-			temp => 	sub {my (undef,$bitData) = @_; return (((SD_WS_binaryToNumber($bitData,22,25)*256 +  SD_WS_binaryToNumber($bitData,18,21)*16 + SD_WS_binaryToNumber($bitData,14,17)) *10 -12200) /18)/10;  },	#temp
+			temp => 	sub {my (undef,$bitData) = @_; return round((((SD_WS_binaryToNumber($bitData,22,25)*256 +  SD_WS_binaryToNumber($bitData,18,21)*16 + SD_WS_binaryToNumber($bitData,14,17)) *10 -12200) /18)/10,1);  },	#temp
 			hum => 		sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,30,33)*16 + SD_WS_binaryToNumber($bitData,26,29));  }, 					#hum
 			channel => 	sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,12,13)+1 );  }, 		#channel
      		bat => 		sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,34) eq "0" ? "ok" : "low";},
@@ -542,7 +544,8 @@ sub SD_WS_Parse($$)
 	    	$temp=$decodingSubs{$protocol}{temp}->( $rawData,$bitData );
 	    	$hum=$decodingSubs{$protocol}{hum}->( $rawData,$bitData );
 	    	$channel=$decodingSubs{$protocol}{channel}->( $rawData,$bitData );
-	    	$model = $decodingSubs{$protocol}{model};
+	    	$model = $decodingSubs{$protocol}{model};						# for models without Humidity
+			$model = $decodingSubs{$protocol}{model}."H" if $hum != 0;		# for models with Humidity
 	    	$bat = $decodingSubs{$protocol}{bat}->( $rawData,$bitData );
 	    	$trend = $decodingSubs{$protocol}{trend}->( $rawData,$bitData ) if (defined($decodingSubs{$protocol}{trend}));
 
