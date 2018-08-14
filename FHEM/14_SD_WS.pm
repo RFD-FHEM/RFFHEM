@@ -28,6 +28,7 @@ sub SD_WS_Initialize($)
 	$hash->{ParseFn}	= "SD_WS_Parse";
 	$hash->{AttrFn}		= "SD_WS_Attr";
 	$hash->{AttrList}	= "IODev do_not_notify:1,0 ignore:0,1 showtime:1,0 " .
+							# model:BresserTemeo,SD_WH2,SD_WS_33_T,SD_WS_33_TH,SD_WS37_TH,SD_WS50_SM,SD_WS51_TH,SD_WS58_TH,SD_WS71_T " .
 						  "$readingFnAttributes ";
 	$hash->{AutoCreate} =
 	{ 
@@ -38,8 +39,8 @@ sub SD_WS_Initialize($)
 		"SD_WS58_TH.*"	=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "2:90"},
 		"SD_WH2.*"		=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "2:90"},
 		"SD_WS71_T.*"	=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4:Temp,", autocreateThreshold => "2:180"},
-		"SD_WS_33_T.*" 	=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4:Temp,", autocreateThreshold => "2:180"},
-		"SD_WS_33_TH.*"	=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "2:180"},
+		"SD_WS_33_T_.*"		=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4:Temp,", autocreateThreshold => "2:180"},
+		"SD_WS_33_TH_.*"	=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "2:180"},
 	};
 
 }
@@ -95,6 +96,10 @@ sub SD_WS_Parse($$)
 	my $model;	# wenn im elsif Abschnitt definiert, dann wird der Sensor per AutoCreate angelegt
 	my $SensorTyp;
 	my $id;
+	
+	my $id_check;
+	my $id51_check;
+	
 	my $bat;
 	my $channel;
 	my $rawTemp;
@@ -166,7 +171,8 @@ sub SD_WS_Parse($$)
         	model =>	'SD_WS_51_TH', 
 			prematch => sub {my $msg = shift; return 1 if ($msg =~ /^[0-9A-F]{10}/); }, 							# prematch
 			crcok => 	sub {return 1;  }, 																			# crc is unknown
-			id => 		sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,0,12); },   				# random id?
+			id => 		sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,0,12); },   			# random id?
+			id_check =>	sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,0,9); },   				# id from 33
 	#		sendmode =>	sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,10,11) eq "1" ? "manual" : "auto";  }
 			temp => 	sub {my (undef,$bitData) = @_; return round(((SD_WS_binaryToNumber($bitData,16,27)) -1220) *5 /90.0,1); },	#temp
 			hum => 		sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,28,31)*10) + (SD_WS_binaryToNumber($bitData,32,35));  }, 		#hum
@@ -538,14 +544,32 @@ sub SD_WS_Parse($$)
 		    	Log3 $iohash, 4, "$name decoded protocolid: $protocol ($SensorTyp) crc error: $retcrc";
 		    	return "";  
 	    	}
-	    	$id=$decodingSubs{$protocol}{id}->( $rawData,$bitData );
-	    	#my $temphex=$decodingSubs{$protocol}{temphex}->( $rawData,$bitData );
+			$id=$decodingSubs{$protocol}{id}->( $rawData,$bitData );
+			
+			######################### NEW #########################
+			if ($protocol eq "51") {
+				$id_check = $iohash->{helper}{ID33} if $iohash->{helper}{ID33} ne "";			# id33 in hash
+				$id51_check = $decodingSubs{$protocol}{id_check}->( $rawData,$bitData );		# id51 on same place how id33
+				Log3 $iohash, 4, "$name decoded protocolid: $protocol sensor id51=$id | id33_check=$id_check | id51_check=$id51_check";
+			} elsif ($protocol eq "33") {
+				$iohash->{helper}{ID33} = $id;
+				Log3 $iohash, 4, "$name decoded protocolid: $protocol sensor id33=".$iohash->{helper}{ID33}." from hash";
+			}
+			
+			if ($protocol eq "51" and ($id_check == $id51_check)) {		# check of same ids
+				Log3 $iohash, 4, "$name decoded protocolid: $protocol id DOUBLE decoded !";
+				delete $iohash->{helper}{ID33};
+				return "";
+			}
+			
+			#######################################################			
+			#my $temphex=$decodingSubs{$protocol}{temphex}->( $rawData,$bitData );
 	    	
 	    	$temp=$decodingSubs{$protocol}{temp}->( $rawData,$bitData );
 	    	$hum=$decodingSubs{$protocol}{hum}->( $rawData,$bitData );
 	    	$channel=$decodingSubs{$protocol}{channel}->( $rawData,$bitData );
 	    	$model = $decodingSubs{$protocol}{model};						# for models without Humidity
-			$model = $decodingSubs{$protocol}{model}."H" if $hum != 0;		# for models with Humidity
+			$model = $decodingSubs{$protocol}{model}."H" if $hum != 0 and $protocol eq "33";	# for models with Humidity
 	    	$bat = $decodingSubs{$protocol}{bat}->( $rawData,$bitData );
 	    	$trend = $decodingSubs{$protocol}{trend}->( $rawData,$bitData ) if (defined($decodingSubs{$protocol}{trend}));
 
