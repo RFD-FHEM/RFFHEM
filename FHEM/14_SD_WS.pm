@@ -9,6 +9,9 @@
 # 29.05.2017 Test ob Digest::CRC installiert
 # 22.07.2017 WH2 angepasst
 # 21.08.2017 WH2 Abbruch wenn kein "FF" am Anfang
+# 18.08.2018 Protokoll 51 - prematch auf genau 10 Nibbles angepasst, Protokoll 33 - prematch auf genau 11 Nibbles angepasst
+# 21.08.2018 Modelauswahl hinzugefuegt, da 3 versch. Typen SD_WS_33 --> Batterie-Bit Positionen unterschiedlich (34,35,36)
+
 package main;
 
 
@@ -28,19 +31,19 @@ sub SD_WS_Initialize($)
 	$hash->{ParseFn}	= "SD_WS_Parse";
 	$hash->{AttrFn}		= "SD_WS_Attr";
 	$hash->{AttrList}	= "IODev do_not_notify:1,0 ignore:0,1 showtime:1,0 " .
-							# model:BresserTemeo,SD_WH2,SD_WS_33_T,SD_WS_33_TH,SD_WS37_TH,SD_WS50_SM,SD_WS51_TH,SD_WS58_TH,SD_WS71_T " .
+							"model:other,S522,E0001PA " .
 						  "$readingFnAttributes ";
 	$hash->{AutoCreate} =
 	{ 
-		"SD_WS37_TH.*"	=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,",  autocreateThreshold => "2:180"},
-		"SD_WS50_SM.*"	=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,",  autocreateThreshold => "2:180"},
+		"SD_WS37_TH.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,",  autocreateThreshold => "2:180"},
+		"SD_WS50_SM.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,",  autocreateThreshold => "2:180"},
 		"BresserTemeo.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "2:180"},
-		"SD_WS51_TH.*"	=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "2:180"},
-		"SD_WS58_TH.*"	=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "2:90"},
-		"SD_WH2.*"		=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "2:90"},
-		"SD_WS71_T.*"	=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4:Temp,", autocreateThreshold => "2:180"},
-		"SD_WS_33_T_.*"		=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4:Temp,", autocreateThreshold => "2:180"},
-		"SD_WS_33_TH_.*"	=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "2:180"},
+		"SD_WS51_TH.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "2:180"},
+		"SD_WS58_TH.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "2:90"},
+		"SD_WH2.*"			=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "2:90"},
+		"SD_WS71_T.*"		=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4:Temp,", autocreateThreshold => "2:180"},
+		"SD_WS_33_T_.*"	=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.* model:other", FILTER => "%NAME", GPLOT => "temp4:Temp,", autocreateThreshold => "2:180"},
+		"SD_WS_33_TH_.*"	=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.* model:other", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "2:180"},
 	};
 
 }
@@ -96,11 +99,8 @@ sub SD_WS_Parse($$)
 	my $model;	# wenn im elsif Abschnitt definiert, dann wird der Sensor per AutoCreate angelegt
 	my $SensorTyp;
 	my $id;
-	
-	my $id_check;
-	my $id51_check;
-	
-	my $bat;
+	my $bat;		# many variants - NOT the SAME position!
+	my $sendmode;
 	my $channel;
 	my $rawTemp;
 	my $temp;
@@ -153,26 +153,50 @@ sub SD_WS_Parse($$)
     	 	 },
      33 =>
    	 	 {
-     		sensortype => 's014/TFA 30.3200/TCM/Conrad (example: S522 ...)',
+			# Protokollbeschreibung: Conrad Temperatursensor S522 fuer Funk-Thermometer S521B
+			# ------------------------------------------------------------------------
+			# 0    4    | 8    12   | 16   20   | 24   28   | 32   36   40
+			# 1111 1100 | 0001 0110 | 0001 0000 | 0011 0111 | 0100 1001 01
+			# iiii iiii | iixx cctt | tttt tttt | tthh hhhh | hhxx bgxx xx
+			# i: 10 bit random id (changes on power-loss) - Bit 0 + 1 every 0 ???
+			# b: battery indicator (0=>OK, 1=>LOW)
+			# g: battery changed (1=>changed) - muss noch genauer getestet werden! ????
+			# c: Channel (MSB-first, valid channels are 1-3)
+			# t: Temperature (MSB-first, BCD)
+			#    12 bit unsigned fahrenheit offset by 90 and scaled by 10
+			# h: Humidity (MSB-first, BCD)
+			#    8 bit relative humidity percentage
+			# x: unknown
+
+			# Protokollbeschreibung: renkforce Temperatursensor E0001PA fuer Funk-Wetterstation E0303H2TPR (Conrad)
+			# ------------------------------------------------------------------------
+			# 0    4    | 8    12   | 16   20   | 24   28   | 32   36   40
+			# iiii iiii | iixx cctt | tttt tttt | tthh hhhh | hhsb xxxx xx
+			# i: 10 bit random id (changes on power-loss) - Bit 0 + 1 every 0 ???
+			# s:sendmode (1=>Test push, send manual 0=>automatic send)
+			# c: | t: | h: same like S522
+			# x: unknown
+
+     		sensortype => 's014/TFA 30.3200/TCM/Conrad/Conrad S522',
         	model =>	'SD_WS_33_T',
-			prematch => sub {my $msg = shift; return 1 if ($msg =~ /^[0-9A-F]{10,11}/); }, 							# prematch
+			prematch => sub {my $msg = shift; return 1 if ($msg =~ /^[0-9A-F]{11}$/); }, 							# prematch
 			crcok => 	sub {return SD_WS_binaryToNumber($bitData,36,39)+1;  }, 									# crc currently not calculated
 			id => 		sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,0,9); },   				# id
 	#		sendmode =>	sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,10,11) eq "1" ? "manual" : "auto";  }
-			temp => 	sub {my (undef,$bitData) = @_; return round((((SD_WS_binaryToNumber($bitData,22,25)*256 +  SD_WS_binaryToNumber($bitData,18,21)*16 + SD_WS_binaryToNumber($bitData,14,17)) *10 -12200) /18)/10,1);  },	#temp
+			temp => 	sub {my (undef,$bitData) = @_; return round(((SD_WS_binaryToNumber($bitData,22,25)*256 +  SD_WS_binaryToNumber($bitData,18,21)*16 + SD_WS_binaryToNumber($bitData,14,17)) - 1220) * 5 / 90.0 , 1); },	#temp
 			hum => 		sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,30,33)*16 + SD_WS_binaryToNumber($bitData,26,29));  }, 					#hum
 			channel => 	sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,12,13)+1 );  }, 		#channel
-     		bat => 		sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,34) eq "0" ? "ok" : "low";},
+			bat => 		sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,34) eq "0" ? "ok" : "low";},	# other or modul orginal
+   
     # 		sync => 	sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,35,35) eq "1" ? "true" : "false");},
    	 	 } ,       
      51 =>
    	 	 {
      		sensortype => 'Lidl Wetterstation 2759001/IAN114324',
         	model =>	'SD_WS_51_TH', 
-			prematch => sub {my $msg = shift; return 1 if ($msg =~ /^[0-9A-F]{10}/); }, 							# prematch
+			prematch => sub {my $msg = shift; return 1 if ($msg =~ /^[0-9A-F]{10}$/); }, 							# prematch
 			crcok => 	sub {return 1;  }, 																			# crc is unknown
-			id => 		sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,0,12); },   			# random id?
-			id_check =>	sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,0,9); },   				# id from 33
+			id => 		sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,0,12); },   				# random id?
 	#		sendmode =>	sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,10,11) eq "1" ? "manual" : "auto";  }
 			temp => 	sub {my (undef,$bitData) = @_; return round(((SD_WS_binaryToNumber($bitData,16,27)) -1220) *5 /90.0,1); },	#temp
 			hum => 		sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,28,31)*10) + (SD_WS_binaryToNumber($bitData,32,35));  }, 		#hum
@@ -544,33 +568,21 @@ sub SD_WS_Parse($$)
 		    	Log3 $iohash, 4, "$name decoded protocolid: $protocol ($SensorTyp) crc error: $retcrc";
 		    	return "";  
 	    	}
-			$id=$decodingSubs{$protocol}{id}->( $rawData,$bitData );
-			
-			######################### NEW #########################
-			if ($protocol eq "51") {
-				$id_check = $iohash->{helper}{ID33} if $iohash->{helper}{ID33} ne "";			# id33 in hash
-				$id51_check = $decodingSubs{$protocol}{id_check}->( $rawData,$bitData );		# id51 on same place how id33
-				Log3 $iohash, 4, "$name decoded protocolid: $protocol sensor id51=$id | id33_check=$id_check | id51_check=$id51_check";
-			} elsif ($protocol eq "33") {
-				$iohash->{helper}{ID33} = $id;
-				Log3 $iohash, 4, "$name decoded protocolid: $protocol sensor id33=".$iohash->{helper}{ID33}." from hash";
-			}
-			
-			if ($protocol eq "51" and ($id_check == $id51_check)) {		# check of same ids
-				Log3 $iohash, 4, "$name decoded protocolid: $protocol id DOUBLE decoded !";
-				delete $iohash->{helper}{ID33};
-				return "";
-			}
-			
-			#######################################################			
-			#my $temphex=$decodingSubs{$protocol}{temphex}->( $rawData,$bitData );
+	    	$id=$decodingSubs{$protocol}{id}->( $rawData,$bitData );
+	    	#my $temphex=$decodingSubs{$protocol}{temphex}->( $rawData,$bitData );
 	    	
 	    	$temp=$decodingSubs{$protocol}{temp}->( $rawData,$bitData );
 	    	$hum=$decodingSubs{$protocol}{hum}->( $rawData,$bitData );
 	    	$channel=$decodingSubs{$protocol}{channel}->( $rawData,$bitData );
-	    	$model = $decodingSubs{$protocol}{model};						# for models without Humidity
-			$model = $decodingSubs{$protocol}{model}."H" if $hum != 0 and $protocol eq "33";	# for models with Humidity
-	    	$bat = $decodingSubs{$protocol}{bat}->( $rawData,$bitData );
+	    	$model = $decodingSubs{$protocol}{model};
+			$bat = $decodingSubs{$protocol}{bat}->( $rawData,$bitData );			# orginal
+
+																	  
+			if ($model eq "SD_WS_33_T") {			# for SD_WS_33 discrimination T - TH
+				$model = $decodingSubs{$protocol}{model}."H" if $hum != 0;				# for models with Humidity
+			} 
+																	  
+			
 	    	$trend = $decodingSubs{$protocol}{trend}->( $rawData,$bitData ) if (defined($decodingSubs{$protocol}{trend}));
 
 	    	Log3 $iohash, 4, "$name decoded protocolid: $protocol ($SensorTyp) sensor id=$id, channel=$channel, temp=$temp, hum=$hum, bat=$bat";
@@ -599,6 +611,11 @@ sub SD_WS_Parse($$)
 	
 	#print Dumper($modules{SD_WS}{defptr});
 	
+	if ($temp < -30 || $temp > 70 || $hum > 100) {
+		Log3 $iohash, 3, "SD_WS: $deviceCode - ERROR Temperature $temp or humidity $hum";
+		return "";  
+	}
+
 	my $def = $modules{SD_WS}{defptr}{$iohash->{NAME} . "." . $deviceCode};
 	$def = $modules{SD_WS}{defptr}{$deviceCode} if(!$def);
 
@@ -632,6 +649,17 @@ sub SD_WS_Parse($$)
   
 	my $state = (($temp > -60 && $temp < 70) ? "T: $temp":"T: xx") . (($hum > 0 && $hum < 100) ? " H: $hum":"");
 
+	### protocol 33 has different bits per sensor type
+	if ($protocol eq "33") {
+		if (AttrVal($name,'model',0) eq "S522") {									# Conrad S522
+			$bat = SD_WS_binaryToNumber($bitData,36) eq "0" ? "ok" : "low";
+		} elsif (AttrVal($name,'model',0) eq "E0001PA") {							# renkforce E0001PA
+			$bat = SD_WS_binaryToNumber($bitData,35) eq "0" ? "ok" : "low";	
+			$sendmode = SD_WS_binaryToNumber($bitData,34) eq "1" ? "manual" : "auto";
+		}
+	}
+																	
+
 	readingsBeginUpdate($hash);
 	readingsBulkUpdate($hash, "state", $state);
 	readingsBulkUpdate($hash, "temperature", $temp)  if (defined($temp)&& ($temp > -60 && $temp < 70 ));
@@ -640,6 +668,7 @@ sub SD_WS_Parse($$)
 	readingsBulkUpdate($hash, "batteryState", $bat) if (defined($bat) && length($bat) > 0) ;
 	readingsBulkUpdate($hash, "channel", $channel) if (defined($channel)&& length($channel) > 0);
 	readingsBulkUpdate($hash, "trend", $trend) if (defined($trend) && length($trend) > 0);
+	readingsBulkUpdate($hash, "sendmode", $sendmode) if (defined($sendmode) && length($sendmode) > 0);
 	
 	readingsEndUpdate($hash, 1); # Notify is done by Dispatch
 	
