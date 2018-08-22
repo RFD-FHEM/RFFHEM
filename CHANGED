@@ -1,3 +1,6 @@
+22.08.2018
+ 00_SIGNALduino.pm - Sub EM Protocol (80) added
+ signalduino_protocols.hash  - new Protocol (80) EM added
 05.07.2018
  00_SIGNALduino.pm Log Eintrage beim RESTART geordnet / vereinfacht
 03.07.2018
