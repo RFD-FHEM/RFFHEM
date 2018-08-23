@@ -582,7 +582,7 @@ sub SD_WS_Parse($$)
 				$model = $decodingSubs{$protocol}{model}."H" if $hum != 0;				# for models with Humidity
 			} 
 																	  
-			
+
 	    	$trend = $decodingSubs{$protocol}{trend}->( $rawData,$bitData ) if (defined($decodingSubs{$protocol}{trend}));
 
 	    	Log3 $iohash, 4, "$name decoded protocolid: $protocol ($SensorTyp) sensor id=$id, channel=$channel, temp=$temp, hum=$hum, bat=$bat";
@@ -749,10 +749,12 @@ sub SD_WS_WH2SHIFT($){
   <b>Known models:</b>
   <ul>
     <li>Bresser 7009994</li>
-    <li>Opus XT300</li>
     <li>BresserTemeo</li>
-    <li>WH2 (TFA Dostmann/Wertheim 30.3157(Temperature only!) (sold in Germany), Agimex Rosenborg 66796 (sold in Denmark),ClimeMET CM9088 (Sold in UK)</li>
+    <li>Conrad S522</li>
+	<li>Opus XT300</li>
     <li>PV-8644 infactory Poolthermometer</li>
+    <li>Renkforce E0001PA</li>
+	<li>WH2 (TFA Dostmann/Wertheim 30.3157(Temperature only!) (sold in Germany), Agimex Rosenborg 66796 (sold in Denmark),ClimeMET CM9088 (Sold in UK)</li>
   </ul>
   <br>
   New received device are add in fhem with autocreate.
@@ -769,25 +771,25 @@ sub SD_WS_WH2SHIFT($){
   <b>Generated readings:</b>
   <br>Some devices may not support all readings, so they will not be presented<br>
   <ul>
-  	 <li>State (T: H:)</li>
-     <li>temperature (&deg;C)</li>
-     <li>humidity: (The humidity (1-100 if available)</li>
      <li>battery: (low or ok)</li>
      <li>channel: (The Channelnumber (number if)</li>
+	 <li>humidity: (The humidity (1-100 if available)</li>
+	 <li>sendmode (automatic or manual)</li>
+	 <li>state (T: H:)</li>
+     <li>temperature (&deg;C)</li>
   </ul>
   <br>
   <b>Attributes</b>
   <ul>
     <li><a href="#do_not_notify">do_not_notify</a></li>
     <li><a href="#ignore">ignore</a></li>
+    <li>model (other / E0001PA / S522)<br>
+	The sensors of the "SD_WS_33 series" have different battery bit positions. If the battery bit is detected incorrectly (low instead of ok), then you can adjust with the model selection of the sensor.<br>
+	All sensors except the E0001PA and S522 model are created after an autocreate as model "other". If you own a Conrad S522 or Renkforce E0001PA sensor, set the model for proper battery bit detection.</li>
     <li><a href="#showtime">showtime</a></li>
     <li><a href="#readingFnAttributes">readingFnAttributes</a></li>
-  </ul>
+  </ul><br>
 
-  <a name="SD_WS_Set"></a>
-  <b>Set</b> <ul>N/A</ul><br>
-
-  <a name="SD_WS_Parse"></a>
   <b>Set</b> <ul>N/A</ul><br>
 
 </ul>
@@ -804,10 +806,12 @@ sub SD_WS_WH2SHIFT($){
   <b>Unterst&uumltzte Modelle:</b>
   <ul>
     <li>Bresser 7009994</li>
-    <li>Opus XT300</li>
     <li>BresserTemeo</li>
-    <li>WH2 (TFA Dostmann/Wertheim 30.3157(Temperatur!) (Deutschland), Agimex Rosenborg 66796 (Denmark),ClimeMET CM9088 (UK)</li>
+    <li>Conrad S522</li>
+	<li>Opus XT300</li>
     <li>PV-8644 infactory Poolthermometer</li>
+    <li>Renkforce E0001PA</li>
+	<li>WH2 (TFA Dostmann/Wertheim 30.3157(Temperatur!) (Deutschland), Agimex Rosenborg 66796 (Denmark),ClimeMET CM9088 (UK)</li>
   </ul>
   <br>
   Neu empfangene Sensoren werden in FHEM per autocreate angelegt.
@@ -820,27 +824,28 @@ sub SD_WS_WH2SHIFT($){
   </ul>
   <br>
   <a name="SD_WS Events"></a>
-  <b>Generierte Readings:</b>
+  <b>Generierte Readings:</b><br>
+  <small><u>(sind unterschiedlich je Typ des Sensors)</small></u>
   <ul>
-  	 <li>State (T: H:)</li>
-     <li>temperature (&deg;C)</li>
-     <li>humidity: (Luftfeuchte (1-100)</li>
-     <li>battery: (low oder ok)</li>
+  	 <li>battery: (low oder ok)</li>
      <li>channel: (Der Sensor Kanal)</li>
+     <li>humidity: (Luftfeuchte (1-100)</li>
+	 <li>state (T: H:)</li>
+     <li>temperature (&deg;C)</li>
+     <li>sendmode (Der Sendemodus, automatic oder manual via Taster im Sender)</li>
   </ul>
   <br>
   <b>Attribute</b>
   <ul>
     <li><a href="#do_not_notify">do_not_notify</a></li>
     <li><a href="#ignore">ignore</a></li>
-    <li><a href="#showtime">showtime</a></li>
+    <li>model (other / E0001PA / S522)<br>
+	Die Sensoren der "SD_WS_33 - Reihe" besitzen unterschiedliche Batterie-Bit Positionen. Sollte das Batterie-Bit falsch erkannt werden (low anstatt ok), so kann man mit der Modelauswahl des Sensors das anpassen.<br>
+	Bisher sind 3 Varianten bekannt. Alle Sensoren außer dem E0001PA und S522 Modell werden nach einem Autocreate als "other" angelegt. Besitzen Sie einen Conrad S522 oder Renkforce E0001PA Sensor, so stellen Sie das jeweilige Modell ein für eine richtige Erkennung des Batterie-Bit.</li>
+	<li><a href="#showtime">showtime</a></li>
     <li><a href="#readingFnAttributes">readingFnAttributes</a></li>
-  </ul>
+  </ul><br>
 
-  <a name="SD_WS_Set"></a>
-  <b>Set</b> <ul>N/A</ul><br>
-
-  <a name="SD_WS_Parse"></a>
   <b>Set</b> <ul>N/A</ul><br>
 
 </ul>
