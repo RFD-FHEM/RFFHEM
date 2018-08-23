@@ -138,7 +138,7 @@ my $clientsSIGNALduino = ":IT:"
 			        	."FLAMINGO:"
 			        	."CUL_WS:"
 			        	."Revolt:"
-					." :"		# Zeilenumbruch
+						." :"		# Zeilenumbruch
 			        	."FS10:"
 			        	."CUL_FHTTK:"
 			        	."Siro:"
@@ -206,7 +206,7 @@ SIGNALduino_Initialize($)
 					  ." hexFile"
                       ." initCommands"
                       ." flashCommand"
-  					  ." hardware:nano328,uno,promini328,nanoCC1101,miniculcc1101,radinocc1101,ESP_1M,ESP32"
+  					  ." hardware:nano,promini,nanoCC1101,miniculCC1101,radinocc1101,ESP_1M,ESP32"
 					  ." firmwareUpdates:stable,testing"
 					  ." debug:0,1"
 					  ." longids"
@@ -474,7 +474,7 @@ SIGNALduino_Set($@)
                     timeout    => 5,
                     hash       => $hash,                                                                                 # Muss gesetzt werden, damit die Callback funktion wieder $hash hat
                     method     => "GET",                                                                                 # Lesen von Inhalten
-                    header     => "User-Agent: perl_fhem\r\nAccept: application/json",  								 # Den Header gemäss abzufragender Daten ändern
+                    header     => "User-Agent: perl_fhem\r\nAccept: application/json",  								 # Den Header gemï¿½ss abzufragender Daten ï¿½ndern
                     callback   =>  \&SIGNALduino_githubParseHttpResponse,                                                # Diese Funktion soll das Ergebnis dieser HTTP Anfrage bearbeiten
                     command    => "getReleaseByTag"
                     
@@ -4119,7 +4119,7 @@ sub SIGNALduino_querygithubreleases
                     timeout    => 5,
                     hash       => $hash,                                                                                 # Muss gesetzt werden, damit die Callback funktion wieder $hash hat
                     method     => "GET",                                                                                 # Lesen von Inhalten
-                    header     => "User-Agent: perl_fhem\r\nAccept: application/json",  								 # Den Header gemäss abzufragender Daten ändern
+                    header     => "User-Agent: perl_fhem\r\nAccept: application/json",  								 # Den Header gemï¿½ss abzufragender Daten ï¿½ndern
                     callback   =>  \&SIGNALduino_githubParseHttpResponse,                                                # Diese Funktion soll das Ergebnis dieser HTTP Anfrage bearbeiten
                     command    => "queryReleases"
                     
@@ -4136,17 +4136,17 @@ sub SIGNALduino_githubParseHttpResponse($)
 
     if($err ne "")                                                                                                         # wenn ein Fehler bei der HTTP Abfrage aufgetreten ist
     {
-        Log3 $name, 3, "error while requesting ".$param->{url}." - $err (command: $param->{command}";                                                  # Eintrag fürs Log
+        Log3 $name, 3, "error while requesting ".$param->{url}." - $err (command: $param->{command}";                                                  # Eintrag fï¿½rs Log
         #readingsSingleUpdate($hash, "fullResponse", "ERROR");                                                              # Readings erzeugen
     }
 
-    elsif($data ne "")                                                                                                     # wenn die Abfrage erfolgreich war ($data enthält die Ergebnisdaten des HTTP Aufrufes)
+    elsif($data ne "")                                                                                                     # wenn die Abfrage erfolgreich war ($data enthï¿½lt die Ergebnisdaten des HTTP Aufrufes)
     {
     	my $json_array = decode_json($data);
     	#print  Dumper($json_array);
     	
        	if ($param->{command} eq "queryReleases") {
-	        #Log3 $name, 3, "url ".$param->{url}." returned: $data";                                                            # Eintrag fürs Log
+	        #Log3 $name, 3, "url ".$param->{url}." returned: $data";                                                            # Eintrag fï¿½rs Log
 	
 			my @fwreleases;
 			if (ref($json_array) eq "ARRAY") {
@@ -4708,7 +4708,7 @@ With a # at the beginnging whitelistIDs can be deactivated.
 		</ul>
 	</li><br>
 	<li>firmwareUpdates<br>
-		Das Modul sucht nach Verfügbaren Firmware Vesionen und bietet diesen zum Flashen an. Mit dem Attribut kann festgelegt werden ob nur stabile Versionen angezeigt werden oder auch vorabversionen einer neuen Firmware.
+		Das Modul sucht nach Verfï¿½gbaren Firmware Vesionen und bietet diesen zum Flashen an. Mit dem Attribut kann festgelegt werden ob nur stabile Versionen angezeigt werden oder auch vorabversionen einer neuen Firmware.
 		Die Option testing inkludiert auch die stabilen Versionen.
 		<ul>
 			<li>stable: Als stabil getestete Versionen, erscheint nur sehr selten</li>
