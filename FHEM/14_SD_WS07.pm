@@ -117,6 +117,7 @@ SD_WS07_Parse($$)
   # 0110 0011 1  000  000011101010  1111  00001010		 other device from HomeAuto_User SD_WS07_TH_631
   # 1110 1011 1  000  000010111000  1111  00000000		 other device from HomeAuto_User SD_WS07_T_EB1
   # 1100 0100 1  000  000100100010  1111  00000000		 other device from HomeAuto_User SD_WS07_T_C41
+  # 0110 0100 0  000  000100001110  1111  00101010		 hama TS36E from HomeAuto_User - Bat bit identified
   #      ID  Bat CHN       TMP      ??   HUM
   
 	# Modelliste
@@ -129,7 +130,7 @@ SD_WS07_Parse($$)
     Log3 $iohash, 4, "$iohash->{NAME}: SD_WS07_Parse $model converted to bits " . $bitData2;
     
     my $id = substr($rawData,0,2);
-	 my $bat = substr($bitData,8,1);
+    my $bat = substr($bitData,8,1) eq "1" ? "ok" : "low";	# 1 = ok | 0 = low --> identified on hama TS36E
     my $channel = oct("0b" . substr($bitData,9,3)) + 1;
     my $temp = oct("0b" . substr($bitData,12,12));
     my $bit24bis27 = oct("0b".substr($bitData,24,4));
@@ -253,11 +254,10 @@ SD_WS07_Parse($$)
 	$hash->{lastMSG} = $rawData;
 	$hash->{bitMSG} = $bitData2; 
 
-	if (AttrVal($name, "negation-batt", "no") eq "no") {		# default no negation batt bit
-		$bat = "0" eq "1" ? "ok" : "low";							# 1 = ok
-	} else {
+	if (AttrVal($name, "negation-batt", "no") eq "yes") {	# default undef negation batt bit
 		$bat = "0" eq "0" ? "ok" : "low";							# 0 = ok
 	}
+	
     my $state = "T: $temp". ($hum>0 ? " H: $hum":"");
     
     readingsBeginUpdate($hash);

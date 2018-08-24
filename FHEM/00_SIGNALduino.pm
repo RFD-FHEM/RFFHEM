@@ -144,6 +144,7 @@ my $clientsSIGNALduino = ":IT:"
 			        	."Siro:"
 						."FHT:"
 						."FS20:"
+						."CUL_EM:"
 			      		."SIGNALduino_un:"
 					; 
 
@@ -172,6 +173,7 @@ my %matchListSIGNALduino = (
      "22:Siro"					=> '^P72#[A-Fa-f0-9]+',
      "23:FHT"      				=> "^81..(04|09|0d)..(0909a001|83098301|c409c401)..",
      "24:FS20"    				=> "^81..(04|0c)..0101a001", 
+     "25:CUL_EM"    				=> "^E0.................", 
      "X:SIGNALduino_un"			=> '^[u]\d+#.*',
 );
 
@@ -3111,6 +3113,38 @@ sub SIGNALduino_postDemo_Hoermann($@) {
 		$msg = substr($msg,9);
 		return (1,split("",$msg));
 	}
+}
+
+sub SIGNALduino_postDemo_EM($@) {
+	my ($name, @bit_msg) = @_;
+	my $msg = join("",@bit_msg);
+	my $msg_start = index($msg, "0000000001");				# find start
+	my $count;
+	$msg = substr($msg,$msg_start + 10);						# delete preamble + 1 bit
+	my $new_msg = "";
+	my $crcbyte;
+	my $msgcrc = 0;
+
+	if ($msg_start > 0 && length $msg == 89) {
+		for ($count = 0; $count < length ($msg) ; $count +=9) {
+			$crcbyte = substr($msg,$count,8);
+			if ($count < (length($msg) - 10)) {
+				$new_msg.= join "", reverse @bit_msg[$msg_start + 10 + $count.. $msg_start + 17 + $count];
+				$msgcrc = $msgcrc ^ oct( "0b$crcbyte" );
+			}
+		}
+	
+		if ($msgcrc == oct( "0b$crcbyte" )) {
+			SIGNALduino_Log3 $name, 4, "$name: EM Protocol - CRC OK";
+			return (1,split("",$new_msg));
+		} else {
+			SIGNALduino_Log3 $name, 3, "$name: EM Protocol - CRC ERROR";
+			return 0, undef;
+		}
+	}
+	
+	SIGNALduino_Log3 $name, 3, "$name: EM Protocol - Start not found or length msg (".length $msg.") not correct";
+	return 0, undef;
 }
 
 sub SIGNALduino_postDemo_FS20($@) {
