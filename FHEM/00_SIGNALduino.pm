@@ -2308,11 +2308,8 @@ sub SIGNALduino_Parse_MU($$$$@)
 
 				$valid=1; # Set valid to 1 for every loop
 				#Debug $patternLookupHash{substr($rawData,$i,$signal_width)}; ## Get $signal_width number of chars from raw data string
-				if (exists $patternLookupHash{$sig_str}) 
-				{
-					my $bit = $patternLookupHash{$sig_str};
-					
-					push(@bit_msg,$bit) if (looks_like_number($bit)) ; ## Add the bits to our bit array
+				if (exists $patternLookupHash{$sig_str}) {
+					push(@bit_msg,$patternLookupHash{$sig_str})  ## Add the bits to our bit array
 				}
 				my $lastSignal = $i+$signal_width>length($rawData)-$signal_width;	# last signal
 				if (!exists $patternLookupHash{$sig_str} || $lastSignal)  		## Dispatch if last signal or unknown data
@@ -2339,8 +2336,11 @@ sub SIGNALduino_Parse_MU($$$$@)
 							Debug "$name: padding 0 bit to bit_msg array" if ($debug);
 						}
 			
-						SIGNALduino_Log3 $name, 5, "$name: dispatching bits: @bit_msg";
-						my $dmsg = SIGNALduino_b2h(join "", @bit_msg);
+						my $dmsg = join ("", @bit_msg);
+						SIGNALduino_Log3 $name, 5, "$name: dispatching bits: $dmsg";
+						if (index($dmsg, "F") == -1 ) {
+							$dmsg = SIGNALduino_b2h($dmsg);
+						}
 						$dmsg =~ s/^0+//	 if (defined($ProtocolListSIGNALduino{$id}{remove_zero})); 
 						$dmsg = "$dmsg"."$ProtocolListSIGNALduino{$id}{postamble}" if (defined($ProtocolListSIGNALduino{$id}{postamble}));
 						$dmsg = "$ProtocolListSIGNALduino{$id}{preamble}"."$dmsg" if (defined($ProtocolListSIGNALduino{$id}{preamble}));
