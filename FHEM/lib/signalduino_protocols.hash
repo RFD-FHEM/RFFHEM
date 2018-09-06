@@ -1444,4 +1444,35 @@
 			length_max		=> '114',
 			postDemodulation => \&SIGNALduino_postDemo_EM,
 		},
+	"81" => # 
+		{	name             => 'SA-434-1',
+			comment          => 'Remote control SA-434-1 mini 923301',
+			id               => '81',
+			one              => [-2,1],
+			zero             => [-1,2],
+			start            => [-35,1],		# Message is not provided as MS, worakround is start
+			clockabs		 => 500,                 
+			format           => 'twostate',
+			preamble	     => 'u81#',			# prepend to converted message	
+			#clientmodule	 => 'SD_UT', 
+			length_min       => '12',
+			length_max       => '12',
+		},
+	"82" => ## Fernotron shutters and light switches   
+			# MU;P0=-32001;P1=435;P2=-379;P4=-3201;P5=831;P6=-778;D=01212121212121214525252525252521652161452525252525252161652141652521652521652521614165252165252165216521416521616165216525216141652161616521652165214165252161616521652161416525216161652161652141616525252165252521614161652525216525216521452165252525252525;CP=1;O;
+			# the messages received are usual missing 12 bits at the end for some reason. So the checksum byte is missing.
+			# Fernotron protocol is unidirectional. Here we can only receive messages from controllers send to receivers. 
+		{
+			name           => 'Fernotron',
+			id             => '82',       # protocol number
+			developId      => 'm',
+			one            => [1,-2],     # on=400us, off=800us
+			zero           => [2,-1],     # on=800us, off=400us
+			float          => [1,-8],     # on=400us, off=3200us. each 10bit word has one [1,-8] in front
+			clockabs       => 400,        # 400us
+			preamble       => 'P82#',     # prepend our protocol number to converted message
+			clientmodule   => 'Fernotron',
+			length_min     => '100',      # actual 120 bit (12 x 10bit words to decode 6 bytes data), but last 20 are for checksum
+			length_max     => '3360',     # 3360 bit (336 x 10bit words to decode 168 bytes data) for full timer message
+	    },
 );

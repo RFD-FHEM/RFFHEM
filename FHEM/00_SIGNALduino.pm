@@ -142,6 +142,7 @@ my $clientsSIGNALduino = ":IT:"
 						."FHT:"
 						."FS20:"
 						."CUL_EM:"
+						."Fernotron:"
 			      		."SIGNALduino_un:"
 					; 
 
@@ -171,7 +172,8 @@ my %matchListSIGNALduino = (
      "23:FHT"      				=> "^81..(04|09|0d)..(0909a001|83098301|c409c401)..",
      "24:FS20"    				=> "^81..(04|0c)..0101a001", 
      "25:CUL_EM"    				=> "^E0.................", 
-     "X:SIGNALduino_un"			=> '^[u]\d+#.*',
+     "25:Fernotron"  			=> '^P82#.*',
+	 "X:SIGNALduino_un"			=> '^[u]\d+#.*',
 );
 
 
