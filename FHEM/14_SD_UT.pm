@@ -270,6 +270,8 @@ sub SD_UT_Parse($$) {
 	$deviceCode = sprintf("%x", oct( "0b$deviceCode" ) );
 	$devicedef = "Westinghouse_Delancey " . $deviceCode if(!$def && $protocol == 83);
 	$def = $modules{SD_UT}{defptr}{$devicedef} if (!$def && $protocol == 83);
+	$devicedef = "Westinghouse_Delancey " . $deviceCode if(!$def && $protocol == 30);
+	$def = $modules{SD_UT}{defptr}{$devicedef} if (!$def && $protocol == 30);
 	### VTX_BELL ###
 	$deviceCode = sprintf("%x", oct( "0b$bitData" ) );
 	$devicedef = "VTX_BELL " . $deviceCode if(!$def && $protocol == 79);
@@ -285,6 +287,17 @@ sub SD_UT_Parse($$) {
 
 	Log3 $iohash, 4, "$ioname: SD_UT device $devicedef found (delete cache = $deletecache)" if($def && $deletecache && $deletecache ne "-");
 	
+	# #### TEST ####
+	# foreach my $search (sort keys %{$modules{SD_UT}{defptr}}) {
+		# #Log3 $iohash, 3, "$ioname: SD_UT device $search found" if ($search ne "ioname");
+		# if ($search =~ /Westinghouse_Delancey\s\d/s) {
+			# Log3 $iohash, 3, "$ioname: SD_UT device $search definiert";
+			# my @found = split(" ", $search);
+			# Log3 $iohash, 3, "$ioname: SD_UT device arg0=$found[0] arg1=$found[1]";
+		# }
+	# }
+	# #### ENDE ####
+	
 	if(!$def) {
 		Log3 $iohash, 1, "$ioname: SD_UT UNDEFINED sensor " . $model . " detected, code " . $deviceCode;
 		return "UNDEFINED $model SD_UT $model";
@@ -296,9 +309,7 @@ sub SD_UT_Parse($$) {
 	$hash->{bitMSG} = $bitData;
 	$deviceCode = undef;				# reset for Westinghouse_Delancey
 	
-	my $protocolnumber = ReadingsVal($name, "sduino_protocol", "unknown");
-	readingsSingleUpdate($hash, "sduino_protocol" , $protocol, 0) if ($protocol);		# save protocol nr
-
+	readingsSingleUpdate($hash, "sduino_protocol" , $protocol, 0) if ($protocol && AttrVal($name, "model", "unknown") ne "unknown");		## only to view im Device
 	
 	############ unitec orginal ############ Protocol 30 ############
 	if (AttrVal($name, "model", "unknown") eq "Unitec_other" && $protocol == 30) {
@@ -319,12 +330,12 @@ sub SD_UT_Parse($$) {
 		$hash->{lastReceive} = time();
 		$hash->{lastMSG} = $rawData;
 		$hash->{bitMSG} = $bitData;
-	############ Westinghouse_Delancey ############ Protocol 30 ############
-	} elsif (AttrVal($name, "model", "unknown") eq "Westinghouse_Delancey" && $protocol == 83) {
+	############ Westinghouse_Delancey ############ Protocol 83 oder 30 ############
+	} elsif (AttrVal($name, "model", "unknown") eq "Westinghouse_Delancey" && ($protocol == 83 || $protocol == 30)) {
 		$model = AttrVal($name, "model", "unknown");
 		$state = substr($bitData,6,6);
 		$deviceCode = substr($bitData,1,4);
-		
+
 		## deviceCode conversion for User in ON or OFF ##
 		my $deviceCodeUser = $deviceCode;
 		$deviceCodeUser =~ s/0/off|/g && $deviceCodeUser =~ s/1/on|/g;
@@ -382,7 +393,7 @@ sub SD_UT_Parse($$) {
 	############ unknown ############
 	} else {
 		readingsSingleUpdate($hash, "state", "???", 0);
-		readingsSingleUpdate($hash, "unknownMSG", $bitData, 1);
+		readingsSingleUpdate($hash, "unknownMSG", $bitData."  (protocol: ".$protocol.")", 1);
 		Log3 $name, 3, "$ioname: SD_UT Please define your model of Device $name in Attributes!";
 		Log3 $name, 4, "$ioname: SD_UT_Parse Protocol: $protocol, rawData=$rawData, bitData=$bitData, model=$model";
 	}
@@ -390,7 +401,7 @@ sub SD_UT_Parse($$) {
 	readingsBeginUpdate($hash);
 	readingsBulkUpdate($hash, "deviceCode", $deviceCode, 0)  if (defined($deviceCode));
 	readingsBulkUpdate($hash, "LastAction", "receive", 0)  if (defined($state) && $model eq "Westinghouse_Delancey");
-	readingsBulkUpdate($hash, "state", $state)  if (defined($state));
+	readingsBulkUpdate($hash, "state", $state)  if (defined($state) && $state ne "unknown");	# state ne "unknown" because protocol without checksum
 	readingsEndUpdate($hash, 1); 		# Notify is done by Dispatch
 		
 	return $name;
