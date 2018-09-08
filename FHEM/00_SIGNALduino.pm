@@ -163,7 +163,7 @@ my %matchListSIGNALduino = (
      "14:Dooya"					=> '^P16#[A-Fa-f0-9]+',
      "15:SOMFY"					=> '^Ys[0-9A-F]+',
      "16:SD_WS_Maverick"		=> '^P47#[A-Fa-f0-9]+',
-     "17:SD_UT"            		=> '^u30#.*',						## BELL 201.2 TXA
+     "17:SD_UT"            		=> '^[P|u](30|79|81)#.*',		 # universal
      "18:FLAMINGO"            	=> '^P13#[A-Fa-f0-9]+',						## Flamingo Smoke
      "19:CUL_WS"				=> '^K[A-Fa-f0-9]{5,}',
      "20:Revolt"				=> '^r[A-Fa-f0-9]{22}',
@@ -172,7 +172,7 @@ my %matchListSIGNALduino = (
      "23:FHT"      				=> "^81..(04|09|0d)..(0909a001|83098301|c409c401)..",
      "24:FS20"    				=> "^81..(04|0c)..0101a001", 
      "25:CUL_EM"    				=> "^E0.................", 
-     "25:Fernotron"  			=> '^P82#.*',
+     "26:Fernotron"  			=> '^P82#.*',
 	 "X:SIGNALduino_un"			=> '^[u]\d+#.*',
 );
 

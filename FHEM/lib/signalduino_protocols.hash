@@ -566,19 +566,21 @@
 			length_max      => '12',				# message has only 10 bit but is paddet to 12
 		},
 	"30" => # a unitec remote door reed switch
+			# MU;P0=-10026;P1=-924;P2=309;P3=-688;P4=-361;P5=637;D=123245453245324532453245320232454532453245324532453202324545324532453245324532023245453245324532453245320232454532453245324532453202324545324532453245324532023245453245324532453245320232454532453245324532453202324545324532453245324532023240;CP=2;O;
+			# MU;P0=307;P1=-10027;P2=-691;P3=-365;P4=635;D=0102034342034203420342034201020343420342034203420342010203434203420342034203420102034342034203420342034201020343420342034203420342010203434203420342034203420102034342034203420342034201;CP=0;
 		{
-            name			=> 'unitec47031',	
-			comment         => 'developModule. SD_UT module is only in github available',
+            name			=> 'diverse',	
+			comment         => 'unitec remote door reed switch 47031 (developModule SD_UT module is only in github available)',
 			id          	=> '30',
 			developId       => 'm',
 			one				=> [-1,2],
 			zero			=> [-2,1],
-			start			=> [-33,1],				# Message is not provided as MS, worakround is start
-			clockabs		=> 300,                 # ca 300 us
+			start			=> [-30,1],				# Message is not provided as MS, worakround is start
+			clockabs		=> 330,                 # ca 300 us
 			format 			=> 'twostate',	  		# there is a pause puls between words
-			preamble		=> 'u30#',				# prepend to converted message	
-			clientmodule    => 'SD_UT',   			# not used now
-			modulematch     => '^u30',  			# not used now
+			preamble		=> 'P30#',				# prepend to converted message	
+			clientmodule    => 'SD_UT', 
+			modulematch     => '^P30#.{3}',
 			length_min      => '12',
 			length_max      => '12',				# message has only 10 bit but is paddet to 12
 		},
@@ -1420,8 +1422,8 @@
 			clockabs     	=> 330,
 			format 		=> 'twostate',	    # 
 			preamble	=> 'U79#',	# prepend to converted message	
-			#clientmodule    => '',   	# not used now
-			#modulematch     => '^TX......', # not used now
+			#clientmodule    => 'SD_UT',   	# not used now
+			#modulematch     => '^P79#.*', # not used now
 			length_min      => '12',
 			#length_max      => '44',
 		},
@@ -1433,7 +1435,6 @@
 			name			=> 'EM (Energy-Monitor)',
 			comment		=> 'EM (Energy-Monitor) (868Mhz)',
 			id				=> '80',
-			developId	=> 'y',
 			one			=> [1,-2],	# 800
 			zero			=> [1,-1],	# 400
 			clockabs		=> 400,
@@ -1444,20 +1445,23 @@
 			length_max		=> '114',
 			postDemodulation => \&SIGNALduino_postDemo_EM,
 		},
-	"81" => # Remote SA-434-1
+	"81" => ## Remote control SA-434-1 @elektron-bbs
 		{
+			# MU;P0=-485;P1=188;P2=-6784;P3=508;P5=1010;P6=-974;P7=-17172;D=0123050505630505056305630563730505056305050563056305637305050563050505630563056373050505630505056305630563730505056305050563056305637305050563050505630563056373050505630505056305630563730505056305050563056305637305050563050505630563056373050505630505056;CP=3;R=0;																																																																																				   
 			# MU;P0=-1756;P1=112;P2=-11752;P3=496;P4=-495;P5=998;P6=-988;P7=-17183;D=0123454545634545456345634563734545456345454563456345637345454563454545634563456373454545634545456345634563734545456345454563456345637345454563454545634563456373454545634545456345634563734545456345454563456345637345454563454545634563456373454545634545456;CP=3;R=0;
 
 			name             => 'SA-434-1',
 			comment          => 'Remote control SA-434-1 mini 923301',
 			id               => '81',
+			developId		 => 'm',
 			one              => [-2,1],
 			zero             => [-1,2],
 			start            => [-35,1],		# Message is not provided as MS, worakround is start
 			clockabs		 => 500,                 
 			format           => 'twostate',
-			preamble	     => 'u81#',			# prepend to converted message	
-			#clientmodule	 => 'SD_UT', 
+			preamble	     => 'P81#',			# prepend to converted message
+			modulematch      => '^P81#.{3}',
+			clientmodule	 => 'SD_UT',
 			length_min       => '12',
 			length_max       => '12',
 		},
@@ -1478,4 +1482,24 @@
 			length_min     => '100',      # actual 120 bit (12 x 10bit words to decode 6 bytes data), but last 20 are for checksum
 			length_max     => '3360',     # 3360 bit (336 x 10bit words to decode 168 bytes data) for full timer message
 	    },
+	"83" => ## Westinghouse Deckenventilator Delancey, @zwiebelxxl
+			# Taste 1 MU;P0=388;P1=-112;P2=267;P3=-378;P5=585;P6=-693;P7=-11234;D=0123035353535356262623562626272353535353562626235626262723535353535626262356262627235353535356262623562626272353535353562626235626262723535353535626262356262627235353535356262623562626272353535353562626235626262723535353535626262356262627235353535356262;CP=2;R=43;O;
+			# Taste 2 MU;P0=-176;P1=262;P2=-11240;P3=112;P5=-367;P6=591;P7=-695;D=0123215656565656717171567156712156565656567171715671567121565656565671717156715671215656565656717171567156712156565656567171715671567121565656565671717156715671215656565656717171567156712156565656567171715671567121565656565671717171717171215656565656717;CP=1;R=19;O;
+			# Taste 3 MU;P0=564;P1=-392;P2=-713;P3=245;P4=-11247;D=0101010101023231023232323431010101010232310232323234310101010102323102323232343101010101023231023232323431010101010232310232323234310101010102323102323232343101010101023231023232323431010101010232310232323234310101010102323102323232343101010101023231023;CP=3;R=40;O;
+		{
+            name			=> 'Westinghouse Delancey 7800140',	
+			comment         => '(developModule SD_UT module is only in github available)',
+			id          	=> '83',
+			developId       => 'm',
+			one				=> [-1,2],
+			zero			=> [-2,1],
+			start			=> [-35,1],				# Message is not provided as MS, worakround is start
+			clockabs		=> 320,                 # ca 300 us
+			format 			=> 'twostate',	  		# there is a pause puls between words
+			preamble		=> 'P83#',				# prepend to converted message	
+			clientmodule    => 'SD_UT', 
+			modulematch     => '^P83#.{3}',
+			length_min      => '12',
+			length_max      => '12',				# message has only 10 bit but is paddet to 12
+		},
 );
