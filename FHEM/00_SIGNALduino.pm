@@ -25,7 +25,7 @@ no warnings 'portable';
 
 
 use constant {
-	SDUINO_VERSION            => "v3.3.3-dev_20.04.",
+	SDUINO_VERSION            => "v3.3.3-dev_08.09.",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -163,7 +163,7 @@ my %matchListSIGNALduino = (
      "14:Dooya"					=> '^P16#[A-Fa-f0-9]+',
      "15:SOMFY"					=> '^Ys[0-9A-F]+',
      "16:SD_WS_Maverick"		=> '^P47#[A-Fa-f0-9]+',
-     "17:SD_UT"            		=> '^[P|u](30|79|81)#.*',		 # universal
+     "17:SD_UT"            		=> '^[P|u](30|79|81|83)#.*',	 # universal - more devices with different protocols
      "18:FLAMINGO"            	=> '^P13#[A-Fa-f0-9]+',						## Flamingo Smoke
      "19:CUL_WS"				=> '^K[A-Fa-f0-9]{5,}',
      "20:Revolt"				=> '^r[A-Fa-f0-9]{22}',
@@ -2929,7 +2929,8 @@ sub SIGNALduino_PreparingSend_FS20_FHT($$$) {
 	}
 	
 	$newmsg .= SIGNALduino_dec2binppari($sum & 0xFF);   # Checksum		
-	$newmsg .= "0P#R3";            		# EOT, Pause, 3 Repeats    
+	my $repeats = $id - 71;			# FS20(74)=3, FHT(73)=2
+	$newmsg .= "0P#R" . $repeats;		# EOT, Pause, 3 Repeats    
 	
 	return $newmsg;
 }
