@@ -14,7 +14,7 @@
 #     Adresse: FF - Gehäuse geöffnet?
 #     get sduino_dummy raw MU;;P0=684;;P1=-304;;P2=-644;;P3=369;;P4=-9931;;D=010101010101010232323104310101010101010102323231043101010101010101023232310431010101010101010232323104310101010101010102323231043101010101010101023232310431010101010101010232323104310101010101010102323231043101010101010101023232310431010100;;CP=0;;O;;
 ####################################################################################################################################
-# - Westinghouse Delancey Deckenventilator (Typ Westinghouse_Delancey) [Protocol 83] (sync -35)
+# - Westinghouse Delancey Deckenventilator (Typ Westinghouse_Delancey) [Protocol 83] (sync -36)
 #     Adresse F: I - fan minimum speed
 #     get sduino_dummy raw MU;;P0=388;;P1=-112;;P2=267;;P3=-378;;P5=585;;P6=-693;;P7=-11234;;D=0123035353535356262623562626272353535353562626235626262723535353535626262356262627235353535356262623562626272353535353562626235626262723535353535626262356262627235353535356262623562626272353535353562626235626262723535353535626262356262627235353535356262;;CP=2;;R=43;;O;;
 #     Adresse 7: I - fan minimum speed
@@ -138,27 +138,27 @@ sub SD_UT_Set($$$@) {
 		if ($cmd eq "?") {
 			$ret .= "1_fan_minimum_speed:noArg 2_fan_low_speed:noArg 3_fan_medium_low_speed:noArg 4_fan_medium_speed:noArg 5_fan_medium_high_speed:noArg 6_fan_high_speed:noArg fan_direction:noArg fan_off:noArg light_on/off:noArg set:noArg";
 		} else {
-			my $msg = "P83#1". $adr ."0";
+			my $msg = "P83#0". $adr ."1";
 			if ($cmd eq "1_fan_minimum_speed") {
-				$msg .= "001000";		# I - fan minimum speed
+				$msg .= "110111";		# I - fan minimum speed
 			} elsif ($cmd eq "2_fan_low_speed") {
-				$msg .= "001010";		# II - fan low speed
+				$msg .= "110101";		# II - fan low speed
 			} elsif ($cmd eq "3_fan_medium_low_speed") {
-				$msg .= "010000";		# III - fan medium low speed
+				$msg .= "101111";		# III - fan medium low speed
 			} elsif ($cmd eq "4_fan_medium_speed") {
-				$msg .= "011000";		# IV - fan medium speed
+				$msg .= "100111";		# IV - fan medium speed
 			} elsif ($cmd eq "5_fan_medium_high_speed") {
-				$msg .= "100010";		# V - fan medium high speed
+				$msg .= "011101";		# V - fan medium high speed
 			} elsif ($cmd eq "6_fan_high_speed") {
-				$msg .= "100000";		# VI - fan high speed
+				$msg .= "011111";		# VI - fan high speed
 			} elsif ($cmd eq "fan_off") {
-				$msg .= "000010";		# Turn the fan off
+				$msg .= "111101";		# Turn the fan off
 			} elsif ($cmd eq "fan_direction") {
-				$msg .= "000100";		# fan direction
+				$msg .= "111011";		# fan direction
 			} elsif ($cmd eq "light_on/off") {
-				$msg .= "000001";		# light on/off
+				$msg .= "111110";		# light on/off
 			} elsif ($cmd eq "set") {
-				$msg .= "010010";		# set
+				$msg .= "101101";		# set
 			} else {
 				return "Wrong command, please select one from list.";
 			}
@@ -340,7 +340,7 @@ sub SD_UT_Parse($$) {
 
 		## deviceCode conversion for User in ON or OFF ##
 		my $deviceCodeUser = $deviceCode;
-		$deviceCodeUser =~ s/0/off|/g && $deviceCodeUser =~ s/1/on|/g;
+		$deviceCodeUser =~ s/1/off|/g && $deviceCodeUser =~ s/0/on|/g;
 		$deviceCodeUser = substr($deviceCodeUser, 0 , length($deviceCodeUser)-1);
 		$deviceCode = $deviceCode." ($deviceCodeUser)";
 		
@@ -348,25 +348,25 @@ sub SD_UT_Parse($$) {
 		#my $unknown2 = substr($bitData,5,1);
 		$bin = substr($bitData,0,8);
 		Log3 $name, 3, "$ioname: $model devicecode=$deviceCode state=$state ($rawData)";
-		if ($state eq "001000") {
+		if ($state eq "110111") {
 			$state = "I - fan minimum speed";
-		} elsif ($state eq "001010") {
+		} elsif ($state eq "110101") {
 			$state = "II - fan low speed";
-		} elsif ($state eq "010000") {
+		} elsif ($state eq "101111") {
 			$state = "III - fan medium low speed";
-		} elsif ($state eq "011000") {
+		} elsif ($state eq "100111") {
 			$state = "IV - fan medium speed";
-		} elsif ($state eq "100010") {
+		} elsif ($state eq "011101") {
 			$state = "V - fan medium high speed";
-		} elsif ($state eq "100000") {
+		} elsif ($state eq "011111") {
 			$state = "VI - fan high speed";
-		} elsif ($state eq "000010") {
+		} elsif ($state eq "111101") {
 			$state = "Turn the fan off";
-		} elsif ($state eq "000001") {
+		} elsif ($state eq "111110") {
 			$state = "light on/off";
-		} elsif ($state eq "000100") {
+		} elsif ($state eq "111011") {
 			$state = "fan direction";
-		} elsif ($state eq "010010") {
+		} elsif ($state eq "101101") {
 		$state = "set";
 		} else {
 			$state = "unknown";
