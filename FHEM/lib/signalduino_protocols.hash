@@ -573,8 +573,8 @@
 			comment         => 'unitec remote door reed switch 47031 (developModule SD_UT module is only in github available)',
 			id          	=> '30',
 			developId       => 'm',
-			one				=> [-1,2],
-			zero			=> [-2,1],
+			one				=> [-2,1],
+			zero			=> [-1,2],
 			start			=> [-30,1],				# Message is not provided as MS, worakround is start
 			clockabs		=> 330,                 # ca 300 us
 			format 			=> 'twostate',	  		# there is a pause puls between words
@@ -1494,7 +1494,7 @@
 			developId       => 'm',
 			one				=> [-2,1],
 			zero			=> [-1,2],
-			start			=> [-36,1],				# calculated 12126,31579 µS
+			start			=> [-35,1],				# calculated 12126,31579 µS
 			clockabs		=> 335,                 # calculated ca 336,8421053 µS short - 673,6842105µS long 
 			format 			=> 'twostate',	  		# there is a pause puls between words
 			preamble		=> 'P83#',				# prepend to converted message	
