@@ -9,19 +9,19 @@
 ####################################################################################################################################
 # - unitec remote door reed switch 47031 (Typ Unitec_47031) [Protocol 30] (sync -30)
 #     FORUM: https://forum.fhem.de/index.php/topic,43346.msg353144.html#msg353144
-#     Adresse: 6A - öffnen?
+#     Adresse: 95 - öffnen?
 #     get sduino_dummy raw MU;;P0=309;;P1=636;;P2=-690;;P3=-363;;P4=-10027;;D=012031203120402031312031203120312031204020313120312031203120312040203131203120312031203120402031312031203120312031204020313120312031203120312040203131203120312031203120402031312031203120312031204020313120312031203120312040203131203120312030;;CP=0;;O;;
-#     Adresse: FF - Gehäuse geöffnet?
+#     Adresse: 00 - Gehäuse geöffnet?
 #     get sduino_dummy raw MU;;P0=684;;P1=-304;;P2=-644;;P3=369;;P4=-9931;;D=010101010101010232323104310101010101010102323231043101010101010101023232310431010101010101010232323104310101010101010102323231043101010101010101023232310431010101010101010232323104310101010101010102323231043101010101010101023232310431010100;;CP=0;;O;;
 ####################################################################################################################################
-# - Westinghouse Delancey Deckenventilator (Typ Westinghouse_Delancey) [Protocol 83] (sync -36)
-#     Adresse F: I - fan minimum speed
+# - Westinghouse Delancey Deckenventilator (Typ Westinghouse_Delancey) [Protocol 83] (sync -36) (1 = off | 0 = on)
+#     Adresse 0 | 0000 (on|on|on|on): I - fan minimum speed
 #     get sduino_dummy raw MU;;P0=388;;P1=-112;;P2=267;;P3=-378;;P5=585;;P6=-693;;P7=-11234;;D=0123035353535356262623562626272353535353562626235626262723535353535626262356262627235353535356262623562626272353535353562626235626262723535353535626262356262627235353535356262623562626272353535353562626235626262723535353535626262356262627235353535356262;;CP=2;;R=43;;O;;
-#     Adresse 7: I - fan minimum speed
+#     Adresse 8 | 1000 (off|on|on|on): I - fan minimum speed
 #     get sduino_dummy raw MU;;P0=-11250;;P1=-200;;P2=263;;P3=-116;;P4=-374;;P5=578;;P6=-697;;D=1232456245454562626245626262024562454545626262456262620245624545456262624562626202456245454562626245626262024562454545626262456262620245624545456262624562626202456245454562626245626262024562454545626262456262620245624545456262624562626202456245454562626;;CP=2;;R=49;;O;;
-#	  Adresse 3: fan_off
+#	  Adresse c | 1100 (off|off|on|on): fan_off
 #	  get sduino_dummy raw MU;;P0=-720;;P1=235;;P2=-386;;P3=561;;P4=-11254;;D=01230141230101232301010101012301412301012323010101010123014123010123230101010101010141230101232301010101010101412301012323010101010101014123010123230101010101010;;CP=1;;R=242;;
-#	  Adresse 3: fan_off
+#	  Adresse c | 1100 (off|off|on|on): fan_off
 #	  get sduino_dummy raw MU;;P0=-11230;;P1=258;;P2=-390;;P3=571;;P4=-699;;D=0123414123234141414141234101234141232341414141412341012341412323414141414123410123414123234141414141234101234141232341414141412341012341412323414141414123410123414123234141414141234101234141232341414141412341012341412323414141414123410123414123234141414;;CP=1;;R=246;;O;;
 ####################################################################################################################################
 # - Remote control SA-434-1 mini 923301  [Protocol 81]
@@ -89,7 +89,7 @@ sub SD_UT_Define($$) {
 	return "wrong define: $a[2] need no HEX-Value to define!" if($a[2] eq "unknown" && $a[3] && length($a[3]) >= 1);
 	### checks Westinghouse_Delancey ###
 	return "wrong HEX-Value! $a[2] have one HEX-Value" if ($a[2] eq "Westinghouse_Delancey" && length($a[3]) > 1);
-	return "wrong HEX-Value! $a[2] HEX-Value are not (0-9 | a-f | A-F)" if ($a[2] eq "Westinghouse_Delancey" && not $a[3] =~ /^[0-9a-fA-F]/s);
+	return "wrong HEX-Value! $a[2] HEX-Value are not (0-9 | a-f | A-F)" if ($a[2] eq "Westinghouse_Delancey" && not $a[3] =~ /^[0-9a-fA-F]{1}/s);
 	### checks SA_434_1_mini ###
 	return "wrong HEX-Value! $a[2] HEX-Value to short | long or not HEX (0-9 | a-f | A-F){3}" if ($a[2] eq "SA_434_1_mini" && not $a[3] =~ /^[0-9a-fA-F]{3}/s);
 	### checks VTX_BELL ###
@@ -97,7 +97,7 @@ sub SD_UT_Define($$) {
 	### checks Unitec_47031 ###
 	return "wrong HEX-Value! $a[2] HEX-Value to short | long or not HEX (0-9 | a-f | A-F){2}" if ($a[2] eq "Unitec_47031" && not $a[3] =~ /^[0-9a-fA-F]{2}/s);
 	### checks Unitec_other ###
-	return "wrong HEX-Value! $a[2] HEX-Value to short | long or not HEX (0-9 | a-f | A-F){3}" if ($a[2] eq "Unitec_other" && not $a[3] =~ /^[0-9a-fA-F]{3}/s);
+	return "wrong HEX-Value! $a[2] HEX-Value to short | long or not HEX (0-9 | a-f | A-F){3}" if ($a[2] eq "Unitec_other" && not $a[3] =~ /^[0-9a-fA-F]{2}/s);
 
 	
 	$hash->{lastMSG} =  "";
@@ -165,7 +165,8 @@ sub SD_UT_Set($$$@) {
 			
 			# Gitub - User: "Die besten Ergebnisse waren mit "#R7"."
 			# https://github.com/RFD-FHEM/RFFHEM/issues/250#issuecomment-419622486
-			$msg .= "#R7";
+			# data sheet say repeat 4 !
+			$msg .= "#R4";
 
 			## for hex Check ##
 			my @split = split("#", $msg);
@@ -259,27 +260,30 @@ sub SD_UT_Parse($$) {
 	}
 	
 	### Remote control SA_434_1_mini 923301 ###
-	$deviceCode = sprintf("%x", oct( "0b$bitData" ) );
+	$deviceCode = sprintf("%03X", oct( "0b$bitData" ) );
 	$devicedef = "SA_434_1_mini " . $deviceCode if (!$def && $protocol == 81);
 	$def = $modules{SD_UT}{defptr}{$devicedef} if (!$def && $protocol == 81);
 	### Unitec_47031 ###
 	$deviceCode = substr($bitData,0,8);
-	$deviceCode = sprintf("%x", oct( "0b$deviceCode" ) );
+	$deviceCode = sprintf("%02X", oct( "0b$deviceCode" ) );
 	$devicedef = "Unitec_47031 " . $deviceCode if(!$def && $protocol == 30);
 	$def = $modules{SD_UT}{defptr}{$devicedef} if(!$def && $protocol == 30);
+	$devicedef = "Unitec_47031 " . $deviceCode if(!$def && $protocol == 83);			# to test id 83 with same deviceCode | because same protocol with different sync 
+	$def = $modules{SD_UT}{defptr}{$devicedef} if(!$def && $protocol == 83);			# to test id 83 with same deviceCode | because same protocol with different sync 
 	### Westinghouse_Delancey ###
 	$deviceCode = substr($bitData,1,4);
-	$deviceCode = sprintf("%x", oct( "0b$deviceCode" ) );
+	$deviceCode = sprintf("%X", oct( "0b$deviceCode" ) );
 	$devicedef = "Westinghouse_Delancey " . $deviceCode if(!$def && $protocol == 83);
 	$def = $modules{SD_UT}{defptr}{$devicedef} if (!$def && $protocol == 83);
-	$devicedef = "Westinghouse_Delancey " . $deviceCode if(!$def && $protocol == 30);
-	$def = $modules{SD_UT}{defptr}{$devicedef} if (!$def && $protocol == 30);
+	$devicedef = "Westinghouse_Delancey " . $deviceCode if(!$def && $protocol == 30);	# to test id 30 with same deviceCode | because same protocol with different sync 
+	$def = $modules{SD_UT}{defptr}{$devicedef} if (!$def && $protocol == 30);			# to test id 30 with same deviceCode | because same protocol with different sync 
 	### VTX_BELL ###
-	$deviceCode = sprintf("%x", oct( "0b$bitData" ) );
+	$deviceCode = sprintf("%03X", oct( "0b$bitData" ) );
 	$devicedef = "VTX_BELL " . $deviceCode if(!$def && $protocol == 79);
 	$def = $modules{SD_UT}{defptr}{$devicedef} if (!$def && $protocol == 79);
 	### Unitec_other ###
-	$deviceCode = sprintf("%x", oct( "0b$bitData" ) );
+	$deviceCode = substr($bitData,0,8);
+	$deviceCode = sprintf("%02X", oct( "0b$bitData" ) );
 	$devicedef = "Unitec_other " . $deviceCode  if(!$def && $protocol == 30);
 	$def = $modules{SD_UT}{defptr}{$devicedef}  if(!$def && $protocol == 30);
 	### unknown ###
@@ -288,17 +292,6 @@ sub SD_UT_Parse($$) {
 	$modules{SD_UT}{defptr}{ioname} = $ioname;
 
 	Log3 $iohash, 4, "$ioname: SD_UT device $devicedef found (delete cache = $deletecache)" if($def && $deletecache && $deletecache ne "-");
-	
-	# #### TEST ####
-	# foreach my $search (sort keys %{$modules{SD_UT}{defptr}}) {
-		# #Log3 $iohash, 3, "$ioname: SD_UT device $search found" if ($search ne "ioname");
-		# if ($search =~ /Westinghouse_Delancey\s\d/s) {
-			# Log3 $iohash, 3, "$ioname: SD_UT device $search definiert";
-			# my @found = split(" ", $search);
-			# Log3 $iohash, 3, "$ioname: SD_UT device arg0=$found[0] arg1=$found[1]";
-		# }
-	# }
-	# #### ENDE ####
 	
 	if(!$def) {
 		Log3 $iohash, 1, "$ioname: SD_UT UNDEFINED sensor " . $model . " detected, code " . $deviceCode;
@@ -311,15 +304,13 @@ sub SD_UT_Parse($$) {
 	$hash->{bitMSG} = $bitData;
 	$deviceCode = undef;				# reset for Westinghouse_Delancey
 	
-	readingsSingleUpdate($hash, "sduino_protocol" , $protocol, 0) if ($protocol && AttrVal($name, "model", "unknown") ne "unknown");		## only to view im Device
-	
 	############ unitec orginal ############ Protocol 30 ############
 	if (AttrVal($name, "model", "unknown") eq "Unitec_other" && $protocol == 30) {
 		$model = AttrVal($name, "model", "unknown");
 		$bin = substr($bitData,0,8);
 		$state = substr($bitData,8,4);
 		$SensorTyp = "FAAC/HEIDEMANN";	
-		$deviceCode = sprintf('%X', oct("0b$bin"));
+		$deviceCode = sprintf('%02X', oct("0b$bin"));
 		Log3 $name, 3, "$ioname: $model $SensorTyp devicecode=$deviceCode state=$state ($rawData)";
 		if (!defined(AttrVal($hash->{NAME},"event-min-interval",undef)))
 		{
@@ -338,28 +329,34 @@ sub SD_UT_Parse($$) {
 		$state = substr($bitData,6,6);
 		$deviceCode = substr($bitData,1,4);
 
+		## Check fixed bits
+		my $unknown1 = substr($bitData,0,1);	# every 0
+		my $unknown2 = substr($bitData,5,1);	# every 1
+		if ($unknown1 ne "0" | $unknown2 ne "1") {
+			Log3 $name, 3, "$ioname: $model fixed bits wrong! always bit0=0 ($unknown1) and bit5=1 ($unknown2)";
+			return "";
+		}
+
 		## deviceCode conversion for User in ON or OFF ##
 		my $deviceCodeUser = $deviceCode;
-		$deviceCodeUser =~ s/1/off|/g && $deviceCodeUser =~ s/0/on|/g;
+		$deviceCodeUser =~ s/1/off|/g;
+		$deviceCodeUser =~ s/0/on|/g;
 		$deviceCodeUser = substr($deviceCodeUser, 0 , length($deviceCodeUser)-1);
 		$deviceCode = $deviceCode." ($deviceCodeUser)";
-		
-		#my $unknown1 = substr($bitData,0,1);
-		#my $unknown2 = substr($bitData,5,1);
-		$bin = substr($bitData,0,8);
+
 		Log3 $name, 3, "$ioname: $model devicecode=$deviceCode state=$state ($rawData)";
 		if ($state eq "110111") {
-			$state = "I - fan minimum speed";
+			$state = "1 - fan minimum speed";
 		} elsif ($state eq "110101") {
-			$state = "II - fan low speed";
+			$state = "2 - fan low speed";
 		} elsif ($state eq "101111") {
-			$state = "III - fan medium low speed";
+			$state = "3 - fan medium low speed";
 		} elsif ($state eq "100111") {
-			$state = "IV - fan medium speed";
+			$state = "4 - fan medium speed";
 		} elsif ($state eq "011101") {
-			$state = "V - fan medium high speed";
+			$state = "5 - fan medium high speed";
 		} elsif ($state eq "011111") {
-			$state = "VI - fan high speed";
+			$state = "6 - fan high speed";
 		} elsif ($state eq "111101") {
 			$state = "Turn the fan off";
 		} elsif ($state eq "111110") {
@@ -369,7 +366,8 @@ sub SD_UT_Parse($$) {
 		} elsif ($state eq "101101") {
 		$state = "set";
 		} else {
-			$state = "unknown";
+			Log3 $name, 3, "$ioname: SD_UT $model unknown Button receive ($state) or houscode is double!";
+			return "";
 		}
 		
 		#$state.= " | ".TimeNow();
@@ -380,7 +378,7 @@ sub SD_UT_Parse($$) {
 		$state = "new MSG | ".TimeNow();
 		$bin = substr($bitData,0,8);
 		#$state = substr($bitData,8,4);
-		$deviceCode = sprintf('%X', oct("0b$bin"));
+		$deviceCode = sprintf('%02X', oct("0b$bin"));
 		Log3 $name, 3, "$ioname: $model devicecode=$deviceCode state=$state ($rawData)";
 	############ SA_434_1_mini ############ Protocol xx ############
 	} elsif (AttrVal($name, "model", "unknown") eq "SA_434_1_mini" && $protocol == 81) {
@@ -435,7 +433,7 @@ sub SD_UT_Attr(@) {
 				$attr{$name}{model}	= $attrValue;				# set new model
 				my $bitData = InternalVal($name, "bitMSG", "-");
 				$deviceCode = substr($bitData,1,4);
-				$deviceCode = sprintf("%x", oct( "0b$deviceCode" ) );
+				$deviceCode = sprintf("%X", oct( "0b$deviceCode" ) );
 				$devicemodel = "Westinghouse_Delancey";
 				$devicename = $devicemodel."_".$deviceCode;
 				Log3 $name, 3, "SD_UT: UNDEFINED sensor ".$attrValue . " detected, code ". $deviceCode;
@@ -444,7 +442,7 @@ sub SD_UT_Attr(@) {
 			} elsif ($attrName eq "model" && $attrValue eq "SA_434_1_mini") {
 				$attr{$name}{model}	= $attrValue;				# set new model
 				my $bitData = InternalVal($name, "bitMSG", "0");
-				$deviceCode = sprintf("%x", oct( "0b$bitData" ) );
+				$deviceCode = sprintf("%03X", oct( "0b$bitData" ) );
 				$devicemodel = "SA_434_1_mini";
 				$devicename = $devicemodel."_".$deviceCode;
 				Log3 $name, 3, "SD_UT: UNDEFINED sensor " . $attrValue . " detected, code " . $deviceCode;
@@ -453,8 +451,8 @@ sub SD_UT_Attr(@) {
 			} elsif ($attrName eq "model" && $attrValue eq "Unitec_47031") {
 				$attr{$name}{model}	= $attrValue;				# set new model
 				my $bitData = InternalVal($name, "bitMSG", "0");
-				$deviceCode = substr($bitData,0,8);
-				$deviceCode = sprintf("%x", oct( "0b$deviceCode" ) );
+				$deviceCode = substr($bitData,0,8);		# unklar derzeit! 10Dil auf Bild
+				$deviceCode = sprintf("%02X", oct( "0b$deviceCode" ) );
 				$devicemodel = "Unitec_47031";
 				$devicename = $devicemodel."_".$deviceCode;
 				Log3 $name, 3, "SD_UT: UNDEFINED sensor " . $attrValue . " detected, code " . $deviceCode;
@@ -463,7 +461,7 @@ sub SD_UT_Attr(@) {
 			} elsif ($attrName eq "model" && $attrValue eq "VTX_BELL") {
 				$attr{$name}{model}	= $attrValue;				# set new model
 				my $bitData = InternalVal($name, "bitMSG", "0");
-				$deviceCode = sprintf("%x", oct( "0b$bitData" ) );
+				$deviceCode = sprintf("%03X", oct( "0b$bitData" ) );
 				$devicemodel = "VTX_BELL";
 				$devicename = $devicemodel."_".$deviceCode;
 				Log3 $name, 3, "SD_UT: UNDEFINED sensor " . $attrValue . " detected, code " . $deviceCode;
@@ -472,7 +470,7 @@ sub SD_UT_Attr(@) {
 			} elsif ($attrName eq "model" && $attrValue eq "Unitec_other") {
 				$attr{$name}{model}	= $attrValue;				# set new model
 				my $bitData = InternalVal($name, "bitMSG", "0");
-				$deviceCode = sprintf("%x", oct( "0b$bitData" ) );
+				$deviceCode = sprintf("%02X", oct( "0b$bitData" ) );
 				$devicemodel = "Unitec_other";
 				$devicename = $devicemodel."_".$deviceCode;
 				Log3 $name, 3, "SD_UT: UNDEFINED sensor $attrValue";
@@ -514,7 +512,7 @@ sub SD_UT_Attr(@) {
 		delete $hash->{READINGS}{"Button"} if($hash->{READINGS});
 		delete $hash->{READINGS}{"deviceCode"} if($hash->{READINGS});
 		delete $hash->{READINGS}{"LastAction"} if($hash->{READINGS});
-		delete $hash->{READINGS}{"sduino_protocol"} if($hash->{READINGS});
+		#delete $hash->{READINGS}{"sduino_protocol"} if($hash->{READINGS});
 		delete $hash->{READINGS}{"state"} if($hash->{READINGS});
 		delete $hash->{READINGS}{"unknownMSG"} if($hash->{READINGS});
 	}
@@ -543,7 +541,8 @@ sub SD_UT_binaryToNumber {
 <ul>The module SD_UT is a universal module of SIGNALduino for devices or sensors with a 12bit message.<br>
 	After the first creation of the device <code><b>SD_UT_Unknown</b></code>, the user must define the device himself via the <code>model</code> attribute.<br>
 	If the device is not supported yet, bit data can be collected with the SD_UT_Unknown device.<br><br>
-	<i><u>Note:</u></i> As soon as the attribute model of a defined device is changed or deleted, the module re-creates a device of the selected type, and when a new message is run, the current device is deleted.<br><br>
+	<i><u><b>Note:</b></u></i> As soon as the attribute model of a defined device is changed or deleted, the module re-creates a device of the selected type, and when a new message is run, the current device is deleted. 
+	Devices of <u>the same or different type with the same deviceCode will result in errors</u>. PLEASE use different <code>deviceCode</code>.<br><br>
 	 <u>The following devices are supported:</u><br>
 	 <ul> - Remote control SA-434-1 mini 923301&nbsp;&nbsp;&nbsp;<small>(module model: SA_434_1_mini | protocol 81)</small></ul>
 	 <ul> - unitec Sound (Ursprungsmodul)&nbsp;&nbsp;&nbsp;<small>(module model: Unitec_other | protocol 30)</small></ul>
@@ -594,7 +593,8 @@ sub SD_UT_binaryToNumber {
 <ul>Das Modul SD_UT ist ein Universalmodul vom SIGNALduino f&uuml;r Ger&auml;te oder Sensoren mit einer 12bit Nachricht.<br>
 	Nach dem ersten anlegen des Ger&auml;tes <code><b>SD_UT_Unknown</b></code> muss der User das Ger&auml;t selber definieren via dem Attribut <code>model</code>.<br>
 	Bei noch nicht unterst&uuml;tzen Ger&auml;ten k&ouml;nnen mit dem <code><b>SD_UT_Unknown</b></code> Ger&auml;t Bitdaten gesammelt werden.<br><br>
-	<i><u>Hinweis:</u></i> Sobald das Attribut model eines definieren Ger&auml;tes verstellt oder gelöscht wird, so legt das Modul ein Ger&auml;t des gew&auml;hlten Typs neu an und mit Durchlauf einer neuen Nachricht wird das aktuelle Ger&auml;t gel&ouml;scht.<br><br>
+	<i><u><b>Hinweis:</b></u></i> Sobald das Attribut model eines definieren Ger&auml;tes verstellt oder gelöscht wird, so legt das Modul ein Ger&auml;t des gew&auml;hlten Typs neu an und mit Durchlauf einer neuen Nachricht wird das aktuelle Ger&auml;t gel&ouml;scht. 
+	Das betreiben von Ger&auml;ten des <u>gleichen oder unterschiedliches Typs mit gleichem <code>deviceCode</code> f&uuml;hrt zu Fehlern</u>. BITTE achte stets auf einen unterschiedlichen <code>deviceCode</code>.<br><br>
 	 <u>Es werden bisher folgende Ger&auml;te unterst&uuml;tzt:</u><br>
 	 <ul> - Remote control SA-434-1 mini 923301&nbsp;&nbsp;&nbsp;<small>(Modulmodel: SA_434_1_mini | Protokoll 81)</small></ul>
 	 <ul> - unitec Sound (Ursprungsmodul)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Unitec_other | Protokoll 30)</small></ul>
