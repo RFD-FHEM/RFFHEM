@@ -574,11 +574,11 @@
 			one				=> [-2,1],
 			zero			=> [-1,2],
 			start			=> [-30,1],				# Message is not provided as MS, worakround is start
-			clockabs		=> 300,                 # ca 300 us
+			clockabs		=> 330,                 # ca 300 us
 			format 			=> 'twostate',	  		# there is a pause puls between words
-			preamble		=> 'u30#',				# prepend to converted message	
-			clientmodule    => 'SD_UT',   			# not used now
-			modulematch     => '^u30',  			# not used now
+			preamble		=> 'P30#',				# prepend to converted message	
+			clientmodule    => 'SD_UT', 
+			modulematch     => '^P30#.{3}',
 			length_min      => '12',
 			length_max      => '12',				# message has only 10 bit but is paddet to 12
 		},
@@ -1417,8 +1417,8 @@
 			clockabs     	=> 330,
 			format 		=> 'twostate',	    # 
 			preamble	=> 'U79#',	# prepend to converted message	
-			#clientmodule    => '',   	# not used now
-			#modulematch     => '^TX......', # not used now
+			#clientmodule    => 'SD_UT',   	# not used now
+			#modulematch     => '^P79#.*', # not used now
 			length_min      => '12',
 			#length_max      => '44',
 		},
