@@ -284,27 +284,6 @@ SIGNALduino_un_Parse($$)
 		
 		
 		Log3 $hash, 4, "$name decoded protocolid: $protocol ($SensorTyp ) mode=$sendMode, sensor id=$id, channel=$channel, temp=$temp, hum=$hum, bat=$bat, crc=$crc, sync=$sync, unkown3=$unknown3\n" ;
-	} elsif ($protocol == "37" && length($bitData)>=40)  ## Bresser 7009993
-	{
-		
-		# 0      7 8 9 10 12        22   25    31
-		# 01011010 0 0 01 01100001110 10 0111101 11001010
-		# ID      B? T Kan Temp       ?? Hum     Pruefsumme?
-		#
-		
-		my $SensorTyp = "Bresser 7009994";
-		
-		my $id = SIGNALduino_un_binaryToNumber($bitData,0,7);  
-		my $channel = SIGNALduino_un_binaryToNumber($bitData,10,11);
-		my $hum=SIGNALduino_un_binaryToNumber($bitData,25,31);
-		my $rawTemp = SIGNALduino_un_binaryToNumber($bitData,12,22);
-		my $temp = ($rawTemp - 609.93) / 9.014;
-		$temp = sprintf("%.2f", $temp);
-		
-		my $bitData2 = substr($bitData,0,8) . ' ' . substr($bitData,8,4) . ' ' . substr($bitData,12,11);
-		$bitData2 = $bitData2 . ' ' . substr($bitData,23,2) . ' ' . substr($bitData,25,7) . ' ' . substr($bitData,32,8);
-		Log3 $hash, 4, "$name converted to bits: " . $bitData2;
-		Log3 $hash, 4, "$name decoded protocolid: $protocol ($SensorTyp) sensor id=$id, channel=$channel, rawTemp=$rawTemp, temp=$temp, hum=$hum";
 	} elsif ($protocol == "78" && length($bitData)>=14)  ## geiger rohrmotor
 	{
 		my %bintotristate=(
