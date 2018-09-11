@@ -263,27 +263,6 @@ SIGNALduino_un_Parse($$)
 		Log3 $hash, 4, "$name decoded protocolid: 7 ($SensorTyp / type=$type) mode=$sendMode, sensor id=$id, channel=$channel, temp=$temp, bat=$bat\n" ;
 
 
-	} elsif ($protocol == "33" && length($bitData)>=42)  ## S014 or tcm sensor
-	{
-		my $SensorTyp = "s014/TFA 30.3200/TCM/Conrad";
-		
-		my $id = SIGNALduino_un_binaryToNumber($bitData,0,9);  
-		#my $unknown1 = SIGNALduino_un_binaryToNumber($bitData,8,10);  
-		my $sendMode = SIGNALduino_un_binaryToNumber($bitData,10,11) eq "1" ? "manual" : "auto";  
-		
-		my $channel = SIGNALduino_un_binaryToNumber($bitData,12,13)+1; 
-		#my $temp = (((oct("0b".substr($bitData,22,4))*256) + (oct("0b".substr($bitData,18,4))*16) + (oct("0b".substr($bitData,14,4)))/10) - 90 - 32) * (5/9);
-		my $temp = (((SIGNALduino_un_binaryToNumber($bitData,22,25)*256 +  SIGNALduino_un_binaryToNumber($bitData,18,21)*16 + SIGNALduino_un_binaryToNumber($bitData,14,17)) *10 -12200) /18)/10;
-		
-		my $hum=SIGNALduino_un_binaryToNumber($bitData,30,33)*16 + SIGNALduino_un_binaryToNumber($bitData,26,29);
-		my $bat = SIGNALduino_un_binaryToBoolean($bitData,34) eq "1" ? "ok" : "critical";  # Eventuell falsch!
-		my $sync = SIGNALduino_un_binaryToBoolean($bitData,35,35) eq "1" ? "true" : "false";  
-		my $unknown3 =SIGNALduino_un_binaryToNumber($bitData,36,37);  
-		
-		my $crc=substr($bitData,36,4);
-		
-		
-		Log3 $hash, 4, "$name decoded protocolid: $protocol ($SensorTyp ) mode=$sendMode, sensor id=$id, channel=$channel, temp=$temp, hum=$hum, bat=$bat, crc=$crc, sync=$sync, unkown3=$unknown3\n" ;
 	} elsif ($protocol == "78" && length($bitData)>=14)  ## geiger rohrmotor
 	{
 		my %bintotristate=(

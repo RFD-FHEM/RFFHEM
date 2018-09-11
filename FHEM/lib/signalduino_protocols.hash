@@ -547,21 +547,23 @@
 			length_min      => '8',
 			length_max      => '8',				
 		},
-	"29" => # 
+	"29" => # example remote control with HT12E chip
+           # MU;P0=250;P1=-492;P2=166;P3=-255;P4=491;P5=-8588;D=052121212121234121212121234521212121212341212121212345212121212123412121212123452121212121234121212121234;CP=0;
+           # https://forum.fhem.de/index.php/topic,58397.960.html
 		{
             name			=> 'HT12e remote',	
+			comment         => 'Remote control for example Westinghouse airfan with five Buttons (developModule SD_UT is only in github available)',
 			id          	=> '29',
 			one				=> [-2,1],
 			zero			=> [-1,2],
-			#float          => [1,-1],	
-			start			=> [-38,1],				# Message is not provided as MS, worakround is start
-			clockabs		=> 220,                 #ca 220
-			format 			=> 'tristate',	  		# there is a pause puls between words
-			preamble		=> 'u29#',				# prepend to converted message	
-			#clientmodule    => '',   				# not used now
-			#modulematch     => '',  				# not used now
-			length_min      => '10',
-			length_max      => '12',				# message has only 10 bit but is paddet to 12
+			start           => [-35,1],         # Message is not provided as MS, worakround is start
+			clockabs        => 235,             # ca 220
+			format          => 'twostate',      # there is a pause puls between words
+			preamble        => 'u29#',				# prepend to converted message	
+			clientmodule    => 'SD_UT', 
+			modulematch     => '^u29#.{3}',
+			length_min      => '12',
+			length_max      => '12',
 		},
 	"30" => # a unitec remote door reed switch
 			# MU;P0=-10026;P1=-924;P2=309;P3=-688;P4=-361;P5=637;D=123245453245324532453245320232454532453245324532453202324545324532453245324532023245453245324532453245320232454532453245324532453202324545324532453245324532023245453245324532453245320232454532453245324532453202324545324532453245324532023240;CP=2;O;
@@ -613,20 +615,20 @@
 			length_min      => '24',
 			length_max      => '24',				
     	},
-    "33" => #Thermo-/Hygrosensor S014
+    "33" => # Thermo-/Hygrosensor S014 | renkforce E0001PA
 	# MS;P0=-7871;P2=-1960;P3=578;P4=-3954;D=030323232323434343434323232323234343434323234343234343234343232323432323232323232343234;CP=3;SP=0;R=0;m=0;
-    # sensor id=62, channel=1, temp=21.0555555555556, hum=76, bat=ok
+    # sensor id=62, channel=1, temp=21.1, hum=76, bat=ok
     	{   
        		name			=> 'weather33',		
 			id          	=> '33',
 			one				=> [1,-8],
 			zero			=> [1,-4],
 			sync			=> [1,-15],
-			clockabs   		=> '500',				# not used now
+			clockabs   		=> '500',
 			format     		=> 'twostate',  		# not used now
 			preamble		=> 'W33#',				# prepend to converted message	
 			postamble		=> '',					# Append to converted message	 	
-			clientmodule    => 'SD_WS',      		# not used now
+			clientmodule    => 'SD_WS',
 			#modulematch     => '',     			# not used now
 			length_min      => '42',
 			length_max      => '44',
@@ -1426,28 +1428,32 @@
 			# MU;P1=-417;P2=385;P3=-815;P4=-12058;D=42121212121212121212121212121212121232321212121212121232321212121212121232323212323212321232121212321212123232121212321212121232323212121212121232121212121212121232323212121212123232321232121212121232123232323212321;CP=2;R=87;
 		{	
 			name			=> 'EM (Energy-Monitor)',
-			comment		=> 'EM (Energy-Monitor) (868Mhz)',
+			comment         => 'EM (Energy-Monitor) (868Mhz)',
 			id				=> '80',
-			one			=> [1,-2],	# 800
+			one             => [1,-2],	# 800
 			zero			=> [1,-1],	# 400
 			clockabs		=> 400,
 			format			=> 'twostate', # not used now
 			clientmodule	=> 'CUL_EM',
-			preamble			=> 'E',
+			preamble        => 'E',
 			length_min		=> '104',
 			length_max		=> '114',
 			postDemodulation => \&SIGNALduino_postDemo_EM,
 		},
-	"81" => ## Remote control SA-434-1 @elektron-bbs
+	"81" => ## Remote control SA-434-1 based on HT12E @ elektron-bbs
 			# MU;P0=-485;P1=188;P2=-6784;P3=508;P5=1010;P6=-974;P7=-17172;D=0123050505630505056305630563730505056305050563056305637305050563050505630563056373050505630505056305630563730505056305050563056305637305050563050505630563056373050505630505056305630563730505056305050563056305637305050563050505630563056373050505630505056;CP=3;R=0;																																																																																				   
 			# MU;P0=-1756;P1=112;P2=-11752;P3=496;P4=-495;P5=998;P6=-988;P7=-17183;D=0123454545634545456345634563734545456345454563456345637345454563454545634563456373454545634545456345634563734545456345454563456345637345454563454545634563456373454545634545456345634563734545456345454563456345637345454563454545634563456373454545634545456;CP=3;R=0;
+			#      __        ____
+			# ____|  |    __|    |
+			#  Bit 1       Bit 0
+			# short 500 microSec / long 1000 microSec / bittime 1500 mikroSek / pilot 12 * bittime, from that 1/3 bitlength high
 		{
 			name             => 'SA-434-1',
-			comment          => 'Remote control SA-434-1 mini 923301',
+			comment          => 'Remote control SA-434-1 mini 923301 based on HT12E (developModule SD_UT is only in github available)',
 			id               => '81',
 			developId		 => 'm',
-			one              => [-2,1],
-			zero             => [-1,2],
+			one              => [-2,1],			# i.O.
+			zero             => [-1,2],			# i.O.
 			start            => [-35,1],		# Message is not provided as MS, worakround is start
 			clockabs		 => 500,                 
 			format           => 'twostate',
@@ -1474,15 +1480,15 @@
 			length_min     => '100',      # actual 120 bit (12 x 10bit words to decode 6 bytes data), but last 20 are for checksum
 			length_max     => '3360',     # 3360 bit (336 x 10bit words to decode 168 bytes data) for full timer message
 	    },
-	"83" => ## Westinghouse Deckenventilator Delancey, @zwiebelxxl
-			# !MOSDESIGN SEMICONDUCTOR CORP (CMOS ASIC encoder) M1EN - compatible HT12E!
+	"83" => ## Remote control RH787T based on MOSDESIGN SEMICONDUCTOR CORP (CMOS ASIC encoder) M1EN compatible HT12E
+			# for example Westinghouse Deckenventilator Delancey, 6 speed buttons, @zwiebelxxl
 			# https://github.com/RFD-FHEM/RFFHEM/issues/250
 			# Taste 1 MU;P0=388;P1=-112;P2=267;P3=-378;P5=585;P6=-693;P7=-11234;D=0123035353535356262623562626272353535353562626235626262723535353535626262356262627235353535356262623562626272353535353562626235626262723535353535626262356262627235353535356262623562626272353535353562626235626262723535353535626262356262627235353535356262;CP=2;R=43;O;
 			# Taste 2 MU;P0=-176;P1=262;P2=-11240;P3=112;P5=-367;P6=591;P7=-695;D=0123215656565656717171567156712156565656567171715671567121565656565671717156715671215656565656717171567156712156565656567171715671567121565656565671717156715671215656565656717171567156712156565656567171715671567121565656565671717171717171215656565656717;CP=1;R=19;O;
 			# Taste 3 MU;P0=564;P1=-392;P2=-713;P3=245;P4=-11247;D=0101010101023231023232323431010101010232310232323234310101010102323102323232343101010101023231023232323431010101010232310232323234310101010102323102323232343101010101023231023232323431010101010232310232323234310101010102323102323232343101010101023231023;CP=3;R=40;O;
 		{
-            name			=> 'Westinghouse Delancey 7800140',	
-			comment         => '(developModule SD_UT module is only in github available)',
+            name			=> 'RH787T',	
+			comment         => 'Remote control for example Westinghouse Delancey 7800140 (developModule SD_UT is only in github available)',
 			id          	=> '83',
 			developId       => 'm',
 			one				=> [-2,1],
@@ -1494,6 +1500,6 @@
 			clientmodule    => 'SD_UT', 
 			modulematch     => '^P83#.{3}',
 			length_min      => '12',
-			length_max      => '12',				# message has only 10 bit but is paddet to 12
+			length_max      => '12',
 		},
 );

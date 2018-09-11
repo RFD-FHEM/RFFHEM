@@ -1,10 +1,10 @@
 11.09.2018  
+ signalduino_protocols.hash  - doc
   14_SD_WS: mod Code and fix plot creation
-22.08.2018  
-  14_SD_WS: Support batteryBit + mod Code for models (prot 33)
+ 90_SIGNALduino_un.pm - clean Code (P33)
 10.09.2018
  signalduino_protocols.hash  - sorted + added
- 90_SIGNALduino_un.pm - clean Code
+ 90_SIGNALduino_un.pm - clean Code (P37)
 08.09.2018
  14_SD_UT.pm - revised for many devices
  00_SIGNALduino.pm - match SD_UT mod
@@ -14,7 +14,8 @@
 23.08.2018
  00_SIGNALduino.pm - Sub EM Protocol (80) added
  signalduino_protocols.hash  - new Protocol (80) EM added
-05.07.2018
+22.08.2018  
+  14_SD05.07.2018
  00_SIGNALduino.pm Log Eintrage beim RESTART geordnet / vereinfacht
 03.07.2018
   14_SD_WS07: Support batteryState reading + mod Code for models
