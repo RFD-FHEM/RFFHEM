@@ -1,6 +1,9 @@
+11.09.2018
+ signalduino_protocols.hash  - doc
+ 90_SIGNALduino_un.pm - clean Code (P33)
 10.09.2018
  signalduino_protocols.hash  - sorted + added
- 90_SIGNALduino_un.pm - clean Code
+ 90_SIGNALduino_un.pm - clean Code (P37)
 08.09.2018
  14_SD_UT.pm - revised for many devices
  00_SIGNALduino.pm - match SD_UT mod
