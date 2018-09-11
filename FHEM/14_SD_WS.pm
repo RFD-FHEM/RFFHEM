@@ -11,6 +11,7 @@
 # 21.08.2017 WH2 Abbruch wenn kein "FF" am Anfang
 # 18.08.2018 Protokoll 51 - prematch auf genau 10 Nibbles angepasst, Protokoll 33 - prematch auf genau 11 Nibbles angepasst
 # 21.08.2018 Modelauswahl hinzugefuegt, da 3 versch. Typen SD_WS_33 --> Batterie-Bit Positionen unterschiedlich (34,35,36)
+# 11.09.2018 Plotanlegung korrigiert | doc | temp check war falsch positioniert
 
 package main;
 
@@ -38,8 +39,8 @@ sub SD_WS_Initialize($)
 		"SD_WS37_TH.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,",  autocreateThreshold => "2:180"},
 		"SD_WS50_SM.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,",  autocreateThreshold => "2:180"},
 		"BresserTemeo.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "2:180"},
-		"SD_WS51_TH.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "2:180"},
-		"SD_WS58_TH.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "2:90"},
+		"SD_WS_51_TH.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "2:180"},
+		"SD_WS_58_TH.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "2:90"},
 		"SD_WH2.*"			=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "2:90"},
 		"SD_WS71_T.*"		=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4:Temp,", autocreateThreshold => "2:180"},
 		"SD_WS_33_T_.*"	=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.* model:other", FILTER => "%NAME", GPLOT => "temp4:Temp,", autocreateThreshold => "2:180"},
@@ -259,7 +260,7 @@ sub SD_WS_Parse($$)
     );
     
     	
-	Log3 $name, 4, "SD_WS_Parse: Protocol: $protocol, rawData: $rawData";
+	Log3 $name, 4, "$name: SD_WS_Parse Protocol: $protocol, rawData: $rawData";
 	
 	if ($protocol eq "37") {		# Bresser 7009994
 		# Protokollbeschreibung:
@@ -320,7 +321,7 @@ sub SD_WS_Parse($$)
 		my $binvalue = $bitData;
  
 		if (length($binvalue) != 72) {
-			Log3 $iohash, 4, "SD_WS_Parse BresserTemeo: length error (72 bits expected)!!!";
+			Log3 $iohash, 4, "$name: SD_WS_Parse BresserTemeo length error (72 bits expected)!!!";
 			return "";
 		}
 
@@ -328,15 +329,15 @@ sub SD_WS_Parse($$)
 		if ($protocol eq "44")
 		{
 			$binvalue = "0".$binvalue;
-			Log3 $iohash, 4, "SD_WS_Parse BresserTemeo: Humidity <= 79  Flag";
+			Log3 $iohash, 4, "$name: SD_WS_Parse BresserTemeo Humidity <= 79  Flag";
 		}
 		else
 		{
 			$binvalue = "1".$binvalue;
-			Log3 $iohash, 4, "SD_WS_Parse BresserTemeo: Humidity > 79  Flag";
+			Log3 $iohash, 4, "$name: SD_WS_Parse BresserTemeo Humidity > 79  Flag";
 		}
 		
-		Log3 $iohash, 4, "SD_WS_Parse BresserTemeo: new bin $binvalue";
+		Log3 $iohash, 4, "$name: SD_WS_Parse BresserTemeo new bin $binvalue";
 	
 		my $checksumOkay = 1;
 		
@@ -347,14 +348,14 @@ sub SD_WS_Parse($$)
 
 		if ($checkHum1 != $hum1Dec || $checkHum2 != $hum2Dec)
 		{
-			Log3 $iohash, 4, "SD_WS_Parse BresserTemeo: checksum error in Humidity";
+			Log3 $iohash, 4, "$name: SD_WS_Parse BresserTemeo checksum error in Humidity";
 		}
 		else
 		{
 			$hum = $hum1Dec.$hum2Dec;
 			if ($hum < 1 || $hum > 100)
 			{
-				Log3 $iohash, 4, "SD_WS_Parse BresserTemeo: Humidity Error. Humidity=$hum";
+				Log3 $iohash, 4, "$name: SD_WS_Parse BresserTemeo Humidity Error. Humidity=$hum";
 				return "";
 			}
 		}
@@ -369,13 +370,13 @@ sub SD_WS_Parse($$)
 		
 		if ($checkTemp1 != $temp1Dec || $checkTemp2 != $temp2Dec || $checkTemp3 != $temp3Dec)
 		{
-			Log3 $iohash, 4, "SD_WS_Parse BresserTemeo: checksum error in Temperature";
+			Log3 $iohash, 4, "$name: SD_WS_Parse BresserTemeo checksum error in Temperature";
 			$checksumOkay = 0;
 		}
 
 		if ($temp > 60)
 		{
-			Log3 $iohash, 4, "SD_WS_Parse BresserTemeo: Temperature Error. temp=$temp";
+			Log3 $iohash, 4, "$name: SD_WS_Parse BresserTemeo Temperature Error. temp=$temp";
 			return "";
 		}
 		
@@ -384,7 +385,7 @@ sub SD_WS_Parse($$)
 		
 		if ($sign != $checkSign) 
 		{
-			Log3 $iohash, 4, "SD_WS_Parse BresserTemeo: checksum error in Sign";
+			Log3 $iohash, 4, "$name: SD_WS_Parse BresserTemeo checksum error in Sign";
 			$checksumOkay = 0;
 		}
 		else
@@ -400,7 +401,7 @@ sub SD_WS_Parse($$)
 		
 		if ($bat != $checkBat)
 		{
-			Log3 $iohash, 4, "SD_WS_Parse BresserTemeo: checksum error in Bat";
+			Log3 $iohash, 4, "$name: SD_WS_Parse BresserTemeo checksum error in Bat";
 			$bat = undef;
 		}
 		else
@@ -415,18 +416,18 @@ sub SD_WS_Parse($$)
 		
 		if ($channel != $checkChannel || $id != $checkId)
 		{
-			Log3 $iohash, 4, "SD_WS_Parse BresserTemeo: checksum error in Channel or Id";
+			Log3 $iohash, 4, "$name: SD_WS_Parse BresserTemeo checksum error in Channel or Id";
 			$checksumOkay = 0;
 		}
 		
 		if ($checksumOkay == 0)
 		{
-			Log3 $iohash, 4, "SD_WS_Parse BresserTemeo: checksum error!!! These Values seem incorrect: temp=$temp, channel=$channel, id=$id";
+			Log3 $iohash, 4, "$name:SD_WS_Parse BresserTemeo checksum error!!! These Values seem incorrect: temp=$temp, channel=$channel, id=$id";
 			return "";
 		}
 		
 		$id = sprintf('%02X', $id);           # wandeln nach hex
-		Log3 $iohash, 4, "$name SD_WS_Parse: model=$model, temp=$temp, hum=$hum, channel=$channel, id=$id, bat=$bat";
+		Log3 $iohash, 4, "$name: SD_WS_Parse model=$model, temp=$temp, hum=$hum, channel=$channel, id=$id, bat=$bat";
 		
 	}   elsif  ($protocol eq "64")	# WH2
   {
@@ -531,7 +532,7 @@ sub SD_WS_Parse($$)
 	   }  
 	   
 	    $bitData = unpack("B$blen", pack("H$hlen", $rawData)); 
-	   	Log3 $iohash, 4, "$name converted to bits: WH2 " . $bitData;    
+	   	Log3 $iohash, 4, "$name: converted to bits WH2 " . $bitData;    
 	    $model = "SD_WS_WH2";
 		$SensorTyp = "WH2";
 		$id = 	SD_WS_bin2dec(substr($bitData,$vorpre + 4,6));
@@ -548,10 +549,10 @@ sub SD_WS_Parse($$)
 	    # Temp negativ
 	     	$temp = -(SD_WS_bin2dec(substr($bitData,$vorpre + 13,11))) / 10;
 	    }
-	    Log3 $iohash, 4, "$name decoded protocolid: $protocol ($SensorTyp) sensor id=$id, Data:".substr($bitData,$vorpre + 12,12)." temp=$temp";
+	    Log3 $iohash, 4, "$name: decoded protocolid $protocol ($SensorTyp) sensor id=$id, Data:".substr($bitData,$vorpre + 12,12)." temp=$temp";
 	    $hum =  SD_WS_bin2dec(substr($bitData,$vorpre + 24,8));   # TFA 30.3157 nur Temp, Hum = 255
-	    Log3 $iohash, 4, "$name SD_WS_WH2_8: $protocol ($SensorTyp) sensor id=$id, Data:".substr($bitData,$vorpre + 24,8)." hum=$hum";
-	    Log3 $iohash, 4, "$name SD_WS_WH2_9: $protocol ($SensorTyp) sensor id=$id, channel=$channel, temp=$temp, hum=$hum";
+	    Log3 $iohash, 4, "$name: SD_WS_WH2_8 $protocol ($SensorTyp) sensor id=$id, Data:".substr($bitData,$vorpre + 24,8)." hum=$hum";
+	    Log3 $iohash, 4, "$name: SD_WS_WH2_9 $protocol ($SensorTyp) sensor id=$id, channel=$channel, temp=$temp, hum=$hum";
 		
  	}
    
@@ -560,12 +561,12 @@ sub SD_WS_Parse($$)
 	 	   	$SensorTyp=$decodingSubs{$protocol}{sensortype};
 		    if (!$decodingSubs{$protocol}{prematch}->( $rawData ))
 		    { 
-		   		Log3 $iohash, 4, "$name decoded protocolid: $protocol ($SensorTyp) prematch error" ;
+		   		Log3 $iohash, 4, "$name: decoded protocolid $protocol ($SensorTyp) prematch error" ;
 		    	return "";  
 	    	}
 		    my $retcrc=$decodingSubs{$protocol}{crcok}->( $rawData );
 		    if (!$retcrc)		    { 
-		    	Log3 $iohash, 4, "$name decoded protocolid: $protocol ($SensorTyp) crc error: $retcrc";
+		    	Log3 $iohash, 4, "$name: decoded protocolid $protocol ($SensorTyp) crc error: $retcrc";
 		    	return "";  
 	    	}
 	    	$id=$decodingSubs{$protocol}{id}->( $rawData,$bitData );
@@ -604,37 +605,37 @@ sub SD_WS_Parse($$)
 	if (($longids ne "0") && ($longids eq "1" || $longids eq "ALL" || (",$longids," =~ m/,$model,/)))
 	{
 		$deviceCode = $model . '_' . $id . $channel;
-		Log3 $iohash,4, "$name using longid: $longids model: $model";
+		Log3 $iohash,4, "$name: using longid $longids model: $model";
 	} else {
 		$deviceCode = $model . "_" . $channel;
 	}
 	
 	#print Dumper($modules{SD_WS}{defptr});
 	
-	if ($temp < -30 || $temp > 70 || $hum > 100) {
-		Log3 $iohash, 3, "SD_WS: $deviceCode - ERROR Temperature $temp or humidity $hum";
-		return "";  
-	}
-
 	my $def = $modules{SD_WS}{defptr}{$iohash->{NAME} . "." . $deviceCode};
 	$def = $modules{SD_WS}{defptr}{$deviceCode} if(!$def);
 
 	if(!$def) {
-		Log3 $iohash, 1, 'SD_WS: UNDEFINED sensor ' . $model . ' detected, code ' . $deviceCode;
+		Log3 $iohash, 1, "$name: SD_WS_Parse UNDEFINED sensor $model detected, code $deviceCode";
 		return "UNDEFINED $deviceCode SD_WS $deviceCode";
 	}
 		
 	my $hash = $def;
 	$name = $hash->{NAME};
 	return "" if(IsIgnored($name));
+
+	if ($temp < -30 || $temp > 70 || $hum > 100) {
+		Log3 $iohash, 3, "$iohash->{NAME}: $deviceCode - ERROR Temperature $temp or humidity $hum";
+		return "";  
+	}
 	
-	Log3 $name, 4, "SD_WS: $name ($rawData)";  
+	Log3 $name, 4, "$iohash->{NAME}: SD_WS_Parse $name ($rawData)";  
 
 	if (!defined(AttrVal($hash->{NAME},"event-min-interval",undef)))
 	{
 		my $minsecs = AttrVal($iohash->{NAME},'minsecs',0);
 		if($hash->{lastReceive} && (time() - $hash->{lastReceive} < $minsecs)) {
-			Log3 $hash, 4, "$deviceCode Dropped due to short time. minsecs=$minsecs";
+			Log3 $hash, 4, "$iohash->{NAME}: $deviceCode Dropped due to short time. minsecs=$minsecs";
 			return "";
 		}
 	}
