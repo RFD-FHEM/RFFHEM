@@ -1,4 +1,4 @@
-# $Id: 00_SIGNALduino.pm 10488 2018-04-20 23:00:00Z v3.3.3-dev $
+# $Id: 00_SIGNALduino.pm 10488 2018-09-15 11:00:00Z v3.3.3-dev $
 #
 # v3.3.3 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -25,7 +25,7 @@ no warnings 'portable';
 
 
 use constant {
-	SDUINO_VERSION            => "v3.3.3-dev_08.09.",
+	SDUINO_VERSION            => "v3.3.3-dev_15.09.",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -2566,7 +2566,7 @@ SIGNALduino_Parse($$$$@)
 		$dispatched= SIGNALduino_Parse_MS($hash, $iohash, $name, $rmsg,%signal_parts);
 	}
 	# Message unsynced type   -> MU
-  	elsif (@{$hash->{muIdList}} && $rmsg=~ m/^MU;(P\d=-?\d+;){3,8}D=\d+;CP=\d;/)
+  	elsif (@{$hash->{muIdList}} && $rmsg=~ m/^MU;(P\d=-?\d+;){3,8}((CP|R)=\d+;){0,2}D=\d+;/)
 	{
 		$dispatched=  SIGNALduino_Parse_MU($hash, $iohash, $name, $rmsg,%signal_parts);
 	}
