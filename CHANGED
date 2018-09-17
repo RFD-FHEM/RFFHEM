@@ -1,6 +1,6 @@
 17.09.2018  
  14_SD_UT.pm - added new Westinghouse model (remote with five buttons) + doc
- signalduino_protocols.hash  - mod Protocol 40
+ signalduino_protocols.hash  - mod Protocol 40 + added doc
 11.09.2018  
  signalduino_protocols.hash  - doc
   14_SD_WS: mod Code and fix plot creation
