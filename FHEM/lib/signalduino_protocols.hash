@@ -739,6 +739,10 @@
 			filterfunc      => 'SIGNALduino_compPattern',
 		},    
 	"40" => ## Romotec
+			# https://github.com/RFD-FHEM/RFFHEM/issues/71
+			# MU;P0=255;P1=-413;P2=650;P3=-761;P4=160;P5=-140;D=0012103030321210303210321430303032103030303050103030321212102;CP=0;
+			# MU;P0=300;P1=-772;P2=674;P3=-397;P4=4756;P5=-1512;D=4501232301230123230101232301010123230101230103;CP=0;
+			# MU;P0=-132;P1=-388;P2=675;P4=271;P5=-762;D=012145212145452121454545212145452145214545454521454545452145454541;CP=4;
 		{
 			name => 'romotec',
 			id => '40',
@@ -749,7 +753,6 @@
 			preamble => 'u40#', # prepend to converted message
 			#clientmodule => '', # not used now
 			#modulematch => '', # not used now
-			length_min => '10',
 			length_min => '12',
 		},    
 	"41" => ## Elro (Smartwares) Doorbell DB200
