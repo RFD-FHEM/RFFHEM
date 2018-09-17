@@ -92,50 +92,7 @@ SIGNALduino_un_Parse($$)
 	my $bitData= unpack("B$blen", pack("H$hlen", $rawData)); 
 	Log3 $hash, 4, "$name converted to bits: $bitData";
 		
-	if ($protocol == "7" && length($bitData)>=36)  ## Unknown Proto 7 
-	{
-		
-		
-		## Try TX70DTH Decoding
-		my $SensorTyp = "TX70DTH";
-		my $channel = SIGNALduino_un_bin2dec(substr($bitData,9,3));
-		my $bin = substr($bitData,0,8);
-		my $id = sprintf('%X', oct("0b$bin"));
-		my $bat = int(substr($bitData,8,1)) eq "1" ? "ok" : "critical";
-		my $trend = "";
-		my $sendMode = "";
-		my $temp = SIGNALduino_un_bin2dec(substr($bitData,16,8));
-		if (substr($bitData,14,1) eq "1") {
-		  $temp = $temp - 1024;
-		}
-		$temp = $temp / 10;
-		my $hum = SIGNALduino_un_bin2dec(substr($bitData,29,7));
-		my $val = "T: $temp H: $hum B: $bat";
-		Log3 $hash, 4, "$name decoded protocolid: 7 ($SensorTyp) sensor id=$id, channel=$channel, temp=$temp, hum=$hum, bat=$bat\n" ;
-		
-
-		# Try Eurochron EAS 800
-		  #		        4	 8    12            24    28        36
-	      #          0011 0110 1010  000100000010  1111  00111000 0000         	Kanal 3, 25.8 Grad, 56%
-	      #          0011 0110 1010  000011110011  1111  00111000 0000     		Kanal 3, 24.3 Grad, 56%
-	      #          0011 0001 1001  000100001001  1111  00111101 0000		 	Kanal 2, 26.5 Grad, 61%
-	      #          0011 1000 1000  000100000011  1111  01000000 0000         	Kanal 1
-	      
-	      #                ID?  CHN       TMP        ??     HUM
-		$SensorTyp = "EAS800z";
-		$id = oct ("0b".substr($bitData,4,4));
-		$channel = SIGNALduino_un_bin2dec(substr($bitData,9,3))+1;
-		$temp = oct ("0b".substr($bitData,12,12))/10;
-		$bat = int(substr($bitData,8,1)) eq "1" ? "ok" : "critical";  # Eventuell falsch!
-		$hum = SIGNALduino_un_bin2dec(substr($bitData,28,8));
-		$sendMode = int(substr($bitData,4,1)) eq "1" ? "auto" : "manual";  # Eventuell falsch!
-		my $type = SIGNALduino_un_bin2dec(substr($bitData,0,4));
-		
-		Log3 $hash, 4, "$name decoded protocolid: 7 ($SensorTyp / type=$type) mode=$sendMode, sensor id=$id, channel=$channel, temp=$temp, hum=$hum, bat=$bat\n" ;
-		
-		
-
-	} elsif ($protocol == "6" && length($bitData)>=36)  ## Eurochron 
+	if ($protocol == "6" && length($bitData)>=36)  ## Eurochron 
 	{   
 
 		  # EuroChron / Tchibo
@@ -166,40 +123,7 @@ SIGNALduino_un_Parse($$)
 		my $val = "T: $temp H: $hum B: $bat";
 		Log3 $hash, 4, "$name decoded protocolid: 6  $SensorTyp, sensor id=$id, channel=$channel, temp=$temp\n" ;
 
-	} elsif ($protocol == "9" && length($bitData)>=70)  ## Unknown Proto 9 
-	{   #http://nupo-artworks.de/media/report.pdf
-		
-		my $syncpos= index($bitData,"11111110");  #7x1 1x0 preamble
-		
-		if ($syncpos ==-1 || length($bitData)-$syncpos < 68) 
-		{
-			Log3 $hash, 4, "$name  ctw600 not found, aborting";
-			return undef;
-		}
-		my $sensdata = substr($bitData,$syncpos+8);
-
-		my $bat = substr($sensdata,0,3);
-		my $id = substr($sensdata,4,6);
-		my $temp = substr($sensdata,12,10);
-		my $hum = substr($sensdata,22,8);
-		my $wind = substr($sensdata,30,16);
-		my $rain = substr($sensdata,46,16);
-		my $winddir = substr($sensdata,66,4);
-		
-		Log3 $hash, 4, "$name found ctw600 syncpos at $syncpos message is: $sensdata - sensor id:$id, bat:$bat, temp=$temp, hum=$hum, wind=$wind, rain=$rain, winddir=$winddir";
-
-	} elsif ($protocol == "13"  && length($bitData)>=14)  ## RF21 Protocol 
-	{  
-		#my $model=$a[3];
-		#my $deviceCode = $a[5].$a[6].$a[7].$a[8].$a[9];
-		#my  $Freq = $a[10].$a[11].$a[12].$a[13].$a[14];
-		my $deviceCode = substr($bitData,0,23);
-		my $unit= substr($bitData,23,1);
-		
-
-		Log3 $hash, 4, "$name found RF21 protocol. devicecode=$deviceCode, unit=$unit";
-	}
-	elsif ($protocol == "14" && length($bitData)>=12)  ## Heidman HX 
+	} elsif ($protocol == "14" && length($bitData)>=12)  ## Heidman HX 
 	{  
 
 		my $bin = substr($bitData,0,4);
@@ -216,28 +140,7 @@ SIGNALduino_un_Parse($$)
 
 		Log3 $hash, 4, "$name found TCM doorbell. devicecode=$deviceCode";
 
-	}
-	elsif ($protocol == "16" && length($bitData)>=36)  ##Rohrmotor24
-	{
-		Log3 $hash, 4, "$name / shutter Dooya $bitData received";
-		
-		Log3 $hash,4, substr($bitData,0,23)." ".substr($bitData,24,4)." ".substr($bitData,28,4)." ".substr($bitData,32,4)." ".substr($bitData,36,4);
-		my $id = SIGNALduino_un_binaryToNumber($bitData,0,23);
-		my $remote = SIGNALduino_un_binaryToNumber($bitData,24,27);
-		my $channel = SIGNALduino_un_binaryToNumber($bitData,28,31);
-		
-		my $all = ($channel == 0) ? "true" : "false";
- 	    my $commandcode = SIGNALduino_un_binaryToNumber($bitData,32,35);
- 	    my $direction="";
- 	    
- 	    if ($commandcode == 0b0001) {$direction="up";}
- 	    elsif ($commandcode == 0b0011) {$direction="down";}
-  	    elsif ($commandcode == 0b0101) {$direction="stop";}
-  	    elsif ($commandcode == 0b1100) {$direction="learn";}
-		else  { $direction="unknown";}
-		Log3 $hash, 4, "$name found shutter from Dooya. id=$id, remotetype=$remote,  channel=$channel, direction=$direction, all_shutters=$all";
-	} 
-	elsif ($protocol == "21" && length($bitData)>=32)  ##Einhell doorshutter
+	} elsif ($protocol == "21" && length($bitData)>=32)  ##Einhell doorshutter
 	{
 		Log3 $hash, 4, "$name / Einhell doorshutter received";
 		
