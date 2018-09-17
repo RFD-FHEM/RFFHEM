@@ -14,15 +14,22 @@
 #     Adresse: 00 - Gehäuse geöffnet?
 #     get sduino_dummy raw MU;;P0=684;;P1=-304;;P2=-644;;P3=369;;P4=-9931;;D=010101010101010232323104310101010101010102323231043101010101010101023232310431010101010101010232323104310101010101010102323231043101010101010101023232310431010101010101010232323104310101010101010102323231043101010101010101023232310431010100;;CP=0;;O;;
 ####################################################################################################################################
-# - Westinghouse Delancey Deckenventilator (Typ Westinghouse_Delancey) [Protocol 83] (sync -36) (1 = off | 0 = on)
+# - Westinghouse Deckenventilator (Typ HT12E | remote with 5 buttons without SET | Buttons_five ??? 7787100 ???) [Protocol 29] (sync -35) (1 = off | 0 = on)
+#     FORUM: https://forum.fhem.de/index.php/topic,58397.960.html | https://forum.fhem.de/index.php/topic,53282.30.html
+#     Adresse e | 1110 (off|off|off|on): fan_off
+#     get sduino_dummy raw MU;;P0=250;;P1=-492;;P2=166;;P3=-255;;P4=491;;P5=-8588;;D=052121212121234121212121234521212121212341212121212345212121212123412121212123452121212121234121212121234;;CP=0;;
+#     Adresse e | 1110 (off|off|off|on): fan low speed
+#     get sduino_dummy raw MU;;P0=-32001;;P1=224;;P2=-255;;P3=478;;P4=-508;;P6=152;;P7=-8598;;D=01234141414641414141414123712341414141414141414141237123414141414141414141412371234141414141414141414123712341414141414141414141237123414141414141414141412371234141414141414141414123712341414141414141414141237123414141414141414141412371234141414141414141;;CP=1;;R=108;;O;;
+####################################################################################################################################
+# - Westinghouse Deckenventilator (Typ [M1EN compatible HT12E] example Delancey | remote RH787T with 9 buttons + SET) [Protocol 83] (sync -36) (1 = off | 0 = on)
 #     Adresse 0 | 0000 (on|on|on|on): I - fan minimum speed
 #     get sduino_dummy raw MU;;P0=388;;P1=-112;;P2=267;;P3=-378;;P5=585;;P6=-693;;P7=-11234;;D=0123035353535356262623562626272353535353562626235626262723535353535626262356262627235353535356262623562626272353535353562626235626262723535353535626262356262627235353535356262623562626272353535353562626235626262723535353535626262356262627235353535356262;;CP=2;;R=43;;O;;
 #     Adresse 8 | 1000 (off|on|on|on): I - fan minimum speed
 #     get sduino_dummy raw MU;;P0=-11250;;P1=-200;;P2=263;;P3=-116;;P4=-374;;P5=578;;P6=-697;;D=1232456245454562626245626262024562454545626262456262620245624545456262624562626202456245454562626245626262024562454545626262456262620245624545456262624562626202456245454562626245626262024562454545626262456262620245624545456262624562626202456245454562626;;CP=2;;R=49;;O;;
-#	  Adresse c | 1100 (off|off|on|on): fan_off
-#	  get sduino_dummy raw MU;;P0=-720;;P1=235;;P2=-386;;P3=561;;P4=-11254;;D=01230141230101232301010101012301412301012323010101010123014123010123230101010101010141230101232301010101010101412301012323010101010101014123010123230101010101010;;CP=1;;R=242;;
-#	  Adresse c | 1100 (off|off|on|on): fan_off
-#	  get sduino_dummy raw MU;;P0=-11230;;P1=258;;P2=-390;;P3=571;;P4=-699;;D=0123414123234141414141234101234141232341414141412341012341412323414141414123410123414123234141414141234101234141232341414141412341012341412323414141414123410123414123234141414141234101234141232341414141412341012341412323414141414123410123414123234141414;;CP=1;;R=246;;O;;
+#     Adresse c | 1100 (off|off|on|on): fan_off
+#     get sduino_dummy raw MU;;P0=-720;;P1=235;;P2=-386;;P3=561;;P4=-11254;;D=01230141230101232301010101012301412301012323010101010123014123010123230101010101010141230101232301010101010101412301012323010101010101014123010123230101010101010;;CP=1;;R=242;;
+#     Adresse c | 1100 (off|off|on|on): fan_off
+#     get sduino_dummy raw MU;;P0=-11230;;P1=258;;P2=-390;;P3=571;;P4=-699;;D=0123414123234141414141234101234141232341414141412341012341412323414141414123410123414123234141414141234101234141232341414141412341012341412323414141414123410123414123234141414141234101234141232341414141412341012341412323414141414123410123414123234141414;;CP=1;;R=246;;O;;
 ####################################################################################################################################
 # - Remote control SA-434-1 mini 923301  [Protocol 81]
 #     one Button, 434 MHz
@@ -40,15 +47,15 @@
 #     pilot 12 bitlength, from that 1/3 bitlength high: -175000, 500   -35, 1
 #     one:                                                -1000, 500    -2, 1
 #     zero:                                                -500, 1000   -1, 2
-#		get sduino_dummy raw MU;;P0=-1756;;P1=112;;P2=-11752;;P3=496;;P4=-495;;P5=998;;P6=-988;;P7=-17183;;D=0123454545634545456345634563734545456345454563456345637345454563454545634563456373454545634545456345634563734545456345454563456345637345454563454545634563456373454545634545456345634563734545456345454563456345637345454563454545634563456373454545634545456;;CP=3;;R=0;;
-#		get sduino_dummy raw MU;;P0=-485;;P1=188;;P2=-6784;;P3=508;;P5=1010;;P6=-974;;P7=-17172;;D=0123050505630505056305630563730505056305050563056305637305050563050505630563056373050505630505056305630563730505056305050563056305637305050563050505630563056373050505630505056305630563730505056305050563056305637305050563050505630563056373050505630505056;;CP=3;;R=0;;
+#     get sduino_dummy raw MU;;P0=-1756;;P1=112;;P2=-11752;;P3=496;;P4=-495;;P5=998;;P6=-988;;P7=-17183;;D=0123454545634545456345634563734545456345454563456345637345454563454545634563456373454545634545456345634563734545456345454563456345637345454563454545634563456373454545634545456345634563734545456345454563456345637345454563454545634563456373454545634545456;;CP=3;;R=0;;
+#     get sduino_dummy raw MU;;P0=-485;;P1=188;;P2=-6784;;P3=508;;P5=1010;;P6=-974;;P7=-17172;;D=0123050505630505056305630563730505056305050563056305637305050563050505630563056373050505630505056305630563730505056305050563056305637305050563050505630563056373050505630505056305630563730505056305050563056305637305050563050505630563056373050505630505056;;CP=3;;R=0;;
 ####################################################################################################################################
 # - VTX-BELL_Funkklingel  [Protocol 79]
 #     get sduino_dummy raw MU;;P0=656;;P1=-656;;P2=335;;P3=-326;;P4=-5024;;D=01230121230123030303012423012301212301230303030124230123012123012303030301242301230121230123030303012423012301212301230303030124230123012123012303030301242301230121230123030303012423012301212301230303030124230123012123012303030301242301230121230123030303;;CP=2;;O;;
 ####################################################################################################################################
 # !!! ToDo´s !!!
 #     - send MSG von $protocol nutzen ?
-#     - 
+#     - doppelte Logeinträge bei zutreffen von 2 Protokollen?
 ####################################################################################################################################
 
 package main;
@@ -60,13 +67,13 @@ use warnings;
 
 sub SD_UT_Initialize($) {
 	my ($hash) = @_;
-	$hash->{Match}		= "^[P|u](30|79|81|83)#.*";
+	$hash->{Match}		= "^[P|u](29|30|79|81|83)#.*";
 	$hash->{DefFn}		= "SD_UT_Define";
 	$hash->{UndefFn}	= "SD_UT_Undef";
 	$hash->{ParseFn}	= "SD_UT_Parse";
 	$hash->{SetFn}		= "SD_UT_Set";
 	$hash->{AttrFn}	= "SD_UT_Attr";
-	$hash->{AttrList}	= "IODev do_not_notify:1,0 ignore:0,1 showtime:1,0 model:unknown,SA_434_1_mini,Unitec_47031,Unitec_other,VTX_BELL,Westinghouse_Delancey " .
+	$hash->{AttrList}	= "IODev do_not_notify:1,0 ignore:0,1 showtime:1,0 model:unknown,Buttons_five,RH787T,SA_434_1_mini,Unitec_47031,Unitec_other,VTX_BELL " .
 				"$readingFnAttributes ";
 	$hash->{AutoCreate}	={"SD_UT.*" => {ATTR => "model:unknown", FILTER => "%NAME", autocreateThreshold => "2:180"}};
 	#$hash->{noAutocreatedFilelog} = 1;		### Bug? bei Aktivierung wird keine AutoCreate Attr berücksichtigt! ###
@@ -84,12 +91,15 @@ sub SD_UT_Define($$) {
 	
 	# Argument					   0	 1		2		3				4
 	return "wrong syntax: define <name> SD_UT <model> <HEX-Value> <optional IODEV>" if(int(@a) < 3 || int(@a) > 5);
-	return "wrong <model>: SA_434_1_mini | Unitec_47031 | Unitec_other | VTX_BELL | Westinghouse_Delancey | unknown" if not($a[2] eq  "SA_434_1_mini" || $a[2] eq  "Unitec_47031" || $a[2] eq "Unitec_other" || $a[2] eq "VTX_BELL" || $a[2] eq "Westinghouse_Delancey" || $a[2] eq "unknown");
+	return "wrong <model>: Buttons_five | RH787T | SA_434_1_mini | Unitec_47031 | Unitec_other | VTX_BELL | unknown" if not($a[2] eq "Buttons_five" || $a[2] eq "RH787T" || $a[2] eq  "SA_434_1_mini" || $a[2] eq  "Unitec_47031" || $a[2] eq "Unitec_other" || $a[2] eq "VTX_BELL" || $a[2] eq "unknown");
 	### checks unknown ###
 	return "wrong define: $a[2] need no HEX-Value to define!" if($a[2] eq "unknown" && $a[3] && length($a[3]) >= 1);
-	### checks Westinghouse_Delancey ###
-	return "wrong HEX-Value! $a[2] have one HEX-Value" if ($a[2] eq "Westinghouse_Delancey" && length($a[3]) > 1);
-	return "wrong HEX-Value! $a[2] HEX-Value are not (0-9 | a-f | A-F)" if ($a[2] eq "Westinghouse_Delancey" && not $a[3] =~ /^[0-9a-fA-F]{1}/s);
+	### checks Westinghouse_Delancey RH787T ###
+	return "wrong HEX-Value! $a[2] have one HEX-Value" if ($a[2] eq "RH787T" && length($a[3]) > 1);
+	return "wrong HEX-Value! $a[2] HEX-Value are not (0-9 | a-f | A-F)" if ($a[2] eq "RH787T" && not $a[3] =~ /^[0-9a-fA-F]{1}/s);
+	### checks Westinghouse	Buttons_five ###
+	return "wrong HEX-Value! $a[2] have one HEX-Value" if ($a[2] eq "Buttons_five" && length($a[3]) > 1);
+	return "wrong HEX-Value! $a[2] HEX-Value are not (0-9 | a-f | A-F)" if ($a[2] eq "Buttons_five" && not $a[3] =~ /^[0-9a-fA-F]{1}/s);
 	### checks SA_434_1_mini ###
 	return "wrong HEX-Value! $a[2] HEX-Value to short | long or not HEX (0-9 | a-f | A-F){3}" if ($a[2] eq "SA_434_1_mini" && not $a[3] =~ /^[0-9a-fA-F]{3}/s);
 	### checks VTX_BELL ###
@@ -129,8 +139,8 @@ sub SD_UT_Set($$$@) {
 	my $model = AttrVal($name, "model", "unknown");
 	my $ret = undef;
 	
-	############ Westinghouse_Delancey ############
-	if ($model eq "Westinghouse_Delancey") {
+	############ Westinghouse_Delancey RH787T ############
+	if ($model eq "RH787T") {
 
 		my @definition = split(" ", $hash->{DEF});									# split adress from def
 		my $adr = sprintf( "%04b", hex($definition[1])) if ($name ne "unknown");	# argument 1 - adress to binary with 4 digits
@@ -168,6 +178,43 @@ sub SD_UT_Set($$$@) {
 			# data sheet say repeat 4 !
 			$msg .= "#R4";
 
+			## for hex Check ##
+			my @split = split("#", $msg);
+			my $hexvalue = $split[1];
+			$hexvalue = sprintf("%X", oct( "0b$hexvalue" ) );
+			###################
+			
+			Log3 $name, 3, "$ioname: $name sendMsg=$msg ($hexvalue)";
+			Log3 $name, 3, "$ioname: $name set $cmd" if ($cmd ne "?");
+			IOWrite($hash, 'sendMsg', $msg);
+		}
+	############ Westinghouse Buttons_five ############
+	} elsif 	($model eq "Buttons_five") {
+		
+		my @definition = split(" ", $hash->{DEF});									# split adress from def
+		my $adr = sprintf( "%04b", hex($definition[1])) if ($name ne "unknown");	# argument 1 - adress to binary with 4 digits
+
+		if ($cmd eq "?") {
+			$ret .= "1_fan_low_speed:noArg 2_fan_medium_speed:noArg 3_fan_high_speed:noArg light_on_off:noArg fan_off:noArg";
+		} else {
+			my $msg = "P29#";
+			if ($cmd eq "1_fan_low_speed") {
+				$msg .= "011111";		# 1_fan_low_speed
+			} elsif ($cmd eq "2_fan_medium_speed") {
+				$msg .= "111111";		# 2_fan_medium_speed
+			} elsif ($cmd eq "3_fan_high_speed") {
+				$msg .= "111101";		# 3_fan_high_speed
+			} elsif ($cmd eq "light_on_off") {
+				$msg .= "101111";		# light_on_off
+			} elsif ($cmd eq "fan_off") {
+				$msg .= "111110";		# fan_off
+			} else {
+				return "Wrong command, please select one from list.";
+			}
+
+			# data sheet say repeat 4 !			
+			$msg .= "11".$adr."#R4";
+			
 			## for hex Check ##
 			my @split = split("#", $msg);
 			my $hexvalue = $split[1];
@@ -268,15 +315,22 @@ sub SD_UT_Parse($$) {
 	$deviceCode = sprintf("%02X", oct( "0b$deviceCode" ) );
 	$devicedef = "Unitec_47031 " . $deviceCode if(!$def && $protocol == 30);
 	$def = $modules{SD_UT}{defptr}{$devicedef} if(!$def && $protocol == 30);
-	$devicedef = "Unitec_47031 " . $deviceCode if(!$def && $protocol == 83);			# to test id 83 with same deviceCode | because same protocol with different sync 
-	$def = $modules{SD_UT}{defptr}{$devicedef} if(!$def && $protocol == 83);			# to test id 83 with same deviceCode | because same protocol with different sync 
-	### Westinghouse_Delancey ###
+	$devicedef = "Unitec_47031 " . $deviceCode if(!$def && $protocol == 83);		# to test id 83 with same deviceCode | because same protocol with different sync 
+	$def = $modules{SD_UT}{defptr}{$devicedef} if(!$def && $protocol == 83);		# to test id 83 with same deviceCode | because same protocol with different sync 
+	### Westinghouse_Delancey RH787T ###
 	$deviceCode = substr($bitData,1,4);
 	$deviceCode = sprintf("%X", oct( "0b$deviceCode" ) );
-	$devicedef = "Westinghouse_Delancey " . $deviceCode if(!$def && $protocol == 83);
+	$devicedef = "RH787T " . $deviceCode if(!$def && $protocol == 83);
 	$def = $modules{SD_UT}{defptr}{$devicedef} if (!$def && $protocol == 83);
-	$devicedef = "Westinghouse_Delancey " . $deviceCode if(!$def && $protocol == 30);	# to test id 30 with same deviceCode | because same protocol with different sync 
-	$def = $modules{SD_UT}{defptr}{$devicedef} if (!$def && $protocol == 30);			# to test id 30 with same deviceCode | because same protocol with different sync 
+	$devicedef = "RH787T " . $deviceCode if(!$def && $protocol == 30);				# to test id 30 with same deviceCode | because same protocol with different sync 
+	$def = $modules{SD_UT}{defptr}{$devicedef} if (!$def && $protocol == 30);		# to test id 30 with same deviceCode | because same protocol with different sync 
+	### Westinghouse Buttons_five ###
+	$deviceCode = substr($bitData,8,4);
+	$deviceCode = sprintf("%X", oct( "0b$deviceCode" ) );
+	$devicedef = "Buttons_five " . $deviceCode if(!$def && $protocol == 29);
+	$def = $modules{SD_UT}{defptr}{$devicedef} if (!$def && $protocol == 29);
+	$devicedef = "Buttons_five " . $deviceCode if(!$def && $protocol == 30);		# to test id 30 with same deviceCode | because same protocol with different sync 
+	$def = $modules{SD_UT}{defptr}{$devicedef} if (!$def && $protocol == 30);		# to test id 30 with same deviceCode | because same protocol with different sync 
 	### VTX_BELL ###
 	$deviceCode = sprintf("%03X", oct( "0b$bitData" ) );
 	$devicedef = "VTX_BELL " . $deviceCode if(!$def && $protocol == 79);
@@ -323,8 +377,8 @@ sub SD_UT_Parse($$) {
 		$hash->{lastReceive} = time();
 		$hash->{lastMSG} = $rawData;
 		$hash->{bitMSG} = $bitData;
-	############ Westinghouse_Delancey ############ Protocol 83 oder 30 ############
-	} elsif (AttrVal($name, "model", "unknown") eq "Westinghouse_Delancey" && ($protocol == 83 || $protocol == 30)) {
+	############ Westinghouse_Delancey RH787T ############ Protocol 83 oder 30 ############
+	} elsif (AttrVal($name, "model", "unknown") eq "RH787T" && ($protocol == 83 || $protocol == 30)) {
 		$model = AttrVal($name, "model", "unknown");
 		$state = substr($bitData,6,6);
 		$deviceCode = substr($bitData,1,4);
@@ -371,6 +425,45 @@ sub SD_UT_Parse($$) {
 		}
 		
 		#$state.= " | ".TimeNow();
+
+	############ Westinghouse Buttons_five ############ Protocol 29 oder 30 ############
+	} elsif (AttrVal($name, "model", "unknown") eq "Buttons_five" && ($protocol == 29 || $protocol == 30)) {
+		$model = AttrVal($name, "model", "unknown");
+		$state = substr($bitData,0,6);
+		$deviceCode = substr($bitData,8,4);
+
+		## Check fixed bits
+		my $unknown1 = substr($bitData,6,1);	# every 1
+		my $unknown2 = substr($bitData,7,1);	# every 1
+		if ($unknown1 ne "1" | $unknown2 ne "1") {
+			Log3 $name, 3, "$ioname: $model fixed bits wrong! always bit6=1 ($unknown1) and bit7=1 ($unknown2)";
+			return "";
+		}
+
+		## deviceCode conversion for User in ON or OFF ##
+		my $deviceCodeUser = $deviceCode;
+		$deviceCodeUser =~ s/1/off|/g;
+		$deviceCodeUser =~ s/0/on|/g;
+		$deviceCodeUser = substr($deviceCodeUser, 0 , length($deviceCodeUser)-1);
+		$deviceCode = $deviceCode." ($deviceCodeUser)";
+
+		Log3 $name, 3, "$ioname: $model devicecode=$deviceCode state=$state ($rawData)";
+		if ($state eq "011111") {
+			$state = "fan low speed";
+		} elsif ($state eq "111111") {
+			$state = "fan medium speed";
+		} elsif ($state eq "111101") {
+			$state = "fan high speed";
+		} elsif ($state eq "101111") {
+			$state = "light on_off";
+		} elsif ($state eq "111110") {
+			$state = "fan off";
+		} else {
+			Log3 $name, 3, "$ioname: SD_UT $model unknown Button receive ($state) or houscode is double!";
+			return "";
+		}
+		
+		#$state.= " | ".TimeNow();
 		
 	############ Unitec_47031 ############ Protocol 30 ############
 	} elsif (AttrVal($name, "model", "unknown") eq "Unitec_47031" && $protocol == 30) {
@@ -400,7 +493,7 @@ sub SD_UT_Parse($$) {
 
 	readingsBeginUpdate($hash);
 	readingsBulkUpdate($hash, "deviceCode", $deviceCode, 0)  if (defined($deviceCode));
-	readingsBulkUpdate($hash, "LastAction", "receive", 0)  if (defined($state) && $model eq "Westinghouse_Delancey");
+	readingsBulkUpdate($hash, "LastAction", "receive", 0)  if (defined($state) && $model eq "RH787T");
 	readingsBulkUpdate($hash, "state", $state)  if (defined($state) && $state ne "unknown");	# state ne "unknown" because protocol without checksum
 	readingsEndUpdate($hash, 1); 		# Notify is done by Dispatch
 		
@@ -428,13 +521,23 @@ sub SD_UT_Attr(@) {
 				readingsSingleUpdate($hash, "state", " Please define your model with attributes! ", 0);
 			}
 			
-			############ Westinghouse_Delancey	############			
-			if ($attrName eq "model" && $attrValue eq "Westinghouse_Delancey") {
+			############ Westinghouse_Delancey RH787T ############
+			if ($attrName eq "model" && $attrValue eq "RH787T") {
 				$attr{$name}{model}	= $attrValue;				# set new model
 				my $bitData = InternalVal($name, "bitMSG", "-");
 				$deviceCode = substr($bitData,1,4);
 				$deviceCode = sprintf("%X", oct( "0b$deviceCode" ) );
-				$devicemodel = "Westinghouse_Delancey";
+				$devicemodel = "RH787T";
+				$devicename = $devicemodel."_".$deviceCode;
+				Log3 $name, 3, "SD_UT: UNDEFINED sensor ".$attrValue . " detected, code ". $deviceCode;
+				$state = "Defined";
+			############ Westinghouse Buttons_five ############
+			} elsif ($attrName eq "model" && $attrValue eq "Buttons_five") {
+				$attr{$name}{model}	= $attrValue;				# set new model
+				my $bitData = InternalVal($name, "bitMSG", "-");
+				$deviceCode = substr($bitData,8,4);
+				$deviceCode = sprintf("%X", oct( "0b$deviceCode" ) );
+				$devicemodel = "Buttons_five";
 				$devicename = $devicemodel."_".$deviceCode;
 				Log3 $name, 3, "SD_UT: UNDEFINED sensor ".$attrValue . " detected, code ". $deviceCode;
 				$state = "Defined";
@@ -548,16 +651,17 @@ sub SD_UT_binaryToNumber {
 	 <ul> - unitec Sound (Ursprungsmodul)&nbsp;&nbsp;&nbsp;<small>(module model: Unitec_other | protocol 30)</small></ul>
 	 <ul> - unitec remote door reed switch 47031 (prepared)&nbsp;&nbsp;&nbsp;<small>(module model: Unitec_47031 | protocol 30)</small></ul>
 	 <ul> - VTX-BELL_Funkklingel&nbsp;&nbsp;&nbsp;<small>(module model: VTX-BELL | protocol 79)</small></ul>
-	 <ul> - Westinghouse Delancey Deckenventilator&nbsp;&nbsp;&nbsp;<small>(module model: Westinghouse_Delancey | protocol 83)</small></ul>
+	 <ul> - Westinghouse Delancey ceiling fan (remote, 5 buttons without SET)&nbsp;&nbsp;&nbsp;<small>(module model: Buttons_five | protocol 29)</small></ul>
+	 <ul> - Westinghouse Delancey ceiling fan (remote, 9 buttons with SET)&nbsp;&nbsp;&nbsp;<small>(module model: RH787T | protocol 83)</small></ul>
 	 <br><br>
 	<b>Define</b><br>
 	<ul><code>define &lt;NAME&gt; SD_UT &lt;model&gt; &lt;Hex-address&gt;</code><br><br>
 	<u>examples:</u>
 		<ul>
 		define &lt;NAME&gt; SD_UT Unitec_other 6FF<br>
+		define &lt;NAME&gt; SD_UT RH787T AB5<br>
 		define &lt;NAME&gt; SD_UT SA_434_1_mini ffd<br>
 		define &lt;NAME&gt; SD_UT unknown<br>
-		define &lt;NAME&gt; SD_UT Westinghouse_Delancey AB5<br>
 		</ul>	</ul><br><br>
 	<b>Set</b><br>
 	<ul>Different transmission commands are available.</ul><br>
@@ -565,7 +669,13 @@ sub SD_UT_binaryToNumber {
 	<ul><li>send&nbsp;&nbsp;<small>(Always send the same, even if the user sends another set command via console.)</small></li></ul><br>
 	<ul><u>VTX-BELL_radio bell</u></ul>
 	<ul><li>send&nbsp;&nbsp;<small>(Always send the same, even if the user sends another set command via console.)</small></li></ul><br>
-	<ul><u>Westinghouse Delancey ceiling fan</u></ul>
+	<ul><u>Westinghouse Deckenventilator (remote with 5 buttons and without SET)</u></ul>
+	<ul><li>1_fan_low_speed --> Button LOW on the remote</li></ul>
+	<ul><li>2_fan_medium_speed --> Button MED on the remote</li></ul>
+	<ul><li>3_fan_high_speed --> Button HI on the remote</li></ul>
+	<ul><li>light_on/off --> Button LIGHT on the remote</li></ul>
+	<ul><li>fan_off --> Button OFF on the remote</li></ul><br>
+	<ul><u>Westinghouse Delancey ceiling fan (remote RH787T with 9 buttons and SET)</u></ul>
 	<ul><li>1_fan_minimum_speed --> Button I on the remote</li></ul>
 	<ul><li>2_fan_low_speed --> Button II on the remote</li></ul>
 	<ul><li>3_fan_medium_low_speed --> Button III on the remote</li></ul>
@@ -583,7 +693,7 @@ sub SD_UT_binaryToNumber {
 	<ul><li><a href="#do_not_notify">do_not_notify</a></li></ul><br>
 	<ul><li><a href="#ignore">ignore</a></li></ul><br>
 	<ul><li><a href="#IODev">IODev</a></li></ul><br>
-	<ul><li><a href="#model">model</a> (unknown,SA_434_1_mini,Unitec_47031,Unitec_other,VTX-BELL,Westinghouse_Delancey)</li></ul><br>
+	<ul><li><a href="#model">model</a> (unknown,Buttons_five,SA_434_1_mini,Unitec_47031,Unitec_other,VTX-BELL,RH787T)</li></ul><br>
 </ul>
 =end html
 =begin html_DE
@@ -600,16 +710,17 @@ sub SD_UT_binaryToNumber {
 	 <ul> - unitec Sound (Ursprungsmodul)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Unitec_other | Protokoll 30)</small></ul>
 	 <ul> - unitec remote door reed switch 47031 (vorbereitet)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Unitec_47031 | Protokoll 30)</small></ul>
 	 <ul> - VTX-BELL_Funkklingel&nbsp;&nbsp;&nbsp;<small>(Modulmodel: VTX-BELL | Protokoll 79)</small></ul>
-	 <ul> - Westinghouse Delancey Deckenventilator&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Westinghouse_Delancey | Protokoll 83)</small></ul>
+	 <ul> - Westinghouse Deckenventilator (Fernbedienung, 5 Tasten ohne SET)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Buttons_five | Protokoll 29)</small></ul>
+	 <ul> - Westinghouse Delancey Deckenventilator (Fernbedienung, 9 Tasten mit SET)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: RH787T | Protokoll 83)</small></ul>
 	 <br><br>
 	<b>Define</b><br>
 	<ul><code>define &lt;NAME&gt; SD_UT &lt;model&gt; &lt;Hex-Adresse&gt;</code><br><br>
 	<u>Beispiele:</u>
 		<ul>
 		define &lt;NAME&gt; SD_UT Unitec_other 6FF<br>
+		define &lt;NAME&gt; SD_UT RH787T AB5<br>
 		define &lt;NAME&gt; SD_UT SA_434_1_mini ffd<br>
 		define &lt;NAME&gt; SD_UT unknown<br>
-		define &lt;NAME&gt; SD_UT Westinghouse_Delancey AB5<br>
 		</ul></ul><br><br>
 	<b>Set</b><br>
 	<ul>Je nach Ger&auml;t sind unterschiedliche Sendebefehle verf&uuml;gbar.</ul><br>
@@ -617,7 +728,13 @@ sub SD_UT_binaryToNumber {
 	<ul><li>send&nbsp;&nbsp;<small>(Sendet immer das selbe, auch wenn der Benutzer einen anderen Set-Befehl via Konsole sendet.)</small></li></ul><br>
 	<ul><u>VTX-BELL_Funkklingel</u></ul>
 	<ul><li>send&nbsp;&nbsp;<small>(Sendet immer das selbe, auch wenn der Benutzer einen anderen Set-Befehl via Konsole sendet.)</small></li></ul><br>
-	<ul><u>Westinghouse Delancey Deckenventilator</u></ul>
+	<ul><u>Westinghouse Deckenventilator (Fernbedienung mit 5 Tasten)</u></ul>
+	<ul><li>1_fan_low_speed --> Taste LOW auf der Fernbedienung</li></ul>
+	<ul><li>2_fan_medium_speed --> Taste MED auf der Fernbedienung</li></ul>
+	<ul><li>3_fan_high_speed --> Taste HI auf der Fernbedienung</li></ul>
+	<ul><li>light_on/off --> Taste LIGHT auf der Fernbedienung</li></ul>
+	<ul><li>fan_off --> Taste OFF auf der Fernbedienung</li></ul><br>
+	<ul><u>Westinghouse Delancey Deckenventilator (Fernbedienung RH787T mit 9 Tasten + SET)</u></ul>
 	<ul><li>1_fan_minimum_speed --> Taste I auf der Fernbedienung</li></ul>
 	<ul><li>2_fan_low_speed --> Taste II auf der Fernbedienung</li></ul>
 	<ul><li>3_fan_medium_low_speed --> Taste III auf der Fernbedienung</li></ul>
@@ -635,7 +752,7 @@ sub SD_UT_binaryToNumber {
 	<ul><li><a href="#do_not_notify">do_not_notify</a></li></ul><br>
 	<ul><li><a href="#ignore">ignore</a></li></ul><br>
 	<ul><li><a href="#IODev">IODev</a></li></ul><br>
-	<ul><li><a href="#model">model</a> (unknown,SA_434_1_mini,Unitec_47031,Unitec_other,VTX-BELL,Westinghouse_Delancey)</li></ul><br>
+	<ul><li><a href="#model">model</a> (unknown,Buttons_five,RH787T,SA_434_1_mini,Unitec_47031,Unitec_other,VTX-BELL)</li></ul><br>
 </ul>
 =end html_DE
 =cut
