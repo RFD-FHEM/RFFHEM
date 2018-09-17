@@ -1,3 +1,6 @@
+17.09.2018
+  14_SD_WS: added Protocol 84 -> new sensor Auriol (IAN 283582)
+  signalduino_protocols.hash  - added Protocol 84
 11.09.2018  
  signalduino_protocols.hash  - doc
   14_SD_WS: mod Code and fix plot creation
