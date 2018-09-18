@@ -1,10 +1,10 @@
 ##############################################
 # $Id: 90_SIGNALduino_un.pm 15479 2018-01-24 20:00:00 dev-r33 $
+# 
 # The file is part of the SIGNALduino project
-# see http://www.fhemwiki.de/wiki/SIGNALduino
-# to support debugging of unknown signal data
+# see http://www.fhemwiki.de/wiki/SIGNALduino to support debugging of unknown signal data
 # The purpos is to use it as addition to the SIGNALduino
-# S. Butzek, 2015
+# S. Butzek, 2015 | HomeAuto_User & elektron-bbs - 2018
 #
 
 package main;
@@ -20,14 +20,14 @@ SIGNALduino_un_Initialize($)
   my ($hash) = @_;
 
 
-  $hash->{Match}     = '^[uP]\d+#.*';
+  $hash->{Match}     = '^[u]\d+#.*';
   $hash->{DefFn}     = "SIGNALduino_un_Define";
   $hash->{UndefFn}   = "SIGNALduino_un_Undef";
   $hash->{AttrFn}    = "SIGNALduino_un_Attr";
+  $hash->{SetFn}     = "SIGNALduino_un_Set";											
   $hash->{ParseFn}   = "SIGNALduino_un_Parse";
   $hash->{AttrList}  = "IODev do_not_notify:0,1 showtime:0,1 ignore:0,1 ".$readingFnAttributes;
 }
-
 
 #####################################
 sub
@@ -36,20 +36,19 @@ SIGNALduino_un_Define($$)
   my ($hash, $def) = @_;
   my @a = split("[ \t][ \t]*", $def);
 
-  return "wrong syntax: define <name> SIGNALduino_un <code> <minsecs> <equalmsg>".int(@a)
-		if(int(@a) < 3 || int(@a) > 5);
+  return " wrong syntax: define <name> SIGNALduino_un <code> <optional IODEV> (".int(@a).")" if(int(@a) < 3 || int(@a) > 4);
 
-  $hash->{CODE}    = $a[2];
-  $hash->{minsecs} = ((int(@a) > 3) ? $a[3] : 30);
-  $hash->{equalMSG} = ((int(@a) > 4) ? $a[4] : 0);
   $hash->{lastMSG} =  "";
   $hash->{bitMSG} =  "";
-
-  $modules{SIGNALduino_un}{defptr}{$a[2]} = $hash;
   $hash->{STATE} = "Defined";
 
-  AssignIoPort($hash);
-  return undef;
+  my $iodevice = $a[3] if($a[3]);
+  $modules{SIGNALduino_un}{defptr}{$a[2]} = $hash;
+  
+  my $ioname = $modules{SIGNALduino_un}{defptr}{ioname} if (exists $modules{SIGNALduino_un}{defptr}{ioname} && not $iodevice);
+  $iodevice = $ioname if not $iodevice;
+  
+  AssignIoPort($hash, $iodevice);
 }
 
 #####################################
@@ -57,17 +56,18 @@ sub
 SIGNALduino_un_Undef($$)
 {
   my ($hash, $name) = @_;
-  delete($modules{SIGNALduino_un}{defptr}{$hash->{CODE}}) if($hash && $hash->{CODE});
+  delete($modules{SIGNALduino_un}{defptr}{$hash->{DEF}}) if($hash && $hash->{DEF});
+  delete($modules{SIGNALduino_un}{defptr}{ioname}) if (exists $modules{SIGNALduino_un}{defptr}{ioname});
   return undef;
 }
 
+#####################################
 sub SIGNALduino_un_hex2bin {
         my $h = shift;
         my $hlen = length($h);
         my $blen = $hlen * 4;
         return unpack("B$blen", pack("H$hlen", $h));
 }
-
 
 #####################################
 sub
@@ -76,6 +76,7 @@ SIGNALduino_un_Parse($$)
 	my ($hash,$msg) = @_;
 	my @a = split("", $msg);
 	my $name = "SIGNALduino_unknown";# $hash->{NAME};
+	my $ioname = $hash->{NAME};
 	Log3 $hash, 4, "$name incomming msg: $msg";
 	#my $rawData=substr($msg,2);
 
@@ -184,18 +185,82 @@ SIGNALduino_un_Parse($$)
 		#Dispatch($hash, $tscode,undef);
 
 		
-	} else {
-		Log3 $hash, 4, $dummyreturnvalue;
-		
-		return undef;
-	}
+	}	
+								   
+	##############################################################################################
+	# version 1) message with u..# without development y attribut -> Unknown code u..# , help me!
+	# version 2) message with u..# and development y attribut -> no message for Unknown code
+	##############################################################################################
+	
+	my $value = AttrVal($ioname, "development", "none");
+	my @delevopmentargs = split (",",$value);
+	my $search = "y".$protocol;			# for version 2
+	my $search2 = "u".$protocol;		# for version 1
 
+	Log3 $name, 5, "$name: $ioname AttrVal development: $value" if (defined $value);
+	
+	if (grep{/$search$/ || /$search2$/}@delevopmentargs) {
+		### Help Device + Logfile ###
+	
+		Log3 $name, 4, "$name: $ioname Protocol $protocol ($search) found in AttrVal development!" if (grep{/$search$/}@delevopmentargs);
+		Log3 $name, 4, "$name: $ioname Protocol $protocol ($search2) found in AttrVal development!" if (grep{/$search2$/}@delevopmentargs);
+		
+		my $def;
+		my $devicedef = $name."_".$protocol;
+		$def = $modules{SIGNALduino_un}{defptr}{$devicedef} if(!$def);
+		$modules{SIGNALduino_un}{defptr}{ioname} = $ioname;
+		
+		if(!$def) {
+			Log3 $ioname, 1, "$ioname: $name UNDEFINED sensor " . $devicedef . " detected";
+			return "UNDEFINED $devicedef SIGNALduino_un $devicedef";
+		}
+	
+		my $hash = $def;
+		my $name = $hash->{NAME};
+		my $info = "$bitData | bits=".length($bitData);
+	
+		readingsBeginUpdate($hash);
+		readingsBulkUpdate($hash, "state", "newMSG - ".TimeNow(),0);
+		readingsBulkUpdate($hash, "LogInfo", $info)  if (defined($info));
+		readingsEndUpdate($hash, 1); 		# Notify is done by Dispatch
+		
+		return $name;
+	} else {
+		### nothing - Info ###
+		Log3 $name, 4, "$name: $ioname Protocol:$protocol | To help decode or debug, please add u$protocol or y$protocol ($msg) to the attr development!" if ($protocol);
+	}
+	############################
+	
+	
 	Log3 $hash, 4, $dummyreturnvalue;
 	return undef;  
 }
 
+#####################################
+sub
+SIGNALduino_un_Set($$$@)
+{
+  my ( $hash, $name, @a ) = @_;
+  my $cmd = $a[0];
+  my $cmd2 = $a[1];
+  my $ret = "write";
 
+  if ($cmd ne "?") {
+		return "wrong argument! please use $ret argument and one comment." if($a[0] ne "write" || not $a[1]);
+		
+		readingsBeginUpdate($hash);
+		readingsBulkUpdate($hash, "state" , "UserMSG - ".TimeNow(),0);
+		readingsBulkUpdate($hash, "UserMSG", $cmd2)  if (defined($cmd2));
+		readingsEndUpdate($hash, 1); 		# Notify is done by Dispatch
+		
+		return undef;						# undef because user is in same windows without message, better to use
+		#return "Thanks";
+  }
+  
+  return $ret;
+}
 
+#####################################
 sub
 SIGNALduino_un_Attr(@)
 {
@@ -206,15 +271,14 @@ SIGNALduino_un_Attr(@)
   return if($a[0] ne "set" || $a[2] ne "IODev");
   my $hash = $defs{$a[1]};
   my $iohash = $defs{$a[3]};
-  my $cde = $hash->{CODE};
-  delete($modules{SIGNALduino_un}{defptr}{$cde});
-  $modules{SIGNALduino_un}{defptr}{$iohash->{NAME} . "." . $cde} = $hash;
+  my $cde = $hash->{DEF};
+  
+  #delete($modules{SIGNALduino_un}{defptr}{$cde});
+  #$modules{SIGNALduino_un}{defptr}{$iohash->{NAME} . "." . $cde} = $hash;
   return undef;
 }
 
-
-# binary string,  fistbit #, lastbit #
-
+#####################################
 sub
 SIGNALduino_un_binaryToNumber
 {
@@ -228,14 +292,14 @@ SIGNALduino_un_binaryToNumber
 	
 }
 
-
+#####################################
 sub
 SIGNALduino_un_binaryToBoolean
 {
 	return int(SIGNALduino_un_binaryToNumber(@_));
 }
 
-
+#####################################
 sub
 SIGNALduino_un_bin2dec($)
 {
@@ -243,6 +307,8 @@ SIGNALduino_un_bin2dec($)
   my $int = unpack("N", pack("B32",substr("0" x 32 . $h, -32))); 
   return sprintf("%d", $int); 
 }
+
+#####################################				 
 sub
 SIGNALduino_un_binflip($)
 {
@@ -278,15 +344,18 @@ SIGNALduino_un_binflip($)
 
     <br>
     You can define a Device, but currently you can do nothing with it.
-    Autocreate is also not enabled for this module.
-    The function of this module is only to output some logging at verbose 4 or higher. May some data is decoded correctly but it's also possible that this does not work.
-    The Module will try to process all messages, which where not handled by other modules.
+    The function of this module is only to output some logging at verbose 4 or higher at FHEM-logfile or logging to help device. May some data is decoded correctly but it's also possible that this does not work.
+    The Module will try to process all messages, which where not handled by other modules.<br><br>
+	Created devices / logfiles must be deleted manually after removing the protocol from the attribute <code> development</code>. (example: u40, y84)
    
   </ul>
   <br>
 
   <a name="SIGNALduino_unset"></a>
-  <b>Set</b> <ul>N/A</ul><br>
+  <b>Set</b>
+  <ul>write "comment" - the user can put comments in the logfile which are arranged to his bits of the device<br>
+ (Beispiel: to write off the digital display of the thermometer at the time of reception or states of switches ...)</ul>
+  <br>
 
   <a name="SIGNALduino_unget"></a>
   <b>Get</b> <ul>N/A</ul><br>
@@ -294,7 +363,8 @@ SIGNALduino_un_binflip($)
   <a name="SIGNALduino_unattr"></a>
   <b>Attributes</b>
   <ul>
-    <li><a href="#verbose">Verbose</a></li>
+    <li><a href="#ignore">ignore</a></li>
+	<li><a href="#verbose">verbose</a></li>
   </ul>
   <br>
 </ul>
@@ -306,8 +376,8 @@ SIGNALduino_un_binflip($)
 <a name="SIGNALduino_un"></a>
 <h3>SIGNALduino_un</h3>
 <ul>
-  Das SIGNALduino_un Modul ist ein Hilfsmodul um unbekannte Nachrichten zu debuggen und analysieren zu k&ouml;nnen.
-  Das Modul legt keinerlei Ger&aumlte oder &aumlhnliches an.
+  Das SIGNALduino_un Modul ist ein Hilfsmodul um unbekannte Nachrichten zu debuggen und analysieren zu k&ouml;nnen.<br>
+  Das Modul legt nur eine Hilfsger&aumlt an mit Logfile der Bits sobald man das Attribut <code>development</code> auf das entsprechende unbekannte Protokoll setzt.
   <br><br>
 
   <a name="SIGNALduino_undefine"></a>
@@ -317,21 +387,27 @@ SIGNALduino_un_binflip($)
 
     <br>
     Es ist m&ouml;glich ein Ger&auml;t manuell zu definieren, aber damit passiert &uuml;berhaupt nichts.
-    Autocreate wird auch keinerlei Ger&auml;te aus diesem Modul anlegen.
     <br>
-    Die einzigeste Funktion dieses Modules ist, ab Verbose 4 Logmeldungen &uumlber die Empfangene Nachricht ins Log zu schreiben. Dabei kann man sich leider nicht darauf verlassen, dass die Nachricht korrekt dekodiert wurde.<br>
-    Dieses Modul wird alle Nachrichten verarbeiten, welche von anderen Modulen nicht verarbeitet wurden.
+    Die einzigeste Funktion dieses Modules ist, ab Verbose 4 Logmeldungen &uumlber die Empfangene Nachricht ins FHEM-Log zu schreiben oder in das Logfile des Hilfsger&aumlt.<br>
+	Dabei kann man sich leider nicht darauf verlassen, dass die Nachricht korrekt dekodiert wurde. Dieses Modul wird alle Nachrichten verarbeiten, welche von anderen Modulen nicht verarbeitet werden.<br>
+	<br>
+	Angelegte Ger&auml;te / Logfiles m&uuml;ssen manuell gel&ouml;scht werden nachdem aus dem Attribut <code>development</code> das zu untersuchende Protokoll entfernt wurde. (Beispiel: u40,y84)
+	
   <ul><br>
   <a name="SIGNALduino_unset"></a>
-  <b>Set</b> <ul>N/A</ul><br>
-
+  <b>Set</b>
+  <ul>write "Kommentar" - somit kann der User in das Logfile des Hilfsger&aumlt Kommentare setzen welche zeitlich zu seinen Bits des Ger&aumltes eingeordnet werden<br>
+ (Beispiel: um die Digitalanzeige des Thermometers abzuschreiben zum Zeitpunkt des Empfangs oder Zustände von Schaltern ...)</ul>
+  <br>
+  
   <a name="SIGNALduino_unget"></a>
   <b>Get</b> <ul>N/A</ul><br>
 
   <a name="SIGNALduino_unattr"></a>
   <b>Attributes</b>
   <ul>
-    <li><a href="#verbose">Verbose</a></li>
+    <li><a href="#ignore">ignore</a></li>
+	<li><a href="#verbose">verbose</a></li>
   </ul>
   <br>
 </ul>
