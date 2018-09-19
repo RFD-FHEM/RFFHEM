@@ -51,7 +51,9 @@ SIGNALduino_un_Define($$)
   $iodevice = $ioname if not $iodevice;
   
   ### Attributes ###
-  $attr{$name}{stateFormat}	= "{ReadingsVal('$name', 'state', '').' | '.ReadingsTimestamp('$name', 'state', '-');}" if( not defined( $attr{$name}{stateformat} ) );
+  if ( $init_done == 1 ) {
+	$attr{$name}{stateFormat}	= "{ReadingsVal('$name', 'state', '').' | '.ReadingsTimestamp('$name', 'state', '-');}" if( not defined( $attr{$name}{stateformat} ) );
+  }
   
   AssignIoPort($hash, $iodevice);
 }
@@ -197,7 +199,7 @@ SIGNALduino_un_Parse($$)
 	# version 2) message with u..# and development y attribut -> no message for Unknown code
 	##############################################################################################
 	
-	my $value = AttrVal($ioname, "development", "none");
+	my $value = AttrVal($ioname, "development", "");
 	my @delevopmentargs = split (",",$value);
 	my $search = "y".$protocol;			# for version 2
 	my $search2 = "u".$protocol;		# for version 1
@@ -205,8 +207,8 @@ SIGNALduino_un_Parse($$)
 	if ((any{ $search eq $_ }@delevopmentargs) || (any{ $search2 eq $_ }@delevopmentargs)) {
 		### Help Device + Logfile ###
 	
-		Log3 $name, 4, "$name: $ioname Protocol $protocol ($search) found in AttrVal development!" if (any{ $search eq $_ }@delevopmentargs);
-		Log3 $name, 4, "$name: $ioname Protocol $protocol ($search2) found in AttrVal development!" if (any{ $search2 eq $_ }@delevopmentargs);
+		Log3 $hash, 5, "$name: $ioname Protocol $protocol ($search) found in AttrVal development!" if (any{ $search eq $_ }@delevopmentargs);
+		Log3 $hash, 5, "$name: $ioname Protocol $protocol ($search2) found in AttrVal development!" if (any{ $search2 eq $_ }@delevopmentargs);
 		
 		my $def;
 		my $devicedef = $name."_".$protocol;
@@ -233,10 +235,13 @@ SIGNALduino_un_Parse($$)
 		return $name;
 	} else {
 		### nothing - Info ###
-		my $value = AttrVal($ioname, "development", "none");	# read attr development from IODev
-		$value.= ",u$protocol" if ($value ne "none");			# definitions already exist
-		$value = "u$protocol" if ($value eq "none");			# no definitions exist
-		Log3 $hash, 4, "$name $ioname Protocol:$protocol | To help decode or debug, please add u$protocol! (attr $ioname development $value)" if ($protocol);	# To help decode or debug, please add u84! (attr sduino_dummy development u84)
+		my $value = AttrVal($ioname, "development", "");	# read attr development from IODev
+		
+		if ($value ne "") {
+			$value .= ","; 					# some definitions already exist, so prepend a new one
+		}
+        $value .= "u$protocol";		
+		Log3 $hash, 3, "$name $ioname Protocol:$protocol | To help decode or debug, please add u$protocol! (attr $ioname development $value)" if ($protocol);	# To help decode or debug, please add u84! (attr sduino_dummy development u84)
 	}
 	############################
 	
@@ -343,7 +348,9 @@ SIGNALduino_un_binflip($)
 <a name="SIGNALduino_un"></a>
 <h3>SIGNALduino_un</h3>
 <ul>
-  The SIGNALduino_un module is a testing and debugging module to decode some devices, it will not create any devices, it will catch only all messages from the signalduino which can't be send to another module
+  The SIGNALduino_un module is a testing and debugging module to decode some devices, it will catch only all messages from the signalduino which can't be send to another module.<br>
+  It can create one help devices after define development attribute on SIGNALduino device. You get a hint from Verbose 4 in the FHEM Log.<br>
+  <u>example:</u> <code>SIGNALduino_unknown sduino_dummy Protocol:40 | To help decode or debug, please add u40! (attr sduino_dummy development u40)</code>
   <br><br>
 
   <a name="SIGNALduino_undefine"></a>
@@ -373,6 +380,7 @@ SIGNALduino_un_binflip($)
   <b>Attributes</b>
   <ul>
     <li><a href="#ignore">ignore</a></li>
+	<li><a href="#stateFormat">stateFormat</a></li>
 	<li><a href="#verbose">verbose</a></li>
   </ul>
   <br>
@@ -385,8 +393,10 @@ SIGNALduino_un_binflip($)
 <a name="SIGNALduino_un"></a>
 <h3>SIGNALduino_un</h3>
 <ul>
-  Das SIGNALduino_un Modul ist ein Hilfsmodul um unbekannte Nachrichten zu debuggen und analysieren zu k&ouml;nnen.<br>
-  Das Modul legt nur eine Hilfsger&aumlt an mit Logfile der Bits sobald man das Attribut <code>development</code> im Empf&auml;nger Device auf das entsprechende unbekannte Protokoll setzt.
+  Das SIGNALduino_un Modul ist ein Hilfsmodul um unbekannte Nachrichten zu debuggen und analysieren zu k&ouml;nnen.<br><br>
+  Das Modul legt nur eine Hilfsger&aumlt an mit Logfile der Bits sobald man das Attribut <code>development</code> im Empf&auml;nger Device auf das entsprechende unbekannte Protokoll setzt.<br>
+  Einen entsprechenden Hinweis erhalten Sie ab Verbose 4 im FHEM Log.<br>
+  <u>Beispiel:</u> <code>SIGNALduino_unknown sduino_dummy Protocol:40 | To help decode or debug, please add u40! (attr sduino_dummy development u40)</code>
   <br><br>
 
   <a name="SIGNALduino_undefine"></a>
@@ -397,10 +407,10 @@ SIGNALduino_un_binflip($)
     <br>
     Es ist m&ouml;glich ein Ger&auml;t manuell zu definieren, aber damit passiert &uuml;berhaupt nichts.
     <br>
-    Die einzigeste Funktion dieses Modules ist, ab Verbose 4 Logmeldungen &uumlber die Empfangene Nachricht ins FHEM-Log zu schreiben oder in das Logfile des Hilfsger&aumlt.<br>
+    Die einzigste Funktion dieses Modules ist, ab Verbose 4 Logmeldungen &uumlber die Empfangene Nachricht ins FHEM-Log zu schreiben oder in das Logfile des Hilfsger&aumltes.<br>
 	Dabei kann man sich leider nicht darauf verlassen, dass die Nachricht korrekt dekodiert wurde. Dieses Modul wird alle Nachrichten verarbeiten, welche von anderen Modulen nicht verarbeitet werden.<br>
 	<br>
-	Angelegte Ger&auml;te / Logfiles m&uuml;ssen manuell gel&ouml;scht werden nachdem aus dem Attribut <code>development</code> das zu untersuchende Protokoll entfernt wurde. (Beispiel: u40,y84)
+	Angelegte Ger&auml;te / Logfiles m&uuml;ssen manuell gel&ouml;scht werden nachdem aus dem Attribut <code>development</code> des SIGNALduinos das zu untersuchende Protokoll entfernt wurde. (Beispiel: u40,y84)
 	
   <ul><br>
   <a name="SIGNALduino_unset"></a>
@@ -416,6 +426,7 @@ SIGNALduino_un_binflip($)
   <b>Attributes</b>
   <ul>
     <li><a href="#ignore">ignore</a></li>
+    <li><a href="#stateFormat">stateFormat</a></li>
 	<li><a href="#verbose">verbose</a></li>
   </ul>
   <br>
