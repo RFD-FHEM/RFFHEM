@@ -1,6 +1,6 @@
 ##############################################
 # $Id: 90_SIGNALduino_un.pm 15479 2018-01-24 20:00:00 dev-r33 $
-# 
+#
 # The file is part of the SIGNALduino project
 # see http://www.fhemwiki.de/wiki/SIGNALduino to support debugging of unknown signal data
 # The purpos is to use it as addition to the SIGNALduino
@@ -12,6 +12,7 @@ package main;
 use strict;
 use warnings;
 use POSIX;
+use List::Util qw(any);		# for any function
 
 #####################################
 sub
@@ -24,9 +25,9 @@ SIGNALduino_un_Initialize($)
   $hash->{DefFn}     = "SIGNALduino_un_Define";
   $hash->{UndefFn}   = "SIGNALduino_un_Undef";
   $hash->{AttrFn}    = "SIGNALduino_un_Attr";
-  $hash->{SetFn}     = "SIGNALduino_un_Set";											
+  $hash->{SetFn}     = "SIGNALduino_un_Set";
   $hash->{ParseFn}   = "SIGNALduino_un_Parse";
-  $hash->{AttrList}  = "IODev do_not_notify:0,1 showtime:0,1 ignore:0,1 ".$readingFnAttributes;
+  $hash->{AttrList}  = "IODev do_not_notify:0,1 stateFormat showtime:0,1 ignore:0,1 ".$readingFnAttributes;
 }
 
 #####################################
@@ -41,12 +42,16 @@ SIGNALduino_un_Define($$)
   $hash->{lastMSG} =  "";
   $hash->{bitMSG} =  "";
   $hash->{STATE} = "Defined";
-
+  my $name = $hash->{NAME};
+  
   my $iodevice = $a[3] if($a[3]);
   $modules{SIGNALduino_un}{defptr}{$a[2]} = $hash;
   
   my $ioname = $modules{SIGNALduino_un}{defptr}{ioname} if (exists $modules{SIGNALduino_un}{defptr}{ioname} && not $iodevice);
   $iodevice = $ioname if not $iodevice;
+  
+  ### Attributes ###
+  $attr{$name}{stateFormat}	= "{ReadingsVal('$name', 'state', '').' | '.ReadingsTimestamp('$name', 'state', '-');}" if( not defined( $attr{$name}{stateformat} ) );
   
   AssignIoPort($hash, $iodevice);
 }
@@ -186,7 +191,7 @@ SIGNALduino_un_Parse($$)
 
 		
 	}	
-								   
+	
 	##############################################################################################
 	# version 1) message with u..# without development y attribut -> Unknown code u..# , help me!
 	# version 2) message with u..# and development y attribut -> no message for Unknown code
@@ -197,13 +202,11 @@ SIGNALduino_un_Parse($$)
 	my $search = "y".$protocol;			# for version 2
 	my $search2 = "u".$protocol;		# for version 1
 
-	Log3 $name, 5, "$name: $ioname AttrVal development: $value" if (defined $value);
-	
-	if (grep{/$search$/ || /$search2$/}@delevopmentargs) {
+	if ((any{ $search eq $_ }@delevopmentargs) || (any{ $search2 eq $_ }@delevopmentargs)) {
 		### Help Device + Logfile ###
 	
-		Log3 $name, 4, "$name: $ioname Protocol $protocol ($search) found in AttrVal development!" if (grep{/$search$/}@delevopmentargs);
-		Log3 $name, 4, "$name: $ioname Protocol $protocol ($search2) found in AttrVal development!" if (grep{/$search2$/}@delevopmentargs);
+		Log3 $name, 4, "$name: $ioname Protocol $protocol ($search) found in AttrVal development!" if (any{ $search eq $_ }@delevopmentargs);
+		Log3 $name, 4, "$name: $ioname Protocol $protocol ($search2) found in AttrVal development!" if (any{ $search2 eq $_ }@delevopmentargs);
 		
 		my $def;
 		my $devicedef = $name."_".$protocol;
@@ -217,17 +220,23 @@ SIGNALduino_un_Parse($$)
 	
 		my $hash = $def;
 		my $name = $hash->{NAME};
-		my $info = "$bitData | bits=".length($bitData);
+		my $info = "$bitData; length:".length($bitData)."; hex:$rawData";	# log example, 2018-09-19_13:43:34 SIGNALduino_unknown_84 receive: 0000001100110101010000001111110110111100; length:40; hex:033540FDBC
+	
+		$hash->{lastMSG} = $rawData;
+		$hash->{bitMSG} =  $bitData;
 	
 		readingsBeginUpdate($hash);
-		readingsBulkUpdate($hash, "state", "newMSG - ".TimeNow(),0);
-		readingsBulkUpdate($hash, "LogInfo", $info)  if (defined($info));
+		readingsBulkUpdate($hash, "state", $rawData,0);
+		readingsBulkUpdate($hash, "receive", $info);
 		readingsEndUpdate($hash, 1); 		# Notify is done by Dispatch
 		
 		return $name;
 	} else {
 		### nothing - Info ###
-		Log3 $name, 4, "$name: $ioname Protocol:$protocol | To help decode or debug, please add u$protocol or y$protocol ($msg) to the attr development!" if ($protocol);
+		my $value = AttrVal($ioname, "development", "none");	# read attr development from IODev
+		$value.= ",u$protocol" if ($value ne "none");			# definitions already exist
+		$value = "u$protocol" if ($value eq "none");			# no definitions exist
+		Log3 $hash, 4, "$name $ioname Protocol:$protocol | To help decode or debug, please add u$protocol! (attr $ioname development $value)" if ($protocol);	# To help decode or debug, please add u84! (attr sduino_dummy development u84)
 	}
 	############################
 	
@@ -249,7 +258,7 @@ SIGNALduino_un_Set($$$@)
 		return "wrong argument! please use $ret argument and one comment." if($a[0] ne "write" || not $a[1]);
 		
 		readingsBeginUpdate($hash);
-		readingsBulkUpdate($hash, "state" , "UserMSG - ".TimeNow(),0);
+		readingsBulkUpdate($hash, "state" , "UserMSG",0);
 		readingsBulkUpdate($hash, "UserMSG", $cmd2)  if (defined($cmd2));
 		readingsEndUpdate($hash, 1); 		# Notify is done by Dispatch
 		
@@ -308,7 +317,7 @@ SIGNALduino_un_bin2dec($)
   return sprintf("%d", $int); 
 }
 
-#####################################				 
+#####################################
 sub
 SIGNALduino_un_binflip($)
 {
@@ -354,7 +363,7 @@ SIGNALduino_un_binflip($)
   <a name="SIGNALduino_unset"></a>
   <b>Set</b>
   <ul>write "comment" - the user can put comments in the logfile which are arranged to his bits of the device<br>
- (Beispiel: to write off the digital display of the thermometer at the time of reception or states of switches ...)</ul>
+ (example: to write off the digital display of the thermometer at the time of reception or states of switches ...)</ul>
   <br>
 
   <a name="SIGNALduino_unget"></a>
@@ -377,7 +386,7 @@ SIGNALduino_un_binflip($)
 <h3>SIGNALduino_un</h3>
 <ul>
   Das SIGNALduino_un Modul ist ein Hilfsmodul um unbekannte Nachrichten zu debuggen und analysieren zu k&ouml;nnen.<br>
-  Das Modul legt nur eine Hilfsger&aumlt an mit Logfile der Bits sobald man das Attribut <code>development</code> auf das entsprechende unbekannte Protokoll setzt.
+  Das Modul legt nur eine Hilfsger&aumlt an mit Logfile der Bits sobald man das Attribut <code>development</code> im Empf&auml;nger Device auf das entsprechende unbekannte Protokoll setzt.
   <br><br>
 
   <a name="SIGNALduino_undefine"></a>
@@ -399,7 +408,7 @@ SIGNALduino_un_binflip($)
   <ul>write "Kommentar" - somit kann der User in das Logfile des Hilfsger&aumlt Kommentare setzen welche zeitlich zu seinen Bits des Ger&aumltes eingeordnet werden<br>
  (Beispiel: um die Digitalanzeige des Thermometers abzuschreiben zum Zeitpunkt des Empfangs oder Zustände von Schaltern ...)</ul>
   <br>
-  
+
   <a name="SIGNALduino_unget"></a>
   <b>Get</b> <ul>N/A</ul><br>
 
