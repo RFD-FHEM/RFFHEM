@@ -14,6 +14,7 @@ before_install:
 install:
  - cpanm File::Find File::Basename --quiet --installdeps --notest 
 script:
+ - perl ./build_controls_list.pl FHEM
  - git add ./controls_signalduino.txt
  - git commit --message "Travis automatic update controls file: $TRAVIS_BUILD_NUMBER"
  - branch_name=`git rev-parse --abbrev-ref HEAD`
