@@ -13,7 +13,7 @@ commit_controls_file() {
 
 upload_files() {
   #git remote add origin https://${GH_TOKEN}@github.com/RFD-FHEM/RFFHEM/resources.git > /dev/null 2>&1
-  git push HEAD:$TRAVIS_BRANCH
+  git push origin HEAD:$TRAVIS_BRANCH 
 }
 
 setup_git
