@@ -9,7 +9,7 @@ env:
 install:
  - cpanm File::Find File::Basename --quiet --installdeps --notest 
 script:
-  - perl ./build_controls_list.pl;
+  - perl ./build_controls_list.pl FHEM;
   - chmod +x ./gh-push.sh
   - ./gh-push.sh
 
