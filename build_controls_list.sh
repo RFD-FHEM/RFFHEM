@@ -13,7 +13,7 @@ while IFS= read -r -d '' FILE
 do
 	FILE=$(echo "$FILE"  | cut -c 3-)
 	printf "MOV %s unused\n" "$FILE"  >> controls_signalduino.txt
-done <   <(find ./FHEM/firmware -maxdepth 1 -name "*.hex" -print0 | sort -)
+done <   <(find ./FHEM/firmware -maxdepth 1 -name "*.hex" -print0 | sort -z)
 
 
 #Some old files not used anymore
