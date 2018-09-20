@@ -7,13 +7,13 @@ do
     FILESIZE=$(stat -c%s "$FILE")
 	FILE=$(echo "$FILE"  | cut -c 3-)
 	printf "UPD %s %-7d %s\n" "$TIME" "$FILESIZE" "$FILE"  >> controls_signalduino.txt
-done <   <(find ./FHEM -maxdepth 2 \( -name "*.pm" -or -name "*.hash" \) -print0 | sort -z)
+done <   <(find ./FHEM -maxdepth 2 \( -name "*.pm" -or -name "*.hash" \) -print0 | sort -z -g)
 
 while IFS= read -r -d '' FILE
 do
 	FILE=$(echo "$FILE"  | cut -c 3-)
 	printf "MOV %s unused\n" "$FILE"  >> controls_signalduino.txt
-done <   <(find ./FHEM/firmware -maxdepth 1 -name "*.hex" -print0 | sort -z)
+done <   <(find ./FHEM/firmware -maxdepth 1 -name "*.hex" -print0 | sort -z -g)
 
 
 #Some old files not used anymore
