@@ -4,4 +4,5 @@
    TIME       .*
    versionmodul v.*
    DoubleMsgIDs: .*
-     .*   state           Initialized
+   .*   state           opened
+   .*   version         0
