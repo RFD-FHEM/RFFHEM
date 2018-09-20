@@ -1,0 +1,7 @@
+   DMSG       .*
+   LASTDMSG   .*
+   NR         .*
+   TIME       .*
+   versionmodul v.*
+   DoubleMsgIDs: .*
+     .*   state           Initialized
