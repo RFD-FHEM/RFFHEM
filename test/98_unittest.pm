@@ -67,6 +67,8 @@ sub UnitTest_Notify($$)
     if ($devName eq "global" && $event eq "INITIALIZED")
     {
     	UnitTest_Test_1($own_hash);
+    	UnitTest_Test_2($own_hash);
+    	
     }
     # Examples:
     # $event = "readingname: value" 
@@ -84,8 +86,8 @@ sub UnitTest_Test_1
 	my $targetHash = $defs{$own_hash->{targetDevice}};
 	#print Dumper($targetHash);
 	
-    ok( $targetHash->{TYPE} eq "SIGNALduino", 'SIGNALduino detected' );
-    ok( ReadingsVal($targetHash->{NAME},"state","") eq "opened", 'SIGNALduino is opened' );
+    is( $targetHash->{TYPE}, "SIGNALduino", 'SIGNALduino detected' );
+    is( ReadingsVal($targetHash->{NAME},"state",""),"opened", 'SIGNALduino is opened' );
 
 
     # Bad tests, bevause the result depends on the time which is over till now
@@ -93,6 +95,28 @@ sub UnitTest_Test_1
 	#ok( $targetHash->{muIdList} eq "SIGNALduino", 'SIGNALduino detected' );
 	#ok( $targetHash->{mcIdList} eq "SIGNALduino", 'SIGNALduino detected' );
 	
+}
+
+sub UnitTest_Test_2
+{
+	use Test::Device::SerialPort;
+	my ($own_hash) = @_;
+	my $targetHash = $defs{$own_hash->{targetDevice}};
+
+    ## Mock a dummy serial device
+	my $PortObj = Test::Device::SerialPort->new('/dev/ttyS0');
+	$PortObj->baudrate(57600);
+    $PortObj->parity('none');
+    $PortObj->databits(8);
+    $PortObj->stopbits(1);
+	$targetHash->{USBDev} = $PortObj;
+	#SIGNALDuino_Shutdown($targetHash);
+	CallFn($targetHash->{NAME}, "ShutdownFn", $targetHash);
+	
+    is( $targetHash->{USBDev}->{_tx_buf}, "XQ\n", 'SIGNALDuino_Shutdown sends correct characters' );
+    
+    #cleanup
+    $targetHash->{USBDev} = undef;
 }
 
 sub UnitTest_mock_log3
