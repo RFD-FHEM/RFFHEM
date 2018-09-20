@@ -21,8 +21,8 @@ install:
  - sudo apt-get install fhem -y
  - chmod +x ./build_controls_list.sh 
  - sudo make
- - sudo make test
 script:
+ - sudo make test
  - ./build_controls_list.sh 
  - git commit -m "Travis automatic update controls file. Build (${TRAVIS_BUILD_NUMBER})" ./controls_signalduino.txt || true
  - git push origin HEAD:$TRAVIS_BRANCH 
