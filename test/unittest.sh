@@ -1,11 +1,11 @@
 #!/bin/bash
 echo "--------- Starting test $1 ---------"
 
-CMD=$(cat tests/$1-cmd.txt)
-RETURN=$(perl /opt/fhem/fhem.pl 7072 '$CMD')
+CMD=$(cat "tests/$1-cmd.txt")
+RETURN=$(perl /opt/fhem/fhem.pl 7072 "$CMD")
 
 echo "- Diff:"
-diff <( grep -v -f $MY_PATH/$1-excl.txt -x <(echo "$RETURN")) <( grep -v -f $MY_PATH/$1-excl.txt -x $MY_PATH/$1-res.txt) || {
+diff <( grep -v -f "test/$1-excl.txt"  -x <(echo "$RETURN")) <( grep -v -f "test/$1-excl.txt" -x "test/$1-res.txt") || {
     echo "- changes detected"
     echo "- return was:"
     echo "$RETURN"    

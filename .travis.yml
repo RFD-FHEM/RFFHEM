@@ -6,6 +6,8 @@ perl:
 env:
   global:
     secure: QZkNIahKdBIE/ANg04akx6MNgFItbLVSvGrR2By6rjHqrU9kllv862aVmcOjJw5/lcewEgRMgdK8ddhCKunW5HKpgW9CrkTi2GYVcmnJpw39ye7UnIIyOJM1N3YC+vWAaru+LJh8rHkXSfopKiiOjq9uTtfFCt+kngP7oIRKfPJ/7qdgKWvYpqKnqGoFoXghBWKe3V63xunILMkRVeTg+ogBOXbRy+3OU4WBIc4DsGdKOz+XkTecjLM9sdoyYLWUodLcmqwfCNGKWKwjVOaIe+859QtIoAEkclJtXunn6wYOeaumAJ+dILKZmOt4ORQxVYtVs+3W0eUl8+Z12xi6SGCenIQQGFHjxQgbjekXCiN56vf5LQUlxSEktjK67o9tq3+8VpgnPxqAgFOh4CvX4Ite3IT2+mPMegFOJavuyN/xOTuZgTe3sXDJzCfDBTQdBrb94ex/eZWZPn0M5Dkupiegh1CK6lJFVUwHpcJWb11SI2hzQRsGtPmlxDOfi48n23gVt7/bDeJS8rUlQoehF5fTVY1lMo4SZkB1Zs/ykm+NjPFg7h03j9E1msGFE/wQOZsN550GSxnpacZT9HandaxundiQHmVUfHHR54ieLxd3/xSTjqEpZcai21Oiq2ghmagGp8s+eRdNejMWLVWuHuWynFr72XU3LSXBW6YWyIc=
+git:
+  depth: false
 before_install:
  - git config --global user.email "travis@travis-ci.org"
  - git config --global user.name "Travis CI"
@@ -19,6 +21,7 @@ install:
  - sudo apt-get install fhem -y
  - chmod +x ./build_controls_list.sh 
  - git fetch --unshallow
+ - make
 script:
  - ./build_controls_list.sh 
  - git commit -m "Travis automatic update controls file. Build (${TRAVIS_BUILD_NUMBER})" ./controls_signalduino.txt || true
