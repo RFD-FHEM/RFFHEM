@@ -1,7 +1,7 @@
 #!/bin/bash
 echo "--------- Starting test $1 ---------"
 
-CMD=$(<test/$1-cmd.txt)
+CMD=$(<test/"$1"-cmd.txt)
 RETURN=$(perl /opt/fhem/fhem.pl 7072 "$CMD")
 
 echo "- Diff:"
