@@ -69,6 +69,9 @@ sub UnitTest_Notify($$)
     	UnitTest_Test_1($own_hash);
     	UnitTest_Test_2($own_hash);
     	
+    	InternalTimer(gettimeofday()+4, 'UnitTest_Test_3',$own_hash,0);       # verzoegern bis alle Attribute eingelesen sind
+    	
+    	
     }
     # Examples:
     # $event = "readingname: value" 
@@ -78,6 +81,11 @@ sub UnitTest_Notify($$)
     # processing $event with further code
   }
 }
+
+
+#
+# Verify if the given device is a signalduino and if it is opened
+#
 
 sub UnitTest_Test_1
 {
@@ -97,6 +105,10 @@ sub UnitTest_Test_1
 	
 }
 
+
+#
+# Verify if the SIGNALDuino_Shutdown sub writes the correct chars to the serial port
+#
 sub UnitTest_Test_2
 {
 	use Test::Device::SerialPort;
@@ -110,7 +122,6 @@ sub UnitTest_Test_2
     $PortObj->databits(8);
     $PortObj->stopbits(1);
 	$targetHash->{USBDev} = $PortObj;
-	#SIGNALDuino_Shutdown($targetHash);
 	CallFn($targetHash->{NAME}, "ShutdownFn", $targetHash);
 	
     is( $targetHash->{USBDev}->{_tx_buf}, "XQ\n", 'SIGNALDuino_Shutdown sends correct characters' );
@@ -118,6 +129,36 @@ sub UnitTest_Test_2
     #cleanup
     $targetHash->{USBDev} = undef;
 }
+
+#
+# Verify MS Decoder with NC_WS Data
+# DMSG s5C080FC32000
+# T: 25.2 H: 50
+
+sub UnitTest_Test_3
+{
+	my ($own_hash) = @_;
+	my $targetHash = $defs{$own_hash->{targetDevice}};
+
+	my $mock = Mock::Sub->new;
+ 	my $Dispatch = $mock->mock('Dispatch');
+	sleep 3;
+	my $rmsg="MS;P1=502;P2=-9212;P3=-1939;P4=-3669;D=12131413141414131313131313141313131313131314141414141413131313141413131413;CP=1;SP=2;";
+	my %signal_parts=SIGNALduino_Split_Message($rmsg,my $targetHash->{NAME});   ## Split message and save anything in an hash %signal_parts
+	
+	
+	$attr{$targetHash->{NAME}}{debug} = 1;
+	SIGNALduino_Parse_MS($targetHash, $targetHash, $targetHash->{NAME}, $rmsg,%signal_parts);
+	$attr{$targetHash->{NAME}}{debug} = 0;	
+	
+	is($Dispatch->called_count, 1, "Called Dispatch from parse MS");
+	
+	if ($Dispatch->called_count){		
+		my @called_args = $Dispatch->called_with;
+		is( @called_args[1], "s5C080FC32000", 'Parse_MS dispatched message for Module CUL_TCM_97001' );
+	}
+}
+
 
 sub UnitTest_mock_log3
 {
