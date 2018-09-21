@@ -11,9 +11,7 @@ use Test::More;
 use Data::Dumper qw(Dumper);
 
 
-# Variablen
-
-
+# Testdefinition
 
 # FHEM Modulfunktionen
 
@@ -135,28 +133,32 @@ sub UnitTest_Test_2
 # DMSG s5C080FC32000
 # T: 25.2 H: 50
 
+
 sub UnitTest_Test_3
 {
 	my ($own_hash) = @_;
 	my $targetHash = $defs{$own_hash->{targetDevice}};
-
-	my $mock = Mock::Sub->new;
- 	my $Dispatch = $mock->mock('Dispatch');
-	sleep 3;
-	my $rmsg="MS;P1=502;P2=-9212;P3=-1939;P4=-3669;D=12131413141414131313131313141313131313131314141414141413131313141413131413;CP=1;SP=2;";
-	my %signal_parts=SIGNALduino_Split_Message($rmsg,my $targetHash->{NAME});   ## Split message and save anything in an hash %signal_parts
 	
-	
-	$attr{$targetHash->{NAME}}{debug} = 1;
-	SIGNALduino_Parse_MS($targetHash, $targetHash, $targetHash->{NAME}, $rmsg,%signal_parts);
-	$attr{$targetHash->{NAME}}{debug} = 0;	
-	
-	is($Dispatch->called_count, 1, "Called Dispatch from parse MS");
+	my $Dispatch;
+   	my $mock;
+   	$mock = Mock::Sub->new; 
+    $Dispatch = $mock->mock('Dispatch');
+    
+        		
+    my $rmsg="MS;P1=502;P2=-9212;P3=-1939;P4=-3669;D=12131413141414131313131313141313131313131314141414141413131313141413131413;CP=1;SP=2;";
+	my %signal_parts=SIGNALduino_Split_Message($rmsg,$targetHash->{NAME});   ## Split message and save anything in an hash %signal_parts
+    #$attr{$targetHash->{NAME}}{debug} = 1;
+    SIGNALduino_Parse_MS($targetHash, $targetHash, $targetHash->{NAME}, $rmsg,%signal_parts);
+	#$attr{$targetHash->{NAME}}{debug} = 0;	
+    is($Dispatch->called_count, 1, "Called Dispatch from parse MS");
 	
 	if ($Dispatch->called_count){		
 		my @called_args = $Dispatch->called_with;
-		is( @called_args[1], "s5C080FC32000", 'Parse_MS dispatched message for Module CUL_TCM_97001' );
+		is( $called_args[1], "s5C080FC32000", 'Parse_MS dispatched message for Module CUL_TCM_97001' );
 	}
+	
+	
+	
 }
 
 
