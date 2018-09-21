@@ -7,7 +7,7 @@ use strict;
 use warnings;
 # Laden evtl. abhängiger Perl- bzw. FHEM-Module
 use Mock::Sub (no_warnings => 1);
-use Test::More;
+use Test::More tests => 5;
 use Data::Dumper qw(Dumper);
 
 
@@ -26,17 +26,26 @@ sub UnitTest_Initialize() {
 sub UnitTest_Define() {
 	my ( $hash, $def ) = @_;
    
-    my @param = split('[ \t]+', $def);
+    my ($name,$type,$target,$cmd) = split('[ \t]+', $def,4);
+
     
-    if(@param != 3) {
-        my $msg = "wrong syntax: define <name> UnitTest <name of target device>";
+	$cmd =~ s/\((.*)\)/$1/s;
+    $hash->{'.testcode'} = $cmd;
+
+
+    if (!$cmd) {
+        my $msg = "wrong syntax: define <name> UnitTest <name of target device> (Test Code in Perl)";
     	Log3 undef, 2, $msg;
     	return $msg;
     }
-    $hash->{name}  = $param[0];
-    $hash->{targetDevice}  = $param[2];
+    $hash->{name}  = $name;
+    $hash->{targetDevice}  = $target;
     
-    Log3 $param[0], 2, "Defined unittest for target: ".$hash->{targetDevice};
+    Log3 $name, 2, "Defined unittest for target: ".$hash->{targetDevice};
+	Log3 $name, 5, "Loaded this code ".$hash->{'.testcode'};
+	readingsSingleUpdate($hash, "state", "waiting", 1);
+		
+	
     
     return undef;
 
@@ -64,11 +73,11 @@ sub UnitTest_Notify($$)
     $event = "" if(!defined($event));
     if ($devName eq "global" && $event eq "INITIALIZED")
     {
-    	UnitTest_Test_1($own_hash);
-    	UnitTest_Test_2($own_hash);
+    	#UnitTest_Test_1($own_hash);
+    	#UnitTest_Test_2($own_hash);
     	
-    	InternalTimer(gettimeofday()+4, 'UnitTest_Test_3',$own_hash,0);       # verzoegern bis alle Attribute eingelesen sind
     	
+    	InternalTimer(gettimeofday()+4, 'UnitTest_Test_generic',$own_hash,0);       # verzoegern bis alle Attribute eingelesen sind, da das SIGNALduino Modul keinen Event erzeugt, wenn dies erfolgt ist
     	
     }
     # Examples:
@@ -81,9 +90,35 @@ sub UnitTest_Notify($$)
 }
 
 
+sub UnitTest_Test_generic
+{
+	
+	# Define some generic vars for our Test
+	my $hash = shift;
+	my $name = $hash->{NAME};
+	my $target = $hash->{targetDevice};
+	my $targetHash = $defs{$target};
+	
+	# Redirect Test Output to internals
+	Test::More->builder->output(\$hash->{test_output});
+	Test::More->builder->failure_output(\$hash->{test_failure});
+	Test::More->builder->todo_output(\$hash->{todo_output});
+	
+	Log3 $name, 5, "Running now this code ".$hash->{'.testcode'};
+	
+	readingsSingleUpdate($hash, "state", "running", 1);
+	my $ret =eval $hash->{'.testcode'};
+	if ($@) {
+		Log3 $name, 5, "return from eval was ".$ret." with error $@";
+	}
+	
+	readingsSingleUpdate($hash, "state", "finished", 1);
+}
+
 #
 # Verify if the given device is a signalduino and if it is opened
 #
+
 
 sub UnitTest_Test_1
 {
@@ -147,17 +182,13 @@ sub UnitTest_Test_3
         		
     my $rmsg="MS;P1=502;P2=-9212;P3=-1939;P4=-3669;D=12131413141414131313131313141313131313131314141414141413131313141413131413;CP=1;SP=2;";
 	my %signal_parts=SIGNALduino_Split_Message($rmsg,$targetHash->{NAME});   ## Split message and save anything in an hash %signal_parts
-    #$attr{$targetHash->{NAME}}{debug} = 1;
     SIGNALduino_Parse_MS($targetHash, $targetHash, $targetHash->{NAME}, $rmsg,%signal_parts);
-	#$attr{$targetHash->{NAME}}{debug} = 0;	
     is($Dispatch->called_count, 1, "Called Dispatch from parse MS");
 	
 	if ($Dispatch->called_count){		
 		my @called_args = $Dispatch->called_with;
 		is( $called_args[1], "s5C080FC32000", 'Parse_MS dispatched message for Module CUL_TCM_97001' );
 	}
-	
-	
 	
 }
 
@@ -196,11 +227,32 @@ sub UnitTest_mock_log3
 =item summary_DE Hilfsmodul was es ermöglicht unit test auszuführen
 
 =begin html
- Englische Commandref in HTML
+ <a name="UnitTest"></a>
+ <h3>UnitTest</h3>
+  
+  The Module runs perl code (unit tests) which is specified in the definition. The code which is in braces will be evaluated<br>
+  <a name="UnitTestdefine"></a>
+  <b>Define</b><br>
+ 
+  Syntax  define <nameOfThisDefinition> UnitTest <Which device is under test> ( { PERL CODE GOES HERE }  )<br>
+  <code>define test1 UnitTest dummyDuino \<br>
+(\
+  { \
+	Log3 undef, 2, "this is a Log Message inside our Test";;
+  }\
+)
+  </code><br><br>
+  <a name="UnitTestinternals"></a>
+  <b>Internals</b>
+  <ul>
+   <li> test_failure - Failures from our unittest will go in here
+   <li> test_output - ok / nok Messages will be visible here
+   <li> todo_output - diagnostics output of a todo test
+  </ul>
 =end html
 
 =begin html_DE
- Deustche Commandref in HTML
+ Siehe englische Commandref
 =end html
 
 # Ende der Commandref
