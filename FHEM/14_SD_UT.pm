@@ -7,8 +7,10 @@
 # - unitec Modul alte Variante bis 20180901 (Typ unitec-Sound) --> keine MU MSG!
 # - unitec Funkfernschalterset (Typ uniTEC_48110) ??? EIM-826 Funksteckdosen --> keine MU MSG!
 ####################################################################################################################################
-# - unitec remote door reed switch 47031 (Typ Unitec_47031) [Protocol 30] (sync -30)
+# - unitec remote door reed switch 47031 (Typ Unitec_47031) [Protocol 30] (sync -30)  (1 = on | 0 = off)
 #     FORUM: https://forum.fhem.de/index.php/topic,43346.msg353144.html#msg353144
+#     8 DIP-switches for deviceCode (1-8) | 3 DIP-switches for zone (9-11) | 1 DIP-switch unknown (12) | baugleich FRIEDLAND SU4F zwecks gleichem Platinenlayout + Jumper
+#     Kopplung an Unitec 47121 (Zone 1-6) | Unitec 47125 (Zone 1-2) | Friedland (Zone 1)
 #     Adresse: 95 - öffnen?
 #     get sduino_dummy raw MU;;P0=309;;P1=636;;P2=-690;;P3=-363;;P4=-10027;;D=012031203120402031312031203120312031204020313120312031203120312040203131203120312031203120402031312031203120312031204020313120312031203120312040203131203120312031203120402031312031203120312031204020313120312031203120312040203131203120312030;;CP=0;;O;;
 #     Adresse: 00 - Gehäuse geöffnet?
@@ -129,6 +131,7 @@ sub SD_UT_Define($$) {
 	$attr{$name}{room}	= "SD_UT"	if( not defined( $attr{$name}{room} ) );
 	
 	AssignIoPort($hash, $iodevice);
+	
 }
 
 ###################################
@@ -284,7 +287,7 @@ sub SD_UT_Parse($$) {
 	my $bitData = unpack("B$blen", pack("H$hlen", $rawData));
 	my $model = "unknown";
 	my $SensorTyp;
-	Log3 $iohash, 3, "$ioname: SD_UT protocol $protocol, bitData $bitData";
+	Log3 $iohash, 4, "$ioname: SD_UT protocol $protocol, bitData $bitData";
 	if (!defined($model)) {
 		Log3 $iohash, 4, "$ioname: SD_UT unknown model, please report ($rawData)";  
 		return "";
@@ -292,6 +295,9 @@ sub SD_UT_Parse($$) {
 	my $bin;
 	my $def;
 	my $deviceCode;
+	my $zone;		# Unitec_47031
+	my $subzone;	# Unitec_47031
+	my $system;		# Unitec_47031
 	my $devicedef;
 	my $state;
 	
@@ -377,7 +383,7 @@ sub SD_UT_Parse($$) {
 		$hash->{lastReceive} = time();
 		$hash->{lastMSG} = $rawData;
 		$hash->{bitMSG} = $bitData;
-	############ Westinghouse_Delancey RH787T ############ Protocol 83 oder 30 ############
+	############ Westinghouse_Delancey RH787T ############ Protocol 83 or 30 ############
 	} elsif (AttrVal($name, "model", "unknown") eq "RH787T" && ($protocol == 83 || $protocol == 30)) {
 		$model = AttrVal($name, "model", "unknown");
 		$state = substr($bitData,6,6);
@@ -426,7 +432,7 @@ sub SD_UT_Parse($$) {
 		
 		#$state.= " | ".TimeNow();
 
-	############ Westinghouse Buttons_five ############ Protocol 29 oder 30 ############
+	############ Westinghouse Buttons_five ############ Protocol 29 or 30 ############
 	} elsif (AttrVal($name, "model", "unknown") eq "Buttons_five" && ($protocol == 29 || $protocol == 30)) {
 		$model = AttrVal($name, "model", "unknown");
 		$state = substr($bitData,0,6);
@@ -465,15 +471,58 @@ sub SD_UT_Parse($$) {
 		
 		#$state.= " | ".TimeNow();
 		
-	############ Unitec_47031 ############ Protocol 30 ############
-	} elsif (AttrVal($name, "model", "unknown") eq "Unitec_47031" && $protocol == 30) {
+	############ Unitec_47031 ############ Protocol 30 or 83 ############
+	} elsif (AttrVal($name, "model", "unknown") eq "Unitec_47031" && ($protocol == 30 || $protocol == 83)) {
 		$model = AttrVal($name, "model", "unknown");
-		$state = "new MSG | ".TimeNow();
-		$bin = substr($bitData,0,8);
-		#$state = substr($bitData,8,4);
-		$deviceCode = sprintf('%02X', oct("0b$bin"));
-		Log3 $name, 3, "$ioname: $model devicecode=$deviceCode state=$state ($rawData)";
-	############ SA_434_1_mini ############ Protocol xx ############
+		#$state = "new MSG | ".TimeNow();
+		$state = substr($bitData,11,1);		# muss noch 100% verifiziert werden !!!
+
+		## deviceCode conversion for User in ON or OFF ##
+		$deviceCode = substr($bitData,0,8);		
+		my $deviceCodeUser = $deviceCode;
+		$deviceCodeUser =~ s/1/on|/g;
+		$deviceCodeUser =~ s/0/off|/g;
+		$deviceCodeUser = substr($deviceCodeUser, 0 , length($deviceCodeUser)-1);
+		$deviceCode = $deviceCode." ($deviceCodeUser)";
+		
+		## zone conversion for User in ON or OFF ##
+		$zone = substr($bitData,8,3);
+		my $zoneUser = $zone;
+		$zoneUser =~ s/1/on|/g;
+		$zoneUser =~ s/0/off|/g;
+		$zoneUser = substr($zoneUser, 0 , length($zoneUser)-1);
+		
+		if ($zone eq "000") {			# Anmeldung an Profi-Alarmanzentrale 47121
+			$subzone = "1";
+			$system = "Unitec 47121";
+		} elsif ($zone eq "001") {		# Anmeldung an Profi-Alarmanzentrale 47121
+			$subzone = "2";
+			$system = "Unitec 47121";
+		}  elsif ($zone eq "010") {		# Anmeldung an Profi-Alarmanzentrale 47121
+			$subzone = "3";
+			$system = "Unitec 47121";
+		} elsif ($zone eq "011") {		# Anmeldung an Profi-Alarmanzentrale 47121
+			$subzone = "4";
+			$system = "Unitec 47121";
+		} elsif ($zone eq "100") {		# Anmeldung an Profi-Alarmanzentrale 47121
+			$subzone = "5";
+			$system = "Unitec 47121";
+		} elsif ($zone eq "101") {		# Anmeldung an Profi-Alarmanzentrale 47121
+			$subzone = "6";
+			$system = "Unitec 47121";
+		}  elsif ($zone eq "110") {		# Anmeldung an Basis-Alarmanzentrale 47125 | Sirenen-System (z.B. ein System ohne separate Funk-Zentrale)
+			$subzone = "1";
+			$system = "Unitec 47125 or Friedland";
+		}  elsif ($zone eq "111") {		# Anmeldung an Basis-Alarmanzentrale 47125
+			$subzone = "2";
+			$system = "Unitec 47125";
+		}
+
+		$zone = $zone." ($zoneUser) - Zone $subzone";
+
+		
+		Log3 $name, 3, "$ioname: $model Systemcode=$deviceCode Zone=$zone state=$state ($rawData)";
+	############ SA_434_1_mini ############ Protocol 81 ############
 	} elsif (AttrVal($name, "model", "unknown") eq "SA_434_1_mini" && $protocol == 81) {
 		$model = AttrVal($name, "model", "unknown");
 		$state = "receive";
@@ -487,12 +536,15 @@ sub SD_UT_Parse($$) {
 	} else {
 		readingsSingleUpdate($hash, "state", "???", 0);
 		readingsSingleUpdate($hash, "unknownMSG", $bitData."  (protocol: ".$protocol.")", 1);
-		Log3 $name, 3, "$ioname: SD_UT Please define your model of Device $name in Attributes!";
+		Log3 $name, 3, "$ioname: SD_UT Please define your model of Device $name in Attributes!" if (AttrVal($name, "model", "unknown") eq "unknown");
 		Log3 $name, 4, "$ioname: SD_UT_Parse Protocol: $protocol, rawData=$rawData, bitData=$bitData, model=$model";
 	}
 
 	readingsBeginUpdate($hash);
-	readingsBulkUpdate($hash, "deviceCode", $deviceCode, 0)  if (defined($deviceCode));
+	readingsBulkUpdate($hash, "deviceCode", $deviceCode, 0)  if (defined($deviceCode) && $model eq "Buttons_five" || $model eq "RH787T" );
+	readingsBulkUpdate($hash, "Systemcode", $deviceCode, 0)  if (defined($deviceCode) && $model eq "Unitec_47031");
+	readingsBulkUpdate($hash, "Zone", $zone, 0)  if (defined($zone) && $model eq "Unitec_47031");
+	readingsBulkUpdate($hash, "Usersystem", $system, 0)  if (defined($system) && $model eq "Unitec_47031");
 	readingsBulkUpdate($hash, "LastAction", "receive", 0)  if (defined($state) && $model eq "RH787T");
 	readingsBulkUpdate($hash, "state", $state)  if (defined($state) && $state ne "unknown");	# state ne "unknown" because protocol without checksum
 	readingsEndUpdate($hash, 1); 		# Notify is done by Dispatch
@@ -649,7 +701,7 @@ sub SD_UT_binaryToNumber {
 	 <u>The following devices are supported:</u><br>
 	 <ul> - Remote control SA-434-1 mini 923301&nbsp;&nbsp;&nbsp;<small>(module model: SA_434_1_mini | protocol 81)</small></ul>
 	 <ul> - unitec Sound (Ursprungsmodul)&nbsp;&nbsp;&nbsp;<small>(module model: Unitec_other | protocol 30)</small></ul>
-	 <ul> - unitec remote door reed switch 47031 (prepared)&nbsp;&nbsp;&nbsp;<small>(module model: Unitec_47031 | protocol 30)</small></ul>
+	 <ul> - unitec remote door reed switch 47031 (Unitec 47121 | Unitec 47125 | Friedland)&nbsp;&nbsp;&nbsp;<small>(module model: Unitec_47031 | protocol 30)</small></ul>
 	 <ul> - VTX-BELL_Funkklingel&nbsp;&nbsp;&nbsp;<small>(module model: VTX-BELL | protocol 79)</small></ul>
 	 <ul> - Westinghouse Delancey ceiling fan (remote, 5 buttons without SET)&nbsp;&nbsp;&nbsp;<small>(module model: Buttons_five | protocol 29)</small></ul>
 	 <ul> - Westinghouse Delancey ceiling fan (remote, 9 buttons with SET)&nbsp;&nbsp;&nbsp;<small>(module model: RH787T | protocol 83)</small></ul>
@@ -659,7 +711,7 @@ sub SD_UT_binaryToNumber {
 	<u>examples:</u>
 		<ul>
 		define &lt;NAME&gt; SD_UT Unitec_other 6FF<br>
-		define &lt;NAME&gt; SD_UT RH787T AB5<br>
+		define &lt;NAME&gt; SD_UT RH787T A<br>
 		define &lt;NAME&gt; SD_UT SA_434_1_mini ffd<br>
 		define &lt;NAME&gt; SD_UT unknown<br>
 		</ul>	</ul><br><br>
@@ -708,7 +760,7 @@ sub SD_UT_binaryToNumber {
 	 <u>Es werden bisher folgende Ger&auml;te unterst&uuml;tzt:</u><br>
 	 <ul> - Remote control SA-434-1 mini 923301&nbsp;&nbsp;&nbsp;<small>(Modulmodel: SA_434_1_mini | Protokoll 81)</small></ul>
 	 <ul> - unitec Sound (Ursprungsmodul)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Unitec_other | Protokoll 30)</small></ul>
-	 <ul> - unitec remote door reed switch 47031 (vorbereitet)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Unitec_47031 | Protokoll 30)</small></ul>
+	 <ul> - unitec remote door reed switch 47031 (Unitec 47121 | Unitec 47125 | Friedland)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Unitec_47031 | Protokoll 30)</small></ul>
 	 <ul> - VTX-BELL_Funkklingel&nbsp;&nbsp;&nbsp;<small>(Modulmodel: VTX-BELL | Protokoll 79)</small></ul>
 	 <ul> - Westinghouse Deckenventilator (Fernbedienung, 5 Tasten ohne SET)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Buttons_five | Protokoll 29)</small></ul>
 	 <ul> - Westinghouse Delancey Deckenventilator (Fernbedienung, 9 Tasten mit SET)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: RH787T | Protokoll 83)</small></ul>
@@ -718,7 +770,7 @@ sub SD_UT_binaryToNumber {
 	<u>Beispiele:</u>
 		<ul>
 		define &lt;NAME&gt; SD_UT Unitec_other 6FF<br>
-		define &lt;NAME&gt; SD_UT RH787T AB5<br>
+		define &lt;NAME&gt; SD_UT RH787T A<br>
 		define &lt;NAME&gt; SD_UT SA_434_1_mini ffd<br>
 		define &lt;NAME&gt; SD_UT unknown<br>
 		</ul></ul><br><br>
