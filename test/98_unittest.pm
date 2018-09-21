@@ -113,6 +113,10 @@ sub UnitTest_Test_generic
 	}
 	
 	readingsSingleUpdate($hash, "state", "finished", 1);
+	readingsSingleUpdate($hash, "test_output", $hash->{test_output} , 1);
+	readingsSingleUpdate($hash, "test_failure", $hash->{test_failure} , 1);
+	readingsSingleUpdate($hash, "todo_output", $hash->{todo_output} , 1);
+	
 }
 
 #
