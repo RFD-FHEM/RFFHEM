@@ -1,3 +1,47 @@
+################################################################################
+# The file is part of the SIGNALduino project
+#
+# !!! useful hints !!!
+# --------------------
+# name        => ' '       # name of device or group of all devices
+# comment     => ' '       # exact description or example of devices
+# id          => ' '       # number of the protocol definition, each number only once use ((accepted no .)
+# one         => [ , ]     # value pair for a one bit, must be always a positive and negative factor of clockabs (accepted . | example 1.5)
+# zero        => [ , ]     # value pair for a zero bit, must be always a positive and negative factor of clockabs (accepted . | example -1.5)
+# clockabs    => ' '       # value pulse / pause times
+# clockabs    => '-1'      # value pulse / pause times is automatically
+# clockrange  => [ , ]     # min , max of pulse / pause times
+# start       => [ , ]     # value pair for start message
+# sync        => [ , ]     # value pair for sync pulse of signal
+# length_min               # minimum length of bits of the message
+# length_max               # maximum length of bits of the message
+#
+# developId   => 'm'       # the implementation module is under development
+# developId   => 'p'       # protocol is under development or to reserve IDs, the log in the development attribute with developId => 'p' are only used without the other entries
+# developId   => 'y'       # protocol is under development, all logs in the development attribute with developId => 'y' are used
+#
+# preamble    => ' '       # prepend to converted message
+# preamble    => 'u..'     # message is unknown and without module, forwarding SIGNALduino_un or FHEM DOIF
+# preamble    => 'U..'     # message can be unknown and without module, no forwarding SIGNALduino_un but forwarding can FHEM DOIF
+#
+# clientmodule => ' '      # FHEM module for processing
+# filterfunc  => ' '       # SIGNALduino_filterSign | SIGNALduino_compPattern --> SIGNALduino internal filter function, it remove the sign from the pattern, and compress message and pattern
+#                          # SIGNALduino_filterMC --> SIGNALduino internal filter function, it will decode MU data via Manchester encoding
+# float       => [ , ]     # Convert 0F -> 01 (F) to be compatible with CUL
+# format      => ' '       # twostate | pwm | manchester --> modulation type of the signal, only manchester use SIGNALduino internal, other types only comment
+# method      => \&        # call to process this message
+# modulematch => ' '       # RegEx on the exact message including preamble
+# paddingbits => ' '       # default is 4, pad up to x bits
+# paddingbits => '1'       # will disable padding
+# polarity    => 'invert'  # invert bits of the signal
+# postamble   => ' '       # ???
+# postDemodulation => \&   # SIGNALduino internal sub for processing in front of the module
+# remove_zero => 1         # removes leading zeros from output
+#
+#####################################################################################
+# !!!! please, documentation minimum one MU / MC / MS message at new protocols !!!! #
+#####################################################################################
+
 (
     "0"    => 
 				# MS;P1=-2009;P2=486;P3=-9058;P4=-4037;D=23212121242121212421242421242421212424242424212124212121212121212121212124;CP=2;SP=3;R=67;m=2;
@@ -71,15 +115,15 @@
 			#length_max      => '800',		# Don't know maximal lenth of a valid message
 
 			},
-    "3.1"    => 	# MS;P0=-11440;P1=-1121;P2=-416;P5=309;P6=1017;D=150516251515162516251625162516251515151516251625151;CP=5;SP=0;R=66;
-			# MS;P1=309;P2=-1130;P3=1011;P4=-429;P5=-11466;D=15123412121234123412141214121412141212123412341234;CP=1;SP=5;R=38;  Gruppentaste, siehe Kommentar in sub SIGNALduino_bit2itv1
+    "3.1"    => # MS;P0=-11440;P1=-1121;P2=-416;P5=309;P6=1017;D=150516251515162516251625162516251515151516251625151;CP=5;SP=0;R=66;
+			    # MS;P1=309;P2=-1130;P3=1011;P4=-429;P5=-11466;D=15123412121234123412141214121412141212123412341234;CP=1;SP=5;R=38;  Gruppentaste, siehe Kommentar in sub SIGNALduino_bit2itv1
         {
             name			=> 'itv1_sync40',	
-			comment		=> 'IT remote Control PAR 1000',
+			comment         => 'IT remote Control PAR 1000, ITS-150',
 			id          	=> '3',
-			one			=> [3,-1],
+			one             => [3,-1],
 			zero			=> [1,-3],
-			float			=> [1,-1],	# siehe Kommentar in sub SIGNALduino_bit2itv1
+			float			=> [1,-1],	# fuer Gruppentaste (nur bei ITS-150,ITR-3500 und ITR-300), siehe Kommentar in sub SIGNALduino_bit2itv1
 			sync			=> [1,-40],
 			clockabs     	=> -1,	# -1=auto	
 			format 			=> 'twostate',	# not used now
@@ -627,6 +671,7 @@
     # sensor id=62, channel=1, temp=21.1, hum=76, bat=ok
     	{   
        		name			=> 'weather33',		
+			comment         => 's014/TFA 30.3200/TCM/Conrad',
 			id          	=> '33',
 			one				=> [1,-8],
 			zero			=> [1,-4],
@@ -1399,7 +1444,7 @@
 	"77" => ##  https://github.com/juergs/NANO_DS1820_4Fach		
 		{
 			name			=> 'NANO_DS1820_4Fach',
-			comment			=> 'Seltbau Sensor',
+			comment			=> 'Selbstbau Sensor',
 			id				=> '77',
 			developId		=> 'y', 
 			zero			=> [4,-6], 		#
