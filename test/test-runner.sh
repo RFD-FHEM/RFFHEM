@@ -2,10 +2,18 @@
 
 # Return 0 when test run is okay
 # Return 1 when there was an test error
+# Return 255 if fhem.pl was not found
 
 
-#FHEM_SCRIPT = "/opt/fhem/fhem.pl"
-FHEM_SCRIPT='./fhem.pl'
+FHEM_SCRIPT="/opt/fhem/fhem.pl"
+if [ ! -f $FHEM_SCRIPT ]; then
+	FHEM_SCRIPT="./fhem.pl"
+	if [ ! -f $FHEM_SCRIPT ]; then
+		exit 255
+	fi
+fi
+#printf "Script %s\n" $FHEM_SCRIPT
+
 IFS=
 # Start the fhem instance with a test config file
 #perl $FHEM_SCRIPT fhemtest.cfg
