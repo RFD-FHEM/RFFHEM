@@ -7,11 +7,9 @@ use strict;
 use warnings;
 # Laden evtl. abhängiger Perl- bzw. FHEM-Module
 use Mock::Sub (no_warnings => 1);
-use Test::More tests => 5;
+use Test::More;
 use Data::Dumper qw(Dumper);
 
-
-# Testdefinition
 
 # FHEM Modulfunktionen
 
@@ -49,7 +47,9 @@ sub UnitTest_Define() {
 	if  ($init_done) {
 	   	InternalTimer(gettimeofday()+1, 'UnitTest_Test_generic',$hash,0);       
 	}   	
-    
+    $hash->{test_output}="";
+    $hash->{test_failure}="";
+    $hash->{todo_output}="";
     return undef;
 
 }
@@ -101,28 +101,59 @@ sub UnitTest_Test_generic
 	my $name = $hash->{NAME};
 	my $target = $hash->{targetDevice};
 	my $targetHash = $defs{$target};
+	Log3 $name, 3, "---- Test $name starts here ---->";
 	
 	# Redirect Test Output to internals
 	Test::More->builder->output(\$hash->{test_output});
 	Test::More->builder->failure_output(\$hash->{test_failure});
 	Test::More->builder->todo_output(\$hash->{todo_output});
 	
+	# Disable warnings for prototype mismatch
+	$SIG{__WARN__} = sub {CORE::say $_[0] if $_[0] !~ /Prototype/};
+	
 	Log3 $name, 5, "Running now this code ".$hash->{'.testcode'};
 	
 	readingsSingleUpdate($hash, "state", "running", 1);
-	my $ret =eval $hash->{'.testcode'};
+	my $ret ="";
+	$ret =eval $hash->{'.testcode'};
 	if ($@) {
 		Log3 $name, 5, "return from eval was ".$ret." with error $@";
 	}
+
+	# enable warnings for prototype mismatch
+	$SIG{__WARN__} = sub {CORE::say $_[0]};
 	
-	readingsSingleUpdate($hash, "state", "finished", 1);
-	readingsSingleUpdate($hash, "test_output", $hash->{test_output} , 1);
-	readingsSingleUpdate($hash, "test_failure", $hash->{test_failure} , 1);
-	readingsSingleUpdate($hash, "todo_output", $hash->{todo_output} , 1);
+	#$hash->{test_output} =~ tr{\n]{ };
+	#$hash->{test_output} =~ s{\n}{\\n}g;
+    
+    my @test_output_list = split "\n",$hash->{test_output};	
+    foreach my $logine(@test_output_list) {
+    		Log3 $name, 3, $logine;
+    	
+    }
+    my @test_failure_list = split "\n",$hash->{test_failure};	
+    foreach my $logine(@test_failure_list) {
+    		Log3 $name, 3, $logine;
+    }
+    my @test_todo_list = split "\n",$hash->{test_todo};	
+    foreach my $logine(@test_todo_list) {
+    		Log3 $name, 3, $logine;
+    }
 	
+	Log3 $name, 3, "<---- Test $name ends here ----";
+	
+	readingsBeginUpdate($hash);
+	readingsBulkUpdate($hash, "state", "finished", 1);
+	readingsBulkUpdate($hash, "test_output", "$hash->{test_output}" , 1);
+	readingsBulkUpdate($hash, "test_failure", $hash->{test_failure} , 1);
+	readingsBulkUpdate($hash, "todo_output", $hash->{todo_output} , 1);
+	readingsEndUpdate($hash,1);
+
+
 }
 
 #
+# Demo code yust demonstrating how test code is written
 # Verify if the given device is a signalduino and if it is opened
 #
 
