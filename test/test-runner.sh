@@ -29,9 +29,9 @@ do
 	fi
 	sleep 0
 	
-	if [ $a -eq "100" ]
+	if [ $a -gt "20" ]
 	then
-	  return 254
+	  exit 254
 	fi
 	a=$(($a+1))
 done
