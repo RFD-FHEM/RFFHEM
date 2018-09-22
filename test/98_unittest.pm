@@ -45,7 +45,10 @@ sub UnitTest_Define() {
 	Log3 $name, 5, "Loaded this code ".$hash->{'.testcode'};
 	readingsSingleUpdate($hash, "state", "waiting", 1);
 		
-	
+	## Test starten wenn Fhem bereits initialisiert wurde	
+	if  ($init_done) {
+	   	InternalTimer(gettimeofday()+1, 'UnitTest_Test_generic',$hash,0);       
+	}   	
     
     return undef;
 
