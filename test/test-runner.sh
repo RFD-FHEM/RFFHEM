@@ -2,6 +2,7 @@
 
 # Return 0 when test run is okay
 # Return 1 when there was an test error
+# Return 254 no connection to fhem process possible
 # Return 255 if fhem.pl was not found
 
 
@@ -17,8 +18,29 @@ fi
 IFS=
 # Start the fhem instance with a test config file
 #perl $FHEM_SCRIPT fhemtest.cfg
-RETURN=$(perl $FHEM_SCRIPT 7072 "reload 98_UnitTest")
-echo $RETURN
+a=0
+# Check if connection to fhem process is possible
+while  true 
+do 
+	perl $FHEM_SCRIPT 7072 \"LIST\" 
+	if [ $? -eq 0 ]
+	then
+		break
+	fi
+	sleep 0
+	
+	if [ $a -eq "100" ]
+	then
+	  return 254
+	fi
+	a=$(($a+1))
+done
+
+
+#RETURN=$(perl $FHEM_SCRIPT 7072 "reload 98_UnitTest")  # only for testing
+#echo $RETURN
+
+
 echo "--------- Starting test $1 ---------\n\n"
 
 # Load test definitions, and import them to our running instance
@@ -34,7 +56,7 @@ echo $RETURN
 #Wait until state of current test is finished
 #Todo prevent forever loop here
 CMD="{ReadingsVal(\"$1\",\"state\",\"\")}"
-until [ $(perl $FHEM_SCRIPT 7072 "$CMD") == "finished" ] ; do 
+until [ "$(perl $FHEM_SCRIPT 7072 "$CMD")" == "finished" ] ; do 
   sleep 1; 
 done
 
