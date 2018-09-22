@@ -6,19 +6,19 @@
 # name        => ' '       # name of device or group of all devices
 # comment     => ' '       # exact description or example of devices
 # id          => ' '       # number of the protocol definition, each number only once use ((accepted no .)
-# one         => [ , ]     # value pair for a one bit, must be always a positive and negative factor of clockabs (accepted . | example 1.5)
-# zero        => [ , ]     # value pair for a zero bit, must be always a positive and negative factor of clockabs (accepted . | example -1.5)
-# clockabs    => ' '       # value pulse / pause times
-# clockabs    => '-1'      # value pulse / pause times is automatically
-# clockrange  => [ , ]     # min , max of pulse / pause times
+# one         => [ , ]     # only MU signals | value pair for a one bit, must be always a positive and negative factor of clockabs (accepted . | example 1.5)
+# zero        => [ , ]     # only MU signals | value pair for a zero bit, must be always a positive and negative factor of clockabs (accepted . | example -1.5)
+# clockabs    => ' '       # only MU signals | value pulse / pause times
+# clockabs    => '-1'      # only MU signals | value pulse / pause times is automatically
+# clockrange  => [ , ]     # only MC signals | min , max of pulse / pause times
 # start       => [ , ]     # value pair for start message
 # sync        => [ , ]     # value pair for sync pulse of signal
 # length_min               # minimum length of bits of the message
 # length_max               # maximum length of bits of the message
 #
-# developId   => 'm'       # the implementation module is under development
-# developId   => 'p'       # protocol is under development or to reserve IDs, the log in the development attribute with developId => 'p' are only used without the other entries
-# developId   => 'y'       # protocol is under development, all logs in the development attribute with developId => 'y' are used
+# developId   => 'm'       # logical module is under development
+# developId   => 'p'       # protocol is under development or to reserve IDs, the ID in the development attribute with developId => 'p' are only used without the other entries
+# developId   => 'y'       # protocol is under development, all IDs in the development attribute with developId => 'y' are used
 #
 # preamble    => ' '       # prepend to converted message
 # preamble    => 'u..'     # message is unknown and without module, forwarding SIGNALduino_un or FHEM DOIF
@@ -33,8 +33,8 @@
 # modulematch => ' '       # RegEx on the exact message including preamble
 # paddingbits => ' '       # default is 4, pad up to x bits
 # paddingbits => '1'       # will disable padding
-# polarity    => 'invert'  # invert bits of the signal
-# postamble   => ' '       # ???
+# polarity    => 'invert'  # only MC signals | invert bits of the signal
+# postamble   => ' '       # hangs a string to the demodulated signal
 # postDemodulation => \&   # SIGNALduino internal sub for processing in front of the module
 # remove_zero => 1         # removes leading zeros from output
 #
