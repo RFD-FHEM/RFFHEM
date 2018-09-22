@@ -6,10 +6,10 @@
 # name        => ' '       # name of device or group of all devices
 # comment     => ' '       # exact description or example of devices
 # id          => ' '       # number of the protocol definition, each number only once use ((accepted no .)
-# one         => [ , ]     # only MU signals | value pair for a one bit, must be always a positive and negative factor of clockabs (accepted . | example 1.5)
-# zero        => [ , ]     # only MU signals | value pair for a zero bit, must be always a positive and negative factor of clockabs (accepted . | example -1.5)
-# clockabs    => ' '       # only MU signals | value pulse / pause times
-# clockabs    => '-1'      # only MU signals | value pulse / pause times is automatically
+# one         => [ , ]     # only MU + MS signals | value pair for a one bit, must be always a positive and negative factor of clockabs (accepted . | example 1.5)
+# zero        => [ , ]     # only MU + MS  signals | value pair for a zero bit, must be always a positive and negative factor of clockabs (accepted . | example -1.5)
+# clockabs    => ' '       # only MU + MS  signals | value pulse / pause times
+# clockabs    => '-1'      # only MU + MS  signals | value pulse / pause times is automatically
 # clockrange  => [ , ]     # only MC signals | min , max of pulse / pause times
 # start       => [ , ]     # value pair for start message
 # sync        => [ , ]     # value pair for sync pulse of signal
