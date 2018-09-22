@@ -27,9 +27,9 @@ do
 	then
 		break
 	fi
-	sleep 0
+	sleep 3
 	
-	if [ $a -gt "20" ]
+	if [ $a -gt "100" ]  # Limit trys
 	then
 	  exit 254
 	fi
@@ -45,7 +45,7 @@ echo "--------- Starting test $1 ---------\n\n"
 
 # Load test definitions, and import them to our running instance
 
-CMD=$( sed '/{/,/}/s/;/;;/g' ../test/"$1"-definition.txt)
+CMD=$( sed '/{/,/}/s/;/;;/g' test/"$1"-definition.txt)
 #echo $CMD
 CMD=$(echo "$CMD" | awk 'BEGIN{RS="\n" ; ORS=" ";}{ print }' )
 #echo $CMD
