@@ -13,7 +13,6 @@ deploylocal: /opt/fhem/FHEM/00_SIGNALduino.pm 98_UnitTest.pm /opt/fhem/FHEM/90_S
 	TZ=Europe/Berlin 
 	cd /opt/fhem && perl -MDevel::Cover fhem.pl fhem.cfg && cd ${TRAVIS_BUILD_DIR}
 	
-
 test: deploylocal
 	@echo === running 00_SIGNALduino unit tests ===
 	test/unittest.sh 00-list-dummyduino

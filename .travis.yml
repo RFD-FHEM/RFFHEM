@@ -22,7 +22,6 @@ install:
  - sudo chown travis -R /opt/fhem
 script:
  - make test
- - sleep 5
  - ./build_controls_list.sh 
  - git commit -m "Travis automatic update controls file. Build (${TRAVIS_BUILD_NUMBER}) [skip ci]" ./controls_signalduino.txt || true
  - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ] && [[ $TRAVIS_JOB_NUMBER == *.1 ]]; then git push origin HEAD:$TRAVIS_BRANCH ; fi'
