@@ -9,7 +9,7 @@
 # one         => [ , ]     # only MU + MS signals | value pair for a one bit, must be always a positive and negative factor of clockabs (accepted . | example 1.5)
 # zero        => [ , ]     # only MU + MS  signals | value pair for a zero bit, must be always a positive and negative factor of clockabs (accepted . | example -1.5)
 # clockabs    => ' '       # only MU + MS  signals | value pulse / pause times
-# clockabs    => '-1'      # only MU + MS  signals | value pulse / pause times is automatically
+# clockabs    => '-1'      # only MS signals | value pulse / pause times is automatically
 # clockrange  => [ , ]     # only MC signals | min , max of pulse / pause times
 # start       => [ , ]     # value pair for start message
 # sync        => [ , ]     # value pair for sync pulse of signal
@@ -27,12 +27,13 @@
 # clientmodule => ' '      # FHEM module for processing
 # filterfunc  => ' '       # SIGNALduino_filterSign | SIGNALduino_compPattern --> SIGNALduino internal filter function, it remove the sign from the pattern, and compress message and pattern
 #                          # SIGNALduino_filterMC --> SIGNALduino internal filter function, it will decode MU data via Manchester encoding
-# float       => [ , ]     # Convert 0F -> 01 (F) to be compatible with CUL
+# float       => [ , ]     # only MU + MS  signals | Convert 0F -> 01 (F) to be compatible with CUL
 # format      => ' '       # twostate | pwm | manchester --> modulation type of the signal, only manchester use SIGNALduino internal, other types only comment
 # method      => \&        # call to process this message
 # modulematch => ' '       # RegEx on the exact message including preamble
 # paddingbits => ' '       # default is 4, pad up to x bits
 # paddingbits => '1'       # will disable padding
+# pause       => [ ]       # value, pause when sending between two signals
 # polarity    => 'invert'  # only MC signals | invert bits of the signal
 # postamble   => ' '       # hangs a string to the demodulated signal
 # postDemodulation => \&   # SIGNALduino internal sub for processing in front of the module
