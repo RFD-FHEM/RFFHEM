@@ -15,8 +15,10 @@ before_install:
  - git remote set-url origin https://${GH_API_KEY}@github.com/RFD-FHEM/RFFHEM.git
  - wget -qO - http://debian.fhem.de/archive.key | sudo apt-key add -
  - echo "deb http://debian.fhem.de/nightly/ /" | sudo tee -a /etc/apt/sources.list
+ - cpanm File::Find File::Basename Mock::Sub Test::More Test::Device::SerialPort
+
 install:
- - cpanm File::Find File::Basename Mock::Sub Test::More Test::Device::SerialPort --quiet --installdeps --notest
+ - cpanm -v --installdeps --notest .
  - sudo apt-get update -qq
  - sudo apt-get install fhem -y
  - chmod +x ./build_controls_list.sh 
@@ -25,4 +27,4 @@ script:
  - sleep 5
  - ./build_controls_list.sh 
  - git commit -m "Travis automatic update controls file. Build (${TRAVIS_BUILD_NUMBER}) [skip ci]" ./controls_signalduino.txt || true
- - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ] && [[ $TRAVIS_JOB_NUMBER == *.1 ]]; then git push origin HEAD:$TRAVIS_BRANCH ; fi'
+ - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ] && [[ $TRAVIS_JOB_NUMBER == *.1 ]]; then git push origin HEAD:$TRAVIS_BRANCH ; fi
