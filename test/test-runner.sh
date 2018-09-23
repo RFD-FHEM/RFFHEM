@@ -22,8 +22,8 @@ a=0
 # Check if connection to fhem process is possible
 while  true 
 do 
-	perl $FHEM_SCRIPT 7072 \"LIST\" 
-	if [ $? -eq 0 ]
+	
+	if perl $FHEM_SCRIPT 7072 \"LIST\" 
 	then
 		break
 	fi
@@ -40,8 +40,7 @@ done
 RETURN=$(perl $FHEM_SCRIPT 7072 "reload 98_UnitTest")  # only for testing
 echo $RETURN
 
-
-echo "--------- Starting test $1 ---------\n\n"
+printf "\n\n--------- Starting test %s: ---------\n" $1 
 
 # Load test definitions, and import them to our running instance
 
@@ -76,8 +75,7 @@ testlog=$(awk '/Test '"$1"' starts here ---->/,/<---- Test '"$1"' ends here/' /o
 
 #echo $testlog
 
-echo "Output of $1:\n\n"
-echo $OUTPUT
+printf "Output of %s:\n\n%s" $1 $OUTPUT
 
 if [ -z "$OUTPUT_FAILED" ]
 then
