@@ -15,7 +15,6 @@ before_install:
  - git remote set-url origin https://${GH_API_KEY}@github.com/RFD-FHEM/RFFHEM.git
  - wget -qO - http://debian.fhem.de/archive.key | sudo apt-key add -
  - echo "deb http://debian.fhem.de/nightly/ /" | sudo tee -a /etc/apt/sources.list
- - cpanm 
 install:
  - cpanm File::Find File::Basename Mock::Sub Test::More Test::Device::SerialPort --installdeps --notest 
  - sudo apt-get update -qq
