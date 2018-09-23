@@ -1,10 +1,10 @@
 ##############################################
 # $Id: 90_SIGNALduino_un.pm 15479 2018-01-24 20:00:00 dev-r33 $
+#
 # The file is part of the SIGNALduino project
-# see http://www.fhemwiki.de/wiki/SIGNALduino
-# to support debugging of unknown signal data
+# see http://www.fhemwiki.de/wiki/SIGNALduino to support debugging of unknown signal data
 # The purpos is to use it as addition to the SIGNALduino
-# S. Butzek, 2015
+# S. Butzek, 2015 | HomeAuto_User & elektron-bbs - 2018
 #
 
 package main;
@@ -12,6 +12,7 @@ package main;
 use strict;
 use warnings;
 use POSIX;
+use List::Util qw(any);		# for any function
 
 #####################################
 sub
@@ -20,14 +21,14 @@ SIGNALduino_un_Initialize($)
   my ($hash) = @_;
 
 
-  $hash->{Match}     = '^[uP]\d+#.*';
+  $hash->{Match}     = '^[u]\d+#.*';
   $hash->{DefFn}     = "SIGNALduino_un_Define";
   $hash->{UndefFn}   = "SIGNALduino_un_Undef";
   $hash->{AttrFn}    = "SIGNALduino_un_Attr";
+  $hash->{SetFn}     = "SIGNALduino_un_Set";
   $hash->{ParseFn}   = "SIGNALduino_un_Parse";
-  $hash->{AttrList}  = "IODev do_not_notify:0,1 showtime:0,1 ignore:0,1 ".$readingFnAttributes;
+  $hash->{AttrList}  = "IODev do_not_notify:0,1 stateFormat showtime:0,1 ignore:0,1 ".$readingFnAttributes;
 }
-
 
 #####################################
 sub
@@ -36,20 +37,25 @@ SIGNALduino_un_Define($$)
   my ($hash, $def) = @_;
   my @a = split("[ \t][ \t]*", $def);
 
-  return "wrong syntax: define <name> SIGNALduino_un <code> <minsecs> <equalmsg>".int(@a)
-		if(int(@a) < 3 || int(@a) > 5);
+  return " wrong syntax: define <name> SIGNALduino_un <code> <optional IODEV> (".int(@a).")" if(int(@a) < 3 || int(@a) > 4);
 
-  $hash->{CODE}    = $a[2];
-  $hash->{minsecs} = ((int(@a) > 3) ? $a[3] : 30);
-  $hash->{equalMSG} = ((int(@a) > 4) ? $a[4] : 0);
   $hash->{lastMSG} =  "";
   $hash->{bitMSG} =  "";
-
-  $modules{SIGNALduino_un}{defptr}{$a[2]} = $hash;
   $hash->{STATE} = "Defined";
-
-  AssignIoPort($hash);
-  return undef;
+  my $name = $hash->{NAME};
+  
+  my $iodevice = $a[3] if($a[3]);
+  $modules{SIGNALduino_un}{defptr}{$a[2]} = $hash;
+  
+  my $ioname = $modules{SIGNALduino_un}{defptr}{ioname} if (exists $modules{SIGNALduino_un}{defptr}{ioname} && not $iodevice);
+  $iodevice = $ioname if not $iodevice;
+  
+  ### Attributes ###
+  if ( $init_done == 1 ) {
+	$attr{$name}{stateFormat}	= "{ReadingsVal('$name', 'state', '').' | '.ReadingsTimestamp('$name', 'state', '-');}" if( not defined( $attr{$name}{stateformat} ) );
+  }
+  
+  AssignIoPort($hash, $iodevice);
 }
 
 #####################################
@@ -57,17 +63,18 @@ sub
 SIGNALduino_un_Undef($$)
 {
   my ($hash, $name) = @_;
-  delete($modules{SIGNALduino_un}{defptr}{$hash->{CODE}}) if($hash && $hash->{CODE});
+  delete($modules{SIGNALduino_un}{defptr}{$hash->{DEF}}) if($hash && $hash->{DEF});
+  delete($modules{SIGNALduino_un}{defptr}{ioname}) if (exists $modules{SIGNALduino_un}{defptr}{ioname});
   return undef;
 }
 
+#####################################
 sub SIGNALduino_un_hex2bin {
         my $h = shift;
         my $hlen = length($h);
         my $blen = $hlen * 4;
         return unpack("B$blen", pack("H$hlen", $h));
 }
-
 
 #####################################
 sub
@@ -76,6 +83,7 @@ SIGNALduino_un_Parse($$)
 	my ($hash,$msg) = @_;
 	my @a = split("", $msg);
 	my $name = "SIGNALduino_unknown";# $hash->{NAME};
+	my $ioname = $hash->{NAME};
 	Log3 $hash, 4, "$name incomming msg: $msg";
 	#my $rawData=substr($msg,2);
 
@@ -92,50 +100,7 @@ SIGNALduino_un_Parse($$)
 	my $bitData= unpack("B$blen", pack("H$hlen", $rawData)); 
 	Log3 $hash, 4, "$name converted to bits: $bitData";
 		
-	if ($protocol == "7" && length($bitData)>=36)  ## Unknown Proto 7 
-	{
-		
-		
-		## Try TX70DTH Decoding
-		my $SensorTyp = "TX70DTH";
-		my $channel = SIGNALduino_un_bin2dec(substr($bitData,9,3));
-		my $bin = substr($bitData,0,8);
-		my $id = sprintf('%X', oct("0b$bin"));
-		my $bat = int(substr($bitData,8,1)) eq "1" ? "ok" : "critical";
-		my $trend = "";
-		my $sendMode = "";
-		my $temp = SIGNALduino_un_bin2dec(substr($bitData,16,8));
-		if (substr($bitData,14,1) eq "1") {
-		  $temp = $temp - 1024;
-		}
-		$temp = $temp / 10;
-		my $hum = SIGNALduino_un_bin2dec(substr($bitData,29,7));
-		my $val = "T: $temp H: $hum B: $bat";
-		Log3 $hash, 4, "$name decoded protocolid: 7 ($SensorTyp) sensor id=$id, channel=$channel, temp=$temp, hum=$hum, bat=$bat\n" ;
-		
-
-		# Try Eurochron EAS 800
-		  #		        4	 8    12            24    28        36
-	      #          0011 0110 1010  000100000010  1111  00111000 0000         	Kanal 3, 25.8 Grad, 56%
-	      #          0011 0110 1010  000011110011  1111  00111000 0000     		Kanal 3, 24.3 Grad, 56%
-	      #          0011 0001 1001  000100001001  1111  00111101 0000		 	Kanal 2, 26.5 Grad, 61%
-	      #          0011 1000 1000  000100000011  1111  01000000 0000         	Kanal 1
-	      
-	      #                ID?  CHN       TMP        ??     HUM
-		$SensorTyp = "EAS800z";
-		$id = oct ("0b".substr($bitData,4,4));
-		$channel = SIGNALduino_un_bin2dec(substr($bitData,9,3))+1;
-		$temp = oct ("0b".substr($bitData,12,12))/10;
-		$bat = int(substr($bitData,8,1)) eq "1" ? "ok" : "critical";  # Eventuell falsch!
-		$hum = SIGNALduino_un_bin2dec(substr($bitData,28,8));
-		$sendMode = int(substr($bitData,4,1)) eq "1" ? "auto" : "manual";  # Eventuell falsch!
-		my $type = SIGNALduino_un_bin2dec(substr($bitData,0,4));
-		
-		Log3 $hash, 4, "$name decoded protocolid: 7 ($SensorTyp / type=$type) mode=$sendMode, sensor id=$id, channel=$channel, temp=$temp, hum=$hum, bat=$bat\n" ;
-		
-		
-
-	} elsif ($protocol == "6" && length($bitData)>=36)  ## Eurochron 
+	if ($protocol == "6" && length($bitData)>=36)  ## Eurochron 
 	{   
 
 		  # EuroChron / Tchibo
@@ -166,40 +131,7 @@ SIGNALduino_un_Parse($$)
 		my $val = "T: $temp H: $hum B: $bat";
 		Log3 $hash, 4, "$name decoded protocolid: 6  $SensorTyp, sensor id=$id, channel=$channel, temp=$temp\n" ;
 
-	} elsif ($protocol == "9" && length($bitData)>=70)  ## Unknown Proto 9 
-	{   #http://nupo-artworks.de/media/report.pdf
-		
-		my $syncpos= index($bitData,"11111110");  #7x1 1x0 preamble
-		
-		if ($syncpos ==-1 || length($bitData)-$syncpos < 68) 
-		{
-			Log3 $hash, 4, "$name  ctw600 not found, aborting";
-			return undef;
-		}
-		my $sensdata = substr($bitData,$syncpos+8);
-
-		my $bat = substr($sensdata,0,3);
-		my $id = substr($sensdata,4,6);
-		my $temp = substr($sensdata,12,10);
-		my $hum = substr($sensdata,22,8);
-		my $wind = substr($sensdata,30,16);
-		my $rain = substr($sensdata,46,16);
-		my $winddir = substr($sensdata,66,4);
-		
-		Log3 $hash, 4, "$name found ctw600 syncpos at $syncpos message is: $sensdata - sensor id:$id, bat:$bat, temp=$temp, hum=$hum, wind=$wind, rain=$rain, winddir=$winddir";
-
-	} elsif ($protocol == "13"  && length($bitData)>=14)  ## RF21 Protocol 
-	{  
-		#my $model=$a[3];
-		#my $deviceCode = $a[5].$a[6].$a[7].$a[8].$a[9];
-		#my  $Freq = $a[10].$a[11].$a[12].$a[13].$a[14];
-		my $deviceCode = substr($bitData,0,23);
-		my $unit= substr($bitData,23,1);
-		
-
-		Log3 $hash, 4, "$name found RF21 protocol. devicecode=$deviceCode, unit=$unit";
-	}
-	elsif ($protocol == "14" && length($bitData)>=12)  ## Heidman HX 
+	} elsif ($protocol == "14" && length($bitData)>=12)  ## Heidman HX 
 	{  
 
 		my $bin = substr($bitData,0,4);
@@ -216,28 +148,7 @@ SIGNALduino_un_Parse($$)
 
 		Log3 $hash, 4, "$name found TCM doorbell. devicecode=$deviceCode";
 
-	}
-	elsif ($protocol == "16" && length($bitData)>=36)  ##Rohrmotor24
-	{
-		Log3 $hash, 4, "$name / shutter Dooya $bitData received";
-		
-		Log3 $hash,4, substr($bitData,0,23)." ".substr($bitData,24,4)." ".substr($bitData,28,4)." ".substr($bitData,32,4)." ".substr($bitData,36,4);
-		my $id = SIGNALduino_un_binaryToNumber($bitData,0,23);
-		my $remote = SIGNALduino_un_binaryToNumber($bitData,24,27);
-		my $channel = SIGNALduino_un_binaryToNumber($bitData,28,31);
-		
-		my $all = ($channel == 0) ? "true" : "false";
- 	    my $commandcode = SIGNALduino_un_binaryToNumber($bitData,32,35);
- 	    my $direction="";
- 	    
- 	    if ($commandcode == 0b0001) {$direction="up";}
- 	    elsif ($commandcode == 0b0011) {$direction="down";}
-  	    elsif ($commandcode == 0b0101) {$direction="stop";}
-  	    elsif ($commandcode == 0b1100) {$direction="learn";}
-		else  { $direction="unknown";}
-		Log3 $hash, 4, "$name found shutter from Dooya. id=$id, remotetype=$remote,  channel=$channel, direction=$direction, all_shutters=$all";
-	} 
-	elsif ($protocol == "21" && length($bitData)>=32)  ##Einhell doorshutter
+	} elsif ($protocol == "21" && length($bitData)>=32)  ##Einhell doorshutter
 	{
 		Log3 $hash, 4, "$name / Einhell doorshutter received";
 		
@@ -281,18 +192,89 @@ SIGNALduino_un_Parse($$)
 		#Dispatch($hash, $tscode,undef);
 
 		
-	} else {
-		Log3 $hash, 4, $dummyreturnvalue;
-		
-		return undef;
-	}
+	}	
+	
+	##############################################################################################
+	# version 1) message with u..# without development y attribut -> Unknown code u..# , help me!
+	# version 2) message with u..# and development y attribut -> no message for Unknown code
+	##############################################################################################
+	
+	my $value = AttrVal($ioname, "development", "");
+	my @delevopmentargs = split (",",$value);
+	my $search = "y".$protocol;			# for version 2
+	my $search2 = "u".$protocol;		# for version 1
 
+	if ((any{ $search eq $_ }@delevopmentargs) || (any{ $search2 eq $_ }@delevopmentargs)) {
+		### Help Device + Logfile ###
+	
+		Log3 $hash, 5, "$name: $ioname Protocol $protocol ($search) found in AttrVal development!" if (any{ $search eq $_ }@delevopmentargs);
+		Log3 $hash, 5, "$name: $ioname Protocol $protocol ($search2) found in AttrVal development!" if (any{ $search2 eq $_ }@delevopmentargs);
+		
+		my $def;
+		my $devicedef = $name."_".$protocol;
+		$def = $modules{SIGNALduino_un}{defptr}{$devicedef} if(!$def);
+		$modules{SIGNALduino_un}{defptr}{ioname} = $ioname;
+		
+		if(!$def) {
+			Log3 $ioname, 1, "$ioname: $name UNDEFINED sensor " . $devicedef . " detected";
+			return "UNDEFINED $devicedef SIGNALduino_un $devicedef";
+		}
+	
+		my $hash = $def;
+		my $name = $hash->{NAME};
+		my $info = "$bitData; length:".length($bitData)."; hex:$rawData";	# log example, 2018-09-19_13:43:34 SIGNALduino_unknown_84 receive: 0000001100110101010000001111110110111100; length:40; hex:033540FDBC
+	
+		$hash->{lastMSG} = $rawData;
+		$hash->{bitMSG} =  $bitData;
+	
+		readingsBeginUpdate($hash);
+		readingsBulkUpdate($hash, "state", $rawData,0);
+		readingsBulkUpdate($hash, "receive", $info);
+		readingsEndUpdate($hash, 1); 		# Notify is done by Dispatch
+		
+		return $name;
+	} else {
+		### nothing - Info ###
+		my $value = AttrVal($ioname, "development", "");	# read attr development from IODev
+		
+		if ($value ne "") {
+			$value .= ","; 					# some definitions already exist, so prepend a new one
+		}
+        $value .= "u$protocol";		
+		Log3 $hash, 3, "$name $ioname Protocol:$protocol | To help decode or debug, please add u$protocol! (attr $ioname development $value)" if ($protocol);	# To help decode or debug, please add u84! (attr sduino_dummy development u84)
+	}
+	############################
+	
+	
 	Log3 $hash, 4, $dummyreturnvalue;
 	return undef;  
 }
 
+#####################################
+sub
+SIGNALduino_un_Set($$$@)
+{
+  my ( $hash, $name, @a ) = @_;
+  my $cmd = $a[0];
+  my $cmd2 = $a[1];
+  my $ret = "write";
 
+  if ($cmd ne "?") {
+		return "wrong argument! please use $ret argument and one comment." if($a[0] ne "write" || not $a[1]);
+		
+		readingsBeginUpdate($hash);
+		readingsBulkUpdate($hash, "state" , "UserMSG",0);
+		readingsBulkUpdate($hash, "UserMSG", $cmd2)  if (defined($cmd2));
+		readingsEndUpdate($hash, 1); 		# Notify is done by Dispatch
+		
+		return undef;						# undef because user is in same windows without message, better to use
+		#return "Thanks";
+  }
+  
+  return $ret;
+}
 
+#####################################
 sub
 SIGNALduino_un_Attr(@)
 {
@@ -303,15 +285,14 @@ SIGNALduino_un_Attr(@)
   return if($a[0] ne "set" || $a[2] ne "IODev");
   my $hash = $defs{$a[1]};
   my $iohash = $defs{$a[3]};
-  my $cde = $hash->{CODE};
-  delete($modules{SIGNALduino_un}{defptr}{$cde});
-  $modules{SIGNALduino_un}{defptr}{$iohash->{NAME} . "." . $cde} = $hash;
+  my $cde = $hash->{DEF};
+  
+  #delete($modules{SIGNALduino_un}{defptr}{$cde});
+  #$modules{SIGNALduino_un}{defptr}{$iohash->{NAME} . "." . $cde} = $hash;
   return undef;
 }
 
-
-# binary string,  fistbit #, lastbit #
-
+#####################################
 sub
 SIGNALduino_un_binaryToNumber
 {
@@ -325,14 +306,14 @@ SIGNALduino_un_binaryToNumber
 	
 }
 
-
+#####################################
 sub
 SIGNALduino_un_binaryToBoolean
 {
 	return int(SIGNALduino_un_binaryToNumber(@_));
 }
 
-
+#####################################
 sub
 SIGNALduino_un_bin2dec($)
 {
@@ -340,6 +321,8 @@ SIGNALduino_un_bin2dec($)
   my $int = unpack("N", pack("B32",substr("0" x 32 . $h, -32))); 
   return sprintf("%d", $int); 
 }
+
+#####################################
 sub
 SIGNALduino_un_binflip($)
 {
@@ -365,7 +348,9 @@ SIGNALduino_un_binflip($)
 <a name="SIGNALduino_un"></a>
 <h3>SIGNALduino_un</h3>
 <ul>
-  The SIGNALduino_un module is a testing and debugging module to decode some devices, it will not create any devices, it will catch only all messages from the signalduino which can't be send to another module
+  The SIGNALduino_un module is a testing and debugging module to decode some devices, it will catch only all messages from the signalduino which can't be send to another module.<br>
+  It can create one help devices after define development attribute on SIGNALduino device. You get a hint from Verbose 4 in the FHEM Log.<br>
+  <u>example:</u> <code>SIGNALduino_unknown sduino_dummy Protocol:40 | To help decode or debug, please add u40! (attr sduino_dummy development u40)</code>
   <br><br>
 
   <a name="SIGNALduino_undefine"></a>
@@ -375,15 +360,18 @@ SIGNALduino_un_binflip($)
 
     <br>
     You can define a Device, but currently you can do nothing with it.
-    Autocreate is also not enabled for this module.
-    The function of this module is only to output some logging at verbose 4 or higher. May some data is decoded correctly but it's also possible that this does not work.
-    The Module will try to process all messages, which where not handled by other modules.
+    The function of this module is only to output some logging at verbose 4 or higher at FHEM-logfile or logging to help device. May some data is decoded correctly but it's also possible that this does not work.
+    The Module will try to process all messages, which where not handled by other modules.<br><br>
+	Created devices / logfiles must be deleted manually after removing the protocol from the attribute <code> development</code>. (example: u40, y84)
    
   </ul>
   <br>
 
   <a name="SIGNALduino_unset"></a>
-  <b>Set</b> <ul>N/A</ul><br>
+  <b>Set</b>
+  <ul>write "comment" - the user can put comments in the logfile which are arranged to his bits of the device<br>
+ (example: to write off the digital display of the thermometer at the time of reception or states of switches ...)</ul>
+  <br>
 
   <a name="SIGNALduino_unget"></a>
   <b>Get</b> <ul>N/A</ul><br>
@@ -391,7 +379,9 @@ SIGNALduino_un_binflip($)
   <a name="SIGNALduino_unattr"></a>
   <b>Attributes</b>
   <ul>
-    <li><a href="#verbose">Verbose</a></li>
+    <li><a href="#ignore">ignore</a></li>
+	<li><a href="#stateFormat">stateFormat</a></li>
+	<li><a href="#verbose">verbose</a></li>
   </ul>
   <br>
 </ul>
@@ -403,8 +393,10 @@ SIGNALduino_un_binflip($)
 <a name="SIGNALduino_un"></a>
 <h3>SIGNALduino_un</h3>
 <ul>
-  Das SIGNALduino_un Modul ist ein Hilfsmodul um unbekannte Nachrichten zu debuggen und analysieren zu k&ouml;nnen.
-  Das Modul legt keinerlei Ger&aumlte oder &aumlhnliches an.
+  Das SIGNALduino_un Modul ist ein Hilfsmodul um unbekannte Nachrichten zu debuggen und analysieren zu k&ouml;nnen.<br><br>
+  Das Modul legt nur eine Hilfsger&aumlt an mit Logfile der Bits sobald man das Attribut <code>development</code> im Empf&auml;nger Device auf das entsprechende unbekannte Protokoll setzt.<br>
+  Einen entsprechenden Hinweis erhalten Sie ab Verbose 4 im FHEM Log.<br>
+  <u>Beispiel:</u> <code>SIGNALduino_unknown sduino_dummy Protocol:40 | To help decode or debug, please add u40! (attr sduino_dummy development u40)</code>
   <br><br>
 
   <a name="SIGNALduino_undefine"></a>
@@ -414,13 +406,18 @@ SIGNALduino_un_binflip($)
 
     <br>
     Es ist m&ouml;glich ein Ger&auml;t manuell zu definieren, aber damit passiert &uuml;berhaupt nichts.
-    Autocreate wird auch keinerlei Ger&auml;te aus diesem Modul anlegen.
     <br>
-    Die einzigeste Funktion dieses Modules ist, ab Verbose 4 Logmeldungen &uumlber die Empfangene Nachricht ins Log zu schreiben. Dabei kann man sich leider nicht darauf verlassen, dass die Nachricht korrekt dekodiert wurde.<br>
-    Dieses Modul wird alle Nachrichten verarbeiten, welche von anderen Modulen nicht verarbeitet wurden.
+    Die einzigste Funktion dieses Modules ist, ab Verbose 4 Logmeldungen &uumlber die Empfangene Nachricht ins FHEM-Log zu schreiben oder in das Logfile des Hilfsger&aumltes.<br>
+	Dabei kann man sich leider nicht darauf verlassen, dass die Nachricht korrekt dekodiert wurde. Dieses Modul wird alle Nachrichten verarbeiten, welche von anderen Modulen nicht verarbeitet werden.<br>
+	<br>
+	Angelegte Ger&auml;te / Logfiles m&uuml;ssen manuell gel&ouml;scht werden nachdem aus dem Attribut <code>development</code> des SIGNALduinos das zu untersuchende Protokoll entfernt wurde. (Beispiel: u40,y84)
+	
   <ul><br>
   <a name="SIGNALduino_unset"></a>
-  <b>Set</b> <ul>N/A</ul><br>
+  <b>Set</b>
+  <ul>write "Kommentar" - somit kann der User in das Logfile des Hilfsger&aumlt Kommentare setzen welche zeitlich zu seinen Bits des Ger&aumltes eingeordnet werden<br>
+ (Beispiel: um die Digitalanzeige des Thermometers abzuschreiben zum Zeitpunkt des Empfangs oder Zustände von Schaltern ...)</ul>
+  <br>
 
   <a name="SIGNALduino_unget"></a>
   <b>Get</b> <ul>N/A</ul><br>
@@ -428,7 +425,9 @@ SIGNALduino_un_binflip($)
   <a name="SIGNALduino_unattr"></a>
   <b>Attributes</b>
   <ul>
-    <li><a href="#verbose">Verbose</a></li>
+    <li><a href="#ignore">ignore</a></li>
+    <li><a href="#stateFormat">stateFormat</a></li>
+	<li><a href="#verbose">verbose</a></li>
   </ul>
   <br>
 </ul>
