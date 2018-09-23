@@ -10,7 +10,7 @@ deploylocal: /opt/fhem/FHEM/00_SIGNALduino.pm 98_UnitTest.pm /opt/fhem/FHEM/90_S
 	sudo rm /opt/fhem/log/fhem-*.log || true
 	sudo cp test/fhem.cfg /opt/fhem/fhem.cfg
 	sudo rm /opt/fhem/log/fhem.save || true
-	TZ=Europe/Berlin service fhem start && sudo ps - ef
+	TZ=Europe/Berlin service fhem start && sudo ps -ef
 	
 
 test: deploylocal
