@@ -16,7 +16,6 @@ before_install:
  - wget -qO - http://debian.fhem.de/archive.key | sudo apt-key add -
  - echo "deb http://debian.fhem.de/nightly/ /" | sudo tee -a /etc/apt/sources.list
  - cpanm File::Find File::Basename Mock::Sub Test::More Test::Device::SerialPort
-
 install:
  - cpanm -v --installdeps --notest .
  - sudo apt-get update -qq
