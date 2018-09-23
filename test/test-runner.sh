@@ -37,8 +37,8 @@ do
 done
 
 
-#RETURN=$(perl $FHEM_SCRIPT 7072 "reload 98_UnitTest")  # only for testing
-#echo $RETURN
+RETURN=$(perl $FHEM_SCRIPT 7072 "reload 98_UnitTest")  # only for testing
+echo $RETURN
 
 
 echo "--------- Starting test $1 ---------\n\n"
@@ -70,7 +70,7 @@ OUTPUT_FAILED=$(perl $FHEM_SCRIPT 7072 "$CMD")
 	#echo $OUTPUT
 	#echo $OUTPUT_FAILED
 
-testlog=$(awk '/Test '"$1"' starts here ---->/,/<---- Test '"$1"' ends here/' log/fhem-*.log)
+testlog=$(awk '/Test '"$1"' starts here ---->/,/<---- Test '"$1"' ends here/' /opt/fhem/log/fhem-*.log)
 #oklines=$(echo $testlog | egrep ^[[:digit:]]{4}\.[[:digit:]]{2}\.[[:digit:]]{2}[[:space:]][[:digit:]]{2}:[[:digit:]]{2}:[[:digit:]]{2}[[:space:]]3:[[:space:]]ok)
 #noklines=$(echo $testlog | egrep ^[[:digit:]]{4}\.[[:digit:]]{2}\.[[:digit:]]{2}[[:space:]][[:digit:]]{2}:[[:digit:]]{2}:[[:digit:]]{2}[[:space:]]3:[[:space:]]nok)
 
