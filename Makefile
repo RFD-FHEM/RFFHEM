@@ -12,7 +12,7 @@ deploylocal: /opt/fhem/FHEM/00_SIGNALduino.pm 98_UnitTest.pm /opt/fhem/FHEM/90_S
 	sudo rm /opt/fhem/log/fhem.save || true
 	TZ=Europe/Berlin 
 	#service fhem start && sudo ps -ef
-	cd /opt/fhem && perl -MDevel::Cover fhem.pl fhem.cfg && cd TRAVIS_BUILD_DIR
+	cd /opt/fhem && perl -MDevel::Cover fhem.pl fhem.cfg && cd $TRAVIS_BUILD_DIR
 	
 
 test: deploylocal
