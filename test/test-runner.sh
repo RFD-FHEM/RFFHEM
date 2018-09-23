@@ -8,7 +8,7 @@
 
 FHEM_SCRIPT="/opt/fhem/fhem.pl"
 if [ ! -f $FHEM_SCRIPT ]; then
-	FHEM_SCRIPT="./fhem.pl"
+	FHEM_SCRIPT="./fhem/fhem.pl"
 	if [ ! -f $FHEM_SCRIPT ]; then
 		exit 255
 	fi
@@ -70,7 +70,7 @@ OUTPUT_FAILED=$(perl $FHEM_SCRIPT 7072 "$CMD")
 	#echo $OUTPUT
 	#echo $OUTPUT_FAILED
 
-testlog=$(awk '/Test '"$1"' starts here ---->/,/<---- Test '"$1"' ends here/' /opt/fhem/log/fhem-*.log)
+testlog=$(awk '/Test '"$1"' starts here ---->/,/<---- Test '"$1"' ends here/' fhem/log/fhem-*.log)
 #oklines=$(echo $testlog | egrep ^[[:digit:]]{4}\.[[:digit:]]{2}\.[[:digit:]]{2}[[:space:]][[:digit:]]{2}:[[:digit:]]{2}:[[:digit:]]{2}[[:space:]]3:[[:space:]]ok)
 #noklines=$(echo $testlog | egrep ^[[:digit:]]{4}\.[[:digit:]]{2}\.[[:digit:]]{2}[[:space:]][[:digit:]]{2}:[[:digit:]]{2}:[[:digit:]]{2}[[:space:]]3:[[:space:]]nok)
 
