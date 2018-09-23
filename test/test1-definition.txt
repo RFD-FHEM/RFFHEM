@@ -1,0 +1,20 @@
+defmod test1 UnitTest dummyDuino 
+(
+ {
+	 my $rmsg="MS;P1=502;P2=-9212;P3=-1939;P4=-3669;D=1234;CP=1;SP=2;";
+     my %signal_parts=SIGNALduino_Split_Message($rmsg,$targetHash->{NAME});
+	 
+     is( $signal_parts{messagetype], "MS", "SIGNALduino_Split_Message check messagetype" );
+     is( $signal_parts{rawData}, "1234", "SIGNALduino_Split_Message check rawData" );
+     is( $signal_parts{syncidx}, "2", "SIGNALduino_Split_Message check syncIdx" );
+     is( $signal_parts{clockidx}, "1", "SIGNALduino_Split_Message check clockIdx" );
+     is( $signal_parts{pattern}{1}, "502", "SIGNALduino_Split_Message check pattern" );
+
+	 $rmsg="MU;P1=502;P2=-9212;P3=-1939;P4=-3669;D=1234;CP=1;";
+	 %signal_parts=SIGNALduino_Split_Message($rmsg,$targetHash->{NAME});
+     is( $signal_parts{messagetype], "MU", "SIGNALduino_Split_Message check messagetype" );
+     is( $signal_parts{rawData}, "1234", "SIGNALduino_Split_Message check rawData" );
+     is( $signal_parts{pattern}{1}, "502", "SIGNALduino_Split_Message check pattern" );
+ }
+);
+attr test3 room tests
