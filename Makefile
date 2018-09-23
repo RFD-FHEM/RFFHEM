@@ -2,7 +2,7 @@
 	sudo cp $< $@ 
 /opt/fhem/FHEM/lib/%.hash: FHEM/lib/%.hash
 	sudo cp $< $@ 
-/opt/fhem/FHEM/98_UnitTest.pm: test/%.pm
+/opt/fhem/FHEM/98_UnitTest.pm: test/98_unittest.pm
 	sudo cp $< $@ 
 
 deploylocal: /opt/fhem/FHEM/00_SIGNALduino.pm /opt/fhem/FHEM/98_UnitTest.pm /opt/fhem/FHEM/90_SIGNALduino_un.pm /opt/fhem/FHEM/lib/signalduino_protocols.hash
