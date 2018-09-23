@@ -6,12 +6,11 @@
 	sudo cp $< /opt/fhem/FHEM/$@
 		
 deploylocal: /opt/fhem/FHEM/00_SIGNALduino.pm 98_UnitTest.pm /opt/fhem/FHEM/90_SIGNALduino_un.pm /opt/fhem/FHEM/lib/signalduino_protocols.hash
-	sudo service fhem stop || true
+	timeout 3 killall -qws2 perl || killall -qws9 perl || true
 	sudo rm /opt/fhem/log/fhem-*.log || true
 	sudo cp test/fhem.cfg /opt/fhem/fhem.cfg
 	sudo rm /opt/fhem/log/fhem.save || true
 	TZ=Europe/Berlin 
-	#service fhem start && sudo ps -ef
 	cd /opt/fhem && perl -MDevel::Cover fhem.pl fhem.cfg && cd ${TRAVIS_BUILD_DIR}
 	
 
@@ -20,4 +19,4 @@ test: deploylocal
 	test/unittest.sh 00-list-dummyduino
 	test/test-runner.sh test3
 	@echo === finished 00_SIGNALduino unit tests ===
-	sudo service fhem stop
+	timeout 30 killall -vw perl || killall -vws9 perl
