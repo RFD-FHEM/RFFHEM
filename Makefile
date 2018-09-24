@@ -17,5 +17,6 @@ test: deploylocal
 	@echo === running 00_SIGNALduino unit tests ===
 	test/test-runner.sh test1
 	test/test-runner.sh test3
+	#test/test-runner.sh test4
 	@echo === finished 00_SIGNALduino unit tests ===
 	sudo timeout 30 killall -vw perl || sudo killall -vws9 perl

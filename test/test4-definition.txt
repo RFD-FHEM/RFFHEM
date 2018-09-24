@@ -1,10 +1,15 @@
 defmod test4 UnitTest dummyDuino 
 ( 
   { 
-     Log3 undef, 2, "this is a Log Message inside our Test";
-     Log3 undef, 2, "this is a second Log Message inside our Test";
+	my $mock;
+	$mock = Mock::Sub->new;
+	my $DoTrigger = $mock->mock("DoTrigger");
+  	my $logmsg = "check with eventlogging=1";
+	SIGNALduino_Log3 $target, 2, $logmsg;
+	is($DoTrigger->called_count, 1, "check if called DoTrigger from SIGNALduino_Log3");
 
   } 
 ) 
 ;
-attr test4 room tests
+attr test4 room tests;
+attr dummyDuino eventlogging 1;
