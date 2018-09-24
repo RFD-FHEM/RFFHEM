@@ -203,12 +203,14 @@ SIGNALduino_un_Parse($$)
 	my @delevopmentargs = split (",",$value);
 	my $search = "y".$protocol;			# for version 2
 	my $search2 = "u".$protocol;		# for version 1
+	my $search3 = "m".$protocol;		# for version 3
 
-	if ((any{ $search eq $_ }@delevopmentargs) || (any{ $search2 eq $_ }@delevopmentargs)) {
+	if ((any{ $search eq $_ }@delevopmentargs) || (any{ $search2 eq $_ }@delevopmentargs) || (any{ $search3 eq $_ }@delevopmentargs)) {
 		### Help Device + Logfile ###
 	
 		Log3 $hash, 5, "$name: $ioname Protocol $protocol ($search) found in AttrVal development!" if (any{ $search eq $_ }@delevopmentargs);
 		Log3 $hash, 5, "$name: $ioname Protocol $protocol ($search2) found in AttrVal development!" if (any{ $search2 eq $_ }@delevopmentargs);
+		Log3 $hash, 5, "$name: $ioname Protocol $protocol ($search3) found in AttrVal development!" if (any{ $search3 eq $_ }@delevopmentargs);
 		
 		my $def;
 		my $devicedef = $name."_".$protocol;
@@ -222,16 +224,30 @@ SIGNALduino_un_Parse($$)
 	
 		my $hash = $def;
 		my $name = $hash->{NAME};
-		my $info = "$bitData; length:".length($bitData)."; hex:$rawData";	# log example, 2018-09-19_13:43:34 SIGNALduino_unknown_84 receive: 0000001100110101010000001111110110111100; length:40; hex:033540FDBC
 	
 		$hash->{lastMSG} = $rawData;
 		$hash->{bitMSG} =  $bitData;
 	
+		my $bitcount = length($bitData);
+		my $hexcount = length($rawData);
+		
 		readingsBeginUpdate($hash);
 		readingsBulkUpdate($hash, "state", $rawData,0);
-		readingsBulkUpdate($hash, "receive", $info);
+		readingsBulkUpdate($hash, "bitMsg", $bitData);
+		readingsBulkUpdate($hash, "bitCount", $bitcount);
+		readingsBulkUpdate($hash, "hexMsg", $rawData);
+		readingsBulkUpdate($hash, "hexCount", $hexcount);
+		readingsBulkUpdate($hash, "lastInputDev", $ioname);
 		readingsEndUpdate($hash, 1); 		# Notify is done by Dispatch
 		
+		### Example Logfile ###
+		# 2018-09-24_17:32:53 SIGNALduino_unknown_85 UserMSG: Temp 22.4 sehr warm
+		# 2018-09-24_17:34:25 SIGNALduino_unknown_85 bitMsg: 11110011101110100011100111111110110110110100111110101010101100000000
+		# 2018-09-24_17:34:25 SIGNALduino_unknown_85 bitCount: 68
+		# 2018-09-24_17:34:25 SIGNALduino_unknown_85 hexMsg: F3BA39FEDB4FAAB00
+		# 2018-09-24_17:34:25 SIGNALduino_unknown_85 hexCount: 17
+		# 2018-09-24_17:34:25 SIGNALduino_unknown_85 lastInputDev: sduino_dummy
+
 		return $name;
 	} else {
 		### nothing - Info ###
@@ -241,7 +257,7 @@ SIGNALduino_un_Parse($$)
 			$value .= ","; 					# some definitions already exist, so prepend a new one
 		}
         $value .= "u$protocol";		
-		Log3 $hash, 3, "$name $ioname Protocol:$protocol | To help decode or debug, please add u$protocol! (attr $ioname development $value)" if ($protocol);	# To help decode or debug, please add u84! (attr sduino_dummy development u84)
+		Log3 $hash, 4, "$name $ioname Protocol:$protocol | To help decode or debug, please add u$protocol! (attr $ioname development $value)" if ($protocol);	# To help decode or debug, please add u84! (attr sduino_dummy development u84)
 	}
 	############################
 	
@@ -255,16 +271,15 @@ sub
 SIGNALduino_un_Set($$$@)
 {
   my ( $hash, $name, @a ) = @_;
-  my $cmd = $a[0];
-  my $cmd2 = $a[1];
-  my $ret = "write";
+  my $ret = "UserInfo";
+  my $input = join " ", @a[1 .. scalar(@a)];		# Teile der Eingabe zusammenfassen
 
-  if ($cmd ne "?") {
-		return "wrong argument! please use $ret argument and one comment." if($a[0] ne "write" || not $a[1]);
+  if ($a[0] ne "?") {
+		return "wrong argument! please use $ret argument and one comment." if($a[0] ne "UserInfo" || not $a[1]);
 		
 		readingsBeginUpdate($hash);
 		readingsBulkUpdate($hash, "state" , "UserMSG",0);
-		readingsBulkUpdate($hash, "UserMSG", $cmd2)  if (defined($cmd2));
+		readingsBulkUpdate($hash, "UserMSG", $input)  if (defined($input));
 		readingsEndUpdate($hash, 1); 		# Notify is done by Dispatch
 		
 		return undef;						# undef because user is in same windows without message, better to use
