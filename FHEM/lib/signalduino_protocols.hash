@@ -13,8 +13,8 @@
 # clockrange  => [ , ]     # only MC signals | min , max of pulse / pause times
 # start       => [ , ]     # value pair for start message
 # sync        => [ , ]     # value pair for sync pulse of signal
-# length_min               # minimum length of bits of the message
-# length_max               # maximum length of bits of the message
+# length_min  => ' '       # minimum length of bits of the message
+# length_max  => ' '       # maximum length of bits of the message
 #
 # developId   => 'm'       # logical module is under development
 # developId   => 'p'       # protocol is under development or to reserve IDs, the ID in the development attribute with developId => 'p' are only used without the other entries
@@ -33,10 +33,10 @@
 # modulematch => ' '       # RegEx on the exact message including preamble
 # paddingbits => ' '       # default is 4, pad up to x bits
 # paddingbits => '1'       # will disable padding
-# pause       => [ ]       # value, pause when sending between two signals
+# pause       => [ ]       # delay when sending between two signals
 # polarity    => 'invert'  # only MC signals | invert bits of the signal
-# postamble   => ' '       # hangs a string to the demodulated signal
-# postDemodulation => \&   # SIGNALduino internal sub for processing in front of the module
+# postamble   => ' '       # appends a string to the demodulated signal
+# postDemodulation => \&   # SIGNALduino internal sub for processing before dispatching to a logical module
 # remove_zero => 1         # removes leading zeros from output
 #
 #####################################################################################
