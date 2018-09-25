@@ -230,22 +230,29 @@ SIGNALduino_un_Parse($$)
 	
 		my $bitcount = length($bitData);
 		my $hexcount = length($rawData);
+		my $bitDataInvert = $bitData;
+		$bitDataInvert =~ tr/01/10/; 			# invert message and check if it is possible to deocde now
+		my $rawDataInvert = SIGNALduino_un_b2h($bitDataInvert);
 		
 		readingsBeginUpdate($hash);
 		readingsBulkUpdate($hash, "state", $rawData,0);
 		readingsBulkUpdate($hash, "bitMsg", $bitData);
+		readingsBulkUpdate($hash, "bitMsg_invert", $bitDataInvert);
 		readingsBulkUpdate($hash, "bitCount", $bitcount);
 		readingsBulkUpdate($hash, "hexMsg", $rawData);
-		readingsBulkUpdate($hash, "hexCount", $hexcount);
+		readingsBulkUpdate($hash, "hexMsg_invert", $rawDataInvert);
+		readingsBulkUpdate($hash, "hexCount or nibble", $hexcount);
 		readingsBulkUpdate($hash, "lastInputDev", $ioname);
 		readingsEndUpdate($hash, 1); 		# Notify is done by Dispatch
 		
 		### Example Logfile ###
-		# 2018-09-24_17:32:53 SIGNALduino_unknown_85 UserMSG: Temp 22.4 sehr warm
-		# 2018-09-24_17:34:25 SIGNALduino_unknown_85 bitMsg: 11110011101110100011100111111110110110110100111110101010101100000000
+		# 2018-09-24_17:32:53 SIGNALduino_unknown_85 UserInfo: Temp 22.4 Hum 52
+		# 2018-09-24_17:34:25 SIGNALduino_unknown_85 bitMsg: 11110011101110100011100111111110110110111110111110100110001100101000
+		# 2018-09-24_17:34:25 SIGNALduino_unknown_85 bitMsg_invert: 00001100010001011100011000000001001001000001000001011001110011010111
 		# 2018-09-24_17:34:25 SIGNALduino_unknown_85 bitCount: 68
-		# 2018-09-24_17:34:25 SIGNALduino_unknown_85 hexMsg: F3BA39FEDB4FAAB00
-		# 2018-09-24_17:34:25 SIGNALduino_unknown_85 hexCount: 17
+		# 2018-09-24_17:34:25 SIGNALduino_unknown_85 hexMsg: F3BA39FEDBEFA6328
+		# 2018-09-24_17:34:25 SIGNALduino_unknown_85 hexMsg_invert: 0C45C601241059CD7
+		# 2018-09-24_17:34:25 SIGNALduino_unknown_85 hexCount or nibble: 17
 		# 2018-09-24_17:34:25 SIGNALduino_unknown_85 lastInputDev: sduino_dummy
 
 		return $name;
@@ -351,6 +358,25 @@ SIGNALduino_un_binflip($)
   }
 
   return $flip;
+}
+
+#####################################
+sub SIGNALduino_un_b2h {
+    my $num   = shift;
+    my $WIDTH = 4;
+    my $index = length($num) - $WIDTH;
+    my $hex = '';
+    do {
+        my $width = $WIDTH;
+        if ($index < 0) {
+            $width += $index;
+            $index = 0;
+        }
+        my $cut_string = substr($num, $index, $width);
+        $hex = sprintf('%X', oct("0b$cut_string")) . $hex;
+        $index -= $WIDTH;
+    } while ($index > (-1 * $WIDTH));
+    return $hex;
 }
 
 1;
