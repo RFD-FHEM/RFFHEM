@@ -27,8 +27,7 @@ sub UnitTest_Define() {
     my ($name,$type,$target,$cmd) = split('[ \t]+', $def,4);
 
     
-	$cmd =~ s/\((.*)\)/$1/s;
-    $hash->{'.testcode'} = $cmd;
+    ($hash->{'.testcode'}) = $cmd =~ /(\{[^}{]*(?:(?R)[^}{]*)*+\})/;
 
 
     if (!$cmd) {
