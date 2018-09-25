@@ -201,16 +201,10 @@ SIGNALduino_un_Parse($$)
 	
 	my $value = AttrVal($ioname, "development", "");
 	my @delevopmentargs = split (",",$value);
-	my $search = "y".$protocol;			# for version 2
-	my $search2 = "u".$protocol;		# for version 1
-	my $search3 = "m".$protocol;		# for version 3
 
-	if ((any{ $search eq $_ }@delevopmentargs) || (any{ $search2 eq $_ }@delevopmentargs) || (any{ $search3 eq $_ }@delevopmentargs)) {
+	if ($value =~ m/([umyp])$protocol/g) {		# check for u|m|y|p development
 		### Help Device + Logfile ###
-	
-		Log3 $hash, 5, "$name: $ioname Protocol $protocol ($search) found in AttrVal development!" if (any{ $search eq $_ }@delevopmentargs);
-		Log3 $hash, 5, "$name: $ioname Protocol $protocol ($search2) found in AttrVal development!" if (any{ $search2 eq $_ }@delevopmentargs);
-		Log3 $hash, 5, "$name: $ioname Protocol $protocol ($search3) found in AttrVal development!" if (any{ $search3 eq $_ }@delevopmentargs);
+		Log3 $hash, 5, "$name: $ioname Protocol $1$protocol found in AttrVal development!";
 		
 		my $def;
 		my $devicedef = $name."_".$protocol;
