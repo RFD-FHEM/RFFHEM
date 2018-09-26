@@ -5,7 +5,7 @@
 package main;
 use strict;
 use warnings;
-# Laden evtl. abhängiger Perl- bzw. FHEM-Module
+# Laden evtl. abhÃ¤ngiger Perl- bzw. FHEM-Module
 use Mock::Sub (no_warnings => 1);
 use Test::More;
 use Data::Dumper qw(Dumper);
@@ -252,7 +252,7 @@ sub UnitTest_mock_log3
 	
 }
 
-# Eval-Rückgabewert für erfolgreiches
+# Eval-RÃ¼ckgabewert fÃ¼r erfolgreiches
 # Laden des Moduls
 1;
 
@@ -262,7 +262,7 @@ sub UnitTest_mock_log3
 =pod
 =item [helper|device|command]
 =item summary Helpermodule which supports unit tesing
-=item summary_DE Hilfsmodul was es ermöglicht unit test auszuführen
+=item summary_DE Hilfsmodul was es ermÃ¶glicht unit test auszufÃ¼hren
 
 =begin html
  <a name="UnitTest"></a>

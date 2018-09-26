@@ -40,6 +40,7 @@ done
 #RETURN=$(echo "reload 98_UnitTest" | /bin/nc localhost 7072)
 #echo $RETURN
 
+
 printf "\n\n--------- Starting test %s: ---------\n" $1 
 
 # Load test definitions, and import them to our running instance
@@ -63,6 +64,7 @@ unset DEF
 #RETURN=$(perl $FHEM_SCRIPT 7072 "$CMD")
 RETURN=$(echo "$CMD" | /bin/nc localhost 7072)
 echo $RETURN
+
 #Wait until state of current test is finished
 #Todo prevent forever loop here
 CMD="{ReadingsVal(\"$1\",\"state\",\"\")}"
@@ -79,6 +81,7 @@ OUTPUT_FAILED=$(echo "$CMD" | /bin/nc localhost 7072)
 
 	#echo $OUTPUT
 	#echo $OUTPUT_FAILED
+
 testlog=$(awk '/Test '"$1"' starts here ---->/,/<---- Test '"$1"' ends here/' /opt/fhem/log/fhem-*.log)
 #oklines=$(echo $testlog | egrep ^[[:digit:]]{4}\.[[:digit:]]{2}\.[[:digit:]]{2}[[:space:]][[:digit:]]{2}:[[:digit:]]{2}:[[:digit:]]{2}[[:space:]]3:[[:space:]]ok)
 #noklines=$(echo $testlog | egrep ^[[:digit:]]{4}\.[[:digit:]]{2}\.[[:digit:]]{2}[[:space:]][[:digit:]]{2}:[[:digit:]]{2}:[[:digit:]]{2}[[:space:]]3:[[:space:]]nok)

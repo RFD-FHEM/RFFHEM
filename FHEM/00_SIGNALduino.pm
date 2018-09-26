@@ -4318,16 +4318,15 @@ With a # at the beginnging whitelistIDs can be deactivated.
 		<br><br>
 		Input args are:
 		<p>
-		P<protocol id>#binarydata#R<num of repeats>#C<optional clock>   (#C is optional) 
-		O<protocol id>#0xhexdata#R<num of repeats>#C<optional clock>    (#C is optional) 
-		
-		<br>Example: P0#0101#R3#C500
+		<ul><li>P<protocol id>#binarydata#R<num of repeats>#C<optional clock>   (#C is optional) 
+		<br>Example binarydata: <code>set sduino sendMsg P0#0101#R3#C500</code>
 		<br>Will generate the raw send command for the message 0101 with protocol 0 and instruct the arduino to send this three times and the clock is 500.
-		<br>SR;R=3;P0=500;P1=-9000;P2=-4000;P3=-2000;D=03020302;
-		<br>Example: P29#0xF7E#R4
+		<br>SR;R=3;P0=500;P1=-9000;P2=-4000;P3=-2000;D=03020302;</li></ul><br>
+		<ul><li>P<protocol id>#0xhexdata#R<num of repeats>#C<optional clock>    (#C is optional) 
+		<br>Example 0xhexdata: <code>set sduino sendMsg P29#0xF7E#R4</code>
 		<br>Generates the raw send command with the hex message F7E with protocl id 29 . The message will be send four times.
 		<br>SR;R=4;P0=-8360;P1=220;P2=-440;P3=-220;P4=440;D=01212121213421212121212134;
-		</p>
+		</p></li></ul>
 
 		
 		</li><br>
@@ -4631,7 +4630,7 @@ Mit diesem Attribut können Sie steuern, ob jede Logmeldung auch als Ereignis be
          </ul><br>
 	<li>reset<br></li>
 	&Ouml;ffnet die Verbindung zum Ger&auml;t neu und initialisiert es. <br><br>
-	<li>sendMsg<br></li>
+	<li>sendMsg</li>
 	Dieser Befehl erstellt die erforderlichen Anweisungen zum Senden von Rohdaten &uuml;ber den SIGNALduino. Sie k&ouml;nnen die Signaldaten wie Protokoll und die Bits angeben, die Sie senden m&ouml;chten.<br>
 	Alternativ ist es auch möglich, die zu sendenden Daten in hexadezimaler Form zu übergeben. Dazu muss ein 0x vor den Datenteil geschrieben werden.
 	<br><br>
@@ -4639,16 +4638,15 @@ Mit diesem Attribut können Sie steuern, ob jede Logmeldung auch als Ereignis be
 		<br><br>
 		Argumente sind:
 		<p>
-		P<protocol id>#binarydata#R<anzahl der wiederholungen>#C<optional taktrate>   (#C is optional) 
-		O<protocol id>#0xhexdata#R<anzahl der wiederholungen>#C<optional taktrate>    (#C is optional) 
-		
-		<br>Beispiel: P29#0101#R3#C500
+		<ul><li>P<protocol id>#binarydata#R<anzahl der wiederholungen>#C<optional taktrate>   (#C is optional) 
+		<br>Beispiel binarydata: <code>set sduino sendMsg P29#0101#R3#C500</code>
 		<br>Wird eine sende Kommando für die Bitfolge 0101 anhand der protocol id 0 erzeugen. Als Takt wird 500 verwendet.
-		<br>SR;R=3;P0=500;P1=-9000;P2=-4000;P3=-2000;D=03020302;
-		<br>Beispiel: P29#0xF7E#R4
+		<br>SR;R=3;P0=500;P1=-9000;P2=-4000;P3=-2000;D=03020302;<br></li></ul><br>
+		<ul><li>P<protocol id>#0xhexdata#R<anzahl der wiederholungen>#C<optional taktrate>    (#C is optional) 
+		<br>Beispiel 0xhexdata: <code>set sduino sendMsg P29#0xF7E#R4</code>
 		<br>Wird eine sende Kommando für die Hexfolge F7E anhand der protocol id 29 erzeugen. Die Nachricht soll 4x gesenset werden.
 		<br>SR;R=4;P0=-8360;P1=220;P2=-440;P3=-220;P4=440;D=01212121213421212121212134;
-		</p>
+		</p></li></ul>
 
 		
 	
