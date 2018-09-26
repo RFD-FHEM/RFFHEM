@@ -5,7 +5,7 @@
 package main;
 use strict;
 use warnings;
-# Laden evtl. abhängiger Perl- bzw. FHEM-Module
+# Laden evtl. abhÃ¤ngiger Perl- bzw. FHEM-Module
 use Mock::Sub (no_warnings => 1);
 use Test::More;
 use Data::Dumper qw(Dumper);
@@ -26,21 +26,21 @@ sub UnitTest_Define() {
    
     my ($name,$type,$target,$cmd) = split('[ \t]+', $def,4);
 
-    
-	$cmd =~ s/\((.*)\)/$1/s;
-    $hash->{'.testcode'} = $cmd;
-
 
     if (!$cmd) {
         my $msg = "wrong syntax: define <name> UnitTest <name of target device> (Test Code in Perl)";
     	Log3 undef, 2, $msg;
     	return $msg;
     }
+    Log3 $name, 2, "Defined unittest for target: ".$hash->{targetDevice};
+    Log3 $name, 5, "DEV is $cmd";
+    
+    ($hash->{'.testcode'}) = $cmd =~ /(\{[^}{]*(?:(?R)[^}{]*)*+\})/;
+    Log3 $name, 5, "Loaded this code ".$hash->{'.testcode'};
+    
     $hash->{name}  = $name;
     $hash->{targetDevice}  = $target;
     
-    Log3 $name, 2, "Defined unittest for target: ".$hash->{targetDevice};
-	Log3 $name, 5, "Loaded this code ".$hash->{'.testcode'};
 	readingsSingleUpdate($hash, "state", "waiting", 1);
 		
 	## Test starten wenn Fhem bereits initialisiert wurde	
@@ -252,7 +252,7 @@ sub UnitTest_mock_log3
 	
 }
 
-# Eval-Rückgabewert für erfolgreiches
+# Eval-RÃ¼ckgabewert fÃ¼r erfolgreiches
 # Laden des Moduls
 1;
 
@@ -262,7 +262,7 @@ sub UnitTest_mock_log3
 =pod
 =item [helper|device|command]
 =item summary Helpermodule which supports unit tesing
-=item summary_DE Hilfsmodul was es ermöglicht unit test auszuführen
+=item summary_DE Hilfsmodul was es ermÃ¶glicht unit test auszufÃ¼hren
 
 =begin html
  <a name="UnitTest"></a>
