@@ -15,6 +15,9 @@ deploylocal: /opt/fhem/FHEM/00_SIGNALduino.pm 98_UnitTest.pm /opt/fhem/FHEM/90_S
 	
 test: deploylocal
 	@echo === running 00_SIGNALduino unit tests ===
+	test/test-runner.sh test1
 	test/test-runner.sh test3
+	test/test-runner.sh test4
+	test/test-runner.sh test_mu_1
 	@echo === finished 00_SIGNALduino unit tests ===
 	sudo timeout 30 killall -vw perl || sudo killall -vws9 perl
