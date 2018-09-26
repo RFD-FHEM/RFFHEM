@@ -45,3 +45,12 @@ Open the DEF from this device an put any perl code inside the {} brackets.
 
 Note: the Name dummyDuino must be the name of a existing definition you want to run tests on. If you startet fhem with the provided minimal `fhem-unittest.cfg`, then this Device of type SIGNALduino named dummyDuino.
 
+In your testcode you can run any perl command.
+
+Additionally there are a few variables provided 
+
+$hash = the hash of the UnitTest Definition
+$name = The Name of the UnitTest Definition
+$target = The Name of the provided Targetdevice which is under test. Provided in DEF from this UnitTest device. In our example dummyDuino.
+$targetHash = Hash from the Targetdevice which is under test.
+
