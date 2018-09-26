@@ -226,7 +226,7 @@ SIGNALduino_un_Parse($$)
 		my $hexcount = length($rawData);
 		my $bitDataInvert = $bitData;
 		$bitDataInvert =~ tr/01/10/; 			# invert message and check if it is possible to deocde now
-		my $rawDataInvert = SIGNALduino_un_b2h($bitDataInvert);
+		my $rawDataInvert = SIGNALduino_b2h($bitDataInvert);
 		
 		readingsBeginUpdate($hash);
 		readingsBulkUpdate($hash, "state", $rawData,0);
@@ -352,25 +352,6 @@ SIGNALduino_un_binflip($)
   }
 
   return $flip;
-}
-
-#####################################
-sub SIGNALduino_un_b2h {
-    my $num   = shift;
-    my $WIDTH = 4;
-    my $index = length($num) - $WIDTH;
-    my $hex = '';
-    do {
-        my $width = $WIDTH;
-        if ($index < 0) {
-            $width += $index;
-            $index = 0;
-        }
-        my $cut_string = substr($num, $index, $width);
-        $hex = sprintf('%X', oct("0b$cut_string")) . $hex;
-        $index -= $WIDTH;
-    } while ($index > (-1 * $WIDTH));
-    return $hex;
 }
 
 1;
