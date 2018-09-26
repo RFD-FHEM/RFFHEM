@@ -26,20 +26,21 @@ sub UnitTest_Define() {
    
     my ($name,$type,$target,$cmd) = split('[ \t]+', $def,4);
 
-    
-    ($hash->{'.testcode'}) = $cmd =~ /(\{[^}{]*(?:(?R)[^}{]*)*+\})/;
-
 
     if (!$cmd) {
         my $msg = "wrong syntax: define <name> UnitTest <name of target device> (Test Code in Perl)";
     	Log3 undef, 2, $msg;
     	return $msg;
     }
+    Log3 $name, 2, "Defined unittest for target: ".$hash->{targetDevice};
+    Log3 $name, 5, "DEV is $cmd";
+    
+    ($hash->{'.testcode'}) = $cmd =~ /(\{[^}{]*(?:(?R)[^}{]*)*+\})/;
+    Log3 $name, 5, "Loaded this code ".$hash->{'.testcode'};
+    
     $hash->{name}  = $name;
     $hash->{targetDevice}  = $target;
     
-    Log3 $name, 2, "Defined unittest for target: ".$hash->{targetDevice};
-	Log3 $name, 5, "Loaded this code ".$hash->{'.testcode'};
 	readingsSingleUpdate($hash, "state", "waiting", 1);
 		
 	## Test starten wenn Fhem bereits initialisiert wurde	
