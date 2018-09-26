@@ -38,9 +38,10 @@ If you call `test-runer.sh my_test_1` then this will try to load a file test/my_
 ### Writing my first unittest ### 
 Define a new test with
 
-defmod my_Test_1 UnitTest ({} ) 
+defmod my_Test_1 UnitTest dummyDuino ({} ) 
 
 Now you have a placeholder for defining your code.
 Open the DEF from this device an put any perl code inside the {} brackets.
 
+Note: the Name dummyDuino must be the name of a existing definition you want to run tests on. If you startet fhem with the provided minimal `fhem-unittest.cfg`, then this Device of type SIGNALduino named dummyDuino.
 
