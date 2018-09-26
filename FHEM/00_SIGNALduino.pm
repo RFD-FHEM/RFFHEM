@@ -1,4 +1,4 @@
-# $Id: 00_SIGNALduino.pm 10488 2018-09-11 16:00:00Z v3.3.3-dev $
+# $Id: 00_SIGNALduino.pm 10488 2018-09-26 16:00:00Z v3.3.3-dev $
 #
 # v3.3.3 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -25,7 +25,7 @@ no warnings 'portable';
 
 
 use constant {
-	SDUINO_VERSION            => "v3.3.3-dev_11.09.",
+	SDUINO_VERSION            => "v3.3.3-dev_26.09.",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -141,6 +141,8 @@ my $clientsSIGNALduino = ":IT:"
 			        	."Siro:"
 						."FHT:"
 						."FS20:"
+						."CUL_EM:"
+						."Fernotron:"
 			      		."SIGNALduino_un:"
 					; 
 
@@ -161,7 +163,7 @@ my %matchListSIGNALduino = (
      "14:Dooya"					=> '^P16#[A-Fa-f0-9]+',
      "15:SOMFY"					=> '^Ys[0-9A-F]+',
      "16:SD_WS_Maverick"		=> '^P47#[A-Fa-f0-9]+',
-     "17:SD_UT"            		=> '^u30#.*',						## BELL 201.2 TXA
+     "17:SD_UT"            		=> '^[P|u](30|79|81|83)#.*',	 # universal - more devices with different protocols
      "18:FLAMINGO"            	=> '^P13#[A-Fa-f0-9]+',						## Flamingo Smoke
      "19:CUL_WS"				=> '^K[A-Fa-f0-9]{5,}',
      "20:Revolt"				=> '^r[A-Fa-f0-9]{22}',
@@ -169,7 +171,9 @@ my %matchListSIGNALduino = (
      "22:Siro"					=> '^P72#[A-Fa-f0-9]+',
      "23:FHT"      				=> "^81..(04|09|0d)..(0909a001|83098301|c409c401)..",
      "24:FS20"    				=> "^81..(04|0c)..0101a001", 
-     "X:SIGNALduino_un"			=> '^[u]\d+#.*',
+     "25:CUL_EM"    				=> "^E0.................", 
+     "26:Fernotron"  			=> '^P82#.*',
+	 "X:SIGNALduino_un"			=> '^[u]\d+#.*',
 );
 
 
@@ -2573,7 +2577,7 @@ SIGNALduino_Parse($$$$@)
 		$dispatched= SIGNALduino_Parse_MS($hash, $iohash, $name, $rmsg,%signal_parts);
 	}
 	# Message unsynced type   -> MU
-  	elsif (@{$hash->{muIdList}} && $rmsg=~ m/^MU;(P\d=-?\d+;){3,8}.*D=\d+;/)
+  	elsif (@{$hash->{muIdList}} && $rmsg=~ m/^MU;(P\d=-?\d+;){3,8}((CP|R)=\d+;){0,2}D=\d+;/)
 	{
 		$dispatched=  SIGNALduino_Parse_MU($hash, $iohash, $name, $rmsg,%signal_parts);
 	}
@@ -2936,7 +2940,8 @@ sub SIGNALduino_PreparingSend_FS20_FHT($$$) {
 	}
 	
 	$newmsg .= SIGNALduino_dec2binppari($sum & 0xFF);   # Checksum		
-	$newmsg .= "0P#R3";            		# EOT, Pause, 3 Repeats    
+	my $repeats = $id - 71;			# FS20(74)=3, FHT(73)=2
+	$newmsg .= "0P#R" . $repeats;		# EOT, Pause, 3 Repeats    
 	
 	return $newmsg;
 }
@@ -3029,6 +3034,38 @@ sub SIGNALduino_postDemo_Hoermann($@) {
 		$msg = substr($msg,9);
 		return (1,split("",$msg));
 	}
+}
+
+sub SIGNALduino_postDemo_EM($@) {
+	my ($name, @bit_msg) = @_;
+	my $msg = join("",@bit_msg);
+	my $msg_start = index($msg, "0000000001");				# find start
+	my $count;
+	$msg = substr($msg,$msg_start + 10);						# delete preamble + 1 bit
+	my $new_msg = "";
+	my $crcbyte;
+	my $msgcrc = 0;
+
+	if ($msg_start > 0 && length $msg == 89) {
+		for ($count = 0; $count < length ($msg) ; $count +=9) {
+			$crcbyte = substr($msg,$count,8);
+			if ($count < (length($msg) - 10)) {
+				$new_msg.= join "", reverse @bit_msg[$msg_start + 10 + $count.. $msg_start + 17 + $count];
+				$msgcrc = $msgcrc ^ oct( "0b$crcbyte" );
+			}
+		}
+	
+		if ($msgcrc == oct( "0b$crcbyte" )) {
+			SIGNALduino_Log3 $name, 4, "$name: EM Protocol - CRC OK";
+			return (1,split("",$new_msg));
+		} else {
+			SIGNALduino_Log3 $name, 3, "$name: EM Protocol - CRC ERROR";
+			return 0, undef;
+		}
+	}
+	
+	SIGNALduino_Log3 $name, 3, "$name: EM Protocol - Start not found or length msg (".length $msg.") not correct";
+	return 0, undef;
 }
 
 sub SIGNALduino_postDemo_FS20($@) {
@@ -3348,29 +3385,36 @@ sub SIGNALduino_postDemo_WS2000($@) {
 sub SIGNALduino_postDemo_WS7053($@) {
 	my ($name, @bit_msg) = @_;
 	my $msg = join("",@bit_msg);
-	my $new_msg ="";
-	my $parity = 0;									# Parity even
-   if (length($msg) > 32) {                  # start not correct
-      $msg = substr($msg,1)
-   }
-	SIGNALduino_Log3 $name, 4, "$name: WS7053 MSG = $msg";
-	if (substr($msg,0,8) ne "10100000") {		# check ident
-		SIGNALduino_Log3 $name, 3, "$name: WS7053 ERROR - Ident not 1010 0000 - " . substr($msg,0,8);
+	my $parity = 0;	                       # Parity even
+	SIGNALduino_Log3 $name, 4, "$name: WS7053 - MSG = $msg";
+	my $msg_start = index($msg, "10100000");
+	if ($msg_start > 0) {                  # start not correct
+		$msg = substr($msg, $msg_start);
+		$msg .= "0";
+		SIGNALduino_Log3 $name, 5, "$name: WS7053 - cut $msg_start char(s) at begin";
+	}
+	if ($msg_start < 0) {                  # start not found
+		SIGNALduino_Log3 $name, 3, "$name: WS7053 ERROR - Ident 10100000 not found";
 		return 0, undef;
 	} else {
-		for(my $i = 15; $i < 28; $i++) {			# Parity over bit 15 and 12 bit temperature
-	      $parity += substr($msg, $i, 1);
-		}
-		if ($parity % 2 != 0) {
-			SIGNALduino_Log3 $name, 3, "$name: WS7053 ERROR - Parity not even";
-			return 0, undef;
+		if (length($msg) < 32) {             # msg too short
+			SIGNALduino_Log3 $name, 3, "$name: WS7053 ERROR - msg too short, length " . length($msg);
+		return 0, undef;
 		} else {
-			SIGNALduino_Log3 $name, 5, "$name: WS7053 before: " . substr($msg,0,4) ." ". substr($msg,4,4) ." ". substr($msg,8,4) ." ". substr($msg,12,4) ." ". substr($msg,16,4) ." ". substr($msg,20,4) ." ". substr($msg,24,4) ." ". substr($msg,28,4);
-         # Format from 7053:  Bit 0-7 Ident, Bit 8-15 Rolling Code/Parity, Bit 16-27 Temperature (12.3), Bit 28-31 Zero
-			$new_msg = substr($msg,0,28) . substr($msg,16,8) . substr($msg,28,4);
-         # Format for CUL_TX: Bit 0-7 Ident, Bit 8-15 Rolling Code/Parity, Bit 16-27 Temperature (12.3), Bit 28 - 35 Temperature (12), Bit 36-39 Zero
-			SIGNALduino_Log3 $name, 5, "$name: WS7053 after:  " . substr($new_msg,0,4) ." ". substr($new_msg,4,4) ." ". substr($new_msg,8,4) ." ". substr($new_msg,12,4) ." ". substr($new_msg,16,4) ." ". substr($new_msg,20,4) ." ". substr($new_msg,24,4) ." ". substr($new_msg,28,4) ." ". substr($new_msg,32,4) ." ". substr($new_msg,36,4);
-			return (1,split("",$new_msg));
+			for(my $i = 15; $i < 28; $i++) {   # Parity over bit 15 and 12 bit temperature
+				$parity += substr($msg, $i, 1);
+			}
+			if ($parity % 2 != 0) {
+				SIGNALduino_Log3 $name, 3, "$name: WS7053 ERROR - Parity not even";
+				return 0, undef;
+			} else {
+				SIGNALduino_Log3 $name, 5, "$name: WS7053 before: " . substr($msg,0,4) ." ". substr($msg,4,4) ." ". substr($msg,8,4) ." ". substr($msg,12,4) ." ". substr($msg,16,4) ." ". substr($msg,20,4) ." ". substr($msg,24,4) ." ". substr($msg,28,4);
+				# Format from 7053:  Bit 0-7 Ident, Bit 8-15 Rolling Code/Parity, Bit 16-27 Temperature (12.3), Bit 28-31 Zero
+				my $new_msg = substr($msg,0,28) . substr($msg,16,8) . substr($msg,28,4);
+				# Format for CUL_TX: Bit 0-7 Ident, Bit 8-15 Rolling Code/Parity, Bit 16-27 Temperature (12.3), Bit 28 - 35 Temperature (12), Bit 36-39 Zero
+				SIGNALduino_Log3 $name, 5, "$name: WS7053 after:  " . substr($new_msg,0,4) ." ". substr($new_msg,4,4) ." ". substr($new_msg,8,4) ." ". substr($new_msg,12,4) ." ". substr($new_msg,16,4) ." ". substr($new_msg,20,4) ." ". substr($new_msg,24,4) ." ". substr($new_msg,28,4) ." ". substr($new_msg,32,4) ." ". substr($new_msg,36,4);
+				return (1,split("",$new_msg));
+			}
 		}
 	}
 }
@@ -4034,22 +4078,28 @@ sub SIGNALduino_Log3($$$)
 
 
 	Wireless switches  <br>
-	ITv1 & ITv3/Elro and other brands using pt2263 or arctech protocol--> uses IT.pm<br><br>
-
-	In the ITv1 protocol is used to sent a default ITclock from 250 and it may be necessary in the IT-Modul to define the attribute ITclock<br>
-	<br><br>
-	Temperatur / humidity senso
 	<ul>
-	<li>PEARL NC7159, LogiLink WS0002,GT-WT-02,AURIOL,TCM97001, TCM27 and many more -> 14_CUL_TCM97001 </li>
-	<li>Oregon Scientific v2 and v3 Sensors  -> 41_OREGON.pm</li>
-	<li>Temperatur / humidity sensors suppored -> 14_SD_WS07</li>
+		<li>ITv1 & ITv3/Elro and other brands using pt2263 or arctech protocol--> uses IT.pm<br>
+				In the ITv1 protocol is used to sent a default ITclock from 250 and it may be necessary in the IT-Modul to define the attribute ITclock</li>
+    <li>ELV FS10 -> 10_FS10</li>
+    <li>ELV FS20 -> 10_FS20</li>
+	</ul>
+	<br>
+	
+	Temperatur / humidity sensors
+	<ul>
+		<li>PEARL NC7159, LogiLink WS0002,GT-WT-02,AURIOL,TCM97001, TCM27 and many more -> 14_CUL_TCM97001 </li>
+		<li>Oregon Scientific v2 and v3 Sensors  -> 41_OREGON.pm</li>
+		<li>Temperatur / humidity sensors suppored -> 14_SD_WS07</li>
     <li>technoline WS 6750 and TX70DTH -> 14_SD_WS07</li>
     <li>Eurochon EAS 800z -> 14_SD_WS07</li>
     <li>CTW600, WH1080	-> 14_SD_WS09 </li>
     <li>Hama TS33C, Bresser Thermo/Hygro Sensor -> 14_Hideki</li>
     <li>FreeTec Aussenmodul NC-7344 -> 14_SD_WS07</li>
+    <li>La Crosse WS-7035, WS-7053, WS-7054 -> 14_CUL_TX</li>
+    <li>ELV WS-2000, La Crosse WS-7000 -> 14_CUL_WS</li>
 	</ul>
-	<br><br>
+	<br>
 
 	It is possible to attach more than one device in order to get better
 	reception, fhem will filter out duplicate messages.<br><br>
@@ -4279,16 +4329,15 @@ With a # at the beginnging whitelistIDs can be deactivated.
 		<br><br>
 		Input args are:
 		<p>
-		P<protocol id>#binarydata#R<num of repeats>#C<optional clock>   (#C is optional) 
-		O<protocol id>#0xhexdata#R<num of repeats>#C<optional clock>    (#C is optional) 
-		
-		<br>Example: P0#0101#R3#C500
+		<ul><li>P<protocol id>#binarydata#R<num of repeats>#C<optional clock>   (#C is optional) 
+		<br>Example binarydata: <code>set sduino sendMsg P0#0101#R3#C500</code>
 		<br>Will generate the raw send command for the message 0101 with protocol 0 and instruct the arduino to send this three times and the clock is 500.
-		<br>SR;R=3;P0=500;P1=-9000;P2=-4000;P3=-2000;D=03020302;
-		<br>Example: P29#0xF7E#R4
+		<br>SR;R=3;P0=500;P1=-9000;P2=-4000;P3=-2000;D=03020302;</li></ul><br>
+		<ul><li>P<protocol id>#0xhexdata#R<num of repeats>#C<optional clock>    (#C is optional) 
+		<br>Example 0xhexdata: <code>set sduino sendMsg P29#0xF7E#R4</code>
 		<br>Generates the raw send command with the hex message F7E with protocl id 29 . The message will be send four times.
 		<br>SR;R=4;P0=-8360;P1=220;P2=-440;P3=-220;P4=440;D=01212121213421212121212134;
-		</p>
+		</p></li></ul>
 
 		
 		</li><br>
@@ -4351,34 +4400,36 @@ With a # at the beginnging whitelistIDs can be deactivated.
 
 	<table>
 	<tr><td>
-	Der <a href="https://wiki.fhem.de/wiki/SIGNALduino">SIGNALduino</a> ist basierend auf eine Idee von "mdorenka" und ver&ouml;ffentlicht im <a
-	href="http://forum.fhem.de/index.php/topic,17196.0.html">FHEM Forum</a>.<br>
+	Der <a href="https://wiki.fhem.de/wiki/SIGNALduino">SIGNALduino</a> ist basierend auf einer Idee von "mdorenka" und ver&ouml;ffentlicht im <a href="http://forum.fhem.de/index.php/topic,17196.0.html">FHEM Forum</a>.<br>
 
-	Mit der OpenSource-Firmware (hier der <a
-	href="https://github.com/RFD-FHEM/SIGNALduino">Link</a>) ist dieser f&auml;hig
-	f&uuml;r den Empfang und zum Senden verschiedener Protokolle von diversen Medien. Derzeit sind 433Mhz / 868Mhz Protokolle implementiert.
+	Mit der OpenSource-Firmware (<a href="https://github.com/RFD-FHEM/SIGNALduino">GitHub</a>) ist dieser f&auml;hig zum Empfangen und Senden verschiedener Protokolle auf 433 und 868 Mhz.
 	<br><br>
 	
-	Folgende Ger&auml;teunterst&uuml;tzung sind ist derzeit verf&uuml;gbar:
+	Folgende Ger&auml;te werden zur Zeit unterst&uuml;tzt:
 	<br><br>
 	
 	Funk-Schalter<br>
-	ITv1 & ITv3/Elro und andere Marken mit dem pt2263-Chip oder welche das arctech Protokoll nutzen --> IT.pm<br><br>
-	
-	Das ITv1 Protokoll benutzt einen Standard ITclock von 250 und es kann vorkommen, in dem IT-Modul das Attribut "ITclock" zu setzen.<br>
-	<br><br>
-	Temperatur / Feuchtigkeits Sensoren:
 	<ul>
-	<li>PEARL NC7159, LogiLink WS0002,GT-WT-02,AURIOL,TCM97001, TCM27 und viele anderen -> 14_CUL_TCM97001.pm</li>
-	<li>Oregon Scientific v2 und v3 Sensoren  -> 41_OREGON.pm</li>
-	<li>Temperatur / Feuchtigkeits Sensoren unterst&uuml;tzt -> 14_SD_WS07.pm</li>
+		<li>ITv1 & ITv3/Elro und andere Marken mit dem pt2263-Chip oder welche das arctech Protokoll nutzen --> IT.pm<br>
+				Das ITv1 Protokoll benutzt einen Standard ITclock von 250 und es kann vorkommen, das in dem IT-Modul das Attribut "ITclock" zu setzen ist.</li>
+    <li>ELV FS10 -> 10_FS10</li>
+    <li>ELV FS20 -> 10_FS20</li>
+	</ul>
+	
+	Temperatur-, Luftfeuchtigkeits-, Luftdruck-, Helligkeits-, Regen- und Windsensoren:
+	<ul>
+		<li>PEARL NC7159, LogiLink WS0002,GT-WT-02,AURIOL,TCM97001, TCM27 und viele anderen -> 14_CUL_TCM97001.pm</li>
+		<li>Oregon Scientific v2 und v3 Sensoren  -> 41_OREGON.pm</li>
+		<li>Temperatur / Feuchtigkeits Sensoren unterst&uuml;tzt -> 14_SD_WS07.pm</li>
     <li>technoline WS 6750 und TX70DTH -> 14_SD_WS07.pm</li>
     <li>Eurochon EAS 800z -> 14_SD_WS07.pm</li>
     <li>CTW600, WH1080	-> 14_SD_WS09.pm</li>
     <li>Hama TS33C, Bresser Thermo/Hygro Sensoren -> 14_Hideki.pm</li>
     <li>FreeTec Aussenmodul NC-7344 -> 14_SD_WS07.pm</li>
+    <li>La Crosse WS-7035, WS-7053, WS-7054 -> 14_CUL_TX</li>
+    <li>ELV WS-2000, La Crosse WS-7000 -> 14_CUL_WS</li>
 	</ul>
-	<br><br>
+	<br>
 
 	Es ist m&ouml;glich, mehr als ein Ger&auml;t anzuschließen, um beispielsweise besseren Empfang zu erhalten. FHEM wird doppelte Nachrichten herausfiltern.<br><br>
 
@@ -4590,7 +4641,7 @@ Mit diesem Attribut können Sie steuern, ob jede Logmeldung auch als Ereignis be
          </ul><br>
 	<li>reset<br></li>
 	&Ouml;ffnet die Verbindung zum Ger&auml;t neu und initialisiert es. <br><br>
-	<li>sendMsg<br></li>
+	<li>sendMsg</li>
 	Dieser Befehl erstellt die erforderlichen Anweisungen zum Senden von Rohdaten &uuml;ber den SIGNALduino. Sie k&ouml;nnen die Signaldaten wie Protokoll und die Bits angeben, die Sie senden m&ouml;chten.<br>
 	Alternativ ist es auch möglich, die zu sendenden Daten in hexadezimaler Form zu übergeben. Dazu muss ein 0x vor den Datenteil geschrieben werden.
 	<br><br>
@@ -4598,16 +4649,15 @@ Mit diesem Attribut können Sie steuern, ob jede Logmeldung auch als Ereignis be
 		<br><br>
 		Argumente sind:
 		<p>
-		P<protocol id>#binarydata#R<anzahl der wiederholungen>#C<optional taktrate>   (#C is optional) 
-		O<protocol id>#0xhexdata#R<anzahl der wiederholungen>#C<optional taktrate>    (#C is optional) 
-		
-		<br>Beispiel: P29#0101#R3#C500
+		<ul><li>P<protocol id>#binarydata#R<anzahl der wiederholungen>#C<optional taktrate>   (#C is optional) 
+		<br>Beispiel binarydata: <code>set sduino sendMsg P29#0101#R3#C500</code>
 		<br>Wird eine sende Kommando für die Bitfolge 0101 anhand der protocol id 0 erzeugen. Als Takt wird 500 verwendet.
-		<br>SR;R=3;P0=500;P1=-9000;P2=-4000;P3=-2000;D=03020302;
-		<br>Beispiel: P29#0xF7E#R4
+		<br>SR;R=3;P0=500;P1=-9000;P2=-4000;P3=-2000;D=03020302;<br></li></ul><br>
+		<ul><li>P<protocol id>#0xhexdata#R<anzahl der wiederholungen>#C<optional taktrate>    (#C is optional) 
+		<br>Beispiel 0xhexdata: <code>set sduino sendMsg P29#0xF7E#R4</code>
 		<br>Wird eine sende Kommando für die Hexfolge F7E anhand der protocol id 29 erzeugen. Die Nachricht soll 4x gesenset werden.
 		<br>SR;R=4;P0=-8360;P1=220;P2=-440;P3=-220;P4=440;D=01212121213421212121212134;
-		</p>
+		</p></li></ul>
 
 		
 	

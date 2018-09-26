@@ -1,6 +1,8 @@
-SIGNALduino - FHEM Modules development Version 3.3.1 
+SIGNALduino - FHEM Modules development Version 3.3.x 
 
 ======
+
+[![Coverage Status](https://coveralls.io/repos/github/RFD-FHEM/RFFHEM/badge.svg?branch=dev-r33)](https://coveralls.io/github/RFD-FHEM/RFFHEM?branch=dev-r33) [![Build Status](https://travis-ci.org/RFD-FHEM/RFFHEM.svg?branch=dev-r33)](https://travis-ci.org/RFD-FHEM/RFFHEM)
 
 Counterpart of SIGNALDuino uC, it's the code for FHEM to work with the data received from the uC
 
@@ -43,6 +45,8 @@ Supported Devices / Protocols
 |Clarus | remote power socket|
 |WH2 | (TFA 30.3157 nur Temp, Hum = 255 -> nicht angezeigt)|
 |TS-K108W11 | Doorbell |
+|WS-7035, WS-7053, WS7054 | Temperature sensor 433MHz |
+|WS-2000, WS-7000 | Series of various sensors |
 
 How to install
 ======

@@ -1,0 +1,10 @@
+defmod test4 UnitTest dummyDuino 
+( 
+  { 
+     Log3 undef, 2, "this is a Log Message inside our Test";
+     Log3 undef, 2, "this is a second Log Message inside our Test";
+
+  } 
+) 
+;
+attr test4 room tests
