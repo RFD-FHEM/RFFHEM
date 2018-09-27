@@ -37,19 +37,32 @@ do
 done
 
 
-RETURN=$(perl $FHEM_SCRIPT 7072 "reload 98_UnitTest")  # only for testing
-echo $RETURN
+#RETURN=$(echo "reload 98_UnitTest" | /bin/nc localhost 7072)
+#echo $RETURN
+
 
 printf "\n\n--------- Starting test %s: ---------\n" $1 
 
 # Load test definitions, and import them to our running instance
+oIFS=$IFS
+IFS=$';\n'  # Split into array at every ";" char 
+command eval CMD='($(<test/$1-definition.txt))'
+IFS=$oIFS
+unset oIFS  
+command eval DEF='$(printf "%s;;" ${CMD[@]})'  # Add after every line ;; and store in DEF
 
-CMD=$( sed '/{/,/}/s/;/;;/g' test/"$1"-definition.txt)
-#echo $CMD
-CMD=$(echo "$CMD" | awk 'BEGIN{RS="\n" ; ORS=" ";}{ print }' )
-#echo $CMD
-RETURN=$(perl $FHEM_SCRIPT 7072 "$CMD")
+CMD=$DEF
+unset DEF
 
+#CMD=$( echo $CMD | sed '/{/,/}/s/;/;;/g')
+#echo $CMD
+#CMD=$(printf "%s" $CMD | awk 'BEGIN{RS="\n" ; ORS=" ";}{ print }' )
+#CMD=$(printf "%q" $CMD )
+
+
+#echo $CMD
+#RETURN=$(perl $FHEM_SCRIPT 7072 "$CMD")
+RETURN=$(echo "$CMD" | /bin/nc localhost 7072)
 echo $RETURN
 
 #Wait until state of current test is finished
@@ -60,11 +73,11 @@ until [ "$(perl $FHEM_SCRIPT 7072 "$CMD")" == "finished" ] ; do
 done
 
 CMD="{ReadingsVal(\"$1\",\"test_output\",\"\")}"
-OUTPUT=$(perl $FHEM_SCRIPT 7072 "$CMD")
+OUTPUT=$(echo "$CMD" | /bin/nc localhost 7072)
 OUTPUT=$(echo $OUTPUT | awk '{gsub(/\\n/,"\n")}1')
 
 CMD="{ReadingsVal(\"$1\",\"test_failure\",\"\")}"
-OUTPUT_FAILED=$(perl $FHEM_SCRIPT 7072 "$CMD")
+OUTPUT_FAILED=$(echo "$CMD" | /bin/nc localhost 7072)
 
 	#echo $OUTPUT
 	#echo $OUTPUT_FAILED
