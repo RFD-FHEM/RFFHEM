@@ -1,17 +1,18 @@
+##############################################
+# 98_unittest.pm 
 #
-#  98_unittest.pm 
-#
+# The file is part of the development SIGNALduino project
+# https://github.com/RFD-FHEM/RFFHEM/blob/dev-r33/test/install.md
+#												 
 
 package main;
 use strict;
 use warnings;
-# Laden evtl. abhängiger Perl- bzw. FHEM-Module
+# Laden evtl. abhÃ¤ngiger Perl- bzw. FHEM-Module
 use Mock::Sub (no_warnings => 1);
-use Test::More tests => 5;
+use Test::More;
 use Data::Dumper qw(Dumper);
 
-
-# Testdefinition
 
 # FHEM Modulfunktionen
 
@@ -28,25 +29,30 @@ sub UnitTest_Define() {
    
     my ($name,$type,$target,$cmd) = split('[ \t]+', $def,4);
 
-    
-	$cmd =~ s/\((.*)\)/$1/s;
-    $hash->{'.testcode'} = $cmd;
-
 
     if (!$cmd) {
         my $msg = "wrong syntax: define <name> UnitTest <name of target device> (Test Code in Perl)";
     	Log3 undef, 2, $msg;
     	return $msg;
     }
+    Log3 $name, 2, "Defined unittest for target: ".$hash->{targetDevice};
+    Log3 $name, 5, "DEV is $cmd";
+    
+    ($hash->{'.testcode'}) = $cmd =~ /(\{[^}{]*(?:(?R)[^}{]*)*+\})/;
+    Log3 $name, 5, "Loaded this code ".$hash->{'.testcode'};
+    
     $hash->{name}  = $name;
     $hash->{targetDevice}  = $target;
     
-    Log3 $name, 2, "Defined unittest for target: ".$hash->{targetDevice};
-	Log3 $name, 5, "Loaded this code ".$hash->{'.testcode'};
 	readingsSingleUpdate($hash, "state", "waiting", 1);
 		
-	
-    
+	## Test starten wenn Fhem bereits initialisiert wurde	
+	if  ($init_done) {
+	   	InternalTimer(gettimeofday()+1, 'UnitTest_Test_generic',$hash,0);       
+	}   	
+    $hash->{test_output}="";
+    $hash->{test_failure}="";
+    $hash->{todo_output}="";
     return undef;
 
 }
@@ -98,28 +104,59 @@ sub UnitTest_Test_generic
 	my $name = $hash->{NAME};
 	my $target = $hash->{targetDevice};
 	my $targetHash = $defs{$target};
+	Log3 $name, 3, "---- Test $name starts here ---->";
 	
 	# Redirect Test Output to internals
 	Test::More->builder->output(\$hash->{test_output});
 	Test::More->builder->failure_output(\$hash->{test_failure});
 	Test::More->builder->todo_output(\$hash->{todo_output});
 	
+	# Disable warnings for prototype mismatch
+	$SIG{__WARN__} = sub {CORE::say $_[0] if $_[0] !~ /Prototype/};
+	
 	Log3 $name, 5, "Running now this code ".$hash->{'.testcode'};
 	
 	readingsSingleUpdate($hash, "state", "running", 1);
-	my $ret =eval $hash->{'.testcode'};
+	my $ret ="";
+	$ret =eval $hash->{'.testcode'};
 	if ($@) {
-		Log3 $name, 5, "return from eval was ".$ret." with error $@";
+		Log3 $name, 5, "return from eval was ".$ret." with error $@" if $ret;
 	}
+
+	# enable warnings for prototype mismatch
+	$SIG{__WARN__} = sub {CORE::say $_[0]};
 	
-	readingsSingleUpdate($hash, "state", "finished", 1);
-	readingsSingleUpdate($hash, "test_output", $hash->{test_output} , 1);
-	readingsSingleUpdate($hash, "test_failure", $hash->{test_failure} , 1);
-	readingsSingleUpdate($hash, "todo_output", $hash->{todo_output} , 1);
+	#$hash->{test_output} =~ tr{\n]{ };
+	#$hash->{test_output} =~ s{\n}{\\n}g;
+    
+    my @test_output_list = split "\n",$hash->{test_output};	
+    foreach my $logine(@test_output_list) {
+    		Log3 $name, 3, $logine;
+    	
+    }
+    my @test_failure_list = split "\n",$hash->{test_failure};	
+    foreach my $logine(@test_failure_list) {
+    		Log3 $name, 3, $logine;
+    }
+    my @test_todo_list = split "\n",$hash->{test_todo} if $hash->{test_todo};
+    foreach my $logine(@test_todo_list) {
+    		Log3 $name, 3, $logine;
+    }
 	
+	Log3 $name, 3, "<---- Test $name ends here ----";
+	
+	readingsBeginUpdate($hash);
+	readingsBulkUpdate($hash, "state", "finished", 1);
+	readingsBulkUpdate($hash, "test_output", "$hash->{test_output}" , 1);
+	readingsBulkUpdate($hash, "test_failure", $hash->{test_failure} , 1);
+	readingsBulkUpdate($hash, "todo_output", $hash->{todo_output} , 1);
+	readingsEndUpdate($hash,1);
+
+
 }
 
 #
+# Demo code yust demonstrating how test code is written
 # Verify if the given device is a signalduino and if it is opened
 #
 
@@ -218,7 +255,7 @@ sub UnitTest_mock_log3
 	
 }
 
-# Eval-Rückgabewert für erfolgreiches
+# Eval-RÃ¼ckgabewert fÃ¼r erfolgreiches
 # Laden des Moduls
 1;
 
@@ -228,7 +265,7 @@ sub UnitTest_mock_log3
 =pod
 =item [helper|device|command]
 =item summary Helpermodule which supports unit tesing
-=item summary_DE Hilfsmodul was es ermöglicht unit test auszuführen
+=item summary_DE Hilfsmodul was es ermÃ¶glicht unit test auszufÃ¼hren
 
 =begin html
  <a name="UnitTest"></a>

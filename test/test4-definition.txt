@@ -1,0 +1,16 @@
+defmod test4 UnitTest dummyDuino ( 
+{ 
+my $mock = Mock::Sub->new;
+$attr{$target}{eventlogging}=0;
+my $DoTrigger = $mock->mock("DoTrigger");
+my $logmsg = "check with eventlogging=0";
+SIGNALduino_Log3 $target, 2, $logmsg;
+is($DoTrigger->called_count, 0, "check if not called DoTrigger from SIGNALduino_Log3");
+
+$attr{$target}{eventlogging}=1;
+$logmsg = "check with eventlogging=1";
+SIGNALduino_Log3 $target, 2, $logmsg;
+is($DoTrigger->called_count, 1, "check if called DoTrigger from SIGNALduino_Log3");
+
+} 
+)
