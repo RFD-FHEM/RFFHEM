@@ -2815,9 +2815,18 @@ sub SIGNALduino_IdList($@)
 		}
 		if ($bflag == 1 && defined($BlacklistIDs{$id}))
 		{
-			SIGNALduino_Log3 $name, 4, "$name skip Blacklist ID $id";
+			#SIGNALduino_Log3 $name, 4, "$name skip Blacklist ID $id";
 			next;
 		}
+		
+		if (defined($ProtocolListSIGNALduino{$id}{developId}) && substr($ProtocolListSIGNALduino{$id}{developId},0,1) eq "m") {
+			my $devid = "m$id";
+			if ($develop !~ m/$devid/) {		# skip wenn die Id nicht im Attribut development steht
+				#SIGNALduino_Log3 $name, 3, "$name: ID=$devid skiped (developId=m)";
+				push (@skipedId, $devid);
+				next;
+			}
+		}																					 
 		
 		if (defined($ProtocolListSIGNALduino{$id}{developId}) && substr($ProtocolListSIGNALduino{$id}{developId},0,1) eq "p") {
 			my $devid = "p$id";
@@ -4141,7 +4150,8 @@ sub SIGNALduino_Log3($$$)
         Create triggers for additional device values. Right now these are RSSI, RAWMSG and DMSG.
         </li>
         <li>blacklist_IDs<br>
-        The blacklist works only if a whitelist not exist.
+        <a name="blacklist_IDs"></a>
+        The blacklist works only if a whitelist not exist. <a name=" "></a>
         </li>
         <li>cc1101_frequency<br>
         Since the PA table values ​​are frequency-dependent, is at 868 MHz a value greater 800 required.
@@ -4152,16 +4162,16 @@ sub SIGNALduino_Log3($$$)
 	This will bring the module in a very verbose debug output. Usefull to find new signals and verify if the demodulation works correctly.
 	</li>
 	<li>development<br>
+	<a name="development"></a>
 	With development you can enable protocol decoding for protocolls witch are still in development and may not be very accurate implemented. 
 	This can result in crashes or throw high amount of log entrys in your logfile, so be careful to use this. <br><br>
 	
 	Protocols flagged with a developID flag are not loaded unless specified to do so.<br>
 	
-	If the flag developId => 'y' is set in the protocol defintion then the protocol is still in development. You can enable it with the attribute:<br>
-	Specify "y" followed with the protocol id to enable it.<br><br>
-    If the protocoll is developed well, but the logical module is not ready, developId => 'm' is set.<br> 
-    You can enable it with the attribute:<br>
-	Specify "m" followed with the protocol id to enable it.<br>
+	<ul><li>If the flag developId => 'y' is set in the protocol defintion then the protocol is still in development. You can enable it with the attribute:<br>
+	Specify "y" followed with the protocol id to enable it.</li>
+    <li>If the protocoll is developed well, but the logical module is not ready, developId => 'm' is set. 
+    You can enable it with the attribute: <br> Specify "m" followed with the protocol id to enable it. <a name=" "></li></ul></a><br>
 	</li>
 	<li>doubleMsgCheck_IDs<br>
 	This attribute allows it, to specify protocols which must be received two equal messages to call dispatch to the modules.<br>
@@ -4222,12 +4232,13 @@ When set to "1" received raw messages triggers events
 <li>suppressDeviceRawmsg<br>
 When set to 1, the internal "RAWMSG" will not be updated with the received messages
 </li>
-<li>whitelistIDs<br>
+<li>whitelist_IDs<br>
+<a name="whitelist_IDs"></a>
 This attribute allows it, to specify whichs protocos are considured from this module.
 Protocols which are not considured, will not generate logmessages or events. They are then completly ignored. 
 This makes it possible to lower ressource usage and give some better clearnes in the logs.
 You can specify multiple whitelistIDs wih a colon : 0,3,7,12<br>
-With a # at the beginnging whitelistIDs can be deactivated.
+With a # at the beginnging whitelistIDs can be deactivated. <a name=" "></a>
 </li><br>
    <li>WS09_CRCAUS<br>
        <br>0: CRC-Check WH1080 CRC = 0  on, default   
@@ -4459,15 +4470,21 @@ With a # at the beginnging whitelistIDs can be deactivated.
 	<li><a href="#addvaltrigger">addvaltrigger</a><br></li>
 	Generiert Trigger f&uuml;r zus&auml;tzliche Werte. Momentan werden DMSG , RAWMSG und RSSI unterst&uuml;zt.<br><br>
 	<li>blacklist_IDs<br></li>
-	Dies ist eine durch Komma getrennte Liste. Die Blacklist funktioniert nur, wenn keine Whitelist existiert! Hier kann man ID´s eintragen welche man nicht ausgewertet haben m&ouml;chte.<br><br>
+	<a name="blacklist_IDs"></a>
+	Dies ist eine durch Komma getrennte Liste. Die Blacklist funktioniert nur, wenn keine Whitelist existiert! Hier kann man ID´s eintragen welche man nicht ausgewertet haben m&ouml;chte.	<a name=" "></a><br><br>
 	<li>cc1101_frequency<br></li>
 	Frequenzeinstellung des cc1101. | Bsp: 433.920Mhz / 868.350Mhz<br><br>
 	<li>debug<br>
 	Dies bringt das Modul in eine sehr ausf&uuml;hrliche Debug-Ausgabe im Logfile. Somit lassen sich neue Signale finden und Signale &uuml;berpr&uuml;fen, ob die Demodulation korrekt funktioniert.</li><br>
 	<li>development<br>
+	<a name="development"></a>
 	Mit development k&ouml;nnen Sie die Protokolldekodierung f&uuml;r Protokolle aktivieren, die sich noch in der Entwicklung befinden und m&ouml;glicherweise nicht sehr genau implementiert sind.
-	Dies kann zu Abst&uuml;rzen oder zu einer hohen Anzahl an Log-Eintr&auml;gen in Ihrer Logdatei f&uuml;hren. Protokolle, die mit einem developmentID-Flag gekennzeichnet sind, werden nicht geladen, sofern dies nicht angegeben ist.
-	Wenn das Flag developId => 'y' in der Protokolldefinition gesetzt ist, befindet sich das Protokoll noch in der Entwicklung. Wenn Sie es aktivieren wollen, so geben Sie "y" gefolgt von der Protokoll-ID an.</li><br>
+	Dies kann zu Abst&uuml;rzen oder zu einer hohen Anzahl an Log-Eintr&auml;gen in Ihrer Logdatei f&uuml;hren. Protokolle, die mit einem developmentID-Flag gekennzeichnet sind, werden nicht geladen, sofern dies nicht angegeben ist.<br>
+	<ul><li>Wenn das Flag developId => 'm' in der Protokolldefinition gesetzt ist, befindet sich das logische Modul in der Entwicklung.
+	Wenn Sie es aktivieren wollen, so geben Sie "m" gefolgt von der Protokoll-ID an.</li>
+	<li>Wenn das Flag developId => 'p' in der Protokolldefinition gesetzt ist, wurde die ID reserviert.</li>
+	<li>Wenn das Flag developId => 'y' in der Protokolldefinition gesetzt ist, befindet sich das Protokoll noch in der Entwicklung.
+	Wenn Sie es aktivieren wollen, so geben Sie "y" gefolgt von der Protokoll-ID an.</li><a name=" "></a></li></ul><br>
 	<li><a href="#do_not_notify">do_not_notify</a></li><br>
 	<li>doubleMsgCheck_IDs<br></li>
 	Dieses Attribut erlaubt es, Protokolle anzugeben, die zwei gleiche Nachrichten enthalten m&uuml;ssen, um diese an die Module zu &uuml;bergeben. Sie k&ouml;nnen mehrere IDs mit einem Komma angeben: 0,3,7,12<br><br>
@@ -4524,8 +4541,9 @@ Mit diesem Attribut können Sie steuern, ob jede Logmeldung auch als Ereignis be
 	<li>suppressDeviceRawmsg</li>
 	Bei der Einstellung "1" wird das interne "RAWMSG" nicht mit den empfangenen Nachrichten aktualisiert.<br><br>
 	<li>whitelist_IDs<br></li>
+	<a name="whitelist_IDs"></a>
 	Dieses Attribut erlaubt es, festzulegen, welche Protokolle von diesem Modul aus verwendet werden. Protokolle, die nicht beachtet werden, erzeugen keine Logmeldungen oder Ereignisse. Sie werden dann vollst&auml;ndig ignoriert.
-	Dies erm&ouml;glicht es, die Ressourcennutzung zu reduzieren und bessere Klarheit in den Protokollen zu erzielen. Sie k&ouml;nnen mehrere WhitelistIDs mit einem Komma angeben: 0,3,7,12. Mit einer # am Anfang k&ouml;nnen WhitelistIDs deaktiviert werden.<br><br>
+	Dies erm&ouml;glicht es, die Ressourcennutzung zu reduzieren und bessere Klarheit in den Protokollen zu erzielen. Sie k&ouml;nnen mehrere WhitelistIDs mit einem Komma angeben: 0,3,7,12. Mit einer # am Anfang k&ouml;nnen WhitelistIDs deaktiviert werden. <a name=" "></a><br><br>
 	<li>WS09_CRCAUS<br>
 		<ul>
 			<li>0: CRC-Check WH1080 CRC = 0 on, Standard</li>
@@ -4639,7 +4657,7 @@ Mit diesem Attribut können Sie steuern, ob jede Logmeldung auch als Ereignis be
 		Argumente sind:
 		<p>
 		<ul><li>P<protocol id>#binarydata#R<anzahl der wiederholungen>#C<optional taktrate>   (#C is optional) 
-		<br>Beispiel binarydata: <code>set sduino sendMsg P29#0101#R3#C500</code>
+		<br>Beispiel binarydata: <code>set sduino sendMsg P0#0101#R3#C500</code>
 		<br>Wird eine sende Kommando für die Bitfolge 0101 anhand der protocol id 0 erzeugen. Als Takt wird 500 verwendet.
 		<br>SR;R=3;P0=500;P1=-9000;P2=-4000;P3=-2000;D=03020302;<br></li></ul><br>
 		<ul><li>P<protocol id>#0xhexdata#R<anzahl der wiederholungen>#C<optional taktrate>    (#C is optional) 
