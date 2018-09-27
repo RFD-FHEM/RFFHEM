@@ -210,7 +210,7 @@ SIGNALduino_Initialize($)
 					  ." hexFile"
                       ." initCommands"
                       ." flashCommand"
-  					  ." hardware:nano,promini,nanoCC1101,miniculCC1101,radinocc1101,ESP_1M,ESP32"
+  					  ." hardware:ESP_1M,ESP32,nano,nanoCC1101,miniculCC1101,promini,radinoCC1101"
 					  ." firmwareUpdates:stable,testing"
 					  ." debug:0,1"
 					  ." longids"
@@ -313,8 +313,7 @@ SIGNALduino_Define($$)
 
   if( !defined( $attr{$name}{flashCommand} ) ) {
 #    $attr{$name}{flashCommand} = "avrdude -p atmega328P -c arduino -P [PORT] -D -U flash:w:[HEXFILE] 2>[LOGFILE]"
-     $attr{$name}{flashCommand} = "avrdude -c arduino -b [BAUDRATE] -P [PORT] -p atmega328p -vv -U flash:w:[HEXFILE] 2>[LOGFILE]"; 
-    
+     $attr{$name}{flashCommand} = "avrdude -c arduino -b [BAUDRATE] -P [PORT] -p atmega328p -vv -U flash:w:[HEXFILE] 2>[LOGFILE]";
   }
   $hash->{DeviceName} = $dev;
   
@@ -2841,6 +2840,27 @@ SIGNALduino_Attr(@)
 		} else {
 			SIGNALduino_Log3 $name, 3, "$name: setting cc1101_frequency to 868";
 			$hash->{cc1101_frequency} = 868;
+		}
+	}
+	
+	elsif ($aName eq "hardware")	# to set flashCommand if hardware def or change
+	{
+		# Option: hardware and flashCommand mod if hardware mod after define hardware
+		
+		# radinoCC1101 Port not /dev/ttyUSB0 --> /dev/ttyACM0
+		if ($aVal eq "radinoCC1101") {
+			$attr{$name}{flashCommand} = "avrdude -c avr109 -b [BAUDRATE] -P [PORT] -p atmega32u4 -vv -D -U flash:w:[HEXFILE] 2>[LOGFILE]";
+		# nano, nanoCC1101, miniculCC1101, promini
+		} elsif ($aVal ne "radinoCC1101" && $aVal ne "ESP_1M" && $aVal ne "ESP32") {
+			$attr{$name}{flashCommand} = "avrdude -c arduino -b [BAUDRATE] -P [PORT] -p atmega328p -vv -U flash:w:[HEXFILE] 2>[LOGFILE]";
+		# ESP_1M, ESP32
+		} elsif ($aVal eq "ESP_1M" || $aVal eq "ESP32") {
+			if (exists $attr{$name}{flashCommand}) { delete $attr{$name}{flashCommand};}
+		}
+		
+		# to delete flashCommand if hardware delete
+		if ($cmd eq "del") {
+			if (exists $attr{$name}{flashCommand}) { delete $attr{$name}{flashCommand};}
 		}
 	}
 	
