@@ -461,12 +461,14 @@ SIGNALduino_Set($@)
     my $hexFile = "";
     my @deviceName = split('@', $hash->{DeviceName});
     my $port = $deviceName[0];
-	my $hardware=AttrVal($name,"hardware","nano328");
+	my $hardware=AttrVal($name,"hardware","");
 	my $baudrate=$hardware eq "uno" ? 115200 : 57600;
     my $defaultHexFile = "./FHEM/firmware/$hash->{TYPE}_$hardware.hex";
     my $logFile = AttrVal("global", "logdir", "./log/") . "$hash->{TYPE}-Flash.log";
 
-    #SIGNALduino_Log3 $hash, 3, "SIGNALduino_Set choosen flash option: $args[0] of available: ".Dumper($my_sets{flash});
+	return "Please define Attributes hardware" if ($hardware eq "");
+	
+	#SIGNALduino_Log3 $hash, 3, "SIGNALduino_Set choosen flash option: $args[0] of available: ".Dumper($my_sets{flash});
     
 	if( grep $args[0] eq $_ , split(",",$my_sets{flash}) )
 	{
@@ -516,6 +518,14 @@ SIGNALduino_Set($@)
     $log .= "log file: $logFile\n";
 
     my $flashCommand = AttrVal($name, "flashCommand", "");
+	
+	# Option: hardware set, but flashCommand are deleted before FHEM restart because standard flashCommand in SIGNALduino_Define
+	if ($hardware eq "radinoCC1101") {																	# radinoCC1101 Port not /dev/ttyUSB0 --> /dev/ttyACM0
+		$flashCommand = "avrdude -c avr109 -b [BAUDRATE] -P [PORT] -p atmega32u4 -vv -D -U flash:w:[HEXFILE] 2>[LOGFILE]";
+	} elsif ($hardware ne "radinoCC1101" && $hardware ne "ESP_1M" && $hardware ne "ESP32") {			# nano, nanoCC1101, miniculCC1101, promini
+		$flashCommand = "avrdude -c arduino -b [BAUDRATE] -P [PORT] -p atmega328p -vv -U flash:w:[HEXFILE] 2>[LOGFILE]";
+	}
+
 
     if($flashCommand ne "") {
       if (-e $logFile) {
