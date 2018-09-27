@@ -7,7 +7,7 @@ dummyDuino
     $Log3->side_effect( sub { 
           if ($_[2] =~ /skiped/)
           {  
-            like($_[2],qr/9999/,"check if protocl id 9999 is skipped" )
+            unlike($_[2],qr/9999/,"check if protocl id 9999 is skipped" )
           }
         } 
      );
