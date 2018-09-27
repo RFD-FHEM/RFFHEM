@@ -1,6 +1,6 @@
 27.09.2018
  signalduino_protocols.hash - doc 00_SIGNALduino.pm - fixed code (output developId=m failed), doc developId revised
- 90_SIGNALduino_un.pm - fixed code and added more information in log and readings
+ 90_SIGNALduino_un.pm - fixed code and added more information in log and readings, fixed PERL WARNING
 20.09.2018
  00_SIGNALduino.pm - doc sendMSG revised
 20.09.2018
