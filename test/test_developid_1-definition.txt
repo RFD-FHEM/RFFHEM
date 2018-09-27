@@ -1,4 +1,4 @@
-ddefmod test_mu_1 UnitTest ummyDuino 
+defmod test_mu_1 UnitTest ummyDuino 
 (
  { 
     
