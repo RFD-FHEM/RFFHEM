@@ -1,0 +1,25 @@
+dummyDuino 
+(
+ { 
+    
+    my $mock = Mock::Sub->new;
+    my $Log3= $mock->mock("SIGNALduino_Log3");
+    $Log3->side_effect( sub { 
+          if ($_[2] =~ /skiped/)
+          {  
+            like($_[2],qr/9999/,"check if protocl id 9999 is skipped" )
+          }
+        } 
+     );
+
+    my $id = 9999;	
+    $main::ProtocolListSIGNALduino{$id} =
+        {
+            name			=> 'test protocol',		
+			comment			=> 'none' ,
+			id          	=> '9999',
+			developId		=> 'm',
+	 },
+     my $logret = SIGNALduino_IdList("x:$target","","","m9999");  
+}
+);
