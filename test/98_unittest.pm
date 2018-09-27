@@ -1,6 +1,9 @@
+##############################################
+# 98_unittest.pm 
 #
-#  98_unittest.pm 
-#
+# The file is part of the development SIGNALduino project
+# https://github.com/RFD-FHEM/RFFHEM/blob/dev-r33/test/install.md
+#												 
 
 package main;
 use strict;
@@ -117,7 +120,7 @@ sub UnitTest_Test_generic
 	my $ret ="";
 	$ret =eval $hash->{'.testcode'};
 	if ($@) {
-		Log3 $name, 5, "return from eval was ".$ret." with error $@";
+		Log3 $name, 5, "return from eval was ".$ret." with error $@" if $ret;
 	}
 
 	# enable warnings for prototype mismatch
@@ -135,7 +138,7 @@ sub UnitTest_Test_generic
     foreach my $logine(@test_failure_list) {
     		Log3 $name, 3, $logine;
     }
-    my @test_todo_list = split "\n",$hash->{test_todo};	
+    my @test_todo_list = split "\n",$hash->{test_todo} if $hash->{test_todo};
     foreach my $logine(@test_todo_list) {
     		Log3 $name, 3, $logine;
     }
