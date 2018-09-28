@@ -338,7 +338,7 @@ sub SIGNALduino_Connect($$)
 
 	# damit wird die err-msg nur einmal ausgegeben
 	if (!defined($hash->{disConnFlag}) && $err) {
-		SIGNALduino_Log3($hash, 3, "SIGNALduino $hash->{NAME}: ${err}");
+		SIGNALduino_Log3($hash, 3, "$hash->{NAME}: ${err}");
 		$hash->{disConnFlag} = 1;
 	}
 }
@@ -1593,7 +1593,7 @@ sub SIGNALduino_ParseHttpResponse
 
     if($err ne "")               											 		# wenn ein Fehler bei der HTTP Abfrage aufgetreten ist
     {
-        SIGNALduino_Log3 $name, 3, "error while requesting ".$param->{url}." - $err";    		# Eintrag fürs Log
+        SIGNALduino_Log3 $name, 3, "$name: error while requesting ".$param->{url}." - $err";    		# Eintrag fürs Log
     }
     elsif($param->{code} eq "200" && $data ne "")                                                       		# wenn die Abfrage erfolgreich war ($data enthaelt die Ergebnisdaten des HTTP Aufrufes)
     {
@@ -1611,7 +1611,7 @@ sub SIGNALduino_ParseHttpResponse
 	    		($filename = $param->{path}) =~s/.*\///;
 			}
 			
-	    	SIGNALduino_Log3 $name, 3, "$name: Downloaded $filename firmware from ".$param->{host};
+	    	SIGNALduino_Log3 $name, 3, "$hash->{TYPE} $name: Downloaded $filename firmware from ".$param->{host};
 	    	SIGNALduino_Log3 $name, 5, "$name: Header = ".$param->{httpheader};
 	
 			
@@ -1627,7 +1627,7 @@ sub SIGNALduino_ParseHttpResponse
 			
     	}
     } else {
-    	SIGNALduino_Log3 $name, 3, "undefined error while requesting ".$param->{url}." - $err - code=".$param->{code};    		# Eintrag fürs Log
+    	SIGNALduino_Log3 $name, 3, "$name: undefined error while requesting ".$param->{url}." - $err - code=".$param->{code};    		# Eintrag fürs Log
     }
 }
 
