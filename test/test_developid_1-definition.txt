@@ -9,7 +9,7 @@ defmod test_developid_1 UnitTest dummyDuino (
 	};
 	my $msg;
 	my $use_like;
-	my $regex="9999ut";
+	my $regex=$local_ProtocolListSIGNALduino->{'9999ut'}{id};
 	my $mock = Mock::Sub->new;
     my $Log3= $mock->mock("SIGNALduino_Log3");
 		$Log3->side_effect( sub { 
