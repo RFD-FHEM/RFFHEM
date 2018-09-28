@@ -4595,11 +4595,11 @@ With a # at the beginnging whitelistIDs can be deactivated. <a name=" "></a>
 			</ul>
 			<li>2) force bootloader:<ul>
 			- pressing reset button twice</ul>
-			</li><br>
-			<b>If the bootloader is enabled, it signals with a flashing LED. Then you have 8 seconds to flash.</b>
-		</ul>
-		</li><a name=" "></a><br>
-		</ul>
+			</li></ul>
+		<li>In bootloader mode, the radino gets a different USB ID.</li><br>
+		<b>If the bootloader is enabled, it signals with a flashing LED. Then you have 8 seconds to flash.</b>
+		</li><a name=" "></a>
+		</ul><br>
 		
 		<a name=" "></a>
 		<li>sendMsg<br>
@@ -4916,7 +4916,7 @@ Mit diesem Attribut können Sie steuern, ob jede Logmeldung auch als Ereignis be
 	<li>disableMessagetype<br>
 			Erm&ouml;glicht das Deaktivieren der Nachrichtenverarbeitung f&uuml;r
 			<ul>
-				<li>Nachrichten mit sync (syncedMS),</li>
+				<li>Nachrichten mit sync (syncedMS)</li>
 				<li>Nachrichten ohne einen sync pulse (unsyncedMU)</li> 
 				<li>Manchester codierte Nachrichten (manchesterMC) </li>
 			</ul>
@@ -4948,11 +4948,12 @@ Mit diesem Attribut können Sie steuern, ob jede Logmeldung auch als Ereignis be
 			</ul>
 			<li>2) Bootloader erzwingen:<ul>
 			- durch zweimaliges drücken der Reset-Taste</ul>
-			</li><br>
-			<b>Wenn der Bootloader aktiviert ist, signalisiert er das mit dem Blinken einer LED. Dann hat man ca. 8 Sekunden Zeit zum flashen.</b>
+			</li>
 		</ul>
-		</li><a name=" "></a><br>
-	</ul>
+		<li>Im Bootloader-Modus erh&auml;lt der radino eine andere USB ID.</li><br>
+		<b>Wenn der Bootloader aktiviert ist, signalisiert er das mit dem Blinken einer LED. Dann hat man ca. 8 Sekunden Zeit zum flashen.</b>
+		</li><a name=" "></a>
+	</ul><br>
 	<li>raw<br></li>
 	Geben Sie einen SIGNALduino-Firmware-Befehl aus, ohne auf die vom SIGNALduino zur&uuml;ckgegebenen Daten zu warten. Ausf&uuml;hrliche Informationen zu SIGNALduino-Befehlen finden Sie im SIGNALduino-Firmware-Code. Mit dieser Linie k&ouml;nnen Sie fast jedes Signal &uuml;ber einen angeschlossenen Sender senden.<br>
 	Um einige Rohdaten zu senden, schauen Sie sich diese Beispiele an: P#binarydata#R#C (#C is optional)
