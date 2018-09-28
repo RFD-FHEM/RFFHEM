@@ -90,7 +90,7 @@ testlog=$(awk '/Test '"$1"' starts here ---->/,/<---- Test '"$1"' ends here/' /o
 
 printf "Output of %s:\n\n%s" $1 $OUTPUT
 
-if [ -z "$OUTPUT_FAILED" || $2 != "debug" ]
+if [ -z "$OUTPUT_FAILED"  ]
 then
     if [ $(echo $testlog | grep -Fxc "PERL WARNING") -gt 0 ]
 	then
