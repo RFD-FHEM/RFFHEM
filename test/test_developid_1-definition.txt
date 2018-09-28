@@ -1,37 +1,47 @@
-defmod test_developid_1 UnitTest dummyDuino 
-(
+defmod test_developid_1 UnitTest dummyDuino (
  { 
     my $local_ProtocolListSIGNALduino = SIGNALduino_getProtocolList();
-    my $mock = Mock::Sub->new;
-    my $Log3= $mock->mock("SIGNALduino_Log3");
-    $Log3->side_effect( sub { 
-          if ($_[2] =~ /skiped/)
-          {  
-            like($_[2],qr/9999ut/,"check if protocl id 9999ut is skipped" );
-            Log3 $_[0], $_[1] ,$_[2];
-          }
-        } 
-     );
-
-  $local_ProtocolListSIGNALduino->{'9999ut'} =
-        {
+	$local_ProtocolListSIGNALduino->{'9999ut'} =
+	{
 			name			=> 'Unittest dummy protocol',
 			comment         => 'unittest protocol',
 			id				=> '9999ut',
 			developId		=> 'm',
-	    };
-    
-    SIGNALduino_IdList("x:$target","",""," ");  
-    $Log3->side_effect( sub { 
-          if ($_[2] =~ /skiped/)
-          {  
-            unlike($_[2],qr/9999ut/,"check if protocol id 9999ut is not skiped" );
-            Log3 $_[0], $_[1] ,$_[2];
-          }
-        } 
-     );
+	};
+	my $mock = Mock::Sub->new;
+    my $Log3= $mock->mock("SIGNALduino_Log3");
+	subtest 'SIGNALduino_IdList developid "m" skip scenariois' => sub {
+	
+		my $msg;
+		plan tests => 3;
+		$Log3->side_effect( sub { 
+			Log3 $_[0], $_[1] ,$_[2] if ($_[2] =~ /skiped/ &&  like($_[2],qr/9999ut/,$msg ))
+		} 
+		);
+		$msg="development is empty" ;
+		SIGNALduino_IdList("x:$target","","","");
+		$msg="development has other m75" ;
+		SIGNALduino_IdList("x:$target","","","m75"); 
+		$msg="development has y9999ut" ;
+		SIGNALduino_IdList("x:$target","","","y9999ut");  
 
-    SIGNALduino_IdList("x:$target","","","m9999ut");  
+	};
+	subtest 'SIGNALduino_IdList development "m" not skiped scenariois' => sub {
+	
+		my $msg;
+		plan tests => 2;
+		$Log3->side_effect( sub { 
+			Log3 $_[0], $_[1] ,$_[2] if ($_[2] =~ /skiped/ &&  unlike($_[2],qr/9999ut/,$msg ))
+		} 
+		);
+		$msg="development is m9999ut" ;
+		SIGNALduino_IdList("x:$target","","","m9999ut");  
+		$msg="development is m75 m9999ut u73 " ;
+		SIGNALduino_IdList("x:$target","","","m75 m9999ut u73"); 
 
-}
+	};
+	
+
+	}
 );
+
