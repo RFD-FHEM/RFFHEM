@@ -456,6 +456,7 @@ SIGNALduino_Set($@)
     my $logFile = AttrVal("global", "logdir", "./log/") . "$hash->{TYPE}-Flash.log";
 
 	return "Please define your hardware! (attr $name hardware <model of your receiver>) " if ($hardware eq "");
+	return "ERROR: argument failed! flash [hexFile|url]" if (!$args[0]);
 	
 	#SIGNALduino_Log3 $hash, 3, "SIGNALduino_Set choosen flash option: $args[0] of available: ".Dumper($my_sets{flash});
     
@@ -497,7 +498,7 @@ SIGNALduino_Set($@)
     } else {
       $hexFile = $args[0];
     }
-	SIGNALduino_Log3 $name, 3, "$hash->{TYPE} $name: filename $hexFile provided, trying to flash";
+	SIGNALduino_Log3 $name, 5, "$hash->{TYPE} $name: filename $hexFile provided, trying to flash";
  
     return "Usage: set $name flash [filename]\n\nor use the hexFile attribute" if($hexFile !~ m/^(\w|\/|.)+$/);
 
@@ -508,7 +509,7 @@ SIGNALduino_Set($@)
 
 	my $flashCommand;
     if( !defined( $attr{$name}{flashCommand} ) ) {		# check defined flashCommand from user | not, use standard flashCommand | yes, use user flashCommand
-			SIGNALduino_Log3 $name, 3, "$hash->{TYPE} $name: flashCommand are not defined. standard used to flash.";
+			SIGNALduino_Log3 $name, 5, "$hash->{TYPE} $name: flashCommand are not defined. standard used to flash.";
 		if ($hardware eq "radinoCC1101") {																	# radinoCC1101 Port not /dev/ttyUSB0 --> /dev/ttyACM0
 			$flashCommand = "avrdude -c avr109 -b [BAUDRATE] -P [PORT] -p atmega32u4 -vv -D -U flash:w:[HEXFILE] 2>[LOGFILE]";
 		} elsif ($hardware ne "radinoCC1101" && $hardware ne "ESP_1M" && $hardware ne "ESP32") {			# nano, nanoCC1101, miniculCC1101, promini
@@ -4434,19 +4435,19 @@ sub SIGNALduino_githubParseHttpResponse($)
 			</li>
 			<li>[LOGFILE]<br>
 			The logfile that collects information about the flash process. It gets displayed in FHEM after finishing the flash process</li>
-		</ul><a name=" "></a>
-    
-    </li>
+		</ul><br>
+		<u><i>note:</u></i> ! Sometimes there can be problems flashing radino on Linux. <a href="https://wiki.in-circuit.de/index.php5?title=radino_common_problems">Here in the wiki under the point "radino & Linux" is a patch!</a><a name=" "></a><a name=" "></a>
+    </li><br>
     <li>hardware<br>
       	When using the flash command, you should specify what hardware you have connected to the usbport. Doing not, can cause failures of the device.
 		<ul>
+			<li>ESP_1MCC1101: ESP8266 with 1 MB flash and CC1101 receiver</li>
+			<li>ESP32: ESP32 </li>
 			<li>nano328: Arduino Nano with cheap receiver</li>
 			<li>nanoCC1101: Arduino Nano wirh CC110x receiver</li>
-			<li>promini328: Arduino Pro Mini with cheap receiver </li>
 			<li>miniculCC1101: Arduino pro Mini with CC110x receiver and cables as a minicul</li>
+			<li>promini328: Arduino Pro Mini with cheap receiver </li>
 			<li>radinoCC1101: Arduino compatible radino with cc1101 receiver</li>
-			<li>ESP_1MCC1101: ESP8266 wirh 1 MB flash and CC1101 receiver</li>
-			<li>ESP32: ESP32 </li>
 		</ul>
 	</li><br>
 	<li>firmwareUpdates<br>
@@ -4503,7 +4504,7 @@ With a # at the beginnging whitelistIDs can be deactivated. <a name=" "></a>
        <br>0: CRC-Check WH1080 CRC = 0  on, default   
        <br>2: CRC = 49 (x031) WH1080, set OK
     </li>
-   </ul>
+   </ul><br>
    
    
     
@@ -4552,18 +4553,17 @@ With a # at the beginnging whitelistIDs can be deactivated. <a name=" "></a>
 		<br>Example 1: set sduino raw SR;R=3;P0=500;P1=-9000;P2=-4000;P3=-2000;D=0302030  sends the data in raw mode 3 times repeated
         <br>Example 2: set sduino raw SM;R=3;P0=500;C=250;D=A4F7FDDE  sends the data manchester encoded with a clock of 250uS
         <br>Example 3: set sduino raw SC;R=3;SR;P0=5000;SM;P0=500;C=250;D=A4F7FDDE  sends a combined message of raw and manchester encoded repeated 3 times
-
-		<br>;
 		</p>
 
 
-		</li><br>
+		</li>
 		<li>reset<br>
 		This will do a reset of the usb port and normaly causes to reset the uC connected.
 		</li><br>
 		<li>close<br>
 		Closes the connection to the device.
 		</li><br>
+		<a name="flash"></a>
 		<li>flash [hexFile|url]<br>
 			The SIGNALduino needs the right firmware to be able to receive and deliver the sensor data to fhem. In addition to the way using the
 			arduino IDE to flash the firmware into the SIGNALduino this provides a way to flash it directly from FHEM.
@@ -4575,10 +4575,14 @@ With a # at the beginnging whitelistIDs can be deactivated. <a name=" "></a>
 					On a Raspberry PI this can be done with: sudo apt-get install avrdude</li>
 				<li>the hardware attribute must be set if using any other hardware as an Arduino nano<br>
 					This attribute defines the command, that gets sent to avrdude to flash the uC.<br></li>
-		     	<br>
-	
 			</ul>
-		</li>
+	Example:
+	<ul>
+	<li>flash via hexFile: <code>set sduino flash ./FHEM/firmware/SIGNALduino_mega2560.hex</code></li>
+	<li>flash via url for Nano with CC1101: <code>set sduino flash https://github.com/RFD-FHEM/SIGNALDuino/releases/download/3.3.1-RC7/SIGNALDuino_nanocc1101.hex</code></li>
+	</ul><a name=" "></a><br>
+	</li>
+		</li><a name=" "></a>
 		<li>sendMsg<br>
 		This command will create the needed instructions for sending raw data via the signalduino. Insteaf of specifying the signaldata by your own you specify 
 		a protocol and the bits you want to send. The command will generate the needed command, that the signalduino will send this.
@@ -4588,22 +4592,26 @@ With a # at the beginnging whitelistIDs can be deactivated. <a name=" "></a>
 		<br><br>
 		Input args are:
 		<p>
-		<ul><li>P<protocol id>#binarydata#R<num of repeats>#C<optional clock>   (#C is optional) 
-		<br>Example binarydata: <code>set sduino sendMsg P0#0101#R3#C500</code>
-		<br>Will generate the raw send command for the message 0101 with protocol 0 and instruct the arduino to send this three times and the clock is 500.
-		<br>SR;R=3;P0=500;P1=-9000;P2=-4000;P3=-2000;D=03020302;</li></ul><br>
-		<ul><li>P<protocol id>#0xhexdata#R<num of repeats>#C<optional clock>    (#C is optional) 
-		<br>Example 0xhexdata: <code>set sduino sendMsg P29#0xF7E#R4</code>
-		<br>Generates the raw send command with the hex message F7E with protocl id 29 . The message will be send four times.
-		<br>SR;R=4;P0=-8360;P1=220;P2=-440;P3=-220;P4=440;D=01212121213421212121212134;
-		</p></li></ul>
-
-		
-		</li><br>
+			<ul>
+				<li>P<protocol id>#binarydata#R<num of repeats>#C<optional clock>   (#C is optional) 
+				<br>Example binarydata: <code>set sduino sendMsg P0#0101#R3#C500</code>
+				<br>Will generate the raw send command for the message 0101 with protocol 0 and instruct the arduino to send this three times and the clock is 500.
+				<br>SR;R=3;P0=500;P1=-9000;P2=-4000;P3=-2000;D=03020302;
+				</li>
+			</ul><br>
+			<ul>
+				<li>P<protocol id>#0xhexdata#R<num of repeats>#C<optional clock>    (#C is optional) 
+					<br>Example 0xhexdata: <code>set sduino sendMsg P29#0xF7E#R4</code>
+					<br>Generates the raw send command with the hex message F7E with protocl id 29 . The message will be send four times.
+					<br>SR;R=4;P0=-8360;P1=220;P2=-440;P3=-220;P4=440;D=01212121213421212121212134;
+					</p>
+				</li>
+			</ul>
+		</li>
 		<li>enableMessagetype<br>
 			Allows you to enable the message processing for 
 			<ul>
-				<li>messages with sync (syncedMS),</li>
+				<li>messages with sync (syncedMS)</li>
 				<li>messages without a sync pulse (unsyncedMU) </li>
 				<li>manchester encoded messages (manchesterMC) </li>
 			</ul>
@@ -4617,7 +4625,7 @@ With a # at the beginnging whitelistIDs can be deactivated. <a name=" "></a>
 				<li>manchester encoded messages (manchesterMC) </li>
 			</ul>
 			The new state will be saved into the eeprom of your arduino.
-		</li><br><br>
+		</li><br>
 		
 		<li>freq / bWidth / patable / rAmpl / sens<br>
 		Only with CC1101 receiver.<br>
@@ -4769,23 +4777,24 @@ With a # at the beginnging whitelistIDs can be deactivated. <a name=" "></a>
 			</li>
 			<li>[LOGFILE]<br>
 			Die Logdatei, die Informationen &uuml;ber den Flash-Prozess sammelt. Es wird nach Abschluss des Flash-Prozesses in FHEM angezeigt</li>
-		</ul><a name=" "></a>
+		</ul><br>
+	<u><i>Hinweis:</u></i> ! Teilweise kann es beim flashen vom radino unter Linux Probleme geben. <a href="https://wiki.in-circuit.de/index.php5?title=radino_common_problems">Hier im Wiki unter dem Punkt "radino & Linux" gibt es einen Patch!</a><a name=" "></a>
 	</li><br>
 	<li>hardware<br>
 		Derzeit m&ouml;gliche Hardware Varianten:
 		<ul>
-			<li>nano328: Arduino Nano f&uuml;r "Billig"-Empf&auml;nger</li>
-			<li>nanoCC1101: Arduino Nano f&uuml;r einen CC110x-Empf&auml;nger</li>
-			<li>promini328: Arduino Pro Mini f&uuml;r "Billig"-Empf&auml;nger</li>
-			<li>miniculCC1101: Arduino pro Mini mit einen CC110x-Empf&auml;nger entsprechend dem minicul verkabelt</li>
-			<li>radinoCC1101: Ein Arduino Kompatibler Radino mit cc1101 receiver</li>
 			<li>ESP_1MCC1101: ESP8266 mit 1 MB Flash und einem CC1101</li>
 			<li>ESP32: ESP32 </li>
-			
-		</ul>
+			<li>nano328: Arduino Nano f&uuml;r "Billig"-Empf&auml;nger</li>
+			<li>nanoCC1101: Arduino Nano f&uuml;r einen CC110x-Empf&auml;nger</li>
+			<li>miniculCC1101: Arduino pro Mini mit einen CC110x-Empf&auml;nger entsprechend dem minicul verkabelt</li>
+			<li>promini328: Arduino Pro Mini f&uuml;r "Billig"-Empf&auml;nger</li>
+			<li>radinoCC1101: Ein Arduino Kompatibler Radino mit cc1101 receiver</li>
+		</ul><br>
+		Notwendig f&uuml;r den Befehl <code>flash</code>. Hier sollten Sie angeben, welche Hardware Sie mit dem usbport verbunden haben. Andernfalls kann es zu Fehlfunktionen des Ger&auml;ts kommen.<br>
 	</li><br>
 	<li>firmwareUpdates<br>
-		Das Modul sucht nach Verf�gbaren Firmware Vesionen und bietet diesen zum Flashen an. Mit dem Attribut kann festgelegt werden ob nur stabile Versionen angezeigt werden oder auch vorabversionen einer neuen Firmware.
+		Das Modul sucht nach verf&uuml;gbaren Firmware Vesionen und bietet diesen zum Flashen an. Mit dem Attribut kann festgelegt werden ob nur stabile Versionen angezeigt werden oder auch vorabversionen einer neuen Firmware.
 		Die Option testing inkludiert auch die stabilen Versionen.
 		<ul>
 			<li>stable: Als stabil getestete Versionen, erscheint nur sehr selten</li>
@@ -4793,7 +4802,6 @@ With a # at the beginnging whitelistIDs can be deactivated. <a name=" "></a>
 		</ul>
 	</li><br>
 	
-	Notwendig f&uuml;r den Befehl <code>flash</code>. Hier sollten Sie angeben, welche Hardware Sie mit dem usbport verbunden haben. Andernfalls kann es zu Fehlfunktionen des Ger&auml;ts kommen.<br><br>
 	<li>longids<br></li>
 	Durch Komma getrennte Liste von Device-Typen f&uuml;r Empfang von langen IDs mit dem SIGNALduino. Diese zus&auml;tzliche ID erlaubt es Wettersensoren, welche auf dem gleichen Kanal senden zu unterscheiden. Hierzu wird eine zuf&auml;llig generierte ID hinzugef&uuml;gt. Wenn Sie longids verwenden, dann wird in den meisten F&auml;llen nach einem Batteriewechsel ein neuer Sensor angelegt. Standardm&auml;ßig werden keine langen IDs verwendet.
 	Folgende Module verwenden diese Funktionalit&auml;t: 14_Hideki, 41_OREGON, 14_CUL_TCM97001, 14_SD_WS07.<br>
@@ -4895,13 +4903,19 @@ Mit diesem Attribut können Sie steuern, ob jede Logmeldung auch als Ereignis be
 			</ul>
 			Der neue Status wird in den eeprom vom Arduino geschrieben.
 		</li><br>
+	<a name="flash"></a>
 	<li>flash [hexFile|url]<br>
 	Der SIGNALduino ben&ouml;tigt die richtige Firmware, um die Sensordaten zu empfangen und zu liefern. Unter Verwendung der Arduino IDE zum Flashen der Firmware in den SIGNALduino bietet dies eine M&ouml;glichkeit, ihn direkt von FHEM aus zu flashen. Sie k&ouml;nnen eine Datei auf Ihrem fhem-Server angeben oder eine URL angeben, von der die Firmware heruntergeladen wird.
 	Es gibt einige Anforderungen:
 			<ul>
 				<li><code>avrdude</code> muss auf dem Host installiert sein. Auf einem Raspberry PI kann dies getan werden mit: <code>sudo apt-get install avrdude</code></li>
 				<li>Das Hardware-Attribut muss festgelegt werden, wenn eine andere Hardware als Arduino Nano verwendet wird. Dieses Attribut definiert den Befehl, der an avrdude gesendet wird, um den uC zu flashen.</li>
-			</ul><br>
+			</ul>
+	Beispiele:
+	<ul>
+	<li>flash via hexFile: <code>set sduino flash ./FHEM/firmware/SIGNALduino_mega2560.hex</code></li>
+	<li>flash via url f&uuml;r einen Nano mit CC1101: <code>set sduino flash https://github.com/RFD-FHEM/SIGNALDuino/releases/download/3.3.1-RC7/SIGNALDuino_nanocc1101.hex</code></li>
+	</ul><br><a name=" "></a>
 	</li>
 	<li>raw<br></li>
 	Geben Sie einen SIGNALduino-Firmware-Befehl aus, ohne auf die vom SIGNALduino zur&uuml;ckgegebenen Daten zu warten. Ausf&uuml;hrliche Informationen zu SIGNALduino-Befehlen finden Sie im SIGNALduino-Firmware-Code. Mit dieser Linie k&ouml;nnen Sie fast jedes Signal &uuml;ber einen angeschlossenen Sender senden.<br>
