@@ -304,17 +304,6 @@ SIGNALduino_Define($$)
   #$hash->{CMDS} = "";
   $hash->{Clients} = $clientsSIGNALduino;
   $hash->{MatchList} = \%matchListSIGNALduino;
-  
-
-  #if( !defined( $attr{$name}{hardware} ) ) {
-  #  $attr{$name}{hardware} = "nano328";
-  #}
-
-
-  if( !defined( $attr{$name}{flashCommand} ) ) {
-#    $attr{$name}{flashCommand} = "avrdude -p atmega328P -c arduino -P [PORT] -D -U flash:w:[HEXFILE] 2>[LOGFILE]"
-     $attr{$name}{flashCommand} = "avrdude -c arduino -b [BAUDRATE] -P [PORT] -p atmega328p -vv -U flash:w:[HEXFILE] 2>[LOGFILE]";
-  }
   $hash->{DeviceName} = $dev;
   
   my $ret=undef;
@@ -466,7 +455,7 @@ SIGNALduino_Set($@)
     my $defaultHexFile = "./FHEM/firmware/$hash->{TYPE}_$hardware.hex";
     my $logFile = AttrVal("global", "logdir", "./log/") . "$hash->{TYPE}-Flash.log";
 
-	return "Please define Attributes hardware" if ($hardware eq "");
+	return "Please define your hardware! (attr $name hardware <model of your receiver>) " if ($hardware eq "");
 	
 	#SIGNALduino_Log3 $hash, 3, "SIGNALduino_Set choosen flash option: $args[0] of available: ".Dumper($my_sets{flash});
     
@@ -508,7 +497,7 @@ SIGNALduino_Set($@)
     } else {
       $hexFile = $args[0];
     }
-	SIGNALduino_Log3 $name, 3, "$name: filename $hexFile provided, trying to flash";
+	SIGNALduino_Log3 $name, 3, "$hash->{TYPE} $name: filename $hexFile provided, trying to flash";
  
     return "Usage: set $name flash [filename]\n\nor use the hexFile attribute" if($hexFile !~ m/^(\w|\/|.)+$/);
 
@@ -517,16 +506,20 @@ SIGNALduino_Set($@)
     $log .= "port: $port\n";
     $log .= "log file: $logFile\n";
 
-    my $flashCommand = AttrVal($name, "flashCommand", "");
-	
-	# Option: hardware set, but flashCommand are deleted before FHEM restart because standard flashCommand in SIGNALduino_Define
-	if ($hardware eq "radinoCC1101") {																	# radinoCC1101 Port not /dev/ttyUSB0 --> /dev/ttyACM0
-		$flashCommand = "avrdude -c avr109 -b [BAUDRATE] -P [PORT] -p atmega32u4 -vv -D -U flash:w:[HEXFILE] 2>[LOGFILE]";
-	} elsif ($hardware ne "radinoCC1101" && $hardware ne "ESP_1M" && $hardware ne "ESP32") {			# nano, nanoCC1101, miniculCC1101, promini
-		$flashCommand = "avrdude -c arduino -b [BAUDRATE] -P [PORT] -p atmega328p -vv -U flash:w:[HEXFILE] 2>[LOGFILE]";
+	my $flashCommand;
+    if( !defined( $attr{$name}{flashCommand} ) ) {		# check defined flashCommand from user | not, use standard flashCommand | yes, use user flashCommand
+			SIGNALduino_Log3 $name, 3, "$hash->{TYPE} $name: flashCommand are not defined. standard used to flash.";
+		if ($hardware eq "radinoCC1101") {																	# radinoCC1101 Port not /dev/ttyUSB0 --> /dev/ttyACM0
+			$flashCommand = "avrdude -c avr109 -b [BAUDRATE] -P [PORT] -p atmega32u4 -vv -D -U flash:w:[HEXFILE] 2>[LOGFILE]";
+		} elsif ($hardware ne "radinoCC1101" && $hardware ne "ESP_1M" && $hardware ne "ESP32") {			# nano, nanoCC1101, miniculCC1101, promini
+			$flashCommand = "avrdude -c arduino -b [BAUDRATE] -P [PORT] -p atmega328p -vv -U flash:w:[HEXFILE] 2>[LOGFILE]";
+		}
+	} else {
+		$flashCommand = $attr{$name}{flashCommand};
+		SIGNALduino_Log3 $name, 3, "$hash->{TYPE} $name: flashCommand are manual defined! $flashCommand";
 	}
-
-
+	
+	
     if($flashCommand ne "") {
       if (-e $logFile) {
         unlink $logFile;
@@ -2855,19 +2848,6 @@ SIGNALduino_Attr(@)
 	
 	elsif ($aName eq "hardware")	# to set flashCommand if hardware def or change
 	{
-		# Option: hardware and flashCommand mod if hardware mod after define hardware
-		
-		# radinoCC1101 Port not /dev/ttyUSB0 --> /dev/ttyACM0
-		if ($aVal eq "radinoCC1101") {
-			$attr{$name}{flashCommand} = "avrdude -c avr109 -b [BAUDRATE] -P [PORT] -p atmega32u4 -vv -D -U flash:w:[HEXFILE] 2>[LOGFILE]";
-		# nano, nanoCC1101, miniculCC1101, promini
-		} elsif ($aVal ne "radinoCC1101" && $aVal ne "ESP_1M" && $aVal ne "ESP32") {
-			$attr{$name}{flashCommand} = "avrdude -c arduino -b [BAUDRATE] -P [PORT] -p atmega328p -vv -U flash:w:[HEXFILE] 2>[LOGFILE]";
-		# ESP_1M, ESP32
-		} elsif ($aVal eq "ESP_1M" || $aVal eq "ESP32") {
-			if (exists $attr{$name}{flashCommand}) { delete $attr{$name}{flashCommand};}
-		}
-		
 		# to delete flashCommand if hardware delete
 		if ($cmd eq "del") {
 			if (exists $attr{$name}{flashCommand}) { delete $attr{$name}{flashCommand};}
@@ -4433,10 +4413,17 @@ sub SIGNALduino_githubParseHttpResponse($)
 	You can specify multiple IDs wih a colon : 0,3,7,12<br>
 	</li>
 	<li>flashCommand<br>
+	<a name="flashCommand"></a>
     	This is the command, that is executed to performa the firmware flash. Do not edit, if you don't know what you are doing.<br>
-    	The default is: avrdude -p atmega328P -c arduino -P [PORT] -D -U flash:w:[HEXFILE] 2>[LOGFILE]<br>
+		If the attribute not defined, it uses the default settings. <b>If the user defines the attribute manually, the system uses the specifications!</b><br>
+    	<ul>
+		<li>default for nano, nanoCC1101, miniculCC1101, promini: <code>avrdude -c arduino -b [BAUDRATE] -P [PORT] -p atmega328p -vv -U flash:w:[HEXFILE] 2>[LOGFILE]</code></li>
+		<li>default for radinoCC1101: <code>avrdude -c avr109 -b [BAUDRATE] -P [PORT] -p atmega32u4 -vv -D -U flash:w:[HEXFILE] 2>[LOGFILE]</code></li>
+		</ul>
 		It contains some place-holders that automatically get filled with the according values:<br>
 		<ul>
+			<li>[BAUDRATE]<br>
+			is the speed (e.g. 57600)</li>
 			<li>[PORT]<br>
 			is the port the Signalduino is connectd to (e.g. /dev/ttyUSB0) and will be used from the defenition</li>
 			<li>[HEXFILE]<br>
@@ -4447,7 +4434,7 @@ sub SIGNALduino_githubParseHttpResponse($)
 			</li>
 			<li>[LOGFILE]<br>
 			The logfile that collects information about the flash process. It gets displayed in FHEM after finishing the flash process</li>
-		</ul>
+		</ul><a name=" "></a>
     
     </li>
     <li>hardware<br>
@@ -4761,10 +4748,17 @@ With a # at the beginnging whitelistIDs can be deactivated. <a name=" "></a>
 	<li>doubleMsgCheck_IDs<br></li>
 	Dieses Attribut erlaubt es, Protokolle anzugeben, die zwei gleiche Nachrichten enthalten m&uuml;ssen, um diese an die Module zu &uuml;bergeben. Sie k&ouml;nnen mehrere IDs mit einem Komma angeben: 0,3,7,12<br><br>
 	<li>flashCommand<br>
-	Dies ist der Befehl, der ausgef&uuml;hrt wird, um den Firmware-Flash auszuf&uuml;hren. Nutzen Sie dies nicht, wenn Sie nicht wissen, was Sie tun.<br>
-	Standard: <code>avrdude -p atmega328P -c arduino -P [PORT] -D -U flash:w:[HEXFILE] 2>[LOGFILE]</code><br><br>
+	<a name="flashCommand"></a>
+	Dies ist der Befehl, der ausgef&uuml;hrt wird, um den Firmware-Flash auszuf&uuml;hren. Nutzen Sie dies nicht, wenn Sie nicht wissen, was Sie tun!<br>
+	Wurde das Attribut nicht definiert, so verwendet es die Standardeinstellungen. <b>Sobald der User das Attribut manuell definiert, nutzt das System die Vorgaben!</b><br>
+	<ul>
+	<li>Standard nano, nanoCC1101, miniculCC1101, promini: <code>avrdude -c arduino -b [BAUDRATE] -P [PORT] -p atmega328p -vv -U flash:w:[HEXFILE] 2>[LOGFILE]</code></li>
+	<li>Standard radinoCC1101: <code>avrdude -c avr109 -b [BAUDRATE] -P [PORT] -p atmega32u4 -vv -D -U flash:w:[HEXFILE] 2>[LOGFILE]</code></li>
+	</ul>
 	Es enth&auml;lt einige Platzhalter, die automatisch mit den entsprechenden Werten gef&uuml;llt werden:
 		<ul>
+			<li>[BAUDRATE]<br>
+			Ist die Schrittgeschwindigkeit. (z.Bsp: 57600)</li>
 			<li>[PORT]<br>
 			Ist der Port, an den der SIGNALduino angeschlossen ist (z.Bsp: /dev/ttyUSB0) und wird von der Defenition verwendet.</li>
 			<li>[HEXFILE]<br>
@@ -4775,7 +4769,7 @@ With a # at the beginnging whitelistIDs can be deactivated. <a name=" "></a>
 			</li>
 			<li>[LOGFILE]<br>
 			Die Logdatei, die Informationen &uuml;ber den Flash-Prozess sammelt. Es wird nach Abschluss des Flash-Prozesses in FHEM angezeigt</li>
-		</ul>
+		</ul><a name=" "></a>
 	</li><br>
 	<li>hardware<br>
 		Derzeit m&ouml;gliche Hardware Varianten:
