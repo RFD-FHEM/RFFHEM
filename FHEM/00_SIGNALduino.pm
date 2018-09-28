@@ -4576,13 +4576,32 @@ With a # at the beginnging whitelistIDs can be deactivated. <a name=" "></a>
 				<li>the hardware attribute must be set if using any other hardware as an Arduino nano<br>
 					This attribute defines the command, that gets sent to avrdude to flash the uC.<br></li>
 			</ul>
-	Example:
-	<ul>
-	<li>flash via hexFile: <code>set sduino flash ./FHEM/firmware/SIGNALduino_mega2560.hex</code></li>
-	<li>flash via url for Nano with CC1101: <code>set sduino flash https://github.com/RFD-FHEM/SIGNALDuino/releases/download/3.3.1-RC7/SIGNALDuino_nanocc1101.hex</code></li>
-	</ul><a name=" "></a><br>
-	</li>
-		</li><a name=" "></a>
+		Example:
+		<ul>
+			<li>flash via hexFile: <code>set sduino flash ./FHEM/firmware/SIGNALduino_mega2560.hex</code></li>
+			<li>flash via url for Nano with CC1101: <code>set sduino flash https://github.com/RFD-FHEM/SIGNALDuino/releases/download/3.3.1-RC7/SIGNALDuino_nanocc1101.hex</code></li>
+		</ul><br>
+		</li>
+		</li>
+		<u><i>note model radino:</u></i><ul>
+		<li>Sometimes there can be problems flashing radino on Linux. <a href="https://wiki.in-circuit.de/index.php5?title=radino_common_problems">Here in the wiki under point "radino & Linux" is a patch!</a></li>
+		<li>To activate the bootloader of the radino there are 2 variants.
+		<ul><li>1) modules that contain a BSL-button:</li>
+			<ul>
+			- apply supply voltage<br>
+			- press & hold BSL- and RESET-Button<br>
+			- release RESET-button, release BSL-button<br>
+			 (repeat these steps if your radino doesn't enter bootloader mode right away.)
+			</ul>
+			<li>2) force bootloader:<ul>
+			- pressing reset button twice</ul>
+			</li><br>
+			<b>If the bootloader is enabled, it signals with a flashing LED. Then you have 8 seconds to flash.</b>
+		</ul>
+		</li><a name=" "></a><br>
+		</ul>
+		
+		<a name=" "></a>
 		<li>sendMsg<br>
 		This command will create the needed instructions for sending raw data via the signalduino. Insteaf of specifying the signaldata by your own you specify 
 		a protocol and the bits you want to send. The command will generate the needed command, that the signalduino will send this.
@@ -4915,8 +4934,25 @@ Mit diesem Attribut können Sie steuern, ob jede Logmeldung auch als Ereignis be
 	<ul>
 	<li>flash via hexFile: <code>set sduino flash ./FHEM/firmware/SIGNALduino_mega2560.hex</code></li>
 	<li>flash via url f&uuml;r einen Nano mit CC1101: <code>set sduino flash https://github.com/RFD-FHEM/SIGNALDuino/releases/download/3.3.1-RC7/SIGNALDuino_nanocc1101.hex</code></li>
-	</ul><br><a name=" "></a>
+	</ul>
 	</li>
+	<i><u>Hinweise Modell radino:</u></i><ul>
+		<li>Teilweise kann es beim flashen vom radino unter Linux Probleme geben. <a href="https://wiki.in-circuit.de/index.php5?title=radino_common_problems">Hier im Wiki unter dem Punkt "radino & Linux" gibt es einen Patch!</a></li>
+		<li>Um den Bootloader vom radino zu aktivieren gibt es 2 Varianten.
+		<ul><li>1) Module welche einen BSL-Button besitzen:</li>
+			<ul>
+			- Spannung anlegen<br>
+			- drücke & halte BSL- und RESET-Button<br>
+			- RESET-Button loslassen und danach den BSL-Button loslassen<br>
+			 (Wiederholen Sie diese Schritte, wenn Ihr radino nicht sofort in den Bootloader-Modus wechselt.)
+			</ul>
+			<li>2) Bootloader erzwingen:<ul>
+			- durch zweimaliges drücken der Reset-Taste</ul>
+			</li><br>
+			<b>Wenn der Bootloader aktiviert ist, signalisiert er das mit dem Blinken einer LED. Dann hat man ca. 8 Sekunden Zeit zum flashen.</b>
+		</ul>
+		</li><a name=" "></a><br>
+	</ul>
 	<li>raw<br></li>
 	Geben Sie einen SIGNALduino-Firmware-Befehl aus, ohne auf die vom SIGNALduino zur&uuml;ckgegebenen Daten zu warten. Ausf&uuml;hrliche Informationen zu SIGNALduino-Befehlen finden Sie im SIGNALduino-Firmware-Code. Mit dieser Linie k&ouml;nnen Sie fast jedes Signal &uuml;ber einen angeschlossenen Sender senden.<br>
 	Um einige Rohdaten zu senden, schauen Sie sich diese Beispiele an: P#binarydata#R#C (#C is optional)
