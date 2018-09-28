@@ -4016,7 +4016,7 @@ sub SIGNALduino_compPattern($$$%)
 			$buckets{$key}=$patternListRaw{$key};
 		}
 	}
-
+-
 	return ($cnt,$rawData, %patternListRaw);
 	#print "rdata: ".$msg_parts{rawData}."\n";
 
@@ -4043,6 +4043,13 @@ sub SIGNALduino_Log3($$$)
   }
   
   return Log3($name,$loglevel,$text);
+}
+
+################################################
+# Helper to get a reference of the protocolList Hash
+sub SIGNALduino_getProtocolList()
+{
+	return \%ProtocolListSIGNALduino
 }
 
 #print Dumper (%msg_parts);
