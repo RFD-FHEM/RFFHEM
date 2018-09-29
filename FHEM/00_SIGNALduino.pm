@@ -17,6 +17,7 @@ use Time::HiRes qw(gettimeofday);
 use Data::Dumper qw(Dumper);
 use Scalar::Util qw(looks_like_number);
 no warnings 'portable';
+use JSON;
 
 #$| = 1;		#Puffern abschalten, Hilfreich für PEARL WARNINGS Search
 
@@ -70,6 +71,7 @@ my %gets = (    # Name, Data to send to the SIGNALduino, Regexp for the answer
 #  "FAParms"  => ["fp", '.*' ],
 #  "TCParms"  => ["dp", '.*' ],
 #  "HXParms"  => ["hp", '.*' ]
+  "queryFirmware" => ["none",'none'],
 );
 
 
@@ -89,6 +91,7 @@ my %sets = (
   "cc1101_sens"    => '',
   "cc1101_patable_433" => '-10_dBm,-5_dBm,0_dBm,5_dBm,7_dBm,10_dBm',
   "cc1101_patable_868" => '-10_dBm,-5_dBm,0_dBm,5_dBm,7_dBm,10_dBm',
+  "update" => 'stable,testing',
 );
 
 my %patable = (
@@ -135,7 +138,7 @@ my $clientsSIGNALduino = ":IT:"
 			        	."FLAMINGO:"
 			        	."CUL_WS:"
 			        	."Revolt:"
-					." :"		# Zeilenumbruch
+						." :"		# Zeilenumbruch
 			        	."FS10:"
 			        	."CUL_FHTTK:"
 			        	."Siro:"
@@ -201,12 +204,14 @@ SIGNALduino_Initialize($)
   $hash->{GetFn}   			= "SIGNALduino_Get";
   $hash->{SetFn}   			= "SIGNALduino_Set";
   $hash->{AttrFn}  			= "SIGNALduino_Attr";
+  #$hash->{NotifyFn}         = "SIGNALduino_Notify";
   $hash->{AttrList}			= 
                        "Clients MatchList do_not_notify:1,0 dummy:1,0"
 					  ." hexFile"
                       ." initCommands"
                       ." flashCommand"
   					  ." hardware:ESP_1M,ESP32,nano,nanoCC1101,miniculCC1101,promini,radinoCC1101"
+					  ." firmwareUpdates:stable,testing"
 					  ." debug:0,1"
 					  ." longids"
 					  ." minsecs"
@@ -316,8 +321,12 @@ SIGNALduino_Define($$)
   $hash->{LASTDMSG} = "nothing";
   $hash->{TIME}=time();
   $hash->{versionmodul} = SDUINO_VERSION;
-  
+  #notifyRegexpChanged($hash,"^$name$:^opened\$");  # Auf das Event opened der eigenen Definition reagieren
+  #notifyRegexpChanged($hash,"sduino:opened");  # Auf das Event opened der eigenen Definition reagieren
+  #$hash->{NOTIFYDEV}="$name";
   Log3 $name, 3, "$name: Firmwareversion: ".$hash->{READINGS}{version}{VAL}  if ($hash->{READINGS}{version}{VAL});
+
+
 
   return $ret;
 }
@@ -395,14 +404,23 @@ SIGNALduino_Set($@)
        $CC1101Frequency = $hash->{cc1101_frequency};
     }
   }
-  if (!defined($sets{$a[1]})) {
+  my %my_sets = %sets;
+  #SIGNALduino_Log3 $hash, 3, "SIGNALduino_Set addionals set commands: ".Dumper(%{$hash->{additionalSets}});
+  #SIGNALduino_Log3 $hash, 3, "SIGNALduino_Set normal set commands: ".Dumper(%my_sets);
+  #SIGNALduino_Log3 $hash, 3, "SIGNALduino_Set global set commands: ".Dumper(%sets);
+
+  %my_sets = ( %my_sets,  %{$hash->{additionalSets}} ) if ( defined($hash->{additionalSets}) );
+  
+  
+    
+  if (!defined($my_sets{$a[1]})) {
     my $arguments = ' ';
-    foreach my $arg (sort keys %sets) {
+    foreach my $arg (sort keys %my_sets) {
       next if ($arg =~ m/cc1101/ && $hasCC1101 == 0);
       if ($arg =~ m/patable/) {
         next if (substr($arg, -3) ne $CC1101Frequency);
       }
-      $arguments.= $arg . ($sets{$arg} ? (':' . $sets{$arg}) : '') . ' ';
+      $arguments.= $arg . ($my_sets{$arg} ? (':' . $my_sets{$arg}) : '') . ' ';
     }
     #SIGNALduino_Log3 $hash, 3, "set arg = $arguments";
     return "Unknown argument $a[1], choose one of " . $arguments;
@@ -432,15 +450,33 @@ SIGNALduino_Set($@)
     my $hexFile = "";
     my @deviceName = split('@', $hash->{DeviceName});
     my $port = $deviceName[0];
-	my $hardware=AttrVal($name,"hardware","");
-	my $baudrate=$hardware eq "uno" ? 115200 : 57600;
+	  my $hardware=AttrVal($name,"hardware","");
+	  my $baudrate=$hardware eq "uno" ? 115200 : 57600;
     my $defaultHexFile = "./FHEM/firmware/$hash->{TYPE}_$hardware.hex";
     my $logFile = AttrVal("global", "logdir", "./log/") . "$hash->{TYPE}-Flash.log";
+    return "Please define your hardware! (attr $name hardware <model of your receiver>) " if ($hardware eq "");
+	  return "ERROR: argument failed! flash [hexFile|url]" if (!$args[0]);
 
-	return "Please define your hardware! (attr $name hardware <model of your receiver>) " if ($hardware eq "");
-	return "ERROR: argument failed! flash [hexFile|url]" if (!$args[0]);
-	
-    if(!$arg || $args[0] !~ m/^(\w|\/|.)+$/) {
+    #SIGNALduino_Log3 $hash, 3, "SIGNALduino_Set choosen flash option: $args[0] of available: ".Dumper($my_sets{flash});
+    
+	if( grep $args[0] eq $_ , split(",",$my_sets{flash}) )
+	{
+		SIGNALduino_Log3 $hash, 3, "SIGNALduino_Set try to fetch github assets for tag $args[0]";
+		
+	    my $http_param = {
+                    url        => "https://api.github.com/repos/RFD-FHEM/SIGNALDuino/releases/tags/$args[0]",
+                    timeout    => 5,
+                    hash       => $hash,                                                                                 # Muss gesetzt werden, damit die Callback funktion wieder $hash hat
+                    method     => "GET",                                                                                 # Lesen von Inhalten
+                    header     => "User-Agent: perl_fhem\r\nAccept: application/json",  								 # Den Header gem�ss abzufragender Daten �ndern
+                    callback   =>  \&SIGNALduino_githubParseHttpResponse,                                                # Diese Funktion soll das Ergebnis dieser HTTP Anfrage bearbeiten
+                    command    => "getReleaseByTag"
+                    
+                };
+   		HttpUtils_NonblockingGet($http_param);                                                                                     # Starten der HTTP Abfrage. Es gibt keinen Return-Code. 
+		return;
+	} 
+    elsif(!$arg || $args[0] !~ m/^(\w|\/|.)+$/) {
       $hexFile = AttrVal($name, "hexFile", "");
       if ($hexFile eq "") {
         $hexFile = $defaultHexFile;
@@ -653,8 +689,8 @@ SIGNALduino_Set($@)
 
 		$sendData = $intro . "SM;" . ($repeats > 0 ? "R=$repeats;" : "") . "C=$clock;D=$data;" . $outro . $frequency; #	SM;R=2;C=400;D=AFAFAF;
 		SIGNALduino_Log3 $name, 5, "$name: sendmsg Preparing manchester protocol=$protocol, repeats=$repeats, clock=$clock data=$data";
-		
-	} else {
+
+} else {
 		if ($protocol == 3 || substr($data,0,2) eq "is") {
 			if (substr($data,0,2) eq "is") {
 				$data = substr($data,2);   # is am Anfang entfernen
@@ -717,7 +753,9 @@ SIGNALduino_Set($@)
 	#SIGNALduino_SimpleWrite($hash, $sendData);
 	SIGNALduino_AddSendQueue($hash,$sendData);
 	SIGNALduino_Log3 $name, 4, "$name/set: sending via SendMsg: $sendData";
-	
+  } elsif( $cmd eq "update" ) {
+	  SIGNALduino_Log3 $name, 5, "$name: update msg=$arg";
+	  $my_sets{flash} = $arg;	
   } else {
   	SIGNALduino_Log3 $name, 5, "$name/set: set $name $cmd $arg";
 	#SIGNALduino_SimpleWrite($hash, $arg);
@@ -899,6 +937,8 @@ SIGNALduino_Get($@)
 	
 	return "$a[1]: \n\n$ret\n";
 	#return "$a[1]: \n\n$ret\nIds with modules: $moduleId";
+  }   elsif ($a[1] eq "queryFirmware") {
+  	SIGNALduino_querygithubreleases($hash);
   }
   
 
@@ -1049,8 +1089,7 @@ SIGNALduino_DoInit($)
     @{$hash->{QUEUE}} = ();
     $hash->{sendworking} = 0;
     
- # 	if (($hash->{DEF} !~ m/\@DirectIO/) and ($hash->{DEF} !~ m/none/) )
- if (($hash->{DEF} !~ m/\@directio/) and ($hash->{DEF} !~ m/none/) )
+    if (($hash->{DEF} !~ m/\@directio/) and ($hash->{DEF} !~ m/none/) )
 	{
 		SIGNALduino_Log3 $hash, 1, "$name/init: ".$hash->{DEF};
 		$hash->{initretry} = 0;
@@ -1064,8 +1103,41 @@ SIGNALduino_DoInit($)
 	# Reset the counter
 	delete($hash->{XMIT_TIME});
 	delete($hash->{NR_CMD_LAST_H});
+	
+	
+	
+
+  
+  
+	
 	return;
 	return undef;
+}
+
+sub SIGNALduino_Notify($$)
+{
+  my ($own_hash, $hash) = @_;
+
+  my $devName = $hash->{NAME}; # Device that created the events
+  return "" if(IsDisabled($devName)); # Return without any further action if the module is disabled
+
+  my $events = deviceEvents($hash,1);
+
+  SIGNALduino_Log3 $hash, 3, "$devName/Notify: $devName events: ".Dumper($events);
+
+  return if( !$events );
+
+  foreach my $event (@{$events}) {
+    $event = "" if(!defined($event));
+
+
+	if ($event eq "opened")
+	{
+		#$hash->{setcmd} = %sets;
+		
+	}
+  }
+	
 }
 
 # Disable receiver
@@ -1109,6 +1181,20 @@ sub SIGNALduino_StartInit($)
 	}
 }
 
+######
+#
+# updates possible arguments for set operations and overwrites with a additional list of commands
+#
+######
+sub SIGNALduino_updSetArgs
+{
+		my ($hash,$additionals) = @_;
+		my $name = $hash->{NAME};
+	
+		$hash->{setcmds} = %sets; # Load default set commands		
+		
+		SIGNALduino_Log3 $hash, 3, "$name/Notify: arguments created: ".$hash->{setcmds};
+}
 
 ####################
 sub SIGNALduino_CheckCmdResp($)
@@ -1147,6 +1233,8 @@ sub SIGNALduino_CheckCmdResp($)
 			$hash->{keepalive}{ok}    = 0;
 			$hash->{keepalive}{retry} = 0;
 			InternalTimer(gettimeofday() + SDUINO_KEEPALIVE_TIMEOUT, "SIGNALduino_KeepAlive", $hash, 0);
+			#SIGNALduino_genSetArgs($hash);
+
 		}
 	}
 	else {
@@ -4060,11 +4148,143 @@ sub SIGNALduino_Log3($$$)
   return Log3($name,$loglevel,$text);
 }
 
-#print Dumper (%msg_parts);
-#print "\n";
-#SIGNALduino_filterSign(%msg_parts);
-#print Dumper (%msg_parts);
-#print "\n";
+# - - - - - - - - - - - -
+#=item SIGNALduino_compPattern()
+#This functons, will act as a filter function. It will remove the sign from the pattern, and compress message and pattern
+# 
+# Will return  $count of combined values,  modified $rawData , modified %patternListRaw,
+# =cut
+
+
+sub SIGNALduino_updateSets
+{
+	my ($key,$val)=@_;
+	
+	$sets{$key} = $val if (exists($sets{$key}));
+}
+
+
+
+
+sub SIGNALduino_querygithubreleases
+{
+    my ($hash) = @_;
+    my $name = $hash->{NAME};
+    my $param = {
+                    url        => "https://api.github.com/repos/RFD-FHEM/SIGNALDuino/releases",
+                    timeout    => 5,
+                    hash       => $hash,                                                                                 # Muss gesetzt werden, damit die Callback funktion wieder $hash hat
+                    method     => "GET",                                                                                 # Lesen von Inhalten
+                    header     => "User-Agent: perl_fhem\r\nAccept: application/json",  								 # Den Header gem�ss abzufragender Daten �ndern
+                    callback   =>  \&SIGNALduino_githubParseHttpResponse,                                                # Diese Funktion soll das Ergebnis dieser HTTP Anfrage bearbeiten
+                    command    => "queryReleases"
+                    
+                };
+
+    HttpUtils_NonblockingGet($param);                                                                                     # Starten der HTTP Abfrage. Es gibt keinen Return-Code. 
+}
+
+sub SIGNALduino_githubParseHttpResponse($)
+{
+    my ($param, $err, $data) = @_;
+    my $hash = $param->{hash};
+    my $name = $hash->{NAME};
+
+    if($err ne "")                                                                                                         # wenn ein Fehler bei der HTTP Abfrage aufgetreten ist
+    {
+        Log3 $name, 3, "error while requesting ".$param->{url}." - $err (command: $param->{command}";                                                  # Eintrag f�rs Log
+        #readingsSingleUpdate($hash, "fullResponse", "ERROR");                                                              # Readings erzeugen
+    }
+
+    elsif($data ne "")                                                                                                     # wenn die Abfrage erfolgreich war ($data enth�lt die Ergebnisdaten des HTTP Aufrufes)
+    {
+    	my $json_array = decode_json($data);
+    	#print  Dumper($json_array);
+    	
+       	if ($param->{command} eq "queryReleases") {
+	        #Log3 $name, 3, "url ".$param->{url}." returned: $data";                                                            # Eintrag f�rs Log
+	
+			my @fwreleases;
+			if (ref($json_array) eq "ARRAY") {
+				foreach my $item( @$json_array ) { 
+					my %fwrelease;
+		
+					#Debug " item = ".Dumper($item);
+					$fwrelease{releasename} = $item->{name};
+					$fwrelease{isprerelease} = $item->{prerelease};
+					$fwrelease{tagname} = $item->{tag_name}; # Anzeige in Auswahlbox
+					
+					foreach my $asset (@{$item->{assets}})
+					{
+				    	my %fileinfo;
+						
+						$fileinfo{filename} = $asset->{name};
+						$fileinfo{dlurl} = $asset->{browser_download_url};
+						$fileinfo{create_date} = $asset->{created_at};
+						push @{$fwrelease{files}}, \%fileinfo;
+						
+					}
+		            #Debug $item->{name}.": ".$item->{prerelease}.", ".$item->{assets}[0]->{name}."=".$item->{assets}[0]->{browser_download_url};
+		            
+		            
+		      
+				   #for my $key (keys(%$item)) {
+				     # my $val = $item->{$key};
+		      		  
+		      		#  print "$key: $val\n";
+		      		  
+		    		#}
+					push @fwreleases, \%fwrelease;
+			
+				}
+			}
+			#Debug " releases = ".Data::Dumper->new([\@fwreleases],[qw(fwreleases)])->Indent(3)->Quotekeys(0)->Dump;
+			
+			my $releaselist="";
+			foreach my $release (@fwreleases)
+			{
+				next if (AttrVal($name,"firmwareUpdates","stable") eq "stable" && $release->{isprerelease});
+				
+				$releaselist.=$release->{tagname}.",";
+			}
+			$releaselist =~ s/,$//;
+			
+	        # An dieser Stelle die Antwort parsen / verarbeiten mit $data
+	        #Debug "updating update set with: $releaselist";
+	
+	
+		  $hash->{additionalSets}{flash} = $releaselist;
+	
+	
+	      #readingsSingleUpdate($hash, "fullResponse", $data);                                                                # Readings erzeugen
+    	} elsif ($param->{command} eq "getReleaseByTag") {
+			#Debug " json response = ".Dumper($json_array);
+			
+			my @fwfiles;
+			my $hardware=AttrVal($name,"hardware","nano328");
+			foreach my $asset (@{$json_array->{assets}})
+			{
+				my %fileinfo;
+				if ( $asset->{name} =~ m/$hardware/i)  
+				{
+					$fileinfo{filename} = $asset->{name};
+					$fileinfo{dlurl} = $asset->{browser_download_url};
+					$fileinfo{create_date} = $asset->{created_at};
+					Debug " firmwarefiles = ".Dumper(@fwfiles);
+					push @fwfiles, \%fileinfo;
+					
+					SIGNALduino_Set($hash,$name,"flash",$asset->{browser_download_url}); # $hash->{SetFn
+					
+					last;
+					
+				}
+			}
+			
+    	}
+    }
+    # Damit ist die Abfrage zuende.
+    # Evtl. einen InternalTimer neu schedulen
+}
 
 1;
 
@@ -4227,6 +4447,13 @@ sub SIGNALduino_Log3($$$)
 			<li>miniculCC1101: Arduino pro Mini with CC110x receiver and cables as a minicul</li>
 			<li>promini328: Arduino Pro Mini with cheap receiver </li>
 			<li>radinoCC1101: Arduino compatible radino with cc1101 receiver</li>
+		</ul>
+	</li><br>
+	<li>firmwareUpdates<br>
+		The module searchs for new firmware versions. Depending on your choice, only stable versions are displayed or also prereleases are available for flash. The option testing does also provide the stable ones.
+		<ul>
+			<li>stable: only versions marked as stable are available. These releases are provided very infrequently</li>
+			<li>testing: These versions needs some verifications and provided in shorter intervals</li>
 		</ul>
 	</li><br>
     <li>minsecs<br>
@@ -4579,7 +4806,16 @@ With a # at the beginnging whitelistIDs can be deactivated. <a name=" "></a>
 		</ul><br>
 		Notwendig f&uuml;r den Befehl <code>flash</code>. Hier sollten Sie angeben, welche Hardware Sie mit dem usbport verbunden haben. Andernfalls kann es zu Fehlfunktionen des Ger&auml;ts kommen.<br>
 	</li><br>
-
+	<li>firmwareUpdates<br>
+		Das Modul sucht nach Verf&uml;gbaren Firmware Vesionen und bietet diesen zum Flashen an. Mit dem Attribut kann festgelegt werden ob nur stabile Versionen angezeigt werden oder auch vorabversionen einer neuen Firmware.
+		Die Option testing inkludiert auch die stabilen Versionen.
+		<ul>
+			<li>stable: Als stabil getestete Versionen, erscheint nur sehr selten</li>
+			<li>testing: Neue Versionen, welche noch getestet werden muss</li>
+		</ul>
+	</li><br>
+	
+	Notwendig f&uuml;r den Befehl <code>flash</code>. Hier sollten Sie angeben, welche Hardware Sie mit dem usbport verbunden haben. Andernfalls kann es zu Fehlfunktionen des Ger&auml;ts kommen.<br><br>
 	<li>longids<br></li>
 	Durch Komma getrennte Liste von Device-Typen f&uuml;r Empfang von langen IDs mit dem SIGNALduino. Diese zus&auml;tzliche ID erlaubt es Wettersensoren, welche auf dem gleichen Kanal senden zu unterscheiden. Hierzu wird eine zuf&auml;llig generierte ID hinzugef&uuml;gt. Wenn Sie longids verwenden, dann wird in den meisten F&auml;llen nach einem Batteriewechsel ein neuer Sensor angelegt. Standardm&auml;ßig werden keine langen IDs verwendet.
 	Folgende Module verwenden diese Funktionalit&auml;t: 14_Hideki, 41_OREGON, 14_CUL_TCM97001, 14_SD_WS07.<br>
