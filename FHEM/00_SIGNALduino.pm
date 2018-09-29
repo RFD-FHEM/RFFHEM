@@ -91,7 +91,6 @@ my %sets = (
   "cc1101_sens"    => '',
   "cc1101_patable_433" => '-10_dBm,-5_dBm,0_dBm,5_dBm,7_dBm,10_dBm',
   "cc1101_patable_868" => '-10_dBm,-5_dBm,0_dBm,5_dBm,7_dBm,10_dBm',
-  "update" => 'stable,testing',
 );
 
 my %patable = (
@@ -753,9 +752,6 @@ SIGNALduino_Set($@)
 	#SIGNALduino_SimpleWrite($hash, $sendData);
 	SIGNALduino_AddSendQueue($hash,$sendData);
 	SIGNALduino_Log3 $name, 4, "$name/set: sending via SendMsg: $sendData";
-  } elsif( $cmd eq "update" ) {
-	  SIGNALduino_Log3 $name, 5, "$name: update msg=$arg";
-	  $my_sets{flash} = $arg;	
   } else {
   	SIGNALduino_Log3 $name, 5, "$name/set: set $name $cmd $arg";
 	#SIGNALduino_SimpleWrite($hash, $arg);
