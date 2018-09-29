@@ -210,7 +210,7 @@ SIGNALduino_Initialize($)
                       ." initCommands"
                       ." flashCommand"
   					  ." hardware:ESP_1M,ESP32,nano,nanoCC1101,miniculCC1101,promini,radinoCC1101"
-					  ." firmwareUpdates:stable,testing"
+					  ." updateChannelFW:stable,testing"
 					  ." debug:0,1"
 					  ." longids"
 					  ." minsecs"
@@ -4239,7 +4239,7 @@ sub SIGNALduino_githubParseHttpResponse($)
 			my $releaselist="";
 			foreach my $release (@fwreleases)
 			{
-				next if (AttrVal($name,"firmwareUpdates","stable") eq "stable" && $release->{isprerelease});
+				next if (AttrVal($name,"updateChannelFW","stable") eq "stable" && $release->{isprerelease});
 				
 				$releaselist.=$release->{tagname}.",";
 			}
@@ -4445,13 +4445,14 @@ sub SIGNALduino_githubParseHttpResponse($)
 			<li>radinoCC1101: Arduino compatible radino with cc1101 receiver</li>
 		</ul>
 	</li><br>
-	<li>firmwareUpdates<br>
-		The module searchs for new firmware versions. Depending on your choice, only stable versions are displayed or also prereleases are available for flash. The option testing does also provide the stable ones.
+	<li>updateChannelFW<br>
+		The module can search for new firmware versions. Depending on your choice, only stable versions are displayed or also prereleases are available for flash. The option testing does also provide the stable ones.
 		<ul>
 			<li>stable: only versions marked as stable are available. These releases are provided very infrequently</li>
 			<li>testing: These versions needs some verifications and provided in shorter intervals</li>
 		</ul>
 	</li><br>
+	
     <li>minsecs<br>
     This is a very special attribute. It is provided to other modules. minsecs should act like a threshold. All logic must be done in the logical module. 
     If specified, then supported modules will discard new messages if minsecs isn't past.
@@ -4802,7 +4803,7 @@ With a # at the beginnging whitelistIDs can be deactivated. <a name=" "></a>
 		</ul><br>
 		Notwendig f&uuml;r den Befehl <code>flash</code>. Hier sollten Sie angeben, welche Hardware Sie mit dem usbport verbunden haben. Andernfalls kann es zu Fehlfunktionen des Ger&auml;ts kommen.<br>
 	</li><br>
-	<li>firmwareUpdates<br>
+	<li>UpdateChannelFW<br>
 		Das Modul sucht nach Verf&uml;gbaren Firmware Vesionen und bietet diesen zum Flashen an. Mit dem Attribut kann festgelegt werden ob nur stabile Versionen angezeigt werden oder auch vorabversionen einer neuen Firmware.
 		Die Option testing inkludiert auch die stabilen Versionen.
 		<ul>
