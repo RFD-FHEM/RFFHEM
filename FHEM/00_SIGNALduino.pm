@@ -450,14 +450,22 @@ SIGNALduino_Set($@)
     my $hexFile = "";
     my @deviceName = split('@', $hash->{DeviceName});
     my $port = $deviceName[0];
+<<<<<<< HEAD
 	  my $hardware=AttrVal($name,"hardware","");
 	  my $baudrate=$hardware eq "uno" ? 115200 : 57600;
+=======
+	my $hardware=AttrVal($name,"hardware","");
+	my $baudrate=$hardware eq "uno" ? 115200 : 57600;
+>>>>>>> dev-r33-fwfromghreleases_flash
     my $defaultHexFile = "./FHEM/firmware/$hash->{TYPE}_$hardware.hex";
     my $logFile = AttrVal("global", "logdir", "./log/") . "$hash->{TYPE}-Flash.log";
     return "Please define your hardware! (attr $name hardware <model of your receiver>) " if ($hardware eq "");
 	  return "ERROR: argument failed! flash [hexFile|url]" if (!$args[0]);
 
-    #SIGNALduino_Log3 $hash, 3, "SIGNALduino_Set choosen flash option: $args[0] of available: ".Dumper($my_sets{flash});
+	return "Please define your hardware! (attr $name hardware <model of your receiver>) " if ($hardware eq "");
+	return "ERROR: argument failed! flash [hexFile|url]" if (!$args[0]);
+	
+	#SIGNALduino_Log3 $hash, 3, "SIGNALduino_Set choosen flash option: $args[0] of available: ".Dumper($my_sets{flash});
     
 	if( grep $args[0] eq $_ , split(",",$my_sets{flash}) )
 	{
@@ -497,7 +505,7 @@ SIGNALduino_Set($@)
     } else {
       $hexFile = $args[0];
     }
-	SIGNALduino_Log3 $name, 3, "$name: filename $hexFile provided, trying to flash";
+	SIGNALduino_Log3 $name, 5, "$hash->{TYPE} $name: filename $hexFile provided, trying to flash";
  
     return "Usage: set $name flash [filename]\n\nor use the hexFile attribute" if($hexFile !~ m/^(\w|\/|.)+$/);
 
@@ -519,7 +527,11 @@ SIGNALduino_Set($@)
 		SIGNALduino_Log3 $name, 3, "$hash->{TYPE} $name: flashCommand are manual defined! $flashCommand";
 	}
 	
+<<<<<<< HEAD
 
+=======
+	
+>>>>>>> dev-r33-fwfromghreleases_flash
     if($flashCommand ne "") {
       if (-e $logFile) {
         unlink $logFile;
@@ -1610,7 +1622,7 @@ sub SIGNALduino_ParseHttpResponse
 	    		($filename = $param->{path}) =~s/.*\///;
 			}
 			
-	    	SIGNALduino_Log3 $name, 3, "$name: Downloaded $filename firmware from ".$param->{host};
+	    	SIGNALduino_Log3 $name, 3, "$hash->{TYPE} $name: Downloaded $filename firmware from ".$param->{host};
 	    	SIGNALduino_Log3 $name, 5, "$name: Header = ".$param->{httpheader};
 	
 			
@@ -2845,7 +2857,11 @@ SIGNALduino_Attr(@)
 			$hash->{cc1101_frequency} = 868;
 		}
 	}
+<<<<<<< HEAD
 
+=======
+	
+>>>>>>> dev-r33-fwfromghreleases_flash
 	elsif ($aName eq "hardware")	# to set flashCommand if hardware def or change
 	{
 		# to delete flashCommand if hardware delete
@@ -2853,7 +2869,11 @@ SIGNALduino_Attr(@)
 			if (exists $attr{$name}{flashCommand}) { delete $attr{$name}{flashCommand};}
 		}
 	}
+<<<<<<< HEAD
 		
+=======
+	
+>>>>>>> dev-r33-fwfromghreleases_flash
   	return undef;
 }
 
@@ -4579,8 +4599,13 @@ With a # at the beginnging whitelistIDs can be deactivated. <a name=" "></a>
 			<li>flash via hexFile: <code>set sduino flash ./FHEM/firmware/SIGNALduino_mega2560.hex</code></li>
 			<li>flash via url for Nano with CC1101: <code>set sduino flash https://github.com/RFD-FHEM/SIGNALDuino/releases/download/3.3.1-RC7/SIGNALDuino_nanocc1101.hex</code></li>
 		</ul><br>
+<<<<<<< HEAD
 		</li>
 		</li>
+=======
+		</li>
+		</li>
+>>>>>>> dev-r33-fwfromghreleases_flash
 		<u><i>note model radino:</u></i><ul>
 		<li>Sometimes there can be problems flashing radino on Linux. <a href="https://wiki.in-circuit.de/index.php5?title=radino_common_problems">Here in the wiki under point "radino & Linux" is a patch!</a></li>
 		<li>To activate the bootloader of the radino there are 2 variants.
@@ -4609,6 +4634,7 @@ With a # at the beginnging whitelistIDs can be deactivated. <a name=" "></a>
 		<br><br>
 		Input args are:
 		<p>
+<<<<<<< HEAD
 		<ul><li>P<protocol id>#binarydata#R<num of repeats>#C<optional clock>   (#C is optional) 
 		<br>Example binarydata: <code>set sduino sendMsg P0#0101#R3#C500</code>
 		<br>Will generate the raw send command for the message 0101 with protocol 0 and instruct the arduino to send this three times and the clock is 500.
@@ -4620,6 +4646,23 @@ With a # at the beginnging whitelistIDs can be deactivated. <a name=" "></a>
 		</p></li></ul>
 
 		
+=======
+			<ul>
+				<li>P<protocol id>#binarydata#R<num of repeats>#C<optional clock>   (#C is optional) 
+				<br>Example binarydata: <code>set sduino sendMsg P0#0101#R3#C500</code>
+				<br>Will generate the raw send command for the message 0101 with protocol 0 and instruct the arduino to send this three times and the clock is 500.
+				<br>SR;R=3;P0=500;P1=-9000;P2=-4000;P3=-2000;D=03020302;
+				</li>
+			</ul><br>
+			<ul>
+				<li>P<protocol id>#0xhexdata#R<num of repeats>#C<optional clock>    (#C is optional) 
+					<br>Example 0xhexdata: <code>set sduino sendMsg P29#0xF7E#R4</code>
+					<br>Generates the raw send command with the hex message F7E with protocl id 29 . The message will be send four times.
+					<br>SR;R=4;P0=-8360;P1=220;P2=-440;P3=-220;P4=440;D=01212121213421212121212134;
+					</p>
+				</li>
+			</ul>
+>>>>>>> dev-r33-fwfromghreleases_flash
 		</li>
 		<li>enableMessagetype<br>
 			Allows you to enable the message processing for 
@@ -4807,7 +4850,11 @@ With a # at the beginnging whitelistIDs can be deactivated. <a name=" "></a>
 		Notwendig f&uuml;r den Befehl <code>flash</code>. Hier sollten Sie angeben, welche Hardware Sie mit dem usbport verbunden haben. Andernfalls kann es zu Fehlfunktionen des Ger&auml;ts kommen.<br>
 	</li><br>
 	<li>firmwareUpdates<br>
+<<<<<<< HEAD
 		Das Modul sucht nach Verf&uml;gbaren Firmware Vesionen und bietet diesen zum Flashen an. Mit dem Attribut kann festgelegt werden ob nur stabile Versionen angezeigt werden oder auch vorabversionen einer neuen Firmware.
+=======
+		Das Modul sucht nach verf&uuml;gbaren Firmware Vesionen und bietet diesen zum Flashen an. Mit dem Attribut kann festgelegt werden ob nur stabile Versionen angezeigt werden oder auch vorabversionen einer neuen Firmware.
+>>>>>>> dev-r33-fwfromghreleases_flash
 		Die Option testing inkludiert auch die stabilen Versionen.
 		<ul>
 			<li>stable: Als stabil getestete Versionen, erscheint nur sehr selten</li>
@@ -4815,7 +4862,6 @@ With a # at the beginnging whitelistIDs can be deactivated. <a name=" "></a>
 		</ul>
 	</li><br>
 	
-	Notwendig f&uuml;r den Befehl <code>flash</code>. Hier sollten Sie angeben, welche Hardware Sie mit dem usbport verbunden haben. Andernfalls kann es zu Fehlfunktionen des Ger&auml;ts kommen.<br><br>
 	<li>longids<br></li>
 	Durch Komma getrennte Liste von Device-Typen f&uuml;r Empfang von langen IDs mit dem SIGNALduino. Diese zus&auml;tzliche ID erlaubt es Wettersensoren, welche auf dem gleichen Kanal senden zu unterscheiden. Hierzu wird eine zuf&auml;llig generierte ID hinzugef&uuml;gt. Wenn Sie longids verwenden, dann wird in den meisten F&auml;llen nach einem Batteriewechsel ein neuer Sensor angelegt. Standardm&auml;ßig werden keine langen IDs verwendet.
 	Folgende Module verwenden diese Funktionalit&auml;t: 14_Hideki, 41_OREGON, 14_CUL_TCM97001, 14_SD_WS07.<br>
