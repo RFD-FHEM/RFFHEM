@@ -206,7 +206,7 @@ SIGNALduino_Initialize($)
 					  ." hexFile"
                       ." initCommands"
                       ." flashCommand"
-  					  ." hardware:nano328,uno,promini328,nanoCC1101"
+  					  ." hardware:ESP_1M,ESP32,nano,nanoCC1101,miniculCC1101,promini,radinoCC1101"
 					  ." debug:0,1"
 					  ." longids"
 					  ." minsecs"
@@ -299,18 +299,6 @@ SIGNALduino_Define($$)
   #$hash->{CMDS} = "";
   $hash->{Clients} = $clientsSIGNALduino;
   $hash->{MatchList} = \%matchListSIGNALduino;
-  
-
-  #if( !defined( $attr{$name}{hardware} ) ) {
-  #  $attr{$name}{hardware} = "nano328";
-  #}
-
-
-  if( !defined( $attr{$name}{flashCommand} ) ) {
-#    $attr{$name}{flashCommand} = "avrdude -p atmega328P -c arduino -P [PORT] -D -U flash:w:[HEXFILE] 2>[LOGFILE]"
-     $attr{$name}{flashCommand} = "avrdude -c arduino -b [BAUDRATE] -P [PORT] -p atmega328p -vv -U flash:w:[HEXFILE] 2>[LOGFILE]"; 
-    
-  }
   $hash->{DeviceName} = $dev;
   
   my $ret=undef;
@@ -341,7 +329,7 @@ sub SIGNALduino_Connect($$)
 
 	# damit wird die err-msg nur einmal ausgegeben
 	if (!defined($hash->{disConnFlag}) && $err) {
-		SIGNALduino_Log3($hash, 3, "SIGNALduino $hash->{NAME}: ${err}");
+		SIGNALduino_Log3($hash, 3, "$hash->{NAME}: ${err}");
 		$hash->{disConnFlag} = 1;
 	}
 }
@@ -444,11 +432,14 @@ SIGNALduino_Set($@)
     my $hexFile = "";
     my @deviceName = split('@', $hash->{DeviceName});
     my $port = $deviceName[0];
-	my $hardware=AttrVal($name,"hardware","nano328");
+	my $hardware=AttrVal($name,"hardware","");
 	my $baudrate=$hardware eq "uno" ? 115200 : 57600;
     my $defaultHexFile = "./FHEM/firmware/$hash->{TYPE}_$hardware.hex";
     my $logFile = AttrVal("global", "logdir", "./log/") . "$hash->{TYPE}-Flash.log";
 
+	return "Please define your hardware! (attr $name hardware <model of your receiver>) " if ($hardware eq "");
+	return "ERROR: argument failed! flash [hexFile|url]" if (!$args[0]);
+	
     if(!$arg || $args[0] !~ m/^(\w|\/|.)+$/) {
       $hexFile = AttrVal($name, "hexFile", "");
       if ($hexFile eq "") {
@@ -479,7 +470,19 @@ SIGNALduino_Set($@)
     $log .= "port: $port\n";
     $log .= "log file: $logFile\n";
 
-    my $flashCommand = AttrVal($name, "flashCommand", "");
+	my $flashCommand;
+    if( !defined( $attr{$name}{flashCommand} ) ) {		# check defined flashCommand from user | not, use standard flashCommand | yes, use user flashCommand
+			SIGNALduino_Log3 $name, 5, "$hash->{TYPE} $name: flashCommand are not defined. standard used to flash.";
+		if ($hardware eq "radinoCC1101") {																	# radinoCC1101 Port not /dev/ttyUSB0 --> /dev/ttyACM0
+			$flashCommand = "avrdude -c avr109 -b [BAUDRATE] -P [PORT] -p atmega32u4 -vv -D -U flash:w:[HEXFILE] 2>[LOGFILE]";
+		} elsif ($hardware ne "radinoCC1101" && $hardware ne "ESP_1M" && $hardware ne "ESP32") {			# nano, nanoCC1101, miniculCC1101, promini
+			$flashCommand = "avrdude -c arduino -b [BAUDRATE] -P [PORT] -p atmega328p -vv -U flash:w:[HEXFILE] 2>[LOGFILE]";
+		}
+	} else {
+		$flashCommand = $attr{$name}{flashCommand};
+		SIGNALduino_Log3 $name, 3, "$hash->{TYPE} $name: flashCommand are manual defined! $flashCommand";
+	}
+	
 
     if($flashCommand ne "") {
       if (-e $logFile) {
@@ -650,6 +653,7 @@ SIGNALduino_Set($@)
 
 		$sendData = $intro . "SM;" . ($repeats > 0 ? "R=$repeats;" : "") . "C=$clock;D=$data;" . $outro . $frequency; #	SM;R=2;C=400;D=AFAFAF;
 		SIGNALduino_Log3 $name, 5, "$name: sendmsg Preparing manchester protocol=$protocol, repeats=$repeats, clock=$clock data=$data";
+		
 	} else {
 		if ($protocol == 3 || substr($data,0,2) eq "is") {
 			if (substr($data,0,2) eq "is") {
@@ -897,6 +901,7 @@ SIGNALduino_Get($@)
 	#return "$a[1]: \n\n$ret\nIds with modules: $moduleId";
   }
   
+
   #SIGNALduino_SimpleWrite($hash, $gets{$a[1]}[0] . $arg);
   SIGNALduino_AddSendQueue($hash, $gets{$a[1]}[0] . $arg);
   $hash->{getcmd}->{cmd}=$a[1];
@@ -1151,6 +1156,8 @@ sub SIGNALduino_CheckCmdResp($)
 		SIGNALduino_StartInit($hash);
 	}
 }
+
+
 
 
 #####################################
@@ -1497,9 +1504,9 @@ sub SIGNALduino_ParseHttpResponse
 
     if($err ne "")               											 		# wenn ein Fehler bei der HTTP Abfrage aufgetreten ist
     {
-        SIGNALduino_Log3 $name, 3, "error while requesting ".$param->{url}." - $err";    		# Eintrag fürs Log
+        SIGNALduino_Log3 $name, 3, "$name: error while requesting ".$param->{url}." - $err";    		# Eintrag fürs Log
     }
-    elsif($param->{code} eq "200" && $data ne "")                                                       		# wenn die Abfrage erfolgreich war ($data enthält die Ergebnisdaten des HTTP Aufrufes)
+    elsif($param->{code} eq "200" && $data ne "")                                                       		# wenn die Abfrage erfolgreich war ($data enthaelt die Ergebnisdaten des HTTP Aufrufes)
     {
     	
         SIGNALduino_Log3 $name, 3, "url ".$param->{url}." returned: ".length($data)." bytes Data";  # Eintrag fürs Log
@@ -1531,7 +1538,7 @@ sub SIGNALduino_ParseHttpResponse
 			
     	}
     } else {
-    	SIGNALduino_Log3 $name, 3, "undefined error while requesting ".$param->{url}." - $err - code=".$param->{code};    		# Eintrag fürs Log
+    	SIGNALduino_Log3 $name, 3, "$name: undefined error while requesting ".$param->{url}." - $err - code=".$param->{code};    		# Eintrag fürs Log
     }
 }
 
@@ -2750,7 +2757,15 @@ SIGNALduino_Attr(@)
 			$hash->{cc1101_frequency} = 868;
 		}
 	}
-	
+
+	elsif ($aName eq "hardware")	# to set flashCommand if hardware def or change
+	{
+		# to delete flashCommand if hardware delete
+		if ($cmd eq "del") {
+			if (exists $attr{$name}{flashCommand}) { delete $attr{$name}{flashCommand};}
+		}
+	}
+		
   	return undef;
 }
 
@@ -4178,10 +4193,17 @@ sub SIGNALduino_Log3($$$)
 	You can specify multiple IDs wih a colon : 0,3,7,12<br>
 	</li>
 	<li>flashCommand<br>
+	<a name="flashCommand"></a>
     	This is the command, that is executed to performa the firmware flash. Do not edit, if you don't know what you are doing.<br>
-    	The default is: avrdude -p atmega328P -c arduino -P [PORT] -D -U flash:w:[HEXFILE] 2>[LOGFILE]<br>
+		If the attribute not defined, it uses the default settings. <b>If the user defines the attribute manually, the system uses the specifications!</b><br>
+    	<ul>
+		<li>default for nano, nanoCC1101, miniculCC1101, promini: <code>avrdude -c arduino -b [BAUDRATE] -P [PORT] -p atmega328p -vv -U flash:w:[HEXFILE] 2>[LOGFILE]</code></li>
+		<li>default for radinoCC1101: <code>avrdude -c avr109 -b [BAUDRATE] -P [PORT] -p atmega32u4 -vv -D -U flash:w:[HEXFILE] 2>[LOGFILE]</code></li>
+		</ul>
 		It contains some place-holders that automatically get filled with the according values:<br>
 		<ul>
+			<li>[BAUDRATE]<br>
+			is the speed (e.g. 57600)</li>
 			<li>[PORT]<br>
 			is the port the Signalduino is connectd to (e.g. /dev/ttyUSB0) and will be used from the defenition</li>
 			<li>[HEXFILE]<br>
@@ -4192,12 +4214,21 @@ sub SIGNALduino_Log3($$$)
 			</li>
 			<li>[LOGFILE]<br>
 			The logfile that collects information about the flash process. It gets displayed in FHEM after finishing the flash process</li>
-		</ul>
-    
-    </li>
+		</ul><br>
+		<u><i>note:</u></i> ! Sometimes there can be problems flashing radino on Linux. <a href="https://wiki.in-circuit.de/index.php5?title=radino_common_problems">Here in the wiki under the point "radino & Linux" is a patch!</a><a name=" "></a><a name=" "></a>
+    </li><br>
     <li>hardware<br>
     When using the flash command, you should specify what hardware you have connected to the usbport. Doing not, can cause failures of the device.
-    </li>
+		<ul>
+			<li>ESP_1MCC1101: ESP8266 with 1 MB flash and CC1101 receiver</li>
+			<li>ESP32: ESP32 </li>
+			<li>nano328: Arduino Nano with cheap receiver</li>
+			<li>nanoCC1101: Arduino Nano wirh CC110x receiver</li>
+			<li>miniculCC1101: Arduino pro Mini with CC110x receiver and cables as a minicul</li>
+			<li>promini328: Arduino Pro Mini with cheap receiver </li>
+			<li>radinoCC1101: Arduino compatible radino with cc1101 receiver</li>
+		</ul>
+	</li><br>
     <li>minsecs<br>
     This is a very special attribute. It is provided to other modules. minsecs should act like a threshold. All logic must be done in the logical module. 
     If specified, then supported modules will discard new messages if minsecs isn't past.
@@ -4244,7 +4275,7 @@ With a # at the beginnging whitelistIDs can be deactivated. <a name=" "></a>
        <br>0: CRC-Check WH1080 CRC = 0  on, default   
        <br>2: CRC = 49 (x031) WH1080, set OK
     </li>
-   </ul>
+   </ul><br>
    
    
     
@@ -4293,18 +4324,17 @@ With a # at the beginnging whitelistIDs can be deactivated. <a name=" "></a>
 		<br>Example 1: set sduino raw SR;R=3;P0=500;P1=-9000;P2=-4000;P3=-2000;D=0302030  sends the data in raw mode 3 times repeated
         <br>Example 2: set sduino raw SM;R=3;P0=500;C=250;D=A4F7FDDE  sends the data manchester encoded with a clock of 250uS
         <br>Example 3: set sduino raw SC;R=3;SR;P0=5000;SM;P0=500;C=250;D=A4F7FDDE  sends a combined message of raw and manchester encoded repeated 3 times
-
-		<br>;
 		</p>
 
 
-		</li><br>
+		</li>
 		<li>reset<br>
 		This will do a reset of the usb port and normaly causes to reset the uC connected.
 		</li><br>
 		<li>close<br>
 		Closes the connection to the device.
 		</li><br>
+		<a name="flash"></a>
 		<li>flash [hexFile|url]<br>
 			The SIGNALduino needs the right firmware to be able to receive and deliver the sensor data to fhem. In addition to the way using the
 			arduino IDE to flash the firmware into the SIGNALduino this provides a way to flash it directly from FHEM.
@@ -4316,10 +4346,33 @@ With a # at the beginnging whitelistIDs can be deactivated. <a name=" "></a>
 					On a Raspberry PI this can be done with: sudo apt-get install avrdude</li>
 				<li>the hardware attribute must be set if using any other hardware as an Arduino nano<br>
 					This attribute defines the command, that gets sent to avrdude to flash the uC.<br></li>
-		     	<br>
-	
 			</ul>
+		Example:
+		<ul>
+			<li>flash via hexFile: <code>set sduino flash ./FHEM/firmware/SIGNALduino_mega2560.hex</code></li>
+			<li>flash via url for Nano with CC1101: <code>set sduino flash https://github.com/RFD-FHEM/SIGNALDuino/releases/download/3.3.1-RC7/SIGNALDuino_nanocc1101.hex</code></li>
+		</ul><br>
 		</li>
+		</li>
+		<u><i>note model radino:</u></i><ul>
+		<li>Sometimes there can be problems flashing radino on Linux. <a href="https://wiki.in-circuit.de/index.php5?title=radino_common_problems">Here in the wiki under point "radino & Linux" is a patch!</a></li>
+		<li>To activate the bootloader of the radino there are 2 variants.
+		<ul><li>1) modules that contain a BSL-button:</li>
+			<ul>
+			- apply supply voltage<br>
+			- press & hold BSL- and RESET-Button<br>
+			- release RESET-button, release BSL-button<br>
+			 (repeat these steps if your radino doesn't enter bootloader mode right away.)
+			</ul>
+			<li>2) force bootloader:<ul>
+			- pressing reset button twice</ul>
+			</li></ul>
+		<li>In bootloader mode, the radino gets a different USB ID.</li><br>
+		<b>If the bootloader is enabled, it signals with a flashing LED. Then you have 8 seconds to flash.</b>
+		</li><a name=" "></a>
+		</ul><br>
+		
+		<a name=" "></a>
 		<li>sendMsg<br>
 		This command will create the needed instructions for sending raw data via the signalduino. Insteaf of specifying the signaldata by your own you specify 
 		a protocol and the bits you want to send. The command will generate the needed command, that the signalduino will send this.
@@ -4340,11 +4393,11 @@ With a # at the beginnging whitelistIDs can be deactivated. <a name=" "></a>
 		</p></li></ul>
 
 		
-		</li><br>
+		</li>
 		<li>enableMessagetype<br>
 			Allows you to enable the message processing for 
 			<ul>
-				<li>messages with sync (syncedMS),</li>
+				<li>messages with sync (syncedMS)</li>
 				<li>messages without a sync pulse (unsyncedMU) </li>
 				<li>manchester encoded messages (manchesterMC) </li>
 			</ul>
@@ -4358,7 +4411,7 @@ With a # at the beginnging whitelistIDs can be deactivated. <a name=" "></a>
 				<li>manchester encoded messages (manchesterMC) </li>
 			</ul>
 			The new state will be saved into the eeprom of your arduino.
-		</li><br><br>
+		</li><br>
 		
 		<li>freq / bWidth / patable / rAmpl / sens<br>
 		Only with CC1101 receiver.<br>
@@ -4489,10 +4542,17 @@ With a # at the beginnging whitelistIDs can be deactivated. <a name=" "></a>
 	<li>doubleMsgCheck_IDs<br></li>
 	Dieses Attribut erlaubt es, Protokolle anzugeben, die zwei gleiche Nachrichten enthalten m&uuml;ssen, um diese an die Module zu &uuml;bergeben. Sie k&ouml;nnen mehrere IDs mit einem Komma angeben: 0,3,7,12<br><br>
 	<li>flashCommand<br>
-	Dies ist der Befehl, der ausgef&uuml;hrt wird, um den Firmware-Flash auszuf&uuml;hren. Nutzen Sie dies nicht, wenn Sie nicht wissen, was Sie tun.<br>
-	Standard: <code>avrdude -p atmega328P -c arduino -P [PORT] -D -U flash:w:[HEXFILE] 2>[LOGFILE]</code><br><br>
+	<a name="flashCommand"></a>
+	Dies ist der Befehl, der ausgef&uuml;hrt wird, um den Firmware-Flash auszuf&uuml;hren. Nutzen Sie dies nicht, wenn Sie nicht wissen, was Sie tun!<br>
+	Wurde das Attribut nicht definiert, so verwendet es die Standardeinstellungen. <b>Sobald der User das Attribut manuell definiert, nutzt das System die Vorgaben!</b><br>
+	<ul>
+	<li>Standard nano, nanoCC1101, miniculCC1101, promini: <code>avrdude -c arduino -b [BAUDRATE] -P [PORT] -p atmega328p -vv -U flash:w:[HEXFILE] 2>[LOGFILE]</code></li>
+	<li>Standard radinoCC1101: <code>avrdude -c avr109 -b [BAUDRATE] -P [PORT] -p atmega32u4 -vv -D -U flash:w:[HEXFILE] 2>[LOGFILE]</code></li>
+	</ul>
 	Es enth&auml;lt einige Platzhalter, die automatisch mit den entsprechenden Werten gef&uuml;llt werden:
 		<ul>
+			<li>[BAUDRATE]<br>
+			Ist die Schrittgeschwindigkeit. (z.Bsp: 57600)</li>
 			<li>[PORT]<br>
 			Ist der Port, an den der SIGNALduino angeschlossen ist (z.Bsp: /dev/ttyUSB0) und wird von der Defenition verwendet.</li>
 			<li>[HEXFILE]<br>
@@ -4503,18 +4563,23 @@ With a # at the beginnging whitelistIDs can be deactivated. <a name=" "></a>
 			</li>
 			<li>[LOGFILE]<br>
 			Die Logdatei, die Informationen &uuml;ber den Flash-Prozess sammelt. Es wird nach Abschluss des Flash-Prozesses in FHEM angezeigt</li>
-		</ul>
+		</ul><br>
+	<u><i>Hinweis:</u></i> ! Teilweise kann es beim flashen vom radino unter Linux Probleme geben. <a href="https://wiki.in-circuit.de/index.php5?title=radino_common_problems">Hier im Wiki unter dem Punkt "radino & Linux" gibt es einen Patch!</a><a name=" "></a>
 	</li><br>
 	<li>hardware<br>
 		Derzeit m&ouml;gliche Hardware Varianten:
 		<ul>
+			<li>ESP_1MCC1101: ESP8266 mit 1 MB Flash und einem CC1101</li>
+			<li>ESP32: ESP32 </li>
 			<li>nano328: Arduino Nano f&uuml;r "Billig"-Empf&auml;nger</li>
 			<li>nanoCC1101: Arduino Nano f&uuml;r einen CC110x-Empf&auml;nger</li>
+			<li>miniculCC1101: Arduino pro Mini mit einen CC110x-Empf&auml;nger entsprechend dem minicul verkabelt</li>
 			<li>promini328: Arduino Pro Mini f&uuml;r "Billig"-Empf&auml;nger</li>
-			<li>uno: Arudino Uno</li>
-		</ul>
+			<li>radinoCC1101: Ein Arduino Kompatibler Radino mit cc1101 receiver</li>
+		</ul><br>
+		Notwendig f&uuml;r den Befehl <code>flash</code>. Hier sollten Sie angeben, welche Hardware Sie mit dem usbport verbunden haben. Andernfalls kann es zu Fehlfunktionen des Ger&auml;ts kommen.<br>
 	</li><br>
-	Notwendig f&uuml;r den Befehl <code>flash</code>. Hier sollten Sie angeben, welche Hardware Sie mit dem usbport verbunden haben. Andernfalls kann es zu Fehlfunktionen des Ger&auml;ts kommen.<br><br>
+
 	<li>longids<br></li>
 	Durch Komma getrennte Liste von Device-Typen f&uuml;r Empfang von langen IDs mit dem SIGNALduino. Diese zus&auml;tzliche ID erlaubt es Wettersensoren, welche auf dem gleichen Kanal senden zu unterscheiden. Hierzu wird eine zuf&auml;llig generierte ID hinzugef&uuml;gt. Wenn Sie longids verwenden, dann wird in den meisten F&auml;llen nach einem Batteriewechsel ein neuer Sensor angelegt. Standardm&auml;ßig werden keine langen IDs verwendet.
 	Folgende Module verwenden diese Funktionalit&auml;t: 14_Hideki, 41_OREGON, 14_CUL_TCM97001, 14_SD_WS07.<br>
@@ -4610,20 +4675,44 @@ Mit diesem Attribut können Sie steuern, ob jede Logmeldung auch als Ereignis be
 	<li>disableMessagetype<br>
 			Erm&ouml;glicht das Deaktivieren der Nachrichtenverarbeitung f&uuml;r
 			<ul>
-				<li>Nachrichten mit sync (syncedMS),</li>
+				<li>Nachrichten mit sync (syncedMS)</li>
 				<li>Nachrichten ohne einen sync pulse (unsyncedMU)</li> 
 				<li>Manchester codierte Nachrichten (manchesterMC) </li>
 			</ul>
 			Der neue Status wird in den eeprom vom Arduino geschrieben.
 		</li><br>
+	<a name="flash"></a>
 	<li>flash [hexFile|url]<br>
 	Der SIGNALduino ben&ouml;tigt die richtige Firmware, um die Sensordaten zu empfangen und zu liefern. Unter Verwendung der Arduino IDE zum Flashen der Firmware in den SIGNALduino bietet dies eine M&ouml;glichkeit, ihn direkt von FHEM aus zu flashen. Sie k&ouml;nnen eine Datei auf Ihrem fhem-Server angeben oder eine URL angeben, von der die Firmware heruntergeladen wird.
 	Es gibt einige Anforderungen:
 			<ul>
 				<li><code>avrdude</code> muss auf dem Host installiert sein. Auf einem Raspberry PI kann dies getan werden mit: <code>sudo apt-get install avrdude</code></li>
 				<li>Das Hardware-Attribut muss festgelegt werden, wenn eine andere Hardware als Arduino Nano verwendet wird. Dieses Attribut definiert den Befehl, der an avrdude gesendet wird, um den uC zu flashen.</li>
-			</ul><br>
+			</ul>
+	Beispiele:
+	<ul>
+	<li>flash via hexFile: <code>set sduino flash ./FHEM/firmware/SIGNALduino_mega2560.hex</code></li>
+	<li>flash via url f&uuml;r einen Nano mit CC1101: <code>set sduino flash https://github.com/RFD-FHEM/SIGNALDuino/releases/download/3.3.1-RC7/SIGNALDuino_nanocc1101.hex</code></li>
+	</ul>
 	</li>
+	<i><u>Hinweise Modell radino:</u></i><ul>
+		<li>Teilweise kann es beim flashen vom radino unter Linux Probleme geben. <a href="https://wiki.in-circuit.de/index.php5?title=radino_common_problems">Hier im Wiki unter dem Punkt "radino & Linux" gibt es einen Patch!</a></li>
+		<li>Um den Bootloader vom radino zu aktivieren gibt es 2 Varianten.
+		<ul><li>1) Module welche einen BSL-Button besitzen:</li>
+			<ul>
+			- Spannung anlegen<br>
+			- drücke & halte BSL- und RESET-Button<br>
+			- RESET-Button loslassen und danach den BSL-Button loslassen<br>
+			 (Wiederholen Sie diese Schritte, wenn Ihr radino nicht sofort in den Bootloader-Modus wechselt.)
+			</ul>
+			<li>2) Bootloader erzwingen:<ul>
+			- durch zweimaliges drücken der Reset-Taste</ul>
+			</li>
+		</ul>
+		<li>Im Bootloader-Modus erh&auml;lt der radino eine andere USB ID.</li><br>
+		<b>Wenn der Bootloader aktiviert ist, signalisiert er das mit dem Blinken einer LED. Dann hat man ca. 8 Sekunden Zeit zum flashen.</b>
+		</li><a name=" "></a>
+	</ul><br>
 	<li>raw<br></li>
 	Geben Sie einen SIGNALduino-Firmware-Befehl aus, ohne auf die vom SIGNALduino zur&uuml;ckgegebenen Daten zu warten. Ausf&uuml;hrliche Informationen zu SIGNALduino-Befehlen finden Sie im SIGNALduino-Firmware-Code. Mit dieser Linie k&ouml;nnen Sie fast jedes Signal &uuml;ber einen angeschlossenen Sender senden.<br>
 	Um einige Rohdaten zu senden, schauen Sie sich diese Beispiele an: P#binarydata#R#C (#C is optional)
