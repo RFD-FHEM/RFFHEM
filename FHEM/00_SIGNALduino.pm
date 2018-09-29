@@ -449,25 +449,31 @@ SIGNALduino_Set($@)
     my $hexFile = "";
     my @deviceName = split('@', $hash->{DeviceName});
     my $port = $deviceName[0];
-	  my $hardware=AttrVal($name,"hardware","");
-	  my $baudrate=$hardware eq "uno" ? 115200 : 57600;
+	my $hardware=AttrVal($name,"hardware","");
+	my $baudrate=$hardware eq "uno" ? 115200 : 57600;
     my $defaultHexFile = "./FHEM/firmware/$hash->{TYPE}_$hardware.hex";
     my $logFile = AttrVal("global", "logdir", "./log/") . "$hash->{TYPE}-Flash.log";
     return "Please define your hardware! (attr $name hardware <model of your receiver>) " if ($hardware eq "");
-	  return "ERROR: argument failed! flash [hexFile|url]" if (!$args[0]);
+	return "ERROR: argument failed! flash [hexFile|url]" if (!$args[0]);
 
     #SIGNALduino_Log3 $hash, 3, "SIGNALduino_Set choosen flash option: $args[0] of available: ".Dumper($my_sets{flash});
     
 	if( grep $args[0] eq $_ , split(",",$my_sets{flash}) )
 	{
 		SIGNALduino_Log3 $hash, 3, "SIGNALduino_Set try to fetch github assets for tag $args[0]";
-		
+
+		my $ghurl = "https://api.github.com/repos/<REPONAME>/releases/tags/$args[0]";
+		if ($hardware =~ /ESP/) {
+			$ghurl =~ s/<REPONAME>/SIGNALESP\/releases/ ;
+		} else {
+			$ghurl =~ s/<REPONAME>/SIGNALDuino\/releases/ ; 
+		}
 	    my $http_param = {
-                    url        => "https://api.github.com/repos/RFD-FHEM/SIGNALDuino/releases/tags/$args[0]",
+                    url        => $ghurl,
                     timeout    => 5,
                     hash       => $hash,                                                                                 # Muss gesetzt werden, damit die Callback funktion wieder $hash hat
                     method     => "GET",                                                                                 # Lesen von Inhalten
-                    header     => "User-Agent: perl_fhem\r\nAccept: application/json",  								 # Den Header gem�ss abzufragender Daten �ndern
+                    header     => "User-Agent: perl_fhem\r\nAccept: application/json",  								 # Den Header gemaess abzufragender Daten aendern
                     callback   =>  \&SIGNALduino_githubParseHttpResponse,                                                # Diese Funktion soll das Ergebnis dieser HTTP Anfrage bearbeiten
                     command    => "getReleaseByTag"
                     
