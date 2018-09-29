@@ -1,4 +1,4 @@
-# $Id: 00_SIGNALduino.pm 10488 2018-09-26 16:00:00Z v3.3.3-dev $
+# $Id: 00_SIGNALduino.pm 10488 2018-09-29 20:00:00Z v3.3.3-dev $
 #
 # v3.3.3 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -25,7 +25,7 @@ no warnings 'portable';
 
 
 use constant {
-	SDUINO_VERSION            => "v3.3.3-dev_26.09.",
+	SDUINO_VERSION            => "v3.3.3-dev_29.09.",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -37,7 +37,8 @@ use constant {
 	
 	SDUINO_DISPATCH_VERBOSE     => 5,      # default 5
 	SDUINO_MC_DISPATCH_VERBOSE  => 5,      # wenn kleiner 5, z.B. 3 dann wird vor dem dispatch mit loglevel 3 die ID und rmsg ausgegeben
-	SDUINO_MC_DISPATCH_LOG_ID   => '12.1'  # die o.g. Ausgabe erfolgt nur wenn der Wert mit der ID übereinstimmt
+	SDUINO_MC_DISPATCH_LOG_ID   => '12.1', # die o.g. Ausgabe erfolgt nur wenn der Wert mit der ID uebereinstimmt
+	SDUINO_PARSE_DEFAULT_LENGHT_MIN => 8
 };
 
 
@@ -2270,9 +2271,17 @@ sub SIGNALduino_Parse_MU($$$$@)
 			
 			Debug "StartSignalRegex is: $start_regex" if ($debug);
 			
+			my $signal_width= @{$ProtocolListSIGNALduino{$id}{one}};
+			my $length_min;
+			if (defined($ProtocolListSIGNALduino{$id}{length_min})) {
+				$length_min = $ProtocolListSIGNALduino{$id}{length_min};
+			} else {
+				$length_min = SDUINO_PARSE_DEFAULT_LENGHT_MIN;
+			}
+			
 			if ($rawData =~ m/$start_regex/) {
 				$message_start=$-[0];
-				next if ((length($rawData) - $message_start) < 10);
+				next if ((length($rawData) - $message_start) < ($length_min * $signal_width));	# Abbruch wenn Rest kleiner Mindestlaenge
 			} else {
 				Debug "$start_regex not found." if ($debug);
 				next;
@@ -2282,9 +2291,6 @@ sub SIGNALduino_Parse_MU($$$$@)
 			## Check somethin else
 		
 			#Anything seems to be valid, we can start decoding this.			
-
-			my $signal_width= @{$ProtocolListSIGNALduino{$id}{one}};
-			#Debug $signal_width;
 			
 			my @bit_msg=();			# array to store decoded signal bits
 			
@@ -2320,8 +2326,9 @@ sub SIGNALduino_Parse_MU($$$$@)
 				{
 					Debug "$name: demodulated message raw (@bit_msg), ".@bit_msg." bits\n" if ($debug);
 					#Check converted message against lengths 
-					$valid = $valid && $ProtocolListSIGNALduino{$id}{length_max} >= scalar @bit_msg  if (defined($ProtocolListSIGNALduino{$id}{length_max}));					
-					$valid = $valid && $ProtocolListSIGNALduino{$id}{length_min} <= scalar @bit_msg  if (defined($ProtocolListSIGNALduino{$id}{length_min})); 
+					$valid = $valid && $ProtocolListSIGNALduino{$id}{length_max} >= scalar @bit_msg  if (defined($ProtocolListSIGNALduino{$id}{length_max}));
+					$valid = $valid && $length_min <= scalar @bit_msg;
+					#$valid = $valid && $ProtocolListSIGNALduino{$id}{length_min} <= scalar @bit_msg  if (defined($ProtocolListSIGNALduino{$id}{length_min}));
 
 					if ($valid) {
 			
@@ -2378,15 +2385,14 @@ sub SIGNALduino_Parse_MU($$$$@)
 							$message_dispatched=1;
 						}
 					} else {
-						if ($debug)
-						{
+						#if ($debug)
+						#{
 							my $debugstr;
-							$debugstr.=$ProtocolListSIGNALduino{$id}{length_min} if defined($ProtocolListSIGNALduino{$id}{length_min});
-							$debugstr.="/";
+							$debugstr.= $length_min . "/";
 							$debugstr.=$ProtocolListSIGNALduino{$id}{length_max} if defined($ProtocolListSIGNALduino{$id}{length_max});
 							
-							Debug "$name: length ($debugstr) does not match (@bit_msg), ".@bit_msg." bits\n";
-						}	
+							SIGNALduino_Log3 $name, 5, "$name: pos=$i sigstr=$sig_str length ($debugstr) does not match (@bit_msg), ".@bit_msg." bits";
+						#}	
 						
 					}
 					@bit_msg=(); # clear bit_msg array
