@@ -1,4 +1,4 @@
-defmod test_firmware-download_1 UnitTest dummyDuino 
+defmod test_firmware_download_1 UnitTest dummyDuino 
 (
  {
 	my $mock;
