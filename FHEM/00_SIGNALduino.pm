@@ -71,7 +71,7 @@ my %gets = (    # Name, Data to send to the SIGNALduino, Regexp for the answer
 #  "FAParms"  => ["fp", '.*' ],
 #  "TCParms"  => ["dp", '.*' ],
 #  "HXParms"  => ["hp", '.*' ]
-  "queryFirmware" => ["none",'none'],
+  "availableFirmware" => ["none",'none'],
 );
 
 
@@ -939,7 +939,7 @@ SIGNALduino_Get($@)
 	
 	return "$a[1]: \n\n$ret\n";
 	#return "$a[1]: \n\n$ret\nIds with modules: $moduleId";
-  }   elsif ($a[1] eq "queryFirmware") {
+  }   elsif ($a[1] eq "availableFimrware") {
   	SIGNALduino_querygithubreleases($hash);
   }
   
@@ -4540,6 +4540,8 @@ With a # at the beginnging whitelistIDs can be deactivated. <a name=" "></a>
 		<li>ccreg<br>
 		read cc1101 registers (99 reads all cc1101 registers)
 		</li><br>
+		<li>availableFirmware<br>
+    	Searchs for available firmware in internet.You must define the attribute hardware to use this feature.<br><br></li>
 	</ul>
 	<a name="SIGNALduinoset"></a>
 	<b>SET</b>
@@ -4872,6 +4874,8 @@ Mit diesem Attribut können Sie steuern, ob jede Logmeldung auch als Ereignis be
 	Zeigt Ihnen die aktuelle Konfiguration der SIGNALduino Protokollkathegorie an. | Bsp: <code>MS=1;MU=1;MC=1;Mred=0</code><br><br>
 	<li>freeram<br></li>
    Zeigt den freien RAM an.<br><br>
+	<li>availableFirmware<br>
+    Sucht im Internet nach verfügbaren Firmware Versionen und zeigt diese an. Voraussetzung ist, dass das Attribut hardware gesetzt ist.<br><br></li>
 	<li>ping<br></li>
 	Pr&uuml;ft die Kommunikation mit dem SIGNALduino.<br><br>
 	<li>protocolIDs<br></li>
