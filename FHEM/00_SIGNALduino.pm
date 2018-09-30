@@ -4306,7 +4306,7 @@ sub SIGNALduino_Log3($$$)
 		command.
 		</li><br>
 		<li>config<br>
-		Displays the configuration of the SIGNALduino protocol cathegory. | example: <code>MS=1;MU=1;MC=1;Mred=0</code>
+		Displays the configuration of the SIGNALduino protocol category. | example: <code>MS=1;MU=1;MC=1;Mred=0</code>
 		</li><br>
 		<li>freeram<br>
 		Displays the free RAM.
