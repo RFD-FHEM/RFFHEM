@@ -12,6 +12,7 @@
 # 18.08.2018 Protokoll 51 - prematch auf genau 10 Nibbles angepasst, Protokoll 33 - prematch auf genau 11 Nibbles angepasst
 # 21.08.2018 Modelauswahl hinzugefuegt, da 3 versch. Typen SD_WS_33 --> Batterie-Bit Positionen unterschiedlich (34,35,36)
 # 11.09.2018 Plotanlegung korrigiert | doc | temp check war falsch positioniert
+# 16.09.2018 neues Protokoll 84: Funk Wetterstation Auriol IAN 283582 Version 06/2017 (Lidl), Modell-Nr.: HG02832D
 
 package main;
 
@@ -45,6 +46,7 @@ sub SD_WS_Initialize($)
 		"SD_WS71_T.*"		=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4:Temp,", autocreateThreshold => "2:180"},
 		"SD_WS_33_T_.*"	=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.* model:other", FILTER => "%NAME", GPLOT => "temp4:Temp,", autocreateThreshold => "2:180"},
 		"SD_WS_33_TH_.*"	=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.* model:other", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "2:180"},
+		"SD_WS_84_TH_.*"	=> { ATTR => "event-min-interval:.*:160 event-on-change-reading:.* model:other", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "2:120"},
 	};
 
 }
@@ -89,14 +91,11 @@ sub SD_WS_Parse($$)
 	my $name = $iohash->{NAME};
 	my ($protocol,$rawData) = split("#",$msg);
 	$protocol=~ s/^[WP](\d+)/$1/; # extract protocol
-	
-
 	my $dummyreturnvalue= "Unknown, please report";
 	my $hlen = length($rawData);
 	my $blen = $hlen * 4;
 	my $bitData = unpack("B$blen", pack("H$hlen", $rawData));
 	my $bitData2;
-	
 	my $model;	# wenn im elsif Abschnitt definiert, dann wird der Sensor per AutoCreate angelegt
 	my $SensorTyp;
 	my $id;
@@ -257,6 +256,37 @@ sub SD_WS_Parse($$)
 			temp => 	sub {my (undef,$bitData) = @_; return round((SD_WS_binaryToNumber($bitData,20,31)-720)*0.0556,1); }, 		   # temp
 			hum => 		sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,32,39));  }, 							   # hum
    	 	 }   ,     
+		84 =>
+			{
+				# Protokollbeschreibung: Funk Wetterstation Auriol IAN 283582 (Lidl)
+				# ------------------------------------------------------------------------
+				# 0    4    | 8    12   | 16   20   | 24   28   | 32   36  
+				# 1111 1100 | 0001 0110 | 0001 0000 | 0011 0111 | 0100 1001
+				# iiii iiii | hhhh hhhh | bscc tttt | tttt tttt | ???? ????
+				# i: 8 bit random id (changes on power-loss) - noch nicht geprüft!!!
+				# h: 8 bit relative humidity percentage
+				# b: 1 bit battery indicator (0=>OK, 1=>LOW)
+				# s: 1 bit sendmode 1=manual (button pressed) 0=auto
+				# c: 2 bit channel valid channels are 0-2 (1-3)
+				# t: 12 bit signed temperature scaled by 10
+				# ?: unknown
+				# Sensor sends approximately every 30 seconds
+				sensortype => 'Funk Wetterstation Auriol IAN 283582',
+				model => 'SD_WS_84_TH',
+				prematch => sub {my $msg = shift; return 1 if ($msg =~ /^[0-9A-F]{10}$/); },
+				crcok => 	sub {	return SD_WS_binaryToNumber($bitData,32,39); }, 									# crc currently not calculated
+				id =>	sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,0,7); },
+				sendmode =>	sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,17) eq "1" ? "manual" : "auto"; },
+				temp => sub {	my (undef,$bitData) = @_;
+								my $tempraw = SD_WS_binaryToNumber($bitData,20,23) * 256 + SD_WS_binaryToNumber($bitData,24,27) * 16 + SD_WS_binaryToNumber($bitData,28,31);
+								$tempraw -= 4096 if ($tempraw > 1023);		# negative
+								$tempraw /= 10.0;
+								return $tempraw;
+							},
+				hum => sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,8,11)*16 + SD_WS_binaryToNumber($bitData,12,15)); },
+				channel => sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,18,19)+1 );  },
+				bat => 		sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,16) eq "0" ? "ok" : "low";},
+   	 	} ,       
     );
     
     	
@@ -283,7 +313,7 @@ sub SD_WS_Parse($$)
 		$SensorTyp = "Bresser 7009994";
 		my $checksum = (SD_WS_binaryToNumber($bitData,0,7) + SD_WS_binaryToNumber($bitData,8,15) + SD_WS_binaryToNumber($bitData,16,23) + SD_WS_binaryToNumber($bitData,24,31)) & 0xFF;
 		if ($checksum != SD_WS_binaryToNumber($bitData,32,39)) {
-			Log3 $name, 3, "$name: SD_WS37 ERROR - checksum $checksum != ".SD_WS_binaryToNumber($bitData,32,39);
+			Log3 $name, 4, "$name: SD_WS37 ERROR - checksum $checksum != ".SD_WS_binaryToNumber($bitData,32,39);
 			return "";
 		} else {
 			Log3 $name, 4, "$name: SD_WS37 checksum ok $checksum = ".SD_WS_binaryToNumber($bitData,32,39);
@@ -583,7 +613,7 @@ sub SD_WS_Parse($$)
 				$model = $decodingSubs{$protocol}{model}."H" if $hum != 0;				# for models with Humidity
 			} 
 																	  
-
+	    	$sendmode = $decodingSubs{$protocol}{sendmode}->( $rawData,$bitData ) if (defined($decodingSubs{$protocol}{sendmode}));
 	    	$trend = $decodingSubs{$protocol}{trend}->( $rawData,$bitData ) if (defined($decodingSubs{$protocol}{trend}));
 
 	    	Log3 $iohash, 4, "$name decoded protocolid: $protocol ($SensorTyp) sensor id=$id, channel=$channel, temp=$temp, hum=$hum, bat=$bat";
@@ -659,7 +689,6 @@ sub SD_WS_Parse($$)
 			$sendmode = SD_WS_binaryToNumber($bitData,34) eq "1" ? "manual" : "auto";
 		}
 	}
-																	
 
 	readingsBeginUpdate($hash);
 	readingsBulkUpdate($hash, "state", $state);
