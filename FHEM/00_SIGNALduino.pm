@@ -4125,9 +4125,8 @@ sub SIGNALduino_Log3($$$)
 	</table>
 	<br>
 	<a name="SIGNALduinodefine"></a>
-	<b>Define</b><br>
-	<code>define &lt;name&gt; SIGNALduino &lt;device&gt; </code> <br>
-	<br>
+	<b>Define</b>
+	<ul><code>define &lt;name&gt; SIGNALduino &lt;device&gt; </code></ul>
 	USB-connected devices (SIGNALduino):<br>
 	<ul><li>
 		&lt;device&gt; specifies the serial port to communicate with the SIGNALduino.
@@ -4158,181 +4157,65 @@ sub SIGNALduino_Log3($$$)
 
 	</ul>
 
-	<a name="SIGNALduinoattr"></a>
-	<b>Attributes</b>
-	<ul>
-	<li><a name="addvaltrigger">addvaltrigger</a><br>
-        Create triggers for additional device values. Right now these are RSSI, RAWMSG and DMSG.
-        </li>
-        <li>blacklist_IDs<br>
-        <a name="blacklist_IDs"></a>
-        The blacklist works only if a whitelist not exist. <a name=" "></a>
-        </li>
-        <li>cc1101_frequency<br>
-        Since the PA table values ​​are frequency-dependent, is at 868 MHz a value greater 800 required.
-        </li>
-	<li><a href="#do_not_notify">do_not_notify</a></li>
-	<li><a href="#attrdummy">dummy</a></li>
-	<li>debug<br>
-	This will bring the module in a very verbose debug output. Usefull to find new signals and verify if the demodulation works correctly.
-	</li>
-	<li>development<br>
-	<a name="development"></a>
-	With development you can enable protocol decoding for protocolls witch are still in development and may not be very accurate implemented. 
-	This can result in crashes or throw high amount of log entrys in your logfile, so be careful to use this. <br><br>
 	
-	Protocols flagged with a developID flag are not loaded unless specified to do so.<br>
-	
-	<ul><li>If the flag developId => 'y' is set in the protocol defintion then the protocol is still in development. You can enable it with the attribute:<br>
-	Specify "y" followed with the protocol id to enable it.</li>
-    <li>If the protocoll is developed well, but the logical module is not ready, developId => 'm' is set. 
-    You can enable it with the attribute: <br> Specify "m" followed with the protocol id to enable it. <a name=" "></li></ul></a><br>
-	</li>
-	<li>doubleMsgCheck_IDs<br>
-	This attribute allows it, to specify protocols which must be received two equal messages to call dispatch to the modules.<br>
-	You can specify multiple IDs wih a colon : 0,3,7,12<br>
-	</li>
-	<li>flashCommand<br>
-	<a name="flashCommand"></a>
-    	This is the command, that is executed to performa the firmware flash. Do not edit, if you don't know what you are doing.<br>
-		If the attribute not defined, it uses the default settings. <b>If the user defines the attribute manually, the system uses the specifications!</b><br>
-    	<ul>
-		<li>default for nano, nanoCC1101, miniculCC1101, promini: <code>avrdude -c arduino -b [BAUDRATE] -P [PORT] -p atmega328p -vv -U flash:w:[HEXFILE] 2>[LOGFILE]</code></li>
-		<li>default for radinoCC1101: <code>avrdude -c avr109 -b [BAUDRATE] -P [PORT] -p atmega32u4 -vv -D -U flash:w:[HEXFILE] 2>[LOGFILE]</code></li>
-		</ul>
-		It contains some place-holders that automatically get filled with the according values:<br>
-		<ul>
-			<li>[BAUDRATE]<br>
-			is the speed (e.g. 57600)</li>
-			<li>[PORT]<br>
-			is the port the Signalduino is connectd to (e.g. /dev/ttyUSB0) and will be used from the defenition</li>
-			<li>[HEXFILE]<br>
-			is the .hex file that shall get flashed. There are three options (applied in this order):<br>
-			- passed in set flash as first argument<br>
-			- taken from the hexFile attribute<br>
-			- the default value defined in the module<br>
-			</li>
-			<li>[LOGFILE]<br>
-			The logfile that collects information about the flash process. It gets displayed in FHEM after finishing the flash process</li>
-		</ul><br>
-		<u><i>note:</u></i> ! Sometimes there can be problems flashing radino on Linux. <a href="https://wiki.in-circuit.de/index.php5?title=radino_common_problems">Here in the wiki under the point "radino & Linux" is a patch!</a><a name=" "></a><a name=" "></a>
-    </li><br>
-    <li>hardware<br>
-    When using the flash command, you should specify what hardware you have connected to the usbport. Doing not, can cause failures of the device.
-		<ul>
-			<li>ESP_1MCC1101: ESP8266 with 1 MB flash and CC1101 receiver</li>
-			<li>ESP32: ESP32 </li>
-			<li>nano328: Arduino Nano with cheap receiver</li>
-			<li>nanoCC1101: Arduino Nano wirh CC110x receiver</li>
-			<li>miniculCC1101: Arduino pro Mini with CC110x receiver and cables as a minicul</li>
-			<li>promini328: Arduino Pro Mini with cheap receiver </li>
-			<li>radinoCC1101: Arduino compatible radino with cc1101 receiver</li>
-		</ul>
-	</li><br>
-    <li>minsecs<br>
-    This is a very special attribute. It is provided to other modules. minsecs should act like a threshold. All logic must be done in the logical module. 
-    If specified, then supported modules will discard new messages if minsecs isn't past.
-    </li>
-    
-    <li>eventlogging<br>
-    With this attribute you can control if every logmessage is also provided as event. This allows to generate event for every log messages.
-    Set this to 0 and logmessages are only saved to the global fhem logfile if the loglevel is higher or equal to the verbose attribute.
-    Set this to 1 and every logmessages is also dispatched as event. This allows you to log the events in a seperate logfile.
-    </li>
-    
-    <li>noMsgVerbose<br>
-    With this attribute you can control the logging of debug messages from the io device.
-    If set to 3, this messages are logged if global verbose is set to 3 or higher.
-    </li>
-    <li>longids<br>
-        Comma separated list of device-types for SIGNALduino that should be handled using long IDs. This additional ID allows it to differentiate some weather sensors, if they are sending on the same channel. Therfor a random generated id is added. If you choose to use longids, then you'll have to define a different device after battery change.<br>
-		Default is to not to use long IDs for all devices.
-      <br><br>
-      Examples:<PRE>
-# Do not use any long IDs for any devices:
-attr sduino longids 0
-# Use any long IDs for all devices (this is default):
-attr sduino longids 1
-# Use longids for BTHR918N devices.
-# Will generate devices names like BTHR918N_f3.
-attr sduino longids BTHR918N
-</PRE></li>
-<li>rawmsgEvent<br>
-When set to "1" received raw messages triggers events
-</li>
-<li>suppressDeviceRawmsg<br>
-When set to 1, the internal "RAWMSG" will not be updated with the received messages
-</li>
-<li>whitelist_IDs<br>
-<a name="whitelist_IDs"></a>
-This attribute allows it, to specify whichs protocos are considured from this module.
-Protocols which are not considured, will not generate logmessages or events. They are then completly ignored. 
-This makes it possible to lower ressource usage and give some better clearnes in the logs.
-You can specify multiple whitelistIDs wih a colon : 0,3,7,12<br>
-With a # at the beginnging whitelistIDs can be deactivated. <a name=" "></a>
-</li><br>
-   <li>WS09_CRCAUS<br>
-       <br>0: CRC-Check WH1080 CRC = 0  on, default   
-       <br>2: CRC = 49 (x031) WH1080, set OK
-    </li>
-   </ul><br>
-   
-   
-    
-	<a name="SIGNALduinoget"></a>
-	<b>Get</b>
-	<ul>
-		<li>version<br>
-		return the SIGNALduino firmware version
-		</li><br>
-		<li>raw<br>
-		Issue a SIGNALduino firmware command, and wait for one line of data returned by
-		the SIGNALduino. See the SIGNALduino firmware code  for details on SIGNALduino
-		commands. With this line, you can send almost any signal via a transmitter connected
-		</li><br>
-		<li>cmds<br>
-		Depending on the firmware installed, SIGNALduinos have a different set of
-		possible commands. Please refer to the sourcecode of the firmware of your
-		SIGNALduino to interpret the response of this command. See also the raw-
-		command.
-		</li><br>
-		<li>protocolIDs<br>
-		display a list of the protocol IDs
-		</li><br>
-		<li>ccconf<br>
-		Only with cc1101 receiver.
-		Read some CUL radio-chip (cc1101) registers (frequency, bandwidth, etc.),
-		and display them in human readable form.
-		</li><br>
-		<li>ccpatable<br>
-		read cc1101 PA table (power amplification for RF sending)
-		</li><br>
-		<li>ccreg<br>
-		read cc1101 registers (99 reads all cc1101 registers)
-		</li><br>
-	</ul>
 	<a name="SIGNALduinoset"></a>
 	<b>SET</b>
 	<ul>
-		<li>raw<br>
-		Issue a SIGNALduino firmware command, without waiting data returned by
-		the SIGNALduino. See the SIGNALduino firmware code  for details on SIGNALduino
-		commands. With this line, you can send almost any signal via a transmitter connected
-
-        To send some raw data look at these examples:
-		P<protocol id>#binarydata#R<num of repeats>#C<optional clock>   (#C is optional) 
-		<br>Example 1: set sduino raw SR;R=3;P0=500;P1=-9000;P2=-4000;P3=-2000;D=0302030  sends the data in raw mode 3 times repeated
-        <br>Example 2: set sduino raw SM;R=3;P0=500;C=250;D=A4F7FDDE  sends the data manchester encoded with a clock of 250uS
-        <br>Example 3: set sduino raw SC;R=3;SR;P0=5000;SM;P0=500;C=250;D=A4F7FDDE  sends a combined message of raw and manchester encoded repeated 3 times
-		</p>
-
-
-		</li>
-		<li>reset<br>
-		This will do a reset of the usb port and normaly causes to reset the uC connected.
-		</li><br>
+		<a name="close"></a>
 		<li>close<br>
 		Closes the connection to the device.
+		</li><br>
+		<a name="disableMessagetype"></a>
+		<li>disableMessagetype<br>
+			Allows you to disable the message processing for 
+			<ul>
+				<li>messages with sync (syncedMS),</li>
+				<li>messages without a sync pulse (unsyncedMU)</li> 
+				<li>manchester encoded messages (manchesterMC) </li>
+			</ul>
+			The new state will be saved into the eeprom of your arduino.
+		</li><br>
+		<a name="enableMessagetype"></a>
+		<li>enableMessagetype<br>
+			Allows you to enable the message processing for 
+			<ul>
+				<li>messages with sync (syncedMS)</li>
+				<li>messages without a sync pulse (unsyncedMU) </li>
+				<li>manchester encoded messages (manchesterMC) </li>
+			</ul>
+			The new state will be saved into the eeprom of your arduino.
+		</li><br>
+		
+		<li>freq / bWidth / patable / rAmpl / sens<br>
+		Only with CC1101 receiver.<br>
+		Set the sduino frequency / bandwidth / PA table / receiver-amplitude / sensitivity<br>
+		
+		Use it with care, it may destroy your hardware and it even may be
+		illegal to do so. Note: The parameters used for RFR transmission are
+		not affected.<br>
+		<ul>
+		<a name="cc1101_freq"></a>
+		<li>freq sets both the reception and transmission frequency. Note:
+		    Although the CC1101 can be set to frequencies between 315 and 915
+		    MHz, the antenna interface and the antenna of the CUL is tuned for
+		    exactly one frequency. Default is 868.3 MHz (or 433 MHz)</li>
+		<a name="cc1101_bWidth"></a>
+		<li>bWidth can be set to values between 58 kHz and 812 kHz. Large values
+		    are susceptible to interference, but make possible to receive
+		    inaccurately calibrated transmitters. It affects tranmission too.
+		    Default is 325 kHz.</li>
+		<a name="cc1101_patable"></a>
+		<li>patable change the PA table (power amplification for RF sending) 
+		</li>
+		<a name="cc1101_rAmpl"></a>
+		<li>rAmpl is receiver amplification, with values between 24 and 42 dB.
+		    Bigger values allow reception of weak signals. Default is 42.
+		</li>
+		<a name="cc1101_sens"></a>
+		<li>sens is the decision boundary between the on and off values, and it
+		    is 4, 8, 12 or 16 dB.  Smaller values allow reception of less clear
+		    signals. Default is 4 dB.</li>
+		</ul>
 		</li><br>
 		<a name="flash"></a>
 		<li>flash [hexFile|url]<br>
@@ -4369,10 +4252,26 @@ With a # at the beginnging whitelistIDs can be deactivated. <a name=" "></a>
 			</li></ul>
 		<li>In bootloader mode, the radino gets a different USB ID.</li><br>
 		<b>If the bootloader is enabled, it signals with a flashing LED. Then you have 8 seconds to flash.</b>
-		</li><a name=" "></a>
+		</li>
 		</ul><br>
-		
-		<a name=" "></a>
+		<a name="reset"></a>
+		<li>reset<br>
+		This will do a reset of the usb port and normaly causes to reset the uC connected.
+		</li><br>
+		<a name="raw"></a>
+		<li>raw<br>
+		Issue a SIGNALduino firmware command, without waiting data returned by
+		the SIGNALduino. See the SIGNALduino firmware code  for details on SIGNALduino
+		commands. With this line, you can send almost any signal via a transmitter connected
+
+        To send some raw data look at these examples:
+		P<protocol id>#binarydata#R<num of repeats>#C<optional clock>   (#C is optional)<br>
+		<br>Example 1: set sduino raw SR;R=3;P0=500;P1=-9000;P2=-4000;P3=-2000;D=0302030  sends the data in raw mode 3 times repeated
+        <br>Example 2: set sduino raw SM;R=3;P0=500;C=250;D=A4F7FDDE  sends the data manchester encoded with a clock of 250uS
+        <br>Example 3: set sduino raw SC;R=3;SR;P0=5000;SM;P0=500;C=250;D=A4F7FDDE  sends a combined message of raw and manchester encoded repeated 3 times
+		</p>
+		</li>
+        <a name="sendMsg"></a>
 		<li>sendMsg<br>
 		This command will create the needed instructions for sending raw data via the signalduino. Insteaf of specifying the signaldata by your own you specify 
 		a protocol and the bits you want to send. The command will generate the needed command, that the signalduino will send this.
@@ -4391,60 +4290,198 @@ With a # at the beginnging whitelistIDs can be deactivated. <a name=" "></a>
 		<br>Generates the raw send command with the hex message F7E with protocl id 29 . The message will be send four times.
 		<br>SR;R=4;P0=-8360;P1=220;P2=-440;P3=-220;P4=440;D=01212121213421212121212134;
 		</p></li></ul>
-
-		
 		</li>
-		<li>enableMessagetype<br>
-			Allows you to enable the message processing for 
-			<ul>
-				<li>messages with sync (syncedMS)</li>
-				<li>messages without a sync pulse (unsyncedMU) </li>
-				<li>manchester encoded messages (manchesterMC) </li>
-			</ul>
-			The new state will be saved into the eeprom of your arduino.
+	</ul>
+	
+	
+	<a name="SIGNALduinoget"></a>
+	<b>Get</b>
+	<ul>
+        <a name="ccconf"></a>
+        <li>ccconf<br>
+		Only with cc1101 receiver.
+		Read some CUL radio-chip (cc1101) registers (frequency, bandwidth, etc.),
+		and display them in human readable form.
 		</li><br>
-		<li>disableMessagetype<br>
-			Allows you to disable the message processing for 
-			<ul>
-				<li>messages with sync (syncedMS),</li>
-				<li>messages without a sync pulse (unsyncedMU)</li> 
-				<li>manchester encoded messages (manchesterMC) </li>
-			</ul>
-			The new state will be saved into the eeprom of your arduino.
+        <a name="ccpatable"></a>
+		<li>ccpatable<br>
+		read cc1101 PA table (power amplification for RF sending)
 		</li><br>
-		
-		<li>freq / bWidth / patable / rAmpl / sens<br>
-		Only with CC1101 receiver.<br>
-		Set the sduino frequency / bandwidth / PA table / receiver-amplitude / sensitivity<br>
-		
-		Use it with care, it may destroy your hardware and it even may be
-		illegal to do so. Note: The parameters used for RFR transmission are
-		not affected.<br>
-		<ul>
-		<li>freq sets both the reception and transmission frequency. Note:
-		    Although the CC1101 can be set to frequencies between 315 and 915
-		    MHz, the antenna interface and the antenna of the CUL is tuned for
-		    exactly one frequency. Default is 868.3 MHz (or 433 MHz)</li>
-		<li>bWidth can be set to values between 58 kHz and 812 kHz. Large values
-		    are susceptible to interference, but make possible to receive
-		    inaccurately calibrated transmitters. It affects tranmission too.
-		    Default is 325 kHz.</li>
-		<li>patable change the PA table (power amplification for RF sending) 
-		</li>
-		<li>rAmpl is receiver amplification, with values between 24 and 42 dB.
-		    Bigger values allow reception of weak signals. Default is 42.
-		</li>
-		<li>sens is the decision boundary between the on and off values, and it
-		    is 4, 8, 12 or 16 dB.  Smaller values allow reception of less clear
-		    signals. Default is 4 dB.</li>
-		</ul>
+        <a name="ccreg"></a>
+		<li>ccreg<br>
+		read cc1101 registers (99 reads all cc1101 registers)
 		</li><br>
-		
+        <a name="cmds"></a>
+		<li>cmds<br>
+		Depending on the firmware installed, SIGNALduinos have a different set of
+		possible commands. Please refer to the sourcecode of the firmware of your
+		SIGNALduino to interpret the response of this command. See also the raw-
+		command.
+		</li><br>
+        <a name="config"></a>
+		<li>config<br>
+		Displays the configuration of the SIGNALduino protocol category. | example: <code>MS=1;MU=1;MC=1;Mred=0</code>
+		</li><br>
+        <a name="freeram"></a>
+		<li>freeram<br>
+		Displays the free RAM.
+		</li><br>
+        <a name="ping"></a>
+		<li>ping<br>
+		Check the communication with the SIGNALduino.
+		</li><br>
+        <a name="protocolIDs"></a>
+		<li>protocolIDs<br>
+		display a list of the protocol IDs
+		</li><br>
+        <a name="raw"></a>
+		<li>raw<br>
+		Issue a SIGNALduino firmware command, and wait for one line of data returned by
+		the SIGNALduino. See the SIGNALduino firmware code  for details on SIGNALduino
+		commands. With this line, you can send almost any signal via a transmitter connected
+		</li><br>
+        <a name="uptime"></a>
+		<li>uptime<br>
+		Displays information how long the SIGNALduino is running. A FHEM reboot resets the timer.
+		</li><br>
+        <a name="version"></a>
+		<li>version<br>
+		return the SIGNALduino firmware version
+		</li><br>		
 	</ul>
 
-
-
-
+	
+	<a name="SIGNALduinoattr"></a>
+	<b>Attributes</b>
+	<ul>
+	<li><a href="#addvaltrigger">addvaltrigger</a><br>
+        Create triggers for additional device values. Right now these are RSSI, RAWMSG and DMSG.
+        </li><br>
+        <a name="blacklist_IDs"></a>
+        <li>blacklist_IDs<br>
+        The blacklist works only if a whitelist not exist.
+        </li><br>
+        <a name="cc1101_frequency"></a>
+		<li>cc1101_frequency<br>
+        Since the PA table values ​​are frequency-dependent, is at 868 MHz a value greater 800 required.
+        </li><br>
+	<a name="debug"></a>
+	<li>debug<br>
+	This will bring the module in a very verbose debug output. Usefull to find new signals and verify if the demodulation works correctly.
+	</li><br>
+	<a name="development"></a>
+	<li>development<br>
+	With development you can enable protocol decoding for protocolls witch are still in development and may not be very accurate implemented. 
+	This can result in crashes or throw high amount of log entrys in your logfile, so be careful to use this. <br><br>
+	
+	Protocols flagged with a developID flag are not loaded unless specified to do so.<br>
+	
+	<ul><li>If the protocoll is developed well, but the logical module is not ready, developId => 'm' is set. 
+    You can enable it with the attribute: <br> Specify "m" followed with the protocol id to enable it.</li>
+	<li>If the flag developId => 'p' is set in the protocol defintion then the protocol ID is reserved.</li>
+	<li>If the flag developId => 'y' is set in the protocol defintion then the protocol is still in development. You can enable it with the attribute:<br>
+	Specify "y" followed with the protocol id to enable it.</li>
+	</ul><br>
+	</li>
+	<li><a href="#do_not_notify">do_not_notify</a></li><br>
+	<li><a href="#attrdummy">dummy</a></li><br>
+    <a name="doubleMsgCheck_IDs"></a>
+	<li>doubleMsgCheck_IDs<br>
+	This attribute allows it, to specify protocols which must be received two equal messages to call dispatch to the modules.<br>
+	You can specify multiple IDs wih a colon : 0,3,7,12<br>
+	</li><br>
+    <a name="eventlogging"></a>
+	<li>eventlogging<br>
+    With this attribute you can control if every logmessage is also provided as event. This allows to generate event for every log messages.
+    Set this to 0 and logmessages are only saved to the global fhem logfile if the loglevel is higher or equal to the verbose attribute.
+    Set this to 1 and every logmessages is also dispatched as event. This allows you to log the events in a seperate logfile.
+    </li><br>
+	<a name="flashCommand"></a>
+	<li>flashCommand<br>
+    	This is the command, that is executed to performa the firmware flash. Do not edit, if you don't know what you are doing.<br>
+		If the attribute not defined, it uses the default settings. <b>If the user defines the attribute manually, the system uses the specifications!</b><br>
+    	<ul>
+		<li>default for nano, nanoCC1101, miniculCC1101, promini: <code>avrdude -c arduino -b [BAUDRATE] -P [PORT] -p atmega328p -vv -U flash:w:[HEXFILE] 2>[LOGFILE]</code></li>
+		<li>default for radinoCC1101: <code>avrdude -c avr109 -b [BAUDRATE] -P [PORT] -p atmega32u4 -vv -D -U flash:w:[HEXFILE] 2>[LOGFILE]</code></li>
+		</ul>
+		It contains some place-holders that automatically get filled with the according values:<br>
+		<ul>
+			<li>[BAUDRATE]<br>
+			is the speed (e.g. 57600)</li>
+			<li>[PORT]<br>
+			is the port the Signalduino is connectd to (e.g. /dev/ttyUSB0) and will be used from the defenition</li>
+			<li>[HEXFILE]<br>
+			is the .hex file that shall get flashed. There are three options (applied in this order):<br>
+			- passed in set flash as first argument<br>
+			- taken from the hexFile attribute<br>
+			- the default value defined in the module<br>
+			</li>
+			<li>[LOGFILE]<br>
+			The logfile that collects information about the flash process. It gets displayed in FHEM after finishing the flash process</li>
+		</ul><br>
+		<u><i>note:</u></i> ! Sometimes there can be problems flashing radino on Linux. <a href="https://wiki.in-circuit.de/index.php5?title=radino_common_problems">Here in the wiki under the point "radino & Linux" is a patch!</a>
+    </li><br>
+    <a name="hardware"></a>
+	<li>hardware<br>
+    When using the flash command, you should specify what hardware you have connected to the usbport. Doing not, can cause failures of the device.
+		<ul>
+			<li>ESP_1MCC1101: ESP8266 with 1 MB flash and CC1101 receiver</li>
+			<li>ESP32: ESP32 </li>
+			<li>nano328: Arduino Nano with cheap receiver</li>
+			<li>nanoCC1101: Arduino Nano wirh CC110x receiver</li>
+			<li>miniculCC1101: Arduino pro Mini with CC110x receiver and cables as a minicul</li>
+			<li>promini328: Arduino Pro Mini with cheap receiver </li>
+			<li>radinoCC1101: Arduino compatible radino with cc1101 receiver</li>
+		</ul>
+	</li><br>
+    <a name="minsecs"></a>
+	<li>minsecs<br>
+    This is a very special attribute. It is provided to other modules. minsecs should act like a threshold. All logic must be done in the logical module. 
+    If specified, then supported modules will discard new messages if minsecs isn't past.
+    </li><br>
+    <a name="noMsgVerbose"></a>
+    <li>noMsgVerbose<br>
+    With this attribute you can control the logging of debug messages from the io device.
+    If set to 3, this messages are logged if global verbose is set to 3 or higher.
+    </li><br>
+    <a name="longids"></a>
+	<li>longids<br>
+        Comma separated list of device-types for SIGNALduino that should be handled using long IDs. This additional ID allows it to differentiate some weather sensors, if they are sending on the same channel. Therfor a random generated id is added. If you choose to use longids, then you'll have to define a different device after battery change.<br>
+		Default is to not to use long IDs for all devices.
+      <br><br>
+      Examples:<PRE>
+# Do not use any long IDs for any devices:
+attr sduino longids 0
+# Use any long IDs for all devices (this is default):
+attr sduino longids 1
+# Use longids for BTHR918N devices.
+# Will generate devices names like BTHR918N_f3.
+attr sduino longids BTHR918N
+</PRE></li>
+<a name="rawmsgEvent"></a>
+<li>rawmsgEvent<br>
+When set to "1" received raw messages triggers events
+</li><br>
+<a name="suppressDeviceRawmsg"></a>
+<li>suppressDeviceRawmsg<br>
+When set to 1, the internal "RAWMSG" will not be updated with the received messages
+</li><br>
+<a name="whitelist_IDs"></a>
+<li>whitelist_IDs<br>
+This attribute allows it, to specify whichs protocos are considured from this module.
+Protocols which are not considured, will not generate logmessages or events. They are then completly ignored. 
+This makes it possible to lower ressource usage and give some better clearnes in the logs.
+You can specify multiple whitelistIDs wih a colon : 0,3,7,12<br>
+With a # at the beginnging whitelistIDs can be deactivated.
+</li><br>
+   <a name="WS09_CRCAUS"></a>
+   <li>WS09_CRCAUS<br>
+       <br>0: CRC-Check WH1080 CRC = 0  on, default   
+       <br>2: CRC = 49 (x031) WH1080, set OK
+    </li>
+   </ul>
+							  
+		   
 =end html
 =begin html_DE
 
@@ -4493,9 +4530,8 @@ With a # at the beginnging whitelistIDs can be deactivated. <a name=" "></a>
 	</table>
 	<br>
 	<a name="SIGNALduinodefine"></a>
-	<b>Define</b><br>
-	<code>define &lt;name&gt; SIGNALduino &lt;device&gt; </code> <br>
-	<br>
+	<b>Define</b>
+	<ul><code>define &lt;name&gt; SIGNALduino &lt;device&gt; </code></ul>
 	USB-connected devices (SIGNALduino):<br>
 	<ul><li>
 		&lt;device&gt; spezifiziert den seriellen Port f&uuml;r die Kommunikation mit dem SIGNALduino.
@@ -4516,135 +4552,8 @@ With a # at the beginnging whitelistIDs can be deactivated. <a name=" "></a>
 		OSX.  <br><br>
 		</li>
 	</ul>
-	<a name="SIGNALduinoattr"></a>
-	<b>Attributes</b>
-	<ul>
-	<li><a href="#dummy">dummy</a><br><br></li>
-	<li><a href="#addvaltrigger">addvaltrigger</a><br></li>
-	Generiert Trigger f&uuml;r zus&auml;tzliche Werte. Momentan werden DMSG , RAWMSG und RSSI unterst&uuml;zt.<br><br>
-	<li>blacklist_IDs<br></li>
-	<a name="blacklist_IDs"></a>
-	Dies ist eine durch Komma getrennte Liste. Die Blacklist funktioniert nur, wenn keine Whitelist existiert! Hier kann man ID´s eintragen welche man nicht ausgewertet haben m&ouml;chte.	<a name=" "></a><br><br>
-	<li>cc1101_frequency<br></li>
-	Frequenzeinstellung des cc1101. | Bsp: 433.920Mhz / 868.350Mhz<br><br>
-	<li>debug<br>
-	Dies bringt das Modul in eine sehr ausf&uuml;hrliche Debug-Ausgabe im Logfile. Somit lassen sich neue Signale finden und Signale &uuml;berpr&uuml;fen, ob die Demodulation korrekt funktioniert.</li><br>
-	<li>development<br>
-	<a name="development"></a>
-	Mit development k&ouml;nnen Sie die Protokolldekodierung f&uuml;r Protokolle aktivieren, die sich noch in der Entwicklung befinden und m&ouml;glicherweise nicht sehr genau implementiert sind.
-	Dies kann zu Abst&uuml;rzen oder zu einer hohen Anzahl an Log-Eintr&auml;gen in Ihrer Logdatei f&uuml;hren. Protokolle, die mit einem developmentID-Flag gekennzeichnet sind, werden nicht geladen, sofern dies nicht angegeben ist.<br>
-	<ul><li>Wenn das Flag developId => 'm' in der Protokolldefinition gesetzt ist, befindet sich das logische Modul in der Entwicklung.
-	Wenn Sie es aktivieren wollen, so geben Sie "m" gefolgt von der Protokoll-ID an.</li>
-	<li>Wenn das Flag developId => 'p' in der Protokolldefinition gesetzt ist, wurde die ID reserviert.</li>
-	<li>Wenn das Flag developId => 'y' in der Protokolldefinition gesetzt ist, befindet sich das Protokoll noch in der Entwicklung.
-	Wenn Sie es aktivieren wollen, so geben Sie "y" gefolgt von der Protokoll-ID an.</li><a name=" "></a></li></ul><br>
-	<li><a href="#do_not_notify">do_not_notify</a></li><br>
-	<li>doubleMsgCheck_IDs<br></li>
-	Dieses Attribut erlaubt es, Protokolle anzugeben, die zwei gleiche Nachrichten enthalten m&uuml;ssen, um diese an die Module zu &uuml;bergeben. Sie k&ouml;nnen mehrere IDs mit einem Komma angeben: 0,3,7,12<br><br>
-	<li>flashCommand<br>
-	<a name="flashCommand"></a>
-	Dies ist der Befehl, der ausgef&uuml;hrt wird, um den Firmware-Flash auszuf&uuml;hren. Nutzen Sie dies nicht, wenn Sie nicht wissen, was Sie tun!<br>
-	Wurde das Attribut nicht definiert, so verwendet es die Standardeinstellungen. <b>Sobald der User das Attribut manuell definiert, nutzt das System die Vorgaben!</b><br>
-	<ul>
-	<li>Standard nano, nanoCC1101, miniculCC1101, promini: <code>avrdude -c arduino -b [BAUDRATE] -P [PORT] -p atmega328p -vv -U flash:w:[HEXFILE] 2>[LOGFILE]</code></li>
-	<li>Standard radinoCC1101: <code>avrdude -c avr109 -b [BAUDRATE] -P [PORT] -p atmega32u4 -vv -D -U flash:w:[HEXFILE] 2>[LOGFILE]</code></li>
-	</ul>
-	Es enth&auml;lt einige Platzhalter, die automatisch mit den entsprechenden Werten gef&uuml;llt werden:
-		<ul>
-			<li>[BAUDRATE]<br>
-			Ist die Schrittgeschwindigkeit. (z.Bsp: 57600)</li>
-			<li>[PORT]<br>
-			Ist der Port, an den der SIGNALduino angeschlossen ist (z.Bsp: /dev/ttyUSB0) und wird von der Defenition verwendet.</li>
-			<li>[HEXFILE]<br>
-			Ist die .hex-Datei, die geflasht werden soll. Es gibt drei Optionen (angewendet in dieser Reihenfolge):<br>
-			&nbsp;&nbsp;- in <code>set SIGNALduino flash</code> als erstes Argument &uuml;bergeben<br>
-			&nbsp;&nbsp;- aus dem Hardware-Attribut genommen<br>
-			&nbsp;&nbsp;- der im Modul definierte Standardwert<br>
-			</li>
-			<li>[LOGFILE]<br>
-			Die Logdatei, die Informationen &uuml;ber den Flash-Prozess sammelt. Es wird nach Abschluss des Flash-Prozesses in FHEM angezeigt</li>
-		</ul><br>
-	<u><i>Hinweis:</u></i> ! Teilweise kann es beim flashen vom radino unter Linux Probleme geben. <a href="https://wiki.in-circuit.de/index.php5?title=radino_common_problems">Hier im Wiki unter dem Punkt "radino & Linux" gibt es einen Patch!</a><a name=" "></a>
-	</li><br>
-	<li>hardware<br>
-		Derzeit m&ouml;gliche Hardware Varianten:
-		<ul>
-			<li>ESP_1MCC1101: ESP8266 mit 1 MB Flash und einem CC1101</li>
-			<li>ESP32: ESP32 </li>
-			<li>nano328: Arduino Nano f&uuml;r "Billig"-Empf&auml;nger</li>
-			<li>nanoCC1101: Arduino Nano f&uuml;r einen CC110x-Empf&auml;nger</li>
-			<li>miniculCC1101: Arduino pro Mini mit einen CC110x-Empf&auml;nger entsprechend dem minicul verkabelt</li>
-			<li>promini328: Arduino Pro Mini f&uuml;r "Billig"-Empf&auml;nger</li>
-			<li>radinoCC1101: Ein Arduino Kompatibler Radino mit cc1101 receiver</li>
-		</ul><br>
-		Notwendig f&uuml;r den Befehl <code>flash</code>. Hier sollten Sie angeben, welche Hardware Sie mit dem usbport verbunden haben. Andernfalls kann es zu Fehlfunktionen des Ger&auml;ts kommen.<br>
-	</li><br>
-
-	<li>longids<br></li>
-	Durch Komma getrennte Liste von Device-Typen f&uuml;r Empfang von langen IDs mit dem SIGNALduino. Diese zus&auml;tzliche ID erlaubt es Wettersensoren, welche auf dem gleichen Kanal senden zu unterscheiden. Hierzu wird eine zuf&auml;llig generierte ID hinzugef&uuml;gt. Wenn Sie longids verwenden, dann wird in den meisten F&auml;llen nach einem Batteriewechsel ein neuer Sensor angelegt. Standardm&auml;ßig werden keine langen IDs verwendet.
-	Folgende Module verwenden diese Funktionalit&auml;t: 14_Hideki, 41_OREGON, 14_CUL_TCM97001, 14_SD_WS07.<br>
-	Beispiele:<br>
-	<br>
-    # Keine langen IDs verwenden (Default Einstellung):<br>
-    attr SIGNALduino longids 0<br>
-    # Immer lange IDs verwenden:<br>
-    attr SIGNALduino longids 1<br>
-    # Verwende lange IDs f&uuml;r SD_WS07 Devices.<br>
-    # Device Namen sehen z.B. so aus: SD_WS07_TH_3 for channel 3.<br>
-    attr SIGNALduino longids SD_WS07<br><br>
-	<li>minsecs<br></li>
-	Es wird von anderen Modulen bereitgestellt. Minsecs sollte wie eine Schwelle wirken. Wenn angegeben, werden unterst&uuml;tzte Module neue Nachrichten verworfen, wenn minsecs nicht vergangen sind.<br><br>
-	<li>noMsgVerbose<br></li>
-	Mit diesem Attribut k&ouml;nnen Sie die Protokollierung von Debug-Nachrichten vom io-Ger&auml;t steuern. Wenn dieser Wert auf 3 festgelegt ist, werden diese Nachrichten protokolliert, wenn der globale Verbose auf 3 oder h&ouml;her eingestellt ist.<br><br>
-    <li>eventlogging<br>
-Mit diesem Attribut können Sie steuern, ob jede Logmeldung auch als Ereignis bereitgestellt wird. Dies ermöglicht das Erzeugen eines Ereignisses für jede Protokollnachricht.
-    Setze dies auf 0 und Logmeldungen werden nur in der globalen Fhem-Logdatei gespeichert, wenn der Loglevel höher oder gleich dem Verbose-Attribut ist.
-    Setze dies auf 1 und jede Logmeldung wird auch als Ereignis versendet. Dadurch können Sie die Ereignisse in einer separaten Protokolldatei protokollieren.<br><br>
-    </li>
-    <li>rawmsgEvent<br></li>
-	Bei der Einstellung "1", l&ouml;sen empfangene Rohnachrichten Ereignisse aus.<br><br>
-	<li>suppressDeviceRawmsg</li>
-	Bei der Einstellung "1" wird das interne "RAWMSG" nicht mit den empfangenen Nachrichten aktualisiert.<br><br>
-	<li>whitelist_IDs<br></li>
-	<a name="whitelist_IDs"></a>
-	Dieses Attribut erlaubt es, festzulegen, welche Protokolle von diesem Modul aus verwendet werden. Protokolle, die nicht beachtet werden, erzeugen keine Logmeldungen oder Ereignisse. Sie werden dann vollst&auml;ndig ignoriert.
-	Dies erm&ouml;glicht es, die Ressourcennutzung zu reduzieren und bessere Klarheit in den Protokollen zu erzielen. Sie k&ouml;nnen mehrere WhitelistIDs mit einem Komma angeben: 0,3,7,12. Mit einer # am Anfang k&ouml;nnen WhitelistIDs deaktiviert werden. <a name=" "></a><br><br>
-	<li>WS09_CRCAUS<br>
-		<ul>
-			<li>0: CRC-Check WH1080 CRC = 0 on, Standard</li>
-			<li>2: CRC = 49 (x031) WH1080, set OK</li>
-		</ul>
-	</li><br>
-	</ul>
 	
-	<a name="SIGNALduinoget"></a>
-	<b>Get</b>
-	<ul>
-	<li>ccconf<br></li>
-   Liest s&auml;mtliche radio-chip (cc1101) Register (Frequenz, Bandbreite, etc.) aus und zeigt die aktuelle Konfiguration an.<br>
-   (NUR bei Verwendung eines cc1101 Empf&auml;nger)<br><br>
-	<li>ccpatable<br></li>
-   Liest die cc1101 PA Tabelle aus (power amplification for RF sending).<br><br>
-	<li>ccreg<br></li>
-   Liest das cc1101 Register aus (99 reads all cc1101 registers).<br><br>
-	<li>cmds<br></li>
-	Abh&auml;ngig von der installierten Firmware besitzt der SIGNALduino verschiedene Befehle. Bitte beachten Sie den Quellcode der Firmware Ihres SIGNALduino, um die Antwort dieses Befehls zu interpretieren.<br><br>
-	<li>config<br></li>
-	Zeigt Ihnen die aktuelle Konfiguration der SIGNALduino Protokollkathegorie an. | Bsp: <code>MS=1;MU=1;MC=1;Mred=0</code><br><br>
-	<li>freeram<br></li>
-   Zeigt den freien RAM an.<br><br>
-	<li>ping<br></li>
-	Pr&uuml;ft die Kommunikation mit dem SIGNALduino.<br><br>
-	<li>protocolIDs<br></li>
-	Zeigt Ihnen die aktuell implementierten Protokolle des SIGNALduino an und an welches FHEM Modul Sie &uuml;bergeben werden.<br><br>
-	<li>raw<br></li>
-	Abh&auml;ngig von der installierten Firmware! Somit k&ouml;nnen Sie einen SIGNALduino-Firmware-Befehl direkt ausf&uuml;hren.<br><br>
-	<li>uptime<br></li>
-	Zeigt Ihnen die Information an, wie lange der SIGNALduino l&auml;uft. Ein FHEM Neustart setzt den Timer zur&uuml;ck.<br><br>
-	<li>version<br></li>
-	Zeigt Ihnen die Information an, welche aktuell genutzte Software Sie mit dem SIGNALduino verwenden.<br><br>
-	</ul>
-	
+							  
 	<a name="SIGNALduinoset"></a>
 	<b>SET</b>
 	<ul>
@@ -4654,15 +4563,22 @@ Mit diesem Attribut können Sie steuern, ob jede Logmeldung auch als Ereignis be
 	Verwenden Sie es mit Vorsicht. Es kann Ihre Hardware zerst&ouml;ren und es kann sogar illegal sein, dies zu tun.<br>
 	Hinweis: Die f&uuml;r die RFR-&Uuml;bertragung verwendeten Parameter sind nicht betroffen.<br>
 			<ul>
+				<a name="cc1101_freq"></a>
 				<li><code>freq</code> , legt sowohl die Empfangsfrequenz als auch die &Uuml;bertragungsfrequenz fest.<br>
 				Hinweis: Obwohl der CC1101 auf Frequenzen zwischen 315 und 915 MHz eingestellt werden kann, ist die Antennenschnittstelle und die Antenne des CUL auf genau eine Frequenz abgestimmt. Standard ist 868,3 MHz (oder 433 MHz)</li>
+				<a name="cc1101_bWidth"></a>
 				<li><code>bWidth</code> , kann auf Werte zwischen 58 kHz und 812 kHz eingestellt werden. Große Werte sind st&ouml;ranf&auml;llig, erm&ouml;glichen jedoch den Empfang von ungenau kalibrierten Sendern. Es wirkt sich auch auf die &Uuml;bertragung aus. Standard ist 325 kHz.</li>
+				<a name="cc1101_patable"></a>
 				<li><code>patable</code> , &Auml;nderung der PA-Tabelle (Leistungsverst&auml;rkung f&uuml;r HF-Senden)</li>
+				<a name="cc1101_rAmpl"></a>
 				<li><code>rAmpl</code> , ist die Empf&auml;ngerverst&auml;rkung mit Werten zwischen 24 und 42 dB. Gr&ouml;ßere Werte erlauben den Empfang schwacher Signale. Der Standardwert ist 42.</li>
+				<a name="cc1101_sens"></a>
 				<li><code>sens</code> , ist die Entscheidungsgrenze zwischen den Ein- und Aus-Werten und betr&auml;gt 4, 8, 12 oder 16 dB. Kleinere Werte erlauben den Empfang von weniger klaren Signalen. Standard ist 4 dB.</li>
 			</ul><br>
+	<a name="close"></a>
 	<li>close<br></li>
 	Beendet die Verbindung zum Ger&auml;t.<br><br>
+	<a name="enableMessagetype"></a>
 	<li>enableMessagetype<br>
 			Erm&ouml;glicht die Aktivierung der Nachrichtenverarbeitung f&uuml;r
 			<ul>
@@ -4672,6 +4588,7 @@ Mit diesem Attribut können Sie steuern, ob jede Logmeldung auch als Ereignis be
 			</ul>
 			Der neue Status wird in den eeprom vom Arduino geschrieben.
 		</li><br>
+	<a name="disableMessagetype"></a>
 	<li>disableMessagetype<br>
 			Erm&ouml;glicht das Deaktivieren der Nachrichtenverarbeitung f&uuml;r
 			<ul>
@@ -4711,8 +4628,9 @@ Mit diesem Attribut können Sie steuern, ob jede Logmeldung auch als Ereignis be
 		</ul>
 		<li>Im Bootloader-Modus erh&auml;lt der radino eine andere USB ID.</li><br>
 		<b>Wenn der Bootloader aktiviert ist, signalisiert er das mit dem Blinken einer LED. Dann hat man ca. 8 Sekunden Zeit zum flashen.</b>
-		</li><a name=" "></a>
+		</li>
 	</ul><br>
+	<a name="raw"></a>
 	<li>raw<br></li>
 	Geben Sie einen SIGNALduino-Firmware-Befehl aus, ohne auf die vom SIGNALduino zur&uuml;ckgegebenen Daten zu warten. Ausf&uuml;hrliche Informationen zu SIGNALduino-Befehlen finden Sie im SIGNALduino-Firmware-Code. Mit dieser Linie k&ouml;nnen Sie fast jedes Signal &uuml;ber einen angeschlossenen Sender senden.<br>
 	Um einige Rohdaten zu senden, schauen Sie sich diese Beispiele an: P#binarydata#R#C (#C is optional)
@@ -4721,7 +4639,7 @@ Mit diesem Attribut können Sie steuern, ob jede Logmeldung auch als Ereignis be
 				<li>Beispiel 2: <code>set sduino raw SM;R=3;P0=500;C=250;D=A4F7FDDE</code> , sendet die Daten Manchester codiert mit einem clock von 250&micro;S</li>
 				<li>Beispiel 3: <code>set sduino raw SC;R=3;SR;P0=5000;SM;P0=500;C=250;D=A4F7FDDE</code> , sendet eine kombinierte Nachricht von Raw und Manchester codiert 3 mal wiederholt</li>
 			</ul><br>
-			<ul>
+		<ul>
          <u>NUR für DEBUG Nutzung | <small>Befehle sind abhänging vom Firmwarestand!</small></u><br>
          <small>(Hinweis: Die falsche Benutzung kann zu Fehlfunktionen des SIGNALduino´s f&uuml;hren!)</small>
             <li>CED -> Debugausgaben ein</li>
@@ -4735,8 +4653,10 @@ Mit diesem Attribut können Sie steuern, ob jede Logmeldung auch als Ereignis be
             <li>CSmcmbl=[Wert] -> minbitlen für MC-Nachrichten</li>
             <li>CSfifolimit=[Wert] -> Schwellwert für debug Ausgabe der Pulsanzahl im FIFO Puffer</li>
          </ul><br>
+	<a name="reset"></a>
 	<li>reset<br></li>
 	&Ouml;ffnet die Verbindung zum Ger&auml;t neu und initialisiert es. <br><br>
+	<a name="sendMsg"></a>
 	<li>sendMsg</li>
 	Dieser Befehl erstellt die erforderlichen Anweisungen zum Senden von Rohdaten &uuml;ber den SIGNALduino. Sie k&ouml;nnen die Signaldaten wie Protokoll und die Bits angeben, die Sie senden m&ouml;chten.<br>
 	Alternativ ist es auch möglich, die zu sendenden Daten in hexadezimaler Form zu übergeben. Dazu muss ein 0x vor den Datenteil geschrieben werden.
@@ -4754,12 +4674,160 @@ Mit diesem Attribut können Sie steuern, ob jede Logmeldung auch als Ereignis be
 		<br>Wird eine sende Kommando für die Hexfolge F7E anhand der protocol id 29 erzeugen. Die Nachricht soll 4x gesenset werden.
 		<br>SR;R=4;P0=-8360;P1=220;P2=-440;P3=-220;P4=440;D=01212121213421212121212134;
 		</p></li></ul>
-
-		
-	
-	</ul><br><br>
-	
+	</ul><br>
 	</ul>
+	
+	
+	<a name="SIGNALduinoget"></a>
+	<b>Get</b>
+	<ul>
+	<a name="ccconf"></a>
+	<li>ccconf<br></li>
+   Liest s&auml;mtliche radio-chip (cc1101) Register (Frequenz, Bandbreite, etc.) aus und zeigt die aktuelle Konfiguration an.<br>
+   (NUR bei Verwendung eines cc1101 Empf&auml;nger)<br><br>
+	<a name="ccpatable"></a>
+	<li>ccpatable<br></li>
+   Liest die cc1101 PA Tabelle aus (power amplification for RF sending).<br><br>
+	<a name="ccreg"></a>
+	<li>ccreg<br></li>
+   Liest das cc1101 Register aus (99 reads all cc1101 registers).<br><br>
+	<a name="cmds"></a>
+	<li>cmds<br></li>
+	Abh&auml;ngig von der installierten Firmware besitzt der SIGNALduino verschiedene Befehle. Bitte beachten Sie den Quellcode der Firmware Ihres SIGNALduino, um die Antwort dieses Befehls zu interpretieren.<br><br>
+	<a name="config"></a>
+	<li>config<br></li>
+	Zeigt Ihnen die aktuelle Konfiguration der SIGNALduino Protokollkathegorie an. | Bsp: <code>MS=1;MU=1;MC=1;Mred=0</code><br><br>
+	<a name="freeram"></a>
+	<li>freeram<br></li>
+   Zeigt den freien RAM an.<br><br>
+	<a name="ping"></a>
+   <li>ping<br></li>
+	Pr&uuml;ft die Kommunikation mit dem SIGNALduino.<br><br>
+	<a name="protocolIDs"></a>
+	<li>protocolIDs<br></li>
+	Zeigt Ihnen die aktuell implementierten Protokolle des SIGNALduino an und an welches FHEM Modul Sie &uuml;bergeben werden.<br><br>
+	<a name="raw"></a>
+	<li>raw<br></li>
+	Abh&auml;ngig von der installierten Firmware! Somit k&ouml;nnen Sie einen SIGNALduino-Firmware-Befehl direkt ausf&uuml;hren.<br><br>
+	<a name="uptime"></a>
+	<li>uptime<br></li>
+	Zeigt Ihnen die Information an, wie lange der SIGNALduino l&auml;uft. Ein FHEM Neustart setzt den Timer zur&uuml;ck.<br><br>
+	<a name="version"></a>
+	<li>version<br></li>
+	Zeigt Ihnen die Information an, welche aktuell genutzte Software Sie mit dem SIGNALduino verwenden.<br><br>
+	</ul>
+	
+	
+	<a name="SIGNALduinoattr"></a>
+	<b>Attributes</b>
+	<ul>
+	<a name="addvaltrigger"></a>
+	<li>addvaltrigger<br></li>
+	Generiert Trigger f&uuml;r zus&auml;tzliche Werte. Momentan werden DMSG , RAWMSG und RSSI unterst&uuml;zt.<br><br>
+	<li><a href="#dummy">dummy</a><br><br></li>
+	<a name="blacklist_IDs"></a>
+	<li>blacklist_IDs<br></li>
+	Dies ist eine durch Komma getrennte Liste. Die Blacklist funktioniert nur, wenn keine Whitelist existiert! Hier kann man ID´s eintragen welche man nicht ausgewertet haben m&ouml;chte.<br><br>
+	<a name="cc1101_frequency"></a>
+	<li>cc1101_frequency<br></li>
+	Frequenzeinstellung des cc1101. | Bsp: 433.920Mhz / 868.350Mhz<br><br>
+	<a name="debug"></a>
+	<li>debug<br>
+	Dies bringt das Modul in eine sehr ausf&uuml;hrliche Debug-Ausgabe im Logfile. Somit lassen sich neue Signale finden und Signale &uuml;berpr&uuml;fen, ob die Demodulation korrekt funktioniert.</li><br>
+	<a name="development"></a>
+	<li>development<br>
+	Mit development k&ouml;nnen Sie die Protokolldekodierung f&uuml;r Protokolle aktivieren, die sich noch in der Entwicklung befinden und m&ouml;glicherweise nicht sehr genau implementiert sind.
+	Dies kann zu Abst&uuml;rzen oder zu einer hohen Anzahl an Log-Eintr&auml;gen in Ihrer Logdatei f&uuml;hren. Protokolle, die mit einem developmentID-Flag gekennzeichnet sind, werden nicht geladen, sofern dies nicht angegeben ist.<br>
+	<ul><li>Wenn das Flag developId => 'm' in der Protokolldefinition gesetzt ist, befindet sich das logische Modul in der Entwicklung.
+	Wenn Sie es aktivieren wollen, so geben Sie "m" gefolgt von der Protokoll-ID an.</li>
+	<li>Wenn das Flag developId => 'p' in der Protokolldefinition gesetzt ist, wurde die ID reserviert.</li>
+	<li>Wenn das Flag developId => 'y' in der Protokolldefinition gesetzt ist, befindet sich das Protokoll noch in der Entwicklung.
+	Wenn Sie es aktivieren wollen, so geben Sie "y" gefolgt von der Protokoll-ID an.</li></a></li></ul><br>
+	<li><a href="#do_not_notify">do_not_notify</a></li><br>
+	<a name="doubleMsgCheck_IDs"></a>
+	<li>doubleMsgCheck_IDs<br></li>
+	Dieses Attribut erlaubt es, Protokolle anzugeben, die zwei gleiche Nachrichten enthalten m&uuml;ssen, um diese an die Module zu &uuml;bergeben. Sie k&ouml;nnen mehrere IDs mit einem Komma angeben: 0,3,7,12<br><br>
+	<a name="flashCommand"></a>
+	<li>flashCommand<br>
+	Dies ist der Befehl, der ausgef&uuml;hrt wird, um den Firmware-Flash auszuf&uuml;hren. Nutzen Sie dies nicht, wenn Sie nicht wissen, was Sie tun!<br>
+	Wurde das Attribut nicht definiert, so verwendet es die Standardeinstellungen. <b>Sobald der User das Attribut manuell definiert, nutzt das System die Vorgaben!</b><br>
+	<ul>
+	<li>Standard nano, nanoCC1101, miniculCC1101, promini: <code>avrdude -c arduino -b [BAUDRATE] -P [PORT] -p atmega328p -vv -U flash:w:[HEXFILE] 2>[LOGFILE]</code></li>
+	<li>Standard radinoCC1101: <code>avrdude -c avr109 -b [BAUDRATE] -P [PORT] -p atmega32u4 -vv -D -U flash:w:[HEXFILE] 2>[LOGFILE]</code></li>
+	</ul>
+	Es enth&auml;lt einige Platzhalter, die automatisch mit den entsprechenden Werten gef&uuml;llt werden:
+		<ul>
+			<li>[BAUDRATE]<br>
+			Ist die Schrittgeschwindigkeit. (z.Bsp: 57600)</li>
+			<li>[PORT]<br>
+			Ist der Port, an den der SIGNALduino angeschlossen ist (z.Bsp: /dev/ttyUSB0) und wird von der Defenition verwendet.</li>
+			<li>[HEXFILE]<br>
+			Ist die .hex-Datei, die geflasht werden soll. Es gibt drei Optionen (angewendet in dieser Reihenfolge):<br>
+			&nbsp;&nbsp;- in <code>set SIGNALduino flash</code> als erstes Argument &uuml;bergeben<br>
+			&nbsp;&nbsp;- aus dem Hardware-Attribut genommen<br>
+			&nbsp;&nbsp;- der im Modul definierte Standardwert<br>
+			</li>
+			<li>[LOGFILE]<br>
+			Die Logdatei, die Informationen &uuml;ber den Flash-Prozess sammelt. Es wird nach Abschluss des Flash-Prozesses in FHEM angezeigt</li>
+		</ul><br>
+	<u><i>Hinweis:</u></i> ! Teilweise kann es beim flashen vom radino unter Linux Probleme geben. <a href="https://wiki.in-circuit.de/index.php5?title=radino_common_problems">Hier im Wiki unter dem Punkt "radino & Linux" gibt es einen Patch!</a>
+	</li><br>
+	<a name="hardware"></a>
+	<li>hardware<br>
+		Derzeit m&ouml;gliche Hardware Varianten:
+		<ul>
+			<li>ESP_1MCC1101: ESP8266 mit 1 MB Flash und einem CC1101</li>
+			<li>ESP32: ESP32 </li>
+			<li>nano328: Arduino Nano f&uuml;r "Billig"-Empf&auml;nger</li>
+			<li>nanoCC1101: Arduino Nano f&uuml;r einen CC110x-Empf&auml;nger</li>
+			<li>miniculCC1101: Arduino pro Mini mit einen CC110x-Empf&auml;nger entsprechend dem minicul verkabelt</li>
+			<li>promini328: Arduino Pro Mini f&uuml;r "Billig"-Empf&auml;nger</li>
+			<li>radinoCC1101: Ein Arduino Kompatibler Radino mit cc1101 receiver</li>
+		</ul><br>
+		Notwendig f&uuml;r den Befehl <code>flash</code>. Hier sollten Sie angeben, welche Hardware Sie mit dem usbport verbunden haben. Andernfalls kann es zu Fehlfunktionen des Ger&auml;ts kommen.<br>
+	</li><br>
+	<a name="longids"></a>
+	<li>longids<br></li>
+	Durch Komma getrennte Liste von Device-Typen f&uuml;r Empfang von langen IDs mit dem SIGNALduino. Diese zus&auml;tzliche ID erlaubt es Wettersensoren, welche auf dem gleichen Kanal senden zu unterscheiden. Hierzu wird eine zuf&auml;llig generierte ID hinzugef&uuml;gt. Wenn Sie longids verwenden, dann wird in den meisten F&auml;llen nach einem Batteriewechsel ein neuer Sensor angelegt. Standardm&auml;ßig werden keine langen IDs verwendet.
+	Folgende Module verwenden diese Funktionalit&auml;t: 14_Hideki, 41_OREGON, 14_CUL_TCM97001, 14_SD_WS07.<br>
+	Beispiele:<br>
+	<br>
+    # Keine langen IDs verwenden (Default Einstellung):<br>
+    attr SIGNALduino longids 0<br>
+    # Immer lange IDs verwenden:<br>
+    attr SIGNALduino longids 1<br>
+    # Verwende lange IDs f&uuml;r SD_WS07 Devices.<br>
+    # Device Namen sehen z.B. so aus: SD_WS07_TH_3 for channel 3.<br>
+    attr SIGNALduino longids SD_WS07<br><br>
+	<a name="minsecs"></a>
+	<li>minsecs<br></li>
+	Es wird von anderen Modulen bereitgestellt. Minsecs sollte wie eine Schwelle wirken. Wenn angegeben, werden unterst&uuml;tzte Module neue Nachrichten verworfen, wenn minsecs nicht vergangen sind.<br><br>
+	<a name="noMsgVerbose"></a>
+	<li>noMsgVerbose<br></li>
+	Mit diesem Attribut k&ouml;nnen Sie die Protokollierung von Debug-Nachrichten vom io-Ger&auml;t steuern. Wenn dieser Wert auf 3 festgelegt ist, werden diese Nachrichten protokolliert, wenn der globale Verbose auf 3 oder h&ouml;her eingestellt ist.<br><br>
+	<a name="eventlogging"></a>
+	<li>eventlogging<br>
+Mit diesem Attribut können Sie steuern, ob jede Logmeldung auch als Ereignis bereitgestellt wird. Dies ermöglicht das Erzeugen eines Ereignisses für jede Protokollnachricht.
+    Setze dies auf 0 und Logmeldungen werden nur in der globalen Fhem-Logdatei gespeichert, wenn der Loglevel höher oder gleich dem Verbose-Attribut ist.
+    Setze dies auf 1 und jede Logmeldung wird auch als Ereignis versendet. Dadurch können Sie die Ereignisse in einer separaten Protokolldatei protokollieren.<br><br>
+    </li>
+	<a name="rawmsgEvent"></a>
+	<li>rawmsgEvent<br></li>
+	Bei der Einstellung "1", l&ouml;sen empfangene Rohnachrichten Ereignisse aus.<br><br>
+	<a name="suppressDeviceRawmsg"></a>
+	<li>suppressDeviceRawmsg</li>
+	Bei der Einstellung "1" wird das interne "RAWMSG" nicht mit den empfangenen Nachrichten aktualisiert.<br><br>
+	<a name="whitelist_IDs"></a>
+	<li>whitelist_IDs<br></li>
+	Dieses Attribut erlaubt es, festzulegen, welche Protokolle von diesem Modul aus verwendet werden. Protokolle, die nicht beachtet werden, erzeugen keine Logmeldungen oder Ereignisse. Sie werden dann vollst&auml;ndig ignoriert.
+	Dies erm&ouml;glicht es, die Ressourcennutzung zu reduzieren und bessere Klarheit in den Protokollen zu erzielen. Sie k&ouml;nnen mehrere WhitelistIDs mit einem Komma angeben: 0,3,7,12. Mit einer # am Anfang k&ouml;nnen WhitelistIDs deaktiviert werden. <br><br>
+	<a name="WS09_CRCAUS"></a>
+	<li>WS09_CRCAUS<br>
+		<ul>
+			<li>0: CRC-Check WH1080 CRC = 0 on, Standard</li>
+			<li>2: CRC = 49 (x031) WH1080, set OK</li>
+		</ul>
+	</li><br>
 	
 =end html_DE
 =cut
