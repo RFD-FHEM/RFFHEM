@@ -4451,6 +4451,9 @@ sub SIGNALduino_Log3($$$)
 			<li>radinoCC1101: Arduino compatible radino with cc1101 receiver</li>
 		</ul>
 	</li><br>
+	<li>maxMuMsgRepeat <br>
+	MU signals can contain multipple repeats of the same message. The results are all send to a logical module. You can limit the number of scanned repeatitions. Defaukt is 4, so after found 4 repeats, the demoduation is aborted. 	
+	<br></li>
     <a name="minsecs"></a>
 	<li>minsecs<br>
     This is a very special attribute. It is provided to other modules. minsecs should act like a threshold. All logic must be done in the logical module. 
@@ -4816,6 +4819,10 @@ With a # at the beginnging whitelistIDs can be deactivated.
     # Verwende lange IDs f&uuml;r SD_WS07 Devices.<br>
     # Device Namen sehen z.B. so aus: SD_WS07_TH_3 for channel 3.<br>
     attr SIGNALduino longids SD_WS07<br><br>
+	<a name="maxMuMsgRepeat "></a>
+	<li>maxMuMsgRepeat <br><
+	In MU Signalen können mehrere Wiederholungen stecken. Diese werden einzeln ausgewertet und an ein logisches Modul übergeben. Mit diesem Attribut kann angepasst werden, wie viele Wiederholungen weiter gegeben werden. Standard ist 4. 	
+	<br></li>
 	<a name="minsecs"></a>
 	<li>minsecs<br></li>
 	Es wird von anderen Modulen bereitgestellt. Minsecs sollte wie eine Schwelle wirken. Wenn angegeben, werden unterst&uuml;tzte Module neue Nachrichten verworfen, wenn minsecs nicht vergangen sind.<br><br>
