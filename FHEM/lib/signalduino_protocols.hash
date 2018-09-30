@@ -1,3 +1,48 @@
+################################################################################
+# The file is part of the SIGNALduino project
+#
+# !!! useful hints !!!
+# --------------------
+# name        => ' '       # name of device or group of all devices
+# comment     => ' '       # exact description or example of devices
+# id          => ' '       # number of the protocol definition, each number only once use ((accepted no .)
+# one         => [ , ]     # only MU + MS signals | value pair for a one bit, must be always a positive and negative factor of clockabs (accepted . | example 1.5)
+# zero        => [ , ]     # only MU + MS  signals | value pair for a zero bit, must be always a positive and negative factor of clockabs (accepted . | example -1.5)
+# clockabs    => ' '       # only MU + MS  signals | value pulse / pause times
+# clockabs    => '-1'      # only MS signals | value pulse / pause times is automatically
+# clockrange  => [ , ]     # only MC signals | min , max of pulse / pause times
+# start       => [ , ]     # value pair for start message
+# sync        => [ , ]     # value pair for sync pulse of signal
+# length_min  => ' '       # minimum length of bits of the message
+# length_max  => ' '       # maximum length of bits of the message
+#
+# developId   => 'm'       # logical module is under development
+# developId   => 'p'       # protocol is under development or to reserve IDs, the ID in the development attribute with developId => 'p' are only used without the other entries
+# developId   => 'y'       # protocol is under development, all IDs in the development attribute with developId => 'y' are used
+#
+# preamble    => ' '       # prepend to converted message
+# preamble    => 'u..'     # message is unknown and without module, forwarding SIGNALduino_un or FHEM DOIF
+# preamble    => 'U..'     # message can be unknown and without module, no forwarding SIGNALduino_un but forwarding can FHEM DOIF
+#
+# clientmodule => ' '      # FHEM module for processing
+# filterfunc  => ' '       # SIGNALduino_filterSign | SIGNALduino_compPattern --> SIGNALduino internal filter function, it remove the sign from the pattern, and compress message and pattern
+#                          # SIGNALduino_filterMC --> SIGNALduino internal filter function, it will decode MU data via Manchester encoding
+# float       => [ , ]     # only MU + MS  signals | Convert 0F -> 01 (F) to be compatible with CUL
+# format      => ' '       # twostate | pwm | manchester --> modulation type of the signal, only manchester use SIGNALduino internal, other types only comment
+# method      => \&        # call to process this message
+# modulematch => ' '       # RegEx on the exact message including preamble
+# paddingbits => ' '       # default is 4, pad up to x bits
+# paddingbits => '1'       # will disable padding
+# pause       => [ ]       # delay when sending between two signals
+# polarity    => 'invert'  # only MC signals | invert bits of the signal
+# postamble   => ' '       # appends a string to the demodulated signal
+# postDemodulation => \&   # SIGNALduino internal sub for processing before dispatching to a logical module
+# remove_zero => 1         # removes leading zeros from output
+#
+#####################################################################################
+# !!!! please, documentation minimum one MU / MC / MS message at new protocols !!!! #
+#####################################################################################
+
 (
     "0"    => 
 				# MS;P1=-2009;P2=486;P3=-9058;P4=-4037;D=23212121242121212421242421242421212424242424212124212121212121212121212124;CP=2;SP=3;R=67;m=2;
@@ -71,15 +116,15 @@
 			#length_max      => '800',		# Don't know maximal lenth of a valid message
 
 			},
-    "3.1"    => 	# MS;P0=-11440;P1=-1121;P2=-416;P5=309;P6=1017;D=150516251515162516251625162516251515151516251625151;CP=5;SP=0;R=66;
-			# MS;P1=309;P2=-1130;P3=1011;P4=-429;P5=-11466;D=15123412121234123412141214121412141212123412341234;CP=1;SP=5;R=38;  Gruppentaste, siehe Kommentar in sub SIGNALduino_bit2itv1
+    "3.1"    => # MS;P0=-11440;P1=-1121;P2=-416;P5=309;P6=1017;D=150516251515162516251625162516251515151516251625151;CP=5;SP=0;R=66;
+			    # MS;P1=309;P2=-1130;P3=1011;P4=-429;P5=-11466;D=15123412121234123412141214121412141212123412341234;CP=1;SP=5;R=38;  Gruppentaste, siehe Kommentar in sub SIGNALduino_bit2itv1
         {
             name			=> 'itv1_sync40',	
-			comment		=> 'IT remote Control PAR 1000',
+			comment         => 'IT remote Control PAR 1000, ITS-150',
 			id          	=> '3',
-			one			=> [3,-1],
+			one             => [3,-1],
 			zero			=> [1,-3],
-			float			=> [1,-1],	# siehe Kommentar in sub SIGNALduino_bit2itv1
+			float			=> [1,-1],	# fuer Gruppentaste (nur bei ITS-150,ITR-3500 und ITR-300), siehe Kommentar in sub SIGNALduino_bit2itv1
 			sync			=> [1,-40],
 			clockabs     	=> -1,	# -1=auto	
 			format 			=> 'twostate',	# not used now
@@ -110,6 +155,7 @@
 			#length_max      => '76',		# Don't know maximal lenth of a valid message
 		},
     "5"    => 	## Similar protocol as intertechno, but without sync
+				# ! same definition how ID 75, but other length !
 				# MU;P0=-404;P1=1319;P2=-1022;P3=546;P4=-7696;D=012121212321232123232321232323212121212121232323212321212121212121232323212321212323212140;CP=3;R=230;
         {
             name			=> 'unitec6899',	
@@ -320,6 +366,8 @@
 			#method          => \&SIGNALduino_Cresta	# Call to process this message
 		}, 	
 	"16" => # Rohrmotor24 und andere Funk Rolladen / Markisen Motoren
+            # MU;P0=-1608;P1=-785;P2=288;P3=650;P4=-419;P5=4676;D=1212121213434212134213434212121343434212121213421213434212134345021213434213434342121212121343421213421343421212134343421212121342121343421213432;CP=2;
+			# MU;P0=-1562;P1=-411;P2=297;P3=-773;P4=668;P5=4754;D=1232341234141234141234141414123414123232341232341412323414150234123234123232323232323234123414123414123414141412341412323234123234141232341415023412323412323232323232323412341412341412341414141234141232323412323414123234142;CP=2;
 		{
             name			=> 'Dooya shutter',	
 			id          	=> '16',
@@ -407,7 +455,9 @@
 	#		length_min      => '16',
 	#		length_max      => '32',
 	#	}, 	 	
-	"20" => #Livolo	
+	"20" => # Livolo         	
+            # https://github.com/RFD-FHEM/RFFHEM/issues/29
+         	# MU;P0=-195;P1=151;P2=475;P3=-333;D=010101010102010101010101013101013101010101013101010201010101010101010101010101010101010101020101010101010101010101010101010101010102010101010101013101013101;CP=1;																																														 
 		{
             name			=> 'livolo',	
 			id          	=> '20',
@@ -585,6 +635,8 @@
 			length_max      => '12',				# message has only 10 bit but is paddet to 12
 		},
 	"31" => # Pollin Isotronic
+			# https://github.com/RFD-FHEM/RFFHEM/issues/44            
+			# MU;P0=-32001;P1=1208;P2=-682;P3=-1324;P4=570;P5=-15617;D=12121212121212121212121212121342121213454212121212121212121212121212121342121213454212121212121212121212121212121342121213454212121212121212121212121212121342121213405;CP=1;
 		{
             name			=> 'pollin isotronic',	
 			id          	=> '31',
@@ -620,6 +672,7 @@
     # sensor id=62, channel=1, temp=21.1, hum=76, bat=ok
     	{   
        		name			=> 'weather33',		
+			comment         => 's014/TFA 30.3200/TCM/Conrad',
 			id          	=> '33',
 			one				=> [1,-8],
 			zero			=> [1,-4],
@@ -703,7 +756,9 @@
 			length_min      => '40',
 			length_max      => '41',
     	},
-    "38" =>
+    "38" => ## Lidl Wetterstation
+         	# https://github.com/RFD-FHEM/RFFHEM/issues/63
+         	# MS;P1=367;P2=-2077;P4=-9415;P5=-4014;D=141515151515151515121512121212121212121212121212121212121212121212;CP=1;SP=4;O;
       	 {   
        		name			=> 'weather38',		
        		id          	=> '38',
@@ -721,6 +776,8 @@
 			paddingbits     => '8',			
     	},   
 	"39" => ## X10 Protocol
+         	# https://github.com/RFD-FHEM/RFFHEM/issues/65
+         	# MU;P0=10530;P1=-2908;P2=533;P3=-598;P4=-1733;P5=767;D=0123242323232423242324232324232423242323232324232323242424242324242424232423242424232501232423232324232423242323242324232423232323242323232424242423242424242324232424242325012324232323242324232423232423242324232323232423232324242424232424242423242324242;CP=2;O;
 		{
 			name => 'X10 Protocol',
 			id => '39',
@@ -739,6 +796,10 @@
 			filterfunc      => 'SIGNALduino_compPattern',
 		},    
 	"40" => ## Romotec
+			# https://github.com/RFD-FHEM/RFFHEM/issues/71
+			# MU;P0=255;P1=-413;P2=650;P3=-761;P4=160;P5=-140;D=0012103030321210303210321430303032103030303050103030321212102;CP=0;
+			# MU;P0=300;P1=-772;P2=674;P3=-397;P4=4756;P5=-1512;D=4501232301230123230101232301010123230101230103;CP=0;
+			# MU;P0=-132;P1=-388;P2=675;P4=271;P5=-762;D=012145212145452121454545212145452145214545454521454545452145454541;CP=4;
 		{
 			name => 'romotec',
 			id => '40',
@@ -749,10 +810,12 @@
 			preamble => 'u40#', # prepend to converted message
 			#clientmodule => '', # not used now
 			#modulematch => '', # not used now
-			length_min => '10',
 			length_min => '12',
 		},    
 	"41" => ## Elro (Smartwares) Doorbell DB200
+            # https://github.com/RFD-FHEM/RFFHEM/issues/70
+			# MS;P0=1444;P1=-538;P3=449;P4=-6969;P5=-1525;D=34353530013535353501013535010101350101353535350135010101350135350101;CP=3;SP=4;O;
+			# MS;P0=462;P1=-1521;P2=1439;P3=-538;P4=-6969;D=040101230101010123230101232323012323010101012301232323012301012323;CP=0;SP=4;O;
 		{
 			name => 'elro doorbell',
 			comment => 'Elro (Smartwares) Doorbell DB200',
@@ -780,6 +843,7 @@
 	#		length_min => '24',
 	#	},
 	"43" => ## Somfy RTS
+            # MC;LL=-1405;LH=1269;SL=-723;SH=620;D=98DBD153D631BB;C=669;L=56;R=229;
 		{
 			name 			=> 'Somfy RTS',
 			id 				=> '43',
@@ -840,7 +904,9 @@
 			length_max   => '120',	
 			postDemodulation => sub {	my ($name, @bit_msg) = @_;	my @new_bitmsg = splice @bit_msg, 0,88;	return 1,@new_bitmsg; },
 		},    
-    "46"    => 
+    "46"    => ## Berner Garagentorantrieb GA401
+               # https://github.com/RFD-FHEM/RFFHEM/issues/91
+			   # MU;P0=-15829;P1=-3580;P2=1962;P3=-330;P4=245;P5=-2051;D=1234523232345234523232323234523234540023452323234523452323232323452323454023452323234523452323232323452323454023452323234523452323232323452323454023452323234523452323232323452323454023452323234523452323;CP=2;
         {
             name			=> 'EKX1BE',	
 			id          	=> '46',
@@ -855,7 +921,8 @@
 			length_max 		=> '18',
 			
 			},
-   	"47"    => 			## maverick
+   	"47"    => ## maverick
+               # MC;LL=-507;LH=490;SL=-258;SH=239;D=AA9995599599A959996699A969;C=248;L=104;
 		{
             name			=> 'Maverick protocol',	
 			id          	=> '47',
@@ -869,7 +936,10 @@
 			method          => \&SIGNALduino_Maverick,		# Call to process this message
 			#polarity		=> 'invert'
 		}, 			
-     "48"    => 			## Joker Dostmann TFA
+     "48"    => ## Joker Dostmann TFA
+				# https://github.com/RFD-FHEM/RFFHEM/issues/92
+				# MU;P0=591;P1=-1488;P2=-3736;P3=1338;P4=-372;P6=-988;D=23406060606063606363606363606060636363636363606060606363606060606060606060606060636060636360106060606060606063606363606363606060636363636363606060606363606060606060606060606060636060636360106060606060606063606363606363606060636363636363606060606363606060;CP=0;O;
+				# MU;P0=96;P1=-244;P2=510;P3=-1000;P4=1520;P5=-1506;D=01232323232343234343232343234323434343434343234323434343232323232323232323232323234343234325232323232323232343234343232343234323434343434343234323434343232323232323232323232323234343234325232323232323232343234343232343234323434343434343234323434343232323;CP=2;O;
 		{
             name			=> 'TFA Dostmann',	
 			id          	=> '48',
@@ -1024,7 +1094,6 @@
 			length_max      => '24',
 		},			
 	"60" =>	## ELV, LA CROSSE (WS2000/WS7000)
-		{
 			# MU;P0=32001;P1=-381;P2=835;P3=354;P4=-857;D=01212121212121212121343421212134342121213434342121343421212134213421213421212121342121212134212121213421212121343421343430;CP=2;R=53;
 			# tested sensors:   WS-7000-20, AS2000, ASH2000, S2000, S2000I, S2001A, S2001IA,
 			#                   ASH2200, S300IA, S2001I, S2000ID, S2001ID, S2500H 
@@ -1034,6 +1103,7 @@
 			# |   |_     | |___
 			#  Bit 0      Bit 1
 			# kurz 366 mikroSek / lang 854 mikroSek / gesamt 1220 mikroSek - Sollzeiten 
+		{
 			name                 => 'WS2000',
 			comment              => 'Series WS2000/WS7000 of various sensors',
 			id                   => '60',
@@ -1317,7 +1387,8 @@
 			postDemodulation => \&SIGNALduino_postDemo_FS20,
 		},
 	"75" => ## ConradRSL2 @litronics https://github.com/RFD-FHEM/SIGNALDuino/issues/69
-		# MU;P0=-1365;P1=477;P2=1145;P3=-734;P4=-6332;D=01023202310102323102423102323102323101023232323101010232323231023102323102310102323102423102323102323101023232323101010232323231023102323102310102323102;CP=1;R=12;
+            # ! same definition how ID 5, but other length !
+		    # MU;P0=-1365;P1=477;P2=1145;P3=-734;P4=-6332;D=01023202310102323102423102323102323101023232323101010232323231023102323102310102323102423102323102323101023232323101010232323231023102323102310102323102;CP=1;R=12;
 		{
 			name			=> 'ConradRSL2', 
 			id			=> '75',
@@ -1374,7 +1445,7 @@
 	"77" => ##  https://github.com/juergs/NANO_DS1820_4Fach		
 		{
 			name			=> 'NANO_DS1820_4Fach',
-			comment			=> 'Seltbau Sensor',
+			comment			=> 'Selbstbau Sensor',
 			id				=> '77',
 			developId		=> 'y', 
 			zero			=> [4,-6], 		#
@@ -1473,7 +1544,8 @@
 			developId      => 'm',
 			one            => [1,-2],     # on=400us, off=800us
 			zero           => [2,-1],     # on=800us, off=400us
-			float          => [1,-8],     # on=400us, off=3200us. each 10bit word has one [1,-8] in front
+			float          => [1,-8],     # on=400us, off=3200us. the preamble and each 10bit word has one [1,-8] in front
+			pause          => [1,-1],     # preamble (5x)
 			clockabs       => 400,        # 400us
 			preamble       => 'P82#',     # prepend our protocol number to converted message
 			clientmodule   => 'Fernotron',

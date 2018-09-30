@@ -1,0 +1,128 @@
+Internals:
+   Clients    :IT:CUL_TCM97001:SD_RSL:OREGON:CUL_TX:SD_AS:Hideki:SD_WS07:SD_WS09: :SD_WS:RFXX10REC:Dooya:SOMFY:SD_UT:SD_WS_Maverick:FLAMINGO:CUL_WS:Revolt: :FS10:CUL_FHTTK:Siro:FHT:FS20:CUL_EM:Fernotron:SIGNALduino_un:
+   DEF        none
+   DevState   initialized
+   DeviceName none
+   LASTDMSG   nothing
+   NAME       dummyDuino
+   NR         15
+   STATE      opened
+   TYPE       SIGNALduino
+   versionmodul v.*
+   MatchList:
+     10:SD_WS07 ^P7#[A-Fa-f0-9]{6}F[A-Fa-f0-9]{2}(#R[A-F0-9][A-F0-9]){0,1}$
+     11:SD_WS09 ^P9#F[A-Fa-f0-9]+
+     12:SD_WS   ^W\d+x{0,1}#.*
+     13:RFXX10REC ^(20|29)[A-Fa-f0-9]+
+     14:Dooya   ^P16#[A-Fa-f0-9]+
+     15:SOMFY   ^Ys[0-9A-F]+
+     16:SD_WS_Maverick ^P47#[A-Fa-f0-9]+
+     17:SD_UT   ^[P|u](30|79|81|83)#.*
+     18:FLAMINGO ^P13#[A-Fa-f0-9]+
+     19:CUL_WS  ^K[A-Fa-f0-9]{5,}
+     1:IT       ^i......
+     20:Revolt  ^r[A-Fa-f0-9]{22}
+     21:FS10    ^P61#[A-F0-9]+
+     22:Siro    ^P72#[A-Fa-f0-9]+
+     23:FHT     ^81..(04|09|0d)..(0909a001|83098301|c409c401)..
+     24:FS20    ^81..(04|0c)..0101a001
+     25:CUL_EM  ^E0.................
+     26:Fernotron ^P82#.*
+     2:CUL_TCM97001 ^s[A-Fa-f0-9]+
+     3:SD_RSL   ^P1#[A-Fa-f0-9]{8}
+     4:OREGON   ^(3[8-9A-F]|[4-6][0-9A-F]|7[0-8]).*
+     5:CUL_TX   ^TX..........
+     6:SD_AS    ^P2#[A-Fa-f0-9]{7,8}
+     7:Hideki   ^P12#75[A-F0-9]+
+     9:CUL_FHTTK ^T[A-F0-9]{8}
+     X:SIGNALduino_un ^[u]\d+#.*
+   READINGS:
+   mcIdList:
+     10
+     11
+     12
+     18
+     43
+     47
+     52
+     57
+     58
+   msIdList:
+     0
+     1
+     2
+     3
+     3.1
+     4
+     6
+     7
+     13
+     13.2
+     14
+     15
+     17
+     22
+     23
+     25
+     32
+     33
+     35
+     38
+     41
+     51
+     55
+     65
+     68
+     72.1
+   muIdList:
+     5
+     8
+     9
+     13.1
+     16
+     17.1
+     20
+     21
+     24
+     26
+     27
+     28
+     29
+     30
+     31
+     36
+     37
+     39
+     40
+     44
+     44.1
+     45
+     46
+     48
+     49
+     50
+     56
+     59
+     60
+     61
+     62
+     64
+     66
+     67
+     69
+     70
+     71
+     72
+     74
+     75
+     79
+     80
+     81
+     82
+     83
+Attributes:
+   debug      0
+   dummy      1
+   flashCommand avrdude -c arduino -b [BAUDRATE] -P [PORT] -p atmega328p -vv -U flash:w:[HEXFILE] 2>[LOGFILE]
+   room       Signalduino,System
+   verbose    5
