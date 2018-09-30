@@ -1574,4 +1574,22 @@
 			length_min      => '12',
 			length_max      => '12',
 		},
+	"84" => ## Funk Wetterstation Auriol IAN 283582 (Lidl 2018) @roobbb
+		# https://github.com/RFD-FHEM/RFFHEM/issues/263#issuecomment-420739666
+		# MU;P0=-28796;P1=376;P2=-875;P3=834;P4=220;P5=-632;P6=592;P7=-268;D=0123232324545454545456767454567674567456745674545454545456767676767674567674567676767456;CP=4;R=22;
+		# MU;P0=-28784;P1=340;P2=-903;P3=814;P4=223;P5=-632;P6=604;P7=-248;D=0123232324545454545456767456745456767674545674567454545456745454545456767454545456745676;CP=4;R=22;
+	{
+		name         => 'IAN283582',
+		comment      => 'Funk Wetterstation Auriol IAN 283582',
+		id           => '84',
+		one          => [3,-1],
+		zero         => [1,-3],
+		start        => [4,-4,4,-4,4,-4],
+		clockabs     => 213, 
+		preamble     => 'u84#',             # prepend to converted message
+		clientmodule => '',                 # not used now
+		modulematch  => '',                 # not used now
+		length_min   => '39',               # das letzte Bit fehlt
+		length_max   => '40',
+	},
 );
