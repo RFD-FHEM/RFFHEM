@@ -273,9 +273,9 @@ SIGNALduino_un_Set($$$@)
 {
   my ( $hash, $name, @a ) = @_;
   my $ret = "UserInfo";
-  my $input = join " ", @a[1 .. scalar(@a)];		# Teile der Eingabe zusammenfassen
 
   if ($a[0] ne "?") {
+		my $input = join " ", @a[1 .. (scalar(@a)-1)];		# Teile der Eingabe zusammenfassen
 		return "wrong argument! please use $ret argument and one comment." if($a[0] ne "UserInfo" || not $a[1]);
 		
 		readingsBeginUpdate($hash);
