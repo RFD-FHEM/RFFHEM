@@ -2279,7 +2279,8 @@ sub SIGNALduino_Parse_MU($$$$@)
 			my $length_max = "";
 			$length_max = $ProtocolListSIGNALduino{$id}{length_max} if (defined($ProtocolListSIGNALduino{$id}{length_max}));
 
-			$signal_regex = '(' . $oneStr . $zeroStr . $floatStr .')';
+			$signal_regex = '(' . $oneStr . $zeroStr . $floatStr ."){$length_min}";
+			#$signal_regex = '(' . $oneStr . $zeroStr . $floatStr .')';
 			
 			if (length ($startStr) > 0 ) {
 				$start_regex = '^' . $signal_regex;
@@ -2293,7 +2294,8 @@ sub SIGNALduino_Parse_MU($$$$@)
 				$message_start=$-[0];
 				next if ((length($rawData) - $message_start) < ($length_min * $signal_width));	# Abbruch wenn Rest kleiner Mindestlaenge
 			} else {
-				Debug "$start_regex not found." if ($debug);
+				Log3 $name, 5, "$name: regex ($start_regex) not found, aborting";
+				#Debug "$start_regex not found." if ($debug);
 				next;
 			}
 			
@@ -2304,7 +2306,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 			
 			my @bit_msg=();			# array to store decoded signal bits
 			
-			$nrRestart
+			my $nrRestart=0;
 			my $repeat=0;
 			my $repeatStr="";
 			 
@@ -2341,6 +2343,8 @@ sub SIGNALduino_Parse_MU($$$$@)
 					$valid = $valid && $length_min <= scalar @bit_msg;
 					#$valid = $valid && $ProtocolListSIGNALduino{$id}{length_min} <= scalar @bit_msg  if (defined($ProtocolListSIGNALduino{$id}{length_min}));
 
+					my $length_str = "";
+					
 					if ($valid) {
 			
 						my ($rcode,@retvalue) = SIGNALduino_callsub('postDemodulation',$ProtocolListSIGNALduino{$id}{postDemodulation},$name,@bit_msg);
@@ -2403,7 +2407,10 @@ sub SIGNALduino_Parse_MU($$$$@)
 						
 					}
 					@bit_msg=(); # clear bit_msg array
-					last if ($lastSignal);
+					if ($lastSignal) {
+						SIGNALduino_Log3 $name, 5, "$name: pos=$i sigstr=$sig_str $length_str lastsignal, aborting";
+						last;
+					}
 					
 					#Find next position of valid signal (skip invalid pieces)
 					my $regex=".{$i}".$startStr.$signal_regex;
@@ -2416,6 +2423,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 						Debug "$name: found restart at Position $i ($regex)\n" if ($debug);
 						last if ((length($rawData) - $i) < ($length_min * $signal_width));		# Abbruch wenn Rest kleiner Mindestlaenge
 					} else {
+						SIGNALduino_Log3 $name, 5, "$name: $length_str regex ($regex) not found, aborting";
 						last;
 					}
 					
