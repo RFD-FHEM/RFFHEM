@@ -222,6 +222,7 @@ SIGNALduino_Initialize($)
 					  ." development"
 					  ." noMsgVerbose:0,1,2,3,4,5"
 					  ." eventlogging:0,1"
+					  ." maxMuMsgRepeat"
 		              ." $readingFnAttributes";
 
   $hash->{ShutdownFn} = "SIGNALduino_Shutdown";
@@ -2261,6 +2262,16 @@ sub SIGNALduino_Parse_MU($$$$@)
 			
 			SIGNALduino_Log3 $name, 4, "$name: Fingerprint for MU Protocol id $id -> $ProtocolListSIGNALduino{$id}{name} matches, trying to demodulate";
 			
+			my $signal_width= @{$ProtocolListSIGNALduino{$id}{one}};
+			my $length_min;
+			if (defined($ProtocolListSIGNALduino{$id}{length_min})) {
+				$length_min = $ProtocolListSIGNALduino{$id}{length_min};
+			} else {
+				$length_min = SDUINO_PARSE_DEFAULT_LENGHT_MIN;
+			}
+			my $length_max = "";
+			$length_max = $ProtocolListSIGNALduino{$id}{length_max} if (defined($ProtocolListSIGNALduino{$id}{length_max}));
+
 			$signal_regex = '(' . $oneStr . $zeroStr . $floatStr .')';
 			
 			if (length ($startStr) > 0 ) {
@@ -2270,14 +2281,6 @@ sub SIGNALduino_Parse_MU($$$$@)
 			}
 			
 			Debug "StartSignalRegex is: $start_regex" if ($debug);
-			
-			my $signal_width= @{$ProtocolListSIGNALduino{$id}{one}};
-			my $length_min;
-			if (defined($ProtocolListSIGNALduino{$id}{length_min})) {
-				$length_min = $ProtocolListSIGNALduino{$id}{length_min};
-			} else {
-				$length_min = SDUINO_PARSE_DEFAULT_LENGHT_MIN;
-			}
 			
 			if ($rawData =~ m/$start_regex/) {
 				$message_start=$-[0];
@@ -2294,6 +2297,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 			
 			my @bit_msg=();			# array to store decoded signal bits
 			
+			$nrRestart
 			my $repeat=0;
 			my $repeatStr="";
 			 
@@ -2302,7 +2306,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 			#for (my $i=index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{sync}}))+$signal_width;$i<length($rawData);$i+=$signal_width)
 			Debug "Message starts at $message_start - length of data is ".length($rawData) if ($debug);
 			
-			SIGNALduino_Log3 $name, 5, "$name: Starting demodulation ($startLogStr" . "Signal: $start_regex Pos $message_start)";
+			SIGNALduino_Log3 $name, 5, "$name: Starting demodulation ($startLogStr" . "Signal: $start_regex Pos $message_start) length_min_max ($length_min/$length_max) signal length=".length($rawData);
 			#my $onepos= index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}},\%patternList));
 			#my $zeropos=index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{zero}},\%patternList));
 			#SIGNALduino_Log3 $name, 3, "op=$onepos zp=$zeropos";
@@ -2326,7 +2330,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 				{
 					Debug "$name: demodulated message raw (@bit_msg), ".@bit_msg." bits\n" if ($debug);
 					#Check converted message against lengths 
-					$valid = $valid && $ProtocolListSIGNALduino{$id}{length_max} >= scalar @bit_msg  if (defined($ProtocolListSIGNALduino{$id}{length_max}));
+					$valid = $valid && $length_max >= scalar @bit_msg  if (defined($ProtocolListSIGNALduino{$id}{length_max}));
 					$valid = $valid && $length_min <= scalar @bit_msg;
 					#$valid = $valid && $ProtocolListSIGNALduino{$id}{length_min} <= scalar @bit_msg  if (defined($ProtocolListSIGNALduino{$id}{length_min}));
 
@@ -2364,7 +2368,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 						
 						$repeat += 1;
 						$repeatStr = " repeat $repeat"; 
-						last if ($repeat > 20);		# zur Sicherheit, damit es auf gar keinen Fall zu einer Endlosschleife kommen kann
+						last if ($repeat > AttrVal($name,"maxMuMsgRepeat", 4));
 						
 						my $modulematch;
 						if (defined($ProtocolListSIGNALduino{$id}{modulematch})) {
@@ -2385,14 +2389,10 @@ sub SIGNALduino_Parse_MU($$$$@)
 							$message_dispatched=1;
 						}
 					} else {
-						#if ($debug)
-						#{
-							my $debugstr;
-							$debugstr.= $length_min . "/";
-							$debugstr.=$ProtocolListSIGNALduino{$id}{length_max} if defined($ProtocolListSIGNALduino{$id}{length_max});
-							
-							SIGNALduino_Log3 $name, 5, "$name: pos=$i sigstr=$sig_str length ($debugstr) does not match (@bit_msg), ".@bit_msg." bits";
-						#}	
+						$length_str = " (wrong length ".@bit_msg.")";
+						
+						Debug "$name: pos=$i sigstr=$sig_str length ($length_min/$length_max) does not match (@bit_msg), ".@bit_msg." bits\n" if ($debug);
+					}
 						
 					}
 					@bit_msg=(); # clear bit_msg array
@@ -2407,13 +2407,13 @@ sub SIGNALduino_Parse_MU($$$$@)
 						$i=$-[0] + $i + length($startStr);
 						$i=$i-$signal_width if ($i >= $signal_width);
 						Debug "$name: found restart at Position $i ($regex)\n" if ($debug);
-						last if ((length($rawData) - $i) <  (8 * $signal_width));		# Mindestlaenge 8 Bit
+						last if ((length($rawData) - $i) < ($length_min * $signal_width));		# Abbruch wenn Rest kleiner Mindestlaenge
 					} else {
 						last;
 					}
 					
-					SIGNALduino_Log3 $name, 5, "$name: restarting demodulation at Position $i+$signal_width";
-				
+					SIGNALduino_Log3 $name, 5, "$name: $nrRestart" . '.' . "restarting demodulation$length_str at Pos $i+$signal_width regex ($regex)";
+					$nrRestart++;
 				}
 			}
 					
