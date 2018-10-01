@@ -1,5 +1,6 @@
 01.10.2018
  00_SIGNALduino.pm - added doc availableFirmware + updateChannelFW
+ signalduino_protocols.hash - sensor comments added & revised
 30.09.2018
  00_SIGNALduino.pm - doc_DE revised & doc_EN some attributes were missing
  14_SD_WS: added Protocol 84 -> new sensor Auriol (IAN 283582)
