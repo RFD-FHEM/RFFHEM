@@ -1007,6 +1007,14 @@ SIGNALduino_ResetDevice($)
 {
   my ($hash) = @_;
   my $name = $hash->{NAME};
+  
+  if (defined($hash->{USBDev}))
+  {
+     my $po = $hash->{USBDev};
+ 	 SIGNALduino_Log3 $hash, 3, "$name toggle DTR"; 
+  	 $po->pulse_dtr_on(100);
+	 $po->pulse_dtr_off(100);
+  }
 
   SIGNALduino_Log3 $hash, 3, "$name reset"; 
   DevIo_CloseDev($hash);
