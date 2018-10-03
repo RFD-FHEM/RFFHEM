@@ -1473,6 +1473,7 @@
 			name			=> 'geiger',
 			comment			=> 'geiger blind motors',
 			id				=> '78',
+			developId		=> 'y',
 			zero			=> [1,-6.6], 		
 			one				=> [6.6,-1],   		 
 			start  			=> [-53],		
