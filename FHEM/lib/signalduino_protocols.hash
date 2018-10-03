@@ -7,8 +7,8 @@
 # comment     => ' '       # exact description or example of devices
 # id          => ' '       # number of the protocol definition, each number only once use ((accepted no .)
 # one         => [ , ]     # only MU + MS signals | value pair for a one bit, must be always a positive and negative factor of clockabs (accepted . | example 1.5)
-# zero        => [ , ]     # only MU + MS  signals | value pair for a zero bit, must be always a positive and negative factor of clockabs (accepted . | example -1.5)
-# clockabs    => ' '       # only MU + MS  signals | value pulse / pause times
+# zero        => [ , ]     # only MU + MS signals | value pair for a zero bit, must be always a positive and negative factor of clockabs (accepted . | example -1.5)
+# clockabs    => ' '       # only MU + MS signals | value pulse / pause times
 # clockabs    => '-1'      # only MS signals | value pulse / pause times is automatically
 # clockrange  => [ , ]     # only MC signals | min , max of pulse / pause times
 # start       => [ , ]     # value pair for start message
@@ -27,7 +27,7 @@
 # clientmodule => ' '      # FHEM module for processing
 # filterfunc  => ' '       # SIGNALduino_filterSign | SIGNALduino_compPattern --> SIGNALduino internal filter function, it remove the sign from the pattern, and compress message and pattern
 #                          # SIGNALduino_filterMC --> SIGNALduino internal filter function, it will decode MU data via Manchester encoding
-# float       => [ , ]     # only MU + MS  signals | Convert 0F -> 01 (F) to be compatible with CUL
+# float       => [ , ]     # only MU + MS signals | Convert 0F -> 01 (F) to be compatible with CUL
 # format      => ' '       # twostate | pwm | manchester --> modulation type of the signal, only manchester use SIGNALduino internal, other types only comment
 # method      => \&        # call to process this message
 # modulematch => ' '       # RegEx on the exact message including preamble
@@ -190,7 +190,7 @@
 			  # MS;P1=-3882;P2=504;P3=-957;P4=-1949;D=21232424232323242423232323232323232424232323242423242424242323232324232424;CP=2;SP=1;R=249;m=2;
         {
             name			=> 'weatherID7',	
-			comment		=> 'EAS800z, FreeTec NC-7344',
+			comment         => 'EAS800z, FreeTec NC-7344, HAMA TS34A',
 			id          	=> '7',
 			one				=> [1,-4],
 			zero			=> [1,-2],
@@ -366,6 +366,8 @@
 			#method          => \&SIGNALduino_Cresta	# Call to process this message
 		}, 	
 	"16" => # Rohrmotor24 und andere Funk Rolladen / Markisen Motoren
+			# ! same definition how ID 72 !
+			# https://forum.fhem.de/index.php/topic,49523.0.html							   
             # MU;P0=-1608;P1=-785;P2=288;P3=650;P4=-419;P5=4676;D=1212121213434212134213434212121343434212121213421213434212134345021213434213434342121212121343421213421343421212134343421212121342121343421213432;CP=2;
 			# MU;P0=-1562;P1=-411;P2=297;P3=-773;P4=668;P5=4754;D=1232341234141234141234141414123414123232341232341412323414150234123234123232323232323234123414123414123414141412341412323234123234141232341415023412323412323232323232323412341412341412341414141234141232323412323414123234142;CP=2;
 		{
@@ -672,7 +674,7 @@
     # sensor id=62, channel=1, temp=21.1, hum=76, bat=ok
     	{   
        		name			=> 'weather33',		
-			comment         => 's014/TFA 30.3200/TCM/Conrad',
+			comment         => 'S014/TFA 30.3200/TCM/Conrad/renkforce E0001PA',
 			id          	=> '33',
 			one				=> [1,-8],
 			zero			=> [1,-4],
@@ -936,12 +938,13 @@
 			method          => \&SIGNALduino_Maverick,		# Call to process this message
 			#polarity		=> 'invert'
 		}, 			
-     "48"    => ## Joker Dostmann TFA
+     "48"    => ## Joker Dostmann TFA 30.3055.01
 				# https://github.com/RFD-FHEM/RFFHEM/issues/92
 				# MU;P0=591;P1=-1488;P2=-3736;P3=1338;P4=-372;P6=-988;D=23406060606063606363606363606060636363636363606060606363606060606060606060606060636060636360106060606060606063606363606363606060636363636363606060606363606060606060606060606060636060636360106060606060606063606363606363606060636363636363606060606363606060;CP=0;O;
 				# MU;P0=96;P1=-244;P2=510;P3=-1000;P4=1520;P5=-1506;D=01232323232343234343232343234323434343434343234323434343232323232323232323232323234343234325232323232323232343234343232343234323434343434343234323434343232323232323232323232323234343234325232323232323232343234343232343234323434343434343234323434343232323;CP=2;O;
 		{
             name			=> 'TFA Dostmann',	
+            comment			=> 'Funk-Thermometer Joker TFA 30.3055.01',
 			id          	=> '48',
 			clockabs     	=> 250, 						# In real it is 500 but this leads to unprceise demodulation 
 			one				=> [-4,6],
@@ -1311,11 +1314,13 @@
 			length_max      => '48',
 		},
 	"72" => # Siro blinds MU    @Dr. Smag
+			# ! same definition how ID 16 !
+			# https://forum.fhem.de/index.php?topic=77167.0
 			# MU;P0=-760;P1=334;P2=693;P3=-399;P4=-8942;P5=4796;P6=-1540;D=01010102310232310101010102310232323101010102310101010101023102323102323102323102310101010102310232323101010102310101010101023102310231023102456102310232310232310231010101010231023232310101010231010101010102310231023102310245610231023231023231023101010101;CP=1;R=45;O;
 			# MU;P0=-8848;P1=4804;P2=-1512;P3=336;P4=-757;P5=695;P6=-402;D=0123456345656345656345634343434345634565656343434345634343434343456345634563456345;CP=3;R=49;	
 		{
 			name			=> 'Siro shutter',
-			comment         => 'developModule. Siro is not in github or SVN available',
+			comment         => 'developModule. Siro is not in github',
 			id				=> '72',
 			developId		=> 'm',
 			dispatchequals  =>  'true',
@@ -1335,7 +1340,7 @@
 			  # MS;P0=4803;P1=-1522;P2=333;P3=-769;P4=699;P5=-393;P6=-9190;D=2601234523454523454523452323232323452345454523232323452323232323234523232345454545;CP=2;SP=6;R=61;
 		{
 			name			=> 'Siro shutter',
-			comment     	=> 'developModule. Siro is not in github or SVN available',
+			comment     	=> 'developModule. Siro is not in github',
 			id				=> '72',
 			developId		=> 'm',
 			dispatchequals  =>  'true',
@@ -1574,4 +1579,22 @@
 			length_min      => '12',
 			length_max      => '12',
 		},
+	"84" => ## Funk Wetterstation Auriol IAN 283582 (Lidl 2018) @roobbb
+		# https://github.com/RFD-FHEM/RFFHEM/issues/263#issuecomment-420739666
+		# MU;P0=-28796;P1=376;P2=-875;P3=834;P4=220;P5=-632;P6=592;P7=-268;D=0123232324545454545456767454567674567456745674545454545456767676767674567674567676767456;CP=4;R=22;
+		# MU;P0=-28784;P1=340;P2=-903;P3=814;P4=223;P5=-632;P6=604;P7=-248;D=0123232324545454545456767456745456767674545674567454545456745454545456767454545456745676;CP=4;R=22;
+	{
+		name         => 'IAN283582',
+		comment      => 'Funk Wetterstation Auriol IAN 283582',
+		id           => '84',
+		one          => [3,-1],
+		zero         => [1,-3],
+		start        => [4,-4,4,-4,4,-4],
+		clockabs     => 213, 
+		preamble     => 'u84#',             # prepend to converted message
+		clientmodule => '',                 # not used now
+		modulematch  => '',                 # not used now
+		length_min   => '39',               # das letzte Bit fehlt
+		length_max   => '40',
+	},
 );

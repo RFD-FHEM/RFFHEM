@@ -176,10 +176,10 @@ sub SD_UT_Set($$$@) {
 				return "Wrong command, please select one from list.";
 			}
 			
-			# Gitub - User: "Die besten Ergebnisse waren mit "#R7"."
-			# https://github.com/RFD-FHEM/RFFHEM/issues/250#issuecomment-419622486
-			# data sheet say repeat 4 !
-			$msg .= "#R4";
+			# 1) data sheet say repeat 4 !
+			# 2) button Turn the fan off - repeat 9 !
+
+			$msg .= "#R9";
 
 			## for hex Check ##
 			my @split = split("#", $msg);
@@ -404,32 +404,32 @@ sub SD_UT_Parse($$) {
 		$deviceCodeUser = substr($deviceCodeUser, 0 , length($deviceCodeUser)-1);
 		$deviceCode = $deviceCode." ($deviceCodeUser)";
 
-		Log3 $name, 3, "$ioname: $model devicecode=$deviceCode state=$state ($rawData)";
-		if ($state eq "110111") {
+		if ($state eq "110111") {					# button 1
 			$state = "1 - fan minimum speed";
-		} elsif ($state eq "110101") {
+		} elsif ($state eq "110101") {				# button 2
 			$state = "2 - fan low speed";
-		} elsif ($state eq "101111") {
+		} elsif ($state eq "101111") {				# button 3
 			$state = "3 - fan medium low speed";
-		} elsif ($state eq "100111") {
+		} elsif ($state eq "100111") {				# button 4
 			$state = "4 - fan medium speed";
-		} elsif ($state eq "011101") {
+		} elsif ($state eq "011101") {				# button 5
 			$state = "5 - fan medium high speed";
-		} elsif ($state eq "011111") {
+		} elsif ($state eq "011111") {				# button 6
 			$state = "6 - fan high speed";
-		} elsif ($state eq "111101") {
+		} elsif ($state eq "111101") {				# button Turn the fan off
 			$state = "Turn the fan off";
-		} elsif ($state eq "111110") {
+		} elsif ($state eq "111110") {				# button light on/off
 			$state = "light on/off";
-		} elsif ($state eq "111011") {
+		} elsif ($state eq "111011") {				# button fan direction
 			$state = "fan direction";
-		} elsif ($state eq "101101") {
+		} elsif ($state eq "101101") {				# button in remote backside
 		$state = "set";
 		} else {
 			Log3 $name, 3, "$ioname: SD_UT $model unknown Button receive ($state) or houscode is double!";
 			return "";
 		}
-		
+
+		Log3 $name, 4, "$ioname: $model devicecode=$deviceCode state=$state ($rawData)";		
 		#$state.= " | ".TimeNow();
 
 	############ Westinghouse Buttons_five ############ Protocol 29 or 30 ############
@@ -453,7 +453,7 @@ sub SD_UT_Parse($$) {
 		$deviceCodeUser = substr($deviceCodeUser, 0 , length($deviceCodeUser)-1);
 		$deviceCode = $deviceCode." ($deviceCodeUser)";
 
-		Log3 $name, 3, "$ioname: $model devicecode=$deviceCode state=$state ($rawData)";
+		Log3 $name, 4, "$ioname: $model devicecode=$deviceCode state=$state ($rawData)";
 		if ($state eq "011111") {
 			$state = "fan low speed";
 		} elsif ($state eq "111111") {
@@ -542,7 +542,7 @@ sub SD_UT_Parse($$) {
 
 	readingsBeginUpdate($hash);
 	readingsBulkUpdate($hash, "deviceCode", $deviceCode, 0)  if (defined($deviceCode) && $model eq "Buttons_five" || $model eq "RH787T" );
-	readingsBulkUpdate($hash, "Systemcode", $deviceCode, 0)  if (defined($deviceCode) && $model eq "Unitec_47031");
+	readingsBulkUpdate($hash, "System-Hauscode", $deviceCode, 0)  if (defined($deviceCode) && $model eq "Unitec_47031");
 	readingsBulkUpdate($hash, "Zone", $zone, 0)  if (defined($zone) && $model eq "Unitec_47031");
 	readingsBulkUpdate($hash, "Usersystem", $system, 0)  if (defined($system) && $model eq "Unitec_47031");
 	readingsBulkUpdate($hash, "LastAction", "receive", 0)  if (defined($state) && $model eq "RH787T");
@@ -718,34 +718,94 @@ sub SD_UT_binaryToNumber {
 	<b>Set</b><br>
 	<ul>Different transmission commands are available.</ul><br>
 	<ul><u>Remote control SA-434-1 mini 923301</u></ul>
-	<ul><li>send&nbsp;&nbsp;<small>(Always send the same, even if the user sends another set command via console.)</small></li></ul><br>
+	<ul>
+		<li>send<br>
+		button <small>(Always send the same, even if the user sends another set command via console.)</small></li>
+	</ul><br>
+	
 	<ul><u>VTX-BELL_radio bell</u></ul>
-	<ul><li>send&nbsp;&nbsp;<small>(Always send the same, even if the user sends another set command via console.)</small></li></ul><br>
+	<ul>
+		<li>send<br>
+		ring <small>(Always send the same, even if the user sends another set command via console.)</small></li>
+	</ul><br>
+	
 	<ul><u>Westinghouse Deckenventilator (remote with 5 buttons and without SET)</u></ul>
-	<ul><li>1_fan_low_speed --> Button LOW on the remote</li></ul>
-	<ul><li>2_fan_medium_speed --> Button MED on the remote</li></ul>
-	<ul><li>3_fan_high_speed --> Button HI on the remote</li></ul>
-	<ul><li>light_on/off --> Button LIGHT on the remote</li></ul>
-	<ul><li>fan_off --> Button OFF on the remote</li></ul><br>
+	<ul><a name="1_fan_low_speed"></a>
+		<li>1_fan_low_speed<br>
+		Button LOW on the remote</li>
+	</ul>
+	<ul><a name="2_fan_medium_speed"></a>
+		<li>2_fan_medium_speed<br>
+		Button MED on the remote</li>
+	</ul>
+	<ul><a name="3_fan_high_speed"></a>
+		<li>3_fan_high_speed<br>
+		Button HI on the remote</li>
+	</ul>
+	<ul><a name="light_on/off"></a>
+		<li>light_on/off<br>
+		switch light on or off</li>
+	</ul>
+	<ul><a name="fan_off"></a>
+		<li>fan_off<br>
+		turns off the fan</li>
+	</ul><br><a name=" "></a>
+	
 	<ul><u>Westinghouse Delancey ceiling fan (remote RH787T with 9 buttons and SET)</u></ul>
-	<ul><li>1_fan_minimum_speed --> Button I on the remote</li></ul>
-	<ul><li>2_fan_low_speed --> Button II on the remote</li></ul>
-	<ul><li>3_fan_medium_low_speed --> Button III on the remote</li></ul>
-	<ul><li>4_fan_medium_speed --> Button IV on the remote</li></ul>
-	<ul><li>5_fan_medium_high_speed --> Button V on the remote</li></ul>
-	<ul><li>6_fan_high_speed --> Button VI on the remote</li></ul>
-	<ul><li>fan_off</li></ul>
-	<ul><li>fan_direction</li></ul>
-	<ul><li>light_on/off</li></ul>
-	<ul><li>set --> Button SET in the remote</li></ul>
+	<ul><a name="1_fan_minimum_speed"></a>
+		<li>1_fan_minimum_speed<br>
+		Button I on the remote</li>
+	</ul>
+	<ul><a name="2_fan_low_speed"></a>
+		<li>2_fan_low_speed<br>
+		Button II on the remote</li>
+	</ul>
+	<ul><a name="3_fan_medium_low_speed"></a>
+		<li>3_fan_medium_low_speed<br>
+		Button III on the remote</li>
+	</ul>
+	<ul><a name="4_fan_medium_speed"></a>
+		<li>4_fan_medium_speed<br>
+		Button IV on the remote</li>
+	</ul>
+	<ul><a name="5_fan_medium_high_speed"></a>
+		<li>5_fan_medium_high_speed<br>
+		Button V on the remote</li>
+	</ul>
+	<ul><a name="6_fan_high_speed"></a>
+		<li>6_fan_high_speed<br>
+		Button VI on the remote</li>
+	</ul>
+	<ul><a name="fan_off"></a>
+		<li>fan_off<br>
+		turns off the fan</li>
+	</ul>
+	<ul><a name="fan_direction"></a>
+		<li>fan_direction<br>
+		Defining the direction of rotation</li>
+	</ul>
+	<ul><a name="light_on/off"></a>
+		<li>light_on/off<br>
+		switch light on or off</li>
+	</ul>
+	<ul><a name="set"></a>
+		<li>set<br>
+		Button SET in the remote</li><a name=" "></a>
+	</ul>
 	<br><br>
+	
 	<b>Get</b><br>
 	<ul>N/A</ul><br><br>
+	
 	<b>Attribute</b><br>
 	<ul><li><a href="#do_not_notify">do_not_notify</a></li></ul><br>
 	<ul><li><a href="#ignore">ignore</a></li></ul><br>
 	<ul><li><a href="#IODev">IODev</a></li></ul><br>
-	<ul><li><a href="#model">model</a> (unknown,Buttons_five,SA_434_1_mini,Unitec_47031,Unitec_other,VTX-BELL,RH787T)</li></ul><br>
+	<ul><a name="model"></a>
+		<li>model<br>
+		The attribute indicates the model type of your device.<br>
+		(unknown,Buttons_five,RH787T,SA_434_1_mini,Unitec_47031,Unitec_other,VTX-BELL)</li>
+	</ul>
 </ul>
 =end html
 =begin html_DE
@@ -765,6 +825,7 @@ sub SD_UT_binaryToNumber {
 	 <ul> - Westinghouse Deckenventilator (Fernbedienung, 5 Tasten ohne SET)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Buttons_five | Protokoll 29)</small></ul>
 	 <ul> - Westinghouse Delancey Deckenventilator (Fernbedienung, 9 Tasten mit SET)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: RH787T | Protokoll 83)</small></ul>
 	 <br><br>
+	
 	<b>Define</b><br>
 	<ul><code>define &lt;NAME&gt; SD_UT &lt;model&gt; &lt;Hex-Adresse&gt;</code><br><br>
 	<u>Beispiele:</u>
@@ -774,37 +835,99 @@ sub SD_UT_binaryToNumber {
 		define &lt;NAME&gt; SD_UT SA_434_1_mini ffd<br>
 		define &lt;NAME&gt; SD_UT unknown<br>
 		</ul></ul><br><br>
+	
 	<b>Set</b><br>
 	<ul>Je nach Ger&auml;t sind unterschiedliche Sendebefehle verf&uuml;gbar.</ul><br>
 	<ul><u>Remote control SA-434-1 mini 923301</u></ul>
-	<ul><li>send&nbsp;&nbsp;<small>(Sendet immer das selbe, auch wenn der Benutzer einen anderen Set-Befehl via Konsole sendet.)</small></li></ul><br>
+	<ul>
+		<li>send<br>
+		Knopfdruck <small>(Sendet immer das selbe, auch wenn der Benutzer einen anderen Set-Befehl via Konsole sendet.)</small></li>
+	</ul><br>
+	
 	<ul><u>VTX-BELL_Funkklingel</u></ul>
-	<ul><li>send&nbsp;&nbsp;<small>(Sendet immer das selbe, auch wenn der Benutzer einen anderen Set-Befehl via Konsole sendet.)</small></li></ul><br>
+	<ul><li>send<br>
+		klingeln <small>(Sendet immer das selbe, auch wenn der Benutzer einen anderen Set-Befehl via Konsole sendet.)</small></li>
+	</ul><br>
+	
 	<ul><u>Westinghouse Deckenventilator (Fernbedienung mit 5 Tasten)</u></ul>
-	<ul><li>1_fan_low_speed --> Taste LOW auf der Fernbedienung</li></ul>
-	<ul><li>2_fan_medium_speed --> Taste MED auf der Fernbedienung</li></ul>
-	<ul><li>3_fan_high_speed --> Taste HI auf der Fernbedienung</li></ul>
-	<ul><li>light_on/off --> Taste LIGHT auf der Fernbedienung</li></ul>
-	<ul><li>fan_off --> Taste OFF auf der Fernbedienung</li></ul><br>
-	<ul><u>Westinghouse Delancey Deckenventilator (Fernbedienung RH787T mit 9 Tasten + SET)</u></ul>
-	<ul><li>1_fan_minimum_speed --> Taste I auf der Fernbedienung</li></ul>
-	<ul><li>2_fan_low_speed --> Taste II auf der Fernbedienung</li></ul>
-	<ul><li>3_fan_medium_low_speed --> Taste III auf der Fernbedienung</li></ul>
-	<ul><li>4_fan_medium_speed --> Taste IV auf der Fernbedienung</li></ul>
-	<ul><li>5_fan_medium_high_speed --> Taste V auf der Fernbedienung</li></ul>
-	<ul><li>6_fan_high_speed --> Taste VI auf der Fernbedienung</li></ul>
-	<ul><li>fan_off</li></ul>
-	<ul><li>fan_direction</li></ul>
-	<ul><li>light_on/off</li></ul>
-	<ul><li>set --> Taste SET in der Fernbedienung</li></ul>
+	<ul><a name="1_fan_low_speed"></a>
+		<li>1_fan_low_speed<br>
+		Taste LOW auf der Fernbedienung</li>
+	</ul>
+	<ul><a name="2_fan_medium_speed"></a>
+		<li>2_fan_medium_speed<br>
+		Taste MED auf der Fernbedienung</li>
+	</ul>
+	<ul><a name="3_fan_high_speed"></a>
+		<li>3_fan_high_speed<br>
+		Taste HI auf der Fernbedienung</li>
+	</ul>
+	<ul><a name="light_on/off"></a>
+		<li>light_on/off<br>
+		Licht ein-/ausschalten</li>
+	</ul>
+	<ul><a name="fan_off"></a>
+		<li>fan_off<br>
+		Ventilator ausschalten</li>
+	</ul><br>
+	
+	<ul><a name=" "></a>Westinghouse Delancey Deckenventilator (Fernbedienung RH787T mit 9 Tasten + SET)</u></ul>
+	<ul><a name="1_fan_minimum_speed"></a>
+		<li>1_fan_minimum_speed<br>
+		Taste I auf der Fernbedienung</li>
+	</ul>
+	<ul><a name="2_fan_low_speed"></a>
+		<li>2_fan_low_speed<br>
+		Taste II auf der Fernbedienung</li>
+	</ul>
+	
+	<ul><a name="3_fan_medium_low_speed"></a>
+		<li>3_fan_medium_low_speed<br>
+		Taste III auf der Fernbedienung</li>
+	</ul>
+	<ul><a name="4_fan_medium_speed"></a>
+		<li>4_fan_medium_speed<br>
+		Taste IV auf der Fernbedienung</li>
+	</ul>
+	<ul><a name="5_fan_medium_high_speed"></a>
+		<li>5_fan_medium_high_speed<br>
+		Taste V auf der Fernbedienung</li>
+	</ul>
+	<ul><a name="6_fan_high_speed"></a>
+		<li>6_fan_high_speed<br>
+		Taste VI auf der Fernbedienung</li>
+	</ul>
+	<ul><a name="fan_off"></a>
+		<li>fan_off<br>
+		Ventilator ausschalten</li></ul>
+	<ul><a name="fan_direction"></a>
+		<li>fan_direction<br>
+		Drehrichtung festlegen</li>
+	</ul>
+	<ul><a name="light_on/off"></a>
+		<li>light_on/off<br>
+		Licht ein-/ausschalten</li>
+	</ul>
+	<ul><a name="set"></a>
+		<li>set<br>
+		Taste SET in der Fernbedienung</li><a name=" "></a>
+	</ul>
 	<br><br>
+	
 	<b>Get</b><br>
 	<ul>N/A</ul><br><br>
+	
 	<b>Attribute</b><br>
 	<ul><li><a href="#do_not_notify">do_not_notify</a></li></ul><br>
 	<ul><li><a href="#ignore">ignore</a></li></ul><br>
 	<ul><li><a href="#IODev">IODev</a></li></ul><br>
-	<ul><li><a href="#model">model</a> (unknown,Buttons_five,RH787T,SA_434_1_mini,Unitec_47031,Unitec_other,VTX-BELL)</li></ul><br>
+	<ul><a name="model"></a>
+		<li>model<br>
+		Das Attribut bezeichnet den Modelltyp Ihres Gerätes.<br>
+		(unknown,Buttons_five,RH787T,SA_434_1_mini,Unitec_47031,Unitec_other,VTX-BELL)</li>
+	</ul>
+		
+		
 </ul>
 =end html_DE
 =cut
