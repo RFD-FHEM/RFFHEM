@@ -4054,7 +4054,7 @@ sub SIGNALduino_compPattern($$$%)
 			$buckets{$key}=$patternListRaw{$key};
 		}
 	}
--
+
 	return ($cnt,$rawData, %patternListRaw);
 	#print "rdata: ".$msg_parts{rawData}."\n";
 
