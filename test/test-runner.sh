@@ -45,16 +45,16 @@ printf "\n\n--------- Starting test %s: ---------\n" $1
 
 # Load test definitions, and import them to our running instance
 oIFS=$IFS
-IFS=$';\n'  # Split into array at every ";" char 
+IFS=$'\n'  # Split into array at every ";" char 
 command eval CMD='($(<test/$1-definition.txt))'
 IFS=$oIFS
 unset oIFS  
-command eval DEF='$(printf "%s;;" ${CMD[@]})'  # Add after every line ;; and store in DEF
+command eval DEF='$(printf "%s" ${CMD[@]})'  # Add after every line ;; and store in DEF
 
 CMD=$DEF
 unset DEF
 
-#CMD=$( echo $CMD | sed '/{/,/}/s/;/;;/g')
+CMD=$( echo $CMD | sed '/{/,/}/s/;/;;/g')
 #echo $CMD
 #CMD=$(printf "%s" $CMD | awk 'BEGIN{RS="\n" ; ORS=" ";}{ print }' )
 #CMD=$(printf "%q" $CMD )
@@ -90,7 +90,7 @@ testlog=$(awk '/Test '"$1"' starts here ---->/,/<---- Test '"$1"' ends here/' /o
 
 printf "Output of %s:\n\n%s" $1 $OUTPUT
 
-if [ -z "$OUTPUT_FAILED" ]
+if [ -z "$OUTPUT_FAILED"  ]
 then
     if [ $(echo $testlog | grep -Fxc "PERL WARNING") -gt 0 ]
 	then
