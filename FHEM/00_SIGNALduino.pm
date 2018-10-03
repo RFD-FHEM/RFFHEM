@@ -51,6 +51,8 @@ sub SIGNALduino_Read($);
 sub SIGNALduino_Ready($);
 sub SIGNALduino_Write($$$);
 sub SIGNALduino_SimpleWrite(@);
+sub SIGNALduino_LoadProtocolHash($);
+sub SIGNALduino_Log3($$$);
 
 #my $debug=0;
 
@@ -231,19 +233,40 @@ SIGNALduino_Initialize($)
   $hash->{muIdList} = ();
   $hash->{mcIdList} = ();
   
-  my $protocol_data = do {
-    open my $fh, '<', "$attr{global}{modpath}/FHEM/lib/signalduino_protocols.hash";
-    local $/; # Undefine $/ for this scope...
-    <$fh>;    # so <> slurps up the entire file
-  };
-  %ProtocolListSIGNALduino =  eval $protocol_data ;
+  #ours %attr{};
 
-  
+  %ProtocolListSIGNALduino = SIGNALduino_LoadProtocolHash("$attr{global}{modpath}/FHEM/lib/signalduino_protocols.hash");
+  if (exists($ProtocolListSIGNALduino{error})  ) {
+  	Log3 "SIGNALduino", 1, "Error loading Protocol Hash. Module is in inoperable mode error message:($ProtocolListSIGNALduino{error})";
+  	delete($ProtocolListSIGNALduino{error});
+  	return undef;
+  }
 }
 
-#pre declaration
-sub SIGNALduino_Log3($$$);
+# Load Protocol hash from File into a hash.
+# First Parameter is for filename (full or relativ path) to be loaded
+#
+# returns a hash with protocols if loaded without error. Returns a hash with {eror} => errormessage if there was an error
 
+sub SIGNALduino_LoadProtocolHash($)
+{
+	
+	if (! -e $_[0]) {
+		return %{ {"error" => "File does not exsits"}};
+	}
+	
+	my $protocol_data = do {
+	open my $fh, '<', $_[0] ;
+		local $/; # Undefine $/ for this scope...
+   		<$fh>;    # so <> slurps up the entire file
+	};
+	
+	my %evalret= eval $protocol_data ;
+	if (!%evalret) {
+		return %{ {"error" => $@}};
+	} 
+	return %evalret;
+}
 
 
 
@@ -4056,7 +4079,7 @@ sub SIGNALduino_compPattern($$$%)
 			$buckets{$key}=$patternListRaw{$key};
 		}
 	}
-
+-
 	return ($cnt,$rawData, %patternListRaw);
 	#print "rdata: ".$msg_parts{rawData}."\n";
 
@@ -4083,6 +4106,13 @@ sub SIGNALduino_Log3($$$)
   }
   
   return Log3($name,$loglevel,$text);
+}
+
+################################################
+# Helper to get a reference of the protocolList Hash
+sub SIGNALduino_getProtocolList()
+{
+	return \%ProtocolListSIGNALduino
 }
 
 #print Dumper (%msg_parts);
