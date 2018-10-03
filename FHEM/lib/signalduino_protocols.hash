@@ -39,6 +39,11 @@
 # postDemodulation => \&   # SIGNALduino internal sub for processing before dispatching to a logical module
 # remove_zero => 1         # removes leading zeros from output
 #
+#
+##### notice #### or #### info ######################################################
+# - PLEASE USE FIRST UNUSED ID´s for new protocols
+# - ID´s are unused: 19, 34, 42 
+# -
 #####################################################################################
 # !!!! please, documentation minimum one MU / MC / MS message at new protocols !!!! #
 #####################################################################################
@@ -1320,9 +1325,7 @@
 			# MU;P0=-8848;P1=4804;P2=-1512;P3=336;P4=-757;P5=695;P6=-402;D=0123456345656345656345634343434345634565656343434345634343434343456345634563456345;CP=3;R=49;	
 		{
 			name			=> 'Siro shutter',
-			comment         => 'developModule. Siro is not in github',
 			id				=> '72',
-			developId		=> 'm',
 			dispatchequals  =>  'true',
 			one				=> [2,-1.2],    # 680, -400
 			zero			=> [1,-2.2],    # 340, -750
@@ -1470,7 +1473,7 @@
 			name			=> 'geiger',
 			comment			=> 'geiger blind motors',
 			id				=> '78',
-			developId		=> 'y', 
+			developId		=> 'y',
 			zero			=> [1,-6.6], 		
 			one				=> [6.6,-1],   		 
 			start  			=> [-53],		
