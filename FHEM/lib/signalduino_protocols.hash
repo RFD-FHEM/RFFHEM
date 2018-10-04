@@ -463,7 +463,7 @@
 			#clientmodule    => '',   				# not used now
 			#modulematch     => '',  				# not used now
 			length_min      => '19',
-			#length_max      => '22',
+			length_max      => '23',				# not confirmed, length one more as MU Message
 		},
 	"20" => # Livolo         	
             # https://github.com/RFD-FHEM/RFFHEM/issues/29
