@@ -481,7 +481,7 @@ Hideki_Attr(@)
   <a name="Hideki_readings"></a>
   <b>Generated readings</b>
   <ul>
-	<li>battery & batteyState (ok or low)</li>
+	<li>battery & batteryState (ok or low)</li>
 	<li>channel (The Channelnumber (number if)</li>
 	<li>humidity (0-100)</li>
 	<li>state (T:x H:y B:z)</li>
@@ -550,11 +550,11 @@ Hideki_Attr(@)
   <br>
 
   <a name="Hideki_readings"></a>
-  <b>Generated Readings</b>
+  <b>Generierte Readings</b>
   <ul>
-	<li>battery & batteryState (Batteriestatus: ok oder low)</li>
+	<li>battery & batteryState (ok oder low)</li>
 	<li>channel (Der Sensor Kanal)</li>
-	<li>humidity (relative Luftfeuchte: 0-100)</li>
+	<li>humidity (0-100)</li>
 	<li>state (T:x H:y B:z)</li>
 	<li>temperature (&deg;C)</li>
 
