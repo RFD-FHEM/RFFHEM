@@ -42,7 +42,7 @@
 #
 ##### notice #### or #### info ######################################################
 # - PLEASE USE FIRST UNUSED ID´s for new protocols
-# - ID´s are unused: 19, 34, 42 
+# - ID´s are unused: 34, 42
 # -
 #####################################################################################
 # !!!! please, documentation minimum one MU / MC / MS message at new protocols !!!! #
@@ -447,21 +447,24 @@
 			polarity        => 'invert',		    # invert bits
 			method          => \&SIGNALduino_OSV1   # Call to process this message
 		},
-	#"19" => # nothing knowing about this 2015-09-28 01:25:40-MS;P0=-8916;P1=-19904;P2=390;P3=-535;P4=-1020;P5=12846;P6=1371;D=2120232323232324242423232323232323232320239;CP=2;SP=1;
-	#	{
-    #       name			=> 'unknown19',	
-	#		id          	=> '19',
-	#		one				=> [1,-2],
-	#		zero			=> [1,-1],
-	#		sync			=> [1,-50,1,-22],				
-	#		clockabs		=> 395,
-	#		format 			=> 'twostate',	  		
-	#		preamble		=> 'u19#',				# prepend to converted message	
-	#		#clientmodule    => '',   				# not used now
-	#		#modulematch     => '',  				# not used now
-	#		length_min      => '16',
-	#		length_max      => '32',
-	#	}, 	 	
+	"19" => # minify Funksteckdose
+            # https://github.com/RFD-FHEM/RFFHEM/issues/114
+			# MU;P0=293;P1=-887;P2=-312;P6=-1900;P7=872;D=6727272010101720172720101720172010172727272720;CP=0;
+			# MU;P0=9078;P1=-308;P2=180;P3=-835;P4=881;P5=309;P6=-1316;D=0123414141535353415341415353415341535341414141415603;CP=5;
+		{
+            name			=> 'minify',
+			comment 		=> 'RC202 remote ?',
+			id          	=> '19',
+			one				=> [3,-1],
+			zero			=> [1,-3],
+			clockabs		=> 300,
+			format 			=> 'twostate',	  		
+			preamble		=> 'u19#',				# prepend to converted message
+			#clientmodule    => '',   				# not used now
+			#modulematch     => '',  				# not used now
+			length_min      => '19',
+			length_max      => '23',				# not confirmed, length one more as MU Message
+		},
 	"20" => # Livolo         	
             # https://github.com/RFD-FHEM/RFFHEM/issues/29
          	# MU;P0=-195;P1=151;P2=475;P3=-333;D=010101010102010101010101013101013101010101013101010201010101010101010101010101010101010101020101010101010101010101010101010101010102010101010101013101013101;CP=1;																																														 
