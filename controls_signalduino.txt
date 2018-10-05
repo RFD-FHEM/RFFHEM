@@ -13,7 +13,7 @@ UPD 2018-09-17_17:10:17 37094   FHEM/14_SD_WS.pm
 UPD 2018-07-04_21:56:16 37910   FHEM/41_OREGON.pm
 UPD 2018-09-27_19:48:12 15694   FHEM/90_SIGNALduino_un.pm
 UPD 2017-11-12_23:12:44 40243   FHEM/98_Dooya.pm
-UPD 2018-10-04_01:14:21 72760   FHEM/lib/signalduino_protocols.hash
+UPD 2018-10-04_23:37:13 72923   FHEM/lib/signalduino_protocols.hash
 MOV FHEM/firmware/SIGNALduino_nano328.hex unused
 MOV FHEM/firmware/SIGNALduino_nanoCC1101.hex unused
 MOV FHEM/firmware/SIGNALduino_promini328.hex unused
