@@ -1,0 +1,10 @@
+(
+    "9999"    => 
+        {
+            name			=> 'Unittest MS Protocol',		
+			comment			=> 'ony for running automated tests'
+			id				=> '9999',
+        },
+		
+ 
+);
