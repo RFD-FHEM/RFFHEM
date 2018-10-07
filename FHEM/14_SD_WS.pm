@@ -13,6 +13,7 @@
 # 21.08.2018 Modelauswahl hinzugefuegt, da 3 versch. Typen SD_WS_33 --> Batterie-Bit Positionen unterschiedlich (34,35,36)
 # 11.09.2018 Plotanlegung korrigiert | doc | temp check war falsch positioniert
 # 16.09.2018 neues Protokoll 84: Funk Wetterstation Auriol IAN 283582 Version 06/2017 (Lidl), Modell-Nr.: HG02832D
+# 31.09.2018 neues Protokoll 85: Kombisensor TFA 30.3222.02 fuer Wetterstation TFA 35.1140.01
 
 package main;
 
@@ -33,8 +34,10 @@ sub SD_WS_Initialize($)
 	$hash->{ParseFn}	= "SD_WS_Parse";
 	$hash->{AttrFn}		= "SD_WS_Attr";
 	$hash->{AttrList}	= "IODev do_not_notify:1,0 ignore:0,1 showtime:1,0 " .
-							"model:other,S522,E0001PA " .
-						  "$readingFnAttributes ";
+											"model:other,S522,E0001PA " .
+                      "max-deviation-temp:1,2,3,4,5,6,7,8,9,10,15,20,25,30,35,40,45,50 ".
+                      "max-deviation-hum:1,2,3,4,5,6,7,8,9,10,15,20,25,30,35,40,45,50 ".
+											"$readingFnAttributes ";
 	$hash->{AutoCreate} =
 	{ 
 		"SD_WS37_TH.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,",  autocreateThreshold => "2:180"},
@@ -46,13 +49,11 @@ sub SD_WS_Initialize($)
 		"SD_WS71_T.*"		=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4:Temp,", autocreateThreshold => "2:180"},
 		"SD_WS_33_T_.*"	=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.* model:other", FILTER => "%NAME", GPLOT => "temp4:Temp,", autocreateThreshold => "2:180"},
 		"SD_WS_33_TH_.*"	=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.* model:other", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "2:180"},
-		"SD_WS_84_TH_.*"	=> { ATTR => "event-min-interval:.*:160 event-on-change-reading:.* model:other", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "2:120"},
+		"SD_WS_84_TH_.*"	=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.* model:other", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "2:120"},
+		"SD_WS_85_THW_.*"	=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.* model:other", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "2:120"},
 	};
 
 }
-
-
-
 
 #############################
 sub SD_WS_Define($$)
@@ -89,6 +90,7 @@ sub SD_WS_Parse($$)
 	my ($iohash, $msg) = @_;
 	#my $rawData = substr($msg, 2);
 	my $name = $iohash->{NAME};
+	my $ioname = $iohash->{NAME};
 	my ($protocol,$rawData) = split("#",$msg);
 	$protocol=~ s/^[WP](\d+)/$1/; # extract protocol
 	my $dummyreturnvalue= "Unknown, please report";
@@ -99,12 +101,13 @@ sub SD_WS_Parse($$)
 	my $model;	# wenn im elsif Abschnitt definiert, dann wird der Sensor per AutoCreate angelegt
 	my $SensorTyp;
 	my $id;
-	my $bat;		# many variants - NOT the SAME position!
+	my $bat;
 	my $sendmode;
 	my $channel;
 	my $rawTemp;
 	my $temp;
 	my $hum;
+	my $windspeed;
 	my $trend;
 	
 	my %decodingSubs  = (
@@ -177,22 +180,19 @@ sub SD_WS_Parse($$)
 			# c: | t: | h: same like S522
 			# x: unknown
 
-     		sensortype => 's014/TFA 30.3200/TCM/Conrad/Conrad S522',
-        	model =>	'SD_WS_33_T',
+			sensortype => 's014/TFA 30.3200/TCM/Conrad S522/renkforce E0001PA',
+			model =>	'SD_WS_33_T',
 			prematch => sub {my $msg = shift; return 1 if ($msg =~ /^[0-9A-F]{11}$/); }, 							# prematch
 			crcok => 	sub {return SD_WS_binaryToNumber($bitData,36,39)+1;  }, 									# crc currently not calculated
 			id => 		sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,0,9); },   				# id
-	#		sendmode =>	sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,10,11) eq "1" ? "manual" : "auto";  }
 			temp => 	sub {my (undef,$bitData) = @_; return round(((SD_WS_binaryToNumber($bitData,22,25)*256 +  SD_WS_binaryToNumber($bitData,18,21)*16 + SD_WS_binaryToNumber($bitData,14,17)) - 1220) * 5 / 90.0 , 1); },	#temp
 			hum => 		sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,30,33)*16 + SD_WS_binaryToNumber($bitData,26,29));  }, 					#hum
 			channel => 	sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,12,13)+1 );  }, 		#channel
-			bat => 		sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,34) eq "0" ? "ok" : "low";},	# other or modul orginal
-   
-    # 		sync => 	sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,35,35) eq "1" ? "true" : "false");},
+			bat => 		sub {my (undef,$bitData) = @_; return substr($bitData,34,1) eq "0" ? "ok" : "low";},	# other or modul orginal
    	 	 } ,       
      51 =>
    	 	 {
-     		sensortype => 'Lidl Wetterstation 2759001/IAN114324',
+     		sensortype => 'Lidl Wetterstation Auriol IAN 275901 / IAN 114324',
         	model =>	'SD_WS_51_TH', 
 			prematch => sub {my $msg = shift; return 1 if ($msg =~ /^[0-9A-F]{10}$/); }, 							# prematch
 			crcok => 	sub {return 1;  }, 																			# crc is unknown
@@ -263,7 +263,7 @@ sub SD_WS_Parse($$)
 				# 0    4    | 8    12   | 16   20   | 24   28   | 32   36  
 				# 1111 1100 | 0001 0110 | 0001 0000 | 0011 0111 | 0100 1001
 				# iiii iiii | hhhh hhhh | bscc tttt | tttt tttt | ???? ????
-				# i: 8 bit random id (changes on power-loss) - noch nicht geprüft!!!
+				# i: 8 bit id (?) - no change after battery change, i have seen two IDs: 0x03 and 0xfe
 				# h: 8 bit relative humidity percentage
 				# b: 1 bit battery indicator (0=>OK, 1=>LOW)
 				# s: 1 bit sendmode 1=manual (button pressed) 0=auto
@@ -274,19 +274,63 @@ sub SD_WS_Parse($$)
 				sensortype => 'Funk Wetterstation Auriol IAN 283582',
 				model => 'SD_WS_84_TH',
 				prematch => sub {my $msg = shift; return 1 if ($msg =~ /^[0-9A-F]{10}$/); },
-				crcok => 	sub {	return SD_WS_binaryToNumber($bitData,32,39); }, 									# crc currently not calculated
 				id =>	sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,0,7); },
-				sendmode =>	sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,17) eq "1" ? "manual" : "auto"; },
+				hum => sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,8,15); },
+				bat => 		sub {my (undef,$bitData) = @_; return substr($bitData,16,1) eq "0" ? "ok" : "low";},
+				sendmode =>	sub {my (undef,$bitData) = @_; return substr($bitData,17,1) eq "1" ? "manual" : "auto"; },
+				channel => sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,18,19)+1 ); },
 				temp => sub {	my (undef,$bitData) = @_;
-								my $tempraw = SD_WS_binaryToNumber($bitData,20,23) * 256 + SD_WS_binaryToNumber($bitData,24,27) * 16 + SD_WS_binaryToNumber($bitData,28,31);
-								$tempraw -= 4096 if ($tempraw > 1023);		# negative
-								$tempraw /= 10.0;
-								return $tempraw;
-							},
-				hum => sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,8,11)*16 + SD_WS_binaryToNumber($bitData,12,15)); },
-				channel => sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,18,19)+1 );  },
-				bat => 		sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,16) eq "0" ? "ok" : "low";},
+											my $tempraw = SD_WS_binaryToNumber($bitData,20,31);
+											$tempraw -= 4096 if ($tempraw > 1023);		# negative
+											$tempraw /= 10.0;
+											return $tempraw;
+										},
+				crcok      => sub {return 1;},		# crc test method is so far unknown
    	 	} ,       
+		85 =>
+			{
+				# Protokollbeschreibung: Kombisensor TFA 30.3222.02 fuer Wetterstation TFA 35.1140.01
+				# -----------------------------------------------------------------------------------
+				# 0    4    | 8    12   | 16   20   | 24   28   | 32   36   | 40   44   | 48   52   | 56   60   | 64
+				# 0000 1001 | 0001 0110 | 0001 0000 | 0000 0111 | 0100 1001 | 0100 0000 | 0100 1001 | 0100 1001 | 1
+				# ???? iiii | iiii iiii | iiii iiii | b??? ??yy | tttt tttt | tttt ???? | hhhh hhhh | ???? ???? | ?   message 1
+				# ???? iiii | iiii iiii | iiii iiii | b??? ??yy | wwww wwww | wwww ???? | 0000 0000 | ???? ???? | ?   message 2
+				# i: 20 bit random id (changes on power-loss)
+				# b:  1 bit battery indicator (0=>OK, 1=>LOW)
+				# y:  2 bit typ, 01 - thermo/hygro (message 1), 10 - wind (message 2)
+				# t: 12 bit unsigned temperature, offset 500, scaled by 10 - if message 1
+				# h:  8 bit relative humidity percentage - if message 1
+				# w: 12 bit unsigned windspeed, scaled by 10 - if message 2
+				# ?: unknown
+				sensortype => 'Kombisensor TFA 30.3222.02',
+				model      => 'SD_WS_85_THW',
+				prematch   => sub {my $msg = shift; return 1 if ($msg =~ /^[0-9A-F]{16}/); },		# min 16 nibbles
+				crcok      => sub {return 1;},		# crc test method is so far unknown
+				id         =>	sub {my (undef,$bitData) = @_; return substr($rawData,1,5); },		# 0952CF012B1021DF0
+				bat        => sub {my (undef,$bitData) = @_; return substr($bitData,24,1) eq "0" ? "ok" : "low";},
+				channel    => sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,26,27) + 1 ); },		# unknown
+				temp       => sub {my (undef,$bitData) = @_;
+														if (substr($bitData,30,2) eq "01") {		# message 1 thermo/hygro
+															return ((SD_WS_binaryToNumber($bitData,32,43) - 500) / 10.0);
+														} else {
+															return undef;
+														}
+													},
+				hum        => sub {my (undef,$bitData) = @_;
+														if (substr($bitData,30,2) eq "01") {		# message 1 thermo/hygro
+															return SD_WS_binaryToNumber($bitData,48,55);
+														} else {
+															return undef;
+														}
+													},
+				windspeed  => sub {my (undef,$bitData) = @_;
+														if (substr($bitData,30,2) eq "10") {		# message 2 windspeed
+															return (SD_WS_binaryToNumber($bitData,32,43) / 10.0);
+														} else {
+															return undef;
+														}
+													},
+			} ,
     );
     
     	
@@ -601,29 +645,25 @@ sub SD_WS_Parse($$)
 	    	}
 	    	$id=$decodingSubs{$protocol}{id}->( $rawData,$bitData );
 	    	#my $temphex=$decodingSubs{$protocol}{temphex}->( $rawData,$bitData );
-	    	
-	    	$temp=$decodingSubs{$protocol}{temp}->( $rawData,$bitData );
-	    	$hum=$decodingSubs{$protocol}{hum}->( $rawData,$bitData );
+	    	$temp=$decodingSubs{$protocol}{temp}->( $rawData,$bitData ) if (defined($decodingSubs{$protocol}{temp}));
+	    	$hum=$decodingSubs{$protocol}{hum}->( $rawData,$bitData ) if (defined($decodingSubs{$protocol}{hum}));
+	    	$windspeed=$decodingSubs{$protocol}{windspeed}->( $rawData,$bitData ) if (defined($decodingSubs{$protocol}{windspeed}));
 	    	$channel=$decodingSubs{$protocol}{channel}->( $rawData,$bitData );
 	    	$model = $decodingSubs{$protocol}{model};
-			$bat = $decodingSubs{$protocol}{bat}->( $rawData,$bitData );			# orginal
-
-																	  
-			if ($model eq "SD_WS_33_T") {			# for SD_WS_33 discrimination T - TH
-				$model = $decodingSubs{$protocol}{model}."H" if $hum != 0;				# for models with Humidity
-			} 
-																	  
+				$bat = $decodingSubs{$protocol}{bat}->( $rawData,$bitData ) if (defined($decodingSubs{$protocol}{bat}));
+				if ($model eq "SD_WS_33_T") {			# for SD_WS_33 discrimination T - TH
+					$model = $decodingSubs{$protocol}{model}."H" if $hum != 0;				# for models with Humidity
+				} 
 	    	$sendmode = $decodingSubs{$protocol}{sendmode}->( $rawData,$bitData ) if (defined($decodingSubs{$protocol}{sendmode}));
 	    	$trend = $decodingSubs{$protocol}{trend}->( $rawData,$bitData ) if (defined($decodingSubs{$protocol}{trend}));
-
-	    	Log3 $iohash, 4, "$name decoded protocolid: $protocol ($SensorTyp) sensor id=$id, channel=$channel, temp=$temp, hum=$hum, bat=$bat";
-		
+				#Use of uninitialized value $temp 
+	    	#Log3 $iohash, 4, "$name: decoded protocolid $protocol ($SensorTyp) sensor id=$id, channel=$channel, temp=$temp, hum=$hum, bat=$bat";
+	    	Log3 $iohash, 4, "$name: decoded protocolid $protocol ($SensorTyp) sensor id=$id";
 	} 
 	else {
-		Log3 $iohash, 2, "SD_WS_WH2: unknown message, please report. converted to bits: $bitData";
+		Log3 $iohash, 2, "$name: SD_WS_Parse unknown message, please report. converted to bits: $bitData";
 		return undef;
 	}
-
 
 	if (!defined($model)) {
 		return undef;
@@ -631,10 +671,10 @@ sub SD_WS_Parse($$)
 	
 	my $deviceCode;
 	
-	my $longids = AttrVal($iohash->{NAME},'longids',0);
+	my $longids = AttrVal($ioname,'longids',0);
 	if (($longids ne "0") && ($longids eq "1" || $longids eq "ALL" || (",$longids," =~ m/,$model,/)))
 	{
-		$deviceCode = $model . '_' . $id . $channel;
+		$deviceCode = $model . '_' . $id . '_' . $channel;
 		Log3 $iohash,4, "$name: using longid $longids model: $model";
 	} else {
 		$deviceCode = $model . "_" . $channel;
@@ -642,7 +682,7 @@ sub SD_WS_Parse($$)
 	
 	#print Dumper($modules{SD_WS}{defptr});
 	
-	my $def = $modules{SD_WS}{defptr}{$iohash->{NAME} . "." . $deviceCode};
+	my $def = $modules{SD_WS}{defptr}{$ioname . "." . $deviceCode};
 	$def = $modules{SD_WS}{defptr}{$deviceCode} if(!$def);
 
 	if(!$def) {
@@ -654,21 +694,67 @@ sub SD_WS_Parse($$)
 	$name = $hash->{NAME};
 	return "" if(IsIgnored($name));
 
-	if ($temp < -30 || $temp > 70 || $hum > 100) {
-		Log3 $iohash, 3, "$iohash->{NAME}: $deviceCode - ERROR Temperature $temp or humidity $hum";
-		return "";  
-	}
-	
-	Log3 $name, 4, "$iohash->{NAME}: SD_WS_Parse $name ($rawData)";  
-
-	if (!defined(AttrVal($hash->{NAME},"event-min-interval",undef)))
-	{
-		my $minsecs = AttrVal($iohash->{NAME},'minsecs',0);
+	if (!defined(AttrVal($name,"event-min-interval",undef))) {
+		my $minsecs = AttrVal($ioname,'minsecs',0);
 		if($hash->{lastReceive} && (time() - $hash->{lastReceive} < $minsecs)) {
-			Log3 $hash, 4, "$iohash->{NAME}: $deviceCode Dropped due to short time. minsecs=$minsecs";
+			Log3 $hash, 4, "$ioname: $deviceCode dropped due to short time. minsecs=$minsecs";
 			return "";
 		}
 	}
+
+	if (defined $temp && defined $hum) {
+		if ($temp < -30 || $temp > 70 || $hum > 100) {
+			Log3 $iohash, 3, "$ioname: $deviceCode - ERROR Temperature $temp or humidity $hum";
+			return "";  
+		}
+	}
+	
+	# Sanity checks
+  if($def) {
+		my $timeSinceLastUpdate = abs(ReadingsAge($name, "state", 0));
+		# temperature
+		if($temp && $hash->{READINGS}{temperature} && $hash->{READINGS}{temperature}{VAL}) {
+			my $diffTemp = 0;
+			my $oldTemp = ReadingsVal($name, "temperature", undef);
+			my $maxdeviation = AttrVal($name, "max-deviation-temp", 1);				# default 1 K
+			if ($temp > $oldTemp) {
+				$diffTemp = ($temp - $oldTemp);
+			} else {
+				$diffTemp = ($oldTemp - $temp);
+			}
+			$diffTemp = sprintf("%.1f", $diffTemp);				
+			Log3 $name, 4, "$ioname: $name old temp $oldTemp, age $timeSinceLastUpdate, new temp $temp, diff temp $diffTemp";
+			my $maxDiffTemp = $timeSinceLastUpdate / 60 + $maxdeviation; 			# maxdeviation + 1.0 Kelvin/Minute
+			$maxDiffTemp = sprintf("%.1f", $maxDiffTemp + 0.05);						# round 0.1
+			Log3 $name, 4, "$ioname: $name max difference temperature $maxDiffTemp K";
+			if ($diffTemp > $maxDiffTemp) {
+				Log3 $name, 3, "$ioname: $name ERROR - Temp diff too large (old $oldTemp, new $temp, diff $diffTemp)";
+				return "";
+			}
+		}
+		# humidity
+		if($hum && $hash->{READINGS}{humidity} && $hash->{READINGS}{humidity}{VAL}) {
+			my $diffHum = 0;
+			my $oldHum = ReadingsVal($name, "humidity", undef);
+			my $maxdeviation = AttrVal($name, "max-deviation-hum", 1);				# default 1 %
+			if ($hum > $oldHum) {
+				$diffHum = ($hum - $oldHum);
+			} else {
+				$diffHum = ($oldHum - $hum);
+			}
+			$diffHum = sprintf("%.1f", $diffHum);				
+			Log3 $name, 4, "$ioname: $name old hum $oldHum, age $timeSinceLastUpdate, new hum $hum, diff hum $diffHum";
+			my $maxDiffHum = $timeSinceLastUpdate / 60 + $maxdeviation; 			# $maxdeviation + 1.0 %/Minute
+			$maxDiffHum = sprintf("%1.f", $maxDiffHum + 0.5);							# round 1
+			Log3 $name, 4, "$ioname: $name max difference humidity $maxDiffHum %";
+			if ($diffHum > $maxDiffHum) {
+				Log3 $name, 3, "$ioname: $name ERROR - Hum diff too large (old $oldHum, new $hum, diff $diffHum)";
+				return "";
+			}
+		}
+  }
+	
+	Log3 $name, 4, "$ioname: SD_WS_Parse $name ($rawData)";  
 
 	$hash->{lastReceive} = time();
 	$hash->{lastMSG} = $rawData;
@@ -678,28 +764,39 @@ sub SD_WS_Parse($$)
 		$hash->{bitMSG} = $bitData;
 	}
   
-	my $state = (($temp > -60 && $temp < 70) ? "T: $temp":"T: xx") . (($hum > 0 && $hum < 100) ? " H: $hum":"");
-
+	#my $state = (($temp > -60 && $temp < 70) ? "T: $temp":"T: xx") . (($hum > 0 && $hum < 100) ? " H: $hum":"");
+	my $state = "";
+	if (defined($temp)) {
+		$state .= "T: $temp"
+	}
+	if (defined($hum) && ($hum > 0 && $hum < 100)) {
+		$state .= " H: $hum"
+	}
+	if (defined($windspeed)) {
+		$state .= " " if (length($state) > 0);
+		$state .= "W: $windspeed"
+	}
+	
 	### protocol 33 has different bits per sensor type
 	if ($protocol eq "33") {
 		if (AttrVal($name,'model',0) eq "S522") {									# Conrad S522
-			$bat = SD_WS_binaryToNumber($bitData,36) eq "0" ? "ok" : "low";
-		} elsif (AttrVal($name,'model',0) eq "E0001PA") {							# renkforce E0001PA
-			$bat = SD_WS_binaryToNumber($bitData,35) eq "0" ? "ok" : "low";	
-			$sendmode = SD_WS_binaryToNumber($bitData,34) eq "1" ? "manual" : "auto";
+			$bat = substr($bitData,36,1) eq "0" ? "ok" : "low";
+		} elsif (AttrVal($name,'model',0) eq "E0001PA") {					# renkforce E0001PA
+			$bat = substr($bitData,35,1) eq "0" ? "ok" : "low";	
+			$sendmode = substr($bitData,34,1) eq "1" ? "manual" : "auto";
 		}
 	}
 
 	readingsBeginUpdate($hash);
 	readingsBulkUpdate($hash, "state", $state);
-	readingsBulkUpdate($hash, "temperature", $temp)  if (defined($temp)&& ($temp > -60 && $temp < 70 ));
+	readingsBulkUpdate($hash, "temperature", $temp)  if (defined($temp) && ($temp > -60 && $temp < 70 ));
 	readingsBulkUpdate($hash, "humidity", $hum)  if (defined($hum) && ($hum > 0 && $hum < 100 )) ;
-	readingsBulkUpdate($hash, "battery", $bat) if (defined($bat) && length($bat) > 0) ;
+	readingsBulkUpdate($hash, "windspeed", $windspeed)  if (defined($windspeed)) ;
+	#readingsBulkUpdate($hash, "battery", $bat) if (defined($bat) && length($bat) > 0) ;
 	readingsBulkUpdate($hash, "batteryState", $bat) if (defined($bat) && length($bat) > 0) ;
 	readingsBulkUpdate($hash, "channel", $channel) if (defined($channel)&& length($channel) > 0);
 	readingsBulkUpdate($hash, "trend", $trend) if (defined($trend) && length($trend) > 0);
 	readingsBulkUpdate($hash, "sendmode", $sendmode) if (defined($sendmode) && length($sendmode) > 0);
-	
 	readingsEndUpdate($hash, 1); # Notify is done by Dispatch
 	
 	return $name;
@@ -735,7 +832,6 @@ sub SD_WS_binaryToNumber
 	my $fbit=shift;
 	my $lbit=$fbit;
 	$lbit=shift if @_;
-	
 	return oct("0b".substr($binstr,$fbit,($lbit-$fbit)+1));
 }
 
@@ -774,54 +870,86 @@ sub SD_WS_WH2SHIFT($){
 <a name="SD_WS"></a>
 <h3>Weather Sensors various protocols</h3>
 <ul>
-  The SD_WS module interprets temperature sensor messages received by a Device like CUL, CUN, SIGNALduino etc.<br>
-  <br>
+  The SD_WS module processes the messages from various environmental sensors received from an IO device (CUL, CUN, SIGNALDuino, SignalESP etc.).<br><br>
   <b>Known models:</b>
   <ul>
     <li>Bresser 7009994</li>
     <li>BresserTemeo</li>
     <li>Conrad S522</li>
-	<li>Opus XT300</li>
+		<li>Opus XT300</li>
     <li>PV-8644 infactory Poolthermometer</li>
     <li>Renkforce E0001PA</li>
-	<li>WH2 (TFA Dostmann/Wertheim 30.3157(Temperature only!) (sold in Germany), Agimex Rosenborg 66796 (sold in Denmark),ClimeMET CM9088 (Sold in UK)</li>
-  </ul>
-  <br>
-  New received device are add in fhem with autocreate.
-  <br><br>
+		<li>WH2 (TFA Dostmann/Wertheim 30.3157 (sold in Germany), Agimex Rosenborg 66796 (sold in Denmark),ClimeMET CM9088 (Sold in UK)</li>
+		<li>Weatherstation Auriol IAN 283582 Version 06/2017 (Lidl), Modell-Nr.: HG02832D</li>
+		<li>Weatherstation TFA 35.1140.01 with temperature, humidity and windspeed sensor TFA 30.3222.02</li>
+  </ul><br><br>
 
   <a name="SD_WS_Define"></a>
-  <b>Define</b> 
-  <ul>The received devices created automatically.<br>
-  The ID of the defice is the cannel or, if the longid attribute is specified, it is a combination of channel and some random generated bits at powering the sensor and the channel.<br>
-  If you want to use more sensors, than channels available, you can use the longid option to differentiate them.
-  </ul>
-  <br>
+  <b>Define</b><br><br>
+  <ul>
+		Newly received sensors are usually automatically created in FHEM via autocreate.<br>
+		It is also possible to set up the devices manually with the following command:<br><br>
+    <code>define &lt;name&gt; SD_WS &lt;code&gt; </code> <br><br>
+    &lt;code&gt; is the channel or individual identifier used to identify the sensor.<br>
+  </ul><br><br>
+
   <a name="SD_WS Events"></a>
-  <b>Generated readings:</b>
-  <br>Some devices may not support all readings, so they will not be presented<br>
+  <b>Generated readings:</b><br><br>
   <ul>
-     <li>battery: (low or ok)</li>
-     <li>channel: (The Channelnumber (number if)</li>
-	 <li>humidity: (The humidity (1-100 if available)</li>
-	 <li>sendmode (automatic or manual)</li>
-	 <li>state (T: H:)</li>
-     <li>temperature (&deg;C)</li>
-  </ul>
-  <br>
-  <b>Attributes</b>
+		Some devices may not support all readings, so they will not be presented<br>
+	</ul>
   <ul>
-    <li><a href="#do_not_notify">do_not_notify</a></li>
-    <li><a href="#ignore">ignore</a></li>
-    <li>model (other / E0001PA / S522)<br>
-	The sensors of the "SD_WS_33 series" have different battery bit positions. If the battery bit is detected incorrectly (low instead of ok), then you can adjust with the model selection of the sensor.<br>
-	All sensors except the E0001PA and S522 model are created after an autocreate as model "other". If you own a Conrad S522 or Renkforce E0001PA sensor, set the model for proper battery bit detection.</li>
-    <li><a href="#showtime">showtime</a></li>
-    <li><a href="#readingFnAttributes">readingFnAttributes</a></li>
+    <li>battery: (low or ok)</li>
+    <li>channel: (number of channel</li>
+		<li>humidity: (humidity (1-100 % only if available)</li>
+		<li>sendmode (automatic or manual)</li>
+		<li>state (T: H:)</li>
+    <li>temperature (&deg;C)</li>
+    <li>sendmode (transmission mode, automatic or manual via button on the transmitter)</li>
+  </ul><br><br>
+
+  <a name="SD_WS Attribute"></a>
+  <b>Attributes</b><br><br>
+  <ul>
+    <li><a href="#do_not_notify">do_not_notify</a></li><br>
+    <li><a href="#ignore">ignore</a></li><br>
+    <li>max-deviation-hum<br>
+			(Default:1, allowed values: 1,2,3,4,5,6,7,8,9,10,15,20,25,30,35,40,45,50)<br>
+			<a name="max-deviation-hum"></a>
+			Maximum permissible deviation of the measured humidity from the previous value in percent.<br>
+			Since many of the sensors handled in the module do not have checksums, etc. send, it can easily come to the reception of implausible values. 
+			To intercept these, a maximum deviation from the last correctly received value can be set. 
+			Greater deviations are then ignored and result in an error message in the log file, such as an error message like this:<br>
+			<code>SD_WS_TH_84 ERROR - Hum diff too large (old 60, new 68, diff 8)</code><br>
+			In addition to the set value, a value dependent on the difference of the reception times is added. 
+			This is 1.0% relative humidity per minute. 
+			This means e.g. if a difference of 8 is set and the time interval of receipt of the messages is 3 minutes, the maximum allowable difference is 11.<br>
+			Instead of the <code>max-deviation-hum</code> and <code>max-deviation-temp</code> attributes, 
+			the <code>doubleMsgCheck_IDs</code> attribute of the SIGNALduino can also be used if the sensor is well received. 
+			An update of the readings is only executed if the same values ??have been received at least twice.
+			<a name="end_max-deviation-hum"></a>
+    </li><br>
+    <li>max-deviation-temp<br>
+			(Default:1, allowed values: 1,2,3,4,5,6,7,8,9,10,15,20,25,30,35,40,45,50)<br>
+			<a name="max-deviation-temp"></a>
+			Maximum permissible deviation of the measured temperature from the previous value in Kelvin.<br>
+			Explanation see attribute "max-deviation-hum".
+			<a name="end_max-deviation-temp"></a>
+    </li><br>
+    <li>model<br>
+			(Default: other, currently supported sensors: E0001PA, S522)<br>
+			<a name="model"></a>
+			The sensors of the "SD_WS_33 series" use different positions for the battery bit. 
+			If the battery bit is detected incorrectly (low instead of ok), then you can possibly adjust with the model selection of the sensor.<br>
+			So far, 3 variants are known. All sensors are created by Autocreate as model "other". 
+			If you receive a Conrad S522 or Renkforce E0001PA, then set the appropriate model for the proper processing of the battery bit.
+			<a name="end_model"></a>
+		</li><br>
+    <li><a href="#readingFnAttributes">readingFnAttributes</a></li><br>
+		<li><a href="#showtime">showtime</a></li><br>
   </ul><br>
-
-  <b>Set</b> <ul>N/A</ul><br>
-
+  <b>Set</b>
+	<ul>N/A</ul><br>
 </ul>
 
 =end html
@@ -831,53 +959,88 @@ sub SD_WS_WH2SHIFT($){
 <a name="SD_WS"></a>
 <h3>SD_WS</h3>
 <ul>
-  Das SD_WS Modul verarbeitet von einem IO Ger&aumlt (CUL, CUN, SIGNALDuino, etc.) empfangene Nachrichten von Temperatur-Sensoren.<br>
+  Das Modul SD_WS verarbeitet die von einem IO-Ger&aumlt (CUL, CUN, SIGNALDuino, SignalESP etc.) empfangenen Nachrichten verschiedener Umwelt-Sensoren.<br>
   <br>
-  <b>Unterst&uumltzte Modelle:</b>
+  <b>Unterst&uumltzte Modelle:</b><br><br>
   <ul>
     <li>Bresser 7009994</li>
     <li>BresserTemeo</li>
     <li>Conrad S522</li>
-	<li>Opus XT300</li>
+		<li>Opus XT300</li>
     <li>PV-8644 infactory Poolthermometer</li>
     <li>Renkforce E0001PA</li>
-	<li>WH2 (TFA Dostmann/Wertheim 30.3157(Temperatur!) (Deutschland), Agimex Rosenborg 66796 (Denmark),ClimeMET CM9088 (UK)</li>
-  </ul>
-  <br>
-  Neu empfangene Sensoren werden in FHEM per autocreate angelegt.
+		<li>WH2 (TFA Dostmann/Wertheim 30.3157 (Deutschland), Agimex Rosenborg 66796 (Denmark), ClimeMET CM9088 (UK)</li>
+		<li>Wetterstation Auriol IAN 283582 Version 06/2017 (Lidl), Modell-Nr.: HG02832D</li>
+		<li>Wetterstation TFA 35.1140.01 mit Temperatur-/Feuchte- und Windsensor TFA 30.3222.02</li>
+		</ul>
   <br><br>
 
   <a name="SD_WS_Define"></a>
-  <b>Define</b> 
-  <ul>Die empfangenen Sensoren werden automatisch angelegt.<br>
-  Die ID der angelgten Sensoren ist entweder der Kanal des Sensors, oder wenn das Attribut longid gesetzt ist, dann wird die ID aus dem Kanal und einer Reihe von Bits erzeugt, welche der Sensor beim Einschalten zuf&aumlllig vergibt.<br>
+  <b>Define</b><br><br>
+  <ul>
+		Neu empfangene Sensoren werden in FHEM normalerweise per autocreate automatisch angelegt.<br>
+		Es ist auch m&ouml;glich, die Ger&auml;te manuell mit folgendem Befehl einzurichten:<br><br>
+    <code>define &lt;name&gt; SD_WS &lt;code&gt; </code> <br><br>
+    &lt;code&gt; ist der Kanal oder eine individuelle Ident, mit dem der Sensor identifiziert wird.<br>
   </ul>
-  <br>
+  <br><br>
+
   <a name="SD_WS Events"></a>
-  <b>Generierte Readings:</b><br>
-  <small><u>(sind unterschiedlich je Typ des Sensors)</small></u>
+  <b>Generierte Readings:</b><br><br>
+  <ul>(verschieden, je nach Typ des Sensors)</ul>
   <ul>
-  	 <li>battery: (low oder ok)</li>
-     <li>channel: (Der Sensor Kanal)</li>
-     <li>humidity: (Luftfeuchte (1-100)</li>
-	 <li>state (T: H:)</li>
-     <li>temperature (&deg;C)</li>
-     <li>sendmode (Der Sendemodus, automatic oder manual via Taster im Sender)</li>
+  	<li>battery: (low oder ok)</li>
+    <li>channel: (Der Sensor Kanal)</li>
+    <li>humidity: (Luftfeuchte (1-100)</li>
+		<li>state (T: H:)</li>
+    <li>temperature (&deg;C)</li>
+    <li>sendmode (Der Sendemodus, automatic oder manuell mittels Taster am Sender)</li>
   </ul>
-  <br>
-  <b>Attribute</b>
+  <br><br>
+
+  <a name="SD_WS Attribute"></a>
+  <b>Attribute</b><br><br>
   <ul>
-    <li><a href="#do_not_notify">do_not_notify</a></li>
-    <li><a href="#ignore">ignore</a></li>
-    <li>model (other / E0001PA / S522)<br>
-	Die Sensoren der "SD_WS_33 - Reihe" besitzen unterschiedliche Batterie-Bit Positionen. Sollte das Batterie-Bit falsch erkannt werden (low anstatt ok), so kann man mit der Modelauswahl des Sensors das anpassen.<br>
-	Bisher sind 3 Varianten bekannt. Alle Sensoren außer dem E0001PA und S522 Modell werden nach einem Autocreate als "other" angelegt. Besitzen Sie einen Conrad S522 oder Renkforce E0001PA Sensor, so stellen Sie das jeweilige Modell ein für eine richtige Erkennung des Batterie-Bit.</li>
-	<li><a href="#showtime">showtime</a></li>
-    <li><a href="#readingFnAttributes">readingFnAttributes</a></li>
-  </ul><br>
+    <li><a href="#do_not_notify">do_not_notify</a></li><br>
+    <li><a href="#ignore">ignore</a></li><br>
+    <li>max-deviation-hum<br>
+			(Default:1, erlaubte Werte: 1,2,3,4,5,6,7,8,9,10,15,20,25,30,35,40,45,50)<br>
+			<a name="max-deviation-hum"></a>
+			Maximal erlaubte Abweichung der gemessenen Feuchte zum vorhergehenden Wert in Prozent.
+			<br>Da viele der in dem Modul behandelten Sensoren keine Checksummen o.&auml;. senden, kann es leicht zum Empfang von unplausiblen Werten kommen. 
+			Um diese abzufangen, kann eine maximale Abweichung zum letzten korrekt empfangenen Wert festgelegt werden.
+			Gr&ouml&szlig;ere Abweichungen werden dann ignoriert und f&uuml;hren zu einer Fehlermeldung im Logfile, wie z.B. dieser:<br>
+			<code>SD_WS_TH_84 ERROR - Hum diff too large (old 60, new 68, diff 8)</code><br>
+			Zus&auml;tzlich zum eingestellten Wert wird ein von der Differenz der Empfangszeiten abh&auml;ngiger Wert addiert.
+			Dieser betr&auml;gt 1.0 % relative Feuchte pro Minute. Das bedeutet z.B. wenn eine Differenz von 8 eingestellt ist
+			und der zeitliche Abstand des Empfangs der Nachrichten betr&auml;gt 3 Minuten, ist die maximal erlaubte Differenz 11.
+			<br>Anstelle der Attribute <code>max-deviation-hum</code> und <code>max-deviation-temp</code> kann bei gutem Empfang des Sensors 
+			auch das Attribut <code>doubleMsgCheck_IDs</code> des SIGNALduino verwendet werden. Dabei wird ein Update der Readings erst 
+			ausgef&uuml;hrt, wenn mindestens zweimal die gleichen Werte empfangen wurden.
+			<a name="end_max-deviation-hum"></a>
+    </li><br>
+    <li>max-deviation-temp<br>
+			(Default:1, erlaubte Werte: 1,2,3,4,5,6,7,8,9,10,15,20,25,30,35,40,45,50)<br>
+			<a name="max-deviation-temp"></a>
+			Maximal erlaubte Abweichung der gemessenen Temperatur zum vorhergehenden Wert in Kelvin.<br>
+			Erkl&auml;rung siehe Attribut "max-deviation-hum".
+			<a name="end_max-deviation-temp"></a>
+    </li><br>
+    <li>model<br>
+			(Default: other, zur Zeit unterst&uuml;tzte Sensoren: E0001PA, S522)<br>
+			<a name="model"></a>
+			Die Sensoren der "SD_WS_33 - Reihe" verwenden unterschiedliche Positionen f&uuml;r das Batterie-Bit. 
+			Sollte das Batterie-Bit falsch erkannt werden (low statt ok), so kann man mit der Modelauswahl des Sensors das evtl. anpassen.<br>
+			Bisher sind 3 Varianten bekannt. Alle Sensoren werden durch Autocreate als Model "other" angelegt. 
+			Empfangen Sie einen Conrad S522 oder Renkforce E0001PA Sensor, so stellen Sie das jeweilige Modell f&uuml;r die richtige Verarbeitung des Batterie-Bit ein.
+			<a name="end_model"></a>
+		</li><br>
+    <li><a href="#readingFnAttributes">readingFnAttributes</a></li><br>
+		<li><a href="#showtime">showtime</a></li><br>
+  </ul>
+	<br>
 
   <b>Set</b> <ul>N/A</ul><br>
-
 </ul>
 
 =end html_DE

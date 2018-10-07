@@ -23,12 +23,11 @@ Supported Devices / Protocols
 |technoline Weatherstation WS 6750/TX70DTH| Weather sensor and station |
 ||Remote sockets from serval brands|
 |CTW600 WH1080 | Weather station WH3080 UV/Lux Sensor |
-|TFA 30320902,30320802  | Weather sensor |
 |Visivon remote PT4450  | Remote control |
 |Einhel - HS 434/6 | Garagedoor opener |
 |FA21RF | Smoke detector | 
 |Mumbi m-FS300 | remote socket |
-|s014/TFA 30.3200/TCM/Conrad | Weather sensor |
+|s014/TCM/Conrad | Weather sensor |
 |les led  | Remote controlled led lamp |
 |Livolo | Remote switches and sockets  |
 |Somfy RTS | Somfy blinds |
@@ -38,7 +37,7 @@ Supported Devices / Protocols
 |Somfy RTS | Shutters from Somfy|
 |Opus XT300 | Soil moisture sensor |
 |Oregon NR868 | Motion sensor |
-|IAN 275901 Lidl | Weatherstation |
+|IAN 275901, 283582 (Lidl) | Weatherstation |
 |m-e VTX and BASIC | wireless bell |
 |FT0073 | Weather sensors|
 |revolt | Energy sensors|
