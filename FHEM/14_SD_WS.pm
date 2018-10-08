@@ -645,17 +645,17 @@ sub SD_WS_Parse($$)
 	    	}
 	    	$id=$decodingSubs{$protocol}{id}->( $rawData,$bitData );
 	    	#my $temphex=$decodingSubs{$protocol}{temphex}->( $rawData,$bitData );
-	    	$temp=$decodingSubs{$protocol}{temp}->( $rawData,$bitData ) if (defined($decodingSubs{$protocol}{temp}));
-	    	$hum=$decodingSubs{$protocol}{hum}->( $rawData,$bitData ) if (defined($decodingSubs{$protocol}{hum}));
-	    	$windspeed=$decodingSubs{$protocol}{windspeed}->( $rawData,$bitData ) if (defined($decodingSubs{$protocol}{windspeed}));
+	    	$temp=$decodingSubs{$protocol}{temp}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{temp}));
+	    	$hum=$decodingSubs{$protocol}{hum}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{hum}));
+	    	$windspeed=$decodingSubs{$protocol}{windspeed}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{windspeed}));
 	    	$channel=$decodingSubs{$protocol}{channel}->( $rawData,$bitData );
 	    	$model = $decodingSubs{$protocol}{model};
-				$bat = $decodingSubs{$protocol}{bat}->( $rawData,$bitData ) if (defined($decodingSubs{$protocol}{bat}));
+				$bat = $decodingSubs{$protocol}{bat}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{bat}));
 				if ($model eq "SD_WS_33_T") {			# for SD_WS_33 discrimination T - TH
 					$model = $decodingSubs{$protocol}{model}."H" if $hum != 0;				# for models with Humidity
 				} 
-	    	$sendmode = $decodingSubs{$protocol}{sendmode}->( $rawData,$bitData ) if (defined($decodingSubs{$protocol}{sendmode}));
-	    	$trend = $decodingSubs{$protocol}{trend}->( $rawData,$bitData ) if (defined($decodingSubs{$protocol}{trend}));
+	    	$sendmode = $decodingSubs{$protocol}{sendmode}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{sendmode}));
+	    	$trend = $decodingSubs{$protocol}{trend}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{trend}));
 				#Use of uninitialized value $temp 
 	    	#Log3 $iohash, 4, "$name: decoded protocolid $protocol ($SensorTyp) sensor id=$id, channel=$channel, temp=$temp, hum=$hum, bat=$bat";
 	    	Log3 $iohash, 4, "$name: decoded protocolid $protocol ($SensorTyp) sensor id=$id";
@@ -713,7 +713,7 @@ sub SD_WS_Parse($$)
   if($def) {
 		my $timeSinceLastUpdate = abs(ReadingsAge($name, "state", 0));
 		# temperature
-		if($temp && $hash->{READINGS}{temperature} && $hash->{READINGS}{temperature}{VAL}) {
+		if (defined($temp) && defined(ReadingsVal($name, "temperature", undef))) {
 			my $diffTemp = 0;
 			my $oldTemp = ReadingsVal($name, "temperature", undef);
 			my $maxdeviation = AttrVal($name, "max-deviation-temp", 1);				# default 1 K
@@ -733,7 +733,7 @@ sub SD_WS_Parse($$)
 			}
 		}
 		# humidity
-		if($hum && $hash->{READINGS}{humidity} && $hash->{READINGS}{humidity}{VAL}) {
+		if (defined($hum) && defined(ReadingsVal($name, "humidity", undef))) {
 			my $diffHum = 0;
 			my $oldHum = ReadingsVal($name, "humidity", undef);
 			my $maxdeviation = AttrVal($name, "max-deviation-hum", 1);				# default 1 %
