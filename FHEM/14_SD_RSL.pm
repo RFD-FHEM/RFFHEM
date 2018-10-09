@@ -300,7 +300,7 @@ The SD_RSL module decrypts and sends Conrad RSL messages sent by the SIGNALduino
 <b>Get</b>
 <ul>
 	N/A
-</ul>
+</ul><br>
 <a name="SD_RSL_Attr"></a>
 <b>Attribute</b>
 <ul>
@@ -309,9 +309,64 @@ The SD_RSL module decrypts and sends Conrad RSL messages sent by the SIGNALduino
 	<li><a href="#eventMap">eventMap</a></li>
 	<li><a href="#ignore">ignore</a></li>
 	<li><a href="#readingFnAttributes">readingFnAttributes</a></li>
+	<a name="RSLrepetition"></a>
 	<li>RSLrepetition<br>
 	Set the repeats for sending signal. 
 	</li>
 </ul>
 =end html
+
+=begin html_DE
+
+<a name="SD_RSL"></a>
+<h3>RSL</h3>
+Das SD_RSL-Modul decodiert und sendet Conrad-RSL-Nachrichten, die vom SIGNALduino gesendet werden.<br>
+<br>
+<a name="SD_RSL_Define"></a>
+<b>Define</b>
+<ul>
+	<p><code>define &lt;name&gt; SD_RSL &lt;code&gt;_&lt;channel&gt;_&lt;button&gt;</code>
+	<br>
+	<br>
+	<code>&lt;name&gt;</code> ist ein Name, der dem Ger&auml;t zugewiesen ist.
+	Zur besseren &Uuml;bersicht wird empfohlen, einen Namen in dieser Form zu verwenden &quot;RSL_B1A800_1_2&quot;
+	<br /><br />
+	<code>&lt;code&gt;</code> Der Code ist 00000-FFFFFF
+	<br /><br />
+	<code>&lt;channel&gt;</code> Der Kanal ist 1-4
+	<br /><br />
+	<code>&lt;button&gt;</code> Der Knopf ist 1-4
+	<br /><br />
+</ul>   
+<a name="SD_RSL_Set"></a>
+<b>Set</b>
+<ul>
+  <code>set &lt;name&gt; &lt;value&gt;</code>
+  <br /><br />
+  <code>&lt;value&gt;</code> kann einer der folgenden Werte sein:<br>
+  <pre>
+  off
+  on
+  </pre>
+</ul>
+<a name="SD_RSL_Get"></a>
+<b>Get</b>
+<ul>
+	N/A
+</ul><br>
+<a name="SD_RSL_Attr"></a>
+<b>Attribute</b>
+<ul>
+        <li><a href="#IODev">IODev</a></li>
+	<li><a href="#do_not_notify">do_not_notify</a></li>
+	<li><a href="#eventMap">eventMap</a></li>
+	<li><a href="#ignore">ignore</a></li>
+	<li><a href="#readingFnAttributes">readingFnAttributes</a></li>
+	<a name="RSLrepetition"></a>
+	<li>RSLrepetition<br>
+	Stellen Sie die Wiederholungen für das Senden des Signals ein. 
+	</li>
+</ul>
+=end html_DE
+
 =cut
