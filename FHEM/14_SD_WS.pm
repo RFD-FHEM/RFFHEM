@@ -674,8 +674,11 @@ sub SD_WS_Parse($$)
 	my $longids = AttrVal($ioname,'longids',0);
 	if (($longids ne "0") && ($longids eq "1" || $longids eq "ALL" || (",$longids," =~ m/,$model,/)))
 	{
-		$deviceCode = $model . '_' . $id . '_' . $channel;
-		Log3 $iohash,4, "$name: using longid $longids model: $model";
+		$deviceCode = $model . '_' . $id . $channel;						# old form of longid
+		if (!defined($modules{SD_WS}{defptr}{$deviceCode})) {
+			$deviceCode = $model . '_' . $id . '_' . $channel;		# new form of longid
+		}
+		Log3 $iohash,4, "$name: using longid for $longids device $deviceCode";
 	} else {
 		$deviceCode = $model . "_" . $channel;
 	}
