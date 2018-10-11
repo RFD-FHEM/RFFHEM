@@ -1,5 +1,7 @@
-09.10.2018
+11.10.2018
  14_SD_RSL.pm - added Doc_DE
+09.10.2018
+ 90_SIGNALduino_un.pm - added bitCountLength & added doc 
 04.10.2018
  signalduino_protocols.hash - revised Info & del developId 72 + 78 + added ID 19 minify
 01.10.2018
