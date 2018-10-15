@@ -686,7 +686,7 @@
 			id          	=> '33',
 			one				=> [1,-8],
 			zero			=> [1,-4],
-			sync			=> [1,-15],
+			sync			=> [1,-16],
 			clockabs   		=> '500',
 			format     		=> 'twostate',  		# not used now
 			preamble		=> 'W33#',				# prepend to converted message	
