@@ -1,5 +1,13 @@
-##############################################
+#################################################################
 # $Id: 14_FLAMINGO.pm 3818 2016-08-15 $
+#################################################################
+# The module was taken over by an unknown maintainer
+#################################################################
+# note / ToDo´s / Bugs:
+# - 
+# - 
+#################################################################
+
 package main;
 
 use strict;
@@ -7,19 +15,10 @@ use warnings;
 
 
 my %FLAMINGO_c2b;
-
-
-my %models = (
-  itremote    => 'FA20',
-  itswitch    => 'FA21',
-  itdimmer    => 'KD101',
-  );
-
 my %sets = (
-	"off" => "noArg",
-	"on" => "noArg",
-	"on-for-timer" => "textField",
-	"on-till" => "textField",
+	"Testalarm:noArg" => "noArg",
+	"Counterreset:noArg" => "noArg",
+	#"on-for-timer" => "textField",
 );
 
 
@@ -29,91 +28,39 @@ FLAMINGO_Initialize($)
 {
   my ($hash) = @_;
   
-    
-  
-  $hash->{Match}     = "P13#[A-Fa-f0-9]+";
+	$hash->{Match}     = "^(P13|P13.1)#[A-Fa-f0-9]+";
   $hash->{SetFn}     = "FLAMINGO_Set";
 #  $hash->{StateFn}   = "FLAMINGO_SetState";
   $hash->{DefFn}     = "FLAMINGO_Define";
   $hash->{UndefFn}   = "FLAMINGO_Undef";
   $hash->{AttrFn}    = "FLAMINGO_Attr";
   $hash->{ParseFn}   = "FLAMINGO_Parse";
-  $hash->{AttrList}  = "IODev FA20RFrepetition do_not_notify:0,1 showtime:0,1 ignore:0,1 model:FA20RF,FA21RF ".
- 						$readingFnAttributes;
+  $hash->{AttrList}  = "IODev do_not_notify:0,1 showtime:0,1 ignore:0,1 ".
+											 "model:model:FA20RF,FA21RF,FA22RF,LM-101LD,unknown ".
+											 "room:FLAMINGO ".
+											 $readingFnAttributes;
    $hash->{AutoCreate}=
     { 
-        "FLAMINGO.*" => {  FILTER => "%NAME", autocreateThreshold => "2:180"},
+				"FLAMINGO.*" => { ATTR => "event-on-change-reading:.* room:FLAMINGO", FILTER => "%NAME", GPLOT => ""},
     };
- 
 }
 
-sub FLAMINGO_SetState($$$$){ ###################################################
+#####################################
+sub FLAMINGO_SetState($$$$) {
   my ($hash, $tim, $vt, $val) = @_;
   $val = $1 if($val =~ m/^(.*) \d+$/);
   return "Undefined value $val" if(!defined($FLAMINGO_c2b{$val}));
   return undef;
 }
 
-sub
-FLAMINGO_Do_On_Till($@)
-{
-  my ($hash, @a) = @_;
-  return "Timespec (HH:MM[:SS]) needed for the on-till command" if(@a != 3);
-
-  my ($err, $hr, $min, $sec, $fn) = GetTimeSpec($a[2]);
-  return $err if($err);
-
-  my @lt = localtime;
-  my $hms_till = sprintf("%02d:%02d:%02d", $hr, $min, $sec);
-  my $hms_now = sprintf("%02d:%02d:%02d", $lt[2], $lt[1], $lt[0]);
-  if($hms_now ge $hms_till) {
-    Log 4, "on-till: won't switch as now ($hms_now) is later than $hms_till";
-    return "";
-  }
-
-  my @b = ($a[0], "on");
-  FLAMINGO_Set($hash, @b);
-  my $tname = $hash->{NAME} . "_till";
-  CommandDelete(undef, $tname) if($defs{$tname});
-  CommandDefine(undef, "$tname at $hms_till set $a[0] off");
-
-}
-
-sub
-FLAMINGO_On_For_Timer($@)
-{
-  my ($hash, @a) = @_;
-  return "Seconds are needed for the on-for-timer command" if(@a != 3);
-
-  # my ($err, $hr, $min, $sec, $fn) = GetTimeSpec($a[2]);
-  # return $err if($err);
-  
-  my @lt = localtime;
-  my @tt = localtime(time + $a[2]);
-  my $hms_till = sprintf("%02d:%02d:%02d", $tt[2], $tt[1], $tt[0]);
-  my $hms_now = sprintf("%02d:%02d:%02d", $lt[2], $lt[1], $lt[0]);
-  
-  if($hms_now ge $hms_till) {
-    Log 4, "on-for-timer: won't switch as now ($hms_now) is later than $hms_till";
-    return "";
-  }
-
-  my @b = ($a[0], "on");
-  FLAMINGO_Set($hash, @b);
-  my $tname = $hash->{NAME} . "_till";
-  CommandDelete(undef, $tname) if($defs{$tname});
-  CommandDefine(undef, "$tname at $hms_till set $a[0] off");
-
-}
-
 #####################################
-sub
-FLAMINGO_Define($$)
-{
+sub FLAMINGO_Define($$) {
 	my ($hash, $def) = @_;
 	my @a = split("[ \t][ \t]*", $def);
 
-	return "wrong syntax: define <name> FLAMINGO <code> ".int(@a) if(int(@a) < 3 );
+	return "wrong syntax: define <name> FLAMINGO <code> <optional IODev>" if(int(@a) < 3 || int(@a) > 4);
+	return "wrong hex value: ".$a[2] if not ($a[2] =~ /^[0-9a-fA-F]{6}$/m);
+	#return "wrong syntax: define <name> FLAMINGO <code> <optional IODev>".int(@a) if(int(@a) < 3 || int(@a) > 4);
 
 	$hash->{CODE} = $a[2];
 	$hash->{lastMSG} =  "";
@@ -123,122 +70,148 @@ FLAMINGO_Define($$)
 	$hash->{STATE} = "Defined";
 
 	my $name= $hash->{NAME};
+	my $iodev = $a[3] if($a[3]);
+	$iodev = $modules{FLAMINGO}{defptr}{ioname} if (exists $modules{FLAMINGO}{defptr}{ioname} && not $iodev);
 
-
-	if(!defined $hash->{IODev} ||!defined $hash->{IODev}{NAME}){	
-		AssignIoPort($hash);
-  	};  
+	### Attributes ###
+	if ( $init_done == 1 ) {
+		#$attr{$name}{model}	= "unknown"	if( not defined( $attr{$name}{model} ) );
+		$attr{$name}{room}	= "FLAMINGO";
+		#$attr{$name}{stateFormat} = "{ReadingsVal($name, "state", "")." | ".ReadingsTimestamp($name, "state", "")}";
+	}
 	
-	return undef; 
- 
+	AssignIoPort($hash,$iodev);		## sucht nach einem passenden IO-Gerät (physikalische Definition)
+
+	return undef;
 }
 
 #####################################
-sub
-FLAMINGO_Undef($$)
-{
+sub FLAMINGO_Undef($$) {
   my ($hash, $name) = @_;
+  
+  RemoveInternalTimer($hash, "FLAMINGO_UpdateState");
   delete($modules{FLAMINGO}{defptr}{$hash->{CODE}}) if($hash && $hash->{CODE});
   return undef;
 }
 
-sub FLAMINGO_Set($@){ ##########################################################
-  
+#####################################
+sub FLAMINGO_Set($$@) {
 	my ( $hash, $name, @args ) = @_;
-	my $hname = $hash->{NAME};
-	
-	my $na = int(@args);
-	return "no set value specified" if($na < 2 || $na > 3);
 	
 	my $ret = undef;
 	my $message;
-	my $msg;
-	my $list = join (" ",keys %sets);
+	my $list;
+	my $model = $attr{$name}{model};
+	my $iodev = $hash->{IODev}{NAME};
 	
+	$list = join (" ",keys %sets);
+	return "ERROR: wrong command! (only $list)"  if ($args[0] ne "?" && $args[0] ne "Testalarm" && $args[0] ne "Counterreset");
 	
-	return SetExtensions($hash, $list, $hname, @args) if( $args[1] eq "?" );
-	return SetExtensions($hash, $list, $hname, @args) if( !grep( $_ =~ /^$args[1]($|:)/, split( ' ', $list ) ) );
+	if ($args[0] eq "?") {
+		$ret = $list;
+	}
 	
+	my $hlen = length($hash->{CODE});
+	my $blen = $hlen * 4;
+	my $bitData= unpack("B$blen", pack("H$hlen", $hash->{CODE}));
 	
-	return FLAMINGO_Do_On_Till($hash, @args) if($args[1] eq "on-till");
-	return "Bad time spec" if($na == 3 && $args[2] !~ m/^\d*\.?\d+$/);
-	
-	return FLAMINGO_On_For_Timer($hash, @args) if($args[1] eq "on-for-timer");
-	# return "Bad time spec" if($na == 1 && $args[2] !~ m/^\d*\.?\d+$/);
+	my $bitAdd = substr($bitData,23,1);					# for last bit, is needed to send
+	$message = "P13.1#".$bitData.$bitAdd."P#R55";
 
-	my $io = $hash->{IODev};
+	## Send Message to IODev and wait for correct answer	
+	Log3 $hash, 3, "FLAMINGO set $name $args[0]" if ($args[0] ne "?");
+	Log3 $hash, 4, "$iodev: FLAMINGO send raw Message: $message" if ($args[0] eq "Testalarm");
 
-	my $v = join(" ", @args);
-	$message = "P13#".$hash->{CODE}."#R7";
-  
-	Log GetLogLevel($args[0],2), "FLAMINGO set $v";
-	(undef, $v) = split(" ", $v, 2);	# Not interested in the name...
-
-	## Send Message to IODev and wait for correct answer
-	Log3 $hash, 5, "Messsage an IO senden Message raw: $message";
-  
-	IOWrite($io,'sendMsg',$message);
+	if ($args[0] eq "Counterreset") {
+		readingsSingleUpdate($hash, "alarmcounter", 0, 1);
+		readingsSingleUpdate($hash, "state", "Counterreset", 1);
+	}
+	
+  	if ($args[0] ne "?" and $args[0] ne "Counterreset") {
+		
+		# remove InternalTimer
+		RemoveInternalTimer($hash, "FLAMINGO_UpdateState");
+		
+		readingsSingleUpdate($hash, "state", "Testalarm", 1);
+		IOWrite($hash, 'sendMsg', $message);
+		
+		InternalTimer(gettimeofday()+5, "FLAMINGO_UpdateState", $hash, 0);		# set timer to Update status
+	}
   
 	return $ret;
 }
 
 #####################################
-sub
-FLAMINGO_Parse($$)
-{
+sub FLAMINGO_Parse($$) {
  	my ($iohash, $msg) = @_;
-	#my $rawData = substr($msg, 2);
 	#my $name = $iohash->{NAME};
 	my ($protocol,$rawData) = split("#",$msg);
 	$protocol=~ s/^[P](\d+)/$1/; # extract protocol
 	
+	my $iodev = $iohash->{NAME};
+	$modules{FLAMINGO}{defptr}{ioname} = $iodev;
+	
+	$iohash->{CODE} = $rawData;
 
-
+	my $hlen = length($rawData);
+	my $blen = $hlen * 4;
+	my $bitData= unpack("B$blen", pack("H$hlen", $rawData));
+	
 	my $deviceCode = $rawData;  	# Message is in hex "4d4efd"
 	
-
-
-  
-	my $def = $modules{FLAMINGO}{defptr}{$iohash->{NAME} . "." . $deviceCode};
+	my $def = $modules{FLAMINGO}{defptr}{$deviceCode};
 	$def = $modules{FLAMINGO}{defptr}{$deviceCode} if(!$def);
+	my $hash = $def;
+	
 	if(!$def) {
-    	Log3 $iohash, 1, "FLAMINGO UNDEFINED sensor FLAMINGO detected, code $deviceCode";
+		Log3 $iohash, 1, "FLAMINGO UNDEFINED sensor detected, code $deviceCode";
 		return "UNDEFINED FLAMINGO_$deviceCode FLAMINGO $deviceCode";
 	}
-  
-	my $hash = $def;
-	my $name = $hash->{NAME};
-	return "" if(IsIgnored($name));
-  
-	Log3 $name, 5, "FLAMINGO: actioncode: $deviceCode";  
-	$hash->{lastReceive} = time();
-	  
-	Log3 $name, 4, "FLAMINGO: $name: is sending Alarm";
 
+	my $name = $hash->{NAME};
+	my $model = $attr{$name}{model};
+	return "" if(IsIgnored($name));
+	
+	$hash->{bitMSG} = $bitData;
+	$hash->{lastMSG} = $rawData;
+	$hash->{lastReceive} = time();
+	
+	# if ($model eq "unknown") {
+		# Log3 $name, 3, "$iodev: FLAMINGO $name ---> Please define your model! <--- (attr $name model [your model])";
+		# return $name;
+	# }
+
+	my $alarmcounter = ReadingsVal($name, "alarmcounter", 0)+1 ;
+	
+	Log3 $name, 5, "$iodev: FLAMINGO actioncode: $deviceCode";
+	Log3 $name, 4, "$iodev: FLAMINGO $name: is sending Alarm";
+	
+	# remove InternalTimer
+	RemoveInternalTimer($hash, "FLAMINGO_UpdateState");
+	
  	readingsBeginUpdate($hash);
  	readingsBulkUpdate($hash, "state", "Alarm");
+	readingsBulkUpdate($hash, "alarmcounter", $alarmcounter);
 	readingsEndUpdate($hash, 1); # Notify is done by Dispatch
-	InternalTimer(gettimeofday()+$hash->{Interval}, "FLAMINGO_UpdateState", $hash, 0);	
+
+	InternalTimer(gettimeofday()+5, "FLAMINGO_UpdateState", $hash, 0);		# set timer to Update status
   	return $name;
 }
 
-sub 
-FLAMINGO_UpdateState($)
-{
+#####################################
+sub FLAMINGO_UpdateState($) {
 	my ($hash) = @_;
 	my $name = $hash->{NAME};
 	
 	readingsBeginUpdate($hash);
- 	readingsBulkUpdate($hash, "state", "no alarm");
+ 	readingsBulkUpdate($hash, "state", "no Alarm");
 	readingsEndUpdate($hash, 1); # Notify is done by Dispatch
 	
 	Log3 $name, 4, "FLAMINGO: $name: Alarm stopped";
 }
 
-sub
-FLAMINGO_Attr(@)
-{
-  
+#####################################
+sub FLAMINGO_Attr(@) {  
   my @a = @_;
 
   # Make possible to use the same code for different logical devices when they
@@ -257,13 +230,14 @@ FLAMINGO_Attr(@)
 
 =pod
 =item summary    Supports flamingo fa20rf/fa21 smoke detectors
-=item summary_DE Unterst&uumltzt Flamingo FA20RF/FA21 Rauchmelder
+=item summary_DE Unterst&uumltzt Flamingo FA20RF/FA21/FA22RF/LM-101LD Rauchmelder
 =begin html
 
 <a name="FLAMINGO"></a>
 <h3>FLAMINGO</h3>
 <ul>
-  The FLAMINGO module interprets FLAMINGO FA20RF/FA21 type of messages received by the SIGNALduino.
+  The FLAMINGO module interprets FLAMINGO FA20RF/FA21/FA22RF type of messages received by the SIGNALduino.<br>
+  Of this smoke detector, there are identical types profitec KD101LA, POLLIN KD101LA or renkforce LM-101LD.
   <br><br>
 
   <a name="FLAMINGOdefine"></a>
@@ -277,7 +251,13 @@ FLAMINGO_Attr(@)
   <br>
 
   <a name="FLAMINGOset"></a>
-  <b>Set</b> <ul>N/A</ul><br>
+  <b>Set</b>
+  <ul>
+  <li>Counterreset<br>
+  - set alarmcounter to 0</li>
+  <li>Testalarm<br>
+  - trigger a test alarm</li>
+  </ul><br>
 
   <a name="FLAMINGOget"></a>
   <b>Get</b> <ul>N/A</ul><br>
@@ -289,11 +269,32 @@ FLAMINGO_Attr(@)
     <li><a href="#do_not_notify">do_not_notify</a></li>
     <li><a href="#eventMap">eventMap</a></li>
     <li><a href="#ignore">ignore</a></li>
-    <li><a href="#model">model</a> (LogiLink FA20RF)</li>
-    <li><a href="#showtime">showtime</a></li>
+	<a name="model"></a>
+	<li>model<br>
+	FA20RF, FA21RF, FA22RF, LM-101LD, unknown</li>
+    <a name="showtime"></a>
+	<li><a href="#showtime">showtime</a></li>
     <li><a href="#readingFnAttributes">readingFnAttributes</a></li>
   </ul>
-  <br>
+  <br><br>
+  <b><u>Generated readings</u></b><br>
+  - alarmcounter | counter started with 0<br>
+  - state | (no Alarm, Alarm, Testalaram)<br>
+  <br><br>
+  <u><b>manual<br></b></u>
+  <b>Pairing (Master-Slave)</b>  
+  <ul>
+    <li>Determine master<br>
+  LEARN button push until the green LED lights on</li>
+    <li>Determine slave<br>
+  LEARN button push until the red LED lights on</li>
+    <li>Master, hold down the TEST button until an alarm signal generated at all "Slaves"</li>
+  </ul><br>
+  <b>Standalone</b>
+  <ul>
+    <li>LEARN button push until the green LED lights on</li>
+    <li>TEST button hold down until an alarm signal generated</li>
+  </ul>
 </ul>
 
 =end html
@@ -303,7 +304,8 @@ FLAMINGO_Attr(@)
 <a name="FLAMINGO"></a>
 <h3>FLAMINGO</h3>
 <ul>
-  Das FLAMINGO module dekodiert vom SIGNALduino empfangene Nachrichten des FLAMINGO FA20RF / FA21RF Rauchmelders.
+  Das FLAMINGO module dekodiert vom SIGNALduino empfangene Nachrichten des FLAMINGO FA20RF / FA21 / FA22RF Rauchmelders.<br>
+  Von diesem Rauchmelder gibt es baugleiche Typen wie profitec KD101LA, POLLIN KD101LA oder renkforce LM-101LD.
   <br><br>
 
   <a name="FLAMINGOdefine"></a>
@@ -318,10 +320,16 @@ FLAMINGO_Attr(@)
   <br>
 
   <a name="FLAMINGOset"></a>
-  <b>Set</b> <ul>N/A</ul><br>
+  <b>Set</b>
+  <ul>
+  <li>Counterreset<br>
+  - Alarmz&auml;hler auf 0 setzen</li>
+  <li>Testalarm<br>
+  - ausl&ouml;sen eines Testalarmes</li>
+  </ul><br>
 
   <a name="FLAMINGOget"></a>
-  <b>Get</b> <ul>N/A</ul><br>
+  <b>Get</b> <ul>N/A</ul><br><br>
 
   <a name="FLAMINGOattr"></a>
   <b>Attributes</b>
@@ -330,11 +338,32 @@ FLAMINGO_Attr(@)
     <li><a href="#do_not_notify">do_not_notify</a></li>
     <li><a href="#eventMap">eventMap</a></li>
     <li><a href="#ignore">ignore</a></li>
-    <li><a href="#model">model</a> (FA20RF)</li>
+	<a name="model"></a>
+	<li>model<br>
+	FA20RF, FA21RF, FA22RF, LM-101LD, unknown</li>
+	<a name="showtime"></a>
     <li><a href="#showtime">showtime</a></li>
     <li><a href="#readingFnAttributes">readingFnAttributes</a></li>
   </ul>
-  <br>
+  <br><br>
+  <b><u>Generierte Readings</u></b><br>
+  - alarmcounter | Alarmz&auml;hler beginnend mit 0<br>
+  - state | (no Alarm, Alarm, Testalaram)<br>
+  <br><br>
+  <u><b>Anleitung<br></b></u>
+  <b>Melder paaren (Master-Slave Prinzip)</b>
+  <ul>
+  <li>Master bestimmen<br>
+  LEARN-Taste bis gr&uuml;ne Anzeige LED leuchtet</li>
+  <li>Slave bestimmen<br>
+  LEARN-Taste bis rote Anzeige LED leuchtet</li>
+  <li>Master, TEST-Taste gedr&uuml;ckt halten, bevor LEDś abschalten und alles "Slaves" ein Alarmsignal erzeugen</li>
+  </ul><br>
+  <b>Paarung aufheben / Standalone Betrieb</b>
+  <ul>
+  <li>LEARN-Taste bis gr&uuml;ne Anzeige LED leuchtet</li>
+  <li>TEST-Taste gedr&uuml;ckt halten bis ein Alarmsignal erzeugt wird</li>
+  </ul>
 </ul>
 
 =end html_DE
