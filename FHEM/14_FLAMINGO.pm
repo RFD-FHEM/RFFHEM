@@ -28,7 +28,7 @@ FLAMINGO_Initialize($)
 {
   my ($hash) = @_;
   
-	$hash->{Match}     = "^(P13|P13.1)#[A-Fa-f0-9]+";
+  $hash->{Match}     = "^P13\.?1?#[A-Fa-f0-9]+";
   $hash->{SetFn}     = "FLAMINGO_Set";
 #  $hash->{StateFn}   = "FLAMINGO_SetState";
   $hash->{DefFn}     = "FLAMINGO_Define";
