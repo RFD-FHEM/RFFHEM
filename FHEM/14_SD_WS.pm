@@ -795,7 +795,6 @@ sub SD_WS_Parse($$)
 	readingsBulkUpdate($hash, "temperature", $temp)  if (defined($temp) && ($temp > -60 && $temp < 70 ));
 	readingsBulkUpdate($hash, "humidity", $hum)  if (defined($hum) && ($hum > 0 && $hum < 100 )) ;
 	readingsBulkUpdate($hash, "windspeed", $windspeed)  if (defined($windspeed)) ;
-	#readingsBulkUpdate($hash, "battery", $bat) if (defined($bat) && length($bat) > 0) ;
 	readingsBulkUpdate($hash, "batteryState", $bat) if (defined($bat) && length($bat) > 0) ;
 	readingsBulkUpdate($hash, "channel", $channel) if (defined($channel)&& length($channel) > 0);
 	readingsBulkUpdate($hash, "trend", $trend) if (defined($trend) && length($trend) > 0);
@@ -902,13 +901,12 @@ sub SD_WS_WH2SHIFT($){
 		Some devices may not support all readings, so they will not be presented<br>
 	</ul>
   <ul>
-    <li>battery: (low or ok)</li>
-    <li>channel: (number of channel</li>
-		<li>humidity: (humidity (1-100 % only if available)</li>
+    <li>batteryState (low or ok)</li>
+    <li>channel (number of channel</li>
+		<li>humidity (humidity (1-100 % only if available)</li>
 		<li>sendmode (automatic or manual)</li>
-		<li>state (T: H:)</li>
+		<li>state (T: H: W:)</li>
     <li>temperature (&deg;C)</li>
-    <li>sendmode (transmission mode, automatic or manual via button on the transmitter)</li>
   </ul><br><br>
 
   <a name="SD_WS Attribute"></a>
@@ -992,9 +990,9 @@ sub SD_WS_WH2SHIFT($){
   <b>Generierte Readings:</b><br><br>
   <ul>(verschieden, je nach Typ des Sensors)</ul>
   <ul>
-  	<li>battery: (low oder ok)</li>
-    <li>channel: (Der Sensor Kanal)</li>
-    <li>humidity: (Luftfeuchte (1-100)</li>
+  	<li>batteryState (low oder ok)</li>
+    <li>channel (Der Sensor Kanal)</li>
+    <li>humidity (Luftfeuchte (1-100)</li>
 		<li>state (T: H:)</li>
     <li>temperature (&deg;C)</li>
     <li>sendmode (Der Sendemodus, automatic oder manuell mittels Taster am Sender)</li>
