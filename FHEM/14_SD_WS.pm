@@ -993,7 +993,7 @@ sub SD_WS_WH2SHIFT($){
   	<li>batteryState (low oder ok)</li>
     <li>channel (Der Sensor Kanal)</li>
     <li>humidity (Luftfeuchte (1-100)</li>
-		<li>state (T: H:)</li>
+		<li>state (T: H: W:)</li>
     <li>temperature (&deg;C)</li>
     <li>sendmode (Der Sendemodus, automatic oder manuell mittels Taster am Sender)</li>
   </ul>
