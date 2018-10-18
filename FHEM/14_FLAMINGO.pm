@@ -33,7 +33,6 @@ FLAMINGO_Initialize($)
 #  $hash->{StateFn}   = "FLAMINGO_SetState";
   $hash->{DefFn}     = "FLAMINGO_Define";
   $hash->{UndefFn}   = "FLAMINGO_Undef";
-  $hash->{AttrFn}    = "FLAMINGO_Attr";
   $hash->{ParseFn}   = "FLAMINGO_Parse";
   $hash->{AttrList}  = "IODev do_not_notify:0,1 showtime:0,1 ignore:0,1 ".
 											 "model:model:FA20RF,FA21RF,FA22RF,LM-101LD,unknown ".
@@ -41,7 +40,7 @@ FLAMINGO_Initialize($)
 											 $readingFnAttributes;
    $hash->{AutoCreate}=
     { 
-				"FLAMINGO.*" => { ATTR => "event-on-change-reading:.* room:FLAMINGO", FILTER => "%NAME", GPLOT => ""},
+				"FLAMINGO.*" => { ATTR => "event-on-change-reading:.* event-min-interval:.*:300 room:FLAMINGO", FILTER => "%NAME", GPLOT => ""},
     };
 }
 
@@ -88,7 +87,7 @@ sub FLAMINGO_Define($$) {
 #####################################
 sub FLAMINGO_Undef($$) {
   my ($hash, $name) = @_;
-  
+
   RemoveInternalTimer($hash, "FLAMINGO_UpdateState");
   delete($modules{FLAMINGO}{defptr}{$hash->{CODE}}) if($hash && $hash->{CODE});
   return undef;
@@ -97,7 +96,7 @@ sub FLAMINGO_Undef($$) {
 #####################################
 sub FLAMINGO_Set($$@) {
 	my ( $hash, $name, @args ) = @_;
-	
+
 	my $ret = undef;
 	my $message;
 	my $list;
@@ -122,13 +121,14 @@ sub FLAMINGO_Set($$@) {
 	Log3 $hash, 3, "FLAMINGO set $name $args[0]" if ($args[0] ne "?");
 	Log3 $hash, 4, "$iodev: FLAMINGO send raw Message: $message" if ($args[0] eq "Testalarm");
 
+	## Counterreset ##
 	if ($args[0] eq "Counterreset") {
 		readingsSingleUpdate($hash, "alarmcounter", 0, 1);
-		readingsSingleUpdate($hash, "state", "Counterreset", 1);
 	}
-	
-  	if ($args[0] ne "?" and $args[0] ne "Counterreset") {
-		
+
+	## Testarlarm ##	
+	if ($args[0] ne "?" and $args[0] ne "Counterreset") {
+																			 
 		# remove InternalTimer
 		RemoveInternalTimer($hash, "FLAMINGO_UpdateState");
 		
@@ -147,27 +147,25 @@ sub FLAMINGO_Parse($$) {
 	#my $name = $iohash->{NAME};
 	my ($protocol,$rawData) = split("#",$msg);
 	$protocol=~ s/^[P](\d+)/$1/; # extract protocol
-	
+
 	my $iodev = $iohash->{NAME};
-	$modules{FLAMINGO}{defptr}{ioname} = $iodev;
-	
-	$iohash->{CODE} = $rawData;
+	$modules{FLAMINGO}{defptr}{ioname} = $iodev;	
 
 	my $hlen = length($rawData);
 	my $blen = $hlen * 4;
 	my $bitData= unpack("B$blen", pack("H$hlen", $rawData));
-	
+
 	my $deviceCode = $rawData;  	# Message is in hex "4d4efd"
 	
 	my $def = $modules{FLAMINGO}{defptr}{$deviceCode};
 	$def = $modules{FLAMINGO}{defptr}{$deviceCode} if(!$def);
 	my $hash = $def;
-	
+
 	if(!$def) {
 		Log3 $iohash, 1, "FLAMINGO UNDEFINED sensor detected, code $deviceCode";
 		return "UNDEFINED FLAMINGO_$deviceCode FLAMINGO $deviceCode";
 	}
-
+  
 	my $name = $hash->{NAME};
 	my $model = $attr{$name}{model};
 	return "" if(IsIgnored($name));
@@ -181,10 +179,14 @@ sub FLAMINGO_Parse($$) {
 		# return $name;
 	# }
 
-	my $alarmcounter = ReadingsVal($name, "alarmcounter", 0)+1 ;
+	my $alarmcounter = ReadingsVal($name, "alarmcounter", 0);
 	
+	if (ReadingsVal($name, "state", "") ne "Alarm") {
+		$alarmcounter = $alarmcounter+1;	
+	}
+
 	Log3 $name, 5, "$iodev: FLAMINGO actioncode: $deviceCode";
-	Log3 $name, 4, "$iodev: FLAMINGO $name: is sending Alarm";
+	Log3 $name, 4, "$iodev: FLAMINGO $name: is receiving Alarm (Counter $alarmcounter)";
 	
 	# remove InternalTimer
 	RemoveInternalTimer($hash, "FLAMINGO_UpdateState");
@@ -195,34 +197,19 @@ sub FLAMINGO_Parse($$) {
 	readingsEndUpdate($hash, 1); # Notify is done by Dispatch
 
 	InternalTimer(gettimeofday()+5, "FLAMINGO_UpdateState", $hash, 0);		# set timer to Update status
-  	return $name;
+  return $name;
 }
 
 #####################################
 sub FLAMINGO_UpdateState($) {
 	my ($hash) = @_;
 	my $name = $hash->{NAME};
-	
+
 	readingsBeginUpdate($hash);
  	readingsBulkUpdate($hash, "state", "no Alarm");
 	readingsEndUpdate($hash, 1); # Notify is done by Dispatch
 	
 	Log3 $name, 4, "FLAMINGO: $name: Alarm stopped";
-}
-
-#####################################
-sub FLAMINGO_Attr(@) {  
-  my @a = @_;
-
-  # Make possible to use the same code for different logical devices when they
-  # are received through different physical devices.
-  return if($a[0] ne "set" || $a[2] ne "IODev");
-  my $hash = $defs{$a[1]};
-  my $iohash = $defs{$a[3]};
-  my $cde = $hash->{CODE};
-  delete($modules{FLAMINGO}{defptr}{$cde});
-  $modules{FLAMINGO}{defptr}{$iohash->{NAME} . "." . $cde} = $hash;
-  return undef;
 }
 
 
