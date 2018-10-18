@@ -205,7 +205,7 @@ sub SD_RSL_Parse($$)
 
     if(!$def) 
     {
-      Log3 $hash, 3, "UNDEFINED Remotebutton send to define: $deviceCode";
+      Log3 $hash, 3, "$name RSL_Parse UNDEFINED Remotebutton send to define: $deviceCode";
       return "UNDEFINED RSL_$deviceCode SD_RSL $deviceCode";
     }
 
