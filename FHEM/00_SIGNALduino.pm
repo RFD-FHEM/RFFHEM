@@ -1,4 +1,4 @@
-# $Id: 00_SIGNALduino.pm 10488 2018-10-10 20:00:00Z v3.3.3-dev $
+# $Id: 00_SIGNALduino.pm 10488 2018-10-18 19:00:00Z v3.3.3-dev $
 #
 # v3.3.3 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -25,7 +25,7 @@ no warnings 'portable';
 
 
 use constant {
-	SDUINO_VERSION            => "v3.3.3-dev_10.10.",
+	SDUINO_VERSION            => "v3.3.3-dev_18.10.",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -2160,6 +2160,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 	my %patternListRaw;
 	my $message_dispatched=0;
 	my $debug = AttrVal($iohash->{NAME},"debug",0);
+	my $dummy = AttrVal($iohash->{NAME},"dummy",0);
 	
 	if (defined($rssi)) {
 		$rssi = ($rssi>=128 ? (($rssi-256)/2-74) : ($rssi/2-74)); # todo: passt dies so? habe ich vom 00_cul.pm
@@ -2330,7 +2331,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 				if ($partData ne "") {		# wurde die regex gefunden?
 					$message_start=$-[0];
 				} else {
-					SIGNALduino_Log3 $name, 5, "$name: $length_str $nrRestart.restarting, regex ($regex) not found, aborting";
+					Log3 $name, 5, "$name: $length_str $nrRestart.restarting, regex ($regex) not found, aborting" if ($dummy);
 					last;
 				}
 				
@@ -2373,6 +2374,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 					
 					if (defined($ProtocolListSIGNALduino{$id}{dispatchBin})) {
 						$dmsg = join ("", @bit_msg);
+						SIGNALduino_Log3 $name, 5, "$name: dispatching bits: $dmsg";
 					} else {
 						my $padwith = defined($ProtocolListSIGNALduino{$id}{paddingbits}) ? $ProtocolListSIGNALduino{$id}{paddingbits} : 4;
 						while (scalar @bit_msg % $padwith > 0)  ## will pad up full nibbles per default or full byte if specified in protocol
@@ -2381,10 +2383,10 @@ sub SIGNALduino_Parse_MU($$$$@)
 							Debug "$name: padding 0 bit to bit_msg array" if ($debug);
 						}
 						$dmsg = join ("", @bit_msg);
+						SIGNALduino_Log3 $name, 5, "$name: dispatching bits: $dmsg with padwith = $padwith";
 						$dmsg = SIGNALduino_b2h($dmsg);
 					}
 					@bit_msg=(); # clear bit_msg array
-					SIGNALduino_Log3 $name, 5, "$name: dispatching bits: $dmsg";
 					
 					$dmsg =~ s/^0+//	 if (defined($ProtocolListSIGNALduino{$id}{remove_zero})); 
 					$dmsg = "$dmsg"."$ProtocolListSIGNALduino{$id}{postamble}" if (defined($ProtocolListSIGNALduino{$id}{postamble}));
@@ -2420,7 +2422,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 					}
 						
 					if (length($rawData) < ($length_min * $signal_width)) {	# Abbruch wenn Rest kleiner Mindestlaenge
-						SIGNALduino_Log3 $name, 5, "$name: $length_str last signal, aborting";
+						Log3 $name, 5, "$name: $length_str last signal, aborting" if ($dummy);
 						last;
 					}
 				}
