@@ -1,4 +1,6 @@
-10.10.2018
+18.10.2018
+ signalduino_protocols.hash - doc added & sorted explanation
+ 14_SD_RSL.pm - added Doc_DE | Logoutput revised
  14_SD_WS.pm - change, protocol for weatherstation Auriol IAN 283582
  14_SD_WS.pm - feature, new protocol for weatherstation TFA 35.1140.01
  14_SD_WS.pm - feature, plausibility check temperature and humidity values
