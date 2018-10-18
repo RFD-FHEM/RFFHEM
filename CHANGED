@@ -1,5 +1,5 @@
 18.10.2018
- signalduino_protocols.hash - doc added & sorted explanation
+ signalduino_protocols.hash - doc added & sorted explanation | ID 3,3.1,4,5,17,65 length_max definded
  14_SD_RSL.pm - added Doc_DE | Logoutput revised
 09.10.2018
  90_SIGNALduino_un.pm - added bitCountLength & added doc 

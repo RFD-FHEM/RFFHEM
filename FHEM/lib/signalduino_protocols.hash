@@ -120,7 +120,7 @@
 			clientmodule    => 'IT',   # not used now
 			modulematch     => '^i......', # not used now
 			length_min      => '24',
-			#length_max      => '800',		# Don't know maximal lenth of a valid message
+			length_max      => '24',		# Don't know maximal lenth of a valid message
 
 			},
     "3.1"    => # MS;P0=-11440;P1=-1121;P2=-416;P5=309;P6=1017;D=150516251515162516251625162516251515151516251625151;CP=5;SP=0;R=66;
@@ -139,7 +139,7 @@
 			clientmodule    => 'IT',   # not used now
 			modulematch     => '^i......', # not used now
 			length_min      => '24',
-			#length_max      => '800',		# Don't know maximal lenth of a valid message
+			length_max      => '24',		# Don't know maximal lenth of a valid message
 			postDemodulation => \&SIGNALduino_bit2itv1,
 			},
     "4"    => 
@@ -158,8 +158,8 @@
 			postamble		=> '00',		# Append to converted message	 	
 			clientmodule    => 'IT',   		# not used now
 			modulematch     => '^i......',  # not used now
-			length_min      => '32',
-			#length_max      => '76',		# Don't know maximal lenth of a valid message
+			length_min      => '39',
+			length_max      => '44',		# Don't know maximal lenth of a valid message
 		},
     "5"    => 	## Similar protocol as intertechno, but without sync
 				# ! same definition how ID 75, but other length !
@@ -175,6 +175,7 @@
 			clientmodule    => 'IT',   		# not used now
 			modulematch     => '^i......',  # not used now
 			length_min      => '24',
+			length_max      => '24',		# Don't know maximal lenth of a valid message
 
 		},    
 	
@@ -415,7 +416,7 @@
 			clientmodule    => 'IT',   		# not used now
 			modulematch     => '^i......',  # not used now
 			length_min      => '32',
-			#length_max     => '76',		# Don't know maximal lenth of a valid message
+			length_max      => '34',		# Don't know maximal lenth of a valid message
 			postDemodulation => \&SIGNALduino_bit2Arctec,
 		},
 	 "17.1"	=> # intertechno --> MU anstatt sonst MS (ID 17)
@@ -1234,6 +1235,7 @@
 			preamble     => 'ih',
 			clientmodule => 'IT',
 			length_min   => '57',
+			length_max   => '72',
 			postDemodulation => \&SIGNALduino_HE_EU,
 		},
 	"66" => ## TX2 Protocol (Remote Temp Transmitter & Remote Thermo Model 7035)
