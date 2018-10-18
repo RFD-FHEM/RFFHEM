@@ -849,7 +849,7 @@
 			preamble => 'u41#', # prepend to converted message
 			#clientmodule => '', # not used now
 			#modulematch => '', # not used now
-			length_min => '20',
+			length_min => '32',  # all available messages are length_min 32
 		},     
 	#"42" => ## MKT Multi Kon Trade  // Sollte eigentlich als MS ITv1 erkannt werden
 	#	{
@@ -1162,6 +1162,7 @@
 			one		=> [1,-2],
 			zero		=> [1,-1],
 			clockabs	=> 400,
+			pause          => [-81],         # 400*81=32400*6=194400 - pause between repeats of send messages (clockabs*pause must be < 32768)
 			format 		=> 'twostate',
 			preamble	=> 'P61#',      # prepend to converted message
 			postamble	=> '',         # Append to converted message
