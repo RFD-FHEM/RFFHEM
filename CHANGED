@@ -1,4 +1,6 @@
-15.10.2018
+18.10.2018
+ signalduino_protocols.hash - doc added & sorted explanation
+ 14_SD_RSL.pm - added Doc_DE | Logoutput revised
  14_SD_WS09 - doc revised | FHEM Standard | Def - Set - Get ...
 09.10.2018
  90_SIGNALduino_un.pm - added bitCountLength & added doc 
