@@ -90,6 +90,7 @@ sub FLAMINGO_Undef($$) {
 
   RemoveInternalTimer($hash, "FLAMINGO_UpdateState");
   delete($modules{FLAMINGO}{defptr}{$hash->{CODE}}) if($hash && $hash->{CODE});
+  delete($modules{FLAMINGO}{defptr}{testrunning}) if exists ($modules{FLAMINGO}{defptr}{testrunning});
   return undef;
 }
 
@@ -128,14 +129,17 @@ sub FLAMINGO_Set($$@) {
 
 	## Testarlarm ##	
 	if ($args[0] ne "?" and $args[0] ne "Counterreset") {
-																			 
+
 		# remove InternalTimer
 		RemoveInternalTimer($hash, "FLAMINGO_UpdateState");
+		
+		$modules{FLAMINGO}{defptr}{testrunning} = "yes";						# marker, device send Testalarm to NOT register this alarm with other receivers in FHEM
+		Log3 $hash, 4, "FLAMINGO set marker TESTALARM is running";
 		
 		readingsSingleUpdate($hash, "state", "Testalarm", 1);
 		IOWrite($hash, 'sendMsg', $message);
 		
-		InternalTimer(gettimeofday()+5, "FLAMINGO_UpdateState", $hash, 0);		# set timer to Update status
+		InternalTimer(gettimeofday()+15, "FLAMINGO_UpdateState", $hash, 0);		# set timer to Update status
 	}
   
 	return $ret;
@@ -179,6 +183,14 @@ sub FLAMINGO_Parse($$) {
 		# return $name;
 	# }
 
+	## check if Testalarm received from a other transmitter in FHEM ##
+	my $testalarmcheck = "";
+	$testalarmcheck = $modules{FLAMINGO}{defptr}{testrunning} if exists ($modules{FLAMINGO}{defptr}{testrunning});
+	
+	if ($testalarmcheck eq "yes") {
+		return "";
+	}
+	
 	my $alarmcounter = ReadingsVal($name, "alarmcounter", 0);
 	
 	if (ReadingsVal($name, "state", "") ne "Alarm") {
@@ -193,11 +205,12 @@ sub FLAMINGO_Parse($$) {
 	
  	readingsBeginUpdate($hash);
  	readingsBulkUpdate($hash, "state", "Alarm");
-	readingsBulkUpdate($hash, "alarmcounter", $alarmcounter);
+	readingsBulkUpdate($hash, "alarmcounter", $alarmcounter);				# register non testalarms how user can set via FHEM
 	readingsEndUpdate($hash, 1); # Notify is done by Dispatch
 
-	InternalTimer(gettimeofday()+5, "FLAMINGO_UpdateState", $hash, 0);		# set timer to Update status
-  return $name;
+	InternalTimer(gettimeofday()+15, "FLAMINGO_UpdateState", $hash, 0);		# set timer to Update status
+	
+	return $name;
 }
 
 #####################################
@@ -208,6 +221,10 @@ sub FLAMINGO_UpdateState($) {
 	readingsBeginUpdate($hash);
  	readingsBulkUpdate($hash, "state", "no Alarm");
 	readingsEndUpdate($hash, 1); # Notify is done by Dispatch
+
+	## delete marker device Testalarm ##
+	Log3 $hash, 4, "FLAMINGO delete marker TESTALARM was running" if exists ($modules{FLAMINGO}{defptr}{testrunning});
+	delete($modules{FLAMINGO}{defptr}{testrunning}) if exists ($modules{FLAMINGO}{defptr}{testrunning});
 	
 	Log3 $name, 4, "FLAMINGO: $name: Alarm stopped";
 }
@@ -243,7 +260,7 @@ sub FLAMINGO_UpdateState($) {
   <li>Counterreset<br>
   - set alarmcounter to 0</li>
   <li>Testalarm<br>
-  - trigger a test alarm</li>
+  - trigger a test alarm (The testalarm does not increase the alarm ounter!)</li>
   </ul><br>
 
   <a name="FLAMINGOget"></a>
@@ -301,7 +318,7 @@ sub FLAMINGO_UpdateState($) {
     <code>define &lt;name&gt; FLAMINGO &lt;code&gt; </code> <br>
 
     <br>
-    &lt;code&gt; ist der automatisch angelegte eindeutige code  des FLAMINGO Rauchmelders. Dieser ändern sich nach
+    &lt;code&gt; ist der automatisch angelegte eindeutige code  des FLAMINGO Rauchmelders. Dieser &auml;ndern sich nach
 	dem Pairing mit einem Master.<br>
   </ul>
   <br>
@@ -312,7 +329,7 @@ sub FLAMINGO_UpdateState($) {
   <li>Counterreset<br>
   - Alarmz&auml;hler auf 0 setzen</li>
   <li>Testalarm<br>
-  - ausl&ouml;sen eines Testalarmes</li>
+  - ausl&ouml;sen eines Testalarmes. (Der Testalarm erh&ouml;ht nicht den Alarmz&auml;hler!)</li>
   </ul><br>
 
   <a name="FLAMINGOget"></a>
