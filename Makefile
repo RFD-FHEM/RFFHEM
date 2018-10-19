@@ -21,5 +21,7 @@ test: deploylocal
 	test/test-runner.sh test_mu_1
 	cp test/*.hash /opt/fhem/FHEM/lib && test/test-runner.sh test_loadprotohash
 	test/test-runner.sh test_developid_1
+	test/test-runner.sh test_proto84
+	test/test-runner.sh test_proto85
 	@echo === finished 00_SIGNALduino unit tests ===
 	sudo timeout 30 killall -vw perl || sudo killall -vws9 perl
