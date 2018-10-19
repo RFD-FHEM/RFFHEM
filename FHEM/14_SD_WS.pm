@@ -697,14 +697,6 @@ sub SD_WS_Parse($$)
 	$name = $hash->{NAME};
 	return "" if(IsIgnored($name));
 
-	if (!defined(AttrVal($name,"event-min-interval",undef))) {
-		my $minsecs = AttrVal($ioname,'minsecs',0);
-		if($hash->{lastReceive} && (time() - $hash->{lastReceive} < $minsecs)) {
-			Log3 $hash, 4, "$ioname: $deviceCode dropped due to short time. minsecs=$minsecs";
-			return "";
-		}
-	}
-
 	if (defined $temp && defined $hum) {
 		if ($temp < -30 || $temp > 70 || $hum > 100) {
 			Log3 $iohash, 3, "$ioname: $deviceCode - ERROR Temperature $temp or humidity $hum";
