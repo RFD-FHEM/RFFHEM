@@ -1,4 +1,4 @@
-# $Id: 00_SIGNALduino.pm 10488 2018-10-18 19:00:00Z v3.3.3-dev $
+# $Id: 00_SIGNALduino.pm 10488 2018-10-19 20:00:00Z v3.3.3-dev $
 #
 # v3.3.3 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -25,7 +25,7 @@ no warnings 'portable';
 
 
 use constant {
-	SDUINO_VERSION            => "v3.3.3-dev_18.10.",
+	SDUINO_VERSION            => "v3.3.3-dev_19.10.",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -2160,7 +2160,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 	my %patternListRaw;
 	my $message_dispatched=0;
 	my $debug = AttrVal($iohash->{NAME},"debug",0);
-	my $dummy = AttrVal($iohash->{NAME},"dummy",0);
+	my $dummy = IsDummy($iohash->{NAME});
 	
 	if (defined($rssi)) {
 		$rssi = ($rssi>=128 ? (($rssi-256)/2-74) : ($rssi/2-74)); # todo: passt dies so? habe ich vom 00_cul.pm
@@ -2208,15 +2208,19 @@ sub SIGNALduino_Parse_MU($$$$@)
 			}
 			
 			my $msgclock;
-			my $clocksource = $ProtocolListSIGNALduino{$id}{clockpos}[0];
-			if (!defined($clocksource))
+			my $clocksource = "";
+			my $clockMsg = "";
+			if (defined($ProtocolListSIGNALduino{$id}{clockpos}) && defined($ProtocolListSIGNALduino{$id}{clockpos}[0]))
 			{
-				$clocksource = "";
-			} elsif ($clocksource ne "one" && $clocksource ne "zero") {	# wenn clocksource nicht one oder zero ist, dann wird CP= aus der Nachricht verwendet
-				$msgclock = $msg_parts{pattern}{$clockidx};
-				if (!SIGNALduino_inTol($clockabs,$msgclock,$msgclock*0.30)) {
-					Log3 $name, 5, "$name: clock for MU Protocol id $id, clockId=$clockabs, clockmsg=$msgclock (cp) is not in tol=" . $msgclock*0.30 if ($dummy);
-					next;
+				$clocksource = $ProtocolListSIGNALduino{$id}{clockpos}[0];
+				if ($clocksource ne "one" && $clocksource ne "zero") {	# wenn clocksource nicht one oder zero ist, dann wird CP= aus der Nachricht verwendet
+					$msgclock = $msg_parts{pattern}{$clockidx};
+					if (!SIGNALduino_inTol($clockabs,$msgclock,$msgclock*0.30)) {
+						Log3 $name, 5, "$name: clock for MU Protocol id $id, clockId=$clockabs, clockmsg=$msgclock (cp) is not in tol=" . $msgclock*0.30 if ($dummy);
+						next;
+					} else {
+						$clockMsg = ", msgClock=$msgclock (cp) is in tol" if ($dummy);
+					}
 				}
 			}
 			
@@ -2274,7 +2278,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 			my $floatRegex ="";
 			my $signalRegex;
 			my $regex;
-			my $ProtocListClock;
+			my $protocListClock;
 			
 			if (($pstr=SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}},\%patternList,\$rawData)) eq -1)
 			{
@@ -2285,10 +2289,12 @@ sub SIGNALduino_Parse_MU($$$$@)
 			if ($clocksource eq "one")		# clocksource one, dann die clock aus one holen
 			{
 				$msgclock = $msg_parts{pattern}{substr($pstr, $ProtocolListSIGNALduino{$id}{clockpos}[1], 1)};
-				$ProtocListClock = $clockabs * $ProtocolListSIGNALduino{$id}{one}[$ProtocolListSIGNALduino{$id}{clockpos}[1]];
-				if (!SIGNALduino_inTol($ProtocListClock,$msgclock,$msgclock*0.30)) {
-					Log3 $name, 5, "$name: clock for MU Protocol id $id, protocClock=$ProtocListClock, msgClock=$msgclock (one) is not in tol=" . $msgclock*0.30 if ($dummy);
+				$protocListClock = $clockabs * $ProtocolListSIGNALduino{$id}{one}[$ProtocolListSIGNALduino{$id}{clockpos}[1]];
+				if (!SIGNALduino_inTol($protocListClock,$msgclock,$msgclock*0.30)) {
+					Log3 $name, 5, "$name: clock for MU Protocol id $id, protocClock=$protocListClock, msgClock=$msgclock (one) is not in tol=" . $msgclock*0.30 if ($dummy);
 					next;
+				} else {
+					$clockMsg = ", msgClock=$msgclock (one) is in tol" if ($dummy);
 				}
 			}
 			$oneRegex=$pstr;
@@ -2306,10 +2312,12 @@ sub SIGNALduino_Parse_MU($$$$@)
 				if ($clocksource eq "zero")		# clocksource zero, dann die clock aus zero holen
 				{
 					$msgclock = $msg_parts{pattern}{substr($pstr, $ProtocolListSIGNALduino{$id}{clockpos}[1], 1)};
-					$ProtocListClock = $clockabs * $ProtocolListSIGNALduino{$id}{zero}[$ProtocolListSIGNALduino{$id}{clockpos}[1]];
-					if (!SIGNALduino_inTol($ProtocListClock,$msgclock,$msgclock*0.30)) {
-						Log3 $name, 5, "$name: clock for MU Protocol id $id, protocClock=$ProtocListClock, msgClock=$msgclock (zero) is not in tol=" . $msgclock*0.30 if ($dummy);
+					$protocListClock = $clockabs * $ProtocolListSIGNALduino{$id}{zero}[$ProtocolListSIGNALduino{$id}{clockpos}[1]];
+					if (!SIGNALduino_inTol($protocListClock,$msgclock,$msgclock*0.30)) {
+						Log3 $name, 5, "$name: clock for MU Protocol id $id, protocClock=$protocListClock, msgClock=$msgclock (zero) is not in tol=" . $msgclock*0.30 if ($dummy);
 						next;
+					} else {
+						$clockMsg = ", msgClock=$msgclock (zero) is in tol" if ($dummy);
 					}
 				}
 				$zeroRegex='|' . $pstr;
@@ -2326,7 +2334,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 			}
 			
 			#Debug "Pattern Lookup Table".Dumper(%patternLookupHash);
-			SIGNALduino_Log3 $name, 4, "$name: Fingerprint for MU Protocol id $id -> $ProtocolListSIGNALduino{$id}{name} matches, trying to demodulate";
+			SIGNALduino_Log3 $name, 4, "$name: Fingerprint for MU Protocol id $id -> $ProtocolListSIGNALduino{$id}{name} matches, trying to demodulate$clockMsg";
 			
 			my $signal_width= @{$ProtocolListSIGNALduino{$id}{one}};
 			my $length_min;
@@ -2358,7 +2366,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 				
 				Debug "Regex is: $regex" if ($debug);
 				
-				if ($partData ne "") {		# wurde die regex gefunden?
+				if (defined($partData) && $partData ne "") {		# wurde die regex gefunden?
 					$message_start=$-[0];
 				} else {
 					Log3 $name, 5, "$name: $length_str $nrRestart.restarting, regex ($regex) not found, aborting" if ($dummy);
