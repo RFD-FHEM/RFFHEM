@@ -1,3 +1,5 @@
+21.10.2018
+ 00_SIGNALduino.pm - Feature support dupTimeout on same iodev
 19.10.2018
  14_SD_UT.pm - documentation revised + logoutput changed
 18.10.2018
