@@ -1,5 +1,7 @@
-19.10.2018
+20.10.2018
  signalduino_protocols.hash - doc added & sorted explanation | added def pause ID 61 & revised length ID 41
+19.10.2018
+ 14_SD_UT.pm - documentation revised + logoutput changed
 18.10.2018
  signalduino_protocols.hash - doc added & sorted explanation | ID 3,3.1,4,5,17,65 length_max definded
  14_SD_RSL.pm - added Doc_DE | Logoutput revised
