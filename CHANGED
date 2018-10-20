@@ -3,6 +3,10 @@
 18.10.2018
  signalduino_protocols.hash - doc added & sorted explanation | ID 3,3.1,4,5,17,65 length_max definded
  14_SD_RSL.pm - added Doc_DE | Logoutput revised
+ 14_SD_WS.pm - change, protocol for weatherstation Auriol IAN 283582
+ 14_SD_WS.pm - feature, new protocol for weatherstation TFA 35.1140.01
+ 14_SD_WS.pm - feature, plausibility check temperature and humidity values
+ 14_SD_WS.pm - change, reading battery removed
 09.10.2018
  90_SIGNALduino_un.pm - added bitCountLength & added doc 
 04.10.2018
