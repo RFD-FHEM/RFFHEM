@@ -5,7 +5,7 @@
 98_UnitTest.pm: test/98_unittest.pm
 	sudo cp $< /opt/fhem/FHEM/$@
 		
-deploylocal: /opt/fhem/FHEM/00_SIGNALduino.pm 98_UnitTest.pm /opt/fhem/FHEM/90_SIGNALduino_un.pm /opt/fhem/FHEM/lib/signalduino_protocols.hash
+deploylocal: /opt/fhem/FHEM/00_SIGNALduino.pm 14_SD_WS.pm 98_UnitTest.pm /opt/fhem/FHEM/90_SIGNALduino_un.pm /opt/fhem/FHEM/lib/signalduino_protocols.hash
 	sudo timeout 3 killall -qws2 perl || sudo killall -qws9 perl || true
 	sudo rm /opt/fhem/log/fhem-*.log || true
 	sudo cp test/fhem.cfg /opt/fhem/fhem.cfg
