@@ -27,4 +27,4 @@ script:
  - git commit -m "Travis automatic update controls file. Build (${TRAVIS_BUILD_NUMBER}) [skip ci]" ./controls_signalduino.txt || true
  - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ] && [[ $TRAVIS_JOB_NUMBER == *.1 ]]; then git push origin HEAD:$TRAVIS_BRANCH ; fi'
  - cp -R /opt/fhem/cover_db ./
- - git --no-pager diff --name-only $TRAVIS_COMMIT_RANGE | grep .pm | xargs -I@ echo -select @ | xargs cover -report coverall
+ - git --no-pager diff --name-only $TRAVIS_COMMIT_RANGE | grep .pm | xargs -I@ echo -select @ | xargs cover -report coveralls
