@@ -2327,7 +2327,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 				
 				Debug "Regex is: $regex" if ($debug);
 				
-				if ($partData ne "") {		# wurde die regex gefunden?
+				if ($partData ne "") {		# wurde die regex gefunden?   //TODO:  $partData is not initialized!
 					$message_start=$-[0];
 				} else {
 					SIGNALduino_Log3 $name, 5, "$name: $length_str $nrRestart.restarting, regex ($regex) not found, aborting";
@@ -4048,7 +4048,7 @@ sub SIGNALduino_compPattern($$$%)
 			$buckets{$key}=$patternListRaw{$key};
 		}
 	}
--
+
 	return ($cnt,$rawData, %patternListRaw);
 	#print "rdata: ".$msg_parts{rawData}."\n";
 

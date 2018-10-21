@@ -526,7 +526,7 @@ sub SD_UT_Parse($$) {
 	} elsif (AttrVal($name, "model", "unknown") eq "SA_434_1_mini" && $protocol == 81) {
 		$model = AttrVal($name, "model", "unknown");
 		$state = "receive";
-		Log3 $name, 3, "$ioname: $model $name state=$state ($rawData)";
+		Log3 $name, 4, "$ioname: $model $name state=$state ($rawData)";
 	############ VTX_BELL ############ Protocol 79 ############
 	} elsif (AttrVal($name, "model", "unknown") eq "VTX_BELL" && $protocol == 79) {
 		$model = AttrVal($name, "model", "unknown");
@@ -542,7 +542,7 @@ sub SD_UT_Parse($$) {
 
 	readingsBeginUpdate($hash);
 	readingsBulkUpdate($hash, "deviceCode", $deviceCode, 0)  if (defined($deviceCode) && $model eq "Buttons_five" || $model eq "RH787T" );
-	readingsBulkUpdate($hash, "System-Hauscode", $deviceCode, 0)  if (defined($deviceCode) && $model eq "Unitec_47031");
+	readingsBulkUpdate($hash, "System-Housecode", $deviceCode, 0)  if (defined($deviceCode) && $model eq "Unitec_47031");
 	readingsBulkUpdate($hash, "Zone", $zone, 0)  if (defined($zone) && $model eq "Unitec_47031");
 	readingsBulkUpdate($hash, "Usersystem", $system, 0)  if (defined($system) && $model eq "Unitec_47031");
 	readingsBulkUpdate($hash, "LastAction", "receive", 0)  if (defined($state) && $model eq "RH787T");
@@ -639,7 +639,7 @@ sub SD_UT_Attr(@) {
 				$state = "Defined";
 			}
 
-			$modules{SD_UT}{defptr}{deletecache} = $name;
+			$modules{SD_UT}{defptr}{deletecache} = $name if ($hash->{DEF} eq "unknown");
 			Log3 $name, 5, "SD_UT: Attr cmd=$cmd devicename=$name attrName=$attrName attrValue=$attrValue oldmodel=$oldmodel";
 
 			readingsSingleUpdate($hash, "state", $state, 0);
@@ -702,7 +702,7 @@ sub SD_UT_binaryToNumber {
 	 <ul> - Remote control SA-434-1 mini 923301&nbsp;&nbsp;&nbsp;<small>(module model: SA_434_1_mini | protocol 81)</small></ul>
 	 <ul> - unitec Sound (Ursprungsmodul)&nbsp;&nbsp;&nbsp;<small>(module model: Unitec_other | protocol 30)</small></ul>
 	 <ul> - unitec remote door reed switch 47031 (Unitec 47121 | Unitec 47125 | Friedland)&nbsp;&nbsp;&nbsp;<small>(module model: Unitec_47031 | protocol 30)</small></ul>
-	 <ul> - VTX-BELL_Funkklingel&nbsp;&nbsp;&nbsp;<small>(module model: VTX-BELL | protocol 79)</small></ul>
+	 <ul> - VTX-BELL_Funkklingel&nbsp;&nbsp;&nbsp;<small>(module model: VTX_BELL | protocol 79)</small></ul>
 	 <ul> - Westinghouse Delancey ceiling fan (remote, 5 buttons without SET)&nbsp;&nbsp;&nbsp;<small>(module model: Buttons_five | protocol 29)</small></ul>
 	 <ul> - Westinghouse Delancey ceiling fan (remote, 9 buttons with SET)&nbsp;&nbsp;&nbsp;<small>(module model: RH787T | protocol 83)</small></ul>
 	 <br><br>
@@ -805,7 +805,40 @@ sub SD_UT_binaryToNumber {
 		<li>model<br>
 		The attribute indicates the model type of your device.<br>
 		(unknown,Buttons_five,RH787T,SA_434_1_mini,Unitec_47031,Unitec_other,VTX-BELL)</li>
-	</ul>
+	</ul><br><br>
+	
+	<b><i>Generated readings of the models</i></b><br>
+	<ul><u>Buttons_five & RH787T</u><br>
+	<li>deviceCode<br>
+	Device code of the system</li>
+	<li>LastAction<br>
+	Last executed action of the device. <code>receive</code> for command received | <code>send</code> for command send</li>
+	<li>state<br>
+	Last executed keystroke of the remote control</li></ul><br>
+	
+	<ul><u>SA_434_1_mini</u><br>
+	<li>state<br>
+	Last executed action of the device. <code>receive</code> for command received | <code>send</code> for command send</li></ul><br>
+	
+	<ul><u>Unitec_47031</u><br>
+	<li>System-Housecode<br>
+	System or house code of the device</li>
+	<li>state<br>
+	Condition of contact (prepared, unconfirmed)</li>
+	<li>Zone<br>
+	Zone of the device</li>
+	<li>Usersystem<br>
+	Group of the system</li>
+	</ul><br>
+	
+	<ul><u>Unitec_other</u><br>
+	<li>state<br>
+	4Bit (prepared)</li></ul><br>
+	
+	<ul><u>VTX_BELL</u><br>
+	<li>state<br>
+	Last executed action of the device. <code>receive</code> for command received | <code>send</code> for command send</li></ul>
+	
 </ul>
 =end html
 =begin html_DE
@@ -821,7 +854,7 @@ sub SD_UT_binaryToNumber {
 	 <ul> - Remote control SA-434-1 mini 923301&nbsp;&nbsp;&nbsp;<small>(Modulmodel: SA_434_1_mini | Protokoll 81)</small></ul>
 	 <ul> - unitec Sound (Ursprungsmodul)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Unitec_other | Protokoll 30)</small></ul>
 	 <ul> - unitec remote door reed switch 47031 (Unitec 47121 | Unitec 47125 | Friedland)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Unitec_47031 | Protokoll 30)</small></ul>
-	 <ul> - VTX-BELL_Funkklingel&nbsp;&nbsp;&nbsp;<small>(Modulmodel: VTX-BELL | Protokoll 79)</small></ul>
+	 <ul> - VTX-BELL_Funkklingel&nbsp;&nbsp;&nbsp;<small>(Modulmodel: VTX_BELL | Protokoll 79)</small></ul>
 	 <ul> - Westinghouse Deckenventilator (Fernbedienung, 5 Tasten ohne SET)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Buttons_five | Protokoll 29)</small></ul>
 	 <ul> - Westinghouse Delancey Deckenventilator (Fernbedienung, 9 Tasten mit SET)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: RH787T | Protokoll 83)</small></ul>
 	 <br><br>
@@ -871,7 +904,7 @@ sub SD_UT_binaryToNumber {
 		Ventilator ausschalten</li>
 	</ul><br>
 	
-	<ul><a name=" "></a>Westinghouse Delancey Deckenventilator (Fernbedienung RH787T mit 9 Tasten + SET)</u></ul>
+	<ul><a name=" "></a><u>Westinghouse Delancey Deckenventilator (Fernbedienung RH787T mit 9 Tasten + SET)</u></ul>
 	<ul><a name="1_fan_minimum_speed"></a>
 		<li>1_fan_minimum_speed<br>
 		Taste I auf der Fernbedienung</li>
@@ -923,11 +956,42 @@ sub SD_UT_binaryToNumber {
 	<ul><li><a href="#IODev">IODev</a></li></ul><br>
 	<ul><a name="model"></a>
 		<li>model<br>
-		Das Attribut bezeichnet den Modelltyp Ihres Gerätes.<br>
-		(unknown,Buttons_five,RH787T,SA_434_1_mini,Unitec_47031,Unitec_other,VTX-BELL)</li>
-	</ul>
-		
-		
+		Das Attribut bezeichnet den Modelltyp Ihres Ger&auml;tes.<br>
+		(unknown,Buttons_five,RH787T,SA_434_1_mini,Unitec_47031,Unitec_other,VTX-BELL)</li><a name=" "></a>
+	</ul><br><br>
+	
+	<b><i>Generierte Readings der Modelle</i></b><br>
+	<ul><u>Buttons_five & RH787T</u><br>
+	<li>deviceCode<br>
+	Ger&auml;teCode des Systemes</li>
+	<li>LastAction<br>
+	Zuletzt ausgef&uuml;hrte Aktion des Ger&auml;tes. <code>receive</code> f&uuml;r Kommando empfangen | <code>send</code> f&uuml;r Kommando gesendet</li>
+	<li>state<br>
+	Zuletzt ausgef&uuml;hrter Tastendruck der Fernbedienung</li></ul><br>
+	
+	<ul><u>SA_434_1_mini</u><br>
+	<li>state<br>
+	Zuletzt ausgef&uuml;hrte Aktion des Ger&auml;tes. <code>receive</code> f&uuml;r Kommando empfangen | <code>send</code> f&uuml;r Kommando gesendet</li></ul><br>
+	
+	<ul><u>Unitec_47031</u><br>
+	<li>System-Housecode<br>
+	Eingestellter System bzw. Hauscode des Ger&auml;tes</li>
+	<li>state<br>
+	Zustand des Kontaktes (vorbereitet, unbest&auml;tigt)</li>
+	<li>Zone<br>
+	Eingestellte Zone des Ger&auml;tes</li>
+	<li>Usersystem<br>
+	Bezeichnung Systemes</li>
+	</ul><br>
+	
+	<ul><u>Unitec_other</u><br>
+	<li>state<br>
+	4Bit (vorbereitet)</li></ul><br>
+	
+	<ul><u>VTX_BELL</u><br>
+	<li>state<br>
+	Zuletzt ausgef&uuml;hrte Aktion des Ger&auml;tes. <code>receive</code> f&uuml;r Kommando empfangen | <code>send</code> f&uuml;r Kommando gesendet</li></ul>
+
 </ul>
 =end html_DE
 =cut
