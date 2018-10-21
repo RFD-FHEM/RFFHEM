@@ -701,7 +701,7 @@
 			id          	=> '33',
 			one				=> [1,-8],
 			zero			=> [1,-4],
-			sync			=> [1,-15],
+			sync			=> [1,-16],
 			clockabs   		=> '500',
 			format     		=> 'twostate',  		# not used now
 			preamble		=> 'W33#',				# prepend to converted message	
@@ -851,7 +851,7 @@
 			preamble => 'u41#', # prepend to converted message
 			#clientmodule => '', # not used now
 			#modulematch => '', # not used now
-			length_min => '20',
+			length_min => '32',  # all available messages are length_min 32
 		},     
 	#"42" => ## MKT Multi Kon Trade  // Sollte eigentlich als MS ITv1 erkannt werden
 	#	{
@@ -1164,6 +1164,7 @@
 			one		=> [1,-2],
 			zero		=> [1,-1],
 			clockabs	=> 400,
+			pause          => [-81],         # 400*81=32400*6=194400 - pause between repeats of send messages (clockabs*pause must be < 32768)
 			format 		=> 'twostate',
 			preamble	=> 'P61#',      # prepend to converted message
 			postamble	=> '',         # Append to converted message
@@ -1608,22 +1609,44 @@
 			length_min      => '12',
 			length_max      => '12',
 		},
-	"84" => ## Funk Wetterstation Auriol IAN 283582 (Lidl 2018) @roobbb
-		# https://github.com/RFD-FHEM/RFFHEM/issues/263#issuecomment-420739666
-		# MU;P0=-28796;P1=376;P2=-875;P3=834;P4=220;P5=-632;P6=592;P7=-268;D=0123232324545454545456767454567674567456745674545454545456767676767674567674567676767456;CP=4;R=22;
-		# MU;P0=-28784;P1=340;P2=-903;P3=814;P4=223;P5=-632;P6=604;P7=-248;D=0123232324545454545456767456745456767674545674567454545456745454545456767454545456745676;CP=4;R=22;
-	{
-		name         => 'IAN283582',
-		comment      => 'Funk Wetterstation Auriol IAN 283582',
-		id           => '84',
-		one          => [3,-1],
-		zero         => [1,-3],
-		start        => [4,-4,4,-4,4,-4],
-		clockabs     => 213, 
-		preamble     => 'u84#',             # prepend to converted message
-		clientmodule => '',                 # not used now
-		modulematch  => '',                 # not used now
-		length_min   => '39',               # das letzte Bit fehlt
-		length_max   => '40',
-	},
+	"84" => ## Funk Wetterstation Auriol IAN 283582 Version 06/2017 (Lidl), Modell-Nr.: HG02832D, 09/2018@roobbb
+			# https://github.com/RFD-FHEM/RFFHEM/issues/263
+			# MU;P0=-28796;P1=376;P2=-875;P3=834;P4=220;P5=-632;P6=592;P7=-268;D=0123232324545454545456767454567674567456745674545454545456767676767674567674567676767456;CP=4;R=22;
+			#	MU;P0=-28784;P1=340;P2=-903;P3=814;P4=223;P5=-632;P6=604;P7=-248;D=0123232324545454545456767456745456767674545674567454545456745454545456767454545456745676;CP=4;R=22;
+			# MU;P0=-21520;P1=235;P2=-855;P3=846;P4=620;P5=-236;P7=-614;D=012323232454545454545451717451717171745171717171717171717174517171745174517174517174545;CP=1;R=217;
+		{
+			name         => 'IAN283582',
+			comment      => 'Weatherstation Auriol IAN 283582',
+			id           => '84',
+			one          => [3,-1],
+			zero         => [1,-3],
+			start        => [4,-4,4,-4,4,-4],
+			clockabs     => 215, 
+			format       => 'twostate',
+			preamble     => 'W84#',             # prepend to converted message	
+			postamble    => '',                 # append to converted message	 	
+			clientmodule => 'SD_WS',
+			length_min   => '39',               # das letzte Bit fehlt meistens
+			length_max   => '40',
+		},
+	"85" => ## Funk Wetterstation TFA 35.1140.01 mit Temperatur-/Feuchte- und Windsensor TFA 30.3222.02 09/2018@Iron-R
+			# https://github.com/RFD-FHEM/RFFHEM/issues/266
+			# MU;P0=-509;P1=474;P2=-260;P3=228;P4=718;P5=-745;D=01212303030303012301230123012301230301212121230454545453030303012123030301230303012301212123030301212303030303030303012303012303012303012301212303030303012301230123012301230301212121212454545453030303012123030301230303012301212123030301212303030303030303;CP=3;R=46;O;
+			# MU;P0=-504;P1=481;P2=-254;P3=227;P4=723;P5=-739;P6=-1848;D=01230121212303030121230303030303030453030303012123030301230303012301212303030303030304530303030121230303012303030123012121230303012123030303030303030123030123030123030123012123030303030123012301230123012303012121212364545454530303030121230303012303030123;CP=3;R=45;O;
+			# MU;P0=7944;P1=-724;P2=742;P3=241;P4=-495;P5=483;P6=-248;D=01212121343434345656343434563434345634565656343434565634343434343434345634345634345634343434343434343434345634565634345656345634343456563421212121343434345656343434563434345634565656343434565634343434343434345634345634345634343434343434343434345634565634;CP=3;R=47;O;�
+		{
+			name         => 'TFA 35.1140.01',
+			comment      => 'Combisensor TFA 30.3222.02 for Weatherstation TFA 35.1140.01',
+			id           => '85',
+			one          => [2,-1],
+			zero         => [1,-2],
+			start        => [3,-3,3,-3,3,-3],
+			clockabs     => 250,
+			format       => 'twostate',
+			preamble     => 'W85#',             # prepend to converted message	
+			postamble    => '',                 # append to converted message	 	
+			clientmodule => 'SD_WS',
+			length_min   => '64',
+			length_max   => '68',
+		},
 );
