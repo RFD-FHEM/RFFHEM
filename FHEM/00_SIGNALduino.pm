@@ -2224,22 +2224,26 @@ sub SIGNALduino_Parse_MU($$$$@)
 
 			Debug "Searching in patternList: ".Dumper(\%patternList) if($debug);
 
-			my @msgStartLst;
 			my $startStr="";
 			my $message_start=0 ;
 			my $startLogStr="";
 			
-			if (defined($ProtocolListSIGNALduino{$id}{start}))	# wenn start definiert ist, dann startStr ermitteln und in rawData suchen und in der rawData alles bis zum startStr abschneiden
+			
+			if (exists($ProtocolListSIGNALduino{$id}{start}) && defined($ProtocolListSIGNALduino{$id}{start}))	# wenn start definiert ist, dann startStr ermitteln und in rawData suchen und in der rawData alles bis zum startStr abschneiden
 			{
-				@msgStartLst = $ProtocolListSIGNALduino{$id}{start};
-				Debug "msgStartLst: ".Dumper(@msgStartLst)  if ($debug);
+				Debug "msgStartLst: ".Dumper(\@{$ProtocolListSIGNALduino{$id}{start}})  if ($debug);
 				
-				if ( ($startStr=SIGNALduino_PatternExists($hash,@msgStartLst,\%patternList,\$rawData)) eq -1)
+				if ( ($startStr=SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{start}},\%patternList,\$rawData)) eq -1)
 				{
 					SIGNALduino_Log3 $name, 5, "$name: start pattern for MU Protocol id $id -> $ProtocolListSIGNALduino{$id}{name} not found, aborting";
 					next;
 				}
 				Debug "startStr is: $startStr" if ($debug);
+				
+				
+				####  				while ($rawData =~ /$startStr.*/)
+				
+				
 				
 				$message_start = index($rawData, $startStr);
 				if ($message_start >= 0) {
