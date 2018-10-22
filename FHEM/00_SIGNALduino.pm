@@ -1,4 +1,4 @@
-# $Id: 00_SIGNALduino.pm 10488 2018-10-10 20:00:00Z v3.3.3-dev $
+# $Id: 00_SIGNALduino.pm 10488 2018-10-23 00:22:00Z v3.3.3-dev $
 #
 # v3.3.3 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
@@ -25,7 +25,7 @@ no warnings 'portable';
 
 
 use constant {
-	SDUINO_VERSION            => "v3.3.3-dev_10.10.",
+	SDUINO_VERSION            => "v3.3.3-dev_23.10.",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
