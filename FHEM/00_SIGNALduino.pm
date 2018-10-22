@@ -2300,12 +2300,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 			SIGNALduino_Log3 $name, 4, "$name: Fingerprint for MU Protocol id $id -> $ProtocolListSIGNALduino{$id}{name} matches, trying to demodulate";
 			
 			my $signal_width= @{$ProtocolListSIGNALduino{$id}{one}};
-			my $length_min;
-			if (exists($ProtocolListSIGNALduino{$id}{length_min})) {
-				$length_min = $ProtocolListSIGNALduino{$id}{length_min};
-			} else {
-				$length_min = SDUINO_PARSE_DEFAULT_LENGHT_MIN;
-			}
+			my $length_min = $ProtocolListSIGNALduino{$id}{length_min};
 			my $length_max = "";
 			$length_max = $ProtocolListSIGNALduino{$id}{length_max} if (exists($ProtocolListSIGNALduino{$id}{length_max}));
 			
@@ -2852,6 +2847,8 @@ sub SIGNALduino_IdList($@)
 		}
 		elsif (exists ($ProtocolListSIGNALduino{$id}{clockabs}))
 		{
+			$ProtocolListSIGNALduino{$id}{length_min} = SDUINO_PARSE_DEFAULT_LENGHT_MIN if (!exists($ProtocolListSIGNALduino{$id}{length_min}));	
+
 			push (@muIdList, $id);
 		}
 	}
@@ -4423,7 +4420,7 @@ sub SIGNALduino_getProtocolList()
 		</ul>
 	</li><br>
 	<li>maxMuMsgRepeat <br>
-	MU signals can contain multipple repeats of the same message. The results are all send to a logical module. You can limit the number of scanned repeatitions. Defaukt is 4, so after found 4 repeats, the demoduation is aborted. 	
+	MU signals can contain multiple repeats of the same message. The results are all send to a logical module. You can limit the number of scanned repetitions. Defaukt is 4, so after found 4 repeats, the demoduation is aborted. 	
 	<br></li>
     <a name="minsecs"></a>
 	<li>minsecs<br>
@@ -4792,7 +4789,7 @@ With a # at the beginnging whitelistIDs can be deactivated.
     attr SIGNALduino longids SD_WS07<br><br>
 	<a name="maxMuMsgRepeat "></a>
 	<li>maxMuMsgRepeat <br><
-	In MU Signalen können mehrere Wiederholungen stecken. Diese werden einzeln ausgewertet und an ein logisches Modul übergeben. Mit diesem Attribut kann angepasst werden, wie viele Wiederholungen weiter gegeben werden. Standard ist 4. 	
+	In MU Signalen können mehrere Wiederholungen stecken. Diese werden einzeln ausgewertet und an ein logisches Modul übergeben. Mit diesem Attribut kann angepasst werden, wie viele Wiederholungen gesucht werden. Standard ist 4. 	
 	<br></li>
 	<a name="minsecs"></a>
 	<li>minsecs<br></li>
