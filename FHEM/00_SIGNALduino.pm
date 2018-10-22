@@ -2228,7 +2228,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 
 			Debug "Searching in patternList: ".Dumper(\%patternList) if($debug);
 
-			my $startStr=".*"; # Default match if there is no start pattern available
+			my $startStr=""; # Default match if there is no start pattern available
 			my $message_start=0 ;
 			my $startLogStr="";
 			
@@ -2330,7 +2330,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 				}
 				
 				if ($nrRestart == 1) {
-					SIGNALduino_Log3 $name, 5, "$name: Starting demodulation ($startLogStr" . "Signal: $signalRegex Pos $message_start) length_min_max (".$length_min."..".$length_max.") length=".scalar @pairs; 
+					SIGNALduino_Log3 $name, 5, "$name: Starting demodulation ($startLogStr" . "regex: $regex Pos $message_start) length_min_max (".$length_min."..".$length_max.") length=".scalar @pairs; 
 				} else {
 					SIGNALduino_Log3 $name, 5, "$name: $nrRestart. try demodulation$length_str at Pos $-[0]";
 				}
