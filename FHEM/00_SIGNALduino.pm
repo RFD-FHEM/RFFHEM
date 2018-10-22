@@ -278,7 +278,7 @@ SIGNALduino_FingerprintFn($$)
   # Store only the "relevant" part, as the Signalduino won't compute the checksum
   #$msg = substr($msg, 8) if($msg =~ m/^81/ && length($msg) > 8);
 
-  return ($name, $msg);
+  return ("", $msg);
 }
 
 #####################################
@@ -4103,7 +4103,7 @@ sub SIGNALduino_getProtocolList()
 	<br>
 
 	It is possible to attach more than one device in order to get better
-	reception, fhem will filter out duplicate messages.<br><br>
+	reception, fhem will filter out duplicate messages. See more at the <a href="#global">global</a> section with attribute dupTimeout<>br><br>
 
 	Note: this module require the Device::SerialPort or Win32::SerialPort
 	module. It can currently only attatched via USB.
@@ -4512,7 +4512,8 @@ With a # at the beginnging whitelistIDs can be deactivated.
 	</ul>
 	<br>
 
-	Es ist m&ouml;glich, mehr als ein Ger&auml;t anzuschließen, um beispielsweise besseren Empfang zu erhalten. FHEM wird doppelte Nachrichten herausfiltern.<br><br>
+	Es ist m&ouml;glich, mehr als ein Ger&auml;t anzuschließen, um beispielsweise besseren Empfang zu erhalten. FHEM wird doppelte Nachrichten herausfiltern.
+	Mehr dazu im dem <a href="#global">global</a> Abschnitt unter dem Attribut dupTimeout<br><br>
 
 	Hinweis: Dieses Modul erfordert das Device::SerialPort oder Win32::SerialPort
 	Modul. Es kann derzeit nur &uuml;ber USB angeschlossen werden.
