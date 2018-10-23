@@ -1,7 +1,7 @@
 # $Id: 00_SIGNALduino.pm 10488 2018-09-19 11:00:00Z v3.3.3-dev $
 #
 # v3.3.3 (Development release 3.3)
-# The module is inspired by the FHEMduino project and modified in serval ways for processing the incomming messages
+# The module is inspired by the FHEMduino project and modified in serval ways for processing the incoming messages
 # see http://www.fhemwiki.de/wiki/SIGNALDuino
 # It was modified also to provide support for raw message handling which can be send from the SIGNALduino
 # The purpos is to use it as addition to the SIGNALduino which runs on an arduno nano or arduino uno.
@@ -2578,7 +2578,7 @@ SIGNALduino_Parse($$$$@)
 	my $debug = AttrVal($iohash->{NAME},"debug",0);
 	
 	
-	Debug "$name: incomming message: ($rmsg)\n" if ($debug);
+	Debug "$name: incoming message: ($rmsg)\n" if ($debug);
 	
 	if (AttrVal($name, "rawmsgEvent", 0)) {
 		DoTrigger($name, "RAWMSG " . $rmsg);
