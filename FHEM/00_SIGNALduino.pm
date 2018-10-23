@@ -208,7 +208,7 @@ SIGNALduino_Initialize($)
 					  ." hexFile"
                       ." initCommands"
                       ." flashCommand"
-  					  ." hardware:ESP_1M,ESP32,nano,nanoCC1101,miniculCC1101,promini,radinoCC1101"
+  					  ." hardware:ESP_1MCC1101,ESP32,nano328,nanoCC1101,miniculCC1101,promini328,radinoCC1101"
 					  ." debug:0,1"
 					  ." longids"
 					  ." minsecs"
@@ -498,7 +498,7 @@ SIGNALduino_Set($@)
 			SIGNALduino_Log3 $name, 5, "$hash->{TYPE} $name: flashCommand are not defined. standard used to flash.";
 		if ($hardware eq "radinoCC1101") {																	# radinoCC1101 Port not /dev/ttyUSB0 --> /dev/ttyACM0
 			$flashCommand = "avrdude -c avr109 -b [BAUDRATE] -P [PORT] -p atmega32u4 -vv -D -U flash:w:[HEXFILE] 2>[LOGFILE]";
-		} elsif ($hardware ne "radinoCC1101" && $hardware ne "ESP_1M" && $hardware ne "ESP32") {			# nano, nanoCC1101, miniculCC1101, promini
+		} elsif ($hardware ne "ESP_1MCC1101" && $hardware ne "ESP32" && $hardware ne "radinoCC1101") {			# nano328, nanoCC1101, miniculCC1101, promini328
 			$flashCommand = "avrdude -c arduino -b [BAUDRATE] -P [PORT] -p atmega328p -vv -U flash:w:[HEXFILE] 2>[LOGFILE]";
 		}
 	} else {
