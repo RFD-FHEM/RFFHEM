@@ -208,7 +208,7 @@ SIGNALduino_Initialize($)
 					  ." hexFile"
                       ." initCommands"
                       ." flashCommand"
-  					  ." hardware:ESP_1MCC1101,ESP32,nano,nanoCC1101,miniculCC1101,promini,radinoCC1101"
+  					  ." hardware:ESP_1M,ESP32,nano,nanoCC1101,miniculCC1101,promini,radinoCC1101"
 					  ." debug:0,1"
 					  ." longids"
 					  ." minsecs"
@@ -498,7 +498,7 @@ SIGNALduino_Set($@)
 			SIGNALduino_Log3 $name, 5, "$hash->{TYPE} $name: flashCommand are not defined. standard used to flash.";
 		if ($hardware eq "radinoCC1101") {																	# radinoCC1101 Port not /dev/ttyUSB0 --> /dev/ttyACM0
 			$flashCommand = "avrdude -c avr109 -b [BAUDRATE] -P [PORT] -p atmega32u4 -vv -D -U flash:w:[HEXFILE] 2>[LOGFILE]";
-		} elsif ($hardware ne "ESP_1MCC1101" && $hardware ne "ESP32" && $hardware ne "radinoCC1101") {			# nano, nanoCC1101, miniculCC1101, promini
+		} elsif ($hardware ne "ESP_1M" && $hardware ne "ESP32" && $hardware ne "radinoCC1101") {			# nano, nanoCC1101, miniculCC1101, promini
 			$flashCommand = "avrdude -c arduino -b [BAUDRATE] -P [PORT] -p atmega328p -vv -U flash:w:[HEXFILE] 2>[LOGFILE]";
 		}
 	} else {
@@ -4455,7 +4455,7 @@ sub SIGNALduino_getProtocolList()
 	<li>hardware<br>
     When using the flash command, you should specify what hardware you have connected to the usbport. Doing not, can cause failures of the device.
 		<ul>
-			<li>ESP_1MCC1101: ESP8266 with 1 MB flash and CC1101 receiver</li>
+			<li>ESP_1M: ESP8266 with 1 MB flash and CC1101 receiver</li>
 			<li>ESP32: ESP32 </li>
 			<li>nano: Arduino Nano 328 with cheap receiver</li>
 			<li>nanoCC1101: Arduino Nano 328 wirh CC110x receiver</li>
@@ -4807,7 +4807,7 @@ With a # at the beginnging whitelistIDs can be deactivated.
 	<li>hardware<br>
 		Derzeit m&ouml;gliche Hardware Varianten:
 		<ul>
-			<li>ESP_1MCC1101: ESP8266 mit 1 MB Flash und einem CC1101</li>
+			<li>ESP_1M: ESP8266 mit 1 MB Flash und einem CC1101</li>
 			<li>ESP32: ESP32 </li>
 			<li>nano: Arduino Nano 328 f&uuml;r "Billig"-Empf&auml;nger</li>
 			<li>nanoCC1101: Arduino Nano f&uuml;r einen CC110x-Empf&auml;nger</li>
