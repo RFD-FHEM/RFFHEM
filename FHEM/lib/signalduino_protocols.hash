@@ -85,7 +85,6 @@
 			modulematch     => '^P1#[A-Fa-f0-9]{8}', 	# not used now
 			length_min 		=> '20',   # 23
 			length_max 		=> '40',   # 24
-
         },
     "2"    => 
         {
@@ -104,11 +103,12 @@
 			length_min      => '32',
 			length_max      => '34',		# Don't know maximal lenth of a valid message
 			paddingbits     => '8',		    # pad up to 8 bits, default is 4
-	
         },
-    "3"    => 
+    "3"    => # remote like WOFI Lamp
+              # need more Device Infos / User Message
         {
             name			=> 'itv1',	
+			comment         => 'example: remote for WOFI',
 			id          	=> '3',
 			one				=> [3,-1],
 			zero			=> [1,-3],
@@ -121,10 +121,10 @@
 			modulematch     => '^i......', # not used now
 			length_min      => '24',
 			length_max      => '24',		# Don't know maximal lenth of a valid message
-
 			},
     "3.1"    => # MS;P0=-11440;P1=-1121;P2=-416;P5=309;P6=1017;D=150516251515162516251625162516251515151516251625151;CP=5;SP=0;R=66;
 			    # MS;P1=309;P2=-1130;P3=1011;P4=-429;P5=-11466;D=15123412121234123412141214121412141212123412341234;CP=1;SP=5;R=38;  Gruppentaste, siehe Kommentar in sub SIGNALduino_bit2itv1
+			    # need more Device Infos / User Message
         {
             name			=> 'itv1_sync40',	
 			comment         => 'IT remote Control PAR 1000, ITS-150',
@@ -142,7 +142,7 @@
 			length_max      => '24',		# Don't know maximal lenth of a valid message
 			postDemodulation => \&SIGNALduino_bit2itv1,
 			},
-    "4"    => 
+    "4"    => # need more Device Infos / User Message
         {
             name			=> 'arctech2',	
 			id          	=> '4',
@@ -176,7 +176,6 @@
 			modulematch     => '^i......',  # not used now
 			length_min      => '24',
 			length_max      => '24',		# Don't know maximal lenth of a valid message
-
 		},    
 	
 	"6"    => 			## Eurochron Protocol
@@ -192,7 +191,6 @@
 			#clientmodule    => '',   	# not used now
 			#modulematch     => '^u......',  # not used now
 			length_min      => '24',
-
 		},
 	"7"    => ## weather sensors like EAS800z
 			  # MS;P1=-3882;P2=504;P3=-957;P4=-1949;D=21232424232323242423232323232323232424232323242423242424242323232324232424;CP=2;SP=1;R=249;m=2;
@@ -210,7 +208,6 @@
 			modulematch     => '^P7#.{6}F.{2}', # not used now
 			length_min      => '35',
 			length_max      => '40',
-
 		}, 
 	"8"    =>   ## TX3 (ITTX) Protocol
 				# MU;P0=-1046;P1=1339;P2=524;P3=-28696;D=010201010101010202010101010202010202020102010101020101010202020102010101010202310101010201020101010101020201010101020201020202010201010102010101020202010201010101020;CP=2;R=4;
@@ -228,7 +225,6 @@
 			length_min      => '43',
 			length_max      => '44',
 			remove_zero     => 1,           # Removes leading zeros from output
-
 		}, 	
 	"9"    => 			## Funk Wetterstation CTW600
 			{
@@ -246,7 +242,6 @@
 			#modulematch     => '^u9#.....',  # not used now
 			length_min      => '60',
 			length_max      => '120',
-
 		}, 	
 	"10"    => 			## Oregon Scientific 2
 		{
@@ -399,7 +394,7 @@
 			length_min      => '39',
 			length_max      => '40',
 		}, 	
-    "17"    => 
+    "17"    => # need more Device Infos / User Message
         {
             name			=> 'arctech / intertechno',
 			id          	=> '17',
@@ -964,7 +959,6 @@
 			#modulematch     => '', # not used now
 			length_min      => '16',
 			length_max 		=> '18',
-			
 			},
    	"47"    => ## maverick
                # MC;LL=-507;LH=490;SL=-258;SH=239;D=AA9995599599A959996699A969;C=248;L=104;
@@ -1000,11 +994,11 @@
 			length_min      => '47',
 			length_max      => '48',
 		}, 			
-	"49"    => ## quigg / Aldi gt_9000
+	"49"    => ## QUIGG / ALDI GT-9000
 			   # https://github.com/RFD-FHEM/RFFHEM/issues/93
                # MU;P0=-563;P1=479;P2=991;P3=-423;P4=361;P5=-1053;P6=3008;P7=-7110;D=2345454523452323454523452323452323452323454545456720151515201520201515201520201520201520201515151567201515152015202015152015202015202015202015151515672015151520152020151520152020152020152020151515156720151515201520201515201520201520201520201515151;CP=1;R=21;
 		{
-            name			=> 'quigg_gt9000',	
+            name			=> 'QUIGG_GT-9000',	
 			id          	=> '49',
 			clockabs     	=> 400, 						
 			one				=> [2,-1.2],
@@ -1066,9 +1060,9 @@
 			polarity        => 'invert',			
 		}, 	
     
-	"55"  => ##quigg gt1000
+	"55"  => ## QUIGG GT-1000
 		{
-            name			=> 'quigg_gt1000',	
+            name			=> 'QUIGG_GT-1000',
 			id          	=> '55',
 			clockabs     	=> 300, 						
 			zero			=> [1,-4],
@@ -1198,7 +1192,6 @@
 			#modulematch	=> '',
 			length_min	=> '38',	# eigentlich 41 oder 46 (Pruefsumme nicht bei allen)
 			length_max      => '48',	# eigentlich 46
-			
 		}, 
 	"62" => ## Clarus_Switch  
 			# MU;P0=-5893;P4=-634;P5=498;P6=-257;P7=116;D=45656567474747474745656707456747474747456745674567456565674747474747456567074567474747474567456745674565656747474747474565670745674747474745674567456745656567474747474745656707456747474747456745674567456565674747474747456567074567474747474567456745674567;CP=7;O;		
@@ -1682,4 +1675,25 @@
 			length_min   => '64',
 			length_max   => '68',
 		},
+	"86" => ## CAME Drehtor Antrieb
+            # https://forum.fhem.de/index.php/topic,63370.msg849400.html#msg849400
+			# https://github.com/RFD-FHEM/RFFHEM/issues/151
+			# MU;P0=711;P1=-15288;P4=132;P5=-712;P6=316;P7=-313;D=4565656705656567056567056 16 565656705656567056567056 16 56565670565656705656705616565656705656567056567056165656567056565670565670561656565670565656705656705616565656705656567056567056165656567056565670565670561656565670565656705656705616565656705656567056;CP=6;R=52;
+            # MU;P0=-322;P1=136;P2=-15241;P3=288;P4=-735;P6=723;D=012343434306434343064343430623434343064343430643434306 2343434306434343064343430 623434343064343430643434306234343430643434306434343062343434306434343064343430623434343064343430643434306234343430643434306434343062343434306434343064343430;CP=3;R=27;
+            # MU;P0=-15281;P1=293;P2=-745;P3=-319;P4=703;P5=212;P6=152;P7=-428;D=0 1212121342121213421213421 01 212121342121213421213421 01 21212134212121342121342101212121342121213421213421012121213421212134212134210121243134212121342121342101252526742121213425213421012121213421212134212134210121212134212;CP=1;R=23;
+	{
+		name		  => 'CAME Drehtor Antrieb',
+		#comment	   => '',
+		id            => '86',
+		zero		  => [-2,1],
+		one           => [-1,2],
+		start         => [-44,1],
+		clockabs      => 345,
+		format        => 'twostate',
+		preamble      => 'u86#',	  # prepend to converted message	
+		#clientmodule  => 'SD_UT',    # not used now
+		#modulematch   => '^U86#.*',  # not used now
+		length_min    => '12',
+		length_max    => '12',
+	},
 );
