@@ -1692,7 +1692,7 @@
 		format        => 'twostate',
 		preamble      => 'u86#',	  # prepend to converted message	
 		#clientmodule  => 'SD_UT',    # not used now
-		#modulematch   => '^U86#.*',  # not used now
+		#modulematch   => '^u86#.{3}',# not used now
 		length_min    => '12',
 		length_max    => '12',
 	},
