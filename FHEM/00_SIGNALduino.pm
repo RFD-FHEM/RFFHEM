@@ -208,7 +208,7 @@ SIGNALduino_Initialize($)
 					  ." hexFile"
                       ." initCommands"
                       ." flashCommand"
-  					  ." hardware:ESP_1MCC1101,ESP32,nano328,nanoCC1101,miniculCC1101,promini328,radinoCC1101"
+  					  ." hardware:ESP_1MCC1101,ESP32,nano,nanoCC1101,miniculCC1101,promini,radinoCC1101"
 					  ." debug:0,1"
 					  ." longids"
 					  ." minsecs"
@@ -304,7 +304,7 @@ SIGNALduino_Define($$)
   
   my $dev = $a[2];
   #Debug "dev: $dev" if ($debug);
-  #my $hardware=AttrVal($name,"hardware","nano328");
+  #my $hardware=AttrVal($name,"hardware","nano");
   #Debug "hardware: $hardware" if ($debug);
  
  
@@ -498,7 +498,7 @@ SIGNALduino_Set($@)
 			SIGNALduino_Log3 $name, 5, "$hash->{TYPE} $name: flashCommand are not defined. standard used to flash.";
 		if ($hardware eq "radinoCC1101") {																	# radinoCC1101 Port not /dev/ttyUSB0 --> /dev/ttyACM0
 			$flashCommand = "avrdude -c avr109 -b [BAUDRATE] -P [PORT] -p atmega32u4 -vv -D -U flash:w:[HEXFILE] 2>[LOGFILE]";
-		} elsif ($hardware ne "ESP_1MCC1101" && $hardware ne "ESP32" && $hardware ne "radinoCC1101") {			# nano328, nanoCC1101, miniculCC1101, promini328
+		} elsif ($hardware ne "ESP_1MCC1101" && $hardware ne "ESP32" && $hardware ne "radinoCC1101") {			# nano, nanoCC1101, miniculCC1101, promini
 			$flashCommand = "avrdude -c arduino -b [BAUDRATE] -P [PORT] -p atmega328p -vv -U flash:w:[HEXFILE] 2>[LOGFILE]";
 		}
 	} else {
@@ -4457,10 +4457,10 @@ sub SIGNALduino_getProtocolList()
 		<ul>
 			<li>ESP_1MCC1101: ESP8266 with 1 MB flash and CC1101 receiver</li>
 			<li>ESP32: ESP32 </li>
-			<li>nano328: Arduino Nano with cheap receiver</li>
-			<li>nanoCC1101: Arduino Nano wirh CC110x receiver</li>
+			<li>nano: Arduino Nano 328 with cheap receiver</li>
+			<li>nanoCC1101: Arduino Nano 328 wirh CC110x receiver</li>
 			<li>miniculCC1101: Arduino pro Mini with CC110x receiver and cables as a minicul</li>
-			<li>promini328: Arduino Pro Mini with cheap receiver </li>
+			<li>promini: Arduino Pro Mini 328 with cheap receiver </li>
 			<li>radinoCC1101: Arduino compatible radino with cc1101 receiver</li>
 		</ul>
 	</li><br>
@@ -4809,10 +4809,10 @@ With a # at the beginnging whitelistIDs can be deactivated.
 		<ul>
 			<li>ESP_1MCC1101: ESP8266 mit 1 MB Flash und einem CC1101</li>
 			<li>ESP32: ESP32 </li>
-			<li>nano328: Arduino Nano f&uuml;r "Billig"-Empf&auml;nger</li>
+			<li>nano: Arduino Nano 328 f&uuml;r "Billig"-Empf&auml;nger</li>
 			<li>nanoCC1101: Arduino Nano f&uuml;r einen CC110x-Empf&auml;nger</li>
 			<li>miniculCC1101: Arduino pro Mini mit einen CC110x-Empf&auml;nger entsprechend dem minicul verkabelt</li>
-			<li>promini328: Arduino Pro Mini f&uuml;r "Billig"-Empf&auml;nger</li>
+			<li>promini: Arduino Pro Mini 328 f&uuml;r "Billig"-Empf&auml;nger</li>
 			<li>radinoCC1101: Ein Arduino Kompatibler Radino mit cc1101 receiver</li>
 		</ul><br>
 		Notwendig f&uuml;r den Befehl <code>flash</code>. Hier sollten Sie angeben, welche Hardware Sie mit dem usbport verbunden haben. Andernfalls kann es zu Fehlfunktionen des Ger&auml;ts kommen.<br>
