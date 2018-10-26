@@ -1691,8 +1691,8 @@
 		clockabs      => 345,
 		format        => 'twostate',
 		preamble      => 'u86#',	  # prepend to converted message	
-		#clientmodule  => 'SD_UT',    # not used now
-		#modulematch   => '^u86#.{3}',# not used now
+		#clientmodule  => 'SD_UT',
+		#modulematch   => '^u86#.{3}',
 		length_min    => '12',
 		length_max    => '12',
 	},
@@ -1718,8 +1718,8 @@
 		clockabs      => 365,
 		format        => 'twostate',
 		preamble      => 'u87#',	  # prepend to converted message	
-		#clientmodule  => 'SD_UT',    # not used now
-		#modulematch   => '^u87#',    # not used now
+		#clientmodule  => 'SD_UT',
+		#modulematch   => '^u87#',
 		length_min    => '12',
 		length_max    => '18',
 	},
