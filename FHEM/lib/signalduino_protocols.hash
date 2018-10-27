@@ -39,7 +39,7 @@
 # postDemodulation => \&   # only MU - SIGNALduino internal sub for processing before dispatching to a logical module
 # method      => \&        # call to process this message
 # format      => ' '       # twostate | pwm | manchester --> modulation type of the signal, only manchester use SIGNALduino internal, other types only comment
-# modulematch => ' '       # RegEx on the exact message including preamble
+# modulematch => ' '       # RegEx on the exact message including preamble | if defined, it will be evaluated
 # polarity    => 'invert'  # only MC signals | invert bits of the signal
 #
 ##### notice #### or #### info ############################################################################################################
@@ -60,29 +60,29 @@
 			one				=> [1,-8],
 			zero			=> [1,-4],
 			sync			=> [1,-18],		
-			clockabs   		=> '500',		# not used now
+			clockabs   		=> '500',
 			format     		=> 'twostate',  # not used now
 			preamble		=> 's',			# prepend to converted message	 	
 			postamble		=> '00',		# Append to converted message	 	
-			clientmodule    => 'CUL_TCM97001',   # not used now
-			#modulematch     => '^s[A-Fa-f0-9]+', # not used now
+			clientmodule    => 'CUL_TCM97001',
+			#modulematch     => '^s[A-Fa-f0-9]+',
 			length_min      => '24',
 			length_max      => '42',
 			paddingbits     => '8',				 # pad up to 8 bits, default is 4
         },
     "1"    => 
         {
-            name			=> 'ConradRSL',			# 
+            name			=> 'ConradRSL',
 			id          	=> '1',
 			one				=> [2,-1],
 			zero			=> [1,-2],
 			sync			=> [1,-11],		
-			clockabs   		=> '560',				# not used now
+			clockabs   		=> '560',
 			format     		=> 'twostate',  		# not used now
 			preamble		=> 'P1#',					# prepend to converted message	 	
 			postamble		=> '',					# Append to converted message	 	
-			clientmodule    => 'SD_RSL',   # not used now
-			modulematch     => '^P1#[A-Fa-f0-9]{8}', 	# not used now
+			clientmodule    => 'SD_RSL',
+			modulematch     => '^P1#[A-Fa-f0-9]{8}',
 			length_min 		=> '20',   # 23
 			length_max 		=> '40',   # 24
         },
@@ -95,10 +95,10 @@
 			one				=> [1,-2],
 			zero			=> [1,-1],
 			sync			=> [1,-20],
-			clockabs     	=> '500',		# not used now
+			clockabs     	=> '500',
 			format 			=> 'twostate',	
 			preamble		=> 'P2#',		# prepend to converted message		
-			clientmodule    => 'SD_AS',   # not used now
+			clientmodule    => 'SD_AS',
 			modulematch     => '^P2#.{7,8}',
 			length_min      => '32',
 			length_max      => '34',		# Don't know maximal lenth of a valid message
@@ -117,8 +117,8 @@
 			clockabs     	=> -1,	# -1=auto	
 			format 			=> 'twostate',	# not used now
 			preamble		=> 'i',			
-			clientmodule    => 'IT',   # not used now
-			modulematch     => '^i......', # not used now
+			clientmodule    => 'IT',
+			modulematch     => '^i......',
 			length_min      => '24',
 			length_max      => '24',		# Don't know maximal lenth of a valid message
 			},
@@ -136,8 +136,8 @@
 			clockabs     	=> -1,	# -1=auto	
 			format 			=> 'twostate',	# not used now
 			preamble		=> 'i',			
-			clientmodule    => 'IT',   # not used now
-			modulematch     => '^i......', # not used now
+			clientmodule    => 'IT',
+			modulematch     => '^i......',
 			length_min      => '24',
 			length_max      => '24',		# Don't know maximal lenth of a valid message
 			postDemodulation => \&SIGNALduino_bit2itv1,
@@ -156,8 +156,8 @@
 			format 			=> 'twostate',	# tristate can't be migrated from bin into hex!
 			preamble		=> 'i',			# Append to converted message	
 			postamble		=> '00',		# Append to converted message	 	
-			clientmodule    => 'IT',   		# not used now
-			modulematch     => '^i......',  # not used now
+			clientmodule    => 'IT',
+			modulematch     => '^i......',
 			length_min      => '39',
 			length_max      => '44',		# Don't know maximal lenth of a valid message
 		},
@@ -172,8 +172,8 @@
 			clockabs     	=> 500,			# -1 = auto
 			format 			=> 'twostate',	# tristate can't be migrated from bin into hex!
 			preamble		=> 'p5#',			# Append to converted message	
-			clientmodule    => 'IT',   		# not used now
-			modulematch     => '^i......',  # not used now
+			clientmodule    => 'IT',
+			modulematch     => '^i......',
 			length_min      => '24',
 			length_max      => '24',		# Don't know maximal lenth of a valid message
 		},    
@@ -188,8 +188,8 @@
 			clockabs     	=> 220,			# -1 = auto
 			format 			=> 'twostate',	# tristate can't be migrated from bin into hex!
 			preamble		=> 'u6#',			# Append to converted message	
-			#clientmodule    => '',   	# not used now
-			#modulematch     => '^u......',  # not used now
+			#clientmodule    => '',
+			#modulematch     => '^u......',
 			length_min      => '24',
 		},
 	"7"    => ## weather sensors like EAS800z
@@ -204,8 +204,8 @@
 			clockabs     	=> 484,			
 			format 			=> 'twostate',	
 			preamble		=> 'P7#',		# prepend to converted message	
-			clientmodule    => 'SD_WS07',   	# not used now
-			modulematch     => '^P7#.{6}F.{2}', # not used now
+			clientmodule    => 'SD_WS07',
+			modulematch     => '^P7#.{6}F.{2}',
 			length_min      => '35',
 			length_max      => '40',
 		}, 
@@ -217,11 +217,11 @@
 			one				=> [1,-2],
 			zero			=> [2,-2],
 			#sync			=> [1,-8],		# 
-			clockabs     	=> 470,			# 
+			clockabs     	=> 470,
 			format 			=> 'pwm',	    # 
 			preamble		=> 'TX',		# prepend to converted message	
-			clientmodule    => 'CUL_TX',   	# not used now
-			modulematch     => '^TX......', # not used now
+			clientmodule    => 'CUL_TX',
+			modulematch     => '^TX......',
 			length_min      => '43',
 			length_max      => '44',
 			remove_zero     => 1,           # Removes leading zeros from output
@@ -238,8 +238,8 @@
 			clockabs     	=> 480,			# -1 = auto undef=noclock
 			format 			=> 'pwm',	    # tristate can't be migrated from bin into hex!
 			preamble		=> 'P9#',		# prepend to converted message	
-			clientmodule    => 'SD_WS09',   	# not used now
-			#modulematch     => '^u9#.....',  # not used now
+			clientmodule    => 'SD_WS09',
+			#modulematch     => '^u9#.....',
 			length_min      => '60',
 			length_max      => '120',
 		}, 	
@@ -263,7 +263,7 @@
 			clockrange     	=> [380,425],			# min , max
 			format 			=> 'manchester',	    # tristate can't be migrated from bin into hex!
 			preamble		=> 'P2#',		# prepend to converted message	
-			clientmodule    => 'SD_AS',   	# not used now
+			clientmodule    => 'SD_AS',
 			modulematch     => '^P2#.{7,8}',
 			length_min      => '52',
 			length_max      => '56',
@@ -278,8 +278,8 @@
 			clockrange     	=> [420,510],                   # min, max better for Bresser Sensors, OK for hideki/Hideki/TFA too     
 			format 			=> 'manchester',	
 			preamble		=> 'P12#',						# prepend to converted message	
-			clientmodule    => 'hideki',   				# not used now
-			modulematch     => '^P12#75.+',  						# not used now
+			clientmodule    => 'hideki',
+			modulematch     => '^P12#75.+',
 			length_min      => '71',
 			length_max      => '128',
 			method          => \&SIGNALduino_Hideki,	# Call to process this message
@@ -298,8 +298,8 @@
 			clockabs		=> 800,
 			format 			=> 'twostate',	  		
 			preamble		=> 'P13#',				# prepend to converted message	
-			clientmodule    => 'FLAMINGO',   				# not used now
-			#modulematch     => 'P13#.*',  				# not used now
+			clientmodule    => 'FLAMINGO',
+			#modulematch     => 'P13#.*',
 			length_min      => '24',
 			length_max      => '26',
 		}, 		
@@ -320,8 +320,8 @@
 			clockabs		=> 800,
 			format 			=> 'twostate',	  		
 			preamble		=> 'P13#',				# prepend to converted message	
-			clientmodule    => 'FLAMINGO',   				# not used now
-			#modulematch     => 'P13#.*',  				# not used now
+			clientmodule    => 'FLAMINGO',
+			#modulematch     => 'P13#.*',
 			length_min      => '24',
 			length_max      => '24',
 		}, 		
@@ -330,14 +330,14 @@
 			name		=> 'LM-101LD Rauchm',
 			comment		=> 'Unitec Rauchmelder',
 			id		=> '13',
-			zero		=> [1,-1.8], 	#
-			one		=> [1,-3.5],   	# 
-			sync		=> [1,-11,10,-1.2],	#
+			zero		=> [1,-1.8],
+			one		    => [1,-3.5],
+			sync		=> [1,-11,10,-1.2],
 			clockabs     	=> 790,
-			format 		=> 'twostate',	    # 
+			format 		=> 'twostate',
 			preamble	=> 'P13#',	# prepend to converted message	
 			clientmodule    => 'FLAMINGO',
-			#modulematch     => '', # not used now
+			#modulematch     => '',
 			length_min      => '24',
 			length_max      => '24',
 		},
@@ -349,12 +349,12 @@
 			one				=> [1,-2],
 			zero			=> [1,-1],
 			#float			=> [-1,3],				# not full supported now, for later use
-			sync			=> [1,-14],				# 
+			sync			=> [1,-14],
 			clockabs		=> 350,
 			format 			=> 'twostate',	  		
 			preamble		=> 'u14#',				# prepend to converted message	
-			#clientmodule    => '',   				# not used now
-			#modulematch     => '',  				# not used now
+			#clientmodule    => '',
+			#modulematch     => '',
 			length_min      => '12',
 			length_max      => '20',
 		}, 			
@@ -365,12 +365,12 @@
 			id          	=> '15',
 			one				=> [1,-1],
 			zero			=> [1,-2],
-			sync			=> [1,-45],				# 
+			sync			=> [1,-45],
 			clockabs		=> 700,
 			format 			=> 'twostate',	  		
 			preamble		=> 'u15#',				# prepend to converted message	
-			#clientmodule    => '',   				# not used now
-			#modulematch     => '',  				# not used now
+			#clientmodule    => '',
+			#modulematch     => '',
 			length_min      => '10',
 			length_max      => '20',
 			#method          => \&SIGNALduino_Cresta	# Call to process this message
@@ -389,8 +389,8 @@
 			clockabs		=> 280,
 			format 			=> 'twostate',	  		
 			preamble		=> 'P16#',				# prepend to converted message	
-			clientmodule    => 'Dooya',   				# not used now
-			#modulematch     => '',  				# not used now
+			clientmodule    => 'Dooya',
+			#modulematch     => '',
 			length_min      => '39',
 			length_max      => '40',
 		}, 	
@@ -409,8 +409,8 @@
 			format 			=> 'twostate',	# tristate can't be migrated from bin into hex!
 			preamble		=> 'i',			# Append to converted message	
 			postamble		=> '00',		# Append to converted message	 	
-			clientmodule    => 'IT',   		# not used now
-			modulematch     => '^i......',  # not used now
+			clientmodule    => 'IT',
+			modulematch     => '^i......',
 			length_min      => '32',
 			length_max      => '34',		# Don't know maximal lenth of a valid message
 			postDemodulation => \&SIGNALduino_bit2Arctec,
@@ -431,8 +431,8 @@
 			format 			=> 'twostate',	# tristate can't be migrated from bin into hex!
 			preamble		=> 'i',			# Append to converted message	
 			postamble		=> '00',		# Append to converted message	 	
-			clientmodule    => 'IT',   		# not used now
-			modulematch     => '^i......',  # not used now
+			clientmodule    => 'IT',
+			modulematch     => '^i......',
 			length_min      => '32',
 			length_max     	=> '34',		# Don't know maximal lenth of a valid message
 			postDemodulation => \&SIGNALduino_bit2Arctec,
@@ -465,8 +465,8 @@
 			clockabs		=> 300,
 			format 			=> 'twostate',	  		
 			preamble		=> 'u19#',				# prepend to converted message
-			#clientmodule    => '',   				# not used now
-			#modulematch     => '',  				# not used now
+			#clientmodule    => '',
+			#modulematch     => '',
 			length_min      => '19',
 			length_max      => '23',				# not confirmed, length one more as MU Message
 		},
@@ -488,8 +488,8 @@
 			clockabs		=> 110,                  #can be 90-140
 			format 			=> 'twostate',	  		
 			preamble		=> 'u20#',				# prepend to converted message	
-			#clientmodule    => '',   				# not used now
-			#modulematch     => '',  				# not used now
+			#clientmodule    => '',
+			#modulematch     => '',
 			length_min      => '16',
 			filterfunc      => 'SIGNALduino_filterSign',
 		},
@@ -504,8 +504,8 @@
 			clockabs		=> 400,                  #ca 400us
 			format 			=> 'twostate',	  		
 			preamble		=> 'u21#',				# prepend to converted message	
-			#clientmodule   => '',   				# not used now
-			#modulematch    => '',  				# not used now
+			#clientmodule   => '',
+			#modulematch    => '',
 			length_min      => '32',
 			length_max      => '32',				
 			paddingbits     => '1',					# This will disable padding 
@@ -520,8 +520,8 @@
 			clockabs		=> 500,                  #ca 400us
 			format 			=> 'twostate',	  		
 			preamble		=> 'u22#',				# prepend to converted message	
-			#clientmodule    => '',   				# not used now
-			#modulematch     => '',  				# not used now
+			#clientmodule    => '',
+			#modulematch     => '',
 			length_min      => '40',
 			#length_max      => '',				    # must be tested
 		},
@@ -535,8 +535,8 @@
 			clockabs		=> 200,                  #ca 200us
 			format 			=> 'twostate',	  		
 			preamble		=> 'u23#',				# prepend to converted message	
-			#clientmodule    => '',   				# not used now
-			#modulematch     => '',  				# not used now
+			#clientmodule    => '',
+			#modulematch     => '',
 			length_min      => '36',
 			length_max      => '44',				
 		},
@@ -554,8 +554,8 @@
 			clockabs		=> 150,                  #ca 150us
 			format 			=> 'twostate',	  		
 			preamble		=> 'u24#',				# prepend to converted message	
-			#clientmodule    => '',   				# not used now
-			#modulematch     => '',  				# not used now
+			#clientmodule    => '',
+			#modulematch     => '',
 			length_min      => '54',
 			length_max      => '58',				
 		},
@@ -571,8 +571,8 @@
 			clockabs		=> 350,                 #ca 350us
 			format 			=> 'twostate',	  		
 			preamble		=> 'u25#',				# prepend to converted message	
-			#clientmodule    => '',   				# not used now
-			#modulematch     => '',  				# not used now
+			#clientmodule    => '',
+			#modulematch     => '',
 			length_min      => '24',
 			length_max      => '50',				# message has only 24 bit, but we get more than one message, calculation has to be corrected
 		},
@@ -587,8 +587,8 @@
 			clockabs		=> 380,                 #ca 380
 			format 			=> 'twostate',	  		
 			preamble		=> 'u26#',				# prepend to converted message	
-			#clientmodule    => '',   				# not used now
-			#modulematch     => '',  				# not used now
+			#clientmodule    => '',
+			#modulematch     => '',
 			length_min      => '24',
 			length_max      => '24',				# message has only 24 bit, but we get more than one message, calculation has to be corrected
 		},
@@ -602,8 +602,8 @@
 			clockabs		=> 480,                 #ca 480
 			format 			=> 'twostate',	  		
 			preamble		=> 'u27#',				# prepend to converted message	
-			#clientmodule    => '',   				# not used now
-			#modulematch     => '',  				# not used now
+			#clientmodule    => '',
+			#modulematch     => '',
 			length_min      => '24',
 			length_max      => '24',				
 		},
@@ -617,8 +617,8 @@
 			clockabs		=> 600,                 #ca 600
 			format 			=> 'twostate',	  		
 			preamble		=> 'u28#',				# prepend to converted message
-			#clientmodule    => '',   				# not used now
-			#modulematch     => '',  				# not used now
+			#clientmodule    => '',
+			#modulematch     => '',
 			length_min      => '8',
 			length_max      => '8',				
 		},
@@ -673,8 +673,8 @@
 			clockabs		=> 600,                  
 			format 			=> 'twostate',	  		
 			preamble		=> 'u31#',				# prepend to converted message	
-			#clientmodule    => '',   				# not used now
-			#modulematch     => '',  				# not used now
+			#clientmodule    => '',
+			#modulematch     => '',
 			length_min      => '20',
 			length_max      => '20',				
 		},
@@ -698,8 +698,8 @@
 			clockabs		=> 150,
 			format 			=> 'twostate',	  		
 			preamble		=> 'u32#',				# prepend to converted message	
-			#clientmodule    => '',   				# not used now
-			#modulematch     => '',  				# not used now
+			#clientmodule    => '',
+			#modulematch     => '',
 			length_min      => '24',
 			length_max      => '24',				
     	},
@@ -718,7 +718,7 @@
 			preamble		=> 'W33#',				# prepend to converted message	
 			postamble		=> '',					# Append to converted message	 	
 			clientmodule    => 'SD_WS',
-			#modulematch     => '',     			# not used now
+			#modulematch     => '',
 			length_min      => '42',
 			length_max      => '44',
     	},
@@ -733,8 +733,8 @@
 #			format     		=> 'twostate',  		# not used now
 #			preamble		=> 'u34#',				# prepend to converted message	
 #			postamble		=> '',					# Append to converted message	 	
-#			#clientmodule    => '',      			# not used now
-#			#modulematch     => '',     			# not used now
+#			#clientmodule    => '',
+#			#modulematch     => '',
 #			length_min      => '40',
 #			length_max      => '40',
  #   	},
@@ -751,8 +751,8 @@
 			format     		=> 'twostate',  		# not used now
 			preamble		=> 'ih',				# prepend to converted message	
 			postamble		=> '',					# Append to converted message	 	
-			clientmodule    => 'IT',      			# not used now
-			#modulematch     => '',     			# not used now
+			clientmodule    => 'IT',
+			#modulematch     => '',
 			length_min      => '28',
 			length_max      => '40',
 			postDemodulation => \&SIGNALduino_HE800,
@@ -768,8 +768,8 @@
 			format     		=> 'twostate',  		# not used now
 			preamble		=> 'u36#',				# prepend to converted message	
 			postamble		=> '',					# Append to converted message	 	
-			#clientmodule    => '',      			# not used now
-			#modulematch     => '',     			# not used now
+			#clientmodule    => '',
+			#modulematch     => '',
 			length_min      => '24',
 			length_max      => '24',
     	},
@@ -801,12 +801,12 @@
 			one				=> [1,-10],
 			zero			=> [1,-5],
 			sync 			=> [1,-25],
-			clockabs   		=> '360',		# not used now
+			clockabs   		=> '360',
 			format     		=> 'twostate',  # not used now
 			preamble		=> 's',			# prepend to converted message	 	
 			postamble		=> '00',		# Append to converted message	 	
-			clientmodule    => 'CUL_TCM97001',   # not used now
-			#modulematch     => '^s[A-Fa-f0-9]+', # not used now
+			clientmodule    => 'CUL_TCM97001',
+			#modulematch     => '^s[A-Fa-f0-9]+',
 			length_min      => '32',
 			length_max      => '32',
 			paddingbits     => '8',			
@@ -823,8 +823,8 @@
 			clockabs => 560, 
 			format => 'twostate', 
 			preamble => '', # prepend to converted message
-			clientmodule => 'RFXX10REC', # not used now
-			#modulematch => '^TX......', # not used now
+			clientmodule => 'RFXX10REC',
+			#modulematch => '^TX......',
 			length_min => '32',
 			length_max => '44',
 			paddingbits     => '8',		
@@ -843,8 +843,8 @@
 			start => [1,-2],
 			clockabs => 250, 
 			preamble => 'u40#', # prepend to converted message
-			#clientmodule => '', # not used now
-			#modulematch => '', # not used now
+			#clientmodule => '',
+			#modulematch => '',
 			length_min => '12',
 		},    
 	"41" => ## Elro (Smartwares) Doorbell DB200 / 16 melodies
@@ -864,8 +864,8 @@
 			sync => [1,-14],
 			clockabs => 500, 
 			preamble => 'u41#', # prepend to converted message
-			#clientmodule => '', # not used now
-			#modulematch => '', # not used now
+			#clientmodule => '',
+			#modulematch => '',
 			length_min => '32',
 			length_max => '32',
 		},     
@@ -878,7 +878,7 @@
 	#		sync => [-28],
 	#		clockabs => 550, 
 	#		preamble => 'u42#', # prepend to converted message
-	#		#clientmodule => '', # not used now
+	#		#clientmodule => '',
 	#		#modulematch => '', 
 	#		length_min => '24',
 	#	},
@@ -955,8 +955,8 @@
 			clockabs     	=> 250,	# -1=auto	
 			format 			=> 'twostate',	# not used now
 			preamble		=> 'u46#',			
-			#clientmodule    => '',   # not used now
-			#modulematch     => '', # not used now
+			#clientmodule    => '',
+			#modulematch     => '',
 			length_min      => '16',
 			length_max 		=> '18',
 			},
@@ -989,8 +989,8 @@
 			start			=> [-6,2],
 			format 			=> 'twostate',	
 			preamble		=> 'U48#',						# prepend to converted message	
-			#clientmodule    => '',   						# not used now
-			modulematch     => '^U48#.*',  					# not used now
+			#clientmodule    => '',
+			modulematch     => '^U48#.*',
 			length_min      => '47',
 			length_max      => '48',
 		}, 			
@@ -1006,8 +1006,8 @@
 			start			=> [6,-15],
 			format 			=> 'twostate',	
 			preamble		=> 'U49#',						# prepend to converted message	
-			#clientmodule    => '',   						# not used now
-			modulematch     => '^U49#.*',  					# not used now
+			#clientmodule    => '',
+			modulematch     => '^U49#.*',
 			length_min      => '22',
 			length_max      => '28',
 		}, 
@@ -1021,8 +1021,8 @@
 		#	start			=> [1,-25],						# Wenn das startsignal empfangen wird, fehlt das 1 bit
 			format 			=> 'twostate',	
 			preamble		=> 'W50#',						# prepend to converted message	
-			clientmodule    => 'SD_WS',   					# not used now
-			modulematch     => '^W50#.*',  					# not used now
+			clientmodule    => 'SD_WS',
+			modulematch     => '^W50#.*',
 			length_min      => '47',
 			length_max      => '48',
 		},
@@ -1036,7 +1036,7 @@
 			one				=> [1,-8],
 			zero			=> [1,-4],
 			sync			=> [1,-13],		
-			clockabs   		=> '560',		# not used now
+			clockabs   		=> '560',
 			format     		=> 'twostate',  # not used now
 			preamble		=> 'W51#',		# prepend to converted message	 	
 			postamble		=> '',			# Append to converted message	 	
@@ -1070,8 +1070,8 @@
 			sync			=> [1,-8],						
 			format 			=> 'twostate',	
 			preamble		=> 'i',						# prepend to converted message	
-			clientmodule    => 'IT',   					# not used now
-			modulematch     => '^i.*',  					# not used now
+			clientmodule    => 'IT',
+			modulematch     => '^i.*',
 			length_min      => '24',
 			length_max      => '24',
 		},	
@@ -1085,8 +1085,8 @@
 			start			=> [25,-3],						
 			format 			=> 'twostate',	
 			preamble		=> 'u56#',						# prepend to converted message	
-			#clientmodule    => ''	,   					# not used now
-			modulematch     => '',  						# not used now
+			#clientmodule    => '',
+			modulematch     => '',
 			length_min      => '56',
 			length_max      => '68',
 		},		
@@ -1137,8 +1137,8 @@
 			format 			=> 'twostate',	# tristate can't be migrated from bin into hex!
 			preamble		=> 'u59#',			# Append to converted message	
 			postamble		=> '',		# Append to converted message	 	
-			#clientmodule    => '',   		# not used now
-			modulematch     => '',  # not used now
+			#clientmodule    => '',
+			modulematch     => '',
 			length_min      => '24',
 			length_max      => '24',
 		},			
@@ -1306,10 +1306,10 @@
       		one				=> [1,-10],
 			zero			=> [1,-5],
       		sync			=> [1,-21],	
-			clockabs   		=> 380,		# not used now
+			clockabs   		=> 380,
       		preamble		=> 's',			# prepend to converted message	 	
 			postamble		=> '00',		# Append to converted message	 	
-			clientmodule    => 'CUL_TCM97001',   # not used now
+			clientmodule    => 'CUL_TCM97001',
      		length_min      => '24',
 			length_max      => '42',
 			paddingbits     => '8',				 # pad up to 8 bits, default is 4
@@ -1502,13 +1502,13 @@
 			comment			=> 'Selbstbau Sensor',
 			id				=> '77',
 			developId		=> 'y', 
-			zero			=> [4,-6], 		#
-			one				=> [1,-6],   	# 
-			clockabs     	=> 250,			# 
+			zero			=> [4,-6],
+			one				=> [1,-6],
+			clockabs     	=> 250,
 			format 			=> 'pwm',	    # 
 			preamble		=> 'TX',		# prepend to converted message	
-			clientmodule    => 'CUL_TX',   	# not used now
-			modulematch     => '^TX......', # not used now
+			clientmodule    => 'CUL_TX',
+			modulematch     => '^TX......',
 			length_min      => '43',
 			length_max      => '44',
 			remove_zero     => 1,           # Removes leading zeros from output
@@ -1545,14 +1545,14 @@
 			name		=> 'm-e VTX-BELL',
 			comment	    => 'wireless chime VTX-BELL',
 			id		=> '79',
-			zero		=> [-2,1], 	#
-			one		=> [-1,2],   	# 
-			start  		=> [-15,1],	#
+			zero		=> [-2,1],
+			one		    => [-1,2],
+			start  		=> [-15,1],
 			clockabs     	=> 330,
 			format 		=> 'twostate',	    # 
 			preamble	=> 'U79#',	# prepend to converted message	
-			#clientmodule    => 'SD_UT',   	# not used now
-			#modulematch     => '^P79#.*', # not used now
+			#clientmodule    => 'SD_UT',
+			#modulematch     => '^P79#.*',
 			length_min      => '12',
 			length_max      => '12',
 		},
