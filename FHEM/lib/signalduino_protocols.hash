@@ -33,7 +33,7 @@
 # preamble    => 'U..'     # message can be unknown and without module, no forwarding SIGNALduino_un but forwarding can FHEM DOIF
 # postamble   => ' '       # appends a string to the demodulated signal
 #
-# clientmodule => ' '      # FHEM module for processing | if defined, it will be evaluated
+# clientmodule => ' '      # FHEM module for processing
 # filterfunc  => ' '       # SIGNALduino_filterSign | SIGNALduino_compPattern --> SIGNALduino internal filter function, it remove the sign from the pattern, and compress message and pattern
 #                          # SIGNALduino_filterMC --> SIGNALduino internal filter function, it will decode MU data via Manchester encoding
 # postDemodulation => \&   # only MU - SIGNALduino internal sub for processing before dispatching to a logical module
