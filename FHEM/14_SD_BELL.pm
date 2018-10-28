@@ -32,7 +32,6 @@ use strict;
 use warnings;
 
 my %models = (
-    "00"  => 'unknwon',
     "14"  => 'Heidemann_HX',
     "15"  => 'TCM_234759',
 	"32"  => 'FreeTec_PE-6946',
@@ -43,7 +42,7 @@ my %models = (
 
 sub SD_BELL_Initialize($) {
 	my ($hash) = @_;
-	$hash->{Match}		= "^[u|P](14|15|32|41|57|79)#.*";
+	$hash->{Match}		= "^[u|P](?:14|15|32|41|57|79)#.*";
 	$hash->{DefFn}		= "SD_BELL_Define";
 	$hash->{UndefFn}	= "SD_BELL_Undef";
 	$hash->{ParseFn}	= "SD_BELL_Parse";
@@ -62,7 +61,7 @@ sub SD_BELL_Define($$) {
 
 	# Argument					   0	 1		2		3				4
 	return "wrong syntax: define <name> SD_BELL <Protocol> <HEX-Value> <optional IODEV>" if(int(@a) < 3 || int(@a) > 5);
-	return "wrong <protocol> $a[2]" if not($a[2] =~ /^\b14\b|^\b15\b|^\b32\b|^\b41\b|^\b57\b|^\b79\b/s);
+	return "wrong <protocol> $a[2]" if not($a[2] =~ /^(?:14|15|32|41|57|79)/s);
 	### checks ###
 	return "wrong HEX-Value! Protocol $a[2] HEX-Value to short | long or not HEX (0-9 | a-f | A-F){3,8}" if (not $a[3] =~ /^[0-9a-fA-F]{3,8}/s);
 
