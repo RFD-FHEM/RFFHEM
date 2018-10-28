@@ -2131,7 +2131,7 @@ sub SIGNALduino_padbits(\@$)
 
 # - - - - - - - - - - - -
 #=item SIGNALduino_getProtoProp()
-#This functons, will return a value from the Protocolist and check if it is defined optional you can specify a optional default value that will be reurned
+#This functons, will return a value from the Protocolist and check if the key exists and a value is defined optional you can specify a optional default value that will be reurned
 # 
 # returns "" if the var is not defined
 # =cut
@@ -2143,7 +2143,7 @@ sub SIGNALduino_getProtoProp
 	
 	#my $id = shift;
 	#my $propNameLst = shift;
-	return $ProtocolListSIGNALduino{$id}{$propNameLst} if defined($ProtocolListSIGNALduino{$id}{$propNameLst});
+	return $ProtocolListSIGNALduino{$id}{$propNameLst} if exists($ProtocolListSIGNALduino{$id}{$propNameLst}) && defined($ProtocolListSIGNALduino{$id}{$propNameLst});
 	return $default; # Will return undef if $default is not provided
 	#return undef;
 }
@@ -2155,7 +2155,6 @@ sub SIGNALduino_Parse_MU($$$$@)
 	my $protocolid;
 	my $clockidx=$msg_parts{clockidx};
 	my $rssi=$msg_parts{rssi};
-	#my $protocol=undef;		# wird dies noch benoetigt
 	my $rawData;
 	my %patternListRaw;
 	my $message_dispatched=0;
@@ -2186,7 +2185,6 @@ sub SIGNALduino_Parse_MU($$$$@)
 		
 		foreach $id (@{$hash->{muIdList}}) {
 			
-			#my $valid=1;
 			$clockabs= $ProtocolListSIGNALduino{$id}{clockabs};
 			my %patternList;
 			$rawData=$msg_parts{rawData};
@@ -2210,22 +2208,8 @@ sub SIGNALduino_Parse_MU($$$$@)
 				%patternList = map { $_ => round($patternListRaw{$_}/$clockabs,1) } keys %patternListRaw; 
 			}
 			
-			#my $signal_length = length($rawData);        # Length of data array
-			
-			#my @keys = sort { $patternList{$a} <=> $patternList{$b} } keys %patternList;
-
-			#Debug Dumper(\%patternList);	
-			#Debug Dumper(@keys);	
-			#$debug=1;
 					
 			Debug "Testing against Protocol id $id -> $ProtocolListSIGNALduino{$id}{name}"  if ($debug);
-	
-#			$valid=SIGNALduino_inTol($ProtocolListSIGNALduino{$id}{clockabs},$clockabs,$clockabs*0.30) if ($ProtocolListSIGNALduino{$id}{clockabs} > 0);
-
-			
-			#my $bit_length = ($signal_length/((scalar @{$ProtocolListSIGNALduino{$id}{one}} + scalar @{$ProtocolListSIGNALduino{$id}{zero}})/2));
-			#Debug "Expect $bit_length bits in message"  if ($debug);
-
 			Debug "Searching in patternList: ".Dumper(\%patternList) if($debug);
 
 			my $startStr=""; # Default match if there is no start pattern available
@@ -2348,23 +2332,29 @@ sub SIGNALduino_Parse_MU($$$$@)
 				@bit_msg = @retvalue;
 				undef(@retvalue); undef($rcode);
 	
-				my $padwith = defined($ProtocolListSIGNALduino{$id}{paddingbits}) ? $ProtocolListSIGNALduino{$id}{paddingbits} : 4;
-				while (scalar @bit_msg % $padwith > 0)  ## will pad up full nibbles per default or full byte if specified in protocol
+				my $dispmode="bin";
+				if (SIGNALduino_getProtpProp($id,"dispatchBin",0) == 0 )
 				{
-					push(@bit_msg,'0');
-					Debug "$name: padding 0 bit to bit_msg array" if ($debug);
+					$dispmode="hex";
+					my $padwith = SIGNALduino_getProtpProp($id,"paddingbits",0);
+					while (scalar @bit_msg % $padwith > 0)  ## will pad up full nibbles per default or full byte if specified in protocol
+					{
+						push(@bit_msg,'0');
+						Debug "$name: padding 0 bit to bit_msg array" if ($debug);
+					}
 				}
 				my $dmsg = join ("", @bit_msg);
 				@bit_msg=(); # clear bit_msg array
 
-				$dmsg = SIGNALduino_b2h($dmsg) if (!exists($ProtocolListSIGNALduino{$id}{dispatchBin}));
+				$dmsg = SIGNALduino_b2h($dmsg) if (SIGNALduino_getProtpProp($id,"dispatchBin",0) == 0 );
+				
 
-				$dmsg =~ s/^0+//	 if (defined($ProtocolListSIGNALduino{$id}{remove_zero})); 
-				$dmsg = "$dmsg"."$ProtocolListSIGNALduino{$id}{postamble}" if (defined($ProtocolListSIGNALduino{$id}{postamble}));
-				$dmsg = "$ProtocolListSIGNALduino{$id}{preamble}"."$dmsg" if (defined($ProtocolListSIGNALduino{$id}{preamble}));
-				SIGNALduino_Log3 $name, 5, "$name: dispatching bits: $dmsg";
+				$dmsg =~ s/^0+//	 if (  SIGNALduino_getProtpProp($id,"remove_zero",0) );
+				
+				sprintf("%s%s%s",SIGNALduino_getProtpProp($id,"preamble",""),$dmsg,SIGNALduino_getProtpProp($id,"postamble",""));
+				SIGNALduino_Log3 $name, 5, "$name: dispatching $dispmode: $dmsg";
 
-				if (!defined($ProtocolListSIGNALduino{$id}{modulematch}) || $dmsg =~ m/$ProtocolListSIGNALduino{$id}{modulematch}/) {
+				if (!defined(my $modMatchRegex=SIGNALduino_getProtpProp($id,"modulematch",undef)) || $dmsg =~ m/$modMatchRegex/) {
 					Debug "$name: dispatching now msg: $dmsg" if ($debug);
 					if (defined($ProtocolListSIGNALduino{$id}{developId}) && substr($ProtocolListSIGNALduino{$id}{developId},0,1) eq "m") {
 						my $develop = lc(AttrVal($name,"development",""));
