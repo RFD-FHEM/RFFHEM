@@ -255,7 +255,7 @@ SIGNALduino_un_Parse($$)
 		readingsBulkUpdate($hash, "bitCount", $bitcount);
 		readingsBulkUpdate($hash, "hexMsg", $rawData);
 		readingsBulkUpdate($hash, "hexMsg_invert", $rawDataInvert);
-		readingsBulkUpdate($hash, "hexCount or nibble", $hexcount);
+		readingsBulkUpdate($hash, "hexCount_or_nibble", $hexcount);
 		readingsBulkUpdate($hash, "lastInputDev", $ioname);
 		readingsEndUpdate($hash, 1); 		# Notify is done by Dispatch
 		
@@ -427,7 +427,7 @@ SIGNALduino_un_binflip($)
 	<li>bitCountLength  (Length range of all received signals of the protocol)</li>
 	<li>bitMsg</li>
 	<li>bitMsg_invert (Message binary, inverted)</li>
-	<li>hexCount or nibble (Length of the signal, hexadecimal)</li>
+	<li>hexCount_or_nibble (Length of the signal, hexadecimal)</li>
 	<li>hexMsg</li>
 	<li>hexMsg_invert (Message hexadecimal, inverted)</li>
 	<li>lastInputDev (Device at the last reception)</li>
@@ -485,7 +485,7 @@ SIGNALduino_un_binflip($)
 	<li>bitCountLength  (L&auml;ngenbereich aller empfangen Signale des Protokolles)</li>
 	<li>bitMsg</li>
 	<li>bitMsg_invert (Nachricht bin&auml;r, invertiert)</li>
-	<li>hexCount or nibble (L&auml;nge des Signals, hexadezimal)</li>
+	<li>hexCount_or_nibble (L&auml;nge des Signals, hexadezimal)</li>
 	<li>hexMsg</li>
 	<li>hexMsg_invert (Nachricht hexadezimal, invertiert)</li>
 	<li>lastInputDev (Device beim letzten Empfang)</li>

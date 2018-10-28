@@ -1,4 +1,7 @@
+22.10.2018
+ signalduino_protocols.hash - doc added & revised ID 14,15,20,31,41,57,79
 21.10.2018
+ 90_SIGNALduino_un.pm - fix readingname
  14_SD_WS09 - doc revised | FHEM Standard | Def - Set - Get ...
  00_SIGNALduino.pm - Feature support dupTimeout on same iodev
 20.10.2018

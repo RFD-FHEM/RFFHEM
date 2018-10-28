@@ -348,9 +348,10 @@
 			length_min      => '24',
 			length_max      => '24',
 		},
-	"14"    => 			## Heidemann HX
+	"14"    =>	## Heidemann HX BELL
 		{
             name			=> 'Heidemann HX',	
+			comment         => 'Heidemann HX doorbell',										
 			id          	=> '14',
 			one				=> [1,-2],
 			zero			=> [1,-1],
@@ -361,13 +362,13 @@
 			preamble		=> 'u14#',				# prepend to converted message	
 			#clientmodule    => '',   				# not used now
 			#modulematch     => '',  				# not used now
-			length_min      => '10',
+			length_min      => '12',
 			length_max      => '20',
 		}, 			
 	"15"    => 			## TCM234759
 			{
-            name			=> 'TCM Bell',	
-			comment         => '234759',			
+			name			=> 'TCM 234759 Bell',	
+			comment         => 'wireless doorbell TCM 234759 Tchibo',
 			id          	=> '15',
 			one				=> [1,-1],
 			zero			=> [1,-2],
@@ -479,6 +480,12 @@
 	"20" => # Livolo         	
             # https://github.com/RFD-FHEM/RFFHEM/issues/29
          	# MU;P0=-195;P1=151;P2=475;P3=-333;D=010101010102010101010101013101013101010101013101010201010101010101010101010101010101010101020101010101010101010101010101010101010102010101010101013101013101;CP=1;																																														 
+			#
+			# protocol sends 24 to 47 pulses per message.
+			# First pulse is the header and is 595 μs long. All subsequent pulses are either 170 μs (short pulse) or 340 μs (long pulse) long.
+			# Two subsequent short pulses correspond to bit 0, one long pulse corresponds to bit 1. There is no footer. The message is repeated for about 1 second.
+			#             _____________                 ___                 _______
+			# Start bit: |             |___|    bit 0: |   |___|    bit 1: |       |___|								   
 		{
             name			=> 'livolo',	
 			id          	=> '20',
@@ -660,11 +667,12 @@
 			length_min      => '12',
 			length_max      => '12',				# message has only 10 bit but is paddet to 12
 		},
-	"31" => # Pollin Isotronic
+	"31" => # Pollin Isotronik - 12 Tasten remote
 			# https://github.com/RFD-FHEM/RFFHEM/issues/44            
 			# MU;P0=-32001;P1=1208;P2=-682;P3=-1324;P4=570;P5=-15617;D=12121212121212121212121212121342121213454212121212121212121212121212121342121213454212121212121212121212121212121342121213454212121212121212121212121212121342121213405;CP=1;
 		{
-            name			=> 'pollin isotronic',	
+            name			=> 'Pollin Isotronik',
+            comment         => 'remote',
 			id          	=> '31',
 			one				=> [-1,2],
 			zero			=> [-2,1],
@@ -678,14 +686,23 @@
 			length_max      => '20',				
 		},
 	"32" => #FreeTec PE-6946 -> http://www.free-tec.de/Funkklingel-mit-Voic-PE-6946-919.shtml
+			# OLD
+			# https://github.com/RFD-FHEM/RFFHEM/issues/49
 		    # MS;P0=-266;P1=160;P3=-690;P4=580;P5=-6628;D=15131313401340134013401313404040404040404040404040;CP=1;SP=5;O;
+			# NEW
+			# https://github.com/RFD-FHEM/RFFHEM/issues/315
+			# MU;P0=-6676;P1=578;P2=-278;P4=-680;P5=176;P6=-184;D=541654165412545412121212121212121212121250545454125412541254125454121212121212121212121212;CP=1;R=0;
+			# MU;P0=146;P1=245;P3=571;P4=-708;P5=-284;P7=-6689;D=14351435143514143535353535353535353535350704040435043504350435040435353535353535353535353507040404350435043504350404353535353535353535353535070404043504350435043504043535353535353535353535350704040435043504350435040435353535353535353535353507040404350435;CP=3;R=0;O;
+			# MU;P0=-6680;P1=162;P2=-298;P4=253;P5=-699;P6=555;D=45624562456245456262626262626262626262621015151562156215621562151562626262626262626262626210151515621562156215621515626262626262626262626262;CP=6;R=0;
     	{   
             name			=> 'freetec 6946',	
+            comment         => 'Doorbell FreeTec PE-6946',
 			id          	=> '32',
 			one				=> [4,-2],
 			zero			=> [1,-5],
-			sync			=> [1,-49],				
-			clockabs		=> 140,                 #ca 140us
+			start           => [1,-45],				# neuerdings MU Erknnung
+			#sync           => [1,-49],				# old MS Erkennung
+			clockabs		=> 150,
 			format 			=> 'twostate',	  		
 			preamble		=> 'u32#',				# prepend to converted message	
 			#clientmodule    => '',   				# not used now
@@ -839,20 +856,25 @@
 		},    
 	"41" => ## Elro (Smartwares) Doorbell DB200 / 16 melodies
             # https://github.com/RFD-FHEM/RFFHEM/issues/70
-			# MS;P0=462;P1=-1521;P2=1439;P3=-538;P4=-6969;D=040101230101010123230101232323012323010101012301232323012301012323;CP=0;SP=4;O;
-			# MS;P0=-1520;P1=462;P2=1448;P3=-532;P4=-6959;D=141010231010101023231010232323102323101010102310232323102310102323;CP=1;SP=4;O;
+            # MS;P0=-526;P1=1450;P2=467;P3=-6949;P4=-1519;D=231010101010242424242424102424101010102410241024101024241024241010;CP=2;SP=3;O;
+            # MS;P0=468;P1=-1516;P2=1450;P3=-533;P4=-7291;D=040101230101010123230101232323012323010101012301232323012301012323;CP=0;SP=4;O;
+            # unitec Modell:98156+98YK / 36 melodies
+            # repeats 15, change two codes every 15 repeats --> one button push, 2 codes
+            # MS;P0=1474;P1=-521;P2=495;P3=-1508;P4=-6996;D=242323232301232323010101230123232301012301230123010123230123230101;CP=2;SP=4;R=51;m=0;
+            # MS;P1=-7005;P2=482;P3=-1511;P4=1487;P5=-510;D=212345454523452345234523232345232345232323234523454545234523234545;CP=2;SP=1;R=47;m=2;
 		{
-			name => 'elro doorbell',
-			comment => 'Elro (Smartwares) Doorbell DB200',
+			name => 'Doorbell',
+			comment => 'Elro (Smartwares) DB200 / unitec',
 			id => '41',
 			zero => [1,-3],
 			one => [3,-1],
-			sync => [1,-15],
-			clockabs => 450, 
+			sync => [1,-14],
+			clockabs => 500, 
 			preamble => 'u41#', # prepend to converted message
 			#clientmodule => '', # not used now
 			#modulematch => '', # not used now
-			length_min => '32',  # all available messages are length_min 32
+			length_min => '32',
+			length_max => '32',
 		},     
 	#"42" => ## MKT Multi Kon Trade  // Sollte eigentlich als MS ITv1 erkannt werden
 	#	{
@@ -1076,9 +1098,14 @@
 			length_min      => '56',
 			length_max      => '68',
 		},		
- 		"57"    => 			## m-e doorbell
+ 	"57" =>	## m-e doorbell fuer FG- und Basic-Serie
+			# https://forum.fhem.de/index.php/topic,64251.0.html
+			# MC;LL=-653;LH=665;SL=-317;SH=348;D=D55B58;C=330;L=21;
+			# MC;LL=-654;LH=678;SL=-314;SH=351;D=D55B58;C=332;L=21;
+			# MC;LL=-653;LH=679;SL=-310;SH=351;D=D55B58;C=332;L=21;					  
 		{
             name			=> 'm-e',	
+            comment         => 'radio gong transmitter for FG- and Basic-Serie ',
 			id          	=> '57',
 			clockrange     	=> [300,360],			# min , max
 			format 			=> 'manchester',	    # tristate can't be migrated from bin into hex!
@@ -1514,11 +1541,18 @@
 			length_max      => '18',
 			paddingbits     => '2'				 # pad 1 bit, default is 4
 		},
-	"79" => ##  MU;P0=656;P1=-656;P2=335;P3=-326;P4=-5024;D=01230121230123030303012423012301212301230303030124230123012123012303030301242301230121230123030303012423012301212301230303030124230123012123012303030301242301230121230123030303012423012301212301230303030124230123012123012303030301242301230121230123030303;CP=2;O;
+	"79" => ## m-e Funkmodul VTX-BELL
 			# https://github.com/RFD-FHEM/SIGNALDuino/issues/84
+			# MU;P0=656;P1=-656;P2=335;P3=-326;P4=-5024;D=0123012123012303030301 24 230123012123012303030301 24 230123012123012303030301 24 2301230121230123030303012423012301212301230303030124230123012123012303030301242301230121230123030303012423012301212301230303030124230123012123012303030301242301230121230123030303;CP=2;O;
+			# https://forum.fhem.de/index.php/topic,64251.0.html			
+			# MU;P0=540;P1=-421;P2=-703;P3=268;P4=-4948;D=4 323102323101010101010232 34 323102323101010101010232 34 323102323101010101010232 34 3231023231010101010102323432310232310101010101023234323102323101010101010232343231023231010101010102323432310232310101010101023234323102323101010101010232343231023231010101010;CP=3;O;
+			# https://github.com/RFD-FHEM/RFFHEM/issues/252
+			# MU;P0=-24096;P1=314;P2=-303;P3=615;P4=-603;P5=220;P6=-4672;D=0123456123412341414141412323234 16 123412341414141412323234 16 12341234141414141232323416123412341414141412323234161234123414141414123232341612341234141414141232323416123412341414141412323234161234123414141414123232341612341234141414141232323416123412341414;CP=1;R=26;O;
+			# MU;P0=-10692;P1=602;P2=-608;P3=311;P4=-305;P5=-4666;D=01234123232323234141412 35 341234123232323234141412 35 341234123232323234141412 35 34123412323232323414141235341234123232323234141412353412341232323232341414123534123412323232323414141235341234123232323234141412353412341232323232341414123534123412323232323414;CP=3;R=47;O;
+			# MU;P0=-7152;P1=872;P2=-593;P3=323;P4=-296;P5=622;P6=-4650;D=01234523232323234545452 36 345234523232323234545452 36 345234523232323234545452 36 34523452323232323454545236345234523232323234545452363452345232323232345454523634523452323232323454545236345234523232323234545452363452345232323232345454523634523452323232323454;CP=3;R=26;O;																																																																				 
 		{
-			name		=> 'VTX-BELL_Funkklingel',
-			#comment	=> '',
+			name		=> 'm-e VTX-BELL',
+			comment	    => 'wireless chime VTX-BELL',
 			id		=> '79',
 			zero		=> [-2,1], 	#
 			one		=> [-1,2],   	# 
@@ -1529,7 +1563,7 @@
 			#clientmodule    => 'SD_UT',   	# not used now
 			#modulematch     => '^P79#.*', # not used now
 			length_min      => '12',
-			#length_max      => '44',
+			length_max      => '12',
 		},
 	"80" => ## EM (Energy-Monitor) Funkprotokoll (868Mhz),  @HomeAutoUser | Derwelcherichbin
 			# MU;P1=-417;P2=385;P3=-815;P4=-12058;D=42121212121212121212121212121212121232321212121212121232321212121212121232323212323212321232121212321212123232121212321212121232323212121212121232121212121212121232323212121212123232321232121212121232123232323212321;CP=2;R=87;
