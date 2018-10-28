@@ -66,7 +66,7 @@ use warnings;
 
 sub SD_UT_Initialize($) {
 	my ($hash) = @_;
-	$hash->{Match}		= "^[P|u](29|30|81|83)#.*";
+	$hash->{Match}		= "^[P|u](?:29|30|81|83)#.*";
 	$hash->{DefFn}		= "SD_UT_Define";
 	$hash->{UndefFn}	= "SD_UT_Undef";
 	$hash->{ParseFn}	= "SD_UT_Parse";
