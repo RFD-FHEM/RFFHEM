@@ -52,9 +52,6 @@
 #     get sduino_dummy raw MU;;P0=-1756;;P1=112;;P2=-11752;;P3=496;;P4=-495;;P5=998;;P6=-988;;P7=-17183;;D=0123454545634545456345634563734545456345454563456345637345454563454545634563456373454545634545456345634563734545456345454563456345637345454563454545634563456373454545634545456345634563734545456345454563456345637345454563454545634563456373454545634545456;;CP=3;;R=0;;
 #     get sduino_dummy raw MU;;P0=-485;;P1=188;;P2=-6784;;P3=508;;P5=1010;;P6=-974;;P7=-17172;;D=0123050505630505056305630563730505056305050563056305637305050563050505630563056373050505630505056305630563730505056305050563056305637305050563050505630563056373050505630505056305630563730505056305050563056305637305050563050505630563056373050505630505056;;CP=3;;R=0;;
 ####################################################################################################################################
-# - VTX-BELL_Funkklingel  [Protocol 79]
-#     get sduino_dummy raw MU;;P0=656;;P1=-656;;P2=335;;P3=-326;;P4=-5024;;D=01230121230123030303012423012301212301230303030124230123012123012303030301242301230121230123030303012423012301212301230303030124230123012123012303030301242301230121230123030303012423012301212301230303030124230123012123012303030301242301230121230123030303;;CP=2;;O;;
-####################################################################################################################################
 # !!! ToDo´s !!!
 #     - send MSG von $protocol nutzen ?
 #     - doppelte Logeinträge bei zutreffen von 2 Protokollen?
@@ -69,13 +66,13 @@ use warnings;
 
 sub SD_UT_Initialize($) {
 	my ($hash) = @_;
-	$hash->{Match}		= "^[P|u](29|30|79|81|83)#.*";
+	$hash->{Match}		= "^[P|u](?:29|30|81|83)#.*";
 	$hash->{DefFn}		= "SD_UT_Define";
 	$hash->{UndefFn}	= "SD_UT_Undef";
 	$hash->{ParseFn}	= "SD_UT_Parse";
 	$hash->{SetFn}		= "SD_UT_Set";
 	$hash->{AttrFn}	= "SD_UT_Attr";
-	$hash->{AttrList}	= "IODev do_not_notify:1,0 ignore:0,1 showtime:1,0 model:unknown,Buttons_five,RH787T,SA_434_1_mini,Unitec_47031,Unitec_other,VTX_BELL " .
+	$hash->{AttrList}	= "IODev do_not_notify:1,0 ignore:0,1 showtime:1,0 model:unknown,Buttons_five,RH787T,SA_434_1_mini,Unitec_47031,Unitec_other " .
 				"$readingFnAttributes ";
 	$hash->{AutoCreate}	={"SD_UT.*" => {ATTR => "model:unknown", FILTER => "%NAME", autocreateThreshold => "2:180"}};
 	#$hash->{noAutocreatedFilelog} = 1;		### Bug? bei Aktivierung wird keine AutoCreate Attr berücksichtigt! ###
@@ -104,8 +101,6 @@ sub SD_UT_Define($$) {
 	return "wrong HEX-Value! $a[2] HEX-Value are not (0-9 | a-f | A-F)" if ($a[2] eq "Buttons_five" && not $a[3] =~ /^[0-9a-fA-F]{1}/s);
 	### checks SA_434_1_mini ###
 	return "wrong HEX-Value! $a[2] HEX-Value to short | long or not HEX (0-9 | a-f | A-F){3}" if ($a[2] eq "SA_434_1_mini" && not $a[3] =~ /^[0-9a-fA-F]{3}/s);
-	### checks VTX_BELL ###
-	return "wrong HEX-Value! $a[2] HEX-Value to short | long or not HEX (0-9 | a-f | A-F){3}" if ($a[2] eq "VTX_BELL" && not $a[3] =~ /^[0-9a-fA-F]{3}/s);
 	### checks Unitec_47031 ###
 	return "wrong HEX-Value! $a[2] HEX-Value to short | long or not HEX (0-9 | a-f | A-F){2}" if ($a[2] eq "Unitec_47031" && not $a[3] =~ /^[0-9a-fA-F]{2}/s);
 	### checks Unitec_other ###
@@ -244,22 +239,6 @@ sub SD_UT_Set($$$@) {
 				Log3 $name, 3, "$ioname: $name set $cmd" if ($cmd ne "?");
 				IOWrite($hash, 'sendMsg', $msg);
 			}
-	############ VTX_BELL ############
-	} elsif 	($model eq "VTX_BELL") {
-			if ($cmd eq "?") {
-				$ret .= "send:noArg";
-			} else {
-				my $msg = "P79#" . $hash->{bitMSG};
-				$msg .= "#R5";		# Anzahl Wiederholungen noch klären!
-				Log3 $name, 5, "$ioname: $name sendMsg=$msg";
-				
-				if ($cmd ne "?") {
-					$cmd = "send";
-				}				
-
-				Log3 $name, 3, "$ioname: $name set $cmd" if ($cmd ne "?");
-				IOWrite($hash, 'sendMsg', $msg);
-			}
 	}
 
 	readingsSingleUpdate($hash, "LastAction", "send", 0) if ($cmd ne "?" && $model eq "Westinghouse_Delancey");
@@ -337,10 +316,6 @@ sub SD_UT_Parse($$) {
 	$def = $modules{SD_UT}{defptr}{$devicedef} if (!$def && $protocol == 29);
 	$devicedef = "Buttons_five " . $deviceCode if(!$def && $protocol == 30);		# to test id 30 with same deviceCode | because same protocol with different sync 
 	$def = $modules{SD_UT}{defptr}{$devicedef} if (!$def && $protocol == 30);		# to test id 30 with same deviceCode | because same protocol with different sync 
-	### VTX_BELL ###
-	$deviceCode = sprintf("%03X", oct( "0b$bitData" ) );
-	$devicedef = "VTX_BELL " . $deviceCode if(!$def && $protocol == 79);
-	$def = $modules{SD_UT}{defptr}{$devicedef} if (!$def && $protocol == 79);
 	### Unitec_other ###
 	$deviceCode = substr($bitData,0,8);
 	$deviceCode = sprintf("%02X", oct( "0b$bitData" ) );
@@ -527,11 +502,6 @@ sub SD_UT_Parse($$) {
 		$model = AttrVal($name, "model", "unknown");
 		$state = "receive";
 		Log3 $name, 4, "$ioname: $model $name state=$state ($rawData)";
-	############ VTX_BELL ############ Protocol 79 ############
-	} elsif (AttrVal($name, "model", "unknown") eq "VTX_BELL" && $protocol == 79) {
-		$model = AttrVal($name, "model", "unknown");
-		$state = "receive";
-		Log3 $name, 3, "$ioname: $model $name state=$state ($rawData)";
 	############ unknown ############
 	} else {
 		readingsSingleUpdate($hash, "state", "???", 0);
@@ -609,15 +579,6 @@ sub SD_UT_Attr(@) {
 				$deviceCode = substr($bitData,0,8);		# unklar derzeit! 10Dil auf Bild
 				$deviceCode = sprintf("%02X", oct( "0b$deviceCode" ) );
 				$devicemodel = "Unitec_47031";
-				$devicename = $devicemodel."_".$deviceCode;
-				Log3 $name, 3, "SD_UT: UNDEFINED sensor " . $attrValue . " detected, code " . $deviceCode;
-				$state = "Defined";
-			############ VTX_BELL	############
-			} elsif ($attrName eq "model" && $attrValue eq "VTX_BELL") {
-				$attr{$name}{model}	= $attrValue;				# set new model
-				my $bitData = InternalVal($name, "bitMSG", "0");
-				$deviceCode = sprintf("%03X", oct( "0b$bitData" ) );
-				$devicemodel = "VTX_BELL";
 				$devicename = $devicemodel."_".$deviceCode;
 				Log3 $name, 3, "SD_UT: UNDEFINED sensor " . $attrValue . " detected, code " . $deviceCode;
 				$state = "Defined";
@@ -702,7 +663,6 @@ sub SD_UT_binaryToNumber {
 	 <ul> - Remote control SA-434-1 mini 923301&nbsp;&nbsp;&nbsp;<small>(module model: SA_434_1_mini | protocol 81)</small></ul>
 	 <ul> - unitec Sound (Ursprungsmodul)&nbsp;&nbsp;&nbsp;<small>(module model: Unitec_other | protocol 30)</small></ul>
 	 <ul> - unitec remote door reed switch 47031 (Unitec 47121 | Unitec 47125 | Friedland)&nbsp;&nbsp;&nbsp;<small>(module model: Unitec_47031 | protocol 30)</small></ul>
-	 <ul> - VTX-BELL_Funkklingel&nbsp;&nbsp;&nbsp;<small>(module model: VTX_BELL | protocol 79)</small></ul>
 	 <ul> - Westinghouse Delancey ceiling fan (remote, 5 buttons without SET)&nbsp;&nbsp;&nbsp;<small>(module model: Buttons_five | protocol 29)</small></ul>
 	 <ul> - Westinghouse Delancey ceiling fan (remote, 9 buttons with SET)&nbsp;&nbsp;&nbsp;<small>(module model: RH787T | protocol 83)</small></ul>
 	 <br><br>
@@ -721,12 +681,6 @@ sub SD_UT_binaryToNumber {
 	<ul>
 		<li>send<br>
 		button <small>(Always send the same, even if the user sends another set command via console.)</small></li>
-	</ul><br>
-	
-	<ul><u>VTX-BELL_radio bell</u></ul>
-	<ul>
-		<li>send<br>
-		ring <small>(Always send the same, even if the user sends another set command via console.)</small></li>
 	</ul><br>
 	
 	<ul><u>Westinghouse Deckenventilator (remote with 5 buttons and without SET)</u></ul>
@@ -804,7 +758,7 @@ sub SD_UT_binaryToNumber {
 	<ul><a name="model"></a>
 		<li>model<br>
 		The attribute indicates the model type of your device.<br>
-		(unknown,Buttons_five,RH787T,SA_434_1_mini,Unitec_47031,Unitec_other,VTX-BELL)</li>
+		(unknown,Buttons_five,RH787T,SA_434_1_mini,Unitec_47031,Unitec_other)</li>
 	</ul><br><br>
 	
 	<b><i>Generated readings of the models</i></b><br>
@@ -835,10 +789,6 @@ sub SD_UT_binaryToNumber {
 	<li>state<br>
 	4Bit (prepared)</li></ul><br>
 	
-	<ul><u>VTX_BELL</u><br>
-	<li>state<br>
-	Last executed action of the device. <code>receive</code> for command received | <code>send</code> for command send</li></ul>
-	
 </ul>
 =end html
 =begin html_DE
@@ -854,7 +804,6 @@ sub SD_UT_binaryToNumber {
 	 <ul> - Remote control SA-434-1 mini 923301&nbsp;&nbsp;&nbsp;<small>(Modulmodel: SA_434_1_mini | Protokoll 81)</small></ul>
 	 <ul> - unitec Sound (Ursprungsmodul)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Unitec_other | Protokoll 30)</small></ul>
 	 <ul> - unitec remote door reed switch 47031 (Unitec 47121 | Unitec 47125 | Friedland)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Unitec_47031 | Protokoll 30)</small></ul>
-	 <ul> - VTX-BELL_Funkklingel&nbsp;&nbsp;&nbsp;<small>(Modulmodel: VTX_BELL | Protokoll 79)</small></ul>
 	 <ul> - Westinghouse Deckenventilator (Fernbedienung, 5 Tasten ohne SET)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Buttons_five | Protokoll 29)</small></ul>
 	 <ul> - Westinghouse Delancey Deckenventilator (Fernbedienung, 9 Tasten mit SET)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: RH787T | Protokoll 83)</small></ul>
 	 <br><br>
@@ -875,11 +824,6 @@ sub SD_UT_binaryToNumber {
 	<ul>
 		<li>send<br>
 		Knopfdruck <small>(Sendet immer das selbe, auch wenn der Benutzer einen anderen Set-Befehl via Konsole sendet.)</small></li>
-	</ul><br>
-	
-	<ul><u>VTX-BELL_Funkklingel</u></ul>
-	<ul><li>send<br>
-		klingeln <small>(Sendet immer das selbe, auch wenn der Benutzer einen anderen Set-Befehl via Konsole sendet.)</small></li>
 	</ul><br>
 	
 	<ul><u>Westinghouse Deckenventilator (Fernbedienung mit 5 Tasten)</u></ul>
@@ -957,7 +901,7 @@ sub SD_UT_binaryToNumber {
 	<ul><a name="model"></a>
 		<li>model<br>
 		Das Attribut bezeichnet den Modelltyp Ihres Ger&auml;tes.<br>
-		(unknown,Buttons_five,RH787T,SA_434_1_mini,Unitec_47031,Unitec_other,VTX-BELL)</li><a name=" "></a>
+		(unknown,Buttons_five,RH787T,SA_434_1_mini,Unitec_47031,Unitec_other)</li><a name=" "></a>
 	</ul><br><br>
 	
 	<b><i>Generierte Readings der Modelle</i></b><br>
@@ -988,10 +932,6 @@ sub SD_UT_binaryToNumber {
 	<li>state<br>
 	4Bit (vorbereitet)</li></ul><br>
 	
-	<ul><u>VTX_BELL</u><br>
-	<li>state<br>
-	Zuletzt ausgef&uuml;hrte Aktion des Ger&auml;tes. <code>receive</code> f&uuml;r Kommando empfangen | <code>send</code> f&uuml;r Kommando gesendet</li></ul>
-
 </ul>
 =end html_DE
 =cut

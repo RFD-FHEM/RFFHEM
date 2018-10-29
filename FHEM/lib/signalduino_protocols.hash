@@ -44,7 +44,7 @@
 #
 ##### notice #### or #### info ############################################################################################################
 # Please use first unused id for new protocols
-# ID´s are currently unused: 34, 42 and 86
+# ID´s are currently unused: 42 and 86
 ###########################################################################################################################################
 # Please provide at least three messages for each new MU/MC/MS protocol and a URL of issue in GitHub or discussion in FHEM Forum
 # https://forum.fhem.de/index.php/topic,58396.975.html | https://github.com/RFD-FHEM/RFFHEM
@@ -669,7 +669,7 @@
 			id          	=> '31',
 			one				=> [-1,2],
 			zero			=> [-2,1],
-			start			=> [1],				
+			start			=> [-26,1],				
 			clockabs		=> 600,                  
 			format 			=> 'twostate',	  		
 			preamble		=> 'u31#',				# prepend to converted message	
@@ -721,23 +721,27 @@
 			#modulematch     => '',
 			length_min      => '42',
 			length_max      => '44',
-    	},
-#    "34" =>   # replaced by 37
-#     	 {   
-#       		name			=> 'unknown34',		
-#       		id          	=> '34',
-#			one				=> [2,-1],
-#			zero			=> [1,-2],
-#			start			=> [3,-3,3,-3,3,-3,3,-3],
-#			clockabs   		=> '240',		
-#			format     		=> 'twostate',  		# not used now
-#			preamble		=> 'u34#',				# prepend to converted message	
-#			postamble		=> '',					# Append to converted message	 	
-#			#clientmodule    => '',
-#			#modulematch     => '',
-#			length_min      => '40',
-#			length_max      => '40',
- #   	},
+      },
+    "34" => # QUIGG GT-7000 Funk-Steckdosendimmer | transmitter DMV-7000 - receiver DMV-7009AS
+			# https://github.com/RFD-FHEM/RFFHEM/issues/195
+			# MU;P0=-9808;P1=608;P2=-679;P3=1243;D=01232323232323232323232323232323232323232;CP=3;R=254;
+            # MU;P0=-5476;P1=592;P2=-665;P3=1226;P4=-1309;D=01232323232323232323232323412323412323414;CP=3;R=1;
+            # MU;P0=-3156;P1=589;P2=-668;P3=1247;P4=-1370;D=01232323232323232323232323412323232323412;CP=3;R=255;
+            # MU;P0=-9800;P1=592;P2=-665;P3=1259;P4=-1332;D=01232323232323232323232323234123412323232;CP=3;R=1;
+		{   
+			name 			=> 'QUIGG_GT-7000',
+			comment         => 'remote QUIGG DMV-7000',
+			id 				=> '34',
+			one             => [-1,2],
+			zero            => [-2,1],
+			clockabs   		=> '660',
+			format			=> 'twostate', 
+			preamble 		=> 'u34#',
+			#clientmodule	=> '',
+			#modulematch 	=> '',
+			length_min 		=> '19',
+			length_max 		=> '20',
+    },
      "35" => # Homeeasy
 			 # MS;P0=907;P1=-376;P2=266;P3=-1001;P6=-4860;D=2601010123230123012323230101012301230101010101230123012301;CP=2;SP=6;
 		{   
