@@ -44,7 +44,7 @@
 #
 ##### notice #### or #### info ############################################################################################################
 # Please use first unused id for new protocols
-# ID´s are currently unused: 42 and 86
+# ID´s are currently unused: 42
 ###########################################################################################################################################
 # Please provide at least three messages for each new MU/MC/MS protocol and a URL of issue in GitHub or discussion in FHEM Forum
 # https://forum.fhem.de/index.php/topic,58396.975.html | https://github.com/RFD-FHEM/RFFHEM
@@ -493,9 +493,12 @@
 			length_min      => '16',
 			filterfunc      => 'SIGNALduino_filterSign',
 		},
-	"21" => #Einhell Garagentor	
+	"21" => # Einhell Garagentor
+	        # https://forum.fhem.de/index.php?topic=42373.0
+			# static adress: Bit 1-28 | channel remote Bit 29-32 | repeats 31
 		{
-            name			=> 'einhell garagedoor',	
+            name			=> 'Einhell Garagedoor',	
+			comment         => 'remote ISC HS 434/6',
 			id          	=> '21',
 			one				=> [-3,1],
 			zero			=> [-1,3],
@@ -510,7 +513,8 @@
 			length_max      => '32',				
 			paddingbits     => '1',					# This will disable padding 
 		},
-	"22" => #TX-EZ6 / Meteo	
+	"22" => # TX-EZ6 / Weatherstation TZS First Austria
+            # https://forum.fhem.de/index.php?topic=35844.0
 		{
             name			=> 'TX-EZ6',	
 			id          	=> '22',
