@@ -61,7 +61,7 @@ sub SD_BELL_Define($$) {
 
 	# Argument					   0	 1		2		3				4
 	return "wrong syntax: define <name> SD_BELL <Protocol> <HEX-Value> <optional IODEV>" if(int(@a) < 3 || int(@a) > 5);
-	return "wrong <protocol> $a[2]" if not($a[2] =~ /^(?:14|15|32|41|57|79)/s);
+	return "wrong <protocol> $a[2]" if not($a[2] =~ /^\b14\b|^\b15\b|^\b32\b|^\b41\b|^\b57\b|^\b79\b/s);
 	### checks ###
 	return "wrong HEX-Value! Protocol $a[2] HEX-Value to short | long or not HEX (0-9 | a-f | A-F){3,8}" if (not $a[3] =~ /^[0-9a-fA-F]{3,8}/s);
 
@@ -132,7 +132,7 @@ sub SD_BELL_Parse($$) {
 	my ($iohash, $msg) = @_;
 	my $ioname = $iohash->{NAME};
 	my ($protocol,$rawData) = split("#",$msg);
-	$protocol=~ s/^[u|U|P](\d+)/$1/; # extract protocol
+	$protocol=~ s/^[u|U|P](\d+)/$1/;		# extract protocol ID, $1 = ID
 	my $hlen = length($rawData);
 	my $blen = $hlen * 4;
 	my $bitData = unpack("B$blen", pack("H$hlen", $rawData));
@@ -140,7 +140,7 @@ sub SD_BELL_Parse($$) {
 	Log3 $iohash, 4, "$ioname: SD_BELL protocol $protocol $models{$protocol}, bitData $bitData";
 	
 	my $def;
-	my $deviceCode = sprintf("%03X", oct( "0b$bitData" ));
+	my $deviceCode = $rawData;
 	my $devicedef;
 	my $state;
 	
@@ -152,19 +152,19 @@ sub SD_BELL_Parse($$) {
 	$modules{SD_BELL}{defptr}{ioname} = $ioname;
 
 	Log3 $iohash, 4, "$ioname: SD_BELL device $devicedef found" if($def);
-	
+
 	if(!$def) {
 		Log3 $iohash, 1, "$ioname: SD_BELL UNDEFINED BELL detected, Protocol ".$protocol." code " . $deviceCode;
 		return "UNDEFINED SD_BELL_$deviceCode SD_BELL $protocol $deviceCode";
 	}
-	
+
 	my $hash = $def;
 	my $name = $hash->{NAME};
 	$hash->{lastMSG} = $rawData;
 	$hash->{bitMSG} = $bitData;
-	
+
 	my $model = AttrVal($name, "model", "unknown");
-	$state = "receive";
+	$state = "ring";
 	Log3 $name, 4, "$ioname: SD_BELL $name model=$model state=$state ($rawData)";
 
 	readingsBeginUpdate($hash);
@@ -186,8 +186,8 @@ sub SD_BELL_Attr(@) {
 	#Log3 $name, 3, "SD_BELL: cmd=$cmd attrName=$attrName attrValue=$attrValue oldmodel=$oldmodel";
 	
 	if ($cmd eq "del" && $attrName eq "model") {			### delete readings
-		delete $hash->{READINGS}{"LastAction"} if($hash->{READINGS});
-		delete $hash->{READINGS}{"state"} if($hash->{READINGS});
+		readingsDelete($hash, "LastAction") if($hash->{READINGS});
+		readingsDelete($hash, "state") if($hash->{READINGS});
 	}
 	
 	return undef;
@@ -196,8 +196,8 @@ sub SD_BELL_Attr(@) {
 1;
 
 =pod
-=item summary    module for bells
-=item summary_DE Modul f&uuml;r Klingeln
+=item summary    module for wireless bells
+=item summary_DE Modul f&uuml;r Funk-Klingeln
 =begin html
 
 <a name="SD_BELL"></a>
