@@ -32,6 +32,7 @@ use strict;
 use warnings;
 
 my %models = (
+	"00"  => 'unknown',
     "14"  => 'Heidemann_HX',
     "15"  => 'TCM_234759',
 	"32"  => 'FreeTec_PE-6946',
@@ -48,8 +49,8 @@ sub SD_BELL_Initialize($) {
 	$hash->{ParseFn}	= "SD_BELL_Parse";
 	$hash->{SetFn}		= "SD_BELL_Set";
 	$hash->{AttrFn}		= "SD_BELL_Attr";
-	$hash->{AttrList}	= "IODev do_not_notify:1,0 ignore:0,1 showtime:1,0" .
-						"model:".join(",", sort keys %models);
+	$hash->{AttrList}	= "IODev do_not_notify:1,0 ignore:0,1 showtime:1,0 " .
+						"model:".join(",", sort values %models);
 						"$readingFnAttributes ";
 	$hash->{AutoCreate}	={"SD_BELL.*" => {ATTR => "model:unknown", FILTER => "%NAME", autocreateThreshold => "2:180"}};
 }
