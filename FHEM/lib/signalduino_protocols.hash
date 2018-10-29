@@ -734,7 +734,6 @@
 			id 				=> '34',
 			one             => [-1,2],
 			zero            => [-2,1],
-			start			=> [1],
 			clockabs   		=> '660',
 			format			=> 'twostate', 
 			preamble 		=> 'u34#',
