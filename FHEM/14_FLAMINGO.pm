@@ -35,7 +35,7 @@ FLAMINGO_Initialize($)
   $hash->{UndefFn}   = "FLAMINGO_Undef";
   $hash->{ParseFn}   = "FLAMINGO_Parse";
   $hash->{AttrList}  = "IODev do_not_notify:0,1 showtime:0,1 ignore:0,1 ".
-											 "model:model:FA20RF,FA21RF,FA22RF,LM-101LD,unknown ".
+											 "model:FA20RF,FA21RF,FA22RF,LM-101LD,unknown ".
 											 "room:FLAMINGO ".
 											 $readingFnAttributes;
    $hash->{AutoCreate}=
@@ -74,7 +74,7 @@ sub FLAMINGO_Define($$) {
 
 	### Attributes ###
 	if ( $init_done == 1 ) {
-		#$attr{$name}{model}	= "unknown"	if( not defined( $attr{$name}{model} ) );
+		$attr{$name}{model}	= "unknown"	if( not defined( $attr{$name}{model} ) );
 		$attr{$name}{room}	= "FLAMINGO";
 		#$attr{$name}{stateFormat} = "{ReadingsVal($name, "state", "")." | ".ReadingsTimestamp($name, "state", "")}";
 	}
@@ -101,14 +101,18 @@ sub FLAMINGO_Set($$@) {
 	my $ret = undef;
 	my $message;
 	my $list;
-	my $model = $attr{$name}{model};
+	my $model = AttrVal($name, "model", "unknown");
 	my $iodev = $hash->{IODev}{NAME};
 	
 	$list = join (" ",keys %sets);
 	return "ERROR: wrong command! (only $list)"  if ($args[0] ne "?" && $args[0] ne "Testalarm" && $args[0] ne "Counterreset");
 	
 	if ($args[0] eq "?") {
-		$ret = $list;
+		if ($model eq "unknown") {
+			$ret = "";		# no set if model unknown
+		} else {
+			$ret = $list;
+		}
 	}
 	
 	my $hlen = length($hash->{CODE});
@@ -116,7 +120,18 @@ sub FLAMINGO_Set($$@) {
 	my $bitData= unpack("B$blen", pack("H$hlen", $hash->{CODE}));
 	
 	my $bitAdd = substr($bitData,23,1);					# for last bit, is needed to send
-	$message = "P13.1#".$bitData.$bitAdd."P#R55";
+	my $sendID;
+	
+	## different ID to send
+	if ($model eq "FA22RF" || $model eq "FA20RF") {
+		$sendID = "P13.1";
+	} elsif ($model eq "FA21RF") {
+		$sendID = "P13";
+	} elsif ($model eq "LM-101LD") {
+		$sendID = "P13.2";
+	}
+	
+	$message = $sendID."#".$bitData.$bitAdd."P#R55";
 
 	## Send Message to IODev and wait for correct answer	
 	Log3 $hash, 3, "FLAMINGO set $name $args[0]" if ($args[0] ne "?");
