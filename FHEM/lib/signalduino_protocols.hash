@@ -322,7 +322,7 @@
 			format 			=> 'twostate',	  		
 			preamble		=> 'P13.1#',				# prepend to converted message	
 			clientmodule    => 'FLAMINGO',   				# not used now
-			modulematch     => '^P13\.?1?#[A-Fa-f0-9]+',     # not used now
+			modulematch     => 'P13\.?1?#[A-Fa-f0-9]+',     # not used now
 			length_min      => '24',
 			length_max      => '24',
 		}, 		
