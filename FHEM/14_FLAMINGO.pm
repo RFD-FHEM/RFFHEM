@@ -2,9 +2,18 @@
 # $Id: 14_FLAMINGO.pm 3818 2016-08-15 $
 #################################################################
 # The module was taken over by an unknown maintainer
+# 2018 - HomeAuto_User & elektron-bbs
+#################################################################
+# FLAMINGO FA20RF
+# get sduino_dummy raw MU;;P0=-1384;;P1=815;;P2=-2725;;P3=-20001;;P4=8159;;P5=-891;;D=01010121212121010101210101345101210101210101212101010101012121212101010121010134510121010121010121210101010101212121210101012101013451012101012101012121010101010121212121010101210101345101210101210101212101010101012121212101010121010134510121010121010121;;CP=1;;O;;
+# FLAMINGO FA21RF
+# get sduino_dummy raw MS;;P0=-1413;;P1=757;;P2=-2779;;P3=-16079;;P4=8093;;P5=-954;;D=1345121210101212101210101012121012121210121210101010;;CP=1;;SP=3;;R=33;;O;;
+# FLAMINGO FA22RF
+# get sduino_dummy raw MU;;P0=-5684;;P1=8149;;P2=-887;;P3=798;;P4=-1393;;P5=-2746;;P6=-19956;;D=0123434353534353434343434343435343534343534353534353612343435353435343434343434343534353434353435353435361234343535343534343434343434353435343435343535343536123434353534353434343434343435343534343534353534353612343435353435343434343434343534353434353435;;CP=3;;R=0;;
+# LM-101LD
+# get sduino_dummy raw MS;;P1=-2708;;P2=796;;P3=-1387;;P4=-8477;;P5=8136;;P6=-904;;D=2456212321212323232321212121212121212123212321212121;;CP=2;;SP=4;;
 #################################################################
 # note / ToDo´s / Bugs:
-# - 
 # - 
 #################################################################
 
@@ -14,12 +23,21 @@ use strict;
 use warnings;
 
 
-my %FLAMINGO_c2b;
 my %sets = (
-	"Testalarm:noArg" => "noArg",
-	"Counterreset:noArg" => "noArg",
-	#"on-for-timer" => "textField",
+	"Testalarm:noArg",
+	"Counterreset:noArg",
 );
+
+my %models = (
+	"FA20RF",
+	"FA21RF",
+	"FA22RF",
+	"KD-101LA",
+	"LM-101LD",
+	"unknown",
+);
+
+
 
 
 #####################################
@@ -30,26 +48,17 @@ FLAMINGO_Initialize($)
   
   $hash->{Match}     = "^P13\.?1?#[A-Fa-f0-9]+";
   $hash->{SetFn}     = "FLAMINGO_Set";
-#  $hash->{StateFn}   = "FLAMINGO_SetState";
   $hash->{DefFn}     = "FLAMINGO_Define";
   $hash->{UndefFn}   = "FLAMINGO_Undef";
   $hash->{ParseFn}   = "FLAMINGO_Parse";
   $hash->{AttrList}  = "IODev do_not_notify:0,1 showtime:0,1 ignore:0,1 ".
-											 "model:FA20RF,FA21RF,FA22RF,LM-101LD,unknown ".
-											 "room:FLAMINGO ".
-											 $readingFnAttributes;
+						"model:".join(",", sort %models)." " .
+						"room:FLAMINGO ".
+						$readingFnAttributes;
    $hash->{AutoCreate}=
     { 
-				"FLAMINGO.*" => { ATTR => "event-on-change-reading:.* event-min-interval:.*:300 room:FLAMINGO", FILTER => "%NAME", GPLOT => ""},
+		"FLAMINGO.*" => { ATTR => "event-on-change-reading:.* event-min-interval:.*:300 room:FLAMINGO", FILTER => "%NAME", GPLOT => ""},
     };
-}
-
-#####################################
-sub FLAMINGO_SetState($$$$) {
-  my ($hash, $tim, $vt, $val) = @_;
-  $val = $1 if($val =~ m/^(.*) \d+$/);
-  return "Undefined value $val" if(!defined($FLAMINGO_c2b{$val}));
-  return undef;
 }
 
 #####################################
@@ -57,13 +66,16 @@ sub FLAMINGO_Define($$) {
 	my ($hash, $def) = @_;
 	my @a = split("[ \t][ \t]*", $def);
 
-	return "wrong syntax: define <name> FLAMINGO <code> <optional IODev>" if(int(@a) < 3 || int(@a) > 4);
+	# Argument					    0      1       2       3         4
+	return "wrong syntax: define <name> FLAMINGO <code> <model> <optional IODev>" if(int(@a) < 3 || int(@a) > 5);
+	### check code ###
 	return "wrong hex value: ".$a[2] if not ($a[2] =~ /^[0-9a-fA-F]{6}$/m);
-	#return "wrong syntax: define <name> FLAMINGO <code> <optional IODev>".int(@a) if(int(@a) < 3 || int(@a) > 4);
-
+	### check model ###
+	return "wrong model: ".$a[3] if $a[3] && ( !grep { $_ eq $a[3] } %models );
+	
 	$hash->{CODE} = $a[2];
-	$hash->{lastMSG} =  "";
-	$hash->{bitMSG} =  "";
+	$hash->{lastMSG} =  "no data";
+	$hash->{bitMSG} =  "no data";
 
 	$modules{FLAMINGO}{defptr}{$a[2]} = $hash;
 	$hash->{STATE} = "Defined";
@@ -74,7 +86,9 @@ sub FLAMINGO_Define($$) {
 
 	### Attributes ###
 	if ( $init_done == 1 ) {
-		$attr{$name}{model}	= "unknown"	if( not defined( $attr{$name}{model} ) );
+		$attr{$name}{model}	= $a[3] if $a[3];
+		$attr{$name}{model}	= "unknown" if not $a[3];
+		
 		$attr{$name}{room}	= "FLAMINGO";
 		#$attr{$name}{stateFormat} = "{ReadingsVal($name, "state", "")." | ".ReadingsTimestamp($name, "state", "")}";
 	}
@@ -104,12 +118,12 @@ sub FLAMINGO_Set($$@) {
 	my $model = AttrVal($name, "model", "unknown");
 	my $iodev = $hash->{IODev}{NAME};
 	
-	$list = join (" ",keys %sets);
+	$list = join (" ", %sets);
 	return "ERROR: wrong command! (only $list)"  if ($args[0] ne "?" && $args[0] ne "Testalarm" && $args[0] ne "Counterreset");
 	
 	if ($args[0] eq "?") {
 		if ($model eq "unknown") {
-			$ret = "";		# no set if model unknown
+			$ret = "";		# no set if model unknown or no model attribut
 		} else {
 			$ret = $list;
 		}
@@ -119,19 +133,12 @@ sub FLAMINGO_Set($$@) {
 	my $blen = $hlen * 4;
 	my $bitData= unpack("B$blen", pack("H$hlen", $hash->{CODE}));
 	
-	my $bitAdd = substr($bitData,23,1);					# for last bit, is needed to send
-	my $sendID;
+	my $bitAdd = substr($bitData,23,1);							# for last bit, is needed to send
 	
-	## different ID to send
-	if ($model eq "FA22RF" || $model eq "FA20RF") {
-		$sendID = "P13.1";
-	} elsif ($model eq "FA21RF") {
-		$sendID = "P13";
-	} elsif ($model eq "LM-101LD") {
-		$sendID = "P13.2";
-	}
+	## use the protocol ID how receive last message
+	my $sendID = ReadingsVal($name, "lastReceive_ID", "");		# for send command, because ID´s can vary / MU / MS message
 	
-	$message = $sendID."#".$bitData.$bitAdd."P#R55";
+	$message = "P".$sendID."#".$bitData.$bitAdd."P#R55";
 
 	## Send Message to IODev and wait for correct answer	
 	Log3 $hash, 3, "FLAMINGO set $name $args[0]" if ($args[0] ne "?");
@@ -180,24 +187,22 @@ sub FLAMINGO_Parse($$) {
 	$def = $modules{FLAMINGO}{defptr}{$deviceCode} if(!$def);
 	my $hash = $def;
 
+	#my $model = AttrVal($name, "model", "unknown");
+	
 	if(!$def) {
-		Log3 $iohash, 1, "FLAMINGO UNDEFINED sensor detected, code $deviceCode";
+		Log3 $iohash, 1, "FLAMINGO UNDEFINED sensor detected, code $deviceCode, protocol $protocol";
 		return "UNDEFINED FLAMINGO_$deviceCode FLAMINGO $deviceCode";
 	}
   
 	my $name = $hash->{NAME};
-	my $model = $attr{$name}{model};
 	return "" if(IsIgnored($name));
 	
 	$hash->{bitMSG} = $bitData;
 	$hash->{lastMSG} = $rawData;
 	$hash->{lastReceive} = time();
 	
-	# if ($model eq "unknown") {
-		# Log3 $name, 3, "$iodev: FLAMINGO $name ---> Please define your model! <--- (attr $name model [your model])";
-		# return $name;
-	# }
-
+	readingsSingleUpdate($hash, "lastReceive_ID", $protocol, 0);		# to save lastReceive_ID for send command
+	
 	## check if Testalarm received from a other transmitter in FHEM ##
 	my $testalarmcheck = "";
 	$testalarmcheck = $modules{FLAMINGO}{defptr}{testrunning} if exists ($modules{FLAMINGO}{defptr}{testrunning});
@@ -265,9 +270,12 @@ sub FLAMINGO_UpdateState($) {
     <code>define &lt;name&gt; FLAMINGO &lt;code&gt;</code> <br>
 
     <br>
-    &lt;code&gt; is the unic code of the autogenerated address of the FLAMINGO device. This changes, after pairing to the master<br>
+    <li>&lt;code&gt; is the unic code of the autogenerated address of the FLAMINGO device. This changes, after pairing to the master</li>
+	<li>&lt;model&gt; is the model name</li><br>
+	- if autocreate, the defined model is <code>unknown</code>.<br>
+	- with manual <code>define</code> you can choose the model which is available as attribute.
   </ul>
-  <br>
+  <br><br>
 
   <a name="FLAMINGOset"></a>
   <b>Set</b>
@@ -290,7 +298,7 @@ sub FLAMINGO_UpdateState($) {
     <li><a href="#ignore">ignore</a></li>
 	<a name="model"></a>
 	<li>model<br>
-	FA20RF, FA21RF, FA22RF, LM-101LD, unknown</li>
+	FA20RF, FA21RF, FA22RF, KD-101LA, LM-101LD, unknown</li>
     <a name="showtime"></a>
 	<li><a href="#showtime">showtime</a></li>
     <li><a href="#readingFnAttributes">readingFnAttributes</a></li>
@@ -298,6 +306,7 @@ sub FLAMINGO_UpdateState($) {
   <br><br>
   <b><u>Generated readings</u></b><br>
   - alarmcounter | counter started with 0<br>
+  - lastReceive_ID | the protocol ID from SIGNALduino<br>
   - state | (no Alarm, Alarm, Testalaram)<br>
   <br><br>
   <u><b>manual<br></b></u>
@@ -330,13 +339,16 @@ sub FLAMINGO_UpdateState($) {
   <a name="FLAMINGOdefine"></a>
   <b>Define</b>
   <ul>
-    <code>define &lt;name&gt; FLAMINGO &lt;code&gt; </code> <br>
+    <code>define &lt;name&gt; FLAMINGO &lt;code&gt;  &lt;model&gt; </code> <br>
 
     <br>
-    &lt;code&gt; ist der automatisch angelegte eindeutige code  des FLAMINGO Rauchmelders. Dieser &auml;ndern sich nach
-	dem Pairing mit einem Master.<br>
+    <li>&lt;code&gt; ist der automatisch angelegte eindeutige code  des FLAMINGO Rauchmelders. Dieser &auml;ndern sich nach
+	dem Pairing mit einem Master.</li>
+	<li>&lt;model&gt; ist die Modelbezeichnung</li><br>
+	- Bei einem Autocreate wird als Model <code>unknown</code> definiert.<br>
+	- Bei einem manuellen <code>define</code> kann man das Model frei w&auml;hlen welche als Attribut verf&uuml;gbar sind .
   </ul>
-  <br>
+  <br><br>
 
   <a name="FLAMINGOset"></a>
   <b>Set</b>
@@ -359,7 +371,7 @@ sub FLAMINGO_UpdateState($) {
     <li><a href="#ignore">ignore</a></li>
 	<a name="model"></a>
 	<li>model<br>
-	FA20RF, FA21RF, FA22RF, LM-101LD, unknown</li>
+	FA20RF, FA21RF, FA22RF, KD-101LA, LM-101LD, unknown</li>
 	<a name="showtime"></a>
     <li><a href="#showtime">showtime</a></li>
     <li><a href="#readingFnAttributes">readingFnAttributes</a></li>
@@ -367,6 +379,7 @@ sub FLAMINGO_UpdateState($) {
   <br><br>
   <b><u>Generierte Readings</u></b><br>
   - alarmcounter | Alarmz&auml;hler beginnend mit 0<br>
+  - lastReceive_ID | Protokoll ID vom SIGNALduino<br>
   - state | (no Alarm, Alarm, Testalaram)<br>
   <br><br>
   <u><b>Anleitung<br></b></u>
