@@ -640,7 +640,7 @@
 			format          => 'twostate',      # there is a pause puls between words
 			preamble        => 'u29#',				# prepend to converted message	
 			clientmodule    => 'SD_UT', 
-			modulematch     => '^u29#.{3}',
+			modulematch     => '^P29#.{3}',
 			length_min      => '12',
 			length_max      => '12',
 		},
@@ -740,8 +740,8 @@
 			zero            => [-2,1],
 			clockabs   		=> '660',
 			format			=> 'twostate', 
-			preamble 		=> 'u34#',
-			#clientmodule	=> '',
+			preamble 		=> 'P34#',
+			clientmodule	=> 'SD_UT',
 			#modulematch 	=> '',
 			length_min 		=> '19',
 			length_max 		=> '20',
@@ -1559,7 +1559,7 @@
 			clockabs     	=> 330,
 			format 		=> 'twostate',	    # 
 			preamble	=> 'U79#',	# prepend to converted message	
-			#clientmodule    => 'SD_UT',
+			#clientmodule    => 'SD_BELL',
 			#modulematch     => '^P79#.*',
 			length_min      => '12',
 			length_max      => '12',
@@ -1712,9 +1712,9 @@
 		start         => [-44,1],
 		clockabs      => 350,
 		format        => 'twostate',
-		preamble      => 'u86#',	  # prepend to converted message	
-		#clientmodule  => 'SD_UT',
-		#modulematch   => '^u86#.*',
+		preamble      => 'P86#',	  # prepend to converted message	
+		clientmodule  => 'SD_UT',
+		#modulematch   => '^P86#.*',
 		length_min    => '12',
 		length_max    => '18',
 	},
