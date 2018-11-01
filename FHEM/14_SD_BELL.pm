@@ -26,12 +26,14 @@
 #     -
 ####################################################################################################################################
 
+### oberer Teil ###
 package main;
 
 use strict;
 use warnings;
 
 my %models = (
+	# key => values
 	"00"  => 'unknown',
     "14"  => 'Heidemann_HX',
     "15"  => 'TCM_234759',
@@ -44,19 +46,57 @@ my %models = (
 sub SD_BELL_Initialize($) {
 	my ($hash) = @_;
 	$hash->{Match}		= "^[u|P](?:14|15|32|41|57|79)#.*";
-	$hash->{DefFn}		= "SD_BELL_Define";
-	$hash->{UndefFn}	= "SD_BELL_Undef";
-	$hash->{ParseFn}	= "SD_BELL_Parse";
-	$hash->{SetFn}		= "SD_BELL_Set";
-	$hash->{AttrFn}		= "SD_BELL_Attr";
+	$hash->{DefFn}		= "SD_BELL::Define";
+	$hash->{UndefFn}	= "SD_BELL::Undef";
+	$hash->{ParseFn}	= "SD_BELL::Parse";
+	$hash->{SetFn}		= "SD_BELL::Set";
+	$hash->{AttrFn}		= "SD_BELL::Attr";
 	$hash->{AttrList}	= "IODev do_not_notify:1,0 ignore:0,1 showtime:1,0 " .
 						"model:".join(",", sort values %models);
 						"$readingFnAttributes ";
 	$hash->{AutoCreate}	={"SD_BELL.*" => {ATTR => "model:unknown", FILTER => "%NAME", autocreateThreshold => "2:180"}};
 }
 
+### unterer Teil ###
+package SD_BELL;
+
+use strict;
+use warnings;
+use POSIX;
+
+use GPUtils qw(:all);  # wird für den Import der FHEM Funktionen aus der fhem.pl benötigt
+
+my $missingModul = "";
+
+## Import der FHEM Funktionen
+BEGIN {
+    GP_Import(qw(
+		AssignIoPort
+		attr
+		AttrVal
+		defs
+		deviceEvents
+		fhem
+		init_done
+		InternalVal
+		IsDisabled
+		Log3
+		modules
+		readingsBeginUpdate
+		readingsBulkUpdate
+		readingsBulkUpdateIfChanged
+		readingsDelete
+		readingsEndUpdate
+		readingsSingleUpdate
+		ReadingsVal
+		Value
+    ))
+};
+
+
+
 #############################
-sub SD_BELL_Define($$) {
+sub Define($$) {
 	my ($hash, $def) = @_;
 	my @a = split("[ \t][ \t]*", $def);
 
@@ -87,7 +127,7 @@ sub SD_BELL_Define($$) {
 }
 
 ###################################
-sub SD_BELL_Set($$$@) {
+sub Set($$$@) {
 	my ( $hash, $name, @a ) = @_;
 	my $cmd = $a[0];
 	my $ioname = $hash->{IODev}{NAME};
@@ -120,7 +160,7 @@ sub SD_BELL_Set($$$@) {
 }
 
 #####################################
-sub SD_BELL_Undef($$) {
+sub Undef($$) {
 	my ($hash, $name) = @_;
 	delete($modules{SD_BELL}{defptr}{$hash->{DEF}})
 		if(defined($hash->{DEF}) && defined($modules{SD_BELL}{defptr}{$hash->{DEF}}));
@@ -129,7 +169,7 @@ sub SD_BELL_Undef($$) {
 
 
 ###################################
-sub SD_BELL_Parse($$) {
+sub Parse($$) {
 	my ($iohash, $msg) = @_;
 	my $ioname = $iohash->{NAME};
 	my ($protocol,$rawData) = split("#",$msg);
@@ -176,7 +216,7 @@ sub SD_BELL_Parse($$) {
 }
 
 ###################################
-sub SD_BELL_Attr(@) {
+sub Attr(@) {
 	my ($cmd, $name, $attrName, $attrValue) = @_;
 	my $hash = $defs{$name};
 	my $typ = $hash->{TYPE};
