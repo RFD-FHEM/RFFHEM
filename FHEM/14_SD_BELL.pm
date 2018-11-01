@@ -1,7 +1,7 @@
 ##############################################
 # $Id: 14_SD_BELL.pm 32 2016-04-02 14:00:00 v3.2-dev $
 #
-# The purpose of this module is to support many BELL devices
+# The purpose of this module is to support many wireless BELL devices
 # 2018 - HomeAuto_User & elektron-bbs
 #
 ####################################################################################################################################
@@ -52,9 +52,9 @@ sub SD_BELL_Initialize($) {
 	$hash->{SetFn}		= "SD_BELL::Set";
 	$hash->{AttrFn}		= "SD_BELL::Attr";
 	$hash->{AttrList}	= "IODev do_not_notify:1,0 ignore:0,1 showtime:1,0 " .
-						"model:".join(",", sort values %models);
-						"$readingFnAttributes ";
-	$hash->{AutoCreate}	={"SD_BELL.*" => {ATTR => "model:unknown", FILTER => "%NAME", autocreateThreshold => "2:180"}};
+						"model:".join(",", sort values %models) . " " .
+						$main::readingFnAttributes;
+	$hash->{AutoCreate}	={"SD_BELL.*" => {FILTER => "%NAME", autocreateThreshold => "2:180", GPLOT => ""}};
 }
 
 ### unterer Teil ###
@@ -100,7 +100,7 @@ sub Define($$) {
 	my ($hash, $def) = @_;
 	my @a = split("[ \t][ \t]*", $def);
 
-	# Argument					   0	 1		2		3				4
+	# Argument					    0	   1		2		    3				4
 	return "wrong syntax: define <name> SD_BELL <Protocol> <HEX-Value> <optional IODEV>" if(int(@a) < 3 || int(@a) > 5);
 	return "wrong <protocol> $a[2]" if not($a[2] =~ /^(?:14|15|32|41|57|79)/s);
 	### checks ###
@@ -120,7 +120,6 @@ sub Define($$) {
 	my $devicetyp = $a[2];
 	$devicetyp = $models{$a[2]};
 	$attr{$name}{model}	= $devicetyp if( not defined( $attr{$name}{model} ) );	
-	
 	$attr{$name}{room}	= "SD_BELL"	if( not defined( $attr{$name}{room} ) );
 	
 	AssignIoPort($hash, $iodevice);
