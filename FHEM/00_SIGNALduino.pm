@@ -2351,8 +2351,9 @@ sub SIGNALduino_Parse_MU($$$$@)
 				
 				sprintf("%s%s%s",SIGNALduino_getProtpProp($id,"preamble",""),$dmsg,SIGNALduino_getProtpProp($id,"postamble",""));
 				SIGNALduino_Log3 $name, 5, "$name: dispatching $dispmode: $dmsg";
-
-				if (!defined(my $modMatchRegex=SIGNALduino_getProtpProp($id,"modulematch",undef)) || $dmsg =~ m/$modMatchRegex/) {
+				
+				my $modMatchRegex;
+				if (!defined($modMatchRegex=SIGNALduino_getProtpProp($id,"modulematch",undef)) || $dmsg =~ m/$modMatchRegex/) {
 					Debug "$name: dispatching now msg: $dmsg" if ($debug);
 					if (defined($ProtocolListSIGNALduino{$id}{developId}) && substr($ProtocolListSIGNALduino{$id}{developId},0,1) eq "m") {
 						my $develop = lc(AttrVal($name,"development",""));
