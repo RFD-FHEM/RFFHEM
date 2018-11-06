@@ -20,8 +20,8 @@
 #
 # length_min  => ' '       # minimum number of bits of message length
 # length_max  => ' '       # maximum number of bits of message length
-# paddingbits => ' '       # pad up to x bits before call module, default is 4
-# paddingbits => '1'       # will disable padding
+# paddingbits => ' '       # pad up to x bits before call module, default is 4. 
+# paddingbits => '1'       # will disable padding, use this setting when using dispatchBin
 # remove_zero => 1         # removes leading zeros from output
 #
 # developId   => 'm'       # logical module is under development
@@ -36,8 +36,8 @@
 # clientmodule => ' '      # FHEM module for processing
 # filterfunc  => ' '       # SIGNALduino_filterSign | SIGNALduino_compPattern --> SIGNALduino internal filter function, it remove the sign from the pattern, and compress message and pattern
 #                          # SIGNALduino_filterMC --> SIGNALduino internal filter function, it will decode MU data via Manchester encoding
-# dispatchBin => 1,     # If set to 1, data will be dispatched in binary representation to other logcial modules. 
-#                            paddingbits has no function in dispatchBin mode. If not set (default) or set to 0, data will be dispatched in hex mode to other logical modules.
+# dispatchBin => 1,		   # If set to 1, data will be dispatched in binary representation to other logcial modules. 
+#                            If not set (default) or set to 0, data will be dispatched in hex mode to other logical modules.
 # postDemodulation => \&   # only MU - SIGNALduino internal sub for processing before dispatching to a logical module
 # method      => \&        # call to process this message
 # format      => ' '       # twostate | pwm | manchester --> modulation type of the signal, only manchester use SIGNALduino internal, other types only comment

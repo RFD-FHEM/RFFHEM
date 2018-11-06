@@ -2332,17 +2332,15 @@ sub SIGNALduino_Parse_MU($$$$@)
 				@bit_msg = @retvalue;
 				undef(@retvalue); undef($rcode);
 	
-				my $dispmode="bin";
-				if (SIGNALduino_getProtpProp($id,"dispatchBin",0) == 0 )
+				my $dispmode="hex";
+				$dispmode="bin" if (SIGNALduino_getProtpProp($id,"dispatchBin",0) == 1 );
+				
+				my $padwith = SIGNALduino_getProtpProp($id,"paddingbits",0);
+				while (scalar @bit_msg % $padwith > 0)  ## will pad up full nibbles per default or full byte if specified in protocol
 				{
-					$dispmode="hex";
-					my $padwith = SIGNALduino_getProtpProp($id,"paddingbits",0);
-					while (scalar @bit_msg % $padwith > 0)  ## will pad up full nibbles per default or full byte if specified in protocol
-					{
-						push(@bit_msg,'0');
-						Debug "$name: padding 0 bit to bit_msg array" if ($debug);
-					}
-				}
+					push(@bit_msg,'0');
+					Debug "$name: padding 0 bit to bit_msg array" if ($debug);
+				}		
 				my $dmsg = join ("", @bit_msg);
 				@bit_msg=(); # clear bit_msg array
 
