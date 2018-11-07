@@ -1,4 +1,4 @@
-# $Id: 00_SIGNALduino.pm 10488 2018-09-19 11:00:00Z v3.3.3-dev $
+# $Id: 00_SIGNALduino.pm 10488 2018-10-23 00:22:00Z v3.3.3-dev $
 #
 # v3.3.3 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incoming messages
@@ -18,14 +18,14 @@ use Data::Dumper qw(Dumper);
 use Scalar::Util qw(looks_like_number);
 no warnings 'portable';
 
-#$| = 1;		#Puffern abschalten, Hilfreich für PEARL WARNINGS Search
+#$| = 1;		#Puffern abschalten, Hilfreich fuer PEARL WARNINGS Search
 
 #use POSIX qw( floor);  # can be removed
 #use Math::Round qw();
 
 
 use constant {
-	SDUINO_VERSION            => "v3.3.3-dev_15.09.",
+	SDUINO_VERSION            => "v3.3.3-dev_23.10.",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -37,7 +37,8 @@ use constant {
 	
 	SDUINO_DISPATCH_VERBOSE     => 5,      # default 5
 	SDUINO_MC_DISPATCH_VERBOSE  => 5,      # wenn kleiner 5, z.B. 3 dann wird vor dem dispatch mit loglevel 3 die ID und rmsg ausgegeben
-	SDUINO_MC_DISPATCH_LOG_ID   => '12.1'  # die o.g. Ausgabe erfolgt nur wenn der Wert mit der ID übereinstimmt
+	SDUINO_MC_DISPATCH_LOG_ID   => '12.1', # die o.g. Ausgabe erfolgt nur wenn der Wert mit der ID uebereinstimmt
+	SDUINO_PARSE_DEFAULT_LENGHT_MIN => 8
 };
 
 
@@ -223,6 +224,7 @@ SIGNALduino_Initialize($)
 					  ." development"
 					  ." noMsgVerbose:0,1,2,3,4,5"
 					  ." eventlogging:0,1"
+					  ." maxMuMsgRepeat"
 		              ." $readingFnAttributes";
 
   $hash->{ShutdownFn} = "SIGNALduino_Shutdown";
@@ -1527,12 +1529,12 @@ sub SIGNALduino_ParseHttpResponse
 
     if($err ne "")               											 		# wenn ein Fehler bei der HTTP Abfrage aufgetreten ist
     {
-        SIGNALduino_Log3 $name, 3, "$name: error while requesting ".$param->{url}." - $err";    		# Eintrag fürs Log
+        SIGNALduino_Log3 $name, 3, "$name: error while requesting ".$param->{url}." - $err";    		# Eintrag fuers Log
     }
     elsif($param->{code} eq "200" && $data ne "")                                                       		# wenn die Abfrage erfolgreich war ($data enthaelt die Ergebnisdaten des HTTP Aufrufes)
     {
     	
-        SIGNALduino_Log3 $name, 3, "url ".$param->{url}." returned: ".length($data)." bytes Data";  # Eintrag fürs Log
+        SIGNALduino_Log3 $name, 3, "url ".$param->{url}." returned: ".length($data)." bytes Data";  # Eintrag fuers Log
 		    	
     	if ($param->{command} eq "flash")
     	{
@@ -1554,14 +1556,14 @@ sub SIGNALduino_ParseHttpResponse
 			print $file $data;
 			close $file;
 	
-			# Den Flash Befehl mit der soebene heruntergeladenen Datei ausführen
-			#SIGNALduino_Log3 $name, 3, "calling set ".$param->{command}." $filename";    		# Eintrag fürs Log
+			# Den Flash Befehl mit der soebene heruntergeladenen Datei ausfuehren
+			#SIGNALduino_Log3 $name, 3, "calling set ".$param->{command}." $filename";    		# Eintrag fuers Log
 
 			SIGNALduino_Set($hash,$name,$param->{command},$filename); # $hash->{SetFn}
 			
     	}
     } else {
-    	SIGNALduino_Log3 $name, 3, "$name: undefined error while requesting ".$param->{url}." - $err - code=".$param->{code};    		# Eintrag fürs Log
+    	SIGNALduino_Log3 $name, 3, "$name: undefined error while requesting ".$param->{url}." - $err - code=".$param->{code};    		# Eintrag fuers Log
     }
 }
 
@@ -2129,7 +2131,7 @@ sub SIGNALduino_padbits(\@$)
 
 # - - - - - - - - - - - -
 #=item SIGNALduino_getProtoProp()
-#This functons, will return a value from the Protocolist and check if it is defined optional you can specify a optional default value that will be reurned
+#This functons, will return a value from the Protocolist and check if the key exists and a value is defined optional you can specify a optional default value that will be reurned
 # 
 # returns "" if the var is not defined
 # =cut
@@ -2141,7 +2143,7 @@ sub SIGNALduino_getProtoProp
 	
 	#my $id = shift;
 	#my $propNameLst = shift;
-	return $ProtocolListSIGNALduino{$id}{$propNameLst} if defined($ProtocolListSIGNALduino{$id}{$propNameLst});
+	return $ProtocolListSIGNALduino{$id}{$propNameLst} if exists($ProtocolListSIGNALduino{$id}{$propNameLst}) && defined($ProtocolListSIGNALduino{$id}{$propNameLst});
 	return $default; # Will return undef if $default is not provided
 	#return undef;
 }
@@ -2153,14 +2155,15 @@ sub SIGNALduino_Parse_MU($$$$@)
 	my $protocolid;
 	my $clockidx=$msg_parts{clockidx};
 	my $rssi=$msg_parts{rssi};
-	my $protocol=undef;
 	my $rawData;
 	my %patternListRaw;
 	my $message_dispatched=0;
 	my $debug = AttrVal($iohash->{NAME},"debug",0);
+	my $rssiStr= "";
 	
 	if (defined($rssi)) {
 		$rssi = ($rssi>=128 ? (($rssi-256)/2-74) : ($rssi/2-74)); # todo: passt dies so? habe ich vom 00_cul.pm
+		$rssiStr= " RSSI = $rssi"
 	}
 	
     Debug "$name: processing unsynced message\n" if ($debug);
@@ -2178,9 +2181,10 @@ sub SIGNALduino_Parse_MU($$$$@)
 
 		## Find matching protocols
 		my $id;
+		
+		
 		foreach $id (@{$hash->{muIdList}}) {
 			
-			my $valid=1;
 			$clockabs= $ProtocolListSIGNALduino{$id}{clockabs};
 			my %patternList;
 			$rawData=$msg_parts{rawData};
@@ -2192,7 +2196,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 					SIGNALduino_Log3 $name, 5, "$name: Error: Unknown filtermethod=$method. Please define it in file $0";
 					next;
 				} else {					
-					SIGNALduino_Log3 $name, 5, "$name: applying filterfunc $method";
+					SIGNALduino_Log3 $name, 5, "$name: for MU Protocol id $id, applying filterfunc $method";
 
 				    no strict "refs";
 					(my $count_changes,$rawData,my %patternListRaw_tmp) = $method->($name,$id,$rawData,%patternListRaw);				
@@ -2204,237 +2208,175 @@ sub SIGNALduino_Parse_MU($$$$@)
 				%patternList = map { $_ => round($patternListRaw{$_}/$clockabs,1) } keys %patternListRaw; 
 			}
 			
-			my $signal_length = length($rawData);        # Length of data array
-			
-			my @keys = sort { $patternList{$a} <=> $patternList{$b} } keys %patternList;
-
-			#Debug Dumper(\%patternList);	
-			#Debug Dumper(@keys);	
-			#$debug=1;
 					
 			Debug "Testing against Protocol id $id -> $ProtocolListSIGNALduino{$id}{name}"  if ($debug);
-	
-#			$valid=SIGNALduino_inTol($ProtocolListSIGNALduino{$id}{clockabs},$clockabs,$clockabs*0.30) if ($ProtocolListSIGNALduino{$id}{clockabs} > 0);
-
-			next if (!$valid) ;
-			
-			my $bit_length = ($signal_length/((scalar @{$ProtocolListSIGNALduino{$id}{one}} + scalar @{$ProtocolListSIGNALduino{$id}{zero}})/2));
-			Debug "Expect $bit_length bits in message"  if ($valid && $debug);
-
-			#Check calculated min length
-			#$valid = $valid && $ProtocolListSIGNALduino{$id}{length_min} <= $bit_length if (exists $ProtocolListSIGNALduino{$id}{length_min}); 
-			#Check calculated max length
-			#$valid = $valid && $ProtocolListSIGNALduino{$id}{length_max} >= $bit_length if (exists $ProtocolListSIGNALduino{$id}{length_max});
-
-			#next if (!$valid) ;
-			#Debug "expecting $bit_length bits in signal" if ($debug && $valid);
-
 			Debug "Searching in patternList: ".Dumper(\%patternList) if($debug);
-			next if (!$valid) ;
 
-	
-			my %patternLookupHash=();
-
-			#Debug "phash:".Dumper(%patternLookupHash);
-			my $pstr="";
-			$valid = $valid && ($pstr=SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}},\%patternList,\$rawData)) >=0;
-			Debug "Found matched one" if ($debug && $valid);
-			my $oneStr=$pstr if ($valid);
-			$patternLookupHash{$pstr}="1" if ($valid); ## Append one to our lookuptable
-			Debug "added $pstr " if ($debug && $valid);
-
-			my $zeroStr ="";
-			if (scalar @{$ProtocolListSIGNALduino{$id}{zero}} >0) {
-				$valid = $valid && ($pstr=SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{zero}},\%patternList,\$rawData)) >=0;
-				Debug "Found matched zero" if ($debug && $valid);
-				$zeroStr=$pstr if ($valid);
-				$patternLookupHash{$pstr}="0" if ($valid); ## Append zero to our lookuptable
-				Debug "added $pstr " if ($debug && $valid);
-			}
-
-			if (defined($ProtocolListSIGNALduino{$id}{float}))
-			{
-				$valid = $valid && ($pstr=SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{float}},\%patternList,\$rawData)) >=0;
-				Debug "Found matched float" if ($debug && $valid);
-				$patternLookupHash{$pstr}="F" if ($valid); ## Append float to our lookuptable
-				Debug "added $pstr " if ($debug && $valid);
-			}
-
-			next if (!$valid) ;
-			#Debug "Pattern Lookup Table".Dumper(%patternLookupHash);
-			## Check somethin else
-
-		
-			#Anything seems to be valid, we can start decoding this.			
-
-			SIGNALduino_Log3 $name, 4, "$name: Fingerprint for MU Protocol id $id -> $ProtocolListSIGNALduino{$id}{name} matches, trying to demodulate"  if ($valid);
-			my $signal_width= @{$ProtocolListSIGNALduino{$id}{one}};
-			#Debug $signal_width;
-			
-			my @bit_msg=();							# array to store decoded signal bits
-			
+			my $startStr=""; # Default match if there is no start pattern available
 			my $message_start=0 ;
-			my @msgStartLst;
-			my $startStr="";
-			my $start_regex;
-			#my $oneStr=SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}},\%patternList,\$rawData);
-			#my $zeroStr=SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{zero}},\%patternList,\$rawData);
-
-			if (@msgStartLst = SIGNALduino_getProtoProp($id,"start"))
+			my $startLogStr="";
+			
+			if (exists($ProtocolListSIGNALduino{$id}{start}) && defined($ProtocolListSIGNALduino{$id}{start}) && ref($ProtocolListSIGNALduino{$id}{start}) eq 'ARRAY')	# wenn start definiert ist, dann startStr ermitteln und in rawData suchen und in der rawData alles bis zum startStr abschneiden
 			{
-				Debug "msgStartLst: ".Dumper(@msgStartLst)  if ($debug);
-			
-				if ( ($startStr=SIGNALduino_PatternExists($hash,@msgStartLst,\%patternList,\$rawData)) eq -1)
-				{
-					SIGNALduino_Log3 $name, 5, "$name: start pattern for MU Protocol id $id -> $ProtocolListSIGNALduino{$id}{name} mismatches, aborting"  ;
-					$valid=0;
-					next;
-				};
-			} 
-			
-			
-			if (length ($zeroStr) > 0 ){  $start_regex = "$startStr\($oneStr\|$zeroStr\)";}
-			else {$start_regex  = $startStr.$oneStr; }
-			
-			Debug "Regex is: $start_regex" if ($debug);
-
-			$rawData =~ /$start_regex/;
-			if (defined($-[0] && $-[0] > 0)) {
-				$message_start=$-[0]+ length($startStr);
-			} else {
-				undef($message_start);				
-			}
-			undef @msgStartLst;
-			
-			#for (my $i=index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{sync}}))+$signal_width;$i<length($rawData);$i+=$signal_width)
-			Debug "Message starts at $message_start - length of data is ".length($rawData) if ($debug);
-			next if (!defined($message_start));
-			SIGNALduino_Log3 $name, 5, "$name: Starting demodulation at Position $message_start";
-			#my $onepos= index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}},\%patternList));
-			#my $zeropos=index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{zero}},\%patternList));
-			#SIGNALduino_Log3 $name, 3, "op=$onepos zp=$zeropos";
-			#Debug "phash:".Dumper(%patternLookupHash);
-			
-			my $padwith = defined($ProtocolListSIGNALduino{$id}{paddingbits}) ? $ProtocolListSIGNALduino{$id}{paddingbits} : 4;
-			
-			for (my $i=$message_start;$i<=length($rawData)-$signal_width;$i+=$signal_width)
-			{
+				Debug "msgStartLst: ".Dumper(\@{$ProtocolListSIGNALduino{$id}{start}})  if ($debug);
 				
-				my $sig_str= substr($rawData,$i,$signal_width);
-				Debug "$name: i=$i  search=$sig_str" if ($debug);
-
-				$valid=1; # Set valid to 1 for every loop
-				#Debug $patternLookupHash{substr($rawData,$i,$signal_width)}; ## Get $signal_width number of chars from raw data string
-				if (exists $patternLookupHash{$sig_str}) 
+				if ( ($startStr=SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{start}},\%patternList,\$rawData)) eq -1)
 				{
-					my $bit = $patternLookupHash{$sig_str};
-					
-					push(@bit_msg,$bit) if (looks_like_number($bit)) ; ## Add the bits to our bit array
+					SIGNALduino_Log3 $name, 5, "$name: start pattern for MU Protocol id $id -> $ProtocolListSIGNALduino{$id}{name} not found, aborting";
+					next;
 				}
-				if (!exists $patternLookupHash{$sig_str} || $i+$signal_width>length($rawData)-$signal_width)  ## Dispatch if last signal or unknown data
+				Debug "startStr is: $startStr" if ($debug);
+				
+				if ($message_start = index($rawData, $startStr)) 
 				{
-					Debug "$name: demodulated message raw (@bit_msg), ".@bit_msg." bits\n" if ($debug);
-					#Check converted message against lengths 
-					$valid = $valid && $ProtocolListSIGNALduino{$id}{length_max} >= scalar @bit_msg  if (defined($ProtocolListSIGNALduino{$id}{length_max}));					
-					$valid = $valid && $ProtocolListSIGNALduino{$id}{length_min} <= scalar @bit_msg  if (defined($ProtocolListSIGNALduino{$id}{length_min})); 
+					$rawData = substr($rawData, $message_start);
+					$startLogStr = "StartStr: $startStr first found at $message_start";
+					Debug "rawData = $rawData" if ($debug);
+					Debug "startStr $startStr found. Message starts at $message_start" if ($debug);
+				} else {
+					Debug "startStr $startStr not found." if ($debug);
+					next;
+				}
+				
+			}
+			
+			my %patternLookupHash=();
+			my $pstr="";
+			my $zeroRegex ="";
+			my $oneRegex ="";
+			my $floatRegex ="";
+			
+			
+			if (($pstr=SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}},\%patternList,\$rawData)) eq -1)
+			{
+				SIGNALduino_Log3 $name, 5, "$name: one pattern for MU Protocol id $id not found, aborting";
+				next;
+			}
+			Debug "Found matched one" if ($debug);
 
-					
-					#next if (!$valid);  ## Last chance to try next protocol if there is somethin invalid
-					if ($valid) {
+			$oneRegex=$pstr;
+			$patternLookupHash{$pstr}="1";		## Append one to our lookuptable
+			Debug "added $pstr " if ($debug);
 			
-						my ($rcode,@retvalue) = SIGNALduino_callsub('postDemodulation',$ProtocolListSIGNALduino{$id}{postDemodulation},$name,@bit_msg);
-						next if ($rcode < 1 );
+			if (scalar @{$ProtocolListSIGNALduino{$id}{zero}} >0)
+			{
+				if  (($pstr=SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{zero}},\%patternList,\$rawData)) eq -1)
+				{
+					SIGNALduino_Log3 $name, 5, "$name: zero pattern for MU Protocol id $id not found, aborting";
+					next;
+				}
+				Debug "Found matched zero" if ($debug);
 
-						#SIGNALduino_Log3 $name, 5, "$name: postdemodulation value @retvalue";
+				$zeroRegex='|' . $pstr;
+				$patternLookupHash{$pstr}="0";		## Append zero to our lookuptable
+				Debug "added $pstr " if ($debug);
+			}
+
+			if (exists($ProtocolListSIGNALduino{$id}{float}) && ($pstr=SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{float}},\%patternList,\$rawData)) >=0)
+			{
+				Debug "Found matched float" if ($debug);
+				$floatRegex='|' . $pstr;
+				$patternLookupHash{$pstr}="F";		## Append float to our lookuptable
+				Debug "added $pstr " if ($debug);
+			}
 			
-						@bit_msg = @retvalue;
-						undef(@retvalue); undef($rcode);
+			#Debug "Pattern Lookup Table".Dumper(%patternLookupHash);
+			SIGNALduino_Log3 $name, 4, "$name: Fingerprint for MU Protocol id $id -> $ProtocolListSIGNALduino{$id}{name} matches, trying to demodulate";
 			
+			my $signal_width= @{$ProtocolListSIGNALduino{$id}{one}};
+			my $length_min = $ProtocolListSIGNALduino{$id}{length_min};
+			my $length_max = "";
+			$length_max = $ProtocolListSIGNALduino{$id}{length_max} if (exists($ProtocolListSIGNALduino{$id}{length_max}));
 			
-						while (scalar @bit_msg % $padwith > 0)  ## will pad up full nibbles per default or full byte if specified in protocol
-						{
-							push(@bit_msg,'0');
-							Debug "$name: padding 0 bit to bit_msg array" if ($debug);
-						}
+			my $signalRegex = "(?:" . $oneRegex . $zeroRegex . $floatRegex . "){$length_min,}";
+			Debug "signalRegex is $signalRegex " if ($debug);
+
+			my $nrRestart=0;
+			my $nrDispatch=0;
+			my $regex="(?:$startStr)($signalRegex)";
 			
-						SIGNALduino_Log3 $name, 5, "$name: dispatching bits: @bit_msg";
-						my $dmsg = SIGNALduino_b2h(join "", @bit_msg);
-						$dmsg =~ s/^0+//	 if (defined($ProtocolListSIGNALduino{$id}{remove_zero})); 
-						$dmsg = "$dmsg"."$ProtocolListSIGNALduino{$id}{postamble}" if (defined($ProtocolListSIGNALduino{$id}{postamble}));
-						$dmsg = "$ProtocolListSIGNALduino{$id}{preamble}"."$dmsg" if (defined($ProtocolListSIGNALduino{$id}{preamble}));
-						
-						if (defined($rssi)) {
-							SIGNALduino_Log3 $name, 4, "$name: decoded matched MU Protocol id $id dmsg $dmsg length " . scalar @bit_msg . " RSSI = $rssi";
-						} else {
-							SIGNALduino_Log3 $name, 4, "$name: decoded matched MU Protocol id $id dmsg $dmsg length " . scalar @bit_msg;
-						}
-						
-						my $modulematch;
-						if (defined($ProtocolListSIGNALduino{$id}{modulematch})) {
-							$modulematch = $ProtocolListSIGNALduino{$id}{modulematch};
-						}
-						if (!defined($modulematch) || $dmsg =~ m/$modulematch/) {
-							Debug "$name: dispatching now msg: $dmsg" if ($debug);
-							if (defined($ProtocolListSIGNALduino{$id}{developId}) && substr($ProtocolListSIGNALduino{$id}{developId},0,1) eq "m") {
-								my $devid = "m$id";
-								my $develop = lc(AttrVal($name,"development",""));
-								if ($develop !~ m/$devid/) {		# kein dispatch wenn die Id nicht im Attribut development steht
-									SIGNALduino_Log3 $name, 3, "$name: ID=$devid skiped dispatch (developId=m). To use, please add m$id to the attr development";
-									next;
-								}
-							}
-	
-							SIGNALduno_Dispatch($hash,$rmsg,$dmsg,$rssi,$id);
-							$message_dispatched=1;
-						}
-					} else {
-						if ($debug)
-						{
-							my $debugstr;
-							$debugstr.=$ProtocolListSIGNALduino{$id}{length_min} if defined($ProtocolListSIGNALduino{$id}{length_min});
-							$debugstr.="/";
-							$debugstr.=$ProtocolListSIGNALduino{$id}{length_max} if defined($ProtocolListSIGNALduino{$id}{length_max});
-							
-							Debug "$name: length ($debugstr) does not match (@bit_msg), ".@bit_msg." bits\n";
-						}	
-						
+			while ( $rawData =~ m/$regex/g)		{
+				my $length_str="";
+				$nrRestart++;
+				SIGNALduino_Log3 $name, 5, "part is $1 starts at position $-[0] and ends at ". pos $rawData;				
+			
+				my @pairs = unpack "(a$signal_width)*", $1;
+			
+				if (exists($ProtocolListSIGNALduino{$id}{length_max}) && scalar @pairs > $ProtocolListSIGNALduino{$id}{length_max})	# ist die Nachricht zu lang?
+				{
+					SIGNALduino_Log3 $name, 5, "$name: $nrRestart. skip demodulation (length scalar @pairs is to long) at Pos $-[0] regex ($regex)";
+					next;
+				}
+				
+				if ($nrRestart == 1) {
+					SIGNALduino_Log3 $name, 5, "$name: Starting demodulation ($startLogStr" . "regex: $regex Pos $message_start) length_min_max (".$length_min."..".$length_max.") length=".scalar @pairs; 
+				} else {
+					SIGNALduino_Log3 $name, 5, "$name: $nrRestart. try demodulation$length_str at Pos $-[0]";
+				}
+				
+				
+				
+				
+				my @bit_msg=();			# array to store decoded signal bits
+				foreach my $sigStr (@pairs)
+				{
+					if (exists $patternLookupHash{$sigStr}) {
+						push(@bit_msg,$patternLookupHash{$sigStr})  ## Add the bits to our bit array
 					}
-					@bit_msg=(); # clear bit_msg array
-					
-					#Find next position of valid signal (skip invalid pieces)
-					my $regex=".{$i}".$start_regex;
-					Debug "$name: searching new start with ($regex)\n" if ($debug);
-					
-					$rawData =~ /$regex/;
-					if (defined($-[0]) && ($-[0] > 0)) {
-						#$i=$-[0]+ $i+ length($startStr);
-						$i=$-[0]+ $i;
-						$i=$i-$signal_width if ($i>0 && length($startStr) == 0); #Todo:
-						Debug "$name: found restart at Position $i ($regex)\n" if ($debug);
-					} else {
+				}
+				
+				Debug "$name: demodulated message raw (@bit_msg), ".@bit_msg." bits\n" if ($debug);
+
+				my ($rcode,@retvalue) = SIGNALduino_callsub('postDemodulation',$ProtocolListSIGNALduino{$id}{postDemodulation},$name,@bit_msg);
+				next if ($rcode < 1 );
+				@bit_msg = @retvalue;
+				undef(@retvalue); undef($rcode);
+	
+				my $dispmode="hex";
+				$dispmode="bin" if (SIGNALduino_getProtpProp($id,"dispatchBin",0) == 1 );
+				
+				my $padwith = SIGNALduino_getProtpProp($id,"paddingbits",0);
+				while (scalar @bit_msg % $padwith > 0)  ## will pad up full nibbles per default or full byte if specified in protocol
+				{
+					push(@bit_msg,'0');
+					Debug "$name: padding 0 bit to bit_msg array" if ($debug);
+				}		
+				my $dmsg = join ("", @bit_msg);
+				@bit_msg=(); # clear bit_msg array
+
+				$dmsg = SIGNALduino_b2h($dmsg) if (SIGNALduino_getProtpProp($id,"dispatchBin",0) == 0 );
+				
+
+				$dmsg =~ s/^0+//	 if (  SIGNALduino_getProtpProp($id,"remove_zero",0) );
+				
+				sprintf("%s%s%s",SIGNALduino_getProtpProp($id,"preamble",""),$dmsg,SIGNALduino_getProtpProp($id,"postamble",""));
+				SIGNALduino_Log3 $name, 5, "$name: dispatching $dispmode: $dmsg";
+				
+				my $modMatchRegex;
+				if (!defined($modMatchRegex=SIGNALduino_getProtpProp($id,"modulematch",undef)) || $dmsg =~ m/$modMatchRegex/) {
+					Debug "$name: dispatching now msg: $dmsg" if ($debug);
+					if (defined($ProtocolListSIGNALduino{$id}{developId}) && substr($ProtocolListSIGNALduino{$id}{developId},0,1) eq "m") {
+						my $develop = lc(AttrVal($name,"development",""));
+						if ($develop !~ m/$ProtocolListSIGNALduino{$id}{developId}/) {		# kein dispatch wenn die Id nicht im Attribut development steht
+							SIGNALduino_Log3 $name, 3, "$name: ID=$ProtocolListSIGNALduino{$id}{developId} skiped dispatch (developId=m). To use, please add $ProtocolListSIGNALduino{$id}{developId} to the attr development";
+							last;
+						}
+					}
+					$nrDispatch++;
+					SIGNALduino_Log3 $name, 4, "$name: decoded matched MU Protocol id $id dmsg $dmsg length scalar @bit_msg dispatch($nrDispatch/". AttrVal($name,'maxMuMsgRepeat', 4) . ")$rssiStr";
+					SIGNALduno_Dispatch($hash,$rmsg,$dmsg,$rssi,$id);
+					if ( $nrDispatch == AttrVal($name,"maxMuMsgRepeat", 4))
+					{
 						last;
 					}
-					
-					#if ($startStr)
-					#{
-				#		$i= index($rawData,$startStr,$i);	
-				#	} else {
-				#		$i = (index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}},\%patternList),$i+$signal_width) < index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{zero}},\%patternList),$i+$signal_width) ? index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}},\%patternList),$i+$signal_width) : index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{zero}},\%patternList),$i+$signal_width));
-				#		$i-=$signal_width if ($i<length($rawData)-$signal_width) ;
-				#		
-				#	}
-				#	last if ($i <=-1);	
-					$i=$i-($signal_width-length($startStr))	if ($i>0 && defined($startStr) && length($startStr) > 0 && length($startStr) < $signal_width);
-					SIGNALduino_Log3 $name, 5, "$name: restarting demodulation at Position $i+$signal_width" if ($debug);
-				
 				}
+
 			}
-					
-			#my $dmsg = sprintf "%02x", oct "0b" . join "", @bit_msg;			## Array -> String -> bin -> hex
+			SIGNALduino_Log3 $name, 5, "$name: $nrRestart. try, regex ($regex) did not match" if ($nrRestart == 0);
+			$message_dispatched=$message_dispatched+$nrDispatch;
 		}
-		return 0 if (!$message_dispatched);
+		return $message_dispatched;	
 		
-		return 1;
 	}
 }
 
@@ -2894,6 +2836,8 @@ sub SIGNALduino_IdList($@)
 		}
 		elsif (exists ($ProtocolListSIGNALduino{$id}{clockabs}))
 		{
+			$ProtocolListSIGNALduino{$id}{length_min} = SDUINO_PARSE_DEFAULT_LENGHT_MIN if (!exists($ProtocolListSIGNALduino{$id}{length_min}));	
+
 			push (@muIdList, $id);
 		}
 	}
@@ -3383,7 +3327,7 @@ sub SIGNALduino_postDemo_WS2000($@) {
 		SIGNALduino_Log3 $name, 4, "$name: WS2000 Sensortyp $typ Adr $adr - ERROR check XOR";
 		return (0, undef);
 	} else {
-		if ($datalength < 45 || $datalength > 46) { 			# Summe prüfen, außer Typ 1 ohne Summe
+		if ($datalength < 45 || $datalength > 46) { 			# Summe pruefen, außer Typ 1 ohne Summe
 			$data = oct( "0b".(join "", reverse @bit_msg[$dataindex .. $dataindex + 3]));
 			if ($data != ($sum & 0x0F)) {
 				SIGNALduino_Log3 $name, 4, "$name: WS2000 Sensortyp $typ Adr $adr - ERROR sum";
@@ -4464,6 +4408,9 @@ sub SIGNALduino_getProtocolList()
 			<li>radinoCC1101: Arduino compatible radino with cc1101 receiver</li>
 		</ul>
 	</li><br>
+	<li>maxMuMsgRepeat<br>
+	MU signals can contain multiple repeats of the same message. The results are all send to a logical module. You can limit the number of scanned repetitions. Defaukt is 4, so after found 4 repeats, the demoduation is aborted. 	
+	<br></li>
     <a name="minsecs"></a>
 	<li>minsecs<br>
     This is a very special attribute. It is provided to other modules. minsecs should act like a threshold. All logic must be done in the logical module. 
@@ -4649,12 +4596,12 @@ With a # at the beginnging whitelistIDs can be deactivated.
 		<ul><li>1) Module welche einen BSL-Button besitzen:</li>
 			<ul>
 			- Spannung anlegen<br>
-			- drücke & halte BSL- und RESET-Button<br>
+			- druecke & halte BSL- und RESET-Button<br>
 			- RESET-Button loslassen und danach den BSL-Button loslassen<br>
 			 (Wiederholen Sie diese Schritte, wenn Ihr radino nicht sofort in den Bootloader-Modus wechselt.)
 			</ul>
 			<li>2) Bootloader erzwingen:<ul>
-			- durch zweimaliges drücken der Reset-Taste</ul>
+			- durch zweimaliges druecken der Reset-Taste</ul>
 			</li>
 		</ul>
 		<li>Im Bootloader-Modus erh&auml;lt der radino eine andere USB ID.</li><br>
@@ -4671,7 +4618,7 @@ With a # at the beginnging whitelistIDs can be deactivated.
 				<li>Beispiel 3: <code>set sduino raw SC;R=3;SR;P0=5000;SM;P0=500;C=250;D=A4F7FDDE</code> , sendet eine kombinierte Nachricht von Raw und Manchester codiert 3 mal wiederholt</li>
 			</ul><br>
 		<ul>
-         <u>NUR für DEBUG Nutzung | <small>Befehle sind abhänging vom Firmwarestand!</small></u><br>
+         <u>NUR fuer DEBUG Nutzung | <small>Befehle sind abhaenging vom Firmwarestand!</small></u><br>
          <small>(Hinweis: Die falsche Benutzung kann zu Fehlfunktionen des SIGNALduino´s f&uuml;hren!)</small>
             <li>CED -> Debugausgaben ein</li>
             <li>CDD -> Debugausgaben aus</li>
@@ -4679,10 +4626,10 @@ With a # at the beginnging whitelistIDs can be deactivated.
             <li>CEL -> LED ein</li>
             <li>CER -> Einschalten der Datenkomprimierung (config: Mred=1)</li>
             <li>CDR -> Abschalten der Datenkomprimierung (config: Mred=0)</li>
-            <li>CSmscnt=[Wert] -> Wiederholungszähler für den split von MS Nachrichten</li>
-            <li>CSmuthresh=[Wert] -> Schwellwert für den split von MU Nachrichten (0=aus)</li>
-            <li>CSmcmbl=[Wert] -> minbitlen für MC-Nachrichten</li>
-            <li>CSfifolimit=[Wert] -> Schwellwert für debug Ausgabe der Pulsanzahl im FIFO Puffer</li>
+            <li>CSmscnt=[Wert] -> Wiederholungszaehler fuer den split von MS Nachrichten</li>
+            <li>CSmuthresh=[Wert] -> Schwellwert fuer den split von MU Nachrichten (0=aus)</li>
+            <li>CSmcmbl=[Wert] -> minbitlen fuer MC-Nachrichten</li>
+            <li>CSfifolimit=[Wert] -> Schwellwert fuer debug Ausgabe der Pulsanzahl im FIFO Puffer</li>
          </ul><br>
 	<a name="reset"></a>
 	<li>reset<br></li>
@@ -4690,19 +4637,19 @@ With a # at the beginnging whitelistIDs can be deactivated.
 	<a name="sendMsg"></a>
 	<li>sendMsg</li>
 	Dieser Befehl erstellt die erforderlichen Anweisungen zum Senden von Rohdaten &uuml;ber den SIGNALduino. Sie k&ouml;nnen die Signaldaten wie Protokoll und die Bits angeben, die Sie senden m&ouml;chten.<br>
-	Alternativ ist es auch möglich, die zu sendenden Daten in hexadezimaler Form zu übergeben. Dazu muss ein 0x vor den Datenteil geschrieben werden.
+	Alternativ ist es auch moeglich, die zu sendenden Daten in hexadezimaler Form zu uebergeben. Dazu muss ein 0x vor den Datenteil geschrieben werden.
 	<br><br>
-	Bitte beachte, dieses Kommando funktioniert nur für MU oder MS Protokolle nach dieser Vorgehensweise:
+	Bitte beachte, dieses Kommando funktioniert nur fuer MU oder MS Protokolle nach dieser Vorgehensweise:
 		<br><br>
 		Argumente sind:
 		<p>
 		<ul><li>P<protocol id>#binarydata#R<anzahl der wiederholungen>#C<optional taktrate>   (#C is optional) 
 		<br>Beispiel binarydata: <code>set sduino sendMsg P0#0101#R3#C500</code>
-		<br>Wird eine sende Kommando für die Bitfolge 0101 anhand der protocol id 0 erzeugen. Als Takt wird 500 verwendet.
+		<br>Wird eine sende Kommando fuer die Bitfolge 0101 anhand der protocol id 0 erzeugen. Als Takt wird 500 verwendet.
 		<br>SR;R=3;P0=500;P1=-9000;P2=-4000;P3=-2000;D=03020302;<br></li></ul><br>
 		<ul><li>P<protocol id>#0xhexdata#R<anzahl der wiederholungen>#C<optional taktrate>    (#C is optional) 
 		<br>Beispiel 0xhexdata: <code>set sduino sendMsg P29#0xF7E#R4</code>
-		<br>Wird eine sende Kommando für die Hexfolge F7E anhand der protocol id 29 erzeugen. Die Nachricht soll 4x gesenset werden.
+		<br>Wird eine sende Kommando fuer die Hexfolge F7E anhand der protocol id 29 erzeugen. Die Nachricht soll 4x gesenset werden.
 		<br>SR;R=4;P0=-8360;P1=220;P2=-440;P3=-220;P4=440;D=01212121213421212121212134;
 		</p></li></ul>
 	</ul><br>
@@ -4830,6 +4777,10 @@ With a # at the beginnging whitelistIDs can be deactivated.
     # Verwende lange IDs f&uuml;r SD_WS07 Devices.<br>
     # Device Namen sehen z.B. so aus: SD_WS07_TH_3 for channel 3.<br>
     attr SIGNALduino longids SD_WS07<br><br>
+	<a name="maxMuMsgRepeat"></a>
+	<li>maxMuMsgRepeat <br><
+	In MU Signalen koennen mehrere Wiederholungen stecken. Diese werden einzeln ausgewertet und an ein logisches Modul uebergeben. Mit diesem Attribut kann angepasst werden, wie viele Wiederholungen gesucht werden. Standard ist 4. 	
+	<br></li>
 	<a name="minsecs"></a>
 	<li>minsecs<br></li>
 	Es wird von anderen Modulen bereitgestellt. Minsecs sollte wie eine Schwelle wirken. Wenn angegeben, werden unterst&uuml;tzte Module neue Nachrichten verworfen, wenn minsecs nicht vergangen sind.<br><br>
@@ -4838,9 +4789,9 @@ With a # at the beginnging whitelistIDs can be deactivated.
 	Mit diesem Attribut k&ouml;nnen Sie die Protokollierung von Debug-Nachrichten vom io-Ger&auml;t steuern. Wenn dieser Wert auf 3 festgelegt ist, werden diese Nachrichten protokolliert, wenn der globale Verbose auf 3 oder h&ouml;her eingestellt ist.<br><br>
 	<a name="eventlogging"></a>
 	<li>eventlogging<br>
-Mit diesem Attribut können Sie steuern, ob jede Logmeldung auch als Ereignis bereitgestellt wird. Dies ermöglicht das Erzeugen eines Ereignisses für jede Protokollnachricht.
-    Setze dies auf 0 und Logmeldungen werden nur in der globalen Fhem-Logdatei gespeichert, wenn der Loglevel höher oder gleich dem Verbose-Attribut ist.
-    Setze dies auf 1 und jede Logmeldung wird auch als Ereignis versendet. Dadurch können Sie die Ereignisse in einer separaten Protokolldatei protokollieren.<br><br>
+    Mit diesem Attribut koennen Sie steuern, ob jede Logmeldung auch als Ereignis bereitgestellt wird. Dies ermoeglicht das Erzeugen eines Ereignisses fuer jede Protokollnachricht.
+    Setze dies auf 0 und Logmeldungen werden nur in der globalen Fhem-Logdatei gespeichert, wenn der Loglevel hoeher oder gleich dem Verbose-Attribut ist.
+    Setze dies auf 1 und jede Logmeldung wird auch als Ereignis versendet. Dadurch koennen Sie die Ereignisse in einer separaten Protokolldatei protokollieren.<br><br>
     </li>
 	<a name="rawmsgEvent"></a>
 	<li>rawmsgEvent<br></li>
