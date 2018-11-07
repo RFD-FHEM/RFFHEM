@@ -18,7 +18,7 @@ use Data::Dumper qw(Dumper);
 use Scalar::Util qw(looks_like_number);
 no warnings 'portable';
 
-#$| = 1;		#Puffern abschalten, Hilfreich für PEARL WARNINGS Search
+#$| = 1;		#Puffern abschalten, Hilfreich fuer PEARL WARNINGS Search
 
 #use POSIX qw( floor);  # can be removed
 #use Math::Round qw();
@@ -1529,12 +1529,12 @@ sub SIGNALduino_ParseHttpResponse
 
     if($err ne "")               											 		# wenn ein Fehler bei der HTTP Abfrage aufgetreten ist
     {
-        SIGNALduino_Log3 $name, 3, "$name: error while requesting ".$param->{url}." - $err";    		# Eintrag fürs Log
+        SIGNALduino_Log3 $name, 3, "$name: error while requesting ".$param->{url}." - $err";    		# Eintrag fuers Log
     }
     elsif($param->{code} eq "200" && $data ne "")                                                       		# wenn die Abfrage erfolgreich war ($data enthaelt die Ergebnisdaten des HTTP Aufrufes)
     {
     	
-        SIGNALduino_Log3 $name, 3, "url ".$param->{url}." returned: ".length($data)." bytes Data";  # Eintrag fürs Log
+        SIGNALduino_Log3 $name, 3, "url ".$param->{url}." returned: ".length($data)." bytes Data";  # Eintrag fuers Log
 		    	
     	if ($param->{command} eq "flash")
     	{
@@ -1556,14 +1556,14 @@ sub SIGNALduino_ParseHttpResponse
 			print $file $data;
 			close $file;
 	
-			# Den Flash Befehl mit der soebene heruntergeladenen Datei ausführen
-			#SIGNALduino_Log3 $name, 3, "calling set ".$param->{command}." $filename";    		# Eintrag fürs Log
+			# Den Flash Befehl mit der soebene heruntergeladenen Datei ausfuehren
+			#SIGNALduino_Log3 $name, 3, "calling set ".$param->{command}." $filename";    		# Eintrag fuers Log
 
 			SIGNALduino_Set($hash,$name,$param->{command},$filename); # $hash->{SetFn}
 			
     	}
     } else {
-    	SIGNALduino_Log3 $name, 3, "$name: undefined error while requesting ".$param->{url}." - $err - code=".$param->{code};    		# Eintrag fürs Log
+    	SIGNALduino_Log3 $name, 3, "$name: undefined error while requesting ".$param->{url}." - $err - code=".$param->{code};    		# Eintrag fuers Log
     }
 }
 
@@ -3327,7 +3327,7 @@ sub SIGNALduino_postDemo_WS2000($@) {
 		SIGNALduino_Log3 $name, 4, "$name: WS2000 Sensortyp $typ Adr $adr - ERROR check XOR";
 		return (0, undef);
 	} else {
-		if ($datalength < 45 || $datalength > 46) { 			# Summe prüfen, außer Typ 1 ohne Summe
+		if ($datalength < 45 || $datalength > 46) { 			# Summe pruefen, außer Typ 1 ohne Summe
 			$data = oct( "0b".(join "", reverse @bit_msg[$dataindex .. $dataindex + 3]));
 			if ($data != ($sum & 0x0F)) {
 				SIGNALduino_Log3 $name, 4, "$name: WS2000 Sensortyp $typ Adr $adr - ERROR sum";
@@ -4408,7 +4408,7 @@ sub SIGNALduino_getProtocolList()
 			<li>radinoCC1101: Arduino compatible radino with cc1101 receiver</li>
 		</ul>
 	</li><br>
-	<li>maxMuMsgRepeat <br>
+	<li>maxMuMsgRepeat<br>
 	MU signals can contain multiple repeats of the same message. The results are all send to a logical module. You can limit the number of scanned repetitions. Defaukt is 4, so after found 4 repeats, the demoduation is aborted. 	
 	<br></li>
     <a name="minsecs"></a>
@@ -4596,12 +4596,12 @@ With a # at the beginnging whitelistIDs can be deactivated.
 		<ul><li>1) Module welche einen BSL-Button besitzen:</li>
 			<ul>
 			- Spannung anlegen<br>
-			- drücke & halte BSL- und RESET-Button<br>
+			- druecke & halte BSL- und RESET-Button<br>
 			- RESET-Button loslassen und danach den BSL-Button loslassen<br>
 			 (Wiederholen Sie diese Schritte, wenn Ihr radino nicht sofort in den Bootloader-Modus wechselt.)
 			</ul>
 			<li>2) Bootloader erzwingen:<ul>
-			- durch zweimaliges drücken der Reset-Taste</ul>
+			- durch zweimaliges druecken der Reset-Taste</ul>
 			</li>
 		</ul>
 		<li>Im Bootloader-Modus erh&auml;lt der radino eine andere USB ID.</li><br>
@@ -4618,7 +4618,7 @@ With a # at the beginnging whitelistIDs can be deactivated.
 				<li>Beispiel 3: <code>set sduino raw SC;R=3;SR;P0=5000;SM;P0=500;C=250;D=A4F7FDDE</code> , sendet eine kombinierte Nachricht von Raw und Manchester codiert 3 mal wiederholt</li>
 			</ul><br>
 		<ul>
-         <u>NUR für DEBUG Nutzung | <small>Befehle sind abhänging vom Firmwarestand!</small></u><br>
+         <u>NUR fuer DEBUG Nutzung | <small>Befehle sind abhaenging vom Firmwarestand!</small></u><br>
          <small>(Hinweis: Die falsche Benutzung kann zu Fehlfunktionen des SIGNALduino´s f&uuml;hren!)</small>
             <li>CED -> Debugausgaben ein</li>
             <li>CDD -> Debugausgaben aus</li>
@@ -4626,10 +4626,10 @@ With a # at the beginnging whitelistIDs can be deactivated.
             <li>CEL -> LED ein</li>
             <li>CER -> Einschalten der Datenkomprimierung (config: Mred=1)</li>
             <li>CDR -> Abschalten der Datenkomprimierung (config: Mred=0)</li>
-            <li>CSmscnt=[Wert] -> Wiederholungszähler für den split von MS Nachrichten</li>
-            <li>CSmuthresh=[Wert] -> Schwellwert für den split von MU Nachrichten (0=aus)</li>
-            <li>CSmcmbl=[Wert] -> minbitlen für MC-Nachrichten</li>
-            <li>CSfifolimit=[Wert] -> Schwellwert für debug Ausgabe der Pulsanzahl im FIFO Puffer</li>
+            <li>CSmscnt=[Wert] -> Wiederholungszaehler fuer den split von MS Nachrichten</li>
+            <li>CSmuthresh=[Wert] -> Schwellwert fuer den split von MU Nachrichten (0=aus)</li>
+            <li>CSmcmbl=[Wert] -> minbitlen fuer MC-Nachrichten</li>
+            <li>CSfifolimit=[Wert] -> Schwellwert fuer debug Ausgabe der Pulsanzahl im FIFO Puffer</li>
          </ul><br>
 	<a name="reset"></a>
 	<li>reset<br></li>
@@ -4637,19 +4637,19 @@ With a # at the beginnging whitelistIDs can be deactivated.
 	<a name="sendMsg"></a>
 	<li>sendMsg</li>
 	Dieser Befehl erstellt die erforderlichen Anweisungen zum Senden von Rohdaten &uuml;ber den SIGNALduino. Sie k&ouml;nnen die Signaldaten wie Protokoll und die Bits angeben, die Sie senden m&ouml;chten.<br>
-	Alternativ ist es auch möglich, die zu sendenden Daten in hexadezimaler Form zu übergeben. Dazu muss ein 0x vor den Datenteil geschrieben werden.
+	Alternativ ist es auch moeglich, die zu sendenden Daten in hexadezimaler Form zu uebergeben. Dazu muss ein 0x vor den Datenteil geschrieben werden.
 	<br><br>
-	Bitte beachte, dieses Kommando funktioniert nur für MU oder MS Protokolle nach dieser Vorgehensweise:
+	Bitte beachte, dieses Kommando funktioniert nur fuer MU oder MS Protokolle nach dieser Vorgehensweise:
 		<br><br>
 		Argumente sind:
 		<p>
 		<ul><li>P<protocol id>#binarydata#R<anzahl der wiederholungen>#C<optional taktrate>   (#C is optional) 
 		<br>Beispiel binarydata: <code>set sduino sendMsg P0#0101#R3#C500</code>
-		<br>Wird eine sende Kommando für die Bitfolge 0101 anhand der protocol id 0 erzeugen. Als Takt wird 500 verwendet.
+		<br>Wird eine sende Kommando fuer die Bitfolge 0101 anhand der protocol id 0 erzeugen. Als Takt wird 500 verwendet.
 		<br>SR;R=3;P0=500;P1=-9000;P2=-4000;P3=-2000;D=03020302;<br></li></ul><br>
 		<ul><li>P<protocol id>#0xhexdata#R<anzahl der wiederholungen>#C<optional taktrate>    (#C is optional) 
 		<br>Beispiel 0xhexdata: <code>set sduino sendMsg P29#0xF7E#R4</code>
-		<br>Wird eine sende Kommando für die Hexfolge F7E anhand der protocol id 29 erzeugen. Die Nachricht soll 4x gesenset werden.
+		<br>Wird eine sende Kommando fuer die Hexfolge F7E anhand der protocol id 29 erzeugen. Die Nachricht soll 4x gesenset werden.
 		<br>SR;R=4;P0=-8360;P1=220;P2=-440;P3=-220;P4=440;D=01212121213421212121212134;
 		</p></li></ul>
 	</ul><br>
@@ -4777,9 +4777,9 @@ With a # at the beginnging whitelistIDs can be deactivated.
     # Verwende lange IDs f&uuml;r SD_WS07 Devices.<br>
     # Device Namen sehen z.B. so aus: SD_WS07_TH_3 for channel 3.<br>
     attr SIGNALduino longids SD_WS07<br><br>
-	<a name="maxMuMsgRepeat "></a>
+	<a name="maxMuMsgRepeat"></a>
 	<li>maxMuMsgRepeat <br><
-	In MU Signalen können mehrere Wiederholungen stecken. Diese werden einzeln ausgewertet und an ein logisches Modul übergeben. Mit diesem Attribut kann angepasst werden, wie viele Wiederholungen gesucht werden. Standard ist 4. 	
+	In MU Signalen koennen mehrere Wiederholungen stecken. Diese werden einzeln ausgewertet und an ein logisches Modul uebergeben. Mit diesem Attribut kann angepasst werden, wie viele Wiederholungen gesucht werden. Standard ist 4. 	
 	<br></li>
 	<a name="minsecs"></a>
 	<li>minsecs<br></li>
@@ -4789,9 +4789,9 @@ With a # at the beginnging whitelistIDs can be deactivated.
 	Mit diesem Attribut k&ouml;nnen Sie die Protokollierung von Debug-Nachrichten vom io-Ger&auml;t steuern. Wenn dieser Wert auf 3 festgelegt ist, werden diese Nachrichten protokolliert, wenn der globale Verbose auf 3 oder h&ouml;her eingestellt ist.<br><br>
 	<a name="eventlogging"></a>
 	<li>eventlogging<br>
-Mit diesem Attribut können Sie steuern, ob jede Logmeldung auch als Ereignis bereitgestellt wird. Dies ermöglicht das Erzeugen eines Ereignisses für jede Protokollnachricht.
-    Setze dies auf 0 und Logmeldungen werden nur in der globalen Fhem-Logdatei gespeichert, wenn der Loglevel höher oder gleich dem Verbose-Attribut ist.
-    Setze dies auf 1 und jede Logmeldung wird auch als Ereignis versendet. Dadurch können Sie die Ereignisse in einer separaten Protokolldatei protokollieren.<br><br>
+    Mit diesem Attribut koennen Sie steuern, ob jede Logmeldung auch als Ereignis bereitgestellt wird. Dies ermoeglicht das Erzeugen eines Ereignisses fuer jede Protokollnachricht.
+    Setze dies auf 0 und Logmeldungen werden nur in der globalen Fhem-Logdatei gespeichert, wenn der Loglevel hoeher oder gleich dem Verbose-Attribut ist.
+    Setze dies auf 1 und jede Logmeldung wird auch als Ereignis versendet. Dadurch koennen Sie die Ereignisse in einer separaten Protokolldatei protokollieren.<br><br>
     </li>
 	<a name="rawmsgEvent"></a>
 	<li>rawmsgEvent<br></li>
