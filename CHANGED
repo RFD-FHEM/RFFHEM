@@ -1,3 +1,6 @@
+07.11.2018
+ If start is defined, then we will search for start and discard anything before start (#244)
+ Number of dispatches can be limited (maxMuMsgRepeat)
 30.10.2018
  signalduino_protocols.hash - added more doc ID 86
 29.10.2018
