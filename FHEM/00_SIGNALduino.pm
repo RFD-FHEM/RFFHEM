@@ -2332,10 +2332,10 @@ sub SIGNALduino_Parse_MU($$$$@)
 				@bit_msg = @retvalue;
 				undef(@retvalue); undef($rcode);
 	
-				my $dispmode="hex";
-				$dispmode="bin" if (SIGNALduino_getProtpProp($id,"dispatchBin",0) == 1 );
+				my $dispmode="hex"; 
+				$dispmode="bin" if (SIGNALduino_getProtoProp($id,"dispatchBin",0) == 1 );
 				
-				my $padwith = SIGNALduino_getProtpProp($id,"paddingbits",0);
+				my $padwith = SIGNALduino_getProtoProp($id,"paddingbits",0);
 				while (scalar @bit_msg % $padwith > 0)  ## will pad up full nibbles per default or full byte if specified in protocol
 				{
 					push(@bit_msg,'0');
@@ -2344,16 +2344,16 @@ sub SIGNALduino_Parse_MU($$$$@)
 				my $dmsg = join ("", @bit_msg);
 				@bit_msg=(); # clear bit_msg array
 
-				$dmsg = SIGNALduino_b2h($dmsg) if (SIGNALduino_getProtpProp($id,"dispatchBin",0) == 0 );
+				$dmsg = SIGNALduino_b2h($dmsg) if (SIGNALduino_getProtoProp($id,"dispatchBin",0) == 0 );
 				
 
-				$dmsg =~ s/^0+//	 if (  SIGNALduino_getProtpProp($id,"remove_zero",0) );
+				$dmsg =~ s/^0+//	 if (  SIGNALduino_getProtoProp($id,"remove_zero",0) );
 				
-				sprintf("%s%s%s",SIGNALduino_getProtpProp($id,"preamble",""),$dmsg,SIGNALduino_getProtpProp($id,"postamble",""));
+				sprintf("%s%s%s",SIGNALduino_getProtoProp($id,"preamble",""),$dmsg,SIGNALduino_getProtoProp($id,"postamble",""));
 				SIGNALduino_Log3 $name, 5, "$name: dispatching $dispmode: $dmsg";
 				
 				my $modMatchRegex;
-				if (!defined($modMatchRegex=SIGNALduino_getProtpProp($id,"modulematch",undef)) || $dmsg =~ m/$modMatchRegex/) {
+				if (!defined($modMatchRegex=SIGNALduino_getProtoProp($id,"modulematch",undef)) || $dmsg =~ m/$modMatchRegex/) {
 					Debug "$name: dispatching now msg: $dmsg" if ($debug);
 					if (defined($ProtocolListSIGNALduino{$id}{developId}) && substr($ProtocolListSIGNALduino{$id}{developId},0,1) eq "m") {
 						my $develop = lc(AttrVal($name,"development",""));
