@@ -25,7 +25,7 @@ no warnings 'portable';
 
 
 use constant {
-	SDUINO_VERSION            => "v3.3.3-dev_07.11.",
+	SDUINO_VERSION            => "v3.3.3-dev_08.11.",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -2304,7 +2304,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 			
 				if (exists($ProtocolListSIGNALduino{$id}{length_max}) && scalar @pairs > $ProtocolListSIGNALduino{$id}{length_max})	# ist die Nachricht zu lang?
 				{
-					SIGNALduino_Log3 $name, 5, "$name: $nrRestart. skip demodulation (length scalar @pairs is to long) at Pos $-[0] regex ($regex)";
+					SIGNALduino_Log3 $name, 5, "$name: $nrRestart. skip demodulation (length ".scalar @pairs." is to long) at Pos $-[0] regex ($regex)";
 					next;
 				}
 				
@@ -2335,13 +2335,14 @@ sub SIGNALduino_Parse_MU($$$$@)
 				my $dispmode="hex"; 
 				$dispmode="bin" if (SIGNALduino_getProtoProp($id,"dispatchBin",0) == 1 );
 				
-				my $padwith = SIGNALduino_getProtoProp($id,"paddingbits",1);
+				my $padwith = SIGNALduino_getProtoProp($id,"paddingbits",4);
 				while (scalar @bit_msg % $padwith > 0)  ## will pad up full nibbles per default or full byte if specified in protocol
 				{
 					push(@bit_msg,'0');
 					Debug "$name: padding 0 bit to bit_msg array" if ($debug);
 				}		
 				my $dmsg = join ("", @bit_msg);
+				my $bit_length=scalar @bit_msg;
 				@bit_msg=(); # clear bit_msg array
 
 				$dmsg = SIGNALduino_b2h($dmsg) if (SIGNALduino_getProtoProp($id,"dispatchBin",0) == 0 );
@@ -2349,11 +2350,11 @@ sub SIGNALduino_Parse_MU($$$$@)
 
 				$dmsg =~ s/^0+//	 if (  SIGNALduino_getProtoProp($id,"remove_zero",0) );
 				
-				sprintf("%s%s%s",SIGNALduino_getProtoProp($id,"preamble",""),$dmsg,SIGNALduino_getProtoProp($id,"postamble",""));
+				$dmsg=sprintf("%s%s%s",SIGNALduino_getProtoProp($id,"preamble",""),$dmsg,SIGNALduino_getProtoProp($id,"postamble",""));
 				SIGNALduino_Log3 $name, 5, "$name: dispatching $dispmode: $dmsg";
 				
-				my $modMatchRegex;
-				if (!defined($modMatchRegex=SIGNALduino_getProtoProp($id,"modulematch",undef)) || $dmsg =~ m/$modMatchRegex/) {
+				my $modMatchRegex=SIGNALduino_getProtoProp($id,"modulematch",undef);
+				if (!defined($modMatchRegex) || $dmsg =~ m/$modMatchRegex/) {
 					Debug "$name: dispatching now msg: $dmsg" if ($debug);
 					if (defined($ProtocolListSIGNALduino{$id}{developId}) && substr($ProtocolListSIGNALduino{$id}{developId},0,1) eq "m") {
 						my $develop = lc(AttrVal($name,"development",""));
@@ -2363,7 +2364,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 						}
 					}
 					$nrDispatch++;
-					SIGNALduino_Log3 $name, 4, "$name: decoded matched MU Protocol id $id dmsg $dmsg length scalar @bit_msg dispatch($nrDispatch/". AttrVal($name,'maxMuMsgRepeat', 4) . ")$rssiStr";
+					SIGNALduino_Log3 $name, 4, "$name: decoded matched MU Protocol id $id dmsg $dmsg length $bit_length dispatch($nrDispatch/". AttrVal($name,'maxMuMsgRepeat', 4) . ")$rssiStr";
 					SIGNALduno_Dispatch($hash,$rmsg,$dmsg,$rssi,$id);
 					if ( $nrDispatch == AttrVal($name,"maxMuMsgRepeat", 4))
 					{
