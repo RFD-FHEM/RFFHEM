@@ -2335,7 +2335,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 				my $dispmode="hex"; 
 				$dispmode="bin" if (SIGNALduino_getProtoProp($id,"dispatchBin",0) == 1 );
 				
-				my $padwith = SIGNALduino_getProtoProp($id,"paddingbits",0);
+				my $padwith = SIGNALduino_getProtoProp($id,"paddingbits",1);
 				while (scalar @bit_msg % $padwith > 0)  ## will pad up full nibbles per default or full byte if specified in protocol
 				{
 					push(@bit_msg,'0');
