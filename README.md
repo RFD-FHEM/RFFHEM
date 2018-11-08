@@ -2,7 +2,7 @@ SIGNALduino - FHEM Modules development Version 3.3.x
 
 ======
 
-[![Coverage Status](https://coveralls.io/repos/github/RFD-FHEM/RFFHEM/badge.svg?branch=dev-r33_new_Parse_MU)](https://coveralls.io/github/RFD-FHEM/RFFHEM?branch=dev-r33_new_Parse_MU) [![Build Status](https://travis-ci.org/RFD-FHEM/RFFHEM.svg?branch=dev-r33_new_Parse_MU)](https://travis-ci.org/RFD-FHEM/RFFHEM)
+[![Coverage Status](https://coveralls.io/repos/github/RFD-FHEM/RFFHEM/badge.svg?branch=dev-r33)](https://coveralls.io/github/RFD-FHEM/RFFHEM?branch=dev-r33) [![Build Status](https://travis-ci.org/RFD-FHEM/RFFHEM.svg?branch=dev-r33)](https://travis-ci.org/RFD-FHEM/RFFHEM)
 
 Counterpart of SIGNALDuino uC, it's the code for FHEM to work with the data received from the uC
 
