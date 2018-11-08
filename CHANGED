@@ -1,5 +1,42 @@
+07.11.2018
+ If start is defined, then we will search for start and discard anything before start (#244)
+ Number of dispatches can be limited (maxMuMsgRepeat)
+30.10.2018
+ signalduino_protocols.hash - added more doc ID 86
+29.10.2018
+ signalduino_protocols.hash - ID 87 integrated in ID 86 (two in one) & added doc
+28.10.2018
+ 14_SD_UT.pm - clean Code (VTX_Bell gets another module)
+27.10.2018
+ signalduino_protocols.hash - Comments cleaned
+25.10.2018
+ signalduino_protocols.hash - added ID 87 + 34
+24.10.2018
+ signalduino_protocols.hash - added ID 86
+22.10.2018
+ signalduino_protocols.hash - doc added & revised ID 14,15,20,31,41,57,79
+21.10.2018
+ 90_SIGNALduino_un.pm - fix readingname
+ 14_SD_WS09 - doc revised | FHEM Standard | Def - Set - Get ...
+ 00_SIGNALduino.pm - Feature support dupTimeout on same iodev
+20.10.2018
+ signalduino_protocols.hash - doc added & sorted explanation | added def pause ID 61 & revised length ID 41
+19.10.2018
+ 14_SD_UT.pm - documentation revised + logoutput changed
+18.10.2018
+ signalduino_protocols.hash - doc added & sorted explanation | ID 3,3.1,4,5,17,65 length_max definded
+ 14_SD_RSL.pm - added Doc_DE | Logoutput revised
+ 14_SD_WS.pm - change, protocol for weatherstation Auriol IAN 283582
+ 14_SD_WS.pm - feature, new protocol for weatherstation TFA 35.1140.01
+ 14_SD_WS.pm - feature, plausibility check temperature and humidity values
+ 14_SD_WS.pm - change, reading battery removed
+09.10.2018
+ 90_SIGNALduino_un.pm - added bitCountLength & added doc 
+04.10.2018
+ signalduino_protocols.hash - revised Info & del developId 72 + 78 + added ID 19 minify
 01.10.2018
- 00_SIGNALduino.pm - added doc availableFirmware + updateChannelFW
+ signalduino_protocols.hash - sensor comments added & revised
+ 14_Hideki.pm: doc revised (added doc windSpeedCorr)
 30.09.2018
  00_SIGNALduino.pm - doc_DE revised & doc_EN some attributes were missing
  14_SD_WS: added Protocol 84 -> new sensor Auriol (IAN 283582)
@@ -50,6 +87,9 @@
 02.07.2018
   00_SIGNALduino.pm update postdemodulation WS7053, WS7054 - better processing start of message
   SD_WS_07: fix for weather trend 2759001)
+03.07.2018
+ 00_SIGNALduino.pm 
+      Log Eintrage beim RESTART geordnet / vereinfacht
 16.03.2018
 14_SD_WS_Maverick: rename Readings, fit to Maverick_RFXTRX now
         added attribute inactivityInterval and updated commandref
