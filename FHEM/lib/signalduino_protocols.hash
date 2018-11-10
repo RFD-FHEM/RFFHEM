@@ -316,15 +316,16 @@
 		{
             name			=> 'FLAMINGO FA22RF / FA21RF / LM-101LD',
 			comment		=> 'FLAMINGO oder Unitec Rauchmelder',
-			id          	=> '13',
+			id          	=> '13.1',
 			one				=> [1,-1.8],
 			zero			=> [1,-3.5],
-			start			=> [-23.5,10,-1],
+			start			=> [10,-1],
+			pause           => [-25],
 			clockabs		=> 800,
 			format 			=> 'twostate',	  		
-			preamble		=> 'P13#',				# prepend to converted message	
-			clientmodule    => 'FLAMINGO',
-			#modulematch     => 'P13#.*',
+			preamble		=> 'P13.1#',				# prepend to converted message	
+			clientmodule    => 'FLAMINGO',   				# not used now
+			#modulematch     => '^P13\.?1?#[A-Fa-f0-9]+',
 			length_min      => '24',
 			length_max      => '24',
 		}, 		
