@@ -1,15 +1,18 @@
 defmod test_mu_1 UnitTest dummyDuino 
 (
  {
-	 my $mock;
-	 $mock = Mock::Sub->new;
-	 my $Dispatch;
-     $Dispatch = $mock->mock("Dispatch");
+	SIGNALduino_IdList("sduino_IdList:$targetHash->{NAME}",49);
+	my $mock = Mock::Sub->new;
+    my $SD_Dispatch = $mock->mock("SIGNALduno_Dispatch");
 
-	 my $rmsg="MU;P0=-563;P1=479;P2=991;P3=-423;P4=361;P5=-1053;P6=3008;P7=-7110;D=2345454523452323454523452323452323452323454545456720151515201520201515201520201520201520201515151567201515152015202015152015202015202015202015151515672015151520152020151520152020152020152020151515156720151515201520201515201520201520201520201515151;CP=1;R=21;";
-     my %signal_parts=SIGNALduino_Split_Message($rmsg,$targetHash->{NAME});
-     SIGNALduino_Parse_MU($targetHash, $targetHash, $targetHash->{NAME}, $rmsg,%signal_parts);;
-	 is($Dispatch->called_count, 0, "check not called Dispatch from parse MU");
+	my $rmsg="MU;P0=-563;P1=479;P2=991;P3=-423;P4=361;P5=-1053;P6=3008;P7=-7110;D=2345454523452323454523452323452323452323454545456720151515201520201515201520201520201520201515151567201515152015202015152015202015202015202015151515672015151520152020151520152020152020152020151515156720151515201520201515201520201520201520201515151;CP=1;R=21;";
+    my %signal_parts=SIGNALduino_Split_Message($rmsg,$targetHash->{NAME});
+    ok(SIGNALduino_Parse_MU($targetHash, $targetHash, $targetHash->{NAME}, $rmsg,%signal_parts) ,"check if MU Data protocol 49 is dispatched");
+	is($SD_Dispatch->called_count, 4, "check number of dispatch attempts from protocol 49");
+	is( ($SD_Dispatch->called_with)[4], "49", "SIGNALduno_Dispatch check id " );
+	is( ($SD_Dispatch->called_with)[2], "U49#8B2DB0", "SIGNALduno_Dispatch check dmsg" );
+
+	SIGNALduino_IdList("sduino_IdList:$targetHash->{NAME}");
  }
 );
 attr test_mu_1 room tests
