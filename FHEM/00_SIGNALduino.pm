@@ -964,7 +964,7 @@ SIGNALduino_Get($@)
 	
 	return "$a[1]: \n\n$ret\n";
 	#return "$a[1]: \n\n$ret\nIds with modules: $moduleId";
-  }   elsif ($a[1] eq "availableFimrware") {
+  }   elsif ($a[1] eq "availableFirmware") {
   	SIGNALduino_querygithubreleases($hash);
   }
   
