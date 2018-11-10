@@ -966,6 +966,7 @@ SIGNALduino_Get($@)
 	#return "$a[1]: \n\n$ret\nIds with modules: $moduleId";
   }   elsif ($a[1] eq "availableFirmware") {
   	SIGNALduino_querygithubreleases($hash);
+  	
   }
   
 
@@ -4145,7 +4146,7 @@ sub SIGNALduino_querygithubreleases
                     timeout    => 5,
                     hash       => $hash,                                                                                 # Muss gesetzt werden, damit die Callback funktion wieder $hash hat
                     method     => "GET",                                                                                 # Lesen von Inhalten
-                    header     => "User-Agent: perl_fhem\r\nAccept: application/json",  								 # Den Header gem�ss abzufragender Daten �ndern
+                    header     => "User-Agent: perl_fhem\r\nAccept: application/json",  								 # Den Header gemaess abzufragender Daten aendern
                     callback   =>  \&SIGNALduino_githubParseHttpResponse,                                                # Diese Funktion soll das Ergebnis dieser HTTP Anfrage bearbeiten
                     command    => "queryReleases"
                     
@@ -4162,17 +4163,17 @@ sub SIGNALduino_githubParseHttpResponse($)
 
     if($err ne "")                                                                                                         # wenn ein Fehler bei der HTTP Abfrage aufgetreten ist
     {
-        Log3 $name, 3, "error while requesting ".$param->{url}." - $err (command: $param->{command}";                                                  # Eintrag f�rs Log
+        Log3 $name, 3, "error while requesting ".$param->{url}." - $err (command: $param->{command}";                                                  # Eintrag fuers Log
         #readingsSingleUpdate($hash, "fullResponse", "ERROR");                                                              # Readings erzeugen
     }
 
-    elsif($data ne "")                                                                                                     # wenn die Abfrage erfolgreich war ($data enth�lt die Ergebnisdaten des HTTP Aufrufes)
+    elsif($data ne "")                                                                                                     # wenn die Abfrage erfolgreich war ($data enthaelt die Ergebnisdaten des HTTP Aufrufes)
     {
     	my $json_array = decode_json($data);
     	#print  Dumper($json_array);
     	
        	if ($param->{command} eq "queryReleases") {
-	        #Log3 $name, 3, "url ".$param->{url}." returned: $data";                                                            # Eintrag f�rs Log
+	        #Log3 $name, 3, "url ".$param->{url}." returned: $data";                                                            # Eintrag fuers Log
 	
 			my @fwreleases;
 			if (ref($json_array) eq "ARRAY") {
@@ -4254,6 +4255,7 @@ sub SIGNALduino_githubParseHttpResponse($)
     }
     # Damit ist die Abfrage zuende.
     # Evtl. einen InternalTimer neu schedulen
+    FW_directNotify("#FHEMWEB:$FW_wname", "location.reload('true')", "");
 }
 
 1;
