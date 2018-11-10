@@ -1,0 +1,11 @@
+defmod test_proto46 UnitTest dummyDuino ( 
+{ 
+ my $rmsg="MU;P0=-15829;P1=-3580;P2=1962;P3=-330;P4=245;P5=-2051;D=1234523232345234523232323234523234540023452323234523452323232323452323454023452323234523452323232323452323454023452323234523452323232323452323454023452323234523452323232323452323454023452323234523452323;CP=2;";      
+ my %signal_parts=SIGNALduino_Split_Message($rmsg,$targetHash->{NAME});     
+ my $mock = Mock::Sub->new; 	
+ my $SD_Dispatch = $mock->mock("SIGNALduno_Dispatch");  	
+ is(SIGNALduino_Parse_MU($targetHash, $targetHash, $targetHash->{NAME}, $rmsg,%signal_parts), 4 , "MU Data dispatched");
+ is( ($SD_Dispatch->called_with)[4], "46", "SIGNALduno_Dispatch check id" );
+ is( ($SD_Dispatch->called_with)[2], "u46#45048", "SIGNALduno_Dispatch check dmsg" );
+} 
+)
