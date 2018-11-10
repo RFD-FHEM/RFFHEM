@@ -20,8 +20,8 @@
 #
 # length_min  => ' '       # minimum number of bits of message length
 # length_max  => ' '       # maximum number of bits of message length
-# paddingbits => ' '       # pad up to x bits before call module, default is 4
-# paddingbits => '1'       # will disable padding
+# paddingbits => ' '       # pad up to x bits before call module, default is 4. 
+# paddingbits => '1'       # will disable padding, use this setting when using dispatchBin
 # remove_zero => 1         # removes leading zeros from output
 #
 # developId   => 'm'       # logical module is under development
@@ -36,6 +36,8 @@
 # clientmodule => ' '      # FHEM module for processing
 # filterfunc  => ' '       # SIGNALduino_filterSign | SIGNALduino_compPattern --> SIGNALduino internal filter function, it remove the sign from the pattern, and compress message and pattern
 #                          # SIGNALduino_filterMC --> SIGNALduino internal filter function, it will decode MU data via Manchester encoding
+# dispatchBin => 1,		   # If set to 1, data will be dispatched in binary representation to other logcial modules. 
+#                            If not set (default) or set to 0, data will be dispatched in hex mode to other logical modules.
 # postDemodulation => \&   # only MU - SIGNALduino internal sub for processing before dispatching to a logical module
 # method      => \&        # call to process this message
 # format      => ' '       # twostate | pwm | manchester --> modulation type of the signal, only manchester use SIGNALduino internal, other types only comment
@@ -44,7 +46,7 @@
 #
 ##### notice #### or #### info ############################################################################################################
 # Please use first unused id for new protocols
-# ID´s are currently unused: 34, 42 and 86
+# ID´s are currently unused: 42
 ###########################################################################################################################################
 # Please provide at least three messages for each new MU/MC/MS protocol and a URL of issue in GitHub or discussion in FHEM Forum
 # https://forum.fhem.de/index.php/topic,58396.975.html | https://github.com/RFD-FHEM/RFFHEM
@@ -493,9 +495,12 @@
 			length_min      => '16',
 			filterfunc      => 'SIGNALduino_filterSign',
 		},
-	"21" => #Einhell Garagentor	
+	"21" => # Einhell Garagentor
+	        # https://forum.fhem.de/index.php?topic=42373.0
+			# static adress: Bit 1-28 | channel remote Bit 29-32 | repeats 31
 		{
-            name			=> 'einhell garagedoor',	
+            name			=> 'Einhell Garagedoor',	
+			comment         => 'remote ISC HS 434/6',
 			id          	=> '21',
 			one				=> [-3,1],
 			zero			=> [-1,3],
@@ -510,7 +515,8 @@
 			length_max      => '32',				
 			paddingbits     => '1',					# This will disable padding 
 		},
-	"22" => #TX-EZ6 / Meteo	
+	"22" => # TX-EZ6 / Weatherstation TZS First Austria
+            # https://forum.fhem.de/index.php?topic=35844.0
 		{
             name			=> 'TX-EZ6',	
 			id          	=> '22',
@@ -669,7 +675,7 @@
 			id          	=> '31',
 			one				=> [-1,2],
 			zero			=> [-2,1],
-			start			=> [1],				
+			start			=> [-26,1],				
 			clockabs		=> 600,                  
 			format 			=> 'twostate',	  		
 			preamble		=> 'u31#',				# prepend to converted message	
@@ -721,23 +727,27 @@
 			#modulematch     => '',
 			length_min      => '42',
 			length_max      => '44',
-    	},
-#    "34" =>   # replaced by 37
-#     	 {   
-#       		name			=> 'unknown34',		
-#       		id          	=> '34',
-#			one				=> [2,-1],
-#			zero			=> [1,-2],
-#			start			=> [3,-3,3,-3,3,-3,3,-3],
-#			clockabs   		=> '240',		
-#			format     		=> 'twostate',  		# not used now
-#			preamble		=> 'u34#',				# prepend to converted message	
-#			postamble		=> '',					# Append to converted message	 	
-#			#clientmodule    => '',
-#			#modulematch     => '',
-#			length_min      => '40',
-#			length_max      => '40',
- #   	},
+      },
+    "34" => # QUIGG GT-7000 Funk-Steckdosendimmer | transmitter DMV-7000 - receiver DMV-7009AS
+			# https://github.com/RFD-FHEM/RFFHEM/issues/195
+			# MU;P0=-9808;P1=608;P2=-679;P3=1243;D=01232323232323232323232323232323232323232;CP=3;R=254;
+            # MU;P0=-5476;P1=592;P2=-665;P3=1226;P4=-1309;D=01232323232323232323232323412323412323414;CP=3;R=1;
+            # MU;P0=-3156;P1=589;P2=-668;P3=1247;P4=-1370;D=01232323232323232323232323412323232323412;CP=3;R=255;
+            # MU;P0=-9800;P1=592;P2=-665;P3=1259;P4=-1332;D=01232323232323232323232323234123412323232;CP=3;R=1;
+		{   
+			name 			=> 'QUIGG_GT-7000',
+			comment         => 'remote QUIGG DMV-7000',
+			id 				=> '34',
+			one             => [-1,2],
+			zero            => [-2,1],
+			clockabs   		=> '660',
+			format			=> 'twostate', 
+			preamble 		=> 'u34#',
+			#clientmodule	=> '',
+			#modulematch 	=> '',
+			length_min 		=> '19',
+			length_max 		=> '20',
+    },
      "35" => # Homeeasy
 			 # MS;P0=907;P1=-376;P2=266;P3=-1001;P6=-4860;D=2601010123230123012323230101012301230101010101230123012301;CP=2;SP=6;
 		{   
@@ -1603,6 +1613,7 @@
 			name           => 'Fernotron',
 			id             => '82',       # protocol number
 			developId      => 'm',
+			dispatchBin    => 'y',
 			one            => [1,-2],     # on=400us, off=800us
 			zero           => [2,-1],     # on=800us, off=400us
 			float          => [1,-8],     # on=400us, off=3200us. the preamble and each 10bit word has one [1,-8] in front
@@ -1675,28 +1686,15 @@
 			length_min   => '64',
 			length_max   => '68',
 		},
-	"86" => ## CAME Drehtor Antrieb
-            # https://forum.fhem.de/index.php/topic,63370.msg849400.html#msg849400
+	"86" => ## for two remote controls: Novy Pureline 6830 kitchen hood / CAME TOP 432EV 433,92 MHz für z.B. Drehtor Antrieb
+			### CAME TOP 432EV 433,92 MHz für z.B. Drehtor Antrieb:
+			# https://forum.fhem.de/index.php/topic,63370.msg849400.html#msg849400
 			# https://github.com/RFD-FHEM/RFFHEM/issues/151
 			# MU;P0=711;P1=-15288;P4=132;P5=-712;P6=316;P7=-313;D=4565656705656567056567056 16 565656705656567056567056 16 56565670565656705656705616565656705656567056567056165656567056565670565670561656565670565656705656705616565656705656567056567056165656567056565670565670561656565670565656705656705616565656705656567056;CP=6;R=52;
-            # MU;P0=-322;P1=136;P2=-15241;P3=288;P4=-735;P6=723;D=012343434306434343064343430623434343064343430643434306 2343434306434343064343430 623434343064343430643434306234343430643434306434343062343434306434343064343430623434343064343430643434306234343430643434306434343062343434306434343064343430;CP=3;R=27;
-            # MU;P0=-15281;P1=293;P2=-745;P3=-319;P4=703;P5=212;P6=152;P7=-428;D=0 1212121342121213421213421 01 212121342121213421213421 01 21212134212121342121342101212121342121213421213421012121213421212134212134210121243134212121342121342101252526742121213425213421012121213421212134212134210121212134212;CP=1;R=23;
-	{
-		name		  => 'CAME Drehtor Antrieb',
-		#comment	   => '',
-		id            => '86',
-		zero		  => [-2,1],
-		one           => [-1,2],
-		start         => [-44,1],
-		clockabs      => 345,
-		format        => 'twostate',
-		preamble      => 'u86#',	  # prepend to converted message	
-		#clientmodule  => 'SD_UT',
-		#modulematch   => '^u86#.{3}',
-		length_min    => '12',
-		length_max    => '12',
-	},
-	"87" => # Novy Pureline 6830 kitchen hood
+			# MU;P0=-322;P1=136;P2=-15241;P3=288;P4=-735;P6=723;D=012343434306434343064343430623434343064343430643434306 2343434306434343064343430 623434343064343430643434306234343430643434306434343062343434306434343064343430623434343064343430643434306234343430643434306434343062343434306434343064343430;CP=3;R=27;
+			# MU;P0=-15281;P1=293;P2=-745;P3=-319;P4=703;P5=212;P6=152;P7=-428;D=0 1212121342121213421213421 01 212121342121213421213421 01 21212134212121342121342101212121342121213421213421012121213421212134212134210121243134212121342121342101252526742121213425213421012121213421212134212134210121212134212;CP=1;R=23;
+			# rechteTaste: 0x112 (000100010010), linkeTaste: 0x111 (000100010001), the least significant bits distinguish the keys
+			### remote control for Novy Pureline 6830 kitchen hood:
 			# https://github.com/RFD-FHEM/RFFHEM/issues/331
             # light on/off button
 			# MU;P0=710;P1=353;P2=-403;P4=-761;P6=-16071;D=20204161204120412041204120414141204120202041612041204120412041204141412041202020416120412041204120412041414120412020204161204120412041204120414141204120202041;CP=1;R=40;
@@ -1709,17 +1707,17 @@
             # novy button
 			# MU;P0=706;P1=-763;P2=370;P3=-405;P4=-15980;D=0123012301230304230123012301230123012303042;CP=2;R=42;
 	{
-		name 		  => 'Novy',
-		comment       => 'Pureline_6830',
-		id            => '87',
+		name		  => 'CAME \ Novy',
+		comment	      => 'CAME TOP 432EV or Novy Pureline 6830',
+		id            => '86',
 		zero		  => [-2,1],
 		one           => [-1,2],
 		start         => [-44,1],
-		clockabs      => 365,
+		clockabs      => 350,
 		format        => 'twostate',
-		preamble      => 'u87#',	  # prepend to converted message	
+		preamble      => 'u86#',	  # prepend to converted message	
 		#clientmodule  => 'SD_UT',
-		#modulematch   => '^u87#',
+		#modulematch   => '^u86#.*',
 		length_min    => '12',
 		length_max    => '18',
 	},
