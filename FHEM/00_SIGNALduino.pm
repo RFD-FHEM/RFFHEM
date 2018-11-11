@@ -965,8 +965,10 @@ SIGNALduino_Get($@)
 	return "$a[1]: \n\n$ret\n";
 	#return "$a[1]: \n\n$ret\nIds with modules: $moduleId";
   }   elsif ($a[1] eq "availableFirmware") {
+  	my $channel=AttrVal($name,"updateChannelFW","stable");
+	my $hardware=AttrVal($name,"hardware","nano");
   	SIGNALduino_querygithubreleases($hash);
-  	
+	return "$a[1]: \n\nFetching $channel firmware versions for $hardware from github\n";
   }
   
 
