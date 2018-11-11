@@ -637,12 +637,13 @@
             name			=> 'HT12e remote',	
 			comment         => 'Remote control for example Westinghouse airfan with five Buttons (developModule SD_UT is only in github available)',
 			id          	=> '29',
+		    developId       => 'm',
 			one				=> [-2,1],
 			zero			=> [-1,2],
 			start           => [-35,1],         # Message is not provided as MS, worakround is start
 			clockabs        => 235,             # ca 220
 			format          => 'twostate',      # there is a pause puls between words
-			preamble        => 'u29#',				# prepend to converted message	
+			preamble        => 'P29#',				# prepend to converted message	
 			clientmodule    => 'SD_UT', 
 			modulematch     => '^P29#.{3}',
 			length_min      => '12',
@@ -739,6 +740,7 @@
 		{   
 			name 			=> 'QUIGG_GT-7000',
 			comment         => 'remote QUIGG DMV-7000',
+			developId       => 'm',
 			id 				=> '34',
 			one             => [-1,2],
 			zero            => [-2,1],
@@ -1712,8 +1714,9 @@
 		name		  => 'CAME \ Novy',
 		comment	      => 'CAME TOP 432EV or Novy Pureline 6830',
 		id            => '86',
-		zero		  => [-2,1],
-		one           => [-1,2],
+		developId     => 'm',
+		one           => [-2,1],
+		zero          => [-1,2],
 		start         => [-44,1],
 		clockabs      => 350,
 		format        => 'twostate',
