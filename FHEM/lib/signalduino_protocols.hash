@@ -324,7 +324,7 @@
 			clockabs		=> 800,
 			format 			=> 'twostate',	  		
 			preamble		=> 'P13.1#',				# prepend to converted message	
-			clientmodule    => 'FLAMINGO',   				# not used now
+			clientmodule    => 'FLAMINGO',
 			#modulematch     => '^P13\.?1?#[A-Fa-f0-9]+',
 			length_min      => '24',
 			length_max      => '24',
