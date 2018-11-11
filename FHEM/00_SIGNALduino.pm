@@ -133,7 +133,7 @@ my $clientsSIGNALduino = ":IT:"
 						."RFXX10REC:"
 						."Dooya:"
 						."SOMFY:"
-						."SD_UT:"	## BELL 201.2 TXA
+						."SD_UT:"	## universal - more devices with different protocols
 			        	."SD_WS_Maverick:"
 			        	."FLAMINGO:"
 			        	."CUL_WS:"
@@ -166,7 +166,7 @@ my %matchListSIGNALduino = (
      "14:Dooya"					=> '^P16#[A-Fa-f0-9]+',
      "15:SOMFY"					=> '^Ys[0-9A-F]+',
      "16:SD_WS_Maverick"		=> '^P47#[A-Fa-f0-9]+',
-     "17:SD_UT"            		=> '^[P|u](30|79|81|83)#.*',	 # universal - more devices with different protocols
+     "17:SD_UT"            		=> '^[P|u](29|30|34|81|83|86)#.*',	 # universal - more devices with different protocols
      "18:FLAMINGO"            	=> '^P13\.?1?#[A-Fa-f0-9]+',     # Flamingo Smoke
      "19:CUL_WS"				=> '^K[A-Fa-f0-9]{5,}',
      "20:Revolt"				=> '^r[A-Fa-f0-9]{22}',
