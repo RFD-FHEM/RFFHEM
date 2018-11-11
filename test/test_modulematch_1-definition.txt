@@ -1,0 +1,56 @@
+defmod test_modukematch_1 UnitTest dummyDuino (
+ { 
+    my $local_ProtocolListSIGNALduino = SIGNALduino_getProtocolList();
+	$local_ProtocolListSIGNALduino->{'9999ut'} =
+	{
+			name			=> 'Unittest dummy protocol',
+			comment         => 'unittest protocol',
+			id				=> '9999ut',
+	};
+	my $msg;
+	my $use_like;
+	my $regex=$local_ProtocolListSIGNALduino->{'9999ut'}{id};
+	my $mock = Mock::Sub->new;
+    my $Log3= $mock->mock("SIGNALduino_Log3");
+		$Log3->side_effect( sub { 
+		Log3 $_[0], $_[1] ,$_[2] if ($_[2] =~ /skiped/ && ( ($use_like == 1 && like($_[2],qr/$regex/,$msg) || ($use_like == 0 && unlike($_[2],qr/$regex/,$msg)) )))
+	} 
+	);
+
+	subtest 'SIGNALduino_moduleMatch cenariois without development attr' => sub {
+		plan tests => 3;
+		$use_like=1;
+		is(SIGNALduino_moduleMatch($targe,'9999ut',"X3332222"),1,"check returncode without modulematch");
+
+		$local_ProtocolListSIGNALduino->{'9999ut'}{modulematch}="^X[A-Fa-f0-9]+";
+		is(SIGNALduino_moduleMatch($target,'9999ut',"X3332222"),1,"check returncode with matching modulematch");
+		is(SIGNALduino_moduleMatch($target,'9999ut',"Y3332222"),0,"check returncode with not matching modulematch");
+	};
+	
+	subtest 'SIGNALduino_moduleMatch cenariois with development attr' => sub {
+		$local_ProtocolListSIGNALduino->{'9999ut'}{developId}="m";
+		plan tests => 3;
+		$use_like=1;
+		unset($local_ProtocolListSIGNALduino->{'9999ut'}{modulematch});
+
+		is(SIGNALduino_moduleMatch($target,'9999ut',"X3332222"),1,"check returncode without modulematch");
+
+		$local_ProtocolListSIGNALduino->{'9999ut'}{modulematch}="^X[A-Fa-f0-9]+";
+		is(SIGNALduino_moduleMatch($target,'9999ut',"X3332222"),-1,"check returncode with matching modulematch");
+
+		%defs{$target}{attr}{development} = "m";
+		$local_ProtocolListSIGNALduino->{'9999ut'}{modulematch}="^X[A-Fa-f0-9]+";
+		is(SIGNALduino_moduleMatch($target,'9999ut',"X3332222"),-1,"check returncode with matching modulematch but wrong development attr");
+
+		%defs{$target}{attr}{development} = "m9999ut";
+		$local_ProtocolListSIGNALduino->{'9999ut'}{modulematch}="^X[A-Fa-f0-9]+";
+		is(SIGNALduino_moduleMatch($target,'9999ut',"X3332222"),1,"check returncode with matching modulematch but wrong development attr");
+		is(SIGNALduino_moduleMatch($target,'9999ut',"Y3332222"),0,"check returncode with not matching modulematch");
+
+	};
+
+
+
+	}
+);
+

@@ -1916,11 +1916,12 @@ sub SIGNALduino_moduleMatch
 		Debug "$name: modmatch passed for: $dmsg" if ($debug);
 		my $developATTR = AttrVal($name,"development","");
 		my $developID = SIGNALduino_getProtoProp($id,"developId","");
-		if (length($developATTR) > 0 && $developID eq "m") {
-			if ($developATTR !~ m/$developID$id/) {		# kein dispatch wenn die Id nicht im Attribut development steht
-				SIGNALduino_Log3 $name, 3, "$name: ID=id skiped dispatch (developId=$developID). To use, please add $developID$id to the attr development";
-				return -1;
+		if ($developID eq "m") {
+			if ( length($developATTR) > 0 && $developATTR =~ m/$developID$id/) { 
+				return 1; #   return 1 da modulematch gefunden wurde			
 			}
+			SIGNALduino_Log3 $name, 3, "$name: ID=id skiped dispatch (developId=$developID). To use, please add $developID$id to the attr development";	
+			return -1;
 		}
 		return 1;
 	}
