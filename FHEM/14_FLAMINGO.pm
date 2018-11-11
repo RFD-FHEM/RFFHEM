@@ -1,7 +1,10 @@
 #################################################################
-# $Id: 14_FLAMINGO.pm 3818 2016-08-15 $
+# $Id: 14_FLAMINGO.pm 3818 2016-08-15 HomeAuto_User $
 #################################################################
-# The module was taken over by an unknown maintainer
+# The module was taken over by an unknown maintainer!
+# It is part of the SIGNALduinos project.
+# https://github.com/RFD-FHEM/RFFHEM/tree/dev-r33
+# 
 # 2018 - HomeAuto_User & elektron-bbs
 #################################################################
 # FLAMINGO FA20RF
@@ -38,8 +41,6 @@ my %models = (
 );
 
 
-
-
 #####################################
 sub
 FLAMINGO_Initialize($)
@@ -71,7 +72,7 @@ sub FLAMINGO_Define($$) {
 	### check code ###
 	return "wrong hex value: ".$a[2] if not ($a[2] =~ /^[0-9a-fA-F]{6}$/m);
 	### check model ###
-	return "wrong model: ".$a[3] if $a[3] && ( !grep { $_ eq $a[3] } %models );
+	return "wrong model: ".$a[3] . "\n\n(allowed modelvalues: " . join(" | ", sort %models).")" if $a[3] && ( !grep { $_ eq $a[3] } %models );
 	
 	$hash->{CODE} = $a[2];
 	$hash->{lastMSG} =  "no data";
