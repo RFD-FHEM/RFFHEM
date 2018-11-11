@@ -1914,10 +1914,11 @@ sub SIGNALduino_moduleMatch
 	
 	if (!defined($modMatchRegex) || $dmsg =~ m/$modMatchRegex/) {
 		Debug "$name: modmatch passed for: $dmsg" if ($debug);
-		my $developattr = lc(AttrVal($name,"development",undef));
-		if (defined($developattr) && $ProtocolListSIGNALduino{$id}{developId} eq "m") {
-			if ($developattr !~ m/$ProtocolListSIGNALduino{$id}{developId}$id/) {		# kein dispatch wenn die Id nicht im Attribut development steht
-				SIGNALduino_Log3 $name, 3, "$name: ID=$ProtocolListSIGNALduino{$id}{developId} skiped dispatch (developId=m). To use, please add $ProtocolListSIGNALduino{$id}{developId}$id to the attr development";
+		my $developATTR = AttrVal($name,"development","");
+		my $developID = SIGNALduino_getProtoProp($id,"developId","");
+		if (length($developATTR) > 0 && $developID eq "m") {
+			if ($developATTR !~ m/$developID$id/) {		# kein dispatch wenn die Id nicht im Attribut development steht
+				SIGNALduino_Log3 $name, 3, "$name: ID=id skiped dispatch (developId=$developID). To use, please add $developID$id to the attr development";
 				return -1;
 			}
 		}
