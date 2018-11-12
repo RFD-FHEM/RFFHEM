@@ -1,7 +1,7 @@
 ##############################################
 # $Id: 14_SD_UT.pm 32 2016-04-02 14:00:00 v3.2-dev $
 #
-# The purpose of this module is universal support for devices or sensors
+# The purpose of this module is universal support for devices
 # 2016 - 1.fhemtester | 2018 - HomeAuto_User & elektron-bbs
 #
 # - unitec Modul alte Variante bis 20180901 (Typ unitec-Sound) --> keine MU MSG!
@@ -367,8 +367,9 @@ sub SD_UT_Parse($$) {
 	my $bin;
 	my $def;
 	my $deviceCode;
-	my $zone;
-	my $usersystem;
+	my $zone;			# bits for zone
+	my $zoneRead;		# text for user of zone
+	my $usersystem;		# text for user of system
 	my $devicedef;
 	my $state;
 	
@@ -495,15 +496,15 @@ sub SD_UT_Parse($$) {
 		$zoneUser =~ s/0/off|/g;
 		$zoneUser = substr($zoneUser, 0 , length($zoneUser)-1);
 		
-		$zone = $zone." ($zoneUser) - Zone ";
+		$zoneRead = $zone." ($zoneUser) - Zone ";
 		
 		# Anmeldung an Profi-Alarmanzentrale 47121
 		if (oct("0b".$zone) < 6 ) {
-			$zone.= (oct("0b".$zone)+1);
+			$zoneRead.= (oct("0b".$zone)+1);
 			$usersystem = "Unitec 47121";
 		# other variants
 		} else {
-			$zone.= (oct("0b".$zone)-5);
+			$zoneRead.= (oct("0b".$zone)-5);
 			# Anmeldung an Basis-Alarmanzentrale 47125 | Sirenen-System (z.B. ein System ohne separate Funk-Zentrale)
 			$usersystem = "Unitec 47125 or Friedland" if (oct("0b".$zone) == 6);
 			# Anmeldung an Basis-Alarmanzentrale 47125
@@ -558,7 +559,7 @@ sub SD_UT_Parse($$) {
 	readingsBeginUpdate($hash);
 	readingsBulkUpdate($hash, "deviceCode", $deviceCode, 0)  if (defined($deviceCode) && $models{$model}{Typ} eq "remote" && $model ne "SA_434_1_mini");
 	readingsBulkUpdate($hash, "System-Housecode", $deviceCode, 0)  if (defined($deviceCode) && $model eq "Unitec_47031");
-	readingsBulkUpdate($hash, "Zone", $zone, 0)  if (defined($zone) && $model eq "Unitec_47031");
+	readingsBulkUpdate($hash, "Zone", $zoneRead, 0) if ($model eq "Unitec_47031");
 	readingsBulkUpdate($hash, "Usersystem", $usersystem, 0)  if ($model eq "Unitec_47031");
 	readingsBulkUpdate($hash, "LastAction", "receive", 0)  if (defined($state) && $models{$model}{Typ} eq "remote" && $model ne "SA_434_1_mini");
 	readingsBulkUpdate($hash, "state", $state)  if (defined($state) && $state ne "unknown");
