@@ -10,6 +10,7 @@
 # S.Butzek,Ralf9 2016-2018
 
 package main;
+my $missingModulSIGNALduino;
 
 use strict;
 use warnings;
@@ -17,8 +18,8 @@ use Time::HiRes qw(gettimeofday);
 use Data::Dumper qw(Dumper);
 use Scalar::Util qw(looks_like_number);
 no warnings 'portable';
-use JSON;
 
+eval "use JSON;1" or $missingModulSIGNALduino .= "JSON ";
 #$| = 1;		#Puffern abschalten, Hilfreich fuer PEARL WARNINGS Search
 
 #use POSIX qw( floor);  # can be removed
@@ -290,6 +291,8 @@ SIGNALduino_Define($$)
 {
   my ($hash, $def) = @_;
   my @a = split("[ \t][ \t]*", $def);
+
+  return "Cannot define SIGNALduino device. Perl modul ${missingModulSIGNALduino}is missing." if ( $missingModulSIGNALduino );
 
   if(@a != 3) {
     my $msg = "wrong syntax: define <name> SIGNALduino {none | devicename[\@baudrate] | devicename\@directio | hostname:port}";
