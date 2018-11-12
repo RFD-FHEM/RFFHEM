@@ -1,7 +1,8 @@
 ##############################################
 # $Id: 14_SD_BELL.pm 32 2016-04-02 14:00:00 v3.2-dev $
 #
-# The purpose of this module is to support many wireless BELL devices
+# The file is part of the SIGNALduino project.
+# The purpose of this module is to support many wireless BELL devices.
 # 2018 - HomeAuto_User & elektron-bbs
 #
 ####################################################################################################################################
@@ -45,7 +46,7 @@ my %models = (
 
 sub SD_BELL_Initialize($) {
 	my ($hash) = @_;
-	$hash->{Match}		= "^[u|P](?:14|15|32|41|57|79)#.*";
+	$hash->{Match}		= "^P(?:14|15|32|41|57|79)#.*";
 	$hash->{DefFn}		= "SD_BELL::Define";
 	$hash->{UndefFn}	= "SD_BELL::Undef";
 	$hash->{ParseFn}	= "SD_BELL::Parse";
@@ -72,24 +73,7 @@ my $missingModul = "";
 BEGIN {
     GP_Import(qw(
 		AssignIoPort
-		attr
-		AttrVal
-		defs
-		deviceEvents
-		fhem
-		init_done
-		InternalVal
-		IsDisabled
 		Log3
-		modules
-		readingsBeginUpdate
-		readingsBulkUpdate
-		readingsBulkUpdateIfChanged
-		readingsDelete
-		readingsEndUpdate
-		readingsSingleUpdate
-		ReadingsVal
-		Value
     ))
 };
 
