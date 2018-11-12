@@ -7,6 +7,16 @@
 
 
 FHEM_SCRIPT="/opt/fhem/fhem.pl"
+
+VERBOSE=0
+
+if [ ! -z $2 ]; then
+  if [ $2 = "-v" ]; then  
+        VERBOSE=1
+  fi
+fi
+
+
 if [ ! -f $FHEM_SCRIPT ]; then
 	FHEM_SCRIPT="./fhem/fhem.pl"
 	if [ ! -f $FHEM_SCRIPT ]; then
@@ -33,7 +43,7 @@ do
 	then
 	  exit 254
 	fi
-	a=$(($a+1))
+	a=$((a+1))
 done
 
 
@@ -41,7 +51,7 @@ done
 #echo $RETURN
 
 
-printf "\n\n--------- Starting test %s: ---------\n" $1 
+printf "\n\n--------- Starting test %s: ---------\n" "$1" 
 
 # Load test definitions, and import them to our running instance
 oIFS=$IFS
@@ -63,7 +73,7 @@ CMD=$( echo $CMD | sed '/{/,/}/s/;/;;/g')
 #echo $CMD
 #RETURN=$(perl $FHEM_SCRIPT 7072 "$CMD")
 RETURN=$(echo "$CMD" | /bin/nc localhost 7072)
-echo $RETURN
+echo "$RETURN"
 
 #Wait until state of current test is finished
 #Todo prevent forever loop here
@@ -74,28 +84,21 @@ done
 
 CMD="{ReadingsVal(\"$1\",\"test_output\",\"\")}"
 OUTPUT=$(echo "$CMD" | /bin/nc localhost 7072)
-OUTPUT=$(echo $OUTPUT | awk '{gsub(/\\n/,"\n")}1')
+OUTPUT=$(echo "$OUTPUT" | awk '{gsub(/\\n/,"\n")}1')
 
 CMD="{ReadingsVal(\"$1\",\"test_failure\",\"\")}"
 OUTPUT_FAILED=$(echo "$CMD" | /bin/nc localhost 7072)
-
-	#echo $OUTPUT
-	#echo $OUTPUT_FAILED
-
 testlog=$(awk '/Test '"$1"' starts here ---->/,/<---- Test '"$1"' ends here/' /opt/fhem/log/fhem-*.log)
-#oklines=$(echo $testlog | egrep ^[[:digit:]]{4}\.[[:digit:]]{2}\.[[:digit:]]{2}[[:space:]][[:digit:]]{2}:[[:digit:]]{2}:[[:digit:]]{2}[[:space:]]3:[[:space:]]ok)
-#noklines=$(echo $testlog | egrep ^[[:digit:]]{4}\.[[:digit:]]{2}\.[[:digit:]]{2}[[:space:]][[:digit:]]{2}:[[:digit:]]{2}:[[:digit:]]{2}[[:space:]]3:[[:space:]]nok)
 
-#echo $testlog
 
-printf "Output of %s:\n\n%s" $1 $OUTPUT
+printf "Output of %s:\n\n%s" "$1" "$OUTPUT"
 
 if [ -z "$OUTPUT_FAILED"  ]
 then
-    if [ $(echo $testlog | grep -Fxc "PERL WARNING") -gt 0 ]
+    if { [ $(echo $testlog | grep -Fxc "PERL WARNING") -gt 0 ] || [ $VERBOSE -eq 1 ]; }
 	then
 		echo "Warnings in FHEM Log snippet from test run:"
-		echo $testlog
+		echo "$testlog"
 		status="ok with warnings"
 	else 
 		status="ok"
@@ -103,14 +106,14 @@ then
 
 else
 	echo "Errors of test $1:"
-	echo $OUTPUT_FAILED
+	echo "$OUTPUT_FAILED"
 
 	echo "FHEM Log snippet from test run:"
-	echo $testlog
+	echo "$testlog"
 	status="error"
 fi
 
-printf "\n\n--------- Test %s: %s ---------\n" $1 $status
+printf "\n\n--------- Test %s: %s ---------\n" "$1" "$status"
 
 if [ $status == "error" ] 
 then
