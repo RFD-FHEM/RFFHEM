@@ -1896,6 +1896,38 @@ sub SIGNALduno_Dispatch($$$$$)
    }
 }
 
+# param #1 is name of definition 
+# param #2 is protocol id
+# param #3 is dispatched message to check against
+#
+# returns 1 if message matches modulematch + development attribute
+# returns 0 if message does not match modulematch  
+# return -1 if message does not match development attribute
+sub SIGNALduino_moduleMatch
+{
+	my $name = shift;
+	my $id = shift;
+	my $dmsg = shift;
+	my $debug = AttrVal($name,"debug",0);
+	
+	my $modMatchRegex=SIGNALduino_getProtoProp($id,"modulematch",undef);
+	
+	if (!defined($modMatchRegex) || $dmsg =~ m/$modMatchRegex/) {
+		Debug "$name: modmatch passed for: $dmsg" if ($debug);
+		my $developATTR = AttrVal($name,"development","");
+		my $developID = SIGNALduino_getProtoProp($id,"developId","");
+		if ($developID eq "m") {
+			if ( length($developATTR) > 0 && $developATTR =~ m/$developID$id/) { 
+				return 1; #   return 1 da modulematch gefunden wurde			
+			}
+			SIGNALduino_Log3 $name, 3, "$name: ID=id skiped dispatch (developId=$developID). To use, please add $developID$id to the attr development";	
+			return -1;
+		}
+		return 1;
+	}
+	return 0;
+}
+
 sub
 SIGNALduino_Parse_MS($$$$%)
 {
@@ -2117,7 +2149,6 @@ SIGNALduino_Parse_MS($$$$%)
 }
 
 
-
 ## //Todo: check list as reference
 sub SIGNALduino_padbits(\@$)
 {
@@ -2147,6 +2178,8 @@ sub SIGNALduino_getProtoProp
 	return $default; # Will return undef if $default is not provided
 	#return undef;
 }
+
+
 
 sub SIGNALduino_Parse_MU($$$$@)
 {
@@ -2353,16 +2386,8 @@ sub SIGNALduino_Parse_MU($$$$@)
 				$dmsg=sprintf("%s%s%s",SIGNALduino_getProtoProp($id,"preamble",""),$dmsg,SIGNALduino_getProtoProp($id,"postamble",""));
 				SIGNALduino_Log3 $name, 5, "$name: dispatching $dispmode: $dmsg";
 				
-				my $modMatchRegex=SIGNALduino_getProtoProp($id,"modulematch",undef);
-				if (!defined($modMatchRegex) || $dmsg =~ m/$modMatchRegex/) {
-					Debug "$name: dispatching now msg: $dmsg" if ($debug);
-					if (defined($ProtocolListSIGNALduino{$id}{developId}) && substr($ProtocolListSIGNALduino{$id}{developId},0,1) eq "m") {
-						my $develop = lc(AttrVal($name,"development",""));
-						if ($develop !~ m/$ProtocolListSIGNALduino{$id}{developId}/) {		# kein dispatch wenn die Id nicht im Attribut development steht
-							SIGNALduino_Log3 $name, 3, "$name: ID=$ProtocolListSIGNALduino{$id}{developId} skiped dispatch (developId=m). To use, please add $ProtocolListSIGNALduino{$id}{developId} to the attr development";
-							last;
-						}
-					}
+				if ( SIGNALduino_moduleMatch($name,$id,$dmsg) == 1)
+				{
 					$nrDispatch++;
 					SIGNALduino_Log3 $name, 4, "$name: decoded matched MU Protocol id $id dmsg $dmsg length $bit_length dispatch($nrDispatch/". AttrVal($name,'maxMuMsgRepeat', 4) . ")$rssiStr";
 					SIGNALduno_Dispatch($hash,$rmsg,$dmsg,$rssi,$id);
@@ -2370,7 +2395,8 @@ sub SIGNALduino_Parse_MU($$$$@)
 					{
 						last;
 					}
-				}
+				} 
+
 
 			}
 			SIGNALduino_Log3 $name, 5, "$name: $nrRestart. try, regex ($regex) did not match" if ($nrRestart == 0);
@@ -2380,6 +2406,8 @@ sub SIGNALduino_Parse_MU($$$$@)
 		
 	}
 }
+
+
 
 
 sub
