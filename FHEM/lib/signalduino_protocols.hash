@@ -22,6 +22,7 @@
 # length_max  => ' '       # maximum number of bits of message length
 # paddingbits => ' '       # pad up to x bits before call module, default is 4. 
 # paddingbits => '1'       # will disable padding, use this setting when using dispatchBin
+# paddingbits => '2'       # is padded to an even number, that is a maximum of 1 bit
 # remove_zero => 1         # removes leading zeros from output
 #
 # developId   => 'm'       # logical module is under development
@@ -129,7 +130,7 @@
 			    # need more Device Infos / User Message
         {
             name			=> 'itv1_sync40',	
-			comment         => 'IT remote Control PAR 1000, ITS-150',
+			comment         => 'IT remote Control PAR 1000, ITS-150, AB440R',
 			id          	=> '3',
 			one             => [3,-1],
 			zero			=> [1,-3],
@@ -313,17 +314,18 @@
 				# Times measured
 				# Sync 8100 microSec, 900 microSec | Bit1 2700 microSec low - 800 microSec high | Bit0 1400 microSec low - 800 microSec high | Pause Repeat 20000 microSec | 1 Sync + 24Bit, Totaltime 65550 microSec without Sync
 		{
-            name			=> 'FLAMINGO FA21 / LM-101LD',
+            name			=> 'FLAMINGO FA22RF / FA21RF / LM-101LD',
 			comment		=> 'FLAMINGO oder Unitec Rauchmelder',
-			id          	=> '13',
+			id          	=> '13.1',
 			one				=> [1,-1.8],
 			zero			=> [1,-3.5],
-			start			=> [-23.5,10,-1],
+			start			=> [10,-1],
+			pause           => [-25],
 			clockabs		=> 800,
 			format 			=> 'twostate',	  		
-			preamble		=> 'P13#',				# prepend to converted message	
+			preamble		=> 'P13.1#',				# prepend to converted message	
 			clientmodule    => 'FLAMINGO',
-			#modulematch     => 'P13#.*',
+			#modulematch     => '^P13\.?1?#[A-Fa-f0-9]+',
 			length_min      => '24',
 			length_max      => '24',
 		}, 		
@@ -1561,7 +1563,7 @@
 			clockabs     	=> 330,
 			format 		=> 'twostate',	    # 
 			preamble	=> 'U79#',	# prepend to converted message	
-			#clientmodule    => 'SD_UT',
+			#clientmodule    => 'SD_BELL',
 			#modulematch     => '^P79#.*',
 			length_min      => '12',
 			length_max      => '12',
