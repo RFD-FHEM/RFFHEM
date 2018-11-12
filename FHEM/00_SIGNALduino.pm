@@ -206,7 +206,6 @@ SIGNALduino_Initialize($)
   $hash->{GetFn}   			= "SIGNALduino_Get";
   $hash->{SetFn}   			= "SIGNALduino_Set";
   $hash->{AttrFn}  			= "SIGNALduino_Attr";
-  #$hash->{NotifyFn}         = "SIGNALduino_Notify";
   $hash->{AttrList}			= 
                        "Clients MatchList do_not_notify:1,0 dummy:1,0"
 					  ." hexFile"
@@ -1144,31 +1143,7 @@ SIGNALduino_DoInit($)
 	return undef;
 }
 
-sub SIGNALduino_Notify($$)
-{
-  my ($own_hash, $hash) = @_;
 
-  my $devName = $hash->{NAME}; # Device that created the events
-  return "" if(IsDisabled($devName)); # Return without any further action if the module is disabled
-
-  my $events = deviceEvents($hash,1);
-
-  SIGNALduino_Log3 $hash, 3, "$devName/Notify: $devName events: ".Dumper($events);
-
-  return if( !$events );
-
-  foreach my $event (@{$events}) {
-    $event = "" if(!defined($event));
-
-
-	if ($event eq "opened")
-	{
-		#$hash->{setcmd} = %sets;
-		
-	}
-  }
-	
-}
 
 # Disable receiver
 sub SIGNALduino_SimpleWrite_XQ($) {
@@ -1211,20 +1186,6 @@ sub SIGNALduino_StartInit($)
 	}
 }
 
-######
-#
-# updates possible arguments for set operations and overwrites with a additional list of commands
-#
-######
-sub SIGNALduino_updSetArgs
-{
-		my ($hash,$additionals) = @_;
-		my $name = $hash->{NAME};
-	
-		$hash->{setcmds} = %sets; # Load default set commands		
-		
-		SIGNALduino_Log3 $hash, 3, "$name/Notify: arguments created: ".$hash->{setcmds};
-}
 
 ####################
 sub SIGNALduino_CheckCmdResp($)
@@ -1263,7 +1224,6 @@ sub SIGNALduino_CheckCmdResp($)
 			$hash->{keepalive}{ok}    = 0;
 			$hash->{keepalive}{retry} = 0;
 			InternalTimer(gettimeofday() + SDUINO_KEEPALIVE_TIMEOUT, "SIGNALduino_KeepAlive", $hash, 0);
-			#SIGNALduino_genSetArgs($hash);
 
 		}
 	}
@@ -4129,12 +4089,6 @@ sub SIGNALduino_getProtocolList()
 }
 
 
-sub SIGNALduino_updateSets
-{
-	my ($key,$val)=@_;
-	
-	$sets{$key} = $val if (exists($sets{$key}));
-}
 
 
 
@@ -4493,7 +4447,7 @@ sub SIGNALduino_githubParseHttpResponse($)
 	<ul>
         <a name="availableFirmware"></a>
         <li>availableFirmware<br>
-		Gets the firmware version.
+		Retrieves available firmware versions from github and displays them in set flash command.
 		</li><br>
 		<a name="ccconf"></a>
         <li>ccconf<br>
@@ -4672,8 +4626,9 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
 		The module can search for new firmware versions. Depending on your choice, only stable versions are displayed or also prereleases are available for flash. The option testing does also provide the stable ones.
 		<ul>
 			<li>stable: only versions marked as stable are available. These releases are provided very infrequently</li>
-			<li>testing: These versions needs some verifications and provided in shorter intervals</li>
+			<li>testing: These versions needs some verifications and are provided in shorter intervals</li>
 		</ul>
+		<br>Reload the available Firmware via get availableFirmware manually.
 	</li><br>
 <a name="whitelist_IDs"></a>
 <li>whitelist_IDs<br>
@@ -4893,7 +4848,7 @@ With a # at the beginnging whitelistIDs can be deactivated.
 	<ul>
     <a name="availableFirmware"></a>
     <li>availableFirmware<br>
-	Ruft die verf&uuml;gbaren Firmware-Version ab.</li><br><br>
+	Ruft die verf&uuml;gbaren Firmware-Version von github ab und macht diese im set flash Befehl ausw&auml;hlbar.</li><br><br>
 	<a name="ccconf"></a>
 	<li>ccconf<br></li>
    Liest s&auml;mtliche radio-chip (cc1101) Register (Frequenz, Bandbreite, etc.) aus und zeigt die aktuelle Konfiguration an.<br>
@@ -5042,6 +4997,8 @@ With a # at the beginnging whitelistIDs can be deactivated.
 			<li>stable: Als stabil getestete Versionen, erscheint nur sehr selten</li>
 			<li>testing: Neue Versionen, welche noch getestet werden muss</li>
 		</ul>
+		<br>Die Liste der verfügbaren Versionen muss mittels get availableFirmware manuell neu geladen werden.
+		
 	</li><br>
 	
 	Notwendig f&uuml;r den Befehl <code>flash</code>. Hier sollten Sie angeben, welche Hardware Sie mit dem usbport verbunden haben. Andernfalls kann es zu Fehlfunktionen des Ger&auml;ts kommen. <br><br>
