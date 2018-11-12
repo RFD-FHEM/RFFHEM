@@ -30,11 +30,12 @@ sub UnitTest_Define() {
     my ($name,$type,$target,$cmd) = split('[ \t]+', $def,4);
 
 	#if (!$cmd || (not $cmd =~ m/^[(].*[)]$/g)) {
-	if (!$cmd || $cmd !~ m/(\n.*)[(](.*|.*\n.*){1,}[)][;]$/g) {
+	if (!$cmd || $cmd !~ m/\(?:.*\)$/) {
         my $msg = "wrong syntax: define <name> UnitTest <name of target device> (Test Code in Perl)";
     	Log3 undef, 2, $msg;
     	return $msg;
     }
+    $hash->{targetDevice}  = $target;
 	Log3 $name, 2, "Defined unittest for target: ".$hash->{targetDevice} if ($hash->{targetDevice});
     Log3 $name, 5, "DEV is $cmd";
     
@@ -42,7 +43,6 @@ sub UnitTest_Define() {
     Log3 $name, 5, "Loaded this code ".$hash->{'.testcode'} if ($hash->{'.testcode'});
     
     $hash->{name}  = $name;
-    $hash->{targetDevice}  = $target;
     
 	readingsSingleUpdate($hash, "state", "waiting", 1);
 		
