@@ -30,7 +30,7 @@ sub UnitTest_Define() {
     my ($name,$type,$target,$cmd) = split('[ \t]+', $def,4);
 
 	#if (!$cmd || (not $cmd =~ m/^[(].*[)]$/g)) {
-	if (!$cmd || $cmd !~ m/\(.*\)$/) {
+	if (!$cmd || $cmd !~ m/(?:\(.*\)).*$/) {
         my $msg = "wrong syntax: define <name> UnitTest <name of target device> (Test Code in Perl)";
     	Log3 undef, 2, $msg;
     	Log3 undef, 5, "cmd was: $cmd";
