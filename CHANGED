@@ -1,5 +1,7 @@
-11.11.2018
+12.11.2018
  14_SD_UT.pm - added devices QUIGG GT-7000 |Novy Pureline 6830 kitchen hood|CAME Drehtor Antrieb (develop - user feedback required)
+ !! Module has been completely redesigned !! protocol 34 & 86 are developID's
+11.11.2018 
  14_FLAMINGO.pm - fix Maintainer & fix issue error
 10.11.2018
  signalduino_protocols.hash - ID 13.1 revised & model added for Modul FLAMINGO

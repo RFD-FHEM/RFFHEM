@@ -637,7 +637,6 @@
             name			=> 'HT12e remote',	
 			comment         => 'Remote control for example Westinghouse airfan with five Buttons (developModule SD_UT is only in github available)',
 			id          	=> '29',
-		    developId       => 'm',
 			one				=> [-2,1],
 			zero			=> [-1,2],
 			start           => [-35,1],         # Message is not provided as MS, worakround is start
@@ -657,7 +656,6 @@
             name			=> 'diverse',	
 			comment         => 'unitec remote door reed switch 47031 (developModule SD_UT module is only in github available)',
 			id          	=> '30',
-			developId       => 'm',
 			one				=> [-2,1],
 			zero			=> [-1,2],
 			start			=> [-30,1],				# Message is not provided as MS, worakround is start
@@ -1597,7 +1595,6 @@
 			name             => 'SA-434-1',
 			comment          => 'Remote control SA-434-1 mini 923301 based on HT12E (developModule SD_UT is only in github available)',
 			id               => '81',
-			developId		 => 'm',
 			one              => [-2,1],			# i.O.
 			zero             => [-1,2],			# i.O.
 			start            => [-35,1],		# Message is not provided as MS, worakround is start
@@ -1638,7 +1635,6 @@
             name			=> 'RH787T',	
 			comment         => 'Remote control for example Westinghouse Delancey 7800140 (developModule SD_UT is only in github available)',
 			id          	=> '83',
-			developId       => 'm',
 			one				=> [-2,1],
 			zero			=> [-1,2],
 			start			=> [-35,1],				# calculated 12126,31579 µS
