@@ -2760,21 +2760,18 @@ SIGNALduino_Attr(@)
 	}
 	elsif ($aName eq "whitelist_IDs")
 	{
-		SIGNALduino_Log3 $name, 3, "$name Attr: whitelist_IDs";
 		if ($init_done) {		# beim fhem Start wird das SIGNALduino_IdList nicht aufgerufen, da es beim define aufgerufen wird
 			SIGNALduino_IdList("x:$name",$aVal);
 		}
 	}
 	elsif ($aName eq "blacklist_IDs")
 	{
-		SIGNALduino_Log3 $name, 3, "$name Attr: blacklist_IDs";
 		if ($init_done) {		# beim fhem Start wird das SIGNALduino_IdList nicht aufgerufen, da es beim define aufgerufen wird
 			SIGNALduino_IdList("x:$name",undef,$aVal);
 		}
 	}
 	elsif ($aName eq "development")
 	{
-		SIGNALduino_Log3 $name, 3, "$name Attr: development";
 		if ($init_done) {		# beim fhem Start wird das SIGNALduino_IdList nicht aufgerufen, da es beim define aufgerufen wird
 			SIGNALduino_IdList("x:$name",undef,undef,$aVal);
 		}
