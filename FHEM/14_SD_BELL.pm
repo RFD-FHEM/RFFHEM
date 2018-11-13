@@ -73,10 +73,12 @@ my $missingModul = "";
 BEGIN {
     GP_Import(qw(
 		AssignIoPort
+		attr
+		defs
 		Log3
+		modules
     ))
 };
-
 
 
 #############################
@@ -210,8 +212,8 @@ sub Attr(@) {
 	#Log3 $name, 3, "SD_BELL: cmd=$cmd attrName=$attrName attrValue=$attrValue oldmodel=$oldmodel";
 	
 	if ($cmd eq "del" && $attrName eq "model") {			### delete readings
-		readingsDelete($hash, "LastAction") if($hash->{READINGS});
-		readingsDelete($hash, "state") if($hash->{READINGS});
+		readingsDelete($hash, "LastAction") if(defined(ReadingsVal($hash->{NAME},"LastAction",undef)));
+		readingsDelete($hash, "state") if(defined(ReadingsVal($hash->{NAME},"state",undef)));
 	}
 	
 	return undef;
