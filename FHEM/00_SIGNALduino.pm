@@ -4651,7 +4651,7 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
 </li><br>
 	<a name="updateChannelFW"></a>
 	<li>updateChannelFW<br>
-		The module can search for new firmware versions. Depending on your choice, only stable versions are displayed or also prereleases are available for flash. The option testing does also provide the stable ones.
+		The module can search for new firmware versions (<a href="https://github.com/RFD-FHEM/SIGNALDuino/releases">GitHub</a>). Depending on your choice, only stable versions are displayed or also prereleases are available for flash. The option testing does also provide the stable ones.
 		<ul>
 			<li>stable: only versions marked as stable are available. These releases are provided very infrequently</li>
 			<li>testing: These versions needs some verifications and are provided in shorter intervals</li>
@@ -4876,7 +4876,7 @@ With a # at the beginnging whitelistIDs can be deactivated.
 	<ul>
     <a name="availableFirmware"></a>
     <li>availableFirmware<br>
-	Ruft die verf&uuml;gbaren Firmware-Version von github ab und macht diese im set flash Befehl ausw&auml;hlbar.</li><br><br>
+	Ruft die verf&uuml;gbaren Firmware-Version von github ab und macht diese im <code>set flash</code> Befehl ausw&auml;hlbar.</li><br><br>
 	<a name="ccconf"></a>
 	<li>ccconf<br></li>
    Liest s&auml;mtliche radio-chip (cc1101) Register (Frequenz, Bandbreite, etc.) aus und zeigt die aktuelle Konfiguration an.<br>
@@ -5019,7 +5019,7 @@ With a # at the beginnging whitelistIDs can be deactivated.
 	Bei der Einstellung "1" wird das interne "RAWMSG" nicht mit den empfangenen Nachrichten aktualisiert.<br><br>
 	<a name="updateChannelFW"></a>
 	<li>updateChannelFW<br>
-		Das Modul sucht nach Verf&uuml;gbaren Firmware Versionen und bietet diese via dem Befehl <code>flash</code> zum Flashen an. Mit dem Attribut kann festgelegt werden, ob nur stabile Versionen ("Latest Release") angezeigt werden oder auch Vorabversionen ("Pre-release") einer neuen Firmware.<br>
+		Das Modul sucht nach Verf&uuml;gbaren Firmware Versionen (<a href="https://github.com/RFD-FHEM/SIGNALDuino/releases">GitHub</a>) und bietet diese via dem Befehl <code>flash</code> zum Flashen an. Mit dem Attribut kann festgelegt werden, ob nur stabile Versionen ("Latest Release") angezeigt werden oder auch Vorabversionen ("Pre-release") einer neuen Firmware.<br>
 		Die Option testing inkludiert auch die stabilen Versionen.
 		<ul>
 			<li>stable: Als stabil getestete Versionen, erscheint nur sehr selten</li>
