@@ -1,5 +1,5 @@
 13.11.2018
- 00_SIGNALduino.pm - added missingModulCheck
+ 00_SIGNALduino.pm - added missingModulCheck | remove double logoutput
 12.11.2018
  14_SD_UT.pm - added devices QUIGG GT-7000 |Novy Pureline 6830 kitchen hood|CAME Drehtor Antrieb (develop - user feedback required)
  14_SD_UT.pm - !! Module has been completely redesigned !! 
