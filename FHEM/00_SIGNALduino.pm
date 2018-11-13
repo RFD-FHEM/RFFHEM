@@ -14,12 +14,13 @@ my $missingModulSIGNALduino;
 
 use strict;
 use warnings;
-use Time::HiRes qw(gettimeofday);
-use Data::Dumper qw(Dumper);
-use Scalar::Util qw(looks_like_number);
 no warnings 'portable';
 
+eval "use Data::Dumper qw(Dumper);1" or $missingModulSIGNALduino .= "Data::Dumper ";
 eval "use JSON;1" or $missingModulSIGNALduino .= "JSON ";
+eval "use Scalar::Util qw(looks_like_number);1" or $missingModulSIGNALduino .= "Scalar::Util ";
+eval "use Time::HiRes qw(gettimeofday);1" or $missingModulSIGNALduino .= "Time::HiRes ";
+
 #$| = 1;		#Puffern abschalten, Hilfreich fuer PEARL WARNINGS Search
 
 #use POSIX qw( floor);  # can be removed
