@@ -1322,7 +1322,7 @@
       		preamble		=> 's',			# prepend to converted message	 	
 			postamble		=> '00',		# Append to converted message	 	
 			clientmodule    => 'CUL_TCM97001',
-     		length_min      => '24',
+     		length_min      => '36',
 			length_max      => '42',
 			paddingbits     => '8',				 # pad up to 8 bits, default is 4
 		}, 	
