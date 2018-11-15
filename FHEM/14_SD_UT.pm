@@ -102,6 +102,7 @@ package main;
 
 use strict;
 use warnings;
+no warnings 'portable';  # Support for 64-bit ints required
 #use SetExtensions;
 
 #$| = 1;		#Puffern abschalten, Hilfreich für PEARL WARNINGS Search
