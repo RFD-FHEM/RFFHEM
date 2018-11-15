@@ -10,16 +10,16 @@
 # S.Butzek,Ralf9 2016-2018
 
 package main;
-my $missingModulSIGNALduino;
+my $missingModulSIGNALduino="";
 
 use strict;
 use warnings;
 no warnings 'portable';
 
-eval "use Data::Dumper qw(Dumper);1" or $missingModulSIGNALduino .= "Data::Dumper ";
+eval "use Data::Dumper qw(Dumper);1";
 eval "use JSON;1" or $missingModulSIGNALduino .= "JSON ";
-eval "use Scalar::Util qw(looks_like_number);1" or $missingModulSIGNALduino .= "Scalar::Util ";
-eval "use Time::HiRes qw(gettimeofday);1" or $missingModulSIGNALduino .= "Time::HiRes ";
+eval "use Scalar::Util qw(looks_like_number);1";
+eval "use Time::HiRes qw(gettimeofday);1" ;
 
 #$| = 1;		#Puffern abschalten, Hilfreich fuer PEARL WARNINGS Search
 
@@ -292,8 +292,6 @@ SIGNALduino_Define($$)
 {
   my ($hash, $def) = @_;
   my @a = split("[ \t][ \t]*", $def);
-
-  return "Cannot define SIGNALduino device. Perl modul ${missingModulSIGNALduino}is missing." if ( $missingModulSIGNALduino );
 
   if(@a != 3) {
     my $msg = "wrong syntax: define <name> SIGNALduino {none | devicename[\@baudrate] | devicename\@directio | hostname:port}";
@@ -821,6 +819,21 @@ SIGNALduino_Get($@)
   
   my ($msg, $err);
 
+  if ($a[1] eq "availableFirmware") {
+  	
+  	if ($missingModulSIGNALduino =~ m/JSON/ )
+  	{
+  		SIGNALduino_Log3 $name, 1, "$name: get $a[1] failed. Pleas install Perl module JSON. Example: sudo apt-get install libjson-perl";
+  		
+ 		return "$a[1]: \n\nFetching from github is not possible. Please install JSON. Example:<br><code>sudo apt-get install libjson-perl</code>";
+  	} 
+  	
+  	my $channel=AttrVal($name,"updateChannelFW","stable");
+	my $hardware=AttrVal($name,"hardware","nano");
+  	SIGNALduino_querygithubreleases($hash);
+	return "$a[1]: \n\nFetching $channel firmware versions for $hardware from github\n";
+  }
+  
   if (IsDummy($name))
   {
   	if ($arg =~ /^M[CcSU];.*/)
@@ -967,13 +980,7 @@ SIGNALduino_Get($@)
 	
 	return "$a[1]: \n\n$ret\n";
 	#return "$a[1]: \n\n$ret\nIds with modules: $moduleId";
-  }   elsif ($a[1] eq "availableFirmware") {
-  	my $channel=AttrVal($name,"updateChannelFW","stable");
-	my $hardware=AttrVal($name,"hardware","nano");
-  	SIGNALduino_querygithubreleases($hash);
-	return "$a[1]: \n\nFetching $channel firmware versions for $hardware from github\n";
-  }
-  
+  }  
 
   #SIGNALduino_SimpleWrite($hash, $gets{$a[1]}[0] . $arg);
   SIGNALduino_AddSendQueue($hash, $gets{$a[1]}[0] . $arg);
