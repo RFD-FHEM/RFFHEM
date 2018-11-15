@@ -281,7 +281,6 @@ sub SD_UT_Set($$$@) {
 		$msg = $models{$model}{Protocol} . "#0" . $adr ."1";
 		$msgEnd = "#R9";
 	
-		Debug " $ioname: SD_UT_Set attr_model=$model msg=$msg msgEnd=$msgEnd" if($debug);
 	############ Westinghouse Buttons_five ############
 	} elsif ($model eq "Buttons_five" && $cmd ne "?") {
 		
@@ -291,7 +290,6 @@ sub SD_UT_Set($$$@) {
 		$msg = $models{$model}{Protocol} . "#";
 		$msgEnd .= "11".$adr."#R9";
 
-		Debug " $ioname: SD_UT_Set attr_model=$model msg=$msg msgEnd=$msgEnd" if($debug);
 	############ SA_434_1_mini ############
 	} elsif ($model eq "SA_434_1_mini" && $cmd ne "?") {
 		
@@ -309,7 +307,6 @@ sub SD_UT_Set($$$@) {
 		$msg = $models{$model}{Protocol} . "#P" . $adr;
 		$msgEnd = "#R1";															# !!! Anzahl Wiederholungen noch klären !!!
 
-		Debug " $ioname: SD_UT_Set attr_model=$model msg=$msg msgEnd=$msgEnd" if($debug);
 	############ Novy_Pureline_6830 ############
 	} elsif ($model eq "Novy_Pureline_6830" && $cmd ne "?") {
 
@@ -319,7 +316,6 @@ sub SD_UT_Set($$$@) {
 		$msg = $models{$model}{Protocol} . "#" . $adr;
 		$msgEnd = "#R9";															# !!! Anzahl Wiederholungen noch klären !!!
 
-		Debug " $ioname: SD_UT_Set attr_model=$model msg=$msg msgEnd=$msgEnd" if($debug);
 	############ CAME_TOP_432EV ############
 	} elsif ($model eq "CAME_TOP_432EV" && $cmd ne "?") {
 
@@ -329,7 +325,6 @@ sub SD_UT_Set($$$@) {
 		$msg = $models{$model}{Protocol} . "#" . $adr;
 		$msgEnd = "#R9";															# !!! Anzahl Wiederholungen noch klären !!!
 
-		Debug " $ioname: SD_UT_Set attr_model=$model msg=$msg msgEnd=$msgEnd" if($debug);
 	############ Hoermann HS1-868-BS ############
 	} elsif ($model eq "HS1_868_BS" && $cmd ne "?") {
 		my @definition = split(" ", $hash->{DEF});																		# split adress from def
@@ -343,8 +338,9 @@ sub SD_UT_Set($$$@) {
 		my $adr = sprintf( "%028b", hex($definition[1])) if ($name ne "unknown");	# argument 1 - adress to binary with 7 digits
 		$msg = $models{$model}{Protocol} . "#00000000" . $adr;
 		$msgEnd .= "1100#R3";
-		Debug " $ioname: SD_UT_Set attr_model=$model msg=$msg msgEnd=$msgEnd" if($debug);
 	}
+
+	Debug " $ioname: SD_UT_Set attr_model=$model msg=$msg msgEnd=$msgEnd" if($debug && defined $msgEnd);
 	
 	if ($cmd eq "?") {
 		### create setlist ###
@@ -508,7 +504,6 @@ sub SD_UT_Parse($$) {
 		$deviceCodeUser = substr($deviceCodeUser, 0 , length($deviceCodeUser)-1);
 		$deviceCode = $deviceCode." ($deviceCodeUser)";
 
-		Debug " $ioname: SD_UT_Parse devicedef=$devicedef attr_model=$model protocol=$protocol devicecode=$deviceCode state=$state" if($debug);
 	############ Westinghouse Buttons_five ############ Protocol 29 or 30 ############
 	} elsif ($model eq "Buttons_five" && ($protocol == 29 || $protocol == 30)) {
 		$state = substr($bitData,0,6);
@@ -529,7 +524,6 @@ sub SD_UT_Parse($$) {
 		$deviceCodeUser = substr($deviceCodeUser, 0 , length($deviceCodeUser)-1);
 		$deviceCode = $deviceCode." ($deviceCodeUser)";
 
-		Debug " $ioname: SD_UT_Parse devicedef=$devicedef attr_model=$model protocol=$protocol devicecode=$deviceCode state=$state" if($debug);
 	############ Unitec_47031 ############ Protocol 30 or 83 ############
 	} elsif ($model eq "Unitec_47031" && ($protocol == 30 || $protocol == 83)) {
 		$state = substr($bitData,11,1);		# muss noch 100% verifiziert werden !!!
@@ -575,31 +569,26 @@ sub SD_UT_Parse($$) {
 		$state = substr($bitData,12,8);
 		$deviceCode = substr($bitData,0,12);
 
-		Debug " $ioname: SD_UT_Parse devicedef=$devicedef attr_model=$model protocol=$protocol deviceCode=$deviceCode state=$state" if($debug);
 	############ Novy_Pureline_6830 ############ Protocol 86 ############
 	} elsif ($model eq "Novy_Pureline_6830" && ($protocol == 86 || $protocol == 81)) {
 		$state = substr($bitData,8);
 		$deviceCode = substr($bitData,0,8);
 
-		Debug " $ioname: SD_UT_Parse devicedef=$devicedef attr_model=$model protocol=$protocol deviceCode=$deviceCode state=$state" if($debug);
 	############ CAME_TOP_432EV ############ Protocol 86 ############
 	} elsif ($model eq "CAME_TOP_432EV" && ($protocol == 86 || $protocol == 81)) {
 		$state = substr($bitData,8);
 		$deviceCode = substr($bitData,0,8);
 
-		Debug " $ioname: SD_UT_Parse devicedef=$devicedef attr_model=$model protocol=$protocol deviceCode=$deviceCode state=$state" if($debug);		
 	############ Hoermann HS1-868-BS ############ Protocol 69 ############
 	} elsif ($model eq "HS1_868_BS" && $protocol == 69) {
 		$state = "receive";
 		$deviceCode = substr($bitData,8,28);
 	
-		Debug " $ioname: SD_UT_Parse devicedef=$devicedef attr_model=$model protocol=$protocol deviceCode=$deviceCode state=$state" if($debug);
 	############ Hoermann HSM4 ############ Protocol 69 ############
 	} elsif ($model eq "HSM4" && $protocol == 69) {
 		$state = substr($bitData,36,4);
 		$deviceCode = substr($bitData,8,28);
 	
-		Debug " $ioname: SD_UT_Parse devicedef=$devicedef attr_model=$model protocol=$protocol deviceCode=$deviceCode state=$state" if($debug);		
 		############ unknown ############
 	} else {
 		readingsSingleUpdate($hash, "state", "???", 0);
@@ -608,6 +597,7 @@ sub SD_UT_Parse($$) {
 		Debug " $ioname: SD_UT_Parse devicedef=$devicedef attr_model=$model protocol=$protocol rawData=$rawData, bitData=$bitData" if($debug);
 	}
 
+	Debug " $ioname: SD_UT_Parse devicedef=$devicedef attr_model=$model protocol=$protocol devicecode=$deviceCode state=$state" if($debug && ($model ne "unknown" || $model ne "Unitec_47031" || $model ne "SA_434_1_mini"));
 	Debug " $ioname: SD_UT_Parse devicedef=$devicedef attr_model=$model typ=".$models{$model}{Typ}." (after check)" if($debug);
 	
 	if ($models{$model}{Typ} eq "remote" && ($model ne "SA_434_1_mini" || $model ne "HS1_868_BS")) {
@@ -662,7 +652,6 @@ sub SD_UT_Attr(@) {
 				$deviceCode = sprintf("%X", oct( "0b$deviceCode" ) );
 				$devicemodel = "RH787T";
 				$devicename = $devicemodel."_".$deviceCode;
-				Log3 $name, 3, "SD_UT_Attr UNDEFINED sensor ".$attrValue . " detected, code ". $deviceCode;
 				$state = "Defined";
 			############ Westinghouse Buttons_five ############
 			} elsif ($attrName eq "model" && $attrValue eq "Buttons_five") {
@@ -672,7 +661,6 @@ sub SD_UT_Attr(@) {
 				$deviceCode = sprintf("%X", oct( "0b$deviceCode" ) );
 				$devicemodel = "Buttons_five";
 				$devicename = $devicemodel."_".$deviceCode;
-				Log3 $name, 3, "SD_UT_Attr UNDEFINED sensor ".$attrValue . " detected, code ". $deviceCode;
 				$state = "Defined";
 			############ SA_434_1_mini	############
 			} elsif ($attrName eq "model" && $attrValue eq "SA_434_1_mini") {
@@ -681,7 +669,6 @@ sub SD_UT_Attr(@) {
 				$deviceCode = sprintf("%03X", oct( "0b$bitData" ) );
 				$devicemodel = "SA_434_1_mini";
 				$devicename = $devicemodel."_".$deviceCode;
-				Log3 $name, 3, "SD_UT_Attr UNDEFINED sensor " . $attrValue . " detected, code " . $deviceCode;
 				$state = "Defined";
 			############ Unitec_47031	############
 			} elsif ($attrName eq "model" && $attrValue eq "Unitec_47031") {
@@ -691,7 +678,6 @@ sub SD_UT_Attr(@) {
 				$deviceCode = sprintf("%02X", oct( "0b$deviceCode" ) );
 				$devicemodel = "Unitec_47031";
 				$devicename = $devicemodel."_".$deviceCode;
-				Log3 $name, 3, "SD_UT_Attr UNDEFINED sensor " . $attrValue . " detected, code " . $deviceCode;
 				$state = "Defined";
 			############ QUIGG_DMV ############
 			} elsif ($attrName eq "model" && $attrValue eq "QUIGG_DMV") {
@@ -701,7 +687,6 @@ sub SD_UT_Attr(@) {
 				$deviceCode = sprintf("%X", oct( "0b$deviceCode" ) );
 				$devicemodel = "QUIGG_DMV";
 				$devicename = $devicemodel."_".$deviceCode;
-				Log3 $name, 3, "SD_UT_Attr UNDEFINED sensor " . $attrValue . " detected, code " . $deviceCode;
 				$state = "Defined";
 			############ Novy_Pureline_6830 ############
 			} elsif ($attrName eq "model" && $attrValue eq "Novy_Pureline_6830") {
@@ -711,7 +696,6 @@ sub SD_UT_Attr(@) {
 				$deviceCode = sprintf("%X", oct( "0b$deviceCode" ) );
 				$devicemodel = "Novy_Pureline_6830";
 				$devicename = $devicemodel."_".$deviceCode;
-				Log3 $name, 3, "SD_UT_Attr UNDEFINED sensor " . $attrValue . " detected, code " . $deviceCode;
 				$state = "Defined";
 			############ CAME_TOP_432EV ############
 			} elsif ($attrName eq "model" && $attrValue eq "CAME_TOP_432EV") {
@@ -721,7 +705,6 @@ sub SD_UT_Attr(@) {
 				$deviceCode = sprintf("%X", oct( "0b$deviceCode" ) );
 				$devicemodel = "CAME_TOP_432EV";
 				$devicename = $devicemodel."_".$deviceCode;
-				Log3 $name, 3, "SD_UT_Attr UNDEFINED sensor " . $attrValue . " detected, code " . $deviceCode;
 				$state = "Defined";
 			############ Hoermann HS1-868-BS	############
 			} elsif ($attrName eq "model" && $attrValue eq "HS1_868_BS") {
@@ -730,7 +713,6 @@ sub SD_UT_Attr(@) {
 				$deviceCode = sprintf("%09X", oct( "0b$bitData" ) );
 				$devicemodel = "HS1_868_BS";
 				$devicename = $devicemodel."_".$deviceCode;
-				Log3 $name, 3, "SD_UT_Attr UNDEFINED sensor " . $attrValue . " detected, code " . $deviceCode;
 				$state = "Defined";
 			############ Hoermann HSM4	############
 			} elsif ($attrName eq "model" && $attrValue eq "HSM4") {
@@ -739,7 +721,6 @@ sub SD_UT_Attr(@) {
 				$deviceCode = substr(sprintf("%X", oct( "0b$bitData" ) ) , 0 , 7);
 				$devicemodel = "HSM4";
 				$devicename = $devicemodel."_".$deviceCode;
-				Log3 $name, 3, "SD_UT_Attr UNDEFINED sensor " . $attrValue . " detected, code " . $deviceCode;
 				$state = "Defined";
 			############ unknown ############
 			} else {
@@ -749,6 +730,8 @@ sub SD_UT_Attr(@) {
 				Log3 $name, 3, "SD_UT_Attr UNDEFINED sensor $attrValue";
 				$state = "Defined";
 			}
+
+			Log3 $name, 3, "SD_UT_Attr UNDEFINED sensor " . $attrValue . " detected, code " . $deviceCode if ($devicemodel ne "unknown");
 
 			$modules{SD_UT}{defptr}{deletecache} = $name if ($hash->{DEF} eq "unknown");
 			Log3 $name, 5, "SD_UT: Attr cmd=$cmd devicename=$name attrName=$attrName attrValue=$attrValue oldmodel=$oldmodel";
