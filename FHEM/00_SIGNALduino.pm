@@ -4247,7 +4247,7 @@ sub SIGNALduino_githubParseHttpResponse($)
 
 =pod
 =item summary    supports the same low-cost receiver for digital signals
-=item summary_DE Unterst&uumltzt den gleichnamigen Low-Cost Empf&aumlnger fuer digitale Signale
+=item summary_DE Unterst&uumltzt den gleichnamigen Low-Cost Empf&aumlnger f&uuml;r digitale Signale
 =begin html
 
 <a name="SIGNALduino"></a>
@@ -4321,7 +4321,7 @@ sub SIGNALduino_githubParseHttpResponse($)
 
 	
 	<a name="SIGNALduinoset"></a>
-	<b>SET</b>
+	<b>Set</b>
 	<ul>
 		<a name="close"></a>
 		<li>close<br>
@@ -4509,55 +4509,54 @@ sub SIGNALduino_githubParseHttpResponse($)
 	<a name="SIGNALduinoattr"></a>
 	<b>Attributes</b>
 	<ul>
-	<li><a href="#addvaltrigger">addvaltrigger</a><br>
-        Create triggers for additional device values. Right now these are RSSI, RAWMSG and DMSG.
-        </li><br>
-        <a name="blacklist_IDs"></a>
-        <li>blacklist_IDs<br>
-        The blacklist works only if a whitelist not exist.
-        </li><br>
-        <a name="cc1101_frequency"></a>
+		<li><a href="#addvaltrigger">addvaltrigger</a><br>
+        	Create triggers for additional device values. Right now these are RSSI, RAWMSG and DMSG.
+        	</li><br>
+        	<a name="blacklist_IDs"></a>
+        	<li>blacklist_IDs<br>
+        	The blacklist works only if a whitelist not exist.
+        	</li><br>
+        	<a name="cc1101_frequency"></a>
 		<li>cc1101_frequency<br>
-        Since the PA table values ​​are frequency-dependent, is at 868 MHz a value greater 800 required.
-        </li><br>
-	<a name="debug"></a>
-	<li>debug<br>
-	This will bring the module in a very verbose debug output. Usefull to find new signals and verify if the demodulation works correctly.
-	</li><br>
-	<a name="development"></a>
-	<li>development<br>
-	With development you can enable protocol decoding for protocolls witch are still in development and may not be very accurate implemented. 
-	This can result in crashes or throw high amount of log entrys in your logfile, so be careful to use this. <br><br>
+        	Since the PA table values are frequency-dependent, is at 868 MHz a value greater 800 required.
+        	</li><br>
+		<a name="debug"></a>
+		<li>debug<br>
+		This will bring the module in a very verbose debug output. Usefull to find new signals and verify if the demodulation works correctly.
+		</li><br>
+		<a name="development"></a>
+		<li>development<br>
+		With development you can enable protocol decoding for protocolls witch are still in development and may not be very accurate implemented. 
+		This can result in crashes or throw high amount of log entrys in your logfile, so be careful to use this. <br><br>
+		
+		Protocols flagged with a developID flag are not loaded unless specified to do so.<br>
 	
-	Protocols flagged with a developID flag are not loaded unless specified to do so.<br>
-	
-	<ul><li>If the protocoll is developed well, but the logical module is not ready, developId => 'm' is set. 
-    You can enable it with the attribute: <br> Specify "m" followed with the protocol id to enable it.</li>
-	<li>If the flag developId => 'p' is set in the protocol defintion then the protocol ID is reserved.</li>
-	<li>If the flag developId => 'y' is set in the protocol defintion then the protocol is still in development. You can enable it with the attribute:<br>
-	Specify "y" followed with the protocol id to enable it.</li>
-	</ul><br>
-	</li>
-	<li><a href="#do_not_notify">do_not_notify</a></li><br>
-	<li><a href="#attrdummy">dummy</a></li><br>
-    <a name="doubleMsgCheck_IDs"></a>
-	<li>doubleMsgCheck_IDs<br>
-	This attribute allows it, to specify protocols which must be received two equal messages to call dispatch to the modules.<br>
-	You can specify multiple IDs wih a colon : 0,3,7,12<br>
-	</li><br>
-    <a name="eventlogging"></a>
-	<li>eventlogging<br>
-    With this attribute you can control if every logmessage is also provided as event. This allows to generate event for every log messages.
-    Set this to 0 and logmessages are only saved to the global fhem logfile if the loglevel is higher or equal to the verbose attribute.
-    Set this to 1 and every logmessages is also dispatched as event. This allows you to log the events in a seperate logfile.
-    </li><br>
-	<a name="flashCommand"></a>
-	<li>flashCommand<br>
-    	This is the command, that is executed to performa the firmware flash. Do not edit, if you don't know what you are doing.<br>
+		<ul>
+			<li>If the protocoll is developed well, but the logical module is not ready, developId => 'm' is set. You can enable it with the attribute: <br> Specify "m" followed with the protocol id to enable it.</li>
+			<li>If the flag developId => 'p' is set in the protocol defintion then the protocol ID is reserved.</li>
+			<li>If the flag developId => 'y' is set in the protocol defintion then the protocol is still in development. You can enable it with the attribute:<br> Specify "y" followed with the protocol id to enable it.</li>
+		</ul><br>
+		</li>
+		<li><a href="#do_not_notify">do_not_notify</a></li><br>
+		<li><a href="#attrdummy">dummy</a></li><br>
+    		<a name="doubleMsgCheck_IDs"></a>
+		<li>doubleMsgCheck_IDs<br>
+		This attribute allows it, to specify protocols which must be received two equal messages to call dispatch to the modules.<br>
+		You can specify multiple IDs wih a colon : 0,3,7,12<br>
+		</li><br>
+    		<a name="eventlogging"></a>
+		<li>eventlogging<br>
+    		With this attribute you can control if every logmessage is also provided as event. This allows to generate event for every log messages.
+    		Set this to 0 and logmessages are only saved to the global fhem logfile if the loglevel is higher or equal to the verbose attribute.
+    		Set this to 1 and every logmessages is also dispatched as event. This allows you to log the events in a seperate logfile.
+    		</li><br>
+		<a name="flashCommand"></a>
+		<li>flashCommand<br>
+    		This is the command, that is executed to performa the firmware flash. Do not edit, if you don't know what you are doing.<br>
 		If the attribute not defined, it uses the default settings. <b>If the user defines the attribute manually, the system uses the specifications!</b><br>
-    	<ul>
-		<li>default for nano, nanoCC1101, miniculCC1101, promini: <code>avrdude -c arduino -b [BAUDRATE] -P [PORT] -p atmega328p -vv -U flash:w:[HEXFILE] 2>[LOGFILE]</code></li>
-		<li>default for radinoCC1101: <code>avrdude -c avr109 -b [BAUDRATE] -P [PORT] -p atmega32u4 -vv -D -U flash:w:[HEXFILE] 2>[LOGFILE]</code></li>
+    		<ul>
+			<li>default for nano, nanoCC1101, miniculCC1101, promini: <code>avrdude -c arduino -b [BAUDRATE] -P [PORT] -p atmega328p -vv -U flash:w:[HEXFILE] 2>[LOGFILE]</code></li>
+			<li>default for radinoCC1101: <code>avrdude -c avr109 -b [BAUDRATE] -P [PORT] -p atmega32u4 -vv -D -U flash:w:[HEXFILE] 2>[LOGFILE]</code></li>
 		</ul>
 		It contains some place-holders that automatically get filled with the according values:<br>
 		<ul>
@@ -4575,10 +4574,10 @@ sub SIGNALduino_githubParseHttpResponse($)
 			The logfile that collects information about the flash process. It gets displayed in FHEM after finishing the flash process</li>
 		</ul><br>
 		<u><i>note:</u></i> ! Sometimes there can be problems flashing radino on Linux. <a href="https://wiki.in-circuit.de/index.php5?title=radino_common_problems">Here in the wiki under the point "radino & Linux" is a patch!</a>
-    </li><br>
-    <a name="hardware"></a>
-	<li>hardware<br>
-    When using the flash command, you should specify what hardware you have connected to the usbport. Doing not, can cause failures of the device.
+    		</li><br>
+    		<a name="hardware"></a>
+		<li>hardware<br>
+    		When using the flash command, you should specify what hardware you have connected to the usbport. Doing not, can cause failures of the device.
 		<ul>
 			<li>ESP_1M: ESP8266 with 1 MB flash and CC1101 receiver</li>
 			<li>ESP32: ESP32</li>
@@ -4588,67 +4587,64 @@ sub SIGNALduino_githubParseHttpResponse($)
 			<li>promini: Arduino Pro Mini 328 with cheap receiver </li>
 			<li>radinoCC1101: Arduino compatible radino with cc1101 receiver</li>
 		</ul>
-	</li><br>
-	<li>maxMuMsgRepeat<br>
-	MU signals can contain multiple repeats of the same message. The results are all send to a logical module. You can limit the number of scanned repetitions. Defaukt is 4, so after found 4 repeats, the demoduation is aborted. 	
-	<br></li>
-    <a name="minsecs"></a>
-	<li>minsecs<br>
-    This is a very special attribute. It is provided to other modules. minsecs should act like a threshold. All logic must be done in the logical module. 
-    If specified, then supported modules will discard new messages if minsecs isn't past.
-    </li><br>
-    <a name="noMsgVerbose"></a>
-    <li>noMsgVerbose<br>
-    With this attribute you can control the logging of debug messages from the io device.
-    If set to 3, this messages are logged if global verbose is set to 3 or higher.
-    </li><br>
-    <a name="longids"></a>
-	<li>longids<br>
-        Comma separated list of device-types for SIGNALduino that should be handled using long IDs. This additional ID allows it to differentiate some weather sensors, if they are sending on the same channel. Therfor a random generated id is added. If you choose to use longids, then you'll have to define a different device after battery change.<br>
+		</li><br>
+		<li>maxMuMsgRepeat<br>
+		MU signals can contain multiple repeats of the same message. The results are all send to a logical module. You can limit the number of scanned repetitions. Defaukt is 4, so after found 4 repeats, the demoduation is aborted. 	
+		<br></li>
+    		<a name="minsecs"></a>
+		<li>minsecs<br>
+    		This is a very special attribute. It is provided to other modules. minsecs should act like a threshold. All logic must be done in the logical module. 
+    		If specified, then supported modules will discard new messages if minsecs isn't past.
+    		</li><br>
+    		<a name="noMsgVerbose"></a>
+    		<li>noMsgVerbose<br>
+    		With this attribute you can control the logging of debug messages from the io device.
+    		If set to 3, this messages are logged if global verbose is set to 3 or higher.
+    		</li><br>
+    		<a name="longids"></a>
+		<li>longids<br>
+        	Comma separated list of device-types for SIGNALduino that should be handled using long IDs. This additional ID allows it to differentiate some weather sensors, if they are sending on the same channel. Therfor a random generated id is added. If you choose to use longids, then you'll have to define a different device after battery change.<br>
 		Default is to not to use long IDs for all devices.
-      <br><br>
-      Examples:<PRE>
-# Do not use any long IDs for any devices:
-attr sduino longids 0
-# Use any long IDs for all devices (this is default):
-attr sduino longids 1
-# Use longids for BTHR918N devices.
-# Will generate devices names like BTHR918N_f3.
-attr sduino longids BTHR918N
-</PRE></li>
-<a name="rawmsgEvent"></a>
-<li>rawmsgEvent<br>
-When set to "1" received raw messages triggers events
-</li><br>
-<a name="suppressDeviceRawmsg"></a>
-<li>suppressDeviceRawmsg<br>
-When set to 1, the internal "RAWMSG" will not be updated with the received messages
-</li><br>
-	<a name="updateChannelFW"></a>
-	<li>updateChannelFW<br>
+      		<br><br>
+      		Examples:<PRE>
+		# Do not use any long IDs for any devices:
+		attr sduino longids 0
+		# Use any long IDs for all devices (this is default):
+		attr sduino longids 1
+		# Use longids for BTHR918N devices.
+		# Will generate devices names like BTHR918N_f3.
+		attr sduino longids BTHR918N
+		</PRE></li>
+		<a name="rawmsgEvent"></a>
+		<li>rawmsgEvent<br>
+		When set to "1" received raw messages triggers events
+		</li><br>
+		<a name="suppressDeviceRawmsg"></a>
+		<li>suppressDeviceRawmsg<br>
+		When set to 1, the internal "RAWMSG" will not be updated with the received messages
+		</li><br>
+		<a name="updateChannelFW"></a>
+		<li>updateChannelFW<br>
 		The module can search for new firmware versions. Depending on your choice, only stable versions are displayed or also prereleases are available for flash. The option testing does also provide the stable ones.
 		<ul>
 			<li>stable: only versions marked as stable are available. These releases are provided very infrequently</li>
 			<li>testing: These versions needs some verifications and are provided in shorter intervals</li>
 		</ul>
 		<br>Reload the available Firmware via get availableFirmware manually.
-	</li><br>
-<a name="whitelist_IDs"></a>
-<li>whitelist_IDs<br>
-This attribute allows it, to specify whichs protocos are considured from this module.
-Protocols which are not considured, will not generate logmessages or events. They are then completly ignored. 
-This makes it possible to lower ressource usage and give some better clearnes in the logs.
-You can specify multiple whitelistIDs wih a colon : 0,3,7,12<br>
-With a # at the beginnging whitelistIDs can be deactivated.
-</li><br>
-   <a name="WS09_CRCAUS"></a>
-   <li>WS09_CRCAUS<br>
-       <br>0: CRC-Check WH1080 CRC = 0  on, default   
-       <br>2: CRC = 49 (x031) WH1080, set OK
-    </li>
-   </ul>
-							  
-		   
+		</li><br>
+		<a name="whitelist_IDs"></a>
+		<li>whitelist_IDs<br>
+		This attribute allows it, to specify whichs protocos are considured from this module. Protocols which are not considured, will not generate logmessages or events. They are then completly ignored. This makes it possible to lower ressource usage and give some better clearnes in the logs. You can specify multiple whitelistIDs wih a colon : 0,3,7,12<br> With a # at the beginnging whitelistIDs can be deactivated.
+		</li><br>
+   		<a name="WS09_CRCAUS"></a>
+   		<li>WS09_CRCAUS<br>
+       		<ul>
+			<li>0: CRC-Check WH1080 CRC = 0  on, default</li>
+       			<li>2: CRC = 49 (x031) WH1080, set OK</li>
+		</ul>
+    		</li>
+   	</ul>
+							  		   
 =end html
 =begin html_DE
 
