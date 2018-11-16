@@ -137,6 +137,7 @@ my $clientsSIGNALduino = ":IT:"
 						."RFXX10REC:"
 						."Dooya:"
 						."SOMFY:"
+						."SD_BELL:"	## bells
 						."SD_UT:"	## universal - more devices with different protocols
 			        	."SD_WS_Maverick:"
 			        	."FLAMINGO:"
@@ -170,7 +171,7 @@ my %matchListSIGNALduino = (
      "14:Dooya"					=> '^P16#[A-Fa-f0-9]+',
      "15:SOMFY"					=> '^Ys[0-9A-F]+',
      "16:SD_WS_Maverick"		=> '^P47#[A-Fa-f0-9]+',
-     "17:SD_UT"            		=> '^[P|u](29|30|34|81|83|86)#.*',	 # universal - more devices with different protocols
+     "17:SD_UT"            		=> '^P(?:29|30|34|69|81|83|86)#.*',	 # universal - more devices with different protocols
      "18:FLAMINGO"            	=> '^P13\.?1?#[A-Fa-f0-9]+',     # Flamingo Smoke
      "19:CUL_WS"				=> '^K[A-Fa-f0-9]{5,}',
      "20:Revolt"				=> '^r[A-Fa-f0-9]{22}',
@@ -180,6 +181,7 @@ my %matchListSIGNALduino = (
      "24:FS20"    				=> "^81..(04|0c)..0101a001", 
      "25:CUL_EM"    				=> "^E0.................", 
      "26:Fernotron"  			=> '^P82#.*',
+     "27:SD_BELL"  			    => '^[u|P](?:14|15|32|41|57|79)#.*',
 	 "X:SIGNALduino_un"			=> '^[u]\d+#.*',
 );
 
@@ -1410,7 +1412,7 @@ SIGNALduino_Read($)
     ($rmsg,$SIGNALduinodata) = split("\n", $SIGNALduinodata, 2);
     $rmsg =~ s/\r//;
     
-    	if ($rmsg =~ m/^\002(M(s|u);.*;)\003/) {
+    	if ($rmsg =~ m/^\002(M(s|u|o);.*;)\003/) {
 		$rmsg =~ s/^\002//;                # \002 am Anfang entfernen
 		my @msg_parts = split(";",$rmsg);
 		my $m0;
@@ -1422,7 +1424,7 @@ SIGNALduino_Read($)
 		my $partD;
 		
 		foreach my $msgPart (@msg_parts) {
-			next if (length($msgPart) le 1 ) ;
+			next if ($msgPart eq "");
 			$m0 = substr($msgPart,0,1);
 			$mnr0 = ord($m0);
 			$m1 = substr($msgPart,1);
@@ -1463,6 +1465,9 @@ SIGNALduino_Read($)
 			}
 			elsif (($m0 eq "C" || $m0 eq "S") && length($m1) == 1) {
 				$part .= "$m0" . "P=$m1;";
+			}
+			elsif ($m0 eq "o" || $m0 eq "m") {
+				$part .= "$m0$m1;";
 			}
 			elsif ($m1 =~ m/^[0-9A-Z]{1,2}$/) {        # bei 1 oder 2 Hex Ziffern nach Dez wandeln 
 				$part .= "$m0=" . hex($m1) . ";";
@@ -3090,20 +3095,6 @@ sub SIGNALduino_HE_EU($@)
 		}
 	}
 	return (1,@bit_msg);
-}
-
-sub SIGNALduino_postDemo_Hoermann($@) {
-	my ($name, @bit_msg) = @_;
-	my $msg = join("",@bit_msg);
-	
-	if (substr($msg,0,9) ne "000000001") {		# check ident
-		SIGNALduino_Log3 $name, 4, "$name: Hoermann ERROR - Ident not 000000001";
-		return 0, undef;
-	} else {
-		SIGNALduino_Log3 $name, 5, "$name: Hoermann $msg";
-		$msg = substr($msg,9);
-		return (1,split("",$msg));
-	}
 }
 
 sub SIGNALduino_postDemo_EM($@) {
