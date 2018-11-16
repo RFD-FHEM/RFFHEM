@@ -1405,7 +1405,7 @@ SIGNALduino_Read($)
     ($rmsg,$SIGNALduinodata) = split("\n", $SIGNALduinodata, 2);
     $rmsg =~ s/\r//;
     
-    	if ($rmsg =~ m/^\002(M(s|u);.*;)\003/) {
+    	if ($rmsg =~ m/^\002(M(s|u|o);.*;)\003/) {
 		$rmsg =~ s/^\002//;                # \002 am Anfang entfernen
 		my @msg_parts = split(";",$rmsg);
 		my $m0;
@@ -1417,7 +1417,7 @@ SIGNALduino_Read($)
 		my $partD;
 		
 		foreach my $msgPart (@msg_parts) {
-			next if (length($msgPart) le 1 ) ;
+			next if ($msgPart eq "");
 			$m0 = substr($msgPart,0,1);
 			$mnr0 = ord($m0);
 			$m1 = substr($msgPart,1);
@@ -1458,6 +1458,9 @@ SIGNALduino_Read($)
 			}
 			elsif (($m0 eq "C" || $m0 eq "S") && length($m1) == 1) {
 				$part .= "$m0" . "P=$m1;";
+			}
+			elsif ($m0 eq "o" || $m0 eq "m") {
+				$part .= "$m0$m1;";
 			}
 			elsif ($m1 =~ m/^[0-9A-Z]{1,2}$/) {        # bei 1 oder 2 Hex Ziffern nach Dez wandeln 
 				$part .= "$m0=" . hex($m1) . ";";
