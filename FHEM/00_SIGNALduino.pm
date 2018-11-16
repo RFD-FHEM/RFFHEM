@@ -4878,7 +4878,6 @@ sub SIGNALduino_githubParseHttpResponse($)
 	<li>addvaltrigger<br>
 	Generiert Trigger f&uuml;r zus&auml;tzliche Werte. Momentan werden DMSG , RAWMSG und RSSI unterst&uuml;zt.
 	</li><br>
-	<li><a href="#dummy">dummy</a></li><br>
 	<a name="blacklist_IDs"></a>
 	<li>blacklist_IDs<br>
 	Dies ist eine durch Komma getrennte Liste. Die Blacklist funktioniert nur, wenn keine Whitelist existiert! Hier kann man ID´s eintragen welche man nicht ausgewertet haben m&ouml;chte.
@@ -4906,6 +4905,7 @@ sub SIGNALduino_githubParseHttpResponse($)
 	<li>doubleMsgCheck_IDs<br><br>
 	Dieses Attribut erlaubt es, Protokolle anzugeben, die zwei gleiche Nachrichten enthalten m&uuml;ssen, um diese an die Module zu &uuml;bergeben. Sie k&ouml;nnen mehrere IDs mit einem Komma angeben: 0,3,7,12
 	</li><br>
+	<li><a href="#dummy">dummy</a></li><br>
 	<a name="flashCommand"></a>
 	<li>flashCommand<br>
 	Dies ist der Befehl, der ausgef&uuml;hrt wird, um den Firmware-Flash auszuf&uuml;hren. Nutzen Sie dies nicht, wenn Sie nicht wissen, was Sie tun!<br>
