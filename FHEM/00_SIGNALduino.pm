@@ -4255,12 +4255,9 @@ sub SIGNALduino_githubParseHttpResponse($)
 
 	<table>
 	<tr><td>
-	The SIGNALduino ia based on an idea from mdorenka published at <a
-	href="http://forum.fhem.de/index.php/topic,17196.0.html">FHEM Forum</a>.
+	The SIGNALduino ia based on an idea from mdorenka published at <a href="http://forum.fhem.de/index.php/topic,17196.0.html">FHEM Forum</a>.
 
-	With the opensource firmware (see this <a
-	href="https://github.com/RFD-FHEM/SIGNALduino">link</a>) it is capable
-	to receive and send different protocols over different medias. Currently are 433Mhz protocols implemented.
+	With the opensource firmware (see this <a href="https://github.com/RFD-FHEM/SIGNALduino">link</a>) it is capable to receive and send different protocols over different medias. Currently are 433Mhz protocols implemented.
 	<br><br>
 
 	The following device support is currently available:
@@ -4276,26 +4273,24 @@ sub SIGNALduino_githubParseHttpResponse($)
 	</ul>
 	<br>
 	
-	Temperatur / humidity sensors
+	Temperature / humidity sensors
 	<ul>
 		<li>PEARL NC7159, LogiLink WS0002,GT-WT-02,AURIOL,TCM97001, TCM27 and many more -> 14_CUL_TCM97001 </li>
 		<li>Oregon Scientific v2 and v3 Sensors  -> 41_OREGON.pm</li>
 		<li>Temperatur / humidity sensors suppored -> 14_SD_WS07</li>
-    <li>technoline WS 6750 and TX70DTH -> 14_SD_WS07</li>
-    <li>Eurochon EAS 800z -> 14_SD_WS07</li>
-    <li>CTW600, WH1080	-> 14_SD_WS09 </li>
-    <li>Hama TS33C, Bresser Thermo/Hygro Sensor -> 14_Hideki</li>
-    <li>FreeTec Aussenmodul NC-7344 -> 14_SD_WS07</li>
-    <li>La Crosse WS-7035, WS-7053, WS-7054 -> 14_CUL_TX</li>
-    <li>ELV WS-2000, La Crosse WS-7000 -> 14_CUL_WS</li>
+    		<li>technoline WS 6750 and TX70DTH -> 14_SD_WS07</li>
+    		<li>Eurochon EAS 800z -> 14_SD_WS07</li>
+    		<li>CTW600, WH1080	-> 14_SD_WS09 </li>
+    		<li>Hama TS33C, Bresser Thermo/Hygro Sensor -> 14_Hideki</li>
+    		<li>FreeTec Aussenmodul NC-7344 -> 14_SD_WS07</li>
+    		<li>La Crosse WS-7035, WS-7053, WS-7054 -> 14_CUL_TX</li>
+    		<li>ELV WS-2000, La Crosse WS-7000 -> 14_CUL_WS</li>
 	</ul>
 	<br>
 
-	It is possible to attach more than one device in order to get better
-	reception, fhem will filter out duplicate messages. See more at the <a href="#global">global</a> section with attribute dupTimeout<>br><br>
+	It is possible to attach more than one device in order to get better reception, fhem will filter out duplicate messages. See more at the <a href="#global">global</a> section with attribute dupTimeout<>br><br>
 
-	Note: this module require the Device::SerialPort or Win32::SerialPort
-	module. It can currently only attatched via USB.
+	Note: this module require the Device::SerialPort or Win32::SerialPort module. It can currently only attatched via USB.
 
 	</td>
 	</tr>
@@ -4316,8 +4311,8 @@ sub SIGNALduino_githubParseHttpResponse($)
 		modprobe usbserial 
 		vendor=0x03eb
 		product=0x204b
-		</ul>In this case the device is most probably
-		/dev/ttyUSB0.<br><br>
+		</ul>
+		In this case the device is most probably /dev/ttyUSB0.<br><br>
 
 		You can also specify a baudrate if the device name contains the @
 		character, e.g.: /dev/ttyACM0@57600<br><br>This is also the default baudrate
@@ -4371,27 +4366,16 @@ sub SIGNALduino_githubParseHttpResponse($)
 		illegal to do so. Note: The parameters used for RFR transmission are
 		not affected.<br>
 		<ul>
-		<a name="cc1101_freq"></a>
-		<li>freq sets both the reception and transmission frequency. Note:
-		    Although the CC1101 can be set to frequencies between 315 and 915
-		    MHz, the antenna interface and the antenna is tuned for
-		    exactly one frequency. Default is 868.3 MHz (or 433 MHz)</li>
-		<a name="cc1101_bWidth"></a>
-		<li>bWidth can be set to values between 58 kHz and 812 kHz. Large values
-		    are susceptible to interference, but make possible to receive
-		    inaccurately calibrated transmitters. It affects tranmission too.
-		    Default is 325 kHz.</li>
-		<a name="cc1101_patable"></a>
-		<li>patable change the PA table (power amplification for RF sending) 
-		</li>
-		<a name="cc1101_rAmpl"></a>
-		<li>rAmpl is receiver amplification, with values between 24 and 42 dB.
-		    Bigger values allow reception of weak signals. Default is 42.
-		</li>
-		<a name="cc1101_sens"></a>
-		<li>sens is the decision boundary between the on and off values, and it
-		    is 4, 8, 12 or 16 dB.  Smaller values allow reception of less clear
-		    signals. Default is 4 dB.</li>
+			<a name="cc1101_freq"></a>
+			<li><code>freq</code> sets both the reception and transmission frequency. Note: Although the CC1101 can be set to frequencies between 315 and 915 MHz, the antenna interface and the antenna is tuned for exactly one frequency. Default is 868.3 MHz (or 433 MHz)</li>
+			<a name="cc1101_bWidth"></a>
+			<li><code>bWidth</code> can be set to values between 58 kHz and 812 kHz. Large values are susceptible to interference, but make possible to receive inaccurately calibrated transmitters. It affects tranmission too. Default is 325 kHz.</li>
+			<a name="cc1101_patable"></a>
+			<li><code>patable</code> change the PA table (power amplification for RF sending)</li>
+			<a name="cc1101_rAmpl"></a>
+			<li><code>rAmpl</code> is receiver amplification, with values between 24 and 42 dB. Bigger values allow reception of weak signals. Default is 42.</li>
+			<a name="cc1101_sens"></a>
+			<li><code>sens</code> is the decision boundary between the on and off values, and it is 4, 8, 12 or 16 dB.  Smaller values allow reception of less clear signals. Default is 4 dB.</li>
 		</ul>
 		</li><br>
 		<a name="flash"></a>
@@ -4607,7 +4591,7 @@ sub SIGNALduino_githubParseHttpResponse($)
     When using the flash command, you should specify what hardware you have connected to the usbport. Doing not, can cause failures of the device.
 		<ul>
 			<li>ESP_1M: ESP8266 with 1 MB flash and CC1101 receiver</li>
-			<li>ESP32: ESP32 </li>
+			<li>ESP32: ESP32</li>
 			<li>nano: Arduino Nano 328 with cheap receiver</li>
 			<li>nanoCC1101: Arduino Nano 328 wirh CC110x receiver</li>
 			<li>miniculCC1101: Arduino pro Mini with CC110x receiver and cables as a minicul</li>
@@ -4735,8 +4719,7 @@ With a # at the beginnging whitelistIDs can be deactivated.
 		<li>modprobe usbserial</li>
 		<li>vendor=0x03eb</li>
 		<li>product=0x204b</li>
-		</ul>In diesem Fall ist das Ger&auml;t h&ouml;chstwahrscheinlich
-		<code>/dev/ttyUSB0</code>.<br><br>
+		</ul>In diesem Fall ist das Ger&auml;t h&ouml;chstwahrscheinlich <code>/dev/ttyUSB0</code>.<br><br>
 
 		Sie k&ouml;nnen auch eine Baudrate angeben, wenn der Ger&auml;tename das @ enth&auml;lt, Beispiel: <code>/dev/ttyACM0@57600</code><br>Dies ist auch die Standard-Baudrate.<br><br>
 
@@ -4777,8 +4760,8 @@ With a # at the beginnging whitelistIDs can be deactivated.
 			Erm&ouml;glicht die Aktivierung der Nachrichtenverarbeitung f&uuml;r
 			<ul>
 				<li>Nachrichten mit sync (syncedMS),</li>
-				<li>Nachrichten ohne einen sync pulse (unsyncedMU) </li>
-				<li>Manchester codierte Nachrichten (manchesterMC) </li>
+				<li>Nachrichten ohne einen sync pulse (unsyncedMU)</li>
+				<li>Manchester codierte Nachrichten (manchesterMC)</li>
 			</ul>
 			Der neue Status wird in den eeprom vom Arduino geschrieben.
 		</li><br>
@@ -4788,7 +4771,7 @@ With a # at the beginnging whitelistIDs can be deactivated.
 			<ul>
 				<li>Nachrichten mit sync (syncedMS)</li>
 				<li>Nachrichten ohne einen sync pulse (unsyncedMU)</li> 
-				<li>Manchester codierte Nachrichten (manchesterMC) </li>
+				<li>Manchester codierte Nachrichten (manchesterMC)</li>
 			</ul>
 			Der neue Status wird in den eeprom vom Arduino geschrieben.
 		</li><br>
@@ -4834,7 +4817,7 @@ With a # at the beginnging whitelistIDs can be deactivated.
 				<li>Beispiel 3: <code>set sduino raw SC;R=3;SR;P0=5000;SM;P0=500;C=250;D=A4F7FDDE</code> , sendet eine kombinierte Nachricht von Raw und Manchester codiert 3 mal wiederholt</li>
 			</ul><br>
 		<ul>
-         <u>NUR fuer DEBUG Nutzung | <small>Befehle sind abhaenging vom Firmwarestand!</small></u><br>
+         <u>NUR f&uuml;r DEBUG Nutzung | <small>Befehle sind abhaenging vom Firmwarestand!</small></u><br>
          <small>(Hinweis: Die falsche Benutzung kann zu Fehlfunktionen des SIGNALduino´s f&uuml;hren!)</small>
             <li>CED -> Debugausgaben ein</li>
             <li>CDD -> Debugausgaben aus</li>
@@ -4887,7 +4870,7 @@ With a # at the beginnging whitelistIDs can be deactivated.
    Liest die cc1101 PA Tabelle aus (power amplification for RF sending).<br><br>
 	<a name="ccreg"></a>
 	<li>ccreg<br></li>
-   Liest das cc1101 Register aus (99 reads all cc1101 registers).<br><br>
+   Liest das cc1101 Register aus (99 liest alle aus).<br><br>
 	<a name="cmds"></a>
 	<li>cmds<br></li>
 	Abh&auml;ngig von der installierten Firmware besitzt der SIGNALduino verschiedene Befehle. Bitte beachten Sie den Quellcode der Firmware Ihres SIGNALduino, um die Antwort dieses Befehls zu interpretieren.<br><br>
@@ -4974,7 +4957,7 @@ With a # at the beginnging whitelistIDs can be deactivated.
 		Derzeit m&ouml;gliche Hardware Varianten:
 		<ul>
 			<li>ESP_1M: ESP8266 mit 1 MB Flash und einem CC1101</li>
-			<li>ESP32: ESP32 </li>
+			<li>ESP32: ESP32</li>
 			<li>nano: Arduino Nano 328 f&uuml;r "Billig"-Empf&auml;nger</li>
 			<li>nanoCC1101: Arduino Nano f&uuml;r einen CC110x-Empf&auml;nger</li>
 			<li>miniculCC1101: Arduino pro Mini mit einen CC110x-Empf&auml;nger entsprechend dem minicul verkabelt</li>
