@@ -4908,7 +4908,7 @@ With a # at the beginnging whitelistIDs can be deactivated.
 	</li><br>
 	<li><a href="#dummy">dummy</a></li><br>
 	<a name="blacklist_IDs"></a>
-	<li>blacklist_IDs<br>>
+	<li>blacklist_IDs<br>
 	Dies ist eine durch Komma getrennte Liste. Die Blacklist funktioniert nur, wenn keine Whitelist existiert! Hier kann man ID´s eintragen welche man nicht ausgewertet haben m&ouml;chte.
 	</li><br>
 	<a name="cc1101_frequency"></a>
