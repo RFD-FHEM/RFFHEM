@@ -4347,8 +4347,8 @@ sub SIGNALduino_githubParseHttpResponse($)
 			Allows you to enable the message processing for 
 			<ul>
 				<li>messages with sync (syncedMS)</li>
-				<li>messages without a sync pulse (unsyncedMU) </li>
-				<li>manchester encoded messages (manchesterMC) </li>
+				<li>messages without a sync pulse (unsyncedMU)</li>
+				<li>manchester encoded messages (manchesterMC)</li>
 			</ul>
 			The new state will be saved into the eeprom of your arduino.
 		</li><br>
