@@ -4300,33 +4300,23 @@ sub SIGNALduino_githubParseHttpResponse($)
 	<b>Define</b>
 	<ul><code>define &lt;name&gt; SIGNALduino &lt;device&gt; </code></ul>
 	USB-connected devices (SIGNALduino):<br>
-	<ul><li>
-		&lt;device&gt; specifies the serial port to communicate with the SIGNALduino.
-		The name of the serial-device depends on your distribution, under
-		linux the cdc_acm kernel module is responsible, and usually a
-		/dev/ttyACM0 or /dev/ttyUSB0 device will be created. If your distribution does not have a
-		cdc_acm module, you can force usbserial to handle the SIGNALduino by the
-		following command:
-		<ul>
-		modprobe usbserial 
-		vendor=0x03eb
-		product=0x204b
+	<ul>
+		<li>
+		&lt;device&gt; specifies the serial port to communicate with the SIGNALduino. The name of the serial-device depends on your distribution, under linux the cdc_acm kernel module is responsible, and usually a /dev/ttyACM0 or /dev/ttyUSB0 device will be created. If your distribution does not have a	cdc_acm module, you can force usbserial to handle the SIGNALduino by the following command:
+		<ul>		
+			<li>modprobe usbserial</li>
+			<li>vendor=0x03eb</li>
+			<li>product=0x204b</li>
 		</ul>
 		In this case the device is most probably /dev/ttyUSB0.<br><br>
 
-		You can also specify a baudrate if the device name contains the @
-		character, e.g.: /dev/ttyACM0@57600<br><br>This is also the default baudrate
+		You can also specify a baudrate if the device name contains the @ character, e.g.: /dev/ttyACM0@57600<br><br>This is also the default baudrate
 
 		It is recommended to specify the device via a name which does not change:
 		e.g. via by-id devicename: /dev/serial/by-id/usb-1a86_USB2.0-Serial-if00-port0@57600
 
-		If the baudrate is "directio" (e.g.: /dev/ttyACM0@directio), then the
-		perl module Device::SerialPort is not needed, and fhem opens the device
-		with simple file io. This might work if the operating system uses sane
-		defaults for the serial parameters, e.g. some Linux distributions and
-		OSX.  <br><br>
+		If the baudrate is "directio" (e.g.: /dev/ttyACM0@directio), then the perl module Device::SerialPort is not needed, and fhem opens the device with simple file io. This might work if the operating system uses sane defaults for the serial parameters, e.g. some Linux distributions and OSX.<br><br>
 		</li>
-
 	</ul>
 
 	
@@ -4713,23 +4703,22 @@ With a # at the beginnging whitelistIDs can be deactivated.
 	USB-connected devices (SIGNALduino):<br>
 	<ul><li>
 		&lt;device&gt; spezifiziert den seriellen Port f&uuml;r die Kommunikation mit dem SIGNALduino.
-		Der Name des seriellen Ger&auml;ts h&auml;ngt von Ihrer  Distribution ab. In
-		Linux ist das <code>cdc_acm</code> Kernel_Modul daf&uuml;r verantwortlich und es wird ein <code>/dev/ttyACM0</code> oder <code>/dev/ttyUSB0</code> Ger&auml;t angelegt. Wenn deine Distribution kein <code>cdc_acm</code> Module besitzt, kannst du usbserial nutzen um den SIGNALduino zu betreiben mit folgenden Kommandos:
+		Der Name des seriellen Ger&auml;ts h&auml;ngt von Ihrer  Distribution ab. In Linux ist das <code>cdc_acm</code> Kernel_Modul daf&uuml;r verantwortlich und es wird ein <code>/dev/ttyACM0</code> oder <code>/dev/ttyUSB0</code> Ger&auml;t angelegt. Wenn deine Distribution kein <code>cdc_acm</code> Module besitzt, kannst du usbserial nutzen um den SIGNALduino zu betreiben mit folgenden Kommandos:
 		<ul>
-		<li>modprobe usbserial</li>
-		<li>vendor=0x03eb</li>
-		<li>product=0x204b</li>
-		</ul>In diesem Fall ist das Ger&auml;t h&ouml;chstwahrscheinlich <code>/dev/ttyUSB0</code>.<br><br>
+			<li>modprobe usbserial</li>
+			<li>vendor=0x03eb</li>
+			<li>product=0x204b</li>
+		</ul>
+		In diesem Fall ist das Ger&auml;t h&ouml;chstwahrscheinlich <code>/dev/ttyUSB0</code>.<br><br>
 
 		Sie k&ouml;nnen auch eine Baudrate angeben, wenn der Ger&auml;tename das @ enth&auml;lt, Beispiel: <code>/dev/ttyACM0@57600</code><br>Dies ist auch die Standard-Baudrate.<br><br>
 
 		Es wird empfohlen, das Ger&auml;t &uuml;ber einen Namen anzugeben, der sich nicht &auml;ndert. Beispiel via by-id devicename: <code>/dev/serial/by-id/usb-1a86_USB2.0-Serial-if00-port0@57600</code><br>
 
 		Wenn die Baudrate "directio" (Bsp: <code>/dev/ttyACM0@directio</code>), dann benutzt das Perl Modul nicht Device::SerialPort und FHEM &ouml;ffnet das Ger&auml;t mit einem file io. Dies kann funktionieren, wenn das Betriebssystem die Standardwerte f&uuml;r die seriellen Parameter verwendet. Bsp: einige Linux Distributionen und
-		OSX.  <br><br>
+		OSX.<br><br>
 		</li>
 	</ul>
-	
 							  
 	<a name="SIGNALduinoset"></a>
 	<b>SET</b>
