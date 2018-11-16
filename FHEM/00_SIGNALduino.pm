@@ -4308,6 +4308,26 @@ sub SIGNALduino_githubParseHttpResponse($)
 	<a name="SIGNALduinoset"></a>
 	<b>Set</b>
 	<ul>
+		<li>freq / bWidth / patable / rAmpl / sens<br>
+		Only with CC1101 receiver.<br>
+		Set the sduino frequency / bandwidth / PA table / receiver-amplitude / sensitivity<br>
+		
+		Use it with care, it may destroy your hardware and it even may be
+		illegal to do so. Note: The parameters used for RFR transmission are
+		not affected.<br>
+		<ul>
+			<a name="cc1101_freq"></a>
+			<li><code>freq</code> sets both the reception and transmission frequency. Note: Although the CC1101 can be set to frequencies between 315 and 915 MHz, the antenna interface and the antenna is tuned for exactly one frequency. Default is 868.3 MHz (or 433 MHz)</li>
+			<a name="cc1101_bWidth"></a>
+			<li><code>bWidth</code> can be set to values between 58 kHz and 812 kHz. Large values are susceptible to interference, but make possible to receive inaccurately calibrated transmitters. It affects tranmission too. Default is 325 kHz.</li>
+			<a name="cc1101_patable"></a>
+			<li><code>patable</code> change the PA table (power amplification for RF sending)</li>
+			<a name="cc1101_rAmpl"></a>
+			<li><code>rAmpl</code> is receiver amplification, with values between 24 and 42 dB. Bigger values allow reception of weak signals. Default is 42.</li>
+			<a name="cc1101_sens"></a>
+			<li><code>sens</code> is the decision boundary between the on and off values, and it is 4, 8, 12 or 16 dB.  Smaller values allow reception of less clear signals. Default is 4 dB.</li>
+		</ul>
+		</li><br>
 		<a name="close"></a>
 		<li>close<br>
 		Closes the connection to the device.
@@ -4332,64 +4352,42 @@ sub SIGNALduino_githubParseHttpResponse($)
 			</ul>
 			The new state will be saved into the eeprom of your arduino.
 		</li><br>
-		
-		<li>freq / bWidth / patable / rAmpl / sens<br>
-		Only with CC1101 receiver.<br>
-		Set the sduino frequency / bandwidth / PA table / receiver-amplitude / sensitivity<br>
-		
-		Use it with care, it may destroy your hardware and it even may be
-		illegal to do so. Note: The parameters used for RFR transmission are
-		not affected.<br>
-		<ul>
-			<a name="cc1101_freq"></a>
-			<li><code>freq</code> sets both the reception and transmission frequency. Note: Although the CC1101 can be set to frequencies between 315 and 915 MHz, the antenna interface and the antenna is tuned for exactly one frequency. Default is 868.3 MHz (or 433 MHz)</li>
-			<a name="cc1101_bWidth"></a>
-			<li><code>bWidth</code> can be set to values between 58 kHz and 812 kHz. Large values are susceptible to interference, but make possible to receive inaccurately calibrated transmitters. It affects tranmission too. Default is 325 kHz.</li>
-			<a name="cc1101_patable"></a>
-			<li><code>patable</code> change the PA table (power amplification for RF sending)</li>
-			<a name="cc1101_rAmpl"></a>
-			<li><code>rAmpl</code> is receiver amplification, with values between 24 and 42 dB. Bigger values allow reception of weak signals. Default is 42.</li>
-			<a name="cc1101_sens"></a>
-			<li><code>sens</code> is the decision boundary between the on and off values, and it is 4, 8, 12 or 16 dB.  Smaller values allow reception of less clear signals. Default is 4 dB.</li>
-		</ul>
-		</li><br>
 		<a name="flash"></a>
 		<li>flash [hexFile|url]<br>
-			The SIGNALduino needs the right firmware to be able to receive and deliver the sensor data to fhem. In addition to the way using the
-			arduino IDE to flash the firmware into the SIGNALduino this provides a way to flash it directly from FHEM.
-			You can specify a file on your fhem server or specify a url from which the firmware is downloaded
-
-			There are some requirements:
-			<ul>
-				<li>avrdude must be installed on the host<br>
-					On a Raspberry PI this can be done with: sudo apt-get install avrdude</li>
-				<li>the hardware attribute must be set if using any other hardware as an Arduino nano<br>
-					This attribute defines the command, that gets sent to avrdude to flash the uC.<br></li>
-			</ul>
+		The SIGNALduino needs the right firmware to be able to receive and deliver the sensor data to fhem. In addition to the way using the arduino IDE to flash the firmware into the SIGNALduino this provides a way to flash it directly from FHEM. You can specify a file on your fhem server or specify a url from which the firmware is downloaded There are some requirements:
+		<ul>
+			<li>avrdude must be installed on the host<br> On a Raspberry PI this can be done with: sudo apt-get install avrdude</li>
+			<li>the hardware attribute must be set if using any other hardware as an Arduino nano<br> This attribute defines the command, that gets sent to avrdude to flash the uC.</li>
+		</ul>
 		Example:
 		<ul>
 			<li>flash via hexFile: <code>set sduino flash ./FHEM/firmware/SIGNALduino_mega2560.hex</code></li>
 			<li>flash via url for Nano with CC1101: <code>set sduino flash https://github.com/RFD-FHEM/SIGNALDuino/releases/download/3.3.1-RC7/SIGNALDuino_nanocc1101.hex</code></li>
-		</ul><br>
-		</li>
-		</li>
-		<u><i>note model radino:</u></i><ul>
-		<li>Sometimes there can be problems flashing radino on Linux. <a href="https://wiki.in-circuit.de/index.php5?title=radino_common_problems">Here in the wiki under point "radino & Linux" is a patch!</a></li>
-		<li>To activate the bootloader of the radino there are 2 variants.
-		<ul><li>1) modules that contain a BSL-button:</li>
+		</ul>
+		<i><u>note model radino:</u></i>
+		<ul>
+			<li>Sometimes there can be problems flashing radino on Linux. <a href="https://wiki.in-circuit.de/index.php5?title=radino_common_problems">Here in the wiki under point "radino & Linux" is a patch!</a></li>
+			<li>To activate the bootloader of the radino there are 2 variants.
 			<ul>
-			- apply supply voltage<br>
-			- press & hold BSL- and RESET-Button<br>
-			- release RESET-button, release BSL-button<br>
-			 (repeat these steps if your radino doesn't enter bootloader mode right away.)
+				<li>1) modules that contain a BSL-button:
+				<ul>
+					<li>apply supply voltage</li>
+					<li>press & hold BSL- and RESET-Button</li>
+					<li>release RESET-button, release BSL-button</li>
+			 		<li>(repeat these steps if your radino doesn't enter bootloader mode right away.)</li>
+				</ul>
+				</li>
+				<li>2) force bootloader:
+				<ul>
+					<li>pressing reset button twice</li>
+				</ul>
+				</li>
 			</ul>
-			<li>2) force bootloader:<ul>
-			- pressing reset button twice</ul>
-			</li></ul>
-		<li>In bootloader mode, the radino gets a different USB ID.</li><br>
-		<b>If the bootloader is enabled, it signals with a flashing LED. Then you have 8 seconds to flash.</b>
-		</li>
-		</ul><br>
+			<li>In bootloader mode, the radino gets a different USB ID.</li><br>
+			<b>If the bootloader is enabled, it signals with a flashing LED. Then you have 8 seconds to flash.</b>
+			</li>
+		</ul>
+		</li><br>
 		<a name="reset"></a>
 		<li>reset<br>
 		This will do a reset of the usb port and normaly causes to reset the uC connected.
@@ -4695,29 +4693,30 @@ sub SIGNALduino_githubParseHttpResponse($)
 	<a name="SIGNALduinoset"></a>
 	<b>SET</b>
 	<ul>
-	<li>cc1101_freq / cc1101_bWidth / cc1101_patable / cc1101_rAmpl / cc1101_sens<br></li>
-	(NUR bei Verwendung eines cc110x Empf&auml;nger)<br><br>
-	Stellt die SIGNALduino-Frequenz / Bandbreite / PA-Tabelle / Empf&auml;nger-Amplitude / Empfindlichkeit ein.<br>
-	Verwenden Sie es mit Vorsicht. Es kann Ihre Hardware zerst&ouml;ren und es kann sogar illegal sein, dies zu tun.<br>
-	Hinweis: Die f&uuml;r die RFR-&Uuml;bertragung verwendeten Parameter sind nicht betroffen.<br>
-			<ul>
-				<a name="cc1101_freq"></a>
-				<li><code>freq</code> , legt sowohl die Empfangsfrequenz als auch die &Uuml;bertragungsfrequenz fest.<br>
-				Hinweis: Obwohl der CC1101 auf Frequenzen zwischen 315 und 915 MHz eingestellt werden kann, ist die Antennenschnittstelle und die Antenne auf genau eine Frequenz abgestimmt. Standard ist 868.3 MHz (oder 433 MHz)</li>
-				<a name="cc1101_bWidth"></a>
-				<li><code>bWidth</code> , kann auf Werte zwischen 58 kHz und 812 kHz eingestellt werden. Große Werte sind st&ouml;ranf&auml;llig, erm&ouml;glichen jedoch den Empfang von ungenau kalibrierten Sendern. Es wirkt sich auch auf die &Uuml;bertragung aus. Standard ist 325 kHz.</li>
-				<a name="cc1101_patable"></a>
-				<li><code>patable</code> , &Auml;nderung der PA-Tabelle (Leistungsverst&auml;rkung f&uuml;r HF-Senden)</li>
-				<a name="cc1101_rAmpl"></a>
-				<li><code>rAmpl</code> , ist die Empf&auml;ngerverst&auml;rkung mit Werten zwischen 24 und 42 dB. Gr&ouml;ßere Werte erlauben den Empfang schwacher Signale. Der Standardwert ist 42.</li>
-				<a name="cc1101_sens"></a>
-				<li><code>sens</code> , ist die Entscheidungsgrenze zwischen den Ein- und Aus-Werten und betr&auml;gt 4, 8, 12 oder 16 dB. Kleinere Werte erlauben den Empfang von weniger klaren Signalen. Standard ist 4 dB.</li>
-			</ul><br>
-	<a name="close"></a>
-	<li>close<br></li>
-	Beendet die Verbindung zum Ger&auml;t.<br><br>
-	<a name="enableMessagetype"></a>
-	<li>enableMessagetype<br>
+		<li>cc1101_freq / cc1101_bWidth / cc1101_patable / cc1101_rAmpl / cc1101_sens<br></li>
+		(NUR bei Verwendung eines cc110x Empf&auml;nger)<br><br>
+		Stellt die SIGNALduino-Frequenz / Bandbreite / PA-Tabelle / Empf&auml;nger-Amplitude / Empfindlichkeit ein.<br>
+		Verwenden Sie es mit Vorsicht. Es kann Ihre Hardware zerst&ouml;ren und es kann sogar illegal sein, dies zu tun.<br>
+		Hinweis: Die f&uuml;r die RFR-&Uuml;bertragung verwendeten Parameter sind nicht betroffen.<br>
+		<ul>
+		<a name="cc1101_freq"></a>
+		<li><code>freq</code> , legt sowohl die Empfangsfrequenz als auch die &Uuml;bertragungsfrequenz fest.<br>
+		Hinweis: Obwohl der CC1101 auf Frequenzen zwischen 315 und 915 MHz eingestellt werden kann, ist die Antennenschnittstelle und die Antenne auf genau eine Frequenz abgestimmt. Standard ist 868.3 MHz (oder 433 MHz)</li>
+		<a name="cc1101_bWidth"></a>
+		<li><code>bWidth</code> , kann auf Werte zwischen 58 kHz und 812 kHz eingestellt werden. Große Werte sind st&ouml;ranf&auml;llig, erm&ouml;glichen jedoch den Empfang von ungenau kalibrierten Sendern. Es wirkt sich auch auf die &Uuml;bertragung aus. Standard ist 325 kHz.</li>
+		<a name="cc1101_patable"></a>
+		<li><code>patable</code> , &Auml;nderung der PA-Tabelle (Leistungsverst&auml;rkung f&uuml;r HF-Senden)</li>
+		<a name="cc1101_rAmpl"></a>
+		<li><code>rAmpl</code> , ist die Empf&auml;ngerverst&auml;rkung mit Werten zwischen 24 und 42 dB. Gr&ouml;ßere Werte erlauben den Empfang schwacher Signale. Der Standardwert ist 42.</li>
+		<a name="cc1101_sens"></a>
+		<li><code>sens</code> , ist die Entscheidungsgrenze zwischen den Ein- und Aus-Werten und betr&auml;gt 4, 8, 12 oder 16 dB. Kleinere Werte erlauben den Empfang von weniger klaren Signalen. Standard ist 4 dB.</li>
+		</ul>
+		</li><br>
+		<a name="close"></a>
+		<li>close<br></li>
+		Beendet die Verbindung zum Ger&auml;t.<br><br>
+		<a name="enableMessagetype"></a>
+		<li>enableMessagetype<br>
 			Erm&ouml;glicht die Aktivierung der Nachrichtenverarbeitung f&uuml;r
 			<ul>
 				<li>Nachrichten mit sync (syncedMS),</li>
@@ -4726,48 +4725,52 @@ sub SIGNALduino_githubParseHttpResponse($)
 			</ul>
 			Der neue Status wird in den eeprom vom Arduino geschrieben.
 		</li><br>
-	<a name="disableMessagetype"></a>
-	<li>disableMessagetype<br>
-			Erm&ouml;glicht das Deaktivieren der Nachrichtenverarbeitung f&uuml;r
-			<ul>
-				<li>Nachrichten mit sync (syncedMS)</li>
-				<li>Nachrichten ohne einen sync pulse (unsyncedMU)</li> 
-				<li>Manchester codierte Nachrichten (manchesterMC)</li>
-			</ul>
-			Der neue Status wird in den eeprom vom Arduino geschrieben.
+		<a name="disableMessagetype"></a>
+		<li>disableMessagetype<br>
+		Erm&ouml;glicht das Deaktivieren der Nachrichtenverarbeitung f&uuml;r
+		<ul>
+			<li>Nachrichten mit sync (syncedMS)</li>
+			<li>Nachrichten ohne einen sync pulse (unsyncedMU)</li> 
+			<li>Manchester codierte Nachrichten (manchesterMC)</li>
+		</ul>
+		Der neue Status wird in den eeprom vom Arduino geschrieben.
 		</li><br>
-	<a name="flash"></a>
-	<li>flash [hexFile|url]<br>
-	Der SIGNALduino ben&ouml;tigt die richtige Firmware, um die Sensordaten zu empfangen und zu liefern. Unter Verwendung der Arduino IDE zum Flashen der Firmware in den SIGNALduino bietet dies eine M&ouml;glichkeit, ihn direkt von FHEM aus zu flashen. Sie k&ouml;nnen eine Datei auf Ihrem fhem-Server angeben oder eine URL angeben, von der die Firmware heruntergeladen wird.
-	Es gibt einige Anforderungen:
+		<a name="flash"></a>
+		<li>flash [hexFile|url]<br>
+		Der SIGNALduino ben&ouml;tigt die richtige Firmware, um die Sensordaten zu empfangen und zu liefern. Unter Verwendung der Arduino IDE zum Flashen der Firmware in den SIGNALduino bietet dies eine M&ouml;glichkeit, ihn direkt von FHEM aus zu flashen. Sie k&ouml;nnen eine Datei auf Ihrem fhem-Server angeben oder eine URL angeben, von der die Firmware heruntergeladen wird. Es gibt einige Anforderungen:
+		<ul>
+			<li><code>avrdude</code> muss auf dem Host installiert sein. Auf einem Raspberry PI kann dies getan werden mit: <code>sudo apt-get install avrdude</code></li>
+			<li>Das Hardware-Attribut muss festgelegt werden, wenn eine andere Hardware als Arduino Nano verwendet wird. Dieses Attribut definiert den Befehl, der an avrdude gesendet wird, um den uC zu flashen.</li>
+		</ul>
+		Beispiele:
+		<ul>
+			<li>flash via hexFile: <code>set sduino flash ./FHEM/firmware/SIGNALduino_mega2560.hex</code></li>
+			<li>flash via url f&uuml;r einen Nano mit CC1101: <code>set sduino flash https://github.com/RFD-FHEM/SIGNALDuino/releases/download/3.3.1-RC7/SIGNALDuino_nanocc1101.hex</code></li>
+		</ul>
+		<i><u>Hinweise Modell radino:</u></i>
+		<ul>
+			<li>Teilweise kann es beim flashen vom radino unter Linux Probleme geben. <a href="https://wiki.in-circuit.de/index.php5?title=radino_common_problems">Hier im Wiki unter dem Punkt "radino & Linux" gibt es einen Patch!</a></li>
+			<li>Um den Bootloader vom radino zu aktivieren gibt es 2 Varianten.
 			<ul>
-				<li><code>avrdude</code> muss auf dem Host installiert sein. Auf einem Raspberry PI kann dies getan werden mit: <code>sudo apt-get install avrdude</code></li>
-				<li>Das Hardware-Attribut muss festgelegt werden, wenn eine andere Hardware als Arduino Nano verwendet wird. Dieses Attribut definiert den Befehl, der an avrdude gesendet wird, um den uC zu flashen.</li>
+				<li>1) Module welche einen BSL-Button besitzen:
+				<ul>
+					<li>Spannung anlegen</li>
+					<li>druecke & halte BSL- und RESET-Button</li>
+					<li>RESET-Button loslassen und danach den BSL-Button loslassen</li>
+					<li>(Wiederholen Sie diese Schritte, wenn Ihr radino nicht sofort in den Bootloader-Modus wechselt.)</li>
+				</ul>
+				</li>
+				<li>2) Bootloader erzwingen:
+				<ul>
+					<li>durch zweimaliges druecken der Reset-Taste</li>
+				</ul>
+				</li>
 			</ul>
-	Beispiele:
-	<ul>
-	<li>flash via hexFile: <code>set sduino flash ./FHEM/firmware/SIGNALduino_mega2560.hex</code></li>
-	<li>flash via url f&uuml;r einen Nano mit CC1101: <code>set sduino flash https://github.com/RFD-FHEM/SIGNALDuino/releases/download/3.3.1-RC7/SIGNALDuino_nanocc1101.hex</code></li>
-	</ul>
-	</li>
-	<i><u>Hinweise Modell radino:</u></i><ul>
-		<li>Teilweise kann es beim flashen vom radino unter Linux Probleme geben. <a href="https://wiki.in-circuit.de/index.php5?title=radino_common_problems">Hier im Wiki unter dem Punkt "radino & Linux" gibt es einen Patch!</a></li>
-		<li>Um den Bootloader vom radino zu aktivieren gibt es 2 Varianten.
-		<ul><li>1) Module welche einen BSL-Button besitzen:</li>
-			<ul>
-			- Spannung anlegen<br>
-			- druecke & halte BSL- und RESET-Button<br>
-			- RESET-Button loslassen und danach den BSL-Button loslassen<br>
-			 (Wiederholen Sie diese Schritte, wenn Ihr radino nicht sofort in den Bootloader-Modus wechselt.)
-			</ul>
-			<li>2) Bootloader erzwingen:<ul>
-			- durch zweimaliges druecken der Reset-Taste</ul>
+			<li>Im Bootloader-Modus erh&auml;lt der radino eine andere USB ID.</li><br>
+			<b>Wenn der Bootloader aktiviert ist, signalisiert er das mit dem Blinken einer LED. Dann hat man ca. 8 Sekunden Zeit zum flashen.</b>
 			</li>
 		</ul>
-		<li>Im Bootloader-Modus erh&auml;lt der radino eine andere USB ID.</li><br>
-		<b>Wenn der Bootloader aktiviert ist, signalisiert er das mit dem Blinken einer LED. Dann hat man ca. 8 Sekunden Zeit zum flashen.</b>
-		</li>
-	</ul><br>
+		</li><br>
 	<a name="raw"></a>
 	<li>raw<br></li>
 	Geben Sie einen SIGNALduino-Firmware-Befehl aus, ohne auf die vom SIGNALduino zur&uuml;ckgegebenen Daten zu warten. Ausf&uuml;hrliche Informationen zu SIGNALduino-Befehlen finden Sie im SIGNALduino-Firmware-Code. Mit dieser Linie k&ouml;nnen Sie fast jedes Signal &uuml;ber einen angeschlossenen Sender senden.<br>
