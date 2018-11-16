@@ -4588,18 +4588,17 @@ sub SIGNALduino_githubParseHttpResponse($)
     		</li><br>
     		<a name="longids"></a>
 		<li>longids<br>
-        	Comma separated list of device-types for SIGNALduino that should be handled using long IDs. This additional ID allows it to differentiate some weather sensors, if they are sending on the same channel. Therfor a random generated id is added. If you choose to use longids, then you'll have to define a different device after battery change.<br>
-		Default is to not to use long IDs for all devices.
-      		<br><br>
+        	Comma separated list of device-types for SIGNALduino that should be handled using long IDs. This additional ID allows it to differentiate some weather sensors, if they are sending on the same channel. Therfor a random generated id is added. If you choose to use longids, then you'll have to define a different device after battery change.<br> Default is to not to use long IDs for all devices.<br>
+		Following modules can use this function: 14_Hideki, 41_OREGON, 14_CUL_TCM97001, 14_SD_WS07.<br>
       		Examples:<PRE>
-		# Do not use any long IDs for any devices:
+		# Do not use any long IDs for any devices (this is default):
 		attr sduino longids 0
-		# Use any long IDs for all devices (this is default):
+		# Use any long IDs for all devices:
 		attr sduino longids 1
-		# Use longids for BTHR918N devices.
-		# Will generate devices names like BTHR918N_f3.
-		attr sduino longids BTHR918N
-		</PRE></li>
+		# Use longids for SD_WS07 devices.
+		# Will generate devices names like SD_WS07_TH_3.
+		attr sduino longids SD_WS07
+		</PRE></li><br>
 		<a name="rawmsgEvent"></a>
 		<li>rawmsgEvent<br>
 		When set to "1" received raw messages triggers events
@@ -4950,18 +4949,17 @@ sub SIGNALduino_githubParseHttpResponse($)
 	</li><br>
 	<a name="longids"></a>
 	<li>longids<br><br>
-	Durch Komma getrennte Liste von Device-Typen f&uuml;r Empfang von langen IDs mit dem SIGNALduino. Diese zus&auml;tzliche ID erlaubt es Wettersensoren, welche auf dem gleichen Kanal senden zu unterscheiden. Hierzu wird eine zuf&auml;llig generierte ID hinzugef&uuml;gt. Wenn Sie longids verwenden, dann wird in den meisten F&auml;llen nach einem Batteriewechsel ein neuer Sensor angelegt. Standardm&auml;ßig werden keine langen IDs verwendet.
+	Durch Komma getrennte Liste von Device-Typen f&uuml;r Empfang von langen IDs mit dem SIGNALduino. Diese zus&auml;tzliche ID erlaubt es Wettersensoren, welche auf dem gleichen Kanal senden zu unterscheiden. Hierzu wird eine zuf&auml;llig generierte ID hinzugef&uuml;gt. Wenn Sie longids verwenden, dann wird in den meisten F&auml;llen nach einem Batteriewechsel ein neuer Sensor angelegt. Standardm&auml;ßig werden keine langen IDs verwendet.<br>
 	Folgende Module verwenden diese Funktionalit&auml;t: 14_Hideki, 41_OREGON, 14_CUL_TCM97001, 14_SD_WS07.<br>
-	Beispiele:<br>
-	<br>
-    	# Keine langen IDs verwenden (Default Einstellung):<br>
-    	attr SIGNALduino longids 0<br>
-    	# Immer lange IDs verwenden:<br>
-    	attr SIGNALduino longids 1<br>
-    	# Verwende lange IDs f&uuml;r SD_WS07 Devices.<br>
-    	# Device Namen sehen z.B. so aus: SD_WS07_TH_3 for channel 3.<br>
-    	attr SIGNALduino longids SD_WS07
-	</li><br>
+	Beispiele:<PRE>
+    		# Keine langen IDs verwenden (Default Einstellung):
+    		attr sduino longids 0
+    		# Immer lange IDs verwenden:
+    		attr sduino longids 1
+    		# Verwende lange IDs f&uuml;r SD_WS07 Devices.
+    		# Device Namen sehen z.B. so aus: SD_WS07_TH_3.
+    		attr sduino longids SD_WS07
+	</PRE></li><br>
 	<a name="maxMuMsgRepeat"></a>
 	<li>maxMuMsgRepeat<br><br>
 	In MU Signalen koennen mehrere Wiederholungen stecken. Diese werden einzeln ausgewertet und an ein logisches Modul uebergeben. Mit diesem Attribut kann angepasst werden, wie viele Wiederholungen gesucht werden. Standard ist 4.
