@@ -4255,24 +4255,15 @@ sub SIGNALduino_githubParseHttpResponse($)
 
 	<table>
 	<tr><td>
-	The SIGNALduino ia based on an idea from mdorenka published at <a href="http://forum.fhem.de/index.php/topic,17196.0.html">FHEM Forum</a>.
-
-	With the opensource firmware (see this <a href="https://github.com/RFD-FHEM/SIGNALduino">link</a>) it is capable to receive and send different protocols over different medias. Currently are 433Mhz protocols implemented.
-	<br><br>
-
-	The following device support is currently available:
-	<br><br>
-
-
-	Wireless switches  <br>
+	The SIGNALduino ia based on an idea from mdorenka published at <a href="http://forum.fhem.de/index.php/topic,17196.0.html">FHEM Forum</a>. With the opensource firmware (see this <a href="https://github.com/RFD-FHEM/SIGNALduino">link</a>) it is capable to receive and send different protocols over different medias. Currently are 433Mhz protocols implemented.<br><br>
+	The following device support is currently available:<br><br>
+	Wireless switches<br>
 	<ul>
-		<li>ITv1 & ITv3/Elro and other brands using pt2263 or arctech protocol--> uses IT.pm<br>
-				In the ITv1 protocol is used to sent a default ITclock from 250 and it may be necessary in the IT-Modul to define the attribute ITclock</li>
-    <li>ELV FS10 -> 10_FS10</li>
-    <li>ELV FS20 -> 10_FS20</li>
+		<li>ITv1 & ITv3/Elro and other brands using pt2263 or arctech protocol--> uses IT.pm<br>In the ITv1 protocol is used to sent a default ITclock from 250 and it may be necessary in the IT-Modul to define the attribute ITclock</li>
+    		<li>ELV FS10 -> 10_FS10</li>
+    		<li>ELV FS20 -> 10_FS20</li>
 	</ul>
 	<br>
-	
 	Temperature / humidity sensors
 	<ul>
 		<li>PEARL NC7159, LogiLink WS0002,GT-WT-02,AURIOL,TCM97001, TCM27 and many more -> 14_CUL_TCM97001 </li>
@@ -4287,11 +4278,8 @@ sub SIGNALduino_githubParseHttpResponse($)
     		<li>ELV WS-2000, La Crosse WS-7000 -> 14_CUL_WS</li>
 	</ul>
 	<br>
-
 	It is possible to attach more than one device in order to get better reception, fhem will filter out duplicate messages. See more at the <a href="#global">global</a> section with attribute dupTimeout<>br><br>
-
 	Note: this module require the Device::SerialPort or Win32::SerialPort module. It can currently only attatched via USB.
-
 	</td>
 	</tr>
 	</table>
@@ -4309,12 +4297,9 @@ sub SIGNALduino_githubParseHttpResponse($)
 			<li>product=0x204b</li>
 		</ul>
 		In this case the device is most probably /dev/ttyUSB0.<br><br>
-
-		You can also specify a baudrate if the device name contains the @ character, e.g.: /dev/ttyACM0@57600<br><br>This is also the default baudrate
-
-		It is recommended to specify the device via a name which does not change:
-		e.g. via by-id devicename: /dev/serial/by-id/usb-1a86_USB2.0-Serial-if00-port0@57600
-
+		You can also specify a baudrate if the device name contains the @ character, e.g.: /dev/ttyACM0@57600<br><br>This is also the default baudrate.<br>
+		It is recommended to specify the device via a name which does not change:<br>
+		e.g. via by-id devicename: /dev/serial/by-id/usb-1a86_USB2.0-Serial-if00-port0@57600<br>
 		If the baudrate is "directio" (e.g.: /dev/ttyACM0@directio), then the perl module Device::SerialPort is not needed, and fhem opens the device with simple file io. This might work if the operating system uses sane defaults for the serial parameters, e.g. some Linux distributions and OSX.<br><br>
 		</li>
 	</ul>
@@ -4657,36 +4642,30 @@ sub SIGNALduino_githubParseHttpResponse($)
 
 	Mit der OpenSource-Firmware (<a href="https://github.com/RFD-FHEM/SIGNALduino">GitHub</a>) ist dieser f&auml;hig zum Empfangen und Senden verschiedener Protokolle auf 433 und 868 Mhz.
 	<br><br>
-	
 	Folgende Ger&auml;te werden zur Zeit unterst&uuml;tzt:
 	<br><br>
-	
 	Funk-Schalter<br>
 	<ul>
-		<li>ITv1 & ITv3/Elro und andere Marken mit dem pt2263-Chip oder welche das arctech Protokoll nutzen --> IT.pm<br>
-				Das ITv1 Protokoll benutzt einen Standard ITclock von 250 und es kann vorkommen, das in dem IT-Modul das Attribut "ITclock" zu setzen ist.</li>
-    <li>ELV FS10 -> 10_FS10</li>
-    <li>ELV FS20 -> 10_FS20</li>
+		<li>ITv1 & ITv3/Elro und andere Marken mit dem pt2263-Chip oder welche das arctech Protokoll nutzen --> IT.pm<br> Das ITv1 Protokoll benutzt einen Standard ITclock von 250 und es kann vorkommen, das in dem IT-Modul das Attribut "ITclock" zu setzen ist.</li>
+    		<li>ELV FS10 -> 10_FS10</li>
+    		<li>ELV FS20 -> 10_FS20</li>
 	</ul>
-	
 	Temperatur-, Luftfeuchtigkeits-, Luftdruck-, Helligkeits-, Regen- und Windsensoren:
 	<ul>
 		<li>PEARL NC7159, LogiLink WS0002,GT-WT-02,AURIOL,TCM97001, TCM27 und viele anderen -> 14_CUL_TCM97001.pm</li>
 		<li>Oregon Scientific v2 und v3 Sensoren  -> 41_OREGON.pm</li>
 		<li>Temperatur / Feuchtigkeits Sensoren unterst&uuml;tzt -> 14_SD_WS07.pm</li>
-    <li>technoline WS 6750 und TX70DTH -> 14_SD_WS07.pm</li>
-    <li>Eurochon EAS 800z -> 14_SD_WS07.pm</li>
-    <li>CTW600, WH1080	-> 14_SD_WS09.pm</li>
-    <li>Hama TS33C, Bresser Thermo/Hygro Sensoren -> 14_Hideki.pm</li>
-    <li>FreeTec Aussenmodul NC-7344 -> 14_SD_WS07.pm</li>
-    <li>La Crosse WS-7035, WS-7053, WS-7054 -> 14_CUL_TX</li>
-    <li>ELV WS-2000, La Crosse WS-7000 -> 14_CUL_WS</li>
+    		<li>technoline WS 6750 und TX70DTH -> 14_SD_WS07.pm</li>
+    		<li>Eurochon EAS 800z -> 14_SD_WS07.pm</li>
+    		<li>CTW600, WH1080	-> 14_SD_WS09.pm</li>
+    		<li>Hama TS33C, Bresser Thermo/Hygro Sensoren -> 14_Hideki.pm</li>
+    		<li>FreeTec Aussenmodul NC-7344 -> 14_SD_WS07.pm</li>
+    		<li>La Crosse WS-7035, WS-7053, WS-7054 -> 14_CUL_TX</li>
+    		<li>ELV WS-2000, La Crosse WS-7000 -> 14_CUL_WS</li>
 	</ul>
 	<br>
-
 	Es ist m&ouml;glich, mehr als ein Ger&auml;t anzuschließen, um beispielsweise besseren Empfang zu erhalten. FHEM wird doppelte Nachrichten herausfiltern.
 	Mehr dazu im dem <a href="#global">global</a> Abschnitt unter dem Attribut dupTimeout<br><br>
-
 	Hinweis: Dieses Modul erfordert das Device::SerialPort oder Win32::SerialPort
 	Modul. Es kann derzeit nur &uuml;ber USB angeschlossen werden.
 	</td>
@@ -4708,9 +4687,7 @@ sub SIGNALduino_githubParseHttpResponse($)
 		In diesem Fall ist das Ger&auml;t h&ouml;chstwahrscheinlich <code>/dev/ttyUSB0</code>.<br><br>
 
 		Sie k&ouml;nnen auch eine Baudrate angeben, wenn der Ger&auml;tename das @ enth&auml;lt, Beispiel: <code>/dev/ttyACM0@57600</code><br>Dies ist auch die Standard-Baudrate.<br><br>
-
 		Es wird empfohlen, das Ger&auml;t &uuml;ber einen Namen anzugeben, der sich nicht &auml;ndert. Beispiel via by-id devicename: <code>/dev/serial/by-id/usb-1a86_USB2.0-Serial-if00-port0@57600</code><br>
-
 		Wenn die Baudrate "directio" (Bsp: <code>/dev/ttyACM0@directio</code>), dann benutzt das Perl Modul nicht Device::SerialPort und FHEM &ouml;ffnet das Ger&auml;t mit einem file io. Dies kann funktionieren, wenn das Betriebssystem die Standardwerte f&uuml;r die seriellen Parameter verwendet. Bsp: einige Linux Distributionen und
 		OSX.<br><br>
 		</li>
