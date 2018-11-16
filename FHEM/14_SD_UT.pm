@@ -57,7 +57,8 @@
 # - QUIGG GT-7000 Funk-Steckdosendimmer | transmitter QUIGG_DMV - receiver DMV-7009AS  [Protocol 34]
 #{    https://github.com/RFD-FHEM/RFFHEM/issues/195
 #     nibble 0-2 -> Ident | nibble 3-4 -> Tastencode
-#}    get sduino_dummy raw MU;;P0=-5476;;P1=592;;P2=-665;;P3=1226;;P4=-1309;;D=01232323232323232323232323412323412323414;;CP=3;;R=1;;
+#     get sduino_dummy raw MU;;P0=-5476;;P1=592;;P2=-665;;P3=1226;;P4=-1309;;D=01232323232323232323232323412323412323414;;CP=3;;R=1;;
+#}    Send Adresse FFF funktioniert nicht 100%ig!
 ####################################################################################################################################
 # - Novy_Pureline_6830 kitchen hood [Protocol 86]
 #{    https://github.com/RFD-FHEM/RFFHEM/issues/331
@@ -113,7 +114,7 @@ my %models = (
 	"Buttons_five" =>	{ "011111"	=> "1_fan_low_speed",
 						  "111111" 	=> "2_fan_medium_speed",
 						  "111101" 	=> "3_fan_high_speed",
-						  "101111" 	=> "light_on/off",
+						  "101111" 	=> "light_on_off",
 						  "111110"	=> "fan_off",
 						  Protocol 	=> "P29",
 						  Typ			=> "remote"
@@ -134,9 +135,9 @@ my %models = (
 				  Protocol 	=> "P69",
 				  Typ		=> "remote"
 				},
-	"Novy_Pureline_6830" => { "011101000111"	=> "light_on/off_1",	# need USERTEST!!! one variants, not three
-							  "11010001"		=> "light_on/off_2",	# need USERTEST!!! one variants, not three
-							  "01110111"		=> "light_on/off_3",	# need USERTEST!!! one variants, not three
+	"Novy_Pureline_6830" => { "011101000111"	=> "light_on_off_1",	# need USERTEST!!! one variants, not three
+							  "11010001"		=> "light_on_off_2",	# need USERTEST!!! one variants, not three
+							  "01110111"		=> "light_on_off_3",	# need USERTEST!!! one variants, not three
 							  "0101"			=> "+_button",
 							  "0110"			=> "-_button",
 							  "011101001111" 	=> "power_button",
@@ -167,7 +168,7 @@ my %models = (
 				  "011111"	=> "6_fan_high_speed",
 				  "111011"	=> "fan_direction",
 				  "111101"	=> "fan_off",
-				  "111110"	=> "light_on/off",
+				  "111110"	=> "light_on_off",
 				  "101101"	=> "set",
 				  Protocol	=> "P83",
 				  Typ		=> "remote"
@@ -634,6 +635,7 @@ sub SD_UT_Attr(@) {
 	my $ioDev = InternalVal($name, "LASTInputDev", undef);
 	my $state;
 	my $oldmodel = AttrVal($name, "model", "unknown");
+	my $bitData;
 	
 	############ chance device models ############
 	if ($cmd eq "set" && $attrName eq "model" && $attrValue ne $oldmodel) {
@@ -643,92 +645,64 @@ sub SD_UT_Attr(@) {
 			if ($attrName eq "model" && $attrValue eq "unknown") {
 				readingsSingleUpdate($hash, "state", " Please define your model with attributes! ", 0);
 			}
-			
+
+			foreach my $keys (sort keys %models) {	
+				Log3 $name, 3, "SD_UT_Attr $keys";
+				if($keys eq $attrValue) {
+					$attr{$name}{model}	= $attrValue;				# set new model
+					$bitData = InternalVal($name, "bitMSG", "-");
+					$devicemodel = $keys;
+					$state = "Defined";
+					last;
+				}
+			}
+
 			############ Westinghouse_Delancey RH787T ############
 			if ($attrName eq "model" && $attrValue eq "RH787T") {
-				$attr{$name}{model}	= $attrValue;				# set new model
-				my $bitData = InternalVal($name, "bitMSG", "-");
 				$deviceCode = substr($bitData,1,4);
 				$deviceCode = sprintf("%X", oct( "0b$deviceCode" ) );
-				$devicemodel = "RH787T";
 				$devicename = $devicemodel."_".$deviceCode;
-				$state = "Defined";
 			############ Westinghouse Buttons_five ############
 			} elsif ($attrName eq "model" && $attrValue eq "Buttons_five") {
-				$attr{$name}{model}	= $attrValue;				# set new model
-				my $bitData = InternalVal($name, "bitMSG", "-");
 				$deviceCode = substr($bitData,8,4);
 				$deviceCode = sprintf("%X", oct( "0b$deviceCode" ) );
-				$devicemodel = "Buttons_five";
 				$devicename = $devicemodel."_".$deviceCode;
-				$state = "Defined";
 			############ SA_434_1_mini	############
 			} elsif ($attrName eq "model" && $attrValue eq "SA_434_1_mini") {
-				$attr{$name}{model}	= $attrValue;				# set new model
-				my $bitData = InternalVal($name, "bitMSG", "0");
 				$deviceCode = sprintf("%03X", oct( "0b$bitData" ) );
-				$devicemodel = "SA_434_1_mini";
 				$devicename = $devicemodel."_".$deviceCode;
-				$state = "Defined";
 			############ Unitec_47031	############
 			} elsif ($attrName eq "model" && $attrValue eq "Unitec_47031") {
-				$attr{$name}{model}	= $attrValue;				# set new model
-				my $bitData = InternalVal($name, "bitMSG", "0");
 				$deviceCode = substr($bitData,0,8);		# unklar derzeit! 10Dil auf Bild
 				$deviceCode = sprintf("%02X", oct( "0b$deviceCode" ) );
-				$devicemodel = "Unitec_47031";
 				$devicename = $devicemodel."_".$deviceCode;
-				$state = "Defined";
 			############ QUIGG_DMV ############
 			} elsif ($attrName eq "model" && $attrValue eq "QUIGG_DMV") {
-				$attr{$name}{model}	= $attrValue;				# set new model
-				my $bitData = InternalVal($name, "bitMSG", "0");
 				$deviceCode = substr($bitData,0,12);
 				$deviceCode = sprintf("%X", oct( "0b$deviceCode" ) );
-				$devicemodel = "QUIGG_DMV";
 				$devicename = $devicemodel."_".$deviceCode;
-				$state = "Defined";
 			############ Novy_Pureline_6830 ############
 			} elsif ($attrName eq "model" && $attrValue eq "Novy_Pureline_6830") {
-				$attr{$name}{model}	= $attrValue;				# set new model
-				my $bitData = InternalVal($name, "bitMSG", "0");
 				$deviceCode = substr($bitData,0,8);
 				$deviceCode = sprintf("%X", oct( "0b$deviceCode" ) );
-				$devicemodel = "Novy_Pureline_6830";
 				$devicename = $devicemodel."_".$deviceCode;
-				$state = "Defined";
 			############ CAME_TOP_432EV ############
 			} elsif ($attrName eq "model" && $attrValue eq "CAME_TOP_432EV") {
-				$attr{$name}{model}	= $attrValue;				# set new model
-				my $bitData = InternalVal($name, "bitMSG", "0");
 				$deviceCode = substr($bitData,0,8);
 				$deviceCode = sprintf("%X", oct( "0b$deviceCode" ) );
-				$devicemodel = "CAME_TOP_432EV";
 				$devicename = $devicemodel."_".$deviceCode;
-				$state = "Defined";
 			############ Hoermann HS1-868-BS	############
 			} elsif ($attrName eq "model" && $attrValue eq "HS1_868_BS") {
-				$attr{$name}{model}	= $attrValue;				# set new model
-				my $bitData = InternalVal($name, "bitMSG", "0");
 				$deviceCode = sprintf("%09X", oct( "0b$bitData" ) );
-				$devicemodel = "HS1_868_BS";
 				$devicename = $devicemodel."_".$deviceCode;
-				$state = "Defined";
 			############ Hoermann HSM4	############
 			} elsif ($attrName eq "model" && $attrValue eq "HSM4") {
-				$attr{$name}{model}	= $attrValue;				# set new model
-				my $bitData = InternalVal($name, "bitMSG", "0");
 				$deviceCode = substr(sprintf("%X", oct( "0b$bitData" ) ) , 0 , 7);
-				$devicemodel = "HSM4";
 				$devicename = $devicemodel."_".$deviceCode;
-				$state = "Defined";
 			############ unknown ############
 			} else {
-				$attr{$name}{model}	= $attrValue;				# set new model
-				$devicemodel = "unknown";
 				$devicename = $devicemodel;
 				Log3 $name, 3, "SD_UT_Attr UNDEFINED sensor $attrValue";
-				$state = "Defined";
 			}
 
 			Log3 $name, 3, "SD_UT_Attr UNDEFINED sensor " . $attrValue . " detected, code " . $deviceCode if ($devicemodel ne "unknown");
@@ -851,8 +825,8 @@ sub SD_UT_binaryToNumber {
 		<li>3_fan_high_speed<br>
 		Button HI on the remote</li>
 	</ul>
-	<ul><a name="light_on/off"></a>
-		<li>light_on/off<br>
+	<ul><a name="light_on_off"></a>
+		<li>light_on_off<br>
 		switch light on or off</li>
 	</ul>
 	<ul><a name="fan_off"></a>
@@ -893,8 +867,8 @@ sub SD_UT_binaryToNumber {
 		<li>fan_direction<br>
 		Defining the direction of rotation</li>
 	</ul>
-	<ul><a name="light_on/off"></a>
-		<li>light_on/off<br>
+	<ul><a name="light_on_off"></a>
+		<li>light_on_off<br>
 		switch light on or off</li>
 	</ul>
 	<ul><a name="set"></a>
@@ -1015,8 +989,8 @@ sub SD_UT_binaryToNumber {
 		<li>3_fan_high_speed<br>
 		Taste HI auf der Fernbedienung</li>
 	</ul>
-	<ul><a name="light_on/off"></a>
-		<li>light_on/off<br>
+	<ul><a name="light_on_off"></a>
+		<li>light_on_off<br>
 		Licht ein-/ausschalten</li>
 	</ul>
 	<ul><a name="fan_off"></a>
@@ -1057,8 +1031,8 @@ sub SD_UT_binaryToNumber {
 		<li>fan_direction<br>
 		Drehrichtung festlegen</li>
 	</ul>
-	<ul><a name="light_on/off"></a>
-		<li>light_on/off<br>
+	<ul><a name="light_on_off"></a>
+		<li>light_on_off<br>
 		Licht ein-/ausschalten</li>
 	</ul>
 	<ul><a name="set"></a>
