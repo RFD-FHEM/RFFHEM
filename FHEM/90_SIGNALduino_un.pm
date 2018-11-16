@@ -12,7 +12,9 @@ package main;
 use strict;
 use warnings;
 use POSIX;
-use List::Util qw(any);		# for any function
+use List::Util qw(any);				# for any function
+
+my @bitcountlength = (0,0,0);		# array min|default|max
 
 #####################################
 sub
@@ -223,6 +225,24 @@ SIGNALduino_un_Parse($$)
 		$hash->{bitMSG} =  $bitData;
 	
 		my $bitcount = length($bitData);
+		
+		$bitcountlength[1] = $bitcount if ($bitcountlength[1] == 0);	# to first receive
+		
+		if ($bitcount != $bitcountlength[1]) {							# comparison
+			if ($bitcount gt $bitcountlength[1]) { 
+				$bitcountlength[2] = $bitcount;
+				$bitcountlength[0] = $bitcountlength[1];
+			}
+			
+			if ($bitcount lt $bitcountlength[1]) {
+				$bitcountlength[0] = $bitcount;
+				$bitcountlength[2] = $bitcountlength[1];
+			}
+
+			$bitcountlength[1] = $bitcount;
+			readingsSingleUpdate($hash, "bitCountLength", "$bitcountlength[0] to $bitcountlength[2]" ,0);
+		}
+		
 		my $hexcount = length($rawData);
 		my $bitDataInvert = $bitData;
 		$bitDataInvert =~ tr/01/10/; 			# invert message and check if it is possible to deocde now
@@ -235,7 +255,7 @@ SIGNALduino_un_Parse($$)
 		readingsBulkUpdate($hash, "bitCount", $bitcount);
 		readingsBulkUpdate($hash, "hexMsg", $rawData);
 		readingsBulkUpdate($hash, "hexMsg_invert", $rawDataInvert);
-		readingsBulkUpdate($hash, "hexCount or nibble", $hexcount);
+		readingsBulkUpdate($hash, "hexCount_or_nibble", $hexcount);
 		readingsBulkUpdate($hash, "lastInputDev", $ioname);
 		readingsEndUpdate($hash, 1); 		# Notify is done by Dispatch
 		
@@ -399,7 +419,19 @@ SIGNALduino_un_binflip($)
 	<li><a href="#stateFormat">stateFormat</a></li>
 	<li><a href="#verbose">verbose</a></li>
   </ul>
-  <br>
+  <br><br>
+  <a name="SIGNALduino_un_readings"></a>
+  <b>Generated readings</b>
+  <ul>
+	<li>bitCount (Length of the signal, binary)</li>
+	<li>bitCountLength  (Length range of all received signals of the protocol)</li>
+	<li>bitMsg</li>
+	<li>bitMsg_invert (Message binary, inverted)</li>
+	<li>hexCount_or_nibble (Length of the signal, hexadecimal)</li>
+	<li>hexMsg</li>
+	<li>hexMsg_invert (Message hexadecimal, inverted)</li>
+	<li>lastInputDev (Device at the last reception)</li>
+  </ul>
 </ul>
 
 =end html
@@ -445,7 +477,19 @@ SIGNALduino_un_binflip($)
     <li><a href="#stateFormat">stateFormat</a></li>
 	<li><a href="#verbose">verbose</a></li>
   </ul>
-  <br>
+  <br><br>
+  <a name="SIGNALduino_un_readings"></a>
+  <b>Generierte Readings</b>
+  <ul>
+	<li>bitCount (L&auml;nge des Signals, binär)</li>
+	<li>bitCountLength  (L&auml;ngenbereich aller empfangen Signale des Protokolles)</li>
+	<li>bitMsg</li>
+	<li>bitMsg_invert (Nachricht bin&auml;r, invertiert)</li>
+	<li>hexCount_or_nibble (L&auml;nge des Signals, hexadezimal)</li>
+	<li>hexMsg</li>
+	<li>hexMsg_invert (Nachricht hexadezimal, invertiert)</li>
+	<li>lastInputDev (Device beim letzten Empfang)</li>
+  </ul>
 </ul>
 
 =end html_DE

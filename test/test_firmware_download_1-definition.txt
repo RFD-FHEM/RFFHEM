@@ -1,0 +1,35 @@
+defmod test_firmware_download_1 UnitTest dummyDuino 
+(
+ {
+	my $mock = Mock::Sub->new;
+	Log3 $name , 3, "Test starting";
+ 
+ 	my $HTTP_CALL = $mock->mock("HttpUtils_NonblockingGet");
+	$targetHash->{additionalSets}{flash} = "r1.2.4";
+	
+	subtest 'call without hardware parameter set' => sub {
+		plan tests => 1;
+		$attr{$target}{hardware} = undef;
+		SIGNALduino_Set($targetHash, $target, "flash" ,"r1.2.4");
+		is($HTTP_CALL->called_count, 0, "HttpUtils_NonblockingGet not called");
+	} 
+	
+	subtest 'call with esp hardware parameter set' => sub {
+		plan tests => 2;
+		$attr{$target}{hardware} = "ESP_1M";
+		SIGNALduino_Set($targetHash, $target, "flash" ,"r1.2.4");
+		is($HTTP_CALL->called_count, 1, "HttpUtils_NonblockingGet is called");
+		my @called_args = $HTTP_CALL->called_with;
+		like( $called_args[0]{url}, qr/SIGNALESP/, "Download URL set to SIGNALESP Repo" );
+	} 
+	subtest 'call with nano hardware parameter set' => sub {
+		plan tests => 2;
+		$attr{$target}{hardware} = "nano";
+		SIGNALduino_Set($targetHash, $target, "flash" ,"r1.2.4");
+		is($HTTP_CALL->called_count, 2, "HttpUtils_NonblockingGet is called");
+		my @called_args = $HTTP_CALL->called_with;
+		like( $called_args[0]{url}, qr/SIGNALDuino/, "Download URL set to SIGNALDuino Repo" );
+	} 
+
+ }
+);
