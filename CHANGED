@@ -1,3 +1,5 @@
+17.11.2018
+ 14_SD_BELL.pm - fix error "subroutine &SD_BELL::AttrVal called at ./FHEM/14_SD_BELL.pm line 192."
 16.11.2018
  14_SD_UT.pm - fix "error message" action name | code optimized
 15.11.2018
