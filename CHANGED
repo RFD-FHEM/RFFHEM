@@ -1,4 +1,7 @@
+16.11.2018
+ 14_SD_UT.pm - fix "error message" action name | code optimized
 15.11.2018
+ 14_SD_BELL.pm - new module for bells
  signalduino_protocols.hash - revised P69
  00_SIGNALduino.pm - protocol 69 are development ID's | ID 69 modified preamble - Attention, DOIF no longer functional | added doc
  14_SD_UT.pm - added devices Hoermann HS1-868-BS & HSM4 (develop - user feedback required) | send command QUIGG GT-7000 (develop - user feedback required)
@@ -11,7 +14,6 @@
  00_SIGNALduino.pm - protocol 34 & 86 are development ID's | ID 29 modified preamble
  00_SIGNALduino - Firmware can be downloaded and flashed on demand from gitghub releases
 11.11.2018
- 14_SD_BELL.pm - new module for bells
  14_FLAMINGO.pm - fix Maintainer & fix issue error
 10.11.2018
  signalduino_protocols.hash - ID 13.1 revised & model added for Modul FLAMINGO
