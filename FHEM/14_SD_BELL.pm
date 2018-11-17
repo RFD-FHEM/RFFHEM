@@ -73,6 +73,7 @@ my $missingModul = "";
 BEGIN {
     GP_Import(qw(
 		AssignIoPort
+		AttrVal
 		attr
 		defs
 		Log3
