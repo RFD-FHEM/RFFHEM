@@ -488,14 +488,16 @@ SIGNALduino_Set($@)
     
 	if( grep $args[0] eq $_ , split(",",$my_sets{flash}) )
 	{
-		SIGNALduino_Log3 $hash, 3, "SIGNALduino_Set try to fetch github assets for tag $args[0]";
+		SIGNALduino_Log3 $hash, 3, "SIGNALduino_Set flash $args[0] try to fetch github assets for tag $args[0]";
 
-		my $ghurl = "https://api.github.com/repos/<REPONAME>/releases/tags/$args[0]";
+		my $ghurl = "https://api.github.com/repos/RFD-FHEM/<REPONAME>/releases/tags/$args[0]";
 		if ($hardware =~ /ESP/) {
-			$ghurl =~ s/<REPONAME>/SIGNALESP\/releases/ ;
+			$ghurl =~ s/<REPONAME>/SIGNALESP/ ;
 		} else {
-			$ghurl =~ s/<REPONAME>/SIGNALDuino\/releases/ ; 
+			$ghurl =~ s/<REPONAME>/SIGNALDuino/ ; 
 		}
+		SIGNALduino_Log3 $hash, 3, "SIGNALduino_Set flash $args[0] try to fetch release $ghurl";
+		
 	    my $http_param = {
                     url        => $ghurl,
                     timeout    => 5,
