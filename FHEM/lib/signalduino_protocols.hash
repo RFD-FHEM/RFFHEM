@@ -356,9 +356,9 @@
 			sync			=> [1,-14],
 			clockabs		=> 350,
 			format 			=> 'twostate',	  		
-			preamble		=> 'u14#',				# prepend to converted message	
-			#clientmodule    => '',
-			#modulematch     => '',
+			preamble		=> 'P14#',				# prepend to converted message	
+			clientmodule    => 'SD_BELL',
+			modulematch     => '^P14#.*',
 			length_min      => '12',
 			length_max      => '20',
 		}, 			
@@ -372,12 +372,11 @@
 			sync			=> [1,-45],
 			clockabs		=> 700,
 			format 			=> 'twostate',	  		
-			preamble		=> 'u15#',				# prepend to converted message	
-			#clientmodule    => '',
-			#modulematch     => '',
+			preamble		=> 'P15#',				# prepend to converted message	
+			clientmodule    => 'SD_BELL',
+			modulematch     => '^P15#.*',
 			length_min      => '10',
 			length_max      => '20',
-			#method          => \&SIGNALduino_Cresta	# Call to process this message
 		}, 	
 	"16" => # Rohrmotor24 und andere Funk Rolladen / Markisen Motoren
 			# ! same definition how ID 72 !
@@ -704,9 +703,9 @@
 			#sync           => [1,-49],				# old MS Erkennung
 			clockabs		=> 150,
 			format 			=> 'twostate',	  		
-			preamble		=> 'u32#',				# prepend to converted message	
-			#clientmodule    => '',
-			#modulematch     => '',
+			preamble		=> 'P32#',				# prepend to converted message	
+			clientmodule    => 'SD_BELL',
+			modulematch     => '^P32#.*',
 			length_min      => '24',
 			length_max      => '24',				
     	},
@@ -868,18 +867,18 @@
             # MS;P0=1474;P1=-521;P2=495;P3=-1508;P4=-6996;D=242323232301232323010101230123232301012301230123010123230123230101;CP=2;SP=4;R=51;m=0;
             # MS;P1=-7005;P2=482;P3=-1511;P4=1487;P5=-510;D=212345454523452345234523232345232345232323234523454545234523234545;CP=2;SP=1;R=47;m=2;
 		{
-			name => 'Doorbell',
-			comment => 'Elro (Smartwares) DB200 / unitec',
-			id => '41',
-			zero => [1,-3],
-			one => [3,-1],
-			sync => [1,-14],
-			clockabs => 500, 
-			preamble => 'u41#', # prepend to converted message
-			#clientmodule => '',
-			#modulematch => '',
-			length_min => '32',
-			length_max => '32',
+			name         => 'Doorbell',
+			comment      => 'Elro (Smartwares) DB200 / unitec',
+			id           => '41',
+			zero         => [1,-3],
+			one          => [3,-1],
+			sync         => [1,-14],
+			clockabs     => 500, 
+			preamble     => 'P41#', # prepend to converted message
+			clientmodule => 'SD_BELL',
+			modulematch  => '^P41#.*',
+			length_min   => '32',
+			length_max   => '32',
 		},     
 	#"42" => ## MKT Multi Kon Trade  // Sollte eigentlich als MS ITv1 erkannt werden
 	#	{
@@ -1113,9 +1112,9 @@
 			id          	=> '57',
 			clockrange     	=> [300,360],			# min , max
 			format 			=> 'manchester',	    # tristate can't be migrated from bin into hex!
-			clientmodule    => '',
-			modulematch     => '^u57*',
-			preamble		=> 'u57#',
+			clientmodule    => 'SD_BELL',
+			modulematch     => '^P57#.*',
+			preamble		=> 'P57#',
 			length_min      => '21',
 			length_max      => '24',
 			method          => \&SIGNALduino_MCRAW, # Call to process this message
@@ -1565,19 +1564,19 @@
 			# MU;P0=-10692;P1=602;P2=-608;P3=311;P4=-305;P5=-4666;D=01234123232323234141412 35 341234123232323234141412 35 341234123232323234141412 35 34123412323232323414141235341234123232323234141412353412341232323232341414123534123412323232323414141235341234123232323234141412353412341232323232341414123534123412323232323414;CP=3;R=47;O;
 			# MU;P0=-7152;P1=872;P2=-593;P3=323;P4=-296;P5=622;P6=-4650;D=01234523232323234545452 36 345234523232323234545452 36 345234523232323234545452 36 34523452323232323454545236345234523232323234545452363452345232323232345454523634523452323232323454545236345234523232323234545452363452345232323232345454523634523452323232323454;CP=3;R=26;O;																																																																				 
 		{
-			name		=> 'm-e VTX-BELL',
-			comment	    => 'wireless chime VTX-BELL',
-			id		=> '79',
-			zero		=> [-2,1],
-			one		    => [-1,2],
-			start  		=> [-15,1],
-			clockabs     	=> 330,
-			format 		=> 'twostate',	    # 
-			preamble	=> 'U79#',	# prepend to converted message	
-			#clientmodule    => 'SD_BELL',
-			#modulematch     => '^P79#.*',
-			length_min      => '12',
-			length_max      => '12',
+			name          => 'm-e VTX-BELL',
+			comment       => 'wireless chime VTX-BELL',
+			id            => '79',
+			zero          => [-2,1],
+			one           => [-1,2],
+			start         => [-15,1],
+			clockabs      => 330,
+			format        => 'twostate',	    # 
+			preamble      => 'P79#',	# prepend to converted message	
+			clientmodule  => 'SD_BELL',
+			modulematch   => '^P79#.*',
+			length_min    => '12',
+			length_max    => '12',
 		},
 	"80" => ## EM (Energy-Monitor) Funkprotokoll (868Mhz),  @HomeAutoUser | Derwelcherichbin
 			# MU;P1=-417;P2=385;P3=-815;P4=-12058;D=42121212121212121212121212121212121232321212121212121232321212121212121232323212323212321232121212321212123232121212321212121232323212121212121232121212121212121232323212121212123232321232121212121232123232323212321;CP=2;R=87;
