@@ -78,6 +78,10 @@ BEGIN {
 		defs
 		Log3
 		modules
+		readingsBeginUpdate;
+		readingsBulkUpdate;
+		readingsEndUpdate;
+		readingsSingleUpdate;
     ))
 };
 
