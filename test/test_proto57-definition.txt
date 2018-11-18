@@ -27,7 +27,7 @@ defmod test_proto57 UnitTest dummyDuino (
 
 		is(SIGNALduino_Parse_MC($targetHash, $targetHash, $targetHash->{NAME}, $rmsg,%signal_parts),1 , "check to good MC data dispatched");
 		is( ($SD_Dispatch->called_with)[4], "57", "SIGNALduno_Dispatch check id" );
-		is( ($SD_Dispatch->called_with)[2], "u57#2AA4A7", "SIGNALduno_Dispatch check dmsg" );
+		is( ($SD_Dispatch->called_with)[2], "P57#2AA4A7", "SIGNALduno_Dispatch check dmsg" );
 	};
 
 
