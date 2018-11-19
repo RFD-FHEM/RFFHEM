@@ -4501,7 +4501,7 @@ sub SIGNALduino_githubParseHttpResponse($)
         	</li><br>
         	<a name="cc1101_frequency"></a>
 		<li>cc1101_frequency<br>
-        	Since the PA table values are frequency-dependent, is at 868 MHz a value greater 800 required.
+        	Since the PA table values are frequency-dependent, at 868 MHz a value greater 800 required.
         	</li><br>
 		<a name="debug"></a>
 		<li>debug<br>
@@ -4509,11 +4509,8 @@ sub SIGNALduino_githubParseHttpResponse($)
 		</li><br>
 		<a name="development"></a>
 		<li>development<br>
-		With development you can enable protocol decoding for protocolls witch are still in development and may not be very accurate implemented. 
-		This can result in crashes or throw high amount of log entrys in your logfile, so be careful to use this. <br><br>
-		
+		With development attribute you can enable protocol decoding for protocols which are still in development and may not be very accurate implemented. This can result in crashes or throw high amount of log entries in your logfile, so be careful to use this. <br><br>
 		Protocols flagged with a developID flag are not loaded unless specified to do so.<br>
-	
 		<ul>
 			<li>If the protocoll is developed well, but the logical module is not ready, developId => 'm' is set. You can enable it with the attribute: <br> Specify "m" followed with the protocol id to enable it.</li>
 			<li>If the flag developId => 'p' is set in the protocol defintion then the protocol ID is reserved.</li>
