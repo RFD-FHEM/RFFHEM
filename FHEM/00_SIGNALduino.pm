@@ -4887,7 +4887,7 @@ sub SIGNALduino_githubParseHttpResponse($)
 	</li><br>
 	<a name="cc1101_frequency"></a>
 	<li>cc1101_frequency<br>
-	Frequenzeinstellung des cc1101. | Bsp: 433.920Mhz / 868.350Mhz
+	Frequenzeinstellung des cc1101. | Bsp: 433.920 / 868.350
 	</li><br>
 	<a name="debug"></a>
 	<li>debug<br>
