@@ -4437,17 +4437,19 @@ sub SIGNALduino_githubParseHttpResponse($)
 		</li><br>
 		<a name="ccconf"></a>
         <li>ccconf<br>
-		Only with cc1101 receiver.
 		Read some CUL radio-chip (cc1101) registers (frequency, bandwidth, etc.),
-		and display them in human readable form.
+		and display them in human readable form.<br>
+		Only with cc1101 receiver.
 		</li><br>
         <a name="ccpatable"></a>
 		<li>ccpatable<br>
-		read cc1101 PA table (power amplification for RF sending)
+		read cc1101 PA table (power amplification for RF sending)<br>
+		Only with cc1101 receiver.
 		</li><br>
         <a name="ccreg"></a>
 		<li>ccreg<br>
-		read cc1101 registers (99 reads all cc1101 registers)
+		read cc1101 registers (99 reads all cc1101 registers)<br>
+		Only with cc1101 receiver.
 		</li><br>
         <a name="cmds"></a>
 		<li>cmds<br>
@@ -4829,11 +4831,13 @@ sub SIGNALduino_githubParseHttpResponse($)
    	</li><br>
 	<a name="ccpatable"></a>
 	<li>ccpatable<br>
-   	Liest die cc1101 PA Tabelle aus (power amplification for RF sending).
+   	Liest die cc1101 PA Tabelle aus (power amplification for RF sending).<br>
+	(NUR bei Verwendung eines cc1101 Empf&auml;nger)
    	</li><br>
 	<a name="ccreg"></a>
 	<li>ccreg<br>
-   	Liest das cc1101 Register aus (99 liest alle aus).
+   	Liest das cc1101 Register aus (99 liest alle aus).<br>
+	(NUR bei Verwendung eines cc1101 Empf&auml;nger)
 	</li><br>
 	<a name="cmds"></a>
 	<li>cmds<br>
