@@ -4815,7 +4815,6 @@ sub SIGNALduino_githubParseHttpResponse($)
 	</ul><br>
 	</ul>
 	
-	
 	<a name="SIGNALduinoget"></a>
 	<b>Get</b>
 	<ul>
@@ -4825,12 +4824,12 @@ sub SIGNALduino_githubParseHttpResponse($)
 	</li><br>
 	<a name="ccconf"></a>
 	<li>ccconf<br>
-   Liest s&auml;mtliche radio-chip (cc1101) Register (Frequenz, Bandbreite, etc.) aus und zeigt die aktuelle Konfiguration an.<br>
-   (NUR bei Verwendung eines cc1101 Empf&auml;nger)
+   	Liest s&auml;mtliche radio-chip (cc1101) Register (Frequenz, Bandbreite, etc.) aus und zeigt die aktuelle Konfiguration an.<br>
+	(NUR bei Verwendung eines cc1101 Empf&auml;nger)
    	</li><br>
 	<a name="ccpatable"></a>
 	<li>ccpatable<br>
-   Liest die cc1101 PA Tabelle aus (power amplification for RF sending).
+   	Liest die cc1101 PA Tabelle aus (power amplification for RF sending).
    	</li><br>
 	<a name="ccreg"></a>
 	<li>ccreg<br>
