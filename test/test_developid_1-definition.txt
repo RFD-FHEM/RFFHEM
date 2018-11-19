@@ -13,7 +13,7 @@ defmod test_developid_1 UnitTest dummyDuino (
 	my $mock = Mock::Sub->new;
     my $Log3= $mock->mock("SIGNALduino_Log3");
 		$Log3->side_effect( sub { 
-		Log3 $_[0], $_[1] ,$_[2] if ($_[2] =~ /skiped/ && ( ($use_like == 1 && like($_[2],qr/$regex/,$msg) || ($use_like == 0 && unlike($_[2],qr/$regex/,$msg)) )))
+		Log3 $_[0], $_[1] ,$_[2] if ($_[2] =~ /skipped/ && ( ($use_like == 1 && like($_[2],qr/$regex/,$msg) || ($use_like == 0 && unlike($_[2],qr/$regex/,$msg)) )))
 	} 
 	);
 
