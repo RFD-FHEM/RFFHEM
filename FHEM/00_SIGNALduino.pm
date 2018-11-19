@@ -4651,7 +4651,7 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
 </li><br>
 	<a name="updateChannelFW"></a>
 	<li>updateChannelFW<br>
-		The module can search for new firmware versions (<a href="https://github.com/RFD-FHEM/SIGNALDuino/releases">GitHub</a>). Depending on your choice, only stable versions are displayed or also prereleases are available for flash. The option testing does also provide the stable ones.
+		The module can search for new firmware versions (<a href="https://github.com/RFD-FHEM/SIGNALDuino/releases">SIGNALDuino</a> and <a href="https://github.com/RFD-FHEM/SIGNALESP/releases">SIGNALESP</a>). Depending on your choice, only stable versions are displayed or also prereleases are available for flash. The option testing does also provide the stable ones.
 		<ul>
 			<li>stable: only versions marked as stable are available. These releases are provided very infrequently</li>
 			<li>testing: These versions needs some verifications and are provided in shorter intervals</li>
@@ -4684,7 +4684,7 @@ With a # at the beginnging whitelistIDs can be deactivated.
 	<tr><td>
 	Der <a href="https://wiki.fhem.de/wiki/SIGNALduino">SIGNALduino</a> ist basierend auf einer Idee von "mdorenka" und ver&ouml;ffentlicht im <a href="http://forum.fhem.de/index.php/topic,17196.0.html">FHEM Forum</a>.<br>
 
-	Mit der OpenSource-Firmware (<a href="https://github.com/RFD-FHEM/SIGNALduino">GitHub</a>) ist dieser f&auml;hig zum Empfangen und Senden verschiedener Protokolle auf 433 und 868 Mhz.
+	Mit der OpenSource-Firmware (<a href="https://github.com/RFD-FHEM/SIGNALDuino/releases">SIGNALDuino</a> und <a href="https://github.com/RFD-FHEM/SIGNALESP/releases">SIGNALESP</a>) ist dieser f&auml;hig zum Empfangen und Senden verschiedener Protokolle auf 433 und 868 Mhz.
 	<br><br>
 	
 	Folgende Ger&auml;te werden zur Zeit unterst&uuml;tzt:
