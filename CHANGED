@@ -1,3 +1,5 @@
+20.11.2018
+ 14_SD_BELL.pm - fix error "subroutine subroutine &SD_BELL::InternalVal ..." 
 18.11.2018
  signalduino_protocols.hash - protocoll ID 14,15,32,41,57,79 switch to modul SD_BELL
  !!! Attention, DOIF can not react anymore, a new device from modul SD_BELL will be created !!!

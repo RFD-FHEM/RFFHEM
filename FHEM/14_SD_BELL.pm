@@ -76,12 +76,14 @@ BEGIN {
 		AttrVal
 		attr
 		defs
+		InternalVal
 		Log3
 		modules
-		readingsBeginUpdate;
-		readingsBulkUpdate;
-		readingsEndUpdate;
-		readingsSingleUpdate;
+		readingsBeginUpdate
+		readingsBulkUpdate
+		readingsDelete
+		readingsEndUpdate
+		readingsSingleUpdate
     ))
 };
 
