@@ -736,7 +736,6 @@
 		{   
 			name 			=> 'QUIGG_GT-7000',
 			comment         => 'remote QUIGG DMV-7000',
-			developId       => 'm',
 			id 				=> '34',
 			one             => [-1,2],
 			zero            => [-2,1],
@@ -1346,7 +1345,6 @@
 			start           => [25,-1],    # 12750,510
 			clockabs        => 510,
 			format          => 'twostate',
-			developId       => 'm',
 			clientmodule    => 'SD_UT',
 			modulematch     => '^P69#.{11}',
 			preamble        => 'P69#',
@@ -1724,7 +1722,6 @@
 		name		  => 'CAME \ Novy',
 		comment	      => 'CAME TOP 432EV or Novy Pureline 6830',
 		id            => '86',
-		developId     => 'm',
 		one           => [-2,1],
 		zero          => [-1,2],
 		start         => [-44,1],
