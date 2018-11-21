@@ -76,12 +76,15 @@ BEGIN {
 		AttrVal
 		attr
 		defs
+		IOWrite
+		InternalVal
 		Log3
 		modules
-		readingsBeginUpdate;
-		readingsBulkUpdate;
-		readingsEndUpdate;
-		readingsSingleUpdate;
+		readingsBeginUpdate
+		readingsBulkUpdate
+		readingsDelete
+		readingsEndUpdate
+		readingsSingleUpdate
     ))
 };
 
