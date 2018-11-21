@@ -76,6 +76,7 @@ BEGIN {
 		AttrVal
 		attr
 		defs
+		IOWrite
 		InternalVal
 		Log3
 		modules
