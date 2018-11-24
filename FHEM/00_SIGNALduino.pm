@@ -28,7 +28,7 @@ eval "use Time::HiRes qw(gettimeofday);1" ;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.3.3-dev_12.11.",
+	SDUINO_VERSION            => "v3.3.3-dev_24.11.",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -483,6 +483,9 @@ SIGNALduino_Set($@)
     my $logFile = AttrVal("global", "logdir", "./log/") . "$hash->{TYPE}-Flash.log";
     return "Please define your hardware! (attr $name hardware <model of your receiver>) " if ($hardware eq "");
 	return "ERROR: argument failed! flash [hexFile|url]" if (!$args[0]);
+	
+	
+	
 
     #SIGNALduino_Log3 $hash, 3, "SIGNALduino_Set choosen flash option: $args[0] of available: ".Dumper($my_sets{flash});
     
@@ -536,66 +539,83 @@ SIGNALduino_Set($@)
  
     return "Usage: set $name flash [filename]\n\nor use the hexFile attribute" if($hexFile !~ m/^(\w|\/|.)+$/);
 
-    $log .= "flashing Arduino $name\n";
-    $log .= "hex file: $hexFile\n";
-    $log .= "port: $port\n";
-    $log .= "log file: $logFile\n";
-
-	my $flashCommand;
-    if( !defined( $attr{$name}{flashCommand} ) ) {		# check defined flashCommand from user | not, use standard flashCommand | yes, use user flashCommand
-			SIGNALduino_Log3 $name, 5, "$hash->{TYPE} $name: flashCommand are not defined. standard used to flash.";
-		if ($hardware eq "radinoCC1101") {																	# radinoCC1101 Port not /dev/ttyUSB0 --> /dev/ttyACM0
-			$flashCommand = "avrdude -c avr109 -b [BAUDRATE] -P [PORT] -p atmega32u4 -vv -D -U flash:w:[HEXFILE] 2>[LOGFILE]";
-		} elsif ($hardware ne "ESP_1M" && $hardware ne "ESP32" && $hardware ne "radinoCC1101") {			# nano, nanoCC1101, miniculCC1101, promini
-			$flashCommand = "avrdude -c arduino -b [BAUDRATE] -P [PORT] -p atmega328p -vv -U flash:w:[HEXFILE] 2>[LOGFILE]";
+	# Only for Ardino , not for ESP
+	if ($hardware =~ /(?:nano|mini|radino|)/)
+	{
+		my $avrdudefound=0;
+		my $tool_name = "avrdude"; 
+		for my $path ( split /:/, $ENV{PATH} ) {
+		    if ( -f "$path/$tool_name" && -x _ ) {
+		    	$avrdudefound=1;
+		        last;
+		    }
 		}
-	} else {
-		$flashCommand = $attr{$name}{flashCommand};
-		SIGNALduino_Log3 $name, 3, "$hash->{TYPE} $name: flashCommand are manual defined! $flashCommand";
+	    return "Error: avrdude is not installed. Please provide avrdude tool example: sudo apt-get install avrdude" if(!$avrdudefound);
+
+	    $log .= "flashing Arduino $name\n";
+	    $log .= "hex file: $hexFile\n";
+	    $log .= "port: $port\n";
+	    $log .= "log file: $logFile\n";
+	
+		my $flashCommand;
+	    if( !defined( $attr{$name}{flashCommand} ) ) {		# check defined flashCommand from user | not, use standard flashCommand | yes, use user flashCommand
+				SIGNALduino_Log3 $name, 5, "$hash->{TYPE} $name: flashCommand are not defined. standard used to flash.";
+			if ($hardware eq "radinoCC1101") {																	# radinoCC1101 Port not /dev/ttyUSB0 --> /dev/ttyACM0
+				$flashCommand = "avrdude -c avr109 -b [BAUDRATE] -P [PORT] -p atmega32u4 -vv -D -U flash:w:[HEXFILE] 2>[LOGFILE]";
+			} elsif ($hardware ne "ESP_1M" && $hardware ne "ESP32" && $hardware ne "radinoCC1101") {			# nano, nanoCC1101, miniculCC1101, promini
+				$flashCommand = "avrdude -c arduino -b [BAUDRATE] -P [PORT] -p atmega328p -vv -U flash:w:[HEXFILE] 2>[LOGFILE]";
+			}
+		} else {
+			$flashCommand = $attr{$name}{flashCommand};
+			SIGNALduino_Log3 $name, 3, "$hash->{TYPE} $name: flashCommand are manual defined! $flashCommand";
+		}
+		
+	
+	    if($flashCommand ne "") {
+	      if (-e $logFile) {
+	        unlink $logFile;
+	      }
+	
+	      DevIo_CloseDev($hash);
+	      $hash->{STATE} = "disconnected";
+	      $log .= "$name closed\n";
+	
+	      my $avrdude = $flashCommand;
+	      $avrdude =~ s/\Q[PORT]\E/$port/g;
+	      $avrdude =~ s/\Q[BAUDRATE]\E/$baudrate/g;
+	      $avrdude =~ s/\Q[HEXFILE]\E/$hexFile/g;
+	      $avrdude =~ s/\Q[LOGFILE]\E/$logFile/g;
+	
+	      $log .= "command: $avrdude\n\n";
+	      `$avrdude`;
+	
+	      local $/=undef;
+	      if (-e $logFile) {
+	        open FILE, $logFile;
+	        my $logText = <FILE>;
+	        close FILE;
+	        $log .= "--- AVRDUDE ---------------------------------------------------------------------------------\n";
+	        $log .= $logText;
+	        $log .= "--- AVRDUDE ---------------------------------------------------------------------------------\n\n";
+	      }
+	      else {
+	        $log .= "WARNING: avrdude created no log file\n\n";
+	      }
+	
+	    }
+	    else {
+	      $log .= "\n\nNo flashCommand found. Please define this attribute.\n\n";
+	    }
+	
+	    DevIo_OpenDev($hash, 0, "SIGNALduino_DoInit", 'SIGNALduino_Connect');
+	    $log .= "$name opened\n";
+		
+	    return $log;
+	} else
+	{
+		return "Sorry, Flashing your ESP via Module is currently not supported.";
 	}
 	
-
-    if($flashCommand ne "") {
-      if (-e $logFile) {
-        unlink $logFile;
-      }
-
-      DevIo_CloseDev($hash);
-      $hash->{STATE} = "disconnected";
-      $log .= "$name closed\n";
-
-      my $avrdude = $flashCommand;
-      $avrdude =~ s/\Q[PORT]\E/$port/g;
-      $avrdude =~ s/\Q[BAUDRATE]\E/$baudrate/g;
-      $avrdude =~ s/\Q[HEXFILE]\E/$hexFile/g;
-      $avrdude =~ s/\Q[LOGFILE]\E/$logFile/g;
-
-      $log .= "command: $avrdude\n\n";
-      `$avrdude`;
-
-      local $/=undef;
-      if (-e $logFile) {
-        open FILE, $logFile;
-        my $logText = <FILE>;
-        close FILE;
-        $log .= "--- AVRDUDE ---------------------------------------------------------------------------------\n";
-        $log .= $logText;
-        $log .= "--- AVRDUDE ---------------------------------------------------------------------------------\n\n";
-      }
-      else {
-        $log .= "WARNING: avrdude created no log file\n\n";
-      }
-
-    }
-    else {
-      $log .= "\n\nNo flashCommand found. Please define this attribute.\n\n";
-    }
-
-    DevIo_OpenDev($hash, 0, "SIGNALduino_DoInit", 'SIGNALduino_Connect');
-    $log .= "$name opened\n";
-
-    return $log;
-
   } elsif ($cmd =~ m/reset/i) {
 	delete($hash->{initResetFlag}) if defined($hash->{initResetFlag});
 	return SIGNALduino_ResetDevice($hash);
