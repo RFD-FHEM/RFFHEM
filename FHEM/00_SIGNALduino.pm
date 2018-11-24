@@ -539,9 +539,11 @@ SIGNALduino_Set($@)
  
     return "Usage: set $name flash [filename]\n\nor use the hexFile attribute" if($hexFile !~ m/^(\w|\/|.)+$/);
 
+	SIGNALduino_Log3 $name, 3, "$name: checking $hardware";
 	# Only for Ardino , not for ESP
-	if ($hardware =~ /(?:nano|mini|radino|)/)
+	if ($hardware =~ m/(?:nano|mini|radino)/)
 	{
+		
 		my $avrdudefound=0;
 		my $tool_name = "avrdude"; 
 		for my $path ( split /:/, $ENV{PATH} ) {
@@ -550,7 +552,8 @@ SIGNALduino_Set($@)
 		        last;
 		    }
 		}
-	    return "Error: avrdude is not installed. Please provide avrdude tool example: sudo apt-get install avrdude" if(!$avrdudefound);
+	    SIGNALduino_Log3 $name, 5, "$name: avrdude found = $avrdudefound";
+	    return "avrdude is not installed. Please provide avrdude tool example: sudo apt-get install avrdude" if($avrdudefound == 0);
 
 	    $log .= "flashing Arduino $name\n";
 	    $log .= "hex file: $hexFile\n";
@@ -610,7 +613,7 @@ SIGNALduino_Set($@)
 	    DevIo_OpenDev($hash, 0, "SIGNALduino_DoInit", 'SIGNALduino_Connect');
 	    $log .= "$name opened\n";
 		
-	    return $log;
+	    return undef;
 	} else
 	{
 		return "Sorry, Flashing your ESP via Module is currently not supported.";
@@ -1650,8 +1653,13 @@ sub SIGNALduino_ParseHttpResponse
 			# Den Flash Befehl mit der soebene heruntergeladenen Datei ausfuehren
 			#SIGNALduino_Log3 $name, 3, "calling set ".$param->{command}." $filename";    		# Eintrag fuers Log
 
-			SIGNALduino_Set($hash,$name,$param->{command},$filename); # $hash->{SetFn}
-			
+			my $set_return = SIGNALduino_Set($hash,$name,$param->{command},$filename); # $hash->{SetFn}
+			if (defined($set_return))
+			{
+				SIGNALduino_Log3 $name ,3, "$name: Error while flashing: $set_return";
+			} else {
+				SIGNALduino_Log3 $name ,3, "$name: Firmware update was succesfull";
+			}
     	}
     } else {
     	SIGNALduino_Log3 $name, 3, "$name: undefined error while requesting ".$param->{url}." - $err - code=".$param->{code};    		# Eintrag fuers Log
@@ -4246,11 +4254,14 @@ sub SIGNALduino_githubParseHttpResponse($)
 					$fileinfo{filename} = $asset->{name};
 					$fileinfo{dlurl} = $asset->{browser_download_url};
 					$fileinfo{create_date} = $asset->{created_at};
-					Debug " firmwarefiles = ".Dumper(@fwfiles);
+					#Debug " firmwarefiles = ".Dumper(@fwfiles);
 					push @fwfiles, \%fileinfo;
 					
-					SIGNALduino_Set($hash,$name,"flash",$asset->{browser_download_url}); # $hash->{SetFn
-					
+					my $set_return = SIGNALduino_Set($hash,$name,"flash",$asset->{browser_download_url}); # $hash->{SetFn
+					if(defined($set_return))
+					{
+						SIGNALduino_Log3  $name, 3, "$name: Error while trying to download firmware: $set_return";    	
+					} 
 					last;
 					
 				}
