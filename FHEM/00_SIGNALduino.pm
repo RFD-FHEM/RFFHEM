@@ -234,7 +234,8 @@ SIGNALduino_Initialize($)
 					  ." maxMuMsgRepeat"
 		              ." $readingFnAttributes";
 
-  $hash->{ShutdownFn} = "SIGNALduino_Shutdown";
+  $hash->{ShutdownFn}		= "SIGNALduino_Shutdown";
+  $hash->{FW_detailFn}		= "SIGNALduino_Detail";
   
   $hash->{msIdList} = ();
   $hash->{muIdList} = ();
@@ -536,7 +537,6 @@ SIGNALduino_Set($@)
       $hexFile = $args[0];
     }
 	SIGNALduino_Log3 $name, 3, "$name: filename $hexFile provided, trying to flash";
- 
     return "Usage: set $name flash [filename]\n\nor use the hexFile attribute" if($hexFile !~ m/^(\w|\/|.)+$/);
 
 	SIGNALduino_Log3 $name, 3, "$name: checking $hardware";
@@ -562,7 +562,7 @@ SIGNALduino_Set($@)
 	
 		my $flashCommand;
 	    if( !defined( $attr{$name}{flashCommand} ) ) {		# check defined flashCommand from user | not, use standard flashCommand | yes, use user flashCommand
-				SIGNALduino_Log3 $name, 5, "$hash->{TYPE} $name: flashCommand are not defined. standard used to flash.";
+				SIGNALduino_Log3 $name, 5, "$hash->{TYPE} $name: flashCommand is not defined. standard used to flash.";
 			if ($hardware eq "radinoCC1101") {																	# radinoCC1101 Port not /dev/ttyUSB0 --> /dev/ttyACM0
 				$flashCommand = "avrdude -c avr109 -b [BAUDRATE] -P [PORT] -p atmega32u4 -vv -D -U flash:w:[HEXFILE] 2>[LOGFILE]";
 			} elsif ($hardware ne "ESP_1M" && $hardware ne "ESP32" && $hardware ne "radinoCC1101") {			# nano, nanoCC1101, miniculCC1101, promini
@@ -570,7 +570,7 @@ SIGNALduino_Set($@)
 			}
 		} else {
 			$flashCommand = $attr{$name}{flashCommand};
-			SIGNALduino_Log3 $name, 3, "$hash->{TYPE} $name: flashCommand are manual defined! $flashCommand";
+			SIGNALduino_Log3 $name, 3, "$hash->{TYPE} $name: flashCommand is manual defined! $flashCommand";
 		}
 		
 	
@@ -580,7 +580,7 @@ SIGNALduino_Set($@)
 	      }
 	
 	      DevIo_CloseDev($hash);
-	      $hash->{STATE} = "disconnected";
+	      $hash->{STATE} = "FIRMWARE UPDATE running";
 	      $log .= "$name closed\n";
 	
 	      my $avrdude = $flashCommand;
@@ -2859,6 +2859,28 @@ SIGNALduino_Attr(@)
   	return undef;
 }
 
+sub SIGNALduino_Detail($@) {
+  my ($FW_wname, $name, $room, $pageHash) = @_;
+  
+  
+  my @dspec=devspec2array("DEF=.*fakelog");
+  my $lfn = $dspec[0];
+  my $fn=%defs{$name}->{TYPE}."-Flash.log";
+  
+  if (-s AttrVal("global", "logdir", "./log/") .$fn)
+  { 
+	  my $flashlogurl="$FW_ME/FileLog_logWrapper?dev=$lfn&type=text&file=$fn";
+	  
+	  my $ret  = "<table>";
+	     $ret .= "<tr><td>";
+	     $ret .= "<a href=\"$flashlogurl\">Last Flashlog<\/a>";
+	     $ret .= "</td>";
+	     $ret .= "</table>";
+	  return $ret;
+  }
+}
+
+
 
 sub SIGNALduino_IdList($@)
 {
@@ -4389,9 +4411,11 @@ sub SIGNALduino_githubParseHttpResponse($)
 		<ul>
 			<li>avrdude must be installed on the host<br> On a Raspberry PI this can be done with: sudo apt-get install avrdude</li>
 			<li>the hardware attribute must be set if using any other hardware as an Arduino nano<br> This attribute defines the command, that gets sent to avrdude to flash the uC.</li>
+			<li>If you encounter a problem, look into the logfile</li>
 		</ul>
 		Example:
 		<ul>
+			<li>flash via Version Name: Versions are provided via get availableFirmware</li>
 			<li>flash via hexFile: <code>set sduino flash ./FHEM/firmware/SIGNALduino_mega2560.hex</code></li>
 			<li>flash via url for Nano with CC1101: <code>set sduino flash https://github.com/RFD-FHEM/SIGNALDuino/releases/download/3.3.1-RC7/SIGNALDuino_nanocc1101.hex</code></li>
 		</ul>
@@ -4771,9 +4795,11 @@ sub SIGNALduino_githubParseHttpResponse($)
 		<ul>
 			<li><code>avrdude</code> muss auf dem Host installiert sein. Auf einem Raspberry PI kann dies getan werden mit: <code>sudo apt-get install avrdude</code></li>
 			<li>Das Hardware-Attribut muss festgelegt werden, wenn eine andere Hardware als Arduino Nano verwendet wird. Dieses Attribut definiert den Befehl, der an avrdude gesendet wird, um den uC zu flashen.</li>
+			<li>Bei Problem mit dem Flashen, können im Logfile interessante Informationen zu finden sein.</li>
 		</ul>
 		Beispiele:
 		<ul>
+			<li>flash mittels Versionsnummer: Versionen können mit get availableFirmware abgerufen werden</li>		
 			<li>flash via hexFile: <code>set sduino flash ./FHEM/firmware/SIGNALduino_mega2560.hex</code></li>
 			<li>flash via url f&uuml;r einen Nano mit CC1101: <code>set sduino flash https://github.com/RFD-FHEM/SIGNALDuino/releases/download/3.3.1-RC7/SIGNALDuino_nanocc1101.hex</code></li>
 		</ul>
