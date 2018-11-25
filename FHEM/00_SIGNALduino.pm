@@ -539,8 +539,7 @@ SIGNALduino_Set($@)
 	SIGNALduino_Log3 $name, 3, "$name: filename $hexFile provided, trying to flash";
     return "Usage: set $name flash [filename]\n\nor use the hexFile attribute" if($hexFile !~ m/^(\w|\/|.)+$/);
 
-	SIGNALduino_Log3 $name, 3, "$name: checking $hardware";
-	# Only for Ardino , not for ESP
+	# Only for Arduino , not for ESP
 	if ($hardware =~ m/(?:nano|mini|radino)/)
 	{
 		
