@@ -11,10 +11,10 @@ about: A new device (sensor, switch, ...) should be supported
   - pictures of the device / the board (very helpful)
 
   
-## Specifications Receiver
+## Specifications 
 
   - Microcontroller:
-  - Versionmodul (Firmware):
-( where can I find? devicename -> Internals -> versionmodul )
-  - Version (SIGNALduino):
-( where can I find? devicename -> Internals -> version )
+  - Version (Firmware):
+( can be found here devicename -> Internals -> version )
+  - Versionmodul (FHEM Module):
+( can be found here: devicename -> Internals -> versionmodul )
