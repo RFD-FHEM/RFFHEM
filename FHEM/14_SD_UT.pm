@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 14_SD_UT.pm 32 2016-04-02 14:00:00 v3.2-dev $
+# $Id: 14_SD_UT.pm 32 2018-11-25 12:00:00 v3.3.3-dev_12.11. $HomeAuto_User
 #
 # The file is part of the SIGNALduino project.
 # The purpose of this module is universal support for devices.
@@ -101,9 +101,23 @@
 #     0000 0000 1110 0110 1011 1110 1001 0001 0000 1101 1100 (HSM4 Taste D)
 #}    get sduino_dummy raw MU;;P0=-3656;;P1=12248;;P2=-519;;P3=1008;;P4=506;;P5=-1033;;D=01232323232323232324545453232454532453245454545453245323245323232453232323245453245454532321232323232323232324545453232454532453245454545453245323245323232453232323245453245454532321232323232323232324545453232454532453245454545453245323245323232453232323;;CP=4;;R=48;;O;;
 ####################################################################################################################################
-# - NEFF kitchen hood [Protocol 86]
-#{    https://github.com/RFD-FHEM/RFFHEM/issues/376 | https://forum.fhem.de/index.php?topic=93545.msg862583.msg#862583
-#}
+# - Transmitter SF01 01319004 433,92 MHz (NEFF kitchen hood)
+#{    https://github.com/RFD-FHEM/RFFHEM/issues/376 | https://forum.fhem.de/index.php?topic=93545.0
+#     Sends 18 bits, converting to hex in SIGNALduino.pm adds 2 bits of 0
+#                   iiii iiii iiii ii bbbb aa   hex
+#     ------------------------------------------------							
+#     Plus:         1010 0001 0101 00 1100 00   A15 30
+#     Minus:        1010 0001 0101 00 1010 00   A15 28
+#     Licht:        1010 0001 0101 00 1110 00   A15 38
+#     Nachlüften:   1010 0001 0101 00 1001 00   A15 24			
+#     Intervall:    1010 0001 0101 00 1101 00   A15 34
+#     ------------------------------------------------
+#     i - ident, b - button, a - appended
+#     get sduino_dummy raw MU;;P0=706;;P1=-160;;P2=140;;P3=-335;;P4=-664;;P5=385;;P6=-15226;;P7=248;;D=01210103045303045453030304545453030454530653030453030454530303045454530304747306530304530304545303030454545303045453065303045303045453030304545453030454530653030453030454530303045454530304545306530304530304545303030454545303045453065303045303045453030304;;CP=5;;O;;
+#     get sduino_dummy raw MU;;P0=-15222;;P1=379;;P2=-329;;P3=712;;P6=-661;;D=30123236123236161232323616161232361232301232361232361612323236161612323612323012323612323616123232361616123236123230123236123236161232323616161232361232301232361232361612323236161612323612323012323612323616123232361616123236123230123236123236161232323616;;CP=1;;O;;
+#     get sduino_dummy raw MU;;P0=705;;P1=-140;;P2=-336;;P3=-667;;P4=377;;P5=-15230;;P6=248;;D=01020342020343420202034343420202020345420203420203434202020343434202020203654202034202034342020203434342020202034542020342020343420202034343420202020345420203420203434202020343434202020203454202034202034342020203434342020202034542020342020343420202034343;;CP=4;;O;;
+#     get sduino_dummy raw MU;;P0=704;;P1=-338;;P2=-670;;P3=378;;P4=-15227;;P5=244;;D=01023231010102323231010102310431010231010232310101023232310101025104310102310102323101010232323101010231043101023101023231010102323231010102310431010231010232310101023232310101023104310102310102323101010232323101010231043101023101023231010102323231010102;;CP=3;;O;;
+#}    get sduino_dummy raw MU;;P0=-334;;P1=709;;P2=-152;;P3=-663;;P4=379;;P5=-15226;;P6=250;;D=01210134010134340101013434340101340134540101340101343401010134343401013601365401013401013434010101343434010134013454010134010134340101013434340101340134540101340101343401010134343401013401345401013401013434010101343434010134013454010134010134340101013434;;CP=4;;O;;
 ####################################################################################################################################
 # !!! ToDo´s !!!
 #     - 
@@ -253,7 +267,9 @@ sub SD_UT_Define($$) {
 	### checks Hoermann HS1-868-BS ###
 	return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short | long or not HEX (0-9 | a-f | A-F){9}" if ($a[2] eq "HS1_868_BS" && not $a[3] =~ /^[0-9a-fA-F]{9}/s);
 	### checks Hoermann HSM4 ###
-	return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short | long or not HEX (0-9 | a-f | A-F){7}" if ($a[2] eq "HSM4" && not $a[3] =~ /^[0-9a-fA-F]{7}/s);																													   
+	return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short | long or not HEX (0-9 | a-f | A-F){7}" if ($a[2] eq "HSM4" && not $a[3] =~ /^[0-9a-fA-F]{7}/s);	
+	### checks Neff SF01_01319004 ###
+	return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short | long or not HEX (0-9 | a-f | A-F){4}" if ($a[2] eq "SF01_01319004" && not $a[3] =~ /^[0-9a-fA-F]{4}/s);																													   
 	
 	$hash->{lastMSG} =  "no data";
 	$hash->{bitMSG} =  "no data";
@@ -472,23 +488,26 @@ sub SD_UT_Parse($$) {
 	$devicedef = "Novy_840029 " . $deviceCode  if(!$def && ($protocol == 86 || $protocol == 81));
 	$def = $modules{SD_UT}{defptr}{$devicedef}  if(!$def && ($protocol == 86 || $protocol == 81));
 	### SF01_01319004 [P86] ###
-	$deviceCode = substr($bitData,0,14) . "00" if ($blen >= 14);
-	$deviceCode = sprintf("%X", oct( "0b$deviceCode" ) );
-	Log3 $iohash, 3, "$ioname: SD_UT_Parse UNDEFINED sensor " . $model . " detected, code " . $deviceCode;
-	$devicedef = "SF01_01319004 " . $deviceCode  if(!$def && $protocol == 86);
-	$def = $modules{SD_UT}{defptr}{$devicedef}  if(!$def && $protocol == 86);
+	if ($hlen == 5) {
+		$deviceCode = substr($bitData,0,14) . "00";
+		$deviceCode = sprintf("%X", oct( "0b$deviceCode" ) );
+		$devicedef = "SF01_01319004 " . $deviceCode  if(!$def && $protocol == 86);
+		$def = $modules{SD_UT}{defptr}{$devicedef}  if(!$def && $protocol == 86);
+	}
 	### CAME_TOP_432EV [P86] ###
 	$deviceCode = substr($rawData,0,2);
 	$devicedef = "CAME_TOP_432EV " . $deviceCode  if(!$def && ($protocol == 86 || $protocol == 81));
 	$def = $modules{SD_UT}{defptr}{$devicedef}  if(!$def && ($protocol == 86 || $protocol == 81));
-	### Remote control Hoermann HS1-868-BS [P69] ###
-	$deviceCode = substr($rawData,2,9) if ($hlen >= 11);
-	$devicedef = "HS1_868_BS " . $deviceCode if (!$def && $protocol == 69);
-	$def = $modules{SD_UT}{defptr}{$devicedef} if (!$def && $protocol == 69);
-	### Remote control Hoermann HSM4 [P69] ###
-	$deviceCode = substr($rawData,2,7) if ($hlen >= 11);
-	$devicedef = "HSM4 " . $deviceCode if (!$def && $protocol == 69);
-	$def = $modules{SD_UT}{defptr}{$devicedef} if (!$def && $protocol == 69);
+	if ($hlen == 11) {
+		### Remote control Hoermann HS1-868-BS [P69] ###
+		$deviceCode = substr($rawData,2,9) if ($hlen >= 11);
+		$devicedef = "HS1_868_BS " . $deviceCode if (!$def && $protocol == 69);
+		$def = $modules{SD_UT}{defptr}{$devicedef} if (!$def && $protocol == 69);
+		### Remote control Hoermann HSM4 [P69] ###
+		$deviceCode = substr($rawData,2,7) if ($hlen >= 11);
+		$devicedef = "HSM4 " . $deviceCode if (!$def && $protocol == 69);
+		$def = $modules{SD_UT}{defptr}{$devicedef} if (!$def && $protocol == 69);
+	}
 	### unknown ###
 	$devicedef = "unknown" if(!$def);
 	$def = $modules{SD_UT}{defptr}{$devicedef} if(!$def);
