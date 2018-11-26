@@ -88,7 +88,7 @@
 ####################################################################################################################################
 # - Hoermann HS1-868-BS
 #{    https://github.com/RFD-FHEM/RFFHEM/issues/344 | https://github.com/RFD-FHEM/RFFHEM/issues/149
-#               iiii iiii iiii iiii iiii iiii iiii bbbb
+#                iiii iiii iiii iiii iiii iiii iiii bbbb
 #			0000 0000 1111 0110 0010 1010 1001 1100 0000 0001 1100 (HS1-868-BS)
 #}    get sduino_dummy raw MU;;P0=-578;;P1=1033;;P2=506;;P3=-1110;;P4=13632;;D=0101010232323101040101010101010101023232323102323101010231023102310231010232323101010101010101010232323101040101010101010101023232323102323101010231023102310231010232323101010101010101010232323101040101010101010101023232323102323101010231023102310231010;;CP=2;;R=77;;
 ####################################################################################################################################
@@ -101,9 +101,13 @@
 #     0000 0000 1110 0110 1011 1110 1001 0001 0000 1101 1100 (HSM4 Taste D)
 #}    get sduino_dummy raw MU;;P0=-3656;;P1=12248;;P2=-519;;P3=1008;;P4=506;;P5=-1033;;D=01232323232323232324545453232454532453245454545453245323245323232453232323245453245454532321232323232323232324545453232454532453245454545453245323245323232453232323245453245454532321232323232323232324545453232454532453245454545453245323245323232453232323;;CP=4;;R=48;;O;;
 ####################################################################################################################################
+# - NEFF kitchen hood [Protocol 86]
+#{    https://github.com/RFD-FHEM/RFFHEM/issues/376 | https://forum.fhem.de/index.php?topic=93545.msg862583.msg#862583
+#}
+####################################################################################################################################
 # !!! ToDo´s !!!
 #     - 
-#     - doppelte Logeinträge bei zutreffen von 2 Protokollen?
+#     -
 ####################################################################################################################################
 
 package main;
@@ -148,9 +152,6 @@ my %models = (
                        "0110"        => "speed_minus",
                        "0111010001"  => "light_on_off",	# 0111010000
                        "0111010011"  => "power_on_off",	# 0111010010
-								
-										   
-								   
                        Protocol		 => "P86",
                        Typ			 => "remote"
 					},
@@ -285,7 +286,6 @@ sub SD_UT_Set($$$@) {
 	my $ret = undef;
 	my $msg = undef;
 	my $msgEnd = undef;
-
 	my $value = "";		# value from models cmd
 	my $save = "";		# bits from models cmd
 
@@ -356,7 +356,6 @@ sub SD_UT_Set($$$@) {
 		my $bitData = "00000000";
 		$bitData .= sprintf( "%036b", hex($definition[1])) if ($name ne "unknown");	# argument 1 - adress to binary with 7 digits
 		$msg = $models{$model}{Protocol} . "#" . $bitData . "#R3";										# !!! Anzahl Wiederholungen noch klären !!!
-																	
 	############ Hoermann HSM4 ############
 	} elsif ($model eq "HSM4" && $cmd ne "?") {
 		my @definition = split(" ", $hash->{DEF});									# split adress from def
@@ -375,7 +374,6 @@ sub SD_UT_Set($$$@) {
 			}
 		}
 	} else {
- 
 		if (defined $msgEnd) {
 			### if cmd, set bits ###
 			foreach my $keys (sort keys %{ $models{$model}}) {
@@ -385,7 +383,6 @@ sub SD_UT_Set($$$@) {
 					last if ($value eq $cmd);
 				}
 			}
-
 			$msg .= $save.$msgEnd;
 			Debug " $ioname: SD_UT_Set attr_model=$model msg=$msg cmd=$cmd value=$value (cmd loop)" if($debug);
 		}
@@ -402,9 +399,7 @@ sub SD_UT_Set($$$@) {
 		$hexvalue =~ s/P+//g;									# if P parameter, replace P with nothing
 		$hexvalue = sprintf("%X", oct( "0b$hexvalue" ) );
 		###################
-
 		Log3 $name, 4, "$ioname: $name SD_UT_Set sendMsg $msg, rawData $hexvalue";
-										   
 	}
 	return $ret;
 }
@@ -688,7 +683,6 @@ sub SD_UT_Attr(@) {
 			}
 
 			foreach my $keys (sort keys %models) {	
-									  
 				if($keys eq $attrValue) {
 					$attr{$name}{model}	= $attrValue;				# set new model
 					$bitData = InternalVal($name, "bitMSG", "-");
@@ -817,6 +811,7 @@ sub SD_UT_binaryToNumber {
 	 <ul> - CAME swing gate drive&nbsp;&nbsp;&nbsp;<small>(module model: CAME_TOP_432EV | protocol 86)</small></ul>
 	 <ul> - Hoermann HS1-868-BS&nbsp;&nbsp;&nbsp;<small>(module model: HS1_868_BS | protocol 69)</small></ul>
 	 <ul> - Hoermann HSM4&nbsp;&nbsp;&nbsp;<small>(module model: HSM4 | protocol 69)</small></ul>
+	 <ul> - NEFF kitchen hood&nbsp;&nbsp;&nbsp;<small>(module model: SF01_01319004 | protocol 86)</small></ul>
 	 <ul> - Novy Pureline 6830 kitchen hood&nbsp;&nbsp;&nbsp;<small>(module model: Novy_840029 | protocol 86)</small></ul>
 	 <ul> - QUIGG DMV-7000&nbsp;&nbsp;&nbsp;<small>(module model: QUIGG_DMV | protocol 34)</small></ul>
 	 <ul> - Remote control SA-434-1 mini 923301&nbsp;&nbsp;&nbsp;<small>(module model: SA_434_1_mini | protocol 81)</small></ul>
@@ -979,6 +974,7 @@ sub SD_UT_binaryToNumber {
 	 <ul> - CAME Drehtor Antrieb&nbsp;&nbsp;&nbsp;<small>(Modulmodel: CAME_TOP_432EV | Protokoll 86)</small></ul>
 	 <ul> - Hoermann HS1-868-BS&nbsp;&nbsp;&nbsp;<small>(Modulmodel: HS1_868_BS | Protokoll 69)</small></ul>
 	 <ul> - Hoermann HSM4&nbsp;&nbsp;&nbsp;<small>(Modulmodel: HSM4 | Protokoll 69)</small></ul>
+	 <ul> - NEFF Dunstabzugshaube&nbsp;&nbsp;&nbsp;<small>(Modulmodel: SF01_01319004 | Protokoll 86)</small></ul>
 	 <ul> - Novy Pureline 6830 Dunstabzugshaube&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Novy_840029 | Protokoll 86)</small></ul>
 	 <ul> - QUIGG DMV-7000&nbsp;&nbsp;&nbsp;<small>(Modulmodel: QUIGG_DMV | Protokoll 34)</small></ul>
 	 <ul> - Remote control SA-434-1 mini 923301&nbsp;&nbsp;&nbsp;<small>(Modulmodel: SA_434_1_mini | Protokoll 81)</small></ul>
