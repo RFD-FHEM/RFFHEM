@@ -441,11 +441,12 @@ sub SD_WS_Parse($$)
 		my $checkTemp2 = SD_WS_binaryToNumber($binvalue, 56, 59) ^ 0b1111;
 		my $checkTemp3 = SD_WS_binaryToNumber($binvalue, 60, 63) ^ 0b1111;
 		if ($checkTemp1 != $temp1Dec || $checkTemp2 != $temp2Dec || $checkTemp3 != $temp3Dec)
+		$temp = $temp1Dec.$temp2Dec.".".$temp3Dec;
+		$temp =~ s/^0//;
 		{
 			Log3 $iohash, 4, "$name: SD_WS_Parse BresserTemeo checksum error in Temperature";
 			$checksumOkay = 0;
 		}
-		$temp = sprintf("%.1f", $temp1Dec.$temp2Dec.".".$temp3Dec);
 		if ($temp > 60)
 		{
 			Log3 $iohash, 4, "$name: SD_WS_Parse BresserTemeo Temperature Error. temp=$temp";
