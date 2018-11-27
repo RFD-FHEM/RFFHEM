@@ -745,7 +745,7 @@
 			preamble 		=> 'P34#',
 			clientmodule	=> 'SD_UT',
 			#modulematch 	=> '',
-			length_min 		=> '19',
+			length_min 		=> '20',
 			length_max 		=> '20',
     },
      "35" => # Homeeasy
