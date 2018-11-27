@@ -1,5 +1,8 @@
 27.11.2018
   00_SIGNALduino.pm - Bug in Parse_MU removed
+26.11.2018
+ 14_SD_UT.pm - added new model SF01_01319004 | rename model Novy_Pureline_6830 to Novy_840029 | Novy_840029 buttons rename
+ !!! Attention, model Novy_Pureline_6830 are delete and must be new define after receive (Novy_840029)!!!
 25.11.2018
  00_SIGNALduino.pm - Enhanced logoutput and better troubeleshoot support when flashing firmware via module
 20.11.2018
