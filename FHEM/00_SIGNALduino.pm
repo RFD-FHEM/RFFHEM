@@ -2357,17 +2357,18 @@ sub SIGNALduino_Parse_MU($$$$@)
 					next;
 				}
 				Debug "startStr is: $startStr" if ($debug);
-				
-				if ($message_start = index($rawData, $startStr) > -1) # Support beginning at zero
+				$message_start = index($rawData, $startStr);
+				if ( $message_start == -1) 
 				{
+					Debug "startStr $startStr not found." if ($debug);
+					next;
+				} else {
 					$rawData = substr($rawData, $message_start);
 					$startLogStr = "StartStr: $startStr first found at $message_start";
 					Debug "rawData = $rawData" if ($debug);
 					Debug "startStr $startStr found. Message starts at $message_start" if ($debug);
-				} else {
-					Debug "startStr $startStr not found." if ($debug);
-					next;
-				}
+					SIGNALduino_Log3 $name, 5, "$name: substr: $rawData"; # todo: entfernen
+				} 
 				
 			}
 			
@@ -2864,7 +2865,7 @@ sub SIGNALduino_Detail($@) {
   
   my @dspec=devspec2array("DEF=.*fakelog");
   my $lfn = $dspec[0];
-  my $fn=%defs{$name}->{TYPE}."-Flash.log";
+  my $fn=$defs{$name}->{TYPE}."-Flash.log";
   
   if (-s AttrVal("global", "logdir", "./log/") .$fn)
   { 
