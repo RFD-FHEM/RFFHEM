@@ -2864,7 +2864,7 @@ sub SIGNALduino_Detail($@) {
   
   my @dspec=devspec2array("DEF=.*fakelog");
   my $lfn = $dspec[0];
-  my $fn=%defs{$name}->{TYPE}."-Flash.log";
+  my $fn=$defs{$name}->{TYPE}."-Flash.log";
   
   if (-s AttrVal("global", "logdir", "./log/") .$fn)
   { 
