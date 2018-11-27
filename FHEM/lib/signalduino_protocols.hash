@@ -47,7 +47,7 @@
 #
 ##### notice #### or #### info ############################################################################################################
 # Please use first unused id for new protocols
-# ID´s are currently unused: 42
+# ID´s are currently unused: -
 ###########################################################################################################################################
 # Please provide at least three messages for each new MU/MC/MS protocol and a URL of issue in GitHub or discussion in FHEM Forum
 # https://forum.fhem.de/index.php/topic,58396.975.html | https://github.com/RFD-FHEM/RFFHEM
@@ -194,6 +194,7 @@
 			#clientmodule    => '',
 			#modulematch     => '^u......',
 			length_min      => '24',
+			#length_max      => '36',
 		},
 	"7"    => ## weather sensors like EAS800z
 			  # MS;P1=-3882;P2=504;P3=-957;P4=-1949;D=21232424232323242423232323232323232424232323242423242424242323232324232424;CP=2;SP=1;R=249;m=2;
@@ -879,19 +880,26 @@
 			length_min   => '32',
 			length_max   => '32',
 		},     
-	#"42" => ## MKT Multi Kon Trade  // Sollte eigentlich als MS ITv1 erkannt werden
-	#	{
-	#		name => 'MKT motionsensor',
-	#		id => '42',
-	#		zero => [1,-3],
-	#		one => [3,-1],
-	#		sync => [-28],
-	#		clockabs => 550, 
-	#		preamble => 'u42#', # prepend to converted message
-	#		#clientmodule => '',
-	#		#modulematch => '', 
-	#		length_min => '24',
-	#	},
+	"42" => ## KANGTAI Doorbell (Pollin 94-550405)
+			# https://github.com/RFD-FHEM/RFFHEM/issues/365
+			# MS;P0=1390;P1=-600;P2=409;P3=-1600;P4=-7083;D=240123010101230123232301230123232301232323230123010101230123230101;CP=2;SP=4;R=248;O;m0;
+			# MS;P0=1399;P1=-604;P2=397;P3=-1602;P4=-7090;D=240123010101230123232301230123232301232323230123010101230123230101;CP=2;SP=4;R=248;O;m1;
+			# MS;P1=403;P2=-7102;P3=-1608;P4=1378;P5=-620;D=121313134513454545451313451313134545451345134513454513134513134545;CP=1;SP=2;R=5;O;m0;
+		{
+			name         => 'KANGTAI',
+			comment      => 'KANGTAI Doorbell (Pollin 94-550405)',
+			id           => '42',
+			one	     	 => [1,-4],   # 400,-1600
+			zero	     => [4,-1],   # 1600,-600
+			sync         => [1,-17],  # 400,-7000
+			clockabs     => 400,
+			format       => 'twostate',
+			preamble     => 'P42#',
+			clientmodule => 'SD_Bell',
+			modulematch  => '^P42#.*',
+			length_min   => '32',
+			length_max   => '32',
+		},
 	"43" => ## Somfy RTS
             # MC;LL=-1405;LH=1269;SL=-723;SH=620;D=98DBD153D631BB;C=669;L=56;R=229;
 		{
@@ -1219,7 +1227,10 @@
 			length_max   => '24',		
 		},
 	"63" => ## Warema MU
-		{    #MU;P0=-2988;P1=1762;P2=-1781;P3=-902;P4=871;P5=6762;P6=5012;D=0121342434343434352434313434243521342134343436;
+            # https://forum.fhem.de/index.php/topic,38831.msg395978/topicseen.html#msg395978 | https://www.mikrocontroller.net/topic/264063
+			# MU;P0=-2988;P1=1762;P2=-1781;P3=-902;P4=871;P5=6762;P6=5012;D=0121342434343434352434313434243521342134343436;
+			# MU;P0=6324;P1=-1789;P2=864;P3=-910;P4=1756;D=0123234143212323232323032321234141032323232323232323;CP=2;
+		{
 			name         => 'Warema',
 			comment      => 'developId, is still experimental',
 			id           => '63',
@@ -1462,6 +1473,7 @@
 		},
 	"75" => ## ConradRSL2 @litronics https://github.com/RFD-FHEM/SIGNALDuino/issues/69
             # ! same definition how ID 5, but other length !
+            # !! protocol needed revision - start or sync failed !! https://github.com/RFD-FHEM/SIGNALDuino/issues/69#issuecomment-440349328
 		    # MU;P0=-1365;P1=477;P2=1145;P3=-734;P4=-6332;D=01023202310102323102423102323102323101023232323101010232323231023102323102310102323102423102323102323101023232323101010232323231023102323102310102323102;CP=1;R=12;
 		{
 			name			=> 'ConradRSL2', 
