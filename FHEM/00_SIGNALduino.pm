@@ -2358,7 +2358,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 				}
 				Debug "startStr is: $startStr" if ($debug);
 				
-				if ($message_start = index($rawData, $startStr)) 
+				if ($message_start = index($rawData, $startStr) > -1) # Support beginning at zero
 				{
 					$rawData = substr($rawData, $message_start);
 					$startLogStr = "StartStr: $startStr first found at $message_start";
