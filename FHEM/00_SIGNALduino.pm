@@ -2440,7 +2440,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 				}
 				
 				if ($nrRestart == 1) {
-					SIGNALduino_Log3 $name, 5, "$name: Starting demodulation ($startLogStr" . "regex: $regex Pos $message_start) length_min_max (".$length_min."..".$length_max.") length=".scalar @pairs; 
+					SIGNALduino_Log3 $name, 5, "$name: Starting demodulation ($startLogStr " . "regex: $regex Pos $message_start) length_min_max (".$length_min."..".$length_max.") length=".scalar @pairs; 
 				} else {
 					SIGNALduino_Log3 $name, 5, "$name: $nrRestart. try demodulation$length_str at Pos $-[0]";
 				}
