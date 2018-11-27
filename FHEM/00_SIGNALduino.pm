@@ -4623,44 +4623,45 @@ sub SIGNALduino_githubParseHttpResponse($)
 			<li>promini: Arduino Pro Mini 328 with cheap receiver </li>
 			<li>radinoCC1101: Arduino compatible radino with cc1101 receiver</li>
 		</ul>
-		</li><br>
-		<li>maxMuMsgRepeat<br>
-		MU signals can contain multiple repeats of the same message. The results are all send to a logical module. You can limit the number of scanned repetitions. Defaukt is 4, so after found 4 repeats, the demoduation is aborted. 	
-		<br></li>
-    		<a name="minsecs"></a>
-		<li>minsecs<br>
-    		This is a very special attribute. It is provided to other modules. minsecs should act like a threshold. All logic must be done in the logical module. 
-    		If specified, then supported modules will discard new messages if minsecs isn't past.
-    		</li><br>
-    		<a name="noMsgVerbose"></a>
-    		<li>noMsgVerbose<br>
-    		With this attribute you can control the logging of debug messages from the io device.
-    		If set to 3, this messages are logged if global verbose is set to 3 or higher.
-    		</li><br>
-    		<a name="longids"></a>
-		<li>longids<br>
-        	Comma separated list of device-types for SIGNALduino that should be handled using long IDs. This additional ID allows it to differentiate some weather sensors, if they are sending on the same channel. Therfor a random generated id is added. If you choose to use longids, then you'll have to define a different device after battery change.<br> Default is to not to use long IDs for all devices.<br>
-		Following modules can use this function: 14_Hideki, 41_OREGON, 14_CUL_TCM97001, 14_SD_WS07.<br>
-      		Examples:<PRE>
-		# Do not use any long IDs for any devices (this is default):
-		attr sduino longids 0
-		# Use any long IDs for all devices:
-		attr sduino longids 1
-		# Use longids for SD_WS07 devices.
-		# Will generate devices names like SD_WS07_TH_3.
-		attr sduino longids SD_WS07
-		</PRE></li><br>
-		<a name="rawmsgEvent"></a>
-		<li>rawmsgEvent<br>
-		When set to "1" received raw messages triggers events
-		</li><br>
-		<a name="suppressDeviceRawmsg"></a>
-		<li>suppressDeviceRawmsg<br>
-		When set to 1, the internal "RAWMSG" will not be updated with the received messages
-		</li><br>
-		<a name="updateChannelFW"></a>
-		<li>updateChannelFW<br>
-		The module can search for new firmware versions. Depending on your choice, only stable versions are displayed or also prereleases are available for flash. The option testing does also provide the stable ones.
+	</li><br>
+	<li>maxMuMsgRepeat<br>
+	MU signals can contain multiple repeats of the same message. The results are all send to a logical module. You can limit the number of scanned repetitions. Defaukt is 4, so after found 4 repeats, the demoduation is aborted. 	
+	<br></li>
+    <a name="minsecs"></a>
+	<li>minsecs<br>
+    This is a very special attribute. It is provided to other modules. minsecs should act like a threshold. All logic must be done in the logical module. 
+    If specified, then supported modules will discard new messages if minsecs isn't past.
+    </li><br>
+    <a name="noMsgVerbose"></a>
+    <li>noMsgVerbose<br>
+    With this attribute you can control the logging of debug messages from the io device.
+    If set to 3, this messages are logged if global verbose is set to 3 or higher.
+    </li><br>
+    <a name="longids"></a>
+	<li>longids<br>
+        Comma separated list of device-types for SIGNALduino that should be handled using long IDs. This additional ID allows it to differentiate some weather sensors, if they are sending on the same channel. Therfor a random generated id is added. If you choose to use longids, then you'll have to define a different device after battery change.<br>
+		Default is to not to use long IDs for all devices.
+      <br><br>
+      Examples:<PRE>
+# Do not use any long IDs for any devices:
+attr sduino longids 0
+# Use any long IDs for all devices (this is default):
+attr sduino longids 1
+# Use longids for BTHR918N devices.
+# Will generate devices names like BTHR918N_f3.
+attr sduino longids BTHR918N
+</PRE></li>
+<a name="rawmsgEvent"></a>
+<li>rawmsgEvent<br>
+When set to "1" received raw messages triggers events
+</li><br>
+<a name="suppressDeviceRawmsg"></a>
+<li>suppressDeviceRawmsg<br>
+When set to 1, the internal "RAWMSG" will not be updated with the received messages
+</li><br>
+	<a name="updateChannelFW"></a>
+	<li>updateChannelFW<br>
+		The module can search for new firmware versions (<a href="https://github.com/RFD-FHEM/SIGNALDuino/releases">SIGNALDuino</a> and <a href="https://github.com/RFD-FHEM/SIGNALESP/releases">SIGNALESP</a>). Depending on your choice, only stable versions are displayed or also prereleases are available for flash. The option testing does also provide the stable ones.
 		<ul>
 			<li>stable: only versions marked as stable are available. These releases are provided very infrequently</li>
 			<li>testing: These versions needs some verifications and are provided in shorter intervals</li>
@@ -4690,7 +4691,7 @@ sub SIGNALduino_githubParseHttpResponse($)
 	<tr><td>
 	Der <a href="https://wiki.fhem.de/wiki/SIGNALduino">SIGNALduino</a> ist basierend auf einer Idee von "mdorenka" und ver&ouml;ffentlicht im <a href="http://forum.fhem.de/index.php/topic,17196.0.html">FHEM Forum</a>.<br>
 
-	Mit der OpenSource-Firmware (<a href="https://github.com/RFD-FHEM/SIGNALduino">GitHub</a>) ist dieser f&auml;hig zum Empfangen und Senden verschiedener Protokolle auf 433 und 868 Mhz.
+	Mit der OpenSource-Firmware (<a href="https://github.com/RFD-FHEM/SIGNALDuino/releases">SIGNALDuino</a> und <a href="https://github.com/RFD-FHEM/SIGNALESP/releases">SIGNALESP</a>) ist dieser f&auml;hig zum Empfangen und Senden verschiedener Protokolle auf 433 und 868 Mhz.
 	<br><br>
 	Folgende Ger&auml;te werden zur Zeit unterst&uuml;tzt:
 	<br><br>
@@ -4876,10 +4877,9 @@ sub SIGNALduino_githubParseHttpResponse($)
 	<a name="SIGNALduinoget"></a>
 	<b>Get</b>
 	<ul>
-    	<a name="availableFirmware"></a>
-    	<li>availableFirmware<br>
-	Ruft die verf&uuml;gbaren Firmware-Version von github ab und macht diese im set flash Befehl ausw&auml;hlbar.
-	</li><br>
+    <a name="availableFirmware"></a>
+    <li>availableFirmware<br>
+	Ruft die verf&uuml;gbaren Firmware-Version von github ab und macht diese im <code>set flash</code> Befehl ausw&auml;hlbar.</li><br><br>
 	<a name="ccconf"></a>
 	<li>ccconf<br>
    	Liest s&auml;mtliche radio-chip (cc1101) Register (Frequenz, Bandbreite, etc.) aus und zeigt die aktuelle Konfiguration an.<br>
@@ -5004,7 +5004,7 @@ sub SIGNALduino_githubParseHttpResponse($)
 			<li>promini: Arduino Pro Mini 328 f&uuml;r "Billig"-Empf&auml;nger</li>
 			<li>radinoCC1101: Ein Arduino Kompatibler Radino mit cc1101 receiver</li>
 		</ul><br>
-		Notwendig f&uuml;r den Befehl <code>flash</code>. Hier sollten Sie angeben, welche Hardware Sie mit dem USB-Port verbunden haben. Andernfalls kann es zu Fehlfunktionen des Ger&auml;ts kommen.<br>
+		Notwendig f&uuml;r den Befehl <code>flash</code>. Hier sollten Sie angeben, welche Hardware Sie mit dem usbport verbunden haben. Andernfalls kann es zu Fehlfunktionen des Ger&auml;ts kommen. Wichtig ist auch das Attribut <code>updateChannelFW</code><br>
 	</li><br>
 	<a name="longids"></a>
 	<li>longids<br><br>
@@ -5047,15 +5047,17 @@ sub SIGNALduino_githubParseHttpResponse($)
 	</li><br>
 	<a name="updateChannelFW"></a>
 	<li>updateChannelFW<br>
-		Das Modul sucht nach Verf&uml;gbaren Firmware Vesionen und bietet diesen zum Flashen an. Mit dem Attribut kann festgelegt werden ob nur stabile Versionen angezeigt werden oder auch vorabversionen einer neuen Firmware.<br>
+		Das Modul sucht nach Verf&uuml;gbaren Firmware Versionen (<a href="https://github.com/RFD-FHEM/SIGNALDuino/releases">GitHub</a>) und bietet diese via dem Befehl <code>flash</code> zum Flashen an. Mit dem Attribut kann festgelegt werden, ob nur stabile Versionen ("Latest Release") angezeigt werden oder auch Vorabversionen ("Pre-release") einer neuen Firmware.<br>
 		Die Option testing inkludiert auch die stabilen Versionen.
 		<ul>
 			<li>stable: Als stabil getestete Versionen, erscheint nur sehr selten</li>
 			<li>testing: Neue Versionen, welche noch getestet werden muss</li>
 		</ul>
-		<br>Die Liste der verfügbaren Versionen muss mittels get availableFirmware manuell neu geladen werden.	
+		<br>Die Liste der verf&uuml;gbaren Versionen muss manuell mittels <code>get availableFirmware</code> neu geladen werden.
+		
 	</li><br>
-	Notwendig f&uuml;r den Befehl <code>flash</code>. Hier sollten Sie angeben, welche Hardware Sie mit dem usbport verbunden haben. Andernfalls kann es zu Fehlfunktionen des Ger&auml;ts kommen. <br><br>
+	
+	Notwendig f&uuml;r den Befehl <code>flash</code>. Wichtig ist auch das Attribut <code>hardware</code><br><br>
 	<a name="whitelist_IDs"></a>
 	<li>whitelist_IDs<br>
 	Dieses Attribut erlaubt es, festzulegen, welche Protokolle von diesem Modul aus verwendet werden. Protokolle, die nicht beachtet werden, erzeugen keine Logmeldungen oder Ereignisse. Sie werden dann vollst&auml;ndig ignoriert. Dies erm&ouml;glicht es, die Ressourcennutzung zu reduzieren und bessere Klarheit in den Protokollen zu erzielen. Sie k&ouml;nnen mehrere WhitelistIDs mit einem Komma angeben: 0,3,7,12. Mit einer # am Anfang k&ouml;nnen WhitelistIDs deaktiviert werden. 
