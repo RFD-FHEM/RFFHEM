@@ -2357,17 +2357,18 @@ sub SIGNALduino_Parse_MU($$$$@)
 					next;
 				}
 				Debug "startStr is: $startStr" if ($debug);
-				
-				if ($message_start = index($rawData, $startStr)) 
+				$message_start = index($rawData, $startStr);
+				if ( $message_start == -1) 
 				{
+					Debug "startStr $startStr not found." if ($debug);
+					next;
+				} else {
 					$rawData = substr($rawData, $message_start);
 					$startLogStr = "StartStr: $startStr first found at $message_start";
 					Debug "rawData = $rawData" if ($debug);
 					Debug "startStr $startStr found. Message starts at $message_start" if ($debug);
-				} else {
-					Debug "startStr $startStr not found." if ($debug);
-					next;
-				}
+					SIGNALduino_Log3 $name, 5, "$name: substr: $rawData"; # todo: entfernen
+				} 
 				
 			}
 			
@@ -2440,7 +2441,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 				}
 				
 				if ($nrRestart == 1) {
-					SIGNALduino_Log3 $name, 5, "$name: Starting demodulation ($startLogStr" . "regex: $regex Pos $message_start) length_min_max (".$length_min."..".$length_max.") length=".scalar @pairs; 
+					SIGNALduino_Log3 $name, 5, "$name: Starting demodulation ($startLogStr " . "regex: $regex Pos $message_start) length_min_max (".$length_min."..".$length_max.") length=".scalar @pairs; 
 				} else {
 					SIGNALduino_Log3 $name, 5, "$name: $nrRestart. try demodulation$length_str at Pos $-[0]";
 				}
