@@ -57,7 +57,7 @@ sub UnitTest_Define() {
 
     ### Attributes ###
     if ( $init_done == 1 ) {
-		$attr{$name}{room}	= "UnitTest";
+		$attr{$name}{room}	= "UnitTest" if( not defined( $attr{$name}{room} ) );
     }
 
     return undef;
