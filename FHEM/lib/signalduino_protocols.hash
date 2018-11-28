@@ -54,8 +54,10 @@
 ###########################################################################################################################################
 
 (
-    "0"    => 
-				# MS;P1=-2009;P2=486;P3=-9058;P4=-4037;D=23212121242121212421242421242421212424242424212124212121212121212121212124;CP=2;SP=3;R=67;m=2;
+    "0"    => # various weather sensors
+	          # CUL_TCM97001 Typ - Mebus
+			  # MS;P0=-9298;P1=495;P2=-1980;P3=-4239;D=1012121312131313121313121312121212121212131212131312131212;CP=1;SP=0;R=223;O;m2;
+			  # !!! some RAWMSG are also decode under ID 68 !!!
         {
             name			=> 'weather1',		# Logilink, NC, WS, TCM97001 etc.
 			comment		=> 'Logilink, NC, WS, TCM97001 etc',
@@ -174,7 +176,7 @@
 			zero			=> [1,-3],
 			clockabs     	=> 500,			# -1 = auto
 			format 			=> 'twostate',	# tristate can't be migrated from bin into hex!
-			preamble		=> 'p5#',			# Append to converted message	
+			preamble		=> 'U5#',		# Append to converted message	
 			clientmodule    => 'IT',
 			modulematch     => '^i......',
 			length_min      => '24',
@@ -1482,6 +1484,7 @@
 			zero			=> [1,-3],
 			clockabs		=> 500, 
 			format			=> 'twostate', 
+			developId       => 'y',
 			clientmodule		=> 'SD_RSL',
 			preamble		=> 'P1#',  
 			modulematch		=> '^P1#[A-Fa-f0-9]{8}', 
