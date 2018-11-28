@@ -54,8 +54,10 @@
 ###########################################################################################################################################
 
 (
-    "0"    => 
-				# MS;P1=-2009;P2=486;P3=-9058;P4=-4037;D=23212121242121212421242421242421212424242424212124212121212121212121212124;CP=2;SP=3;R=67;m=2;
+    "0"    => # various weather sensors
+	          # CUL_TCM97001 Typ - Mebus
+			  # MS;P0=-9298;P1=495;P2=-1980;P3=-4239;D=1012121312131313121313121312121212121212131212131312131212;CP=1;SP=0;R=223;O;m2;
+			  # !!! some RAWMSG are also decode under ID 68 !!!
         {
             name			=> 'weather1',		# Logilink, NC, WS, TCM97001 etc.
 			comment		=> 'Logilink, NC, WS, TCM97001 etc',
@@ -164,23 +166,30 @@
 			length_min      => '39',
 			length_max      => '44',		# Don't know maximal lenth of a valid message
 		},
-    "5"    => 	## Similar protocol as intertechno, but without sync
-				# ! same definition how ID 75, but other length !
-				# MU;P0=-404;P1=1319;P2=-1022;P3=546;P4=-7696;D=012121212321232123232321232323212121212121232323212321212121212121232323212321212323212140;CP=3;R=230;
+    "5"    => 	# Unitec, Modellnummer 6899/45108
+				# https://github.com/RFD-FHEM/RFFHEM/pull/389#discussion_r237232347 | https://github.com/RFD-FHEM/RFFHEM/pull/389#discussion_r237245943
+				# MU;P0=-31960;P1=660;P2=401;P3=-1749;P5=276;D=232353232323232323232323232353535353232323535353535353535353535010;CP=5;R=38;
+				# MU;P0=-1757;P1=124;P2=218;P3=282;P5=-31972;P6=644;P7=-9624;D=010201020303030202030303020303030202020202020203030303035670;CP=2;R=32;
+				# MU;P0=-1850;P1=172;P3=-136;P5=468;P6=236;D=010101010101310506010101010101010101010101010101010101010;CP=1;R=30;
+				# A AN:
+				# MU;P0=132;P1=-4680;P2=508;P3=-1775;P4=287;P6=192;D=123434343434343634343436363434343636343434363634343036363434343;CP=4;R=2;
+				# A AUS:
+				# MU;P0=-1692;P1=132;P2=194;P4=355;P5=474;P7=-31892;D=010202040505050505050404040404040404040470;CP=4;R=27; 
         {
-            name			=> 'unitec6899',	
+            name			=> 'unitec',	
+			comment			=> 'model 6899/45108',
 			id          	=> '5',
-			one				=> [3,-1],
-			zero			=> [1,-3],
-			clockabs     	=> 500,			# -1 = auto
-			format 			=> 'twostate',	# tristate can't be migrated from bin into hex!
-			preamble		=> 'p5#',			# Append to converted message	
-			clientmodule    => 'IT',
-			modulematch     => '^i......',
-			length_min      => '24',
-			length_max      => '24',		# Don't know maximal lenth of a valid message
-		},    
-	
+			one				=> [3,-1], # ?
+			zero			=> [1,-3], # ?
+			clockabs     	=> 500,    # ?
+			developId       => 'y',
+			format 			=> 'twostate',
+			preamble		=> 'u5',
+			#clientmodule    => '',
+			#modulematch     => '',
+			length_min      => '24',   # ?
+			length_max      => '24',   # ?
+		},   
 	"6"    => 			## Eurochron Protocol
         {
             name			=> 'weatherID6',	
@@ -1482,6 +1491,7 @@
 			zero			=> [1,-3],
 			clockabs		=> 500, 
 			format			=> 'twostate', 
+			developId       => 'y',
 			clientmodule		=> 'SD_RSL',
 			preamble		=> 'P1#',  
 			modulematch		=> '^P1#[A-Fa-f0-9]{8}', 
@@ -1744,5 +1754,25 @@
 		#modulematch   => '^P86#.*',
 		length_min    => '12',
 		length_max    => '18',
+	},
+	"87" => ## JAROLIFT Funkwandsender TDRC 16W / TDRCT 04W
+            # https://github.com/RFD-FHEM/RFFHEM/issues/380
+			# MS;P1=1524;P2=-413;P3=388;P4=-3970;P5=-815;P6=778;P7=-16024;D=34353535623562626262626235626262353562623535623562626235356235626262623562626262626262626262626262623535626235623535353535626262356262626262626267123232323232323232323232;CP=3;SP=4;R=226;O;m2;
+            # MS;P0=-15967;P1=1530;P2=-450;P3=368;P4=-3977;P5=-835;P6=754;D=34353562623535623562623562356262626235353562623562623562626235353562623562626262626262626262626262623535626235623535353535626262356262626262626260123232323232323232323232;CP=3;SP=4;R=229;O;
+	{
+        name			=> 'JAROLIFT',
+		comment	        => 'remote TDRC 16W / TDRCT 04W',
+		id          	=> '87',
+		one				=> [1,-2],
+		zero			=> [2,-1],
+		sync			=> [1,-10],				# this is a end marker, but we use this as a start marker
+		clockabs		=> 400,                 # ca 400us
+		developId       => 'y',
+		format 			=> 'twostate',	  		
+		preamble		=> 'u87#',				# prepend to converted message	
+		#clientmodule    => '',
+		#modulematch     => '',
+		length_min      => '72',
+		length_max      => '85',
 	},
 );
