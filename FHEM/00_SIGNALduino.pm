@@ -4768,8 +4768,8 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
 		</ul>
 		</li><br>
 		<a name="close"></a>
-		<li>close<br></li>
-		Beendet die Verbindung zum Ger&auml;t.<br><br>
+		<li>close<br>
+		Beendet die Verbindung zum Ger&auml;t.</li><br>
 		<a name="enableMessagetype"></a>
 		<li>enableMessagetype<br>
 			Erm&ouml;glicht die Aktivierung der Nachrichtenverarbeitung f&uuml;r
@@ -4829,7 +4829,7 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
 		</ul>
 		</li><br>
 	<a name="raw"></a>
-	<li>raw<br></li>
+	<li>raw<br>
 	Geben Sie einen SIGNALduino-Firmware-Befehl aus, ohne auf die vom SIGNALduino zur&uuml;ckgegebenen Daten zu warten. Ausf&uuml;hrliche Informationen zu SIGNALduino-Befehlen finden Sie im SIGNALduino-Firmware-Code. Mit dieser Linie k&ouml;nnen Sie fast jedes Signal &uuml;ber einen angeschlossenen Sender senden.<br>
 	Um einige Rohdaten zu senden, schauen Sie sich diese Beispiele an: P#binarydata#R#C (#C is optional)
 			<ul>
@@ -4850,12 +4850,12 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
             <li>CSmuthresh=[Wert] -> Schwellwert fuer den split von MU Nachrichten (0=aus)</li>
             <li>CSmcmbl=[Wert] -> minbitlen fuer MC-Nachrichten</li>
             <li>CSfifolimit=[Wert] -> Schwellwert fuer debug Ausgabe der Pulsanzahl im FIFO Puffer</li>
-         </ul><br>
+         </ul><br></li>
 	<a name="reset"></a>
-	<li>reset<br></li>
-	&Ouml;ffnet die Verbindung zum Ger&auml;t neu und initialisiert es. <br><br>
+	<li>reset<br>
+	&Ouml;ffnet die Verbindung zum Ger&auml;t neu und initialisiert es.</li><br>
 	<a name="sendMsg"></a>
-	<li>sendMsg</li>
+	<li>sendMsg<br>
 	Dieser Befehl erstellt die erforderlichen Anweisungen zum Senden von Rohdaten &uuml;ber den SIGNALduino. Sie k&ouml;nnen die Signaldaten wie Protokoll und die Bits angeben, die Sie senden m&ouml;chten.<br>
 	Alternativ ist es auch moeglich, die zu sendenden Daten in hexadezimaler Form zu uebergeben. Dazu muss ein 0x vor den Datenteil geschrieben werden.
 	<br><br>
@@ -4873,7 +4873,7 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
 		<br>SR;R=4;P0=-8360;P1=220;P2=-440;P3=-220;P4=440;D=01212121213421212121212134;
 		</p></li></ul>
 	</ul><br>
-	</ul>
+	</ul></li>
 	
 	<a name="SIGNALduinoget"></a>
 	<b>Get</b>
