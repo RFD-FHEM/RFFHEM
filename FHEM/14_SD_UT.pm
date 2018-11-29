@@ -382,40 +382,42 @@ sub SD_UT_Set($$$@) {
 
 	Debug " $ioname: SD_UT_Set attr_model=$model msg=$msg msgEnd=$msgEnd" if($debug && defined $msgEnd);
 	
-	if ($cmd eq "?") {
-		### create setlist ###
-		foreach my $keys (sort keys %{ $models{$model}}) {	
-			if ( $keys =~ /^[0-1]{1,}/s ) {
-				$ret.= $models{$model}{$keys}.":noArg ";
-			}
-		}
-	} else {
-		if (defined $msgEnd) {
-			### if cmd, set bits ###
-			foreach my $keys (sort keys %{ $models{$model}}) {
+	if ($name ne "unknown_please_select_model") {
+		if ($cmd eq "?") {
+			### create setlist ###
+			foreach my $keys (sort keys %{ $models{$model}}) {	
 				if ( $keys =~ /^[0-1]{1,}/s ) {
-					$save = $keys;
-					$value = $models{$model}{$keys};
-					last if ($value eq $cmd);
+					$ret.= $models{$model}{$keys}.":noArg ";
 				}
 			}
-			$msg .= $save.$msgEnd;
-			Debug " $ioname: SD_UT_Set attr_model=$model msg=$msg cmd=$cmd value=$value (cmd loop)" if($debug);
-		}
+		} else {
+			if (defined $msgEnd) {
+				### if cmd, set bits ###
+				foreach my $keys (sort keys %{ $models{$model}}) {
+					if ( $keys =~ /^[0-1]{1,}/s ) {
+						$save = $keys;
+						$value = $models{$model}{$keys};
+						last if ($value eq $cmd);
+					}
+				}
+				$msg .= $save.$msgEnd;
+				Debug " $ioname: SD_UT_Set attr_model=$model msg=$msg cmd=$cmd value=$value (cmd loop)" if($debug);
+			}
 	
-		readingsSingleUpdate($hash, "LastAction", "send", 0) if ($models{$model}{Typ} eq "remote");
-		readingsSingleUpdate($hash, "state" , $cmd, 1);
+			readingsSingleUpdate($hash, "LastAction", "send", 0) if ($models{$model}{Typ} eq "remote");
+			readingsSingleUpdate($hash, "state" , $cmd, 1);
 		
-		IOWrite($hash, 'sendMsg', $msg);
-		Log3 $name, 3, "$ioname: $name set $cmd";
+			IOWrite($hash, 'sendMsg', $msg);
+			Log3 $name, 3, "$ioname: $name set $cmd";
 		
-		## for hex output ##
-		my @split = split("#", $msg);
-		my $hexvalue = $split[1];
-		$hexvalue =~ s/P+//g;									# if P parameter, replace P with nothing
-		$hexvalue = sprintf("%X", oct( "0b$hexvalue" ) );
-		###################
-		Log3 $name, 4, "$ioname: $name SD_UT_Set sendMsg $msg, rawData $hexvalue";
+			## for hex output ##
+			my @split = split("#", $msg);
+			my $hexvalue = $split[1];
+			$hexvalue =~ s/P+//g;									# if P parameter, replace P with nothing
+			$hexvalue = sprintf("%X", oct( "0b$hexvalue" ) );
+			###################
+			Log3 $name, 4, "$ioname: $name SD_UT_Set sendMsg $msg, rawData $hexvalue";
+		}
 	}
 	return $ret;
 }
