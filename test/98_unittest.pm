@@ -275,6 +275,7 @@ sub UnitTest_mock_log3
 =item summary_DE Hilfsmodul was es ermöglicht unit test auszuführen
 
 =begin html
+
  <a name="UnitTest"></a>
  <h3>UnitTest</h3><br>
   
@@ -317,14 +318,14 @@ sub UnitTest_mock_log3
 			developId		=> 'm',
 	 },<br>
   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SIGNALduino_IdList("x:$target","","","m9999");<br>
-  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;is($Log3->called_count-$ref_called_count,$ref_called_count+1,"SIGNALduino_Log3 output increased");<br>
-  &nbsp;&nbsp;&nbsp;&nbsp;}<br>
-  &nbsp;&nbsp;);
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;is($Log3->called_count-$ref_called_count,$ref_called_count+1,"SIGNALduino_Log3 output increased");})
   </ul><br>
   <a href="https://github.com/RFD-FHEM/RFFHEM/blob/dev-r33/test/install.md">Other instructions can be found here.</a>
 =end html
 
+
 =begin html_DE
+
  <a name="UnitTest"></a>
  <h3>UnitTest</h3><br>
   
@@ -367,9 +368,7 @@ sub UnitTest_mock_log3
 			developId		=> 'm',
 	 },<br>
   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SIGNALduino_IdList("x:$target","","","m9999");<br>
-  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;is($Log3->called_count-$ref_called_count,$ref_called_count+1,"SIGNALduino_Log3 output increased");<br>
-  &nbsp;&nbsp;&nbsp;&nbsp;}<br>
-  &nbsp;&nbsp;);
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;is($Log3->called_count-$ref_called_count,$ref_called_count+1,"SIGNALduino_Log3 output increased");})
   </ul><br>
   <a href="https://github.com/RFD-FHEM/RFFHEM/blob/dev-r33/test/install.md">Eine weitere Anleitung finden Sie hier.</a>
 =end html_DE
