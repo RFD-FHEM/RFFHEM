@@ -761,7 +761,7 @@ sub SD_UT_Attr(@) {
 				$devicename = $devicemodel."_".$deviceCode;
 			############ unknown ############
 			} else {
-				$devicename = $devicemodel;
+				$devicename = "unknown_please_select_model";
 				Log3 $name, 3, "SD_UT_Attr UNDEFINED sensor $attrValue";
 			}
 
@@ -774,16 +774,22 @@ sub SD_UT_Attr(@) {
 			
 			my $search = "FileLog_$devicename";
 			
-			fhem("define unknown_please_select_model SD_UT unknown_please_select_model") if ($devicename eq "unknown");		# if user push attr return to unknown
-			fhem("define $devicename SD_UT $devicemodel $deviceCode") if ($devicename ne "unknown");						# create new device
-			fhem("attr $devicename model $attrValue") if ($devicename ne "unknown");										# set model
-			fhem("attr $devicename room SD_UT") if ($devicename ne "unknown");												# set room
+			CommandDefine( undef, "unknown_please_select_model SD_UT unknown" ) if ($devicename eq "unknown_please_select_model");		# if user push attr return to unknown
+			#fhem("define unknown_please_select_model SD_UT unknown") if ($devicename eq "unknown");
+			CommandDefine( undef, "$devicename SD_UT $devicemodel $deviceCode" ) if ($devicename ne "unknown_please_select_model");		# create new device
+			#fhem("define $devicename SD_UT $devicemodel $deviceCode") if ($devicename ne "unknown");
+			CommandAttr(undef, "$devicename model $attrValue") if ($devicename ne "unknown_please_select_model");						# set model
+			#fhem("attr $devicename model $attrValue") if ($devicename ne "unknown");
+			CommandAttr(undef, "$devicename room SD_UT") if ($devicename ne "unknown_please_select_model");								# set room
+			#fhem("attr $devicename room SD_UT") if ($devicename ne "unknown");
 			
 			if (!defined($defs{$search})) {
-				fhem("define FileLog_$devicename FileLog ./log/$devicename-%Y-%m.log $devicename") if ($devicename);		# Filelog
+				CommandDefine( undef, "FileLog_$devicename FileLog ./log/$devicename-%Y-%m.log $devicename" ) if ($devicename);		# Filelog
+				#fhem("define FileLog_$devicename FileLog ./log/$devicename-%Y-%m.log $devicename") if ($devicename);
 			}			
 			
-			fhem("attr FileLog_$devicename room SD_UT") if ($devicename);						# set room
+			CommandAttr(undef, "FileLog_$devicename room SD_UT") if ($devicename);		# set room
+			#fhem("attr FileLog_$devicename room SD_UT") if ($devicename);
 
 		} else {
 			$attr{$name}{model}	= "unknown";
