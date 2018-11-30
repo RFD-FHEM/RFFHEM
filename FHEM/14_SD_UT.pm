@@ -306,6 +306,7 @@ sub SD_UT_Set($$$@) {
 	my $save = "";		# bits from models cmd
 
 	Debug " $ioname: SD_UT_Set attr_model=$model name=$name (before check)" if($debug && $cmd ne "?");
+	return $ret if ($defs{$name}->{DEF} eq "unknown");		# no setlist
 	
 	############ Westinghouse_Delancey RH787T ############
 	if ($model eq "RH787T" && $cmd ne "?") {
@@ -382,42 +383,40 @@ sub SD_UT_Set($$$@) {
 
 	Debug " $ioname: SD_UT_Set attr_model=$model msg=$msg msgEnd=$msgEnd" if($debug && defined $msgEnd);
 	
-	if ($name ne "unknown_please_select_model") {
-		if ($cmd eq "?") {
-			### create setlist ###
-			foreach my $keys (sort keys %{ $models{$model}}) {	
-				if ( $keys =~ /^[0-1]{1,}/s ) {
-					$ret.= $models{$model}{$keys}.":noArg ";
-				}
+	if ($cmd eq "?") {
+		### create setlist ###
+		foreach my $keys (sort keys %{ $models{$model}}) {	
+			if ( $keys =~ /^[0-1]{1,}/s ) {
+				$ret.= $models{$model}{$keys}.":noArg ";
 			}
-		} else {
-			if (defined $msgEnd) {
-				### if cmd, set bits ###
-				foreach my $keys (sort keys %{ $models{$model}}) {
-					if ( $keys =~ /^[0-1]{1,}/s ) {
-						$save = $keys;
-						$value = $models{$model}{$keys};
-						last if ($value eq $cmd);
-					}
-				}
-				$msg .= $save.$msgEnd;
-				Debug " $ioname: SD_UT_Set attr_model=$model msg=$msg cmd=$cmd value=$value (cmd loop)" if($debug);
-			}
-	
-			readingsSingleUpdate($hash, "LastAction", "send", 0) if ($models{$model}{Typ} eq "remote");
-			readingsSingleUpdate($hash, "state" , $cmd, 1);
-		
-			IOWrite($hash, 'sendMsg', $msg);
-			Log3 $name, 3, "$ioname: $name set $cmd";
-		
-			## for hex output ##
-			my @split = split("#", $msg);
-			my $hexvalue = $split[1];
-			$hexvalue =~ s/P+//g;									# if P parameter, replace P with nothing
-			$hexvalue = sprintf("%X", oct( "0b$hexvalue" ) );
-			###################
-			Log3 $name, 4, "$ioname: $name SD_UT_Set sendMsg $msg, rawData $hexvalue";
 		}
+	} else {
+		if (defined $msgEnd) {
+			### if cmd, set bits ###
+			foreach my $keys (sort keys %{ $models{$model}}) {
+				if ( $keys =~ /^[0-1]{1,}/s ) {
+					$save = $keys;
+					$value = $models{$model}{$keys};
+					last if ($value eq $cmd);
+				}
+			}
+			$msg .= $save.$msgEnd;
+			Debug " $ioname: SD_UT_Set attr_model=$model msg=$msg cmd=$cmd value=$value (cmd loop)" if($debug);
+		}
+	
+		readingsSingleUpdate($hash, "LastAction", "send", 0) if ($models{$model}{Typ} eq "remote");
+		readingsSingleUpdate($hash, "state" , $cmd, 1);
+		
+		IOWrite($hash, 'sendMsg', $msg);
+		Log3 $name, 3, "$ioname: $name set $cmd";
+		
+		## for hex output ##
+		my @split = split("#", $msg);
+		my $hexvalue = $split[1];
+		$hexvalue =~ s/P+//g;									# if P parameter, replace P with nothing
+		$hexvalue = sprintf("%X", oct( "0b$hexvalue" ) );
+		###################
+		Log3 $name, 4, "$ioname: $name SD_UT_Set sendMsg $msg, rawData $hexvalue";
 	}
 	return $ret;
 }
@@ -775,9 +774,10 @@ sub SD_UT_Attr(@) {
 			
 			my $search = "FileLog_$devicename";
 			
-			fhem("define $devicename SD_UT $devicemodel $deviceCode") if ($devicename);			# create new device
-			fhem("attr $devicename model $attrValue") if ($devicename);							# set model
-			fhem("attr $devicename room SD_UT") if ($devicename);								# set room
+			fhem("define unknown_please_select_model SD_UT unknown_please_select_model") if ($devicename eq "unknown");		# if user push attr return to unknown
+			fhem("define $devicename SD_UT $devicemodel $deviceCode") if ($devicename ne "unknown");						# create new device
+			fhem("attr $devicename model $attrValue") if ($devicename ne "unknown");										# set model
+			fhem("attr $devicename room SD_UT") if ($devicename ne "unknown");												# set room
 			
 			if (!defined($defs{$search})) {
 				fhem("define FileLog_$devicename FileLog ./log/$devicename-%Y-%m.log $devicename") if ($devicename);		# Filelog
@@ -802,6 +802,7 @@ sub SD_UT_Attr(@) {
 		delete $hash->{READINGS}{"unknownMSG"} if($hash->{READINGS});
 	}
 	
+	return "Note: Your unknown_please_select_model device are deleted with the next receive.\nPlease use your new defined model device and do not forget to push -Save config-" if ($defs{$name}->{DEF} eq "unknown" && $oldmodel eq "unknown" );
 	return undef;
 }
 
@@ -989,7 +990,7 @@ sub SD_UT_binaryToNumber {
 <ul>Das Modul SD_UT ist ein Universalmodul vom SIGNALduino f&uuml;r Ger&auml;te oder Sensoren.<br>
 	Nach dem ersten anlegen des Ger&auml;tes <code><b>unknown_please_select_model</b></code> muss der User das Ger&auml;t selber definieren via dem Attribut <code>model</code>.<br>
 	Bei noch nicht unterst&uuml;tzen Ger&auml;ten k&ouml;nnen mit dem <code><b>unknown_please_select_model</b></code> Ger&auml;t Bitdaten gesammelt werden.<br><br>
-	<i><u><b>Hinweis:</b></u></i> Sobald das Attribut model eines definieren Ger&auml;tes verstellt oder gelöscht wird, so legt das Modul ein Ger&auml;t des gew&auml;hlten Typs neu an und mit Durchlauf einer neuen Nachricht wird das aktuelle Ger&auml;t gel&ouml;scht. 
+	<i><u><b>Hinweis:</b></u></i> Sobald das Attribut model eines definieren Ger&auml;tes verstellt oder gel&ouml;scht wird, so legt das Modul ein Ger&auml;t des gew&auml;hlten Typs neu an und mit Durchlauf einer neuen Nachricht wird das aktuelle Ger&auml;t gel&ouml;scht. 
 	Das betreiben von Ger&auml;ten des <u>gleichen oder unterschiedliches Typs mit gleichem <code>deviceCode</code> f&uuml;hrt zu Fehlern</u>. BITTE achte stets auf einen unterschiedlichen <code>deviceCode</code>.<br><br>
 	 <u>Es werden bisher folgende Ger&auml;te unterst&uuml;tzt:</u><br>
 	 <ul> - CAME Drehtor Antrieb&nbsp;&nbsp;&nbsp;<small>(Modulmodel: CAME_TOP_432EV | Protokoll 86)</small></ul>
