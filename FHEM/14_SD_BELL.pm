@@ -16,6 +16,9 @@
 # - Elro (Smartwares) Doorbell DB200 / 16 melodies - unitec Modell:98156+98YK [Protocol 41] length 32 (8)
 #     get sduino_dummy raw MS;;P0=-526;;P1=1450;;P2=467;;P3=-6949;;P4=-1519;;D=231010101010242424242424102424101010102410241024101024241024241010;;CP=2;;SP=3;;O;;
 ####################################################################################################################################
+# - KANGTAI Doorbell (Pollin 94-550405) [Protocol 42]
+#     get sduino_dummy raw MS;;P0=1399;;P1=-604;;P2=397;;P3=-1602;;P4=-7090;;D=240123010101230123232301230123232301232323230123010101230123230101;;CP=2;;SP=4;;R=248;;O;;m1;;
+####################################################################################################################################
 # - m-e doorbell fuer FG- und Basic-Serie  [Protocol 57] length 21-24 (6)
 #     get sduino_dummy raw MC;;LL=-653;;LH=665;;SL=-317;;SH=348;;D=D55B58;;C=330;;L=21;;
 ####################################################################################################################################
@@ -40,13 +43,14 @@ my %models = (
     "15"  => 'TCM_234759',
 	"32"  => 'FreeTec_PE-6946',
 	"41"  => 'Elro_DB200_/_unitec',
+	"42"  => 'KANGTAI',
 	"57"  => 'FG_/_Basic-Serie',
 	"79"  => 'VTX_BELL',
 );
 
 sub SD_BELL_Initialize($) {
 	my ($hash) = @_;
-	$hash->{Match}		= "^P(?:14|15|32|41|57|79)#.*";
+	$hash->{Match}		= "^P(?:14|15|32|41|42|57|79)#.*";
 	$hash->{DefFn}		= "SD_BELL::Define";
 	$hash->{UndefFn}	= "SD_BELL::Undef";
 	$hash->{ParseFn}	= "SD_BELL::Parse";
@@ -76,12 +80,15 @@ BEGIN {
 		AttrVal
 		attr
 		defs
+		IOWrite
+		InternalVal
 		Log3
 		modules
-		readingsBeginUpdate;
-		readingsBulkUpdate;
-		readingsEndUpdate;
-		readingsSingleUpdate;
+		readingsBeginUpdate
+		readingsBulkUpdate
+		readingsDelete
+		readingsEndUpdate
+		readingsSingleUpdate
     ))
 };
 
@@ -93,7 +100,7 @@ sub Define($$) {
 
 	# Argument					    0	   1		2		    3				4
 	return "wrong syntax: define <name> SD_BELL <Protocol> <HEX-Value> <optional IODEV>" if(int(@a) < 3 || int(@a) > 5);
-	return "wrong <protocol> $a[2]" if not($a[2] =~ /^(?:14|15|32|41|57|79)/s);
+	return "wrong <protocol> $a[2]" if not($a[2] =~ /^(?:14|15|32|41|42|57|79)/s);
 	### checks ###
 	return "wrong HEX-Value! Protocol $a[2] HEX-Value to short | long or not HEX (0-9 | a-f | A-F){3,8}" if (not $a[3] =~ /^[0-9a-fA-F]{3,8}/s);
 

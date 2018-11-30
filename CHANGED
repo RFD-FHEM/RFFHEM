@@ -1,3 +1,15 @@
+27.11.2018
+  00_SIGNALduino.pm - Bug in Parse_MU removed
+ 14_SD_BELL.pm - new model KANGTAI Doorbell (Pollin 94-550405)
+ 00_SIGNALduino.pm - added ID 42 on matchListSIGNALduino
+ signalduino_protocols.hash - added ID 42 for KANGTAI Doorbell (Pollin 94-550405) | added doc
+26.11.2018
+ 14_SD_UT.pm - added new model SF01_01319004 | rename model Novy_Pureline_6830 to Novy_840029 | Novy_840029 buttons rename
+ !!! Attention, model Novy_Pureline_6830 are delete and must be new define after receive (Novy_840029)!!!
+25.11.2018
+ 00_SIGNALduino.pm - Enhanced logoutput and better troubeleshoot support when flashing firmware via module
+20.11.2018
+ 14_SD_BELL.pm - fix error "subroutine subroutine &SD_BELL::InternalVal ..." 
 18.11.2018
  signalduino_protocols.hash - protocoll ID 14,15,32,41,57,79 switch to modul SD_BELL
  !!! Attention, DOIF can not react anymore, a new device from modul SD_BELL will be created !!!
@@ -22,6 +34,7 @@
  00_SIGNALduino.pm - protocol 34 & 86 are development ID's | ID 29 modified preamble
  00_SIGNALduino - Firmware can be downloaded and flashed on demand from gitghub releases
 11.11.2018
+ 98_unittest.pm - added + revised doc & fix PERL Warnings + revised define check
  14_FLAMINGO.pm - fix Maintainer & fix issue error
 10.11.2018
  signalduino_protocols.hash - ID 13.1 revised & model added for Modul FLAMINGO
@@ -32,6 +45,7 @@
  Number of dispatches can be limited (maxMuMsgRepeat)
 30.10.2018
  signalduino_protocols.hash - added more doc ID 86
+>>>>>>> dev-r33
 29.10.2018
  signalduino_protocols.hash - ID 87 integrated in ID 86 (two in one) & added doc
 28.10.2018

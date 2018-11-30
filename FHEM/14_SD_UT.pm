@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 14_SD_UT.pm 32 2016-04-02 14:00:00 v3.2-dev $
+# $Id: 14_SD_UT.pm 32 2018-11-25 12:00:00 v3.3.3-dev_12.11. $HomeAuto_User
 #
 # The file is part of the SIGNALduino project.
 # The purpose of this module is universal support for devices.
@@ -60,8 +60,15 @@
 #     get sduino_dummy raw MU;;P0=-5476;;P1=592;;P2=-665;;P3=1226;;P4=-1309;;D=01232323232323232323232323412323412323414;;CP=3;;R=1;;
 #}    Send Adresse FFF funktioniert nicht 100%ig!
 ####################################################################################################################################
-# - Novy_Pureline_6830 kitchen hood [Protocol 86]
-#{    https://github.com/RFD-FHEM/RFFHEM/issues/331
+# - Remote Control Novy_840029 for Novy Pureline 6830 kitchen hood [Protocol 86] (Länge je nach Taste 12 oder 18 Bit)
+#{    0100 "novy_button" - nicht geprüft
+#     0101 "+_button" - i.O.
+#     0110 "-_button" - i.O.
+#     0111010001 "light_on_off"  - nur 10 Bit, SIGNALduino.pm hängt 2 Nullen an
+#     0111010011 "power_button" - nur 10 Bit, SIGNALduino.pm hängt 2 Nullen an
+#     11010001 "light_on_off_2" - woher?
+#     01110111 "light_on_off_3" - woher?
+#    https://github.com/RFD-FHEM/RFFHEM/issues/331
 #     nibble 0-1 -> Ident | nibble 2-4 -> Tastencode
 #     light on/off button
 #     get sduino_dummy raw MU;;P0=710;;P1=353;;P2=-403;;P4=-761;;P6=-16071;;D=20204161204120412041204120414141204120202041612041204120412041204141412041202020416120412041204120412041414120412020204161204120412041204120414141204120202041;;CP=1;;R=40;;
@@ -81,7 +88,7 @@
 ####################################################################################################################################
 # - Hoermann HS1-868-BS
 #{    https://github.com/RFD-FHEM/RFFHEM/issues/344 | https://github.com/RFD-FHEM/RFFHEM/issues/149
-#               iiii iiii iiii iiii iiii iiii iiii bbbb
+#                iiii iiii iiii iiii iiii iiii iiii bbbb
 #			0000 0000 1111 0110 0010 1010 1001 1100 0000 0001 1100 (HS1-868-BS)
 #}    get sduino_dummy raw MU;;P0=-578;;P1=1033;;P2=506;;P3=-1110;;P4=13632;;D=0101010232323101040101010101010101023232323102323101010231023102310231010232323101010101010101010232323101040101010101010101023232323102323101010231023102310231010232323101010101010101010232323101040101010101010101023232323102323101010231023102310231010;;CP=2;;R=77;;
 ####################################################################################################################################
@@ -94,9 +101,27 @@
 #     0000 0000 1110 0110 1011 1110 1001 0001 0000 1101 1100 (HSM4 Taste D)
 #}    get sduino_dummy raw MU;;P0=-3656;;P1=12248;;P2=-519;;P3=1008;;P4=506;;P5=-1033;;D=01232323232323232324545453232454532453245454545453245323245323232453232323245453245454532321232323232323232324545453232454532453245454545453245323245323232453232323245453245454532321232323232323232324545453232454532453245454545453245323245323232453232323;;CP=4;;R=48;;O;;
 ####################################################################################################################################
+# - Transmitter SF01 01319004 433,92 MHz (NEFF kitchen hood)
+#{    https://github.com/RFD-FHEM/RFFHEM/issues/376 | https://forum.fhem.de/index.php?topic=93545.0
+#     Sends 18 bits, converting to hex in SIGNALduino.pm adds 2 bits of 0
+#                   iiii iiii iiii ii bbbb aa   hex
+#     ------------------------------------------------							
+#     Plus:         1010 0001 0101 00 1100 00   A15 30
+#     Minus:        1010 0001 0101 00 1010 00   A15 28
+#     Licht:        1010 0001 0101 00 1110 00   A15 38
+#     Nachlüften:   1010 0001 0101 00 1001 00   A15 24			
+#     Intervall:    1010 0001 0101 00 1101 00   A15 34
+#     ------------------------------------------------
+#     i - ident, b - button, a - appended
+#     get sduino_dummy raw MU;;P0=706;;P1=-160;;P2=140;;P3=-335;;P4=-664;;P5=385;;P6=-15226;;P7=248;;D=01210103045303045453030304545453030454530653030453030454530303045454530304747306530304530304545303030454545303045453065303045303045453030304545453030454530653030453030454530303045454530304545306530304530304545303030454545303045453065303045303045453030304;;CP=5;;O;;
+#     get sduino_dummy raw MU;;P0=-15222;;P1=379;;P2=-329;;P3=712;;P6=-661;;D=30123236123236161232323616161232361232301232361232361612323236161612323612323012323612323616123232361616123236123230123236123236161232323616161232361232301232361232361612323236161612323612323012323612323616123232361616123236123230123236123236161232323616;;CP=1;;O;;
+#     get sduino_dummy raw MU;;P0=705;;P1=-140;;P2=-336;;P3=-667;;P4=377;;P5=-15230;;P6=248;;D=01020342020343420202034343420202020345420203420203434202020343434202020203654202034202034342020203434342020202034542020342020343420202034343420202020345420203420203434202020343434202020203454202034202034342020203434342020202034542020342020343420202034343;;CP=4;;O;;
+#     get sduino_dummy raw MU;;P0=704;;P1=-338;;P2=-670;;P3=378;;P4=-15227;;P5=244;;D=01023231010102323231010102310431010231010232310101023232310101025104310102310102323101010232323101010231043101023101023231010102323231010102310431010231010232310101023232310101023104310102310102323101010232323101010231043101023101023231010102323231010102;;CP=3;;O;;
+#}    get sduino_dummy raw MU;;P0=-334;;P1=709;;P2=-152;;P3=-663;;P4=379;;P5=-15226;;P6=250;;D=01210134010134340101013434340101340134540101340101343401010134343401013601365401013401013434010101343434010134013454010134010134340101013434340101340134540101340101343401010134343401013401345401013401013434010101343434010134013454010134010134340101013434;;CP=4;;O;;
+####################################################################################################################################
 # !!! ToDo´s !!!
 #     - 
-#     - doppelte Logeinträge bei zutreffen von 2 Protokollen?
+#     -
 ####################################################################################################################################
 
 package main;
@@ -119,8 +144,8 @@ my %models = (
 						  Protocol 	=> "P29",
 						  Typ			=> "remote"
 						},
-	"CAME_TOP_432EV" => 	{ "10"		=> "left_button",
-							  "01"		=> "right_button",
+	"CAME_TOP_432EV" => 	{ "1110"	=> "left_button",
+							  "1101"	=> "right_button",
 							  Protocol	=> "P86",
 							  Typ		=> "remote"
 							},
@@ -135,16 +160,15 @@ my %models = (
 				  Protocol 	=> "P69",
 				  Typ		=> "remote"
 				},
-	"Novy_Pureline_6830" => { "011101000111"	=> "light_on_off_1",	# need USERTEST!!! one variants, not three
-							  "11010001"		=> "light_on_off_2",	# need USERTEST!!! one variants, not three
-							  "01110111"		=> "light_on_off_3",	# need USERTEST!!! one variants, not three
-							  "0101"			=> "+_button",
-							  "0110"			=> "-_button",
-							  "011101001111" 	=> "power_button",
-							  "0100"			=> "novy_button",
-							  Protocol			=> "P86",
-							  Typ				=> "remote"
-							},
+	"Novy_840029" => {
+                       "0100"        => "novy",
+                       "0101"        => "speed_plus",
+                       "0110"        => "speed_minus",
+                       "0111010001"  => "light_on_off",	# 0111010000
+                       "0111010011"  => "power_on_off",	# 0111010010
+                       Protocol		 => "P86",
+                       Typ			 => "remote"
+					},
 	"QUIGG_DMV" =>  		{ "11101110"	=> "Ch1_on",
 							  "11111111"	=> "Ch1_off",
 							  "01101100" 	=> "Ch2_on",
@@ -180,6 +204,15 @@ my %models = (
 	"Unitec_47031" =>	{ Protocol	=> "P30",
 						  Typ		=> "switch"
 						},
+	"SF01_01319004" =>	{
+						  "1100"	=> "plus",
+						  "1010" 	=> "minus",
+						  "1101" 	=> "interval",
+						  "1110" 	=> "light_on_off",
+						  "1001"	=> "delay",
+						  Protocol 	=> "P86",
+						  Typ		=> "remote"
+						},
 	"unknown" =>		{ Protocol	=> "any",
 						  Typ		=> "not_exist"
 						}
@@ -196,7 +229,7 @@ sub SD_UT_Initialize($) {
 	$hash->{AttrFn}		= "SD_UT_Attr";
 	$hash->{AttrList}	= "IODev debug:0,1 do_not_notify:1,0 ignore:0,1 showtime:1,0 model:".join(",", sort keys %models)." " .
 						"$readingFnAttributes ";
-	$hash->{AutoCreate}	={"SD_UT.*" => {ATTR => "model:unknown", FILTER => "%NAME", autocreateThreshold => "2:180"}};
+	$hash->{AutoCreate}	={"SD_UT.*" => {ATTR => "model:unknown", FILTER => "%NAME", autocreateThreshold => "3:180"}};
 	#$hash->{noAutocreatedFilelog} = 1;		### Bug? bei Aktivierung wird keine AutoCreate Attr berücksichtigt! ###
 }
 
@@ -229,12 +262,14 @@ sub SD_UT_Define($$) {
 	return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short | long or not HEX (0-9 | a-f | A-F){3}" if ($a[2] eq "QUIGG_DMV" && not $a[3] =~ /^[0-9a-fA-F]{3}/s);
 	### checks CAME_TOP_432EV ###
 	return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short | long or not HEX (0-9 | a-f | A-F){2}" if ($a[2] eq "CAME_TOP_432EV" && not $a[3] =~ /^[0-9a-fA-F]{2}/s);
-	### checks Novy_Pureline_6830 ###
-	return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short | long or not HEX (0-9 | a-f | A-F){2}" if ($a[2] eq "Novy_Pureline_6830" && not $a[3] =~ /^[0-9a-fA-F]{2}/s);
+	### checks Novy_840029 ###
+	return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short | long or not HEX (0-9 | a-f | A-F){2}" if ($a[2] eq "Novy_840029" && not $a[3] =~ /^[0-9a-fA-F]{2}/s);
 	### checks Hoermann HS1-868-BS ###
 	return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short | long or not HEX (0-9 | a-f | A-F){9}" if ($a[2] eq "HS1_868_BS" && not $a[3] =~ /^[0-9a-fA-F]{9}/s);
 	### checks Hoermann HSM4 ###
-	return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short | long or not HEX (0-9 | a-f | A-F){7}" if ($a[2] eq "HSM4" && not $a[3] =~ /^[0-9a-fA-F]{7}/s);																													   
+	return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short | long or not HEX (0-9 | a-f | A-F){7}" if ($a[2] eq "HSM4" && not $a[3] =~ /^[0-9a-fA-F]{7}/s);	
+	### checks Neff SF01_01319004 ###
+	return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short | long or not HEX (0-9 | a-f | A-F){4}" if ($a[2] eq "SF01_01319004" && not $a[3] =~ /^[0-9a-fA-F]{4}/s);																													   
 	
 	$hash->{lastMSG} =  "no data";
 	$hash->{bitMSG} =  "no data";
@@ -267,7 +302,6 @@ sub SD_UT_Set($$$@) {
 	my $ret = undef;
 	my $msg = undef;
 	my $msgEnd = undef;
-
 	my $value = "";		# value from models cmd
 	my $save = "";		# bits from models cmd
 
@@ -308,11 +342,11 @@ sub SD_UT_Set($$$@) {
 		$msg = $models{$model}{Protocol} . "#P" . $adr;
 		$msgEnd = "#R1";															# !!! Anzahl Wiederholungen noch klären !!!
 
-	############ Novy_Pureline_6830 ############
-	} elsif ($model eq "Novy_Pureline_6830" && $cmd ne "?") {
+	############ Novy_840029 ############
+	} elsif ($model eq "Novy_840029" && $cmd ne "?") {
 
 		my @definition = split(" ", $hash->{DEF});									# split adress from def
-		my $adr = sprintf( "%08b", hex($definition[1])) if ($name ne "unknown");	# argument 1 - adress to binary with 4 digits
+		my $adr = sprintf( "%08b", hex($definition[1])) if ($name ne "unknown");	# argument 1 - adress to binary with 2 digits
 
 		$msg = $models{$model}{Protocol} . "#" . $adr;
 		$msgEnd = "#R9";															# !!! Anzahl Wiederholungen noch klären !!!
@@ -321,18 +355,23 @@ sub SD_UT_Set($$$@) {
 	} elsif ($model eq "CAME_TOP_432EV" && $cmd ne "?") {
 
 		my @definition = split(" ", $hash->{DEF});									# split adress from def
-		my $adr = sprintf( "%08b", hex($definition[1])) if ($name ne "unknown");	# argument 1 - adress to binary with 4 digits
+		my $adr = sprintf( "%08b", hex($definition[1])) if ($name ne "unknown");	# argument 1 - adress to binary with 2 digits
 
 		$msg = $models{$model}{Protocol} . "#" . $adr;
 		$msgEnd = "#R9";															# !!! Anzahl Wiederholungen noch klären !!!
 
+	############ SF01_01319004 ############
+	} elsif ($model eq "SF01_01319004" && $cmd ne "?") {
+		my @definition = split(" ", $hash->{DEF});									# split adress from def
+		my $adr = sprintf( "%016b", hex($definition[1])) if ($name ne "unknown");	# argument 1 - adress to binary with 2 digits
+		$msg = $models{$model}{Protocol} . "#" . substr($adr,0,14);
+		$msgEnd = "#R5";
 	############ Hoermann HS1-868-BS ############
 	} elsif ($model eq "HS1_868_BS" && $cmd ne "?") {
 		my @definition = split(" ", $hash->{DEF});																		# split adress from def
 		my $bitData = "00000000";
 		$bitData .= sprintf( "%036b", hex($definition[1])) if ($name ne "unknown");	# argument 1 - adress to binary with 7 digits
 		$msg = $models{$model}{Protocol} . "#" . $bitData . "#R3";										# !!! Anzahl Wiederholungen noch klären !!!
-		Debug " $ioname: SD_UT_Set attr_model=$model msg=$msg" if($debug);
 	############ Hoermann HSM4 ############
 	} elsif ($model eq "HSM4" && $cmd ne "?") {
 		my @definition = split(" ", $hash->{DEF});									# split adress from def
@@ -351,7 +390,6 @@ sub SD_UT_Set($$$@) {
 			}
 		}
 	} else {
-	
 		if (defined $msgEnd) {
 			### if cmd, set bits ###
 			foreach my $keys (sort keys %{ $models{$model}}) {
@@ -361,7 +399,6 @@ sub SD_UT_Set($$$@) {
 					last if ($value eq $cmd);
 				}
 			}
-
 			$msg .= $save.$msgEnd;
 			Debug " $ioname: SD_UT_Set attr_model=$model msg=$msg cmd=$cmd value=$value (cmd loop)" if($debug);
 		}
@@ -370,16 +407,15 @@ sub SD_UT_Set($$$@) {
 		readingsSingleUpdate($hash, "state" , $cmd, 1);
 		
 		IOWrite($hash, 'sendMsg', $msg);
+		Log3 $name, 3, "$ioname: $name set $cmd";
 		
-		## for hex Check ##
+		## for hex output ##
 		my @split = split("#", $msg);
 		my $hexvalue = $split[1];
 		$hexvalue =~ s/P+//g;									# if P parameter, replace P with nothing
 		$hexvalue = sprintf("%X", oct( "0b$hexvalue" ) );
 		###################
-
-		Debug " $ioname: SD_UT_Set attr_model=$model sendMsg=$msg rawData=$hexvalue (after IOWrite)" if($debug);
-		Log3 $name, 3, "$ioname: $name set $cmd";
+		Log3 $name, 4, "$ioname: $name SD_UT_Set sendMsg $msg, rawData $hexvalue";
 	}
 	return $ret;
 }
@@ -447,22 +483,31 @@ sub SD_UT_Parse($$) {
 	$deviceCode = sprintf("%X", oct( "0b$deviceCode" ) );
 	$devicedef = "RH787T " . $deviceCode if(!$def && ($protocol == 83 || $protocol == 30));
 	$def = $modules{SD_UT}{defptr}{$devicedef} if (!$def && ($protocol == 83 || $protocol == 30));
-	### Novy_Pureline_6830 [P86] ###
+	### Novy_840029 [P86] ###
 	$deviceCode = substr($rawData,0,2);
-	$devicedef = "Novy_Pureline_6830 " . $deviceCode  if(!$def && ($protocol == 86 || $protocol == 81));
+	$devicedef = "Novy_840029 " . $deviceCode  if(!$def && ($protocol == 86 || $protocol == 81));
 	$def = $modules{SD_UT}{defptr}{$devicedef}  if(!$def && ($protocol == 86 || $protocol == 81));
+	### SF01_01319004 [P86] ###
+	if ($hlen == 5) {
+		$deviceCode = substr($bitData,0,14) . "00";
+		$deviceCode = sprintf("%X", oct( "0b$deviceCode" ) );
+		$devicedef = "SF01_01319004 " . $deviceCode  if(!$def && $protocol == 86);
+		$def = $modules{SD_UT}{defptr}{$devicedef}  if(!$def && $protocol == 86);
+	}
 	### CAME_TOP_432EV [P86] ###
 	$deviceCode = substr($rawData,0,2);
 	$devicedef = "CAME_TOP_432EV " . $deviceCode  if(!$def && ($protocol == 86 || $protocol == 81));
 	$def = $modules{SD_UT}{defptr}{$devicedef}  if(!$def && ($protocol == 86 || $protocol == 81));
-	### Remote control Hoermann HS1-868-BS [P69] ###
-	$deviceCode = substr($rawData,2,9) if ($hlen >= 11);
-	$devicedef = "HS1_868_BS " . $deviceCode if (!$def && $protocol == 69);
-	$def = $modules{SD_UT}{defptr}{$devicedef} if (!$def && $protocol == 69);
-	### Remote control Hoermann HSM4 [P69] ###
-	$deviceCode = substr($rawData,2,7) if ($hlen >= 11);
-	$devicedef = "HSM4 " . $deviceCode if (!$def && $protocol == 69);
-	$def = $modules{SD_UT}{defptr}{$devicedef} if (!$def && $protocol == 69);
+	if ($hlen == 11) {
+		### Remote control Hoermann HS1-868-BS [P69] ###
+		$deviceCode = substr($rawData,2,9) if ($hlen >= 11);
+		$devicedef = "HS1_868_BS " . $deviceCode if (!$def && $protocol == 69);
+		$def = $modules{SD_UT}{defptr}{$devicedef} if (!$def && $protocol == 69);
+		### Remote control Hoermann HSM4 [P69] ###
+		$deviceCode = substr($rawData,2,7) if ($hlen >= 11);
+		$devicedef = "HSM4 " . $deviceCode if (!$def && $protocol == 69);
+		$def = $modules{SD_UT}{defptr}{$devicedef} if (!$def && $protocol == 69);
+	}
 	### unknown ###
 	$devicedef = "unknown" if(!$def);
 	$def = $modules{SD_UT}{defptr}{$devicedef} if(!$def);
@@ -472,7 +517,7 @@ sub SD_UT_Parse($$) {
 	
 	if(!$def) {
 		Log3 $iohash, 1, "$ioname: SD_UT_Parse UNDEFINED sensor " . $model . " detected, code " . $deviceCode;
-		return "UNDEFINED $model SD_UT $model";
+		return "UNDEFINED unknown_please_select_model SD_UT $model";
 	}
 	
 	my $hash = $def;
@@ -570,15 +615,25 @@ sub SD_UT_Parse($$) {
 		$state = substr($bitData,12,8);
 		$deviceCode = substr($bitData,0,12);
 
-	############ Novy_Pureline_6830 ############ Protocol 86 ############
-	} elsif ($model eq "Novy_Pureline_6830" && ($protocol == 86 || $protocol == 81)) {
-		$state = substr($bitData,8);
+	############ Novy_840029 ############ Protocol 86 ############
+	} elsif ($model eq "Novy_840029" && ($protocol == 86 || $protocol == 81)) {
+		if ($hlen == 3) {		# 12 Bit
+			$state = substr($bitData,8);			# 4 Bit
+		} else {						# 20 Bit
+			$state = substr($bitData,8,10);		# 10 Bit (letzte 2 Bit entfernen)
+		}
 		$deviceCode = substr($bitData,0,8);
 
 	############ CAME_TOP_432EV ############ Protocol 86 ############
 	} elsif ($model eq "CAME_TOP_432EV" && ($protocol == 86 || $protocol == 81)) {
 		$state = substr($bitData,8);
 		$deviceCode = substr($bitData,0,8);
+
+	############ SF01_01319004 ############ Protocol 86 ############
+	} elsif ($model eq "SF01_01319004" && $protocol == 86) {
+		$state = substr($bitData,14,4);
+		$deviceCode = substr($bitData,0,14) . "00" if ($blen >= 14);
+		$deviceCode = sprintf("%X", oct( "0b$deviceCode" ) );
 
 	############ Hoermann HS1-868-BS ############ Protocol 69 ############
 	} elsif ($model eq "HS1_868_BS" && $protocol == 69) {
@@ -647,7 +702,6 @@ sub SD_UT_Attr(@) {
 			}
 
 			foreach my $keys (sort keys %models) {	
-				Log3 $name, 3, "SD_UT_Attr $keys";
 				if($keys eq $attrValue) {
 					$attr{$name}{model}	= $attrValue;				# set new model
 					$bitData = InternalVal($name, "bitMSG", "-");
@@ -681,14 +735,19 @@ sub SD_UT_Attr(@) {
 				$deviceCode = substr($bitData,0,12);
 				$deviceCode = sprintf("%X", oct( "0b$deviceCode" ) );
 				$devicename = $devicemodel."_".$deviceCode;
-			############ Novy_Pureline_6830 ############
-			} elsif ($attrName eq "model" && $attrValue eq "Novy_Pureline_6830") {
+			############ Novy_840029 ############
+			} elsif ($attrName eq "model" && $attrValue eq "Novy_840029") {
 				$deviceCode = substr($bitData,0,8);
 				$deviceCode = sprintf("%X", oct( "0b$deviceCode" ) );
 				$devicename = $devicemodel."_".$deviceCode;
 			############ CAME_TOP_432EV ############
 			} elsif ($attrName eq "model" && $attrValue eq "CAME_TOP_432EV") {
 				$deviceCode = substr($bitData,0,8);
+				$deviceCode = sprintf("%X", oct( "0b$deviceCode" ) );
+				$devicename = $devicemodel."_".$deviceCode;
+			############ SF01_01319004 ############
+			} elsif ($attrName eq "model" && $attrValue eq "SF01_01319004") {
+				$deviceCode = substr($bitData,0,14) . "00";
 				$deviceCode = sprintf("%X", oct( "0b$deviceCode" ) );
 				$devicename = $devicemodel."_".$deviceCode;
 			############ Hoermann HS1-868-BS	############
@@ -763,15 +822,16 @@ sub SD_UT_binaryToNumber {
 <a name="SD_UT"></a>
 <h3>SD_UT</h3>
 <ul>The module SD_UT is a universal module of SIGNALduino for devices or sensors.<br>
-	After the first creation of the device <code><b>SD_UT_Unknown</b></code>, the user must define the device himself via the <code>model</code> attribute.<br>
-	If the device is not supported yet, bit data can be collected with the SD_UT_Unknown device.<br><br>
+	After the first creation of the device <code><b>unknown_please_select_model</b></code>, the user must define the device himself via the <code>model</code> attribute.<br>
+	If the device is not supported yet, bit data can be collected with the unknown_please_select_model device.<br><br>
 	<i><u><b>Note:</b></u></i> As soon as the attribute model of a defined device is changed or deleted, the module re-creates a device of the selected type, and when a new message is run, the current device is deleted. 
 	Devices of <u>the same or different type with the same deviceCode will result in errors</u>. PLEASE use different <code>deviceCode</code>.<br><br>
 	 <u>The following devices are supported:</u><br>
 	 <ul> - CAME swing gate drive&nbsp;&nbsp;&nbsp;<small>(module model: CAME_TOP_432EV | protocol 86)</small></ul>
 	 <ul> - Hoermann HS1-868-BS&nbsp;&nbsp;&nbsp;<small>(module model: HS1_868_BS | protocol 69)</small></ul>
 	 <ul> - Hoermann HSM4&nbsp;&nbsp;&nbsp;<small>(module model: HSM4 | protocol 69)</small></ul>
-	 <ul> - Novy Pureline 6830 kitchen hood&nbsp;&nbsp;&nbsp;<small>(module model: Novy_Pureline_6830 | protocol 86)</small></ul>
+	 <ul> - NEFF kitchen hood&nbsp;&nbsp;&nbsp;<small>(module model: SF01_01319004 | protocol 86)</small></ul>
+	 <ul> - Novy Pureline 6830 kitchen hood&nbsp;&nbsp;&nbsp;<small>(module model: Novy_840029 | protocol 86)</small></ul>
 	 <ul> - QUIGG DMV-7000&nbsp;&nbsp;&nbsp;<small>(module model: QUIGG_DMV | protocol 34)</small></ul>
 	 <ul> - Remote control SA-434-1 mini 923301&nbsp;&nbsp;&nbsp;<small>(module model: SA_434_1_mini | protocol 81)</small></ul>
 	 <ul> - unitec remote door reed switch 47031 (Unitec 47121 | Unitec 47125 | Friedland)&nbsp;&nbsp;&nbsp;<small>(module model: Unitec_47031 | protocol 30)</small></ul>
@@ -889,11 +949,11 @@ sub SD_UT_binaryToNumber {
 	<ul><a name="model"></a>
 		<li>model<br>
 		The attribute indicates the model type of your device.<br>
-		(unknown, Buttons_five, CAME_TOP_432EV, HS1-868-BS, HSM4, QUIGG_DMV, Novy_Pureline_6830, RH787T, SA_434_1_mini, Unitec_47031)</li>
+		(unknown, Buttons_five, CAME_TOP_432EV, HS1-868-BS, HSM4, QUIGG_DMV, Novy_840029, RH787T, SA_434_1_mini, Unitec_47031)</li>
 	</ul><br><br>
 	
 	<b><i>Generated readings of the models</i></b><br>
-	<ul><u>Buttons_five | CAME_TOP_432EV | HSM4 | Novy_Pureline_6830 | QUIGG_DMV | RH787T</u><br>
+	<ul><u>Buttons_five | CAME_TOP_432EV | HSM4 | Novy_840029 | QUIGG_DMV | RH787T</u><br>
 	<li>deviceCode<br>
 	Device code of the system</li>
 	<li>LastAction<br>
@@ -925,15 +985,16 @@ sub SD_UT_binaryToNumber {
 <a name="SD_UT"></a>
 <h3>SD_UT</h3>
 <ul>Das Modul SD_UT ist ein Universalmodul vom SIGNALduino f&uuml;r Ger&auml;te oder Sensoren.<br>
-	Nach dem ersten anlegen des Ger&auml;tes <code><b>SD_UT_Unknown</b></code> muss der User das Ger&auml;t selber definieren via dem Attribut <code>model</code>.<br>
-	Bei noch nicht unterst&uuml;tzen Ger&auml;ten k&ouml;nnen mit dem <code><b>SD_UT_Unknown</b></code> Ger&auml;t Bitdaten gesammelt werden.<br><br>
+	Nach dem ersten anlegen des Ger&auml;tes <code><b>unknown_please_select_model</b></code> muss der User das Ger&auml;t selber definieren via dem Attribut <code>model</code>.<br>
+	Bei noch nicht unterst&uuml;tzen Ger&auml;ten k&ouml;nnen mit dem <code><b>unknown_please_select_model</b></code> Ger&auml;t Bitdaten gesammelt werden.<br><br>
 	<i><u><b>Hinweis:</b></u></i> Sobald das Attribut model eines definieren Ger&auml;tes verstellt oder gelöscht wird, so legt das Modul ein Ger&auml;t des gew&auml;hlten Typs neu an und mit Durchlauf einer neuen Nachricht wird das aktuelle Ger&auml;t gel&ouml;scht. 
 	Das betreiben von Ger&auml;ten des <u>gleichen oder unterschiedliches Typs mit gleichem <code>deviceCode</code> f&uuml;hrt zu Fehlern</u>. BITTE achte stets auf einen unterschiedlichen <code>deviceCode</code>.<br><br>
 	 <u>Es werden bisher folgende Ger&auml;te unterst&uuml;tzt:</u><br>
 	 <ul> - CAME Drehtor Antrieb&nbsp;&nbsp;&nbsp;<small>(Modulmodel: CAME_TOP_432EV | Protokoll 86)</small></ul>
 	 <ul> - Hoermann HS1-868-BS&nbsp;&nbsp;&nbsp;<small>(Modulmodel: HS1_868_BS | Protokoll 69)</small></ul>
 	 <ul> - Hoermann HSM4&nbsp;&nbsp;&nbsp;<small>(Modulmodel: HSM4 | Protokoll 69)</small></ul>
-	 <ul> - Novy Pureline 6830 Dunstabzugshaube&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Novy_Pureline_6830 | Protokoll 86)</small></ul>
+	 <ul> - NEFF Dunstabzugshaube&nbsp;&nbsp;&nbsp;<small>(Modulmodel: SF01_01319004 | Protokoll 86)</small></ul>
+	 <ul> - Novy Pureline 6830 Dunstabzugshaube&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Novy_840029 | Protokoll 86)</small></ul>
 	 <ul> - QUIGG DMV-7000&nbsp;&nbsp;&nbsp;<small>(Modulmodel: QUIGG_DMV | Protokoll 34)</small></ul>
 	 <ul> - Remote control SA-434-1 mini 923301&nbsp;&nbsp;&nbsp;<small>(Modulmodel: SA_434_1_mini | Protokoll 81)</small></ul>
 	 <ul> - unitec remote door reed switch 47031 (Unitec 47121 | Unitec 47125 | Friedland)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Unitec_47031 | Protokoll 30)</small></ul>
@@ -1052,11 +1113,11 @@ sub SD_UT_binaryToNumber {
 	<ul><li><a href="#IODev">IODev</a></li></ul><br>
 	<ul><li><a name="model">model</a><br>
 		Das Attribut bezeichnet den Modelltyp Ihres Ger&auml;tes.<br>
-		(unknown, Buttons_five, CAME_TOP_432EV, HS1-868-BS, HSM4, QUIGG_DMV, RH787T, Novy_Pureline_6830, SA_434_1_mini, Unitec_47031)</li><a name=" "></a>
+		(unknown, Buttons_five, CAME_TOP_432EV, HS1-868-BS, HSM4, QUIGG_DMV, RH787T, Novy_840029, SA_434_1_mini, Unitec_47031)</li><a name=" "></a>
 	</ul><br><br>
 	
 	<b><i>Generierte Readings der Modelle</i></b><br>
-	<ul><u>Buttons_five | CAME_TOP_432EV | HSM4 | Novy_Pureline_6830 | QUIGG_DMV | RH787T</u><br>
+	<ul><u>Buttons_five | CAME_TOP_432EV | HSM4 | Novy_840029 | QUIGG_DMV | RH787T</u><br>
 	<li>deviceCode<br>
 	Ger&auml;teCode des Systemes</li>
 	<li>LastAction<br>
