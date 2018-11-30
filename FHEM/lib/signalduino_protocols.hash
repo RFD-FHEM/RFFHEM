@@ -1518,7 +1518,7 @@
 			clockabs		=> 250,
 			format			=> 'twostate', # not used now
 			#clientmodule	=> '',
-			preamble		=> 'u76',
+			preamble		=> 'u76#',
 			length_min		=> 43,
 			length_max		=> 43,
 		},
@@ -1538,7 +1538,7 @@
 			clockabs		=> 250,
 			format			=> 'twostate', # not used now
 			#clientmodule	=> '',
-			preamble		=> 'u76',
+			preamble		=> 'u76#',
 			length_min		=> 43,
 			length_max		=> 43,
 		},
