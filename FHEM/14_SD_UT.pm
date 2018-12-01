@@ -809,6 +809,8 @@ sub SD_UT_Attr(@) {
 			DoTrigger ("global","UNDEFINED unknown_please_select_model SD_UT unknown") if ($devicename eq "unknown_please_select_model");		# if user push attr return to unknown
 			DoTrigger ("global","UNDEFINED $devicename SD_UT $devicemodel $deviceCode") if ($devicename ne "unknown_please_select_model");		# create new device
 
+			CommandAttr( undef, "$devicename model $attrValue" ) if ($devicename ne "unknown_please_select_model");			# set model
+			
 		} else {
 			$attr{$name}{model}	= "unknown";
 			readingsSingleUpdate($hash, "state", "Please press button again!", 0);
