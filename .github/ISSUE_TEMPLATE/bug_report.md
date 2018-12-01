@@ -20,6 +20,6 @@ about: Create a report to help us improve
 
   - Microcontroller:
   - Version (Firmware):
-( can be found here: devicename -> Internals -> version )
+<!--( can be found here: devicename -> Internals -> version ) -->
   - Versionmodul (FHEM Module):
-( can be found here: devicename -> Internals -> versionmodul )
+<!-- ( can be found here: devicename -> Internals -> versionmodul ) -->
