@@ -15,6 +15,8 @@ about: A new device (sensor, switch, ...) should be supported
 
   - Microcontroller:
   - Version (Firmware):
-( can be found here devicename -> Internals -> version )
+  
+<!-- ( can be found here devicename -> Internals -> version ) -->
   - Versionmodul (FHEM Module):
-( can be found here: devicename -> Internals -> versionmodul )
+  
+<!--( can be found here: devicename -> Internals -> versionmodul ) -->
