@@ -47,18 +47,16 @@ sub UnitTest_Define() {
 	Log3 $name, 5, "$name: Loaded this code ".$hash->{'.testcode'} if ($hash->{'.testcode'});
     
 	$hash->{name}  = $name;
-    
-	readingsSingleUpdate($hash, "state", "waiting", 1);
+	if (IsDisabled($name)) {			    
+		readingsSingleUpdate($hash, "state", "waiting", 1);
 
-	## Test starten wenn Fhem bereits initialisiert wurde	
-	if  ($init_done) {
-		if ($disable eq "0") {			
+		## Test starten wenn Fhem bereits initialisiert wurde	
+		if  ($init_done) {
 			InternalTimer(gettimeofday()+1, 'UnitTest_Test_generic',$hash,0);
-		} else {
-			readingsSingleUpdate($hash, "state", "disabled", 1);
 		}
+	} else {
+		readingsSingleUpdate($hash, "state", "inactive", 1);
 	}
-
 	
     $hash->{test_output}="";
     $hash->{test_failure}="";
@@ -78,7 +76,14 @@ sub UnitTest_Attr(@) {
 	my $hash = $defs{$name};
 
 	if ($cmd eq "set" && $attrName eq "disable" && $attrValue eq "1") {
-		readingsSingleUpdate($hash, "state", "disabled", 1);
+		$hash->{test_failure}="";
+		$hash->{test_output}="";
+		readingsBeginUpdate($hash);
+		readingsBulkUpdate($hash, "test_output", $hash->{test_output} , 1);
+		readingsBulkUpdate($hash, "test_failure", $hash->{test_failure} , 1);
+		readingsBulkUpdate($hash, "state", "inactive", 1);
+		readingsEndUpdate($hash,1);
+		
 		Log3 $name, 3, "$name: is disabled";
 	}
 
