@@ -47,7 +47,7 @@ sub UnitTest_Define() {
 	Log3 $name, 5, "$name: Loaded this code ".$hash->{'.testcode'} if ($hash->{'.testcode'});
     
 	$hash->{name}  = $name;
-	if (IsDisabled($name)) {			    
+	if (IsDisabled($name) ne "1") {	#   1 if($attr{$devname}{disable}) | 3 if($defs{$devname} && $defs{$devname}{STATE} && $defs{$devname}{STATE} eq "inactive") | 3 if(ReadingsVal($devname, "state", "") eq "inactive")
 		readingsSingleUpdate($hash, "state", "waiting", 1);
 
 		## Test starten wenn Fhem bereits initialisiert wurde	
