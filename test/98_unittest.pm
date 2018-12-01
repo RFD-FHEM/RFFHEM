@@ -30,7 +30,6 @@ sub UnitTest_Define() {
 	my ( $hash, $def ) = @_;
    
     my ($name,$type,$target,$cmd) = split('[ \t]+', $def,4);
-	my $disable = AttrVal($name, "disable", "0");
 
 	#if (!$cmd || (not $cmd =~ m/^[(].*[)]$/g)) {
 	if (!$cmd || $cmd !~ m/(?:\(.*\)).*$/) {
