@@ -135,10 +135,10 @@
             name			=> 'itv1_sync40',	
 			comment         => 'IT remote Control PAR 1000, ITS-150, AB440R',
 			id          	=> '3',
-			one             => [3,-1],
-			zero			=> [1,-3],
+			one             => [3.5,-1],
+			zero			=> [1,-3.8],
 			float			=> [1,-1],	# fuer Gruppentaste (nur bei ITS-150,ITR-3500 und ITR-300), siehe Kommentar in sub SIGNALduino_bit2itv1
-			sync			=> [1,-40],
+			sync			=> [1,-44],
 			clockabs     	=> -1,	# -1=auto	
 			format 			=> 'twostate',	# not used now
 			preamble		=> 'i',			
@@ -975,13 +975,20 @@
 			postDemodulation => sub {	my ($name, @bit_msg) = @_;	my @new_bitmsg = splice @bit_msg, 0,88;	return 1,@new_bitmsg; },
 		},    
     "46"    => ## Berner Garagentorantrieb GA401
-               # https://github.com/RFD-FHEM/RFFHEM/issues/91
+               # remote TEDSEN SKX1MD 433.92 MHz - 1 button | settings via 9 switch on battery compartment
+			   # compatible with doors: BERNER SKX1MD, ELKA SKX1MD, TEDSEN SKX1LC, TEDSEN SKX1
+			   # https://github.com/RFD-FHEM/RFFHEM/issues/91
+			   # door open
 			   # MU;P0=-15829;P1=-3580;P2=1962;P3=-330;P4=245;P5=-2051;D=1234523232345234523232323234523234540023452323234523452323232323452323454023452323234523452323232323452323454023452323234523452323232323452323454023452323234523452323232323452323454023452323234523452323;CP=2;
+			   # door close
+			   # MU;P0=-1943;P1=1966;P2=-327;P3=247;P5=-15810;D=01230121212301230121212121230121230351230121212301230121212121230121230351230121212301230121212121230121230351230121212301230121212121230121230351230121212301230121212121230121230351230;CP=1;
         {
-            name			=> 'EKX1BE',	
+            name			=> 'Berner Garagedoor GA401',
+			comment			=> 'remote TEDSEN SKX1MD',
 			id          	=> '46',
 			one				=> [1,-8],
 			zero			=> [8,-1],
+			start           => [1,-63], 							   
 			clockabs     	=> 250,	# -1=auto	
 			format 			=> 'twostate',	# not used now
 			preamble		=> 'u46#',			
@@ -1641,6 +1648,7 @@
 			length_max       => '12',
 		},
 	"82" => ## Fernotron shutters and light switches   
+			# https://github.com/RFD-FHEM/RFFHEM/issues/257
 			# MU;P0=-32001;P1=435;P2=-379;P4=-3201;P5=831;P6=-778;D=01212121212121214525252525252521652161452525252525252161652141652521652521652521614165252165252165216521416521616165216525216141652161616521652165214165252161616521652161416525216161652161652141616525252165252521614161652525216525216521452165252525252525;CP=1;O;
 			# the messages received are usual missing 12 bits at the end for some reason. So the checksum byte is missing.
 			# Fernotron protocol is unidirectional. Here we can only receive messages from controllers send to receivers. 
