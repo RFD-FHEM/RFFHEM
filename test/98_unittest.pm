@@ -21,7 +21,9 @@ sub UnitTest_Initialize() {
 	$hash->{DefFn}         = "UnitTest_Define";
 	$hash->{UndefFn}       = "UnitTest_Undef";
 	$hash->{NotifyFn}      = "UnitTest_Notify";
-	
+	$hash->{AttrFn}        = "UnitTest_Attr";
+	$hash->{AttrList}      = "do_not_notify:1,0 disable:0,1 " .
+							 "$readingFnAttributes ";
 }
 
 sub UnitTest_Define() {
@@ -31,26 +33,30 @@ sub UnitTest_Define() {
 
 	#if (!$cmd || (not $cmd =~ m/^[(].*[)]$/g)) {
 	if (!$cmd || $cmd !~ m/(?:\(.*\)).*$/) {
-        my $msg = "wrong syntax: define <name> UnitTest <name of target device> (Test Code in Perl)";
-    	Log3 undef, 2, $msg;
-    	Log3 undef, 5, "cmd was: $cmd";
-    	return $msg;
-    }
-    $hash->{targetDevice}  = $target;
-	Log3 $name, 2, "Defined unittest for target: ".$hash->{targetDevice} if ($hash->{targetDevice});
-    Log3 $name, 5, "DEV is $cmd";
+		my $msg = "wrong syntax: define <name> UnitTest <name of target device> (Test Code in Perl)";
+		Log3 undef, 2, $name.": ".$msg;
+		Log3 undef, 5, "$name: cmd was: $cmd";
+		return $msg;
+	}
+	$hash->{targetDevice}  = $target;
+	Log3 $name, 2, "$name: Defined unittest for target: ".$hash->{targetDevice} if ($hash->{targetDevice});
+	Log3 $name, 5, "$name: DEV is $cmd";
     
-    ($hash->{'.testcode'}) = $cmd =~ /(\{[^}{]*(?:(?R)[^}{]*)*+\})/;
-    Log3 $name, 5, "Loaded this code ".$hash->{'.testcode'} if ($hash->{'.testcode'});
+	($hash->{'.testcode'}) = $cmd =~ /(\{[^}{]*(?:(?R)[^}{]*)*+\})/;
+	Log3 $name, 5, "$name: Loaded this code ".$hash->{'.testcode'} if ($hash->{'.testcode'});
     
-    $hash->{name}  = $name;
-    
-	readingsSingleUpdate($hash, "state", "waiting", 1);
-		
-	## Test starten wenn Fhem bereits initialisiert wurde	
-	if  ($init_done) {
-	   	InternalTimer(gettimeofday()+1, 'UnitTest_Test_generic',$hash,0);       
-	}   	
+	$hash->{name}  = $name;
+	if (!IsDisabled($name)) {
+		readingsSingleUpdate($hash, "state", "waiting", 1);
+
+		## Test starten wenn Fhem bereits initialisiert wurde	
+		if  ($init_done) {
+			InternalTimer(gettimeofday()+1, 'UnitTest_Test_generic',$hash,0);
+		}
+	} else {
+		readingsSingleUpdate($hash, "state", "inactive", 1);
+	}
+	
     $hash->{test_output}="";
     $hash->{test_failure}="";
     $hash->{todo_output}="";
@@ -62,6 +68,31 @@ sub UnitTest_Define() {
 
     return undef;
 
+}
+
+sub UnitTest_Attr(@) {
+	my ($cmd, $name, $attrName, $attrValue) = @_;
+	my $hash = $defs{$name};
+
+	if ($cmd eq "set" && $attrName eq "disable" && $attrValue eq "1") {
+		$hash->{test_failure}="";
+		$hash->{test_output}="";
+		readingsBeginUpdate($hash);
+		readingsBulkUpdate($hash, "test_output", $hash->{test_output} , 1);
+		readingsBulkUpdate($hash, "test_failure", $hash->{test_failure} , 1);
+		readingsBulkUpdate($hash, "state", "inactive", 1);
+		readingsEndUpdate($hash,1);
+		
+		Log3 $name, 3, "$name: is disabled";
+	}
+
+	if ($cmd eq "set" && $attrName eq "disable" && $attrValue eq "0" || $cmd eq "del" && $attrName eq "disable") {
+		readingsSingleUpdate($hash, "state", "waiting", 1);
+		Log3 $name, 3, "$name: is enabled";
+		
+		InternalTimer(gettimeofday()+1, 'UnitTest_Test_generic',$hash,0);
+	}
+	return undef;
 }
 
 sub UnitTest_Undef($$)    
@@ -275,6 +306,7 @@ sub UnitTest_mock_log3
 =item summary_DE Hilfsmodul was es ermöglicht unit test auszuführen
 
 =begin html
+
  <a name="UnitTest"></a>
  <h3>UnitTest</h3><br>
   
@@ -288,6 +320,12 @@ sub UnitTest_mock_log3
   <ul><u>example:</u><br>
   <code>define test1 UnitTest dummyDuino ( { Log3 undef, 2, "this is a Log Message inside our Test";; } )
   </code></ul><br>
+  
+  <b>Attribute</b><br>
+	<ul><li><a name="disable"></a>disable<br>
+		A UnitTest definition can be disabled with the attribute disable. If disabled, the perl code provided in the definition will not be executed. 
+		The readings "test_output" and "test_failure" from this definition will be deleted. If you delete this attribute or setting it to 0, the test will start immediatly</li><a name=" "></a></ul><br>
+  
   <a name="UnitTestinternals"></a>
   <b>Internals</b>
   <ul>
@@ -317,14 +355,14 @@ sub UnitTest_mock_log3
 			developId		=> 'm',
 	 },<br>
   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SIGNALduino_IdList("x:$target","","","m9999");<br>
-  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;is($Log3->called_count-$ref_called_count,$ref_called_count+1,"SIGNALduino_Log3 output increased");<br>
-  &nbsp;&nbsp;&nbsp;&nbsp;}<br>
-  &nbsp;&nbsp;);
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;is($Log3->called_count-$ref_called_count,$ref_called_count+1,"SIGNALduino_Log3 output increased");})
   </ul><br>
   <a href="https://github.com/RFD-FHEM/RFFHEM/blob/dev-r33/test/install.md">Other instructions can be found here.</a>
 =end html
 
+
 =begin html_DE
+
  <a name="UnitTest"></a>
  <h3>UnitTest</h3><br>
   
@@ -338,7 +376,12 @@ sub UnitTest_mock_log3
   <ul><u>Beispiel:</u><br>
   <code>define test1 UnitTest dummyDuino ( { Log3 undef, 2, "this is a Log Message inside our Test";; } )
   </code></ul><br>
-  <a name="UnitTestinternals"></a>
+  
+  <b>Attribute</b><br>
+	<ul><li><a name="disable"></a>disable<br>
+		Eine UnitTest Definition kann mit Hilfe des Attributes disable, deaktiviert werden. Damit wird verhindert, dass der Perl Code ausgef&uuml;hrt wird. 
+		Es werden die Readings "test_output" und "test_failure" der Definition gel&ouml;scht. Wird das Attribut gel&ouml;scht oder auf 0 gesetzt, so wird der Tests umgehend ausgef&uuml;hrt.</li><a name=" "></a></ul><br>
+    <a name="UnitTestinternals"></a>
   <b>Internals</b>
   <ul>
    <li> state - finished / waiting, Status des aktuellen Unittest (waiting, der Test l&auml;ft aktuell)
@@ -367,9 +410,7 @@ sub UnitTest_mock_log3
 			developId		=> 'm',
 	 },<br>
   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SIGNALduino_IdList("x:$target","","","m9999");<br>
-  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;is($Log3->called_count-$ref_called_count,$ref_called_count+1,"SIGNALduino_Log3 output increased");<br>
-  &nbsp;&nbsp;&nbsp;&nbsp;}<br>
-  &nbsp;&nbsp;);
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;is($Log3->called_count-$ref_called_count,$ref_called_count+1,"SIGNALduino_Log3 output increased");})
   </ul><br>
   <a href="https://github.com/RFD-FHEM/RFFHEM/blob/dev-r33/test/install.md">Eine weitere Anleitung finden Sie hier.</a>
 =end html_DE

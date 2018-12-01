@@ -48,6 +48,7 @@
 ##### notice #### or #### info ############################################################################################################
 # Please use first unused id for new protocols
 # ID´s are currently unused: -
+# ID´s need to be revised (preamble u): 5 | 6 | 19 | 20 | 21 | 22 | 23 | 24 | 25 | 26 | 27 | 28 | 31 | 36 | 40 | 46 | 52 | 56 | 59 | 63 | 78 | 87
 ###########################################################################################################################################
 # Please provide at least three messages for each new MU/MC/MS protocol and a URL of issue in GitHub or discussion in FHEM Forum
 # https://forum.fhem.de/index.php/topic,58396.975.html | https://github.com/RFD-FHEM/RFFHEM
@@ -134,10 +135,10 @@
             name			=> 'itv1_sync40',	
 			comment         => 'IT remote Control PAR 1000, ITS-150, AB440R',
 			id          	=> '3',
-			one             => [3,-1],
-			zero			=> [1,-3],
+			one             => [3.5,-1],
+			zero			=> [1,-3.8],
 			float			=> [1,-1],	# fuer Gruppentaste (nur bei ITS-150,ITR-3500 und ITR-300), siehe Kommentar in sub SIGNALduino_bit2itv1
-			sync			=> [1,-40],
+			sync			=> [1,-44],
 			clockabs     	=> -1,	# -1=auto	
 			format 			=> 'twostate',	# not used now
 			preamble		=> 'i',			
@@ -203,7 +204,7 @@
 			#clientmodule    => '',
 			#modulematch     => '^u......',
 			length_min      => '24',
-			#length_max      => '36',
+			#length_max      => '36',		# missing
 		},
 	"7"    => ## weather sensors like EAS800z
 			  # MS;P1=-3882;P2=504;P3=-957;P4=-1949;D=21232424232323242423232323232323232424232323242423242424242323232324232424;CP=2;SP=1;R=249;m=2;
@@ -504,6 +505,7 @@
 			#clientmodule    => '',
 			#modulematch     => '',
 			length_min      => '16',
+			#length_max      => '',					# missing
 			filterfunc      => 'SIGNALduino_filterSign',
 		},
 	"21" => # Einhell Garagentor
@@ -540,7 +542,7 @@
 			#clientmodule    => '',
 			#modulematch     => '',
 			length_min      => '40',
-			#length_max      => '',				    # must be tested
+			#length_max      => '',				    # must be tested - missing
 		},
 	"23" => # Pearl Sensor
 		{
@@ -856,16 +858,17 @@
 			# MU;P0=300;P1=-772;P2=674;P3=-397;P4=4756;P5=-1512;D=4501232301230123230101232301010123230101230103;CP=0;
 			# MU;P0=-132;P1=-388;P2=675;P4=271;P5=-762;D=012145212145452121454545212145452145214545454521454545452145454541;CP=4;
 		{
-			name => 'romotec',
-			id => '40',
-			one => [3,-2],
-			zero => [1,-3],
-			start => [1,-2],
-			clockabs => 250, 
-			preamble => 'u40#', # prepend to converted message
+			name          => 'romotec',
+			id            => '40',
+			one           => [3,-2],
+			zero          => [1,-3],
+			start         => [1,-2],
+			clockabs      => 250, 
+			preamble      => 'u40#', # prepend to converted message
 			#clientmodule => '',
 			#modulematch => '',
-			length_min => '12',
+			length_min    => '12',
+			#length_max   => '',     # missing
 		},    
 	"41" => ## Elro (Smartwares) Doorbell DB200 / 16 melodies
             # https://github.com/RFD-FHEM/RFFHEM/issues/70
@@ -972,13 +975,20 @@
 			postDemodulation => sub {	my ($name, @bit_msg) = @_;	my @new_bitmsg = splice @bit_msg, 0,88;	return 1,@new_bitmsg; },
 		},    
     "46"    => ## Berner Garagentorantrieb GA401
-               # https://github.com/RFD-FHEM/RFFHEM/issues/91
+               # remote TEDSEN SKX1MD 433.92 MHz - 1 button | settings via 9 switch on battery compartment
+			   # compatible with doors: BERNER SKX1MD, ELKA SKX1MD, TEDSEN SKX1LC, TEDSEN SKX1
+			   # https://github.com/RFD-FHEM/RFFHEM/issues/91
+			   # door open
 			   # MU;P0=-15829;P1=-3580;P2=1962;P3=-330;P4=245;P5=-2051;D=1234523232345234523232323234523234540023452323234523452323232323452323454023452323234523452323232323452323454023452323234523452323232323452323454023452323234523452323232323452323454023452323234523452323;CP=2;
+			   # door close
+			   # MU;P0=-1943;P1=1966;P2=-327;P3=247;P5=-15810;D=01230121212301230121212121230121230351230121212301230121212121230121230351230121212301230121212121230121230351230121212301230121212121230121230351230121212301230121212121230121230351230;CP=1;
         {
-            name			=> 'EKX1BE',	
+            name			=> 'Berner Garagedoor GA401',
+			comment			=> 'remote TEDSEN SKX1MD',
 			id          	=> '46',
 			one				=> [1,-8],
 			zero			=> [8,-1],
+			start           => [1,-63], 							   
 			clockabs     	=> 250,	# -1=auto	
 			format 			=> 'twostate',	# not used now
 			preamble		=> 'u46#',			
@@ -1252,6 +1262,7 @@
 			#clientmodule => '', 
 			#modulematch => '', 
 			length_min   => '24',
+			#length_max  => '',	   # missing
 			filterfunc   => 'SIGNALduino_filterMC',
 		},
 	"64" => ##  WH2 #############################################################################
@@ -1637,6 +1648,7 @@
 			length_max       => '12',
 		},
 	"82" => ## Fernotron shutters and light switches   
+			# https://github.com/RFD-FHEM/RFFHEM/issues/257
 			# MU;P0=-32001;P1=435;P2=-379;P4=-3201;P5=831;P6=-778;D=01212121212121214525252525252521652161452525252525252161652141652521652521652521614165252165252165216521416521616165216525216141652161616521652165214165252161616521652161416525216161652161652141616525252165252521614161652525216525216521452165252525252525;CP=1;O;
 			# the messages received are usual missing 12 bits at the end for some reason. So the checksum byte is missing.
 			# Fernotron protocol is unidirectional. Here we can only receive messages from controllers send to receivers. 
