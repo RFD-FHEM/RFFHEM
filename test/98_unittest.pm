@@ -32,32 +32,33 @@ sub UnitTest_Define() {
     my ($name,$type,$target,$cmd) = split('[ \t]+', $def,4);
 	my $disable = AttrVal($name, "disable", "0");
 
-	if ($disable eq "0") {
-		#if (!$cmd || (not $cmd =~ m/^[(].*[)]$/g)) {
-		if (!$cmd || $cmd !~ m/(?:\(.*\)).*$/) {
-			my $msg = "wrong syntax: define <name> UnitTest <name of target device> (Test Code in Perl)";
-			Log3 undef, 2, $name.": ".$msg;
-			Log3 undef, 5, "$name: cmd was: $cmd";
-			return $msg;
-		}
-		$hash->{targetDevice}  = $target;
-		Log3 $name, 2, "$name: Defined unittest for target: ".$hash->{targetDevice} if ($hash->{targetDevice});
-		Log3 $name, 5, "$name: DEV is $cmd";
-    
-		($hash->{'.testcode'}) = $cmd =~ /(\{[^}{]*(?:(?R)[^}{]*)*+\})/;
-		Log3 $name, 5, "$name: Loaded this code ".$hash->{'.testcode'} if ($hash->{'.testcode'});
-    
-		$hash->{name}  = $name;
-    
-		readingsSingleUpdate($hash, "state", "waiting", 1);
-
-		## Test starten wenn Fhem bereits initialisiert wurde	
-		if  ($init_done) {
-			InternalTimer(gettimeofday()+1, 'UnitTest_Test_generic',$hash,0);
-		}
-   	} else {
-		readingsSingleUpdate($hash, "state", "disabled", 1);
+	#if (!$cmd || (not $cmd =~ m/^[(].*[)]$/g)) {
+	if (!$cmd || $cmd !~ m/(?:\(.*\)).*$/) {
+		my $msg = "wrong syntax: define <name> UnitTest <name of target device> (Test Code in Perl)";
+		Log3 undef, 2, $name.": ".$msg;
+		Log3 undef, 5, "$name: cmd was: $cmd";
+		return $msg;
 	}
+	$hash->{targetDevice}  = $target;
+	Log3 $name, 2, "$name: Defined unittest for target: ".$hash->{targetDevice} if ($hash->{targetDevice});
+	Log3 $name, 5, "$name: DEV is $cmd";
+    
+	($hash->{'.testcode'}) = $cmd =~ /(\{[^}{]*(?:(?R)[^}{]*)*+\})/;
+	Log3 $name, 5, "$name: Loaded this code ".$hash->{'.testcode'} if ($hash->{'.testcode'});
+    
+	$hash->{name}  = $name;
+    
+	readingsSingleUpdate($hash, "state", "waiting", 1);
+
+	## Test starten wenn Fhem bereits initialisiert wurde	
+	if  ($init_done) {
+		if ($disable eq "0") {			
+			InternalTimer(gettimeofday()+1, 'UnitTest_Test_generic',$hash,0);
+		} else {
+			readingsSingleUpdate($hash, "state", "disabled", 1);
+		}
+	}
+
 	
     $hash->{test_output}="";
     $hash->{test_failure}="";
