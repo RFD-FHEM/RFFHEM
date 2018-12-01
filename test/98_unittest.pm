@@ -323,8 +323,8 @@ sub UnitTest_mock_log3
   
   <b>Attribute</b><br>
 	<ul><li><a name="disable"></a>disable<br>
-		This activates / deactivates the test. (0 = on | 1 = off)<br>
-		A defined test starts automatically at the FHEM Restart. If the attribute deleted, the test is always active by default.</li><a name=" "></a></ul><br>
+		A UnitTest definition can be disabled with the attribute disable. If disabled, the perl code provided in the definition will not be executed. 
+		The readings "test_output" and "test_failure" from this definition will be deleted. If you delete this attribute or setting it to 0, the test will start immediatly</li><a name=" "></a></ul><br>
   
   <a name="UnitTestinternals"></a>
   <b>Internals</b>
@@ -379,10 +379,9 @@ sub UnitTest_mock_log3
   
   <b>Attribute</b><br>
 	<ul><li><a name="disable"></a>disable<br>
-		Das aktiviert / deaktiert den Test. (0 = ein | 1 = aus)<br>
-		Ein definierter Test startet automatisch beim FHEM Restart. Sobald das Attribut gel&ouml;scht wird, ist der Test standardm&auml;ßig immer aktiv.</li><a name=" "></a></ul><br>
-  
-  <a name="UnitTestinternals"></a>
+		Eine UnitTest Definition kann mit Hilfe des Attributes disable, deaktiviert werden. Damit wird verhindert, dass der Perl Code ausgef&uuml;hrt wird. 
+		Es werden die Readings "test_output" und "test_failure" der Definition gel&ouml;scht. Wird das Attribut gel&ouml;scht oder auf 0 gesetzt, so wird der Tests umgehend ausgef&uuml;hrt.</li><a name=" "></a></ul><br>
+    <a name="UnitTestinternals"></a>
   <b>Internals</b>
   <ul>
    <li> state - finished / waiting, Status des aktuellen Unittest (waiting, der Test l&auml;ft aktuell)
