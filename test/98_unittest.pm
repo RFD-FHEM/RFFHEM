@@ -21,36 +21,44 @@ sub UnitTest_Initialize() {
 	$hash->{DefFn}         = "UnitTest_Define";
 	$hash->{UndefFn}       = "UnitTest_Undef";
 	$hash->{NotifyFn}      = "UnitTest_Notify";
-	
+	$hash->{AttrFn}        = "UnitTest_Attr";
+	$hash->{AttrList}      = "do_not_notify:1,0 disable:0,1 " .
+							 "$readingFnAttributes ";
 }
 
 sub UnitTest_Define() {
 	my ( $hash, $def ) = @_;
    
     my ($name,$type,$target,$cmd) = split('[ \t]+', $def,4);
+	my $disable = AttrVal($name, "disable", "0");
 
-	#if (!$cmd || (not $cmd =~ m/^[(].*[)]$/g)) {
-	if (!$cmd || $cmd !~ m/(?:\(.*\)).*$/) {
-        my $msg = "wrong syntax: define <name> UnitTest <name of target device> (Test Code in Perl)";
-    	Log3 undef, 2, $msg;
-    	Log3 undef, 5, "cmd was: $cmd";
-    	return $msg;
-    }
-    $hash->{targetDevice}  = $target;
-	Log3 $name, 2, "Defined unittest for target: ".$hash->{targetDevice} if ($hash->{targetDevice});
-    Log3 $name, 5, "DEV is $cmd";
+	if ($disable eq "0") {
+		#if (!$cmd || (not $cmd =~ m/^[(].*[)]$/g)) {
+		if (!$cmd || $cmd !~ m/(?:\(.*\)).*$/) {
+			my $msg = "wrong syntax: define <name> UnitTest <name of target device> (Test Code in Perl)";
+			Log3 undef, 2, $name.": ".$msg;
+			Log3 undef, 5, "$name: cmd was: $cmd";
+			return $msg;
+		}
+		$hash->{targetDevice}  = $target;
+		Log3 $name, 2, "$name: Defined unittest for target: ".$hash->{targetDevice} if ($hash->{targetDevice});
+		Log3 $name, 5, "$name: DEV is $cmd";
     
-    ($hash->{'.testcode'}) = $cmd =~ /(\{[^}{]*(?:(?R)[^}{]*)*+\})/;
-    Log3 $name, 5, "Loaded this code ".$hash->{'.testcode'} if ($hash->{'.testcode'});
+		($hash->{'.testcode'}) = $cmd =~ /(\{[^}{]*(?:(?R)[^}{]*)*+\})/;
+		Log3 $name, 5, "$name: Loaded this code ".$hash->{'.testcode'} if ($hash->{'.testcode'});
     
-    $hash->{name}  = $name;
+		$hash->{name}  = $name;
     
-	readingsSingleUpdate($hash, "state", "waiting", 1);
-		
-	## Test starten wenn Fhem bereits initialisiert wurde	
-	if  ($init_done) {
-	   	InternalTimer(gettimeofday()+1, 'UnitTest_Test_generic',$hash,0);       
-	}   	
+		readingsSingleUpdate($hash, "state", "waiting", 1);
+
+		## Test starten wenn Fhem bereits initialisiert wurde	
+		if  ($init_done) {
+			InternalTimer(gettimeofday()+1, 'UnitTest_Test_generic',$hash,0);
+		}
+   	} else {
+		readingsSingleUpdate($hash, "state", "disabled", 1);
+	}
+	
     $hash->{test_output}="";
     $hash->{test_failure}="";
     $hash->{todo_output}="";
@@ -62,6 +70,24 @@ sub UnitTest_Define() {
 
     return undef;
 
+}
+
+sub UnitTest_Attr(@) {
+	my ($cmd, $name, $attrName, $attrValue) = @_;
+	my $hash = $defs{$name};
+
+	if ($cmd eq "set" && $attrName eq "disable" && $attrValue eq "1") {
+		readingsSingleUpdate($hash, "state", "disabled", 1);
+		Log3 $name, 3, "$name: is disabled";
+	}
+
+	if ($cmd eq "set" && $attrName eq "disable" && $attrValue eq "0" || $cmd eq "del" && $attrName eq "disable") {
+		readingsSingleUpdate($hash, "state", "waiting", 1);
+		Log3 $name, 3, "$name: is enabled";
+		
+		InternalTimer(gettimeofday()+1, 'UnitTest_Test_generic',$hash,0);
+	}
+	return undef;
 }
 
 sub UnitTest_Undef($$)    
@@ -289,6 +315,12 @@ sub UnitTest_mock_log3
   <ul><u>example:</u><br>
   <code>define test1 UnitTest dummyDuino ( { Log3 undef, 2, "this is a Log Message inside our Test";; } )
   </code></ul><br>
+  
+  <b>Attribute</b><br>
+	<ul><li><a name="disable"></a>disable<br>
+		This activates / deactivates the test. (0 = on | 1 = off)<br>
+		A defined test starts automatically at the FHEM Restart. If the attribute deleted, the test is always active by default.</li><a name=" "></a></ul><br>
+  
   <a name="UnitTestinternals"></a>
   <b>Internals</b>
   <ul>
@@ -339,6 +371,12 @@ sub UnitTest_mock_log3
   <ul><u>Beispiel:</u><br>
   <code>define test1 UnitTest dummyDuino ( { Log3 undef, 2, "this is a Log Message inside our Test";; } )
   </code></ul><br>
+  
+  <b>Attribute</b><br>
+	<ul><li><a name="disable"></a>disable<br>
+		Das aktiviert / deaktiert den Test. (0 = ein | 1 = aus)<br>
+		Ein definierter Test startet automatisch beim FHEM Restart. Sobald das Attribut gel&ouml;scht wird, ist der Test standardm&auml;ßig immer aktiv.</li><a name=" "></a></ul><br>
+  
   <a name="UnitTestinternals"></a>
   <b>Internals</b>
   <ul>
