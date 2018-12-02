@@ -924,7 +924,7 @@ SIGNALduino_Get($@)
 		return "";
   	}
   }
-  #return "No $a[1] for dummies" if(IsDummy($name));
+  return "No $a[1] for dummies" if(IsDummy($name));
 
   SIGNALduino_Log3 $name, 5, "$name: command for gets: " . $gets{$a[1]}[0] . " " . $arg;
 
@@ -965,6 +965,7 @@ SIGNALduino_Get($@)
 	{
 		
 		my $msgtype;
+		my $action;
 		if (exists ($ProtocolListSIGNALduino{$id}{format}) && $ProtocolListSIGNALduino{$id}{format} eq "manchester")
 		{
 			$msgtype = "MC";
@@ -978,7 +979,7 @@ SIGNALduino_Get($@)
 			$msgtype = "MU";
 		}
 		
-		
+		$action=""
 		$ret .= sprintf("<tr class=\"%s\"><td><div>%3s</div></td><td><div>%s</div></td><td><div>%s</div></td><td><div>%s</div></td><td><div>%s</div></td></tr>",$oddeven,$id,$msgtype,SIGNALduino_getProtoProp($id,"clientmodule",""),SIGNALduino_getProtoProp($id,"name",""),SIGNALduino_getProtoProp($id,"comment",""));
 		$oddeven= $oddeven eq "odd" ? "even" : "odd" ;
 		
