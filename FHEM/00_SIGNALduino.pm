@@ -965,6 +965,19 @@ SIGNALduino_Get($@)
 	{
 		
 		my $msgtype;
+		if (exists ($ProtocolListSIGNALduino{$id}{format}) && $ProtocolListSIGNALduino{$id}{format} eq "manchester")
+		{
+			$msgtype = "MC";
+		}
+		elsif (exists $ProtocolListSIGNALduino{$id}{sync})
+		{
+			$msgtype = "MS";
+		}
+		elsif (exists ($ProtocolListSIGNALduino{$id}{clockabs}))
+		{
+			$msgtype = "MU";
+		}
+		
 		
 		$ret .= sprintf("<tr class=\"%s\"><td><div>%3s</div></td><td><div>%s</div></td><td><div>%s</div></td><td><div>%s</div></td><td><div>%s</div></td></tr>",$oddeven,$id,$msgtype,SIGNALduino_getProtoProp($id,"clientmodule",""),SIGNALduino_getProtoProp($id,"name",""),SIGNALduino_getProtoProp($id,"comment",""));
 		$oddeven= $oddeven eq "odd" ? "even" : "odd" ;
@@ -972,8 +985,10 @@ SIGNALduino_Get($@)
 		$ret .= "\n";
 	}
 	$ret .= "</tbody></table>";
+	#$moduleId =~ s/,$//;
 	
 	return "$ret";
+	#return "$a[1]: \n\n$ret\nIds with modules: $moduleId";
   }  
 
   #SIGNALduino_SimpleWrite($hash, $gets{$a[1]}[0] . $arg);
