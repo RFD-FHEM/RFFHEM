@@ -924,7 +924,7 @@ SIGNALduino_Get($@)
 		return "";
   	}
   }
-  return "No $a[1] for dummies" if(IsDummy($name));
+  #return "No $a[1] for dummies" if(IsDummy($name));
 
   SIGNALduino_Log3 $name, 5, "$name: command for gets: " . $gets{$a[1]}[0] . " " . $arg;
 
@@ -956,56 +956,24 @@ SIGNALduino_Get($@)
 	}
 	@IdList = sort { $a <=> $b } @IdList;
 	
-	$ret = " ID    modulname       protocolname # comment\n\n";
-	
+	$ret = "<table class=\"block wide internals wrapcolumns\">";
+	$ret .="<caption>$a[1]</caption>";
+	$ret .= "<thead><td>ID</td><td>Message Type</td><td>modulname</td><td>protocolname</td> <td># comment</td><td>Action</td></thead>";
+	$ret .="<tbody>";
+	my $oddeven="odd";
 	foreach $id (@IdList)
 	{
-		$ret .= sprintf("%3s",$id) . " ";
 		
-		if (exists ($ProtocolListSIGNALduino{$id}{format}) && $ProtocolListSIGNALduino{$id}{format} eq "manchester")
-		{
-			$ret .= "MC";
-		}
-		elsif (exists $ProtocolListSIGNALduino{$id}{sync})
-		{
-			$ret .= "MS";
-		}
-		elsif (exists ($ProtocolListSIGNALduino{$id}{clockabs}))
-		{
-			$ret .= "MU";
-		}
+		my $msgtype;
 		
-		if (exists ($ProtocolListSIGNALduino{$id}{clientmodule}))
-		{
-			$moduleId .= "$id,";
-			$s = $ProtocolListSIGNALduino{$id}{clientmodule};
-			if (length($s) < 15)
-			{
-				$s .= substr("               ",length($s) - 15);
-			}
-			$ret .= " $s";
-		}
-		else
-		{
-			$ret .= "                ";
-		}
-		
-		if (exists ($ProtocolListSIGNALduino{$id}{name}))
-		{
-			$ret .= " $ProtocolListSIGNALduino{$id}{name}";
-		}
-		
-		if (exists ($ProtocolListSIGNALduino{$id}{comment}))
-		{
-			$ret .= " # $ProtocolListSIGNALduino{$id}{comment}";
-		}
+		$ret .= sprintf("<tr class=\"%s\"><td><div>%3s</div></td><td><div>%s</div></td><td><div>%s</div></td><td><div>%s</div></td><td><div>%s</div></td></tr>",$oddeven,$id,$msgtype,SIGNALduino_getProtoProp($id,"clientmodule",""),SIGNALduino_getProtoProp($id,"name",""),SIGNALduino_getProtoProp($id,"comment",""));
+		$oddeven= $oddeven eq "odd" ? "even" : "odd" ;
 		
 		$ret .= "\n";
 	}
-	#$moduleId =~ s/,$//;
+	$ret .= "</tbody></table>";
 	
-	return "$a[1]: \n\n$ret\n";
-	#return "$a[1]: \n\n$ret\nIds with modules: $moduleId";
+	return "$ret";
   }  
 
   #SIGNALduino_SimpleWrite($hash, $gets{$a[1]}[0] . $arg);
