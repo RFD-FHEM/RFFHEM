@@ -991,12 +991,12 @@
 			start           => [1,-63], 							   
 			clockabs     	=> 250,	# -1=auto	
 			format 			=> 'twostate',	# not used now
-			preamble		=> 'u46#',			
-			#clientmodule    => '',
-			#modulematch     => '',
+			preamble		=> 'P46#',			
+			clientmodule    => 'SD_UT',
+			modulematch     => '^P46#.*',
 			length_min      => '16',
 			length_max 		=> '18',
-			},
+		},
    	"47"    => ## maverick
                # MC;LL=-507;LH=490;SL=-258;SH=239;D=AA9995599599A959996699A969;C=248;L=104;
 		{
