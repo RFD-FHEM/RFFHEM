@@ -2188,7 +2188,7 @@ SIGNALduino_Parse_MS($$$$%)
 			$valid = $valid && $ProtocolListSIGNALduino{$id}{length_max} >= scalar @bit_msg  if (defined($ProtocolListSIGNALduino{$id}{length_max}));
 			next if (!$valid);  
 			
-			my ($rcode,@retvalue) = SIGNALduino_callsub('postDemodulation',$ProtocolListSIGNALduino{$id}{postDemodulation},$name,@bit_msg,$ProtocolListSIGNALduino{$id}{developId} =~ 'p' ? 1 : undef);
+			my ($rcode,@retvalue) = SIGNALduino_callsub('postDemodulation',$ProtocolListSIGNALduino{$id}{postDemodulation},$name,@bit_msg,SIGNALduino_getProtoProp($id,developId","") =~ 'p' ? 1 : undef);
 			next if ($rcode < 1 );
 			#SIGNALduino_Log3 $name, 5, "$name: postdemodulation value @retvalue";
 			
@@ -2459,7 +2459,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 				
 				Debug "$name: demodulated message raw (@bit_msg), ".@bit_msg." bits\n" if ($debug);
 
-				my ($rcode,@retvalue) = SIGNALduino_callsub('postDemodulation',$ProtocolListSIGNALduino{$id}{postDemodulation},$name,@bit_msg,$ProtocolListSIGNALduino{$id}{developId} =~ 'p' ? 1 : undef);
+				my ($rcode,@retvalue) = SIGNALduino_callsub('postDemodulation',$ProtocolListSIGNALduino{$id}{postDemodulation},$name,@bit_msg,SIGNALduino_getProtoProp($id,developId","") =~ 'p' ? 1 : undef));
 				next if ($rcode < 1 );
 				@bit_msg = @retvalue;
 				undef(@retvalue); undef($rcode);
