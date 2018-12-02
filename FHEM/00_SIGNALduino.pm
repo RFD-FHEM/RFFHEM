@@ -3024,7 +3024,7 @@ sub SIGNALduino_callsub
 	{
 		if (defined($evalFirst) && $evalFirst)
 		{
-			eval( "$method->($name, @args)");
+			eval( $method->($name, @args));
 			if($@) {
 				SIGNALduino_Log3 $name, 5, "$name: Error: $funcname, has an error and will not be executed: $@ please report at github.";
 				return (0,undef);
