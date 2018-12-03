@@ -822,7 +822,7 @@ sub SD_UT_Attr(@) {
 	
 	if ($cmd eq "del" && $attrName eq "model") {			### delete readings
 		
-		for $readingname (qw/Button deviceCode LastAction state unknownMSG/)
+		for my $readingname (qw/Button deviceCode LastAction state unknownMSG/)
 		{
 			readingsDelete($hash,$readingname):
 		}
