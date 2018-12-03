@@ -958,7 +958,7 @@ SIGNALduino_Get($@)
 	
 	$ret = "<table class=\"block wide internals wrapcolumns\">";
 	$ret .="<caption>$a[1]</caption>";
-	$ret .= "<thead><td>dev</td><td>ID</td><td>Message Type</td><td>modulname</td><td>protocolname</td> <td># comment</td><td>Action</td></thead>";
+	$ret .= "<thead style=\"text-align:center\"><td>dev</td><td>ID</td><td>Message Type</td><td>modulname</td><td>protocolname</td> <td># comment</td><td>Action</td></thead>";
 	$ret .="<tbody>";
 	my $oddeven="odd";
 	my $wl_attr= AttrVal($name, "whitelist_IDs", undef);
@@ -1002,7 +1002,7 @@ SIGNALduino_Get($@)
 		
 		$action=FW_pH(urlEncode("cmd.attr$name=attr $name whitelist_IDs $newWlIDs"), $cmd, 0, 0, 1, 0);
 		
-		$ret .= sprintf("<tr class=\"%s\"><td><div>%3s</div></td><td><div>%s</div></td><td><div>%s</div></td><td><div>%s</div></td><td><div>%s</div></td><td><div>%s</div></td><td><div>%s</div></td></tr>",$oddeven,SIGNALduino_getProtoProp($id,"developId",""),$id,$msgtype,SIGNALduino_getProtoProp($id,"clientmodule",""),SIGNALduino_getProtoProp($id,"name",""),SIGNALduino_getProtoProp($id,"comment",""),$action);
+		$ret .= sprintf("<tr class=\"%s\"><td><div>%s</div></td><td><div>%3s</div></td><td><div>%s</div></td><td><div>%s</div></td><td><div>%s</div></td><td><div>%s</div></td><td><div>%s</div></td></tr>",$oddeven,SIGNALduino_getProtoProp($id,"developId",""),$id,$msgtype,SIGNALduino_getProtoProp($id,"clientmodule",""),SIGNALduino_getProtoProp($id,"name",""),SIGNALduino_getProtoProp($id,"comment",""),$action);
 		$oddeven= $oddeven eq "odd" ? "even" : "odd" ;
 		
 		$ret .= "\n";
