@@ -821,11 +821,11 @@ sub SD_UT_Attr(@) {
 	#Log3 $name, 3, "SD_UT: cmd=$cmd attrName=$attrName attrValue=$attrValue oldmodel=$oldmodel";
 	
 	if ($cmd eq "del" && $attrName eq "model") {			### delete readings
-		delete $hash->{READINGS}{"Button"} if($hash->{READINGS});
-		delete $hash->{READINGS}{"deviceCode"} if($hash->{READINGS});
-		delete $hash->{READINGS}{"LastAction"} if($hash->{READINGS});
-		delete $hash->{READINGS}{"state"} if($hash->{READINGS});
-		delete $hash->{READINGS}{"unknownMSG"} if($hash->{READINGS});
+		
+		for $readingname (qw/Button deviceCode LastAction state unknownMSG/)
+		{
+			readingsDelete($hash,$readingname):
+		}
 	}
 	
 	## return if  fhem init
