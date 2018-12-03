@@ -9,7 +9,7 @@
 deploylocal:
 	cp FHEM/*.pm /opt/fhem/FHEM/
 	cp FHEM/lib/*.hash /opt/fhem/FHEM/lib
-	cp test/*.hash /opt/fhem/FHEM/lib &&
+	cp test/*.hash /opt/fhem/FHEM/lib
 	sudo timeout 3 killall -qws2 perl || sudo killall -qws9 perl || true
 	sudo rm /opt/fhem/log/fhem-*.log || true
 	sudo cp test/fhem.cfg /opt/fhem/fhem.cfg
