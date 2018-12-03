@@ -4534,8 +4534,10 @@ sub SIGNALduino_githubParseHttpResponse($)
 		Check the communication with the SIGNALduino.
 		</li><br>
         <a name="protocolIDs"></a>
-		<li>protocolIDs<br>
-		display a list of the protocol IDs
+		<li>protocolIDs<br> 
+		Shows the current implemented protocols from the SIGNALduino and to what logical FHEM Modul data is sent.<br>
+		Additional there is an on/off symbol, which shows you if a protocol will be processed. The attributes whitelistIDs, blacklistIDs und development affects this.
+		Protocols which are flagged in the row <code>dev</code>, can't be activated via this ui.
 		</li><br>
         <a name="raw"></a>
 		<li>raw<br>
@@ -4922,7 +4924,9 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
 	</li><br>
 	<a name="protocolIDs"></a>
 	<li>protocolIDs<br>
-	Zeigt Ihnen die aktuell implementierten Protokolle des SIGNALduino an und an welches FHEM Modul Sie &uuml;bergeben werden.
+	Zeigt Ihnen die aktuell implementierten Protokolle des SIGNALduino an und an welches logische FHEM Modul Sie &uuml;bergeben werden.<br>
+	Außerdem wird mit on/off Symbolen angezeigt ob ein Protokoll verarbeitet wird. Die Attribute whitelistIDs, blacklistIDs und development beeinflussen dies.
+	Protokolle die in der Spalte <code>dev</code> markiert sind, k&ouml;nnen derzeit nicht über die Schaltsymbole aktiviert werden.
 	</li><br>
 	<a name="raw"></a>
 	<li>raw<br>
