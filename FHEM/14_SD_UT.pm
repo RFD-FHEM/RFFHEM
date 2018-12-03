@@ -824,7 +824,7 @@ sub SD_UT_Attr(@) {
 		
 		for my $readingname (qw/Button deviceCode LastAction state unknownMSG/)
 		{
-			readingsDelete($hash,$readingname);
+			readingsDelete($hash,$readingname):
 		}
 	}
 	
