@@ -961,6 +961,8 @@ SIGNALduino_Get($@)
 	$ret .= "<thead><td>ID</td><td>Message Type</td><td>modulname</td><td>protocolname</td> <td># comment</td><td>Action</td></thead>";
 	$ret .="<tbody>";
 	my $oddeven="odd";
+	my $wl_attr= AttrVal($name, "whitelist_IDs", undef);
+	
 	foreach $id (@IdList)
 	{
 		
@@ -979,8 +981,27 @@ SIGNALduino_Get($@)
 			$msgtype = "MU";
 		}
 		
-		$action=""
-		$ret .= sprintf("<tr class=\"%s\"><td><div>%3s</div></td><td><div>%s</div></td><td><div>%s</div></td><td><div>%s</div></td><td><div>%s</div></td></tr>",$oddeven,$id,$msgtype,SIGNALduino_getProtoProp($id,"clientmodule",""),SIGNALduino_getProtoProp($id,"name",""),SIGNALduino_getProtoProp($id,"comment",""));
+		my $cmd;
+		my $newWlIDs;
+		if ($wl_attr =~ /^$id/ || $wl_attr =~ /,$id/) {
+			$cmd ="del";
+			$newWlIDs=$wl_attr;
+			#Todo: Regex kombinieren
+			$newWlIDs =~ s/,$id,/,/;
+			$newWlIDs =~ s/,$id$//;
+			$newWlIDs =~ s/^$id,//;
+			$newWlIDs =~ s/^$id//;
+			
+		} else {
+			$cmd="add";
+			$newWlIDs = defined($wl_attr) ? "$wl_attr,$id" : $id;
+		}
+		
+		#Todo: Add / Remove via Image
+		
+		$action=FW_pH(urlEncode("cmd.attr$name=attr $name whitelist_IDs $newWlIDs"), $cmd, 0, 0, 1, 0);
+		
+		$ret .= sprintf("<tr class=\"%s\"><td><div>%3s</div></td><td><div>%s</div></td><td><div>%s</div></td><td><div>%s</div></td><td><div>%s</div></td><td><div>%s</div></td></tr>",$oddeven,$id,$msgtype,SIGNALduino_getProtoProp($id,"clientmodule",""),SIGNALduino_getProtoProp($id,"name",""),SIGNALduino_getProtoProp($id,"comment",""),$action);
 		$oddeven= $oddeven eq "odd" ? "even" : "odd" ;
 		
 		$ret .= "\n";
