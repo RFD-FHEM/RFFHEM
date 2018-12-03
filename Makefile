@@ -5,7 +5,11 @@
 98_UnitTest.pm: test/98_unittest.pm
 	sudo cp $< /opt/fhem/FHEM/$@
 		
-deploylocal: /opt/fhem/FHEM/00_SIGNALduino.pm /opt/fhem/FHEM/14_SD_WS.pm 98_UnitTest.pm /opt/fhem/FHEM/90_SIGNALduino_un.pm /opt/fhem/FHEM/lib/signalduino_protocols.hash
+#deploylocal: /opt/fhem/FHEM/00_SIGNALduino.pm /opt/fhem/FHEM/10_FS10.pm /opt/fhem/FHEM/14_SD_WS.pm 98_UnitTest.pm /opt/fhem/FHEM/90_SIGNALduino_un.pm /opt/fhem/FHEM/lib/signalduino_protocols.hash
+deploylocal:
+    cp FHEM/*.pm /opt/fhem/FHEM/
+    cp FHEM/lib/*.hash /opt/fhem/FHEM/lib
+	cp test/*.hash /opt/fhem/FHEM/lib &&
 	sudo timeout 3 killall -qws2 perl || sudo killall -qws9 perl || true
 	sudo rm /opt/fhem/log/fhem-*.log || true
 	sudo cp test/fhem.cfg /opt/fhem/fhem.cfg
@@ -20,7 +24,7 @@ test: deploylocal
 	test/test-runner.sh test3
 	test/test-runner.sh test4
 	test/test-runner.sh test_mu_1
-	cp test/*.hash /opt/fhem/FHEM/lib && test/test-runner.sh test_loadprotohash
+	test/test-runner.sh test_loadprotohash
 	test/test-runner.sh test_developid_1
 	test/test-runner.sh test_proto44
 	test/test-runner.sh test_proto46
