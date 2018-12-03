@@ -958,7 +958,7 @@ SIGNALduino_Get($@)
 	
 	$ret = "<table class=\"block wide internals wrapcolumns\">";
 	$ret .="<caption>$a[1]</caption>";
-	$ret .= "<thead><td>ID</td><td>Message Type</td><td>modulname</td><td>protocolname</td> <td># comment</td><td>Action</td></thead>";
+	$ret .= "<thead><td>dev</td><td>ID</td><td>Message Type</td><td>modulname</td><td>protocolname</td> <td># comment</td><td>Action</td></thead>";
 	$ret .="<tbody>";
 	my $oddeven="odd";
 	my $wl_attr= AttrVal($name, "whitelist_IDs", undef);
@@ -984,7 +984,8 @@ SIGNALduino_Get($@)
 		my $cmd;
 		my $newWlIDs;
 		if ($wl_attr =~ /^$id/ || $wl_attr =~ /,$id/) {
-			$cmd ="del";
+			$cmd = FW_makeImage("off","disable","icon");
+			
 			$newWlIDs=$wl_attr;
 			#Todo: Regex kombinieren
 			$newWlIDs =~ s/,$id,/,/;
@@ -993,7 +994,7 @@ SIGNALduino_Get($@)
 			$newWlIDs =~ s/^$id//;
 			
 		} else {
-			$cmd="add";
+			$cmd = FW_makeImage("on","enable","icon");
 			$newWlIDs = defined($wl_attr) ? "$wl_attr,$id" : $id;
 		}
 		
@@ -1001,7 +1002,7 @@ SIGNALduino_Get($@)
 		
 		$action=FW_pH(urlEncode("cmd.attr$name=attr $name whitelist_IDs $newWlIDs"), $cmd, 0, 0, 1, 0);
 		
-		$ret .= sprintf("<tr class=\"%s\"><td><div>%3s</div></td><td><div>%s</div></td><td><div>%s</div></td><td><div>%s</div></td><td><div>%s</div></td><td><div>%s</div></td></tr>",$oddeven,$id,$msgtype,SIGNALduino_getProtoProp($id,"clientmodule",""),SIGNALduino_getProtoProp($id,"name",""),SIGNALduino_getProtoProp($id,"comment",""),$action);
+		$ret .= sprintf("<tr class=\"%s\"><td><div>%3s</div></td><td><div>%s</div></td><td><div>%s</div></td><td><div>%s</div></td><td><div>%s</div></td><td><div>%s</div></td><td><div>%s</div></td></tr>",$oddeven,SIGNALduino_getProtoProp($id,"developId",""),$id,$msgtype,SIGNALduino_getProtoProp($id,"clientmodule",""),SIGNALduino_getProtoProp($id,"name",""),SIGNALduino_getProtoProp($id,"comment",""),$action);
 		$oddeven= $oddeven eq "odd" ? "even" : "odd" ;
 		
 		$ret .= "\n";
