@@ -236,7 +236,7 @@ sub SD_UT_Initialize($) {
 	$hash->{ParseFn}	= "SD_UT_Parse";
 	$hash->{SetFn}		= "SD_UT_Set";
 	$hash->{AttrFn}		= "SD_UT_Attr";
-	$hash->{AttrList}	= "IODev debug:0,1 do_not_notify:1,0 ignore:0,1 showtime:1,0 model:".join(",", sort keys %models)." " .
+	$hash->{AttrList}	= "repeats:1,2,3,4,5,6,7,8,9 IODev debug:0,1 do_not_notify:1,0 ignore:0,1 showtime:1,0 model:".join(",", sort keys %models)." " .
 						"$readingFnAttributes ";
 	$hash->{AutoCreate}	={"SD_UT.*" => {ATTR => "model:unknown", FILTER => "%NAME", autocreateThreshold => "3:180"}};
 	#$hash->{noAutocreatedFilelog} = 1;		### Bug? bei Aktivierung wird keine AutoCreate Attr berücksichtigt! ###
@@ -315,89 +315,74 @@ sub SD_UT_Set($$$@) {
 	my $msgEnd = undef;
 	my $value = "";		# value from models cmd
 	my $save = "";		# bits from models cmd
+	my $repeats = AttrVal($name,'repeats', '5');
 
 	Debug " $ioname: SD_UT_Set attr_model=$model name=$name (before check)" if($debug && $cmd ne "?");
 	return $ret if ($defs{$name}->{DEF} eq "unknown");		# no setlist
 	
 	############ Westinghouse_Delancey RH787T ############
 	if ($model eq "RH787T" && $cmd ne "?") {
-
 		my @definition = split(" ", $hash->{DEF});									# split adress from def
 		my $adr = sprintf( "%04b", hex($definition[1])) if ($name ne "unknown");	# argument 1 - adress to binary with 4 digits
 
 		$msg = $models{$model}{Protocol} . "#0" . $adr ."1";
-		$msgEnd = "#R9";
-	
+		$msgEnd = "#R" . $repeats;
 	############ Westinghouse Buttons_five ############
 	} elsif ($model eq "Buttons_five" && $cmd ne "?") {
-		
 		my @definition = split(" ", $hash->{DEF});									# split adress from def
 		my $adr = sprintf( "%04b", hex($definition[1])) if ($name ne "unknown");	# argument 1 - adress to binary with 4 digits
 
 		$msg = $models{$model}{Protocol} . "#";
-		$msgEnd .= "11".$adr."#R9";
-
+		$msgEnd .= "11".$adr."#R" . $repeats;
 	############ SA_434_1_mini ############
 	} elsif ($model eq "SA_434_1_mini" && $cmd ne "?") {
-		
 		my @definition = split(" ", $hash->{DEF});										# split adress from def
-		my $bitData = sprintf( "%012b", hex($definition[1])) if ($name ne "unknown");	# argument 1 - adress to binary with 4 digits
-		$msg = $models{$model}{Protocol} . "#" . $bitData . "#R5";						# !!! Anzahl Wiederholungen noch klären !!!
-
-		Debug " $ioname: SD_UT_Set attr_model=$model msg=$msg" if($debug);
+		my $bitData = sprintf( "%012b", hex($definition[1])) if ($name ne "unknown");	# argument 1 - adress to binary with 12 digits
+		$msg = $models{$model}{Protocol} . "#" . $bitData . "#R" . $repeats;
 	############ QUIGG_DMV ############
 	} elsif ($model eq "QUIGG_DMV" && $cmd ne "?") {
-
 		my @definition = split(" ", $hash->{DEF});									# split adress from def
-		my $adr = sprintf( "%012b", hex($definition[1])) if ($name ne "unknown");	# argument 1 - adress to binary with 4 digits
+		my $adr = sprintf( "%012b", hex($definition[1])) if ($name ne "unknown");	# argument 1 - adress to binary with 12 digits
 
-		$msg = $models{$model}{Protocol} . "#P" . $adr;
-		$msgEnd = "#R1";															# !!! Anzahl Wiederholungen noch klären !!!
-
+		$msg = $models{$model}{Protocol} . "#" . $adr;
+		$msgEnd = "P#R" . $repeats;
 	############ Novy_840029 ############
 	} elsif ($model eq "Novy_840029" && $cmd ne "?") {
-
 		my @definition = split(" ", $hash->{DEF});									# split adress from def
-		my $adr = sprintf( "%08b", hex($definition[1])) if ($name ne "unknown");	# argument 1 - adress to binary with 2 digits
+		my $adr = sprintf( "%08b", hex($definition[1])) if ($name ne "unknown");	# argument 1 - adress to binary with 8 digits
 
 		$msg = $models{$model}{Protocol} . "#" . $adr;
-		$msgEnd = "#R9";															# !!! Anzahl Wiederholungen noch klären !!!
-
+		$msgEnd = "#R" . $repeats;
 	############ CAME_TOP_432EV ############
 	} elsif ($model eq "CAME_TOP_432EV" && $cmd ne "?") {
-
 		my @definition = split(" ", $hash->{DEF});									# split adress from def
-		my $adr = sprintf( "%08b", hex($definition[1])) if ($name ne "unknown");	# argument 1 - adress to binary with 2 digits
+		my $adr = sprintf( "%08b", hex($definition[1])) if ($name ne "unknown");	# argument 1 - adress to binary with 8 digits
 
 		$msg = $models{$model}{Protocol} . "#" . $adr;
-		$msgEnd = "#R9";															# !!! Anzahl Wiederholungen noch klären !!!
-
+		$msgEnd = "#R" . $repeats;
 	############ SF01_01319004 ############
 	} elsif ($model eq "SF01_01319004" && $cmd ne "?") {
 		my @definition = split(" ", $hash->{DEF});									# split adress from def
-		my $adr = sprintf( "%016b", hex($definition[1])) if ($name ne "unknown");	# argument 1 - adress to binary with 2 digits
+		my $adr = sprintf( "%016b", hex($definition[1])) if ($name ne "unknown");	# argument 1 - adress to binary with 16 digits
 		$msg = $models{$model}{Protocol} . "#" . substr($adr,0,14);
-		$msgEnd = "#R5";
+		$msgEnd = "#R" . $repeats;
 	############ Hoermann HS1-868-BS ############
 	} elsif ($model eq "HS1_868_BS" && $cmd ne "?") {
 		my @definition = split(" ", $hash->{DEF});									# split adress from def
 		my $bitData = "00000000";
-		$bitData .= sprintf( "%036b", hex($definition[1])) if ($name ne "unknown");	# argument 1 - adress to binary with 7 digits
-		$msg = $models{$model}{Protocol} . "#" . $bitData . "#R3";					# !!! Anzahl Wiederholungen noch klären !!!
+		$bitData .= sprintf( "%036b", hex($definition[1])) if ($name ne "unknown");	# argument 1 - adress to binary with 36 digits
+		$msg = $models{$model}{Protocol} . "#" . $bitData . "#R" . $repeats;
 	############ Hoermann HSM4 ############
 	} elsif ($model eq "HSM4" && $cmd ne "?") {
 		my @definition = split(" ", $hash->{DEF});									# split adress from def
-		my $adr = sprintf( "%028b", hex($definition[1])) if ($name ne "unknown");	# argument 1 - adress to binary with 7 digits
+		my $adr = sprintf( "%028b", hex($definition[1])) if ($name ne "unknown");	# argument 1 - adress to binary with 28 digits
 		$msg = $models{$model}{Protocol} . "#00000000" . $adr;
-		$msgEnd .= "1100#R3";
+		$msgEnd .= "1100#R" . $repeats;
 	############ TEDSEN_SKX1MD ############
 	} elsif ($model eq "TEDSEN_SKX1MD" && $cmd ne "?") {
-		
 		my @definition = split(" ", $hash->{DEF});										# split adress from def
 		my $bitData = sprintf( "%012b", hex($definition[1])) if ($name ne "unknown");	# argument 1 - adress to binary with 4 digits
-		$msg = $models{$model}{Protocol} . "#" . $bitData . "#R5";						# !!! Anzahl Wiederholungen noch klären !!!
-
-		Debug " $ioname: SD_UT_Set attr_model=$model msg=$msg" if($debug);
+		$msg = $models{$model}{Protocol} . "#" . $bitData . "#R" . $repeats;
 	}
 
 	Debug " $ioname: SD_UT_Set attr_model=$model msg=$msg msgEnd=$msgEnd" if($debug && defined $msgEnd);
@@ -490,10 +475,6 @@ sub SD_UT_Parse($$) {
 	$deviceCode = substr($rawData,0,2);
 	$devicedef = "Unitec_47031 " . $deviceCode if(!$def && ($protocol == 30 || $protocol == 83));
 	$def = $modules{SD_UT}{defptr}{$devicedef} if(!$def && ($protocol == 30 || $protocol == 83));
-	### QUIGG_DMV [P34] ###
-	$deviceCode = substr($rawData,0,3);
-	$devicedef = "QUIGG_DMV " . $deviceCode  if(!$def && $protocol == 34);
-	$def = $modules{SD_UT}{defptr}{$devicedef}  if(!$def && $protocol == 34);
 	### Remote control TEDSEN_SKX1MD [P46] ###
 	$deviceCode = $rawData;
 	$devicedef = "TEDSEN_SKX1MD " . $deviceCode if (!$def && $protocol == 46);
@@ -511,8 +492,12 @@ sub SD_UT_Parse($$) {
 	$deviceCode = substr($rawData,0,2);
 	$devicedef = "Novy_840029 " . $deviceCode  if(!$def && ($protocol == 86 || $protocol == 81));
 	$def = $modules{SD_UT}{defptr}{$devicedef}  if(!$def && ($protocol == 86 || $protocol == 81));
-	### SF01_01319004 [P86] ###
 	if ($hlen == 5) {
+		### QUIGG_DMV [P34] ###
+		$deviceCode = substr($rawData,0,3);
+		$devicedef = "QUIGG_DMV " . $deviceCode  if(!$def && $protocol == 34);
+		$def = $modules{SD_UT}{defptr}{$devicedef}  if(!$def && $protocol == 34);
+		### SF01_01319004 [P86] ###
 		$deviceCode = substr($bitData,0,14) . "00";
 		$deviceCode = sprintf("%X", oct( "0b$deviceCode" ) );
 		$devicedef = "SF01_01319004 " . $deviceCode  if(!$def && $protocol == 86);
@@ -522,15 +507,15 @@ sub SD_UT_Parse($$) {
 	$deviceCode = substr($rawData,0,2);
 	$devicedef = "CAME_TOP_432EV " . $deviceCode  if(!$def && ($protocol == 86 || $protocol == 81));
 	$def = $modules{SD_UT}{defptr}{$devicedef}  if(!$def && ($protocol == 86 || $protocol == 81));
-	if ($hlen == 11) {
+	if ($hlen == 11 && $protocol == 69) {
 		### Remote control Hoermann HS1-868-BS [P69] ###
-		$deviceCode = substr($rawData,2,9) if ($hlen >= 11);
-		$devicedef = "HS1_868_BS " . $deviceCode if (!$def && $protocol == 69);
-		$def = $modules{SD_UT}{defptr}{$devicedef} if (!$def && $protocol == 69);
+		$deviceCode = substr($rawData,2,9);
+		$devicedef = "HS1_868_BS " . $deviceCode if (!$def);
+		$def = $modules{SD_UT}{defptr}{$devicedef} if (!$def);;
 		### Remote control Hoermann HSM4 [P69] ###
-		$deviceCode = substr($rawData,2,7) if ($hlen >= 11);
-		$devicedef = "HSM4 " . $deviceCode if (!$def && $protocol == 69);
-		$def = $modules{SD_UT}{defptr}{$devicedef} if (!$def && $protocol == 69);
+		$deviceCode = substr($rawData,2,7);
+		$devicedef = "HSM4 " . $deviceCode if (!$def);
+		$def = $modules{SD_UT}{defptr}{$devicedef} if (!$def);
 	}
 	### unknown ###
 	$devicedef = "unknown" if(!$def);
@@ -821,10 +806,10 @@ sub SD_UT_Attr(@) {
 	#Log3 $name, 3, "SD_UT: cmd=$cmd attrName=$attrName attrValue=$attrValue oldmodel=$oldmodel";
 	
 	if ($cmd eq "del" && $attrName eq "model") {			### delete readings
-		
+	
 		for my $readingname (qw/Button deviceCode LastAction state unknownMSG/)
 		{
-			readingsDelete($hash,$readingname):
+			readingsDelete($hash,$readingname);
 		}
 	}
 	
@@ -983,7 +968,9 @@ sub SD_UT_binaryToNumber {
 		<li>model<br>
 		The attribute indicates the model type of your device.<br>
 		(unknown, Buttons_five, CAME_TOP_432EV, HS1-868-BS, HSM4, QUIGG_DMV, Novy_840029, RH787T, SA_434_1_mini, TEDSEN_SKX1MD, Unitec_47031)</li>
-	</ul><br><br>
+	</ul><br>
+	<ul><li><a name="repeats">repeats</a><br>
+	This attribute can be used to adjust how many repetitions are sent. Default is 5.</li></ul><br>
 	
 	<b><i>Generated readings of the models</i></b><br>
 	<ul><u>Buttons_five | CAME_TOP_432EV | HSM4 | Novy_840029 | QUIGG_DMV | RH787T</u><br>
@@ -1148,7 +1135,9 @@ sub SD_UT_binaryToNumber {
 	<ul><li><a name="model">model</a><br>
 		Das Attribut bezeichnet den Modelltyp Ihres Ger&auml;tes.<br>
 		(unknown, Buttons_five, CAME_TOP_432EV, HS1-868-BS, HSM4, QUIGG_DMV, RH787T, Novy_840029, SA_434_1_mini, TEDSEN_SKX1MD, Unitec_47031)</li><a name=" "></a>
-	</ul><br><br>
+	</ul><br>
+	<ul><li><a name="repeats">repeats</a><br>
+	Mit diesem Attribut kann angepasst werden, wie viele Wiederholungen sendet werden. Standard ist 5.</li></ul><br>
 	
 	<b><i>Generierte Readings der Modelle</i></b><br>
 	<ul><u>Buttons_five | CAME_TOP_432EV | HSM4 | Novy_840029 | QUIGG_DMV | RH787T</u><br>
