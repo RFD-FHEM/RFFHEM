@@ -961,7 +961,7 @@ SIGNALduino_Get($@)
 	$ret .= "<thead style=\"text-align:center\"><td>dev</td><td>ID</td><td>Message Type</td><td>modulname</td><td>protocolname</td> <td># comment</td><td>Action</td></thead>";
 	$ret .="<tbody>";
 	my $oddeven="odd";
-	my $wl_attr= AttrVal($name, "whitelist_IDs", undef);
+	my $wl_attr= AttrVal($name, "whitelist_IDs", ".*");
 	
 	foreach $id (@IdList)
 	{
@@ -983,18 +983,24 @@ SIGNALduino_Get($@)
 		
 		my $cmd;
 		my $newWlIDs;
-		if ($wl_attr =~ /^$id/ || $wl_attr =~ /,$id/) {
-			$cmd = FW_makeImage("off","disable","icon");
-			
-			$newWlIDs=$wl_attr;
+		if ( (grep { $_ eq $id } @{$hash->{msIdList}}) ||  (grep { $_ eq $id } @{$hash->{muIdList}}) || (grep { $_ eq $id } @{$hash->{mcIdList}}) ) 
+		{
+			$cmd = FW_makeImage("on","disable","icon");
+			if ($wl_attr eq ".*")
+			{
+				$newWlIDs = join(",",@{$hash->{msIdList}},@{$hash->{muIdList}},@{$hash->{mcIdList}}) 
+			} else  {
+				$newWlIDs=$wl_attr;
+			}
+
 			#Todo: Regex kombinieren
 			$newWlIDs =~ s/,$id,/,/;
 			$newWlIDs =~ s/,$id$//;
 			$newWlIDs =~ s/^$id,//;
 			$newWlIDs =~ s/^$id//;
-			
+		
 		} else {
-			$cmd = FW_makeImage("on","enable","icon");
+			$cmd = FW_makeImage("off","enable","icon");
 			$newWlIDs = defined($wl_attr) ? "$wl_attr,$id" : $id;
 		}
 		
