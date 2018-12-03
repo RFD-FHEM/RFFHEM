@@ -15,6 +15,7 @@ deploylocal: /opt/fhem/FHEM/00_SIGNALduino.pm /opt/fhem/FHEM/14_SD_WS.pm 98_Unit
 	
 test: deploylocal
 	@echo === running 00_SIGNALduino unit tests ===
+	test/test-runner.sh test_modules
 	test/test-runner.sh test1
 	test/test-runner.sh test3
 	test/test-runner.sh test4
