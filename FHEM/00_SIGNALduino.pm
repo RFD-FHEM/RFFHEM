@@ -993,11 +993,7 @@ SIGNALduino_Get($@)
 				$newWlIDs=$wl_attr;
 			}
 
-			#Todo: Regex kombinieren
-			$newWlIDs =~ s/,$id,/,/;
-			$newWlIDs =~ s/,$id$//;
-			$newWlIDs =~ s/^$id,//;
-			$newWlIDs =~ s/^$id//;
+			$newWlIDs =~ s/(?:^$id,?|,$id,|$id$)/,/;
 		
 		} else {
 			$cmd = FW_makeImage("off","enable","icon");
