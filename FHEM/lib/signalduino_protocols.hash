@@ -530,22 +530,25 @@
 			length_max      => '32',				
 			paddingbits     => '1',					# This will disable padding 
 		},
-	"22" => # TX-EZ6 / Weatherstation TZS First Austria
-            # https://forum.fhem.de/index.php?topic=35844.0
-		{
-            name			=> 'TX-EZ6',	
-			id          	=> '22',
-			one				=> [1,-8],
-			zero			=> [1,-3],
-			sync			=> [1,16],				
-			clockabs		=> 500,                  #ca 400us
-			format 			=> 'twostate',	  		
-			preamble		=> 'u22#',				# prepend to converted message	
-			#clientmodule    => '',
-			#modulematch     => '',
-			length_min      => '40',
-			#length_max      => '',				    # must be tested - missing
-		},
+	"22" => ## HAMULiGHT LED Trafo
+					# https://forum.fhem.de/index.php?topic=89301.0
+					# MU;P0=-589;P1=209;P2=-336;P3=32001;P4=-204;P5=1194;P6=-1200;P7=602;D=0123414145610747474101010101074741010747410741074101010101074741010741074741414141456107474741010101010747410107474107410741010101010747410107410747414141414561074747410101010107474101074741074107410101010107474101074107474141414145610747474101010101074;CP=1;R=25;
+					# MU;P0=204;P1=-596;P2=598;P3=-206;P4=1199;P5=-1197;D=0123230123012301010101012323010123012323030303034501232323010101010123230101232301230123010101010123230101230123230303030345012323230101010101232301012323012301230101010101232301012301232303030303450123232301010101012323010123230123012301010101012323010;CP=0;R=25;
+			{
+				name						=> 'HAMULiGHT',
+				comment					=> 'remote LED Transformator',
+				id							=> '22',
+				one							=> [1,-3],
+				zero						=> [3,-1],
+				start						=> [6,-6],
+				clockabs				=> 200,						# ca 200us
+				format					=> 'twostate',
+				preamble				=> 'u22#',				# prepend to converted message
+				#clientmodule    => '',
+				#modulematch     => '',
+				length_min      => '32',
+				length_max      => '32',
+			},
 	"23" => # Pearl Sensor
 		{
             name			=> 'perl unknown',	
@@ -727,12 +730,13 @@
 			length_min      => '24',
 			length_max      => '24',				
     	},
-    "33" => # Thermo-/Hygrosensor S014, renkforce E0001PA, Conrad S522
-            # MS;P0=-7871;P2=-1960;P3=578;P4=-3954;D=030323232323434343434323232323234343434323234343234343234343232323432323232323232343234;CP=3;SP=0;R=0;m=0;
+    "33" => # Thermo-/Hygrosensor S014, renkforce E0001PA, Conrad S522, TX-EZ6 (Weatherstation TZS First Austria)
+            # https://forum.fhem.de/index.php?topic=35844.0
+						# MS;P0=-7871;P2=-1960;P3=578;P4=-3954;D=030323232323434343434323232323234343434323234343234343234343232323432323232323232343234;CP=3;SP=0;R=0;m=0;
             # sensor id=62, channel=1, temp=21.1, hum=76, bat=ok
-    	{   
-       		name			=> 'weather33',		
-			comment         => 'S014/TFA 30.3200/TCM/Conrad S522/renkforce E0001PA',
+		{   
+			name			=> 'weather33',		
+			comment		=> 'S014/TFA 30.3200/TCM/Conrad S522/renkforce E0001PA/Tx-EZ6',
 			id          	=> '33',
 			one				=> [1,-8],
 			zero			=> [1,-4],
@@ -745,7 +749,7 @@
 			#modulematch     => '',
 			length_min      => '42',
 			length_max      => '44',
-      },
+		},
     "34" => # QUIGG GT-7000 Funk-Steckdosendimmer | transmitter DMV-7000 - receiver DMV-7009AS
 			# https://github.com/RFD-FHEM/RFFHEM/issues/195 | https://forum.fhem.de/index.php/topic,38831.msg361341.html#msg361341
 			# MU;P0=-5284;P1=583;P2=-681;P3=1216;P4=-1319;D=012341412323232341412341412323234123232341;CP=1;R=16; | MU;P0=-9812;P1=589;P2=-671;P3=1261;P4=-1320;D=012341412323232341412341412323232323232323;CP=3;R=19;
