@@ -860,7 +860,7 @@ SIGNALduino_Get($@)
 	return "$a[1]: \n\nFetching $channel firmware versions for $hardware from github\n";
   }
   
-  if (IsDummy($name))
+  if (IsDummy($name) && $a[1] ne "protocolIDs")
   {
   	if ($arg =~ /^M[CcSU];.*/)
   	{
@@ -924,7 +924,7 @@ SIGNALduino_Get($@)
 		return "";
   	}
   }
-  return "No $a[1] for dummies" if(IsDummy($name));
+  #return "No $a[1] for dummies" if(IsDummy($name));
 
   SIGNALduino_Log3 $name, 5, "$name: command for gets: " . $gets{$a[1]}[0] . " " . $arg;
 
@@ -943,76 +943,9 @@ SIGNALduino_Get($@)
   }
   elsif ($a[1] eq "protocolIDs")
   {
-	my $id;
-	my $ret;
-	my $s;
-	my $moduleId;
-	my @IdList = ();
+	return SIGNALduino_getProtocolHTML($name);
 	
-	foreach $id (keys %ProtocolListSIGNALduino)
-	{
-		next if ($id eq 'id');
-		push (@IdList, $id);
-	}
-	@IdList = sort { $a <=> $b } @IdList;
 	
-	$ret = "<table class=\"block wide internals wrapcolumns\">";
-	$ret .="<caption>$a[1]</caption>";
-	$ret .= "<thead style=\"text-align:center\"><td>dev</td><td>ID</td><td>Message Type</td><td>modulname</td><td>protocolname</td> <td># comment</td><td>Action</td></thead>";
-	$ret .="<tbody>";
-	my $oddeven="odd";
-	my $wl_attr= AttrVal($name, "whitelist_IDs", ".*");
-	
-	foreach $id (@IdList)
-	{
-		
-		my $msgtype;
-		my $action;
-		if (exists ($ProtocolListSIGNALduino{$id}{format}) && $ProtocolListSIGNALduino{$id}{format} eq "manchester")
-		{
-			$msgtype = "MC";
-		}
-		elsif (exists $ProtocolListSIGNALduino{$id}{sync})
-		{
-			$msgtype = "MS";
-		}
-		elsif (exists ($ProtocolListSIGNALduino{$id}{clockabs}))
-		{
-			$msgtype = "MU";
-		}
-		
-		my $cmd;
-		my $newWlIDs;
-		if ( (grep { $_ eq $id } @{$hash->{msIdList}}) ||  (grep { $_ eq $id } @{$hash->{muIdList}}) || (grep { $_ eq $id } @{$hash->{mcIdList}}) ) 
-		{
-			$cmd = FW_makeImage("on","disable","icon");
-			if ($wl_attr eq ".*")
-			{
-				$newWlIDs = join(",",@{$hash->{msIdList}},@{$hash->{muIdList}},@{$hash->{mcIdList}}) 
-			} else  {
-				$newWlIDs=$wl_attr;
-			}
-
-			$newWlIDs =~ s/(?:^$id,?|,$id,|$id$)/,/;
-		
-		} else {
-			$cmd = FW_makeImage("off","enable","icon");
-			$newWlIDs = defined($wl_attr) ? "$wl_attr,$id" : $id;
-		}
-		
-		#Todo: Add / Remove via Image
-		
-		$action=FW_pH(urlEncode("cmd.attr$name=attr $name whitelist_IDs $newWlIDs"), $cmd, 0, 0, 1, 0);
-		
-		$ret .= sprintf("<tr class=\"%s\"><td><div>%s</div></td><td><div>%3s</div></td><td><div>%s</div></td><td><div>%s</div></td><td><div>%s</div></td><td><div>%s</div></td><td><div>%s</div></td></tr>",$oddeven,SIGNALduino_getProtoProp($id,"developId",""),$id,$msgtype,SIGNALduino_getProtoProp($id,"clientmodule",""),SIGNALduino_getProtoProp($id,"name",""),SIGNALduino_getProtoProp($id,"comment",""),$action);
-		$oddeven= $oddeven eq "odd" ? "even" : "odd" ;
-		
-		$ret .= "\n";
-	}
-	$ret .= "</tbody></table>";
-	#$moduleId =~ s/,$//;
-	
-	return "$ret";
 	#return "$a[1]: \n\n$ret\nIds with modules: $moduleId";
   }  
 
@@ -2870,22 +2803,57 @@ SIGNALduino_Attr(@)
 sub SIGNALduino_Detail($@) {
   my ($FW_wname, $name, $room, $pageHash) = @_;
   
+  my $hash = $defs{$name};
   
   my @dspec=devspec2array("DEF=.*fakelog");
   my $lfn = $dspec[0];
   my $fn=$defs{$name}->{TYPE}."-Flash.log";
   
+  my $ret;
   if (-s AttrVal("global", "logdir", "./log/") .$fn)
   { 
 	  my $flashlogurl="$FW_ME/FileLog_logWrapper?dev=$lfn&type=text&file=$fn";
 	  
-	  my $ret  = "<table>";
-	     $ret .= "<tr><td>";
-	     $ret .= "<a href=\"$flashlogurl\">Last Flashlog<\/a>";
-	     $ret .= "</td>";
-	     $ret .= "</table>";
+	  $ret  = "<table>";
+	  $ret .= "<tr><td>";
+	  $ret .= "<a href=\"$flashlogurl\">Last Flashlog<\/a>";
+	  $ret .= "</td>";
+	  $ret .= "</table>";
 	  return $ret;
   }
+  my $protocolURL="$FW_ME/FileLog_logWrapper?dev=$lfn&type=text&file=$fn";
+  
+  $ret = "<div class='makeTable wide'><span>Information menu</span>
+<table class='block wide' id='SIGNALduinoInfoMenue' nm='$hash->{NAME}' class='block wide'>
+<tr class='even'><td><a href='#showProtocolList' id='showProtocolList'>Display protocollist</a></td></tr>";
+  
+  $ret .= '</table></div>
+<script>
+$( "#showProtocolList" ).click(function(e) {
+	e.preventDefault();
+	FW_cmd(FW_root+\'?cmd={SIGNALduino_getProtocolHTML("'.$FW_detail.'")}&XHR=1\', function(data){SD_plistWindow(data)});
+	
+});
+
+function SD_plistWindow(txt)
+{
+  var div = $("<div id=\"SD_protocolDialog\">");
+  $(div).html(txt);
+  $("body").append(div);
+  var oldPos = $("body").scrollTop();
+  $(div).dialog({
+    dialogClass:"no-close", modal:true, width:"auto", closeOnEscape:true, 
+    maxWidth:$(window).width()*0.9, maxHeight:$(window).height()*0.9,
+    buttons: [{text:"OK", click:function(){
+      $(this).dialog("close");
+      $(div).remove();
+    }}]
+  });
+}
+</script>';
+  return $ret;
+  
+  
 }
 
 
@@ -4176,7 +4144,100 @@ sub SIGNALduino_getProtocolList()
 }
 
 
+sub SIGNALduino_getProtocolHTML
+{
+	my $name = shift;
+	
+	my $hash = $defs{$name};
+	
+	my $id;
+	my $ret;
+	my $s;
+	my $moduleId;
+	my @IdList = ();
+	
+	foreach $id (keys %ProtocolListSIGNALduino)
+	{
+		next if ($id eq 'id');
+		push (@IdList, $id);
+	}
+	@IdList = sort { $a <=> $b } @IdList;
+	
+	$ret = "<table class=\"block wide internals wrapcolumns\">";
+	$ret .="<caption>Protocollist Overview</caption>";
+	$ret .= "<thead style=\"text-align:center\"><td>dev</td><td>ID</td><td>Message Type</td><td>modulname</td><td>protocolname</td> <td># comment</td><td>Action</td></thead>";
+	$ret .="<tbody>";
+	my $oddeven="odd";
+	my $wl_attr= AttrVal($name, "whitelist_IDs", ".*");
+	
+	my $js_ret = '$(".SIGNALduino_Proto").click(function(){
+    			alert( $(this).attr("id") );
+    			FW_cmd(FW_root+\'?cmd==attr $name whitelist_IDs idlist&XHR=1\');#
+    			
+	  		});
+		';
+	
+	foreach $id (@IdList)
+	{
+		
+		my $msgtype;
+		my $action;
+		if (exists ($ProtocolListSIGNALduino{$id}{format}) && $ProtocolListSIGNALduino{$id}{format} eq "manchester")
+		{
+			$msgtype = "MC";
+		}
+		elsif (exists $ProtocolListSIGNALduino{$id}{sync})
+		{
+			$msgtype = "MS";
+		}
+		elsif (exists ($ProtocolListSIGNALduino{$id}{clockabs}))
+		{
+			$msgtype = "MU";
+		}
+		
+		my $cmd;
+		my $newWlIDs;
+		if ( (grep { $_ eq $id } @{$hash->{msIdList}}) ||  (grep { $_ eq $id } @{$hash->{muIdList}}) || (grep { $_ eq $id } @{$hash->{mcIdList}}) ) 
+		{
+			$cmd = FW_makeImage("on","disable","icon");
+			if ($wl_attr eq ".*")
+			{
+				$newWlIDs = join(",",@{$hash->{msIdList}},@{$hash->{muIdList}},@{$hash->{mcIdList}}) 
+			} else  {
+				$newWlIDs=$wl_attr;
+			}
 
+			$newWlIDs =~ s/(?:^$id,?|,$id,|$id$)/,/;
+		
+		} else {
+			$cmd = FW_makeImage("off","enable","icon");
+			$newWlIDs = defined($wl_attr) ? "$wl_attr,$id" : $id;
+		}
+		
+		#Todo: Add / Remove via Image
+		
+		#$action=FW_pH(urlEncode("cmd.attr$name=attr $name whitelist_IDs $newWlIDs"), $cmd, 0, 0, 1, 0);
+		#cmd.attr%s=attr %s whitelist_IDs $s
+	    $action=sprintf("<a class=%s id=%s>%s</a>","SIGNALduino_Proto",$id,$cmd);
+	   
+		#$action .= $FW_CSRF;
+		
+		#$( "#SIGNALduino_Proto_.'.$id.'" ).click(function(e) {
+	#		e.preventDefault();
+#			FW_cmd(FW_root+\'?cmd={SIGNALduino_getProtocolHTML("'.$FW_detail.'")}&XHR=1\', function(data){SD_plistWindow(data)});#
+	
+	#	});
+#		';
+		
+		$ret .= sprintf("<tr class=\"%s\"><td><div>%s</div></td><td><div>%3s</div></td><td><div>%s</div></td><td><div>%s</div></td><td><div>%s</div></td><td><div>%s</div></td><td><div>%s</div></td></tr>",$oddeven,SIGNALduino_getProtoProp($id,"developId",""),$id,$msgtype,SIGNALduino_getProtoProp($id,"clientmodule",""),SIGNALduino_getProtoProp($id,"name",""),SIGNALduino_getProtoProp($id,"comment",""),$action);
+		$oddeven= $oddeven eq "odd" ? "even" : "odd" ;
+		
+		$ret .= "\n";
+	}
+	$ret .= "</tbody></table>";
+	return $ret."<script>".$js_ret."</script>";
+	#$moduleId =~ s/,$//;
+}
 
 
 
