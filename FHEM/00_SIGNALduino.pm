@@ -28,7 +28,7 @@ eval "use Time::HiRes qw(gettimeofday);1" ;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.3.3-dev_12.11.",
+	SDUINO_VERSION            => "v3.3.3-dev_24.11.",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -171,7 +171,7 @@ my %matchListSIGNALduino = (
      "14:Dooya"					=> '^P16#[A-Fa-f0-9]+',
      "15:SOMFY"					=> '^Ys[0-9A-F]+',
      "16:SD_WS_Maverick"		=> '^P47#[A-Fa-f0-9]+',
-     "17:SD_UT"            		=> '^P(?:29|30|34|69|81|83|86)#.*',	 # universal - more devices with different protocols
+     "17:SD_UT"            		=> '^P(?:29|30|34|46|69|81|83|86)#.*',	 # universal - more devices with different protocols
      "18:FLAMINGO"            	=> '^P13\.?1?#[A-Fa-f0-9]+',     # Flamingo Smoke
      "19:CUL_WS"				=> '^K[A-Fa-f0-9]{5,}',
      "20:Revolt"				=> '^r[A-Fa-f0-9]{22}',
@@ -181,7 +181,7 @@ my %matchListSIGNALduino = (
      "24:FS20"    				=> "^81..(04|0c)..0101a001", 
      "25:CUL_EM"    				=> "^E0.................", 
      "26:Fernotron"  			=> '^P82#.*',
-     "27:SD_BELL"  			    => '^P(?:14|15|32|41|57|79)#.*',
+     "27:SD_BELL"  			    => '^P(?:14|15|32|41|42|57|79)#.*',
 	 "X:SIGNALduino_un"			=> '^[u]\d+#.*',
 );
 
@@ -234,7 +234,8 @@ SIGNALduino_Initialize($)
 					  ." maxMuMsgRepeat"
 		              ." $readingFnAttributes";
 
-  $hash->{ShutdownFn} = "SIGNALduino_Shutdown";
+  $hash->{ShutdownFn}		= "SIGNALduino_Shutdown";
+  $hash->{FW_detailFn}		= "SIGNALduino_Detail";
   
   $hash->{msIdList} = ();
   $hash->{muIdList} = ();
@@ -483,6 +484,9 @@ SIGNALduino_Set($@)
     my $logFile = AttrVal("global", "logdir", "./log/") . "$hash->{TYPE}-Flash.log";
     return "Please define your hardware! (attr $name hardware <model of your receiver>) " if ($hardware eq "");
 	return "ERROR: argument failed! flash [hexFile|url]" if (!$args[0]);
+	
+	
+	
 
     #SIGNALduino_Log3 $hash, 3, "SIGNALduino_Set choosen flash option: $args[0] of available: ".Dumper($my_sets{flash});
     
@@ -533,69 +537,87 @@ SIGNALduino_Set($@)
       $hexFile = $args[0];
     }
 	SIGNALduino_Log3 $name, 3, "$name: filename $hexFile provided, trying to flash";
- 
     return "Usage: set $name flash [filename]\n\nor use the hexFile attribute" if($hexFile !~ m/^(\w|\/|.)+$/);
 
-    $log .= "flashing Arduino $name\n";
-    $log .= "hex file: $hexFile\n";
-    $log .= "port: $port\n";
-    $log .= "log file: $logFile\n";
-
-	my $flashCommand;
-    if( !defined( $attr{$name}{flashCommand} ) ) {		# check defined flashCommand from user | not, use standard flashCommand | yes, use user flashCommand
-			SIGNALduino_Log3 $name, 5, "$hash->{TYPE} $name: flashCommand are not defined. standard used to flash.";
-		if ($hardware eq "radinoCC1101") {																	# radinoCC1101 Port not /dev/ttyUSB0 --> /dev/ttyACM0
-			$flashCommand = "avrdude -c avr109 -b [BAUDRATE] -P [PORT] -p atmega32u4 -vv -D -U flash:w:[HEXFILE] 2>[LOGFILE]";
-		} elsif ($hardware ne "ESP_1M" && $hardware ne "ESP32" && $hardware ne "radinoCC1101") {			# nano, nanoCC1101, miniculCC1101, promini
-			$flashCommand = "avrdude -c arduino -b [BAUDRATE] -P [PORT] -p atmega328p -vv -U flash:w:[HEXFILE] 2>[LOGFILE]";
+	# Only for Arduino , not for ESP
+	if ($hardware =~ m/(?:nano|mini|radino)/)
+	{
+		
+		my $avrdudefound=0;
+		my $tool_name = "avrdude"; 
+		for my $path ( split /:/, $ENV{PATH} ) {
+		    if ( -f "$path/$tool_name" && -x _ ) {
+		    	$avrdudefound=1;
+		        last;
+		    }
 		}
-	} else {
-		$flashCommand = $attr{$name}{flashCommand};
-		SIGNALduino_Log3 $name, 3, "$hash->{TYPE} $name: flashCommand are manual defined! $flashCommand";
+	    SIGNALduino_Log3 $name, 5, "$name: avrdude found = $avrdudefound";
+	    return "avrdude is not installed. Please provide avrdude tool example: sudo apt-get install avrdude" if($avrdudefound == 0);
+
+	    $log .= "flashing Arduino $name\n";
+	    $log .= "hex file: $hexFile\n";
+	    $log .= "port: $port\n";
+	    $log .= "log file: $logFile\n";
+	
+		my $flashCommand;
+	    if( !defined( $attr{$name}{flashCommand} ) ) {		# check defined flashCommand from user | not, use standard flashCommand | yes, use user flashCommand
+				SIGNALduino_Log3 $name, 5, "$hash->{TYPE} $name: flashCommand is not defined. standard used to flash.";
+			if ($hardware eq "radinoCC1101") {																	# radinoCC1101 Port not /dev/ttyUSB0 --> /dev/ttyACM0
+				$flashCommand = "avrdude -c avr109 -b [BAUDRATE] -P [PORT] -p atmega32u4 -vv -D -U flash:w:[HEXFILE] 2>[LOGFILE]";
+			} elsif ($hardware ne "ESP_1M" && $hardware ne "ESP32" && $hardware ne "radinoCC1101") {			# nano, nanoCC1101, miniculCC1101, promini
+				$flashCommand = "avrdude -c arduino -b [BAUDRATE] -P [PORT] -p atmega328p -vv -U flash:w:[HEXFILE] 2>[LOGFILE]";
+			}
+		} else {
+			$flashCommand = $attr{$name}{flashCommand};
+			SIGNALduino_Log3 $name, 3, "$hash->{TYPE} $name: flashCommand is manual defined! $flashCommand";
+		}
+		
+	
+	    if($flashCommand ne "") {
+	      if (-e $logFile) {
+	        unlink $logFile;
+	      }
+	
+	      DevIo_CloseDev($hash);
+	      $hash->{STATE} = "FIRMWARE UPDATE running";
+	      $log .= "$name closed\n";
+	
+	      my $avrdude = $flashCommand;
+	      $avrdude =~ s/\Q[PORT]\E/$port/g;
+	      $avrdude =~ s/\Q[BAUDRATE]\E/$baudrate/g;
+	      $avrdude =~ s/\Q[HEXFILE]\E/$hexFile/g;
+	      $avrdude =~ s/\Q[LOGFILE]\E/$logFile/g;
+	
+	      $log .= "command: $avrdude\n\n";
+	      `$avrdude`;
+	
+	      local $/=undef;
+	      if (-e $logFile) {
+	        open FILE, $logFile;
+	        my $logText = <FILE>;
+	        close FILE;
+	        $log .= "--- AVRDUDE ---------------------------------------------------------------------------------\n";
+	        $log .= $logText;
+	        $log .= "--- AVRDUDE ---------------------------------------------------------------------------------\n\n";
+	      }
+	      else {
+	        $log .= "WARNING: avrdude created no log file\n\n";
+	      }
+	
+	    }
+	    else {
+	      $log .= "\n\nNo flashCommand found. Please define this attribute.\n\n";
+	    }
+	
+	    DevIo_OpenDev($hash, 0, "SIGNALduino_DoInit", 'SIGNALduino_Connect');
+	    $log .= "$name opened\n";
+		
+	    return undef;
+	} else
+	{
+		return "Sorry, Flashing your ESP via Module is currently not supported.";
 	}
 	
-
-    if($flashCommand ne "") {
-      if (-e $logFile) {
-        unlink $logFile;
-      }
-
-      DevIo_CloseDev($hash);
-      $hash->{STATE} = "disconnected";
-      $log .= "$name closed\n";
-
-      my $avrdude = $flashCommand;
-      $avrdude =~ s/\Q[PORT]\E/$port/g;
-      $avrdude =~ s/\Q[BAUDRATE]\E/$baudrate/g;
-      $avrdude =~ s/\Q[HEXFILE]\E/$hexFile/g;
-      $avrdude =~ s/\Q[LOGFILE]\E/$logFile/g;
-
-      $log .= "command: $avrdude\n\n";
-      `$avrdude`;
-
-      local $/=undef;
-      if (-e $logFile) {
-        open FILE, $logFile;
-        my $logText = <FILE>;
-        close FILE;
-        $log .= "--- AVRDUDE ---------------------------------------------------------------------------------\n";
-        $log .= $logText;
-        $log .= "--- AVRDUDE ---------------------------------------------------------------------------------\n\n";
-      }
-      else {
-        $log .= "WARNING: avrdude created no log file\n\n";
-      }
-
-    }
-    else {
-      $log .= "\n\nNo flashCommand found. Please define this attribute.\n\n";
-    }
-
-    DevIo_OpenDev($hash, 0, "SIGNALduino_DoInit", 'SIGNALduino_Connect');
-    $log .= "$name opened\n";
-
-    return $log;
-
   } elsif ($cmd =~ m/reset/i) {
 	delete($hash->{initResetFlag}) if defined($hash->{initResetFlag});
 	return SIGNALduino_ResetDevice($hash);
@@ -1630,8 +1652,13 @@ sub SIGNALduino_ParseHttpResponse
 			# Den Flash Befehl mit der soebene heruntergeladenen Datei ausfuehren
 			#SIGNALduino_Log3 $name, 3, "calling set ".$param->{command}." $filename";    		# Eintrag fuers Log
 
-			SIGNALduino_Set($hash,$name,$param->{command},$filename); # $hash->{SetFn}
-			
+			my $set_return = SIGNALduino_Set($hash,$name,$param->{command},$filename); # $hash->{SetFn}
+			if (defined($set_return))
+			{
+				SIGNALduino_Log3 $name ,3, "$name: Error while flashing: $set_return";
+			} else {
+				SIGNALduino_Log3 $name ,3, "$name: Firmware update was succesfull";
+			}
     	}
     } else {
     	SIGNALduino_Log3 $name, 3, "$name: undefined error while requesting ".$param->{url}." - $err - code=".$param->{code};    		# Eintrag fuers Log
@@ -2330,17 +2357,18 @@ sub SIGNALduino_Parse_MU($$$$@)
 					next;
 				}
 				Debug "startStr is: $startStr" if ($debug);
-				
-				if ($message_start = index($rawData, $startStr)) 
+				$message_start = index($rawData, $startStr);
+				if ( $message_start == -1) 
 				{
+					Debug "startStr $startStr not found." if ($debug);
+					next;
+				} else {
 					$rawData = substr($rawData, $message_start);
 					$startLogStr = "StartStr: $startStr first found at $message_start";
 					Debug "rawData = $rawData" if ($debug);
 					Debug "startStr $startStr found. Message starts at $message_start" if ($debug);
-				} else {
-					Debug "startStr $startStr not found." if ($debug);
-					next;
-				}
+					SIGNALduino_Log3 $name, 5, "$name: substr: $rawData"; # todo: entfernen
+				} 
 				
 			}
 			
@@ -2413,7 +2441,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 				}
 				
 				if ($nrRestart == 1) {
-					SIGNALduino_Log3 $name, 5, "$name: Starting demodulation ($startLogStr" . "regex: $regex Pos $message_start) length_min_max (".$length_min."..".$length_max.") length=".scalar @pairs; 
+					SIGNALduino_Log3 $name, 5, "$name: Starting demodulation ($startLogStr " . "regex: $regex Pos $message_start) length_min_max (".$length_min."..".$length_max.") length=".scalar @pairs; 
 				} else {
 					SIGNALduino_Log3 $name, 5, "$name: $nrRestart. try demodulation$length_str at Pos $-[0]";
 				}
@@ -2830,6 +2858,28 @@ SIGNALduino_Attr(@)
 		
   	return undef;
 }
+
+sub SIGNALduino_Detail($@) {
+  my ($FW_wname, $name, $room, $pageHash) = @_;
+  
+  
+  my @dspec=devspec2array("DEF=.*fakelog");
+  my $lfn = $dspec[0];
+  my $fn=$defs{$name}->{TYPE}."-Flash.log";
+  
+  if (-s AttrVal("global", "logdir", "./log/") .$fn)
+  { 
+	  my $flashlogurl="$FW_ME/FileLog_logWrapper?dev=$lfn&type=text&file=$fn";
+	  
+	  my $ret  = "<table>";
+	     $ret .= "<tr><td>";
+	     $ret .= "<a href=\"$flashlogurl\">Last Flashlog<\/a>";
+	     $ret .= "</td>";
+	     $ret .= "</table>";
+	  return $ret;
+  }
+}
+
 
 
 sub SIGNALduino_IdList($@)
@@ -4226,11 +4276,14 @@ sub SIGNALduino_githubParseHttpResponse($)
 					$fileinfo{filename} = $asset->{name};
 					$fileinfo{dlurl} = $asset->{browser_download_url};
 					$fileinfo{create_date} = $asset->{created_at};
-					Debug " firmwarefiles = ".Dumper(@fwfiles);
+					#Debug " firmwarefiles = ".Dumper(@fwfiles);
 					push @fwfiles, \%fileinfo;
 					
-					SIGNALduino_Set($hash,$name,"flash",$asset->{browser_download_url}); # $hash->{SetFn
-					
+					my $set_return = SIGNALduino_Set($hash,$name,"flash",$asset->{browser_download_url}); # $hash->{SetFn
+					if(defined($set_return))
+					{
+						SIGNALduino_Log3  $name, 3, "$name: Error while trying to download firmware: $set_return";    	
+					} 
 					last;
 					
 				}
@@ -4358,9 +4411,11 @@ sub SIGNALduino_githubParseHttpResponse($)
 		<ul>
 			<li>avrdude must be installed on the host<br> On a Raspberry PI this can be done with: sudo apt-get install avrdude</li>
 			<li>the hardware attribute must be set if using any other hardware as an Arduino nano<br> This attribute defines the command, that gets sent to avrdude to flash the uC.</li>
+			<li>If you encounter a problem, look into the logfile</li>
 		</ul>
 		Example:
 		<ul>
+			<li>flash via Version Name: Versions are provided via get availableFirmware</li>
 			<li>flash via hexFile: <code>set sduino flash ./FHEM/firmware/SIGNALduino_mega2560.hex</code></li>
 			<li>flash via url for Nano with CC1101: <code>set sduino flash https://github.com/RFD-FHEM/SIGNALDuino/releases/download/3.3.1-RC7/SIGNALDuino_nanocc1101.hex</code></li>
 		</ul>
@@ -4569,44 +4624,45 @@ sub SIGNALduino_githubParseHttpResponse($)
 			<li>promini: Arduino Pro Mini 328 with cheap receiver </li>
 			<li>radinoCC1101: Arduino compatible radino with cc1101 receiver</li>
 		</ul>
-		</li><br>
-		<li>maxMuMsgRepeat<br>
-		MU signals can contain multiple repeats of the same message. The results are all send to a logical module. You can limit the number of scanned repetitions. Defaukt is 4, so after found 4 repeats, the demoduation is aborted. 	
-		<br></li>
-    		<a name="minsecs"></a>
-		<li>minsecs<br>
-    		This is a very special attribute. It is provided to other modules. minsecs should act like a threshold. All logic must be done in the logical module. 
-    		If specified, then supported modules will discard new messages if minsecs isn't past.
-    		</li><br>
-    		<a name="noMsgVerbose"></a>
-    		<li>noMsgVerbose<br>
-    		With this attribute you can control the logging of debug messages from the io device.
-    		If set to 3, this messages are logged if global verbose is set to 3 or higher.
-    		</li><br>
-    		<a name="longids"></a>
-		<li>longids<br>
-        	Comma separated list of device-types for SIGNALduino that should be handled using long IDs. This additional ID allows it to differentiate some weather sensors, if they are sending on the same channel. Therfor a random generated id is added. If you choose to use longids, then you'll have to define a different device after battery change.<br> Default is to not to use long IDs for all devices.<br>
-		Following modules can use this function: 14_Hideki, 41_OREGON, 14_CUL_TCM97001, 14_SD_WS07.<br>
-      		Examples:<PRE>
-		# Do not use any long IDs for any devices (this is default):
-		attr sduino longids 0
-		# Use any long IDs for all devices:
-		attr sduino longids 1
-		# Use longids for SD_WS07 devices.
-		# Will generate devices names like SD_WS07_TH_3.
-		attr sduino longids SD_WS07
-		</PRE></li><br>
-		<a name="rawmsgEvent"></a>
-		<li>rawmsgEvent<br>
-		When set to "1" received raw messages triggers events
-		</li><br>
-		<a name="suppressDeviceRawmsg"></a>
-		<li>suppressDeviceRawmsg<br>
-		When set to 1, the internal "RAWMSG" will not be updated with the received messages
-		</li><br>
-		<a name="updateChannelFW"></a>
-		<li>updateChannelFW<br>
-		The module can search for new firmware versions. Depending on your choice, only stable versions are displayed or also prereleases are available for flash. The option testing does also provide the stable ones.
+	</li><br>
+	<li>maxMuMsgRepeat<br>
+	MU signals can contain multiple repeats of the same message. The results are all send to a logical module. You can limit the number of scanned repetitions. Defaukt is 4, so after found 4 repeats, the demoduation is aborted. 	
+	<br></li>
+    <a name="minsecs"></a>
+	<li>minsecs<br>
+    This is a very special attribute. It is provided to other modules. minsecs should act like a threshold. All logic must be done in the logical module. 
+    If specified, then supported modules will discard new messages if minsecs isn't past.
+    </li><br>
+    <a name="noMsgVerbose"></a>
+    <li>noMsgVerbose<br>
+    With this attribute you can control the logging of debug messages from the io device.
+    If set to 3, this messages are logged if global verbose is set to 3 or higher.
+    </li><br>
+    <a name="longids"></a>
+	<li>longids<br>
+        Comma separated list of device-types for SIGNALduino that should be handled using long IDs. This additional ID allows it to differentiate some weather sensors, if they are sending on the same channel. Therfor a random generated id is added. If you choose to use longids, then you'll have to define a different device after battery change.<br>
+		Default is to not to use long IDs for all devices.
+      <br><br>
+      Examples:<PRE>
+# Do not use any long IDs for any devices:
+attr sduino longids 0
+# Use any long IDs for all devices (this is default):
+attr sduino longids 1
+# Use longids for BTHR918N devices.
+# Will generate devices names like BTHR918N_f3.
+attr sduino longids BTHR918N
+</PRE></li>
+<a name="rawmsgEvent"></a>
+<li>rawmsgEvent<br>
+When set to "1" received raw messages triggers events
+</li><br>
+<a name="suppressDeviceRawmsg"></a>
+<li>suppressDeviceRawmsg<br>
+When set to 1, the internal "RAWMSG" will not be updated with the received messages
+</li><br>
+	<a name="updateChannelFW"></a>
+	<li>updateChannelFW<br>
+		The module can search for new firmware versions (<a href="https://github.com/RFD-FHEM/SIGNALDuino/releases">SIGNALDuino</a> and <a href="https://github.com/RFD-FHEM/SIGNALESP/releases">SIGNALESP</a>). Depending on your choice, only stable versions are displayed or also prereleases are available for flash. The option testing does also provide the stable ones.
 		<ul>
 			<li>stable: only versions marked as stable are available. These releases are provided very infrequently</li>
 			<li>testing: These versions needs some verifications and are provided in shorter intervals</li>
@@ -4636,7 +4692,7 @@ sub SIGNALduino_githubParseHttpResponse($)
 	<tr><td>
 	Der <a href="https://wiki.fhem.de/wiki/SIGNALduino">SIGNALduino</a> ist basierend auf einer Idee von "mdorenka" und ver&ouml;ffentlicht im <a href="http://forum.fhem.de/index.php/topic,17196.0.html">FHEM Forum</a>.<br>
 
-	Mit der OpenSource-Firmware (<a href="https://github.com/RFD-FHEM/SIGNALduino">GitHub</a>) ist dieser f&auml;hig zum Empfangen und Senden verschiedener Protokolle auf 433 und 868 Mhz.
+	Mit der OpenSource-Firmware (<a href="https://github.com/RFD-FHEM/SIGNALDuino/releases">SIGNALDuino</a> und <a href="https://github.com/RFD-FHEM/SIGNALESP/releases">SIGNALESP</a>) ist dieser f&auml;hig zum Empfangen und Senden verschiedener Protokolle auf 433 und 868 Mhz.
 	<br><br>
 	Folgende Ger&auml;te werden zur Zeit unterst&uuml;tzt:
 	<br><br>
@@ -4712,8 +4768,8 @@ sub SIGNALduino_githubParseHttpResponse($)
 		</ul>
 		</li><br>
 		<a name="close"></a>
-		<li>close<br></li>
-		Beendet die Verbindung zum Ger&auml;t.<br><br>
+		<li>close<br>
+		Beendet die Verbindung zum Ger&auml;t.</li><br>
 		<a name="enableMessagetype"></a>
 		<li>enableMessagetype<br>
 			Erm&ouml;glicht die Aktivierung der Nachrichtenverarbeitung f&uuml;r
@@ -4740,9 +4796,11 @@ sub SIGNALduino_githubParseHttpResponse($)
 		<ul>
 			<li><code>avrdude</code> muss auf dem Host installiert sein. Auf einem Raspberry PI kann dies getan werden mit: <code>sudo apt-get install avrdude</code></li>
 			<li>Das Hardware-Attribut muss festgelegt werden, wenn eine andere Hardware als Arduino Nano verwendet wird. Dieses Attribut definiert den Befehl, der an avrdude gesendet wird, um den uC zu flashen.</li>
+			<li>Bei Problem mit dem Flashen, können im Logfile interessante Informationen zu finden sein.</li>
 		</ul>
 		Beispiele:
 		<ul>
+			<li>flash mittels Versionsnummer: Versionen können mit get availableFirmware abgerufen werden</li>		
 			<li>flash via hexFile: <code>set sduino flash ./FHEM/firmware/SIGNALduino_mega2560.hex</code></li>
 			<li>flash via url f&uuml;r einen Nano mit CC1101: <code>set sduino flash https://github.com/RFD-FHEM/SIGNALDuino/releases/download/3.3.1-RC7/SIGNALDuino_nanocc1101.hex</code></li>
 		</ul>
@@ -4771,7 +4829,7 @@ sub SIGNALduino_githubParseHttpResponse($)
 		</ul>
 		</li><br>
 	<a name="raw"></a>
-	<li>raw<br></li>
+	<li>raw<br>
 	Geben Sie einen SIGNALduino-Firmware-Befehl aus, ohne auf die vom SIGNALduino zur&uuml;ckgegebenen Daten zu warten. Ausf&uuml;hrliche Informationen zu SIGNALduino-Befehlen finden Sie im SIGNALduino-Firmware-Code. Mit dieser Linie k&ouml;nnen Sie fast jedes Signal &uuml;ber einen angeschlossenen Sender senden.<br>
 	Um einige Rohdaten zu senden, schauen Sie sich diese Beispiele an: P#binarydata#R#C (#C is optional)
 			<ul>
@@ -4792,12 +4850,12 @@ sub SIGNALduino_githubParseHttpResponse($)
             <li>CSmuthresh=[Wert] -> Schwellwert fuer den split von MU Nachrichten (0=aus)</li>
             <li>CSmcmbl=[Wert] -> minbitlen fuer MC-Nachrichten</li>
             <li>CSfifolimit=[Wert] -> Schwellwert fuer debug Ausgabe der Pulsanzahl im FIFO Puffer</li>
-         </ul><br>
+         </ul><br></li>
 	<a name="reset"></a>
-	<li>reset<br></li>
-	&Ouml;ffnet die Verbindung zum Ger&auml;t neu und initialisiert es. <br><br>
+	<li>reset<br>
+	&Ouml;ffnet die Verbindung zum Ger&auml;t neu und initialisiert es.</li><br>
 	<a name="sendMsg"></a>
-	<li>sendMsg</li>
+	<li>sendMsg<br>
 	Dieser Befehl erstellt die erforderlichen Anweisungen zum Senden von Rohdaten &uuml;ber den SIGNALduino. Sie k&ouml;nnen die Signaldaten wie Protokoll und die Bits angeben, die Sie senden m&ouml;chten.<br>
 	Alternativ ist es auch moeglich, die zu sendenden Daten in hexadezimaler Form zu uebergeben. Dazu muss ein 0x vor den Datenteil geschrieben werden.
 	<br><br>
@@ -4815,7 +4873,7 @@ sub SIGNALduino_githubParseHttpResponse($)
 		<br>SR;R=4;P0=-8360;P1=220;P2=-440;P3=-220;P4=440;D=01212121213421212121212134;
 		</p></li></ul>
 	</ul><br>
-	</ul>
+	</ul></li>
 	
 	<a name="SIGNALduinoget"></a>
 	<b>Get</b>
@@ -4952,7 +5010,7 @@ sub SIGNALduino_githubParseHttpResponse($)
 			<li>promini: Arduino Pro Mini 328 f&uuml;r "Billig"-Empf&auml;nger</li>
 			<li>radinoCC1101: Ein Arduino Kompatibler Radino mit cc1101 receiver</li>
 		</ul><br>
-		Notwendig f&uuml;r den Befehl <code>flash</code>. Hier sollten Sie angeben, welche Hardware Sie mit dem USB-Port verbunden haben. Andernfalls kann es zu Fehlfunktionen des Ger&auml;ts kommen.<br>
+		Notwendig f&uuml;r den Befehl <code>flash</code>. Hier sollten Sie angeben, welche Hardware Sie mit dem usbport verbunden haben. Andernfalls kann es zu Fehlfunktionen des Ger&auml;ts kommen. Wichtig ist auch das Attribut <code>updateChannelFW</code><br>
 	</li><br>
 	<a name="longids"></a>
 	<li>longids<br>
@@ -4995,13 +5053,14 @@ sub SIGNALduino_githubParseHttpResponse($)
 	</li><br>
 	<a name="updateChannelFW"></a>
 	<li>updateChannelFW<br>
-		Das Modul sucht nach Verf&uml;gbaren Firmware Vesionen und bietet diesen zum Flashen an. Mit dem Attribut kann festgelegt werden ob nur stabile Versionen angezeigt werden oder auch vorabversionen einer neuen Firmware.<br>
+		Das Modul sucht nach Verf&uuml;gbaren Firmware Versionen (<a href="https://github.com/RFD-FHEM/SIGNALDuino/releases">GitHub</a>) und bietet diese via dem Befehl <code>flash</code> zum Flashen an. Mit dem Attribut kann festgelegt werden, ob nur stabile Versionen ("Latest Release") angezeigt werden oder auch Vorabversionen ("Pre-release") einer neuen Firmware.<br>
 		Die Option testing inkludiert auch die stabilen Versionen.
 		<ul>
 			<li>stable: Als stabil getestete Versionen, erscheint nur sehr selten</li>
 			<li>testing: Neue Versionen, welche noch getestet werden muss</li>
 		</ul>
-		<br>Die Liste der verfügbaren Versionen muss mittels get availableFirmware manuell neu geladen werden.	
+		<br>Die Liste der verf&uuml;gbaren Versionen muss manuell mittels <code>get availableFirmware</code> neu geladen werden.
+		
 	</li><br>
 	Notwendig f&uuml;r den Befehl <code>flash</code>. Hier sollten Sie angeben, welche Hardware Sie mit dem USB-Port verbunden haben. Andernfalls kann es zu Fehlfunktionen des Ger&auml;ts kommen. <br><br>
 	<a name="whitelist_IDs"></a>
