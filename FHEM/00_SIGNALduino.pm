@@ -2847,6 +2847,7 @@ function SD_plistWindow(txt)
     buttons: [{text:"OK", click:function(){
       $(this).dialog("close");
       $(div).remove();
+      location.reload();
     }}]
   });
 }
@@ -4136,12 +4137,69 @@ sub SIGNALduino_Log3($$$)
   return Log3($name,$loglevel,$text);
 }
 
+
+################################################
+# Functions for fhemweb actions 
+
+
+sub SIGNALduino_changeProtocolusage_FW
+{
+	my $name = shift;
+	my $htmlIdNme = shift;
+	
+	my ($id) = $htmlIdNme =~ /SIGNALduino_Proto_(\d)/;
+	SIGNALduino_Log3 $name,3, "id is $id";
+	my $hash=$defs{$name};
+	
+	
+	my $wl_attr= AttrVal($name, "whitelist_IDs", ".*");
+	my $cmd;
+	if ( (grep { $_ eq $id } @{$hash->{msIdList}}) ||  (grep { $_ eq $id } @{$hash->{muIdList}}) || (grep { $_ eq $id } @{$hash->{mcIdList}}) ) 
+	{
+		#$cmd = FW_makeImage("off","enable","icon");
+		if ($wl_attr eq ".*")
+		{
+			$wl_attr = join(",",@{$hash->{msIdList}},@{$hash->{muIdList}},@{$hash->{mcIdList}}); #Generate a new List,  if we are in default mode
+		}
+		$wl_attr =~ s/(?:^$id,?|,$id,|$id$)/,/;
+		$wl_attr =~ s/,,/,/;
+		
+		
+	} else {
+		#$cmd = FW_makeImage("on","disable","icon");
+		$wl_attr = defined($wl_attr) ? "$wl_attr,$id" : $id;
+	}
+	
+	#Todo Funktion sperren wenn kein JSON installiert ist. 
+ 	#SIGNAlduino_Attr("set",$name,"whitelist_IDs",$wl_attr); # Saves new Attr	
+ 	my $ret = CallFn($name, "AttrFn", "set", $name, "whitelist_IDs", $wl_attr);
+ 	if (!defined($ret))
+ 	{
+ 		$attr{$name}{"whitelist_IDs"} = $wl_attr;
+ 		if ( (grep { $_ eq $id } @{$hash->{msIdList}}) ||  (grep { $_ eq $id } @{$hash->{muIdList}}) || (grep { $_ eq $id } @{$hash->{mcIdList}}) ) 
+ 		{
+ 			$cmd = FW_makeImage("on","disable","icon");	
+ 		} else {
+ 			$cmd = FW_makeImage("off","enable","icon");
+ 		
+ 		}
+ 		my %return_hash = ('id'=>$htmlIdNme, 'data'=>$cmd);
+		my $return_json = to_json(\%return_hash);
+ 		
+		return $return_json;
+ 	}
+ 	
+ 	
+}
+
+
 ################################################
 # Helper to get a reference of the protocolList Hash
 sub SIGNALduino_getProtocolList()
 {
 	return \%ProtocolListSIGNALduino
 }
+
 
 
 sub SIGNALduino_getProtocolHTML
@@ -4171,11 +4229,14 @@ sub SIGNALduino_getProtocolHTML
 	my $wl_attr= AttrVal($name, "whitelist_IDs", ".*");
 	
 	my $js_ret = '$(".SIGNALduino_Proto").click(function(){
-    			alert( $(this).attr("id") );
-    			FW_cmd(FW_root+\'?cmd==attr $name whitelist_IDs idlist&XHR=1\');#
-    			
-	  		});
+			FW_cmd(FW_root+ \'?XHR=1'.$FW_CSRF.'&cmd={SIGNALduino_changeProtocolusage_FW("'.$name.'","\'+$(this).attr("id")+\'")}\',function(data){
+				var dataobj = JSON.parse(data);
+				$("#"+dataobj.id).html(dataobj.data);
+			});
+			
+	  	});
 		';
+	#    			
 	
 	foreach $id (@IdList)
 	{
@@ -4218,7 +4279,7 @@ sub SIGNALduino_getProtocolHTML
 		
 		#$action=FW_pH(urlEncode("cmd.attr$name=attr $name whitelist_IDs $newWlIDs"), $cmd, 0, 0, 1, 0);
 		#cmd.attr%s=attr %s whitelist_IDs $s
-	    $action=sprintf("<a class=%s id=%s>%s</a>","SIGNALduino_Proto",$id,$cmd);
+	    $action=sprintf("<a class=%s id=%s>%s</a>","SIGNALduino_Proto","SIGNALduino_Proto_".$id,$cmd);
 	   
 		#$action .= $FW_CSRF;
 		
