@@ -1,3 +1,5 @@
+05.12.2018
+ 14_SD_UT.pm - added new model SF01_01319004_Typ2 for BOSCH
 04.12.2018
  signalduino_protocols.hash - changed ID 22 (old, double from ID33) to new remote HAMULiGHT LED Trafo | Sensor TX-EZ6 decode from ID33
 03.12.2018
