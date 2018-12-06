@@ -251,6 +251,13 @@ SIGNALduino_Initialize($)
   }
 }
 
+#
+# Predeclare Variables from other modules may be loaded later from fhem
+#
+our $FW_CSRF;
+
+
+
 # Load Protocol hash from File into a hash.
 # First Parameter is for filename (full or relativ path) to be loaded
 #
