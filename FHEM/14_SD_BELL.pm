@@ -134,15 +134,7 @@ sub Define($$) {
 	
 	### Attributes | model set after codesyntax ###
 	my $Protocol = $a[2];
-	my $hash_name;
-	
-		### search protocol --> model ###
-	foreach my $search (keys(%models)) {
-		if ($models{$search}{Protocol} == $Protocol) {
-			$hash_name = $search;
-			last;
-		}
-	}
+	my ( $hash_name ) = grep { $models{$_} eq $search } keys %models; ### search protocol --> model ###
 	
 	$attr{$name}{model}	= $hash_name if( not defined( $attr{$name}{model} ) );	
 	$attr{$name}{room}	= "SD_BELL"	if( not defined( $attr{$name}{room} ) );
