@@ -1,14 +1,12 @@
-##############################################
-# $Id: 14_SD_BELL.pm 32 2016-04-02 14:00:00 v3.2-dev $
+##############################################################################
+# $Id: 14_SD_BELL.pm 32 2018-12-06 14:00:00 v3.3.3-dev_06.12. $HomeAuto_User
 #
 # The file is part of the SIGNALduino project.
 # The purpose of this module is to support many wireless BELL devices.
 # 2018 - HomeAuto_User & elektron-bbs
 #
 ####################################################################################################################################
-# - Heidemann HX BELL  [Protocol 14] length 12-20 (3-5)
-####################################################################################################################################
-# - wireless doorbell TCM 234759 Tchibo  [Protocol 15] length 12-20 (3-5)
+# - wireless doorbell TCM_234759 Tchibo  [Protocol 15] length 12-20 (3-5)
 ####################################################################################################################################
 # - FreeTec PE-6946  [Protocol 32] length 24 (6)
 #     get sduino_dummy raw MU;;P0=146;;P1=245;;P3=571;;P4=-708;;P5=-284;;P7=-6689;;D=14351435143514143535353535353535353535350704040435043504350435040435353535353535353535353507040404350435043504350404353535353535353535353535070404043504350435043504043535353535353535353535350704040435043504350435040435353535353535353535353507040404350435;;CP=3;;R=0;;O;;
@@ -16,7 +14,7 @@
 # - Elro (Smartwares) Doorbell DB200 / 16 melodies - unitec Modell:98156+98YK [Protocol 41] length 32 (8)
 #     get sduino_dummy raw MS;;P0=-526;;P1=1450;;P2=467;;P3=-6949;;P4=-1519;;D=231010101010242424242424102424101010102410241024101024241024241010;;CP=2;;SP=3;;O;;
 ####################################################################################################################################
-# - KANGTAI Doorbell (Pollin 94-550405) [Protocol 42]
+# - KANGTAI Doorbell (Pollin 94-550405) [Protocol 42]  length 32 (8)
 #     get sduino_dummy raw MS;;P0=1399;;P1=-604;;P2=397;;P3=-1602;;P4=-7090;;D=240123010101230123232301230123232301232323230123010101230123230101;;CP=2;;SP=4;;R=248;;O;;m1;;
 ####################################################################################################################################
 # - m-e doorbell fuer FG- und Basic-Serie  [Protocol 57] length 21-24 (6)
@@ -36,30 +34,50 @@ package main;
 use strict;
 use warnings;
 
+### HASH for all modul models ###
 my %models = (
-	# key => values
-	"00"  => 'unknown',
-    "14"  => 'Heidemann_HX',
-    "15"  => 'TCM_234759',
-	"32"  => 'FreeTec_PE-6946',
-	"41"  => 'Elro_DB200_/_unitec',
-	"42"  => 'KANGTAI',
-	"57"  => 'FG_/_Basic-Serie',
-	"79"  => 'VTX_BELL',
+	# keys(model) => values
+	"unknown" =>	{	hex_lengh		=> " ",
+									Protocol		=> "00",
+									doubleCode	=> "no"
+								},
+	"TCM_234759" =>	{	hex_lengh		=> "3,4,5",
+										Protocol		=> "15",
+										doubleCode	=> "no"
+									},
+	"FreeTec_PE-6946" =>	{	hex_lengh		=> "6",
+													Protocol		=> "32",
+													doubleCode	=> "no"
+												},
+	"Elro_DB200_/_unitec" =>	{	hex_lengh		=> "8",
+															Protocol		=> "41",
+															doubleCode	=> "yes"
+														},
+	"KANGTAI" =>	{	hex_lengh		=> "8",
+									Protocol		=> "42",
+									doubleCode	=> "yes"
+								},
+	"FG_/_Basic-Serie" =>	{	hex_lengh		=> "6",
+													Protocol		=> "57",
+													doubleCode	=> "no"
+												},
+	"Heidemann_|_Heidemann_HX_|_VTX-BELL" =>	{	hex_lengh		=> "3",
+																							Protocol		=> "79",
+																							doubleCode	=> "no"
+																						},
 );
+
 
 sub SD_BELL_Initialize($) {
 	my ($hash) = @_;
-	$hash->{Match}		= "^P(?:14|15|32|41|42|57|79)#.*";
-	$hash->{DefFn}		= "SD_BELL::Define";
-	$hash->{UndefFn}	= "SD_BELL::Undef";
-	$hash->{ParseFn}	= "SD_BELL::Parse";
-	$hash->{SetFn}		= "SD_BELL::Set";
-	$hash->{AttrFn}		= "SD_BELL::Attr";
-	$hash->{AttrList}	= "IODev do_not_notify:1,0 ignore:0,1 showtime:1,0 " .
-						"model:".join(",", sort values %models) . " " .
-						$main::readingFnAttributes;
-	$hash->{AutoCreate}	={"SD_BELL.*" => {FILTER => "%NAME", autocreateThreshold => "2:180", GPLOT => ""}};
+	$hash->{Match}			= "^P(?:15|32|41|42|57|79)#.*";
+	$hash->{DefFn}			= "SD_BELL::Define";
+	$hash->{UndefFn}		= "SD_BELL::Undef";
+	$hash->{ParseFn}		= "SD_BELL::Parse";
+	$hash->{SetFn}			= "SD_BELL::Set";
+	$hash->{AttrFn}			= "SD_BELL::Attr";
+	$hash->{AttrList}		= "repeats:1,2,3,4,5,6,7,8,9 IODev do_not_notify:1,0 ignore:0,1 showtime:1,0 model:".join(",", sort keys %models) . " $main::readingFnAttributes";
+	$hash->{AutoCreate}	=	{"SD_BELL.*" => {FILTER => "%NAME", autocreateThreshold => "3:180", GPLOT => ""}};
 }
 
 ### unterer Teil ###
@@ -98,7 +116,7 @@ sub Define($$) {
 	my ($hash, $def) = @_;
 	my @a = split("[ \t][ \t]*", $def);
 
-	# Argument					    0	   1		2		    3				4
+	# Argument											0	   	1					2		    	3						4
 	return "wrong syntax: define <name> SD_BELL <Protocol> <HEX-Value> <optional IODEV>" if(int(@a) < 3 || int(@a) > 5);
 	return "wrong <protocol> $a[2]" if not($a[2] =~ /^(?:14|15|32|41|42|57|79)/s);
 	### checks ###
@@ -115,9 +133,18 @@ sub Define($$) {
 	$iodevice = $ioname if not $iodevice;
 	
 	### Attributes | model set after codesyntax ###
-	my $devicetyp = $a[2];
-	$devicetyp = $models{$a[2]};
-	$attr{$name}{model}	= $devicetyp if( not defined( $attr{$name}{model} ) );	
+	my $Protocol = $a[2];
+	my $hash_name;
+	
+		### search protocol --> model ###
+	foreach my $search (keys(%models)) {
+		if ($models{$search}{Protocol} == $Protocol) {
+			$hash_name = $search;
+			last;
+		}
+	}
+	
+	$attr{$name}{model}	= $hash_name if( not defined( $attr{$name}{model} ) );	
 	$attr{$name}{room}	= "SD_BELL"	if( not defined( $attr{$name}{room} ) );
 	
 	AssignIoPort($hash, $iodevice);
@@ -131,6 +158,7 @@ sub Set($$$@) {
 	my $model = AttrVal($name, "model", "unknown");
 	my @split = split(" ", $hash->{DEF});
 	my $protocol = $split[0];
+	my $repeats = AttrVal($name,'repeats', '5');
 	my $ret = undef;
 	
 	if ($hash->{bitMSG} ne "") {
@@ -138,7 +166,7 @@ sub Set($$$@) {
 			$ret .= "ring:noArg";
 		} else {
 			my $msg = "P$protocol#" . $hash->{bitMSG};
-			$msg .= "#R5";		# Anzahl Wiederholungen noch klären!
+			$msg .= "#R$repeats";
 			Log3 $name, 4, "$ioname: $name sendMsg=$msg";
 
 			if ($cmd ne "?") {
@@ -174,8 +202,17 @@ sub Parse($$) {
 	my $hlen = length($rawData);
 	my $blen = $hlen * 4;
 	my $bitData = unpack("B$blen", pack("H$hlen", $rawData));
+	my $hash_name;
 	
-	Log3 $iohash, 4, "$ioname: SD_BELL protocol $protocol $models{$protocol}, bitData $bitData";
+	### search protocol --> model ###
+	foreach my $search (keys(%models)) {
+		if ($models{$search}{Protocol} == $protocol) {
+			$hash_name = $search;
+			last;
+		}
+	}
+	
+	Log3 $iohash, 4, "$ioname: SD_BELL_Parse protocol $protocol $hash_name doubleCode=".$models{$hash_name}{doubleCode}.", bitData $bitData";
 	
 	my $def;
 	my $deviceCode = $rawData;
@@ -189,10 +226,10 @@ sub Parse($$) {
 	
 	$modules{SD_BELL}{defptr}{ioname} = $ioname;
 
-	Log3 $iohash, 4, "$ioname: SD_BELL device $devicedef found" if($def);
+	Log3 $iohash, 4, "$ioname: SD_BELL_Parse device $devicedef found" if($def);
 
 	if(!$def) {
-		Log3 $iohash, 1, "$ioname: SD_BELL UNDEFINED BELL detected, Protocol ".$protocol." code " . $deviceCode;
+		Log3 $iohash, 1, "$ioname: SD_BELL_Parse UNDEFINED BELL detected, Protocol ".$protocol." code " . $deviceCode;
 		return "UNDEFINED SD_BELL_$deviceCode SD_BELL $protocol $deviceCode";
 	}
 
@@ -203,7 +240,7 @@ sub Parse($$) {
 
 	my $model = AttrVal($name, "model", "unknown");
 	$state = "ring";
-	Log3 $name, 4, "$ioname: SD_BELL $name model=$model state=$state ($rawData)";
+	Log3 $name, 4, "$ioname: SD_BELL_Parse $name model=$model state=$state ($rawData)";
 
 	readingsBeginUpdate($hash);
 	readingsBulkUpdate($hash, "state", $state);
@@ -220,10 +257,17 @@ sub Attr(@) {
 	my $ioDev = InternalVal($name, "LASTInputDev", undef);
 	my $state;
 	my $oldmodel = AttrVal($name, "model", "unknown");
+	my $hex_lengh = length(InternalVal($name, "lastMSG", "0"));
 	
-	#Log3 $name, 3, "SD_BELL: cmd=$cmd attrName=$attrName attrValue=$attrValue oldmodel=$oldmodel";
+	#Log3 $name, 3, "SD_BELL_Attr cmd=$cmd attrName=$attrName attrValue=$attrValue oldmodel=$oldmodel";
 	
-	if ($cmd eq "del" && $attrName eq "model") {			### delete readings
+	if ($cmd eq "set" && $attrName eq "model" && $attrValue ne $oldmodel) {		### set new attr
+		return "ERROR! You want to choose the $oldmodel model to $attrValue.\nPlease check your selection.\nRAWMSG is to short!" if ($models{$attrValue}{hex_lengh} > $hex_lengh);	# variants one
+		return "ERROR! You want to choose the $oldmodel model to $attrValue.\nPlease check your selection.\nRAWMSG is to long!" if ($models{$attrValue}{hex_lengh} < $hex_lengh);		# variants two
+		Log3 $name, 3, "SD_BELL_Attr $cmd $attrName to $attrValue from $oldmodel";
+	}
+	
+	if ($cmd eq "del" && $attrName eq "model") {		### delete readings
 		readingsDelete($hash, "LastAction") if(defined(ReadingsVal($hash->{NAME},"LastAction",undef)));
 		readingsDelete($hash, "state") if(defined(ReadingsVal($hash->{NAME},"state",undef)));
 	}
@@ -263,8 +307,10 @@ sub Attr(@) {
 	<ul><li><a href="#IODev">IODev</a></li></ul>
 	<ul><a name="model"></a>
 		<li>model<br>
-		The attribute indicates the model type of your device.<br></li><a name=" "></a>
-	</ul><br><br>
+		The attribute indicates the model type of your device.<br></li></ul>
+	<ul><li><a name="repeats"></a>repeats<br>
+		This attribute can be used to adjust how many repetitions are sent. Default is 5.</li></ul><br>
+		<br>
 </ul>
 =end html
 =begin html_DE
@@ -294,8 +340,10 @@ sub Attr(@) {
 	<ul><li><a href="#IODev">IODev</a></li></ul>
 	<ul><a name="model"></a>
 		<li>model<br>
-		Das Attribut bezeichnet den Modelltyp Ihres Ger&auml;tes.<br></li><a name=" "></a>
-	</ul><br><br>
+		Das Attribut bezeichnet den Modelltyp Ihres Ger&auml;tes.<br></li></ul>
+		<ul><li><a name="repeats"></a>repeats<br>
+		Mit diesem Attribut kann angepasst werden, wie viele Wiederholungen sendet werden. Standard ist 5.</li></ul><br>
+	<br>
 </ul>
 =end html_DE
 =cut
