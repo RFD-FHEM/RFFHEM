@@ -287,12 +287,11 @@ sub Attr(@) {
 <ul>The module SD_BELL is a universal module of the SIGNALduino for different bells.<br><br>
 	<u>Currently, the following models are supported:</u>
 	<ul>
-	<li>Heidemann HX BELL  [Protocol 14]</li>
 	<li>wireless doorbell TCM 234759 Tchibo  [Protocol 15]</li>
 	<li>FreeTec PE-6946  [Protocol 32]</li>
 	<li>Elro (Smartwares) Doorbell DB200 / 16 melodies - unitec Modell:98156+98YK [Protocol 41]</li>
 	<li>m-e doorbell fuer FG- and Basic-Serie  [Protocol 57]</li>
-	<li>VTX-BELL_Funkklingel  [Protocol 79]</li>
+	<li>Heidemann | Heidemann HX | VTX-BELL_Funkklingel  [Protocol 79]</li>
 	</ul><br><br>
 
 	<b>Set</b><br>
@@ -320,12 +319,11 @@ sub Attr(@) {
 <ul>Das Modul SD_BELL ist ein Universalmodul vom SIGNALduino f&uuml;r verschiedene Klingeln.<br><br>
 	<u>Derzeit werden folgende Modelle unters&uuml;tzt:</u>
 	<ul>
-	<li>Heidemann HX BELL  [Protocol 14]</li>
-	<li>wireless doorbell TCM 234759 Tchibo  [Protocol 15]</li>
-	<li>FreeTec PE-6946  [Protocol 32]</li>
-	<li>Elro (Smartwares) Doorbell DB200 / 16 melodies - unitec Modell:98156+98YK [Protocol 41]</li>
-	<li>m-e doorbell fuer FG- und Basic-Serie  [Protocol 57]</li>
-	<li>VTX-BELL_Funkklingel  [Protocol 79]</li>
+	<li>wireless doorbell TCM 234759 Tchibo  [Protokoll 15]</li>
+	<li>FreeTec PE-6946  [Protokoll 32]</li>
+	<li>Elro (Smartwares) Doorbell DB200 / 16 Melodien - unitec Modell:98156+98YK [Protokoll 41]</li>
+	<li>m-e doorbell fuer FG- und Basic-Serie  [Protokoll 57]</li>
+	<li>Heidemann | Heidemann HX | VTX-BELL_Funkklingel  [Protokoll 79]</li>
 	</ul><br><br>
 
 	<b>Set</b><br>
