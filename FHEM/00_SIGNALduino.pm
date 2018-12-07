@@ -235,7 +235,7 @@ SIGNALduino_Initialize($)
 		              ." $readingFnAttributes";
 
   $hash->{ShutdownFn}		= "SIGNALduino_Shutdown";
-  $hash->{FW_detailFn}		= "SIGNALduino_Detail";
+  $hash->{FW_detailFn}		= "SIGNALduino_FW_Detail";
   
   $hash->{msIdList} = ();
   $hash->{muIdList} = ();
@@ -255,8 +255,7 @@ SIGNALduino_Initialize($)
 # Predeclare Variables from other modules may be loaded later from fhem
 #
 our $FW_CSRF;
-
-
+our $FW_detail;
 
 # Load Protocol hash from File into a hash.
 # First Parameter is for filename (full or relativ path) to be loaded
@@ -950,7 +949,7 @@ SIGNALduino_Get($@)
   }
   elsif ($a[1] eq "protocolIDs")
   {
-	return SIGNALduino_getProtocolHTML($name);
+	return SIGNALduino_FW_getProtocolList($name);
 	
 	
 	#return "$a[1]: \n\n$ret\nIds with modules: $moduleId";
@@ -2807,7 +2806,7 @@ SIGNALduino_Attr(@)
   	return undef;
 }
 
-sub SIGNALduino_Detail($@) {
+sub SIGNALduino_FW_Detail($@) {
   my ($FW_wname, $name, $room, $pageHash) = @_;
   
   my $hash = $defs{$name};
@@ -2838,7 +2837,7 @@ sub SIGNALduino_Detail($@) {
 <script>
 $( "#showProtocolList" ).click(function(e) {
 	e.preventDefault();
-	FW_cmd(FW_root+\'?cmd={SIGNALduino_getProtocolHTML("'.$FW_detail.'")}&XHR=1\', function(data){SD_plistWindow(data)});
+	FW_cmd(FW_root+\'?cmd={SIGNALduino_FW_getProtocolList("'.$FW_detail.'")}&XHR=1\', function(data){SD_plistWindow(data)});
 	
 });
 
@@ -4148,13 +4147,12 @@ sub SIGNALduino_Log3($$$)
 ################################################
 # Functions for fhemweb actions 
 
-
-sub SIGNALduino_changeProtocolusage_FW
+sub SIGNALduino_FW_changeProtocolUsage
 {
 	my $name = shift;
-	my $htmlIdNme = shift;
+	my $id = shift;
 	
-	my ($id) = $htmlIdNme =~ /SIGNALduino_Proto_(\d)/;
+	
 	SIGNALduino_Log3 $name,3, "id is $id";
 	my $hash=$defs{$name};
 	
@@ -4163,7 +4161,6 @@ sub SIGNALduino_changeProtocolusage_FW
 	my $cmd;
 	if ( (grep { $_ eq $id } @{$hash->{msIdList}}) ||  (grep { $_ eq $id } @{$hash->{muIdList}}) || (grep { $_ eq $id } @{$hash->{mcIdList}}) ) 
 	{
-		#$cmd = FW_makeImage("off","enable","icon");
 		if ($wl_attr eq ".*")
 		{
 			$wl_attr = join(",",@{$hash->{msIdList}},@{$hash->{muIdList}},@{$hash->{mcIdList}}); #Generate a new List,  if we are in default mode
@@ -4173,7 +4170,6 @@ sub SIGNALduino_changeProtocolusage_FW
 		
 		
 	} else {
-		#$cmd = FW_makeImage("on","disable","icon");
 		$wl_attr = defined($wl_attr) ? "$wl_attr,$id" : $id;
 	}
 	
@@ -4190,7 +4186,7 @@ sub SIGNALduino_changeProtocolusage_FW
  			$cmd = FW_makeImage("off","enable","icon");
  		
  		}
- 		my %return_hash = ('id'=>$htmlIdNme, 'data'=>$cmd);
+ 		my %return_hash = ('id'=>$id, 'data'=>$cmd);
 		my $return_json = to_json(\%return_hash);
  		
 		return $return_json;
@@ -4209,7 +4205,7 @@ sub SIGNALduino_getProtocolList()
 
 
 
-sub SIGNALduino_getProtocolHTML
+sub SIGNALduino_FW_getProtocolList
 {
 	my $name = shift;
 	
@@ -4236,11 +4232,14 @@ sub SIGNALduino_getProtocolHTML
 	my $wl_attr= AttrVal($name, "whitelist_IDs", ".*");
 	
 	my $js_ret = '$(".SIGNALduino_Proto").click(function(){
-			FW_cmd(FW_root+ \'?XHR=1'.$FW_CSRF.'&cmd={SIGNALduino_changeProtocolusage_FW("'.$name.'","\'+$(this).attr("id")+\'")}\',function(data){
-				var dataobj = JSON.parse(data);
-				$("#"+dataobj.id).html(dataobj.data);
-			});
+   			console.log( $(this));
+			var element = $(this);
 			
+			FW_cmd(FW_root+ \'?XHR=1&cmd={SIGNALduino_FW_changeProtocolUsage("'.$name.'","\'+$(this).attr("protoid")+\'")}\',function(data){
+   				var dataobj = JSON.parse(data);
+		    	element.html(dataobj.data);
+			});
+		 		
 	  	});
 		';
 	#    			
@@ -4282,20 +4281,10 @@ sub SIGNALduino_getProtocolHTML
 			$newWlIDs = defined($wl_attr) ? "$wl_attr,$id" : $id;
 		}
 		
-		#Todo: Add / Remove via Image
 		
-		#$action=FW_pH(urlEncode("cmd.attr$name=attr $name whitelist_IDs $newWlIDs"), $cmd, 0, 0, 1, 0);
-		#cmd.attr%s=attr %s whitelist_IDs $s
-	    $action=sprintf("<a class=%s id=%s>%s</a>","SIGNALduino_Proto","SIGNALduino_Proto_".$id,$cmd);
+		my $htmlid="SIGNALduino_Proto_".$id;
+	    $action=sprintf("<a class=%s id=%s protoid=%s>%s</a>","SIGNALduino_Proto",$htmlid,$id,$cmd);
 	   
-		#$action .= $FW_CSRF;
-		
-		#$( "#SIGNALduino_Proto_.'.$id.'" ).click(function(e) {
-	#		e.preventDefault();
-#			FW_cmd(FW_root+\'?cmd={SIGNALduino_getProtocolHTML("'.$FW_detail.'")}&XHR=1\', function(data){SD_plistWindow(data)});#
-	
-	#	});
-#		';
 		
 		$ret .= sprintf("<tr class=\"%s\"><td><div>%s</div></td><td><div>%3s</div></td><td><div>%s</div></td><td><div>%s</div></td><td><div>%s</div></td><td><div>%s</div></td><td><div>%s</div></td></tr>",$oddeven,SIGNALduino_getProtoProp($id,"developId",""),$id,$msgtype,SIGNALduino_getProtoProp($id,"clientmodule",""),SIGNALduino_getProtoProp($id,"name",""),SIGNALduino_getProtoProp($id,"comment",""),$action);
 		$oddeven= $oddeven eq "odd" ? "even" : "odd" ;
