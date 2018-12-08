@@ -68,7 +68,7 @@ my %gets = (    # Name, Data to send to the SIGNALduino, Regexp for the answer
 # "ITParms"  => ["ip",'.*'],
   "ping"     => ["P",'^OK$'],
   "config"   => ["CG",'^MS.*MU.*MC.*'],
-  "protocolIDs"   => ["none",'none'],
+#  "protocolIDs"   => ["none",'none'],
   "ccconf"   => ["C0DnF", 'C0Dn11.*'],
   "ccreg"    => ["C", '^C.* = .*'],
   "ccpatable" => ["C3E", '^C3E = .*'],
@@ -4651,12 +4651,6 @@ sub SIGNALduino_githubParseHttpResponse($)
 		<li>ping<br>
 		Check the communication with the SIGNALduino.
 		</li><br>
-        <a name="protocolIDs"></a>
-		<li>protocolIDs<br> 
-		Shows the current implemented protocols from the SIGNALduino and to what logical FHEM Modul data is sent.<br>
-		Additional there is an on/off symbol, which shows you if a protocol will be processed. The attributes whitelistIDs, blacklistIDs und development affects this.
-		Protocols which are flagged in the row <code>dev</code>, can't be activated via this ui.
-		</li><br>
         <a name="raw"></a>
 		<li>raw<br>
 		Issue a SIGNALduino firmware command, and wait for one line of data returned by
@@ -4804,10 +4798,21 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
    		<a name="WS09_CRCAUS"></a>
    		<li>WS09_CRCAUS<br>
        		<ul>
-			<li>0: CRC-Check WH1080 CRC = 0  on, default</li>
+				<li>0: CRC-Check WH1080 CRC = 0  on, default</li>
        			<li>2: CRC = 49 (x031) WH1080, set OK</li>
-		</ul>
-    		</li>
+			</ul>
+    	</li>
+   	</ul>
+   	<a name="SIGNALduinoDetail"></a>
+	<b>Information menu</b>
+	<ul>
+   	    <a name="Display protocollist"></a>
+		<li>Display protocollist<br> 
+		Shows the current implemented protocols from the SIGNALduino and to what logical FHEM Modul data is sent.<br>
+		Additional there is an on/off symbol, which shows you if a protocol will be processed. This changes the Attribute whitlistIDs for you in the background. The attributes whitelistIDs, blacklistIDs und development affects this.
+		Protocols which are flagged in the row <code>dev</code>, can't be activated via this ui.
+		If you are using blacklistIDs, then you also can not activate them via the button, delete the attribute blacklistIDs if you want to control enabled protocols via this menu.
+		</li><br>
    	</ul>
 							  		   
 =end html
@@ -4854,7 +4859,7 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
 	<br>
 	<a name="SIGNALduinodefine"></a>
 	<b>Define</b>
-	<ul><code>define &lt;name&gt; SIGNALduino &lt;device&gt; </code></ul>
+	<code>define &lt;name&gt; SIGNALduino &lt;device&gt; </code>
 	USB-connected devices (SIGNALduino):<br>
 	<ul><li>
 		&lt;device&gt; spezifiziert den seriellen Port f&uuml;r die Kommunikation mit dem SIGNALduino.
@@ -4876,11 +4881,11 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
 	<a name="SIGNALduinoset"></a>
 	<b>SET</b>
 	<ul>
-		<li>cc1101_freq / cc1101_bWidth / cc1101_patable / cc1101_rAmpl / cc1101_sens<br></li>
+		<li>cc1101_freq / cc1101_bWidth / cc1101_patable / cc1101_rAmpl / cc1101_sens<br>
 		(NUR bei Verwendung eines cc110x Empf&auml;nger)<br><br>
 		Stellt die SIGNALduino-Frequenz / Bandbreite / PA-Tabelle / Empf&auml;nger-Amplitude / Empfindlichkeit ein.<br>
 		Verwenden Sie es mit Vorsicht. Es kann Ihre Hardware zerst&ouml;ren und es kann sogar illegal sein, dies zu tun.<br>
-		Hinweis: Die f&uuml;r die RFR-&Uuml;bertragung verwendeten Parameter sind nicht betroffen.<br>
+		Hinweis: Die f&uuml;r die RFR-&Uuml;bertragung verwendeten Parameter sind nicht betroffen.<br></li>
 		<ul>
 		<a name="cc1101_freq"></a>
 		<li><code>freq</code> , legt sowohl die Empfangsfrequenz als auch die &Uuml;bertragungsfrequenz fest.<br>
@@ -4894,7 +4899,7 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
 		<a name="cc1101_sens"></a>
 		<li><code>sens</code> , ist die Entscheidungsgrenze zwischen den Ein- und Aus-Werten und betr&auml;gt 4, 8, 12 oder 16 dB. Kleinere Werte erlauben den Empfang von weniger klaren Signalen. Standard ist 4 dB.</li>
 		</ul>
-		</li><br>
+		<br>
 		<a name="close"></a>
 		<li>close<br>
 		Beendet die Verbindung zum Ger&auml;t.</li><br>
@@ -4991,17 +4996,20 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
 		<br><br>
 		Argumente sind:
 		<p>
-		<ul><li>P<protocol id>#binarydata#R<anzahl der wiederholungen>#C<optional taktrate>   (#C is optional) 
-		<br>Beispiel binarydata: <code>set sduino sendMsg P0#0101#R3#C500</code>
-		<br>Wird eine sende Kommando fuer die Bitfolge 0101 anhand der protocol id 0 erzeugen. Als Takt wird 500 verwendet.
-		<br>SR;R=3;P0=500;P1=-9000;P2=-4000;P3=-2000;D=03020302;<br></li></ul><br>
-		<ul><li>P<protocol id>#0xhexdata#R<anzahl der wiederholungen>#C<optional taktrate>    (#C is optional) 
-		<br>Beispiel 0xhexdata: <code>set sduino sendMsg P29#0xF7E#R4</code>
-		<br>Wird eine sende Kommando fuer die Hexfolge F7E anhand der protocol id 29 erzeugen. Die Nachricht soll 4x gesenset werden.
-		<br>SR;R=4;P0=-8360;P1=220;P2=-440;P3=-220;P4=440;D=01212121213421212121212134;
-		</p></li></ul>
-	</ul><br>
-	</ul></li>
+		<ul>
+			<li>P<protocol id>#binarydata#R<anzahl der wiederholungen>#C<optional taktrate>   (#C is optional) 
+			<br>Beispiel binarydata: <code>set sduino sendMsg P0#0101#R3#C500</code>
+			<br>Wird eine sende Kommando fuer die Bitfolge 0101 anhand der protocol id 0 erzeugen. Als Takt wird 500 verwendet.
+			<br>SR;R=3;P0=500;P1=-9000;P2=-4000;P3=-2000;D=03020302;<br></li></ul><br>
+			<ul><li>P<protocol id>#0xhexdata#R<anzahl der wiederholungen>#C<optional taktrate>    (#C is optional) 
+			<br>Beispiel 0xhexdata: <code>set sduino sendMsg P29#0xF7E#R4</code>
+			<br>Wird eine sende Kommando fuer die Hexfolge F7E anhand der protocol id 29 erzeugen. Die Nachricht soll 4x gesenset werden.
+			<br>SR;R=4;P0=-8360;P1=220;P2=-440;P3=-220;P4=440;D=01212121213421212121212134;
+			</p></li>
+		</ul>
+	</li>
+	<br>
+	</ul>
 	
 	<a name="SIGNALduinoget"></a>
 	<b>Get</b>
@@ -5039,12 +5047,6 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
 	<a name="ping"></a>
    	<li>ping<br>
 	Pr&uuml;ft die Kommunikation mit dem SIGNALduino.
-	</li><br>
-	<a name="protocolIDs"></a>
-	<li>protocolIDs<br>
-	Zeigt Ihnen die aktuell implementierten Protokolle des SIGNALduino an und an welches logische FHEM Modul Sie &uuml;bergeben werden.<br>
-	Außerdem wird mit on/off Symbolen angezeigt ob ein Protokoll verarbeitet wird. Die Attribute whitelistIDs, blacklistIDs und development beeinflussen dies.
-	Protokolle die in der Spalte <code>dev</code> markiert sind, k&ouml;nnen derzeit nicht über die Schaltsymbole aktiviert werden.
 	</li><br>
 	<a name="raw"></a>
 	<li>raw<br>
@@ -5200,6 +5202,19 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
 			<li>2: CRC = 49 (x031) WH1080, set OK</li>
 		</ul>
 	</li><br>
-	
+  </ul>
+ 
+   	<a name="SIGNALduinoDetail"></a>
+	<b>Information menu</b>
+	<ul>
+   	    <a name="Display protocollist"></a>
+		<li>Display protocollist<br> 
+		Zeigt Ihnen die aktuell implementierten Protokolle des SIGNALduino an und an welches logische FHEM Modul Sie &uuml;bergeben werden.<br>
+		Außerdem wird mit on/off Symbolen angezeigt ob ein Protokoll verarbeitet wird. Durch Klick auf das Symbol, wird im Hintergrund das Attribut whitlelistIDs angepasst. Die Attribute whitelistIDs, blacklistIDs und development beeinflussen dies.
+		Protokolle die in der Spalte <code>dev</code> markiert sind, k&ouml;nnen derzeit nicht über die Schaltsymbole aktiviert werden. Protokolle, welche in dem blacklistIDs Attribut eingetragen sind, können nicht über das Menü aktiviert werden. Dazu bitte das Attribut blacklistIDs entfernen.
+		</li><br>
+   	</ul>
+   
+     
 =end html_DE
 =cut

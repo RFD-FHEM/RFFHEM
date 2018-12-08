@@ -1,3 +1,5 @@
+08.12.2018
+ 00_SIGNALduino.pm: Added new menu via fhemweb. There the protocol List can be seend and protocols can be managed(active/inactive)
 01.12.2018
  signalduino_protocols.hash - ID 46 modified preamble - Attention, DOIF no longer functional | added doc
  14_SD_UT.pm - added new model TEDSEN_SKX1MD
