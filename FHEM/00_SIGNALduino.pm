@@ -250,6 +250,11 @@ SIGNALduino_Initialize($)
   	return undef;
   }
 }
+#
+# Predeclare Variables from other modules may be loaded later from fhem
+#
+our $FW_wname;
+our $FW_ME;      
 
 #
 # Predeclare Variables from other modules may be loaded later from fhem
