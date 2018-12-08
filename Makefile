@@ -19,7 +19,7 @@ deploylocal : 98_UnitTest.pm
 	
 test: deploylocal
 	@echo === running commandref test ===
-	git --no-pager diff --name-only $TRAVIS_COMMIT_RANGE | grep .pm | xargs -I@ echo -select @ | xargs perl /opt/fhem/contrib/commandref_join.pl 
+	git --no-pager diff --name-only $(TRAVIS_COMMIT_RANGE) | grep .pm | xargs -I@ echo -select @ | xargs perl /opt/fhem/contrib/commandref_join.pl 
 	@echo === running unit tests ===
 	test/test-runner.sh test_modules
 	test/test-runner.sh test1
