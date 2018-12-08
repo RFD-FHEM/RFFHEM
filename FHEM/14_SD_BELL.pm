@@ -1,5 +1,5 @@
 ##############################################################################
-# $Id: 14_SD_BELL.pm 32 2018-12-06 14:00:00 v3.3.3-dev_06.12. $HomeAuto_User
+# $Id: 14_SD_BELL.pm 32 2018-12-08 14:00:00 v3.3.3-dev_08.12. $HomeAuto_User
 #
 # The file is part of the SIGNALduino project.
 # The purpose of this module is to support many wireless BELL devices.
@@ -13,8 +13,7 @@
 ####################################################################################################################################
 # - Elro (Smartwares) Doorbell DB200 / 16 melodies - unitec Modell:98156+98YK [Protocol 41] length 32 (8)
 #     get sduino_dummy raw MS;;P0=-526;;P1=1450;;P2=467;;P3=-6949;;P4=-1519;;D=231010101010242424242424102424101010102410241024101024241024241010;;CP=2;;SP=3;;O;;
-####################################################################################################################################
-# - KANGTAI Doorbell (Pollin 94-550405) [Protocol 42]  length 32 (8)
+# - KANGTAI Doorbell (Pollin 94-550405) [Protocol 41]  length 32 (8)
 #     get sduino_dummy raw MS;;P0=1399;;P1=-604;;P2=397;;P3=-1602;;P4=-7090;;D=240123010101230123232301230123232301232323230123010101230123230101;;CP=2;;SP=4;;R=248;;O;;m1;;
 ####################################################################################################################################
 # - m-e doorbell fuer FG- und Basic-Serie  [Protocol 57] length 21-24 (6)
@@ -37,7 +36,7 @@ use warnings;
 ### HASH for all modul models ###
 my %models = (
 	# keys(model) => values
-	"unknown" =>	{	hex_lengh		=> " ",
+	"unknown" =>	{	hex_lengh		=> "99",			# length only for comparison
 									Protocol		=> "00",
 									doubleCode	=> "no"
 								},
@@ -49,14 +48,10 @@ my %models = (
 													Protocol		=> "32",
 													doubleCode	=> "no"
 												},
-	"Elro_DB200_/_unitec" =>	{	hex_lengh		=> "8",
-															Protocol		=> "41",
-															doubleCode	=> "yes"
-														},
-	"KANGTAI" =>	{	hex_lengh		=> "8",
-									Protocol		=> "42",
-									doubleCode	=> "yes"
-								},
+	"Elro_DB200_/_KANGTAI_/_unitec" =>	{	hex_lengh		=> "8",
+																				Protocol		=> "41",
+																				doubleCode	=> "yes"
+																			},
 	"FG_/_Basic-Serie" =>	{	hex_lengh		=> "6",
 													Protocol		=> "57",
 													doubleCode	=> "no"
@@ -93,7 +88,7 @@ my $missingModul = "";
 
 ## Import der FHEM Funktionen
 BEGIN {
-    GP_Import(qw(
+		GP_Import(qw(
 		AssignIoPort
 		AttrVal
 		attr
@@ -107,38 +102,45 @@ BEGIN {
 		readingsDelete
 		readingsEndUpdate
 		readingsSingleUpdate
-    ))
+		))
 };
 
 
-#############################
+###################################
 sub Define($$) {
 	my ($hash, $def) = @_;
 	my @a = split("[ \t][ \t]*", $def);
+	my $hash_name;
+	my $name = $hash->{NAME};
+	my $protocol = $a[2];
+	my $hex_lengh = length($a[3]);
+	my $doubleCode = "no";
 
-	# Argument											0	   	1					2		    	3						4
-	return "wrong syntax: define <name> SD_BELL <Protocol> <HEX-Value> <optional IODEV>" if(int(@a) < 3 || int(@a) > 5);
-	return "wrong <protocol> $a[2]" if not($a[2] =~ /^(?:14|15|32|41|42|57|79)/s);
-	### checks ###
-	return "wrong HEX-Value! Protocol $a[2] HEX-Value to short | long or not HEX (0-9 | a-f | A-F){3,8}" if (not $a[3] =~ /^[0-9a-fA-F]{3,8}/s);
+	#Log3 $name, 3, "SD_BELL_Def name=$a[0] protocol=$protocol HEX-Value=$a[3] hex_lengh=$hex_lengh";
 
-	
+	# Argument															0	   	1					2		    	3						4
+	return "SD_BELL: wrong syntax: define <name> SD_BELL <Protocol> <HEX-Value> <optional IODEV>" if(int(@a) < 3 || int(@a) > 5);
+	### checks - doubleCode yes ###
+	return "SD_BELL: wrong <protocol> $a[2]" if not($a[2] =~ /^(?:15|32|41|57|79)/s);
+	return "SD_BELL: wrong HEX-Value! Protocol $a[2] HEX-Value <$a[3]> not HEX (0-9 | a-f | A-F)" if (($protocol != 41) && not $a[3] =~ /^[0-9a-fA-F]*$/s);
+	return "SD_BELL: wrong HEX-Value! Protocol $a[2] HEX-Value <$a[3]> not HEX (0-9 | a-f | A-F) or length wrong!" if (($protocol == 41) && not $a[3] =~ /^[0-9a-fA-F]{8}_[0-9a-fA-F]{8}$/s);
+
+	($hash_name) = grep { $models{$_}{Protocol} eq $protocol } keys %models;		# search protocol --> model
+	$doubleCode = $models{$hash_name}{doubleCode};															# read note doubleCode
+
+	$hash->{doubleCode} =  "Code alternates between two RAWMSG" if($protocol == 41);
 	$hash->{lastMSG} =  "";
 	$hash->{bitMSG} =  "";
 	my $iodevice = $a[4] if($a[4]);
-	my $name = $hash->{NAME};
 
 	$modules{SD_BELL}{defptr}{$hash->{DEF}} = $hash;
 	my $ioname = $modules{SD_BELL}{defptr}{ioname} if (exists $modules{SD_BELL}{defptr}{ioname} && not $iodevice);
 	$iodevice = $ioname if not $iodevice;
-	
+
 	### Attributes | model set after codesyntax ###
-	my $Protocol = $a[2];
-	my ( $hash_name ) = grep { $models{$_} eq $Protocol } keys (%models); ### search protocol --> model ###
-	
-	$attr{$name}{model}	= $hash_name if( not defined( $attr{$name}{model} ) );	
-	$attr{$name}{room}	= "SD_BELL"	if( not defined( $attr{$name}{room} ) );
-	
+	$attr{$name}{model}	= $hash_name if( not defined( $attr{$name}{model} ) );				# set model, if only undef --> new def
+	$attr{$name}{room}	= "SD_BELL"	if( not defined( $attr{$name}{room} ) );					# set room, if only undef --> new def
+
 	AssignIoPort($hash, $iodevice);
 }
 
@@ -152,7 +154,7 @@ sub Set($$$@) {
 	my $protocol = $split[0];
 	my $repeats = AttrVal($name,'repeats', '5');
 	my $ret = undef;
-	
+
 	if ($hash->{bitMSG} ne "") {
 		if ($cmd eq "?") {
 			$ret .= "ring:noArg";
@@ -176,11 +178,12 @@ sub Set($$$@) {
 	return $ret;
 }
 
-#####################################
+###################################
 sub Undef($$) {
 	my ($hash, $name) = @_;
-	delete($modules{SD_BELL}{defptr}{$hash->{DEF}})
-		if(defined($hash->{DEF}) && defined($modules{SD_BELL}{defptr}{$hash->{DEF}}));
+	delete($modules{SD_BELL}{defptr}{$hash->{DEF}}) if(defined($hash->{DEF}) && defined($modules{SD_BELL}{defptr}{$hash->{DEF}}));
+	delete($modules{SD_BELL}{defptr}{doubleCode}) if(defined($modules{SD_BELL}{defptr}{defptr}{doubleCode}));
+	delete($modules{SD_BELL}{defptr}{doubleCode_Time}) if(defined($modules{SD_BELL}{defptr}{defptr}{doubleCode_Time}));
 	return undef;
 }
 
@@ -190,35 +193,75 @@ sub Parse($$) {
 	my ($iohash, $msg) = @_;
 	my $ioname = $iohash->{NAME};
 	my ($protocol,$rawData) = split("#",$msg);
-	$protocol=~ s/^[u|U|P](\d+)/$1/;		# extract protocol ID, $1 = ID
+	$protocol=~ s/^[u|U|P](\d+)/$1/;																									# extract protocol ID, $1 = ID
 	my $hlen = length($rawData);
 	my $blen = $hlen * 4;
 	my $bitData = unpack("B$blen", pack("H$hlen", $rawData));
-	my $hash_name;
-	
-	### search protocol --> model ###
-	foreach my $search (keys(%models)) {
-		if ($models{$search}{Protocol} == $protocol) {
-			$hash_name = $search;
-			last;
-		}
-	}
-	
-	Log3 $iohash, 4, "$ioname: SD_BELL_Parse protocol $protocol $hash_name doubleCode=".$models{$hash_name}{doubleCode}.", bitData $bitData";
-	
-	my $def;
+	my $doubleCode_known = "0";																												# marker, RAWMSG known in defpr
+	my ($hash_name) = grep { $models{$_}{Protocol} eq $protocol } keys %models;				# search protocol --> model
 	my $deviceCode = $rawData;
 	my $devicedef;
-	my $state;
-	
-	if (!$def) {
-		$devicedef = $protocol . " " .$deviceCode;
-		$def = $modules{SD_BELL}{defptr}{$devicedef};
-	}
-	
-	$modules{SD_BELL}{defptr}{ioname} = $ioname;
 
-	Log3 $iohash, 4, "$ioname: SD_BELL_Parse device $devicedef found" if($def);
+	Log3 $iohash, 4, "$ioname: SD_BELL_Parse protocol $protocol $hash_name doubleCode=".$models{$hash_name}{doubleCode}.", bitData $bitData";	
+
+	## loop to view SD_BELL defined defptr ##
+	if ($protocol == 41) {
+		foreach my $d(sort keys %{$modules{SD_BELL}{defptr}}) {
+			Log3 $iohash, 5, "$ioname: SD_BELL_Parse Check defptr - $d" if ($d =~ /$protocol/s);
+			Log3 $iohash, 4, "$ioname: SD_BELL_Parse Check defptr - $rawData is already registered" if ($d =~ /$rawData/s);
+			my @doubleCode = split(" ",$d) if ($d =~ /$rawData/s);																															# split two RAWMSG from protocol in def
+			$doubleCode_known = $doubleCode[1] if ($d =~ /$rawData/s);																													# RAWMSG are in split RAWMSG
+			Log3 $iohash, 5, "$ioname: SD_BELL_Parse Check defptr - $doubleCode_known found";
+		}
+	}
+
+	### doubleCode yes and RAWMSG are unknown in def ###
+	if ($models{$hash_name}{doubleCode} eq "yes" && $doubleCode_known eq "0") {
+		my $old_doubleCode = $modules{SD_BELL}{defptr}{doubleCode} if (defined $modules{SD_BELL}{defptr}{doubleCode});
+		my $old_doubleCode_Time = $modules{SD_BELL}{defptr}{doubleCode_Time} if (defined $modules{SD_BELL}{defptr}{doubleCode_Time});
+
+		if (exists $modules{SD_BELL}{defptr}{doubleCode}) {
+			Log3 $iohash, 5, "$ioname: SD_BELL_Parse Check doubleCode - already defined!";
+		} else {
+			$modules{SD_BELL}{defptr}{doubleCode} = $rawData."_doubleCode";									# reset marker, RAWMSG other
+			Log3 $iohash, 3, "$ioname: SD_BELL_Parse Check doubleCode - new defined!";
+			return "";
+		}
+
+		if ($modules{SD_BELL}{defptr}{doubleCode} =~ /_doubleCode/s ) {										# check of 2 RAWMSG
+			my @doubleCode = split("_",$modules{SD_BELL}{defptr}{doubleCode});
+			Log3 $iohash, 4, "$ioname: SD_BELL_Parse Check doubleCode - $doubleCode[0] part two find";
+			if ($modules{SD_BELL}{defptr}{doubleCode} =~ /$rawData/s) {											# check, part known
+				Log3 $iohash, 4, "$ioname: SD_BELL_Parse Check doubleCode - $rawData already exists";
+			} else {																																				# new part
+				$modules{SD_BELL}{defptr}{doubleCode} = $doubleCode[0]."_".$rawData;
+				$modules{SD_BELL}{defptr}{doubleCode_Time} = time();													# timemarker, 2 RAWMSG´s
+			}
+			Log3 $iohash, 5, "$ioname: SD_BELL_Parse Check doubleCode - ".$modules{SD_BELL}{defptr}{doubleCode}." complete | def_Time=".$modules{SD_BELL}{defptr}{doubleCode_Time};
+			$deviceCode = $modules{SD_BELL}{defptr}{doubleCode};
+			$devicedef = $protocol . " " .$deviceCode;
+		} else {
+			if ($modules{SD_BELL}{defptr}{doubleCode} =~ /$rawData/s) {											# check RAWMSG known
+				Log3 $iohash, 4, "$ioname: SD_BELL_Parse Check doubleCode - $rawData already exists";
+				$deviceCode = $modules{SD_BELL}{defptr}{doubleCode};
+				$devicedef = $protocol . " " .$deviceCode;
+			} else {
+				Log3 $iohash, 3, "$ioname: SD_BELL_Parse Check doubleCode - $rawData other unknown RAWMSG";		# Error detections, another bit
+				return "";
+			}
+		}
+		### doubleCode yes and RAWMSG are known in def ###
+	} elsif ($models{$hash_name}{doubleCode} eq "yes" && $doubleCode_known ne "0") {
+		$devicedef = $protocol . " " .$doubleCode_known;																														# variant two, RAWMSG in a different order
+		Log3 $iohash, 4, "$ioname: SD_BELL_Parse Check doubleCode - $rawData already exist in $doubleCode_known";
+		### doubleCode no ###
+	} else {
+		$devicedef = $protocol . " " .$deviceCode;
+		Log3 $iohash, 4, "$ioname: SD_BELL_Parse Check doubleCode - $rawData alone";
+	}
+
+	my $def = $modules{SD_BELL}{defptr}{$devicedef};
+	$modules{SD_BELL}{defptr}{ioname} = $ioname;
 
 	if(!$def) {
 		Log3 $iohash, 1, "$ioname: SD_BELL_Parse UNDEFINED BELL detected, Protocol ".$protocol." code " . $deviceCode;
@@ -231,7 +274,7 @@ sub Parse($$) {
 	$hash->{bitMSG} = $bitData;
 
 	my $model = AttrVal($name, "model", "unknown");
-	$state = "ring";
+	my $state = "ring";
 	Log3 $name, 4, "$ioname: SD_BELL_Parse $name model=$model state=$state ($rawData)";
 
 	readingsBeginUpdate($hash);
@@ -249,21 +292,24 @@ sub Attr(@) {
 	my $ioDev = InternalVal($name, "LASTInputDev", undef);
 	my $state;
 	my $oldmodel = AttrVal($name, "model", "unknown");
-	my $hex_lengh = length(InternalVal($name, "lastMSG", "0"));
-	
+
+	my @hex_lengh_def = split(" ", $defs{$name}->{DEF});
+	my $hex_lengh = length($hex_lengh_def[1]);
+	my $check_ok = 0;
 	#Log3 $name, 3, "SD_BELL_Attr cmd=$cmd attrName=$attrName attrValue=$attrValue oldmodel=$oldmodel";
-	
+
 	if ($cmd eq "set" && $attrName eq "model" && $attrValue ne $oldmodel) {		### set new attr
-		return "ERROR! You want to choose the $oldmodel model to $attrValue.\nPlease check your selection.\nRAWMSG is to short!" if ($models{$attrValue}{hex_lengh} > $hex_lengh);	# variants one
-		return "ERROR! You want to choose the $oldmodel model to $attrValue.\nPlease check your selection.\nRAWMSG is to long!" if ($models{$attrValue}{hex_lengh} < $hex_lengh);		# variants two
+
+		$check_ok = 1 if ($models{$attrValue}{hex_lengh} =~ /($hex_lengh)/);
+		return "SD_BELL: ERROR! You want to choose the $oldmodel model to $attrValue.\nPlease check your selection. Your HEX-Value in DEF with a length of " .$hex_lengh. " are not allowed on this model!" if ($check_ok != 1 && $hex_lengh != 0);
 		Log3 $name, 3, "SD_BELL_Attr $cmd $attrName to $attrValue from $oldmodel";
 	}
-	
+
 	if ($cmd eq "del" && $attrName eq "model") {		### delete readings
 		readingsDelete($hash, "LastAction") if(defined(ReadingsVal($hash->{NAME},"LastAction",undef)));
 		readingsDelete($hash, "state") if(defined(ReadingsVal($hash->{NAME},"state",undef)));
 	}
-	
+
 	return undef;
 }
 
@@ -284,7 +330,19 @@ sub Attr(@) {
 	<li>Elro (Smartwares) Doorbell DB200 / 16 melodies - unitec Modell:98156+98YK [Protocol 41]</li>
 	<li>m-e doorbell fuer FG- and Basic-Serie  [Protocol 57]</li>
 	<li>Heidemann | Heidemann HX | VTX-BELL_Funkklingel  [Protocol 79]</li>
-	</ul><br><br>
+	<br>
+	<u><i>Special feature Protocol 41, 2 different codes will be sent one after the other!</u></i>
+	</ul><br>
+	<br>
+
+	<b>Define</b><br>
+	<ul><code>define &lt;NAME&gt; SD_BELL &lt;protocol&gt; &lt;hex-adresse&gt;</code><br><br>
+	<u>Examples:</u>
+		<ul>
+		define &lt;NAME&gt; SD_BELL 32 68C1DA<br>
+		define &lt;NAME&gt; SD_BELL 41 754485D3_08E8D593<br>
+		define &lt;NAME&gt; SD_BELL 79 A3C<br>
+		</ul></ul><br>
 
 	<b>Set</b><br>
 	<ul>ring</ul><br>
@@ -316,7 +374,19 @@ sub Attr(@) {
 	<li>Elro (Smartwares) Doorbell DB200 / 16 Melodien - unitec Modell:98156+98YK [Protokoll 41]</li>
 	<li>m-e doorbell fuer FG- und Basic-Serie  [Protokoll 57]</li>
 	<li>Heidemann | Heidemann HX | VTX-BELL_Funkklingel  [Protokoll 79]</li>
-	</ul><br><br>
+	<br>
+	<u><i>Besonderheit Protokoll 41, es sendet 2 verschiedene Codes nacheinader!</u></i>
+	</ul><br>
+	<br>
+
+	<b>Define</b><br>
+	<ul><code>define &lt;NAME&gt; SD_BELL &lt;Protokoll&gt; &lt;Hex-Adresse&gt;</code><br><br>
+	<u>Beispiele:</u>
+		<ul>
+		define &lt;NAME&gt; SD_BELL 32 68C1DA<br>
+		define &lt;NAME&gt; SD_BELL 41 754485D3_08E8D593<br>
+		define &lt;NAME&gt; SD_BELL 79 A3C<br>
+		</ul></ul><br>
 
 	<b>Set</b><br>
 	<ul>ring</ul><br>
