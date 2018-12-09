@@ -1861,6 +1861,8 @@
 			start        => [3,-3,3,-3,3,-3],
 			clockabs     => 250,
 			format       => 'twostate',
+			preamble     => 'W89#',
+			postamble    => '',
 			clientmodule => 'SD_WS',
 			length_min   => '40',
 			length_max   => '40',
