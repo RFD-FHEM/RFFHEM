@@ -28,7 +28,7 @@ eval "use Time::HiRes qw(gettimeofday);1" ;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.3.3-dev_06.12.",
+	SDUINO_VERSION            => "v3.3.3-dev_09.12.",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -68,7 +68,7 @@ my %gets = (    # Name, Data to send to the SIGNALduino, Regexp for the answer
 # "ITParms"  => ["ip",'.*'],
   "ping"     => ["P",'^OK$'],
   "config"   => ["CG",'^MS.*MU.*MC.*'],
-  "protocolIDs"   => ["none",'none'],
+#  "protocolIDs"   => ["none",'none'],
   "ccconf"   => ["C0DnF", 'C0Dn11.*'],
   "ccreg"    => ["C", '^C.* = .*'],
   "ccpatable" => ["C3E", '^C3E = .*'],
@@ -235,7 +235,7 @@ SIGNALduino_Initialize($)
 		              ." $readingFnAttributes";
 
   $hash->{ShutdownFn}		= "SIGNALduino_Shutdown";
-  $hash->{FW_detailFn}		= "SIGNALduino_Detail";
+  $hash->{FW_detailFn}		= "SIGNALduino_FW_Detail";
   
   $hash->{msIdList} = ();
   $hash->{muIdList} = ();
@@ -255,6 +255,12 @@ SIGNALduino_Initialize($)
 #
 our $FW_wname;
 our $FW_ME;      
+
+#
+# Predeclare Variables from other modules may be loaded later from fhem
+#
+our $FW_CSRF;
+our $FW_detail;
 
 # Load Protocol hash from File into a hash.
 # First Parameter is for filename (full or relativ path) to be loaded
@@ -865,7 +871,7 @@ SIGNALduino_Get($@)
 	return "$a[1]: \n\nFetching $channel firmware versions for $hardware from github\n";
   }
   
-  if (IsDummy($name))
+  if (IsDummy($name) && $a[1] ne "protocolIDs")
   {
   	if ($arg =~ /^M[CcSU];.*/)
   	{
@@ -929,7 +935,7 @@ SIGNALduino_Get($@)
 		return "";
   	}
   }
-  return "No $a[1] for dummies" if(IsDummy($name));
+  #return "No $a[1] for dummies" if(IsDummy($name));
 
   SIGNALduino_Log3 $name, 5, "$name: command for gets: " . $gets{$a[1]}[0] . " " . $arg;
 
@@ -948,68 +954,9 @@ SIGNALduino_Get($@)
   }
   elsif ($a[1] eq "protocolIDs")
   {
-	my $id;
-	my $ret;
-	my $s;
-	my $moduleId;
-	my @IdList = ();
+	return SIGNALduino_FW_getProtocolList($name);
 	
-	foreach $id (keys %ProtocolListSIGNALduino)
-	{
-		next if ($id eq 'id');
-		push (@IdList, $id);
-	}
-	@IdList = sort { $a <=> $b } @IdList;
 	
-	$ret = " ID    modulname       protocolname # comment\n\n";
-	
-	foreach $id (@IdList)
-	{
-		$ret .= sprintf("%3s",$id) . " ";
-		
-		if (exists ($ProtocolListSIGNALduino{$id}{format}) && $ProtocolListSIGNALduino{$id}{format} eq "manchester")
-		{
-			$ret .= "MC";
-		}
-		elsif (exists $ProtocolListSIGNALduino{$id}{sync})
-		{
-			$ret .= "MS";
-		}
-		elsif (exists ($ProtocolListSIGNALduino{$id}{clockabs}))
-		{
-			$ret .= "MU";
-		}
-		
-		if (exists ($ProtocolListSIGNALduino{$id}{clientmodule}))
-		{
-			$moduleId .= "$id,";
-			$s = $ProtocolListSIGNALduino{$id}{clientmodule};
-			if (length($s) < 15)
-			{
-				$s .= substr("               ",length($s) - 15);
-			}
-			$ret .= " $s";
-		}
-		else
-		{
-			$ret .= "                ";
-		}
-		
-		if (exists ($ProtocolListSIGNALduino{$id}{name}))
-		{
-			$ret .= " $ProtocolListSIGNALduino{$id}{name}";
-		}
-		
-		if (exists ($ProtocolListSIGNALduino{$id}{comment}))
-		{
-			$ret .= " # $ProtocolListSIGNALduino{$id}{comment}";
-		}
-		
-		$ret .= "\n";
-	}
-	#$moduleId =~ s/,$//;
-	
-	return "$a[1]: \n\n$ret\n";
 	#return "$a[1]: \n\n$ret\nIds with modules: $moduleId";
   }  
 
@@ -2864,25 +2811,61 @@ SIGNALduino_Attr(@)
   	return undef;
 }
 
-sub SIGNALduino_Detail($@) {
+sub SIGNALduino_FW_Detail($@) {
   my ($FW_wname, $name, $room, $pageHash) = @_;
   
+  my $hash = $defs{$name};
   
   my @dspec=devspec2array("DEF=.*fakelog");
   my $lfn = $dspec[0];
   my $fn=$defs{$name}->{TYPE}."-Flash.log";
   
+  my $ret;
   if (-s AttrVal("global", "logdir", "./log/") .$fn)
   { 
 	  my $flashlogurl="$FW_ME/FileLog_logWrapper?dev=$lfn&type=text&file=$fn";
 	  
-	  my $ret  = "<table>";
-	     $ret .= "<tr><td>";
-	     $ret .= "<a href=\"$flashlogurl\">Last Flashlog<\/a>";
-	     $ret .= "</td>";
-	     $ret .= "</table>";
+	  $ret  = "<table>";
+	  $ret .= "<tr><td>";
+	  $ret .= "<a href=\"$flashlogurl\">Last Flashlog<\/a>";
+	  $ret .= "</td>";
+	  $ret .= "</table>";
 	  return $ret;
   }
+  my $protocolURL="$FW_ME/FileLog_logWrapper?dev=$lfn&type=text&file=$fn";
+  
+  $ret = "<div class='makeTable wide'><span>Information menu</span>
+<table class='block wide' id='SIGNALduinoInfoMenue' nm='$hash->{NAME}' class='block wide'>
+<tr class='even'><td><a href='#showProtocolList' id='showProtocolList'>Display protocollist</a></td></tr>";
+  
+  $ret .= '</table></div>
+<script>
+$( "#showProtocolList" ).click(function(e) {
+	e.preventDefault();
+	FW_cmd(FW_root+\'?cmd={SIGNALduino_FW_getProtocolList("'.$FW_detail.'")}&XHR=1\', function(data){SD_plistWindow(data)});
+	
+});
+
+function SD_plistWindow(txt)
+{
+  var div = $("<div id=\"SD_protocolDialog\">");
+  $(div).html(txt);
+  $("body").append(div);
+  var oldPos = $("body").scrollTop();
+  $(div).dialog({
+    dialogClass:"no-close", modal:true, width:"auto", closeOnEscape:true, 
+    maxWidth:$(window).width()*0.9, maxHeight:$(window).height()*0.9,
+    buttons: [{text:"OK", click:function(){
+      $(this).dialog("close");
+      $(div).remove();
+      location.reload();
+    }}]
+  });
+}
+</script>';
+  return $ret;
+  
+  
 }
 
 
@@ -4165,6 +4148,59 @@ sub SIGNALduino_Log3($$$)
   return Log3($name,$loglevel,$text);
 }
 
+
+################################################
+# Functions for fhemweb actions 
+
+sub SIGNALduino_FW_changeProtocolUsage
+{
+	my $name = shift;
+	my $id = shift;
+	
+	
+	SIGNALduino_Log3 $name,3, "id is $id";
+	my $hash=$defs{$name};
+	
+	
+	my $wl_attr= AttrVal($name, "whitelist_IDs", ".*");
+	my $cmd;
+	if ( (grep { $_ eq $id } @{$hash->{msIdList}}) ||  (grep { $_ eq $id } @{$hash->{muIdList}}) || (grep { $_ eq $id } @{$hash->{mcIdList}}) ) 
+	{
+		if ($wl_attr eq ".*")
+		{
+			$wl_attr = join(",",@{$hash->{msIdList}},@{$hash->{muIdList}},@{$hash->{mcIdList}}); #Generate a new List,  if we are in default mode
+		}
+		$wl_attr =~ s/(?:^$id,?|,$id,|$id$)/,/;
+		$wl_attr =~ s/,,/,/;
+		
+		
+	} else {
+		$wl_attr = defined($wl_attr) ? "$wl_attr,$id" : $id;
+	}
+	
+	#Todo Funktion sperren wenn kein JSON installiert ist. 
+ 	#SIGNAlduino_Attr("set",$name,"whitelist_IDs",$wl_attr); # Saves new Attr	
+ 	my $ret = CallFn($name, "AttrFn", "set", $name, "whitelist_IDs", $wl_attr);
+ 	if (!defined($ret))
+ 	{
+ 		$attr{$name}{"whitelist_IDs"} = $wl_attr;
+ 		if ( (grep { $_ eq $id } @{$hash->{msIdList}}) ||  (grep { $_ eq $id } @{$hash->{muIdList}}) || (grep { $_ eq $id } @{$hash->{mcIdList}}) ) 
+ 		{
+ 			$cmd = FW_makeImage("on","disable","icon");	
+ 		} else {
+ 			$cmd = FW_makeImage("off","enable","icon");
+ 		
+ 		}
+ 		my %return_hash = ('id'=>$id, 'data'=>$cmd);
+		my $return_json = to_json(\%return_hash);
+ 		
+		return $return_json;
+ 	}
+ 	
+ 	
+}
+
+
 ################################################
 # Helper to get a reference of the protocolList Hash
 sub SIGNALduino_getProtocolList()
@@ -4174,6 +4210,96 @@ sub SIGNALduino_getProtocolList()
 
 
 
+sub SIGNALduino_FW_getProtocolList
+{
+	my $name = shift;
+	
+	my $hash = $defs{$name};
+	
+	my $id;
+	my $ret;
+	my $s;
+	my $moduleId;
+	my @IdList = ();
+	
+	foreach $id (keys %ProtocolListSIGNALduino)
+	{
+		next if ($id eq 'id');
+		push (@IdList, $id);
+	}
+	@IdList = sort { $a <=> $b } @IdList;
+	
+	$ret = "<table class=\"block wide internals wrapcolumns\">";
+	$ret .="<caption>Protocollist Overview</caption>";
+	$ret .= "<thead style=\"text-align:center\"><td>dev</td><td>ID</td><td>Message Type</td><td>modulname</td><td>protocolname</td> <td># comment</td><td>Action</td></thead>";
+	$ret .="<tbody>";
+	my $oddeven="odd";
+	my $wl_attr= AttrVal($name, "whitelist_IDs", ".*");
+	
+	my $js_ret = '$(".SIGNALduino_Proto").click(function(){
+   			console.log( $(this));
+			var element = $(this);
+			
+			FW_cmd(FW_root+ \'?XHR=1&cmd={SIGNALduino_FW_changeProtocolUsage("'.$name.'","\'+$(this).attr("protoid")+\'")}\',function(data){
+   				var dataobj = JSON.parse(data);
+		    	element.html(dataobj.data);
+			});
+		 		
+	  	});
+		';
+	#    			
+	
+	foreach $id (@IdList)
+	{
+		
+		my $msgtype;
+		my $action;
+		if (exists ($ProtocolListSIGNALduino{$id}{format}) && $ProtocolListSIGNALduino{$id}{format} eq "manchester")
+		{
+			$msgtype = "MC";
+		}
+		elsif (exists $ProtocolListSIGNALduino{$id}{sync})
+		{
+			$msgtype = "MS";
+		}
+		elsif (exists ($ProtocolListSIGNALduino{$id}{clockabs}))
+		{
+			$msgtype = "MU";
+		}
+		
+		my $cmd;
+		my $newWlIDs;
+		if ( (grep { $_ eq $id } @{$hash->{msIdList}}) ||  (grep { $_ eq $id } @{$hash->{muIdList}}) || (grep { $_ eq $id } @{$hash->{mcIdList}}) ) 
+		{
+			$cmd = FW_makeImage("on","disable","icon");
+			if ($wl_attr eq ".*")
+			{
+				$newWlIDs = join(",",@{$hash->{msIdList}},@{$hash->{muIdList}},@{$hash->{mcIdList}}) 
+			} else  {
+				$newWlIDs=$wl_attr;
+			}
+
+			$newWlIDs =~ s/(?:^$id,?|,$id,|$id$)/,/;
+		
+		} else {
+			$cmd = FW_makeImage("off","enable","icon");
+			$newWlIDs = defined($wl_attr) ? "$wl_attr,$id" : $id;
+		}
+		
+		
+		my $htmlid="SIGNALduino_Proto_".$id;
+	    $action=sprintf("<a class=%s id=%s protoid=%s>%s</a>","SIGNALduino_Proto",$htmlid,$id,$cmd);
+	   
+		
+		$ret .= sprintf("<tr class=\"%s\"><td><div>%s</div></td><td><div>%3s</div></td><td><div>%s</div></td><td><div>%s</div></td><td><div>%s</div></td><td><div>%s</div></td><td><div>%s</div></td></tr>",$oddeven,SIGNALduino_getProtoProp($id,"developId",""),$id,$msgtype,SIGNALduino_getProtoProp($id,"clientmodule",""),SIGNALduino_getProtoProp($id,"name",""),SIGNALduino_getProtoProp($id,"comment",""),$action);
+		$oddeven= $oddeven eq "odd" ? "even" : "odd" ;
+		
+		$ret .= "\n";
+	}
+	$ret .= "</tbody></table>";
+	return $ret."<script>".$js_ret."</script>";
+	#$moduleId =~ s/,$//;
+}
 
 
 
@@ -4530,10 +4656,6 @@ sub SIGNALduino_githubParseHttpResponse($)
 		<li>ping<br>
 		Check the communication with the SIGNALduino.
 		</li><br>
-        <a name="protocolIDs"></a>
-		<li>protocolIDs<br>
-		display a list of the protocol IDs
-		</li><br>
         <a name="raw"></a>
 		<li>raw<br>
 		Issue a SIGNALduino firmware command, and wait for one line of data returned by
@@ -4681,10 +4803,21 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
    		<a name="WS09_CRCAUS"></a>
    		<li>WS09_CRCAUS<br>
        		<ul>
-			<li>0: CRC-Check WH1080 CRC = 0  on, default</li>
+				<li>0: CRC-Check WH1080 CRC = 0  on, default</li>
        			<li>2: CRC = 49 (x031) WH1080, set OK</li>
-		</ul>
-    		</li>
+			</ul>
+    	</li>
+   	</ul>
+   	<a name="SIGNALduinoDetail"></a>
+	<b>Information menu</b>
+	<ul>
+   	    <a name="Display protocollist"></a>
+		<li>Display protocollist<br> 
+		Shows the current implemented protocols from the SIGNALduino and to what logical FHEM Modul data is sent.<br>
+		Additional there is an on/off symbol, which shows you if a protocol will be processed. This changes the Attribute whitlistIDs for you in the background. The attributes whitelistIDs, blacklistIDs und development affects this.
+		Protocols which are flagged in the row <code>dev</code>, can't be activated via this ui.
+		If you are using blacklistIDs, then you also can not activate them via the button, delete the attribute blacklistIDs if you want to control enabled protocols via this menu.
+		</li><br>
    	</ul>
 							  		   
 =end html
@@ -4731,7 +4864,7 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
 	<br>
 	<a name="SIGNALduinodefine"></a>
 	<b>Define</b>
-	<ul><code>define &lt;name&gt; SIGNALduino &lt;device&gt; </code></ul>
+	<code>define &lt;name&gt; SIGNALduino &lt;device&gt; </code>
 	USB-connected devices (SIGNALduino):<br>
 	<ul><li>
 		&lt;device&gt; spezifiziert den seriellen Port f&uuml;r die Kommunikation mit dem SIGNALduino.
@@ -4753,11 +4886,11 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
 	<a name="SIGNALduinoset"></a>
 	<b>SET</b>
 	<ul>
-		<li>cc1101_freq / cc1101_bWidth / cc1101_patable / cc1101_rAmpl / cc1101_sens<br></li>
+		<li>cc1101_freq / cc1101_bWidth / cc1101_patable / cc1101_rAmpl / cc1101_sens<br>
 		(NUR bei Verwendung eines cc110x Funk-Moduls)<br><br>
 		Stellt die SIGNALduino-Frequenz / Bandbreite / PA-Tabelle / Empf&auml;nger-Amplitude / Empfindlichkeit ein.<br>
 		Verwenden Sie es mit Vorsicht. Es kann Ihre Hardware zerst&ouml;ren und es kann sogar illegal sein, dies zu tun.<br>
-		Hinweis: Die f&uuml;r die RFR-&Uuml;bertragung verwendeten Parameter sind nicht betroffen.<br>
+		Hinweis: Die f&uuml;r die RFR-&Uuml;bertragung verwendeten Parameter sind nicht betroffen.<br></li>
 		<ul>
 		<a name="cc1101_freq"></a>
 		<li><code>cc1101_freq</code> , legt sowohl die Empfangsfrequenz als auch die &Uuml;bertragungsfrequenz fest.<br>
@@ -4771,7 +4904,7 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
 		<a name="cc1101_sens"></a>
 		<li><code>cc1101_sens</code> , ist die Entscheidungsgrenze zwischen den Ein- und Aus-Werten und betr&auml;gt 4, 8, 12 oder 16 dB. Kleinere Werte erlauben den Empfang von weniger klaren Signalen. Standard ist 4 dB.</li>
 		</ul>
-		</li><br>
+		<br>
 		<a name="close"></a>
 		<li>close<br>
 		Beendet die Verbindung zum Ger&auml;t.</li><br>
@@ -4868,17 +5001,20 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
 		<br><br>
 		Argumente sind:
 		<p>
-		<ul><li>P<protocol id>#binarydata#R<anzahl der wiederholungen>#C<optional taktrate>   (#C is optional) 
-		<br>Beispiel binarydata: <code>set sduino sendMsg P0#0101#R3#C500</code>
-		<br>Wird eine sende Kommando fuer die Bitfolge 0101 anhand der protocol id 0 erzeugen. Als Takt wird 500 verwendet.
-		<br>SR;R=3;P0=500;P1=-9000;P2=-4000;P3=-2000;D=03020302;<br></li></ul><br>
-		<ul><li>P<protocol id>#0xhexdata#R<anzahl der wiederholungen>#C<optional taktrate>    (#C is optional) 
-		<br>Beispiel 0xhexdata: <code>set sduino sendMsg P29#0xF7E#R4</code>
-		<br>Wird eine sende Kommando fuer die Hexfolge F7E anhand der protocol id 29 erzeugen. Die Nachricht soll 4x gesenset werden.
-		<br>SR;R=4;P0=-8360;P1=220;P2=-440;P3=-220;P4=440;D=01212121213421212121212134;
-		</p></li></ul>
-	</ul><br>
-	</ul></li>
+		<ul>
+			<li>P<protocol id>#binarydata#R<anzahl der wiederholungen>#C<optional taktrate>   (#C is optional) 
+			<br>Beispiel binarydata: <code>set sduino sendMsg P0#0101#R3#C500</code>
+			<br>Wird eine sende Kommando fuer die Bitfolge 0101 anhand der protocol id 0 erzeugen. Als Takt wird 500 verwendet.
+			<br>SR;R=3;P0=500;P1=-9000;P2=-4000;P3=-2000;D=03020302;<br></li></ul><br>
+			<ul><li>P<protocol id>#0xhexdata#R<anzahl der wiederholungen>#C<optional taktrate>    (#C is optional) 
+			<br>Beispiel 0xhexdata: <code>set sduino sendMsg P29#0xF7E#R4</code>
+			<br>Wird eine sende Kommando fuer die Hexfolge F7E anhand der protocol id 29 erzeugen. Die Nachricht soll 4x gesenset werden.
+			<br>SR;R=4;P0=-8360;P1=220;P2=-440;P3=-220;P4=440;D=01212121213421212121212134;
+			</p></li>
+		</ul>
+	</li>
+	<br>
+	</ul>
 	
 	<a name="SIGNALduinoget"></a>
 	<b>Get</b>
@@ -4921,10 +5057,6 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
 	<a name="ping"></a>
    	<li>ping<br>
 	Pr&uuml;ft die Kommunikation mit dem SIGNALduino.
-	</li><br>
-	<a name="protocolIDs"></a>
-	<li>protocolIDs<br>
-	Zeigt Ihnen die aktuell implementierten Protokolle des SIGNALduino an und an welches FHEM Modul Sie &uuml;bergeben werden.
 	</li><br>
 	<a name="raw"></a>
 	<li>raw<br>
@@ -5079,6 +5211,19 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
 			<li>2: CRC = 49 (x031) WH1080, set OK</li>
 		</ul>
 	</li><br>
-	
+  </ul>
+ 
+   	<a name="SIGNALduinoDetail"></a>
+	<b>Information menu</b>
+	<ul>
+   	    <a name="Display protocollist"></a>
+		<li>Display protocollist<br> 
+		Zeigt Ihnen die aktuell implementierten Protokolle des SIGNALduino an und an welches logische FHEM Modul Sie &uuml;bergeben werden.<br>
+		Außerdem wird mit on/off Symbolen angezeigt ob ein Protokoll verarbeitet wird. Durch Klick auf das Symbol, wird im Hintergrund das Attribut whitlelistIDs angepasst. Die Attribute whitelistIDs, blacklistIDs und development beeinflussen dies.
+		Protokolle die in der Spalte <code>dev</code> markiert sind, k&ouml;nnen derzeit nicht über die Schaltsymbole aktiviert werden. Protokolle, welche in dem blacklistIDs Attribut eingetragen sind, können nicht über das Menü aktiviert werden. Dazu bitte das Attribut blacklistIDs entfernen.
+		</li><br>
+   	</ul>
+   
+     
 =end html_DE
 =cut
