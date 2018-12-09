@@ -28,7 +28,7 @@ eval "use Time::HiRes qw(gettimeofday);1" ;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.3.3-dev_24.11.",
+	SDUINO_VERSION            => "v3.3.3-dev_06.12.",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -132,57 +132,57 @@ my $clientsSIGNALduino = ":IT:"
 						."Hideki:"
 						."SD_WS07:"
 						."SD_WS09:"
-						." :"		# Zeilenumbruch
+						." :"					# Zeilenumbruch
 						."SD_WS:"
 						."RFXX10REC:"
 						."Dooya:"
 						."SOMFY:"
-						."SD_BELL:"	## bells
-						."SD_UT:"	## universal - more devices with different protocols
-			        	."SD_WS_Maverick:"
-			        	."FLAMINGO:"
-			        	."CUL_WS:"
-			        	."Revolt:"
-						." :"		# Zeilenumbruch
-			        	."FS10:"
-			        	."CUL_FHTTK:"
-			        	."Siro:"
+						."SD_BELL:"		## bells
+						."SD_UT:"			## universal - more devices with different protocols
+						."SD_WS_Maverick:"
+						."FLAMINGO:"
+						."CUL_WS:"
+						."Revolt:"
+						." :"					# Zeilenumbruch
+						."FS10:"
+						."CUL_FHTTK:"
+						."Siro:"
 						."FHT:"
 						."FS20:"
 						."CUL_EM:"
 						."Fernotron:"
-			      		."SIGNALduino_un:"
+						."SIGNALduino_un:"
 					; 
 
 ## default regex match List for dispatching message to logical modules, can be updated during runtime because it is referenced
 my %matchListSIGNALduino = (
-     "1:IT"            			=> "^i......",	  				  # Intertechno Format
-     "2:CUL_TCM97001"      		=> "^s[A-Fa-f0-9]+",			  # Any hex string		beginning with s
-     "3:SD_RSL"					=> "^P1#[A-Fa-f0-9]{8}",
-     "5:CUL_TX"               	=> "^TX..........",         	  # Need TX to avoid FHTTK
-     "6:SD_AS"       			=> "^P2#[A-Fa-f0-9]{7,8}", 		  # Arduino based Sensors, should not be default
-     "4:OREGON"            		=> "^(3[8-9A-F]|[4-6][0-9A-F]|7[0-8]).*",		
-     "7:Hideki"					=> "^P12#75[A-F0-9]+",
-     "9:CUL_FHTTK"				=> "^T[A-F0-9]{8}",
-     "10:SD_WS07"				=> "^P7#[A-Fa-f0-9]{6}F[A-Fa-f0-9]{2}(#R[A-F0-9][A-F0-9]){0,1}\$",
-     "11:SD_WS09"				=> "^P9#F[A-Fa-f0-9]+",
-     "12:SD_WS"					=> '^W\d+x{0,1}#.*',
-     "13:RFXX10REC" 			=> '^(20|29)[A-Fa-f0-9]+',
-     "14:Dooya"					=> '^P16#[A-Fa-f0-9]+',
-     "15:SOMFY"					=> '^Ys[0-9A-F]+',
-     "16:SD_WS_Maverick"		=> '^P47#[A-Fa-f0-9]+',
-     "17:SD_UT"            		=> '^P(?:29|30|34|46|69|81|83|86)#.*',	 # universal - more devices with different protocols
-     "18:FLAMINGO"            	=> '^P13\.?1?#[A-Fa-f0-9]+',     # Flamingo Smoke
-     "19:CUL_WS"				=> '^K[A-Fa-f0-9]{5,}',
-     "20:Revolt"				=> '^r[A-Fa-f0-9]{22}',
-     "21:FS10"					=> '^P61#[A-F0-9]+',
-     "22:Siro"					=> '^P72#[A-Fa-f0-9]+',
-     "23:FHT"      				=> "^81..(04|09|0d)..(0909a001|83098301|c409c401)..",
-     "24:FS20"    				=> "^81..(04|0c)..0101a001", 
-     "25:CUL_EM"    				=> "^E0.................", 
-     "26:Fernotron"  			=> '^P82#.*',
-     "27:SD_BELL"  			    => '^P(?:14|15|32|41|42|57|79)#.*',
-	 "X:SIGNALduino_un"			=> '^[u]\d+#.*',
+			"1:IT"								=> "^i......",														# Intertechno Format
+			"2:CUL_TCM97001"			=> "^s[A-Fa-f0-9]+",											# Any hex string		beginning with s
+			"3:SD_RSL"						=> "^P1#[A-Fa-f0-9]{8}",
+			"5:CUL_TX"						=> "^TX..........",												# Need TX to avoid FHTTK
+			"6:SD_AS"							=> "^P2#[A-Fa-f0-9]{7,8}",								# Arduino based Sensors, should not be default
+			"4:OREGON"						=> "^(3[8-9A-F]|[4-6][0-9A-F]|7[0-8]).*",
+			"7:Hideki"						=> "^P12#75[A-F0-9]+",
+			"9:CUL_FHTTK"					=> "^T[A-F0-9]{8}",
+			"10:SD_WS07"					=> "^P7#[A-Fa-f0-9]{6}F[A-Fa-f0-9]{2}(#R[A-F0-9][A-F0-9]){0,1}\$",
+			"11:SD_WS09"					=> "^P9#F[A-Fa-f0-9]+",
+			"12:SD_WS"						=> '^W\d+x{0,1}#.*',
+			"13:RFXX10REC"				=> '^(20|29)[A-Fa-f0-9]+',
+			"14:Dooya"						=> '^P16#[A-Fa-f0-9]+',
+			"15:SOMFY"						=> '^Ys[0-9A-F]+',
+			"16:SD_WS_Maverick"		=> '^P47#[A-Fa-f0-9]+',
+			"17:SD_UT"						=> '^P(?:29|30|34|46|69|81|83|86)#.*',		# universal - more devices with different protocols
+			"18:FLAMINGO"					=> '^P13\.?1?#[A-Fa-f0-9]+',							# Flamingo Smoke
+			"19:CUL_WS"						=> '^K[A-Fa-f0-9]{5,}',
+			"20:Revolt"						=> '^r[A-Fa-f0-9]{22}',
+			"21:FS10"							=> '^P61#[A-F0-9]+',
+			"22:Siro"							=> '^P72#[A-Fa-f0-9]+',
+			"23:FHT"							=> "^81..(04|09|0d)..(0909a001|83098301|c409c401)..",
+			"24:FS20"							=> "^81..(04|0c)..0101a001", 
+			"25:CUL_EM"						=> "^E0.................", 
+			"26:Fernotron"				=> '^P82#.*',
+			"27:SD_BELL"					=> '^P(?:|15|32|41|57|79)#.*',
+			"X:SIGNALduino_un"		=> '^[u]\d+#.*',
 );
 
 
