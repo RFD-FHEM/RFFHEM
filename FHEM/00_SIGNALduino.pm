@@ -2823,25 +2823,26 @@ sub SIGNALduino_FW_Detail($@) {
   my $lfn = $dspec[0];
   my $fn=$defs{$name}->{TYPE}."-Flash.log";
   
-  my $ret;
+  my $ret = "<div class='makeTable wide'><span>Information menu</span>
+<table class='block wide' id='SIGNALduinoInfoMenue' nm='$hash->{NAME}' class='block wide'>
+<tr class='even'>";
+
+
   if (-s AttrVal("global", "logdir", "./log/") .$fn)
   { 
 	  my $flashlogurl="$FW_ME/FileLog_logWrapper?dev=$lfn&type=text&file=$fn";
 	  
-	  $ret  = "<table>";
-	  $ret .= "<tr><td>";
+	  $ret .= "<td>";
 	  $ret .= "<a href=\"$flashlogurl\">Last Flashlog<\/a>";
 	  $ret .= "</td>";
-	  $ret .= "</table>";
-	  return $ret;
+	  #return $ret;
   }
+
   my $protocolURL="$FW_ME/FileLog_logWrapper?dev=$lfn&type=text&file=$fn";
   
-  $ret = "<div class='makeTable wide'><span>Information menu</span>
-<table class='block wide' id='SIGNALduinoInfoMenue' nm='$hash->{NAME}' class='block wide'>
-<tr class='even'><td><a href='#showProtocolList' id='showProtocolList'>Display protocollist</a></td></tr>";
+  $ret.="<td><a href='#showProtocolList' id='showProtocolList'>Display protocollist</a></td>";
+  $ret .= '</tr></table></div>
   
-  $ret .= '</table></div>
 <script>
 $( "#showProtocolList" ).click(function(e) {
 	e.preventDefault();
