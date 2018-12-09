@@ -138,8 +138,8 @@ sub Define($$) {
 	$iodevice = $ioname if not $iodevice;
 
 	### Attributes | model set after codesyntax ###
-	$attr{$name}{model}	= $hash_name if( not defined( $attr{$name}{model} ) );				# set model, if only undef --> new def
-	$attr{$name}{room}	= "SD_BELL"	if( not defined( $attr{$name}{room} ) );					# set room, if only undef --> new def
+	$attr{$name}{model}	= $hash_name if ( not exists($attr{$name}{model}) );				# set model, if only undef --> new def
+	$attr{$name}{room}	= "SD_BELL"	if ( not exists( $attr{$name}{room} ) );				# set room, if only undef --> new def
 
 	AssignIoPort($hash, $iodevice);
 }
