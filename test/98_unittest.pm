@@ -21,7 +21,9 @@ sub UnitTest_Initialize() {
 	$hash->{DefFn}         = "UnitTest_Define";
 	$hash->{UndefFn}       = "UnitTest_Undef";
 	$hash->{NotifyFn}      = "UnitTest_Notify";
-	
+	$hash->{AttrFn}        = "UnitTest_Attr";
+	$hash->{AttrList}      = "do_not_notify:1,0 disable:0,1 " .
+							 "$readingFnAttributes ";
 }
 
 sub UnitTest_Define() {
@@ -29,32 +31,68 @@ sub UnitTest_Define() {
    
     my ($name,$type,$target,$cmd) = split('[ \t]+', $def,4);
 
+	#if (!$cmd || (not $cmd =~ m/^[(].*[)]$/g)) {
+	if (!$cmd || $cmd !~ m/(?:\(.*\)).*$/s) {
+		my $msg = "wrong syntax: define <name> UnitTest <name of target device> (Test Code in Perl)";
+		Log3 undef, 2, $name.": ".$msg;
+		Log3 undef, 5, "$name: cmd was: $cmd";
+		return $msg;
+	}
+	$hash->{targetDevice}  = $target;
+	Log3 $name, 2, "$name: Defined unittest for target: ".$hash->{targetDevice} if ($hash->{targetDevice});
+	Log3 $name, 5, "$name: DEV is $cmd";
+    
+	($hash->{'.testcode'}) = $cmd =~ /(\{[^}{]*(?:(?R)[^}{]*)*+\})/;
+	Log3 $name, 5, "$name: Loaded this code ".$hash->{'.testcode'} if ($hash->{'.testcode'});
+    
+	$hash->{name}  = $name;
+	if (!IsDisabled($name)) {
+		readingsSingleUpdate($hash, "state", "waiting", 1);
 
-    if (!$cmd) {
-        my $msg = "wrong syntax: define <name> UnitTest <name of target device> (Test Code in Perl)";
-    	Log3 undef, 2, $msg;
-    	return $msg;
-    }
-    Log3 $name, 2, "Defined unittest for target: ".$hash->{targetDevice};
-    Log3 $name, 5, "DEV is $cmd";
-    
-    ($hash->{'.testcode'}) = $cmd =~ /(\{[^}{]*(?:(?R)[^}{]*)*+\})/;
-    Log3 $name, 5, "Loaded this code ".$hash->{'.testcode'};
-    
-    $hash->{name}  = $name;
-    $hash->{targetDevice}  = $target;
-    
-	readingsSingleUpdate($hash, "state", "waiting", 1);
-		
-	## Test starten wenn Fhem bereits initialisiert wurde	
-	if  ($init_done) {
-	   	InternalTimer(gettimeofday()+1, 'UnitTest_Test_generic',$hash,0);       
-	}   	
+		## Test starten wenn Fhem bereits initialisiert wurde	
+		if  ($init_done) {
+			InternalTimer(gettimeofday()+1, 'UnitTest_Test_generic',$hash,0);
+		}
+	} else {
+		readingsSingleUpdate($hash, "state", "inactive", 1);
+	}
+	
     $hash->{test_output}="";
     $hash->{test_failure}="";
     $hash->{todo_output}="";
+
+    ### Attributes ###
+    if ( $init_done == 1 ) {
+		$attr{$name}{room}	= "UnitTest" if( not defined( $attr{$name}{room} ) );
+    }
+
     return undef;
 
+}
+
+sub UnitTest_Attr(@) {
+	my ($cmd, $name, $attrName, $attrValue) = @_;
+	my $hash = $defs{$name};
+
+	if ($cmd eq "set" && $attrName eq "disable" && $attrValue eq "1") {
+		$hash->{test_failure}="";
+		$hash->{test_output}="";
+		readingsBeginUpdate($hash);
+		readingsBulkUpdate($hash, "test_output", $hash->{test_output} , 1);
+		readingsBulkUpdate($hash, "test_failure", $hash->{test_failure} , 1);
+		readingsBulkUpdate($hash, "state", "inactive", 1);
+		readingsEndUpdate($hash,1);
+		
+		Log3 $name, 3, "$name: is disabled";
+	}
+
+	if ($cmd eq "set" && $attrName eq "disable" && $attrValue eq "0" || $cmd eq "del" && $attrName eq "disable") {
+		readingsSingleUpdate($hash, "state", "waiting", 1);
+		Log3 $name, 3, "$name: is enabled";
+		
+		InternalTimer(gettimeofday()+1, 'UnitTest_Test_generic',$hash,0);
+	}
+	return undef;
 }
 
 sub UnitTest_Undef($$)    
@@ -114,11 +152,11 @@ sub UnitTest_Test_generic
 	# Disable warnings for prototype mismatch
 	$SIG{__WARN__} = sub {CORE::say $_[0] if $_[0] !~ /Prototype/};
 	
-	Log3 $name, 5, "Running now this code ".$hash->{'.testcode'};
+	Log3 $name, 5, "Running now this code ".$hash->{'.testcode'} if ($hash->{'.testcode'});
 	
 	readingsSingleUpdate($hash, "state", "running", 1);
 	my $ret ="";
-	$ret =eval $hash->{'.testcode'};
+	$ret =eval $hash->{'.testcode'} if ($hash->{'.testcode'});
 	if ($@) {
 		Log3 $name, 5, "return from eval was ".$ret." with error $@" if $ret;
 	}
@@ -268,33 +306,114 @@ sub UnitTest_mock_log3
 =item summary_DE Hilfsmodul was es ermöglicht unit test auszuführen
 
 =begin html
+
  <a name="UnitTest"></a>
- <h3>UnitTest</h3>
+ <h3>UnitTest</h3><br>
   
-  The Module runs perl code (unit tests) which is specified in the definition. The code which is in braces will be evaluated<br>
+  The Module runs perl code (unit tests) which is specified in the definition. The code which is in braces will be evaluated.<br><br>
+  <small><u><b>Necessary components PERL:</u></b></small> <ul>Mock::Sub Test::More & Test::More Test::Device::SerialPort <br>(install via <code>cpan Mock::Sub Test::More Test::Device::SerialPort</code> on system)</ul><br>
   <a name="UnitTestdefine"></a>
   <b>Define</b><br>
  
-  Syntax  define <nameOfThisDefinition> UnitTest <Which device is under test> ( { PERL CODE GOES HERE }  )<br>
-  <code>define test1 UnitTest dummyDuino \<br>
-(\
-  { \
-	Log3 undef, 2, "this is a Log Message inside our Test";;
-  }\
-)
-  </code><br><br>
+  <ul><code>define &lt;NameOfThisDefinition&gt; UnitTest &lt;Which device is under test&gt; ( { PERL CODE GOES HERE }  )</code></ul>
+  
+  <ul><u>example:</u><br>
+  <code>define test1 UnitTest dummyDuino ( { Log3 undef, 2, "this is a Log Message inside our Test";; } )
+  </code></ul><br>
+  
+  <b>Attribute</b><br>
+	<ul><li><a name="disable"></a>disable<br>
+		A UnitTest definition can be disabled with the attribute disable. If disabled, the perl code provided in the definition will not be executed. 
+		The readings "test_output" and "test_failure" from this definition will be deleted. If you delete this attribute or setting it to 0, the test will start immediatly</li><a name=" "></a></ul><br>
+  
   <a name="UnitTestinternals"></a>
   <b>Internals</b>
   <ul>
+   <li> state - finished / waiting, Status of the current unittest (waiting, the test is running)
    <li> test_failure - Failures from our unittest will go in here
    <li> test_output - ok / nok Messages will be visible here
    <li> todo_output - diagnostics output of a todo test
-  </ul>
+  </ul><br><br>
+  <a name="code_example"></a>
+  <b>code example:</b><br>
+  <ul>
+  dummyDuino<br>
+  &nbsp;&nbsp;(<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;{<br>
+    
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;my $mock = Mock::Sub->new;<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;my $Log3= $mock->mock("SIGNALduino_Log3");<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SIGNALduino_IdList("x:$target","","","");<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;my $ref_called_count = $Log3->called_count;<br><br>
+    
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;my $id = 9999;<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$main::ProtocolListSIGNALduino{$id} =
+        {
+            name			=> 'test protocol',		
+			comment			=> 'none' ,
+			id          	=> '9999',
+			developId		=> 'm',
+	 },<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SIGNALduino_IdList("x:$target","","","m9999");<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;is($Log3->called_count-$ref_called_count,$ref_called_count+1,"SIGNALduino_Log3 output increased");})
+  </ul><br>
+  <a href="https://github.com/RFD-FHEM/RFFHEM/blob/dev-r33/test/install.md">Other instructions can be found here.</a>
 =end html
 
+
 =begin html_DE
- Siehe englische Commandref
-=end html
+
+ <a name="UnitTest"></a>
+ <h3>UnitTest</h3><br>
+  
+  Das Modul f&uuml;hrt einen Perl-Code (unit tests) aus, der in der Definition festgelegt wird. Der Code in geschweiften Klammern wird ausgewertet.<br>
+    <small><u><b>Ben&ouml;tigte Bestandteile PERL:</u></b></small> <ul>Mock::Sub Test::More & Test::More Test::Device::SerialPort <br>(install via <code>cpan Mock::Sub Test::More Test::Device::SerialPort</code> auf dem System)</ul><br>
+  <a name="UnitTestdefine"></a>
+  <b>Define</b><br>
+ 
+  <ul><code>define &lt;NameDerDefinition&gt; UnitTest &lt;Which device is under test&gt; ( { PERL CODE GOES HERE }  )</code></ul>
+  
+  <ul><u>Beispiel:</u><br>
+  <code>define test1 UnitTest dummyDuino ( { Log3 undef, 2, "this is a Log Message inside our Test";; } )
+  </code></ul><br>
+  
+  <b>Attribute</b><br>
+	<ul><li><a name="disable"></a>disable<br>
+		Eine UnitTest Definition kann mit Hilfe des Attributes disable, deaktiviert werden. Damit wird verhindert, dass der Perl Code ausgef&uuml;hrt wird. 
+		Es werden die Readings "test_output" und "test_failure" der Definition gel&ouml;scht. Wird das Attribut gel&ouml;scht oder auf 0 gesetzt, so wird der Tests umgehend ausgef&uuml;hrt.</li><a name=" "></a></ul><br>
+    <a name="UnitTestinternals"></a>
+  <b>Internals</b>
+  <ul>
+   <li> state - finished / waiting, Status des aktuellen Unittest (waiting, der Test l&auml;ft aktuell)
+   <li> test_failure - Fehler aus unserem Unittest werden hier ausgegeben
+   <li> test_output - ok / nok, Nachrichten werden hier sichtbar sein
+   <li> todo_output - Diagnoseausgabe eines Todo-Tests
+  </ul><br><br>
+  <a name="Code_Beispiel"></a>
+  <b>Code Beispiel:</b><br>
+  <ul>
+  dummyDuino<br>
+  &nbsp;&nbsp;(<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;{<br>
+    
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;my $mock = Mock::Sub->new;<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;my $Log3= $mock->mock("SIGNALduino_Log3");<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SIGNALduino_IdList("x:$target","","","");<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;my $ref_called_count = $Log3->called_count;<br><br>
+    
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;my $id = 9999;<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$main::ProtocolListSIGNALduino{$id} =
+        {
+            name			=> 'test protocol',		
+			comment			=> 'none' ,
+			id          	=> '9999',
+			developId		=> 'm',
+	 },<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SIGNALduino_IdList("x:$target","","","m9999");<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;is($Log3->called_count-$ref_called_count,$ref_called_count+1,"SIGNALduino_Log3 output increased");})
+  </ul><br>
+  <a href="https://github.com/RFD-FHEM/RFFHEM/blob/dev-r33/test/install.md">Eine weitere Anleitung finden Sie hier.</a>
+=end html_DE
 
 # Ende der Commandref
 =cut
