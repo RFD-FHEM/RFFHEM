@@ -181,7 +181,7 @@ my %matchListSIGNALduino = (
 			"24:FS20"							=> "^81..(04|0c)..0101a001", 
 			"25:CUL_EM"						=> "^E0.................", 
 			"26:Fernotron"				=> '^P82#.*',
-			"27:SD_BELL"					=> '^P(?:|15|32|41|57|79)#.*',
+			"27:SD_BELL"					=> '^P(?:15|32|41|57|79)#.*',
 			"X:SIGNALduino_un"		=> '^[u]\d+#.*',
 );
 
@@ -2023,7 +2023,7 @@ sub SIGNALduino_moduleMatch
 			if ( length($developATTR) > 0 && $developATTR =~ m/$developID$id/) { 
 				return 1; #   return 1 da modulematch gefunden wurde			
 			}
-			SIGNALduino_Log3 $name, 3, "$name: ID=id skipped dispatch (developId=$developID). To use, please add $developID$id to the attr development";	
+			SIGNALduino_Log3 $name, 3, "$name: ID=$id skipped dispatch (developId=$developID). To use, please add $developID$id to the attr development";	
 			return -1;
 		}
 		return 1;
