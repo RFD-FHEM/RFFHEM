@@ -1,4 +1,5 @@
 10.12.2018
+ 14_SD_BELL.pm - code revised for doubeCode BELL (ID41) | repeats increased to 15
  00_SIGNALduino.pm - added ID14 LED X-MAS Chilitec model 22640 | added ID42 ## Pollin 94-551227 | revised doc
 09.12.2018
  00_SIGNALduino.pm: Added new menu via fhemweb. There the protocol List can be seend and protocols can be managed(active/inactive)
