@@ -1,5 +1,4 @@
 09.12.2018
-
  00_SIGNALduino.pm: Added new menu via fhemweb. There the protocol List can be seend and protocols can be managed(active/inactive)
 08.12.2018
  14_SD_BELL.pm - code revised for doubeCode BELL (ID41) | modelname revised
@@ -28,11 +27,11 @@
 25.11.2018
  00_SIGNALduino.pm - Enhanced logoutput and better troubeleshoot support when flashing firmware via module
 20.11.2018
- 14_SD_BELL.pm - fix error "subroutine subroutine &SD_BELL::InternalVal ..." 
+ 14_SD_BELL.pm - fix error "subroutine subroutine &SD_BELL::InternalVal ..."
 18.11.2018
  signalduino_protocols.hash - protocoll ID 14,15,32,41,57,79 switch to modul SD_BELL
  !!! Attention, DOIF can not react anymore, a new device from modul SD_BELL will be created !!!
- 14_SD_BELL.pm - fix error "subroutine subroutine &SD_BELL::readingsBeginUpdate ..." 
+ 14_SD_BELL.pm - fix error "subroutine subroutine &SD_BELL::readingsBeginUpdate ..."
 17.11.2018
  00_SIGNALduino.pm - bugfix set flash for github releases
  14_SD_BELL.pm - fix error "subroutine &SD_BELL::AttrVal called at ./FHEM/14_SD_BELL.pm line 192."
@@ -49,7 +48,7 @@
  00_SIGNALduino.pm - added missingModulCheck | remove double logoutput
 12.11.2018
  14_SD_UT.pm - added devices QUIGG GT-7000 |Novy Pureline 6830 kitchen hood|CAME Drehtor Antrieb (develop - user feedback required)
- 14_SD_UT.pm - !! Module has been completely redesigned !! 
+ 14_SD_UT.pm - !! Module has been completely redesigned !!
  00_SIGNALduino.pm - protocol 34 & 86 are development ID's | ID 29 modified preamble
  00_SIGNALduino - Firmware can be downloaded and flashed on demand from gitghub releases
 11.11.2018
@@ -93,7 +92,7 @@
  14_SD_WS.pm - feature, plausibility check temperature and humidity values
  14_SD_WS.pm - change, reading battery removed
 09.10.2018
- 90_SIGNALduino_un.pm - added bitCountLength & added doc 
+ 90_SIGNALduino_un.pm - added bitCountLength & added doc
 04.10.2018
  signalduino_protocols.hash - revised Info & del developId 72 + 78 + added ID 19 minify
 01.10.2018
@@ -113,15 +112,15 @@
  00_SIGNALduino.pm - doc sendMSG revised
 20.09.2018
  14_SD_UT.pm - added/fix doc and evaluation Unitec_47031 extended (SysCode + Zone)
-19.09.2018  
+19.09.2018
  90_SIGNALduino_un.pm - added doc description & optimization code
-18.09.2018  
+18.09.2018
  90_SIGNALduino_un.pm - added helpful feature for debug|decode + doc
-17.09.2018  
- 90_SIGNALduino_un.pm - clean Code (P7,P9,P13,P16) 
+17.09.2018
+ 90_SIGNALduino_un.pm - clean Code (P7,P9,P13,P16)
  14_SD_UT.pm - added new Westinghouse model (remote with five buttons) + doc
  signalduino_protocols.hash  - mod Protocol 40 + added doc
-11.09.2018  
+11.09.2018
  signalduino_protocols.hash  - doc
   14_SD_WS: mod Code and fix plot creation
  90_SIGNALduino_un.pm - clean Code (P33)
@@ -137,7 +136,7 @@
 23.08.2018
  00_SIGNALduino.pm - Sub EM Protocol (80) added
  signalduino_protocols.hash  - new Protocol (80) EM added
-22.08.2018  
+22.08.2018
   14_SD05.07.2018
  00_SIGNALduino.pm Log Eintrage beim RESTART geordnet / vereinfacht
 03.07.2018
@@ -150,13 +149,13 @@
   00_SIGNALduino.pm update postdemodulation WS7053, WS7054 - better processing start of message
   SD_WS_07: fix for weather trend 2759001)
 03.07.2018
- 00_SIGNALduino.pm 
+ 00_SIGNALduino.pm
       Log Eintrage beim RESTART geordnet / vereinfacht
 16.03.2018
 14_SD_WS_Maverick: rename Readings, fit to Maverick_RFXTRX now
         added attribute inactivityInterval and updated commandref
 15.02.02018
- 00_SIGNALduino.pm 
+ 00_SIGNALduino.pm
       attribut zum Aktivieren aller Log Eintrage auch als Event
 08.02.2018
  00_SIGNALduino.pm Anpassung FHT80 Sub - Parity
@@ -177,13 +176,13 @@
  support of blacklisting of protocols via new attribute
  serval new protocols are added
  many stacktraces and race conditions are fixed
- firmware can now be also updated via http source 
- commands (sending) are now placed in a queue, so switching multiple 
+ firmware can now be also updated via http source
+ commands (sending) are now placed in a queue, so switching multiple
  sockets for example is now possible withoud manual added delay
  many more fixes
  support for cc1101 based uC like radino or nanocul added
 05.12.2016
-  Bugfix wrong return in SIGNALduino_un ParseFn  
+  Bugfix wrong return in SIGNALduino_un ParseFn
 09.10.2016
   improve Send queue: Send not before response of previous
 30.09.2016
@@ -200,7 +199,7 @@
   fixed incomplete mc output (last nibble was not delivered)
   decoding mc signals > message buffer is now possible
   max 340 bits are currently suppored
-  small improvement in processMessage  (if MS decoding fails, 
+  small improvement in processMessage  (if MS decoding fails,
   mc or mu decoding is called)
   corrected readings for firmware version.
   new sendMsg Function
@@ -219,16 +218,16 @@
  - some fixes and removed some warning
  - For sending IT messages, the clock can be adjusted via set <name> ITClock
  - SIGNALduino_un will catch all messages, which coul'd not be processed
- 
+
 15.10.2015
  - Addes SD_WS07 Module for Technoline and Eurochron sensordevices
  - Bugfixes for MU messages
- 
+
 13.10.2015
  - Added support for Sensors which use Hideki Protocol (Cresta, Bresser, TFA, HAMA and more)
  - Added an option to specify a whitlist for supported protocols
  - Updated Firmware to 3.1.7-hf3
- 
+
 12.10.2015
  - Hotfix2 for firmware 3.1.7
  - some minor changes
@@ -237,7 +236,7 @@
  - Added Demodulation for Meteo TX6 Signal
  - Corrected serval bugs in demodulation for MU Messages, shoud be more accurate now
  - Updated Firmware to 3.1.7 -> bugfix and better detection for MU Messages
- 
+
 06.10.2015
  - Added Demodulation for Oregon Scientific V1 Data. No Decoding
  - Support Attribute longids
@@ -245,7 +244,7 @@
  - Try to add HS 434/6 6-Channel. ISC GmbH demodulation
  - Changed Identification for unknown Protocols
  - Modified demodulation, for start and end of demodulation process
- 
+
 12.10.2015
  - Whitelist option
  - Firmware 3.1.7 hotfix2
@@ -255,17 +254,17 @@
 
 23.09.2015
  - Defined Dooya shutter protocol, and debug decoding of signal (untested)
- 
+
 21.09.2015
  - Added support for longids in physical module
  - Use floating point value for better puls factor detection
  - some code cleanup
  - dropped firmware support <3.1.4 -- flashing the microcontroller is needed
- 
+
 15.09.2015
  - Added some eas800 code for decoding the sensor
  - Updated rfreceiver to 3.1.5
- 
+
 31.08.2015
  - Added helper submodule to allow some decoding tests for serval sensors
 
@@ -289,7 +288,7 @@
  - code improvements
  - messages without sync, can now be defined and converted via protocol list
  - some warnings and errors removed
- - Added detection of protocol in this Module. 
+ - Added detection of protocol in this Module.
 
 27.07.2015
  - RC1
@@ -320,12 +319,12 @@
  - Added Firmware 3.1.1 for promini, nano and uno
  - Removed Firmware for mini and mega2560
  - Enabled filter list update trough fhem at startup at SIGNALduino (extension from 11.05.2015)
- - Added eurochon protocol detection and protocol unknown1 
+ - Added eurochon protocol detection and protocol unknown1
  - some basic stuff to detect osv2 protocol (not finished)
  - Changed Regex for better message detection and filtering some bad things out
 
 22.06.2015
- - added option to specify arduino hardware type (nano328,mini328,uno,mega2560) 
+ - added option to specify arduino hardware type (nano328,mini328,uno,mega2560)
  - changed some code future support of MU and MC messages from signalduino
 
 11.05.2015
