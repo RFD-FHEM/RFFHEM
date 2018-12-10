@@ -133,17 +133,7 @@ SIGNALduino_un_Parse($$)
 		my $val = "T: $temp H: $hum B: $bat";
 		Log3 $hash, 4, "$name decoded protocolid: 6  $SensorTyp, sensor id=$id, channel=$channel, temp=$temp\n" ;
 
-	} elsif ($protocol == "14" && length($bitData)>=12)  ## Heidman HX 
-	{  
-
-		my $bin = substr($bitData,0,4);
-		my $deviceCode = sprintf('%X', oct("0b$bin"));
- 	    my $sound = substr($bitData,7,5);
-
-		Log3 $hash, 4, "$name found Heidman HX doorbell. devicecode=$deviceCode, sound=$sound";
-
-	}
-	elsif ($protocol == "15" && length($bitData)>=64)  ## TCM 
+	} elsif ($protocol == "15" && length($bitData)>=64)  ## TCM 
 	{  
 		my $deviceCode = $a[4].$a[5].$a[6].$a[7].$a[8];
 
