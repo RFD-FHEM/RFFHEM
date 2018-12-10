@@ -347,7 +347,7 @@
 	"13.2"	=>	## LM-101LD Rauchm
 							# MS;P1=-2708;P2=796;P3=-1387;P4=-8477;P5=8136;P6=-904;D=2456212321212323232321212121212121212123212321212121;CP=2;SP=4;
 		{
-			name						=> 'LM-101LD (MS decode)',
+			name						=> 'LM-101LD',
 			comment					=> 'Unitec smoke detector (message decode as MS)',
 			id							=> '13',
 			zero						=> [1,-1.8],
