@@ -47,8 +47,8 @@
 #
 ##### notice #### or #### info ############################################################################################################
 # Please use first unused id for new protocols
-# ID´s are currently unused: 14 | 42
-# ID´s need to be revised (preamble u): 5 | 6 | 19 | 20 | 21 | 22 | 23 | 24 | 25 | 26 | 27 | 28 | 31 | 36 | 40 | 52 | 56 | 59 | 63 | 78 | 87 | 88
+# ID´s are currently unused:
+# ID´s need to be revised (preamble u): 5|6|14|19|20|21|22|23|24|25|26|27|28|31|36|40|42|52|56|59|63|78|87|88
 ###########################################################################################################################################
 # Please provide at least three messages for each new MU/MC/MS protocol and a URL of issue in GitHub or discussion in FHEM Forum
 # https://forum.fhem.de/index.php/topic,58396.975.html | https://github.com/RFD-FHEM/RFFHEM
@@ -110,11 +110,11 @@
 			length_max			=> '34',				# Don't know maximal lenth of a valid message
 			paddingbits			=> '8',					# pad up to 8 bits, default is 4
 		},
-	"3"	=>	## itv1 - remote like WOFI Lamp
+	"3"	=>	## itv1 - remote like WOFI Lamp | Intertek Modell 1946518 // ELRO
 					# need more Device Infos / User Message
 		{
 			name						=> 'itv1',
-			comment					=> 'example: remote for WOFI',
+			comment					=> 'remote for WOFI | Intertek',
 			id							=> '3',
 			one							=> [3,-1],
 			zero						=> [1,-3],
@@ -128,7 +128,7 @@
 			length_min			=> '24',
 			length_max			=> '24',				# Don't know maximal lenth of a valid message
 		},
-	"3.1"	=>	## itv1_sync40
+	"3.1"	=>	## itv1_sync40 | Intertek Modell 1946518 // ELRO
 						# MS;P0=-11440;P1=-1121;P2=-416;P5=309;P6=1017;D=150516251515162516251625162516251515151516251625151;CP=5;SP=0;R=66;
 						# MS;P1=309;P2=-1130;P3=1011;P4=-429;P5=-11466;D=15123412121234123412141214121412141212123412341234;CP=1;SP=5;R=38;  Gruppentaste, siehe Kommentar in sub SIGNALduino_bit2itv1
 						# need more Device Infos / User Message
@@ -359,23 +359,25 @@
 			length_min			=> '24',
 			length_max			=> '24',
 		},
-	# "14"	=>	## Heidemann HX BELL
-		# {
-			# name						=> 'Heidemann HX',
-			# comment					=> 'Heidemann HX doorbell',
-			# id							=> '14',
-			# one							=> [1,-2],
-			# zero						=> [1,-1],
-			# #float					=> [-1,3],				# not full supported now, for later use
-			# sync						=> [1,-14],
-			# clockabs				=> 350,
-			# format					=> 'twostate',
-			# preamble				=> 'P14#',				# prepend to converted message
-			# clientmodule		=> 'SD_BELL',
-			# modulematch			=> '^P14#.*',
-			# length_min			=> '12',
-			# length_max			=> '20',
-		# },
+	"14"	=>	## LED X-MAS Chilitec model 22640
+						# https://github.com/RFD-FHEM/RFFHEM/issues/421 | https://forum.fhem.de/index.php/topic,94211.msg869214.html#msg869214
+						# MS;P0=988;P1=-384;P2=346;P3=-1026;P4=-4923;D=240123012301230123012323232323232301232323;CP=2;SP=4;R=0;O;m=1;
+						# MS;P0=-398;P1=974;P3=338;P4=-1034;P6=-4939;D=361034103410341034103434343434343410103434;CP=3;SP=6;R=0;
+		{
+			name						=> 'LED X-MAS',
+			comment					=> 'Chilitec model 22640',
+			id							=> '14',
+			one							=> [3,-1],
+			zero						=> [1,-3],
+			sync						=> [1,-14],
+			clockabs				=> 350,
+			format					=> 'twostate',
+			preamble				=> 'u14#',				# prepend to converted message
+			#clientmodule		=> '',
+			#modulematch			=> '^u14#.*',
+			length_min			=> '20',
+			length_max			=> '20',
+		},
 	"15"	=>	## TCM 234759
 		{
 			name						=> 'TCM 234759 Bell',
@@ -691,7 +693,7 @@
 			length_min		=> '12',
 			length_max		=> '12',				# message has only 10 bit but is paddet to 12
 		},
-	"31"	=>	## Pollin Isotronik - 12 Tasten remote
+	"31"	=>	## Pollin ISOTRONIC - 12 Tasten remote
 						# https://github.com/RFD-FHEM/RFFHEM/issues/44
 						# OLD
 						# MU;P0=-32001;P1=1208;P2=-682;P3=-1324;P4=570;P5=-15617;D=12121212121212121212121212121342121213454212121212121212121212121212121342121213454212121212121212121212121212121342121213454212121212121212121212121212121342121213405;CP=1;
@@ -700,8 +702,8 @@
 						# MU;P0=-12724;P1=597;P2=-667;P3=1253;P4=-1331;D=01234141412341412341414123232323232323232;CP=1;R=0;
 						# MU;P0=-9588;P1=600;P2=-664;P3=1254;P4=-1325;D=01234141412341412341414123232323232323232;CP=1;R=0;
 		{
-			name					=> 'Pollin Isotronik',
-			comment				=> 'remote control with 12 buttons',
+			name					=> 'Pollin ISOTRONIC',
+			comment				=> 'remote control model 58608 with 12 buttons',
 			id						=> '31',
 			one						=> [-1,2],
 			zero					=> [-2,1],
@@ -919,22 +921,24 @@
 			length_min		=> '32',
 			length_max		=> '32',
 		},
-	# "42"	=>	## unused
-		# {
-			# name					=> 'KANGTAI',
-			# comment				=> 'KANGTAI Doorbell (Pollin 94-550405)',
-			# id						=> '42',
-			# one						=> [1,-4],   # 400,-1600
-			# zero					=> [4,-1],   # 1600,-600
-			# sync					=> [1,-17],  # 400,-7000
-			# clockabs			=> 400,
-			# format				=> 'twostate',
-			# preamble			=> 'P42#',
-			# clientmodule	=> 'SD_Bell',
-			# modulematch		=> '^P42#.*',
-			# length_min		=> '32',
-			# length_max		=> '32',
-		# },
+	"42"	=>	## Pollin 94-551227
+						# https://github.com/RFD-FHEM/RFFHEM/issues/390
+						# MU;P0=1446;P1=-487;P2=477;D=0101012121212121212121212101010101212121212121212121210101010121212121212121212121010101012121212121212121212101010101212121212121212121210101010121212121212121212121010101012121212121212121212101010101212121212121212121210101010121212121212121212121010;CP=2;R=93;O;
+		{
+			name					=> 'Doorbell',
+			comment				=> 'Pollin 94-551227',
+			id						=> '42',
+			one						=> [1,-1],
+			zero					=> [3,-1],
+			start					=> [1,-1,1,-1,1,-1,],
+			clockabs			=> 500,
+			format				=> 'twostate',
+			preamble			=> 'u42#',
+			#clientmodule	=> 'SD_Bell',
+			#modulematch		=> '^P42#.*',
+			length_min		=> '116',
+			length_max		=> '120',
+		},
 	"43" => ## Somfy RTS
 					# MC;LL=-1405;LH=1269;SL=-723;SH=620;D=98DBD153D631BB;C=669;L=56;R=229;
 		{
