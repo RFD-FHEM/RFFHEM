@@ -78,7 +78,8 @@
 		},
 	"1"	=>	## ConradRSL
 		{
-			name					=> 'ConradRSL',
+			name					=> 'Conrad RSL v1',
+			comment				=> 'remotes and switches',
 			id						=> '1',
 			one						=> [2,-1],
 			zero					=> [1,-2],
@@ -307,6 +308,7 @@
 						# MS;P0=-1413;P1=757;P2=-2779;P3=-16079;P4=8093;P5=-954;D=1345121210101212101210101012121012121210121210101010;CP=1;SP=3;R=33;O;
 		{
 			name						=> 'FLAMINGO FA21',
+			comment					=> 'FLAMINGO FA21 smoke detector (message decode as MS)',
 			id							=> '13',
 			one							=> [1,-2],
 			zero						=> [1,-4],
@@ -328,7 +330,7 @@
 							# Sync 8100 microSec, 900 microSec | Bit1 2700 microSec low - 800 microSec high | Bit0 1400 microSec low - 800 microSec high | Pause Repeat 20000 microSec | 1 Sync + 24Bit, Totaltime 65550 microSec without Sync
 		{
 			name						=> 'FLAMINGO FA22RF / FA21RF / LM-101LD',
-			comment					=> 'FLAMINGO oder Unitec Rauchmelder',
+			comment					=> 'FLAMINGO | Unitec smoke detector (message decode as MU)',
 			id							=> '13.1',
 			one							=> [1,-1.8],
 			zero						=> [1,-3.5],
@@ -345,8 +347,8 @@
 	"13.2"	=>	## LM-101LD Rauchm
 							# MS;P1=-2708;P2=796;P3=-1387;P4=-8477;P5=8136;P6=-904;D=2456212321212323232321212121212121212123212321212121;CP=2;SP=4;
 		{
-			name						=> 'LM-101LD Rauchm',
-			comment					=> 'Unitec Rauchmelder',
+			name						=> 'LM-101LD',
+			comment					=> 'Unitec smoke detector (message decode as MS)',
 			id							=> '13',
 			zero						=> [1,-1.8],
 			one							=> [1,-3.5],
@@ -694,10 +696,8 @@
 			length_max		=> '12',				# message has only 10 bit but is paddet to 12
 		},
 	"31"	=>	## Pollin ISOTRONIC - 12 Tasten remote
+						# remote basicadresse with 12bit -> changed if push reset behind battery cover
 						# https://github.com/RFD-FHEM/RFFHEM/issues/44
-						# OLD
-						# MU;P0=-32001;P1=1208;P2=-682;P3=-1324;P4=570;P5=-15617;D=12121212121212121212121212121342121213454212121212121212121212121212121342121213454212121212121212121212121212121342121213454212121212121212121212121212121342121213405;CP=1;
-						# NEW
 						# MU;P0=-9584;P1=592;P2=-665;P3=1223;P4=-1311;D=01234141412341412341414123232323412323234;CP=1;R=0;
 						# MU;P0=-12724;P1=597;P2=-667;P3=1253;P4=-1331;D=01234141412341412341414123232323232323232;CP=1;R=0;
 						# MU;P0=-9588;P1=600;P2=-664;P3=1254;P4=-1325;D=01234141412341412341414123232323232323232;CP=1;R=0;
@@ -1523,12 +1523,13 @@
 			length_max				=> '67',
 			postDemodulation	=> \&SIGNALduino_postDemo_FS20,
 		},
-	"75"	=>	## ConradRSL2 @litronics https://github.com/RFD-FHEM/SIGNALDuino/issues/69
+	"75"	=>	## Conrad RSL (Erweiterung v2) @litronics https://github.com/RFD-FHEM/SIGNALDuino/issues/69
 						# ! same definition how ID 5, but other length !
 						# !! protocol needed revision - start or sync failed !! https://github.com/RFD-FHEM/SIGNALDuino/issues/69#issuecomment-440349328
 						# MU;P0=-1365;P1=477;P2=1145;P3=-734;P4=-6332;D=01023202310102323102423102323102323101023232323101010232323231023102323102310102323102423102323102323101023232323101010232323231023102323102310102323102;CP=1;R=12;
 		{
-			name					=> 'ConradRSL2',
+			name					=> 'Conrad RSL v2',
+			comment				=> 'remotes and switches',
 			id						=> '75',
 			one						=> [3,-1],
 			zero					=> [1,-3],
@@ -1687,6 +1688,7 @@
 						# Fernotron protocol is unidirectional. Here we can only receive messages from controllers send to receivers.
 		{
 			name					=> 'Fernotron',
+			comment				=> 'shutters and light switches',
 			id						=> '82',				# protocol number
 			developId			=> 'm',
 			dispatchBin		=> 'y',
