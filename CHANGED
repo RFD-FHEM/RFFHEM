@@ -1,5 +1,6 @@
+10.12.2018
+ 14_SD_BELL.pm - code revised for doubeCode BELL (ID41) | repeats increased to 15
 09.12.2018
-
  00_SIGNALduino.pm: Added new menu via fhemweb. There the protocol List can be seend and protocols can be managed(active/inactive)
 08.12.2018
  14_SD_BELL.pm - code revised for doubeCode BELL (ID41) | modelname revised

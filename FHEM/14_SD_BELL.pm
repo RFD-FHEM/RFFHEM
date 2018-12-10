@@ -71,7 +71,7 @@ sub SD_BELL_Initialize($) {
 	$hash->{ParseFn}		= "SD_BELL::Parse";
 	$hash->{SetFn}			= "SD_BELL::Set";
 	$hash->{AttrFn}			= "SD_BELL::Attr";
-	$hash->{AttrList}		= "repeats:1,2,3,4,5,6,7,8,9 IODev do_not_notify:1,0 ignore:0,1 showtime:1,0 model:".join(",", sort keys %models) . " $main::readingFnAttributes";
+	$hash->{AttrList}		= "repeats:1,2,3,4,5,6,7,8,9,10,11,12,13,14,15 IODev do_not_notify:1,0 ignore:0,1 showtime:1,0 model:".join(",", sort keys %models) . " $main::readingFnAttributes";
 	$hash->{AutoCreate}	=	{"SD_BELL.*" => {FILTER => "%NAME", autocreateThreshold => "3:180", GPLOT => ""}};
 }
 
@@ -202,62 +202,93 @@ sub Parse($$) {
 	my $deviceCode = $rawData;
 	my $devicedef;
 
-	Log3 $iohash, 4, "$ioname: SD_BELL_Parse protocol $protocol $hash_name doubleCode=".$models{$hash_name}{doubleCode}.", bitData $bitData";	
+	Log3 $iohash, 4, "$ioname: SD_BELL_Parse protocol $protocol $hash_name doubleCode=".$models{$hash_name}{doubleCode}." rawData=$rawData";	
 
 	## loop to view SD_BELL defined defptr ##
 	if ($protocol == 41) {
 		foreach my $d(sort keys %{$modules{SD_BELL}{defptr}}) {
-			Log3 $iohash, 5, "$ioname: SD_BELL_Parse Check defptr - $d" if ($d =~ /$protocol/s);
-			Log3 $iohash, 4, "$ioname: SD_BELL_Parse Check defptr - $rawData is already registered" if ($d =~ /$rawData/s);
-			my @doubleCode = split(" ",$d) if ($d =~ /$rawData/s);																															# split two RAWMSG from protocol in def
-			$doubleCode_known = $doubleCode[1] if ($d =~ /$rawData/s);																													# RAWMSG are in split RAWMSG
-			Log3 $iohash, 5, "$ioname: SD_BELL_Parse Check defptr - $doubleCode_known found";
+			Log3 $iohash, 4, "$ioname: SD_BELL_Parse Check defptr - $d is defined!" if ($d =~ /$protocol/s);
+			if ($d =~ /$rawData/s) {
+				my @doubleCode = split(" ",$d);								# split two RAWMSG from protocol in def 41 BA7983D3_3286D393
+				$doubleCode_known = $doubleCode[1];						# RAWMSG are in split RAWMSG
+				Log3 $iohash, 4, "$ioname: SD_BELL_Parse Check defptr - $rawData is already registered!"			 
+			}
 		}
-	}
 
-	### doubleCode yes and RAWMSG are unknown in def ###
-	if ($models{$hash_name}{doubleCode} eq "yes" && $doubleCode_known eq "0") {
-		my $old_doubleCode = $modules{SD_BELL}{defptr}{doubleCode} if (defined $modules{SD_BELL}{defptr}{doubleCode});
-		my $old_doubleCode_Time = $modules{SD_BELL}{defptr}{doubleCode_Time} if (defined $modules{SD_BELL}{defptr}{doubleCode_Time});
+		$modules{SD_BELL}{defptr}{doubleCode_Time} = 0 if (!exists $modules{SD_BELL}{defptr}{doubleCode_Time});
+		Log3 $iohash, 4, "$ioname: SD_BELL_Parse Check doubleCode - doubleCode_Time_old=".$modules{SD_BELL}{defptr}{doubleCode_Time}." Time_now=".time()." Diff=".(time()-$modules{SD_BELL}{defptr}{doubleCode_Time});
 
-		if (exists $modules{SD_BELL}{defptr}{doubleCode}) {
-			Log3 $iohash, 5, "$ioname: SD_BELL_Parse Check doubleCode - already defined!";
-		} else {
-			$modules{SD_BELL}{defptr}{doubleCode} = $rawData."_doubleCode";									# reset marker, RAWMSG other
-			Log3 $iohash, 3, "$ioname: SD_BELL_Parse Check doubleCode - new defined!";
+		if ((time() - $modules{SD_BELL}{defptr}{doubleCode_Time} > 15) && $doubleCode_known eq "0") {			# max timediff 15 seconds
+			delete ($modules{SD_BELL}{defptr}{doubleCode});
+			$modules{SD_BELL}{defptr}{doubleCode_Time} = time();															# set time for new RAWMSG
+			Log3 $iohash, 4, "$ioname: SD_BELL_Parse Check doubleCode - pointer <doubleCode> data deleted! RAWMSG too old!";
 			return "";
 		}
 
-		if ($modules{SD_BELL}{defptr}{doubleCode} =~ /_doubleCode/s ) {										# check of 2 RAWMSG
-			my @doubleCode = split("_",$modules{SD_BELL}{defptr}{doubleCode});
-			Log3 $iohash, 4, "$ioname: SD_BELL_Parse Check doubleCode - $doubleCode[0] part two find";
-			if ($modules{SD_BELL}{defptr}{doubleCode} =~ /$rawData/s) {											# check, part known
-				Log3 $iohash, 4, "$ioname: SD_BELL_Parse Check doubleCode - $rawData already exists";
-			} else {																																				# new part
-				$modules{SD_BELL}{defptr}{doubleCode} = $doubleCode[0]."_".$rawData;
-				$modules{SD_BELL}{defptr}{doubleCode_Time} = time();													# timemarker, 2 RAWMSG´s
+		### doubleCode yes and RAWMSG are unknown in def ###
+		if ($models{$hash_name}{doubleCode} eq "yes" && $doubleCode_known eq "0") {					# !defs
+			Log3 $iohash, 3, "$ioname: SD_BELL_Parse Check doubleCode - doubleCode known $doubleCode_known in defptr. autocreate are not complete finish!";
+
+			if (exists $modules{SD_BELL}{defptr}{doubleCode}) {
+				Log3 $iohash, 4, "$ioname: SD_BELL_Parse Check doubleCode - pointer <doubleCode> data already exists!";
+			} else {
+				$modules{SD_BELL}{defptr}{doubleCode} = $rawData."_doubleCode";									# first RAWMSG | reset marker, RAWMSG other
+				$modules{SD_BELL}{defptr}{doubleCode_Time} = time();														# set time from new RAWMSG
+				Log3 $iohash, 3, "$ioname: SD_BELL_Parse Check doubleCode - ".$modules{SD_BELL}{defptr}{doubleCode}." new defined!";
+				return "";
 			}
-			Log3 $iohash, 5, "$ioname: SD_BELL_Parse Check doubleCode - ".$modules{SD_BELL}{defptr}{doubleCode}." complete | def_Time=".$modules{SD_BELL}{defptr}{doubleCode_Time};
-			$deviceCode = $modules{SD_BELL}{defptr}{doubleCode};
-			$devicedef = $protocol . " " .$deviceCode;
-		} else {
-			if ($modules{SD_BELL}{defptr}{doubleCode} =~ /$rawData/s) {											# check RAWMSG known
-				Log3 $iohash, 4, "$ioname: SD_BELL_Parse Check doubleCode - $rawData already exists";
+
+			if ($modules{SD_BELL}{defptr}{doubleCode} =~ /_doubleCode/s ) {										# check of 2 RAWMSG
+				my @doubleCode = split("_",$modules{SD_BELL}{defptr}{doubleCode});
+
+				# 0123 4 5 6 7			0123 4 5 6 7
+				################################
+				# 45D7 7 A 2 C			BA79 8 3 D 3
+				# E86E 2 A 6 C			3286 D 3 9 3
+
+				my $check_4 = 0;
+				$check_4 = 1 if (abs(hex(substr($doubleCode[0],4,1)) - hex(substr($rawData,4,1))) == 5);
+				my $check_5 = 0;
+				$check_5 = 1 if (substr($doubleCode[0],5,1) eq substr($rawData,5,1));
+				my $check_6 = 0;
+				$check_6 = 1 if (abs(hex(substr($doubleCode[0],6,1)) - hex(substr($rawData,6,1))) == 4);
+				my $check_7 = 0;
+				$check_7 = 1 if (substr($doubleCode[0],7,1) eq substr($rawData,7,1));
+
+				if ($check_4 != 1 || $check_5 != 1 || $check_6 != 1 || $check_7 != 1) {
+					Log3 $iohash, 3, "$ioname: SD_BELL_Parse Check doubleCode - RAWMSG check failed ($check_4 $check_5 $check_6 $check_7)";
+					return "";
+				}
+
+				### messages are verified ###
+				if ($modules{SD_BELL}{defptr}{doubleCode} =~ /$rawData/s) {											# check, part known
+					Log3 $iohash, 4, "$ioname: SD_BELL_Parse Check doubleCode - $rawData is already known!";
+				} else {																																				# new part
+					$modules{SD_BELL}{defptr}{doubleCode} = $doubleCode[0]."_".$rawData;
+					Log3 $iohash, 4, "$ioname: SD_BELL_Parse Check doubleCode - $rawData part two for defptr find!";
+				}
+				Log3 $iohash, 4, "$ioname: SD_BELL_Parse Check doubleCode - ".$modules{SD_BELL}{defptr}{doubleCode}." complete for defptr";
 				$deviceCode = $modules{SD_BELL}{defptr}{doubleCode};
 				$devicedef = $protocol . " " .$deviceCode;
 			} else {
-				Log3 $iohash, 3, "$ioname: SD_BELL_Parse Check doubleCode - $rawData other unknown RAWMSG";		# Error detections, another bit
-				return "";
+				if ($modules{SD_BELL}{defptr}{doubleCode} =~ /$rawData/s) {											# check RAWMSG known
+					Log3 $iohash, 4, "$ioname: SD_BELL_Parse Check doubleCode - $rawData already registered! The system search the second code.";
+					$deviceCode = $modules{SD_BELL}{defptr}{doubleCode};
+					$devicedef = $protocol . " " .$deviceCode;
+				} else {
+					Log3 $iohash, 3, "$ioname: SD_BELL_Parse Check doubleCode - RAWMSG $rawData failed! Other MSG are registered!";		# Error detections, another bit
+					return "";
+				}
 			}
+			### doubleCode yes and RAWMSG are known in def ###
+		} elsif ($models{$hash_name}{doubleCode} eq "yes" && $doubleCode_known ne "0") {
+			$devicedef = $protocol . " " .$doubleCode_known;																									# variant two, RAWMSG in a different order
+			Log3 $iohash, 4, "$ioname: SD_BELL_Parse Check doubleCode - $devicedef ready to define!";					# Error detections, another bit
 		}
-		### doubleCode yes and RAWMSG are known in def ###
-	} elsif ($models{$hash_name}{doubleCode} eq "yes" && $doubleCode_known ne "0") {
-		$devicedef = $protocol . " " .$doubleCode_known;																														# variant two, RAWMSG in a different order
-		Log3 $iohash, 4, "$ioname: SD_BELL_Parse Check doubleCode - $rawData already exist in $doubleCode_known";
-		### doubleCode no ###
+	### doubleCode no without P41 ###
 	} else {
 		$devicedef = $protocol . " " .$deviceCode;
-		Log3 $iohash, 4, "$ioname: SD_BELL_Parse Check doubleCode - $rawData alone";
+		Log3 $iohash, 4, "$ioname: SD_BELL_Parse Check - $rawData alone";
 	}
 
 	my $def = $modules{SD_BELL}{defptr}{$devicedef};
