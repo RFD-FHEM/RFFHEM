@@ -60,8 +60,8 @@
 					# MS;P0=-9298;P1=495;P2=-1980;P3=-4239;D=1012121312131313121313121312121212121212131212131312131212;CP=1;SP=0;R=223;O;m2;
 					# !!! some RAWMSG are also decode under ID 68 !!!
 		{
-			name						=> 'weather1',	# Logilink, NC, WS, TCM97001 etc.
-			comment					=> 'Logilink, NC, WS, TCM97001 etc',
+			name						=> 'weather',
+			comment					=> 'Logilink, NC, WS, TCM97001 ...',
 			id							=> '0',
 			one							=> [1,-8],
 			zero						=> [1,-4],
@@ -76,7 +76,7 @@
 			length_max			=> '42',
 			paddingbits			=> '8',					# pad up to 8 bits, default is 4
 		},
-	"1"	=>	## ConradRSL
+	"1"	=>	## Conrad RSL
 		{
 			name					=> 'Conrad RSL v1',
 			comment				=> 'remotes and switches',
@@ -95,8 +95,8 @@
 		},
 	"2"	=>	## Self build arduino sensor
 		{
-			name						=> 'AS, Self build arduino sensor',
-			comment					=> 'developModule. SD_AS module is only in github available',
+			name						=> 'Arduino',
+			comment					=> 'self build arduino sensor (developModule. SD_AS module only in github)',
 			developId				=> 'm',
 			id							=> '2',
 			one							=> [1,-2],
@@ -141,9 +141,9 @@
 			zero							=> [1,-3.8],
 			float							=> [1,-1],			# fuer Gruppentaste (nur bei ITS-150,ITR-3500 und ITR-300), siehe Kommentar in sub SIGNALduino_bit2itv1
 			sync							=> [1,-44],
-			clockabs					=> -1,					# -1=auto
+			clockabs					=> -1,					# -1=auto	
 			format						=> 'twostate',	# not used now
-			preamble					=> 'i',
+			preamble					=> 'i',			
 			clientmodule			=> 'IT',
 			modulematch				=> '^i......',
 			length_min				=> '24',
@@ -178,7 +178,7 @@
 					# A AN:
 					# MU;P0=132;P1=-4680;P2=508;P3=-1775;P4=287;P6=192;D=123434343434343634343436363434343636343434363634343036363434343;CP=4;R=2;
 					# A AUS:
-					# MU;P0=-1692;P1=132;P2=194;P4=355;P5=474;P7=-31892;D=010202040505050505050404040404040404040470;CP=4;R=27;
+					# MU;P0=-1692;P1=132;P2=194;P4=355;P5=474;P7=-31892;D=010202040505050505050404040404040404040470;CP=4;R=27; 
 		{
 			name						=> 'Unitec',
 			comment					=> 'remote control model 6899/45108',
@@ -196,7 +196,8 @@
 		},
 	"6"	=>	## Eurochron Protocol
 		{
-			name					=> 'weatherID6',
+			name					=> 'weather',
+			comment				=> 'unknown sensor is under development',
 			id						=> '6',
 			one						=> [1,-10],
 			zero					=> [1,-5],
@@ -212,7 +213,7 @@
 	"7"	=>	## weather sensors like EAS800z
 					# MS;P1=-3882;P2=504;P3=-957;P4=-1949;D=21232424232323242423232323232323232424232323242423242424242323232324232424;CP=2;SP=1;R=249;m=2;
 		{
-			name						=> 'weatherID7',
+			name						=> 'weather',
 			comment					=> 'EAS800z, FreeTec NC-7344, HAMA TS34A',
 			id							=> '7',
 			one							=> [1,-4],
@@ -225,7 +226,7 @@
 			modulematch			=> '^P7#.{6}F.{2}',
 			length_min			=> '35',
 			length_max			=> '40',
-		},
+		}, 
 	"8"	=>	## TX3 (ITTX) Protocol
 					# MU;P0=-1046;P1=1339;P2=524;P3=-28696;D=010201010101010202010101010202010202020102010101020101010202020102010101010202310101010201020101010101020201010101020201020202010201010102010101020202010201010101020;CP=2;R=4;
 		{
@@ -251,7 +252,7 @@
 			zero						=> [3,-2],
 			one							=> [1,-2],
 			#float					=> [-1,3],			# not full supported now, for later use
-			#sync						=> [1,-8],			#
+			#sync						=> [1,-8],			# 
 			clockabs				=> 480,					# -1 = auto undef=noclock
 			format					=> 'pwm',				# tristate can't be migrated from bin into hex!
 			preamble				=> 'P9#',				# prepend to converted message
@@ -262,7 +263,8 @@
 		},
 	"10"	=>	## Oregon Scientific 2
 		{
-			name						=> 'OSV2o3',
+			name						=> 'Oregon Scientific v2|v3',
+			comment					=> 'temperature / humidity or other sensors',
 			id							=> '10',
 			clockrange			=> [300,520],						# min , max
 			format					=> 'manchester',				# tristate can't be migrated from bin into hex!
@@ -275,7 +277,8 @@
 		},
 	"11"	=>	## Arduino Sensor
 		{
-			name						=> 'AS',
+			name						=> 'Arduino',
+			comment					=> 'for Arduino based sensors',
 			id							=> '11',
 			clockrange			=> [380,425],						# min , max
 			format					=> 'manchester',				# tristate can't be migrated from bin into hex!
@@ -289,8 +292,8 @@
 	"12"	=>	## Hideki
 						# MC;LL=-1040;LH=904;SL=-542;SH=426;D=A8C233B53A3E0A0783;C=485;L=72;R=213;
 		{
-			name						=> 'Hideki protocol',
-			comment					=> 'Hideki messages are sometimes received as inverted (check in sub)',
+			name						=> 'Hideki',
+			comment					=> 'temperature / humidity or other sensors',
 			id							=> '12',
 			clockrange			=> [420,510],							# min, max better for Bresser Sensors, OK for hideki/Hideki/TFA too
 			format					=> 'manchester',
@@ -402,7 +405,8 @@
 						# MU;P0=-1608;P1=-785;P2=288;P3=650;P4=-419;P5=4676;D=1212121213434212134213434212121343434212121213421213434212134345021213434213434342121212121343421213421343421212134343421212121342121343421213432;CP=2;
 						# MU;P0=-1562;P1=-411;P2=297;P3=-773;P4=668;P5=4754;D=1232341234141234141234141414123414123232341232341412323414150234123234123232323232323234123414123414123414141412341412323234123234141232341415023412323412323232323232323412341412341412341414141234141232323412323414123234142;CP=2;
 		{
-			name						=> 'Dooya shutter',
+			name						=> 'Dooya',
+			comment					=> 'Rohrmotor24 and other radio shutters / awnings motors',
 			id							=> '16',
 			one							=> [2,-1],
 			zero						=> [1,-3],
@@ -418,7 +422,7 @@
 	"17"	=>	## arctech / intertechno
 						# need more Device Infos / User Message
 		{
-			name							=> 'arctech / intertechno',
+			name							=> 'arctech / Intertechno',
 			id								=> '17',
 			one								=> [1,-5,1,-1],
 			zero							=> [1,-1,1,-5],
@@ -444,7 +448,7 @@
 							# MU;P0=355;P1=-189;P2=-1222;P3=-10252;P4=-2604;D=01020201010201020201020101020102020102010201020102010201010201020102010201020201020101020102010201020102010201020 304 0102 01020102020101020201010201020201020101020102020102010201020102010201010201020102010201020201020101020102010201020102010201020 304 01020;CP=0;R=0;
 							# https://www.sweetpi.de/blog/329/ein-ueberblick-ueber-433mhz-funksteckdosen-und-deren-protokolle
 		{
-			name							=> 'intertechno',
+			name							=> 'Intertechno',
 			comment						=> 'PIR-1000 | ITT-1500',
 			id								=> '17.1',
 			one								=> [1,-5,1,-1],
@@ -462,7 +466,8 @@
 	"18"	=>	## Oregon Scientific v1
 						# MC;LL=-2721;LH=3139;SL=-1246;SH=1677;D=1A51FF47;C=1463;L=32;R=12;
 		{
-			name						=> 'OSV1',
+			name						=> 'Oregon Scientific v1',
+			comment					=> 'temperature / humidity or other sensors',
 			id							=> '18',
 			clockrange			=> [1400,1500],					# min , max
 			format					=> 'manchester',				# tristate can't be migrated from bin into hex!
@@ -503,6 +508,7 @@
 						# Start bit: |             |___|    bit 0: |   |___|    bit 1: |       |___|
 		{
 			name					=> 'Livolo',
+			comment				=> 'remote control / dimmmer / switch ...',
 			id						=> '20',
 			one						=> [3],
 			zero					=> [1],
@@ -559,7 +565,8 @@
 		},
 	"23"	=>	## Pearl Sensor
 		{
-			name					=> 'perl unknown',
+			name					=> 'Pearl',
+			comment				=> 'unknown sensortyp',
 			id						=> '23',
 			one						=> [1,-6],
 			zero					=> [1,-1],
@@ -612,7 +619,7 @@
 						# https://forum.fhem.de/index.php/topic,43292.msg352982.html#msg352982
 						# MU;P0=1086;P1=-433;P2=327;P3=-1194;P4=-2318;P5=2988;D=01012323010123010101230123012323232323010101232324010123230101230101012301230123232323230101012323240101232301012301010123012301232323232301010123232401012323010123010101230123012323232323010101232353;CP=2;
 		{
-			name					=> 'remote26',
+			name					=> 'remote',
 			id						=> '26',
 			one						=> [1,-3],
 			zero					=> [3,-1],
@@ -630,7 +637,7 @@
 						# https://forum.fhem.de/index.php/topic,43292.msg352982.html#msg352982
 						# MU;P0=963;P1=-559;P2=393;P3=-1134;P4=2990;P5=-7172;D=01012323010123010101230123012323232323010101232345010123230101230101012301230123232323230101012323450101232301012301010123012301232323232301010123234501012323010123010101230123012323232323010101232323;CP=2;
 		{
-			name						=> 'remote27',
+			name						=> 'remote',
 			id							=> '27',
 			one							=> [1,-2],
 			zero						=> [2,-1],
@@ -671,7 +678,7 @@
 			clockabs				=> 235,						# ca 220
 			format					=> 'twostate',		# there is a pause puls between words
 			preamble				=> 'P29#',				# prepend to converted message
-			clientmodule		=> 'SD_UT',
+			clientmodule		=> 'SD_UT', 
 			modulematch			=> '^P29#.{3}',
 			length_min			=> '12',
 			length_max			=> '12',
@@ -690,7 +697,7 @@
 			clockabs			=> 330,						# ca 300 us
 			format				=> 'twostate',		# there is a pause puls between words
 			preamble			=> 'P30#',				# prepend to converted message
-			clientmodule	=> 'SD_UT',
+			clientmodule	=> 'SD_UT', 
 			modulematch		=> '^P30#.{3}',
 			length_min		=> '12',
 			length_max		=> '12',				# message has only 10 bit but is paddet to 12
@@ -726,8 +733,8 @@
 						# MU;P0=146;P1=245;P3=571;P4=-708;P5=-284;P7=-6689;D=14351435143514143535353535353535353535350704040435043504350435040435353535353535353535353507040404350435043504350404353535353535353535353535070404043504350435043504043535353535353535353535350704040435043504350435040435353535353535353535353507040404350435;CP=3;R=0;O;
 						# MU;P0=-6680;P1=162;P2=-298;P4=253;P5=-699;P6=555;D=45624562456245456262626262626262626262621015151562156215621562151562626262626262626262626210151515621562156215621515626262626262626262626262;CP=6;R=0;
 		{
-			name						=> 'freetec 6946',
-			comment					=> 'Doorbell FreeTec PE-6946',
+			name						=> 'FreeTec PE-6946',
+			comment					=> 'wireless doorbell',
 			id							=> '32',
 			one							=> [4,-2],
 			zero						=> [1,-5],
@@ -747,8 +754,8 @@
 						# sensor id=62, channel=1, temp=21.1, hum=76, bat=ok
 						# !! ToDo Tx-EZ6 neues Attribut ins Modul bauen um Trend + CRC auszuwerten !!
 		{
-			name					=> 'weather33',
-			comment				=> 'S014/TFA 30.3200/TCM/Conrad S522/renkforce E0001PA/Tx-EZ6',
+			name					=> 'weather',
+			comment				=> 'S014, TFA 30.3200, TCM, Conrad S522, renkforce E0001PA, TX-EZ6',
 			id						=> '33',
 			one						=> [1,-8],
 			zero					=> [1,-4],
@@ -776,7 +783,7 @@
 			start					=> [1],
 			pause					=> [-15],   # 9900
 			clockabs			=> '660',
-			format				=> 'twostate',
+			format				=> 'twostate', 
 			preamble			=> 'P34#',
 			clientmodule	=> 'SD_UT',
 			#modulematch	=> '',
@@ -786,13 +793,12 @@
 	"35"	=>	## Homeeasy
 						# MS;P0=907;P1=-376;P2=266;P3=-1001;P6=-4860;D=2601010123230123012323230101012301230101010101230123012301;CP=2;SP=6;
 		{
-			name							=> 'HE800',
-			comment						=> 'Homeeasy',
+			name							=> 'HomeEasy HE800',
 			id								=> '35',
 			one								=> [1,-4],
 			zero							=> [3.4,-1],
 			sync							=> [1,-18],
-			clockabs					=> '280',
+			clockabs					=> '280',		
 			format						=> 'twostate',		# not used now
 			preamble					=> 'ih',					# prepend to converted message
 			postamble					=> '',						# Append to converted message
@@ -809,7 +815,7 @@
 			one							=> [1,-3],
 			zero						=> [1,-1],
 			start						=> [20,-20],
-			clockabs				=> '500',
+			clockabs				=> '500',		
 			format					=> 'twostate',		# not used now
 			preamble				=> 'u36#',				# prepend to converted message
 			postamble				=> '',						# Append to converted message
@@ -826,14 +832,15 @@
 						# sync preamble of pulse, gap, 750 us each, repeated 4 times
 	{
 			name						=> 'Bresser 7009994',
+			comment					=> 'temperature / humidity sensor',
 			id							=> '37',
 			one							=> [2,-1],
 			zero						=> [1,-2],
 			start						=> [3,-3,3,-3],
-			clockabs				=> '250',
+			clockabs				=> '250',		
 			format					=> 'twostate',		# not used now
 			preamble				=> 'W37#',				# prepend to converted message
-			clientmodule		=> 'SD_WS',
+			clientmodule		=> 'SD_WS', 
 			length_min			=> '40',
 			length_max			=> '41',
 	},
@@ -841,7 +848,8 @@
 						# https://github.com/RFD-FHEM/RFFHEM/issues/63
 						# MS;P1=367;P2=-2077;P4=-9415;P5=-4014;D=141515151515151515121512121212121212121212121212121212121212121212;CP=1;SP=4;O;
 		{
-			name						=> 'weather38',
+			name						=> 'weather',
+			comment					=> 'temperature / humidity or other sensors',
 			id							=> '38',
 			one							=> [1,-10],
 			zero						=> [1,-5],
@@ -865,14 +873,14 @@
 			one								=> [1,-3],
 			zero							=> [1,-1],
 			start							=> [17,-7],
-			clockabs					=> 560,
-			format						=> 'twostate',
+			clockabs					=> 560, 
+			format						=> 'twostate', 
 			preamble					=> '', # prepend to converted message
 			clientmodule			=> 'RFXX10REC',
 			#modulematch		=> '^TX......',
 			length_min				=> '32',
 			length_max				=> '44',
-			paddingbits				=> '8',
+			paddingbits				=> '8',		
 			postDemodulation	=> \&SIGNALduino_lengtnPrefix,
 			filterfunc				=> 'SIGNALduino_compPattern',
 		},
@@ -881,12 +889,13 @@
 						# MU;P0=300;P1=-772;P2=674;P3=-397;P4=4756;P5=-1512;D=4501232301230123230101232301010123230101230103;CP=0;
 						# MU;P0=-132;P1=-388;P2=675;P4=271;P5=-762;D=012145212145452121454545212145452145214545454521454545452145454541;CP=4;
 		{
-			name						=> 'romotec',
+			name						=> 'Romotec ',
+			comment					=> 'Tubular motor',
 			id							=> '40',
 			one							=> [3,-2],
 			zero						=> [1,-3],
 			start						=> [1,-2],
-			clockabs				=> 250,
+			clockabs				=> 250, 
 			preamble				=> 'u40#',	# prepend to converted message
 			#clientmodule		=> '',
 			#modulematch		=> '',
@@ -908,13 +917,13 @@
 						# P41#BA2885D3: MS;P0=1399;P1=-604;P2=397;P3=-1602;P4=-7090;D=240123010101230123232301230123232301232323230123010101230123230101;CP=2;SP=4;R=248;O;m1;
 						# P41#1791D593: MS;P1=403;P2=-7102;P3=-1608;P4=1378;P5=-620;D=121313134513454545451313451313134545451345134513454513134513134545;CP=1;SP=2;R=5;O;m0;
 		{
-			name					=> 'Doorbell',
+			name					=> 'wireless doorbell',
 			comment				=> 'Elro (DB200) / KANGTAI (Pollin 94-550405) / unitec',
 			id						=> '41',
 			zero					=> [1,-3],
 			one						=> [3,-1],
 			sync					=> [1,-14],
-			clockabs			=> 500,
+			clockabs			=> 500, 
 			preamble			=> 'P41#', # prepend to converted message
 			clientmodule	=> 'SD_BELL',
 			modulematch		=> '^P41#.*',
@@ -925,7 +934,7 @@
 						# https://github.com/RFD-FHEM/RFFHEM/issues/390
 						# MU;P0=1446;P1=-487;P2=477;D=0101012121212121212121212101010101212121212121212121210101010121212121212121212121010101012121212121212121212101010101212121212121212121210101010121212121212121212121010101012121212121212121212101010101212121212121212121210101010121212121212121212121010;CP=2;R=93;O;
 		{
-			name					=> 'Doorbell',
+			name					=> 'wireless doorbell',
 			comment				=> 'Pollin 94-551227',
 			id						=> '42',
 			one						=> [1,-1],
@@ -939,13 +948,13 @@
 			length_min		=> '116',
 			length_max		=> '120',
 		},
-	"43" => ## Somfy RTS
-					# MC;LL=-1405;LH=1269;SL=-723;SH=620;D=98DBD153D631BB;C=669;L=56;R=229;
+	"43"	=>	## Somfy RTS
+						# MC;LL=-1405;LH=1269;SL=-723;SH=620;D=98DBD153D631BB;C=669;L=56;R=229;
 		{
 			name					=> 'Somfy RTS',
 			id						=> '43',
 			clockrange		=> [610,680],								# min , max
-			format				=> 'manchester',
+			format				=> 'manchester', 
 			preamble			=> 'Ys',
 			clientmodule	=> 'SOMFY',									# not used now
 			modulematch		=> '^Ys[0-9A-F]{14}',
@@ -959,6 +968,7 @@
 	"44"	=>	## Bresser Temeo Trend
 		{
 			name					=> 'BresserTemeo',
+			comment				=> 'temperature / humidity sensor',
 			id						=> '44',
 			clockabs			=> 500,
 			zero					=> [4,-4],
@@ -973,6 +983,7 @@
 	"44.1"	=>	## Bresser Temeo Trend
 		{
 			name					=> 'BresserTemeo',
+			comment				=> 'temperature / humidity sensor',
 			id						=> '44',
 			clockabs			=> 500,
 			zero					=> [4,-4],
@@ -984,7 +995,7 @@
 			length_min		=> '64',
 			length_max		=> '72',
 		},
-	"45"	=>	## Revolt
+	"45"	=>	## Revolt 
 						#	MU;P0=-8320;P1=9972;P2=-376;P3=117;P4=-251;P5=232;D=012345434345434345454545434345454545454543454343434343434343434343434543434345434343434545434345434343434343454343454545454345434343454345434343434343434345454543434343434345434345454543454343434543454345434545;CP=3;R=2
 		{
 			name							=> 'Revolt',
@@ -992,9 +1003,9 @@
 			one								=> [2,-2],
 			zero							=> [1,-2],
 			start							=> [83,-3],
-			clockabs					=> 120,
+			clockabs					=> 120, 
 			preamble					=> 'r', # prepend to converted message
-			clientmodule			=> 'Revolt',
+			clientmodule			=> 'Revolt', 
 			modulematch				=> '^r[A-Fa-f0-9]{22}',
 			length_min				=> '84',
 			length_max				=> '120',
@@ -1026,7 +1037,8 @@
 	"47"	=>	## Maverick
 						# MC;LL=-507;LH=490;SL=-258;SH=239;D=AA9995599599A959996699A969;C=248;L=104;
 		{
-			name						=> 'Maverick protocol',
+			name						=> 'Maverick',
+			comment					=> 'BBQ / food thermometer',
 			id							=> '47',
 			clockrange			=> [180,260],
 			format					=> 'manchester',
@@ -1046,7 +1058,7 @@
 			name						=> 'TFA Dostmann',
 			comment					=> 'Funk-Thermometer Joker TFA 30.3055.01',
 			id							=> '48',
-			clockabs				=> 250, 						# In real it is 500 but this leads to unprceise demodulation
+			clockabs				=> 250, 						# In real it is 500 but this leads to unprceise demodulation 
 			one							=> [-4,6],
 			zero						=> [-4,2],
 			start						=> [-6,2],
@@ -1080,13 +1092,14 @@
 						# MU;P0=248;P1=-21400;P2=545;P3=-925;P4=1368;P5=-12308;D=01232323232323232343234323432343234343434343234323432343434343432323232323232323232343432323432345232323232323232343234323432343234343434343234323432343434343432323232323232323232343432323432345232323232323232343234323432343234343434343234323432343434343;CP=2;O;
 		{
 			name						=> 'Opus_XT300',
+			comment					=> 'sensor for ground humidity',
 			id							=> '50',
 			clockabs				=> 500,
 			zero						=> [3,-2],
 			one							=> [1,-2],
 			#	start					=> [1,-25],				# Wenn das startsignal empfangen wird, fehlt das 1 bit
-			format					=> 'twostate',
-			preamble				=> 'W50#',				# prepend to converted message
+			format					=> 'twostate',	
+			preamble				=> 'W50#',				# prepend to converted message	
 			clientmodule		=> 'SD_WS',
 			modulematch			=> '^W50#.*',
 			length_min			=> '47',
@@ -1096,7 +1109,7 @@
 						# MS;P0=-16046;P1=552;P2=-1039;P3=983;P5=-7907;P6=-1841;P7=-4129;D=15161716171616161717171716161616161617161717171717171617171617161716161616161616171032323232;CP=1;SP=5;O;
 						# https://github.com/RFD-FHEM/RFFHEM/issues/118
 		{
-			name						=> 'weather51',		# Logilink, NC, WS, TCM97001 etc.
+			name						=> 'weather',
 			comment					=> 'IAN 275901 Wetterstation Lidl',
 			id							=> '51',
 			one							=> [1,-8],
@@ -1115,7 +1128,7 @@
 						# https://forum.fhem.de/index.php/topic,63604.msg548256.html#msg548256
 						# MC;LL=-1045;LH=1153;SL=-494;SH=606;D=FFFED518;C=549;L=30;
 		{
-			name						=> 'OS_PIR',
+			name						=> 'Oregon Scientific PIR',
 			id							=> '52',
 			clockrange			=> [470,640],							# min , max
 			format					=> 'manchester',					# tristate can't be migrated from bin into hex!
@@ -1177,9 +1190,10 @@
 			method					=> \&SIGNALduino_MCRAW,	# Call to process this message
 			polarity				=> 'invert',
 		},
-	"58"	=>	## tfa 30.3208.0
+	"58"	=>	## TFA 30.3208.0 
 		{
-			name						=> 'tfa 30.3208.0',
+			name						=> 'TFA 30.3208.0',
+			comment					=> 'temperature / humidity sensor',
 			id							=> '58',
 			clockrange			=> [460,520],			# min , max
 			format					=> 'manchester',	# tristate can't be migrated from bin into hex!
@@ -1214,13 +1228,13 @@
 	"60"	=>	## ELV, LA CROSSE (WS2000/WS7000)
 						# MU;P0=32001;P1=-381;P2=835;P3=354;P4=-857;D=01212121212121212121343421212134342121213434342121343421212134213421213421212121342121212134212121213421212121343421343430;CP=2;R=53;
 						# tested sensors:   WS-7000-20, AS2000, ASH2000, S2000, S2000I, S2001A, S2001IA,
-						#                   ASH2200, S300IA, S2001I, S2000ID, S2001ID, S2500H
+						#                   ASH2200, S300IA, S2001I, S2000ID, S2001ID, S2500H 
 						# not tested:       AS3, S2000W, S2000R, WS7000-15, WS7000-16, WS2500-19, S300TH, S555TH
 						# das letzte Bit (1) und mehrere Bit (0) Preambel fehlen meistens
 						#  ___        _
 						# |   |_     | |___
 						#  Bit 0      Bit 1
-						# kurz 366 mikroSek / lang 854 mikroSek / gesamt 1220 mikroSek - Sollzeiten
+						# kurz 366 mikroSek / lang 854 mikroSek / gesamt 1220 mikroSek - Sollzeiten 
 		{
 			name								=> 'WS2000',
 			comment							=> 'Series WS2000/WS7000 of various sensors',
@@ -1244,7 +1258,7 @@
 						#  __         __
 						# |  |__     |  |____
 						#  Bit 0      Bit 1
-						# kurz 400 mikroSek / lang 800 mikroSek / gesamt 800 mikroSek = 0, gesamt 1200 mikroSek = 1 - Sollzeiten
+						# kurz 400 mikroSek / lang 800 mikroSek / gesamt 800 mikroSek = 0, gesamt 1200 mikroSek = 1 - Sollzeiten 
 		{
 			name					=> 'FS10',
 			comment				=> 'remote control (434Mhz)',
@@ -1262,7 +1276,7 @@
 			length_max		=> '48',				# eigentlich 46
 		},
 	"62"	=>	## Clarus_Switch
-						# MU;P0=-5893;P4=-634;P5=498;P6=-257;P7=116;D=45656567474747474745656707456747474747456745674567456565674747474747456567074567474747474567456745674565656747474747474565670745674747474745674567456745656567474747474745656707456747474747456745674567456565674747474747456567074567474747474567456745674567;CP=7;O;
+						# MU;P0=-5893;P4=-634;P5=498;P6=-257;P7=116;D=45656567474747474745656707456747474747456745674567456565674747474747456567074567474747474567456745674565656747474747474565670745674747474745674567456745656567474747474745656707456747474747456745674567456565674747474747456567074567474747474567456745674567;CP=7;O;		
 		{
 			name					=> 'Clarus_Switch',
 			id						=> '62',
@@ -1272,7 +1286,7 @@
 			clockabs			=> 189,
 			preamble			=> 'i',				# prepend to converted message
 			clientmodule	=> 'IT',
-			#modulematch	=> '',
+			#modulematch	=> '', 
 			length_min		=> '24',
 			length_max		=> '24',
 		},
@@ -1282,16 +1296,16 @@
 						# MU;P0=6324;P1=-1789;P2=864;P3=-910;P4=1756;D=0123234143212323232323032321234141032323232323232323;CP=2;
 		{
 			name					=> 'Warema',
-			comment				=> 'developId, is still experimental',
+			comment				=> 'radio shutter switch (is still experimental)',
 			id						=> '63',
 			developId			=> 'y',
 			one						=> [1],
 			zero					=> [0],
-			clockabs			=> 800,
+			clockabs			=> 800, 
 			syncabs				=> '6700',	# Special field for filterMC function
 			preamble			=> 'u63',		# prepend to converted message
-			#clientmodule	=> '',
-			#modulematch	=> '',
+			#clientmodule	=> '', 
+			#modulematch	=> '', 
 			length_min		=> '24',
 			#length_max		=> '',			# missing
 			filterfunc		=> 'SIGNALduino_filterMC',
@@ -1302,6 +1316,7 @@
 						# MU;P0=134;P1=-113;P3=412;P4=-1062;P5=1379;D=01010101013434343434343454345454345454545454345454545454343434545434345454345454545454543454543454345454545434545454345;CP=3;
 		{
 			name					=> 'WH2',
+			comment				=> 'temperature / humidity sensor',
 			id						=> '64',
 			one						=> [1,-2],
 			zero					=> [3,-2],
@@ -1317,8 +1332,7 @@
 	"65"	=>	## Homeeasy
 						# MS;P1=231;P2=-1336;P4=-312;P5=-8920;D=15121214141412121212141414121212121414121214121214141212141212141212121414121414141212121214141214121212141412141212;CP=1;SP=5;
 		{
-			name							=> 'HE_EU',
-			comment						=> 'Homeeasy',
+			name							=> 'HomeEasy HE_EU',
 			id								=> '65',
 			one								=> [1,-5.5],
 			zero							=> [1,-1.2],
@@ -1332,9 +1346,11 @@
 			postDemodulation	=> \&SIGNALduino_HE_EU,
 		},
 	"66"	=>	## TX2 Protocol (Remote Temp Transmitter & Remote Thermo Model 7035)
+						# https://github.com/RFD-FHEM/RFFHEM/issues/160
 						# MU;P0=13312;P1=-2785;P2=4985;P3=1124;P4=-6442;P5=3181;P6=-31980;D=0121345434545454545434545454543454545434343454543434545434545454545454343434545434343434545621213454345454545454345454545434545454343434545434345454345454545454543434345454343434345456212134543454545454543454545454345454543434345454343454543454545454545;CP=3;R=73;O;
 		{
 			name							=> 'WS7035',
+			comment						=> 'temperature sensor',
 			id								=> '66',
 			one								=> [10,-52],
 			zero							=> [27,-52],
@@ -1349,6 +1365,7 @@
 			postDemodulation	=> \&SIGNALduino_postDemo_WS7035,
 		},
 	"67"	=>	## TX2 Protocol (Remote Datalink & Remote Thermo Model 7053, 7054)
+						# https://github.com/RFD-FHEM/RFFHEM/issues/162
 						# MU;P0=3381;P1=-672;P2=-4628;P3=1142;P4=-30768;D=010 2320232020202020232020232020202320232323202323202020202020202020 4 010 2320232020202020232020232020202320232323202323202020202020202020 0;CP=0;R=45;
 						# MU;P0=1148;P1=3421;P6=-664;P7=-4631;D=161 7071707171717171707171707171717171707070717071717171707071717171 0;CP=1;R=29;
 						# Message repeats 4 x with pause of ca. 30-34 mS
@@ -1358,6 +1375,7 @@
 						#    4630  1220       4630   3420   mikroSek - mit Oszi gemessene Zeiten
 		{
 			name							=> 'WS7053',
+			comment						=> 'temperature sensor',
 			id								=> '67',
 			one								=> [-38,10],     # -4636, 1220
 			zero							=> [-38,28],     # -4636, 3416
@@ -1369,15 +1387,16 @@
 			length_max				=> '34',
 			postDemodulation	=> \&SIGNALduino_postDemo_WS7053,
 		},
-	"68"	=>	## PFR-130 ###########################################################################
+	"68"	=>	## Pollin PFR-130 ###########################################################################
 						# MS;P0=-3890;P1=386;P2=-2191;P3=-8184;D=1312121212121012121212121012121212101012101010121012121210121210101210101012;CP=1;SP=3;R=20;O;
 						# MS;P0=-2189;P1=371;P2=-3901;P3=-8158;D=1310101010101210101010101210101010121210121212101210101012101012121012121210;CP=1;SP=3;R=20;O;
 		{
-			name					=> 'PFR-130',
+			name					=> 'Pollin PFR-130',
+			comment				=> 'temperature sensor with rain',
 			id						=> '68',
 			one						=> [1,-10],
 			zero					=> [1,-5],
-			sync					=> [1,-21],
+			sync					=> [1,-21],	
 			clockabs			=> 380,
 			preamble			=> 's',				# prepend to converted message
 			postamble			=> '00',			# Append to converted message
@@ -1385,14 +1404,14 @@
 			length_min		=> '36',
 			length_max		=> '42',
 			paddingbits		=> '8',				 # pad up to 8 bits, default is 4
-		},
+		}, 	
 	"69"	=>	## Hoermann HSM2, HSM4, HS1-868-BS (868 MHz)
 						# https://github.com/RFD-FHEM/RFFHEM/issues/149
 						# MU;P0=-508;P1=1029;P2=503;P3=-1023;P4=12388;D=01010232323232310104010101010101010102323231010232310231023232323231023101023101010231010101010232323232310104010101010101010102323231010232310231023232323231023101023101010231010101010232323232310104010101010101010102323231010232310231023232323231023101;CP=2;R=37;O;
 						# Remote control HS1-868-BS (one button):
 						# https://github.com/RFD-FHEM/RFFHEM/issues/344
 						# MU;P0=-578;P1=1033;P2=506;P3=-1110;P4=13632;D=0101010232323101040101010101010101023232323102323101010231023102310231010232323101010101010101010232323101040101010101010101023232323102323101010231023102310231010232323101010101010101010232323101040101010101010101023232323102323101010231023102310231010;CP=2;R=77;
-						# MU;P0=-547;P1=1067;P2=553;P3=-1066;P4=13449;D=0101010101010232323101040101010101010101023232323102323101010231023102310231010232323101010101010101010232323101040101010101010101023232323102323101010231023102310231010232323101010101010101010232323101040101010101010101023232323102323101010231023102310;CP=2;R=71;
+						# MU;P0=-547;P1=1067;P2=553;P3=-1066;P4=13449;D=0101010101010232323101040101010101010101023232323102323101010231023102310231010232323101010101010101010232323101040101010101010101023232323102323101010231023102310231010232323101010101010101010232323101040101010101010101023232323102323101010231023102310;CP=2;R=71;	
 						# https://forum.fhem.de/index.php/topic,71877.msg642879.html (HSM4, Taste 1-4)
 						# MU;P0=-332;P1=92;P2=-1028;P3=12269;P4=-510;P5=1014;P6=517;D=01234545454545454545462626254546262546254626262626254625454625454546254545454546262626262545434545454545454545462626254546262546254626262626254625454625454546254545454546262626262545434545454545454545462626254546262546254626262626254625454625454546254545;CP=6;R=37;O;
 						# MU;P0=509;P1=-10128;P2=1340;P3=-517;P4=1019;P5=-1019;P6=12372;D=01234343434343434343050505434305054305430505050505430543430543434305434343430543050505054343634343434343434343050505434305054305430505050505430543430543434305434343430543050505054343634343434343434343050505434305054305430505050505430543430543434305434343;CP=0;R=52;O;
@@ -1414,6 +1433,7 @@
 			length_max				=> '44',
 		},
 	"70"	=>	## FHT80TF (Funk-Tuer-Fenster-Melder FHT 80TF und FHT 80TF-2)
+						# https://github.com/RFD-FHEM/RFFHEM/issues/171
 						# closed MU;P0=-24396;P1=417;P2=-376;P3=610;P4=-582;D=012121212121212121212121234123434121234341212343434121234123434343412343434121234341212121212341212341234341234123434;CP=1;R=35;
 						# open   MU;P0=-21652;P1=429;P2=-367;P4=634;P5=-555;D=012121212121212121212121245124545121245451212454545121245124545454512454545121245451212121212124512451245451245121212;CP=1;R=38;
 		{
@@ -1533,11 +1553,11 @@
 			id						=> '75',
 			one						=> [3,-1],
 			zero					=> [1,-3],
-			clockabs			=> 500,
+			clockabs			=> 500, 
 			format				=> 'twostate',
 			developId			=> 'y',
 			clientmodule	=> 'SD_RSL',
-			preamble			=> 'P1#',
+			preamble			=> 'P1#',  
 			modulematch		=> '^P1#[A-Fa-f0-9]{8}',
 			length_min		=> '32',
 			length_max 		=> '40',
@@ -1563,7 +1583,7 @@
 			name					=> 'LED XM21',
 			comment				=> 'reserviert, LED Lichtrekette off',
 			id						=> '76.1',
-			developId			=> 'p',
+			developId			=> 'p', 
 			one						=> [1.2,-2],			# 120,-200
 			zero					=> [],						# existiert nicht
 			start					=> [4.5,-2],			# 450,-200 Starsequenz
@@ -1585,9 +1605,9 @@
 						# MU;P0=-1485;P1=967;P2=236;P3=-21536;D=010201020131010101020102010101010102020102020101020102010201010101010101010102010201010101020102013101010102010201010101010202010202010102010201020101010101010101010201020101010102010201;CP=1;
 		{
 			name					=> 'NANO_DS1820_4Fach',
-			comment				=> 'Selbstbau Sensor',
+			comment				=> 'self build sensor',
 			id						=> '77',
-			developId			=> 'y',
+			developId			=> 'y', 
 			zero					=> [4,-6],
 			one						=> [1,-6],
 			clockabs			=> 250,
@@ -1606,7 +1626,7 @@
 			name					=> 'geiger',
 			comment				=> 'geiger blind motors',
 			id						=> '78',
-			developId			=> 'y',
+			developId			=> 'y', 
 			zero					=> [1,-6.6],
 			one						=> [6.6,-1],
 			start					=> [-53],
@@ -1614,7 +1634,7 @@
 			format				=> 'twostate',
 			preamble			=> 'u78#',			# prepend to converted message
 			clientmodule	=> 'SIGNALduino_un',
-			#modulematch	=> '^TX......',
+			#modulematch	=> '^TX......', 
 			length_min		=> '14',
 			length_max		=> '18',
 			paddingbits		=> '2'				 # pad 1 bit, default is 4
@@ -1629,24 +1649,25 @@
 						# MU;P0=-10692;P1=602;P2=-608;P3=311;P4=-305;P5=-4666;D=01234123232323234141412 35 341234123232323234141412 35 341234123232323234141412 35 34123412323232323414141235341234123232323234141412353412341232323232341414123534123412323232323414141235341234123232323234141412353412341232323232341414123534123412323232323414;CP=3;R=47;O;
 						# MU;P0=-7152;P1=872;P2=-593;P3=323;P4=-296;P5=622;P6=-4650;D=01234523232323234545452 36 345234523232323234545452 36 345234523232323234545452 36 34523452323232323454545236345234523232323234545452363452345232323232345454523634523452323232323454545236345234523232323234545452363452345232323232345454523634523452323232323454;CP=3;R=26;O;
 		{
-			name					=> 'doorbell',
+			name					=> 'wireless doorbell',
 			comment				=> 'Heidemann | Heidemann HX | VTX-BELL',
 			id						=> '79',
 			zero					=> [-2,1],
 			one						=> [-1,2],
 			start					=> [-15,1],
 			clockabs			=> 330,
-			format				=> 'twostate',	#
+			format				=> 'twostate',	# 
 			preamble			=> 'P79#',			# prepend to converted message
 			clientmodule	=> 'SD_BELL',
 			modulematch		=> '^P79#.*',
 			length_min		=> '12',
 			length_max		=> '12',
 		},
-	"80"	=>	## EM (Energy-Monitor) Funkprotokoll (868Mhz),  @HomeAutoUser | Derwelcherichbin
+	"80"	=>	## EM1000WZ (Energy-Monitor) Funkprotokoll (868Mhz),  @HomeAutoUser | Derwelcherichbin
+						# https://github.com/RFD-FHEM/RFFHEM/issues/253
 						# MU;P1=-417;P2=385;P3=-815;P4=-12058;D=42121212121212121212121212121212121232321212121212121232321212121212121232323212323212321232121212321212123232121212321212121232323212121212121232121212121212121232323212121212123232321232121212121232123232323212321;CP=2;R=87;
 		{
-			name							=> 'EM (Energy-Monitor)',
+			name							=> 'EM1000WZ',
 			comment						=> 'EM (Energy-Monitor) (868Mhz)',
 			id								=> '80',
 			one								=> [1,-2],	# 800
@@ -1660,7 +1681,7 @@
 			postDemodulation	=> \&SIGNALduino_postDemo_EM,
 		},
 	"81"	=>	## Remote control SA-434-1 based on HT12E @ elektron-bbs
-						# MU;P0=-485;P1=188;P2=-6784;P3=508;P5=1010;P6=-974;P7=-17172;D=0123050505630505056305630563730505056305050563056305637305050563050505630563056373050505630505056305630563730505056305050563056305637305050563050505630563056373050505630505056305630563730505056305050563056305637305050563050505630563056373050505630505056;CP=3;R=0;
+						# MU;P0=-485;P1=188;P2=-6784;P3=508;P5=1010;P6=-974;P7=-17172;D=0123050505630505056305630563730505056305050563056305637305050563050505630563056373050505630505056305630563730505056305050563056305637305050563050505630563056373050505630505056305630563730505056305050563056305637305050563050505630563056373050505630505056;CP=3;R=0;																																																																																				   
 						# MU;P0=-1756;P1=112;P2=-11752;P3=496;P4=-495;P5=998;P6=-988;P7=-17183;D=0123454545634545456345634563734545456345454563456345637345454563454545634563456373454545634545456345634563734545456345454563456345637345454563454545634563456373454545634545456345634563734545456345454563456345637345454563454545634563456373454545634545456;CP=3;R=0;
 						#      __        ____
 						# ____|  |    __|    |
@@ -1685,7 +1706,7 @@
 						# https://github.com/RFD-FHEM/RFFHEM/issues/257
 						# MU;P0=-32001;P1=435;P2=-379;P4=-3201;P5=831;P6=-778;D=01212121212121214525252525252521652161452525252525252161652141652521652521652521614165252165252165216521416521616165216525216141652161616521652165214165252161616521652161416525216161652161652141616525252165252521614161652525216525216521452165252525252525;CP=1;O;
 						# the messages received are usual missing 12 bits at the end for some reason. So the checksum byte is missing.
-						# Fernotron protocol is unidirectional. Here we can only receive messages from controllers send to receivers.
+						# Fernotron protocol is unidirectional. Here we can only receive messages from controllers send to receivers. 
 		{
 			name					=> 'Fernotron',
 			comment				=> 'shutters and light switches',
@@ -1715,10 +1736,10 @@
 			one						=> [-2,1],
 			zero					=> [-1,2],
 			start					=> [-35,1],				# calculated 12126,31579 µS
-			clockabs			=> 335,						# calculated ca 336,8421053 µS short - 673,6842105µS long
+			clockabs			=> 335,						# calculated ca 336,8421053 µS short - 673,6842105µS long 
 			format				=> 'twostate',		# there is a pause puls between words
 			preamble			=> 'P83#',				# prepend to converted message
-			clientmodule	=> 'SD_UT',
+			clientmodule	=> 'SD_UT', 
 			modulematch		=> '^P83#.{3}',
 			length_min		=> '12',
 			length_max		=> '12',
@@ -1733,13 +1754,13 @@
 						# MU;P0=11916;P1=-852;P2=856;P3=610;P4=-240;P5=237;P6=-610;D=01212134563456563434565634565634343456565634565656565634345634565656563434563456343430;CP=5;R=254;
 						# MU;P0=-30004;P1=815;P2=-910;P3=599;P4=-263;P5=234;P6=-621;D=0121212345634565634345656345656343456345656345656565656343456345634563456343434565656;CP=5;R=5;
 		{
-			name					=> 'IAN283582',
+			name					=> 'IAN 283582',
 			comment				=> 'Weatherstation Auriol IAN 283582 / Sempre 92596/65395',
 			id						=> '84',
 			one						=> [3,-1],
 			zero					=> [1,-3],
 			start					=> [4,-4,4,-4,4,-4],
-			clockabs			=> 215,
+			clockabs			=> 215, 
 			format				=> 'twostate',
 			preamble			=> 'W84#',						# prepend to converted message
 			postamble			=> '',								# append to converted message
@@ -1759,7 +1780,7 @@
 			one						=> [2,-1],
 			zero					=> [1,-2],
 			start					=> [3,-3,3,-3,3,-3],
-			clockabs			=> 250,
+			clockabs			=> 250, 
 			format				=> 'twostate',
 			preamble			=> 'W85#',					# prepend to converted message
 			postamble			=> '',							# append to converted message
@@ -1796,7 +1817,7 @@
 						# MU;P0=704;P1=-338;P2=-670;P3=378;P4=-15227;P5=244;D=01023231010102323231010102310431010231010232310101023232310101025104310102310102323101010232323101010231043101023101023231010102323231010102310431010231010232310101023232310101023104310102310102323101010232323101010231043101023101023231010102323231010102;CP=3;O;
 						# MU;P0=-334;P1=709;P2=-152;P3=-663;P4=379;P5=-15226;P6=250;D=01210134010134340101013434340101340134540101340101343401010134343401013601365401013401013434010101343434010134013454010134010134340101013434340101340134540101340101343401010134343401013401345401013401013434010101343434010134013454010134010134340101013434;CP=4;O;
 		{
-			name					=> 'BOSCH|CAME|Novy|Neff',
+			name					=> 'BOSCH | CAME | Novy | Neff',
 			comment				=> 'remote control CAME TOP 432EV, Novy 840029, BOSCH or Neff SF01 01319004',
 			id						=> '86',
 			one						=> [-2,1],
@@ -1824,7 +1845,7 @@
 			clockabs			=> 400,						# ca 400us
 			developId			=> 'y',
 			format				=> 'twostate',
-			preamble			=> 'u87#',				# prepend to converted message
+			preamble			=> 'u87#',				# prepend to converted message	
 			#clientmodule	=> '',
 			#modulematch	=> '',
 			length_min		=> '72',					# 72
@@ -1850,7 +1871,7 @@
 			length_min		=> '65',
 			length_max		=> '78',
 		},
-	"89" => ## Funk Wetterstation TFA 35.1140.01 mit Temperatur-/Feuchtesensor TFA 30.3221.02 12/2018@Iron-R
+"89" => ## Funk Wetterstation TFA 35.1140.01 mit Temperatur-/Feuchtesensor TFA 30.3221.02 12/2018@Iron-R
 					# https://github.com/RFD-FHEM/RFFHEM/issues/266
 					# MU;P0=-900;P1=390;P2=-499;P3=-288;P4=193;P7=772;D=1213424213131342134242424213134242137070707013424213134242131342134242421342424213421342131342421313134213424242421313424213707070701342421313424213134213424242134242421342134213134242131313421342424242131342421;CP=4;R=43;
 					# MU;P0=-491;P1=382;P2=-270;P3=179;P4=112;P5=778;P6=-878;D=01212304012123012303030123030301230123012303030121212301230301230121212121256565656123030121230301212301230303012303030123012301230303012121230123030123012121212125656565612303012123030121230123030301230303012301230123030301212123012303012301212121212565;CP=3;R=43;O;
@@ -1860,7 +1881,7 @@
 					# MU;P0=172;P1=-533;P2=401;P3=-296;P5=773;P6=-895;D=01230101230101012323010101230123010101010101230101230101012323010101230123010301230101010101012301012301010123230101012301230101010123010101010101012301565656562323232301010101010101230101230101012323010101230123010101012301010101010101230156565656232323;CP=0;R=23;O;
 		{
 			name         => 'TFA 30.3221.02',
-			comment      => 'Temperature / humidity sensor for weatherstation TFA 35.1140.01',
+			comment      => 'temperature / humidity sensor for weatherstation TFA 35.1140.01',
 			id           => '89',
 			one          => [2,-1],
 			zero         => [1,-2],
