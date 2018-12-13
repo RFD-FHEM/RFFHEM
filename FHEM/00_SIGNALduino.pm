@@ -1869,7 +1869,11 @@ sub SIGNALduino_Split_Message($$)
 			$_ =~ s/R=//;
 			$rssi = $_ ;
 			Debug "$name: extracted RSSI $rssi \n" if ($debug);
-			$ret{rssi} = $rssi;
+			if ($rssi == 0) {
+				$ret{rssi} = undef;
+			} else {
+				$ret{rssi} = $rssi;
+			}
 		}  else {
 			Debug "$name: unknown Message part $_" if ($debug);;
 		}
@@ -2162,9 +2166,11 @@ SIGNALduino_Parse_MS($$$$%)
 			$dmsg = "$ProtocolListSIGNALduino{$id}{preamble}"."$dmsg" if (defined($ProtocolListSIGNALduino{$id}{preamble}));
 			
 			if (defined($rssi)) {
-				SIGNALduino_Log3 $name, 4, "$name: Decoded MS Protocol id $id dmsg $dmsg length " . scalar @bit_msg . " RSSI = $rssi";
+				SIGNALduino_Log3 $name, 4, "$name: Decoded MS Protocol id $id dmsg $dmsg length $bit_length-" . scalar @bit_msg . " RSSI = $rssi" if (scalar @bit_msg-$bit_length != 0);
+				SIGNALduino_Log3 $name, 4, "$name: Decoded MS Protocol id $id dmsg $dmsg length " . scalar @bit_msg . " RSSI = $rssi" if ($bit_length-scalar @bit_msg == 0);
 			} else {
-				SIGNALduino_Log3 $name, 4, "$name: Decoded MS Protocol id $id dmsg $dmsg length " . scalar @bit_msg;
+				SIGNALduino_Log3 $name, 4, "$name: Decoded MS Protocol id $id dmsg $dmsg length $bit_length-" . scalar @bit_msg if (scalar @bit_msg-$bit_length != 0);
+				SIGNALduino_Log3 $name, 4, "$name: Decoded MS Protocol id $id dmsg $dmsg length " . scalar @bit_msg if ($bit_length-scalar @bit_msg == 0);
 			}
 			
 			#my ($rcode,@retvalue) = SIGNALduino_callsub('preDispatchfunc',$ProtocolListSIGNALduino{$id}{preDispatchfunc},$name,$dmsg);
