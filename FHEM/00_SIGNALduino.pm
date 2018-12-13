@@ -469,6 +469,8 @@ SIGNALduino_Set($@)
   my $cmd = shift @a;
   my $arg = join(" ", @a);
   
+  return "SET commands are not available with a dummy device!" if($hash->{DeviceName} eq "none" && $cmd ne "?");
+
   if ($cmd =~ m/cc1101/ && $hasCC1101 == 0) {
     return "This command is only available with a cc1101 receiver";
   }
@@ -846,6 +848,8 @@ SIGNALduino_Get($@)
     my @cList = map { $_ =~ m/^(file|raw|ccreg)$/ ? $_ : "$_:noArg" } sort keys %gets;
     return "Unknown argument $a[1], choose one of " . join(" ", @cList);
   }
+
+  return "GET commands are not available with a dummy device" if ($a[1] ne "?"  && $hash->{DeviceName} eq "none");
 
   my $arg = ($a[2] ? $a[2] : "");
   return "no command to send, get aborted." if (length($gets{$a[1]}[0]) == 0 && length($arg) == 0);
