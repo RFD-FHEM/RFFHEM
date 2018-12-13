@@ -377,9 +377,9 @@
 			sync						=> [1,-14],
 			clockabs				=> 350,
 			format					=> 'twostate',
-			preamble				=> 'u14#',				# prepend to converted message
-			#clientmodule		=> '',
-			#modulematch			=> '^u14#.*',
+			preamble				=> 'P14#',				# prepend to converted message
+			clientmodule		=> 'SD_UT',
+			#modulematch			=> '^P14#.*',
 			length_min			=> '20',
 			length_max			=> '20',
 		},
@@ -924,6 +924,7 @@
 			one						=> [3,-1],
 			sync					=> [1,-14],
 			clockabs			=> 500, 
+			format				=> 'twostate',
 			preamble			=> 'P41#', # prepend to converted message
 			clientmodule	=> 'SD_BELL',
 			modulematch		=> '^P41#.*',
