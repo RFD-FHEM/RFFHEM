@@ -1,5 +1,5 @@
 ##############################################################################
-# $Id: 14_SD_BELL.pm 32 2018-12-08 14:00:00 v3.3.3-dev_08.12. $HomeAuto_User
+# $Id: 14_SD_BELL.pm 32 2018-12-13 14:00:00 v3.3.3-dev_08.12. $HomeAuto_User
 #
 # The file is part of the SIGNALduino project.
 # The purpose of this module is to support many wireless BELL devices.
@@ -11,7 +11,7 @@
 # - FreeTec PE-6946  [Protocol 32] length 24 (6)
 #     get sduino_dummy raw MU;;P0=146;;P1=245;;P3=571;;P4=-708;;P5=-284;;P7=-6689;;D=14351435143514143535353535353535353535350704040435043504350435040435353535353535353535353507040404350435043504350404353535353535353535353535070404043504350435043504043535353535353535353535350704040435043504350435040435353535353535353535353507040404350435;;CP=3;;R=0;;O;;
 ####################################################################################################################################
-# - Elro (Smartwares) Doorbell DB200 / 16 melodies - unitec Modell:98156+98YK [Protocol 41] length 32 (8)
+# - Elro (Smartwares) Doorbell DB200 / 16 melodies - unitec Modell:98156+98YK [Protocol 41] length 32 (8) doubleCode
 #     get sduino_dummy raw MS;;P0=-526;;P1=1450;;P2=467;;P3=-6949;;P4=-1519;;D=231010101010242424242424102424101010102410241024101024241024241010;;CP=2;;SP=3;;O;;
 # - KANGTAI Doorbell (Pollin 94-550405) [Protocol 41]  length 32 (8)
 #     get sduino_dummy raw MS;;P0=1399;;P1=-604;;P2=397;;P3=-1602;;P4=-7090;;D=240123010101230123232301230123232301232323230123010101230123230101;;CP=2;;SP=4;;R=248;;O;;m1;;
@@ -23,7 +23,7 @@
 #     get sduino_dummy raw MU;;P0=656;;P1=-656;;P2=335;;P3=-326;;P4=-5024;;D=01230121230123030303012423012301212301230303030124230123012123012303030301242301230121230123030303012423012301212301230303030124230123012123012303030301242301230121230123030303012423012301212301230303030124230123012123012303030301242301230121230123030303;;CP=2;;O;;
 ####################################################################################################################################
 # !!! ToDo´s !!!
-#     -
+#     - KANGTAI doubleCode must CEHCK | only one Code? - MORE USER MSG needed
 #     -
 ####################################################################################################################################
 
@@ -151,27 +151,41 @@ sub Set($$$@) {
 	my $ioname = $hash->{IODev}{NAME};
 	my $model = AttrVal($name, "model", "unknown");
 	my @split = split(" ", $hash->{DEF});
+	my @splitCode = "";																			# for doubleCode
 	my $protocol = $split[0];
 	my $repeats = AttrVal($name,'repeats', '5');
+	my $doubleCodeCheck;
 	my $ret = undef;
 
-	if ($hash->{bitMSG} ne "") {
-		if ($cmd eq "?") {
-			$ret .= "ring:noArg";
-		} else {
-			my $msg = "P$protocol#" . $hash->{bitMSG};
-			$msg .= "#R$repeats";
-			Log3 $name, 4, "$ioname: $name sendMsg=$msg";
-
-			if ($cmd ne "?") {
-				$cmd = "ring";
-			}				
-
-			Log3 $name, 3, "$ioname: $name set $cmd" if ($cmd ne "?");
-			IOWrite($hash, 'sendMsg', $msg);
-		}
+	if ($cmd eq "?") {
+		$ret .= "ring:noArg";
 	} else {
-		return $ret;
+		my $rawDatasend = $split[1];													# hex value from def without protocol
+		if ($rawDatasend =~ /[0-9a-fA-F]_[0-9a-fA-F]/s) {			# check doubleCode in def
+			$doubleCodeCheck = 1;
+			@splitCode = split("_", $rawDatasend);
+			$rawDatasend = $splitCode[0];
+		} else {
+			$doubleCodeCheck = 0;
+		}
+
+		Log3 $name, 4, "$ioname: SD_BELL_Set_doubleCodeCheck doubleCodeCheck=$doubleCodeCheck splitCode[0]=$rawDatasend";
+		
+		my $hlen = length($rawDatasend);
+		my $blen = $hlen * 4;
+		my $bitData = unpack("B$blen", pack("H$hlen", $rawDatasend));
+		
+		my $msg = "P$protocol#" . $bitData;
+		
+		$msg .= "#R$repeats";
+		Log3 $name, 3, "$ioname: $name sendMsg=$msg";
+
+		if ($cmd ne "?") {
+			$cmd = "ring";
+		}				
+
+		Log3 $name, 3, "$ioname: $name set $cmd" if ($cmd ne "?");
+		IOWrite($hash, 'sendMsg', $msg);
 	}
 
 	readingsSingleUpdate($hash, "state" , $cmd, 1) if ($cmd ne "?");
@@ -219,9 +233,10 @@ sub Parse($$) {
 		Log3 $iohash, 4, "$ioname: SD_BELL_Parse Check doubleCode - doubleCode_Time_old=".$modules{SD_BELL}{defptr}{doubleCode_Time}." Time_now=".time()." Diff=".(time()-$modules{SD_BELL}{defptr}{doubleCode_Time});
 
 		if ((time() - $modules{SD_BELL}{defptr}{doubleCode_Time} > 15) && $doubleCode_known eq "0") {			# max timediff 15 seconds
-			delete ($modules{SD_BELL}{defptr}{doubleCode});
+			Log3 $iohash, 4, "$ioname: SD_BELL_Parse Check doubleCode - pointer <doubleCode> not exists!" if (not exists $modules{SD_BELL}{defptr}{doubleCode});
+			Log3 $iohash, 4, "$ioname: SD_BELL_Parse Check doubleCode - pointer <doubleCode> ".$modules{SD_BELL}{defptr}{doubleCode}." deleted! RAWMSG too old!" if (exists $modules{SD_BELL}{defptr}{doubleCode});
+			delete ($modules{SD_BELL}{defptr}{doubleCode}) if (exists $modules{SD_BELL}{defptr}{doubleCode});
 			$modules{SD_BELL}{defptr}{doubleCode_Time} = time();															# set time for new RAWMSG
-			Log3 $iohash, 4, "$ioname: SD_BELL_Parse Check doubleCode - pointer <doubleCode> data deleted! RAWMSG too old!";
 			return "";
 		}
 
@@ -241,24 +256,29 @@ sub Parse($$) {
 			if ($modules{SD_BELL}{defptr}{doubleCode} =~ /_doubleCode/s ) {										# check of 2 RAWMSG
 				my @doubleCode = split("_",$modules{SD_BELL}{defptr}{doubleCode});
 
-				# 0123 4 5 6 7			0123 4 5 6 7
-				################################
-				# 45D7 7 A 2 C			BA79 8 3 D 3
-				# E86E 2 A 6 C			3286 D 3 9 3
+				# Codes - common ground unknown !! #
+				####################################
+				# 45D77A2C	BA7983D3
+				# E86E2A6C	3286D393
+				#
+				# 754485D3  08E8D593
+				# 08E8D593  754485D3
+				# 3286D393  BA7983D3
+				# BA7983D3  3286D393
 
-				my $check_4 = 0;
-				$check_4 = 1 if (abs(hex(substr($doubleCode[0],4,1)) - hex(substr($rawData,4,1))) == 5);
-				my $check_5 = 0;
-				$check_5 = 1 if (substr($doubleCode[0],5,1) eq substr($rawData,5,1));
-				my $check_6 = 0;
-				$check_6 = 1 if (abs(hex(substr($doubleCode[0],6,1)) - hex(substr($rawData,6,1))) == 4);
-				my $check_7 = 0;
-				$check_7 = 1 if (substr($doubleCode[0],7,1) eq substr($rawData,7,1));
+				# my $check_4 = 0;
+				# $check_4 = 1 if (abs(hex(substr($doubleCode[0],4,1)) - hex(substr($rawData,4,1))) == 5);
+				# my $check_5 = 0;
+				# $check_5 = 1 if (substr($doubleCode[0],5,1) eq substr($rawData,5,1));
+				# my $check_6 = 0;
+				# $check_6 = 1 if (abs(hex(substr($doubleCode[0],6,1)) - hex(substr($rawData,6,1))) == 4);
+				# my $check_7 = 0;
+				# $check_7 = 1 if (substr($doubleCode[0],7,1) eq substr($rawData,7,1));
 
-				if ($check_4 != 1 || $check_5 != 1 || $check_6 != 1 || $check_7 != 1) {
-					Log3 $iohash, 3, "$ioname: SD_BELL_Parse Check doubleCode - RAWMSG check failed ($check_4 $check_5 $check_6 $check_7)";
-					return "";
-				}
+				# if ($check_4 != 1 || $check_5 != 1 || $check_6 != 1 || $check_7 != 1) {
+					# Log3 $iohash, 3, "$ioname: SD_BELL_Parse Check doubleCode - RAWMSG check failed ($check_4 $check_5 $check_6 $check_7)";
+					# return "";
+				# }
 
 				### messages are verified ###
 				if ($modules{SD_BELL}{defptr}{doubleCode} =~ /$rawData/s) {											# check, part known
