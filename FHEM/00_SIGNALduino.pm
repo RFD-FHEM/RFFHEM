@@ -849,7 +849,7 @@ SIGNALduino_Get($@)
     return "Unknown argument $a[1], choose one of " . join(" ", @cList);
   }
 
-  return "GET commands are not available with a dummy device" if ($a[1] ne "?"  && $hash->{DeviceName} eq "none");
+  return "GET commands are not available with a dummy device" if ($a[1] ne "?"  && $a[1] ne "raw" && $hash->{DeviceName} eq "none");
 
   my $arg = ($a[2] ? $a[2] : "");
   return "no command to send, get aborted." if (length($gets{$a[1]}[0]) == 0 && length($arg) == 0);
