@@ -1,0 +1,52 @@
+defmod test_read UnitTest dummyDuino 
+(
+ {
+	use Test::Device::SerialPort;
+    my %mockData = (
+    '9'    => 
+		{	
+			real	=>	"MU;P0=-28704;P1=450;P2=-1064;P3=1422;CP=1;R=13;D=012121212121212123212121212121212121212123232323232123212321232123232323232323232323232323232323232323232323232323232121212123210121212121212121232121212121212121212121232323232321232123212321232323232323232323232323232323232323232323232323232321212121232101212121212121212321212121212121212121212323232323212321232123212323232323232323232323232323232323232323232323232323212121212321;",
+			raw 	=> 	'02 4d 75 3b a0 a0 f0 3b 91 c2 81 3b a2 a8 84 3b 93 8e 85 3b 43 31 3b 52 44 3b 44 01 21 21 21 21 21 21 21 23 21 21 21 21 21 21 21 21 21 21 21 23 23 23 23 23 21 23 21 23 21 23 21 23 23 23 23 23 23 23 23 23 23 23 23 23 23 23 23 23 23 23 23 23 23 23 23 23 23 21 21 21 21 23 21 01 21 21 21 21 21 21 21 23 21 21 21 21 21 21 21 21 21 21 21 23 23 23 23 23 21 23 21 23 21 23 21 23 23 23 23 23 23 23 23 23 23 23 23 23 23 23 23 23 23 23 23 23 23 23 23 23 23 21 21 21 21 3b 46 36 34 3b 44 23 21 01 21 21 21 21 21 21 21 23 21 21 21 21 21 21 21 21 21 21 21 23 23 23 23 23 21 23 21 23 21 23 21 23 23 23 23 23 23 23 23 23 23 23 23 23 23 23 23 23 23 23 23 23 23 23 23 23 23 21 21 21 21 23 21 3b 65 3b 03',
+		}
+	);
+	
+	
+	my $id=9;
+	
+	fhem("attr $target debug 1");
+	my $PortObj = Test::Device::SerialPort->new('/dev/ttyS0');
+	my $mock = Mock::Sub->new;
+ 	my $parsefn = $mock->mock('SIGNALduino_Parse');
+	$targetHash->{USBDev} = $PortObj;
+
+
+	subtest 'Checking read function without mred' => sub {
+   		plan tests => 2;	
+		$parsefn->reset();
+	
+		$PortObj->{"_fake_input"} = $mockData{$id}{real}."\n";
+		SIGNALduino_Read($targetHash);
+		is($parsefn->called_count, 1, "check number of parse attempts ");
+		is( ($parsefn->called_with)[3], $mockData{$id}{real}, 'check rmsg send to SIGNALduino_Parse' ); 
+	};
+	
+	subtest 'Checking read function with mred' => sub {
+       	plan tests => 2;	
+    
+	    $parsefn->reset();
+		$PortObj->{"_fake_input"} = "";
+		$mockData{$id}{raw} =~ tr/ //d;
+		$PortObj->{"_fake_input"} .= pack('H*', $mockData{$id}{raw});
+		$PortObj->{"_fake_input"}.="\n";
+
+		SIGNALduino_Read($targetHash);
+		is($parsefn->called_count, 1, "check number of parse attempts ");
+		is( ($parsefn->called_with)[3], $mockData{$id}{real}, 'check rmsg send to SIGNALduino_Parse' ); 
+	};
+	
+		
+	fhem("attr $target debug 0");
+	$targetHash->{USBDev} = undef;
+ }
+);
+    
