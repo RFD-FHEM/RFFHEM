@@ -76,27 +76,6 @@
 			length_max			=> '42',
 			paddingbits			=> '8',					# pad up to 8 bits, default is 4
 		},
-	"0.1"	=>	## various weather sensors
-						# CUL_TCM97001 Typ - Prologue
-						# MS;P0=-4152;P1=643;P2=-2068;P3=-9066;D=1310121210121212101210101212121212121212121212121010121012121212121012101212;CP=1;SP=3;R=220;O;m2;
-						# MS;P0=-4149;P2=-9098;P3=628;P4=-2076;D=3230343430343434303430303434343434343434343434343030343030343434343034303434;CP=3;SP=2;R=218;O;m2;
-		{
-			name						=> 'weather',
-			comment					=> 'temperature / humidity or other sensors',
-			id							=> '0.1',
-			one							=> [1,-6.5],
-			zero						=> [1,-3.3],
-			sync						=> [1,-14.4],
-			clockabs				=> '630',
-			format					=> 'twostate',	# not used now
-			preamble				=> 's',					# prepend to converted message
-			postamble				=> '00',				# Append to converted message
-			clientmodule		=> 'CUL_TCM97001',
-			#modulematch		=> '^s[A-Fa-f0-9]+',
-			length_min			=> '36',
-			length_max			=> '40',
-			paddingbits			=> '8',					# pad up to 8 bits, default is 4
-		},
 		"1"	=>	## Conrad RSL
 		{
 			name					=> 'Conrad RSL v1',
@@ -866,6 +845,7 @@
 			length_max			=> '41',
 	},
 	"38"	=>	## Lidl Wetterstation
+						# CUL_TCM97001 Typ - AURIOL
 						# https://github.com/RFD-FHEM/RFFHEM/issues/63
 						# MS;P1=367;P2=-2077;P4=-9415;P5=-4014;D=141515151515151515121512121212121212121212121212121212121212121212;CP=1;SP=4;O;
 		{
@@ -1916,5 +1896,26 @@
 			clientmodule => 'SD_WS',
 			length_min   => '40',
 			length_max   => '40',
+		},
+	"90"	=>	## various weather sensors
+						# CUL_TCM97001 Typ - Prologue
+						# MS;P0=-4152;P1=643;P2=-2068;P3=-9066;D=1310121210121212101210101212121212121212121212121010121012121212121012101212;CP=1;SP=3;R=220;O;m2;
+						# MS;P0=-4149;P2=-9098;P3=628;P4=-2076;D=3230343430343434303430303434343434343434343434343030343030343434343034303434;CP=3;SP=2;R=218;O;m2;
+		{
+			name						=> 'weather',
+			comment					=> 'temperature / humidity or other sensors',
+			id							=> '0.1',
+			one							=> [1,-6.5],
+			zero						=> [1,-3.3],
+			sync						=> [1,-14.4],
+			clockabs				=> '630',
+			format					=> 'twostate',	# not used now
+			preamble				=> 's',					# prepend to converted message
+			postamble				=> '00',				# Append to converted message
+			clientmodule		=> 'CUL_TCM97001',
+			#modulematch		=> '^s[A-Fa-f0-9]+',
+			length_min			=> '36',
+			length_max			=> '40',
+			paddingbits			=> '8',					# pad up to 8 bits, default is 4
 		},
 );
