@@ -23,6 +23,7 @@ test: deploylocal
 	@echo === running unit tests ===
 	test/test-runner.sh test_modules
 	test/test-runner.sh test_callsub_1
+	test/test-runner.sh test_read
 	test/test-runner.sh test1
 	test/test-runner.sh test3
 	test/test-runner.sh test4
