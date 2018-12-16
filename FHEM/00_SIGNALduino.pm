@@ -1,4 +1,4 @@
-# $Id: 00_SIGNALduino.pm 10488 2018-10-23 00:22:00Z v3.3.3-dev $
+# $Id: 00_SIGNALduino.pm 10488 2018-12-16 00:22:00Z v3.3.3-dev $
 #
 # v3.3.3 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incoming messages
@@ -28,7 +28,7 @@ eval "use Time::HiRes qw(gettimeofday);1" ;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.3.3-dev_09.12.",
+	SDUINO_VERSION            => "v3.3.3-dev_16.12.",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -4231,42 +4231,49 @@ sub SIGNALduino_FW_getProtocolList
 	
 	my $id;
 	my $ret;
-	my $s;
-	my $moduleId;
+	my $devFlag = 0;	# 1 - develop version
+	my $devText = "";
+	my %mIdListH = ();
 	my @IdList = ();
+	
+	my $whitelist = AttrVal($name,"whitelist_IDs","#");
+	
+	my $develop = AttrVal($name,"development","");
+	if (length($develop) > 0 && ($develop eq "1" || substr($develop,0,1) eq "y")) {		# develop version
+		$devFlag = 1;
+		$devText = "development version - ";
+	}
+	
+	my $mIdList = join(",",@{$hash->{msIdList}},@{$hash->{muIdList}},@{$hash->{mcIdList}});
+	%mIdListH = map { $_ => 1 } split(",", $mIdList);
+	SIGNALduino_Log3 $name,4, "$name IdList: $mIdList";
 	
 	foreach $id (keys %ProtocolListSIGNALduino)
 	{
-		next if ($id eq 'id');
+		next if ($id eq 'id' || $id >= 900);
+		next if ($devFlag == 0 && defined($ProtocolListSIGNALduino{$id}{developId}) && $ProtocolListSIGNALduino{$id}{developId} eq "p");
 		push (@IdList, $id);
 	}
 	@IdList = sort { $a <=> $b } @IdList;
-	
+
 	$ret = "<table class=\"block wide internals wrapcolumns\">";
-	$ret .="<caption>Protocollist Overview</caption>";
-	$ret .= "<thead style=\"text-align:center\"><td>dev</td><td>ID</td><td>Message Type</td><td>modulname</td><td>protocolname</td> <td># comment</td><td>Action</td></thead>";
+	
+	$ret .="<caption id=\"myCaption\">$devText";
+	if (substr($whitelist,0,1) ne "#") {
+		$ret .="whitelist active</caption>";
+	}
+	else {
+		$ret .="whitelist not active (save activate it)</caption>";
+	}
+	$ret .= "<thead style=\"text-align:center\"><td>act.</td><td>dev</td><td>ID</td><td>Message Type</td><td>modulname</td><td>protocolname</td> <td># comment</td></thead>";
 	$ret .="<tbody>";
 	my $oddeven="odd";
-	my $wl_attr= AttrVal($name, "whitelist_IDs", ".*");
-	
-	my $js_ret = '$(".SIGNALduino_Proto").click(function(){
-   			console.log( $(this));
-			var element = $(this);
-			
-			FW_cmd(FW_root+ \'?XHR=1&cmd={SIGNALduino_FW_changeProtocolUsage("'.$name.'","\'+$(this).attr("protoid")+\'")}\',function(data){
-   				var dataobj = JSON.parse(data);
-		    	element.html(dataobj.data);
-			});
-		 		
-	  	});
-		';
-	#    			
 	
 	foreach $id (@IdList)
 	{
-		
 		my $msgtype;
-		my $action;
+		my $chkbox;
+				
 		if (exists ($ProtocolListSIGNALduino{$id}{format}) && $ProtocolListSIGNALduino{$id}{format} eq "manchester")
 		{
 			$msgtype = "MC";
@@ -4280,38 +4287,22 @@ sub SIGNALduino_FW_getProtocolList
 			$msgtype = "MU";
 		}
 		
-		my $cmd;
-		my $newWlIDs;
-		if ( (grep { $_ eq $id } @{$hash->{msIdList}}) ||  (grep { $_ eq $id } @{$hash->{muIdList}}) || (grep { $_ eq $id } @{$hash->{mcIdList}}) ) 
-		{
-			$cmd = FW_makeImage("on","disable","icon");
-			if ($wl_attr eq ".*")
-			{
-				$newWlIDs = join(",",@{$hash->{msIdList}},@{$hash->{muIdList}},@{$hash->{mcIdList}}) 
-			} else  {
-				$newWlIDs=$wl_attr;
-			}
-
-			$newWlIDs =~ s/(?:^$id,?|,$id,|$id$)/,/;
+		my $checked="";
 		
-		} else {
-			$cmd = FW_makeImage("off","enable","icon");
-			$newWlIDs = defined($wl_attr) ? "$wl_attr,$id" : $id;
+		if (defined($mIdListH{$id}))
+		{
+			$checked="checked";
 		}
 		
+		$chkbox=sprintf("<INPUT type=\"checkbox\" name=\"%s\" %s/>",$id,$checked);
 		
-		my $htmlid="SIGNALduino_Proto_".$id;
-	    $action=sprintf("<a class=%s id=%s protoid=%s>%s</a>","SIGNALduino_Proto",$htmlid,$id,$cmd);
-	   
-		
-		$ret .= sprintf("<tr class=\"%s\"><td><div>%s</div></td><td><div>%3s</div></td><td><div>%s</div></td><td><div>%s</div></td><td><div>%s</div></td><td><div>%s</div></td><td><div>%s</div></td></tr>",$oddeven,SIGNALduino_getProtoProp($id,"developId",""),$id,$msgtype,SIGNALduino_getProtoProp($id,"clientmodule",""),SIGNALduino_getProtoProp($id,"name",""),SIGNALduino_getProtoProp($id,"comment",""),$action);
+		$ret .= sprintf("<tr class=\"%s\"><td>%s</td><td><div>%s</div></td><td><div>%3s</div></td><td><div>%s</div></td><td><div>%s</div></td><td><div>%s</div></td><td><div>%s</div></td></tr>",$oddeven,$chkbox,SIGNALduino_getProtoProp($id,"developId",""),$id,$msgtype,SIGNALduino_getProtoProp($id,"clientmodule",""),SIGNALduino_getProtoProp($id,"name",""),SIGNALduino_getProtoProp($id,"comment",""));
 		$oddeven= $oddeven eq "odd" ? "even" : "odd" ;
 		
 		$ret .= "\n";
 	}
 	$ret .= "</tbody></table>";
-	return $ret."<script>".$js_ret."</script>";
-	#$moduleId =~ s/,$//;
+	return $ret;
 }
 
 
