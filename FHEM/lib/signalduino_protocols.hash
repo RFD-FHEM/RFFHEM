@@ -56,7 +56,7 @@
 
 (
 	"0"	=>	## various weather sensors
-					# CUL_TCM97001 Typ - Mebus
+					# CUL_TCM97001 Typ - AURIOL / Mebus / TCM...
 					# MS;P0=-9298;P1=495;P2=-1980;P3=-4239;D=1012121312131313121313121312121212121212131212131312131212;CP=1;SP=0;R=223;O;m2;
 					# !!! some RAWMSG are also decode under ID 68 !!!
 		{
@@ -74,6 +74,27 @@
 			#modulematch		=> '^s[A-Fa-f0-9]+',
 			length_min			=> '24',
 			length_max			=> '42',
+			paddingbits			=> '8',					# pad up to 8 bits, default is 4
+		},
+	"0.1"	=>	## various weather sensors
+						# CUL_TCM97001 Typ - Prologue
+						# MS;P0=-4152;P1=643;P2=-2068;P3=-9066;D=1310121210121212101210101212121212121212121212121010121012121212121012101212;CP=1;SP=3;R=220;O;m2;
+						# MS;P0=-4149;P2=-9098;P3=628;P4=-2076;D=3230343430343434303430303434343434343434343434343030343030343434343034303434;CP=3;SP=2;R=218;O;m2;
+		{
+			name						=> 'weather',
+			comment					=> 'temperature / humidity or other sensors',
+			id							=> '0.1',
+			one							=> [1,-6.5],
+			zero						=> [1,-3.3],
+			sync						=> [1,-14.4],
+			clockabs				=> '630',
+			format					=> 'twostate',	# not used now
+			preamble				=> 's',					# prepend to converted message
+			postamble				=> '00',				# Append to converted message
+			clientmodule		=> 'CUL_TCM97001',
+			#modulematch		=> '^s[A-Fa-f0-9]+',
+			length_min			=> '36',
+			length_max			=> '40',
 			paddingbits			=> '8',					# pad up to 8 bits, default is 4
 		},
 		"1"	=>	## Conrad RSL
@@ -1896,26 +1917,5 @@
 			clientmodule => 'SD_WS',
 			length_min   => '40',
 			length_max   => '40',
-		},
-	"90"	=>	## various weather sensors
-						# CUL_TCM97001 Typ - Prologue
-						# MS;P0=-4152;P1=643;P2=-2068;P3=-9066;D=1310121210121212101210101212121212121212121212121010121012121212121012101212;CP=1;SP=3;R=220;O;m2;
-						# MS;P0=-4149;P2=-9098;P3=628;P4=-2076;D=3230343430343434303430303434343434343434343434343030343030343434343034303434;CP=3;SP=2;R=218;O;m2;
-		{
-			name						=> 'weather',
-			comment					=> 'temperature / humidity or other sensors',
-			id							=> '0.1',
-			one							=> [1,-6.5],
-			zero						=> [1,-3.3],
-			sync						=> [1,-14.4],
-			clockabs				=> '630',
-			format					=> 'twostate',	# not used now
-			preamble				=> 's',					# prepend to converted message
-			postamble				=> '00',				# Append to converted message
-			clientmodule		=> 'CUL_TCM97001',
-			#modulematch		=> '^s[A-Fa-f0-9]+',
-			length_min			=> '36',
-			length_max			=> '40',
-			paddingbits			=> '8',					# pad up to 8 bits, default is 4
 		},
 );
