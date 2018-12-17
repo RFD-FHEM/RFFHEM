@@ -636,7 +636,7 @@ sub SD_UT_Parse($$) {
 	}
 
 	if ($hlen == 15 || $hlen == 16 && $protocol == 76) {
-		### Remote LED_XM21_0 [P76|P76.1] ###
+		### Remote LED_XM21_0 [P76] ###
 		$deviceCode = substr($rawData,0,14);
 		$devicedef = "LED_XM21_0 " . $deviceCode if (!$def);
 		$def = $modules{SD_UT}{defptr}{$devicedef} if (!$def);
@@ -774,7 +774,7 @@ sub SD_UT_Parse($$) {
 	} elsif ($model eq "Chilitec_22640" && $protocol == 14) {
 		$state = substr($bitData,16,4);
 		$deviceCode = substr($bitData,0,16);
-	############ LED_XM21_0 ############ Protocol 76|76.1 ############
+	############ LED_XM21_0 ############ Protocol 76 ############
 	} elsif ($model eq "LED_XM21_0" && $protocol == 76) {
 		$deviceCode = substr($bitData,0,56);
 		$state = substr($bitData,56,8);
