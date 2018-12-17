@@ -865,10 +865,12 @@
 			length_min			=> '40',
 			length_max			=> '41',
 	},
-	"38"	=>	## Lidl Wetterstation
-						# CUL_TCM97001 Typ - AURIOL
+	"38"	=>	## LIDL Wetterstation & other Sensors
 						# https://github.com/RFD-FHEM/RFFHEM/issues/63
 						# MS;P1=367;P2=-2077;P4=-9415;P5=-4014;D=141515151515151515121512121212121212121212121212121212121212121212;CP=1;SP=4;O;
+						# CUL_TCM97001 Typ - AURIOL
+						# MS;P1=416;P2=-9618;P3=-4610;P4=-2036;D=1213141313131313141313141314141414141414141313141314131414;CP=1;SP=2;R=220;O;m0;
+						# MS;P1=397;P2=-2033;P3=-4627;P4=-9630;D=1413121313131313121313121312121212121212121313121312131212;CP=1;SP=4;R=221;
 		{
 			name						=> 'weather',
 			comment					=> 'temperature / humidity or other sensors',
@@ -882,7 +884,7 @@
 			postamble				=> '00',					# Append to converted message
 			clientmodule		=> 'CUL_TCM97001',
 			#modulematch		=> '^s[A-Fa-f0-9]+',
-			length_min			=> '32',
+			length_min			=> '28',					# 32 LIDL sensor | 28 other sensor
 			length_max			=> '32',
 			paddingbits			=> '8',
 		},
