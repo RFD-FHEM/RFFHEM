@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 14_SD_UT.pm 32 2018-12-13 12:00:00 v3.3.3-dev_05.12. $HomeAuto_User
+# $Id: 14_SD_UT.pm 32 2018-12-17 12:00:00 v3.3.3-dev_05.12. $HomeAuto_User
 #
 # The file is part of the SIGNALduino project.
 # The purpose of this module is universal support for devices.
@@ -148,6 +148,21 @@
 #
 #}    get sduino_dummy raw MS;;P0=988;;P1=-384;;P2=346;;P3=-1026;;P4=-4923;;D=240123012301230123012323232323232301232323;;CP=2;;SP=4;;R=0;;O;;m=1;;
 ####################################################################################################################################
+# - XM21-0 - LED Christbaumkerzen mit Fernbedienung [Protocol 76]
+#{ 		button - ON
+# 		MU;P0=-205;P1=113;P3=406;D=010101010101010101010101010101010101010101010101010101010101030303030101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010103030303010101010101010101010100;CP=1;R=69;
+# 		MU;P0=-198;P1=115;P4=424;D=0101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010404040401010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101040404040;CP=1;R=60;O;
+# 		MU;P0=114;P1=-197;P2=419;D=01212121210101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010121212121010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010
+# 		button - OFF
+# 		MU;P0=-189;P1=115;P4=422;D=0101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101040404040101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010104040404010101010;CP=1;R=73;O;
+# 		MU;P0=-203;P1=412;P2=114;D=01010101020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020101010102020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020200;CP=2;R=74;
+# 		MU;P0=-210;P1=106;P3=413;D=0101010101010101010303030301010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101030303030100;CP=1;R=80;
+#
+# 		    iiiiiiiiiiiiii bb
+# 		---------------------
+# 		P76#FFFFFFFFFFFFFF FF		- on
+#} 		P76#FFFFFFFFFFFFFF C		- off
+####################################################################################################################################
 # !!! ToDo´s !!!
 #     -
 #     -
@@ -256,6 +271,12 @@ my %models = (
 											hex_lengh	=> "3",
 											Typ				=> "switch"
 										},
+	"LED_XM21_0" =>	{	"1100"			=> "off",
+										"11111111"	=> "on",
+										Protocol		=> "P76",
+										hex_lengh		=> "15,16",
+										Typ					=> "remote"
+									},
 	"SF01_01319004" =>	{ "1100"		=> "plus",
 												"1010"		=> "minus",
 												"1101"		=> "interval",
@@ -283,7 +304,7 @@ my %models = (
 #############################
 sub SD_UT_Initialize($) {
 	my ($hash) = @_;
-	$hash->{Match}			= "^P(?:14|29|30|34|46|69|81|83|86)#.*";
+	$hash->{Match}			= "^P(?:14|29|30|34|46|69|76|81|83|86)#.*";
 	$hash->{DefFn}			= "SD_UT_Define";
 	$hash->{UndefFn}		= "SD_UT_Undef";
 	$hash->{ParseFn}		= "SD_UT_Parse";
@@ -340,8 +361,10 @@ sub SD_UT_Define($$) {
 	return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short | long or not HEX (0-9 | a-f | A-F){5}" if ($a[2] eq "TEDSEN_SKX1MD" && not $a[3] =~ /^[0-9a-fA-F]{5}/s);
 	### [7] checks Hoermann HSM4 ###
 	return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short | long or not HEX (0-9 | a-f | A-F){7}" if ($a[2] eq "HSM4" && not $a[3] =~ /^[0-9a-fA-F]{7}/s);
-### [9] checks Hoermann HS1-868-BS ###
+	### [9] checks Hoermann HS1-868-BS ###
 	return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short | long or not HEX (0-9 | a-f | A-F){9}" if ($a[2] eq "HS1_868_BS" && not $a[3] =~ /^[0-9a-fA-F]{9}/s);
+	### [14] checks LED_XM21_0 ###
+	return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short | long or not HEX (0-9 | a-f | A-F){14}" if ($a[2] eq "LED_XM21_0" && not $a[3] =~ /^[0-9a-fA-F]{14}/s);
 
 	$hash->{lastMSG} =  "no data";
 	$hash->{bitMSG} =  "no data";
@@ -442,6 +465,12 @@ sub SD_UT_Set($$$@) {
 	} elsif ($model eq "Chilitec_22640" && $cmd ne "?") {
 		my @definition = split(" ", $hash->{DEF});																# split adress from def
 		my $adr = sprintf( "%016b", hex($definition[1])) if ($name ne "unknown");	# argument 1 - adress to binary with 16 digits
+		$msg = $models{$model}{Protocol} . "#" . $adr;
+		$msgEnd .= "#R" . $repeats;
+	############ LED_XM21_0 22640 ############
+	} elsif ($model eq "LED_XM21_0" && $cmd ne "?") {
+		my @definition = split(" ", $hash->{DEF});																# split adress from def
+		my $adr = sprintf( "%014b", hex($definition[1])) if ($name ne "unknown");	# argument 1 - adress to binary with 14 digits
 		$msg = $models{$model}{Protocol} . "#" . $adr;
 		$msgEnd .= "#R" . $repeats;
 	}
@@ -606,6 +635,13 @@ sub SD_UT_Parse($$) {
 		$def = $modules{SD_UT}{defptr}{$devicedef} if (!$def);
 	}
 
+	if ($hlen == 15 || $hlen == 16 && $protocol == 76) {
+		### Remote LED_XM21_0 [P76|P76.1] ###
+		$deviceCode = substr($rawData,0,14);
+		$devicedef = "LED_XM21_0 " . $deviceCode if (!$def);
+		$def = $modules{SD_UT}{defptr}{$devicedef} if (!$def);
+	}
+	
 	### unknown ###
 	$devicedef = "unknown" if(!$def);
 	$def = $modules{SD_UT}{defptr}{$devicedef} if(!$def);
@@ -738,6 +774,10 @@ sub SD_UT_Parse($$) {
 	} elsif ($model eq "Chilitec_22640" && $protocol == 14) {
 		$state = substr($bitData,16,4);
 		$deviceCode = substr($bitData,0,16);
+	############ LED_XM21_0 ############ Protocol 76|76.1 ############
+	} elsif ($model eq "LED_XM21_0" && $protocol == 76) {
+		$deviceCode = substr($bitData,0,56);
+		$state = substr($bitData,56,8);
 
 	############ unknown ############
 	} else {
@@ -801,8 +841,9 @@ sub SD_UT_Attr(@) {
 
 			Log3 $name, 4, "SD_UT_Attr Check for the change, $oldmodel hex_lengh=$hex_lengh, attrValue=$attrValue needed hex_lengh=".$models{$attrValue}{hex_lengh};
 			return "ERROR! You want to choose the $oldmodel model to $attrValue.\nPlease check your selection.\nThe length of RAWMSG must be the same!\n\nAllowed models are: $allowed_models" if ($models{$attrValue}{hex_lengh} ne $hex_lengh && $oldmodel ne "unknown");	# variants one
-			return "ERROR! You want to choose the unknown model to $attrValue.\nPlease check your selection.\nRAWMSG is to short!\n\nAllowed models are: $allowed_models" if ($models{$attrValue}{hex_lengh} > $hex_lengh && $oldmodel eq "unknown");												# variants two
-			return "ERROR! You want to choose the unknown model to $attrValue.\nPlease check your selection.\nRAWMSG is to long!\n\nAllowed models are: $allowed_models" if ($models{$attrValue}{hex_lengh} < $hex_lengh && $oldmodel eq "unknown");												# variants three
+			#return "ERROR! You want to choose the unknown model to $attrValue.\nPlease check your selection.\nRAWMSG is to short!\n\nAllowed models are: $allowed_models" if ($models{$attrValue}{hex_lengh} > $hex_lengh && $oldmodel eq "unknown");											# variants two
+			#return "ERROR! You want to choose the unknown model to $attrValue.\nPlease check your selection.\nRAWMSG is to long!\n\nAllowed models are: $allowed_models" if ($models{$attrValue}{hex_lengh} < $hex_lengh && $oldmodel eq "unknown");												# variants three
+			return "ERROR! You want to choose the unknown model to $attrValue.\nPlease check your selection.\nRAWMSG length is wrong!\n\nAllowed models are: $allowed_models" if (not ($models{$attrValue}{hex_lengh} =~ /($hex_lengh)/ ) && $oldmodel eq "unknown");				# variants two/three
 			### #### #### ###
 
 			if ($attrName eq "model" && $attrValue eq "unknown") {
@@ -876,6 +917,11 @@ sub SD_UT_Attr(@) {
 				$deviceCode = substr($bitData,0,16);
 				$deviceCode = sprintf("%04X", oct( "0b$deviceCode" ) );
 				$devicename = $devicemodel."_".$deviceCode;
+			############ LED_XM21_0	############
+			} elsif ($attrName eq "model" && $attrValue eq "LED_XM21_0") {
+				$deviceCode = substr($bitData,0,56);
+				$deviceCode = sprintf("%14X", oct( "0b$deviceCode" ) );
+				$devicename = $devicemodel."_".$deviceCode;
 			############ unknown ############
 			} else {
 				$devicename = "unknown_please_select_model";
@@ -946,6 +992,7 @@ sub SD_UT_binaryToNumber {
 	 <ul> - ChiliTec LED X-Mas light&nbsp;&nbsp;&nbsp;<small>(module model: Chilitec_22640 | protocol 14)</small></ul>
 	 <ul> - Hoermann HS1-868-BS&nbsp;&nbsp;&nbsp;<small>(module model: HS1_868_BS | protocol 69)</small></ul>
 	 <ul> - Hoermann HSM4&nbsp;&nbsp;&nbsp;<small>(module model: HSM4 | protocol 69)</small></ul>
+	 <ul> - LED_XM21_0 X-Mas light string&nbsp;&nbsp;&nbsp;<small>(module model: LED_XM21_0 | protocol 76)</small></ul>
 	 <ul> - NEFF kitchen hood&nbsp;&nbsp;&nbsp;<small>(module model: SF01_01319004 | protocol 86)</small></ul>
 	 <ul> - Novy Pureline 6830 kitchen hood&nbsp;&nbsp;&nbsp;<small>(module model: Novy_840029 | protocol 86)</small></ul>
 	 <ul> - QUIGG DMV-7000&nbsp;&nbsp;&nbsp;<small>(module model: QUIGG_DMV | protocol 34)</small></ul>
@@ -1011,6 +1058,16 @@ sub SD_UT_binaryToNumber {
 	<ul><a name="brightness_plus"></a>
 		<li>brightness_plus<br>
 		button + on the remote</li>
+	</ul><br>
+	
+	<ul><u>LED_XM21_0 light string</u></ul>
+	<ul><a name="on"></a>
+		<li>on<br>
+		button I on the remote</li>
+	</ul>
+	<ul><a name="off"></a>
+		<li>off<br>
+		button O on the remote</li>
 	</ul><br>
 
 	<ul><u>Remote control SA-434-1 mini 923301&nbsp;&nbsp;|&nbsp;&nbsp;Hoermann HS1-868-BS&nbsp;&nbsp;|&nbsp;&nbsp;TEDSEN_SKX1MD</u></ul>
@@ -1112,13 +1169,13 @@ sub SD_UT_binaryToNumber {
 	<ul><a name="model"></a>
 		<li>model<br>
 		The attribute indicates the model type of your device.<br>
-		(unknown, Buttons_five, CAME_TOP_432EV, HS1-868-BS, HSM4, QUIGG_DMV, Novy_840029, RH787T, SA_434_1_mini, SF01_01319004, TEDSEN_SKX1MD, Unitec_47031)</li>
+		(unknown, Buttons_five, CAME_TOP_432EV, Chilitec_22640, HS1-868-BS, HSM4, QUIGG_DMV, LED_XM21_0, Novy_840029, RH787T, SA_434_1_mini, SF01_01319004, TEDSEN_SKX1MD, Unitec_47031)</li>
 	</ul><br>
 	<ul><li><a name="repeats">repeats</a><br>
 	This attribute can be used to adjust how many repetitions are sent. Default is 5.</li></ul><br>
 
 	<b><i>Generated readings of the models</i></b><br>
-	<ul><u>Buttons_five | CAME_TOP_432EV | HSM4 | Novy_840029 | QUIGG_DMV | SF01_01319004 | SF01_01319004_Typ2 | RH787T</u><br>
+	<ul><u>Buttons_five | CAME_TOP_432EV | Chilitec_22640 | HSM4 | LED_XM21_0 | Novy_840029 | QUIGG_DMV | SF01_01319004 | SF01_01319004_Typ2 | RH787T</u><br>
 	<li>deviceCode<br>
 	Device code of the system</li>
 	<li>LastAction<br>
@@ -1160,6 +1217,7 @@ sub SD_UT_binaryToNumber {
 	 <ul> - ChiliTec LED Christbaumkerzen&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Chilitec_22640 | Protokoll 14)</small></ul>
 	 <ul> - Hoermann HS1-868-BS&nbsp;&nbsp;&nbsp;<small>(Modulmodel: HS1_868_BS | Protokoll 69)</small></ul>
 	 <ul> - Hoermann HSM4&nbsp;&nbsp;&nbsp;<small>(Modulmodel: HSM4 | Protokoll 69)</small></ul>
+	 <ul> - LED_XM21_0 Christbaumkerzen&nbsp;&nbsp;&nbsp;<small>(Modulmodel: LED_XM21_0 | Protokol 76)</small></ul>
 	 <ul> - NEFF Dunstabzugshaube&nbsp;&nbsp;&nbsp;<small>(Modulmodel: SF01_01319004 | Protokoll 86)</small></ul>
 	 <ul> - Novy Pureline 6830 Dunstabzugshaube&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Novy_840029 | Protokoll 86)</small></ul>
 	 <ul> - QUIGG DMV-7000&nbsp;&nbsp;&nbsp;<small>(Modulmodel: QUIGG_DMV | Protokoll 34)</small></ul>
@@ -1227,6 +1285,16 @@ sub SD_UT_binaryToNumber {
 	<ul><a name="brightness_plus"></a>
 		<li>brightness_plus<br>
 		Taste + auf der Fernbedienung</li>
+	</ul><br>
+	
+	<ul><u>LED_XM21_0 Christbaumkerzen</u></ul>
+	<ul><a name="on"></a>
+		<li>on<br>
+		Taste I auf der Fernbedienung</li>
+	</ul>
+	<ul><a name="off"></a>
+		<li>off<br>
+		Taste O auf der Fernbedienung</li>
 	</ul><br>
 
 	<ul><u>Remote control SA-434-1 mini 923301&nbsp;&nbsp;|&nbsp;&nbsp;Hoermann HS1-868-BS&nbsp;&nbsp;|&nbsp;&nbsp;TEDSEN_SKX1MD</u></ul>
@@ -1327,13 +1395,13 @@ sub SD_UT_binaryToNumber {
 	<ul><li><a href="#IODev">IODev</a></li></ul><br>
 	<ul><li><a name="model">model</a><br>
 		Das Attribut bezeichnet den Modelltyp Ihres Ger&auml;tes.<br>
-		(unknown, Buttons_five, CAME_TOP_432EV, HS1-868-BS, HSM4, QUIGG_DMV, RH787T, Novy_840029, SA_434_1_mini, SF01_01319004, TEDSEN_SKX1MD, Unitec_47031)</li><a name=" "></a>
+		(unknown, Buttons_five, CAME_TOP_432EV, Chilitec_22640, HS1-868-BS, HSM4, QUIGG_DMV, RH787T, LED_XM21_0, Novy_840029, SA_434_1_mini, SF01_01319004, TEDSEN_SKX1MD, Unitec_47031)</li><a name=" "></a>
 	</ul><br>
 	<ul><li><a name="repeats">repeats</a><br>
 	Mit diesem Attribut kann angepasst werden, wie viele Wiederholungen sendet werden. Standard ist 5.</li></ul><br>
 
 	<b><i>Generierte Readings der Modelle</i></b><br>
-	<ul><u>Buttons_five | CAME_TOP_432EV | HSM4 | Novy_840029 | QUIGG_DMV | SF01_01319004 | SF01_01319004_Typ2 | RH787T</u><br>
+	<ul><u>Buttons_five | CAME_TOP_432EV | Chilitec_22640 | HSM4 | LED_XM21_0 | Novy_840029 | QUIGG_DMV | SF01_01319004 | SF01_01319004_Typ2 | RH787T</u><br>
 	<li>deviceCode<br>
 	Ger&auml;teCode des Systemes</li>
 	<li>LastAction<br>
