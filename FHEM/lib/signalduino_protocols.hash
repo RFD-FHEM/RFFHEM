@@ -1623,7 +1623,7 @@
 			id						=> '76',
 			one						=> [1.2,-2],			# 120,-200
 			zero					=> [],						# existiert nicht
-			start					=> [4.5,-2],			# 450,-200 Starsequenz
+			start					=> [4.5,-2,4.5,-2,4.5,-2,4.5,-2],			# 450,-200 Starsequenz
 			clockabs			=> 100,
 			format				=> 'twostate',		# not used now
 			clientmodule	=> 'SD_UT',
