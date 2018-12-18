@@ -62,7 +62,7 @@
 					# CUL_TCM97001 Typ - AURIOL / Mebus / TCM...
 					# MS;P0=-9298;P1=495;P2=-1980;P3=-4239;D=1012121312131313121313121312121212121212131212131312131212;CP=1;SP=0;R=223;O;m2;
 		{
-			name						=> 'weather',
+			name						=> 'weather (v1)',
 			comment					=> 'temperature / humidity or other sensors',
 			id							=> '0',
 			one							=> [1,-7],
@@ -87,7 +87,7 @@
 						# https://github.com/RFD-FHEM/RFFHEM/issues/63
 						# MS;P1=367;P2=-2077;P4=-9415;P5=-4014;D=141515151515151515121512121212121212121212121212121212121212121212;CP=1;SP=4;O;
 		{
-			name						=> 'weather',
+			name						=> 'weather (v2)',
 			comment					=> 'temperature / humidity or other sensors',
 			id							=> '0.1',
 			one							=> [1,-12],
@@ -103,17 +103,17 @@
 			length_max			=> '32',
 			paddingbits			=> '8',
 		},
-	"0.2"	=>	## other Sensors | for sensors how tol is runaway (280 | 9650)
+	"0.2"	=>	## other Sensors | for sensors how tol is runaway (260+tol | 9650)
 						# MS;P1=-2140;P2=309;P3=-4690;P4=-9695;D=2421232323232121232123232321212121212121212123212121232121;CP=2;SP=4;R=211;m1;
 						# MS;P0=-9703;P1=304;P2=-2133;P3=-4689;D=1012131312131212131213131312121212121212121212131312131212;CP=1;SP=0;R=208;
 						# MS;P0=138;P1=-2140;P2=315;P3=-9704;P4=-4713;P5=234;D=2321212421242454210424212421512121215121512124212121542121;CP=2;SP=3;R=210;
 		{
-			name						=> 'weather',
+			name						=> 'weather (v3)',
 			comment					=> 'temperature / humidity or other sensors',
 			id							=> '0.2',
-			one							=> [1,-17],
-			zero						=> [1,-8],
-			sync						=> [1,-34],
+			one							=> [1,-18],
+			zero						=> [1,-9],
+			sync						=> [1,-37],
 			clockabs				=> -1,
 			format					=> 'twostate',		# not used now
 			preamble				=> 's',						# prepend to converted message
@@ -913,26 +913,8 @@
 			length_min			=> '40',
 			length_max			=> '41',
 	},
-	# "38"	=>	## LIDL Wetterstation
-						# # https://github.com/RFD-FHEM/RFFHEM/issues/63
-						# # MS;P1=367;P2=-2077;P4=-9415;P5=-4014;D=141515151515151515121512121212121212121212121212121212121212121212;CP=1;SP=4;O;
-		# {
-			# name						=> 'weather',
-			# comment					=> 'temperature / humidity or other sensors',
-			# id							=> '38',
-			# one							=> [1,-10],
-			# zero						=> [1,-5],
-			# sync						=> [1,-25],
-			# clockabs				=> '360',
-			# format					=> 'twostate',		# not used now
-			# preamble				=> 's',						# prepend to converted message
-			# postamble				=> '00',					# Append to converted message
-			# clientmodule		=> 'CUL_TCM97001',
-			# #modulematch		=> '^s[A-Fa-f0-9]+',
-			# length_min			=> '32',
-			# length_max			=> '32',
-			# paddingbits			=> '8',
-		# },
+		# "38"	=>	can use
+
 	"39"	=>	## X10 Protocol
 						# https://github.com/RFD-FHEM/RFFHEM/issues/65
 						# MU;P0=10530;P1=-2908;P2=533;P3=-598;P4=-1733;P5=767;D=0123242323232423242324232324232423242323232324232323242424242324242424232423242424232501232423232324232423242323242324232423232323242323232424242423242424242324232424242325012324232323242324232423232423242324232323232423232324242424232424242423242324242;CP=2;O;
@@ -1458,25 +1440,9 @@
 			length_max				=> '34',
 			postDemodulation	=> \&SIGNALduino_postDemo_WS7053,
 		},
-	# "68"	=>	## Pollin PFR-130
-						# # CUL_TCM97001 Typ - AURIOL
-						# # MS;P0=-3890;P1=386;P2=-2191;P3=-8184;D=1312121212121012121212121012121212101012101010121012121210121210101210101012;CP=1;SP=3;R=20;O;
-						# # MS;P0=-2189;P1=371;P2=-3901;P3=-8158;D=1310101010101210101010101210101010121210121212101210101012101012121012121210;CP=1;SP=3;R=20;O;
-		# {
-			# name					=> 'Pollin PFR-130',
-			# comment				=> 'temperature sensor with rain',
-			# id						=> '68',
-			# one						=> [1,-10],
-			# zero					=> [1,-5],
-			# sync					=> [1,-21],	
-			# clockabs			=> 380,
-			# preamble			=> 's',				# prepend to converted message
-			# postamble			=> '00',			# Append to converted message
-			# clientmodule	=> 'CUL_TCM97001',
-			# length_min		=> '36',
-			# length_max		=> '42',
-			# paddingbits		=> '8',				 # pad up to 8 bits, default is 4
-		# }, 	
+
+		# "68"	=>	can use
+		
 	"69"	=>	## Hoermann HSM2, HSM4, HS1-868-BS (868 MHz)
 						# https://github.com/RFD-FHEM/RFFHEM/issues/149
 						# MU;P0=-508;P1=1029;P2=503;P3=-1023;P4=12388;D=01010232323232310104010101010101010102323231010232310231023232323231023101023101010231010101010232323232310104010101010101010102323231010232310231023232323231023101023101010231010101010232323232310104010101010101010102323231010232310231023232323231023101;CP=2;R=37;O;
