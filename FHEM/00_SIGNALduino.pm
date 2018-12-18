@@ -119,6 +119,7 @@ my %patable = (
   },
 );
 
+my $glHash;
 
 my @ampllist = (24, 27, 30, 33, 36, 38, 40, 42); # rAmpl(dB)
 
@@ -2818,7 +2819,8 @@ sub SIGNALduino_FW_Detail($@) {
   my ($FW_wname, $name, $room, $pageHash) = @_;
   
   my $hash = $defs{$name};
-  
+  $glHash = $hash;
+    
   my @dspec=devspec2array("DEF=.*fakelog");
   my $lfn = $dspec[0];
   my $fn=$defs{$name}->{TYPE}."-Flash.log";
@@ -2856,23 +2858,102 @@ function SD_plistWindow(txt)
   $(div).html(txt);
   $("body").append(div);
   var oldPos = $("body").scrollTop();
+  var element = document.getElementById("SD_protoCaption");
+  var caption = element.innerHTML;
+  var btxtStable = "";
+  var btxtBlack = "";
+  if (caption.substr(0,1) != "d") {
+    btxtStable = "stable";
+  }
+  if (caption.substr(-1) == ".") {
+    btxtBlack = " except blacklist";
+  }
   $(div).dialog({
     dialogClass:"no-close", modal:true, width:"auto", closeOnEscape:true, 
     maxWidth:$(window).width()*0.9, maxHeight:$(window).height()*0.9,
-    buttons: [{text:"OK", click:function(){
-      $(this).dialog("close");
-      $(div).remove();
-      location.reload();
-    }}]
+    title: "Protocollist Overview",
+    buttons: [
+      {text:"select all " + btxtStable + btxtBlack, click:function(){
+           //FW_cmd(FW_root+ \'?XHR=1&cmd={SIGNALduino_FW_selectAll()}\', function(data){SD_selectAll(data)});
+      }},
+      {text:"deselect all", click:function(){
+           // FW_cmd(FW_root+ \'?XHR=1&cmd={SIGNALduino_FW_deselectAll()}\', function(){SD_deselectAll()});
+           SD_deselectAll()
+      }},
+      {text:"save to whitelist and close", click:function(){
+          var ret = SD_saveWhitelist();
+          FW_cmd(FW_root+ \'?XHR=1&cmd={SIGNALduino_FW_saveWhitelist("\'+ret+\'")}\');
+          $(this).dialog("close");
+          $(div).remove();
+          location.reload();
+      }},
+      {text:"close", click:function(){
+        $(this).dialog("close");
+        $(div).remove();
+        location.reload();
+      }}]
   });
 }
-</script>';
-  return $ret;
-  
-  
+
+function SD_deselectAll()
+{
+  var element = document.getElementById("SD_protocolDialog");
+  var checkboxes = element.getElementsByTagName("input");
+  for (var i = 0; i < checkboxes.length; i++) {
+     checkboxes[i].checked = false;
+  }
+}
+
+function SD_selectAll(data)
+{
+
+}
+
+function SD_saveWhitelist()
+{
+  var element = document.getElementById("SD_protocolDialog");
+  var checkboxes = element.getElementsByTagName("input");
+  var txt = "";
+  for (var i = 0; i < checkboxes.length; i++) {
+    if (checkboxes[i].checked == true) {
+      txt = txt + checkboxes[i].name + ",";
+    }
+  }
+  return txt;
 }
 
 
+</script>';
+  return $ret;
+}
+
+sub SIGNALduino_FW_saveWhitelist
+{
+	my $wl_attr = shift;
+	#my $hash = shift;
+	my $hash = $glHash;
+	my $name = $hash->{NAME};
+	
+	
+	if ($wl_attr eq "") {
+		$wl_attr = 0;
+	}
+	else {
+		$wl_attr =~ s/,$//;			# Komma am Ende entfernen
+	}
+	$attr{$name}{whitelist_IDs} = $wl_attr;
+	SIGNALduino_Log3 $hash, 3, "$name Protocolist save: $wl_attr";
+	SIGNALduino_IdList("x:$name", $wl_attr);
+}
+
+sub SIGNALduino_FW_deselectAll
+{
+	#my $hash = shift;
+	my $hash = $glHash;
+	my $name = $hash->{NAME};
+
+	SIGNALduino_Log3 $hash, 3, "$name: button deselectAll";
+}
 
 sub SIGNALduino_IdList($@)
 {
@@ -4233,10 +4314,13 @@ sub SIGNALduino_FW_getProtocolList
 	my $ret;
 	my $devFlag = 0;	# 1 - develop version
 	my $devText = "";
+	my $blackTxt = "";
 	my @IdList = ();
 	
 	my $whitelist = AttrVal($name,"whitelist_IDs","#");
-	
+	if (AttrVal($name,"blacklist_IDs","") ne "") {				# wenn es eine blacklist gibt, dann "." an die Ueberschrift anhaengen
+		$blackTxt = ".";
+	}
 	my $develop = AttrVal($name,"development","");
 	if (length($develop) > 0 && ($develop eq "1" || substr($develop,0,1) eq "y")) {		# develop version
 		$devFlag = 1;
@@ -4249,7 +4333,7 @@ sub SIGNALduino_FW_getProtocolList
 	
 	foreach $id (keys %ProtocolListSIGNALduino)
 	{
-		next if ($id eq 'id' || $id >= 900);
+		next if ($id >= 900);
 		push (@IdList, $id);
 	}
 	@IdList = sort { $a <=> $b } @IdList;
@@ -4258,10 +4342,10 @@ sub SIGNALduino_FW_getProtocolList
 	
 	$ret .="<caption id=\"SD_protoCaption\">$devText";
 	if (substr($whitelist,0,1) ne "#") {
-		$ret .="whitelist active</caption>";
+		$ret .="whitelist active$blackTxt</caption>";
 	}
 	else {
-		$ret .="whitelist not active (save activate it)</caption>";
+		$ret .="whitelist not active (save activate it)$blackTxt</caption>";
 	}
 	$ret .= "<thead style=\"text-align:center\"><td>act.</td><td>dev</td><td>ID</td><td>Message Type</td><td>modulname</td><td>protocolname</td> <td># comment</td></thead>";
 	$ret .="<tbody>";
