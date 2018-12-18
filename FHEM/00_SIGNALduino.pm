@@ -4233,7 +4233,6 @@ sub SIGNALduino_FW_getProtocolList
 	my $ret;
 	my $devFlag = 0;	# 1 - develop version
 	my $devText = "";
-	my %mIdListH = ();
 	my @IdList = ();
 	
 	my $whitelist = AttrVal($name,"whitelist_IDs","#");
@@ -4244,21 +4243,20 @@ sub SIGNALduino_FW_getProtocolList
 		$devText = "development version - ";
 	}
 	
-	my $mIdList = join(",",@{$hash->{msIdList}},@{$hash->{muIdList}},@{$hash->{mcIdList}});
-	%mIdListH = map { $_ => 1 } split(",", $mIdList);
-	SIGNALduino_Log3 $name,4, "$name IdList: $mIdList";
+	my %activeIdHash;
+	@activeIdHash{@{$hash->{msIdList}}, @{$hash->{muIdList}}, @{$hash->{mcIdList}}} = (undef);
+	#SIGNALduino_Log3 $name,4, "$name IdList: $mIdList";
 	
 	foreach $id (keys %ProtocolListSIGNALduino)
 	{
 		next if ($id eq 'id' || $id >= 900);
-		next if ($devFlag == 0 && defined($ProtocolListSIGNALduino{$id}{developId}) && $ProtocolListSIGNALduino{$id}{developId} eq "p");
 		push (@IdList, $id);
 	}
 	@IdList = sort { $a <=> $b } @IdList;
 
 	$ret = "<table class=\"block wide internals wrapcolumns\">";
 	
-	$ret .="<caption id=\"myCaption\">$devText";
+	$ret .="<caption id=\"SD_protoCaption\">$devText";
 	if (substr($whitelist,0,1) ne "#") {
 		$ret .="whitelist active</caption>";
 	}
@@ -4273,7 +4271,7 @@ sub SIGNALduino_FW_getProtocolList
 	{
 		my $msgtype;
 		my $chkbox;
-				
+		
 		if (exists ($ProtocolListSIGNALduino{$id}{format}) && $ProtocolListSIGNALduino{$id}{format} eq "manchester")
 		{
 			$msgtype = "MC";
@@ -4289,12 +4287,17 @@ sub SIGNALduino_FW_getProtocolList
 		
 		my $checked="";
 		
-		if (defined($mIdListH{$id}))
+		if (exists($activeIdHash{$id}))
 		{
 			$checked="checked";
 		}
 		
-		$chkbox=sprintf("<INPUT type=\"checkbox\" name=\"%s\" %s/>",$id,$checked);
+		if ($devFlag == 0 && defined($ProtocolListSIGNALduino{$id}{developId}) && $ProtocolListSIGNALduino{$id}{developId} eq "p") {
+			$chkbox="<div> </div>";
+		}
+		else {
+			$chkbox=sprintf("<INPUT type=\"checkbox\" name=\"%s\" %s/>",$id,$checked);
+		}
 		
 		$ret .= sprintf("<tr class=\"%s\"><td>%s</td><td><div>%s</div></td><td><div>%3s</div></td><td><div>%s</div></td><td><div>%s</div></td><td><div>%s</div></td><td><div>%s</div></td></tr>",$oddeven,$chkbox,SIGNALduino_getProtoProp($id,"developId",""),$id,$msgtype,SIGNALduino_getProtoProp($id,"clientmodule",""),SIGNALduino_getProtoProp($id,"name",""),SIGNALduino_getProtoProp($id,"comment",""));
 		$oddeven= $oddeven eq "odd" ? "even" : "odd" ;
@@ -4304,7 +4307,6 @@ sub SIGNALduino_FW_getProtocolList
 	$ret .= "</tbody></table>";
 	return $ret;
 }
-
 
 
 sub SIGNALduino_querygithubreleases
