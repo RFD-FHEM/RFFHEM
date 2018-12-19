@@ -2902,7 +2902,7 @@ sub SIGNALduino_IdList($@)
 	if (!defined($develop)) {
 		$develop = SIGNALduino_getAttrDevelopment($name);
 	}
-	if (length($develop) > 0 && ($develop eq "1" || substr($develop,0,1) eq "y")) {	# Entwicklerversion, y ist nur zur Abwaertskompatibilitaet und kann in einer der naechsten Versionen entfernt werden
+	if ($develop eq "1" || substr($develop,0,1) eq "y") {	# Entwicklerversion, y ist nur zur Abwaertskompatibilitaet und kann in einer der naechsten Versionen entfernt werden
 		$yflag = 1;
 		SIGNALduino_Log3 $name, 3, "$name IdList development version: $develop";
 	}
@@ -2954,7 +2954,7 @@ sub SIGNALduino_IdList($@)
 			if (defined($ProtocolListSIGNALduino{$id}{developId}))
 			{
 				if ($ProtocolListSIGNALduino{$id}{developId} eq "m") {
-					if ($develop eq "" || $develop !~ m/m$id/) {  # ist nur zur Abwaertskompatibilitaet und kann in einer der naechsten Versionen entfernt werden
+					if ($develop !~ m/m$id/) {  # ist nur zur Abwaertskompatibilitaet und kann in einer der naechsten Versionen entfernt werden
 						push (@devModulId, $id);
 					}
 				}
@@ -3013,10 +3013,10 @@ sub SIGNALduino_getAttrDevelopment
 	my $name = shift;
 	my $develop;
 	if (index(SDUINO_VERSION, "dev") >= 0) {  	# development version
-		$develop = AttrVal($name,"development","");
+		$develop = AttrVal($name,"development", 0);
 	}
 	else {
-		$develop = "";
+		$develop = "0";
 		SIGNALduino_Log3 $name, 3, "$name IdList: ### Attribute development is in this version ignored ###";
 	}
 	return $develop;
