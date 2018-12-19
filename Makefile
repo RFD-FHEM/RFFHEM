@@ -18,8 +18,11 @@ deploylocal : 98_UnitTest.pm
 	cd /opt/fhem && perl -MDevel::Cover fhem.pl fhem.cfg && cd ${TRAVIS_BUILD_DIR}
 	
 test: deploylocal
-	@echo === running 00_SIGNALduino unit tests ===
+	@echo === running commandref test ===
+	git --no-pager diff --name-only $(TRAVIS_COMMIT_RANGE) | grep .pm | xargs -I@ echo -select @ | xargs --no-run-if-empty perl /opt/fhem/contrib/commandref_join.pl 
+	@echo === running unit tests ===
 	test/test-runner.sh test_modules
+	test/test-runner.sh test_callsub_1
 	test/test-runner.sh test1
 	test/test-runner.sh test3
 	test/test-runner.sh test4
@@ -34,5 +37,5 @@ test: deploylocal
 	test/test-runner.sh test_fingerprint
 	test/test-runner.sh test_firmware_download_1
 	test/test-runner.sh test_modulematch_1
-	@echo === finished 00_SIGNALduino unit tests ===
+	@echo === finished unit tests ===
 	sudo timeout 30 killall -vw perl || sudo killall -vws9 perl

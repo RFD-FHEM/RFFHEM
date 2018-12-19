@@ -12,8 +12,10 @@ defmod test_proto85 UnitTest dummyDuino (
  
  ok(!IsDevice($sensorname), "check Sensor not created with single dispatch");
  $SD_Dispatch->unmock;
- sleep 3;
- SIGNALduino_Parse_MU($targetHash, $targetHash, $targetHash->{NAME}, $rmsg,%signal_parts);
+ for (my $i=1; $i <= 3; $i++) {
+   sleep 3;
+   SIGNALduino_Parse_MU($targetHash, $targetHash, $targetHash->{NAME}, $rmsg,%signal_parts);
+ }
  ok(IsDevice($sensorname), "check Sensor created with second dispatch");
  
  subtest 'Checking readings' => sub {
