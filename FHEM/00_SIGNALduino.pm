@@ -1,4 +1,4 @@
-# $Id: 00_SIGNALduino.pm 10488 2018-10-23 00:22:00Z v3.3.3-dev $
+# $Id: 00_SIGNALduino.pm 10488 2018-12-19 12:00:00Z v3.3.3-dev $
 #
 # v3.3.3 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incoming messages
@@ -28,7 +28,7 @@ eval "use Time::HiRes qw(gettimeofday);1" ;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.3.3-dev_17.12.",
+	SDUINO_VERSION            => "v3.3.3-dev_19.12.",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -228,7 +228,7 @@ SIGNALduino_Initialize($)
 					  ." cc1101_frequency"
 					  ." doubleMsgCheck_IDs"
 					  ." suppressDeviceRawmsg:1,0"
-					  ." development"
+					  ." development:0,1"
 					  ." noMsgVerbose:0,1,2,3,4,5"
 					  ." eventlogging:0,1"
 					  ." maxMuMsgRepeat"
@@ -1964,14 +1964,13 @@ sub SIGNALduino_moduleMatch
 	
 	if (!defined($modMatchRegex) || $dmsg =~ m/$modMatchRegex/) {
 		Debug "$name: modmatch passed for: $dmsg" if ($debug);
-		my $developATTR = AttrVal($name,"development","");
 		my $developID = SIGNALduino_getProtoProp($id,"developId","");
 		if ($developID eq "m") {
-			if ( length($developATTR) > 0 && $developATTR =~ m/$developID$id/) { 
-				return 1; #   return 1 da modulematch gefunden wurde			
+			if (defined($hash->{IDsNoDispatch}) && $hash->{IDsNoDispatch} =~ m/(^$id,|,$id,|,$id$)/) {	# kein dispatch wenn die Id nicht im Attribut whitelist_IDs steht
+				SIGNALduino_Log3 $name, 3, "$name: ID=$id skiped dispatch (developId=m). To use, please add $id to the attr whitelist_IDs";
+				return -1;
 			}
-			SIGNALduino_Log3 $name, 3, "$name: ID=$id skipped dispatch (developId=$developID). To use, please add $developID$id to the attr development";	
-			return -1;
+			return 1; #   return 1 da modulematch gefunden wurde			
 		}
 		return 1;
 	}
@@ -2873,7 +2872,6 @@ function SD_plistWindow(txt)
 }
 
 
-
 sub SIGNALduino_IdList($@)
 {
 	my ($param, $aVal, $blacklist, $develop) = @_;
@@ -2883,84 +2881,99 @@ sub SIGNALduino_IdList($@)
 	my @msIdList = ();
 	my @muIdList = ();
 	my @mcIdList = ();
-	my @skippedId = ();
+	my @skippedDevId = ();
+	my @skippedBlackId = ();
+	my @devModulId = ();
+	my %WhitelistIDs;
+	my %BlacklistIDs;
+	my $wflag = 0;		# whitelist flag, 0=disabled
+	my $bflag = 0;		# blacklist flag, 0=disabled
+	my $yflag = 0;		# 1 = alle developIDs aktivieren
+	
+	delete ($hash->{IDsNoDispatch}) if (defined($hash->{IDsNoDispatch}));
 
 	if (!defined($aVal)) {
 		$aVal = AttrVal($name,"whitelist_IDs","");
 	}
 	
-	if (!defined($blacklist)) {
-		$blacklist = AttrVal($name,"blacklist_IDs","");
-	}
-	
 	if (!defined($develop)) {
 		$develop = AttrVal($name,"development","");
 	}
-	$develop = lc($develop);
-
-	my %WhitelistIDs;
-	my %BlacklistIDs;
-	my $wflag = 0;		# whitelist flag, 0=disabled
-	my $bflag = 0;		# blacklist flag, 0=disabled
-	if (defined($aVal) && length($aVal)>0)
-	{
-		if (substr($aVal,0 ,1) eq '#') {
-			SIGNALduino_Log3 $name, 3, "$name Attr whitelist disabled: $aVal";
+	if (length($develop) > 0 && ($develop eq "1" || substr($develop,0,1) eq "y")) {	# Entwicklerversion, y ist nur zur Abwaertskompatibilitaet und kann in einer der naechsten Versionen entfernt werden
+		$yflag = 1;
+		SIGNALduino_Log3 $name, 3, "$name IdList: development version: $develop";
+	}
+	
+	if ($aVal eq "" || substr($aVal,0 ,1) eq '#') {		# whitelist nicht aktiv
+		if ($yflag == 1) {
+			SIGNALduino_Log3 $name, 3, "$name IdList attr whitelist disabled (all IDs active, except blacklist): $aVal";
 		}
 		else {
-			%WhitelistIDs = map { $_ => 1 } split(",", $aVal);
-			#my $w = join ', ' => map "$_" => keys %WhitelistIDs;
-			#SIGNALduino_Log3 $name, 3, "Attr whitelist $w";
-			$wflag = 1;
+			SIGNALduino_Log3 $name, 3, "$name IdList attr whitelist disabled (all IDs active, except blacklist and developID): $aVal";
 		}
 	}
-	if ($wflag == 0) {		# whitelist disabled
-		if (defined($blacklist) && length($blacklist)>0) {
+	else {
+		#SIGNALduino_Log3 $name, 3, "$name IdList: attr whitelistIds=$aVal";
+		%WhitelistIDs = map { $_ => 1 } split(",", $aVal);			# whitelist in Hash wandeln
+		my $w = join ', ' => map "$_" => keys %WhitelistIDs;
+		SIGNALduino_Log3 $name, 3, "$name IdList: attr whitelist $w";
+		$wflag = 1;
+	}
+	#SIGNALduino_Log3 $name, 3, "$name IdList: attr whitelistIds=$aVal" if ($aVal);
+		
+	if ($wflag == 0) {			# whitelist disabled
+		if (!defined($blacklist)) {
+			$blacklist = AttrVal($name,"blacklist_IDs","");
+		}
+		if (length($blacklist) > 0) {							# Blacklist in Hash wandeln
+			SIGNALduino_Log3 $name, 3, "$name IdList: attr blacklistIds=$blacklist";
 			%BlacklistIDs = map { $_ => 1 } split(",", $blacklist);
-			my $w = join ', ' => map "$_" => keys %BlacklistIDs;
-			SIGNALduino_Log3 $name, 4, "$name Attr blacklist $w";
+			#my $w = join ', ' => map "$_" => keys %BlacklistIDs;
+			#SIGNALduino_Log3 $name, 3, "$name IdList, Attr blacklist $w";
 			$bflag = 1;
 		}
 	}
 	
 	my $id;
+	my $wIdFound;						# 1 = Id wurde in der whitelist gefunden
 	foreach $id (keys %ProtocolListSIGNALduino)
 	{
-		next if ($id eq 'id');
-		if ($wflag == 1 && !defined($WhitelistIDs{$id}))
-		{
-			#SIGNALduino_Log3 $name, 3, "skip ID $id";
-			next;
-		}
-		if ($bflag == 1 && defined($BlacklistIDs{$id}))
-		{
-			#SIGNALduino_Log3 $name, 4, "$name skip Blacklist ID $id";
-			next;
-		}
+		$wIdFound = 0;
 		
-		if (defined($ProtocolListSIGNALduino{$id}{developId}) && substr($ProtocolListSIGNALduino{$id}{developId},0,1) eq "m") {
-			my $devid = "m$id";
-			if ($develop !~ m/$devid/) {		# skip wenn die Id nicht im Attribut development steht
-				#SIGNALduino_Log3 $name, 3, "$name: ID=$devid skipped (developId=m)";
-				push (@skippedId, $devid);
-				next;
+		if ($wflag == 1)				# whitelist
+		{
+			if (defined($WhitelistIDs{$id}))	# Id wurde in der whitelist gefunden
+			{
+				$wIdFound = 1;
 			}
-		}																					 
-		
-		if (defined($ProtocolListSIGNALduino{$id}{developId}) && substr($ProtocolListSIGNALduino{$id}{developId},0,1) eq "p") {
-			my $devid = "p$id";
-			if ($develop !~ m/$devid/) {		# skip wenn die Id nicht im Attribut development steht
-				#SIGNALduino_Log3 $name, 3, "$name: ID=$devid skipped (developId=p)";
-				push (@skippedId, $devid);
+			else
+			{
+				#Log3 $name, 3, "skip ID $id";
 				next;
 			}
 		}
 		
-		if (defined($ProtocolListSIGNALduino{$id}{developId}) && substr($ProtocolListSIGNALduino{$id}{developId},0,1) eq "y") {
-			my $devid = "y$id";
-			if ($develop !~ m/$devid/) {		# skip wenn die Id nicht im Attribut development steht
-				#SIGNALduino_Log3 $name, 3, "$name: ID=$id skipped (developId=y)";
-				push (@skippedId, $devid);
+		if ($bflag == 1 && defined($BlacklistIDs{$id})) {
+				#SIGNALduino_Log3 $name, 3, "$name IdList, skip Blacklist ID $id";
+				push (@skippedBlackId, $id);
+				next;
+		}
+		
+		# wenn die Id in der whitelist gefunden wurde, es keine developId gibt, dann die folgenden Abfragen ueberspringen
+		if ($wIdFound == 0 && defined($ProtocolListSIGNALduino{$id}{developId}))
+		{
+			if ($ProtocolListSIGNALduino{$id}{developId} eq "m") {
+				if ($develop eq "" || $develop !~ m/m$id/) {  # ist nur zur Abwaertskompatibilitaet und kann in einer der naechsten Versionen entfernt werden
+					push (@devModulId, $id);
+				}
+			}
+			elsif ($ProtocolListSIGNALduino{$id}{developId} eq "p") {
+				SIGNALduino_Log3 $name, 3, "$name IdList: ID=$id skiped (developId=p), not for user";
+				next;
+			}
+			elsif ($ProtocolListSIGNALduino{$id}{developId} eq "y" && $yflag == 0) {	# skip wenn develop nicht im Attribut whitelist steht
+				#SIGNALduino_Log3 $name, 3, "$name: IdList ID=$id skiped (developId=y)";
+				push (@skippedDevId, $id);
 				next;
 			}
 		}
@@ -2984,21 +2997,25 @@ sub SIGNALduino_IdList($@)
 	@msIdList = sort {$a <=> $b} @msIdList;
 	@muIdList = sort {$a <=> $b} @muIdList;
 	@mcIdList = sort {$a <=> $b} @mcIdList;
-	@skippedId = sort @skippedId;
+	@skippedDevId = sort {$a <=> $b} @skippedDevId;
+	@skippedBlackId = sort {$a <=> $b} @skippedBlackId;
+	@devModulId = sort {$a <=> $b} @devModulId;
 
 	SIGNALduino_Log3 $name, 3, "$name: IDlist MS @msIdList";
 	SIGNALduino_Log3 $name, 3, "$name: IDlist MU @muIdList";
-    SIGNALduino_Log3 $name, 3, "$name: IDlist MC @mcIdList";
-	SIGNALduino_Log3 $name, 3, "$name: IDlist development = $develop" if ($develop);
-	SIGNALduino_Log3 $name, 3, "$name: IDlist development skipped = @skippedId" if (scalar @skippedId > 0);
-	SIGNALduino_Log3 $name, 3, "$name: IDlist blacklist = $blacklist" if ($blacklist);
-	SIGNALduino_Log3 $name, 3, "$name: IDlist whitelist = $aVal" if ($aVal);
+	SIGNALduino_Log3 $name, 3, "$name: IDlist MC @mcIdList";
+	SIGNALduino_Log3 $name, 3, "$name: IDlist blacklistId skipped = @skippedBlackId" if (scalar @skippedBlackId > 0);
+	SIGNALduino_Log3 $name, 3, "$name: IDlist development skipped = @skippedDevId" if (scalar @skippedDevId > 0);
+	if (scalar @devModulId > 0)
+	{
+		SIGNALduino_Log3 $name, 3, "$name: IDlist, develop module used (dispatch must with the whitelist_IDs aktivated) = @devModulId";
+		$hash->{IDsNoDispatch} = join(",", @devModulId);
+	}
 	
 	$hash->{msIdList} = \@msIdList;
-    $hash->{muIdList} = \@muIdList;
-    $hash->{mcIdList} = \@mcIdList;
+	$hash->{muIdList} = \@muIdList;
+	$hash->{mcIdList} = \@mcIdList;
 }
-
 
 sub SIGNALduino_callsub
 {
