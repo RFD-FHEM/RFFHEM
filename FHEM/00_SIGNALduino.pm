@@ -2946,9 +2946,9 @@ sub SIGNALduino_FW_saveWhitelist
 sub SIGNALduino_FW_deselectAll
 {
 	#my $hash = shift;
-	my $name = $hash->{NAME};
+	#my $name = $hash->{NAME};
 
-	SIGNALduino_Log3 $hash, 3, "$name: button deselectAll";
+	#SIGNALduino_Log3 $hash, 3, "$name: button deselectAll";
 }
 
 sub SIGNALduino_IdList($@)
