@@ -119,7 +119,6 @@ my %patable = (
   },
 );
 
-my $glHash;
 
 my @ampllist = (24, 27, 30, 33, 36, 38, 40, 42); # rAmpl(dB)
 
@@ -2882,7 +2881,7 @@ function SD_plistWindow(txt)
       }},
       {text:"save to whitelist and close", click:function(){
           var ret = SD_saveWhitelist();
-          FW_cmd(FW_root+ \'?XHR=1&cmd={SIGNALduino_FW_saveWhitelist("\'+ret+\'")}\');
+          FW_cmd(FW_root+ \'?XHR=1&cmd={SIGNALduino_FW_saveWhitelist("'.$name.'","\'+ret+\'")}\');
           $(this).dialog("close");
           $(div).remove();
           location.reload();
@@ -2929,10 +2928,9 @@ function SD_saveWhitelist()
 
 sub SIGNALduino_FW_saveWhitelist
 {
+	my $name = shift;
 	my $wl_attr = shift;
-	#my $hash = shift;
-	my $hash = $glHash;
-	my $name = $hash->{NAME};
+	my $hash = $defs{$name};
 	
 	
 	if ($wl_attr eq "") {
