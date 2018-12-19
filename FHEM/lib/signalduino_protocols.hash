@@ -131,7 +131,7 @@
 						# Ventus W174
 						# MS;P3=-2009;P4=479;P5=-9066;P6=-4047;D=45434343464343434643464643464643434643464646434346464343434343434346464643;CP=4;SP=5;R=55;O;m2;
 		{
-			name					=> 'weather',
+			name					=> 'weather (v4)',
 			comment				=> 'temperature / humidity or other sensors | Pollin PFR-130, Ventus W174 ...',
 			id						=> '0.3',
 			one						=> [1,-10],
@@ -218,8 +218,7 @@
 			length_min				=> '24',
 			length_max				=> '24',				# Don't know maximal lenth of a valid message
 			postDemodulation	=> \&SIGNALduino_bit2itv1,
-		},
-		
+		},		
 	"4"	=>	## arctech2
 					# need more Device Infos / User Message
 		{
@@ -1181,6 +1180,10 @@
 	"52"	=>	## Oregon Scientific PIR Protocol
 						# https://forum.fhem.de/index.php/topic,63604.msg548256.html#msg548256
 						# MC;LL=-1045;LH=1153;SL=-494;SH=606;D=FFFED518;C=549;L=30;
+						#
+						# FFFED5 = Adresse, die per DIP einstellt wird, FFF ändert sich nie
+						# 1 = Kanal, per gesondertem DIP, bei mir bei beiden 1 (CH 1) oder 3 (CH 2)
+						# C = wechselt, 0, 4, 8, C - dann fängt es wieder mit 0 an und wiederholt sich bei jeder Bewegung
 		{
 			name						=> 'Oregon Scientific PIR',
 			id							=> '52',
@@ -1926,23 +1929,25 @@
 		},
 
 	"90"	=>	## socket remote -  mumbi m-fs300 / manax MX-RCS250
-						# MS;P0=-9964;P1=273;P4=-866;P5=792;P6=-343;D=10145614141414565656561414561456561414141456565656561456141414145614;CP=1;SP=0;R=35;O;m2; //A  AN
-						# MS;P0=300;P1=-330;P2=-10160;P3=804;P7=-840;D=02073107070707313131310707310731310707070731313107310731070707070707;CP=0;SP=2;R=23;O;m1 //A  AUS
-						# MS;P1=260;P2=-873;P3=788;P4=-351;P6=-10157;D=16123412121212343434341212341234341212121234341234341234121212341212;CP=1;SP=6;R=21;O;m2; // B AN
+						# https://forum.fhem.de/index.php/topic,94327.15.html
+						# MS;P0=-9964;P1=273;P4=-866;P5=792;P6=-343;D=10145614141414565656561414561456561414141456565656561456141414145614;CP=1;SP=0;R=35;O;m2;		//A AN
+						# MS;P0=300;P1=-330;P2=-10160;P3=804;P7=-840;D=02073107070707313131310707310731310707070731313107310731070707070707;CP=0;SP=2;R=23;O;m1;	//A	AUS
+						# MS;P1=260;P2=-873;P3=788;P4=-351;P6=-10157;D=16123412121212343434341212341234341212121234341234341234121212341212;CP=1;SP=6;R=21;O;m2;	//B AN
+						# MS;P1=268;P3=793;P4=-337;P6=-871;P7=-10159;D=17163416161616343434341616341634341616161634341616341634161616343416;CP=1;SP=7;R=24;O;m2;	//B	AUS
 						# need more Device Infos / User Message
 		{
-			name							=> 'm-fs300',
-			comment							=> 'IT remote control mumbi FS300, MX-RCS250',
-			id								=> '90',
-			one								=> [3,-1],
-			zero							=> [1,-3],
-			sync							=> [1,-38],
-			clockabs						=> -1,					# -1=auto	
-			format							=> 'twostate',			# not used now
-			preamble						=> 'u#90',			
-			length_min						=> '33',
-			length_max						=> '36',		
-			developId						=> 'p',		
+			name					=> 'm-fs300',
+			comment				=> 'IT remote control mumbi FS300, MX-RCS250',
+			id						=> '90',
+			one						=> [3,-1],
+			zero					=> [1,-3],
+			sync					=> [1,-38],
+			clockabs			=> -1,						# -1=auto	
+			format				=> 'twostate',		# not used now
+			preamble			=> 'u90#',			
+			length_min		=> '33',
+			length_max		=> '36',		
+			developId			=> 'p',		
 		},
 
 
