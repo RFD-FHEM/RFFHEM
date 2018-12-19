@@ -47,7 +47,7 @@
 #
 ##### notice #### or #### info ############################################################################################################
 # Please use first unused id for new protocols
-# ID´s are currently unused:
+# ID´s are currently unused: 20 | 38 | 68
 # ID´s need to be revised (preamble u): 5|6|19|20|21|22|23|24|25|26|27|28|31|36|40|42|52|56|59|63|78|87|88
 ###########################################################################################################################################
 # Please provide at least three messages for each new MU/MC/MS protocol and a URL of issue in GitHub or discussion in FHEM Forum
@@ -55,48 +55,96 @@
 ###########################################################################################################################################
 
 (
-	"0"	=>	## various weather sensors
+	"0"	=>	## various weather sensors (500 | 9100)
+					# CUL_TCM97001 Typ - Prologue
+					# MS;P0=-4152;P1=643;P2=-2068;P3=-9066;D=1310121210121212101210101212121212121212121212121010121012121212121012101212;CP=1;SP=3;R=220;O;m2;
+					# MS;P0=-4149;P2=-9098;P3=628;P4=-2076;D=3230343430343434303430303434343434343434343434343030343030343434343034303434;CP=3;SP=2;R=218;O;m2;
 					# CUL_TCM97001 Typ - AURIOL / Mebus / TCM...
 					# MS;P0=-9298;P1=495;P2=-1980;P3=-4239;D=1012121312131313121313121312121212121212131212131312131212;CP=1;SP=0;R=223;O;m2;
-					# !!! some RAWMSG are also decode under ID 68 !!!
 		{
-			name						=> 'weather',
-			comment					=> 'Logilink, NC, WS, TCM97001 ...',
+			name						=> 'weather (v1)',
+			comment					=> 'temperature / humidity or other sensors',
 			id							=> '0',
-			one							=> [1,-8],
-			zero						=> [1,-4],
-			sync						=> [1,-18],
-			clockabs				=> '500',
+			one							=> [1,-7],
+			zero						=> [1,-3],
+			sync						=> [1,-16],
+			clockabs				=> -1,
 			format					=> 'twostate',	# not used now
 			preamble				=> 's',					# prepend to converted message
 			postamble				=> '00',				# Append to converted message
 			clientmodule		=> 'CUL_TCM97001',
 			#modulematch		=> '^s[A-Fa-f0-9]+',
 			length_min			=> '24',
-			length_max			=> '42',
-			paddingbits			=> '8',					# pad up to 8 bits, default is 4
-		},
-	"0.1"	=>	## various weather sensors
-						# CUL_TCM97001 Typ - Prologue
-						# MS;P0=-4152;P1=643;P2=-2068;P3=-9066;D=1310121210121212101210101212121212121212121212121010121012121212121012101212;CP=1;SP=3;R=220;O;m2;
-						# MS;P0=-4149;P2=-9098;P3=628;P4=-2076;D=3230343430343434303430303434343434343434343434343030343030343434343034303434;CP=3;SP=2;R=218;O;m2;
-		{
-			name						=> 'weather',
-			comment					=> 'temperature / humidity or other sensors',
-			id							=> '0.1',
-			one							=> [1,-6.5],
-			zero						=> [1,-3.3],
-			sync						=> [1,-14.4],
-			clockabs				=> '630',
-			format					=> 'twostate',	# not used now
-			preamble				=> 's',					# prepend to converted message
-			postamble				=> '00',				# Append to converted message
-			clientmodule		=> 'CUL_TCM97001',
-			#modulematch		=> '^s[A-Fa-f0-9]+',
-			length_min			=> '36',
 			length_max			=> '40',
 			paddingbits			=> '8',					# pad up to 8 bits, default is 4
 		},
+	"0.1"	=>	## other Sensors  (380 | 9650)
+						# CUL_TCM97001 Typ - AURIOL | Mebus
+						# MS;P1=416;P2=-9618;P3=-4610;P4=-2036;D=1213141313131313141313141314141414141414141313141314131414;CP=1;SP=2;R=220;O;m0;
+						# MS;P1=397;P2=-2033;P3=-4627;P4=-9630;D=1413121313131313121313121312121212121212121313121312131212;CP=1;SP=4;R=221;
+						# MS;P0=-9690;P3=354;P4=-4662;P5=-2107;D=3034343434343535343534343435353535353535353434353535343535;CP=3;SP=0;R=209;O;m2;
+						## LIDL Wetterstation
+						# https://github.com/RFD-FHEM/RFFHEM/issues/63
+						# MS;P1=367;P2=-2077;P4=-9415;P5=-4014;D=141515151515151515121512121212121212121212121212121212121212121212;CP=1;SP=4;O;
+		{
+			name						=> 'weather (v2)',
+			comment					=> 'temperature / humidity or other sensors',
+			id							=> '0.1',
+			one							=> [1,-12],
+			zero						=> [1,-6],
+			sync						=> [1,-26],
+			clockabs				=> -1,
+			format					=> 'twostate',		# not used now
+			preamble				=> 's',						# prepend to converted message
+			postamble				=> '00',					# Append to converted message
+			clientmodule		=> 'CUL_TCM97001',
+			#modulematch		=> '^s[A-Fa-f0-9]+',
+			length_min			=> '24',
+			length_max			=> '32',
+			paddingbits			=> '8',
+		},
+	"0.2"	=>	## other Sensors | for sensors how tol is runaway (260+tol | 9650)
+						# MS;P1=-2140;P2=309;P3=-4690;P4=-9695;D=2421232323232121232123232321212121212121212123212121232121;CP=2;SP=4;R=211;m1;
+						# MS;P0=-9703;P1=304;P2=-2133;P3=-4689;D=1012131312131212131213131312121212121212121212131312131212;CP=1;SP=0;R=208;
+						# MS;P0=138;P1=-2140;P2=315;P3=-9704;P4=-4713;P5=234;D=2321212421242454210424212421512121215121512124212121542121;CP=2;SP=3;R=210;
+		{
+			name						=> 'weather (v3)',
+			comment					=> 'temperature / humidity or other sensors',
+			id							=> '0.2',
+			one							=> [1,-18],
+			zero						=> [1,-9],
+			sync						=> [1,-37],
+			clockabs				=> -1,
+			format					=> 'twostate',		# not used now
+			preamble				=> 's',						# prepend to converted message
+			postamble				=> '00',					# Append to converted message
+			clientmodule		=> 'CUL_TCM97001',
+			#modulematch		=> '^s[A-Fa-f0-9]+',
+			length_min			=> '24',
+			length_max			=> '32',
+			paddingbits			=> '8',
+		},
+	"0.3"	=>	## Pollin PFR-130
+						# CUL_TCM97001 Typ - AURIOL | W174 
+						# MS;P0=-3890;P1=386;P2=-2191;P3=-8184;D=1312121212121012121212121012121212101012101010121012121210121210101210101012;CP=1;SP=3;R=20;O;
+						# MS;P0=-2189;P1=371;P2=-3901;P3=-8158;D=1310101010101210101010101210101010121210121212101210101012101012121012121210;CP=1;SP=3;R=20;O;
+						# Ventus W174
+						# MS;P3=-2009;P4=479;P5=-9066;P6=-4047;D=45434343464343434643464643464643434643464646434346464343434343434346464643;CP=4;SP=5;R=55;O;m2;
+		{
+			name					=> 'weather',
+			comment				=> 'temperature / humidity or other sensors | Pollin PFR-130, Ventus W174 ...',
+			id						=> '0.3',
+			one						=> [1,-10],
+			zero					=> [1,-5],
+			sync					=> [1,-21],	
+			clockabs			=> -1,
+			preamble			=> 's',				# prepend to converted message
+			postamble			=> '00',			# Append to converted message
+			clientmodule	=> 'CUL_TCM97001',
+			length_min		=> '36',
+			length_max		=> '42',
+			paddingbits		=> '8',				 # pad up to 8 bits, default is 4
+		}, 
 		"1"	=>	## Conrad RSL
 		{
 			name					=> 'Conrad RSL v1',
@@ -518,31 +566,31 @@
 			length_min		=> '19',
 			length_max		=> '23',					# not confirmed, length one more as MU Message
 		},
-	"20"	=>	## Livolo
-						# https://github.com/RFD-FHEM/RFFHEM/issues/29
-						# MU;P0=-195;P1=151;P2=475;P3=-333;D=0101010101 02 01010101010101310101310101010101310101 02 01010101010101010101010101010101010101 02 01010101010101010101010101010101010101 02 010101010101013101013101;CP=1;
-						#
-						# protocol sends 24 to 47 pulses per message.
-						# First pulse is the header and is 595 μs long. All subsequent pulses are either 170 μs (short pulse) or 340 μs (long pulse) long.
-						# Two subsequent short pulses correspond to bit 0, one long pulse corresponds to bit 1. There is no footer. The message is repeated for about 1 second.
-						#             _____________                 ___                 _______
-						# Start bit: |             |___|    bit 0: |   |___|    bit 1: |       |___|
-		{
-			name					=> 'Livolo',
-			comment				=> 'remote control / dimmmer / switch ...',
-			id						=> '20',
-			one						=> [3],
-			zero					=> [1],
-			start					=> [5],
-			clockabs			=> 110,						#can be 90-140
-			format				=> 'twostate',
-			preamble			=> 'u20#',				# prepend to converted message
-			#clientmodule	=> '',
-			#modulematch	=> '',
-			length_min		=> '16',
-			#length_max		=> '',						# missing
-			filterfunc		=> 'SIGNALduino_filterSign',
-		},
+	# "20"	=>	## Livolo
+						# # https://github.com/RFD-FHEM/RFFHEM/issues/29
+						# # MU;P0=-195;P1=151;P2=475;P3=-333;D=0101010101 02 01010101010101310101310101010101310101 02 01010101010101010101010101010101010101 02 01010101010101010101010101010101010101 02 010101010101013101013101;CP=1;
+						# #
+						# # protocol sends 24 to 47 pulses per message.
+						# # First pulse is the header and is 595 μs long. All subsequent pulses are either 170 μs (short pulse) or 340 μs (long pulse) long.
+						# # Two subsequent short pulses correspond to bit 0, one long pulse corresponds to bit 1. There is no footer. The message is repeated for about 1 second.
+						# #             _____________                 ___                 _______
+						# # Start bit: |             |___|    bit 0: |   |___|    bit 1: |       |___|
+		# {
+			# name					=> 'Livolo',
+			# comment				=> 'remote control / dimmmer / switch ...',
+			# id						=> '20',
+			# one						=> [3],
+			# zero					=> [1],
+			# start					=> [5],
+			# clockabs			=> 110,						#can be 90-140
+			# format				=> 'twostate',
+			# preamble			=> 'u20#',				# prepend to converted message
+			# #clientmodule	=> '',
+			# #modulematch	=> '',
+			# length_min		=> '16',
+			# #length_max		=> '',						# missing
+			# filterfunc		=> 'SIGNALduino_filterSign',
+		# },
 	"21"	=>	## Einhell Garagentor
 						# https://forum.fhem.de/index.php?topic=42373.0 | user have no RAWMSG
 						# static adress: Bit 1-28 | channel remote Bit 29-32 | repeats 31 | pause 20 ms
@@ -865,48 +913,8 @@
 			length_min			=> '40',
 			length_max			=> '41',
 	},
-	"38"	=>	## LIDL Wetterstation
-						# https://github.com/RFD-FHEM/RFFHEM/issues/63
-						# MS;P1=367;P2=-2077;P4=-9415;P5=-4014;D=141515151515151515121512121212121212121212121212121212121212121212;CP=1;SP=4;O;
-		{
-			name						=> 'weather',
-			comment					=> 'temperature / humidity or other sensors',
-			id							=> '38',
-			one							=> [1,-10],
-			zero						=> [1,-5],
-			sync						=> [1,-25],
-			clockabs				=> '360',
-			format					=> 'twostate',		# not used now
-			preamble				=> 's',						# prepend to converted message
-			postamble				=> '00',					# Append to converted message
-			clientmodule		=> 'CUL_TCM97001',
-			#modulematch		=> '^s[A-Fa-f0-9]+',
-			length_min			=> '32',
-			length_max			=> '32',
-			paddingbits			=> '8',
-		},
-	"38.1"	=>	## other Sensors
-							# CUL_TCM97001 Typ - AURIOL
-							# MS;P1=416;P2=-9618;P3=-4610;P4=-2036;D=1213141313131313141313141314141414141414141313141314131414;CP=1;SP=2;R=220;O;m0;
-							# MS;P1=397;P2=-2033;P3=-4627;P4=-9630;D=1413121313131313121313121312121212121212121313121312131212;CP=1;SP=4;R=221;
-							# MS;P0=-9690;P3=354;P4=-4662;P5=-2107;D=3034343434343535343534343435353535353535353434353535343535;CP=3;SP=0;R=209;O;m2;
-		{
-			name						=> 'weather',
-			comment					=> 'temperature / humidity or other sensors',
-			id							=> '38.1',
-			one							=> [1,-12.8],
-			zero						=> [1,-5.6],
-			sync						=> [1,-26.7],
-			clockabs				=> '360',
-			format					=> 'twostate',		# not used now
-			preamble				=> 's',						# prepend to converted message
-			postamble				=> '00',					# Append to converted message
-			clientmodule		=> 'CUL_TCM97001',
-			#modulematch		=> '^s[A-Fa-f0-9]+',
-			length_min			=> '28',
-			length_max			=> '32',
-			paddingbits			=> '8',
-		},
+		# "38"	=>	can use
+
 	"39"	=>	## X10 Protocol
 						# https://github.com/RFD-FHEM/RFFHEM/issues/65
 						# MU;P0=10530;P1=-2908;P2=533;P3=-598;P4=-1733;P5=767;D=0123242323232423242324232324232423242323232324232323242424242324242424232423242424232501232423232324232423242323242324232423232323242323232424242423242424242324232424242325012324232323242324232423232423242324232323232423232324242424232424242423242324242;CP=2;O;
@@ -1432,25 +1440,9 @@
 			length_max				=> '34',
 			postDemodulation	=> \&SIGNALduino_postDemo_WS7053,
 		},
-	"68"	=>	## Pollin PFR-130
-						# CUL_TCM97001 Typ - AURIOL
-						# MS;P0=-3890;P1=386;P2=-2191;P3=-8184;D=1312121212121012121212121012121212101012101010121012121210121210101210101012;CP=1;SP=3;R=20;O;
-						# MS;P0=-2189;P1=371;P2=-3901;P3=-8158;D=1310101010101210101010101210101010121210121212101210101012101012121012121210;CP=1;SP=3;R=20;O;
-		{
-			name					=> 'Pollin PFR-130',
-			comment				=> 'temperature sensor with rain',
-			id						=> '68',
-			one						=> [1,-10],
-			zero					=> [1,-5],
-			sync					=> [1,-21],	
-			clockabs			=> 380,
-			preamble			=> 's',				# prepend to converted message
-			postamble			=> '00',			# Append to converted message
-			clientmodule	=> 'CUL_TCM97001',
-			length_min		=> '36',
-			length_max		=> '42',
-			paddingbits		=> '8',				 # pad up to 8 bits, default is 4
-		}, 	
+
+		# "68"	=>	can use
+		
 	"69"	=>	## Hoermann HSM2, HSM4, HS1-868-BS (868 MHz)
 						# https://github.com/RFD-FHEM/RFFHEM/issues/149
 						# MU;P0=-508;P1=1029;P2=503;P3=-1023;P4=12388;D=01010232323232310104010101010101010102323231010232310231023232323231023101023101010231010101010232323232310104010101010101010102323231010232310231023232323231023101023101010231010101010232323232310104010101010101010102323231010232310231023232323231023101;CP=2;R=37;O;
