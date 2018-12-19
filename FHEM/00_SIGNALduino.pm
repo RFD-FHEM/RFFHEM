@@ -2818,7 +2818,6 @@ sub SIGNALduino_FW_Detail($@) {
   my ($FW_wname, $name, $room, $pageHash) = @_;
   
   my $hash = $defs{$name};
-  $glHash = $hash;
     
   my @dspec=devspec2array("DEF=.*fakelog");
   my $lfn = $dspec[0];
@@ -2947,7 +2946,6 @@ sub SIGNALduino_FW_saveWhitelist
 sub SIGNALduino_FW_deselectAll
 {
 	#my $hash = shift;
-	my $hash = $glHash;
 	my $name = $hash->{NAME};
 
 	SIGNALduino_Log3 $hash, 3, "$name: button deselectAll";
