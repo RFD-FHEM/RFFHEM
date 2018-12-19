@@ -1971,14 +1971,12 @@ sub SIGNALduino_moduleMatch
 		Debug "$name: modmatch passed for: $dmsg" if ($debug);
 		my $developID = SIGNALduino_getProtoProp($id,"developId","");
 		my $IDsNoDispatch = "," . InternalVal($name,"IDsNoDispatch","") . ",";
-			if ($IDsNoDispatch ne ",," && index($IDsNoDispatch, ",$id,") >= 0) {	# kein dispatch wenn die Id im Internal IDsNoDispatch steht
-				SIGNALduino_Log3 $name, 3, "$name: ID=$id skiped dispatch (developId=m). To use, please add $id to the attr whitelist_IDs";
-				return -1;
-			}
-			return 1; #   return 1 da modulematch gefunden wurde			
+		if ($IDsNoDispatch ne ",," && index($IDsNoDispatch, ",$id,") >= 0) {	# kein dispatch wenn die Id im Internal IDsNoDispatch steht
+			SIGNALduino_Log3 $name, 3, "$name: ID=$id skiped dispatch (developId=m). To use, please add $id to the attr whitelist_IDs";
+			return -1;
 		}
-		return 1;
-	}
+		return 1; #   return 1 da modulematch gefunden wurde			
+		}
 	return 0;
 }
 
