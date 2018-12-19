@@ -129,19 +129,19 @@
 			paddingbits			=> '8',
 		},
 	"0.3"	=>	## Pollin PFR-130
-						# CUL_TCM97001 Typ - AURIOL | W174 
+						# CUL_TCM97001 Typ - AURIOL | W174
 						# MS;P0=-3890;P1=386;P2=-2191;P3=-8184;D=1312121212121012121212121012121212101012101010121012121210121210101210101012;CP=1;SP=3;R=20;O;
 						# MS;P0=-2189;P1=371;P2=-3901;P3=-8158;D=1310101010101210101010101210101010121210121212101210101012101012121012121210;CP=1;SP=3;R=20;O;
 						# Ventus W174
 						# MS;P3=-2009;P4=479;P5=-9066;P6=-4047;D=45434343464343434643464643464643434643464646434346464343434343434346464643;CP=4;SP=5;R=55;O;m2;
 		{
-			name					=> 'weather',
+			name					=> 'weather (v4)',
 			comment				=> 'temperature / humidity or other sensors | Pollin PFR-130, Ventus W174 ...',
 			id						=> '0.3',
 			recfreq				=> '',
 			one						=> [1,-10],
 			zero					=> [1,-5],
-			sync					=> [1,-21],	
+			sync					=> [1,-21],
 			clockabs			=> -1,
 			preamble			=> 's',				# prepend to converted message
 			postamble			=> '00',			# Append to converted message
@@ -149,7 +149,7 @@
 			length_min		=> '36',
 			length_max		=> '42',
 			paddingbits		=> '8',				 # pad up to 8 bits, default is 4
-		}, 
+		},
 		"1"	=>	## Conrad RSL
 		{
 			name					=> 'Conrad RSL v1',
@@ -219,16 +219,15 @@
 			zero							=> [1,-3.8],
 			float							=> [1,-1],			# fuer Gruppentaste (nur bei ITS-150,ITR-3500 und ITR-300), siehe Kommentar in sub SIGNALduino_bit2itv1
 			sync							=> [1,-44],
-			clockabs					=> -1,					# -1=auto	
+			clockabs					=> -1,					# -1=auto
 			format						=> 'twostate',	# not used now
-			preamble					=> 'i',			
+			preamble					=> 'i',
 			clientmodule			=> 'IT',
 			modulematch				=> '^i......',
 			length_min				=> '24',
 			length_max				=> '24',				# Don't know maximal lenth of a valid message
 			postDemodulation	=> \&SIGNALduino_bit2itv1,
 		},
-		
 	"4"	=>	## arctech2
 					# need more Device Infos / User Message
 		{
@@ -258,7 +257,7 @@
 					# A AN:
 					# MU;P0=132;P1=-4680;P2=508;P3=-1775;P4=287;P6=192;D=123434343434343634343436363434343636343434363634343036363434343;CP=4;R=2;
 					# A AUS:
-					# MU;P0=-1692;P1=132;P2=194;P4=355;P5=474;P7=-31892;D=010202040505050505050404040404040404040470;CP=4;R=27; 
+					# MU;P0=-1692;P1=132;P2=194;P4=355;P5=474;P7=-31892;D=010202040505050505050404040404040404040470;CP=4;R=27;
 		{
 			name						=> 'Unitec',
 			comment					=> 'remote control model 6899/45108',
@@ -309,7 +308,7 @@
 			modulematch			=> '^P7#.{6}F.{2}',
 			length_min			=> '35',
 			length_max			=> '40',
-		}, 
+		},
 	"8"	=>	## TX3 (ITTX) Protocol
 					# MU;P0=-1046;P1=1339;P2=524;P3=-28696;D=010201010101010202010101010202010202020102010101020101010202020102010101010202310101010201020101010101020201010101020201020202010201010102010101020202010201010101020;CP=2;R=4;
 		{
@@ -337,7 +336,7 @@
 			zero						=> [3,-2],
 			one							=> [1,-2],
 			#float					=> [-1,3],			# not full supported now, for later use
-			#sync						=> [1,-8],			# 
+			#sync						=> [1,-8],			#
 			clockabs				=> 480,					# -1 = auto undef=noclock
 			format					=> 'pwm',				# tristate can't be migrated from bin into hex!
 			preamble				=> 'P9#',				# prepend to converted message
@@ -786,7 +785,7 @@
 			clockabs				=> 235,						# ca 220
 			format					=> 'twostate',		# there is a pause puls between words
 			preamble				=> 'P29#',				# prepend to converted message
-			clientmodule		=> 'SD_UT', 
+			clientmodule		=> 'SD_UT',
 			modulematch			=> '^P29#.{3}',
 			length_min			=> '12',
 			length_max			=> '12',
@@ -806,7 +805,7 @@
 			clockabs			=> 330,						# ca 300 us
 			format				=> 'twostate',		# there is a pause puls between words
 			preamble			=> 'P30#',				# prepend to converted message
-			clientmodule	=> 'SD_UT', 
+			clientmodule	=> 'SD_UT',
 			modulematch		=> '^P30#.{3}',
 			length_min		=> '12',
 			length_max		=> '12',				# message has only 10 bit but is paddet to 12
@@ -896,7 +895,7 @@
 			start					=> [1],
 			pause					=> [-15],   # 9900
 			clockabs			=> '660',
-			format				=> 'twostate', 
+			format				=> 'twostate',
 			preamble			=> 'P34#',
 			clientmodule	=> 'SD_UT',
 			#modulematch	=> '',
@@ -912,7 +911,7 @@
 			one								=> [1,-4],
 			zero							=> [3.4,-1],
 			sync							=> [1,-18],
-			clockabs					=> '280',		
+			clockabs					=> '280',
 			format						=> 'twostate',		# not used now
 			preamble					=> 'ih',					# prepend to converted message
 			postamble					=> '',						# Append to converted message
@@ -930,7 +929,7 @@
 			one							=> [1,-3],
 			zero						=> [1,-1],
 			start						=> [20,-20],
-			clockabs				=> '500',		
+			clockabs				=> '500',
 			format					=> 'twostate',		# not used now
 			preamble				=> 'u36#',				# prepend to converted message
 			postamble				=> '',						# Append to converted message
@@ -953,10 +952,10 @@
 			one							=> [2,-1],
 			zero						=> [1,-2],
 			start						=> [3,-3,3,-3],
-			clockabs				=> '250',		
+			clockabs				=> '250',
 			format					=> 'twostate',		# not used now
 			preamble				=> 'W37#',				# prepend to converted message
-			clientmodule		=> 'SD_WS', 
+			clientmodule		=> 'SD_WS',
 			length_min			=> '40',
 			length_max			=> '41',
 	},
@@ -972,14 +971,14 @@
 			one								=> [1,-3],
 			zero							=> [1,-1],
 			start							=> [17,-7],
-			clockabs					=> 560, 
-			format						=> 'twostate', 
+			clockabs					=> 560,
+			format						=> 'twostate',
 			preamble					=> '', # prepend to converted message
 			clientmodule			=> 'RFXX10REC',
 			#modulematch		=> '^TX......',
 			length_min				=> '32',
 			length_max				=> '44',
-			paddingbits				=> '8',		
+			paddingbits				=> '8',
 			postDemodulation	=> \&SIGNALduino_lengtnPrefix,
 			filterfunc				=> 'SIGNALduino_compPattern',
 		},
@@ -995,7 +994,7 @@
 			one							=> [3,-2],
 			zero						=> [1,-3],
 			start						=> [1,-2],
-			clockabs				=> 250, 
+			clockabs				=> 250,
 			preamble				=> 'u40#',	# prepend to converted message
 			#clientmodule		=> '',
 			#modulematch		=> '',
@@ -1024,7 +1023,7 @@
 			zero					=> [1,-3],
 			one						=> [3,-1],
 			sync					=> [1,-14],
-			clockabs			=> 500, 
+			clockabs			=> 500,
 			format				=> 'twostate',
 			preamble			=> 'P41#', # prepend to converted message
 			clientmodule	=> 'SD_BELL',
@@ -1035,7 +1034,7 @@
 	"42"	=>	## Pollin 94-551227
 						# https://github.com/RFD-FHEM/RFFHEM/issues/390
 						# MU;P0=1446;P1=-487;P2=477;D=0101012121212121212121212101010101212121212121212121210101010121212121212121212121010101012121212121212121212101010101212121212121212121210101010121212121212121212121010101012121212121212121212101010101212121212121212121210101010121212121212121212121010;CP=2;R=93;O;
-						# MU;P0=-112;P1=1075;P2=-511;P3=452;P5=1418;D=01212121232323232323232323232525252523232323232323232323252525252323232323232323232325252525;CP=3;R=77; 
+						# MU;P0=-112;P1=1075;P2=-511;P3=452;P5=1418;D=01212121232323232323232323232525252523232323232323232323252525252323232323232323232325252525;CP=3;R=77;
 		{
 			name					=> 'wireless doorbell',
 			comment				=> 'Pollin 94-551227',
@@ -1059,7 +1058,7 @@
 			id						=> '43',
 			recfreq				=> '',
 			clockrange		=> [610,680],								# min , max
-			format				=> 'manchester', 
+			format				=> 'manchester',
 			preamble			=> 'Ys',
 			clientmodule	=> 'SOMFY',									# not used now
 			modulematch		=> '^Ys[0-9A-F]{14}',
@@ -1102,7 +1101,7 @@
 			length_min		=> '64',
 			length_max		=> '72',
 		},
-	"45"	=>	## Revolt 
+	"45"	=>	## Revolt
 						#	MU;P0=-8320;P1=9972;P2=-376;P3=117;P4=-251;P5=232;D=012345434345434345454545434345454545454543454343434343434343434343434543434345434343434545434345434343434343454343454545454345434343454345434343434343434345454543434343434345434345454543454343434543454345434545;CP=3;R=2
 		{
 			name							=> 'Revolt',
@@ -1111,9 +1110,9 @@
 			one								=> [2,-2],
 			zero							=> [1,-2],
 			start							=> [83,-3],
-			clockabs					=> 120, 
+			clockabs					=> 120,
 			preamble					=> 'r', # prepend to converted message
-			clientmodule			=> 'Revolt', 
+			clientmodule			=> 'Revolt',
 			modulematch				=> '^r[A-Fa-f0-9]{22}',
 			length_min				=> '84',
 			length_max				=> '120',
@@ -1169,7 +1168,7 @@
 			comment					=> 'Funk-Thermometer Joker TFA 30.3055.01',
 			id							=> '48',
 			recfreq         => '',
-			clockabs				=> 250, 						# In real it is 500 but this leads to unprceise demodulation 
+			clockabs				=> 250, 						# In real it is 500 but this leads to unprceise demodulation
 			one							=> [-4,6],
 			zero						=> [-4,2],
 			start						=> [-6,2],
@@ -1211,8 +1210,8 @@
 			zero						=> [3,-2],
 			one							=> [1,-2],
 			#	start					=> [1,-25],				# Wenn das startsignal empfangen wird, fehlt das 1 bit
-			format					=> 'twostate',	
-			preamble				=> 'W50#',				# prepend to converted message	
+			format					=> 'twostate',
+			preamble				=> 'W50#',				# prepend to converted message
 			clientmodule		=> 'SD_WS',
 			modulematch			=> '^W50#.*',
 			length_min			=> '47',
@@ -1241,6 +1240,10 @@
 	"52"	=>	## Oregon Scientific PIR Protocol
 						# https://forum.fhem.de/index.php/topic,63604.msg548256.html#msg548256
 						# MC;LL=-1045;LH=1153;SL=-494;SH=606;D=FFFED518;C=549;L=30;
+						#
+						# FFFED5 = Adresse, die per DIP einstellt wird, FFF ändert sich nie
+						# 1 = Kanal, per gesondertem DIP, bei mir bei beiden 1 (CH 1) oder 3 (CH 2)
+						# C = wechselt, 0, 4, 8, C - dann fängt es wieder mit 0 an und wiederholt sich bei jeder Bewegung
 		{
 			name						=> 'Oregon Scientific PIR',
 			id							=> '52',
@@ -1308,7 +1311,7 @@
 			method					=> \&SIGNALduino_MCRAW,	# Call to process this message
 			polarity				=> 'invert',
 		},
-	"58"	=>	## TFA 30.3208.0 
+	"58"	=>	## TFA 30.3208.0
 		{
 			name						=> 'TFA 30.3208.0',
 			comment					=> 'temperature / humidity sensor',
@@ -1348,13 +1351,13 @@
 	"60"	=>	## ELV, LA CROSSE (WS2000/WS7000)
 						# MU;P0=32001;P1=-381;P2=835;P3=354;P4=-857;D=01212121212121212121343421212134342121213434342121343421212134213421213421212121342121212134212121213421212121343421343430;CP=2;R=53;
 						# tested sensors:   WS-7000-20, AS2000, ASH2000, S2000, S2000I, S2001A, S2001IA,
-						#                   ASH2200, S300IA, S2001I, S2000ID, S2001ID, S2500H 
+						#                   ASH2200, S300IA, S2001I, S2000ID, S2001ID, S2500H
 						# not tested:       AS3, S2000W, S2000R, WS7000-15, WS7000-16, WS2500-19, S300TH, S555TH
 						# das letzte Bit (1) und mehrere Bit (0) Preambel fehlen meistens
 						#  ___        _
 						# |   |_     | |___
 						#  Bit 0      Bit 1
-						# kurz 366 mikroSek / lang 854 mikroSek / gesamt 1220 mikroSek - Sollzeiten 
+						# kurz 366 mikroSek / lang 854 mikroSek / gesamt 1220 mikroSek - Sollzeiten
 		{
 			name								=> 'WS2000',
 			comment							=> 'Series WS2000/WS7000 of various sensors',
@@ -1379,7 +1382,7 @@
 						#  __         __
 						# |  |__     |  |____
 						#  Bit 0      Bit 1
-						# kurz 400 mikroSek / lang 800 mikroSek / gesamt 800 mikroSek = 0, gesamt 1200 mikroSek = 1 - Sollzeiten 
+						# kurz 400 mikroSek / lang 800 mikroSek / gesamt 800 mikroSek = 0, gesamt 1200 mikroSek = 1 - Sollzeiten
 		{
 			name					=> 'FS10',
 			comment				=> 'remote control (434Mhz)',
@@ -1398,7 +1401,7 @@
 			length_max		=> '48',				# eigentlich 46
 		},
 	"62"	=>	## Clarus_Switch
-						# MU;P0=-5893;P4=-634;P5=498;P6=-257;P7=116;D=45656567474747474745656707456747474747456745674567456565674747474747456567074567474747474567456745674565656747474747474565670745674747474745674567456745656567474747474745656707456747474747456745674567456565674747474747456567074567474747474567456745674567;CP=7;O;		
+						# MU;P0=-5893;P4=-634;P5=498;P6=-257;P7=116;D=45656567474747474745656707456747474747456745674567456565674747474747456567074567474747474567456745674565656747474747474565670745674747474745674567456745656567474747474745656707456747474747456745674567456565674747474747456567074567474747474567456745674567;CP=7;O;
 		{
 			name					=> 'Clarus_Switch',
 			id						=> '62',
@@ -1409,7 +1412,7 @@
 			clockabs			=> 189,
 			preamble			=> 'i',				# prepend to converted message
 			clientmodule	=> 'IT',
-			#modulematch	=> '', 
+			#modulematch	=> '',
 			length_min		=> '24',
 			length_max		=> '24',
 		},
@@ -1425,11 +1428,11 @@
 			developId			=> 'y',
 			one						=> [1],
 			zero					=> [0],
-			clockabs			=> 800, 
+			clockabs			=> 800,
 			syncabs				=> '6700',	# Special field for filterMC function
 			preamble			=> 'u63',		# prepend to converted message
-			#clientmodule	=> '', 
-			#modulematch	=> '', 
+			#clientmodule	=> '',
+			#modulematch	=> '',
 			length_min		=> '24',
 			#length_max		=> '',			# missing
 			filterfunc		=> 'SIGNALduino_filterMC',
@@ -1517,14 +1520,14 @@
 		},
 
 		# "68"	=>	can use
-		
+
 	"69"	=>	## Hoermann HSM2, HSM4, HS1-868-BS (868 MHz)
 						# https://github.com/RFD-FHEM/RFFHEM/issues/149
 						# MU;P0=-508;P1=1029;P2=503;P3=-1023;P4=12388;D=01010232323232310104010101010101010102323231010232310231023232323231023101023101010231010101010232323232310104010101010101010102323231010232310231023232323231023101023101010231010101010232323232310104010101010101010102323231010232310231023232323231023101;CP=2;R=37;O;
 						# Remote control HS1-868-BS (one button):
 						# https://github.com/RFD-FHEM/RFFHEM/issues/344
 						# MU;P0=-578;P1=1033;P2=506;P3=-1110;P4=13632;D=0101010232323101040101010101010101023232323102323101010231023102310231010232323101010101010101010232323101040101010101010101023232323102323101010231023102310231010232323101010101010101010232323101040101010101010101023232323102323101010231023102310231010;CP=2;R=77;
-						# MU;P0=-547;P1=1067;P2=553;P3=-1066;P4=13449;D=0101010101010232323101040101010101010101023232323102323101010231023102310231010232323101010101010101010232323101040101010101010101023232323102323101010231023102310231010232323101010101010101010232323101040101010101010101023232323102323101010231023102310;CP=2;R=71;	
+						# MU;P0=-547;P1=1067;P2=553;P3=-1066;P4=13449;D=0101010101010232323101040101010101010101023232323102323101010231023102310231010232323101010101010101010232323101040101010101010101023232323102323101010231023102310231010232323101010101010101010232323101040101010101010101023232323102323101010231023102310;CP=2;R=71;
 						# https://forum.fhem.de/index.php/topic,71877.msg642879.html (HSM4, Taste 1-4)
 						# MU;P0=-332;P1=92;P2=-1028;P3=12269;P4=-510;P5=1014;P6=517;D=01234545454545454545462626254546262546254626262626254625454625454546254545454546262626262545434545454545454545462626254546262546254626262626254625454625454546254545454546262626262545434545454545454545462626254546262546254626262626254625454625454546254545;CP=6;R=37;O;
 						# MU;P0=509;P1=-10128;P2=1340;P3=-517;P4=1019;P5=-1019;P6=12372;D=01234343434343434343050505434305054305430505050505430543430543434305434343430543050505054343634343434343434343050505434305054305430505050505430543430543434305434343430543050505054343634343434343434343050505434305054305430505050505430543430543434305434343;CP=0;R=52;O;
@@ -1674,11 +1677,11 @@
 			recfreq				=> '',
 			one						=> [3,-1],
 			zero					=> [1,-3],
-			clockabs			=> 500, 
+			clockabs			=> 500,
 			format				=> 'twostate',
 			developId			=> 'y',
 			clientmodule	=> 'SD_RSL',
-			preamble			=> 'P1#',  
+			preamble			=> 'P1#',
 			modulematch		=> '^P1#[A-Fa-f0-9]{8}',
 			length_min		=> '32',
 			length_max 		=> '40',
@@ -1721,7 +1724,7 @@
 			comment				=> 'self build sensor',
 			id						=> '77',
 			recfreq				=> '',
-			developId			=> 'y', 
+			developId			=> 'y',
 			zero					=> [4,-6],
 			one						=> [1,-6],
 			clockabs			=> 250,
@@ -1741,7 +1744,7 @@
 			comment				=> 'geiger blind motors',
 			id						=> '78',
 			recfreq				=> '',
-			developId			=> 'y', 
+			developId			=> 'y',
 			zero					=> [1,-6.6],
 			one						=> [6.6,-1],
 			start					=> [-53],
@@ -1749,7 +1752,7 @@
 			format				=> 'twostate',
 			preamble			=> 'u78#',			# prepend to converted message
 			clientmodule	=> 'SIGNALduino_un',
-			#modulematch	=> '^TX......', 
+			#modulematch	=> '^TX......',
 			length_min		=> '14',
 			length_max		=> '18',
 			paddingbits		=> '2'				 # pad 1 bit, default is 4
@@ -1772,7 +1775,7 @@
 			one						=> [-1,2],
 			start					=> [-15,1],
 			clockabs			=> 330,
-			format				=> 'twostate',	# 
+			format				=> 'twostate',	#
 			preamble			=> 'P79#',			# prepend to converted message
 			clientmodule	=> 'SD_BELL',
 			modulematch		=> '^P79#.*',
@@ -1798,7 +1801,7 @@
 			postDemodulation	=> \&SIGNALduino_postDemo_EM,
 		},
 	"81"	=>	## Remote control SA-434-1 based on HT12E @ elektron-bbs
-						# MU;P0=-485;P1=188;P2=-6784;P3=508;P5=1010;P6=-974;P7=-17172;D=0123050505630505056305630563730505056305050563056305637305050563050505630563056373050505630505056305630563730505056305050563056305637305050563050505630563056373050505630505056305630563730505056305050563056305637305050563050505630563056373050505630505056;CP=3;R=0;																																																																																				   
+						# MU;P0=-485;P1=188;P2=-6784;P3=508;P5=1010;P6=-974;P7=-17172;D=0123050505630505056305630563730505056305050563056305637305050563050505630563056373050505630505056305630563730505056305050563056305637305050563050505630563056373050505630505056305630563730505056305050563056305637305050563050505630563056373050505630505056;CP=3;R=0;
 						# MU;P0=-1756;P1=112;P2=-11752;P3=496;P4=-495;P5=998;P6=-988;P7=-17183;D=0123454545634545456345634563734545456345454563456345637345454563454545634563456373454545634545456345634563734545456345454563456345637345454563454545634563456373454545634545456345634563734545456345454563456345637345454563454545634563456373454545634545456;CP=3;R=0;
 						#      __        ____
 						# ____|  |    __|    |
@@ -1824,7 +1827,7 @@
 						# https://github.com/RFD-FHEM/RFFHEM/issues/257
 						# MU;P0=-32001;P1=435;P2=-379;P4=-3201;P5=831;P6=-778;D=01212121212121214525252525252521652161452525252525252161652141652521652521652521614165252165252165216521416521616165216525216141652161616521652165214165252161616521652161416525216161652161652141616525252165252521614161652525216525216521452165252525252525;CP=1;O;
 						# the messages received are usual missing 12 bits at the end for some reason. So the checksum byte is missing.
-						# Fernotron protocol is unidirectional. Here we can only receive messages from controllers send to receivers. 
+						# Fernotron protocol is unidirectional. Here we can only receive messages from controllers send to receivers.
 		{
 			name					=> 'Fernotron',
 			comment				=> 'shutters and light switches',
@@ -1856,10 +1859,10 @@
 			one						=> [-2,1],
 			zero					=> [-1,2],
 			start					=> [-35,1],				# calculated 12126,31579 µS
-			clockabs			=> 335,						# calculated ca 336,8421053 µS short - 673,6842105µS long 
+			clockabs			=> 335,						# calculated ca 336,8421053 µS short - 673,6842105µS long
 			format				=> 'twostate',		# there is a pause puls between words
 			preamble			=> 'P83#',				# prepend to converted message
-			clientmodule	=> 'SD_UT', 
+			clientmodule	=> 'SD_UT',
 			modulematch		=> '^P83#.{3}',
 			length_min		=> '12',
 			length_max		=> '12',
@@ -1881,7 +1884,7 @@
 			one						=> [3,-1],
 			zero					=> [1,-3],
 			start					=> [4,-4,4,-4,4,-4],
-			clockabs			=> 215, 
+			clockabs			=> 215,
 			format				=> 'twostate',
 			preamble			=> 'W84#',						# prepend to converted message
 			postamble			=> '',								# append to converted message
@@ -1902,7 +1905,7 @@
 			one						=> [2,-1],
 			zero					=> [1,-2],
 			start					=> [3,-3,3,-3,3,-3],
-			clockabs			=> 250, 
+			clockabs			=> 250,
 			format				=> 'twostate',
 			preamble			=> 'W85#',					# prepend to converted message
 			postamble			=> '',							# append to converted message
@@ -1969,7 +1972,7 @@
 			clockabs			=> 400,						# ca 400us
 			developId			=> 'y',
 			format				=> 'twostate',
-			preamble			=> 'u87#',				# prepend to converted message	
+			preamble			=> 'u87#',				# prepend to converted message
 			#clientmodule	=> '',
 			#modulematch	=> '',
 			length_min		=> '72',					# 72
@@ -2022,24 +2025,26 @@
 		},
 
 	"90"	=>	## socket remote -  mumbi m-fs300 / manax MX-RCS250
-						# MS;P0=-9964;P1=273;P4=-866;P5=792;P6=-343;D=10145614141414565656561414561456561414141456565656561456141414145614;CP=1;SP=0;R=35;O;m2; //A  AN
-						# MS;P0=300;P1=-330;P2=-10160;P3=804;P7=-840;D=02073107070707313131310707310731310707070731313107310731070707070707;CP=0;SP=2;R=23;O;m1 //A  AUS
-						# MS;P1=260;P2=-873;P3=788;P4=-351;P6=-10157;D=16123412121212343434341212341234341212121234341234341234121212341212;CP=1;SP=6;R=21;O;m2; // B AN
+						# https://forum.fhem.de/index.php/topic,94327.15.html
+						# MS;P0=-9964;P1=273;P4=-866;P5=792;P6=-343;D=10145614141414565656561414561456561414141456565656561456141414145614;CP=1;SP=0;R=35;O;m2;		//A AN
+						# MS;P0=300;P1=-330;P2=-10160;P3=804;P7=-840;D=02073107070707313131310707310731310707070731313107310731070707070707;CP=0;SP=2;R=23;O;m1;	//A	AUS
+						# MS;P1=260;P2=-873;P3=788;P4=-351;P6=-10157;D=16123412121212343434341212341234341212121234341234341234121212341212;CP=1;SP=6;R=21;O;m2;	//B AN
+						# MS;P1=268;P3=793;P4=-337;P6=-871;P7=-10159;D=17163416161616343434341616341634341616161634341616341634161616343416;CP=1;SP=7;R=24;O;m2;	//B	AUS
 						# need more Device Infos / User Message
 		{
-			name							=> 'm-fs300',
-			comment						=> 'IT remote control mumbi FS300, MX-RCS250',
-			id								=> '90',
+			name			=> 'm-fs300',
+			comment			=> 'IT remote control mumbi FS300, MX-RCS250',
+			id			=> '90',
 			recfreq						=> '',
-			one								=> [3,-1],
-			zero							=> [1,-3],
-			sync							=> [1,-38],
-			clockabs					=> -1,					# -1=auto	
-			format						=> 'twostate',			# not used now
-			preamble					=> 'u#90',			
-			length_min				=> '33',
-			length_max				=> '36',		
-			developId					=> 'p',		
+			one			=> [3,-1],
+			zero			=> [1,-3],
+			sync			=> [1,-38],
+			clockabs		=> -1,						# -1=auto
+			format			=> 'twostate',
+			preamble		=> 'u90#',
+			length_min		=> '33',
+			length_max		=> '36',
+			developId		=> 'p',
 		},
 
 
