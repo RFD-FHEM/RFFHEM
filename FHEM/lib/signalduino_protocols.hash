@@ -219,6 +219,7 @@
 			length_max				=> '24',				# Don't know maximal lenth of a valid message
 			postDemodulation	=> \&SIGNALduino_bit2itv1,
 		},
+		
 	"4"	=>	## arctech2
 					# need more Device Infos / User Message
 		{
@@ -1923,4 +1924,26 @@
 			length_min   => '40',
 			length_max   => '40',
 		},
+
+	"90"	=>	## socket remote -  mumbi m-fs300 / manax MX-RCS250
+						# MS;P0=-9964;P1=273;P4=-866;P5=792;P6=-343;D=10145614141414565656561414561456561414141456565656561456141414145614;CP=1;SP=0;R=35;O;m2; //A  AN
+						# MS;P0=300;P1=-330;P2=-10160;P3=804;P7=-840;D=02073107070707313131310707310731310707070731313107310731070707070707;CP=0;SP=2;R=23;O;m1 //A  AUS
+						# MS;P1=260;P2=-873;P3=788;P4=-351;P6=-10157;D=16123412121212343434341212341234341212121234341234341234121212341212;CP=1;SP=6;R=21;O;m2; // B AN
+						# need more Device Infos / User Message
+		{
+			name							=> 'm-fs300',
+			comment							=> 'IT remote control mumbi FS300, MX-RCS250',
+			id								=> '90',
+			one								=> [3,-1],
+			zero							=> [1,-3],
+			sync							=> [1,-38],
+			clockabs						=> -1,					# -1=auto	
+			format							=> 'twostate',			# not used now
+			preamble						=> 'u#90',			
+			length_min						=> '33',
+			length_max						=> '36',		
+			developId						=> 'p',		
+		},
+
+
 );
