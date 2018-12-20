@@ -1972,7 +1972,7 @@ sub SIGNALduino_moduleMatch
 		my $developID = SIGNALduino_getProtoProp($id,"developId","");
 		my $IDsNoDispatch = "," . InternalVal($name,"IDsNoDispatch","") . ",";
 		if ($IDsNoDispatch ne ",," && index($IDsNoDispatch, ",$id,") >= 0) {	# kein dispatch wenn die Id im Internal IDsNoDispatch steht
-			SIGNALduino_Log3 $name, 3, "$name: ID=$id skiped dispatch (developId=m). To use, please add $id to the attr whitelist_IDs";
+			SIGNALduino_Log3 $name, 3, "$name: ID=$id skipped dispatch (developId=m). To use, please add $id to the attr whitelist_IDs";
 			return -1;
 		}
 		return 1; #   return 1 da modulematch gefunden wurde			
@@ -2959,11 +2959,11 @@ sub SIGNALduino_IdList($@)
 					}
 				}
 				elsif ($ProtocolListSIGNALduino{$id}{developId} eq "p") {
-					SIGNALduino_Log3 $name, 3, "$name IdList: ID=$id skiped (developId=p), not for user";
+					SIGNALduino_Log3 $name, 3, "$name IdList: ID=$id skipped (developId=p), not for user";
 					next;
 				}
 				elsif ($ProtocolListSIGNALduino{$id}{developId} eq "y" && $yflag == 0) {	# skip wenn develop nicht im Attribut whitelist steht
-					#SIGNALduino_Log3 $name, 3, "$name: IdList ID=$id skiped (developId=y)";
+					#SIGNALduino_Log3 $name, 3, "$name: IdList ID=$id skipped (developId=y)";
 					push (@skippedDevId, $id);
 					next;
 				}
