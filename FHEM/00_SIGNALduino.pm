@@ -2988,9 +2988,17 @@ sub SIGNALduino_IdList($@)
 	@msIdList = sort {$a <=> $b} @msIdList;
 	@muIdList = sort {$a <=> $b} @muIdList;
 	@mcIdList = sort {$a <=> $b} @mcIdList;
-	@skippedDevId = sort @skippedDevId;
-	@skippedBlackId = sort @skippedBlackId;
-	@devModulId = sort  @devModulId;
+	
+	sub SIGNALduino_normalisedSort
+	{
+	    $a =~ /(\d).?(\d)/; 
+	    $b =~ /(\d).?(\d)/;
+	    $a <=> $b;
+	}
+
+	@skippedDevId = sort SIGNALduino_normalisedSort @skippedDevId;
+	@skippedBlackId = sort SIGNALduino_normalisedSort @skippedBlackId;
+	@devModulId = sort SIGNALduino_normalisedSort @devModulId;
 
 	SIGNALduino_Log3 $name, 3, "$name: IDlist MS @msIdList";
 	SIGNALduino_Log3 $name, 3, "$name: IDlist MU @muIdList";
