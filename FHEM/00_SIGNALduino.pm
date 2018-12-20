@@ -2988,9 +2988,9 @@ sub SIGNALduino_IdList($@)
 	@msIdList = sort {$a <=> $b} @msIdList;
 	@muIdList = sort {$a <=> $b} @muIdList;
 	@mcIdList = sort {$a <=> $b} @mcIdList;
-	@skippedDevId = sort {$a <=> $b} @skippedDevId;
-	@skippedBlackId = sort {$a <=> $b} @skippedBlackId;
-	@devModulId = sort {$a <=> $b} @devModulId;
+	@skippedDevId = sort @skippedDevId;
+	@skippedBlackId = sort @skippedBlackId;
+	@devModulId = sort  @devModulId;
 
 	SIGNALduino_Log3 $name, 3, "$name: IDlist MS @msIdList";
 	SIGNALduino_Log3 $name, 3, "$name: IDlist MU @muIdList";
