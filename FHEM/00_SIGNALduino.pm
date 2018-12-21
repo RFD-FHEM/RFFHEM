@@ -2909,10 +2909,10 @@ sub SIGNALduino_IdList($@)
 	
 	if ($aVal eq "" || substr($aVal,0 ,1) eq '#') {		# whitelist nicht aktiv
 		if ($yflag == 1) {
-			SIGNALduino_Log3 $name, 3, "$name IdList attr whitelist disabled (all IDs active, except blacklist): $aVal";
+			SIGNALduino_Log3 $name, 3, "$name IdList attr whitelist disabled or not defined (all IDs are enabled, except blacklist): $aVal";
 		}
 		else {
-			SIGNALduino_Log3 $name, 3, "$name IdList attr whitelist disabled (all IDs active, except blacklist and developID): $aVal";
+			SIGNALduino_Log3 $name, 3, "$name IdList attr whitelist disabled or not defined (all IDs are enabled, except blacklist and instable developIDs): $aVal";
 		}
 	}
 	else {
@@ -2959,7 +2959,7 @@ sub SIGNALduino_IdList($@)
 					}
 				}
 				elsif ($ProtocolListSIGNALduino{$id}{developId} eq "p") {
-					SIGNALduino_Log3 $name, 3, "$name IdList: ID=$id skipped (developId=p), caution, protocol can cause crashes, use only if advised to do";
+					SIGNALduino_Log3 $name, 5, "$name IdList: ID=$id skipped (developId=p), caution, protocol can cause crashes, use only if advised to do";
 					next;
 				}
 				elsif ($ProtocolListSIGNALduino{$id}{developId} eq "y" && $yflag == 0) {	# skip wenn develop nicht im Attribut whitelist steht
@@ -2999,7 +2999,7 @@ sub SIGNALduino_IdList($@)
 	SIGNALduino_Log3 $name, 3, "$name: IDlist development skipped = @skippedDevId" if (scalar @skippedDevId > 0);
 	if (scalar @devModulId > 0)
 	{
-		SIGNALduino_Log3 $name, 3, "$name: IDlist, develop module used (dispatch must with the whitelist_IDs activated) = @devModulId";
+		SIGNALduino_Log3 $name, 3, "$name: IDlist, development protocol is active (to activate dispatch to not finshed logical module, enable desired protocol via whitelistIDs) = @devModulId";
 		$hash->{IDsNoDispatch} = join(",", @devModulId);
 	}
 	
