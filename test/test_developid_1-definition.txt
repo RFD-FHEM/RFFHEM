@@ -52,19 +52,29 @@ defmod test_developid_1 UnitTest dummyDuino (
 		$regex_matched=0;
 		
 	};
-	SKIP: {
-		skip "debugging";
 	subtest 'SIGNALduino_IdList developid "y" skip scenarios' => sub {
 		$local_ProtocolListSIGNALduino->{'9999'}{developId}="y";
 		plan tests => 3;
 		$use_like=1;
-		$msg="development is empty" ;
+		$msg="development attr is empty" ;
 		SIGNALduino_IdList("x:$target","","","");
-		$msg="development has other y75" ;
-		SIGNALduino_IdList("x:$target","","","y75"); 
-		$msg="development has m9999" ;
+		ok($regex_matched,$msg) or diag("check log entrys for skipped with id 9999, they where not found");
+		$regex_matched=0;
+
+		$msg="development attr should enable another protocol y75" ;
+		SIGNALduino_IdList("x:$target","","","y75");
+		ok($regex_matched,$msg) or diag("check log entrys for skipped with id 9999, they where not found");
+		$regex_matched=0;
+
+		
+		$msg="development attr should enable another protocol m9999" ;
 		SIGNALduino_IdList("x:$target","","","m9999");  
+		ok($regex_matched,$msg) or diag("check log entrys for skipped with id 9999, they where not found");
+		$regex_matched=0;
 	};
+		SKIP: {
+		skip "debugging";
+
 	subtest 'SIGNALduino_IdList developid "p" skip scenarios' => sub {
 		$local_ProtocolListSIGNALduino->{'9999'}{developId}="p";
 		plan tests => 3;
