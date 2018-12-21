@@ -2939,7 +2939,7 @@ sub SIGNALduino_IdList($@)
 	my $id;
 	foreach $id (keys %ProtocolListSIGNALduino)
 	{
-		if ($wflag == 1)				# whitelist aktive
+		if ($wflag == 1)				# whitelist active
 		{
 			next if (!exists($WhitelistIDs{$id}))		# Id wurde in der whitelist nicht gefunden
 		}
@@ -2951,7 +2951,7 @@ sub SIGNALduino_IdList($@)
 			}
 		
 			# wenn es keine developId gibt, dann die folgenden Abfragen ueberspringen
-			if (defined($ProtocolListSIGNALduino{$id}{developId}))
+			if (exists($ProtocolListSIGNALduino{$id}{developId}))
 			{
 				if ($ProtocolListSIGNALduino{$id}{developId} eq "m") {
 					if ($develop !~ m/m$id/) {  # ist nur zur Abwaertskompatibilitaet und kann in einer der naechsten Versionen entfernt werden
@@ -2959,7 +2959,7 @@ sub SIGNALduino_IdList($@)
 					}
 				}
 				elsif ($ProtocolListSIGNALduino{$id}{developId} eq "p") {
-					SIGNALduino_Log3 $name, 3, "$name IdList: ID=$id skipped (developId=p), cauton, protocol can cause crashes, use only if advised to do";
+					SIGNALduino_Log3 $name, 3, "$name IdList: ID=$id skipped (developId=p), caution, protocol can cause crashes, use only if advised to do";
 					next;
 				}
 				elsif ($ProtocolListSIGNALduino{$id}{developId} eq "y" && $yflag == 0) {	# skip wenn develop nicht im Attribut whitelist steht
@@ -2999,7 +2999,7 @@ sub SIGNALduino_IdList($@)
 	SIGNALduino_Log3 $name, 3, "$name: IDlist development skipped = @skippedDevId" if (scalar @skippedDevId > 0);
 	if (scalar @devModulId > 0)
 	{
-		SIGNALduino_Log3 $name, 3, "$name: IDlist, develop module used (dispatch must with the whitelist_IDs aktivated) = @devModulId";
+		SIGNALduino_Log3 $name, 3, "$name: IDlist, develop module used (dispatch must with the whitelist_IDs activated) = @devModulId";
 		$hash->{IDsNoDispatch} = join(",", @devModulId);
 	}
 	
