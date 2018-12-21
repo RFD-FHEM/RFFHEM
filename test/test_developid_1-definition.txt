@@ -1,85 +1,112 @@
 defmod test_developid_1 UnitTest dummyDuino (
  { 
     my $local_ProtocolListSIGNALduino = SIGNALduino_getProtocolList();
-	$local_ProtocolListSIGNALduino->{'9999ut'} =
+	isnt (exists($local_ProtocolListSIGNALduino->{'9999'}),1,"Check if testprotocol already is defined");
+	
+	$local_ProtocolListSIGNALduino->{'9999'} =
 	{
 			name			=> 'Unittest dummy protocol',
 			comment         => 'unittest protocol',
-			id				=> '9999ut',
+			id				=> '9999',
 	};
 	my $msg;
 	my $use_like;
-	my $regex=$local_ProtocolListSIGNALduino->{'9999ut'}{id};
+	my $regex=$local_ProtocolListSIGNALduino->{'9999'}{id};
+	my $regex_matched=0;
+	
 	my $mock = Mock::Sub->new;
     my $Log3= $mock->mock("SIGNALduino_Log3");
 		$Log3->side_effect( sub { 
-		Log3 $_[0], $_[1] ,$_[2] if ($_[2] =~ /skipped/ && ( ($use_like == 1 && like($_[2],qr/$regex/,$msg) || ($use_like == 0 && unlike($_[2],qr/$regex/,$msg)) )))
+		if (!$regex_matched && $_[2] =~ /skipped/) 
+		{
+			if ($use_like == 1 && $_[2] =~ $regex) 
+			{
+				$regex_matched=1;
+			} 
+			elsif ($use_like == 0 && $_[2] !~ $regex) 
+			{
+				$regex_matched=1;
+			}
+		}
+		Log3 $_[0], $_[1] ,$_[2];
 	} 
 	);
 
-	subtest 'SIGNALduino_IdList developid "m" skip scenariois' => sub {
-		$local_ProtocolListSIGNALduino->{'9999ut'}{developId}="m";
+	subtest 'SIGNALduino_IdList developid "m" skip scenarios' => sub {
+		$local_ProtocolListSIGNALduino->{'9999'}{developId}="m";
 		plan tests => 3;
 		$use_like=1;
-		$msg="development is empty" ;
-		SIGNALduino_IdList("x:$target","","","");
-		$msg="development has other m75" ;
-		SIGNALduino_IdList("x:$target","","","m75"); 
-		$msg="development has y9999ut" ;
-		SIGNALduino_IdList("x:$target","","","y9999ut");  
+		$msg="attr whitelist=10, development=\"\"" ;
+		SIGNALduino_IdList("x:$target","10","","");
+		ok($regex_matched,$msg) or diag("check log entrys for skipped with id 9999, they where not found");
+		$regex_matched=0;
+		
+		$msg="attr whitelist=10, development=1" ;
+		SIGNALduino_IdList("x:$target","10","",1);
+		ok($regex_matched,$msg) or diag("check log entrys for skipped with id 9999, they where not found");
+		$regex_matched=0;
+
+		$msg="attr blacklist=9999, development=0" ;
+		SIGNALduino_IdList("x:$target","",9999,0);
+		ok($regex_matched,$msg) or diag("check log entrys for skipped with id 9999, they where not found");
+		$regex_matched=0;
+		
 	};
-	subtest 'SIGNALduino_IdList developid "y" skip scenariois' => sub {
-		$local_ProtocolListSIGNALduino->{'9999ut'}{developId}="y";
+	SKIP: {
+		skip "debugging";
+	subtest 'SIGNALduino_IdList developid "y" skip scenarios' => sub {
+		$local_ProtocolListSIGNALduino->{'9999'}{developId}="y";
 		plan tests => 3;
 		$use_like=1;
 		$msg="development is empty" ;
 		SIGNALduino_IdList("x:$target","","","");
 		$msg="development has other y75" ;
 		SIGNALduino_IdList("x:$target","","","y75"); 
-		$msg="development has m9999ut" ;
-		SIGNALduino_IdList("x:$target","","","m9999ut");  
+		$msg="development has m9999" ;
+		SIGNALduino_IdList("x:$target","","","m9999");  
 	};
-	subtest 'SIGNALduino_IdList developid "p" skip scenariois' => sub {
-		$local_ProtocolListSIGNALduino->{'9999ut'}{developId}="p";
+	subtest 'SIGNALduino_IdList developid "p" skip scenarios' => sub {
+		$local_ProtocolListSIGNALduino->{'9999'}{developId}="p";
 		plan tests => 3;
 		$use_like=1;
 		$msg="development is empty" ;
 		SIGNALduino_IdList("x:$target","","","");
 		$msg="development has other p75" ;
 		SIGNALduino_IdList("x:$target","","","p75"); 
-		$msg="development has m9999ut" ;
-		SIGNALduino_IdList("x:$target","","","m9999ut");  
+		$msg="development has m9999" ;
+		SIGNALduino_IdList("x:$target","","","m9999");  
 	};
 
-	subtest 'SIGNALduino_IdList development "m" not skiped scenariois' => sub {
-		$local_ProtocolListSIGNALduino->{'9999ut'}{developId}="m";
+	subtest 'SIGNALduino_IdList development "m" not skipped scenarios' => sub {
+		$local_ProtocolListSIGNALduino->{'9999'}{developId}="m";
 		plan tests => 2;
 		$use_like=0;
-		$msg="development is m9999ut" ;
-		SIGNALduino_IdList("x:$target","","","m9999ut");  
-		$msg="development is m75 m9999ut u73 " ;
-		SIGNALduino_IdList("x:$target","","","m75 m9999ut u73"); 
+		$msg="development is m9999" ;
+		SIGNALduino_IdList("x:$target","","","m9999");  
+		$msg="development is m75 m9999 u73 " ;
+		SIGNALduino_IdList("x:$target","","","m75 m9999 u73"); 
 	};
-	subtest 'SIGNALduino_IdList development "y" not skiped scenariois' => sub {
-		$local_ProtocolListSIGNALduino->{'9999ut'}{developId}="y";
+	subtest 'SIGNALduino_IdList development "y" not skipped scenarios' => sub {
+		$local_ProtocolListSIGNALduino->{'9999'}{developId}="y";
 		plan tests => 2;
 		$use_like=0;
-		$msg="development is y9999ut" ;
-		SIGNALduino_IdList("x:$target","","","y9999ut");  
-		$msg="development is m75 y9999ut u73 " ;
-		SIGNALduino_IdList("x:$target","","","m75 y9999ut u73"); 
+		$msg="development is y9999" ;
+		SIGNALduino_IdList("x:$target","","","y9999");  
+		$msg="development is m75 y9999 u73 " ;
+		SIGNALduino_IdList("x:$target","","","m75 y9999 u73"); 
 	};
-	subtest 'SIGNALduino_IdList development "p" not skiped scenariois' => sub {
-		$local_ProtocolListSIGNALduino->{'9999ut'}{developId}="p";
+	subtest 'SIGNALduino_IdList development "p" not skipped scenarios' => sub {
+		$local_ProtocolListSIGNALduino->{'9999'}{developId}="p";
 		plan tests => 2;
 		$use_like=0;
-		$msg="development is p9999ut" ;
-		SIGNALduino_IdList("x:$target","","","p9999ut");  
-		$msg="development is m75 p9999ut u73 " ;
-		SIGNALduino_IdList("x:$target","","","m75 p9999ut u73"); 
+		$msg="development is p9999" ;
+		SIGNALduino_IdList("x:$target","","","p9999");  
+		$msg="development is m75 p9999 u73 " ;
+		SIGNALduino_IdList("x:$target","","","m75 p9999 u73"); 
 	};
 
-
+	};
+	
 	}
 );
 

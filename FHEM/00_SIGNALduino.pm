@@ -2886,6 +2886,7 @@ sub SIGNALduino_IdList($@)
 	my @mcIdList = ();
 	my @skippedDevId = ();
 	my @skippedBlackId = ();
+	my @skippedWhiteId = ();
 	my @devModulId = ();
 	my %WhitelistIDs;
 	my %BlacklistIDs;
@@ -2941,7 +2942,11 @@ sub SIGNALduino_IdList($@)
 	{
 		if ($wflag == 1)				# whitelist active
 		{
-			next if (!exists($WhitelistIDs{$id}))		# Id wurde in der whitelist nicht gefunden
+			if (!exists($WhitelistIDs{$id}))		# Id wurde in der whitelist nicht gefunden
+			{
+				push (@skippedWhiteId, $id);
+				next;
+			}
 		}
 		else {						# whitelist not aktive
 			if ($bflag == 1 && exists($BlacklistIDs{$id})) {
@@ -2990,11 +2995,14 @@ sub SIGNALduino_IdList($@)
 	@mcIdList = sort {$a <=> $b} @mcIdList;
 	@skippedDevId = sort {$a <=> $b} @skippedDevId;
 	@skippedBlackId = sort {$a <=> $b} @skippedBlackId;
+	@skippedWhiteId = sort {$a <=> $b} @skippedWhiteId;
+	
 	@devModulId = sort {$a <=> $b} @devModulId;
 
 	SIGNALduino_Log3 $name, 3, "$name: IDlist MS @msIdList";
 	SIGNALduino_Log3 $name, 3, "$name: IDlist MU @muIdList";
 	SIGNALduino_Log3 $name, 3, "$name: IDlist MC @mcIdList";
+	SIGNALduino_Log3 $name, 3, "$name: IDlist not whitelisted skipped = @skippedWhiteId" if (scalar @skippedWhiteId > 0);
 	SIGNALduino_Log3 $name, 3, "$name: IDlist blacklistId skipped = @skippedBlackId" if (scalar @skippedBlackId > 0);
 	SIGNALduino_Log3 $name, 3, "$name: IDlist development skipped = @skippedDevId" if (scalar @skippedDevId > 0);
 	if (scalar @devModulId > 0)
