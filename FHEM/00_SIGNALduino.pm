@@ -2905,15 +2905,15 @@ sub SIGNALduino_IdList($@)
 	}
 	if ($develop eq "1" || substr($develop,0,1) eq "y") {	# Entwicklerversion, y ist nur zur Abwaertskompatibilitaet und kann in einer der naechsten Versionen entfernt werden
 		$yflag = 1;
-		SIGNALduino_Log3 $name, 3, "$name IdList development version: $develop";
+		SIGNALduino_Log3 $name, 3, "$name IdList development attribute = $develop"; 
 	}
 	
 	if ($aVal eq "" || substr($aVal,0 ,1) eq '#') {		# whitelist nicht aktiv
 		if ($yflag == 1) {
-			SIGNALduino_Log3 $name, 3, "$name IdList attr whitelist disabled or not defined (all IDs are enabled, except blacklist): $aVal";
+			SIGNALduino_Log3 $name, 3, "$name IdList attr whitelist disabled or not defined (all IDs are enabled, except blacklisted): $aVal";
 		}
 		else {
-			SIGNALduino_Log3 $name, 3, "$name IdList attr whitelist disabled or not defined (all IDs are enabled, except blacklist and instable developIDs): $aVal";
+			SIGNALduino_Log3 $name, 3, "$name IdList attr whitelist disabled or not defined (all IDs are enabled, except blacklisted and instable IDs): $aVal";
 		}
 	}
 	else {
