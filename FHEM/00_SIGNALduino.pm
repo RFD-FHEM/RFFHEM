@@ -2959,7 +2959,7 @@ sub SIGNALduino_IdList($@)
 					}
 				}
 				elsif ($ProtocolListSIGNALduino{$id}{developId} eq "p") {
-					SIGNALduino_Log3 $name, 3, "$name IdList: ID=$id skipped (developId=p), not for user";
+					SIGNALduino_Log3 $name, 3, "$name IdList: ID=$id skipped (developId=p), cauton, protocol can cause crashes, use only if advised to do";
 					next;
 				}
 				elsif ($ProtocolListSIGNALduino{$id}{developId} eq "y" && $yflag == 0) {	# skip wenn develop nicht im Attribut whitelist steht
@@ -2988,17 +2988,9 @@ sub SIGNALduino_IdList($@)
 	@msIdList = sort {$a <=> $b} @msIdList;
 	@muIdList = sort {$a <=> $b} @muIdList;
 	@mcIdList = sort {$a <=> $b} @mcIdList;
-	
-	sub SIGNALduino_normalisedSort
-	{
-	    $a =~ /(\d).?(\d)/; 
-	    $b =~ /(\d).?(\d)/;
-	    $a <=> $b;
-	}
-
-	@skippedDevId = sort SIGNALduino_normalisedSort @skippedDevId;
-	@skippedBlackId = sort SIGNALduino_normalisedSort @skippedBlackId;
-	@devModulId = sort SIGNALduino_normalisedSort @devModulId;
+	@skippedDevId = sort {$a <=> $b} @skippedDevId;
+	@skippedBlackId = sort {$a <=> $b} @skippedBlackId;
+	@devModulId = sort {$a <=> $b} @devModulId;
 
 	SIGNALduino_Log3 $name, 3, "$name: IDlist MS @msIdList";
 	SIGNALduino_Log3 $name, 3, "$name: IDlist MU @muIdList";
