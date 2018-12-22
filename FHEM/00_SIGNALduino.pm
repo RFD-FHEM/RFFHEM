@@ -2905,21 +2905,21 @@ sub SIGNALduino_IdList($@)
 	}
 	if ($develop eq "1" || (substr($develop,0,1) eq "y" && $develop !~ m/^y\d/)) {	# Entwicklerversion, y ist nur zur Abwaertskompatibilitaet und kann in einer der naechsten Versionen entfernt werden
 		$yflag = 1;
-		SIGNALduino_Log3 $name, 3, "$name IdList development attribute = $develop"; 
+		SIGNALduino_Log3 $name, 3, "$name IDlist development attribute = $develop"; 
 	}
 	
 	if ($aVal eq "" || substr($aVal,0 ,1) eq '#') {		# whitelist nicht aktiv
 		if ($yflag == 1) {
-			SIGNALduino_Log3 $name, 3, "$name IdList attr whitelist disabled or not defined (all IDs are enabled, except blacklisted): $aVal";
+			SIGNALduino_Log3 $name, 3, "$name: IDlist attr whitelist disabled or not defined (all IDs are enabled, except blacklisted): $aVal";
 		}
 		else {
-			SIGNALduino_Log3 $name, 3, "$name IdList attr whitelist disabled or not defined (all IDs are enabled, except blacklisted and instable IDs): $aVal";
+			SIGNALduino_Log3 $name, 3, "$name: IDlist attr whitelist disabled or not defined (all IDs are enabled, except blacklisted and instable IDs): $aVal";
 		}
 	}
 	else {
-		%WhitelistIDs = split(",", $aVal);			# whitelist in Hash wandeln
+		%WhitelistIDs = map {$_ => undef} split(",", $aVal);			# whitelist in Hash wandeln
 		#my $w = join ',' => map "$_" => keys %WhitelistIDs;
-		SIGNALduino_Log3 $name, 3, "$name IdList attr whitelist: $aVal";
+		SIGNALduino_Log3 $name, 3, "$name: IDlist attr whitelist: $aVal";
 		$wflag = 1;
 	}
 	#SIGNALduino_Log3 $name, 3, "$name IdList: attr whitelistIds=$aVal" if ($aVal);
@@ -2929,7 +2929,7 @@ sub SIGNALduino_IdList($@)
 			$blacklist = AttrVal($name,"blacklist_IDs","");
 		}
 		if (length($blacklist) > 0) {							# Blacklist in Hash wandeln
-			SIGNALduino_Log3 $name, 3, "$name IdList: attr blacklistIds=$blacklist";
+			SIGNALduino_Log3 $name, 3, "$name IDlist attr blacklistIds=$blacklist";
 			%BlacklistIDs = map { $_ => 1 } split(",", $blacklist);
 			#my $w = join ', ' => map "$_" => keys %BlacklistIDs;
 			#SIGNALduino_Log3 $name, 3, "$name IdList, Attr blacklist $w";
@@ -2964,7 +2964,7 @@ sub SIGNALduino_IdList($@)
 					}
 				}
 				elsif ($ProtocolListSIGNALduino{$id}{developId} eq "p") {
-					SIGNALduino_Log3 $name, 5, "$name IdList: ID=$id skipped (developId=p), caution, protocol can cause crashes, use only if advised to do";
+					SIGNALduino_Log3 $name, 5, "$name: IDlist ID=$id skipped (developId=p), caution, protocol can cause crashes, use only if advised to do";
 					next;
 				}
 				elsif ($ProtocolListSIGNALduino{$id}{developId} eq "y" && $yflag == 0 && $develop !~ m/y$id/) {	# skip wenn develop nicht im Attribut whitelist steht
