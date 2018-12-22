@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 14_SD_UT.pm 32 2018-12-17 12:00:00 v3.3.3-dev_05.12. $HomeAuto_User
+# $Id: 14_SD_UT.pm 32 2018-12-22 12:00:00 v3.3.3-dev_05.12. $HomeAuto_User
 #
 # The file is part of the SIGNALduino project.
 # The purpose of this module is universal support for devices.
@@ -57,7 +57,8 @@
 # - QUIGG GT-7000 Funk-Steckdosendimmer | transmitter QUIGG_DMV - receiver DMV-7009AS  [Protocol 34]
 #{    https://github.com/RFD-FHEM/RFFHEM/issues/195
 #     nibble 0-2 -> Ident | nibble 3-4 -> Tastencode
-#     get sduino_dummy raw MU;;P0=-5476;;P1=592;;P2=-665;;P3=1226;;P4=-1309;;D=01232323232323232323232323412323412323414;;CP=3;;R=1;;
+#     get sduino_dummy raw MU;;P0=-29120;;P1=603;;P2=-666;;P3=1235;;P4=-1307;;D=012341412323232341412341412341232323232341;;CP=1;;R=16;;
+#			get sduino_dummy raw MU;;P0=-5284;;P1=583;;P2=-681;;P3=1216;;P4=-1319;;D=012341412323232341412341412323234123232341;;CP=1;;R=16;;
 #}    Send Adresse FFF funktioniert nicht 100%ig!
 ####################################################################################################################################
 # - Remote Control Novy_840029 for Novy Pureline 6830 kitchen hood [Protocol 86] (Länge je nach Taste 12 oder 18 Bit)
@@ -547,6 +548,9 @@ sub SD_UT_Parse($$) {
 	my $devicedef;
 	my $state = "unknown";
 
+	my $createflag = "manually";
+	my $devicename;
+
 	my $deletecache = $modules{SD_UT}{defptr}{deletecache};
 	Log3 $iohash, 5, "$ioname: SD_UT device in delete cache = $deletecache" if($deletecache && $deletecache ne "-");
 
@@ -557,6 +561,9 @@ sub SD_UT_Parse($$) {
 		$modules{SD_UT}{defptr}{deletecache} = "-";
 		return "";
 	}
+
+	$iohash->{bitMSG} = $bitData;
+	#Log3 $iohash, 3, "$ioname: SD_UT_Parse check hlen=$hlen protocol=$protocol";
 
 	if ($hlen == 3) {
 		### Westinghouse Buttons_five [P29] ###
@@ -599,20 +606,35 @@ sub SD_UT_Parse($$) {
 
 	if ($hlen == 5) {
 		### Chilitec_22640 [P14] ###
-		if (!$def && $protocol == 14) {
+		if ($protocol == 14) {
 			$deviceCode = substr($rawData,0,4);
 			$devicedef = "Chilitec_22640 " . $deviceCode;
 			$def = $modules{SD_UT}{defptr}{$devicedef};
+
+			$createflag = "auto";
+			$model = "Chilitec_22640";
+			$devicename = $model."_".$deviceCode;
+			$state = substr($bitData,16,4);
 		### QUIGG_DMV [P34] ###
-		} elsif (!$def && $protocol == 34) {
+		} elsif ($protocol == 34) {
 			$deviceCode = substr($rawData,0,3);
 			$devicedef = "QUIGG_DMV " . $deviceCode;
 			$def = $modules{SD_UT}{defptr}{$devicedef};
-			### Remote control TEDSEN_SKX1MD [P46] ###
-		} elsif (!$def && $protocol == 46) {
+
+			$createflag = "auto";
+			$model = "QUIGG_DMV";
+			$devicename = $model."_".$deviceCode;
+			$state = substr($bitData,12,8);
+		### Remote control TEDSEN_SKX1MD [P46] ###
+		} elsif ($protocol == 46) {
 			$deviceCode = $rawData;
 			$devicedef = "TEDSEN_SKX1MD " . $deviceCode;
 			$def = $modules{SD_UT}{defptr}{$devicedef};
+
+			$createflag = "auto";
+			$model = "TEDSEN_SKX1MD";
+			$devicename = $model."_".$deviceCode;
+			$state = "receive";
 		### NEFF SF01_01319004 || BOSCH SF01_01319004_Typ2 [P86] ###
 		} elsif (!$def && $protocol == 86) {
 			$deviceCode = substr($bitData,0,14) . "00";
@@ -640,8 +662,13 @@ sub SD_UT_Parse($$) {
 		$deviceCode = substr($rawData,0,14);
 		$devicedef = "LED_XM21_0 " . $deviceCode if (!$def);
 		$def = $modules{SD_UT}{defptr}{$devicedef} if (!$def);
+
+		$createflag = "auto";
+		$model = "LED_XM21_0";
+		$devicename = $model."_".$deviceCode;
+		$state = substr($bitData,56,8);
 	}
-	
+
 	### unknown ###
 	$devicedef = "unknown" if(!$def);
 	$def = $modules{SD_UT}{defptr}{$devicedef} if(!$def);
@@ -649,15 +676,19 @@ sub SD_UT_Parse($$) {
 
 	Log3 $iohash, 4, "$ioname: SD_UT device $devicedef found (delete cache = $deletecache)" if($def && $deletecache && $deletecache ne "-");
 
-	if(!$def) {
-		Log3 $iohash, 1, "$ioname: SD_UT_Parse UNDEFINED sensor $model detected, protocol $protocol, data $rawData, code $deviceCode";
+	if(!$def && $createflag eq "manually") {
+		Log3 $iohash, 1, "$ioname: SD_UT_Parse manually UNDEFINED sensor $model detected, protocol $protocol, data $rawData, code $deviceCode";
 		return "UNDEFINED unknown_please_select_model SD_UT $model";
+	}
+
+	if(!$def && $createflag eq "auto") {
+		Log3 $iohash, 1, "$ioname: SD_UT_Parse auto UNDEFINED sensor $model detected, protocol $protocol, data $rawData, code $deviceCode";
+		return "UNDEFINED $devicename SD_UT $model $deviceCode";
 	}
 
 	my $hash = $def;
 	my $name = $hash->{NAME};
 	$hash->{lastMSG} = $rawData;
-	$hash->{bitMSG} = $bitData;
 	$deviceCode = undef;				# reset
 
 	$model = AttrVal($name, "model", "unknown");
@@ -735,16 +766,9 @@ sub SD_UT_Parse($$) {
 			$usersystem = "Unitec 47125" if (oct("0b".$zone) == 7);
 		}
 		Log3 $name, 5, "$ioname: SD_UT_Parse devicedef=$devicedef attr_model=$model protocol=$protocol deviceCode=$deviceCode state=$state Zone=$zone";
-	############ TEDSEN_SKX1MD ############ Protocol 46 ############
-	} elsif ($model eq "TEDSEN_SKX1MD" && $protocol == 46) {
-		$state = "receive";
 	############ SA_434_1_mini ############ Protocol 81 ############
 	} elsif ($model eq "SA_434_1_mini" && ($protocol == 81 || $protocol == 83 || $protocol == 86)) {
 		$state = "receive";
-	############ QUIGG_DMV ############ Protocol 34 ############
-	} elsif ($model eq "QUIGG_DMV" && $protocol == 34) {
-		$state = substr($bitData,12,8);
-		$deviceCode = substr($bitData,0,12);
 	############ Novy_840029 ############ Protocol 86 ############
 	} elsif ($model eq "Novy_840029" && ($protocol == 86 || $protocol == 81)) {
 		if ($hlen == 3) {		# 12 Bit [3]
@@ -770,15 +794,6 @@ sub SD_UT_Parse($$) {
 	} elsif ($model eq "HSM4" && $protocol == 69) {
 		$state = substr($bitData,36,4);
 		$deviceCode = substr($bitData,8,28);
-	############ Chilitec_22640 ############ Protocol 14 ############
-	} elsif ($model eq "Chilitec_22640" && $protocol == 14) {
-		$state = substr($bitData,16,4);
-		$deviceCode = substr($bitData,0,16);
-	############ LED_XM21_0 ############ Protocol 76 ############
-	} elsif ($model eq "LED_XM21_0" && $protocol == 76) {
-		$deviceCode = substr($bitData,0,56);
-		$state = substr($bitData,56,8);
-
 	############ unknown ############
 	} else {
 		readingsSingleUpdate($hash, "state", "???", 0);
