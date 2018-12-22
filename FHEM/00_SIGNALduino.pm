@@ -3002,9 +3002,9 @@ sub SIGNALduino_IdList($@)
 	SIGNALduino_Log3 $name, 3, "$name: IDlist MS @msIdList";
 	SIGNALduino_Log3 $name, 3, "$name: IDlist MU @muIdList";
 	SIGNALduino_Log3 $name, 3, "$name: IDlist MC @mcIdList";
-	SIGNALduino_Log3 $name, 3, "$name: IDlist not whitelisted skipped = @skippedWhiteId" if (scalar @skippedWhiteId > 0);
-	SIGNALduino_Log3 $name, 3, "$name: IDlist blacklistId skipped = @skippedBlackId" if (scalar @skippedBlackId > 0);
-	SIGNALduino_Log3 $name, 3, "$name: IDlist development skipped = @skippedDevId" if (scalar @skippedDevId > 0);
+	SIGNALduino_Log3 $name, 5, "$name: IDlist not whitelisted skipped = @skippedWhiteId" if (scalar @skippedWhiteId > 0);
+	SIGNALduino_Log3 $name, 4, "$name: IDlist blacklistId skipped = @skippedBlackId" if (scalar @skippedBlackId > 0);
+	SIGNALduino_Log3 $name, 4, "$name: IDlist development skipped = @skippedDevId" if (scalar @skippedDevId > 0);
 	if (scalar @devModulId > 0)
 	{
 		SIGNALduino_Log3 $name, 3, "$name: IDlist, development protocol is active (to activate dispatch to not finshed logical module, enable desired protocol via whitelistIDs) = @devModulId";
