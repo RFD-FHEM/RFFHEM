@@ -1955,16 +1955,16 @@ sub SIGNALduno_Dispatch($$$$$)
 # param #2 is protocol id
 # param #3 is dispatched message to check against
 #
-# returns 1 if message matches modulematch + development attribute
+# returns 1 if message matches modulematch + development attribute/whitelistIDs
 # returns 0 if message does not match modulematch  
-# return -1 if message does not match development attribute
+# return -1 if message is not activated via whitelistIDs but has developID=m flag
 sub SIGNALduino_moduleMatch
 {
 	my $name = shift;
 	my $id = shift;
 	my $dmsg = shift;
 	my $debug = AttrVal($name,"debug",0);
-	
+	$debug=1;
 	my $modMatchRegex=SIGNALduino_getProtoProp($id,"modulematch",undef);
 	
 	if (!defined($modMatchRegex) || $dmsg =~ m/$modMatchRegex/) {
