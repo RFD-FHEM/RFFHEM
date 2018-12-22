@@ -51,7 +51,7 @@ defmod test_modulematch_1 UnitTest dummyDuino (
 	
 	subtest 'SIGNALduino_moduleMatch cenarios without whitlistIDs but development attr' => sub {
 		$local_ProtocolListSIGNALduino->{'9999'}{developId}="m";
-		plan tests => 3;
+		plan tests => 4;
 
 		SIGNALduino_IdList("x:$target","","","m");
 		$local_ProtocolListSIGNALduino->{'9999'}{modulematch}="^X[A-Fa-f0-9]+";
@@ -61,7 +61,9 @@ defmod test_modulematch_1 UnitTest dummyDuino (
 		$local_ProtocolListSIGNALduino->{'9999'}{modulematch}="^X[A-Fa-f0-9]+";
 		is(SIGNALduino_moduleMatch($target,'9999',"X3332222"),1,"check returncode with matching modulematch and right development attr");
 		is(SIGNALduino_moduleMatch($target,'9999',"Y3332222"),0,"check returncode with not matching modulematch");
+		is(SIGNALduino_moduleMatch($target,'9999',"Y3332222"),0,"check returncode with not matching modulematch");
 	};
+	delete($local_ProtocolListSIGNALduino->{'9999'});
  }
 );
 

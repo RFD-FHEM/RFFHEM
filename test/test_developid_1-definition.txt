@@ -243,10 +243,10 @@ defmod test_developid_1 UnitTest dummyDuino (
 
 	
 	};
-	
+	delete($local_ProtocolListSIGNALduino->{'9999'});
+	delete($local_ProtocolListSIGNALduino->{'9998'});
+
 
 	};
-	
-	}
 );
 
