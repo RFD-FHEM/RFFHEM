@@ -188,7 +188,7 @@ defmod test_developid_1 UnitTest dummyDuino (
 		$regex_matched=0;
 		
 		$msg="attr whitelist=\"\", development=\"y m9998\"" ;
-		SIGNALduino_IdList("x:$target","","","m9999");  
+		SIGNALduino_IdList("x:$target","","","y m9999");  
 		isnt($regex_matched,1,$msg) or diag("check log entrys for skipped with id $regex, this should not be skipped");
 		$regex_matched=0;
 		
