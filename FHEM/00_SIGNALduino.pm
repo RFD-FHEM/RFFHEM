@@ -3594,6 +3594,7 @@ sub SIGNALduino_OSV2()
 	my $preamble_pos;
 	my $message_end;
 	my $message_length;
+	my $msg_start;
 	
 	#$bitData =~ tr/10/01/;
 	if ($bitData =~ m/^.?(01){12,17}.?10011001/) 
@@ -3651,17 +3652,31 @@ sub SIGNALduino_OSV2()
 		#$dmsg=$osv2hex;
 		return (1,$osv2hex);
 	}
-	elsif ($bitData =~ m/^.?(1){16,24}0101/)  {  # Valid OSV3 detected!	
-		$preamble_pos = index($bitData, '0101', 16);
-		$message_end = length($bitData);
-		$message_length = $message_end - ($preamble_pos+4);
-		SIGNALduino_Log3 $name, 4, "$name: OSV3 protocol detected: preamble_pos = $preamble_pos, message_length = $message_length";
+	elsif (($preamble_pos = index($bitData, '1111111111110101')) >= 0)  {  # Preamble 12 x 1, Valid OSV3 detected!	
+		$msg_start = $preamble_pos + 16;
+		if ($preamble_pos < 40) {	# die 40 ist willkuerlich gewaehlt
+			$message_end = index($bitData, '111111111111111111110101', $preamble_pos + 60);  # preamble der zweiten Nachricht 20 * 1
+			if ($message_end == -1) {		# es wurde keine zweite Nachricht gefunden
+				$message_end = length($bitData);
+			}
+			else {				# zweite Nachricht
+				$message_end -= 4;
+				SIGNALduino_Log3 $name, 4, "$name: OSV3 protocol with two messages detected: length off second message = " . (length($bitData) - $message_end - 24);
+			}
+		}
+		else {
+			$message_end = length($bitData);  # bei zwei Nachrichten, wurde bei der ersten Nachricht keine preamble gefunden
+		}
+		$message_length = $message_end - $msg_start;
+		#SIGNALduino_Log3 $name, 4, "$name: OSV3: bitdata=$bitData";
+		SIGNALduino_Log3 $name, 4, "$name: OSV3 protocol detected: msg_start = $msg_start, message_length = $message_length";
+		return (-1," message with length ($message_length) is to short") if (defined($ProtocolListSIGNALduino{$id}{length_min}) && $message_length < $ProtocolListSIGNALduino{$id}{length_min} );
 		
 		my $idx=0;
 		#my $osv3bits="";
 		my $osv3hex ="";
 		
-		for ($idx=$preamble_pos+4;$idx<length($bitData);$idx=$idx+4)
+		for ($idx=$msg_start; $idx<$message_end; $idx=$idx+4)
 		{
 			if (length($bitData)-$idx  < 4 )
 			{
