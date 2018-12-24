@@ -1,14 +1,21 @@
 defmod test_modulematch_1 UnitTest dummyDuino (
  { 
-    my $local_ProtocolListSIGNALduino = SIGNALduino_getProtocolList();
-	isnt (exists($local_ProtocolListSIGNALduino->{'9999'}),1,"Check if testprotocol 9999 already is defined");
+	my %ProtocolListTest =  SIGNALduino_LoadProtocolHash("$attr{global}{modpath}/FHEM/lib/test_loadprotohash-ok.hash");
+	is($ProtocolListTest{error},undef,"load test protocol hash ");
+
 	
-	$local_ProtocolListSIGNALduino->{'9999'} =
+	foreach my $id (qw/9999 9998/)
 	{
-			name			=> 'Unittest dummy protocol',
-			comment         => 'unittest protocol',
-			id				=> '9999',
-	};
+		is($ProtocolListTest{$id}{id},$id,"id $id exists");
+	}
+	my $local_ProtocolListSIGNALduino = SIGNALduino_getProtocolList();
+	foreach (keys %$local_ProtocolListSIGNALduino)
+    {
+        delete $local_ProtocolListSIGNALduino->{$_};
+    }
+	%{$local_ProtocolListSIGNALduino} = ( %ProtocolListTest);
+
+	
  
 	subtest 'SIGNALduino_moduleMatch scenarios without whitlistIDs and development attr' => sub {
 		plan tests => 4;
@@ -20,50 +27,42 @@ defmod test_modulematch_1 UnitTest dummyDuino (
 		$local_ProtocolListSIGNALduino->{'9999'}{modulematch}="^X[A-Fa-f0-9]+";
 		is(SIGNALduino_moduleMatch($target,'9999',"X3332222"),-1,"check returncode with matching modulematch");
 		is(SIGNALduino_moduleMatch($target,'9999',"Y3332222"),0,"check returncode with not matching modulematch");
-
-
-		delete($local_ProtocolListSIGNALduino->{'9999'}{modulematch});
-		
-		$local_ProtocolListSIGNALduino->{'9999'}{modulematch}="^X[A-Fa-f0-9]+";
 		is(SIGNALduino_moduleMatch($target,'9999',"X3332222"),-1,"check returncode with matching modulematch");
 	};
 	
 	
 	subtest 'SIGNALduino_moduleMatch scenarios with whitlistIDs, whithout development attr' => sub {
-		plan tests => 5;
-		$local_ProtocolListSIGNALduino->{'9999'}{developId}="m";
+		plan tests => 4;
 		SIGNALduino_IdList("x:$target","9999","","");
 
 		is(SIGNALduino_moduleMatch($target,'9999',"X3332222"),1,"check returncode without modulematch");
 
-		$local_ProtocolListSIGNALduino->{'9999'}{modulematch}="^X[A-Fa-f0-9]+";
 		is(SIGNALduino_moduleMatch($target,'9999',"X3332222"),1,"check returncode with matching modulematch");
 		is(SIGNALduino_moduleMatch($target,'9999',"Y3332222"),0,"check returncode with not matching modulematch");
 
 
-		delete($local_ProtocolListSIGNALduino->{'9999'}{modulematch});
-		is(SIGNALduino_moduleMatch($target,'9999',"X33322221"),1,"check returncode without modulematch");
+		is(SIGNALduino_moduleMatch($target,'9998',"X33322221"),1,"check returncode without modulematch");
 		
-		$local_ProtocolListSIGNALduino->{'9999'}{modulematch}="^X[A-Fa-f0-9]+";
-		is(SIGNALduino_moduleMatch($target,'9999',"X3332222"),1,"check returncode with matching modulematch");
 
 	};
 	
 	subtest 'SIGNALduino_moduleMatch scenarios without whitlistIDs but development attr' => sub {
-		$local_ProtocolListSIGNALduino->{'9999'}{developId}="m";
-		plan tests => 4;
+		plan tests => 3;
 
 		SIGNALduino_IdList("x:$target","","","m");
-		$local_ProtocolListSIGNALduino->{'9999'}{modulematch}="^X[A-Fa-f0-9]+";
 		is(SIGNALduino_moduleMatch($target,'9999',"X3332222"),-1,"check returncode with matching modulematch but wrong development attr");
 
 		SIGNALduino_IdList("x:$target","","","m9999");
 		$local_ProtocolListSIGNALduino->{'9999'}{modulematch}="^X[A-Fa-f0-9]+";
 		is(SIGNALduino_moduleMatch($target,'9999',"X3332222"),1,"check returncode with matching modulematch and right development attr");
 		is(SIGNALduino_moduleMatch($target,'9999',"Y3332222"),0,"check returncode with not matching modulematch");
-		is(SIGNALduino_moduleMatch($target,'9999',"Y3332222"),0,"check returncode with not matching modulematch");
 	};
-	delete($local_ProtocolListSIGNALduino->{'9999'});
+	CommandReload(undef,"00_SIGNALduino.pm");
+	foreach my $id (qw/9999 9998/)
+	{
+		isnt($local_ProtocolListSIGNALduino->{$id},$id,"check if id $id is deleted");
+	}
+
  }
 );
 
