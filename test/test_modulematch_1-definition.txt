@@ -58,6 +58,8 @@ defmod test_modulematch_1 UnitTest dummyDuino (
 		is(SIGNALduino_moduleMatch($target,'9999',"Y3332222"),0,"check returncode with not matching modulematch");
 	};
 	CommandReload(undef,"00_SIGNALduino.pm");
+	SIGNALduino_IdList("x:$target","","","");  
+
 	foreach my $id (qw/9999 9998/)
 	{
 		isnt($local_ProtocolListSIGNALduino->{$id},$id,"check if id $id is deleted");
