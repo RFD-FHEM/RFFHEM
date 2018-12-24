@@ -1,9 +1,8 @@
 defmod test_developid_1 UnitTest dummyDuino (
  { 
 
-	my %ProtocolListTest;
-    %ProtocolListTest =  SIGNALduino_LoadProtocolHash("$attr{global}{modpath}/FHEM/lib/test_loadprotohash-ok.hash");
-    is($ProtocolListTest{error},undef,"load test protocol hash ");
+	my %ProtocolListTest =  SIGNALduino_LoadProtocolHash("$attr{global}{modpath}/FHEM/lib/test_loadprotohash-ok.hash");
+	is($ProtocolListTest{error},undef,"load test protocol hash ");
 
 	
 	foreach my $id (qw/9999 9998 9997 9996/)
@@ -244,9 +243,13 @@ defmod test_developid_1 UnitTest dummyDuino (
 		
 		Log3 $name, 3 ,$subTestName." <--|";
 
-	
-	};
 
+	};
+	CommandReload(undef,"00_SIGNALduino.pm");
+	foreach my $id (qw/9999 9998 9997 9996/)
+	{
+		isnt($local_ProtocolListSIGNALduino->{$id},$id,"check if id $id is deleted");
+	}
 
 	};
 );
