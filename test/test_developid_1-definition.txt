@@ -246,6 +246,8 @@ defmod test_developid_1 UnitTest dummyDuino (
 
 	};
 	CommandReload(undef,"00_SIGNALduino.pm");
+	SIGNALduino_IdList("x:$target","","","");  
+
 	foreach my $id (qw/9999 9998 9997 9996/)
 	{
 		isnt($local_ProtocolListSIGNALduino->{$id},$id,"check if id $id is deleted");
