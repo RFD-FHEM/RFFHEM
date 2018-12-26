@@ -1,0 +1,36 @@
+defmod test_sub_SIGNALduino_OSV2 UnitTest dummyDuino ( 
+{ 
+  TODO: {
+		local $TODO = "Result is not finished";
+		subtest 'OSV3 Tests' => sub {
+			plan tests => 8;
+			my $id=10;
+			my ($rcode,$hexresult);
+			
+			my $bitdata="11111111111111010111110001010000101000100000100000110000000100000001000010000001110100100011001";
+			($rcode,$hexresult)=SIGNALduino_OSV2($target,$bitdata,$id,length $bitdata);
+			is($rcode,1,"check returncode for single OSV3 data");
+			is($hexresult,"50FA281441302020042E31","check result for single OSV3 data");
+
+			$bitdata="11111111111111010111110001010000101000100000100000110000000100000001000010000001110100100011001111111111111111111111110101111100010100001010001000001000";
+			($rcode,$hexresult)=SIGNALduino_OSV2($target,$bitdata,$id,length $bitdata);
+			is($rcode,1,"check result for seconds OSV3 data to short");
+			is($hexresult,"50FA281441302020042E31","check result for seconds OSV3 data to short");
+
+			$bitdata="01010000101000100000100000110000000100000001000010000001110100100011001111111111111111111111110101111100010100001010001000001000001100000001000000010000100000011101001000110011";
+			
+			($rcode,$hexresult)=SIGNALduino_OSV2($target,$bitdata,$id,length $bitdata);
+			is($rcode,1,"check result for first is incomplete, seconds OSV3 data is okay");
+			is($hexresult,"50FA281441302020042E31","check result for first is incomplete, seconds OSV3 data is okay");
+
+			$bitdata="01010000101000100000100000110000000100000001000010000001110100100011001111111111111111111111110101111100010100001010001000001000001100000001000000010000100000011101001000110011";
+			
+			($rcode,$hexresult)=SIGNALduino_OSV2($target,$bitdata,$id,length $bitdata);
+			is($rcode,1,"check result for two complete transmissions");
+			is($hexresult,"50FA281441302020042E31","check result for two complete transmissions");
+
+		};
+	};
+
+} 
+)
