@@ -3652,20 +3652,20 @@ sub SIGNALduino_OSV2()
 		#$dmsg=$osv2hex;
 		return (1,$osv2hex);
 	}
-	elsif (($preamble_pos = index($bitData, '1111111111110101')) >= 0)  {  # Preamble 12 x 1, Valid OSV3 detected!	
-		$msg_start = $preamble_pos + 16;
-		if ($preamble_pos < 40) {	# die 40 ist willkuerlich gewaehlt
-			$message_end = index($bitData, '111111111111111111110101', $preamble_pos + 60);  # preamble der zweiten Nachricht 20 * 1
-			if ($message_end == -1) {		# es wurde keine zweite Nachricht gefunden
-				$message_end = length($bitData);
+	elsif ($bitData =~ m/1{12,24}(0101)/) {  # Preamble 12 x 1, Valid OSV3 detected!	
+		$preamble_pos = $-[1];
+		$msg_start = $preamble_pos + 4;
+		if ($preamble_pos < 40) {			# die 40 ist willkuerlich gewaehlt
+			if ($bitData =~ m/^.{60,}1{24}(0101)/) {		#  preamble + sync der zweiten Nachricht
+				$message_end = ($-[1]) - 24;
+				SIGNALduino_Log3 $name, 4, "$name: OSV3 protocol with two messages detected: length off second message = " . ($mcbitnum - $message_end - 28);
 			}
-			else {				# zweite Nachricht
-				$message_end -= 4;
-				SIGNALduino_Log3 $name, 4, "$name: OSV3 protocol with two messages detected: length off second message = " . (length($bitData) - $message_end - 24);
+			else {		# es wurde keine zweite Nachricht gefunden
+				$message_end = $mcbitnum;
 			}
 		}
 		else {
-			$message_end = length($bitData);  # bei zwei Nachrichten, wurde bei der ersten Nachricht keine preamble gefunden
+			$message_end = $mcbitnum;  # bei zwei Nachrichten, wurde bei der ersten Nachricht keine preamble gefunden
 		}
 		$message_length = $message_end - $msg_start;
 		#SIGNALduino_Log3 $name, 4, "$name: OSV3: bitdata=$bitData";
