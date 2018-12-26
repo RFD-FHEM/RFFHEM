@@ -3587,7 +3587,7 @@ sub SIGNALduino_MCTFA
 }
 
 
-sub SIGNALduino_OSV2()
+sub SIGNALduino_OSV2
 {
 	my ($name,$bitData,$id,$mcbitnum) = @_;
 	
