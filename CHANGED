@@ -1,6 +1,5 @@
 26.12.2018
- signalduino_protocols.hash - revised ID 90 | added doc ESTO Lighting GmbH | added new ID 30 Atlantic security
- "" Attention, old ID30 (unitec remote door reed switch) DOIF no longer functional --> new ID83 "" (ID30, in the reception was ID83)
+ signalduino_protocols.hash - revised ID 90 | added doc ESTO Lighting GmbH
 17.12.2018
  14_SD_UT.pm - added new model LED_XM21_0 for XM21-0 - LED XMAS | https://github.com/RFD-FHEM/RFFHEM/pull/437#issuecomment-448019192
 13.12.2018
