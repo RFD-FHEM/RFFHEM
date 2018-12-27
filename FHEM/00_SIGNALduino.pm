@@ -850,7 +850,7 @@ SIGNALduino_Get($@)
   my $arg = ($a[2] ? $a[2] : "");
   return "no command to send, get aborted." if (length($gets{$a[1]}[0]) == 0 && length($arg) == 0);
   
-  if (($a[1] eq "ccconf" || $a[1] eq "ccreg" || $a[1] eq "ccpatable") && $hash->{version} && $hash->{version} !~ m/cc1101/) {
+  if (($a[1] eq "ccconf" || $a[1] eq "ccreg" || $a[1] eq "ccpatable") && $hash->{version} && $hash->{version} !~ m/cc1101/i) {
     return "This command is only available with a cc1101 receiver";
   }
   
