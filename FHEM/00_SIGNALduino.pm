@@ -435,7 +435,7 @@ SIGNALduino_Set($@)
 
   my $hasCC1101 = 0;
   my $CC1101Frequency;
-  if ($hash->{version} && $hash->{version} =~ m/cc1101/) {
+  if ($hash->{version} && $hash->{version} =~ m/cc1101/i) {
     $hasCC1101 = 1;
     if (!defined($hash->{cc1101_frequency})) {
        $CC1101Frequency = "433";
