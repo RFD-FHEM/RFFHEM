@@ -1,4 +1,4 @@
-# $Id: 00_SIGNALduino.pm 10488 2018-10-23 00:22:00Z v3.3.3-dev $
+# $Id: 00_SIGNALduino.pm 10488 2018-12-01 13:00:00Z v3.3.3-dev $
 #
 # v3.3.3 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incoming messages
@@ -28,7 +28,7 @@ eval "use Time::HiRes qw(gettimeofday);1" ;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.3.3-dev_09.12.",
+	SDUINO_VERSION            => "v3.3.3-dev_17.12.",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -171,7 +171,7 @@ my %matchListSIGNALduino = (
 			"14:Dooya"						=> '^P16#[A-Fa-f0-9]+',
 			"15:SOMFY"						=> '^Ys[0-9A-F]+',
 			"16:SD_WS_Maverick"		=> '^P47#[A-Fa-f0-9]+',
-			"17:SD_UT"						=> '^P(?:14|29|30|34|46|69|81|83|86)#.*',		# universal - more devices with different protocols
+			"17:SD_UT"						=> '^P(?:14|29|30|34|46|69|76|81|83|86)#.*',		# universal - more devices with different protocols
 			"18:FLAMINGO"					=> '^P13\.?1?#[A-Fa-f0-9]+',							# Flamingo Smoke
 			"19:CUL_WS"						=> '^K[A-Fa-f0-9]{5,}',
 			"20:Revolt"						=> '^r[A-Fa-f0-9]{22}',
@@ -1380,7 +1380,7 @@ SIGNALduino_Read($)
   my $debug = AttrVal($name,"debug",0);
 
   my $SIGNALduinodata = $hash->{PARTIAL};
-  SIGNALduino_Log3 $name, 5, "$name/RAW READ: $SIGNALduinodata/$buf" if ($debug); 
+  Log3 $name, 5, "$name/RAW READ: $SIGNALduinodata/$buf" if ($debug); 
   $SIGNALduinodata .= $buf;
 
   while($SIGNALduinodata =~ m/\n/) {
@@ -1388,7 +1388,7 @@ SIGNALduino_Read($)
     ($rmsg,$SIGNALduinodata) = split("\n", $SIGNALduinodata, 2);
     $rmsg =~ s/\r//;
     
-    	if ($rmsg =~ m/^\002(M(s|u|o);.*;)\003/) {
+    	if ($rmsg =~ m/^\002(M(s|u);.*;)\003/) {
 		$rmsg =~ s/^\002//;                # \002 am Anfang entfernen
 		my @msg_parts = split(";",$rmsg);
 		my $m0;
@@ -1398,6 +1398,7 @@ SIGNALduino_Read($)
 		my $mH;
 		my $part = "";
 		my $partD;
+		my $dOverfl = 0;
 		
 		foreach my $msgPart (@msg_parts) {
 			next if ($msgPart eq "");
@@ -1424,7 +1425,13 @@ SIGNALduino_Read($)
 			}
 			elsif (($m0 eq "D" || $m0 eq "d") && length($m1) > 0) {
 				my @arrayD = split(//, $m1);
-				$part .= "D=";
+				if ($dOverfl == 0) {
+					$part .= "D=";
+				}
+				else {
+					$part =~ s/;$//;	# ; am Ende entfernen
+				}
+				$dOverfl++;
 				$partD = "";
 				foreach my $D (@arrayD) {
 					$mH = ord($D) >> 4;
@@ -1445,6 +1452,10 @@ SIGNALduino_Read($)
 			elsif ($m0 eq "o" || $m0 eq "m") {
 				$part .= "$m0$m1;";
 			}
+			elsif ($m0 eq "F") {
+				my $F = hex($m1);
+				SIGNALduino_Log3 $name, AttrVal($name,"noMsgVerbose",4), "$name/msg READredu(o$dOverfl) FIFO=$F";
+			}
 			elsif ($m1 =~ m/^[0-9A-Z]{1,2}$/) {        # bei 1 oder 2 Hex Ziffern nach Dez wandeln 
 				$part .= "$m0=" . hex($m1) . ";";
 			}
@@ -1456,7 +1467,12 @@ SIGNALduino_Read($)
 				$part .= ";";
 			}
 		}
-		SIGNALduino_Log3 $name, 4, "$name/msg READredu: $part";
+		my $MuOverfl = "";
+		if ($dOverfl > 1) {
+			$dOverfl--;
+			$MuOverfl = "(o$dOverfl)";
+		}
+		SIGNALduino_Log3 $name, 4, "$name/msg READredu$MuOverfl: $part";
 		$rmsg = "\002$part\003";
 	}
 	else {
