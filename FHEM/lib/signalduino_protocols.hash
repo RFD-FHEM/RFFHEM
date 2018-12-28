@@ -276,6 +276,8 @@
 			length_max			=> '24',				# ?
 		},
 	"6"	=>	## Eurochron Protocol
+					# MS;P1=-7982;P2=262;P3=-1949;P4=-948;D=21232423232424242324242424242424242424232424232323242424242424232424242324;CP=2;SP=1;R=249;O;m2;
+					# MS;P0=254;P1=-7990;P2=-1935;P3=-950;D=01020302020303030203030303030303030303020302030203030303030303020303030203;CP=0;SP=1;R=248;O;m2;
 		{
 			name					=> 'weather',
 			comment				=> 'unknown sensor is under development',
@@ -2024,7 +2026,6 @@
 			length_min   => '40',
 			length_max   => '40',
 		},
-
 	"90"	=>	## mumbi m-FS300 / manax MX-RCS250 (CP 260-275)
 						# https://forum.fhem.de/index.php/topic,94327.15.html
 						# MS;P0=-9964;P1=273;P4=-866;P5=792;P6=-343;D=10145614141414565656561414561456561414141456565656561456141414145614;CP=1;SP=0;R=35;O;m2;		//A	AN
@@ -2048,8 +2049,10 @@
 			format       => 'twostate',
 			preamble     => 'u90#',			
 			length_min   => '33',
-			length_max   => '36',		
-			developId    => 'p',
+			length_max   => '36',
+			#clientmodule	=> 'SD_UT',
+			#modulematch	=> '^P90#.*',
+			developId    => 'y',
 		},
 	"91"	=>	## Atlantic Security / Focus Security China Devices
 						# https://forum.fhem.de/index.php/topic,58397.msg876862.html#msg876862
@@ -2070,6 +2073,27 @@
 			preamble			=> 'u91#',			# prepend to converted message
 			length_min		=> '36',
 			length_max		=> '36',
-			developId     => 'p',
+			developId     => 'y',
 		},
+	"92"	=>	## Krinner Lumix - LED X-MAS
+						# https://github.com/RFD-FHEM/RFFHEM/issues/452 | https://forum.fhem.de/index.php/topic,94873.msg876477.html?PHPSESSID=khp4ja64pcqa5gsf6gb63l1es5#msg876477
+						# MU;P0=24188;P1=-16308;P2=993;P3=-402;P4=416;P5=-967;P6=-10162;D=0123234545454523234523234545454545454545232623452345454545454523234523234545454523234523234545454545454545232623452345454545454523234523234545454523234523234545454545454545232623452345454545454523234523234545454523234523234545454545454545232;CP=4;R=25;
+						# MU;P0=11076;P1=-20524;P2=281;P3=-980;P4=982;P5=-411;P6=408;P7=-10156;D=0123232345456345456363636363636363634745634563636363636345456345456363636345456345456363636363636363634745634563636363636345456345456363636345456345456363636363636363634745634563636363636345456345456363636345456345456363636363636363634;CP=6;R=38;
+		{
+			name					=> 'Krinner Lumix',
+			comment				=> 'LED X-MAS model 572152',
+			id						=> '92',
+			knownFreqs		=> '',
+			zero					=> [1,-2],
+			one						=> [2,-1],
+			start					=> [2,-24],
+			clockabs			=> 420,
+			format				=> 'twostate',	#
+			preamble			=> 'u92#',			# prepend to converted message
+			length_min		=> '32',
+			length_max		=> '32',
+			#clientmodule	=> 'SD_UT',
+			#modulematch	=> '^P92#.*',
+			developId     => 'y',
+		},																		 
 );
