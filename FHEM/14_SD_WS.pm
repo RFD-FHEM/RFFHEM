@@ -14,6 +14,7 @@
 # 11.09.2018 Plotanlegung korrigiert | doc | temp check war falsch positioniert
 # 16.09.2018 neues Protokoll 84: Funk Wetterstation Auriol IAN 283582 Version 06/2017 (Lidl), Modell-Nr.: HG02832D
 # 31.09.2018 neues Protokoll 85: Kombisensor TFA 30.3222.02 fuer Wetterstation TFA 35.1140.01
+# 09.12.2018 neues Protokoll 89: Temperatur-/Feuchtesensor TFA 30.3221.02 fuer Wetterstation TFA 35.1140.01
 
 package main;
 
@@ -49,8 +50,9 @@ sub SD_WS_Initialize($)
 		"SD_WS71_T.*"		=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4:Temp,", autocreateThreshold => "2:180"},
 		"SD_WS_33_T_.*"	=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.* model:other", FILTER => "%NAME", GPLOT => "temp4:Temp,", autocreateThreshold => "2:180"},
 		"SD_WS_33_TH_.*"	=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.* model:other", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "2:180"},
-		"SD_WS_84_TH_.*"	=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.* model:other", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "2:120"},
-		"SD_WS_85_THW_.*"	=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.* model:other", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "2:120"},
+		"SD_WS_84_TH_.*"	=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "2:120"},
+		"SD_WS_85_THW_.*"	=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "4:120"},
+		"SD_WS_89_TH.*"	=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "3:180"},
 	};
 
 }
@@ -294,14 +296,16 @@ sub SD_WS_Parse($$)
 				# 0    4    | 8    12   | 16   20   | 24   28   | 32   36   | 40   44   | 48   52   | 56   60   | 64
 				# 0000 1001 | 0001 0110 | 0001 0000 | 0000 0111 | 0100 1001 | 0100 0000 | 0100 1001 | 0100 1001 | 1
 				# ???? iiii | iiii iiii | iiii iiii | b??? ??yy | tttt tttt | tttt ???? | hhhh hhhh | ???? ???? | ?   message 1
-				# ???? iiii | iiii iiii | iiii iiii | b??? ??yy | wwww wwww | wwww ???? | 0000 0000 | ???? ???? | ?   message 2
+				# ???? iiii | iiii iiii | iiii iiii | b?cc ??yy | wwww wwww | wwww ???? | 0000 0000 | ???? ???? | ?   message 2
 				# i: 20 bit random id (changes on power-loss)
 				# b:  1 bit battery indicator (0=>OK, 1=>LOW)
+				# c:  2 bit channel valid channels are (always 00 stands for channel 1)
 				# y:  2 bit typ, 01 - thermo/hygro (message 1), 10 - wind (message 2)
 				# t: 12 bit unsigned temperature, offset 500, scaled by 10 - if message 1
 				# h:  8 bit relative humidity percentage - if message 1
 				# w: 12 bit unsigned windspeed, scaled by 10 - if message 2
 				# ?: unknown
+				# The sensor sends at intervals of about 30 seconds
 				sensortype => 'Kombisensor TFA 30.3222.02',
 				model      => 'SD_WS_85_THW',
 				prematch   => sub {my $msg = shift; return 1 if ($msg =~ /^[0-9A-F]{16}/); },		# min 16 nibbles
@@ -330,6 +334,32 @@ sub SD_WS_Parse($$)
 															return undef;
 														}
 													},
+			} ,
+		89 =>
+			{
+				# Protokollbeschreibung: Temperatur-/Feuchtesensor TFA 30.3221.02 fuer Wetterstation TFA 35.1140.01
+				# -------------------------------------------------------------------------------------------------
+				# 0    4    | 8    12   | 16   20   | 24   28   | 32   36  
+				# 0000 1001 | 0001 0110 | 0001 0000 | 0000 0111 | 0100 1001
+				# iiii iiii | bscc tttt | tttt tttt | hhhh hhhh | ???? ????
+				# i:  8 bit random id (changes on power-loss)
+				# b:  1 bit battery indicator (0=>OK, 1=>LOW)
+				# s:  1 bit sendmode (0=>auto, 1=>manual)
+				# c:  2 bit channel valid channels are 0-2 (1-3)
+				# t: 12 bit unsigned temperature, offset 500, scaled by 10
+				# h:  8 bit relative humidity percentage
+				# ?:  8 bit unknown
+				# The sensor sends 3 repetitions at intervals of about 60 seconds
+				sensortype => 'Sensor TFA 30.3221.02',
+				model      => 'SD_WS_89_TH',
+				prematch   => sub {my $msg = shift; return 1 if ($msg =~ /^[0-9A-F]{10}$/); },
+				id         =>	sub {my (undef,$bitData) = @_; return substr($rawData,0,2); },
+				bat        => sub {my (undef,$bitData) = @_; return substr($bitData,8,1) eq "0" ? "ok" : "low";},
+				sendmode   => sub {my (undef,$bitData) = @_; return substr($bitData,9,1) eq "1" ? "manual" : "auto"; },
+				channel    => sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,10,11) + 1); },
+				temp       => sub {my (undef,$bitData) = @_; return ((SD_WS_binaryToNumber($bitData,12,23) - 500) / 10.0); },
+				hum        => sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,24,31); },
+				crcok      => sub {return 1;},		# crc test method is so far unknown
 			} ,
     );
     
