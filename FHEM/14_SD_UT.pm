@@ -1,5 +1,5 @@
-##############################################
-# $Id: 14_SD_UT.pm 32 2018-12-22 12:00:00 v3.3.3-dev_05.12. $HomeAuto_User
+#########################################################################################
+# $Id: 14_SD_UT.pm 32 2018-12-28 12:00:00 v3.3.3-dev_05.12. $HomeAuto_User
 #
 # The file is part of the SIGNALduino project.
 # The purpose of this module is universal support for devices.
@@ -7,33 +7,25 @@
 #
 # - unitec Modul alte Variante bis 20180901 (Typ unitec-Sound) --> keine MU MSG!
 # - unitec Funkfernschalterset (Typ uniTEC_48110) ??? EIM-826 Funksteckdosen --> keine MU MSG!
-####################################################################################################################################
+###############################################################################################################################################################################
 # - unitec remote door reed switch 47031 (Typ Unitec_47031) [Protocol 30] and [additionally Protocol 83] (sync -30)  (1 = on | 0 = off)
-#{     FORUM: https://forum.fhem.de/index.php/topic,43346.msg353144.html#msg353144
+#{    FORUM: https://forum.fhem.de/index.php/topic,43346.msg353144.html#msg353144
 #     8 DIP-switches for deviceCode (1-8) | 3 DIP-switches for zone (9-11) | 1 DIP-switch unknown (12) | baugleich FRIEDLAND SU4F zwecks gleichem Platinenlayout + Jumper
 #     Kopplung an Unitec 47121 (Zone 1-6) | Unitec 47125 (Zone 1-2) | Friedland (Zone 1)
-#     Adresse: 95 - öffnen?
-#     get sduino_dummy raw MU;;P0=309;;P1=636;;P2=-690;;P3=-363;;P4=-10027;;D=012031203120402031312031203120312031204020313120312031203120312040203131203120312031203120402031312031203120312031204020313120312031203120312040203131203120312031203120402031312031203120312031204020313120312031203120312040203131203120312030;;CP=0;;O;;
-#     Adresse: 00 - Gehäuse geöffnet?
-#}    get sduino_dummy raw MU;;P0=684;;P1=-304;;P2=-644;;P3=369;;P4=-9931;;D=010101010101010232323104310101010101010102323231043101010101010101023232310431010101010101010232323104310101010101010102323231043101010101010101023232310431010101010101010232323104310101010101010102323231043101010101010101023232310431010100;;CP=0;;O;;
-####################################################################################################################################
+#     Adresse: 95 - öffnen?               |  get sduino_dummy raw MU;;P0=309;;P1=636;;P2=-690;;P3=-363;;P4=-10027;;D=012031203120402031312031203120312031204020313120312031203120312040203131203120312031203120402031312031203120312031204020313120312031203120312040203131203120312031203120402031312031203120312031204020313120312031203120312040203131203120312030;;CP=0;;O;;
+#}    Adresse: 00 - Gehäuse geöffnet?     |  get sduino_dummy raw MU;;P0=684;;P1=-304;;P2=-644;;P3=369;;P4=-9931;;D=010101010101010232323104310101010101010102323231043101010101010101023232310431010101010101010232323104310101010101010102323231043101010101010101023232310431010101010101010232323104310101010101010102323231043101010101010101023232310431010100;;CP=0;;O;;
+###############################################################################################################################################################################
 # - Westinghouse Deckenventilator (Typ HT12E | remote with 5 buttons without SET | Buttons_five ??? 7787100 ???) [Protocol 29] and [additionally Protocol 30] (sync -35) (1 = off | 0 = on)
 #{    FORUM: https://forum.fhem.de/index.php/topic,58397.960.html | https://forum.fhem.de/index.php/topic,53282.30.html
-#     Adresse e | 1110 (off|off|off|on): fan_off
-#     get sduino_dummy raw MU;;P0=250;;P1=-492;;P2=166;;P3=-255;;P4=491;;P5=-8588;;D=052121212121234121212121234521212121212341212121212345212121212123412121212123452121212121234121212121234;;CP=0;;
-#     Adresse e | 1110 (off|off|off|on): fan low speed
-#}    get sduino_dummy raw MU;;P0=-32001;;P1=224;;P2=-255;;P3=478;;P4=-508;;P6=152;;P7=-8598;;D=01234141414641414141414123712341414141414141414141237123414141414141414141412371234141414141414141414123712341414141414141414141237123414141414141414141412371234141414141414141414123712341414141414141414141237123414141414141414141412371234141414141414141;;CP=1;;R=108;;O;;
+#     Adresse e | 1110 (off|off|off|on): fan_off         |  get sduino_dummy raw MU;;P0=250;;P1=-492;;P2=166;;P3=-255;;P4=491;;P5=-8588;;D=052121212121234121212121234521212121212341212121212345212121212123412121212123452121212121234121212121234;;CP=0;;
+#}    Adresse e | 1110 (off|off|off|on): fan low speed   |  get sduino_dummy raw MU;;P0=-32001;;P1=224;;P2=-255;;P3=478;;P4=-508;;P6=152;;P7=-8598;;D=01234141414641414141414123712341414141414141414141237123414141414141414141412371234141414141414141414123712341414141414141414141237123414141414141414141412371234141414141414141414123712341414141414141414141237123414141414141414141412371234141414141414141;;CP=1;;R=108;;O;;
 ####################################################################################################################################
 # - Westinghouse Deckenventilator (Typ [M1EN compatible HT12E] example Delancey | remote RH787T with 9 buttons + SET) [Protocol 83] and [additionally Protocol 30] (sync -36) (1 = off | 0 = on)
-#{    Adresse 0 | 0000 (on|on|on|on): I - fan minimum speed
-#     get sduino_dummy raw MU;;P0=388;;P1=-112;;P2=267;;P3=-378;;P5=585;;P6=-693;;P7=-11234;;D=0123035353535356262623562626272353535353562626235626262723535353535626262356262627235353535356262623562626272353535353562626235626262723535353535626262356262627235353535356262623562626272353535353562626235626262723535353535626262356262627235353535356262;;CP=2;;R=43;;O;;
-#     Adresse 8 | 1000 (off|on|on|on): I - fan minimum speed
-#     get sduino_dummy raw MU;;P0=-11250;;P1=-200;;P2=263;;P3=-116;;P4=-374;;P5=578;;P6=-697;;D=1232456245454562626245626262024562454545626262456262620245624545456262624562626202456245454562626245626262024562454545626262456262620245624545456262624562626202456245454562626245626262024562454545626262456262620245624545456262624562626202456245454562626;;CP=2;;R=49;;O;;
-#     Adresse c | 1100 (off|off|on|on): fan_off
-#     get sduino_dummy raw MU;;P0=-720;;P1=235;;P2=-386;;P3=561;;P4=-11254;;D=01230141230101232301010101012301412301012323010101010123014123010123230101010101010141230101232301010101010101412301012323010101010101014123010123230101010101010;;CP=1;;R=242;;
-#     Adresse c | 1100 (off|off|on|on): fan_off
-#}    get sduino_dummy raw MU;;P0=-11230;;P1=258;;P2=-390;;P3=571;;P4=-699;;D=0123414123234141414141234101234141232341414141412341012341412323414141414123410123414123234141414141234101234141232341414141412341012341412323414141414123410123414123234141414141234101234141232341414141412341012341412323414141414123410123414123234141414;;CP=1;;R=246;;O;;
-####################################################################################################################################
+#{    Adresse 0 | 0000 (on|on|on|on): I - fan minimum speed  |  get sduino_dummy raw MU;;P0=388;;P1=-112;;P2=267;;P3=-378;;P5=585;;P6=-693;;P7=-11234;;D=0123035353535356262623562626272353535353562626235626262723535353535626262356262627235353535356262623562626272353535353562626235626262723535353535626262356262627235353535356262623562626272353535353562626235626262723535353535626262356262627235353535356262;;CP=2;;R=43;;O;;
+#     Adresse 8 | 1000 (off|on|on|on): I - fan minimum speed |  get sduino_dummy raw MU;;P0=-11250;;P1=-200;;P2=263;;P3=-116;;P4=-374;;P5=578;;P6=-697;;D=1232456245454562626245626262024562454545626262456262620245624545456262624562626202456245454562626245626262024562454545626262456262620245624545456262624562626202456245454562626245626262024562454545626262456262620245624545456262624562626202456245454562626;;CP=2;;R=49;;O;;
+#     Adresse c | 1100 (off|off|on|on): fan_off              |  get sduino_dummy raw MU;;P0=-720;;P1=235;;P2=-386;;P3=561;;P4=-11254;;D=01230141230101232301010101012301412301012323010101010123014123010123230101010101010141230101232301010101010101412301012323010101010101014123010123230101010101010;;CP=1;;R=242;;
+#}    Adresse c | 1100 (off|off|on|on): fan_off              |  get sduino_dummy raw MU;;P0=-11230;;P1=258;;P2=-390;;P3=571;;P4=-699;;D=0123414123234141414141234101234141232341414141412341012341412323414141414123410123414123234141414141234101234141232341414141412341012341412323414141414123410123414123234141414141234101234141232341414141412341012341412323414141414123410123414123234141414;;CP=1;;R=246;;O;;
+###############################################################################################################################################################################
 # - Remote control SA-434-1 mini 923301 [Protocol 81] and [additionally Protocol 83 + Protocol 86]
 #{    one Button, 434 MHz
 #     protocol like HT12E
@@ -53,14 +45,13 @@
 #
 #     get sduino_dummy raw MU;;P0=-1756;;P1=112;;P2=-11752;;P3=496;;P4=-495;;P5=998;;P6=-988;;P7=-17183;;D=0123454545634545456345634563734545456345454563456345637345454563454545634563456373454545634545456345634563734545456345454563456345637345454563454545634563456373454545634545456345634563734545456345454563456345637345454563454545634563456373454545634545456;;CP=3;;R=0;;
 #}    get sduino_dummy raw MU;;P0=-485;;P1=188;;P2=-6784;;P3=508;;P5=1010;;P6=-974;;P7=-17172;;D=0123050505630505056305630563730505056305050563056305637305050563050505630563056373050505630505056305630563730505056305050563056305637305050563050505630563056373050505630505056305630563730505056305050563056305637305050563050505630563056373050505630505056;;CP=3;;R=0;;
-####################################################################################################################################
+###############################################################################################################################################################################
 # - QUIGG GT-7000 Funk-Steckdosendimmer | transmitter QUIGG_DMV - receiver DMV-7009AS  [Protocol 34]
 #{    https://github.com/RFD-FHEM/RFFHEM/issues/195
 #     nibble 0-2 -> Ident | nibble 3-4 -> Tastencode
-#     get sduino_dummy raw MU;;P0=-29120;;P1=603;;P2=-666;;P3=1235;;P4=-1307;;D=012341412323232341412341412341232323232341;;CP=1;;R=16;;
-#			get sduino_dummy raw MU;;P0=-5284;;P1=583;;P2=-681;;P3=1216;;P4=-1319;;D=012341412323232341412341412323234123232341;;CP=1;;R=16;;
+#     get sduino_dummy raw MU;;P0=-5476;;P1=592;;P2=-665;;P3=1226;;P4=-1309;;D=01232323232323232323232323412323412323414;;CP=3;;R=1;;
 #}    Send Adresse FFF funktioniert nicht 100%ig!
-####################################################################################################################################
+###############################################################################################################################################################################
 # - Remote Control Novy_840029 for Novy Pureline 6830 kitchen hood [Protocol 86] (Länge je nach Taste 12 oder 18 Bit)
 #{    0100				"novy_button"			- nicht geprüft
 #     0101				"+_button"				- i.O.
@@ -69,28 +60,23 @@
 #     0111010011	"power_button"		- nur 10 Bit, SIGNALduino.pm hängt 2 Nullen an
 #    https://github.com/RFD-FHEM/RFFHEM/issues/331
 #			nibble 0-1 -> Ident | nibble 2-4 -> Tastencode
-#     light on/off button
-#     get sduino_dummy raw MU;;P0=710;;P1=353;;P2=-403;;P4=-761;;P6=-16071;;D=20204161204120412041204120414141204120202041612041204120412041204141412041202020416120412041204120412041414120412020204161204120412041204120414141204120202041;;CP=1;;R=40;;
-#     + button
-#     get sduino_dummy raw MU;;P0=22808;;P1=-24232;;P2=701;;P3=-765;;P4=357;;P5=-15970;;P7=-406;;D=012345472347234723472347234723454723472347234723472347234547234723472347234723472345472347234723472347234723454723472347234723472347234;;CP=4;;R=39;;
-#     - button
-#     get sduino_dummy raw MU;;P0=-8032;;P1=364;;P2=-398;;P3=700;;P4=-760;;P5=-15980;;D=0123412341234123412341412351234123412341234123414123512341234123412341234141235123412341234123412341412351234123412341234123414123;;CP=1;;R=40;;
-#     power button
-#     get sduino_dummy raw MU;;P0=-756;;P1=718;;P2=354;;P3=-395;;P4=-16056;;D=01020202310231310202423102310231023102310202023102313102024231023102310231023102020231023131020242310231023102310231020202310231310202;;CP=2;;R=41;;
-#     novy button
-#}    get sduino_dummy raw MU;;P0=706;;P1=-763;;P2=370;;P3=-405;;P4=-15980;;D=0123012301230304230123012301230123012303042;;CP=2;;R=42;;
-####################################################################################################################################
+#     light on/off button   -	get sduino_dummy raw MU;;P0=710;;P1=353;;P2=-403;;P4=-761;;P6=-16071;;D=20204161204120412041204120414141204120202041612041204120412041204141412041202020416120412041204120412041414120412020204161204120412041204120414141204120202041;;CP=1;;R=40;;
+#     + button              -	get sduino_dummy raw MU;;P0=22808;;P1=-24232;;P2=701;;P3=-765;;P4=357;;P5=-15970;;P7=-406;;D=012345472347234723472347234723454723472347234723472347234547234723472347234723472345472347234723472347234723454723472347234723472347234;;CP=4;;R=39;;
+#     - button              -	get sduino_dummy raw MU;;P0=-8032;;P1=364;;P2=-398;;P3=700;;P4=-760;;P5=-15980;;D=0123412341234123412341412351234123412341234123414123512341234123412341234141235123412341234123412341412351234123412341234123414123;;CP=1;;R=40;;
+#     power button          -	get sduino_dummy raw MU;;P0=-756;;P1=718;;P2=354;;P3=-395;;P4=-16056;;D=01020202310231310202423102310231023102310202023102313102024231023102310231023102020231023131020242310231023102310231020202310231310202;;CP=2;;R=41;;
+#}    novy button           - get sduino_dummy raw MU;;P0=706;;P1=-763;;P2=370;;P3=-405;;P4=-15980;;D=0123012301230304230123012301230123012303042;;CP=2;;R=42;;
+###############################################################################################################################################################################
 # - CAME Drehtor Antrieb - remote CAME_TOP_432EV [Protocol 86] and [additionally Protocol 81]
 #{    https://github.com/RFD-FHEM/RFFHEM/issues/151
 #     nibble 0-1 -> Ident | nibble 2 -> Tastencode
 #}    get sduino_dummy raw MU;;P0=-322;;P1=136;;P2=-15241;;P3=288;;P4=-735;;P6=723;;D=0123434343064343430643434306234343430643434306434343062343434306434343064343430623434343064343430643434306234343430643434306434343062343434306434343064343430623434343064343430643434306234343430643434306434343062343434306434343064343430;;CP=3;;R=27;;
-####################################################################################################################################
+###############################################################################################################################################################################
 # - Hoermann HS1-868-BS [Protocol 69]
 #{    https://github.com/RFD-FHEM/RFFHEM/issues/344 | https://github.com/RFD-FHEM/RFFHEM/issues/149
 #                iiii iiii iiii iiii iiii iiii iiii bbbb
 #			0000 0000 1111 0110 0010 1010 1001 1100 0000 0001 1100 (HS1-868-BS)
 #}    get sduino_dummy raw MU;;P0=-578;;P1=1033;;P2=506;;P3=-1110;;P4=13632;;D=0101010232323101040101010101010101023232323102323101010231023102310231010232323101010101010101010232323101040101010101010101023232323102323101010231023102310231010232323101010101010101010232323101040101010101010101023232323102323101010231023102310231010;;CP=2;;R=77;;
-####################################################################################################################################
+###############################################################################################################################################################################
 # - Hoermann HSM4 [Protocol 69]
 #{    https://forum.fhem.de/index.php/topic,71877.msg642879.html (HSM4, Taste 1-4)
 #               iiii iiii iiii iiii iiii iiii iiii bbbb
@@ -99,7 +85,7 @@
 #     0000 0000 1110 0110 1011 1110 1001 0001 0000 1110 1100 (HSM4 Taste C)
 #     0000 0000 1110 0110 1011 1110 1001 0001 0000 1101 1100 (HSM4 Taste D)
 #}    get sduino_dummy raw MU;;P0=-3656;;P1=12248;;P2=-519;;P3=1008;;P4=506;;P5=-1033;;D=01232323232323232324545453232454532453245454545453245323245323232453232323245453245454532321232323232323232324545453232454532453245454545453245323245323232453232323245453245454532321232323232323232324545453232454532453245454545453245323245323232453232323;;CP=4;;R=48;;O;;
-####################################################################################################################################
+###############################################################################################################################################################################
 # - Transmitter SF01 01319004 433,92 MHz (SF01_01319004) (NEFF kitchen hood) [Protocol 86]
 #{    https://github.com/RFD-FHEM/RFFHEM/issues/376 | https://forum.fhem.de/index.php?topic=93545.0
 #     Sends 18 bits, converting to hex in SIGNALduino.pm adds 2 bits of 0
@@ -119,7 +105,7 @@
 #}    get sduino_dummy raw MU;;P0=-710;;P1=329;;P2=-388;;P3=661;;P4=-14766;;D=01232301410123012323232301230123012323012323014;;CP=1;;R=1;;
 ###
 # - Transmitter SF01 01319004 (SF01_01319004_Typ2) 433,92 MHz (BOSCH kitchen) [Protocol 86]
-#                   iiii iiii iiii ii bbbb aa   hex
+#{                  iiii iiii iiii ii bbbb aa   hex
 #     ------------------------------------------------
 #     Plus:         0010 0110 0011 10 0100 00		263 90 
 #     Minus:        0010 0110 0011 10 0010 00		263 88 
@@ -133,12 +119,12 @@
 #     get sduino_dummy raw MU;;P0=705;;P1=-140;;P2=-336;;P3=-667;;P4=377;;P5=-15230;;P6=248;;D=01020342020343420202034343420202020345420203420203434202020343434202020203654202034202034342020203434342020202034542020342020343420202034343420202020345420203420203434202020343434202020203454202034202034342020203434342020202034542020342020343420202034343;;CP=4;;O;;
 #     get sduino_dummy raw MU;;P0=704;;P1=-338;;P2=-670;;P3=378;;P4=-15227;;P5=244;;D=01023231010102323231010102310431010231010232310101023232310101025104310102310102323101010232323101010231043101023101023231010102323231010102310431010231010232310101023232310101023104310102310102323101010232323101010231043101023101023231010102323231010102;;CP=3;;O;;
 #}    get sduino_dummy raw MU;;P0=-334;;P1=709;;P2=-152;;P3=-663;;P4=379;;P5=-15226;;P6=250;;D=01210134010134340101013434340101340134540101340101343401010134343401013601365401013401013434010101343434010134013454010134010134340101013434340101340134540101340101343401010134343401013401345401013401013434010101343434010134013454010134010134340101013434;;CP=4;;O;;
-####################################################################################################################################
+###############################################################################################################################################################################
 # - Berner Garagentorantrieb GA401 | remote TEDSEN SKX1MD 433.92 MHz - 1 button | settings via 9 switch on battery compartment [Protocol 46]
 #{    compatible with doors: BERNER SKX1MD, ELKA SKX1MD, TEDSEN SKX1LC, TEDSEN SKX1
 #     https://github.com/RFD-FHEM/RFFHEM/issues/91
 #}    get sduino_dummy raw MU;;P0=-15829;;P1=-3580;;P2=1962;;P3=-330;;P4=245;;P5=-2051;;D=1234523232345234523232323234523234540023452323234523452323232323452323454023452323234523452323232323452323454023452323234523452323232323452323454023452323234523452323232323452323454023452323234523452323;;CP=2;;
-####################################################################################################################################
+###############################################################################################################################################################################
 # - Chilitec Großhandel 22640 - LED Christbaumkerzen mit Fernbedienung
 #{ 		Taste -: 		AA802			0010		brightness_minus
 # 		Taste Aus: 	AA804			0100		power_off
@@ -148,7 +134,7 @@
 # 		Taste +: 		AA80C			1100		brightness_plus
 #
 #}    get sduino_dummy raw MS;;P0=988;;P1=-384;;P2=346;;P3=-1026;;P4=-4923;;D=240123012301230123012323232323232301232323;;CP=2;;SP=4;;R=0;;O;;m=1;;
-####################################################################################################################################
+###############################################################################################################################################################################
 # - XM21-0 - LED Christbaumkerzen mit Fernbedienung [Protocol 76]
 #{ 		button - ON
 # 		MU;P0=-205;P1=113;P3=406;D=010101010101010101010101010101010101010101010101010101010101030303030101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010103030303010101010101010101010100;CP=1;R=69;
@@ -163,11 +149,24 @@
 # 		---------------------
 # 		P76#FFFFFFFFFFFFFF FF		- on
 #} 		P76#FFFFFFFFFFFFFF C		- off
-####################################################################################################################################
+###############################################################################################################################################################################
+# - Krinner LUMIX - LED X-MAS model 572152 [Protocol 92]
+#{ 		button - ON
+# 		MU;P0=-592;P1=112;P2=-968;P3=413;P4=995;P5=-394;P6=-10161;D=01232323245453245453232323232323232454645324532323232323245453245453232323245453245453232323232323232454645324532323232323245453245453232323245453245453232323232323232454645324532323232323245453245453232323245453245453232323232323232454;CP=3;R=25;
+#			MU;P0=24188;P1=-16308;P2=993;P3=-402;P4=416;P5=-967;P6=-10162;D=0123234545454523234523234545454545454545232623452345454545454523234523234545454523234523234545454545454545232623452345454545454523234523234545454523234523234545454545454545232623452345454545454523234523234545454523234523234545454545454545232;CP=4;R=25;
+# 		button - OFF
+# 		MU;P0=417;P1=-558;P2=975;P3=272;P4=-974;P5=140;P6=-419;P7=-10150;D=01213454040426260426260404040404040404042726042604040404040426260426260404040426260426260404040404040404042726042604040404040426260426260404040426260426260404040404040404042726042604040404040426260426260404040426260426260404040404040404042;CP=0;R=37;
+#			MU;P0=11076;P1=-20524;P2=281;P3=-980;P4=982;P5=-411;P6=408;P7=-10156;D=0123232345456345456363636363636363634745634563636363636345456345456363636345456345456363636363636363634745634563636363636345456345456363636345456345456363636363636363634745634563636363636345456345456363636345456345456363636363636363634;CP=6;R=38;
+#
+# 		    iiiiiii b
+# 		----------- -
+# 		P92#A06C360 1
+#} 		P92#A06C360 0
+###############################################################################################################################################################################
 # !!! ToDo´s !!!
 #     -
 #     -
-####################################################################################################################################
+###############################################################################################################################################################################
 
 package main;
 
@@ -219,6 +218,12 @@ my %models = (
 							Protocol 	=> "P69",
 							Typ				=> "remote"
 						},
+	"Krinner_LUMIX" =>	{	"0000"			=> "off",
+												"0001"			=> "on",
+												Protocol		=> "P92",
+												hex_lengh		=> "8",
+												Typ					=> "remote"
+											},
 	"Novy_840029" => 	{	"0100"        => "novy",
 											"0101"        => "speed_plus",
 											"0110"        => "speed_minus",
@@ -305,7 +310,7 @@ my %models = (
 #############################
 sub SD_UT_Initialize($) {
 	my ($hash) = @_;
-	$hash->{Match}			= "^P(?:14|29|30|34|46|69|76|81|83|86)#.*";
+	$hash->{Match}			= "^P(?:14|29|30|34|46|69|76|81|83|86|92)#.*";
 	$hash->{DefFn}			= "SD_UT_Define";
 	$hash->{UndefFn}		= "SD_UT_Undef";
 	$hash->{ParseFn}		= "SD_UT_Parse";
@@ -360,8 +365,8 @@ sub SD_UT_Define($$) {
 
 	### [5] checks TEDSEN_SKX1MD ###
 	return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short | long or not HEX (0-9 | a-f | A-F){5}" if ($a[2] eq "TEDSEN_SKX1MD" && not $a[3] =~ /^[0-9a-fA-F]{5}/s);
-	### [7] checks Hoermann HSM4 ###
-	return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short | long or not HEX (0-9 | a-f | A-F){7}" if ($a[2] eq "HSM4" && not $a[3] =~ /^[0-9a-fA-F]{7}/s);
+	### [7] checks Hoermann HSM4 | Krinner_LUMIX ###
+	return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short | long or not HEX (0-9 | a-f | A-F){7}" if (($a[2] eq "HSM4" || $a[2] eq "Krinner_LUMIX") && not $a[3] =~ /^[0-9a-fA-F]{7}/s);
 	### [9] checks Hoermann HS1-868-BS ###
 	return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short | long or not HEX (0-9 | a-f | A-F){9}" if ($a[2] eq "HS1_868_BS" && not $a[3] =~ /^[0-9a-fA-F]{9}/s);
 	### [14] checks LED_XM21_0 ###
@@ -474,6 +479,12 @@ sub SD_UT_Set($$$@) {
 		my $adr = sprintf( "%014b", hex($definition[1])) if ($name ne "unknown");	# argument 1 - adress to binary with 14 digits
 		$msg = $models{$model}{Protocol} . "#" . $adr;
 		$msgEnd .= "#R" . $repeats;
+	############ Krinner_LUMIX ############
+	} elsif ($model eq "Krinner_LUMIX" && $cmd ne "?") {
+		my @definition = split(" ", $hash->{DEF});																# split adress from def
+		my $adr = sprintf( "%028b", hex($definition[1])) if ($name ne "unknown");	# argument 1 - adress to binary with 14 digits
+		$msg = $models{$model}{Protocol} . "#" . $adr;
+		$msgEnd .= "#R" . $repeats;
 	}
 
 	Log3 $name, 4, "$ioname: SD_UT_Set attr_model=$model msg=$msg msgEnd=$msgEnd" if(defined $msgEnd);
@@ -548,9 +559,6 @@ sub SD_UT_Parse($$) {
 	my $devicedef;
 	my $state = "unknown";
 
-	my $createflag = "manually";
-	my $devicename;
-
 	my $deletecache = $modules{SD_UT}{defptr}{deletecache};
 	Log3 $iohash, 5, "$ioname: SD_UT device in delete cache = $deletecache" if($deletecache && $deletecache ne "-");
 
@@ -561,9 +569,6 @@ sub SD_UT_Parse($$) {
 		$modules{SD_UT}{defptr}{deletecache} = "-";
 		return "";
 	}
-
-	$iohash->{bitMSG} = $bitData;
-	#Log3 $iohash, 3, "$ioname: SD_UT_Parse check hlen=$hlen protocol=$protocol";
 
 	if ($hlen == 3) {
 		### Westinghouse Buttons_five [P29] ###
@@ -606,35 +611,20 @@ sub SD_UT_Parse($$) {
 
 	if ($hlen == 5) {
 		### Chilitec_22640 [P14] ###
-		if ($protocol == 14) {
+		if (!$def && $protocol == 14) {
 			$deviceCode = substr($rawData,0,4);
 			$devicedef = "Chilitec_22640 " . $deviceCode;
 			$def = $modules{SD_UT}{defptr}{$devicedef};
-
-			$createflag = "auto";
-			$model = "Chilitec_22640";
-			$devicename = $model."_".$deviceCode;
-			$state = substr($bitData,16,4);
 		### QUIGG_DMV [P34] ###
-		} elsif ($protocol == 34) {
+		} elsif (!$def && $protocol == 34) {
 			$deviceCode = substr($rawData,0,3);
 			$devicedef = "QUIGG_DMV " . $deviceCode;
 			$def = $modules{SD_UT}{defptr}{$devicedef};
-
-			$createflag = "auto";
-			$model = "QUIGG_DMV";
-			$devicename = $model."_".$deviceCode;
-			$state = substr($bitData,12,8);
-		### Remote control TEDSEN_SKX1MD [P46] ###
-		} elsif ($protocol == 46) {
+			### Remote control TEDSEN_SKX1MD [P46] ###
+		} elsif (!$def && $protocol == 46) {
 			$deviceCode = $rawData;
 			$devicedef = "TEDSEN_SKX1MD " . $deviceCode;
 			$def = $modules{SD_UT}{defptr}{$devicedef};
-
-			$createflag = "auto";
-			$model = "TEDSEN_SKX1MD";
-			$devicename = $model."_".$deviceCode;
-			$state = "receive";
 		### NEFF SF01_01319004 || BOSCH SF01_01319004_Typ2 [P86] ###
 		} elsif (!$def && $protocol == 86) {
 			$deviceCode = substr($bitData,0,14) . "00";
@@ -646,6 +636,13 @@ sub SD_UT_Parse($$) {
 		} 
 	}
 
+	if ($hlen == 8 && $protocol == 92) {
+		### Remote control Krinner_LUMIX [P92] ###
+		$deviceCode = substr($rawData,0,7);
+		$devicedef = "Krinner_LUMIX " . $deviceCode if (!$def);
+		$def = $modules{SD_UT}{defptr}{$devicedef} if (!$def);
+	}
+	
 	if ($hlen == 11 && $protocol == 69) {
 		### Remote control Hoermann HS1-868-BS [P69] ###
 		$deviceCode = substr($rawData,2,9);
@@ -662,13 +659,8 @@ sub SD_UT_Parse($$) {
 		$deviceCode = substr($rawData,0,14);
 		$devicedef = "LED_XM21_0 " . $deviceCode if (!$def);
 		$def = $modules{SD_UT}{defptr}{$devicedef} if (!$def);
-
-		$createflag = "auto";
-		$model = "LED_XM21_0";
-		$devicename = $model."_".$deviceCode;
-		$state = substr($bitData,56,8);
 	}
-
+	
 	### unknown ###
 	$devicedef = "unknown" if(!$def);
 	$def = $modules{SD_UT}{defptr}{$devicedef} if(!$def);
@@ -676,19 +668,15 @@ sub SD_UT_Parse($$) {
 
 	Log3 $iohash, 4, "$ioname: SD_UT device $devicedef found (delete cache = $deletecache)" if($def && $deletecache && $deletecache ne "-");
 
-	if(!$def && $createflag eq "manually") {
-		Log3 $iohash, 1, "$ioname: SD_UT_Parse manually UNDEFINED sensor $model detected, protocol $protocol, data $rawData, code $deviceCode";
+	if(!$def) {
+		Log3 $iohash, 1, "$ioname: SD_UT_Parse UNDEFINED sensor $model detected, protocol $protocol, data $rawData, code $deviceCode";
 		return "UNDEFINED unknown_please_select_model SD_UT $model";
-	}
-
-	if(!$def && $createflag eq "auto") {
-		Log3 $iohash, 1, "$ioname: SD_UT_Parse auto UNDEFINED sensor $model detected, protocol $protocol, data $rawData, code $deviceCode";
-		return "UNDEFINED $devicename SD_UT $model $deviceCode";
 	}
 
 	my $hash = $def;
 	my $name = $hash->{NAME};
 	$hash->{lastMSG} = $rawData;
+	$hash->{bitMSG} = $bitData;
 	$deviceCode = undef;				# reset
 
 	$model = AttrVal($name, "model", "unknown");
@@ -766,9 +754,16 @@ sub SD_UT_Parse($$) {
 			$usersystem = "Unitec 47125" if (oct("0b".$zone) == 7);
 		}
 		Log3 $name, 5, "$ioname: SD_UT_Parse devicedef=$devicedef attr_model=$model protocol=$protocol deviceCode=$deviceCode state=$state Zone=$zone";
+	############ TEDSEN_SKX1MD ############ Protocol 46 ############
+	} elsif ($model eq "TEDSEN_SKX1MD" && $protocol == 46) {
+		$state = "receive";
 	############ SA_434_1_mini ############ Protocol 81 ############
 	} elsif ($model eq "SA_434_1_mini" && ($protocol == 81 || $protocol == 83 || $protocol == 86)) {
 		$state = "receive";
+	############ QUIGG_DMV ############ Protocol 34 ############
+	} elsif ($model eq "QUIGG_DMV" && $protocol == 34) {
+		$state = substr($bitData,12,8);
+		$deviceCode = substr($bitData,0,12);
 	############ Novy_840029 ############ Protocol 86 ############
 	} elsif ($model eq "Novy_840029" && ($protocol == 86 || $protocol == 81)) {
 		if ($hlen == 3) {		# 12 Bit [3]
@@ -794,6 +789,19 @@ sub SD_UT_Parse($$) {
 	} elsif ($model eq "HSM4" && $protocol == 69) {
 		$state = substr($bitData,36,4);
 		$deviceCode = substr($bitData,8,28);
+	############ Chilitec_22640 ############ Protocol 14 ############
+	} elsif ($model eq "Chilitec_22640" && $protocol == 14) {
+		$state = substr($bitData,16,4);
+		$deviceCode = substr($bitData,0,16);
+	############ LED_XM21_0 ############ Protocol 76 ############
+	} elsif ($model eq "LED_XM21_0" && $protocol == 76) {
+		$deviceCode = substr($bitData,0,56);
+		$state = substr($bitData,56,8);
+	############ Krinner_LUMIX ############ Protocol 92 ############
+	} elsif ($model eq "Krinner_LUMIX" && $protocol == 92) {
+		$deviceCode = substr($bitData,0,28);
+		$state = substr($bitData,28,4);
+
 	############ unknown ############
 	} else {
 		readingsSingleUpdate($hash, "state", "???", 0);
@@ -856,8 +864,6 @@ sub SD_UT_Attr(@) {
 
 			Log3 $name, 4, "SD_UT_Attr Check for the change, $oldmodel hex_lengh=$hex_lengh, attrValue=$attrValue needed hex_lengh=".$models{$attrValue}{hex_lengh};
 			return "ERROR! You want to choose the $oldmodel model to $attrValue.\nPlease check your selection.\nThe length of RAWMSG must be the same!\n\nAllowed models are: $allowed_models" if ($models{$attrValue}{hex_lengh} ne $hex_lengh && $oldmodel ne "unknown");	# variants one
-			#return "ERROR! You want to choose the unknown model to $attrValue.\nPlease check your selection.\nRAWMSG is to short!\n\nAllowed models are: $allowed_models" if ($models{$attrValue}{hex_lengh} > $hex_lengh && $oldmodel eq "unknown");											# variants two
-			#return "ERROR! You want to choose the unknown model to $attrValue.\nPlease check your selection.\nRAWMSG is to long!\n\nAllowed models are: $allowed_models" if ($models{$attrValue}{hex_lengh} < $hex_lengh && $oldmodel eq "unknown");												# variants three
 			return "ERROR! You want to choose the unknown model to $attrValue.\nPlease check your selection.\nRAWMSG length is wrong!\n\nAllowed models are: $allowed_models" if (not ($models{$attrValue}{hex_lengh} =~ /($hex_lengh)/ ) && $oldmodel eq "unknown");				# variants two/three
 			### #### #### ###
 
@@ -937,6 +943,11 @@ sub SD_UT_Attr(@) {
 				$deviceCode = substr($bitData,0,56);
 				$deviceCode = sprintf("%14X", oct( "0b$deviceCode" ) );
 				$devicename = $devicemodel."_".$deviceCode;
+			############ Krinner_LUMIX	############
+			} elsif ($attrName eq "model" && $attrValue eq "Krinner_LUMIX") {
+				$deviceCode = substr($bitData,0,28);
+				$deviceCode = sprintf("%07X", oct( "0b$deviceCode" ) );
+				$devicename = $devicemodel."_".$deviceCode;
 			############ unknown ############
 			} else {
 				$devicename = "unknown_please_select_model";
@@ -1007,6 +1018,7 @@ sub SD_UT_binaryToNumber {
 	 <ul> - ChiliTec LED X-Mas light&nbsp;&nbsp;&nbsp;<small>(module model: Chilitec_22640 | protocol 14)</small></ul>
 	 <ul> - Hoermann HS1-868-BS&nbsp;&nbsp;&nbsp;<small>(module model: HS1_868_BS | protocol 69)</small></ul>
 	 <ul> - Hoermann HSM4&nbsp;&nbsp;&nbsp;<small>(module model: HSM4 | protocol 69)</small></ul>
+	 <ul> - Krinner LUMIX X-Mas light string&nbsp;&nbsp;&nbsp;<small>(module model: Krinner_LUMIX | protocol 92)</small></ul>
 	 <ul> - LED_XM21_0 X-Mas light string&nbsp;&nbsp;&nbsp;<small>(module model: LED_XM21_0 | protocol 76)</small></ul>
 	 <ul> - NEFF kitchen hood&nbsp;&nbsp;&nbsp;<small>(module model: SF01_01319004 | protocol 86)</small></ul>
 	 <ul> - Novy Pureline 6830 kitchen hood&nbsp;&nbsp;&nbsp;<small>(module model: Novy_840029 | protocol 86)</small></ul>
@@ -1232,6 +1244,7 @@ sub SD_UT_binaryToNumber {
 	 <ul> - ChiliTec LED Christbaumkerzen&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Chilitec_22640 | Protokoll 14)</small></ul>
 	 <ul> - Hoermann HS1-868-BS&nbsp;&nbsp;&nbsp;<small>(Modulmodel: HS1_868_BS | Protokoll 69)</small></ul>
 	 <ul> - Hoermann HSM4&nbsp;&nbsp;&nbsp;<small>(Modulmodel: HSM4 | Protokoll 69)</small></ul>
+	 <ul> - Krinner LUMIX Christbaumkerzen&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Krinner_LUMIX | Protokol 92)</small></ul>
 	 <ul> - LED_XM21_0 Christbaumkerzen&nbsp;&nbsp;&nbsp;<small>(Modulmodel: LED_XM21_0 | Protokol 76)</small></ul>
 	 <ul> - NEFF Dunstabzugshaube&nbsp;&nbsp;&nbsp;<small>(Modulmodel: SF01_01319004 | Protokoll 86)</small></ul>
 	 <ul> - Novy Pureline 6830 Dunstabzugshaube&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Novy_840029 | Protokoll 86)</small></ul>
