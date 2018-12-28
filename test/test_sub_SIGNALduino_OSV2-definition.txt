@@ -27,7 +27,7 @@ defmod test_sub_SIGNALduino_OSV2 UnitTest dummyDuino (
 		};
 
 		subtest 'OSV3 Tests' => sub {
-			plan tests => 8;
+			plan tests => 12;
 			my $id=10;
 			my ($rcode,$hexresult);
 			
@@ -53,6 +53,17 @@ defmod test_sub_SIGNALduino_OSV2 UnitTest dummyDuino (
 			is($rcode,1,"check result for two complete transmissions");
 			is($hexresult,"50FA281441302020042E31","check result for two complete transmissions");
 
+			$bitdata="11111111111010111110001010000101000100000100000110000000100000001000010000001110100100011001111111111111111111111110101111100010100001010001000001000";
+			($rcode,$hexresult)=SIGNALduino_OSV2($target,$bitdata,$id,length $bitdata);
+			is($rcode,-1,"check result first preamble to short second message to short");
+			isnt($hexresult,"50FA281441302020042E31","check result first preamble to short second message to short");
+			TODO: {
+				local $TODO = "codechange needed to detect second message";
+				$bitdata="11111111111111010111110001010000101000100011001111111111111111111111110101111100010100001010001000001000001100000001000000010000100000011101001000110011";
+				($rcode,$hexresult)=SIGNALduino_OSV2($target,$bitdata,$id,length $bitdata);
+				is($rcode,1,"check result first transmission to short second message is okay");
+				is($hexresult,"50FA281441302020042E31","heck result first transmission to short second message is okay");
+			}
 		};
 
 } 

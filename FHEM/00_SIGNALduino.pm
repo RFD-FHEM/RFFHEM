@@ -3655,7 +3655,7 @@ sub SIGNALduino_OSV2
 	elsif ($bitData =~ m/1{12,24}(0101)/g) {  # min Preamble 12 x 1, Valid OSV3 detected!	
 		$preamble_pos = $-[1];
 		$msg_start = $preamble_pos + 4;
-		if ($bitData =~ m/\G.+?(1{24})(0101)/) {		#  preamble + sync der zweiten Nachricht
+		if ($bitData =~ m/\G.+?(1{24})0101/) {		#  preamble + sync der zweiten Nachricht
 			$message_end = $-[1];
 			SIGNALduino_Log3 $name, 4, "$name: OSV3 protocol with two messages detected: length of second message = " . ($mcbitnum - $message_end - 28);
 		}
