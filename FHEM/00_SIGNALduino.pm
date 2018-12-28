@@ -4531,7 +4531,13 @@ sub SIGNALduino_githubParseHttpResponse($)
 		If the baudrate is "directio" (e.g.: /dev/ttyACM0@directio), then the perl module Device::SerialPort is not needed, and fhem opens the device with simple file io. This might work if the operating system uses sane defaults for the serial parameters, e.g. some Linux distributions and OSX.<br><br>
 		</li>
 	</ul>
-
+	<a name="SIGNALduinointernals"></a>
+	<b>Internals</b>
+	<ul>
+		<li><b>IDsNoDispatch</b>: Here are protocols entryls listed by their numeric id for which not communication to a logical module is enabled. To enable, look at the menu option "Display protocollist".</li>
+		<li><b>versionmodule</b>: This shows the version of the SIGNALduino FHEM module itself.</li>
+		<li><b>version</b>: This shows the version of the SIGNALduino microcontroller.</li>
+	</ul>
 	
 	<a name="SIGNALduinoset"></a>
 	<b>Set</b>
@@ -4737,13 +4743,10 @@ sub SIGNALduino_githubParseHttpResponse($)
 		</li><br>
 		<a name="development"></a>
 		<li>development<br>
-		With development attribute you can enable protocol decoding for protocols which are still in development and may not be very accurate implemented. This can result in crashes or throw high amount of log entries in your logfile, so be careful to use this. <br><br>
-		Protocols flagged with a developID flag are not loaded unless specified to do so.<br>
-		<ul>
-			<li>If the protocoll is developed well, but the logical module is not ready, developId => 'm' is set. You can enable it with the attribute: <br> Specify "m" followed with the protocol id to enable it.</li>
-			<li>If the flag developId => 'p' is set in the protocol defintion then the protocol ID is reserved.</li>
-			<li>If the flag developId => 'y' is set in the protocol defintion then the protocol is still in development. You can enable it with the attribute:<br> Specify "y" followed with the protocol id to enable it.</li>
-		</ul><br>
+		The development attribute is only available in development version of this Module for backwart compatibility. Use the whitelistIDs Attribute instead. Setting this attribute to 1 will enable all protocols which are flagged with developID=Y.
+		<br>
+		To check which protocols are flagged, open via FHEM webinterface in the section "Information menu" the option "Display protocollist". Look at the column "dev" where the flags are noted.
+		<br>
 		</li>
 		<li><a href="#do_not_notify">do_not_notify</a></li><br>
 		<li><a href="#attrdummy">dummy</a></li><br>
@@ -4843,6 +4846,8 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
 		<a name="whitelist_IDs"></a>
 		<li>whitelist_IDs<br>
 		This attribute allows it, to specify whichs protocos are considured from this module. Protocols which are not considured, will not generate logmessages or events. They are then completly ignored. This makes it possible to lower ressource usage and give some better clearnes in the logs. You can specify multiple whitelistIDs wih a colon : 0,3,7,12<br> With a # at the beginnging whitelistIDs can be deactivated.
+		<br>
+		Not using this attribute or deactivate it, will process all stable protocol entrys. Protocols which are under development, must be activated explicit via this Attribute.
 		</li><br>
    		<a name="WS09_CRCAUS"></a>
    		<li>WS09_CRCAUS<br>
@@ -4858,8 +4863,14 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
    	    <a name="Display protocollist"></a>
 		<li>Display protocollist<br> 
 		Shows the current implemented protocols from the SIGNALduino and to what logical FHEM Modul data is sent.<br>
-		Additional there is an on/off symbol, which shows you if a protocol will be processed. This changes the Attribute whitlistIDs for you in the background. The attributes whitelistIDs, blacklistIDs und development affects this.
-		Protocols which are flagged in the row <code>dev</code>, can't be activated via this ui.
+		Additional there is an on/off symbol, which shows you if a protocol will be processed. This changes the Attribute whitlistIDs for you in the background. The attributes whitelistIDs and blacklistIDs affects this state.
+		Protocols which are flagged in the row <code>dev</code>, are under development
+		<ul>
+			<li>If a row is flagged via 'm', then the logical module which provides you with an interface is still under development. Per default, these protocols will not send data to logcial module. To allow communication to a logical module you have to enable the protocol.</li> 
+			<li>If a row is flagged via 'p', then this protocol entry is reserved or in early development state.</li>
+			<li>If a row is flalged via 'y' then this protocol isn't fully tested or reviewed.</li>
+		</ul>
+		<br>
 		If you are using blacklistIDs, then you also can not activate them via the button, delete the attribute blacklistIDs if you want to control enabled protocols via this menu.
 		</li><br>
    	</ul>
@@ -4926,7 +4937,16 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
 		OSX.<br><br>
 		</li>
 	</ul>
-							  
+	
+	<a name="SIGNALduinointernals"></a>
+	<b>Internals</b>
+	<ul>
+		<li><b>IDsNoDispatch</b>: Hier werden protokoll Eintr&auml;ge mit ihrer numerischen ID aufgelistet, für welche keine Weitergabe von Daten an logische Module aktiviert wurde. Um die weiterhabe zu aktivieren, kann die Me&uuml;option "Display protocollist" verwendet werden.</li>
+		<li><b>versionmodule</b>: Hier wird die Version des SIGNALduino FHEM Modules selbst angezeigt.</li>
+		<li><b>version</b>: Hier wird die Version des SIGNALduino microcontrollers angezeigt.</li>
+	</ul>
+	
+					  
 	<a name="SIGNALduinoset"></a>
 	<b>SET</b>
 	<ul>
@@ -5138,13 +5158,12 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
 	</li><br>
 	<a name="development"></a>
 	<li>development<br>
-	Mit development k&ouml;nnen Sie die Protokolldekodierung f&uuml;r Protokolle aktivieren, die sich noch in der Entwicklung befinden und m&ouml;glicherweise nicht sehr genau implementiert sind.
-	Dies kann zu Abst&uuml;rzen oder zu einer hohen Anzahl an Log-Eintr&auml;gen in Ihrer Logdatei f&uuml;hren. Protokolle, die mit einem developmentID-Flag gekennzeichnet sind, werden nicht geladen, sofern dies nicht angegeben ist.<br>
-		<ul>
-			<li>Wenn das Flag developId => 'm' in der Protokolldefinition gesetzt ist, befindet sich das logische Modul in der Entwicklung. Wenn Sie es aktivieren wollen, so geben Sie "m" gefolgt von der Protokoll-ID an.</li>
-			<li>Wenn das Flag developId => 'p' in der Protokolldefinition gesetzt ist, wurde die ID reserviert.</li>
-			<li>Wenn das Flag developId => 'y' in der Protokolldefinition gesetzt ist, befindet sich das Protokoll noch in der Entwicklung. Wenn Sie es aktivieren wollen, so geben Sie "y" gefolgt von der Protokoll-ID an.</li>
-		</ul>
+		<li>development<br>
+		The development attribute is only available in development version of this Module for backwart compatibility. Use the whitelistIDs Attribute instead. Setting this attribute to 1 will enable all protocols which are flagged with developID=Y.
+		<br>
+		Wird das Attribut auf 1 gesetzt, so werden alle in Protokolle die mit dem developID Flag "y" markiert sind aktiviert. Die Flags (Spalte dev) können über das Webfrontend im Abschnitt "Information menu" mittels "Display protocollist" eingesehen werden.
+		</li>
+		<br>
 	</li><br>
 	<li><a href="#do_not_notify">do_not_notify</a></li><br>
 	<a name="doubleMsgCheck_IDs"></a>
@@ -5247,6 +5266,8 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
 	<a name="whitelist_IDs"></a>
 	<li>whitelist_IDs<br>
 	Dieses Attribut erlaubt es, festzulegen, welche Protokolle von diesem Modul aus verwendet werden. Protokolle, die nicht beachtet werden, erzeugen keine Logmeldungen oder Ereignisse. Sie werden dann vollst&auml;ndig ignoriert. Dies erm&ouml;glicht es, die Ressourcennutzung zu reduzieren und bessere Klarheit in den Protokollen zu erzielen. Sie k&ouml;nnen mehrere WhitelistIDs mit einem Komma angeben: 0,3,7,12. Mit einer # am Anfang k&ouml;nnen WhitelistIDs deaktiviert werden. 
+	<br>
+	Wird dieses Attribut nicht verwrndet oder deaktiviert, werden alle stabilen Protokolleinträge verarbeitet. Protokolleinträge, welche sich noch in Entwicklung befinden müssen explizit über dieses Attribut aktiviert werden.
 	</li><br>
 	<a name="WS09_CRCAUS"></a>
 	<li>WS09_CRCAUS<br>
@@ -5256,6 +5277,9 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
 		</ul>
 	</li><br>
   </ul>
+
+
+Wenn das Flag developId => 'm' in der Protokolldefinition gesetzt ist, befindet sich das logische Modul in der Entwicklung oder es ist weder im SVN noch im dev-r33 und es erfolgt kein dispatch. Wenn Sie es aktivieren wollen, so tragen Sie die Protokoll-ID in die whitelist_IDs ein.
  
    	<a name="SIGNALduinoDetail"></a>
 	<b>Information menu</b>
@@ -5263,8 +5287,15 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
    	    <a name="Display protocollist"></a>
 		<li>Display protocollist<br> 
 		Zeigt Ihnen die aktuell implementierten Protokolle des SIGNALduino an und an welches logische FHEM Modul Sie &uuml;bergeben werden.<br>
-		Außerdem wird mit on/off Symbolen angezeigt ob ein Protokoll verarbeitet wird. Durch Klick auf das Symbol, wird im Hintergrund das Attribut whitlelistIDs angepasst. Die Attribute whitelistIDs, blacklistIDs und development beeinflussen dies.
-		Protokolle die in der Spalte <code>dev</code> markiert sind, k&ouml;nnen derzeit nicht über die Schaltsymbole aktiviert werden. Protokolle, welche in dem blacklistIDs Attribut eingetragen sind, können nicht über das Menü aktiviert werden. Dazu bitte das Attribut blacklistIDs entfernen.
+		Außerdem wird mit on/off Symbolen angezeigt ob ein Protokoll verarbeitet wird. Durch Klick auf das Symbol, wird im Hintergrund das Attribut whitlelistIDs angepasst. Die Attribute whitelistIDs und blacklistIDs beeinflussen diesn Status.
+		Protokolle die in der Spalte <code>dev</code> markiert sind, befinden sich in Entwicklung. 
+		<ul>
+			<li>Wemm eine Zeile mit 'm' markiert ist, befindet sich das logische Modul, welches eine Schnittstelle bereitstellt in Entwicklung. Im Standard übergeben diese Protokolle keine Daten an logische Module. Um die Kommunikation zu ermöglichenm muss der Protokolleintrag aktiviert werden.</li> 
+			<li>Wemm eine Zeile mit 'p' markiert ist, wurde der Protokolleintrag reserviert oder befindet sich in einem frühen Entwicklungsstadium.</li>
+			<li>Wemm eine Zeile mit 'y' markiert ist, wurde das Protkokoll noch nicht ausgiebig getestet und überprüft.</li>
+		</ul>
+		<br>
+		Protokolle, welche in dem blacklistIDs Attribut eingetragen sind, können nicht über das Menü aktiviert werden. Dazu bitte das Attribut blacklistIDs entfernen.
 		</li><br>
    	</ul>
    
