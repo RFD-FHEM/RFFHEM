@@ -5279,8 +5279,6 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
   </ul>
 
 
-Wenn das Flag developId => 'm' in der Protokolldefinition gesetzt ist, befindet sich das logische Modul in der Entwicklung oder es ist weder im SVN noch im dev-r33 und es erfolgt kein dispatch. Wenn Sie es aktivieren wollen, so tragen Sie die Protokoll-ID in die whitelist_IDs ein.
- 
    	<a name="SIGNALduinoDetail"></a>
 	<b>Information menu</b>
 	<ul>
