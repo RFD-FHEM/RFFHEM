@@ -5,6 +5,8 @@
    which are under developmen
    The new Internal IDsNoDispatch holds the protocols which will not send
    data to other modules.
+28.12.2018
+ signalduino_protocols.hash - revised ID90 (ESTO Lighting GmbH) | added ID91 (Atlantic Security) | added ID92 (Krinner Lumix - LED X-MAS)
 17.12.2018
  14_SD_UT.pm - added new model LED_XM21_0 for XM21-0 - LED XMAS | https://github.com/RFD-FHEM/RFFHEM/pull/437#issuecomment-448019192
 13.12.2018
