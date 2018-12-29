@@ -1964,7 +1964,6 @@ sub SIGNALduino_moduleMatch
 	my $id = shift;
 	my $dmsg = shift;
 	my $debug = AttrVal($name,"debug",0);
-	$debug=1;
 	my $modMatchRegex=SIGNALduino_getProtoProp($id,"modulematch",undef);
 	
 	if (!defined($modMatchRegex) || $dmsg =~ m/$modMatchRegex/) {
@@ -2905,7 +2904,7 @@ sub SIGNALduino_IdList($@)
 	}
 	if ($develop eq "1" || (substr($develop,0,1) eq "y" && $develop !~ m/^y\d/)) {	# Entwicklerversion, y ist nur zur Abwaertskompatibilitaet und kann in einer der naechsten Versionen entfernt werden
 		$yflag = 1;
-		SIGNALduino_Log3 $name, 3, "$name IDlist development attribute = $develop"; 
+		SIGNALduino_Log3 $name, 3, "$name: IDlist development attribute = $develop"; 
 	}
 	
 	if ($aVal eq "" || substr($aVal,0 ,1) eq '#') {		# whitelist nicht aktiv
@@ -2929,7 +2928,7 @@ sub SIGNALduino_IdList($@)
 			$blacklist = AttrVal($name,"blacklist_IDs","");
 		}
 		if (length($blacklist) > 0) {							# Blacklist in Hash wandeln
-			SIGNALduino_Log3 $name, 3, "$name IDlist attr blacklistIds=$blacklist";
+			SIGNALduino_Log3 $name, 3, "$name: IDlist attr blacklistIds=$blacklist";
 			%BlacklistIDs = map { $_ => 1 } split(",", $blacklist);
 			#my $w = join ', ' => map "$_" => keys %BlacklistIDs;
 			#SIGNALduino_Log3 $name, 3, "$name IdList, Attr blacklist $w";
