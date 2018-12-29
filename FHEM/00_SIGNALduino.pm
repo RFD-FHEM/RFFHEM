@@ -1964,7 +1964,6 @@ sub SIGNALduino_moduleMatch
 	my $id = shift;
 	my $dmsg = shift;
 	my $debug = AttrVal($name,"debug",0);
-	$debug=1;
 	my $modMatchRegex=SIGNALduino_getProtoProp($id,"modulematch",undef);
 	
 	if (!defined($modMatchRegex) || $dmsg =~ m/$modMatchRegex/) {
