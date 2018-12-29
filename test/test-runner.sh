@@ -33,7 +33,7 @@ a=0
 while  true 
 do 
 	
-	if perl $FHEM_SCRIPT 7072 \"LIST\" 
+	if echo "LIST" | nc 127.0.0.1 7072
 	then
 		break
 	fi
@@ -55,24 +55,27 @@ printf "\n\n--------- Starting test %s: ---------\n" "$1"
 
 # Load test definitions, and import them to our running instance
 oIFS=$IFS
-IFS=$'\n'  # Split into array at every ";" char 
+IFS=$'\n'  # Split into array at every linebreak char 
 command eval CMD='($(<test/$1-definition.txt))'
+command eval DEF='$(printf "%s" ${CMD[@]})'  # Add escaped linebreak after every line #\\\\\\n
 IFS=$oIFS
 unset oIFS  
-command eval DEF='$(printf "%s" ${CMD[@]})'  # Add after every line ;; and store in DEF
 
 CMD=$DEF
 unset DEF
-
-CMD=$( echo $CMD | sed '/{/,/}/s/;/;;/g')
+#CMD=$( echo $CMD | sed '/{/,/}/s/;/;;/g') # Add after every line ;; and store in CMD
+CMD=$( echo $CMD | sed 's/;/;;/g') # Add after every line ;; and store in CMD
 #echo $CMD
 #CMD=$(printf "%s" $CMD | awk 'BEGIN{RS="\n" ; ORS=" ";}{ print }' )
 #CMD=$(printf "%q" $CMD )
 
 
-#echo $CMD
+echo $CMD
 #RETURN=$(perl $FHEM_SCRIPT 7072 "$CMD")
-RETURN=$(echo "$CMD" | /bin/nc localhost 7072)
+#printf "%s" $CMD
+RETURN=$(echo $CMD | /bin/nc localhost 7072)
+#RETURN=$(printf "%s" $CMD | /bin/nc localhost 7072)
+#RETURN=$(perl $FHEM_SCRIPT 7072 \"$CMD\")
 echo "$RETURN"
 
 #Wait until state of current test is finished
