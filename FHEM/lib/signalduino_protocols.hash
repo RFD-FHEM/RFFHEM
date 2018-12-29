@@ -2032,25 +2032,20 @@
 						# MS;P0=300;P1=-330;P2=-10160;P3=804;P7=-840;D=02073107070707313131310707310731310707070731313107310731070707070707;CP=0;SP=2;R=23;O;m1;	//A	AUS
 						# MS;P1=260;P2=-873;P3=788;P4=-351;P6=-10157;D=16123412121212343434341212341234341212121234341234341234121212341212;CP=1;SP=6;R=21;O;m2;	//B	AN
 						# MS;P1=268;P3=793;P4=-337;P6=-871;P7=-10159;D=17163416161616343434341616341634341616161634341616341634161616343416;CP=1;SP=7;R=24;O;m2;	//B	AUS
-						## ESTO Lighting GmbH | remote control KL-RF01 with 9 buttons (CP 375-395)
-						# https://github.com/RFD-FHEM/RFFHEM/issues/449
-						# MS;P1=376;P4=-1200;P5=1170;P6=-409;P7=-12224;D=17141414561456561456565656145656141414145614141414565656145656565614;CP=1;SP=7;R=231;e;m0; 
-						# MS;P1=393;P2=-1174;P4=1180;P5=-401;P6=-12222;D=16121212451245451245454545124545124545451212121212121212454545454512;CP=1;SP=6;R=243;e;m0;
-						# MS;P0=397;P1=-385;P2=-1178;P3=1191;P4=-12230;D=04020202310231310231313131023131023131020202020202020231313131313102;CP=0;SP=4;R=250;e;m0;
 		{
-			name         => 'ESTO Lighting GmbH | mumbi | MANAX',
-			comment      => 'remote control mumbi FS300, MANAX MX-RCS250, ESTO KL-RF01',
+			name         => 'mumbi | MANAX',
+			comment      => 'remote control mumbi FS300, MANAX MX-RCS250',
 			id           => '90',
 			knownFreqs   => '433.92',
 			one          => [3,-1],
 			zero         => [1,-3],
-			sync         => [1,-38],
-			clockabs     => -1,						# -1=auto	
+			sync         => [1,-36],
+			clockabs     => 280,						# -1=auto	
 			format       => 'twostate',
 			preamble     => 'u90#',			
 			length_min   => '33',
 			length_max   => '36',
-			#clientmodule	=> 'SD_UT',
+			#clientmodule	=> 'IT',
 			#modulematch	=> '^P90#.*',
 			developId    => 'y',
 		},
@@ -2094,5 +2089,27 @@
 			#clientmodule	=> 'SD_UT',
 			#modulematch	=> '^P92#.*',
 			developId     => 'y',
-		},																		 
+		},
+	"93"	=>	## ESTO Lighting GmbH | remote control KL-RF01 with 9 buttons (CP 375-395)
+						# https://github.com/RFD-FHEM/RFFHEM/issues/449
+						# MS;P1=376;P4=-1200;P5=1170;P6=-409;P7=-12224;D=17141414561456561456565656145656141414145614141414565656145656565614;CP=1;SP=7;R=231;e;m0; 
+						# MS;P1=393;P2=-1174;P4=1180;P5=-401;P6=-12222;D=16121212451245451245454545124545124545451212121212121212454545454512;CP=1;SP=6;R=243;e;m0;
+						# MS;P0=397;P1=-385;P2=-1178;P3=1191;P4=-12230;D=04020202310231310231313131023131023131020202020202020231313131313102;CP=0;SP=4;R=250;e;m0;
+		{
+			name         => 'ESTO Lighting GmbH',
+			comment      => 'remote control KL-RF01',
+			id           => '93',
+			knownFreqs   => '433.92',
+			one          => [3,-1],
+			zero         => [1,-3],
+			sync         => [1,-32],
+			clockabs     => 385,						# -1=auto	
+			format       => 'twostate',
+			preamble     => 'u93#',
+			length_min   => '33',
+			length_max   => '36',
+			#clientmodule	=> 'SD_UT',
+			#modulematch	=> '^P93#.*',
+			developId    => 'y',
+		},
 );
