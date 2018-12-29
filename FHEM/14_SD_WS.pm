@@ -194,7 +194,7 @@ sub SD_WS_Parse($$)
    	 	 } ,       
      51 =>
    	 	 {
-     		sensortype => 'Lidl Wetterstation Auriol IAN 275901 / IAN 114324',
+     		sensortype => 'Auriol IAN 275901 / IAN 114324',
         	model =>	'SD_WS_51_TH', 
 			prematch => sub {my $msg = shift; return 1 if ($msg =~ /^[0-9A-F]{10}$/); }, 							# prematch
 			crcok => 	sub {return 1;  }, 																			# crc is unknown
@@ -209,7 +209,7 @@ sub SD_WS_Parse($$)
    	 	 }   ,  
        58 => 
    	 	 {
-     		sensortype => 'TFA 3032080',
+     		sensortype => 'TFA 30.3208.0',
         	model =>	'SD_WS_58_TH', 
 			prematch => sub {my $msg = shift; return 1 if ($msg =~ /^45[0-9A-F]{11}/); }, 							# prematch
 			crcok => 	sub {   my $msg = shift;
@@ -273,9 +273,9 @@ sub SD_WS_Parse($$)
 				# t: 12 bit signed temperature scaled by 10
 				# ?: unknown
 				# Sensor sends approximately every 30 seconds
-				sensortype => 'Funk Wetterstation Auriol IAN 283582',
+				sensortype => 'Auriol IAN 283582',
 				model => 'SD_WS_84_TH',
-				prematch => sub {my $msg = shift; return 1 if ($msg =~ /^[0-9A-F]{10}$/); },
+				prematch   => sub {my $msg = shift; return 1 if ($msg =~ /^[0-9A-F]{4}[01245689ACDE]{1}[0-9A-F]{5}$/); },		# valid channel only 0-2
 				id =>	sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,0,7); },
 				hum => sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,8,15); },
 				bat => 		sub {my (undef,$bitData) = @_; return substr($bitData,16,1) eq "0" ? "ok" : "low";},
@@ -306,7 +306,7 @@ sub SD_WS_Parse($$)
 				# w: 12 bit unsigned windspeed, scaled by 10 - if message 2
 				# ?: unknown
 				# The sensor sends at intervals of about 30 seconds
-				sensortype => 'Kombisensor TFA 30.3222.02',
+				sensortype => 'TFA 30.3222.02',
 				model      => 'SD_WS_85_THW',
 				prematch   => sub {my $msg = shift; return 1 if ($msg =~ /^[0-9A-F]{16}/); },		# min 16 nibbles
 				crcok      => sub {return 1;},		# crc test method is so far unknown
@@ -350,9 +350,9 @@ sub SD_WS_Parse($$)
 				# h:  8 bit relative humidity percentage
 				# ?:  8 bit unknown
 				# The sensor sends 3 repetitions at intervals of about 60 seconds
-				sensortype => 'Sensor TFA 30.3221.02',
+				sensortype => 'TFA 30.3221.02',
 				model      => 'SD_WS_89_TH',
-				prematch   => sub {my $msg = shift; return 1 if ($msg =~ /^[0-9A-F]{10}$/); },
+				prematch   => sub {my $msg = shift; return 1 if ($msg =~ /^[0-9A-F]{2}[01245689ACDE]{1}[0-9A-F]{7}$/); },		# valid channel only 0-2
 				id         =>	sub {my (undef,$bitData) = @_; return substr($rawData,0,2); },
 				bat        => sub {my (undef,$bitData) = @_; return substr($bitData,8,1) eq "0" ? "ok" : "low";},
 				sendmode   => sub {my (undef,$bitData) = @_; return substr($bitData,9,1) eq "1" ? "manual" : "auto"; },
@@ -664,12 +664,12 @@ sub SD_WS_Parse($$)
 	 	   	$SensorTyp=$decodingSubs{$protocol}{sensortype};
 		    if (!$decodingSubs{$protocol}{prematch}->( $rawData ))
 		    { 
-		   		Log3 $iohash, 4, "$name: decoded protocolid $protocol ($SensorTyp) prematch error" ;
+		   		Log3 $iohash, 4, "$name: SD_WS_Parse $rawData protocolid $protocol ($SensorTyp) prematch error" ;
 		    	return "";  
 	    	}
 		    my $retcrc=$decodingSubs{$protocol}{crcok}->( $rawData );
 		    if (!$retcrc)		    { 
-		    	Log3 $iohash, 4, "$name: decoded protocolid $protocol ($SensorTyp) crc error: $retcrc";
+		    	Log3 $iohash, 4, "$name: SD_WS_Parse $rawData protocolid $protocol ($SensorTyp) crc error: $retcrc";
 		    	return "";  
 	    	}
 	    	$id=$decodingSubs{$protocol}{id}->( $rawData,$bitData );
@@ -726,9 +726,15 @@ sub SD_WS_Parse($$)
 	$name = $hash->{NAME};
 	return "" if(IsIgnored($name));
 
-	if (defined $temp && defined $hum) {
-		if ($temp < -30 || $temp > 70 || $hum > 100) {
-			Log3 $iohash, 3, "$ioname: $deviceCode - ERROR Temperature $temp or humidity $hum";
+	if (defined $temp) {
+		if ($temp < -30 || $temp > 70) {
+			Log3 $iohash, 3, "$ioname: SD_WS_Parse $deviceCode - ERROR temperature $temp";
+			return "";  
+		}
+	}
+	if (defined $hum) {
+		if ($hum > 100) {
+			Log3 $iohash, 3, "$ioname: SD_WS_Parse $deviceCode - ERROR humidity $hum";
 			return "";  
 		}
 	}
@@ -904,7 +910,7 @@ sub SD_WS_WH2SHIFT($){
     <li>Renkforce E0001PA</li>
 		<li>WH2 (TFA Dostmann/Wertheim 30.3157 (sold in Germany), Agimex Rosenborg 66796 (sold in Denmark),ClimeMET CM9088 (Sold in UK)</li>
 		<li>Weatherstation Auriol IAN 283582 Version 06/2017 (Lidl), Modell-Nr.: HG02832D</li>
-		<li>Weatherstation TFA 35.1140.01 with temperature, humidity and windspeed sensor TFA 30.3222.02</li>
+		<li>Weatherstation TFA 35.1140.01 with temperature / humidity sensor TFA 30.3221.02 and temperature / humidity / windspeed sensor TFA 30.3222.02</li>
   </ul><br><br>
 
   <a name="SD_WS_Define"></a>
@@ -993,7 +999,7 @@ sub SD_WS_WH2SHIFT($){
     <li>Renkforce E0001PA</li>
 		<li>WH2 (TFA Dostmann/Wertheim 30.3157 (Deutschland), Agimex Rosenborg 66796 (Denmark), ClimeMET CM9088 (UK)</li>
 		<li>Wetterstation Auriol IAN 283582 Version 06/2017 (Lidl), Modell-Nr.: HG02832D</li>
-		<li>Wetterstation TFA 35.1140.01 mit Temperatur-/Feuchte- und Windsensor TFA 30.3222.02</li>
+		<li>Wetterstation TFA 35.1140.01 mit Temperatur-/Feuchtesensor TFA 30.3221.02 und Temperatur-/Feuchte- und Windsensor TFA 30.3222.02</li>
 		</ul>
   <br><br>
 
