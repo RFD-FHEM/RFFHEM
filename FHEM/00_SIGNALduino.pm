@@ -1,4 +1,4 @@
-# $Id: 00_SIGNALduino.pm 10488 2018-10-23 00:22:00Z v3.3.3-dev $
+# $Id: 00_SIGNALduino.pm 10488 2018-12-19 12:00:00Z v3.3.3-dev $
 #
 # v3.3.3 (Development release 3.3)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incoming messages
@@ -28,7 +28,7 @@ eval "use Time::HiRes qw(gettimeofday);1" ;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.3.3-dev_17.12.",
+	SDUINO_VERSION            => "v3.3.3-dev_19.12.",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -198,6 +198,11 @@ SIGNALduino_Initialize($)
 
   require "$attr{global}{modpath}/FHEM/DevIo.pm";
 
+  my $dev = "";
+  if (index(SDUINO_VERSION, "dev") >= 0) {
+     $dev = ",1";
+  }
+
 # Provider
   $hash->{ReadFn}  = "SIGNALduino_Read";
   $hash->{WriteFn} = "SIGNALduino_Write";
@@ -217,7 +222,7 @@ SIGNALduino_Initialize($)
                       ." flashCommand"
   					  ." hardware:ESP_1M,ESP32,nano,nanoCC1101,miniculCC1101,promini,radinoCC1101"
 					  ." updateChannelFW:stable,testing"
-					  ." debug:0,1"
+					  ." debug:0$dev"
 					  ." longids"
 					  ." minsecs"
 					  ." whitelist_IDs"
@@ -228,7 +233,7 @@ SIGNALduino_Initialize($)
 					  ." cc1101_frequency"
 					  ." doubleMsgCheck_IDs"
 					  ." suppressDeviceRawmsg:1,0"
-					  ." development"
+					  ." development:0$dev"
 					  ." noMsgVerbose:0,1,2,3,4,5"
 					  ." eventlogging:0,1"
 					  ." maxMuMsgRepeat"
@@ -1950,31 +1955,27 @@ sub SIGNALduno_Dispatch($$$$$)
 # param #2 is protocol id
 # param #3 is dispatched message to check against
 #
-# returns 1 if message matches modulematch + development attribute
+# returns 1 if message matches modulematch + development attribute/whitelistIDs
 # returns 0 if message does not match modulematch  
-# return -1 if message does not match development attribute
+# return -1 if message is not activated via whitelistIDs but has developID=m flag
 sub SIGNALduino_moduleMatch
 {
 	my $name = shift;
 	my $id = shift;
 	my $dmsg = shift;
 	my $debug = AttrVal($name,"debug",0);
-	
 	my $modMatchRegex=SIGNALduino_getProtoProp($id,"modulematch",undef);
 	
 	if (!defined($modMatchRegex) || $dmsg =~ m/$modMatchRegex/) {
 		Debug "$name: modmatch passed for: $dmsg" if ($debug);
-		my $developATTR = AttrVal($name,"development","");
 		my $developID = SIGNALduino_getProtoProp($id,"developId","");
-		if ($developID eq "m") {
-			if ( length($developATTR) > 0 && $developATTR =~ m/$developID$id/) { 
-				return 1; #   return 1 da modulematch gefunden wurde			
-			}
-			SIGNALduino_Log3 $name, 3, "$name: ID=$id skipped dispatch (developId=$developID). To use, please add $developID$id to the attr development";	
+		my $IDsNoDispatch = "," . InternalVal($name,"IDsNoDispatch","") . ",";
+		if ($IDsNoDispatch ne ",," && index($IDsNoDispatch, ",$id,") >= 0) {	# kein dispatch wenn die Id im Internal IDsNoDispatch steht
+			SIGNALduino_Log3 $name, 3, "$name: ID=$id skipped dispatch (developId=m). To use, please add $id to the attr whitelist_IDs";
 			return -1;
 		}
-		return 1;
-	}
+		return 1; #   return 1 da modulematch gefunden wurde			
+		}
 	return 0;
 }
 
@@ -2873,7 +2874,6 @@ function SD_plistWindow(txt)
 }
 
 
-
 sub SIGNALduino_IdList($@)
 {
 	my ($param, $aVal, $blacklist, $develop) = @_;
@@ -2883,42 +2883,55 @@ sub SIGNALduino_IdList($@)
 	my @msIdList = ();
 	my @muIdList = ();
 	my @mcIdList = ();
-	my @skippedId = ();
+	my @skippedDevId = ();
+	my @skippedBlackId = ();
+	my @skippedWhiteId = ();
+	my @devModulId = ();
+	my %WhitelistIDs;
+	my %BlacklistIDs;
+	my $wflag = 0;		# whitelist flag, 0=disabled
+	my $bflag = 0;		# blacklist flag, 0=disabled
+	my $yflag = 0;		# 1 = alle developIDs aktivieren
+	
+	delete ($hash->{IDsNoDispatch}) if (defined($hash->{IDsNoDispatch}));
 
 	if (!defined($aVal)) {
 		$aVal = AttrVal($name,"whitelist_IDs","");
 	}
 	
-	if (!defined($blacklist)) {
-		$blacklist = AttrVal($name,"blacklist_IDs","");
+	if (!defined($develop)) {
+		$develop = SIGNALduino_getAttrDevelopment($name);
+	}
+	if ($develop eq "1" || (substr($develop,0,1) eq "y" && $develop !~ m/^y\d/)) {	# Entwicklerversion, y ist nur zur Abwaertskompatibilitaet und kann in einer der naechsten Versionen entfernt werden
+		$yflag = 1;
+		SIGNALduino_Log3 $name, 3, "$name: IDlist development attribute = $develop"; 
 	}
 	
-	if (!defined($develop)) {
-		$develop = AttrVal($name,"development","");
-	}
-	$develop = lc($develop);
-
-	my %WhitelistIDs;
-	my %BlacklistIDs;
-	my $wflag = 0;		# whitelist flag, 0=disabled
-	my $bflag = 0;		# blacklist flag, 0=disabled
-	if (defined($aVal) && length($aVal)>0)
-	{
-		if (substr($aVal,0 ,1) eq '#') {
-			SIGNALduino_Log3 $name, 3, "$name Attr whitelist disabled: $aVal";
+	if ($aVal eq "" || substr($aVal,0 ,1) eq '#') {		# whitelist nicht aktiv
+		if ($yflag == 1) {
+			SIGNALduino_Log3 $name, 3, "$name: IDlist attr whitelist disabled or not defined (all IDs are enabled, except blacklisted): $aVal";
 		}
 		else {
-			%WhitelistIDs = map { $_ => 1 } split(",", $aVal);
-			#my $w = join ', ' => map "$_" => keys %WhitelistIDs;
-			#SIGNALduino_Log3 $name, 3, "Attr whitelist $w";
-			$wflag = 1;
+			SIGNALduino_Log3 $name, 3, "$name: IDlist attr whitelist disabled or not defined (all IDs are enabled, except blacklisted and instable IDs): $aVal";
 		}
 	}
-	if ($wflag == 0) {		# whitelist disabled
-		if (defined($blacklist) && length($blacklist)>0) {
+	else {
+		%WhitelistIDs = map {$_ => undef} split(",", $aVal);			# whitelist in Hash wandeln
+		#my $w = join ',' => map "$_" => keys %WhitelistIDs;
+		SIGNALduino_Log3 $name, 3, "$name: IDlist attr whitelist: $aVal";
+		$wflag = 1;
+	}
+	#SIGNALduino_Log3 $name, 3, "$name IdList: attr whitelistIds=$aVal" if ($aVal);
+		
+	if ($wflag == 0) {			# whitelist not aktive
+		if (!defined($blacklist)) {
+			$blacklist = AttrVal($name,"blacklist_IDs","");
+		}
+		if (length($blacklist) > 0) {							# Blacklist in Hash wandeln
+			SIGNALduino_Log3 $name, 3, "$name: IDlist attr blacklistIds=$blacklist";
 			%BlacklistIDs = map { $_ => 1 } split(",", $blacklist);
-			my $w = join ', ' => map "$_" => keys %BlacklistIDs;
-			SIGNALduino_Log3 $name, 4, "$name Attr blacklist $w";
+			#my $w = join ', ' => map "$_" => keys %BlacklistIDs;
+			#SIGNALduino_Log3 $name, 3, "$name IdList, Attr blacklist $w";
 			$bflag = 1;
 		}
 	}
@@ -2926,42 +2939,38 @@ sub SIGNALduino_IdList($@)
 	my $id;
 	foreach $id (keys %ProtocolListSIGNALduino)
 	{
-		next if ($id eq 'id');
-		if ($wflag == 1 && !defined($WhitelistIDs{$id}))
+		if ($wflag == 1)				# whitelist active
 		{
-			#SIGNALduino_Log3 $name, 3, "skip ID $id";
-			next;
-		}
-		if ($bflag == 1 && defined($BlacklistIDs{$id}))
-		{
-			#SIGNALduino_Log3 $name, 4, "$name skip Blacklist ID $id";
-			next;
-		}
-		
-		if (defined($ProtocolListSIGNALduino{$id}{developId}) && substr($ProtocolListSIGNALduino{$id}{developId},0,1) eq "m") {
-			my $devid = "m$id";
-			if ($develop !~ m/$devid/) {		# skip wenn die Id nicht im Attribut development steht
-				#SIGNALduino_Log3 $name, 3, "$name: ID=$devid skipped (developId=m)";
-				push (@skippedId, $devid);
-				next;
-			}
-		}																					 
-		
-		if (defined($ProtocolListSIGNALduino{$id}{developId}) && substr($ProtocolListSIGNALduino{$id}{developId},0,1) eq "p") {
-			my $devid = "p$id";
-			if ($develop !~ m/$devid/) {		# skip wenn die Id nicht im Attribut development steht
-				#SIGNALduino_Log3 $name, 3, "$name: ID=$devid skipped (developId=p)";
-				push (@skippedId, $devid);
+			if (!exists($WhitelistIDs{$id}))		# Id wurde in der whitelist nicht gefunden
+			{
+				push (@skippedWhiteId, $id);
 				next;
 			}
 		}
-		
-		if (defined($ProtocolListSIGNALduino{$id}{developId}) && substr($ProtocolListSIGNALduino{$id}{developId},0,1) eq "y") {
-			my $devid = "y$id";
-			if ($develop !~ m/$devid/) {		# skip wenn die Id nicht im Attribut development steht
-				#SIGNALduino_Log3 $name, 3, "$name: ID=$id skipped (developId=y)";
-				push (@skippedId, $devid);
+		else {						# whitelist not active
+			if ($bflag == 1 && exists($BlacklistIDs{$id})) {
+				#SIGNALduino_Log3 $name, 3, "$name IdList, skip Blacklist ID $id";
+				push (@skippedBlackId, $id);
 				next;
+			}
+		
+			# wenn es keine developId gibt, dann die folgenden Abfragen ueberspringen
+			if (exists($ProtocolListSIGNALduino{$id}{developId}))
+			{
+				if ($ProtocolListSIGNALduino{$id}{developId} eq "m") {
+					if ($develop !~ m/m$id/) {  # ist nur zur Abwaertskompatibilitaet und kann in einer der naechsten Versionen entfernt werden
+						push (@devModulId, $id);
+					}
+				}
+				elsif ($ProtocolListSIGNALduino{$id}{developId} eq "p") {
+					SIGNALduino_Log3 $name, 5, "$name: IDlist ID=$id skipped (developId=p), caution, protocol can cause crashes, use only if advised to do";
+					next;
+				}
+				elsif ($ProtocolListSIGNALduino{$id}{developId} eq "y" && $yflag == 0 && $develop !~ m/y$id/) {	# skip wenn develop nicht im Attribut whitelist steht
+					#SIGNALduino_Log3 $name, 3, "$name: IdList ID=$id skipped (developId=y)";
+					push (@skippedDevId, $id);
+					next;
+				}
 			}
 		}
 		
@@ -2976,7 +2985,6 @@ sub SIGNALduino_IdList($@)
 		elsif (exists ($ProtocolListSIGNALduino{$id}{clockabs}))
 		{
 			$ProtocolListSIGNALduino{$id}{length_min} = SDUINO_PARSE_DEFAULT_LENGHT_MIN if (!exists($ProtocolListSIGNALduino{$id}{length_min}));	
-
 			push (@muIdList, $id);
 		}
 	}
@@ -2984,19 +2992,41 @@ sub SIGNALduino_IdList($@)
 	@msIdList = sort {$a <=> $b} @msIdList;
 	@muIdList = sort {$a <=> $b} @muIdList;
 	@mcIdList = sort {$a <=> $b} @mcIdList;
-	@skippedId = sort @skippedId;
+	@skippedDevId = sort {$a <=> $b} @skippedDevId;
+	@skippedBlackId = sort {$a <=> $b} @skippedBlackId;
+	@skippedWhiteId = sort {$a <=> $b} @skippedWhiteId;
+	
+	@devModulId = sort {$a <=> $b} @devModulId;
 
 	SIGNALduino_Log3 $name, 3, "$name: IDlist MS @msIdList";
 	SIGNALduino_Log3 $name, 3, "$name: IDlist MU @muIdList";
-    SIGNALduino_Log3 $name, 3, "$name: IDlist MC @mcIdList";
-	SIGNALduino_Log3 $name, 3, "$name: IDlist development = $develop" if ($develop);
-	SIGNALduino_Log3 $name, 3, "$name: IDlist development skipped = @skippedId" if (scalar @skippedId > 0);
-	SIGNALduino_Log3 $name, 3, "$name: IDlist blacklist = $blacklist" if ($blacklist);
-	SIGNALduino_Log3 $name, 3, "$name: IDlist whitelist = $aVal" if ($aVal);
+	SIGNALduino_Log3 $name, 3, "$name: IDlist MC @mcIdList";
+	SIGNALduino_Log3 $name, 5, "$name: IDlist not whitelisted skipped = @skippedWhiteId" if (scalar @skippedWhiteId > 0);
+	SIGNALduino_Log3 $name, 4, "$name: IDlist blacklistId skipped = @skippedBlackId" if (scalar @skippedBlackId > 0);
+	SIGNALduino_Log3 $name, 4, "$name: IDlist development skipped = @skippedDevId" if (scalar @skippedDevId > 0);
+	if (scalar @devModulId > 0)
+	{
+		SIGNALduino_Log3 $name, 3, "$name: IDlist development protocol is active (to activate dispatch to not finshed logical module, enable desired protocol via whitelistIDs) = @devModulId";
+		$hash->{IDsNoDispatch} = join(",", @devModulId);
+	}
 	
 	$hash->{msIdList} = \@msIdList;
-    $hash->{muIdList} = \@muIdList;
-    $hash->{mcIdList} = \@mcIdList;
+	$hash->{muIdList} = \@muIdList;
+	$hash->{mcIdList} = \@mcIdList;
+}
+
+sub SIGNALduino_getAttrDevelopment
+{
+	my $name = shift;
+	my $develop;
+	if (index(SDUINO_VERSION, "dev") >= 0) {  	# development version
+		$develop = AttrVal($name,"development", 0);
+	}
+	else {
+		$develop = "0";
+		SIGNALduino_Log3 $name, 3, "$name IdList: ### Attribute development is in this version ignored ###";
+	}
+	return $develop;
 }
 
 
@@ -4510,7 +4540,13 @@ sub SIGNALduino_githubParseHttpResponse($)
 		If the baudrate is "directio" (e.g.: /dev/ttyACM0@directio), then the perl module Device::SerialPort is not needed, and fhem opens the device with simple file io. This might work if the operating system uses sane defaults for the serial parameters, e.g. some Linux distributions and OSX.<br><br>
 		</li>
 	</ul>
-
+	<a name="SIGNALduinointernals"></a>
+	<b>Internals</b>
+	<ul>
+		<li><b>IDsNoDispatch</b>: Here are protocols entryls listed by their numeric id for which not communication to a logical module is enabled. To enable, look at the menu option "Display protocollist".</li>
+		<li><b>versionmodule</b>: This shows the version of the SIGNALduino FHEM module itself.</li>
+		<li><b>version</b>: This shows the version of the SIGNALduino microcontroller.</li>
+	</ul>
 	
 	<a name="SIGNALduinoset"></a>
 	<b>Set</b>
@@ -4716,13 +4752,10 @@ sub SIGNALduino_githubParseHttpResponse($)
 		</li><br>
 		<a name="development"></a>
 		<li>development<br>
-		With development attribute you can enable protocol decoding for protocols which are still in development and may not be very accurate implemented. This can result in crashes or throw high amount of log entries in your logfile, so be careful to use this. <br><br>
-		Protocols flagged with a developID flag are not loaded unless specified to do so.<br>
-		<ul>
-			<li>If the protocoll is developed well, but the logical module is not ready, developId => 'm' is set. You can enable it with the attribute: <br> Specify "m" followed with the protocol id to enable it.</li>
-			<li>If the flag developId => 'p' is set in the protocol defintion then the protocol ID is reserved.</li>
-			<li>If the flag developId => 'y' is set in the protocol defintion then the protocol is still in development. You can enable it with the attribute:<br> Specify "y" followed with the protocol id to enable it.</li>
-		</ul><br>
+		The development attribute is only available in development version of this Module for backwart compatibility. Use the whitelistIDs Attribute instead. Setting this attribute to 1 will enable all protocols which are flagged with developID=Y.
+		<br>
+		To check which protocols are flagged, open via FHEM webinterface in the section "Information menu" the option "Display protocollist". Look at the column "dev" where the flags are noted.
+		<br>
 		</li>
 		<li><a href="#do_not_notify">do_not_notify</a></li><br>
 		<li><a href="#attrdummy">dummy</a></li><br>
@@ -4822,6 +4855,8 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
 		<a name="whitelist_IDs"></a>
 		<li>whitelist_IDs<br>
 		This attribute allows it, to specify whichs protocos are considured from this module. Protocols which are not considured, will not generate logmessages or events. They are then completly ignored. This makes it possible to lower ressource usage and give some better clearnes in the logs. You can specify multiple whitelistIDs wih a colon : 0,3,7,12<br> With a # at the beginnging whitelistIDs can be deactivated.
+		<br>
+		Not using this attribute or deactivate it, will process all stable protocol entrys. Protocols which are under development, must be activated explicit via this Attribute.
 		</li><br>
    		<a name="WS09_CRCAUS"></a>
    		<li>WS09_CRCAUS<br>
@@ -4837,8 +4872,14 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
    	    <a name="Display protocollist"></a>
 		<li>Display protocollist<br> 
 		Shows the current implemented protocols from the SIGNALduino and to what logical FHEM Modul data is sent.<br>
-		Additional there is an on/off symbol, which shows you if a protocol will be processed. This changes the Attribute whitlistIDs for you in the background. The attributes whitelistIDs, blacklistIDs und development affects this.
-		Protocols which are flagged in the row <code>dev</code>, can't be activated via this ui.
+		Additional there is an on/off symbol, which shows you if a protocol will be processed. This changes the Attribute whitlistIDs for you in the background. The attributes whitelistIDs and blacklistIDs affects this state.
+		Protocols which are flagged in the row <code>dev</code>, are under development
+		<ul>
+			<li>If a row is flagged via 'm', then the logical module which provides you with an interface is still under development. Per default, these protocols will not send data to logcial module. To allow communication to a logical module you have to enable the protocol.</li> 
+			<li>If a row is flagged via 'p', then this protocol entry is reserved or in early development state.</li>
+			<li>If a row is flalged via 'y' then this protocol isn't fully tested or reviewed.</li>
+		</ul>
+		<br>
 		If you are using blacklistIDs, then you also can not activate them via the button, delete the attribute blacklistIDs if you want to control enabled protocols via this menu.
 		</li><br>
    	</ul>
@@ -4905,7 +4946,16 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
 		OSX.<br><br>
 		</li>
 	</ul>
-							  
+	
+	<a name="SIGNALduinointernals"></a>
+	<b>Internals</b>
+	<ul>
+		<li><b>IDsNoDispatch</b>: Hier werden protokoll Eintr&auml;ge mit ihrer numerischen ID aufgelistet, f&ouml;r welche keine Weitergabe von Daten an logische Module aktiviert wurde. Um die weiterhabe zu aktivieren, kann die Me&uuml;option "Display protocollist" verwendet werden.</li>
+		<li><b>versionmodule</b>: Hier wird die Version des SIGNALduino FHEM Modules selbst angezeigt.</li>
+		<li><b>version</b>: Hier wird die Version des SIGNALduino microcontrollers angezeigt.</li>
+	</ul>
+	
+					  
 	<a name="SIGNALduinoset"></a>
 	<b>SET</b>
 	<ul>
@@ -4957,11 +5007,11 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
 		<ul>
 			<li><code>avrdude</code> muss auf dem Host installiert sein. Auf einem Raspberry PI kann dies getan werden mit: <code>sudo apt-get install avrdude</code></li>
 			<li>Das Hardware-Attribut muss festgelegt werden, wenn eine andere Hardware als Arduino Nano verwendet wird. Dieses Attribut definiert den Befehl, der an avrdude gesendet wird, um den uC zu flashen.</li>
-			<li>Bei Problem mit dem Flashen, können im Logfile interessante Informationen zu finden sein.</li>
+			<li>Bei Problem mit dem Flashen, k&ouml;nnen im Logfile interessante Informationen zu finden sein.</li>
 		</ul>
 		Beispiele:
 		<ul>
-			<li>flash mittels Versionsnummer: Versionen können mit get availableFirmware abgerufen werden</li>		
+			<li>flash mittels Versionsnummer: Versionen k&ouml;nnen mit get availableFirmware abgerufen werden</li>		
 			<li>flash via hexFile: <code>set sduino flash ./FHEM/firmware/SIGNALduino_mega2560.hex</code></li>
 			<li>flash via url f&uuml;r einen Nano mit CC1101: <code>set sduino flash https://github.com/RFD-FHEM/SIGNALDuino/releases/download/3.3.1-RC7/SIGNALDuino_nanocc1101.hex</code></li>
 		</ul>
@@ -5117,13 +5167,12 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
 	</li><br>
 	<a name="development"></a>
 	<li>development<br>
-	Mit development k&ouml;nnen Sie die Protokolldekodierung f&uuml;r Protokolle aktivieren, die sich noch in der Entwicklung befinden und m&ouml;glicherweise nicht sehr genau implementiert sind.
-	Dies kann zu Abst&uuml;rzen oder zu einer hohen Anzahl an Log-Eintr&auml;gen in Ihrer Logdatei f&uuml;hren. Protokolle, die mit einem developmentID-Flag gekennzeichnet sind, werden nicht geladen, sofern dies nicht angegeben ist.<br>
-		<ul>
-			<li>Wenn das Flag developId => 'm' in der Protokolldefinition gesetzt ist, befindet sich das logische Modul in der Entwicklung. Wenn Sie es aktivieren wollen, so geben Sie "m" gefolgt von der Protokoll-ID an.</li>
-			<li>Wenn das Flag developId => 'p' in der Protokolldefinition gesetzt ist, wurde die ID reserviert.</li>
-			<li>Wenn das Flag developId => 'y' in der Protokolldefinition gesetzt ist, befindet sich das Protokoll noch in der Entwicklung. Wenn Sie es aktivieren wollen, so geben Sie "y" gefolgt von der Protokoll-ID an.</li>
-		</ul>
+		<li>development<br>
+		Das development Attribut ist nur in den Entwicklungsversionen des FHEM Modules aus Gr&uuml;den der Abw&auml;rtskompatibilit&auml;t vorhanden. Bei Setzen des Attributes auf "1" werden alle Protokolle aktiviert, welche mittels developID=y markiert sind. 
+		<br>
+		Wird das Attribut auf 1 gesetzt, so werden alle in Protokolle die mit dem developID Flag "y" markiert sind aktiviert. Die Flags (Spalte dev) k&ouml;nnen &uuml;ber das Webfrontend im Abschnitt "Information menu" mittels "Display protocollist" eingesehen werden.
+		</li>
+		<br>
 	</li><br>
 	<li><a href="#do_not_notify">do_not_notify</a></li><br>
 	<a name="doubleMsgCheck_IDs"></a>
@@ -5226,6 +5275,8 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
 	<a name="whitelist_IDs"></a>
 	<li>whitelist_IDs<br>
 	Dieses Attribut erlaubt es, festzulegen, welche Protokolle von diesem Modul aus verwendet werden. Protokolle, die nicht beachtet werden, erzeugen keine Logmeldungen oder Ereignisse. Sie werden dann vollst&auml;ndig ignoriert. Dies erm&ouml;glicht es, die Ressourcennutzung zu reduzieren und bessere Klarheit in den Protokollen zu erzielen. Sie k&ouml;nnen mehrere WhitelistIDs mit einem Komma angeben: 0,3,7,12. Mit einer # am Anfang k&ouml;nnen WhitelistIDs deaktiviert werden. 
+	<br>
+	Wird dieses Attribut nicht verwrndet oder deaktiviert, werden alle stabilen Protokolleintr&auml;ge verarbeitet. Protokolleintr&auml;ge, welche sich noch in Entwicklung befinden m&uuml;ssen explizit &uuml;ber dieses Attribut aktiviert werden.
 	</li><br>
 	<a name="WS09_CRCAUS"></a>
 	<li>WS09_CRCAUS<br>
@@ -5235,15 +5286,23 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
 		</ul>
 	</li><br>
   </ul>
- 
+
+
    	<a name="SIGNALduinoDetail"></a>
 	<b>Information menu</b>
 	<ul>
    	    <a name="Display protocollist"></a>
 		<li>Display protocollist<br> 
 		Zeigt Ihnen die aktuell implementierten Protokolle des SIGNALduino an und an welches logische FHEM Modul Sie &uuml;bergeben werden.<br>
-		Außerdem wird mit on/off Symbolen angezeigt ob ein Protokoll verarbeitet wird. Durch Klick auf das Symbol, wird im Hintergrund das Attribut whitlelistIDs angepasst. Die Attribute whitelistIDs, blacklistIDs und development beeinflussen dies.
-		Protokolle die in der Spalte <code>dev</code> markiert sind, k&ouml;nnen derzeit nicht über die Schaltsymbole aktiviert werden. Protokolle, welche in dem blacklistIDs Attribut eingetragen sind, können nicht über das Menü aktiviert werden. Dazu bitte das Attribut blacklistIDs entfernen.
+		Außerdem wird mit on/off Symbolen angezeigt ob ein Protokoll verarbeitet wird. Durch Klick auf das Symbol, wird im Hintergrund das Attribut whitlelistIDs angepasst. Die Attribute whitelistIDs und blacklistIDs beeinflussen diesn Status.
+		Protokolle die in der Spalte <code>dev</code> markiert sind, befinden sich in Entwicklung. 
+		<ul>
+			<li>Wemm eine Zeile mit 'm' markiert ist, befindet sich das logische Modul, welches eine Schnittstelle bereitstellt in Entwicklung. Im Standard &uuml;bergeben diese Protokolle keine Daten an logische Module. Um die Kommunikation zu erm&ouml;glichenm muss der Protokolleintrag aktiviert werden.</li> 
+			<li>Wemm eine Zeile mit 'p' markiert ist, wurde der Protokolleintrag reserviert oder befindet sich in einem fr&uuml;hen Entwicklungsstadium.</li>
+			<li>Wemm eine Zeile mit 'y' markiert ist, wurde das Protkokoll noch nicht ausgiebig getestet und &uuml;berpr&uuml;ft.</li>
+		</ul>
+		<br>
+		Protokolle, welche in dem blacklistIDs Attribut eingetragen sind, k&ouml;nnen nicht &uuml;ber das Men&uuml; aktiviert werden. Dazu bitte das Attribut blacklistIDs entfernen.
 		</li><br>
    	</ul>
    

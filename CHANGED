@@ -1,3 +1,13 @@
+29.12.2018
+ 00_SIGNALduino -
+   Attribute development has changed and should not be used anymore.
+   Attribute Whitelist_IDs is now also capable of enabeling protocols   
+   which are under developmen
+   The new Internal IDsNoDispatch holds the protocols which will not send
+   data to other modules.
+ signalduino_protocols.hash - revised ID90 CP-value | added ID93 (ESTO Lighting GmbH) | old ID90 with 2 defs not unique due to 2 different CP values
+28.12.2018
+ signalduino_protocols.hash - revised ID90 (ESTO Lighting GmbH) | added ID91 (Atlantic Security) | added ID92 (Krinner Lumix - LED X-MAS)
 17.12.2018
  14_SD_UT.pm - added new model LED_XM21_0 for XM21-0 - LED XMAS | https://github.com/RFD-FHEM/RFFHEM/pull/437#issuecomment-448019192
 13.12.2018
