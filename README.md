@@ -39,7 +39,11 @@ Supported Devices / Protocols
 |Opus XT300 | Soil moisture sensor |
 |Oregon NR868 | Motion sensor |
 |IAN 275901, 283582 (Lidl) | Weatherstation |
+|FreeTec PE-6946 | wireless bell |
+|Elro DB200, KANGTAI, unitec | wireless bell |
 |m-e VTX and BASIC | wireless bell |
+|Pollin 551227 | wireless bell |
+|TCM 234759 Tchibo | wireless bell |
 |FT0073 | Weather sensors|
 |revolt | Energy sensors|
 |Clarus | remote power socket|
