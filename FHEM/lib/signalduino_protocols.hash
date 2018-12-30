@@ -1837,7 +1837,7 @@
 			id						=> '82',				# protocol number
 			knownFreqs		=> '',
 			developId			=> 'm',
-			dispatchBin		=> 'y',
+			dispatchBin		=> '1',
 			one						=> [1,-2],			# on=400us, off=800us
 			zero					=> [2,-1],			# on=800us, off=400us
 			float					=> [1,-8],			# on=400us, off=3200us. the preamble and each 10bit word has one [1,-8] in front
