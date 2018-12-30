@@ -1,3 +1,6 @@
+30.12.2018
+ 14_SD_WS.pm - Check for valid channel numbers added in Protocols 84 and 89
+ 14_SD_WS.pm - Test for valid temperature and humidity values separately
 29.12.2018
  00_SIGNALduino -
    Attribute development has changed and should not be used anymore.
