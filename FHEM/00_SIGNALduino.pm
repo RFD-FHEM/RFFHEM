@@ -3617,13 +3617,14 @@ sub SIGNALduino_MCTFA
 }
 
 
-sub SIGNALduino_OSV2()
+sub SIGNALduino_OSV2
 {
 	my ($name,$bitData,$id,$mcbitnum) = @_;
 	
 	my $preamble_pos;
 	my $message_end;
 	my $message_length;
+	my $msg_start;
 	
 	#$bitData =~ tr/10/01/;
 	if ($bitData =~ m/^.?(01){12,17}.?10011001/) 
@@ -3681,17 +3682,26 @@ sub SIGNALduino_OSV2()
 		#$dmsg=$osv2hex;
 		return (1,$osv2hex);
 	}
-	elsif ($bitData =~ m/^.?(1){16,24}0101/)  {  # Valid OSV3 detected!	
-		$preamble_pos = index($bitData, '0101', 16);
-		$message_end = length($bitData);
-		$message_length = $message_end - ($preamble_pos+4);
-		SIGNALduino_Log3 $name, 4, "$name: OSV3 protocol detected: preamble_pos = $preamble_pos, message_length = $message_length";
+	elsif ($bitData =~ m/1{12,24}(0101)/g) {  # min Preamble 12 x 1, Valid OSV3 detected!	
+		$preamble_pos = $-[1];
+		$msg_start = $preamble_pos + 4;
+		if ($bitData =~ m/\G.+?(1{24})0101/) {		#  preamble + sync der zweiten Nachricht
+			$message_end = $-[1];
+			SIGNALduino_Log3 $name, 4, "$name: OSV3 protocol with two messages detected: length of second message = " . ($mcbitnum - $message_end - 28);
+		}
+		else {		# es wurde keine zweite Nachricht gefunden
+			$message_end = $mcbitnum;
+		}
+		$message_length = $message_end - $msg_start;
+		#SIGNALduino_Log3 $name, 4, "$name: OSV3: bitdata=$bitData";
+		SIGNALduino_Log3 $name, 4, "$name: OSV3 protocol detected: msg_start = $msg_start, message_length = $message_length";
+		return (-1," message with length ($message_length) is to short") if (defined($ProtocolListSIGNALduino{$id}{length_min}) && $message_length < $ProtocolListSIGNALduino{$id}{length_min} );
 		
 		my $idx=0;
 		#my $osv3bits="";
 		my $osv3hex ="";
 		
-		for ($idx=$preamble_pos+4;$idx<length($bitData);$idx=$idx+4)
+		for ($idx=$msg_start; $idx<$message_end; $idx=$idx+4)
 		{
 			if (length($bitData)-$idx  < 4 )
 			{
