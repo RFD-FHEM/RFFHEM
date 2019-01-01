@@ -151,6 +151,26 @@
 			length_max		=> '42',
 			paddingbits		=> '8',				 # pad up to 8 bits, default is 4
 		},
+	"0.4"	=>	## Auriol Z31092
+						# CUL_TCM97001 Typ - AURIOL
+						# MS;P0=443;P3=-9169;P4=-1993;P5=-3954;D=030405040505050505050404040404040404040505050504050405050504040405;CP=0;SP=3;R=14;O;m0;
+						# MS;P0=-9102;P1=446;P2=-3956;P3=-2008;D=10121312121212121312131213131313131313131212121313121213121213121314;CP=1;SP=0;R=212;O;m2;
+		{
+			name					=> 'weather (v5)',
+			comment				=> 'temperature / humidity or other sensors | Auriol Z31092',
+			id						=> '0.4',
+			knownFreqs		=> '433.92',
+			one						=> [1,-9],
+			zero					=> [1,-4],
+			sync					=> [1,-20],
+			clockabs			=> 450,
+			preamble			=> 's',				# prepend to converted message
+			postamble			=> '00',			# Append to converted message
+			clientmodule	=> 'CUL_TCM97001',
+			length_min		=> '32',
+			length_max		=> '36',
+			paddingbits		=> '8',				 # pad up to 8 bits, default is 4
+		},
 		"1"	=>	## Conrad RSL
 		{
 			name					=> 'Conrad RSL v1',
@@ -924,11 +944,16 @@
 			length_max				=> '40',
 			postDemodulation	=> \&SIGNALduino_HE800,
 		},
-	"36"	=>	## socket36
+	"36"	=>	## remote - cheap wireless dimmer
+						# https://forum.fhem.de/index.php/topic,38831.msg394238.html#msg394238
+						# MU;P0=499;P1=-1523;P2=-522;P3=10220;P4=-10047;D=01020202020202020134010102020101010201020202020102010202020202020201340101020201010102010202020201020102020202020202013401010202010101020102020202010201020202020202020134010102020101010201020202020102010202020202020201340101020201010102010;CP=0;O;
+						# MU;P0=-520;P1=500;P2=-1523;P3=10220;P4=-10043;D=01010101210121010101010101012341212101012121210121010101012101210101010101010123412121010121212101210101010121012101010101010101234121210101212121012101010101210121010101010101012341212101012121210121010101012101210101010101010123412121010;CP=1;O;
+						# MU;P0=498;P1=-1524;P2=-521;P3=10212;P4=-10047;D=01010102010202020201020102020202020202013401010202010101020102020202010201020202020202020134010102020101010201020202020102010202020202020201340101020201010102010202020201020102020202020202013401010202010101020102020202010201020202020202020;CP=0;O;
 		{
-			name						=> 'socket36',
+			name						=> 'remote',
+			comment					=> 'cheap wireless dimmer',
 			id							=> '36',
-			knownFreqs      => '',
+			knownFreqs      => '433.92',
 			one							=> [1,-3],
 			zero						=> [1,-1],
 			start						=> [20,-20],
@@ -997,7 +1022,7 @@
 			one							=> [3,-2],
 			zero						=> [1,-3],
 			start						=> [1,-2],
-			clockabs				=> 250,
+			clockabs				=> 270,
 			preamble				=> 'u40#',	# prepend to converted message
 			#clientmodule		=> '',
 			#modulematch		=> '',
@@ -2026,7 +2051,7 @@
 			length_min   => '40',
 			length_max   => '40',
 		},
-	"90"	=>	## mumbi m-FS300 / manax MX-RCS250 (CP 260-275)
+	"90"	=>	## mumbi m-FS300 / manax MX-RCS250 (CP 258-298)
 						# https://forum.fhem.de/index.php/topic,94327.15.html
 						# MS;P0=-9964;P1=273;P4=-866;P5=792;P6=-343;D=10145614141414565656561414561456561414141456565656561456141414145614;CP=1;SP=0;R=35;O;m2;		//A	AN
 						# MS;P0=300;P1=-330;P2=-10160;P3=804;P7=-840;D=02073107070707313131310707310731310707070731313107310731070707070707;CP=0;SP=2;R=23;O;m1;	//A	AUS
@@ -2083,12 +2108,11 @@
 			start					=> [2,-24],
 			clockabs			=> 420,
 			format				=> 'twostate',	#
-			preamble			=> 'u92#',			# prepend to converted message
+			preamble			=> 'P92#',			# prepend to converted message
 			length_min		=> '32',
 			length_max		=> '32',
-			#clientmodule	=> 'SD_UT',
+			clientmodule	=> 'SD_UT',
 			#modulematch	=> '^P92#.*',
-			developId     => 'y',
 		},
 	"93"	=>	## ESTO Lighting GmbH | remote control KL-RF01 with 9 buttons (CP 375-395)
 						# https://github.com/RFD-FHEM/RFFHEM/issues/449
