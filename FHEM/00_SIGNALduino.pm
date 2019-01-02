@@ -2872,10 +2872,9 @@ function SD_plistWindow(txt)
     title: "Protocollist Overview",
     buttons: [
       {text:"select all " + btxtStable + btxtBlack, click:function(){
-           //FW_cmd(FW_root+ \'?XHR=1&cmd={SIGNALduino_FW_selectAll()}\', function(data){SD_selectAll(data)});
+           FW_cmd(FW_root+ \'?XHR=1&cmd={SIGNALduino_FW_selectAll("'.$name.'")}\', function(data){SD_selectAll(data)});
       }},
       {text:"deselect all", click:function(){
-           // FW_cmd(FW_root+ \'?XHR=1&cmd={SIGNALduino_FW_deselectAll()}\', function(){SD_deselectAll()});
            SD_deselectAll()
       }},
       {text:"save to whitelist and close", click:function(){
@@ -2904,7 +2903,21 @@ function SD_deselectAll()
 
 function SD_selectAll(data)
 {
-
+  var ids = JSON.parse("[" + data + "]");
+  var element = document.getElementById("SD_protocolDialog");
+  var checkboxes = element.getElementsByTagName("input");
+  var i = 0;
+    for (var icb = 0; icb < checkboxes.length; icb++) {
+       if (checkboxes[icb].name == ids[i]) {
+          checkboxes[icb].checked = false;
+          if (i < ids.length) {
+             i++;
+          }
+       }
+       else {
+          checkboxes[icb].checked = true;
+       }
+    }
 }
 
 function SD_saveWhitelist()
@@ -2929,8 +2942,6 @@ sub SIGNALduino_FW_saveWhitelist
 {
 	my $name = shift;
 	my $wl_attr = shift;
-	my $hash = $defs{$name};
-	
 	
 	if ($wl_attr eq "") {
 		$wl_attr = 0;
@@ -2939,16 +2950,57 @@ sub SIGNALduino_FW_saveWhitelist
 		$wl_attr =~ s/,$//;			# Komma am Ende entfernen
 	}
 	$attr{$name}{whitelist_IDs} = $wl_attr;
-	SIGNALduino_Log3 $hash, 3, "$name Protocolist save: $wl_attr";
+	SIGNALduino_Log3 $name, 3, "$name Protocolist save: $wl_attr";
 	SIGNALduino_IdList("x:$name", $wl_attr);
 }
 
-sub SIGNALduino_FW_deselectAll
+sub SIGNALduino_FW_selectAll
 {
-	#my $hash = shift;
-	#my $name = $hash->{NAME};
-
-	#SIGNALduino_Log3 $hash, 3, "$name: button deselectAll";
+	my $name = shift;
+	my $hash = $defs{$name};
+	my %BlacklistIDs;
+	my @IdList = ();
+	my $ret = "";
+	my $bflag = 0;
+	my $devFlag = 0;
+	
+	my $blacklist = AttrVal($name,"blacklist_IDs","");
+	if (length($blacklist) > 0) {							# Blacklist in Hash wandeln
+		SIGNALduino_Log3 $name, 5, "$name Protocolist selectAll: attr blacklistIds=$blacklist";
+		%BlacklistIDs = map { $_ => 1 } split(",", $blacklist);
+		#my $w = join ', ' => map "$_" => keys %BlacklistIDs;
+		#SIGNALduino_Log3 $name, 3, "$name IdList, Attr blacklist $w";
+		$bflag = 1;
+	}
+	
+	my $develop = SIGNALduino_getAttrDevelopment($name);
+	if ($develop eq "1" || substr($develop,0,1) eq "y") {		# Entwicklerversion
+		$devFlag = 1;
+	}
+	
+	my $id;
+	foreach $id (keys %ProtocolListSIGNALduino)
+	{
+		next if ($id >= 900);
+		
+		if ($bflag == 1 && exists($BlacklistIDs{$id})) {
+			#SIGNALduino_Log3 $name, 3, "$name Protocolist activateAll, skip Blacklist ID $id";
+			push(@IdList, $id);
+		}
+		elsif (exists($ProtocolListSIGNALduino{$id}{developId})) {
+			if ($devFlag == 1 && $ProtocolListSIGNALduino{$id}{developId} eq "p") {
+				push(@IdList, $id);
+			}
+			elsif ($devFlag == 0 && $ProtocolListSIGNALduino{$id}{developId} eq "y") {
+				push(@IdList, $id);
+			}
+		}
+	}
+	@IdList = sort {$a <=> $b} @IdList;
+	$ret = join(",",@IdList);
+	
+	SIGNALduino_Log3 $name, 4, "$name Protocolist selectAll: ret=$ret";
+	return $ret;
 }
 
 sub SIGNALduino_IdList($@)
@@ -4240,64 +4292,11 @@ sub SIGNALduino_Log3($$$)
 
 
 ################################################
-# Functions for fhemweb actions 
-
-sub SIGNALduino_FW_changeProtocolUsage
-{
-	my $name = shift;
-	my $id = shift;
-	
-	
-	SIGNALduino_Log3 $name,3, "id is $id";
-	my $hash=$defs{$name};
-	
-	
-	my $wl_attr= AttrVal($name, "whitelist_IDs", ".*");
-	my $cmd;
-	if ( (grep { $_ eq $id } @{$hash->{msIdList}}) ||  (grep { $_ eq $id } @{$hash->{muIdList}}) || (grep { $_ eq $id } @{$hash->{mcIdList}}) ) 
-	{
-		if ($wl_attr eq ".*")
-		{
-			$wl_attr = join(",",@{$hash->{msIdList}},@{$hash->{muIdList}},@{$hash->{mcIdList}}); #Generate a new List,  if we are in default mode
-		}
-		$wl_attr =~ s/(?:^$id,?|,$id,|$id$)/,/;
-		$wl_attr =~ s/,,/,/;
-		
-		
-	} else {
-		$wl_attr = defined($wl_attr) ? "$wl_attr,$id" : $id;
-	}
-	
-	#Todo Funktion sperren wenn kein JSON installiert ist. 
- 	#SIGNAlduino_Attr("set",$name,"whitelist_IDs",$wl_attr); # Saves new Attr	
- 	my $ret = CallFn($name, "AttrFn", "set", $name, "whitelist_IDs", $wl_attr);
- 	if (!defined($ret))
- 	{
- 		$attr{$name}{"whitelist_IDs"} = $wl_attr;
- 		if ( (grep { $_ eq $id } @{$hash->{msIdList}}) ||  (grep { $_ eq $id } @{$hash->{muIdList}}) || (grep { $_ eq $id } @{$hash->{mcIdList}}) ) 
- 		{
- 			$cmd = FW_makeImage("on","disable","icon");	
- 		} else {
- 			$cmd = FW_makeImage("off","enable","icon");
- 		
- 		}
- 		my %return_hash = ('id'=>$id, 'data'=>$cmd);
-		my $return_json = to_json(\%return_hash);
- 		
-		return $return_json;
- 	}
- 	
- 	
-}
-
-
-################################################
 # Helper to get a reference of the protocolList Hash
 sub SIGNALduino_getProtocolList()
 {
 	return \%ProtocolListSIGNALduino
 }
-
 
 
 sub SIGNALduino_FW_getProtocolList
