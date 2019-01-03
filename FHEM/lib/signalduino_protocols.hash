@@ -289,7 +289,7 @@
 			clockabs				=> 500,					# ?
 			developId				=> 'y',
 			format					=> 'twostate',
-			preamble				=> 'u5',
+			preamble				=> 'u5#',
 			#clientmodule		=> '',
 			#modulematch		=> '',
 			length_min			=> '24',				# ?
