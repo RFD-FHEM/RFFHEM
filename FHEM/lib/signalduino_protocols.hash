@@ -2089,14 +2089,16 @@
 			comment				=> 'example: sensor MD-210R (MU decode)',
 			id						=> '91',
 			knownFreqs		=> '433.92 | 868.35',
-			zero					=> [-1,2],
-			one						=> [-2,1],
+			zero					=> [-2,1],
+			one						=> [-1,2],
 			start					=> [-10,1],
 			clockabs			=> 400,
 			format				=> 'twostate',	#
 			preamble			=> 'u91#',			# prepend to converted message
 			length_min		=> '36',
 			length_max		=> '36',
+			#clientmodule	=> 'SD_UT',
+			#modulematch	=> '^P91#.*',
 			developId     => 'y',
 		},
 	"91.1"	=>	## Atlantic Security / Focus Security China Devices
@@ -2108,14 +2110,16 @@
 			comment				=> 'example: sensor MD-210R (MS decode)',
 			id						=> '91.1',
 			knownFreqs		=> '433.92 | 868.35',
-			zero					=> [-1,2],
-			one						=> [-2,1],
+			zero					=> [-2,1],
+			one						=> [-1,2],
 			sync					=> [-10,1],
 			clockabs			=> 400,
 			format				=> 'twostate',	#
-			preamble			=> 'u91#',			# prepend to converted message
+			preamble			=> 'u91.1#',		# prepend to converted message
 			length_min		=> '32',
 			length_max		=> '36',
+			#clientmodule	=> 'SD_UT',
+			#modulematch	=> '^P91.1#.*',
 			developId     => 'y',
 		},
 	"92"	=>	## KRINNER Lumix - LED X-MAS
