@@ -194,7 +194,7 @@ SIGNALduino_un_Parse($$)
 	my $value = AttrVal($ioname, "development", "");
 	my @delevopmentargs = split (",",$value);
 
-	if ($value =~ m/([umyp])$protocol/g) {		# check for u|m|y|p development
+	if ($value =~ m/([umyp]$protocol|1)/g) {		# check for u|m|y|p|1 development (u|m|y|p downwards compatibility)
 		### Help Device + Logfile ###
 		Log3 $hash, 5, "$name: $ioname Protocol $1$protocol found in AttrVal development!";
 		
