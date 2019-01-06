@@ -8,7 +8,9 @@
    which are under developmen
    The new Internal IDsNoDispatch holds the protocols which will not send
    data to other modules.
+   New Oregon V3 sensors now supported. 
  signalduino_protocols.hash - revised ID90 CP-value | added ID93 (ESTO Lighting GmbH) | old ID90 with 2 defs not unique due to 2 different CP values
+ 14_SD_BELL.pm - added new model Pollin_551227
 28.12.2018
  signalduino_protocols.hash - revised ID90 (ESTO Lighting GmbH) | added ID91 (Atlantic Security) | added ID92 (Krinner Lumix - LED X-MAS)
 17.12.2018
