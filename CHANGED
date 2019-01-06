@@ -1,3 +1,7 @@
+06.01.2019
+  00_SIGNALduino - Bugfix:
+    wrong interpretation of equal and unequal num
+    of message bits when uc send data with reduction 
 01.01.2019
  signalduino_protocols.hash - added ID 0.4 (Auriol Z31092) + revised doc + fix ID92 + fix CP ID40
 30.12.2018

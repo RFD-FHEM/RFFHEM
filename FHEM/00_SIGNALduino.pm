@@ -28,7 +28,7 @@ eval "use Time::HiRes qw(gettimeofday);1" ;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.3.3-dev_30.12.",
+	SDUINO_VERSION            => "v3.3.3-dev_06.01.",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -1437,8 +1437,8 @@ SIGNALduino_Read($)
 					$partD .= "$mH$mL";
 				}
 				#SIGNALduino_Log3 $name, 3, "$name/msg READredu1$m0: $partD";
-				if ($m0 eq "d") {
-					$partD =~ s/.$//;	   # letzte Ziffer entfernen wenn Anzahl der Ziffern ungerade
+				if ($m0 eq "D") {
+					$partD =~ s/.$//;	   # letzte Ziffer entfernen wenn Anzahl der Ziffern ungerade # Todo: In chop($partD); ändern
 				}
 				$partD =~ s/^8//;	           # 8 am Anfang entfernen
 				#SIGNALduino_Log3 $name, 3, "$name/msg READredu2$m0: $partD";
