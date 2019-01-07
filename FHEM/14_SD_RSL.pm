@@ -333,11 +333,12 @@ The SD_RSL module decrypts and sends Conrad RSL messages sent by the SIGNALduino
 <a name="SD_RSL"></a>
 <h3>RSL</h3>
 Das SD_RSL-Modul decodiert und sendet Conrad-RSL-Nachrichten, die vom SIGNALduino gesendet werden.<br>
+Beim Autocreate wird bei der Taste All anstatt channel und button = 4 jetzt &quot;&lt;code&gt;_ALL&quot; angelegt, z.B. RSL_74A400_ALL<br>
 <br>
 <a name="SD_RSL_Define"></a>
 <b>Define</b>
 <ul>
-	<p><code>define &lt;name&gt; SD_RSL &lt;code&gt;_&lt;channel&gt;_&lt;button&gt;</code>
+	<p><code>define &lt;name&gt; SD_RSL &lt;code&gt;_&lt;channel&gt;[_&lt;button&gt;]</code>
 	<br>
 	<br>
 	<code>&lt;name&gt;</code> ist ein Name, der dem Ger&auml;t zugewiesen ist.
@@ -345,11 +346,11 @@ Das SD_RSL-Modul decodiert und sendet Conrad-RSL-Nachrichten, die vom SIGNALduin
 	<br /><br />
 	<code>&lt;code&gt;</code> Der Code ist 00000-FFFFFF
 	<br /><br />
-	<code>&lt;channel&gt;</code> Der Kanal ist 1-4
+	<code>&lt;channel&gt;</code> Der Kanal ist 1-4 oder ALL
 	<br /><br />
 	<code>&lt;button&gt;</code> Der Knopf ist 1-4
 	<br /><br />
-</ul>   
+</ul>
 <a name="SD_RSL_Set"></a>
 <b>Set</b>
 <ul>
