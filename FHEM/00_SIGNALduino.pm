@@ -2957,11 +2957,9 @@ sub SIGNALduino_FW_saveWhitelist
 sub SIGNALduino_FW_selectAll
 {
 	my $name = shift;
-	my $hash = $defs{$name};
 	my %BlacklistIDs;
 	my @IdList = ();
 	my $ret = "";
-	my $bflag = 0;
 	my $devFlag = 0;
 	
 	my $blacklist = AttrVal($name,"blacklist_IDs","");
@@ -2970,20 +2968,17 @@ sub SIGNALduino_FW_selectAll
 		%BlacklistIDs = map { $_ => 1 } split(",", $blacklist);
 		#my $w = join ', ' => map "$_" => keys %BlacklistIDs;
 		#SIGNALduino_Log3 $name, 3, "$name IdList, Attr blacklist $w";
-		$bflag = 1;
 	}
 	
 	my $develop = SIGNALduino_getAttrDevelopment($name);
-	if ($develop eq "1" || substr($develop,0,1) eq "y") {		# Entwicklerversion
+	if ($develop eq "1" || (substr($develop,0,1) eq "y" && $develop !~ m/^y\d/)) {	# Entwicklerversion, y ist nur zur Abwaertskompatibilitaet und kann in einer der naechsten Versionen entfernt werden
 		$devFlag = 1;
 	}
 	
 	my $id;
-	foreach $id (keys %ProtocolListSIGNALduino)
+	foreach $id (keys %ProtocolListSIGNALduino)		# Alle IDs die in der Protkolluebersicht nicht checked sein sollen, werden in das Array IdList eingetragen
 	{
-		next if ($id >= 900);
-		
-		if ($bflag == 1 && exists($BlacklistIDs{$id})) {
+		if (exists($BlacklistIDs{$id})) {
 			#SIGNALduino_Log3 $name, 3, "$name Protocolist activateAll, skip Blacklist ID $id";
 			push(@IdList, $id);
 		}
@@ -2991,7 +2986,7 @@ sub SIGNALduino_FW_selectAll
 			if ($devFlag == 1 && $ProtocolListSIGNALduino{$id}{developId} eq "p") {
 				push(@IdList, $id);
 			}
-			elsif ($devFlag == 0 && $ProtocolListSIGNALduino{$id}{developId} eq "y") {
+			elsif ($devFlag == 0 && $ProtocolListSIGNALduino{$id}{developId} eq "y" && $develop !~ m/y$id/) {
 				push(@IdList, $id);
 			}
 		}
@@ -4317,7 +4312,7 @@ sub SIGNALduino_FW_getProtocolList
 		$blackTxt = ".";
 	}
 	my $develop = AttrVal($name,"development","");
-	if (length($develop) > 0 && ($develop eq "1" || substr($develop,0,1) eq "y")) {		# develop version
+	if ($develop eq "1" || (substr($develop,0,1) eq "y" && $develop !~ m/^y\d/)) {	# Entwicklerversion, y ist nur zur Abwaertskompatibilitaet und kann in einer der naechsten Versionen entfernt werden
 		$devFlag = 1;
 		$devText = "development version - ";
 	}
@@ -4328,7 +4323,6 @@ sub SIGNALduino_FW_getProtocolList
 	
 	foreach $id (keys %ProtocolListSIGNALduino)
 	{
-		next if ($id >= 900);
 		push (@IdList, $id);
 	}
 	@IdList = sort { $a <=> $b } @IdList;
