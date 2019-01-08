@@ -1,3 +1,23 @@
+01.01.2019
+ signalduino_protocols.hash - added ID 0.4 (Auriol Z31092) + revised doc + fix ID92 + fix CP ID40
+30.12.2018
+ 14_SD_WS.pm - Check for valid channel numbers added in Protocols 84 and 89
+ 14_SD_WS.pm - Test for valid temperature and humidity values separately
+29.12.2018
+ 00_SIGNALduino -
+   Attribute development has changed and should not be used anymore.
+   Attribute Whitelist_IDs is now also capable of enabeling protocols   
+   which are under developmen
+   The new Internal IDsNoDispatch holds the protocols which will not send
+   data to other modules.
+   New Oregon V3 sensors now supported. 
+ signalduino_protocols.hash - revised ID90 CP-value | added ID93 (ESTO Lighting GmbH) | old ID90 with 2 defs not unique due to 2 different CP values
+ 14_SD_BELL.pm - added new model Pollin_551227
+28.12.2018
+ signalduino_protocols.hash - revised ID90 (ESTO Lighting GmbH) | added ID91 (Atlantic Security) | added ID92 (Krinner Lumix - LED X-MAS)
+ 14_SD_UT.pm - added new model Krinner_Lumix
+17.12.2018
+ 14_SD_UT.pm - added new model LED_XM21_0 for XM21-0 - LED XMAS | https://github.com/RFD-FHEM/RFFHEM/pull/437#issuecomment-448019192
 13.12.2018
  00_SIGNALduino.pm - added ID14 in matchListSIGNALduino
  signalduino_protocols.hash - changed ID14 preamble + added Modul
