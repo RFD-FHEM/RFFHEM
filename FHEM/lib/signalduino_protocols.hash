@@ -2086,7 +2086,7 @@
 						# MU;P0=14292;P1=-10684;P2=398;P3=-803;P4=-406;P5=806;P6=-4001;D=01232324532453232454532453245454532324545323232453245324562454532324532454532323245324532324545324532454545323245453232324532453245624545323245324545323232453245323245453245324545453232454532323245324532456245453232453245453232324532453232454532453245454;CP=2;R=50;O;
 		{
 			name					=> 'Atlantic security',
-			comment				=> 'example: sensor MD-210R (MU decode)',
+			comment				=> 'example sensor MD-210R | MD-2018R | MD-2003R (MU decode)',
 			id						=> '91',
 			knownFreqs		=> '433.92 | 868.35',
 			zero					=> [-2,1],
@@ -2094,12 +2094,11 @@
 			start					=> [-10,1],
 			clockabs			=> 400,
 			format				=> 'twostate',	#
-			preamble			=> 'u91#',			# prepend to converted message
+			preamble			=> 'P91#',			# prepend to converted message
 			length_min		=> '36',
 			length_max		=> '36',
-			#clientmodule	=> 'SD_UT',
+			clientmodule	=> 'SD_UT',
 			#modulematch	=> '^P91#.*',
-			developId     => 'y',
 		},
 	"91.1"	=>	## Atlantic Security / Focus Security China Devices
 						# https://forum.fhem.de/index.php/topic,58397.msg878008.html#msg878008
@@ -2107,7 +2106,7 @@
 						# MS;P1=392;P2=-824;P3=-416;P4=804;P5=-4034;D=15121343421343434212121342121212121342134342121212121213434212121343434212;CP=1;SP=5;e;m2;
 		{
 			name					=> 'Atlantic security',
-			comment				=> 'example: sensor MD-210R (MS decode)',
+			comment				=> 'example sensor MD-210R | MD-2018R | MD-2003R (MS decode)',
 			id						=> '91.1',
 			knownFreqs		=> '433.92 | 868.35',
 			zero					=> [-2,1],
@@ -2115,12 +2114,11 @@
 			sync					=> [-10,1],
 			clockabs			=> 400,
 			format				=> 'twostate',	#
-			preamble			=> 'u91.1#',		# prepend to converted message
+			preamble			=> 'P91.1#',		# prepend to converted message
 			length_min		=> '32',
 			length_max		=> '36',
-			#clientmodule	=> 'SD_UT',
+			clientmodule	=> 'SD_UT',
 			#modulematch	=> '^P91.1#.*',
-			developId     => 'y',
 		},
 	"92"	=>	## KRINNER Lumix - LED X-MAS
 						# https://github.com/RFD-FHEM/RFFHEM/issues/452 | https://forum.fhem.de/index.php/topic,94873.msg876477.html?PHPSESSID=khp4ja64pcqa5gsf6gb63l1es5#msg876477
