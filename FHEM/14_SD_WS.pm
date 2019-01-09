@@ -960,7 +960,7 @@ sub SD_WS_WH2SHIFT($){
     <li><a href="#do_not_notify">do_not_notify</a></li><br>
     <li><a href="#ignore">ignore</a></li><br>
     <li>max-deviation-hum<br>
-			(Default:1, allowed values: 1,2,3,4,5,6,7,8,9,10,15,20,25,30,35,40,45,50)<br>
+			(Default: 1, allowed values: 1,2,3,4,5,6,7,8,9,10,15,20,25,30,35,40,45,50)<br>
 			<a name="max-deviation-hum"></a>
 			Maximum permissible deviation of the measured humidity from the previous value in percent.<br>
 			Since many of the sensors handled in the module do not have checksums, etc. send, it can easily come to the reception of implausible values. 
@@ -976,7 +976,7 @@ sub SD_WS_WH2SHIFT($){
 			<a name="end_max-deviation-hum"></a>
     </li><br>
     <li>max-deviation-temp<br>
-			(Default:1, allowed values: 1,2,3,4,5,6,7,8,9,10,15,20,25,30,35,40,45,50)<br>
+			(Default: 1, allowed values: 1,2,3,4,5,6,7,8,9,10,15,20,25,30,35,40,45,50)<br>
 			<a name="max-deviation-temp"></a>
 			Maximum permissible deviation of the measured temperature from the previous value in Kelvin.<br>
 			Explanation see attribute "max-deviation-hum".
@@ -1053,7 +1053,7 @@ sub SD_WS_WH2SHIFT($){
     <li><a href="#do_not_notify">do_not_notify</a></li><br>
     <li><a href="#ignore">ignore</a></li><br>
     <li>max-deviation-hum<br>
-			(Default:1, erlaubte Werte: 1,2,3,4,5,6,7,8,9,10,15,20,25,30,35,40,45,50)<br>
+			(Standard: 1, erlaubte Werte: 1,2,3,4,5,6,7,8,9,10,15,20,25,30,35,40,45,50)<br>
 			<a name="max-deviation-hum"></a>
 			Maximal erlaubte Abweichung der gemessenen Feuchte zum vorhergehenden Wert in Prozent.
 			<br>Da viele der in dem Modul behandelten Sensoren keine Checksummen o.&auml;. senden, kann es leicht zum Empfang von unplausiblen Werten kommen. 
@@ -1069,7 +1069,7 @@ sub SD_WS_WH2SHIFT($){
 			<a name="end_max-deviation-hum"></a>
     </li><br>
     <li>max-deviation-temp<br>
-			(Default:1, erlaubte Werte: 1,2,3,4,5,6,7,8,9,10,15,20,25,30,35,40,45,50)<br>
+			(Standard: 1, erlaubte Werte: 1,2,3,4,5,6,7,8,9,10,15,20,25,30,35,40,45,50)<br>
 			<a name="max-deviation-temp"></a>
 			Maximal erlaubte Abweichung der gemessenen Temperatur zum vorhergehenden Wert in Kelvin.<br>
 			Erkl&auml;rung siehe Attribut "max-deviation-hum".
@@ -1077,7 +1077,7 @@ sub SD_WS_WH2SHIFT($){
     </li><br>
     <li>model<br>
 			<a name="model"></a>
-			(Default: other, zur Zeit unterst&uuml;tzte Sensoren: E0001PA, S522, TX-EZ6)<br>
+			(Standard: other, zur Zeit unterst&uuml;tzte Sensoren: E0001PA, S522, TX-EZ6)<br>
 			Die Sensoren der "SD_WS_33 - Reihe" verwenden unterschiedliche Positionen f&uuml;r das Batterie-Bit und unterst&uuml;tzen verschiedene Readings. 
 			Sollte das Batterie-Bit falsch erkannt werden (low statt ok), so kann man mit der Modelauswahl des Sensors das evtl. anpassen.<br>
 			Bisher sind 3 Varianten bekannt. Alle Sensoren werden durch Autocreate als Model "other" angelegt. 
