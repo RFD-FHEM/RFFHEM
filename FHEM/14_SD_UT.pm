@@ -909,16 +909,8 @@ sub SD_UT_Parse($$) {
 			} else {
 				$state = "warning";
 			}
-		############ MD_2018R ############ vibration ############
-		} elsif ($model eq "MD_2018R") {
-			($contact) = @_ = ('no Alarm', 'Alarm')[$contact];
-			if ($sabotage eq "closed" && $contact eq "no Alarm") {
-				$state = "normal";
-			} else {
-				$state = "warning";
-			}
-		############ MD_2003R ############ gas ############
-		} elsif ($model eq "MD_2003R") {
+		############ MD_2018R ############ vibration ############ | ############ MD_2003R ############ gas ############
+		} elsif ($model eq "MD_2018R" || $model eq "MD_2003R") {
 			($contact) = @_ = ('no Alarm', 'Alarm')[$contact];
 			$sabotage = undef;
 
