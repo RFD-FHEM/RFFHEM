@@ -320,7 +320,7 @@ If autocreate is used, a device &quot;&lt;code&gt;_ALL&quot; like RSL_74A400_ALL
 <a name="SD_RSL_Attr"></a>
 <b>Attribute</b>
 <ul>
-     li><a href="#IODev">IODev</a></li>
+    <li><a href="#IODev">IODev</a></li>
 	<li><a href="#do_not_notify">do_not_notify</a></li>
 	<li><a href="#eventMap">eventMap</a></li>
 	<li><a href="#ignore">ignore</a></li>
