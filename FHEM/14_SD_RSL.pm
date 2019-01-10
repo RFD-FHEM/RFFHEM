@@ -5,6 +5,7 @@
 # Supports following devices:
 # - Conrad RSL 
 # Ralf9 2019
+# Sidey89 2019
 #####################################
 
 package main;
@@ -279,20 +280,23 @@ sub SD_RSL_Attr(@)
 
 <a name="SD_RSL"></a>
 <h3>RSL</h3>
-The SD_RSL module decrypts and sends Conrad RSL messages sent by the SIGNALduino.<br>
+The SD_RSL module decrypts and creates Conrad RSL messages sent / received by a SIGNALduino device.<br>
+If autocreate is used, a device &quot;&lt;code&gt;_ALL&quot; like RSL_74A400_ALLis created instead of channel and button = 4.<br>
+
 <br>
 <a name="SD_RSL_Define"></a>
 <b>Define</b>
 <ul>
-	<p><code>define &lt;name&gt; SD_RSL &lt;code&gt;_&lt;channel&gt;_&lt;button&gt;</code>
+	<p><code>define &lt;name&gt; SD_RSL &lt;code&gt;_&lt;channel&gt;[_&lt;button&gt;]</code>
 	<br>
 	<br>
 	<code>&lt;name&gt;</code> is any name assigned to the device.
+	
 	For a better overview it is recommended to use a name in the form &quot;RSL_B1A800_1_2&quot;
 	<br /><br />
 	<code>&lt;code&gt;</code> The code is 00000-FFFFFF
 	<br /><br />
-	<code>&lt;channel&gt;</code> The channel is 1-4
+	<code>&lt;channel&gt;</code> The channel is 1-4 or ALL
 	<br /><br />
 	<code>&lt;button&gt;</code> The button is 1-4
 	<br /><br />
@@ -316,7 +320,7 @@ The SD_RSL module decrypts and sends Conrad RSL messages sent by the SIGNALduino
 <a name="SD_RSL_Attr"></a>
 <b>Attribute</b>
 <ul>
-        <li><a href="#IODev">IODev</a></li>
+     li><a href="#IODev">IODev</a></li>
 	<li><a href="#do_not_notify">do_not_notify</a></li>
 	<li><a href="#eventMap">eventMap</a></li>
 	<li><a href="#ignore">ignore</a></li>
@@ -332,8 +336,8 @@ The SD_RSL module decrypts and sends Conrad RSL messages sent by the SIGNALduino
 
 <a name="SD_RSL"></a>
 <h3>RSL</h3>
-Das SD_RSL-Modul decodiert und sendet Conrad-RSL-Nachrichten, die vom SIGNALduino gesendet werden.<br>
-Beim Autocreate wird bei der Taste All anstatt channel und button = 4 jetzt &quot;&lt;code&gt;_ALL&quot; angelegt, z.B. RSL_74A400_ALL<br>
+Das SD_RSL-Modul decodiert und erstellt Conrad-RSL-Nachrichten, die vom SIGNALduino gesendet bzw. empfangen werden.<br>
+Beim Verwendung von Autocreate wird bei der Taste All anstatt channel und button = 4 &quot;&lt;code&gt;_ALL&quot; angelegt, z.B. RSL_74A400_ALL<br>
 <br>
 <a name="SD_RSL_Define"></a>
 <b>Define</b>
@@ -370,14 +374,14 @@ Beim Autocreate wird bei der Taste All anstatt channel und button = 4 jetzt &quo
 <a name="SD_RSL_Attr"></a>
 <b>Attribute</b>
 <ul>
-        <li><a href="#IODev">IODev</a></li>
+    <li><a href="#IODev">IODev</a></li>
 	<li><a href="#do_not_notify">do_not_notify</a></li>
 	<li><a href="#eventMap">eventMap</a></li>
 	<li><a href="#ignore">ignore</a></li>
 	<li><a href="#readingFnAttributes">readingFnAttributes</a></li>
 	<a name="RSLrepetition"></a>
 	<li>RSLrepetition<br>
-	Stellen Sie die Wiederholungen für das Senden des Signals ein. 
+	Stellen Sie die Wiederholungen f&uumlr das Senden des Signals ein. 
 	</li>
 </ul>
 =end html_DE
