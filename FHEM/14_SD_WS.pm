@@ -15,6 +15,7 @@
 # 16.09.2018 neues Protokoll 84: Funk Wetterstation Auriol IAN 283582 Version 06/2017 (Lidl), Modell-Nr.: HG02832D
 # 31.09.2018 neues Protokoll 85: Kombisensor TFA 30.3222.02 fuer Wetterstation TFA 35.1140.01
 # 09.12.2018 neues Protokoll 89: Temperatur-/Feuchtesensor TFA 30.3221.02 fuer Wetterstation TFA 35.1140.01
+# 06.01.2019 Protokoll 33: Temperatur-/Feuchtesensor TX-EZ6 fuer Wetterstation TZS First Austria hinzugefuegt
 
 package main;
 
@@ -35,7 +36,7 @@ sub SD_WS_Initialize($)
 	$hash->{ParseFn}	= "SD_WS_Parse";
 	$hash->{AttrFn}		= "SD_WS_Attr";
 	$hash->{AttrList}	= "IODev do_not_notify:1,0 ignore:0,1 showtime:1,0 " .
-											"model:other,S522,E0001PA " .
+											"model:E0001PA,S522,TX-EZ6,other " .
                       "max-deviation-temp:1,2,3,4,5,6,7,8,9,10,15,20,25,30,35,40,45,50 ".
                       "max-deviation-hum:1,2,3,4,5,6,7,8,9,10,15,20,25,30,35,40,45,50 ".
 											"$readingFnAttributes ";
@@ -111,6 +112,8 @@ sub SD_WS_Parse($$)
 	my $hum;
 	my $windspeed;
 	my $trend;
+	my $trendTemp;
+	my $trendHum;
 	
 	my %decodingSubs  = (
     50    => # Protocol 50
@@ -166,26 +169,31 @@ sub SD_WS_Parse($$)
 			# i: 10 bit random id (changes on power-loss) - Bit 0 + 1 every 0 ???
 			# b: battery indicator (0=>OK, 1=>LOW)
 			# g: battery changed (1=>changed) - muss noch genauer getestet werden! ????
-			# c: Channel (MSB-first, valid channels are 1-3)
-			# t: Temperature (MSB-first, BCD)
-			#    12 bit unsigned fahrenheit offset by 90 and scaled by 10
-			# h: Humidity (MSB-first, BCD)
-			#    8 bit relative humidity percentage
+			# c: Channel (MSB-first, valid channels are 0x00-0x02 -> 1-3)
+			# t: Temperature (MSB-first, BCD, 12 bit unsigned fahrenheit offset by 90 and scaled by 10)
+			# h: always 0
 			# x: unknown
 
 			# Protokollbeschreibung: renkforce Temperatursensor E0001PA fuer Funk-Wetterstation E0303H2TPR (Conrad)
 			# ------------------------------------------------------------------------
 			# 0    4    | 8    12   | 16   20   | 24   28   | 32   36   40
 			# iiii iiii | iixx cctt | tttt tttt | tthh hhhh | hhsb xxxx xx
-			# i: 10 bit random id (changes on power-loss) - Bit 0 + 1 every 0 ???
-			# s:sendmode (1=>Test push, send manual 0=>automatic send)
-			# c: | t: | h: same like S522
-			# x: unknown
+			# h: Humidity (MSB-first, BCD, 8 bit relative humidity percentage)
+			# s: sendmode (1=>Test push, send manual 0=>automatic send)
+			# i: | c: | t: | h: | b: | x: same like S522
 
-			sensortype => 's014/TFA 30.3200/TCM/Conrad S522/renkforce E0001PA',
+			# Protokollbeschreibung: Temperatur-/Fechtesensor TX-EZ6 fuer Wetterstation TZS First Austria
+			# ------------------------------------------------------------------------
+			# 0    4    | 8    12   | 16   20   | 24   28   | 32   36   40
+			# iiii iiii | iiHH cctt | tttt tttt | tthh hhhh | hhsb TTxx xx
+			# H: Humidity trend, 00 = equal, 01 = up, 10 = down
+			# T: Temperature trend, 00 = equal, 01 = up, 10 = down
+			# i: | c: | t: | h: | s: | b: | x: same like E0001PA
+
+			sensortype => 's014/TFA 30.3200/TCM/S522/E0001PA/TX-EZ6',
 			model =>	'SD_WS_33_T',
 			prematch => sub {my $msg = shift; return 1 if ($msg =~ /^[0-9A-F]{11}$/); }, 							# prematch
-			crcok => 	sub {return SD_WS_binaryToNumber($bitData,36,39)+1;  }, 									# crc currently not calculated
+			crcok => 	sub {return 1;}, 									# crc currently not calculated
 			id => 		sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,0,9); },   				# id
 			temp => 	sub {my (undef,$bitData) = @_; return round(((SD_WS_binaryToNumber($bitData,22,25)*256 +  SD_WS_binaryToNumber($bitData,18,21)*16 + SD_WS_binaryToNumber($bitData,14,17)) - 1220) * 5 / 90.0 , 1); },	#temp
 			hum => 		sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,30,33)*16 + SD_WS_binaryToNumber($bitData,26,29));  }, 					#hum
@@ -814,6 +822,11 @@ sub SD_WS_Parse($$)
 		} elsif (AttrVal($name,'model',0) eq "E0001PA") {					# renkforce E0001PA
 			$bat = substr($bitData,35,1) eq "0" ? "ok" : "low";	
 			$sendmode = substr($bitData,34,1) eq "1" ? "manual" : "auto";
+		} elsif (AttrVal($name,'model',0) eq "TX-EZ6") {					# TZS First Austria TX-EZ6
+			$bat = substr($bitData,35,1) eq "0" ? "ok" : "low";	
+			$sendmode = substr($bitData,34,1) eq "1" ? "manual" : "auto";
+			$trendTemp = ('consistent', 'rising', 'falling', 'unknown')[SD_WS_binaryToNumber($bitData,10,11)];
+			$trendHum = ('consistent', 'rising', 'falling', 'unknown')[SD_WS_binaryToNumber($bitData,36,37)];
 		}
 	}
 
@@ -825,6 +838,8 @@ sub SD_WS_Parse($$)
 	readingsBulkUpdate($hash, "batteryState", $bat) if (defined($bat) && length($bat) > 0) ;
 	readingsBulkUpdate($hash, "channel", $channel) if (defined($channel)&& length($channel) > 0);
 	readingsBulkUpdate($hash, "trend", $trend) if (defined($trend) && length($trend) > 0);
+	readingsBulkUpdate($hash, "temperatureTrend", $trendTemp) if (defined($trendTemp) && length($trendTemp) > 0);
+	readingsBulkUpdate($hash, "humidityTrend", $trendHum) if (defined($trendHum) && length($trendHum) > 0);
 	readingsBulkUpdate($hash, "sendmode", $sendmode) if (defined($sendmode) && length($sendmode) > 0);
 	readingsEndUpdate($hash, 1); # Notify is done by Dispatch
 	
@@ -908,6 +923,7 @@ sub SD_WS_WH2SHIFT($){
 		<li>Opus XT300</li>
     <li>PV-8644 infactory Poolthermometer</li>
     <li>Renkforce E0001PA</li>
+		<li>TX-EZ6 for Weatherstation TZS First Austria</li>
 		<li>WH2 (TFA Dostmann/Wertheim 30.3157 (sold in Germany), Agimex Rosenborg 66796 (sold in Denmark),ClimeMET CM9088 (Sold in UK)</li>
 		<li>Weatherstation Auriol IAN 283582 Version 06/2017 (Lidl), Modell-Nr.: HG02832D</li>
 		<li>Weatherstation TFA 35.1140.01 with temperature / humidity sensor TFA 30.3221.02 and temperature / humidity / windspeed sensor TFA 30.3222.02</li>
@@ -931,9 +947,11 @@ sub SD_WS_WH2SHIFT($){
     <li>batteryState (low or ok)</li>
     <li>channel (number of channel</li>
 		<li>humidity (humidity (1-100 % only if available)</li>
+		<li>humidityTrend (consistent, rising, falling)</li>
 		<li>sendmode (automatic or manual)</li>
 		<li>state (T: H: W:)</li>
     <li>temperature (&deg;C)</li>
+		<li>temperatureTrend (consistent, rising, falling)</li>
   </ul><br><br>
 
   <a name="SD_WS Attribute"></a>
@@ -942,7 +960,7 @@ sub SD_WS_WH2SHIFT($){
     <li><a href="#do_not_notify">do_not_notify</a></li><br>
     <li><a href="#ignore">ignore</a></li><br>
     <li>max-deviation-hum<br>
-			(Default:1, allowed values: 1,2,3,4,5,6,7,8,9,10,15,20,25,30,35,40,45,50)<br>
+			(Default: 1, allowed values: 1,2,3,4,5,6,7,8,9,10,15,20,25,30,35,40,45,50)<br>
 			<a name="max-deviation-hum"></a>
 			Maximum permissible deviation of the measured humidity from the previous value in percent.<br>
 			Since many of the sensors handled in the module do not have checksums, etc. send, it can easily come to the reception of implausible values. 
@@ -958,7 +976,7 @@ sub SD_WS_WH2SHIFT($){
 			<a name="end_max-deviation-hum"></a>
     </li><br>
     <li>max-deviation-temp<br>
-			(Default:1, allowed values: 1,2,3,4,5,6,7,8,9,10,15,20,25,30,35,40,45,50)<br>
+			(Default: 1, allowed values: 1,2,3,4,5,6,7,8,9,10,15,20,25,30,35,40,45,50)<br>
 			<a name="max-deviation-temp"></a>
 			Maximum permissible deviation of the measured temperature from the previous value in Kelvin.<br>
 			Explanation see attribute "max-deviation-hum".
@@ -967,10 +985,10 @@ sub SD_WS_WH2SHIFT($){
     <li>model<br>
 			(Default: other, currently supported sensors: E0001PA, S522)<br>
 			<a name="model"></a>
-			The sensors of the "SD_WS_33 series" use different positions for the battery bit. 
+			The sensors of the "SD_WS_33 series" use different positions for the battery bit and different readings. 
 			If the battery bit is detected incorrectly (low instead of ok), then you can possibly adjust with the model selection of the sensor.<br>
 			So far, 3 variants are known. All sensors are created by Autocreate as model "other". 
-			If you receive a Conrad S522 or Renkforce E0001PA, then set the appropriate model for the proper processing of the battery bit.
+			If you receive a Conrad S522, Renkforce E0001PA or TX-EZ6, then set the appropriate model for the proper processing of readings.
 			<a name="end_model"></a>
 		</li><br>
     <li><a href="#readingFnAttributes">readingFnAttributes</a></li><br>
@@ -997,6 +1015,7 @@ sub SD_WS_WH2SHIFT($){
 		<li>Opus XT300</li>
     <li>PV-8644 infactory Poolthermometer</li>
     <li>Renkforce E0001PA</li>
+		<li>TX-EZ6 fuer Wetterstation TZS First Austria</li>
 		<li>WH2 (TFA Dostmann/Wertheim 30.3157 (Deutschland), Agimex Rosenborg 66796 (Denmark), ClimeMET CM9088 (UK)</li>
 		<li>Wetterstation Auriol IAN 283582 Version 06/2017 (Lidl), Modell-Nr.: HG02832D</li>
 		<li>Wetterstation TFA 35.1140.01 mit Temperatur-/Feuchtesensor TFA 30.3221.02 und Temperatur-/Feuchte- und Windsensor TFA 30.3222.02</li>
@@ -1018,10 +1037,12 @@ sub SD_WS_WH2SHIFT($){
   <ul>(verschieden, je nach Typ des Sensors)</ul>
   <ul>
   	<li>batteryState (low oder ok)</li>
-    <li>channel (Der Sensor Kanal)</li>
-    <li>humidity (Luftfeuchte (1-100)</li>
+    <li>channel (Sensor-Kanal)</li>
+    <li>humidity (Luftfeuchte (1-100 %)</li>
+		<li>humidityTrend (gleichbleibend, steigend, fallend)</li>
 		<li>state (T: H: W:)</li>
     <li>temperature (&deg;C)</li>
+		<li>temperatureTrend (gleichbleibend, steigend, fallend)</li>
     <li>sendmode (Der Sendemodus, automatic oder manuell mittels Taster am Sender)</li>
   </ul>
   <br><br>
@@ -1032,7 +1053,7 @@ sub SD_WS_WH2SHIFT($){
     <li><a href="#do_not_notify">do_not_notify</a></li><br>
     <li><a href="#ignore">ignore</a></li><br>
     <li>max-deviation-hum<br>
-			(Default:1, erlaubte Werte: 1,2,3,4,5,6,7,8,9,10,15,20,25,30,35,40,45,50)<br>
+			(Standard: 1, erlaubte Werte: 1,2,3,4,5,6,7,8,9,10,15,20,25,30,35,40,45,50)<br>
 			<a name="max-deviation-hum"></a>
 			Maximal erlaubte Abweichung der gemessenen Feuchte zum vorhergehenden Wert in Prozent.
 			<br>Da viele der in dem Modul behandelten Sensoren keine Checksummen o.&auml;. senden, kann es leicht zum Empfang von unplausiblen Werten kommen. 
@@ -1048,19 +1069,19 @@ sub SD_WS_WH2SHIFT($){
 			<a name="end_max-deviation-hum"></a>
     </li><br>
     <li>max-deviation-temp<br>
-			(Default:1, erlaubte Werte: 1,2,3,4,5,6,7,8,9,10,15,20,25,30,35,40,45,50)<br>
+			(Standard: 1, erlaubte Werte: 1,2,3,4,5,6,7,8,9,10,15,20,25,30,35,40,45,50)<br>
 			<a name="max-deviation-temp"></a>
 			Maximal erlaubte Abweichung der gemessenen Temperatur zum vorhergehenden Wert in Kelvin.<br>
 			Erkl&auml;rung siehe Attribut "max-deviation-hum".
 			<a name="end_max-deviation-temp"></a>
     </li><br>
     <li>model<br>
-			(Default: other, zur Zeit unterst&uuml;tzte Sensoren: E0001PA, S522)<br>
 			<a name="model"></a>
-			Die Sensoren der "SD_WS_33 - Reihe" verwenden unterschiedliche Positionen f&uuml;r das Batterie-Bit. 
+			(Standard: other, zur Zeit unterst&uuml;tzte Sensoren: E0001PA, S522, TX-EZ6)<br>
+			Die Sensoren der "SD_WS_33 - Reihe" verwenden unterschiedliche Positionen f&uuml;r das Batterie-Bit und unterst&uuml;tzen verschiedene Readings. 
 			Sollte das Batterie-Bit falsch erkannt werden (low statt ok), so kann man mit der Modelauswahl des Sensors das evtl. anpassen.<br>
 			Bisher sind 3 Varianten bekannt. Alle Sensoren werden durch Autocreate als Model "other" angelegt. 
-			Empfangen Sie einen Conrad S522 oder Renkforce E0001PA Sensor, so stellen Sie das jeweilige Modell f&uuml;r die richtige Verarbeitung des Batterie-Bit ein.
+			Empfangen Sie einen Sensor vom Typ Conrad S522, Renkforce E0001PA oder TX-EZ6, so stellen Sie das jeweilige Modell f&uuml;r die richtige Verarbeitung der Readings ein.
 			<a name="end_model"></a>
 		</li><br>
     <li><a href="#readingFnAttributes">readingFnAttributes</a></li><br>

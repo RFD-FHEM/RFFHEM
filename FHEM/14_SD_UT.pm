@@ -1,5 +1,5 @@
 #########################################################################################
-# $Id: 14_SD_UT.pm 32 2018-12-28 12:00:00 v3.3.3-dev_05.12. $HomeAuto_User
+# $Id: 14_SD_UT.pm 32 2019-01-09 12:00:00 v3.3.3-dev_05.12. $HomeAuto_User
 #
 # The file is part of the SIGNALduino project.
 # The purpose of this module is universal support for devices.
@@ -163,6 +163,35 @@
 # 		P92#A06C360 1
 #} 		P92#A06C360 0
 ###############################################################################################################################################################################
+# - Atlantic Security / Focus Security China Devices | door/windows switch MD-210R | Vibration Schock Sensor MD-2018R | GasSensor MD-2003R [Protocol 91] & [Protocol 91.1]
+#		https://forum.fhem.de/index.php/topic,95346.0.html | https://forum.fhem.de/index.php?topic=95346.msg881810#msg881810 | https://github.com/RFD-FHEM/RFFHEM/issues/477
+#		36bit = 24bit DeviceID + 8bit Commando (4 Bit -> Sabo,Contact,Contact extern,keepalive or batterie | 4 bit -> typ) + 4bit Check | all nibbles are XOR = 0
+#		i ident | s sabo | c contact intern | e contact extern | k keepalive (battery?) | t typ | C ckecksumme
+#
+#{	door/windows switch MD_210R
+#
+#		iiiiiiiiiiiiiiiiiiiiiiiiscekttttCCCC
+#		------------------------------------
+#		Kontakt auf | Gehäuse auf		get sduino_dummy raw MS;;P1=-410;;P2=807;;P3=-803;;P4=394;;P5=-3994;;D=45412123434123412123434341234123434121234123412121234341234343434123412343;;CP=4;;SP=5;;R=30;;O;;m2;;
+#		Kontakt zu | Gehäuse auf		get sduino_dummy raw MS;;P0=-397;;P1=816;;P2=-804;;P3=407;;P4=-4007;;D=34301012323012301012323230123012323010123012301010123010123232323012323232;;CP=3;;SP=4;;R=71;;O;;m2;;
+#		Kontakt auf | Gehäuse zu		get sduino_dummy raw MS;;P1=-404;;P2=813;;P3=-794;;P4=409;;P5=-4002;;D=45412123434123412123434341234123434121234123412121212341234343434121212343;;CP=4;;SP=5;;R=65;;m0;;
+#		Kontakt zu | Gehäuse zu			get sduino_dummy raw MS;;P0=-800;;P1=402;;P2=-401;;P3=806;;P4=-3983;;D=14123230101230123230101012301230101232301230123232323232301010101232301010;;CP=1;;SP=4;;R=57;;O;;m2;;
+#}
+#{	Vibration Schock Sensor MD-2018R
+#
+#		iiiiiiiiiiiiiiiiiiiiiiiisc?kttttCCCC
+#		------------------------------------
+#		get sduino_dummy raw MS;;P0=-404;;P1=383;;P2=-797;;P3=778;;P4=-3934;;D=14103030321032121032103030303030321210321032103210303030321032103032103212;;CP=1;;SP=4;;R=0;;
+#		get sduino_dummy raw MU;;P0=776;;P1=-409;;P2=-802;;P3=379;;P4=-3946;;D=010102310102323231043101010231023231023101010101010232310231023102310102310101023101023232310431010102310232310231010101010102323102310231023101023101010231010232323100;;CP=3;;R=0;;
+#}
+#{	GasSensor MD-2003R
+#
+#		iiiiiiiiiiiiiiiiiiiiiiiisc?kttttCCCC
+#		------------------------------------
+#		get sduino_dummy raw MU;;P0=-164;;P1=378;;P2=-813;;P3=-429;;P4=764;;P5=-3929;;D=0121212134342121343434343421342121212121213434343421212134342134213451212121212121343421213434343434213421212121212134343434212121343421342134512121212121213434212134343434342134212121212121343434342121213434213421345121212121212134342121343434343421342;;CP=1;;R=0;;O;;
+#		get sduino_dummy raw MU;;P1=-419;;P2=380;;P3=-810;;P5=767;;P6=-3912;;P7=-32001;;D=262323232323232151532321515151515321532323232323215321515153232151515153232;;CP=2;;R=0;;
+#}
+###############################################################################################################################################################################
 # !!! ToDo´s !!!
 #     -
 #     -
@@ -301,6 +330,18 @@ my %models = (
 														Protocol 	=> "P86",
 														Typ				=> "remote"
 													},
+	"MD_2003R" =>	{	Protocol	=> "P91", 	#P91.1
+									hex_lengh	=> "9",
+									Typ				=> "gas"
+								},
+	"MD_210R" =>	{	Protocol	=> "P91", 	#P91.1
+									hex_lengh	=> "9",
+									Typ				=> "switch"
+								},
+	"MD_2018R" =>	{	Protocol	=> "P91", 	#P91.1
+									hex_lengh	=> "9",
+									Typ				=> "vibration"
+								},
 	"unknown" =>	{	Protocol	=> "any",
 									hex_lengh	=> "",
 									Typ				=> "not_exist"
@@ -310,7 +351,7 @@ my %models = (
 #############################
 sub SD_UT_Initialize($) {
 	my ($hash) = @_;
-	$hash->{Match}			= "^P(?:14|29|30|34|46|69|76|81|83|86|92)#.*";
+	$hash->{Match}			= "^P(?:14|29|30|34|46|69|76|81|83|86|91|91.1|92)#.*";
 	$hash->{DefFn}			= "SD_UT_Define";
 	$hash->{UndefFn}		= "SD_UT_Undef";
 	$hash->{ParseFn}		= "SD_UT_Parse";
@@ -319,8 +360,10 @@ sub SD_UT_Initialize($) {
 	$hash->{AttrList}		= "repeats:1,2,3,4,5,6,7,8,9 IODev do_not_notify:1,0 ignore:0,1 showtime:1,0 model:".join(",", sort keys %models)." $readingFnAttributes ";
 	$hash->{AutoCreate} =
 	{
-		"SD_UT.*" => {ATTR => "model:unknown", FILTER => "%NAME", autocreateThreshold => "3:180"},
-		"unknown_please_select_model" => {ATTR => "model:unknown", FILTER => "%NAME", autocreateThreshold => "3:180"},
+		"MD_2003R.*"	 => {ATTR => "model:MD_2003R", FILTER => "%NAME", autocreateThreshold => "3:180", GPLOT => ""},
+		"MD_210R.*"	 => {ATTR => "model:MD_210R", FILTER => "%NAME", autocreateThreshold => "3:180", GPLOT => ""},
+		"MD_2018R.*"	 => {ATTR => "model:MD_2018R", FILTER => "%NAME", autocreateThreshold => "3:180", GPLOT => ""},
+		"unknown_please_select_model"	=> {ATTR => "model:unknown", FILTER => "%NAME", autocreateThreshold => "5:180", GPLOT => ""},
 	};
 }
 
@@ -365,6 +408,8 @@ sub SD_UT_Define($$) {
 
 	### [5] checks TEDSEN_SKX1MD ###
 	return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short | long or not HEX (0-9 | a-f | A-F){5}" if ($a[2] eq "TEDSEN_SKX1MD" && not $a[3] =~ /^[0-9a-fA-F]{5}/s);
+	### [6] checks MD_2003R | MD_210R | MD_2018R ###
+	return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short | long or not HEX (0-9 | a-f | A-F){6}" if (($a[2] eq "MD_2003R" || $a[2] eq "MD_210R" || $a[2] eq "MD_2018R") && not $a[3] =~ /^[0-9a-fA-F]{6}/s);
 	### [7] checks Hoermann HSM4 | Krinner_LUMIX ###
 	return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short | long or not HEX (0-9 | a-f | A-F){7}" if (($a[2] eq "HSM4" || $a[2] eq "Krinner_LUMIX") && not $a[3] =~ /^[0-9a-fA-F]{7}/s);
 	### [9] checks Hoermann HS1-868-BS ###
@@ -374,6 +419,7 @@ sub SD_UT_Define($$) {
 
 	$hash->{lastMSG} =  "no data";
 	$hash->{bitMSG} =  "no data";
+	$hash->{STATE} =  "Defined";
 	my $iodevice = $a[4] if($a[4]);
 	my $name = $hash->{NAME};
 
@@ -386,7 +432,7 @@ sub SD_UT_Define($$) {
 	if ($devicetyp eq "unknown") {
 		$attr{$name}{model}	= "unknown"	if( not defined( $attr{$name}{model} ) );
 	} else {
-		$attr{$name}{model}	= $devicetyp	if( not defined( $attr{$name}{model} ) );	
+		$attr{$name}{model}	= $devicetyp	if( not defined( $attr{$name}{model} ) );
 	}
 	$attr{$name}{room}	= "SD_UT"	if( not defined( $attr{$name}{room} ) );
 
@@ -547,16 +593,21 @@ sub SD_UT_Parse($$) {
 	my $blen = $hlen * 4;
 	my $bitData = unpack("B$blen", pack("H$hlen", $rawData));
 	my $model = "unknown";
+	my $name = "unknown_please_select_model";
 	my $SensorTyp;
 	Log3 $iohash, 4, "$ioname: SD_UT protocol $protocol, bitData $bitData";
 
-	my $bin;
 	my $def;
 	my $deviceCode = "";
-	my $zone;				# bits for zone
-	my $zoneRead;		# text for user of zone
-	my $usersystem;	# text for user of system
 	my $devicedef;
+	my $zone;							# Unitec_47031 - bits for zone
+	my $zoneRead;					# Unitec_47031 - text for user of zone
+	my $usersystem;				# Unitec_47031 - text for user of system
+	my $deviceTyp;				# hash -> typ
+	my $contact;					# MD_210R
+	my $keepalive;				# MD_210R
+	my $sabotage;					# MD_210R
+	my $batteryState;
 	my $state = "unknown";
 
 	my $deletecache = $modules{SD_UT}{defptr}{deletecache};
@@ -642,6 +693,43 @@ sub SD_UT_Parse($$) {
 		$devicedef = "Krinner_LUMIX " . $deviceCode if (!$def);
 		$def = $modules{SD_UT}{defptr}{$devicedef} if (!$def);
 	}
+
+	if ($hlen == 9 && ($protocol == 91 || $protocol == 91.1)) {
+		### Atlantic Security with all models [P91] or [P91.1 ] with CHECK ###
+		Log3 $iohash, 4, "$ioname: SD_UT device MD_210R check length & Protocol OK";
+		my @array_rawData = split("",$rawData);
+		my $xor_check = hex($array_rawData[0]);
+		foreach my $nibble (1...8) {
+			$xor_check = $xor_check ^ hex($array_rawData[$nibble]);
+		}
+		if ($xor_check != 0) {
+			Log3 $iohash, 4, "$ioname: SD_UT device from Atlantic Security - check XOR ($xor_check) FAILED! rawData=$rawData";
+			return "";
+		} else {
+			Log3 $iohash, 4, "$ioname: SD_UT device from Atlantic Security - check XOR OK";
+		}
+
+		$model = substr($rawData,7,1);
+		if ($model eq "E") {
+			$model = "MD_210R";
+		} elsif ($model eq "4") {
+			$model = "MD_2018R";
+		} elsif ($model eq "C") {
+			$model = "MD_2003R";
+		} else {
+			Log3 $iohash, 1, "SD_UT Please report maintainer. Your model from Atlantic Security are unknown! rawData=$rawData";
+			return "";
+		}
+		
+		$deviceTyp = $models{$model}{Typ};
+		$model = "$model";
+		$deviceCode = substr($rawData,0,6);
+		$devicedef = "$model " . $deviceCode if (!$def);
+		$def = $modules{SD_UT}{defptr}{$devicedef} if (!$def);
+		$name = $model."_" . $deviceCode;
+
+		Log3 $iohash, 4, "$ioname: SD_UT device $model from category $deviceTyp with code $deviceCode are ready to decode";
+	}
 	
 	if ($hlen == 11 && $protocol == 69) {
 		### Remote control Hoermann HS1-868-BS [P69] ###
@@ -670,11 +758,12 @@ sub SD_UT_Parse($$) {
 
 	if(!$def) {
 		Log3 $iohash, 1, "$ioname: SD_UT_Parse UNDEFINED sensor $model detected, protocol $protocol, data $rawData, code $deviceCode";
-		return "UNDEFINED unknown_please_select_model SD_UT $model";
+		return "UNDEFINED $name SD_UT $model" if ($model eq "unknown");																		# model set user manual
+		return "UNDEFINED $name SD_UT $model $deviceCode" if ($model ne "unknown_please_select_model");		# model set automatically
 	}
 
 	my $hash = $def;
-	my $name = $hash->{NAME};
+	$name = $hash->{NAME};
 	$hash->{lastMSG} = $rawData;
 	$hash->{bitMSG} = $bitData;
 	$deviceCode = undef;				# reset
@@ -801,7 +890,36 @@ sub SD_UT_Parse($$) {
 	} elsif ($model eq "Krinner_LUMIX" && $protocol == 92) {
 		$deviceCode = substr($bitData,0,28);
 		$state = substr($bitData,28,4);
+	############ Atlantic Security ############ Protocol 91 or 91.1 ############
+	} elsif ($protocol == 91 || $protocol == 91.1) {
+		############ MD_210R ############ switch ############
+		$sabotage = substr($bitData,24,1);
+		$contact = substr($bitData,25,1);
+		$batteryState = substr($bitData,26,1);		# muss noch 100% verifiziert werden  bei all typs !!!
+		$keepalive = substr($bitData,27,1);				# muss noch 100% verifiziert werden  bei all typs !!!
+		
+		($batteryState) = @_ = ('ok', 'warning')[$batteryState];
+		($keepalive) = @_ = ('event', 'periodically')[$keepalive];
+		($sabotage) = @_ = ('closed', 'open')[$sabotage];
+		
+		if ($model eq "MD_210R") {
+			($contact) = @_ = ('closed', 'open')[$contact];
+			if ($sabotage eq "closed" && $contact eq "closed") {
+				$state = "normal";
+			} else {
+				$state = "warning";
+			}
+		############ MD_2018R ############ vibration ############ | ############ MD_2003R ############ gas ############
+		} elsif ($model eq "MD_2018R" || $model eq "MD_2003R") {
+			($contact) = @_ = ('no Alarm', 'Alarm')[$contact];
+			$sabotage = undef;
 
+			if ($contact eq "no Alarm") {
+				$state = "normal";
+			} else {
+				$state = "warning";
+			}
+		}
 	############ unknown ############
 	} else {
 		readingsSingleUpdate($hash, "state", "???", 0);
@@ -825,11 +943,16 @@ sub SD_UT_Parse($$) {
 	}
 
 	readingsBeginUpdate($hash);
-	readingsBulkUpdate($hash, "deviceCode", $deviceCode, 0)  if (defined($deviceCode) && $models{$model}{Typ} eq "remote");
-	readingsBulkUpdate($hash, "System-Housecode", $deviceCode, 0)  if (defined($deviceCode) && $model eq "Unitec_47031");
-	readingsBulkUpdate($hash, "Zone", $zoneRead, 0) if ($model eq "Unitec_47031");
-	readingsBulkUpdate($hash, "Usersystem", $usersystem, 0)  if ($model eq "Unitec_47031");
-	readingsBulkUpdate($hash, "LastAction", "receive", 0)  if (defined($state) && $models{$model}{Typ} eq "remote" && ($model ne "SA_434_1_mini" || $model ne "HS1_868_BS"));
+	readingsBulkUpdate($hash, "deviceCode", $deviceCode, 0) if (defined($deviceCode) && $models{$model}{Typ} eq "remote");
+	readingsBulkUpdate($hash, "contact", $contact) if (defined($contact) && ($model eq "MD_210R" || $model eq "MD_2018R" || $model eq "MD_2003R"));
+	readingsBulkUpdate($hash, "batteryState", $batteryState) if (defined($batteryState));
+	readingsBulkUpdate($hash, "deviceTyp", $deviceTyp,0) if (defined($deviceTyp) && ($model eq "MD_210R" || $model eq "MD_2018R" || $model eq "MD_2003R"));
+	readingsBulkUpdate($hash, "keepalive", $keepalive) if (defined($keepalive) && ($model eq "MD_210R" || $model eq "MD_2018R" || $model eq "MD_2003R"));
+	readingsBulkUpdate($hash, "sabotage", $sabotage) if (defined($sabotage) && ($model eq "MD_210R" || $model eq "MD_2018R" || $model eq "MD_2003R"));
+	readingsBulkUpdate($hash, "System-Housecode", $deviceCode, 0) if (defined($deviceCode) && $model eq "Unitec_47031");
+	readingsBulkUpdate($hash, "Zone", $zoneRead, 0) if (defined($zoneRead) && $model eq "Unitec_47031");
+	readingsBulkUpdate($hash, "Usersystem", $usersystem, 0) if (defined($zoneRead) && $model eq "Unitec_47031");
+	readingsBulkUpdate($hash, "LastAction", "receive", 0) if (defined($state) && $models{$model}{Typ} eq "remote" && ($model ne "SA_434_1_mini" || $model ne "HS1_868_BS"));
 	readingsBulkUpdate($hash, "state", $state)  if (defined($state) && $state ne "unknown");
 	readingsEndUpdate($hash, 1); 		# Notify is done by Dispatch
 
@@ -981,22 +1104,15 @@ sub SD_UT_Attr(@) {
 		}
 	}
 
-	## return if  fhem init
+	## return if fhem init
 	if ($init_done) {
-		Log3 $name, 3, "SD_UT_Attr set $attrName to $attrValue " if ($cmd eq "set");
-		return "Note: Your unknown_please_select_model device are deleted with the next receive.\nPlease use your new defined model device and do not forget to push -Save config-" if ($defs{$name}->{DEF} eq "unknown" && $oldmodel eq "unknown" );
+		Log3 $name, 3, "SD_UT_Attr set $attrName to $attrValue" if ($cmd eq "set");
+		return "Note: Your unknown_please_select_model device are deleted with the next receive.\nPlease use your new defined model device and do not forget to push -Save config-" if ($defs{$name}->{DEF} eq "unknown" && $oldmodel eq "unknown" && $attrValue ne "$oldmodel");
 	}
 	return undef;
 }
 
 ###################################
-sub SD_UT_binaryToNumber {
-	my $binstr=shift;
-	my $fbit=shift;
-	my $lbit=$fbit;
-	$lbit=shift if @_;
-	return oct("0b".substr($binstr,$fbit,($lbit-$fbit)+1));
-}
 
 1;
 
@@ -1013,6 +1129,7 @@ sub SD_UT_binaryToNumber {
 	<i><u><b>Note:</b></u></i> As soon as the attribute model of a defined device is changed or deleted, the module re-creates a device of the selected type, and when a new message is run, the current device is deleted. 
 	Devices of <u>the same or different type with the same deviceCode will result in errors</u>. PLEASE use different <code>deviceCode</code>.<br><br>
 	 <u>The following devices are supported:</u><br>
+	 <ul> - Atlantic Security sensors&nbsp;&nbsp;&nbsp;<small>(module model: MD-2003R, MD-2018R,MD-210R | Protokoll 91|91.1)</small></ul>
 	 <ul> - BOSCH ceiling fan&nbsp;&nbsp;&nbsp;<small>(module model: SF01_01319004_Typ2 | protocol 86)</small></ul>
 	 <ul> - CAME swing gate drive&nbsp;&nbsp;&nbsp;<small>(module model: CAME_TOP_432EV | protocol 86)</small></ul>
 	 <ul> - ChiliTec LED X-Mas light&nbsp;&nbsp;&nbsp;<small>(module model: Chilitec_22640 | protocol 14)</small></ul>
@@ -1210,6 +1327,16 @@ sub SD_UT_binaryToNumber {
 	<li>state<br>
 	Last executed keystroke of the remote control</li></ul><br>
 
+	<ul><u>MD_2003R (gas)&nbsp;&nbsp;|&nbsp;&nbsp;MD_2018R (vibration)&nbsp;&nbsp;|&nbsp;&nbsp;MD_210R (door/windows switch)</u><br>
+	<li>contact<br>
+	Status of the internal alarm contact</li>
+	<li>deviceTyp<br>
+	Model type of your sensor</li>
+	<li>sabotage<br>
+	State of sabotage contact</li>
+	<li>state<br>
+	State of the device</li></ul><br>
+
 	<ul><u>HS1-868-BS&nbsp;&nbsp;|&nbsp;&nbsp;SA_434_1_mini&nbsp;&nbsp;|&nbsp;&nbsp;TEDSEN_SKX1MD</u><br>
 	<li>LastAction<br>
 	Last executed action of FHEM. <code>send</code> for command send.</li>
@@ -1239,6 +1366,7 @@ sub SD_UT_binaryToNumber {
 	<i><u><b>Hinweis:</b></u></i> Sobald das Attribut model eines definieren Ger&auml;tes verstellt oder gel&ouml;scht wird, so legt das Modul ein Ger&auml;t des gew&auml;hlten Typs neu an und mit Durchlauf einer neuen Nachricht wird das aktuelle Ger&auml;t gel&ouml;scht. 
 	Das betreiben von Ger&auml;ten des <u>gleichen oder unterschiedliches Typs mit gleichem <code>deviceCode</code> f&uuml;hrt zu Fehlern</u>. BITTE achte stets auf einen unterschiedlichen <code>deviceCode</code>.<br><br>
 	 <u>Es werden bisher folgende Ger&auml;te unterst&uuml;tzt:</u><br>
+	 <ul> - Atlantic Security Sensoren&nbsp;&nbsp;&nbsp;<small>(Modulmodel: MD-2003R, MD-2018R,MD-210R | Protokoll 91|91.1)</small></ul>
 	 <ul> - BOSCH Deckenl&uuml;fter&nbsp;&nbsp;&nbsp;<small>(Modulmodel: SF01_01319004_Typ2 | Protokoll 86)</small></ul>
 	 <ul> - CAME Drehtor Antrieb&nbsp;&nbsp;&nbsp;<small>(Modulmodel: CAME_TOP_432EV | Protokoll 86)</small></ul>
 	 <ul> - ChiliTec LED Christbaumkerzen&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Chilitec_22640 | Protokoll 14)</small></ul>
@@ -1436,6 +1564,16 @@ sub SD_UT_binaryToNumber {
 	Zuletzt ausgef&uuml;hrte Aktion des Ger&auml;tes. <code>receive</code> f&uuml;r Kommando empfangen | <code>send</code> f&uuml;r Kommando gesendet</li>
 	<li>state<br>
 	Zuletzt ausgef&uuml;hrter Tastendruck der Fernbedienung</li></ul><br>
+
+	<ul><u>MD_2003R (gas)&nbsp;&nbsp;|&nbsp;&nbsp;MD_2018R (vibration)&nbsp;&nbsp;|&nbsp;&nbsp;MD_210R (door/windows switch)</u><br>
+	<li>contact<br>
+	Zustand des internen Alarmkontaktes.</li>
+	<li>deviceTyp<br>
+	Modeltyp Ihres Sensors.</li>
+	<li>sabotage<br>
+	Zustand des Sabotagekontaktes.</li>
+	<li>state<br>
+	Zustand des Ger&auml;tes.</li></ul><br>
 
 	<ul><u>HS1-868-BS&nbsp;&nbsp;|&nbsp;&nbsp;SA_434_1_mini&nbsp;&nbsp;|&nbsp;&nbsp;TEDSEN_SKX1MD</u><br>
 	<li>LastAction<br>
