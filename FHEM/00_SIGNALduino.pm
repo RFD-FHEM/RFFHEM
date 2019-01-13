@@ -2961,7 +2961,6 @@ sub SIGNALduino_FW_selectAll
 	my %BlacklistIDs;
 	my @IdList = ();
 	my $ret = "";
-	my $devFlag = 0;
 	
 	my $blacklist = AttrVal($name,"blacklist_IDs","");
 	if (length($blacklist) > 0) {							# Blacklist in Hash wandeln
@@ -2971,10 +2970,7 @@ sub SIGNALduino_FW_selectAll
 		#SIGNALduino_Log3 $name, 3, "$name IdList, Attr blacklist $w";
 	}
 	
-	my $develop = SIGNALduino_getAttrDevelopment($name);
-	if ($develop eq "1" || (substr($develop,0,1) eq "y" && $develop !~ m/^y\d/)) {	# Entwicklerversion, y ist nur zur Abwaertskompatibilitaet und kann in einer der naechsten Versionen entfernt werden
-		$devFlag = 1;
-	}
+	my ($develop,$devFlag) = SIGNALduino_getAttrDevelopment($name);
 	
 	my $id;
 	foreach $id (keys %ProtocolListSIGNALduino)		# Alle IDs die in der Protkolluebersicht nicht checked sein sollen, werden in das Array IdList eingetragen
@@ -3015,8 +3011,6 @@ sub SIGNALduino_IdList($@)
 	my %WhitelistIDs;
 	my %BlacklistIDs;
 	my $wflag = 0;		# whitelist flag, 0=disabled
-	my $bflag = 0;		# blacklist flag, 0=disabled
-	my $yflag = 0;		# 1 = alle developIDs aktivieren
 	
 	delete ($hash->{IDsNoDispatch}) if (defined($hash->{IDsNoDispatch}));
 
@@ -3024,16 +3018,11 @@ sub SIGNALduino_IdList($@)
 		$aVal = AttrVal($name,"whitelist_IDs","");
 	}
 	
-	if (!defined($develop)) {
-		$develop = SIGNALduino_getAttrDevelopment($name);
-	}
-	if ($develop eq "1" || (substr($develop,0,1) eq "y" && $develop !~ m/^y\d/)) {	# Entwicklerversion, y ist nur zur Abwaertskompatibilitaet und kann in einer der naechsten Versionen entfernt werden
-		$yflag = 1;
-		SIGNALduino_Log3 $name, 3, "$name: IDlist development attribute = $develop"; 
-	}
+	my ($develop,$devFlag) = SIGNALduino_getAttrDevelopment($name, $develop);	# $devFlag = 1 -> alle developIDs y aktivieren
+	SIGNALduino_Log3 $name, 3, "$name IDlist development version active: development attribute = $develop" if ($devFlag == 1);
 	
 	if ($aVal eq "" || substr($aVal,0 ,1) eq '#') {		# whitelist nicht aktiv
-		if ($yflag == 1) {
+		if ($devFlag == 1) {
 			SIGNALduino_Log3 $name, 3, "$name: IDlist attr whitelist disabled or not defined (all IDs are enabled, except blacklisted): $aVal";
 		}
 		else {
@@ -3057,7 +3046,6 @@ sub SIGNALduino_IdList($@)
 			%BlacklistIDs = map { $_ => 1 } split(",", $blacklist);
 			#my $w = join ', ' => map "$_" => keys %BlacklistIDs;
 			#SIGNALduino_Log3 $name, 3, "$name IdList, Attr blacklist $w";
-			$bflag = 1;
 		}
 	}
 	
@@ -3073,7 +3061,7 @@ sub SIGNALduino_IdList($@)
 			}
 		}
 		else {						# whitelist not active
-			if ($bflag == 1 && exists($BlacklistIDs{$id})) {
+			if (exists($BlacklistIDs{$id})) {
 				#SIGNALduino_Log3 $name, 3, "$name IdList, skip Blacklist ID $id";
 				push (@skippedBlackId, $id);
 				next;
@@ -3091,7 +3079,7 @@ sub SIGNALduino_IdList($@)
 					SIGNALduino_Log3 $name, 5, "$name: IDlist ID=$id skipped (developId=p), caution, protocol can cause crashes, use only if advised to do";
 					next;
 				}
-				elsif ($ProtocolListSIGNALduino{$id}{developId} eq "y" && $yflag == 0 && $develop !~ m/y$id/) {	# skip wenn develop nicht im Attribut whitelist steht
+				elsif ($devFlag == 0 && $ProtocolListSIGNALduino{$id}{developId} eq "y" && $develop !~ m/y$id/) {
 					#SIGNALduino_Log3 $name, 3, "$name: IdList ID=$id skipped (developId=y)";
 					push (@skippedDevId, $id);
 					next;
@@ -3143,15 +3131,17 @@ sub SIGNALduino_IdList($@)
 sub SIGNALduino_getAttrDevelopment
 {
 	my $name = shift;
-	my $develop;
+	my $develop = shift;
+	my $devFlag = 0;
 	if (index(SDUINO_VERSION, "dev") >= 0) {  	# development version
-		$develop = AttrVal($name,"development", 0);
+		$develop = AttrVal($name,"development", 0) if (!defined($develop));
+		$devFlag = 1 if ($develop eq "1" || (substr($develop,0,1) eq "y" && $develop !~ m/^y\d/));	# Entwicklerversion, y ist nur zur Abwaertskompatibilitaet und kann in einer der naechsten Versionen entfernt werden
 	}
 	else {
 		$develop = "0";
 		SIGNALduino_Log3 $name, 3, "$name IdList: ### Attribute development is in this version ignored ###";
 	}
-	return $develop;
+	return ($develop,$devFlag);
 }
 
 
@@ -4340,27 +4330,30 @@ sub SIGNALduino_FW_getProtocolList
 	my $name = shift;
 	
 	my $hash = $defs{$name};
-	
 	my $id;
 	my $ret;
-	my $devFlag = 0;	# 1 - develop version
 	my $devText = "";
 	my $blackTxt = "";
 	my @IdList = ();
+	my $comment;
 	
 	my $whitelist = AttrVal($name,"whitelist_IDs","#");
 	if (AttrVal($name,"blacklist_IDs","") ne "") {				# wenn es eine blacklist gibt, dann "." an die Ueberschrift anhaengen
 		$blackTxt = ".";
 	}
-	my $develop = AttrVal($name,"development","");
-	if ($develop eq "1" || (substr($develop,0,1) eq "y" && $develop !~ m/^y\d/)) {	# Entwicklerversion, y ist nur zur Abwaertskompatibilitaet und kann in einer der naechsten Versionen entfernt werden
-		$devFlag = 1;
-		$devText = "development version - ";
-	}
+	
+	my ($develop,$devFlag) = SIGNALduino_getAttrDevelopment($name);	# $devFlag = 1 -> alle developIDs y aktivieren
+	$devText = "development version - " if ($devFlag == 1);
 	
 	my %activeIdHash;
 	@activeIdHash{@{$hash->{msIdList}}, @{$hash->{muIdList}}, @{$hash->{mcIdList}}} = (undef);
 	#SIGNALduino_Log3 $name,4, "$name IdList: $mIdList";
+	
+	my %IDsNoDispatch;
+	if (defined($hash->{IDsNoDispatch})) {
+		%IDsNoDispatch = map { $_ => 1 } split(",", $hash->{IDsNoDispatch});
+		#SIGNALduino_Log3 $name,4, "$name IdList IDsNoDispatch=" . join ', ' => map "$_" => keys %IDsNoDispatch;
+	}
 	
 	foreach $id (keys %ProtocolListSIGNALduino)
 	{
@@ -4377,13 +4370,13 @@ sub SIGNALduino_FW_getProtocolList
 	else {
 		$ret .="whitelist not active (save activate it)$blackTxt</caption>";
 	}
-	$ret .= "<thead style=\"text-align:center\"><td>act.</td><td>dev</td><td>ID</td><td>Message Type</td><td>modulname</td><td>protocolname</td> <td># comment</td></thead>";
+	$ret .= "<thead style=\"text-align:center\"><td>act.</td><td>dev</td><td>ID</td><td>Msg Type</td><td>modulname</td><td>protocolname</td> <td># comment</td></thead>";
 	$ret .="<tbody>";
 	my $oddeven="odd";
 	
 	foreach $id (@IdList)
 	{
-		my $msgtype;
+		my $msgtype = "";
 		my $chkbox;
 		
 		if (exists ($ProtocolListSIGNALduino{$id}{format}) && $ProtocolListSIGNALduino{$id}{format} eq "manchester")
@@ -4406,14 +4399,19 @@ sub SIGNALduino_FW_getProtocolList
 			$checked="checked";
 		}
 		
-		if ($devFlag == 0 && defined($ProtocolListSIGNALduino{$id}{developId}) && $ProtocolListSIGNALduino{$id}{developId} eq "p") {
+		if ($devFlag == 0 && exists($ProtocolListSIGNALduino{$id}{developId}) && $ProtocolListSIGNALduino{$id}{developId} eq "p") {
 			$chkbox="<div> </div>";
 		}
 		else {
 			$chkbox=sprintf("<INPUT type=\"checkbox\" name=\"%s\" %s/>",$id,$checked);
 		}
 		
-		$ret .= sprintf("<tr class=\"%s\"><td>%s</td><td><div>%s</div></td><td><div>%3s</div></td><td><div>%s</div></td><td><div>%s</div></td><td><div>%s</div></td><td><div>%s</div></td></tr>",$oddeven,$chkbox,SIGNALduino_getProtoProp($id,"developId",""),$id,$msgtype,SIGNALduino_getProtoProp($id,"clientmodule",""),SIGNALduino_getProtoProp($id,"name",""),SIGNALduino_getProtoProp($id,"comment",""));
+		$comment = SIGNALduino_getProtoProp($id,"comment","");
+		if (exists($IDsNoDispatch{$id})) {
+			$comment .= " (dispatch is only with a active whitelist possible)";
+		}
+		
+		$ret .= sprintf("<tr class=\"%s\"><td>%s</td><td><div>%s</div></td><td><div>%3s</div></td><td><div>%s</div></td><td><div>%s</div></td><td><div>%s</div></td><td><div>%s</div></td></tr>",$oddeven,$chkbox,SIGNALduino_getProtoProp($id,"developId",""),$id,$msgtype,SIGNALduino_getProtoProp($id,"clientmodule",""),SIGNALduino_getProtoProp($id,"name",""),$comment);
 		$oddeven= $oddeven eq "odd" ? "even" : "odd" ;
 		
 		$ret .= "\n";
