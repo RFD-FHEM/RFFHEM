@@ -2089,8 +2089,8 @@
 			comment				=> 'example sensor MD-210R | MD-2018R | MD-2003R (MU decode)',
 			id						=> '91',
 			knownFreqs		=> '433.92 | 868.35',
-			zero					=> [-2,1],
-			one						=> [-1,2],
+			one           => [-2,1],
+			zero          => [-1,2],
 			start					=> [-10,1],
 			clockabs			=> 400,
 			format				=> 'twostate',	#
@@ -2109,8 +2109,8 @@
 			comment				=> 'example sensor MD-210R | MD-2018R | MD-2003R (MS decode)',
 			id						=> '91.1',
 			knownFreqs		=> '433.92 | 868.35',
-			zero					=> [-2,1],
-			one						=> [-1,2],
+			one           => [-2,1],
+			zero          => [-1,2],
 			sync					=> [-10,1],
 			clockabs			=> 400,
 			format				=> 'twostate',	#
