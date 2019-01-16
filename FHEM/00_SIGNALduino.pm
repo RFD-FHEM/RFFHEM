@@ -2875,8 +2875,8 @@ function SD_plistWindow(txt)
       {text:"select all " + btxtStable + btxtBlack, click:function(){
            FW_cmd(FW_root+ \'?XHR=1&cmd={SIGNALduino_FW_selectAll("'.$name.'")}\', function(data){SD_selectAll(data)});
       }},
-      {text:"deselect all", click:function(){
-           SD_deselectAll()
+      {text:"deselect all", click:function(e){
+           $("#SD_protocolDialog table td input:checkbox").prop(\'checked\', false);
       }},
       {text:"save to whitelist and close", click:function(){
           var ret = SD_saveWhitelist();
@@ -2893,14 +2893,7 @@ function SD_plistWindow(txt)
   });
 }
 
-function SD_deselectAll()
-{
-  var element = document.getElementById("SD_protocolDialog");
-  var checkboxes = element.getElementsByTagName("input");
-  for (var i = 0; i < checkboxes.length; i++) {
-     checkboxes[i].checked = false;
-  }
-}
+
 
 function SD_selectAll(data)
 {
