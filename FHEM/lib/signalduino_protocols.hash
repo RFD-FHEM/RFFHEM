@@ -1350,7 +1350,7 @@
 			knownFreqs      => '',
 			clockrange			=> [460,520],			# min , max
 			format					=> 'manchester',	# tristate can't be migrated from bin into hex!
-			clientmodule		=> '',
+			clientmodule		=> 'SD_WS',
 			modulematch			=> '^W58*',
 			preamble				=> 'W58#',
 			length_min			=> '54',
@@ -1868,11 +1868,13 @@
 			knownFreqs		=> '',
 			developId			=> 'm',
 			dispatchBin		=> '1',
+			paddingbits		=> '1',      # disable padding
 			one						=> [1,-2],			# on=400us, off=800us
 			zero					=> [2,-1],			# on=800us, off=400us
 			float					=> [1,-8],			# on=400us, off=3200us. the preamble and each 10bit word has one [1,-8] in front
 			pause					=> [1,-1],			# preamble (5x)
 			clockabs			=> 400,					# 400us
+			format				=> 'twostate',
 			preamble			=> 'P82#',			# prepend our protocol number to converted message
 			clientmodule	=> 'Fernotron',
 			length_min		=> '100',				# actual 120 bit (12 x 10bit words to decode 6 bytes data), but last 20 are for checksum
@@ -2089,8 +2091,8 @@
 			comment				=> 'example sensor MD-210R | MD-2018R | MD-2003R (MU decode)',
 			id						=> '91',
 			knownFreqs		=> '433.92 | 868.35',
-			zero					=> [-2,1],
-			one						=> [-1,2],
+			one           => [-2,1],
+			zero          => [-1,2],
 			start					=> [-10,1],
 			clockabs			=> 400,
 			format				=> 'twostate',	#
@@ -2109,8 +2111,8 @@
 			comment				=> 'example sensor MD-210R | MD-2018R | MD-2003R (MS decode)',
 			id						=> '91.1',
 			knownFreqs		=> '433.92 | 868.35',
-			zero					=> [-2,1],
-			one						=> [-1,2],
+			one           => [-2,1],
+			zero          => [-1,2],
 			sync					=> [-10,1],
 			clockabs			=> 400,
 			format				=> 'twostate',	#

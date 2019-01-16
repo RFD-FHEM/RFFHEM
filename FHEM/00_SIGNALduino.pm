@@ -738,7 +738,7 @@ SIGNALduino_Set($@)
 	my $cnt=0;
 	
 	my $sendData;
-	if  ($ProtocolListSIGNALduino{$protocol}{format} eq 'manchester')
+	if  (exists($ProtocolListSIGNALduino{$protocol}{format}) && $ProtocolListSIGNALduino{$protocol}{format} eq 'manchester')
 	{
 		#$clock = (map { $clock += $_ } @{$ProtocolListSIGNALduino{$protocol}{clockrange}}) /  2 if (!defined($clock));
 		
