@@ -3575,32 +3575,34 @@ sub SIGNALduino_MCTFA
 	my $message_length;
 		
 	#if ($bitData =~ m/^.?(1){16,24}0101/)  {  
-	if ($bitData =~ m/(1{10}101)/ )
+	if ($bitData =~ m/(1{9}101)/ )
 	{ 
 		$preamble_pos=$+[1];
 		SIGNALduino_Log3 $name, 4, "$name: TFA 30.3208.0 preamble_pos = $preamble_pos";
 		return return (-1," sync not found") if ($preamble_pos <=0);
 		my @messages;
 		
+		my $i=1;
 		do 
 		{
 			$message_end = index($bitData,"1111111111101",$preamble_pos); 
 			if ($message_end < $preamble_pos)
 			{
-				$message_end=length($bitData);
+				$message_end=$mcbitnum;		# length($bitData);
 			} 
 			$message_length = ($message_end - $preamble_pos);			
 			
 			my $part_str=substr($bitData,$preamble_pos,$message_length);
 			$part_str = substr($part_str,0,52) if (length($part_str)) > 52;
 
-			SIGNALduino_Log3 $name, 4, "$name: TFA message start=$preamble_pos end=$message_end with length".$message_length;
-			SIGNALduino_Log3 $name, 5, "$name: part $part_str";
+			SIGNALduino_Log3 $name, 4, "$name: TFA message start($i)=$preamble_pos end=$message_end with length=$message_length";
+			SIGNALduino_Log3 $name, 5, "$name: TFA message part($i)=$part_str";
 			my $hex=SIGNALduino_b2h($part_str);
 			push (@messages,$hex);
-			SIGNALduino_Log3 $name, 4, "$name: ".$hex;
+			SIGNALduino_Log3 $name, 4, "$name: TFA message part($i)=$hex";
 			$preamble_pos=index($bitData,"1101",$message_end)+4;
-		}  while ( $message_end < length($bitData) );
+			$i++;
+		}  while ($message_end < $mcbitnum && $i < 10);
 		
 		my %seen;
 		my @dupmessages = map { 1==$seen{$_}++ ? $_ : () } @messages;
