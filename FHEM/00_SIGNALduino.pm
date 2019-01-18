@@ -2912,12 +2912,13 @@ sub SIGNALduino_FW_saveWhitelist
 	my $wl_attr = shift;
 	
 	if (!IsDevice($name)) {
-		SIGNALduino_Log3 undef, 3, "SIGNALduino_FW_saveWhitelist: $name is not a valid device, operation aborted.";
+		SIGNALduino_Log3 undef, 3, "SIGNALduino_FW_saveWhitelist: $name is not a valid definition, operation aborted.";
 		return;
 	}
 	
-	if ($wl_attr eq "") {
-		$wl_attr = 0;
+	if ($wl_attr !~ /\d+(?:,\d.?\d?)*$/ ) {
+		SIGNALduino_Log3 $name, 3, "$name Protocolist save: attr whitelist_IDs can not be updated";
+		return;
 	}
 	else {
 		$wl_attr =~ s/,$//;			# Komma am Ende entfernen
