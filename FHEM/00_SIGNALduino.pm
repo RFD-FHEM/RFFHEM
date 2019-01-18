@@ -2857,16 +2857,15 @@ function SD_plistWindow(txt)
   $(div).html(txt);
   $("body").append(div);
   var oldPos = $("body").scrollTop();
-  var element = document.getElementById("SD_protoCaption");
-  var caption = element.innerHTML;
   var btxtStable = "";
   var btxtBlack = "";
-  if (caption.substr(0,1) != "d") {
-    btxtStable = "stable";
+  if ($("#SD_protoCaption").text().substr(0,1) != "d") {
+  	    btxtStable = "stable";
   }
-  if (caption.substr(-1) == ".") {
+ if ($("#SD_protoCaption").text().substr(-1) == ".") {
     btxtBlack = " except blacklist";
   }
+  
   $(div).dialog({
     dialogClass:"no-close", modal:true, width:"auto", closeOnEscape:true, 
     maxWidth:$(window).width()*0.9, maxHeight:$(window).height()*0.9,
