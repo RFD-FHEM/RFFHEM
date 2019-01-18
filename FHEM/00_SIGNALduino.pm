@@ -2911,6 +2911,11 @@ sub SIGNALduino_FW_saveWhitelist
 	my $name = shift;
 	my $wl_attr = shift;
 	
+	if (!IsDevice($name)) {
+		SIGNALduino_Log3 undef, 3, "SIGNALduino_FW_saveWhitelist: $name is not a valid device, operation aborted.";
+		return;
+	}
+	
 	if ($wl_attr eq "") {
 		$wl_attr = 0;
 	}
