@@ -4386,7 +4386,7 @@ sub SIGNALduino_FW_getProtocolList
 			$chkbox="<div> </div>";
 		}
 		else {
-			$chkbox=sprintf("<INPUT type=\"checkbox\" id=\"%s\" name=\"%s\" %s/>", "SD_$id", $checkAll, $checked);
+			$chkbox=sprintf("<INPUT type=\"checkbox\" id=\"%s\" name=\"%s\" value=\"%s\" %s/>", "SD_$id", $checkAll,$id, $checked);
 		}
 		
 		$comment = SIGNALduino_getProtoProp($id,"comment","");
