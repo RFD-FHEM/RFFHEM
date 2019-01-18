@@ -1472,7 +1472,7 @@ SIGNALduino_Read($)
 	{
 		my $regexp;
 		if ($hash->{getcmd}->{cmd} eq 'sendraw') {
-			$regexp = '^S(R|C|M);';
+			$regexp = '^S(?:R|C|M);.';
 		}
 		elsif ($hash->{getcmd}->{cmd} eq 'ccregAll') {
 			$regexp = '^ccreg 00:';
