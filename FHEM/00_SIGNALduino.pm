@@ -2884,8 +2884,12 @@ function SD_plistWindow(txt)
            $("#SD_protocolDialog table td input:checkbox").prop(\'checked\', false);
       }},
       {text:"save to whitelist and close", click:function(){
-          var ret = SD_saveWhitelist();
-          FW_cmd(FW_root+ \'?XHR=1&cmd={SIGNALduino_FW_saveWhitelist("'.$name.'","\'+ret+\'")}\');
+      	var allVals = [];
+ 		  $("#SD_protocolDialog table td input:checkbox:checked").each(function() {
+	    	  allVals.push($(this).val());
+		  })
+
+          FW_cmd(FW_root+ \'?XHR=1&cmd={SIGNALduino_FW_saveWhitelist("'.$name.'","\'+String(allVals)+\'")}\');
           $(this).dialog("close");
           $(div).remove();
           location.reload();
@@ -2896,22 +2900,6 @@ function SD_plistWindow(txt)
         location.reload();
       }}]
   });
-}
-
-
-
-
-function SD_saveWhitelist()
-{
-  var element = document.getElementById("SD_protocolDialog");
-  var checkboxes = element.getElementsByTagName("input");
-  var txt = "";
-  for (var i = 0; i < checkboxes.length; i++) {
-    if (checkboxes[i].checked == true) {
-      txt = txt + checkboxes[i].name + ",";
-    }
-  }
-  return txt;
 }
 
 
