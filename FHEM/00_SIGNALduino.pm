@@ -2873,7 +2873,12 @@ function SD_plistWindow(txt)
     title: "Protocollist Overview",
     buttons: [
       {text:"select all " + btxtStable + btxtBlack, click:function(){
-           FW_cmd(FW_root+ \'?XHR=1&cmd={SIGNALduino_FW_selectAll("'.$name.'")}\', function(data){SD_selectAll(data)});
+		  $("#SD_protocolDialog table td input:checkbox").prop(\'checked\', false);
+		  
+		  $("input[name=SDcheck]").each( function () {
+			  $(this).prop(\'checked\',true);
+		  });
+
       }},
       {text:"deselect all", click:function(e){
            $("#SD_protocolDialog table td input:checkbox").prop(\'checked\', false);
@@ -2895,24 +2900,6 @@ function SD_plistWindow(txt)
 
 
 
-function SD_selectAll(data)
-{
-  var ids = JSON.parse("[" + data + "]");
-  var element = document.getElementById("SD_protocolDialog");
-  var checkboxes = element.getElementsByTagName("input");
-  var i = 0;
-    for (var icb = 0; icb < checkboxes.length; icb++) {
-       if (checkboxes[icb].name == ids[i]) {
-          checkboxes[icb].checked = false;
-          if (i < ids.length) {
-             i++;
-          }
-       }
-       else {
-          checkboxes[icb].checked = true;
-       }
-    }
-}
 
 function SD_saveWhitelist()
 {
