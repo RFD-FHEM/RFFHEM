@@ -2948,46 +2948,6 @@ sub SIGNALduino_FW_saveWhitelist
 	SIGNALduino_IdList("x:$name", $wl_attr);
 }
 
-sub SIGNALduino_FW_selectAll
-{
-	my $name = shift;
-	my %BlacklistIDs;
-	my @IdList = ();
-	my $ret = "";
-	
-	my $blacklist = AttrVal($name,"blacklist_IDs","");
-	if (length($blacklist) > 0) {							# Blacklist in Hash wandeln
-		SIGNALduino_Log3 $name, 5, "$name Protocolist selectAll: attr blacklistIds=$blacklist";
-		%BlacklistIDs = map { $_ => 1 } split(",", $blacklist);
-		#my $w = join ', ' => map "$_" => keys %BlacklistIDs;
-		#SIGNALduino_Log3 $name, 3, "$name IdList, Attr blacklist $w";
-	}
-	
-	my ($develop,$devFlag) = SIGNALduino_getAttrDevelopment($name);
-	
-	my $id;
-	foreach $id (keys %ProtocolListSIGNALduino)		# Alle IDs die in der Protkolluebersicht nicht checked sein sollen, werden in das Array IdList eingetragen
-	{
-		if (exists($BlacklistIDs{$id})) {
-			#SIGNALduino_Log3 $name, 3, "$name Protocolist activateAll, skip Blacklist ID $id";
-			push(@IdList, $id);
-		}
-		elsif (exists($ProtocolListSIGNALduino{$id}{developId})) {
-			if ($devFlag == 1 && $ProtocolListSIGNALduino{$id}{developId} eq "p") {
-				push(@IdList, $id);
-			}
-			elsif ($devFlag == 0 && $ProtocolListSIGNALduino{$id}{developId} eq "y" && $develop !~ m/y$id/) {
-				push(@IdList, $id);
-			}
-		}
-	}
-	@IdList = sort {$a <=> $b} @IdList;
-	$ret = join(",",@IdList);
-	
-	SIGNALduino_Log3 $name, 4, "$name Protocolist selectAll: ret=$ret";
-	return $ret;
-}
-
 sub SIGNALduino_IdList($@)
 {
 	my ($param, $aVal, $blacklist, $develop) = @_;
@@ -4327,8 +4287,15 @@ sub SIGNALduino_FW_getProtocolList
 	my $ret;
 	my $devText = "";
 	my $blackTxt = "";
+	my %BlacklistIDs;
 	my @IdList = ();
 	my $comment;
+	
+	my $blacklist = AttrVal($name,"blacklist_IDs","");
+	if (length($blacklist) > 0) {							# Blacklist in Hash wandeln
+		#SIGNALduino_Log3 $name, 5, "$name getProtocolList: attr blacklistIds=$blacklist";
+		%BlacklistIDs = map { $_ => 1 } split(",", $blacklist);;
+	}
 	
 	my $whitelist = AttrVal($name,"whitelist_IDs","#");
 	if (AttrVal($name,"blacklist_IDs","") ne "") {				# wenn es eine blacklist gibt, dann "." an die Ueberschrift anhaengen
@@ -4366,6 +4333,8 @@ sub SIGNALduino_FW_getProtocolList
 	$ret .= "<thead style=\"text-align:center\"><td>act.</td><td>dev</td><td>ID</td><td>Msg Type</td><td>modulname</td><td>protocolname</td> <td># comment</td></thead>";
 	$ret .="<tbody>";
 	my $oddeven="odd";
+	my $checked;
+	my $checkAll;
 	
 	foreach $id (@IdList)
 	{
@@ -4385,18 +4354,39 @@ sub SIGNALduino_FW_getProtocolList
 			$msgtype = "MU";
 		}
 		
-		my $checked="";
+		$checked="";
+		
+		if (substr($whitelist,0,1) ne "#") {	# whitelist aktiv, dann ermitteln welche ids bei select all nicht checked sein sollen
+			$checkAll = "SDcheck";
+			if (exists($BlacklistIDs{$id})) {
+				$checkAll = "SDnotCheck";
+			}
+			elsif (exists($ProtocolListSIGNALduino{$id}{developId})) {
+				if ($devFlag == 1 && $ProtocolListSIGNALduino{$id}{developId} eq "p") {
+					$checkAll = "SDnotCheck";
+				}
+				elsif ($devFlag == 0 && $ProtocolListSIGNALduino{$id}{developId} eq "y" && $develop !~ m/y$id/) {
+					$checkAll = "SDnotCheck"
+				}
+			}
+		}
+		else {
+			$checkAll = "SDnotCheck";
+		}
 		
 		if (exists($activeIdHash{$id}))
 		{
 			$checked="checked";
+			if (substr($whitelist,0,1) eq "#") {	# whitelist nicht aktiv, dann entspricht select all dem $activeIdHash 
+				$checkAll = "SDcheck";
+			}
 		}
 		
 		if ($devFlag == 0 && exists($ProtocolListSIGNALduino{$id}{developId}) && $ProtocolListSIGNALduino{$id}{developId} eq "p") {
 			$chkbox="<div> </div>";
 		}
 		else {
-			$chkbox=sprintf("<INPUT type=\"checkbox\" name=\"%s\" %s/>",$id,$checked);
+			$chkbox=sprintf("<INPUT type=\"checkbox\" id=\"%s\" name=\"%s\" %s/>", "SD_$id", $checkAll, $checked);
 		}
 		
 		$comment = SIGNALduino_getProtoProp($id,"comment","");
