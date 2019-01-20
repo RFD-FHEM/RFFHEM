@@ -2072,8 +2072,8 @@ SIGNALduino_Parse_MS($$$$%)
 
 			$valid = $valid && ($pstr=SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}},\%patternList,\$rawData)) >=0;
 			Debug "Found matched one with indexes: ($pstr)" if ($debug && $valid);
-			$patternLookupHash{$pstr}="1" if ($valid); ## Append Sync to our lookuptable
-			$endPatternLookupHash{substr($pstr,0,length($pstr)-1)}="1" if ($valid); ## Append Sync to our lookuptable
+			$patternLookupHash{$pstr}="1" if ($valid); ## Append one to our lookuptable
+			$endPatternLookupHash{substr($pstr,0,length($pstr)-1)}="1" if ($valid); ## Append one to our endbit lookuptable
 			#SIGNALduino_Log3 $name, 4, "$name: Sync 1 ".$pstr." -> ".substr($pstr,0,length($pstr)-1)." eingetragen"  if ($valid);
 			#Debug "added $pstr " if ($debug && $valid);
 			Debug "one pattern not found" if ($debug && !$valid);
@@ -2127,7 +2127,7 @@ SIGNALduino_Parse_MS($$$$%)
 				if (exists $patternLookupHash{$sig_str}) { ## Add the bits to our bit array
 					push(@bit_msg,$patternLookupHash{$sig_str})
 				} elsif ((length($sig_str)< $signal_width ) && (exists $endPatternLookupHash{$sig_str})) {
-					SIGNALduino_Log3 $name, 5, "$name: letztes Bit rekonstruiert.";
+					SIGNALduino_Log3 $name, 5, "$name: last bit reconstructed";
 					push(@bit_msg,$endPatternLookupHash{$sig_str})
 				} else {
 					SIGNALduino_Log3 $name, 5, "$name: Found wrong signalpattern, catched ".scalar @bit_msg." bits, aborting demodulation";
