@@ -2374,7 +2374,14 @@ sub SIGNALduino_Parse_MU($$$$@)
 			my $length_max = "";
 			$length_max = $ProtocolListSIGNALduino{$id}{length_max} if (exists($ProtocolListSIGNALduino{$id}{length_max}));
 			
+			my $firstOne;
+			my $firstZero;
 			my $signalRegex = "(?:" . $oneRegex . $zeroRegex . $floatRegex . "){$length_min,}";
+			if ($zeroRegex ne "") {
+				$firstOne = substr($oneRegex,0,1);
+				$firstZero = substr($zeroRegex,1,1);
+				$signalRegex .= "(?:" . $firstOne . "|" . $firstZero . ")?";
+			}
 			Debug "signalRegex is $signalRegex " if ($debug);
 
 			my $nrRestart=0;
@@ -2409,6 +2416,18 @@ sub SIGNALduino_Parse_MU($$$$@)
 					if (exists $patternLookupHash{$sigStr}) {
 						push(@bit_msg,$patternLookupHash{$sigStr})  ## Add the bits to our bit array
 					}
+				}
+				
+				if (exists($ProtocolListSIGNALduino{$id}{reconstructBit}) && length($1) %2 == 1) {  # Laenge ungerade
+					my $lastHalfPair = substr($1,-1);
+					my $lastbit;
+					if ($firstOne eq $lastHalfPair) {
+						$lastbit='1';
+					} elsif ($firstZero eq $lastHalfPair) {
+						$lastbit='0';
+					}
+					SIGNALduino_Log3 $name, 5, "$name: last half pair=$lastHalfPair reconstructed, bit=$lastbit)";
+					push(@bit_msg,$lastbit);
 				}
 				
 				Debug "$name: demodulated message raw (@bit_msg), ".@bit_msg." bits\n" if ($debug);
