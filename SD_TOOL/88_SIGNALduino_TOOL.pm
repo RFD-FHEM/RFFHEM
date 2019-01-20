@@ -1,10 +1,10 @@
 ######################################################################
-# $Id: 88_SIGNALduino_TOOL.pm 13115 2019-01-17 21:17:50Z HomeAuto_User $
+# $Id: 88_SIGNALduino_TOOL.pm 13115 2019-01-20 21:17:50Z HomeAuto_User $
 #
 # The file is part of the SIGNALduino project
 # see http://www.fhemwiki.de/wiki/SIGNALduino to support debugging of unknown signal data
 # The purpos is to use it as addition to the SIGNALduino
-# HomeAuto_User & elektron-bbs - 2018
+# 2018 | 2019 - HomeAuto_User & elektron-bbs
 #
 ######################################################################
 # Note´s
@@ -19,7 +19,9 @@ use warnings;
 use Data::Dumper qw (Dumper);
 
 #$| = 1;		#Puffern abschalten, Hilfreich für PEARL WARNINGS Search
-my %List;		# message hash
+
+my %List;																								# message hash
+my $Filename_Dispatch = "SIGNALduino_TOOL_Dispatch_";		# name file to read input for dispatch
 
 
 ################################
@@ -130,9 +132,7 @@ sub SIGNALduino_TOOL_Set($$$@) {
 	if ($cmd eq "?") {
 		my @modeltyp;
 		my $DispatchFile;
-		my $Filename_Dispatch = "SIGNALduino_TOOL_Dispatch_";
 		opendir(DIR,$path) || die "ERROR: set ? follow with Error in opening dir $path!";
-		my @directory=readdir(in);
 		while( my $directory_value = readdir DIR ){
 		if ($directory_value =~ /^$Filename_Dispatch.*txt/) {
 				$DispatchFile = $directory_value;
@@ -156,7 +156,7 @@ sub SIGNALduino_TOOL_Set($$$@) {
 			while (<FileCheck>){
 				if ($_ !~ /^#.*/ && $_ ne "\r\n" && $_ ne "\r" && $_ ne "\n") {
 					$count++;
-					my @arg = split(",", $_);		# a0=Modell | a1=Zustand | a2=RAWMSG
+					my @arg = split(",", $_);										# a0=Modell | a1=Zustand | a2=RAWMSG
 					$arg[1] = "noArg" if ($arg[1] eq "");
 					$arg[1] =~ s/[^A-Za-z0-9\-;=_|#?]//g;;			# nur zulässige Zeichen erlauben sonst leicht ERROR
 					$List{$arg[0]}{$arg[1]} = $arg[2];
@@ -207,7 +207,7 @@ sub SIGNALduino_TOOL_Set($$$@) {
 
 						if ((index($string,("MU;")) >= 0 ) or (index($string,("MS;")) >= 0 ) or (index($string,("MC;")) >= 0 )) {
 							$count2++;
-							Log3 $name, 4, "$name: readed Line $content[$count1]"." |END| count2=$count2";		# Ausgabe
+							Log3 $name, 4, "$name: readed Line $content[$count1]"." |END| count2=$count2";																# Ausgabe
 							Log3 $name, 5, "$name: Zeile ".($count1+1)." Poscheck string1pos=$pos D=$pos2 D=;=$pos3 lastpos=$lastpos";		# Ausgabe
 						}
 
@@ -218,7 +218,6 @@ sub SIGNALduino_TOOL_Set($$$@) {
 							### dispatch all ###
 							if ($count3 <= $DispatchMax) {
 								Log3 $name, 4, "$name: ($count2) get $Dummyname raw $string";			# Ausgabe
-								#Log3 $name, 4, "$name: readed Line $string";		# Ausgabe
 								Log3 $name, 5, "$name: letztes Zeichen '$lastpos' (".ord($lastpos).") in Zeile ".($count1+1)." ist ungueltig " if ($lastpos ne ";");
 
 								fhem("get $Dummyname raw $string");
@@ -560,7 +559,6 @@ sub SIGNALduino_TOOL_Get($$$@) {
 		my $timestamp = 0;
 		my $manually = 0;
 		my $save = "";
-		my $length;
 		my $pos;
 
 		return "ERROR: Your arguments in Filename_input is not definded!" if (not defined $a[0]);
@@ -571,24 +569,19 @@ sub SIGNALduino_TOOL_Get($$$@) {
 			$search = $a[0]." ".$a[1];
 			$manually = 1;
 			$timestamp = 1;
-			#Log3 $name, 3, "SIGNALduino_TOOL_Get: cmd check1, searcharg=$search timeoption=$timestamp manually=$manually";
 		### without $a[1] | RAWMSG READ READredu with timestamp ###
 		} elsif (($a[0] eq "RAWMSG" || $a[0] eq "READ" || $a[0] eq "READredu") && not defined $a[1]) {
 			$timestamp = 1;
-			#Log3 $name, 3, "SIGNALduino_TOOL_Get: cmd check2, searcharg=$search timeoption=$timestamp manually=$manually";
 		### without $a[1] | dmsg with timestamp ###
 		} elsif ($a[0] eq "dmsg" && not defined $a[1]) {
 			$timestamp = 1;
 			$search = $a[0];
-			#Log3 $name, 3, "SIGNALduino_TOOL_Get: cmd check3, searcharg=$search timeoption=$timestamp manually=$manually";
 		} elsif ($a[0] =~ /bitMsg:|bitMsg_invert:|dmsg:|hexMsg:|hexMsg_invert:|RAWMSG:|READredu:|READ:|,/s) {
 			my @arg = split(",", $a[0]);
 			$search = $arg[0].":|".$arg[1].":";
 			$manually = 1;
-			#Log3 $name, 3, "SIGNALduino_TOOL_Get: cmd check4, searcharg=$search timeoption=$timestamp manually=$manually";
 		}
-
-		my $id;
+		#Log3 $name, 3, "SIGNALduino_TOOL_Get: cmd check4, searcharg=$search timeoption=$timestamp manually=$manually";
 
 		return "ERROR: Your Attributes Filename_input is not definded!" if ($Filename_input eq "");
 		#Log3 $name, 3, "SIGNALduino_TOOL_Get: after cmd check, searcharg=$search timeoption=$timestamp manually=$manually";
@@ -601,8 +594,7 @@ sub SIGNALduino_TOOL_Get($$$@) {
 				my @arg = split(" ", $_);
 				if ($manually == 0) {
 					$pos = index($_,"$search");
-					$length = length($_);
-					$save = substr($_,$pos,($length-$pos));
+					$save = substr($_,$pos,(length($_)-$pos));
 					$save =~ s/[a-zA-z:\s]//g if ($a[0] eq "bitMsg" || $a[0] eq "bitMsg_invert");
 					$save =~ s/$search\s//g if ($a[0] ne "bitMsg" && $a[0] ne "bitMsg_invert");				
 				} else {
@@ -636,7 +628,7 @@ sub SIGNALduino_TOOL_Get($$$@) {
 		return "ERROR: Your filter (".substr($search,0,length($search)-1).") found nothing!\nNo file saved!" if ($founded == 0);
 		return "ERROR: Your Attributes Filename_export is not definded!" if ($Filename_export eq "");
 
-		open(OutFile, ">$Filename_export");
+		open(OutFile, ">$path$Filename_export");
 		for (@Zeilen) {
 			print OutFile $_."\n";
 		}
@@ -780,7 +772,7 @@ sub SIGNALduino_TOOL_Get($$$@) {
 		readingsSingleUpdate($hash, "state" , substr($cmd,4)." in tol found ($founded)", 0) if ($founded != 0);
 
 		return "ERROR: Your Attributes Filename_export is not definded!" if ($Filename_export eq "");
-		open(OutFile, ">$Filename_export");
+		open(OutFile, ">$path$Filename_export");
 		for (@Zeilen) {
 			print OutFile $_."\n";
 		}
@@ -837,8 +829,9 @@ sub SIGNALduino_TOOL_Get($$$@) {
 				chomp ($_);										# Zeilenende entfernen
 				my $checkData = $_;
 
-				$_ =~ s/^.*;D=//g;						# cut bis D=
-				$_ =~ s/;CP=.*//g;						# cut ab ;CP=
+				#$_ =~ s/^.*;D=//g;						# cut bis D=		# OLD
+				#$_ =~ s/;CP=.*//g;						# cut ab ;CP=		# OLD
+				$_ = $1 if ($_ =~ /.*;D=(\d+?);.*/);			# cut bis D= & ab ;CP= 	# NEW
 
 				my @array_Data = split("",$_);
 				my $pushbefore = "";
@@ -859,7 +852,7 @@ sub SIGNALduino_TOOL_Get($$$@) {
 		close InputFile;
 
 		return "ERROR: Your Attributes Filename_export is not definded!" if ($Filename_export eq "");
-		open(OutFile, ">$Filename_export");
+		open(OutFile, ">$path$Filename_export");
 		for (@Zeilen) {
 			print OutFile $_."\n";
 		}
@@ -939,7 +932,6 @@ sub SIGNALduino_TOOL_Attr() {
 
 			### all files in path
 			opendir(DIR,$path) || die "ERROR: attr $attrName follow with Error in opening dir $path!";
-			my @directory2=readdir(in);
 			my @errorlist = ();
 			while( my $directory_value = readdir DIR ){
 					if ($directory_value =~ /.txt$/) {
@@ -962,7 +954,6 @@ sub SIGNALduino_TOOL_Attr() {
 			my $DispatchModuleNew = $attrValue;
 			%List = () if ($DispatchModuleOld ne $attrValue);
 
-			my $Filename_Dispatch = "SIGNALduino_TOOL_Dispatch_";
 			my $count;
 
 			open (FileCheck,"<$path$Filename_Dispatch$attrValue.txt") || return "ERROR: No file $Filename_Dispatch$attrValue.txt exists!";
@@ -1052,7 +1043,12 @@ sub SIGNALduino_TOOL_RAWMSG_Check($$$) {
 <a name="SIGNALduino_TOOL"></a>
 <h3>SIGNALduino_TOOL</h3>
 <ul>
-	The module is for the support of developers of the SIGNALduino project. It includes various functions for calculation / filtering / dispatchen / conversion and much more.<br>
+	The module is for the support of developers of the SIGNALduino project. It includes various functions for calculation / filtering / dispatchen / conversion and much more.<br><br><br>
+
+	<b>Define</b><br>
+	<ul><code>define &lt;NAME&gt; SIGNALduino_TOOL</code><br><br>
+	example: define sduino_TOOL SIGNALduino_TOOL
+	</ul><br><br>
 
 	<a name="SIGNALduino_TOOL_Set"></a>
 	<b>Set</b>
@@ -1118,7 +1114,12 @@ sub SIGNALduino_TOOL_RAWMSG_Check($$$) {
 <a name="SIGNALduino_TOOL"></a>
 <h3>SIGNALduino_TOOL</h3>
 <ul>
-	Das Modul ist zur Hilfestellung für Entwickler des SIGNALduino Projektes. Es beinhaltet verschiedene Funktionen zur Berechnung / Filterung / Dispatchen / Wandlung und vieles mehr.<br><br>
+	Das Modul ist zur Hilfestellung für Entwickler des SIGNALduino Projektes. Es beinhaltet verschiedene Funktionen zur Berechnung / Filterung / Dispatchen / Wandlung und vieles mehr.<br><br><br>
+
+	<b>Define</b><br>
+	<ul><code>define &lt;NAME&gt; SIGNALduino_TOOL</code><br><br>
+	Beispiel: define sduino_TOOL SIGNALduino_TOOL
+	</ul><br><br>
 
 	<a name="SIGNALduino_TOOL_Set"></a>
 	<b>Set</b>
