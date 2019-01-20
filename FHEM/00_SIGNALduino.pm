@@ -2862,7 +2862,7 @@ function SD_plistWindow(txt)
   if ($("#SD_protoCaption").text().substr(0,1) != "d") {
   	    btxtStable = "stable";
   }
- if ($("#SD_protoCaption").text().substr(-1) == ".") {
+  if ($("#SD_protoCaption").text().substr(-1) == ".") {
     btxtBlack = " except blacklist";
   }
   
@@ -2872,12 +2872,11 @@ function SD_plistWindow(txt)
     title: "Protocollist Overview",
     buttons: [
       {text:"select all " + btxtStable + btxtBlack, click:function(){
-		  $("#SD_protocolDialog table td input:checkbox").prop(\'checked\', false);
+		  $("#SD_protocolDialog table td input:checkbox").prop(\'checked\', true);
 		  
-		  $("input[name=SDcheck]").each( function () {
-			  $(this).prop(\'checked\',true);
+		  $("input[name=SDnotCheck]").each( function () {
+			  $(this).prop(\'checked\',false);
 		  });
-
       }},
       {text:"deselect all", click:function(e){
            $("#SD_protocolDialog table td input:checkbox").prop(\'checked\', false);
@@ -2887,7 +2886,6 @@ function SD_plistWindow(txt)
  		  $("#SD_protocolDialog table td input:checkbox:checked").each(function() {
 	    	  allVals.push($(this).val());
 		  })
-
           FW_cmd(FW_root+ \'?XHR=1&cmd={SIGNALduino_FW_saveWhitelist("'.$name.'","\'+String(allVals)+\'")}\');
           $(this).dialog("close");
           $(div).remove();
@@ -2916,15 +2914,18 @@ sub SIGNALduino_FW_saveWhitelist
 		return;
 	}
 	
-	if ($wl_attr !~ /\d+(?:,\d.?\d?)*$/ ) {
-		SIGNALduino_Log3 $name, 3, "$name Protocolist save: attr whitelist_IDs can not be updated";
+	if ($wl_attr eq "") {	# da ein Attribut nicht leer sein kann, kommt ein Komma rein
+		$wl_attr = ',';
+	}
+	elsif ($wl_attr !~ /\d+(?:,\d.?\d?)*$/ ) {
+		SIGNALduino_Log3 $name, 3, "$name Whitelist save: attr whitelist_IDs can not be updated";
 		return;
 	}
 	else {
 		$wl_attr =~ s/,$//;			# Komma am Ende entfernen
 	}
 	$attr{$name}{whitelist_IDs} = $wl_attr;
-	SIGNALduino_Log3 $name, 3, "$name Protocolist save: $wl_attr";
+	SIGNALduino_Log3 $name, 3, "$name Whitelist save: $wl_attr";
 	SIGNALduino_IdList("x:$name", $wl_attr);
 }
 
@@ -4366,7 +4367,7 @@ sub SIGNALduino_FW_getProtocolList
 			$chkbox="<div> </div>";
 		}
 		else {
-			$chkbox=sprintf("<INPUT type=\"checkbox\" id=\"%s\" name=\"%s\" value=\"%s\" %s/>", "SD_$id", $checkAll,$id, $checked);
+			$chkbox=sprintf("<INPUT type=\"checkbox\" name=\"%s\" value=\"%s\" %s/>", $checkAll, $id, $checked);
 		}
 		
 		$comment = SIGNALduino_getProtoProp($id,"comment","");
