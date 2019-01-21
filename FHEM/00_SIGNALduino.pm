@@ -3609,7 +3609,8 @@ sub SIGNALduino_MCTFA
 		
 		my %seen;
 		my @dupmessages = map { 1==$seen{$_}++ ? $_ : () } @messages;
-	
+		
+		return ($i,"loop error, please report this data $bitData") if ($i==10);
 		if (scalar(@dupmessages) > 0 ) {
 			SIGNALduino_Log3 $name, 4, "$name: repeated hex ".$dupmessages[0]." found ".$seen{$dupmessages[0]}." times";
 			return  (1,$dupmessages[0]);
