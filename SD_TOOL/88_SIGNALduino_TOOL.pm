@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: 88_SIGNALduino_TOOL.pm 13115 2019-01-20 21:17:50Z HomeAuto_User $
+# $Id: 88_SIGNALduino_TOOL.pm 13115 2019-01-21 21:17:50Z HomeAuto_User $
 #
 # The file is part of the SIGNALduino project
 # see http://www.fhemwiki.de/wiki/SIGNALduino to support debugging of unknown signal data
@@ -9,6 +9,7 @@
 ######################################################################
 # Note´s
 # - added commandref doublePulse command take a while
+# - Send_RAWMSG last message Button!! nicht 
 ######################################################################
 
 package main;
@@ -34,7 +35,7 @@ sub SIGNALduino_TOOL_Initialize($) {
 	$hash->{AttrFn}			=	"SIGNALduino_TOOL_Attr";
 	$hash->{GetFn}			=	"SIGNALduino_TOOL_Get";
 	$hash->{AttrList}		=	"disable Dummyname Filename_input Filename_export Path StartString:MU;,MC;,MS; DispatchMax comment"
-												." RAWMSG_M1 RAWMSG_M2 RAWMSG_M3 Sendername $readingFnAttributes";
+												." RAWMSG_M1 RAWMSG_M2 RAWMSG_M3 Sendername Senderrepeats $readingFnAttributes";
 }
 
 ################################
@@ -103,6 +104,7 @@ sub SIGNALduino_TOOL_Set($$$@) {
 	my $file = AttrVal($name,"Filename_input","");							# Filename
 	my $path = AttrVal($name,"Path","./");											# Path | # Path if not define
 	my $Sendername = AttrVal($name,"Sendername","none");				# Sendername to direct send command
+	my $Sender_repeats = AttrVal($name,"Senderrepeats",1);			# Senderepeats
 	my $Dummyname = AttrVal($name,"Dummyname","none");					# Dummyname
 	my $DummyDMSG = InternalVal($Dummyname, "DMSG", "failed");	# P30#7FE
 	my $DummyMSGCNT = InternalVal($Dummyname, "MSGCNT", 0);			# DummynameMSGCNT
@@ -132,7 +134,11 @@ sub SIGNALduino_TOOL_Set($$$@) {
 	if ($cmd eq "?") {
 		my @modeltyp;
 		my $DispatchFile;
-		opendir(DIR,$path) || die "ERROR: set ? follow with Error in opening dir $path!";
+
+		readingsSingleUpdate($hash, "state" , "ERROR: $path not found! Please check Attributes Path." , 0) if not (-d $path);
+		readingsSingleUpdate($hash, "state" , "ready" , 0) if (-d $path && ReadingsVal($name, "state", "none") =~ /^ERROR.*Path.$/);
+
+		opendir(DIR,$path) || return "ERROR: directory $path can not open!";
 		while( my $directory_value = readdir DIR ){
 		if ($directory_value =~ /^$Filename_Dispatch.*txt/) {
 				$DispatchFile = $directory_value;
@@ -151,6 +157,7 @@ sub SIGNALduino_TOOL_Set($$$@) {
 		if ($DispatchModule ne "-") {
 			my $count = 0;
 			my $returnList = "";
+			
 			### read file in hash
 			open (FileCheck,"<$path$Filename_Dispatch$DispatchModule.txt") || return "ERROR: No file ($Filename_Dispatch$DispatchModule.txt) exists!";
 			while (<FileCheck>){
@@ -259,7 +266,7 @@ sub SIGNALduino_TOOL_Set($$$@) {
 			fhem("get $Dummyname raw $msg");
 			$RAWMSG_last = $a[1];
 			$DummyTime = InternalVal($Dummyname, "TIME", 0);								# time if protocol dispatched - 1544377856
-			$return = "$cmd dispatched";
+			$return = "RAWMSG dispatched";
 			$count3 = 1;
 		}
 
@@ -267,13 +274,14 @@ sub SIGNALduino_TOOL_Set($$$@) {
 		if ($cmd eq $NameDispatchSet."DMSG") {
 			return "ERROR: argument failed!" if (not $a[1]);
 			return "ERROR: wrong argument! (no space at Start & End)" if (not $a[1] =~ /^\S.*\S$/s);
+			return "ERROR: wrong DMSG message format!" if ($a[1] =~ /(^(MU|MS|MC)|.*;)/s);
 
 			Dispatch($defs{$Dummyname}, $a[1], undef);
 
 			$RAWMSG_last = "none";
 			$DummyMSGCNTvalue = undef;
 			$DMSG_last = $a[1];
-			$return = "$cmd dispatched";
+			$return = "DMSG dispatched";
 			$count3 = 1;
 		}
 
@@ -362,31 +370,33 @@ sub SIGNALduino_TOOL_Set($$$@) {
 		### Readings cmd_raw cmd_sendMSG ###
 		if ($cmd eq $NameSendSet."RAWMSG") {
 			return "ERROR: argument failed!" if (not $a[1]);
+			return "ERROR: wrong message! syntax is wrong!" if (not $a[1] =~ /^(MU|MS|MC);.*D=/);
 
 			my $RAWMSG = $a[1];
-			chomp ($RAWMSG);												# Zeilenende entfernen
-			$RAWMSG =~ s/[^A-Za-z0-9\-;=]//g;;			# nur zulässige Zeichen erlauben sonst leicht ERROR
+			chomp ($RAWMSG);																				# Zeilenende entfernen
+			$RAWMSG =~ s/[^A-Za-z0-9\-;=]//g;;											# nur zulässige Zeichen erlauben sonst leicht ERROR
+			$RAWMSG = $1 if ($RAWMSG =~ /^(.*;D=\d+?;).*/);					# cut ab ;CP=
 
 			my $prefix;
 			if (substr($RAWMSG,0,2) eq "MU") {
-				$prefix = "SR";
+				$prefix = "SR;R=$Sender_repeats";
 			} elsif (substr($RAWMSG,0,2) eq "MS") {
-				$prefix = "SM";
+				$prefix = "SM;R=$Sender_repeats";
 			} elsif (substr($RAWMSG,0,2) eq "MC") {
-				$prefix = "SC";
+				$prefix = "SC;R=$Sender_repeats";
 			}
 			
 			$RAWMSG = $prefix.substr($RAWMSG,2,length($RAWMSG)-2);
+			$RAWMSG =~ s/;/;;/g;;
 			
-			Log3 $name, 3, "$name: raw $Sendername $RAWMSG";
-			#SIGNALduino_AddSendQueue($hash,$RAWMSG);
-			#push(@{$Sendername->{QUEUE}}, $RAWMSG);
+			Log3 $name, 3, "$name: set $Sendername raw $RAWMSG";
+			fhem("set $Sendername raw ".$RAWMSG);
 			
 			$RAWMSG_last = $a[1];
 			$count3 = undef;
 			$DummyMSGCNTvalue = undef;
 			$return = "send RAWMSG";
-			return "The function are in development!";
+			#return "The function are in development!";
 		}
 		
 		### counter message_to_module ###
@@ -931,7 +941,7 @@ sub SIGNALduino_TOOL_Attr() {
 			return "Your Attributes $attrName must defined!" if ($attrValue eq "1");
 
 			### all files in path
-			opendir(DIR,$path) || die "ERROR: attr $attrName follow with Error in opening dir $path!";
+			opendir(DIR,$path) || return "ERROR: attr $attrName follow with Error in opening dir $path!";
 			my @errorlist = ();
 			while( my $directory_value = readdir DIR ){
 					if ($directory_value =~ /.txt$/) {
@@ -945,7 +955,7 @@ sub SIGNALduino_TOOL_Attr() {
 			open (FileCheck,"<$path$attrValue") || return "ERROR: No file ($attrValue) exists for attrib Filename_input!\n\nFiles in path:\n- ".join("\n- ",@errorlist_sorted);
 			close FileCheck;
 		
-			$attr{$name}{webCmd}	= "START" if ( not exists($attr{$name}{webCmd} ) );							# set model, if only undef --> new def
+			$attr{$name}{webCmd}	= "START" if ( not exists($attr{$name}{webCmd}) || $webCmd !~ /START/ );							# set model, if only undef --> new def
 		}
 
 		### dispatch from file with line check
@@ -973,6 +983,11 @@ sub SIGNALduino_TOOL_Attr() {
 			close FileCheck;
 
 			return "Your Attributes $attrName must defined!" if ($attrValue eq "1");
+		}
+		
+		### repeats for sender
+		if ($attrName eq "Senderrepeats" && $attrValue gt "25") {
+			return "ERROR: Your attrib $attrName with value $attrValue are wrong!\nPlease put a value smaler 25 repeats.";
 		}
 
 		Log3 $name, 3, "$name: set Attributes $attrName to $attrValue";
@@ -1057,6 +1072,7 @@ sub SIGNALduino_TOOL_RAWMSG_Check($$$) {
 	<ul><li><a name="Dispatch_RAWMSG_last"></a><code>Dispatch_RAWMSG_last</code> - dispatch the last RAW message</li><a name=""></a></ul>
 	<ul><li><a name="modulname"></a><code>&lt;modulname&gt;</code> - dispatch a message of the selected module from the DispatchModule attribute</li><a name=""></a></ul>
 	<ul><li><a name="START"></a><code>START</code> - starts the loop for automatic dispatch</li><a name=""></a></ul>
+	<ul><li><a name="Send_RAWMSG"></a><code>Send_RAWMSG</code> - send one MU | MS | MC RAWMSG with the defined Sendename (attributes Sendename needed!)</li><a name=""></a></ul>
 	<a name=""></a>
 	<br>
 
@@ -1099,6 +1115,8 @@ sub SIGNALduino_TOOL_RAWMSG_Check($$$) {
 			Memory 3 for a raw message</li>
 		<li><a name="Sendername">Sendername</a><br>
 			Name of the initialized device, which is used for direct transmission.</li>
+		<li><a name="Senderrepeats">Senderrepeats</a><br>
+			Numbre of repeats to send.</li>
 		<li><a name="StartString">StartString</a><br>
 			The attribute is necessary for the <code> set START</code> option. It search the start of the dispatch command.<br>
 			There are 3 options: <code>MC;</code> | <code>MS;</code> | <code>MU;</code></li>
@@ -1128,6 +1146,7 @@ sub SIGNALduino_TOOL_RAWMSG_Check($$$) {
 	<ul><li><a name="Dispatch_RAWMSG_last"></a><code>Dispatch_RAWMSG_last</code> - Dispatch die zu letzt dispatchte Roh-Nachricht</li><a name=""></a></ul>
 	<ul><li><a name="modulname"></a><code>&lt;modulname&gt;</code> - Dispatch eine Nachricht des ausgewählten Moduls aus dem Attribut DispatchModule.</li><a name=""></a></ul>
 	<ul><li><a name="START"></a><code>START</code> - startet die Schleife zum automatischen dispatchen</li><a name=""></a></ul>
+	<ul><li><a name="Send_RAWMSG"></a><code>Send_RAWMSG</code> - sendet eine MU | MS | MC Nachricht direkt über den angegebenen Sender (Attribut Sendename ist notwendig!)</li><a name=""></a></ul>
 	<br>
 
 	<a name="SIGNALduino_TOOL_Get"></a>
@@ -1169,6 +1188,8 @@ sub SIGNALduino_TOOL_RAWMSG_Check($$$) {
 			Speicherplatz 3 für eine Roh-Nachricht</li>
 		<li><a name="Sendername">Sendername</a><br>
 			Name des initialisierten Device, welches zum direkten senden genutzt wird.</li>
+		<li><a name="Senderrepeats">Senderrepeats</a><br>
+			Anzahl der Sendewiederholungen.</li>
 		<li><a name="StartString">StartString</a><br>
 			Das Attribut ist notwendig für die <code> set START</code> Option. Es gibt das Suchkriterium an welches automatisch den Start f&uuml;r den Dispatch-Befehl bestimmt.<br>
 			Es gibt 3 M&ouml;glichkeiten: <code>MC;</code> | <code>MS;</code> | <code>MU;</code></li>
