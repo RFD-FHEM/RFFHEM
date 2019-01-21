@@ -2377,9 +2377,9 @@ sub SIGNALduino_Parse_MU($$$$@)
 			my $firstOne;
 			my $firstZero;
 			my $signalRegex = "(?:" . $oneRegex . $zeroRegex . $floatRegex . "){$length_min,}";
-			if ($zeroRegex ne "") {
+			if (exists($ProtocolListSIGNALduino{$id}{reconstructBit})) {
 				$firstOne = substr($oneRegex,0,1);
-				$firstZero = substr($zeroRegex,1,1);
+				$firstZero = substr($zeroRegex,1,1) if ($zeroRegex ne "");
 				$signalRegex .= "(?:" . $firstOne . "|" . $firstZero . ")?";
 			}
 			Debug "signalRegex is $signalRegex " if ($debug);
