@@ -3007,6 +3007,10 @@ sub SIGNALduino_IdList($@)
 				if ($ProtocolListSIGNALduino{$id}{developId} eq "m") {
 					if ($develop !~ m/m$id/) {  # ist nur zur Abwaertskompatibilitaet und kann in einer der naechsten Versionen entfernt werden
 						push (@devModulId, $id);
+						if ($devFlag == 0) {
+							push (@skippedDevId, $id);
+							next;
+						}
 					}
 				}
 				elsif ($ProtocolListSIGNALduino{$id}{developId} eq "p") {
@@ -4347,7 +4351,10 @@ sub SIGNALduino_FW_getProtocolList
 					$checkAll = "SDnotCheck";
 				}
 				elsif ($devFlag == 0 && $ProtocolListSIGNALduino{$id}{developId} eq "y" && $develop !~ m/y$id/) {
-					$checkAll = "SDnotCheck"
+					$checkAll = "SDnotCheck";
+				}
+				elsif ($devFlag == 0 && $ProtocolListSIGNALduino{$id}{developId} eq "m") {
+					$checkAll = "SDnotCheck";
 				}
 			}
 		}
