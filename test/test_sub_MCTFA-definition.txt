@@ -17,7 +17,6 @@ defmod test_sub_MCTFA UnitTest dummyDuino (
 		is($rcode,1,"check returncode");
 		is($hexresult,"45C814434EC90","check result message");
 	};
-
 	subtest 'MCTFA double+ transmission ' => sub {
 		plan tests => 2;
 		my ($rcode,$hexresult);
@@ -27,24 +26,19 @@ defmod test_sub_MCTFA UnitTest dummyDuino (
 		is($hexresult,"45C814434EC90","check result message");
 	};
 	subtest 'MCTFA double to short' => sub {
-		TODO: {
-			local $TODO = "need code change to test this correct";
-			my ($rcode,$hexresult);
-			my $bitdata="1111111111010100010111001000010000000011111111111010100010111001000010000000";				
-			($rcode,$hexresult)=SIGNALduino_MCTFA($target,$bitdata,$id,length $bitdata);
-			is($rcode,-1,"check returncode");
-			is($hexresult,"to short","check result message");
-		}
+		my ($rcode,$hexresult);
+		my $bitdata="1111111111010100010111001000010000000011111111111010100010111001000010000000";				
+		($rcode,$hexresult)=SIGNALduino_MCTFA($target,$bitdata,$id,length $bitdata);
+		is($rcode,-1,"check returncode");
+		like($hexresult,qr/message is to short/,"check result message");
 	};
 	subtest 'MCTFA double to short' => sub {
-		TODO: {
-			local $TODO = "need code change to test this correct";
-			my ($rcode,$hexresult);
-			my $bitdata="11111111110101000101110010000100000000000101110010000100000000000101110010000100000000000101110010000100000000000101110010000100000000000101110010000100000000000101110010000100000000111111111110101000101110010000100000000000101110010000100000000000101110010000100000000000101110010000100000000000101110010000100000000000101110010000100000000000101110010000100000000";				
-			($rcode,$hexresult)=SIGNALduino_MCTFA($target,$bitdata,$id,length $bitdata);
-			is($rcode,-1,"check returncode");
-			is($hexresult,"to long","check result message");
-		}
+		local $TODO = "need code change to test this correct";
+		my ($rcode,$hexresult);
+		my $bitdata="11111111110101000101110010000100000000000101110010000100000000000101110010000100000000000101110010000100000000000101110010000100000000000101110010000100000000000101110010000100000000111111111110101000101110010000100000000000101110010000100000000000101110010000100000000000101110010000100000000000101110010000100000000000101110010000100000000000101110010000100000000";				
+		($rcode,$hexresult)=SIGNALduino_MCTFA($target,$bitdata,$id,length $bitdata);
+		is($rcode,-1,"check returncode");
+		like($hexresult,qr/message is to long/,"check result message");
 	};
 
 
