@@ -2327,6 +2327,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 			}
 			
 			my %patternLookupHash=();
+			my %endPatternLookupHash=();
 			my $pstr="";
 			my $zeroRegex ="";
 			my $oneRegex ="";
@@ -2374,13 +2375,22 @@ sub SIGNALduino_Parse_MU($$$$@)
 			my $length_max = "";
 			$length_max = $ProtocolListSIGNALduino{$id}{length_max} if (exists($ProtocolListSIGNALduino{$id}{length_max}));
 			
-			my $firstOne;
-			my $firstZero;
 			my $signalRegex = "(?:" . $oneRegex . $zeroRegex . $floatRegex . "){$length_min,}";
-			if (exists($ProtocolListSIGNALduino{$id}{reconstructBit})) {
-				$firstOne = substr($oneRegex,0,1);
-				$firstZero = substr($zeroRegex,1,1) if ($zeroRegex ne "");
-				$signalRegex .= "(?:" . $firstOne . "|" . $firstZero . ")?";
+			
+			if (exists($ProtocolListSIGNALduino{$id}{reconstructBit}) && $signal_width > 1) {
+				my $partOne = substr($oneRegex,0,$signal_width-1);
+				$endPatternLookupHash{$partOne} = "1";
+				my $partZero = "";
+				if ($zeroRegex ne "") {
+					$partZero = substr($zeroRegex,0,$signal_width);
+					$endPatternLookupHash{substr($partZero,1)} = "0";		# "|" am Anfang entfernen
+				}
+				my $partFloat = "";
+				if ($floatRegex ne "") {
+					$partFloat = substr($floatRegex,0,$signal_width);
+					$endPatternLookupHash{substr($partFloat,1)} = "F";		# "|" am Anfang entfernen
+				}
+				$signalRegex .= "(?:" . $partOne . $partZero . $partFloat . ")?";
 			}
 			Debug "signalRegex is $signalRegex " if ($debug);
 
@@ -2411,10 +2421,16 @@ sub SIGNALduino_Parse_MU($$$$@)
 				
 				
 				my @bit_msg=();			# array to store decoded signal bits
+				
 				foreach my $sigStr (@pairs)
 				{
 					if (exists $patternLookupHash{$sigStr}) {
 						push(@bit_msg,$patternLookupHash{$sigStr})  ## Add the bits to our bit array
+					}
+					elsif (exists($ProtocolListSIGNALduino{$id}{reconstructBit}) && exists($endPatternLookupHash{$sigStr})) {
+						my $lastbit = $endPatternLookupHash{$sigStr};
+						push(@bit_msg,$lastbit);
+						SIGNALduino_Log3 $name, 5, "$name: last part pair=$sigStr reconstructed, bit=$lastbit";
 					}
 				}
 				
