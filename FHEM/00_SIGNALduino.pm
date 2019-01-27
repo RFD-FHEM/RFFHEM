@@ -786,7 +786,7 @@ SIGNALduino_Set($@)
 
 		SIGNALduino_Log3 $name, 5, "$name: sendmsg Preparing rawsend command for protocol=$protocol, repeats=$repeats, clock=$clock bits=$data";
 		
-		foreach my $item (qw(sync start one zero float pause end a b c))
+		foreach my $item (qw(preSync sync start one zero float pause end universal))
 		{
 		    #print ("item= $item \n");
 		    next if (!exists($ProtocolListSIGNALduino{$protocol}{$item}));
@@ -807,11 +807,12 @@ SIGNALduino_Set($@)
 		}
 		my @bits = split("", $data);
 	
-		my %bitconv = (1=>"one", 0=>"zero", 'D'=> "float", 'F'=> "float", 'P'=> "pause", 'A'=> "a", 'B'=> "b", 'C'=> "c");
+		my %bitconv = (1=>"one", 0=>"zero", 'D'=> "float", 'F'=> "float", 'P'=> "pause", 'U'=> "universal");
 		my $SignalData="D=";
 		
-		$SignalData.=$signalHash{sync} if (exists($signalHash{sync}) && !exists($ProtocolListSIGNALduino{$protocol}{syncNotUseForSend}));
-		$SignalData.=$signalHash{start} if (exists($signalHash{start}) && !exists($ProtocolListSIGNALduino{$protocol}{startNotUseForSend}));
+		$SignalData.=$signalHash{preSync} if (exists($signalHash{preSync}));
+		$SignalData.=$signalHash{sync} if (exists($signalHash{sync}));
+		$SignalData.=$signalHash{start} if (exists($signalHash{start}));
 		foreach my $bit (@bits)
 		{
 			next if (!exists($bitconv{$bit}));
