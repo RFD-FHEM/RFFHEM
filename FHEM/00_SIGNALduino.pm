@@ -2031,28 +2031,21 @@ SIGNALduino_Parse_MS($$$$%)
 		foreach $id (@{$hash->{msIdList}}) {
 			
 			my $valid=1;
-			#$debug=1;
 			Debug "Testing against Protocol id $id -> $ProtocolListSIGNALduino{$id}{name}"  if ($debug);
 
 			# Check Clock if is it in range
-			$valid=SIGNALduino_inTol($ProtocolListSIGNALduino{$id}{clockabs},$clockabs,$clockabs*0.30) if ($ProtocolListSIGNALduino{$id}{clockabs} > 0);
-			Debug "validclock = $valid"  if ($debug);
-			
-			next if (!$valid) ;
-
-			my $bit_length = ($signal_length-(scalar @{$ProtocolListSIGNALduino{$id}{sync}}))/((scalar @{$ProtocolListSIGNALduino{$id}{one}} + scalar @{$ProtocolListSIGNALduino{$id}{zero}})/2);
-
-			#Check calculated min length
-			$valid = $valid && $ProtocolListSIGNALduino{$id}{length_min} <= $bit_length if (exists $ProtocolListSIGNALduino{$id}{length_min}); 
-			#Check calculated max length
-			$valid = $valid && $ProtocolListSIGNALduino{$id}{length_max} >= $bit_length if (exists $ProtocolListSIGNALduino{$id}{length_max});
+			if ($ProtocolListSIGNALduino{$id}{clockabs} > 0) {
+				if (!SIGNALduino_inTol($ProtocolListSIGNALduino{$id}{clockabs},$clockabs,$clockabs*0.30)) {
+					Debug "protocClock=$ProtocolListSIGNALduino{$id}{clockabs}, msgClock=$clockabs is not in tol=" . $clockabs*0.30 if ($debug);  
+					next;
+				} elsif ($debug) {
+					Debug "protocClock=$ProtocolListSIGNALduino{$id}{clockabs}, msgClock=$clockabs is in tol=" . $clockabs*0.30;
+				}
+			}
 
 			Debug "expecting $bit_length bits in signal" if ($debug);
-			next if (!$valid) ;
-
 			#Debug Dumper(@{$ProtocolListSIGNALduino{$id}{sync}});
 			Debug "Searching in patternList: ".Dumper(\%patternList) if($debug);
-
 			Debug "searching sync: @{$ProtocolListSIGNALduino{$id}{sync}}[0] @{$ProtocolListSIGNALduino{$id}{sync}}[1]" if($debug); # z.B. [1, -18] 
 			#$valid = $valid && SIGNALduino_inTol($patternList{$clockidx}, @{$ProtocolListSIGNALduino{$id}{sync}}[0], 3); #sync in tolerance
 			#$valid = $valid && SIGNALduino_inTol($patternList{$syncidx}, @{$ProtocolListSIGNALduino{$id}{sync}}[1], 3); #sync in tolerance
@@ -2068,18 +2061,29 @@ SIGNALduino_Parse_MS($$$$%)
 			Debug "sync not found " if (!$valid && $debug); # z.B. [1, -18] 
 
 			next if (!$valid) ;
-
+			
+			my $message_start =index($rawData,$syncstr)+length($syncstr);
+			my $signal_width= @{$ProtocolListSIGNALduino{$id}{one}};
+			my $bit_length = ($signal_length-$message_start) / $signal_width;
+			
+			#Check calculated min length
+			if (exists($ProtocolListSIGNALduino{$id}{length_min}) && $ProtocolListSIGNALduino{$id}{length_min} > $bit_length) {
+				Debug "bit_length=$bit_length to short" if ($debug);
+				next;
+			}
+			
 			$valid = $valid && ($pstr=SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}},\%patternList,\$rawData)) >=0;
 			Debug "Found matched one with indexes: ($pstr)" if ($debug && $valid);
 			$patternLookupHash{$pstr}="1" if ($valid); ## Append Sync to our lookuptable
 			#Debug "added $pstr " if ($debug && $valid);
 			Debug "one pattern not found" if ($debug && !$valid);
 
-
 			$valid = $valid && ($pstr=SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{zero}},\%patternList,\$rawData)) >=0;
 			Debug "Found matched zero with indexes: ($pstr)" if ($debug && $valid);
 			$patternLookupHash{$pstr}="0" if ($valid); ## Append Sync to our lookuptable
 			Debug "zero pattern not found" if ($debug && !$valid);
+			
+			next if (!$valid);
 			
 			if (defined($ProtocolListSIGNALduino{$id}{float}))
 			{
@@ -2088,25 +2092,18 @@ SIGNALduino_Parse_MS($$$$%)
 				$patternLookupHash{$pstr}="F" if ($floatValid); ## Append Sync to our lookuptable
 				Debug "float pattern not found" if ($debug && !$floatValid);
 			}
-			#Debug "added $pstr " if ($debug && $valid);
 
-			next if (!$valid) ;
 			#Debug "Pattern Lookup Table".Dumper(%patternLookupHash);
-			## Check somethin else
 
-		
 			#Anything seems to be valid, we can start decoding this.			
 
 			SIGNALduino_Log3 $name, 4, "$name: Matched MS Protocol id $id -> $ProtocolListSIGNALduino{$id}{name}"  if ($valid);
-			my $signal_width= @{$ProtocolListSIGNALduino{$id}{one}};
-			#Debug $signal_width;
-			
-			
+
 			my @bit_msg;							# array to store decoded signal bits
 
 			#for (my $i=index($rawData,SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{sync}}))+$signal_width;$i<length($rawData);$i+=$signal_width)
 			#for (my $i=scalar@{$ProtocolListSIGNALduino{$id}{sync}};$i<length($rawData);$i+=$signal_width)
-			my $message_start =index($rawData,$syncstr)+length($syncstr);
+
 			SIGNALduino_Log3 $name, 5, "$name: Starting demodulation at Position $message_start";
 			
 			for (my $i=$message_start;$i<length($rawData);$i+=$signal_width)
@@ -2123,8 +2120,18 @@ SIGNALduino_Parse_MS($$$$%)
 			}
 	
 			
-			Debug "$name: decoded message raw (@bit_msg), ".@bit_msg." bits\n" if ($debug);;
-
+			Debug "$name: decoded message raw (@bit_msg), ".@bit_msg." bits\n" if ($debug);
+			
+			#Check converted message against lengths
+			if (exists($ProtocolListSIGNALduino{$id}{length_min}) && $ProtocolListSIGNALduino{$id}{length_min} > scalar @bit_msg) {
+				Debug "$name: decoded message is to short" if ($debug);
+				next;
+			}
+			if (exists($ProtocolListSIGNALduino{$id}{length_max}) && $ProtocolListSIGNALduino{$id}{length_max} < scalar @bit_msg) {
+				Debug "$name: decoded message is to long" if ($debug);
+				next;
+			}
+			
 			my $padwith = defined($ProtocolListSIGNALduino{$id}{paddingbits}) ? $ProtocolListSIGNALduino{$id}{paddingbits} : 4;
 			
 			my $i=0;
@@ -2134,13 +2141,12 @@ SIGNALduino_Parse_MS($$$$%)
 				$i++;
 			}
 			Debug "$name padded $i bits to bit_msg array" if ($debug);
-				
-			#my $logmsg = SIGNALduino_padbits(@bit_msg,$padwith);
 			
-			#Check converted message against lengths
-			$valid = $valid && $ProtocolListSIGNALduino{$id}{length_min} <= scalar @bit_msg  if (defined($ProtocolListSIGNALduino{$id}{length_min})); 
-			$valid = $valid && $ProtocolListSIGNALduino{$id}{length_max} >= scalar @bit_msg  if (defined($ProtocolListSIGNALduino{$id}{length_max}));
-			next if (!$valid);  
+			if ($i == 0) {
+				SIGNALduino_Log3 $name, 5, "$name: dispatching bits: @bit_msg";
+			} else {
+				SIGNALduino_Log3 $name, 5, "$name: dispatching bits: @bit_msg with $i Paddingbits 0";
+			}
 			
 			my $evalcheck = (SIGNALduino_getProtoProp($id,"developId","") =~ 'p') ? 1 : undef;
 			my ($rcode,@retvalue) = SIGNALduino_callsub('postDemodulation',$ProtocolListSIGNALduino{$id}{postDemodulation},$evalcheck,$name,@bit_msg);
