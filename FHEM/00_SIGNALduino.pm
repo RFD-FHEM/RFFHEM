@@ -2052,6 +2052,7 @@ SIGNALduino_Parse_MS($$$$%)
 			
 			my $pstr;
 			my %patternLookupHash=();
+			my %endPatternLookupHash=();
 
 			$valid = $valid && ($pstr=SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{sync}},\%patternList,\$rawData)) >=0;
 			Debug "Found matched sync with indexes: ($pstr)" if ($debug && $valid);
@@ -2075,12 +2076,14 @@ SIGNALduino_Parse_MS($$$$%)
 			$valid = $valid && ($pstr=SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}},\%patternList,\$rawData)) >=0;
 			Debug "Found matched one with indexes: ($pstr)" if ($debug && $valid);
 			$patternLookupHash{$pstr}="1" if ($valid); ## Append Sync to our lookuptable
+			$endPatternLookupHash{substr($pstr,0,$signal_width-1)}="1" if ($valid && exists($ProtocolListSIGNALduino{$id}{reconstructBit})); ## Append one to our endbit lookuptable
 			#Debug "added $pstr " if ($debug && $valid);
 			Debug "one pattern not found" if ($debug && !$valid);
 
 			$valid = $valid && ($pstr=SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{zero}},\%patternList,\$rawData)) >=0;
 			Debug "Found matched zero with indexes: ($pstr)" if ($debug && $valid);
 			$patternLookupHash{$pstr}="0" if ($valid); ## Append Sync to our lookuptable
+			$endPatternLookupHash{substr($pstr,0,$signal_width-1)}="0" if ($valid && exists($ProtocolListSIGNALduino{$id}{reconstructBit})); ## Append zero to our endbit lookuptable
 			Debug "zero pattern not found" if ($debug && !$valid);
 			
 			next if (!$valid);
@@ -2090,6 +2093,7 @@ SIGNALduino_Parse_MS($$$$%)
 				my $floatValid = ($pstr=SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{float}},\%patternList,\$rawData)) >=0;
 				Debug "Found matched float with indexes: ($pstr)" if ($debug && $floatValid);
 				$patternLookupHash{$pstr}="F" if ($floatValid); ## Append Sync to our lookuptable
+				$endPatternLookupHash{substr($pstr,0,$signal_width-1)}="F" if ($floatValid && exists($ProtocolListSIGNALduino{$id}{reconstructBit})); ## Append float to our endbit lookuptable
 				Debug "float pattern not found" if ($debug && !$floatValid);
 			}
 
@@ -2108,13 +2112,18 @@ SIGNALduino_Parse_MS($$$$%)
 			
 			for (my $i=$message_start;$i<length($rawData);$i+=$signal_width)
 			{
-				my $sig_str= substr($rawData,$i,$signal_width);
-				#SIGNALduino_Log3 $name, 5, "demodulating $sig_str";
+				my $sigStr= substr($rawData,$i,$signal_width);
+				#SIGNALduino_Log3 $name, 5, "demodulating $sigStr";
 				#Debug $patternLookupHash{substr($rawData,$i,$signal_width)}; ## Get $signal_width number of chars from raw data string
-				if (exists $patternLookupHash{$sig_str}) { ## Add the bits to our bit array
-					push(@bit_msg,$patternLookupHash{$sig_str})
+				if (exists $patternLookupHash{$sigStr}) { ## Add the bits to our bit array
+					push(@bit_msg,$patternLookupHash{$sigStr});
+				} elsif (exists($ProtocolListSIGNALduino{$id}{reconstructBit}) && exists($endPatternLookupHash{$sigStr})) {
+					my $lastbit = $endPatternLookupHash{$sigStr};
+					push(@bit_msg,$lastbit);
+					SIGNALduino_Log3 $name, 4, "$name: last part pair=$sigStr reconstructed, bit=$lastbit";
+					last;
 				} else {
-					SIGNALduino_Log3 $name, 5, "$name: Found wrong signalpattern, catched ".scalar @bit_msg." bits, aborting demodulation";
+					SIGNALduino_Log3 $name, 5, "$name: Found wrong signalpattern $sigStr, catched ".scalar @bit_msg." bits, aborting demodulation";
 					last;
 				}
 			}
