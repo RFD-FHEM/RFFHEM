@@ -15,6 +15,7 @@
 # one         => [ , ]     # only MU + MS signals | value pair for a one bit, must be always a positive and negative factor of clockabs (accepted . | example 1.5)
 # zero        => [ , ]     # only MU + MS signals | value pair for a zero bit, must be always a positive and negative factor of clockabs (accepted . | example -1.5)
 # start       => [ , ]     # only MU - value pair or more for start message
+# preSync     => [ , ]     # only MU + MS - value pair or more for preamble pulse of signal
 # sync        => [ , ]     # only MS - value pair or more for sync pulse of signal
 # float       => [ , ]     # only MU + MS signals | Convert 0F -> 01 (F) to be compatible with CUL
 # pause       => [ ]       # delay when sending between two signals (clockabs * pause must be < 32768
