@@ -2043,7 +2043,6 @@ SIGNALduino_Parse_MS($$$$%)
 				}
 			}
 
-			Debug "expecting $bit_length bits in signal" if ($debug);
 			#Debug Dumper(@{$ProtocolListSIGNALduino{$id}{sync}});
 			Debug "Searching in patternList: ".Dumper(\%patternList) if($debug);
 			Debug "searching sync: @{$ProtocolListSIGNALduino{$id}{sync}}[0] @{$ProtocolListSIGNALduino{$id}{sync}}[1]" if($debug); # z.B. [1, -18] 
@@ -2066,6 +2065,7 @@ SIGNALduino_Parse_MS($$$$%)
 			my $message_start =index($rawData,$syncstr)+length($syncstr);
 			my $signal_width= @{$ProtocolListSIGNALduino{$id}{one}};
 			my $bit_length = ($signal_length-$message_start) / $signal_width;
+			Debug "expecting $bit_length bits in signal" if ($debug);
 			
 			#Check calculated min length
 			if (exists($ProtocolListSIGNALduino{$id}{length_min}) && $ProtocolListSIGNALduino{$id}{length_min} > $bit_length) {
