@@ -15,6 +15,7 @@
 # one         => [ , ]     # only MU + MS signals | value pair for a one bit, must be always a positive and negative factor of clockabs (accepted . | example 1.5)
 # zero        => [ , ]     # only MU + MS signals | value pair for a zero bit, must be always a positive and negative factor of clockabs (accepted . | example -1.5)
 # start       => [ , ]     # only MU - value pair or more for start message
+# preSync     => [ , ]     # only MU + MS - value pair or more for preamble pulse of signal
 # sync        => [ , ]     # only MS - value pair or more for sync pulse of signal
 # float       => [ , ]     # only MU + MS signals | Convert 0F -> 01 (F) to be compatible with CUL
 # pause       => [ ]       # delay when sending between two signals (clockabs * pause must be < 32768
@@ -1997,13 +1998,15 @@
 						# MS;P1=1524;P2=-413;P3=388;P4=-3970;P5=-815;P6=778;P7=-16024;D=34353535623562626262626235626262353562623535623562626235356235626262623562626262626262626262626262623535626235623535353535626262356262626262626267123232323232323232323232;CP=3;SP=4;R=226;O;m2;
 						# MS;P0=-15967;P1=1530;P2=-450;P3=368;P4=-3977;P5=-835;P6=754;D=34353562623535623562623562356262626235353562623562623562626235353562623562626262626262626262626262623535626235623535353535626262356262626262626260123232323232323232323232;CP=3;SP=4;R=229;O;
 		{
-			name					=> 'JAROLIFT',
+			name				=> 'JAROLIFT',
 			comment				=> 'remote control JAROLIFT TDRC_16W / TDRCT_04W',
-			id						=> '87',
-			knownFreqs		=> '433.92',
-			one						=> [1,-2],
-			zero					=> [2,-1],
-			sync					=> [1,-10],				# this is a end marker, but we use this as a start marker
+			id				=> '87',
+			knownFreqs			=> '433.92',
+			one				=> [1,-2],
+			zero				=> [2,-1],
+			preSync				=> [3.8,-1, 1,-1, 1,-1, 1,-1, 1,-1, 1,-1, 1,-1, 1,-1, 1,-1, 1,-1, 1,-1, 1,-1, 1,-1],
+			sync				=> [1,-10],				# this is a end marker, but we use this as a start marker
+			pause				=> [-40],
 			clockabs			=> 400,						# ca 400us
 			developId			=> 'y',
 			format				=> 'twostate',
