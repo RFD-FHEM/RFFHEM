@@ -786,7 +786,7 @@ SIGNALduino_Set($@)
 
 		SIGNALduino_Log3 $name, 5, "$name: sendmsg Preparing rawsend command for protocol=$protocol, repeats=$repeats, clock=$clock bits=$data";
 		
-		foreach my $item (qw(sync start one zero float pause end))
+		foreach my $item (qw(preSync sync start one zero float pause end universal))
 		{
 		    #print ("item= $item \n");
 		    next if (!exists($ProtocolListSIGNALduino{$protocol}{$item}));
@@ -807,9 +807,10 @@ SIGNALduino_Set($@)
 		}
 		my @bits = split("", $data);
 	
-		my %bitconv = (1=>"one", 0=>"zero", 'D'=> "float", 'F'=> "float", 'P'=> "pause");
+		my %bitconv = (1=>"one", 0=>"zero", 'D'=> "float", 'F'=> "float", 'P'=> "pause", 'U'=> "universal");
 		my $SignalData="D=";
 		
+		$SignalData.=$signalHash{preSync} if (exists($signalHash{preSync}));
 		$SignalData.=$signalHash{sync} if (exists($signalHash{sync}));
 		$SignalData.=$signalHash{start} if (exists($signalHash{start}));
 		foreach my $bit (@bits)
@@ -1472,7 +1473,7 @@ SIGNALduino_Read($)
 	{
 		my $regexp;
 		if ($hash->{getcmd}->{cmd} eq 'sendraw') {
-			$regexp = '^S(R|C|M);';
+			$regexp = '^S(?:R|C|M);.';
 		}
 		elsif ($hash->{getcmd}->{cmd} eq 'ccregAll') {
 			$regexp = '^ccreg 00:';
