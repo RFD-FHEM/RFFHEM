@@ -3583,7 +3583,6 @@ sub SIGNALduino_MCTFA
 		return return (-1," sync not found") if ($preamble_pos <=0);
 		my @messages;
 		
-		my $i=1;
 		my $retmsg = "";
 		do 
 		{
@@ -3611,8 +3610,7 @@ sub SIGNALduino_MCTFA
 			}
 			
 			$preamble_pos=index($bitData,"1101",$message_end)+4;
-			$i++;
-		}  while ($message_end < $mcbitnum && $i < 10);
+		}  while ($message_end < $mcbitnum);
 		
 		my %seen;
 		my @dupmessages = map { 1==$seen{$_}++ ? $_ : () } @messages;
