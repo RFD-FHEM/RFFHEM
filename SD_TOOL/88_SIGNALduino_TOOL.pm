@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: 88_SIGNALduino_TOOL.pm 13115 2019-01-21 21:17:50Z HomeAuto_User $
+# $Id: 88_SIGNALduino_TOOL.pm 13115 2019-01-29 21:17:50Z HomeAuto_User $
 #
 # The file is part of the SIGNALduino project
 # see http://www.fhemwiki.de/wiki/SIGNALduino to support debugging of unknown signal data
@@ -442,7 +442,7 @@ sub SIGNALduino_TOOL_Get($$$@) {
 	my $path = AttrVal($name,"Path","./");
 	my $list = "TimingsList:noArg invert_bitMsg invert_hexMsg change_bitMsg_to_hexMsg change_hexMsg_to_bitMsg ";
 	$list .= "FilterFile:multiple,bitMsg,bitMsg_invert,dmsg,hexMsg,hexMsg_invert,RAWMSG,READredu,READ ".
-					"All_ClockPulse:noArg All_SyncPulse:noArg FilterFile_one_ClockPulse FilterFile_one_SyncPulse FilterFile_doublePulse:noArg" if ($Filename_input ne "");
+					"All_ClockPulse:noArg All_SyncPulse:noArg InputFile_one_ClockPulse InputFile_one_SyncPulse InputFile_doublePulse:noArg InputFile_length_Datapart:noArg" if ($Filename_input ne "");
 	my $linecount = 0;
 	my $founded = 0;
 	my $search = "";
@@ -590,8 +590,12 @@ sub SIGNALduino_TOOL_Get($$$@) {
 			my @arg = split(",", $a[0]);
 			$search = $arg[0].":|".$arg[1].":";
 			$manually = 1;
+		### only $a[0] and value are a numbre ###
+		} elsif ($a[0] =~ /^?-\d+$/s) {
+			$manually = 1;
+			$search = substr($a[0],0,length($a[0]));
 		}
-		#Log3 $name, 3, "SIGNALduino_TOOL_Get: cmd check4, searcharg=$search timeoption=$timestamp manually=$manually";
+		Log3 $name, 4, "SIGNALduino_TOOL_Get: cmd check4, searcharg=$search timeoption=$timestamp manually=$manually";
 
 		return "ERROR: Your Attributes Filename_input is not definded!" if ($Filename_input eq "");
 		#Log3 $name, 3, "SIGNALduino_TOOL_Get: after cmd check, searcharg=$search timeoption=$timestamp manually=$manually";
@@ -599,7 +603,6 @@ sub SIGNALduino_TOOL_Get($$$@) {
 		open (InputFile,"<$path$Filename_input") || return "ERROR: No file ($Filename_input) found in $path directory from FHEM!";
 		while (<InputFile>){
 			if ($_ =~ /$search/s){
-				Log3 $name, 3, "SIGNALduino_TOOL_Get: $search";
 				chomp ($_);												# Zeilenende entfernen
 				my @arg = split(" ", $_);
 				if ($manually == 0) {
@@ -723,14 +726,15 @@ sub SIGNALduino_TOOL_Get($$$@) {
 		return substr($cmd,4)." &Oslash; are ".$value." at $founded readed values!\nmin: $min (- $valuepercentmin%) | max: $max (+ $valuepercentmax%)";
 	}
 
-	if ($cmd eq "FilterFile_one_ClockPulse" || $cmd eq "FilterFile_one_SyncPulse") {
+	if ($cmd eq "InputFile_one_ClockPulse" || $cmd eq "InputFile_one_SyncPulse") {
 		return "ERROR: Your Attributes Filename_input is not definded!" if ($Filename_input eq "");
-		return "ERROR: wrong value of $cmd! only [0-9]!" if (not $a[0] =~ /^(-\d+|\d+$)/);
+		return "ERROR: ".substr($cmd,14)." is not definded" if (not $a[0]);
+		return "ERROR: wrong value of $cmd! only [0-9]!" if (not $a[0] =~ /^(-\d+|\d+$)/ && $a[0] > 1);
 
 		my $ClockPulse = 0;			# array Zeilen
 		my $SyncPulse = 0;			# array Zeilen
-		$search = "CP=" if ($cmd eq "FilterFile_one_ClockPulse");
-		$search = "SP=" if ($cmd eq "FilterFile_one_SyncPulse");
+		$search = "CP=" if ($cmd eq "InputFile_one_ClockPulse");
+		$search = "SP=" if ($cmd eq "InputFile_one_SyncPulse");
 		my $CP;
 		my $SP;
 		my $pos2;
@@ -744,11 +748,11 @@ sub SIGNALduino_TOOL_Get($$$@) {
 				my $text = substr($_,$pos,10);
 				$text = substr($text, 0 ,index ($text,";"));
 
-				if ($cmd eq "FilterFile_one_ClockPulse") {
+				if ($cmd eq "InputFile_one_ClockPulse") {
 					$text =~ s/CP=//g;
 					$CP = $text;
 					$pos2 = index($_,"P$CP=");
-				} elsif ($cmd eq "FilterFile_one_SyncPulse") {
+				} elsif ($cmd eq "InputFile_one_SyncPulse") {
 					$text =~ s/SP=//g;
 					$SP = $text;
 					$pos2 = index($_,"P$SP=");
@@ -757,10 +761,10 @@ sub SIGNALduino_TOOL_Get($$$@) {
 				my $text2 = substr($_,$pos2,12);
 				$text2 = substr($text2, 0 ,index ($text2,";"));
 
-				if ($cmd eq "FilterFile_one_ClockPulse") {
+				if ($cmd eq "InputFile_one_ClockPulse") {
 					$text2 = substr($text2,length($text2)-3);
 					$ClockPulse += $text2;
-				}	elsif ($cmd eq "FilterFile_one_SyncPulse") {
+				}	elsif ($cmd eq "InputFile_one_SyncPulse") {
 					$text2 =~ s/P$SP=//g;
 					$SyncPulse += $text2;
 				}
@@ -778,8 +782,8 @@ sub SIGNALduino_TOOL_Get($$$@) {
 		close InputFile;
 
 		readingsSingleUpdate($hash, "line_read" , $linecount, 0);
-		readingsSingleUpdate($hash, "state" , substr($cmd,4)." NOT in tol found!", 0) if ($founded == 0);
-		readingsSingleUpdate($hash, "state" , substr($cmd,4)." in tol found ($founded)", 0) if ($founded != 0);
+		readingsSingleUpdate($hash, "state" , substr($cmd,14)." NOT in tol found!", 0) if ($founded == 0);
+		readingsSingleUpdate($hash, "state" , substr($cmd,14)." in tol found ($founded)", 0) if ($founded != 0);
 
 		return "ERROR: Your Attributes Filename_export is not definded!" if ($Filename_export eq "");
 		open(OutFile, ">$path$Filename_export");
@@ -789,7 +793,7 @@ sub SIGNALduino_TOOL_Get($$$@) {
 		close OutFile;
 
 		return "ERROR: no $cmd with value $a[0] in tol!" if ($founded == 0);
-		return substr($cmd,4)." in tol found!";
+		return substr($cmd,14)." in tol found!";
 	}
 	
 	if ($cmd eq "invert_bitMsg" || $cmd eq "invert_hexMsg") {
@@ -826,7 +830,7 @@ sub SIGNALduino_TOOL_Get($$$@) {
 		}
 	}
 
-	if ($cmd eq "FilterFile_doublePulse") {
+	if ($cmd eq "InputFile_doublePulse") {
 		return "ERROR: Your Attributes Filename_input is not definded!" if ($Filename_input eq "");
 
 		my $counterror = 0;
@@ -872,6 +876,27 @@ sub SIGNALduino_TOOL_Get($$$@) {
 		my $percenterrorMS = sprintf ("%.2f", ($MSerror*100)/$founded);
 
 		return "$cmd are finished.\n\n- read $linecount lines\n- found $founded messages (MS|MU)\n- found MU with ERROR = $MUerror ($percenterrorMU"."%)\n- found MS with ERROR = $MSerror ($percenterrorMS"."%)";
+	}
+	
+	if ($cmd eq "InputFile_length_Datapart") {
+		return "ERROR: Your Attributes Filename_input is not definded!" if ($Filename_input eq "");
+		my @dataarray;
+		my $dataarray_min;
+		my $dataarray_max;
+
+		open (InputFile,"<$path$Filename_input") || return "ERROR: No file ($Filename_input) found in $path directory from FHEM!";
+		while (<InputFile>){
+			if ($_ =~ /M(U|S);/s){
+				$_ = $1 if ($_ =~ /.*;D=(\d+?);.*/);			# cut bis D= & ab ;CP= 	# NEW
+				my $length_data = length($_);
+				push (@dataarray,$length_data),
+				($dataarray_min,$dataarray_max) = (sort {$a <=> $b} @dataarray)[0,-1];
+				$linecount++;
+			}
+		}
+		close InputFile;
+
+		return "length of Datapart from RAWMSG in $linecount lines.\n\nmin:$dataarray_min max:$dataarray_max";
 	}
 
 	return "Unknown argument $cmd, choose one of $list";
@@ -970,8 +995,10 @@ sub SIGNALduino_TOOL_Attr() {
 			while (<FileCheck>){
 				$count++;
 				if ($_ !~ /^#.*/ && $_ ne "\r\n" && $_ ne "\r" && $_ ne "\n") {
+					return "ERROR: the line $count in file $path$Filename_Dispatch$attrValue.txt have a wrong syntax! ( ) [ ] is not allowed!" if (not $_ =~ /[a-zA-Z\d,_;=-]/);										# not other allowed
+					
 					chomp ($_);												# Zeilenende entfernen
-					$_ =~ s/[^A-Za-z0-9\-;,=]//g;;		# nur zulässige Zeichen erlauben
+					$_ =~ s/[^A-Za-z0-9\-;,=_]//g;;		# nur zulässige Zeichen erlauben
 
 					return "ERROR: the line $count in file $path$Filename_Dispatch$attrValue.txt have a wrong syntax! [<model>,<state>,<RAWMSG>]" if (not $_ =~ /^.*,.*,.*;.*/);
 					return "ERROR: the line $count in file $path$Filename_Dispatch$attrValue.txt have a wrong RAWMSG! syntax RAWMSG is wrong. no ; at end of line!" if (not $_ =~ /.*;$/);					# end of RAWMSG ;
@@ -1030,7 +1057,7 @@ sub SIGNALduino_TOOL_Attr() {
 sub SIGNALduino_TOOL_RAWMSG_Check($$$) {
 	my ( $name, $message, $cmd ) = @_;
 	$message =~ s/[^A-Za-z0-9\-;=]//g;;		# nur zulässige Zeichen erlauben
-	#Log3 $name, 4, "$name: RAWMSG_Check is running for $cmd with $message";
+	Log3 $name, 4, "$name: RAWMSG_Check is running for $cmd with $message";
 
 	return "ERROR: no attribute value defined" 	if ($message =~ /^1/ && $cmd eq "set");																			# attr without value
 	return "ERROR: wrong RAWMSG - no MU;|MC;|MS; at start" 	if not $message =~ /^(?:MU;|MC;|MS;).*/;												# Start with MU;|MC;|MS;
@@ -1081,9 +1108,10 @@ sub SIGNALduino_TOOL_RAWMSG_Check($$$) {
 	<ul><li><a name="All_ClockPulse"></a><code>All_ClockPulse</code> - calculates the average of the ClockPulse from Input_File</li><a name=""></a></ul>
 	<ul><li><a name="All_SyncPulse"></a><code>All_SyncPulse</code> - calculates the average of the SyncPulse from Input_File</li><a name=""></a></ul>
 	<ul><li><a name="FilterFile"></a><code>FilterFile</code> - creates a file with the filtered values</li><a name=""></a></ul>
-	<ul><li><a name="FilterFile_doublePulse"></a><code>FilterFile_doublePulse</code> - searches for duplicate pulses in the data part of the individual messages in the input_file and filters them into the export_file</li><a name=""></a></ul>
-	<ul><li><a name="FilterFile_one_ClockPulse"></a><code>FilterFile_one_ClockPulse</code> - Find the specified ClockPulse with 15% tolerance from the Input_File and filter the RAWMSG in the Export_File</li><a name=""></a></ul>
-	<ul><li><a name="FilterFile_one_SyncPulse"></a><code>FilterFile_one_SyncPulse</code> - Find the specified SyncPulse with 15% tolerance from the Input_File and filter the RAWMSG in the Export_File</li><a name=""></a></ul>
+	<ul><li><a name="InputFile_doublePulse"></a><code>InputFile_doublePulse</code> - searches for duplicate pulses in the data part of the individual messages in the input_file and filters them into the export_file</li><a name=""></a></ul>
+	<ul><li><a name="InputFile_length_Datapart"></a><code>InputFile_length_Datapart</code> - determines the min and max lenght of the readed RAWMSG.</li><a name=""></a></ul>
+	<ul><li><a name="InputFile_one_ClockPulse"></a><code>InputFile_one_ClockPulse</code> - Find the specified ClockPulse with 15% tolerance from the Input_File and filter the RAWMSG in the Export_File</li><a name=""></a></ul>
+	<ul><li><a name="InputFile_one_SyncPulse"></a><code>InputFile_one_SyncPulse</code> - Find the specified SyncPulse with 15% tolerance from the Input_File and filter the RAWMSG in the Export_File</li><a name=""></a></ul>
 	<ul><li><a name="TimingsList"></a><code>TimingsList</code> - created one file in csv format from the file &lt;signalduino_protocols.hash&gt; to use for import</li><a name=""></a></ul>
 	<ul><li><a name="change_bitMsg_to_hexMsg"></a><code>change_bitMsg_to_hexMsg</code> - converts the binary input to HEX</li><a name=""></a></ul>
 	<ul><li><a name="change_hexMsg_to_bitMsg"></a><code>change_hexMsg_to_bitMsg</code> - converts the hexadecimal input into binary</li><a name=""></a></ul>
@@ -1154,12 +1182,13 @@ sub SIGNALduino_TOOL_RAWMSG_Check($$$) {
 	<ul><li><a name="All_ClockPulse"></a><code>All_ClockPulse</code> - berechnet den Durchschnitt des ClockPulse aus der Input_Datei.</li><a name=""></a></ul>
 	<ul><li><a name="All_SyncPulse"></a><code>All_SyncPulse</code> - berechnet den Durchschnitt des SyncPulse aus der Input_Datei.</li><a name=""></a></ul>
 	<ul><li><a name="FilterFile"></a><code>FilterFile</code> - erstellt eine Datei mit den gefilterten Werten.</li><a name=""></a></ul>
-	<ul><li><a name="FilterFile_doublePulse"></a><code>FilterFile_doublePulse</code> - sucht nach doppelten Pulsen im Datenteil der einzelnen Nachrichten innerhalb der Input_Datei und filtert diese in die Export_Datei.</li><a name=""></a></ul>
-	<ul><li><a name="FilterFile_one_ClockPulse"></a><code>FilterFile_one_ClockPulse</code> - sucht den angegebenen ClockPulse mit 15% Tolleranz aus der Input_Datei und filtert die RAWMSG in die Export_Datei.</li><a name=""></a></ul>
-	<ul><li><a name="FilterFile_one_SyncPulse"></a><code>FilterFile_one_SyncPulse</code> - sucht den angegebenen SyncPulse mit 15% Tolleranz aus der Input_Datei und filtert die RAWMSG in die Export_Datei.</li><a name=""></a></ul>
+	<ul><li><a name="InputFile_doublePulse"></a><code>InputFile_doublePulse</code> - sucht nach doppelten Pulsen im Datenteil der einzelnen Nachrichten innerhalb der Input_Datei und filtert diese in die Export_Datei.</li><a name=""></a></ul>
+	<ul><li><a name="InputFile_length_Datapart"></a><code>InputFile_length_Datapart</code> - ermittelt die min und max L&auml;nge vom Datenteil der eingelesenen RAWMSG´s.</li><a name=""></a></ul>
+	<ul><li><a name="InputFile_one_ClockPulse"></a><code>InputFile_one_ClockPulse</code> - sucht den angegebenen ClockPulse mit 15% Tolleranz aus der Input_Datei und filtert die RAWMSG in die Export_Datei.</li><a name=""></a></ul>
+	<ul><li><a name="InputFile_one_SyncPulse"></a><code>InputFile_one_SyncPulse</code> - sucht den angegebenen SyncPulse mit 15% Tolleranz aus der Input_Datei und filtert die RAWMSG in die Export_Datei.</li><a name=""></a></ul>
 	<ul><li><a name="TimingsList"></a><code>TimingsList</code> - erstellt eine Liste der Protokolldatei &lt;signalduino_protocols.hash&gt; im CSV-Format welche zum Import genutzt werden kann</li><a name=""></a></ul>
 	<ul><li><a name="change_bitMsg_to_hexMsg"></a><code>change_bitMsg_to_hexMsg</code> - wandelt die binäre Eingabe in HEX.</li><a name=""></a></ul>
-	<ul><li><a name="change_hexMsg_to_bitMsg"></a><code>change_hexMsg_to_bitMsg</code> - wandelt die hexadezimale Eingabe in binär.</li><a name=""></a></ul>
+	<ul><li><a name="change_hexMsg_to_bitMsg"></a><code>change_hexMsg_to_bitMsg</code> - wandelt die hexadezimale Eingabe in bin&auml;r.</li><a name=""></a></ul>
 	<ul><li><a name="invert_bitMsg"></a><code>invert_bitMsg</code> - invertiert die eingegebene binäre Nachricht.</li><a name=""></a></ul>
 	<ul><li><a name="invert_hexMsg"></a><code>invert_hexMsg</code> - invertiert die eingegebene hexadezimale Nachricht.</li><a name=""></a></ul>
 	<br><br>

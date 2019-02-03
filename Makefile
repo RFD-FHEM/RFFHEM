@@ -38,6 +38,7 @@ test: deploylocal
 	test/test-runner.sh test_firmware_download_1
 	test/test-runner.sh test_modulematch_1
 	test/test-runner.sh test_sub_SIGNALduino_OSV2
+	test/test-runner.sh test_sub_MCTFA
 	test/test-runner.sh test_sub_SIGNALduino_getAttrDevelopment
 	@echo === finished unit tests ===
 	sudo timeout 30 killall -vw perl || sudo killall -vws9 perl
