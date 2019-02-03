@@ -1,3 +1,11 @@
+03.02.2019
+ 00_SIGNALduino - Handling and functionality of webmenu "Display protocollist" enhanced
+10.01.2019
+ 14_SD_RSL.pm - Updated implementation for "all" button on device
+06.01.2019
+ 14_SD_WS.pm - Protocol 33 add temperature/humidity sensor TX-EZ6 for weatherstation TZS First Austria
+01.01.2019
+ 14_SD_UT.pm - added new model Atlantic Security
 01.01.2019
  signalduino_protocols.hash - added ID 0.4 (Auriol Z31092) + revised doc + fix ID92 + fix CP ID40
 30.12.2018

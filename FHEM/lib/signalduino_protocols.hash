@@ -15,6 +15,7 @@
 # one         => [ , ]     # only MU + MS signals | value pair for a one bit, must be always a positive and negative factor of clockabs (accepted . | example 1.5)
 # zero        => [ , ]     # only MU + MS signals | value pair for a zero bit, must be always a positive and negative factor of clockabs (accepted . | example -1.5)
 # start       => [ , ]     # only MU - value pair or more for start message
+# preSync     => [ , ]     # only MU + MS - value pair or more for preamble pulse of signal
 # sync        => [ , ]     # only MS - value pair or more for sync pulse of signal
 # float       => [ , ]     # only MU + MS signals | Convert 0F -> 01 (F) to be compatible with CUL
 # pause       => [ ]       # delay when sending between two signals (clockabs * pause must be < 32768
@@ -1350,7 +1351,7 @@
 			knownFreqs      => '',
 			clockrange			=> [460,520],			# min , max
 			format					=> 'manchester',	# tristate can't be migrated from bin into hex!
-			clientmodule		=> '',
+			clientmodule		=> 'SD_WS',
 			modulematch			=> '^W58*',
 			preamble				=> 'W58#',
 			length_min			=> '54',
@@ -1868,11 +1869,13 @@
 			knownFreqs		=> '',
 			developId			=> 'm',
 			dispatchBin		=> '1',
+			paddingbits		=> '1',      # disable padding
 			one						=> [1,-2],			# on=400us, off=800us
 			zero					=> [2,-1],			# on=800us, off=400us
 			float					=> [1,-8],			# on=400us, off=3200us. the preamble and each 10bit word has one [1,-8] in front
 			pause					=> [1,-1],			# preamble (5x)
 			clockabs			=> 400,					# 400us
+			format				=> 'twostate',
 			preamble			=> 'P82#',			# prepend our protocol number to converted message
 			clientmodule	=> 'Fernotron',
 			length_min		=> '100',				# actual 120 bit (12 x 10bit words to decode 6 bytes data), but last 20 are for checksum
@@ -1995,13 +1998,15 @@
 						# MS;P1=1524;P2=-413;P3=388;P4=-3970;P5=-815;P6=778;P7=-16024;D=34353535623562626262626235626262353562623535623562626235356235626262623562626262626262626262626262623535626235623535353535626262356262626262626267123232323232323232323232;CP=3;SP=4;R=226;O;m2;
 						# MS;P0=-15967;P1=1530;P2=-450;P3=368;P4=-3977;P5=-835;P6=754;D=34353562623535623562623562356262626235353562623562623562626235353562623562626262626262626262626262623535626235623535353535626262356262626262626260123232323232323232323232;CP=3;SP=4;R=229;O;
 		{
-			name					=> 'JAROLIFT',
+			name				=> 'JAROLIFT',
 			comment				=> 'remote control JAROLIFT TDRC_16W / TDRCT_04W',
-			id						=> '87',
-			knownFreqs		=> '433.92',
-			one						=> [1,-2],
-			zero					=> [2,-1],
-			sync					=> [1,-10],				# this is a end marker, but we use this as a start marker
+			id				=> '87',
+			knownFreqs			=> '433.92',
+			one				=> [1,-2],
+			zero				=> [2,-1],
+			preSync				=> [3.8,-1, 1,-1, 1,-1, 1,-1, 1,-1, 1,-1, 1,-1, 1,-1, 1,-1, 1,-1, 1,-1, 1,-1, 1,-1],
+			sync				=> [1,-10],				# this is a end marker, but we use this as a start marker
+			pause				=> [-40],
 			clockabs			=> 400,						# ca 400us
 			developId			=> 'y',
 			format				=> 'twostate',
@@ -2086,20 +2091,19 @@
 						# MU;P0=14292;P1=-10684;P2=398;P3=-803;P4=-406;P5=806;P6=-4001;D=01232324532453232454532453245454532324545323232453245324562454532324532454532323245324532324545324532454545323245453232324532453245624545323245324545323232453245323245453245324545453232454532323245324532456245453232453245453232324532453232454532453245454;CP=2;R=50;O;
 		{
 			name					=> 'Atlantic security',
-			comment				=> 'example: sensor MD-210R (MU decode)',
+			comment				=> 'example sensor MD-210R | MD-2018R | MD-2003R (MU decode)',
 			id						=> '91',
 			knownFreqs		=> '433.92 | 868.35',
-			zero					=> [-2,1],
-			one						=> [-1,2],
+			one           => [-2,1],
+			zero          => [-1,2],
 			start					=> [-10,1],
 			clockabs			=> 400,
 			format				=> 'twostate',	#
-			preamble			=> 'u91#',			# prepend to converted message
+			preamble			=> 'P91#',			# prepend to converted message
 			length_min		=> '36',
 			length_max		=> '36',
-			#clientmodule	=> 'SD_UT',
+			clientmodule	=> 'SD_UT',
 			#modulematch	=> '^P91#.*',
-			developId     => 'y',
 		},
 	"91.1"	=>	## Atlantic Security / Focus Security China Devices
 						# https://forum.fhem.de/index.php/topic,58397.msg878008.html#msg878008
@@ -2107,20 +2111,19 @@
 						# MS;P1=392;P2=-824;P3=-416;P4=804;P5=-4034;D=15121343421343434212121342121212121342134342121212121213434212121343434212;CP=1;SP=5;e;m2;
 		{
 			name					=> 'Atlantic security',
-			comment				=> 'example: sensor MD-210R (MS decode)',
+			comment				=> 'example sensor MD-210R | MD-2018R | MD-2003R (MS decode)',
 			id						=> '91.1',
 			knownFreqs		=> '433.92 | 868.35',
-			zero					=> [-2,1],
-			one						=> [-1,2],
+			one           => [-2,1],
+			zero          => [-1,2],
 			sync					=> [-10,1],
 			clockabs			=> 400,
 			format				=> 'twostate',	#
-			preamble			=> 'u91.1#',		# prepend to converted message
+			preamble			=> 'P91.1#',		# prepend to converted message
 			length_min		=> '32',
 			length_max		=> '36',
-			#clientmodule	=> 'SD_UT',
+			clientmodule	=> 'SD_UT',
 			#modulematch	=> '^P91.1#.*',
-			developId     => 'y',
 		},
 	"92"	=>	## KRINNER Lumix - LED X-MAS
 						# https://github.com/RFD-FHEM/RFFHEM/issues/452 | https://forum.fhem.de/index.php/topic,94873.msg876477.html?PHPSESSID=khp4ja64pcqa5gsf6gb63l1es5#msg876477

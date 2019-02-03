@@ -171,7 +171,7 @@ my %matchListSIGNALduino = (
 			"14:Dooya"						=> '^P16#[A-Fa-f0-9]+',
 			"15:SOMFY"						=> '^Ys[0-9A-F]+',
 			"16:SD_WS_Maverick"		=> '^P47#[A-Fa-f0-9]+',
-			"17:SD_UT"						=> '^P(?:14|29|30|34|46|69|76|81|83|86|92)#.*',		# universal - more devices with different protocols
+			"17:SD_UT"						=> '^P(?:14|29|30|34|46|69|76|81|83|86|91|91.1|92)#.*',		# universal - more devices with different protocols
 			"18:FLAMINGO"					=> '^P13\.?1?#[A-Fa-f0-9]+',							# Flamingo Smoke
 			"19:CUL_WS"						=> '^K[A-Fa-f0-9]{5,}',
 			"20:Revolt"						=> '^r[A-Fa-f0-9]{22}',
@@ -738,7 +738,7 @@ SIGNALduino_Set($@)
 	my $cnt=0;
 	
 	my $sendData;
-	if  ($ProtocolListSIGNALduino{$protocol}{format} eq 'manchester')
+	if  (exists($ProtocolListSIGNALduino{$protocol}{format}) && $ProtocolListSIGNALduino{$protocol}{format} eq 'manchester')
 	{
 		#$clock = (map { $clock += $_ } @{$ProtocolListSIGNALduino{$protocol}{clockrange}}) /  2 if (!defined($clock));
 		
@@ -786,7 +786,7 @@ SIGNALduino_Set($@)
 
 		SIGNALduino_Log3 $name, 5, "$name: sendmsg Preparing rawsend command for protocol=$protocol, repeats=$repeats, clock=$clock bits=$data";
 		
-		foreach my $item (qw(sync start one zero float pause end))
+		foreach my $item (qw(preSync sync start one zero float pause end universal))
 		{
 		    #print ("item= $item \n");
 		    next if (!exists($ProtocolListSIGNALduino{$protocol}{$item}));
@@ -807,9 +807,10 @@ SIGNALduino_Set($@)
 		}
 		my @bits = split("", $data);
 	
-		my %bitconv = (1=>"one", 0=>"zero", 'D'=> "float", 'F'=> "float", 'P'=> "pause");
+		my %bitconv = (1=>"one", 0=>"zero", 'D'=> "float", 'F'=> "float", 'P'=> "pause", 'U'=> "universal");
 		my $SignalData="D=";
 		
+		$SignalData.=$signalHash{preSync} if (exists($signalHash{preSync}));
 		$SignalData.=$signalHash{sync} if (exists($signalHash{sync}));
 		$SignalData.=$signalHash{start} if (exists($signalHash{start}));
 		foreach my $bit (@bits)
@@ -1472,7 +1473,7 @@ SIGNALduino_Read($)
 	{
 		my $regexp;
 		if ($hash->{getcmd}->{cmd} eq 'sendraw') {
-			$regexp = '^S(R|C|M);';
+			$regexp = '^S(?:R|C|M);.';
 		}
 		elsif ($hash->{getcmd}->{cmd} eq 'ccregAll') {
 			$regexp = '^ccreg 00:';
