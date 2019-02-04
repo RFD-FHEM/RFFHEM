@@ -2078,11 +2078,11 @@
 			sync         => [1,-36],
 			clockabs     => 280,						# -1=auto	
 			format       => 'twostate',
-			preamble     => 'u90#',			
+			preamble     => 'P90#',
 			length_min   => '33',
 			length_max   => '36',
-			#clientmodule	=> 'IT',
-			#modulematch	=> '^P90#.*',
+			clientmodule => 'SD_UT',
+			modulematch	=> '^P90#.*',
 			developId    => 'y',
 		},
 	"91"	=>	## Atlantic Security / Focus Security China Devices
