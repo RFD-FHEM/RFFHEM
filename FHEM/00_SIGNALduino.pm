@@ -2933,7 +2933,7 @@ sub SIGNALduino_FW_saveWhitelist
 
 sub SIGNALduino_IdList($@)
 {
-	my ($param, $aVal, $blacklist, $develop) = @_;
+	my ($param, $aVal, $blacklist, $develop0) = @_;
 	my (undef,$name) = split(':', $param);
 	my $hash = $defs{$name};
 
@@ -2954,7 +2954,7 @@ sub SIGNALduino_IdList($@)
 		$aVal = AttrVal($name,"whitelist_IDs","");
 	}
 	
-	my ($develop,$devFlag) = SIGNALduino_getAttrDevelopment($name, $develop);	# $devFlag = 1 -> alle developIDs y aktivieren
+	my ($develop,$devFlag) = SIGNALduino_getAttrDevelopment($name, $develop0);	# $devFlag = 1 -> alle developIDs y aktivieren
 	SIGNALduino_Log3 $name, 3, "$name IDlist development version active: development attribute = $develop" if ($devFlag == 1);
 	
 	if ($aVal eq "" || substr($aVal,0 ,1) eq '#') {		# whitelist nicht aktiv
