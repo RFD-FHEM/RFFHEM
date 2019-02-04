@@ -2056,6 +2056,7 @@ SIGNALduino_Parse_MS($$$$%)
 			$valid = $valid && ($pstr=SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{sync}},\%patternList,\$rawData)) >=0;
 			Debug "Found matched sync with indexes: ($pstr)" if ($debug && $valid);
 			$patternLookupHash{$pstr}="" if ($valid); ## Append Sync to our lookuptable
+			$endPatternLookupHash{substr($pstr,0,length($pstr)-1)}="" if ($valid); ## Append Sync to our lookuptable
 			my $syncstr=$pstr; # Store for later start search
 
 			Debug "sync not found " if (!$valid && $debug); # z.B. [1, -18] 
@@ -2075,7 +2076,9 @@ SIGNALduino_Parse_MS($$$$%)
 			
 			$valid = $valid && ($pstr=SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}},\%patternList,\$rawData)) >=0;
 			Debug "Found matched one with indexes: ($pstr)" if ($debug && $valid);
-			$patternLookupHash{$pstr}="1" if ($valid); ## Append Sync to our lookuptable
+			$patternLookupHash{$pstr}="1" if ($valid); ## Append one to our lookuptable
+			$endPatternLookupHash{substr($pstr,0,length($pstr)-1)}="1" if ($valid); ## Append one to our endbit lookuptable
+			#SIGNALduino_Log3 $name, 4, "$name: Sync 1 ".$pstr." -> ".substr($pstr,0,length($pstr)-1)." eingetragen"  if ($valid);
 			$endPatternLookupHash{substr($pstr,0,$signal_width-1)}="1" if ($valid && exists($ProtocolListSIGNALduino{$id}{reconstructBit})); ## Append one to our endbit lookuptable
 			#Debug "added $pstr " if ($debug && $valid);
 			Debug "one pattern not found" if ($debug && !$valid);
@@ -2122,6 +2125,9 @@ SIGNALduino_Parse_MS($$$$%)
 					push(@bit_msg,$lastbit);
 					SIGNALduino_Log3 $name, 4, "$name: last part pair=$sigStr reconstructed, bit=$lastbit";
 					last;
+				} elsif ((length($sig_str)< $signal_width ) && (exists $endPatternLookupHash{$sig_str})) {
+					SIGNALduino_Log3 $name, 5, "$name: last bit reconstructed";
+					push(@bit_msg,$endPatternLookupHash{$sig_str})
 				} else {
 					SIGNALduino_Log3 $name, 5, "$name: Found wrong signalpattern $sigStr, catched ".scalar @bit_msg." bits, aborting demodulation";
 					last;
