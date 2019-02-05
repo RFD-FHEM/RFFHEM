@@ -15,6 +15,7 @@
 # one         => [ , ]     # only MU + MS signals | value pair for a one bit, must be always a positive and negative factor of clockabs (accepted . | example 1.5)
 # zero        => [ , ]     # only MU + MS signals | value pair for a zero bit, must be always a positive and negative factor of clockabs (accepted . | example -1.5)
 # start       => [ , ]     # only MU - value pair or more for start message
+# preSync     => [ , ]     # only MU + MS - value pair or more for preamble pulse of signal
 # sync        => [ , ]     # only MS - value pair or more for sync pulse of signal
 # float       => [ , ]     # only MU + MS signals | Convert 0F -> 01 (F) to be compatible with CUL
 # pause       => [ ]       # delay when sending between two signals (clockabs * pause must be < 32768
@@ -1343,20 +1344,21 @@
 			polarity				=> 'invert',
 		},
 	"58"	=>	## TFA 30.3208.0
+			# MC;LL=-981;LH=964;SL=-480;SH=520;D=002BA37EBDBBA24F0015D1BF5EDDD127800AE8DFAF6EE893C;C=486;L=194;
 		{
-			name						=> 'TFA 30.3208.0',
-			comment					=> 'temperature / humidity sensor',
-			id							=> '58',
-			knownFreqs      => '',
+			name				=> 'TFA 30.3208.0',
+			comment				=> 'temperature / humidity sensor',
+			id				=> '58',
+			#knownFreqs			=> '',
 			clockrange			=> [460,520],			# min , max
-			format					=> 'manchester',	# tristate can't be migrated from bin into hex!
-			clientmodule		=> 'SD_WS',
+			format				=> 'manchester',	# tristate can't be migrated from bin into hex!
+			clientmodule			=> 'SD_WS',
 			modulematch			=> '^W58*',
-			preamble				=> 'W58#',
-			length_min			=> '54',
-			length_max			=> '136',
-			method					=> \&SIGNALduino_MCTFA, # Call to process this message
-			polarity				=> 'invert',
+			preamble			=> 'W58#',
+			length_min			=> '52',	# 54
+			length_max			=> '52',	# 136
+			method				=> \&SIGNALduino_MCTFA, # Call to process this message
+			polarity			=> 'invert',
 		},
 	"59"	=>	## AK-HD-4 remote | 4 Buttons
 						# https://github.com/RFD-FHEM/RFFHEM/issues/133
@@ -2004,7 +2006,9 @@
 			knownFreqs			=> '433.92',
 			one				=> [1,-2],
 			zero				=> [2,-1],
+			preSync				=> [3.8,-1, 1,-1, 1,-1, 1,-1, 1,-1, 1,-1, 1,-1, 1,-1, 1,-1, 1,-1, 1,-1, 1,-1, 1,-1],
 			sync				=> [1,-10],				# this is a end marker, but we use this as a start marker
+			pause				=> [-40],
 			clockabs			=> 400,						# ca 400us
 			reconstructBit			=> '1',
 			developId			=> 'y',
