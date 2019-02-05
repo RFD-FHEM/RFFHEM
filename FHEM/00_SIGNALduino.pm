@@ -2430,20 +2430,8 @@ sub SIGNALduino_Parse_MU($$$$@)
 					elsif (exists($ProtocolListSIGNALduino{$id}{reconstructBit}) && exists($endPatternLookupHash{$sigStr})) {
 						my $lastbit = $endPatternLookupHash{$sigStr};
 						push(@bit_msg,$lastbit);
-						SIGNALduino_Log3 $name, 5, "$name: last part pair=$sigStr reconstructed, bit=$lastbit";
+						SIGNALduino_Log3 $name, 4, "$name: last part pair=$sigStr reconstructed, bit=$lastbit";
 					}
-				}
-				
-				if (exists($ProtocolListSIGNALduino{$id}{reconstructBit}) && length($1) %2 == 1) {  # Laenge ungerade
-					my $lastHalfPair = substr($1,-1);
-					my $lastbit;
-					if ($firstOne eq $lastHalfPair) {
-						$lastbit='1';
-					} elsif ($firstZero eq $lastHalfPair) {
-						$lastbit='0';
-					}
-					SIGNALduino_Log3 $name, 5, "$name: last half pair=$lastHalfPair reconstructed, bit=$lastbit)";
-					push(@bit_msg,$lastbit);
 				}
 				
 				Debug "$name: demodulated message raw (@bit_msg), ".@bit_msg." bits\n" if ($debug);
