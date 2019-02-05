@@ -1,3 +1,5 @@
+05.02.2019
+ 00_SIGNALduino - improved an option to detecct the last bit better if data for the last bit is not complete
 03.02.2019
  00_SIGNALduino - Handling and functionality of webmenu "Display protocollist" enhanced
 17.01.2019
