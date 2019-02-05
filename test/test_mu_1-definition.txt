@@ -25,6 +25,30 @@ defmod test_mu_1 UnitTest dummyDuino (
 		is( ($SD_Dispatch->called_with)[4], "49", "SIGNALduno_Dispatch check id " );
 		is( ($SD_Dispatch->called_with)[2], "U49#8B2DB0", "SIGNALduno_Dispatch check dmsg" );
 	};
+	subtest 'mu reconstruct lastbit is 1' => sub {
+		plan tests => 4;
+	    SIGNALduino_IdList("sduino_IdList:$targetHash->{NAME}",9);
+		$SD_Dispatch->reset();
+		my $rmsg="MU;P0=-987;P1=144;P2=522;P3=1495;CP=2;R=244;D=0102020202020202020203020303030202020203030303030203020202020203020302030302030302030303030303030303030303030303020303030302020303030202030202020303030303020202030302020303020202;";
+		my %signal_parts=SIGNALduino_Split_Message($rmsg,$targetHash->{NAME});
+		ok(SIGNALduino_Parse_MU($targetHash, $targetHash, $targetHash->{NAME}, $rmsg,%signal_parts) ,"check if MU Data is dispatched");
+		is($SD_Dispatch->called_count, 1, "check number of dispatch attempts");
+		is( ($SD_Dispatch->called_with)[4], "9", "SIGNALduno_Dispatch check id " );
+		is( ($SD_Dispatch->called_with)[2], "P9#FFA3C17D4900010C6E0E67", "SIGNALduno_Dispatch check dmsg" );
+	};
+	
+	subtest 'mu reconstruct lastbit is 0' => sub {
+		plan tests => 4;
+	    SIGNALduino_IdList("sduino_IdList:$targetHash->{NAME}",9);
+		$SD_Dispatch->reset();
+		my $rmsg="MU;P0=-987;P1=144;P2=522;P3=1495;CP=2;R=244;D=0102020202020202020203020303030202020203030303030203020202020203020302030302030302030303030303030303030303030303020303030302020303030202030202020303030303020202030302020303020203;";
+		my %signal_parts=SIGNALduino_Split_Message($rmsg,$targetHash->{NAME});
+		ok(SIGNALduino_Parse_MU($targetHash, $targetHash, $targetHash->{NAME}, $rmsg,%signal_parts) ,"check if MU Data is dispatched");
+		is($SD_Dispatch->called_count, 1, "check number of dispatch attempts");
+		is( ($SD_Dispatch->called_with)[4], "9", "SIGNALduno_Dispatch check id " );
+		is( ($SD_Dispatch->called_with)[2], "P9#FFA3C17D4900010C6E0E66", "SIGNALduno_Dispatch check dmsg" );
+	};
+
     SIGNALduino_IdList("sduino_IdList:$targetHash->{NAME}");
  }
 );

@@ -2342,6 +2342,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 			Debug "Found matched one" if ($debug);
 
 			$oneRegex=$pstr;
+			$endPatternLookupHash{substr($pstr,0,length($pstr)-1)}="1"; ## Append one to our endbit lookuptable
 			$patternLookupHash{$pstr}="1";		## Append one to our lookuptable
 			Debug "added $pstr " if ($debug);
 			
@@ -2356,13 +2357,15 @@ sub SIGNALduino_Parse_MU($$$$@)
 
 				$zeroRegex='|' . $pstr;
 				$patternLookupHash{$pstr}="0";		## Append zero to our lookuptable
-				Debug "added $pstr " if ($debug);
+				$endPatternLookupHash{substr($pstr,0,length($pstr)-1)}="0";
+				Debug "added $pstr " if ($debug); # Append zero to our endbit lookuptable
 			}
 
 			if (exists($ProtocolListSIGNALduino{$id}{float}) && ($pstr=SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{float}},\%patternList,\$rawData)) >=0)
 			{
 				Debug "Found matched float" if ($debug);
 				$floatRegex='|' . $pstr;
+				$endPatternLookupHash{substr($pstr,0,length($pstr)-1)}="F"; ## Appemd float to our endbit lookuptable
 				$patternLookupHash{$pstr}="F";		## Append float to our lookuptable
 				Debug "added $pstr " if ($debug);
 			}
@@ -2377,20 +2380,9 @@ sub SIGNALduino_Parse_MU($$$$@)
 			
 			my $signalRegex = "(?:" . $oneRegex . $zeroRegex . $floatRegex . "){$length_min,}";
 			
-			if (exists($ProtocolListSIGNALduino{$id}{reconstructBit}) && $signal_width > 1) {
-				my $partOne = substr($oneRegex,0,$signal_width-1);
-				$endPatternLookupHash{$partOne} = "1";
-				my $partZero = "";
-				if ($zeroRegex ne "") {
-					$partZero = substr($zeroRegex,0,$signal_width);
-					$endPatternLookupHash{substr($partZero,1)} = "0";		# "|" am Anfang entfernen
-				}
-				my $partFloat = "";
-				if ($floatRegex ne "") {
-					$partFloat = substr($floatRegex,0,$signal_width);
-					$endPatternLookupHash{substr($partFloat,1)} = "F";		# "|" am Anfang entfernen
-				}
-				$signalRegex .= "(?:" . $partOne . $partZero . $partFloat . ")?";
+			if (exists($ProtocolListSIGNALduino{$id}{reconstructBit})) {
+				
+				$signalRegex .= "(?:" . join("|",keys %endPatternLookupHash) . ")?";
 			}
 			Debug "signalRegex is $signalRegex " if ($debug);
 
@@ -2434,17 +2426,6 @@ sub SIGNALduino_Parse_MU($$$$@)
 					}
 				}
 				
-				if (exists($ProtocolListSIGNALduino{$id}{reconstructBit}) && length($1) %2 == 1) {  # Laenge ungerade
-					my $lastHalfPair = substr($1,-1);
-					my $lastbit;
-					if ($firstOne eq $lastHalfPair) {
-						$lastbit='1';
-					} elsif ($firstZero eq $lastHalfPair) {
-						$lastbit='0';
-					}
-					SIGNALduino_Log3 $name, 5, "$name: last half pair=$lastHalfPair reconstructed, bit=$lastbit)";
-					push(@bit_msg,$lastbit);
-				}
 				
 				Debug "$name: demodulated message raw (@bit_msg), ".@bit_msg." bits\n" if ($debug);
 
