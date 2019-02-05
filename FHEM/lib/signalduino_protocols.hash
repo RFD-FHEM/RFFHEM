@@ -25,7 +25,7 @@
 # paddingbits => '1'       # will disable padding, use this setting when using dispatchBin
 # paddingbits => '2'       # is padded to an even number, that is a maximum of 1 bit
 # remove_zero => 1         # removes leading zeros from output
-# reconstructBit => 1      # if set, then the last bit is reconstructed if the rest is missing
+# reconstructBit => 1      # if set, then the last bit is reconstructed if the last pulse is missing
 #
 # developId   => 'm'       # logical module is under development
 # developId   => 'p'       # protocol is under development or to reserve IDs, the ID in the development attribute with developId => 'p' are only used without the other entries
