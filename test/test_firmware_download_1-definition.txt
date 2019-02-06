@@ -32,7 +32,7 @@ defmod test_firmware_download_1 UnitTest dummyDuino
 	};
 	
 	subtest 'check prerelease without hardware parameter set' => sub {
-		plan tests => 1;
+		plan tests => 2;
 		my $param = {
 			hash       => $targetHash,    
 			command    => "queryReleases"
@@ -45,10 +45,9 @@ defmod test_firmware_download_1 UnitTest dummyDuino
 			Log3 $name , 3, "json @json";
 			my $jsonstr=join ("\n",@json);
 			SIGNALduino_githubParseHttpResponse($param,"",$jsonstr);
-			TODO: {
-				local $TODO = "hardware check not implemented";
-				unlike($targetHash->{additionalSets}{flash},qr/3.3.1-RC10/,"check if testing firmware is found");
-			}
+			ok(exists($targetHash->{additionalSets}{flash}),"check if additionalSets are created");
+			local $TODO = "hardware check not implemented";
+			unlike($targetHash->{additionalSets}{flash},qr/3.3.1-RC10/,"check if testing firmware isn't found");
 		} else {
 			diag("open json firmware file was not possible $error");
 		}
@@ -87,10 +86,7 @@ defmod test_firmware_download_1 UnitTest dummyDuino
 			Log3 $name , 3, "json @json";
 			my $jsonstr=join ("\n",@json);
 			SIGNALduino_githubParseHttpResponse($param,"",$jsonstr);
-			TODO: {
-				local $TODO = "hardware check not implemented";
-				like($targetHash->{additionalSets}{flash},qr/3.3.1-RC10/,"check if testing firmware is found");
-			}
+			unlike($targetHash->{additionalSets}{flash},qr/3.3.1-RC10/,"check if testing firmware is found");
 		} else {
 			diag("open json firmware file was not possible $error");
 		}
@@ -110,10 +106,7 @@ defmod test_firmware_download_1 UnitTest dummyDuino
 			Log3 $name , 3, "json @json";
 			my $jsonstr=join ("\n",@json);
 			SIGNALduino_githubParseHttpResponse($param,"",$jsonstr);
-			TODO: {
-				local $TODO = "hardware check not implemented";
-				unlike($targetHash->{additionalSets}{flash},qr/3.3.0/,"check if testing firmware is found");
-			}
+			unlike($targetHash->{additionalSets}{flash},qr/3.3.0/,"check if testing firmware is found");
 		} else {
 			diag("open json firmware file was not possible $error");
 		}
@@ -132,7 +125,6 @@ defmod test_firmware_download_1 UnitTest dummyDuino
 			Log3 $name , 3, "json @json";
 			my $jsonstr=join ("\n",@json);
 			SIGNALduino_githubParseHttpResponse($param,"",$jsonstr);
-			local $TODO = "hardware check not implemented";
 			like($targetHash->{additionalSets}{flash},qr/3.3.0/,"check if testing firmware is found");
 		} else {
 			diag("open json firmware file was not possible $error");

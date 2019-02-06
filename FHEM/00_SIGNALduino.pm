@@ -4445,70 +4445,50 @@ sub SIGNALduino_githubParseHttpResponse($$$)
     my ($param, $err, $data) = @_;
     my $hash = $param->{hash};
     my $name = $hash->{NAME};
+    my $hardware=AttrVal($name,"hardware",undef);
+    
     if($err ne "")                                                                                                         # wenn ein Fehler bei der HTTP Abfrage aufgetreten ist
     {
         Log3 $name, 3, "error while requesting ".$param->{url}." - $err (command: $param->{command}";                                                  # Eintrag fuers Log
         #readingsSingleUpdate($hash, "fullResponse", "ERROR");                                                              # Readings erzeugen
     }
 
-    elsif($data ne "")                                                                                                     # wenn die Abfrage erfolgreich war ($data enthaelt die Ergebnisdaten des HTTP Aufrufes)
+    elsif($data ne "" && defined($hardware))                                                                                                     # wenn die Abfrage erfolgreich war ($data enthaelt die Ergebnisdaten des HTTP Aufrufes)
     {
     	my $json_array = decode_json($data);
     	#print  Dumper($json_array);
-    	
        	if ($param->{command} eq "queryReleases") {
 	        #Log3 $name, 3, "url ".$param->{url}." returned: $data";                                                            # Eintrag fuers Log
-	
+			
+			my $releaselist="";
 			my @fwreleases;
 			if (ref($json_array) eq "ARRAY") {
 				foreach my $item( @$json_array ) { 
+					next if (AttrVal($name,"updateChannelFW","stable") eq "stable" && $item->{prerelease});
+
 					my %fwrelease;
+					$fwrelease{isprerelease} = $item->{prerelease};
 		
 					#Debug " item = ".Dumper($item);
-					$fwrelease{releasename} = $item->{name};
-					$fwrelease{isprerelease} = $item->{prerelease};
-					$fwrelease{tagname} = $item->{tag_name}; # Anzeige in Auswahlbox
 					
 					foreach my $asset (@{$item->{assets}})
 					{
-				    	my %fileinfo;
-						
-						$fileinfo{filename} = $asset->{name};
-						$fileinfo{dlurl} = $asset->{browser_download_url};
-						$fileinfo{create_date} = $asset->{created_at};
-						push @{$fwrelease{files}}, \%fileinfo;
-						
+						next if ($asset->{name} !~ m/$hardware/i);
+						$releaselist.=$item->{tag_name}."," ;		
+						last;
 					}
-		            #Debug $item->{name}.": ".$item->{prerelease}.", ".$item->{assets}[0]->{name}."=".$item->{assets}[0]->{browser_download_url};
-		            
-		            
-		      
-				   #for my $key (keys(%$item)) {
-				     # my $val = $item->{$key};
-		      		  
-		      		#  print "$key: $val\n";
-		      		  
-		    		#}
-					push @fwreleases, \%fwrelease;
-			
+					
 				}
 			}
 			#Debug " releases = ".Data::Dumper->new([\@fwreleases],[qw(fwreleases)])->Indent(3)->Quotekeys(0)->Dump;
 			
-			my $releaselist="";
-			foreach my $release (@fwreleases)
-			{
-				next if (AttrVal($name,"updateChannelFW","stable") eq "stable" && $release->{isprerelease});
-				
-				$releaselist.=$release->{tagname}.",";
-			}
 			$releaselist =~ s/,$//;
 			
 	        # An dieser Stelle die Antwort parsen / verarbeiten mit $data
 	        #Debug "updating update set with: $releaselist";
 	
 	
-		  $hash->{additionalSets}{flash} = $releaselist;
+		  	$hash->{additionalSets}{flash} = $releaselist;
 	
 	
 	      #readingsSingleUpdate($hash, "fullResponse", $data);                                                                # Readings erzeugen
@@ -4538,8 +4518,11 @@ sub SIGNALduino_githubParseHttpResponse($$$)
 				}
 			}
 			
-    	}
-    }
+    	} 
+    } elsif (!defined($hardware))  {
+    	SIGNALduino_Log3  $name, 3, "$name: attribute hardware is not set. Query firmware is not possible!";    	
+    	
+    }                                                                                              # wenn
     # Damit ist die Abfrage zuende.
     # Evtl. einen InternalTimer neu schedulen
     FW_directNotify("#FHEMWEB:$FW_wname", "location.reload('true')", "");
