@@ -4440,12 +4440,11 @@ sub SIGNALduino_querygithubreleases
     HttpUtils_NonblockingGet($param);                                                                                     # Starten der HTTP Abfrage. Es gibt keinen Return-Code. 
 }
 
-sub SIGNALduino_githubParseHttpResponse($)
+sub SIGNALduino_githubParseHttpResponse($$$)
 {
     my ($param, $err, $data) = @_;
     my $hash = $param->{hash};
     my $name = $hash->{NAME};
-
     if($err ne "")                                                                                                         # wenn ein Fehler bei der HTTP Abfrage aufgetreten ist
     {
         Log3 $name, 3, "error while requesting ".$param->{url}." - $err (command: $param->{command}";                                                  # Eintrag fuers Log
