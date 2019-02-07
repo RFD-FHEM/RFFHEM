@@ -46,7 +46,6 @@ defmod test_firmware_download_1 UnitTest dummyDuino
 			my $jsonstr=join ("\n",@json);
 			SIGNALduino_githubParseHttpResponse($param,"",$jsonstr);
 			ok(exists($targetHash->{additionalSets}{flash}),"check if additionalSets are created");
-			local $TODO = "hardware check not implemented";
 			unlike($targetHash->{additionalSets}{flash},qr/3.3.1-RC10/,"check if testing firmware isn't found");
 		} else {
 			diag("open json firmware file was not possible $error");
