@@ -2118,9 +2118,17 @@ SIGNALduino_Parse_MS($$$$%)
 				#Debug $patternLookupHash{substr($rawData,$i,$signal_width)}; ## Get $signal_width number of chars from raw data string
 				if (exists $patternLookupHash{$sigStr}) { ## Add the bits to our bit array
 					push(@bit_msg,$patternLookupHash{$sigStr});
-				} elsif (exists($ProtocolListSIGNALduino{$id}{reconstructBit}) && exists($endPatternLookupHash{$sigStr})) {
-					push(@bit_msg,$endPatternLookupHash{$sigStr});
-					SIGNALduino_Log3 $name, 4, "$name: last part pair=$sigStr reconstructed, bit=$endPatternLookupHash{$sigStr}";
+				} elsif (exists($ProtocolListSIGNALduino{$id}{reconstructBit})) {
+					if (length($sigStr) == $signal_width) {			# ist $sigStr zu lang?
+						$sigStr = substr($sigStr,0,$signal_width-1);
+					}
+					if (exists($endPatternLookupHash{$sigStr})) {
+						push(@bit_msg,$endPatternLookupHash{$sigStr});
+						SIGNALduino_Log3 $name, 4, "$name: last part pair=$sigStr reconstructed, last bit=$endPatternLookupHash{$sigStr}";
+					}
+					else {
+						SIGNALduino_Log3 $name, 5, "$name: can't reconstruct last part pair=$sigStr";
+					}
 					last;
 				} else {
 					SIGNALduino_Log3 $name, 5, "$name: Found wrong signalpattern $sigStr, catched ".scalar @bit_msg." bits, aborting demodulation";
