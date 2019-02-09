@@ -1408,7 +1408,7 @@ SIGNALduino_Read($)
     ($rmsg,$SIGNALduinodata) = split("\n", $SIGNALduinodata, 2);
     $rmsg =~ s/\r//;
     
-    	if ($rmsg =~ m/^\002(M(s|u|o);.*;)\003/) {
+    if ($rmsg =~ m/^\002(M(s|u|o);.*;)\003/) {
 		$rmsg =~ s/^\002//;                # \002 am Anfang entfernen
 		my @msg_parts = split(";",$rmsg);
 		my $m0;
@@ -1418,6 +1418,7 @@ SIGNALduino_Read($)
 		my $mH;
 		my $part = "";
 		my $partD;
+		SIGNALduino_Log3 $name, 5, "$name/RAW rmsg: $rmsg"; 
 		
 		foreach my $msgPart (@msg_parts) {
 			next if ($msgPart eq "");
