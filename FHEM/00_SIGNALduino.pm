@@ -786,7 +786,7 @@ SIGNALduino_Set($@)
 
 		SIGNALduino_Log3 $name, 5, "$name: sendmsg Preparing rawsend command for protocol=$protocol, repeats=$repeats, clock=$clock bits=$data";
 		
-		foreach my $item (qw(sync start one zero float pause end))
+		foreach my $item (qw(preSync sync start one zero float pause end universal))
 		{
 		    #print ("item= $item \n");
 		    next if (!exists($ProtocolListSIGNALduino{$protocol}{$item}));
@@ -807,9 +807,10 @@ SIGNALduino_Set($@)
 		}
 		my @bits = split("", $data);
 	
-		my %bitconv = (1=>"one", 0=>"zero", 'D'=> "float", 'F'=> "float", 'P'=> "pause");
+		my %bitconv = (1=>"one", 0=>"zero", 'D'=> "float", 'F'=> "float", 'P'=> "pause", 'U'=> "universal");
 		my $SignalData="D=";
 		
+		$SignalData.=$signalHash{preSync} if (exists($signalHash{preSync}));
 		$SignalData.=$signalHash{sync} if (exists($signalHash{sync}));
 		$SignalData.=$signalHash{start} if (exists($signalHash{start}));
 		foreach my $bit (@bits)
@@ -2540,6 +2541,7 @@ SIGNALduino_Parse_MC($$$$@)
 			{
 				SIGNALduino_Log3 $name, 5, "$name: Error: Unknown function=$method. Please define it in file $0";
 			} else {
+				$mcbitnum = length($bitData) if ($mcbitnum > length($bitData));
 				my ($rcode,$res) = $method->($name,$bitData,$id,$mcbitnum);
 				if ($rcode != -1) {
 					$dmsg = $res;
@@ -2820,7 +2822,7 @@ sub SIGNALduino_FW_Detail($@) {
   my ($FW_wname, $name, $room, $pageHash) = @_;
   
   my $hash = $defs{$name};
-  
+    
   my @dspec=devspec2array("DEF=.*fakelog");
   my $lfn = $dspec[0];
   my $fn=$defs{$name}->{TYPE}."-Flash.log";
@@ -2858,26 +2860,81 @@ function SD_plistWindow(txt)
   $(div).html(txt);
   $("body").append(div);
   var oldPos = $("body").scrollTop();
+  var btxtStable = "";
+  var btxtBlack = "";
+  if ($("#SD_protoCaption").text().substr(0,1) != "d") {
+  	    btxtStable = "stable";
+  }
+  if ($("#SD_protoCaption").text().substr(-1) == ".") {
+    btxtBlack = " except blacklist";
+  }
+  
   $(div).dialog({
     dialogClass:"no-close", modal:true, width:"auto", closeOnEscape:true, 
     maxWidth:$(window).width()*0.9, maxHeight:$(window).height()*0.9,
-    buttons: [{text:"OK", click:function(){
-      $(this).dialog("close");
-      $(div).remove();
-      location.reload();
-    }}]
+    title: "Protocollist Overview",
+    buttons: [
+      {text:"select all " + btxtStable + btxtBlack, click:function(){
+		  $("#SD_protocolDialog table td input:checkbox").prop(\'checked\', true);
+		  
+		  $("input[name=SDnotCheck]").each( function () {
+			  $(this).prop(\'checked\',false);
+		  });
+      }},
+      {text:"deselect all", click:function(e){
+           $("#SD_protocolDialog table td input:checkbox").prop(\'checked\', false);
+      }},
+      {text:"save to whitelist and close", click:function(){
+      	var allVals = [];
+ 		  $("#SD_protocolDialog table td input:checkbox:checked").each(function() {
+	    	  allVals.push($(this).val());
+		  })
+          FW_cmd(FW_root+ \'?XHR=1&cmd={SIGNALduino_FW_saveWhitelist("'.$name.'","\'+String(allVals)+\'")}\');
+          $(this).dialog("close");
+          $(div).remove();
+          location.reload();
+      }},
+      {text:"close", click:function(){
+        $(this).dialog("close");
+        $(div).remove();
+        location.reload();
+      }}]
   });
 }
+
+
 </script>';
   return $ret;
-  
-  
 }
 
+sub SIGNALduino_FW_saveWhitelist
+{
+	my $name = shift;
+	my $wl_attr = shift;
+	
+	if (!IsDevice($name)) {
+		SIGNALduino_Log3 undef, 3, "SIGNALduino_FW_saveWhitelist: $name is not a valid definition, operation aborted.";
+		return;
+	}
+	
+	if ($wl_attr eq "") {	# da ein Attribut nicht leer sein kann, kommt ein Komma rein
+		$wl_attr = ',';
+	}
+	elsif ($wl_attr !~ /\d+(?:,\d.?\d?)*$/ ) {
+		SIGNALduino_Log3 $name, 3, "$name Whitelist save: attr whitelist_IDs can not be updated";
+		return;
+	}
+	else {
+		$wl_attr =~ s/,$//;			# Komma am Ende entfernen
+	}
+	$attr{$name}{whitelist_IDs} = $wl_attr;
+	SIGNALduino_Log3 $name, 3, "$name Whitelist save: $wl_attr";
+	SIGNALduino_IdList("x:$name", $wl_attr);
+}
 
 sub SIGNALduino_IdList($@)
 {
-	my ($param, $aVal, $blacklist, $develop) = @_;
+	my ($param, $aVal, $blacklist, $develop0) = @_;
 	my (undef,$name) = split(':', $param);
 	my $hash = $defs{$name};
 
@@ -2891,8 +2948,6 @@ sub SIGNALduino_IdList($@)
 	my %WhitelistIDs;
 	my %BlacklistIDs;
 	my $wflag = 0;		# whitelist flag, 0=disabled
-	my $bflag = 0;		# blacklist flag, 0=disabled
-	my $yflag = 0;		# 1 = alle developIDs aktivieren
 	
 	delete ($hash->{IDsNoDispatch}) if (defined($hash->{IDsNoDispatch}));
 
@@ -2900,16 +2955,11 @@ sub SIGNALduino_IdList($@)
 		$aVal = AttrVal($name,"whitelist_IDs","");
 	}
 	
-	if (!defined($develop)) {
-		$develop = SIGNALduino_getAttrDevelopment($name);
-	}
-	if ($develop eq "1" || (substr($develop,0,1) eq "y" && $develop !~ m/^y\d/)) {	# Entwicklerversion, y ist nur zur Abwaertskompatibilitaet und kann in einer der naechsten Versionen entfernt werden
-		$yflag = 1;
-		SIGNALduino_Log3 $name, 3, "$name: IDlist development attribute = $develop"; 
-	}
+	my ($develop,$devFlag) = SIGNALduino_getAttrDevelopment($name, $develop0);	# $devFlag = 1 -> alle developIDs y aktivieren
+	SIGNALduino_Log3 $name, 3, "$name IDlist development version active: development attribute = $develop" if ($devFlag == 1);
 	
 	if ($aVal eq "" || substr($aVal,0 ,1) eq '#') {		# whitelist nicht aktiv
-		if ($yflag == 1) {
+		if ($devFlag == 1) {
 			SIGNALduino_Log3 $name, 3, "$name: IDlist attr whitelist disabled or not defined (all IDs are enabled, except blacklisted): $aVal";
 		}
 		else {
@@ -2933,7 +2983,6 @@ sub SIGNALduino_IdList($@)
 			%BlacklistIDs = map { $_ => 1 } split(",", $blacklist);
 			#my $w = join ', ' => map "$_" => keys %BlacklistIDs;
 			#SIGNALduino_Log3 $name, 3, "$name IdList, Attr blacklist $w";
-			$bflag = 1;
 		}
 	}
 	
@@ -2949,7 +2998,7 @@ sub SIGNALduino_IdList($@)
 			}
 		}
 		else {						# whitelist not active
-			if ($bflag == 1 && exists($BlacklistIDs{$id})) {
+			if (exists($BlacklistIDs{$id})) {
 				#SIGNALduino_Log3 $name, 3, "$name IdList, skip Blacklist ID $id";
 				push (@skippedBlackId, $id);
 				next;
@@ -2961,13 +3010,17 @@ sub SIGNALduino_IdList($@)
 				if ($ProtocolListSIGNALduino{$id}{developId} eq "m") {
 					if ($develop !~ m/m$id/) {  # ist nur zur Abwaertskompatibilitaet und kann in einer der naechsten Versionen entfernt werden
 						push (@devModulId, $id);
+						if ($devFlag == 0) {
+							push (@skippedDevId, $id);
+							next;
+						}
 					}
 				}
 				elsif ($ProtocolListSIGNALduino{$id}{developId} eq "p") {
 					SIGNALduino_Log3 $name, 5, "$name: IDlist ID=$id skipped (developId=p), caution, protocol can cause crashes, use only if advised to do";
 					next;
 				}
-				elsif ($ProtocolListSIGNALduino{$id}{developId} eq "y" && $yflag == 0 && $develop !~ m/y$id/) {	# skip wenn develop nicht im Attribut whitelist steht
+				elsif ($devFlag == 0 && $ProtocolListSIGNALduino{$id}{developId} eq "y" && $develop !~ m/y$id/) {
 					#SIGNALduino_Log3 $name, 3, "$name: IdList ID=$id skipped (developId=y)";
 					push (@skippedDevId, $id);
 					next;
@@ -3019,15 +3072,17 @@ sub SIGNALduino_IdList($@)
 sub SIGNALduino_getAttrDevelopment
 {
 	my $name = shift;
-	my $develop;
+	my $develop = shift;
+	my $devFlag = 0;
 	if (index(SDUINO_VERSION, "dev") >= 0) {  	# development version
-		$develop = AttrVal($name,"development", 0);
+		$develop = AttrVal($name,"development", 0) if (!defined($develop));
+		$devFlag = 1 if ($develop eq "1" || (substr($develop,0,1) eq "y" && $develop !~ m/^y\d/));	# Entwicklerversion, y ist nur zur Abwaertskompatibilitaet und kann in einer der naechsten Versionen entfernt werden
 	}
 	else {
 		$develop = "0";
 		SIGNALduino_Log3 $name, 3, "$name IdList: ### Attribute development is in this version ignored ###";
 	}
-	return $develop;
+	return ($develop,$devFlag);
 }
 
 
@@ -3576,41 +3631,53 @@ sub SIGNALduino_MCTFA
 	my $message_length;
 		
 	#if ($bitData =~ m/^.?(1){16,24}0101/)  {  
-	if ($bitData =~ m/(1{10}101)/ )
+	if ($bitData =~ m/(1{9}101)/ )
 	{ 
 		$preamble_pos=$+[1];
 		SIGNALduino_Log3 $name, 4, "$name: TFA 30.3208.0 preamble_pos = $preamble_pos";
 		return return (-1," sync not found") if ($preamble_pos <=0);
 		my @messages;
 		
+		my $i=1;
+		my $retmsg = "";
 		do 
 		{
 			$message_end = index($bitData,"1111111111101",$preamble_pos); 
 			if ($message_end < $preamble_pos)
 			{
-				$message_end=length($bitData);
+				$message_end=$mcbitnum;		# length($bitData);
 			} 
 			$message_length = ($message_end - $preamble_pos);			
 			
 			my $part_str=substr($bitData,$preamble_pos,$message_length);
-			$part_str = substr($part_str,0,52) if (length($part_str)) > 52;
+			#$part_str = substr($part_str,0,52) if (length($part_str)) > 52;
 
-			SIGNALduino_Log3 $name, 4, "$name: TFA message start=$preamble_pos end=$message_end with length".$message_length;
-			SIGNALduino_Log3 $name, 5, "$name: part $part_str";
-			my $hex=SIGNALduino_b2h($part_str);
-			push (@messages,$hex);
-			SIGNALduino_Log3 $name, 4, "$name: ".$hex;
+			SIGNALduino_Log3 $name, 4, "$name: TFA message start($i)=$preamble_pos end=$message_end with length=$message_length";
+			SIGNALduino_Log3 $name, 5, "$name: TFA message part($i)=$part_str";
+			
+			my ($rcode, $rtxt) = SIGNALduino_TestLength($name, $id, $message_length, "TFA message part($i)");
+			if ($rcode) {
+				my $hex=SIGNALduino_b2h($part_str);
+				push (@messages,$hex);
+				SIGNALduino_Log3 $name, 4, "$name: TFA message part($i)=$hex";
+			}
+			else {
+				$retmsg = ", " . $rtxt;
+			}
+			
 			$preamble_pos=index($bitData,"1101",$message_end)+4;
-		}  while ( $message_end < length($bitData) );
+			$i++;
+		}  while ($message_end < $mcbitnum);
 		
 		my %seen;
 		my @dupmessages = map { 1==$seen{$_}++ ? $_ : () } @messages;
-	
+		
+		return ($i,"loop error, please report this data $bitData") if ($i==10);
 		if (scalar(@dupmessages) > 0 ) {
 			SIGNALduino_Log3 $name, 4, "$name: repeated hex ".$dupmessages[0]." found ".$seen{$dupmessages[0]}." times";
 			return  (1,$dupmessages[0]);
 		} else {  
-			return (-1," no duplicate found");
+			return (-1," no duplicate found$retmsg");
 		}
 	}
 	return (-1,undef);
@@ -3970,6 +4037,22 @@ sub SIGNALduino_SomfyRTS()
 	return (1, $encData);
 }
 
+
+sub SIGNALduino_TestLength
+{
+	my ($name, $id, $message_length, $logMsg) = @_;
+	
+	if (defined($ProtocolListSIGNALduino{$id}{length_min}) && $message_length < $ProtocolListSIGNALduino{$id}{length_min}) {
+		SIGNALduino_Log3 $name, 4, "$name: $logMsg: message with length=$message_length is to short" if ($logMsg ne "");
+		return (0, "message is to short");
+	}
+	elsif (defined($ProtocolListSIGNALduino{$id}{length_max}) && $message_length > $ProtocolListSIGNALduino{$id}{length_max}) {
+		SIGNALduino_Log3 $name, 4, "$name: $logMsg: message with length=$message_length is to long" if ($logMsg ne "");
+		return (0, "message is to long");
+	}
+	return (1,"");
+}
+
 # - - - - - - - - - - - -
 #=item SIGNALduino_filterMC()
 #This functons, will act as a filter function. It will decode MU data via Manchester encoding
@@ -4204,58 +4287,6 @@ sub SIGNALduino_Log3($$$)
 
 
 ################################################
-# Functions for fhemweb actions 
-
-sub SIGNALduino_FW_changeProtocolUsage
-{
-	my $name = shift;
-	my $id = shift;
-	
-	
-	SIGNALduino_Log3 $name,3, "id is $id";
-	my $hash=$defs{$name};
-	
-	
-	my $wl_attr= AttrVal($name, "whitelist_IDs", ".*");
-	my $cmd;
-	if ( (grep { $_ eq $id } @{$hash->{msIdList}}) ||  (grep { $_ eq $id } @{$hash->{muIdList}}) || (grep { $_ eq $id } @{$hash->{mcIdList}}) ) 
-	{
-		if ($wl_attr eq ".*")
-		{
-			$wl_attr = join(",",@{$hash->{msIdList}},@{$hash->{muIdList}},@{$hash->{mcIdList}}); #Generate a new List,  if we are in default mode
-		}
-		$wl_attr =~ s/(?:^$id,?|,$id,|$id$)/,/;
-		$wl_attr =~ s/,,/,/;
-		
-		
-	} else {
-		$wl_attr = defined($wl_attr) ? "$wl_attr,$id" : $id;
-	}
-	
-	#Todo Funktion sperren wenn kein JSON installiert ist. 
- 	#SIGNAlduino_Attr("set",$name,"whitelist_IDs",$wl_attr); # Saves new Attr	
- 	my $ret = CallFn($name, "AttrFn", "set", $name, "whitelist_IDs", $wl_attr);
- 	if (!defined($ret))
- 	{
- 		$attr{$name}{"whitelist_IDs"} = $wl_attr;
- 		if ( (grep { $_ eq $id } @{$hash->{msIdList}}) ||  (grep { $_ eq $id } @{$hash->{muIdList}}) || (grep { $_ eq $id } @{$hash->{mcIdList}}) ) 
- 		{
- 			$cmd = FW_makeImage("on","disable","icon");	
- 		} else {
- 			$cmd = FW_makeImage("off","enable","icon");
- 		
- 		}
- 		my %return_hash = ('id'=>$id, 'data'=>$cmd);
-		my $return_json = to_json(\%return_hash);
- 		
-		return $return_json;
- 	}
- 	
- 	
-}
-
-
-################################################
 # Helper to get a reference of the protocolList Hash
 sub SIGNALduino_getProtocolList()
 {
@@ -4263,51 +4294,69 @@ sub SIGNALduino_getProtocolList()
 }
 
 
-
 sub SIGNALduino_FW_getProtocolList
 {
 	my $name = shift;
 	
 	my $hash = $defs{$name};
-	
 	my $id;
 	my $ret;
-	my $s;
-	my $moduleId;
+	my $devText = "";
+	my $blackTxt = "";
+	my %BlacklistIDs;
 	my @IdList = ();
+	my $comment;
+	
+	my $blacklist = AttrVal($name,"blacklist_IDs","");
+	if (length($blacklist) > 0) {							# Blacklist in Hash wandeln
+		#SIGNALduino_Log3 $name, 5, "$name getProtocolList: attr blacklistIds=$blacklist";
+		%BlacklistIDs = map { $_ => 1 } split(",", $blacklist);;
+	}
+	
+	my $whitelist = AttrVal($name,"whitelist_IDs","#");
+	if (AttrVal($name,"blacklist_IDs","") ne "") {				# wenn es eine blacklist gibt, dann "." an die Ueberschrift anhaengen
+		$blackTxt = ".";
+	}
+	
+	my ($develop,$devFlag) = SIGNALduino_getAttrDevelopment($name);	# $devFlag = 1 -> alle developIDs y aktivieren
+	$devText = "development version - " if ($devFlag == 1);
+	
+	my %activeIdHash;
+	@activeIdHash{@{$hash->{msIdList}}, @{$hash->{muIdList}}, @{$hash->{mcIdList}}} = (undef);
+	#SIGNALduino_Log3 $name,4, "$name IdList: $mIdList";
+	
+	my %IDsNoDispatch;
+	if (defined($hash->{IDsNoDispatch})) {
+		%IDsNoDispatch = map { $_ => 1 } split(",", $hash->{IDsNoDispatch});
+		#SIGNALduino_Log3 $name,4, "$name IdList IDsNoDispatch=" . join ', ' => map "$_" => keys %IDsNoDispatch;
+	}
 	
 	foreach $id (keys %ProtocolListSIGNALduino)
 	{
-		next if ($id eq 'id');
 		push (@IdList, $id);
 	}
 	@IdList = sort { $a <=> $b } @IdList;
-	
+
 	$ret = "<table class=\"block wide internals wrapcolumns\">";
-	$ret .="<caption>Protocollist Overview</caption>";
-	$ret .= "<thead style=\"text-align:center\"><td>dev</td><td>ID</td><td>Message Type</td><td>modulname</td><td>protocolname</td> <td># comment</td><td>Action</td></thead>";
+	
+	$ret .="<caption id=\"SD_protoCaption\">$devText";
+	if (substr($whitelist,0,1) ne "#") {
+		$ret .="whitelist active$blackTxt</caption>";
+	}
+	else {
+		$ret .="whitelist not active (save activate it)$blackTxt</caption>";
+	}
+	$ret .= "<thead style=\"text-align:center\"><td>act.</td><td>dev</td><td>ID</td><td>Msg Type</td><td>modulname</td><td>protocolname</td> <td># comment</td></thead>";
 	$ret .="<tbody>";
 	my $oddeven="odd";
-	my $wl_attr= AttrVal($name, "whitelist_IDs", ".*");
-	
-	my $js_ret = '$(".SIGNALduino_Proto").click(function(){
-   			console.log( $(this));
-			var element = $(this);
-			
-			FW_cmd(FW_root+ \'?XHR=1&cmd={SIGNALduino_FW_changeProtocolUsage("'.$name.'","\'+$(this).attr("protoid")+\'")}\',function(data){
-   				var dataobj = JSON.parse(data);
-		    	element.html(dataobj.data);
-			});
-		 		
-	  	});
-		';
-	#    			
+	my $checked;
+	my $checkAll;
 	
 	foreach $id (@IdList)
 	{
+		my $msgtype = "";
+		my $chkbox;
 		
-		my $msgtype;
-		my $action;
 		if (exists ($ProtocolListSIGNALduino{$id}{format}) && $ProtocolListSIGNALduino{$id}{format} eq "manchester")
 		{
 			$msgtype = "MC";
@@ -4321,40 +4370,57 @@ sub SIGNALduino_FW_getProtocolList
 			$msgtype = "MU";
 		}
 		
-		my $cmd;
-		my $newWlIDs;
-		if ( (grep { $_ eq $id } @{$hash->{msIdList}}) ||  (grep { $_ eq $id } @{$hash->{muIdList}}) || (grep { $_ eq $id } @{$hash->{mcIdList}}) ) 
-		{
-			$cmd = FW_makeImage("on","disable","icon");
-			if ($wl_attr eq ".*")
-			{
-				$newWlIDs = join(",",@{$hash->{msIdList}},@{$hash->{muIdList}},@{$hash->{mcIdList}}) 
-			} else  {
-				$newWlIDs=$wl_attr;
-			}
-
-			$newWlIDs =~ s/(?:^$id,?|,$id,|$id$)/,/;
+		$checked="";
 		
-		} else {
-			$cmd = FW_makeImage("off","enable","icon");
-			$newWlIDs = defined($wl_attr) ? "$wl_attr,$id" : $id;
+		if (substr($whitelist,0,1) ne "#") {	# whitelist aktiv, dann ermitteln welche ids bei select all nicht checked sein sollen
+			$checkAll = "SDcheck";
+			if (exists($BlacklistIDs{$id})) {
+				$checkAll = "SDnotCheck";
+			}
+			elsif (exists($ProtocolListSIGNALduino{$id}{developId})) {
+				if ($devFlag == 1 && $ProtocolListSIGNALduino{$id}{developId} eq "p") {
+					$checkAll = "SDnotCheck";
+				}
+				elsif ($devFlag == 0 && $ProtocolListSIGNALduino{$id}{developId} eq "y" && $develop !~ m/y$id/) {
+					$checkAll = "SDnotCheck";
+				}
+				elsif ($devFlag == 0 && $ProtocolListSIGNALduino{$id}{developId} eq "m") {
+					$checkAll = "SDnotCheck";
+				}
+			}
+		}
+		else {
+			$checkAll = "SDnotCheck";
 		}
 		
+		if (exists($activeIdHash{$id}))
+		{
+			$checked="checked";
+			if (substr($whitelist,0,1) eq "#") {	# whitelist nicht aktiv, dann entspricht select all dem $activeIdHash 
+				$checkAll = "SDcheck";
+			}
+		}
 		
-		my $htmlid="SIGNALduino_Proto_".$id;
-	    $action=sprintf("<a class=%s id=%s protoid=%s>%s</a>","SIGNALduino_Proto",$htmlid,$id,$cmd);
-	   
+		if ($devFlag == 0 && exists($ProtocolListSIGNALduino{$id}{developId}) && $ProtocolListSIGNALduino{$id}{developId} eq "p") {
+			$chkbox="<div> </div>";
+		}
+		else {
+			$chkbox=sprintf("<INPUT type=\"checkbox\" name=\"%s\" value=\"%s\" %s/>", $checkAll, $id, $checked);
+		}
 		
-		$ret .= sprintf("<tr class=\"%s\"><td><div>%s</div></td><td><div>%3s</div></td><td><div>%s</div></td><td><div>%s</div></td><td><div>%s</div></td><td><div>%s</div></td><td><div>%s</div></td></tr>",$oddeven,SIGNALduino_getProtoProp($id,"developId",""),$id,$msgtype,SIGNALduino_getProtoProp($id,"clientmodule",""),SIGNALduino_getProtoProp($id,"name",""),SIGNALduino_getProtoProp($id,"comment",""),$action);
+		$comment = SIGNALduino_getProtoProp($id,"comment","");
+		if (exists($IDsNoDispatch{$id})) {
+			$comment .= " (dispatch is only with a active whitelist possible)";
+		}
+		
+		$ret .= sprintf("<tr class=\"%s\"><td>%s</td><td><div>%s</div></td><td><div>%3s</div></td><td><div>%s</div></td><td><div>%s</div></td><td><div>%s</div></td><td><div>%s</div></td></tr>",$oddeven,$chkbox,SIGNALduino_getProtoProp($id,"developId",""),$id,$msgtype,SIGNALduino_getProtoProp($id,"clientmodule",""),SIGNALduino_getProtoProp($id,"name",""),$comment);
 		$oddeven= $oddeven eq "odd" ? "even" : "odd" ;
 		
 		$ret .= "\n";
 	}
 	$ret .= "</tbody></table>";
-	return $ret."<script>".$js_ret."</script>";
-	#$moduleId =~ s/,$//;
+	return $ret;
 }
-
 
 
 sub SIGNALduino_querygithubreleases
@@ -4516,7 +4582,7 @@ sub SIGNALduino_githubParseHttpResponse($)
     		<li>ELV WS-2000, La Crosse WS-7000 -> 14_CUL_WS</li>
 	</ul>
 	<br>
-	It is possible to attach more than one device in order to get better reception, fhem will filter out duplicate messages. See more at the <a href="#global">global</a> section with attribute dupTimeout<>br><br>
+	It is possible to attach more than one device in order to get better reception, fhem will filter out duplicate messages. See more at the <a href="#global">global</a> section with attribute dupTimeout<br><br>
 	Note: this module require the Device::SerialPort or Win32::SerialPort module. It can currently only attatched via USB.
 	</td>
 	</tr>
@@ -4544,7 +4610,7 @@ sub SIGNALduino_githubParseHttpResponse($)
 	<a name="SIGNALduinointernals"></a>
 	<b>Internals</b>
 	<ul>
-		<li><b>IDsNoDispatch</b>: Here are protocols entryls listed by their numeric id for which not communication to a logical module is enabled. To enable, look at the menu option "Display protocollist".</li>
+		<li><b>IDsNoDispatch</b>: Here are protocols entryls listed by their numeric id for which not communication to a logical module is enabled. To enable, look at the menu option <a href="#SIGNALduinoDetail">Display protocollist</a>.</li>
 		<li><b>versionmodule</b>: This shows the version of the SIGNALduino FHEM module itself.</li>
 		<li><b>version</b>: This shows the version of the SIGNALduino microcontroller.</li>
 	</ul>
@@ -4873,7 +4939,7 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
    	    <a name="Display protocollist"></a>
 		<li>Display protocollist<br> 
 		Shows the current implemented protocols from the SIGNALduino and to what logical FHEM Modul data is sent.<br>
-		Additional there is an on/off symbol, which shows you if a protocol will be processed. This changes the Attribute whitlistIDs for you in the background. The attributes whitelistIDs and blacklistIDs affects this state.
+		Additional there is an checkbox symbol, which shows you if a protocol will be processed. This changes the Attribute whitlistIDs for you in the background. The attributes whitelistIDs and blacklistIDs affects this state.
 		Protocols which are flagged in the row <code>dev</code>, are under development
 		<ul>
 			<li>If a row is flagged via 'm', then the logical module which provides you with an interface is still under development. Per default, these protocols will not send data to logcial module. To allow communication to a logical module you have to enable the protocol.</li> 
@@ -4951,7 +5017,7 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
 	<a name="SIGNALduinointernals"></a>
 	<b>Internals</b>
 	<ul>
-		<li><b>IDsNoDispatch</b>: Hier werden protokoll Eintr&auml;ge mit ihrer numerischen ID aufgelistet, f&ouml;r welche keine Weitergabe von Daten an logische Module aktiviert wurde. Um die weiterhabe zu aktivieren, kann die Me&uuml;option "Display protocollist" verwendet werden.</li>
+		<li><b>IDsNoDispatch</b>: Hier werden protokoll Eintr&auml;ge mit ihrer numerischen ID aufgelistet, f&ouml;r welche keine Weitergabe von Daten an logische Module aktiviert wurde. Um die weiterhabe zu aktivieren, kann die Me&uuml;option <a href="#SIGNALduinoDetail">Display protocollist</a> verwendet werden.</li>
 		<li><b>versionmodule</b>: Hier wird die Version des SIGNALduino FHEM Modules selbst angezeigt.</li>
 		<li><b>version</b>: Hier wird die Version des SIGNALduino microcontrollers angezeigt.</li>
 	</ul>
@@ -5295,7 +5361,7 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
    	    <a name="Display protocollist"></a>
 		<li>Display protocollist<br> 
 		Zeigt Ihnen die aktuell implementierten Protokolle des SIGNALduino an und an welches logische FHEM Modul Sie &uuml;bergeben werden.<br>
-		Außerdem wird mit on/off Symbolen angezeigt ob ein Protokoll verarbeitet wird. Durch Klick auf das Symbol, wird im Hintergrund das Attribut whitlelistIDs angepasst. Die Attribute whitelistIDs und blacklistIDs beeinflussen diesn Status.
+		Außerdem wird mit checkbox Symbolen angezeigt ob ein Protokoll verarbeitet wird. Durch Klick auf das Symbol, wird im Hintergrund das Attribut whitlelistIDs angepasst. Die Attribute whitelistIDs und blacklistIDs beeinflussen den dargestellten Status.
 		Protokolle die in der Spalte <code>dev</code> markiert sind, befinden sich in Entwicklung. 
 		<ul>
 			<li>Wemm eine Zeile mit 'm' markiert ist, befindet sich das logische Modul, welches eine Schnittstelle bereitstellt in Entwicklung. Im Standard &uuml;bergeben diese Protokolle keine Daten an logische Module. Um die Kommunikation zu erm&ouml;glichenm muss der Protokolleintrag aktiviert werden.</li> 

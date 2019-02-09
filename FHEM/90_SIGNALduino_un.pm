@@ -184,7 +184,18 @@ SIGNALduino_un_Parse($$)
 		#Dispatch($hash, $tscode,undef);
 
 		
-	}	
+	}	elsif ($protocol == "88" && length($rawData) == 17) {
+		my $serial = substr($bitData,32,28);
+		my $buttonbits = substr($bitData,60,4);
+		
+		my %buttons = (
+ 		 	"0010" => "hoch",
+		 	"1001" => "runter",
+ 		 	"1000" => "stop"
+		);
+		
+		Log3 $hash, 4, "$name: Roto shutter - Serialbits=$serial Serial=".oct( "0b$serial" )." Buttonbits=$buttonbits Button=$buttons{$buttonbits}";
+	}
 	
 	##############################################################################################
 	# version 1) message with u..# without development y attribut -> Unknown code u..# , help me!
