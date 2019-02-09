@@ -1,5 +1,6 @@
-07.02.2019
- 00_SIGNALduino - getAvailableFirmware returns only version for which a file could be found
+10.02.2019
+ 00_SIGNALduino - getAvailableFirmware returns only version for which a file could be found.
+                  Attribute hardware does not longer support nano. Select nano328 instead
 03.02.2019
  00_SIGNALduino - Handling and functionality of webmenu "Display protocollist" enhanced
 17.01.2019
