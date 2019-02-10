@@ -28,4 +28,89 @@
 			id				=> '9996',
 			developId		=> 'p',
         },
+	"9995"	=>
+		{
+			name			=> 'Unittest MS Protocol',
+			comment			=> 'ony for running automated tests',
+			id				=> '9995',
+			one				=> [-2,1],
+			zero			=> [-1,2],
+			sync			=> [-10,1],
+			clockabs		=> 400,
+			format			=> 'twostate',	#
+			preamble		=> '#',			# prepend to converted message
+			length_min		=> '32',
+			length_max		=> '36',
+			test_data		=> 	{ 
+									test_MS_2 => [
+										{
+											desc	=>	"ms signal without reconstruct at end of signal", 
+											input	=>	"MS;P1=-403;P2=813;P3=-812;P4=396;P5=-4005;D=45412123434123412123434341234123434121234123412121212121234343434121234343;CP=4;SP=5;",
+											output	=>	[1,1,9995,"#34EB281E6"],
+										},
+										{
+											desc	=>	"ms signal without reconstruct at middle of signal", 
+											input	=>	"MS;P1=-403;P2=813;P3=-812;P4=396;P5=-4005;P6=5000;D=454121234341234121234343412341234341212341234121212121212343434341212343436;CP=4;SP=5;",
+											output	=>	[1,1,9995,"#34EB281E6"],
+										},
+										{
+											desc	=>	"ms signal without reconstruct and 31 bits (to short)", 
+											input	=>	"MS;P1=-403;P2=813;P3=-812;P4=396;P5=-4005;P6=5000;D=45412123434123412123434341234123434121234123412121212121234343434141;CP=4;SP=5;",
+											output	=>	[0],
+										},
+										{
+											desc	=>	"ms signal without reconstruct and 37 bits (to long)", 
+											input	=>	"MS;P1=-403;P2=813;P3=-812;P4=396;P5=-4005;P6=5000;D=45412123434123412123434341234123434121234123412121212121234343434121234343434;CP=4;SP=5;",
+											output	=>	[0],
+										},
+
+									],
+								},
+		},
+	"9994"	=>
+		{
+			name			=> 'Unittest MS Protocol',
+			comment			=> 'ony for running automated tests',
+			id				=> '9994',
+			one				=> [-2,1],
+			zero			=> [-1,2],
+			sync			=> [-10,1],
+			clockabs		=> 400,
+			format			=> 'twostate',	#
+			preamble		=> '#',			# prepend to converted message
+			length_min		=> '32',
+			length_max		=> '36',
+			reconstructBit	=> 1,
+			test_data		=> 	{ 
+									test_MS_2 => [
+										{
+											desc	=>	"ms signal with reconstruct at end of signal", 
+											input	=>	"MS;P1=-403;P2=813;P3=-812;P4=396;P5=-4005;D=45412123434123412123434341234123434121234123412121212121234343434121234343;CP=4;SP=5;",
+											output	=>	[1,1,9994,"#34EB281E7"],
+										
+										},
+										{
+											desc	=>	"ms signal with reconstruct at middle of signal", 
+											input	=>	"MS;P1=-403;P2=813;P3=-812;P4=396;P5=-4005;P6=5000;D=454121234341234121234343412341234341212341234121212121212343434341212343436;CP=4;SP=5;",
+											output	=>	[1,1,9994,"#34EB281E7"],
+										},
+										{
+											desc	=>	"ms signal with reconstruct 32  bits (long enough)", 
+											input	=>	"MS;P1=-403;P2=813;P3=-812;P4=396;P5=-4005;P6=5000;D=45412123434123412123434341234123434121234123412121212121234343434141;CP=4;SP=5;",
+											output	=>	[1,1,9994,"#34EB281E"],
+										},
+										{
+											desc	=>	"ms signal with reconstruct 31  bits (to short)", 
+											input	=>	"MS;P1=-403;P2=813;P3=-812;P4=396;P5=-4005;P6=5000;D=454121234341234121234343412341234341212341234121212121212343434341;CP=4;SP=5;",
+											output	=>	[0],
+										},
+										{
+											desc	=>	"ms signal with reconstruct and 37 bits (to long)", 
+											input	=>	"MS;P1=-403;P2=813;P3=-812;P4=396;P5=-4005;P6=5000;D=4541212343412341212343434123412343412123412341212121212123434343412123434343;CP=4;SP=5;",
+											output	=>	[0],
+										},
+
+									]
+								},
+		},
 );

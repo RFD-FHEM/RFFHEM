@@ -27,7 +27,7 @@ test: deploylocal
 	test/test-runner.sh test3
 	test/test-runner.sh test4
 	test/test-runner.sh test_mu_1
-	test/test-runner.sh test_MS_1
+	test/test-runner.sh test_MS_2
 	test/test-runner.sh test_loadprotohash
 	test/test-runner.sh test_developid_1
 	test/test-runner.sh test_proto44
