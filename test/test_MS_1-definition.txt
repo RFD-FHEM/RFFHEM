@@ -1,0 +1,57 @@
+defmod test_MS_1 UnitTest dummyDuino (
+ {
+	my $mock = Mock::Sub->new;
+	my $SD_Dispatch = $mock->mock("SIGNALduno_Dispatch");
+	my $local_ProtocolListSIGNALduino = SIGNALduino_getProtocolList();
+	subtest 'ms signal without reconstruct at end of signal ' => sub {
+		plan tests => 4;
+		$SD_Dispatch->reset();
+		SIGNALduino_IdList("sduino_IdList:$targetHash->{NAME}",91.1);
+		delete($local_ProtocolListSIGNALduino->{91.1}{reconstructBit});
+		my $rmsg="MS;P1=-403;P2=813;P3=-812;P4=396;P5=-4005;D=45412123434123412123434341234123434121234123412121212121234343434121234343;CP=4;SP=5;";
+		my %signal_parts=SIGNALduino_Split_Message($rmsg,$targetHash->{NAME});
+		ok(SIGNALduino_Parse_MS($targetHash, $targetHash, $targetHash->{NAME}, $rmsg,%signal_parts) ,"check return code SIGNALduino_Parse_MS");
+		is($SD_Dispatch->called_count, 1, "check number of dispatch attempts");
+		is( ($SD_Dispatch->called_with)[4], "91.1", "SIGNALduno_Dispatch check id " );
+		is( ($SD_Dispatch->called_with)[2], "P91.1#34EB281E6", "SIGNALduno_Dispatch check dmsg" );
+	};
+	subtest 'ms signal with reconstruct at end of signal ' => sub {
+		plan tests => 4;
+		$SD_Dispatch->reset();
+		SIGNALduino_IdList("sduino_IdList:$targetHash->{NAME}",91.1);
+		$local_ProtocolListSIGNALduino->{91.1}{reconstructBit}=1;
+		my $rmsg="MS;P1=-403;P2=813;P3=-812;P4=396;P5=-4005;D=45412123434123412123434341234123434121234123412121212121234343434121234343;CP=4;SP=5;";
+		my %signal_parts=SIGNALduino_Split_Message($rmsg,$targetHash->{NAME});
+		ok(SIGNALduino_Parse_MS($targetHash, $targetHash, $targetHash->{NAME}, $rmsg,%signal_parts) ,"check return code SIGNALduino_Parse_MS");
+		is($SD_Dispatch->called_count, 1, "check number of dispatch attempts");
+		is( ($SD_Dispatch->called_with)[4], "91.1", "SIGNALduno_Dispatch check id " );
+		is( ($SD_Dispatch->called_with)[2], "P91.1#34EB281E7", "SIGNALduno_Dispatch check dmsg" );
+	};
+
+	subtest 'ms signal without reconstruct before end of signal ' => sub {
+		plan tests => 2;
+		$SD_Dispatch->reset();
+		SIGNALduino_IdList("sduino_IdList:$targetHash->{NAME}",87);
+		delete($local_ProtocolListSIGNALduino->{87}{reconstructBit});
+		my $rmsg="MS;P1=1524;P2=-413;P3=388;P4=-3970;P5=-815;P6=778;P7=-16024;D=34353535623562626262626235626262353562623535623562626235356235626262623562626262626262626262626262623535626235623535353535626262356262626262626267123232323232323232323232;CP=3;SP=4;";
+		my %signal_parts=SIGNALduino_Split_Message($rmsg,$targetHash->{NAME});
+		ok(!SIGNALduino_Parse_MS($targetHash, $targetHash, $targetHash->{NAME}, $rmsg,%signal_parts) ,"check return code SIGNALduino_Parse_MS");
+		is($SD_Dispatch->called_count, 0, "check number of dispatch attempts");
+	};
+
+	subtest 'ms signal with reconstruct before end of signal ' => sub {
+		plan tests => 4;
+		$SD_Dispatch->reset();
+		SIGNALduino_IdList("sduino_IdList:$targetHash->{NAME}",87);
+		$local_ProtocolListSIGNALduino->{87}{reconstructBit}=1;
+		my $rmsg="MS;P1=1524;P2=-413;P3=388;P4=-3970;P5=-815;P6=778;P7=-16024;D=34353535623562626262626235626262353562623535623562626235356235626262623562626262626262626262626262623535626235623535353535626262356262626262626267123232323232323232323232;CP=3;SP=4;";
+		my %signal_parts=SIGNALduino_Split_Message($rmsg,$targetHash->{NAME});
+		ok(SIGNALduino_Parse_MS($targetHash, $targetHash, $targetHash->{NAME}, $rmsg,%signal_parts) ,"check return code SIGNALduino_Parse_MS");
+		is($SD_Dispatch->called_count, 1, "check number of dispatch attempts");
+		is( ($SD_Dispatch->called_with)[4], "87", "SIGNALduno_Dispatch check id " );
+		is( ($SD_Dispatch->called_with)[2], "u87#E8119A34200065F100", "SIGNALduno_Dispatch check dmsg" );
+	};
+
+    SIGNALduino_IdList("sduino_IdList:$targetHash->{NAME}");
+ }
+);
