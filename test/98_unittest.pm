@@ -157,8 +157,8 @@ sub UnitTest_Test_generic
 	readingsSingleUpdate($hash, "state", "running", 1);
 	my $ret ="";
 	$ret =eval $hash->{'.testcode'} if ($hash->{'.testcode'});
-	if ($@) {
-		Log3 $name, 5, "return from eval was ".$ret." with error $@" if $ret;
+	unless ($ret) {
+		Log3 $name, 5, "return from eval was ".$ret." with error $@" ;
 	}
 
 	# enable warnings for prototype mismatch
