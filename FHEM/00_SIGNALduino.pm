@@ -1394,7 +1394,7 @@ SIGNALduino_Read($)
     ($rmsg,$SIGNALduinodata) = split("\n", $SIGNALduinodata, 2);
     $rmsg =~ s/\r//;
     
-    	if ($rmsg =~ m/^\002(M(s|u|o);.*;)\003/) {
+    if ($rmsg =~ m/^\002(M(s|u|o);.*;)\003/) {
 		$rmsg =~ s/^\002//;                # \002 am Anfang entfernen
 		my @msg_parts = split(";",$rmsg);
 		my $m0;
@@ -1404,6 +1404,7 @@ SIGNALduino_Read($)
 		my $mH;
 		my $part = "";
 		my $partD;
+		SIGNALduino_Log3 $name, 5, "$name/RAW rmsg: $rmsg"; 
 		
 		foreach my $msgPart (@msg_parts) {
 			next if ($msgPart eq "");
@@ -2933,7 +2934,7 @@ sub SIGNALduino_FW_saveWhitelist
 
 sub SIGNALduino_IdList($@)
 {
-	my ($param, $aVal, $blacklist, $develop) = @_;
+	my ($param, $aVal, $blacklist, $develop0) = @_;
 	my (undef,$name) = split(':', $param);
 	my $hash = $defs{$name};
 
@@ -2954,7 +2955,7 @@ sub SIGNALduino_IdList($@)
 		$aVal = AttrVal($name,"whitelist_IDs","");
 	}
 	
-	my ($develop,$devFlag) = SIGNALduino_getAttrDevelopment($name, $develop);	# $devFlag = 1 -> alle developIDs y aktivieren
+	my ($develop,$devFlag) = SIGNALduino_getAttrDevelopment($name, $develop0);	# $devFlag = 1 -> alle developIDs y aktivieren
 	SIGNALduino_Log3 $name, 3, "$name IDlist development version active: development attribute = $develop" if ($devFlag == 1);
 	
 	if ($aVal eq "" || substr($aVal,0 ,1) eq '#') {		# whitelist nicht aktiv
