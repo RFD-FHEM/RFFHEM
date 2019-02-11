@@ -1,3 +1,7 @@
+11.02.2019
+ 00_SIGNALduino - added P90 matchListSIGNALduino
+ 14_SD_UT.pm - fix Create bug model RH787T & CAME_TOP_432EV | added new model Manax (ONLY RECEIVE!)
+ signalduino_protocols.hash - revised P90 Manax to SD_UT module
 05.02.2019
  signalduino_protocols.hash - added ID38 NC-3911-675 refrigerator thermometer
 03.02.2019
@@ -18,11 +22,11 @@
 29.12.2018
  00_SIGNALduino -
    Attribute development has changed and should not be used anymore.
-   Attribute Whitelist_IDs is now also capable of enabeling protocols   
+   Attribute Whitelist_IDs is now also capable of enabeling protocols
    which are under developmen
    The new Internal IDsNoDispatch holds the protocols which will not send
    data to other modules.
-   New Oregon V3 sensors now supported. 
+   New Oregon V3 sensors now supported.
  signalduino_protocols.hash - revised ID90 CP-value | added ID93 (ESTO Lighting GmbH) | old ID90 with 2 defs not unique due to 2 different CP values
  14_SD_BELL.pm - added new model Pollin_551227
 28.12.2018

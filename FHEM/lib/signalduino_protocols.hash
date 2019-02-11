@@ -2088,7 +2088,7 @@
 						# MS;P1=268;P3=793;P4=-337;P6=-871;P7=-10159;D=17163416161616343434341616341634341616161634341616341634161616343416;CP=1;SP=7;R=24;O;m2;	//B	AUS
 		{
 			name         => 'mumbi | MANAX',
-			comment      => 'remote control mumbi FS300, MANAX MX-RCS250',
+			comment      => 'remote control mumbi FS300, MANAX MX-RCS250 (only receive)',
 			id           => '90',
 			knownFreqs   => '433.92',
 			one          => [3,-1],
@@ -2096,12 +2096,11 @@
 			sync         => [1,-36],
 			clockabs     => 280,						# -1=auto	
 			format       => 'twostate',
-			preamble     => 'u90#',			
+			preamble     => 'P90#',
 			length_min   => '33',
 			length_max   => '36',
-			#clientmodule	=> 'IT',
-			#modulematch	=> '^P90#.*',
-			developId    => 'y',
+			clientmodule => 'SD_UT',
+			modulematch	=> '^P90#.*',
 		},
 	"91"	=>	## Atlantic Security / Focus Security China Devices
 						# https://forum.fhem.de/index.php/topic,58397.msg876862.html#msg876862
