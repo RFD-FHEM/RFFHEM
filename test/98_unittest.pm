@@ -158,7 +158,11 @@ sub UnitTest_Test_generic
 	my $ret ="";
 	$ret =eval $hash->{'.testcode'} if ($hash->{'.testcode'});
 	unless ($ret) {
-		Log3 $name, 5, "return from eval was ".$ret." with error $@" ;
+		Log3 $name, 5, "return from eval was with error $@" ;
+	}
+	if ($ret)
+	{
+		Log3 $name, 5, "Test has following result: $ret" ;
 	}
 
 	# enable warnings for prototype mismatch
