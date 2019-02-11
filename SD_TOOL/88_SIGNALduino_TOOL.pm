@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: 88_SIGNALduino_TOOL.pm 13115 2019-01-29 21:17:50Z HomeAuto_User $
+# $Id: 88_SIGNALduino_TOOL.pm 13115 2019-02-11 21:17:50Z HomeAuto_User $
 #
 # The file is part of the SIGNALduino project
 # see http://www.fhemwiki.de/wiki/SIGNALduino to support debugging of unknown signal data
@@ -34,7 +34,7 @@ sub SIGNALduino_TOOL_Initialize($) {
 	$hash->{ShutdownFn}	= "SIGNALduino_TOOL_Shutdown";
 	$hash->{AttrFn}			=	"SIGNALduino_TOOL_Attr";
 	$hash->{GetFn}			=	"SIGNALduino_TOOL_Get";
-	$hash->{AttrList}		=	"disable Dummyname Filename_input Filename_export Path StartString:MU;,MC;,MS; DispatchMax comment"
+	$hash->{AttrList}		=	"disable Dummyname Filename_input Filename_export MessageNumber Path StartString:MU;,MC;,MS; DispatchMax comment"
 												." RAWMSG_M1 RAWMSG_M2 RAWMSG_M3 Sendername Senderrepeats $readingFnAttributes";
 }
 
@@ -116,6 +116,7 @@ sub SIGNALduino_TOOL_Set($$$@) {
 	my $userattr = AttrVal($name,"userattr","-");								# userattr value
 	my $NameDispatchSet = "Dispatch_";													# name of setlist value´s to dispatch
 	my $NameSendSet = "Send_";																	# name of setlist value´s to send
+	my $messageNumber = AttrVal($name,"MessageNumber",0);				# MessageNumber
 	
 	my $setList = "";
 	$setList = $NameDispatchSet."DMSG ".$NameDispatchSet."RAWMSG";
@@ -126,7 +127,7 @@ sub SIGNALduino_TOOL_Set($$$@) {
 	$setList .= " RAWMSG_M3:noArg" if (AttrVal($name,"RAWMSG_M3","") ne "");
 	$setList .= " ".$NameSendSet."RAWMSG" if ($Sendername ne "none");
 
-	#Log3 $name, 3, "$name: Set | cmd=$cmd file=$file RAWMSG_last=$RAWMSG_last DMSG_last=$DMSG_last webCmd=$webCmd" if ($cmd ne "?");
+	Log3 $name, 4, "$name: Set | cmd=$cmd file=$file RAWMSG_last=$RAWMSG_last DMSG_last=$DMSG_last webCmd=$webCmd" if ($cmd ne "?");
 
 	$attr{$name}{webCmd} =~ s/:$NameDispatchSet?RAWMSG_last//g  if (($RAWMSG_last eq "none" && $DMSG_last eq "none") && ($webCmd =~ /:$NameDispatchSet?RAWMSG_last/));
 
@@ -202,7 +203,8 @@ sub SIGNALduino_TOOL_Set($$$@) {
 				if ($string1pos ne "") {
 					for ($count1 = 0;$count1<@content;$count1++){		# loop to read file in array
 						Log3 $name, 3, "$name: #####################################################################" if ($count1 == 0);
-						Log3 $name, 3, "$name: ##### -->>> DISPATCH_TOOL is running (max dispatch=$DispatchMax) !!! <<<-- #####" if ($count1 == 0);
+						Log3 $name, 3, "$name: ##### -->>> DISPATCH_TOOL is running (max dispatch=$DispatchMax) !!! <<<-- #####" if ($count1 == 0 && $messageNumber == 0);
+						Log3 $name, 3, "$name: ##### -->>> DISPATCH_TOOL is running (MessageNumber) !!! <<<-- #####" if ($count1 == 0 && $messageNumber != 0);
 
 						my $string = $content[$count1];
 						$string =~ s/[^A-Za-z0-9\-;=]//g;;			# nur zulässige Zeichen erlauben
@@ -214,7 +216,7 @@ sub SIGNALduino_TOOL_Set($$$@) {
 
 						if ((index($string,("MU;")) >= 0 ) or (index($string,("MS;")) >= 0 ) or (index($string,("MC;")) >= 0 )) {
 							$count2++;
-							Log3 $name, 4, "$name: readed Line $content[$count1]"." |END| count2=$count2";																# Ausgabe
+							Log3 $name, 4, "$name: readed Line ($count2) | $content[$count1]"." |END|";																		# Ausgabe
 							Log3 $name, 5, "$name: Zeile ".($count1+1)." Poscheck string1pos=$pos D=$pos2 D=;=$pos3 lastpos=$lastpos";		# Ausgabe
 						}
 
@@ -223,7 +225,7 @@ sub SIGNALduino_TOOL_Set($$$@) {
 							$string =~ s/;+/;;/g;		# ersetze ; durch ;;
 
 							### dispatch all ###
-							if ($count3 <= $DispatchMax) {
+							if ($count3 <= $DispatchMax && $messageNumber == 0) {
 								Log3 $name, 4, "$name: ($count2) get $Dummyname raw $string";			# Ausgabe
 								Log3 $name, 5, "$name: letztes Zeichen '$lastpos' (".ord($lastpos).") in Zeile ".($count1+1)." ist ungueltig " if ($lastpos ne ";");
 
@@ -233,6 +235,13 @@ sub SIGNALduino_TOOL_Set($$$@) {
 
 								$count3++;
 								if ($count3 == $DispatchMax) { last; }		# stop loop
+							} elsif ($count2 == $messageNumber) {
+								Log3 $name, 4, "$name: ($count2) get $Dummyname raw $string";			# Ausgabe
+								Log3 $name, 5, "$name: letztes Zeichen '$lastpos' (".ord($lastpos).") in Zeile ".($count1+1)." ist ungueltig " if ($lastpos ne ";");
+
+								fhem("get $Dummyname raw $string");
+								$count3 = 1;
+								last;																			# stop loop
 							}
 						}
 					}
@@ -242,7 +251,7 @@ sub SIGNALduino_TOOL_Set($$$@) {
 					Log3 $name, 3, "$name: ####################################################";
 
 					$return = "dispatched" if ($count3 > 0);
-					$return = "no dispatched" if ($count3 == 0);
+					$return = "no dispatched -> MessageNumber not found!" if ($count3 == 0);
 				} else {
 					$return = "no StartString";
 				}
@@ -338,7 +347,7 @@ sub SIGNALduino_TOOL_Set($$$@) {
 
 			$RAWMSG =~ s/[^A-Za-z0-9\-;=]//g;;															# nur zulässige Zeichen erlauben
 			$RAWMSG =~ s/;/;;/g;																						# ersetze ; durch ;;
-			Log3 $name, 3, "$name: get $Dummyname raw $RAWMSG";
+			Log3 $name, 4, "$name: get $Dummyname raw $RAWMSG";
 			fhem("get $Dummyname raw ".$RAWMSG);
 			$DummyTime = InternalVal($Dummyname, "TIME", 0);								# time if protocol dispatched - 1544377856
 			$return = "$a[0] dispatched" if (not defined $cmd2);
@@ -356,7 +365,7 @@ sub SIGNALduino_TOOL_Set($$$@) {
 			my $blen = $hlen * 4;
 			my $bitData = unpack("B$blen", pack("H$hlen", $rawData));
 
-			#Log3 $name, 3, "$name: Dummyname_Time=$DummyTime time=".time()." diff=".(time()-$DummyTime)." DMSG=$DummyDMSG rawData=$rawData";
+			Log3 $name, 4, "$name: Dummyname_Time=$DummyTime time=".time()." diff=".(time()-$DummyTime)." DMSG=$DummyDMSG rawData=$rawData";
 
 			if (time() - $DummyTime < 2)	{
 				$cmd_raw = "D=$bitData";
@@ -389,7 +398,7 @@ sub SIGNALduino_TOOL_Set($$$@) {
 			$RAWMSG = $prefix.substr($RAWMSG,2,length($RAWMSG)-2);
 			$RAWMSG =~ s/;/;;/g;;
 			
-			Log3 $name, 3, "$name: set $Sendername raw $RAWMSG";
+			Log3 $name, 4, "$name: set $Sendername raw $RAWMSG";
 			fhem("set $Sendername raw ".$RAWMSG);
 			
 			$RAWMSG_last = $a[1];
@@ -420,7 +429,7 @@ sub SIGNALduino_TOOL_Set($$$@) {
 		readingsBulkUpdate($hash, "message_to_module" , $DummyMSGCNTvalue, 0) if (defined $DummyMSGCNTvalue);
 		readingsEndUpdate($hash, 1);
 
-		#Log3 $name, 3, "$name: Set | cmd=$cmd RAWMSG_last=$RAWMSG_last DMSG_last=$DMSG_last webCmd=$webCmd" if ($cmd ne "?");
+		Log3 $name, 4, "$name: Set | cmd=$cmd RAWMSG_last=$RAWMSG_last DMSG_last=$DMSG_last webCmd=$webCmd" if ($cmd ne "?");
 
 		if (($RAWMSG_last ne "none" || $DMSG_last ne "none") && (not $webCmd =~ /:$NameDispatchSet?RAWMSG_last/) && $cmd ne "?") {
 				$webCmd .= ":$NameDispatchSet"."RAWMSG_last";
@@ -440,8 +449,9 @@ sub SIGNALduino_TOOL_Get($$$@) {
 	my $Filename_input = AttrVal($name,"Filename_input","");
 	my $Filename_export = AttrVal($name,"Filename_export","");
 	my $path = AttrVal($name,"Path","./");
+	my $onlyDataName = "-ONLY_DATA-";
 	my $list = "TimingsList:noArg invert_bitMsg invert_hexMsg change_bitMsg_to_hexMsg change_hexMsg_to_bitMsg ";
-	$list .= "FilterFile:multiple,bitMsg,bitMsg_invert,dmsg,hexMsg,hexMsg_invert,RAWMSG,READredu,READ ".
+	$list .= "FilterFile:multiple,bitMsg:,bitMsg_invert:,dmsg:,hexMsg:,hexMsg_invert:,MC;,MS;,MU;,RAWMSG:,READredu:,READ:,UserInfo:,$onlyDataName ".
 					"All_ClockPulse:noArg All_SyncPulse:noArg InputFile_one_ClockPulse InputFile_one_SyncPulse InputFile_doublePulse:noArg InputFile_length_Datapart:noArg" if ($Filename_input ne "");
 	my $linecount = 0;
 	my $founded = 0;
@@ -566,65 +576,73 @@ sub SIGNALduino_TOOL_Get($$$@) {
 	}
 
 	if ($cmd eq "FilterFile") {
-		my $timestamp = 0;
 		my $manually = 0;
+		my $only_Data = 0;
+		my $Data_parts = 1;
 		my $save = "";
 		my $pos;
-
 		return "ERROR: Your arguments in Filename_input is not definded!" if (not defined $a[0]);
 
-		$search = $a[0] . ":";
-		### with $a[1] | manually ###
+		Log3 $name, 4, "SIGNALduino_TOOL_Get: cmd $cmd - a0=$a[0]";
+		Log3 $name, 4, "SIGNALduino_TOOL_Get: cmd $cmd - a0=$a[0] a0=$a[1]" if (defined $a[1]);
+		Log3 $name, 4, "SIGNALduino_TOOL_Get: cmd $cmd - a0=$a[0] a1=$a[1] a2=$a[2]" if (defined $a[1] && defined $a[2]);
+		
+		### Auswahl checkboxen - ohne Textfeld Eingabe ###
+		my $check = 0;
+		$search = $a[0];
+		
 		if (defined $a[1]) {
-			$search = $a[0]." ".$a[1];
-			$manually = 1;
-			$timestamp = 1;
-		### without $a[1] | RAWMSG READ READredu with timestamp ###
-		} elsif (($a[0] eq "RAWMSG" || $a[0] eq "READ" || $a[0] eq "READredu") && not defined $a[1]) {
-			$timestamp = 1;
-		### without $a[1] | dmsg with timestamp ###
-		} elsif ($a[0] eq "dmsg" && not defined $a[1]) {
-			$timestamp = 1;
-			$search = $a[0];
-		} elsif ($a[0] =~ /bitMsg:|bitMsg_invert:|dmsg:|hexMsg:|hexMsg_invert:|RAWMSG:|READredu:|READ:|,/s) {
-			my @arg = split(",", $a[0]);
-			$search = $arg[0].":|".$arg[1].":";
-			$manually = 1;
-		### only $a[0] and value are a numbre ###
-		} elsif ($a[0] =~ /^?-\d+$/s) {
-			$manually = 1;
-			$search = substr($a[0],0,length($a[0]));
+			$search.= " ".$a[1];
+			$a[0] = $search;
 		}
-		Log3 $name, 4, "SIGNALduino_TOOL_Get: cmd check4, searcharg=$search timeoption=$timestamp manually=$manually";
+		
+		if (defined $a[1] && $a[1] =~ /.*$onlyDataName.*/) {
+			return "This option is supported with only one argument!";
+		}
+		
+		my @arg = split(",", $a[0]);
+		
+		### check - mehr als 1 Auswahlbox selektiert ###
+		if (scalar(@arg) != 1) {
+			$search =~ tr/,/|/;
+		}
+		
+		### check - Option only_Data in Auswahl selektiert ###
+		if (grep /$onlyDataName/, @arg) {
+			$only_Data = 1;
+			$Data_parts = scalar(@arg) - 1;
+			$search =~ s/\|$onlyDataName//g;
+		}
+
+		Log3 $name, 4, "SIGNALduino_TOOL_Get: cmd $cmd - searcharg=$search  splitting arg from a0=".scalar(@arg)."  manually=$manually  only_Data=$only_Data";
 
 		return "ERROR: Your Attributes Filename_input is not definded!" if ($Filename_input eq "");
-		#Log3 $name, 3, "SIGNALduino_TOOL_Get: after cmd check, searcharg=$search timeoption=$timestamp manually=$manually";
 
 		open (InputFile,"<$path$Filename_input") || return "ERROR: No file ($Filename_input) found in $path directory from FHEM!";
 		while (<InputFile>){
 			if ($_ =~ /$search/s){
-				chomp ($_);												# Zeilenende entfernen
-				my @arg = split(" ", $_);
-				if ($manually == 0) {
-					$pos = index($_,"$search");
-					$save = substr($_,$pos,(length($_)-$pos));
-					$save =~ s/[a-zA-z:\s]//g if ($a[0] eq "bitMsg" || $a[0] eq "bitMsg_invert");
-					$save =~ s/$search\s//g if ($a[0] ne "bitMsg" && $a[0] ne "bitMsg_invert");				
+				chomp ($_);														# Zeilenende entfernen
+				if ($only_Data == 1) {
+					if ($Data_parts == 1) {
+						$pos = index($_,"$search");
+						$save = substr($_,$pos+length($search)+1,(length($_)-$pos)) if not ($search =~ /MC;|MS;|MU;/);
+						$save = substr($_,$pos,(length($_)-$pos)) if ($search =~ /MC;|MS;|MU;/);
+						Log3 $name, 5, "SIGNALduino_TOOL_Get: cmd $cmd - startpos=$pos line save=$save";
+						push(@Zeilen,$save);							# Zeile in array
+					} else {
+						foreach my $i (0 ... $Data_parts-1) {
+							$pos = index($_,$arg[$i]);
+							$save = substr($_,$pos+length($arg[$i])+1,(length($_)-$pos));
+							Log3 $name, 5, "SIGNALduino_TOOL_Get: cmd $cmd - startpos=$pos line save=$save";
+							if ($pos >= 0) {
+								push(@Zeilen,$save);					# Zeile in array
+							}
+						}
+					}
 				} else {
 					$save = $_;
+					push(@Zeilen,$save);								# Zeile in array
 				}
-
-				if ($_ =~ /[i][d]/s) {						# if protocol ID in line
-					$save = substr($_,index($_,"id"));
-				}
-
-				if ($timestamp == 1 && $manually == 0) {
-					$save = $arg[0]." ".$arg[1]." ".$save
-				} elsif ($manually == 1) {
-					$save = $_;
-				}
-
-				push(@Zeilen,$save);							# Zeile in array
 				$founded++;
 			}
 			$linecount++;
@@ -638,7 +656,7 @@ sub SIGNALduino_TOOL_Get($$$@) {
 		readingsSingleUpdate($hash, "line_read" , $linecount, 0);
 		readingsSingleUpdate($hash, "state" , "data filtered", 0);
 
-		return "ERROR: Your filter (".substr($search,0,length($search)-1).") found nothing!\nNo file saved!" if ($founded == 0);
+		return "ERROR: Your filter (".$search.") found nothing!\nNo file saved!" if ($founded == 0);
 		return "ERROR: Your Attributes Filename_export is not definded!" if ($Filename_export eq "");
 
 		open(OutFile, ">$path$Filename_export");
@@ -995,10 +1013,8 @@ sub SIGNALduino_TOOL_Attr() {
 			while (<FileCheck>){
 				$count++;
 				if ($_ !~ /^#.*/ && $_ ne "\r\n" && $_ ne "\r" && $_ ne "\n") {
-					return "ERROR: the line $count in file $path$Filename_Dispatch$attrValue.txt have a wrong syntax! ( ) [ ] is not allowed!" if (not $_ =~ /[a-zA-Z\d,_;=-]/);										# not other allowed
-					
 					chomp ($_);												# Zeilenende entfernen
-					$_ =~ s/[^A-Za-z0-9\-;,=_]//g;;		# nur zulässige Zeichen erlauben
+					$_ =~ s/[^A-Za-z0-9\-;,=]//g;;		# nur zulässige Zeichen erlauben
 
 					return "ERROR: the line $count in file $path$Filename_Dispatch$attrValue.txt have a wrong syntax! [<model>,<state>,<RAWMSG>]" if (not $_ =~ /^.*,.*,.*;.*/);
 					return "ERROR: the line $count in file $path$Filename_Dispatch$attrValue.txt have a wrong RAWMSG! syntax RAWMSG is wrong. no ; at end of line!" if (not $_ =~ /.*;$/);					# end of RAWMSG ;
@@ -1133,6 +1149,8 @@ sub SIGNALduino_TOOL_RAWMSG_Check($$$) {
 			File name of the file in which the new data is stored.</li>
 		<li><a name="Filename_input">Filename_input</a><br>
 			File name of the file containing the input entries.</li>
+		<li><a name="MessageNumber">MessageNumber</a><br>
+		Number of message how dispatched only. (force-option)</li>
 		<li><a name="Path">Path</a><br>
 			Path of the tool in which the file (s) are stored or read. (standard is <code>./</code> which corresponds to the directory FHEM)</li>
 		<li><a name="RAWMSG_M1">RAWMSG_M1</a><br>
@@ -1181,7 +1199,10 @@ sub SIGNALduino_TOOL_RAWMSG_Check($$$) {
 	<b>Get</b>
 	<ul><li><a name="All_ClockPulse"></a><code>All_ClockPulse</code> - berechnet den Durchschnitt des ClockPulse aus der Input_Datei.</li><a name=""></a></ul>
 	<ul><li><a name="All_SyncPulse"></a><code>All_SyncPulse</code> - berechnet den Durchschnitt des SyncPulse aus der Input_Datei.</li><a name=""></a></ul>
-	<ul><li><a name="FilterFile"></a><code>FilterFile</code> - erstellt eine Datei mit den gefilterten Werten.</li><a name=""></a></ul>
+	<ul><li><a name="FilterFile"></a><code>FilterFile</code> - erstellt eine Datei mit den gefilterten Werten.<br>
+	&emsp;&rarr; eine Vorauswahl von Suchbegriffen via Checkbox ist m&ouml;glich<br>
+	&emsp;&rarr; die Checkbox Auswahl <i>-ONLY_DATA-</i> filtert nur die Suchdaten einzel aus jeder Zeile anstatt die komplette Zeile mit den gesuchten Daten<br>
+	&emsp;&rarr; eingegebene Texte im Textfeld welche mit <i>Komma ,</i> getrennt werden, werden ODER verkn&uuml;pft und ein Text mit Leerzeichen wird als ganzes Argument gesucht</li><a name=""></a></ul>
 	<ul><li><a name="InputFile_doublePulse"></a><code>InputFile_doublePulse</code> - sucht nach doppelten Pulsen im Datenteil der einzelnen Nachrichten innerhalb der Input_Datei und filtert diese in die Export_Datei.</li><a name=""></a></ul>
 	<ul><li><a name="InputFile_length_Datapart"></a><code>InputFile_length_Datapart</code> - ermittelt die min und max L&auml;nge vom Datenteil der eingelesenen RAWMSG´s.</li><a name=""></a></ul>
 	<ul><li><a name="InputFile_one_ClockPulse"></a><code>InputFile_one_ClockPulse</code> - sucht den angegebenen ClockPulse mit 15% Tolleranz aus der Input_Datei und filtert die RAWMSG in die Export_Datei.</li><a name=""></a></ul>
@@ -1207,6 +1228,9 @@ sub SIGNALduino_TOOL_RAWMSG_Check($$$) {
 			Dateiname der Datei, worin die neuen Daten gespeichert werden.</li>
 		<li><a name="Filename_input">Filename_input</a><br>
 			Dateiname der Datei, welche die Input-Eingaben enth&auml;lt.</li>
+		<li><a name="MessageNumber">MessageNumber</a><br>
+			Nummer der g&uuml;ltigen Nachricht welche EINZELN dispatcht werden soll. (force-Option)</li>
+			<a name="MessageNumberEnd"></a>
 		<li><a name="Path">Path</a><br>
 			Pfadangabe des Tools worin die Datei(en) gespeichert werden oder gelesen werden. (Standard ist <code>./</code> was dem Verzeichnis FHEM entspricht)</li>
 		<li><a name="RAWMSG_M1">RAWMSG_M1</a><br>
