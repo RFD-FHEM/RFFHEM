@@ -1652,9 +1652,9 @@ sub SIGNALduino_FillPatternLookupTable {
 			my $pstr=undef;
 			if (($pstr=SIGNALduino_PatternExists($hash, $symbol,$patternList,$rawData)) >=0) {
 				${$rtext} = $pstr;
-				$patternLookupHash->{$pstr}=${$representation};		 ## Append Sync to our lookuptable
+				$patternLookupHash->{$pstr}=${$representation};		 ## Append to lookuptable
 				chop $pstr;
-				$endPatternLookupHash->{$pstr} = ${$representation}; ## Append zero to our endbit lookuptable
+				$endPatternLookupHash->{$pstr} = ${$representation} if (!exists($endPatternLookupHash->{$pstr})); ## Append shortened string to lookuptable
 				return 1;
 			} else {
 				${$rtext} = "";
@@ -2091,6 +2091,7 @@ SIGNALduino_Parse_MS($$$$%)
 						next IDLOOP;
 					}
 					Debug "expecting $bit_length bits in signal" if ($debug);
+					%endPatternLookupHash=();
 				}
 				Debug sprintf("Found matched %s with indexes: (%s)",$key,$return_text) if ($debug);
 			}

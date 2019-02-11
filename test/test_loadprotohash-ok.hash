@@ -113,4 +113,32 @@
 									]
 								},
 		},
+	"9993"	=>			
+		{
+			name			=> 'Unittest MS Protocol with float',
+			comment			=> 'ony for running automated tests',
+			id				=> '9993',
+			one				=> [3.5,-1],
+			zero			=> [1,-3.8],
+			float			=> [1,-1],			# fuer Gruppentaste (nur bei ITS-150,ITR-3500 und ITR-300), siehe Kommentar in sub SIGNALduino_bit2itv1
+			sync			=> [1,-44],
+			clockabs		=> -1,				# -1=auto
+			format			=> 'twostate',
+			preamble		=> '#',				# prepend to converted message
+			length_min		=> '24',
+			length_max		=> '24',			# Don't know maximal lenth of a valid message
+			postDemodulation	=> \&SIGNALduino_bit2itv1,
+			test_data		=> 	{ 
+						test_MS_2 => [
+							{
+								desc	=>	"ms signal with float at end of signal", 
+								input	=>	" MS;P1=309;P2=-1130;P3=1011;P4=-429;P5=-11466;D=15123412121234123412141214121412141212123412341214;CP=1;SP=5;R=38;",
+								output	=>	[1,1,9993,"#455515"],
+							
+							},
+						]
+					},
+			
+		},
+		
 );
