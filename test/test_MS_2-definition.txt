@@ -12,7 +12,6 @@ defmod test_MS_2 UnitTest dummyDuino (
 		next if (!exists($local_ProtocolListSIGNALduino->{$pID}{test_data}{$name}));
     	foreach my $testData (values %$local_ProtocolListSIGNALduino->{$pID}{test_data}{$name}) 
         {
-		    Log3 $name, 3, "$name:".Dumper($testData);
           subtest "$testData->{desc}" => sub {
               SIGNALduino_IdList("sduino_IdList:$target",$pID);
               $SD_Dispatch->reset();
