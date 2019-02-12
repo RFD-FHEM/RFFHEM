@@ -1,3 +1,5 @@
+12.02.2019
+ ID 87 and 88 can now dispatch to SD_Rollo_Keeloq Module
 11.02.2019
  00_SIGNALduino - added P90 matchListSIGNALduino
  14_SD_UT.pm - fix Create bug model RH787T & CAME_TOP_432EV | added new model Manax (ONLY RECEIVE!)
