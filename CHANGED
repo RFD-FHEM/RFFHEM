@@ -1,3 +1,6 @@
+12.02.2019
+ 00_SIGNALduino - getAvailableFirmware returns only version for which a file could be found.
+                  Attribute hardware does not longer support nano. Select nano328 instead
 11.02.2019
  00_SIGNALduino - added P90 matchListSIGNALduino
  14_SD_UT.pm - fix Create bug model RH787T & CAME_TOP_432EV | added new model Manax (ONLY RECEIVE!)

@@ -18,6 +18,7 @@ no warnings 'portable';
 
 eval "use Data::Dumper qw(Dumper);1";
 eval "use JSON;1" or $missingModulSIGNALduino .= "JSON ";
+
 eval "use Scalar::Util qw(looks_like_number);1";
 eval "use Time::HiRes qw(gettimeofday);1" ;
 
@@ -220,7 +221,7 @@ SIGNALduino_Initialize($)
 					  ." hexFile"
                       ." initCommands"
                       ." flashCommand"
-  					  ." hardware:ESP_1M,ESP32,nano,nanoCC1101,miniculCC1101,promini,radinoCC1101"
+  					  ." hardware:ESP_1M,ESP32,nano328,nanoCC1101,miniculCC1101,promini,radinoCC1101"
 					  ." updateChannelFW:stable,testing"
 					  ." debug:0$dev"
 					  ." longids"
@@ -580,7 +581,7 @@ SIGNALduino_Set($@)
 				SIGNALduino_Log3 $name, 5, "$hash->{TYPE} $name: flashCommand is not defined. standard used to flash.";
 			if ($hardware eq "radinoCC1101") {																	# radinoCC1101 Port not /dev/ttyUSB0 --> /dev/ttyACM0
 				$flashCommand = "avrdude -c avr109 -b [BAUDRATE] -P [PORT] -p atmega32u4 -vv -D -U flash:w:[HEXFILE] 2>[LOGFILE]";
-			} elsif ($hardware ne "ESP_1M" && $hardware ne "ESP32" && $hardware ne "radinoCC1101") {			# nano, nanoCC1101, miniculCC1101, promini
+			} elsif ($hardware ne "ESP_1M" && $hardware ne "ESP32" && $hardware ne "radinoCC1101") {			# nano328, nanoCC1101, miniculCC1101, promini
 				$flashCommand = "avrdude -c arduino -b [BAUDRATE] -P [PORT] -p atmega328p -vv -U flash:w:[HEXFILE] 2>[LOGFILE]";
 			}
 		} else {
@@ -863,18 +864,31 @@ SIGNALduino_Get($@)
   my ($msg, $err);
 
   if ($a[1] eq "availableFirmware") {
-  	
+
+
+	
   	if ($missingModulSIGNALduino =~ m/JSON/ )
   	{
   		SIGNALduino_Log3 $name, 1, "$name: get $a[1] failed. Pleas install Perl module JSON. Example: sudo apt-get install libjson-perl";
-  		
  		return "$a[1]: \n\nFetching from github is not possible. Please install JSON. Example:<br><code>sudo apt-get install libjson-perl</code>";
   	} 
   	
   	my $channel=AttrVal($name,"updateChannelFW","stable");
-	my $hardware=AttrVal($name,"hardware","nano");
+	my $hardware=AttrVal($name,"hardware",undef);
+	
+	my ($validHw) = $modules{$hash->{TYPE}}{AttrList} =~ /.*hardware:(.*?)\s/;  	
+	SIGNALduino_Log3 $name, 1, "$name: $validHw";
+	
+	if (!defined($hardware) || $validHw !~ /$hardware[^\w]/ )
+  	{
+  		SIGNALduino_Log3 $name, 1, "$name: get $a[1] failed. Please set attribute hardware first";
+ 		return "$a[1]: \n\n$name: get $a[1] failed. Please set attribute hardware";
+  	} 
+	
   	SIGNALduino_querygithubreleases($hash);
+		
 	return "$a[1]: \n\nFetching $channel firmware versions for $hardware from github\n";
+	
   }
   
   if (IsDummy($name) && $a[1] ne "protocolIDs")
@@ -4437,88 +4451,54 @@ sub SIGNALduino_querygithubreleases
                     command    => "queryReleases"
                     
                 };
-
-    HttpUtils_NonblockingGet($param);                                                                                     # Starten der HTTP Abfrage. Es gibt keinen Return-Code. 
+	HttpUtils_NonblockingGet($param);                                                                                     # Starten der HTTP Abfrage. Es gibt keinen Return-Code. 
 }
 
-sub SIGNALduino_githubParseHttpResponse($)
+
+#return -10 = hardeware attribute is not set
+sub SIGNALduino_githubParseHttpResponse($$$)
 {
     my ($param, $err, $data) = @_;
     my $hash = $param->{hash};
     my $name = $hash->{NAME};
-
+    my $hardware=AttrVal($name,"hardware",undef);
+    
     if($err ne "")                                                                                                         # wenn ein Fehler bei der HTTP Abfrage aufgetreten ist
     {
         Log3 $name, 3, "error while requesting ".$param->{url}." - $err (command: $param->{command}";                                                  # Eintrag fuers Log
         #readingsSingleUpdate($hash, "fullResponse", "ERROR");                                                              # Readings erzeugen
     }
-
-    elsif($data ne "")                                                                                                     # wenn die Abfrage erfolgreich war ($data enthaelt die Ergebnisdaten des HTTP Aufrufes)
+    elsif($data ne "" && defined($hardware))                                                                                                     # wenn die Abfrage erfolgreich war ($data enthaelt die Ergebnisdaten des HTTP Aufrufes)
     {
+    	
     	my $json_array = decode_json($data);
     	#print  Dumper($json_array);
-    	
        	if ($param->{command} eq "queryReleases") {
 	        #Log3 $name, 3, "url ".$param->{url}." returned: $data";                                                            # Eintrag fuers Log
-	
-			my @fwreleases;
+			
+			my $releaselist="";
 			if (ref($json_array) eq "ARRAY") {
 				foreach my $item( @$json_array ) { 
-					my %fwrelease;
-		
+					next if (AttrVal($name,"updateChannelFW","stable") eq "stable" && $item->{prerelease});
+
 					#Debug " item = ".Dumper($item);
-					$fwrelease{releasename} = $item->{name};
-					$fwrelease{isprerelease} = $item->{prerelease};
-					$fwrelease{tagname} = $item->{tag_name}; # Anzeige in Auswahlbox
 					
 					foreach my $asset (@{$item->{assets}})
 					{
-				    	my %fileinfo;
-						
-						$fileinfo{filename} = $asset->{name};
-						$fileinfo{dlurl} = $asset->{browser_download_url};
-						$fileinfo{create_date} = $asset->{created_at};
-						push @{$fwrelease{files}}, \%fileinfo;
-						
+						next if ($asset->{name} !~ m/$hardware/i);
+						$releaselist.=$item->{tag_name}."," ;		
+						last;
 					}
-		            #Debug $item->{name}.": ".$item->{prerelease}.", ".$item->{assets}[0]->{name}."=".$item->{assets}[0]->{browser_download_url};
-		            
-		            
-		      
-				   #for my $key (keys(%$item)) {
-				     # my $val = $item->{$key};
-		      		  
-		      		#  print "$key: $val\n";
-		      		  
-		    		#}
-					push @fwreleases, \%fwrelease;
-			
+					
 				}
 			}
-			#Debug " releases = ".Data::Dumper->new([\@fwreleases],[qw(fwreleases)])->Indent(3)->Quotekeys(0)->Dump;
 			
-			my $releaselist="";
-			foreach my $release (@fwreleases)
-			{
-				next if (AttrVal($name,"updateChannelFW","stable") eq "stable" && $release->{isprerelease});
-				
-				$releaselist.=$release->{tagname}.",";
-			}
 			$releaselist =~ s/,$//;
-			
-	        # An dieser Stelle die Antwort parsen / verarbeiten mit $data
-	        #Debug "updating update set with: $releaselist";
-	
-	
-		  $hash->{additionalSets}{flash} = $releaselist;
-	
-	
-	      #readingsSingleUpdate($hash, "fullResponse", $data);                                                                # Readings erzeugen
-    	} elsif ($param->{command} eq "getReleaseByTag") {
+		  	$hash->{additionalSets}{flash} = $releaselist;
+    	} elsif ($param->{command} eq "getReleaseByTag" && defined($hardware)) {
 			#Debug " json response = ".Dumper($json_array);
 			
 			my @fwfiles;
-			my $hardware=AttrVal($name,"hardware","nano328");
 			foreach my $asset (@{$json_array->{assets}})
 			{
 				my %fileinfo;
@@ -4540,11 +4520,14 @@ sub SIGNALduino_githubParseHttpResponse($)
 				}
 			}
 			
-    	}
-    }
+    	} 
+    } elsif (!defined($hardware))  {
+    	SIGNALduino_Log3  $name, 5, "$name: SIGNALduino_githubParseHttpResponse hardware is not defined";    	
+    }                                                                                              # wenn
     # Damit ist die Abfrage zuende.
     # Evtl. einen InternalTimer neu schedulen
     FW_directNotify("#FHEMWEB:$FW_wname", "location.reload('true')", "");
+	return 0;
 }
 
 1;
