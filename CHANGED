@@ -1,5 +1,7 @@
 12.02.2019
  ID 87 and 88 can now dispatch to SD_Rollo_Keeloq Module
+ 00_SIGNALduino - getAvailableFirmware returns only version for which a file could be found.
+   Attribute hardware does not longer support nano. Select nano328 instead
 11.02.2019
  00_SIGNALduino - added P90 matchListSIGNALduino
  14_SD_UT.pm - fix Create bug model RH787T & CAME_TOP_432EV | added new model Manax (ONLY RECEIVE!)
@@ -108,7 +110,6 @@
  Number of dispatches can be limited (maxMuMsgRepeat)
 30.10.2018
  signalduino_protocols.hash - added more doc ID 86
->>>>>>> dev-r33
 29.10.2018
  signalduino_protocols.hash - ID 87 integrated in ID 86 (two in one) & added doc
 28.10.2018
