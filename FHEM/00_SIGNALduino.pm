@@ -879,10 +879,10 @@ SIGNALduino_Get($@)
 	my ($validHw) = $modules{$hash->{TYPE}}{AttrList} =~ /.*hardware:(.*?)\s/;  	
 	SIGNALduino_Log3 $name, 1, "$name: $validHw";
 	
-	if (!defined($hardware) || $validHw !~ /$hardware[^\w]/ )
+	if (!defined($hardware) || $validHw !~ /$hardware(?:,|$)/ )
   	{
   		SIGNALduino_Log3 $name, 1, "$name: get $a[1] failed. Please set attribute hardware first";
- 		return "$a[1]: \n\n$name: get $a[1] failed. Please set attribute hardware";
+ 		return "$a[1]: \n\n$name: get $a[1] failed. Please choose one of $validHw attribute hardware";
   	} 
 	
   	SIGNALduino_querygithubreleases($hash);
