@@ -2122,6 +2122,7 @@
 			length_max		=> '36',
 			clientmodule	=> 'SD_UT',
 			#modulematch	=> '^P91#.*',
+			developID 		=> 'y',
 		},
 	"91.1"	=>	## Atlantic Security / Focus Security China Devices
 						# https://forum.fhem.de/index.php/topic,58397.msg878008.html#msg878008
