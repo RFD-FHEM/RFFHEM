@@ -51,7 +51,7 @@
 ##### notice #### or #### info ############################################################################################################
 # !!! Between the keys and values ​​no tabs not equal to a width of 8 or please use spaces !!!
 # !!! Please use first unused id for new protocols !!!
-# ID´s are currently unused: 20 | 38 | 68
+# ID´s are currently unused: 20 | 68
 # ID´s need to be revised (preamble u): 5|6|19|20|21|22|23|24|25|26|27|28|31|36|40|42|52|56|59|63|78|87|88
 ###########################################################################################################################################
 # Please provide at least three messages for each new MU/MC/MS protocol and a URL of issue in GitHub or discussion in FHEM Forum
@@ -1368,7 +1368,7 @@
 			name				=> 'TFA 30.3208.0',
 			comment				=> 'temperature / humidity sensor',
 			id				=> '58',
-			#knownFreqs			=> '',
+			knownFreqs			=> '433.92',
 			clockrange			=> [460,520],			# min , max
 			format				=> 'manchester',	# tristate can't be migrated from bin into hex!
 			clientmodule			=> 'SD_WS',
@@ -2125,6 +2125,7 @@
 			length_max		=> '36',
 			clientmodule	=> 'SD_UT',
 			#modulematch	=> '^P91#.*',
+			developID 		=> 'y',
 		},
 	"91.1"	=>	## Atlantic Security / Focus Security China Devices
 						# https://forum.fhem.de/index.php/topic,58397.msg878008.html#msg878008
@@ -2146,6 +2147,7 @@
 			length_max		=> '36',
 			clientmodule		=> 'SD_UT',
 			#modulematch		=> '^P91.1#.*',
+			developID 		=> 'y',
 		},
 	"92"	=>	## KRINNER Lumix - LED X-MAS
 						# https://github.com/RFD-FHEM/RFFHEM/issues/452 | https://forum.fhem.de/index.php/topic,94873.msg876477.html?PHPSESSID=khp4ja64pcqa5gsf6gb63l1es5#msg876477
