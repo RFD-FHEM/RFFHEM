@@ -1,6 +1,6 @@
-# $Id: 00_SIGNALduino.pm 10488 2019-02-12 12:00:00Z v3.3.3 $
+# $Id: 00_SIGNALduino.pm 10488 2019-02-12 12:00:00Z v3.4.0 $
 #
-# v3.3.3 (Development release 3.3)
+# v3.4.0 (Development release 3.4)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incoming messages
 # see http://www.fhemwiki.de/wiki/SIGNALDuino
 # It was modified also to provide support for raw message handling which can be send from the SIGNALduino
@@ -29,7 +29,7 @@ eval "use Time::HiRes qw(gettimeofday);1" ;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.3.3",
+	SDUINO_VERSION            => "v3.4.0-dev",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
