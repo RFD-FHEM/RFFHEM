@@ -1,0 +1,35 @@
+defmod test_proto57 UnitTest dummyDuino ( 
+ { 
+	my $mock = Mock::Sub->new; 	
+	my $SD_Dispatch = $mock->mock("SIGNALduno_Dispatch");  	
+	
+	subtest 'SIGNALduino_parse_MC maxlength' => sub {
+		plan tests => 1;
+
+		my $rmsg="MC;LL=-762;LH=544;SL=-402;SH=345;D=DB6D5B54;C=342;L=30;R=32;";
+		my %signal_parts=SIGNALduino_Split_Message($rmsg,$targetHash->{NAME});     
+		
+		is(SIGNALduino_Parse_MC($targetHash, $targetHash, $targetHash->{NAME}, $rmsg,%signal_parts),0 , "check to long MC data dispatched");
+	};
+	subtest 'SIGNALduino_parse_MC minlenth' => sub {
+		plan tests => 1;
+		
+		my $rmsg="MC;LL=-762;LH=544;SL=-402;SH=345;D=DB6;C=342;L=12;R=32;";
+		my %signal_parts=SIGNALduino_Split_Message($rmsg,$targetHash->{NAME});     
+
+		is(SIGNALduino_Parse_MC($targetHash, $targetHash, $targetHash->{NAME}, $rmsg,%signal_parts),0 , "check to short MC data dispatched");
+	};
+	subtest 'SIGNALduino_parse_MC good message' => sub {
+		plan tests => 3;
+		
+		my $rmsg="MC;LL=-653;LH=679;SL=-310;SH=351;D=D55B58;C=332;L=21;";
+		my %signal_parts=SIGNALduino_Split_Message($rmsg,$targetHash->{NAME});     
+
+		is(SIGNALduino_Parse_MC($targetHash, $targetHash, $targetHash->{NAME}, $rmsg,%signal_parts),1 , "check to good MC data dispatched");
+		is( ($SD_Dispatch->called_with)[4], "57", "SIGNALduno_Dispatch check id" );
+		is( ($SD_Dispatch->called_with)[2], "P57#2AA4A7", "SIGNALduno_Dispatch check dmsg" );
+	};
+
+
+ }	 
+)
