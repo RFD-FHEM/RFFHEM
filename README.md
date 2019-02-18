@@ -1,8 +1,7 @@
-SIGNALduino - FHEM Modules development Version 3.3.x 
-
+SIGNALduino - FHEM Modules development Version 3.4.0
 ======
 
-[![Coverage Status](https://coveralls.io/repos/github/RFD-FHEM/RFFHEM/badge.svg?branch=dev-r33)](https://coveralls.io/github/RFD-FHEM/RFFHEM?branch=dev-r33) [![Build Status](https://travis-ci.org/RFD-FHEM/RFFHEM.svg?branch=dev-r33)](https://travis-ci.org/RFD-FHEM/RFFHEM)
+[![Coverage Status](https://coveralls.io/repos/github/RFD-FHEM/RFFHEM/badge.svg?branch=dev-r34)](https://coveralls.io/github/RFD-FHEM/RFFHEM?branch=dev-r34) [![Build Status](https://travis-ci.org/RFD-FHEM/RFFHEM.svg?branch=dev-r34)](https://travis-ci.org/RFD-FHEM/RFFHEM)
 
 Counterpart of SIGNALDuino uC, it's the code for FHEM to work with the data received from the uC
 
@@ -56,7 +55,7 @@ How to install
 ======
 The Perl modules can be loaded directly into your FHEM installation:
 
-```update all https://raw.githubusercontent.com/RFD-FHEM/RFFHEM/dev-r33/controls_signalduino.txt```
+```update all https://raw.githubusercontent.com/RFD-FHEM/RFFHEM/dev-r34/controls_signalduino.txt```
 
 Prepare your Arduino nano. Look at http://www.fhemwiki.de/wiki/Datei:Fhemduino_schematic.png
 for hardware setup.
