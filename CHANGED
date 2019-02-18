@@ -1,212 +1,44 @@
 12.02.2019
- ID 87 and 88 can now dispatch to SD_Rollo_Keeloq Module
- 00_SIGNALduino - getAvailableFirmware returns only version for which a file could be found.
-   Attribute hardware does not longer support nano. Select nano328 instead
-11.02.2019
- 00_SIGNALduino - added P90 matchListSIGNALduino
- 14_SD_UT.pm - fix Create bug model RH787T & CAME_TOP_432EV | added new model Manax (ONLY RECEIVE!)
- signalduino_protocols.hash - revised P90 Manax to SD_UT module
-05.02.2019
- signalduino_protocols.hash - added ID38 NC-3911-675 refrigerator thermometer
-03.02.2019
- 00_SIGNALduino - Handling and functionality of webmenu "Display protocollist" enhanced
-17.01.2019
- 00_SIGNALduino - Protocol 58 (TFA 30.3208.0) enhanced
-10.01.2019
- 14_SD_RSL.pm - Updated implementation for "all" button on device
-06.01.2019
- 14_SD_WS.pm - Protocol 33 add temperature/humidity sensor TX-EZ6 for weatherstation TZS First Austria
-01.01.2019
- 14_SD_UT.pm - added new model Atlantic Security
-01.01.2019
- signalduino_protocols.hash - added ID 0.4 (Auriol Z31092) + revised doc + fix ID92 + fix CP ID40
-30.12.2018
- 14_SD_WS.pm - Check for valid channel numbers added in Protocols 84 and 89
- 14_SD_WS.pm - Test for valid temperature and humidity values separately
-29.12.2018
- 00_SIGNALduino -
-   Attribute development has changed and should not be used anymore.
-   Attribute Whitelist_IDs is now also capable of enabeling protocols
-   which are under developmen
-   The new Internal IDsNoDispatch holds the protocols which will not send
-   data to other modules.
-   New Oregon V3 sensors now supported.
- signalduino_protocols.hash - revised ID90 CP-value | added ID93 (ESTO Lighting GmbH) | old ID90 with 2 defs not unique due to 2 different CP values
- 14_SD_BELL.pm - added new model Pollin_551227
-28.12.2018
- signalduino_protocols.hash - revised ID90 (ESTO Lighting GmbH) | added ID91 (Atlantic Security) | added ID92 (Krinner Lumix - LED X-MAS)
- 14_SD_UT.pm - added new model Krinner_Lumix
-17.12.2018
- 14_SD_UT.pm - added new model LED_XM21_0 for XM21-0 - LED XMAS | https://github.com/RFD-FHEM/RFFHEM/pull/437#issuecomment-448019192
-13.12.2018
- 00_SIGNALduino.pm - added ID14 in matchListSIGNALduino
- signalduino_protocols.hash - changed ID14 preamble + added Modul
- 14_SD_UT.pm - added new model Chilitec_22640 for Chilitec 22640 - LED XMAS | https://forum.fhem.de/index.php?topic=94211.new;topicseen#new
-10.12.2018
- 14_SD_BELL.pm - code revised for doubeCode BELL (ID41) | repeats increased to 15
- 00_SIGNALduino.pm - added ID14 LED X-MAS Chilitec model 22640 | added ID42 ## Pollin 94-551227 | revised doc
-09.12.2018
- 00_SIGNALduino.pm: Added new menu via fhemweb. There the protocol List can be seend and protocols can be managed(active/inactive)
-08.12.2018
- 14_SD_BELL.pm - code revised for doubeCode BELL (ID41) | modelname revised
- 00_SIGNALduino.pm - matchListSIGNALduino revised ID42 14_SD_BELL.pm
-06.12.2018
- 14_SD_BELL.pm - code revised for better structur | models revised
- 00_SIGNALduino.pm - matchListSIGNALduino revised ID14 14_SD_BELL.pm
-05.12.2018
- 14_SD_UT.pm - added new model SF01_01319004_Typ2 for BOSCH
-04.12.2018
- signalduino_protocols.hash - changed ID22 (old, double from ID33) to new remote HAMULiGHT LED Trafo | Sensor TX-EZ6 decode from ID33 | added ID88 Roto | revised ID31
-03.12.2018
- 14_SD_UT.pm - added new repeats attr
-01.12.2018
- signalduino_protocols.hash - ID 46 modified preamble - Attention, DOIF no longer functional | added doc
- 14_SD_UT.pm - added new model TEDSEN_SKX1MD
- 00_SIGNALduino.pm - added 46 in SD_UT %matchListSIGNALduino
-27.11.2018
- 00_SIGNALduino.pm - Bug in Parse_MU removed
- 14_SD_BELL.pm - new model KANGTAI Doorbell (Pollin 94-550405)
- 00_SIGNALduino.pm - added ID 42 on matchListSIGNALduino
- signalduino_protocols.hash - added ID 42 for KANGTAI Doorbell (Pollin 94-550405) | added doc
-26.11.2018
- 14_SD_UT.pm - added new model SF01_01319004 | rename model Novy_Pureline_6830 to Novy_840029 | Novy_840029 buttons rename
- !!! Attention, model Novy_Pureline_6830 are delete and must be new define after receive (Novy_840029)!!!
-25.11.2018
- 00_SIGNALduino.pm - Enhanced logoutput and better troubeleshoot support when flashing firmware via module
-20.11.2018
- 14_SD_BELL.pm - fix error "subroutine subroutine &SD_BELL::InternalVal ..."
-18.11.2018
- signalduino_protocols.hash - protocoll ID 14,15,32,41,57,79 switch to modul SD_BELL
- !!! Attention, DOIF can not react anymore, a new device from modul SD_BELL will be created !!!
- 14_SD_BELL.pm - fix error "subroutine subroutine &SD_BELL::readingsBeginUpdate ..."
-17.11.2018
- 00_SIGNALduino.pm - bugfix set flash for github releases
- 14_SD_BELL.pm - fix error "subroutine &SD_BELL::AttrVal called at ./FHEM/14_SD_BELL.pm line 192."
- 00_SIGNALduino.pm - fix regex SD_BELL
-16.11.2018
- 14_SD_UT.pm - fix "error message" action name | code optimized
-15.11.2018
- 14_SD_BELL.pm - new module for bells
- signalduino_protocols.hash - revised P69
- 00_SIGNALduino.pm - protocol 69 are development ID's | ID 69 modified preamble - Attention, DOIF no longer functional | added doc
- 14_SD_UT.pm - added devices Hoermann HS1-868-BS & HSM4 (develop - user feedback required) | send command QUIGG GT-7000 (develop - user feedback required)
-13.11.2018
- signalduino_protocols.hash - adaptation length PFR-130
- 00_SIGNALduino.pm - added missingModulCheck | remove double logoutput
-12.11.2018
- 14_SD_UT.pm - added devices QUIGG GT-7000 |Novy Pureline 6830 kitchen hood|CAME Drehtor Antrieb (develop - user feedback required)
- 14_SD_UT.pm - !! Module has been completely redesigned !!
- 00_SIGNALduino.pm - protocol 34 & 86 are development ID's | ID 29 modified preamble
- 00_SIGNALduino - Firmware can be downloaded and flashed on demand from gitghub releases
-11.11.2018
- 98_unittest.pm - added + revised doc & fix PERL Warnings + revised define check
- 14_FLAMINGO.pm - fix Maintainer & fix issue error
-10.11.2018
- signalduino_protocols.hash - ID 13.1 revised & model added for Modul FLAMINGO
- 00_SIGNALduino.pm - match P13|P13.1 revised for Modul FLAMINGO
- 14_FLAMINGO.pm - revised because of mistakes
-07.11.2018
- If start is defined, then we will search for start and discard anything before start (#244)
- Number of dispatches can be limited (maxMuMsgRepeat)
-30.10.2018
- signalduino_protocols.hash - added more doc ID 86
-29.10.2018
- signalduino_protocols.hash - ID 87 integrated in ID 86 (two in one) & added doc
-28.10.2018
- 14_SD_UT.pm - clean Code (VTX_Bell gets another module)
-27.10.2018
- signalduino_protocols.hash - Comments cleaned
-25.10.2018
- signalduino_protocols.hash - added ID 87 + 34
-24.10.2018
- signalduino_protocols.hash - added ID 86
-22.10.2018
- signalduino_protocols.hash - doc added & revised ID 14,15,20,31,41,57,79
-21.10.2018
- 90_SIGNALduino_un.pm - fix readingname
- 14_SD_WS09 - doc revised | FHEM Standard | Def - Set - Get ...
- 00_SIGNALduino.pm - Feature support dupTimeout on same iodev
-20.10.2018
- signalduino_protocols.hash - doc added & sorted explanation | added def pause ID 61 & revised length ID 41
-19.10.2018
- 14_SD_UT.pm - documentation revised + logoutput changed
-18.10.2018
- signalduino_protocols.hash - doc added & sorted explanation | ID 3,3.1,4,5,17,65 length_max definded
- 14_SD_RSL.pm - added Doc_DE | Logoutput revised
- 14_SD_WS.pm - change, protocol for weatherstation Auriol IAN 283582
- 14_SD_WS.pm - feature, new protocol for weatherstation TFA 35.1140.01
- 14_SD_WS.pm - feature, plausibility check temperature and humidity values
- 14_SD_WS.pm - change, reading battery removed
-09.10.2018
- 90_SIGNALduino_un.pm - added bitCountLength & added doc
-04.10.2018
- signalduino_protocols.hash - revised Info & del developId 72 + 78 + added ID 19 minify
-01.10.2018
- signalduino_protocols.hash - sensor comments added & revised
- 14_Hideki.pm: doc revised (added doc windSpeedCorr)
-30.09.2018
- 00_SIGNALduino.pm - doc_DE revised & doc_EN some attributes were missing
- 14_SD_WS: added Protocol 84 -> new sensor Auriol (IAN 283582)
- signalduino_protocols.hash  - added Protocol 84
- 14_SD_UT.pm - documentation revised
-29.09.2018
- 00_SIGNALduino.pm - changed doc (flashCommand|hardware|flash|Bootloader radino) + flashCommand for radino
-27.09.2018
- signalduino_protocols.hash - doc 00_SIGNALduino.pm - fixed code (output developId=m failed), doc developId revised
- 90_SIGNALduino_un.pm - fixed code and added more information in log and readings, fixed PERL WARNING
-20.09.2018
- 00_SIGNALduino.pm - doc sendMSG revised
-20.09.2018
- 14_SD_UT.pm - added/fix doc and evaluation Unitec_47031 extended (SysCode + Zone)
-19.09.2018
- 90_SIGNALduino_un.pm - added doc description & optimization code
-18.09.2018
- 90_SIGNALduino_un.pm - added helpful feature for debug|decode + doc
-17.09.2018
- 90_SIGNALduino_un.pm - clean Code (P7,P9,P13,P16)
- 14_SD_UT.pm - added new Westinghouse model (remote with five buttons) + doc
- signalduino_protocols.hash  - mod Protocol 40 + added doc
-11.09.2018
- signalduino_protocols.hash  - doc
-  14_SD_WS: mod Code and fix plot creation
- 90_SIGNALduino_un.pm - clean Code (P33)
-10.09.2018
- signalduino_protocols.hash  - sorted + added
- 90_SIGNALduino_un.pm - clean Code (P37)
-08.09.2018
- 14_SD_UT.pm - revised for many devices
- 00_SIGNALduino.pm - match SD_UT mod
- signalduino_protocols.hash  - new 83 added
-06.09.2018
- signalduino_protocols.hash  - new Protocol (81 & 82) added
-23.08.2018
- 00_SIGNALduino.pm - Sub EM Protocol (80) added
- signalduino_protocols.hash  - new Protocol (80) EM added
-22.08.2018
-  14_SD05.07.2018
- 00_SIGNALduino.pm Log Eintrage beim RESTART geordnet / vereinfacht
-03.07.2018
-  14_SD_WS07: Support batteryState reading + mod Code for models
-  signalduino_protocols.hash - Protocol 60 length adapted for reception of sensor type 0
-  00_SIGNALduino.pm update postdemodulation WS7053, WS7054 - better processing start of message
-02.07.2018
-  00_SIGNALduino.pm update postdemodulation WS7053, WS7054 - better processing start of message
-02.07.2018
-  00_SIGNALduino.pm update postdemodulation WS7053, WS7054 - better processing start of message
-  SD_WS_07: fix for weather trend 2759001)
-03.07.2018
- 00_SIGNALduino.pm
-      Log Eintrage beim RESTART geordnet / vereinfacht
-16.03.2018
-14_SD_WS_Maverick: rename Readings, fit to Maverick_RFXTRX now
-        added attribute inactivityInterval and updated commandref
-15.02.02018
- 00_SIGNALduino.pm
-      attribut zum Aktivieren aller Log Eintrage auch als Event
-08.02.2018
- 00_SIGNALduino.pm Anpassung FHT80 Sub - Parity
+ 00_SIGNALduino: feature: getAvailableFirmware returns only version for 
+                  which a file could be found.
+                  change: Attribute hardware does not longer support nano.
+                  select nano328 instead
+                 feature: new webmenu "Display protocollist"
+                 feature: Serval new protocols added
+                 feature: New Oregon V3 sensors suppored.
+                 feature: Firmware for avr boards can be downloaded and flashed 
+                  on demand from gitghub releases
+                 feature:  supports dupTimeout on same iodev
+ 14_SD_UT.pm: bugfix:  Create bug model RH787T & CAME_TOP_432EV 
+              feature: added new model Manax (ONLY RECEIVE!)
+              feature: added new model Atlantic Security
+              feature: added new model SF01_01319004_Typ2 for BOSCH
+              feature: added new model LED_XM21_0 for XM21-0
+              feature: added new model Krinner_Lumix
+              feature: added new model TEDSEN_SKX1MD 
+              feature: added devices QUIGG GT-7000 
+			  feature: added new Westinghouse model (remote with five buttons)
+ 14_SD_RSL.pm: feature: Updated implementation for "all" button on device
+ 14_SD_WS.pm: feature: Protocol 33 added temperature/humidity sensor TX-EZ6 
+               for weatherstation TZS First Austria
+ 14_SD_BELL.pm: feature: added new model Pollin_551227
+                 feature new model KANGTAI Doorbell (Pollin 94-550405)
+ 14_SD_WS.pm: bugfix: protocol for weatherstation Auriol IAN 283582
+              feature: new protocol for weatherstation TFA 35.1140.01
+              feature: plausibility check temperature and humidity values
+              reading battery removed
+              feature: added new sensor Auriol (IAN 283582)
+              bugfix: autocreate plot
+ 14_SD_WS07: feature: Support batteryState reading 
+             bugfix for weather trend 2759001)
 12.12.2017
  14_SD_WS07.pm implementing correction factor temperature and humidity. logs revised
+14_SD_WS_Maverick: rename Readings, fit to Maverick_RFXTRX now
+        added attribute inactivityInterval and updated commandref
+05.12.2017
+ 00_SIGNALduino.pm commandref ins deutsche übersetzte und fs20 Demodulation verbessert
+ 14_Hideki.pm: commandref überarbeitet
+ 41_Oregon.pm: Deutsche commandref ergänzt
 05.12.2017
  00_SIGNALduino.pm commandref ins deutsche übersetzte und fs20 Demodulation verbessert
  14_Hideki.pm: commandref überarbeitet

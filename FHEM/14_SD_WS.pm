@@ -836,6 +836,7 @@ sub SD_WS_Parse($$)
 	readingsBulkUpdate($hash, "humidity", $hum)  if (defined($hum) && ($hum > 0 && $hum < 100 )) ;
 	readingsBulkUpdate($hash, "windspeed", $windspeed)  if (defined($windspeed)) ;
 	readingsBulkUpdate($hash, "batteryState", $bat) if (defined($bat) && length($bat) > 0) ;
+	readingsBulkUpdate($hash, "batteryState", $bat) if (defined($bat) && length($bat) > 0) ;
 	readingsBulkUpdate($hash, "channel", $channel) if (defined($channel)&& length($channel) > 0);
 	readingsBulkUpdate($hash, "trend", $trend) if (defined($trend) && length($trend) > 0);
 	readingsBulkUpdate($hash, "temperatureTrend", $trendTemp) if (defined($trendTemp) && length($trendTemp) > 0);
