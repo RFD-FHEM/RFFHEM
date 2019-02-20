@@ -2097,7 +2097,7 @@
 			one          => [3,-1],
 			zero         => [1,-3],
 			sync         => [1,-36],
-			clockabs     => 280,						# -1=auto
+			clockabs     => 280,						# -1=auto	
 			format       => 'twostate',
 			preamble     => 'P90#',
 			length_min   => '33',
@@ -2148,7 +2148,8 @@
 			clientmodule		=> 'SD_UT',
 			#modulematch		=> '^P91.1#.*',
 			developID 		=> 'y',
-
+			developID 		=> 'y',
+			
 		},
 	"92"	=>	## KRINNER Lumix - LED X-MAS
 						# https://github.com/RFD-FHEM/RFFHEM/issues/452 | https://forum.fhem.de/index.php/topic,94873.msg876477.html?PHPSESSID=khp4ja64pcqa5gsf6gb63l1es5#msg876477
@@ -2172,7 +2173,7 @@
 		},
 	"93"	=>	## ESTO Lighting GmbH | remote control KL-RF01 with 9 buttons (CP 375-395)
 						# https://github.com/RFD-FHEM/RFFHEM/issues/449
-						# MS;P1=376;P4=-1200;P5=1170;P6=-409;P7=-12224;D=17141414561456561456565656145656141414145614141414565656145656565614;CP=1;SP=7;R=231;e;m0;
+						# MS;P1=376;P4=-1200;P5=1170;P6=-409;P7=-12224;D=17141414561456561456565656145656141414145614141414565656145656565614;CP=1;SP=7;R=231;e;m0; 
 						# MS;P1=393;P2=-1174;P4=1180;P5=-401;P6=-12222;D=16121212451245451245454545124545124545451212121212121212454545454512;CP=1;SP=6;R=243;e;m0;
 						# MS;P0=397;P1=-385;P2=-1178;P3=1191;P4=-12230;D=04020202310231310231313131023131023131020202020202020231313131313102;CP=0;SP=4;R=250;e;m0;
 		{
@@ -2183,7 +2184,7 @@
 			one          => [3,-1],
 			zero         => [1,-3],
 			sync         => [1,-32],
-			clockabs     => 385,						# -1=auto
+			clockabs     => 385,						# -1=auto	
 			format       => 'twostate',
 			preamble     => 'u93#',
 			length_min   => '32',           # 2. MSG:	32 Bit, bleibt so

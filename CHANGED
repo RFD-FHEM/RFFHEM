@@ -1,5 +1,3 @@
-18.02.2019
- ID 87 and 88 can now dispatch to SD_Rollo_Keeloq Module
 12.02.2019
  00_SIGNALduino: feature: getAvailableFirmware returns only version for 
                   which a file could be found.
