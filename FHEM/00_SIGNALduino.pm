@@ -2343,6 +2343,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 			}
 			
 			my %patternLookupHash=();
+			my %endPatternLookupHash=();
 			my $pstr="";
 			my $zeroRegex ="";
 			my $oneRegex ="";
@@ -2357,6 +2358,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 			Debug "Found matched one" if ($debug);
 
 			$oneRegex=$pstr;
+			$endPatternLookupHash{substr($pstr,0,length($pstr)-1)}="1"; ## Append one to our endbit lookuptable
 			$patternLookupHash{$pstr}="1";		## Append one to our lookuptable
 			Debug "added $pstr " if ($debug);
 			
@@ -2371,13 +2373,15 @@ sub SIGNALduino_Parse_MU($$$$@)
 
 				$zeroRegex='|' . $pstr;
 				$patternLookupHash{$pstr}="0";		## Append zero to our lookuptable
-				Debug "added $pstr " if ($debug);
+				$endPatternLookupHash{substr($pstr,0,length($pstr)-1)}="0";
+				Debug "added $pstr " if ($debug); # Append zero to our endbit lookuptable
 			}
 
 			if (exists($ProtocolListSIGNALduino{$id}{float}) && ($pstr=SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{float}},\%patternList,\$rawData)) >=0)
 			{
 				Debug "Found matched float" if ($debug);
 				$floatRegex='|' . $pstr;
+				$endPatternLookupHash{substr($pstr,0,length($pstr)-1)}="F"; ## Appemd float to our endbit lookuptable
 				$patternLookupHash{$pstr}="F";		## Append float to our lookuptable
 				Debug "added $pstr " if ($debug);
 			}
@@ -2391,6 +2395,11 @@ sub SIGNALduino_Parse_MU($$$$@)
 			$length_max = $ProtocolListSIGNALduino{$id}{length_max} if (exists($ProtocolListSIGNALduino{$id}{length_max}));
 			
 			my $signalRegex = "(?:" . $oneRegex . $zeroRegex . $floatRegex . "){$length_min,}";
+			
+			if (exists($ProtocolListSIGNALduino{$id}{reconstructBit})) {
+				
+				$signalRegex .= "(?:" . join("|",keys %endPatternLookupHash) . ")?";
+			}
 			Debug "signalRegex is $signalRegex " if ($debug);
 
 			my $nrRestart=0;
@@ -2420,10 +2429,16 @@ sub SIGNALduino_Parse_MU($$$$@)
 				
 				
 				my @bit_msg=();			# array to store decoded signal bits
+				
 				foreach my $sigStr (@pairs)
 				{
 					if (exists $patternLookupHash{$sigStr}) {
 						push(@bit_msg,$patternLookupHash{$sigStr})  ## Add the bits to our bit array
+					}
+					elsif (exists($ProtocolListSIGNALduino{$id}{reconstructBit}) && exists($endPatternLookupHash{$sigStr})) {
+						my $lastbit = $endPatternLookupHash{$sigStr};
+						push(@bit_msg,$lastbit);
+						SIGNALduino_Log3 $name, 4, "$name: last part pair=$sigStr reconstructed, bit=$lastbit";
 					}
 				}
 				

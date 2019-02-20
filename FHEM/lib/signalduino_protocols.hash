@@ -26,6 +26,7 @@
 # paddingbits => '1'       # will disable padding, use this setting when using dispatchBin
 # paddingbits => '2'       # is padded to an even number, that is a maximum of 1 bit
 # remove_zero => 1         # removes leading zeros from output
+# reconstructBit => 1      # if set, then the last bit is reconstructed if the last pulse is missing
 #
 # developId   => 'm'       # logical module is under development
 # developId   => 'p'       # protocol is under development or to reserve IDs, the ID in the development attribute with developId => 'p' are only used without the other entries
@@ -356,19 +357,18 @@
 		},
 	"9"	=>	## Funk Wetterstation CTW600
 		{
-			name						=> 'CTW 600',
+			name					=> 'CTW 600',
 			comment					=> 'FunkWS WH1080/WH3080/CTW600',
-			id							=> '9',
-			knownFreqs      => '',
-			zero						=> [3,-2],
-			one							=> [1,-2],
-			#float					=> [-1,3],			# not full supported now, for later use
-			#sync						=> [1,-8],			#
+			id					=> '9',
+			knownFreqs				=> '433.92 | 868.35',
+			zero					=> [3,-2],
+			one					=> [1,-2],
 			clockabs				=> 480,					# -1 = auto undef=noclock
+			reconstructBit				=> '1',
 			format					=> 'pwm',				# tristate can't be migrated from bin into hex!
 			preamble				=> 'P9#',				# prepend to converted message
-			clientmodule		=> 'SD_WS09',
-			#modulematch		=> '^u9#.....',
+			clientmodule			=> 'SD_WS09',
+			#modulematch			=> '^u9#.....',
 			length_min			=> '60',
 			length_max			=> '120',
 		},
@@ -1702,19 +1702,20 @@
 	"74"	=>	## FS20 - 'Remote Control (868Mhz),  @HomeAutoUser
 						# MU;P0=-10420;P1=-92;P2=398;P3=-417;P5=596;P6=-592;D=1232323232323232323232323562323235656232323232356232356232623232323232323232323232323235623232323562356565623565623562023232323232323232323232356232323565623232323235623235623232323232323232323232323232323562323232356235656562356562356202323232323232323;CP=2;R=72;
 		{
-			name							=> 'FS20',
-			comment						=> 'remote control',
-			id								=> '74',
-			knownFreqs				=> '868.35',
-			one								=> [1.5,-1.5],	# 600
-			zero							=> [1,-1],			# 400
-			pause							=> [-25],
-			clockabs					=> 400,
-			format						=> 'twostate',	# not used now
+			name				=> 'FS20',
+			comment				=> 'remote control',
+			id				=> '74',
+			knownFreqs			=> '868.35',
+			one				=> [1.5,-1.5],	# 600
+			zero				=> [1,-1],	# 400
+			pause				=> [-25],
+			clockabs			=> 400,
+			reconstructBit			=> '1',
+			format				=> 'twostate',	# not used now
 			clientmodule			=> 'FS20',
-			preamble					=> '810b04f70101a001',
-			length_min				=> '50',
-			length_max				=> '67',
+			preamble			=> '810b04f70101a001',
+			length_min			=> '50',
+			length_max			=> '67',
 			postDemodulation	=> \&SIGNALduino_postDemo_FS20,
 		},
 	"75"	=>	## Conrad RSL (Erweiterung v2) @litronics https://github.com/RFD-FHEM/SIGNALDuino/issues/69
@@ -2027,6 +2028,7 @@
 			sync				=> [1,-10],				# this is a end marker, but we use this as a start marker
 			pause				=> [-40],
 			clockabs			=> 400,						# ca 400us
+			reconstructBit			=> '1',
 			developId			=> 'y',
 			format				=> 'twostate',
 			preamble			=> 'u87#',				# prepend to converted message
@@ -2135,8 +2137,9 @@
 			knownFreqs		=> '433.92 | 868.35',
 			one           => [-2,1],
 			zero          => [-1,2],
-			sync					=> [-10,1],
+			sync				=> [-10,1],
 			clockabs			=> 400,
+			reconstructBit		=> '1',
 			format				=> 'twostate',	#
 			preamble			=> 'P91.1#',		# prepend to converted message
 			length_min		=> '32',
