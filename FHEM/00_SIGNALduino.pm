@@ -2269,7 +2269,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 		## Find matching protocols
 		my $id;
 		
-		
+		IDLOOP:
 		foreach $id (@{$hash->{muIdList}}) {
 			
 			$clockabs= $ProtocolListSIGNALduino{$id}{clockabs};
@@ -2307,6 +2307,8 @@ sub SIGNALduino_Parse_MU($$$$@)
 			{
 				Debug "msgStartLst: ".Dumper(\@{$ProtocolListSIGNALduino{$id}{start}})  if ($debug);
 				
+							$debug=1;
+				
 				if ( ($startStr=SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{start}},\%patternList,\$rawData)) eq -1)
 				{
 					SIGNALduino_Log3 $name, 5, "$name: start pattern for MU Protocol id $id -> $ProtocolListSIGNALduino{$id}{name} not found, aborting";
@@ -2334,45 +2336,30 @@ sub SIGNALduino_Parse_MU($$$$@)
 			my $zeroRegex ="";
 			my $oneRegex ="";
 			my $floatRegex ="";
+			my $return_text="";
+			my $signalRegex="(?:";
+						
+			foreach my $key (qw(one zero float) ) {
+				next if (!exists($ProtocolListSIGNALduino{$id}{$key}));
 			
-			
-			if (($pstr=SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{one}},\%patternList,\$rawData)) eq -1)
-			{
-				SIGNALduino_Log3 $name, 5, "$name: one pattern for MU Protocol id $id not found, aborting";
-				next;
-			}
-			Debug "Found matched one" if ($debug);
-
-			$oneRegex=$pstr;
-			$endPatternLookupHash{substr($pstr,0,length($pstr)-1)}="1"; ## Append one to our endbit lookuptable
-			$patternLookupHash{$pstr}="1";		## Append one to our lookuptable
-			Debug "added $pstr " if ($debug);
-			
-			if (scalar @{$ProtocolListSIGNALduino{$id}{zero}} >0)
-			{
-				if  (($pstr=SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{zero}},\%patternList,\$rawData)) eq -1)
+				if (!SIGNALduino_FillPatternLookupTable($hash,\@{$ProtocolListSIGNALduino{$id}{$key}},\$symbol_map{$key},\%patternList,\$rawData,\%patternLookupHash,\%endPatternLookupHash,\$return_text))
 				{
-					SIGNALduino_Log3 $name, 5, "$name: zero pattern for MU Protocol id $id not found, aborting";
-					next;
+						Debug sprintf("%s pattern not found",$key) if ($debug);
+						next IDLOOP;
 				}
-				Debug "Found matched zero" if ($debug);
-
-				$zeroRegex='|' . $pstr;
-				$patternLookupHash{$pstr}="0";		## Append zero to our lookuptable
-				$endPatternLookupHash{substr($pstr,0,length($pstr)-1)}="0";
-				Debug "added $pstr " if ($debug); # Append zero to our endbit lookuptable
+				Debug sprintf("Found matched %s with indexes: (%s)",$key,$return_text) if ($debug);
+				if ($key eq "one")
+				{
+					 $signalRegex .= $return_text;
+					
+				}
+				else {
+					$signalRegex .= "|$return_text";
+						
+				}
 			}
+			$signalRegex .= ")";
 
-			if (exists($ProtocolListSIGNALduino{$id}{float}) && ($pstr=SIGNALduino_PatternExists($hash,\@{$ProtocolListSIGNALduino{$id}{float}},\%patternList,\$rawData)) >=0)
-			{
-				Debug "Found matched float" if ($debug);
-				$floatRegex='|' . $pstr;
-				$endPatternLookupHash{substr($pstr,0,length($pstr)-1)}="F"; ## Appemd float to our endbit lookuptable
-				$patternLookupHash{$pstr}="F";		## Append float to our lookuptable
-				Debug "added $pstr " if ($debug);
-			}
-			
-			#Debug "Pattern Lookup Table".Dumper(%patternLookupHash);
 			SIGNALduino_Log3 $name, 4, "$name: Fingerprint for MU Protocol id $id -> $ProtocolListSIGNALduino{$id}{name} matches, trying to demodulate";
 			
 			my $signal_width= @{$ProtocolListSIGNALduino{$id}{one}};
@@ -2380,7 +2367,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 			my $length_max = "";
 			$length_max = $ProtocolListSIGNALduino{$id}{length_max} if (exists($ProtocolListSIGNALduino{$id}{length_max}));
 			
-			my $signalRegex = "(?:" . $oneRegex . $zeroRegex . $floatRegex . "){$length_min,}";
+			$signalRegex .= "{$length_min,}";
 			
 			if (exists($ProtocolListSIGNALduino{$id}{reconstructBit})) {
 				
