@@ -2052,10 +2052,11 @@
 						# https://forum.fhem.de/index.php/topic,91244.0.html
 						# MS;P1=361;P2=-435;P4=-4018;P5=-829;P6=759;P7=-16210;D=141562156215156262626215151562626215626215621562151515621562151515156262156262626215151562156215621515151515151562151515156262156215171212121212121212121212;CP=1;SP=4;R=66;O;m0;
 						# MS;P0=-16052;P1=363;P2=-437;P3=-4001;P4=-829;P5=755;D=131452521452145252521452145252521414141452521452145214141414525252145252145252525214141452145214521414141414141452141414145252145252101212121212121212121212;CP=1;SP=3;R=51;O;m1;
+						# Waeco_MA650_TX | too buttons
 						# KeeLoq is a registered trademark of Microchip Technology Inc.
 		{
-			name					=> 'Roto shutter',
-			comment				=> 'remote control Aurel TX-nM-HCS',
+			name					=> 'Roto shutter | other',
+			comment				=> 'remote control Aurel TX-nM-HCS | Waeco_MA650_TX',
 			id						=> '88',
 			knownFreqs		=> '',
 			one						=> [1,-2],        # PWM bit pulse width typ. 1.2 mS
