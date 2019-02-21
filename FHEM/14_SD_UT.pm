@@ -1,9 +1,9 @@
 #########################################################################################
-# $Id: 14_SD_UT.pm 32 2019-02-04 12:00:00 v3.3.3-dev_05.12. $HomeAuto_User
+# $Id: 14_SD_UT.pm 18657 2019-02-19 21:02:24Z HomeAuto_User $
 #
 # The file is part of the SIGNALduino project.
 # The purpose of this module is universal support for devices.
-# 2016 - 1.fhemtester | 2018 - HomeAuto_User & elektron-bbs
+# 2016 - 1.fhemtester | 2018/2019 - HomeAuto_User & elektron-bbs
 #
 # - unitec Modul alte Variante bis 20180901 (Typ unitec-Sound) --> keine MU MSG!
 # - unitec Funkfernschalterset (Typ uniTEC_48110) ??? EIM-826 Funksteckdosen --> keine MU MSG!
@@ -86,8 +86,8 @@
 #     0000 0000 1110 0110 1011 1110 1001 0001 0000 1101 1100 (HSM4 Taste D)
 #}    get sduino_dummy raw MU;;P0=-3656;;P1=12248;;P2=-519;;P3=1008;;P4=506;;P5=-1033;;D=01232323232323232324545453232454532453245454545453245323245323232453232323245453245454532321232323232323232324545453232454532453245454545453245323245323232453232323245453245454532321232323232323232324545453232454532453245454545453245323245323232453232323;;CP=4;;R=48;;O;;
 ###############################################################################################################################################################################
-# - Transmitter SF01 01319004 433,92 MHz (SF01_01319004) (NEFF kitchen hood) [Protocol 86]
-#{    https://github.com/RFD-FHEM/RFFHEM/issues/376 | https://forum.fhem.de/index.php?topic=93545.0
+# - Transmitter SF01 01319004 433,92 MHz (SF01_01319004) (NEFF / Refsta Topdraft kitchen hood) [Protocol 86]
+#{    https://github.com/RFD-FHEM/RFFHEM/issues/376 | https://forum.fhem.de/index.php?topic=93545.0 | https://forum.fhem.de/index.php/topic,93545.msg908150.html#msg908150
 #     Sends 18 bits, converting to hex in SIGNALduino.pm adds 2 bits of 0
 #                   iiii iiii iiii ii bbbb aa   hex
 #     ------------------------------------------------
@@ -177,7 +177,7 @@
 #		Kontakt auf | Gehäuse zu		get sduino_dummy raw MS;;P1=-404;;P2=813;;P3=-794;;P4=409;;P5=-4002;;D=45412123434123412123434341234123434121234123412121212341234343434121212343;;CP=4;;SP=5;;R=65;;m0;;
 #		Kontakt zu | Gehäuse zu			get sduino_dummy raw MS;;P0=-800;;P1=402;;P2=-401;;P3=806;;P4=-3983;;D=14123230101230123230101012301230101232301230123232323232301010101232301010;;CP=1;;SP=4;;R=57;;O;;m2;;
 #}
-#{	Vibration Schock Sensor MD-2018R
+#{	Vibration Schock Sensor MD-2018R | water sensor MD_230R
 #
 #		iiiiiiiiiiiiiiiiiiiiiiiisc?kttttCCCC
 #		------------------------------------
@@ -213,8 +213,12 @@
 #		...
 #}
 ###############################################################################################################################################################################
+# - ESTO Lighting GmbH | remote control KL-RF01 with 9 buttons (CP 375-395) [Protocol 93] and [additionally Protocol 90]
+#{  https://github.com/RFD-FHEM/RFFHEM/issues/449
+#}
+###############################################################################################################################################################################
 # !!! ToDo´s !!!
-#     - LED lights, counter battery-h reading
+#     - LED lights, counter battery-h reading --> commandref hour_counter module
 #     -
 ###############################################################################################################################################################################
 
@@ -351,6 +355,19 @@ my %models = (
 														Protocol 	=> "P86",
 														Typ				=> "remote"
 													},
+	"KL_RF01" =>	{	"0001" => "light_color_cold_white",
+									"0010" => "night_mode",
+									"0100" => "on",
+									"0110" => "alternating_full_luminosity",
+									"1000" => "full_brightness",
+									"1001" => "off",
+									"1010" => "light_color_warm_white",
+									"1100" => "dimdown",
+									"1110" => "dimup",
+									Protocol	=> "P93",
+									hex_lengh	=> "9",
+									Typ				=> "remote"
+								},
 	"MD_2003R" =>	{	Protocol	=> "P91", 	#P91.1
 									hex_lengh	=> "9",
 									Typ				=> "gas"
@@ -386,7 +403,7 @@ my %models = (
 #############################
 sub SD_UT_Initialize($) {
 	my ($hash) = @_;
-	$hash->{Match}			= "^P(?:14|29|30|34|46|69|76|81|83|86|90|91|91.1|92)#.*";
+	$hash->{Match}			= "^P(?:14|29|30|34|46|69|76|81|83|86|90|91|91.1|92|93)#.*";
 	$hash->{DefFn}			= "SD_UT_Define";
 	$hash->{UndefFn}		= "SD_UT_Undef";
 	$hash->{ParseFn}		= "SD_UT_Parse";
@@ -406,11 +423,6 @@ sub SD_UT_Initialize($) {
 sub SD_UT_Define($$) {
 	my ($hash, $def) = @_;
 	my @a = split("[ \t][ \t]*", $def);
-
-	### checks all ###
-	#Log3 $hash->{NAME}, 3, "SD_UT: Define arg0=$a[0] arg1=$a[1] arg2=$a[2]" if($a[0] && $a[1] && $a[2] && !$a[3]);
-	#Log3 $hash->{NAME}, 3, "SD_UT: Define arg0=$a[0] arg1=$a[1] arg2=$a[2] arg3=$a[3]" if($a[0] && $a[1] && $a[2] && $a[3] && !$a[4]);
-	#Log3 $hash->{NAME}, 3, "SD_UT: Define arg0=$a[0] arg1=$a[1] arg2=$a[2] arg3=$a[3] arg4=$a[4]" if($a[0] && $a[1] && $a[2] && $a[3] && $a[4]);
 
 	# Argument					   0	 1		2		3				4
 	return "wrong syntax: define <name> SD_UT <model> <HEX-Value> <optional IODEV>" if(int(@a) < 3 || int(@a) > 5);
@@ -436,8 +448,8 @@ sub SD_UT_Define($$) {
 	if (($a[2] eq "SA_434_1_mini" || $a[2] eq "QUIGG_DMV") && not $a[3] =~ /^[0-9a-fA-F]{3}/s) {
 		return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short | long or not HEX (0-9 | a-f | A-F){3}";
 	}
-	### [4] checks Neff SF01_01319004 & BOSCH SF01_01319004_Typ2 & Chilitec_22640 & Manax ###
-	if (($a[2] eq "SF01_01319004" || $a[2] eq "SF01_01319004_Typ2" || $a[2] eq "Chilitec_22640" || $a[2] eq "Manax") && not $a[3] =~ /^[0-9a-fA-F]{4}/s) {
+	### [4] checks Neff SF01_01319004 & BOSCH SF01_01319004_Typ2 & Chilitec_22640 & Manax & ESTO KL_RF01###
+	if (($a[2] eq "SF01_01319004" || $a[2] eq "SF01_01319004_Typ2" || $a[2] eq "Chilitec_22640" || $a[2] eq "Manax" || $a[2] eq "KL_RF01") && not $a[3] =~ /^[0-9a-fA-F]{4}/s) {
 		return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short | long or not HEX (0-9 | a-f | A-F){4}";
 	}
 
@@ -569,6 +581,13 @@ sub SD_UT_Set($$$@) {
 	############ Manax ############
 	} elsif ($model eq "Manax" && $cmd ne "?") {
 		return "ERROR: the send command is currently not supported";
+	############ ESTO KL_RF01############
+	} elsif ($model eq "KL_RF01" && $cmd ne "?") {
+		my @definition = split(" ", $hash->{DEF});																# split adress from def
+		my $adr = sprintf( "%016b", hex($definition[1])) if ($name ne "unknown");	# argument 1 - adress to binary with 14 digits
+		$msg = $models{$model}{Protocol} . "#" . $adr;
+		$msgEnd .= "11110";	# nibble7 every?
+		$msgEnd .= "#R" . $repeats;
 	}
 
 	Log3 $name, 4, "$ioname: SD_UT_Set attr_model=$model msg=$msg msgEnd=$msgEnd" if(defined $msgEnd);
@@ -590,7 +609,14 @@ sub SD_UT_Set($$$@) {
 					last if ($value eq $cmd);
 				}
 			}
-			$msg .= $save.$msgEnd;
+
+			if ($model eq "KL_RF01") {
+				my $save2 = $save;
+				$save2 =~ tr/01/10/;									# invert message (nibble6 invert = nibble4)
+				$msg .= $save."0000".$save2.$msgEnd;	# 0000 = nibble5 every?
+			} else {
+				$msg .= $save.$msgEnd;
+			}
 			Log3 $name, 5, "$ioname: SD_UT_Set attr_model=$model msg=$msg cmd=$cmd value=$value (cmd loop)";
 		}
 
@@ -661,7 +687,7 @@ sub SD_UT_Parse($$) {
 
 	if ($hlen == 3) {
 		### Westinghouse Buttons_five [P29] ###
-		if(!$def && ($protocol == 29 || $protocol == 30)) {
+		if (!$def && ($protocol == 29 || $protocol == 30)) {
 			$deviceCode = substr($rawData,2,1);
 			$devicedef = "Buttons_five " . $deviceCode;
 			$def = $modules{SD_UT}{defptr}{$devicedef};
@@ -743,44 +769,51 @@ sub SD_UT_Parse($$) {
 		if (!$def && ($protocol == 91 || $protocol == 91.1)) {
 			### Atlantic Security with all models [P91] or [P91.1 ] with CHECK ###
 			Log3 $iohash, 4, "$ioname: SD_UT device MD_210R check length & Protocol OK";
-		my @array_rawData = split("",$rawData);
-		my $xor_check = hex($array_rawData[0]);
-		foreach my $nibble (1...8) {
-			$xor_check = $xor_check ^ hex($array_rawData[$nibble]);
-		}
-		if ($xor_check != 0) {
-			Log3 $iohash, 4, "$ioname: SD_UT device from Atlantic Security - check XOR ($xor_check) FAILED! rawData=$rawData";
-			return "";
-		} else {
-			Log3 $iohash, 4, "$ioname: SD_UT device from Atlantic Security - check XOR OK";
-		}
+			my @array_rawData = split("",$rawData);
+			my $xor_check = hex($array_rawData[0]);
+			foreach my $nibble (1...8) {
+				$xor_check = $xor_check ^ hex($array_rawData[$nibble]);
+			}
+			if ($xor_check != 0) {
+				Log3 $iohash, 4, "$ioname: SD_UT device from Atlantic Security - check XOR ($xor_check) FAILED! rawData=$rawData";
+				return "";
+			} else {
+				Log3 $iohash, 4, "$ioname: SD_UT device from Atlantic Security - check XOR OK";
+			}
 
-		$model = substr($rawData,7,1);
-		if ($model eq "E") {
-			$model = "MD_210R";
-		} elsif ($model eq "4") {
-			$model = "MD_2018R";
-		} elsif ($model eq "C") {
-			$model = "MD_2003R";
-		} else {
-			Log3 $iohash, 1, "SD_UT Please report maintainer. Your model from Atlantic Security are unknown! rawData=$rawData";
-			return "";
-		}
+			$model = substr($rawData,7,1);
+			if ($model eq "E") {
+				$model = "MD_210R";
+			} elsif ($model eq "4") {
+				$model = "MD_2018R";
+			} elsif ($model eq "C") {
+				$model = "MD_2003R";
+			} else {
+				Log3 $iohash, 1, "SD_UT Please report maintainer. Your model from Atlantic Security are unknown! rawData=$rawData";
+				return "";
+			}
 		
-		$deviceTyp = $models{$model}{Typ};
-		$model = "$model";
-		$deviceCode = substr($rawData,0,6);
-		$devicedef = "$model " . $deviceCode if (!$def);
-		$def = $modules{SD_UT}{defptr}{$devicedef} if (!$def);
-		$name = $model."_" . $deviceCode;
+			$deviceTyp = $models{$model}{Typ};
+			$model = "$model";
+			$deviceCode = substr($rawData,0,6);
+			$devicedef = "$model " . $deviceCode if (!$def);
+			$def = $modules{SD_UT}{defptr}{$devicedef} if (!$def);
+			$name = $model."_" . $deviceCode;
 
-		Log3 $iohash, 4, "$ioname: SD_UT device $model from category $deviceTyp with code $deviceCode are ready to decode";
-	}
+			Log3 $iohash, 4, "$ioname: SD_UT device $model from category $deviceTyp with code $deviceCode are ready to decode";
+		}
 		
 		### Manax MX-RCS250 [P90] ###
 		if (!$def && $protocol == 90) {
 			$deviceCode = substr($rawData,0,4);
 			$devicedef = "Manax " . $deviceCode;
+			$def = $modules{SD_UT}{defptr}{$devicedef};
+		}
+		
+		### ESTO KL_RF01 [P93] ###
+		if (!$def && $protocol == 93 || $protocol == 90) {
+			$deviceCode = substr($rawData,0,4);
+			$devicedef = "KL_RF01 " . $deviceCode;
 			$def = $modules{SD_UT}{defptr}{$devicedef};
 		}
 	}
@@ -975,17 +1008,33 @@ sub SD_UT_Parse($$) {
 			}
 		}
 	} elsif ($model eq "Manax" && $protocol == 90) {
-	############ Manax  ############ Protocol 90 ############
+	############ Manax ############ Protocol 90 ############
 		## Check fixed bits
 		my $unknown1 = substr($bitData,16,4);		# ?
 		my $unknown2 = substr($bitData,24,12);	# ?
 		
 		$state = substr($bitData,20,4);
 		$deviceCode = substr($bitData,0,16);
+	} elsif ($model eq "KL_RF01" && $protocol == 93) {
+	############ ESTO KL_RF01 ############ Protocol 90 ############
+		## Check fixed bits
+		my $unknown1 = substr($bitData,20,4);		# ?
+		my $unknown2 = substr($bitData,28,4);		# ?
+		
+		$state = substr($bitData,16,4);
+		my $state_invers = substr($bitData,24,4);
+		$deviceCode = substr($bitData,0,16);
+		$state_invers =~ tr/01/10/;							# invert message
+		if ($state eq $state_invers) {
+			Log3 $name, 4, "$ioname: SD_UT_Parse - check $model OK, nibble4 ($state) = nibble6 ($state_invers)";
+		} else {
+			Log3 $name, 3, "$ioname: SD_UT_Parse - check $model FAILED, $state!=$state_invers, ERROR, nibble4 ($state) NOT nibble6 ($state_invers)!";
+			return "";
+		}
 	############ unknown ############
 	} else {
 		readingsSingleUpdate($hash, "state", "???", 0);
-		readingsSingleUpdate($hash, "unknownMSG", $bitData."  (protocol: ".$protocol.")", 1);
+		readingsSingleUpdate($hash, "unknownMSG", $bitData."  (protocol: ".$protocol.")", 1) if (AttrVal($name, "model", "unknown") eq "unknown");
 		Log3 $name, 3, "$ioname: SD_UT Please define your model of Device $name in Attributes!" if (AttrVal($name, "model", "unknown") eq "unknown");
 		Log3 $name, 5, "$ioname: SD_UT_Parse devicedef=$devicedef attr_model=$model protocol=$protocol rawData=$rawData, bitData=$bitData";
 	}
@@ -1104,7 +1153,7 @@ sub SD_UT_Attr(@) {
 				$deviceCode = substr($bitData,0,8);
 				$deviceCode = sprintf("%X", oct( "0b$deviceCode" ) );
 				$devicename = $devicemodel."_".$deviceCode;
-			############ NEFF SF01_01319004 || BOSCH SF01_01319004_Typ2 ############
+			############ NEFF SF01_01319004 || BOSCH SF01_01319004_Typ2 || Refsta Topdraft (Tecnowind) ############
 			} elsif ($attrName eq "model" && ($attrValue eq "SF01_01319004" || $attrValue eq "SF01_01319004_Typ2")) {
 				$deviceCode = substr($bitData,0,14) . "00";
 				$deviceCode = sprintf("%04X", oct( "0b$deviceCode" ) );
@@ -1135,6 +1184,11 @@ sub SD_UT_Attr(@) {
 				$devicename = $devicemodel."_".$deviceCode;
 			############ Manax ############
 			} elsif ($attrName eq "model" && $attrValue eq "Manax") {
+				$deviceCode = substr($bitData,0,16);
+				$deviceCode = sprintf("%04X", oct( "0b$deviceCode" ) );
+				$devicename = $devicemodel."_".$deviceCode;
+			############ ESTO KL_RF01 ############
+			} elsif ($attrName eq "model" && $attrValue eq "KL_RF01") {
 				$deviceCode = substr($bitData,0,16);
 				$deviceCode = sprintf("%04X", oct( "0b$deviceCode" ) );
 				$devicename = $devicemodel."_".$deviceCode;
@@ -1196,16 +1250,18 @@ sub SD_UT_Attr(@) {
 	<i><u><b>Note:</b></u></i> As soon as the attribute model of a defined device is changed or deleted, the module re-creates a device of the selected type, and when a new message is run, the current device is deleted. 
 	Devices of <u>the same or different type with the same deviceCode will result in errors</u>. PLEASE use different <code>deviceCode</code>.<br><br>
 	 <u>The following devices are supported:</u><br>
-	 <ul> - Atlantic Security sensors&nbsp;&nbsp;&nbsp;<small>(module model: MD-2003R, MD-2018R,MD-210R | Protokoll 91|91.1)</small></ul>
+	 <ul> - Atlantic Security sensors&nbsp;&nbsp;&nbsp;<small>(module model: MD-2003R, MD-2018R,MD-210R | Protokoll 91|91.1)</small><br>
+	 <code>&nbsp;&nbsp;&nbsp;note: the model MD_230R (water) is recognized as MD-2018R due to the same hardware ID!</code></ul>
 	 <ul> - BOSCH ceiling fan&nbsp;&nbsp;&nbsp;<small>(module model: SF01_01319004_Typ2 | protocol 86)</small></ul>
 	 <ul> - CAME swing gate drive&nbsp;&nbsp;&nbsp;<small>(module model: CAME_TOP_432EV | protocol 86)</small></ul>
 	 <ul> - ChiliTec LED X-Mas light&nbsp;&nbsp;&nbsp;<small>(module model: Chilitec_22640 | protocol 14)</small></ul>
+	 <ul> - ESTO ceiling lamp&nbsp;&nbsp;&nbsp;<small>(model: KL_RF01 | protocol 93)</small></ul>
 	 <ul> - Hoermann HS1-868-BS&nbsp;&nbsp;&nbsp;<small>(module model: HS1_868_BS | protocol 69)</small></ul>
 	 <ul> - Hoermann HSM4&nbsp;&nbsp;&nbsp;<small>(module model: HSM4 | protocol 69)</small></ul>
 	 <ul> - Krinner LUMIX X-Mas light string&nbsp;&nbsp;&nbsp;<small>(module model: Krinner_LUMIX | protocol 92)</small></ul>
 	 <ul> - LED_XM21_0 X-Mas light string&nbsp;&nbsp;&nbsp;<small>(module model: LED_XM21_0 | protocol 76)</small></ul>
 	 <ul> - Manax RCS250 <b>ONLY RECEIVE!</b>&nbsp;&nbsp;&nbsp;<small>(module model: Manax | protocol 90)</small></ul>
-	 <ul> - NEFF kitchen hood&nbsp;&nbsp;&nbsp;<small>(module model: SF01_01319004 | protocol 86)</small></ul>
+	 <ul> - NEFF or Refsta Topdraft (Tecnowind) kitchen hood&nbsp;&nbsp;&nbsp;<small>(module model: SF01_01319004 | protocol 86)</small></ul>
 	 <ul> - Novy Pureline 6830 kitchen hood&nbsp;&nbsp;&nbsp;<small>(module model: Novy_840029 | protocol 86)</small></ul>
 	 <ul> - QUIGG DMV-7000&nbsp;&nbsp;&nbsp;<small>(module model: QUIGG_DMV | protocol 34)</small></ul>
 	 <ul> - Remote control SA-434-1 mini 923301&nbsp;&nbsp;&nbsp;<small>(module model: SA_434_1_mini | protocol 81)</small></ul>
@@ -1224,7 +1280,7 @@ sub SD_UT_Attr(@) {
 		</ul>	</ul><br><br>
 	<b>Set</b><br>
 	<ul>Different transmission commands are available.</ul><br>
-		<ul><u>BOSCH (SF01_01319004_Typ2) | NEFF (SF01_01319004)</u></ul>
+		<ul><u>BOSCH (SF01_01319004_Typ2) | NEFF / Refsta Topdraft (SF01_01319004)</u></ul>
 	<ul><a name="delay"></a>
 		<li>delay<br>
 		button one on the remote</li>
@@ -1270,6 +1326,44 @@ sub SD_UT_Attr(@) {
 	<ul><a name="brightness_plus"></a>
 		<li>brightness_plus<br>
 		button + on the remote</li>
+	</ul><br>
+	
+		<ul><u>ESTO KL_RF01</u></ul>
+	<ul><a name="on"></a>
+		<li>on<br>
+		button ON on the remote</li>
+	</ul>
+	<ul><a name="off"></a>
+		<li>off<br>
+		button OFF on the remote</li>
+	</ul>
+	<ul><a name="alternating_full_luminosity"></a>
+		<li>alternating_full_luminosity<br>
+		button alternating_full_luminosity on the remote</li>
+	</ul>
+	<ul><a name="full_brightness"></a>
+		<li>full_brightness<br>
+		button full_brightness on the remote</li>
+	</ul>
+	<ul><a name="light_color_warm_white"></a>
+		<li>light_color_warm_white<br>
+		button light_color_warm_white on the remote</li>
+	</ul>
+	<ul><a name="light_color_cold_white"></a>
+		<li>light_color_cold_white<br>
+		button light_color_cold_white on the remote</li>
+	</ul>
+	<ul><a name="dimup"></a>
+		<li>dimup<br>
+		button DIMUP on the remote</li>
+	</ul>
+		<ul><a name="dimdown"></a>
+		<li>dimdown<br>
+		button DIMDOWN on the remote</li>
+	</ul>
+	<ul><a name="night_mode"></a>
+		<li>night_mode<br>
+		button moon on the remote</li>
 	</ul><br>
 	
 	<ul><u>LED_XM21_0 light string</u></ul>
@@ -1381,13 +1475,13 @@ sub SD_UT_Attr(@) {
 	<ul><a name="model"></a>
 		<li>model<br>
 		The attribute indicates the model type of your device.<br>
-		(unknown, Buttons_five, CAME_TOP_432EV, Chilitec_22640, HS1-868-BS, HSM4, QUIGG_DMV, LED_XM21_0, Manax, Novy_840029, RH787T, SA_434_1_mini, SF01_01319004, TEDSEN_SKX1MD, Unitec_47031)</li>
+		(unknown, Buttons_five, CAME_TOP_432EV, Chilitec_22640, KL_RF01, HS1-868-BS, HSM4, QUIGG_DMV, LED_XM21_0, Manax, Novy_840029, RH787T, SA_434_1_mini, SF01_01319004, TEDSEN_SKX1MD, Unitec_47031)</li>
 	</ul><br>
 	<ul><li><a name="repeats">repeats</a><br>
 	This attribute can be used to adjust how many repetitions are sent. Default is 5.</li></ul><br>
 
 	<b><i>Generated readings of the models</i></b><br>
-	<ul><u>Buttons_five | CAME_TOP_432EV | Chilitec_22640 | HSM4 | LED_XM21_0 | Manax | Novy_840029 | QUIGG_DMV | SF01_01319004 | SF01_01319004_Typ2 | RH787T</u><br>
+	<ul><u>Buttons_five | CAME_TOP_432EV | Chilitec_22640 | HSM4 | KL_RF01 | LED_XM21_0 | Manax | Novy_840029 | QUIGG_DMV | SF01_01319004 | SF01_01319004_Typ2 | RH787T</u><br>
 	<li>deviceCode<br>
 	Device code of the system</li>
 	<li>LastAction<br>
@@ -1395,7 +1489,7 @@ sub SD_UT_Attr(@) {
 	<li>state<br>
 	Last executed keystroke of the remote control</li></ul><br>
 
-	<ul><u>MD_2003R (gas)&nbsp;&nbsp;|&nbsp;&nbsp;MD_2018R (vibration)&nbsp;&nbsp;|&nbsp;&nbsp;MD_210R (door/windows switch)</u><br>
+	<ul><u>MD_2003R (gas)&nbsp;&nbsp;|&nbsp;&nbsp;MD_2018R (vibration)&nbsp;&nbsp;|&nbsp;&nbsp;MD_210R (door/windows switch)&nbsp;&nbsp;|&nbsp;&nbsp;MD_230R (water)</u><br>
 	<li>contact<br>
 	Status of the internal alarm contact</li>
 	<li>deviceTyp<br>
@@ -1434,16 +1528,18 @@ sub SD_UT_Attr(@) {
 	<i><u><b>Hinweis:</b></u></i> Sobald das Attribut model eines definieren Ger&auml;tes verstellt oder gel&ouml;scht wird, so legt das Modul ein Ger&auml;t des gew&auml;hlten Typs neu an und mit Durchlauf einer neuen Nachricht wird das aktuelle Ger&auml;t gel&ouml;scht. 
 	Das betreiben von Ger&auml;ten des <u>gleichen oder unterschiedliches Typs mit gleichem <code>deviceCode</code> f&uuml;hrt zu Fehlern</u>. BITTE achte stets auf einen unterschiedlichen <code>deviceCode</code>.<br><br>
 	 <u>Es werden bisher folgende Ger&auml;te unterst&uuml;tzt:</u><br>
-	 <ul> - Atlantic Security Sensoren&nbsp;&nbsp;&nbsp;<small>(Modulmodel: MD-2003R, MD-2018R,MD-210R | Protokoll 91|91.1)</small></ul>
+	 <ul> - Atlantic Security Sensoren&nbsp;&nbsp;&nbsp;<small>(Modulmodel: MD-2003R, MD-2018R,MD-210R | Protokoll 91|91.1)</small><br>
+	 <code>&nbsp;&nbsp;&nbsp;Hinweis: Das Model MD_230R (water) wird aufgrund von gleicher Hardwarekennung als MD-2018R erkannt!</code></ul>
 	 <ul> - BOSCH Deckenl&uuml;fter&nbsp;&nbsp;&nbsp;<small>(Modulmodel: SF01_01319004_Typ2 | Protokoll 86)</small></ul>
 	 <ul> - CAME Drehtor Antrieb&nbsp;&nbsp;&nbsp;<small>(Modulmodel: CAME_TOP_432EV | Protokoll 86)</small></ul>
 	 <ul> - ChiliTec LED Christbaumkerzen&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Chilitec_22640 | Protokoll 14)</small></ul>
+	 <ul> - ESTO Deckenlampe&nbsp;&nbsp;&nbsp;<small>(Modulmodel: KL_RF01 | Protokoll 93)</small></ul>
 	 <ul> - Hoermann HS1-868-BS&nbsp;&nbsp;&nbsp;<small>(Modulmodel: HS1_868_BS | Protokoll 69)</small></ul>
 	 <ul> - Hoermann HSM4&nbsp;&nbsp;&nbsp;<small>(Modulmodel: HSM4 | Protokoll 69)</small></ul>
 	 <ul> - Krinner LUMIX Christbaumkerzen&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Krinner_LUMIX | Protokol 92)</small></ul>
 	 <ul> - LED_XM21_0 Christbaumkerzen&nbsp;&nbsp;&nbsp;<small>(Modulmodel: LED_XM21_0 | Protokol 76)</small></ul>
 	 <ul> - Manax RCS250 <b>NUR EMPFANG!</b>&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Manax | Protokoll 90)</small></ul>
-	 <ul> - NEFF Dunstabzugshaube&nbsp;&nbsp;&nbsp;<small>(Modulmodel: SF01_01319004 | Protokoll 86)</small></ul>
+	 <ul> - NEFF oder Refsta Topdraft (Tecnowind) Dunstabzugshaube&nbsp;&nbsp;&nbsp;<small>(Modulmodel: SF01_01319004 | Protokoll 86)</small></ul>
 	 <ul> - Novy Pureline 6830 Dunstabzugshaube&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Novy_840029 | Protokoll 86)</small></ul>
 	 <ul> - QUIGG DMV-7000&nbsp;&nbsp;&nbsp;<small>(Modulmodel: QUIGG_DMV | Protokoll 34)</small></ul>
 	 <ul> - Remote control SA-434-1 mini 923301&nbsp;&nbsp;&nbsp;<small>(Modulmodel: SA_434_1_mini | Protokoll 81)</small></ul>
@@ -1464,7 +1560,7 @@ sub SD_UT_Attr(@) {
 
 	<b>Set</b><br>
 	<ul>Je nach Ger&auml;t sind unterschiedliche Sendebefehle verf&uuml;gbar.</ul><br>
-	<ul><u>BOSCH (SF01_01319004_Typ2) | NEFF (SF01_01319004)</u></ul>
+	<ul><u>BOSCH (SF01_01319004_Typ2) | NEFF / Refsta Topdraft (SF01_01319004)</u></ul>
 	<ul><a name="delay"></a>
 		<li>delay<br>
 		Taste 1 auf der Fernbedienung</li>
@@ -1510,6 +1606,44 @@ sub SD_UT_Attr(@) {
 	<ul><a name="brightness_plus"></a>
 		<li>brightness_plus<br>
 		Taste + auf der Fernbedienung</li>
+	</ul><br>
+	
+	<ul><u>ESTO KL_RF01</u></ul>
+	<ul><a name="on"></a>
+		<li>on<br>
+		Taste ON auf der Fernbedienung</li>
+	</ul>
+	<ul><a name="off"></a>
+		<li>off<br>
+		Taste OFF auf der Fernbedienung</li>
+	</ul>
+	<ul><a name="alternating_full_luminosity"></a>
+		<li>alternating_full_luminosity<br>
+		Taste ABWECHSELNDE_LEUCHTKRAFT auf der Fernbedienung</li>
+	</ul>
+	<ul><a name="full_brightness"></a>
+		<li>full_brightness<br>
+		Taste VOLLE_HELLIGKEIT auf der Fernbedienung</li>
+	</ul>
+	<ul><a name="light_color_warm_white"></a>
+		<li>light_color_warm_white<br>
+		Taste LICHTFARBE_WARMWEIß auf der Fernbedienung</li>
+	</ul>
+	<ul><a name="light_color_cold_white"></a>
+		<li>light_color_cold_white<br>
+		Taste LICHTFARBE_KALTWEIß auf der Fernbedienung</li>
+	</ul>
+	<ul><a name="dimup"></a>
+		<li>dimup<br>
+		Taste DIMUP auf der Fernbedienung</li>
+	</ul>
+		<ul><a name="dimdown"></a>
+		<li>dimdown<br>
+		Taste DIMDOWN auf der Fernbedienung</li>
+	</ul>
+	<ul><a name="night_mode"></a>
+		<li>night_mode<br>
+		Taste MOND auf der Fernbedienung</li>
 	</ul><br>
 	
 	<ul><u>LED_XM21_0 Christbaumkerzen</u></ul>
@@ -1620,13 +1754,13 @@ sub SD_UT_Attr(@) {
 	<ul><li><a href="#IODev">IODev</a></li></ul><br>
 	<ul><li><a name="model">model</a><br>
 		Das Attribut bezeichnet den Modelltyp Ihres Ger&auml;tes.<br>
-		(unknown, Buttons_five, CAME_TOP_432EV, Chilitec_22640, HS1-868-BS, HSM4, QUIGG_DMV, RH787T, LED_XM21_0, Manax, Novy_840029, SA_434_1_mini, SF01_01319004, TEDSEN_SKX1MD, Unitec_47031)</li><a name=" "></a>
+		(unknown, Buttons_five, CAME_TOP_432EV, Chilitec_22640, KL_RF01, HS1-868-BS, HSM4, QUIGG_DMV, RH787T, LED_XM21_0, Manax, Novy_840029, SA_434_1_mini, SF01_01319004, TEDSEN_SKX1MD, Unitec_47031)</li><a name=" "></a>
 	</ul><br>
 	<ul><li><a name="repeats">repeats</a><br>
 	Mit diesem Attribut kann angepasst werden, wie viele Wiederholungen sendet werden. Standard ist 5.</li></ul><br>
 
 	<b><i>Generierte Readings der Modelle</i></b><br>
-	<ul><u>Buttons_five | CAME_TOP_432EV | Chilitec_22640 | HSM4 | LED_XM21_0 | Manax | Novy_840029 | QUIGG_DMV | SF01_01319004 | SF01_01319004_Typ2 | RH787T</u><br>
+	<ul><u>Buttons_five | CAME_TOP_432EV | Chilitec_22640 | HSM4 | KL_RF01 | LED_XM21_0 | Manax | Novy_840029 | QUIGG_DMV | SF01_01319004 | SF01_01319004_Typ2 | RH787T</u><br>
 	<li>deviceCode<br>
 	Ger&auml;teCode des Systemes</li>
 	<li>LastAction<br>
@@ -1634,7 +1768,7 @@ sub SD_UT_Attr(@) {
 	<li>state<br>
 	Zuletzt ausgef&uuml;hrter Tastendruck der Fernbedienung</li></ul><br>
 
-	<ul><u>MD_2003R (gas)&nbsp;&nbsp;|&nbsp;&nbsp;MD_2018R (vibration)&nbsp;&nbsp;|&nbsp;&nbsp;MD_210R (door/windows switch)</u><br>
+	<ul><u>MD_2003R (gas)&nbsp;&nbsp;|&nbsp;&nbsp;MD_2018R (vibration)&nbsp;&nbsp;|&nbsp;&nbsp;MD_210R (door/windows switch)&nbsp;&nbsp;|&nbsp;&nbsp;MD_230R (water)</u><br>
 	<li>contact<br>
 	Zustand des internen Alarmkontaktes.</li>
 	<li>deviceTyp<br>
