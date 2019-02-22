@@ -1,54 +1,30 @@
 defmod test_mu_1 UnitTest dummyDuino (
  {
-    SIGNALduino_IdList("sduino_IdList:$targetHash->{NAME}",49);
-    my $mock = Mock::Sub->new;
-    my $SD_Dispatch = $mock->mock("SIGNALduno_Dispatch");
-
-	subtest 'mu signal starting at first char in rmsg ' => sub {
-		plan tests => 4;
-		$SD_Dispatch->reset();
-		my $rmsg="MU;P0=-563;P1=479;P2=991;P3=-423;P4=361;P5=-1053;P6=3008;P7=-7110;D=6720151515201520201515201520201520201520201515151567201515152015202015152015202015202015202015151515672015151520152020151520152020152020152020151515156720151515201520201515201520201520201520201515151;CP=1;R=21;";
-		my %signal_parts=SIGNALduino_Split_Message($rmsg,$targetHash->{NAME});
-		ok(SIGNALduino_Parse_MU($targetHash, $targetHash, $targetHash->{NAME}, $rmsg,%signal_parts) ,"check if MU Data protocol 49 is dispatched");
-		is($SD_Dispatch->called_count, 4, "check number of dispatch attempts from protocol 49");
-		is( ($SD_Dispatch->called_with)[4], "49", "SIGNALduno_Dispatch check id " );
-		is( ($SD_Dispatch->called_with)[2], "U49#8B2DB0", "SIGNALduno_Dispatch check dmsg" );
-	};
-
-	subtest 'mu signal starting not at first char in rmsg ' => sub {
-		plan tests => 4;
-		$SD_Dispatch->reset();
-		my $rmsg="MU;P0=-563;P1=479;P2=991;P3=-423;P4=361;P5=-1053;P6=3008;P7=-7110;D=2345454523452323454523452323452323452323454545456720151515201520201515201520201520201520201515151567201515152015202015152015202015202015202015151515672015151520152020151520152020152020152020151515156720151515201520201515201520201520201520201515151;CP=1;R=21;";
-		my %signal_parts=SIGNALduino_Split_Message($rmsg,$targetHash->{NAME});
-		ok(SIGNALduino_Parse_MU($targetHash, $targetHash, $targetHash->{NAME}, $rmsg,%signal_parts) ,"check if MU Data protocol 49 is dispatched");
-		is($SD_Dispatch->called_count, 4, "check number of dispatch attempts from protocol 49");
-		is( ($SD_Dispatch->called_with)[4], "49", "SIGNALduno_Dispatch check id " );
-		is( ($SD_Dispatch->called_with)[2], "U49#8B2DB0", "SIGNALduno_Dispatch check dmsg" );
-	};
-	subtest 'mu reconstruct lastbit is 1' => sub {
-		plan tests => 4;
-	    SIGNALduino_IdList("sduino_IdList:$targetHash->{NAME}",9);
-		$SD_Dispatch->reset();
-		my $rmsg="MU;P0=-987;P1=144;P2=522;P3=1495;CP=2;R=244;D=0102020202020202020203020303030202020203030303030203020202020203020302030302030302030303030303030303030303030303020303030302020303030202030202020303030303020202030302020303020202;";
-		my %signal_parts=SIGNALduino_Split_Message($rmsg,$targetHash->{NAME});
-		ok(SIGNALduino_Parse_MU($targetHash, $targetHash, $targetHash->{NAME}, $rmsg,%signal_parts) ,"check if MU Data is dispatched");
-		is($SD_Dispatch->called_count, 1, "check number of dispatch attempts");
-		is( ($SD_Dispatch->called_with)[4], "9", "SIGNALduno_Dispatch check id " );
-		is( ($SD_Dispatch->called_with)[2], "P9#FFA3C17D4900010C6E0E67", "SIGNALduno_Dispatch check dmsg" );
-	};
+  	my $mock = Mock::Sub->new;
+	my $SD_Dispatch = $mock->mock("SIGNALduno_Dispatch");
 	
-	subtest 'mu reconstruct lastbit is 0' => sub {
-		plan tests => 4;
-	    SIGNALduino_IdList("sduino_IdList:$targetHash->{NAME}",9);
-		$SD_Dispatch->reset();
-		my $rmsg="MU;P0=-987;P1=144;P2=522;P3=1495;CP=2;R=244;D=0102020202020202020203020303030202020203030303030203020202020203020302030302030302030303030303030303030303030303020303030302020303030202030202020303030303020202030302020303020203;";
-		my %signal_parts=SIGNALduino_Split_Message($rmsg,$targetHash->{NAME});
-		ok(SIGNALduino_Parse_MU($targetHash, $targetHash, $targetHash->{NAME}, $rmsg,%signal_parts) ,"check if MU Data is dispatched");
-		is($SD_Dispatch->called_count, 1, "check number of dispatch attempts");
-		is( ($SD_Dispatch->called_with)[4], "9", "SIGNALduno_Dispatch check id " );
-		is( ($SD_Dispatch->called_with)[2], "P9#FFA3C17D4900010C6E0E66", "SIGNALduno_Dispatch check dmsg" );
-	};
+    my %ProtocolListTest =  SIGNALduino_LoadProtocolHash("$attr{global}{modpath}/FHEM/lib/test_loadprotohash-ok.hash");
+	my $local_ProtocolListSIGNALduino = SIGNALduino_getProtocolList();
+	%{$local_ProtocolListSIGNALduino} = ( %ProtocolListTest);
 
-    SIGNALduino_IdList("sduino_IdList:$targetHash->{NAME}");
+    foreach my $pID (keys %$local_ProtocolListSIGNALduino)
+	{	
+		next if (!exists($local_ProtocolListSIGNALduino->{$pID}{test_data}{$name}));
+    	foreach my $testData (values %$local_ProtocolListSIGNALduino->{$pID}{test_data}{$name}) 
+        {
+          subtest "$testData->{desc}" => sub {
+              SIGNALduino_IdList("sduino_IdList:$target",$pID);
+              $SD_Dispatch->reset();
+              my $rmsg=$testData->{input};
+
+              plan tests => scalar @{$testData->{output}};
+              my %signal_parts=SIGNALduino_Split_Message($rmsg,$targetHash->{NAME});
+              is(SIGNALduino_Parse_MU($targetHash, $targetHash, $targetHash->{NAME}, $rmsg, %signal_parts),$testData->{output}[0] ,"check return code SIGNALduino_Parse_MU") if (defined($testData->{output}[0]));
+              is($SD_Dispatch->called_count, $testData->{output}[1], "check number of dispatch attempts") if (defined($testData->{output}[1]));
+              is( ($SD_Dispatch->called_with)[4], $testData->{output}[2], "SIGNALduno_Dispatch check id " ) if (defined($testData->{output}[2]));
+              is( ($SD_Dispatch->called_with)[2], $testData->{output}[3], "SIGNALduno_Dispatch check dmsg" ) if (defined($testData->{output}[3]));
+          };
+        }
+    };
  }
 );
