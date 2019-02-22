@@ -364,7 +364,7 @@
 			zero					=> [3,-2],
 			one					=> [1,-2],
 			clockabs				=> 480,					# -1 = auto undef=noclock
-			reconstructBit				=> '1',
+			#reconstructBit				=> '1',
 			format					=> 'pwm',				# tristate can't be migrated from bin into hex!
 			preamble				=> 'P9#',				# prepend to converted message
 			clientmodule			=> 'SD_WS09',
@@ -1710,7 +1710,7 @@
 			zero				=> [1,-1],	# 400
 			pause				=> [-25],
 			clockabs			=> 400,
-			reconstructBit			=> '1',
+			#reconstructBit			=> '1',
 			format				=> 'twostate',	# not used now
 			clientmodule			=> 'FS20',
 			preamble			=> '810b04f70101a001',
@@ -2028,7 +2028,7 @@
 			sync				=> [1,-10],				# this is a end marker, but we use this as a start marker
 			pause				=> [-40],
 			clockabs			=> 400,						# ca 400us
-			reconstructBit			=> '1',
+			#reconstructBit			=> '1',
 			developId			=> 'y',
 			format				=> 'twostate',
 			preamble			=> 'u87#',				# prepend to converted message
@@ -2139,7 +2139,7 @@
 			zero          => [-1,2],
 			sync				=> [-10,1],
 			clockabs			=> 400,
-			reconstructBit		=> '1',
+			#reconstructBit		=> '1',
 			format				=> 'twostate',	#
 			preamble			=> 'P91.1#',		# prepend to converted message
 			length_min		=> '32',
