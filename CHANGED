@@ -1,3 +1,5 @@
+22.02.2019
+ 00_SIGNALduino: bugfix: Load protocolHash from web if it is missing on fs 
 12.02.2019
  00_SIGNALduino: feature: getAvailableFirmware returns only version for 
                   which a file could be found.
