@@ -58,8 +58,6 @@
 # https://forum.fhem.de/index.php/topic,58396.975.html | https://github.com/RFD-FHEM/RFFHEM
 ###########################################################################################################################################
 package SD_Protocols;
-#use parent 'Exporter';
-#our @EXPORT_OK = qw(getProtocolList);
 { 
 	
 	my %signalduino_protocols = (
