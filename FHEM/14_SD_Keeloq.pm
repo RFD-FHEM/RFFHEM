@@ -83,15 +83,15 @@ my $KeeLoq_NLF;
 sub SD_Keeloq_Initialize() {
   my ($hash) = @_;
   $hash->{Match}				= "^P(?:87|88)#.*";
-	$hash->{DefFn}				= "SD_Keeloq_Define";
-  $hash->{UndefFn}			= "SD_Keeloq_Undef";
-  $hash->{AttrFn}				= "SD_Keeloq_Attr";
-  $hash->{SetFn}				= "SD_Keeloq_Set";
-  $hash->{ParseFn}			= "SD_Keeloq_Parse";
+	$hash->{DefFn}				= "SD_Keeloq::Define";
+  $hash->{UndefFn}			= "SD_Keeloq::Undef";
+  $hash->{AttrFn}				= "SD_Keeloq::Attr";
+  $hash->{SetFn}				= "SD_Keeloq::Set";
+  $hash->{ParseFn}			= "SD_Keeloq::Parse";
   $hash->{AttrList}			= "IODev MasterMSB MasterLSB KeeLoq_NLF model:".join(",", sort keys %models)." stateFormat Channels:0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16 ShowShade:0,1 ShowIcons:0,1 ShowLearn:0,1 ".
 													"UI:aus,Einzeilig,Mehrzeilig ChannelFixed:1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16 ChannelNames Repeats:1,2,3,4,5,6,7,8,9 ".
 													"addGroups Serial_send LearnVersion:old,new ".$readingFnAttributes;
-  $hash->{FW_summaryFn}	= "SD_Keeloq_summaryFn";          # displays html instead of status icon in fhemweb room-view
+  $hash->{FW_summaryFn}	= "SD_Keeloq::summaryFn";          # displays html instead of status icon in fhemweb room-view
 }
 
 ###################################
