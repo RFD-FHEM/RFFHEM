@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: 88_SIGNALduino_TOOL.pm 13115 2019-02-15 21:17:50Z HomeAuto_User $
+# $Id: 88_SIGNALduino_TOOL.pm 13115 2019-02-21 21:17:50Z HomeAuto_User $
 #
 # The file is part of the SIGNALduino project
 # see http://www.fhemwiki.de/wiki/SIGNALduino to support debugging of unknown signal data
@@ -8,7 +8,7 @@
 #
 ######################################################################
 # Note´s
-# - added commandref doublePulse command take a while
+# -
 # - Send_RAWMSG last message Button!! nicht 
 ######################################################################
 
@@ -16,7 +16,6 @@ package main;
 
 use strict;
 use warnings;
-
 use Data::Dumper qw (Dumper);
 
 #$| = 1;		#Puffern abschalten, Hilfreich für PEARL WARNINGS Search
@@ -450,7 +449,7 @@ sub SIGNALduino_TOOL_Get($$$@) {
 	my $Filename_export = AttrVal($name,"Filename_export","");
 	my $path = AttrVal($name,"Path","./");
 	my $onlyDataName = "-ONLY_DATA-";
-	my $list = "TimingsList:noArg Durration_of_Message invert_bitMsg invert_hexMsg change_bitMsg_to_hexMsg change_hexMsg_to_bitMsg ";
+	my $list = "TimingsList:noArg Durration_of_Message invert_bitMsg invert_hexMsg change_bin_to_hex change_hex_to_bin change_dec_to_hex change_hex_to_dec reverse_Input ";
 	$list .= "FilterFile:multiple,bitMsg:,bitMsg_invert:,dmsg:,hexMsg:,hexMsg_invert:,MC;,MS;,MU;,RAWMSG:,READredu:,READ:,UserInfo:,$onlyDataName ".
 					"All_ClockPulse:noArg All_SyncPulse:noArg InputFile_one_ClockPulse InputFile_one_SyncPulse InputFile_doublePulse:noArg InputFile_length_Datapart:noArg" if ($Filename_input ne "");
 	my $linecount = 0;
@@ -833,16 +832,16 @@ sub SIGNALduino_TOOL_Get($$$@) {
 		return "Your $cmd is ready.\n\n  Input: $a[0]\n Output: $value";
 	}
 	
-	if ($cmd eq "change_hexMsg_to_bitMsg" || $cmd eq "change_bitMsg_to_hexMsg") {
+	if ($cmd eq "change_hex_to_bin" || $cmd eq "change_bin_to_hex") {
 		return "ERROR: Your input failed!" if (not defined $a[0]);
-		return "ERROR: wrong value $a[0]! only [0-1]!" if ($cmd eq "change_bitMsg_to_hexMsg" && not $a[0] =~ /^[0-1]+$/);
-		return "ERROR: wrong value $a[0]! only [a-fA-f0-9]!" if ($cmd eq "change_hexMsg_to_bitMsg" && not $a[0] =~ /^[a-fA-f0-9]+$/);
+		return "ERROR: wrong value $a[0]! only [0-1]!" if ($cmd eq "change_bin_to_hex" && not $a[0] =~ /^[0-1]+$/);
+		return "ERROR: wrong value $a[0]! only [a-fA-f0-9]!" if ($cmd eq "change_hex_to_bin" && $a[0] !~ /^[a-fA-f0-9]+$/);
 
-		if ($cmd eq "change_bitMsg_to_hexMsg") {
+		if ($cmd eq "change_bin_to_hex") {
 			$value = sprintf("%x", oct( "0b$a[0]" ) );
 			$value = sprintf("%X", oct( "0b$a[0]" ) );
 			return "Your $cmd is ready.\n\nInput: $a[0]\n  Hex: $value";
-		} elsif ($cmd eq "change_hexMsg_to_bitMsg") {
+		} elsif ($cmd eq "change_hex_to_bin") {
 			$value = sprintf( "%b", hex( $a[0] ) );
 			return "Your $cmd is ready.\n\nInput: $a[0]\n  Bin: $value";
 		}
@@ -988,6 +987,24 @@ sub SIGNALduino_TOOL_Get($$$@) {
 		### END
 
 		return $return;
+	}
+	
+	if ($cmd eq "reverse_Input") {
+		return "ERROR: Your arguments in $cmd is not definded!" if (not defined $a[0]);
+		return "ERROR: You need at least 2 arguments to use this function!" if (length($a[0] == 1));
+		return "Your $cmd is ready.\n\n  Input: $a[0]\n Output: ".reverse $a[0];
+	}
+	
+	if ($cmd eq "change_dec_to_hex") {
+		return "ERROR: Your arguments in $cmd is not definded!" if (not defined $a[0]);
+		return "ERROR: wrong value $a[0]! only [0-9]!" if ($a[0] !~ /^[0-9]+$/);
+		return "Your $cmd is ready.\n\n  Input: $a[0]\n Output: ".sprintf("%x", $a[0]);;
+	}
+	
+	if ($cmd eq "change_hex_to_dec") {
+		return "ERROR: Your arguments in $cmd is not definded!" if (not defined $a[0]);
+		return "ERROR: wrong value $a[0]! only [a-fA-f0-9]!" if ($a[0] !~ /^[0-9a-fA-F]+$/);
+		return "Your $cmd is ready.\n\n  Input: $a[0]\n Output: ".hex($a[0]);
 	}
 
 	return "Unknown argument $cmd, choose one of $list";
@@ -1210,15 +1227,19 @@ sub SIGNALduino_TOOL_RAWMSG_Check($$$) {
 	&emsp;&rarr; example 1: SR;R=3;P0=1520;P1=-400;P2=400;P3=-4000;P4=-800;P5=800;P6=-16000;D=0121212121212121212121212123242424516;<br>
 	&emsp;&rarr; example 2: MS;P0=-16046;P1=552;P2=-1039;P3=983;P5=-7907;P6=-1841;P7=-4129;D=15161716171616171617171617171617161716161616103232;CP=1;SP=5;O;</li><a name=""></a></ul>
 	<ul><li><a name="FilterFile"></a><code>FilterFile</code> - creates a file with the filtered values</li><a name=""></a></ul>
-	<ul><li><a name="InputFile_doublePulse"></a><code>InputFile_doublePulse</code> - searches for duplicate pulses in the data part of the individual messages in the input_file and filters them into the export_file</li><a name=""></a></ul>
+	<ul><li><a name="InputFile_doublePulse"></a><code>InputFile_doublePulse</code> - searches for duplicate pulses in the data part of the individual messages in the input_file and filters them into the export_file. It may take a while depending on the size of the file.</li><a name=""></a></ul>
 	<ul><li><a name="InputFile_length_Datapart"></a><code>InputFile_length_Datapart</code> - determines the min and max lenght of the readed RAWMSG</li><a name=""></a></ul>
 	<ul><li><a name="InputFile_one_ClockPulse"></a><code>InputFile_one_ClockPulse</code> - find the specified ClockPulse with 15% tolerance from the Input_File and filter the RAWMSG in the Export_File</li><a name=""></a></ul>
 	<ul><li><a name="InputFile_one_SyncPulse"></a><code>InputFile_one_SyncPulse</code> - find the specified SyncPulse with 15% tolerance from the Input_File and filter the RAWMSG in the Export_File</li><a name=""></a></ul>
 	<ul><li><a name="TimingsList"></a><code>TimingsList</code> - created one file in csv format from the file &lt;signalduino_protocols.hash&gt; to use for import</li><a name=""></a></ul>
-	<ul><li><a name="change_bitMsg_to_hexMsg"></a><code>change_bitMsg_to_hexMsg</code> - converts the binary input to HEX</li><a name=""></a></ul>
-	<ul><li><a name="change_hexMsg_to_bitMsg"></a><code>change_hexMsg_to_bitMsg</code> - converts the hexadecimal input into binary</li><a name=""></a></ul>
+	<ul><li><a name="change_bin_to_hex"></a><code>change_bin_to_hex</code> - converts the binary input to HEX</li><a name=""></a></ul>
+	<ul><li><a name="change_dec_to_hex"></a><code>change_dec_to_hex</code> - converts the decimal input into hexadecimal</li><a name=""></a></ul>
+	<ul><li><a name="change_hex_to_bin"></a><code>change_hex_to_bin</code> - converts the hexadecimal input into binary</li><a name=""></a></ul>
+	<ul><li><a name="change_hex_to_dec"></a><code>change_hex_to_dec</code> - converts the hexadecimal input into decimal</li><a name=""></a></ul>
 	<ul><li><a name="invert_bitMsg"></a><code>invert_bitMsg</code> - invert your bitMsg</li><a name=""></a></ul>
 	<ul><li><a name="invert_hexMsg"></a><code>invert_hexMsg</code> - invert your RAWMSG</li><a name=""></a></ul>
+	<ul><li><a name="reverse_Input"></a><code>reverse_Input</code> - reverse your input<br>
+	&emsp;&rarr; example: 1234567 turns 7654321</li><a name=""></a></ul></li><a name=""></a></ul>
 	<br><br>
 
 	<b>Attributes</b>
@@ -1295,15 +1316,19 @@ sub SIGNALduino_TOOL_RAWMSG_Check($$$) {
 	&emsp;&rarr; eine Vorauswahl von Suchbegriffen via Checkbox ist m&ouml;glich<br>
 	&emsp;&rarr; die Checkbox Auswahl <i>-ONLY_DATA-</i> filtert nur die Suchdaten einzel aus jeder Zeile anstatt die komplette Zeile mit den gesuchten Daten<br>
 	&emsp;&rarr; eingegebene Texte im Textfeld welche mit <i>Komma ,</i> getrennt werden, werden ODER verkn&uuml;pft und ein Text mit Leerzeichen wird als ganzes Argument gesucht</li><a name=""></a></ul>
-	<ul><li><a name="InputFile_doublePulse"></a><code>InputFile_doublePulse</code> - sucht nach doppelten Pulsen im Datenteil der einzelnen Nachrichten innerhalb der Input_Datei und filtert diese in die Export_Datei</li><a name=""></a></ul>
+	<ul><li><a name="InputFile_doublePulse"></a><code>InputFile_doublePulse</code> - sucht nach doppelten Pulsen im Datenteil der einzelnen Nachrichten innerhalb der Input_Datei und filtert diese in die Export_Datei. Je nach Größe der Datei kann es eine Weile dauern.</li><a name=""></a></ul>
 	<ul><li><a name="InputFile_length_Datapart"></a><code>InputFile_length_Datapart</code> - ermittelt die min und max L&auml;nge vom Datenteil der eingelesenen RAWMSG´s</li><a name=""></a></ul>
 	<ul><li><a name="InputFile_one_ClockPulse"></a><code>InputFile_one_ClockPulse</code> - sucht den angegebenen ClockPulse mit 15% Tolleranz aus der Input_Datei und filtert die RAWMSG in die Export_Datei</li><a name=""></a></ul>
 	<ul><li><a name="InputFile_one_SyncPulse"></a><code>InputFile_one_SyncPulse</code> - sucht den angegebenen SyncPulse mit 15% Tolleranz aus der Input_Datei und filtert die RAWMSG in die Export_Datei</li><a name=""></a></ul>
 	<ul><li><a name="TimingsList"></a><code>TimingsList</code> - erstellt eine Liste der Protokolldatei &lt;signalduino_protocols.hash&gt; im CSV-Format welche zum Import genutzt werden kann</li><a name=""></a></ul>
-	<ul><li><a name="change_bitMsg_to_hexMsg"></a><code>change_bitMsg_to_hexMsg</code> - wandelt die binäre Eingabe in HEX</li><a name=""></a></ul>
-	<ul><li><a name="change_hexMsg_to_bitMsg"></a><code>change_hexMsg_to_bitMsg</code> - wandelt die hexadezimale Eingabe in bin&auml;r</li><a name=""></a></ul>
+	<ul><li><a name="change_bin_to_hex"></a><code>change_bin_to_hex</code> - wandelt die binäre Eingabe in hexadezimal um</li><a name=""></a></ul>
+	<ul><li><a name="change_dec_to_hex"></a><code>change_dec_to_hex</code> - wandelt die dezimale Eingabe in hexadezimal um</li><a name=""></a></ul>
+	<ul><li><a name="change_hex_to_bin"></a><code>change_hex_to_bin</code> - wandelt die hexadezimale Eingabe in bin&auml;r um</li><a name=""></a></ul>
+	<ul><li><a name="change_hex_to_dec"></a><code>change_hex_to_dec</code> - wandelt die hexadezimale Eingabe in dezimal um</li><a name=""></a></ul>
 	<ul><li><a name="invert_bitMsg"></a><code>invert_bitMsg</code> - invertiert die eingegebene binäre Nachricht</li><a name=""></a></ul>
 	<ul><li><a name="invert_hexMsg"></a><code>invert_hexMsg</code> - invertiert die eingegebene hexadezimale Nachricht</li><a name=""></a></ul>
+	<ul><li><a name="reverse_Input"></a><code>reverse_Input</code> - kehrt die Eingabe um<br>
+	&emsp;&rarr; Beispiel: aus 1234567 wird 7654321</li><a name=""></a></ul>
 	<br><br>
 
 	<b>Attributes</b>
