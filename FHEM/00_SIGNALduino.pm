@@ -251,7 +251,7 @@ SIGNALduino_Initialize($)
   
   #ours %attr{};
 
-  %ProtocolListSIGNALduino = %{SIGNALduino_LoadProtocolHash("$attr{global}{modpath}/FHEM/lib/signalduino_protocols.pm")};
+  %ProtocolListSIGNALduino = SIGNALduino_LoadProtocolHash("$attr{global}{modpath}/FHEM/lib/signalduino_protocols.pm");
   #Log3 "SIGNALduino", 1, Dumper(%ProtocolListSIGNALduino);
   if (exists($ProtocolListSIGNALduino{error})  ) {
   	Log3 "SIGNALduino", 1, "Error loading Protocol Hash. Module is in inoperable mode error message:($ProtocolListSIGNALduino{error})";
@@ -284,7 +284,7 @@ sub SIGNALduino_LoadProtocolHash($)
 	}
 	
 	require $_[0];
-	return SD_Protocols->getProtocolList;
+	return %{SD_Protocols->getProtocolList};
 }
 
 
