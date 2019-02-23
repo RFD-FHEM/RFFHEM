@@ -8,9 +8,7 @@
 ## deploylocal: /opt/fhem/FHEM/00_SIGNALduino.pm /opt/fhem/FHEM/10_FS10.pm /opt/fhem/FHEM/14_SD_WS.pm 98_UnitTest.pm /opt/fhem/FHEM/90_SIGNALduino_un.pm /opt/fhem/FHEM/lib/signalduino_protocols.hash
 deploylocal : 98_UnitTest.pm
 	sudo cp FHEM/*.pm /opt/fhem/FHEM/
-	sudo cp FHEM/lib/*.hash /opt/fhem/FHEM/lib
 	sudo cp FHEM/lib/*.pm /opt/fhem/FHEM/lib
-	sudo cp test/*.hash /opt/fhem/FHEM/lib
 	sudo cp test/*.json /opt/fhem/FHEM/lib
 	sudo timeout 3 killall -qws2 perl || sudo killall -qws9 perl || true
 	sudo rm /opt/fhem/log/fhem-*.log || true
