@@ -73,7 +73,6 @@ sub SD_RSL_Initialize($)
 
 sub SD_RSL_Define($$)
 { 
-
   my ($hash, $def) = @_;
 
   my @a = split("[ \t][ \t]*", $def);
@@ -102,9 +101,13 @@ sub SD_RSL_Define($$)
   $hash->{OnCode}  = sprintf('%02X', ($RSLCodes[$channel][$button][1]));
   $hash->{OffCode} = sprintf('%02X', ($RSLCodes[$channel][$button][0]));
   
-  AssignIoPort($hash);
+	my $iodevice = $a[3] if($a[3]);
+	my $ioname = $modules{SD_RSL}{defptr}{ioname} if (exists $modules{SD_RSL}{defptr}{ioname} && not $iodevice);
+	$iodevice = $ioname if not $iodevice;
+	
+  AssignIoPort($hash, $iodevice);
 
-   return undef;
+  return undef;
 }
 
 ##########################################################
@@ -183,7 +186,7 @@ sub RSL_getButtonCode($$)
 
   if (($button >-1) && ($channel > -1)) 
   {
-    Log3 $hash, 4, "RSL button return/result: ID: $DeviceCode $receivedButtonCode DEVICE: $DeviceCode $channel $button ACTION: $action";
+    Log3 $hash, 4, "SD_RSL button return/result: ID: $DeviceCode $receivedButtonCode DEVICE: $DeviceCode $channel $button ACTION: $action";
     if ($channel == 4 && $button == 4) {
       return $DeviceCode."_ALL ".$action;
     }
@@ -201,9 +204,9 @@ sub SD_RSL_Parse($$)
 
   my ($hash,$msg) = @_;
   my $name = $hash->{NAME};
-  my (undef ,$rawData) = split("#",$msg);
+	my (undef ,$rawData) = split("#",$msg);
   
-  Log3 $hash, 4, "$name RSL_Parse Message: $rawData";
+  Log3 $hash, 4, "$name: SD_RSL_Parse Message: $rawData";
 
   my $result = RSL_getButtonCode($hash,$rawData);
 
@@ -211,8 +214,9 @@ sub SD_RSL_Parse($$)
   {
     my ($deviceCode,$action) = split m/ /, $result, 2;
 
-    Log3 $hash, 4, "$name Parse: Device: $deviceCode  Action: $action";
-
+    Log3 $hash, 4, "$name: SD_RSL_Parse: Device: $deviceCode  Action: $action";
+		
+		$modules{SD_RSL}{defptr}{ioname} = $name;
     my $def = $modules{SD_RSL}{defptr}{$hash->{NAME} . "." . $deviceCode};
     $def = $modules{SD_RSL}{defptr}{$deviceCode} if(!$def);
 
