@@ -252,7 +252,8 @@ SIGNALduino_Initialize($)
   
   #ours %attr{};
 
-  %ProtocolListSIGNALduino = SIGNALduino_LoadProtocolHash("$attr{global}{modpath}/FHEM/lib/signalduino_protocols.hash");
+  %ProtocolListSIGNALduino = SIGNALduino_LoadProtocolHash("$attr{global}{modpath}/FHEM/lib/signalduino_protocols.pm");
+  #Log3 "SIGNALduino", 1, Dumper(%ProtocolListSIGNALduino);
   if (exists($ProtocolListSIGNALduino{error})  ) {
   	Log3 "SIGNALduino", 1, "Error loading Protocol Hash. Module is in inoperable mode error message:($ProtocolListSIGNALduino{error})";
   	delete($ProtocolListSIGNALduino{error});
@@ -283,17 +284,8 @@ sub SIGNALduino_LoadProtocolHash($)
 		return %{ {"error" => "File does not exsits"}};
 	}
 	
-	my $protocol_data = do {
-	open my $fh, '<', $_[0] ;
-		local $/; # Undefine $/ for this scope...
-   		<$fh>;    # so <> slurps up the entire file
-	};
-	
-	my %evalret= eval $protocol_data ;
-	if (!%evalret) {
-		return %{ {"error" => $@}};
-	} 
-	return %evalret;
+	require $_[0];
+	return %{SD_Protocols->getProtocolList};
 }
 
 
