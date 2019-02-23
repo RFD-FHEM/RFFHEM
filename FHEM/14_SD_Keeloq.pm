@@ -108,6 +108,7 @@ BEGIN {
 		AssignIoPort
 		AttrVal
 		FW_ME
+		FW_makeImage
 		FW_subdir
 		IOWrite
 		InternalVal
