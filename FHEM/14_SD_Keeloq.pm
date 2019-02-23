@@ -95,7 +95,39 @@ sub SD_Keeloq_Initialize() {
 }
 
 ###################################
-sub SD_Keeloq_Define() {
+package SD_Keeloq;
+
+use strict;
+use warnings;
+use POSIX;
+use GPUtils qw(:all);  # wird für den Import der FHEM Funktionen aus der fhem.pl benötigt
+
+## Import der FHEM Funktionen
+BEGIN {
+	GP_Import(qw(
+		AssignIoPort
+		AttrVal
+		FW_ME
+		FW_subdir
+		IOWrite
+		InternalVal
+		Log3
+		ReadingsVal
+		attr
+		defs
+		init_done
+		modules
+		readingsBeginUpdate
+		readingsBulkUpdate
+		readingsDelete
+		readingsEndUpdate
+		readingsSingleUpdate
+		setReadingsVal
+	))
+};
+
+###################################
+sub Define() {
   my ($hash, $def) = @_;
   my @a = split("[ \t][ \t]*", $def);
 
@@ -129,7 +161,7 @@ sub SD_Keeloq_Define() {
 }
 
 ###################################
-sub SD_Keeloq_Attr(@) {
+sub Attr(@) {
 	my ($cmd, $name, $attrName, $attrValue) = @_;
 	my $hash = $defs{$name};
 	my $addGroups = AttrVal($name, "addGroups", "");
@@ -254,7 +286,7 @@ sub SD_Keeloq_Attr(@) {
 }
 
 ###################################
-sub SD_Keeloq_Set($$$@) {
+sub Set($$$@) {
 	my ( $hash, $name, @a ) = @_;
 	my $ioname = $hash->{IODev}{NAME};
 	my $addGroups = AttrVal($name, "addGroups", "");
@@ -569,7 +601,7 @@ sub SD_Keeloq_Set($$$@) {
 }
 
 ###################################
-sub SD_Keeloq_Parse($$) {
+sub Parse($$) {
 	my ($iohash, $msg) = @_;
 	my $ioname = $iohash->{NAME};
 	my ($protocol,$rawData) = split("#",$msg);
@@ -943,7 +975,7 @@ sub SD_Keeloq_Parse($$) {
 }
 
 #####################################
-sub SD_Keeloq_Undef($$) {
+sub Undef($$) {
 	my ($hash, $name) = @_;
 	delete($modules{SD_Keeloq}{defptr}{$hash->{DEF}}) if(defined($hash->{DEF}) && defined($modules{SD_Keeloq}{defptr}{$hash->{DEF}}));
 	delete($modules{SD_Keeloq}{defptr}{ioname}) if (exists $modules{SD_Keeloq}{defptr}{ioname});
@@ -1079,7 +1111,7 @@ sub SD_Keeloq_binsplit_Roto($) {
 }
 
 #####################################
-sub SD_Keeloq_summaryFn($$$$) {
+sub summaryFn($$$$) {
 	my ($FW_wname, $d, $room, $pageHash) = @_;										# pageHash is set for summaryFn.
 	my $hash   = $defs{$d};
 	my $name = $hash->{NAME};
