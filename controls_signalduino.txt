@@ -1,4 +1,4 @@
-UPD 2019-02-23_22:23:00 200567  FHEM/00_SIGNALduino.pm
+UPD 2019-02-24_21:23:21 200588  FHEM/00_SIGNALduino.pm
 UPD 2017-06-23_17:43:38 14541   FHEM/10_FS10.pm
 UPD 2016-09-18_21:22:06 10111   FHEM/14_BresserTemeo.pm
 UPD 2018-11-11_22:35:33 13616   FHEM/14_FLAMINGO.pm
@@ -14,7 +14,7 @@ UPD 2019-02-12_21:37:35 50246   FHEM/14_SD_WS.pm
 UPD 2018-07-04_21:56:16 37910   FHEM/41_OREGON.pm
 UPD 2019-02-01_07:33:43 17406   FHEM/90_SIGNALduino_un.pm
 UPD 2019-02-21_23:21:07 119707  FHEM/lib/signalduino_protocols.hash
-UPD 2019-02-23_22:47:22 121968  FHEM/lib/signalduino_protocols.pm
+UPD 2019-02-24_21:43:09 122046  FHEM/lib/signalduino_protocols.pm
 MOV FHEM/firmware/SIGNALduino_nano328.hex unused
 MOV FHEM/firmware/SIGNALduino_nanoCC1101.hex unused
 MOV FHEM/firmware/SIGNALduino_promini328.hex unused
