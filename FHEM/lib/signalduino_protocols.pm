@@ -2208,6 +2208,6 @@ package SD_Protocols;
 				#modulematch	=> '^P93#.*',
 			},
 	);
-	sub getProtocolList	{	return \%signalduino_protocols;	}
-
+	sub getProtocolList	{	
+		return \%signalduino_protocols;	}
 }

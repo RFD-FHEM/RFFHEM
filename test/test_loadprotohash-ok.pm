@@ -203,5 +203,7 @@ package SD_Protocols;
 		},
 		
 	);
-	sub getProtocolList	{	return \%signalduino_protocols;	}
+	sub getProtocolList	{			
+		return \%signalduino_protocols;	
+	}
 }
