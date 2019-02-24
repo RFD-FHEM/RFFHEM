@@ -1,3 +1,6 @@
+24.02.2019
+ 00_SIGNALduino: feature: last bit of transmission is tried to be reconstructed
+                          if there is enough data available
 12.02.2019
  00_SIGNALduino: feature: getAvailableFirmware returns only version for 
                   which a file could be found.
