@@ -3,7 +3,7 @@ defmod test_MS_2 UnitTest dummyDuino (
 	my $mock = Mock::Sub->new;
 	my $SD_Dispatch = $mock->mock("SIGNALduno_Dispatch");
 	
-	my %ProtocolListTest =  SIGNALduino_LoadProtocolHash("$attr{global}{modpath}/FHEM/lib/test_loadprotohash-ok.hash");
+	my %ProtocolListTest =  SIGNALduino_LoadProtocolHash("$attr{global}{modpath}/FHEM/lib/test_loadprotohash-ok.pm");
 	my $local_ProtocolListSIGNALduino = SIGNALduino_getProtocolList();
 	%{$local_ProtocolListSIGNALduino} = ( %ProtocolListTest);
 
