@@ -26,5 +26,8 @@ defmod test_MS_2 UnitTest dummyDuino (
           };
         }
     }
+	CommandReload(undef,"00_SIGNALduino.pm");
+	SIGNALduino_IdList("x:$target","","","");  
+
  }
 );
