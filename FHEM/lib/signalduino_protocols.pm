@@ -387,7 +387,7 @@ package SD_Protocols;
 				modulematch			=> '^(3[8-9A-F]|[4-6][0-9A-F]|7[0-8]).*',
 				length_min			=> '64',
 				length_max			=> '220',
-				method					=> \&SIGNALduino_OSV2,	# Call to process this message
+				method					=> \&main::SIGNALduino_OSV2,	# Call to process this message
 				polarity				=> 'invert',
 			},
 		"11"	=>	## Arduino Sensor
@@ -403,7 +403,7 @@ package SD_Protocols;
 				modulematch			=> '^P2#.{7,8}',
 				length_min			=> '52',
 				length_max			=> '56',
-				method					=> \&SIGNALduino_AS			# Call to process this message
+				method					=> \&main::SIGNALduino_AS			# Call to process this message
 			},
 		"12"	=>	## Hideki
 							# MC;LL=-1040;LH=904;SL=-542;SH=426;D=A8C233B53A3E0A0783;C=485;L=72;R=213;
@@ -419,7 +419,7 @@ package SD_Protocols;
 				modulematch			=> '^P12#75.+',
 				length_min			=> '71',
 				length_max			=> '128',
-				method					=> \&SIGNALduino_Hideki,	# Call to process this message
+				method					=> \&main::SIGNALduino_Hideki,	# Call to process this message
 				#polarity				=> 'invert',
 			},
 		"13"	=>	## FLAMINGO FA21
@@ -603,7 +603,7 @@ package SD_Protocols;
 				length_min			=> '32',
 				length_max			=> '32',
 				polarity				=> 'invert',						# invert bits
-				method					=> \&SIGNALduino_OSV1		# Call to process this message
+				method					=> \&main::SIGNALduino_OSV1		# Call to process this message
 			},
 		"19"	=>	## minify Funksteckdose
 							# https://github.com/RFD-FHEM/RFFHEM/issues/114
@@ -1119,7 +1119,7 @@ package SD_Protocols;
 				modulematch		=> '^Ys[0-9A-F]{14}',
 				length_min		=> '56',
 				length_max		=> '57',
-				method				=> \&SIGNALduino_SomfyRTS,	# Call to process this message
+				method				=> \&main::SIGNALduino_SomfyRTS,	# Call to process this message
 				msgIntro			=> 'SR;P0=-2560;P1=2560;P3=-640;D=10101010101010113;',
 				#msgOutro			=> 'SR;P0=-30415;D=0;',
 				frequency			=> '10AB85550A',
@@ -1211,7 +1211,7 @@ package SD_Protocols;
 				modulematch			=> '^P47#[569A]{12}.*',
 				length_min			=> '100',
 				length_max			=> '108',
-				method					=> \&SIGNALduino_Maverick,		# Call to process this message
+				method					=> \&main::SIGNALduino_Maverick,		# Call to process this message
 				#polarity				=> 'invert'
 			},
 		"48"	=>	## Joker Dostmann TFA 30.3055.01
@@ -1318,7 +1318,7 @@ package SD_Protocols;
 				preamble				=> 'u52#',
 				length_min			=> '30',
 				length_max			=> '30',
-				method					=> \&SIGNALduino_OSPIR,		# Call to process this message
+				method					=> \&main::SIGNALduino_OSPIR,		# Call to process this message
 				polarity				=> 'invert',
 			},
 		"55"	=>	## QUIGG GT-1000
@@ -1371,7 +1371,7 @@ package SD_Protocols;
 				preamble				=> 'P57#',
 				length_min			=> '21',
 				length_max			=> '24',
-				method					=> \&SIGNALduino_MCRAW,	# Call to process this message
+				method					=> \&main::SIGNALduino_MCRAW,	# Call to process this message
 				polarity				=> 'invert',
 			},
 		"58"	=>	## TFA 30.3208.0
@@ -1388,7 +1388,7 @@ package SD_Protocols;
 				preamble			=> 'W58#',
 				length_min			=> '52',	# 54
 				length_max			=> '52',	# 136
-				method				=> \&SIGNALduino_MCTFA, # Call to process this message
+				method				=> \&main::SIGNALduino_MCTFA, # Call to process this message
 				polarity			=> 'invert',
 			},
 		"59"	=>	## AK-HD-4 remote | 4 Buttons
