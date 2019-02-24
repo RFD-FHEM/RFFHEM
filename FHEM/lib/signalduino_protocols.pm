@@ -255,7 +255,7 @@ package SD_Protocols;
 				modulematch				=> '^i......',
 				length_min				=> '24',
 				length_max				=> '24',				# Don't know maximal lenth of a valid message
-				postDemodulation	=> \&SIGNALduino_bit2itv1,
+				postDemodulation	=> \&main::SIGNALduino_bit2itv1,
 			},
 		"4"	=>	## arctech2
 						# need more Device Infos / User Message
@@ -563,7 +563,7 @@ package SD_Protocols;
 				modulematch				=> '^i......',
 				length_min				=> '32',
 				length_max				=> '34',				# Don't know maximal lenth of a valid message
-				postDemodulation	=> \&SIGNALduino_bit2Arctec,
+				postDemodulation	=> \&main::SIGNALduino_bit2Arctec,
 			},
 		"17.1"	=>	## intertechno --> MU anstatt sonst MS (ID 17)
 								# MU;P0=344;P1=-1230;P2=-200;D=01020201020101020102020102010102010201020102010201020201020102010201020101020102020102010201020102010201010200;CP=0;R=0;
@@ -586,7 +586,7 @@ package SD_Protocols;
 				modulematch				=> '^i......',
 				length_min				=> '32',
 				length_max				=> '34',				# Don't know maximal lenth of a valid message
-				postDemodulation	=> \&SIGNALduino_bit2Arctec,
+				postDemodulation	=> \&main::SIGNALduino_bit2Arctec,
 			},
 		"18"	=>	## Oregon Scientific v1
 							# MC;LL=-2721;LH=3139;SL=-1246;SH=1677;D=1A51FF47;C=1463;L=32;R=12;
@@ -949,7 +949,7 @@ package SD_Protocols;
 				#modulematch			=> '',
 				length_min				=> '28',
 				length_max				=> '40',
-				postDemodulation	=> \&SIGNALduino_HE800,
+				postDemodulation	=> \&main::SIGNALduino_HE800,
 			},
 		"36"	=>	## remote - cheap wireless dimmer
 							# https://forum.fhem.de/index.php/topic,38831.msg394238.html#msg394238
@@ -1034,7 +1034,7 @@ package SD_Protocols;
 				length_min				=> '32',
 				length_max				=> '44',
 				paddingbits				=> '8',
-				postDemodulation	=> \&SIGNALduino_lengtnPrefix,
+				postDemodulation	=> \&main::SIGNALduino_lengtnPrefix,
 				filterfunc				=> 'SIGNALduino_compPattern',
 			},
 		"40"	=>	## Romotec
@@ -1435,7 +1435,7 @@ package SD_Protocols;
 				clientmodule				=> 'CUL_WS',
 				length_min					=> '38',			# 46, letztes Bit fehlt = 45, 10 Bit Preambel = 35 Bit Daten
 				length_max					=> '82',
-				postDemodulation		=> \&SIGNALduino_postDemo_WS2000,
+				postDemodulation		=> \&main::SIGNALduino_postDemo_WS2000,
 			},
 		"61"	=>	## ELV FS10
 							# tested transmitter:   FS10-S8, FS10-S4, FS10-ZE
@@ -1536,7 +1536,7 @@ package SD_Protocols;
 				clientmodule			=> 'IT',
 				length_min				=> '57',
 				length_max				=> '72',
-				postDemodulation	=> \&SIGNALduino_HE_EU,
+				postDemodulation	=> \&main::SIGNALduino_HE_EU,
 			},
 		"66"	=>	## TX2 Protocol (Remote Temp Transmitter & Remote Thermo Model 7035)
 							# https://github.com/RFD-FHEM/RFFHEM/issues/160
@@ -1556,7 +1556,7 @@ package SD_Protocols;
 				modulematch				=> '^TX......',
 				length_min				=> '43',
 				length_max				=> '44',
-				postDemodulation	=> \&SIGNALduino_postDemo_WS7035,
+				postDemodulation	=> \&main::SIGNALduino_postDemo_WS7035,
 			},
 		"67"	=>	## TX2 Protocol (Remote Datalink & Remote Thermo Model 7053, 7054)
 							# https://github.com/RFD-FHEM/RFFHEM/issues/162
@@ -1580,7 +1580,7 @@ package SD_Protocols;
 				modulematch				=> '^TX......',
 				length_min				=> '32',
 				length_max				=> '34',
-				postDemodulation	=> \&SIGNALduino_postDemo_WS7053,
+				postDemodulation	=> \&main::SIGNALduino_postDemo_WS7053,
 			},
 
 			# "68"	=>	can use
@@ -1630,7 +1630,7 @@ package SD_Protocols;
 				preamble					=> 'T',
 				length_min				=> '50',
 				length_max				=> '58',
-				postDemodulation	=> \&SIGNALduino_postDemo_FHT80TF,
+				postDemodulation	=> \&main::SIGNALduino_postDemo_FHT80TF,
 			},
 		"71"	=>	## PEARL infactory Poolthermometer (PV-8644)
 							# MU;P0=1735;P1=-1160;P2=591;P3=-876;D=0123012323010101230101232301230123010101010123012301012323232323232301232323232323232323012301012;CP=2;R=97;
@@ -1710,7 +1710,7 @@ package SD_Protocols;
 				preamble					=> '810c04xx0909a001',
 				length_min				=> '59',
 				length_max				=> '67',
-				postDemodulation	=> \&SIGNALduino_postDemo_FHT80,
+				postDemodulation	=> \&main::SIGNALduino_postDemo_FHT80,
 			},
 		"74"	=>	## FS20 - 'Remote Control (868Mhz),  @HomeAutoUser
 							# MU;P0=-10420;P1=-92;P2=398;P3=-417;P5=596;P6=-592;D=1232323232323232323232323562323235656232323232356232356232623232323232323232323232323235623232323562356565623565623562023232323232323232323232356232323565623232323235623235623232323232323232323232323232323562323232356235656562356562356202323232323232323;CP=2;R=72;
@@ -1729,7 +1729,7 @@ package SD_Protocols;
 				preamble			=> '810b04f70101a001',
 				length_min			=> '50',
 				length_max			=> '67',
-				postDemodulation	=> \&SIGNALduino_postDemo_FS20,
+				postDemodulation	=> \&main::SIGNALduino_postDemo_FS20,
 			},
 		"75"	=>	## Conrad RSL (Erweiterung v2) @litronics https://github.com/RFD-FHEM/SIGNALDuino/issues/69
 							# ! same definition how ID 5, but other length !
@@ -1865,7 +1865,7 @@ package SD_Protocols;
 				preamble					=> 'E',
 				length_min				=> '104',
 				length_max				=> '114',
-				postDemodulation	=> \&SIGNALduino_postDemo_EM,
+				postDemodulation	=> \&main::SIGNALduino_postDemo_EM,
 			},
 		"81"	=>	## Remote control SA-434-1 based on HT12E @ elektron-bbs
 							# MU;P0=-485;P1=188;P2=-6784;P3=508;P5=1010;P6=-974;P7=-17172;D=0123050505630505056305630563730505056305050563056305637305050563050505630563056373050505630505056305630563730505056305050563056305637305050563050505630563056373050505630505056305630563730505056305050563056305637305050563050505630563056373050505630505056;CP=3;R=0;
