@@ -1,0 +1,17 @@
+defmod test_defineDefaults UnitTest dummyDuino (
+ {
+	CommandDefMod(undef,"-temporary testDuino SIGNALduino none");
+ 	
+ 	
+ 	subtest 'Check internal defaults ' => sub {
+		plan tests => 4;
+		my $name ="testDuino";
+			
+	 	is(InternalVal($name,"DeviceName", undef),"none","check DeviceName");
+	 	is(InternalVal($name,"DMSG", undef),"nothing","check DMSG");
+	 	is(InternalVal($name,"LASTDMSG", undef),"nothing","check LASTDMSG");
+	 	is(InternalVal($name,"versionmodul", undef),SDUINO_VERSION,"check versionmodul");
+	}; 
+
+ };
+);

@@ -23,6 +23,7 @@ test: deploylocal
 	git --no-pager diff --name-only ${TRAVIS_COMMIT_RANGE} | egrep "\.pm" | xargs -I@ echo -select @ | xargs --no-run-if-empty perl /opt/fhem/contrib/commandref_join.pl 
 	@echo === running unit tests ===
 	test/test-runner.sh test_modules
+	test/test-runner.sh test_defineDefaults
 	test/test-runner.sh test_callsub_1
 	test/test-runner.sh test1
 	test/test-runner.sh test3
