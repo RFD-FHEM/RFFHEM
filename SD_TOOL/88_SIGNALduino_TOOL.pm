@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: 88_SIGNALduino_TOOL.pm 13115 2019-02-11 21:17:50Z HomeAuto_User $
+# $Id: 88_SIGNALduino_TOOL.pm 13115 2019-02-21 21:17:50Z HomeAuto_User $
 #
 # The file is part of the SIGNALduino project
 # see http://www.fhemwiki.de/wiki/SIGNALduino to support debugging of unknown signal data
@@ -8,7 +8,7 @@
 #
 ######################################################################
 # Note´s
-# - added commandref doublePulse command take a while
+# -
 # - Send_RAWMSG last message Button!! nicht 
 ######################################################################
 
@@ -16,7 +16,6 @@ package main;
 
 use strict;
 use warnings;
-
 use Data::Dumper qw (Dumper);
 
 #$| = 1;		#Puffern abschalten, Hilfreich für PEARL WARNINGS Search
@@ -166,7 +165,7 @@ sub SIGNALduino_TOOL_Set($$$@) {
 					$count++;
 					my @arg = split(",", $_);										# a0=Modell | a1=Zustand | a2=RAWMSG
 					$arg[1] = "noArg" if ($arg[1] eq "");
-					$arg[1] =~ s/[^A-Za-z0-9\-;=_|#?]//g;;			# nur zulässige Zeichen erlauben sonst leicht ERROR
+					$arg[1] =~ s/[^A-Za-z0-9\-;.:=_|#?]//g;;		# nur zulässige Zeichen erlauben sonst leicht ERROR
 					$List{$arg[0]}{$arg[1]} = $arg[2];
 				}
 			}
@@ -450,7 +449,7 @@ sub SIGNALduino_TOOL_Get($$$@) {
 	my $Filename_export = AttrVal($name,"Filename_export","");
 	my $path = AttrVal($name,"Path","./");
 	my $onlyDataName = "-ONLY_DATA-";
-	my $list = "TimingsList:noArg invert_bitMsg invert_hexMsg change_bitMsg_to_hexMsg change_hexMsg_to_bitMsg ";
+	my $list = "TimingsList:noArg Durration_of_Message invert_bitMsg invert_hexMsg change_bin_to_hex change_hex_to_bin change_dec_to_hex change_hex_to_dec reverse_Input ";
 	$list .= "FilterFile:multiple,bitMsg:,bitMsg_invert:,dmsg:,hexMsg:,hexMsg_invert:,MC;,MS;,MU;,RAWMSG:,READredu:,READ:,UserInfo:,$onlyDataName ".
 					"All_ClockPulse:noArg All_SyncPulse:noArg InputFile_one_ClockPulse InputFile_one_SyncPulse InputFile_doublePulse:noArg InputFile_length_Datapart:noArg" if ($Filename_input ne "");
 	my $linecount = 0;
@@ -833,16 +832,16 @@ sub SIGNALduino_TOOL_Get($$$@) {
 		return "Your $cmd is ready.\n\n  Input: $a[0]\n Output: $value";
 	}
 	
-	if ($cmd eq "change_hexMsg_to_bitMsg" || $cmd eq "change_bitMsg_to_hexMsg") {
+	if ($cmd eq "change_hex_to_bin" || $cmd eq "change_bin_to_hex") {
 		return "ERROR: Your input failed!" if (not defined $a[0]);
-		return "ERROR: wrong value $a[0]! only [0-1]!" if ($cmd eq "change_bitMsg_to_hexMsg" && not $a[0] =~ /^[0-1]+$/);
-		return "ERROR: wrong value $a[0]! only [a-fA-f0-9]!" if ($cmd eq "change_hexMsg_to_bitMsg" && not $a[0] =~ /^[a-fA-f0-9]+$/);
+		return "ERROR: wrong value $a[0]! only [0-1]!" if ($cmd eq "change_bin_to_hex" && not $a[0] =~ /^[0-1]+$/);
+		return "ERROR: wrong value $a[0]! only [a-fA-f0-9]!" if ($cmd eq "change_hex_to_bin" && $a[0] !~ /^[a-fA-f0-9]+$/);
 
-		if ($cmd eq "change_bitMsg_to_hexMsg") {
+		if ($cmd eq "change_bin_to_hex") {
 			$value = sprintf("%x", oct( "0b$a[0]" ) );
 			$value = sprintf("%X", oct( "0b$a[0]" ) );
 			return "Your $cmd is ready.\n\nInput: $a[0]\n  Hex: $value";
-		} elsif ($cmd eq "change_hexMsg_to_bitMsg") {
+		} elsif ($cmd eq "change_hex_to_bin") {
 			$value = sprintf( "%b", hex( $a[0] ) );
 			return "Your $cmd is ready.\n\nInput: $a[0]\n  Bin: $value";
 		}
@@ -917,6 +916,97 @@ sub SIGNALduino_TOOL_Get($$$@) {
 		return "length of Datapart from RAWMSG in $linecount lines.\n\nmin:$dataarray_min max:$dataarray_max";
 	}
 
+	if ($cmd eq "Durration_of_Message") {
+		return "ERROR: Your input failed!" if (not defined $a[0]);
+		return "ERROR: wrong input! only READredu: MU|MS Message or SendMsg: SR|SM" if (not $a[0] =~ /^(SR|SM|MU|MS);/);
+		return "ERROR: wrong value! the part of timings Px= failed!" if (not $a[0] =~ /^.*P\d=/);
+		return "ERROR: wrong value! the part of data D= failed!" if (not $a[0] =~ /^.*D=/);
+		return "ERROR: wrong value! the part of data not correct! only [0-9]" if (not $a[0] =~ /^.*D=\d+;/);
+		return "ERROR: wrong value! the end of line not correct! only ;" if (not $a[0] =~ /^.*;$/);
+
+		my @msg_parts = split(/;/, $a[0]);
+		my %patternList;
+		my $rawData;
+		my $Durration_of_Message = 0;
+		my $Durration_of_Message_total = 0;
+		my $msg_repeats = 1;
+		
+		foreach (@msg_parts) {
+			if ($_ =~ m/^P\d=-?\d{2,}/ or $_ =~ m/^[SL][LH]=-?\d{2,}/) {
+				$_ =~ s/^P+//;  
+				$_ =~ s/^P\d//;  
+				my @pattern = split(/=/,$_);
+		   
+				$patternList{$pattern[0]} = $pattern[1];
+			} elsif($_ =~ m/D=\d+/ or $_ =~ m/^D=[A-F0-9]+/) {
+				$_ =~ s/D=//;  
+				$rawData = $_ ;
+			} elsif ($_ =~ m/^R=\d+/ && $a[0] =~ /^S[RC]/) {
+				$_ =~ s/R=//;
+				$msg_repeats = $_ ;
+			}
+		}
+		
+		foreach (split //, $rawData) {
+			$Durration_of_Message+= abs($patternList{$_});
+		}
+		
+		$Durration_of_Message_total = $msg_repeats * $Durration_of_Message;
+		## only Output Format ##
+		my $return = "Durration_of_Message:\n\n";
+		
+		if ($Durration_of_Message_total > 1000000) {
+			$Durration_of_Message_total /= 1000000;
+			$Durration_of_Message /= 1000000;
+			$Durration_of_Message_total.= " Sekunden" if ($msg_repeats == 1);
+			$Durration_of_Message_total.= " Sekunden with $msg_repeats repeats" if ($msg_repeats > 1);
+			$Durration_of_Message.= " Sekunden";
+		} elsif ($Durration_of_Message_total > 1000) {
+			$Durration_of_Message_total /= 1000;
+			$Durration_of_Message /= 1000;
+			$Durration_of_Message_total.= " Millisekunden" if ($msg_repeats == 1);
+			$Durration_of_Message_total.= " Millisekunden with $msg_repeats repeats" if ($msg_repeats > 1);
+			$Durration_of_Message.= " Millisekunden";
+		} else {
+			$Durration_of_Message_total.= " Mikrosekunden" if ($msg_repeats == 1);
+			$Durration_of_Message_total.= " Mikrosekunden with $msg_repeats repeats" if ($msg_repeats > 1);
+			$Durration_of_Message.= " Mikrosekunden";
+		}
+
+		my $foundpoint1 = index($Durration_of_Message,".");
+		my $foundpoint2 = index($Durration_of_Message_total,".");
+		if ($foundpoint2 > $foundpoint1) {
+			my $diff = $foundpoint2-$foundpoint1;
+			foreach (1..$diff) {
+				$Durration_of_Message = " ".$Durration_of_Message;
+			}
+		}
+
+		$return.= $Durration_of_Message."\n" if ($msg_repeats > 1);
+		$return.= $Durration_of_Message_total;
+		### END
+
+		return $return;
+	}
+	
+	if ($cmd eq "reverse_Input") {
+		return "ERROR: Your arguments in $cmd is not definded!" if (not defined $a[0]);
+		return "ERROR: You need at least 2 arguments to use this function!" if (length($a[0] == 1));
+		return "Your $cmd is ready.\n\n  Input: $a[0]\n Output: ".reverse $a[0];
+	}
+	
+	if ($cmd eq "change_dec_to_hex") {
+		return "ERROR: Your arguments in $cmd is not definded!" if (not defined $a[0]);
+		return "ERROR: wrong value $a[0]! only [0-9]!" if ($a[0] !~ /^[0-9]+$/);
+		return "Your $cmd is ready.\n\n  Input: $a[0]\n Output: ".sprintf("%x", $a[0]);;
+	}
+	
+	if ($cmd eq "change_hex_to_dec") {
+		return "ERROR: Your arguments in $cmd is not definded!" if (not defined $a[0]);
+		return "ERROR: wrong value $a[0]! only [a-fA-f0-9]!" if ($a[0] !~ /^[0-9a-fA-F]+$/);
+		return "Your $cmd is ready.\n\n  Input: $a[0]\n Output: ".hex($a[0]);
+	}
+
 	return "Unknown argument $cmd, choose one of $list";
 
 }
@@ -961,6 +1051,11 @@ sub SIGNALduino_TOOL_Attr() {
 		}
 
 		### name of initialized sender to work with this tool
+		if ($attrName eq "Path") {
+			return "ERROR: wrong value! $attrName must end with /" if (not $attrValue =~ /^.*\/$/);
+		}
+
+		### name of initialized sender to work with this tool
 		if ($attrName eq "Sendername") {
 			### Check, eingegebener Sender als Device definiert?
 			my @sender = ();
@@ -985,9 +1080,11 @@ sub SIGNALduino_TOOL_Attr() {
 
 			### all files in path
 			opendir(DIR,$path) || return "ERROR: attr $attrName follow with Error in opening dir $path!";
+			my @fileend = split(/\./, $attrValue);
+			my $fileend = $fileend[1];
 			my @errorlist = ();
 			while( my $directory_value = readdir DIR ){
-					if ($directory_value =~ /.txt$/) {
+					if ($directory_value =~ /.$fileend$/) {
 						push(@errorlist,$directory_value);
 					}
 			}
@@ -995,10 +1092,10 @@ sub SIGNALduino_TOOL_Attr() {
 			my @errorlist_sorted = sort { lc($a) cmp lc($b) } @errorlist;
 			
 			### check file from attrib
-			open (FileCheck,"<$path$attrValue") || return "ERROR: No file ($attrValue) exists for attrib Filename_input!\n\nFiles in path:\n- ".join("\n- ",@errorlist_sorted);
+			open (FileCheck,"<$path$attrValue") || return "ERROR: No file ($attrValue) exists for attrib Filename_input!\n\nAll $fileend Files in path:\n- ".join("\n- ",@errorlist_sorted);
 			close FileCheck;
 		
-			$attr{$name}{webCmd}	= "START" if ( not exists($attr{$name}{webCmd}) || $webCmd !~ /START/ );							# set model, if only undef --> new def
+			$attr{$name}{webCmd}	= "START" if ( not exists($attr{$name}{webCmd}) || ($webCmd !~ /START/ && $webCmd ne ""));							# set model, if only undef --> new def
 		}
 
 		### dispatch from file with line check
@@ -1110,12 +1207,15 @@ sub SIGNALduino_TOOL_RAWMSG_Check($$$) {
 
 	<a name="SIGNALduino_TOOL_Set"></a>
 	<b>Set</b>
-	<ul><li><a name="Dispatch_DMSG"></a><code>Dispatch_DMSG</code> - a finished DMSG from modul to dispatch (without SIGNALduino processing!)</li><a name=""></a></ul>
-	<ul><li><a name="Dispatch_RAWMSG"></a><code>Dispatch_RAWMSG</code> - one RAW message to dispatch</li><a name=""></a></ul>
+	<ul><li><a name="Dispatch_DMSG"></a><code>Dispatch_DMSG</code> - a finished DMSG from modul to dispatch (without SIGNALduino processing!)<br>
+	&emsp;&rarr; example: W51#087A4DB973</li><a name=""></a></ul>
+	<ul><li><a name="Dispatch_RAWMSG"></a><code>Dispatch_RAWMSG</code> - one RAW message to dispatch<br>
+	&emsp;&rarr; example: MS;P0=-16046;P1=552;P2=-1039;P3=983;P5=-7907;P6=-1841;P7=-4129;D=15161716171616171617171617171617161716161616103232;CP=1;SP=5;</li><a name=""></a></ul>
 	<ul><li><a name="Dispatch_RAWMSG_last"></a><code>Dispatch_RAWMSG_last</code> - dispatch the last RAW message</li><a name=""></a></ul>
 	<ul><li><a name="modulname"></a><code>&lt;modulname&gt;</code> - dispatch a message of the selected module from the DispatchModule attribute</li><a name=""></a></ul>
 	<ul><li><a name="START"></a><code>START</code> - starts the loop for automatic dispatch</li><a name=""></a></ul>
-	<ul><li><a name="Send_RAWMSG"></a><code>Send_RAWMSG</code> - send one MU | MS | MC RAWMSG with the defined Sendename (attributes Sendename needed!)</li><a name=""></a></ul>
+	<ul><li><a name="Send_RAWMSG"></a><code>Send_RAWMSG</code> - send one MU | MS | MC RAWMSG with the defined Sendename (attributes Sendename needed!)<br>
+	&emsp;&rarr; Beispiel: MS;P0=-16046;P1=552;P2=-1039;P3=983;P5=-7907;P6=-1841;P7=-4129;D=15161716171616171617171617171617161716161616103232;CP=1;SP=5;</li><a name=""></a></ul>
 	<a name=""></a>
 	<br>
 
@@ -1123,16 +1223,23 @@ sub SIGNALduino_TOOL_RAWMSG_Check($$$) {
 	<b>Get</b>
 	<ul><li><a name="All_ClockPulse"></a><code>All_ClockPulse</code> - calculates the average of the ClockPulse from Input_File</li><a name=""></a></ul>
 	<ul><li><a name="All_SyncPulse"></a><code>All_SyncPulse</code> - calculates the average of the SyncPulse from Input_File</li><a name=""></a></ul>
+	<ul><li><a name="Durration_of_Message"></a><code>Durration_of_Message</code> - determines the total duration of a Send_RAWMSG or READredu_RAWMSG<br>
+	&emsp;&rarr; example 1: SR;R=3;P0=1520;P1=-400;P2=400;P3=-4000;P4=-800;P5=800;P6=-16000;D=0121212121212121212121212123242424516;<br>
+	&emsp;&rarr; example 2: MS;P0=-16046;P1=552;P2=-1039;P3=983;P5=-7907;P6=-1841;P7=-4129;D=15161716171616171617171617171617161716161616103232;CP=1;SP=5;O;</li><a name=""></a></ul>
 	<ul><li><a name="FilterFile"></a><code>FilterFile</code> - creates a file with the filtered values</li><a name=""></a></ul>
-	<ul><li><a name="InputFile_doublePulse"></a><code>InputFile_doublePulse</code> - searches for duplicate pulses in the data part of the individual messages in the input_file and filters them into the export_file</li><a name=""></a></ul>
-	<ul><li><a name="InputFile_length_Datapart"></a><code>InputFile_length_Datapart</code> - determines the min and max lenght of the readed RAWMSG.</li><a name=""></a></ul>
-	<ul><li><a name="InputFile_one_ClockPulse"></a><code>InputFile_one_ClockPulse</code> - Find the specified ClockPulse with 15% tolerance from the Input_File and filter the RAWMSG in the Export_File</li><a name=""></a></ul>
-	<ul><li><a name="InputFile_one_SyncPulse"></a><code>InputFile_one_SyncPulse</code> - Find the specified SyncPulse with 15% tolerance from the Input_File and filter the RAWMSG in the Export_File</li><a name=""></a></ul>
+	<ul><li><a name="InputFile_doublePulse"></a><code>InputFile_doublePulse</code> - searches for duplicate pulses in the data part of the individual messages in the input_file and filters them into the export_file. It may take a while depending on the size of the file.</li><a name=""></a></ul>
+	<ul><li><a name="InputFile_length_Datapart"></a><code>InputFile_length_Datapart</code> - determines the min and max lenght of the readed RAWMSG</li><a name=""></a></ul>
+	<ul><li><a name="InputFile_one_ClockPulse"></a><code>InputFile_one_ClockPulse</code> - find the specified ClockPulse with 15% tolerance from the Input_File and filter the RAWMSG in the Export_File</li><a name=""></a></ul>
+	<ul><li><a name="InputFile_one_SyncPulse"></a><code>InputFile_one_SyncPulse</code> - find the specified SyncPulse with 15% tolerance from the Input_File and filter the RAWMSG in the Export_File</li><a name=""></a></ul>
 	<ul><li><a name="TimingsList"></a><code>TimingsList</code> - created one file in csv format from the file &lt;signalduino_protocols.hash&gt; to use for import</li><a name=""></a></ul>
-	<ul><li><a name="change_bitMsg_to_hexMsg"></a><code>change_bitMsg_to_hexMsg</code> - converts the binary input to HEX</li><a name=""></a></ul>
-	<ul><li><a name="change_hexMsg_to_bitMsg"></a><code>change_hexMsg_to_bitMsg</code> - converts the hexadecimal input into binary</li><a name=""></a></ul>
+	<ul><li><a name="change_bin_to_hex"></a><code>change_bin_to_hex</code> - converts the binary input to HEX</li><a name=""></a></ul>
+	<ul><li><a name="change_dec_to_hex"></a><code>change_dec_to_hex</code> - converts the decimal input into hexadecimal</li><a name=""></a></ul>
+	<ul><li><a name="change_hex_to_bin"></a><code>change_hex_to_bin</code> - converts the hexadecimal input into binary</li><a name=""></a></ul>
+	<ul><li><a name="change_hex_to_dec"></a><code>change_hex_to_dec</code> - converts the hexadecimal input into decimal</li><a name=""></a></ul>
 	<ul><li><a name="invert_bitMsg"></a><code>invert_bitMsg</code> - invert your bitMsg</li><a name=""></a></ul>
 	<ul><li><a name="invert_hexMsg"></a><code>invert_hexMsg</code> - invert your RAWMSG</li><a name=""></a></ul>
+	<ul><li><a name="reverse_Input"></a><code>reverse_Input</code> - reverse your input<br>
+	&emsp;&rarr; example: 1234567 turns 7654321</li><a name=""></a></ul></li><a name=""></a></ul>
 	<br><br>
 
 	<b>Attributes</b>
@@ -1187,31 +1294,41 @@ sub SIGNALduino_TOOL_RAWMSG_Check($$$) {
 
 	<a name="SIGNALduino_TOOL_Set"></a>
 	<b>Set</b>
-	<ul><li><a name="Dispatch_DMSG"></a><code>Dispatch_DMSG</code> - eine fertige DMSG vom Modul welche dispatch werden soll (ohne SIGNALduino Verarbeitung!)</li><a name=""></a></ul>
-	<ul><li><a name="Dispatch_RAWMSG"></a><code>Dispatch_RAWMSG</code> - eine Roh-Nachricht welche einzeln dispatch werden soll</li><a name=""></a></ul>
+	<ul><li><a name="Dispatch_DMSG"></a><code>Dispatch_DMSG</code> - eine fertige DMSG vom Modul welche dispatch werden soll (ohne SIGNALduino Verarbeitung!)<br>
+	&emsp;&rarr; Beispiel: W51#087A4DB973</li><a name=""></a></ul>
+	<ul><li><a name="Dispatch_RAWMSG"></a><code>Dispatch_RAWMSG</code> - eine Roh-Nachricht welche einzeln dispatch werden soll<br>
+	&emsp;&rarr; Beispiel: MS;P0=-16046;P1=552;P2=-1039;P3=983;P5=-7907;P6=-1841;P7=-4129;D=15161716171616171617171617171617161716161616103232;CP=1;SP=5;</li><a name=""></a></ul>
 	<ul><li><a name="Dispatch_RAWMSG_last"></a><code>Dispatch_RAWMSG_last</code> - Dispatch die zu letzt dispatchte Roh-Nachricht</li><a name=""></a></ul>
 	<ul><li><a name="modulname"></a><code>&lt;modulname&gt;</code> - Dispatch eine Nachricht des ausgewählten Moduls aus dem Attribut DispatchModule.</li><a name=""></a></ul>
 	<ul><li><a name="START"></a><code>START</code> - startet die Schleife zum automatischen dispatchen</li><a name=""></a></ul>
-	<ul><li><a name="Send_RAWMSG"></a><code>Send_RAWMSG</code> - sendet eine MU | MS | MC Nachricht direkt über den angegebenen Sender (Attribut Sendename ist notwendig!)</li><a name=""></a></ul>
+	<ul><li><a name="Send_RAWMSG"></a><code>Send_RAWMSG</code> - sendet eine MU | MS | MC Nachricht direkt über den angegebenen Sender (Attribut Sendename ist notwendig!)<br>
+	&emsp;&rarr; Beispiel: MS;P0=-16046;P1=552;P2=-1039;P3=983;P5=-7907;P6=-1841;P7=-4129;D=15161716171616171617171617171617161716161616103232;CP=1;SP=5;</li><a name=""></a></ul>
 	<br>
 
 	<a name="SIGNALduino_TOOL_Get"></a>
 	<b>Get</b>
-	<ul><li><a name="All_ClockPulse"></a><code>All_ClockPulse</code> - berechnet den Durchschnitt des ClockPulse aus der Input_Datei.</li><a name=""></a></ul>
-	<ul><li><a name="All_SyncPulse"></a><code>All_SyncPulse</code> - berechnet den Durchschnitt des SyncPulse aus der Input_Datei.</li><a name=""></a></ul>
-	<ul><li><a name="FilterFile"></a><code>FilterFile</code> - erstellt eine Datei mit den gefilterten Werten.<br>
+	<ul><li><a name="All_ClockPulse"></a><code>All_ClockPulse</code> - berechnet den Durchschnitt des ClockPulse aus der Input_Datei</li><a name=""></a></ul>
+	<ul><li><a name="All_SyncPulse"></a><code>All_SyncPulse</code> - berechnet den Durchschnitt des SyncPulse aus der Input_Datei</li><a name=""></a></ul>
+	<ul><li><a name="Durration_of_Message"></a><code>Durration_of_Message</code> - ermittelt die Gesamtdauer einer Send_RAWMSG oder READredu_RAWMSG<br>
+	&emsp;&rarr; Beispiel 1: SR;R=3;P0=1520;P1=-400;P2=400;P3=-4000;P4=-800;P5=800;P6=-16000;D=0121212121212121212121212123242424516;<br>
+	&emsp;&rarr; Beispiel 2: MS;P0=-16046;P1=552;P2=-1039;P3=983;P5=-7907;P6=-1841;P7=-4129;D=15161716171616171617171617171617161716161616103232;CP=1;SP=5;O;</li><a name=""></a></ul>
+	<ul><li><a name="FilterFile"></a><code>FilterFile</code> - erstellt eine Datei mit den gefilterten Werten<br>
 	&emsp;&rarr; eine Vorauswahl von Suchbegriffen via Checkbox ist m&ouml;glich<br>
 	&emsp;&rarr; die Checkbox Auswahl <i>-ONLY_DATA-</i> filtert nur die Suchdaten einzel aus jeder Zeile anstatt die komplette Zeile mit den gesuchten Daten<br>
 	&emsp;&rarr; eingegebene Texte im Textfeld welche mit <i>Komma ,</i> getrennt werden, werden ODER verkn&uuml;pft und ein Text mit Leerzeichen wird als ganzes Argument gesucht</li><a name=""></a></ul>
-	<ul><li><a name="InputFile_doublePulse"></a><code>InputFile_doublePulse</code> - sucht nach doppelten Pulsen im Datenteil der einzelnen Nachrichten innerhalb der Input_Datei und filtert diese in die Export_Datei.</li><a name=""></a></ul>
-	<ul><li><a name="InputFile_length_Datapart"></a><code>InputFile_length_Datapart</code> - ermittelt die min und max L&auml;nge vom Datenteil der eingelesenen RAWMSG´s.</li><a name=""></a></ul>
-	<ul><li><a name="InputFile_one_ClockPulse"></a><code>InputFile_one_ClockPulse</code> - sucht den angegebenen ClockPulse mit 15% Tolleranz aus der Input_Datei und filtert die RAWMSG in die Export_Datei.</li><a name=""></a></ul>
-	<ul><li><a name="InputFile_one_SyncPulse"></a><code>InputFile_one_SyncPulse</code> - sucht den angegebenen SyncPulse mit 15% Tolleranz aus der Input_Datei und filtert die RAWMSG in die Export_Datei.</li><a name=""></a></ul>
+	<ul><li><a name="InputFile_doublePulse"></a><code>InputFile_doublePulse</code> - sucht nach doppelten Pulsen im Datenteil der einzelnen Nachrichten innerhalb der Input_Datei und filtert diese in die Export_Datei. Je nach Größe der Datei kann es eine Weile dauern.</li><a name=""></a></ul>
+	<ul><li><a name="InputFile_length_Datapart"></a><code>InputFile_length_Datapart</code> - ermittelt die min und max L&auml;nge vom Datenteil der eingelesenen RAWMSG´s</li><a name=""></a></ul>
+	<ul><li><a name="InputFile_one_ClockPulse"></a><code>InputFile_one_ClockPulse</code> - sucht den angegebenen ClockPulse mit 15% Tolleranz aus der Input_Datei und filtert die RAWMSG in die Export_Datei</li><a name=""></a></ul>
+	<ul><li><a name="InputFile_one_SyncPulse"></a><code>InputFile_one_SyncPulse</code> - sucht den angegebenen SyncPulse mit 15% Tolleranz aus der Input_Datei und filtert die RAWMSG in die Export_Datei</li><a name=""></a></ul>
 	<ul><li><a name="TimingsList"></a><code>TimingsList</code> - erstellt eine Liste der Protokolldatei &lt;signalduino_protocols.hash&gt; im CSV-Format welche zum Import genutzt werden kann</li><a name=""></a></ul>
-	<ul><li><a name="change_bitMsg_to_hexMsg"></a><code>change_bitMsg_to_hexMsg</code> - wandelt die binäre Eingabe in HEX.</li><a name=""></a></ul>
-	<ul><li><a name="change_hexMsg_to_bitMsg"></a><code>change_hexMsg_to_bitMsg</code> - wandelt die hexadezimale Eingabe in bin&auml;r.</li><a name=""></a></ul>
-	<ul><li><a name="invert_bitMsg"></a><code>invert_bitMsg</code> - invertiert die eingegebene binäre Nachricht.</li><a name=""></a></ul>
-	<ul><li><a name="invert_hexMsg"></a><code>invert_hexMsg</code> - invertiert die eingegebene hexadezimale Nachricht.</li><a name=""></a></ul>
+	<ul><li><a name="change_bin_to_hex"></a><code>change_bin_to_hex</code> - wandelt die binäre Eingabe in hexadezimal um</li><a name=""></a></ul>
+	<ul><li><a name="change_dec_to_hex"></a><code>change_dec_to_hex</code> - wandelt die dezimale Eingabe in hexadezimal um</li><a name=""></a></ul>
+	<ul><li><a name="change_hex_to_bin"></a><code>change_hex_to_bin</code> - wandelt die hexadezimale Eingabe in bin&auml;r um</li><a name=""></a></ul>
+	<ul><li><a name="change_hex_to_dec"></a><code>change_hex_to_dec</code> - wandelt die hexadezimale Eingabe in dezimal um</li><a name=""></a></ul>
+	<ul><li><a name="invert_bitMsg"></a><code>invert_bitMsg</code> - invertiert die eingegebene binäre Nachricht</li><a name=""></a></ul>
+	<ul><li><a name="invert_hexMsg"></a><code>invert_hexMsg</code> - invertiert die eingegebene hexadezimale Nachricht</li><a name=""></a></ul>
+	<ul><li><a name="reverse_Input"></a><code>reverse_Input</code> - kehrt die Eingabe um<br>
+	&emsp;&rarr; Beispiel: aus 1234567 wird 7654321</li><a name=""></a></ul>
 	<br><br>
 
 	<b>Attributes</b>

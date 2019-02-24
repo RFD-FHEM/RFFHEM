@@ -1,4 +1,4 @@
-# $Id: 00_SIGNALduino.pm 10488 2019-02-12 12:00:00Z v3.4.0 $
+# $Id: 00_SIGNALduino.pm 10488 2019-02-12 12:00:00Z v3.4.0-dev $
 #
 # v3.4.0 (Development release 3.4)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incoming messages
@@ -29,7 +29,7 @@ eval "use Time::HiRes qw(gettimeofday);1" ;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.4.0-dev",
+	SDUINO_VERSION            => "v3.4.0-dev_18.02",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -152,6 +152,7 @@ my $clientsSIGNALduino = ":IT:"
 						."FS20:"
 						."CUL_EM:"
 						."Fernotron:"
+						."SD_Keeloq:"
 						."SIGNALduino_un:"
 					; 
 
@@ -183,6 +184,7 @@ my %matchListSIGNALduino = (
 			"25:CUL_EM"						=> "^E0.................", 
 			"26:Fernotron"				=> '^P82#.*',
 			"27:SD_BELL"					=> '^P(?:15|32|41|42|57|79)#.*',
+			"28:SD_Keeloq"				=> '^P(?:87|88)#.*',
 			"X:SIGNALduino_un"		=> '^[u]\d+#.*',
 );
 
