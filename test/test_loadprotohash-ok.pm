@@ -129,7 +129,7 @@ package SD_Protocols;
 				preamble		=> '#',				# prepend to converted message
 				length_min		=> '24',
 				length_max		=> '24',			# Don't know maximal lenth of a valid message
-				postDemodulation	=> \&SIGNALduino_bit2itv1,
+				postDemodulation	=> \&main::SIGNALduino_bit2itv1,
 				test_data		=> 	{ 
 							test_MS_2 => [
 								{
