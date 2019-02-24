@@ -1,6 +1,6 @@
-24.02.2019
- 00_SIGNALduino: feature: last bit of transmission is tried to be reconstructed
-                          if there is enough data available
+24,02.2019
+ 00_SIGNALduino: change: load protocolData from another PerlModule instead of
+                         a text file. Fixes update via svn 
  14_SD_Keeloq.pm: new module for Keeloq devices
  90_SIGNALduino_un.pm remove Roto output´s --> new module created
 21.02.2019
