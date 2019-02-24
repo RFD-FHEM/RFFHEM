@@ -1408,7 +1408,7 @@ package SD_Protocols;
 				preamble				=> 'u59#',			# Append to converted message
 				postamble				=> '',					# Append to converted message
 				#clientmodule		=> '',
-				modulematch			=> '',
+				#modulematch			=> '',
 				length_min			=> '24',
 				length_max			=> '24',
 			},
@@ -2042,7 +2042,6 @@ package SD_Protocols;
 				pause				=> [-40],
 				clockabs			=> 400,						# ca 400us
 				reconstructBit			=> '1',
-				developId			=> 'm',
 				format				=> 'twostate',
 				preamble			=> 'P87#',				# prepend to converted message
 				clientmodule			=> 'SD_Keeloq',
@@ -2060,7 +2059,7 @@ package SD_Protocols;
 				name					=> 'Roto shutter | other',
 				comment				=> 'remote control Aurel TX-nM-HCS | Waeco_MA650_TX',
 				id						=> '88',
-				knownFreqs		=> '',
+				knownFreqs		=> '433.92',
 				one						=> [1,-2],        # PWM bit pulse width typ. 1.2 mS
 				zero					=> [2,-1],				# PWM bit pulse width typ. 1.2 mS
 				preSync				=> [1,-1, 1,-1, 1,-1, 1,-1, 1,-1, 1,-1, 1,-1, 1,-1, 1,-1, 1,-1, 1,-1,],	# 11 pulses preambel, 1 sync, 66 data, pause ... repeat
@@ -2068,7 +2067,6 @@ package SD_Protocols;
 				pause         => [-39],         # Guard Time typ. 15.6 mS
 				clockabs			=> 400,						# Basic pulse element typ. 0.4 mS (TABLE 8-4)
 				reconstructBit	=> '1',
-				developId			=> 'm',
 				format				=> 'twostate',
 				preamble			=> 'P88#',				# prepend to converted message
 				clientmodule			=> 'SD_Keeloq',
