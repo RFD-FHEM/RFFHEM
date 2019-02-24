@@ -252,7 +252,6 @@ SIGNALduino_Initialize($)
   #ours %attr{};
 
   %ProtocolListSIGNALduino = SIGNALduino_LoadProtocolHash("$attr{global}{modpath}/FHEM/lib/signalduino_protocols.pm");
-  #Log3 "SIGNALduino", 1, Dumper(%ProtocolListSIGNALduino);
   if (exists($ProtocolListSIGNALduino{error})  ) {
   	Log3 "SIGNALduino", 1, "Error loading Protocol Hash. Module is in inoperable mode error message:($ProtocolListSIGNALduino{error})";
   	delete($ProtocolListSIGNALduino{error});
@@ -278,13 +277,14 @@ our $FW_detail;
 
 sub SIGNALduino_LoadProtocolHash($)
 {
-	
 	if (! -e $_[0]) {
 		return %{ {"error" => "File does not exsits"}};
 	}
-	
+	use Symbol 'delete_package';
+	delete_package 'SD_Protocols';
+	delete($INC{$_[0]});
 	require $_[0];
-	return %{SD_Protocols->getProtocolList};
+	return  %{SD_Protocols->getProtocolList};
 }
 
 

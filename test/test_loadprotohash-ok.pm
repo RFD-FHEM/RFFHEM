@@ -31,5 +31,7 @@ package SD_Protocols;
 				developId		=> 'p',
 	        },
 	);
-	sub getProtocolList	{	return \%signalduino_protocols;	}
+	sub getProtocolList	{			
+		return \%signalduino_protocols;	
+	}
 }
