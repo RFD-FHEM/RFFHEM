@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 90_SIGNALduino_un.pm 15479 2018-01-24 20:00:00 dev-r33 $
+# $Id: 90_SIGNALduino_un.pm 15479 2018-01-24 20:00:00 dev-r34 $
 #
 # The file is part of the SIGNALduino project
 # see http://www.fhemwiki.de/wiki/SIGNALduino to support debugging of unknown signal data
@@ -184,17 +184,6 @@ SIGNALduino_un_Parse($$)
 		#Dispatch($hash, $tscode,undef);
 
 		
-	}	elsif ($protocol == "88" && length($rawData) == 17) {
-		my $serial = substr($bitData,32,28);
-		my $buttonbits = substr($bitData,60,4);
-		
-		my %buttons = (
- 		 	"0010" => "hoch",
-		 	"1001" => "runter",
- 		 	"1000" => "stop"
-		);
-		
-		Log3 $hash, 4, "$name: Roto shutter - Serialbits=$serial Serial=".oct( "0b$serial" )." Buttonbits=$buttonbits Button=$buttons{$buttonbits}";
 	}
 	
 	##############################################################################################
