@@ -103,8 +103,7 @@ sub SD_RSL_Define($$) {
   $hash->{OffCode} = sprintf('%02X', ($RSLCodes[$channel][$button][0]));
   
 	my $iodevice = $a[3] if($a[3]);
-	my $ioname = $modules{SD_RSL}{defptr}{ioname} if (exists $modules{SD_RSL}{defptr}{ioname} && not $iodevice);
-	$iodevice = $ioname if not $iodevice;
+	my $iodevice = $modules{SD_RSL}{defptr}{ioname} if (exists $modules{SD_RSL}{defptr}{ioname} && not $iodevice);
 	
   AssignIoPort($hash, $iodevice);
 
