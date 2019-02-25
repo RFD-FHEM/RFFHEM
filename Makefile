@@ -1,7 +1,5 @@
 /opt/fhem/FHEM/%.pm: FHEM/%.pm
 	sudo cp $< $@ 
-/opt/fhem/FHEM/lib/%.hash: FHEM/lib/%.hash
-	sudo cp $< $@ 
 98_UnitTest.pm: test/98_unittest.pm
 	sudo cp $< /opt/fhem/FHEM/$@
 		
