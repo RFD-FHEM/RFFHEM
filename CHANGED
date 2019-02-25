@@ -1,4 +1,5 @@
 24.02.2019
+ 14_SD_RSL.pm: fix IODEV not correctly assigned #484 | fix undef syntax | revised doc + revised log output´s
  00_SIGNALduino: feature: last bit of transmission is tried to be reconstructed
                           if there is enough data available
  14_SD_Keeloq.pm: new module for Keeloq devices
