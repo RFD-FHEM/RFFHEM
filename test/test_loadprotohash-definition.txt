@@ -1,15 +1,16 @@
 defmod test_loadprotohash UnitTest dummyDuino 
 (
  {
+    plan tests => 3;
     my %ret= SIGNALduino_LoadProtocolHash("dummy.hash");
     ok(exists($ret{error}),"check wrong filename");
-
+    
     %ret= SIGNALduino_LoadProtocolHash("$attr{global}{modpath}/FHEM/lib/test_loadprotohash-ok.pm");
     is($ret{error},undef,"check filename and syntax ok ");
-    
+	    
     %ret= SIGNALduino_LoadProtocolHash("$attr{global}{modpath}/FHEM/lib/test_loadprotohash-nok.pm");
     ok(exists($ret{error}),"check filename and syntax not ok "); }
 
-	CommandReload(undef,"00_SIGNALduino.pm");
-	SIGNALduino_IdList("x:$target","","","");  
+    CommandReload(undef,"00_SIGNALduino.pm");
+    SIGNALduino_IdList("x:$target","","","");  
 );
