@@ -1,4 +1,6 @@
-(
+package SD_Protocols;
+{ 
+	my %signalduino_protocols = (
     "9999"    => 
         {
             name			=> 'Unittest MS Protocol',		
@@ -7,4 +9,6 @@
         },
 		
  
-);
+	);
+	sub getProtocolList	{	return \%signalduino_protocols;	}
+}

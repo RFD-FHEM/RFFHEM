@@ -29,7 +29,7 @@ eval "use Time::HiRes qw(gettimeofday);1" ;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.4.0-dev_18.02",
+	SDUINO_VERSION            => "v3.4.0-dev_25.02",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -252,7 +252,7 @@ SIGNALduino_Initialize($)
   
   #ours %attr{};
 
-  %ProtocolListSIGNALduino = SIGNALduino_LoadProtocolHash("$attr{global}{modpath}/FHEM/lib/signalduino_protocols.hash");
+  %ProtocolListSIGNALduino = SIGNALduino_LoadProtocolHash("$attr{global}{modpath}/FHEM/lib/signalduino_protocols.pm");
   if (exists($ProtocolListSIGNALduino{error})  ) {
   	Log3 "SIGNALduino", 1, "Error loading Protocol Hash. Module is in inoperable mode error message:($ProtocolListSIGNALduino{error})";
   	delete($ProtocolListSIGNALduino{error});
@@ -275,25 +275,19 @@ our $FW_detail;
 # First Parameter is for filename (full or relativ path) to be loaded
 #
 # returns a hash with protocols if loaded without error. Returns a hash with {eror} => errormessage if there was an error
-
-sub SIGNALduino_LoadProtocolHash($)
-{
 	
+sub SIGNALduino_LoadProtocolHash($)
+{	
 	if (! -e $_[0]) {
 		return %{ {"error" => "File does not exsits"}};
 	}
-	
-	my $protocol_data = do {
-	open my $fh, '<', $_[0] ;
-		local $/; # Undefine $/ for this scope...
-   		<$fh>;    # so <> slurps up the entire file
-	};
-	
-	my %evalret= eval $protocol_data ;
-	if (!%evalret) {
-		return %{ {"error" => $@}};
-	} 
-	return %evalret;
+	use Symbol 'delete_package';
+	delete_package 'SD_Protocols';
+	delete($INC{$_[0]});
+	if(  ! eval { require "$_[0]"; 1 }  ) {
+		return 	%{ {"error" => $@}};
+	}	
+	return  %{SD_Protocols->getProtocolList};
 }
 
 
@@ -369,6 +363,7 @@ SIGNALduino_Define($$)
   $hash->{LASTDMSG} = "nothing";
   $hash->{TIME}=time();
   $hash->{versionmodul} = SDUINO_VERSION;
+  $hash->{versionProtocols} =SD_Protocols->VERSION();
   #notifyRegexpChanged($hash,"^$name$:^opened\$");  # Auf das Event opened der eigenen Definition reagieren
   #notifyRegexpChanged($hash,"sduino:opened");  # Auf das Event opened der eigenen Definition reagieren
   #$hash->{NOTIFYDEV}="$name";
