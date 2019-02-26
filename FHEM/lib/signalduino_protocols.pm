@@ -1408,7 +1408,7 @@ package SD_Protocols;
 				preamble				=> 'u59#',			# Append to converted message
 				postamble				=> '',					# Append to converted message
 				#clientmodule		=> '',
-				modulematch			=> '',
+				#modulematch			=> '',
 				length_min			=> '24',
 				length_max			=> '24',
 			},
@@ -1700,7 +1700,6 @@ package SD_Protocols;
 				comment						=> 'roomthermostat (only receive)',
 				id								=> '73',
 				knownFreqs				=> '868.35',
-				developId					=> 'y',
 				one								=> [1.5,-1.5],	# 600
 				zero							=> [1,-1],			# 400
 				pause							=> [-25],
@@ -1965,7 +1964,7 @@ package SD_Protocols;
 							# https://github.com/RFD-FHEM/RFFHEM/issues/266
 							# MU;P0=-509;P1=474;P2=-260;P3=228;P4=718;P5=-745;D=01212303030303012301230123012301230301212121230454545453030303012123030301230303012301212123030301212303030303030303012303012303012303012301212303030303012301230123012301230301212121212454545453030303012123030301230303012301212123030301212303030303030303;CP=3;R=46;O;
 							# MU;P0=-504;P1=481;P2=-254;P3=227;P4=723;P5=-739;P6=-1848;D=01230121212303030121230303030303030453030303012123030301230303012301212303030303030304530303030121230303012303030123012121230303012123030303030303030123030123030123030123012123030303030123012301230123012303012121212364545454530303030121230303012303030123;CP=3;R=45;O;
-							# MU;P0=7944;P1=-724;P2=742;P3=241;P4=-495;P5=483;P6=-248;D=01212121343434345656343434563434345634565656343434565634343434343434345634345634345634343434343434343434345634565634345656345634343456563421212121343434345656343434563434345634565656343434565634343434343434345634345634345634343434343434343434345634565634;CP=3;R=47;O;�
+							# MU;P0=7944;P1=-724;P2=742;P3=241;P4=-495;P5=483;P6=-248;D=01212121343434345656343434563434345634565656343434565634343434343434345634345634345634343434343434343434345634565634345656345634343456563421212121343434345656343434563434345634565656343434565634343434343434345634345634345634343434343434343434345634565634;CP=3;R=47;O;
 			{
 				name					=> 'TFA 30.3222.02',
 				comment				=> 'Combisensor for Weatherstation TFA 35.1140.01',
@@ -2042,7 +2041,7 @@ package SD_Protocols;
 				sync					=> [1,-10],				# this is a end marker, but we use this as a start marker
 				pause					=> [-40],
 				clockabs			=> 400,						# ca 400us
-				#reconstructBit			=> '1',
+				reconstructBit			=> '1',
 				format				=> 'twostate',
 				preamble			=> 'P87#',				# prepend to converted message
 				clientmodule	=> 'SD_Keeloq',
@@ -2141,7 +2140,7 @@ package SD_Protocols;
 				length_max		=> '36',
 				clientmodule	=> 'SD_UT',
 				#modulematch	=> '^P91#.*',
-				developID 		=> 'y',
+				reconstructBit		=> '1',
 			},
 		"91.1"	=>	## Atlantic Security / Focus Security China Devices
 							# https://forum.fhem.de/index.php/topic,58397.msg878008.html#msg878008
@@ -2156,14 +2155,13 @@ package SD_Protocols;
 				zero			=> [-1,2],
 				sync			=> [-10,1],
 				clockabs		=> 400,
-				#reconstructBit		=> '1',
+				reconstructBit		=> '1',
 				format			=> 'twostate',	#
 				preamble		=> 'P91.1#',		# prepend to converted message
 				length_min		=> '32',
 				length_max		=> '36',
 				clientmodule		=> 'SD_UT',
 				#modulematch		=> '^P91.1#.*',
-				developID 		=> 'y',
 			},
 		"92"	=>	## KRINNER Lumix - LED X-MAS
 							# https://github.com/RFD-FHEM/RFFHEM/issues/452 | https://forum.fhem.de/index.php/topic,94873.msg876477.html?PHPSESSID=khp4ja64pcqa5gsf6gb63l1es5#msg876477
