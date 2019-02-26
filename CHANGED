@@ -1,3 +1,5 @@
+26.02.2019
+ signalduino_protocols.pm: set reconstructBit on ID87 + ID91 +91.1 | remove developId status ID 73
 25.02.2019
  00_SIGNALduino: change: load protocolData from another PerlModule instead of
                          a text file. Fixes update via svn 
