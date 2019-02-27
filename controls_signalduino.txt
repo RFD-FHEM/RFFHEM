@@ -25,3 +25,4 @@ MOV FHEM/14_SIGNALduino_AS.pm unused
 MOV FHEM/14_SIGNALduino_un.pm unused
 MOV FHEM/14_SIGNALduino_ID7.pm unused
 MOV FHEM/14_SIGNALduino_RSL.pm unused
+MOV FHEM/lib/signalduino_protocols.hash unused
