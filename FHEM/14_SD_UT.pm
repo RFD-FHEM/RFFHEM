@@ -52,6 +52,11 @@
 #     get sduino_dummy raw MU;;P0=-5476;;P1=592;;P2=-665;;P3=1226;;P4=-1309;;D=01232323232323232323232323412323412323414;;CP=3;;R=1;;
 #}    Send Adresse FFF funktioniert nicht 100%ig!
 ###############################################################################################################################################################################
+# - TR-502MSV (LIBRA GmbH) [LIDL] Funk-Steckdosendimmer + Schalter | transmitter TR-502MSV - receiver RC-710DX|RC-710 [Protocol 34]
+#{    nibble 0-1 -> Hauscode | nibble 3 ??? | nibble 3-4 -> Tastencode | repeats 3
+#			get sduino_dummy raw MU;;P0=-12064;;P1=717;;P2=-669;;P3=1351;;P4=-1319;;D=012323414141234123232323232323232323232323;;
+#}    get sduino_dummy raw MU;;P0=697;;P1=-1352;;P2=-679;;P3=1343;;D=01010101010231023232323232323232323232323;CP=0;R=27;;
+###############################################################################################################################################################################
 # - Remote Control Novy_840029 for Novy Pureline 6830 kitchen hood [Protocol 86] (Länge je nach Taste 12 oder 18 Bit)
 #{    0100				"novy_button"			- nicht geprüft
 #     0101				"+_button"				- i.O.
@@ -107,11 +112,11 @@
 # - Transmitter SF01 01319004 (SF01_01319004_Typ2) 433,92 MHz (BOSCH kitchen) [Protocol 86]
 #{                  iiii iiii iiii ii bbbb aa   hex
 #     ------------------------------------------------
-#     Plus:         0010 0110 0011 10 0100 00		263 90 
-#     Minus:        0010 0110 0011 10 0010 00		263 88 
-#     Licht:        0010 0110 0011 10 0110 00		263 98 
-#     Nachlüften:   0010 0110 0011 10 0001 00		263 84 
-#     Intervall:    0010 0110 0011 10 0101 00		263 94 
+#     Plus:         0010 0110 0011 10 0100 00		263 90
+#     Minus:        0010 0110 0011 10 0010 00		263 88
+#     Licht:        0010 0110 0011 10 0110 00		263 98
+#     Nachlüften:   0010 0110 0011 10 0001 00		263 84
+#     Intervall:    0010 0110 0011 10 0101 00		263 94
 #     ------------------------------------------------
 #     i - ident, b - button, a - appended
 #     get sduino_dummy raw MU;;P0=706;;P1=-160;;P2=140;;P3=-335;;P4=-664;;P5=385;;P6=-15226;;P7=248;;D=01210103045303045453030304545453030454530653030453030454530303045454530304747306530304530304545303030454545303045453065303045303045453030304545453030454530653030453030454530303045454530304545306530304530304545303030454545303045453065303045303045453030304;;CP=5;;O;;
@@ -195,7 +200,7 @@
 # - Manax | MX-RCS270 , Typ: RCS-10 | MX-RCS250 / mumbi | m-FS300 [Protocol 90] and [additionally Protocol 93] - [ONLY receive !!!]
 #{  Manax https://forum.fhem.de/index.php/topic,94327.0.html remote MANAX MX-RCS250
 #
-#		i ident | b button | ? unknown 
+#		i ident | b button | ? unknown
 #		iiii iiii iiii iiii ???? bbbb ???? ???? ?????
 #		---------------------------------------------
 #		Taste A Ein: MS;P1=274;P2=-865;P3=787;P4=-349;P5=-10168;D=15123412121212343434341212341234341212121234343434341234121212123412;CP=1;SP=5;R=46;O;m2;
@@ -299,6 +304,30 @@ my %models = (
 										"00011110" 	=> "Master_off",
 										"00010100" 	=> "Unknown_on",
 										"00000101" 	=> "Unknown_off",
+										hex_lengh		=> "5",
+										Protocol		=> "P34",
+										Typ					=> "remote"
+									},
+	"TR_502MSV" =>	{	"11101110"	=> "Ch1_on",
+										"11111111"	=> "Ch1_off",
+										"01101100" 	=> "Ch2_on",
+										"01111101" 	=> "Ch2_off",
+										"10101111" 	=> "Ch3_on",
+										"10111110" 	=> "Ch3_off",
+										"00101101" 	=> "Ch4_on",
+										"00111100" 	=> "Ch4_off",
+										"00001111" 	=> "Master_on",
+										"00011110" 	=> "Master_off",
+										"00010100" 	=> "dim_up",				# after Master on/off
+										"00000101" 	=> "dim_down",			# after Master on/off
+										"11110101"	=> "Ch1_dim_up",		# after CH1 on/off
+										"11100100"	=> "Ch1_dim_down",	# after CH1 on/off
+										"01110111"	=> "Ch2_dim_up",		# after CH2 on/off
+										"01100110"	=> "Ch2_dim_down",	# after CH2 on/off
+										"10110100"	=> "Ch3_dim_up",		# after CH3 on/off
+										"10100101"	=> "Ch3_dim_down",	# after CH3 on/off
+										"00110110"	=> "Ch4_dim_up",		# after CH4 on/off
+										"00100111"	=> "Ch4_dim_down",	# after CH4 on/off
 										hex_lengh		=> "5",
 										Protocol		=> "P34",
 										Typ					=> "remote"
@@ -440,8 +469,8 @@ sub SD_UT_Define($$) {
 		}
 	}
 
-	### [2] checks CAME_TOP_432EV & Novy_840029 & Unitec_47031 ###
-	if (($a[2] eq "CAME_TOP_432EV" || $a[2] eq "Novy_840029" || $a[2] eq "Unitec_47031") && not $a[3] =~ /^[0-9a-fA-F]{2}/s) {
+	### [2] checks CAME_TOP_432EV & Novy_840029 & Unitec_47031 & TR_502MSV ###
+	if (($a[2] eq "CAME_TOP_432EV" || $a[2] eq "Novy_840029" || $a[2] eq "Unitec_47031" || $a[2] eq "TR_502MSV") && not $a[3] =~ /^[0-9a-fA-F]{2}/s) {
 		return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short | long or not HEX (0-9 | a-f | A-F){2}";
 	}
 	### [3] checks SA_434_1_mini & QUIGG_DMV ###
@@ -530,6 +559,12 @@ sub SD_UT_Set($$$@) {
 		my $adr = sprintf( "%012b", hex($definition[1])) if ($name ne "unknown");	# argument 1 - adress to binary with 12 digits
 		$msg = $models{$model}{Protocol} . "#" . $adr;
 		$msgEnd = "P#R" . $repeats;
+	############ TR_502MSV ############
+	} elsif ($model eq "TR_502MSV" && $cmd ne "?") {
+		my @definition = split(" ", $hash->{DEF});																# split adress from def
+		my $adr = sprintf( "%08b", hex($definition[1])) if ($name ne "unknown");	# argument 1 - adress to binary with 8 digits
+		$msg = $models{$model}{Protocol} . "#" . $adr . "1111";
+		$msgEnd = "P#R" . $repeats;		
 	############ Novy_840029 ############
 	} elsif ($model eq "Novy_840029" && $cmd ne "?") {
 		my @definition = split(" ", $hash->{DEF});																# split adress from def
@@ -594,7 +629,7 @@ sub SD_UT_Set($$$@) {
 
 	if ($cmd eq "?") {
 		### create setlist ###
-		foreach my $keys (sort keys %{ $models{$model}}) {	
+		foreach my $keys (sort keys %{ $models{$model}}) {
 			if ( $keys =~ /^[0-1]{1,}/s ) {
 				$ret.= $models{$model}{$keys}.":noArg ";
 			}
@@ -673,6 +708,7 @@ sub SD_UT_Parse($$) {
 	my $sabotage;					# MD_210R
 	my $batteryState;
 	my $state = "unknown";
+	my $unknown_bits;			# unknown bits to a reading
 
 	my $deletecache = $modules{SD_UT}{defptr}{deletecache};
 	Log3 $iohash, 5, "$ioname: SD_UT device in delete cache = $deletecache" if($deletecache && $deletecache ne "-");
@@ -692,7 +728,7 @@ sub SD_UT_Parse($$) {
 			$devicedef = "Buttons_five " . $deviceCode;
 			$def = $modules{SD_UT}{defptr}{$devicedef};
 		}
-		### Unitec_47031 [P30] ###		
+		### Unitec_47031 [P30] ###
 		if (!$def && ($protocol == 30 || $protocol == 83)) {
 			$deviceCode = substr($rawData,0,2);
 			$devicedef = "Unitec_47031 " . $deviceCode;
@@ -741,6 +777,12 @@ sub SD_UT_Parse($$) {
 			$devicedef = "QUIGG_DMV " . $deviceCode;
 			$def = $modules{SD_UT}{defptr}{$devicedef};
 		}
+		### TR_502MSV [P34] ###
+		if (!$def && $protocol == 34) {
+			$deviceCode = substr($rawData,0,2);
+			$devicedef = "TR_502MSV " . $deviceCode;
+			$def = $modules{SD_UT}{defptr}{$devicedef};
+		}
 		### Remote control TEDSEN_SKX1MD [P46] ###
 		if (!$def && $protocol == 46) {
 			$deviceCode = $rawData;
@@ -755,7 +797,7 @@ sub SD_UT_Parse($$) {
 			$def = $modules{SD_UT}{defptr}{$devicedef} if (!$def);
 			$devicedef = "SF01_01319004_Typ2 " . $deviceCode if (!$def);
 			$def = $modules{SD_UT}{defptr}{$devicedef} if (!$def);
-		} 
+		}
 	}
 
 	if ($hlen == 8 && !$def && $protocol == 92) {
@@ -792,7 +834,7 @@ sub SD_UT_Parse($$) {
 				Log3 $iohash, 1, "SD_UT Please report maintainer. Your model from Atlantic Security are unknown! rawData=$rawData";
 				return "";
 			}
-		
+
 			$deviceTyp = $models{$model}{Typ};
 			$model = "$model";
 			$deviceCode = substr($rawData,0,6);
@@ -802,14 +844,14 @@ sub SD_UT_Parse($$) {
 
 			Log3 $iohash, 4, "$ioname: SD_UT device $model from category $deviceTyp with code $deviceCode are ready to decode";
 		}
-		
+
 		### Manax MX-RCS250 [P90] ###
 		if (!$def && $protocol == 90) {
 			$deviceCode = substr($rawData,0,4);
 			$devicedef = "Manax " . $deviceCode;
 			$def = $modules{SD_UT}{defptr}{$devicedef};
 		}
-		
+
 		### ESTO KL_RF01 [P93] ###
 		if (!$def && $protocol == 93 || $protocol == 90) {
 			$deviceCode = substr($rawData,0,4);
@@ -817,7 +859,7 @@ sub SD_UT_Parse($$) {
 			$def = $modules{SD_UT}{defptr}{$devicedef};
 		}
 	}
-	
+
 	if ($hlen == 11 && $protocol == 69) {
 		### Remote control Hoermann HS1-868-BS [P69] ###
 		$deviceCode = substr($rawData,2,9);
@@ -835,7 +877,7 @@ sub SD_UT_Parse($$) {
 		$devicedef = "LED_XM21_0 " . $deviceCode;
 		$def = $modules{SD_UT}{defptr}{$devicedef};
 	}
-	
+
 	### unknown ###
 	$devicedef = "unknown" if(!$def);
 	$def = $modules{SD_UT}{defptr}{$devicedef} if(!$def);
@@ -902,7 +944,7 @@ sub SD_UT_Parse($$) {
 		$state = substr($bitData,11,1);		# muss noch 100% verifiziert werden !!!
 
 		## deviceCode conversion for User in ON or OFF ##
-		$deviceCode = substr($bitData,0,8);		
+		$deviceCode = substr($bitData,0,8);
 		my $deviceCodeUser = $deviceCode;
 		$deviceCodeUser =~ s/1/on|/g;
 		$deviceCodeUser =~ s/0/off|/g;
@@ -940,6 +982,11 @@ sub SD_UT_Parse($$) {
 	} elsif ($model eq "QUIGG_DMV" && $protocol == 34) {
 		$state = substr($bitData,12,8);
 		$deviceCode = substr($bitData,0,12);
+	############ TR_502MSV ############ Protocol 34 ############
+	} elsif ($model eq "TR_502MSV" && $protocol == 34) {
+		$state = substr($bitData,12,8);
+		$deviceCode = substr($bitData,0,8);
+		$unknown_bits = substr($bitData,8,4);
 	############ Novy_840029 ############ Protocol 86 ############
 	} elsif ($model eq "Novy_840029" && ($protocol == 86 || $protocol == 81)) {
 		if ($hlen == 3) {		# 12 Bit [3]
@@ -984,11 +1031,11 @@ sub SD_UT_Parse($$) {
 		$contact = substr($bitData,25,1);
 		$batteryState = substr($bitData,26,1);		# muss noch 100% verifiziert werden  bei all typs !!!
 		$keepalive = substr($bitData,27,1);				# muss noch 100% verifiziert werden  bei all typs !!!
-		
+
 		($batteryState) = @_ = ('ok', 'warning')[$batteryState];
 		($keepalive) = @_ = ('event', 'periodically')[$keepalive];
 		($sabotage) = @_ = ('closed', 'open')[$sabotage];
-		
+
 		if ($model eq "MD_210R") {
 			($contact) = @_ = ('closed', 'open')[$contact];
 			if ($sabotage eq "closed" && $contact eq "closed") {
@@ -1012,7 +1059,7 @@ sub SD_UT_Parse($$) {
 		## Check fixed bits
 		my $unknown1 = substr($bitData,16,4);		# ?
 		my $unknown2 = substr($bitData,24,12);	# ?
-		
+
 		$state = substr($bitData,20,4);
 		$deviceCode = substr($bitData,0,16);
 	} elsif ($model eq "KL_RF01" && $protocol == 93) {
@@ -1020,7 +1067,7 @@ sub SD_UT_Parse($$) {
 		## Check fixed bits
 		my $unknown1 = substr($bitData,20,4);		# ?
 		my $unknown2 = substr($bitData,28,4);		# ?
-		
+
 		$state = substr($bitData,16,4);
 		my $state_invers = substr($bitData,24,4);
 		$deviceCode = substr($bitData,0,16);
@@ -1044,7 +1091,7 @@ sub SD_UT_Parse($$) {
 
 	if ($models{$model}{Typ} eq "remote" && ($model ne "SA_434_1_mini" || $model ne "HS1_868_BS")) {
 		### identify state bits to value from hash ###
-		foreach my $keys (sort keys %{ $models{$model}}) {	
+		foreach my $keys (sort keys %{ $models{$model}}) {
 			if ($keys eq $state) {
 				$state = $models{$model}{$keys};
 				Log3 $name, 5, "$ioname: SD_UT_Parse devicedef=$devicedef attr_model=$model typ=".$models{$model}{Typ}." key=".$models{$model}{$keys}." (state loop)";
@@ -1055,6 +1102,7 @@ sub SD_UT_Parse($$) {
 
 	readingsBeginUpdate($hash);
 	readingsBulkUpdate($hash, "deviceCode", $deviceCode, 0) if (defined($deviceCode) && $models{$model}{Typ} eq "remote");
+	readingsBulkUpdate($hash, "unknown_bits", $unknown_bits, 0) if (defined($unknown_bits) && $models{$model}{Typ} eq "remote");
 	readingsBulkUpdate($hash, "contact", $contact) if (defined($contact) && ($model eq "MD_210R" || $model eq "MD_2018R" || $model eq "MD_2003R"));
 	readingsBulkUpdate($hash, "batteryState", $batteryState) if (defined($batteryState));
 	readingsBulkUpdate($hash, "deviceTyp", $deviceTyp,0) if (defined($deviceTyp) && ($model eq "MD_210R" || $model eq "MD_2018R" || $model eq "MD_2003R"));
@@ -1105,7 +1153,7 @@ sub SD_UT_Attr(@) {
 				readingsSingleUpdate($hash, "state", " Please define your model with attributes! ", 0);
 			}
 
-			foreach my $keys (sort keys %models) {	
+			foreach my $keys (sort keys %models) {
 				if($keys eq $attrValue) {
 					$attr{$name}{model}	= $attrValue;				# set new model
 					$bitData = InternalVal($name, "bitMSG", "-");
@@ -1142,6 +1190,11 @@ sub SD_UT_Attr(@) {
 			} elsif ($attrName eq "model" && $attrValue eq "QUIGG_DMV") {
 				$deviceCode = substr($bitData,0,12);
 				$deviceCode = sprintf("%03X", oct( "0b$deviceCode" ) );
+				$devicename = $devicemodel."_".$deviceCode;
+			############ TR_502MSV ############
+			} elsif ($attrName eq "model" && $attrValue eq "TR_502MSV") {
+				$deviceCode = substr($bitData,0,8);
+				$deviceCode = sprintf("%02X", oct( "0b$deviceCode" ) );
 				$devicename = $devicemodel."_".$deviceCode;
 			############ Novy_840029 ############
 			} elsif ($attrName eq "model" && $attrValue eq "Novy_840029") {
@@ -1247,7 +1300,7 @@ sub SD_UT_Attr(@) {
 <ul>The module SD_UT is a universal module of SIGNALduino for devices or sensors.<br>
 	After the first creation of the device <code><b>unknown_please_select_model</b></code>, the user must define the device himself via the <code>model</code> attribute.<br>
 	If the device is not supported yet, bit data can be collected with the unknown_please_select_model device.<br><br>
-	<i><u><b>Note:</b></u></i> As soon as the attribute model of a defined device is changed or deleted, the module re-creates a device of the selected type, and when a new message is run, the current device is deleted. 
+	<i><u><b>Note:</b></u></i> As soon as the attribute model of a defined device is changed or deleted, the module re-creates a device of the selected type, and when a new message is run, the current device is deleted.
 	Devices of <u>the same or different type with the same deviceCode will result in errors</u>. PLEASE use different <code>deviceCode</code>.<br><br>
 	 <u>The following devices are supported:</u><br>
 	 <ul> - Atlantic Security sensors&nbsp;&nbsp;&nbsp;<small>(module model: MD-2003R, MD-2018R,MD-210R | Protokoll 91|91.1)</small><br>
@@ -1260,6 +1313,7 @@ sub SD_UT_Attr(@) {
 	 <ul> - Hoermann HSM4&nbsp;&nbsp;&nbsp;<small>(module model: HSM4 | protocol 69)</small></ul>
 	 <ul> - Krinner LUMIX X-Mas light string&nbsp;&nbsp;&nbsp;<small>(module model: Krinner_LUMIX | protocol 92)</small></ul>
 	 <ul> - LED_XM21_0 X-Mas light string&nbsp;&nbsp;&nbsp;<small>(module model: LED_XM21_0 | protocol 76)</small></ul>
+	 <ul> - LIBRA TR-502MSV (LIDL)&nbsp;&nbsp;&nbsp;<small>(module model: TR_502MSV | protocol 34)</small></ul>
 	 <ul> - Manax RCS250 <b>ONLY RECEIVE!</b>&nbsp;&nbsp;&nbsp;<small>(module model: Manax | protocol 90)</small></ul>
 	 <ul> - NEFF or Refsta Topdraft (Tecnowind) kitchen hood&nbsp;&nbsp;&nbsp;<small>(module model: SF01_01319004 | protocol 86)</small></ul>
 	 <ul> - Novy Pureline 6830 kitchen hood&nbsp;&nbsp;&nbsp;<small>(module model: Novy_840029 | protocol 86)</small></ul>
@@ -1327,7 +1381,7 @@ sub SD_UT_Attr(@) {
 		<li>brightness_plus<br>
 		button + on the remote</li>
 	</ul><br>
-	
+
 		<ul><u>ESTO KL_RF01</u></ul>
 	<ul><a name="on"></a>
 		<li>on<br>
@@ -1365,7 +1419,7 @@ sub SD_UT_Attr(@) {
 		<li>night_mode<br>
 		button moon on the remote</li>
 	</ul><br>
-	
+
 	<ul><u>LED_XM21_0 light string</u></ul>
 	<ul><a name="on"></a>
 		<li>on<br>
@@ -1475,13 +1529,13 @@ sub SD_UT_Attr(@) {
 	<ul><a name="model"></a>
 		<li>model<br>
 		The attribute indicates the model type of your device.<br>
-		(unknown, Buttons_five, CAME_TOP_432EV, Chilitec_22640, KL_RF01, HS1-868-BS, HSM4, QUIGG_DMV, LED_XM21_0, Manax, Novy_840029, RH787T, SA_434_1_mini, SF01_01319004, TEDSEN_SKX1MD, Unitec_47031)</li>
+		(unknown, Buttons_five, CAME_TOP_432EV, Chilitec_22640, KL_RF01, HS1-868-BS, HSM4, QUIGG_DMV, LED_XM21_0, Manax, Novy_840029, RH787T, SA_434_1_mini, SF01_01319004, TEDSEN_SKX1MD, TR_502MSV, Unitec_47031)</li>
 	</ul><br>
 	<ul><li><a name="repeats">repeats</a><br>
 	This attribute can be used to adjust how many repetitions are sent. Default is 5.</li></ul><br>
 
 	<b><i>Generated readings of the models</i></b><br>
-	<ul><u>Buttons_five | CAME_TOP_432EV | Chilitec_22640 | HSM4 | KL_RF01 | LED_XM21_0 | Manax | Novy_840029 | QUIGG_DMV | SF01_01319004 | SF01_01319004_Typ2 | RH787T</u><br>
+	<ul><u>Buttons_five | CAME_TOP_432EV | Chilitec_22640 | HSM4 | KL_RF01 | LED_XM21_0 | Manax | Novy_840029 | QUIGG_DMV | RH787T | SF01_01319004 | SF01_01319004_Typ2 | TR_502MSV</u><br>
 	<li>deviceCode<br>
 	Device code of the system</li>
 	<li>LastAction<br>
@@ -1525,7 +1579,7 @@ sub SD_UT_Attr(@) {
 <ul>Das Modul SD_UT ist ein Universalmodul vom SIGNALduino f&uuml;r Ger&auml;te oder Sensoren.<br>
 	Nach dem ersten anlegen des Ger&auml;tes <code><b>unknown_please_select_model</b></code> muss der User das Ger&auml;t selber definieren via dem Attribut <code>model</code>.<br>
 	Bei noch nicht unterst&uuml;tzen Ger&auml;ten k&ouml;nnen mit dem <code><b>unknown_please_select_model</b></code> Ger&auml;t Bitdaten gesammelt werden.<br><br>
-	<i><u><b>Hinweis:</b></u></i> Sobald das Attribut model eines definieren Ger&auml;tes verstellt oder gel&ouml;scht wird, so legt das Modul ein Ger&auml;t des gew&auml;hlten Typs neu an und mit Durchlauf einer neuen Nachricht wird das aktuelle Ger&auml;t gel&ouml;scht. 
+	<i><u><b>Hinweis:</b></u></i> Sobald das Attribut model eines definieren Ger&auml;tes verstellt oder gel&ouml;scht wird, so legt das Modul ein Ger&auml;t des gew&auml;hlten Typs neu an und mit Durchlauf einer neuen Nachricht wird das aktuelle Ger&auml;t gel&ouml;scht.
 	Das betreiben von Ger&auml;ten des <u>gleichen oder unterschiedliches Typs mit gleichem <code>deviceCode</code> f&uuml;hrt zu Fehlern</u>. BITTE achte stets auf einen unterschiedlichen <code>deviceCode</code>.<br><br>
 	 <u>Es werden bisher folgende Ger&auml;te unterst&uuml;tzt:</u><br>
 	 <ul> - Atlantic Security Sensoren&nbsp;&nbsp;&nbsp;<small>(Modulmodel: MD-2003R, MD-2018R,MD-210R | Protokoll 91|91.1)</small><br>
@@ -1538,6 +1592,7 @@ sub SD_UT_Attr(@) {
 	 <ul> - Hoermann HSM4&nbsp;&nbsp;&nbsp;<small>(Modulmodel: HSM4 | Protokoll 69)</small></ul>
 	 <ul> - Krinner LUMIX Christbaumkerzen&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Krinner_LUMIX | Protokol 92)</small></ul>
 	 <ul> - LED_XM21_0 Christbaumkerzen&nbsp;&nbsp;&nbsp;<small>(Modulmodel: LED_XM21_0 | Protokol 76)</small></ul>
+	 <ul> - LIBRA TR-502MSV (LIDL)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: TR_502MSV | Protokol 34)</small></ul>
 	 <ul> - Manax RCS250 <b>NUR EMPFANG!</b>&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Manax | Protokoll 90)</small></ul>
 	 <ul> - NEFF oder Refsta Topdraft (Tecnowind) Dunstabzugshaube&nbsp;&nbsp;&nbsp;<small>(Modulmodel: SF01_01319004 | Protokoll 86)</small></ul>
 	 <ul> - Novy Pureline 6830 Dunstabzugshaube&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Novy_840029 | Protokoll 86)</small></ul>
@@ -1607,7 +1662,7 @@ sub SD_UT_Attr(@) {
 		<li>brightness_plus<br>
 		Taste + auf der Fernbedienung</li>
 	</ul><br>
-	
+
 	<ul><u>ESTO KL_RF01</u></ul>
 	<ul><a name="on"></a>
 		<li>on<br>
@@ -1645,7 +1700,7 @@ sub SD_UT_Attr(@) {
 		<li>night_mode<br>
 		Taste MOND auf der Fernbedienung</li>
 	</ul><br>
-	
+
 	<ul><u>LED_XM21_0 Christbaumkerzen</u></ul>
 	<ul><a name="on"></a>
 		<li>on<br>
@@ -1754,13 +1809,13 @@ sub SD_UT_Attr(@) {
 	<ul><li><a href="#IODev">IODev</a></li></ul><br>
 	<ul><li><a name="model">model</a><br>
 		Das Attribut bezeichnet den Modelltyp Ihres Ger&auml;tes.<br>
-		(unknown, Buttons_five, CAME_TOP_432EV, Chilitec_22640, KL_RF01, HS1-868-BS, HSM4, QUIGG_DMV, RH787T, LED_XM21_0, Manax, Novy_840029, SA_434_1_mini, SF01_01319004, TEDSEN_SKX1MD, Unitec_47031)</li><a name=" "></a>
+		(unknown, Buttons_five, CAME_TOP_432EV, Chilitec_22640, KL_RF01, HS1-868-BS, HSM4, QUIGG_DMV, RH787T, LED_XM21_0, Manax, Novy_840029, SA_434_1_mini, SF01_01319004, TEDSEN_SKX1MD, TR_502MSV, Unitec_47031)</li><a name=" "></a>
 	</ul><br>
 	<ul><li><a name="repeats">repeats</a><br>
 	Mit diesem Attribut kann angepasst werden, wie viele Wiederholungen sendet werden. Standard ist 5.</li></ul><br>
 
 	<b><i>Generierte Readings der Modelle</i></b><br>
-	<ul><u>Buttons_five | CAME_TOP_432EV | Chilitec_22640 | HSM4 | KL_RF01 | LED_XM21_0 | Manax | Novy_840029 | QUIGG_DMV | SF01_01319004 | SF01_01319004_Typ2 | RH787T</u><br>
+	<ul><u>Buttons_five | CAME_TOP_432EV | Chilitec_22640 | HSM4 | KL_RF01 | LED_XM21_0 | Manax | Novy_840029 | QUIGG_DMV | RH787T | SF01_01319004 | SF01_01319004_Typ2 | TR_502MSV</u><br>
 	<li>deviceCode<br>
 	Ger&auml;teCode des Systemes</li>
 	<li>LastAction<br>
