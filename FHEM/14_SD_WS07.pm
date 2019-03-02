@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 14_SD_WS07.pm 9346 2017-12-04 17:00:00Z v3.3.3 $
+# $Id: 14_SD_WS07.pm 18673 2019-02-20 20:52:45Z Sidey $
 # 
 # The purpose of this module is to support serval eurochron
 # weather sensors like eas8007 which use the same protocol
@@ -44,7 +44,9 @@ SD_WS07_Initialize($)
   $hash->{AttrFn}    = "SD_WS07_Attr";
   $hash->{AttrList}  = "IODev do_not_notify:1,0 ignore:0,1 showtime:1,0 " .
                        "negation-batt:no,yes ".
-                        "$readingFnAttributes ";
+                       "max-deviation-temp:1,2,3,4,5,6,7,8,9,10,15,20,25,30,35,40,45,50 ".
+                       "offset-temp ".
+                       "$readingFnAttributes ";
   $hash->{AutoCreate} =
         {
 			"SD_WS07_TH_.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,",  autocreateThreshold => "2:180"},
@@ -90,12 +92,7 @@ sub
 SD_WS07_Parse($$)
 {
   my ($iohash, $msg) = @_;
-  #my $rawData = substr($msg, 2);
-  my (undef ,$rawData, $rssi) = split("#",$msg);	
-  if (defined($rssi)) {	
-	$rssi = hex(substr($rssi,1));	
-	$rssi = ($rssi>=128 ? (($rssi-256)/2-74) : ($rssi/2-74));	
-  }
+  my (undef ,$rawData) = split("#",$msg);
   #$protocol=~ s/^P(\d+)/$1/; # extract protocol
 
   my $model = "SD_WS07";
@@ -104,21 +101,17 @@ SD_WS07_Parse($$)
   my $blen = $hlen * 4;
   my $bitData = unpack("B$blen", pack("H$hlen", $rawData)); 
 
-  if (defined($rssi)) {
-	Log3 $iohash, 4, "$iohash->{NAME}: SD_WS07_Parse $model ($msg) length: $hlen RSSI = $rssi";
-  } else {
 	Log3 $iohash, 4, "$iohash->{NAME}: SD_WS07_Parse $model ($msg) length: $hlen";
-  }
   
-  #      4    8  9    12            24    28     36
+  # 0    4    8  9    12            24    28       36
   # 0011 0110 1  010  000100000010  1111  00111000 0000  eas8007
   # 0111 0010 1  010  000010111100  1111  00000000 0000  other device from anfichtn
   # 1101 0010 0  000  000000010001  1111  00101000       other device from elektron-bbs
-  # 0110 0011 1  000  000011101010  1111  00001010		 other device from HomeAuto_User SD_WS07_TH_631
-  # 1110 1011 1  000  000010111000  1111  00000000		 other device from HomeAuto_User SD_WS07_T_EB1
-  # 1100 0100 1  000  000100100010  1111  00000000		 other device from HomeAuto_User SD_WS07_T_C41
-  # 0110 0100 0  000  000100001110  1111  00101010		 hama TS36E from HomeAuto_User - Bat bit identified
-  #      ID  Bat CHN       TMP      ??   HUM
+  # 0110 0011 1  000  000011101010  1111  00001010       other device from HomeAuto_User SD_WS07_TH_631
+  # 1110 1011 1  000  000010111000  1111  00000000       other device from HomeAuto_User SD_WS07_T_EB1
+  # 1100 0100 1  000  000100100010  1111  00000000       other device from HomeAuto_User SD_WS07_T_C41
+  # 0110 0100 0  000  000100001110  1111  00101010       hama TS36E from HomeAuto_User - Bat bit identified
+  #     ID   Bat CHN       TMP       ??      HUM
   
 	# Modelliste
 	my %models = (
@@ -154,24 +147,21 @@ SD_WS07_Parse($$)
 	}
     
 	### Model specific attributes
-	if ($models{$modelkey} eq "T") {
-		addToDevAttrList($model."_".$deviceCode,"max-deviation-temp:1,2,3,4,5,6,7,8,9,10,15,20,25,30,35,40,45,50 ");
-		addToDevAttrList($model."_".$deviceCode,"offset-temp:slider,-25,1.0,25");
-	} elsif ($models{$modelkey} eq "TH") {
-		addToDevAttrList($model."_".$deviceCode,"max-deviation-temp:1,2,3,4,5,6,7,8,9,10,15,20,25,30,35,40,45,50 ");
+	if ($models{$modelkey} eq "TH") {
 		addToDevAttrList($model."_".$deviceCode,"max-deviation-hum:1,2,3,4,5,6,7,8,9,10,15,20,25,30,35,40,45,50 ");
-		addToDevAttrList($model."_".$deviceCode,"offset-temp:slider,-25,1.0,25");
-		addToDevAttrList($model."_".$deviceCode,"offset-hum:slider,-50,1.0,50");
+		addToDevAttrList($model."_".$deviceCode,"offset-hum");
 	}
     #print Dumper($modules{SD_WS07}{defptr});
     
-    my $def = $modules{SD_WS07}{defptr}{$iohash->{NAME} . "." . $deviceCode};
+    my $def = $modules{SD_WS07}{defptr}{$deviceCode};	# test for already defined devices use wrong naming convention
+    $deviceCode = $model . "_" . $deviceCode;
+    $def = $modules{SD_WS07}{defptr}{$iohash->{NAME} . "." . $deviceCode} if(!$def);
     $def = $modules{SD_WS07}{defptr}{$deviceCode} if(!$def);
 
 	my $device = $model."_".$deviceCode;
     if(!$def) {
 		Log3 $iohash, 1, "$iohash->{NAME}: UNDEFINED Sensor $model detected, code $deviceCode";
-		return "UNDEFINED $device SD_WS07 $deviceCode";
+			return "UNDEFINED $deviceCode SD_WS07 $deviceCode";
     }
         #Log3 $iohash, 3, 'SD_WS07: ' . $def->{NAME} . ' ' . $id;
 	
@@ -261,17 +251,11 @@ SD_WS07_Parse($$)
     my $state = "T: $temp". ($hum>0 ? " H: $hum":"");
     
     readingsBeginUpdate($hash);
-	readingsBulkUpdate($hash, "model", $models{$modelkey});
+    #readingsBulkUpdate($hash, "model", $models{$modelkey});
     readingsBulkUpdate($hash, "state", $state);
     readingsBulkUpdate($hash, "temperature", $temp)  if ($temp ne"");
     readingsBulkUpdate($hash, "humidity", $hum)  if ($models{$modelkey} eq "TH");
-        #my $battery = ReadingsVal($name, "battery", "unknown");
-        #if ($bat ne $battery) {
-
-           readingsBulkUpdate($hash, "battery", $bat);
-           readingsBulkUpdate($hash, "batteryState", $bat);
-           
-        #}
+    readingsBulkUpdate($hash, "batteryState", $bat);
     readingsBulkUpdate($hash, "channel", $channel) if ($channel ne "");
     readingsEndUpdate($hash, 1); # Notify is done by Dispatch
 
@@ -279,9 +263,6 @@ SD_WS07_Parse($$)
 	#delete $hash->{READINGS}{"humidity"} if($hash->{READINGS} && $models{$modelkey} eq "T");
 	delete $hash->{READINGS}{humidity} if($hash->{READINGS}{humidity} && $models{$modelkey} eq "T");
 	
-   if(defined($rssi)) {
-		$hash->{RSSI} = $rssi;
-   }
 	return $name;
 }
 
@@ -305,7 +286,7 @@ sub SD_WS07_Attr(@)
 
 
 =pod
-=item summary    Supports weather sensors protocl 7 from SIGNALduino
+=item summary    Supports weather sensors protocol 7 from SIGNALduino
 =item summary_DE Unterst&uumltzt Wettersensoren mit Protokol 7 vom SIGNALduino
 =begin html
 
@@ -326,7 +307,7 @@ sub SD_WS07_Attr(@)
   <a name="SD_WS07_Define"></a>
   <b>Define</b> 
   <ul>The received devices are created automatically.<br>
-  The ID of the defice is the cannel or, if the longid attribute is specified, it is a combination of channel and some random generated bits at powering the sensor and the channel.<br>
+  The ID of the device is the channel or, if the longid attribute is specified, it is a combination of channel and some random generated bits at powering the sensor and the channel.<br>
   If you want to use more sensors, than channels available, you can use the longid option to differentiate them.
   </ul>
   <br>
@@ -337,7 +318,7 @@ sub SD_WS07_Attr(@)
   	 <li>state (T: H:)</li>
      <li>temperature (&deg;C)</li>
      <li>humidity: (the humidity 1-100)</li>
-     <li>battery: (low or ok)</li>
+     <li>batteryState: (low or ok)</li>
      <li>channel: (the channelnumberf)</li>
   </ul>
   <br>
@@ -345,11 +326,9 @@ sub SD_WS07_Attr(@)
   <ul>
     <li>offset-temp<br>
        This offset can be used to correct the temperature. For example: 10 means, that the temperature is 10 &deg;C higher.<br>
-	   Values from -25 to +25 can be set via Slider.
     </li>
     <li>offset-hum<br>
        Works the same way as offset-temp.<br>
-	   Values from -50 to +50 can be set via Slider.
     </li>
     <li><a href="#do_not_notify">do_not_notify</a></li>
     <li><a href="#ignore">ignore</a></li>
@@ -419,7 +398,7 @@ sub SD_WS07_Attr(@)
      <li>state: (T: H:)</li>
      <li>temperature: (&deg;C)</li>
      <li>humidity: (Luftfeuchte (1-100)</li>
-     <li>battery: (low oder ok)</li>
+     <li>batteryState: (low oder ok)</li>
      <li>channel: (Der Sensor Kanal)</li>
   </ul>
   <br>
@@ -427,11 +406,9 @@ sub SD_WS07_Attr(@)
   <ul>
     <li>offset-temp<br>
        Damit kann die Temperatur korrigiert werden. z.B. mit 10 wird eine um 10 Grad h&ouml;here Temperatur angezeigt.<br>
-	   Werte von -25 bis +25 k&ouml;nnen via Slider eingestellt werden.
     </li>
     <li>offset-hum<br>
        Damit kann die Luftfeuchtigkeit korrigiert werden.<br>
-	   Werte von -50 bis +50 k&ouml;nnen via Slider eingestellt werden.
     </li>
     <li><a href="#do_not_notify">do_not_notify</a></li>
     <li><a href="#ignore">ignore</a></li>
