@@ -1,4 +1,8 @@
 02.03.2019
+ 14_SD_WS07.pm: fix bug autocreate define
+                remove rssi
+                remove slider for offsets
+                remove reading battery
 27.02.2019
  14_SD_UT.pm: added model LIBRA TR-502MSV [receiver RC-710DX|RC-710] (LIDL)
 26.02.2019
