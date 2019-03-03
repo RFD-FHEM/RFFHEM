@@ -153,9 +153,8 @@ SD_WS07_Parse($$)
 	}
     #print Dumper($modules{SD_WS07}{defptr});
     
-    my $def = $modules{SD_WS07}{defptr}{$deviceCode};	# test for already defined devices use wrong naming convention
     $deviceCode = $model . "_" . $deviceCode;
-    $def = $modules{SD_WS07}{defptr}{$iohash->{NAME} . "." . $deviceCode} if(!$def);
+    my $def = $modules{SD_WS07}{defptr}{$deviceCode};	# test for already defined devices
     $def = $modules{SD_WS07}{defptr}{$deviceCode} if(!$def);
 
 	my $device = $model."_".$deviceCode;
@@ -307,7 +306,7 @@ sub SD_WS07_Attr(@)
   <a name="SD_WS07_Define"></a>
   <b>Define</b> 
   <ul>The received devices are created automatically.<br>
-  The ID of the device is the channel or, if the longid attribute is specified, it is a combination of channel and some random generated bits at powering the sensor and the channel.<br>
+  The ID of the device is the channel, or if the longid attribute is specified, it is a combination of some random generated bits at powering the sensor and the channel.<br>
   If you want to use more sensors, than channels available, you can use the longid option to differentiate them.
   </ul>
   <br>
