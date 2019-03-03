@@ -58,10 +58,13 @@
 # https://forum.fhem.de/index.php/topic,58396.975.html | https://github.com/RFD-FHEM/RFFHEM
 ###########################################################################################################################################
 
-package SD_Protocols;
+package lib::SD_PrococolData;
 { 
-	our $VERSION = '1.00';
-	my %signalduino_protocols = (
+	use strict;
+	use warnings;
+	
+	our $VERSION = '1.01';
+	our %protocols = (
 		"0"	=>	## various weather sensors (500 | 9100)
 						# CUL_TCM97001 Typ - Prologue
 						# MS;P0=-4152;P1=643;P2=-2068;P3=-9066;D=1310121210121212101210101212121212121212121212121010121012121212121012101212;CP=1;SP=3;R=220;O;m2;
@@ -2208,5 +2211,7 @@ package SD_Protocols;
 			},
 	);
 	sub getProtocolList	{	
-		return \%signalduino_protocols;	}
+		return \%protocols;	
+	}
+
 }
