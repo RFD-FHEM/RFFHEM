@@ -1,6 +1,10 @@
-package SD_Protocols;
-{ 
-	my %signalduino_protocols = (
+package lib::SD_PrococolData;
+{
+	use strict;
+	use warnings;
+	use diagnostics;
+	
+	our %protocols = (
 		"9999"	=> 
 			{
 				name			=> 'Unittest Protocol with developId=m',
@@ -203,7 +207,9 @@ package SD_Protocols;
 		},
 		
 	);
-	sub getProtocolList	{			
-		return \%signalduino_protocols;	
+	no warnings 'redefine';
+	sub getProtocolList	{	
+		return \%protocols;	
 	}
-}
+ 
+ }
