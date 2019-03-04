@@ -48,7 +48,7 @@ defmod test_SDWS07 UnitTest dummyDuino (
 	sleep 3;
  	subtest "Check autocreate with longid $sensorname" => sub {
  		CommandAttr(undef,"$target longids 1");
-		plan tests => 3;
+		plan tests => 4;
 
 		Dispatch($targetHash,"P7#6300C6F0B");
 	 	ok(!IsDevice($sensorname), "check sensor not created with single dispatch");
