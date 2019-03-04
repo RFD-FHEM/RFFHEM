@@ -306,7 +306,7 @@ sub SD_WS07_Attr(@)
   <a name="SD_WS07_Define"></a>
   <b>Define</b> 
   <ul>The received devices are created automatically.<br>
-  The ID of the device is the channel, or if the longid attribute is specified, it is a combination of some random generated bits at powering the sensor and the channel.<br>
+  The ID of the device is <model>_<channel> or, if the longid attribute is specified, it is <model> with a combination of channel and some random generated bits during powering the sensor.<br>
   If you want to use more sensors, than channels available, you can use the longid option to differentiate them.
   </ul>
   <br>
@@ -387,8 +387,7 @@ sub SD_WS07_Attr(@)
   <a name="SD_WS07_Define"></a>
   <b>Define</b> 
   <ul>Die empfangenen Sensoren werden automatisch angelegt.<br>
-	Die ID der angelegten Sensoren ist entweder der Kanal des Sensors, oder wenn das Attribut longid gesetzt ist, 
-	dann wird die ID aus dem Kanal und einer Reihe von Bits erzeugt, welche der Sensor beim Einschalten zufaellig vergibt.<br>
+	Die ID der angelegten Sensoren ist <model>_<channel>, oder wenn das Attribut longid gesetzt ist, <model> und eine Kombination aus Bits, welche der Sensor beim Einschalten zufaellig vergibt und dem Kanal.<br>
   </ul>
   <br>
   <a name="SD_WS07 Events"></a>
