@@ -58,7 +58,7 @@
 # https://forum.fhem.de/index.php/topic,58396.975.html | https://github.com/RFD-FHEM/RFFHEM
 ###########################################################################################################################################
 
-package lib::SD_PrococolData;
+package lib::SD_ProtocolData;
 { 
 	use strict;
 	use warnings;
