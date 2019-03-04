@@ -1,8 +1,8 @@
 defmod test_SD_Protocols UnitTest dummyDuino 
 (
  {
-	require_ok('lib::SD_Prococols'); 
-	require lib::SD_Prococols;
+	require_ok('lib::SD_Protocols'); 
+	require lib::SD_Protocols;
 
 
 	subtest 'lib SD_Prococols test sub LoadHash() ' => sub {
