@@ -686,6 +686,8 @@ sub Parse($$) {
 	} else {
 		Log3 $iohash, 4, "$ioname: SD_Keeloq_Parse Unknown device with wrong length of $hlen! (rawData=$rawData)";
 		return "";
+	}
+
 	$modules{SD_Keeloq}{defptr}{ioname} = $ioname;
 	my $def = $modules{SD_Keeloq}{defptr}{$devicedef};
 
