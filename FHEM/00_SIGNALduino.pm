@@ -21,7 +21,7 @@ eval "use JSON;1" or $missingModulSIGNALduino .= "JSON ";
 
 eval "use Scalar::Util qw(looks_like_number);1";
 eval "use Time::HiRes qw(gettimeofday);1" ;
-use lib::SD_Prococols;
+use lib::SD_Protocols;
 
 #$| = 1;		#Puffern abschalten, Hilfreich fuer PEARL WARNINGS Search
 
