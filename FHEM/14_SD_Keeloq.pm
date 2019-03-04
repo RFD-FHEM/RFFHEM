@@ -10,8 +10,8 @@
 # KeeLoq is a registered trademark of Microchip Technology Inc.
 #
 ######################################################################################################################
-# !!! ToDo´s !!!
-#		-
+# !!! notes !!! | date: 20190304
+#		- last change: fix PERL WARNING line "my $def = $modules{SD_Keeloq}{defptr}{$devicedef};"
 #		-
 ######################################################################################################################
 
@@ -683,8 +683,9 @@ sub Parse($$) {
 		$serialWithoutCh = reverse (substr ($bitData , 36 , 24));						# 24bit serial without last 4 bit ### Serial without last nibble, fix at device at every channel
 		$serialWithoutCh = sprintf ("%06s", sprintf ("%X", oct( "0b$serialWithoutCh" )));
 		$devicedef = $serialWithoutCh;
-	}
-
+	} else {
+		Log3 $iohash, 4, "$ioname: SD_Keeloq_Parse Unknown device with wrong length of $hlen! (rawData=$rawData)";
+		return "";
 	$modules{SD_Keeloq}{defptr}{ioname} = $ioname;
 	my $def = $modules{SD_Keeloq}{defptr}{$devicedef};
 

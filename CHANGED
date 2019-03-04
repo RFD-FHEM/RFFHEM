@@ -1,4 +1,6 @@
 27.02.2019
+ 14_SD_Keeloq.pm: fix PERL WARNING if hlen a other typ of device
+27.02.2019
  14_SD_UT.pm: added model LIBRA TR-502MSV [receiver RC-710DX|RC-710] (LIDL)
 26.02.2019
  signalduino_protocols.pm: set reconstructBit on ID87 + ID91 +91.1 | remove developId status ID 73
