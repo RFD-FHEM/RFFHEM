@@ -1,4 +1,4 @@
-package lib::SD_PrococolData;
+package lib::SD_ProtocolData;
 { 
 	our %protocols = (
     "9999"    => 

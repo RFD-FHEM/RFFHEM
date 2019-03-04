@@ -1,4 +1,4 @@
-package lib::SD_PrococolData;
+package lib::SD_ProtocolData;
 {
 	use strict;
 	use warnings;

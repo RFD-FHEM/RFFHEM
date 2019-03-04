@@ -1,8 +1,8 @@
 defmod test_SD_Protocols UnitTest dummyDuino 
 (
  {
-	require_ok('lib::SD_Prococols'); 
-	require lib::SD_Prococols;
+	require_ok('lib::SD_Protocols'); 
+	require lib::SD_Protocols;
 
 
 	subtest 'lib SD_Prococols test sub LoadHash() ' => sub {
@@ -18,7 +18,6 @@ defmod test_SD_Protocols UnitTest dummyDuino
 		isa_ok($ret,"HASH","valid file hashref");
 		like($ret->{9999}{name},qr/Unittest/,"valid element hashref");
 
-		$ret=lib::SD_Protocols::LoadHash("./FHEM/lib/test_loadprotohash-ok.pm");
 		is($ret->{error},undef,"valid file error check");
 		
 	};

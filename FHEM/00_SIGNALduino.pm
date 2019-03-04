@@ -21,7 +21,7 @@ eval "use JSON;1" or $missingModulSIGNALduino .= "JSON ";
 
 eval "use Scalar::Util qw(looks_like_number);1";
 eval "use Time::HiRes qw(gettimeofday);1" ;
-use lib::SD_Prococols;
+use lib::SD_Protocols;
 
 #$| = 1;		#Puffern abschalten, Hilfreich fuer PEARL WARNINGS Search
 
@@ -254,7 +254,7 @@ SIGNALduino_Initialize($)
   #our $attr;
 
   
-  %ProtocolListSIGNALduino = SIGNALduino_LoadProtocolHash("$attr{global}{modpath}/FHEM/lib/SD_PrococolData.pm");
+  %ProtocolListSIGNALduino = SIGNALduino_LoadProtocolHash("$attr{global}{modpath}/FHEM/lib/SD_ProtocolData.pm");
   if (exists($ProtocolListSIGNALduino{error})  ) {
   	Log3 "SIGNALduino", 1, "Error loading Protocol Hash. Module is in inoperable mode error message:($ProtocolListSIGNALduino{error})";
   	delete($ProtocolListSIGNALduino{error});

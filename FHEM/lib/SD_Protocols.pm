@@ -64,7 +64,7 @@ sub LoadHash
 #  $id
 sub exists($)
 {
-	return exists($lib::SD_PrococolData::protocols{$_[0]});
+	return exists($lib::SD_ProtocolData::protocols{$_[0]});
 }
 
 # - - - - - - - - - - - -
@@ -73,7 +73,7 @@ sub exists($)
 # =cut
 #  $id, $propertyname,
 sub getProtocolList()	{	
-	return \%lib::SD_PrococolData::protocols;	}
+	return \%lib::SD_ProtocolData::protocols;	}
 
 # - - - - - - - - - - - -
 #=item getKeys()
@@ -84,7 +84,7 @@ sub getProtocolList()	{
 #  $id, $propertyname,
 
 sub getKeys() {
-	return keys %lib::SD_PrococolData::protocols; }
+	return keys %lib::SD_ProtocolData::protocols; }
 
 # - - - - - - - - - - - -
 #=item checkProperty()
@@ -96,7 +96,7 @@ sub getKeys() {
 
 sub checkProperty($$;$)
 {
-	return getProperty($_[0],$_[1]) if exists($lib::SD_PrococolData::protocols{$_[0]}{$_[1]}) && defined($lib::SD_PrococolData::protocols{$_[0]}{$_[1]});
+	return getProperty($_[0],$_[1]) if exists($lib::SD_ProtocolData::protocols{$_[0]}{$_[1]}) && defined($lib::SD_ProtocolData::protocols{$_[0]}{$_[1]});
 	return $_[2]; # Will return undef if $default is not provided
 }
 
@@ -110,7 +110,7 @@ sub checkProperty($$;$)
 
 sub getProperty($$)
 {
-	return $lib::SD_PrococolData::protocols{$_[0]}{$_[1]};
+	return $lib::SD_ProtocolData::protocols{$_[0]}{$_[1]};
 }
 
 
