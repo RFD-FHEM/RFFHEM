@@ -152,17 +152,17 @@ sub UnitTest_Test_generic
 	# Disable warnings for prototype mismatch
 	$SIG{__WARN__} = sub {CORE::say $_[0] if $_[0] !~ /Prototype/};
 	
-	Log3 $name, 5, "Running now this code ".$hash->{'.testcode'} if ($hash->{'.testcode'});
+	Log3 $name, 5, "$name: Running now this code ".$hash->{'.testcode'} if ($hash->{'.testcode'});
 	
 	readingsSingleUpdate($hash, "state", "running", 1);
 	my $ret ="";
 	$ret =eval $hash->{'.testcode'} if ($hash->{'.testcode'});
 	unless ($ret) {
-		Log3 $name, 5, "return from eval was with error $@" ;
+		Log3 $name, 5, "$name: return from eval was with error $@" ;
 	}
 	if ($ret)
 	{
-		Log3 $name, 5, "Test has following result: $ret" ;
+		Log3 $name, 5, "$name: Test has following result: $ret" ;
 	}
 
 	# enable warnings for prototype mismatch
