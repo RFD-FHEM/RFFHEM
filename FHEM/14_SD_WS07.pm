@@ -153,11 +153,10 @@ SD_WS07_Parse($$)
 	}
     #print Dumper($modules{SD_WS07}{defptr});
     
+    my $def = $modules{SD_WS07}{defptr}{$deviceCode};	# test for already defined devices use wrong naming convention (only channel or longid)
     $deviceCode = $model . "_" . $deviceCode;
-    my $def = $modules{SD_WS07}{defptr}{$deviceCode};	# test for already defined devices
-    $def = $modules{SD_WS07}{defptr}{$deviceCode} if(!$def);
+    $def = $modules{SD_WS07}{defptr}{$deviceCode} if(!$def);	# test for already defined devices use normal naming convention (model_channel or model_lonid)
 
-	my $device = $model."_".$deviceCode;
     if(!$def) {
 		Log3 $iohash, 1, "$iohash->{NAME}: UNDEFINED Sensor $model detected, code $deviceCode";
 			return "UNDEFINED $deviceCode SD_WS07 $deviceCode";
