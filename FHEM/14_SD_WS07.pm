@@ -152,10 +152,20 @@ SD_WS07_Parse($$)
 		addToDevAttrList($model."_".$deviceCode,"offset-hum");
 	}
     #print Dumper($modules{SD_WS07}{defptr});
-    
-    my $def = $modules{SD_WS07}{defptr}{$deviceCode};	# test for already defined devices use wrong naming convention (only channel or longid)
+
+	my $oldDeviceCode = $deviceCode;  # temporary statement to find wrong definitions 
+	    
     $deviceCode = $model . "_" . $deviceCode;
-    $def = $modules{SD_WS07}{defptr}{$deviceCode} if(!$def);	# test for already defined devices use normal naming convention (model_channel or model_lonid)
+    my $def = $modules{SD_WS07}{defptr}{$deviceCode};	# test for already defined devices use normal naming convention (model_channel or model_lonid)
+	
+	if (!defined($def)) # temporary statement: fix wrong definition 
+	{
+    	$def = $modules{SD_WS07}{defptr}{$oldDeviceCode};	# test for already defined devices use wrong naming convention (only channel or longid)
+		if(defined($def)) {
+			Log3 $iohash,4, "$def->{NAME}: Updating decrepated DEF of this sensor. Save config is needed to avoid further messages like this.";
+   			CommandModify(undef,"$def->{NAME} $deviceCode")  
+		}
+	}
 
     if(!$def) {
 		Log3 $iohash, 1, "$iohash->{NAME}: UNDEFINED Sensor $model detected, code $deviceCode";
