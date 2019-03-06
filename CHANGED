@@ -1,3 +1,8 @@
+05.03.2019
+ 14_SD_WS07.pm: fix bug autocreate define
+                remove rssi
+                remove slider for offsets
+                remove reading battery
 12.02.2019
  00_SIGNALduino: feature: getAvailableFirmware returns only version for 
                   which a file could be found.
