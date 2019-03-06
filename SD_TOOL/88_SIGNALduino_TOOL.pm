@@ -1,5 +1,5 @@
 ######################################################################
-# $Id: 88_SIGNALduino_TOOL.pm 13115 2019-02-21 21:17:50Z HomeAuto_User $
+# $Id: 88_SIGNALduino_TOOL.pm 13115 2019-02-24 21:17:50Z HomeAuto_User $
 #
 # The file is part of the SIGNALduino project
 # see http://www.fhemwiki.de/wiki/SIGNALduino to support debugging of unknown signal data
@@ -16,13 +16,18 @@ package main;
 
 use strict;
 use warnings;
+
 use Data::Dumper qw (Dumper);
+use JSON::PP;
+
+use lib::SD_Protocols;
 
 #$| = 1;		#Puffern abschalten, Hilfreich für PEARL WARNINGS Search
 
 my %List;																								# message hash
 my $Filename_Dispatch = "SIGNALduino_TOOL_Dispatch_";		# name file to read input for dispatch
-
+my $NameDispatchSet = "Dispatch_";											# name of setlist value´s to dispatch
+my $jsonFile = "SD_ProtocolList.json";									# name of file to export / import Doc_ProtocolList
 
 ################################
 sub SIGNALduino_TOOL_Initialize($) {
@@ -64,6 +69,7 @@ sub SIGNALduino_TOOL_Define($$) {
 
 	### default value´s ###
 	$hash->{STATE} = "Defined";
+	$hash->{Version} = "2019-03-06";
 	readingsSingleUpdate($hash, "state" , "Defined" , 0);
 
 	return undef;
@@ -113,7 +119,6 @@ sub SIGNALduino_TOOL_Set($$$@) {
 	my $webCmd = AttrVal($name,"webCmd","");										# webCmd value from attr
 	my $DispatchModule = AttrVal($name,"DispatchModule","-");		# DispatchModule List
 	my $userattr = AttrVal($name,"userattr","-");								# userattr value
-	my $NameDispatchSet = "Dispatch_";													# name of setlist value´s to dispatch
 	my $NameSendSet = "Send_";																	# name of setlist value´s to send
 	my $messageNumber = AttrVal($name,"MessageNumber",0);				# MessageNumber
 	
@@ -126,7 +131,7 @@ sub SIGNALduino_TOOL_Set($$$@) {
 	$setList .= " RAWMSG_M3:noArg" if (AttrVal($name,"RAWMSG_M3","") ne "");
 	$setList .= " ".$NameSendSet."RAWMSG" if ($Sendername ne "none");
 
-	Log3 $name, 4, "$name: Set | cmd=$cmd file=$file RAWMSG_last=$RAWMSG_last DMSG_last=$DMSG_last webCmd=$webCmd" if ($cmd ne "?");
+	Log3 $name, 4, "$name: Set $cmd - Filename_input=$file RAWMSG_last=$RAWMSG_last DMSG_last=$DMSG_last webCmd=$webCmd" if ($cmd ne "?");
 
 	$attr{$name}{webCmd} =~ s/:$NameDispatchSet?RAWMSG_last//g  if (($RAWMSG_last eq "none" && $DMSG_last eq "none") && ($webCmd =~ /:$NameDispatchSet?RAWMSG_last/));
 
@@ -193,6 +198,7 @@ sub SIGNALduino_TOOL_Set($$$@) {
 
 		### Liste von RAWMSG´s dispatchen ###
 		if ($cmd eq "START") {
+			Log3 $name, 5, "$name: Set $cmd - check (1)";
 			return "ERROR: no StartString is defined in Attributes!" if ($string1pos eq "");
 
 			(my $error, my @content) = FileRead($path.$file);		# check file open
@@ -262,6 +268,7 @@ sub SIGNALduino_TOOL_Set($$$@) {
 
 		### neue RAWMSG benutzen ###
 		if ($cmd eq $NameDispatchSet."RAWMSG") {
+			Log3 $name, 5, "$name: Set $cmd - check (2)";
 			return "ERROR: no RAWMSG" if !defined $a[1];										# no RAWMSG
 			my $error = SIGNALduino_TOOL_RAWMSG_Check($name,$a[1],$cmd);		# check RAWMSG
 			return "$error" if $error ne "";																# if check RAWMSG failed
@@ -272,6 +279,7 @@ sub SIGNALduino_TOOL_Set($$$@) {
 			Log3 $name, 4, "$name: get $Dummyname raw $msg" if (defined $a[1]);
 
 			fhem("get $Dummyname raw $msg");
+			$DMSG_last = InternalVal($Dummyname, "LASTDMSG", 0);
 			$RAWMSG_last = $a[1];
 			$DummyTime = InternalVal($Dummyname, "TIME", 0);								# time if protocol dispatched - 1544377856
 			$return = "RAWMSG dispatched";
@@ -280,12 +288,12 @@ sub SIGNALduino_TOOL_Set($$$@) {
 
 		### neue DMSG benutzen ###
 		if ($cmd eq $NameDispatchSet."DMSG") {
+			Log3 $name, 5, "$name: Set $cmd - check (3)";
 			return "ERROR: argument failed!" if (not $a[1]);
 			return "ERROR: wrong argument! (no space at Start & End)" if (not $a[1] =~ /^\S.*\S$/s);
 			return "ERROR: wrong DMSG message format!" if ($a[1] =~ /(^(MU|MS|MC)|.*;)/s);
 
 			Dispatch($defs{$Dummyname}, $a[1], undef);
-
 			$RAWMSG_last = "none";
 			$DummyMSGCNTvalue = undef;
 			$DMSG_last = $a[1];
@@ -295,6 +303,7 @@ sub SIGNALduino_TOOL_Set($$$@) {
 
 		### letzte RAWMSG_last benutzen ###
 		if ($cmd eq $NameDispatchSet."RAWMSG_last") {
+			Log3 $name, 5, "$name: Set $cmd - check (4)";
 			###	letzte DMSG_last benutzen, da webCmd auf RAWMSG_last gesetzt
 			if ($DMSG_last ne "none" && $RAWMSG_last eq "none") {
 				Dispatch($defs{$Dummyname}, $DMSG_last, undef);
@@ -318,6 +327,7 @@ sub SIGNALduino_TOOL_Set($$$@) {
 
 		### RAWMSG_M1|M2|M3 Speicherplatz benutzen ###
 		if ($cmd eq "RAWMSG_M1" || $cmd eq "RAWMSG_M2" || $cmd eq "RAWMSG_M3") {
+			Log3 $name, 5, "$name: Set $cmd - check (5)";
 			my $RAWMSG_Memory = AttrVal($name,"$cmd","");
 			$RAWMSG_Memory =~ s/;/;;/g;																			# ersetze ; durch ;;
 
@@ -329,6 +339,7 @@ sub SIGNALduino_TOOL_Set($$$@) {
 
 		### RAWMSG from DispatchModule Attributes ###
 		if ($cmd ne "-" && $cmd =~ /$NameDispatchSet$DispatchModule.*/ ) {
+			Log3 $name, 5, "$name: Set $cmd - check (6)";
 			my $setcommand;
 			my $RAWMSG;
 
@@ -352,13 +363,16 @@ sub SIGNALduino_TOOL_Set($$$@) {
 			$return = "$a[0] dispatched" if (not defined $cmd2);
 			$return = "$a[0] -> $a[1] dispatched" if (defined $cmd2);
 			$count3 = 1;
+			$DMSG_last = InternalVal($Dummyname, "LASTDMSG", 0);
 			$RAWMSG_last = $RAWMSG;
 		}
 
 		### Readings cmd_raw cmd_sendMSG ###		
 		if ($cmd eq $NameDispatchSet."RAWMSG" || $cmd =~ /$NameDispatchSet$DispatchModule.*/) {
-			my $rawData = $DummyDMSG;
-			$rawData =~ s/P|u[0-9]+#//g;						# ersetze P30# durch nichts
+			Log3 $name, 5, "$name: Set $cmd - check (7)";
+			my $rawData = $DMSG_last;
+			$rawData =~ s/(P|u)[0-9]+#//g;					# ersetze P30# durch nichts
+			my $DummyDMSG = $DMSG_last;
 			$DummyDMSG =~ s/#/#0x/g;								# ersetze # durch #0x
 			my $hlen = length($rawData);
 			my $blen = $hlen * 4;
@@ -377,6 +391,7 @@ sub SIGNALduino_TOOL_Set($$$@) {
 
 		### Readings cmd_raw cmd_sendMSG ###
 		if ($cmd eq $NameSendSet."RAWMSG") {
+			Log3 $name, 5, "$name: Set $cmd - check (8)";
 			return "ERROR: argument failed!" if (not $a[1]);
 			return "ERROR: wrong message! syntax is wrong!" if (not $a[1] =~ /^(MU|MS|MC);.*D=/);
 
@@ -410,7 +425,9 @@ sub SIGNALduino_TOOL_Set($$$@) {
 		### counter message_to_module ###
 		$DummyMSGCNT = InternalVal($Dummyname, "MSGCNT", 0);
 		if ($cmd ne "START") {
-			 $DummyMSGCNTvalue++ if ($DummyMSGCNT - $DummyMSGCNT_old >= 1);
+			Log3 $name, 5, "$name: Set $cmd - check (9)";
+			$DummyMSGCNTvalue++ if ($DummyMSGCNT - $DummyMSGCNT_old >= 1);
+			$DMSG_last = "no DMSG! Protocol not decoded!" if (defined $DummyMSGCNTvalue && $DummyMSGCNTvalue == 0);
 		}
 
 		$RAWMSG_last =~ s/;;/;/g;																						# ersetze ; durch ;;
@@ -428,14 +445,15 @@ sub SIGNALduino_TOOL_Set($$$@) {
 		readingsBulkUpdate($hash, "message_to_module" , $DummyMSGCNTvalue, 0) if (defined $DummyMSGCNTvalue);
 		readingsEndUpdate($hash, 1);
 
-		Log3 $name, 4, "$name: Set | cmd=$cmd RAWMSG_last=$RAWMSG_last DMSG_last=$DMSG_last webCmd=$webCmd" if ($cmd ne "?");
+		Log3 $name, 5, "$name: Set $cmd - RAWMSG_last=$RAWMSG_last DMSG_last=$DMSG_last webCmd=$webCmd" if ($cmd ne "?");
 
 		if (($RAWMSG_last ne "none" || $DMSG_last ne "none") && (not $webCmd =~ /:$NameDispatchSet?RAWMSG_last/) && $cmd ne "?") {
-				$webCmd .= ":$NameDispatchSet"."RAWMSG_last";
-				$attr{$name}{webCmd} = $webCmd;
+			Log3 $name, 5, "$name: Set $cmd - check (last)";
+			$webCmd .= ":$NameDispatchSet"."RAWMSG_last";
+			$attr{$name}{webCmd} = $webCmd;
 		}
 
-		#Log3 $name, 3, "$name: Set | cmd=$cmd RAWMSG_last=$RAWMSG_last DMSG_last=$DMSG_last webCmd=$webCmd" if ($cmd ne "?");
+		#Log3 $name, 3, "$name: Set $cmd - RAWMSG_last=$RAWMSG_last DMSG_last=$DMSG_last webCmd=$webCmd" if ($cmd ne "?");
 		return;
 	}
 
@@ -445,13 +463,15 @@ sub SIGNALduino_TOOL_Set($$$@) {
 ################################
 sub SIGNALduino_TOOL_Get($$$@) {
 	my ( $hash, $name, $cmd, @a ) = @_;
-	my $Filename_input = AttrVal($name,"Filename_input","");
-	my $Filename_export = AttrVal($name,"Filename_export","");
-	my $path = AttrVal($name,"Path","./");
+	my $Filename_input = AttrVal($name,"Filename_input","");				# Filename
+	my $Filename_export = AttrVal($name,"Filename_export","");			# Filename for export
+	my $webCmd = AttrVal($name,"webCmd","");												# webCmd value from attr
+	my $path = AttrVal($name,"Path","./");													# Path | # Path if not define
 	my $onlyDataName = "-ONLY_DATA-";
 	my $list = "TimingsList:noArg Durration_of_Message invert_bitMsg invert_hexMsg change_bin_to_hex change_hex_to_bin change_dec_to_hex change_hex_to_dec reverse_Input ";
-	$list .= "FilterFile:multiple,bitMsg:,bitMsg_invert:,dmsg:,hexMsg:,hexMsg_invert:,MC;,MS;,MU;,RAWMSG:,READredu:,READ:,UserInfo:,$onlyDataName ".
-					"All_ClockPulse:noArg All_SyncPulse:noArg InputFile_one_ClockPulse InputFile_one_SyncPulse InputFile_doublePulse:noArg InputFile_length_Datapart:noArg" if ($Filename_input ne "");
+	$list .= "FilterFile:multiple,bitMsg:,bitMsg_invert:,dmsg:,hexMsg:,hexMsg_invert:,MC;,MS;,MU;,RAWMSG:,READredu:,READ:,UserInfo:,$onlyDataName Doc_ProtocolList_from_ProtocolData:noArg ".
+					"Doc_ProtocolList_from_JSONfile:noArg All_ClockPulse:noArg All_SyncPulse:noArg InputFile_one_ClockPulse InputFile_one_SyncPulse ".
+					"InputFile_doublePulse:noArg InputFile_length_Datapart:noArg" if ($Filename_input ne "");
 	my $linecount = 0;
 	my $founded = 0;
 	my $search = "";
@@ -459,13 +479,19 @@ sub SIGNALduino_TOOL_Get($$$@) {
 	my @Zeilen = ();
 
 	if ($cmd ne "?") {
-		for my $readingname (qw/cmd_raw cmd_sendMSG last_MSG last_DMSG message_to_module message_dispatched/) {
+		for my $readingname (qw/cmd_raw cmd_sendMSG last_MSG last_DMSG message_to_module message_dispatched line_read/) {
 			readingsDelete($hash,$readingname);
+		}
+
+		if ($webCmd =~ /:$NameDispatchSet?RAWMSG_last/) {
+			$webCmd =~ s/:$NameDispatchSet?RAWMSG_last//g;
+			$attr{$name}{webCmd} = $webCmd;		
 		}
 	}
 
 	if ($cmd eq "TimingsList") {
-		my %ProtocolListSIGNALduino = SIGNALduino_LoadProtocolHash("$attr{global}{modpath}/FHEM/lib/signalduino_protocols.hash");
+		Log3 $name, 5, "$name: Get $cmd - check (1)";
+		my %ProtocolListSIGNALduino = SIGNALduino_LoadProtocolHash("$attr{global}{modpath}/FHEM/lib/SD_ProtocolData.pm");
 		if (exists($ProtocolListSIGNALduino{error})  ) {
 			Log3 "SIGNALduino", 1, "Error loading Protocol Hash. Module is in inoperable mode error message:($ProtocolListSIGNALduino{error})";
 			delete($ProtocolListSIGNALduino{error});
@@ -575,6 +601,7 @@ sub SIGNALduino_TOOL_Get($$$@) {
 	}
 
 	if ($cmd eq "FilterFile") {
+		Log3 $name, 5, "$name: Get $cmd - check (2)";
 		my $manually = 0;
 		my $only_Data = 0;
 		my $Data_parts = 1;
@@ -668,6 +695,7 @@ sub SIGNALduino_TOOL_Get($$$@) {
 	}
 
 	if ($cmd eq "All_ClockPulse" || $cmd eq "All_SyncPulse") {
+		Log3 $name, 5, "$name: Get $cmd - check (3)";
 		my $ClockPulse = 0;			# array Zeilen
 		my $SyncPulse = 0;			# array Zeilen
 		$search = "CP=" if ($cmd eq "All_ClockPulse");
@@ -744,6 +772,7 @@ sub SIGNALduino_TOOL_Get($$$@) {
 	}
 
 	if ($cmd eq "InputFile_one_ClockPulse" || $cmd eq "InputFile_one_SyncPulse") {
+		Log3 $name, 5, "$name: Get $cmd - check (4)";
 		return "ERROR: Your Attributes Filename_input is not definded!" if ($Filename_input eq "");
 		return "ERROR: ".substr($cmd,14)." is not definded" if (not $a[0]);
 		return "ERROR: wrong value of $cmd! only [0-9]!" if (not $a[0] =~ /^(-\d+|\d+$)/ && $a[0] > 1);
@@ -814,6 +843,7 @@ sub SIGNALduino_TOOL_Get($$$@) {
 	}
 	
 	if ($cmd eq "invert_bitMsg" || $cmd eq "invert_hexMsg") {
+		Log3 $name, 5, "$name: Get $cmd - check (5)";
 		return "ERROR: Your input failed!" if (not defined $a[0]);
 		return "ERROR: wrong value $a[0]! only [0-1]!" if ($cmd eq "invert_bitMsg" && not $a[0] =~ /^[0-1]+$/);
 		return "ERROR: wrong value $a[0]! only [a-fA-f0-9]!" if ($cmd eq "invert_hexMsg" && not $a[0] =~ /^[a-fA-f0-9]+$/);
@@ -833,6 +863,7 @@ sub SIGNALduino_TOOL_Get($$$@) {
 	}
 	
 	if ($cmd eq "change_hex_to_bin" || $cmd eq "change_bin_to_hex") {
+		Log3 $name, 5, "$name: Get $cmd - check (6)";
 		return "ERROR: Your input failed!" if (not defined $a[0]);
 		return "ERROR: wrong value $a[0]! only [0-1]!" if ($cmd eq "change_bin_to_hex" && not $a[0] =~ /^[0-1]+$/);
 		return "ERROR: wrong value $a[0]! only [a-fA-f0-9]!" if ($cmd eq "change_hex_to_bin" && $a[0] !~ /^[a-fA-f0-9]+$/);
@@ -848,6 +879,7 @@ sub SIGNALduino_TOOL_Get($$$@) {
 	}
 
 	if ($cmd eq "InputFile_doublePulse") {
+		Log3 $name, 5, "$name: Get $cmd - check (7)";
 		return "ERROR: Your Attributes Filename_input is not definded!" if ($Filename_input eq "");
 
 		my $counterror = 0;
@@ -896,6 +928,7 @@ sub SIGNALduino_TOOL_Get($$$@) {
 	}
 	
 	if ($cmd eq "InputFile_length_Datapart") {
+		Log3 $name, 5, "$name: Get $cmd - check (8)";
 		return "ERROR: Your Attributes Filename_input is not definded!" if ($Filename_input eq "");
 		my @dataarray;
 		my $dataarray_min;
@@ -917,6 +950,7 @@ sub SIGNALduino_TOOL_Get($$$@) {
 	}
 
 	if ($cmd eq "Durration_of_Message") {
+		Log3 $name, 5, "$name: Get $cmd - check (9)";
 		return "ERROR: Your input failed!" if (not defined $a[0]);
 		return "ERROR: wrong input! only READredu: MU|MS Message or SendMsg: SR|SM" if (not $a[0] =~ /^(SR|SM|MU|MS);/);
 		return "ERROR: wrong value! the part of timings Px= failed!" if (not $a[0] =~ /^.*P\d=/);
@@ -988,27 +1022,164 @@ sub SIGNALduino_TOOL_Get($$$@) {
 
 		return $return;
 	}
-	
+
 	if ($cmd eq "reverse_Input") {
 		return "ERROR: Your arguments in $cmd is not definded!" if (not defined $a[0]);
 		return "ERROR: You need at least 2 arguments to use this function!" if (length($a[0] == 1));
 		return "Your $cmd is ready.\n\n  Input: $a[0]\n Output: ".reverse $a[0];
 	}
-	
+
 	if ($cmd eq "change_dec_to_hex") {
 		return "ERROR: Your arguments in $cmd is not definded!" if (not defined $a[0]);
 		return "ERROR: wrong value $a[0]! only [0-9]!" if ($a[0] !~ /^[0-9]+$/);
 		return "Your $cmd is ready.\n\n  Input: $a[0]\n Output: ".sprintf("%x", $a[0]);;
 	}
-	
+
 	if ($cmd eq "change_hex_to_dec") {
 		return "ERROR: Your arguments in $cmd is not definded!" if (not defined $a[0]);
 		return "ERROR: wrong value $a[0]! only [a-fA-f0-9]!" if ($a[0] !~ /^[0-9a-fA-F]+$/);
 		return "Your $cmd is ready.\n\n  Input: $a[0]\n Output: ".hex($a[0]);
 	}
 
-	return "Unknown argument $cmd, choose one of $list";
+	if ($cmd eq "Doc_ProtocolList_from_ProtocolData") {
+		Log3 $name, 5, "$name: Get $cmd - check (10)";
+		my %Doc_ProtocolList;
+		my $id_now;
+		my $id_name;
+		my $id_comment;
+		my $id_clientmodule;
+		my $id_develop;
+		my $msg_count;
+		my $lock = "yes";
+		my $ids_total_count = 0;
+		my $no_comment_count = 0;
+		my $no_clientmodule_count = 0;
+		my $develop_count = 0;
+		my $develop_modul_count = 0;
+		my @linevalue;
 
+		open (InputFile,"<$attr{global}{modpath}/FHEM/lib/SD_ProtocolData.pm") || return "ERROR: No file ($Filename_input) found in $path directory from FHEM!";
+		while (<InputFile>){
+			$_ =~ s/\s+\t+//g;										# cut space | tab
+			$_ =~ s/\n//g;												# cut end
+
+			if ($_ =~ /^("\d+(\.\d)?")/s) {
+				@linevalue = split(/=>/, $_);
+				$linevalue[0] =~ s/[^0-9\.]//g;
+				$ids_total_count++;
+				$id_now = $linevalue[0];
+				$msg_count = 0;
+				$lock = "no";
+
+				$id_name = lib::SD_Protocols::getProperty($id_now,"name");
+				$id_comment = lib::SD_Protocols::getProperty($id_now,"comment");
+				$id_clientmodule = lib::SD_Protocols::getProperty($id_now,"clientmodule");
+				$id_develop = lib::SD_Protocols::getProperty($id_now,"developId");
+
+				$Doc_ProtocolList{$linevalue[0]}{name} = "$id_name";
+
+				if (defined $id_comment) {
+					$Doc_ProtocolList{$linevalue[0]}{comment} = "$id_comment";
+				} else {
+					$Doc_ProtocolList{$linevalue[0]}{comment} = "not noted";
+					$no_comment_count++;
+				}
+
+				if (defined $id_clientmodule) {
+					$Doc_ProtocolList{$linevalue[0]}{clientmodule} = "$id_clientmodule";
+				} else {
+					$Doc_ProtocolList{$linevalue[0]}{clientmodule} = "not assigned";
+					$no_clientmodule_count++;
+				}
+
+				if (defined $id_develop) {
+					$develop_count++ if ($id_develop eq "y");
+					$develop_modul_count++ if ($id_develop eq "m");
+				}
+
+			} elsif ($lock eq "no" && ($_ =~ /(MU;P)/s || $_ =~ /(MS;P)/s || $_ =~ /(MC;L)/s)) {
+				$msg_count++;
+				my $regexsearch = $1;
+				my $RAWMSGkey = "raw".sprintf("%02s", $msg_count);													# name of key RAWMSG
+				my $commentkey = "raw".sprintf("%02s", $msg_count)."comment";								# name of key comment
+
+				$_ =~ s/(^#\s)//g;
+				my $endtpos = "";
+				my $starttext = "";
+
+				if ( $_ =~ /(.*)((MU;|MS;|MC;).*\d+;(O;)?)(.*)/s ) {
+					$starttext = $1 if ($1 ne "");
+					$starttext =~ s/\s|,/_/g;
+					$starttext =~ s/_+/_/g;
+					$starttext =~ s/_$//g;
+					$starttext =~ s/_#//g;
+					Log3 $name, 5, "$name: Get $cmd - id:$id_now START-Text -> $starttext" if ($starttext ne "");
+
+					if (defined $5) {
+						$endtpos = $5 if ($5 ne "");
+					}
+					$endtpos =~ s/^\s+//g;
+					$endtpos =~ s/\s+/_/g;
+					$endtpos =~ s/_+/_/g;
+					$endtpos =~ s/\/+/\//g;
+					Log3 $name, 5, "$name: Get $cmd - id:$id_now END-Text <- $endtpos" if ($endtpos ne "");
+				};
+
+				my $RAWMSG = $2;
+				$RAWMSG =~ s/\s//g;
+
+				$Doc_ProtocolList{$linevalue[0]}{$RAWMSGkey} = $RAWMSG;
+				$Doc_ProtocolList{$linevalue[0]}{$commentkey} = "-" if ($starttext eq "" && $endtpos eq "");
+				$Doc_ProtocolList{$linevalue[0]}{$commentkey} = "$starttext" if ($starttext ne "");
+				$Doc_ProtocolList{$linevalue[0]}{$commentkey} = "$endtpos" if ($endtpos ne "");
+			} elsif ($_ =~ /\},/s || $_ =~ /name.*=>/s) {
+				$lock = "yes";
+			}
+		}
+		close InputFile;
+
+		#### JSON write to file ####
+		my $json = JSON::PP->new()->pretty->sort_by(sub { $JSON::PP::a cmp $JSON::PP::b })->encode(\%Doc_ProtocolList);					# lesbares JSON
+
+		readingsSingleUpdate($hash, "state" , "file $jsonFile created", 0);
+
+		open(SaveDoc, '>', $path.$jsonFile) or die $!;
+			print SaveDoc $json;
+		close(SaveDoc);
+		##############################
+		
+		#return Dumper\%Doc_ProtocolList;
+		#return Dumper\$json;
+		
+		return "writing doc are finished!\n\nids total: $ids_total_count\nids without clientmodule: $no_clientmodule_count\nids without comment: $no_comment_count\ndevelopment ids: $develop_count\ndevelopment moduls: $develop_modul_count";
+	}
+	
+	if ($cmd eq "Doc_ProtocolList_from_JSONfile") {
+		Log3 $name, 5, "$name: Get $cmd - check (11)";
+		#### JSON read  from file ####
+		my $json_new;
+		if (open (my $json_stream, $path.$jsonFile)) {
+			local $/ = undef;
+      $json_new = JSON::PP->new()->pretty->sort_by(sub { $JSON::PP::a cmp $JSON::PP::b })->decode(<$json_stream>);
+      close($json_stream);
+		} else {
+			Log3 $name, 3, "$name: Get $cmd - ERROR: JSON file not loaded!";
+		}
+		
+		my %Doc_ProtocolList2 = %{$json_new};																																							# unsortiert
+		my $json_sort = JSON::PP->new()->pretty->sort_by(sub { $JSON::PP::a cmp $JSON::PP::b })->encode(\%{$json_new});		# sortiert zum check
+
+		readingsSingleUpdate($hash, "state" , "file $jsonFile readed", 0);
+
+		#return Dumper\%Doc_ProtocolList2;
+		#return Dumper\$json_sort;
+		#return $Doc_ProtocolList2{38}{comment};
+		##############################
+
+		return "This feature is still under development!";
+	}
+
+	return "Unknown argument $cmd, choose one of $list";
 }
 
 ################################
@@ -1223,6 +1394,8 @@ sub SIGNALduino_TOOL_RAWMSG_Check($$$) {
 	<b>Get</b>
 	<ul><li><a name="All_ClockPulse"></a><code>All_ClockPulse</code> - calculates the average of the ClockPulse from Input_File</li><a name=""></a></ul>
 	<ul><li><a name="All_SyncPulse"></a><code>All_SyncPulse</code> - calculates the average of the SyncPulse from Input_File</li><a name=""></a></ul>
+	<ul><li><a name="Doc_ProtocolList_from_JSONfile"></a><code>Doc_ProtocolList_from_JSONfile</code> - one reload from <code>SD_ProtocolList.json</code> file</li><a name=""></a></ul>
+	<ul><li><a name="Doc_ProtocolList_from_ProtocolData"></a><code>Doc_ProtocolList_from_ProtocolData</code> - an overview of the RAWMSG's | states and modules directly from protocol file how written to the <code>SD_ProtocolList.json</code> file</li><a name=""></a></ul>
 	<ul><li><a name="Durration_of_Message"></a><code>Durration_of_Message</code> - determines the total duration of a Send_RAWMSG or READredu_RAWMSG<br>
 	&emsp;&rarr; example 1: SR;R=3;P0=1520;P1=-400;P2=400;P3=-4000;P4=-800;P5=800;P6=-16000;D=0121212121212121212121212123242424516;<br>
 	&emsp;&rarr; example 2: MS;P0=-16046;P1=552;P2=-1039;P3=983;P5=-7907;P6=-1841;P7=-4129;D=15161716171616171617171617171617161716161616103232;CP=1;SP=5;O;</li><a name=""></a></ul>
@@ -1309,6 +1482,8 @@ sub SIGNALduino_TOOL_RAWMSG_Check($$$) {
 	<b>Get</b>
 	<ul><li><a name="All_ClockPulse"></a><code>All_ClockPulse</code> - berechnet den Durchschnitt des ClockPulse aus der Input_Datei</li><a name=""></a></ul>
 	<ul><li><a name="All_SyncPulse"></a><code>All_SyncPulse</code> - berechnet den Durchschnitt des SyncPulse aus der Input_Datei</li><a name=""></a></ul>
+	<ul><li><a name="Doc_ProtocolList_from_JSONfile"></a><code>Doc_ProtocolList_from_JSONfile</code> - ein Reload der <code>SD_ProtocolList.json</code> Datei.</li><a name=""></a></ul>
+	<ul><li><a name="Doc_ProtocolList_from_ProtocolData"></a><code>Doc_ProtocolList_from_ProtocolData</code> - eine &Uuml;bersicht der RAWMSG´s | Zust&auml;nde und Module direkt aus der Protokolldatei welche in die <code>SD_ProtocolList.json</code> Datei geschrieben werden.</li><a name=""></a></ul>
 	<ul><li><a name="Durration_of_Message"></a><code>Durration_of_Message</code> - ermittelt die Gesamtdauer einer Send_RAWMSG oder READredu_RAWMSG<br>
 	&emsp;&rarr; Beispiel 1: SR;R=3;P0=1520;P1=-400;P2=400;P3=-4000;P4=-800;P5=800;P6=-16000;D=0121212121212121212121212123242424516;<br>
 	&emsp;&rarr; Beispiel 2: MS;P0=-16046;P1=552;P2=-1039;P3=983;P5=-7907;P6=-1841;P7=-4129;D=15161716171616171617171617171617161716161616103232;CP=1;SP=5;O;</li><a name=""></a></ul>
