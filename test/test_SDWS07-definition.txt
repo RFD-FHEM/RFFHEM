@@ -35,10 +35,7 @@ defmod test_SDWS07 UnitTest dummyDuino (
 		CommandDefine(undef,"$sensorname SD_WS07 SD_WS07_TH_1");
 	 	ok(IsDevice($sensorname), "check sensor not created with single dispatch");
 		my $found=Dispatch($targetHash,"P7#6300C6F0B");
-		TODO: {
-			local $TODO="This bug must be fixed";
-			is($found->[0],$sensorname,"Check if definition is found by dispatch()") || diag(explain $found);
-		};
+		is($found->[0],$sensorname,"Check if definition is found by dispatch()");
 		CommandDelete(undef,$sensorname);
 		ok(!IsDevice($sensorname), "check sensor deleted correctly");
 	};

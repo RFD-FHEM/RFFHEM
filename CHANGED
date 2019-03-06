@@ -1,3 +1,8 @@
+05.03.2019
+ 14_SD_WS07.pm: fix bug autocreate define
+                remove rssi
+                remove slider for offsets
+                remove reading battery
 04.03.2019
  14_SD_Keeloq.pm: fix PERL WARNING if hlen a other typ of device, readings rename to FHEM standard (battery), revised doc
 27.02.2019
