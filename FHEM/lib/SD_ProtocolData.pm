@@ -58,10 +58,13 @@
 # https://forum.fhem.de/index.php/topic,58396.975.html | https://github.com/RFD-FHEM/RFFHEM
 ###########################################################################################################################################
 
-package SD_Protocols;
+package lib::SD_ProtocolData;
 { 
-	our $VERSION = '1.00';
-	my %signalduino_protocols = (
+	use strict;
+	use warnings;
+	
+	our $VERSION = '1.01';
+	our %protocols = (
 		"0"	=>	## various weather sensors (500 | 9100)
 						# CUL_TCM97001 Typ - Prologue
 						# MS;P0=-4152;P1=643;P2=-2068;P3=-9066;D=1310121210121212101210101212121212121212121212121010121012121212121012101212;CP=1;SP=3;R=220;O;m2;
@@ -216,13 +219,18 @@ package SD_Protocols;
 				length_max			=> '34',				# Don't know maximal lenth of a valid message
 				paddingbits			=> '8',					# pad up to 8 bits, default is 4
 			},
-		"3"	=>	## itv1 - remote like WOFI Lamp | Intertek Modell 1946518 // ELRO
-						# need more Device Infos / User Message
+		"3"	=>	## itv1 - remote with IC PT2262 example: ELRO | REWE | Intertek Modell 1946518 | WOFI Lamp
+						# REWE Model: 0175926R (real CP=300 | repeatpause=9300)
+						# MS;P1=-905;P2=896;P3=-317;P4=303;P5=-9299;D=45412341414123412341414123412341234141412341414123;CP=4;SP=5;R=91;A;#;
+						# ELRO AB440R (real CP=330 | repeatpause=10100)
+						# MS;P1=-991;P2=953;P3=-356;P4=303;P5=-10033;D=45412341234141414141234123412341234141412341414123;CP=4;SP=5;R=93;m1;A;A;
+						# Kangtai Model Nr.: 6899 (real CP=300 | repeatpause=9400)
+						# MS;P0=-328;P1=263;P2=-954;P3=888;P5=-9430;D=15123012121230123012121230123012301212123012121230;CP=1;SP=5;R=35;m2;0;0;
 			{
-				name						=> 'itv1',
-				comment					=> 'remote for WOFI | Intertek',
+				name						=> 'chip xx2262',
+				comment					=> 'remote for ELRO|Kangtai|Intertek|REWE|WOFI',
 				id							=> '3',
-				knownFreqs      => '',
+				knownFreqs      => '433.92',
 				one							=> [3,-1],
 				zero						=> [1,-3],
 				#float					=> [-1,3],			# not full supported now later use
@@ -235,7 +243,7 @@ package SD_Protocols;
 				length_min			=> '24',
 				length_max			=> '24',				# Don't know maximal lenth of a valid message
 			},
-		"3.1"	=>	## itv1_sync40 | Intertek Modell 1946518 // ELRO
+		"3.1"	=>	## itv1_sync40 | Intertek Modell 1946518 | ELRO
 							# MS;P0=-11440;P1=-1121;P2=-416;P5=309;P6=1017;D=150516251515162516251625162516251515151516251625151;CP=5;SP=0;R=66;
 							# MS;P1=309;P2=-1130;P3=1011;P4=-429;P5=-11466;D=15123412121234123412141214121412141212123412341234;CP=1;SP=5;R=38;  Gruppentaste, siehe Kommentar in sub SIGNALduino_bit2itv1
 							# need more Device Infos / User Message
@@ -919,7 +927,7 @@ package SD_Protocols;
 							# MU;P0=-12064;P1=71;P2=-669;P3=1351;P4=-1319;D=012323414141234123232323232323232323232323; | MU;P0=697;P1=-1352;P2=-679;P3=1343;D=01010101010231023232323232323232323232323;CP=0;R=27;
 			{
 				name					=> 'QUIGG | LIBRA',
-				comment				=> 'remote control DMV-7000 / TR-502MSV',
+				comment				=> 'remote control DMV-7000, TR-502MSV',
 				id						=> '34',
 				knownFreqs		=> '433.92',
 				one						=> [-1,2],
@@ -1159,7 +1167,7 @@ package SD_Protocols;
 				length_max		=> '72',
 			},
 		"45"	=>	## Revolt
-							#	MU;P0=-8320;P1=9972;P2=-376;P3=117;P4=-251;P5=232;D=012345434345434345454545434345454545454543454343434343434343434343434543434345434343434545434345434343434343454343454545454345434343454345434343434343434345454543434343434345434345454543454343434543454345434545;CP=3;R=2
+							#	MU;P0=-8320;P1=9972;P2=-376;P3=117;P4=-251;P5=232;D=012345434345434345454545434345454545454543454343434343434343434343434543434345434343434545434345434343434343454343454545454345434343454345434343434343434345454543434343434345434345454543454343434543454345434545;CP=3;R=2;
 			{
 				name							=> 'Revolt',
 				id								=> '45',
@@ -1803,7 +1811,7 @@ package SD_Protocols;
 				remove_zero		=> 1,						# Removes leading zeros from output
 			},
 		"78"	=>	## geiger blind motors
-							# MU;P0=313;P1=1212;P2=-309;P4=-2024;P5=-16091;P6=2014;D=01204040562620404626204040404040462046204040562620404626204040404040462046204040562620404626204040404040462046204040562620404626204040404040462046204040;CP=0;R=236;)
+							# MU;P0=313;P1=1212;P2=-309;P4=-2024;P5=-16091;P6=2014;D=01204040562620404626204040404040462046204040562620404626204040404040462046204040562620404626204040404040462046204040562620404626204040404040462046204040;CP=0;R=236;
 							# https://forum.fhem.de/index.php/topic,39153.0.html
 			{
 				name					=> 'geiger',
@@ -2208,5 +2216,7 @@ package SD_Protocols;
 			},
 	);
 	sub getProtocolList	{	
-		return \%signalduino_protocols;	}
+		return \%protocols;	
+	}
+
 }

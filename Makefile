@@ -21,6 +21,7 @@ test: deploylocal
 	git --no-pager diff --name-only ${TRAVIS_COMMIT_RANGE} | egrep "\.pm" | xargs -I@ echo -select @ | xargs --no-run-if-empty perl /opt/fhem/contrib/commandref_join.pl 
 	@echo === running unit tests ===
 	test/test-runner.sh test_modules
+	test/test-runner.sh test_SD_Protocols
 	test/test-runner.sh test_defineDefaults
 	test/test-runner.sh test_callsub_1
 	test/test-runner.sh test1
@@ -41,5 +42,6 @@ test: deploylocal
 	test/test-runner.sh test_sub_SIGNALduino_OSV2
 	test/test-runner.sh test_sub_MCTFA
 	test/test-runner.sh test_sub_SIGNALduino_getAttrDevelopment
+	test/test-runner.sh test_SDWS07
 	@echo === finished unit tests ===
 	sudo timeout 30 killall -vw perl || sudo killall -vws9 perl

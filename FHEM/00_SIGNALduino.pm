@@ -21,6 +21,7 @@ eval "use JSON;1" or $missingModulSIGNALduino .= "JSON ";
 
 eval "use Scalar::Util qw(looks_like_number);1";
 eval "use Time::HiRes qw(gettimeofday);1" ;
+use lib::SD_Protocols;
 
 #$| = 1;		#Puffern abschalten, Hilfreich fuer PEARL WARNINGS Search
 
@@ -29,7 +30,7 @@ eval "use Time::HiRes qw(gettimeofday);1" ;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.4.0-dev_25.02",
+	SDUINO_VERSION            => "v3.4.0_dev_04.03",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -250,9 +251,10 @@ SIGNALduino_Initialize($)
   $hash->{muIdList} = ();
   $hash->{mcIdList} = ();
   
-  #ours %attr{};
+  #our $attr;
 
-  %ProtocolListSIGNALduino = SIGNALduino_LoadProtocolHash("$attr{global}{modpath}/FHEM/lib/signalduino_protocols.pm");
+  
+  %ProtocolListSIGNALduino = SIGNALduino_LoadProtocolHash("$attr{global}{modpath}/FHEM/lib/SD_ProtocolData.pm");
   if (exists($ProtocolListSIGNALduino{error})  ) {
   	Log3 "SIGNALduino", 1, "Error loading Protocol Hash. Module is in inoperable mode error message:($ProtocolListSIGNALduino{error})";
   	delete($ProtocolListSIGNALduino{error});
@@ -278,16 +280,8 @@ our $FW_detail;
 	
 sub SIGNALduino_LoadProtocolHash($)
 {	
-	if (! -e $_[0]) {
-		return %{ {"error" => "File does not exsits"}};
-	}
-	use Symbol 'delete_package';
-	delete_package 'SD_Protocols';
-	delete($INC{$_[0]});
-	if(  ! eval { require "$_[0]"; 1 }  ) {
-		return 	%{ {"error" => $@}};
-	}	
-	return  %{SD_Protocols->getProtocolList};
+	my $ret= lib::SD_Protocols::LoadHash($_[0]);
+	return %$ret;
 }
 
 
