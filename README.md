@@ -50,6 +50,7 @@ Supported Devices / Protocols
 |TS-K108W11 | Doorbell |
 |WS-7035, WS-7053, WS7054 | Temperature sensor 433MHz |
 |WS-2000, WS-7000 | Series of various sensors |
+|NC-3911, NC-3912 | Refrigerator thermometer |
 
 How to install
 ======

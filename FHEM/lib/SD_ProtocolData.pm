@@ -1011,7 +1011,7 @@ package lib::SD_ProtocolData;
 							# Id:A8, Ch:2, T: 5.4, MU;P0=-971;P1=733;P2=-731;P3=488;P4=-244;P5=248;P6=-480;P7=-368;D=01212121234563456345656563456345656563456575634563456345634345656345634343434345650121212123456345634565656345634565656345656563456345634563434565634563434343434565012121212345634563456565634563456565634565656345634563456343456563456343434343456501212121;CP=5;O;
 			{
 				name         => 'NC-3911',
-				comment      => 'refrigerator thermometer',
+				comment      => 'Refrigerator thermometer',
 				id           => '38',
 				knownFreqs   => '433.92',
 				one          => [2,-1],
@@ -1019,12 +1019,11 @@ package lib::SD_ProtocolData;
 				start        => [3,-3,3,-3,3,-3,3,-3],
 				clockabs     => 250,
 				format       => 'twostate',
-				preamble     => 'u38#',
+				preamble     => 'W38#',
+				clientmodule => 'SD_WS',
+				modulematch  => '^W38#.*',
 				length_min   => '36',
 				length_max   => '36',
-				#clientmodule	=> 'SD_WS',
-				#modulematch	=> '^P38#.*',
-				#developId    => 'y',
 			},
 		"39"	=>	## X10 Protocol
 							# https://github.com/RFD-FHEM/RFFHEM/issues/65
