@@ -1,0 +1,25 @@
+defmod test_SDWS UnitTest dummyDuino ( 
+{
+	CommandAttr(undef,"autocreate verbose 5");
+
+	my $sensorname="SD_WS_38_T_1 ";
+	subtest "Check autocreate $sensorname" => sub {
+		plan tests => 4;
+		Dispatch($targetHash,"W38#8B922397E");
+	 	ok(!IsDevice($sensorname), "check sensor not created with single dispatch");
+		sleep 3;
+		Dispatch($targetHash,"W38#8B922397E");
+	 	ok(!IsDevice($sensorname), "check sensor not created with second dispatch");
+		sleep 3;
+		Dispatch($targetHash,"W38#8B922397E");
+		sleep 3;
+		TODO: {
+			local $TODO = "possible timing issue";
+			ok(IsDevice($sensorname), "check sensor created with third dispatch");
+	 	}
+		CommandDelete(undef,$sensorname);
+	 	ok(!IsDevice($sensorname), "check sensor deleted correctly");
+	};
+ 
+} 
+)
