@@ -1,4 +1,4 @@
-# $Id: 00_SIGNALduino.pm 10488 2019-02-12 12:00:00Z v3.4.0-dev $
+# $Id: 00_SIGNALduino.pm 10488 2019-03-08 12:00:00Z v3.4.0-dev $
 #
 # v3.4.0 (Development release 3.4)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incoming messages
@@ -30,7 +30,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.4.0_dev_04.03",
+	SDUINO_VERSION            => "v3.4.0_dev_08.03",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -357,7 +357,7 @@ SIGNALduino_Define($$)
   $hash->{LASTDMSG} = "nothing";
   $hash->{TIME}=time();
   $hash->{versionmodul} = SDUINO_VERSION;
-  $hash->{versionProtocols} =SD_Protocols->VERSION();
+  $hash->{versionProtocols} = lib::SD_Protocols::getProtocolVersion();
   #notifyRegexpChanged($hash,"^$name$:^opened\$");  # Auf das Event opened der eigenen Definition reagieren
   #notifyRegexpChanged($hash,"sduino:opened");  # Auf das Event opened der eigenen Definition reagieren
   #$hash->{NOTIFYDEV}="$name";

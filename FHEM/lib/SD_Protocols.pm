@@ -113,5 +113,16 @@ sub getProperty($$)
 	return $lib::SD_ProtocolData::protocols{$_[0]}{$_[1]};
 }
 
+# - - - - - - - - - - - -
+#=item getProtocolVersion()
+# This functons, will return a version value of the Protocolist
+# 
+# =cut
+
+sub getProtocolVersion
+{
+	return $lib::SD_ProtocolData::VERSION;
+}
+
 
 1;
