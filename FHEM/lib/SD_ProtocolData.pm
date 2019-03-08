@@ -66,11 +66,15 @@ package lib::SD_ProtocolData;
 	our $VERSION = '1.01';
 	our %protocols = (
 		"0"	=>	## various weather sensors (500 | 9100)
+						# CUL_TCM97001 Typ - ABS700
+						# MS;P1=-7949;P2=492;P3=-1978;P4=-3970;D=21232423232424242423232323232324242423232323232424;CP=2;SP=1;R=245;O;
+						# CUL_TCM97001 Typ - AURIOL / Mebus / TCM...
+						# MS;P0=-9298;P1=495;P2=-1980;P3=-4239;D=1012121312131313121313121312121212121212131212131312131212;CP=1;SP=0;R=223;O;m2;
+						# CUL_TCM97001 Typ - GT_WT_02
+						# MS;P0=531;P1=-9027;P3=-4126;P4=-2078;D=0103040304040403030404040404040404040404030303040303040304030304030304040403;CP=0;SP=1;R=249;O;m2;
 						# CUL_TCM97001 Typ - Prologue
 						# MS;P0=-4152;P1=643;P2=-2068;P3=-9066;D=1310121210121212101210101212121212121212121212121010121012121212121012101212;CP=1;SP=3;R=220;O;m2;
 						# MS;P0=-4149;P2=-9098;P3=628;P4=-2076;D=3230343430343434303430303434343434343434343434343030343030343434343034303434;CP=3;SP=2;R=218;O;m2;
-						# CUL_TCM97001 Typ - AURIOL / Mebus / TCM...
-						# MS;P0=-9298;P1=495;P2=-1980;P3=-4239;D=1012121312131313121313121312121212121212131212131312131212;CP=1;SP=0;R=223;O;m2;
 			{
 				name						=> 'weather (v1)',
 				comment					=> 'temperature / humidity or other sensors',
@@ -1194,7 +1198,7 @@ package lib::SD_ProtocolData;
 				name						=> 'Berner Garagedoor GA401',
 				comment					=> 'remote control TEDSEN SKX1MD',
 				id							=> '46',
-				knownFreqs      => '',
+				knownFreqs      => '433.92',
 				one							=> [1,-8],
 				zero						=> [8,-1],
 				start						=> [1,-63],
@@ -1809,12 +1813,13 @@ package lib::SD_ProtocolData;
 				length_max		=> '44',
 				remove_zero		=> 1,						# Removes leading zeros from output
 			},
-		"78"	=>	## geiger blind motors
+		"78"	=>	## GEIGER blind motors
 							# MU;P0=313;P1=1212;P2=-309;P4=-2024;P5=-16091;P6=2014;D=01204040562620404626204040404040462046204040562620404626204040404040462046204040562620404626204040404040462046204040562620404626204040404040462046204040;CP=0;R=236;
+							# MU;P0=-15770;P1=2075;P2=-264;P3=326;P4=-2016;P5=948;D=012121234121234341212121234341234343012125;CP=3;R=208;
 							# https://forum.fhem.de/index.php/topic,39153.0.html
 			{
-				name					=> 'geiger',
-				comment				=> 'geiger blind motors',
+				name					=> 'GEIGER blind motors',
+				comment				=> 'example remote control GF0001',
 				id						=> '78',
 				knownFreqs		=> '',
 				developId			=> 'y',
@@ -1932,7 +1937,7 @@ package lib::SD_ProtocolData;
 				name					=> 'RH787T',
 				comment				=> 'remote control for example Westinghouse Delancey 7800140',
 				id						=> '83',
-				knownFreqs		=> '',
+				knownFreqs		=> '433.92',
 				one						=> [-2,1],
 				zero					=> [-1,2],
 				start					=> [-35,1],				# calculated 12126,31579 µS
