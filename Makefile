@@ -43,5 +43,6 @@ test: deploylocal
 	test/test-runner.sh test_sub_MCTFA
 	test/test-runner.sh test_sub_SIGNALduino_getAttrDevelopment
 	test/test-runner.sh test_SDWS07
+	test/test-runner.sh test_SDWS
 	@echo === finished unit tests ===
 	sudo timeout 30 killall -vw perl || sudo killall -vws9 perl
