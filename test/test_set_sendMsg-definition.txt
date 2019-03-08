@@ -20,7 +20,7 @@ defmod test_set_sendMsg UnitTest dummyDuino
 		},
     '43'    => 
 		{	
-			input	=>	"P43#0101#R3#C500",
+			input	=>	"P43#0101#R3#C500#F10AB85550A",
 			output 	=> 	'SC;R=3;SR;P0=-2560;P1=2560;P3=-640;D=10101010101010113;SM;C=895;D=0101;',
 		},
     '72'    => 
