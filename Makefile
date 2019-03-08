@@ -42,6 +42,8 @@ test: deploylocal
 	test/test-runner.sh test_sub_SIGNALduino_OSV2
 	test/test-runner.sh test_sub_MCTFA
 	test/test-runner.sh test_sub_SIGNALduino_getAttrDevelopment
+	test/test-runner.sh test_set_sendMsg
+	test/test-runner.sh test_read
 	test/test-runner.sh test_SDWS07
 	test/test-runner.sh test_SDWS
 	@echo === finished unit tests ===
