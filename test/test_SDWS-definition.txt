@@ -1,0 +1,33 @@
+defmod test_SDWS UnitTest dummyDuino ( 
+{
+	CommandAttr(undef,"autocreate verbose 5");
+
+	my $sensorname="SD_WS_38_T_1";
+	subtest "Verify $sensorname" => sub {
+		plan tests => 3;
+
+		subtest 'autocreate' => sub {
+			for my $i (1..2) {
+				Dispatch($targetHash,"W38#8B922397E");
+				ok(!IsDevice($sensorname), "check sensor not created with dispatch $i/3");
+				sleep 3;
+			}
+			Dispatch($targetHash,"W38#8B922397E");
+			ok(IsDevice($sensorname), "check sensor created with 3. dispatch");
+			sleep 3;
+			Dispatch($targetHash,"W38#8B922397E");
+		};
+		subtest 'Checking readings' => sub {
+			plan tests => 4;
+			is(ReadingsVal($sensorname,"temperature","0"),"4.7","check temperature reading");
+			is(ReadingsVal($sensorname,"batteryState","0"),"ok","check battery reading");
+			is(ReadingsVal($sensorname,"channel","0"),"1","check battery reading");
+			is(ReadingsVal($sensorname,"beep","0"),"off","check beep reading");
+		};
+		
+		CommandDelete(undef,$sensorname);
+	 	ok(!IsDevice($sensorname), "check sensor deleted correctly");
+	};
+ 
+} 
+)
