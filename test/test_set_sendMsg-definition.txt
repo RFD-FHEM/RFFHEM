@@ -25,13 +25,13 @@ defmod test_set_sendMsg UnitTest dummyDuino
 		{	
 			testname=>  "ID: 43 with explicit frequency",
 			input	=>	"P43#0101#R3#C500#F10AB85550A",
-			output 	=> 	'SC;R=3;SR;P0=-2560;P1=2560;P3=-640;D=10101010101010113;SM;C=895;D=0101;',
+			output 	=> 	'SC;R=3;SR;P0=-2560;P1=2560;P3=-640;D=10101010101010113;SM;C=895;D=0101;F=10AB85550A;',
 		},
     '43a'    => 
 		{	
 			testname=>  "ID: 43 with default frequency",
 			input	=>	"P43#0101#R3#C500",
-			output 	=> 	'SC;R=3;SR;P0=-2560;P1=2560;P3=-640;D=10101010101010113;SM;C=895;D=0101;',
+			output 	=> 	'SC;R=3;SR;P0=-2560;P1=2560;P3=-640;D=10101010101010113;SM;C=895;D=0101;F=10AB85550A;',
 		},
     '72'    => 
 		{	
@@ -43,13 +43,13 @@ defmod test_set_sendMsg UnitTest dummyDuino
 
 	my $mock = Mock::Sub->new;
  	my $AddSendQueuefn = $mock->mock('SIGNALduino_AddSendQueue');
+	$targetHash->{version} = "dummy cc1101";
 
 	foreach my $id (qw/0 17 29 43 43a 72/) 
 	{
 		subtest "checking set sendMsg $mockData{$id}{testname} " => sub {
 			plan tests => 1;	
 			$AddSendQueuefn->reset();
-			
 			
 			SIGNALduino_Set($targetHash,$target,"sendMsg",$mockData{$id}{input});
 			if ($AddSendQueuefn->called)
