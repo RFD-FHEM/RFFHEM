@@ -190,12 +190,12 @@ SD_WS07_Parse($$)
 	
 	$hum += AttrVal($name, "offset-hum", 0);				# correction value for humidity (default 0 %)
 	if ($model ne "SD_WS07_T" && $hum > 100 || $model ne "SD_WS07_T" && $hum < 0) {
-		Log3 $name, 5, "$iohash->{NAME}: $name ERROR - Humidity out of range 0-100: ($hum)";
+		Log3 $name, 4, "$iohash->{NAME}: $name ERROR - Humidity out of range 0-100: ($hum)";
 		return "";
 	}
 	
    if ($temp > 700 && $temp < 3840) {								# -25,6 .. 70,0 Â°C
-		Log3 $name, 5, "$iohash->{NAME}: $name ERROR - Temperature out of range 700-3840 ($temp)";
+		Log3 $name, 4, "$iohash->{NAME}: $name ERROR - Temperature out of range 700-3840 ($temp)";
 		return "";
    } elsif ($temp >= 3840) {        # negative Temperaturen, ist ueberprueft worden
       $temp -= 4096;
@@ -312,6 +312,8 @@ sub SD_WS07_Attr(@)
   <br>
   New received devices are added in FHEM with autocreate.
   <br><br>
+  The module writes from verbose 4 messages, if not possible values like humidity > 100% are decoded.
+  <br><br>
 
   <a name="SD_WS07_Define"></a>
   <b>Define</b> 
@@ -393,7 +395,8 @@ sub SD_WS07_Attr(@)
   <br>
   Neu empfangene Sensoren werden in FHEM per autocreate angelegt.
   <br><br>
-
+  Das Modul schreibt in das Logfile ab verbose 4 Meldungen, wenn die dekodierten Werte nicht plausibel sind. Z.B. Feuchtewerte über 100%.
+  <br><br>
   <a name="SD_WS07_Define"></a>
   <b>Define</b> 
   <ul>Die empfangenen Sensoren werden automatisch angelegt.<br>

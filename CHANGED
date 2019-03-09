@@ -1,5 +1,5 @@
-08.03.2019
- 14_SD_WS07.pm: rise loglevel for values out of range 
+09.03.2019
+ 14_SD_WS07.pm:  loglevel 4 for values out of range, hint added to commandref
 06.03.2019
  14_SD_WS.pm: New protocol for refrigerator thermometer NC-3911, NC-3912 (Rosenstein & Soehne, PEARL)
 05.03.2019
