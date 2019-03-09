@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 14_SD_WS07.pm 18673 2019-02-20 20:52:45Z Sidey $
+# $Id: 14_SD_WS07.pm 18673 2019-03-10 20:52:45Z Sidey $
 # 
 # The purpose of this module is to support serval eurochron
 # weather sensors like eas8007 which use the same protocol
@@ -194,7 +194,7 @@ SD_WS07_Parse($$)
 		return "";
 	}
 	
-   if ($temp > 700 && $temp < 3840) {								# -25,6 .. 70,0 °C
+   if ($temp > 700 && $temp < 3840) {								# -25,6 .. 70,0 Â°C
 		Log3 $name, 4, "$iohash->{NAME}: $name ERROR - Temperature out of range 700-3840 ($temp)";
 		return "";
    } elsif ($temp >= 3840) {        # negative Temperaturen, ist ueberprueft worden
@@ -395,7 +395,7 @@ sub SD_WS07_Attr(@)
   <br>
   Neu empfangene Sensoren werden in FHEM per autocreate angelegt.
   <br><br>
-  Das Modul schreibt in das Logfile ab verbose 4 Meldungen, wenn die dekodierten Werte nicht plausibel sind. Z.B. Feuchtewerte �ber 100%.
+  Das Modul schreibt in das Logfile ab verbose 4 Meldungen, wenn die dekodierten Werte nicht plausibel sind. Z.B. Feuchtewerte über 100%.
   <br><br>
   <a name="SD_WS07_Define"></a>
   <b>Define</b> 
