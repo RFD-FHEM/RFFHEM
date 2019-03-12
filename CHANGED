@@ -1,3 +1,5 @@
+12.03.2019
+ 00_SIGNALduino.pm fix DeviceOverview
 09.03.2019
  14_SD_WS07.pm:  loglevel 4 for values out of range, hint added to commandref
 06.03.2019
