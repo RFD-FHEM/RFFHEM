@@ -30,7 +30,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.4.0_dev_08.03",
+	SDUINO_VERSION            => "v3.4.0_dev_12.03",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -246,6 +246,7 @@ SIGNALduino_Initialize($)
 
   $hash->{ShutdownFn}		= "SIGNALduino_Shutdown";
   $hash->{FW_detailFn}		= "SIGNALduino_FW_Detail";
+  $hash->{FW_deviceOverview} = 1;
   
   $hash->{msIdList} = ();
   $hash->{muIdList} = ();
