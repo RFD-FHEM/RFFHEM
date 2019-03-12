@@ -246,7 +246,7 @@ SIGNALduino_Initialize($)
 
   $hash->{ShutdownFn}		= "SIGNALduino_Shutdown";
   $hash->{FW_detailFn}		= "SIGNALduino_FW_Detail";
-	$hash->{FW_deviceOverview} = 1;
+  $hash->{FW_deviceOverview} = 1;
   
   $hash->{msIdList} = ();
   $hash->{muIdList} = ();
