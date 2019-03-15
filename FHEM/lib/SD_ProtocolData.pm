@@ -759,7 +759,7 @@ package lib::SD_ProtocolData;
 				length_min		=> '24',
 				length_max		=> '50',					# message has only 24 bit, but we get more than one message, calculation has to be corrected
 			},
-		"26"	=>	## some remote code send by flamingo style remote controls
+		"26"	=>	## some remote code, send by flamingo style remote controls
 							# https://forum.fhem.de/index.php/topic,43292.msg352982.html#msg352982
 							# MU;P0=1086;P1=-433;P2=327;P3=-1194;P4=-2318;P5=2988;D=01012323010123010101230123012323232323010101232324010123230101230101012301230123232323230101012323240101232301012301010123012301232323232301010123232401012323010123010101230123012323232323010101232353;CP=2;
 			{
