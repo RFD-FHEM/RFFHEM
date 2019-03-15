@@ -1661,7 +1661,7 @@ package lib::SD_ProtocolData;
 				length_min		=> '48',
 				length_max		=> '48',
 			},
-		"72"	=>	## Siro blinds MU		@Dr. Smag
+		"72"	=>	## Siro blinds MU	 @Dr.Smag
 							# ! same definition how ID 16 !
 							# https://forum.fhem.de/index.php?topic=77167.0
 							# MU;P0=-760;P1=334;P2=693;P3=-399;P4=-8942;P5=4796;P6=-1540;D=01010102310232310101010102310232323101010102310101010101023102323102323102323102310101010102310232323101010102310101010101023102310231023102456102310232310232310231010101010231023232310101010231010101010102310231023102310245610231023231023231023101010101;CP=1;R=45;O;
@@ -1684,7 +1684,7 @@ package lib::SD_ProtocolData;
 				length_max			=> '40',
 				msgOutro				=> 'SR;P0=-8500;D=0;',
 			},
-		"72.1"	=>	## Siro blinds MS		@Dr. Smag
+		"72.1"	=>	## Siro blinds MS		@Dr.Smag
 								# MS;P0=4803;P1=-1522;P2=333;P3=-769;P4=699;P5=-393;P6=-9190;D=2601234523454523454523452323232323452345454523232323452323232323234523232345454545;CP=2;SP=6;R=61;
 			{
 				name						=> 'Siro shutter',
@@ -1863,7 +1863,7 @@ package lib::SD_ProtocolData;
 				length_min		=> '12',
 				length_max		=> '12',
 			},
-		"80"	=>	## EM1000WZ (Energy-Monitor) Funkprotokoll (868Mhz),  @HomeAutoUser | Derwelcherichbin
+		"80"	=>	## EM1000WZ (Energy-Monitor) Funkprotokoll (868Mhz)  @HomeAutoUser | Derwelcherichbin
 							# https://github.com/RFD-FHEM/RFFHEM/issues/253
 							# MU;P1=-417;P2=385;P3=-815;P4=-12058;D=42121212121212121212121212121212121232321212121212121232321212121212121232323212323212321232121212321212123232121212321212121232323212121212121232121212121212121232323212121212123232321232121212121232123232323212321;CP=2;R=87;
 			{
