@@ -1996,7 +1996,7 @@ package lib::SD_ProtocolData;
 				length_min		=> '64',
 				length_max		=> '68',
 			},
-		"86"	=>	### for remote controls:  Novy 840029, CAME TOP 432EV, OSCH & Neff Transmitter SF01 01319004
+		"86"	=>	### for remote controls:  Novy 840029, CAME TOP 432EV, BOSCH & Neff Transmitter SF01 01319004
 							### CAME TOP 432EV 433,92 MHz für z.B. Drehtor Antrieb:
 							# https://forum.fhem.de/index.php/topic,63370.msg849400.html#msg849400
 							# https://github.com/RFD-FHEM/RFFHEM/issues/151 @andreasloe
