@@ -128,7 +128,15 @@
 # - Berner Garagentorantrieb GA401 | remote TEDSEN SKX1MD 433.92 MHz - 1 button | settings via 9 switch on battery compartment [Protocol 46]
 #{    compatible with doors: BERNER SKX1MD, ELKA SKX1MD, TEDSEN SKX1LC, TEDSEN SKX1
 #     https://github.com/RFD-FHEM/RFFHEM/issues/91
-#}    get sduino_dummy raw MU;;P0=-15829;;P1=-3580;;P2=1962;;P3=-330;;P4=245;;P5=-2051;;D=1234523232345234523232323234523234540023452323234523452323232323452323454023452323234523452323232323452323454023452323234523452323232323452323454023452323234523452323232323452323454023452323234523452323;;CP=2;;
+#     get sduino_dummy raw MU;;P0=-15829;;P1=-3580;;P2=1962;;P3=-330;;P4=245;;P5=-2051;;D=1234523232345234523232323234523234540023452323234523452323232323452323454023452323234523452323232323452323454023452323234523452323232323452323454023452323234523452323232323452323454023452323234523452323;;CP=2;;
+#     GEIGER GF0001, 2 Button, DIP-Schalter: + 0 + - + + - 0 0
+#     https://forum.fhem.de/index.php/topic,39153.0.html
+#     rauf:   MU;P0=-32001;P1=2072;P2=-260;P3=326;P4=-2015;P5=-15769;D=01212123412123434121212123434123412351212123412123434121212123434123412351212123412123434121212123434123412351212123412123434121212123434123412351212123412123434121212123434123412351212123412123434121212123434123412351212123412123434121212123434123412351;CP=3;R=37;O;
+#     runter: MU;P0=-15694;P1=2009;P2=-261;P3=324;P4=-2016;D=01212123412123434121212123434123434301212123412123434121212123434123434301212123412123434121212123434123434301212123412123434121212123434123434301212123412123434121212123434123434301;CP=3;R=30;
+#     ???
+#     MU;P0=313;P1=1212;P2=-309;P4=-2024;P5=-16091;P6=2014;D=01204040562620404626204040404040462046204040562620404626204040404040462046204040562620404626204040404040462046204040562620404626204040404040462046204040;CP=0;R=236;
+#     MU;P0=-15770;P1=2075;P2=-264;P3=326;P4=-2016;P5=948;D=012121234121234341212121234341234343012125;CP=3;R=208;
+#}
 ###############################################################################################################################################################################
 # - Chilitec Großhandel 22640 - LED Christbaumkerzen mit Fernbedienung
 #{ 		Taste -: 		AA802			0010		brightness_minus
@@ -302,8 +310,8 @@ my %models = (
 										"00111100" 	=> "Ch4_off",
 										"00001111" 	=> "Master_on",
 										"00011110" 	=> "Master_off",
-										"00010100" 	=> "Unknown_on",
-										"00000101" 	=> "Unknown_off",
+										"00010100" 	=> "Unknown_up",
+										"00000101" 	=> "Unknown_down",
 										hex_lengh		=> "5",
 										Protocol		=> "P34",
 										Typ					=> "remote"
@@ -351,7 +359,31 @@ my %models = (
 												Protocol	=> "P81",
 												Typ				=> "remote"
 											},
-	"TEDSEN_SKX1MD" =>	{	"0"				=> "send",
+	"Tedsen_SKX1xx" =>	{	"1100"		=> "Button_1",	# tristate 10
+												hex_lengh	=> "5",
+												Protocol	=> "P46",
+												Typ				=> "remote"
+											},
+	"Tedsen_SKX2xx" =>	{	"1000"		=> "Button_1",	#	tristate F0 = GEIGER Ab:  0-
+												"1010"		=> "Button_2",	# tristate FF = GEIGER Auf: 00
+												hex_lengh	=> "5",
+												Protocol	=> "P46",
+												Typ				=> "remote"
+											},
+	"Tedsen_SKX4xx" =>	{	"1000"		=> "Button_1",	#	tristate F0 = GEIGER Ab:  0-
+												"1010"		=> "Button_2",	# tristate FF = GEIGER Auf: 00
+												"0000"		=> "Button_3",	# tristate 00 = GEIGER Ab:  --
+												"0010"		=> "Button_4",	# tristate 0F = GEIGER Auf: -0
+												hex_lengh	=> "5",
+												Protocol	=> "P46",
+												Typ				=> "remote"
+											},
+	"Tedsen_SKX6xx" =>	{	"1000"		=> "Button_1",	#	tristate F0 = GEIGER Ab:  0-
+												"1010"		=> "Button_2",	# tristate FF = GEIGER Auf: 00
+												"0000"		=> "Button_3",	# tristate 00 = GEIGER Ab:  --
+												"0010"		=> "Button_4",	# tristate 0F = GEIGER Auf: -0
+												"1110"		=> "Button_5",	# tristate 1F = GEIGER Ab:  +0
+												"1011"		=> "Button_6",	# tristate F1 = GEIGER Auf: 0+
 												hex_lengh	=> "5",
 												Protocol	=> "P46",
 												Typ				=> "remote"
@@ -482,12 +514,12 @@ sub SD_UT_Define($$) {
 		return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short | long or not HEX (0-9 | a-f | A-F){4}";
 	}
 
-	### [5] checks TEDSEN_SKX1MD ###
-	return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short | long or not HEX (0-9 | a-f | A-F){5}" if ($a[2] eq "TEDSEN_SKX1MD" && not $a[3] =~ /^[0-9a-fA-F]{5}/s);
 	### [6] checks MD_2003R | MD_210R | MD_2018R ###
 	return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short | long or not HEX (0-9 | a-f | A-F){6}" if (($a[2] eq "MD_2003R" || $a[2] eq "MD_210R" || $a[2] eq "MD_2018R") && not $a[3] =~ /^[0-9a-fA-F]{6}/s);
 	### [7] checks Hoermann HSM4 | Krinner_LUMIX ###
 	return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short | long or not HEX (0-9 | a-f | A-F){7}" if (($a[2] eq "HSM4" || $a[2] eq "Krinner_LUMIX") && not $a[3] =~ /^[0-9a-fA-F]{7}/s);
+	### [7] checks Tedsen_SKX1xx, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx (tristate code)###
+	return "wrong tristate code! ($a[3]) $a[2] code to short | long or values not 0, 1 or F" if (($a[2] eq "Tedsen_SKX1xx" || $a[2] eq "Tedsen_SKX2xx" || $a[2] eq "Tedsen_SKX4xx" || $a[2] eq "Tedsen_SKX6xx") && not $a[3] =~ /^[01fF]{7}$/s);
 	### [9] checks Hoermann HS1-868-BS ###
 	return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short | long or not HEX (0-9 | a-f | A-F){9}" if ($a[2] eq "HS1_868_BS" && not $a[3] =~ /^[0-9a-fA-F]{9}/s);
 	### [14] checks LED_XM21_0 ###
@@ -548,11 +580,12 @@ sub SD_UT_Set($$$@) {
 		my @definition = split(" ", $hash->{DEF});																		# split adress from def
 		my $bitData = sprintf( "%012b", hex($definition[1])) if ($name ne "unknown");	# argument 1 - adress to binary with 12 digits
 		$msg = $models{$model}{Protocol} . "#" . $bitData . "#R" . $repeats;
-	############ TEDSEN_SKX1MD ############
-	} elsif ($model eq "TEDSEN_SKX1MD" && $cmd ne "?") {
-		my @definition = split(" ", $hash->{DEF});																		# split adress from def
-		my $bitData = sprintf( "%020b", hex($definition[1])) if ($name ne "unknown");	# argument 1 - adress to binary with 20 digits
-		$msg = $models{$model}{Protocol} . "#" . $bitData . "#R" . $repeats;
+	############ Tedsen_SKX1xx, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx ############
+	} elsif (($model eq "Tedsen_SKX1xx" || $model eq "Tedsen_SKX2xx" || $model eq "Tedsen_SKX4xx" || $model eq "Tedsen_SKX6xx") && $cmd ne "?") {
+		my @definition = split(" ", $hash->{DEF});																# split adress from def
+		my $adr = SD_UT_tristate2bin($definition[1]);															# argument 1 - adress tristate to bin with 18 bits
+		$msg = $models{$model}{Protocol} . "#" . $adr;
+		$msgEnd = "#R" . $repeats;
 	############ QUIGG_DMV ############
 	} elsif ($model eq "QUIGG_DMV" && $cmd ne "?") {
 		my @definition = split(" ", $hash->{DEF});																# split adress from def
@@ -610,7 +643,7 @@ sub SD_UT_Set($$$@) {
 	############ Krinner_LUMIX ############
 	} elsif ($model eq "Krinner_LUMIX" && $cmd ne "?") {
 		my @definition = split(" ", $hash->{DEF});																# split adress from def
-		my $adr = sprintf( "%028b", hex($definition[1])) if ($name ne "unknown");	# argument 1 - adress to binary with 14 digits
+		my $adr = sprintf( "%028b", hex($definition[1])) if ($name ne "unknown");	# argument 1 - adress to binary with 28 digits
 		$msg = $models{$model}{Protocol} . "#" . $adr;
 		$msgEnd .= "#R" . $repeats;
 	############ Manax ############
@@ -619,7 +652,7 @@ sub SD_UT_Set($$$@) {
 	############ ESTO KL_RF01############
 	} elsif ($model eq "KL_RF01" && $cmd ne "?") {
 		my @definition = split(" ", $hash->{DEF});																# split adress from def
-		my $adr = sprintf( "%016b", hex($definition[1])) if ($name ne "unknown");	# argument 1 - adress to binary with 14 digits
+		my $adr = sprintf( "%016b", hex($definition[1])) if ($name ne "unknown");	# argument 1 - adress to binary with 16 digits
 		$msg = $models{$model}{Protocol} . "#" . $adr;
 		$msgEnd .= "11110";	# nibble7 every?
 		$msgEnd .= "#R" . $repeats;
@@ -708,6 +741,7 @@ sub SD_UT_Parse($$) {
 	my $sabotage;					# MD_210R
 	my $batteryState;
 	my $state = "unknown";
+	my $tristateCode;
 	my $unknown_bits;			# unknown bits to a reading
 
 	my $deletecache = $modules{SD_UT}{defptr}{deletecache};
@@ -783,11 +817,17 @@ sub SD_UT_Parse($$) {
 			$devicedef = "TR_502MSV " . $deviceCode;
 			$def = $modules{SD_UT}{defptr}{$devicedef};
 		}
-		### Remote control TEDSEN_SKX1MD [P46] ###
+		### Remote control Tedsen_SKX2xx [P46] ###
 		if (!$def && $protocol == 46) {
-			$deviceCode = $rawData;
-			$devicedef = "TEDSEN_SKX1MD " . $deviceCode;
-			$def = $modules{SD_UT}{defptr}{$devicedef};
+			$deviceCode = SD_UT_bin2tristate(substr($bitData,0,14));		# only 14 bit from bitdata to tristate
+			$devicedef = "Tedsen_SKX1xx " . $deviceCode if (!$def);
+			$def = $modules{SD_UT}{defptr}{$devicedef} if (!$def);
+			$devicedef = "Tedsen_SKX2xx " . $deviceCode if (!$def);
+			$def = $modules{SD_UT}{defptr}{$devicedef} if (!$def);
+			$devicedef = "Tedsen_SKX4xx " . $deviceCode if (!$def);
+			$def = $modules{SD_UT}{defptr}{$devicedef} if (!$def);
+			$devicedef = "Tedsen_SKX6xx " . $deviceCode if (!$def);
+			$def = $modules{SD_UT}{defptr}{$devicedef} if (!$def);
 		}
 		### NEFF SF01_01319004 || BOSCH SF01_01319004_Typ2 [P86] ###
 		if (!$def && $protocol == 86) {
@@ -972,9 +1012,11 @@ sub SD_UT_Parse($$) {
 			$usersystem = "Unitec 47125" if (oct("0b".$zone) == 7);
 		}
 		Log3 $name, 5, "$ioname: SD_UT_Parse devicedef=$devicedef attr_model=$model protocol=$protocol deviceCode=$deviceCode state=$state Zone=$zone";
-	############ TEDSEN_SKX1MD ############ Protocol 46 ############
-	} elsif ($model eq "TEDSEN_SKX1MD" && $protocol == 46) {
-		$state = "receive";
+	############ Tedsen_SKX1xx, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx ############ Protocol 46 ############
+	} elsif (($model eq "Tedsen_SKX1xx" || $model eq "Tedsen_SKX2xx" || $model eq "Tedsen_SKX4xx" || $model eq "Tedsen_SKX6xx") && $protocol == 46) {
+		$state = substr($bitData,14,4);
+		$tristateCode = SD_UT_bin2tristate(substr($bitData,0,-2));		# only 18 bit from bitdata
+		Log3 $iohash, 4, "$ioname: SD_UT_Parse $model - converted to tristate $tristateCode";
 	############ SA_434_1_mini ############ Protocol 81 ############
 	} elsif ($model eq "SA_434_1_mini" && ($protocol == 81 || $protocol == 83 || $protocol == 86)) {
 		$state = "receive";
@@ -1113,6 +1155,7 @@ sub SD_UT_Parse($$) {
 	readingsBulkUpdate($hash, "Usersystem", $usersystem, 0) if (defined($zoneRead) && $model eq "Unitec_47031");
 	readingsBulkUpdate($hash, "LastAction", "receive", 0) if (defined($state) && $models{$model}{Typ} eq "remote" && ($model ne "SA_434_1_mini" || $model ne "HS1_868_BS"));
 	readingsBulkUpdate($hash, "state", $state)  if (defined($state) && $state ne "unknown");
+	readingsBulkUpdate($hash, "tristateCode", $tristateCode) if (defined($tristateCode));
 	readingsEndUpdate($hash, 1); 		# Notify is done by Dispatch
 
 	return $name;
@@ -1177,9 +1220,9 @@ sub SD_UT_Attr(@) {
 			} elsif ($attrName eq "model" && $attrValue eq "SA_434_1_mini") {
 				$deviceCode = sprintf("%03X", oct( "0b$bitData" ) );
 				$devicename = $devicemodel."_".$deviceCode;
-			############ TEDSEN_SKX1MD	############
-			} elsif ($attrName eq "model" && $attrValue eq "TEDSEN_SKX1MD") {
-				$deviceCode = sprintf("%05X", oct( "0b$bitData" ) );
+			############ Tedsen_SKX1xx, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx	############
+			} elsif ($attrName eq "model" && ($attrValue eq "Tedsen_SKX1xx" || $attrValue eq "Tedsen_SKX2xx" || $attrValue eq "Tedsen_SKX4xx" || $attrValue eq "Tedsen_SKX6xx")) {
+				$deviceCode = SD_UT_bin2tristate(substr($bitData,0,14));					# only 14 bit from bitdata to tristate
 				$devicename = $devicemodel."_".$deviceCode;
 			############ Unitec_47031	############
 			} elsif ($attrName eq "model" && $attrValue eq "Unitec_47031") {
@@ -1287,6 +1330,36 @@ sub SD_UT_Attr(@) {
 }
 
 ###################################
+sub SD_UT_bin2tristate($) {
+	my $bitData = shift;
+	my %bintotristate=(
+	 	 "00" => "0",
+	 	 "10" => "F",
+	 	 "11" => "1"
+	);
+	my $tscode;
+	for (my $n=0; $n < length($bitData); $n = $n + 2) {
+		$tscode = $tscode . $bintotristate{substr($bitData,$n,2)};
+	}
+	return $tscode;
+}
+
+###################################
+sub SD_UT_tristate2bin($) {
+	my $tsData = shift;
+	my %tristatetobin=(
+	 	 "0" => "00",
+	 	 "F" => "10",
+	 	 "1" => "11"
+	);
+	my $bitData;
+	for (my $n=0; $n < length($tsData); $n++) {
+		$bitData = $bitData . $tristatetobin{substr($tsData,$n,1)};
+	}
+	return $bitData;
+}
+
+###################################
 
 1;
 
@@ -1319,7 +1392,14 @@ sub SD_UT_Attr(@) {
 	 <ul> - Novy Pureline 6830 kitchen hood&nbsp;&nbsp;&nbsp;<small>(module model: Novy_840029 | protocol 86)</small></ul>
 	 <ul> - QUIGG DMV-7000&nbsp;&nbsp;&nbsp;<small>(module model: QUIGG_DMV | protocol 34)</small></ul>
 	 <ul> - Remote control SA-434-1 mini 923301&nbsp;&nbsp;&nbsp;<small>(module model: SA_434_1_mini | protocol 81)</small></ul>
-	 <ul> - Remote control TEDSEN SKX1MD&nbsp;&nbsp;&nbsp;<small>(module model: TEDSEN_SKX1MD | protocol 46)</small></ul>
+	 <ul> - Tedsen Teletaster <small>(protocol 46)</small>:
+			<small>
+			<ul>SKX1xx, 1 button - module model: Tedsen_SKX1xx</ul>
+			<ul>SKX2xx, 2 button (GEIGER_GF0x01) - module model: Tedsen_SKX2xx</ul>
+			<ul>SKX4xx, 4 button (GEIGER_GF0x02) - module model: Tedsen_SKX4xx</ul>
+			<ul>SKX6xx, 6 button (GEIGER_GF0x03) - module model: Tedsen_SKX6xx</ul>
+			</small>
+	 </ul>
 	 <ul> - unitec remote door reed switch 47031 (Unitec 47121 | Unitec 47125 | Friedland)&nbsp;&nbsp;&nbsp;<small>(module model: Unitec_47031 | protocol 30)</small></ul>
 	 <ul> - Westinghouse Delancey ceiling fan (remote, 5 buttons without SET)&nbsp;&nbsp;&nbsp;<small>(module model: Buttons_five | protocol 29)</small></ul>
 	 <ul> - Westinghouse Delancey ceiling fan (remote, 9 buttons with SET)&nbsp;&nbsp;&nbsp;<small>(module model: RH787T | protocol 83)</small></ul>
@@ -1430,7 +1510,7 @@ sub SD_UT_Attr(@) {
 		button O on the remote</li>
 	</ul><br>
 
-	<ul><u>Remote control SA-434-1 mini 923301&nbsp;&nbsp;|&nbsp;&nbsp;Hoermann HS1-868-BS&nbsp;&nbsp;|&nbsp;&nbsp;TEDSEN_SKX1MD</u></ul>
+	<ul><u>Remote control SA-434-1 mini 923301&nbsp;&nbsp;|&nbsp;&nbsp;Hoermann HS1-868-BS&nbsp;&nbsp;|&nbsp;&nbsp;Tedsen_SKX1/2/4/6xx</u></ul>
 	<ul>
 		<li>send<br>
 		button <small>(Always send the same, even if the user sends another set command via console.)</small></li>
@@ -1529,7 +1609,7 @@ sub SD_UT_Attr(@) {
 	<ul><a name="model"></a>
 		<li>model<br>
 		The attribute indicates the model type of your device.<br>
-		(unknown, Buttons_five, CAME_TOP_432EV, Chilitec_22640, KL_RF01, HS1-868-BS, HSM4, QUIGG_DMV, LED_XM21_0, Manax, Novy_840029, RH787T, SA_434_1_mini, SF01_01319004, TEDSEN_SKX1MD, TR_502MSV, Unitec_47031)</li>
+		(unknown, Buttons_five, CAME_TOP_432EV, Chilitec_22640, KL_RF01, HS1-868-BS, HSM4, QUIGG_DMV, LED_XM21_0, Manax, Novy_840029, RH787T, SA_434_1_mini, SF01_01319004, Tedsen_SKX1xx, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx, TR_502MSV, Unitec_47031)</li>
 	</ul><br>
 	<ul><li><a name="repeats">repeats</a><br>
 	This attribute can be used to adjust how many repetitions are sent. Default is 5.</li></ul><br>
@@ -1553,7 +1633,7 @@ sub SD_UT_Attr(@) {
 	<li>state<br>
 	State of the device</li></ul><br>
 
-	<ul><u>HS1-868-BS&nbsp;&nbsp;|&nbsp;&nbsp;SA_434_1_mini&nbsp;&nbsp;|&nbsp;&nbsp;TEDSEN_SKX1MD</u><br>
+	<ul><u>HS1-868-BS&nbsp;&nbsp;|&nbsp;&nbsp;SA_434_1_mini&nbsp;&nbsp;|&nbsp;&nbsp;Tedsen_SKX1xx&nbsp;&nbsp;|&nbsp;&nbsp;Tedsen_SKX2xx&nbsp;&nbsp;|&nbsp;&nbsp;Tedsen_SKX4xx&nbsp;&nbsp;|&nbsp;&nbsp;Tedsen_SKX6xx</u><br>
 	<li>LastAction<br>
 	Last executed action of FHEM. <code>send</code> for command send.</li>
 	<li>state<br>
@@ -1598,7 +1678,14 @@ sub SD_UT_Attr(@) {
 	 <ul> - Novy Pureline 6830 Dunstabzugshaube&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Novy_840029 | Protokoll 86)</small></ul>
 	 <ul> - QUIGG DMV-7000&nbsp;&nbsp;&nbsp;<small>(Modulmodel: QUIGG_DMV | Protokoll 34)</small></ul>
 	 <ul> - Remote control SA-434-1 mini 923301&nbsp;&nbsp;&nbsp;<small>(Modulmodel: SA_434_1_mini | Protokoll 81)</small></ul>
-	 <ul> - Remote control TEDSEN_SKX1MD&nbsp;&nbsp;&nbsp;<small>(Modulmodel: TEDSEN_SKX1MD | Protokoll 46)</small></ul>
+	 <ul> - Tedsen Teletaster <small>(Protokoll 46)</small>:
+			<small>
+			<ul>SKX1xx, 1 Taste - Modulmodel: Tedsen_SKX1xx</ul>
+			<ul>SKX2xx, 2 Tasten (GEIGER_GF0x01) - Modulmodel: Tedsen_SKX2xx</ul>
+			<ul>SKX4xx, 4 Tasten (GEIGER_GF0x02) - Modulmodel: Tedsen_SKX4xx</ul>
+			<ul>SKX6xx, 6 Tasten (GEIGER_GF0x03) - Modulmodel: Tedsen_SKX6xx</ul>
+			</small>
+	 </ul>
 	 <ul> - unitec remote door reed switch 47031 (Unitec 47121 | Unitec 47125 | Friedland)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Unitec_47031 | Protokoll 30)</small></ul>
 	 <ul> - Westinghouse Deckenventilator (Fernbedienung, 5 Tasten ohne SET)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Buttons_five | Protokoll 29)</small></ul>
 	 <ul> - Westinghouse Delancey Deckenventilator (Fernbedienung, 9 Tasten mit SET)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: RH787T | Protokoll 83)</small></ul>
@@ -1711,7 +1798,7 @@ sub SD_UT_Attr(@) {
 		Taste O auf der Fernbedienung</li>
 	</ul><br>
 
-	<ul><u>Remote control SA-434-1 mini 923301&nbsp;&nbsp;|&nbsp;&nbsp;Hoermann HS1-868-BS&nbsp;&nbsp;|&nbsp;&nbsp;TEDSEN_SKX1MD</u></ul>
+	<ul><u>Remote control SA-434-1 mini 923301&nbsp;&nbsp;|&nbsp;&nbsp;Hoermann HS1-868-BS&nbsp;&nbsp;|&nbsp;&nbsp;Tedsen_SKX1xx</u></ul>
 	<ul>
 		<li>send<br>
 		Knopfdruck <small>(Sendet immer das selbe, auch wenn der Benutzer einen anderen Set-Befehl via Konsole sendet.)</small></li>
@@ -1809,7 +1896,7 @@ sub SD_UT_Attr(@) {
 	<ul><li><a href="#IODev">IODev</a></li></ul><br>
 	<ul><li><a name="model">model</a><br>
 		Das Attribut bezeichnet den Modelltyp Ihres Ger&auml;tes.<br>
-		(unknown, Buttons_five, CAME_TOP_432EV, Chilitec_22640, KL_RF01, HS1-868-BS, HSM4, QUIGG_DMV, RH787T, LED_XM21_0, Manax, Novy_840029, SA_434_1_mini, SF01_01319004, TEDSEN_SKX1MD, TR_502MSV, Unitec_47031)</li><a name=" "></a>
+		(unknown, Buttons_five, CAME_TOP_432EV, Chilitec_22640, KL_RF01, HS1-868-BS, HSM4, QUIGG_DMV, RH787T, LED_XM21_0, Manax, Novy_840029, SA_434_1_mini, SF01_01319004, Tedsen_SKX1xx, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx, TR_502MSV, Unitec_47031)</li><a name=" "></a>
 	</ul><br>
 	<ul><li><a name="repeats">repeats</a><br>
 	Mit diesem Attribut kann angepasst werden, wie viele Wiederholungen sendet werden. Standard ist 5.</li></ul><br>
@@ -1833,7 +1920,7 @@ sub SD_UT_Attr(@) {
 	<li>state<br>
 	Zustand des Ger&auml;tes.</li></ul><br>
 
-	<ul><u>HS1-868-BS&nbsp;&nbsp;|&nbsp;&nbsp;SA_434_1_mini&nbsp;&nbsp;|&nbsp;&nbsp;TEDSEN_SKX1MD</u><br>
+	<ul><u>HS1-868-BS&nbsp;&nbsp;|&nbsp;&nbsp;SA_434_1_mini&nbsp;&nbsp;|&nbsp;&nbsp;Tedsen_SKX1xx&nbsp;&nbsp;|&nbsp;&nbsp;Tedsen_SKX2xx&nbsp;&nbsp;|&nbsp;&nbsp;Tedsen_SKX4xx&nbsp;&nbsp;|&nbsp;&nbsp;Tedsen_SKX6xx</u><br>
 	<li>LastAction<br>
 	Zuletzt ausgef&uuml;hrte Aktion aus FHEM. <code>send</code> f&uuml;r Kommando gesendet.</li>
 	<li>state<br>

@@ -44,6 +44,7 @@
 #                            If not set (default) or set to 0, data will be dispatched in hex mode to other logical modules.
 # postDemodulation => \&   # only MU - SIGNALduino internal sub for processing before dispatching to a logical module
 # method      => \&        # call to process this message
+#	frequency   => ' '       # frequency to set register cc1101 to send | example: 10AB85550A
 # format      => ' '       # twostate | pwm | manchester --> modulation type of the signal, only manchester use SIGNALduino internal, other types only comment
 # modulematch => ' '       # RegEx on the exact message including preamble | if defined, it will be evaluated
 # polarity    => 'invert'  # only MC signals | invert bits of the signal
@@ -51,8 +52,8 @@
 ##### notice #### or #### info ############################################################################################################
 # !!! Between the keys and values ​​no tabs not equal to a width of 8 or please use spaces !!!
 # !!! Please use first unused id for new protocols !!!
-# ID´s are currently unused: 20 | 68
-# ID´s need to be revised (preamble u): 5|6|19|20|21|22|23|24|25|26|27|28|31|36|40|42|52|56|59|63|78|87|88
+# ID´s are currently unused: 20 | 68 | 78
+# ID´s need to be revised (preamble u): 5|6|19|21|22|23|24|25|26|27|28|31|36|40|42|52|56|59|63
 ###########################################################################################################################################
 # Please provide at least three messages for each new MU/MC/MS protocol and a URL of issue in GitHub or discussion in FHEM Forum
 # https://forum.fhem.de/index.php/topic,58396.975.html | https://github.com/RFD-FHEM/RFFHEM
@@ -1187,27 +1188,35 @@ package lib::SD_ProtocolData;
 				length_max				=> '120',
 				postDemodulation	=> sub {	my ($name, @bit_msg) = @_;	my @new_bitmsg = splice @bit_msg, 0,88;	return 1,@new_bitmsg; },
 			},
-		"46"	=>	## Berner Garagentorantrieb GA401
+		"46"	=>	## Tedsen Fernbedienungen u.a. für Berner Garagentorantrieb GA401 und Geiger Antriebstechnik Rolladensteuerung
+							# https://github.com/RFD-FHEM/RFFHEM/issues/91
 							# remote TEDSEN SKX1MD 433.92 MHz - 1 button | settings via 9 switch on battery compartment
-							# compatible with doors: BERNER SKX1MD, ELKA SKX1MD, TEDSEN SKX1LC, TEDSEN SKX1
-							# https://github.com/RFD-FHEM/RFFHEM/issues/91 @anphiga
-							# door open   MU;P0=-15829;P1=-3580;P2=1962;P3=-330;P4=245;P5=-2051;D=1234523232345234523232323234523234540023452323234523452323232323452323454023452323234523452323232323452323454023452323234523452323232323452323454023452323234523452323232323452323454023452323234523452323;CP=2;
-							# door close  MU;P0=-1943;P1=1966;P2=-327;P3=247;P5=-15810;D=01230121212301230121212121230121230351230121212301230121212121230121230351230121212301230121212121230121230351230121212301230121212121230121230351230121212301230121212121230121230351230;CP=1;
+							# compatible with doors: BERNER SKX1MD, ELKA SKX1MD, TEDSEN SKX1LC, TEDSEN SKX1 - 1 Button
+							# MU;P0=-15829;P1=-3580;P2=1962;P3=-330;P4=245;P5=-2051;D=1234523232345234523232323234523234540 0 2345 2323 2345 2345 2323 2323 2345 2323 454 023452323234523452323232323452323454023452323234523452323232323452323454023452323234523452323232323452323454023452323234523452323;CP=2;
+							# MU;P0=-1943;P1=1966;P2=-327;P3=247;P5=-15810;D=012301212123012301212121212301212303           5 1230 1212 1230 1230 1212 1212 1230 1212 303 5 1230 1212 1230 1230 1212 1212 1230 1212 303 51230121212301230121212121230121230351230121212301230121212121230121230351230;CP=1;
+							## GEIGER GF0001, 2 Button, DIP-Schalter: + 0 + - + + - 0 0
+							# https://forum.fhem.de/index.php/topic,39153.0.html
+							# rauf:   MU;P0=-32001;P1=2072;P2=-260;P3=326;P4=-2015;P5=-15769;D=01212123412123434121212123434123412351212123412123434121212123434123412351212123412123434121212123434123412351212123412123434121212123434123412351212123412123434121212123434123412351212123412123434121212123434123412351212123412123434121212123434123412351;CP=3;R=37;O;
+							# runter: MU;P0=-15694;P1=2009;P2=-261;P3=324;P4=-2016;D=01212123412123434121212123434123434301212123412123434121212123434123434301212123412123434121212123434123434301212123412123434121212123434123434301212123412123434121212123434123434301;CP=3;R=30;
+							# ?
+							# MU;P0=313;P1=1212;P2=-309;P4=-2024;P5=-16091;P6=2014;D=01204040562620404626204040404040462046204040562620404626204040404040462046204040562620404626204040404040462046204040562620404626204040404040462046204040;CP=0;R=236;
+							# MU;P0=-15770;P1=2075;P2=-264;P3=326;P4=-2016;P5=948;D=012121234121234341212121234341234343012125;CP=3;R=208;
 			{
-				name						=> 'Berner Garagedoor GA401',
-				comment					=> 'remote control TEDSEN SKX1MD',
-				id							=> '46',
+				name            => 'SKXxxx, GF0x0x',
+				comment         => 'remote controls Tedsen SKXxxx, GEIGER GF0x0x',
+				id              => '46',
 				knownFreqs      => '433.92',
-				one							=> [1,-8],
-				zero						=> [8,-1],
-				start						=> [1,-63],
-				clockabs				=> 250,	# -1=auto
-				format					=> 'twostate',	# not used now
-				preamble				=> 'P46#',
-				clientmodule		=> 'SD_UT',
-				modulematch			=> '^P46#.*',
-				length_min			=> '16',
-				length_max			=> '18',
+				one             => [7,-1],
+				zero            => [1,-7],
+				start           => [1,-55],
+				clockabs        => 290,
+				reconstructBit  => '1',
+				format          => 'tristate', # not used now
+				preamble        => 'P46#',
+				clientmodule    => 'SD_UT',
+				modulematch     => '^P46#.*',
+				length_min      => '14',       # ???
+				length_max      => '18',
 			},
 		"47"	=>	## Maverick
 							# MC;LL=-507;LH=490;SL=-258;SH=239;D=AA9995599599A959996699A969;C=248;L=104;
@@ -1814,28 +1823,28 @@ package lib::SD_ProtocolData;
 				length_max		=> '44',
 				remove_zero		=> 1,						# Removes leading zeros from output
 			},
-		"78"	=>	## GEIGER blind motors
-							# https://forum.fhem.de/index.php/topic,39153.0.html @fasch
-							# MU;P0=313;P1=1212;P2=-309;P4=-2024;P5=-16091;P6=2014;D=01204040562620404626204040404040462046204040562620404626204040404040462046204040562620404626204040404040462046204040562620404626204040404040462046204040;CP=0;R=236;
-							# MU;P0=-15770;P1=2075;P2=-264;P3=326;P4=-2016;P5=948;D=012121234121234341212121234341234343012125;CP=3;R=208;
-			{
-				name					=> 'GEIGER blind motors',
-				comment				=> 'example remote control GF0001',
-				id						=> '78',
-				knownFreqs		=> '',
-				developId			=> 'y',
-				zero					=> [1,-6.6],
-				one						=> [6.6,-1],
-				start					=> [-53],
-				clockabs     	=> 300,
-				format				=> 'twostate',
-				preamble			=> 'u78#',			# prepend to converted message
-				clientmodule	=> 'SIGNALduino_un',
-				#modulematch	=> '^TX......',
-				length_min		=> '14',
-				length_max		=> '18',
-				paddingbits		=> '2'				 # pad 1 bit, default is 4
-			},
+		# "78"	=>	## GEIGER blind motors
+							# # https://forum.fhem.de/index.php/topic,39153.0.html @fasch
+							# # MU;P0=313;P1=1212;P2=-309;P4=-2024;P5=-16091;P6=2014;D=01204040562620404626204040404040462046204040562620404626204040404040462046204040562620404626204040404040462046204040562620404626204040404040462046204040;CP=0;R=236;
+							# # MU;P0=-15770;P1=2075;P2=-264;P3=326;P4=-2016;P5=948;D=012121234121234341212121234341234343012125;CP=3;R=208;
+			# {
+				# name					=> 'GEIGER blind motors',
+				# comment				=> 'example remote control GF0001',
+				# id						=> '78',
+				# knownFreqs		=> '',
+				# developId			=> 'y',
+				# zero					=> [1,-6.6],
+				# one						=> [6.6,-1],
+				# start					=> [-53],
+				# clockabs     	=> 300,
+				# format				=> 'twostate',
+				# preamble			=> 'u78#',			# prepend to converted message
+				# clientmodule	=> 'SIGNALduino_un',
+				# #modulematch	=> '^TX......',
+				# length_min		=> '14',
+				# length_max		=> '18',
+				# paddingbits		=> '2'				 # pad 1 bit, default is 4
+			# },
 		"79"	=>	## Heidemann | Heidemann HX | VTX-BELL
 							# https://github.com/RFD-FHEM/SIGNALDuino/issues/84
 							# MU;P0=656;P1=-656;P2=335;P3=-326;P4=-5024;D=0123012123012303030301 24 230123012123012303030301 24 230123012123012303030301 24 2301230121230123030303012423012301212301230303030124230123012123012303030301242301230121230123030303012423012301212301230303030124230123012123012303030301242301230121230123030303;CP=2;O;
@@ -2218,6 +2227,28 @@ package lib::SD_ProtocolData;
 				length_max   => '36',           # 1. MSG: 33 Bit, wird verlängert auf 36 Bit
 				clientmodule	=> 'SD_UT',
 				#modulematch	=> '^P93#.*',
+			},
+		"94"	=>	# Atech wireless weather station (vermutlicher Name: WS-308)
+							# https://github.com/RFD-FHEM/RFFHEM/issues/547 @Kreidler1221
+							# wrong? MU;P0=-31266;P1=1537;P2=-294;P3=-7582;P4=-1999;P5=-223;D=012121212121212131414141412121412121414141414141414141412121412121414141414141212141212141412121412121414121015151512121212131414141412121412121414141414141414141412121412121414141414141212141212141412121412121414121;CP=1;
+							# MU;P0=-31266;P1=1538;P2=-285;P3=-7582;P4=-1995;D=012121212121212131414141412121412121414141414141414141412121412121414141414121214121214141414121214121214121012121212121212131414141412121412121414141414141414141412121412121414141414121214121214141414121214121214121;CP=1;
+							# MU;P0=-31268;P1=1538;P2=-285;P3=-7574;P4=-1997;D=012121212121212131414141412121412121414141414141414141412121412121414141412121414141212141212141212141414121012121212121212131414141412121412121414141414141414141412121412121414141412121414141212141212141212141414121;CP=1;
+			{
+				name						=> 'Atech',
+				comment					=> 'temperature sensor',
+				id							=> '94',
+				knownFreqs      => '',
+				one							=> [6,-1],
+				zero						=> [6,-8],
+				start           => [6,-30],
+				clockabs				=> 250,
+				#developId				=> 'y',
+				format					=> 'twostate',
+				preamble				=> 'u94#',
+				#clientmodule		=> '',
+				#modulematch		=> '',
+				length_min			=> '36',
+				length_max			=> '54',
 			},
 	);
 	sub getProtocolList	{	
