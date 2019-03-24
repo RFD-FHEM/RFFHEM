@@ -1961,7 +1961,10 @@ sub SIGNALduno_Dispatch($$$$$)
 		#readingsSingleUpdate($hash, "state", $hash->{READINGS}{state}{VAL}, $event);
 		
 		$hash->{RAWMSG} = $rmsg;
-		my %addvals = (DMSG => $dmsg);
+		my %addvals = (
+			DMSG => $dmsg,
+			ID   => $id
+		);
 		if (AttrVal($name,"suppressDeviceRawmsg",0) == 0) {
 			$addvals{RAWMSG} = $rmsg
 		}
