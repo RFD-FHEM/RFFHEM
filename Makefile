@@ -1,4 +1,6 @@
 .PHONY: test UnitTest/makefile clean
+space:=
+space+=
 
 MAKEFILE_DIR:=$(subst $(space),\$(space),$(shell dirname $(subst $(space),\$(space),$(realpath $(lastword $(MAKEFILE_LIST))))))
 
@@ -10,9 +12,10 @@ UnitTest/makefile:
 	@mkdir -p $(dir $@)
 	@test -f $@ || wget -O $@ https://raw.githubusercontent.com/RFD-FHEM/UnitTest/master/makefile
 
-test: UnitTest/makefile	deploylocalLibs
+test: UnitTest/makefile deploylocalLibs
 	${MAKE} -f $< setupEnv test PERL_OPTS="-MDevel::Cover"
 
 clean:  UnitTest/makefile	
-ls	${MAKE} -f $< clean
+	${MAKE} -f $< clean
 	@rm UnitTest/makefile || true
+
