@@ -1,8 +1,10 @@
-18.03.2019
+25.03.2019
  14_SD_UT.pm: revised Tedsen models | TEDSEN_SKX1MD OLD rename to TEDSEN_SKX1xx because other new models TEDSEN_SKX2xx,TEDSEN_SKX4xx,TEDSEN_SKX6xx
               !! Old model TEDSEN_SKX1MD delete and autocreate to TEDSEN_SKX1xx | remotes with different number of buttons !!
  signalduino_protocols.pm: revised ID46 and ID78 (GEIGER blind motors) removed | ID 46 is now Tedsen remote for Berner Garagentorantrieb GA401 and Geiger Antriebstechnik Rolladensteuerung)
                            added ID94 for https://github.com/RFD-FHEM/RFFHEM/issues/547 | Atech wireless weather station
+25.03.2019
+ 14_SD_RSL.pm: fix PERL WARNING: "my" variable $iodevice
 16.03.2019
  00_SIGNALduino.pm revised doc sendMSG
 12.03.2019

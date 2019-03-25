@@ -1116,7 +1116,7 @@ package lib::SD_ProtocolData;
 				clockabs			=> 500,
 				format				=> 'twostate',
 				preamble			=> 'P42#',
-				clientmodule	=> 'SD_Bell',
+				clientmodule	=> 'SD_BELL',
 				#modulematch		=> '^P42#.*',
 				length_min		=> '28',
 				length_max		=> '120',
