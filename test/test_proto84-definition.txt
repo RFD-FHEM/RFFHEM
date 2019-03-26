@@ -24,6 +24,8 @@ defmod test_proto84 UnitTest dummyDuino (
    is(ReadingsVal($sensorname,"batteryState","0"),"ok","check battery reading");
    is(ReadingsVal($sensorname,"channel","0"),"1","check battery reading");
    is(ReadingsVal($sensorname,"sendmode","0"),"auto","check sendmode reading");
+   is(InternalVal($sensorname,"$target_ID",undef),"84","check protocolid internal");
+
  }
 } 
 )
