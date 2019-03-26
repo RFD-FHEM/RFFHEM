@@ -23,7 +23,7 @@ defmod test_proto44 UnitTest dummyDuino (
    is(ReadingsVal($sensorname,"humidity","0"),"68","check humidity reading");
    is(ReadingsVal($sensorname,"batteryState","0"),"ok","check battery reading");
    is(ReadingsVal($sensorname,"channel","1"),"1","check battery reading");
-   is(InternalVal($sensorname,"$target_ID","undef"),"44","check protocolid internal");
+   is(InternalVal($sensorname,$target."_ID","undef"),"44","check protocolid internal");
  }
 } 
 )
