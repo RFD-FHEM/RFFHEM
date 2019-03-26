@@ -1,10 +1,10 @@
-.PHONY: test UnitTest/makefile clean
+.PHONY: test UnitTest/makefile deploylocalLibs clean
 space:=
 space+=
 
 MAKEFILE_DIR:=$(subst $(space),\$(space),$(shell dirname $(subst $(space),\$(space),$(realpath $(lastword $(MAKEFILE_LIST))))))
 
-deploylocalLibs :
+deploylocalLibs:
 	@cp $(MAKEFILE_DIR)/FHEM/lib/*.pm /opt/fhem/FHEM/lib
 
 	
