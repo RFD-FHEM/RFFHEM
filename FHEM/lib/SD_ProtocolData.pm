@@ -1210,7 +1210,7 @@ package lib::SD_ProtocolData;
 				zero            => [1,-7],
 				start           => [1,-55],
 				clockabs        => 290,
-				reconstructBit  => '1',
+#				reconstructBit  => '1',    TODO: Festlegen ob reconstruct benötigt wird und wie mit den Startsequenzen zukünftig gearbeitet werden soll
 				format          => 'tristate', # not used now
 				preamble        => 'P46#',
 				clientmodule    => 'SD_UT',
