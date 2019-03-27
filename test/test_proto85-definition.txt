@@ -19,7 +19,7 @@ defmod test_proto85 UnitTest dummyDuino (
  ok(IsDevice($sensorname), "check Sensor created with second dispatch");
  
  subtest 'Checking readings' => sub {
-   plan tests => 4;
+   plan tests => 5;
    sleep 3;
    SIGNALduino_Parse_MU($targetHash, $targetHash, $targetHash->{NAME}, $rmsg,%signal_parts);
    is(ReadingsVal($sensorname,"temperature","0"),"7.6","check temperature reading");
