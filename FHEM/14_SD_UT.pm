@@ -244,6 +244,9 @@ no warnings 'portable';  # Support for 64-bit ints required
 
 #$| = 1;		#Puffern abschalten, Hilfreich für PEARL WARNINGS Search
 
+sub SD_UT_bin2tristate($);
+sub SD_UT_tristate2bin($);
+
 ### HASH for all modul models ###
 my %models = (
 	# keys(model) => values

@@ -1208,9 +1208,9 @@ package lib::SD_ProtocolData;
 				knownFreqs      => '433.92',
 				one             => [7,-1],
 				zero            => [1,-7],
-				start           => [1,-55],
+				start           => [-55],
 				clockabs        => 290,
-#				reconstructBit  => '1',    TODO: Festlegen ob reconstruct benötigt wird und wie mit den Startsequenzen zukünftig gearbeitet werden soll
+				reconstructBit  => '1',    			# TODO: Festlegen ob reconstruct benötigt wird und wie mit den Startsequenzen zukünftig gearbeitet werden soll
 				format          => 'tristate', # not used now
 				preamble        => 'P46#',
 				clientmodule    => 'SD_UT',
