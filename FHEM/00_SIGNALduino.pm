@@ -1963,7 +1963,7 @@ sub SIGNALduno_Dispatch($$$$$)
 		$hash->{RAWMSG} = $rmsg;
 		my %addvals = (
 			DMSG => $dmsg,
-			ID   => $id
+			Protocol_ID => $id
 		);
 		if (AttrVal($name,"suppressDeviceRawmsg",0) == 0) {
 			$addvals{RAWMSG} = $rmsg
