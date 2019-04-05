@@ -16,13 +16,14 @@ defmod test_proto44 UnitTest dummyDuino (
  ok(IsDevice($sensorname), "check Sensor created with second dispatch");
  
  subtest 'Checking readings' => sub {
-   plan tests => 4;
+   plan tests => 5;
    sleep 3;
    SIGNALduino_Parse_MU($targetHash, $targetHash, $targetHash->{NAME}, $rmsg,%signal_parts);
    is(ReadingsVal($sensorname,"temperature","0"),"3.2","check temperature reading without leading 0");
    is(ReadingsVal($sensorname,"humidity","0"),"68","check humidity reading");
    is(ReadingsVal($sensorname,"batteryState","0"),"ok","check battery reading");
    is(ReadingsVal($sensorname,"channel","1"),"1","check battery reading");
+   is(InternalVal($sensorname,$target."_Protocol_ID","undef"),"44","check protocolid internal");
  }
 } 
 )

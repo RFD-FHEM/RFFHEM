@@ -1961,7 +1961,10 @@ sub SIGNALduno_Dispatch($$$$$)
 		#readingsSingleUpdate($hash, "state", $hash->{READINGS}{state}{VAL}, $event);
 		
 		$hash->{RAWMSG} = $rmsg;
-		my %addvals = (DMSG => $dmsg);
+		my %addvals = (
+			DMSG => $dmsg,
+			Protocol_ID => $id
+		);
 		if (AttrVal($name,"suppressDeviceRawmsg",0) == 0) {
 			$addvals{RAWMSG} = $rmsg
 		}
@@ -4769,7 +4772,7 @@ sub SIGNALduino_githubParseHttpResponse($$$)
 	<b>Attributes</b>
 	<ul>
 		<li><a href="#addvaltrigger">addvaltrigger</a><br>
-        	Create triggers for additional device values. Right now these are RSSI, RAWMSG and DMSG.
+        	Create triggers for additional device values. Right now these are RSSI, RAWMSG, DMSG and ID.
         	</li><br>
         	<a name="blacklist_IDs"></a>
         	<li>blacklist_IDs<br>
@@ -5188,7 +5191,7 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
 	<ul>
 	<a name="addvaltrigger"></a>
 	<li>addvaltrigger<br>
-	Generiert Trigger f&uuml;r zus&auml;tzliche Werte. Momentan werden DMSG , RAWMSG und RSSI unterst&uuml;zt.
+	Generiert Trigger f&uuml;r zus&auml;tzliche Werte. Momentan werden DMSG, ID, RAWMSG und RSSI unterst&uuml;zt.
 	</li><br>
 	<a name="blacklist_IDs"></a>
 	<li>blacklist_IDs<br>
