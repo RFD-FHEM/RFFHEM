@@ -166,24 +166,6 @@ SIGNALduino_un_Parse($$)
 		Log3 $hash, 4, "$name decoded protocolid: 7 ($SensorTyp / type=$type) mode=$sendMode, sensor id=$id, channel=$channel, temp=$temp, bat=$bat\n" ;
 
 
-	} elsif ($protocol == "78" && length($bitData)>=14)  ## geiger rohrmotor
-	{
-		my %bintotristate=(
- 		 	"00" => "0",
-		 	"10" => "F",
- 		 	"11" => "1"
-		);
-	  
-		my $tscode;
-		for (my $n=0; $n<length($bitData); $n=$n+2) {
-	      $tscode = $tscode . $bintotristate{substr($bitData,$n,2)};
-	    }
-			
-		
-		Log3 $hash, 4, "geiger message converted to tristate code: " . $tscode;
-		#Dispatch($hash, $tscode,undef);
-
-		
 	}
 	
 	##############################################################################################
