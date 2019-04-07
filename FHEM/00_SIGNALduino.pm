@@ -1,4 +1,4 @@
-# $Id: 00_SIGNALduino.pm 10488 2019-02-12 12:00:00Z v3.4.0-dev $
+# $Id: 00_SIGNALduino.pm 10488 2019-03-08 12:00:00Z v3.4.0-dev $
 #
 # v3.4.0 (Development release 3.4)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incoming messages
@@ -30,7 +30,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.4.0_dev_04.03",
+	SDUINO_VERSION            => "v3.4.0_dev_16.03",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -246,6 +246,7 @@ SIGNALduino_Initialize($)
 
   $hash->{ShutdownFn}		= "SIGNALduino_Shutdown";
   $hash->{FW_detailFn}		= "SIGNALduino_FW_Detail";
+  $hash->{FW_deviceOverview} = 1;
   
   $hash->{msIdList} = ();
   $hash->{muIdList} = ();
@@ -357,7 +358,7 @@ SIGNALduino_Define($$)
   $hash->{LASTDMSG} = "nothing";
   $hash->{TIME}=time();
   $hash->{versionmodul} = SDUINO_VERSION;
-  $hash->{versionProtocols} =SD_Protocols->VERSION();
+  $hash->{versionProtocols} = lib::SD_Protocols::getProtocolVersion();
   #notifyRegexpChanged($hash,"^$name$:^opened\$");  # Auf das Event opened der eigenen Definition reagieren
   #notifyRegexpChanged($hash,"sduino:opened");  # Auf das Event opened der eigenen Definition reagieren
   #$hash->{NOTIFYDEV}="$name";
@@ -1960,7 +1961,10 @@ sub SIGNALduno_Dispatch($$$$$)
 		#readingsSingleUpdate($hash, "state", $hash->{READINGS}{state}{VAL}, $event);
 		
 		$hash->{RAWMSG} = $rmsg;
-		my %addvals = (DMSG => $dmsg);
+		my %addvals = (
+			DMSG => $dmsg,
+			Protocol_ID => $id
+		);
 		if (AttrVal($name,"suppressDeviceRawmsg",0) == 0) {
 			$addvals{RAWMSG} = $rmsg
 		}
@@ -2438,7 +2442,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 				if ( SIGNALduino_moduleMatch($name,$id,$dmsg) == 1)
 				{
 					$nrDispatch++;
-					SIGNALduino_Log3 $name, 4, "$name: decoded matched MU Protocol id $id dmsg $dmsg length $bit_length dispatch($nrDispatch/". AttrVal($name,'maxMuMsgRepeat', 4) . ")$rssiStr";
+					SIGNALduino_Log3 $name, 4, "$name: Decoded matched MU Protocol id $id dmsg $dmsg length $bit_length dispatch($nrDispatch/". AttrVal($name,'maxMuMsgRepeat', 4) . ")$rssiStr";
 					SIGNALduno_Dispatch($hash,$rmsg,$dmsg,$rssi,$id);
 					if ( $nrDispatch == AttrVal($name,"maxMuMsgRepeat", 4))
 					{
@@ -4695,7 +4699,11 @@ sub SIGNALduino_githubParseHttpResponse($$$)
 		<ul><li>P<protocol id>#0xhexdata#R<num of repeats>#C<optional clock>    (#C is optional) 
 		<br>Example 0xhexdata: <code>set sduino sendMsg P29#0xF7E#R4</code>
 		<br>Generates the raw send command with the hex message F7E with protocl id 29 . The message will be send four times.
-		<br>SR;R=4;P0=-8360;P1=220;P2=-440;P3=-220;P4=440;D=01212121213421212121212134;
+		<br>SR;R=4;P0=-8360;P1=220;P2=-440;P3=-220;P4=440;D=01212121213421212121212134;</ul><br>
+		<ul><li>P<protocol id>#0xhexdata#R<num of repeats>#C<optional taktrate>#F<optional frequency>    (#C #F is optional) 
+		<br>Example 0xhexdata: <code>set sduino sendMsg P36#0xF7#R6#Fxxxxxxxxxx</code> (xxxxxxxxxx = register from CC1101)
+		<br>Generates the raw send command with the hex message F7 with protocl id 36 . The message will be send six times.
+		<br>SR;R=6;P0=-8360;P1=220;P2=-440;P3=-220;P4=440;D=012323232324232323;F= (register from CC1101);</ul>
 		</p></li></ul>
 		</li>
 	</ul>
@@ -4764,7 +4772,7 @@ sub SIGNALduino_githubParseHttpResponse($$$)
 	<b>Attributes</b>
 	<ul>
 		<li><a href="#addvaltrigger">addvaltrigger</a><br>
-        	Create triggers for additional device values. Right now these are RSSI, RAWMSG and DMSG.
+        	Create triggers for additional device values. Right now these are RSSI, RAWMSG, DMSG and ID.
         	</li><br>
         	<a name="blacklist_IDs"></a>
         	<li>blacklist_IDs<br>
@@ -5109,8 +5117,12 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
 			<br>SR;R=3;P0=500;P1=-9000;P2=-4000;P3=-2000;D=03020302;<br></li></ul><br>
 			<ul><li>P<protocol id>#0xhexdata#R<anzahl der wiederholungen>#C<optional taktrate>    (#C is optional) 
 			<br>Beispiel 0xhexdata: <code>set sduino sendMsg P29#0xF7E#R4</code>
-			<br>Wird eine sende Kommando fuer die Hexfolge F7E anhand der protocol id 29 erzeugen. Die Nachricht soll 4x gesenset werden.
-			<br>SR;R=4;P0=-8360;P1=220;P2=-440;P3=-220;P4=440;D=01212121213421212121212134;
+			<br>Wird eine sende Kommando fuer die Hexfolge F7E anhand der protocol id 29 erzeugen. Die Nachricht soll 4x gesendet werden.
+			<br>SR;R=4;P0=-8360;P1=220;P2=-440;P3=-220;P4=440;D=01212121213421212121212134;</ul><br>
+			<ul><li>P<protocol id>#0xhexdata#R<anzahl der wiederholungen>#C<optional taktrate>#F<optional Frequenz>    (#C #F is optional) 
+			<br>Beispiel 0xhexdata: <code>set sduino sendMsg P36#0xF7#R6#Fxxxxxxxxxx</code> (xxxxxxxxxx = Registerwert des CC1101)
+			<br>Wird eine sende Kommando fuer die Hexfolge F7 anhand der protocol id 36 erzeugen. Die Nachricht soll 6x gesendet werden mit der angegebenen Frequenz.
+			<br>SR;R=6;P0=-8360;P1=220;P2=-440;P3=-220;P4=440;D=012323232324232323;F= (Registerwert des CC1101);</ul>
 			</p></li>
 		</ul>
 	</li>
@@ -5179,7 +5191,7 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
 	<ul>
 	<a name="addvaltrigger"></a>
 	<li>addvaltrigger<br>
-	Generiert Trigger f&uuml;r zus&auml;tzliche Werte. Momentan werden DMSG , RAWMSG und RSSI unterst&uuml;zt.
+	Generiert Trigger f&uuml;r zus&auml;tzliche Werte. Momentan werden DMSG, ID, RAWMSG und RSSI unterst&uuml;zt.
 	</li><br>
 	<a name="blacklist_IDs"></a>
 	<li>blacklist_IDs<br>
