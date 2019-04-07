@@ -37,7 +37,7 @@ Supported Devices / Protocols
 |Somfy RTS | Shutters from Somfy|
 |Opus XT300 | Soil moisture sensor |
 |Oregon NR868 | Motion sensor |
-|IAN 275901, 283582 (Lidl) | Weatherstation |
+|Auriol IAN 60107, 114324, 275901, 283582 (Lidl) | Weatherstation |
 |FreeTec PE-6946 | wireless bell |
 |Elro DB200, KANGTAI, unitec | wireless bell |
 |m-e VTX and BASIC | wireless bell |
