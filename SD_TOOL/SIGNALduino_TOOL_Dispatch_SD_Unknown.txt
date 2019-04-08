@@ -1,7 +1,0 @@
-############################################################################################################
-## The file is part of the SIGNALduino project for the SIGNALduino_TOOL module
-## https://github.com/RFD-FHEM/RFFHEM
-############################################################################################################
-## columns are -> sensorname,value,RAWMSG ##
-### SEPARATION is done with a comma! All lines with # are skipped! Characters allowed -> A-Za-z0-9\-;.:=_|#?
-############################################################################################################
