@@ -64,7 +64,7 @@ package lib::SD_ProtocolData;
 	use strict;
 	use warnings;
 	
-	our $VERSION = '1.01';
+	our $VERSION = '1.02';
 	our %protocols = (
 		"0"	=>	## various weather sensors (500 | 9100)
 						# CUL_TCM97001 Typ - ABS700
@@ -1210,7 +1210,7 @@ package lib::SD_ProtocolData;
 				zero            => [1,-7],
 				start           => [-55],
 				clockabs        => 290,
-				reconstructBit  => '1',    			# TODO: Festlegen ob reconstruct benötigt wird und wie mit den Startsequenzen zukünftig gearbeitet werden soll
+				reconstructBit  => '1',
 				format          => 'tristate', # not used now
 				preamble        => 'P46#',
 				clientmodule    => 'SD_UT',
@@ -2242,13 +2242,33 @@ package lib::SD_ProtocolData;
 				zero						=> [6,-8],
 				start           => [6,-30],
 				clockabs				=> 250,
-				#developId				=> 'y',
+				developId				=> 'y',
 				format					=> 'twostate',
 				preamble				=> 'u94#',
 				#clientmodule		=> '',
 				#modulematch		=> '',
 				length_min			=> '36',
 				length_max			=> '54',
+			},
+		"95"	=>	# Techmar / Garden Lights Fernbedienung, 6148011 Remote control + 12V Outdoor receiver
+							# https://github.com/RFD-FHEM/RFFHEM/issues/558 @BlackcatSandy
+							# Group_1_on:  MU;P0=-972;P1=526;P2=-335;P3=-666;D=01213131312131313121212121312121313131313121312131313121313131312121212121312121313131313121313121212101213131312131313121212121312121313131313121312131313121313131312121212121312121313131313121313121212101213131312131313121212121312121313131313121312131;CP=1;R=44;O;
+							# Group_5_on:  MU;P0=-651;P1=530;P2=-345;P3=-969;D=01212121312101010121010101212121210121210101010101210121010101210101010121212121012121210101010121010101212101312101010121010101212121210121210101010101210121010101210101010121212121012121210101010121010101212121312101010121010101212121210121210101010101;CP=1;R=24;O;
+							# Group_8_off: MU;P0=538;P1=-329;P2=-653;P3=-964;D=01020301020202010202020101010102010102020202020102010202020102020202010101010101010201020202020202010202010301020202010202020101010102010102020202020102010202020102020202010101010101010201020202020202010201010301020202010202020101010102010102020202020102;CP=0;R=19;O;
+			{
+				name            => 'Techmar',
+				comment         => 'Garden Lights remote control',
+				id              => '95',
+				knownFreqs      => '433.92',
+				one             => [5,-6],	# 550,-660
+				zero            => [5,-3],	# 550,-330
+				start           => [5,-9],	# 550,-990
+				clockabs        => 110,
+				format          => 'twostate',
+				preamble        => 'P95#',
+				clientmodule    => 'SD_UT',
+				length_min      => '50',
+				length_max      => '50',
 			},
 	);
 	sub getProtocolList	{	
