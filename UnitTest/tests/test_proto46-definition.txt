@@ -9,3 +9,4 @@ defmod test_proto46 UnitTest dummyDuino (
  is( ($SD_Dispatch->called_with)[2], "P46#BAFB0", "SIGNALduno_Dispatch check dmsg" );
 } 
 )
+
