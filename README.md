@@ -51,6 +51,9 @@ Supported Devices / Protocols
 |WS-7035, WS-7053, WS7054 | Temperature sensor 433MHz |
 |WS-2000, WS-7000 | Series of various sensors |
 |NC-3911, NC-3912 | Refrigerator thermometer |
+|Tedsen SKX1xx, SKX2xx, SKX4xx, SKX6xx | Remote control |
+|GEIGER GF0x01, GF0x02, GF0x03 | Remote control (compatible to Tedsen) |
+|Techmar Garden Lights | Remote control |
 
 How to install
 ======
