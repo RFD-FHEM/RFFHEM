@@ -230,6 +230,16 @@
 #{  https://github.com/RFD-FHEM/RFFHEM/issues/449
 #}
 ###############################################################################################################################################################################
+# Techmar / Garden Lights Fernbedienung, 6148011 Remote control + 12V Outdoor receiver
+# https://github.com/RFD-FHEM/RFFHEM/issues/558 @BlackcatSandy
+# Fernbedienung mit 10 Tasten, 9 Gruppentasten und 1 Master
+# gesamt 50 Bit, Bit 0-31 Ident, Bit 32-39 Button, Bit 40-47 = Bit 32-39 invertiert, Bit 48-49 wechselt 00|01|02
+# Die letzten beiden Bits wechseln bei der Fernbedienung zwischen 00, 01 oder 02. Der Empfänger reagiert aber auch, wenn nur 00 gesendet wird.
+# sendet bei jedem Tastendruck ca. 50 Wiederholungen, Dauer etwa 6 Sekunden
+# Group_1_on:  MU;P0=-972;P1=526;P2=-335;P3=-666;D=01213131312131313121212121312121313131313121312131313121313131312121212121312121313131313121313121212101213131312131313121212121312121313131313121312131313121313131312121212121312121313131313121313121212101213131312131313121212121312121313131313121312131;CP=1;R=44;O;
+# Group_5_on:  MU;P0=-651;P1=530;P2=-345;P3=-969;D=01212121312101010121010101212121210121210101010101210121010101210101010121212121012121210101010121010101212101312101010121010101212121210121210101010101210121010101210101010121212121012121210101010121010101212121312101010121010101212121210121210101010101;CP=1;R=24;O;
+# Group_8_off: MU;P0=538;P1=-329;P2=-653;P3=-964;D=01020301020202010202020101010102010102020202020102010202020102020202010101010101010201020202020202010202010301020202010202020101010102010102020202020102010202020102020202010101010101010201020202020202010201010301020202010202020101010102010102020202020102;CP=0;R=19;O;
+###############################################################################################################################################################################
 # !!! ToDo´s !!!
 #     - LED lights, counter battery-h reading --> commandref hour_counter module
 #     -
@@ -362,6 +372,30 @@ my %models = (
 												Protocol	=> "P81",
 												Typ				=> "remote"
 											},
+	"Techmar"	=>	{	"00001001"	=> "Group_1_on",		# 0x09
+									"00001010"	=> "Group_1_off",		# 0x0A
+									"00001111"	=> "Group_2_on",		# 0x0F
+									"00010000"	=> "Group_2_off",		# 0x10
+									"00000101"	=> "Group_3_on",		# 0x05
+									"00000110"	=> "Group_3_off",		# 0x06
+									"00001011"	=> "Group_4_on",		# 0x0B
+									"00001100"	=> "Group_4_off",		# 0x0C
+									"00010001"	=> "Group_5_on",		# 0x11
+									"00010010"	=> "Group_5_off",		# 0x12
+									"00001101"	=> "Group_6_on",		# 0x0D
+									"00001110"	=> "Group_6_off",		# 0x0E
+									"00000111"	=> "Group_7_on",		# 0x07
+									"00001000"	=> "Group_7_off",		# 0x08
+									"00000001"	=> "Group_8_on",		# 0x01
+									"00000010"	=> "Group_8_off",		# 0x02
+									"00000011"	=> "Group_9_on",		# 0x03
+									"00000100"	=> "Group_9_off",		# 0x04
+									"00010011"	=> "All_on",				# 0x13
+									"00010100"	=> "All_off",				# 0x14
+									hex_lengh		=> "13",
+									Protocol	=> "P95",
+									Typ				=> "remote"
+								},
 	"Tedsen_SKX1xx" =>	{	"1100"		=> "Button_1",	# tristate 10
 												hex_lengh	=> "5",
 												Protocol	=> "P46",
@@ -467,7 +501,7 @@ my %models = (
 #############################
 sub SD_UT_Initialize($) {
 	my ($hash) = @_;
-	$hash->{Match}			= "^P(?:14|29|30|34|46|69|76|81|83|86|90|91|91.1|92|93)#.*";
+	$hash->{Match}			= "^P(?:14|29|30|34|46|69|76|81|83|86|90|91|91.1|92|93|95)#.*";
 	$hash->{DefFn}			= "SD_UT_Define";
 	$hash->{UndefFn}		= "SD_UT_Undef";
 	$hash->{ParseFn}		= "SD_UT_Parse";
@@ -479,6 +513,7 @@ sub SD_UT_Initialize($) {
 		"MD_2003R.*"	 => {ATTR => "model:MD_2003R", FILTER => "%NAME", autocreateThreshold => "3:180", GPLOT => ""},
 		"MD_210R.*"	 => {ATTR => "model:MD_210R", FILTER => "%NAME", autocreateThreshold => "3:180", GPLOT => ""},
 		"MD_2018R.*"	 => {ATTR => "model:MD_2018R", FILTER => "%NAME", autocreateThreshold => "3:180", GPLOT => ""},
+		"Techmar.*"	 => {ATTR => "model:Techmar", FILTER => "%NAME", autocreateThreshold => "3:180", GPLOT => ""},
 		"unknown_please_select_model"	=> {ATTR => "model:unknown", FILTER => "%NAME", autocreateThreshold => "5:180", GPLOT => ""},
 	};
 }
@@ -522,7 +557,9 @@ sub SD_UT_Define($$) {
 	### [7] checks Hoermann HSM4 | Krinner_LUMIX ###
 	return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short | long or not HEX (0-9 | a-f | A-F){7}" if (($a[2] eq "HSM4" || $a[2] eq "Krinner_LUMIX") && not $a[3] =~ /^[0-9a-fA-F]{7}/s);
 	### [7] checks Tedsen_SKX1xx, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx (tristate code)###
-	return "wrong tristate code! ($a[3]) $a[2] code to short | long or values not 0, 1 or F" if (($a[2] eq "Tedsen_SKX1xx" || $a[2] eq "Tedsen_SKX2xx" || $a[2] eq "Tedsen_SKX4xx" || $a[2] eq "Tedsen_SKX6xx") && not $a[3] =~ /^[01fF]{7}$/s);
+	return "Wrong tristate code! ($a[3]) $a[2] code to short or long (must be 7 chars) or values not 0, 1 or F" if (($a[2] eq "Tedsen_SKX1xx" || $a[2] eq "Tedsen_SKX2xx" || $a[2] eq "Tedsen_SKX4xx" || $a[2] eq "Tedsen_SKX6xx") && not $a[3] =~ /^[01fF]{7}$/s);
+	### [8 nibble] checks Techmar remote control ###
+	return "Wrong HEX-Value! ($a[3]) $a[2] Hex-value to short or long (must be 8 chars) or not hex (0-9 | a-f | A-F)" if ($a[2] eq "Techmar" && not $a[3] =~ /^[0-9a-fA-F]{8}$/s);
 	### [9] checks Hoermann HS1-868-BS ###
 	return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short | long or not HEX (0-9 | a-f | A-F){9}" if ($a[2] eq "HS1_868_BS" && not $a[3] =~ /^[0-9a-fA-F]{9}/s);
 	### [14] checks LED_XM21_0 ###
@@ -659,6 +696,12 @@ sub SD_UT_Set($$$@) {
 		$msg = $models{$model}{Protocol} . "#" . $adr;
 		$msgEnd .= "11110";	# nibble7 every?
 		$msgEnd .= "#R" . $repeats;
+	############ Techmar Garden Lights ############
+	} elsif ($model eq "Techmar" && $cmd ne "?") {
+		my @definition = split(" ", $hash->{DEF});																# split adress from def
+		my $adr = sprintf( "%032b", hex($definition[1])) if ($name ne "unknown");	# argument 1 - adress to binary with 32 bits
+		$msg = $models{$model}{Protocol} . "#" . $adr;
+		$msgEnd = "00#R" . $repeats;	#	Last two bits alternately by transmitter 00, 01 or 02. Receiver also reacts to only 00.
 	}
 
 	Log3 $name, 4, "$ioname: SD_UT_Set attr_model=$model msg=$msg msgEnd=$msgEnd" if(defined $msgEnd);
@@ -685,6 +728,10 @@ sub SD_UT_Set($$$@) {
 				my $save2 = $save;
 				$save2 =~ tr/01/10/;									# invert message (nibble6 invert = nibble4)
 				$msg .= $save."0000".$save2.$msgEnd;	# 0000 = nibble5 every?
+			} elsif ($model eq "Techmar") {
+				my $invert = $save;
+				$invert =~ tr/01/10/;									# invert byte 4 (byte5 = inverted byte 4)
+				$msg .= $save.$invert.$msgEnd;
 			} else {
 				$msg .= $save.$msgEnd;
 			}
@@ -914,6 +961,26 @@ sub SD_UT_Parse($$) {
 		$def = $modules{SD_UT}{defptr}{$devicedef} if (!$def);
 	}
 
+	if ($hlen == 13 && $protocol == 95) {
+		### Remote control Techmar Garden Lights [P95] ###
+		Log3 $iohash, 4, "$ioname: SD_UT_Parse device Techmar - check length and protocol number - OK";
+		# my $byte4 = substr($rawData,8,2);
+		# my $byte5 = substr($rawData,10,2);
+		# my $xor = hex($byte4) ^ hex($byte5);
+		my $check = hex(substr($rawData,8,2)) ^ hex(substr($rawData,10,2));	# byte 5 is inverted to byte 4
+		if ($check != 255) {
+			Log3 $iohash, 3, "$ioname: SD_UT_Parse device Techmar - check byte 4 and byte 5 - ERROR";
+			return "";
+		} else {
+			Log3 $iohash, 4, "$ioname: SD_UT_Parse device Techmar - check byte 4 and byte 5 - OK";
+			$deviceCode = substr($rawData,0,8);
+			$devicedef = "Techmar " . $deviceCode;
+			$def = $modules{SD_UT}{defptr}{$devicedef};
+			$model = "Techmar";
+			$name = "Techmar_" . $deviceCode;
+		}
+	}
+
 	if (($hlen == 15 || $hlen == 16) &&  !$def && $protocol == 76) {
 		### Remote LED_XM21_0 [P76] ###
 		$deviceCode = substr($rawData,0,14);
@@ -1123,6 +1190,10 @@ sub SD_UT_Parse($$) {
 			Log3 $name, 3, "$ioname: SD_UT_Parse - check $model FAILED, $state!=$state_invers, ERROR, nibble4 ($state) NOT nibble6 ($state_invers)!";
 			return "";
 		}
+	### Remote control Techmar Garden Lights [P95] ###
+	} elsif ($model eq "Techmar" && $protocol == 95) {
+		$state = substr($bitData,32,8);
+		$deviceCode = substr($rawData,0,8);
 	############ unknown ############
 	} else {
 		readingsSingleUpdate($hash, "state", "???", 0);
@@ -1291,6 +1362,11 @@ sub SD_UT_Attr(@) {
 				$deviceCode = substr($bitData,0,16);
 				$deviceCode = sprintf("%04X", oct( "0b$deviceCode" ) );
 				$devicename = $devicemodel."_".$deviceCode;
+			############ Techmar Garden Lights ############
+			} elsif ($attrName eq "model" && $attrValue eq "Techmar") {
+				$deviceCode = substr($bitData,0,32);
+				$deviceCode = sprintf("%08X", oct( "0b$deviceCode" ) );
+				$devicename = $devicemodel."_".$deviceCode;
 			############ unknown ############
 			} else {
 				$devicename = "unknown_please_select_model";
@@ -1317,9 +1393,7 @@ sub SD_UT_Attr(@) {
 	}
 
 	if ($cmd eq "del" && $attrName eq "model") {			### delete readings
-
-		for my $readingname (qw/Button deviceCode LastAction state unknownMSG/)
-		{
+		for my $readingname (qw/Button deviceCode LastAction state unknownMSG/) {
 			readingsDelete($hash,$readingname);
 		}
 	}
@@ -1395,6 +1469,7 @@ sub SD_UT_tristate2bin($) {
 	 <ul> - Novy Pureline 6830 kitchen hood&nbsp;&nbsp;&nbsp;<small>(module model: Novy_840029 | protocol 86)</small></ul>
 	 <ul> - QUIGG DMV-7000&nbsp;&nbsp;&nbsp;<small>(module model: QUIGG_DMV | protocol 34)</small></ul>
 	 <ul> - Remote control SA-434-1 mini 923301&nbsp;&nbsp;&nbsp;<small>(module model: SA_434_1_mini | protocol 81)</small></ul>
+	 <ul> - Remote control for Techmar Garden Lights &nbsp;&nbsp;&nbsp;<small>(Modulmodel: Techmar | Protokoll 95)</small></ul>
 	 <ul> - Tedsen Teletaster <small>(protocol 46)</small>:
 			<small>
 			<ul>SKX1xx, 1 button - module model: Tedsen_SKX1xx</ul>
@@ -1537,7 +1612,15 @@ sub SD_UT_tristate2bin($) {
 		Button four on the remote</li>
 	</ul><br>
 
-	<ul><u>Westinghouse Deckenventilator (remote with 5 buttons and without SET)</u></ul>
+	<ul><u>Techmar Garden Lights (remote control with 10 buttons)</u></ul>
+	<ul><li>Group_1 ... Group_9<br>
+		Group 1 to 9, on / off</li>
+	</ul>
+	<ul><li>All_on / All_off<br>
+		All Groups on / off</li>
+	</ul><br>
+	
+	<ul><u>Westinghouse ceiling fan (remote with 5 buttons and without SET)</u></ul>
 	<ul><a name="1_fan_low_speed"></a>
 		<li>1_fan_low_speed<br>
 		Button LOW on the remote</li>
@@ -1681,6 +1764,7 @@ sub SD_UT_tristate2bin($) {
 	 <ul> - Novy Pureline 6830 Dunstabzugshaube&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Novy_840029 | Protokoll 86)</small></ul>
 	 <ul> - QUIGG DMV-7000&nbsp;&nbsp;&nbsp;<small>(Modulmodel: QUIGG_DMV | Protokoll 34)</small></ul>
 	 <ul> - Remote control SA-434-1 mini 923301&nbsp;&nbsp;&nbsp;<small>(Modulmodel: SA_434_1_mini | Protokoll 81)</small></ul>
+	 <ul> - Techmar Garden Lights &nbsp;&nbsp;&nbsp;<small>(Modulmodel: Techmar | Protokoll 95)</small></ul>
 	 <ul> - Tedsen Teletaster <small>(Protokoll 46)</small>:
 			<small>
 			<ul>SKX1xx, 1 Taste - Modulmodel: Tedsen_SKX1xx</ul>
@@ -1823,6 +1907,14 @@ sub SD_UT_tristate2bin($) {
 	<ul><a name="button_4"></a>
 		<li>button_4<br>
 		Taste 4 auf der Fernbedienung</li>
+	</ul><br>
+
+	<ul><u>Techmar Garden Lights (Fernbedienung mit 10 Tasten)</u></ul>
+	<ul><li>Group_1 ... Group_9<br>
+		Gruppe 1 bis 9, jeweils ein und aus</li>
+	</ul>
+	<ul><li>All_on / All_off<br>
+		Alle Gruppen ein / aus</li>
 	</ul><br>
 
 	<ul><u>Westinghouse Deckenventilator (Fernbedienung mit 5 Tasten)</u></ul>
