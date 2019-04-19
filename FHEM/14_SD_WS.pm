@@ -18,6 +18,7 @@
 # 06.01.2019 Protokoll 33: Temperatur-/Feuchtesensor TX-EZ6 fuer Wetterstation TZS First Austria hinzugefuegt
 # 03.03.2019 neues Protokoll 38: Rosenstein & Soehne, PEARL NC-3911, NC-3912, Kuehlschrankthermometer
 # 07.04.2019 Protokoll 51: Buxfix longID 8 statt 12 bit, prematch channel 1-3
+# 15.04.2019 Protokoll 33: sub crcok ergaenzt
 
 package main;
 
@@ -172,22 +173,23 @@ sub SD_WS_Parse($$)
 			# ------------------------------------------------------------------------
 			# 0    4    | 8    12   | 16   20   | 24   28   | 32   36   40
 			# 1111 1100 | 0001 0110 | 0001 0000 | 0011 0111 | 0100 1001 01
-			# iiii iiii | iixx cctt | tttt tttt | tthh hhhh | hhxx bgxx xx
+			# iiii iiii | iiuu cctt | tttt tttt | tthh hhhh | hhuu bgxx xx
 			# i: 10 bit random id (changes on power-loss) - Bit 0 + 1 every 0 ???
 			# b: battery indicator (0=>OK, 1=>LOW)
 			# g: battery changed (1=>changed) - muss noch genauer getestet werden! ????
 			# c: Channel (MSB-first, valid channels are 0x00-0x02 -> 1-3)
 			# t: Temperature (MSB-first, BCD, 12 bit unsigned fahrenheit offset by 90 and scaled by 10)
 			# h: always 0
-			# x: unknown
+			# u: unknown
+			# x: check
 
 			# Protokollbeschreibung: renkforce Temperatursensor E0001PA fuer Funk-Wetterstation E0303H2TPR (Conrad)
 			# ------------------------------------------------------------------------
 			# 0    4    | 8    12   | 16   20   | 24   28   | 32   36   40
-			# iiii iiii | iixx cctt | tttt tttt | tthh hhhh | hhsb xxxx xx
+			# iiii iiii | iiuu cctt | tttt tttt | tthh hhhh | hhsb uuxx xx
 			# h: Humidity (MSB-first, BCD, 8 bit relative humidity percentage)
 			# s: sendmode (1=>Test push, send manual 0=>automatic send)
-			# i: | c: | t: | h: | b: | x: same like S522
+			# i: | c: | t: | h: | b: | u: | x: same like S522
 
 			# Protokollbeschreibung: Temperatur-/Fechtesensor TX-EZ6 fuer Wetterstation TZS First Austria
 			# ------------------------------------------------------------------------
@@ -200,7 +202,23 @@ sub SD_WS_Parse($$)
 			sensortype => 'E0001PA, s014, S522, TCM, TFA 30.3200, TX-EZ6',
 			model =>	'SD_WS_33_T',
 			prematch => sub {my $msg = shift; return 1 if ($msg =~ /^[0-9A-F]{11}$/); }, 							# prematch
-			crcok => 	sub {return 1;}, 									# crc currently not calculated
+			crcok => sub	{	my (undef,$bitData) = @_;
+											my $crc = 0;
+											for (my $i=0; $i < 34; $i++) {
+												if (substr($bitData, $i, 1) == ($crc & 1)) {
+													$crc >>= 1;
+												} else {
+													$crc = ($crc>>1) ^ 12;
+												}
+											}
+											$crc ^= SD_WS_bin2dec(reverse(substr($bitData, 34, 4)));
+											if ($crc == SD_WS_bin2dec(reverse(substr($bitData, 38, 4)))) {
+												return 1;
+											} else {
+												Log3 $name, 3, "$name: SD_WS_33 Parse msg $msg - ERROR check $crc != " . SD_WS_bin2dec(reverse(substr($bitData, 38, 4)));
+												return 0;
+											}
+										},
 			id => 		sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,0,9); },   				# id
 			temp => 	sub {my (undef,$bitData) = @_; return round(((SD_WS_binaryToNumber($bitData,22,25)*256 +  SD_WS_binaryToNumber($bitData,18,21)*16 + SD_WS_binaryToNumber($bitData,14,17)) - 1220) * 5 / 90.0 , 1); },	#temp
 			hum => 		sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,30,33)*16 + SD_WS_binaryToNumber($bitData,26,29));  }, 					#hum
@@ -729,7 +747,7 @@ sub SD_WS_Parse($$)
 		   		Log3 $iohash, 4, "$name: SD_WS_Parse $rawData protocolid $protocol ($SensorTyp) - ERROR prematch" ;
 		    	return "";  
 	    	}
-		    my $retcrc=$decodingSubs{$protocol}{crcok}->( $rawData );
+		    my $retcrc=$decodingSubs{$protocol}{crcok}->( $rawData,$bitData );
 		    if (!$retcrc)		    { 
 		    	Log3 $iohash, 4, "$name: SD_WS_Parse $rawData protocolid $protocol ($SensorTyp) - ERROR CRC";
 		    	return "";  

@@ -1,3 +1,6 @@
+15.04.2019
+ 14_SD_WS.pm: check protocol 33 added
+ SD_ProtocolData.pm: add definition for TFA 30.3200 (CP=750) and Tchibo weatherstation (CP=400)
 13.04.2019
  14_SD_UT.pm: New protocol for Techmar Garden Lights
 07.04.2019
