@@ -64,7 +64,7 @@ package lib::SD_ProtocolData;
 	use strict;
 	use warnings;
 	
-	our $VERSION = '1.02';
+	our $VERSION = '1.03';
 	our %protocols = (
 		"0"	=>	## various weather sensors (500 | 9100)
 						# ABS700 | Id:79 T: 3.3 Bat:low                MS;P1=-7949;P2=492;P3=-1978;P4=-3970;D=21232423232424242423232323232324242423232323232424;CP=2;SP=1;R=245;O;
@@ -891,7 +891,6 @@ package lib::SD_ProtocolData;
 		"33"	=>	## Thermo-/Hygrosensor S014, renkforce E0001PA, Conrad S522, TX-EZ6 (Weatherstation TZS First Austria)
 							# https://forum.fhem.de/index.php?topic=35844.0 @BrainHunter
 							# Id:62 Ch:1 T: 21.1 H: 76 Bat:ok   MS;P0=-7871;P2=-1960;P3=578;P4=-3954;D=030323232323434343434323232323234343434323234343234343234343232323432323232323232343234;CP=3;SP=0;R=0;m=0;
-							# !! ToDo Tx-EZ6 neues Attribut ins Modul bauen um Trend + CRC auszuwerten !!
 			{
 				name					=> 'weather',
 				comment				=> 'S014, TFA 30.3200, TCM, Conrad S522, renkforce E0001PA, TX-EZ6',
@@ -908,6 +907,50 @@ package lib::SD_ProtocolData;
 				#modulematch	=> '',
 				length_min		=> '42',
 				length_max		=> '44',
+			},
+		"33.1"	=>	## Thermo-/Hygrosensor TFA 30.3200
+							# https://github.com/RFD-FHEM/SIGNALDuino/issues/113
+							# SD_WS_33_TH_1   T: 18.8 H: 53   MS;P1=-7796;P2=745;P3=-1976;P4=-3929;D=21232323242324232324242323232323242424232323242324242323242324232324242323232323232424;CP=2;SP=1;R=30;O;m2;
+							# SD_WS_33_TH_2   T: 21.9 H: 49   MS;P1=-7762;P2=747;P3=-1976;P4=-3926;D=21232324232324242323242323232424242424232423232324242323232324232324242323232324242424;CP=2;SP=1;R=32;O;m1;
+							# SD_WS_33_TH_3   T: 19.7 H: 53   MS;P1=758;P2=-1964;P3=-3929;P4=-7758;D=14121213121313131213121212131212131313121213121213131212131213121213131212121212121212;CP=1;SP=4;R=48;O;m1;
+			{
+				name          => 'TFA 30.3200',
+				comment       => 'Thermo-/Hygrosensor TFA 30.3200 (CP=750)',
+				id            => '33.1',
+				knownFreqs    => '433.92',
+				one           => [1,-5.6],	# 736,-4121
+				zero          => [1,-2.8],	# 736,-2060
+				sync          => [1,-11],		# 736,-8096
+				clockabs      => 736,
+				format        => 'twostate',	# not used now
+				preamble      => 'W33#',
+				clientmodule  => 'SD_WS',
+				length_min    => '42',
+				length_max    => '44',
+			},
+		"33.2" => ## Tchibo Wetterstation
+							# https://forum.fhem.de/index.php/topic,58397.msg880339.html#msg880339 @Doublefant
+							# passt bei 33 und 33.2:
+							# SD_WS_33_TH_1   T: 5.1 H: 41   MS;P1=399;P2=-7743;P3=-2038;P4=-3992;D=12131314141414141313131413131314141414131313141314131414131314131314131313131314131314;CP=1;SP=2;R=230;O;m2;
+							# SD_WS_33_TH_1   T: 5.1 H: 41   MS;P1=399;P2=-7733;P3=-2043;P4=-3991;D=12131314141414141313131413131314141414131313141314131414131314131314131313131314131314;CP=1;SP=2;R=230;O;
+							# passt nur bei 33.2:
+							# SD_WS_33_TH_1   T: 5.1 H: 41   MS;P1=393;P2=-7752;P3=-2047;P4=-3993;D=12131314141414141313131413131314141414131313141314131414131314131314131313131314131314;CP=1;SP=2;R=230;O;m1;
+							# SD_WS_33_TH_1   T: 5.1 H: 41   MS;P1=396;P2=-7759;P3=-2045;P4=-4000;D=12131314141414141313131413131314141414131313141314131414131314131314131313131314131314;CP=1;SP=2;R=230;O;m0;
+			{
+				name          => 'Tchibo',
+				comment       => 'Tchibo weatherstation (CP=400)',
+				id            => '33.2',
+				knownFreqs    => '433.92',
+				one           => [1,-10],     # 400,-4000
+				zero          => [1,-5],      # 400,-2000
+				sync          => [1,-19],     # 400,-7600
+				clockabs      => 400,
+				format        => 'twostate',
+				preamble      => 'W33#',
+				postamble     => '',
+				clientmodule  => 'SD_WS',
+				length_min    => '42',
+				length_max    => '44',
 			},
 		"34"	=>	## QUIGG GT-7000 Funk-Steckdosendimmer | transmitter DMV-7000 - receiver DMV-7009AS
 							# https://github.com/RFD-FHEM/RFFHEM/issues/195 | https://forum.fhem.de/index.php/topic,38831.msg361341.html#msg361341 @StefanW
