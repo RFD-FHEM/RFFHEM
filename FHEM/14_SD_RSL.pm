@@ -130,7 +130,7 @@ sub SD_RSL_Set($@) {
 
   ## Send Message to IODev using IOWrite
   $message = 'P1#0x' . $c . $device . '#R' . AttrVal($name, "RSLrepetition", 6);
-  Log3 $name, 3, "$ioName RSL_set: $name $cmd -> message: $message";
+  Log3 $name, 3, "$ioName RSL_set: $name $cmd -> sendMsg: $message";
   IOWrite($hash, 'sendMsg', $message);
   #my $ret = IOWrite($hash, 'sendMsg', $c."_".AttrVal($name, "RSLrepetition", 6));
   #Log3 $hash, 5, "$name Set return : $ret";
