@@ -1787,7 +1787,7 @@ package lib::SD_ProtocolData;
 				id						=> '76',
 				knownFreqs		=> '433.92',
 				one						=> [1.2,-2],			# 120,-200
-				zero					=> [],						# existiert nicht
+				#zero					=> [],						# existiert nicht
 				start					=> [4.5,-2,4.5,-2,4.5,-2,4.5,-2],			# 450,-200 Starsequenz
 				clockabs			=> 100,
 				format				=> 'twostate',		# not used now
