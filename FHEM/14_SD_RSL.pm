@@ -113,16 +113,15 @@ sub SD_RSL_Define($$) {
 
 ##########################################################
 sub SD_RSL_Set($@) { 
-  my ($hash, @a) = @_;
-  my $name = $hash->{NAME};
+  my ($hash,  $name, @a) = @_;
   my $ioHash = $hash->{IODev};
   my $ioName = $ioHash->{NAME};
-  my $cmd  = $a[1];
+  my $cmd  = $a[0];
   my $c;
   my $message;
   my $device = substr($hash->{DEF},0,6);
 
-  return join(" ", sort keys %sets) if((@a < 2) || ($cmd eq "?"));
+  return join(" ", sort keys %sets) if((@a < 1) || ($cmd eq "?"));
 
   $c = $hash->{OnCode}  if  ($cmd eq "on") ;
   $c = $hash->{OffCode} if  ($cmd eq "off");
@@ -131,7 +130,7 @@ sub SD_RSL_Set($@) {
 
   ## Send Message to IODev using IOWrite
   $message = 'P1#0x' . $c . $device . '#R' . AttrVal($name, "RSLrepetition", 6);
-  Log3 $name, 3, "$ioName: RSL_SET - $name -> message: $message";
+  Log3 $name, 3, "$ioName RSL_set: $name $cmd -> sendMsg: $message";
   IOWrite($hash, 'sendMsg', $message);
   #my $ret = IOWrite($hash, 'sendMsg', $c."_".AttrVal($name, "RSLrepetition", 6));
   #Log3 $hash, 5, "$name Set return : $ret";
