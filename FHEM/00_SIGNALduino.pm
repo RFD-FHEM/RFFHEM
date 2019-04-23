@@ -356,7 +356,7 @@ SIGNALduino_Define($$)
   
   $hash->{DMSG}="nothing";
   $hash->{LASTDMSG} = "nothing";
-	$hash->{LAST_Protocol_ID} = "nothing";
+	$hash->{LASTDMSGID} = "nothing";
   $hash->{TIME}=time();
   $hash->{versionmodul} = SDUINO_VERSION;
   $hash->{versionProtocols} = lib::SD_Protocols::getProtocolVersion();
@@ -1945,6 +1945,7 @@ sub SIGNALduno_Dispatch($$$$$)
 			SIGNALduino_Log3 $name, SDUINO_DISPATCH_VERBOSE, "$name Dispatch: $dmsg, test ungleich: disabled";
 		}
 		$hash->{LASTDMSG} = $dmsg;
+		$hash->{LASTDMSGID} = $id;
 	}
 
    if ($DMSGgleich) {
@@ -2184,7 +2185,6 @@ SIGNALduino_Parse_MS($$$$%)
 			if ( SIGNALduino_moduleMatch($name,$id,$dmsg) == 1)
 			{
 				$message_dispatched++;
-				$hash->{LAST_Protocol_ID} = $id;
 				SIGNALduino_Log3 $name, 4, "$name: Decoded matched MS Protocol id $id dmsg $dmsg length " . scalar @bit_msg . " $rssiStr";
 				SIGNALduno_Dispatch($hash,$rmsg,$dmsg,$rssi,$id);
 			} 
@@ -2444,7 +2444,6 @@ sub SIGNALduino_Parse_MU($$$$@)
 				if ( SIGNALduino_moduleMatch($name,$id,$dmsg) == 1)
 				{
 					$nrDispatch++;
-					$hash->{LAST_Protocol_ID} = $id;
 					SIGNALduino_Log3 $name, 4, "$name: Decoded matched MU Protocol id $id dmsg $dmsg length $bit_length dispatch($nrDispatch/". AttrVal($name,'maxMuMsgRepeat', 4) . ")$rssiStr";
 					SIGNALduno_Dispatch($hash,$rmsg,$dmsg,$rssi,$id);
 					if ( $nrDispatch == AttrVal($name,"maxMuMsgRepeat", 4))
@@ -2569,7 +2568,6 @@ SIGNALduino_Parse_MC($$$$@)
 						}
 						SIGNALduno_Dispatch($hash,$rmsg,$dmsg,$rssi,$id);
 						$message_dispatched=1;
-						$hash->{LAST_Protocol_ID} = $id;
 					}
 				} else {
 					$res="undef" if (!defined($res));
@@ -4579,6 +4577,7 @@ sub SIGNALduino_githubParseHttpResponse($$$)
 	<a name="SIGNALduinointernals"></a>
 	<b>Internals</b>
 	<ul>
+		<li><b>LASTDMSGID</b>: This shows the last dispatched Protocol ID.</li>
 		<li><b>IDsNoDispatch</b>: Here are protocols entryls listed by their numeric id for which not communication to a logical module is enabled. To enable, look at the menu option <a href="#SIGNALduinoDetail">Display protocollist</a>.</li>
 		<li><b>versionmodule</b>: This shows the version of the SIGNALduino FHEM module itself.</li>
 		<li><b>version</b>: This shows the version of the SIGNALduino microcontroller.</li>
@@ -4990,12 +4989,13 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
 	<a name="SIGNALduinointernals"></a>
 	<b>Internals</b>
 	<ul>
+		<li><b>LASTDMSGID</b>: Hier wird die zuletzt dispatchte Protocol ID angezeigt.</li>
 		<li><b>IDsNoDispatch</b>: Hier werden protokoll Eintr&auml;ge mit ihrer numerischen ID aufgelistet, f&ouml;r welche keine Weitergabe von Daten an logische Module aktiviert wurde. Um die weiterhabe zu aktivieren, kann die Me&uuml;option <a href="#SIGNALduinoDetail">Display protocollist</a> verwendet werden.</li>
 		<li><b>versionmodule</b>: Hier wird die Version des SIGNALduino FHEM Modules selbst angezeigt.</li>
 		<li><b>version</b>: Hier wird die Version des SIGNALduino microcontrollers angezeigt.</li>
 	</ul>
-	
-					  
+
+
 	<a name="SIGNALduinoset"></a>
 	<b>SET</b>
 	<ul>
