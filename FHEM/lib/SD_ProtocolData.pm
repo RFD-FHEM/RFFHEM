@@ -22,9 +22,9 @@
 #
 # length_min  => ' '       # minimum number of bits of message length
 # length_max  => ' '       # maximum number of bits of message length
-# paddingbits => ' '       # only MS - pad up to x bits before call module, default is 4.
-# paddingbits => '1'       # only MS - will disable padding, use this setting when using dispatchBin
-# paddingbits => '2'       # only MS - is padded to an even number, that is a maximum of 1 bit
+# paddingbits => ' '       # pad up to x bits before call module, default is 4. | --> option is active if paddingbits not defined in message definition !
+# paddingbits => '1'       # will disable padding, use this setting when using dispatchBin
+# paddingbits => '2'       # is padded to an even number, that is a maximum of 1 bit
 # remove_zero => 1         # removes leading zeros from output
 # reconstructBit => 1      # if set, then the last bit is reconstructed if the rest is missing
 #
@@ -1779,7 +1779,7 @@ package lib::SD_ProtocolData;
 				zero				=> [1,-1],	# 400
 				pause				=> [-25],
 				clockabs			=> 400,
-				reconstructBit			=> '1',
+				#reconstructBit			=> '1',
 				format				=> 'twostate',	# not used now
 				clientmodule			=> 'FS20',
 				preamble			=> '810b04f70101a001',
