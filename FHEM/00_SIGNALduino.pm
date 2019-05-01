@@ -2147,7 +2147,7 @@ SIGNALduino_Parse_MS($$$$%)
 			  Debug "$name: decoded $rtxt" if ($debug);
 			  next;
 			}
-			my $padwith = lib::SD_Protocols::SDcheckProperty($id,'paddingbits',4);
+			my $padwith = lib::SD_Protocols::checkProperty($id,'paddingbits',4);
 			
 			my $i=0;
 			while (scalar @bit_msg % $padwith > 0)  ## will pad up full nibbles per default or full byte if specified in protocol
