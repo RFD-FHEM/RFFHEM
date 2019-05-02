@@ -1,5 +1,7 @@
 defmod test_mu_1 UnitTest dummyDuino (
  {
+	use warnings; 
+	use diagnostics;
   	my $mock = Mock::Sub->new;
 	my $SD_Dispatch = $mock->mock("SIGNALduno_Dispatch");
 	
@@ -10,7 +12,7 @@ defmod test_mu_1 UnitTest dummyDuino (
     foreach my $pID (keys %$local_ProtocolListSIGNALduino)
 	{	
 		next if (!exists($local_ProtocolListSIGNALduino->{$pID}{test_data}{$name}));
-    	foreach my $testData (values %$local_ProtocolListSIGNALduino->{$pID}{test_data}{$name}) 
+    	foreach my $testData (values $local_ProtocolListSIGNALduino->{$pID}{test_data}{$name}) 
         {
           subtest "$testData->{desc}" => sub {
               SIGNALduino_IdList("sduino_IdList:$target",$pID);
