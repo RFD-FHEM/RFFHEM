@@ -19,6 +19,7 @@
 # 03.03.2019 neues Protokoll 38: Rosenstein & Soehne, PEARL NC-3911, NC-3912, Kuehlschrankthermometer
 # 07.04.2019 Protokoll 51: Buxfix longID 8 statt 12 bit, prematch channel 1-3
 # 15.04.2019 Protokoll 33: sub crcok ergaenzt
+# 02.05.2019 neues Protokoll 94: Atech wireless weather station (vermutlicher Name: WS-308)
 
 package main;
 
@@ -57,10 +58,11 @@ sub SD_WS_Initialize($)
 		"SD_WS71_T.*"		=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4:Temp,", autocreateThreshold => "2:180"},
 		"SD_WS_33_T_.*"	=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.* model:other", FILTER => "%NAME", GPLOT => "temp4:Temp,", autocreateThreshold => "2:180"},
 		"SD_WS_33_TH_.*"	=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.* model:other", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "2:180"},
-		"SD_WS_38_T_.*"	=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.* model:other", FILTER => "%NAME", GPLOT => "temp4:Temp,", autocreateThreshold => "3:180"},
+		"SD_WS_38_T_.*"	=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4:Temp,", autocreateThreshold => "3:180"},
 		"SD_WS_84_TH_.*"	=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "2:120"},
 		"SD_WS_85_THW_.*"	=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "4:120"},
 		"SD_WS_89_TH.*"	=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "3:180"},
+		"SD_WS_94_T_.*"	=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4:Temp,", autocreateThreshold => "3:180"},
 	};
 
 }
@@ -471,8 +473,7 @@ sub SD_WS_Parse($$)
 			return "";
 		} else {
 			Log3 $name, 4, "$name: SD_WS37 checksum ok $checksum = ".SD_WS_binaryToNumber($bitData,32,39);
-			$id = SD_WS_binaryToNumber($bitData,0,7);
-			$id = sprintf('%02X', $id);           # wandeln nach hex
+			$id = substr($rawData,0,2);
 			$bat = int(substr($bitData,8,1)) eq "0" ? "ok" : "low";		# Batterie-Bit konnte nicht geprueft werden
 			$channel = SD_WS_binaryToNumber($bitData,10,11);
 			$rawTemp = 	SD_WS_binaryToNumber($bitData,12,23);
@@ -737,6 +738,32 @@ sub SD_WS_Parse($$)
 	    Log3 $iohash, 4, "$name: SD_WS_WH2_8 $protocol ($SensorTyp) sensor id=$id, Data:".substr($bitData,$vorpre + 24,8)." hum=$hum";
 	    Log3 $iohash, 4, "$name: SD_WS_WH2_9 $protocol ($SensorTyp) sensor id=$id, channel=$channel, temp=$temp, hum=$hum";
 		
+	} elsif ($protocol eq "94")	# Atech wireless weather station
+	{
+		# Sensor sends Bit 0 as "0", Bit 1 as "110"
+		# Protocol after conversion bits (Length varies from minimum 24 to maximum 32 bits.)
+		# ------------------------------------------------------------------------
+		# 0    4    | 8    12   | 16   20   | 24   28
+		# 1111 1100 | 0000 0110 | 0001 0000 | 0011 0111
+		# iiii iiii | ??s? tttt | tttt tttt | ???? ????
+		# i:  8 bit id
+		# s:  1 bit sign (0 = temperature positive, 1 = temperature negative
+		# t: 12 bit temperature (MSB-first, BCD, 12 bit unsigned celsius scaled by 10)
+		# ?: unknown
+		$model = "SD_WS_94_T";
+		$SensorTyp = "Atech";
+		(my $bitData110 = $bitData) =~ s/110/1/g;	# change 110 to 1
+		$id =	SD_WS_bin2dec(substr($bitData110,0,8));
+		$id = sprintf('%02X', $id); 
+		my $rawtemp100 = SD_WS_binaryToNumber($bitData110,12,15);
+		my $rawtemp10 = SD_WS_binaryToNumber($bitData110,16,19);
+		my $rawtemp1 = SD_WS_binaryToNumber($bitData110,20,23);
+		if ($rawtemp100 > 9 || $rawtemp10 > 9 || $rawtemp1 > 9) {
+			Log3 $iohash, 3, "$name: SD_WS_Parse $model ERROR - BCD of temperature ($rawtemp100 $rawtemp10 $rawtemp1)";
+			return "";
+		}
+		$temp = ($rawtemp100 * 10 + $rawtemp10 + $rawtemp1 / 10);
+		$temp *= -1.0 if (substr($bitData110,10,1) == "1");
  	}
    
 	elsif (defined($decodingSubs{$protocol}))		# durch den hash decodieren
@@ -789,9 +816,12 @@ sub SD_WS_Parse($$)
 		}
 		Log3 $iohash,4, "$name: using longid for $longids device $deviceCode";
 	} else {
-		$deviceCode = $model . "_" . $channel;
+		if (defined $channel) {
+			$deviceCode = $model . "_" . $channel;
+		} else {
+			$deviceCode = $model . "_" . $id;	# for sensors without channel
+		}
 	}
-	
 	#print Dumper($modules{SD_WS}{defptr});
 	
 	my $def = $modules{SD_WS}{defptr}{$deviceCode};
