@@ -3,14 +3,15 @@ defmod test_MS_2 UnitTest dummyDuino (
 	my $mock = Mock::Sub->new;
 	my $SD_Dispatch = $mock->mock("SIGNALduno_Dispatch");
 	
-	my %ProtocolListTest =  SIGNALduino_LoadProtocolHash("$attr{global}{modpath}/FHEM/lib/test_loadprotohash-ok.pm");
-	my $local_ProtocolListSIGNALduino = SIGNALduino_getProtocolList();
-	%{$local_ProtocolListSIGNALduino} = ( %ProtocolListTest);
+    my %local_ProtocolListSIGNALduino =  SIGNALduino_LoadProtocolHash("$attr{global}{modpath}/FHEM/lib/test_loadprotohash-ok.pm");
+    my $ProtocolListSIGNALduino_REF = SIGNALduino_getProtocolList();
+    
+    %$ProtocolListSIGNALduino_REF = %local_ProtocolListSIGNALduino;
 
-	foreach my $pID (keys %$local_ProtocolListSIGNALduino)
+    foreach my $pID (keys %local_ProtocolListSIGNALduino)
 	{	
-		next if (!exists($local_ProtocolListSIGNALduino->{$pID}{test_data}{$name}));
-    	foreach my $testData (values %$local_ProtocolListSIGNALduino->{$pID}{test_data}{$name}) 
+		next if (!exists($local_ProtocolListSIGNALduino{$pID}{test_data}{$name}));
+    	foreach my $testData (values @{$local_ProtocolListSIGNALduino{$pID}{test_data}{$name}}) 
         {
           subtest "$testData->{desc}" => sub {
               SIGNALduino_IdList("sduino_IdList:$target",$pID);
