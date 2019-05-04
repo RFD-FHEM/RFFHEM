@@ -1,4 +1,4 @@
-defmod test1 UnitTest dummyDuino 
+defmod test_1 UnitTest dummyDuino 
 (
  {
 	 my $rmsg="MS;P1=502;P2=-9212;P3=-1939;P4=-3669;D=1234;CP=1;SP=2;";
