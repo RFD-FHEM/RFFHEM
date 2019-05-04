@@ -1978,7 +1978,7 @@ sub SIGNALduno_Dispatch($$$$$)
 		else {
 			$rssi = "";
 		}
-		$dmsg = lc($dmsg) if ($id eq '74');
+		$dmsg = lc($dmsg) if ($id eq '74' or $id eq '74.1');		# 10_FS20.pm accepted only lower case hex
 		SIGNALduino_Log3 $name, SDUINO_DISPATCH_VERBOSE, "$name Dispatch: $dmsg, $rssi dispatch";
 		Dispatch($hash, $dmsg, \%addvals);  ## Dispatch to other Modules 
 		
