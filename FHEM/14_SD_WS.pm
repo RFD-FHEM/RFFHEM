@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 14_SD_WS.pm 18674 2019-02-20 21:25:55Z Sidey $
+# $Id: 14_SD_WS.pm 18674 2019-05-05 12:00:00Z Sidey/elektron-bbs (dev-r34) $
 #
 # The purpose of this module is to support serval
 # weather sensors which use various protocol
@@ -62,7 +62,7 @@ sub SD_WS_Initialize($)
 		"SD_WS_84_TH_.*"	=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "2:120"},
 		"SD_WS_85_THW_.*"	=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "4:120"},
 		"SD_WS_89_TH.*"	=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "3:180"},
-		"SD_WS_94_T_.*"	=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4:Temp,", autocreateThreshold => "3:180"},
+		"SD_WS_94_T.*"	=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4:Temp,", autocreateThreshold => "3:180"},
 	};
 
 }
@@ -812,15 +812,13 @@ sub SD_WS_Parse($$)
 	{
 		$deviceCode = $model . '_' . $id . $channel;						# old form of longid
 		if (!defined($modules{SD_WS}{defptr}{$deviceCode})) {
-			$deviceCode = $model . '_' . $id . '_' . $channel;		# new form of longid
+			$deviceCode = $model . '_' . $id;	# for sensors without channel
+			$deviceCode .= '_' . $channel if (defined $channel);	# new form of longid
 		}
 		Log3 $iohash,4, "$name: using longid for $longids device $deviceCode";
 	} else {
-		if (defined $channel) {
-			$deviceCode = $model . "_" . $channel;
-		} else {
-			$deviceCode = $model . "_" . $id;	# for sensors without channel
-		}
+		$deviceCode = $model;	# for sensors without channel
+		$deviceCode .= '_' . $channel if (defined $channel);
 	}
 	#print Dumper($modules{SD_WS}{defptr});
 	
