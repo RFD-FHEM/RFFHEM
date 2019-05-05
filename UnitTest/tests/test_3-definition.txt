@@ -1,4 +1,4 @@
-defmod test3 UnitTest dummyDuino 
+defmod test_3 UnitTest dummyDuino 
 (
  {
 	 my $mock;

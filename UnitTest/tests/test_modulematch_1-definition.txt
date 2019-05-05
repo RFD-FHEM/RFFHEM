@@ -9,11 +9,11 @@ defmod test_modulematch_1 UnitTest dummyDuino (
 		is($ProtocolListTest{$id}{id},$id,"id $id exists");
 	}
 	my $local_ProtocolListSIGNALduino = SIGNALduino_getProtocolList();
-	foreach (keys %$local_ProtocolListSIGNALduino)
+	foreach (keys %{$local_ProtocolListSIGNALduino})
     {
         delete $local_ProtocolListSIGNALduino->{$_};
     }
-	%{$local_ProtocolListSIGNALduino} = ( %ProtocolListTest);
+    %$local_ProtocolListSIGNALduino = %ProtocolListTest;
 
 	
  

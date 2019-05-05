@@ -1,4 +1,4 @@
-defmod test4 UnitTest dummyDuino ( 
+defmod test_4 UnitTest dummyDuino ( 
 { 
 my $mock = Mock::Sub->new;
 $attr{$target}{eventlogging}=0;

@@ -1,3 +1,13 @@
+02.05.2019
+ 14_SD_WS.pm: New protocol for Atech wireless weather station (protocol #94)
+21.04.2019
+ 00_SIGNALduino.pm: added new internal, which will return LAST_Protocol_ID dispatch
+21.04.2019
+ 14_SD_RSL.pm: change set loglevel from 4 to 3
+               optimize log set
+15.04.2019
+ 14_SD_WS.pm: check protocol 33 added
+ SD_ProtocolData.pm: add definition for TFA 30.3200 (CP=750) and Tchibo weatherstation (CP=400)
 13.04.2019
  14_SD_UT.pm: New protocol for Techmar Garden Lights
 07.04.2019
