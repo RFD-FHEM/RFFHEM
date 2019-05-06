@@ -1,0 +1,36 @@
+defmod test_DeviceData_rmsg UnitTest dummyDuino ( 
+ {  
+ 
+  	my $mock = Mock::Sub->new; 
+	my $SD_Dispatch = $mock->mock("SIGNALduno_Dispatch"); 
+	use JSON; 
+  
+  	my $jsonStr = GetFileFromURL("https://raw.githubusercontent.com/RFD-FHEM/SIGNALduino_TOOL/master/FHEM/lib/SD_Device_ProtocolList.json",4,"",1,4);
+	my $testDataArray; 
+	$testDataArray = decode_json $jsonStr; 
+	if ($? == -1)
+	{
+		diag("open json file SD_Device_ProtocolList was not possible $?"); 
+	} 
+    while (my ($pID, $testSet) = each  (@{$testDataArray}) )
+	{
+		while (my ($tID, $tData) = each (@{$testSet->{data}}) ) 
+		{
+			next if (!defined($tData->{rmsg}));
+
+	        subtest "[$pID]: $testSet->{name}: [$tID] " => sub {
+       		#SIGNALduino_Log3 $target, 5,  Dumper($tData);  
+
+	            $SD_Dispatch->reset();
+	            SIGNALduino_Parse($targetHash, $targetHash, $targetHash->{NAME}, "\002".$tData->{rmsg}."\003") if (defined($tData->{rmsg}));
+	            if ($SD_Dispatch->called() >0 )  {
+		            is($SD_Dispatch->called_count, $tData->{repeat}, "check number of dispatch attempts") if (defined($tData->{repeat}));
+		            is( ($SD_Dispatch->called_with)[4], $testSet->{id}, "SIGNALduno_Dispatch check id ") if (defined($testSet->{id}));
+		            is( ($SD_Dispatch->called_with)[2], $tData->{dmsg}, "SIGNALduno_Dispatch check dmsg" ) if (exists($tData->{dmsg}));
+				} else { diag "SIGNALduno_Dispatch was not called, this must be an error"; }
+            }
+	
+        }
+    };
+ } 
+);
