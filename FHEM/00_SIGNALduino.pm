@@ -235,6 +235,7 @@ SIGNALduino_Initialize($)
 					  ." WS09_CRCAUS:0,1,2"
 					  ." addvaltrigger"
 					  ." rawmsgEvent:1,0"
+						." dmsgEvent:1,0"
 					  ." cc1101_frequency"
 					  ." doubleMsgCheck_IDs"
 					  ." suppressDeviceRawmsg:1,0"
@@ -1946,6 +1947,9 @@ sub SIGNALduno_Dispatch($$$$$)
 		}
 		$hash->{LASTDMSG} = $dmsg;
 		$hash->{LASTDMSGID} = $id;
+		if (AttrVal($name, "dmsgEvent", 0)) {
+			DoTrigger($name, "DMSG " . $dmsg);
+		}
 	}
 
    if ($DMSGgleich) {
@@ -4874,6 +4878,10 @@ attr sduino longids 1
 # Will generate devices names like BTHR918N_f3.
 attr sduino longids BTHR918N
 </PRE></li>
+<a name="dmsgEvent"></a>
+<li>dmsgEvent<br>
+When set to "1" received dmsg messages triggers events
+</li><br>
 <a name="rawmsgEvent"></a>
 <li>rawmsgEvent<br>
 When set to "1" received raw messages triggers events
@@ -5296,6 +5304,10 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
     	Setze dies auf 0 und Logmeldungen werden nur in der globalen Fhem-Logdatei gespeichert, wenn der Loglevel h&ouml;her oder gleich dem Verbose-Attribut ist.
     	Setze dies auf 1 und jede Logmeldung wird auch als Ereignis versendet. Dadurch k&ouml;nnen Sie die Ereignisse in einer separaten Protokolldatei protokollieren.
     	</li><br>
+	<a name="dmsgEvent"></a>
+	<li>dmsgEvent<br>
+	Bei der Einstellung "1", l&ouml;sen empfangene Dispatch Nachrichten Ereignisse aus.
+	</li><br>
 	<a name="rawmsgEvent"></a>
 	<li>rawmsgEvent<br>
 	Bei der Einstellung "1", l&ouml;sen empfangene Rohnachrichten Ereignisse aus.

@@ -1,3 +1,5 @@
+06.05.2018
+ 00_SIGNALduino.pm: added new attrib dmsgEvent
 21.04.2019
  00_SIGNALduino.pm: added new internal, which will return LAST_Protocol_ID dispatch
 21.04.2019
