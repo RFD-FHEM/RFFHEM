@@ -10,7 +10,7 @@
 # KeeLoq is a registered trademark of Microchip Technology Inc.
 #
 ######################################################################################################################
-# !!! notes !!! | date: 20190304
+# !!! notes !!! | date: 20190505
 #		- last change: fix PERL WARNING line "my $def = $modules{SD_Keeloq}{defptr}{$devicedef};"
 #		-
 ######################################################################################################################
@@ -489,7 +489,7 @@ sub Set($$$@) {
 				### single control ###
 				} else {
 					Log3 $name, 4, "$ioname: SD_Keeloq_Set - check, multiple selection: no";
-					if ($cmd2 !~ /^\d$/) {
+					if ($cmd2 !~ /^\d{1,2}$/) {
 						## single group ##
 						if ( not grep( /$cmd2/, $addGroups ) ) {
 							return "ERROR: $cmd2 is not support!";

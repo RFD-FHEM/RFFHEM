@@ -1,5 +1,7 @@
 06.05.2018
  00_SIGNALduino.pm: added new attrib dmsgEvent
+05.05.2019
+ 14_SD_Keeloq.pm: fix use channels 10-16 #issuecomment-488055600
 21.04.2019
  00_SIGNALduino.pm: added new internal, which will return LAST_Protocol_ID dispatch
 21.04.2019
