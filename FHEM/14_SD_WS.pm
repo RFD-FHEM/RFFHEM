@@ -443,8 +443,40 @@ sub SD_WS_Parse($$)
 				temp       => sub {my (undef,$bitData) = @_; return ((SD_WS_binaryToNumber($bitData,12,23) - 500) / 10.0); },
 				hum        => sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,24,31); },
 				crcok      => sub {return 1;},		# crc test method is so far unknown
-			} ,
-    );
+			} ,	
+		94 => {			
+				# Sensor sends Bit 0 as "0", Bit 1 as "110"
+				# Protocol after conversion bits (Length varies from minimum 24 to maximum 32 bits.)
+				# ------------------------------------------------------------------------
+				# 0    4    | 8    12   | 16   20   | 24   28
+				# 1111 1100 | 0000 0110 | 0001 0000 | 0011 0111
+				# iiii iiii | ??s? tttt | tttt tttt | ???? ????
+				# i:  8 bit id
+				# s:  1 bit sign (0 = temperature positive, 1 = temperature negative
+				# t: 12 bit temperature (MSB-first, BCD, 12 bit unsigned celsius scaled by 10)
+				# ?: unknown
+				sensortype => 'Atech',
+				model      => 'SD_WS_94_T',
+				prematch   => sub { return 1; },		#  no precheck known
+				id         => sub { # change 110 to 1 in ref bitdata and return id
+									($_[1] = $_[1]) =~ s/110/1/g; 
+									return sprintf('%02X', SD_WS_bin2dec(substr($_[1],0,8))); 
+								  },  
+				bat        => sub { return substr($_[1],8,1) eq "0" ? "ok" : "low"; },
+				temp       => sub {
+					my $rawtemp100 	= SD_WS_binaryToNumber($_[1],12,15);
+					my $rawtemp10 	= SD_WS_binaryToNumber($_[1],16,19);
+					my $rawtemp1 	= SD_WS_binaryToNumber($_[1],20,23);
+					if ($rawtemp100 > 9 || $rawtemp10 > 9 || $rawtemp1 > 9) {
+						Log3 $iohash, 3, "$name: SD_WS_Parse $model ERROR - BCD of temperature ($rawtemp100 $rawtemp10 $rawtemp1)";
+						return "";
+					};
+					my $temp = ($rawtemp100 * 10 + $rawtemp10 + $rawtemp1 / 10) * ( substr($_[1],10,1) == 1 ? -1.0 : 1.0);
+				},
+				hum        => sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,24,31); },
+				crcok      => sub {return 1;},		# crc test method is so far unknown
+		},
+	);
 
 	Log3 $name, 4, "$name: SD_WS_Parse protocol $protocol, rawData $rawData";
 
@@ -738,33 +770,7 @@ sub SD_WS_Parse($$)
 	    Log3 $iohash, 4, "$name: SD_WS_WH2_8 $protocol ($SensorTyp) sensor id=$id, Data:".substr($bitData,$vorpre + 24,8)." hum=$hum";
 	    Log3 $iohash, 4, "$name: SD_WS_WH2_9 $protocol ($SensorTyp) sensor id=$id, channel=$channel, temp=$temp, hum=$hum";
 		
-	} elsif ($protocol eq "94")	# Atech wireless weather station
-	{
-		# Sensor sends Bit 0 as "0", Bit 1 as "110"
-		# Protocol after conversion bits (Length varies from minimum 24 to maximum 32 bits.)
-		# ------------------------------------------------------------------------
-		# 0    4    | 8    12   | 16   20   | 24   28
-		# 1111 1100 | 0000 0110 | 0001 0000 | 0011 0111
-		# iiii iiii | ??s? tttt | tttt tttt | ???? ????
-		# i:  8 bit id
-		# s:  1 bit sign (0 = temperature positive, 1 = temperature negative
-		# t: 12 bit temperature (MSB-first, BCD, 12 bit unsigned celsius scaled by 10)
-		# ?: unknown
-		$model = "SD_WS_94_T";
-		$SensorTyp = "Atech";
-		(my $bitData110 = $bitData) =~ s/110/1/g;	# change 110 to 1
-		$id =	SD_WS_bin2dec(substr($bitData110,0,8));
-		$id = sprintf('%02X', $id); 
-		my $rawtemp100 = SD_WS_binaryToNumber($bitData110,12,15);
-		my $rawtemp10 = SD_WS_binaryToNumber($bitData110,16,19);
-		my $rawtemp1 = SD_WS_binaryToNumber($bitData110,20,23);
-		if ($rawtemp100 > 9 || $rawtemp10 > 9 || $rawtemp1 > 9) {
-			Log3 $iohash, 3, "$name: SD_WS_Parse $model ERROR - BCD of temperature ($rawtemp100 $rawtemp10 $rawtemp1)";
-			return "";
-		}
-		$temp = ($rawtemp100 * 10 + $rawtemp10 + $rawtemp1 / 10);
-		$temp *= -1.0 if (substr($bitData110,10,1) == "1");
- 	}
+	} 
    
 	elsif (defined($decodingSubs{$protocol}))		# durch den hash decodieren
 	{
@@ -784,13 +790,14 @@ sub SD_WS_Parse($$)
 	    	$temp=$decodingSubs{$protocol}{temp}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{temp}));
 	    	$hum=$decodingSubs{$protocol}{hum}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{hum}));
 	    	$windspeed=$decodingSubs{$protocol}{windspeed}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{windspeed}));
-	    	$channel=$decodingSubs{$protocol}{channel}->( $rawData,$bitData );
+	    	$channel=$decodingSubs{$protocol}{channel}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{channel}));
 	    	$model = $decodingSubs{$protocol}{model};
-				$bat = $decodingSubs{$protocol}{bat}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{bat}));
-				$beep = $decodingSubs{$protocol}{beep}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{beep}));
-				if ($model eq "SD_WS_33_T") {			# for SD_WS_33 discrimination T - TH
+			$bat = $decodingSubs{$protocol}{bat}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{bat}));
+			
+			$beep = $decodingSubs{$protocol}{beep}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{beep}));
+			if ($model eq "SD_WS_33_T") {			# for SD_WS_33 discrimination T - TH
 					$model = $decodingSubs{$protocol}{model}."H" if $hum != 0;				# for models with Humidity
-				} 
+			} 
 	    	$sendmode = $decodingSubs{$protocol}{sendmode}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{sendmode}));
 	    	$trend = $decodingSubs{$protocol}{trend}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{trend}));
 
