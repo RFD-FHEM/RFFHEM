@@ -2090,7 +2090,7 @@ SIGNALduino_Parse_MS($$$$%)
 				if (!SIGNALduino_FillPatternLookupTable($hash,\@{$ProtocolListSIGNALduino{$id}{$key}},\$symbol_map{$key},\%patternList,\$rawData,\%patternLookupHash,\%endPatternLookupHash,\$return_text))
 				{
 					Debug sprintf("%s pattern not found",$key) if ($debug);
-					next IDLOOP if ($key != "float") ;
+					next IDLOOP if ($key ne "float") ;
 				}
 				
 				if ($key eq "sync")
@@ -2341,7 +2341,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 				if (!SIGNALduino_FillPatternLookupTable($hash,\@{$ProtocolListSIGNALduino{$id}{$key}},\$symbol_map{$key},\%patternList,\$rawData,\%patternLookupHash,\%endPatternLookupHash,\$return_text))
 				{
 						Debug sprintf("%s pattern not found",$key) if ($debug);
-						next IDLOOP if ($key != "float");
+						next IDLOOP if ($key ne "float");
 				}
 				Debug sprintf("Found matched %s with indexes: (%s)",$key,$return_text) if ($debug);
 				if ($key eq "one")
