@@ -1,4 +1,4 @@
-# $Id: 00_SIGNALduino.pm 10488 2019-03-08 12:00:00Z v3.4.0-dev $
+# $Id: 00_SIGNALduino.pm 10488 2019-05-11 12:00:00Z v3.4.0-dev $
 #
 # v3.4.0 (Development release 3.4)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incoming messages
@@ -30,7 +30,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.4.0_dev_16.03",
+	SDUINO_VERSION            => "v3.4.0_dev_11.05",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -2090,7 +2090,7 @@ SIGNALduino_Parse_MS($$$$%)
 				if (!SIGNALduino_FillPatternLookupTable($hash,\@{$ProtocolListSIGNALduino{$id}{$key}},\$symbol_map{$key},\%patternList,\$rawData,\%patternLookupHash,\%endPatternLookupHash,\$return_text))
 				{
 					Debug sprintf("%s pattern not found",$key) if ($debug);
-					next IDLOOP;
+					next IDLOOP if ($key != "float") ;
 				}
 				
 				if ($key eq "sync")
@@ -2341,7 +2341,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 				if (!SIGNALduino_FillPatternLookupTable($hash,\@{$ProtocolListSIGNALduino{$id}{$key}},\$symbol_map{$key},\%patternList,\$rawData,\%patternLookupHash,\%endPatternLookupHash,\$return_text))
 				{
 						Debug sprintf("%s pattern not found",$key) if ($debug);
-						next IDLOOP;
+						next IDLOOP if ($key != "float");
 				}
 				Debug sprintf("Found matched %s with indexes: (%s)",$key,$return_text) if ($debug);
 				if ($key eq "one")

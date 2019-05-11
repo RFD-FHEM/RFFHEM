@@ -1,3 +1,6 @@
+11.05.2019
+  00_SIGNALduino.pm: Fixed protocols with float. Float is optional and must 
+                     not be included in transmission
 05.05.2019
  14_SD_Keeloq.pm: fix use channels 10-16 #issuecomment-488055600
 21.04.2019
