@@ -39,11 +39,13 @@ defmod test_DeviceData_rmsg UnitTest dummyDuino (
 	} 
 	);
 	
+	my $noTestRun=1;
 	use lib::SD_Protocols;
 	#my $SD_Protos = lib::SD_Protocols::new("$attr{global}{modpath}/FHEM/lib/SD_ProtocolData.pm"); 
     while ( ($pID, $testSet) = each  (@{$testDataArray}) )
 	{
-		next if ($testSet->{name} ne "MD-230R" );
+		#next if ($testSet->{name} ne "MD-230R" );
+		next if (!lib::SD_Protocols::exists($testSet->{id}));
 		next if (lib::SD_Protocols::checkProperty($testSet->{id},'developId',undef));
 		while ( ($tID, $tData) = each (@{$testSet->{data}}) ) 
 		{
@@ -53,9 +55,9 @@ defmod test_DeviceData_rmsg UnitTest dummyDuino (
        		#SIGNALduino_Log3 $target, 5,  Dumper($tData);  
 				$id_matched=0;
 				$dmsg_matched=0;
-
 	            SIGNALduino_Parse($targetHash, $targetHash, $targetHash->{NAME}, "\002".$tData->{rmsg}."\003") if (defined($tData->{rmsg}));
 	            if ($SD_Dispatch->called() >0 )  {
+					$noTestRun=0;
 		            is($SD_Dispatch_calledCounter, $tData->{repeat}, "check number of dispatch attempts") if (defined($tData->{repeat}));
 		            ok($id_matched,"SIGNALduno_Dispatch check id ");
 		            ok($dmsg_matched,"SIGNALduno_Dispatch check dmsg ");
@@ -65,5 +67,7 @@ defmod test_DeviceData_rmsg UnitTest dummyDuino (
 	
         }
     };
+	is($noTestRun,0,"Verify if a test was performed ");
+    
  } 
 );
