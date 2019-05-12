@@ -462,7 +462,6 @@ sub SD_WS_Parse($$)
 									($_[1] = $_[1]) =~ s/110/1/g; 
 									return sprintf('%02X', SD_WS_bin2dec(substr($_[1],0,8))); 
 								  },  
-				bat        => sub { return substr($_[1],8,1) eq "0" ? "ok" : "low"; },
 				temp       => sub {
 					my $rawtemp100 	= SD_WS_binaryToNumber($_[1],12,15);
 					my $rawtemp10 	= SD_WS_binaryToNumber($_[1],16,19);
@@ -473,7 +472,6 @@ sub SD_WS_Parse($$)
 					};
 					my $temp = ($rawtemp100 * 10 + $rawtemp10 + $rawtemp1 / 10) * ( substr($_[1],10,1) == 1 ? -1.0 : 1.0);
 				},
-				hum        => sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,24,31); },
 				crcok      => sub {return 1;},		# crc test method is so far unknown
 		},
 	);
