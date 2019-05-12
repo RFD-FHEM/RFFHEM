@@ -2,7 +2,6 @@ defmod test_DeviceData_rmsg UnitTest dummyDuino (
  {  
  
   	my $mock = Mock::Sub->new; 
-	my $SD_Dispatch = $mock->mock("SIGNALduno_Dispatch"); 
 	use JSON; 
   
   	my $jsonStr = GetFileFromURL("https://raw.githubusercontent.com/RFD-FHEM/SIGNALduino_TOOL/master/FHEM/lib/SD_Device_ProtocolList.json",4,"",1,4);
@@ -11,22 +10,56 @@ defmod test_DeviceData_rmsg UnitTest dummyDuino (
 	if ($? == -1)
 	{
 		diag("open json file SD_Device_ProtocolList was not possible $?"); 
-	} 
-    while (my ($pID, $testSet) = each  (@{$testDataArray}) )
-	{
-		while (my ($tID, $tData) = each (@{$testSet->{data}}) ) 
-		{
-			next if (!defined($tData->{rmsg}));
+	}
+	
+	my $testSet;
+	my $pID;
 
+	my $tData;
+	my $tID;
+
+	my $id_matched=undef;
+	my $dmsg_matched=undef;
+	my $SD_Dispatch_calledCounter=undef;
+	
+	my $SD_Dispatch = $mock->mock("SIGNALduno_Dispatch"); 
+	$SD_Dispatch->side_effect( sub { 
+		Log3 "Testdev", 5, $_[1].$_[2];
+		if (defined($testSet->{id}) && !$id_matched && $_[4] eq $testSet->{id}) 
+		{
+		 	$id_matched=1;
+		}
+		
+		if (defined($tData->{dmsg}) && !$dmsg_matched && $_[2] eq $tData->{dmsg}) 
+		{
+		 	$dmsg_matched=1;
+		}
+		$SD_Dispatch_calledCounter++;	
+		return undef;
+	} 
+	);
+	
+	use lib::SD_Protocols;
+	#my $SD_Protos = lib::SD_Protocols::new("$attr{global}{modpath}/FHEM/lib/SD_ProtocolData.pm"); 
+    while ( ($pID, $testSet) = each  (@{$testDataArray}) )
+	{
+		next if ($testSet->{name} ne "MD-230R" );
+		next if (lib::SD_Protocols::checkProperty($testSet->{id},'developId',undef));
+		while ( ($tID, $tData) = each (@{$testSet->{data}}) ) 
+		{
+			next if (!defined($tData->{rmsg}) || !defined($tData->{dmsg}));
+			
 	        subtest "[$pID]: $testSet->{name}: [$tID] " => sub {
        		#SIGNALduino_Log3 $target, 5,  Dumper($tData);  
+				$id_matched=0;
+				$dmsg_matched=0;
 
-	            $SD_Dispatch->reset();
 	            SIGNALduino_Parse($targetHash, $targetHash, $targetHash->{NAME}, "\002".$tData->{rmsg}."\003") if (defined($tData->{rmsg}));
 	            if ($SD_Dispatch->called() >0 )  {
-		            is($SD_Dispatch->called_count, $tData->{repeat}, "check number of dispatch attempts") if (defined($tData->{repeat}));
-		            is( ($SD_Dispatch->called_with)[4], $testSet->{id}, "SIGNALduno_Dispatch check id ") if (defined($testSet->{id}));
-		            is( ($SD_Dispatch->called_with)[2], $tData->{dmsg}, "SIGNALduno_Dispatch check dmsg" ) if (exists($tData->{dmsg}));
+		            is($SD_Dispatch_calledCounter, $tData->{repeat}, "check number of dispatch attempts") if (defined($tData->{repeat}));
+		            ok($id_matched,"SIGNALduno_Dispatch check id ");
+		            ok($dmsg_matched,"SIGNALduno_Dispatch check dmsg ");
+		      		            
 				} else { diag "SIGNALduno_Dispatch was not called, this must be an error"; }
             }
 	
