@@ -1024,6 +1024,7 @@ sub SD_WS_WH2SHIFT($){
   The SD_WS module processes the messages from various environmental sensors received from an IO device (CUL, CUN, SIGNALDuino, SignalESP etc.).<br><br>
   <b>Known models:</b>
   <ul>
+    <li>Atech wireless weather station</li>
     <li>Bresser 7009994</li>
     <li>BresserTemeo</li>
     <li>Conrad S522</li>
@@ -1118,6 +1119,7 @@ sub SD_WS_WH2SHIFT($){
   <br>
   <b>Unterst&uumltzte Modelle:</b><br><br>
   <ul>
+    <li>Atech Wetterstation</li>
     <li>Bresser 7009994</li>
     <li>BresserTemeo</li>
     <li>Conrad S522</li>
