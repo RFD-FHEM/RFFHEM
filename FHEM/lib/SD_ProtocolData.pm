@@ -2229,19 +2229,19 @@ package lib::SD_ProtocolData;
 							# warning   MS;P0=-399;P1=407;P2=820;P3=-816;P4=-4017;D=14131020231020202313131023131313131023102023131313131310202313131020202313;CP=1;SP=4;O;m0;
 							# warning   MS;P1=392;P2=-824;P3=-416;P4=804;P5=-4034;D=15121343421343434212121342121212121342134342121212121213434212121343434212;CP=1;SP=5;e;m2;
 			{
-				name			=> 'Atlantic security',
-				comment			=> 'example sensor MD-210R | MD-2018R | MD-2003R (MS decode)',
-				id			=> '91.1',
-				knownFreqs		=> '433.92 | 868.35',
-				one			=> [-2,1],
-				zero			=> [-1,2],
-				sync			=> [-10,1],
-				clockabs		=> 400,
-				reconstructBit		=> '1',
-				format			=> 'twostate',	#
-				preamble		=> 'P91.1#',		# prepend to converted message
-				length_min		=> '32',
-				length_max		=> '36',
+				name						=> 'Atlantic security',
+				comment					=> 'example sensor MD-210R | MD-2018R | MD-2003R (MS decode)',
+				id							=> '91.1',
+				knownFreqs			=> '433.92 | 868.35',
+				one							=> [-2,1],
+				zero						=> [-1,2],
+				sync						=> [-10,1],
+				clockabs				=> 400,
+				reconstructBit	=> '1',
+				format					=> 'twostate',	#
+				preamble				=> 'P91#',		# prepend to converted message
+				length_min			=> '32',
+				length_max			=> '36',
 				clientmodule		=> 'SD_UT',
 				#modulematch		=> '^P91.1#.*',
 			},
