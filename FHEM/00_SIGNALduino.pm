@@ -93,9 +93,9 @@ my %sets = (
   "disableMessagetype" => 'syncedMS,unsyncedMU,manchesterMC',
   "sendMsg"		=> "",
   "cc1101_freq"    => '',
-  "cc1101_bWidth"  => '',
-  "cc1101_rAmpl"   => '',
-  "cc1101_sens"    => '',
+  "cc1101_bWidth"  => '58,68,81,102,116,135,162,203,232,270,325,406,464,541,650,812',
+  "cc1101_rAmpl"   => '24,27,30,33,36,38,40,42',
+  "cc1101_sens"    => '4,8,12,16',
   "cc1101_patable_433" => '-10_dBm,-5_dBm,0_dBm,5_dBm,7_dBm,10_dBm',
   "cc1101_patable_868" => '-10_dBm,-5_dBm,0_dBm,5_dBm,7_dBm,10_dBm',
 );
