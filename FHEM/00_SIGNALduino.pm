@@ -4004,6 +4004,19 @@ sub SIGNALduino_OSPIR()
 		return return (-1," header not found");
 	}	
 }
+
+sub SIGNALduino_GROTHE()
+{
+	my ($name,$bitData,$id,$mcbitnum) = @_;
+	my $debug = AttrVal($name,"debug",0);
+
+
+	my $hex=SIGNALduino_b2h($bitData);
+
+	SIGNALduino_Log3 $name, 4, "$name: GROTHE protocol detected";	
+	return  (1,$hex); ## Return the bits unchanged in hex
+}
+
 sub SIGNALduino_MCRAW()
 {
 	my ($name,$bitData,$id,$mcbitnum) = @_;
