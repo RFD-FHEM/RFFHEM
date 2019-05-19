@@ -2346,7 +2346,7 @@ package lib::SD_ProtocolData;
 				preamble				=> 'u96#',
 				length_min			=> '41',
 				length_max			=> '49',
-				method					=> \&main::SIGNALduino_GROTHE,		# Call to process this message
+				method					=> \&main::SIGNALduino_MCRAW,		# Call to process this message
 			},
 	);
 	sub getProtocolList	{	

@@ -4005,17 +4005,6 @@ sub SIGNALduino_OSPIR()
 	}	
 }
 
-sub SIGNALduino_GROTHE()
-{
-	my ($name,$bitData,$id,$mcbitnum) = @_;
-	my $debug = AttrVal($name,"debug",0);
-
-
-	my $hex=SIGNALduino_b2h($bitData);
-
-	SIGNALduino_Log3 $name, 4, "$name: GROTHE protocol detected";	
-	return  (1,$hex); ## Return the bits unchanged in hex
-}
 
 sub SIGNALduino_MCRAW()
 {
@@ -4026,7 +4015,6 @@ sub SIGNALduino_MCRAW()
 	my $hex=SIGNALduino_b2h($bitData);
 	return  (1,$hex); ## Return the bits unchanged in hex
 }
-
 
 
 sub SIGNALduino_SomfyRTS()
