@@ -30,7 +30,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.4.0_dev_11.05",
+	SDUINO_VERSION            => "v3.4.0_dev_20.05",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -2534,11 +2534,14 @@ SIGNALduino_Parse_MC($$$$@)
 			Debug "$name: extracted data $bitData (bin)\n" if ($debug); ## Convert Message from hex to bits
 		   	SIGNALduino_Log3 $name, 5, "$name: extracted data $bitData (bin)";
 		   	
-		   	my $method = $ProtocolListSIGNALduino{$id}{method};
-		    if (!exists &$method)
-			{
-				SIGNALduino_Log3 $name, 5, "$name: Error: Unknown function=$method. Please define it in file $0";
+	   	my $method;
+	    if (!exists $ProtocolListSIGNALduino{$id}{method}) {
+				$method = \&main::SIGNALduino_MCRAW;
+				SIGNALduino_Log3 $name, 5, "$name: Error: no methode defined -> system used standard methode SIGNALduino_MCRAW | Please define it in file $0";
 			} else {
+				$method = $ProtocolListSIGNALduino{$id}{method};
+			}
+			if( defined &{ $method } ) {
 				$mcbitnum = length($bitData) if ($mcbitnum > length($bitData));
 				my ($rcode,$res) = $method->($name,$bitData,$id,$mcbitnum);
 				if ($rcode != -1) {
@@ -2561,8 +2564,7 @@ SIGNALduino_Parse_MC($$$$@)
 						{
 							if (defined($rssi)) {
 								SIGNALduino_Log3 $name, SDUINO_MC_DISPATCH_VERBOSE, "$name $id, $rmsg RSSI=$rssi";
-							} else
-							{
+							} else {
 								SIGNALduino_Log3 $name, SDUINO_MC_DISPATCH_VERBOSE, "$name $id, $rmsg";
 							}
 						}
@@ -2572,8 +2574,10 @@ SIGNALduino_Parse_MC($$$$@)
 				} else {
 					$res="undef" if (!defined($res));
 					SIGNALduino_Log3 $name, 5, "$name: protocol does not match return from method: ($res)" ; 
-
 				}
+			} else {
+				SIGNALduino_Log3 $name, 3, "$name: Error: defined methode are NOT exist! Please check it!";
+				return 0;
 			}
 		}
 			
@@ -4004,6 +4008,7 @@ sub SIGNALduino_OSPIR()
 		return return (-1," header not found");
 	}	
 }
+
 sub SIGNALduino_MCRAW()
 {
 	my ($name,$bitData,$id,$mcbitnum) = @_;
