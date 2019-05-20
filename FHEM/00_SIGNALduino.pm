@@ -1,4 +1,4 @@
-# $Id: 00_SIGNALduino.pm 10488 2019-03-08 12:00:00Z v3.4.0-dev $
+# $Id: 00_SIGNALduino.pm 10488 2019-05-11 12:00:00Z v3.4.0-dev $
 #
 # v3.4.0 (Development release 3.4)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incoming messages
@@ -30,7 +30,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.4.0_dev_16.03",
+	SDUINO_VERSION            => "v3.4.0_dev_11.05",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -93,9 +93,9 @@ my %sets = (
   "disableMessagetype" => 'syncedMS,unsyncedMU,manchesterMC',
   "sendMsg"		=> "",
   "cc1101_freq"    => '',
-  "cc1101_bWidth"  => '',
-  "cc1101_rAmpl"   => '',
-  "cc1101_sens"    => '',
+  "cc1101_bWidth"  => '58,68,81,102,116,135,162,203,232,270,325,406,464,541,650,812',
+  "cc1101_rAmpl"   => '24,27,30,33,36,38,40,42',
+  "cc1101_sens"    => '4,8,12,16',
   "cc1101_patable_433" => '-10_dBm,-5_dBm,0_dBm,5_dBm,7_dBm,10_dBm',
   "cc1101_patable_868" => '-10_dBm,-5_dBm,0_dBm,5_dBm,7_dBm,10_dBm',
 );
@@ -2090,7 +2090,7 @@ SIGNALduino_Parse_MS($$$$%)
 				if (!SIGNALduino_FillPatternLookupTable($hash,\@{$ProtocolListSIGNALduino{$id}{$key}},\$symbol_map{$key},\%patternList,\$rawData,\%patternLookupHash,\%endPatternLookupHash,\$return_text))
 				{
 					Debug sprintf("%s pattern not found",$key) if ($debug);
-					next IDLOOP;
+					next IDLOOP if ($key ne "float") ;
 				}
 				
 				if ($key eq "sync")
@@ -2341,7 +2341,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 				if (!SIGNALduino_FillPatternLookupTable($hash,\@{$ProtocolListSIGNALduino{$id}{$key}},\$symbol_map{$key},\%patternList,\$rawData,\%patternLookupHash,\%endPatternLookupHash,\$return_text))
 				{
 						Debug sprintf("%s pattern not found",$key) if ($debug);
-						next IDLOOP;
+						next IDLOOP if ($key ne "float");
 				}
 				Debug sprintf("Found matched %s with indexes: (%s)",$key,$return_text) if ($debug);
 				if ($key eq "one")
@@ -4004,6 +4004,8 @@ sub SIGNALduino_OSPIR()
 		return return (-1," header not found");
 	}	
 }
+
+
 sub SIGNALduino_MCRAW()
 {
 	my ($name,$bitData,$id,$mcbitnum) = @_;
@@ -4013,7 +4015,6 @@ sub SIGNALduino_MCRAW()
 	my $hex=SIGNALduino_b2h($bitData);
 	return  (1,$hex); ## Return the bits unchanged in hex
 }
-
 
 
 sub SIGNALduino_SomfyRTS()
