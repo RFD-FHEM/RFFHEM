@@ -44,6 +44,8 @@
 #                            If not set (default) or set to 0, data will be dispatched in hex mode to other logical modules.
 # postDemodulation => \&   # only MU - SIGNALduino internal sub for processing before dispatching to a logical module
 # method      => \&        # call to process this message
+#                            system method: SIGNALduino_MCRAW -> returns bits without editing and length check included
+#
 #	frequency   => ' '       # frequency to set register cc1101 to send | example: 10AB85550A
 # format      => ' '       # twostate | pwm | manchester --> modulation type of the signal, only manchester use SIGNALduino internal, other types only comment
 # modulematch => ' '       # RegEx on the exact message including preamble | if defined, it will be evaluated
@@ -64,7 +66,7 @@ package lib::SD_ProtocolData;
 	use strict;
 	use warnings;
 	
-	our $VERSION = '1.03';
+	our $VERSION = '1.04';
 	our %protocols = (
 		"0"	=>	## various weather sensors (500 | 9100)
 						# ABS700 | Id:79 T: 3.3 Bat:low                MS;P1=-7949;P2=492;P3=-1978;P4=-3970;D=21232423232424242423232323232324242423232323232424;CP=2;SP=1;R=245;O;
@@ -2329,6 +2331,24 @@ package lib::SD_ProtocolData;
 				clientmodule    => 'SD_UT',
 				length_min      => '50',
 				length_max      => '50',
+			},
+		"96"	=>	# Funk-Gong | Taster Grothe Mistral SE 03.1 , Innenteil Grothe Mistral 200M(E)
+							# https://forum.fhem.de/index.php/topic,64251.msg940593.html?PHPSESSID=nufcvvjobdd8r7rgr0cq3qkrv0#msg940593 @coolheizer
+							# Button_1    MC;LL=-424;LH=438;SL=-215;SH=212;D=238823B1001F8;C=214;L=49;R=68;
+							# Button_2    MC;LL=-412;LH=458;SL=-187;SH=240;D=238129D9A78;C=216;L=41;R=241;
+			{
+				name            => 'Grothe Mistral',
+				comment         => 'wireless gong',
+				id              => '96',
+				knownFreqs      => '866.35',
+				clockrange			=> [210,220],							# min , max
+				format					=> 'manchester',					# tristate can't be migrated from bin into hex!
+				#clientmodule		 => '',
+				#modulematch		 => '^u96#',
+				preamble				=> 'u96#',
+				length_min			=> '41',
+				length_max			=> '49',
+				method					=> \&main::SIGNALduino_MCRAW,		# Call to process this message
 			},
 	);
 	sub getProtocolList	{	
