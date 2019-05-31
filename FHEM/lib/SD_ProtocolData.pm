@@ -44,7 +44,7 @@
 #                            If not set (default) or set to 0, data will be dispatched in hex mode to other logical modules.
 # postDemodulation => \&   # only MU - SIGNALduino internal sub for processing before dispatching to a logical module
 # method      => \&        # call to process this message
-#                            system method: SIGNALduino_MCRAW -> returns bits without editing and length check included
+#                            system method: lib::SD_Protocols::MCRAW -> returns bits without editing and length check included
 #
 #	frequency   => ' '       # frequency to set register cc1101 to send | example: 10AB85550A
 # format      => ' '       # twostate | pwm | manchester --> modulation type of the signal, only manchester use SIGNALduino internal, other types only comment
@@ -1427,7 +1427,7 @@ package lib::SD_ProtocolData;
 				preamble				=> 'P57#',
 				length_min			=> '21',
 				length_max			=> '24',
-				method					=> \&main::SIGNALduino_MCRAW,	# Call to process this message
+				method					=> \&lib::SD_Protocols::MCRAW,	# Call to process this message
 				polarity				=> 'invert',
 			},
 		"58"	=>	## TFA 30.3208.0
@@ -2348,7 +2348,7 @@ package lib::SD_ProtocolData;
 				preamble				=> 'u96#',
 				length_min			=> '41',
 				length_max			=> '49',
-				method					=> \&main::SIGNALduino_MCRAW,		# Call to process this message
+				method					=> \&lib::SD_Protocols::MCRAW,		# Call to process this message
 			},
 	);
 	sub getProtocolList	{	
