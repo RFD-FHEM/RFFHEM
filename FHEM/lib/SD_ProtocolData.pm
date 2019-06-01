@@ -1312,21 +1312,25 @@ package lib::SD_ProtocolData;
 		"50"	=>	## Opus XT300
 							# https://github.com/RFD-FHEM/RFFHEM/issues/99 @sidey79
 							# Ch:1 T: 25 H: 5   MU;P0=248;P1=-21400;P2=545;P3=-925;P4=1368;P5=-12308;D=01232323232323232343234323432343234343434343234323432343434343432323232323232323232343432323432345232323232323232343234323432343234343434343234323432343434343432323232323232323232343432323432345232323232323232343234323432343234343434343234323432343434343;CP=2;O;
+							# CH:1 T: 18 H: 5   W50#FF55053AFF93    MU;P2=-962;P4=508;P5=1339;P6=-12350;D=46424242424242424252425242524252425252525252425242525242424252425242424242424242424252524252524240;CP=4;R=0;
+							# CH:3 T: 18 H: 5   W50#FF57053AFF95    MU;P2=510;P3=-947;P5=1334;P6=-12248;D=26232323232323232353235323532323235353535353235323535323232353235323232323232323232353532353235320;CP=2;R=0;
+
 			{
-				name						=> 'Opus_XT300',
+				name					=> 'Opus_XT300',
 				comment					=> 'sensor for ground humidity',
-				id							=> '50',
-				knownFreqs      => '',
+				id						=> '50',
+				knownFreqs				=> '433.92',
 				clockabs				=> 500,
-				zero						=> [3,-2],
-				one							=> [1,-2],
-				#	start					=> [1,-25],				# Wenn das startsignal empfangen wird, fehlt das 1 bit
+				zero					=> [3,-2],
+				one						=> [1,-2],
+				# start				  	=> [-25],				# Wenn das startsignal empfangen wird, fehlt das 1 bit
+				reconstructBit			=> '1',
 				format					=> 'twostate',
 				preamble				=> 'W50#',				# prepend to converted message
-				clientmodule		=> 'SD_WS',
-				modulematch			=> '^W50#.*',
-				length_min			=> '47',
-				length_max			=> '48',
+				clientmodule			=> 'SD_WS',
+				modulematch				=> '^W50#.*',
+				length_min				=> '47',
+				length_max				=> '48',
 			},
 		"51"	=>	## weather sensors
 							# https://github.com/RFD-FHEM/RFFHEM/issues/118 @Stertzi
