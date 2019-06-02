@@ -1,5 +1,7 @@
-20.05.2019
+31.05.2019
  00_SIGNALduino.pm: added check method for no break and fix PEARL WARNING
+20.05.2019
+  SD_ProtocolData.pm: improved OpusXT300
 18.05.2019
  SD_ProtocolData.pm: added ID 96 Grothe Mistral
 15.05.2019
