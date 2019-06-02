@@ -187,7 +187,7 @@ sub  binStr2hexStr {
 # This functon is desired to be used as a default output helper for manchester signals. It will check for length_max and return a hex string
 # 
 # =cut
-sub MCRAW()
+sub MCRAW
 {
 	my ($name,$bitData,$id,$mcbitnum) = @_;
 

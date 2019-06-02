@@ -2535,7 +2535,7 @@ SIGNALduino_Parse_MC($$$$@)
 		   	SIGNALduino_Log3 $name, 5, "$name: extracted data $bitData (bin)";
 		   	
 		   	my $method = lib::SD_Protocols::getProperty($id,"method");
-		    if (!exists &$method)
+		    if (!exists &$method || !defined &{ $method })
 			{
 				SIGNALduino_Log3 $name, 5, "$name: Error: Unknown function=$method. Please define it in file $0";
 			} else {
