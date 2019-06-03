@@ -64,11 +64,17 @@ defmod test_SD_Protocols UnitTest dummyDuino
 	};
 	
 	subtest 'lib SD_Prococols test sub MCRAW() ' => sub {
-		plan tests => 1;
+		plan tests => 2;
 		TODO: {
 		local $TODO = "Syntax fix needed";
-		is_deeply(lib::SD_Protocols::MCRAW($target,"11110000",9990,8),qw ( 1 F0) , 'check if output is correct');
 		}
+		my @mcraw_ret = lib::SD_Protocols::MCRAW($target,"11110000",9990,8);
+		my @exprected_ret = qw ( 1 F0) ;
+		is_deeply(\@mcraw_ret, \@exprected_ret , 'check with max_length output');
+
+		my @mcraw_ret = lib::SD_Protocols::MCRAW($target,"11110000",9990,9);
+		@exprected_ret =( -1, " message is to long") ;
+		is_deeply(\@mcraw_ret, \@exprected_ret , 'check > max_length output');
 	};
 	
 	CommandReload(undef,"00_SIGNALduino.pm");

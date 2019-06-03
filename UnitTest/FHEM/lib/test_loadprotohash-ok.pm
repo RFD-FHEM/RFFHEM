@@ -213,7 +213,7 @@ package lib::SD_ProtocolData;
 				clockrange			=> [300,360],						
 				format				=> 'manchester',				
 				length_min			=> '2',
-				length_max			=> '3',
+				length_max			=> '8',
 		},
 		"9989"=>			
 			{
