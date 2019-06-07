@@ -1935,6 +1935,24 @@ package lib::SD_ProtocolData;
 				length_min		=> '12',
 				length_max		=> '12',
 			},
+		"79.1"	=>	## Heidemann | Heidemann HX | VTX-BELL  MS Version 
+			{
+				name				=> 'wireless doorbell',
+				comment				=> 'Heidemann | Heidemann HX | VTX-BELL',
+				id						=> '79.1',
+				knownFreqs			=> '',
+				zero				=> [-2,1],
+				one					=> [-1,2],
+				sync				=> [-15,1],
+				clockabs			=> 330,
+				format				=> 'twostate',	
+				preamble			=> 'P79#',			# prepend to converted message
+				clientmodule		=> 'SD_BELL',
+				modulematch			=> '^P79#.*',
+				length_min			=> '12',
+				length_max			=> '12',
+			},
+
 		"80"	=>	## EM1000WZ (Energy-Monitor) Funkprotokoll (868Mhz)  @HomeAutoUser | Derwelcherichbin
 							# https://github.com/RFD-FHEM/RFFHEM/issues/253
 							# CNT:91 CUM:14.560 5MIN:0.240 TOP:0.170   MU;P1=-417;P2=385;P3=-815;P4=-12058;D=42121212121212121212121212121212121232321212121212121232321212121212121232323212323212321232121212321212123232121212321212121232323212121212121232121212121212121232323212121212123232321232121212121232123232323212321;CP=2;R=87;
