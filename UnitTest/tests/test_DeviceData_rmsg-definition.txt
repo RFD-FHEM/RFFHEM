@@ -4,7 +4,7 @@ defmod test_DeviceData_rmsg UnitTest dummyDuino (
   	my $mock = Mock::Sub->new; 
 	use JSON; 
   
-  	my $jsonStr = GetFileFromURL("https://raw.githubusercontent.com/RFD-FHEM/SIGNALduino_TOOL/master/FHEM/lib/SD_Device_ProtocolList.json",4,"",1,4);
+  	my $jsonStr = GetFileFromURL("https://raw.githubusercontent.com/RFD-FHEM/SIGNALduino_TOOL/3.4.0/FHEM/lib/SD_Device_ProtocolList.json",4,"",1,4);
 	my $testDataArray; 
 	$testDataArray = decode_json $jsonStr; 
 	if ($? == -1)
