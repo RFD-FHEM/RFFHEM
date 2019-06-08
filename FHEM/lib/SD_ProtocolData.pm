@@ -44,6 +44,8 @@
 #                            If not set (default) or set to 0, data will be dispatched in hex mode to other logical modules.
 # postDemodulation => \&   # only MU - SIGNALduino internal sub for processing before dispatching to a logical module
 # method      => \&        # call to process this message
+#                            system method: lib::SD_Protocols::MCRAW -> returns bits without editing and length check included
+#
 #	frequency   => ' '       # frequency to set register cc1101 to send | example: 10AB85550A
 # format      => ' '       # twostate | pwm | manchester --> modulation type of the signal, only manchester use SIGNALduino internal, other types only comment
 # modulematch => ' '       # RegEx on the exact message including preamble | if defined, it will be evaluated
@@ -64,7 +66,7 @@ package lib::SD_ProtocolData;
 	use strict;
 	use warnings;
 	
-	our $VERSION = '1.03';
+	our $VERSION = '1.04';
 	our %protocols = (
 		"0"	=>	## various weather sensors (500 | 9100)
 						# ABS700 | Id:79 T: 3.3 Bat:low                MS;P1=-7949;P2=492;P3=-1978;P4=-3970;D=21232423232424242423232323232324242423232323232424;CP=2;SP=1;R=245;O;
@@ -1310,21 +1312,25 @@ package lib::SD_ProtocolData;
 		"50"	=>	## Opus XT300
 							# https://github.com/RFD-FHEM/RFFHEM/issues/99 @sidey79
 							# Ch:1 T: 25 H: 5   MU;P0=248;P1=-21400;P2=545;P3=-925;P4=1368;P5=-12308;D=01232323232323232343234323432343234343434343234323432343434343432323232323232323232343432323432345232323232323232343234323432343234343434343234323432343434343432323232323232323232343432323432345232323232323232343234323432343234343434343234323432343434343;CP=2;O;
+							# CH:1 T: 18 H: 5   W50#FF55053AFF93    MU;P2=-962;P4=508;P5=1339;P6=-12350;D=46424242424242424252425242524252425252525252425242525242424252425242424242424242424252524252524240;CP=4;R=0;
+							# CH:3 T: 18 H: 5   W50#FF57053AFF95    MU;P2=510;P3=-947;P5=1334;P6=-12248;D=26232323232323232353235323532323235353535353235323535323232353235323232323232323232353532353235320;CP=2;R=0;
+
 			{
-				name						=> 'Opus_XT300',
+				name					=> 'Opus_XT300',
 				comment					=> 'sensor for ground humidity',
-				id							=> '50',
-				knownFreqs      => '',
+				id						=> '50',
+				knownFreqs				=> '433.92',
 				clockabs				=> 500,
-				zero						=> [3,-2],
-				one							=> [1,-2],
-				#	start					=> [1,-25],				# Wenn das startsignal empfangen wird, fehlt das 1 bit
+				zero					=> [3,-2],
+				one						=> [1,-2],
+				# start				  	=> [-25],				# Wenn das startsignal empfangen wird, fehlt das 1 bit
+				reconstructBit			=> '1',
 				format					=> 'twostate',
 				preamble				=> 'W50#',				# prepend to converted message
-				clientmodule		=> 'SD_WS',
-				modulematch			=> '^W50#.*',
-				length_min			=> '47',
-				length_max			=> '48',
+				clientmodule			=> 'SD_WS',
+				modulematch				=> '^W50#.*',
+				length_min				=> '47',
+				length_max				=> '48',
 			},
 		"51"	=>	## weather sensors
 							# https://github.com/RFD-FHEM/RFFHEM/issues/118 @Stertzi
@@ -1425,7 +1431,7 @@ package lib::SD_ProtocolData;
 				preamble				=> 'P57#',
 				length_min			=> '21',
 				length_max			=> '24',
-				method					=> \&main::SIGNALduino_MCRAW,	# Call to process this message
+				method					=> \&lib::SD_Protocols::MCRAW,	# Call to process this message
 				polarity				=> 'invert',
 			},
 		"58"	=>	## TFA 30.3208.0
@@ -2229,19 +2235,19 @@ package lib::SD_ProtocolData;
 							# warning   MS;P0=-399;P1=407;P2=820;P3=-816;P4=-4017;D=14131020231020202313131023131313131023102023131313131310202313131020202313;CP=1;SP=4;O;m0;
 							# warning   MS;P1=392;P2=-824;P3=-416;P4=804;P5=-4034;D=15121343421343434212121342121212121342134342121212121213434212121343434212;CP=1;SP=5;e;m2;
 			{
-				name			=> 'Atlantic security',
-				comment			=> 'example sensor MD-210R | MD-2018R | MD-2003R (MS decode)',
-				id			=> '91.1',
-				knownFreqs		=> '433.92 | 868.35',
-				one			=> [-2,1],
-				zero			=> [-1,2],
-				sync			=> [-10,1],
-				clockabs		=> 400,
-				reconstructBit		=> '1',
-				format			=> 'twostate',	#
-				preamble		=> 'P91.1#',		# prepend to converted message
-				length_min		=> '32',
-				length_max		=> '36',
+				name						=> 'Atlantic security',
+				comment					=> 'example sensor MD-210R | MD-2018R | MD-2003R (MS decode)',
+				id							=> '91.1',
+				knownFreqs			=> '433.92 | 868.35',
+				one							=> [-2,1],
+				zero						=> [-1,2],
+				sync						=> [-10,1],
+				clockabs				=> 400,
+				reconstructBit	=> '1',
+				format					=> 'twostate',	#
+				preamble				=> 'P91#',		# prepend to converted message
+				length_min			=> '32',
+				length_max			=> '36',
 				clientmodule		=> 'SD_UT',
 				#modulematch		=> '^P91.1#.*',
 			},
@@ -2287,25 +2293,28 @@ package lib::SD_ProtocolData;
 				#modulematch	=> '^P93#.*',
 			},
 		"94"	=>	# Atech wireless weather station (vermutlicher Name: WS-308)
-							# https://github.com/RFD-FHEM/RFFHEM/issues/547 @Kreidler1221
-							# u94#0D801B06C368   MU;P0=-31266;P1=1538;P2=-285;P3=-7582;P4=-1995;D=012121212121212131414141412121412121414141414141414141412121412121414141414121214121214141414121214121214121012121212121212131414141412121412121414141414141414141412121412121414141414121214121214141414121214121214121;CP=1;
-							# u94#0D801B0C6D88   MU;P0=-31268;P1=1538;P2=-285;P3=-7574;P4=-1997;D=012121212121212131414141412121412121414141414141414141412121412121414141412121414141212141212141212141414121012121212121212131414141412121412121414141414141414141412121412121414141412121414141212141212141212141414121;CP=1;
+							# https://github.com/RFD-FHEM/RFFHEM/issues/547 @Kreidler1221 2019-03-15
+							# Sensor sends Bit 0 as "0", Bit 1 as "110"
+							# Id:0C T:-14.6 MU;P0=-32001;P1=1525;P2=-303;P3=-7612;P4=-2008;D=01212121212121213141414141212141212141414141412121414141414121214141212141414141212141212141412121412121414121214121;CP=1;
+							# Id:0C T:-0.4  MU;P0=-32001;P1=1533;P2=-297;P3=-7612;P4=-2005;D=0121212121212121314141414121214121214141414141212141414141414141414141412121414141212141412121414121;CP=1;
+							# Id:0C T:0.2   MU;P0=-32001;P1=1532;P2=-299;P3=-7608;P4=-2005;D=0121212121212121314141414121214121214141414141414141414141414141414141212141412121412121412121414121;CP=1;
+							# Id:0C T:10.2  MU;P0=-31292;P1=1529;P2=-300;P3=-7610;P4=-2009;D=012121212121212131414141412121412121414141414141414141412121414141414141412121414121214121214121214121214121012121212121212131414141412121412121414141414141414141412121414141414141412121414121214121214121214121214121;CP=1;
+							# Id:0C T:27    MU;P0=-31290;P1=1533;P2=-297;P3=-7608;P4=-2006;D=012121212121212131414141412121412121414141414141414141212141414121214121214121214141414141212141414121214121012121212121212131414141412121412121414141414141414141212141414121214121214121214141414141212141414121214121;CP=1;
 			{
-				name						=> 'Atech',
-				comment					=> 'temperature sensor',
-				id							=> '94',
-				knownFreqs      => '',
-				one							=> [6,-1],
-				zero						=> [6,-8],
-				start           => [6,-30],
-				clockabs				=> 250,
-				developId				=> 'y',
-				format					=> 'twostate',
-				preamble				=> 'u94#',
-				#clientmodule		=> '',
-				#modulematch		=> '',
-				length_min			=> '36',
-				length_max			=> '54',
+				name            => 'Atech',
+				comment         => 'Temperature sensor',
+				id              => '94',
+				knownFreqs      => '433.92',
+				one             => [5.3,-1],     # 1537, 290
+				zero            => [5.3,-6.9],   # 1537, 2001
+				start           => [5.3,-26.1],  # 1537, 7569
+				clockabs        => 290,
+				reconstructBit  => '1',
+				format          => 'twostate',
+				preamble        => 'W94#',
+				clientmodule    => 'SD_WS',
+				length_min      => '24',         # minimal 24*0=24 Bit, kuerzeste bekannte aus Userlog: 36
+				length_max      => '96',         # maximal 24*110=96 Bit, laengste bekannte aus Userlog:  60
 			},
 		"95"	=>	# Techmar / Garden Lights Fernbedienung, 6148011 Remote control + 12V Outdoor receiver
 							# https://github.com/RFD-FHEM/RFFHEM/issues/558 @BlackcatSandy
@@ -2326,6 +2335,24 @@ package lib::SD_ProtocolData;
 				clientmodule    => 'SD_UT',
 				length_min      => '50',
 				length_max      => '50',
+			},
+		"96"	=>	# Funk-Gong | Taster Grothe Mistral SE 03.1 , Innenteil Grothe Mistral 200M(E)
+							# https://forum.fhem.de/index.php/topic,64251.msg940593.html?PHPSESSID=nufcvvjobdd8r7rgr0cq3qkrv0#msg940593 @coolheizer
+							# Button_1    MC;LL=-424;LH=438;SL=-215;SH=212;D=238823B1001F8;C=214;L=49;R=68;
+							# Button_2    MC;LL=-412;LH=458;SL=-187;SH=240;D=238129D9A78;C=216;L=41;R=241;
+			{
+				name            => 'Grothe Mistral',
+				comment         => 'wireless gong',
+				id              => '96',
+				knownFreqs      => '866.35',
+				clockrange			=> [210,220],							# min , max
+				format					=> 'manchester',					# tristate can't be migrated from bin into hex!
+				#clientmodule		 => '',
+				#modulematch		 => '^u96#',
+				preamble				=> 'u96#',
+				length_min			=> '41',
+				length_max			=> '49',
+				method					=> \&lib::SD_Protocols::MCRAW,		# Call to process this message
 			},
 	);
 	sub getProtocolList	{	

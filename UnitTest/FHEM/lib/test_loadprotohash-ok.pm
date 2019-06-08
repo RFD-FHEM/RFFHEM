@@ -205,6 +205,28 @@ package lib::SD_ProtocolData;
 						},
 			
 		},
+		"9990"=>			
+			{
+				name				=> 'Unittest MC Protocol',
+				comment				=> 'ony for running automated tests',
+				id					=> '9990',
+				clockrange			=> [300,360],						
+				format				=> 'manchester',				
+				length_min			=> '2',
+				length_max			=> '8',
+		},
+		"9989"=>			
+			{
+				name				=> 'Unittest MC Protocol',
+				comment				=> 'ony for running automated tests',
+				id					=> '9989',
+				clockrange			=> [300,360],						
+				format				=> 'manchester',				
+				length_min			=> '1',
+				length_max			=> '24',
+				method				=> \&lib::SD_Protocols::Not_Existing_Sub,	
+				polarity			=> 'invert',
+		},
 		
 	);
 	no warnings 'redefine';

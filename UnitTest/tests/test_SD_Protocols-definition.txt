@@ -40,7 +40,8 @@ defmod test_SD_Protocols UnitTest dummyDuino
 		plan tests => 3;
 		cmp_ok( lib::SD_Protocols::getKeys(),'>=',"9",' more than 8 keys returnd' );
 		like(join(",",lib::SD_Protocols::getKeys()), qr/9999/, 'protocol id 9999 is in keys');
-		unlike(join(",",lib::SD_Protocols::getKeys()), qr/0/, 'protocol id 0 is not in keys');
+		ok( !grep(/^0$/, lib::SD_Protocols::getKeys()), 'protocol id 0 is not in keys' );
+		
 	};
 	
 	subtest 'lib SD_Prococols test sub checkProperty() ' => sub {
@@ -54,6 +55,26 @@ defmod test_SD_Protocols UnitTest dummyDuino
 		plan tests => 2;
 		is(lib::SD_Protocols::getProperty(9999,"developId"), 'm', 'check existing property developID');
 		is(lib::SD_Protocols::getProperty(9999,"clockabs"), undef, 'check missing property clockabs');
+	};
+	
+	subtest 'lib SD_Prococols test sub setDefaults() ' => sub {
+		plan tests => 2;
+		is_deeply(lib::SD_Protocols::getProperty(9990,"method"), \&lib::SD_Protocols::MCRAW, 'check if default for method is applied ');
+		is(defined(&{lib::SD_Protocols::getProperty(9989,"method")}), '', 'check if default does not override existing method ');
+	};
+	
+	subtest 'lib SD_Prococols test sub MCRAW() ' => sub {
+		plan tests => 2;
+		TODO: {
+		local $TODO = "Syntax fix needed";
+		}
+		my @mcraw_ret = lib::SD_Protocols::MCRAW($target,"11110000",9990,8);
+		my @exprected_ret = qw ( 1 F0) ;
+		is_deeply(\@mcraw_ret, \@exprected_ret , 'check with max_length output');
+
+		my @mcraw_ret = lib::SD_Protocols::MCRAW($target,"11110000",9990,9);
+		@exprected_ret =( -1, " message is to long") ;
+		is_deeply(\@mcraw_ret, \@exprected_ret , 'check > max_length output');
 	};
 	
 	CommandReload(undef,"00_SIGNALduino.pm");

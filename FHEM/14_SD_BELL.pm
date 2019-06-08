@@ -1,5 +1,5 @@
 ##############################################################################
-# $Id: 14_SD_BELL.pm 32 2018-12-29 14:00:00 v3.3.3-dev_08.12. $HomeAuto_User
+# $Id: 14_SD_BELL.pm 18657 2019-02-19 21:02:24Z HomeAuto_User $
 #
 # The file is part of the SIGNALduino project.
 # The purpose of this module is to support many wireless BELL devices.
@@ -184,7 +184,12 @@ sub Set($$$@) {
 		
 		my $msg = "P$protocol#" . $bitData;
 		
-		$msg .= "#R$repeats";
+		if ($model eq "Heidemann_|_Heidemann_HX_|_VTX-BELL") {
+			$msg .= "#R135";
+		} else {
+			$msg .= "#R$repeats";
+		}
+
 		Log3 $name, 3, "$ioname: $name sendMsg=$msg";
 
 		if ($cmd ne "?") {
@@ -426,7 +431,8 @@ sub Attr(@) {
 		<li>model<br>
 		The attribute indicates the model type of your device.<br></li></ul>
 	<ul><li><a name="repeats"></a>repeats<br>
-		This attribute can be used to adjust how many repetitions are sent. Default is 5.</li></ul><br>
+		This attribute can be used to adjust how many repetitions are sent. Default is 5.<br>
+		<i>(For the model Heidemann_|_Heidemann_HX_|_VTX-BELL, the value repeats is fixed at 135!)</i></li></ul><br>
 		<br>
 </ul>
 =end html
@@ -471,7 +477,8 @@ sub Attr(@) {
 		<li>model<br>
 		Das Attribut bezeichnet den Modelltyp Ihres Ger&auml;tes.<br></li></ul>
 		<ul><li><a name="repeats"></a>repeats<br>
-		Mit diesem Attribut kann angepasst werden, wie viele Wiederholungen sendet werden. Standard ist 5.</li></ul><br>
+		Mit diesem Attribut kann angepasst werden, wie viele Wiederholungen sendet werden. Standard ist 5.<br>
+		<i>(Bei dem Model Heidemann_|_Heidemann_HX_|_VTX-BELL ist der Wert repeats fest auf 135 gesetzt unabhäning vom eingestellten Attribut!)</i></li></ul><br>
 	<br>
 </ul>
 =end html_DE
