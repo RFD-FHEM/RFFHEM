@@ -1983,22 +1983,22 @@ package lib::SD_ProtocolData;
 							# Fernotron protocol is unidirectional. Here we can only receive messages from controllers send to receivers.
 			{
 				name					=> 'Fernotron',
-				comment				=> 'shutters and light switches',
+				comment					=> 'shutters and light switches',
 				id						=> '82',				# protocol number
-				knownFreqs		=> '',
-				developId			=> 'm',
-				dispatchBin		=> '1',
-				paddingbits		=> '1',      # disable padding
+				knownFreqs				=> '',
+				developId				=> 'm',
+				dispatchBin				=> '1',
+				paddingbits				=> '1',     		# disable padding
 				one						=> [1,-2],			# on=400us, off=800us
 				zero					=> [2,-1],			# on=800us, off=400us
 				float					=> [1,-8],			# on=400us, off=3200us. the preamble and each 10bit word has one [1,-8] in front
 				pause					=> [1,-1],			# preamble (5x)
-				clockabs			=> 400,					# 400us
-				format				=> 'twostate',
-				preamble			=> 'P82#',			# prepend our protocol number to converted message
-				clientmodule	=> 'Fernotron',
-				length_min		=> '100',				# actual 120 bit (12 x 10bit words to decode 6 bytes data), but last 20 are for checksum
-				length_max		=> '3360',			# 3360 bit (336 x 10bit words to decode 168 bytes data) for full timer message
+				clockabs				=> 400,				# 400us
+				format					=> 'twostate',
+				preamble				=> 'P82#',			# prepend our protocol number to converted message
+				clientmodule			=> 'Fernotron',
+				length_min				=> '100',			# actual 120 bit (12 x 10bit words to decode 6 bytes data), but last 20 are for checksum
+				length_max				=> '3360',			# 3360 bit (336 x 10bit words to decode 168 bytes data) for full timer message
 			},
 		"83"	=>	## Remote control RH787T based on MOSDESIGN SEMICONDUCTOR CORP (CMOS ASIC encoder) M1EN compatible HT12E
 							# for example Westinghouse Deckenventilator Delancey, 6 speed buttons, @zwiebelxxl
