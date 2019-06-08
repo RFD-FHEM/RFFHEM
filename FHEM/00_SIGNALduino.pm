@@ -2534,8 +2534,8 @@ SIGNALduino_Parse_MC($$$$@)
 			Debug "$name: extracted data $bitData (bin)\n" if ($debug); ## Convert Message from hex to bits
 		   	SIGNALduino_Log3 $name, 5, "$name: extracted data $bitData (bin)";
 		   	
-		   	my $method = $ProtocolListSIGNALduino{$id}{method};
-		    if (!exists &$method)
+		   	my $method = lib::SD_Protocols::getProperty($id,"method");
+		    if (!exists &$method || !defined &{ $method })
 			{
 				SIGNALduino_Log3 $name, 5, "$name: Error: Unknown function=$method. Please define it in file $0";
 			} else {
@@ -4005,16 +4005,6 @@ sub SIGNALduino_OSPIR()
 	}	
 }
 
-
-sub SIGNALduino_MCRAW()
-{
-	my ($name,$bitData,$id,$mcbitnum) = @_;
-
-	return (-1," message is to long") if (defined($ProtocolListSIGNALduino{$id}{length_max}) && $mcbitnum > $ProtocolListSIGNALduino{$id}{length_max} );
-	
-	my $hex=SIGNALduino_b2h($bitData);
-	return  (1,$hex); ## Return the bits unchanged in hex
-}
 
 
 sub SIGNALduino_SomfyRTS()

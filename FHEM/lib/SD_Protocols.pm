@@ -4,7 +4,7 @@
  
 package lib::SD_Protocols;
 
-our $VERSION = '0.10';
+our $VERSION = '0.20';
 use strict;
 use warnings;
 
@@ -15,6 +15,7 @@ use warnings;
 #=item getKeys() # This functons, will return all keys from the protocol hash
 #=item checkProperty() #This functons, will return a value from the Protocolist and check if the key exists and a value is defined optional you can specify a optional default value that will be returned
 #=item getProperty() #This functons, will return a value from the Protocolist without any checks
+#=item setDefaults() #This functons, will add common Defaults to the Protocollist
 
 # - - - - - - - - - - - -
 #=item new($)
@@ -53,6 +54,7 @@ sub LoadHash
 	if(  ! eval { require "$_[0]"; 1 }  ) {
 		return 	\%{ {"error" => $@}};
 	}
+	setDefaults();
 	return getProtocolList();
 }
 
@@ -122,6 +124,77 @@ sub getProperty($$)
 sub getProtocolVersion
 {
 	return $lib::SD_ProtocolData::VERSION;
+}
+
+# - - - - - - - - - - - -
+#=item setDefaults()
+# This functon will add common Defaults to the Protocollist
+# 
+# =cut
+
+sub setDefaults
+{
+	foreach my $id (getKeys())
+	{
+		my $format = getProperty($id,"format");
+		
+		if (defined ($format) && $format eq "manchester")
+		{
+			# Manchester defaults :
+			$lib::SD_ProtocolData::protocols{$id}{method} = \&lib::SD_Protocols::MCRAW if (!defined(checkProperty($id,"method")));
+		}
+		elsif (getProperty($id,"sync"))
+		{
+			# Messages with sync defaults :
+			
+		}
+		elsif (getProperty($id,"clockabs"))
+		{
+			# Messages without sync defaults :
+			$lib::SD_ProtocolData::protocols{$id}{length_min} = 8 if (!defined(checkProperty($id,"length_min")));
+		}
+			
+	}
+}
+
+# - - - - - - - - - - - -
+#=item binStr2hexStr()
+# This functon will convert binary string into its hex representation as string
+# 
+# =cut
+
+sub  binStr2hexStr {
+    my $num   = shift;
+    my $WIDTH = 4;
+    my $index = length($num) - $WIDTH;
+    my $hex = '';
+    do {
+        my $width = $WIDTH;
+        if ($index < 0) {
+            $width += $index;
+            $index = 0;
+        }
+        my $cut_string = substr($num, $index, $width);
+        $hex = sprintf('%X', oct("0b$cut_string")) . $hex;
+        $index -= $WIDTH;
+    } while ($index > (-1 * $WIDTH));
+    return $hex;
+}
+
+
+# - - - - - - - - - - - -
+#=item MCRAW()
+# This functon is desired to be used as a default output helper for manchester signals. It will check for length_max and return a hex string
+# 
+# =cut
+sub MCRAW
+{
+	my ($name,$bitData,$id,$mcbitnum) = @_;
+
+	return (-1," message is to long") if ($mcbitnum > checkProperty($id,"length_max",0) );
+
+	return(1,binStr2hexStr($bitData)); 
+		
 }
 
 
