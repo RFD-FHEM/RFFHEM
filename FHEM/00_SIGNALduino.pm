@@ -30,7 +30,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.4.0_dev_11.05",
+	SDUINO_VERSION            => "v3.4.0_dev_08.06",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -2337,7 +2337,6 @@ sub SIGNALduino_Parse_MU($$$$@)
 						
 			foreach my $key (qw(one zero float) ) {
 				next if (!exists($ProtocolListSIGNALduino{$id}{$key}));
-			
 				if (!SIGNALduino_FillPatternLookupTable($hash,\@{$ProtocolListSIGNALduino{$id}{$key}},\$symbol_map{$key},\%patternList,\$rawData,\%patternLookupHash,\%endPatternLookupHash,\$return_text))
 				{
 						Debug sprintf("%s pattern not found",$key) if ($debug);
@@ -2347,11 +2346,9 @@ sub SIGNALduino_Parse_MU($$$$@)
 				if ($key eq "one")
 				{
 					 $signalRegex .= $return_text;
-					
 				}
 				else {
-					$signalRegex .= "|$return_text";
-						
+					$signalRegex .= "|$return_text" if($return_text);
 				}
 			}
 			$signalRegex .= ")";
