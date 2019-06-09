@@ -35,7 +35,7 @@ defmod test_DeviceData_rmsg UnitTest dummyDuino (
 		 	$dmsg_matched=1;
 		}
 		$SD_Dispatch_calledCounter++;	
-		return undef;
+		undef;
 	} 
 	);
 	
@@ -59,10 +59,11 @@ defmod test_DeviceData_rmsg UnitTest dummyDuino (
 	            if ($SD_Dispatch->called() >0 )  {
 					$noTestRun=0;
 		            is($SD_Dispatch_calledCounter, $tData->{repeat}, "check number of dispatch attempts") if (defined($tData->{repeat}));
-		            ok($id_matched,"SIGNALduno_Dispatch check id ");
+		            ok($id_matched,"SIGNALduno_Dispatch check id ") || diag explain  $SD_Dispatch;
 		            ok($dmsg_matched,"SIGNALduno_Dispatch check dmsg ");
 		      		            
 				} else { diag "SIGNALduno_Dispatch was not called, this must be an error"; }
+            	$SD_Dispatch->reset();
             }
 	
         }
