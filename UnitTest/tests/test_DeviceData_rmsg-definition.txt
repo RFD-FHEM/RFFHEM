@@ -4,7 +4,7 @@ defmod test_DeviceData_rmsg UnitTest dummyDuino (
   	my $mock = Mock::Sub->new; 
 	use JSON; 
   
-  	my $jsonStr = GetFileFromURL("https://raw.githubusercontent.com/RFD-FHEM/SIGNALduino_TOOL/3.4.0/FHEM/lib/SD_Device_ProtocolList.json",4,"",1,4);
+  	my $jsonStr = GetFileFromURL("https://raw.githubusercontent.com/RFD-FHEM/SIGNALduino_TOOL/dev_JSON_v1/FHEM/lib/SD_Device_ProtocolList.json",4,"",1,4);
 	my $testDataArray; 
 	$testDataArray = decode_json $jsonStr; 
 	if ($? == -1)
@@ -49,7 +49,7 @@ defmod test_DeviceData_rmsg UnitTest dummyDuino (
 		next if (lib::SD_Protocols::checkProperty($testSet->{id},'developId',undef));
 		while ( ($tID, $tData) = each (@{$testSet->{data}}) ) 
 		{
-			next if (!defined($tData->{rmsg}) || !defined($tData->{dmsg}));
+			next if (!defined($tData->{rmsg}) || !defined($tData->{dmsg}) || !defined($tData->{internals}) );
 			
 	        subtest "[$pID]: $testSet->{name}: [$tID] " => sub {
        		#SIGNALduino_Log3 $target, 5,  Dumper($tData);  
