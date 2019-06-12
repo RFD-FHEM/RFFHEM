@@ -543,7 +543,6 @@ package lib::SD_ProtocolData;
 				#modulematch		=> '',
 				length_min			=> '39',
 				length_max			=> '40',
-				reconstructBit  => '1',
 			},
 		"17"	=>	## arctech / intertechno
 							# need more Device Infos / User Message
