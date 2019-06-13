@@ -23,12 +23,16 @@ defmod test_DeviceData_rmsg UnitTest dummyDuino (
 	my $SD_Dispatch_calledCounter=undef;
 	
 	my $SD_Dispatch = $mock->mock("SIGNALduno_Dispatch"); 
-	$SD_Dispatch->side_effect( sub { 
+	sub VerifyDispatch { 
 		Log3 "Testdev", 5, $_[1].$_[2];
 		if (defined($testSet->{id}) && !$id_matched && $_[4] eq $testSet->{id}) 
 		{
 		 	$id_matched=1;
+		} elsif ( defined($testSet->{id}) && !$id_matched && $_[4] ne $testSet->{id}  )
+		{
+			diag explain ($_[4], $testSet->{id});
 		}
+		
 		
 		if (defined($tData->{dmsg}) && !$dmsg_matched && $_[2] eq $tData->{dmsg}) 
 		{
@@ -37,14 +41,13 @@ defmod test_DeviceData_rmsg UnitTest dummyDuino (
 		$SD_Dispatch_calledCounter++;	
 		undef;
 	} 
-	);
 	
 	my $noTestRun=1;
 	use lib::SD_Protocols;
 	#my $SD_Protos = lib::SD_Protocols::new("$attr{global}{modpath}/FHEM/lib/SD_ProtocolData.pm"); 
     while ( ($pID, $testSet) = each  (@{$testDataArray}) )
 	{
-		#next if ($testSet->{name} ne "MD-230R" );
+		#next if ($testSet->{name} ne "NC-3911-675" );
 		next if (!lib::SD_Protocols::exists($testSet->{id}));
 		next if (lib::SD_Protocols::checkProperty($testSet->{id},'developId',undef));
 		while ( ($tID, $tData) = each (@{$testSet->{data}}) ) 
@@ -52,19 +55,21 @@ defmod test_DeviceData_rmsg UnitTest dummyDuino (
 			next if (!defined($tData->{rmsg}) || !defined($tData->{dmsg}) || !defined($tData->{internals}) );
 			
 	        subtest "[$pID]: $testSet->{name}: [$tID] " => sub {
-       		#SIGNALduino_Log3 $target, 5,  Dumper($tData);  
+	            $SD_Dispatch->reset();
+				$SD_Dispatch->side_effect(\&VerifyDispatch);
+       			#SIGNALduino_Log3 $target, 5,  Dumper($tData);  
 				$id_matched=0;
 				$dmsg_matched=0;
+				$SD_Dispatch_calledCounter=0;
 	            SIGNALduino_Parse($targetHash, $targetHash, $targetHash->{NAME}, "\002".$tData->{rmsg}."\003") if (defined($tData->{rmsg}));
 	            if ($SD_Dispatch->called() >0 )  {
 					$noTestRun=0;
 		            is($SD_Dispatch_calledCounter, $tData->{repeat}, "check number of dispatch attempts") if (defined($tData->{repeat}));
-		            ok($id_matched,"SIGNALduno_Dispatch check id ") || diag explain  $SD_Dispatch;
+		            ok($id_matched,"SIGNALduno_Dispatch check id ") || diag explain (($SD_Dispatch->called_with())[4] , " vs ", $testSet->{id});
 		            ok($dmsg_matched,"SIGNALduno_Dispatch check dmsg ");
 		      		            
 				} else { diag "SIGNALduno_Dispatch was not called, this must be an error"; }
-            	$SD_Dispatch->reset();
-            }
+            };
 	
         }
     };
