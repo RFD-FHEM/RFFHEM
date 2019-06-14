@@ -20,6 +20,7 @@
 # 07.04.2019 Protokoll 51: Buxfix longID 8 statt 12 bit, prematch channel 1-3
 # 15.04.2019 Protokoll 33: sub crcok ergaenzt
 # 02.05.2019 neues Protokoll 94: Atech wireless weather station (vermutlicher Name: WS-308)
+# 14.06.2019 neuer Sensor TECVANCE TV-4848 - Protokoll 84 angepasst (prematch)
 
 package main;
 
@@ -356,9 +357,9 @@ sub SD_WS_Parse($$)
 				# t: 12 bit signed temperature scaled by 10
 				# ?: unknown
 				# Sensor sends approximately every 30 seconds
-				sensortype => 'Auriol IAN 283582',
+				sensortype => 'Auriol IAN 283582, TV-4848',
 				model => 'SD_WS_84_TH',
-				prematch   => sub {my $msg = shift; return 1 if ($msg =~ /^[0-9A-F]{4}[01245689ACDE]{1}[0-9A-F]{5}$/); },		# valid channel only 0-2
+				prematch   => sub {my $msg = shift; return 1 if ($msg =~ /^[0-9A-F]{4}[01245689ACDE]{1}[0-9A-F]{5,6}$/); },		# valid channel only 0-2
 				id =>	sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,0,7); },
 				hum => sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,8,15); },
 				bat => 		sub {my (undef,$bitData) = @_; return substr($bitData,16,1) eq "0" ? "ok" : "low";},

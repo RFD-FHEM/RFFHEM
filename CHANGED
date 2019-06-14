@@ -1,3 +1,6 @@
+14.06.2019
+ SD_ProtocolData.pm: ID 84 changed, added new device TV-4848
+ 14_SD_WS.pm: changed ID 84 for new sensor TECVANCE TV-4848
 07.06.2019
  00_SIGNALduino.pm: added check method for no break and fix PEARL WARNING
 01.06.2019
