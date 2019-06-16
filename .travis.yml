@@ -28,3 +28,5 @@ script:
  - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ] && [[ $TRAVIS_JOB_NUMBER == *.1 ]]; then git push origin HEAD:$TRAVIS_BRANCH ; fi'
  - cp -R /opt/fhem/cover_db ./
  - git --no-pager diff --diff-filter=d --name-only $TRAVIS_COMMIT_RANGE | grep .pm | xargs -I@ echo -select @ | xargs cover -report coveralls
+after_failure:
+- curl -H "Authorization: token ${GH_API_KEY}" -X POST -d "{\"body\": \"Failed Travis-CI Test\"}" "https://api.github.com/repos/${TRAVIS_REPO_SLUG}/issues/${TRAVIS_PULL_REQUEST}/comments"
