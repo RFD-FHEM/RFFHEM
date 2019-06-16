@@ -8,9 +8,9 @@ defmod test_DeviceData_rmsg UnitTest dummyDuino (
   
   	my $jsonStr = GetFileFromURL("https://raw.githubusercontent.com/RFD-FHEM/SIGNALduino_TOOL/dev_JSON_v1/FHEM/lib/SD_Device_ProtocolList.json",4,"",1,4);
 	my $testDataArray; 
-	$testDataArray = from_json $jsonStr; 
-	if ($? == -1)
-	{
+	$testDataArray = eval { decode_json($jsonStr) };
+	
+	if($@){
 		diag("open json file SD_Device_ProtocolList was not possible $?"); 
 		diag explain $jsonStr;
 	}
