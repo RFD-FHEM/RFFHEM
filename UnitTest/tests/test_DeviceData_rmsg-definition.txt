@@ -26,16 +26,12 @@ defmod test_DeviceData_rmsg UnitTest dummyDuino (
 	
 	my $SD_Dispatch = $mock->mock("SIGNALduno_Dispatch"); 
 	sub VerifyDispatch { 
-		Log3 "Testdev", 5, $_[1].$_[2];
+		#Log3 "Testdev", 5, "rmsg=".$_[1]." DMSG=".$_[2];
 		if (defined($testSet->{id}) && !$id_matched && $_[4] eq $testSet->{id}) 
 		{
 		 	$id_matched=1;
-		} elsif ( defined($testSet->{id}) && !$id_matched && $_[4] ne $testSet->{id}  )
-		{
-			diag explain ($_[4], $testSet->{id});
-		}
-		
-		
+		} 
+				
 		if (defined($tData->{dmsg}) && !$dmsg_matched && $_[2] eq $tData->{dmsg}) 
 		{
 		 	$dmsg_matched=1;
@@ -67,8 +63,13 @@ defmod test_DeviceData_rmsg UnitTest dummyDuino (
 	            if ($SD_Dispatch->called() >0 )  {
 					$noTestRun=0;
 					my $expected_repeat=min(4,$tData->{repeat}+1);
-		            is($SD_Dispatch_calledCounter, $expected_repeat, "check number of dispatch attempts") if (defined($tData->{repeat}));
-		            ok($id_matched,"SIGNALduno_Dispatch check id ") || diag explain (($SD_Dispatch->called_with())[4] , " vs ", $testSet->{id});
+					 
+					TODO: {
+					    local $TODO = "Checking for repeats is not finishes, because number of repeats is not always number of dispatches";
+				        is($SD_Dispatch_calledCounter, $expected_repeat, "check number of dispatch attempts") if (defined($tData->{repeat}));
+					};
+					
+		            ok($id_matched,"SIGNALduno_Dispatch check id ") || note explain (($SD_Dispatch->called_with())[4] , " vs ", $testSet->{id});
 		            ok($dmsg_matched,"SIGNALduno_Dispatch check dmsg ");
 		      		            
 				} else { diag "SIGNALduno_Dispatch was not called, this must be an error"; }
@@ -77,6 +78,5 @@ defmod test_DeviceData_rmsg UnitTest dummyDuino (
         }
     };
 	is($noTestRun,0,"Verify if a test was performed ");
-    
  } 
 );
