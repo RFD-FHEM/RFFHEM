@@ -20,6 +20,7 @@
 # 07.04.2019 Protokoll 51: Buxfix longID 8 statt 12 bit, prematch channel 1-3
 # 15.04.2019 Protokoll 33: sub crcok ergaenzt
 # 02.05.2019 neues Protokoll 94: Atech wireless weather station (vermutlicher Name: WS-308)
+# 14.06.2019 neuer Sensor TECVANCE TV-4848 - Protokoll 84 angepasst (prematch)
 
 package main;
 
@@ -356,9 +357,9 @@ sub SD_WS_Parse($$)
 				# t: 12 bit signed temperature scaled by 10
 				# ?: unknown
 				# Sensor sends approximately every 30 seconds
-				sensortype => 'Auriol IAN 283582',
+				sensortype => 'Auriol IAN 283582, TV-4848',
 				model => 'SD_WS_84_TH',
-				prematch   => sub {my $msg = shift; return 1 if ($msg =~ /^[0-9A-F]{4}[01245689ACDE]{1}[0-9A-F]{5}$/); },		# valid channel only 0-2
+				prematch   => sub {my $msg = shift; return 1 if ($msg =~ /^[0-9A-F]{4}[01245689ACDE]{1}[0-9A-F]{5,6}$/); },		# valid channel only 0-2
 				id =>	sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,0,7); },
 				hum => sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,8,15); },
 				bat => 		sub {my (undef,$bitData) = @_; return substr($bitData,16,1) eq "0" ? "ok" : "low";},
@@ -1032,6 +1033,7 @@ sub SD_WS_WH2SHIFT($){
 		<li>Opus XT300</li>
     <li>PV-8644 infactory Poolthermometer</li>
     <li>Renkforce E0001PA</li>
+		<li>TECVANCE TV-4848</li>
 		<li>TX-EZ6 for Weatherstation TZS First Austria</li>
 		<li>WH2 (TFA Dostmann/Wertheim 30.3157 (sold in Germany), Agimex Rosenborg 66796 (sold in Denmark),ClimeMET CM9088 (Sold in UK)</li>
 		<li>Weatherstation Auriol IAN 283582 Version 06/2017 (Lidl), Modell-Nr.: HG02832D</li>
@@ -1127,6 +1129,7 @@ sub SD_WS_WH2SHIFT($){
 		<li>Opus XT300</li>
     <li>PV-8644 infactory Poolthermometer</li>
     <li>Renkforce E0001PA</li>
+		<li>TECVANCE TV-4848</li>
 		<li>TX-EZ6 fuer Wetterstation TZS First Austria</li>
 		<li>WH2 (TFA Dostmann/Wertheim 30.3157 (Deutschland), Agimex Rosenborg 66796 (Denmark), ClimeMET CM9088 (UK)</li>
 		<li>Wetterstation Auriol IAN 283582 Version 06/2017 (Lidl), Modell-Nr.: HG02832D</li>
