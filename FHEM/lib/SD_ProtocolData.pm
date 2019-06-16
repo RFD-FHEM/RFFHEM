@@ -1983,22 +1983,22 @@ package lib::SD_ProtocolData;
 							# Fernotron protocol is unidirectional. Here we can only receive messages from controllers send to receivers.
 			{
 				name					=> 'Fernotron',
-				comment				=> 'shutters and light switches',
+				comment					=> 'shutters and light switches',
 				id						=> '82',				# protocol number
-				knownFreqs		=> '',
-				developId			=> 'm',
-				dispatchBin		=> '1',
-				paddingbits		=> '1',      # disable padding
+				knownFreqs				=> '',
+				developId				=> 'm',
+				dispatchBin				=> '1',
+				paddingbits				=> '1',     		# disable padding
 				one						=> [1,-2],			# on=400us, off=800us
 				zero					=> [2,-1],			# on=800us, off=400us
 				float					=> [1,-8],			# on=400us, off=3200us. the preamble and each 10bit word has one [1,-8] in front
 				pause					=> [1,-1],			# preamble (5x)
-				clockabs			=> 400,					# 400us
-				format				=> 'twostate',
-				preamble			=> 'P82#',			# prepend our protocol number to converted message
-				clientmodule	=> 'Fernotron',
-				length_min		=> '100',				# actual 120 bit (12 x 10bit words to decode 6 bytes data), but last 20 are for checksum
-				length_max		=> '3360',			# 3360 bit (336 x 10bit words to decode 168 bytes data) for full timer message
+				clockabs				=> 400,				# 400us
+				format					=> 'twostate',
+				preamble				=> 'P82#',			# prepend our protocol number to converted message
+				clientmodule			=> 'Fernotron',
+				length_min				=> '100',			# actual 120 bit (12 x 10bit words to decode 6 bytes data), but last 20 are for checksum
+				length_max				=> '3360',			# 3360 bit (336 x 10bit words to decode 168 bytes data) for full timer message
 			},
 		"83"	=>	## Remote control RH787T based on MOSDESIGN SEMICONDUCTOR CORP (CMOS ASIC encoder) M1EN compatible HT12E
 							# for example Westinghouse Deckenventilator Delancey, 6 speed buttons, @zwiebelxxl
@@ -2030,13 +2030,15 @@ package lib::SD_ProtocolData;
 							# Ch:1 T: 6.9 H: 66 Bat:ok    MU;P0=-21520;P1=235;P2=-855;P3=846;P4=620;P5=-236;P7=-614;D=012323232454545454545451717451717171745171717171717171717174517171745174517174517174545;CP=1;R=217;
 							## Sempre 92596/65395, Hofer/Aldi, WS97210-1, WS97230-1, WS97210-2, WS97230-2
 							# https://github.com/RFD-FHEM/RFFHEM/issues/223
-							# no decode!                  MU;P0=11916;P1=-852;P2=856;P3=610;P4=-240;P5=237;P6=-610;D=01212134563456563434565634565634343456565634565656565634345634565656563434563456343430;CP=5;R=254;
 							# Ch:3 T: 21.3 H: 77 Bat:ok   MU;P0=-30004;P1=815;P2=-910;P3=599;P4=-263;P5=234;P6=-621;D=0121212345634565634345656345656343456345656345656565656343456345634563456343434565656;CP=5;R=5;
+							## TECVANCE TV-4848 (Amazon) @HomeAutoUser
+							# Ch:1 T: 26.4 H: 49 (L39)    MU;P0=-218;P1=254;P2=-605;P4=616;P5=907;P6=-799;P7=-1536;D=012121212401212124012401212121240125656565612401240404040121212404012121240121212121212124012121212401212124012401212121247;CP=1;
+							# Ch:1 T: 26.6 H: 49 (L41)    MU;P0=239;P1=-617;P2=612;P3=-245;P4=862;P5=-842;D=01230145454545012301232323230101012323010101230123010101010123010101012301230123232301012301230145454545012301232323230101012323010101230123010101010123010101012301230123232301012301230145454545012301232323230101012323010101230123010101010123010101012301;CP=0;R=89;O;
 			{
-				name					=> 'IAN 283582',
-				comment				=> 'Weatherstation Auriol IAN 283582 / Sempre 92596/65395',
+				name					=> 'IAN 283582 / TV-4848',
+				comment				=> 'Weatherstation Auriol IAN 283582 / Sempre 92596/65395 / TECVANCE',
 				id						=> '84',
-				knownFreqs		=> '',
+				knownFreqs		=> '433.92',
 				one						=> [3,-1],
 				zero					=> [1,-3],
 				start					=> [4,-4,4,-4,4,-4],
@@ -2046,7 +2048,7 @@ package lib::SD_ProtocolData;
 				postamble			=> '',								# append to converted message
 				clientmodule	=> 'SD_WS',
 				length_min		=> '39',							# das letzte Bit fehlt meistens
-				length_max		=> '40',
+				length_max		=> '41',
 			},
 		"85"	=>	## Funk Wetterstation TFA 35.1140.01 mit Temperatur-/Feuchte- und Windsensor TFA 30.3222.02 09/2018 @Iron-R
 							# https://github.com/RFD-FHEM/RFFHEM/issues/266
