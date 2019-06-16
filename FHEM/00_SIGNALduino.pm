@@ -2118,7 +2118,7 @@ SIGNALduino_Parse_MS($$$$%)
 				#SIGNALduino_Log3 $name, 5, "demodulating $sigStr";
 				#Debug $patternLookupHash{substr($rawData,$i,$signal_width)}; ## Get $signal_width number of chars from raw data string
 				if (exists $patternLookupHash{$sigStr}) { ## Add the bits to our bit array
-					push(@bit_msg,$patternLookupHash{$sigStr});
+					push(@bit_msg,$patternLookupHash{$sigStr}) if ($patternLookupHash{$sigStr} ne '');
 				} elsif (exists($ProtocolListSIGNALduino{$id}{reconstructBit})) {
 					if (length($sigStr) == $signal_width) {			# ist $sigStr zu lang?
 						chop($sigStr);
