@@ -221,6 +221,9 @@ package lib::SD_ProtocolData;
 						# ELRO AB440R -> on | v1               MS;P1=-991;P2=953;P3=-356;P4=303;P5=-10033;D=45412341234141414141234123412341234141412341414123;CP=4;SP=5;R=93;m1;A;A;
 						## (real CP=300 | repeatpause=9400)
 						# Kangtai Model Nr.: 6899 -> on | v1   MS;P0=-328;P1=263;P2=-954;P3=888;P5=-9430;D=15123012121230123012121230123012301212123012121230;CP=1;SP=5;R=35;m2;0;0;
+						# door/window switch from CHN (PT2262 compatible) from amazon & ebay | itswitch_CHN model
+						# open                                 MS;P1=-478;P2=1360;P3=468;P4=-1366;P5=-14045;D=35212134212134343421212134213434343434343421342134;CP=3;SP=5;R=30;O;m2;4;
+						# close                                MS;P1=-474;P2=1373;P3=455;P4=-1367;P5=-14044;D=35212134212134343421212134213434343434343421212134;CP=3;SP=5;R=37;O;m2;
 			{
 				name						=> 'chip xx2262',
 				comment					=> 'remote for ELRO|Kangtai|Intertek|REWE|WOFI',
