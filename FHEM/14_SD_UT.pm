@@ -943,10 +943,10 @@ sub SD_UT_Parse($$) {
 		}
 
 		### ESTO KL_RF01 [P93] ###
-		if (!$def && $protocol == 93 || $protocol == 90) {
+		if (!$def && ($protocol == 93 || $protocol == 90)) {
 			$deviceCode = substr($rawData,0,4);
-			$devicedef = "KL_RF01 " . $deviceCode if (!$def);
-			$def = $modules{SD_UT}{defptr}{$devicedef} if (!$def);
+			$devicedef = "KL_RF01 " . $deviceCode;
+			$def = $modules{SD_UT}{defptr}{$devicedef};
 		}
 	}
 
