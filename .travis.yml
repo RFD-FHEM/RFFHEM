@@ -29,4 +29,4 @@ script:
  - cp -R /opt/fhem/cover_db ./
  - git --no-pager diff --diff-filter=d --name-only $TRAVIS_COMMIT_RANGE | grep .pm | xargs -I@ echo -select @ | xargs cover -report coveralls
 after_failure:
- - UnitTest/report_failure.sh
+ - UnitTest/src/report_failure.sh
