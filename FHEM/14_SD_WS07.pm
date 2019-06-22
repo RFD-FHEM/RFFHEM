@@ -21,7 +21,7 @@
 #  flags are 4 bits B 0 C C, where B is the battery status: 1=OK, 0=LOW 
 #  and CC is the channel: 0=CH1, 1=CH2, 2=CH3 
 #  temp is 12 bit signed scaled by 10 
-#  const is always 1111 (0x0F) 
+#  const is always 1111 (0xF) or 1010 (0xA)
 #  humiditiy is 8 bits 
 
 package main;
@@ -38,7 +38,7 @@ SD_WS07_Initialize($)
 {
   my ($hash) = @_;
 
-  $hash->{Match}     = "^P7#[A-Fa-f0-9]{6}F[A-Fa-f0-9]{2}";    ## pos 7 ist aktuell immer 0xF
+  $hash->{Match}     = "^P7#[A-Fa-f0-9]{6}A|F[A-Fa-f0-9]{2}";    ## pos 7 ist aktuell immer 0xF oder 0xA
   $hash->{DefFn}     = "SD_WS07_Define";
   $hash->{UndefFn}   = "SD_WS07_Undef";
   $hash->{ParseFn}   = "SD_WS07_Parse";
@@ -112,6 +112,7 @@ SD_WS07_Parse($$)
   # 1110 1011 1  000  000010111000  1111  00000000       other device from HomeAuto_User SD_WS07_T_EB1
   # 1100 0100 1  000  000100100010  1111  00000000       other device from HomeAuto_User SD_WS07_T_C41
   # 0110 0100 0  000  000100001110  1111  00101010       hama TS36E from HomeAuto_User - Bat bit identified
+  # 1011 0001 1  000  000100011010  1010  00101100       Auriol AFW 2 A1, IAN: 297514
   #     ID   Bat CHN       TMP       ??      HUM
   
 	# Modelliste

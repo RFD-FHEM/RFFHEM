@@ -66,7 +66,7 @@ package lib::SD_ProtocolData;
 	use strict;
 	use warnings;
 	
-	our $VERSION = '1.04';
+	our $VERSION = '1.05';
 	our %protocols = (
 		"0"	=>	## various weather sensors (500 | 9100)
 						# ABS700 | Id:79 T: 3.3 Bat:low                MS;P1=-7949;P2=492;P3=-1978;P4=-3970;D=21232423232424242423232323232324242423232323232424;CP=2;SP=1;R=245;O;
@@ -328,9 +328,12 @@ package lib::SD_ProtocolData;
 			},
 		"7"	=>	## weather sensors like EAS800z
 						# Ch:1 T: 19.8 H: 11 Bat:low   MS;P1=-3882;P2=504;P3=-957;P4=-1949;D=21232424232323242423232323232323232424232323242423242424242323232324232424;CP=2;SP=1;R=249;m=2;
+						# https://forum.fhem.de/index.php/topic,101682.0.html (Auriol AFW 2 A1, IAN: 297514)
+						# Ch:1 T: 28.2 H: 44 Bat:ok    MS;P0=494;P1=-1949;P2=-967;P3=-3901;D=03010201010202020101020202020202010202020101020102010201020202010201010202;CP=0;SP=3;R=37;m0;
+						# Ch:1 T: 24.4 H: 56 Bat:ok    MS;P1=-1940;P2=495;P3=-957;P4=-3878;D=24212321212323232121232323232323232121212123212323212321232323212121232323;CP=2;SP=4;R=20;O;m1;
 			{
-				name						=> 'weather',
-				comment					=> 'EAS800z, FreeTec NC-7344, HAMA TS34A',
+				name						=> 'Weather',
+				comment					=> 'EAS800z, FreeTec NC-7344, HAMA TS34A, Auriol AFW 2 A1',
 				id							=> '7',
 				knownFreqs      => '433.92',
 				one							=> [1,-4],
@@ -340,7 +343,7 @@ package lib::SD_ProtocolData;
 				format					=> 'twostate',
 				preamble				=> 'P7#',				# prepend to converted message
 				clientmodule		=> 'SD_WS07',
-				modulematch			=> '^P7#.{6}F.{2}',
+				modulematch			=> '^P7#.{6}A|F.{2}',
 				length_min			=> '35',
 				length_max			=> '40',
 			},
