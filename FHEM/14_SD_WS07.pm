@@ -104,16 +104,16 @@ SD_WS07_Parse($$)
 
 	Log3 $iohash, 4, "$iohash->{NAME}: SD_WS07_Parse $model ($msg) length: $hlen";
   
-  # 0    4    8  9    12            24    28       36
-  # 0011 0110 1  010  000100000010  1111  00111000 0000  eas8007
-  # 0111 0010 1  010  000010111100  1111  00000000 0000  other device from anfichtn
-  # 1101 0010 0  000  000000010001  1111  00101000       other device from elektron-bbs
-  # 0110 0011 1  000  000011101010  1111  00001010       other device from HomeAuto_User SD_WS07_TH_631
-  # 1110 1011 1  000  000010111000  1111  00000000       other device from HomeAuto_User SD_WS07_T_EB1
-  # 1100 0100 1  000  000100100010  1111  00000000       other device from HomeAuto_User SD_WS07_T_C41
-  # 0110 0100 0  000  000100001110  1111  00101010       hama TS36E from HomeAuto_User - Bat bit identified
-  # 1011 0001 1  000  000100011010  1010  00101100       Auriol AFW 2 A1, IAN: 297514
-  #     ID   Bat CHN       TMP       ??      HUM
+  # 0   4    8     12            24    28       36
+  # 00110110 1010  000100000010  1111  00111000 0000  eas8007
+  # 01110010 1010  000010111100  1111  00000000 0000  other device from anfichtn
+  # 11010010 0000  000000010001  1111  00101000       other device from elektron-bbs
+  # 01100011 1000  000011101010  1111  00001010       other device from HomeAuto_User SD_WS07_TH_631
+  # 11101011 1000  000010111000  1111  00000000       other device from HomeAuto_User SD_WS07_T_EB1
+  # 11000100 1000  000100100010  1111  00000000       other device from HomeAuto_User SD_WS07_T_C41
+  # 01100100 0000  000100001110  1111  00101010       hama TS36E from HomeAuto_User - Bat bit identified
+  # 10110001 1000  000100011010  1010  00101100       Auriol AFW 2 A1, IAN: 297514
+  # Long-ID  BSCC  TEMPERATURE    ??   HUMIDITY       B=Battery, S=Sendmode, C=Channel
   
 	# Modelliste
 	my %models = (
@@ -126,7 +126,8 @@ SD_WS07_Parse($$)
     
     my $id = substr($rawData,0,2);
     my $bat = substr($bitData,8,1) eq "1" ? "ok" : "low";	# 1 = ok | 0 = low --> identified on hama TS36E
-    my $channel = oct("0b" . substr($bitData,9,3)) + 1;
+    my $sendmode = substr($bitData,9,1) eq "1" ? "manual" : "auto";	# 1 = manual | 0 = auto --> identified on Auriol AFW 2 A1
+    my $channel = oct("0b" . substr($bitData,10,2)) + 1;
     my $temp = oct("0b" . substr($bitData,12,12));
     my $bit24bis27 = oct("0b".substr($bitData,24,4));
     my $hum = oct("0b" . substr($bitData,28,8));
@@ -266,6 +267,7 @@ SD_WS07_Parse($$)
     readingsBulkUpdate($hash, "temperature", $temp)  if ($temp ne"");
     readingsBulkUpdate($hash, "humidity", $hum)  if ($models{$modelkey} eq "TH");
     readingsBulkUpdate($hash, "batteryState", $bat);
+    readingsBulkUpdate($hash, "sendmode", $sendmode);
     readingsBulkUpdate($hash, "channel", $channel) if ($channel ne "");
     readingsEndUpdate($hash, 1); # Notify is done by Dispatch
 
