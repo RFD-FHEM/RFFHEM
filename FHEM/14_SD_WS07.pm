@@ -307,6 +307,7 @@ sub SD_WS07_Attr(@)
   <br>
   <b>Known models:</b>
   <ul>
+    <li>Auriol AFW 2 A1, IAN: 297514</li>
     <li>Eurochon EAS800z</li>
     <li>Technoline WS6750/TX70DTH</li>
   </ul>
@@ -388,6 +389,7 @@ sub SD_WS07_Attr(@)
   <br>
   <b>Unterst&uumltzte Modelle:</b>
   <ul>
+    <li>Auriol AFW 2 A1, IAN: 297514</li>
     <li>Eurochon EAS800z</li>
     <li>Technoline WS6750/TX70DTH</li>
     <li>TFA 30320902</li>
