@@ -37,8 +37,7 @@ sub
 SD_WS07_Initialize($)
 {
   my ($hash) = @_;
-
-  $hash->{Match}     = "^P7#[A-Fa-f0-9]{6}A|F[A-Fa-f0-9]{2}";    ## pos 7 ist aktuell immer 0xF oder 0xA
+  $hash->{Match}     = "^P7#[A-Fa-f0-9]{6}[AFaf][A-Fa-f0-9]{2}";    ## pos 7 ist aktuell immer 0xF oder 0xA
   $hash->{DefFn}     = "SD_WS07_Define";
   $hash->{UndefFn}   = "SD_WS07_Undef";
   $hash->{ParseFn}   = "SD_WS07_Parse";

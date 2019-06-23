@@ -343,7 +343,7 @@ package lib::SD_ProtocolData;
 				format					=> 'twostate',
 				preamble				=> 'P7#',				# prepend to converted message
 				clientmodule		=> 'SD_WS07',
-				modulematch			=> '^P7#.{6}A|F.{2}',
+				modulematch			=> '^P7#.{6}[AFaf].{2}',
 				length_min			=> '35',
 				length_max			=> '40',
 			},
