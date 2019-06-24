@@ -111,6 +111,8 @@ SD_WS07_Parse($$)
   # 11101011 1000  000010111000  1111  00000000       other device from HomeAuto_User SD_WS07_T_EB1
   # 11000100 1000  000100100010  1111  00000000       other device from HomeAuto_User SD_WS07_T_C41
   # 01100100 0000  000100001110  1111  00101010       hama TS36E from HomeAuto_User - Bat bit identified
+  # Long-ID  BCCC  TEMPERATURE    ??   HUMIDITY       B=Battery, C=Channel
+
   # 10110001 1000  000100011010  1010  00101100       Auriol AFW 2 A1, IAN: 297514
   # Long-ID  BSCC  TEMPERATURE    ??   HUMIDITY       B=Battery, S=Sendmode, C=Channel
   
@@ -125,10 +127,13 @@ SD_WS07_Parse($$)
     
     my $id = substr($rawData,0,2);
     my $bat = substr($bitData,8,1) eq "1" ? "ok" : "low";	# 1 = ok | 0 = low --> identified on hama TS36E
-    my $sendmode = substr($bitData,9,1) eq "1" ? "manual" : "auto";	# 1 = manual | 0 = auto --> identified on Auriol AFW 2 A1
-    my $channel = oct("0b" . substr($bitData,10,2)) + 1;
+    my $sendmode;
+    my $channel = oct("0b" . substr($bitData,9,3)) + 1;
+    if (substr($bitData,24,4) eq "1010") {
+      $sendmode = substr($bitData,9,1) eq "1" ? "manual" : "auto";	# 1 = manual | 0 = auto --> identified on Auriol AFW 2 A1
+      $channel = oct("0b" . substr($bitData,10,2)) + 1;
+    }
     my $temp = oct("0b" . substr($bitData,12,12));
-    my $bit24bis27 = oct("0b".substr($bitData,24,4));
     my $hum = oct("0b" . substr($bitData,28,8));
 	my $modelkey;
     
@@ -266,7 +271,7 @@ SD_WS07_Parse($$)
     readingsBulkUpdate($hash, "temperature", $temp)  if ($temp ne"");
     readingsBulkUpdate($hash, "humidity", $hum)  if ($models{$modelkey} eq "TH");
     readingsBulkUpdate($hash, "batteryState", $bat);
-    readingsBulkUpdate($hash, "sendmode", $sendmode);
+    readingsBulkUpdate($hash, "sendmode", $sendmode, 0) if (defined($sendmode));
     readingsBulkUpdate($hash, "channel", $channel) if ($channel ne "");
     readingsEndUpdate($hash, 1); # Notify is done by Dispatch
 
