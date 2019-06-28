@@ -938,8 +938,8 @@ sub SD_UT_Parse($$) {
 		### Manax MX-RCS250 [P90] ###
 		if (!$def && $protocol == 90) {
 			$deviceCode = substr($rawData,0,4);
-			$devicedef = "Manax " . $deviceCode if (!$def);
-			$def = $modules{SD_UT}{defptr}{$devicedef} if (!$def);
+			$devicedef = "Manax " . $deviceCode;
+			$def = $modules{SD_UT}{defptr}{$devicedef};
 		}
 
 		### ESTO KL_RF01 [P93] ###
