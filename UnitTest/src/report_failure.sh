@@ -2,7 +2,8 @@
 # set -x
 # TRAVIS_BUILD_ID=547435645
 # TRAVIS_JOB_NUMBER="1555.1"
-
+# TRAVIS_PULL_REQUEST="584"
+# TRAVIS_REPO_SLUG="RFD-FHEM/RFFHEM"
 #  make UnitTest/makefile deploylocalLibs && make -f UnitTest/makefile setupEnv test_DeviceData_rmsg
 if [ "$TRAVIS_PULL_REQUEST" != "false" ] ; then
 	
@@ -12,13 +13,13 @@ if [ "$TRAVIS_PULL_REQUEST" != "false" ] ; then
 		JSON_STRING=$( jq -n \
 					  --arg jn "$TRAVIS_JOB_NUMBER" \
 					  --arg bid "$TRAVIS_BUILD_ID" \
-					  --arg result "<details><summary>$VALUE</summary>" \
+					  --arg result "<details><summary>Testdetail $TRAVIS_PERL_VERSION</summary>$VALUE</details>" \
 					  '{jobnum: $jn, build_id: $bid, comment: $result}' )
-		curl -X POST  -H "x-api-key: qhIo6E5YIR89SZmgOSZzr3lz44v83oRp3GBorJvA"  -H "Content-Type: application/json" -d "$JSON_STRING" https://os5upwuzf7.execute-api.eu-central-1.amazonaws.com/Stage/save
+		curl --retry 5 --retry-max-time 40 -X POST  -H "x-api-key: qhIo6E5YIR89SZmgOSZzr3lz44v83oRp3GBorJvA"  -H "Content-Type: application/json" -d "$JSON_STRING" https://os5upwuzf7.execute-api.eu-central-1.amazonaws.com/Stage/save
 	fi
 	
-	# curl -H "Authorization: token ${GH_API_KEY}" -X POST \
-	# -d "{\"body\": \"\<details\>\<summary\>result\</summary\>\`\`\`${VALUE}\`\`\`\</details\>\"}" \
-	# "https://api.github.com/repos/${TRAVIS_REPO_SLUG}/issues/${TRAVIS_PULL_REQUEST}/comments"
+	# curl -H "Authorization: token ${GH_API_KEY}" -X POST -d "{\"body\": \"\<details\>\<summary\>result\</summary\>\`\`\`${VALUE}\`\`\`\</details\>\"}" \"https://api.github.com/repos/${TRAVIS_REPO_SLUG}/issues/${TRAVIS_PULL_REQUEST}/comments"
+	# curl -H "Authorization: token ${GH_API_KEY}" -X POST -d "{\"body\": \"\<details\>\<summary\>result\</summary\>\`\`\`${VALUE}\`\`\`\</details\>\"}" \"https://api.github.com/repos/${TRAVIS_REPO_SLUG}/issues/${TRAVIS_PULL_REQUEST}/comments"
+
 fi
 # cat test_failure.json | jq '.Results[].Readings | del(.[][] | select(. == ""))' | jq '.test_fail  ure.Value'
