@@ -224,6 +224,19 @@
 #
 #		mumbi m-FS300 https://github.com/RFD-FHEM/RFFHEM/issues/60
 #		...
+#
+#		SET mumbi AFS300-s  https://forum.fhem.de/index.php/topic,94327.msg953226.html#msg953226 | https://forum.fhem.de/index.php/topic,94327.msg953235.html#msg953235
+#		remote control typ RC-10 | random code wireless switch typ RCS-22GS
+#		Taste A on    :	MS;P1=781;P3=-372;P4=251;P5=-903;P6=-10342;D=46451313131345454545131345134545134545454513131313454513454513451345;CP=4;SP=6;O;m1;E;
+#		Taste A off   :	MS;P1=790;P2=-363;P3=257;P4=-896;P5=-10283;D=35341212121234343434121234123434123434343412121234343412343412343434;CP=3;SP=5;O;m2;C;C;
+#		Taste B on    :	MS;P0=-367;P2=-892;P3=265;P4=-10335;P5=787;D=34325050505032323232505032503232503232323250503250323250323250503232;CP=3;SP=4;O;m2;2;P;
+#		Taste B off   :	MS;P0=264;P1=-367;P2=791;P4=-887;P6=-10335;D=06042121212104040404212104210404210404040421210404040421040421212104;CP=0;SP=6;O;m2;
+#		Taste C on    : MS;P0=-887;P1=790;P2=-361;P3=265;P5=-10342;D=35301212121230303030121230123030123030303012301212303012303030301230;CP=3;SP=5;O;m2;0;0;
+#		Taste C off   : MS;P0=794;P1=-364;P2=265;P3=-885;P4=-10325;D=24230101010123232323010123012323012323232301230123232301232323232323;CP=2;SP=4;O;m1;
+#		Taste D on    : MS;P0=-884;P1=790;P2=-365;P3=272;P4=-10323;D=34301212121230303030121230123030123030303030121212303012301230301230;CP=3;SP=4;O;m1;0;
+#		Taste D off   : MS;P1=-364;P2=264;P3=-892;P4=787;P5=-10331;D=25234141414123232323414123412323412323232323414123232341234123232323;CP=2;SP=5;O;m2;A;
+#		Taste All on  : MS;P1=-361;P2=267;P3=-884;P4=792;P5=-10342;D=25234141414123232323414123412323412323232323412323232341234123414123;CP=2;SP=5;O;m2;A;
+#		Taste All off : MS;P1=-363;P2=789;P3=267;P4=-887;P5=-10332;D=35342121212134343434212134213434213434343421343434343421343434212134;CP=3;SP=5;O;m2;4;
 #}
 ###############################################################################################################################################################################
 # - ESTO Lighting GmbH | remote control KL-RF01 with 9 buttons (CP 375-395) [Protocol 93] and [additionally Protocol 90]
@@ -1465,6 +1478,7 @@ sub SD_UT_tristate2bin($) {
 	 <ul> - LED_XM21_0 X-Mas light string&nbsp;&nbsp;&nbsp;<small>(module model: LED_XM21_0 | protocol 76)</small></ul>
 	 <ul> - LIBRA TR-502MSV (LIDL)&nbsp;&nbsp;&nbsp;<small>(module model: TR_502MSV | protocol 34)</small></ul>
 	 <ul> - Manax RCS250 <b>ONLY RECEIVE!</b>&nbsp;&nbsp;&nbsp;<small>(module model: Manax | protocol 90)</small></ul>
+	 <ul> - mumbi AFS300-s (remote control RC-10 | random code wireless switch RCS-22GS)<b>ONLY RECEIVE!</b>&nbsp;&nbsp;&nbsp;<small>(module model: Manax | protocol 90)</small></ul>
 	 <ul> - NEFF or Refsta Topdraft (Tecnowind) kitchen hood&nbsp;&nbsp;&nbsp;<small>(module model: SF01_01319004 | protocol 86)</small></ul>
 	 <ul> - Novy Pureline 6830 kitchen hood&nbsp;&nbsp;&nbsp;<small>(module model: Novy_840029 | protocol 86)</small></ul>
 	 <ul> - QUIGG DMV-7000&nbsp;&nbsp;&nbsp;<small>(module model: QUIGG_DMV | protocol 34)</small></ul>
@@ -1760,6 +1774,7 @@ sub SD_UT_tristate2bin($) {
 	 <ul> - LED_XM21_0 Christbaumkerzen&nbsp;&nbsp;&nbsp;<small>(Modulmodel: LED_XM21_0 | Protokol 76)</small></ul>
 	 <ul> - LIBRA TR-502MSV (LIDL)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: TR_502MSV | Protokol 34)</small></ul>
 	 <ul> - Manax RCS250 <b>NUR EMPFANG!</b>&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Manax | Protokoll 90)</small></ul>
+	 <ul> - mumbi AFS300-s (remote control RC-10 | random code wireless switch RCS-22GS) <b>NUR EMPFANG!</b>&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Manax | Protokoll 90)</small></ul>
 	 <ul> - NEFF oder Refsta Topdraft (Tecnowind) Dunstabzugshaube&nbsp;&nbsp;&nbsp;<small>(Modulmodel: SF01_01319004 | Protokoll 86)</small></ul>
 	 <ul> - Novy Pureline 6830 Dunstabzugshaube&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Novy_840029 | Protokoll 86)</small></ul>
 	 <ul> - QUIGG DMV-7000&nbsp;&nbsp;&nbsp;<small>(Modulmodel: QUIGG_DMV | Protokoll 34)</small></ul>
