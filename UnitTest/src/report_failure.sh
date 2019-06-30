@@ -19,7 +19,7 @@ if [ "$TRAVIS_PULL_REQUEST" != "false" ] ; then
                       '{jobnum: $jn, build_id: $bid, comment: $result}' )
 		#printf -v JSON_POST %b "$JSON_STRING"
 		echo "$JSON_STRING" | curl --retry 5 --retry-max-time 40 -X POST -H "x-api-key: ${AWS_API_KEY}"  -H "Content-Type: application/json" -d @- https://os5upwuzf7.execute-api.eu-central-1.amazonaws.com/Stage/save	fi
-	
+	fi
 	# curl -H "Authorization: token ${GH_API_KEY}" -X POST -d "{\"body\": \"\<details\>\<summary\>result\</summary\>\`\`\`${VALUE}\`\`\`\</details\>\"}" \"https://api.github.com/repos/${TRAVIS_REPO_SLUG}/issues/${TRAVIS_PULL_REQUEST}/comments"
 	# curl -H "Authorization: token ${GH_API_KEY}" -X POST -d "{\"body\": \"\<details\>\<summary\>result\</summary\>\`\`\`${VALUE}\`\`\`\</details\>\"}" \"https://api.github.com/repos/${TRAVIS_REPO_SLUG}/issues/${TRAVIS_PULL_REQUEST}/comments"
 
