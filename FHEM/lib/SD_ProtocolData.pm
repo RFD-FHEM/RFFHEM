@@ -2194,15 +2194,15 @@ package lib::SD_ProtocolData;
 				length_min   => '40',
 				length_max   => '40',
 			},
-		"90"	=>	## mumbi m-FS300 / manax MX-RCS250 (CP 258-298)
-							# https://forum.fhem.de/index.php/topic,94327.15.html @my-engel
+		"90"	=>	## mumbi AFS300-s / manax MX-RCS250 (CP 258-298)
+							# https://forum.fhem.de/index.php/topic,94327.15.html @my-engel @peterboeckmann
 							# A	AN    MS;P0=-9964;P1=273;P4=-866;P5=792;P6=-343;D=10145614141414565656561414561456561414141456565656561456141414145614;CP=1;SP=0;R=35;O;m2;
 							# A	AUS   MS;P0=300;P1=-330;P2=-10160;P3=804;P7=-840;D=02073107070707313131310707310731310707070731313107310731070707070707;CP=0;SP=2;R=23;O;m1;
 							# B	AN    MS;P1=260;P2=-873;P3=788;P4=-351;P6=-10157;D=16123412121212343434341212341234341212121234341234341234121212341212;CP=1;SP=6;R=21;O;m2;
 							# B	AUS   MS;P1=268;P3=793;P4=-337;P6=-871;P7=-10159;D=17163416161616343434341616341634341616161634341616341634161616343416;CP=1;SP=7;R=24;O;m2;
 			{
 				name         => 'mumbi | MANAX',
-				comment      => 'remote control mumbi FS300, MANAX MX-RCS250 (only receive)',
+				comment      => 'remote control mumbi RC-10, MANAX MX-RCS250 (only receive)',
 				id           => '90',
 				knownFreqs   => '433.92',
 				one          => [3,-1],
