@@ -66,7 +66,7 @@ defmod test_DeviceData_rmsg UnitTest dummyDuino (
 					my $expected_repeat=min(4,$tData->{repeat}+1);
 					 
 					TODO: {
-					#    local $TODO = "Checking for repeats is not finishes, because number of repeats is not always number of dispatches";
+					    local $TODO = "Checking for repeats is not finishes, because number of repeats is not always number of dispatches";
 				        is($SD_Dispatch_calledCounter, $expected_repeat, "check number of dispatch attempts") if (defined($tData->{repeat}));
 					};
 					
