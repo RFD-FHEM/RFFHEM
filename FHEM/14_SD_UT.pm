@@ -565,7 +565,7 @@ sub SD_UT_Define($$) {
 		return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short | long or not HEX (0-9 | a-f | A-F){4}";
 	}
 	### [6] checks Manax | mumbi ###
-	if ($a[2] eq "RC_10" && not $a[3] =~ /^[0-9a-fA-F]{4}_([ABCD]|[a][l][l])$/s) {
+	if ($a[2] eq "RC_10" && not $a[3] =~ /^[0-9a-fA-F]{4}_([ABCD]|all)$/s) {
 		return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short | long or not HEX (0-9 | a-f | A-F){4}_[ABCD]|[all]";
 	}
 
