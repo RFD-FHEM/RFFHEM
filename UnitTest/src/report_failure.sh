@@ -15,7 +15,7 @@ if [ "$TRAVIS_PULL_REQUEST" != "false" ] ; then
 		JSON_STRING=$( jq --slurp --raw-input -n \
                       --arg jn "$TRAVIS_JOB_NUMBER" \
                       --arg bid "$TRAVIS_BUILD_ID" \
-                      --arg result "<details><summary>Testdetail wit Perl ($TRAVIS_PERL_VERSION)</summary>$V2</details>" \
+                      --arg result "<details><summary>${TRAVIS_JOB_NUMBER}: Details Perl ($TRAVIS_PERL_VERSION)</summary>$V2</details>" \
                       '{jobnum: $jn, build_id: $bid, comment: $result}' )
 		#printf -v JSON_POST %b "$JSON_STRING"
 		echo "$JSON_STRING" | curl --retry 5 --retry-max-time 40 -X POST -H "x-api-key: ${AWS_API_KEY}"  -H "Content-Type: application/json" -d @- https://os5upwuzf7.execute-api.eu-central-1.amazonaws.com/Stage/save
