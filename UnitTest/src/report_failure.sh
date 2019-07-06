@@ -1,5 +1,5 @@
 #!/bin/bash
-# set -x
+ # set -x
  #TRAVIS_BUILD_ID=552259819
  #TRAVIS_JOB_NUMBER="1580.1"
  #TRAVIS_PULL_REQUEST="584"
@@ -9,7 +9,7 @@ if [ "$TRAVIS_PULL_REQUEST" != "false" ] ; then
 	
 	VALUE=$(UnitTest/src/fhemcl.sh 8083 "jsonlist2 test_DeviceData_rmsg test_failure" | jq '.Results[].Readings | del(.[][] | select(. == ""))' | jq -r '.test_failure.Value')
 	if [ "$VALUE" != "" ] ; then
-		JOBNUM=$TRAVIS_JOB_NUMBER | cut -d "." -f2
+		#JOBNUM=$TRAVIS_JOB_NUMBER | cut -d "." -f2
 		NL="\n"
 		printf -v V2 "%b" "$NL$NL$NL" "- **test_DeviceData_rmsg** $NL \`\`\`$VALUE$NL\`\`\`$NL"
 		JSON_STRING=$( jq --slurp --raw-input -n \
@@ -20,8 +20,6 @@ if [ "$TRAVIS_PULL_REQUEST" != "false" ] ; then
 		#printf -v JSON_POST %b "$JSON_STRING"
 		echo "$JSON_STRING" | curl --retry 5 --retry-max-time 40 -X POST -H "x-api-key: ${AWS_API_KEY}"  -H "Content-Type: application/json" -d @- https://os5upwuzf7.execute-api.eu-central-1.amazonaws.com/Stage/save
 	fi
-	# curl -H "Authorization: token ${GH_API_KEY}" -X POST -d "{\"body\": \"\<details\>\<summary\>result\</summary\>\`\`\`${VALUE}\`\`\`\</details\>\"}" \"https://api.github.com/repos/${TRAVIS_REPO_SLUG}/issues/${TRAVIS_PULL_REQUEST}/comments"
-	# curl -H "Authorization: token ${GH_API_KEY}" -X POST -d "{\"body\": \"\<details\>\<summary\>result\</summary\>\`\`\`${VALUE}\`\`\`\</details\>\"}" \"https://api.github.com/repos/${TRAVIS_REPO_SLUG}/issues/${TRAVIS_PULL_REQUEST}/comments"
-
+else
+  echo "This is not a pullrequest build. Failures are not reported"
 fi
-# cat test_failure.json | jq '.Results[].Readings | del(.[][] | select(. == ""))' | jq '.test_fail  ure.Value'
