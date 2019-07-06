@@ -30,7 +30,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.4.0_dev_08.06",
+	SDUINO_VERSION            => "v3.4.0_dev_01.07",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -3447,6 +3447,7 @@ sub SIGNALduino_postDemo_WS7035($@) {
 	my ($name, @bit_msg) = @_;
 	my $msg = join("",@bit_msg);
 	my $parity = 0;					# Parity even
+	my $sum = 0;						# checksum
 
 	SIGNALduino_Log3 $name, 4, "$name: WS7035 $msg";
 	if (substr($msg,0,8) ne "10100000") {		# check ident
@@ -3460,9 +3461,17 @@ sub SIGNALduino_postDemo_WS7035($@) {
 			SIGNALduino_Log3 $name, 3, "$name: WS7035 ERROR - Parity not even";
 			return 0, undef;
 		} else {
-			SIGNALduino_Log3 $name, 4, "$name: WS7035 " . substr($msg,0,4) ." ". substr($msg,4,4) ." ". substr($msg,8,4) ." ". substr($msg,12,4) ." ". substr($msg,16,4) ." ". substr($msg,20,4) ." ". substr($msg,24,4) ." ". substr($msg,28,4) ." ". substr($msg,32,4) ." ". substr($msg,36,4) ." ". substr($msg,40);
-			substr($msg, 27, 4, '');			# delete nibble 8
-			return (1,split("",$msg));
+			for(my $i = 0; $i < 39; $i += 4) {			# Sum over nibble 0 - 9
+				$sum += oct("0b".substr($msg,$i,4));
+			}
+			if (($sum &= 0x0F) != oct("0b".substr($msg,40,4))) {
+				SIGNALduino_Log3 $name, 3, "$name: WS7035 ERROR - Checksum";
+				return 0, undef;
+			} else {
+				SIGNALduino_Log3 $name, 4, "$name: WS7035 " . substr($msg,0,4) ." ". substr($msg,4,4) ." ". substr($msg,8,4) ." ". substr($msg,12,4) ." ". substr($msg,16,4) ." ". substr($msg,20,4) ." ". substr($msg,24,4) ." ". substr($msg,28,4) ." ". substr($msg,32,4) ." ". substr($msg,36,4) ." ". substr($msg,40);
+				substr($msg, 27, 4, '');			# delete nibble 8
+				return (1,split("",$msg));
+			}
 		}
 	}
 }

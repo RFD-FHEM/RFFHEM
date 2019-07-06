@@ -66,7 +66,7 @@ package lib::SD_ProtocolData;
 	use strict;
 	use warnings;
 	
-	our $VERSION = '1.05';
+	our $VERSION = '1.06';
 	our %protocols = (
 		"0"	=>	## various weather sensors (500 | 9100)
 						# ABS700 | Id:79 T: 3.3 Bat:low                MS;P1=-7949;P2=492;P3=-1978;P4=-3970;D=21232423232424242423232323232324242423232323232424;CP=2;SP=1;R=245;O;
@@ -1608,6 +1608,7 @@ package lib::SD_ProtocolData;
 		"66"	=>	## TX2 Protocol (Remote Temp Transmitter & Remote Thermo Model 7035)
 							# https://github.com/RFD-FHEM/RFFHEM/issues/160 @elektron-bbs
 							# Id:66 T: 23.2   MU;P0=13312;P1=-2785;P2=4985;P3=1124;P4=-6442;P5=3181;P6=-31980;D=0121345434545454545434545454543454545434343454543434545434545454545454343434545434343434545621213454345454545454345454545434545454343434545434345454345454545454543434345454343434345456212134543454545454543454545454345454543434345454343454543454545454545;CP=3;R=73;O;
+							# Id:49 T: 25.2   MU;P0=32001;P1=-2766;P2=4996;P3=1158;P4=-6416;P5=3203;P6=-31946;D=01213454345454545454543434545454345454343434543454345454345454545454543434345434543434345456212134543454545454545434345454543454543434345434543454543454545454545434343454345434343454562121345434545454545454343454545434545434343454345434545434545454545454;CP=3;R=72;O; 
 			{
 				name							=> 'WS7035',
 				comment						=> 'temperature sensor',
@@ -1617,6 +1618,7 @@ package lib::SD_ProtocolData;
 				zero							=> [27,-52],
 				start							=> [-21,42,-21],
 				clockabs					=> 122,
+				reconstructBit		=> '1',
 				format						=> 'pwm',				# not used now
 				preamble					=> 'TX',
 				clientmodule			=> 'CUL_TX',
@@ -2194,15 +2196,15 @@ package lib::SD_ProtocolData;
 				length_min   => '40',
 				length_max   => '40',
 			},
-		"90"	=>	## mumbi m-FS300 / manax MX-RCS250 (CP 258-298)
-							# https://forum.fhem.de/index.php/topic,94327.15.html @my-engel
+		"90"	=>	## mumbi AFS300-s / manax MX-RCS250 (CP 258-298)
+							# https://forum.fhem.de/index.php/topic,94327.15.html @my-engel @peterboeckmann
 							# A	AN    MS;P0=-9964;P1=273;P4=-866;P5=792;P6=-343;D=10145614141414565656561414561456561414141456565656561456141414145614;CP=1;SP=0;R=35;O;m2;
 							# A	AUS   MS;P0=300;P1=-330;P2=-10160;P3=804;P7=-840;D=02073107070707313131310707310731310707070731313107310731070707070707;CP=0;SP=2;R=23;O;m1;
 							# B	AN    MS;P1=260;P2=-873;P3=788;P4=-351;P6=-10157;D=16123412121212343434341212341234341212121234341234341234121212341212;CP=1;SP=6;R=21;O;m2;
 							# B	AUS   MS;P1=268;P3=793;P4=-337;P6=-871;P7=-10159;D=17163416161616343434341616341634341616161634341616341634161616343416;CP=1;SP=7;R=24;O;m2;
 			{
 				name         => 'mumbi | MANAX',
-				comment      => 'remote control mumbi FS300, MANAX MX-RCS250 (only receive)',
+				comment      => 'remote control mumbi RC-10, MANAX MX-RCS250 (only receive)',
 				id           => '90',
 				knownFreqs   => '433.92',
 				one          => [3,-1],
