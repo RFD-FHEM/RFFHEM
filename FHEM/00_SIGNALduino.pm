@@ -2651,7 +2651,8 @@ SIGNALduino_Parse($$$$@)
 		return undef;
 		#Todo  compare Sync/Clock fact and length of D= if equal, then it's the same protocol!
 	}
-
+	return $dispatched;
+	
 
 }
 
