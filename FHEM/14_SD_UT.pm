@@ -243,15 +243,16 @@
 #{  https://github.com/RFD-FHEM/RFFHEM/issues/449
 #}
 ###############################################################################################################################################################################
-# Techmar / Garden Lights Fernbedienung, 6148011 Remote control + 12V Outdoor receiver
-# https://github.com/RFD-FHEM/RFFHEM/issues/558 @BlackcatSandy
-# Fernbedienung mit 10 Tasten, 9 Gruppentasten und 1 Master
-# gesamt 50 Bit, Bit 0-31 Ident, Bit 32-39 Button, Bit 40-47 = Bit 32-39 invertiert, Bit 48-49 wechselt 00|01|02
-# Die letzten beiden Bits wechseln bei der Fernbedienung zwischen 00, 01 oder 02. Der Empfänger reagiert aber auch, wenn nur 00 gesendet wird.
-# sendet bei jedem Tastendruck ca. 50 Wiederholungen, Dauer etwa 6 Sekunden
-# Group_1_on:  MU;P0=-972;P1=526;P2=-335;P3=-666;D=01213131312131313121212121312121313131313121312131313121313131312121212121312121313131313121313121212101213131312131313121212121312121313131313121312131313121313131312121212121312121313131313121313121212101213131312131313121212121312121313131313121312131;CP=1;R=44;O;
-# Group_5_on:  MU;P0=-651;P1=530;P2=-345;P3=-969;D=01212121312101010121010101212121210121210101010101210121010101210101010121212121012121210101010121010101212101312101010121010101212121210121210101010101210121010101210101010121212121012121210101010121010101212121312101010121010101212121210121210101010101;CP=1;R=24;O;
-# Group_8_off: MU;P0=538;P1=-329;P2=-653;P3=-964;D=01020301020202010202020101010102010102020202020102010202020102020202010101010101010201020202020202010202010301020202010202020101010102010102020202020102010202020102020202010101010101010201020202020202010201010301020202010202020101010102010102020202020102;CP=0;R=19;O;
+#		Techmar / Garden Lights Fernbedienung, 6148011 Remote control + 12V Outdoor receiver
+#		https://github.com/RFD-FHEM/RFFHEM/issues/558 @BlackcatSandy
+#		Fernbedienung mit 10 Tasten, 9 Gruppentasten und 1 Master
+#		gesamt 50 Bit, Bit 0-31 Ident, Bit 32-39 Button, Bit 40-47 = Bit 32-39 invertiert, Bit 48-49 wechselt 00|01|02
+#		Die letzten beiden Bits wechseln bei der Fernbedienung zwischen 00, 01 oder 02. Der Empfänger reagiert aber auch, wenn nur 00 gesendet wird.
+#		sendet bei jedem Tastendruck ca. 50 Wiederholungen, Dauer etwa 6 Sekunden
+#
+#		Group_1_on:  MU;P0=-972;P1=526;P2=-335;P3=-666;D=01213131312131313121212121312121313131313121312131313121313131312121212121312121313131313121313121212101213131312131313121212121312121313131313121312131313121313131312121212121312121313131313121313121212101213131312131313121212121312121313131313121312131;CP=1;R=44;O;
+#		Group_5_on:  MU;P0=-651;P1=530;P2=-345;P3=-969;D=01212121312101010121010101212121210121210101010101210121010101210101010121212121012121210101010121010101212101312101010121010101212121210121210101010101210121010101210101010121212121012121210101010121010101212121312101010121010101212121210121210101010101;CP=1;R=24;O;
+#		Group_8_off: MU;P0=538;P1=-329;P2=-653;P3=-964;D=01020301020202010202020101010102010102020202020102010202020102020202010101010101010201020202020202010202010301020202010202020101010102010102020202020102010202020102020202010101010101010201020202020202010201010301020202010202020101010102010102020202020102;CP=0;R=19;O;
 ###############################################################################################################################################################################
 # !!! ToDo´s !!!
 #     - LED lights, counter battery-h reading --> commandref hour_counter module
@@ -705,7 +706,27 @@ sub SD_UT_Set($$$@) {
 		$msgEnd .= "#R" . $repeats;
 	############ Manax | mumbi ############
 	} elsif ($model eq "RC_10" && $cmd ne "?") {
-		return "ERROR: the send command is currently not supported";
+		return "ERROR: to send, please push button on and off again on remote" if ( (ReadingsVal($name, "x_n5-8_on", "0") eq "0") || (ReadingsVal($name, "x_n5-8_off", "0") eq "0") || (ReadingsVal($name, "x_n4", "0") eq "0") );
+
+		my @definition = split(" ", $hash->{DEF});																# split adress from def
+		$definition[1] = substr($definition[1],0,4);
+		my $adr = sprintf( "%016b", hex($definition[1])) if ($name ne "unknown");	# argument 1 - adress to binary with 16 digits
+		my $unknown1 = ReadingsVal($name, "x_n4", "0");
+		my $unknown2_btn = "x_n5-8_".$cmd;
+		my $unknown2 = ReadingsVal($name, $unknown2_btn, "0");
+		$msg = $models{$model}{Protocol} . "#" . $adr . $unknown1 . $unknown2;
+		$msgEnd .= "#R" . $repeats;
+
+		### if device _all, set A | B | C | D ### -> RC_10_7869_all (model_device_button)
+		my $device = $model."_".substr($name,6,4);
+		if ($name =~ /^$device.all$/) {
+			foreach my $d (sort keys %defs) {
+				if (defined($defs{$d}) && defined($defs{$d}{NAME}) && $defs{$d}{NAME} =~ /^$device.[ABCD]$/) {
+					readingsSingleUpdate($defs{$d}, "state" , $cmd , 1);
+					Log3 $name, 4, "$ioname: SD_UT_Set attr_model=$model device $name set ".$defs{$d}{NAME}." to $cmd";
+				}
+			}
+		}
 	############ ESTO KL_RF01############
 	} elsif ($model eq "KL_RF01" && $cmd ne "?") {
 		my @definition = split(" ", $hash->{DEF});																# split adress from def
@@ -717,6 +738,7 @@ sub SD_UT_Set($$$@) {
 	} elsif ($model eq "Techmar" && $cmd ne "?") {
 		my @definition = split(" ", $hash->{DEF});																# split adress from def
 		my $adr = sprintf( "%032b", hex($definition[1])) if ($name ne "unknown");	# argument 1 - adress to binary with 32 bits
+		
 		$msg = $models{$model}{Protocol} . "#" . $adr;
 		$msgEnd = "00#R" . $repeats;	#	Last two bits alternately by transmitter 00, 01 or 02. Receiver also reacts to only 00.
 	}
@@ -1005,9 +1027,7 @@ sub SD_UT_Parse($$) {
 	if ($hlen == 13 && $protocol == 95) {
 		### Remote control Techmar Garden Lights [P95] ###
 		Log3 $iohash, 4, "$ioname: SD_UT_Parse device Techmar - check length and protocol number - OK";
-		# my $byte4 = substr($rawData,8,2);
-		# my $byte5 = substr($rawData,10,2);
-		# my $xor = hex($byte4) ^ hex($byte5);
+
 		my $check = hex(substr($rawData,8,2)) ^ hex(substr($rawData,10,2));	# byte 5 is inverted to byte 4
 		if ($check != 255) {
 			Log3 $iohash, 3, "$ioname: SD_UT_Parse device Techmar - check byte 4 and byte 5 - ERROR";
@@ -1209,9 +1229,16 @@ sub SD_UT_Parse($$) {
 		}
 	} elsif ($model eq "RC_10" && $protocol == 90) {
 	############ Manax | mumbi ############ Protocol 90 ############
-		## Check fixed bits
-		my $unknown1 = substr($bitData,16,4);		# ?
-		my $unknown2 = substr($bitData,24,12);	# ?
+		## Check fixed bits	## Workaround to send ##
+		my $nibble4 = substr($bitData,16,4);			# evey 0000 ?
+		my $nibble5 = substr($bitData,20,4);			# Button and State
+		my $nibble6to8 = substr($bitData,24,9);		# unknown crc ? | SIGNALduino added to full nibble
+
+		readingsBeginUpdate($hash);
+		readingsBulkUpdate($hash, "x_n4" , $nibble4, 0);
+		readingsBulkUpdate($hash, "x_n5-8_on" , $nibble5.$nibble6to8, 0) if ($state eq "on");
+		readingsBulkUpdate($hash, "x_n5-8_off" , $nibble5.$nibble6to8, 0) if ($state eq "off");
+		readingsEndUpdate($hash, 1);
 
 		$deviceCode = substr($bitData,0,16);
 	} elsif ($model eq "KL_RF01" && $protocol == 93) {
@@ -1513,8 +1540,8 @@ sub SD_UT_tristate2bin($) {
 	 <ul> - Krinner LUMIX X-Mas light string&nbsp;&nbsp;&nbsp;<small>(module model: Krinner_LUMIX | protocol 92)</small></ul>
 	 <ul> - LED_XM21_0 X-Mas light string&nbsp;&nbsp;&nbsp;<small>(module model: LED_XM21_0 | protocol 76)</small></ul>
 	 <ul> - LIBRA TR-502MSV (LIDL)&nbsp;&nbsp;&nbsp;<small>(module model: TR_502MSV | protocol 34)</small></ul>
-	 <ul> - Manax RCS250 <b>ONLY RECEIVE!</b>&nbsp;&nbsp;&nbsp;<small>(module model: RC_10 | protocol 90)</small></ul>
-	 <ul> - mumbi AFS300-s (remote control RC-10 | random code wireless switch RCS-22GS)<b>ONLY RECEIVE!</b>&nbsp;&nbsp;&nbsp;<small>(module model: RC_10 | protocol 90)</small></ul>
+	 <ul> - Manax RCS250&nbsp;&nbsp;&nbsp;<small>(module model: RC_10 | protocol 90)</small></ul>
+	 <ul> - mumbi AFS300-s (remote control RC-10 | random code wireless switch RCS-22GS)&nbsp;&nbsp;&nbsp;<small>(module model: RC_10 | protocol 90)</small></ul>
 	 <ul> - NEFF or Refsta Topdraft (Tecnowind) kitchen hood&nbsp;&nbsp;&nbsp;<small>(module model: SF01_01319004 | protocol 86)</small></ul>
 	 <ul> - Novy Pureline 6830 kitchen hood&nbsp;&nbsp;&nbsp;<small>(module model: Novy_840029 | protocol 86)</small></ul>
 	 <ul> - QUIGG DMV-7000&nbsp;&nbsp;&nbsp;<small>(module model: QUIGG_DMV | protocol 34)</small></ul>
@@ -1809,8 +1836,8 @@ sub SD_UT_tristate2bin($) {
 	 <ul> - Krinner LUMIX Christbaumkerzen&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Krinner_LUMIX | Protokol 92)</small></ul>
 	 <ul> - LED_XM21_0 Christbaumkerzen&nbsp;&nbsp;&nbsp;<small>(Modulmodel: LED_XM21_0 | Protokol 76)</small></ul>
 	 <ul> - LIBRA TR-502MSV (LIDL)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: TR_502MSV | Protokol 34)</small></ul>
-	 <ul> - Manax RCS250 <b>NUR EMPFANG!</b>&nbsp;&nbsp;&nbsp;<small>(Modulmodel: RC_10 | Protokoll 90)</small></ul>
-	 <ul> - mumbi AFS300-s (remote control RC-10 | random code wireless switch RCS-22GS) <b>NUR EMPFANG!</b>&nbsp;&nbsp;&nbsp;<small>(Modulmodel: RC_10 | Protokoll 90)</small></ul>
+	 <ul> - Manax RCS250&nbsp;&nbsp;&nbsp;<small>(Modulmodel: RC_10 | Protokoll 90)</small></ul>
+	 <ul> - mumbi AFS300-s (remote control RC-10 | random code wireless switch RCS-22GS)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: RC_10 | Protokoll 90)</small></ul>
 	 <ul> - NEFF oder Refsta Topdraft (Tecnowind) Dunstabzugshaube&nbsp;&nbsp;&nbsp;<small>(Modulmodel: SF01_01319004 | Protokoll 86)</small></ul>
 	 <ul> - Novy Pureline 6830 Dunstabzugshaube&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Novy_840029 | Protokoll 86)</small></ul>
 	 <ul> - QUIGG DMV-7000&nbsp;&nbsp;&nbsp;<small>(Modulmodel: QUIGG_DMV | Protokoll 34)</small></ul>
