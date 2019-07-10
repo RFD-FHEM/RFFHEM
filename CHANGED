@@ -60,6 +60,11 @@
  00_SIGNALduino.pm revised doc sendMSG
 12.03.2019
  00_SIGNALduino.pm fix DeviceOverview
+10.03.2019
+ 14_SD_WS07.pm: fix bug autocreate define
+                remove rssi
+                remove slider for offsets
+                remove reading battery
 09.03.2019
  14_SD_WS07.pm:  loglevel 4 for values out of range, hint added to commandref
 06.03.2019
@@ -84,6 +89,8 @@
                           if there is enough data available
  14_SD_Keeloq.pm: new module for Keeloq devices
  90_SIGNALduino_un.pm remove Roto output´s --> new module created
+22.02.2019
+ 00_SIGNALduino: bugfix: Load protocolHash from web if it is missing on fs 
 21.02.2019
  14_SD_UT.pm: new model KL_RF01 -> ESTO Lighting GmbH | revised doc Refsta Topdraft
 18.02.2019
