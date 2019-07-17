@@ -1,6 +1,6 @@
-# $Id: 00_SIGNALduino.pm 10488 2019-05-11 12:00:00Z v3.4.0-dev $
+# $Id: 00_SIGNALduino.pm 10488 2019-07-10 12:00:00Z v3.4.0 $
 #
-# v3.4.0 (Development release 3.4)
+# v34.0 (stable release 3.4)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incoming messages
 # see http://www.fhemwiki.de/wiki/SIGNALDuino
 # It was modified also to provide support for raw message handling which can be send from the SIGNALduino
@@ -30,7 +30,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.4.0_dev_01.07",
+	SDUINO_VERSION            => "v3.4.0",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -256,10 +256,15 @@ SIGNALduino_Initialize($)
 
   
   %ProtocolListSIGNALduino = SIGNALduino_LoadProtocolHash("$attr{global}{modpath}/FHEM/lib/SD_ProtocolData.pm");
+  #Log3 "SIGNALduino", 1, "%ProtocolListSIGNALduino=" .Dumper(%ProtocolListSIGNALduino);
   if (exists($ProtocolListSIGNALduino{error})  ) {
-  	Log3 "SIGNALduino", 1, "Error loading Protocol Hash. Module is in inoperable mode error message:($ProtocolListSIGNALduino{error})";
+  	Log3 "SIGNALduino", 1, "Error loading protocol hash. module is not in standalone mode:($ProtocolListSIGNALduino{error}). Try loading from svn.fhem.de";
   	delete($ProtocolListSIGNALduino{error});
-  	return undef;
+  	%ProtocolListSIGNALduino = eval GetFileFromURL("https://svn.fhem.de/fhem/trunk/fhem/FHEM/lib/signalduino_protocols.hash",4,"",1,4);
+  	if (!%ProtocolListSIGNALduino) {
+  	  	Log3 "SIGNALduino", 1, "Error reloading protocol hash dynamic from svn.fhem.de. Module is in inoperable mode.";
+	  	return undef;
+  	}
   }
 }
 #

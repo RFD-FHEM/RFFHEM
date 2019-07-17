@@ -431,8 +431,8 @@ SIGNALduino_un_binflip($)
 	Dabei kann man sich leider nicht darauf verlassen, dass die Nachricht korrekt dekodiert wurde. Dieses Modul wird alle Nachrichten verarbeiten, welche von anderen Modulen nicht verarbeitet werden.<br>
 	<br>
 	Angelegte Ger&auml;te / Logfiles m&uuml;ssen manuell gel&ouml;scht werden nachdem aus dem Attribut <code>development</code> des SIGNALduinos das zu untersuchende Protokoll entfernt wurde. (Beispiel: u40,y84)
-	
-  <ul><br>
+  </ul>	
+  <br>
   <a name="SIGNALduino_unset"></a>
   <b>Set</b>
   <ul>write "Kommentar" - somit kann der User in das Logfile des Hilfsger&aumlt Kommentare setzen welche zeitlich zu seinen Bits des Ger&aumltes eingeordnet werden<br>
