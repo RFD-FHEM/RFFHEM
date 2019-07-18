@@ -4705,12 +4705,12 @@ sub SIGNALduino_githubParseHttpResponse($$$)
 		<ul><li>P<protocol id>#0xhexdata#R<num of repeats>#C<optional clock>    (#C is optional) 
 		<br>Example 0xhexdata: <code>set sduino sendMsg P29#0xF7E#R4</code>
 		<br>Generates the raw send command with the hex message F7E with protocl id 29 . The message will be send four times.
-		<br>SR;R=4;P0=-8360;P1=220;P2=-440;P3=-220;P4=440;D=01212121213421212121212134;</ul><br>
-		<ul><li>P<protocol id>#0xhexdata#R<num of repeats>#C<optional taktrate>#F<optional frequency>    (#C #F is optional) 
+		<br>SR;R=4;P0=-8360;P1=220;P2=-440;P3=-220;P4=440;D=01212121213421212121212134;</li><br>
+		<li>P<protocol id>#0xhexdata#R<num of repeats>#C<optional taktrate>#F<optional frequency>    (#C #F is optional) 
 		<br>Example 0xhexdata: <code>set sduino sendMsg P36#0xF7#R6#Fxxxxxxxxxx</code> (xxxxxxxxxx = register from CC1101)
 		<br>Generates the raw send command with the hex message F7 with protocl id 36 . The message will be send six times.
 		<br>SR;R=6;P0=-8360;P1=220;P2=-440;P3=-220;P4=440;D=012323232324232323;F= (register from CC1101);</ul>
-		</p></li></ul>
+		</p></li>
 		</li>
 	</ul>
 	
@@ -5121,17 +5121,19 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
 			<li>P<protocol id>#binarydata#R<anzahl der wiederholungen>#C<optional taktrate>   (#C is optional) 
 			<br>Beispiel binarydata: <code>set sduino sendMsg P0#0101#R3#C500</code>
 			<br>Wird eine sende Kommando fuer die Bitfolge 0101 anhand der protocol id 0 erzeugen. Als Takt wird 500 verwendet.
-			<br>SR;R=3;P0=500;P1=-9000;P2=-4000;P3=-2000;D=03020302;<br></li></ul><br>
-			<ul><li>P<protocol id>#0xhexdata#R<anzahl der wiederholungen>#C<optional taktrate>    (#C is optional) 
+			<br>SR;R=3;P0=500;P1=-9000;P2=-4000;P3=-2000;D=03020302;<br></li>
+		</ul><br>
+		<ul>
+			<li>P<protocol id>#0xhexdata#R<anzahl der wiederholungen>#C<optional taktrate>    (#C is optional) 
 			<br>Beispiel 0xhexdata: <code>set sduino sendMsg P29#0xF7E#R4</code>
 			<br>Wird eine sende Kommando fuer die Hexfolge F7E anhand der protocol id 29 erzeugen. Die Nachricht soll 4x gesendet werden.
 			<br>SR;R=4;P0=-8360;P1=220;P2=-440;P3=-220;P4=440;D=01212121213421212121212134;</ul><br>
-			<ul><li>P<protocol id>#0xhexdata#R<anzahl der wiederholungen>#C<optional taktrate>#F<optional Frequenz>    (#C #F is optional) 
+		<ul><li>P<protocol id>#0xhexdata#R<anzahl der wiederholungen>#C<optional taktrate>#F<optional Frequenz>    (#C #F is optional) 
 			<br>Beispiel 0xhexdata: <code>set sduino sendMsg P36#0xF7#R6#Fxxxxxxxxxx</code> (xxxxxxxxxx = Registerwert des CC1101)
 			<br>Wird eine sende Kommando fuer die Hexfolge F7 anhand der protocol id 36 erzeugen. Die Nachricht soll 6x gesendet werden mit der angegebenen Frequenz.
-			<br>SR;R=6;P0=-8360;P1=220;P2=-440;P3=-220;P4=440;D=012323232324232323;F= (Registerwert des CC1101);</ul>
-			</p></li>
+			<br>SR;R=6;P0=-8360;P1=220;P2=-440;P3=-220;P4=440;D=012323232324232323;F= (Registerwert des CC1101);
 		</ul>
+		</p>
 	</li>
 	<br>
 	</ul>
