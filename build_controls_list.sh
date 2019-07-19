@@ -7,7 +7,7 @@ do
     FILESIZE=$(stat -c%s "$FILE")
 	FILE=$(echo "$FILE"  | cut -c 3-)
 	printf "UPD %s %-7d %s\n" "$TIME" "$FILESIZE" "$FILE"  >> controls_signalduino.txt
-done <   <(find ./FHEM -maxdepth 2 \( -name "*.pm" -or -name "*.hash" \) -print0 | sort -z -g)
+done <   <(find ./FHEM -maxdepth 2 \( -name "*.pm" \) -print0 | sort -z -g)
 
 while IFS= read -r -d '' FILE
 do
@@ -23,5 +23,6 @@ printf "MOV FHEM/14_SIGNALduino_AS.pm unused\n"
 printf "MOV FHEM/14_SIGNALduino_un.pm unused\n"
 printf "MOV FHEM/14_SIGNALduino_ID7.pm unused\n"
 printf "MOV FHEM/14_SIGNALduino_RSL.pm unused\n" 
+printf "MOV FHEM/lib/signalduino_protocols.hash unused\n" 
 }  >> controls_signalduino.txt
 

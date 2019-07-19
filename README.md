@@ -1,7 +1,8 @@
-SIGNALduino - FHEM Modules stable Version 3.3.4
+SIGNALduino - FHEM Modules stable Version 3.4.0
 ======
 
 [![Coverage Status](https://coveralls.io/repos/github/RFD-FHEM/RFFHEM/badge.svg?branch=master)](https://coveralls.io/github/RFD-FHEM/RFFHEM?branch=master) [![Build Status](https://travis-ci.org/RFD-FHEM/RFFHEM.svg?branch=master)](https://travis-ci.org/RFD-FHEM/RFFHEM)
+[![Coverage Status](https://coveralls.io/repos/github/RFD-FHEM/RFFHEM/badge.svg?branch=dev-r34)](https://coveralls.io/github/RFD-FHEM/RFFHEM?branch=dev-r34) [![Build Status](https://travis-ci.org/RFD-FHEM/RFFHEM.svg?branch=dev-r34)](https://travis-ci.org/RFD-FHEM/RFFHEM)
 
 Counterpart of SIGNALDuino uC, it's the code for FHEM to work with the data received from the uC
 
@@ -37,7 +38,7 @@ Supported Devices / Protocols
 |Somfy RTS | Shutters from Somfy|
 |Opus XT300 | Soil moisture sensor |
 |Oregon NR868 | Motion sensor |
-|IAN 275901, 283582 (Lidl) | Weatherstation |
+|Auriol IAN 60107, 114324, 275901, 283582, 297514 (Lidl) | Weatherstation |
 |FreeTec PE-6946 | wireless bell |
 |Elro DB200, KANGTAI, unitec | wireless bell |
 |m-e VTX and BASIC | wireless bell |
@@ -50,12 +51,16 @@ Supported Devices / Protocols
 |TS-K108W11 | Doorbell |
 |WS-7035, WS-7053, WS7054 | Temperature sensor 433MHz |
 |WS-2000, WS-7000 | Series of various sensors |
+|NC-3911, NC-3912 | Refrigerator thermometer |
+|Tedsen SKX1xx, SKX2xx, SKX4xx, SKX6xx | Remote control |
+|GEIGER GF0x01, GF0x02, GF0x03 | Remote control (compatible to Tedsen) |
+|Techmar Garden Lights | Remote control |
 
 How to install
 ======
 The Perl modules can be loaded directly into your FHEM installation:
 
-```update all https://raw.githubusercontent.com/RFD-FHEM/RFFHEM/master/controls_signalduino.txt```
+```update all https://raw.githubusercontent.com/RFD-FHEM/RFFHEM/dev-r34/controls_signalduino.txt```
 
 Prepare your Arduino nano. Look at http://www.fhemwiki.de/wiki/Datei:Fhemduino_schematic.png
 for hardware setup.

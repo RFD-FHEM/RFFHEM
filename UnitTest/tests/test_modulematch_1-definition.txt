@@ -1,6 +1,6 @@
 defmod test_modulematch_1 UnitTest dummyDuino (
  { 
-	my %ProtocolListTest =  SIGNALduino_LoadProtocolHash("$attr{global}{modpath}/FHEM/lib/test_loadprotohash-ok.hash");
+	my %ProtocolListTest =  SIGNALduino_LoadProtocolHash("$attr{global}{modpath}/FHEM/lib/test_loadprotohash-ok.pm");
 	is($ProtocolListTest{error},undef,"load test protocol hash ");
 
 	
@@ -9,11 +9,11 @@ defmod test_modulematch_1 UnitTest dummyDuino (
 		is($ProtocolListTest{$id}{id},$id,"id $id exists");
 	}
 	my $local_ProtocolListSIGNALduino = SIGNALduino_getProtocolList();
-	foreach (keys %$local_ProtocolListSIGNALduino)
+	foreach (keys %{$local_ProtocolListSIGNALduino})
     {
         delete $local_ProtocolListSIGNALduino->{$_};
     }
-	%{$local_ProtocolListSIGNALduino} = ( %ProtocolListTest);
+    %$local_ProtocolListSIGNALduino = %ProtocolListTest;
 
 	
  

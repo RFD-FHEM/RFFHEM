@@ -17,14 +17,16 @@ before_install:
  - wget -qO - http://debian.fhem.de/archive.key | sudo apt-key add -
  - echo "deb http://debian.fhem.de/nightly/ /" | sudo tee -a /etc/apt/sources.list
 install:
- - cpanm File::Find File::Basename Mock::Sub Test::More Test::Device::SerialPort Devel::Cover Devel::Cover::Report::Coveralls JSON --notest 
+ - cpanm File::Find File::Basename Mock::Sub Test::More Test::Device::SerialPort Devel::Cover Devel::Cover::Report::Coveralls JSON Net::SSLeay --notest 
  - sudo apt-get update -qq
  - sudo apt-get install fhem -y
  - sudo chown travis -R /opt/fhem
 script:
- - make test
+ - make test -j2
  - ./build_controls_list.sh 
  - git commit -m "Travis automatic update controls file. Build (${TRAVIS_BUILD_NUMBER}) [skip ci]" ./controls_signalduino.txt || true
  - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ] && [[ $TRAVIS_JOB_NUMBER == *.1 ]]; then git push origin HEAD:$TRAVIS_BRANCH ; fi'
  - cp -R /opt/fhem/cover_db ./
- - git --no-pager diff --name-only $TRAVIS_COMMIT_RANGE | grep .pm | xargs -I@ echo -select @ | xargs cover -report coveralls
+ - git --no-pager diff --diff-filter=d --name-only $TRAVIS_COMMIT_RANGE | grep .pm | xargs -I@ echo -select @ | xargs cover -report coveralls
+after_failure:
+ - UnitTest/src/report_failure.sh

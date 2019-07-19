@@ -1,4 +1,6 @@
-(
+package lib::SD_ProtocolData;
+{ 
+	our %protocols = (
     "9999"    => 
         {
             name			=> 'Unittest MS Protocol',		
@@ -7,4 +9,7 @@
         },
 		
  
-);
+	);
+	sub getProtocolList	{	return \%protocols;	}
+};
+
