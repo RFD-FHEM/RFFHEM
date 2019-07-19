@@ -1,4 +1,4 @@
-# $Id: 00_SIGNALduino.pm 10488 2019-07-10 12:00:00Z v3.4.0 $
+# $Id: 00_SIGNALduino.pm 19857 2019-07-19 18:00:16Z Sidey $
 #
 # v34.0 (stable release 3.4)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incoming messages
@@ -4521,7 +4521,7 @@ sub SIGNALduino_githubParseHttpResponse($$$)
 
 =pod
 =item summary    supports the same low-cost receiver for digital signals
-=item summary_DE Unterst&uumltzt den gleichnamigen Low-Cost Empf&aumlnger f&uuml;r digitale Signale
+=item summary_DE Unterstuetzt den gleichnamigen Low-Cost Empfaenger fuer digitale Signale
 =begin html
 
 <a name="SIGNALduino"></a>
@@ -5127,11 +5127,11 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
 			<li>P<protocol id>#0xhexdata#R<anzahl der wiederholungen>#C<optional taktrate>    (#C is optional) 
 			<br>Beispiel 0xhexdata: <code>set sduino sendMsg P29#0xF7E#R4</code>
 			<br>Wird eine sende Kommando fuer die Hexfolge F7E anhand der protocol id 29 erzeugen. Die Nachricht soll 4x gesendet werden.
-			<br>SR;R=4;P0=-8360;P1=220;P2=-440;P3=-220;P4=440;D=01212121213421212121212134;</ul><br>
+			<br>SR;R=4;P0=-8360;P1=220;P2=-440;P3=-220;P4=440;D=01212121213421212121212134;</li></ul><br>
 		<ul><li>P<protocol id>#0xhexdata#R<anzahl der wiederholungen>#C<optional taktrate>#F<optional Frequenz>    (#C #F is optional) 
 			<br>Beispiel 0xhexdata: <code>set sduino sendMsg P36#0xF7#R6#Fxxxxxxxxxx</code> (xxxxxxxxxx = Registerwert des CC1101)
 			<br>Wird eine sende Kommando fuer die Hexfolge F7 anhand der protocol id 36 erzeugen. Die Nachricht soll 6x gesendet werden mit der angegebenen Frequenz.
-			<br>SR;R=6;P0=-8360;P1=220;P2=-440;P3=-220;P4=440;D=012323232324232323;F= (Registerwert des CC1101);
+			<br>SR;R=6;P0=-8360;P1=220;P2=-440;P3=-220;P4=440;D=012323232324232323;F= (Registerwert des CC1101);</li>
 		</ul>
 		</p>
 	</li>
