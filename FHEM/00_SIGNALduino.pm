@@ -1,6 +1,6 @@
-# $Id: 00_SIGNALduino.pm 10488 2019-05-11 12:00:00Z v3.4.0-dev $
+# $Id: 00_SIGNALduino.pm 10488 2019-07-10 12:00:00Z v3.4.0 $
 #
-# v3.4.0 (Development release 3.4)
+# v3.4.0 (Development release 3.4.x)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incoming messages
 # see http://www.fhemwiki.de/wiki/SIGNALDuino
 # It was modified also to provide support for raw message handling which can be send from the SIGNALduino
@@ -30,7 +30,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.4.0_dev_08.06",
+	SDUINO_VERSION            => "v3.4.1_dev_19.07",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -167,7 +167,7 @@ my %matchListSIGNALduino = (
 			"4:OREGON"						=> "^(3[8-9A-F]|[4-6][0-9A-F]|7[0-8]).*",
 			"7:Hideki"						=> "^P12#75[A-F0-9]+",
 			"9:CUL_FHTTK"					=> "^T[A-F0-9]{8}",
-			"10:SD_WS07"					=> "^P7#[A-Fa-f0-9]{6}F[A-Fa-f0-9]{2}(#R[A-F0-9][A-F0-9]){0,1}\$",
+			"10:SD_WS07"					=> "^P7#[A-Fa-f0-9]{6}[AFaf][A-Fa-f0-9]{2,3}",
 			"11:SD_WS09"					=> "^P9#F[A-Fa-f0-9]+",
 			"12:SD_WS"						=> '^W\d+x{0,1}#.*',
 			"13:RFXX10REC"				=> '^(20|29)[A-Fa-f0-9]+',
@@ -256,6 +256,7 @@ SIGNALduino_Initialize($)
 
   
   %ProtocolListSIGNALduino = SIGNALduino_LoadProtocolHash("$attr{global}{modpath}/FHEM/lib/SD_ProtocolData.pm");
+
   if (exists($ProtocolListSIGNALduino{error})  ) {
   	Log3 "SIGNALduino", 1, "Error loading Protocol Hash. Module is in inoperable mode error message:($ProtocolListSIGNALduino{error})";
   	delete($ProtocolListSIGNALduino{error});
@@ -2118,7 +2119,7 @@ SIGNALduino_Parse_MS($$$$%)
 				#SIGNALduino_Log3 $name, 5, "demodulating $sigStr";
 				#Debug $patternLookupHash{substr($rawData,$i,$signal_width)}; ## Get $signal_width number of chars from raw data string
 				if (exists $patternLookupHash{$sigStr}) { ## Add the bits to our bit array
-					push(@bit_msg,$patternLookupHash{$sigStr});
+					push(@bit_msg,$patternLookupHash{$sigStr}) if ($patternLookupHash{$sigStr} ne '');
 				} elsif (exists($ProtocolListSIGNALduino{$id}{reconstructBit})) {
 					if (length($sigStr) == $signal_width) {			# ist $sigStr zu lang?
 						chop($sigStr);
@@ -2651,7 +2652,8 @@ SIGNALduino_Parse($$$$@)
 		return undef;
 		#Todo  compare Sync/Clock fact and length of D= if equal, then it's the same protocol!
 	}
-
+	return $dispatched;
+	
 
 }
 
@@ -3446,6 +3448,7 @@ sub SIGNALduino_postDemo_WS7035($@) {
 	my ($name, @bit_msg) = @_;
 	my $msg = join("",@bit_msg);
 	my $parity = 0;					# Parity even
+	my $sum = 0;						# checksum
 
 	SIGNALduino_Log3 $name, 4, "$name: WS7035 $msg";
 	if (substr($msg,0,8) ne "10100000") {		# check ident
@@ -3459,9 +3462,17 @@ sub SIGNALduino_postDemo_WS7035($@) {
 			SIGNALduino_Log3 $name, 3, "$name: WS7035 ERROR - Parity not even";
 			return 0, undef;
 		} else {
-			SIGNALduino_Log3 $name, 4, "$name: WS7035 " . substr($msg,0,4) ." ". substr($msg,4,4) ." ". substr($msg,8,4) ." ". substr($msg,12,4) ." ". substr($msg,16,4) ." ". substr($msg,20,4) ." ". substr($msg,24,4) ." ". substr($msg,28,4) ." ". substr($msg,32,4) ." ". substr($msg,36,4) ." ". substr($msg,40);
-			substr($msg, 27, 4, '');			# delete nibble 8
-			return (1,split("",$msg));
+			for(my $i = 0; $i < 39; $i += 4) {			# Sum over nibble 0 - 9
+				$sum += oct("0b".substr($msg,$i,4));
+			}
+			if (($sum &= 0x0F) != oct("0b".substr($msg,40,4))) {
+				SIGNALduino_Log3 $name, 3, "$name: WS7035 ERROR - Checksum";
+				return 0, undef;
+			} else {
+				SIGNALduino_Log3 $name, 4, "$name: WS7035 " . substr($msg,0,4) ." ". substr($msg,4,4) ." ". substr($msg,8,4) ." ". substr($msg,12,4) ." ". substr($msg,16,4) ." ". substr($msg,20,4) ." ". substr($msg,24,4) ." ". substr($msg,28,4) ." ". substr($msg,32,4) ." ". substr($msg,36,4) ." ". substr($msg,40);
+				substr($msg, 27, 4, '');			# delete nibble 8
+				return (1,split("",$msg));
+			}
 		}
 	}
 }

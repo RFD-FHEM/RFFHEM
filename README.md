@@ -1,4 +1,4 @@
-SIGNALduino - FHEM Modules development Version 3.4.0
+SIGNALduino - FHEM Modules development Version 3.4.1
 ======
 
 [![Coverage Status](https://coveralls.io/repos/github/RFD-FHEM/RFFHEM/badge.svg?branch=dev-r34)](https://coveralls.io/github/RFD-FHEM/RFFHEM?branch=dev-r34) [![Build Status](https://travis-ci.org/RFD-FHEM/RFFHEM.svg?branch=dev-r34)](https://travis-ci.org/RFD-FHEM/RFFHEM)
@@ -37,7 +37,7 @@ Supported Devices / Protocols
 |Somfy RTS | Shutters from Somfy|
 |Opus XT300 | Soil moisture sensor |
 |Oregon NR868 | Motion sensor |
-|Auriol IAN 60107, 114324, 275901, 283582 (Lidl) | Weatherstation |
+|Auriol IAN 60107, 114324, 275901, 283582, 297514 (Lidl) | Weatherstation |
 |FreeTec PE-6946 | wireless bell |
 |Elro DB200, KANGTAI, unitec | wireless bell |
 |m-e VTX and BASIC | wireless bell |

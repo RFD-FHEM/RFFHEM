@@ -1,3 +1,22 @@
+22.07.2019
+ 14_SD_Keeloq.pm: added new model RP_S1_HS_RF11 (Rademacher)
+08.07.2019
+ 14_SD_UT.pm: Manax and mumbi device (RC_10) added send commands
+02.07.2019
+ 00_SIGNALduino.pm: add checksum for WS7035
+ SD_ProtocolData.pm: add reconstructBit for WS7035
+01.07.2019
+ 14_SD_UT.pm: rename model Manax to RC_10, added commandref !! OLD model Manax please delete | Manax and mumbi Devices autocreates to RC_10 !!
+29.06.2019
+ 14_SD_UT.pm: fixed (no Manax device created), added mumbi commandref
+22.06.2019
+ 14_SD_WS07.pm: new weather station Auriol AFW 2 A1, IAN: 297514
+16.06.2019
+ 00_SIGNALDuino.pm: Support MS signals with multiple syncs as 
+                    like Firmware 3.3.1-experimental
+14.06.2019
+ SD_ProtocolData.pm: ID 84 changed, added new device TV-4848
+ 14_SD_WS.pm: changed ID 84 for new sensor TECVANCE TV-4848
 07.06.2019
  00_SIGNALduino.pm: added check method for no break and fix PEARL WARNING
 01.06.2019
@@ -43,6 +62,11 @@
  00_SIGNALduino.pm revised doc sendMSG
 12.03.2019
  00_SIGNALduino.pm fix DeviceOverview
+10.03.2019
+ 14_SD_WS07.pm: fix bug autocreate define
+                remove rssi
+                remove slider for offsets
+                remove reading battery
 09.03.2019
  14_SD_WS07.pm:  loglevel 4 for values out of range, hint added to commandref
 06.03.2019
@@ -67,6 +91,8 @@
                           if there is enough data available
  14_SD_Keeloq.pm: new module for Keeloq devices
  90_SIGNALduino_un.pm remove Roto output´s --> new module created
+22.02.2019
+ 00_SIGNALduino: bugfix: Load protocolHash from web if it is missing on fs 
 21.02.2019
  14_SD_UT.pm: new model KL_RF01 -> ESTO Lighting GmbH | revised doc Refsta Topdraft
 18.02.2019

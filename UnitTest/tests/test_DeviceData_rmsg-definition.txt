@@ -1,0 +1,83 @@
+defmod test_DeviceData_rmsg UnitTest dummyDuino ( 
+ {  
+ 
+  	my $mock = Mock::Sub->new; 
+	use JSON; 
+  	use List::Util qw[min max];
+
+  
+  	my $jsonStr = GetFileFromURL("https://raw.githubusercontent.com/RFD-FHEM/SIGNALduino_TOOL/dev_JSON_v1/FHEM/lib/SD_Device_ProtocolList.json",4,"",1,4);
+	my $testDataArray; 
+	$testDataArray = eval { decode_json($jsonStr) };
+	
+	if($@){
+		diag("open json file SD_Device_ProtocolList was not possible $?"); 
+		diag explain $jsonStr;
+	}
+	
+	my $testSet;
+	my $pID;
+
+	my $tData;
+	my $tID;
+
+	my $id_matched=undef;
+	my $dmsg_matched=undef;
+	my $SD_Dispatch_calledCounter=undef;
+	
+	my $SD_Dispatch = $mock->mock("SIGNALduno_Dispatch"); 
+	sub VerifyDispatch { 
+		#Log3 "Testdev", 5, "rmsg=".$_[1]." DMSG=".$_[2];
+		if (defined($testSet->{id}) && !$id_matched && $_[4] eq $testSet->{id}) 
+		{
+		 	$id_matched=1;
+		} 
+				
+		if (defined($tData->{dmsg}) && !$dmsg_matched && $_[2] eq $tData->{dmsg}) 
+		{
+		 	$dmsg_matched=1;
+		}
+		$SD_Dispatch_calledCounter++;	
+		undef;
+	} 
+	
+	my $noTestRun=1;
+	use lib::SD_Protocols;
+	#my $SD_Protos = lib::SD_Protocols::new("$attr{global}{modpath}/FHEM/lib/SD_ProtocolData.pm"); 
+    while ( ($pID, $testSet) = each  (@{$testDataArray}) )
+	{
+		#next if ($testSet->{name} ne "NC-3911-675" );
+		next if (!lib::SD_Protocols::exists($testSet->{id}));
+		next if (lib::SD_Protocols::checkProperty($testSet->{id},'developId',undef));
+		while ( ($tID, $tData) = each (@{$testSet->{data}}) ) 
+		{
+			next if (!defined($tData->{rmsg}) || !defined($tData->{dmsg}) || !defined($tData->{internals}) );
+			
+	        subtest "[$pID]: $testSet->{name}: [$tID] " => sub {
+	            $SD_Dispatch->reset();
+				$SD_Dispatch->side_effect(\&VerifyDispatch);
+       			#SIGNALduino_Log3 $target, 5,  Dumper($tData);  
+				$id_matched=0;
+				$dmsg_matched=0;
+				$SD_Dispatch_calledCounter=0;
+	            SIGNALduino_Parse($targetHash, $targetHash, $targetHash->{NAME}, "\002".$tData->{rmsg}."\003") if (defined($tData->{rmsg}));
+	            if ($SD_Dispatch->called() >0 )  {
+					$noTestRun=0;
+					my $expected_repeat=min(4,$tData->{repeat}+1);
+					 
+					TODO: {
+					    local $TODO = "Checking for repeats is not finishes, because number of repeats is not always number of dispatches";
+				        is($SD_Dispatch_calledCounter, $expected_repeat, "check number of dispatch attempts") if (defined($tData->{repeat}));
+					};
+					
+		            ok($id_matched,"SIGNALduno_Dispatch check id ") || note explain (($SD_Dispatch->called_with())[4] , " vs ", $testSet->{id});
+		            ok($dmsg_matched,"SIGNALduno_Dispatch check dmsg ");
+		      		            
+				} else { diag "SIGNALduno_Dispatch was not called, this must be an error"; }
+            };
+	
+        }
+    };
+	is($noTestRun,0,"Verify if a test was performed ");
+ } 
+);

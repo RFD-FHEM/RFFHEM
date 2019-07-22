@@ -66,7 +66,7 @@ package lib::SD_ProtocolData;
 	use strict;
 	use warnings;
 	
-	our $VERSION = '1.04';
+	our $VERSION = '1.06';
 	our %protocols = (
 		"0"	=>	## various weather sensors (500 | 9100)
 						# ABS700 | Id:79 T: 3.3 Bat:low                MS;P1=-7949;P2=492;P3=-1978;P4=-3970;D=21232423232424242423232323232324242423232323232424;CP=2;SP=1;R=245;O;
@@ -221,6 +221,9 @@ package lib::SD_ProtocolData;
 						# ELRO AB440R -> on | v1               MS;P1=-991;P2=953;P3=-356;P4=303;P5=-10033;D=45412341234141414141234123412341234141412341414123;CP=4;SP=5;R=93;m1;A;A;
 						## (real CP=300 | repeatpause=9400)
 						# Kangtai Model Nr.: 6899 -> on | v1   MS;P0=-328;P1=263;P2=-954;P3=888;P5=-9430;D=15123012121230123012121230123012301212123012121230;CP=1;SP=5;R=35;m2;0;0;
+						# door/window switch from CHN (PT2262 compatible) from amazon & ebay | itswitch_CHN model
+						# open                                 MS;P1=-478;P2=1360;P3=468;P4=-1366;P5=-14045;D=35212134212134343421212134213434343434343421342134;CP=3;SP=5;R=30;O;m2;4;
+						# close                                MS;P1=-474;P2=1373;P3=455;P4=-1367;P5=-14044;D=35212134212134343421212134213434343434343421212134;CP=3;SP=5;R=37;O;m2;
 			{
 				name						=> 'chip xx2262',
 				comment					=> 'remote for ELRO|Kangtai|Intertek|REWE|WOFI',
@@ -325,9 +328,12 @@ package lib::SD_ProtocolData;
 			},
 		"7"	=>	## weather sensors like EAS800z
 						# Ch:1 T: 19.8 H: 11 Bat:low   MS;P1=-3882;P2=504;P3=-957;P4=-1949;D=21232424232323242423232323232323232424232323242423242424242323232324232424;CP=2;SP=1;R=249;m=2;
+						# https://forum.fhem.de/index.php/topic,101682.0.html (Auriol AFW 2 A1, IAN: 297514)
+						# Ch:1 T: 28.2 H: 44 Bat:ok    MS;P0=494;P1=-1949;P2=-967;P3=-3901;D=03010201010202020101020202020202010202020101020102010201020202010201010202;CP=0;SP=3;R=37;m0;
+						# Ch:1 T: 24.4 H: 56 Bat:ok    MS;P1=-1940;P2=495;P3=-957;P4=-3878;D=24212321212323232121232323232323232121212123212323212321232323212121232323;CP=2;SP=4;R=20;O;m1;
 			{
-				name						=> 'weather',
-				comment					=> 'EAS800z, FreeTec NC-7344, HAMA TS34A',
+				name						=> 'Weather',
+				comment					=> 'EAS800z, FreeTec NC-7344, HAMA TS34A, Auriol AFW 2 A1',
 				id							=> '7',
 				knownFreqs      => '433.92',
 				one							=> [1,-4],
@@ -337,7 +343,7 @@ package lib::SD_ProtocolData;
 				format					=> 'twostate',
 				preamble				=> 'P7#',				# prepend to converted message
 				clientmodule		=> 'SD_WS07',
-				modulematch			=> '^P7#.{6}F.{2}',
+				modulematch			=> '^P7#.{6}[AFaf].{2}',
 				length_min			=> '35',
 				length_max			=> '40',
 			},
@@ -1602,6 +1608,7 @@ package lib::SD_ProtocolData;
 		"66"	=>	## TX2 Protocol (Remote Temp Transmitter & Remote Thermo Model 7035)
 							# https://github.com/RFD-FHEM/RFFHEM/issues/160 @elektron-bbs
 							# Id:66 T: 23.2   MU;P0=13312;P1=-2785;P2=4985;P3=1124;P4=-6442;P5=3181;P6=-31980;D=0121345434545454545434545454543454545434343454543434545434545454545454343434545434343434545621213454345454545454345454545434545454343434545434345454345454545454543434345454343434345456212134543454545454543454545454345454543434345454343454543454545454545;CP=3;R=73;O;
+							# Id:49 T: 25.2   MU;P0=32001;P1=-2766;P2=4996;P3=1158;P4=-6416;P5=3203;P6=-31946;D=01213454345454545454543434545454345454343434543454345454345454545454543434345434543434345456212134543454545454545434345454543454543434345434543454543454545454545434343454345434343454562121345434545454545454343454545434545434343454345434545434545454545454;CP=3;R=72;O; 
 			{
 				name							=> 'WS7035',
 				comment						=> 'temperature sensor',
@@ -1611,6 +1618,7 @@ package lib::SD_ProtocolData;
 				zero							=> [27,-52],
 				start							=> [-21,42,-21],
 				clockabs					=> 122,
+				reconstructBit		=> '1',
 				format						=> 'pwm',				# not used now
 				preamble					=> 'TX',
 				clientmodule			=> 'CUL_TX',
@@ -2030,13 +2038,15 @@ package lib::SD_ProtocolData;
 							# Ch:1 T: 6.9 H: 66 Bat:ok    MU;P0=-21520;P1=235;P2=-855;P3=846;P4=620;P5=-236;P7=-614;D=012323232454545454545451717451717171745171717171717171717174517171745174517174517174545;CP=1;R=217;
 							## Sempre 92596/65395, Hofer/Aldi, WS97210-1, WS97230-1, WS97210-2, WS97230-2
 							# https://github.com/RFD-FHEM/RFFHEM/issues/223
-							# no decode!                  MU;P0=11916;P1=-852;P2=856;P3=610;P4=-240;P5=237;P6=-610;D=01212134563456563434565634565634343456565634565656565634345634565656563434563456343430;CP=5;R=254;
 							# Ch:3 T: 21.3 H: 77 Bat:ok   MU;P0=-30004;P1=815;P2=-910;P3=599;P4=-263;P5=234;P6=-621;D=0121212345634565634345656345656343456345656345656565656343456345634563456343434565656;CP=5;R=5;
+							## TECVANCE TV-4848 (Amazon) @HomeAutoUser
+							# Ch:1 T: 26.4 H: 49 (L39)    MU;P0=-218;P1=254;P2=-605;P4=616;P5=907;P6=-799;P7=-1536;D=012121212401212124012401212121240125656565612401240404040121212404012121240121212121212124012121212401212124012401212121247;CP=1;
+							# Ch:1 T: 26.6 H: 49 (L41)    MU;P0=239;P1=-617;P2=612;P3=-245;P4=862;P5=-842;D=01230145454545012301232323230101012323010101230123010101010123010101012301230123232301012301230145454545012301232323230101012323010101230123010101010123010101012301230123232301012301230145454545012301232323230101012323010101230123010101010123010101012301;CP=0;R=89;O;
 			{
-				name					=> 'IAN 283582',
-				comment				=> 'Weatherstation Auriol IAN 283582 / Sempre 92596/65395',
+				name					=> 'IAN 283582 / TV-4848',
+				comment				=> 'Weatherstation Auriol IAN 283582 / Sempre 92596/65395 / TECVANCE',
 				id						=> '84',
-				knownFreqs		=> '',
+				knownFreqs		=> '433.92',
 				one						=> [3,-1],
 				zero					=> [1,-3],
 				start					=> [4,-4,4,-4,4,-4],
@@ -2046,7 +2056,7 @@ package lib::SD_ProtocolData;
 				postamble			=> '',								# append to converted message
 				clientmodule	=> 'SD_WS',
 				length_min		=> '39',							# das letzte Bit fehlt meistens
-				length_max		=> '40',
+				length_max		=> '41',
 			},
 		"85"	=>	## Funk Wetterstation TFA 35.1140.01 mit Temperatur-/Feuchte- und Windsensor TFA 30.3222.02 09/2018 @Iron-R
 							# https://github.com/RFD-FHEM/RFFHEM/issues/266
@@ -2136,15 +2146,21 @@ package lib::SD_ProtocolData;
 				length_min		=> '72',					# 72
 				length_max		=> '85',					# 85
 			},
-		"88"	=>	## Roto Dachfensterrolladen | Aurel Fernbedienung "TX-nM-HCS" (HCS301 Chip) | three buttons -> up, stop, down
+		"88"	=>	## Roto Dachfensterrolladen | Aurel Fernbedienung "TX-nM-HCS" (HCS301 chip) | three buttons -> up, stop, down
 							# https://forum.fhem.de/index.php/topic,91244.0.html @bruen985
 							# P88#AC3895D790EAFEF2C | button=0100   MS;P1=361;P2=-435;P4=-4018;P5=-829;P6=759;P7=-16210;D=141562156215156262626215151562626215626215621562151515621562151515156262156262626215151562156215621515151515151562151515156262156215171212121212121212121212;CP=1;SP=4;R=66;O;m0;
 							# P88#9451E57890EAFEF24 | button=0100   MS;P0=-16052;P1=363;P2=-437;P3=-4001;P4=-829;P5=755;D=131452521452145252521452145252521414141452521452145214141414525252145252145252525214141452145214521414141414141452141414145252145252101212121212121212121212;CP=1;SP=3;R=51;O;m1;
-							# Waeco_MA650_TX | too buttons
+							## remote control Waeco MA650_TX (HCS300 chip) | two buttons
+							# P88#4A823F65482822040 | button=blue MS;P0=344;P3=-429;P4=-3926;P5=719;P6=-823;P7=-15343;D=045306535306530653065353535353065353530606060606065306065353065306530653530653535353530653065353535353065353530653535353535306535353570303030303030303030303;CP=0;SP=4;R=38;O;m2;0;0;
+							## remote control RADEMACHER RP-S1-HS-RF11 (HCS301 chip) fuer Garagentorantrieb RolloPort S1 with two buttons
+							# https://github.com/RFD-FHEM/RFFHEM/issues/612 @ D3ltorohd 20.07.2019
+							# Firmware: Signalduino V 3.3.2.1-rc8 SIGNALduino cc1101 - compiled at Jan 10 2019 20:13:56
+							# P88#7EFDFFDDF9C284E4C | button=0010 MS;P1=735;P2=-375;P3=377;P4=-752;P6=-3748;D=3612343434343434123434343434341234343434343434343434341234343412343434343434121234343412121212341234121212123412123434341212341212343;CP=3;SP=6;R=42;e;m1;
+							# P88#C2C85435F9C284E18 | button=1000 MS;P1=385;P2=-375;P3=-3756;P4=-745;P5=766;P6=-15000;D=131414525252521452141452521452525252145214521452525252141452145214141414141452521414145252525214521452525252145252141414525252521414561212121212121212121212;CP=1;SP=3;R=54;O;s=36;m0;
 							# KeeLoq is a registered trademark of Microchip Technology Inc.
 			{
-				name					=> 'Roto shutter | other',
-				comment				=> 'remote control Aurel TX-nM-HCS | Waeco_MA650_TX',
+				name					=> 'HCS300/HCS301',
+				comment				=> 'remote controls Aurel TX-nM-HCS, Rademacher RP-S1-HS-RF11, Waeco MA650_TX',
 				id						=> '88',
 				knownFreqs		=> '433.92',
 				one						=> [1,-2],        # PWM bit pulse width typ. 1.2 mS
@@ -2152,12 +2168,11 @@ package lib::SD_ProtocolData;
 				preSync				=> [1,-1, 1,-1, 1,-1, 1,-1, 1,-1, 1,-1, 1,-1, 1,-1, 1,-1, 1,-1, 1,-1,],	# 11 pulses preambel, 1 sync, 66 data, pause ... repeat
 				sync					=> [1,-10],				# Header duration typ. 4 mS
 				pause         => [-39],         # Guard Time typ. 15.6 mS
-				clockabs			=> 400,						# Basic pulse element typ. 0.4 mS (TABLE 8-4)
+				clockabs			=> 400,						# Basic pulse element typ. 0.4 mS (Timings from table CODE WORD TRANSMISSION TIMING REQUIREMENTS in PDF)
 				reconstructBit	=> '1',
 				format				=> 'twostate',
-				preamble			=> 'P88#',				# prepend to converted message
+				preamble			=> 'P88#',
 				clientmodule			=> 'SD_Keeloq',
-				#modulematch	=> '',
 				length_min		=> '65',
 				length_max		=> '78',
 			},
@@ -2186,15 +2201,15 @@ package lib::SD_ProtocolData;
 				length_min   => '40',
 				length_max   => '40',
 			},
-		"90"	=>	## mumbi m-FS300 / manax MX-RCS250 (CP 258-298)
-							# https://forum.fhem.de/index.php/topic,94327.15.html @my-engel
+		"90"	=>	## mumbi AFS300-s / manax MX-RCS250 (CP 258-298)
+							# https://forum.fhem.de/index.php/topic,94327.15.html @my-engel @peterboeckmann
 							# A	AN    MS;P0=-9964;P1=273;P4=-866;P5=792;P6=-343;D=10145614141414565656561414561456561414141456565656561456141414145614;CP=1;SP=0;R=35;O;m2;
 							# A	AUS   MS;P0=300;P1=-330;P2=-10160;P3=804;P7=-840;D=02073107070707313131310707310731310707070731313107310731070707070707;CP=0;SP=2;R=23;O;m1;
 							# B	AN    MS;P1=260;P2=-873;P3=788;P4=-351;P6=-10157;D=16123412121212343434341212341234341212121234341234341234121212341212;CP=1;SP=6;R=21;O;m2;
 							# B	AUS   MS;P1=268;P3=793;P4=-337;P6=-871;P7=-10159;D=17163416161616343434341616341634341616161634341616341634161616343416;CP=1;SP=7;R=24;O;m2;
 			{
 				name         => 'mumbi | MANAX',
-				comment      => 'remote control mumbi FS300, MANAX MX-RCS250 (only receive)',
+				comment      => 'remote control mumbi RC-10, MANAX MX-RCS250 (only receive)',
 				id           => '90',
 				knownFreqs   => '433.92',
 				one          => [3,-1],
