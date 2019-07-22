@@ -2146,15 +2146,21 @@ package lib::SD_ProtocolData;
 				length_min		=> '72',					# 72
 				length_max		=> '85',					# 85
 			},
-		"88"	=>	## Roto Dachfensterrolladen | Aurel Fernbedienung "TX-nM-HCS" (HCS301 Chip) | three buttons -> up, stop, down
+		"88"	=>	## Roto Dachfensterrolladen | Aurel Fernbedienung "TX-nM-HCS" (HCS301 chip) | three buttons -> up, stop, down
 							# https://forum.fhem.de/index.php/topic,91244.0.html @bruen985
 							# P88#AC3895D790EAFEF2C | button=0100   MS;P1=361;P2=-435;P4=-4018;P5=-829;P6=759;P7=-16210;D=141562156215156262626215151562626215626215621562151515621562151515156262156262626215151562156215621515151515151562151515156262156215171212121212121212121212;CP=1;SP=4;R=66;O;m0;
 							# P88#9451E57890EAFEF24 | button=0100   MS;P0=-16052;P1=363;P2=-437;P3=-4001;P4=-829;P5=755;D=131452521452145252521452145252521414141452521452145214141414525252145252145252525214141452145214521414141414141452141414145252145252101212121212121212121212;CP=1;SP=3;R=51;O;m1;
-							# Waeco_MA650_TX | too buttons
+							## remote control Waeco MA650_TX (HCS300 chip) | two buttons
+							# P88#4A823F65482822040 | button=blue MS;P0=344;P3=-429;P4=-3926;P5=719;P6=-823;P7=-15343;D=045306535306530653065353535353065353530606060606065306065353065306530653530653535353530653065353535353065353530653535353535306535353570303030303030303030303;CP=0;SP=4;R=38;O;m2;0;0;
+							## remote control RADEMACHER RP-S1-HS-RF11 (HCS301 chip) fuer Garagentorantrieb RolloPort S1 with two buttons
+							# https://github.com/RFD-FHEM/RFFHEM/issues/612 @ D3ltorohd 20.07.2019
+							# Firmware: Signalduino V 3.3.2.1-rc8 SIGNALduino cc1101 - compiled at Jan 10 2019 20:13:56
+							# P88#7EFDFFDDF9C284E4C | button=0010 MS;P1=735;P2=-375;P3=377;P4=-752;P6=-3748;D=3612343434343434123434343434341234343434343434343434341234343412343434343434121234343412121212341234121212123412123434341212341212343;CP=3;SP=6;R=42;e;m1;
+							# P88#C2C85435F9C284E18 | button=1000 MS;P1=385;P2=-375;P3=-3756;P4=-745;P5=766;P6=-15000;D=131414525252521452141452521452525252145214521452525252141452145214141414141452521414145252525214521452525252145252141414525252521414561212121212121212121212;CP=1;SP=3;R=54;O;s=36;m0;
 							# KeeLoq is a registered trademark of Microchip Technology Inc.
 			{
-				name					=> 'Roto shutter | other',
-				comment				=> 'remote control Aurel TX-nM-HCS | Waeco_MA650_TX',
+				name					=> 'HCS300/HCS301',
+				comment				=> 'remote controls Aurel TX-nM-HCS, Rademacher RP-S1-HS-RF11, Waeco MA650_TX',
 				id						=> '88',
 				knownFreqs		=> '433.92',
 				one						=> [1,-2],        # PWM bit pulse width typ. 1.2 mS
@@ -2162,12 +2168,11 @@ package lib::SD_ProtocolData;
 				preSync				=> [1,-1, 1,-1, 1,-1, 1,-1, 1,-1, 1,-1, 1,-1, 1,-1, 1,-1, 1,-1, 1,-1,],	# 11 pulses preambel, 1 sync, 66 data, pause ... repeat
 				sync					=> [1,-10],				# Header duration typ. 4 mS
 				pause         => [-39],         # Guard Time typ. 15.6 mS
-				clockabs			=> 400,						# Basic pulse element typ. 0.4 mS (TABLE 8-4)
+				clockabs			=> 400,						# Basic pulse element typ. 0.4 mS (Timings from table CODE WORD TRANSMISSION TIMING REQUIREMENTS in PDF)
 				reconstructBit	=> '1',
 				format				=> 'twostate',
-				preamble			=> 'P88#',				# prepend to converted message
+				preamble			=> 'P88#',
 				clientmodule			=> 'SD_Keeloq',
-				#modulematch	=> '',
 				length_min		=> '65',
 				length_max		=> '78',
 			},
