@@ -54,6 +54,14 @@ my %models = (
 									Typ				=> "remote"
 								},
 
+	"RP_S1_HS_RF11" => {	Button => {	"one"			=>	"1000",
+																		"two"			=>	"0010",
+																		"one+two"	=>	"1010"
+																	},
+												Protocol 	=> "P88",
+												Typ				=> "remote"
+											},
+
 	"Roto" => {	Button => {	"up"		=>	"0100",
 													"down"	=>	"1001",
 													"stop"	=>	"0001"
@@ -350,13 +358,8 @@ sub Set($$$@) {
 					$ret.=" $_:$ChannelFixed";
 				}
 			}
-		### Typ Roto ###
-		} elsif ($model eq "Roto") {
-			foreach (keys %{$models{$model}{Button}}) {
-				$ret.=" $_:noArg";
-			}
-		### Typ Waeco_MA650_TX ###
-		} elsif ($model eq "Waeco_MA650_TX") {
+		### Typ RP_S1_HS_RF11 | Roto | Waeco_MA650_TX ###
+		} elsif ($model eq "RP_S1_HS_RF11" || $model eq "Roto" || $model eq "Waeco_MA650_TX") {
 			foreach (keys %{$models{$model}{Button}}) {
 				$ret.=" $_:noArg";
 			}
@@ -387,8 +390,8 @@ sub Set($$$@) {
 				}
 			}
 		}
-	### Typ Roto ###
-	} elsif ($model eq "Roto" || $model eq "Waeco_MA650_TX") {
+	### Typ RP_S1_HS_RF11 | Roto | Waeco_MA650_TX ###
+	} elsif ($model eq "RP_S1_HS_RF11" || $model eq "Roto" || $model eq "Waeco_MA650_TX") {
 		return "ERROR: no set value specified!" if(int(@a) != 1);
 	}
 
@@ -654,7 +657,7 @@ sub Parse($$) {
 
 	################################################################################################
 
-	## Roto or Waeco_MA650_TX ##
+	## RP_S1_HS_RF11 | Roto | Waeco_MA650_TX ##
 	## D13E68A890EAFEF20 ##
 	## 11010001001111100110100010101000100100001110101011111110111100100000 ##
 	#
@@ -723,7 +726,7 @@ sub Parse($$) {
 	my $channel;
 	my $channel_bin;
 
-	### Roto only ###
+	### RP_S1_HS_RF11 | Roto | Waeco_MA650_TX only ###
 	my $bit0to15;
 	my $bit16to27;
 	my $bit28to31;
@@ -785,8 +788,8 @@ sub Parse($$) {
 		foreach my $keys (keys %{$models{$model}{Channel}}) {																							# search channel bits --> channels
 			$channel_bin = $models{$model}{Channel}{$keys} if ($keys eq $channel);
 		}
-	### Roto ###
-	} elsif ($model eq "Roto" || $model eq "Waeco_MA650_TX") {
+	### RP_S1_HS_RF11 | Roto | Waeco_MA650_TX ###
+	} elsif ($model eq "RP_S1_HS_RF11" || $model eq "Roto" || $model eq "Waeco_MA650_TX") {
 		$VLOW = substr ($bitData , 64 , 1);
 		$RPT = substr ($bitData , 65 , 1);
 
@@ -820,7 +823,7 @@ sub Parse($$) {
 		my $Hopcode;
 		if ($model eq "JaroLift") {
 			$Hopcode = $bit0to7.$bit8to15.$counter;		
-		} elsif ($model eq "Roto") {
+		} elsif ($model ne "JaroLift" && $model ne "unknown") {
 			$Hopcode = $bit0to15.$bit16to27.$bit28to31;		
 		}
 
@@ -903,7 +906,7 @@ sub Parse($$) {
 			}
 		}
 
-		if ($model eq "Roto") {
+		if ($model ne "JaroLift" && $model ne "unknown") {
 			my $Decoded_split;
 			for my $i(0..31){
 				$Decoded_split.= substr($Decoded,$i,1);
@@ -920,9 +923,9 @@ sub Parse($$) {
 			Log3 $name, 5, "$ioname: SD_Keeloq_Parse                                             sync counter |discriminat.| bt";
 			Log3 $name, 5, "$ioname: SD_Keeloq_Parse - Decoded (bin split)                  = $Decoded_split\n";
 			Log3 $name, 5, "######## DEBUG only with LSB & MSB Keys ########";
-			Log3 $name, 5, "$ioname: SD_Keeloq_Parse - sync counter (bits)	          = $bit0to15_decr";
-			Log3 $name, 5, "$ioname: SD_Keeloq_Parse - sync counter (dez) 	          = $counter_decr";
-			Log3 $name, 5, "$ioname: SD_Keeloq_Parse - discrimination                       = $bit16to27";
+			Log3 $name, 5, "$ioname: SD_Keeloq_Parse - sync counter (bits)	                = $bit0to15_decr";
+			Log3 $name, 5, "$ioname: SD_Keeloq_Parse - sync counter (dez) 	                = $counter_decr";
+			Log3 $name, 5, "$ioname: SD_Keeloq_Parse - discrimination                       = $bit16to27_decr";
 			Log3 $name, 5, "$ioname: SD_Keeloq_Parse - button (in encoded part)             = $bit28to31_decr = $buttonbits ???";
 
 			$state = "receive $button"
@@ -943,14 +946,14 @@ sub Parse($$) {
 	Log3 $name, 5, "$ioname: SD_Keeloq_Parse - decrypts channel (from serial)       = $channel" if (defined $channel);					# JaroLift
 	Log3 $name, 5, "$ioname: SD_Keeloq_Parse - decrypts channelpart2 (group 8-15)   = $bit64to71" if (defined $bit64to71);			# JaroLift
 	Log3 $name, 5, "$ioname: SD_Keeloq_Parse - decrypts channel_control             = $group_value" if (defined $group_value);	# JaroLift
-	Log3 $name, 5, "$ioname: SD_Keeloq_Parse - decrypts Voltage LOW indicator       = $VLOW" if (defined $VLOW);								# Roto | Waeco_MA650_TX
-	Log3 $name, 5, "$ioname: SD_Keeloq_Parse - decrypts Repeat indicator            = $RPT" if (defined $RPT);									# Roto | Waeco_MA650_TX
+	Log3 $name, 5, "$ioname: SD_Keeloq_Parse - decrypts Voltage LOW indicator       = $VLOW" if (defined $VLOW);								# RP_S1_HS_RF11 | Roto | Waeco_MA650_TX
+	Log3 $name, 5, "$ioname: SD_Keeloq_Parse - decrypts Repeat indicator            = $RPT" if (defined $RPT);									# RP_S1_HS_RF11 | Roto | Waeco_MA650_TX
 	Log3 $name, 5, "$ioname: SD_Keeloq_Parse - user_modus                           = $modus";
 	Log3 $name, 5, "$ioname: SD_Keeloq_Parse - user_info                            = $info";
 	Log3 $name, 5, "######## DEBUG END ########\n";
 	
-	$VLOW = $VLOW eq "0" ? "ok" : "low" if (defined $VLOW);		# only chip HCS301 - Roto | Waeco_MA650_TX
-	$RPT = $RPT eq "0" ? "no" : "yes" if (defined $RPT);			# only chip HCS301 - Roto | Waeco_MA650_TX
+	$VLOW = $VLOW eq "0" ? "ok" : "low" if (defined $VLOW);		# only chip HCS301 - RP_S1_HS_RF11 | Roto | Waeco_MA650_TX
+	$RPT = $RPT eq "0" ? "no" : "yes" if (defined $RPT);			# only chip HCS301 - RP_S1_HS_RF11 | Roto | Waeco_MA650_TX
 
 	readingsBeginUpdate($hash);
 	readingsBulkUpdate($hash, "button", $button);
@@ -959,8 +962,8 @@ sub Parse($$) {
 	readingsBulkUpdate($hash, "channel_control", $group_value) if (defined $group_value);		# JaroLift
 	readingsBulkUpdate($hash, "counter_receive", $counter_decr) if (defined $counter_decr);
 	readingsBulkUpdate($hash, "last_digits", $bit8to15) if (defined $bit8to15);							# JaroLift
-	readingsBulkUpdate($hash, "repeat_message", $RPT) if (defined $RPT);										# Roto | Waeco_MA650_TX
-	readingsBulkUpdate($hash, "batteryState", $VLOW) if (defined $VLOW);										# Roto | Waeco_MA650_TX
+	readingsBulkUpdate($hash, "repeat_message", $RPT) if (defined $RPT);										# RP_S1_HS_RF11 | Roto | Waeco_MA650_TX
+	readingsBulkUpdate($hash, "batteryState", $VLOW) if (defined $VLOW);										# RP_S1_HS_RF11 | Roto | Waeco_MA650_TX
 	readingsBulkUpdate($hash, "serial_receive", $serialWithoutCh, 0);
 	readingsBulkUpdate($hash, "state", $state);
 	readingsBulkUpdate($hash, "user_modus", $modus);
@@ -1311,11 +1314,12 @@ sub SD_Keeloq_attr2htmlButtons($$$$$) {
 	
 	<u>The following devices are supported:</u><br>
 	<ul> - JaroLift radio wall transmitter (example: TDRC 16W / TDRCT 04W)&nbsp;&nbsp;&nbsp;<small>(model: JaroLift | protocol 87)</small><br></ul>
+	<ul> - RADEMACHER remote with two button&nbsp;&nbsp;&nbsp;<small>(model: RP_S1_HS_RF11 | protocol 88)&nbsp;&nbsp;[HCS301 chip]</small><br></ul>
 	<ul> - Roto remote with three button&nbsp;&nbsp;&nbsp;<small>(model: Roto | protocol 88)&nbsp;&nbsp;[HCS301 chip]</small><br></ul>
 	<ul> - Waeco_MA650_TX remote with two button&nbsp;&nbsp;&nbsp;<small>(model: Waeco_MA650_TX | protocol 88)&nbsp;&nbsp;[HCS301 chip]</small><br></ul>
 	<br>
 	<b><i>Each model has a different length of the serial number! Please enter the serial number in hexadecimal.<br>
-	For the models Roto & Waeco_MA650_TX the length is 7 and for the model JaroLift 6.</i></b>
+	For the models RP_S1_HS_RF11 / Roto & Waeco_MA650_TX the length is 7 and for the model JaroLift 6.</i></b>
 	<br><br><br>
 
 	<b>Define</b><br>
@@ -1428,7 +1432,7 @@ sub SD_Keeloq_attr2htmlButtons($$$$$) {
 		</li>
 	</ul>
 	<br><br>
-	<b>Generated shared readings | JaroLift & Roto & Waeco_MA650_TX</b><br><br>
+	<b>Generated shared readings | JaroLift RP_S1_HS_RF11 / Roto & Waeco_MA650_TX</b><br><br>
 	<ul>
 	<li>button<br>
 	Pressed button on the remote control or in the FHEM device</li>
@@ -1471,11 +1475,12 @@ sub SD_Keeloq_attr2htmlButtons($$$$$) {
 	
 	<u>Es werden bisher folgende Ger&auml;te unterst&uuml;tzt:</u><br>
 	<ul> - JaroLift Funkwandsender (Bsp: TDRC 16W / TDRCT 04W)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: JaroLift | Protokoll 87)</small><br></ul>
+	<ul> - RADEMACHER Fernbedienung mit 2 Tasten&nbsp;&nbsp;&nbsp;<small>(Modulmodel: RP_S1_HS_RF11 | Protokoll 88)&nbsp;&nbsp;[HCS301 chip]</small><br></ul>
 	<ul> - Roto Fernbedienung mit 3 Tasten&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Roto | Protokoll 88)&nbsp;&nbsp;[HCS301 chip]</small><br></ul>
 	<ul> - Waeco_MA650_TX Fernbedienung mit 2 Tasten&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Waeco_MA650_TX | Protokoll 88)&nbsp;&nbsp;[HCS301 chip]</small><br></ul>
 	<br>
 	<b><i>Jedes Model besitzt eine andere L&auml;nge der Seriennummer! Bitte geben Sie die Serialnummer hexadezimal ein.<br>
-	Bei den Modellen Roto & Waeco_MA650_TX ist die L&auml;nge jeweils 7 und bei dem Model JaroLift 6.</i></b>
+	Bei den Modellen RP_S1_HS_RF11 / Roto & Waeco_MA650_TX ist die L&auml;nge jeweils 7 und bei dem Model JaroLift 6.</i></b>
 	<br><br><br>
 
 	<b>Define</b><br>
@@ -1588,7 +1593,7 @@ sub SD_Keeloq_attr2htmlButtons($$$$$) {
 		</li>
 	</ul>
 	<br><br>
-	<b>Generierte gemeinsamgenutzte Readings | JaroLift & Roto & Waeco_MA650_TX</b><br><br>
+	<b>Generierte gemeinsamgenutzte Readings | JaroLift / RP_S1_HS_RF11 / Roto & Waeco_MA650_TX</b><br><br>
 	<ul>
 	<li>button<br>
 	Gedr&uuml;ckter Knopf an der Fernbedienung oder im FHEM Device</li>
