@@ -54,7 +54,7 @@
 ##### notice #### or #### info ############################################################################################################
 # !!! Between the keys and values ​​no tabs not equal to a width of 8 or please use spaces !!!
 # !!! Please use first unused id for new protocols !!!
-# ID´s are currently unused: 20 | 54 | 68 | 78
+# ID´s are currently unused: 20 | 53 | 54 | 78
 # ID´s need to be revised (preamble u): 5|6|19|21|22|23|24|25|26|27|28|31|36|40|42|52|56|59|63
 ###########################################################################################################################################
 # Please provide at least three messages for each new MU/MC/MS protocol and a URL of issue in GitHub or discussion in FHEM Forum
@@ -66,7 +66,7 @@ package lib::SD_ProtocolData;
 	use strict;
 	use warnings;
 	
-	our $VERSION = '1.06';
+	our $VERSION = '1.07';
 	our %protocols = (
 		"0"	=>	## various weather sensors (500 | 9100)
 						# ABS700 | Id:79 T: 3.3 Bat:low                MS;P1=-7949;P2=492;P3=-1978;P4=-3970;D=21232423232424242423232323232324242423232323232424;CP=2;SP=1;R=245;O;
@@ -1651,9 +1651,29 @@ package lib::SD_ProtocolData;
 				length_max				=> '34',
 				postDemodulation	=> \&main::SIGNALduino_postDemo_WS7053,
 			},
-
-			# "68"	=>	can use
-
+		"68"	=>	## Medion OR28V RF Vista Remote Control (Made in china by X10)
+							# sendet zwei verschiedene Codes pro Taste
+							# Taste ok    739E0  MS;P1=-1746;P2=513;P3=-571;P4=-4612;P5=2801;D=24512321212123232121212323212121212323232323;CP=2;SP=4;R=58;#;#;
+							# Taste ok    F31E0  MS;P1=-1712;P2=518;P3=-544;P4=-4586;P5=2807;D=24512121212123232121232323212121212323232323;CP=2;SP=4;R=58;m2;#;#;
+							# Taste Vol+  E00B0  MS;P1=-1620;P2=580;P3=-549;P4=-4561;P5=2812;D=24512121212323232323232323232123212123232323;CP=2;SP=4;R=69;O;m2;#;#;
+							# Taste Vol+  608B0  MS;P1=-1645;P2=574;P3=-535;P4=-4556;P5=2811;D=24512321212323232323212323232123212123232323;CP=2;SP=4;R=57;m2;#;#;
+			{
+				name         => 'OR28V',
+				comment      => 'Medion OR28V RF Vista Remote Control',
+				id           => '68',
+				knownFreqs   => '433.92',
+				one          => [1,-3],
+				zero         => [1,-1],
+				sync         => [1,-8,5,-3],
+				clockabs     => 550,
+				format       => 'twostate',
+				developId    => 'y',
+				preamble     => 'u68#',
+				#clientmodule => 'SD_UT',
+				#modulematch  => '^P68#.{5}',
+				length_min   => '20',
+				length_max   => '20',
+			},
 		"69"	=>	## Hoermann HSM2, HSM4, HS1-868-BS (868 MHz)
 							# https://github.com/RFD-FHEM/RFFHEM/issues/149
 							# HSM4 | button_1   MU;P0=-508;P1=1029;P2=503;P3=-1023;P4=12388;D=01010232323232310104010101010101010102323231010232310231023232323231023101023101010231010101010232323232310104010101010101010102323231010232310231023232323231023101023101010231010101010232323232310104010101010101010102323231010232310231023232323231023101;CP=2;R=37;O;
