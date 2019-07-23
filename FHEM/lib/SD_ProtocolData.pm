@@ -374,13 +374,13 @@ package lib::SD_ProtocolData;
 				zero					=> [3,-2],
 				one					=> [1,-2],
 				clockabs				=> 480,					# -1 = auto undef=noclock
-				#reconstructBit				=> '1',
 				format					=> 'pwm',				# tristate can't be migrated from bin into hex!
 				preamble				=> 'P9#',				# prepend to converted message
 				clientmodule			=> 'SD_WS09',
 				#modulematch			=> '^u9#.....',
 				length_min			=> '60',
 				length_max			=> '120',
+				reconstructBit  => '1',
 			},
 		"10"	=>	## Oregon Scientific 2
 			{
