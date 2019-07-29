@@ -1,3 +1,6 @@
+29.07.2019
+ 00_SIGNALduino.pm: add id68 to matchlist
+ 14_SD_UT.pm: fixed Parse button all model RC_10 & added model OR28V (receive)
 23.07.2019
  SD_ProtocolData.pm: add definition for Medion OR28V RF Vista Remote Control
 22.07.2019
