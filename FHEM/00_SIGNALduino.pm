@@ -4708,9 +4708,7 @@ sub SIGNALduino_githubParseHttpResponse($$$)
 		<br>SR;R=6;P0=-8360;P1=220;P2=-440;P3=-220;P4=440;D=012323232324232323;F= (register from CC1101);</ul>
 		</p></li></ul>
 		</li>
-	</ul>
-	
-	
+		
 	<a name="SIGNALduinoget"></a>
 	<b>Get</b>
 	<ul>
