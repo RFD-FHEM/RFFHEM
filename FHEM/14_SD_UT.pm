@@ -256,7 +256,7 @@
 #}
 ###############################################################################################################################################################################
 # - Medion OR28V RF Vista Remote Control (Made in china by X10) [Protocol 68]
-#{  !! sendet zwei verschiedene Codes pro Taste !!
+#{  !! sendet zwei verschiedene Codes pro Taste (ausser power) !!
 #		Taste ok    MS;P1=-1746;P2=513;P3=-571;P4=-4612;P5=2801;D=24512321212123232121212323212121212323232323;CP=2;SP=4;R=58;#;#;
 #		Taste ok    MS;P1=-1712;P2=518;P3=-544;P4=-4586;P5=2807;D=24512121212123232121232323212121212323232323;CP=2;SP=4;R=58;m2;#;#;
 #		Taste Vol+  MS;P1=-1620;P2=580;P3=-549;P4=-4561;P5=2812;D=24512121212323232323232323232123212123232323;CP=2;SP=4;R=69;O;m2;#;#;
@@ -352,7 +352,7 @@ my %models = (
 								"011101"  => "arrow_left",
 								"011110"  => "ok",
 								"011111"  => "arrow_right",
-								"100000"  => "left",
+								"100000"  => "back",
 								"100001"  => "video_back",
 								"100010"  => "arrow_down",
 								"100011"  => "video_forward",
@@ -602,13 +602,23 @@ sub SD_UT_Define($$) {
 	### checks unknown ###
 	return "wrong define: <model> $a[2] need no HEX-Value to define!" if($a[2] eq "unknown" && $a[3] && length($a[3]) >= 1);
 
-	### checks OR28V & Westinghouse_Delancey RH787T & WestinghouseButtons_five ###
-	if ($a[2] eq "OR28V" || $a[2] eq "RH787T" || $a[2] eq "Buttons_five") {
+	### checks Westinghouse_Delancey RH787T & WestinghouseButtons_five ###
+	if ($a[2] eq "RH787T" || $a[2] eq "Buttons_five") {
 		if (length($a[3]) > 1) {
 			return "wrong HEX-Value! $a[2] have one HEX-Value";
 		}
 		if (not $a[3] =~ /^[0-9a-fA-F]{1}/s) {
 			return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value are not (0-9 | a-f | A-F)";
+		}
+	}
+
+	### checks Medion OR28V ###
+	if ($a[2] eq "OR28V") {
+		if (length($a[3]) > 2) {
+			return "wrong Value! $a[2] must be an number between 1 - 16";
+		}
+		if ($a[3] < 1 || $a[3] > 16) {
+			return "wrong address! ($a[3]) $a[2] must be an number between 1 - 16";
 		}
 	}
 
@@ -802,7 +812,8 @@ sub SD_UT_Set($$$@) {
 		$msgEnd = "00#R" . $repeats;	#	Last two bits alternately by transmitter 00, 01 or 02. Receiver also reacts to only 00.
 	############ Medion OR28V ############
 	} elsif ($model eq "OR28V" && $cmd ne "?") {
-		return "ERROR: to send, currently only receive. Please for understanding.";
+		$msg = $models{$model}{Protocol} . "#";
+		$msgEnd .= "#R" . $repeats;	# R1 wird vom SIGNALduino nicht als MS erkannt!
 	}
 
 	Log3 $name, 4, "$ioname: SD_UT_Set attr_model=$model msg=$msg msgEnd=$msgEnd" if(defined $msgEnd);
@@ -825,6 +836,7 @@ sub SD_UT_Set($$$@) {
 				}
 			}
 
+			############ KL_RF01 ############
 			if ($model eq "KL_RF01") {
 				my $save2 = $save;
 				$save2 =~ tr/01/10/;									# invert message (nibble6 invert = nibble4)
@@ -833,6 +845,33 @@ sub SD_UT_Set($$$@) {
 				my $invert = $save;
 				$invert =~ tr/01/10/;									# invert byte 4 (byte5 = inverted byte 4)
 				$msg .= $save.$invert.$msgEnd;
+			############ Medion OR28V ############
+			} elsif ($model eq "OR28V") {
+				my @definition = split(" ", $hash->{DEF});						# split adress from def
+				my $adr = $definition[1] - 1;													# argument 1 - adress
+				my $checksum = ($adr * 16 + oct("0b$save") + 85) & 0x7f;
+				my $laststate = ReadingsVal($name, "state", "fehlt");
+				my $lastbit0 = ReadingsVal($name, "bit0", "fehlt");
+				Log3 $name, 5, "$ioname: SD_UT_Set $name ReadingsVal lastbit0=$lastbit0";
+				my $bit0 = "0";													# bit 0 first press a new button
+				if ($cmd eq $laststate && $cmd ne "power") {
+					$bit0 = $lastbit0 eq "0" ? "1" : "0";	# toggle bit 0 when press the same button again
+				}
+				$bit0 = "1" if ($cmd eq "power");				# bit 0 always 1 by button power
+				Log3 $name, 5, "$ioname: SD_UT_Set $name ReadingsVal laststate=$laststate cmd=$cmd bit0=$bit0";
+				$msg .= $bit0;													# bit 0
+				$msg .= sprintf ("%07b",$checksum);			# bit 1-7
+				if (oct("0b$save") > 42) {	# button
+					$msg .= $bit0;												# bit 8 = bit 0
+				} else {
+					$msg .= $bit0 eq "0" ? "1" : "0";			# bit 8 = bit 0 inverted
+				}
+				$msg .= "0";														# bit 9 always zero
+				$msg .= $save;													# bit 10-15
+				$msg .= sprintf ("%04b",$adr);					# bit 16-19
+				$msg .= $msgEnd;
+				Log3 $name, 5, "$ioname: SD_UT_Set $name msg=$msg checksum=$checksum";
+				readingsSingleUpdate($hash, "bit0" , $bit0, 0);
 			} else {
 				$msg .= $save.$msgEnd;
 			}
@@ -982,13 +1021,13 @@ sub SD_UT_Parse($$) {
 		}
 		### OR28V [P68] ###
 		if ($protocol == 68) {
-			my $check = oct( "0b".substr($bitData,9,7) ) + oct( "0b".substr($bitData,16,4)."0000" ) + 85;
+			my $check = (oct( "0b".substr($bitData,9,7) ) + oct( "0b".substr($bitData,16,4)."0000" ) + 85) & 0x7f;
 			if ($check != oct( "0b".substr($bitData,1,7))) {
 				Log3 $iohash, 3, "$ioname: SD_UT_Parse device OR28V - checksum - ERROR (rawData:$rawData)";
 				return "";
 			} else {
-				Log3 $iohash, 4, "$ioname: SD_UT device OR28V check length & Protocol OK";
-				$deviceCode = substr($rawData,4,1);
+				Log3 $iohash, 4, "$ioname: SD_UT_Parse device OR28V check length & Protocol OK";
+				$deviceCode = oct(substr($rawData,4,1)) + 1;
 				$devicedef = "OR28V " . $deviceCode;
 				$def = $modules{SD_UT}{defptr}{$devicedef};
 				$model = "OR28V";
