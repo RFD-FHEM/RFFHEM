@@ -54,6 +54,15 @@ my %models = (
 									Typ				=> "remote"
 								},
 
+	"PR3_4207_002" => {	Button => {	"1" =>	"0010",
+																	"2" =>	"0100",
+																	"3"	=>	"1000",
+																	"4"	=>	"0001"
+																	},
+												Protocol 	=> "P88",
+												Typ				=> "remote"
+											},	
+	
 	"RP_S1_HS_RF11" => {	Button => {	"one"			=>	"1000",
 																		"two"			=>	"0010",
 																		"one+two"	=>	"1010"
@@ -1316,6 +1325,7 @@ sub SD_Keeloq_attr2htmlButtons($$$$$) {
 	<ul> - JaroLift radio wall transmitter (example: TDRC 16W / TDRCT 04W)&nbsp;&nbsp;&nbsp;<small>(model: JaroLift | protocol 87)</small><br></ul>
 	<ul> - RADEMACHER remote with two button&nbsp;&nbsp;&nbsp;<small>(model: RP_S1_HS_RF11 | protocol 88)&nbsp;&nbsp;[HCS301 chip]</small><br></ul>
 	<ul> - Roto remote with three button&nbsp;&nbsp;&nbsp;<small>(model: Roto | protocol 88)&nbsp;&nbsp;[HCS301 chip]</small><br></ul>
+	<ul> - SCS Sentinel remote with four button&nbsp;&nbsp;&nbsp;<small>(model: PR3_4207_002 | protocol 88)&nbsp;&nbsp;[HCS301 chip]</small><br></ul>
 	<ul> - Waeco_MA650_TX remote with two button&nbsp;&nbsp;&nbsp;<small>(model: Waeco_MA650_TX | protocol 88)&nbsp;&nbsp;[HCS301 chip]</small><br></ul>
 	<br>
 	<b><i>Each model has a different length of the serial number! Please enter the serial number in hexadecimal.<br>
@@ -1432,7 +1442,7 @@ sub SD_Keeloq_attr2htmlButtons($$$$$) {
 		</li>
 	</ul>
 	<br><br>
-	<b>Generated shared readings | JaroLift RP_S1_HS_RF11 / Roto & Waeco_MA650_TX</b><br><br>
+	<b>Generated shared readings | JaroLift / PR3_4207_002 / RP_S1_HS_RF11 / Roto & Waeco_MA650_TX</b><br><br>
 	<ul>
 	<li>button<br>
 	Pressed button on the remote control or in the FHEM device</li>
@@ -1477,6 +1487,7 @@ sub SD_Keeloq_attr2htmlButtons($$$$$) {
 	<ul> - JaroLift Funkwandsender (Bsp: TDRC 16W / TDRCT 04W)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: JaroLift | Protokoll 87)</small><br></ul>
 	<ul> - RADEMACHER Fernbedienung mit 2 Tasten&nbsp;&nbsp;&nbsp;<small>(Modulmodel: RP_S1_HS_RF11 | Protokoll 88)&nbsp;&nbsp;[HCS301 chip]</small><br></ul>
 	<ul> - Roto Fernbedienung mit 3 Tasten&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Roto | Protokoll 88)&nbsp;&nbsp;[HCS301 chip]</small><br></ul>
+	<ul> - SCS Sentinel Fernbedienung mit 4 Tasten&nbsp;&nbsp;&nbsp;<small>(Modulmodel: PR3_4207_002 | Protokoll 88)&nbsp;&nbsp;[HCS301 chip]</small><br></ul>
 	<ul> - Waeco_MA650_TX Fernbedienung mit 2 Tasten&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Waeco_MA650_TX | Protokoll 88)&nbsp;&nbsp;[HCS301 chip]</small><br></ul>
 	<br>
 	<b><i>Jedes Model besitzt eine andere L&auml;nge der Seriennummer! Bitte geben Sie die Serialnummer hexadezimal ein.<br>
@@ -1593,7 +1604,7 @@ sub SD_Keeloq_attr2htmlButtons($$$$$) {
 		</li>
 	</ul>
 	<br><br>
-	<b>Generierte gemeinsamgenutzte Readings | JaroLift / RP_S1_HS_RF11 / Roto & Waeco_MA650_TX</b><br><br>
+	<b>Generierte gemeinsamgenutzte Readings | JaroLift / PR3_4207_002 / RP_S1_HS_RF11 / Roto & Waeco_MA650_TX</b><br><br>
 	<ul>
 	<li>button<br>
 	Gedr&uuml;ckter Knopf an der Fernbedienung oder im FHEM Device</li>
