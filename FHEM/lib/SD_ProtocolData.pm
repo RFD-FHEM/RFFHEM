@@ -2229,7 +2229,7 @@ package lib::SD_ProtocolData;
 							# B	AUS   MS;P1=268;P3=793;P4=-337;P6=-871;P7=-10159;D=17163416161616343434341616341634341616161634341616341634161616343416;CP=1;SP=7;R=24;O;m2;
 			{
 				name         => 'mumbi | MANAX',
-				comment      => 'remote control mumbi RC-10, MANAX MX-RCS250 (only receive)',
+				comment      => 'remote control mumbi RC-10, MANAX MX-RCS250',
 				id           => '90',
 				knownFreqs   => '433.92',
 				one          => [3,-1],
