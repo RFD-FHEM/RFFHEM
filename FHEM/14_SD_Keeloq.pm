@@ -1,5 +1,5 @@
 ######################################################################################################################
-# $Id: 14_SD_Keeloq.pm 32 2019-02-23 12:00:00Z v3.4-dev_02.12. $
+# $Id: 14_SD_Keeloq.pm 32 2019-08-05 12:00:00Z v3.4-dev_02.12. $
 #
 # The file is part of the SIGNALduino project.
 # The purpose of this module is support for KeeLoq devices.
@@ -54,10 +54,10 @@ my %models = (
 									Typ				=> "remote"
 								},
 
-	"PR3_4207_002" => {	Button => {	"1" =>	"0010",
-																	"2" =>	"0100",
-																	"3"	=>	"1000",
-																	"4"	=>	"0001"
+	"PR3_4207_002" => {	Button => {	"one"   =>  "0010",
+																	"two"   =>  "0100",
+																	"three"	=>  "1000",
+																	"four"	=>  "0001"
 																	},
 												Protocol 	=> "P88",
 												Typ				=> "remote"
@@ -367,8 +367,8 @@ sub Set($$$@) {
 					$ret.=" $_:$ChannelFixed";
 				}
 			}
-		### Typ RP_S1_HS_RF11 | Roto | Waeco_MA650_TX ###
-		} elsif ($model eq "RP_S1_HS_RF11" || $model eq "Roto" || $model eq "Waeco_MA650_TX") {
+		### Typ PR3_4207_002 | RP_S1_HS_RF11 | Roto | Waeco_MA650_TX ###
+		} elsif ($model eq "PR3_4207_002" || $model eq "RP_S1_HS_RF11" || $model eq "Roto" || $model eq "Waeco_MA650_TX") {
 			foreach (keys %{$models{$model}{Button}}) {
 				$ret.=" $_:noArg";
 			}
@@ -399,8 +399,8 @@ sub Set($$$@) {
 				}
 			}
 		}
-	### Typ RP_S1_HS_RF11 | Roto | Waeco_MA650_TX ###
-	} elsif ($model eq "RP_S1_HS_RF11" || $model eq "Roto" || $model eq "Waeco_MA650_TX") {
+	### Typ PR3_4207_002 || RP_S1_HS_RF11 | Roto | Waeco_MA650_TX ###
+	} elsif ($model eq "PR3_4207_002" || $model eq "RP_S1_HS_RF11" || $model eq "Roto" || $model eq "Waeco_MA650_TX") {
 		return "ERROR: no set value specified!" if(int(@a) != 1);
 	}
 
@@ -666,7 +666,7 @@ sub Parse($$) {
 
 	################################################################################################
 
-	## RP_S1_HS_RF11 | Roto | Waeco_MA650_TX ##
+	## PR3_4207_002 | RP_S1_HS_RF11 | Roto | Waeco_MA650_TX ##
 	## D13E68A890EAFEF20 ##
 	## 11010001001111100110100010101000100100001110101011111110111100100000 ##
 	#
@@ -735,7 +735,7 @@ sub Parse($$) {
 	my $channel;
 	my $channel_bin;
 
-	### RP_S1_HS_RF11 | Roto | Waeco_MA650_TX only ###
+	### PR3_4207_002 | RP_S1_HS_RF11 | Roto | Waeco_MA650_TX only ###
 	my $bit0to15;
 	my $bit16to27;
 	my $bit28to31;
@@ -797,8 +797,8 @@ sub Parse($$) {
 		foreach my $keys (keys %{$models{$model}{Channel}}) {																							# search channel bits --> channels
 			$channel_bin = $models{$model}{Channel}{$keys} if ($keys eq $channel);
 		}
-	### RP_S1_HS_RF11 | Roto | Waeco_MA650_TX ###
-	} elsif ($model eq "RP_S1_HS_RF11" || $model eq "Roto" || $model eq "Waeco_MA650_TX") {
+	### PR3_4207_002 | RP_S1_HS_RF11 | Roto | Waeco_MA650_TX ###
+	} elsif ($model eq "PR3_4207_002" || $model eq "RP_S1_HS_RF11" || $model eq "Roto" || $model eq "Waeco_MA650_TX") {
 		$VLOW = substr ($bitData , 64 , 1);
 		$RPT = substr ($bitData , 65 , 1);
 
