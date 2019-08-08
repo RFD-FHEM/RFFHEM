@@ -104,6 +104,9 @@ sub SD_Keeloq_Initialize() {
   $hash->{AttrList}			= "IODev MasterMSB MasterLSB KeeLoq_NLF model:".join(",", sort keys %models)." stateFormat Channels:0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16 ShowShade:0,1 ShowIcons:0,1 ShowLearn:0,1 ".
 													"UI:aus,Einzeilig,Mehrzeilig ChannelFixed:1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16 ChannelNames Repeats:1,2,3,4,5,6,7,8,9 ".
 													"addGroups Serial_send LearnVersion:old,new ".$readingFnAttributes;
+	$hash->{FW_detailFn}	= "SD_Keeloq::summaryFn";
+	$hash->{FW_addDetailToSummary}	= 1;
+	$hash->{FW_deviceOverview}			= 1;
 }
 
 ###################################
