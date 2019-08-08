@@ -1121,13 +1121,12 @@ sub SD_UT_Parse($$) {
 			Log3 $iohash, 4, "$ioname: SD_UT device - RC_10 button: $button | state: $state";
 			
 			### if receive device _all, set A | B | C | D ###
-			my $device_all = "RC_10 ".$deviceCode."_all";
-			if ($devicedef =~ /^$device_all$/) {
-				foreach my $d (sort keys %defs) {
-					if (defined($defs{$d}) && defined($defs{$d}{NAME}) && $defs{$d}{NAME} =~ /^RC_10_$deviceCode.[ABCD]$/) {
-						readingsSingleUpdate($defs{$d}, "state" , $state , 1);
-						Log3 $iohash, 4, "$ioname: SD_UT device - ".$defs{$d}{NAME}." | state: $state";
-					}
+			my @list = devspec2array("DEF=RC_10 $deviceCode"."_.*");
+
+			foreach (@list) {
+				if ($_ !~ /_all/) {
+					readingsSingleUpdate($defs{$_}, "state" , $state , 1);
+					Log3 $iohash, 4, "$ioname: SD_UT device - ".$_." | state: $state";				
 				}
 			}
 		}
