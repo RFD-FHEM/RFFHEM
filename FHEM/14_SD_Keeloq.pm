@@ -1,5 +1,5 @@
 ######################################################################################################################
-# $Id: 14_SD_Keeloq.pm 32 2019-08-05 12:00:00Z v3.4-dev_02.12. $
+# $Id: 14_SD_Keeloq.pm 32 2019-08-08 12:00:00Z v3.4-dev_02.12. $
 #
 # The file is part of the SIGNALduino project.
 # The purpose of this module is support for KeeLoq devices.
@@ -9,10 +9,6 @@
 #
 # KeeLoq is a registered trademark of Microchip Technology Inc.
 #
-######################################################################################################################
-# !!! notes !!! | date: 20190505
-#		- last change: fix PERL WARNING line "my $def = $modules{SD_Keeloq}{defptr}{$devicedef};"
-#		-
 ######################################################################################################################
 
 package main;
@@ -108,7 +104,9 @@ sub SD_Keeloq_Initialize() {
   $hash->{AttrList}			= "IODev MasterMSB MasterLSB KeeLoq_NLF model:".join(",", sort keys %models)." stateFormat Channels:0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16 ShowShade:0,1 ShowIcons:0,1 ShowLearn:0,1 ".
 													"UI:aus,Einzeilig,Mehrzeilig ChannelFixed:1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16 ChannelNames Repeats:1,2,3,4,5,6,7,8,9 ".
 													"addGroups Serial_send LearnVersion:old,new ".$readingFnAttributes;
-  $hash->{FW_summaryFn}	= "SD_Keeloq::summaryFn";          # displays html instead of status icon in fhemweb room-view
+	$hash->{FW_detailFn}	= "SD_Keeloq::summaryFn";
+	$hash->{FW_addDetailToSummary}	= 1;
+	$hash->{FW_deviceOverview}			= 1;
 }
 
 ###################################
@@ -154,7 +152,9 @@ sub Define() {
   # Argument            				   0	     1       2        3
 	return "wrong syntax: define <name> SD_Keeloq <Serial> <optional IODEV>" if(int(@a) < 3 || int(@a) > 4);
 	return "ERROR: your <Serial> $a[2] is wrong! Please use only hexadecimal input." if (not $a[2] =~ /^[0-9a-fA-F]{6,7}/s);
-	return "ERROR: your <Serial> $a[2] is wrong! Please use only hexadecimal input with END 00." if (length $a[2] == 6 && not $a[2] =~ /^[0-9a-fA-F]{4}00/s);
+
+	# Users report serial numbers with 00 at the end | https://github.com/HomeAutoUser/Jaro/issues/6 | https://forum.fhem.de/index.php/topic,13596.msg962983.html#msg962983
+	# return "ERROR: your <Serial> $a[2] is wrong! Please use only hexadecimal input with END 00." if (length $a[2] == 6 && not $a[2] =~ /^[0-9a-fA-F]{4}00/s);
 
 	$hash->{STATE} = "Defined";
 	my $name = $hash->{NAME};
