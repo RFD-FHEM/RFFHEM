@@ -5129,7 +5129,6 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
 		</ul>
 	</li>
 	<br>
-	</ul>
 	
 	<a name="SIGNALduinoget"></a>
 	<b>Get</b>
