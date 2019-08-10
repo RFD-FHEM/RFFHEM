@@ -3945,7 +3945,7 @@ sub	SIGNALduino_Hideki()
 		return (-1,"message is to long") if (defined($ProtocolListSIGNALduino{$id}{length_max}) && $message_length > $ProtocolListSIGNALduino{$id}{length_max} );
 
 		
-		my $hidekihex;
+		my $hidekihex = "";
 		my $idx;
 		
 		for ($idx=$message_start; $idx<$message_end; $idx=$idx+9)
