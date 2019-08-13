@@ -1,6 +1,6 @@
 # $Id: 00_SIGNALduino.pm 10488 2019-07-10 12:00:00Z v3.4.0 $
 #
-# v3.4.0 (Development release 3.4.x)
+# v3.4.1 (Development release 3.4.x)
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incoming messages
 # see http://www.fhemwiki.de/wiki/SIGNALDuino
 # It was modified also to provide support for raw message handling which can be send from the SIGNALduino
@@ -30,7 +30,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.4.1_dev_29.07",
+	SDUINO_VERSION            => "v3.4.1_dev_11.08",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -3945,7 +3945,7 @@ sub	SIGNALduino_Hideki()
 		return (-1,"message is to long") if (defined($ProtocolListSIGNALduino{$id}{length_max}) && $message_length > $ProtocolListSIGNALduino{$id}{length_max} );
 
 		
-		my $hidekihex;
+		my $hidekihex = "";
 		my $idx;
 		
 		for ($idx=$message_start; $idx<$message_end; $idx=$idx+9)
@@ -4708,7 +4708,7 @@ sub SIGNALduino_githubParseHttpResponse($$$)
 		<br>SR;R=6;P0=-8360;P1=220;P2=-440;P3=-220;P4=440;D=012323232324232323;F= (register from CC1101);</ul>
 		</p></li></ul>
 		</li>
-		
+
 	<a name="SIGNALduinoget"></a>
 	<b>Get</b>
 	<ul>
@@ -5128,7 +5128,7 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
 		</ul>
 	</li>
 	<br>
-		
+
 	<a name="SIGNALduinoget"></a>
 	<b>Get</b>
 	<ul>
