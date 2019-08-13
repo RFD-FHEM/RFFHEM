@@ -174,7 +174,7 @@ my %matchListSIGNALduino = (
 			"14:Dooya"						=> '^P16#[A-Fa-f0-9]+',
 			"15:SOMFY"						=> '^Ys[0-9A-F]+',
 			"16:SD_WS_Maverick"		=> '^P47#[A-Fa-f0-9]+',
-			"17:SD_UT"						=> '^P(?:14|29|30|34|46|69|76|81|83|86|90|91|91.1|92|93|95)#.*',	# universal - more devices with different protocols
+			"17:SD_UT"						=> '^P(?:14|29|30|34|46|68|69|76|81|83|86|90|91|91.1|92|93|95)#.*',	# universal - more devices with different protocols
 			"18:FLAMINGO"					=> '^P13\.?1?#[A-Fa-f0-9]+',							# Flamingo Smoke
 			"19:CUL_WS"						=> '^K[A-Fa-f0-9]{5,}',
 			"20:Revolt"						=> '^r[A-Fa-f0-9]{22}',
@@ -4708,8 +4708,7 @@ sub SIGNALduino_githubParseHttpResponse($$$)
 		<br>SR;R=6;P0=-8360;P1=220;P2=-440;P3=-220;P4=440;D=012323232324232323;F= (register from CC1101);</ul>
 		</p></li></ul>
 		</li>
-	
-	
+
 	<a name="SIGNALduinoget"></a>
 	<b>Get</b>
 	<ul>
@@ -5129,7 +5128,7 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
 		</ul>
 	</li>
 	<br>
-	
+
 	<a name="SIGNALduinoget"></a>
 	<b>Get</b>
 	<ul>
@@ -5207,14 +5206,12 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
 	Dies bringt das Modul in eine sehr ausf&uuml;hrliche Debug-Ausgabe im Logfile. Somit lassen sich neue Signale finden und Signale &uuml;berpr&uuml;fen, ob die Demodulation korrekt funktioniert.
 	</li><br>
 	<a name="development"></a>
-	<li>development<br>
 		<li>development<br>
 		Das development Attribut ist nur in den Entwicklungsversionen des FHEM Modules aus Gr&uuml;den der Abw&auml;rtskompatibilit&auml;t vorhanden. Bei Setzen des Attributes auf "1" werden alle Protokolle aktiviert, welche mittels developID=y markiert sind. 
 		<br>
 		Wird das Attribut auf 1 gesetzt, so werden alle in Protokolle die mit dem developID Flag "y" markiert sind aktiviert. Die Flags (Spalte dev) k&ouml;nnen &uuml;ber das Webfrontend im Abschnitt "Information menu" mittels "Display protocollist" eingesehen werden.
 		</li>
 		<br>
-	</li><br>
 	<li><a href="#do_not_notify">do_not_notify</a></li><br>
 	<a name="doubleMsgCheck_IDs"></a>
 	<li>doubleMsgCheck_IDs<br>
