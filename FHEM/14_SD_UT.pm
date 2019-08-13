@@ -1116,19 +1116,15 @@ sub SD_UT_Parse($$) {
 					$state = "unknown";
 					$def = undef;
 				}
+
+				### if receive device _all, set A | B | C | D ###
+				readingsSingleUpdate("RC_10 " . $deviceCode ."_A", "state" , $state , 1) if (defined $defs{"RC_10 " . $deviceCode ."_A"});
+				readingsSingleUpdate("RC_10 " . $deviceCode ."_B", "state" , $state , 1) if (defined $defs{"RC_10 " . $deviceCode ."_B"});
+				readingsSingleUpdate("RC_10 " . $deviceCode ."_C", "state" , $state , 1) if (defined $defs{"RC_10 " . $deviceCode ."_C"});
+				readingsSingleUpdate("RC_10 " . $deviceCode ."_D", "state" , $state , 1) if (defined $defs{"RC_10 " . $deviceCode ."_D"});
 			}
 			Log3 $iohash, 4, "$ioname: SD_UT device - RC_10 devicedef: $devicedef";
 			Log3 $iohash, 4, "$ioname: SD_UT device - RC_10 button: $button | state: $state";
-			
-			### if receive device _all, set A | B | C | D ###
-			my @list = devspec2array("DEF=RC_10 $deviceCode"."_.*");
-
-			foreach (@list) {
-				if ($_ !~ /_all/) {
-					readingsSingleUpdate($defs{$_}, "state" , $state , 1);
-					Log3 $iohash, 4, "$ioname: SD_UT device - ".$_." | state: $state";				
-				}
-			}
 		}
 
 		### ESTO KL_RF01 [P93] ###
