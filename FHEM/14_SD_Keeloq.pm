@@ -1,5 +1,5 @@
 ######################################################################################################################
-# $Id: 14_SD_Keeloq.pm 32 2019-08-08 12:00:00Z v3.4-dev_02.12. $
+# $Id: 14_SD_Keeloq.pm 32 2019-08-20 12:00:00Z v3.4-dev_02.12. $
 #
 # The file is part of the SIGNALduino project.
 # The purpose of this module is support for KeeLoq devices.
@@ -125,6 +125,7 @@ BEGIN {
 		FW_ME
 		FW_makeImage
 		FW_subdir
+		FmtDateTime
 		IOWrite
 		InternalVal
 		Log3
