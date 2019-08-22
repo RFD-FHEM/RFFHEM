@@ -1118,10 +1118,18 @@ sub SD_UT_Parse($$) {
 				}
 
 				### if receive device _all, set A | B | C | D ###
-				readingsSingleUpdate($defs{"RC_10_" . $deviceCode ."_A"}, "state" , $state , 1) if (defined $defs{"RC_10_" . $deviceCode ."_A"});
-				readingsSingleUpdate($defs{"RC_10_" . $deviceCode ."_B"}, "state" , $state , 1) if (defined $defs{"RC_10_" . $deviceCode ."_B"});
-				readingsSingleUpdate($defs{"RC_10_" . $deviceCode ."_C"}, "state" , $state , 1) if (defined $defs{"RC_10_" . $deviceCode ."_C"});
-				readingsSingleUpdate($defs{"RC_10_" . $deviceCode ."_D"}, "state" , $state , 1) if (defined $defs{"RC_10_" . $deviceCode ."_D"});
+				### if receive device _all, set A | B | C | D ###
+				for ( "A" .. "D" ) {
+					local $devicedef = $modules{SD_UT}{defptr}{"RC_10 ".$deviceCode."_$_"};
+					readingsSingleUpdate($devicedef, "state" , $state , 1) if (defined $devicedef);
+					#DoTrigger($device, "state") if (defined $defs{$device}); # user request https://forum.fhem.de/index.php/topic,94327.msg968537.html#msg968537
+				}
+				
+				
+				#readingsSingleUpdate($defs{"RC_10_" . $deviceCode ."_A"}, "state" , $state , 1) if (defined $defs{"RC_10_" . $deviceCode ."_A"});
+				#readingsSingleUpdate($defs{"RC_10_" . $deviceCode ."_B"}, "state" , $state , 1) if (defined $defs{"RC_10_" . $deviceCode ."_B"});
+				#readingsSingleUpdate($defs{"RC_10_" . $deviceCode ."_C"}, "state" , $state , 1) if (defined $defs{"RC_10_" . $deviceCode ."_C"});
+				#readingsSingleUpdate($defs{"RC_10_" . $deviceCode ."_D"}, "state" , $state , 1) if (defined $defs{"RC_10_" . $deviceCode ."_D"});
 			}
 			Log3 $iohash, 4, "$ioname: SD_UT device - RC_10 devicedef: $devicedef";
 			Log3 $iohash, 4, "$ioname: SD_UT device - RC_10 button: $button | state: $state";
