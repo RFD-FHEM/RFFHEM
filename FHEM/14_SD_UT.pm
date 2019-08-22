@@ -1102,6 +1102,10 @@ sub SD_UT_Parse($$) {
 					last;
 				}
 			}
+			# -> Schleife ersetzen durch:
+			#$button = $models{RC_10}{buttons}{$button};
+			#$devicedef=	"RC_10 " . $button;
+			
 			$def = $modules{SD_UT}{defptr}{$devicedef};
 			
 			$state = substr($bitData,23,1);
@@ -1120,8 +1124,8 @@ sub SD_UT_Parse($$) {
 				### if receive device _all, set A | B | C | D ###
 				### if receive device _all, set A | B | C | D ###
 				for ( "A" .. "D" ) {
-					local $devicedef = $modules{SD_UT}{defptr}{"RC_10 ".$deviceCode."_$_"};
-					readingsSingleUpdate($devicedef, "state" , $state , 1) if (defined $devicedef);
+					my $defPtr = $modules{SD_UT}{defptr}{"RC_10 ".$deviceCode."_$_"};
+					readingsSingleUpdate($defPtr, "state" , $state , 1) if (defined $defPtr);
 					#DoTrigger($device, "state") if (defined $defs{$device}); # user request https://forum.fhem.de/index.php/topic,94327.msg968537.html#msg968537
 				}
 				
