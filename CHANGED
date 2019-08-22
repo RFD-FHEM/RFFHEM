@@ -1,3 +1,6 @@
+22.08.2019
+ 14_SD_UT.pm: RC_10 fixed update A B C D E buttons via event 
+              if all button is received Forum#94327
 20.08.2019
  14_SD_Keeloq.pm: fixed Undefined subroutine &SD_Keeloq::FmtDateTime
  14_SD_UT.pm: fixed Parse button all model RC_10 Forum#94327
