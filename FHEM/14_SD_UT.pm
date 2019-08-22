@@ -1364,7 +1364,6 @@ sub SD_UT_Parse($$) {
 		readingsBulkUpdate($hash, "x_n4" , $nibble4, 0);
 		readingsBulkUpdate($hash, "x_n5-8_on" , $nibble5.$nibble6to8, 0) if ($state eq "on");
 		readingsBulkUpdate($hash, "x_n5-8_off" , $nibble5.$nibble6to8, 0) if ($state eq "off");
-		readingsEndUpdate($hash, 1);
 
 		$deviceCode = substr($bitData,0,16);
 	} elsif ($model eq "KL_RF01" && $protocol == 93) {
