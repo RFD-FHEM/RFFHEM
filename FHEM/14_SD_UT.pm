@@ -1115,7 +1115,7 @@ sub SD_UT_Parse($$) {
 				for ( "A" .. "D" ) {
 					my $defPtr = $modules{SD_UT}{defptr}{"RC_10 ".$deviceCode."_$_"};
 					if (defined $defPtr) {
-						readingsSingleUpdate($defPtr, "state" , $state , 1) 
+						readingsSingleUpdate($defPtr, "state" , $state , 1);
 						DoTrigger($defPtr->{NAME}, undef, 0);
 						Log3 $iohash, 5, "$ioname: SD_UT device - RC_10 devicedef: $defPtr->{NAME}";
 						Log3 $iohash, 5, "$ioname: SD_UT device - RC_10 button: $_ | state: $state";
