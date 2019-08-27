@@ -3479,7 +3479,6 @@ sub SIGNALduino_postDemo_WS7035($@) {
 
 sub SIGNALduino_postDemo_WS2000($@) {
 	my ($name, @bit_msg) = @_;
-	my $debug = AttrVal($name,"debug",0);
 	my @new_bit_msg = "";
 	my $protolength = scalar @bit_msg;
 	my @datalenghtws = (35,50,35,50,70,40,40,85);
@@ -3489,7 +3488,6 @@ sub SIGNALduino_postDemo_WS2000($@) {
 	my $index = 0;
 	my $data = 0;
 	my $dataindex = 0;
-	my $error = 0;
 	my $check = 0;
 	my $sum = 5;
 	my $typ = 0;
@@ -3509,7 +3507,7 @@ sub SIGNALduino_postDemo_WS2000($@) {
 		last if $bit_msg[$datastart] eq "1";
 	}
 	if ($datastart == $protolength) {                                 # all bits are 0
-		SIGNALduino_Log3 $name, 3, "$name: WS2000 - ERROR message all bit are zeros";
+		SIGNALduino_Log3 $name, 4, "$name: WS2000 - ERROR message all bit are zeros";
 		return 0, undef;
 	}
 	$datalength = $protolength - $datastart;
@@ -3517,7 +3515,7 @@ sub SIGNALduino_postDemo_WS2000($@) {
 	SIGNALduino_Log3 $name, 5, "$name: WS2000 protolength: $protolength, datastart: $datastart, datalength $datalength";
 	$typ = oct( "0b".(join "", reverse @bit_msg[$datastart + 1.. $datastart + 4]));		# Sensortyp
 	if ($typ > 7) {
-		SIGNALduino_Log3 $name, 4, "$name: WS2000 Sensortyp $typ - ERROR typ to big";
+		SIGNALduino_Log3 $name, 4, "$name: WS2000 Sensortyp $typ - ERROR typ to big (0-7)";
 		return 0, undef;
 	}
 	if ($typ == 1 && ($datalength == 45 || $datalength == 46)) {$datalength1 += 5;}		# Typ 1 ohne Summe
@@ -3529,7 +3527,10 @@ sub SIGNALduino_postDemo_WS2000($@) {
 		return 0, undef;
 	} else {
 		do {
-			$error += !$bit_msg[$index + $datastart];			# jedes 5. Bit muss 1 sein
+			if ($bit_msg[$index + $datastart] != 1) {			# jedes 5. Bit muss 1 sein
+				SIGNALduino_Log3 $name, 4, "$name: WS2000 Sensortyp $typ - ERROR checking bit $index";
+				return (0, undef);
+			}
 			$dataindex = $index + $datastart + 1;				 
 			$data = oct( "0b".(join "", reverse @bit_msg[$dataindex .. $dataindex + 3]));
 			if ($index == 5) {$adr = ($data & 0x07)}			# Sensoradresse
@@ -3546,10 +3547,7 @@ sub SIGNALduino_postDemo_WS2000($@) {
 			$index += 5;
 		} until ($index >= $datalength -1 );
 	}
-	if ($error != 0) {
-		SIGNALduino_Log3 $name, 4, "$name: WS2000 Sensortyp $typ Adr $adr - ERROR examination bit";
-		return (0, undef);
-	} elsif ($check != 0) {
+	if ($check != 0) {
 		SIGNALduino_Log3 $name, 4, "$name: WS2000 Sensortyp $typ Adr $adr - ERROR check XOR";
 		return (0, undef);
 	} else {
@@ -3562,10 +3560,10 @@ sub SIGNALduino_postDemo_WS2000($@) {
 		}
 		SIGNALduino_Log3 $name, 4, "$name: WS2000 Sensortyp $typ Adr $adr - $sensors[$typ]";
 		$datastart += 1;																							# [x] - 14_CUL_WS
-		@new_bit_msg[4 .. 7] = reverse @bit_msg[$datastart .. $datastart+3];						# [2]  Sensortyp
-		@new_bit_msg[0 .. 3] = reverse @bit_msg[$datastart+5 .. $datastart+8];					# [1]  Sensoradresse
+		@new_bit_msg[4 .. 7] = reverse @bit_msg[$datastart .. $datastart+3];							# [2]  Sensortyp
+		@new_bit_msg[0 .. 3] = reverse @bit_msg[$datastart+5 .. $datastart+8];						# [1]  Sensoradresse
 		@new_bit_msg[12 .. 15] = reverse @bit_msg[$datastart+10 .. $datastart+13];				# [4]  T 0.1, R LSN, Wi 0.1, B   1, Py   1
-		@new_bit_msg[8 .. 11] = reverse @bit_msg[$datastart+15 .. $datastart+18];				# [3]  T   1, R MID, Wi   1, B  10, Py  10
+		@new_bit_msg[8 .. 11] = reverse @bit_msg[$datastart+15 .. $datastart+18];					# [3]  T   1, R MID, Wi   1, B  10, Py  10
 		if ($typ == 0 || $typ == 2) {		# Thermo (AS3), Rain (S2000R, WS7000-16)
 			@new_bit_msg[16 .. 19] = reverse @bit_msg[$datastart+20 .. $datastart+23];			# [5]  T  10, R MSN
 		} else {
