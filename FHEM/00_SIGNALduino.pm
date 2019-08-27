@@ -7,7 +7,13 @@
 # The purpos is to use it as addition to the SIGNALduino which runs on an arduno nano or arduino uno.
 # It routes Messages serval Modules which are already integrated in FHEM. But there are also modules which comes with it.
 # N. Butzek, S. Butzek, 2014-2015
-# S.Butzek,Ralf9 2016-2018
+# S.Butzek,Ralf9 2016-2019
+
+# regex    (\s)SIGNALduino_Log3\s(.*);$
+# replace  ($1)$hash->{logMethod}->\($2\);
+
+
+
 
 package main;
 my $missingModulSIGNALduino="";
@@ -343,6 +349,8 @@ SIGNALduino_Define($$)
   $hash->{Clients} = $clientsSIGNALduino;
   $hash->{MatchList} = \%matchListSIGNALduino;
   $hash->{DeviceName} = $dev;
+  #$hash->{logMethod} = \&::SIGNALduino_Log3;
+  $hash->{logMethod} = \&main::Log3;	
   
   my $ret=undef;
   
@@ -357,7 +365,7 @@ SIGNALduino_Define($$)
   
   $hash->{DMSG}="nothing";
   $hash->{LASTDMSG} = "nothing";
-	$hash->{LASTDMSGID} = "nothing";
+  $hash->{LASTDMSGID} = "nothing";
   $hash->{TIME}=time();
   $hash->{versionmodul} = SDUINO_VERSION;
   $hash->{versionProtocols} = lib::SD_Protocols::getProtocolVersion();
@@ -1928,7 +1936,7 @@ sub SIGNALduno_Dispatch($$$$$)
 	
 	if (!defined($dmsg))
 	{
-		SIGNALduino_Log3 $name, 5, "$name Dispatch: dmsg is undef. Skipping dispatch call";
+		$hash->{logMethod}->($name, 5, "$name Dispatch: dmsg is undef. Skipping dispatch call");
 		return;
 	}
 	
@@ -1936,14 +1944,14 @@ sub SIGNALduno_Dispatch($$$$$)
 	
 	my $DMSGgleich = 1;
 	if ($dmsg eq $hash->{LASTDMSG}) {
-		SIGNALduino_Log3 $name, SDUINO_DISPATCH_VERBOSE, "$name Dispatch: $dmsg, test gleich";
+		$hash->{logMethod}->($name, SDUINO_DISPATCH_VERBOSE, "$name Dispatch: $dmsg, test gleich");
 	} else {
 		if (defined($hash->{DoubleMsgIDs}{$id})) {
 			$DMSGgleich = 0;
-			SIGNALduino_Log3 $name, SDUINO_DISPATCH_VERBOSE, "$name Dispatch: $dmsg, test ungleich";
+			$hash->{logMethod}->($name, SDUINO_DISPATCH_VERBOSE, "$name Dispatch: $dmsg, test ungleich");
 		}
 		else {
-			SIGNALduino_Log3 $name, SDUINO_DISPATCH_VERBOSE, "$name Dispatch: $dmsg, test ungleich: disabled";
+			$hash->{logMethod}->($name, SDUINO_DISPATCH_VERBOSE, "$name Dispatch: $dmsg, test ungleich: disabled");
 		}
 		$hash->{LASTDMSG} = $dmsg;
 		$hash->{LASTDMSGID} = $id;
@@ -1980,11 +1988,11 @@ sub SIGNALduno_Dispatch($$$$$)
 			$rssi = "";
 		}
 		$dmsg = lc($dmsg) if ($id eq '74' or $id eq '74.1');		# 10_FS20.pm accepted only lower case hex
-		SIGNALduino_Log3 $name, SDUINO_DISPATCH_VERBOSE, "$name Dispatch: $dmsg, $rssi dispatch";
+		$hash->{logMethod}->($name, SDUINO_DISPATCH_VERBOSE, "$name Dispatch: $dmsg, $rssi dispatch");
 		Dispatch($hash, $dmsg, \%addvals);  ## Dispatch to other Modules 
 		
 	}	else {
-		SIGNALduino_Log3 $name, 4, "$name Dispatch: $dmsg, Dropped due to short time or equal msg";
+		$hash->{logMethod}->($name, 4, "$name Dispatch: $dmsg, Dropped due to short time or equal msg");
 	}
    }
 }
@@ -2809,6 +2817,14 @@ SIGNALduino_Attr(@)
 		# to delete flashCommand if hardware delete
 		if ($cmd eq "del") {
 			if (exists $attr{$name}{flashCommand}) { delete $attr{$name}{flashCommand};}
+		}
+	}
+	elsif ($aName eq "eventlogging")	# enable / disable eventlogging
+	{
+		if ($aVal == 1) {
+			$hash->{logMethod} = \&::SIGNALduino_Log3;	
+		} else {
+			$hash->{logMethod} = \&::Log3;	
 		}
 	}
 		
