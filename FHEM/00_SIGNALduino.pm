@@ -872,7 +872,7 @@ SIGNALduino_Get($@)
 	my $hardware=AttrVal($name,"hardware",undef);
 	
 	my ($validHw) = $modules{$hash->{TYPE}}{AttrList} =~ /.*hardware:(.*?)\s/;  	
-	SIGNALduino_Log3 $name, 1, "$name: $validHw";
+	SIGNALduino_Log3 $name, 1, "$name: found availableFirmware for $validHw";
 	
 	if (!defined($hardware) || $validHw !~ /$hardware(?:,|$)/ )
   	{
