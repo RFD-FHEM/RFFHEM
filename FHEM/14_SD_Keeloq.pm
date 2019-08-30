@@ -1,5 +1,5 @@
 ######################################################################################################################
-# $Id: 14_SD_Keeloq.pm 32 2019-08-20 12:00:00Z v3.4-dev_02.12. $
+# $Id: 14_SD_Keeloq.pm 32 2019-08-30 12:00:00Z v3.4-dev_02.12. $
 #
 # The file is part of the SIGNALduino project.
 # The purpose of this module is support for KeeLoq devices.
@@ -24,7 +24,7 @@ my %models = (
 															"stop"				=>	"0100",	# new LearnVersion (2)
 															"down"				=>	"0010",
 															"learn"				=>	"0001",	# old LearnVersion
-															"shade"				=>	"0101", # 20x stop	(stop with 20x repeats)
+															"shade"				=>	"0101", # 20x stop	(stop with 20x repeats) mod to 15 repeats after test
 															"shade_learn"	=>	"",			# 4x stop		(stop 4x push)
 															"updown"			=>	"1010"	# new LearnVersion (1)
 														},
@@ -481,7 +481,7 @@ sub Set($$$@) {
 					my @multicontrol = split(",", $cmd2);
 					foreach my $found_multi (@multicontrol){
 						## channel ##
-						if ($found_multi =~ /^\d$/) {
+						if ($found_multi =~ /^\d+$/) {
 							Log3 $name, 4, "$ioname: SD_Keeloq_Set - selection $found_multi is channel solo";
 							push(@channels,$found_multi);
 							$channel = $multicontrol[0];
@@ -526,6 +526,7 @@ sub Set($$$@) {
 					} else {
 						$bit0to7.="0";
 					}
+					Log3 $name, 5, "$ioname: SD_Keeloq_Set - create channelpart1 ".sprintf("%02d", $nr)." $bit0to7";
 				}
 
 				### create channelpart2
@@ -535,6 +536,7 @@ sub Set($$$@) {
 					} else {
 						$bit64to71.="0";
 					}
+					Log3 $name, 5, "$ioname: SD_Keeloq_Set - create channelpart2 ".sprintf("%02d", $nr)." $bit64to71";
 				}
 
 				$bit0to7 = reverse $bit0to7;
@@ -562,7 +564,7 @@ sub Set($$$@) {
 
 				### Zusammenführen
 				my $bits = reverse (sprintf("%032b", $encoded)).reverse($models{$model}{Channel}{$channel}).reverse($Serial_send).reverse($buttonbits).reverse($bit64to71);
-				$Repeats = 20 if ($cmd eq "shade");			# special, command shade = 20 repeats
+				$Repeats = 15 if ($cmd eq "shade");			# special, command shade = 20 repeats = 2,34 s / 15 = 1,75s / userreport: 12 repeats ok
 				my $msg = "P87#$bits"."P#R".$Repeats;
 
 				Log3 $name, 5, "$ioname: SD_Keeloq_Set - Channel                   = $channel";
@@ -1100,14 +1102,10 @@ sub SD_Keeloq_binsplit_JaroLift($) {
 	my $bits = shift;
 	my $binsplit;
 
-	for my $i(0..71){
+	for my $i(0..71) {
 		$binsplit.= substr($bits,$i,1);
-		if (($i+1) % 8 == 0 && $i < 32) {
-			$binsplit.= " ";
-		}
-		if ($i == 35 || $i == 59 || $i == 63) {
-			$binsplit.= " ";
-		}
+		$binsplit.= " " if (($i+1) % 8 == 0 && $i < 32);
+		$binsplit.= " " if ($i == 35 || $i == 59 || $i == 63);
 	}
 	return $binsplit;
 }
@@ -1117,14 +1115,10 @@ sub SD_Keeloq_binsplit_Roto($) {
 	my $bits = shift;
 	my $binsplit;
 
-	for my $i(0..65){
+	for my $i(0..65) {
 		$binsplit.= substr($bits,$i,1);
-		if (($i+1) % 16 == 0 && $i < 27) {
-			$binsplit.= " ";
-		}
-		if ($i == 27 || $i == 31 || $i == 59 || $i == 63 || $i == 64 || $i == 65) {
-			$binsplit.= " ";
-		}
+		$binsplit.= " " if (($i+1) % 16 == 0 && $i < 27);
+		$binsplit.= " " if ($i == 27 || $i == 31 || $i == 59 || $i == 63 || $i == 64 || $i == 65);
 	}
 	return $binsplit;
 }
@@ -1200,7 +1194,7 @@ sub SD_Keeloq_attr2html($@) {
 			my $grpName = $grpInfo[0];
 			$html.= "<tr><td>";
 			$html.= $grpName."</td>";
-			$html.= SD_Keeloq_attr2htmlButtons($grpInfo[1], $name, $ShowIcons, 0, 0);
+			$html.= SD_Keeloq_attr2htmlButtons($grpInfo[1], $name, $ShowIcons, $ShowShade, 0);
 			$html.= "</tr>";
 		}
 
@@ -1257,43 +1251,29 @@ sub SD_Keeloq_attr2htmlButtons($$$$$) {
 
 	### UP
 	my $cmd = "cmd.$name=set $name up $channel";
-	$html.="<td><a onClick=\"FW_cmd('$FW_ME$FW_subdir?XHR=1&$cmd')\">Hoch</a></td>" if (!$ShowIcons);
-	if ($ShowIcons == 1){
-		my $img = FW_makeImage("fts_shutter_up");
-		$html.= "<td><a onClick=\"FW_cmd('$FW_ME$FW_subdir?XHR=1&$cmd')\">$img</a></td>";
-	}
+	$html.= "<td><a onClick=\"FW_cmd('$FW_ME$FW_subdir?XHR=1&$cmd')\">Hoch</a></td>" if (!$ShowIcons);
+	$html.= "<td><a onClick=\"FW_cmd('$FW_ME$FW_subdir?XHR=1&$cmd')\">".FW_makeImage("fts_shutter_up")."</a></td>" if ($ShowIcons == 1);
 
 	### STOP
 	$cmd = "cmd.$name=set $name stop $channel";
 	$html.= "<td><a onClick=\"FW_cmd('$FW_ME$FW_subdir?XHR=1&$cmd')\">Stop</a></td>" if (!$ShowIcons);
-	if ($ShowIcons == 1){
-		my $img = FW_makeImage("rc_STOP");
-		$html.= "<td><a onClick=\"FW_cmd('$FW_ME$FW_subdir?XHR=1&$cmd')\">$img</a></td>";
-	}
+	$html.= "<td><a onClick=\"FW_cmd('$FW_ME$FW_subdir?XHR=1&$cmd')\">".FW_makeImage("rc_STOP")."</a></td>" if ($ShowIcons == 1);
 
 	### DOWN
 	$cmd = "cmd.$name=set $name down $channel";
 	$html.= "<td><a onClick=\"FW_cmd('$FW_ME$FW_subdir?XHR=1&$cmd')\">Runter</a></td>" if (!$ShowIcons);
-	if ($ShowIcons == 1){
-		my $img = FW_makeImage("fts_shutter_down");
-		$html.= "<td><a onClick=\"FW_cmd('$FW_ME$FW_subdir?XHR=1&$cmd')\">$img</a></td>";
-	}
+	$html.= "<td><a onClick=\"FW_cmd('$FW_ME$FW_subdir?XHR=1&$cmd')\">".FW_makeImage("fts_shutter_down")."</a></td>" if ($ShowIcons == 1);
 
 	### SHADE
 	$cmd = "cmd.$name=set $name shade $channel";
 	$html.= "<td><a onClick=\"FW_cmd('$FW_ME$FW_subdir?XHR=1&$cmd')\">Beschattung</a></td>" if (($ShowShade) && (!$ShowIcons));
-	if ($ShowIcons == 1 && $ShowShade == 1){
-		my $img = FW_makeImage("fts_shutter_shadding_run");
-		$html.= "<td><a onClick=\"FW_cmd('$FW_ME$FW_subdir?XHR=1&$cmd')\">$img</a></td>";
-	}
+	$html.= "<td><a onClick=\"FW_cmd('$FW_ME$FW_subdir?XHR=1&$cmd')\">".FW_makeImage("fts_shutter_shadding_run")."</a></td>" if ($ShowIcons == 1 && $ShowShade == 1);
 
 	### LEARN
 	$cmd = "cmd.$name=set $name learn $channel";
 	$html.= "<td><a onClick=\"FW_cmd('$FW_ME$FW_subdir?XHR=1&$cmd')\">Lernen</a></td>" if (($ShowLearn) && (!$ShowIcons));
-	if ($ShowIcons == 1 && $ShowLearn == 1){
-		my $img = FW_makeImage("fts_shutter_manual");
-		$html.= "<td><a onClick=\"FW_cmd('$FW_ME$FW_subdir?XHR=1&$cmd')\">$img</a></td>";
-	}
+	$html.= "<td><a onClick=\"FW_cmd('$FW_ME$FW_subdir?XHR=1&$cmd')\">".FW_makeImage("fts_shutter_manual")."</a></td>" if ($ShowIcons == 1 && $ShowLearn == 1);
+
 	return $html;
 }
 
