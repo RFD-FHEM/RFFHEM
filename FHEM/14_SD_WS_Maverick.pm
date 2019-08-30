@@ -232,6 +232,7 @@ SD_WS_Maverick_Parse($$)
   $hash->{temp_food}=$temp_food if ($temp_food ne"");
   $hash->{temp_bbq}=$temp_bbq if ($temp_bbq ne"");
   $hash->{messageType}=$messageType;
+  $hash->{state}=SD_WS_Maverick_buildState($hash);
   
   # TODO: Logging kann entfernt werden, wenn checksum entschlüsselt ist. Wird zur Analyse verwendet.
   Log3 $hash, 4, "$name statistic: checksum=$checksum, t1=$temp_str1, temp-food=$temp_food, t2_$temp_str2, temp-bbq=$temp_bbq;";
@@ -288,8 +289,6 @@ sub SD_WS_Maverick_updateReadings($){
   my $name = $hash->{NAME};
   Log3 $hash, 5, "$name SD_WS_Maverick_updateReadings";
 
-  SD_WS_Maverick_updateState($hash);
-
   readingsBeginUpdate($hash);
     readingsBulkUpdate($hash, "temp-food", $hash->{temp_food});
     readingsBulkUpdate($hash, "temp-bbq", $hash->{temp_bbq});
@@ -297,11 +296,12 @@ sub SD_WS_Maverick_updateReadings($){
     readingsBulkUpdate($hash, "checksum", $hash->{checksum});
     readingsBulkUpdate($hash, "Sensor-1-food_state", $hash->{sensor_1_state});
     readingsBulkUpdate($hash, "Sensor-2-bbq_state", $hash->{sensor_2_state});
+    readingsBulkUpdate($hash, "state", $hash->{state});
   readingsEndUpdate($hash, 1); # Notify is done by Dispatch
   return undef;
 }
 
-sub SD_WS_Maverick_updateState($) {
+sub SD_WS_Maverick_buildState($) {
   my ($hash) = @_;
 
   my $state = "???";
@@ -315,7 +315,7 @@ sub SD_WS_Maverick_updateState($) {
     $state .= " BBQ: ";
     $state .= $state_bbq  eq "connected" ? $hash->{temp_bbq}  : $state_bbq;
   }
-  $hash->{STATE} = $state;
+  return $state;
 }
 
 1;
