@@ -152,12 +152,12 @@ SD_WS_Maverick_Parse($$)
   
   Log3 $iohash, 4, "$name $model decoded protocolid: 47 sensor messageType=$messageType, temp-f=$temp_str1, temp-b=$temp_str2, checksum-s=$checksum_str";
   
-  if ($messageType eq '59'){
-    $messageType="normal";
-  }elsif ($messageType eq '6A') {
-    $messageType="sync";  
-  }else{
-    Log3 $iohash, 4, "$name $model ERROR: wrong messageType=$messageType (must be 59 or 6A)";
+  if ($messageType eq '55' || $messageType eq '59') {
+    $messageType = "normal";
+  } elsif ($messageType eq '66' || $messageType eq '6A') {
+    $messageType = "sync";
+  } else {
+    Log3 $iohash, 4, "$name $model ERROR: wrong messageType '$messageType' (must be one of: 55, 59, 66, 6A)";
     return '';
   }
   
