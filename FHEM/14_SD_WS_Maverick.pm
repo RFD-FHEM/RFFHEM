@@ -10,6 +10,7 @@
 # Version 1.1
 #  - changed: 14_SD_WS_Maverick: rename Readings for Temperatures
 #  - feature: 14_SD_WS_Maverick: added Readings for Sensor-states
+#  - feature: 14_SD_WS_Maverick: added support for device TFA 14.1504 (Küchen-Chef Funk-Bratenthermometer)
 
 package main;
 
@@ -333,6 +334,7 @@ sub SD_WS_Maverick_updateState($) {
   <b>Known models:</b>
   <ul>
     <li>Maverick 732/733</li>
+    <li>TFA 14.1504 (Küchen-Chef Funk-Bratenthermometer)</li>
   </ul>
   <br>
   New received device will be added in fhem with autocreate (if autocreate is globally enabled).
@@ -388,6 +390,7 @@ sub SD_WS_Maverick_updateState($) {
   <b>Unterst&uumltzte Modelle:</b>
   <ul>
     <li>Maverick 732/733</li>
+    <li>TFA 14.1504 (Küchen-Chef Funk-Bratenthermometer)</li>
   </ul>
   <br>
   Neu empfangene Sensoren werden in FHEM per autocreate angelegt (sofern autocreate in global aktiv ist).
