@@ -24,7 +24,7 @@ my %models = (
 															"stop"				=>	"0100",	# new LearnVersion (2)
 															"down"				=>	"0010",
 															"learn"				=>	"0001",	# old LearnVersion
-															"shade"				=>	"0101", # 20x stop	(stop with 20x repeats) mod to 15 repeats after test
+															"shade"				=>	"0100", # 20x stop	(stop with 20x repeats) mod to 15 repeats after test | old 0101
 															"shade_learn"	=>	"",			# 4x stop		(stop 4x push)
 															"updown"			=>	"1010"	# new LearnVersion (1)
 														},
