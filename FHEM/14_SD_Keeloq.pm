@@ -1285,9 +1285,9 @@ sub SD_Keeloq_attr2htmlButtons($$$$$) {
 # Beginn der Commandref
 
 =pod
-=item [helper|device|command]
-=item summary Kurzbeschreibung in Englisch was MYMODULE steuert/unterst&uuml;tzt
-=item summary_DE Kurzbeschreibung in Deutsch was MYMODULE steuert/unterst&uuml;tzt
+=item device
+=item summary 14_SD_Keeloq supports wireless devices with KeeLoq method
+=item summary_DE 14_SD_Keeloq unterst&uuml;tzt Funkger&auml;te mit dem KeeLoq Verfahren
 
 =begin html
 
