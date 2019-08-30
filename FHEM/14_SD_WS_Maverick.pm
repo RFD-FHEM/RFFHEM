@@ -62,36 +62,6 @@ SD_WS_Maverick_Define($$)
   $modules{SD_WS_Maverick}{defptr}{$a[2]} = $hash;
   $hash->{STATE} = "Defined";
   
-  my $name= $hash->{NAME};
-  # prüfen, ob eine neue Definition angelegt wird 
-	if($init_done && !defined($hash->{OLDDEF}))
-	{
-		# setzen von stateFormat
-	 	$attr{$name}{"stateFormat"} = '{
-  my $s1=ReadingsVal($name,"Sensor-1-food_state",-1);
-  my $s2=ReadingsVal($name,"Sensor-2-bbq_state",-1);
-  if ($s1 ne "connected" && $s1 eq $s2 ) {
-    return $s1;
-  }else{
-    my $state="Food: ";
-    my $temp_food=ReadingsVal($name,"temp-food","");
-    my $temp_bbq=ReadingsVal($name,"temp-bbq","");
-    if($s1 eq "connected"){
-        $state .=$temp_food;
-    }else{
-        $state .=$s1;
-    }
-    $state .=" BBQ: ";
-    if($s2 eq "connected"){
-        $state .=$temp_bbq;
-    }else{
-        $state .=$s2;
-    }
-    return $state;
-  }
-}';
-
- 	}
   return undef;
 }
 
@@ -316,7 +286,9 @@ sub SD_WS_Maverick_updateReadings($){
   my ($hash) = @_;
   my $name = $hash->{NAME};
   Log3 $hash, 5, "$name SD_WS_Maverick_updateReadings";
-  
+
+  SD_WS_Maverick_updateState($hash);
+
   readingsBeginUpdate($hash);
     readingsBulkUpdate($hash, "temp-food", $hash->{temp_food});
     readingsBulkUpdate($hash, "temp-bbq", $hash->{temp_bbq});
@@ -326,6 +298,23 @@ sub SD_WS_Maverick_updateReadings($){
     readingsBulkUpdate($hash, "Sensor-2-bbq_state", $hash->{sensor_2_state});
   readingsEndUpdate($hash, 1); # Notify is done by Dispatch
   return undef;
+}
+
+sub SD_WS_Maverick_updateState($) {
+  my ($hash) = @_;
+
+  my $state = "???";
+  my $state_food = $hash->{sensor_1_state};
+  my $state_bbq  = $hash->{sensor_2_state};
+  if ($state_food ne "connected" && $state_food eq $state_bbq ) {
+    $state = $state_food;
+  } else {
+    $state = "Food: ";
+    $state .= $state_food eq "connected" ? $hash->{temp_food} : $state_food;
+    $state .= " BBQ: ";
+    $state .= $state_bbq  eq "connected" ? $hash->{temp_bbq}  : $state_bbq;
+  }
+  $hash->{STATE} = $state;
 }
 
 1;
