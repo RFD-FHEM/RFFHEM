@@ -30,7 +30,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.4.1_dev_11.08",
+	SDUINO_VERSION            => "v3.4.1_dev_30.08",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -4507,7 +4507,7 @@ sub SIGNALduino_githubParseHttpResponse($$$)
     }                                                                                              # wenn
     # Damit ist die Abfrage zuende.
     # Evtl. einen InternalTimer neu schedulen
-    FW_directNotify("#FHEMWEB:$FW_wname", "location.reload('true')", "");
+    FW_directNotify("FILTER=$name", "#FHEMWEB:$FW_wname", "location.reload('true')", "");
 	return 0;
 }
 
