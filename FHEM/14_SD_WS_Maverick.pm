@@ -269,7 +269,7 @@ sub SD_WS_Maverick_SetSensor1Inaktiv($){
   my $name = $hash->{NAME};
   Log3 $hash, 5, "$name SD_WS_Maverick_SetSensor1Inaktiv";
   
-  $hash->{sensor_1_state}="inactiv";
+  $hash->{sensor_1_state}="inactive";
   SD_WS_Maverick_updateReadings($hash);
 }
 
@@ -278,7 +278,7 @@ sub SD_WS_Maverick_SetSensor2Inaktiv($){
   my $name = $hash->{NAME};
   Log3 $hash, 5, "$name SD_WS_Maverick_SetSensor2Inaktiv";
 
-  $hash->{sensor_2_state}="inactiv";
+  $hash->{sensor_2_state}="inactive";
   SD_WS_Maverick_updateReadings($hash);
 }
 
@@ -351,8 +351,8 @@ sub SD_WS_Maverick_updateState($) {
   	 <li>State (Food: BBQ: )</li>
      <li>temp-food (&deg;C)</li>
      <li>temp-bbq (&deg;C)</li>
-     <li>Sensor-1-food_state (connected, disconnected or inactiv)</li>
-     <li>Sensor-2-bbq_state (connected, disconnected or inactiv)</li>
+     <li>Sensor-1-food_state (connected, disconnected or inactive)</li>
+     <li>Sensor-2-bbq_state (connected, disconnected or inactive)</li>
      <li>messageType (sync at startup or resync, otherwise normal)</li>
      <li>checksum (experimental)</li>
   </ul>
@@ -360,7 +360,7 @@ sub SD_WS_Maverick_updateState($) {
   <b>Attributes</b>
   <ul>
     <li>inactivityinterval <seconds (60-3600)><br>
-    The Interval to set Sensor-1-food_state and/or Sensor-2-bbq_state to inactiv after defined minutes. This can help to detect empty batteries or the malfunction of a tempertature-sensor.<br> 
+    The Interval to set Sensor-1-food_state and/or Sensor-2-bbq_state to inactive after defined minutes. This can help to detect empty batteries or the malfunction of a tempertature-sensor.<br>
     <code>default: 360</code></li>
     <li><a href="#do_not_notify">do_not_notify</a></li>
     <li><a href="#ignore">ignore </a></li>
@@ -406,8 +406,8 @@ sub SD_WS_Maverick_updateState($) {
   	 <li>State (Food: BBQ: )</li>
      <li>temp-food (&deg;C)</li>
      <li>temp-bbq (&deg;C)</li>
-     <li>Sensor-1-food_state (connected, disconnected oder inactiv)</li>
-     <li>Sensor-2-bbq_state (connected, disconnected oder inactiv)</li>
+     <li>Sensor-1-food_state (connected, disconnected oder inactive)</li>
+     <li>Sensor-2-bbq_state (connected, disconnected oder inactive)</li>
      <li>messageType (sync bei Start oder resync, sonst normal)</li>
      <li>checksum (experimentell)</li>
   </ul>
@@ -415,7 +415,7 @@ sub SD_WS_Maverick_updateState($) {
   <b>Attribute</b>
   <ul>
     <li>inactivityinterval <Sekunden (60-3600)><br>
-    Das Interval nach dem Sensor-1-food_state und/oder Sensor-2-bbq_state auf inactiv gesetzt werden, wenn keine Signale mehr empfangen werden.
+    Das Interval nach dem Sensor-1-food_state und/oder Sensor-2-bbq_state auf inactive gesetzt werden, wenn keine Signale mehr empfangen werden.
     Hilfreich zum erkennen einer leeren Batterie oder eines defekten Termperaturf&uumlhlers.<br> 
     <code>default: 360</code></li>
     <li><a href="#do_not_notify">do_not_notify</a></li>
