@@ -428,6 +428,7 @@ sub Set($$$@) {
 			}
 
 			if ($cmd eq "shade_learn") {
+				# userreport:  4 repeats only https://github.com/RFD-FHEM/RFFHEM/issues/632#issuecomment-526765758 with check Jarolift-Dongle via putty
 				$foreachCount = 4;
 				$cmd = "stop";
 			}
@@ -567,7 +568,6 @@ sub Set($$$@) {
 				
 				# special, command shade -> 20 repeats = 2,34 s | 15 repeats = 1,75s (two hardware versions ???)
 				# userreport: 12 repeats ok https://github.com/HomeAutoUser/SD_Keeloq__old_Jaro/issues/9#issuecomment-524176737
-				# userreport:  4 repeats only https://github.com/RFD-FHEM/RFFHEM/issues/632#issuecomment-526765758 with check Jarolift-Dongle via putty
 				$Repeats = 15 if ($cmd eq "shade");
 				my $msg = "P87#$bits"."P#R".$Repeats;
 
