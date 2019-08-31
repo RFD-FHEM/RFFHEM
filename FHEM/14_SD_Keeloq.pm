@@ -543,7 +543,7 @@ sub Set($$$@) {
 				$bit64to71 = reverse $bit64to71;		# JaroLift only
 
 				### DeviceKey (die ersten Stellen aus der Vorage, der Rest vom Sendenen Kanal)
-				$Serial_send = sprintf ("%24b", hex($Serial_send));																				# verified
+				$Serial_send = sprintf ("%024b", hex($Serial_send));																			# verified
 
 				$DeviceKey = $Serial_send.$models{$model}{Channel}{$channel};															# verified
 				$DeviceKey = oct("0b".$DeviceKey);																												# verified
