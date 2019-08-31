@@ -66,7 +66,7 @@ package lib::SD_ProtocolData;
 	use strict;
 	use warnings;
 	
-	our $VERSION = '1.07';
+	our $VERSION = '1.08';
 	our %protocols = (
 		"0"	=>	## various weather sensors (500 | 9100)
 						# ABS700 | Id:79 T: 3.3 Bat:low                MS;P1=-7949;P2=492;P3=-1978;P4=-3970;D=21232423232424242423232323232324242423232323232424;CP=2;SP=1;R=245;O;
@@ -2376,23 +2376,28 @@ package lib::SD_ProtocolData;
 				length_min      => '50',
 				length_max      => '50',
 			},
-		"96"	=>	# Funk-Gong | Taster Grothe Mistral SE 03.1 , Innenteil Grothe Mistral 200M(E)
+		"96"	=>	# Funk-Gong | Taster Grothe Mistral SE 03.1 / 01.1, Innenteil Grothe Mistral 200M(E)
 							# https://forum.fhem.de/index.php/topic,64251.msg940593.html?PHPSESSID=nufcvvjobdd8r7rgr0cq3qkrv0#msg940593 @coolheizer
-							# Button_1    MC;LL=-424;LH=438;SL=-215;SH=212;D=238823B1001F8;C=214;L=49;R=68;
-							# Button_2    MC;LL=-412;LH=458;SL=-187;SH=240;D=238129D9A78;C=216;L=41;R=241;
+							# SD_BELL_104762 Alarm        MC;LL=-430;LH=418;SL=-216;SH=226;D=23C823B1401F8;C=214;L=49;R=53;
+							# SD_BELL_104762 ring         MC;LL=-439;LH=419;SL=-221;SH=212;D=238823B1001F8;C=215;L=49;R=69;
+							# SD_BELL_104762 ring low bat MC;LL=-433;LH=424;SL=-214;SH=210;D=238823B100248;C=213;L=49;R=65;
+							# SD_BELL_0253B3 Alarm        MC;LL=-407;LH=451;SL=-195;SH=239;D=23C129D9E78;C=215;L=41;R=241;
+							# SD_BELL_0253B3 ring         MC;LL=-412;LH=458;SL=-187;SH=240;D=238129D9A78;C=216;L=41;R=241;
+							# SD_BELL_024DB5 Alarm        MC;LL=-415;LH=454;SL=-200;SH=226;D=23C126DAE58;C=215;L=41;R=246;
+							# SD_BELL_024DB5 ring         MC;LL=-409;LH=448;SL=-172;SH=262;D=238126DAA58;C=215;L=41;R=238;
 			{
-				name            => 'Grothe Mistral',
-				comment         => 'wireless gong',
+				name            => 'Grothe Mistral SE',
+				comment         => 'Wireless doorbell Grothe Mistral SE 01.1 or 03.1',
 				id              => '96',
-				knownFreqs      => '866.35',
-				clockrange			=> [210,220],							# min , max
-				format					=> 'manchester',					# tristate can't be migrated from bin into hex!
-				#clientmodule		 => '',
-				#modulematch		 => '^u96#',
-				preamble				=> 'u96#',
-				length_min			=> '41',
-				length_max			=> '49',
-				method					=> \&lib::SD_Protocols::MCRAW,		# Call to process this message
+				knownFreqs      => '868.35',
+				clockrange      => [170,260],
+				format          => 'manchester',
+				clientmodule    => 'SD_BELL',
+				modulematch     => '^P96#',
+				preamble        => 'P96#',
+				length_min      => '40',
+				length_max      => '49',
+				method          => \&main::SIGNALduino_GROTHE,
 			},
 	);
 	sub getProtocolList	{	
