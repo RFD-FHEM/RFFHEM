@@ -24,7 +24,7 @@ my %models = (
 															"stop"				=>	"0100",	# new LearnVersion (2)
 															"down"				=>	"0010",
 															"learn"				=>	"0001",	# old LearnVersion
-															"shade"				=>	"0100", # 20x stop	(stop with 20x repeats) mod to 15 repeats after test | old 0101
+															"shade"				=>	"0101", # 20x stop	(stop with 20x repeats) mod to 15 repeats after test | old 0101 | other user 0100 ?
 															"shade_learn"	=>	"",			# 4x stop		(stop 4x push)
 															"updown"			=>	"1010"	# new LearnVersion (1)
 														},
@@ -455,7 +455,8 @@ sub Set($$$@) {
 
 				$button = $cmd;
 				$buttonbits = $models{$model}{Button}{$cmd};
-				Log3 $name, 4, "$ioname: SD_Keeloq_Set - check, foreachLoop=$i LearnVersion=$learning" if ((defined $cmd2 && $learning eq "old") || (defined $cmd2 && $learning eq "new"));
+				my $learning_text = $learning eq "old" ? "send learn" : "send updown and additionally followed stop"; 
+				Log3 $name, 4, "$ioname: SD_Keeloq_Set - check, foreachLoop=$i LearnVersion=$learning ($learning_text)" if ((defined $cmd2 && $learning eq "old") || (defined $cmd2 && $learning eq "new"));
 
 				if ($addGroups ne "") {
 					@channel_from_addGroups = split(" ", $addGroups);
@@ -527,7 +528,6 @@ sub Set($$$@) {
 					} else {
 						$bit0to7.="0";
 					}
-					Log3 $name, 5, "$ioname: SD_Keeloq_Set - create channelpart1 ".sprintf("%02d", $nr)." $bit0to7";
 				}
 
 				### create channelpart2
@@ -537,7 +537,6 @@ sub Set($$$@) {
 					} else {
 						$bit64to71.="0";
 					}
-					Log3 $name, 5, "$ioname: SD_Keeloq_Set - create channelpart2 ".sprintf("%02d", $nr)." $bit64to71";
 				}
 
 				$bit0to7 = reverse $bit0to7;
