@@ -211,12 +211,10 @@ SD_WS_Maverick_Parse($$)
   # Den SensorState bei Inaktivität zurücksetzen lassen durch Timer 
   my $inactivityinterval=int(AttrVal($name,"inactivityinterval",360));
   if ($sensor_1_state ne "unknown") {
-    $hash->{sensor_1_state}=$sensor_1_state;
     RemoveInternalTimer($hash, 'SD_WS_Maverick_SetSensor1Inaktiv');
     InternalTimer(time()+($inactivityinterval), 'SD_WS_Maverick_SetSensor1Inaktiv', $hash, 0);
   }
   if ( $sensor_2_state ne "unknown") {
-    $hash->{sensor_2_state}=$sensor_2_state;
     RemoveInternalTimer($hash, 'SD_WS_Maverick_SetSensor2Inaktiv');
     InternalTimer(time()+($inactivityinterval), 'SD_WS_Maverick_SetSensor2Inaktiv', $hash, 0);
   }
@@ -228,19 +226,33 @@ SD_WS_Maverick_Parse($$)
   # TODO: Die eigentliche Checksum errechnen. Diese ändert sich bei jedem Temperaturwechsel
   # TODO: Evtl. ist in den checksum-bits auch noch eine Info zur Batterie enthalten
   #       ggf. ist es möglich die checksum als ID zu verwenden und so mehrere Mavericks in fhem einbinden zu können.
-  $hash->{checksum}=$checksum;
-  $hash->{temp_food}=$temp_food if ($temp_food ne"");
-  $hash->{temp_bbq}=$temp_bbq if ($temp_bbq ne"");
-  $hash->{messageType}=$messageType;
-  $hash->{state}=SD_WS_Maverick_buildState($hash);
-  
+
   # TODO: Logging kann entfernt werden, wenn checksum entschlüsselt ist. Wird zur Analyse verwendet.
   Log3 $hash, 4, "$name statistic: checksum=$checksum, t1=$temp_str1, temp-food=$temp_food, t2_$temp_str2, temp-bbq=$temp_bbq;";
   
-  SD_WS_Maverick_updateReadings($hash);
+  # overall state for the device
+  my $state = "???";
+  if ($sensor_1_state ne "connected" && $sensor_1_state eq $sensor_2_state) {
+    $state = $sensor_1_state;
+  } else {
+    $state = "Food: ";
+    $state .= $sensor_1_state eq "connected" ? $temp_food : $sensor_1_state;
+    $state .= " BBQ: ";
+    $state .= $sensor_2_state eq "connected" ? $temp_bbq  : $sensor_2_state;
+  }
+
+  # update readings
+  readingsBeginUpdate($hash);
+  readingsBulkUpdate($hash, "checksum",  $checksum);
+  readingsBulkUpdate($hash, "temp-food", $temp_food) if ($temp_food ne "");
+  readingsBulkUpdate($hash, "temp-bbq",  $temp_bbq) if ($temp_bbq ne "");
+  readingsBulkUpdate($hash, "messageType", $messageType);
+  readingsBulkUpdate($hash, "Sensor-1-food_state", $sensor_1_state);
+  readingsBulkUpdate($hash, "Sensor-2-bbq_state", $sensor_2_state);
+  readingsBulkUpdate($hash, "state", $state);
+  readingsEndUpdate($hash, 1); # Notify is done by Dispatch
 
   return $name;
-
 }
 
 sub SD_WS_Maverick_Attr(@)
@@ -270,52 +282,14 @@ sub SD_WS_Maverick_SetSensor1Inaktiv($){
   my ($hash) = @_;
   my $name = $hash->{NAME};
   Log3 $hash, 5, "$name SD_WS_Maverick_SetSensor1Inaktiv";
-  
-  $hash->{sensor_1_state}="inactive";
-  SD_WS_Maverick_updateReadings($hash);
+  readingsSingleUpdate($hash, "Sensor-1-food_state", "inactive", 1);
 }
 
 sub SD_WS_Maverick_SetSensor2Inaktiv($){
   my ($hash) = @_;
   my $name = $hash->{NAME};
   Log3 $hash, 5, "$name SD_WS_Maverick_SetSensor2Inaktiv";
-
-  $hash->{sensor_2_state}="inactive";
-  SD_WS_Maverick_updateReadings($hash);
-}
-
-sub SD_WS_Maverick_updateReadings($){
-  my ($hash) = @_;
-  my $name = $hash->{NAME};
-  Log3 $hash, 5, "$name SD_WS_Maverick_updateReadings";
-
-  readingsBeginUpdate($hash);
-    readingsBulkUpdate($hash, "temp-food", $hash->{temp_food});
-    readingsBulkUpdate($hash, "temp-bbq", $hash->{temp_bbq});
-    readingsBulkUpdate($hash, "messageType ", $hash->{messageType});
-    readingsBulkUpdate($hash, "checksum", $hash->{checksum});
-    readingsBulkUpdate($hash, "Sensor-1-food_state", $hash->{sensor_1_state});
-    readingsBulkUpdate($hash, "Sensor-2-bbq_state", $hash->{sensor_2_state});
-    readingsBulkUpdate($hash, "state", $hash->{state});
-  readingsEndUpdate($hash, 1); # Notify is done by Dispatch
-  return undef;
-}
-
-sub SD_WS_Maverick_buildState($) {
-  my ($hash) = @_;
-
-  my $state = "???";
-  my $state_food = $hash->{sensor_1_state};
-  my $state_bbq  = $hash->{sensor_2_state};
-  if ($state_food ne "connected" && $state_food eq $state_bbq ) {
-    $state = $state_food;
-  } else {
-    $state = "Food: ";
-    $state .= $state_food eq "connected" ? $hash->{temp_food} : $state_food;
-    $state .= " BBQ: ";
-    $state .= $state_bbq  eq "connected" ? $hash->{temp_bbq}  : $state_bbq;
-  }
-  return $state;
+  readingsSingleUpdate($hash, "Sensor-2-bbq_state", "inactive", 1);
 }
 
 1;
