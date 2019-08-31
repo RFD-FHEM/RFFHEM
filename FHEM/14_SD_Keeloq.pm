@@ -566,7 +566,7 @@ sub Set($$$@) {
 				### Zusammenführen
 				my $bits = reverse (sprintf("%032b", $encoded)).reverse($models{$model}{Channel}{$channel}).reverse($Serial_send).reverse($buttonbits).reverse($bit64to71);
 				
-				# special, command shade -> 20 repeats = 2,34 s | 15 repeats = 1,75s (two hardware versions ???)
+				# special, command shade -> 20 repeats = 2,34 s | 15 repeats = 1,75s
 				# userreport: 12 repeats ok https://github.com/HomeAutoUser/SD_Keeloq__old_Jaro/issues/9#issuecomment-524176737
 				$Repeats = 15 if ($cmd eq "shade");
 				my $msg = "P87#$bits"."P#R".$Repeats;
@@ -1374,6 +1374,7 @@ sub SD_Keeloq_attr2htmlButtons($$$$$) {
 		<br>
 		<li><a name="LearnVersion"><b>LearnVersion</b></a><br>
 		Learning variant, as this differs depending on the age of the devices. (Standard old)<br>
+		<i><u>Please read in your manual what you should press.</u></i><br>
 		<ul>- old Version: send <code>learn</code></ul>
 		<ul>- new Version: send <code>updown</code> and additionally followed by <code>stop</code></ul>
 		</li>
@@ -1536,7 +1537,8 @@ sub SD_Keeloq_attr2htmlButtons($$$$$) {
 		</li>
 		<br>
 		<li><a name="LearnVersion"><b>LearnVersion</b></a><br>
-		Anlernvariante, da diese sich je nach alter der Ger&auml;te unterscheidet. (Standard old)<br>
+		Anlernvariante, da diese sich je nach Alter der Ger&auml;te unterscheidet. (Standard old)<br>
+		<i><u>Bitte lesen Sie dazu Ihre Bedienungsanleitung was dr&uuml;cken sollen.</u></i><br>
 		<ul>- old Version: senden von <code>learn</code></ul>
 		<ul>- new Version: senden von <code>updown</code> und zus&auml;tzlich gefolgt von <code>stop</code></ul>
 		</li>
