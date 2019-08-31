@@ -228,7 +228,7 @@ SD_WS_Maverick_Parse($$)
   #       ggf. ist es möglich die checksum als ID zu verwenden und so mehrere Mavericks in fhem einbinden zu können.
 
   # TODO: Logging kann entfernt werden, wenn checksum entschlüsselt ist. Wird zur Analyse verwendet.
-  Log3 $hash, 4, "$name statistic: checksum=$checksum, t1=$temp_str1, temp-food=$temp_food, t2_$temp_str2, temp-bbq=$temp_bbq;";
+  Log3 $hash, 4, "$name statistic: checksum=$checksum, t1=$temp_str1, temp-food=$temp_food, t2=$temp_str2, temp-bbq=$temp_bbq;";
 
   # update readings
   readingsBeginUpdate($hash);
