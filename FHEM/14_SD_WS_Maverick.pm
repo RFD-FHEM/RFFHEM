@@ -26,7 +26,7 @@ sub SD_WS_Maverick_Parse($$);
 sub SD_WS_Maverick_Attr(@);
 sub SD_WS_Maverick_SetSensor1Inactive($);
 sub SD_WS_Maverick_SetSensor2Inactive($);
-sub SD_WS_Maverick_updateReadings($);
+sub SD_WS_Maverick_UpdateState($);
 
 sub
 SD_WS_Maverick_Initialize($)
@@ -229,17 +229,6 @@ SD_WS_Maverick_Parse($$)
 
   # TODO: Logging kann entfernt werden, wenn checksum entschlüsselt ist. Wird zur Analyse verwendet.
   Log3 $hash, 4, "$name statistic: checksum=$checksum, t1=$temp_str1, temp-food=$temp_food, t2_$temp_str2, temp-bbq=$temp_bbq;";
-  
-  # overall state for the device
-  my $state = "???";
-  if ($sensor_1_state ne "connected" && $sensor_1_state eq $sensor_2_state) {
-    $state = $sensor_1_state;
-  } else {
-    $state = "Food: ";
-    $state .= $sensor_1_state eq "connected" ? $temp_food : $sensor_1_state;
-    $state .= " BBQ: ";
-    $state .= $sensor_2_state eq "connected" ? $temp_bbq  : $sensor_2_state;
-  }
 
   # update readings
   readingsBeginUpdate($hash);
@@ -249,8 +238,8 @@ SD_WS_Maverick_Parse($$)
   readingsBulkUpdate($hash, "messageType", $messageType);
   readingsBulkUpdate($hash, "Sensor-1-food_state", $sensor_1_state);
   readingsBulkUpdate($hash, "Sensor-2-bbq_state", $sensor_2_state);
-  readingsBulkUpdate($hash, "state", $state);
   readingsEndUpdate($hash, 1); # Notify is done by Dispatch
+  SD_WS_Maverick_UpdateState($hash);
 
   return $name;
 }
@@ -283,6 +272,7 @@ sub SD_WS_Maverick_SetSensor1Inactive($){
   my $name = $hash->{NAME};
   Log3 $hash, 5, "$name SD_WS_Maverick_SetSensor1Inactive";
   readingsSingleUpdate($hash, "Sensor-1-food_state", "inactive", 1);
+  SD_WS_Maverick_UpdateState($hash);
 }
 
 sub SD_WS_Maverick_SetSensor2Inactive($){
@@ -290,6 +280,31 @@ sub SD_WS_Maverick_SetSensor2Inactive($){
   my $name = $hash->{NAME};
   Log3 $hash, 5, "$name SD_WS_Maverick_SetSensor2Inactive";
   readingsSingleUpdate($hash, "Sensor-2-bbq_state", "inactive", 1);
+  SD_WS_Maverick_UpdateState($hash);
+}
+
+sub SD_WS_Maverick_UpdateState($) {
+  my ($hash) = @_;
+  my $name = $hash->{NAME};
+  Log3 $hash, 5, "$name SD_WS_Maverick_UpdateState";
+
+  my $state_food = ReadingsVal($name, "Sensor-1-food_state", undef);
+  my $temp_food  = ReadingsVal($name, "temp-food", undef);
+  my $state_bbq  = ReadingsVal($name, "Sensor-2-bbq_state",  undef);
+  my $temp_bbq   = ReadingsVal($name, "temp-bbq", undef);;
+
+  my $state = "???";
+  if ($state_food ne "connected" && $state_food eq $state_bbq ) {
+    $state = $state_food;
+  } else {
+    $state = "Food: ";
+    $state .= $state_food eq "connected" ? $temp_food : $state_food;
+    $state .= " BBQ: ";
+    $state .= $state_bbq  eq "connected" ? $temp_bbq  : $state_bbq;
+  }
+
+  Log3 $hash, 5, "$name state: $state";
+  readingsSingleUpdate($hash, "state", $state, 1);
 }
 
 1;
