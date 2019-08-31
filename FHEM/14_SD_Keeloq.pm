@@ -1,5 +1,5 @@
 ######################################################################################################################
-# $Id: 14_SD_Keeloq.pm 32 2019-08-30 12:00:00Z v3.4-dev_02.12. $
+# $Id: 14_SD_Keeloq.pm 32 2019-08-31 12:00:00Z v3.4-dev_02.12. $
 #
 # The file is part of the SIGNALduino project.
 # The purpose of this module is support for KeeLoq devices.
@@ -564,7 +564,11 @@ sub Set($$$@) {
 
 				### Zusammenführen
 				my $bits = reverse (sprintf("%032b", $encoded)).reverse($models{$model}{Channel}{$channel}).reverse($Serial_send).reverse($buttonbits).reverse($bit64to71);
-				$Repeats = 15 if ($cmd eq "shade");			# special, command shade = 20 repeats = 2,34 s / 15 = 1,75s / userreport: 12 repeats ok
+				
+				# special, command shade -> 20 repeats = 2,34 s | 15 repeats = 1,75s (two hardware versions ???)
+				# userreport: 12 repeats ok https://github.com/HomeAutoUser/SD_Keeloq__old_Jaro/issues/9#issuecomment-524176737
+				# userreport:  4 repeats only https://github.com/RFD-FHEM/RFFHEM/issues/632#issuecomment-526765758 with check Jarolift-Dongle via putty
+				$Repeats = 15 if ($cmd eq "shade");
 				my $msg = "P87#$bits"."P#R".$Repeats;
 
 				Log3 $name, 5, "$ioname: SD_Keeloq_Set - Channel                   = $channel";
@@ -1336,7 +1340,8 @@ sub SD_Keeloq_attr2htmlButtons($$$$$) {
 			<li><b>updown</b><br>
 			Simultaneously pressing the up and down keys for programming purposes.<br>
 			<li><b>shade</b><br>
-			Bring shutters into shading position. (not supported by all receivers!)<br>
+			Bring shutters into shading position.<br>
+			<i>(not supported by all receivers! The device sends 15x stop command)</i><br>
 			<br>
 		</ul>
 	example: <ul>set SD_Keeloq_Device1 down 7<br>
@@ -1498,7 +1503,8 @@ sub SD_Keeloq_attr2htmlButtons($$$$$) {
 			<li><b>updown</b><br>
 			Gleichzeitges Dr&uuml;cken der Auf- und Abtaste zu Programmierzwecken.<br>
 			<li><b>shade</b><br>
-			Rolladen in Beschattungsposition bringen. (wird nicht von allen Empf&auml;ngern unterst&uuml;tzt!)<br>
+			Rolladen in Beschattungsposition bringen.<br>
+			<i>(wird nicht von allen Empf&auml;ngern unterst&uuml;tzt! Das Device sendet 15x den Stop Befehl)</i><br>
 			<br>
 		</ul>
 	Beispiele: <ul>set SD_Keeloq_Device1 down 7<br>
