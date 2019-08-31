@@ -30,7 +30,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.4.1_dev_30.08",
+	SDUINO_VERSION            => "v3.4.1_dev_31.08",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -184,7 +184,7 @@ my %matchListSIGNALduino = (
 			"24:FS20"							=> "^81..(04|0c)..0101a001", 
 			"25:CUL_EM"						=> "^E0.................", 
 			"26:Fernotron"				=> '^P82#.*',
-			"27:SD_BELL"					=> '^P(?:15|32|41|42|57|79)#.*',
+			"27:SD_BELL"					=> '^P(?:15|32|41|42|57|79|96)#.*',
 			"28:SD_Keeloq"				=> '^P(?:87|88)#.*',
 			"X:SIGNALduino_un"		=> '^[u]\d+#.*',
 );
@@ -3625,6 +3625,33 @@ sub SIGNALduino_postDemo_WS7053($@) {
 
 
 # manchester method
+
+sub SIGNALduino_GROTHE()
+{
+	my ($name,$bitData,$id,$mcbitnum) = @_;
+	#my $debug = AttrVal($name,"debug",0);
+	my $bitLength;
+	$bitData = substr($bitData, 0, $mcbitnum);
+	my $preamble = "01000111";
+	my $pos = index($bitData, $preamble);
+	if ($pos < 0 || $pos > 5) {
+		SIGNALduino_Log3 $name, 3, "$name: GROTHE protocol-Id $id, start pattern ($preamble) not found";	
+		return (-1,"Start pattern ($preamble) not found");
+	} else {
+		if ($pos == 1) {		# eine Null am Anfang zuviel
+			$bitData =~ s/^0//;		# eine Null am Anfang entfernen
+		}
+		$bitLength = length($bitData);
+		my ($rcode, $rtxt) = SIGNALduino_TestLength($name, $id, $bitLength, "GROTHE ID=$id");
+		if (!$rcode) {
+			SIGNALduino_Log3 $name, 3, "$name: GROTHE protocol-Id $id, $rtxt";	
+			return (-1,"$rtxt");
+		}
+	}
+	my $hex=SIGNALduino_b2h($bitData);
+	SIGNALduino_Log3 $name, 4, "$name: GROTHE protocol-Id $id detected, $bitData ($bitLength)";	
+	return (1,$hex); ## Return the bits unchanged in hex
+}
 
 sub SIGNALduino_MCTFA
 {
