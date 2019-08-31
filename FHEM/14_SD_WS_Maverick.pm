@@ -24,8 +24,8 @@ sub SD_WS_Maverick_Define($$);
 sub SD_WS_Maverick_Undef($$);
 sub SD_WS_Maverick_Parse($$);
 sub SD_WS_Maverick_Attr(@);
-sub SD_WS_Maverick_SetSensor1Inaktiv($);
-sub SD_WS_Maverick_SetSensor2Inaktiv($);
+sub SD_WS_Maverick_SetSensor1Inactive($);
+sub SD_WS_Maverick_SetSensor2Inactive($);
 sub SD_WS_Maverick_updateReadings($);
 
 sub
@@ -211,12 +211,12 @@ SD_WS_Maverick_Parse($$)
   # Den SensorState bei Inaktivität zurücksetzen lassen durch Timer 
   my $inactivityinterval=int(AttrVal($name,"inactivityinterval",360));
   if ($sensor_1_state ne "unknown") {
-    RemoveInternalTimer($hash, 'SD_WS_Maverick_SetSensor1Inaktiv');
-    InternalTimer(time()+($inactivityinterval), 'SD_WS_Maverick_SetSensor1Inaktiv', $hash, 0);
+    RemoveInternalTimer($hash, 'SD_WS_Maverick_SetSensor1Inactive');
+    InternalTimer(time()+($inactivityinterval), 'SD_WS_Maverick_SetSensor1Inactive', $hash, 0);
   }
   if ( $sensor_2_state ne "unknown") {
-    RemoveInternalTimer($hash, 'SD_WS_Maverick_SetSensor2Inaktiv');
-    InternalTimer(time()+($inactivityinterval), 'SD_WS_Maverick_SetSensor2Inaktiv', $hash, 0);
+    RemoveInternalTimer($hash, 'SD_WS_Maverick_SetSensor2Inactive');
+    InternalTimer(time()+($inactivityinterval), 'SD_WS_Maverick_SetSensor2Inactive', $hash, 0);
   }
   
   # Checksum auswerten
@@ -278,17 +278,17 @@ sub SD_WS_Maverick_Attr(@)
   return undef;
 }
 
-sub SD_WS_Maverick_SetSensor1Inaktiv($){
+sub SD_WS_Maverick_SetSensor1Inactive($){
   my ($hash) = @_;
   my $name = $hash->{NAME};
-  Log3 $hash, 5, "$name SD_WS_Maverick_SetSensor1Inaktiv";
+  Log3 $hash, 5, "$name SD_WS_Maverick_SetSensor1Inactive";
   readingsSingleUpdate($hash, "Sensor-1-food_state", "inactive", 1);
 }
 
-sub SD_WS_Maverick_SetSensor2Inaktiv($){
+sub SD_WS_Maverick_SetSensor2Inactive($){
   my ($hash) = @_;
   my $name = $hash->{NAME};
-  Log3 $hash, 5, "$name SD_WS_Maverick_SetSensor2Inaktiv";
+  Log3 $hash, 5, "$name SD_WS_Maverick_SetSensor2Inactive";
   readingsSingleUpdate($hash, "Sensor-2-bbq_state", "inactive", 1);
 }
 
