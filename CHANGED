@@ -1,3 +1,6 @@
+31.08.2019
+ 14_SD_Keeloq.pm: fix group control 9-16  | added enhancement (shade for groups)
+                  reduced repeats for shade after test | fix serial send syntax
 30.08.2019
  00_SIGNALduino.pm: get availableFirmware - fix browser refresh
 27.08.2019
