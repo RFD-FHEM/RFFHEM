@@ -74,6 +74,8 @@ sub
 SD_WS_Maverick_Undef($$)
 {
   my ($hash, $name) = @_;
+  RemoveInternalTimer($hash, 'SD_WS_Maverick_SetSensor1Inactive');
+  RemoveInternalTimer($hash, 'SD_WS_Maverick_SetSensor2Inactive');
   delete($modules{SD_WS_Maverick}{defptr}{$hash->{CODE}})
      if(defined($hash->{CODE}) &&
         defined($modules{SD_WS_Maverick}{defptr}{$hash->{CODE}}));
