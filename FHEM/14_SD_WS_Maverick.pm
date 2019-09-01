@@ -11,6 +11,9 @@
 #  - changed: 14_SD_WS_Maverick: rename Readings for Temperatures
 #  - feature: 14_SD_WS_Maverick: added Readings for Sensor-states
 #  - feature: 14_SD_WS_Maverick: added support for device TFA 14.1504 (Radio-controlled grill and meat thermometer)
+#  - changed: 14_SD_WS_Maverick: removed internals which are identical to readings
+#  - changed: 14_SD_WS_Maverick: removed declaration of stateFormat
+#  - changed: 14_SD_WS_Maverick: code optimization
 
 package main;
 
