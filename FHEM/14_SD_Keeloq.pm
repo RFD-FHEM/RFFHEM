@@ -221,7 +221,7 @@ sub Attr(@) {
 					my $Channels = AttrVal($name, "Channels", "");
 					return "ERROR: you can use Channels = $attrValue only with defined attribut addGroups!" if ($attrValue == 0 && $addGroups eq "");
 					if ($Channels > $attrValue) {
-						foreach my $d (sort keys %{$hash->{READINGS}}) {
+						foreach my $d (keys %{$hash->{READINGS}}) {
 							if ($d =~ /^LastAction_Channel_(\d+)/) {
 								readingsDelete($hash, $d) if ($1 > $attrValue);
 							}
