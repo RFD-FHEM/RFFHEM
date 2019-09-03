@@ -1257,13 +1257,15 @@ package lib::SD_ProtocolData;
 				length_min      => '14',       # ???
 				length_max      => '18',
 			},
-		"47"	=>	## Maverick
+		"47"	=>	## Maverick ET-732, ET-733; TFA 14.1504
+							# https://github.com/RFD-FHEM/RFFHEM/issues/61
 							# Food: 23 BBQ: 22   MC;LL=-507;LH=490;SL=-258;SH=239;D=AA9995599599A959996699A969;C=248;L=104;
+							# https://github.com/RFD-FHEM/RFFHEM/issues/167
 			{
 				name						=> 'Maverick',
 				comment					=> 'BBQ / food thermometer',
 				id							=> '47',
-				knownFreqs      => '',
+				knownFreqs      => '433.92',
 				clockrange			=> [180,260],
 				format					=> 'manchester',
 				preamble				=> 'P47#',						# prepend to converted message

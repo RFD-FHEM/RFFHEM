@@ -557,7 +557,12 @@ SIGNALduino_Set($@)
 		
 		my $avrdudefound=0;
 		my $tool_name = "avrdude"; 
-		for my $path ( split /:/, $ENV{PATH} ) {
+		my $path_separator = ':';
+                if ($^O eq 'MSWin32') {
+			$tool_name .= ".exe";
+			$path_separator = ';';
+		}
+		for my $path ( split /$path_separator/, $ENV{PATH} ) {
 		    if ( -f "$path/$tool_name" && -x _ ) {
 		    	$avrdudefound=1;
 		        last;
