@@ -383,6 +383,12 @@ sub Parse($$) {
 	$hash->{lastMSG} = $rawData;
 	$hash->{bitMSG} = $bitData;
 
+	### Grothe_Mistral_SE 01 or 03 length 10 or 12 nibble (only by first message) ###
+	if ($protocol == 96 && $hash->{STATE} eq "???") {
+		$attr{$name}{model} = "Grothe_Mistral_SE_01" if ($hlen == 10);
+		$attr{$name}{model} = "Grothe_Mistral_SE_03" if ($hlen == 12);
+	}
+
 	my $model = AttrVal($name, "model", "unknown");
 	Log3 $name, 4, "$ioname: SD_BELL_Parse $name model=$model state=$state ($rawData)";
 
@@ -409,16 +415,13 @@ sub Attr(@) {
 	#Log3 $name, 3, "SD_BELL_Attr cmd=$cmd attrName=$attrName attrValue=$attrValue oldmodel=$oldmodel";
 
 	if ($cmd eq "set" && $attrName eq "model" && $attrValue ne $oldmodel) {		### set new attr
-
 		$check_ok = 1 if ($models{$attrValue}{hex_lengh} =~ /($hex_lengh)/);
 		return "SD_BELL: ERROR! You want to choose the $oldmodel model to $attrValue.\nPlease check your selection. Your HEX-Value in DEF with a length of " .$hex_lengh. " are not allowed on this model!" if ($check_ok != 1 && $hex_lengh != 0);
 		Log3 $name, 3, "SD_BELL_Attr $cmd $attrName to $attrValue from $oldmodel";
 	}
 
 	if ($cmd eq "del" && $attrName eq "model") {		### delete readings
-		# PLEASE CHECK !!! BUG ?
-		# readingsDelete($hash, "LastAction") if(defined(ReadingsVal($hash->{NAME},"LastAction",undef)));	# existiert nicht!!!
-		# readingsDelete($hash, "state") if(defined(ReadingsVal($hash->{NAME},"state",undef))); # Absturz FHEM!!!
+		readingsSingleUpdate($hash, "state" , "Please define a model for the correct processing",1);
 	}
 
 	return undef;
