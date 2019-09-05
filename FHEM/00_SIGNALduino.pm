@@ -4302,9 +4302,7 @@ sub SIGNALduino_Log3($$$)
   my $name =$dev;
   $name= $dev->{NAME} if(defined($dev) && ref($dev) eq "HASH");
   
-  if (AttrVal($name,"eventlogging",0)) {
-	  DoTrigger($dev,"$name $loglevel: $text");
-  }
+  DoTrigger($dev,"$name $loglevel: $text");
   
   return Log3($name,$loglevel,$text);
 }
