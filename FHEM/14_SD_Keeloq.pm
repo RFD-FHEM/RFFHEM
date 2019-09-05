@@ -1,5 +1,5 @@
 ######################################################################################################################
-# $Id: 14_SD_Keeloq.pm 32 2019-08-20 12:00:00Z v3.4-dev_02.12. $
+# $Id: 14_SD_Keeloq.pm 32 2019-08-31 12:00:00Z v3.4-dev_02.12. $
 #
 # The file is part of the SIGNALduino project.
 # The purpose of this module is support for KeeLoq devices.
@@ -20,13 +20,14 @@ use POSIX;
 use Data::Dumper qw (Dumper);
 
 my %models = (
-	"JaroLift" =>	{	Button => { "up"					=>	"1000",
-															"stop"				=>	"0100",	# new LearnVersion (2)
-															"down"				=>	"0010",
-															"learn"				=>	"0001",	# old LearnVersion
-															"shade"				=>	"0101", # 20x stop	(stop with 20x repeats)
-															"shade_learn"	=>	"",			# 4x stop		(stop 4x push)
-															"updown"			=>	"1010"	# new LearnVersion (1)
+	"JaroLift" =>	{	Button => { "up"					=>	"1000",	# button
+															"stop"				=>	"0100",	# button - for learn (LearnVersion new, step 2)
+															"down"				=>	"0010",	# button
+															"learn"				=>	"0001",	# function - old LearnVersion
+															"shade"				=>	"0101", # function - 20x stop	(stop with 20x repeats) mod to 15 repeats after test
+																												# manual - button Stop push 5 seconds (2012)
+															"shade_learn"	=>	"",			# function -  4x stop	(stop 4x push)
+															"updown"			=>	"1010"	# buttons together - for learn (LearnVersion new, step 1)
 														},
 									Channel => {	1		=>	"0000",
 																2		=>	"0001",
@@ -57,8 +58,8 @@ my %models = (
 																	},
 												Protocol 	=> "P88",
 												Typ				=> "remote"
-											},	
-	
+											},
+
 	"RP_S1_HS_RF11" => {	Button => {	"one"			=>	"1000",
 																		"two"			=>	"0010",
 																		"one+two"	=>	"1010"
@@ -165,16 +166,16 @@ sub Define() {
 	} else {
 		$model = "unknown";
 	};
-	
+
 	my $iodevice = $a[3] if($a[3]);
 
 	$modules{SD_Keeloq}{defptr}{$hash->{DEF}} = $hash;
 	my $ioname = $modules{SD_Keeloq}{defptr}{ioname} if (exists $modules{SD_Keeloq}{defptr}{ioname} && not $iodevice);
 	$iodevice = $ioname if not $iodevice;
-	
+
 	$attr{$name}{room}		= "SD_Keeloq" if ( not exists($attr{$name}{room}) );
 	$attr{$name}{model}		= $model if ( not exists($attr{$name}{model}) );
-	
+
 	AssignIoPort($hash, $iodevice);
 	return undef;
 }
@@ -216,18 +217,26 @@ sub Attr(@) {
 					$attr{$name}{ChannelNames} = $attrValue;
 				}
 
-				if ($attrName eq "Channels" && $attrValue == 0 && $addGroups eq "") {
-					return "ERROR: you can use Channels = $attrValue only with defined attribut addGroups!";
+				if ($attrName eq "Channels") {
+					my $Channels = AttrVal($name, "Channels", "");
+					return "ERROR: you can use Channels = $attrValue only with defined attribut addGroups!" if ($attrValue == 0 && $addGroups eq "");
+					if ($Channels > $attrValue) {
+						foreach my $d (keys %{$hash->{READINGS}}) {
+							if ($d =~ /^LastAction_Channel_(\d+)/) {
+								readingsDelete($hash, $d) if ($1 > $attrValue);
+							}
+						}
+					}
 				}
-				
+
 				if ($attrName eq "UI" && $attrValue eq "Einzeilig" && not exists $attr{$name}{Channels} && not exists $attr{$name}{ChannelFixed}) {
 					setReadingsVal($hash,"DDSelected",1,FmtDateTime(time()));
 				}
-				
+
 				if ($attrName eq "ChannelFixed"&& $attrValue > $attr{$name}{Channels}) {
 					return "ERROR: your $attrName attribut with value $attrValue is wrong!\nIt is no compatible with ".$attr{$name}{Channels}." channel option.";
 				}
-				
+
 				if ($attrName eq "Serial_send" && $attrValue !~ /^[0-9a-fA-F]{4}00/) {
 					return "ERROR: your $attrName attribut with value $attrValue is wrong!\nOnly support values with 00 at END!";
 				}
@@ -321,6 +330,7 @@ sub Set($$$@) {
 	my $ret;
 
 	my $cmd = $a[0];
+	my $cmd_org = $cmd;
 	my $cmd2 = $a[1];
 
 	### Typ JaroLift ###
@@ -428,12 +438,13 @@ sub Set($$$@) {
 			}
 
 			if ($cmd eq "shade_learn") {
+				# userreport:  4 repeats only https://github.com/RFD-FHEM/RFFHEM/issues/632#issuecomment-526765758 with check Jarolift-Dongle via putty
 				$foreachCount = 4;
 				$cmd = "stop";
 			}
 
 			foreach my $i (1..$foreachCount) {
-				Log3 $name, 4, "$ioname: SD_Keeloq_Set - check, foreachCount=$foreachCount cmd=$cmd";
+				Log3 $name, 4, "$ioname: SD_Keeloq_Set - check, foreachCount=$foreachCount function=$cmd_org cmd=$cmd";
 				## LearnVersion new - part 1
 				if ($learning ne "old" && $cmd eq "learn" && $i == 1) {
 					$cmd = "updown";
@@ -453,8 +464,10 @@ sub Set($$$@) {
 				}
 
 				$button = $cmd;
-				$buttonbits = $models{$model}{Button}{$cmd};
-				Log3 $name, 4, "$ioname: SD_Keeloq_Set - check, foreachLoop=$i LearnVersion=$learning" if ((defined $cmd2 && $learning eq "old") || (defined $cmd2 && $learning eq "new"));
+				$buttonbits = $models{$model}{Button}{$cmd} if ($cmd ne "shade");
+				$buttonbits = $models{$model}{Button}{stop} if ($cmd eq "shade");		# for status shade
+				my $learning_text = $learning eq "old" ? "send learn" : "send updown and additionally followed stop"; 
+				Log3 $name, 4, "$ioname: SD_Keeloq_Set - check, foreachLoop=$i LearnVersion=$learning ($learning_text)" if ((defined $cmd2 && $learning eq "old") || (defined $cmd2 && $learning eq "new"));
 
 				if ($addGroups ne "") {
 					@channel_from_addGroups = split(" ", $addGroups);
@@ -481,7 +494,7 @@ sub Set($$$@) {
 					my @multicontrol = split(",", $cmd2);
 					foreach my $found_multi (@multicontrol){
 						## channel ##
-						if ($found_multi =~ /^\d$/) {
+						if ($found_multi =~ /^\d+$/) {
 							Log3 $name, 4, "$ioname: SD_Keeloq_Set - selection $found_multi is channel solo";
 							push(@channels,$found_multi);
 							$channel = $multicontrol[0];
@@ -541,7 +554,7 @@ sub Set($$$@) {
 				$bit64to71 = reverse $bit64to71;		# JaroLift only
 
 				### DeviceKey (die ersten Stellen aus der Vorage, der Rest vom Sendenen Kanal)
-				$Serial_send = sprintf ("%24b", hex($Serial_send));																				# verified
+				$Serial_send = sprintf ("%024b", hex($Serial_send));																			# verified
 
 				$DeviceKey = $Serial_send.$models{$model}{Channel}{$channel};															# verified
 				$DeviceKey = oct("0b".$DeviceKey);																												# verified
@@ -562,7 +575,10 @@ sub Set($$$@) {
 
 				### Zusammenführen
 				my $bits = reverse (sprintf("%032b", $encoded)).reverse($models{$model}{Channel}{$channel}).reverse($Serial_send).reverse($buttonbits).reverse($bit64to71);
-				$Repeats = 20 if ($cmd eq "shade");			# special, command shade = 20 repeats
+
+				# special, command shade -> 20 repeats = 2,34 s | 15 repeats = 1,75s
+				# userreport: 12 repeats ok https://github.com/HomeAutoUser/SD_Keeloq__old_Jaro/issues/9#issuecomment-524176737
+				$Repeats = 15 if ($cmd eq "shade");
 				my $msg = "P87#$bits"."P#R".$Repeats;
 
 				Log3 $name, 5, "$ioname: SD_Keeloq_Set - Channel                   = $channel";
@@ -578,7 +594,7 @@ sub Set($$$@) {
 				Log3 $name, 5, "$ioname: SD_Keeloq_Set - Counter                   = $counter_send";
 				Log3 $name, 5, "$ioname: SD_Keeloq_Set - encoded (encrypt)         = ".sprintf("%032b", $encoded)."\n";
 
-				my $binsplit = SD_Keeloq_binsplit_JaroLift($bits);
+				my $binsplit = SD_Keeloq_binsplit_JaroLift($bits) if (AttrVal($name, "verbose", "3") eq "5");
 
 				Log3 $name, 5, "$ioname: SD_Keeloq_Set                                           encoded     <- | ->     decrypts";
 				Log3 $name, 5, "$ioname: SD_Keeloq_Set                       Grp 0-7 |digitS/N|      counter    | ch |          serial        | bt |Grp 8-15";
@@ -685,7 +701,7 @@ sub Parse($$) {
 	my $serialWithoutCh;
 	my $model = "unknown";
 	my $devicedef;
-	
+
 	if ($hlen == 17) {
 		$model = "unknown";
 		$serialWithoutCh = reverse (substr ($bitData , 32 , 28));						# 28bit serial
@@ -769,7 +785,7 @@ sub Parse($$) {
 		($bit8to15) = @_ = ( reverse (substr ($bitData , 8 , 8)) , "encrypted" )[$encrypted];			# without MasterMSB | MasterLSB encrypted
 		$bit64to71 = reverse (substr ($bitData , 64 , 8));
 
-		$binsplit = SD_Keeloq_binsplit_JaroLift($bitData);
+		$binsplit = SD_Keeloq_binsplit_JaroLift($bitData) if (AttrVal($name, "verbose", "3") eq "5");
 
 		Log3 $name, 5, "$ioname: SD_Keeloq_Parse - typ = $model";
 		Log3 $name, 5, "$ioname: SD_Keeloq_Parse                                 encoded     <- | ->     decrypts";
@@ -961,7 +977,7 @@ sub Parse($$) {
 	Log3 $name, 5, "$ioname: SD_Keeloq_Parse - user_modus                           = $modus";
 	Log3 $name, 5, "$ioname: SD_Keeloq_Parse - user_info                            = $info";
 	Log3 $name, 5, "######## DEBUG END ########\n";
-	
+
 	$VLOW = $VLOW eq "0" ? "ok" : "low" if (defined $VLOW);		# only chip HCS301 - RP_S1_HS_RF11 | Roto | Waeco_MA650_TX
 	$RPT = $RPT eq "0" ? "no" : "yes" if (defined $RPT);			# only chip HCS301 - RP_S1_HS_RF11 | Roto | Waeco_MA650_TX
 
@@ -1100,14 +1116,10 @@ sub SD_Keeloq_binsplit_JaroLift($) {
 	my $bits = shift;
 	my $binsplit;
 
-	for my $i(0..71){
+	for my $i(0..71) {
 		$binsplit.= substr($bits,$i,1);
-		if (($i+1) % 8 == 0 && $i < 32) {
-			$binsplit.= " ";
-		}
-		if ($i == 35 || $i == 59 || $i == 63) {
-			$binsplit.= " ";
-		}
+		$binsplit.= " " if (($i+1) % 8 == 0 && $i < 32);
+		$binsplit.= " " if ($i == 35 || $i == 59 || $i == 63);
 	}
 	return $binsplit;
 }
@@ -1117,14 +1129,10 @@ sub SD_Keeloq_binsplit_Roto($) {
 	my $bits = shift;
 	my $binsplit;
 
-	for my $i(0..65){
+	for my $i(0..65) {
 		$binsplit.= substr($bits,$i,1);
-		if (($i+1) % 16 == 0 && $i < 27) {
-			$binsplit.= " ";
-		}
-		if ($i == 27 || $i == 31 || $i == 59 || $i == 63 || $i == 64 || $i == 65) {
-			$binsplit.= " ";
-		}
+		$binsplit.= " " if (($i+1) % 16 == 0 && $i < 27);
+		$binsplit.= " " if ($i == 27 || $i == 31 || $i == 59 || $i == 63 || $i == 64 || $i == 65);
 	}
 	return $binsplit;
 }
@@ -1200,7 +1208,7 @@ sub SD_Keeloq_attr2html($@) {
 			my $grpName = $grpInfo[0];
 			$html.= "<tr><td>";
 			$html.= $grpName."</td>";
-			$html.= SD_Keeloq_attr2htmlButtons($grpInfo[1], $name, $ShowIcons, 0, 0);
+			$html.= SD_Keeloq_attr2htmlButtons($grpInfo[1], $name, $ShowIcons, $ShowShade, 0);
 			$html.= "</tr>";
 		}
 
@@ -1257,43 +1265,29 @@ sub SD_Keeloq_attr2htmlButtons($$$$$) {
 
 	### UP
 	my $cmd = "cmd.$name=set $name up $channel";
-	$html.="<td><a onClick=\"FW_cmd('$FW_ME$FW_subdir?XHR=1&$cmd')\">Hoch</a></td>" if (!$ShowIcons);
-	if ($ShowIcons == 1){
-		my $img = FW_makeImage("fts_shutter_up");
-		$html.= "<td><a onClick=\"FW_cmd('$FW_ME$FW_subdir?XHR=1&$cmd')\">$img</a></td>";
-	}
+	$html.= "<td><a onClick=\"FW_cmd('$FW_ME$FW_subdir?XHR=1&$cmd')\">Hoch</a></td>" if (!$ShowIcons);
+	$html.= "<td><a onClick=\"FW_cmd('$FW_ME$FW_subdir?XHR=1&$cmd')\">".FW_makeImage("fts_shutter_up")."</a></td>" if ($ShowIcons == 1);
 
 	### STOP
 	$cmd = "cmd.$name=set $name stop $channel";
 	$html.= "<td><a onClick=\"FW_cmd('$FW_ME$FW_subdir?XHR=1&$cmd')\">Stop</a></td>" if (!$ShowIcons);
-	if ($ShowIcons == 1){
-		my $img = FW_makeImage("rc_STOP");
-		$html.= "<td><a onClick=\"FW_cmd('$FW_ME$FW_subdir?XHR=1&$cmd')\">$img</a></td>";
-	}
+	$html.= "<td><a onClick=\"FW_cmd('$FW_ME$FW_subdir?XHR=1&$cmd')\">".FW_makeImage("rc_STOP")."</a></td>" if ($ShowIcons == 1);
 
 	### DOWN
 	$cmd = "cmd.$name=set $name down $channel";
 	$html.= "<td><a onClick=\"FW_cmd('$FW_ME$FW_subdir?XHR=1&$cmd')\">Runter</a></td>" if (!$ShowIcons);
-	if ($ShowIcons == 1){
-		my $img = FW_makeImage("fts_shutter_down");
-		$html.= "<td><a onClick=\"FW_cmd('$FW_ME$FW_subdir?XHR=1&$cmd')\">$img</a></td>";
-	}
+	$html.= "<td><a onClick=\"FW_cmd('$FW_ME$FW_subdir?XHR=1&$cmd')\">".FW_makeImage("fts_shutter_down")."</a></td>" if ($ShowIcons == 1);
 
 	### SHADE
 	$cmd = "cmd.$name=set $name shade $channel";
 	$html.= "<td><a onClick=\"FW_cmd('$FW_ME$FW_subdir?XHR=1&$cmd')\">Beschattung</a></td>" if (($ShowShade) && (!$ShowIcons));
-	if ($ShowIcons == 1 && $ShowShade == 1){
-		my $img = FW_makeImage("fts_shutter_shadding_run");
-		$html.= "<td><a onClick=\"FW_cmd('$FW_ME$FW_subdir?XHR=1&$cmd')\">$img</a></td>";
-	}
+	$html.= "<td><a onClick=\"FW_cmd('$FW_ME$FW_subdir?XHR=1&$cmd')\">".FW_makeImage("fts_shutter_shadding_run")."</a></td>" if ($ShowIcons == 1 && $ShowShade == 1);
 
 	### LEARN
 	$cmd = "cmd.$name=set $name learn $channel";
 	$html.= "<td><a onClick=\"FW_cmd('$FW_ME$FW_subdir?XHR=1&$cmd')\">Lernen</a></td>" if (($ShowLearn) && (!$ShowIcons));
-	if ($ShowIcons == 1 && $ShowLearn == 1){
-		my $img = FW_makeImage("fts_shutter_manual");
-		$html.= "<td><a onClick=\"FW_cmd('$FW_ME$FW_subdir?XHR=1&$cmd')\">$img</a></td>";
-	}
+	$html.= "<td><a onClick=\"FW_cmd('$FW_ME$FW_subdir?XHR=1&$cmd')\">".FW_makeImage("fts_shutter_manual")."</a></td>" if ($ShowIcons == 1 && $ShowLearn == 1);
+
 	return $html;
 }
 
@@ -1305,9 +1299,9 @@ sub SD_Keeloq_attr2htmlButtons($$$$$) {
 # Beginn der Commandref
 
 =pod
-=item [helper|device|command]
-=item summary Kurzbeschreibung in Englisch was MYMODULE steuert/unterst&uuml;tzt
-=item summary_DE Kurzbeschreibung in Deutsch was MYMODULE steuert/unterst&uuml;tzt
+=item device
+=item summary 14_SD_Keeloq supports wireless devices with KeeLoq method
+=item summary_DE 14_SD_Keeloq unterst&uuml;tzt Funkger&auml;te mit dem KeeLoq Verfahren
 
 =begin html
 
@@ -1321,7 +1315,7 @@ sub SD_Keeloq_attr2htmlButtons($$$$$) {
 	<b><i>After entering the correct key, you will receive all states and the sending or controlling is possible!<br>
 	An anchoring of the keys in the module is NOT included and everyone has to manage it himself.</i></b><br>
 	- KeeLoq is a registered trademark of Microchip Technology Inc.-<br><br>
-	
+
 	<u>The following devices are supported:</u><br>
 	<ul> - JaroLift radio wall transmitter (example: TDRC 16W / TDRCT 04W)&nbsp;&nbsp;&nbsp;<small>(model: JaroLift | protocol 87)</small><br></ul>
 	<ul> - RADEMACHER remote with two button&nbsp;&nbsp;&nbsp;<small>(model: RP_S1_HS_RF11 | protocol 88)&nbsp;&nbsp;[HCS301 chip]</small><br></ul>
@@ -1356,7 +1350,8 @@ sub SD_Keeloq_attr2htmlButtons($$$$$) {
 			<li><b>updown</b><br>
 			Simultaneously pressing the up and down keys for programming purposes.<br>
 			<li><b>shade</b><br>
-			Bring shutters into shading position. (not supported by all receivers!)<br>
+			Bring shutters into shading position.<br>
+			<i>(not supported by all receivers! The device sends 15x stop command)</i><br>
 			<br>
 		</ul>
 	example: <ul>set SD_Keeloq_Device1 down 7<br>
@@ -1389,6 +1384,7 @@ sub SD_Keeloq_attr2htmlButtons($$$$$) {
 		<br>
 		<li><a name="LearnVersion"><b>LearnVersion</b></a><br>
 		Learning variant, as this differs depending on the age of the devices. (Standard old)<br>
+		<i><u>Please read in your manual what you should press.</u></i><br>
 		<ul>- old Version: send <code>learn</code></ul>
 		<ul>- new Version: send <code>updown</code> and additionally followed by <code>stop</code></ul>
 		</li>
@@ -1483,7 +1479,7 @@ sub SD_Keeloq_attr2htmlButtons($$$$$) {
 	<b><i>Nach Eingabe der richtigen Schl&uuml;ssel erh&auml;lt man alle Zust&auml;nde und das Senden bzw. steuern ist m&ouml;glich!<br>
 	Eine Verankerung der Schl&uuml;ssel im Modul ist NICHT enthalten und jeder muss diese selbst verwalten.</i></b><br>
 	- KeeLoq is a registered trademark of Microchip Technology Inc.-<br><br>
-	
+
 	<u>Es werden bisher folgende Ger&auml;te unterst&uuml;tzt:</u><br>
 	<ul> - JaroLift Funkwandsender (Bsp: TDRC 16W / TDRCT 04W)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: JaroLift | Protokoll 87)</small><br></ul>
 	<ul> - RADEMACHER Fernbedienung mit 2 Tasten&nbsp;&nbsp;&nbsp;<small>(Modulmodel: RP_S1_HS_RF11 | Protokoll 88)&nbsp;&nbsp;[HCS301 chip]</small><br></ul>
@@ -1518,7 +1514,8 @@ sub SD_Keeloq_attr2htmlButtons($$$$$) {
 			<li><b>updown</b><br>
 			Gleichzeitges Dr&uuml;cken der Auf- und Abtaste zu Programmierzwecken.<br>
 			<li><b>shade</b><br>
-			Rolladen in Beschattungsposition bringen. (wird nicht von allen Empf&auml;ngern unterst&uuml;tzt!)<br>
+			Rolladen in Beschattungsposition bringen.<br>
+			<i>(wird nicht von allen Empf&auml;ngern unterst&uuml;tzt! Das Device sendet 15x den Stop Befehl)</i><br>
 			<br>
 		</ul>
 	Beispiele: <ul>set SD_Keeloq_Device1 down 7<br>
@@ -1550,7 +1547,8 @@ sub SD_Keeloq_attr2htmlButtons($$$$$) {
 		</li>
 		<br>
 		<li><a name="LearnVersion"><b>LearnVersion</b></a><br>
-		Anlernvariante, da diese sich je nach alter der Ger&auml;te unterscheidet. (Standard old)<br>
+		Anlernvariante, da diese sich je nach Alter der Ger&auml;te unterscheidet. (Standard old)<br>
+		<i><u>Bitte lesen Sie dazu Ihre Bedienungsanleitung was dr&uuml;cken sollen.</u></i><br>
 		<ul>- old Version: senden von <code>learn</code></ul>
 		<ul>- new Version: senden von <code>updown</code> und zus&auml;tzlich gefolgt von <code>stop</code></ul>
 		</li>

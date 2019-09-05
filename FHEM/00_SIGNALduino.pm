@@ -36,7 +36,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.4.1_dev_11.08",
+	SDUINO_VERSION            => "v3.4.1_dev_30.08",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -565,7 +565,12 @@ SIGNALduino_Set($@)
 		
 		my $avrdudefound=0;
 		my $tool_name = "avrdude"; 
-		for my $path ( split /:/, $ENV{PATH} ) {
+		my $path_separator = ':';
+                if ($^O eq 'MSWin32') {
+			$tool_name .= ".exe";
+			$path_separator = ';';
+		}
+		for my $path ( split /$path_separator/, $ENV{PATH} ) {
 		    if ( -f "$path/$tool_name" && -x _ ) {
 		    	$avrdudefound=1;
 		        last;
@@ -4523,7 +4528,7 @@ sub SIGNALduino_githubParseHttpResponse($$$)
     }                                                                                              # wenn
     # Damit ist die Abfrage zuende.
     # Evtl. einen InternalTimer neu schedulen
-    FW_directNotify("#FHEMWEB:$FW_wname", "location.reload('true')", "");
+    FW_directNotify("FILTER=$name", "#FHEMWEB:$FW_wname", "location.reload('true')", "");
 	return 0;
 }
 
