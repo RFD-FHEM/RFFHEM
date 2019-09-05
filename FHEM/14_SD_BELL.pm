@@ -109,7 +109,6 @@ BEGIN {
 		AttrVal
 		attr
 		defs
-		fhem
 		IOWrite
 		InternalVal
 		Log3
@@ -182,7 +181,7 @@ sub Set($$$@) {
 			# set sduino434 raw SC;;R=5;;SR;;R=1;;P0=1500;;P1=-215;;D=01;;SM;;R=1;;C=215;;D=47104762003F;;
 			my $msg = "SC;;R=";
 			$msg .= $repeats;
-			$msg .= ";;SR;;R=1;;P0=1500;;P1=-215;;D=01;;SM;;R=1;;C=215;;D=47";
+			$msg .= ";SR;R=1;P0=1500;P1=-215;D=01;SM;R=1;C=215;D=47";
 			my $id = $split[1];
 			$id = sprintf('%06X', hex(substr($id,0,6)) | 0x800000) if ($cmd eq "Alarm");	# set alarm bit
 			$msg .= $id;
@@ -190,8 +189,8 @@ sub Set($$$@) {
 			$msg .= $checksum;
 			my $model = AttrVal($name,'model', 'Grothe_Mistral_SE_01');
 			$msg .= "3F" if ($model eq "Grothe_Mistral_SE_03");	# only Grothe_Mistral_SE_03
-			$msg .= ";;";
-			fhem("set $ioname raw $msg");
+			$msg .= ";";
+			IOWrite($hash, 'raw', $msg);
 			Log3 $name, 4, "$ioname: $name $msg";
 		} else {
 			my $rawDatasend = $split[1];													# hex value from def without protocol
