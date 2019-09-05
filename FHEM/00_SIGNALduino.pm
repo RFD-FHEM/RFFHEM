@@ -9,11 +9,6 @@
 # N. Butzek, S. Butzek, 2014-2015
 # S.Butzek,Ralf9 2016-2019
 
-# regex    (\s)SIGNALduino_Log3\s(.*);$
-# replace  ($1)$hash->{logMethod}->\($2\);
-
-
-
 
 package main;
 my $missingModulSIGNALduino="";
@@ -36,7 +31,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.4.1_dev_30.08",
+	SDUINO_VERSION            => "v3.4.1_dev_06.09",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -349,7 +344,6 @@ SIGNALduino_Define($$)
   $hash->{Clients} = $clientsSIGNALduino;
   $hash->{MatchList} = \%matchListSIGNALduino;
   $hash->{DeviceName} = $dev;
-  #$hash->{logMethod} = \&::SIGNALduino_Log3;
   $hash->{logMethod} = \&main::Log3;	
   
   my $ret=undef;
