@@ -66,7 +66,7 @@ package lib::SD_ProtocolData;
 	use strict;
 	use warnings;
 	
-	our $VERSION = '1.07';
+	our $VERSION = '1.08';
 	our %protocols = (
 		"0"	=>	## various weather sensors (500 | 9100)
 						# ABS700 | Id:79 T: 3.3 Bat:low                MS;P1=-7949;P2=492;P3=-1978;P4=-3970;D=21232423232424242423232323232324242423232323232424;CP=2;SP=1;R=245;O;
@@ -214,7 +214,7 @@ package lib::SD_ProtocolData;
 				length_max			=> '34',				# Don't know maximal lenth of a valid message
 				paddingbits			=> '8',					# pad up to 8 bits, default is 4
 			},
-		"3"	=>	## itv1 - remote with IC PT2262 example: ELRO | REWE | Intertek Modell 1946518 | WOFI Lamp
+		"3"	=>	## itv1 - remote with IC PT2262 example: ELRO | REWE | Intertek Modell 1946518 | WOFI Lamp // PIR JCHENG with Wireless Coding EV1527
 						## (real CP=300 | repeatpause=9300)
 						# REWE Model: 0175926R -> on | v1      MS;P1=-905;P2=896;P3=-317;P4=303;P5=-9299;D=45412341414123412341414123412341234141412341414123;CP=4;SP=5;R=91;A;#;
 						## (real CP=330 | repeatpause=10100)
@@ -224,9 +224,12 @@ package lib::SD_ProtocolData;
 						# door/window switch from CHN (PT2262 compatible) from amazon & ebay | itswitch_CHN model
 						# open                                 MS;P1=-478;P2=1360;P3=468;P4=-1366;P5=-14045;D=35212134212134343421212134213434343434343421342134;CP=3;SP=5;R=30;O;m2;4;
 						# close                                MS;P1=-474;P2=1373;P3=455;P4=-1367;P5=-14044;D=35212134212134343421212134213434343434343421212134;CP=3;SP=5;R=37;O;m2;
+						## JCHENG SECURITY Wireless PIR
+						# (only autocreate -> J2 Data setting D0 open | D1 closed | D2 closed | D3 open)
+						# on                                   MS;P1=-12541;P2=1227;P3=-405;P4=407;P5=-1209;D=41232323232345452323454523452323234545234545232345;CP=4;SP=1;R=35;O;m2;E;
 			{
 				name						=> 'chip xx2262',
-				comment					=> 'remote for ELRO|Kangtai|Intertek|REWE|WOFI',
+				comment					=> 'remote for ELRO|Kangtai|Intertek|REWE|WOFI / PIR JCHENG',
 				id							=> '3',
 				knownFreqs      => '433.92',
 				one							=> [3,-1],
@@ -2378,23 +2381,28 @@ package lib::SD_ProtocolData;
 				length_min      => '50',
 				length_max      => '50',
 			},
-		"96"	=>	# Funk-Gong | Taster Grothe Mistral SE 03.1 , Innenteil Grothe Mistral 200M(E)
+		"96"	=>	# Funk-Gong | Taster Grothe Mistral SE 03.1 / 01.1, Innenteil Grothe Mistral 200M(E)
 							# https://forum.fhem.de/index.php/topic,64251.msg940593.html?PHPSESSID=nufcvvjobdd8r7rgr0cq3qkrv0#msg940593 @coolheizer
-							# Button_1    MC;LL=-424;LH=438;SL=-215;SH=212;D=238823B1001F8;C=214;L=49;R=68;
-							# Button_2    MC;LL=-412;LH=458;SL=-187;SH=240;D=238129D9A78;C=216;L=41;R=241;
+							# SD_BELL_104762 Alarm        MC;LL=-430;LH=418;SL=-216;SH=226;D=23C823B1401F8;C=214;L=49;R=53;
+							# SD_BELL_104762 ring         MC;LL=-439;LH=419;SL=-221;SH=212;D=238823B1001F8;C=215;L=49;R=69;
+							# SD_BELL_104762 ring low bat MC;LL=-433;LH=424;SL=-214;SH=210;D=238823B100248;C=213;L=49;R=65;
+							# SD_BELL_0253B3 Alarm        MC;LL=-407;LH=451;SL=-195;SH=239;D=23C129D9E78;C=215;L=41;R=241;
+							# SD_BELL_0253B3 ring         MC;LL=-412;LH=458;SL=-187;SH=240;D=238129D9A78;C=216;L=41;R=241;
+							# SD_BELL_024DB5 Alarm        MC;LL=-415;LH=454;SL=-200;SH=226;D=23C126DAE58;C=215;L=41;R=246;
+							# SD_BELL_024DB5 ring         MC;LL=-409;LH=448;SL=-172;SH=262;D=238126DAA58;C=215;L=41;R=238;
 			{
-				name            => 'Grothe Mistral',
-				comment         => 'wireless gong',
+				name            => 'Grothe Mistral SE',
+				comment         => 'Wireless doorbell Grothe Mistral SE 01.1 or 03.1',
 				id              => '96',
-				knownFreqs      => '866.35',
-				clockrange			=> [210,220],							# min , max
-				format					=> 'manchester',					# tristate can't be migrated from bin into hex!
-				#clientmodule		 => '',
-				#modulematch		 => '^u96#',
-				preamble				=> 'u96#',
-				length_min			=> '41',
-				length_max			=> '49',
-				method					=> \&lib::SD_Protocols::MCRAW,		# Call to process this message
+				knownFreqs      => '868.35',
+				clockrange      => [170,260],
+				format          => 'manchester',
+				clientmodule    => 'SD_BELL',
+				modulematch     => '^P96#',
+				preamble        => 'P96#',
+				length_min      => '40',
+				length_max      => '49',
+				method          => \&main::SIGNALduino_GROTHE,
 			},
 	);
 	sub getProtocolList	{	
