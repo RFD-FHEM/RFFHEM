@@ -214,7 +214,7 @@ package lib::SD_ProtocolData;
 				length_max			=> '34',				# Don't know maximal lenth of a valid message
 				paddingbits			=> '8',					# pad up to 8 bits, default is 4
 			},
-		"3"	=>	## itv1 - remote with IC PT2262 example: ELRO | REWE | Intertek Modell 1946518 | WOFI Lamp
+		"3"	=>	## itv1 - remote with IC PT2262 example: ELRO | REWE | Intertek Modell 1946518 | WOFI Lamp // PIR JCHENG with Wireless Coding EV1527
 						## (real CP=300 | repeatpause=9300)
 						# REWE Model: 0175926R -> on | v1      MS;P1=-905;P2=896;P3=-317;P4=303;P5=-9299;D=45412341414123412341414123412341234141412341414123;CP=4;SP=5;R=91;A;#;
 						## (real CP=330 | repeatpause=10100)
@@ -224,9 +224,12 @@ package lib::SD_ProtocolData;
 						# door/window switch from CHN (PT2262 compatible) from amazon & ebay | itswitch_CHN model
 						# open                                 MS;P1=-478;P2=1360;P3=468;P4=-1366;P5=-14045;D=35212134212134343421212134213434343434343421342134;CP=3;SP=5;R=30;O;m2;4;
 						# close                                MS;P1=-474;P2=1373;P3=455;P4=-1367;P5=-14044;D=35212134212134343421212134213434343434343421212134;CP=3;SP=5;R=37;O;m2;
+						## JCHENG SECURITY Wireless PIR
+						# (only autocreate -> J2 Data setting D0 open | D1 closed | D2 closed | D3 open)
+						# on                                   MS;P1=-12541;P2=1227;P3=-405;P4=407;P5=-1209;D=41232323232345452323454523452323234545234545232345;CP=4;SP=1;R=35;O;m2;E;
 			{
 				name						=> 'chip xx2262',
-				comment					=> 'remote for ELRO|Kangtai|Intertek|REWE|WOFI',
+				comment					=> 'remote for ELRO|Kangtai|Intertek|REWE|WOFI / PIR JCHENG',
 				id							=> '3',
 				knownFreqs      => '433.92',
 				one							=> [3,-1],

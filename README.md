@@ -37,6 +37,7 @@ Supported Devices / Protocols
 |Hama TS33C, Bresser Thermo/Hygro Sensor  | Weather sensor |
 |Heidemann, Heidemann HX, VTX-BELL | wireless bell |
 |Hoermann HSM2, HSM4, HS1-868-BS | Remote control |
+|JCHENG SECURITY | PIR |
 |KRINNER Lumix, XM21-0| Remote control LED XMAS|
 |les led  | Remote controlled LED lamp |
 |Livolo | Remote switches and sockets  |
