@@ -1,8 +1,9 @@
+06.09.2019
+  00_SIGNALduino.pm: Optimze logging if eventlogging is 0 or unset
 03.09.2019
  SD_ProtocolData.pm: revised ID 96
  00_SIGNALduino.pm: revised matchListSIGNALduino | added method SIGNALduino_GROTHE
- 14_SD_BELL.pm: added device Grothe_Mistral_SE_01 & Grothe_Mistral_SE_03 | revised attrib repeats (max 30)
-02.09.2019:
+ 14_SD_BELL.pm02.09.2019:
  00_SIGNALduino.pm: add support to flash microcontroller on Windows platform
 01.09.2019
  14_SD_Keeloq.pm: fix shade function
