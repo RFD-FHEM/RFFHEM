@@ -839,6 +839,36 @@ SIGNALduino_Set($@)
   return undef;
 }
 
+
+my %SIGNALduino_GetTable = ( 
+
+	"availableFirmware" => sub {
+  		my ($hash, @a) = @_;
+  		
+		if ($missingModulSIGNALduino =~ m/JSON/ )
+	  	{
+	  		$hash->{logMethod}->($hash->{NAME}, 1, "$hash->{NAME}: get $a[1] failed. Pleas install Perl module JSON. Example: sudo apt-get install libjson-perl");
+	 		return "$a[1]: \n\nFetching from github is not possible. Please install JSON. Example:<br><code>sudo apt-get install libjson-perl</code>";
+	  	} 
+	  	
+	  	my $channel=AttrVal($hash->{NAME},"updateChannelFW","stable");
+		my $hardware=AttrVal($hash->{NAME},"hardware",undef);
+		
+		my ($validHw) = $modules{$hash->{TYPE}}{AttrList} =~ /.*hardware:(.*?)\s/;  	
+		$hash->{logMethod}->($hash->{NAME}, 1, "$hash->{NAME}: found availableFirmware for $validHw");
+		
+		if (!defined($hardware) || $validHw !~ /$hardware(?:,|$)/ )
+	  	{
+	  		$hash->{logMethod}->($hash->{NAME}, 1, "$hash->{NAME}: get $a[1] failed. Please set attribute hardware first");
+	 		return "$a[1]: \n\n$hash->{NAME}: get $a[1] failed. Please choose one of $validHw attribute hardware";
+	  	} 
+	  	SIGNALduino_querygithubreleases($hash);
+		return "$a[1]: \n\nFetching $channel firmware versions for $hardware from github\n";
+ },
+
+);
+
+
 #####################################
 sub
 SIGNALduino_Get($@)
@@ -865,33 +895,9 @@ SIGNALduino_Get($@)
   
   my ($msg, $err);
 
-  if ($a[1] eq "availableFirmware") {
+  return $SIGNALduino_GetTable{$a[1]}->($hash,$a) if (exists($SIGNALduino_GetTable{$a[1]})); 
+  
 
-
-	
-  	if ($missingModulSIGNALduino =~ m/JSON/ )
-  	{
-  		$hash->{logMethod}->($name, 1, "$name: get $a[1] failed. Pleas install Perl module JSON. Example: sudo apt-get install libjson-perl");
- 		return "$a[1]: \n\nFetching from github is not possible. Please install JSON. Example:<br><code>sudo apt-get install libjson-perl</code>";
-  	} 
-  	
-  	my $channel=AttrVal($name,"updateChannelFW","stable");
-	my $hardware=AttrVal($name,"hardware",undef);
-	
-	my ($validHw) = $modules{$hash->{TYPE}}{AttrList} =~ /.*hardware:(.*?)\s/;  	
-	$hash->{logMethod}->($name, 1, "$name: found availableFirmware for $validHw");
-	
-	if (!defined($hardware) || $validHw !~ /$hardware(?:,|$)/ )
-  	{
-  		$hash->{logMethod}->($name, 1, "$name: get $a[1] failed. Please set attribute hardware first");
- 		return "$a[1]: \n\n$name: get $a[1] failed. Please choose one of $validHw attribute hardware";
-  	} 
-	
-  	SIGNALduino_querygithubreleases($hash);
-		
-	return "$a[1]: \n\nFetching $channel firmware versions for $hardware from github\n";
-	
-  }
   
   if (IsDummy($name) && $a[1] ne "protocolIDs")
   {
@@ -987,6 +993,7 @@ SIGNALduino_Get($@)
   $hash->{getcmd}->{cmd}=$a[1];
   $hash->{getcmd}->{asyncOut}=$hash->{CL};
   $hash->{getcmd}->{timenow}=time();
+  
   
   return undef; # We will exit here, and give an output only, if asny output is supported. If this is not supported, only the readings are updated
 }
