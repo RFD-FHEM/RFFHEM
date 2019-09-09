@@ -12,10 +12,11 @@ deploylocalLibs:
 	
 UnitTest/makefile: 
 	@mkdir -p $(dir $@)
-	@test -f $@ || wget -O $@ https://raw.githubusercontent.com/RFD-FHEM/UnitTest/master/makefile
+	@test -f $@ || wget -O $@ https://raw.githubusercontent.com/fhem/UnitTest/master/makefile
 
 test: UnitTest/makefile deploylocalLibs
 	${MAKE} -f $< setupEnv test PERL_OPTS="-MDevel::Cover"
+	${MAKE} -f $< fhem_kill 
 
 clean:  UnitTest/makefile	
 	${MAKE} -f $< clean
