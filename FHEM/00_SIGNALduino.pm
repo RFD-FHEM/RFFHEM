@@ -4094,7 +4094,7 @@ sub SIGNALduino_SomfyRTS()
 sub SIGNALduino_TestLength
 {
 	my ($name, $id, $message_length, $logMsg) = @_;
-	my $hash=$defs{$name} if (exists($defs{$name}));
+	my $hash=$defs{$name} if (defined($name) && exists($defs{$name}));
 	if (defined($ProtocolListSIGNALduino{$id}{length_min}) && $message_length < $ProtocolListSIGNALduino{$id}{length_min}) {
 		$hash->{logMethod}->($name, 4, "$name: $logMsg: message with length=$message_length is to short") if (defined($logMsg));
 		return (0, "message is to short");
