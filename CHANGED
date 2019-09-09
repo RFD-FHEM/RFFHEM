@@ -1,3 +1,5 @@
+09.09.2019
+  00_SIGNALduino.pm: fix warning
 06.09.2019
   00_SIGNALduino.pm: Optimze logging if eventlogging is 0 or unset
 03.09.2019
