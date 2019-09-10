@@ -31,7 +31,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.4.1_dev_06.09",
+	SDUINO_VERSION            => "v3.4.1_dev_09.09",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -2150,7 +2150,7 @@ SIGNALduino_Parse_MS($$$$%)
 			Debug "$name: decoded message raw (@bit_msg), ".@bit_msg." bits\n" if ($debug);
 			
 			#Check converted message against lengths
-			my ($rcode, $rtxt) = SIGNALduino_TestLength(undef,$id,scalar @bit_msg,"");
+			my ($rcode, $rtxt) = SIGNALduino_TestLength(undef,$id,scalar @bit_msg,undef);
 			if (!$rcode)
 			{
 			  Debug "$name: decoded $rtxt" if ($debug);
@@ -4094,13 +4094,13 @@ sub SIGNALduino_SomfyRTS()
 sub SIGNALduino_TestLength
 {
 	my ($name, $id, $message_length, $logMsg) = @_;
-	my $hash=$defs{$name};
+	my $hash=$defs{$name} if (defined($name) && exists($defs{$name}));
 	if (defined($ProtocolListSIGNALduino{$id}{length_min}) && $message_length < $ProtocolListSIGNALduino{$id}{length_min}) {
-		$hash->{logMethod}->($name, 4, "$name: $logMsg: message with length=$message_length is to short") if ($logMsg ne "");
+		$hash->{logMethod}->($name, 4, "$name: $logMsg: message with length=$message_length is to short") if (defined($logMsg));
 		return (0, "message is to short");
 	}
 	elsif (defined($ProtocolListSIGNALduino{$id}{length_max}) && $message_length > $ProtocolListSIGNALduino{$id}{length_max}) {
-		$hash->{logMethod}->($name, 4, "$name: $logMsg: message with length=$message_length is to long") if ($logMsg ne "");
+		$hash->{logMethod}->($name, 4, "$name: $logMsg: message with length=$message_length is to long") if (defined($logMsg));
 		return (0, "message is to long");
 	}
 	return (1,"");
