@@ -39,7 +39,7 @@ defmod test_get_raw UnitTest dummyDuino
 		{
 			is( ($SD_Parse->called_with)[3], "\002".$rawArg."\003" , 'check if SIGNALduino_Parse was called' ) || diag(explain $SD_Parse);
 		} 
-		$mock->unmock;
+		$SD_Parse->unmock;
 	}; 
 	
 	subtest 'Test get raw file=something.txt;' => sub {
@@ -48,6 +48,7 @@ defmod test_get_raw UnitTest dummyDuino
 		my $rawArg="file=something.txt";
 		my $ret=SIGNALduino_Get($targetHash, $target, "raw", $rawArg);
 		like($ret,qr/Could not open file.*/,"Check file not opened");
+		
 		TODO : {
 			local $TODO="file must be specified";
 			my $rawArg="file=./fhem_ut.txt";
