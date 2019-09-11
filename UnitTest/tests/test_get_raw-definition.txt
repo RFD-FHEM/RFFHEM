@@ -1,0 +1,17 @@
+defmod test_get_raw UnitTest dummyDuino 
+(
+ {
+
+	subtest 'Test get gaw intertechno switch' => sub {
+		plan tests => 2;
+		CommandAttr(undef,"$target dummy 0");
+		my $rawArg="is10101010101010101010101010101010";
+		my $ret=SIGNALduino_Get($targetHash, $target, "raw", $rawArg);
+		like($ret,qr/$rawArg$/,"check return contains correct arg");
+		
+		$rawArg="is10101010101010101";
+		$ret=SIGNALduino_Get($targetHash, $target, "raw", $rawArg);
+		is($ret,undef,"check return is undef");
+	}; 
+}
+)
