@@ -1,0 +1,61 @@
+defmod test_get_raw UnitTest dummyDuino 
+(
+ {
+	subtest 'Test get raw intertechno switch' => sub {
+		plan tests => 2;
+		CommandAttr(undef,"$target dummy 0");
+		my $rawArg="is10101010101010101010101010101010";
+		my $ret=SIGNALduino_Get($targetHash, $target, "raw", $rawArg);
+		like($ret,qr/$rawArg$/,"check return contains correct arg");
+		
+		$rawArg="is10101010101010101";
+		$ret=SIGNALduino_Get($targetHash, $target, "raw", $rawArg);
+		is($ret,undef,"check return is undef");
+		CommandAttr(undef,"$target dummy 1");
+		
+	}; 
+
+	subtest 'Test get raw questionmark' => sub {
+		plan tests => 6;
+		CommandAttr(undef,"$target dummy 1");
+		my $rawArg="?";
+		my $ret=SIGNALduino_Get($targetHash, $target, "raw", $rawArg);
+		like($ret,qr/^dummy get raw.*/,"check return contains help");
+		like($ret,qr/raw message.*/,"check return contains raw message");
+		like($ret,qr/dispatch message.*/,"check return contains dispatch message");
+		like($ret,qr/version=.*/,"check return version=");
+		like($ret,qr/regexp=.*/,"check return regexp=");
+		like($ret,qr/file=.*/,"check return file=");
+	}; 
+	
+	subtest 'Test get raw MS;P1=309;' => sub {
+		plan tests => 1;
+		my $mock = Mock::Sub->new;
+	 	my $SD_Parse = $mock->mock('SIGNALduino_Parse');
+		my $rawArg="MS;P1=309;";
+		my $ret=SIGNALduino_Get($targetHash, $target, "raw", $rawArg);
+		
+		if ($SD_Parse->called)
+		{
+			is( ($SD_Parse->called_with)[3], "\002".$rawArg."\003" , 'check if SIGNALduino_Parse was called' ) || diag(explain $SD_Parse);
+		} 
+		$SD_Parse->unmock;
+	}; 
+	
+	subtest 'Test get raw file=something.txt;' => sub {
+		plan tests => 2;
+
+		my $rawArg="file=something.txt";
+		my $ret=SIGNALduino_Get($targetHash, $target, "raw", $rawArg);
+		like($ret,qr/Could not open file.*/,"Check file not opened");
+		
+		TODO : {
+			local $TODO="file must be specified";
+			my $rawArg="file=./fhem_ut.txt";
+			my $ret=SIGNALduino_Get($targetHash, $target, "raw", $rawArg);
+			like($ret,qr/raw Nachrichten eingelesen$/,"Check file not opened");
+		}
+	}; 
+	
+}
+)
