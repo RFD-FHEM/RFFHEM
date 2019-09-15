@@ -5,6 +5,7 @@ defmod test_get_availableFirmware UnitTest dummyDuino
 	subtest 'Test get availableFirmware' => sub {
 		plan tests => 2;
 		$attr{$target}{updateChannelFW} = "stable";
+		$attr{$target}{hardware} = "0";
 
 		my $ret=SIGNALduino_Get($targetHash, $target, "availableFirmware");
 		like($ret,qr/.*get availableFirmware failed.*/,"check return contains failed");
