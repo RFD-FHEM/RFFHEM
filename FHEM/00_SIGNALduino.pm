@@ -380,7 +380,7 @@ sub SIGNALduino_Connect($$)
 
 	# damit wird die err-msg nur einmal ausgegeben
 	if (!defined($hash->{disConnFlag}) && $err) {
-		SIGNALduino_Log3($hash, 3, "$hash->{NAME}: ${err}");
+		$hash->{logmethod}->($hash->{NAME}, 3, "$hash->{NAME}: ${err}");
 		$hash->{disConnFlag} = 1;
 	}
 }
@@ -1088,7 +1088,7 @@ SIGNALduino_ResetDevice($)
   my ($hash) = @_;
   my $name = $hash->{NAME};
 
-  SIGNALduino_Log3 $hash, 3, "$name reset"; 
+  $hash->{logmethod}->($name, 3, "$name reset"); 
   DevIo_CloseDev($hash);
   my $ret = DevIo_OpenDev($hash, 0, "SIGNALduino_DoInit", 'SIGNALduino_Connect');
 
@@ -1100,9 +1100,8 @@ sub
 SIGNALduino_CloseDevice($)
 {
 	my ($hash) = @_;
-	my $name = $hash->{NAME};
 
-	SIGNALduino_Log3 $hash, 2, "$name closed"; 
+	$hash->{logmethod}->($hash->{NAME}, 2, "$hash->{NAME} closed"); 
 	RemoveInternalTimer($hash);
 	DevIo_CloseDev($hash);
 	readingsSingleUpdate($hash, "state", "closed", 1);
@@ -1332,7 +1331,6 @@ SIGNALduino_SendFromQueue($$)
 {
   my ($hash, $msg) = @_;
   my $name = $hash->{NAME};
-  
   if($msg ne "") {
 	SIGNALduino_XmitLimitCheck($hash,$msg);
     #DevIo_SimpleWrite($hash, $msg . "\n", 2);
@@ -1340,7 +1338,7 @@ SIGNALduino_SendFromQueue($$)
     SIGNALduino_SimpleWrite($hash,$msg);
     if ($msg =~ m/^S(R|C|M);/) {
        $hash->{getcmd}->{cmd} = 'sendraw';
-       SIGNALduino_Log3 $hash, 4, "$name SendrawFromQueue: msg=$msg"; # zu testen der Queue, kann wenn es funktioniert auskommentiert werden
+       $hash->{logmethod}->($name, 4, "$name SendrawFromQueue: msg=$msg"); # zu testen der Queue, kann wenn es funktioniert auskommentiert werden
     } 
     elsif ($msg eq "C99") {
        $hash->{getcmd}->{cmd} = 'ccregAll';
@@ -1402,7 +1400,7 @@ SIGNALduino_Read($)
   my $debug = AttrVal($name,"debug",0);
 
   my $SIGNALduinodata = $hash->{PARTIAL};
-  SIGNALduino_Log3 $name, 5, "$name/RAW READ: $SIGNALduinodata/$buf" if ($debug); 
+  $hash->{logmethod}->($name, 5, "$name/RAW READ: $SIGNALduinodata/$buf") if ($debug); 
   $SIGNALduinodata .= $buf;
 
   while($SIGNALduinodata =~ m/\n/) {
@@ -1420,7 +1418,7 @@ SIGNALduino_Read($)
 		my $mH;
 		my $part = "";
 		my $partD;
-		SIGNALduino_Log3 $name, 5, "$name/RAW rmsg: $rmsg"; 
+		$hash->{logmethod}->($name, 5, "$name/RAW rmsg: $rmsg"); 
 		
 		foreach my $msgPart (@msg_parts) {
 			next if ($msgPart eq "");
@@ -1539,7 +1537,7 @@ SIGNALduino_Read($)
 				delete($hash->{getcmd});
 			}
 		} else {
-			SIGNALduino_Log3 $name, 4, "$name/msg READ: Received answer ($rmsg) for ". $hash->{getcmd}->{cmd}." does not match $regexp"; 
+			$hash->{logmethod}->($name, 4, "$name/msg READ: Received answer ($rmsg) for ". $hash->{getcmd}->{cmd}." does not match $regexp"); 
 		}
 	}
   }
@@ -1597,12 +1595,12 @@ sub SIGNALduino_ParseHttpResponse
 
     if($err ne "")               											 		# wenn ein Fehler bei der HTTP Abfrage aufgetreten ist
     {
-        SIGNALduino_Log3 $name, 3, "$name: error while requesting ".$param->{url}." - $err";    		# Eintrag fuers Log
+        $hash->{logmethod}->($name, 3, "$name: error while requesting ".$param->{url}." - $err");    		# Eintrag fuers Log
     }
     elsif($param->{code} eq "200" && $data ne "")                                                       		# wenn die Abfrage erfolgreich war ($data enthaelt die Ergebnisdaten des HTTP Aufrufes)
     {
     	
-        SIGNALduino_Log3 $name, 3, "url ".$param->{url}." returned: ".length($data)." bytes Data";  # Eintrag fuers Log
+        $hash->{logmethod}->($name, 3, "url ".$param->{url}." returned: ".length($data)." bytes Data");  # Eintrag fuers Log
 		    	
     	if ($param->{command} eq "flash")
     	{
@@ -1636,7 +1634,7 @@ sub SIGNALduino_ParseHttpResponse
 			}
     	}
     } else {
-    	SIGNALduino_Log3 $name, 3, "$name: undefined error while requesting ".$param->{url}." - $err - code=".$param->{code};    		# Eintrag fuers Log
+    	$hash->{logmethod}->($name, 3, "$name: undefined error while requesting ".$param->{url}." - $err - code=".$param->{code});    		# Eintrag fuers Log
     }
 }
 
@@ -2330,7 +2328,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 					$startLogStr = "StartStr: $startStr first found at $message_start";
 					Debug "rawData = $rawData" if ($debug);
 					Debug "startStr $startStr found. Message starts at $message_start" if ($debug);
-					SIGNALduino_Log3 $name, 5, "$name: substr: $rawData"; # todo: entfernen
+					#SIGNALduino_Log3 $name, 5, "$name: substr: $rawData"; # todo: entfernen
 				} 
 				
 			}
@@ -2384,7 +2382,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 			while ( $rawData =~ m/$regex/g)		{
 				my $length_str="";
 				$nrRestart++;
-				SIGNALduino_Log3 $name, 5, "part is $1 starts at position $-[0] and ends at ". pos $rawData;				
+				$hash->{logmethod}->($name, 5, "part is $1 starts at position $-[0] and ends at ". pos $rawData);				
 			
 				my @pairs = unpack "(a$signal_width)*", $1;
 			
@@ -2395,7 +2393,7 @@ sub SIGNALduino_Parse_MU($$$$@)
 				}
 				
 				if ($nrRestart == 1) {
-					SIGNALduino_Log3 $name, 5, "$name: Starting demodulation ($startLogStr " . "regex: $regex Pos $message_start) length_min_max (".$length_min."..".$length_max.") length=".scalar @pairs; 
+					$hash->{logmethod}->($name, 5, "$name: Starting demodulation ($startLogStr " . "regex: $regex Pos $message_start) length_min_max (".$length_min."..".$length_max.") length=".scalar @pairs); 
 				} else {
 					$hash->{logMethod}->($name, 5, "$name: $nrRestart. try demodulation$length_str at Pos $-[0]");
 				}
@@ -2577,7 +2575,7 @@ SIGNALduino_Parse_MC($$$$@)
 					}
 				} else {
 					$res="undef" if (!defined($res));
-					SIGNALduino_Log3 $name, 5, "$name: protocol does not match return from method: ($res)" ; 
+					$hash->{logmethod}->($name, 5, "$name: protocol does not match return from method: ($res)") ; 
 
 				}
 			}
@@ -2823,8 +2821,11 @@ SIGNALduino_Attr(@)
 	{
 		if ($aVal == 1) {
 			$hash->{logMethod} = \&::SIGNALduino_Log3;	
+			Log3 $name, 3, "Enable eventlogging";
 		} else {
 			$hash->{logMethod} = \&::Log3;	
+			Log3 $name, 3, "Disable eventlogging";
+			
 		}
 	}
 		
@@ -4550,7 +4551,7 @@ sub SIGNALduino_githubParseHttpResponse($$$)
 					my $set_return = SIGNALduino_Set($hash,$name,"flash",$asset->{browser_download_url}); # $hash->{SetFn
 					if(defined($set_return))
 					{
-						SIGNALduino_Log3  $name, 3, "$name: Error while trying to download firmware: $set_return";    	
+						$hash->{logmethod}->($name, 3, "$name: Error while trying to download firmware: $set_return");    	
 					} 
 					last;
 					
@@ -4559,7 +4560,7 @@ sub SIGNALduino_githubParseHttpResponse($$$)
 			
     	} 
     } elsif (!defined($hardware))  {
-    	SIGNALduino_Log3  $name, 5, "$name: SIGNALduino_githubParseHttpResponse hardware is not defined";    	
+    	$hash->{logmethod}->($name, 5, "$name: SIGNALduino_githubParseHttpResponse hardware is not defined");    	
     }                                                                                              # wenn
     # Damit ist die Abfrage zuende.
     # Evtl. einen InternalTimer neu schedulen
