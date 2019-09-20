@@ -35,7 +35,7 @@ script:
  - ./build_controls_list.sh 
  - git commit -m "Travis automatic update controls file. Build (${TRAVIS_BUILD_NUMBER}) [skip ci]" ./controls_signalduino.txt || true
  - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ] && [[ $TRAVIS_JOB_NUMBER == *.1 ]]; then git push origin HEAD:$TRAVIS_BRANCH ; fi'
- - while /usr/bin/pgrep perl >/dev/null; do sleep 1; echo . done;
+ - while /usr/bin/pgrep perl >/dev/null; do sleep 1; echo .; done;
  - cp -R /opt/fhem/cover_db ./
  - if [ "$FULL_COVER" != "true" ]; then git --no-pager diff --diff-filter=d --name-only $TRAVIS_COMMIT_RANGE | grep .pm | xargs -I@ echo -select @ | xargs cover -report coveralls; fi
  - if [ "$FULL_COVER" = "true" ]; then git ls-tree --full-tree -r --name-only HEAD ./FHEM | grep .pm | xargs -I@ echo -select @ | xargs cover -report coveralls; fi
