@@ -1,7 +1,6 @@
 defmod test_logging UnitTest dummyDuino ( 
 { 
 my $mock = Mock::Sub->new;
-CommandAttr(undef,"$target eventlogging 0");
 my $DoTrigger = $mock->mock("DoTrigger");
 
 subtest "Check logMethod with with attr eventlogging 0" => sub {
@@ -22,6 +21,7 @@ subtest "Check logMethod with attr eventlogging 1" => sub {
 
 	is($DoTrigger->called_count, 1, "check if DoTrigger is called from SIGNALduino_Log3");
 };
+CommandAttr(undef,"$target eventlogging 0");
 
 } 
 )
