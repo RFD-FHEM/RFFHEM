@@ -895,7 +895,7 @@ SIGNALduino_Get($@)
   
   my ($msg, $err);
 
-  return $SIGNALduino_GetTable{$a[1]}->($hash,$a) if (exists($SIGNALduino_GetTable{$a[1]})); 
+  return $SIGNALduino_GetTable{$a[1]}->($hash,@a) if (exists($SIGNALduino_GetTable{$a[1]})); 
   
 
   
