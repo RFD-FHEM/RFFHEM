@@ -1,3 +1,5 @@
+03.10.2019
+  00_SIGNALduino.pm: add special reset for radinoCC1101
 15.09.2019
   00_SIGNALduino.pm: fix some logging issues with disabled eventlogging
 09.09.2019

@@ -598,6 +598,12 @@ SIGNALduino_Set($@)
 	      }
 	
 	      DevIo_CloseDev($hash);
+				if ($hardware eq "radinoCC1101" && $^O eq 'linux') {
+					$hash->{logMethod}->($name, 3, "$hash->{TYPE} $name/flash: forcing special reset for $hardware on $port");
+					# Mit dem Linux-Kommando 'stty' die Port-Einstellungen setzen
+					system("stty -F $port ospeed 1200 ispeed 1200");
+					sleep(1);	# ohne funktioniert es nicht
+				}
 	      $hash->{STATE} = "FIRMWARE UPDATE running";
 	      $log .= "$name closed\n";
 	
@@ -1087,9 +1093,23 @@ SIGNALduino_ResetDevice($)
 {
   my ($hash) = @_;
   my $name = $hash->{NAME};
-
-  $hash->{logMethod}->($name, 3, "$name reset"); 
+  my $hardware = AttrVal($name,"hardware","");
+  $hash->{logMethod}->($name, 3, "$name/reset: $hardware"); 
   DevIo_CloseDev($hash);
+	if ($hardware eq "radinoCC1101" && $^O eq 'linux') {
+		# The reset is triggered when the Micro's virtual (CDC) serial / COM port is opened at 1200 baud and then closed.
+		# When this happens, the processor will reset, breaking the USB connection to the computer (meaning that the virtual serial / COM port will disappear).
+		# After the processor resets, the bootloader starts, remaining active for about 8 seconds.
+		# The bootloader can also be initiated by pressing the reset button on the Micro.
+		# Note that when the board first powers up, it will jump straight to the user sketch, if present, rather than initiating the bootloader.	
+		my $dev = $hash->{DeviceName};
+		my $baudrate;
+		($dev, $baudrate) = split("@", $dev);
+		$hash->{logMethod}->($name, 3, "$hash->{TYPE} $name/reset: forcing special reset for $hardware on $dev");
+		# Mit dem Linux-Kommando 'stty' die Port-Einstellungen setzen
+		system("stty -F $dev ospeed 1200 ispeed 1200");
+		sleep(1);	# ohne funktioniert es nicht
+	}
   my $ret = DevIo_OpenDev($hash, 0, "SIGNALduino_DoInit", 'SIGNALduino_Connect');
 
   return $ret;
