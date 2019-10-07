@@ -423,9 +423,44 @@ SIGNALduino_Shutdown($)
   return undef;
 }
 
+
+
+#####################################
+sub 
+SIGNALduino_flash($) {
+	my $hash = shift;
+    my $name = $hash->{NAME};
+
+	$hash->{STATE} = "FIRMWARE UPDATE running";
+	$hash->{helper}{avrdudelogs} .= "$name closed\n";
+    my $logFile = AttrVal("global", "logdir", "./log/") . "$hash->{TYPE}-Flash.log";
+
+    if (-e $logFile) {
+	    unlink $logFile;
+    }
+
+    $hash->{helper}{avrdudecmd} =~ s/\Q[LOGFILE]\E/$logFile/g;
+	`$hash->{helper}{avrdudecmd}`;
+	 
+	local $/=undef;
+	if (-e $logFile) {
+		open FILE, $logFile;
+	 	$hash->{helper}{avrdudelogs} .= "--- AVRDUDE ---------------------------------------------------------------------------------\n";
+		$hash->{helper}{avrdudelogs} .= <FILE>;
+	    $hash->{helper}{avrdudelogs} .= "--- AVRDUDE ---------------------------------------------------------------------------------\n\n";
+	    close FILE;
+	} else {
+		$hash->{helper}{avrdudelogs} .= "WARNING: avrdude created no log file\n\n";
+	}
+	
+	DevIo_OpenDev($hash, 0, "SIGNALduino_DoInit", 'SIGNALduino_Connect');
+	$hash->{helper}{avrdudelogs} .= "$name opened\n";
+}
+
+
+
 #####################################
 #$hash,$name,"sendmsg","P17;R6#".substr($arg,2)
-
 sub
 SIGNALduino_Set($@)
 {
@@ -495,7 +530,6 @@ SIGNALduino_Set($@)
 	my $hardware=AttrVal($name,"hardware","");
 	my $baudrate=$hardware eq "uno" ? 115200 : 57600;
     my $defaultHexFile = "./FHEM/firmware/$hash->{TYPE}_$hardware.hex";
-    my $logFile = AttrVal("global", "logdir", "./log/") . "$hash->{TYPE}-Flash.log";
     return "Please define your hardware! (attr $name hardware <model of your receiver>) " if ($hardware eq "");
 	return "ERROR: argument failed! flash [hexFile|url]" if (!$args[0]);
 	
@@ -529,7 +563,7 @@ SIGNALduino_Set($@)
    		HttpUtils_NonblockingGet($http_param);                                                                                     # Starten der HTTP Abfrage. Es gibt keinen Return-Code. 
 		return;
 	} 
-    elsif(!$arg || $args[0] !~ m/^(\w|\/|.)+$/) {
+    elsif(!$arg || $args[0] !~ m/^(\w|\/|.)+$/) {   #Todo (\\\\?([^\\/]*[\\/])*)([^\\/]+)$
       $hexFile = AttrVal($name, "hexFile", "");
       if ($hexFile eq "") {
         $hexFile = $defaultHexFile;
@@ -551,7 +585,7 @@ SIGNALduino_Set($@)
       $hexFile = $args[0];
     }
 	$hash->{logMethod}->($name, 3, "$name: filename $hexFile provided, trying to flash");
-    return "Usage: set $name flash [filename]\n\nor use the hexFile attribute" if($hexFile !~ m/^(\w|\/|.)+$/);
+    return "Usage: set $name flash [filename]\n\nor use the hexFile attribute" if($hexFile !~ m/^(\w|\/|.)+$/);   # Todo: (\\\\?([^\\/]*[\\/])*)([^\\/]+)$
 
 	# Only for Arduino , not for ESP
 	if ($hardware =~ m/(?:nano|mini|radino)/)
@@ -560,7 +594,7 @@ SIGNALduino_Set($@)
 		my $avrdudefound=0;
 		my $tool_name = "avrdude"; 
 		my $path_separator = ':';
-                if ($^O eq 'MSWin32') {
+		if ($^O eq 'MSWin32') {
 			$tool_name .= ".exe";
 			$path_separator = ';';
 		}
@@ -576,7 +610,6 @@ SIGNALduino_Set($@)
 	    $log .= "flashing Arduino $name\n";
 	    $log .= "hex file: $hexFile\n";
 	    $log .= "port: $port\n";
-	    $log .= "log file: $logFile\n";
 	
 		my $flashCommand;
 	    if( !defined( $attr{$name}{flashCommand} ) ) {		# check defined flashCommand from user | not, use standard flashCommand | yes, use user flashCommand
@@ -593,53 +626,27 @@ SIGNALduino_Set($@)
 		
 	
 	    if($flashCommand ne "") {
-	      if (-e $logFile) {
-	        unlink $logFile;
-	      }
 	
 	      DevIo_CloseDev($hash);
-				if ($hardware eq "radinoCC1101" && $^O eq 'linux') {
-					$hash->{logMethod}->($name, 3, "$hash->{TYPE} $name/flash: forcing special reset for $hardware on $port");
-					# Mit dem Linux-Kommando 'stty' die Port-Einstellungen setzen
-					system("stty -F $port ospeed 1200 ispeed 1200");
-					sleep(1);	# ohne funktioniert es nicht
-				}
-	      $hash->{STATE} = "FIRMWARE UPDATE running";
-	      $log .= "$name closed\n";
-	
-	      my $avrdude = $flashCommand;
-	      $avrdude =~ s/\Q[PORT]\E/$port/g;
-	      $avrdude =~ s/\Q[BAUDRATE]\E/$baudrate/g;
-	      $avrdude =~ s/\Q[HEXFILE]\E/$hexFile/g;
-	      $avrdude =~ s/\Q[LOGFILE]\E/$logFile/g;
-	
-	      $log .= "command: $avrdude\n\n";
-	      `$avrdude`;
-	
-	      local $/=undef;
-	      if (-e $logFile) {
-	        open FILE, $logFile;
-	        my $logText = <FILE>;
-	        close FILE;
-	        $log .= "--- AVRDUDE ---------------------------------------------------------------------------------\n";
-	        $log .= $logText;
-	        $log .= "--- AVRDUDE ---------------------------------------------------------------------------------\n\n";
-	      }
-	      else {
-	        $log .= "WARNING: avrdude created no log file\n\n";
-	      }
-	
+		  if ($hardware eq "radinoCC1101" && $^O eq 'linux') {
+			$hash->{logMethod}->($name, 3, "$hash->{TYPE} $name/flash: forcing special reset for $hardware on $port");
+			# Mit dem Linux-Kommando 'stty' die Port-Einstellungen setzen
+			system("stty -F $port ospeed 1200 ispeed 1200");
+	  	  }
+	  	  
+	      $hash->{helper}{avrdudecmd} = $flashCommand;
+	      $hash->{helper}{avrdudecmd}=~ s/\Q[PORT]\E/$port/g;
+	      $hash->{helper}{avrdudecmd} =~ s/\Q[BAUDRATE]\E/$baudrate/g;
+	      $hash->{helper}{avrdudecmd} =~ s/\Q[HEXFILE]\E/$hexFile/g;
+		  $log .= "command: $hash->{helper}{avrdudecmd}\n\n";
+		  $hash->{helper}{avrdudelogs} = $log;
+  		  InternalTimer(gettimeofday() + 1,"SIGNALduino_flash",$hash);
 	    }
 	    else {
 	      $log .= "\n\nNo flashCommand found. Please define this attribute.\n\n";
 	    }
-	
-	    DevIo_OpenDev($hash, 0, "SIGNALduino_DoInit", 'SIGNALduino_Connect');
-	    $log .= "$name opened\n";
-		
 	    return undef;
-	} else
-	{
+	} else {
 		return "Sorry, Flashing your ESP via Module is currently not supported.";
 	}
 	
@@ -772,7 +779,7 @@ SIGNALduino_Set($@)
 		$sendData = $intro . "SM;" . ($repeats > 0 ? "R=$repeats;" : "") . "C=$clock;D=$data;" . $outro . $frequency; #	SM;R=2;C=400;D=AFAFAF;
 		$hash->{logMethod}->($name, 5, "$name: sendmsg Preparing manchester protocol=$protocol, repeats=$repeats, clock=$clock data=$data");
 
-} else {
+	} else {
 		if ($protocol == 3 || substr($data,0,2) eq "is") {
 			if (substr($data,0,2) eq "is") {
 				$data = substr($data,2);   # is am Anfang entfernen
@@ -1091,12 +1098,12 @@ sub SIGNALduino_parseResponse($$$)
 sub
 SIGNALduino_ResetDevice($)
 {
-  my ($hash) = @_;
-  my $name = $hash->{NAME};
-  my $hardware = AttrVal($name,"hardware","");
-  $hash->{logMethod}->($name, 3, "$name/reset: $hardware"); 
-  DevIo_CloseDev($hash);
-	if ($hardware eq "radinoCC1101" && $^O eq 'linux') {
+	my ($hash) = @_;
+	my $name = $hash->{NAME};
+	my $hardware = AttrVal($name,"hardware","");
+	$hash->{logMethod}->($name, 3, "$name/reset: $hardware"); 
+	DevIo_CloseDev($hash);
+ 	if ($hardware eq "radinoCC1101" && $^O eq 'linux') {
 		# The reset is triggered when the Micro's virtual (CDC) serial / COM port is opened at 1200 baud and then closed.
 		# When this happens, the processor will reset, breaking the USB connection to the computer (meaning that the virtual serial / COM port will disappear).
 		# After the processor resets, the bootloader starts, remaining active for about 8 seconds.
@@ -1110,9 +1117,9 @@ SIGNALduino_ResetDevice($)
 		system("stty -F $dev ospeed 1200 ispeed 1200");
 		sleep(1);	# ohne funktioniert es nicht
 	}
-  my $ret = DevIo_OpenDev($hash, 0, "SIGNALduino_DoInit", 'SIGNALduino_Connect');
+ 	my $ret = DevIo_OpenDev($hash, 0, "SIGNALduino_DoInit", 'SIGNALduino_Connect');
 
-  return $ret;
+ 	return $ret;
 }
 
 #####################################
