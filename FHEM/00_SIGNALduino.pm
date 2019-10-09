@@ -428,10 +428,16 @@ SIGNALduino_Shutdown($)
 #####################################
 sub 
 SIGNALduino_flash($) {
-	my $hash = shift;
-    my $name = $hash->{NAME};
-
-	$hash->{STATE} = "FIRMWARE UPDATE running";
+	my $name = shift;
+	my $hash = $defs{$name};
+	
+	if (defined($hash->{helper}{stty_pid}))
+	{
+		waitpid( $hash->{helper}{stty_pid}, 0 );
+		delete ( $hash->{helper}{stty_pid});
+	}
+	
+	readingsSingleUpdate($hash,"state","FIRMWARE UPDATE running",1);
 	$hash->{helper}{avrdudelogs} .= "$name closed\n";
     my $logFile = AttrVal("global", "logdir", "./log/") . "$hash->{TYPE}-Flash.log";
 
@@ -440,7 +446,9 @@ SIGNALduino_flash($) {
     }
 
     $hash->{helper}{avrdudecmd} =~ s/\Q[LOGFILE]\E/$logFile/g;
-	`$hash->{helper}{avrdudecmd}`;
+	qx($hash->{helper}{avrdudecmd});
+	
+
 	 
 	local $/=undef;
 	if (-e $logFile) {
@@ -451,10 +459,13 @@ SIGNALduino_flash($) {
 	    close FILE;
 	} else {
 		$hash->{helper}{avrdudelogs} .= "WARNING: avrdude created no log file\n\n";
+		readingsSingleUpdate($hash,"state","FIRMWARE UPDATE with error",1);
+		return "WARNING: avrdude created no log file";
 	}
 	
 	DevIo_OpenDev($hash, 0, "SIGNALduino_DoInit", 'SIGNALduino_Connect');
 	$hash->{helper}{avrdudelogs} .= "$name opened\n";
+	return undef;
 }
 
 
@@ -525,8 +536,7 @@ SIGNALduino_Set($@)
     my @args = split(' ', $arg);
     my $log = "";
     my $hexFile = "";
-    my @deviceName = split('@', $hash->{DeviceName});
-    my $port = $deviceName[0];
+    my ($port,undef) = split('@', $hash->{DeviceName});
 	my $hardware=AttrVal($name,"hardware","");
 	my $baudrate=$hardware eq "uno" ? 115200 : 57600;
     my $defaultHexFile = "./FHEM/firmware/$hash->{TYPE}_$hardware.hex";
@@ -631,20 +641,33 @@ SIGNALduino_Set($@)
 		  if ($hardware eq "radinoCC1101" && $^O eq 'linux') {
 			$hash->{logMethod}->($name, 3, "$hash->{TYPE} $name/flash: forcing special reset for $hardware on $port");
 			# Mit dem Linux-Kommando 'stty' die Port-Einstellungen setzen
-			system("stty -F $port ospeed 1200 ispeed 1200");
-	  	  }
+			#my $output =  qx("stty -F $port ospeed 1200 ispeed 1200");
+			use IPC::Open3;
+ 	
+			my($chld_out, $chld_in, $chld_err);
+			use Symbol 'gensym';
+			$chld_err = gensym;
+ 
+			my $pid = open3($chld_out, $chld_in, $chld_err,  'stty -F $port ospeed 1200 ispeed 1200');
+			close($chld_in);  # give end of file to kid, or feed him
+			my @outlines = <$chld_out>;              # read till EOF
+			my @errlines = <$chld_err>;              # XXX: block potential if massive
+			$hash->{helper}{stty_pid}=$pid;
+	  	$hash->{helper}{stty_output} = join(" ",@outlines).join(" ",@errlines);
+		  }
 	  	  
-	      $hash->{helper}{avrdudecmd} = $flashCommand;
-	      $hash->{helper}{avrdudecmd}=~ s/\Q[PORT]\E/$port/g;
-	      $hash->{helper}{avrdudecmd} =~ s/\Q[BAUDRATE]\E/$baudrate/g;
-	      $hash->{helper}{avrdudecmd} =~ s/\Q[HEXFILE]\E/$hexFile/g;
+	    $hash->{helper}{avrdudecmd} = $flashCommand;
+	    $hash->{helper}{avrdudecmd}=~ s/\Q[PORT]\E/$port/g;
+	    $hash->{helper}{avrdudecmd} =~ s/\Q[BAUDRATE]\E/$baudrate/g;
+	    $hash->{helper}{avrdudecmd} =~ s/\Q[HEXFILE]\E/$hexFile/g;
 		  $log .= "command: $hash->{helper}{avrdudecmd}\n\n";
-		  $hash->{helper}{avrdudelogs} = $log;
-  		  InternalTimer(gettimeofday() + 1,"SIGNALduino_flash",$hash);
+  		InternalTimer(gettimeofday() + 1,"SIGNALduino_flash",$name);
 	    }
 	    else {
 	      $log .= "\n\nNo flashCommand found. Please define this attribute.\n\n";
+	      return "No flashCommand found. Please define this attribute";
 	    }
+   	  $hash->{helper}{avrdudelogs} = $log;
 	    return undef;
 	} else {
 		return "Sorry, Flashing your ESP via Module is currently not supported.";
@@ -1098,28 +1121,32 @@ sub SIGNALduino_parseResponse($$$)
 sub
 SIGNALduino_ResetDevice($)
 {
-	my ($hash) = @_;
+	my $hash = shift;
 	my $name = $hash->{NAME};
-	my $hardware = AttrVal($name,"hardware","");
-	$hash->{logMethod}->($name, 3, "$name/reset: $hardware"); 
-	DevIo_CloseDev($hash);
- 	if ($hardware eq "radinoCC1101" && $^O eq 'linux') {
-		# The reset is triggered when the Micro's virtual (CDC) serial / COM port is opened at 1200 baud and then closed.
-		# When this happens, the processor will reset, breaking the USB connection to the computer (meaning that the virtual serial / COM port will disappear).
-		# After the processor resets, the bootloader starts, remaining active for about 8 seconds.
-		# The bootloader can also be initiated by pressing the reset button on the Micro.
-		# Note that when the board first powers up, it will jump straight to the user sketch, if present, rather than initiating the bootloader.	
-		my $dev = $hash->{DeviceName};
-		my $baudrate;
-		($dev, $baudrate) = split("@", $dev);
-		$hash->{logMethod}->($name, 3, "$hash->{TYPE} $name/reset: forcing special reset for $hardware on $dev");
-		# Mit dem Linux-Kommando 'stty' die Port-Einstellungen setzen
-		system("stty -F $dev ospeed 1200 ispeed 1200");
-		sleep(1);	# ohne funktioniert es nicht
+	if (!defined($hash->{helper}{resetInProgress}))
+	{
+		my $hardware = AttrVal($name,"hardware","");
+		$hash->{logMethod}->($name, 3, "$name/reset: $hardware"); 
+		DevIo_CloseDev($hash);
+	 	if ($hardware eq "radinoCC1101" && $^O eq 'linux') {
+			# The reset is triggered when the Micro's virtual (CDC) serial / COM port is opened at 1200 baud and then closed.
+			# When this happens, the processor will reset, breaking the USB connection to the computer (meaning that the virtual serial / COM port will disappear).
+			# After the processor resets, the bootloader starts, remaining active for about 8 seconds.
+			# The bootloader can also be initiated by pressing the reset button on the Micro.
+			# Note that when the board first powers up, it will jump straight to the user sketch, if present, rather than initiating the bootloader.	
+			my ($dev, $baudrate) = split("@", $hash->{DeviceName});
+			$hash->{logMethod}->($name, 3, "$hash->{TYPE} $name/reset: forcing special reset for $hardware on $dev");
+			# Mit dem Linux-Kommando 'stty' die Port-Einstellungen setzen
+			system("stty -F $dev ospeed 1200 ispeed 1200");
+			$hash->{helper}{resetInProgress}=1;
+			InternalTimer(gettimeofday()+1,"SIGNALduino_ResetDevice",$hash);
+			$hash->{logMethod}->($name, 3, "$name/reset: reopen delayed for 1 second"); 
+			return;
+		}
+	} else {
+		delete($hash->{helper}{resetInProgress});
 	}
- 	my $ret = DevIo_OpenDev($hash, 0, "SIGNALduino_DoInit", 'SIGNALduino_Connect');
-
- 	return $ret;
+ 	DevIo_OpenDev($hash, 0, "SIGNALduino_DoInit", 'SIGNALduino_Connect');
 }
 
 #####################################

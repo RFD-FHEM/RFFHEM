@@ -8,6 +8,7 @@ deploylocalLibs:
 	@cp $(MAKEFILE_DIR)/UnitTest/FHEM/lib/*.pm /opt/fhem/FHEM/lib
 	@cp $(MAKEFILE_DIR)/UnitTest/FHEM/lib/*.json /opt/fhem/FHEM/lib
 	@cp $(MAKEFILE_DIR)/FHEM/lib/*.pm /opt/fhem/FHEM/lib
+	@cp $(MAKEFILE_DIR)/UnitTest/src/avrdude /opt/fhem/contrib
 
 	
 UnitTest/makefile: 

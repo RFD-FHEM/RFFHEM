@@ -1,0 +1,72 @@
+defmod test_reset_1 UnitTest dummyDuino 
+(
+ {
+	my $mock;
+    my $SD_connect;
+	my $IntTimer;
+	BEGIN {
+		$mock = Mock::Sub->new;
+		$SD_connect = $mock->mock('SIGNALduino_Connect');
+		$IntTimer = $mock->mock('main::InternalTimer');
+		$IntTimer->unmock;
+	}	
+	
+	subtest 'reset without hardware parameter set' => sub {
+		plan tests => 2;
+		$attr{$target}{hardware} = "";
+		my $ret = SIGNALduino_Set($targetHash, $target, "reset" ,"");
+		is ($SD_connect->called_count,1,"check if SIGNALduino_Connect is called once");
+		$SD_connect->unmock;
+		is (ReadingsVal($target,"state",""),"disconnected","check state");
+	}; 
+
+
+	subtest 'reset with hardware parameter set (nano328)' => sub {
+		plan tests => 3;
+		$attr{$target}{hardware} = "nano328";
+		$SD_connect->remock;
+		my $ret = SIGNALduino_Set($targetHash, $target, "reset" ,"");
+		is ($SD_connect->called_count,1,"check if SIGNALduino_Connect is called once");
+		$SD_connect->unmock;
+		is (ReadingsVal($target,"state",""),"disconnected","check state");
+		is ($targetHash->{helper}{resetInProgress},undef,"check reset in progress");
+	}; 
+	
+	subtest 'reset with hardware parameter set (radinoCC1101)' => sub {
+		plan tests => 5;
+		$attr{$target}{hardware} = "radinoCC1101";
+		$IntTimer->remock;
+		
+		$SD_connect->remock;
+		my $ret = SIGNALduino_Set($targetHash, $target, "reset" ,"");
+		is ($SD_connect->called_count,0,"check if SIGNALduino_Connect is not called");
+		is ($IntTimer->called_count,1,"check if InternalTimer is called once");
+		$SD_connect->unmock;
+		my @called_args=$IntTimer->called_with;
+		$IntTimer->unmock;
+		ok($called_args[0] > gettimeofday(), "check arg 1 width InternalTimer  is called ");		
+		is (ReadingsVal($target,"state",""),"disconnected","check state");
+		is ($targetHash->{helper}{resetInProgress},1,"check reset in progress");
+		
+	}; 
+	
+	subtest 'reset with specialReset flag set' => sub {
+		plan tests => 3;
+
+		$targetHash->{helper}{resetInProgress}=1;
+		$IntTimer->remock;
+		$SD_connect->remock;
+		SIGNALduino_ResetDevice($targetHash);
+		
+		is ($SD_connect->called_count,1,"check if SIGNALduino_Connect is called once");
+		$SD_connect->unmock;
+		
+		is ($IntTimer->called_count,0,"check if InternalTimer is not called once");
+		$IntTimer->unmock;
+		
+		is ($targetHash->{helper}{resetInProgress},undef,"check reset in progress flag deleted");
+	}; 
+
+
+}
+)
