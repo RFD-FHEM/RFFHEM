@@ -4755,6 +4755,7 @@ sub SIGNALduino_githubParseHttpResponse($$$)
 		<i><u>note model radino:</u></i>
 		<ul>
 			<li>Sometimes there can be problems flashing radino on Linux. <a href="https://wiki.in-circuit.de/index.php5?title=radino_common_problems">Here in the wiki under point "radino & Linux" is a patch!</a></li>
+			<li>If the Radino is defined in this way <code>/dev/ttyACM0</code>, the flashing of the firmware should be done automatically. If this fails, the boot loader must be activated manually:</li>
 			<li>To activate the bootloader of the radino there are 2 variants.
 			<ul>
 				<li>1) modules that contain a BSL-button:
@@ -4771,8 +4772,8 @@ sub SIGNALduino_githubParseHttpResponse($$$)
 				</ul>
 				</li>
 			</ul>
-			<li>In bootloader mode, the radino gets a different USB ID.</li><br>
-			<b>If the bootloader is enabled, it signals with a flashing LED. Then you have 8 seconds to flash.</b>
+			In bootloader mode, the radino gets a different USB ID. This must be entered in the "flashCommand" attribute.<br>
+			If the bootloader is enabled, it signals with a flashing LED. Then you have 8 seconds to flash.
 			</li>
 		</ul>
 		</li><br>
@@ -5164,7 +5165,8 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
 		<i><u>Hinweise Modell radino:</u></i>
 		<ul>
 			<li>Teilweise kann es beim flashen vom radino unter Linux Probleme geben. <a href="https://wiki.in-circuit.de/index.php5?title=radino_common_problems">Hier im Wiki unter dem Punkt "radino & Linux" gibt es einen Patch!</a></li>
-			<li>Um den Bootloader vom radino zu aktivieren gibt es 2 Varianten.
+			<li>Wenn der Radino in dieser Art <code>/dev/ttyACM0</code> definiert wurde, sollte das Flashen der Firmware automatisch erfolgen. Wenn das nicht gelingt, muss der Bootloader manuell aktiviert werden:</li>
+			<li>Um den Bootloader vom radino manuell zu aktivieren gibt es 2 Varianten.
 			<ul>
 				<li>1) Module welche einen BSL-Button besitzen:
 				<ul>
@@ -5180,8 +5182,8 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
 				</ul>
 				</li>
 			</ul>
-			<li>Im Bootloader-Modus erh&auml;lt der radino eine andere USB ID.</li><br>
-			<b>Wenn der Bootloader aktiviert ist, signalisiert er das mit dem Blinken einer LED. Dann hat man ca. 8 Sekunden Zeit zum flashen.</b>
+			Im Bootloader-Modus erh&auml;lt der radino eine andere USB ID. Diese muss im Attribut "flashCommand" eingetragen werden.<br>
+			Wenn der Bootloader aktiviert ist, signalisiert er das mit dem Blinken einer LED. Dann hat man ca. 8 Sekunden Zeit zum flashen.
 			</li>
 		</ul>
 		</li><br>
