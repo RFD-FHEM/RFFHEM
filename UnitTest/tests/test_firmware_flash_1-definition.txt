@@ -67,7 +67,7 @@ defmod test_firmware_flash_1 UnitTest dummyDuino
 		my $ret = SIGNALduino_flash($target);
 		#is($system_call->called_count, 1, "check if system is called once");		
 		
-		is($ret, undef, "check return value");		
+		is($ret, "ERROR: avrdude exited with error", "check return value");		
 		#like($targetHash->{helper}{avrdudelogs}, '/^command: avrdude -c arduino -b \d+ -P none -p atmega328p -vv -U flash:w:.\/fhem\/test\.hex 2>\[LOGFILE\]$/m', "avrdude parameter check");
 		is($targetHash->{helper}{avrdudecmd},'avrdude -c arduino -b 57600 -P none -p atmega328p -vv -U flash:w:./fhem/test.hex 2>./log/SIGNALduino-Flash.log',"check avrdude cmd");
 	}; 
