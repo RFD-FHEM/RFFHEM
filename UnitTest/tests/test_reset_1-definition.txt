@@ -66,6 +66,7 @@ defmod test_reset_1 UnitTest dummyDuino
 		
 		is ($targetHash->{helper}{resetInProgress},undef,"check reset in progress flag deleted");
 	}; 
+    CommandDefMod(undef,"$target $targetHash->{TYPE} $targetHash->{DEF}");
 
 
 }

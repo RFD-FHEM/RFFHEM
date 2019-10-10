@@ -93,7 +93,7 @@ defmod test_firmware_flash_1 UnitTest dummyDuino
 		is($targetHash->{helper}{avrdudecmd},'avrdude -c avr109 -b 57600 -P none -p atmega32u4 -vv -D -U flash:w:./fhem/test.hex 2>[LOGFILE]',"check avrdude cmd");
 
 	}; 
-	$targetHash->{DevState} = 'initialized';
+    CommandDefMod(undef,"$target $targetHash->{TYPE} $targetHash->{DEF}");
 
 }
 )
