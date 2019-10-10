@@ -647,15 +647,20 @@ SIGNALduino_Set($@)
 			my($chld_out, $chld_in, $chld_err);
 			use Symbol 'gensym';
 			$chld_err = gensym;
- 
-			my $pid = open3($chld_in,$chld_out, $chld_err,  "stty -F $port ospeed 1200 ispeed 1200");
-			close($chld_in);  # give end of file to kid, or feed him
-			my @outlines = <$chld_out>;              # read till EOF
-			my @errlines = <$chld_err>;              # XXX: block potential if massive
-			$hash->{helper}{stty_pid}=$pid;
-	  		$hash->{helper}{stty_output} = join(" ",@outlines).join(" ",@errlines);
-	  		# todo: If open3 reports error, catch this and provide useful logmessage
-		  }
+			my $pid;
+			eval {
+				$pid = open3($chld_in,$chld_out, $chld_err,  "stty -F $port ospeed 1200 ispeed 1200");
+	 			close($chld_in);  # give end of file to kid, or feed him
+			};
+			if ($@) {
+			    $hash->{helper}{stty_output}=$@;
+			} else {
+				my @outlines = <$chld_out>;              # read till EOF
+				my @errlines = <$chld_err>;              # XXX: block potential if massive
+				$hash->{helper}{stty_pid}=$pid;
+		  		$hash->{helper}{stty_output} = join(" ",@outlines).join(" ",@errlines);
+			}  
+		}
 	  	  
 	    $hash->{helper}{avrdudecmd} = $flashCommand;
 	    $hash->{helper}{avrdudecmd}=~ s/\Q[PORT]\E/$port/g;
