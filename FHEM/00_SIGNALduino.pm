@@ -648,7 +648,7 @@ SIGNALduino_Set($@)
 			use Symbol 'gensym';
 			$chld_err = gensym;
  
-			my $pid = open3($chld_out, $chld_in, $chld_err,  'stty -F $port ospeed 1200 ispeed 1200');
+			my $pid = open3($chld_out, $chld_in, $chld_err,  "stty -F $port ospeed 1200 ispeed 1200");
 			close($chld_in);  # give end of file to kid, or feed him
 			my @outlines = <$chld_out>;              # read till EOF
 			my @errlines = <$chld_err>;              # XXX: block potential if massive
