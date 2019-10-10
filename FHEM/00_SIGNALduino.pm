@@ -447,7 +447,15 @@ SIGNALduino_flash($) {
 
     $hash->{helper}{avrdudecmd} =~ s/\Q[LOGFILE]\E/$logFile/g;
 	qx($hash->{helper}{avrdudecmd});
-	
+	if ($? !=0 )
+	{
+		readingsSingleUpdate($hash,"state","FIRMWARE UPDATE with error",1);
+		$hash->{logMethod}->($name ,4, "$name: ERROR: avrdude exited with error");
+		return "ERROR: avrdude exited with error";
+	} else {
+		$hash->{logMethod}->($name ,4, "$name: Firmware update was succesfull");
+		readingsSingleUpdate($hash,"state","FIRMWARE UPDATE succesfull",1)
+	}
 
 	 
 	local $/=undef;
@@ -635,45 +643,45 @@ SIGNALduino_Set($@)
 		}
 		
 	
-	    if($flashCommand ne "") {
-	
-	      DevIo_CloseDev($hash);
-		  if ($hardware eq "radinoCC1101" && $^O eq 'linux') {
-			$hash->{logMethod}->($name, 3, "$hash->{TYPE} $name/flash: forcing special reset for $hardware on $port");
-			# Mit dem Linux-Kommando 'stty' die Port-Einstellungen setzen
-			#my $output =  qx("stty -F $port ospeed 1200 ispeed 1200");
-			use IPC::Open3;
- 	
-			my($chld_out, $chld_in, $chld_err);
-			use Symbol 'gensym';
-			$chld_err = gensym;
-			my $pid;
-			eval {
-				$pid = open3($chld_in,$chld_out, $chld_err,  "stty -F $port ospeed 1200 ispeed 1200");
-	 			close($chld_in);  # give end of file to kid, or feed him
-			};
-			if ($@) {
-			    $hash->{helper}{stty_output}=$@;
-			} else {
-				my @outlines = <$chld_out>;              # read till EOF
-				my @errlines = <$chld_err>;              # XXX: block potential if massive
-				$hash->{helper}{stty_pid}=$pid;
-		  		$hash->{helper}{stty_output} = join(" ",@outlines).join(" ",@errlines);
-			}  
-		}
-	  	  
-	    $hash->{helper}{avrdudecmd} = $flashCommand;
-	    $hash->{helper}{avrdudecmd}=~ s/\Q[PORT]\E/$port/g;
-	    $hash->{helper}{avrdudecmd} =~ s/\Q[BAUDRATE]\E/$baudrate/g;
-	    $hash->{helper}{avrdudecmd} =~ s/\Q[HEXFILE]\E/$hexFile/g;
-		  $log .= "command: $hash->{helper}{avrdudecmd}\n\n";
-  		InternalTimer(gettimeofday() + 1,"SIGNALduino_flash",$name);
+		    if($flashCommand ne "") {
+		
+		      DevIo_CloseDev($hash);
+			  if ($hardware eq "radinoCC1101" && $^O eq 'linux') {
+				$hash->{logMethod}->($name, 3, "$hash->{TYPE} $name/flash: forcing special reset for $hardware on $port");
+				# Mit dem Linux-Kommando 'stty' die Port-Einstellungen setzen
+				#my $output =  qx("stty -F $port ospeed 1200 ispeed 1200");
+				use IPC::Open3;
+	 	
+				my($chld_out, $chld_in, $chld_err);
+				use Symbol 'gensym';
+				$chld_err = gensym;
+				my $pid;
+				eval {
+					$pid = open3($chld_in,$chld_out, $chld_err,  "stty -F $port ospeed 1200 ispeed 1200");
+		 			close($chld_in);  # give end of file to kid, or feed him
+				};
+				if ($@) {
+				    $hash->{helper}{stty_output}=$@;
+				} else {
+					my @outlines = <$chld_out>;              # read till EOF
+					my @errlines = <$chld_err>;              # XXX: block potential if massive
+					$hash->{helper}{stty_pid}=$pid;
+			  		$hash->{helper}{stty_output} = join(" ",@outlines).join(" ",@errlines);
+				}  
+			}
+		  	  
+		    $hash->{helper}{avrdudecmd} = $flashCommand;
+		    $hash->{helper}{avrdudecmd}=~ s/\Q[PORT]\E/$port/g;
+		    $hash->{helper}{avrdudecmd} =~ s/\Q[BAUDRATE]\E/$baudrate/g;
+		    $hash->{helper}{avrdudecmd} =~ s/\Q[HEXFILE]\E/$hexFile/g;
+			$log .= "command: $hash->{helper}{avrdudecmd}\n\n";
+	  		InternalTimer(gettimeofday() + 1,"SIGNALduino_flash",$name);
 	    }
 	    else {
 	      $log .= "\n\nNo flashCommand found. Please define this attribute.\n\n";
 	      return "No flashCommand found. Please define this attribute";
 	    }
-   	  $hash->{helper}{avrdudelogs} = $log;
+   	 	$hash->{helper}{avrdudelogs} = $log;
 	    return undef;
 	} else {
 		return "Sorry, Flashing your ESP via Module is currently not supported.";
@@ -1689,9 +1697,7 @@ sub SIGNALduino_ParseHttpResponse
 			if (defined($set_return))
 			{
 				$hash->{logMethod}->($name ,3, "$name: Error while flashing: $set_return");
-			} else {
-				$hash->{logMethod}->($name ,3, "$name: Firmware update was succesfull");
-			}
+			} 
     	}
     } else {
     	$hash->{logMethod}->($name, 3, "$name: undefined error while requesting ".$param->{url}." - $err - code=".$param->{code});    		# Eintrag fuers Log
