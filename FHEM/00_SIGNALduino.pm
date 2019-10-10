@@ -653,7 +653,8 @@ SIGNALduino_Set($@)
 			my @outlines = <$chld_out>;              # read till EOF
 			my @errlines = <$chld_err>;              # XXX: block potential if massive
 			$hash->{helper}{stty_pid}=$pid;
-	  	$hash->{helper}{stty_output} = join(" ",@outlines).join(" ",@errlines);
+	  		$hash->{helper}{stty_output} = join(" ",@outlines).join(" ",@errlines);
+	  		# todo: If open3 reports error, catch this and provide useful logmessage
 		  }
 	  	  
 	    $hash->{helper}{avrdudecmd} = $flashCommand;
