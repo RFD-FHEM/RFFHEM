@@ -446,14 +446,15 @@ SIGNALduino_flash($) {
     }
 
     $hash->{helper}{avrdudecmd} =~ s/\Q[LOGFILE]\E/$logFile/g;
+	local $SIG{CHLD} = 'DEFAULT';
 	qx($hash->{helper}{avrdudecmd});
-	if ($? !=0 )
+	if ($? != 0 )
 	{
 		readingsSingleUpdate($hash,"state","FIRMWARE UPDATE with error",1);
-		$hash->{logMethod}->($name ,4, "$name: ERROR: avrdude exited with error");
+		$hash->{logMethod}->($name ,3, "$name: ERROR: avrdude exited with error $?");
 		return "ERROR: avrdude exited with error";
 	} else {
-		$hash->{logMethod}->($name ,4, "$name: Firmware update was succesfull");
+		$hash->{logMethod}->($name ,3, "$name: Firmware update was succesfull");
 		readingsSingleUpdate($hash,"state","FIRMWARE UPDATE succesfull",1)
 	}
 
@@ -1153,8 +1154,8 @@ SIGNALduino_ResetDevice($)
 			# Mit dem Linux-Kommando 'stty' die Port-Einstellungen setzen
 			system("stty -F $dev ospeed 1200 ispeed 1200");
 			$hash->{helper}{resetInProgress}=1;
-			InternalTimer(gettimeofday()+1,"SIGNALduino_ResetDevice",$hash);
-			$hash->{logMethod}->($name, 3, "$name/reset: reopen delayed for 1 second"); 
+			InternalTimer(gettimeofday()+10,"SIGNALduino_ResetDevice",$hash);
+			$hash->{logMethod}->($name, 3, "$name/reset: reopen delayed for 10 second"); 
 			return;
 		}
 	} else {
