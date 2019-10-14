@@ -44,7 +44,7 @@ defmod test_reset_1 UnitTest dummyDuino
 		$SD_connect->unmock;
 		my @called_args=$IntTimer->called_with;
 		$IntTimer->unmock;
-		ok($called_args[0] > gettimeofday(), "check arg 1 width InternalTimer  is called ");		
+		ok($called_args[0] > gettimeofday(), "check arg 1 width InternalTimer is called ");		
 		is (ReadingsVal($target,"state",""),"disconnected","check state");
 		is ($targetHash->{helper}{resetInProgress},1,"check reset in progress");
 		
