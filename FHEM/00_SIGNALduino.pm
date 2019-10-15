@@ -452,12 +452,11 @@ SIGNALduino_flash($) {
 	{
 		readingsSingleUpdate($hash,"state","FIRMWARE UPDATE with error",1);
 		$hash->{logMethod}->($name ,3, "$name: ERROR: avrdude exited with error $?");
-		return "ERROR: avrdude exited with error";
+		FW_directNotify("FILTER=$name", "#FHEMWEB:WEB", "FW_okDialog('ERROR: avrdude exited with error, for details see last flashlog.')", "");
 	} else {
 		$hash->{logMethod}->($name ,3, "$name: Firmware update was succesfull");
 		readingsSingleUpdate($hash,"state","FIRMWARE UPDATE succesfull",1)
 	}
-
 	 
 	local $/=undef;
 	if (-e $logFile) {
