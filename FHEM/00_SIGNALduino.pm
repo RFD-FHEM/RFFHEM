@@ -444,6 +444,7 @@ SIGNALduino_flash($) {
     if (-e $logFile) {
 	    unlink $logFile;
     }
+	my $retcode=undef;
 
     $hash->{helper}{avrdudecmd} =~ s/\Q[LOGFILE]\E/$logFile/g;
 	local $SIG{CHLD} = 'DEFAULT';
@@ -453,6 +454,8 @@ SIGNALduino_flash($) {
 		readingsSingleUpdate($hash,"state","FIRMWARE UPDATE with error",1);
 		$hash->{logMethod}->($name ,3, "$name: ERROR: avrdude exited with error $?");
 		FW_directNotify("FILTER=$name", "#FHEMWEB:WEB", "FW_okDialog('ERROR: avrdude exited with error, for details see last flashlog.')", "");
+		$retcode="ERROR: avrdude exited with error";
+		
 	} else {
 		$hash->{logMethod}->($name ,3, "$name: Firmware update was succesfull");
 		readingsSingleUpdate($hash,"state","FIRMWARE UPDATE succesfull",1)
@@ -468,12 +471,12 @@ SIGNALduino_flash($) {
 	} else {
 		$hash->{helper}{avrdudelogs} .= "WARNING: avrdude created no log file\n\n";
 		readingsSingleUpdate($hash,"state","FIRMWARE UPDATE with error",1);
-		return "WARNING: avrdude created no log file";
+		$retcode= "WARNING: avrdude created no log file";
 	}
 	
 	DevIo_OpenDev($hash, 0, "SIGNALduino_DoInit", 'SIGNALduino_Connect');
-	$hash->{helper}{avrdudelogs} .= "$name opened\n";
-	return undef;
+	$hash->{helper}{avrdudelogs} .= "$name reopen started\n";
+	return $retcode;
 }
 
 
