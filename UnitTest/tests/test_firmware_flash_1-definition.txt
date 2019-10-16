@@ -3,12 +3,15 @@ defmod test_firmware_flash_1 UnitTest dummyDuino
  {
 	my $mock;
     my $system_call;
+    my $OpenDev;
 	
 	BEGIN {
 		$mock = Mock::Sub->new;
 		$system_call = $mock->mock('system');
+		$OpenDev = $mock->mock('DevIo_OpenDev');
 	}	
-	
+	$OpenDev->unmock;
+		
 	subtest 'flash without hardware parameter set' => sub {
 		plan tests => 1;
 		$attr{$target}{hardware} = "";
@@ -60,15 +63,19 @@ defmod test_firmware_flash_1 UnitTest dummyDuino
 	}; 
 	
 	subtest 'SIGNALduino_flash called (nano328)' => sub {
-		plan tests => 3;
+		plan tests => 4;
 		$attr{$target}{hardware} ="nano328";
+		$OpenDev->remock;
+		
 
 		my $ret = SIGNALduino_flash($target);
-		#is($system_call->called_count, 1, "check if system is called once");		
 		
 		is($ret, "ERROR: avrdude exited with error", "check return value");		
 		is(ReadingsVal($target,"state",""),"FIRMWARE UPDATE with error","check reading state");
 		is($targetHash->{helper}{avrdudecmd},'avrdude -c arduino -b 57600 -P none -p atmega328p -vv -U flash:w:./fhem/test.hex 2>./log/SIGNALduino-Flash.log',"check avrdude cmd");
+		is($OpenDev->called_count, 1, "check if DevIO_OpenDev is called once");		
+		$OpenDev->unmock;
+		
 	}; 
 
 	subtest 'flash avrdude installed (radinoCC1101)' => sub {
@@ -76,7 +83,7 @@ defmod test_firmware_flash_1 UnitTest dummyDuino
 		$attr{$target}{hardware} ="radinoCC1101";
 		my $path = $ENV{'PATH'};
 		my $IntTimer = $mock->mock('main::InternalTimer');
-
+		
 		$ENV{'PATH'}="/opt/fhem/contrib";
 		my $ret = SIGNALduino_Set($targetHash, $target, "flash" ,"./fhem/test.hex");
 		$ENV{'PATH'}=$path;
