@@ -547,6 +547,7 @@ SIGNALduino_Set($@)
     my $hexFile = "";
     my ($port,undef) = split('@', $hash->{DeviceName});
 	my $hardware=AttrVal($name,"hardware","");
+	my $baudrate= 57600;
     return "Please define your hardware! (attr $name hardware <model of your receiver>) " if ($hardware eq "");
 	return "ERROR: argument failed! flash [hexFile|url]" if (!$args[0]);
     
