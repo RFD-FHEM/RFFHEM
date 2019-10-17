@@ -444,7 +444,6 @@ SIGNALduino_flash($) {
     if (-e $logFile) {
 	    unlink $logFile;
     }
-	my $retcode=undef;
 
     $hash->{helper}{avrdudecmd} =~ s/\Q[LOGFILE]\E/$logFile/g;
 	local $SIG{CHLD} = 'DEFAULT';
@@ -454,8 +453,7 @@ SIGNALduino_flash($) {
 		readingsSingleUpdate($hash,"state","FIRMWARE UPDATE with error",1);
 		$hash->{logMethod}->($name ,3, "$name: ERROR: avrdude exited with error $?");
 		FW_directNotify("FILTER=$name", "#FHEMWEB:WEB", "FW_okDialog('ERROR: avrdude exited with error, for details see last flashlog.')", "");
-		$retcode="ERROR: avrdude exited with error";
-		
+		$hash->{FLASH_RESULT}="ERROR: avrdude exited with error";
 	} else {
 		$hash->{logMethod}->($name ,3, "$name: Firmware update was succesfull");
 		readingsSingleUpdate($hash,"state","FIRMWARE UPDATE succesfull",1)
@@ -471,12 +469,12 @@ SIGNALduino_flash($) {
 	} else {
 		$hash->{helper}{avrdudelogs} .= "WARNING: avrdude created no log file\n\n";
 		readingsSingleUpdate($hash,"state","FIRMWARE UPDATE with error",1);
-		$retcode= "WARNING: avrdude created no log file";
+		$hash->{FLASH_RESULT}= "WARNING: avrdude created no log file";
 	}
 	
 	DevIo_OpenDev($hash, 0, "SIGNALduino_DoInit", 'SIGNALduino_Connect');
 	$hash->{helper}{avrdudelogs} .= "$name reopen started\n";
-	return $retcode;
+	return $hash->{FLASH_RESULT};
 }
 
 
@@ -549,15 +547,8 @@ SIGNALduino_Set($@)
     my $hexFile = "";
     my ($port,undef) = split('@', $hash->{DeviceName});
 	my $hardware=AttrVal($name,"hardware","");
-	my $baudrate=$hardware eq "uno" ? 115200 : 57600;
-    my $defaultHexFile = "./FHEM/firmware/$hash->{TYPE}_$hardware.hex";
     return "Please define your hardware! (attr $name hardware <model of your receiver>) " if ($hardware eq "");
 	return "ERROR: argument failed! flash [hexFile|url]" if (!$args[0]);
-	
-	
-	
-
-    #SIGNALduino_Log3 $hash, 3, "SIGNALduino_Set choosen flash option: $args[0] of available: ".Dumper($my_sets{flash});
     
 	if( grep $args[0] eq $_ , split(",",$my_sets{flash}) )
 	{
@@ -581,22 +572,16 @@ SIGNALduino_Set($@)
                     command    => "getReleaseByTag"
                     
                 };
-   		HttpUtils_NonblockingGet($http_param);                                                                                     # Starten der HTTP Abfrage. Es gibt keinen Return-Code. 
+   		HttpUtils_NonblockingGet($http_param);                                                                           # Starten der HTTP Abfrage. Es gibt keinen Return-Code. 
 		return;
 	} 
-    elsif(!$arg || $args[0] !~ m/^(\w|\/|.)+$/) {   #Todo (\\\\?([^\\/]*[\\/])*)([^\\/]+)$
-      $hexFile = AttrVal($name, "hexFile", "");
-      if ($hexFile eq "") {
-        $hexFile = $defaultHexFile;
-      }
-    }
     elsif ($args[0] =~ m/^https?:\/\// ) {
 		my $http_param = {
 		                    url        => $args[0],
 		                    timeout    => 5,
 		                    hash       => $hash,                                  # Muss gesetzt werden, damit die Callback funktion wieder $hash hat
 		                    method     => "GET",                                  # Lesen von Inhalten
-		                    callback   =>  \&SIGNALduino_ParseHttpResponse,        # Diese Funktion soll das Ergebnis dieser HTTP Anfrage bearbeiten
+		                    callback   =>  \&SIGNALduino_ParseHttpResponse,       # Diese Funktion soll das Ergebnis dieser HTTP Anfrage bearbeiten
 		                    command    => 'flash',
 		                };
 		
@@ -606,7 +591,6 @@ SIGNALduino_Set($@)
       $hexFile = $args[0];
     }
 	$hash->{logMethod}->($name, 3, "$name: filename $hexFile provided, trying to flash");
-    return "Usage: set $name flash [filename]\n\nor use the hexFile attribute" if($hexFile !~ m/^(\w|\/|.)+$/);   # Todo: (\\\\?([^\\/]*[\\/])*)([^\\/]+)$
 
 	# Only for Arduino , not for ESP
 	if ($hardware =~ m/(?:nano|mini|radino)/)

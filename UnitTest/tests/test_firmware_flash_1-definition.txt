@@ -63,20 +63,22 @@ defmod test_firmware_flash_1 UnitTest dummyDuino
 	}; 
 	
 	subtest 'SIGNALduino_flash called (nano328)' => sub {
-		plan tests => 4;
+		plan tests => 5;
 		$attr{$target}{hardware} ="nano328";
 		$OpenDev->remock;
 		
-
 		my $ret = SIGNALduino_flash($target);
 		
 		is($ret, "ERROR: avrdude exited with error", "check return value");		
+		is($ret, InternalVal($target,"FLASH_RESULT",undef), "check return value");		
+		
 		is(ReadingsVal($target,"state",""),"FIRMWARE UPDATE with error","check reading state");
 		is($targetHash->{helper}{avrdudecmd},'avrdude -c arduino -b 57600 -P none -p atmega328p -vv -U flash:w:./fhem/test.hex 2>./log/SIGNALduino-Flash.log',"check avrdude cmd");
 		is($OpenDev->called_count, 1, "check if DevIO_OpenDev is called once");		
 		$OpenDev->unmock;
 		
 	}; 
+
 
 	subtest 'flash avrdude installed (radinoCC1101)' => sub {
 		plan tests => 7;
@@ -97,10 +99,8 @@ defmod test_firmware_flash_1 UnitTest dummyDuino
 		is($called_args[1], "SIGNALduino_flash", "check arg 2 InternalTimer is called ");		
 		is($called_args[2], $target, "check arg 3 InternalTimer is called ");		
 		is($targetHash->{helper}{avrdudecmd},'avrdude -c avr109 -b 57600 -P none -p atmega32u4 -vv -D -U flash:w:./fhem/test.hex 2>[LOGFILE]',"check avrdude cmd");
-		
-
 	}; 
-    CommandDefMod(undef,"$target $targetHash->{TYPE} $targetHash->{DEF}");
+	CommandDefMod(undef,"$target $targetHash->{TYPE} $targetHash->{DEF}");
 
 }
 )
