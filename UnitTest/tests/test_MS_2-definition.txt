@@ -27,8 +27,15 @@ defmod test_MS_2 UnitTest dummyDuino (
           };
         }
     }
-	CommandReload(undef,"00_SIGNALduino.pm");
+	undef %{$ProtocolListSIGNALduino_REF};
+	
+	%{$ProtocolListSIGNALduino_REF} = SIGNALduino_LoadProtocolHash("$attr{global}{modpath}/FHEM/lib/SD_ProtocolData.pm");
+	
 	SIGNALduino_IdList("x:$target","","","");  
+	foreach my $id (qw/9999 9998 9997 9996/)
+	{
+		isnt($ProtocolListSIGNALduino_REF->{$id}{id},$id,"check if id $id is deleted");
+	}
 
  }
 );
