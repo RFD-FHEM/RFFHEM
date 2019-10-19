@@ -447,6 +447,7 @@ SIGNALduino_flash($) {
 
     $hash->{helper}{avrdudecmd} =~ s/\Q[LOGFILE]\E/$logFile/g;
 	local $SIG{CHLD} = 'DEFAULT';
+	delete($hash->{FLASH_RESULT}) if (exists($hash->{FLASH_RESULT}));
 	qx($hash->{helper}{avrdudecmd});
 	if ($? != 0 )
 	{
@@ -455,8 +456,8 @@ SIGNALduino_flash($) {
 		FW_directNotify("FILTER=$name", "#FHEMWEB:WEB", "FW_okDialog('ERROR: avrdude exited with error, for details see last flashlog.')", "");
 		$hash->{FLASH_RESULT}="ERROR: avrdude exited with error";
 	} else {
-		$hash->{logMethod}->($name ,3, "$name: Firmware update was succesfull");
-		readingsSingleUpdate($hash,"state","FIRMWARE UPDATE succesfull",1)
+		$hash->{logMethod}->($name ,3, "$name: Firmware update was successfull");
+		readingsSingleUpdate($hash,"state","FIRMWARE UPDATE successfull",1)
 	}
 	 
 	local $/=undef;
@@ -622,7 +623,7 @@ SIGNALduino_Set($@)
 				$hash->{logMethod}->($name, 5, "$hash->{TYPE} $name: flashCommand is not defined. standard used to flash.");
 			if ($hardware eq "radinoCC1101") {																	# radinoCC1101 Port not /dev/ttyUSB0 --> /dev/ttyACM0
 				$flashCommand = "avrdude -c avr109 -b [BAUDRATE] -P [PORT] -p atmega32u4 -vv -D -U flash:w:[HEXFILE] 2>[LOGFILE]";
-			} elsif ($hardware ne "ESP_1M" && $hardware ne "ESP32" && $hardware ne "radinoCC1101") {			# nano328, nanoCC1101, miniculCC1101, promini
+			} else {			# nano328, nanoCC1101, miniculCC1101, promini
 				$flashCommand = "avrdude -c arduino -b [BAUDRATE] -P [PORT] -p atmega328p -vv -U flash:w:[HEXFILE] 2>[LOGFILE]";
 			}
 		} else {
@@ -631,13 +632,12 @@ SIGNALduino_Set($@)
 		}
 		
 	
-		    if($flashCommand ne "") {
-		
+		if($flashCommand ne "") {
+	
 		      DevIo_CloseDev($hash);
 			  if ($hardware eq "radinoCC1101" && $^O eq 'linux') {
 				$hash->{logMethod}->($name, 3, "$hash->{TYPE} $name/flash: forcing special reset for $hardware on $port");
 				# Mit dem Linux-Kommando 'stty' die Port-Einstellungen setzen
-				#my $output =  qx("stty -F $port ospeed 1200 ispeed 1200");
 				use IPC::Open3;
 	 	
 				my($chld_out, $chld_in, $chld_err);
