@@ -618,57 +618,48 @@ SIGNALduino_Set($@)
 	    $log .= "hex file: $hexFile\n";
 	    $log .= "port: $port\n";
 	
-		my $flashCommand;
-	    if( !defined( $attr{$name}{flashCommand} ) ) {		# check defined flashCommand from user | not, use standard flashCommand | yes, use user flashCommand
-				$hash->{logMethod}->($name, 5, "$hash->{TYPE} $name: flashCommand is not defined. standard used to flash.");
-			if ($hardware eq "radinoCC1101") {																	# radinoCC1101 Port not /dev/ttyUSB0 --> /dev/ttyACM0
-				$flashCommand = "avrdude -c avr109 -b [BAUDRATE] -P [PORT] -p atmega32u4 -vv -D -U flash:w:[HEXFILE] 2>[LOGFILE]";
-			} else {			# nano328, nanoCC1101, miniculCC1101, promini
-				$flashCommand = "avrdude -c arduino -b [BAUDRATE] -P [PORT] -p atmega328p -vv -U flash:w:[HEXFILE] 2>[LOGFILE]";
-			}
+		# prepare default Flashcommand
+		my $defaultflashCommand = ($hardware eq "radinoCC1101" ? "avrdude -c avr109 -b [BAUDRATE] -P [PORT] -p atmega32u4 -vv -D -U flash:w:[HEXFILE] 2>[LOGFILE]" : "avrdude -c arduino -b [BAUDRATE] -P [PORT] -p atmega328p -vv -U flash:w:[HEXFILE] 2>[LOGFILE]");
+		
+		# get User defined Flashcommand
+		my $flashCommand = AttrVal($name,"flashCommand",$defaultflashCommand);
+		
+		if ($defaultflashCommand eq $flashCommand)	{
+			$hash->{logMethod}->($name, 5, "$hash->{TYPE} $name: standard flashCommand is used to flash.");
 		} else {
-			$flashCommand = $attr{$name}{flashCommand};
-			$hash->{logMethod}->($name, 3, "$hash->{TYPE} $name: flashCommand is manual defined! $flashCommand");
+			$hash->{logMethod}->($name, 3, "$hash->{TYPE} $name: custom flashCommand is manual defined! $flashCommand");
 		}
 		
-	
-		if($flashCommand ne "") {
-	
-		      DevIo_CloseDev($hash);
-			  if ($hardware eq "radinoCC1101" && $^O eq 'linux') {
-				$hash->{logMethod}->($name, 3, "$hash->{TYPE} $name/flash: forcing special reset for $hardware on $port");
-				# Mit dem Linux-Kommando 'stty' die Port-Einstellungen setzen
-				use IPC::Open3;
-	 	
-				my($chld_out, $chld_in, $chld_err);
-				use Symbol 'gensym';
-				$chld_err = gensym;
-				my $pid;
-				eval {
-					$pid = open3($chld_in,$chld_out, $chld_err,  "stty -F $port ospeed 1200 ispeed 1200");
-		 			close($chld_in);  # give end of file to kid, or feed him
-				};
-				if ($@) {
-				    $hash->{helper}{stty_output}=$@;
-				} else {
-					my @outlines = <$chld_out>;              # read till EOF
-					my @errlines = <$chld_err>;              # XXX: block potential if massive
-					$hash->{helper}{stty_pid}=$pid;
-			  		$hash->{helper}{stty_output} = join(" ",@outlines).join(" ",@errlines);
-				}  
-			}
-		  	  
-		    $hash->{helper}{avrdudecmd} = $flashCommand;
-		    $hash->{helper}{avrdudecmd}=~ s/\Q[PORT]\E/$port/g;
-		    $hash->{helper}{avrdudecmd} =~ s/\Q[BAUDRATE]\E/$baudrate/g;
-		    $hash->{helper}{avrdudecmd} =~ s/\Q[HEXFILE]\E/$hexFile/g;
-			$log .= "command: $hash->{helper}{avrdudecmd}\n\n";
-	  		InternalTimer(gettimeofday() + 1,"SIGNALduino_flash",$name);
-	    }
-	    else {
-	      $log .= "\n\nNo flashCommand found. Please define this attribute.\n\n";
-	      return "No flashCommand found. Please define this attribute";
-	    }
+	    DevIo_CloseDev($hash);
+		if ($hardware eq "radinoCC1101" && $^O eq 'linux') {
+			$hash->{logMethod}->($name, 3, "$hash->{TYPE} $name/flash: forcing special reset for $hardware on $port");
+			# Mit dem Linux-Kommando 'stty' die Port-Einstellungen setzen
+			use IPC::Open3;
+ 	
+			my($chld_out, $chld_in, $chld_err);
+			use Symbol 'gensym';
+			$chld_err = gensym;
+			my $pid;
+			eval {
+				$pid = open3($chld_in,$chld_out, $chld_err,  "stty -F $port ospeed 1200 ispeed 1200");
+	 			close($chld_in);  # give end of file to kid, or feed him
+			};
+			if ($@) {
+			    $hash->{helper}{stty_output}=$@;
+			} else {
+				my @outlines = <$chld_out>;              # read till EOF
+				my @errlines = <$chld_err>;              # XXX: block potential if massive
+				$hash->{helper}{stty_pid}=$pid;
+		  		$hash->{helper}{stty_output} = join(" ",@outlines).join(" ",@errlines);
+			}  
+		}
+	  	  
+	    $hash->{helper}{avrdudecmd} = $flashCommand;
+	    $hash->{helper}{avrdudecmd}=~ s/\Q[PORT]\E/$port/g;
+	    $hash->{helper}{avrdudecmd} =~ s/\Q[BAUDRATE]\E/$baudrate/g;
+	    $hash->{helper}{avrdudecmd} =~ s/\Q[HEXFILE]\E/$hexFile/g;
+		$log .= "command: $hash->{helper}{avrdudecmd}\n\n";
+  		InternalTimer(gettimeofday() + 1,"SIGNALduino_flash",$name);
    	 	$hash->{helper}{avrdudelogs} = $log;
 	    return undef;
 	} else {
