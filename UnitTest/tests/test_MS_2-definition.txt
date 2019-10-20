@@ -27,6 +27,7 @@ defmod test_MS_2 UnitTest dummyDuino (
           };
         }
     }
+	$SD_Dispatch->unmock();
 	undef %{$ProtocolListSIGNALduino_REF};
 	
 	%{$ProtocolListSIGNALduino_REF} = SIGNALduino_LoadProtocolHash("$attr{global}{modpath}/FHEM/lib/SD_ProtocolData.pm");
@@ -36,7 +37,6 @@ defmod test_MS_2 UnitTest dummyDuino (
 	{
 		isnt($ProtocolListSIGNALduino_REF->{$id}{id},$id,"check if id $id is deleted");
 	}
-	$SD_Dispatch->unmock();
 
  }
 );
