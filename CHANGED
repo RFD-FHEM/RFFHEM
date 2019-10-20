@@ -1,5 +1,7 @@
-03.10.2019
+20.10.2019
   00_SIGNALduino.pm: add special reset for radinoCC1101
+                     Introduced new internal which Golds error messages from flash
+                     Avoid DirectX updates in internal STATE instead the Reading state ist updated
 15.09.2019
   00_SIGNALduino.pm: fix some logging issues with disabled eventlogging
 09.09.2019
