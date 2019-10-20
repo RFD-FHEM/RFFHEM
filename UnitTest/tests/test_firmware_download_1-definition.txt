@@ -30,6 +30,7 @@ defmod test_firmware_download_1 UnitTest dummyDuino
 		my @called_args = $HTTP_CALL->called_with;
 		like( $called_args[0]{url}, qr/SIGNALDuino/, "Download URL set to SIGNALDuino Repo" );
 	};
+	$HTTP_CALL->unmock;
 	
 	subtest 'check prerelease without hardware parameter set' => sub {
 		plan tests => 2;
@@ -129,7 +130,6 @@ defmod test_firmware_download_1 UnitTest dummyDuino
 			diag("open json firmware file was not possible $error");
 		}
 	};
-
 
 
 }

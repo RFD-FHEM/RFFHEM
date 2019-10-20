@@ -36,6 +36,7 @@ defmod test_MS_2 UnitTest dummyDuino (
 	{
 		isnt($ProtocolListSIGNALduino_REF->{$id}{id},$id,"check if id $id is deleted");
 	}
+	$SD_Dispatch->unmock();
 
  }
 );

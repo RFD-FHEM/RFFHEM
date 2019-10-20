@@ -24,6 +24,8 @@ defmod test_proto44 UnitTest dummyDuino (
    is(ReadingsVal($sensorname,"batteryState","0"),"ok","check battery reading");
    is(ReadingsVal($sensorname,"channel","1"),"1","check battery reading");
    is(InternalVal($sensorname,$target."_Protocol_ID","undef"),"44","check protocolid internal");
- }
+ };
+ $SD_Dispatch->unmock();
+ 
 } 
 )

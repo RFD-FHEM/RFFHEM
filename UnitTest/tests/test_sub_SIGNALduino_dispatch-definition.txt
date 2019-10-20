@@ -8,5 +8,6 @@ defmod test_sub_SIGNALduino_dispatch UnitTest dummyDuino (
  is(($FHEM_Dispatch->called_with)[1], $dmsg, "Dispatch check dmsg" );
  is(InternalVal($targetHash->{NAME},"LASTDMSG",""), $dmsg, "check Internal LASTDMSG" );
  is(InternalVal($targetHash->{NAME},"LASTDMSGID",""), "0.3", "check Internal LASTDMSGID" );
+ $FHEM_Dispatch->unmock;
 } 
 )

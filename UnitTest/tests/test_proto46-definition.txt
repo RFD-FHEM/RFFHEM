@@ -7,6 +7,8 @@ defmod test_proto46 UnitTest dummyDuino (
  is(SIGNALduino_Parse_MU($targetHash, $targetHash, $targetHash->{NAME}, $rmsg,%signal_parts), 4 , "MU Data dispatched");
  is( ($SD_Dispatch->called_with)[4], "46", "SIGNALduno_Dispatch check id" );
  is( ($SD_Dispatch->called_with)[2], "P46#BAFB0", "SIGNALduno_Dispatch check dmsg" );
+ $SD_Dispatch->unmock();
+ 
 } 
 )
 

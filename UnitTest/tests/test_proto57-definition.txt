@@ -29,6 +29,7 @@ defmod test_proto57 UnitTest dummyDuino (
 		is( ($SD_Dispatch->called_with)[4], "57", "SIGNALduno_Dispatch check id" );
 		is( ($SD_Dispatch->called_with)[2], "P57#2AA4A7", "SIGNALduno_Dispatch check dmsg" );
 	};
+	$SD_Dispatch->unmock();
 
 
  }	 

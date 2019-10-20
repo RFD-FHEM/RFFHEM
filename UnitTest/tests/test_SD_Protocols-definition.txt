@@ -76,5 +76,7 @@ defmod test_SD_Protocols UnitTest dummyDuino
 		@exprected_ret =( -1, " message is to long") ;
 		is_deeply(\@mcraw_ret, \@exprected_ret , 'check > max_length output');
 	};
+    our %ProtocolListSIGNALduino = SIGNALduino_LoadProtocolHash("$attr{global}{modpath}/FHEM/lib/SD_ProtocolData.pm");
+	SIGNALduino_IdList("x:$target","","","");  
  }
 );
