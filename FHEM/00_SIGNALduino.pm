@@ -31,7 +31,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.4.1_dev_09.09",
+	SDUINO_VERSION            => "v3.4.1_dev_20.10",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -423,9 +423,65 @@ SIGNALduino_Shutdown($)
   return undef;
 }
 
+
+
+#####################################
+sub 
+SIGNALduino_flash($) {
+	my $name = shift;
+	my $hash = $defs{$name};
+	
+	if (defined($hash->{helper}{stty_pid}))
+	{
+		waitpid( $hash->{helper}{stty_pid}, 0 );
+		delete ( $hash->{helper}{stty_pid});
+	}
+	
+	readingsSingleUpdate($hash,"state","FIRMWARE UPDATE running",1);
+	$hash->{helper}{avrdudelogs} .= "$name closed\n";
+    my $logFile = AttrVal("global", "logdir", "./log/") . "$hash->{TYPE}-Flash.log";
+
+    if (-e $logFile) {
+	    unlink $logFile;
+    }
+
+    $hash->{helper}{avrdudecmd} =~ s/\Q[LOGFILE]\E/$logFile/g;
+	local $SIG{CHLD} = 'DEFAULT';
+	delete($hash->{FLASH_RESULT}) if (exists($hash->{FLASH_RESULT}));
+	qx($hash->{helper}{avrdudecmd});
+	if ($? != 0 )
+	{
+		readingsSingleUpdate($hash,"state","FIRMWARE UPDATE with error",1);
+		$hash->{logMethod}->($name ,3, "$name: ERROR: avrdude exited with error $?");
+		FW_directNotify("FILTER=$name", "#FHEMWEB:WEB", "FW_okDialog('ERROR: avrdude exited with error, for details see last flashlog.')", "");
+		$hash->{FLASH_RESULT}="ERROR: avrdude exited with error";
+	} else {
+		$hash->{logMethod}->($name ,3, "$name: Firmware update was successfull");
+		readingsSingleUpdate($hash,"state","FIRMWARE UPDATE successfull",1)
+	}
+	 
+	local $/=undef;
+	if (-e $logFile) {
+		open FILE, $logFile;
+	 	$hash->{helper}{avrdudelogs} .= "--- AVRDUDE ---------------------------------------------------------------------------------\n";
+		$hash->{helper}{avrdudelogs} .= <FILE>;
+	    $hash->{helper}{avrdudelogs} .= "--- AVRDUDE ---------------------------------------------------------------------------------\n\n";
+	    close FILE;
+	} else {
+		$hash->{helper}{avrdudelogs} .= "WARNING: avrdude created no log file\n\n";
+		readingsSingleUpdate($hash,"state","FIRMWARE UPDATE with error",1);
+		$hash->{FLASH_RESULT}= "WARNING: avrdude created no log file";
+	}
+	
+	DevIo_OpenDev($hash, 0, "SIGNALduino_DoInit", 'SIGNALduino_Connect');
+	$hash->{helper}{avrdudelogs} .= "$name reopen started\n";
+	return $hash->{FLASH_RESULT};
+}
+
+
+
 #####################################
 #$hash,$name,"sendmsg","P17;R6#".substr($arg,2)
-
 sub
 SIGNALduino_Set($@)
 {
@@ -490,19 +546,11 @@ SIGNALduino_Set($@)
     my @args = split(' ', $arg);
     my $log = "";
     my $hexFile = "";
-    my @deviceName = split('@', $hash->{DeviceName});
-    my $port = $deviceName[0];
+    my ($port,undef) = split('@', $hash->{DeviceName});
 	my $hardware=AttrVal($name,"hardware","");
-	my $baudrate=$hardware eq "uno" ? 115200 : 57600;
-    my $defaultHexFile = "./FHEM/firmware/$hash->{TYPE}_$hardware.hex";
-    my $logFile = AttrVal("global", "logdir", "./log/") . "$hash->{TYPE}-Flash.log";
+	my $baudrate= 57600;
     return "Please define your hardware! (attr $name hardware <model of your receiver>) " if ($hardware eq "");
 	return "ERROR: argument failed! flash [hexFile|url]" if (!$args[0]);
-	
-	
-	
-
-    #SIGNALduino_Log3 $hash, 3, "SIGNALduino_Set choosen flash option: $args[0] of available: ".Dumper($my_sets{flash});
     
 	if( grep $args[0] eq $_ , split(",",$my_sets{flash}) )
 	{
@@ -526,22 +574,16 @@ SIGNALduino_Set($@)
                     command    => "getReleaseByTag"
                     
                 };
-   		HttpUtils_NonblockingGet($http_param);                                                                                     # Starten der HTTP Abfrage. Es gibt keinen Return-Code. 
+   		HttpUtils_NonblockingGet($http_param);                                                                           # Starten der HTTP Abfrage. Es gibt keinen Return-Code. 
 		return;
 	} 
-    elsif(!$arg || $args[0] !~ m/^(\w|\/|.)+$/) {
-      $hexFile = AttrVal($name, "hexFile", "");
-      if ($hexFile eq "") {
-        $hexFile = $defaultHexFile;
-      }
-    }
     elsif ($args[0] =~ m/^https?:\/\// ) {
 		my $http_param = {
 		                    url        => $args[0],
 		                    timeout    => 5,
 		                    hash       => $hash,                                  # Muss gesetzt werden, damit die Callback funktion wieder $hash hat
 		                    method     => "GET",                                  # Lesen von Inhalten
-		                    callback   =>  \&SIGNALduino_ParseHttpResponse,        # Diese Funktion soll das Ergebnis dieser HTTP Anfrage bearbeiten
+		                    callback   =>  \&SIGNALduino_ParseHttpResponse,       # Diese Funktion soll das Ergebnis dieser HTTP Anfrage bearbeiten
 		                    command    => 'flash',
 		                };
 		
@@ -551,7 +593,6 @@ SIGNALduino_Set($@)
       $hexFile = $args[0];
     }
 	$hash->{logMethod}->($name, 3, "$name: filename $hexFile provided, trying to flash");
-    return "Usage: set $name flash [filename]\n\nor use the hexFile attribute" if($hexFile !~ m/^(\w|\/|.)+$/);
 
 	# Only for Arduino , not for ESP
 	if ($hardware =~ m/(?:nano|mini|radino)/)
@@ -560,80 +601,68 @@ SIGNALduino_Set($@)
 		my $avrdudefound=0;
 		my $tool_name = "avrdude"; 
 		my $path_separator = ':';
-                if ($^O eq 'MSWin32') {
+		if ($^O eq 'MSWin32') {
 			$tool_name .= ".exe";
 			$path_separator = ';';
 		}
 		for my $path ( split /$path_separator/, $ENV{PATH} ) {
-		    if ( -f "$path/$tool_name" && -x _ ) {
-		    	$avrdudefound=1;
-		        last;
-		    }
-		}
-	    $hash->{logMethod}->($name, 5, "$name: avrdude found = $avrdudefound");
-	    return "avrdude is not installed. Please provide avrdude tool example: sudo apt-get install avrdude" if($avrdudefound == 0);
-
-	    $log .= "flashing Arduino $name\n";
-	    $log .= "hex file: $hexFile\n";
-	    $log .= "port: $port\n";
-	    $log .= "log file: $logFile\n";
-	
-		my $flashCommand;
-	    if( !defined( $attr{$name}{flashCommand} ) ) {		# check defined flashCommand from user | not, use standard flashCommand | yes, use user flashCommand
-				$hash->{logMethod}->($name, 5, "$hash->{TYPE} $name: flashCommand is not defined. standard used to flash.");
-			if ($hardware eq "radinoCC1101") {																	# radinoCC1101 Port not /dev/ttyUSB0 --> /dev/ttyACM0
-				$flashCommand = "avrdude -c avr109 -b [BAUDRATE] -P [PORT] -p atmega32u4 -vv -D -U flash:w:[HEXFILE] 2>[LOGFILE]";
-			} elsif ($hardware ne "ESP_1M" && $hardware ne "ESP32" && $hardware ne "radinoCC1101") {			# nano328, nanoCC1101, miniculCC1101, promini
-				$flashCommand = "avrdude -c arduino -b [BAUDRATE] -P [PORT] -p atmega328p -vv -U flash:w:[HEXFILE] 2>[LOGFILE]";
+			if ( -f "$path/$tool_name" && -x _ ) {
+				$avrdudefound=1;
+				last;
 			}
+		}
+		$hash->{logMethod}->($name, 5, "$name: avrdude found = $avrdudefound");
+		return "avrdude is not installed. Please provide avrdude tool example: sudo apt-get install avrdude" if($avrdudefound == 0);
+
+		$log .= "flashing Arduino $name\n";
+		$log .= "hex file: $hexFile\n";
+		$log .= "port: $port\n";
+	
+		# prepare default Flashcommand
+		my $defaultflashCommand = ($hardware eq "radinoCC1101" ? "avrdude -c avr109 -b [BAUDRATE] -P [PORT] -p atmega32u4 -vv -D -U flash:w:[HEXFILE] 2>[LOGFILE]" : "avrdude -c arduino -b [BAUDRATE] -P [PORT] -p atmega328p -vv -U flash:w:[HEXFILE] 2>[LOGFILE]");
+		
+		# get User defined Flashcommand
+		my $flashCommand = AttrVal($name,"flashCommand",$defaultflashCommand);
+		
+		if ($defaultflashCommand eq $flashCommand)	{
+			$hash->{logMethod}->($name, 5, "$hash->{TYPE} $name: standard flashCommand is used to flash.");
 		} else {
-			$flashCommand = $attr{$name}{flashCommand};
-			$hash->{logMethod}->($name, 3, "$hash->{TYPE} $name: flashCommand is manual defined! $flashCommand");
+			$hash->{logMethod}->($name, 3, "$hash->{TYPE} $name: custom flashCommand is manual defined! $flashCommand");
 		}
 		
-	
-	    if($flashCommand ne "") {
-	      if (-e $logFile) {
-	        unlink $logFile;
-	      }
-	
-	      DevIo_CloseDev($hash);
-	      $hash->{STATE} = "FIRMWARE UPDATE running";
-	      $log .= "$name closed\n";
-	
-	      my $avrdude = $flashCommand;
-	      $avrdude =~ s/\Q[PORT]\E/$port/g;
-	      $avrdude =~ s/\Q[BAUDRATE]\E/$baudrate/g;
-	      $avrdude =~ s/\Q[HEXFILE]\E/$hexFile/g;
-	      $avrdude =~ s/\Q[LOGFILE]\E/$logFile/g;
-	
-	      $log .= "command: $avrdude\n\n";
-	      `$avrdude`;
-	
-	      local $/=undef;
-	      if (-e $logFile) {
-	        open FILE, $logFile;
-	        my $logText = <FILE>;
-	        close FILE;
-	        $log .= "--- AVRDUDE ---------------------------------------------------------------------------------\n";
-	        $log .= $logText;
-	        $log .= "--- AVRDUDE ---------------------------------------------------------------------------------\n\n";
-	      }
-	      else {
-	        $log .= "WARNING: avrdude created no log file\n\n";
-	      }
-	
-	    }
-	    else {
-	      $log .= "\n\nNo flashCommand found. Please define this attribute.\n\n";
-	    }
-	
-	    DevIo_OpenDev($hash, 0, "SIGNALduino_DoInit", 'SIGNALduino_Connect');
-	    $log .= "$name opened\n";
+		DevIo_CloseDev($hash);
+		if ($hardware eq "radinoCC1101" && $^O eq 'linux') {
+			$hash->{logMethod}->($name, 3, "$hash->{TYPE} $name/flash: forcing special reset for $hardware on $port");
+			# Mit dem Linux-Kommando 'stty' die Port-Einstellungen setzen
+			use IPC::Open3;
+ 	
+			my($chld_out, $chld_in, $chld_err);
+			use Symbol 'gensym';
+			$chld_err = gensym;
+			my $pid;
+			eval {
+				$pid = open3($chld_in,$chld_out, $chld_err,  "stty -F $port ospeed 1200 ispeed 1200");
+	 			close($chld_in);  # give end of file to kid, or feed him
+			};
+			if ($@) {
+				$hash->{helper}{stty_output}=$@;
+			} else {
+				my @outlines = <$chld_out>;              # read till EOF
+				my @errlines = <$chld_err>;              # XXX: block potential if massive
+				$hash->{helper}{stty_pid}=$pid;
+		  		$hash->{helper}{stty_output} = join(" ",@outlines).join(" ",@errlines);
+			}
+		}
 		
+		$hash->{helper}{avrdudecmd} = $flashCommand;
+		$hash->{helper}{avrdudecmd}=~ s/\Q[PORT]\E/$port/g;
+		$hash->{helper}{avrdudecmd} =~ s/\Q[BAUDRATE]\E/$baudrate/g;
+		$hash->{helper}{avrdudecmd} =~ s/\Q[HEXFILE]\E/$hexFile/g;
+		$log .= "command: $hash->{helper}{avrdudecmd}\n\n";
+		InternalTimer(gettimeofday() + 1,"SIGNALduino_flash",$name);
+	 	$hash->{helper}{avrdudelogs} = $log;
 	    return undef;
-	} else
-	{
+	} else {
 		return "Sorry, Flashing your ESP via Module is currently not supported.";
 	}
 	
@@ -1085,14 +1114,32 @@ sub SIGNALduino_parseResponse($$$)
 sub
 SIGNALduino_ResetDevice($)
 {
-  my ($hash) = @_;
-  my $name = $hash->{NAME};
-
-  $hash->{logMethod}->($name, 3, "$name reset"); 
-  DevIo_CloseDev($hash);
-  my $ret = DevIo_OpenDev($hash, 0, "SIGNALduino_DoInit", 'SIGNALduino_Connect');
-
-  return $ret;
+	my $hash = shift;
+	my $name = $hash->{NAME};
+	if (!defined($hash->{helper}{resetInProgress}))
+	{
+		my $hardware = AttrVal($name,"hardware","");
+		$hash->{logMethod}->($name, 3, "$name/reset: $hardware"); 
+		DevIo_CloseDev($hash);
+	 	if ($hardware eq "radinoCC1101" && $^O eq 'linux') {
+			# The reset is triggered when the Micro's virtual (CDC) serial / COM port is opened at 1200 baud and then closed.
+			# When this happens, the processor will reset, breaking the USB connection to the computer (meaning that the virtual serial / COM port will disappear).
+			# After the processor resets, the bootloader starts, remaining active for about 8 seconds.
+			# The bootloader can also be initiated by pressing the reset button on the Micro.
+			# Note that when the board first powers up, it will jump straight to the user sketch, if present, rather than initiating the bootloader.	
+			my ($dev, $baudrate) = split("@", $hash->{DeviceName});
+			$hash->{logMethod}->($name, 3, "$hash->{TYPE} $name/reset: forcing special reset for $hardware on $dev");
+			# Mit dem Linux-Kommando 'stty' die Port-Einstellungen setzen
+			system("stty -F $dev ospeed 1200 ispeed 1200");
+			$hash->{helper}{resetInProgress}=1;
+			InternalTimer(gettimeofday()+10,"SIGNALduino_ResetDevice",$hash);
+			$hash->{logMethod}->($name, 3, "$name/reset: reopen delayed for 10 second"); 
+			return;
+		}
+	} else {
+		delete($hash->{helper}{resetInProgress});
+	}
+ 	DevIo_OpenDev($hash, 0, "SIGNALduino_DoInit", 'SIGNALduino_Connect');
 }
 
 #####################################
@@ -1629,9 +1676,7 @@ sub SIGNALduino_ParseHttpResponse
 			if (defined($set_return))
 			{
 				$hash->{logMethod}->($name ,3, "$name: Error while flashing: $set_return");
-			} else {
-				$hash->{logMethod}->($name ,3, "$name: Firmware update was succesfull");
-			}
+			} 
     	}
     } else {
     	$hash->{logMethod}->($name, 3, "$name: undefined error while requesting ".$param->{url}." - $err - code=".$param->{code});    		# Eintrag fuers Log
@@ -4701,6 +4746,7 @@ sub SIGNALduino_githubParseHttpResponse($$$)
 		<i><u>note model radino:</u></i>
 		<ul>
 			<li>Sometimes there can be problems flashing radino on Linux. <a href="https://wiki.in-circuit.de/index.php5?title=radino_common_problems">Here in the wiki under point "radino & Linux" is a patch!</a></li>
+			<li>If the Radino is defined in this way <code>/dev/ttyACM0</code>, the flashing of the firmware should be done automatically. If this fails, the boot loader must be activated manually:</li>
 			<li>To activate the bootloader of the radino there are 2 variants.
 			<ul>
 				<li>1) modules that contain a BSL-button:
@@ -4717,8 +4763,8 @@ sub SIGNALduino_githubParseHttpResponse($$$)
 				</ul>
 				</li>
 			</ul>
-			<li>In bootloader mode, the radino gets a different USB ID.</li><br>
-			<b>If the bootloader is enabled, it signals with a flashing LED. Then you have 8 seconds to flash.</b>
+			In bootloader mode, the radino gets a different USB ID. This must be entered in the "flashCommand" attribute.<br>
+			If the bootloader is enabled, it signals with a flashing LED. Then you have 8 seconds to flash.
 			</li>
 		</ul>
 		</li><br>
@@ -5110,7 +5156,8 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
 		<i><u>Hinweise Modell radino:</u></i>
 		<ul>
 			<li>Teilweise kann es beim flashen vom radino unter Linux Probleme geben. <a href="https://wiki.in-circuit.de/index.php5?title=radino_common_problems">Hier im Wiki unter dem Punkt "radino & Linux" gibt es einen Patch!</a></li>
-			<li>Um den Bootloader vom radino zu aktivieren gibt es 2 Varianten.
+			<li>Wenn der Radino in dieser Art <code>/dev/ttyACM0</code> definiert wurde, sollte das Flashen der Firmware automatisch erfolgen. Wenn das nicht gelingt, muss der Bootloader manuell aktiviert werden:</li>
+			<li>Um den Bootloader vom radino manuell zu aktivieren gibt es 2 Varianten.
 			<ul>
 				<li>1) Module welche einen BSL-Button besitzen:
 				<ul>
@@ -5126,8 +5173,8 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
 				</ul>
 				</li>
 			</ul>
-			<li>Im Bootloader-Modus erh&auml;lt der radino eine andere USB ID.</li><br>
-			<b>Wenn der Bootloader aktiviert ist, signalisiert er das mit dem Blinken einer LED. Dann hat man ca. 8 Sekunden Zeit zum flashen.</b>
+			Im Bootloader-Modus erh&auml;lt der radino eine andere USB ID. Diese muss im Attribut "flashCommand" eingetragen werden.<br>
+			Wenn der Bootloader aktiviert ist, signalisiert er das mit dem Blinken einer LED. Dann hat man ca. 8 Sekunden Zeit zum flashen.
 			</li>
 		</ul>
 		</li><br>
