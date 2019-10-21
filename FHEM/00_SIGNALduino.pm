@@ -766,7 +766,7 @@ SIGNALduino_Set($@)
 		$sendData = $intro . "SM;" . ($repeats > 0 ? "R=$repeats;" : "") . "C=$clock;D=$data;" . $outro . $frequency; #	SM;R=2;C=400;D=AFAFAF;
 		$hash->{logMethod}->($name, 5, "$name: sendmsg Preparing manchester protocol=$protocol, repeats=$repeats, clock=$clock data=$data");
 
-} else {
+	} else {
 		if ($protocol == 3 || substr($data,0,2) eq "is") {
 			if (substr($data,0,2) eq "is") {
 				$data = substr($data,2);   # is am Anfang entfernen
@@ -1373,7 +1373,7 @@ SIGNALduino_HandleWriteQueue($)
     delete($hash->{getcmd});
   }
 	  
-  if(@{$hash->{QUEUE}}) {
+  if(exists($hash->{QUEUE}) && @{$hash->{QUEUE}}) {
     my $msg= shift(@{$hash->{QUEUE}});
 
     if($msg eq "") {
