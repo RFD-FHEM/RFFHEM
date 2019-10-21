@@ -1,3 +1,5 @@
+21.10.2019
+ 00_SIGNALduino.pm: fixed a rare bug that caused fhem to crash
 20.10.2019
   00_SIGNALduino.pm: 
    add special reset for radinoCC1101
