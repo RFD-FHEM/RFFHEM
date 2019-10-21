@@ -18,7 +18,7 @@ defmod test_loadprotohash UnitTest dummyDuino
     	%ret= SIGNALduino_LoadProtocolHash("$attr{global}{modpath}/FHEM/lib/test_loadprotohash-nok.pm");
     	ok(exists($ret{error}),"check filename and syntax not ok "); 
 	};
-	our %ProtocolListSIGNALduino = SIGNALduino_LoadProtocolHash("$attr{global}{modpath}/FHEM/lib/SD_ProtocolData.pm");
+	#our %ProtocolListSIGNALduino = SIGNALduino_LoadProtocolHash("$attr{global}{modpath}/FHEM/lib/SD_ProtocolData.pm");
 	
     SIGNALduino_IdList("x:$target","","","");  
  }
