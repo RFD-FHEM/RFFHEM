@@ -4933,11 +4933,12 @@ sub SIGNALduino_githubParseHttpResponse($$$)
 		<li>hardware<br>
     		When using the flash command, you should specify what hardware you have connected to the usbport. Doing not, can cause failures of the device.
 		<ul>
-			<li>ESP_1M: ESP8266 with 1 MB flash and CC1101 receiver</li>
 			<li>ESP32: ESP32</li>
+			<li>ESP8266: ESP8266 without CC1101 receiver</li>
+			<li>ESP8266cc1101: ESP8266 with CC1101 receiver</li>
+			<li>miniculCC1101: Arduino pro Mini with CC110x receiver and cables as a minicul</li>
 			<li>nano: Arduino Nano 328 with cheap receiver</li>
 			<li>nanoCC1101: Arduino Nano 328 wirh CC110x receiver</li>
-			<li>miniculCC1101: Arduino pro Mini with CC110x receiver and cables as a minicul</li>
 			<li>promini: Arduino Pro Mini 328 with cheap receiver </li>
 			<li>radinoCC1101: Arduino compatible radino with cc1101 receiver</li>
 		</ul>
@@ -5348,11 +5349,12 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
 	<li>hardware<br>
 		Derzeit m&ouml;gliche Hardware Varianten:
 		<ul>
-			<li>ESP_1M: ESP8266 mit 1 MB Flash und einem CC1101</li>
 			<li>ESP32: ESP32</li>
+			<li>ESP8266: ESP8266 ohne einen CC1101</li>
+			<li>ESP8266cc1101: ESP8266 mit einen CC1101</li>
+			<li>miniculCC1101: Arduino pro Mini mit einen CC110x-Empf&auml;nger entsprechend dem minicul verkabelt</li>
 			<li>nano: Arduino Nano 328 f&uuml;r "Billig"-Empf&auml;nger</li>
 			<li>nanoCC1101: Arduino Nano f&uuml;r einen CC110x-Empf&auml;nger</li>
-			<li>miniculCC1101: Arduino pro Mini mit einen CC110x-Empf&auml;nger entsprechend dem minicul verkabelt</li>
 			<li>promini: Arduino Pro Mini 328 f&uuml;r "Billig"-Empf&auml;nger</li>
 			<li>radinoCC1101: Ein Arduino Kompatibler Radino mit cc1101 receiver</li>
 		</ul><br>
