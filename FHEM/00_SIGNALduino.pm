@@ -31,7 +31,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.4.1_dev_20.10",
+	SDUINO_VERSION            => "v3.4.1_dev_22.10",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -226,7 +226,7 @@ SIGNALduino_Initialize($)
 					  ." hexFile"
                       ." initCommands"
                       ." flashCommand"
-  					  ." hardware:ESP_1M,ESP32,nano328,nanoCC1101,miniculCC1101,promini,radinoCC1101"
+  					." hardware:ESP8266,ESP8266cc1101,ESP32,nano328,nanoCC1101,miniculCC1101,promini,radinoCC1101"
 					  ." updateChannelFW:stable,testing"
 					  ." debug:0$dev"
 					  ." longids"
@@ -556,12 +556,8 @@ SIGNALduino_Set($@)
 	{
 		$hash->{logMethod}->($hash, 3, "SIGNALduino_Set flash $args[0] try to fetch github assets for tag $args[0]");
 
-		my $ghurl = "https://api.github.com/repos/RFD-FHEM/<REPONAME>/releases/tags/$args[0]";
-		if ($hardware =~ /ESP/) {
-			$ghurl =~ s/<REPONAME>/SIGNALESP/ ;
-		} else {
-			$ghurl =~ s/<REPONAME>/SIGNALDuino/ ; 
-		}
+		my $ghurl = "https://api.github.com/repos/RFD-FHEM/SIGNALDuino/releases/tags/$args[0]";
+
 		$hash->{logMethod}->($hash, 3, "SIGNALduino_Set flash $args[0] try to fetch release $ghurl");
 		
 	    my $http_param = {
@@ -663,6 +659,7 @@ SIGNALduino_Set($@)
 	 	$hash->{helper}{avrdudelogs} = $log;
 	    return undef;
 	} else {
+		FW_directNotify("FILTER=$name", "#FHEMWEB:WEB", "FW_okDialog('<u>ERROR:</u><br>Sorry, flashing your ESP is currently not supported.<br>The file is only downloaded in /opt/fhem/FHEM/firmware.')", "");
 		return "Sorry, Flashing your ESP via Module is currently not supported.";
 	}
 	
