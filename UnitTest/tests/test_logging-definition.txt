@@ -21,7 +21,7 @@ subtest "Check logMethod with attr eventlogging 1" => sub {
 
 	is($DoTrigger->called_count, 1, "check if DoTrigger is called from SIGNALduino_Log3");
 };
+$DoTrigger->unmock();
 CommandAttr(undef,"$target eventlogging 0");
-
 } 
 )

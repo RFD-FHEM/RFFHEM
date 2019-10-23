@@ -31,7 +31,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.4.1_dev_20.10",
+	SDUINO_VERSION            => "v3.4.1_dev_21.10",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -1420,7 +1420,7 @@ SIGNALduino_HandleWriteQueue($)
     delete($hash->{getcmd});
   }
 	  
-  if(@{$hash->{QUEUE}}) {
+  if(exists($hash->{QUEUE}) && @{$hash->{QUEUE}}) {
     my $msg= shift(@{$hash->{QUEUE}});
 
     if($msg eq "") {

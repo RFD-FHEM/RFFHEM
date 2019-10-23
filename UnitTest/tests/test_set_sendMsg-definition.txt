@@ -59,6 +59,7 @@ defmod test_set_sendMsg UnitTest dummyDuino
 		};
 	
 	};
+	$AddSendQueuefn->unmock;
 		
  }
 );

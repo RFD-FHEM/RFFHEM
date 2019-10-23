@@ -60,12 +60,14 @@ defmod test_modulematch_1 UnitTest dummyDuino (
 		}
 		is(SIGNALduino_moduleMatch($target,'9999',"Y3332222"),0,"check returncode with not matching modulematch");
 	};
-	CommandReload(undef,"00_SIGNALduino.pm");
+	undef %{$local_ProtocolListSIGNALduino};
+	
+	%{$local_ProtocolListSIGNALduino} = SIGNALduino_LoadProtocolHash("$attr{global}{modpath}/FHEM/lib/SD_ProtocolData.pm");
+	
 	SIGNALduino_IdList("x:$target","","","");  
-
-	foreach my $id (qw/9999 9998/)
+	foreach my $id (qw/9999 9998 9997 9996/)
 	{
-		isnt($local_ProtocolListSIGNALduino->{$id},$id,"check if id $id is deleted");
+		isnt($local_ProtocolListSIGNALduino->{$id}{id},$id,"check if id $id is deleted");
 	}
 
  }

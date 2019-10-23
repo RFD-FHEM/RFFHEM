@@ -79,5 +79,6 @@ defmod test_DeviceData_rmsg UnitTest dummyDuino (
         }
     };
 	is($noTestRun,0,"Verify if a test was performed ");
+	$SD_Dispatch->unmock;
  } 
 );
