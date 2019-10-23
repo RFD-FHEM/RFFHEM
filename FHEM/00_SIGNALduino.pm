@@ -451,13 +451,13 @@ SIGNALduino_flash($) {
 	qx($hash->{helper}{avrdudecmd});
 	if ($? != 0 )
 	{
-		readingsSingleUpdate($hash,"state","FIRMWARE UPDATE with error",1);
+		readingsSingleUpdate($hash,"state","FIRMWARE UPDATE with error",1);    # processed in tests
 		$hash->{logMethod}->($name ,3, "$name: ERROR: avrdude exited with error $?");
 		FW_directNotify("FILTER=$name", "#FHEMWEB:WEB", "FW_okDialog('ERROR: avrdude exited with error, for details see last flashlog.')", "");
-		$hash->{FLASH_RESULT}="ERROR: avrdude exited with error";
+		$hash->{FLASH_RESULT}="ERROR: avrdude exited with error";              # processed in tests
 	} else {
 		$hash->{logMethod}->($name ,3, "$name: Firmware update was successfull");
-		readingsSingleUpdate($hash,"state","FIRMWARE UPDATE successfull",1)
+		readingsSingleUpdate($hash,"state","FIRMWARE UPDATE successfull",1);   # processed in tests
 	}
 	 
 	local $/=undef;
@@ -470,7 +470,7 @@ SIGNALduino_flash($) {
 	} else {
 		$hash->{helper}{avrdudelogs} .= "WARNING: avrdude created no log file\n\n";
 		readingsSingleUpdate($hash,"state","FIRMWARE UPDATE with error",1);
-		$hash->{FLASH_RESULT}= "WARNING: avrdude created no log file";
+		$hash->{FLASH_RESULT}= "WARNING: avrdude created no log file";         # processed in tests
 	}
 	
 	DevIo_OpenDev($hash, 0, "SIGNALduino_DoInit", 'SIGNALduino_Connect');
@@ -660,7 +660,7 @@ SIGNALduino_Set($@)
 	    return undef;
 	} else {
 		FW_directNotify("FILTER=$name", "#FHEMWEB:WEB", "FW_okDialog('<u>ERROR:</u><br>Sorry, flashing your ESP is currently not supported.<br>The file is only downloaded in /opt/fhem/FHEM/firmware.')", "");
-		return "Sorry, Flashing your ESP via Module is currently not supported.";
+		return "Sorry, Flashing your ESP via Module is currently not supported.";    # processed in tests
 	}
 	
   } elsif ($cmd =~ m/reset/i) {
