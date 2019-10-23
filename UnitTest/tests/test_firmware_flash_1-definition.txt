@@ -135,9 +135,9 @@ defmod test_firmware_flash_1 UnitTest dummyDuino
 		plan tests => 2;
 		$ENV{'PATH'}="/opt/fhem/contrib";
 
-		$attr{$target}{hardware} ="ESP_1M";
+		$attr{$target}{hardware} ="ESP8266";
 		my $ret = SIGNALduino_Set($targetHash, $target, "flash" ,"./fhem/test.hex");
-		is($ret, "Sorry, Flashing your ESP via Module is currently not supported.", "check return value for esp_1M");		
+		is($ret, "Sorry, Flashing your ESP via Module is currently not supported.", "check return value for ESP8266");		
 		
 		$attr{$target}{hardware} ="ESP32";
 		$ret = SIGNALduino_Set($targetHash, $target, "flash" ,"./fhem/test.hex");

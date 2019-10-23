@@ -16,7 +16,7 @@ defmod test_firmware_download_1 UnitTest dummyDuino
 	
 	subtest 'flash with esp hardware parameter set' => sub {
 		plan tests => 2;
-		$attr{$target}{hardware} = "ESP_1M";
+		$attr{$target}{hardware} = "ESP8266";
 		SIGNALduino_Set($targetHash, $target, "flash" ,"r1.2.4");
 		is($HTTP_CALL->called_count, 1, "HttpUtils_NonblockingGet is called");
 		my @called_args = $HTTP_CALL->called_with;
@@ -72,13 +72,13 @@ defmod test_firmware_download_1 UnitTest dummyDuino
 			diag("open json firmware file was not possible $error");
 		}
 	};
-	subtest 'check prerelease with hardware parameter set to ESP_1M' => sub {
+	subtest 'check prerelease with hardware parameter set to ESP8266' => sub {
 		plan tests => 1;
 		my $param = {
 			hash       => $targetHash,    
 			command    => "queryReleases"
 		};
-		$attr{$target}{hardware} = "ESP_1M";
+		$attr{$target}{hardware} = "ESP8266";
 		$attr{$target}{updateChannelFW} = 'testing';
 
 		my ($error, @json) = FileRead($attr{global}{modpath}."/FHEM/lib/test_firmware_releases.json");
