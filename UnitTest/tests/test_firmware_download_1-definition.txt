@@ -20,7 +20,7 @@ defmod test_firmware_download_1 UnitTest dummyDuino
 		SIGNALduino_Set($targetHash, $target, "flash" ,"r1.2.4");
 		is($HTTP_CALL->called_count, 1, "HttpUtils_NonblockingGet is called");
 		my @called_args = $HTTP_CALL->called_with;
-		like( $called_args[0]{url}, qr/SIGNALESP/, "Download URL set to SIGNALESP Repo" );
+		like( $called_args[0]{url}, qr/SIGNALDuino/, "Download URL set to SIGNALESP Repo" );
 	}; 
 	subtest 'flash with nano hardware parameter set' => sub {
 		plan tests => 2;
