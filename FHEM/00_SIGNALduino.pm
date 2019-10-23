@@ -4673,10 +4673,11 @@ sub SIGNALduino_githubParseHttpResponse($$$)
 	<a name="SIGNALduinointernals"></a>
 	<b>Internals</b>
 	<ul>
-		<li><b>LASTDMSGID</b>: This shows the last dispatched Protocol ID.</li>
 		<li><b>IDsNoDispatch</b>: Here are protocols entryls listed by their numeric id for which not communication to a logical module is enabled. To enable, look at the menu option <a href="#SIGNALduinoDetail">Display protocollist</a>.</li>
-		<li><b>versionmodule</b>: This shows the version of the SIGNALduino FHEM module itself.</li>
+		<li><b>LASTDMSGID</b>: This shows the last dispatched Protocol ID.</li>
+		<li><b>NR_CMD_LAST_H</b>: Number of messages sent within the last hour.</li>
 		<li><b>version</b>: This shows the version of the SIGNALduino microcontroller.</li>
+		<li><b>versionmodule</b>: This shows the version of the SIGNALduino FHEM module itself.</li>
 	</ul>
 	
 	<a name="SIGNALduinoset"></a>
@@ -4934,11 +4935,11 @@ sub SIGNALduino_githubParseHttpResponse($$$)
     		When using the flash command, you should specify what hardware you have connected to the usbport. Doing not, can cause failures of the device.
 		<ul>
 			<li>ESP32: ESP32</li>
-			<li>ESP8266: ESP8266 without CC1101 receiver</li>
+			<li>ESP8266: ESP8266 cheap receiver</li>
 			<li>ESP8266cc1101: ESP8266 with CC1101 receiver</li>
 			<li>miniculCC1101: Arduino pro Mini with CC110x receiver and cables as a minicul</li>
 			<li>nano: Arduino Nano 328 with cheap receiver</li>
-			<li>nanoCC1101: Arduino Nano 328 wirh CC110x receiver</li>
+			<li>nanoCC1101: Arduino Nano 328 with CC110x receiver</li>
 			<li>promini: Arduino Pro Mini 328 with cheap receiver </li>
 			<li>radinoCC1101: Arduino compatible radino with cc1101 receiver</li>
 		</ul>
@@ -5085,10 +5086,11 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
 	<a name="SIGNALduinointernals"></a>
 	<b>Internals</b>
 	<ul>
-		<li><b>LASTDMSGID</b>: Hier wird die zuletzt dispatchte Protocol ID angezeigt.</li>
 		<li><b>IDsNoDispatch</b>: Hier werden protokoll Eintr&auml;ge mit ihrer numerischen ID aufgelistet, f&ouml;r welche keine Weitergabe von Daten an logische Module aktiviert wurde. Um die weiterhabe zu aktivieren, kann die Me&uuml;option <a href="#SIGNALduinoDetail">Display protocollist</a> verwendet werden.</li>
-		<li><b>versionmodule</b>: Hier wird die Version des SIGNALduino FHEM Modules selbst angezeigt.</li>
+		<li><b>LASTDMSGID</b>: Hier wird die zuletzt dispatchte Protocol ID angezeigt.</li>
+		<li><b>NR_CMD_LAST_H</b>: Anzahl der gesendeten Nachrichten innerhalb der letzten Stunde.</li>
 		<li><b>version</b>: Hier wird die Version des SIGNALduino microcontrollers angezeigt.</li>
+		<li><b>versionmodule</b>: Hier wird die Version des SIGNALduino FHEM Modules selbst angezeigt.</li>
 	</ul>
 
 
@@ -5350,9 +5352,9 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
 		Derzeit m&ouml;gliche Hardware Varianten:
 		<ul>
 			<li>ESP32: ESP32</li>
-			<li>ESP8266: ESP8266 ohne einen CC1101</li>
-			<li>ESP8266cc1101: ESP8266 mit einen CC1101</li>
-			<li>miniculCC1101: Arduino pro Mini mit einen CC110x-Empf&auml;nger entsprechend dem minicul verkabelt</li>
+			<li>ESP8266: ESP8266 f&uuml;r "Billig"-Empf&auml;nger</li>
+			<li>ESP8266cc1101: ESP8266 mit einem CC110x-Empf&auml;nger</li>
+			<li>miniculCC1101: Arduino pro Mini mit einem CC110x-Empf&auml;nger entsprechend dem minicul verkabelt</li>
 			<li>nano: Arduino Nano 328 f&uuml;r "Billig"-Empf&auml;nger</li>
 			<li>nanoCC1101: Arduino Nano f&uuml;r einen CC110x-Empf&auml;nger</li>
 			<li>promini: Arduino Pro Mini 328 f&uuml;r "Billig"-Empf&auml;nger</li>
