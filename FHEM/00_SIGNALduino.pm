@@ -1417,7 +1417,7 @@ SIGNALduino_HandleWriteQueue($)
     delete($hash->{getcmd});
   }
 	  
-  if(@{$hash->{QUEUE}}) {
+  if(exists($hash->{QUEUE}) && @{$hash->{QUEUE}}) {
     my $msg= shift(@{$hash->{QUEUE}});
 
     if($msg eq "") {
