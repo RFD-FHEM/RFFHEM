@@ -910,12 +910,12 @@ SIGNALduino_Get($@)
 	if (!defined($hardware) || $validHw !~ /$hardware(?:,|$)/ )
   	{
   		$hash->{logMethod}->($name, 1, "$name: get $a[1] failed. Please set attribute hardware first");
- 		return "$a[1]: \n\n$name: get $a[1] failed. Please choose one of $validHw attribute hardware";
+ 		return "$a[1]: \n\n$name: get $a[1] failed. Please choose one of $validHw attribute hardware";    # processed in tests
   	} 
 	
   	SIGNALduino_querygithubreleases($hash);
 		
-	return "$a[1]: \n\nFetching $channel firmware versions for $hardware from github\n";
+	return "$a[1]: \n\nFetching $channel firmware versions for $hardware from github\n";    # processed in tests
 	
   }
   
