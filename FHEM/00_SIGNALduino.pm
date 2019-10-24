@@ -225,8 +225,8 @@ SIGNALduino_Initialize($)
                        "Clients MatchList do_not_notify:1,0 dummy:1,0"
 					  ." hexFile"
                       ." initCommands"
-                      ." flashCommand"
-  					." hardware:ESP8266,ESP8266cc1101,ESP32,nano328,nanoCC1101,miniculCC1101,promini,radinoCC1101"
+                  	  ." flashCommand"
+					  ." hardware:ESP8266,ESP8266cc1101,ESP32,nano328,nanoCC1101,miniculCC1101,promini,radinoCC1101"
 					  ." updateChannelFW:stable,testing"
 					  ." debug:0$dev"
 					  ." longids"
@@ -4930,18 +4930,21 @@ sub SIGNALduino_githubParseHttpResponse($$$)
 		</ul><br>
 		<u><i>note:</u></i> ! Sometimes there can be problems flashing radino on Linux. <a href="https://wiki.in-circuit.de/index.php5?title=radino_common_problems">Here in the wiki under the point "radino & Linux" is a patch!</a>
     		</li><br>
-    		<a name="hardware"></a>
+    		<a name="SIGNALDuino_hardware"></a>
 		<li>hardware<br>
-    		When using the flash command, you should specify what hardware you have connected to the usbport. Doing not, can cause failures of the device.
+			Currently, there are serval hardware options with different receiver options available.
+			The simple single wire option,  consists of a single wire connected receiver and a single wire connected transmitter which are connected over a single digital port with the microcontroller. The receiver only sends data and the transmitter receives only from the microcontroller.
+			The other option consists of the cc1101 (sub 1 GHZ) chip, which can transmit and receiver. It's a transceiver which is connected via spi.		
+			ESP8266 hardware type, currently doesn't support flashing out of the modu and needs at leat 1 MB of flash.
 		<ul>
 			<li>ESP32: ESP32</li>
-			<li>ESP8266: ESP8266 cheap receiver</li>
-			<li>ESP8266cc1101: ESP8266 with CC1101 receiver</li>
-			<li>miniculCC1101: Arduino pro Mini with CC110x receiver and cables as a minicul</li>
-			<li>nano: Arduino Nano 328 with cheap receiver</li>
-			<li>nanoCC1101: Arduino Nano 328 with CC110x receiver</li>
-			<li>promini: Arduino Pro Mini 328 with cheap receiver </li>
-			<li>radinoCC1101: Arduino compatible radino with cc1101 receiver</li>
+			<li>ESP8266: ESP8266 simple single wire receiver</li>
+			<li>ESP8266cc1101: ESP8266 with CC1101 (spi connected) receiver</li>
+			<li>miniculCC1101: Arduino pro Mini with CC110x (spi connected) receiver and cables as a minicul</li>
+			<li>nano: Arduino Nano 328 with simple single wired receiver</li>
+			<li>nanoCC1101: Arduino Nano 328 with CC110x (spi connected) receiver</li>
+			<li>promini: Arduino Pro Mini 328 with simple single receiver </li>
+			<li>radinoCC1101: Arduino compatible radino with cc1101 (spi connected) receiver</li>
 		</ul>
 	</li><br>
 	<li>maxMuMsgRepeat<br>
@@ -5347,18 +5350,21 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
 		</ul><br>
 	<u><i>Hinweis:</u></i> ! Teilweise kann es beim Flashen vom radino unter Linux Probleme geben. <a href="https://wiki.in-circuit.de/index.php5?title=radino_common_problems">Hier im Wiki unter dem Punkt "radino & Linux" gibt es einen Patch!</a>
 	</li><br>
-	<a name="hardware"></a>
+	<a name="SIGNALDuino_hardware"></a>
 	<li>hardware<br>
-		Derzeit m&ouml;gliche Hardware Varianten:
+		Derzeit m&ouml;gliche Hardware Varianten mit verschiedenen Empfänger Optionen.
+		Die einfache Variante besteht aus einem Empf&auml;nger und einen Sender, die über je eine einzige digitale Signalleitung Datem mit dem Microcontroller austauschen. Der Empf&auml;nger sendet dabei und der Sender empf&auml;ngt dabei ausschließlich.
+		Weiterhin existiert der den sogenannten cc1101 (sub 1 GHZ) Chip, welche empfangen und senden kann. Dieser wird über die SPI Verbindung angebunden.
+		ESP8266 Hardware Typen, unterstützen derzeit kein flashen aus dem Modul und ben&ouml;tigen mindestens 1 MB Flash Speicher.		
 		<ul>
 			<li>ESP32: ESP32</li>
-			<li>ESP8266: ESP8266 f&uuml;r "Billig"-Empf&auml;nger</li>
-			<li>ESP8266cc1101: ESP8266 mit einem CC110x-Empf&auml;nger</li>
-			<li>miniculCC1101: Arduino pro Mini mit einem CC110x-Empf&auml;nger entsprechend dem minicul verkabelt</li>
-			<li>nano: Arduino Nano 328 f&uuml;r "Billig"-Empf&auml;nger</li>
-			<li>nanoCC1101: Arduino Nano f&uuml;r einen CC110x-Empf&auml;nger</li>
-			<li>promini: Arduino Pro Mini 328 f&uuml;r "Billig"-Empf&auml;nger</li>
-			<li>radinoCC1101: Ein Arduino Kompatibler Radino mit cc1101 receiver</li>
+			<li>ESP8266: ESP8266 f&uuml;r einfacher eindraht Empf&auml;nger</li>
+			<li>ESP8266cc1101: ESP8266 mit einem CC110x-Empf&auml;nger (SPI Verbindung)</li>
+			<li>miniculCC1101: Arduino pro Mini mit einem CC110x-Empf&auml;nger (SPI Verbindung) entsprechend dem minicul verkabelt</li>
+			<li>nano: Arduino Nano 328 f&uuml;r einfacher eindraht Empf&auml;nger</li>
+			<li>nanoCC1101: Arduino Nano f&uuml;r einen CC110x-Empf&auml;nger (SPI Verbindung)</li>
+			<li>promini: Arduino Pro Mini 328 f&uuml;r einfacher eindraht Empf&auml;nger</li>
+			<li>radinoCC1101: Ein Arduino Kompatibler Radino mit cc1101 Empfänger (SPI Verbindung)</li>
 		</ul><br>
 		Notwendig f&uuml;r den Befehl <code>flash</code>. Hier sollten Sie angeben, welche Hardware Sie mit dem usbport verbunden haben. Andernfalls kann es zu Fehlfunktionen des Ger&auml;ts kommen. Wichtig ist auch das Attribut <code>updateChannelFW</code><br>
 	</li><br>

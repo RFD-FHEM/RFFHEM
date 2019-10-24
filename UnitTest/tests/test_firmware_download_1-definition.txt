@@ -16,12 +16,22 @@ defmod test_firmware_download_1 UnitTest dummyDuino
 	
 	subtest 'flash with esp8266cc1101 hardware parameter set' => sub {
 		plan tests => 2;
+		$attr{$target}{hardware} = "ESP8266cc1101";
+		SIGNALduino_Set($targetHash, $target, "flash" ,"r1.2.4");
+		is($HTTP_CALL->called_count, 1, "HttpUtils_NonblockingGet is called");
+		my @called_args = $HTTP_CALL->called_with;
+		like( $called_args[0]{url}, qr/SIGNALDuino/, "Download URL set to SIGNALDuino Repo" );
+	}; 
+	
+	subtest 'flash with esp8266 hardware parameter set' => sub {
+		plan tests => 2;
 		$attr{$target}{hardware} = "ESP8266";
 		SIGNALduino_Set($targetHash, $target, "flash" ,"r1.2.4");
 		is($HTTP_CALL->called_count, 1, "HttpUtils_NonblockingGet is called");
 		my @called_args = $HTTP_CALL->called_with;
 		like( $called_args[0]{url}, qr/SIGNALDuino/, "Download URL set to SIGNALDuino Repo" );
 	}; 
+	
 	subtest 'flash with nano hardware parameter set' => sub {
 		plan tests => 2;
 		$attr{$target}{hardware} = "nano328";
