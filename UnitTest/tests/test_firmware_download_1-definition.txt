@@ -8,25 +8,42 @@ defmod test_firmware_download_1 UnitTest dummyDuino
 	$targetHash->{additionalSets}{flash} = "r1.2.4";
 
 	subtest 'flash without hardware parameter set' => sub {
-		plan tests => 1;
+		plan tests => 2;
 		$attr{$target}{hardware} = undef;
-		SIGNALduino_Set($targetHash, $target, "flash" ,"r1.2.4");
+		my $ret = SIGNALduino_Set($targetHash, $target, "flash" ,"r1.2.4");
+		like($ret,qr/Please define your hardware/,"return value fromSIGNALduino_Set");
 		is($HTTP_CALL->called_count, 0, "HttpUtils_NonblockingGet not called");
 	}; 
 	
-	subtest 'flash with esp hardware parameter set' => sub {
-		plan tests => 2;
-		$attr{$target}{hardware} = "ESP_1M";
-		SIGNALduino_Set($targetHash, $target, "flash" ,"r1.2.4");
+	subtest 'flash with esp8266cc1101 hardware parameter set' => sub {
+		plan tests => 3;
+		$HTTP_CALL->reset;
+		$attr{$target}{hardware} = "ESP8266cc1101";
+		my $ret = SIGNALduino_Set($targetHash, $target, "flash" ,"r1.2.4");
+		is($ret,undef,"return value fromSIGNALduino_Set");
 		is($HTTP_CALL->called_count, 1, "HttpUtils_NonblockingGet is called");
 		my @called_args = $HTTP_CALL->called_with;
-		like( $called_args[0]{url}, qr/SIGNALESP/, "Download URL set to SIGNALESP Repo" );
+		like( $called_args[0]{url}, qr/SIGNALDuino/, "Download URL set to SIGNALDuino Repo" );
 	}; 
+	
+	subtest 'flash with esp8266 hardware parameter set' => sub {
+		plan tests => 3;
+		$attr{$target}{hardware} = "ESP8266";
+		$HTTP_CALL->reset;
+		my $ret = SIGNALduino_Set($targetHash, $target, "flash" ,"r1.2.4");
+		is($ret,undef,"return value fromSIGNALduino_Set");
+		is($HTTP_CALL->called_count, 1, "HttpUtils_NonblockingGet is called");
+		my @called_args = $HTTP_CALL->called_with;
+		like( $called_args[0]{url}, qr/SIGNALDuino/, "Download URL set to SIGNALDuino Repo" );
+	}; 
+	
 	subtest 'flash with nano hardware parameter set' => sub {
-		plan tests => 2;
+		plan tests => 3;
+		$HTTP_CALL->reset;		
 		$attr{$target}{hardware} = "nano328";
-		SIGNALduino_Set($targetHash, $target, "flash" ,"r1.2.4");
-		is($HTTP_CALL->called_count, 2, "HttpUtils_NonblockingGet is called");
+		my $ret = SIGNALduino_Set($targetHash, $target, "flash" ,"r1.2.4");
+		is($ret,undef,"return value fromSIGNALduino_Set");
+		is($HTTP_CALL->called_count, 1, "HttpUtils_NonblockingGet is called");
 		my @called_args = $HTTP_CALL->called_with;
 		like( $called_args[0]{url}, qr/SIGNALDuino/, "Download URL set to SIGNALDuino Repo" );
 	};
@@ -72,13 +89,13 @@ defmod test_firmware_download_1 UnitTest dummyDuino
 			diag("open json firmware file was not possible $error");
 		}
 	};
-	subtest 'check prerelease with hardware parameter set to ESP_1M' => sub {
+	subtest 'check prerelease with hardware parameter set to ESP8266' => sub {
 		plan tests => 1;
 		my $param = {
 			hash       => $targetHash,    
 			command    => "queryReleases"
 		};
-		$attr{$target}{hardware} = "ESP_1M";
+		$attr{$target}{hardware} = "ESP8266";
 		$attr{$target}{updateChannelFW} = 'testing';
 
 		my ($error, @json) = FileRead($attr{global}{modpath}."/FHEM/lib/test_firmware_releases.json");

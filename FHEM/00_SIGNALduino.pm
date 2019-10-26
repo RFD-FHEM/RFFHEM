@@ -31,7 +31,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.4.1_dev_21.10",
+	SDUINO_VERSION            => "v3.4.1_dev_22.10",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -225,8 +225,8 @@ SIGNALduino_Initialize($)
                        "Clients MatchList do_not_notify:1,0 dummy:1,0"
 					  ." hexFile"
                       ." initCommands"
-                      ." flashCommand"
-  					  ." hardware:ESP_1M,ESP32,nano328,nanoCC1101,miniculCC1101,promini,radinoCC1101"
+                  	  ." flashCommand"
+					  ." hardware:ESP8266,ESP8266cc1101,ESP32,nano328,nanoCC1101,miniculCC1101,promini,radinoCC1101"
 					  ." updateChannelFW:stable,testing"
 					  ." debug:0$dev"
 					  ." longids"
@@ -451,13 +451,13 @@ SIGNALduino_flash($) {
 	qx($hash->{helper}{avrdudecmd});
 	if ($? != 0 )
 	{
-		readingsSingleUpdate($hash,"state","FIRMWARE UPDATE with error",1);
+		readingsSingleUpdate($hash,"state","FIRMWARE UPDATE with error",1);    # processed in tests
 		$hash->{logMethod}->($name ,3, "$name: ERROR: avrdude exited with error $?");
 		FW_directNotify("FILTER=$name", "#FHEMWEB:WEB", "FW_okDialog('ERROR: avrdude exited with error, for details see last flashlog.')", "");
-		$hash->{FLASH_RESULT}="ERROR: avrdude exited with error";
+		$hash->{FLASH_RESULT}="ERROR: avrdude exited with error";              # processed in tests
 	} else {
 		$hash->{logMethod}->($name ,3, "$name: Firmware update was successfull");
-		readingsSingleUpdate($hash,"state","FIRMWARE UPDATE successfull",1)
+		readingsSingleUpdate($hash,"state","FIRMWARE UPDATE successfull",1);   # processed in tests
 	}
 	 
 	local $/=undef;
@@ -470,7 +470,7 @@ SIGNALduino_flash($) {
 	} else {
 		$hash->{helper}{avrdudelogs} .= "WARNING: avrdude created no log file\n\n";
 		readingsSingleUpdate($hash,"state","FIRMWARE UPDATE with error",1);
-		$hash->{FLASH_RESULT}= "WARNING: avrdude created no log file";
+		$hash->{FLASH_RESULT}= "WARNING: avrdude created no log file";         # processed in tests
 	}
 	
 	DevIo_OpenDev($hash, 0, "SIGNALduino_DoInit", 'SIGNALduino_Connect');
@@ -556,12 +556,8 @@ SIGNALduino_Set($@)
 	{
 		$hash->{logMethod}->($hash, 3, "SIGNALduino_Set flash $args[0] try to fetch github assets for tag $args[0]");
 
-		my $ghurl = "https://api.github.com/repos/RFD-FHEM/<REPONAME>/releases/tags/$args[0]";
-		if ($hardware =~ /ESP/) {
-			$ghurl =~ s/<REPONAME>/SIGNALESP/ ;
-		} else {
-			$ghurl =~ s/<REPONAME>/SIGNALDuino/ ; 
-		}
+		my $ghurl = "https://api.github.com/repos/RFD-FHEM/SIGNALDuino/releases/tags/$args[0]";
+
 		$hash->{logMethod}->($hash, 3, "SIGNALduino_Set flash $args[0] try to fetch release $ghurl");
 		
 	    my $http_param = {
@@ -663,7 +659,8 @@ SIGNALduino_Set($@)
 	 	$hash->{helper}{avrdudelogs} = $log;
 	    return undef;
 	} else {
-		return "Sorry, Flashing your ESP via Module is currently not supported.";
+		FW_directNotify("FILTER=$name", "#FHEMWEB:WEB", "FW_okDialog('<u>ERROR:</u><br>Sorry, flashing your ESP is currently not supported.<br>The file is only downloaded in /opt/fhem/FHEM/firmware.')", "");
+		return "Sorry, Flashing your ESP via Module is currently not supported.";    # processed in tests
 	}
 	
   } elsif ($cmd =~ m/reset/i) {
@@ -913,12 +910,12 @@ SIGNALduino_Get($@)
 	if (!defined($hardware) || $validHw !~ /$hardware(?:,|$)/ )
   	{
   		$hash->{logMethod}->($name, 1, "$name: get $a[1] failed. Please set attribute hardware first");
- 		return "$a[1]: \n\n$name: get $a[1] failed. Please choose one of $validHw attribute hardware";
+ 		return "$a[1]: \n\n$name: get $a[1] failed. Please choose one of $validHw attribute hardware";    # processed in tests
   	} 
 	
   	SIGNALduino_querygithubreleases($hash);
 		
-	return "$a[1]: \n\nFetching $channel firmware versions for $hardware from github\n";
+	return "$a[1]: \n\nFetching $channel firmware versions for $hardware from github\n";    # processed in tests
 	
   }
   
@@ -4676,10 +4673,11 @@ sub SIGNALduino_githubParseHttpResponse($$$)
 	<a name="SIGNALduinointernals"></a>
 	<b>Internals</b>
 	<ul>
-		<li><b>LASTDMSGID</b>: This shows the last dispatched Protocol ID.</li>
 		<li><b>IDsNoDispatch</b>: Here are protocols entryls listed by their numeric id for which not communication to a logical module is enabled. To enable, look at the menu option <a href="#SIGNALduinoDetail">Display protocollist</a>.</li>
-		<li><b>versionmodule</b>: This shows the version of the SIGNALduino FHEM module itself.</li>
+		<li><b>LASTDMSGID</b>: This shows the last dispatched Protocol ID.</li>
+		<li><b>NR_CMD_LAST_H</b>: Number of messages sent within the last hour.</li>
 		<li><b>version</b>: This shows the version of the SIGNALduino microcontroller.</li>
+		<li><b>versionmodule</b>: This shows the version of the SIGNALduino FHEM module itself.</li>
 	</ul>
 	
 	<a name="SIGNALduinoset"></a>
@@ -4932,17 +4930,21 @@ sub SIGNALduino_githubParseHttpResponse($$$)
 		</ul><br>
 		<u><i>note:</u></i> ! Sometimes there can be problems flashing radino on Linux. <a href="https://wiki.in-circuit.de/index.php5?title=radino_common_problems">Here in the wiki under the point "radino & Linux" is a patch!</a>
     		</li><br>
-    		<a name="hardware"></a>
+    		<a name="SIGNALDuino_hardware"></a>
 		<li>hardware<br>
-    		When using the flash command, you should specify what hardware you have connected to the usbport. Doing not, can cause failures of the device.
+			Currently, there are serval hardware options with different receiver options available.
+			The simple single wire option,  consists of a single wire connected receiver and a single wire connected transmitter which are connected over a single digital port with the microcontroller. The receiver only sends data and the transmitter receives only from the microcontroller.
+			The other option consists of the cc1101 (sub 1 GHZ) chip, which can transmit and receiver. It's a transceiver which is connected via spi.		
+			ESP8266 hardware type, currently doesn't support flashing out of the modu and needs at leat 1 MB of flash.
 		<ul>
-			<li>ESP_1M: ESP8266 with 1 MB flash and CC1101 receiver</li>
 			<li>ESP32: ESP32</li>
-			<li>nano: Arduino Nano 328 with cheap receiver</li>
-			<li>nanoCC1101: Arduino Nano 328 wirh CC110x receiver</li>
-			<li>miniculCC1101: Arduino pro Mini with CC110x receiver and cables as a minicul</li>
-			<li>promini: Arduino Pro Mini 328 with cheap receiver </li>
-			<li>radinoCC1101: Arduino compatible radino with cc1101 receiver</li>
+			<li>ESP8266: ESP8266 simple single wire receiver</li>
+			<li>ESP8266cc1101: ESP8266 with CC1101 (spi connected) receiver</li>
+			<li>miniculCC1101: Arduino pro Mini with CC110x (spi connected) receiver and cables as a minicul</li>
+			<li>nano: Arduino Nano 328 with simple single wired receiver</li>
+			<li>nanoCC1101: Arduino Nano 328 with CC110x (spi connected) receiver</li>
+			<li>promini: Arduino Pro Mini 328 with simple single receiver </li>
+			<li>radinoCC1101: Arduino compatible radino with cc1101 (spi connected) receiver</li>
 		</ul>
 	</li><br>
 	<li>maxMuMsgRepeat<br>
@@ -5087,10 +5089,11 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
 	<a name="SIGNALduinointernals"></a>
 	<b>Internals</b>
 	<ul>
-		<li><b>LASTDMSGID</b>: Hier wird die zuletzt dispatchte Protocol ID angezeigt.</li>
 		<li><b>IDsNoDispatch</b>: Hier werden protokoll Eintr&auml;ge mit ihrer numerischen ID aufgelistet, f&ouml;r welche keine Weitergabe von Daten an logische Module aktiviert wurde. Um die weiterhabe zu aktivieren, kann die Me&uuml;option <a href="#SIGNALduinoDetail">Display protocollist</a> verwendet werden.</li>
-		<li><b>versionmodule</b>: Hier wird die Version des SIGNALduino FHEM Modules selbst angezeigt.</li>
+		<li><b>LASTDMSGID</b>: Hier wird die zuletzt dispatchte Protocol ID angezeigt.</li>
+		<li><b>NR_CMD_LAST_H</b>: Anzahl der gesendeten Nachrichten innerhalb der letzten Stunde.</li>
 		<li><b>version</b>: Hier wird die Version des SIGNALduino microcontrollers angezeigt.</li>
+		<li><b>versionmodule</b>: Hier wird die Version des SIGNALduino FHEM Modules selbst angezeigt.</li>
 	</ul>
 
 
@@ -5347,17 +5350,21 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
 		</ul><br>
 	<u><i>Hinweis:</u></i> ! Teilweise kann es beim Flashen vom radino unter Linux Probleme geben. <a href="https://wiki.in-circuit.de/index.php5?title=radino_common_problems">Hier im Wiki unter dem Punkt "radino & Linux" gibt es einen Patch!</a>
 	</li><br>
-	<a name="hardware"></a>
+	<a name="SIGNALDuino_hardware"></a>
 	<li>hardware<br>
-		Derzeit m&ouml;gliche Hardware Varianten:
+		Derzeit m&ouml;gliche Hardware Varianten mit verschiedenen Empfänger Optionen.
+		Die einfache Variante besteht aus einem Empf&auml;nger und einen Sender, die über je eine einzige digitale Signalleitung Datem mit dem Microcontroller austauschen. Der Empf&auml;nger sendet dabei und der Sender empf&auml;ngt dabei ausschließlich.
+		Weiterhin existiert der den sogenannten cc1101 (sub 1 GHZ) Chip, welche empfangen und senden kann. Dieser wird über die SPI Verbindung angebunden.
+		ESP8266 Hardware Typen, unterstützen derzeit kein flashen aus dem Modul und ben&ouml;tigen mindestens 1 MB Flash Speicher.		
 		<ul>
-			<li>ESP_1M: ESP8266 mit 1 MB Flash und einem CC1101</li>
 			<li>ESP32: ESP32</li>
-			<li>nano: Arduino Nano 328 f&uuml;r "Billig"-Empf&auml;nger</li>
-			<li>nanoCC1101: Arduino Nano f&uuml;r einen CC110x-Empf&auml;nger</li>
-			<li>miniculCC1101: Arduino pro Mini mit einen CC110x-Empf&auml;nger entsprechend dem minicul verkabelt</li>
-			<li>promini: Arduino Pro Mini 328 f&uuml;r "Billig"-Empf&auml;nger</li>
-			<li>radinoCC1101: Ein Arduino Kompatibler Radino mit cc1101 receiver</li>
+			<li>ESP8266: ESP8266 f&uuml;r einfacher eindraht Empf&auml;nger</li>
+			<li>ESP8266cc1101: ESP8266 mit einem CC110x-Empf&auml;nger (SPI Verbindung)</li>
+			<li>miniculCC1101: Arduino pro Mini mit einem CC110x-Empf&auml;nger (SPI Verbindung) entsprechend dem minicul verkabelt</li>
+			<li>nano: Arduino Nano 328 f&uuml;r einfacher eindraht Empf&auml;nger</li>
+			<li>nanoCC1101: Arduino Nano f&uuml;r einen CC110x-Empf&auml;nger (SPI Verbindung)</li>
+			<li>promini: Arduino Pro Mini 328 f&uuml;r einfacher eindraht Empf&auml;nger</li>
+			<li>radinoCC1101: Ein Arduino Kompatibler Radino mit cc1101 Empfänger (SPI Verbindung)</li>
 		</ul><br>
 		Notwendig f&uuml;r den Befehl <code>flash</code>. Hier sollten Sie angeben, welche Hardware Sie mit dem usbport verbunden haben. Andernfalls kann es zu Fehlfunktionen des Ger&auml;ts kommen. Wichtig ist auch das Attribut <code>updateChannelFW</code><br>
 	</li><br>
