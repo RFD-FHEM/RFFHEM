@@ -31,7 +31,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.4.1_dev_22.10",
+	SDUINO_VERSION            => "v3.4.1_dev_26.10",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -621,14 +621,14 @@ SIGNALduino_Set($@)
 		my $flashCommand = AttrVal($name,"flashCommand",$defaultflashCommand);
 		
 		if ($defaultflashCommand eq $flashCommand)	{
-			$hash->{logMethod}->($name, 5, "$hash->{TYPE} $name: standard flashCommand is used to flash.");
+			$hash->{logMethod}->($name, 5, "$name: standard flashCommand is used to flash.");
 		} else {
-			$hash->{logMethod}->($name, 3, "$hash->{TYPE} $name: custom flashCommand is manual defined! $flashCommand");
+			$hash->{logMethod}->($name, 3, "$name: custom flashCommand is manual defined! $flashCommand");
 		}
 		
 		DevIo_CloseDev($hash);
 		if ($hardware eq "radinoCC1101" && $^O eq 'linux') {
-			$hash->{logMethod}->($name, 3, "$hash->{TYPE} $name/flash: forcing special reset for $hardware on $port");
+			$hash->{logMethod}->($name, 3, "$name: forcing special reset for $hardware on $port");
 			# Mit dem Linux-Kommando 'stty' die Port-Einstellungen setzen
 			use IPC::Open3;
  	
@@ -1125,7 +1125,7 @@ SIGNALduino_ResetDevice($)
 			# The bootloader can also be initiated by pressing the reset button on the Micro.
 			# Note that when the board first powers up, it will jump straight to the user sketch, if present, rather than initiating the bootloader.	
 			my ($dev, $baudrate) = split("@", $hash->{DeviceName});
-			$hash->{logMethod}->($name, 3, "$hash->{TYPE} $name/reset: forcing special reset for $hardware on $dev");
+			$hash->{logMethod}->($name, 3, "$name/reset: forcing special reset for $hardware on $dev");
 			# Mit dem Linux-Kommando 'stty' die Port-Einstellungen setzen
 			system("stty -F $dev ospeed 1200 ispeed 1200");
 			$hash->{helper}{resetInProgress}=1;
@@ -2844,7 +2844,7 @@ SIGNALduino_Attr(@)
 	elsif ($aName eq "cc1101_frequency")
 	{
 		if ($aVal eq "" || $aVal < 800) {
-			$hash->{logMethod}->($name, 3, "$name: delete cc1101_frequeny");
+			$hash->{logMethod}->($name, 3, "$name: delete cc1101_frequency");
 			delete ($hash->{cc1101_frequency}) if (defined($hash->{cc1101_frequency}));
 		} else {
 			$hash->{logMethod}->($name, 3, "$name: setting cc1101_frequency to 868");
