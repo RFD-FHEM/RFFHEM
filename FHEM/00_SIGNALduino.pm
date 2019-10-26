@@ -4676,7 +4676,9 @@ sub SIGNALduino_githubParseHttpResponse($$$)
 		<li><b>IDsNoDispatch</b>: Here are protocols entryls listed by their numeric id for which not communication to a logical module is enabled. To enable, look at the menu option <a href="#SIGNALduinoDetail">Display protocollist</a>.</li>
 		<li><b>LASTDMSGID</b>: This shows the last dispatched Protocol ID.</li>
 		<li><b>NR_CMD_LAST_H</b>: Number of messages sent within the last hour.</li>
+		<li><b>RAWMSG</b>: last received RAWMSG</li>
 		<li><b>version</b>: This shows the version of the SIGNALduino microcontroller.</li>
+		<li><b>versionProtocols</b>: This shows the version of SIGNALduino protocol file.</li>
 		<li><b>versionmodule</b>: This shows the version of the SIGNALduino FHEM module itself.</li>
 	</ul>
 	
@@ -5089,10 +5091,12 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
 	<a name="SIGNALduinointernals"></a>
 	<b>Internals</b>
 	<ul>
-		<li><b>IDsNoDispatch</b>: Hier werden protokoll Eintr&auml;ge mit ihrer numerischen ID aufgelistet, f&ouml;r welche keine Weitergabe von Daten an logische Module aktiviert wurde. Um die weiterhabe zu aktivieren, kann die Me&uuml;option <a href="#SIGNALduinoDetail">Display protocollist</a> verwendet werden.</li>
+		<li><b>IDsNoDispatch</b>: Hier werden protokoll Eintr&auml;ge mit ihrer numerischen ID aufgelistet, f&uuml;r welche keine Weitergabe von Daten an logische Module aktiviert wurde. Um die Weitergabe zu aktivieren, kann die Men&uuml;option <a href="#SIGNALduinoDetail">Display protocollist</a> verwendet werden.</li>
 		<li><b>LASTDMSGID</b>: Hier wird die zuletzt dispatchte Protocol ID angezeigt.</li>
 		<li><b>NR_CMD_LAST_H</b>: Anzahl der gesendeten Nachrichten innerhalb der letzten Stunde.</li>
+		<li><b>RAWMSG</b>: zuletzt empfangene RAWMSG</li>
 		<li><b>version</b>: Hier wird die Version des SIGNALduino microcontrollers angezeigt.</li>
+		<li><b>versionProtocols</b>: Hier wird die Version der SIGNALduino Protokolldatei angezeigt.</li>
 		<li><b>versionmodule</b>: Hier wird die Version des SIGNALduino FHEM Modules selbst angezeigt.</li>
 	</ul>
 
@@ -5358,12 +5362,12 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
 		ESP8266 Hardware Typen, unterstützen derzeit kein flashen aus dem Modul und ben&ouml;tigen mindestens 1 MB Flash Speicher.		
 		<ul>
 			<li>ESP32: ESP32</li>
-			<li>ESP8266: ESP8266 f&uuml;r einfacher eindraht Empf&auml;nger</li>
+			<li>ESP8266: ESP8266 f&uuml;r einfachen eindraht Empf&auml;nger</li>
 			<li>ESP8266cc1101: ESP8266 mit einem CC110x-Empf&auml;nger (SPI Verbindung)</li>
 			<li>miniculCC1101: Arduino pro Mini mit einem CC110x-Empf&auml;nger (SPI Verbindung) entsprechend dem minicul verkabelt</li>
-			<li>nano: Arduino Nano 328 f&uuml;r einfacher eindraht Empf&auml;nger</li>
+			<li>nano: Arduino Nano 328 f&uuml;r einfachen eindraht Empf&auml;nger</li>
 			<li>nanoCC1101: Arduino Nano f&uuml;r einen CC110x-Empf&auml;nger (SPI Verbindung)</li>
-			<li>promini: Arduino Pro Mini 328 f&uuml;r einfacher eindraht Empf&auml;nger</li>
+			<li>promini: Arduino Pro Mini 328 f&uuml;r einfachen eindraht Empf&auml;nger</li>
 			<li>radinoCC1101: Ein Arduino Kompatibler Radino mit cc1101 Empfänger (SPI Verbindung)</li>
 		</ul><br>
 		Notwendig f&uuml;r den Befehl <code>flash</code>. Hier sollten Sie angeben, welche Hardware Sie mit dem usbport verbunden haben. Andernfalls kann es zu Fehlfunktionen des Ger&auml;ts kommen. Wichtig ist auch das Attribut <code>updateChannelFW</code><br>
