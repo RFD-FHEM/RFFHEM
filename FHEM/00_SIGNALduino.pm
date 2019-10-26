@@ -448,6 +448,15 @@ SIGNALduino_flash($) {
     $hash->{helper}{avrdudecmd} =~ s/\Q[LOGFILE]\E/$logFile/g;
 	local $SIG{CHLD} = 'DEFAULT';
 	delete($hash->{FLASH_RESULT}) if (exists($hash->{FLASH_RESULT}));
+
+	my $hardware=AttrVal($name,"hardware","");
+	if ($hardware eq "radinoCC1101") {
+		# Normalbetrieb:    /dev/serial/by-id/usb-Unknown_radino_CC1101-if00@57600
+		# Bootloader aktiv: /dev/serial/by-id/usb-In-Circuit_radino_CC1101-if00@57600
+		$hash->{helper}{avrdudecmd} =~ s/usb-Unknown_radino/usb-In-Circuit_radino/g;
+		$hash->{logMethod}->($name ,3, "$name: changed avrdude flashcommand: " . $hash->{helper}{avrdudecmd});
+	}
+
 	qx($hash->{helper}{avrdudecmd});
 	if ($? != 0 )
 	{
