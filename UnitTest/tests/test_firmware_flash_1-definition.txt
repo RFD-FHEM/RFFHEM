@@ -76,7 +76,7 @@ defmod test_firmware_flash_1 UnitTest dummyDuino
 		$targetHash->{helper}{avrdudecmd} = $preparedavrdudecmd;	
 
 		CommandAttr(undef,"global logdir ./jiddsidio/log/");
-		my $ret = SIGNALduino_flash($target);
+		$ret = SIGNALduino_flash($target);
 		
 		is($ret, "WARNING: avrdude created no log file", "check return value");		
 		is($targetHash->{FLASH_RESULT},$ret, "check internal value");		
