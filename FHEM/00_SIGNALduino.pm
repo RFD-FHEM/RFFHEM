@@ -658,6 +658,7 @@ SIGNALduino_Set($@)
 		$hash->{helper}{avrdudecmd}=~ s/\Q[PORT]\E/$port/g;
 		$hash->{helper}{avrdudecmd} =~ s/\Q[HEXFILE]\E/$hexFile/g;
 		if ($hardware =~ "^nano" && $^O eq 'linux') {
+			$hash->{logMethod}->($name ,5, "$name: try additional flash with baudrate 115200 for optiboot");
 			$hash->{helper}{avrdudecmd} = $hash->{helper}{avrdudecmd}." || ". $hash->{helper}{avrdudecmd}; 
 			$hash->{helper}{avrdudecmd} =~ s/\Q[BAUDRATE]\E/$baudrate/;
 			$baudrate=115200;
