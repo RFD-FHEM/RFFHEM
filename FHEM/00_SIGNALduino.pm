@@ -31,7 +31,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.4.1_dev_26.10",
+	SDUINO_VERSION            => "v3.4.1_dev_28.10",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -450,6 +450,15 @@ SIGNALduino_flash($) {
 	delete($hash->{FLASH_RESULT}) if (exists($hash->{FLASH_RESULT}));
 
 	qx($hash->{helper}{avrdudecmd});
+
+	my $hardware=AttrVal($name,"hardware","");
+	if ($? != 0 && ($hardware eq "nano328" || $hardware eq "nanoCC1101"))
+	{
+		$hash->{logMethod}->($name ,3, "$name: ERROR: avrdude exited with error, try with 115200 baud");
+		$hash->{helper}{avrdudecmd} =~ s/57600/115200/g;	# new bootloader optiboot used 115200
+		qx($hash->{helper}{avrdudecmd});
+	}
+
 	if ($? != 0 )
 	{
 		readingsSingleUpdate($hash,"state","FIRMWARE UPDATE with error",1);    # processed in tests
