@@ -451,13 +451,6 @@ SIGNALduino_flash($) {
 
 	qx($hash->{helper}{avrdudecmd});
 
-	my $hardware=AttrVal($name,"hardware","");
-	if ($? != 0 && ($hardware eq "nano328" || $hardware eq "nanoCC1101"))
-	{
-		$hash->{logMethod}->($name ,3, "$name: ERROR: avrdude exited with error, try with 115200 baud");
-		$hash->{helper}{avrdudecmd} =~ s/57600/115200/g;	# new bootloader optiboot used 115200
-		qx($hash->{helper}{avrdudecmd});
-	}
 
 	if ($? != 0 )
 	{
@@ -663,8 +656,13 @@ SIGNALduino_Set($@)
 		}
 		$hash->{helper}{avrdudecmd} = $flashCommand;
 		$hash->{helper}{avrdudecmd}=~ s/\Q[PORT]\E/$port/g;
-		$hash->{helper}{avrdudecmd} =~ s/\Q[BAUDRATE]\E/$baudrate/g;
 		$hash->{helper}{avrdudecmd} =~ s/\Q[HEXFILE]\E/$hexFile/g;
+		if ($hardware =~ "^nano" && $^O eq 'linux') {
+			$hash->{helper}{avrdudecmd} = $hash->{helper}{avrdudecmd}." || ". $hash->{helper}{avrdudecmd}; 
+			$hash->{helper}{avrdudecmd} =~ s/\Q[BAUDRATE]\E/$baudrate/;
+			$baudrate=115200;
+		}	
+		$hash->{helper}{avrdudecmd} =~ s/\Q[BAUDRATE]\E/$baudrate/;
 		$log .= "command: $hash->{helper}{avrdudecmd}\n\n";
 		InternalTimer(gettimeofday() + 1,"SIGNALduino_flash",$name);
 	 	$hash->{helper}{avrdudelogs} = $log;

@@ -70,7 +70,7 @@ defmod test_firmware_flash_1 UnitTest dummyDuino
 		is($targetHash->{helper}{stty_pid}, undef, "check stty_pid value");		
 		
 		is(ReadingsVal($target,"state",""),"FIRMWARE UPDATE with error","check reading state");
-		is($targetHash->{helper}{avrdudecmd},'avrdude -c arduino -b 57600 -P none -p atmega328p -vv -U flash:w:./fhem/test.hex 2>./log/SIGNALduino-Flash.log',"check avrdude cmd");
+		is($targetHash->{helper}{avrdudecmd},'avrdude -c arduino -b 57600 -P none -p atmega328p -vv -U flash:w:./fhem/test.hex 2>./log/SIGNALduino-Flash.log || avrdude -c arduino -b 115200 -P none -p atmega328p -vv -U flash:w:./fhem/test.hex 2>./log/SIGNALduino-Flash.log',"check avrdude cmd");
 		is($OpenDev->called_count, 1, "check if DevIO_OpenDev is called once");		
 
 		$targetHash->{helper}{avrdudecmd} = $preparedavrdudecmd;	
@@ -83,7 +83,7 @@ defmod test_firmware_flash_1 UnitTest dummyDuino
 		is($targetHash->{helper}{stty_pid}, undef, "check stty_pid value");		
 		
 		is(ReadingsVal($target,"state",""),"FIRMWARE UPDATE with error","check reading state");
-		is($targetHash->{helper}{avrdudecmd},'avrdude -c arduino -b 57600 -P none -p atmega328p -vv -U flash:w:./fhem/test.hex 2>./jiddsidio/log/SIGNALduino-Flash.log',"check avrdude cmd");
+		is($targetHash->{helper}{avrdudecmd},'avrdude -c arduino -b 57600 -P none -p atmega328p -vv -U flash:w:./fhem/test.hex 2>./jiddsidio/log/SIGNALduino-Flash.log || avrdude -c arduino -b 115200 -P none -p atmega328p -vv -U flash:w:./fhem/test.hex 2>./jiddsidio/log/SIGNALduino-Flash.log',"check avrdude cmd");
 		is($OpenDev->called_count, 2, "check if DevIO_OpenDev is called once");		
 		$OpenDev->unmock;
 		CommandAttr(undef,"global logdir $logdir");
