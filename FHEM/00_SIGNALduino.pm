@@ -448,6 +448,7 @@ SIGNALduino_flash($) {
     $hash->{helper}{avrdudecmd} =~ s/\Q[LOGFILE]\E/$logFile/g;
 	local $SIG{CHLD} = 'DEFAULT';
 	delete($hash->{FLASH_RESULT}) if (exists($hash->{FLASH_RESULT}));
+
 	qx($hash->{helper}{avrdudecmd});
 	if ($? != 0 )
 	{
@@ -648,8 +649,9 @@ SIGNALduino_Set($@)
 				$hash->{helper}{stty_pid}=$pid;
 		  		$hash->{helper}{stty_output} = join(" ",@outlines).join(" ",@errlines);
 			}
+			$port =~ s/usb-Unknown_radino/usb-In-Circuit_radino/g;
+			$hash->{logMethod}->($name ,3, "$name: changed usb port to \"$port\" for avrdude flashcommand compatible with radino");
 		}
-		
 		$hash->{helper}{avrdudecmd} = $flashCommand;
 		$hash->{helper}{avrdudecmd}=~ s/\Q[PORT]\E/$port/g;
 		$hash->{helper}{avrdudecmd} =~ s/\Q[BAUDRATE]\E/$baudrate/g;
