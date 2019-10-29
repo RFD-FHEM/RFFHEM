@@ -247,17 +247,16 @@ defmod test_developid_1 UnitTest dummyDuino (
 			isnt($regex_matched,1,$msg) or diag("check log entrys for development protocol is active with id $regex, there shouldn't be a note");
 			$regex_matched=0;
 		}
-		
 		Log3 $name, 3 ,$subTestName." <--|";
-
-
 	};
-	CommandReload(undef,"00_SIGNALduino.pm");
+	undef %{$local_ProtocolListSIGNALduino};
+	
+	%{$local_ProtocolListSIGNALduino} = SIGNALduino_LoadProtocolHash("$attr{global}{modpath}/FHEM/lib/SD_ProtocolData.pm");
+	
 	SIGNALduino_IdList("x:$target","","","");  
-
 	foreach my $id (qw/9999 9998 9997 9996/)
 	{
-		isnt($local_ProtocolListSIGNALduino->{$id},$id,"check if id $id is deleted");
+		isnt($local_ProtocolListSIGNALduino->{$id}{id},$id,"check if id $id is deleted");
 	}
 
 	};
