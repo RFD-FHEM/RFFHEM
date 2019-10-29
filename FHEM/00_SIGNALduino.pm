@@ -31,7 +31,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.4.1_dev_26.10",
+	SDUINO_VERSION            => "v3.4.1_dev_28.10",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -450,6 +450,8 @@ SIGNALduino_flash($) {
 	delete($hash->{FLASH_RESULT}) if (exists($hash->{FLASH_RESULT}));
 
 	qx($hash->{helper}{avrdudecmd});
+
+
 	if ($? != 0 )
 	{
 		readingsSingleUpdate($hash,"state","FIRMWARE UPDATE with error",1);    # processed in tests
@@ -654,8 +656,14 @@ SIGNALduino_Set($@)
 		}
 		$hash->{helper}{avrdudecmd} = $flashCommand;
 		$hash->{helper}{avrdudecmd}=~ s/\Q[PORT]\E/$port/g;
-		$hash->{helper}{avrdudecmd} =~ s/\Q[BAUDRATE]\E/$baudrate/g;
 		$hash->{helper}{avrdudecmd} =~ s/\Q[HEXFILE]\E/$hexFile/g;
+		if ($hardware =~ "^nano" && $^O eq 'linux') {
+			$hash->{logMethod}->($name ,5, "$name: try additional flash with baudrate 115200 for optiboot");
+			$hash->{helper}{avrdudecmd} = $hash->{helper}{avrdudecmd}." || ". $hash->{helper}{avrdudecmd}; 
+			$hash->{helper}{avrdudecmd} =~ s/\Q[BAUDRATE]\E/$baudrate/;
+			$baudrate=115200;
+		}	
+		$hash->{helper}{avrdudecmd} =~ s/\Q[BAUDRATE]\E/$baudrate/;
 		$log .= "command: $hash->{helper}{avrdudecmd}\n\n";
 		InternalTimer(gettimeofday() + 1,"SIGNALduino_flash",$name);
 	 	$hash->{helper}{avrdudelogs} = $log;
