@@ -62,10 +62,13 @@ sub SIGNALduino_Log3($$$);
 
 #my $debug=0;
 
+our %modules;
+our %defs;
+
 my %gets = (    # Name, Data to send to the SIGNALduino, Regexp for the answer
   "version"  => ["V", 'V\s.*SIGNAL(duino|ESP).*'],
   "freeram"  => ["R", '^[0-9]+'],
-  "raw"      => ["", '.*'],
+#  "raw"      => ["", '.*'],
   "uptime"   => ["t", '^[0-9]+' ],
   "cmds"     => ["?", '.*Use one of[ 0-9A-Za-z]+[\r\n]*$' ],
 # "ITParms"  => ["ip",'.*'],
@@ -79,7 +82,45 @@ my %gets = (    # Name, Data to send to the SIGNALduino, Regexp for the answer
 #  "FAParms"  => ["fp", '.*' ],
 #  "TCParms"  => ["dp", '.*' ],
 #  "HXParms"  => ["hp", '.*' ]
-  "availableFirmware" => ["none",'none'],
+#  "availableFirmware" => ["none",'none'],
+  "availableFirmware" => sub {
+  		my ($hash, @a) = @_;
+  		
+		if ($missingModulSIGNALduino =~ m/JSON/ )
+	  	{
+	  		$hash->{logMethod}->($hash->{NAME}, 1, "$hash->{NAME}: get $a[1] failed. Pleas install Perl module JSON. Example: sudo apt-get install libjson-perl");
+	 		return "$a[1]: \n\nFetching from github is not possible. Please install JSON. Example:<br><code>sudo apt-get install libjson-perl</code>";
+	  	} 
+	  	
+	  	my $channel=AttrVal($hash->{NAME},"updateChannelFW","stable");
+		my $hardware=AttrVal($hash->{NAME},"hardware",undef);
+		
+		my ($validHw) = $modules{$hash->{TYPE}}{AttrList} =~ /.*hardware:(.*?)\s/;  	
+		$hash->{logMethod}->($hash->{NAME}, 1, "$hash->{NAME}: found availableFirmware for $validHw");
+		
+		if (!defined($hardware) || $validHw !~ /$hardware(?:,|$)/ )
+	  	{
+	  		$hash->{logMethod}->($hash->{NAME}, 1, "$hash->{NAME}: get $a[1] failed. Please set attribute hardware first");
+	 		return "$a[1]: \n\n$hash->{NAME}: get $a[1] failed. Please choose one of $validHw attribute hardware";
+	  	} 
+	  	SIGNALduino_querygithubreleases($hash);
+		return "$a[1]: \n\nFetching $channel firmware versions for $hardware from github\n";
+ 	},
+	 "raw" => sub {
+		my ($hash, @a) = @_;
+	 	if ($a[2] =~ /^M[CcSU];.*/)
+	  	{
+			$a[2]="\002$a[2]\003";  	## Add start end end marker if not already there
+			$hash->{logMethod}->($hash->{NAME}, 5, "$hash->{NAME}/msg adding start and endmarker to message");
+		}
+		if ($a[2] =~ /\002M.;.*;\003$/)
+		{
+			$hash->{logMethod}->( $hash->{NAME}, 4, "$hash->{NAME}/msg get raw: $a[2]");
+			return SIGNALduino_Parse($hash, $hash, $hash->{NAME}, $a[2]);
+	  	}
+ 	
+	},
+
 );
 
 
@@ -876,187 +917,40 @@ SIGNALduino_Set($@)
 }
 
 
-my %SIGNALduino_GetTable = ( 
-
-	"availableFirmware" => sub {
-  		my ($hash, @a) = @_;
-  		
-		if ($missingModulSIGNALduino =~ m/JSON/ )
-	  	{
-	  		$hash->{logMethod}->($hash->{NAME}, 1, "$hash->{NAME}: get $a[1] failed. Pleas install Perl module JSON. Example: sudo apt-get install libjson-perl");
-	 		return "$a[1]: \n\nFetching from github is not possible. Please install JSON. Example:<br><code>sudo apt-get install libjson-perl</code>";
-	  	} 
-	  	
-	  	my $channel=AttrVal($hash->{NAME},"updateChannelFW","stable");
-		my $hardware=AttrVal($hash->{NAME},"hardware",undef);
-		
-		my ($validHw) = $modules{$hash->{TYPE}}{AttrList} =~ /.*hardware:(.*?)\s/;  	
-		$hash->{logMethod}->($hash->{NAME}, 1, "$hash->{NAME}: found availableFirmware for $validHw");
-		
-		if (!defined($hardware) || $validHw !~ /$hardware(?:,|$)/ )
-	  	{
-	  		$hash->{logMethod}->($hash->{NAME}, 1, "$hash->{NAME}: get $a[1] failed. Please set attribute hardware first");
-	 		return "$a[1]: \n\n$hash->{NAME}: get $a[1] failed. Please choose one of $validHw attribute hardware";
-	  	} 
-	  	SIGNALduino_querygithubreleases($hash);
-		return "$a[1]: \n\nFetching $channel firmware versions for $hardware from github\n";
- },
-
-);
 
 
 #####################################
 sub
 SIGNALduino_Get($@)
 {
-  my ($hash, @a) = @_;
-  my $type = $hash->{TYPE};
-  my $name = $hash->{NAME};
-  return "$name is not active, may firmware is not suppoted, please flash or reset" if (exists($hash->{DevState}) && $hash->{DevState} ne 'initialized');
-  #my $name = $a[0];
-  
-  $hash->{logMethod}->($name, 5, "\"get $type\" needs at least one parameter") if(@a < 2);
-  return "\"get $type\" needs at least one parameter" if(@a < 2);
-  if(!defined($gets{$a[1]})) {
-    my @cList = map { $_ =~ m/^(file|raw|ccreg)$/ ? $_ : "$_:noArg" } sort keys %gets;
-    return "Unknown argument $a[1], choose one of " . join(" ", @cList);
-  }
-
-  my $arg = ($a[2] ? $a[2] : "");
-  return "no command to send, get aborted." if (length($gets{$a[1]}[0]) == 0 && length($arg) == 0);
-  
-  if (($a[1] eq "ccconf" || $a[1] eq "ccreg" || $a[1] eq "ccpatable") && $hash->{version} && $hash->{version} !~ m/cc1101/) {
-    return "This command is only available with a cc1101 receiver";
-  }
-  
-  my ($msg, $err);
-
-  return $SIGNALduino_GetTable{$a[1]}->($hash,@a) if (exists($SIGNALduino_GetTable{$a[1]})); 
-  
-
-
-	
-  	if ($missingModulSIGNALduino =~ m/JSON/ )
-  	{
-  		$hash->{logMethod}->($name, 1, "$name: get $a[1] failed. Pleas install Perl module JSON. Example: sudo apt-get install libjson-perl");
- 		return "$a[1]: \n\nFetching from github is not possible. Please install JSON. Example:<br><code>sudo apt-get install libjson-perl</code>";
-  	} 
-  	
-  	my $channel=AttrVal($name,"updateChannelFW","stable");
-	my $hardware=AttrVal($name,"hardware",undef);
-	
-	my ($validHw) = $modules{$hash->{TYPE}}{AttrList} =~ /.*hardware:(.*?)\s/;  	
-	$hash->{logMethod}->($name, 1, "$name: found availableFirmware for $validHw");
-	
-	if (!defined($hardware) || $validHw !~ /$hardware(?:,|$)/ )
-  	{
-  		$hash->{logMethod}->($name, 1, "$name: get $a[1] failed. Please set attribute hardware first");
- 		return "$a[1]: \n\n$name: get $a[1] failed. Please choose one of $validHw attribute hardware";    # processed in tests
-  	} 
-	
-  	SIGNALduino_querygithubreleases($hash);
-		
-	return "$a[1]: \n\nFetching $channel firmware versions for $hardware from github\n";    # processed in tests
-	
-  }
-  
-  if (IsDummy($name) && $a[1] ne "protocolIDs")
-  {
-  	if ($arg =~ /^M[CcSU];.*/)
-  	{
-		$arg="\002$arg\003";  	## Add start end end marker if not already there
-		$hash->{logMethod}->($name, 5, "$name/msg adding start and endmarker to message");
-	
+	my ($hash, @a) = @_;
+	my $type = $hash->{TYPE};
+	my $name = $hash->{NAME};
+	return "$name is not active, may firmware is not suppoted, please flash or reset" if (exists($hash->{DevState}) && $hash->{DevState} ne 'initialized');
+	  
+	$hash->{logMethod}->($name, 5, "\"get $type\" needs at least one parameter") if(@a < 2);
+	return "\"get $type\" needs at least one parameter" if(@a < 2);
+	if(!defined($gets{$a[1]})) {
+		my @cList = map { $_ =~ m/^(raw|ccreg)$/ ? $_ : "$_:noArg" } sort keys %gets;
+		return "Unknown argument $a[1], choose one of " . join(" ", @cList);
 	}
-	if ($arg =~ /\002M.;.*;\003$/)
-	{
-		$hash->{logMethod}->($name, 4, "$name/msg get raw: $arg");
-		return SIGNALduino_Parse($hash, $hash, $hash->{NAME}, $arg);
-  	}
-  	else {
-		my $arg2 = "";
-		if ($arg =~ m/^version=/) {           # set version
-			$arg2 = substr($arg,8);
-			$hash->{version} = "V " . $arg2;
-		}
-		elsif ($arg =~ m/^regexp=/) {         # set fileRegexp for get raw messages from file
-			$arg2 = substr($arg,7);
-			$hash->{fileRegexp} = $arg2;
-			delete($hash->{fileRegexp}) if (!$arg2);
-		}
-		elsif ($arg =~ m/^file=/) {
-			$arg2 = substr($arg,5);
-			my $n = 0;
-			if (open(my $fh, '<', $arg2)) {
-				my $fileRegexp = $hash->{fileRegexp};
-				while (my $row = <$fh>) {
-					if ($row =~ /.*\002M.;.*;\003$/) {
-						chomp $row;
-						$row =~ s/.*\002(M.;.*;)\003/$1/;
-						if (!defined($fileRegexp) || $row =~ m/$fileRegexp/) {
-							$n += 1;
-							$row="\002$row\003";
-							$hash->{logMethod}->($name, 4, "$name/msg fileGetRaw: $row");
-							SIGNALduino_Parse($hash, $hash, $hash->{NAME}, $row);
-						}
-					}
-				}
-				return $n . " raw Nachrichten eingelesen";
-			} else {
-				return "Could not open file $arg2";
-			}
-		}
-		elsif ($arg eq '?') {
-			my $ret;
-			
-			$ret = "dummy get raw\n\n";
-			$ret .= "raw message       e.g. MS;P0=-392;P1=...\n";
-			$ret .= "dispatch message  e.g. P7#6290DCF37\n";
-			$ret .= "version=x.x.x     sets version. e.g. (version=3.2.0) to get old MC messages\n";
-			$ret .= "regexp=           set fileRegexp for get raw messages from file. e.g. regexp=^MC\n";
-			$ret .= "file=             gets raw messages from file in the fhem directory\n";
-			return $ret;
-		}
-		else {
-			$hash->{logMethod}->($name, 4, "$name/msg get dispatch: $arg");
-			Dispatch($hash, $arg, undef);
-		}
-		return "";
-  	}
-  }
-  #return "No $a[1] for dummies" if(IsDummy($name));
-
-  $hash->{logMethod}->($name, 5, "$name: command for gets: " . $gets{$a[1]}[0] . " " . $arg);
-
-  if ($a[1] eq "raw")
-  {
-  	# Dirty hack to check and modify direct communication from logical modules with hardware
-  	if ($arg =~ /^is.*/ && length($arg) == 34)
-  	{
-  		# Arctec protocol
-  		$hash->{logMethod}->($name, 5, "$name: calling set :sendmsg P17;R6#".substr($arg,2));
-  		
-  		SIGNALduino_Set($hash,$name,"sendMsg","P17#",substr($arg,2),"#R6");
-  	    return "$a[0] $a[1] => $arg";
-  	}
-  	
-  }
-  elsif ($a[1] eq "protocolIDs")
-  {
-	return SIGNALduino_FW_getProtocolList($name);
 	
-	
-	#return "$a[1]: \n\n$ret\nIds with modules: $moduleId";
-  }  
-
-  #SIGNALduino_SimpleWrite($hash, $gets{$a[1]}[0] . $arg);
-  SIGNALduino_AddSendQueue($hash, $gets{$a[1]}[0] . $arg);
-  $hash->{getcmd}->{cmd}=$a[1];
-  $hash->{getcmd}->{asyncOut}=$hash->{CL};
-  $hash->{getcmd}->{timenow}=time();
-  
-  
-  return undef; # We will exit here, and give an output only, if asny output is supported. If this is not supported, only the readings are updated
+	return "no command to send, get aborted." if (ref $gets{$a[1]} eq 'ARRAY' && length($gets{$a[1]}[0]) == 0 && length($a[2]) == 0);
+	  
+	if (($a[1] eq "ccconf" || $a[1] eq "ccreg" || $a[1] eq "ccpatable") && $hash->{version} && $hash->{version} !~ m/cc1101/) {
+		return "This command is only available with a cc1101 receiver";
+	}
+	  
+	if (ref $gets{$a[1]} eq 'ARRAY') {
+		$hash->{logMethod}->($name, 5, "$name: command for gets: " . $gets{$a[1]}[0] . " " . $a[2]);
+		SIGNALduino_AddSendQueue($hash, $gets{$a[1]}[0] . $a[2]); 
+		$hash->{getcmd}->{cmd}=$a[1];
+		$hash->{getcmd}->{asyncOut}=$hash->{CL};
+		$hash->{getcmd}->{timenow}=time();
+	} elsif ( ref $gets{$a[1]} eq 'CODE') {
+		return $gets{$a[1]}->($hash,@a); 
+	}
+	return undef; # We will exit here, and give an output only, if asny output is supported. If this is not supported, only the readings are updated
 }
 
 sub SIGNALduino_parseResponse($$$)
