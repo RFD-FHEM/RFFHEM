@@ -61,18 +61,23 @@ defmod test_DeviceData_rmsg UnitTest dummyDuino (
 				$dmsg_matched=0;
 				$SD_Dispatch_calledCounter=0;
 	            SIGNALduino_Parse($targetHash, $targetHash, $targetHash->{NAME}, "\002".$tData->{rmsg}."\003") if (defined($tData->{rmsg}));
-	            if ($SD_Dispatch->called() >0 )  {
-					$noTestRun=0;
-					my $expected_repeat=min(4,$tData->{repeat}+1);
-					 
-					TODO: {
-					    local $TODO = "Checking for repeats is not finishes, because number of repeats is not always number of dispatches";
-				        is($SD_Dispatch_calledCounter, $expected_repeat, "check number of dispatch attempts") if (defined($tData->{repeat}));
-					};
-					
-		            ok($id_matched,"SIGNALduno_Dispatch check id ") || note explain (($SD_Dispatch->called_with())[4] , " vs ", $testSet->{id});
-		            ok($dmsg_matched,"SIGNALduno_Dispatch check dmsg ") || note explain (($SD_Dispatch->called_with())[2] , " vs ", $testSet->{dmsg});
-		      		            
+            if ($SD_Dispatch->called() >0 )  {
+              $noTestRun=0;
+
+							ok($id_matched,"SIGNALduno_Dispatch check id ") || note explain (($SD_Dispatch->called_with())[4] , " vs ", $testSet->{id});
+              ok($dmsg_matched,"SIGNALduno_Dispatch check dmsg ") || note explain (($SD_Dispatch->called_with())[2] , " vs ", $testSet->{dmsg});
+
+              if (defined($tData->{dispatch_repeats})) {
+								ok( $tData->{dispatch_repeats} , "JSON dispatch_repeats entry available");
+								## some tests please added in separate Travistest on SIGNALduino_TOOL ##
+								ok( $tData->{dispatch_repeats} =~ /\d+/ , "JSON dispatch_repeats entry check numeric");
+							}
+
+							my $expected_repeat=min(1,$tData->{dispatch_repeats});
+							TODO: {
+                local $TODO = "Checking dispatches (all dispatches are counted across all modules)";
+								is($tData->{dispatch_repeats}, $SD_Dispatch_calledCounter-1, "JSON dispatch_repeats accuracy") if (defined($tData->{dispatch_repeats}));
+              };
 				} else { diag "SIGNALduno_Dispatch was not called, this must be an error"; }
             };
 	
