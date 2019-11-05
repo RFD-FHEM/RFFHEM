@@ -529,17 +529,17 @@ SIGNALduino_flash($) {
 #####################################
 #$hash,$name,"sendmsg","P17;R6#".substr($arg,2)
 sub
-SIGNALduino_Set($@)
+SIGNALduino_Set($$@)
 {
-  my ($hash, @a) = @_;
+  my ($hash,$name, @a) = @_;
   
-  return "\"set SIGNALduino\" needs at least one parameter" if(@a < 2);
+  return "\"set SIGNALduino\" needs at least one parameter" if(@a < 1);
 
   #SIGNALduino_Log3 $hash, 3, "SIGNALduino_Set called with params @a";
 
 
   my $CC1101Frequency;
-  if (exists($hash->{hasCC1101}) && InternalVal($a[0],"hasCC1101",0)) {
+  if (exists($hash->{hasCC1101}) && InternalVal($name,"hasCC1101",0)) {
     if (!defined($hash->{cc1101_frequency})) {
        $CC1101Frequency = "433";
     } else {
@@ -547,18 +547,12 @@ SIGNALduino_Set($@)
     }
   }
   my %my_sets = %sets;
-  #SIGNALduino_Log3 $hash, 3, "SIGNALduino_Set addionals set commands: ".Dumper(%{$hash->{additionalSets}});
-  #SIGNALduino_Log3 $hash, 3, "SIGNALduino_Set normal set commands: ".Dumper(%my_sets);
-  #SIGNALduino_Log3 $hash, 3, "SIGNALduino_Set global set commands: ".Dumper(%sets);
-
   %my_sets = ( %my_sets,  %{$hash->{additionalSets}} ) if ( defined($hash->{additionalSets}) );
   
-  
-    
-  if (!defined($my_sets{$a[1]})) {
+  if (!defined($my_sets{$a[0]})) {
     my $arguments = ' ';
     foreach my $arg (sort keys %my_sets) {
-      next if ($arg =~ m/cc1101/ && !InternalVal($a[0],"hasCC1101",0));
+      next if ($arg =~ m/cc1101/ && !InternalVal($name,"hasCC1101",0));
       if ($arg =~ m/patable/) {
         next if (substr($arg, -3) ne $CC1101Frequency);
       }
@@ -568,7 +562,6 @@ SIGNALduino_Set($@)
     return "Unknown argument $a[1], choose one of " . $arguments;
   }
 
-  my $name = shift @a;
   my $cmd = shift @a;
   my $arg = join(" ", @a);
   
