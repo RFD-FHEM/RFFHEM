@@ -572,7 +572,7 @@ SIGNALduino_Set($@)
   my $cmd = shift @a;
   my $arg = join(" ", @a);
   
-  if ($cmd =~ m/cc1101/ && !InternalVal($a[0],"hasCC1101",0)) {
+  if ($cmd =~ m/cc1101/ && !InternalVal($name,"hasCC1101",0)) {
     return "This command is only available with a cc1101 receiver";
   }
   
@@ -799,10 +799,10 @@ SIGNALduino_Set($@)
 
 	$repeats=1 if (!defined($repeats));
 
-	if (exists($ProtocolListSIGNALduino{$protocol}{frequency}) && InternalVal($a[0],"hasCC1101",0) && !defined($frequency)) {
+	if (exists($ProtocolListSIGNALduino{$protocol}{frequency}) && InternalVal($name,"hasCC1101",0) && !defined($frequency)) {
 		$frequency = $ProtocolListSIGNALduino{$protocol}{frequency};
 	}
-	if (defined($frequency) && InternalVal($a[0],"hasCC1101",0)) {
+	if (defined($frequency) && InternalVal($name,"hasCC1101",0)) {
 		$frequency="F=$frequency;";
 	} else {
 		$frequency="";
@@ -932,13 +932,13 @@ SIGNALduino_Get($@)
 	if(!defined($gets{$a[1]})) {
 		$hash->{logMethod}->($name, 5, "Unknown argument $a[1] for $a[0]"); 
 		
-		my @cList = sort map { $_ =~ m/^(raw|ccreg)$/ ? $_ : "$_:noArg" } grep { (InternalVal($a[0],"hasCC1101",0)) || (!InternalVal($a[0],"hasCC1101",0) && $_ !~ m/^cc/)  }  keys %gets;
+		my @cList = sort map { $_ =~ m/^(raw|ccreg)$/ ? $_ : "$_:noArg" } grep { (InternalVal($name,"hasCC1101",0)) || (!InternalVal($a[0],"hasCC1101",0) && $_ !~ m/^cc/)  }  keys %gets;
 		return "Unknown argument $a[1], choose one of " . join(" ", @cList);
 	}
 	
 	return "no command to send, get aborted." if (ref $gets{$a[1]} eq 'ARRAY' && length($gets{$a[1]}[0]) == 0 && length($a[2]) == 0);
 	  
-	if (($a[1] eq "ccconf" || $a[1] eq "ccreg" || $a[1] eq "ccpatable") && !InternalVal($a[0],"hasCC1101",0)) {
+	if (($a[1] eq "ccconf" || $a[1] eq "ccreg" || $a[1] eq "ccpatable") && !InternalVal($name,"hasCC1101",0)) {
 		return "This command is only available with a cc1101 receiver";
 	}
 	  
