@@ -67,12 +67,6 @@ defmod test_DeviceData_rmsg UnitTest dummyDuino (
 							ok($id_matched,"SIGNALduno_Dispatch check id ") || note explain (($SD_Dispatch->called_with())[4] , " vs ", $testSet->{id});
               ok($dmsg_matched,"SIGNALduno_Dispatch check dmsg ") || note explain (($SD_Dispatch->called_with())[2] , " vs ", $testSet->{dmsg});
 
-              if (defined($tData->{dispatch_repeats})) {
-								ok( $tData->{dispatch_repeats} , "JSON dispatch_repeats entry available");
-								## some tests please added in separate Travistest on SIGNALduino_TOOL ##
-								ok( $tData->{dispatch_repeats} =~ /\d+/ , "JSON dispatch_repeats entry check numeric");
-							}
-
 							my $expected_repeat=min(1,$tData->{dispatch_repeats});
 							TODO: {
                 local $TODO = "Checking dispatches (all dispatches are counted across all modules)";
