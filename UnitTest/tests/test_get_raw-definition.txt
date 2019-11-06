@@ -1,32 +1,26 @@
 defmod test_get_raw UnitTest dummyDuino 
 (
  {
-	subtest 'Test get raw intertechno switch' => sub {
+
+	subtest 'Test get raw questionmark without cc1101' => sub {
 		plan tests => 2;
-		CommandAttr(undef,"$target dummy 0");
-		my $rawArg="is10101010101010101010101010101010";
-		my $ret=SIGNALduino_Get($targetHash, $target, "raw", $rawArg);
-		like($ret,qr/$rawArg$/,"check return contains correct arg");
-		
-		$rawArg="is10101010101010101";
-		$ret=SIGNALduino_Get($targetHash, $target, "raw", $rawArg);
-		is($ret,undef,"check return is undef");
 		CommandAttr(undef,"$target dummy 1");
-		
+		$targetHash->{hasCC1101} = 0;
+		my $rawArg="?";
+		my $ret=SIGNALduino_Get($targetHash, $target, "?", $rawArg);
+		like($ret,qr/^Unknown argument ?.*/,"check return contains get commands");
+		unlike($ret,qr/.*cc.*/,"check return contains no cc command");
+	}; 
+	
+	subtest 'Test get raw questionmark with cc1101' => sub {
+		plan tests => 1;
+		CommandAttr(undef,"$target dummy 1");
+		$targetHash->{hasCC1101} = 1;
+		my $rawArg="?";
+		my $ret=SIGNALduino_Get($targetHash, $target, "?", $rawArg);
+		like($ret,qr/^Unknown argument ?.*cc.*/,"check return contains get commands with cc commands");
 	}; 
 
-	subtest 'Test get raw questionmark' => sub {
-		plan tests => 6;
-		CommandAttr(undef,"$target dummy 1");
-		my $rawArg="?";
-		my $ret=SIGNALduino_Get($targetHash, $target, "raw", $rawArg);
-		like($ret,qr/^dummy get raw.*/,"check return contains help");
-		like($ret,qr/raw message.*/,"check return contains raw message");
-		like($ret,qr/dispatch message.*/,"check return contains dispatch message");
-		like($ret,qr/version=.*/,"check return version=");
-		like($ret,qr/regexp=.*/,"check return regexp=");
-		like($ret,qr/file=.*/,"check return file=");
-	}; 
 	
 	subtest 'Test get raw MS;P1=309;' => sub {
 		plan tests => 1;
@@ -42,20 +36,95 @@ defmod test_get_raw UnitTest dummyDuino
 		$SD_Parse->unmock;
 	}; 
 	
-	subtest 'Test get raw file=something.txt;' => sub {
-		plan tests => 2;
-
-		my $rawArg="file=something.txt";
-		my $ret=SIGNALduino_Get($targetHash, $target, "raw", $rawArg);
-		like($ret,qr/Could not open file.*/,"Check file not opened");
-		
-		TODO : {
-			local $TODO="file must be specified";
-			my $rawArg="file=./fhem_ut.txt";
-			my $ret=SIGNALduino_Get($targetHash, $target, "raw", $rawArg);
-			like($ret,qr/raw Nachrichten eingelesen$/,"Check file not opened");
-		}
-	}; 
+	subtest 'Verify common get commands send to uC' => sub {
+		$targetHash->{hasCC1101} = 0;		
 	
+		plan tests => 6;
+		my $mock = Mock::Sub->new;
+	 	my $SD_AddSendQueue = $mock->mock('SIGNALduino_AddSendQueue');
+	 	
+		my $ret=SIGNALduino_Get($targetHash, $target, "version");
+		if ($SD_AddSendQueue->called)
+		{
+			is( ($SD_AddSendQueue->called_with)[1], "V" , 'check cmd Version / SIGNALduino_AddSendQueue' ) || diag(explain $SD_AddSendQueue);
+		} 
+		
+		$ret=SIGNALduino_Get($targetHash, $target, "freeram");
+		if ($SD_AddSendQueue->called)
+		{
+			is( ($SD_AddSendQueue->called_with)[1], "R" , 'check cmd freeram / SIGNALduino_AddSendQueue' ) || diag(explain $SD_AddSendQueue);
+		} 
+		
+		$ret=SIGNALduino_Get($targetHash, $target, "uptime");
+		if ($SD_AddSendQueue->called)
+		{
+			is( ($SD_AddSendQueue->called_with)[1], "t" , 'check cmd uptime / SIGNALduino_AddSendQueue' ) || diag(explain $SD_AddSendQueue);
+		} 
+		$ret=SIGNALduino_Get($targetHash, $target, "cmds");
+		if ($SD_AddSendQueue->called)
+		{
+			is( ($SD_AddSendQueue->called_with)[1], "?" , 'check cmd cmds / SIGNALduino_AddSendQueue' ) || diag(explain $SD_AddSendQueue);
+		} 
+		
+		$ret=SIGNALduino_Get($targetHash, $target, "ping");
+		if ($SD_AddSendQueue->called)
+		{
+			is( ($SD_AddSendQueue->called_with)[1], "P" , 'check cmd ping / SIGNALduino_AddSendQueue' ) || diag(explain $SD_AddSendQueue);
+		} 
+		
+		$ret=SIGNALduino_Get($targetHash, $target, "config");
+		if ($SD_AddSendQueue->called)
+		{
+			is( ($SD_AddSendQueue->called_with)[1], "CG" , 'check cmd config / SIGNALduino_AddSendQueue' ) || diag(explain $SD_AddSendQueue);
+		} 
+		
+		
+		
+		$SD_AddSendQueue->unmock;
+	}; 
+
+	subtest 'Verify cc1101 get commands send to uC without cc1101' => sub {
+		$targetHash->{hasCC1101} = 0;		
+	
+		plan tests => 3;
+		my $mock = Mock::Sub->new;
+	 	my $SD_AddSendQueue = $mock->mock('SIGNALduino_AddSendQueue');
+	 	$targetHash->{version} = "SIGNALDUINO 3.3.0";
+		my $ret=SIGNALduino_Get($targetHash, $target, "ccconf");
+		is ($ret,"This command is only available with a cc1101 receiver","Test cmd ccconf is not available");	
+		$ret=SIGNALduino_Get($targetHash, $target, "ccreg");
+		is ($ret,"This command is only available with a cc1101 receiver","Test cmd ccreg is not available");	
+		$ret=SIGNALduino_Get($targetHash, $target, "ccpatable");
+		is ($ret,"This command is only available with a cc1101 receiver","Test cmd ccconf is not available");	
+		$SD_AddSendQueue->unmock;
+	};
+		
+	subtest 'Verify cc1101 get commands send to uC with cc1101' => sub {
+		$targetHash->{hasCC1101} = 1;		
+	
+		plan tests => 3;
+		my $mock = Mock::Sub->new;
+	 	my $SD_AddSendQueue = $mock->mock('SIGNALduino_AddSendQueue');
+	 	#$targetHash->{version} = "SIGNALDUINO cc1101 3.3.0";
+	 	$targetHash->{hasCC1101} = 1;
+		my $ret=SIGNALduino_Get($targetHash, $target, "ccconf");
+		if ($SD_AddSendQueue->called)
+		{
+			is( ($SD_AddSendQueue->called_with)[1], "C0DnF" , 'check cmd ccconf / SIGNALduino_AddSendQueue' ) || diag(explain $SD_AddSendQueue);
+		} 
+		
+		$ret=SIGNALduino_Get($targetHash, $target, "ccreg");
+		if ($SD_AddSendQueue->called)
+		{
+			is( ($SD_AddSendQueue->called_with)[1], "C" , 'check cmd ccreg / SIGNALduino_AddSendQueue' ) || diag(explain $SD_AddSendQueue);
+		} 
+		
+		$ret=SIGNALduino_Get($targetHash, $target, "ccpatable");
+		if ($SD_AddSendQueue->called)
+		{
+			is( ($SD_AddSendQueue->called_with)[1], "C3E" , 'check cmd ccpatable / SIGNALduino_AddSendQueue' ) || diag(explain $SD_AddSendQueue);
+		} 
+	};
+
 }
 )
