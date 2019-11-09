@@ -294,7 +294,7 @@ If autocreate is used, a device &quot;&lt;code&gt;_ALL&quot; like RSL_74A400_ALL
   <code>set <name> &lt;[on|off|toggle]&gt;</code><br>
   Switches the device on or off.<br><br>
   <code>set <name> &lt;[on-for-timer|off-for-timer|on-till|off-till|blink|intervals]&gt;</code><br>
-  Switches the socket for a specified duration. For Details see <a href="#setExtensions">set extensions</a>.</code><br><br>
+  Switches the socket for a specified duration. For Details see <a href="#setExtensions">set extensions</a>.<br><br>
   <br /><br />
 </ul>
 <a name="SD_RSL_Get"></a>
@@ -346,7 +346,7 @@ Beim Verwendung von Autocreate wird bei der Taste All anstatt channel und button
   <code>set <name> &lt;[on|off|toggle]&gt;</code><br
   Schaltet das Ger&auml;t ein oder aus.<br><br>
   <code>set <name> &lt;[on-for-timer|off-for-timer|on-till|off-till|blink|intervals]&gt;</code><br>
-  Schaltet das Ger&auml;t f&uuml;r einen bestimmten Zeitraum. Weitere Infos hierzu unter <a href="#setExtensions">set extensions</a>.</code><br><br>
+  Schaltet das Ger&auml;t f&uuml;r einen bestimmten Zeitraum. Weitere Infos hierzu unter <a href="#setExtensions">set extensions</a>.<br><br>
   <br /><br />
 </ul>
 <a name="SD_RSL_Get"></a>
