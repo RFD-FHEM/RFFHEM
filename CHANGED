@@ -1,3 +1,5 @@
+09.11.2019
+  14_SD_RSL.PM: support for setExtensions added
 05.11.2019
   00_SIGNALduino.pm: remove cc1101 get commands if no cc1101 connected
   					 new Internal hasCC1101 added
