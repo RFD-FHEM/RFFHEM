@@ -1,3 +1,5 @@
+09.11.2019
+ 14_SD_WS.pm: new protocol 53 for weatherstation Lidl AURIOL AHFL 433 B2 IAN 314695
 05.11.2019
   00_SIGNALduino.pm: remove cc1101 get commands if no cc1101 connected
   					 new Internal hasCC1101 added

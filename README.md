@@ -13,7 +13,7 @@ Supported Devices / Protocols
 | ------------- | ----------- |
 |Arduino Sensor | multi purpose sensor based on arduino |
 |Atlantic Security | some sensors (MD-210R / MD-2018R / MD-2003R) |
-|Auriol IAN 60107, 114324, 275901, 283582, 297514 (Lidl) | Weatherstation |
+|Auriol IAN 60107, 114324, 275901, 283582, 297514, 314695 (Lidl) | Weatherstation |
 |BOSCH / Neff | Remote control (SF01 01319004)|
 |CAME TOP 432EV | Remote control |
 |CTW600 WH1080 | Weather station WH3080 UV/Lux Sensor |
