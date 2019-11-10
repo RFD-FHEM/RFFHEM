@@ -61,18 +61,18 @@ defmod test_DeviceData_rmsg UnitTest dummyDuino (
 				$dmsg_matched=0;
 				$SD_Dispatch_calledCounter=0;
 	            SIGNALduino_Parse($targetHash, $targetHash, $targetHash->{NAME}, "\002".$tData->{rmsg}."\003") if (defined($tData->{rmsg}));
-            if ($SD_Dispatch->called() >0 )  {
-              $noTestRun=0;
+           		if ($SD_Dispatch->called() >0 )  {
+              		$noTestRun=0;
 
-							ok($id_matched,"SIGNALduno_Dispatch check id ") || note explain (($SD_Dispatch->called_with())[4] , " vs ", $testSet->{id});
-              ok($dmsg_matched,"SIGNALduno_Dispatch check dmsg ") || note explain (($SD_Dispatch->called_with())[2] , " vs ", $testSet->{dmsg});
+					ok($id_matched,"SIGNALduno_Dispatch check id ") || note explain (($SD_Dispatch->called_with())[4] , " vs ", $testSet->{id});
+              		ok($dmsg_matched,"SIGNALduno_Dispatch check dmsg ") || note explain (($SD_Dispatch->called_with())[2] , " vs ", $testSet->{dmsg});
 
-							my $expected_repeat=min(1,$tData->{dispatch_repeats});
-							TODO: {
-                local $TODO = "Checking dispatches (all dispatches are counted across all modules)";
-								is($tData->{dispatch_repeats}, $SD_Dispatch_calledCounter-1, "JSON dispatch_repeats accuracy") if (defined($tData->{dispatch_repeats}));
-              };
-				} else { diag "SIGNALduno_Dispatch was not called, this must be an error"; }
+					my $expected_repeat=min(AttrVal($target,"maxMuMsgRepeat",4),$tData->{dispatch_repeats});
+					TODO: {
+		                local $TODO = "Checking dispatches (all dispatches are counted across all modules)";
+						is($tData->{dispatch_repeats}, $SD_Dispatch_calledCounter-1, "JSON dispatch_repeats accuracy") if (defined($tData->{dispatch_repeats}));
+        		    };
+					} else { diag "SIGNALduno_Dispatch was not called, this must be an error"; }
             };
 	
         }
