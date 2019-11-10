@@ -54,7 +54,7 @@
 ##### notice #### or #### info ############################################################################################################
 # !!! Between the keys and values ​​no tabs not equal to a width of 8 or please use spaces !!!
 # !!! Please use first unused id for new protocols !!!
-# ID´s are currently unused: 20 | 53 | 54 | 78
+# ID´s are currently unused: 20 | 54 | 78
 # ID´s need to be revised (preamble u): 5|6|19|21|22|23|24|25|26|27|28|31|36|40|42|52|56|59|63
 ###########################################################################################################################################
 # Please provide at least three messages for each new MU/MC/MS protocol and a URL of issue in GitHub or discussion in FHEM Forum
@@ -66,7 +66,7 @@ package lib::SD_ProtocolData;
 	use strict;
 	use warnings;
 	
-	our $VERSION = '1.08';
+	our $VERSION = '1.09';
 	our %protocols = (
 		"0"	=>	## various weather sensors (500 | 9100)
 						# ABS700 | Id:79 T: 3.3 Bat:low                MS;P1=-7949;P2=492;P3=-1978;P4=-3970;D=21232423232424242423232323232324242423232323232424;CP=2;SP=1;R=245;O;
@@ -1394,6 +1394,27 @@ package lib::SD_ProtocolData;
 				length_max			=> '30',
 				method					=> \&main::SIGNALduino_OSPIR,		# Call to process this message
 				polarity				=> 'invert',
+			},
+		"53"	=>	## Lidl AURIOL AHFL 433 B2 IAN 314695
+							# https://github.com/RFD-FHEM/RFFHEM/issues/663 @Kreidler1221 05.10.2019
+							# IAN 314695 Id:07 Ch:1 T:24.2 H:59   MS;P1=611;P2=-2075;P3=-4160;P4=-9134;D=14121212121213131312121212121212121313131312121312121313131213131212131212131213121213;CP=1;SP=4;R=0;O;m2;
+							# IAN 314695 Id:07 Ch:1 T:22.3 H:61   MS;P1=608;P2=-2074;P3=-4138;P4=-9138;D=14121212121213131312121212121212121313121313131313121313131312131212131212131313121212;CP=1;SP=4;R=0;O;m1;
+							# IAN 314695 Id:07 Ch:2 T:18.4 H:70   MS;P0=606;P1=-2075;P2=-4136;P3=-9066;D=03010101010102020201010102010101010201020202010101020101010202010101020101020201010202;CP=0;SP=3;R=0;O;m2;
+			{
+				name          => 'AHFL 433 B2',
+				comment       => 'Auriol weatherstation IAN 314695',
+				id            => '53',
+				knownFreqs    => '433.92',
+				one           => [1,-7],
+				zero          => [1,-3.5],
+				sync          => [1,-15],
+				clockabs      => 600,
+				format        => 'twostate',		# not used now
+				preamble      => 'W53#',
+				clientmodule  => 'SD_WS',
+				modulematch   => '^W53#.*',
+				length_min    => '42',
+				length_max    => '44',
 			},
 		"55"	=>	## QUIGG GT-1000
 			{
