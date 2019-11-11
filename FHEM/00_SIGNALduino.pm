@@ -1201,14 +1201,13 @@ sub SIGNALduino_CheckCmdResp($)
 			$hash->{DevState} = 'initialized';
 			delete($hash->{initResetFlag}) if defined($hash->{initResetFlag});
 			SIGNALduino_SimpleWrite($hash, "XE"); # Enable receiver
-			#DevIo_SimpleWrite($hash, "XE\n",2);
 			$hash->{logMethod}->($hash, 3, "$name/init: enable receiver (XE)");
 			delete($hash->{initretry});
 			# initialize keepalive
 			$hash->{keepalive}{ok}    = 0;
 			$hash->{keepalive}{retry} = 0;
 			InternalTimer(gettimeofday() + SDUINO_KEEPALIVE_TIMEOUT, "SIGNALduino_KeepAlive", $hash, 0);
-		 	$hash->{hasCC1101} = 1  if ($ver !~ m/cc1101/);
+		 	$hash->{hasCC1101} = 1  if ($ver =~ m/cc1101/);
 		}
 	}
 	else {
