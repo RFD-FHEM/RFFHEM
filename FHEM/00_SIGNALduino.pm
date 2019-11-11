@@ -31,7 +31,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.4.1_dev_28.10",
+	SDUINO_VERSION            => "v3.4.1_dev_11.11",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -559,7 +559,7 @@ SIGNALduino_Set($$@)
       $arguments.= $arg . ($my_sets{$arg} ? (':' . $my_sets{$arg}) : '') . ' ';
     }
     #SIGNALduino_Log3 $hash, 3, "set arg = $arguments";
-    return "Unknown argument $a[1], choose one of " . $arguments;
+    return "Unknown argument $a[0], choose one of " . $arguments;
   }
 
   my $cmd = shift @a;
@@ -1184,13 +1184,13 @@ sub SIGNALduino_CheckCmdResp($)
 		if ($ver !~ m/SIGNAL(duino|ESP)/) {
 			$msg = "$name: Not an SIGNALduino device, setting attribute dummy=1 got for V:  $ver";
 			$hash->{logMethod}->($hash, 1, $msg);
-			readingsSingleUpdate($hash, "state", "no SIGNALduino found", 1);
-			$hash->{DevState} = 'INACTIVE';
+			readingsSingleUpdate($hash, "state", "no SIGNALduino found", 1); #uncoverable statement because state is overwritten by SIGNALduino_CloseDevice
+ 			$hash->{DevState} = 'INACTIVE';
 			SIGNALduino_CloseDevice($hash);
 		}
 		elsif($ver =~ m/^V 3\.1\./) {
 			$msg = "$name: Version of your arduino is not compatible, pleas flash new firmware. (device closed) Got for V:  $ver";
-			readingsSingleUpdate($hash, "state", "unsupported firmware found", 1);
+			readingsSingleUpdate($hash, "state", "unsupported firmware found", 1); #uncoverable statement because state is overwritten by SIGNALduino_CloseDevice
 			$hash->{logMethod}->($hash, 1, $msg);
 			$hash->{DevState} = 'INACTIVE';
 			SIGNALduino_CloseDevice($hash);
@@ -1201,14 +1201,13 @@ sub SIGNALduino_CheckCmdResp($)
 			$hash->{DevState} = 'initialized';
 			delete($hash->{initResetFlag}) if defined($hash->{initResetFlag});
 			SIGNALduino_SimpleWrite($hash, "XE"); # Enable receiver
-			#DevIo_SimpleWrite($hash, "XE\n",2);
 			$hash->{logMethod}->($hash, 3, "$name/init: enable receiver (XE)");
 			delete($hash->{initretry});
 			# initialize keepalive
 			$hash->{keepalive}{ok}    = 0;
 			$hash->{keepalive}{retry} = 0;
 			InternalTimer(gettimeofday() + SDUINO_KEEPALIVE_TIMEOUT, "SIGNALduino_KeepAlive", $hash, 0);
-		 	$hash->{hasCC1101} = 1  if ($ver !~ m/cc1101/);
+		 	$hash->{hasCC1101} = 1  if ($ver =~ m/cc1101/);
 		}
 	}
 	else {
