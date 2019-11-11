@@ -31,7 +31,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.4.1_dev_28.10",
+	SDUINO_VERSION            => "v3.4.1_dev_11.11",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -559,7 +559,7 @@ SIGNALduino_Set($$@)
       $arguments.= $arg . ($my_sets{$arg} ? (':' . $my_sets{$arg}) : '') . ' ';
     }
     #SIGNALduino_Log3 $hash, 3, "set arg = $arguments";
-    return "Unknown argument $a[1], choose one of " . $arguments;
+    return "Unknown argument $a[0], choose one of " . $arguments;
   }
 
   my $cmd = shift @a;
