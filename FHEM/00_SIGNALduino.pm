@@ -923,7 +923,7 @@ SIGNALduino_Get($@)
 	$hash->{logMethod}->($name, 5, "\"get $type\" needs at least one parameter") if(@a < 2);
 	return "\"get $type\" needs at least one parameter" if(@a < 2);
 	if(!defined($gets{$a[1]})) {
-		$hash->{logMethod}->($name, 5, "Unknown argument $a[1] for $a[0]"); 
+		Log3 ($name, 5, "Unknown argument $a[1] for $a[0]") if ($a[1] ne "?");
 		
 		my @cList = sort map { $_ =~ m/^(raw|ccreg)$/ ? $_ : "$_:noArg" } grep { (InternalVal($name,"hasCC1101",0)) || (!InternalVal($a[0],"hasCC1101",0) && $_ !~ m/^cc/)  }  keys %gets;
 		return "Unknown argument $a[1], choose one of " . join(" ", @cList);
