@@ -1,0 +1,40 @@
+defmod RSL_411B11_0_0 SD_RSL 411B11_0_0;;
+attr RSL_411B11_0_0 IODev dummyDuino;;
+attr RSL_411B11_0_0 room SD_RSL;;
+
+setstate RSL_411B11_0_0 off;;
+setstate RSL_411B11_0_0 2018-06-14 18:24:38 state off;;
+
+defmod test_rsl UnitTest RSL_411B11_0_0 ( 
+{ 
+	subtest 'Test set questionmark' => sub {
+		plan tests => 4;
+		my $ret=SD_RSL_Set($targetHash,"RSL_411B11_0_0","?");
+		like($ret,qr/^Unknown argument ?.*/,"check return Unknown argument");
+		like($ret,qr/on/,"check return contains on command");
+		like($ret,qr/off/,"check return contains off command");
+		like($ret,qr/toggle/,"check return contains toggle command");
+	}; 
+
+	subtest 'Test set to less args' => sub {
+		plan tests => 1;
+		my $ret=SD_RSL_Set($targetHash,"RSL_411B11_0_0");
+		like($ret,qr/needs at least one argument$/,"check return Unknown argument");
+	}; 
+
+
+	subtest 'Test set on/off/toggle cmds' => sub {
+		plan tests => 3;
+		my $ret=SD_RSL_Set($targetHash,"RSL_411B11_0_0","on");
+		is(ReadingsVal($target,"state","undef"),"on","check reading state for on after on");
+
+		my $ret=SD_RSL_Set($targetHash,"RSL_411B11_0_0","off");
+		is(ReadingsVal($target,"state","undef"),"off","check reading state for off after off");
+
+		my $ret=SD_RSL_Set($targetHash,"RSL_411B11_0_0","toggle");
+		is(ReadingsVal($target,"state","undef"),"on","check reading state for on aftter toggle");
+
+	}; 
+
+} 
+)
