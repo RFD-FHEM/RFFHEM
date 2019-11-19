@@ -1,5 +1,5 @@
 #################################################################
-# $Id: 10_SD_GT.pm 0 2019-11-19 16:00:00Z elektron-bbs $
+# $Id: 10_SD_GT.pm 0 2019-11-19 16:30:00Z elektron-bbs $
 #
 # The file is part of the SIGNALduino project.
 #
@@ -216,8 +216,8 @@ sub Set($$$@) {
 		if ($cmd eq "off") {
 			$sendCodesStr = ReadingsVal($name, "CodesOn", "");
 		}
-		@sendCodesAr = split(",", $learnCodesStr);
-		$sendCodesCnt = scalar(@learnCodesAr);
+		@sendCodesAr = split(",", $sendCodesStr);
+		$sendCodesCnt = scalar(@sendCodesAr);
 	}
 
 	readingsSingleUpdate($hash, "state" , $cmd, 1) if ($cmd ne "?");
