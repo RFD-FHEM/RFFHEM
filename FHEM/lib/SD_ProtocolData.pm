@@ -66,7 +66,7 @@ package lib::SD_ProtocolData;
 	use strict;
 	use warnings;
 	
-	our $VERSION = '1.09';
+	our $VERSION = '1.10';
 	our %protocols = (
 		"0"	=>	## various weather sensors (500 | 9100)
 						# ABS700 | Id:79 T: 3.3 Bat:low                MS;P1=-7949;P2=492;P3=-1978;P4=-3970;D=21232423232424242423232323232324242423232323232424;CP=2;SP=1;R=245;O;
@@ -1303,25 +1303,52 @@ package lib::SD_ProtocolData;
 				length_min			=> '47',
 				length_max			=> '48',
 			},
-		"49"	=>	## QUIGG / ALDI GT-9000
-							# ! some message are decode as protocol 27 !
-							# https://github.com/RFD-FHEM/RFFHEM/issues/93 @TiEr92
-							# U49#8B2DB0   MU;P0=-563;P1=479;P2=991;P3=-423;P4=361;P5=-1053;P6=3008;P7=-7110;D=2345454523452323454523452323452323452323454545456720151515201520201515201520201520201520201515151567201515152015202015152015202015202015202015151515672015151520152020151520152020152020152020151515156720151515201520201515201520201520201520201515151;CP=1;R=21;
+		"49"	=>	## QUIGG GT-9000
+							# Remote control sends 4 messages as MS then ...
+							# https://github.com/RFD-FHEM/RFFHEM/issues/93 @TiEr92 (canceled)
+							# https://github.com/pilight/pilight/blob/master/libs/pilight/protocols/433.92/quigg_gt9000.c (incomplete)
+							# https://github.com/RFD-FHEM/RFFHEM/issues/667
+							# u49#5A98B0   MS;P0=-437;P3=-1194;P4=1056;P6=297;P7=-2319;D=67634063404063406340636340406363634063404063636363;CP=6;SP=7;R=37;
+
 			{
-				name						=> 'QUIGG_GT-9000',
-				comment					=> 'remote control',
-				id							=> '49',
-				knownFreqs      => '',
-				clockabs				=> 400,
-				one							=> [2,-1.2],
-				zero						=> [1,-3],
-				start						=> [6,-15],
-				format					=> 'twostate',
-				preamble				=> 'U49#',						# prepend to converted message
-				#clientmodule		=> '',
-				modulematch			=> '^U49#.*',
-				length_min			=> '22',
-				length_max			=> '28',
+				name            => 'GT-9000',
+				comment         => 'Remote control from QUIGG, ALDI, OBI, CMI, Pollin',
+				id              => '49',
+				knownFreqs      => '433.92',
+				clockabs        => 383,
+				one             => [3,-2],	# 1150,-385 (timings from salae logic)
+				zero            => [1,-3],	# 385,-1150 (timings from salae logic)
+				sync            => [1,-6],	# 385,-2295 (timings from salae logic)
+				format          => 'twostate',
+				preamble        => 'P49#',
+				clientmodule    => 'SD_GT',
+				modulematch     => '^P49.*',
+				length_min      => '24',
+				length_max      => '24',
+			},
+		"49.1"	=>	## QUIGG GT-9000
+							# ... sends 4 messages as MU
+							# Nachricht aus: https://forum.fhem.de/index.php?topic=88568.msg812163#msg812163
+							# U49#8B2DB0   MU;P0=-563;P1=479;P2=991;P3=-423;P4=361;P5=-1053;P6=3008;P7=-7110;D=2345454523452323454523452323452323452323454545456720151515201520201515201520201520201520201515151567201515152015202015152015202015202015202015151515672015151520152020151520152020152020152020151515156720151515201520201515201520201520201520201515151;CP=1;R=21;
+							# https://github.com/RFD-FHEM/RFFHEM/issues/667 @Ralf9 from https://forum.fhem.de/index.php/topic,104506.msg985295.html
+							# u49#5F0530   MU;P0=-459;P1=429;P2=-1188;P3=1060;P4=2952;P5=-7100;P6=310;P7=-2308;D=01230303030301212121212301230121230301212121245123012303030303012121212123012301212303012121212451230123030303030121212121230123012123030121212124512301230303030301212121212301230121230301212121267623062303062303062623030306230626230626262626262676230623;CP=1;R=37;O;
+							# Taste A - ON    u49#8B2DB0   MU;P0=-563;P1=479;P2=991;P3=-423;P4=361;P5=-1053;P6=3008;P7=-7110;D=2345454523452323454523452323452323452323454545456720151515201520201515201520201520201520201515151567201515152015202015152015202015202015202015151515672015151520152020151520152020152020152020151515156720151515201520201515201520201520201520201515151;CP=1;R=21;
+							# Taste A - OFF   U49#887F90   MU;P0=-565;P1=489;P2=991;P3=-423;P4=359;P5=-1047;P6=3000;P7=-7118;D=2345454523454545452323232323232323454523454545456720151515201515151520202020202020201515201515151567201515152015151515202020202020202015152015151515672015151520151515152020202020202020151520151515156720151515201515151520202020202020201515201515151;CP=1;R=17;
+			{
+				name            => 'GT-9000',
+				comment         => 'Remote control from QUIGG, ALDI, OBI, CMI, Pollin',
+				id              => '49.1',
+				knownFreqs      => '433.92',
+				clockabs        => 515,
+				one             => [2,-1],  # 1025,-515  (timings from salae logic)
+				zero            => [1,-2],  # 515,-1030  (timings from salae logic)
+				start           => [6,-14],	# 3075,-7200 (timings from salae logic)
+				format          => 'twostate',
+				preamble        => 'P49#',
+				clientmodule    => 'SD_GT',
+				modulematch     => '^P49.*',
+				length_min      => '24',
+				length_max      => '24',
 			},
 		"50"	=>	## Opus XT300
 							# https://github.com/RFD-FHEM/RFFHEM/issues/99 @sidey79
