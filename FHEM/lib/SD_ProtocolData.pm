@@ -1316,7 +1316,7 @@ package lib::SD_ProtocolData;
 				id              => '49',
 				knownFreqs      => '433.92',
 				clockabs        => 383,
-				one             => [3,-2],	# 1150,-385 (timings from salae logic)
+				one             => [3,-1],	# 1150,-385 (timings from salae logic)
 				zero            => [1,-3],	# 385,-1150 (timings from salae logic)
 				sync            => [1,-6],	# 385,-2295 (timings from salae logic)
 				format          => 'twostate',

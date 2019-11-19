@@ -1,5 +1,5 @@
 #################################################################
-# $Id: 10_SD_GT.pm 0 2019-11-19 16:30:00Z elektron-bbs $
+# $Id: 10_SD_GT.pm 0 2019-11-19 21:30:00Z elektron-bbs $
 #
 # The file is part of the SIGNALduino project.
 #
@@ -189,14 +189,15 @@ sub Define($$) {
 
 sub Set($$$@) {
 	my ($hash, $name, @a) = @_;
+	my $ioname = $hash->{IODev}{NAME};
+	my $name = $hash->{NAME};
   my $na = int(@a);						# Anzahl in Array 
 	my $cmd = $a[0];
-	my $ioname = $hash->{IODev}{NAME};
 	my $repeats = AttrVal($name,'repeats', '5');
 	my $ret = undef;
-	my $sendCodesStr;
-	my @sendCodesAr;
-	my $sendCodesCnt;
+
+	Log3 $hash, 3, "###############################################################";
+	Log3 $hash, 3, "$ioname: $name SD_GT_Set is running";
 	
   return "no set value specified" if ($na < 1);
   return "Dummydevice $ioname will not set data" if(IsDummy($ioname));
@@ -206,21 +207,42 @@ sub Set($$$@) {
 			$ret .= "off:noArg " if (ReadingsVal($name, "CodesOff", "") ne "");
 			$ret .= "on:noArg " if (ReadingsVal($name, "CodesOn", "") ne "");
 		}
+		return $ret;
 	}
 	
-	if ($cmd ne "?") {
-		Log3 $name, 3, "$ioname: SD_GT set $name $cmd";
-		if ($cmd eq "on") {
-			$sendCodesStr = ReadingsVal($name, "CodesOn", "");
-		}
-		if ($cmd eq "off") {
-			$sendCodesStr = ReadingsVal($name, "CodesOn", "");
-		}
-		@sendCodesAr = split(",", $sendCodesStr);
-		$sendCodesCnt = scalar(@sendCodesAr);
-	}
+	my $sendCodesStr;
+	my @sendCodesAr;
+	my $sendCodesCnt;
+	my $sendCode = ReadingsVal($name, "SendCode", "");
 
-	readingsSingleUpdate($hash, "state" , $cmd, 1) if ($cmd ne "?");
+	Log3 $name, 3, "$ioname: SD_GT set $name $cmd";
+	if ($cmd eq "on") {
+		$sendCodesStr = ReadingsVal($name, "CodesOn", "");
+	}
+	if ($cmd eq "off") {
+		$sendCodesStr = ReadingsVal($name, "CodesOff", "");
+	}
+	@sendCodesAr = split(",", $sendCodesStr);
+	$sendCodesCnt = scalar(@sendCodesAr);
+  return "no codes available for sending, please press buttons on your remote for learning" if ($sendCodesCnt < 1);
+	my ($index) = grep { $sendCodesAr[$_] ~~ $sendCode } 0 .. $#sendCodesAr;	# undef wenn nicht gefunden
+	$index = -1 if (not defined($index));
+	$index++;
+	$index = 0 if ($index >= $sendCodesCnt);
+	$sendCode = $sendCodesAr[$index];
+	Log3 $hash, 3, "$ioname: $name SD_GT_Set $cmd, $sendCodesStr, $sendCodesCnt, $sendCode, $index";
+
+	my $msg = "P49#0x" . $sendCode . "#R4";
+	Log3 $hash, 5, "$ioname: $name SD_GT_Set set sendMsg $msg";
+	IOWrite($hash, 'sendMsg', $msg);
+	$msg = "P49.1#0x" . $sendCode . "#R4";
+	Log3 $hash, 5, "$ioname: $name SD_GT_Set set sendMsg $msg";
+	IOWrite($hash, 'sendMsg', $msg);
+
+	readingsBeginUpdate($hash);
+	readingsBulkUpdate($hash, "state", $cmd);
+	readingsBulkUpdate($hash, "SendCode", $sendCode, 0);
+	readingsEndUpdate($hash, 1);
 	return $ret;
 }
 
