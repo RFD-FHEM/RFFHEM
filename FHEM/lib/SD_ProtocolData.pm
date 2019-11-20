@@ -66,7 +66,7 @@ package lib::SD_ProtocolData;
 	use strict;
 	use warnings;
 	
-	our $VERSION = '1.09';
+	our $VERSION = '1.10';
 	our %protocols = (
 		"0"	=>	## various weather sensors (500 | 9100)
 						# ABS700 | Id:79 T: 3.3 Bat:low                MS;P1=-7949;P2=492;P3=-1978;P4=-3970;D=21232423232424242423232323232324242423232323232424;CP=2;SP=1;R=245;O;
@@ -310,24 +310,26 @@ package lib::SD_ProtocolData;
 				length_min			=> '24',				# ?
 				length_max			=> '24',				# ?
 			},
-		"6"	=>	## Eurochron Protocol
-						# u6#B1002A022   MS;P1=-7982;P2=262;P3=-1949;P4=-948;D=21232423232424242324242424242424242424232424232323242424242424232424242324;CP=2;SP=1;R=249;O;m2;
-						# u6#B1002A022   MS;P0=254;P1=-7990;P2=-1935;P3=-950;D=01020302020303030203030303030303030303020302030203030303030303020303030203;CP=0;SP=1;R=248;O;m2;
+		"6"	=>	## TCM 218943, Eurochron
+						# https://github.com/RFD-FHEM/RFFHEM/issues/692 @ Ralf9 2019-11-15
+						# T:22.9, H:24     MS;P0=-970;P1=254;P3=-1983;P4=-8045;D=14101310131010101310101010101010101010101313101010101010101313131010131013;CP=1;SP=4;
+						# T:22.7, H:23, tx MS;P0=-2054;P1=236;P2=-1032;P3=-7760;D=13121012101212121012121210121212121212121012101010121212121010101212121010;CP=1;SP=3;
 			{
-				name					=> 'weather',
-				comment				=> 'unknown sensor is under development',
-				id						=> '6',
-				knownFreqs		=> '',
-				one						=> [1,-10],
-				zero					=> [1,-5],
-				sync					=> [1,-36],				# This special device has no sync
-				clockabs			=> 220,						# -1 = auto
-				format				=> 'twostate',		# tristate can't be migrated from bin into hex!
-				preamble			=> 'u6#',					# Append to converted message
-				#clientmodule	=> '',
-				#modulematch	=> '^u......',
-				length_min		=> '24',
-				#length_max		=> '36',					# missing
+				name         => 'TCM 218943',
+				comment      => 'Weatherstation TCM 218943, Eurochron',
+				id           => '6',
+				knownFreqs   => '434.92',
+				one          => [1,-5],
+				zero         => [1,-10],
+				sync         => [1,-32],
+				clockabs     => 248,
+				format       => 'twostate',
+				preamble     => 's',  # prepend to converted message	 	
+				postamble    => '00', # append to converted message	 	
+				clientmodule => 'CUL_TCM97001',
+				length_min   => '36', # sync, postamble und paddingbits werden nicht mitgezaehlt
+				length_max   => '36', # sync, postamble und paddingbits werden nicht mitgezaehlt
+				paddingbits  => '8',  # pad up to 8 bits, default is 4
 			},
 		"7"	=>	## weather sensors like EAS800z
 						# Ch:1 T: 19.8 H: 11 Bat:low   MS;P1=-3882;P2=504;P3=-957;P4=-1949;D=21232424232323242423232323232323232424232323242423242424242323232324232424;CP=2;SP=1;R=249;m=2;
