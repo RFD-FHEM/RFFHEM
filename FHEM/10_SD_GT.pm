@@ -1,5 +1,5 @@
 #################################################################
-# $Id: 10_SD_GT.pm 0 2019-11-19 21:30:00Z elektron-bbs $
+# $Id: 10_SD_GT.pm 0 2019-11-20 21:45:00Z elektron-bbs $
 #
 # The file is part of the SIGNALduino project.
 #
@@ -190,17 +190,15 @@ sub Define($$) {
 sub Set($$$@) {
 	my ($hash, $name, @a) = @_;
 	my $ioname = $hash->{IODev}{NAME};
-	my $name = $hash->{NAME};
   my $na = int(@a);						# Anzahl in Array 
 	my $cmd = $a[0];
 	my $repeats = AttrVal($name,'repeats', '5');
 	my $ret = undef;
 
-	Log3 $hash, 3, "###############################################################";
-	Log3 $hash, 3, "$ioname: $name SD_GT_Set is running";
+	Log3 $hash, 5, "###############################################################";
+	Log3 $hash, 5, "$ioname: $name SD_GT_Set is running";
 	
   return "no set value specified" if ($na < 1);
-  return "Dummydevice $ioname will not set data" if(IsDummy($ioname));
 
 	if ($cmd eq "?") {
 		if ($hash->{DEF} ne "LEARN") {
@@ -213,30 +211,25 @@ sub Set($$$@) {
 	my $sendCodesStr;
 	my @sendCodesAr;
 	my $sendCodesCnt;
-	my $sendCode = ReadingsVal($name, "SendCode", "");
-
-	Log3 $name, 3, "$ioname: SD_GT set $name $cmd";
-	if ($cmd eq "on") {
-		$sendCodesStr = ReadingsVal($name, "CodesOn", "");
-	}
-	if ($cmd eq "off") {
-		$sendCodesStr = ReadingsVal($name, "CodesOff", "");
-	}
+	my $sendCode = ReadingsVal($name, "SendCode", "");	# load last sendCode
+	$sendCodesStr = ReadingsVal($name, "CodesOn", "") if ($cmd eq "on");
+	$sendCodesStr = ReadingsVal($name, "CodesOff", "") if ($cmd eq "off");
 	@sendCodesAr = split(",", $sendCodesStr);
 	$sendCodesCnt = scalar(@sendCodesAr);
   return "no codes available for sending, please press buttons on your remote for learning" if ($sendCodesCnt < 1);
-	my ($index) = grep { $sendCodesAr[$_] ~~ $sendCode } 0 .. $#sendCodesAr;	# undef wenn nicht gefunden
+	my ($index) = grep { $sendCodesAr[$_] eq $sendCode } (0 .. $sendCodesCnt - 1);
 	$index = -1 if (not defined($index));
 	$index++;
 	$index = 0 if ($index >= $sendCodesCnt);
-	$sendCode = $sendCodesAr[$index];
-	Log3 $hash, 3, "$ioname: $name SD_GT_Set $cmd, $sendCodesStr, $sendCodesCnt, $sendCode, $index";
+	$sendCode = $sendCodesAr[$index];	# new sendCode
+  Log3 $name, 3, "$ioname: SD_GT set $name $cmd";
+	Log3 $hash, 4, "$ioname: SD_GT_Set $name $cmd ($sendCodesCnt codes $sendCodesStr - send $sendCode)";
 
 	my $msg = "P49#0x" . $sendCode . "#R4";
-	Log3 $hash, 5, "$ioname: $name SD_GT_Set set sendMsg $msg";
+	Log3 $hash, 5, "$ioname: $name SD_GT_Set first set sendMsg $msg";
 	IOWrite($hash, 'sendMsg', $msg);
 	$msg = "P49.1#0x" . $sendCode . "#R4";
-	Log3 $hash, 5, "$ioname: $name SD_GT_Set set sendMsg $msg";
+	Log3 $hash, 5, "$ioname: $name SD_GT_Set second set sendMsg $msg";
 	IOWrite($hash, 'sendMsg', $msg);
 
 	readingsBeginUpdate($hash);
@@ -263,24 +256,24 @@ sub Parse($$) {
 	my $level;	# A, B, C, D or all
 	my $state;
 	
-	Log3 $iohash, 3, "###############################################################";
-	Log3 $iohash, 3, "$ioname: SD_GT_Parse is running with protocol $protocol";
+	Log3 $iohash, 5, "###############################################################";
+	Log3 $iohash, 5, "$ioname: SD_GT_Parse is running with protocol $protocol";
 	my ($systemCode1, $systemCode2) = getSystemCodes($rawData);
-	Log3 $iohash, 3, "$ioname: SD_GT_Parse $rawData, possible codes systemCode 1 $systemCode1 or systemCode 2 $systemCode2";
+	Log3 $iohash, 4, "$ioname: SD_GT_Parse $rawData, possible codes version 1 $systemCode1 or version 2 $systemCode2";
 
 	# sucht Version und SytemCode in bereits angelegten SD_GT
 	foreach my $d (keys %defs) {
 		if(defined($defs{$d}) && $defs{$d}{TYPE} eq "SD_GT") {
 			$version = ReadingsVal($d, "Version", 0) ;
 			$systemCode = ReadingsVal($d, "SystemCode", 0);
-			Log3 $iohash, 3, "$ioname: SD_GT_Parse found $d, version $version, systemCode $systemCode";
+			Log3 $iohash, 4, "$ioname: SD_GT_Parse found $d, version $version, systemCode $systemCode";
 			last if ($systemCode1 eq $systemCode && $version == 1);
 			last if ($systemCode2 eq $systemCode && $version == 2);
 		}
 		$version = 0;			# reset version
 		$systemCode = 0;	# reset systemCode
 	}
-	Log3 $iohash, 3, "$ioname: SD_GT_Parse $rawData, found version $version and systemCode $systemCode";
+	Log3 $iohash, 4, "$ioname: SD_GT_Parse $rawData, found version $version with systemCode $systemCode";
 
 	if ($version == 0 && $systemCode eq 0) {	# Version und systemCode nicht gefunden
 		$devicedef = "LEARN";
@@ -290,7 +283,7 @@ sub Parse($$) {
 		$state = $buttons{$version}->{$unit}->{$statecode};
 		$level = $buttons{$version}->{$unit}->{"unit"};
 		$devicedef = $systemCode . "_" . $level;
-		Log3 $iohash, 3, "$ioname: SD_GT_Parse code $rawData, $devicedef";
+		Log3 $iohash, 4, "$ioname: SD_GT_Parse code $rawData, device $devicedef";
 	}
 
 	my $def = $modules{SD_GT}{defptr}{$devicedef};
@@ -307,39 +300,37 @@ sub Parse($$) {
 	my @learnCodesAr;
 	my $learnCodesCnt;
 
-if ($devicedef eq "LEARN") {
-	$learnCodesStr = ReadingsVal($name, "LearnCodes", "");
-	@learnCodesAr = split(",", $learnCodesStr);
-	$learnCodesCnt = scalar(@learnCodesAr);
-
-	Log3 $name, 3, "$ioname: $name SD_GT_Parse $rawData, version $version, systemCode $systemCode, learnCodes $learnCodesStr, learnCodesCnt $learnCodesCnt";
-
-	if ($learnCodesCnt == 0) {	# erster Code empfangen
-		push(@learnCodesAr,$rawData);
-		$learnCodesCnt++;
-		Log3 $name, 3, "$ioname: $name SD_GT_Parse code $rawData is first code";
-	} elsif (grep /$rawData/, @learnCodesAr) {	# Code schon vorhanden
-		$state = "code already registered, please press another button";
-		Log3 $name, 3, "$ioname: $name SD_GT_Parse code $rawData already registered";
-	} else {	# Code pruefen und evtl. uebernehmen
-		push(@learnCodesAr,$rawData);
-		($version, $systemCode) = checkVersion(@learnCodesAr);
-		if ($version == 0) {	# Fehler Version oder Systemcode
-			if ($learnCodesCnt == 1) {
-				@learnCodesAr = ();
-				$systemCode = 0;
-			} else {
-				pop @learnCodesAr; # Wir entfernen das letzte Element des Arrays
-			}
-			$state = "version not unique, please press another button";
-			Log3 $name, 3, "$ioname: $name SD_GT_Parse ERROR - version not unique";
-		} else {	# Version und Code OK
+	if ($devicedef eq "LEARN") {
+		$learnCodesStr = ReadingsVal($name, "LearnCodes", "");
+		@learnCodesAr = split(",", $learnCodesStr);
+		$learnCodesCnt = scalar(@learnCodesAr);
+		Log3 $name, 3, "$ioname: $name $rawData, $learnCodesCnt learned codes $learnCodesStr";
+		if ($learnCodesCnt == 0) {	# erster Code empfangen
+			push(@learnCodesAr,$rawData);
 			$learnCodesCnt++;
-			Log3 $name, 3, "$ioname: $name SD_GT_Parse code $rawData, version $version, systemCode $systemCode";
+			Log3 $name, 3, "$ioname: $name code $rawData is first plausible code";
+		} elsif (grep /$rawData/, @learnCodesAr) {	# Code schon vorhanden
+			$state = "code already registered, please press another button";
+			Log3 $name, 3, "$ioname: $name code $rawData already registered ($learnCodesStr)";
+		} else {	# Code pruefen und evtl. uebernehmen
+			push(@learnCodesAr,$rawData);
+			($version, $systemCode) = checkVersion(@learnCodesAr);
+			if ($version == 0) {	# Fehler Version oder Systemcode
+				if ($learnCodesCnt == 1) {
+					@learnCodesAr = ();
+					$systemCode = 0;
+				} else {
+					pop @learnCodesAr; # Wir entfernen das letzte Element des Arrays
+				}
+				$state = "version not unique, please press another button";
+				Log3 $name, 3, "$ioname: $name ERROR - version not unique";
+			} else {	# Version und Code OK
+				$learnCodesCnt++;
+				Log3 $name, 3, "$ioname: $name code $learnCodesCnt $rawData, version $version, systemCode $systemCode";
+			}
 		}
+		$state = "learned code $learnCodesCnt, please press another button" if (not defined $state);
 	}
-	$state = "learned code $learnCodesCnt, please press another button" if (not defined $state);
-}
 
 	my $CodesOn;
 	my $CodesOff;
@@ -358,16 +349,16 @@ if ($devicedef eq "LEARN") {
 	
 	my $systemCodeDec = hex($systemCode);
 
-	Log3 $name, 3, "$ioname: $name SD_GT_Parse code $rawData, button $level $state" if (defined $level);
+	Log3 $name, 4, "$ioname: SD_GT_Parse code $rawData, $name, button $level $state" if (defined $level);
 	readingsBeginUpdate($hash);
 	readingsBulkUpdate($hash, "state", $state);
 	readingsBulkUpdate($hash, "LearnCodes", $learnCodesStr) if ($devicedef eq "LEARN");
-	readingsBulkUpdate($hash, "CodesOn", $learnCodesStr) if ($state eq "on");
-	readingsBulkUpdate($hash, "CodesOff", $learnCodesStr) if ($state eq "off");
+	readingsBulkUpdate($hash, "CodesOn", $learnCodesStr, 0) if ($state eq "on");
+	readingsBulkUpdate($hash, "CodesOff", $learnCodesStr, 0) if ($state eq "off");
 	if ($devicedef ne "LEARN" || $learnCodesCnt > 5) {
-		readingsBulkUpdate($hash, "Version", $version) if ($version != 0);
-		readingsBulkUpdate($hash, "SystemCode", $systemCode) if ($systemCode ne 0);
-		readingsBulkUpdate($hash, "SystemCodeDec", $systemCodeDec) if ($systemCodeDec != 0);
+		readingsBulkUpdate($hash, "Version", $version, 0) if ($version != 0);
+		readingsBulkUpdate($hash, "SystemCode", $systemCode, 0) if ($systemCode ne 0);
+		readingsBulkUpdate($hash, "SystemCodeDec", $systemCodeDec, 0) if ($systemCodeDec != 0);
 	}
 	readingsEndUpdate($hash, 1);
 	return $name;	
