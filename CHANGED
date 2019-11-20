@@ -1,5 +1,6 @@
 20.11.2019
   SD_ProtocolData.pm: new protocol TCM 218943, replaced u6 was in development
+  90_SIGNALduino_un.pm: protocol 6 and 15 removed
 11.11.2019
   00_SIGNALduino.pm: fix Perlwarning opening device via webif
                      fix missing cc1101 get commands
