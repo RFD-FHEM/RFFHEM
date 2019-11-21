@@ -31,7 +31,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.4.1_dev_11.11",
+	SDUINO_VERSION            => "v3.4.1_dev_16.11",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -924,11 +924,9 @@ SIGNALduino_Get($@)
 	return "\"get $type\" needs at least one parameter" if(@a < 2);
 	if(!defined($gets{$a[1]})) {
 		Log3 ($name, 5, "Unknown argument $a[1] for $a[0]") if ($a[1] ne "?");
-		
-		my @cList = sort map { $_ =~ m/^(raw|ccreg)$/ ? $_ : "$_:noArg" } grep { (InternalVal($name,"hasCC1101",0)) || (!InternalVal($a[0],"hasCC1101",0) && $_ !~ m/^cc/)  }  keys %gets;
+		my @cList = sort map { $_ =~ m/^(raw|ccreg)$/ ? $_ : "$_:noArg" } grep { (( InternalVal($a[0],"hasCC1101",0) || (!InternalVal($a[0],"hasCC1101",0) && $_ !~ /^cc/)) &&  (!IsDummy($a[0]) || IsDummy($a[0]) && $_ =~ m/^(availableFirmware|raw)/)) }   keys %gets;
 		return "Unknown argument $a[1], choose one of " . join(" ", @cList);
 	}
-	
 	return "no command to send, get aborted." if (ref $gets{$a[1]} eq 'ARRAY' && length($gets{$a[1]}[0]) == 0 && length($a[2]) == 0);
 	  
 	if (($a[1] eq "ccconf" || $a[1] eq "ccreg" || $a[1] eq "ccpatable") && !InternalVal($name,"hasCC1101",0)) {
