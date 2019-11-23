@@ -1,5 +1,5 @@
 #################################################################
-# $Id: 10_SD_GT.pm 0 2019-11-20 21:45:00Z elektron-bbs $
+# $Id: 10_SD_GT.pm 0 2019-11-23 21:45:00Z elektron-bbs $
 #
 # The file is part of the SIGNALduino project.
 #
@@ -152,6 +152,7 @@ BEGIN {
 		AttrVal
 		attr
 		defs
+		DoTrigger
 		IOWrite
 		InternalVal
 		IsIgnored
@@ -222,9 +223,20 @@ sub Set($$$@) {
 	$index++;
 	$index = 0 if ($index >= $sendCodesCnt);
 	$sendCode = $sendCodesAr[$index];	# new sendCode
-  Log3 $name, 3, "$ioname: SD_GT set $name $cmd";
+
+	Log3 $name, 3, "$ioname: SD_GT set $name $cmd";
 	Log3 $hash, 4, "$ioname: SD_GT_Set $name $cmd ($sendCodesCnt codes $sendCodesStr - send $sendCode)";
 
+	if ($hash->{DEF} =~ /_all$/) {	# send button all
+		my $systemCode = ReadingsVal($name, "SystemCode", "");
+		foreach my $d (keys %defs) {	# sucht angelegte SD_GT mit gleichem Sytemcode 
+			if(defined($defs{$d}) && $defs{$d}{TYPE} eq "SD_GT" && $defs{$d}{DEF} =~ /$systemCode/ && $defs{$d}{DEF} =~ /[ABCD]$/ && ReadingsVal($d, "state", "") ne $cmd) {
+				readingsSingleUpdate($defs{$d}, "state" , $cmd , 1);
+				Log3 $name, 3, "$ioname: SD_GT set $d $cmd";
+			}
+		}
+	}
+	
 	my $msg = "P49#0x" . $sendCode . "#R4";
 	Log3 $hash, 5, "$ioname: $name SD_GT_Set first set sendMsg $msg";
 	IOWrite($hash, 'sendMsg', $msg);
@@ -345,11 +357,20 @@ sub Parse($$) {
 		push(@learnCodesAr,$rawData) if (not grep /$rawData/, @learnCodesAr);
 	}
 	
-	$learnCodesStr = join(",", @learnCodesAr);
+	if (defined $level && $level eq "all") {	# received button all) {
+		Log3 $name, 4, "$ioname: SD_GT_Parse code $rawData, $name, button $level $state";
+		foreach my $d (keys %defs) {	# sucht angelegte SD_GT mit gleichem Sytemcode 
+			if(defined($defs{$d}) && $defs{$d}{TYPE} eq "SD_GT" && $defs{$d}{DEF} =~ /$systemCode/ && $defs{$d}{DEF} =~ /[ABCD]$/ && ReadingsVal($d, "state", "") ne $state) {
+				readingsSingleUpdate($defs{$d}, "state" , $state , 1);
+				DoTrigger($d, undef, 0);
+				Log3 $name, 4, "$ioname: SD_GT_Parse received button $level, set $d $state";
+			}
+		}
+	}
 	
+	$learnCodesStr = join(",", @learnCodesAr);
 	my $systemCodeDec = hex($systemCode);
 
-	Log3 $name, 4, "$ioname: SD_GT_Parse code $rawData, $name, button $level $state" if (defined $level);
 	readingsBeginUpdate($hash);
 	readingsBulkUpdate($hash, "state", $state);
 	readingsBulkUpdate($hash, "LearnCodes", $learnCodesStr) if ($devicedef eq "LEARN");
