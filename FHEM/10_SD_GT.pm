@@ -1,5 +1,5 @@
 #################################################################
-# $Id: 10_SD_GT.pm 0 2019-11-23 21:45:00Z elektron-bbs $
+# $Id: 10_SD_GT.pm 0 2019-11-25 21:15:00Z elektron-bbs $
 #
 # The file is part of the SIGNALduino project.
 #
@@ -13,12 +13,53 @@ package main;
 use strict;
 use warnings;
 
+sub SD_GT_Initialize($) {
+	my ($hash) = @_;
+	$hash->{Match}			= "^P49.*";
+	$hash->{DefFn}			= "SD_GT::Define";
+	$hash->{UndefFn}		= "SD_GT::Undef";
+	$hash->{ParseFn}		= "SD_GT::Parse";
+	$hash->{SetFn}			= "SD_GT::Set";
+	$hash->{AttrList}		= "IODev do_not_notify:1,0 ignore:0,1 showtime:1,0 $main::readingFnAttributes";
+	$hash->{AutoCreate}	=	{"SD_GT_LEARN" => {FILTER => "%NAME", autocreateThreshold => "5:180", GPLOT => ""}};
+}
+
+#################################################################
+
+package SD_GT;
+
+use strict;
+use warnings;
+use GPUtils qw(:all);  # wird f&uuml;r den Import der FHEM Funktionen aus der fhem.pl ben&ouml;tigt
+
+## Import der FHEM Funktionen
+BEGIN {
+		GP_Import(qw(
+		AssignIoPort
+		AttrVal
+		attr
+		defs
+		DoTrigger
+		IOWrite
+		InternalVal
+		IsIgnored
+		IsDummy
+		Log3
+		modules
+		ReadingsVal
+		readingsBeginUpdate
+		readingsBulkUpdate
+		readingsDelete
+		readingsEndUpdate
+		readingsSingleUpdate
+		))
+};
+
 sub parseSystemcodeHex($$);
 sub decodePayload($$$$);
 sub checkVersion(@);
 sub getSystemCodes($);
 
-##########################
 my %buttons = (
 	'1' => {	# Version 1
 						'hash' => [0x0, 0x9, 0xF, 0x4, 0xA, 0xD, 0x5, 0xB, 0x3, 0x2, 0x1, 0x7, 0xE, 0x6, 0xC, 0x8],
@@ -126,47 +167,6 @@ my %buttons = (
                     },
 					}
 );
-
-sub SD_GT_Initialize($) {
-	my ($hash) = @_;
-	$hash->{Match}			= "^P49.*";
-	$hash->{DefFn}			= "SD_GT::Define";
-	$hash->{UndefFn}		= "SD_GT::Undef";
-	$hash->{ParseFn}		= "SD_GT::Parse";
-	$hash->{SetFn}			= "SD_GT::Set";
-	$hash->{AttrList}		= "IODev do_not_notify:1,0 ignore:0,1 showtime:1,0 $main::readingFnAttributes";
-	$hash->{AutoCreate}	=	{"SD_GT_LEARN" => {FILTER => "%NAME", autocreateThreshold => "5:180", GPLOT => ""}};
-}
-
-package SD_GT;
-
-use strict;
-use warnings;
-
-use GPUtils qw(:all);  # wird für den Import der FHEM Funktionen aus der fhem.pl benötigt
-
-## Import der FHEM Funktionen
-BEGIN {
-		GP_Import(qw(
-		AssignIoPort
-		AttrVal
-		attr
-		defs
-		DoTrigger
-		IOWrite
-		InternalVal
-		IsIgnored
-		IsDummy
-		Log3
-		modules
-		ReadingsVal
-		readingsBeginUpdate
-		readingsBulkUpdate
-		readingsDelete
-		readingsEndUpdate
-		readingsSingleUpdate
-		))
-};
 
 sub Define($$) {
 	my ($hash, $def) = @_;
@@ -453,37 +453,91 @@ sub getSystemCodes($) {
 	return ($systemCode1, $systemCode2);
 }
 
-# Eval-Rückgabewert für erfolgreiches
-# Laden des Moduls
 1;
-
-
-# Beginn der Commandref
 
 =pod
 =item device
-=item summary Kurzbeschreibung in Englisch was MYMODULE steuert/unterstuetzt
-=item summary_DE Kurzbeschreibung in Deutsch was MYMODULE steuert/unterstuetzt
+=item summary Processing of messages from remote controls
+=item summary_DE Verarbeitung der Nachrichten von Fernbedienungen
 
 =begin html
 
 <a name="SD_GT"></a>
-<h3>example modul</h3>
+<h3>SD_GT</h3>
 <ul>
-This is an example module.<br>
+	The SD_GT module decodes and sends messages using the GT-9000 protocol.
+	This protocol is used by a variety of remote controls, which are traded under different names.
+	The messages are received and sent by a SIGNALduino.
+	<br><br>
+	New devices are usually automatically created in FHEM via autocreate.
+	Since the protocol uses encryption, manual setup is virtually impossible.
+	<br><br>
+	The remote control is set up in a learning process.
+	After receiving at least 5 messages within 3 minutes, a new device "SD_GT_LEARN" will be created.
+	Setting up the individual buttons of the remote control starts after receiving another 6 different messages.
+	This learning process is signaled with the status "learned code 4, please press another button", whereby the counter displays the number of currently registered codes.
+	<br>
+	All buttons of the remote control must now be pressed several times.
+	Upon successful decoding of the radio signals, the individual keys are created.
+	<br><br>
+	The programming of the remote control is finished, if all key levels (A, B, C, D and possibly all) are created and the commands "on" and "off" are displayed.
+	For each device, the Readings "CodesOn" and "CodesOff" must be set up with at least one code each.
+	Without these learned codes no sending is possible.
+	<br>
+	The device "SD_GT_LEARN" is no longer needed and can be deleted.
+	<br><br>
+	<p><strong>Readings:</strong></p>
+	<ul>
+		<li>CodesOff: one to four hexadecimal codes for "off" that have been taught and used for sending</li>
+		<li>CodesOn: one to four hexadecimal codes for "on" that have been learned and used for sending</li>
+		<li>SendCode: the last sent code</li>
+		<li>SystemCode: System code hexadecimal, the same for all buttons on a remote control</li>
+		<li>SystemCodeDec: System code in decimal representation</li>
+		<li>Version: Version of the encryption used</li>
+		<li>state: State, "on" or "off"</li>
+	</ul>
 </ul>
-=end html
 
+=end html
 
 =begin html_DE
 
 <a name="SD_GT"></a>
-<h3>SD_GT Modul</h3>
+<h3>SD_GT</h3>
 <ul>
-Das ist ein SD_GT Modul.<br>
+	Das SD_GT-Modul dekodiert und sendet Nachrichten unter Verwendung des Protokolls vom Typ GT-9000.
+	Dieses Protokoll wird von einer Vielzahl Fernbedienungen verwendet, die unter verschiedene Namen gehandelt werden.
+	Die Nachrichten werden von einem SIGNALduino empfangen und gesendet.
+	<br><br>
+	Neue Ger&auml;te werden in FHEM normalerweise per autocreate automatisch angelegt.
+	Da das Protokoll eine Verschl&uuml;sselung nutzt, ist ein manuelles Einrichten praktisch nicht m&ouml;glich.
+	<br><br>
+	Das Einrichten der Fernbedienung erfolgt in einem Lernprozess.
+	Nach dem Empfang von mindestens 5 Nachrichten innerhalb von 3 Minuten wird ein neues Ger&auml;t "SD_GT_LEARN" angelegt.
+	Das Einrichten der einzelnen Tasten der Fernbedienung beginnt nach dem Empfang weiterer 6 verschiedener Nachrichten.
+	Dieser Lernprozess wird mit dem Status "learned code 4, please press another button" signalisiert, wobei der Z&auml;hler die Anzahl der aktuell registrerten Codes anzeigt.
+	<br>
+	Es m&uuml;ssen jetzt s&auml;mtliche Tasten der Fernbedienung mehrmals bet&auml;tigt werden.
+	Bei erfolgreicher Dekodierung der Funksignale werden dabei die einzelnen Tasten angelegt.
+	<br><br>
+	Das Anlernen der Fernbedienung ist beendet, wenn alle Tastenebenen (A, B, C, D und evtl. all) angelegt sind und jeweils die Befehle "on" und "off" angezeigt werden.
+	Bei jedem Ger&auml;t m&uuml;ssen die Readings "CodesOn" und "CodesOff" mit jeweils mindestens einem Code eingerichtet sein.
+	Ohne diese gelernten Codes ist kein Senden m&ouml;glich.
+	<br>
+	Das Ger&auml;t "SD_GT_LEARN" wird jetzt nicht mehr ben&ouml;tigt und kann gel&ouml;scht werden.
+	<br><br>
+	<p><strong>Readings:</strong></p>
+	<ul>
+		<li>CodesOff: ein bis vier hexadezimale Codes f&uuml;r "off", die angelernt wurden und zum Senden verwendet werden</li>
+		<li>CodesOn: ein bis vier hexadezimale Codes f&uuml;r "on", die angelernt wurden und zum Senden verwendet werden</li>
+		<li>SendCode: der zuletzt gesendete Code</li>
+		<li>SystemCode: Systemcode hexadezimal, bei allen Tasten einer Fernbedienung gleich</li>
+		<li>SystemCodeDec: Systemcode in dezimaler Darstellng</li>
+		<li>Version: Version der verwendeten Verschl&uuml;sselung</li>
+		<li>state: Zustand, "on" oder "off"</li>
+	</ul>
 </ul>
 
 =end html_DE
 
-# Ende der Commandref
 =cut
