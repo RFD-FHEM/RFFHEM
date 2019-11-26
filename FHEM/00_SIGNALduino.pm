@@ -2939,7 +2939,7 @@ sub SIGNALduino_IdList($@)
 	}
 	
 	my ($develop,$devFlag) = SIGNALduino_getAttrDevelopment($name, $develop0);	# $devFlag = 1 -> alle developIDs y aktivieren
-	$hash->{logMethod}->($name, 3, "$name IDlist development version active: development attribute = $develop") if ($devFlag == 1);
+	$hash->{logMethod}->($name, 3, "$name: IDlist development version active, development attribute = $develop") if ($devFlag == 1);
 	
 	if ($aVal eq "" || substr($aVal,0 ,1) eq '#') {		# whitelist nicht aktiv
 		if ($devFlag == 1) {
