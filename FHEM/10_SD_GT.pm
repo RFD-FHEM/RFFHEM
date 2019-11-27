@@ -15,13 +15,13 @@ use warnings;
 
 sub SD_GT_Initialize($) {
 	my ($hash) = @_;
-	$hash->{Match}			= "^P49.*";
-	$hash->{DefFn}			= "SD_GT::Define";
-	$hash->{UndefFn}		= "SD_GT::Undef";
-	$hash->{ParseFn}		= "SD_GT::Parse";
-	$hash->{SetFn}			= "SD_GT::Set";
-	$hash->{AttrList}		= "IODev do_not_notify:1,0 ignore:0,1 showtime:1,0 $main::readingFnAttributes";
-	$hash->{AutoCreate}	=	{"SD_GT_LEARN" => {FILTER => "%NAME", autocreateThreshold => "5:180", GPLOT => ""}};
+	$hash->{Match}      = "^P49.*";
+	$hash->{DefFn}      = "SD_GT::Define";
+	$hash->{UndefFn}    = "SD_GT::Undef";
+	$hash->{ParseFn}    = "SD_GT::Parse";
+	$hash->{SetFn}      = "SD_GT::Set";
+	$hash->{AttrList}   = "IODev do_not_notify:1,0 ignore:0,1 showtime:1,0 $main::readingFnAttributes";
+	$hash->{AutoCreate} = {"SD_GT_LEARN" => {FILTER => "%NAME", autocreateThreshold => "5:180", GPLOT => ""}};
 }
 
 #################################################################
@@ -173,7 +173,6 @@ sub Define($$) {
 	my @a = split("[ \t][ \t]*", $def);
 	my $name = $hash->{NAME};
 
-	# Argument														0	   	 1			2
 	return "SD_GT: wrong syntax: define <name> SD_GT <. . .>" if(int(@a) < 2);
 
 	my $iodevice = $a[4] if($a[4]);
@@ -182,24 +181,21 @@ sub Define($$) {
 	my $ioname = $modules{SD_GT}{defptr}{ioname} if (exists $modules{SD_GT}{defptr}{ioname} && not $iodevice);
 	$iodevice = $ioname if not $iodevice;
 
-	### Attributes | model set after codesyntax ###
 	$attr{$name}{room}	= "SD_GT"	if ( not exists( $attr{$name}{room} ) );				# set room, if only undef --> new def
 
 	AssignIoPort($hash, $iodevice);
 }
 
 sub Set($$$@) {
-	my ($hash, $name, @a) = @_;
+	my ($hash, $name, $cmd, @a) = @_;
 	my $ioname = $hash->{IODev}{NAME};
-  my $na = int(@a);						# Anzahl in Array 
-	my $cmd = $a[0];
 	my $repeats = AttrVal($name,'repeats', '5');
 	my $ret = undef;
 
-	Log3 $hash, 5, "###############################################################";
-	Log3 $hash, 5, "$ioname: $name SD_GT_Set is running";
+	Log3 $name, 5, "###############################################################";
+	Log3 $name, 5, "$ioname: $name SD_GT_Set is running";
 	
-  return "no set value specified" if ($na < 1);
+  return "\"set $name\" needs at least one argument" unless(defined($cmd));
 
 	if ($cmd eq "?") {
 		if ($hash->{DEF} ne "LEARN") {
@@ -217,7 +213,7 @@ sub Set($$$@) {
 	$sendCodesStr = ReadingsVal($name, "CodesOff", "") if ($cmd eq "off");
 	@sendCodesAr = split(",", $sendCodesStr);
 	$sendCodesCnt = scalar(@sendCodesAr);
-  return "no codes available for sending, please press buttons on your remote for learning" if ($sendCodesCnt < 1);
+  return "$name: No codes available for sending, please press buttons on your remote for learning." if ($sendCodesCnt < 1);
 	my ($index) = grep { $sendCodesAr[$_] eq $sendCode } (0 .. $sendCodesCnt - 1);
 	$index = -1 if (not defined($index));
 	$index++;
@@ -225,7 +221,7 @@ sub Set($$$@) {
 	$sendCode = $sendCodesAr[$index];	# new sendCode
 
 	Log3 $name, 3, "$ioname: SD_GT set $name $cmd";
-	Log3 $hash, 4, "$ioname: SD_GT_Set $name $cmd ($sendCodesCnt codes $sendCodesStr - send $sendCode)";
+	Log3 $name, 4, "$ioname: SD_GT_Set $name $cmd ($sendCodesCnt codes $sendCodesStr - send $sendCode)";
 
 	if ($hash->{DEF} =~ /_all$/) {	# send button all
 		my $systemCode = ReadingsVal($name, "SystemCode", "");
@@ -238,10 +234,10 @@ sub Set($$$@) {
 	}
 	
 	my $msg = "P49#0x" . $sendCode . "#R4";
-	Log3 $hash, 5, "$ioname: $name SD_GT_Set first set sendMsg $msg";
+	Log3 $name, 5, "$ioname: $name SD_GT_Set first set sendMsg $msg";
 	IOWrite($hash, 'sendMsg', $msg);
 	$msg = "P49.1#0x" . $sendCode . "#R4";
-	Log3 $hash, 5, "$ioname: $name SD_GT_Set second set sendMsg $msg";
+	Log3 $name, 5, "$ioname: $name SD_GT_Set second set sendMsg $msg";
 	IOWrite($hash, 'sendMsg', $msg);
 
 	readingsBeginUpdate($hash);
@@ -268,10 +264,10 @@ sub Parse($$) {
 	my $level;	# A, B, C, D or all
 	my $state;
 	
-	Log3 $iohash, 5, "###############################################################";
-	Log3 $iohash, 5, "$ioname: SD_GT_Parse is running with protocol $protocol";
+	Log3 $ioname, 5, "###############################################################";
+	Log3 $ioname, 5, "$ioname: SD_GT_Parse is running with protocol $protocol";
 	my ($systemCode1, $systemCode2) = getSystemCodes($rawData);
-	Log3 $iohash, 4, "$ioname: SD_GT_Parse $rawData, possible codes version 1 $systemCode1 or version 2 $systemCode2";
+	Log3 $ioname, 4, "$ioname: SD_GT_Parse $rawData, possible codes version 1 $systemCode1 or version 2 $systemCode2";
 
 	# sucht Version und SytemCode in bereits angelegten SD_GT
 	foreach my $d (keys %defs) {
@@ -285,7 +281,7 @@ sub Parse($$) {
 		$version = 0;			# reset version
 		$systemCode = 0;	# reset systemCode
 	}
-	Log3 $iohash, 4, "$ioname: SD_GT_Parse $rawData, found version $version with systemCode $systemCode";
+	Log3 $ioname, 4, "$ioname: SD_GT_Parse $rawData, found version $version with systemCode $systemCode";
 
 	if ($version == 0 && $systemCode eq 0) {	# Version und systemCode nicht gefunden
 		$devicedef = "LEARN";
@@ -295,13 +291,13 @@ sub Parse($$) {
 		$state = $buttons{$version}->{$unit}->{$statecode};
 		$level = $buttons{$version}->{$unit}->{"unit"};
 		$devicedef = $systemCode . "_" . $level;
-		Log3 $iohash, 4, "$ioname: SD_GT_Parse code $rawData, device $devicedef";
+		Log3 $ioname, 4, "$ioname: SD_GT_Parse code $rawData, device $devicedef";
 	}
 
 	my $def = $modules{SD_GT}{defptr}{$devicedef};
 	$modules{SD_GT}{defptr}{ioname} = $ioname;
 	if(!$def) {
-		Log3 $iohash, 1, "$ioname: SD_GT_Parse UNDEFINED SD_GT_$devicedef device detected";
+		Log3 $ioname, 1, "$ioname: SD_GT_Parse UNDEFINED SD_GT_$devicedef device detected";
 		return "UNDEFINED SD_GT_$devicedef SD_GT $devicedef";
 	}
 	my $hash = $def;
@@ -357,8 +353,9 @@ sub Parse($$) {
 		push(@learnCodesAr,$rawData) if (not grep /$rawData/, @learnCodesAr);
 	}
 	
+	Log3 $name, 4, "$ioname: SD_GT_Parse code $rawData, $name, button $level $state";
+
 	if (defined $level && $level eq "all") {	# received button all) {
-		Log3 $name, 4, "$ioname: SD_GT_Parse code $rawData, $name, button $level $state";
 		foreach my $d (keys %defs) {	# sucht angelegte SD_GT mit gleichem Sytemcode 
 			if(defined($defs{$d}) && $defs{$d}{TYPE} eq "SD_GT" && $defs{$d}{DEF} =~ /$systemCode/ && $defs{$d}{DEF} =~ /[ABCD]$/ && ReadingsVal($d, "state", "") ne $state) {
 				readingsSingleUpdate($defs{$d}, "state" , $state , 1);
