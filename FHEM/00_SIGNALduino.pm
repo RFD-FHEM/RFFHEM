@@ -1195,11 +1195,11 @@ sub SIGNALduino_CheckCmdResp($)
 		}
 		else {
 			readingsSingleUpdate($hash, "state", "opened", 1);
-			$hash->{logMethod}->($name, 2, "$name: initialized. " . SDUINO_VERSION);
+			$hash->{logMethod}->($name, 2, "$name: initialized " . SDUINO_VERSION);
 			$hash->{DevState} = 'initialized';
 			delete($hash->{initResetFlag}) if defined($hash->{initResetFlag});
 			SIGNALduino_SimpleWrite($hash, "XE"); # Enable receiver
-			$hash->{logMethod}->($hash, 3, "$name/init: enable receiver (XE)");
+			$hash->{logMethod}->($hash, 3, "$name: enable receiver (XE) ");
 			delete($hash->{initretry});
 			# initialize keepalive
 			$hash->{keepalive}{ok}    = 0;
