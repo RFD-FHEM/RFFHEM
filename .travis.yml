@@ -1,9 +1,12 @@
 sudo: enabled
 language: perl
-perl:
-- '5.26@cover'
-- '5.24@cover'
-- "5.18@cover"
+jobs:
+  include:
+  - perl: "5.26@cover"
+  - perl: "5.24@cover"
+  - perl: "5.18@cover"
+    before_script:
+      - cpanm List::Util --notest 
 cache:
    directories:
       - $HOME/perl5
@@ -25,7 +28,8 @@ install:
  - sudo apt-get update -qq
  - sudo apt-get install fhem -y
  - sudo chown travis -R /opt/fhem
- - sudo systemctl stop fhem
+ - sudo /etc/init.d/fhem stop
+ # - sudo service fhem stop
 script:
  - timeout 40 bash -c 'while /usr/bin/pgrep perl >> /dev/null; do sleep 1; echo .; done;'
  - make test && sudo pkill "^perl"
