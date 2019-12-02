@@ -17,4 +17,3 @@ defmod test_3 UnitTest dummyDuino
      }   
  }
 );
-attr test3 room tests
