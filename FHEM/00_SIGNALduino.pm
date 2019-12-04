@@ -699,7 +699,7 @@ sub SIGNALduino_Set($$@) {
 	my $argm = 'CE' . substr($arg,-1,1);
 	#SIGNALduino_SimpleWrite($hash, $argm);
 	SIGNALduino_AddSendQueue($hash,$argm);
-	$hash->{logMethod}->($name, 4, "name: Set, $cmd $arg $argm");
+	$hash->{logMethod}->($name, 4, "$name: Set, $cmd $arg $argm");
   } elsif( $cmd eq "freq" ) {
 	if ($arg eq "") {
 		$arg = AttrVal($name,"cc1101_frequency", 433.92);
