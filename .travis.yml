@@ -33,7 +33,8 @@ install:
  # - sudo service fhem stop
 script:
  - timeout 40 bash -c 'while /usr/bin/pgrep perl >> /dev/null; do sleep 1; echo .; done;'
- - make test && sudo pkill "^perl" || true
+ - make test 
+ - sudo pkill "^perl" || true
  - timeout 40 bash -c 'while /usr/bin/pgrep perl >> /dev/null; do sleep 1; echo .; done;' || sudo pkill "^perl"
  - sleep 3
  - ./build_controls_list.sh 
