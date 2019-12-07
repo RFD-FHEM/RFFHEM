@@ -1,5 +1,7 @@
 defmod test_MS_2 UnitTest dummyDuino (
 {
+	note("read test from test_MS_2-definition.txt");
+
 	my $mock = Mock::Sub->new;
 	my $SD_Dispatch = $mock->mock("SIGNALduno_Dispatch");
 	

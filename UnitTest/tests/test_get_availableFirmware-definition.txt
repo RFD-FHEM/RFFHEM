@@ -1,6 +1,8 @@
 defmod test_get_availableFirmware UnitTest dummyDuino 
 (
  {
+	note("read test from test_get_availableFirmware-definition.txt");
+
 	subtest 'Test get availableFirmware' => sub {
 		plan tests => 2;
 		$attr{$target}{updateChannelFW} = "stable";

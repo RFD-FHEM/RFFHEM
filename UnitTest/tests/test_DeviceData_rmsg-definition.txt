@@ -1,6 +1,7 @@
 defmod test_DeviceData_rmsg UnitTest dummyDuino ( 
  {  
- 
+ 	note("read test from test_DeviceData_rmsg-definition.txt");
+	
   	my $mock = Mock::Sub->new; 
 	use JSON; 
   	use List::Util qw[min max];

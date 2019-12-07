@@ -1,6 +1,7 @@
 defmod test_3 UnitTest dummyDuino 
 (
  {
+	note("read test from test_3-definition.txt");
 	 my $mock;
 	 $mock = Mock::Sub->new;
 	 my $Dispatch;

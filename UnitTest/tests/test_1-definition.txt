@@ -1,6 +1,7 @@
 defmod test_1 UnitTest dummyDuino 
 (
  {
+	note("read test from test_1-definition.txt");
 	 my $rmsg="MS;P1=502;P2=-9212;P3=-1939;P4=-3669;D=1234;CP=1;SP=2;";
      my %signal_parts=SIGNALduino_Split_Message($rmsg,$targetHash->{NAME});
 	 
@@ -22,7 +23,5 @@ defmod test_1 UnitTest dummyDuino
      is( $signal_parts{rawData}, "55AB", "SIGNALduino_Split_Message check MC rawData" );
      is( $signal_parts{pattern}{LH}, "889", "SIGNALduino_Split_Message check MC pattern LH" );
      is( $signal_parts{pattern}{SL}, "-599", "SIGNALduino_Split_Message check MC pattern SH" );
-
-
  }
 );

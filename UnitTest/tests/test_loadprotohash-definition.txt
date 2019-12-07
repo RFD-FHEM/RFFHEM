@@ -1,6 +1,8 @@
 defmod test_loadprotohash UnitTest dummyDuino 
 (
  {
+    note("read test from test_loadprotohash-definition.txt");
+
     plan tests => 3;
     my %ret= SIGNALduino_LoadProtocolHash("dummy.hash");
     ok(exists($ret{error}),"check with wrong filename");

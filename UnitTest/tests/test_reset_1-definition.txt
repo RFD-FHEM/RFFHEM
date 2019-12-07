@@ -1,6 +1,8 @@
 defmod test_reset_1 UnitTest dummyDuino 
 (
  {
+	note("read test from test_reset_1-definition.txt");
+
 	my $mock;
     my $SD_connect;
 	my $IntTimer;

@@ -1,5 +1,7 @@
 defmod test_sub_parseResponse UnitTest dummyDuino ( 
-{ 
+{
+ 	note("read test from test_sub_parseResponse-definition.txt");
+
 	subtest 'Test cmd "cmds"' => sub {
 		plan tests => 1;
 		

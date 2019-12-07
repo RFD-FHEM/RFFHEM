@@ -1,6 +1,8 @@
 defmod test_firmware_flash_1 UnitTest dummyDuino 
 (
  {
+	note("read test from test_firmware_flash_1-definition.txt");
+
 	my $mock;
     my $system_call;
     my $OpenDev;

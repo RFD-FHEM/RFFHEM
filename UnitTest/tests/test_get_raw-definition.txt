@@ -1,6 +1,7 @@
 defmod test_get_raw UnitTest dummyDuino 
 (
  {
+	note("read test from test_get_raw-definition.txt");
 
 	subtest 'Test get questionmark without cc1101' => sub {
 		plan tests => 2;

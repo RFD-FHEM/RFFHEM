@@ -1,6 +1,8 @@
 defmod test_read UnitTest dummyDuino 
 (
  {
+	note("read test from test_read-definition.txt");
+
 	use Test::Device::SerialPort;
     my %mockData = (
     '9'    => 

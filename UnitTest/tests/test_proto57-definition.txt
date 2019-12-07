@@ -1,5 +1,7 @@
 defmod test_proto57 UnitTest dummyDuino ( 
- { 
+ {
+  note("read test from test_proto57-definition");
+
 	my $mock = Mock::Sub->new; 	
 	
 	subtest 'SIGNALduino_parse_MC maxlength' => sub {

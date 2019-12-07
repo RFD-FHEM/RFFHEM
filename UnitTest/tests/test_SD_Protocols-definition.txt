@@ -1,6 +1,8 @@
 defmod test_SD_Protocols UnitTest dummyDuino 
 (
  {
+	note("read test from test_SD_Protocols-definition.txt");
+
 	require_ok('lib::SD_Protocols'); 
 	require lib::SD_Protocols;
 

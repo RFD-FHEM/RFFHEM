@@ -1,5 +1,7 @@
 defmod test_SDWS UnitTest dummyDuino ( 
 {
+	note("read test from test_SDWS-definition.txt");
+
 	CommandAttr(undef,"autocreate verbose 5");
 
 	my $sensorname="SD_WS_38_T_1";

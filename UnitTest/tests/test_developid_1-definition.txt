@@ -1,6 +1,6 @@
 defmod test_developid_1 UnitTest dummyDuino (
  { 
-
+	note("read test from test_developid_1-definition.txt");
 	my %ProtocolListTest =  SIGNALduino_LoadProtocolHash("$attr{global}{modpath}/FHEM/lib/test_loadprotohash-ok.pm");
 	is($ProtocolListTest{error},undef,"load test protocol hash ");
 

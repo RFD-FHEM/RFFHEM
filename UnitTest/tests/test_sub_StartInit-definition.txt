@@ -1,5 +1,7 @@
 defmod test_sub_StartInit UnitTest dummyDuino ( 
-{ 
+{
+	note("read test from test_sub_StartInit-definition.txt");
+
 	subtest 'Test with initretry=1' => sub {
 		plan tests => 4;
 		

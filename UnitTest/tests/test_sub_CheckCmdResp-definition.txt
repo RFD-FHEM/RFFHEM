@@ -1,5 +1,7 @@
 defmod test_sub_CheckCmdResp UnitTest dummyDuino ( 
-{ 
+{
+ 	note("read test from test_sub_CheckCmdResp-definition.txt");
+
 	subtest 'Test with unset version' => sub {
 		plan tests => 2;
 		

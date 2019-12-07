@@ -1,6 +1,8 @@
 defmod test_set_sendMsg UnitTest dummyDuino 
 (
  {
+ 	  note("read test from test_set_sendMsg-definition.txt");
+
     my %mockData = (
     '0'    => 
 		{	

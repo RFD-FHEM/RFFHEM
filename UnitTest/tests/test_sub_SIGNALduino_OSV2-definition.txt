@@ -1,5 +1,7 @@
 defmod test_sub_SIGNALduino_OSV2 UnitTest dummyDuino ( 
-{ 
+{
+		note("read test from test_sub_SIGNALduino_OSV2-definition.txt");
+
 		subtest 'OSV2 Tests' => sub {
 			plan tests => 2;
 			my ($rcode,$hexresult);

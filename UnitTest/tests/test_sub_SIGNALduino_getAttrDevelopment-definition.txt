@@ -1,5 +1,7 @@
 defmod test_sub_SIGNALduino_getAttrDevelopment UnitTest dummyDuino ( 
-{ 
+{
+	note("read test from test_sub_SIGNALduino_getAttrDevelopment-definition.txt");
+
 	CommandAttr(undef,"$target Whitelist_IDs 1,2,3");
 
 	subtest 'development attr set to 0' => sub {

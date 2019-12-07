@@ -1,6 +1,8 @@
 defmod test_mu_1 UnitTest dummyDuino (
  {
-  	my $mock = Mock::Sub->new;
+ 	note("read test from test_mu_1-definition.txt");
+
+ 	my $mock = Mock::Sub->new;
 	my $SD_Dispatch = $mock->mock("SIGNALduno_Dispatch");
 	
     my %local_ProtocolListSIGNALduino =  SIGNALduino_LoadProtocolHash("$attr{global}{modpath}/FHEM/lib/test_loadprotohash-ok.pm");

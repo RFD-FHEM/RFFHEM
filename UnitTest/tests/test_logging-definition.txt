@@ -1,5 +1,7 @@
 defmod test_logging UnitTest dummyDuino ( 
-{ 
+{
+note("read test from test_logging-definition.txt");
+
 my $mock = Mock::Sub->new;
 my $DoTrigger = $mock->mock("DoTrigger");
 

@@ -1,5 +1,7 @@
 defmod test_sub_MCTFA UnitTest dummyDuino ( 
-{ 
+{
+ 	note("read test from test_sub_MCTFA-definition.txt");
+
 	my $id=58;
 	subtest 'MCTFA single transmission' => sub {
 		plan tests => 2;

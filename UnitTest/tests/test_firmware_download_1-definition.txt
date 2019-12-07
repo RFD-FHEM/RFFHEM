@@ -1,6 +1,8 @@
 defmod test_firmware_download_1 UnitTest dummyDuino 
 (
  {
+	note("read test from test_firmware_download_1-definition.txt");
+
 	my $mock = Mock::Sub->new;
 	Log3 $name , 3, "Test starting";
 

@@ -1,8 +1,8 @@
 defmod test_defineDefaults UnitTest dummyDuino (
  {
+	note("read test from test_defineDefaults-definition.txt");
 	CommandDefMod(undef,"-temporary testDuino SIGNALduino none");
 
- 	
  	subtest 'Check internal defaults ' => sub {
 		plan tests => 5;
 		my $name ="testDuino";

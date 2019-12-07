@@ -7,6 +7,8 @@ setstate RSL_411B11_0_0 2018-06-14 18:24:38 state off;;
 
 defmod test_rsl UnitTest RSL_411B11_0_0 ( 
 { 
+	note("read test from test_rsl-definition.txt");
+
 	subtest 'Test set questionmark' => sub {
 		plan tests => 4;
 		my $ret=SD_RSL_Set($targetHash,"RSL_411B11_0_0","?");
