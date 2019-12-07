@@ -56,7 +56,7 @@ defmod test_read UnitTest dummyDuino
 			}
 		};
 	};
-		
+	$parsefn->unmock;	
 	fhem("attr $target debug 0");
 	$targetHash->{USBDev} = undef;
  }

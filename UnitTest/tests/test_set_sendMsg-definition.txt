@@ -43,7 +43,7 @@ defmod test_set_sendMsg UnitTest dummyDuino
 
 	my $mock = Mock::Sub->new;
  	my $AddSendQueuefn = $mock->mock('SIGNALduino_AddSendQueue');
-	$targetHash->{version} = "dummy cc1101";
+	$targetHash->{hasCC1101} = 1;
 
 	foreach my $id (qw/0 17 29 43 43a 72/) 
 	{
@@ -59,6 +59,8 @@ defmod test_set_sendMsg UnitTest dummyDuino
 		};
 	
 	};
+	$AddSendQueuefn->unmock;
+	$targetHash->{hasCC1101} = 0;
 		
  }
 );
