@@ -4,7 +4,7 @@ defmod test_get_raw UnitTest dummyDuino
 
 	subtest 'Test get questionmark without cc1101' => sub {
 		plan tests => 2;
-		CommandAttr(undef,"$target dummy 0");
+		CommandDeleteAttr(undef,"$target dummy");
 		$targetHash->{hasCC1101} = 0;
 		my $rawArg="?";
 		my $ret=SIGNALduino_Get($targetHash, $target, "?", $rawArg);
@@ -14,7 +14,7 @@ defmod test_get_raw UnitTest dummyDuino
 	
 	subtest 'Test get questionmark with cc1101' => sub {
 		plan tests => 1;
-		CommandAttr(undef,"$target dummy 0");
+		CommandDeleteAttr(undef,"$target dummy");
 		$targetHash->{hasCC1101} = 1;
 		my $rawArg="?";
 		my $ret=SIGNALduino_Get($targetHash, $target, "?", $rawArg);
