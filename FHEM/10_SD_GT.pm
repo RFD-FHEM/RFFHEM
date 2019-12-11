@@ -1,5 +1,5 @@
 #################################################################
-# $Id: 10_SD_GT.pm 0 2019-11-25 21:15:00Z elektron-bbs $
+# $Id: 10_SD_GT.pm 0 2019-12-11 21:00:00Z elektron-bbs $
 #
 # The file is part of the SIGNALduino project.
 #
@@ -41,15 +41,12 @@ BEGIN {
 		defs
 		DoTrigger
 		IOWrite
-		InternalVal
 		IsIgnored
-		IsDummy
 		Log3
 		modules
 		ReadingsVal
 		readingsBeginUpdate
 		readingsBulkUpdate
-		readingsDelete
 		readingsEndUpdate
 		readingsSingleUpdate
 		))
@@ -192,9 +189,6 @@ sub Set($$$@) {
 	my $repeats = AttrVal($name,'repeats', '5');
 	my $ret = undef;
 
-	Log3 $name, 5, "###############################################################";
-	Log3 $name, 5, "$ioname: $name SD_GT_Set is running";
-	
   return "\"set $name\" needs at least one argument" unless(defined($cmd));
 
 	if ($cmd eq "?") {
@@ -264,8 +258,6 @@ sub Parse($$) {
 	my $level;	# A, B, C, D or all
 	my $state;
 	
-	Log3 $ioname, 5, "###############################################################";
-	Log3 $ioname, 5, "$ioname: SD_GT_Parse is running with protocol $protocol";
 	my ($systemCode1, $systemCode2) = getSystemCodes($rawData);
 	Log3 $ioname, 4, "$ioname: SD_GT_Parse $rawData, possible codes version 1 $systemCode1 or version 2 $systemCode2";
 

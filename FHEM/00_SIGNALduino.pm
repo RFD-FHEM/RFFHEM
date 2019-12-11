@@ -31,7 +31,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.4.1_dev_19.11",
+	SDUINO_VERSION            => "v3.4.1_dev_11.12",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -231,7 +231,7 @@ my %matchListSIGNALduino = (
 			"26:Fernotron"				=> '^P82#.*',
 			"27:SD_BELL"					=> '^P(?:15|32|41|42|57|79|96)#.*',
 			"28:SD_Keeloq"				=> '^P(?:87|88)#.*',
-			"29:SD_GT"						=> '^P(49|49.1)#[A-Fa-f0-9]+',
+			"29:SD_GT"						=> '^P49#[A-Fa-f0-9]+',
 			"X:SIGNALduino_un"		=> '^[u]\d+#.*',
 );
 
