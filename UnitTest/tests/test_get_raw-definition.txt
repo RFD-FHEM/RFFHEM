@@ -2,9 +2,9 @@ defmod test_get_raw UnitTest dummyDuino
 (
  {
 
-	subtest 'Test get raw questionmark without cc1101' => sub {
+	subtest 'Test get questionmark without cc1101' => sub {
 		plan tests => 2;
-		CommandAttr(undef,"$target dummy 1");
+		CommandDeleteAttr(undef,"$target dummy");
 		$targetHash->{hasCC1101} = 0;
 		my $rawArg="?";
 		my $ret=SIGNALduino_Get($targetHash, $target, "?", $rawArg);
@@ -12,15 +12,23 @@ defmod test_get_raw UnitTest dummyDuino
 		unlike($ret,qr/.*cc.*/,"check return contains no cc command");
 	}; 
 	
-	subtest 'Test get raw questionmark with cc1101' => sub {
+	subtest 'Test get questionmark with cc1101' => sub {
 		plan tests => 1;
-		CommandAttr(undef,"$target dummy 1");
+		CommandDeleteAttr(undef,"$target dummy");
 		$targetHash->{hasCC1101} = 1;
 		my $rawArg="?";
 		my $ret=SIGNALduino_Get($targetHash, $target, "?", $rawArg);
 		like($ret,qr/^Unknown argument ?.*cc.*/,"check return contains get commands with cc commands");
 	}; 
 
+	subtest 'Test get as dummy' => sub {
+		plan tests => 2;
+		CommandAttr(undef,"$target dummy 1");
+		my $rawArg="?";
+		my $ret=SIGNALduino_Get($targetHash, $target, "?", $rawArg);
+		like($ret,qr/^Unknown argument \?, choose one of availableFirmware:noArg raw$/,"check return contains get commands");
+		unlike($ret,qr/.*cc.*/,"check return contains no cc command");
+	}; 
 	
 	subtest 'Test get raw MS;P1=309;' => sub {
 		plan tests => 1;

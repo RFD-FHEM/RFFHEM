@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 14_SD_WS.pm 18674 2019-11-09 12:00:00Z Sidey/elektron-bbs $
+# $Id: 14_SD_WS.pm 18674 2019-11-10 13:14:00Z Sidey/elektron-bbs $
 #
 # The purpose of this module is to support serval
 # weather sensors which use various protocol

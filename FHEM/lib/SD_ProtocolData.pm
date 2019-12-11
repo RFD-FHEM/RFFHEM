@@ -227,9 +227,13 @@ package lib::SD_ProtocolData;
 						## JCHENG SECURITY Wireless PIR
 						# (only autocreate -> J2 Data setting D0 open | D1 closed | D2 closed | D3 open)
 						# on                                   MS;P1=-12541;P2=1227;P3=-405;P4=407;P5=-1209;D=41232323232345452323454523452323234545234545232345;CP=4;SP=1;R=35;O;m2;E;
+						## benon (Semexo OHG) | remote BH-P with 5 Channels, switch B2112 | Amazon
+						## (real CP=160) chip HS2260C-R4 | length 24
+						# on                                   MS;P0=160;P4=-542;P5=515;P6=-174;P7=-5406;D=07040404560404045604560456045604560404565604045656;CP=0;SP=7;R=24;O;m2;
+						# off                                  MS;P1=-538;P2=163;P3=518;P4=-175;P5=-5396;D=25212121342121213421342134213421342121343434342121;CP=2;SP=5;R=31;O;m2;4;
 			{
-				name						=> 'chip xx2262',
-				comment					=> 'remote for ELRO|Kangtai|Intertek|REWE|WOFI / PIR JCHENG',
+				name						=> 'chip xx2260 / xx2262',
+				comment					=> 'remote for benon|ELRO|Kangtai|Intertek|REWE|WOFI / PIR JCHENG',
 				id							=> '3',
 				knownFreqs      => '433.92',
 				one							=> [3,-1],

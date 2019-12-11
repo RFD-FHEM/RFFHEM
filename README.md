@@ -1,7 +1,7 @@
-SIGNALduino - FHEM Modules development Version 3.4.1
+SIGNALduino - FHEM Modules development Version 3.3.x
 ======
 
-[![Coverage Status](https://coveralls.io/repos/github/RFD-FHEM/RFFHEM/badge.svg?branch=dev-r34)](https://coveralls.io/github/RFD-FHEM/RFFHEM?branch=dev-r34) [![Build Status](https://travis-ci.org/RFD-FHEM/RFFHEM.svg?branch=dev-r34)](https://travis-ci.org/RFD-FHEM/RFFHEM)
+[![Coverage Status](https://coveralls.io/repos/github/RFD-FHEM/RFFHEM/badge.svg?branch=master)](https://coveralls.io/github/RFD-FHEM/RFFHEM?branch=master) [![Build Status](https://travis-ci.org/RFD-FHEM/RFFHEM.svg?branch=master)](https://travis-ci.org/RFD-FHEM/RFFHEM)
 
 Counterpart of SIGNALDuino uC, it's the code for FHEM to work with the data received from the uC
 
@@ -14,6 +14,7 @@ Supported Devices / Protocols
 |Arduino Sensor | multi purpose sensor based on arduino |
 |Atlantic Security | some sensors (MD-210R / MD-2018R / MD-2003R) |
 |Auriol IAN 60107, 114324, 275901, 283582, 297514, 314695 (Lidl) | Weatherstation |
+|benon (Semexo OHG) | Remote control (BH-P)|
 |BOSCH / Neff | Remote control (SF01 01319004)|
 |CAME TOP 432EV | Remote control |
 |CTW600 WH1080 | Weather station WH3080 UV/Lux Sensor |
