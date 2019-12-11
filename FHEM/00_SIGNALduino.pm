@@ -4623,9 +4623,17 @@ sub SIGNALduino_githubParseHttpResponse($$$) {
 
         To send some raw data look at these examples:
 		P<protocol id>#binarydata#R<num of repeats>#C<optional clock>   (#C is optional)<br>
-		<br>Example 1: set sduino raw SR;R=3;P0=500;P1=-9000;P2=-4000;P3=-2000;D=0302030  sends the data in raw mode 3 times repeated
-        <br>Example 2: set sduino raw SM;R=3;P0=500;C=250;D=A4F7FDDE  sends the data manchester encoded with a clock of 250uS
-        <br>Example 3: set sduino raw SC;R=3;SR;P0=5000;SM;P0=500;C=250;D=A4F7FDDE  sends a combined message of raw and manchester encoded repeated 3 times
+		<br>Example 1: <code>set sduino raw SR;R=3;P0=500;P1=-9000;P2=-4000;P3=-2000;D=0302030</code>  sends the data in raw mode 3 times repeated
+		<br>Example 2: <code>set sduino raw SM;R=3;P0=500;C=250;D=A4F7FDDE</code>  sends the data manchester encoded with a clock of 250uS
+		<br>Example 3: <code>set sduino raw SC;R=3;SR;P0=5000;SM;P0=500;C=250;D=A4F7FDDE</code>  sends a combined message of raw and manchester encoded repeated 3 times
+		<ul><br>
+			<b>note: The wrong use of the upcoming options can lead to malfunctions of the SIGNALduino!</b><br><br>
+			<u>Register commands for a CC1101</u><br>
+			<li>e -> default settings</li>
+			<li>W -> writes a value to the EEPROM and the CC1101 register<br>
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;note: The EEPROM address has an offset of 2. example: <code>set sduino raw W041D</code> write 1D to Register 0x02
+		 </li>
+		</ul>
 		</p>
 		</li>
         <a name="sendMsg"></a>
@@ -5038,8 +5046,8 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
 				<li>Beispiel 3: <code>set sduino raw SC;R=3;SR;P0=5000;SM;P0=500;C=250;D=A4F7FDDE</code> , sendet eine kombinierte Nachricht von Raw und Manchester codiert 3 mal wiederholt</li>
 			</ul><br>
 		<ul>
-         <u>NUR f&uuml;r DEBUG Nutzung | <small>Befehle sind abhaenging vom Firmwarestand!</small></u><br>
-         <small>(Hinweis: Die falsche Benutzung kann zu Fehlfunktionen des SIGNALduino´s f&uuml;hren!)</small>
+         <b>Hinweis: Die falsche Benutzung der kommenden Optionen kann zu Fehlfunktionen des SIGNALduino´s f&uuml;hren!</b><br><br>
+         <u>NUR f&uuml;r DEBUG Nutzung | <small>Befehle sind abh&auml;nging vom Firmwarestand!</small></u><br>
             <li>CED -> Debugausgaben ein</li>
             <li>CDD -> Debugausgaben aus</li>
             <li>CDL -> LED aus</li>
@@ -5050,7 +5058,13 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
             <li>CSmuthresh=[Wert] -> Schwellwert fuer den split von MU Nachrichten (0=aus)</li>
             <li>CSmcmbl=[Wert] -> minbitlen fuer MC-Nachrichten</li>
             <li>CSfifolimit=[Wert] -> Schwellwert fuer debug Ausgabe der Pulsanzahl im FIFO Puffer</li>
-         </ul><br></li>
+						<br><br>
+         <u>Register Befehle bei einem CC1101</u><br>
+         <li>e -> Werkseinstellungen</li>
+         <li>W -> schreibt einen Wert ins EEPROM und ins CC1101 Register<br>
+				 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Hinweis: Die EEPROM Adresse hat einen Offset von 2. z.Bsp: <code>set sduino raw W041D</code> schreibt 1D ins Register 0x02
+				 </li>
+		</ul><br></li>
 	<a name="reset"></a>
 	<li>reset<br>
 	&Ouml;ffnet die Verbindung zum Ger&auml;t neu und initialisiert es.</li><br>
