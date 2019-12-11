@@ -1418,6 +1418,36 @@ sub SIGNALduino_Read($) {
 				$hash->{keepalive}{ok}    = 1;
 				$hash->{keepalive}{retry} = 0;
 			}
+
+			## detailed register with name ##
+			if ($regexp eq "^ccreg 00:") {
+				my $rmsg2 = $rmsg;
+				$rmsg2 =~ s/ccreg\s\d0:\s//g;
+				$rmsg2 =~ s/\s+/ /g;
+
+				my @ccreg = split(/\s/,$rmsg2);
+				my @ccregnames = (
+					"00 IOCFG2__","01 IOCFG1__","02 IOCFG0__","03 FIFOTHR_","04 SYNC1___","05 SYNC0___",
+					"06 PKTLEN__","07 PKTCTRL1","08 PKTCTRL0","09 ADDR____","0A CHANNR__","0B FSCTRL1_",
+					"0C FSCTRL0_","0D FREQ2___","0E FREQ1___","0F FREQ0___","10 MDMCFG4_","11 MDMCFG3_",
+					"12 MDMCFG2_","13 MDMCFG1_","14 MDMCFG0_","15 DEVIATN_","16 MCSM2___","17 MCSM1___",
+					"18 MCSM0___","19 FOCCFG__","1A BSCFG___","1B AGCCTRL2","1C AGCCTRL1","1D AGCCTRL0",
+					"1E WOREVT1_","1F WOREVT0_","20 WORCTRL_","21 FREND1__","22 FREND0__","23 FSCAL3__",
+					"24 FSCAL2__","25 FSCAL1__","26 FSCAL0__","27 RCCTRL1_","28 RCCTRL0_","29 FSTEST__",
+					"2A PTEST___","2B AGCTEST_","2C TEST2___","2D TEST1___","2E TEST0___" );
+
+				$rmsg2 = "";
+
+				for(my $i=0;$i<=$#ccreg;$i++) {
+					$rmsg2.= "0x".$ccregnames[$i]." - 0x".$ccreg[$i]."  ";
+				}
+
+				$rmsg.= "   ";
+				$rmsg.= "Configuration Register Detail (adr,desc,val):  ";
+				$rmsg.= $rmsg2;
+			}
+			## END ##
+
 			$hash->{logMethod}->($name, 5, "$name: Read, msg: regexp=$regexp cmd=$hash->{getcmd}->{cmd} msg=$rmsg");
 			
 			if ($hash->{getcmd}->{cmd} eq 'version') { # todo prüfen ob der code nicht in die %gets tabelle verschoben werden kann
