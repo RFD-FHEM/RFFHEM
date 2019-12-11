@@ -1436,10 +1436,32 @@ sub SIGNALduino_Read($) {
 					"24 FSCAL2__","25 FSCAL1__","26 FSCAL0__","27 RCCTRL1_","28 RCCTRL0_","29 FSTEST__",
 					"2A PTEST___","2B AGCTEST_","2C TEST2___","2D TEST1___","2E TEST0___" );
 
+				my %register = (
+													"MDMCFG2" => {	
+																					"00" => "2-FSK",
+																					"08" => "2-FSK , Manchester encoding/decoding enable",
+																					"10" => "GFSK",
+																					"18" => "GFSK , Manchester encoding/decoding enable",
+																					"30" => "ASK/OOK",
+																					"38" => "ASK/OOK , Manchester encoding/decoding enable",
+																					"40" => "2-FSK",
+																					"48" => "2-FSK , Manchester encoding/decoding enable",
+																					"70" => "MSK",
+																					"78" => "MSK , Manchester encoding/decoding enable"
+																				}
+				);
+
 				$rmsg2 = "";
 
 				for(my $i=0;$i<=$#ccreg;$i++) {
-					$rmsg2.= "0x".$ccregnames[$i]." - 0x".$ccreg[$i]."  ";
+					my $org_ccregnames = $ccregnames[$i];
+					$org_ccregnames =~ s/_//g;
+					$org_ccregnames = substr($org_ccregnames,3);
+					if ($register{$org_ccregnames} && exists $register{$org_ccregnames}{$ccreg[$i]}) {
+						$rmsg2.= "0x".$ccregnames[$i]." - 0x".$ccreg[$i]." ".$register{$org_ccregnames}{$ccreg[$i]}."  ";
+					} else {
+						$rmsg2.= "0x".$ccregnames[$i]." - 0x".$ccreg[$i]."  ";
+					}
 				}
 
 				$rmsg.= "   ";
