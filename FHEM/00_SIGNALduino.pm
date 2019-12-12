@@ -1441,7 +1441,7 @@ sub SIGNALduino_Read($) {
 				my @ccreg = split(/\s/,$registerstring);
 
 				$rmsg.= "\\n\\n";
-				$rmsg.= "Configuration Register Detail (adr,desc,val):\\n";
+				$rmsg.= "Configuration Register Detail (address, name, value):\\n";
 
 				for(my $i=0;$i<=$#ccreg;$i++) {
 					$rmsg.= "0x".$ccregnames[$i]." - 0x".$ccreg[$i]."\\n";
