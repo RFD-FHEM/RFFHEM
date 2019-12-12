@@ -940,7 +940,6 @@ sub SIGNALduino_parseResponse($$$) {
   	}
   	elsif($cmd eq "ccregAll")
   	{
-		$msg =~ s/  /\n/g;
 		$msg = "\n\n" . $msg
   	}
   	elsif($cmd eq "ccconf")
@@ -1421,53 +1420,32 @@ sub SIGNALduino_Read($) {
 
 			## detailed register with name ##
 			if ($regexp eq "^ccreg 00:") {
-				my $rmsg2 = $rmsg;
-				$rmsg2 =~ s/ccreg\s\d0:\s//g;
-				$rmsg2 =~ s/\s+/ /g;
+				$rmsg =~ s/\s\sccreg/\\nccreg/g;
 
-				my @ccreg = split(/\s/,$rmsg2);
 				my @ccregnames = (
-					"00 IOCFG2__","01 IOCFG1__","02 IOCFG0__","03 FIFOTHR_","04 SYNC1___","05 SYNC0___",
-					"06 PKTLEN__","07 PKTCTRL1","08 PKTCTRL0","09 ADDR____","0A CHANNR__","0B FSCTRL1_",
-					"0C FSCTRL0_","0D FREQ2___","0E FREQ1___","0F FREQ0___","10 MDMCFG4_","11 MDMCFG3_",
-					"12 MDMCFG2_","13 MDMCFG1_","14 MDMCFG0_","15 DEVIATN_","16 MCSM2___","17 MCSM1___",
-					"18 MCSM0___","19 FOCCFG__","1A BSCFG___","1B AGCCTRL2","1C AGCCTRL1","1D AGCCTRL0",
-					"1E WOREVT1_","1F WOREVT0_","20 WORCTRL_","21 FREND1__","22 FREND0__","23 FSCAL3__",
-					"24 FSCAL2__","25 FSCAL1__","26 FSCAL0__","27 RCCTRL1_","28 RCCTRL0_","29 FSTEST__",
-					"2A PTEST___","2B AGCTEST_","2C TEST2___","2D TEST1___","2E TEST0___" );
+					"00 IOCFG2  ","01 IOCFG1  ","02 IOCFG0  ","03 FIFOTHR ","04 SYNC1   ","05 SYNC0   ",
+					"06 PKTLEN  ","07 PKTCTRL1","08 PKTCTRL0","09 ADDR    ","0A CHANNR  ","0B FSCTRL1 ",
+					"0C FSCTRL0 ","0D FREQ2   ","0E FREQ1   ","0F FREQ0   ","10 MDMCFG4 ","11 MDMCFG3 ",
+					"12 MDMCFG2 ","13 MDMCFG1 ","14 MDMCFG0 ","15 DEVIATN ","16 MCSM2   ","17 MCSM1   ",
+					"18 MCSM0   ","19 FOCCFG  ","1A BSCFG   ","1B AGCCTRL2","1C AGCCTRL1","1D AGCCTRL0",
+					"1E WOREVT1 ","1F WOREVT0 ","20 WORCTRL ","21 FREND1  ","22 FREND0  ","23 FSCAL3  ",
+					"24 FSCAL2  ","25 FSCAL1  ","26 FSCAL0  ","27 RCCTRL1 ","28 RCCTRL0 ","29 FSTEST  ",
+					"2A PTEST   ","2B AGCTEST ","2C TEST2   ","2D TEST1   ","2E TEST0   " );
 
-				my %register = (
-													"MDMCFG2" => {	
-																					"00" => "2-FSK",
-																					"08" => "2-FSK , Manchester encoding/decoding enable",
-																					"10" => "GFSK",
-																					"18" => "GFSK , Manchester encoding/decoding enable",
-																					"30" => "ASK/OOK",
-																					"38" => "ASK/OOK , Manchester encoding/decoding enable",
-																					"40" => "2-FSK",
-																					"48" => "2-FSK , Manchester encoding/decoding enable",
-																					"70" => "MSK",
-																					"78" => "MSK , Manchester encoding/decoding enable"
-																				}
-				);
+				my $registerstring = $rmsg;
+				$registerstring =~ s/ccreg\s\d0:\s//g;
+				$registerstring =~ s/\\n/ /g;
 
-				$rmsg2 = "";
+				my @ccreg = split(/\s/,$registerstring);
+
+				$rmsg.= "\\n\\n";
+				$rmsg.= "Configuration Register Detail (adr,desc,val):\\n";
 
 				for(my $i=0;$i<=$#ccreg;$i++) {
-					my $org_ccregnames = $ccregnames[$i];
-					$org_ccregnames =~ s/_//g;
-					$org_ccregnames = substr($org_ccregnames,3);
-					if ($register{$org_ccregnames} && exists $register{$org_ccregnames}{$ccreg[$i]}) {
-						$rmsg2.= "0x".$ccregnames[$i]." - 0x".$ccreg[$i]." ".$register{$org_ccregnames}{$ccreg[$i]}."  ";
-					} else {
-						$rmsg2.= "0x".$ccregnames[$i]." - 0x".$ccreg[$i]."  ";
-					}
+					$rmsg.= "0x".$ccregnames[$i]." - 0x".$ccreg[$i]."\\n";
 				}
-
-				$rmsg.= "   ";
-				$rmsg.= "Configuration Register Detail (adr,desc,val):  ";
-				$rmsg.= $rmsg2;
 			}
+			# string $rmsg have all linebreaks in "\n" format | logMethod view \n and not a linebreak #
 			## END ##
 
 			$hash->{logMethod}->($name, 5, "$name: Read, msg: regexp=$regexp cmd=$hash->{getcmd}->{cmd} msg=$rmsg");
