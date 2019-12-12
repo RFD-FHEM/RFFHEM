@@ -166,7 +166,8 @@ my %patable = (
 );
 
 
-my @ampllist = (24, 27, 30, 33, 36, 38, 40, 42); # rAmpl(dB)
+my @ampllist = (24, 27, 30, 33, 36, 38, 40, 42);                      # rAmpl(dB)
+my @modformat = ("2-FSK","GFSK","-","ASK/OOK","4-FSK","-","-","MSK"); # modulation format
 
 ## Supported Clients per default
 my $clientsSIGNALduino = ":IT:"
@@ -946,18 +947,19 @@ sub SIGNALduino_parseResponse($$$) {
   	{
 		my (undef,$str) = split('=', $msg);
 		my $var;
-		my %r = ( "0D"=>1,"0E"=>1,"0F"=>1,"10"=>1,"11"=>1,"1B"=>1,"1D"=>1 );
+		my %r = ( "0D"=>1,"0E"=>1,"0F"=>1,"10"=>1,"11"=>1,"12"=>1,"1B"=>1,"1D"=>1 );
 		$msg = "";
 		foreach my $a (sort keys %r) {
 			$var = substr($str,(hex($a)-13)*2, 2);
 			$r{$a} = hex($var);
 		}
-		$msg = sprintf("freq:%.3fMHz bWidth:%dKHz rAmpl:%ddB sens:%ddB  (DataRate:%.2fBaud)",
-		26*(($r{"0D"}*256+$r{"0E"})*256+$r{"0F"})/65536,                #Freq
-		26000/(8 * (4+(($r{"10"}>>4)&3)) * (1 << (($r{"10"}>>6)&3))),   #Bw
-		$ampllist[$r{"1B"}&7],                                          #rAmpl
-		4+4*($r{"1D"}&3),                                               #Sens
-		((256+$r{"11"})*(2**($r{"10"} & 15 )))*26000000/(2**28)         #DataRate
+		$msg = sprintf("freq:%.3fMHz bWidth:%dKHz rAmpl:%ddB sens:%ddB (DataRate:%.2fBaud, Modulation:%s)",
+		26*(($r{"0D"}*256+$r{"0E"})*256+$r{"0F"})/65536,                #Freq       | Register 0x0D,0x0E,0x0F
+		26000/(8 * (4+(($r{"10"}>>4)&3)) * (1 << (($r{"10"}>>6)&3))),   #Bw         | Register 0x10
+		$ampllist[$r{"1B"}&7],                                          #rAmpl      | Register 0x1B
+		4+4*($r{"1D"}&3),                                               #Sens       | Register 0x1D
+		((256+$r{"11"})*(2**($r{"10"} & 15 )))*26000000/(2**28),        #DataRate   | Register 0x10,0x11
+		$modformat[$r{"12"}>>4]                                         #Modulation | Register 0x12
 		);
 	}
 	elsif($cmd eq "bWidth") {
