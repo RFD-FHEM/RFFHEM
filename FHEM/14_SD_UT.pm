@@ -1,5 +1,5 @@
 #########################################################################################
-# $Id: 14_SD_UT.pm 19886 2019-08-26 20:21:52Z sidey79 $
+# $Id: 14_SD_UT.pm 20137 2019-09-09 15:58:29Z HomeAuto_User $
 #
 # The file is part of the SIGNALduino project.
 # The purpose of this module is universal support for devices.
@@ -688,139 +688,121 @@ sub SD_UT_Set($$$@) {
 	my $repeats = AttrVal($name,'repeats', '5');
 
 	Log3 $name, 4, "$ioname: SD_UT_Set attr_model=$model name=$name (before check)" if($cmd ne "?");
-	return $ret if ($defs{$name}->{DEF} eq "unknown");		# no setlist
+	return $ret if ($defs{$name}->{DEF} eq "unknown");	# no setlist
 
+	my @definition = split(" ", $hash->{DEF});					# split adress from def
+	if ($cmd ne "?") {
 	############ Westinghouse_Delancey RH787T ############
-	if ($model eq "RH787T" && $cmd ne "?") {
-		my @definition = split(" ", $hash->{DEF});																# split adress from def
-		my $adr = sprintf( "%04b", hex($definition[1])) if ($name ne "unknown");	# argument 1 - adress to binary with 4 digits
+	if ($model eq "RH787T") {
+		my $adr = sprintf( "%04b", hex($definition[1]));	# argument 1 - adress to binary with 4 digits
 		$msg = $models{$model}{Protocol} . "#0" . $adr ."1";
 		$msgEnd = "#R" . $repeats;
 	############ Westinghouse Buttons_five ############
-	} elsif ($model eq "Buttons_five" && $cmd ne "?") {
-		my @definition = split(" ", $hash->{DEF});																# split adress from def
-		my $adr = sprintf( "%04b", hex($definition[1])) if ($name ne "unknown");	# argument 1 - adress to binary with 4 digits
+	} elsif ($model eq "Buttons_five") {
+		my $adr = sprintf( "%04b", hex($definition[1]));	# argument 1 - adress to binary with 4 digits
 		$msg = $models{$model}{Protocol} . "#";
 		$msgEnd .= "11".$adr."#R" . $repeats;
 	############ SA_434_1_mini ############
-	} elsif ($model eq "SA_434_1_mini" && $cmd ne "?") {
-		my @definition = split(" ", $hash->{DEF});																		# split adress from def
-		my $bitData = sprintf( "%012b", hex($definition[1])) if ($name ne "unknown");	# argument 1 - adress to binary with 12 digits
+	} elsif ($model eq "SA_434_1_mini") {
+		my $bitData = sprintf( "%012b", hex($definition[1]));	# argument 1 - adress to binary with 12 digits
 		$msg = $models{$model}{Protocol} . "#" . $bitData . "#R" . $repeats;
 	############ Tedsen_SKX1xx, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx ############
-	} elsif (($model eq "Tedsen_SKX1xx" || $model eq "Tedsen_SKX2xx" || $model eq "Tedsen_SKX4xx" || $model eq "Tedsen_SKX6xx") && $cmd ne "?") {
-		my @definition = split(" ", $hash->{DEF});																# split adress from def
-		my $adr = SD_UT_tristate2bin($definition[1]);															# argument 1 - adress tristate to bin with 18 bits
+	} elsif ($model eq "Tedsen_SKX1xx" || $model eq "Tedsen_SKX2xx" || $model eq "Tedsen_SKX4xx" || $model eq "Tedsen_SKX6xx") {
+		my $adr = SD_UT_tristate2bin($definition[1]);	# argument 1 - adress tristate to bin with 18 bits
 		$msg = $models{$model}{Protocol} . "#" . $adr;
 		$msgEnd = "#R" . $repeats;
 	############ QUIGG_DMV ############
-	} elsif ($model eq "QUIGG_DMV" && $cmd ne "?") {
-		my @definition = split(" ", $hash->{DEF});																# split adress from def
-		my $adr = sprintf( "%012b", hex($definition[1])) if ($name ne "unknown");	# argument 1 - adress to binary with 12 digits
+	} elsif ($model eq "QUIGG_DMV") {
+		my $adr = sprintf( "%012b", hex($definition[1]));	# argument 1 - adress to binary with 12 digits
 		$msg = $models{$model}{Protocol} . "#" . $adr;
 		$msgEnd = "P#R" . $repeats;
 	############ TR_502MSV ############
-	} elsif ($model eq "TR_502MSV" && $cmd ne "?") {
-		my @definition = split(" ", $hash->{DEF});																# split adress from def
-		my $adr = sprintf( "%08b", hex($definition[1])) if ($name ne "unknown");	# argument 1 - adress to binary with 8 digits
+	} elsif ($model eq "TR_502MSV") {
+		my $adr = sprintf( "%08b", hex($definition[1]));	# argument 1 - adress to binary with 8 digits
 		$msg = $models{$model}{Protocol} . "#" . $adr . "1111";
 		$msgEnd = "P#R" . $repeats;		
 	############ Novy_840029 ############
-	} elsif ($model eq "Novy_840029" && $cmd ne "?") {
-		my @definition = split(" ", $hash->{DEF});																# split adress from def
-		my $adr = sprintf( "%08b", hex($definition[1])) if ($name ne "unknown");	# argument 1 - adress to binary with 8 digits
+	} elsif ($model eq "Novy_840029") {
+		my $adr = sprintf( "%08b", hex($definition[1]));	# argument 1 - adress to binary with 8 digits
 		$msg = $models{$model}{Protocol} . "#" . $adr;
 		$msgEnd = "#R" . $repeats;
 	############ CAME_TOP_432EV ############
-	} elsif ($model eq "CAME_TOP_432EV" && $cmd ne "?") {
-		my @definition = split(" ", $hash->{DEF});																# split adress from def
-		my $adr = sprintf( "%08b", hex($definition[1])) if ($name ne "unknown");	# argument 1 - adress to binary with 8 digits
+	} elsif ($model eq "CAME_TOP_432EV") {
+		my $adr = sprintf( "%08b", hex($definition[1]));	# argument 1 - adress to binary with 8 digits
 		$msg = $models{$model}{Protocol} . "#" . $adr;
 		$msgEnd = "#R" . $repeats;
 	############ NEFF SF01_01319004 || BOSCH SF01_01319004_Typ2 ############
-	} elsif (($model eq "SF01_01319004" || $model eq "SF01_01319004_Typ2") && $cmd ne "?") {
-		my @definition = split(" ", $hash->{DEF});																# split adress from def
-		my $adr = sprintf( "%016b", hex($definition[1])) if ($name ne "unknown");	# argument 1 - adress to binary with 16 digits
+	} elsif ($model eq "SF01_01319004" || $model eq "SF01_01319004_Typ2") {
+		my $adr = sprintf( "%016b", hex($definition[1]));	# argument 1 - adress to binary with 16 digits
 		$msg = $models{$model}{Protocol} . "#" . substr($adr,0,14);
 		$msgEnd = "#R" . $repeats;
 	############ Hoermann HS1-868-BS ############
-	} elsif ($model eq "HS1_868_BS" && $cmd ne "?") {
-		my @definition = split(" ", $hash->{DEF});																	# split adress from def
+	} elsif ($model eq "HS1_868_BS") {
 		my $bitData = "00000000";
-		$bitData .= sprintf( "%036b", hex($definition[1])) if ($name ne "unknown");	# argument 1 - adress to binary with 36 digits
+		$bitData .= sprintf( "%036b", hex($definition[1]));	# argument 1 - adress to binary with 36 digits
 		$msg = $models{$model}{Protocol} . "#" . $bitData . "#R" . $repeats;
 	############ Hoermann HSM4 ############
-	} elsif ($model eq "HSM4" && $cmd ne "?") {
-		my @definition = split(" ", $hash->{DEF});																# split adress from def
-		my $adr = sprintf( "%028b", hex($definition[1])) if ($name ne "unknown");	# argument 1 - adress to binary with 28 digits
+	} elsif ($model eq "HSM4") {
+		my $adr = sprintf( "%028b", hex($definition[1]));	# argument 1 - adress to binary with 28 digits
 		$msg = $models{$model}{Protocol} . "#00000000" . $adr;
 		$msgEnd .= "1100#R" . $repeats;
 	############ Chilitec 22640 ############
-	} elsif ($model eq "Chilitec_22640" && $cmd ne "?") {
-		my @definition = split(" ", $hash->{DEF});																# split adress from def
-		my $adr = sprintf( "%016b", hex($definition[1])) if ($name ne "unknown");	# argument 1 - adress to binary with 16 digits
+	} elsif ($model eq "Chilitec_22640") {
+		my $adr = sprintf( "%016b", hex($definition[1]));	# argument 1 - adress to binary with 16 digits
 		$msg = $models{$model}{Protocol} . "#" . $adr;
 		$msgEnd .= "#R" . $repeats;
 	############ LED_XM21_0 22640 ############
-	} elsif ($model eq "LED_XM21_0" && $cmd ne "?") {
-		my @definition = split(" ", $hash->{DEF});																# split adress from def
-		my $adr = sprintf( "%014b", hex($definition[1])) if ($name ne "unknown");	# argument 1 - adress to binary with 14 digits
+	} elsif ($model eq "LED_XM21_0") {
+		my $adr = sprintf( "%014b", hex($definition[1]));	# argument 1 - adress to binary with 14 digits
 		$msg = $models{$model}{Protocol} . "#" . $adr;
 		$msgEnd .= "#R" . $repeats;
 	############ Krinner_LUMIX ############
-	} elsif ($model eq "Krinner_LUMIX" && $cmd ne "?") {
-		my @definition = split(" ", $hash->{DEF});																# split adress from def
-		my $adr = sprintf( "%028b", hex($definition[1])) if ($name ne "unknown");	# argument 1 - adress to binary with 28 digits
+	} elsif ($model eq "Krinner_LUMIX") {
+		my $adr = sprintf( "%028b", hex($definition[1]));	# argument 1 - adress to binary with 28 digits
 		$msg = $models{$model}{Protocol} . "#" . $adr;
 		$msgEnd .= "#R" . $repeats;
 	############ Manax | mumbi ############
-	} elsif ($model eq "RC_10" && $cmd ne "?") {
+	} elsif ($model eq "RC_10") {
 		return "ERROR: to send, please push button on and off again on remote" if ( (ReadingsVal($name, "x_n5-8_on", "0") eq "0") || (ReadingsVal($name, "x_n5-8_off", "0") eq "0") || (ReadingsVal($name, "x_n4", "0") eq "0") );
-
-		my @definition = split(" ", $hash->{DEF});																# split adress from def
 		$definition[1] = substr($definition[1],0,4);
-		my $adr = sprintf( "%016b", hex($definition[1])) if ($name ne "unknown");	# argument 1 - adress to binary with 16 digits
+		my $adr = sprintf( "%016b", hex($definition[1]));	# argument 1 - adress to binary with 16 digits
 		my $unknown1 = ReadingsVal($name, "x_n4", "0");
 		my $unknown2_btn = "x_n5-8_".$cmd;
 		my $unknown2 = ReadingsVal($name, $unknown2_btn, "0");
 		$msg = $models{$model}{Protocol} . "#" . $adr . $unknown1 . $unknown2;
 		$msgEnd .= "#R" . $repeats;
-
 		### if device _all, set A | B | C | D ### -> RC_10_7869_all (model_device_button)
-		my $device = $model."_".substr($name,6,4);
-		if ($name =~ /^$device.all$/) {
-			foreach my $d (sort keys %defs) {
-				if (defined($defs{$d}) && defined($defs{$d}{NAME}) && $defs{$d}{NAME} =~ /^$device.[ABCD]$/) {
-					readingsSingleUpdate($defs{$d}, "state" , $cmd , 1);
-					Log3 $name, 4, "$ioname: SD_UT_Set attr_model=$model device $name set ".$defs{$d}{NAME}." to $cmd";
+		if ($hash->{DEF} =~ /_all$/) {	# send button all
+			foreach my $d (keys %defs) {
+				if(defined($defs{$d}) && $defs{$d}{TYPE} eq "SD_UT" && $defs{$d}{DEF} =~ /$definition[1]/ && $defs{$d}{DEF} =~ /[ABCD]$/ && ReadingsVal($d, "state", "") ne $cmd) {
+					readingsSingleUpdate($defs{$d}, "state" , $cmd , 1);	# set A | B | C | D
+					Log3 $name, 3, "$ioname: $d set $cmd";
 				}
 			}
 		}
 	############ ESTO KL_RF01############
-	} elsif ($model eq "KL_RF01" && $cmd ne "?") {
-		my @definition = split(" ", $hash->{DEF});																# split adress from def
-		my $adr = sprintf( "%016b", hex($definition[1])) if ($name ne "unknown");	# argument 1 - adress to binary with 16 digits
+	} elsif ($model eq "KL_RF01") {
+		my $adr = sprintf( "%016b", hex($definition[1]));	# argument 1 - adress to binary with 16 digits
 		$msg = $models{$model}{Protocol} . "#" . $adr;
 		$msgEnd .= "11110";	# nibble7 every?
 		$msgEnd .= "#R" . $repeats;
 	############ Techmar Garden Lights ############
-	} elsif ($model eq "Techmar" && $cmd ne "?") {
-		my @definition = split(" ", $hash->{DEF});																# split adress from def
-		my $adr = sprintf( "%032b", hex($definition[1])) if ($name ne "unknown");	# argument 1 - adress to binary with 32 bits
-		
+	} elsif ($model eq "Techmar") {
+		my $adr = sprintf( "%032b", hex($definition[1]));	# argument 1 - adress to binary with 32 bits
 		$msg = $models{$model}{Protocol} . "#" . $adr;
 		$msgEnd = "00#R" . $repeats;	#	Last two bits alternately by transmitter 00, 01 or 02. Receiver also reacts to only 00.
 	############ Medion OR28V ############
-	} elsif ($model eq "OR28V" && $cmd ne "?") {
+	} elsif ($model eq "OR28V") {
 		$msg = $models{$model}{Protocol} . "#";
 		$msgEnd .= "#R" . $repeats;	# R1 wird vom SIGNALduino nicht als MS erkannt!
 	}
-
+	}
+	
 	Log3 $name, 4, "$ioname: SD_UT_Set attr_model=$model msg=$msg msgEnd=$msgEnd" if(defined $msgEnd);
 
 	if ($cmd eq "?") {
 		### create setlist ###
-		foreach my $keys (sort keys %{ $models{$model}}) {
+		foreach my $keys (keys %{ $models{$model}}) {
 			if ( $keys =~ /^[0-1]{1,}/s ) {
 				$ret.= $models{$model}{$keys}.":noArg ";
 			}
@@ -828,7 +810,7 @@ sub SD_UT_Set($$$@) {
 	} else {
 		if (defined $msgEnd) {
 			### if cmd, set bits ###
-			foreach my $keys (sort keys %{ $models{$model}}) {
+			foreach my $keys (keys %{ $models{$model}}) {
 				if ( $keys =~ /^[0-1]{1,}/s ) {
 					$save = $keys;
 					$value = $models{$model}{$keys};
@@ -847,7 +829,6 @@ sub SD_UT_Set($$$@) {
 				$msg .= $save.$invert.$msgEnd;
 			############ Medion OR28V ############
 			} elsif ($model eq "OR28V") {
-				my @definition = split(" ", $hash->{DEF});						# split adress from def
 				my $adr = $definition[1] - 1;													# argument 1 - adress
 				my $checksum = ($adr * 16 + oct("0b$save") + 85) & 0x7f;
 				my $laststate = ReadingsVal($name, "state", "fehlt");
