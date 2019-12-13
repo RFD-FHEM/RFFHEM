@@ -27,7 +27,7 @@ before_install:
 install:
  - cpanm Device::SerialPort File::Find File::Basename Mock::Sub Test::More Test::Device::SerialPort Devel::Cover Devel::Cover::Report::Coveralls  JSON Net::SSLeay --notest 
  - sudo apt-get update -qq
- - sudo apt-get install fhem -y || curl -sLO http://fhem.de/fhem-5.9.deb && sudo apt install ./fhem-5.9.deb
+ - sudo apt-get install fhem -y || (curl -sLO http://fhem.de/fhem-5.9.deb && sudo apt install ./fhem-5.9.deb)
  - sudo chown travis -R /opt/fhem
  - sudo /etc/init.d/fhem stop
  # - sudo service fhem stop
