@@ -504,7 +504,7 @@ sub getSystemCodes($) {
 	Das Einrichten der Fernbedienung erfolgt in einem Lernprozess.
 	Nach dem Empfang von mindestens 5 Nachrichten innerhalb von 3 Minuten wird ein neues Ger&auml;t "SD_GT_LEARN" angelegt.
 	Das Einrichten der einzelnen Tasten der Fernbedienung beginnt nach dem Empfang weiterer 6 verschiedener Nachrichten.
-	Dieser Lernprozess wird mit dem Status "learned code 4, please press another button" signalisiert, wobei der Z&auml;hler die Anzahl der aktuell registrerten Codes anzeigt.
+	Dieser Lernprozess wird mit dem Status "learned code 4, please press another button" signalisiert, wobei der Z&auml;hler die Anzahl der aktuell registrierten Codes anzeigt.
 	<br>
 	Es m&uuml;ssen jetzt s&auml;mtliche Tasten der Fernbedienung mehrmals bet&auml;tigt werden.
 	Bei erfolgreicher Dekodierung der Funksignale werden dabei die einzelnen Tasten angelegt.
