@@ -166,7 +166,8 @@ my %patable = (
 );
 
 
-my @ampllist = (24, 27, 30, 33, 36, 38, 40, 42); # rAmpl(dB)
+my @ampllist = (24, 27, 30, 33, 36, 38, 40, 42);                      # rAmpl(dB)
+my @modformat = ("2-FSK","GFSK","-","ASK/OOK","4-FSK","-","-","MSK"); # modulation format
 
 ## Supported Clients per default
 my $clientsSIGNALduino = ":IT:"
@@ -940,25 +941,25 @@ sub SIGNALduino_parseResponse($$$) {
   	}
   	elsif($cmd eq "ccregAll")
   	{
-		$msg =~ s/  /\n/g;
 		$msg = "\n\n" . $msg
   	}
   	elsif($cmd eq "ccconf")
   	{
 		my (undef,$str) = split('=', $msg);
 		my $var;
-		my %r = ( "0D"=>1,"0E"=>1,"0F"=>1,"10"=>1,"11"=>1,"1B"=>1,"1D"=>1 );
+		my %r = ( "0D"=>1,"0E"=>1,"0F"=>1,"10"=>1,"11"=>1,"12"=>1,"1B"=>1,"1D"=>1 );
 		$msg = "";
 		foreach my $a (sort keys %r) {
 			$var = substr($str,(hex($a)-13)*2, 2);
 			$r{$a} = hex($var);
 		}
-		$msg = sprintf("freq:%.3fMHz bWidth:%dKHz rAmpl:%ddB sens:%ddB  (DataRate:%.2fBaud)",
-		26*(($r{"0D"}*256+$r{"0E"})*256+$r{"0F"})/65536,                #Freq
-		26000/(8 * (4+(($r{"10"}>>4)&3)) * (1 << (($r{"10"}>>6)&3))),   #Bw
-		$ampllist[$r{"1B"}&7],                                          #rAmpl
-		4+4*($r{"1D"}&3),                                               #Sens
-		((256+$r{"11"})*(2**($r{"10"} & 15 )))*26000000/(2**28)         #DataRate
+		$msg = sprintf("freq:%.3fMHz bWidth:%dKHz rAmpl:%ddB sens:%ddB (DataRate:%.2fBaud, Modulation:%s)",
+		26*(($r{"0D"}*256+$r{"0E"})*256+$r{"0F"})/65536,                #Freq       | Register 0x0D,0x0E,0x0F
+		26000/(8 * (4+(($r{"10"}>>4)&3)) * (1 << (($r{"10"}>>6)&3))),   #Bw         | Register 0x10
+		$ampllist[$r{"1B"}&7],                                          #rAmpl      | Register 0x1B
+		4+4*($r{"1D"}&3),                                               #Sens       | Register 0x1D
+		((256+$r{"11"})*(2**($r{"10"} & 15 )))*26000000/(2**28),        #DataRate   | Register 0x10,0x11
+		$modformat[$r{"12"}>>4]                                         #Modulation | Register 0x12
 		);
 	}
 	elsif($cmd eq "bWidth") {
@@ -1418,6 +1419,37 @@ sub SIGNALduino_Read($) {
 				$hash->{keepalive}{ok}    = 1;
 				$hash->{keepalive}{retry} = 0;
 			}
+
+			## detailed register with name ##
+			if ($regexp eq "^ccreg 00:") {
+				$rmsg =~ s/\s\sccreg/\\nccreg/g;
+
+				my @ccregnames = (
+					"00 IOCFG2  ","01 IOCFG1  ","02 IOCFG0  ","03 FIFOTHR ","04 SYNC1   ","05 SYNC0   ",
+					"06 PKTLEN  ","07 PKTCTRL1","08 PKTCTRL0","09 ADDR    ","0A CHANNR  ","0B FSCTRL1 ",
+					"0C FSCTRL0 ","0D FREQ2   ","0E FREQ1   ","0F FREQ0   ","10 MDMCFG4 ","11 MDMCFG3 ",
+					"12 MDMCFG2 ","13 MDMCFG1 ","14 MDMCFG0 ","15 DEVIATN ","16 MCSM2   ","17 MCSM1   ",
+					"18 MCSM0   ","19 FOCCFG  ","1A BSCFG   ","1B AGCCTRL2","1C AGCCTRL1","1D AGCCTRL0",
+					"1E WOREVT1 ","1F WOREVT0 ","20 WORCTRL ","21 FREND1  ","22 FREND0  ","23 FSCAL3  ",
+					"24 FSCAL2  ","25 FSCAL1  ","26 FSCAL0  ","27 RCCTRL1 ","28 RCCTRL0 ","29 FSTEST  ",
+					"2A PTEST   ","2B AGCTEST ","2C TEST2   ","2D TEST1   ","2E TEST0   " );
+
+				my $registerstring = $rmsg;
+				$registerstring =~ s/ccreg\s\d0:\s//g;
+				$registerstring =~ s/\\n/ /g;
+
+				my @ccreg = split(/\s/,$registerstring);
+
+				$rmsg.= "\\n\\n";
+				$rmsg.= "Configuration Register Detail (address, name, value):\\n";
+
+				for(my $i=0;$i<=$#ccreg;$i++) {
+					$rmsg.= "0x".$ccregnames[$i]." - 0x".$ccreg[$i]."\\n";
+				}
+			}
+			# string $rmsg have all linebreaks in "\n" format | logMethod view \n and not a linebreak #
+			## END ##
+
 			$hash->{logMethod}->($name, 5, "$name: Read, msg: regexp=$regexp cmd=$hash->{getcmd}->{cmd} msg=$rmsg");
 			
 			if ($hash->{getcmd}->{cmd} eq 'version') { # todo prüfen ob der code nicht in die %gets tabelle verschoben werden kann
@@ -4593,9 +4625,17 @@ sub SIGNALduino_githubParseHttpResponse($$$) {
 
         To send some raw data look at these examples:
 		P<protocol id>#binarydata#R<num of repeats>#C<optional clock>   (#C is optional)<br>
-		<br>Example 1: set sduino raw SR;R=3;P0=500;P1=-9000;P2=-4000;P3=-2000;D=0302030  sends the data in raw mode 3 times repeated
-        <br>Example 2: set sduino raw SM;R=3;P0=500;C=250;D=A4F7FDDE  sends the data manchester encoded with a clock of 250uS
-        <br>Example 3: set sduino raw SC;R=3;SR;P0=5000;SM;P0=500;C=250;D=A4F7FDDE  sends a combined message of raw and manchester encoded repeated 3 times
+		<br>Example 1: <code>set sduino raw SR;R=3;P0=500;P1=-9000;P2=-4000;P3=-2000;D=0302030</code>  sends the data in raw mode 3 times repeated
+		<br>Example 2: <code>set sduino raw SM;R=3;P0=500;C=250;D=A4F7FDDE</code>  sends the data manchester encoded with a clock of 250uS
+		<br>Example 3: <code>set sduino raw SC;R=3;SR;P0=5000;SM;P0=500;C=250;D=A4F7FDDE</code>  sends a combined message of raw and manchester encoded repeated 3 times
+		<ul><br>
+			<b>note: The wrong use of the upcoming options can lead to malfunctions of the SIGNALduino!</b><br><br>
+			<u>Register commands for a CC1101</u><br>
+			<li>e -> default settings</li>
+			<li>W -> writes a value to the EEPROM and the CC1101 register<br>
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;note: The EEPROM address has an offset of 2. example: <code>set sduino raw W041D</code> write 1D to Register 0x02
+		 </li>
+		</ul>
 		</p>
 		</li>
         <a name="sendMsg"></a>
@@ -5008,8 +5048,8 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
 				<li>Beispiel 3: <code>set sduino raw SC;R=3;SR;P0=5000;SM;P0=500;C=250;D=A4F7FDDE</code> , sendet eine kombinierte Nachricht von Raw und Manchester codiert 3 mal wiederholt</li>
 			</ul><br>
 		<ul>
-         <u>NUR f&uuml;r DEBUG Nutzung | <small>Befehle sind abhaenging vom Firmwarestand!</small></u><br>
-         <small>(Hinweis: Die falsche Benutzung kann zu Fehlfunktionen des SIGNALduino´s f&uuml;hren!)</small>
+         <b>Hinweis: Die falsche Benutzung der kommenden Optionen kann zu Fehlfunktionen des SIGNALduino´s f&uuml;hren!</b><br><br>
+         <u>NUR f&uuml;r DEBUG Nutzung | <small>Befehle sind abh&auml;nging vom Firmwarestand!</small></u><br>
             <li>CED -> Debugausgaben ein</li>
             <li>CDD -> Debugausgaben aus</li>
             <li>CDL -> LED aus</li>
@@ -5020,7 +5060,13 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
             <li>CSmuthresh=[Wert] -> Schwellwert fuer den split von MU Nachrichten (0=aus)</li>
             <li>CSmcmbl=[Wert] -> minbitlen fuer MC-Nachrichten</li>
             <li>CSfifolimit=[Wert] -> Schwellwert fuer debug Ausgabe der Pulsanzahl im FIFO Puffer</li>
-         </ul><br></li>
+						<br><br>
+         <u>Register Befehle bei einem CC1101</u><br>
+         <li>e -> Werkseinstellungen</li>
+         <li>W -> schreibt einen Wert ins EEPROM und ins CC1101 Register<br>
+				 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Hinweis: Die EEPROM Adresse hat einen Offset von 2. z.Bsp: <code>set sduino raw W041D</code> schreibt 1D ins Register 0x02
+				 </li>
+		</ul><br></li>
 	<a name="reset"></a>
 	<li>reset<br>
 	&Ouml;ffnet die Verbindung zum Ger&auml;t neu und initialisiert es.</li><br>

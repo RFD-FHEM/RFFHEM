@@ -1,31 +1,28 @@
 defmod test_sub_parseResponse UnitTest dummyDuino ( 
-{ 
+{
 	subtest 'Test cmd "cmds"' => sub {
 		plan tests => 1;
-		
 		my $ret=SIGNALduino_parseResponse($targetHash,"cmds","$target cmds => .*Use one of V R t X S P C r W s x e\n");
 		is($ret," V R t X S P C r W s x e","check return value");
 	}; 
 
 	subtest 'Test cmd "uptime"' => sub {
 		plan tests => 1;
-		
 		my $ret=SIGNALduino_parseResponse($targetHash,"uptime","86410");
 		is($ret,"1 00:00:10","check return value");
 	}; 
 
 	subtest 'Test cmd "ccregAll"' => sub {
 		plan tests => 1;
-		
 		my $ret=SIGNALduino_parseResponse($targetHash,"ccregAll","ccreg 00: 00  ccreg 10: 57");
-		is($ret,"\n\nccreg 00: 00\nccreg 10: 57","check return value");
+		is($ret,"\n\nccreg 00: 00  ccreg 10: 57","check return value");
 	}; 
 
 	subtest 'Test cmd "ccconf"' => sub {
 		plan tests => 1;
 		
 		my $ret=SIGNALduino_parseResponse($targetHash,"ccconf","C0Dn11=10B07157C43023B900070018146C070091");
-		is($ret,"freq:433.920MHz bWidth:325KHz rAmpl:42dB sens:8dB  (DataRate:5603.79Baud)","check return value");
+		is($ret,"freq:433.920MHz bWidth:325KHz rAmpl:42dB sens:8dB (DataRate:5603.79Baud, Modulation:ASK/OOK)","check return value");
 	}; 
 
 	subtest 'Test cmd "bWidth"' => sub {
@@ -45,7 +42,6 @@ defmod test_sub_parseResponse UnitTest dummyDuino (
 		plan tests => 1;
 		my $ret=SIGNALduino_parseResponse($targetHash,"something","some message to verify\n");
 		is($ret,"some message to verify","check return value");
-	}; 
-
-} 
+	};
+}
 )
