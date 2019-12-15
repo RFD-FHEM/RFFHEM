@@ -21,7 +21,7 @@ jobs:
       uses: fhem/fhem-controls-actions@master
       with:
         filename: controls_signalduino.txt 
-        dirname: FHEM/lib
+        directory: FHEM/lib
         writemode: a
     - name: update CHANGED
       run: |
