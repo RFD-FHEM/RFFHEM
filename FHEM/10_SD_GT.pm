@@ -15,7 +15,7 @@ use warnings;
 
 sub SD_GT_Initialize($) {
 	my ($hash) = @_;
-	$hash->{Match}      = "^P49.*";
+	$hash->{Match}      = "^P49#[A-Fa-f0-9]+";
 	$hash->{DefFn}      = "SD_GT::Define";
 	$hash->{UndefFn}    = "SD_GT::Undef";
 	$hash->{ParseFn}    = "SD_GT::Parse";
@@ -30,7 +30,7 @@ package SD_GT;
 
 use strict;
 use warnings;
-use GPUtils qw(:all);  # wird f&uuml;r den Import der FHEM Funktionen aus der fhem.pl ben&ouml;tigt
+use GPUtils qw(:all);  # wird fuer den Import der FHEM Funktionen aus der fhem.pl benoetigt
 
 ## Import der FHEM Funktionen
 BEGIN {
