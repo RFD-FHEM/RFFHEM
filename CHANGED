@@ -1,7 +1,8 @@
 15.12.2019
   14_SD_UT.pm: bugfix RC_10 button set all work after renaming the device
+  SD_ProtocolData.pm: ID34 revised doc & added reconstructBit | remove ID31 = same ID 34
 12.12.2019
- 00_SIGNALduino.pm: added modulationsinfo to ccconf, added commandref cpmmand raw
+  00_SIGNALduino.pm: added modulationsinfo to ccconf, added commandref command raw
 06.12.2019
   00_SIGNALduino.pm: 
     logoutput adjusted to standard -> $name: "sub", "Text"
