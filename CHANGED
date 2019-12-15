@@ -1,4 +1,4 @@
-12.15.2019
+15.12.2019
   14_SD_UT.pm: bugfix RC_10 button set all work after renaming the device
 12.12.2019
  00_SIGNALduino.pm: added modulationsinfo to ccconf, added commandref cpmmand raw
