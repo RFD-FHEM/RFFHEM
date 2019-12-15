@@ -54,8 +54,8 @@
 ##### notice #### or #### info ############################################################################################################
 # !!! Between the keys and values ​​no tabs not equal to a width of 8 or please use spaces !!!
 # !!! Please use first unused id for new protocols !!!
-# ID´s are currently unused: 20 | 54 | 78
-# ID´s need to be revised (preamble u): 5|6|19|21|22|23|24|25|26|27|28|31|36|40|42|52|56|59|63
+# ID´s are currently unused: 20 | 31 | 54 | 78
+# ID´s need to be revised (preamble u): 5|6|19|21|22|23|24|25|26|27|28|36|40|42|52|56|59|63
 ###########################################################################################################################################
 # Please provide at least three messages for each new MU/MC/MS protocol and a URL of issue in GitHub or discussion in FHEM Forum
 # https://forum.fhem.de/index.php/topic,58396.975.html | https://github.com/RFD-FHEM/RFFHEM
@@ -66,7 +66,7 @@ package lib::SD_ProtocolData;
 	use strict;
 	use warnings;
 	
-	our $VERSION = '1.10';
+	our $VERSION = '1.11';
 	our %protocols = (
 		"0"	=>	## various weather sensors (500 | 9100)
 						# ABS700 | Id:79 T: 3.3 Bat:low                MS;P1=-7949;P2=492;P3=-1978;P4=-3970;D=21232423232424242423232323232324242423232323232424;CP=2;SP=1;R=245;O;
@@ -641,32 +641,9 @@ package lib::SD_ProtocolData;
 				length_min		=> '19',
 				length_max		=> '23',					# not confirmed, length one more as MU Message
 			},
-		# "20"	=>	## Livolo
-							# # https://github.com/RFD-FHEM/RFFHEM/issues/29
-							# # MU;P0=-195;P1=151;P2=475;P3=-333;D=0101010101 02 01010101010101310101310101010101310101 02 01010101010101010101010101010101010101 02 01010101010101010101010101010101010101 02 010101010101013101013101;CP=1;
-							# #
-							# # protocol sends 24 to 47 pulses per message.
-							# # First pulse is the header and is 595 μs long. All subsequent pulses are either 170 μs (short pulse) or 340 μs (long pulse) long.
-							# # Two subsequent short pulses correspond to bit 0, one long pulse corresponds to bit 1. There is no footer. The message is repeated for about 1 second.
-							# #             _____________                 ___                 _______
-							# # Start bit: |             |___|    bit 0: |   |___|    bit 1: |       |___|
-			# {
-				# name					=> 'Livolo',
-				# comment				=> 'remote control / dimmmer / switch ...',
-				# id						=> '20',
-				# knownFreqs		=> '',
-				# one						=> [3],
-				# zero					=> [1],
-				# start					=> [5],
-				# clockabs			=> 110,						#can be 90-140
-				# format				=> 'twostate',
-				# preamble			=> 'u20#',				# prepend to converted message
-				# #clientmodule	=> '',
-				# #modulematch	=> '',
-				# length_min		=> '16',
-				# #length_max		=> '',						# missing
-				# filterfunc		=> 'SIGNALduino_filterSign',
-			# },
+
+		#"20"	=> can use
+
 		"21"	=>	## Einhell Garagentor
 							# https://forum.fhem.de/index.php?topic=42373.0 @Ellert | user have no RAWMSG
 							# static adress: Bit 1-28 | channel remote Bit 29-32 | repeats 31 | pause 20 ms
@@ -857,27 +834,9 @@ package lib::SD_ProtocolData;
 				length_min		=> '12',
 				length_max		=> '12',				# message has only 10 bit but is paddet to 12
 			},
-		"31"	=>	## Pollin ISOTRONIC - 12 Tasten remote
-							# remote basicadresse with 12bit -> changed if push reset behind battery cover
-							# https://github.com/RFD-FHEM/RFFHEM/issues/44 @kaihs
-							# u31#891EE   MU;P0=-9584;P1=592;P2=-665;P3=1223;P4=-1311;D=01234141412341412341414123232323412323234;CP=1;R=0;
-							# u31#891FE   MU;P0=-12724;P1=597;P2=-667;P3=1253;P4=-1331;D=01234141412341412341414123232323232323232;CP=1;R=0;
-			{
-				name					=> 'Pollin ISOTRONIC',
-				comment				=> 'remote control model 58608 with 12 buttons',
-				id						=> '31',
-				knownFreqs		=> '',
-				one						=> [-1,2],
-				zero					=> [-2,1],
-				start					=> [-18,1],
-				clockabs			=> 600,
-				format				=> 'twostate',
-				preamble			=> 'u31#',				# prepend to converted message
-				#clientmodule	=> '',
-				#modulematch	=> '',
-				length_min		=> '19',
-				length_max		=> '20',
-			},
+			
+		#"31"	=> can use
+			
 		"32"	=>	## FreeTec PE-6946
 							# ! some message are decode as protocol 40 and protocol 62 !
 							# http://www.free-tec.de/Funkklingel-mit-Voic-PE-6946-919.shtml
@@ -981,21 +940,29 @@ package lib::SD_ProtocolData;
 							## LIBRA GmbH (LIDL) TR-502MSV
 							# no decode!   MU;P0=-12064;P1=71;P2=-669;P3=1351;P4=-1319;D=012323414141234123232323232323232323232323;
 							# Ch1_off      MU;P0=697;P1=-1352;P2=-679;P3=1343;D=01010101010231023232323232323232323232323;CP=0;R=27;
+							## Mandolyn Funksteckdosen Set
+							# https://github.com/RFD-FHEM/RFFHEM/issues/716 @codeartisan-de
+							## Pollin ISOTRONIC - 12 Tasten remote | model 58608
+							# remote basicadresse with 12bit -> changed if push reset behind battery cover
+							# https://github.com/RFD-FHEM/RFFHEM/issues/44 @kaihs
+							# P34#891EE   MU;P0=-9584;P1=592;P2=-665;P3=1223;P4=-1311;D=01234141412341412341414123232323412323234;CP=1;R=0;
+							# P34#891FE   MU;P0=-12724;P1=597;P2=-667;P3=1253;P4=-1331;D=01234141412341412341414123232323232323232;CP=1;R=0;
 			{
-				name					=> 'QUIGG | LIBRA',
-				comment				=> 'remote control DMV-7000, TR-502MSV',
+				name					=> 'QUIGG | LIBRA | Mandolyn | Pollin ISOTRONIC',
+				comment				=> 'remote control DMV-7000, TR-502MSV, 58608',
 				id						=> '34',
 				knownFreqs		=> '433.92',
 				one						=> [-1,2],
 				zero					=> [-2,1],
 				start					=> [1],
 				pause					=> [-15],   # 9900
-				clockabs			=> '660',
+				clockabs			=> '635',
 				format				=> 'twostate',
 				preamble			=> 'P34#',
 				clientmodule	=> 'SD_UT',
+				reconstructBit => '1',
 				#modulematch	=> '',
-				length_min		=> '20',
+				length_min		=> '19',
 				length_max		=> '20',
 			},
 		"35"	=>	## Homeeasy
@@ -1422,6 +1389,9 @@ package lib::SD_ProtocolData;
 				length_min    => '42',
 				length_max    => '44',
 			},
+
+		#"54"	=> can use
+
 		"55"	=>	## QUIGG GT-1000
 			{
 				name						=> 'QUIGG_GT-1000',
@@ -2434,9 +2404,41 @@ package lib::SD_ProtocolData;
 				length_max      => '49',
 				method          => \&main::SIGNALduino_GROTHE,
 			},
+
+		########################################################################
+		#### ### old information from incomplete implemented protocols #### ####
+
+		# ""	=>	## Livolo
+							# https://github.com/RFD-FHEM/RFFHEM/issues/29
+							# MU;P0=-195;P1=151;P2=475;P3=-333;D=0101010101 02 01010101010101310101310101010101310101 02 01010101010101010101010101010101010101 02 01010101010101010101010101010101010101 02 010101010101013101013101;CP=1;
+							#
+							# protocol sends 24 to 47 pulses per message.
+							# First pulse is the header and is 595 μs long. All subsequent pulses are either 170 μs (short pulse) or 340 μs (long pulse) long.
+							# Two subsequent short pulses correspond to bit 0, one long pulse corresponds to bit 1. There is no footer. The message is repeated for about 1 second.
+							#
+							# Start bit: |             |___|    bit 0: |   |___|    bit 1: |       |___|
+			# {
+				# name          => 'Livolo',
+				# comment       => 'remote control / dimmmer / switch ...',
+				# id            => '',
+				# knownFreqs    => '',
+				# one           => [3],
+				# zero          => [1],
+				# start         => [5],
+				# clockabs      => 110,						#can be 90-140
+				# format        => 'twostate',
+				# preamble      => 'uXX#',				# prepend to converted message
+				# #clientmodule  => '',
+				# #modulematch   => '',
+				# length_min    => '16',
+				# #length_max   => '',						# missing
+				# filterfunc    => 'SIGNALduino_filterSign',
+			# },
+
+		########################################################################
+
 	);
 	sub getProtocolList	{	
 		return \%protocols;	
 	}
-
 }
