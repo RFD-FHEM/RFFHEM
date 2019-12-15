@@ -23,7 +23,7 @@ SIGNALduino_un_Initialize($)
   my ($hash) = @_;
 
 
-  $hash->{Match}     = '^[u]\d+(\.\d)?#.*';
+  $hash->{Match}     = '^[u]\d+(?:.\d)?#.*';
   $hash->{DefFn}     = "SIGNALduino_un_Define";
   $hash->{UndefFn}   = "SIGNALduino_un_Undef";
   $hash->{AttrFn}    = "SIGNALduino_un_Attr";
