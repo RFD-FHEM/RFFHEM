@@ -858,6 +858,7 @@ package lib::SD_ProtocolData;
 				length_max		=> '12',				# message has only 10 bit but is paddet to 12
 			},
 		"31"	=>	## Pollin ISOTRONIC - 12 Tasten remote
+							# ! Protocol is very similar to ID 34 !
 							# remote basicadresse with 12bit -> changed if push reset behind battery cover
 							# https://github.com/RFD-FHEM/RFFHEM/issues/44 @kaihs
 							# u31#891EE   MU;P0=-9584;P1=592;P2=-665;P3=1223;P4=-1311;D=01234141412341412341414123232323412323234;CP=1;R=0;
@@ -867,6 +868,7 @@ package lib::SD_ProtocolData;
 				comment				=> 'remote control model 58608 with 12 buttons',
 				id						=> '31',
 				knownFreqs		=> '',
+				developId			=> 'y',
 				one						=> [-1,2],
 				zero					=> [-2,1],
 				start					=> [-18,1],
@@ -981,8 +983,10 @@ package lib::SD_ProtocolData;
 							## LIBRA GmbH (LIDL) TR-502MSV
 							# no decode!   MU;P0=-12064;P1=71;P2=-669;P3=1351;P4=-1319;D=012323414141234123232323232323232323232323;
 							# Ch1_off      MU;P0=697;P1=-1352;P2=-679;P3=1343;D=01010101010231023232323232323232323232323;CP=0;R=27;
+							## Mandolyn Funksteckdosen Set
+							# https://github.com/RFD-FHEM/RFFHEM/issues/716 @codeartisan-de
 			{
-				name					=> 'QUIGG | LIBRA',
+				name					=> 'QUIGG | LIBRA | Mandolyn',
 				comment				=> 'remote control DMV-7000, TR-502MSV',
 				id						=> '34',
 				knownFreqs		=> '433.92',
