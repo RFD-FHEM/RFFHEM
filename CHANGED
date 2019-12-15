@@ -1,6 +1,7 @@
 15.12.2019 
   10_SD_GT.pm: new modul for remote controls based on protocol GT-9000
   SD_ProtocolData.pm: new protocol 49, 49.1 and 49.2 for SD_GT, delete protocol 26 and 27
+  14_SD_UT.pm: bugfix RC_10 button set all work after renaming the device
 12.12.2019
  00_SIGNALduino.pm: added modulationsinfo to ccconf, added commandref cpmmand raw
 06.12.2019
