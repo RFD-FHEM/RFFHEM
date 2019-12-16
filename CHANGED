@@ -1,3 +1,4 @@
+2019-12-16 - Merge branch 'dev-r34' into dev-r34_QUIGG-Gt-9000
 15.12.2019 
   10_SD_GT.pm: new modul for remote controls based on protocol GT-9000
   SD_ProtocolData.pm: new protocol 49, 49.1 and 49.2 for SD_GT, delete protocol 26 and 27
