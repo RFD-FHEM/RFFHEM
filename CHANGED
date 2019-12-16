@@ -1,3 +1,6 @@
+2019-12-16 - Create test_SDUT-devices.txt
+
+- added SD_UT test (an error expected, TEST)
 2019-12-16 - Patch gen controlsfile (#724)
 
 Create controls and CHANGED file via github actions
