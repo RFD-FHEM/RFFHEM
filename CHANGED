@@ -1,3 +1,9 @@
+2019-12-15 - update.yml
+
+corrected sytax
+2019-12-15 - Github Actions
+
+Create controls file via github actions
 15.12.2019
   14_SD_UT.pm: bugfix RC_10 button set all work after renaming the device
   SD_ProtocolData.pm: ID34 revised doc & added reconstructBit | remove ID31 = same ID 34
