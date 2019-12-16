@@ -742,43 +742,6 @@ package lib::SD_ProtocolData;
 				length_min		=> '24',
 				length_max		=> '50',					# message has only 24 bit, but we get more than one message, calculation has to be corrected
 			},
-		"26"	=>	## some remote code, send by flamingo style remote controls
-							# https://forum.fhem.de/index.php/topic,43292.msg352982.html#msg352982
-							# u26#322BE3   MU;P0=1086;P1=-433;P2=327;P3=-1194;P4=-2318;P5=2988;D=01012323010123010101230123012323232323010101232324010123230101230101012301230123232323230101012323240101232301012301010123012301232323232301010123232401012323010123010101230123012323232323010101232353;CP=2;
-			{
-				name					=> 'remote',
-				id						=> '26',
-				knownFreqs		=> '',
-				one						=> [1,-3],
-				zero					=> [3,-1],
-				# sync				=> [1,-6],				# Message is not provided as MS, due to small fact
-				start					=> [1,-6],				# Message is not provided as MS, due to small fact
-				clockabs			=> 380,						#ca 380
-				format				=> 'twostate',
-				preamble			=> 'u26#',				# prepend to converted message
-				#clientmodule	=> '',
-				#modulematch	=> '',
-				length_min		=> '24',
-				length_max		=> '24',					# message has only 24 bit, but we get more than one message, calculation has to be corrected
-			},
-		"27"	=>	## some remote code, send by flamingo style remote controls
-							# https://forum.fhem.de/index.php/topic,43292.msg352982.html#msg352982
-							# u27#322BE3   MU;P0=963;P1=-559;P2=393;P3=-1134;P4=2990;P5=-7172;D=01012323010123010101230123012323232323010101232345010123230101230101012301230123232323230101012323450101232301012301010123012301232323232301010123234501012323010123010101230123012323232323010101232323;CP=2;
-			{
-				name						=> 'remote',
-				id							=> '27',
-				knownFreqs      => '',
-				one							=> [1,-2],
-				zero						=> [2,-1],
-				start						=> [6,-15],				# Message is not provided as MS, worakround is start
-				clockabs				=> 480,						#ca 480
-				format					=> 'twostate',
-				preamble				=> 'u27#',				# prepend to converted message
-				#clientmodule		=> '',
-				#modulematch		=> '',
-				length_min			=> '24',
-				length_max			=> '24',
-			},
 		"28"	=>	## some remote code, send by aldi IC Ledspots
 			{
 				name						=> 'IC Ledspot',
@@ -1276,25 +1239,71 @@ package lib::SD_ProtocolData;
 				length_min			=> '47',
 				length_max			=> '48',
 			},
-		"49"	=>	## QUIGG / ALDI GT-9000
-							# ! some message are decode as protocol 27 !
-							# https://github.com/RFD-FHEM/RFFHEM/issues/93 @TiEr92
-							# U49#8B2DB0   MU;P0=-563;P1=479;P2=991;P3=-423;P4=361;P5=-1053;P6=3008;P7=-7110;D=2345454523452323454523452323452323452323454545456720151515201520201515201520201520201520201515151567201515152015202015152015202015202015202015151515672015151520152020151520152020152020152020151515156720151515201520201515201520201520201520201515151;CP=1;R=21;
+		"49"	=>	## QUIGG GT-9000, EASY HOME RCT DS1 CR-A, uniTEC 48110 and other
+							# The remote sends 8 messages in 2 different formats.
+							# SIGNALduino decodes 4 messages from remote control as MS then ...
+							# https://github.com/RFD-FHEM/RFFHEM/issues/667 - Oct 19, 2019
+							# DMSG: 5A98B0   MS;P0=-437;P3=-1194;P4=1056;P6=297;P7=-2319;D=67634063404063406340636340406363634063404063636363;CP=6;SP=7;R=37;
+							# DMSG: 887F92   MS;P1=-2313;P2=1127;P3=-405;P4=379;P5=-1154;D=41234545452345454545232323232323232345452345452345;CP=4;SP=1;R=251;
+							# DMSG: E6D12E   MS;P0=1062;P1=-1176;P2=315;P3=-2283;P4=-433;D=23040404212104042104042104212121042121042104040421;CP=2;SP=3;R=26;
 			{
-				name						=> 'QUIGG_GT-9000',
-				comment					=> 'remote control',
-				id							=> '49',
-				knownFreqs      => '',
-				clockabs				=> 400,
-				one							=> [2,-1.2],
-				zero						=> [1,-3],
-				start						=> [6,-15],
-				format					=> 'twostate',
-				preamble				=> 'U49#',						# prepend to converted message
-				#clientmodule		=> '',
-				modulematch			=> '^U49#.*',
-				length_min			=> '22',
-				length_max			=> '28',
+				name            => 'GT-9000',
+				comment         => 'Remote control EASY HOME RCT DS1 CR-A',
+				id              => '49',
+				knownFreqs      => '433.92',
+				clockabs        => 383,
+				one             => [3,-1],  # 1150,-385 (timings from salae logic)
+				zero            => [1,-3],  # 385,-1150 (timings from salae logic)
+				sync            => [1,-6],  # 385,-2295 (timings from salae logic)
+				format          => 'twostate',
+				preamble        => 'P49#',
+				clientmodule    => 'SD_GT',
+				modulematch     => '^P49.*',
+				length_min      => '24',
+				length_max      => '24',
+			},
+		"49.1"	=>	## QUIGG GT-9000
+							# ... decodes 4 messages as MU
+							# https://github.com/RFD-FHEM/RFFHEM/issues/667 @Ralf9 from https://forum.fhem.de/index.php/topic,104506.msg985295.html
+							# DMSG: 8B2DB0   MU;P0=-563;P1=479;P2=991;P3=-423;P4=361;P5=-1053;P6=3008;P7=-7110;D=2345454523452323454523452323452323452323454545456720151515201520201515201520201520201520201515151567201515152015202015152015202015202015202015151515672015151520152020151520152020152020152020151515156720151515201520201515201520201520201520201515151;CP=1;R=21;
+							# DMSG: 887F90   MU;P0=-565;P1=489;P2=991;P3=-423;P4=359;P5=-1047;P6=3000;P7=-7118;D=2345454523454545452323232323232323454523454545456720151515201515151520202020202020201515201515151567201515152015151515202020202020202015152015151515672015151520151515152020202020202020151520151515156720151515201515151520202020202020201515201515151;CP=1;R=17;
+			{
+				name            => 'GT-9000',
+				comment         => 'Remote control is traded under different names',
+				id              => '49.1',
+				knownFreqs      => '433.92',
+				clockabs        => 515,
+				one             => [2,-1],  # 1025,-515  (timings from salae logic)
+				zero            => [1,-2],  # 515,-1030  (timings from salae logic)
+				start           => [6,-14],	# 3075,-7200 (timings from salae logic)
+				format          => 'twostate',
+				preamble        => 'P49#',
+				clientmodule    => 'SD_GT',
+				modulematch     => '^P49.*',
+				length_min      => '24',
+				length_max      => '24',
+			},
+		"49.2"	=>	## Tec Star Modell 2335191R
+							# SIGNALduino decodes 4 messages from remote control as MU then ... 49.1
+							# https://forum.fhem.de/index.php/topic,43292.msg352982.html#msg352982 - Nov 01, 2015
+							# message was receive with older firmware
+							# DMSG: CA627C   MU;P0=1092;P1=-429;P2=335;P3=-1184;P4=-2316;P5=2996;D=010123230123012323010123232301232301010101012323240101232301230123230101232323012323010101010123232401012323012301232301012323230123230101010101232355;CP=2;
+							# DMSG: C9AFAC   MU;P0=328;P1=-428;P3=1090;P4=-1190;P5=-2310;D=010131040431310431043131313131043104313104040531310404310404313104310431313131310431043131040405313104043104043131043104313131313104310431310404053131040431040431310431043131313131043104313104042;CP=0;
+			{
+				name            => 'GT-9000',
+				comment         => 'Remote control Tec Star Modell 2335191R',
+				id              => '49.2',
+				knownFreqs      => '433.92',
+				clockabs        => 383,
+				one             => [3,-1],
+				zero            => [1,-3],
+				start           => [1,-6],  # Message is not provided as MS
+				format          => 'twostate',
+				preamble        => 'P49#',
+				clientmodule    => 'SD_GT',
+				modulematch     => '^P49.*',
+				length_min      => '24',
+				length_max      => '24',
 			},
 		"50"	=>	## Opus XT300
 							# https://github.com/RFD-FHEM/RFFHEM/issues/99 @sidey79
