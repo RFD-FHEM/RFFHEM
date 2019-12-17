@@ -54,8 +54,8 @@
 ##### notice #### or #### info ############################################################################################################
 # !!! Between the keys and values ​​no tabs not equal to a width of 8 or please use spaces !!!
 # !!! Please use first unused id for new protocols !!!
-# ID´s are currently unused: 20 | 31 | 54 | 78
-# ID´s need to be revised (preamble u): 5|6|19|21|22|23|24|25|26|27|28|36|40|42|52|56|59|63
+# ID´s are currently unused: 20 | 26 | 27 | 31 | 54 | 78
+# ID´s need to be revised (preamble u): 5|6|19|21|22|23|24|25|28|36|40|42|52|56|59|63
 ###########################################################################################################################################
 # Please provide at least three messages for each new MU/MC/MS protocol and a URL of issue in GitHub or discussion in FHEM Forum
 # https://forum.fhem.de/index.php/topic,58396.975.html | https://github.com/RFD-FHEM/RFFHEM
@@ -742,6 +742,11 @@ package lib::SD_ProtocolData;
 				length_min		=> '24',
 				length_max		=> '50',					# message has only 24 bit, but we get more than one message, calculation has to be corrected
 			},
+
+		#"26"	=> can use
+
+		#"27"	=> can use
+
 		"28"	=>	## some remote code, send by aldi IC Ledspots
 			{
 				name						=> 'IC Ledspot',
@@ -797,9 +802,9 @@ package lib::SD_ProtocolData;
 				length_min		=> '12',
 				length_max		=> '12',				# message has only 10 bit but is paddet to 12
 			},
-			
+
 		#"31"	=> can use
-			
+
 		"32"	=>	## FreeTec PE-6946
 							# ! some message are decode as protocol 40 and protocol 62 !
 							# http://www.free-tec.de/Funkklingel-mit-Voic-PE-6946-919.shtml
@@ -1310,7 +1315,6 @@ package lib::SD_ProtocolData;
 							# Ch:1 T: 25 H: 5   MU;P0=248;P1=-21400;P2=545;P3=-925;P4=1368;P5=-12308;D=01232323232323232343234323432343234343434343234323432343434343432323232323232323232343432323432345232323232323232343234323432343234343434343234323432343434343432323232323232323232343432323432345232323232323232343234323432343234343434343234323432343434343;CP=2;O;
 							# CH:1 T: 18 H: 5   W50#FF55053AFF93    MU;P2=-962;P4=508;P5=1339;P6=-12350;D=46424242424242424252425242524252425252525252425242525242424252425242424242424242424252524252524240;CP=4;R=0;
 							# CH:3 T: 18 H: 5   W50#FF57053AFF95    MU;P2=510;P3=-947;P5=1334;P6=-12248;D=26232323232323232353235323532323235353535353235323535323232353235323232323232323232353532353235320;CP=2;R=0;
-
 			{
 				name					=> 'Opus_XT300',
 				comment					=> 'sensor for ground humidity',
@@ -1885,7 +1889,6 @@ package lib::SD_ProtocolData;
 							# LED_XM21_0 | off   MU;P0=-189;P1=115;P4=422;D=0101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101040404040101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010104040404010101010;CP=1;R=73;O;
 							# LED_XM21_0 | off   MU;P0=-203;P1=412;P2=114;D=01010101020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020101010102020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020200;CP=2;R=74;
 							# LED_XM21_0 | off   MU;P0=-210;P1=106;P3=413;D=0101010101010101010303030301010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101030303030100;CP=1;R=80;
-
 			{
 				name					=> 'LED XM21',
 				comment				=> 'remote with 2-buttons for LED X-MAS light string',
