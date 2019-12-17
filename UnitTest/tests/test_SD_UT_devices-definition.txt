@@ -24,7 +24,7 @@ defmod test_SD_UT_devices UnitTest dummyDuino (
     TestLabel:
 	while ( (my $pID, my $testSet) = each  (@{$testDataArray}) )
 	{
-		next if (!defined($testSet->{module}) || $testSet->{module} != "SD_UT");
+		next if (!defined($testSet->{module}) || $testSet->{module} ne "SD_UT");
 		next if (!lib::SD_Protocols::exists($testSet->{id}));
 		next if (lib::SD_Protocols::checkProperty($testSet->{id},'developId',undef));
 	
@@ -70,7 +70,11 @@ defmod test_SD_UT_devices UnitTest dummyDuino (
 			}
 		}
 	}
-	return if ( defined($todo) );
+	if ( defined($todo) )
+	{
+		done_testing;
+		return;
+	} 
 	my $jsonSourceUrl = AttrVal($name,"Test_Data_URI","https://raw.githubusercontent.com/RFD-FHEM/SIGNALduino_TOOL/pre-release/FHEM/lib/SD_Device_ProtocolList.json");	
 	loadJson($jsonSourceUrl); 
 	$todo = todo "Testing against pre-release testdata, correct test before push this to master";
