@@ -3,6 +3,7 @@ defmod test_module_devices UnitTest dummyDuino (
 	use Test2::V0;
 	use Test2::Tools::Compare qw{is isnt unlike};
 	use Data::Dumper;
+	use JSON; 
 
 	## for online testsytem: defmod test_SDUT_devices UnitTest dummyDuino ##
 	my $testDataArray; 
@@ -17,18 +18,17 @@ defmod test_module_devices UnitTest dummyDuino (
 				
 	}
 
-
-	use JSON; 
-	
-	my $jsonSourceUrl = AttrVal($name,"Test_Data_URI","https://raw.githubusercontent.com/RFD-FHEM/SIGNALduino_TOOL/pre-release/FHEM/lib/SD_Device_ProtocolList.json");
+	my $jsonSourceUrl = AttrVal($name,"Test_Data_URI","https://raw.githubusercontent.com/RFD-FHEM/SIGNALduino_TOOL/master/FHEM/lib/SD_Device_ProtocolList.json");
 	loadJson($jsonSourceUrl); 
-	#diag  $testDataArray;
-	
-	while ( (my $pID, my $testSet) = each  (@{$testDataArray}) )
+    
+    my $todo = undef;
+    
+    TestLabel:
+    while ( (my $pID, my $testSet) = each  (@{$testDataArray}) )
 	{
+		next if (!defined($testSet->{module}) || $testSet->{module} != "!!!!EXAMPLE_MODULE - CHANGE THIS !!");
 		next if (!lib::SD_Protocols::exists($testSet->{id}));
 		next if (lib::SD_Protocols::checkProperty($testSet->{id},'developId',undef));
-		next if (!defined($testSet->{module}) );
 	
 		while ( (my $tID, my $tData) = each (@{$testSet->{data}}) ) 
 		{
@@ -71,7 +71,13 @@ defmod test_module_devices UnitTest dummyDuino (
 				};
 				
 			}
-		}
+		}	
 	}
+	return if ( defined($todo) );
+	my $jsonSourceUrl = AttrVal($name,"Test_Data_URI","https://raw.githubusercontent.com/RFD-FHEM/SIGNALduino_TOOL/pre-release/FHEM/lib/SD_Device_ProtocolList.json");	
+	loadJson($jsonSourceUrl); 
+	$todo = todo "Testing against pre-release testdata, correct test before push this to master";
+	goto TestLabel;
+
 }
 )
