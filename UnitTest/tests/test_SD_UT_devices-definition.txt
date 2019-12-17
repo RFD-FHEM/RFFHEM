@@ -3,7 +3,6 @@ defmod test_SD_UT_devices UnitTest dummyDuino (
 	use Test2::V0;
 	use Test2::Tools::Compare qw{is};
 	use JSON; 
-	use Test2::Harness;
 	 
 	## for online testsytem: defmod test_SDUT_devices UnitTest dummyDuino ##
 	my $testDataArray; 
@@ -21,7 +20,6 @@ defmod test_SD_UT_devices UnitTest dummyDuino (
 	loadJson($jsonSourceUrl); 
     
     my $todo = undef;
-    
     TestLabel:
 	while ( (my $pID, my $testSet) = each  (@{$testDataArray}) )
 	{
@@ -71,6 +69,7 @@ defmod test_SD_UT_devices UnitTest dummyDuino (
 			}
 		}
 	}
+	
 	if ( !defined($todo) )
 	{
 		my $jsonSourceUrl = AttrVal($name,"Test_Data_URI","https://raw.githubusercontent.com/RFD-FHEM/SIGNALduino_TOOL/pre-release/FHEM/lib/SD_Device_ProtocolList.json");	
