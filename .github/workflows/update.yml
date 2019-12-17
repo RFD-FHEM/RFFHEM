@@ -13,6 +13,8 @@ jobs:
       id: extract_branch
     - name: Checkout Repostory
       uses: actions/checkout@master
+      with:
+        fetch-depth: 0
     - name: update controls files
       uses: fhem/fhem-controls-actions@master
       with:
