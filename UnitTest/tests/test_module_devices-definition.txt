@@ -20,7 +20,7 @@ defmod test_module_devices UnitTest dummyDuino (
 
 	use JSON; 
 	
-	my $jsonSourceUrl = AttrVal($name,"Test_Data_URI","https://raw.githubusercontent.com/RFD-FHEM/SIGNALduino_TOOL/pre_addModule/FHEM/lib/SD_Device_ProtocolList.json");
+	my $jsonSourceUrl = AttrVal($name,"Test_Data_URI","https://raw.githubusercontent.com/RFD-FHEM/SIGNALduino_TOOL/pre-release/FHEM/lib/SD_Device_ProtocolList.json");
 	loadJson($jsonSourceUrl); 
 	#diag  $testDataArray;
 	
