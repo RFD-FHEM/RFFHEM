@@ -3,7 +3,8 @@ defmod test_SD_UT_devices UnitTest dummyDuino (
 	use Test2::V0;
 	use Test2::Tools::Compare qw{is};
 	use JSON; 
-
+	use Test2::Harness;
+	 
 	## for online testsytem: defmod test_SDUT_devices UnitTest dummyDuino ##
 	my $testDataArray; 
 	sub loadJson
@@ -70,14 +71,12 @@ defmod test_SD_UT_devices UnitTest dummyDuino (
 			}
 		}
 	}
-	if ( defined($todo) )
+	if ( !defined($todo) )
 	{
-		done_testing;
-		return;
-	} 
-	my $jsonSourceUrl = AttrVal($name,"Test_Data_URI","https://raw.githubusercontent.com/RFD-FHEM/SIGNALduino_TOOL/pre-release/FHEM/lib/SD_Device_ProtocolList.json");	
-	loadJson($jsonSourceUrl); 
-	$todo = todo "Testing against pre-release testdata, correct test before push this to master";
-	goto TestLabel;
+		my $jsonSourceUrl = AttrVal($name,"Test_Data_URI","https://raw.githubusercontent.com/RFD-FHEM/SIGNALduino_TOOL/pre-release/FHEM/lib/SD_Device_ProtocolList.json");	
+		loadJson($jsonSourceUrl); 
+		$todo = todo "Testing against pre-release testdata, correct test before push this to master";
+		goto TestLabel;
+	}
 }
 )

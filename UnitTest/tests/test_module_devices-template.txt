@@ -73,11 +73,13 @@ defmod test_module_devices UnitTest dummyDuino (
 			}
 		}	
 	}
-	return if ( defined($todo) );
-	my $jsonSourceUrl = AttrVal($name,"Test_Data_URI","https://raw.githubusercontent.com/RFD-FHEM/SIGNALduino_TOOL/pre-release/FHEM/lib/SD_Device_ProtocolList.json");	
-	loadJson($jsonSourceUrl); 
-	$todo = todo "Testing against pre-release testdata, correct test before push this to master";
-	goto TestLabel;
+	if ( !defined($todo) )
+	{
+		my $jsonSourceUrl = AttrVal($name,"Test_Data_URI","https://raw.githubusercontent.com/RFD-FHEM/SIGNALduino_TOOL/pre-release/FHEM/lib/SD_Device_ProtocolList.json");	
+		loadJson($jsonSourceUrl); 
+		$todo = todo "Testing against pre-release testdata, correct test before push this to master";
+		goto TestLabel;
+	}
 
 }
 )
