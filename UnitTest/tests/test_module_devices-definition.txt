@@ -35,7 +35,7 @@ defmod test_module_devices UnitTest dummyDuino (
 			#diag explain $tData;
 			
 			subtest "Checking module: $testSet->{module} device: $testSet->{name} TestNo: $tID " => sub {
-				my $todo = todo "module $testSet->{module} is not in scope of tests" if ($testSet->{module} =~ /^CUL_TCM97100|^IT/);
+				my $todo = todo "module $testSet->{module} is not in scope of tests" if ($testSet->{module} =~ /^CUL_TCM97001|^IT/);
 				
 				plan(2); # one for readings and one for internals
 				
