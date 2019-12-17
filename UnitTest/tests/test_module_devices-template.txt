@@ -48,7 +48,7 @@ defmod test_module_devices UnitTest dummyDuino (
 					note("device will be defined temporary");
 					CommandDefMod(undef,"-temporary $tData->{internals}{NAME} $testSet->{module} ".$tData->{internals}{DEF});			
 				}
-				
+				sleep(1.0);
 				SIGNALduino_Parse($targetHash, $targetHash, $targetHash->{NAME}, "\002".$tData->{rmsg}."\003");
 				subtest "Verify readings" => sub {
 					my $plan=0;
