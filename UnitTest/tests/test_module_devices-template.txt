@@ -48,8 +48,9 @@ defmod test_module_devices UnitTest dummyDuino (
 					note("device will be defined temporary");
 					CommandDefMod(undef,"-temporary $tData->{internals}{NAME} $testSet->{module} ".$tData->{internals}{DEF});			
 				}
-				select(undef, undef, undef, 0.1);
-				SIGNALduino_Parse($targetHash, $targetHash, $targetHash->{NAME}, "\002".$tData->{rmsg}."\003");
+				no strict "refs"; 
+				&{$modules{$testSet->{module}}{ParseFn}}($targetHash,$tData->{dmsg});
+				use strict "refs"; 
 				subtest "Verify readings" => sub {
 					my $plan=0;
 					while ( (my $rName, my $rValue) = each (%{$tData->{readings}}) )
