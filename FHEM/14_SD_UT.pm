@@ -263,6 +263,14 @@
 #		Taste Vol+  MS;P1=-1645;P2=574;P3=-535;P4=-4556;P5=2811;D=24512321212323232323212323232123212123232323;CP=2;SP=4;R=57;m2;#;#;
 #}
 ###############################################################################################################################################################################
+# - Remote control with 4 buttons for diesel heating [Protocol 20]
+#{  https://forum.fhem.de/index.php/topic,58397.msg999475.html#msg999475 @ fhem_user0815 2019-12-04
+#   RCnoName20_17E9 on     MS;P0=-740;P2=686;P3=-283;P5=229;P6=-7889;D=5650505023502323232323235023505023505050235050502323502323505050;CP=5;SP=6;R=67;O;m2;
+#   RCnoName20_17E9 off    MS;P1=-754;P2=213;P4=681;P5=-283;P6=-7869;D=2621212145214545454545452145212145212121212145214521212121452121;CP=2;SP=6;R=69;O;m2;
+#   RCnoName20_17E9 plus   MS;P1=-744;P2=221;P3=679;P4=-278;P5=-7860;D=2521212134213434343434342134212134212121213421212134343434212121;CP=2;SP=5;R=66;O;m2;
+#   RCnoName20_17E9 minus  MS;P0=233;P1=-7903;P3=-278;P5=-738;P6=679;D=0105050563056363636363630563050563050505050505630563050505630505;CP=0;SP=1;R=71;O;m1;
+#}
+###############################################################################################################################################################################
 # !!! ToDo´s !!!
 #     - LED lights, counter battery-h reading --> commandref hour_counter module
 #     -
@@ -564,6 +572,14 @@ my %models = (
 								hex_lengh	=> "9",
 								Typ				=> "remote"
 							},
+	"RCnoName20" =>	{	"000010001111000" => "plus",
+										"000000101000100" => "minus",
+										"000001010000100" => "off",
+										"000100011011000" => "on",
+										hex_lengh	=> "8",
+										Protocol 	=> "P20",
+										Typ				=> "remote"
+									},
 	"unknown" =>	{	Protocol	=> "any",
 									hex_lengh	=> "",
 									Typ				=> "not_exist"
@@ -573,7 +589,7 @@ my %models = (
 #############################
 sub SD_UT_Initialize($) {
 	my ($hash) = @_;
-	$hash->{Match}			= "^P(?:14|29|30|34|46|68|69|76|81|83|86|90|91|91.1|92|93|95)#.*";
+	$hash->{Match}			= "^P(?:14|20|29|30|34|46|68|69|76|81|83|86|90|91|91.1|92|93|95)#.*";
 	$hash->{DefFn}			= "SD_UT_Define";
 	$hash->{UndefFn}		= "SD_UT_Undef";
 	$hash->{ParseFn}		= "SD_UT_Parse";
@@ -586,6 +602,7 @@ sub SD_UT_Initialize($) {
 		"MD_210R.*"	 => {ATTR => "model:MD_210R", FILTER => "%NAME", autocreateThreshold => "3:180", GPLOT => ""},
 		"MD_2018R.*"	 => {ATTR => "model:MD_2018R", FILTER => "%NAME", autocreateThreshold => "3:180", GPLOT => ""},
 		"OR28V.*"	 => {ATTR => "model:OR28V", FILTER => "%NAME", autocreateThreshold => "3:180", GPLOT => ""},
+		"RCnoName20.*"	 => {ATTR => "model:RCnoName20", FILTER => "%NAME", autocreateThreshold => "3:180", GPLOT => ""},
 		"Techmar.*"	 => {ATTR => "model:Techmar", FILTER => "%NAME", autocreateThreshold => "3:180", GPLOT => ""},
 		"unknown_please_select_model"	=> {ATTR => "model:unknown", FILTER => "%NAME", autocreateThreshold => "5:180", GPLOT => ""},
 	};
@@ -630,9 +647,9 @@ sub SD_UT_Define($$) {
 	if (($a[2] eq "SA_434_1_mini" || $a[2] eq "QUIGG_DMV" || $a[2] eq "TR_502MSV") && not $a[3] =~ /^[0-9a-fA-F]{3}/s) {
 		return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short or long (must be 3 chars) or not HEX (0-9 | a-f | A-F){3}";
 	}
-	### [4] checks Neff SF01_01319004 & BOSCH SF01_01319004_Typ2 & Chilitec_22640 & ESTO KL_RF01###
-	if (($a[2] eq "SF01_01319004" || $a[2] eq "SF01_01319004_Typ2" || $a[2] eq "Chilitec_22640" || $a[2] eq "KL_RF01") && not $a[3] =~ /^[0-9a-fA-F]{4}/s) {
-		return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short | long or not HEX (0-9 | a-f | A-F){4}";
+	### [4] checks Neff SF01_01319004 & BOSCH SF01_01319004_Typ2 & Chilitec_22640 & ESTO KL_RF01 & RCnoName20###
+	if (($a[2] eq "SF01_01319004" || $a[2] eq "SF01_01319004_Typ2" || $a[2] eq "Chilitec_22640" || $a[2] eq "KL_RF01" || $a[2] eq "RCnoName20") && not $a[3] =~ /^[0-9a-fA-F]{4}/s) {
+		return "Wrong HEX-Value! ($a[3]) $a[2] Hex-value to short or long (must be 4 chars) or not hex (0-9 | a-f | A-F) {4}";
 	}
 	### [6] checks Manax | mumbi ###
 	if ($a[2] eq "RC_10" && not $a[3] =~ /^[0-9a-fA-F]{4}_([ABCD]|all)$/s) {
@@ -795,6 +812,11 @@ sub SD_UT_Set($$$@) {
 		} elsif ($model eq "OR28V") {
 			$msg = $models{$model}{Protocol} . "#";
 			$msgEnd .= "#R" . $repeats;	# R1 wird vom SIGNALduino nicht als MS erkannt!
+		############ RCnoName20 ############
+		} elsif ($model eq "RCnoName20") {
+			my $adr = sprintf( "%016b", hex($definition[1]));	# argument 1 - adress to binary with 16 bits
+			$msg = $models{$model}{Protocol} . "#" . $adr;
+			$msgEnd = "#R" . $repeats;
 		}
 	}
 	
@@ -1026,11 +1048,21 @@ sub SD_UT_Parse($$) {
 		}
 	}
 
-	if ($hlen == 8 && !$def && $protocol == 92) {
-		### Remote control Krinner_LUMIX [P92] ###
-		$deviceCode = substr($rawData,0,7);
-		$devicedef = "Krinner_LUMIX " . $deviceCode;
-		$def = $modules{SD_UT}{defptr}{$devicedef};
+	if ($hlen == 8) {
+		if (!$def && $protocol == 20) {
+			### Remote control RCnoName20 [P20] ###
+			$deviceCode = substr($rawData,0,4);
+			$devicedef = "RCnoName20 " . $deviceCode;
+			$def = $modules{SD_UT}{defptr}{$devicedef};
+			$model = "RCnoName20";
+			$name = "RCnoName20_" . $deviceCode;
+		}
+		if (!$def && $protocol == 92) {
+			### Remote control Krinner_LUMIX [P92] ###
+			$deviceCode = substr($rawData,0,7);
+			$devicedef = "Krinner_LUMIX " . $deviceCode;
+			$def = $modules{SD_UT}{defptr}{$devicedef};
+		}
 	}
 
 	if ($hlen == 9) {
@@ -1366,6 +1398,10 @@ sub SD_UT_Parse($$) {
 	} elsif ($model eq "Techmar" && $protocol == 95) {
 		$state = substr($bitData,32,8);
 		$deviceCode = substr($rawData,0,8);
+	### Remote control RCnoName20 [P20] ###
+	} elsif ($model eq "RCnoName20" && $protocol == 20) {
+		$state = substr($bitData,16,15);	# last bit is filled
+		$deviceCode = substr($rawData,0,4);
 	############ unknown ############
 	} else {
 		readingsBulkUpdate($hash, "state", "???");
@@ -1652,6 +1688,7 @@ sub SD_UT_tristate2bin($) {
 	 <ul> - QUIGG DMV-7000&nbsp;&nbsp;&nbsp;<small>(module model: QUIGG_DMV | protocol 34)</small></ul>
 	 <ul> - Remote control SA-434-1 mini 923301&nbsp;&nbsp;&nbsp;<small>(module model: SA_434_1_mini | protocol 81)</small></ul>
 	 <ul> - Remote control for Techmar Garden Lights &nbsp;&nbsp;&nbsp;<small>(Modulmodel: Techmar | Protokoll 95)</small></ul>
+	 <ul> - Remote control with 4 buttons for diesel heating &nbsp;&nbsp;&nbsp;<small>(Modulmodel: RCnoName20 | Protokoll 20)</small></ul>
 	 <ul> - Tedsen Teletaster <small>(protocol 46)</small>:
 			<small>
 			<ul>SKX1xx, 1 button - module model: Tedsen_SKX1xx</ul>
@@ -1936,6 +1973,7 @@ sub SD_UT_tristate2bin($) {
 	 <ul> - CAME Drehtor Antrieb&nbsp;&nbsp;&nbsp;<small>(Modulmodel: CAME_TOP_432EV | Protokoll 86)</small></ul>
 	 <ul> - ChiliTec LED Christbaumkerzen&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Chilitec_22640 | Protokoll 14)</small></ul>
 	 <ul> - ESTO Deckenlampe&nbsp;&nbsp;&nbsp;<small>(Modulmodel: KL_RF01 | Protokoll 93)</small></ul>
+	 <ul> - Fernbedienung mit 4 Tasten f&uuml;r Diesel-Heizung &nbsp;&nbsp;&nbsp;<small>(Modulmodel: RCnoName20 | Protokoll 20)</small></ul>
 	 <ul> - Hoermann HS1-868-BS&nbsp;&nbsp;&nbsp;<small>(Modulmodel: HS1_868_BS | Protokoll 69)</small></ul>
 	 <ul> - Hoermann HSM4&nbsp;&nbsp;&nbsp;<small>(Modulmodel: HSM4 | Protokoll 69)</small></ul>
 	 <ul> - Krinner LUMIX Christbaumkerzen&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Krinner_LUMIX | Protokol 92)</small></ul>

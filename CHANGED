@@ -1,8 +1,8 @@
-2019-12-18 - TR-502MSV bugfix ident
-
-Ident was only 8 bit, must be 12 bit long
+2019-12-18 - improvement
 18.12.2019
-  14_SD_UT.pm: TR-502MSV bugfix, ident was only 8 bit, must be 12 bit long
+  14_SD_UT.pm:
+    TR-502MSV bugfix, ident was only 8 bit, must be 12 bit long
+    new protocol 20 - Remote control with 4 buttons for diesel heating
 17.12.2019
   14_SD_UT.pm: revised documentation
 15.12.2019 

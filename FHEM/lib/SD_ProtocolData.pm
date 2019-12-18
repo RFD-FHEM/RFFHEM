@@ -54,7 +54,7 @@
 ##### notice #### or #### info ############################################################################################################
 # !!! Between the keys and values ​​no tabs not equal to a width of 8 or please use spaces !!!
 # !!! Please use first unused id for new protocols !!!
-# ID´s are currently unused: 20 | 26 | 27 | 31 | 54 | 78
+# ID´s are currently unused: 26 | 27 | 31 | 54 | 78
 # ID´s need to be revised (preamble u): 5|6|19|21|22|23|24|25|28|36|40|42|52|56|59|63
 ###########################################################################################################################################
 # Please provide at least three messages for each new MU/MC/MS protocol and a URL of issue in GitHub or discussion in FHEM Forum
@@ -66,7 +66,7 @@ package lib::SD_ProtocolData;
 	use strict;
 	use warnings;
 	
-	our $VERSION = '1.11';
+	our $VERSION = '1.12';
 	our %protocols = (
 		"0"	=>	## various weather sensors (500 | 9100)
 						# ABS700 | Id:79 T: 3.3 Bat:low                MS;P1=-7949;P2=492;P3=-1978;P4=-3970;D=21232423232424242423232323232324242423232323232424;CP=2;SP=1;R=245;O;
@@ -322,7 +322,7 @@ package lib::SD_ProtocolData;
 				name         => 'TCM 218943',
 				comment      => 'Weatherstation TCM 218943, Eurochron',
 				id           => '6',
-				knownFreqs   => '434.92',
+				knownFreqs   => '433.92',
 				one          => [1,-5],
 				zero         => [1,-10],
 				sync         => [1,-32],
@@ -641,9 +641,28 @@ package lib::SD_ProtocolData;
 				length_min		=> '19',
 				length_max		=> '23',					# not confirmed, length one more as MU Message
 			},
-
-		#"20"	=> can use
-
+		"20"	=>	## Remote control with 4 buttons for diesel heating
+							# https://forum.fhem.de/index.php/topic,58397.msg999475.html#msg999475 @ fhem_user0815 2019-12-04
+							# RCnoName20_17E9 on     MS;P0=-740;P2=686;P3=-283;P5=229;P6=-7889;D=5650505023502323232323235023505023505050235050502323502323505050;CP=5;SP=6;R=67;O;m2;
+							# RCnoName20_17E9 off    MS;P1=-754;P2=213;P4=681;P5=-283;P6=-7869;D=2621212145214545454545452145212145212121212145214521212121452121;CP=2;SP=6;R=69;O;m2;
+							# RCnoName20_17E9 plus   MS;P1=-744;P2=221;P3=679;P4=-278;P5=-7860;D=2521212134213434343434342134212134212121213421212134343434212121;CP=2;SP=5;R=66;O;m2;
+							# RCnoName20_17E9 minus  MS;P0=233;P1=-7903;P3=-278;P5=-738;P6=679;D=0105050563056363636363630563050563050505050505630563050505630505;CP=0;SP=1;R=71;O;m1;
+			{
+				name         => 'RCnoName20',
+				comment      => 'Remote control with 4 buttons for diesel heating',
+				id           => '20',
+				knownFreqs   => '433.92',
+				one          => [3,-1],  # 720,-240
+				zero         => [1,-3],  # 240,-720
+				sync         => [1,-33], # 240,-7920
+				clockabs     => 240,
+				format       => 'twostate',
+				preamble     => 'P20#',
+				clientmodule => 'SD_UT',
+				modulematch  => '^P20#.{8}',
+				length_min   => '31',
+				length_max   => '32',
+			},
 		"21"	=>	## Einhell Garagentor
 							# https://forum.fhem.de/index.php?topic=42373.0 @Ellert | user have no RAWMSG
 							# static adress: Bit 1-28 | channel remote Bit 29-32 | repeats 31 | pause 20 ms
