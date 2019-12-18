@@ -3,7 +3,6 @@ defmod test_SD_UT_devices UnitTest dummyDuino (
 	use Test2::V0;
 	use Test2::Tools::Compare qw{is};
 	use JSON; 
-	 
 	## for online testsytem: defmod test_SDUT_devices UnitTest dummyDuino ##
 	my $testDataArray; 
 	sub loadJson
@@ -34,19 +33,19 @@ defmod test_SD_UT_devices UnitTest dummyDuino (
 			
 			subtest "Checking module: $testSet->{module} device: $testSet->{name} TestNo: $tID " => sub {
 				
-				plan(2); # one for readings and one for internals
-				
 				if (IsDevice($tData->{internals}{NAME}))
 				{
+					plan(2); # one for readings and one for internals
 					note("device is already defined on system, clearing readings");
-					CommandSetReading(undef, "$tData->{internals}{NAME} state missing");
-					#CommandDelete(undef,$tData->{internals}{NAME});
+					while ( (my $rName, my $rValue) = each (%{$tData->{readings}}) )
+					{
+						CommandDeleteReading(undef, "$tData->{internals}{NAME} $rName");
+					}
 				}  else {
+					plan(3); # one for readings and one for internals and one for defmod
 					note("device will be defined temporary");
-					CommandDefMod(undef,"-temporary $tData->{internals}{NAME} $testSet->{module} ".$tData->{internals}{DEF});			
+					is(CommandDefMod(undef,"-temporary $tData->{internals}{NAME} $testSet->{module} $tData->{internals}{DEF}"),U(),"Verify device defmod") || diag explain $tData;
 				}
-				#select(undef, undef, undef, 0.15);
-				#SIGNALduino_Parse($targetHash, $targetHash, $targetHash->{NAME}, "\002".$tData->{rmsg}."\003");
 				no strict "refs"; 
 				&{$modules{$testSet->{module}}{ParseFn}}($targetHash,$tData->{dmsg});
 				use strict "refs"; 
