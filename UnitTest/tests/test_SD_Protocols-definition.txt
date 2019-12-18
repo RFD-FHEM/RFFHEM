@@ -3,7 +3,7 @@ defmod test_SD_Protocols UnitTest dummyDuino
  {
 	require_ok('lib::SD_Protocols'); 
 	require lib::SD_Protocols;
-
+	use Test2::V0;
 
 	subtest 'lib SD_Prococols test sub LoadHash() ' => sub {
 		plan tests => 5;
@@ -15,7 +15,7 @@ defmod test_SD_Protocols UnitTest dummyDuino
 		like($ret->{error},qr/syntax error at/,"file with syntax error ");
 
 		$ret=lib::SD_Protocols::LoadHash("./FHEM/lib/test_loadprotohash-ok.pm");
-		isa_ok($ret,"HASH","valid file hashref");
+		ref_ok($ret,"HASH","valid file hashref");
 		like($ret->{9999}{name},qr/Unittest/,"valid element hashref");
 
 		is($ret->{error},undef,"valid file error check");
