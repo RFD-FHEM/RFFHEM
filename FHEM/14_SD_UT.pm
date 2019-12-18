@@ -813,6 +813,8 @@ sub SD_UT_Set($$$@) {
 			$msg = $models{$model}{Protocol} . "#";
 			$msgEnd .= "#R" . $repeats;	# R1 wird vom SIGNALduino nicht als MS erkannt!
 		############ RCnoName20 ############
+		} elsif ($model eq "RCnoName20") {
+			my $adr = sprintf( "%016b", hex($definition[1]));	# argument 1 - adress to binary with 16 bits
 			$msg = $models{$model}{Protocol} . "#" . $adr;
 			$msgEnd = "#R" . $repeats;
 		}
