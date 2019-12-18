@@ -52,8 +52,8 @@
 #     get sduino_dummy raw MU;;P0=-5476;;P1=592;;P2=-665;;P3=1226;;P4=-1309;;D=01232323232323232323232323412323412323414;;CP=3;;R=1;;
 #}    Send Adresse FFF funktioniert nicht 100%ig!
 ###############################################################################################################################################################################
-# - TR-502MSV (LIBRA GmbH) [LIDL] Funk-Steckdosendimmer + Schalter | transmitter TR-502MSV - receiver RC-710DX|RC-710 [Protocol 34]
-#{    nibble 0-1 -> Hauscode | nibble 3 ??? | nibble 3-4 -> Tastencode | repeats 3
+# - TR-502MSV (LIBRA GmbH [LIDL] Funk-Steckdosendimmer + Schalter | transmitter TR-502MSV - receiver RC-710DX|RC-710 [Protocol 34]
+#{    nibble 0-2 -> Hauscode | nibble 3-4 -> Tastencode | repeats 3
 #			get sduino_dummy raw MU;;P0=-12064;;P1=717;;P2=-669;;P3=1351;;P4=-1319;;D=012323414141234123232323232323232323232323;;
 #}    get sduino_dummy raw MU;;P0=697;;P1=-1352;;P2=-679;;P3=1343;;D=01010101010231023232323232323232323232323;CP=0;R=27;;
 ###############################################################################################################################################################################
@@ -622,13 +622,13 @@ sub SD_UT_Define($$) {
 		}
 	}
 
-	### [2] checks CAME_TOP_432EV & Novy_840029 & Unitec_47031 & TR_502MSV ###
-	if (($a[2] eq "CAME_TOP_432EV" || $a[2] eq "Novy_840029" || $a[2] eq "Unitec_47031" || $a[2] eq "TR_502MSV") && not $a[3] =~ /^[0-9a-fA-F]{2}/s) {
+	### [2] checks CAME_TOP_432EV & Novy_840029 & Unitec_47031 ###
+	if (($a[2] eq "CAME_TOP_432EV" || $a[2] eq "Novy_840029" || $a[2] eq "Unitec_47031") && not $a[3] =~ /^[0-9a-fA-F]{2}/s) {
 		return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short | long or not HEX (0-9 | a-f | A-F){2}";
 	}
-	### [3] checks SA_434_1_mini & QUIGG_DMV ###
-	if (($a[2] eq "SA_434_1_mini" || $a[2] eq "QUIGG_DMV") && not $a[3] =~ /^[0-9a-fA-F]{3}/s) {
-		return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short | long or not HEX (0-9 | a-f | A-F){3}";
+	### [3] checks SA_434_1_mini & QUIGG_DMV & TR_502MSV ###
+	if (($a[2] eq "SA_434_1_mini" || $a[2] eq "QUIGG_DMV" || $a[2] eq "TR_502MSV") && not $a[3] =~ /^[0-9a-fA-F]{3}/s) {
+		return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short or long (must be 3 chars) or not HEX (0-9 | a-f | A-F){3}";
 	}
 	### [4] checks Neff SF01_01319004 & BOSCH SF01_01319004_Typ2 & Chilitec_22640 & ESTO KL_RF01###
 	if (($a[2] eq "SF01_01319004" || $a[2] eq "SF01_01319004_Typ2" || $a[2] eq "Chilitec_22640" || $a[2] eq "KL_RF01") && not $a[3] =~ /^[0-9a-fA-F]{4}/s) {
@@ -718,8 +718,8 @@ sub SD_UT_Set($$$@) {
 			$msgEnd = "P#R" . $repeats;
 		############ TR_502MSV ############
 		} elsif ($model eq "TR_502MSV") {
-			my $adr = sprintf( "%08b", hex($definition[1]));	# argument 1 - adress to binary with 8 digits
-			$msg = $models{$model}{Protocol} . "#" . $adr . "1111";
+			my $adr = sprintf( "%012b", hex($definition[1]));	# argument 1 - adress to binary with 12 digits
+			$msg = $models{$model}{Protocol} . "#" . $adr;
 			$msgEnd = "P#R" . $repeats;		
 		############ Novy_840029 ############
 		} elsif ($model eq "Novy_840029") {
@@ -984,7 +984,7 @@ sub SD_UT_Parse($$) {
 		}
 		### TR_502MSV [P34] ###
 		if (!$def && $protocol == 34) {
-			$deviceCode = substr($rawData,0,2);
+			$deviceCode = substr($rawData,0,3);
 			$devicedef = "TR_502MSV " . $deviceCode;
 			$def = $modules{SD_UT}{defptr}{$devicedef};
 		}
@@ -1262,8 +1262,7 @@ sub SD_UT_Parse($$) {
 	############ TR_502MSV ############ Protocol 34 ############
 	} elsif ($model eq "TR_502MSV" && $protocol == 34) {
 		$state = substr($bitData,12,8);
-		$deviceCode = substr($bitData,0,8);
-		$unknown_bits = substr($bitData,8,4);
+		$deviceCode = substr($bitData,0,12);
 	############ Novy_840029 ############ Protocol 86 ############
 	} elsif ($model eq "Novy_840029" && ($protocol == 86 || $protocol == 81)) {
 		if ($hlen == 3) {		# 12 Bit [3]
@@ -1482,8 +1481,8 @@ sub SD_UT_Attr(@) {
 				$devicename = $devicemodel."_".$deviceCode;
 			############ TR_502MSV ############
 			} elsif ($attrName eq "model" && $attrValue eq "TR_502MSV") {
-				$deviceCode = substr($bitData,0,8);
-				$deviceCode = sprintf("%02X", oct( "0b$deviceCode" ) );
+				$deviceCode = substr($bitData,0,12);
+				$deviceCode = sprintf("%03X", oct( "0b$deviceCode" ) );
 				$devicename = $devicemodel."_".$deviceCode;
 			############ Novy_840029 ############
 			} elsif ($attrName eq "model" && $attrValue eq "Novy_840029") {
@@ -1644,7 +1643,7 @@ sub SD_UT_tristate2bin($) {
 	 <ul> - Hoermann HSM4&nbsp;&nbsp;&nbsp;<small>(module model: HSM4 | protocol 69)</small></ul>
 	 <ul> - Krinner LUMIX X-Mas light string&nbsp;&nbsp;&nbsp;<small>(module model: Krinner_LUMIX | protocol 92)</small></ul>
 	 <ul> - LED_XM21_0 X-Mas light string&nbsp;&nbsp;&nbsp;<small>(module model: LED_XM21_0 | protocol 76)</small></ul>
-	 <ul> - LIBRA TR-502MSV (LIDL)&nbsp;&nbsp;&nbsp;<small>(module model: TR_502MSV | protocol 34)</small></ul>
+	 <ul> - TR-502MSV (LIDL, LIBRA, MANDOLYN, QUIGG), compatible GT-7008BS, GT-FSI-04, DMV-7008S, Powerfix RCB-I 3600&nbsp;&nbsp;&nbsp;<small>(module model: TR_502MSV | protocol 34)</small></ul>
 	 <ul> - Manax RCS250&nbsp;&nbsp;&nbsp;<small>(module model: RC_10 | protocol 90)</small></ul>
 	 <ul> - Medion OR28V&nbsp;&nbsp;&nbsp;<small>(module model: OR28V | protocol 68)</small></ul>
 	 <ul> - mumbi AFS300-s (remote control RC-10 | random code wireless switch RCS-22GS)&nbsp;&nbsp;&nbsp;<small>(module model: RC_10 | protocol 90)</small></ul>
@@ -1941,7 +1940,7 @@ sub SD_UT_tristate2bin($) {
 	 <ul> - Hoermann HSM4&nbsp;&nbsp;&nbsp;<small>(Modulmodel: HSM4 | Protokoll 69)</small></ul>
 	 <ul> - Krinner LUMIX Christbaumkerzen&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Krinner_LUMIX | Protokol 92)</small></ul>
 	 <ul> - LED_XM21_0 Christbaumkerzen&nbsp;&nbsp;&nbsp;<small>(Modulmodel: LED_XM21_0 | Protokol 76)</small></ul>
-	 <ul> - LIBRA TR-502MSV (LIDL)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: TR_502MSV | Protokol 34)</small></ul>
+	 <ul> - TR-502MSV (LIDL, LIBRA, MANDOLYN, QUIGG), kompatibel GT-7008BS, GT-FSI-04, DMV-7008S, Powerfix RCB-I 3600&nbsp;&nbsp;&nbsp;<small>(module model: TR_502MSV | protocol 34)</small></ul>
 	 <ul> - Manax RCS250&nbsp;&nbsp;&nbsp;<small>(Modulmodel: RC_10 | Protokoll 90)</small></ul>
 	 <ul> - Medion OR28V&nbsp;&nbsp;&nbsp;<small>(Modulmodel: OR28V | Protokoll 68)</small></ul>
 	 <ul> - mumbi AFS300-s (remote control RC-10 | random code wireless switch RCS-22GS)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: RC_10 | Protokoll 90)</small></ul>
