@@ -76,9 +76,9 @@ package lib::SD_ProtocolData;
 						# Prologue | Id:145 Ch:0 T: 2.7, Bat:ok        MS;P0=-4149;P2=-9098;P3=628;P4=-2076;D=3230343430343434303430303434343434343434343434343030343030343434343034303434;CP=3;SP=2;R=218;O;m2;
 			{
 				name						=> 'weather (v1)',
-				comment					=> 'temperature / humidity or other sensors',
+				comment						=> 'temperature / humidity or other sensors',
 				id							=> '0',
-				knownFreqs      => '433.92',
+				knownFreqs 					=> '433.92',
 				one							=> [1,-7],
 				zero						=> [1,-3],
 				sync						=> [1,-16],
