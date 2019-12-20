@@ -1,3 +1,9 @@
+2019-12-20 - update.yml
+
+fixed Update workflow to commit if something in the lib directory is changed
+
+SD_ProtocolData.pm
+force generating controlsfile now
 2019-12-18 - improvement
 18.12.2019
   14_SD_UT.pm:
