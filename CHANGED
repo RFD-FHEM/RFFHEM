@@ -1,3 +1,4 @@
+2019-12-21 - Protocol 26 integrated in SD_UT
 2019-12-20 - update.yml
 
 fixed Update workflow to commit if something in the lib directory is changed
