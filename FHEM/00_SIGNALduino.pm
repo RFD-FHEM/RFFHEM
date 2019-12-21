@@ -4647,7 +4647,6 @@ sub SIGNALduino_githubParseHttpResponse($$$) {
 			<li>W -> writes a value to the EEPROM and the CC1101 register, example: <code>set sduino raw W041D</code> writes 1D to register 0x02</li>
       <li>Wseq -> writes several values ​​to the EEPROM and the CC1101 register (The values ​​are separated with spaces), example: <code>set sduino raw Wseq W0547 W067A</code><br>
 			note: The EEPROM address has an offset of 2</li>
-		 </li>
 		</ul>
 		</p>
 		</li>
