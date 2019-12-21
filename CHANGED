@@ -1,4 +1,5 @@
-2019-12-18 - improvement
+19.12.2019
+  00_SIGNALduino.pm: added new command (raw Wseq) to write more than one register with one step
 18.12.2019
   14_SD_UT.pm:
     TR-502MSV bugfix, ident was only 8 bit, must be 12 bit long

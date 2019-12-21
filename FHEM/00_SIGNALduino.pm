@@ -31,7 +31,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.4.1_dev_18.12",
+	SDUINO_VERSION            => "v3.4.1_dev_21.12",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -557,8 +557,18 @@ sub SIGNALduino_Set($$@) {
   
   if($cmd eq "raw") {
     $hash->{logMethod}->($name, 4, "$name: Set, $cmd $arg");
-    #SIGNALduino_SimpleWrite($hash, $arg);
-    SIGNALduino_AddSendQueue($hash,$arg);
+		if ($arg =~ m/^Wseq /) {
+			my @args = split(' ', $arg);
+			foreach my $argcmd (@args) {
+				if ($argcmd ne "Wseq") {
+					#Log3 $name, 4, "set $name raw Wseq: $argcmd";
+					SIGNALduino_AddSendQueue($hash,$argcmd);
+				}
+			}
+		} else {
+			#SIGNALduino_SimpleWrite($hash, $arg);
+			SIGNALduino_AddSendQueue($hash,$arg);
+		}
   } elsif( $cmd eq "flash" ) {
     my @args = split(' ', $arg);
     my $log = "";
@@ -4634,8 +4644,9 @@ sub SIGNALduino_githubParseHttpResponse($$$) {
 			<b>note: The wrong use of the upcoming options can lead to malfunctions of the SIGNALduino!</b><br><br>
 			<u>Register commands for a CC1101</u><br>
 			<li>e -> default settings</li>
-			<li>W -> writes a value to the EEPROM and the CC1101 register<br>
-			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;note: The EEPROM address has an offset of 2. example: <code>set sduino raw W041D</code> write 1D to Register 0x02
+			<li>W -> writes a value to the EEPROM and the CC1101 register, example: <code>set sduino raw W041D</code> writes 1D to register 0x02</li>
+      <li>Wseq -> writes several values ​​to the EEPROM and the CC1101 register (The values ​​are separated with spaces), example: <code>set sduino raw Wseq W0547 W067A</code><br>
+			note: The EEPROM address has an offset of 2</li>
 		 </li>
 		</ul>
 		</p>
@@ -5065,9 +5076,9 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
 						<br><br>
          <u>Register Befehle bei einem CC1101</u><br>
          <li>e -> Werkseinstellungen</li>
-         <li>W -> schreibt einen Wert ins EEPROM und ins CC1101 Register<br>
-				 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Hinweis: Die EEPROM Adresse hat einen Offset von 2. z.Bsp: <code>set sduino raw W041D</code> schreibt 1D ins Register 0x02
-				 </li>
+         <li>W -> schreibt einen Wert ins EEPROM und ins CC1101 Register, z.Bsp: <code>set sduino raw W041D</code> schreibt 1D ins Register 0x02</li>
+         <li>Wseq -> schreibt mehrere Wert ins EEPROM und ins CC1101 Register (die Trennung der Werte erfolgt mit Leerzeichen), z.Bsp: <code>set sduino raw Wseq W0547 W067A</code><br>
+				 Hinweis: Die EEPROM Adresse hat einen Offset von 2</li>
 		</ul><br></li>
 	<a name="reset"></a>
 	<li>reset<br>
