@@ -1172,6 +1172,16 @@ sub SD_UT_Parse($$) {
 	if ($hlen == 10) {
 		if (!$def && $protocol == 26) {
 			### Remote control xavax [P26] ###
+			my $check = hex(substr($rawData,0,4)) + hex(substr($rawData,4,4));	# Nibble 0-3 is inverted to nibble 5-8
+			if ($check != 65535) {
+				Log3 $iohash, 3, "$ioname: SD_UT_Parse device xavax - check nibble 0-3 and nibble 5-8 - ERROR";
+				return "";
+			}
+			$check = hex(substr($rawData,8,1)) + hex(substr($rawData,9,1));	# Nibble 8 is inverted to nibble 9
+			if ($check != 15) {
+				Log3 $iohash, 3, "$ioname: SD_UT_Parse device xavax - check nibble 8 and nibble 9 - ERROR";
+				return "";
+			}
 			$deviceCode = substr($rawData,0,8);
 			$devicedef = "xavax " . $deviceCode;
 			$def = $modules{SD_UT}{defptr}{$devicedef};
