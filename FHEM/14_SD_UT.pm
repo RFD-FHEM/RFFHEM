@@ -662,8 +662,8 @@ sub SD_UT_Define($$) {
 	if (($a[2] eq "SA_434_1_mini" || $a[2] eq "QUIGG_DMV" || $a[2] eq "TR_502MSV") && not $a[3] =~ /^[0-9a-fA-F]{3}/s) {
 		return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short or long (must be 3 chars) or not HEX (0-9 | a-f | A-F){3}";
 	}
-	### [4] checks Neff SF01_01319004 & BOSCH SF01_01319004_Typ2 & Chilitec_22640 & ESTO KL_RF01 & RCnoName20###
-	if (($a[2] eq "SF01_01319004" || $a[2] eq "SF01_01319004_Typ2" || $a[2] eq "Chilitec_22640" || $a[2] eq "KL_RF01" || $a[2] eq "RCnoName20") && not $a[3] =~ /^[0-9a-fA-F]{4}/s) {
+	### [4 nibble] checks Neff SF01_01319004 & BOSCH SF01_01319004_Typ2 & Chilitec_22640 & ESTO KL_RF01 & RCnoName20 & xavax ###
+	if (($a[2] eq "SF01_01319004" || $a[2] eq "SF01_01319004_Typ2" || $a[2] eq "Chilitec_22640" || $a[2] eq "KL_RF01" || $a[2] eq "RCnoName20" || $a[2] eq "xavax") && not $a[3] =~ /^[0-9a-fA-F]{4}/s) {
 		return "Wrong HEX-Value! ($a[3]) $a[2] Hex-value to short or long (must be 4 chars) or not hex (0-9 | a-f | A-F) {4}";
 	}
 	### [6] checks Manax | mumbi ###
@@ -677,8 +677,8 @@ sub SD_UT_Define($$) {
 	return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short | long or not HEX (0-9 | a-f | A-F){7}" if (($a[2] eq "HSM4" || $a[2] eq "Krinner_LUMIX") && not $a[3] =~ /^[0-9a-fA-F]{7}/s);
 	### [7] checks Tedsen_SKX1xx, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx (tristate code)###
 	return "Wrong tristate code! ($a[3]) $a[2] code to short or long (must be 7 chars) or values not 0, 1 or F" if (($a[2] eq "Tedsen_SKX1xx" || $a[2] eq "Tedsen_SKX2xx" || $a[2] eq "Tedsen_SKX4xx" || $a[2] eq "Tedsen_SKX6xx") && not $a[3] =~ /^[01fF]{7}$/s);
-	### [8 nibble] checks Techmar | xavax remote control ###
-	if (($a[2] eq "Techmar" || $a[2] eq "xavax") && not $a[3] =~ /^[0-9a-fA-F]{8}$/s) {
+	### [8 nibble] checks Techmar ###
+	if (($a[2] eq "Techmar") && not $a[3] =~ /^[0-9a-fA-F]{8}$/s) {
 		return "Wrong HEX-Value! ($a[3]) $a[2] Hex-value to short or long (must be 8 chars) or not hex (0-9 | a-f | A-F)";
 	}
 	### [9] checks Hoermann HS1-868-BS ###
@@ -836,9 +836,11 @@ sub SD_UT_Set($$$@) {
 			$msgEnd = "#R" . $repeats;
 		############ xavax ############
 		} elsif ($model eq "xavax") {
-			my $adr = sprintf( "%032b", hex($definition[1]));	# argument 1 - adress to binary with 32 bits
+			my $adr = sprintf( "%016b", hex($definition[1]));	# argument 1 - adress to binary with 16 bits
 			$msg = $models{$model}{Protocol} . "#" . $adr;
-			$msgEnd = "0P#R" . $repeats;	# 1 pulse for end marker
+			$adr =~ tr/01/10/;						# invert adr
+			$msg .= $adr;									# nibble 5-8 is inverted to nibble 0-3
+			$msgEnd = "0P#R" . $repeats;	# one pulse for end marker, pause, repeats
 		}
 	}
 	
@@ -1182,7 +1184,7 @@ sub SD_UT_Parse($$) {
 				Log3 $iohash, 3, "$ioname: SD_UT_Parse device xavax - check nibble 8 and nibble 9 - ERROR";
 				return "";
 			}
-			$deviceCode = substr($rawData,0,8);
+			$deviceCode = substr($rawData,0,4);
 			$devicedef = "xavax " . $deviceCode;
 			$def = $modules{SD_UT}{defptr}{$devicedef};
 			$model = "xavax";
@@ -1448,7 +1450,7 @@ sub SD_UT_Parse($$) {
 	### Remote control xavax [P26] ###
 	} elsif ($model eq "xavax" && $protocol == 26) {
 		$state = substr($bitData,32,8);
-		$deviceCode = substr($rawData,0,8);
+		$deviceCode = substr($rawData,0,4);
 	############ unknown ############
 	} else {
 		readingsBulkUpdate($hash, "state", "???");
