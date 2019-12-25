@@ -68,7 +68,21 @@ our %defs;
 # Two options are possible to specify a get command 
 # Option 1 will send a serial command to the uC and wait for response. For this an array needs to be specified
 # Option 2 will call a anonymous sub which does some things
+
+
+
+#1. SIGNALduino_get
+#2. SIGNALduino_AddSendQueue
+#3. +0.1 sekunden SIGNALduino_HandleWriteQueue
+#4. SIGNALduino_SendFromQueue 
+#5. RemoveInternalTimer
+
+#6. SIGNALduino_Read
+#7. SIGNALduino_parseResponse
+#8. asyncOutput
 my %gets = (    # Name, Data to send to the SIGNALduino, Regexp for the answer
+
+
   "version"  => ["V", 'V\s.*SIGNAL(duino|ESP).*'],
   "freeram"  => ["R", '^[0-9]+'],
 #  "raw"      => ["", '.*'],

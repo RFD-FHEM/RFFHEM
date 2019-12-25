@@ -1,0 +1,438 @@
+defmod test_sub_SIGNALduino_Set UnitTest dummyDuino 
+(
+ {
+ 	use Test2::V0;
+	use Test2::Tools::Compare qw{    is like isnt unlike
+    match mismatch validator
+    hash array bag object meta number float rounded within string subset bool
+    in_set not_in_set check_set
+    item field call call_list call_hash prop check all_items all_keys all_vals all_values
+    etc end filter_items
+    T F D DNE FDNE E
+    event fail_events
+    exact_ref
+};
+    # Todo:  sendMsg ITV1 with is | protocol 3 command
+    #        sendMsg with L or remove this option
+    # sendMsg is tested in test_set_sendMsg-definition.txt but can be removed
+    # flash is tested in test_firmware_flash_1-definition.txt
+    # resez is tested in test_reset_1-definition.txt
+    
+	my $check = bag {
+		# Uses the next index, in this case index 0;
+		item 'W0D23#W0B22';
+	};
+    
+    #diag explain $check;
+    # Simple commands
+    my @mockData = (
+    	{	
+    		hasCC1101 => 1,
+			testname=>  "set raw W0D23#W0B22",
+			input	=>	"raw W0D23#W0B22",
+			check =>  sub { 
+			    return bag  {
+					# Uses the next index, in this case index 0;
+					item 'W0D23#W0B22';
+					end(); # Ensure no other indexes exist.
+    			};
+		    }
+		},
+    	{	
+    		hasCC1101 => 1,
+			testname=>  "set disableMessagetype MC",
+			input	=>	"disableMessagetype MC",
+			check =>  sub { 
+			    return bag  {
+					item 'CDC';
+    			};
+		    }
+
+		},
+    	{	
+    		hasCC1101 => 1,
+			testname=>  "set enableMessagetype MU",
+			input	=>	"enableMessagetype MU",
+			check =>  sub { 
+			    return bag  {
+					item 'CEU';
+    			};
+		    }
+		},
+		{	
+    		hasCC1101 => 1,
+			testname=>  "set freq 868",
+			input	=>	"cc1101_freq 868",
+			check =>  sub { 
+			    return array  {
+			    	item match qr/^W0F21$/;
+			    	item match qr/^W1062$/;
+			    	item match qr/^W1176$/;
+			    	item 'WS36';
+			    	item 'WS34';
+			    	end();
+    			};
+		    }
+		},
+		{	
+    		hasCC1101 => 0,
+			testname=>  "set freq 868",
+			input	=>	"cc1101_freq 868",
+			check =>  sub { 
+			    return array  {
+			    	end();
+    			};
+		    },
+		    return => "This command is only available with a cc1101 receiver"
+		},
+		{	
+    		hasCC1101 => 1,
+			testname=>  "set freq (defaults to 433)",
+			input	=>	"cc1101_freq",
+			check =>  sub { 
+			    return array  {
+       		    	item match qr/^W0F10$/;
+			    	item match qr/^W10b0$/;
+			    	item match qr/^W1171$/;
+			    	item 'WS36';
+			    	item 'WS34';
+			    	end();
+    			};
+		    },	   
+		},
+		{	
+    		hasCC1101 => 0,
+			testname=>  "set freq (defaults to 433)",
+			input	=>	"cc1101_freq",
+			check =>  sub { 
+			    return array  {
+			    	end();
+    			};
+		    },
+		    return => "This command is only available with a cc1101 receiver"
+		},
+		{	
+			pre_code => sub { $targetHash->{cc1101_frequency} = "868" ; },
+
+    		hasCC1101 => 1,
+			testname =>  "set freq (defaults to 868)",
+			input	=>	"cc1101_freq",
+			check =>  sub { 
+			    return array  {
+			    	item match qr/^W0F21$/;
+			    	item match qr/^W1062$/;
+			    	item match qr/^W1176$/;
+			    	item 'WS36';
+			    	item 'WS34';
+			    	end();
+    			};
+		    },
+		    todo => sub { return todo("seems to be a bug in implementation"); }
+		    
+		},
+
+		{
+    		hasCC1101 => 1,
+			testname=>  "set bWidth xxx",
+			input	=>	"cc1101_bWidth xxx",
+			check =>  sub { 
+			    return array  {
+			    	item 'C10';
+			    	end();
+    			};
+		    }
+		},
+		{
+    		hasCC1101 => 0,
+			testname=>  "set bWidth xxx",
+			input	=>	"cc1101_bWidth xxx",
+			check =>  sub { 
+			    return array  {
+			    	end();
+    			};
+		    },
+		    return => "This command is only available with a cc1101 receiver"
+		},
+		{
+    		hasCC1101 => 1,
+			testname=>  "set rAmpl 24",
+			input	=>	"cc1101_rAmpl 24",
+			check =>  sub { 
+			    return array  {
+			    	item match qr/W1D[\dA-Fa-f]{2}/;
+			    	item 'WS36';
+			    	item 'WS34';
+			    	end();
+    			};
+		    }
+		},
+		{
+    		hasCC1101 => 1,
+			testname=>  "set sens 8",
+			input	=>	"cc1101_sens 8",
+			check =>  sub { 
+			    return array  {
+			    	item match qr/W1F[\dA-Fa-f]{2}/;
+			    	item 'WS36';
+			    	item 'WS34';
+			    	end();
+    			};
+		    }
+		},
+		{
+    		hasCC1101 => 1,
+			testname=>  "set patable_433 5_dBm",
+			input	=>	"cc1101_patable_433 5_dBm",
+			check =>  sub { 
+			    return array  {
+			    	item 'x84';
+			    	item 'WS36';
+			    	item 'WS34';
+			    	end();
+    			};
+		    }
+		},
+		{
+			testname=>  "set sendMsg ID:0 (P0#0101#R3#C500)",
+			input	=>	"sendMsg P0#0101#R3#C500",
+			check =>  sub { 
+			    return bag  {
+			    	item 'SR;R=3;P0=500;P1=-8000;P2=-3500;P3=-1500;D=0103020302;';
+    			};
+		    }
+		},
+		{
+			testname=>  "set sendMsg ID:17 (P17#0101#R3#C500)",
+			input	=>	"sendMsg P17#0101#R3#C500",
+			check =>  sub { 
+			    return bag  {
+			    	item 'SR;R=3;P0=500;P1=-5000;P2=-2500;P3=-500;P4=-20000;D=01030202030302020304;';
+    			};
+		    }
+		},
+		{
+			testname=>  "set sendMsg ID:29 (P29#0xF7E#R4)",
+			input	=>	"sendMsg P29#0xF7E#R4",
+			check =>  sub { 
+			    return bag  {
+			    	item 'SR;R=4;P0=-8225;P1=235;P2=-470;P3=-235;P4=470;D=01212121213421212121212134;';
+    			};
+		    }
+		},
+		{
+    		hasCC1101 => 1,
+			testname=>  "set sendMsg ID:43 (P43#0101#R3#C500#F10AB85550A) with fixed frequency",
+			input	=>	"sendMsg P43#0101#R3#C500#F10AB85550A",
+			check =>  sub { 
+			    return bag  {
+			    	item 'SC;R=3;SR;P0=-2560;P1=2560;P3=-640;D=10101010101010113;SM;C=895;D=0101;F=10AB85550A;';
+    			};
+		    }
+		},
+		{
+    		hasCC1101 => 0,
+			testname=>  "set sendMsg ID:43 (P43#0101#R3#C500#F10AB85550A) with fixed frequency",
+			input	=>	"sendMsg P43#0101#R3#C500#F10AB85550A",
+			check =>  sub { 
+			    return bag  {
+			    	item 'SC;R=3;SR;P0=-2560;P1=2560;P3=-640;D=10101010101010113;SM;C=895;D=0101;';
+    			};
+		    }
+		},
+		{
+    		hasCC1101 => 1,
+			testname=>  "set sendMsg ID:43 (P43#0101#R3#C500) with default frequency",
+			input	=>	"sendMsg P43#0101#R3#C500",
+			check =>  sub { 
+			    return bag  {
+			    	item 'SC;R=3;SR;P0=-2560;P1=2560;P3=-640;D=10101010101010113;SM;C=895;D=0101;F=10AB85550A;';
+    			};
+		    }
+		},
+		{
+    		hasCC1101 => 0,
+			testname=>  "set sendMsg ID:43 (P43#0101#R3#C500) with default frequency",
+			input	=>	"sendMsg P43#0101#R3#C500",
+			check =>  sub { 
+			    return bag  {
+			    	item 'SC;R=3;SR;P0=-2560;P1=2560;P3=-640;D=10101010101010113;SM;C=895;D=0101;';
+    			};
+		    }
+		},
+		{
+			testname=>  "set sendMsg ID:72 (P72#0101#R3#C500)",
+			input	=>	"sendMsg P72#0101#R3#C500",
+			check =>  sub { 
+			    return bag  {
+			    	item 'SR;R=3;P0=7000;P1=-2200;P2=1000;P3=-600;P4=500;P5=-1100;D=0145234523;';
+    			};
+		    },
+		},
+		{
+			testname=>  "set sendMsg ID:3 (P3#is11111000000F#R6)",
+			input	=>	"sendMsg P3#is11111000000F#R6",
+			check =>  sub { 
+			    return bag  {
+			    	item 'SR;R=6;P0=250;P1=-7750;P2=750;P3=-250;P4=-750;D=01232323232323232323230404040404040404040404040423;';
+    			};
+		    },
+		    todo => sub { return todo("this test isn't finished"); }
+		},
+		{
+    		hasCC1101 => 1,
+			testname=>  "set cc1101_regSet 0D23 0B22",
+			input	=>	"regSet 0D23 0B22",
+			check =>  sub { 
+			    return array  {
+			    	item 'W0D23';
+			    	item 'W0D22';
+			    	end();
+    			};
+		    },
+		    todo => sub { return todo("this command isn't implemented"); }
+		},
+		{
+    		hasCC1101	=> 1,
+			dummy		=> 1,
+			testname	=> "set cc1101_regSet 0D23 0B22",
+			input		=> "regSet 0D23 0B22",
+			check 		=> sub { 
+			    return array  {
+			    	item 'W0D23';
+			    	item 'W0D22';
+			    	end();
+    			};
+		    },
+		    return => "This command is not available for dummies",
+		    todo => sub { return todo("this command isn't implemented"); }
+		},
+		{
+    		hasCC1101 => 0,
+			testname=>  "set cc1101_regSet 0D23 0B22",
+			input	=>	"regSet 0D23 0B22",
+			check =>  sub { 
+			    return array  {
+			    	end();
+    			};
+		    },
+		    return => "This command is only available with a cc1101 receiver",
+		    todo => sub { return todo("this command isn't implemented"); }
+		},
+		{
+    		hasCC1101 => 1,
+			testname=>  "set cc1101_regSet AP23 FF22 (wrong register)",
+			input	=>	"regSet AP23 FF22",
+			check =>  sub { 
+			    return array  {
+			    	end();
+    			};
+		    },
+		    todo => sub { return todo("this command isn't implemented"); }
+		},
+		{
+			testname=>  "set bad command",
+    		hasCC1101 => 0,
+			input	=>	"bla",
+			check =>  sub { 
+			    return array  {
+			    	end();
+    			};
+		    },
+		    return => match qr/^Unknown argument bla, choose one of/
+		},
+		{
+			testname=>  "set ? command",
+    		hasCC1101 => 0,
+			input	=>	"?",
+			check =>  sub { 
+			    return array  {
+			    	end();
+    			};
+		    },
+		    return => check_set match qr/^Unknown argument \?, choose one of.*/,!match qr/cc/
+		},
+		{
+			hasCC1101 => 1,
+			testname=>  "set ? command",
+			input	=>	"?",
+			check =>  sub { 
+			    return array  {
+			    	end();
+    			};
+		    },
+		    return => check_set match qr/^Unknown argument \?, choose one of.*/,match qr/cc/
+		},
+		{
+			testname=>  "set ? command for dummy",
+			hasCC1101 => 0,
+			input	=>	"?",
+			check =>  sub { 
+			    return array  {
+			    	end();
+    			};
+		    },
+		    return => check_set match qr/close/,match qr/reset/,!match qr/cc/
+		},
+		{
+			testname	=>  "set ? command for dummy",
+			hasCC1101 	=> 1,
+			check =>  sub { 
+			    return array  {
+			    	end();
+    			};
+		    },
+			input		=>	"?",
+		    todo 		=> sub { return todo("dummy gets currently all set commands"); },
+		    return 		=> check_set match qr/close/,match qr/reset/,match qr/cc/
+		}
+	);
+
+	plan (scalar @mockData);	
+	my $todo=undef;
+	
+	foreach my $element (@mockData)
+	{
+		next if (!exists($element->{testname}));
+		$targetHash->{hasCC1101} = exists($element->{hasCC1101}) ? $element->{hasCC1101} : 0;
+
+		$element->{pre_code}->() if (exists($element->{pre_code}));
+		$todo=$element->{todo}->() if (exists($element->{todo}));
+		
+		subtest "checking $element->{testname}". ($targetHash->{hasCC1101} ? " with cc1101" : " without cc1101") => sub {
+			plan (2);	
+			
+			my $ret = SIGNALduino_Set($targetHash,$target,split(" ",$element->{input}));
+			is($ret,$element->{return},"Verify return value");
+			is($targetHash->{QUEUE},$element->{check}->(),"Verify expected queue element entrys", explain $targetHash->{QUEUE});
+
+			@{$targetHash->{QUEUE}}=();
+			
+		};
+		undef ($todo);
+	
+	};
+	
+	subtest "checking set close " => sub {
+			plan (3);	
+			my $mock = Mock::Sub->new;
+		 	my $DevIo_CloseDev = $mock->mock('DevIo_CloseDev');
+			my $RemoveInternalTimer = $mock->mock('RemoveInternalTimer');
+			
+			SIGNALduino_Set($targetHash,$target,"close");
+			is(ReadingsVal($target,"state",""),"closed","check reading state");
+			
+			ok($DevIo_CloseDev->called, "DevIo_CloseDev is called");
+			ok($RemoveInternalTimer->called, "RemoveInternalTimer is called");
+			
+			$DevIo_CloseDev->unmock;
+			$RemoveInternalTimer->unmock;
+	};
+	
+	
+	
+	
+
+		
+ }
+);
+    
