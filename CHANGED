@@ -1,17 +1,5 @@
-2019-12-23 - 14_SD_UT.pm: xavax change definition from 8 nibble to 4 nibble
-2019-12-23 - 10_SD_GT.pm: add codes for button all in version 2
-2019-12-22 - Error check built in
-2019-12-22 - Correction definition start
-
-Correction definition start in SD_ProtocolData.pm
-2019-12-21 - Protocol 26 integrated in SD_UT
-2019-12-20 - update.yml
-
-fixed Update workflow to commit if something in the lib directory is changed
-
-SD_ProtocolData.pm
-force generating controlsfile now
-2019-12-18 - improvement
+25.12.2019
+  14_SD_UT.pm: new protocol 26 - Remote control xavax 00111939
 18.12.2019
   14_SD_UT.pm:
     TR-502MSV bugfix, ident was only 8 bit, must be 12 bit long

@@ -777,7 +777,7 @@ package lib::SD_ProtocolData;
 				knownFreqs    => '433.92',
 				one           => [1,-3],            # 460,-1380
 				zero          => [1,-1],            # 460,-460
-				start         => [1,-1,1,-1,7,-7],  # 3460,-460,460,-460,220,-3220
+				start         => [1,-1,1,-1,7,-7],  # 460,-460,460,-460,3220,-3220
 				# end           => [1],     # 460 - end funktioniert nicht (wird erst nach pause angehangen), ein bit ans Ende haengen geht, dann aber pause 44 statt 45
 				pause         => [-44],             # -20700 mit end, 20240 mit bit 0 am Ende
 				clockabs      => 460,

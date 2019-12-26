@@ -469,6 +469,17 @@ sub getSystemCodes($) {
 	This protocol is used by a variety of remote controls, which are traded under different names.
 	The messages are received and sent by a SIGNALduino.
 	<br><br>
+	The following models are currently known that use this protocol:
+	<br><br>
+	<ul>
+		<li>EASY HOME RCT DS1 CR-A 3725</li>
+		<li>Globaltronics GT-3000, GT-9000</li>
+		<li>OBI Emil Lux / CMI Art.Nr.: 315606</li>
+		<li>SilverCrest FSS B 20-A (3726) / 66538</li>
+		<li>Tec Star Modell 2335191R</li>
+		<li>uniTEC 48110 Funkfernschalterset (Receiver 55006x10, Transmitter: 50074)</li>
+	</ul>
+	<br>
 	New devices are usually automatically created in FHEM via autocreate.
 	Since the protocol uses encryption, manual setup is virtually impossible.
 	<br><br>
@@ -509,6 +520,17 @@ sub getSystemCodes($) {
 	Dieses Protokoll wird von einer Vielzahl Fernbedienungen verwendet, die unter verschiedene Namen gehandelt werden.
 	Die Nachrichten werden von einem SIGNALduino empfangen und gesendet.
 	<br><br>
+	Folgende Modelle sind zur Zeit bekannt, die dieses Protokoll verwenden:
+	<br><br>
+	<ul>
+		<li>EASY HOME RCT DS1 CR-A 3725</li>
+		<li>Globaltronics GT-3000, GT-9000</li>
+		<li>OBI Emil Lux / CMI Art.Nr.: 315606</li>
+		<li>SilverCrest FSS B 20-A (3726) / 66538</li>
+		<li>Tec Star Modell 2335191R</li>
+		<li>uniTEC 48110 Funkfernschalterset (Receiver 55006x10, Transmitter: 50074)</li>
+	</ul>
+	<br>
 	Neue Ger&auml;te werden in FHEM normalerweise per autocreate automatisch angelegt.
 	Da das Protokoll eine Verschl&uuml;sselung nutzt, ist ein manuelles Einrichten praktisch nicht m&ouml;glich.
 	<br><br>
