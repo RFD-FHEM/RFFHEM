@@ -1,4 +1,3 @@
-2019-12-26 - add remote to commandref
 26.12.2019
   14_SD_UT.pm: new protocol 26 - Remote control xavax 00111939
   10_SD_GT.pm: add codes for button all in version 2
