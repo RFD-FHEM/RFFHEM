@@ -120,7 +120,7 @@ defmod test_firmware_flash_1 UnitTest dummyDuino
 		is($IntTimer->called_count, 1, "check if InternalTimer is called once");		
 		my @called_args=$IntTimer->called_with;
 
-		like($targetHash->{helper}{stty_output},'/^open3: exec of stty -F none ospeed 1200 ispeed 1200 failed/m',"check if stty was called");
+		like($targetHash->{helper}{stty_output},'qr/^open3: exec of stty -F none ospeed 1200 ispeed 1200 failed/m',"check if stty was called");
 		ok($called_args[0] > gettimeofday(), "check arg 1 InternalTimer is called ");		
 		is($called_args[1], "SIGNALduino_flash", "check arg 2 InternalTimer is called ");		
 		is($called_args[2], $target, "check arg 3 InternalTimer is called ");		
