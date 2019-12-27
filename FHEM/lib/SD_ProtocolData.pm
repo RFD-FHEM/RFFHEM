@@ -8,7 +8,7 @@
 # id          => ' '       # number of the protocol definition, each number only once use (accepted no .)
 # knownFreqs	=> ' '       # known receiver frequency 433.92 | 868.35 (some sensor families or remote send on more frequencies)
 #
-# Time for one, zero, start, sync, float and pause are calculated by clockabs * value = result in microseconds, positive value stands for high signal, negative value stands for low signal
+# Time for one, zero, start, sync, float, end and pause are calculated by clockabs * value = result in microseconds, positive value stands for high signal, negative value stands for low signal
 # clockrange  => [ , ]     # only MC signals | min , max of pulse / pause times in microseconds
 # clockabs    => ' '       # only MU + MS signals | value for calculation of pulse / pause times in microseconds
 # clockabs    => '-1'      # only MS signals | value pulse / pause times is automatically
@@ -18,7 +18,10 @@
 # preSync     => [ , ]     # only MU + MS - value pair or more for preamble pulse of signal
 # sync        => [ , ]     # only MS - value pair or more for sync pulse of signal
 # float       => [ , ]     # only MU + MS signals | Convert 0F -> 01 (F) to be compatible with CUL
-# pause       => [ ]       # delay when sending between two signals (clockabs * pause must be < 32768
+# pause       => [ ]       # only MU + MS signals, delay when sending between two repeats (clockabs * pause must be < 32768)
+# end         => [ ]       # only MU + MS - value or more for end pulse of signal for sending
+# msgIntro    => ' '       # only MC - make combined message msgIntro.MC for sending ('SR;P0=-2560;P1=2560;P3=-640;D=10101010101010113;',)
+# msgOutro    => ' '       # only MC - make combined message MC.msgOutro for sending ('SR;P0=-8500;D=0;',)
 #
 # length_min  => ' '       # minimum number of bits of message length
 # length_max  => ' '       # maximum number of bits of message length
@@ -52,9 +55,9 @@
 # polarity    => 'invert'  # only MC signals | invert bits of the signal
 #
 ##### notice #### or #### info ############################################################################################################
-# !!! Between the keys and values ​​no tabs not equal to a width of 8 or please use spaces !!!
+# !!! Between the keys and values ​​no tabs, please use spaces !!!
 # !!! Please use first unused id for new protocols !!!
-# ID´s are currently unused: 26 | 27 | 31 | 54 | 78
+# ID´s are currently unused: 27 | 31 | 54 | 78
 # ID´s need to be revised (preamble u): 5|6|19|21|22|23|24|25|28|36|40|42|52|56|59|63
 ###########################################################################################################################################
 # Please provide at least three messages for each new MU/MC/MS protocol and a URL of issue in GitHub or discussion in FHEM Forum
@@ -66,7 +69,7 @@ package lib::SD_ProtocolData;
 	use strict;
 	use warnings;
 	
-	our $VERSION = '1.12';
+	our $VERSION = '1.13';
 	our %protocols = (
 		"0"	=>	## various weather sensors (500 | 9100)
 						# ABS700 | Id:79 T: 3.3 Bat:low                MS;P1=-7949;P2=492;P3=-1978;P4=-3970;D=21232423232424242423232323232324242423232323232424;CP=2;SP=1;R=245;O;
@@ -76,9 +79,9 @@ package lib::SD_ProtocolData;
 						# Prologue | Id:145 Ch:0 T: 2.7, Bat:ok        MS;P0=-4149;P2=-9098;P3=628;P4=-2076;D=3230343430343434303430303434343434343434343434343030343030343434343034303434;CP=3;SP=2;R=218;O;m2;
 			{
 				name						=> 'weather (v1)',
-				comment					=> 'temperature / humidity or other sensors',
+				comment						=> 'temperature / humidity or other sensors',
 				id							=> '0',
-				knownFreqs      => '433.92',
+				knownFreqs 					=> '433.92',
 				one							=> [1,-7],
 				zero						=> [1,-3],
 				sync						=> [1,-16],
@@ -761,8 +764,30 @@ package lib::SD_ProtocolData;
 				length_min		=> '24',
 				length_max		=> '50',					# message has only 24 bit, but we get more than one message, calculation has to be corrected
 			},
-
-		#"26"	=> can use
+		"26"	=>	## xavax 00111939 Funksteckdosen Set
+							# https://github.com/RFD-FHEM/RFFHEM/issues/717 @codeartisan-de 2019-12-14
+							# xavax_DAAB2554 Ch1_on   MU;P0=412;P1=-534;P2=-1356;P3=-20601;P4=3360;P5=-3470;D=01020102010201020201010201010201020102010201020101020101010102020203010145020201020201020102010201020102020101020101020102010201020102010102010101010202020301014502020102020102010201020102010202010102010102010201020102010201010201010101020202030101450202;CP=0;R=0;O;
+							# xavax_DAAB2554 Ch1_off  MU;P0=-3504;P1=416;P2=-1356;P3=-535;P4=-20816;P5=3324;D=01212131212131213121312131213121213131213131213121312131213121313131212121213131314131350121213121213121312131213121312121313121313121312131213121312131313121212121313131413135012121312121312131213121312131212131312131312131213121312131213131312121212131;CP=1;R=50;O;
+							# xavax_DAAB2554 Ch2_on   MU;P0=5656;P1=-21857;P2=413;P3=-1354;P4=-536;P6=3350;P7=-3487;D=01232423232424232424232423242324232423242424232424232423232124246723232423232423242324232423242323242423242423242324232423242324242423242423242323212424672323242323242324232423242324232324242324242324232423242324232424242324242324232321242467232324232324;CP=2;R=0;O;
+							# xavax_DAAB2554 Ch2_off  MU;P0=3371;P1=-3479;P2=420;P3=-31868;P4=-541;P5=272;P6=-1343;P7=-20621;D=23245426242426242624262426242624242624262624262424272424012626242626242624262426242624262624242624242624262426242624262424262426262426242427242401262624262624262426242624262426262424262424262426242624262426242426242626242624242724240126262426262426242624;CP=2;R=45;O;
+			{
+				name          => 'xavax',
+				comment       => 'Remote control xavax 00111939',
+				id            => '26',
+				knownFreqs    => '433.92',
+				one           => [1,-3],            # 460,-1380
+				zero          => [1,-1],            # 460,-460
+				start         => [1,-1,1,-1,7,-7],  # 460,-460,460,-460,3220,-3220
+				# end           => [1],     # 460 - end funktioniert nicht (wird erst nach pause angehangen), ein bit ans Ende haengen geht, dann aber pause 44 statt 45
+				pause         => [-44],             # -20700 mit end, 20240 mit bit 0 am Ende
+				clockabs      => 460,
+				format        => 'twostate',
+				preamble      => 'P26#',
+				clientmodule  => 'SD_UT',
+				modulematch   => '^P26#.{10}',
+				length_min    => '40',
+				length_max    => '40',
+			},
 
 		#"27"	=> can use
 

@@ -409,6 +409,20 @@ my %models = (
 										Protocol		=> "P34",
 										Typ					=> "remote"
 									},
+	"xavax" =>	{	"10000111"	=> "Ch1_on",		# 11011010101010110010010101010100 10000111 
+								"01111000"	=> "Ch1_off",		# 11011010101010110010010101010100 01111000
+								"01001011" 	=> "Ch2_on",		# 11011010101010110010010101010100 01001011
+								"10110100" 	=> "Ch2_off",		# 11011010101010110010010101010100 10110100
+								"11000011" 	=> "Ch3_on",		# 11011010101010110010010101010100 11000011
+								"00111100" 	=> "Ch3_off",		# 11011010101010110010010101010100 00111100
+								"00101101" 	=> "Ch4_on",		# 11011010101010110010010101010100 00101101
+								"11010010" 	=> "Ch4_off",		# 11011010101010110010010101010100 11010010
+								"10100101" 	=> "Master_on",	# 11011010101010110010010101010100 10100101
+								"01011010" 	=> "Master_off",# 11011010101010110010010101010100 01011010
+								hex_lengh		=> "10",
+								Protocol		=> "P26",
+								Typ					=> "remote"
+							},
 	"TR_502MSV" =>	{	"11101110"	=> "Ch1_on",
 										"11111111"	=> "Ch1_off",
 										"01101100" 	=> "Ch2_on",
@@ -589,7 +603,7 @@ my %models = (
 #############################
 sub SD_UT_Initialize($) {
 	my ($hash) = @_;
-	$hash->{Match}			= "^P(?:14|20|29|30|34|46|68|69|76|81|83|86|90|91|91.1|92|93|95)#.*";
+	$hash->{Match}			= "^P(?:14|20|26|29|30|34|46|68|69|76|81|83|86|90|91|91.1|92|93|95)#.*";
 	$hash->{DefFn}			= "SD_UT_Define";
 	$hash->{UndefFn}		= "SD_UT_Undef";
 	$hash->{ParseFn}		= "SD_UT_Parse";
@@ -604,6 +618,7 @@ sub SD_UT_Initialize($) {
 		"OR28V.*"	 => {ATTR => "model:OR28V", FILTER => "%NAME", autocreateThreshold => "3:180", GPLOT => ""},
 		"RCnoName20.*"	 => {ATTR => "model:RCnoName20", FILTER => "%NAME", autocreateThreshold => "3:180", GPLOT => ""},
 		"Techmar.*"	 => {ATTR => "model:Techmar", FILTER => "%NAME", autocreateThreshold => "3:180", GPLOT => ""},
+		"xavax.*"	 => {ATTR => "model:xavax", FILTER => "%NAME", autocreateThreshold => "3:180", GPLOT => ""},
 		"unknown_please_select_model"	=> {ATTR => "model:unknown", FILTER => "%NAME", autocreateThreshold => "5:180", GPLOT => ""},
 	};
 }
@@ -647,8 +662,8 @@ sub SD_UT_Define($$) {
 	if (($a[2] eq "SA_434_1_mini" || $a[2] eq "QUIGG_DMV" || $a[2] eq "TR_502MSV") && not $a[3] =~ /^[0-9a-fA-F]{3}/s) {
 		return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short or long (must be 3 chars) or not HEX (0-9 | a-f | A-F){3}";
 	}
-	### [4] checks Neff SF01_01319004 & BOSCH SF01_01319004_Typ2 & Chilitec_22640 & ESTO KL_RF01 & RCnoName20###
-	if (($a[2] eq "SF01_01319004" || $a[2] eq "SF01_01319004_Typ2" || $a[2] eq "Chilitec_22640" || $a[2] eq "KL_RF01" || $a[2] eq "RCnoName20") && not $a[3] =~ /^[0-9a-fA-F]{4}/s) {
+	### [4 nibble] checks Neff SF01_01319004 & BOSCH SF01_01319004_Typ2 & Chilitec_22640 & ESTO KL_RF01 & RCnoName20 & xavax ###
+	if (($a[2] eq "SF01_01319004" || $a[2] eq "SF01_01319004_Typ2" || $a[2] eq "Chilitec_22640" || $a[2] eq "KL_RF01" || $a[2] eq "RCnoName20" || $a[2] eq "xavax") && not $a[3] =~ /^[0-9a-fA-F]{4}/s) {
 		return "Wrong HEX-Value! ($a[3]) $a[2] Hex-value to short or long (must be 4 chars) or not hex (0-9 | a-f | A-F) {4}";
 	}
 	### [6] checks Manax | mumbi ###
@@ -662,8 +677,10 @@ sub SD_UT_Define($$) {
 	return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short | long or not HEX (0-9 | a-f | A-F){7}" if (($a[2] eq "HSM4" || $a[2] eq "Krinner_LUMIX") && not $a[3] =~ /^[0-9a-fA-F]{7}/s);
 	### [7] checks Tedsen_SKX1xx, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx (tristate code)###
 	return "Wrong tristate code! ($a[3]) $a[2] code to short or long (must be 7 chars) or values not 0, 1 or F" if (($a[2] eq "Tedsen_SKX1xx" || $a[2] eq "Tedsen_SKX2xx" || $a[2] eq "Tedsen_SKX4xx" || $a[2] eq "Tedsen_SKX6xx") && not $a[3] =~ /^[01fF]{7}$/s);
-	### [8 nibble] checks Techmar remote control ###
-	return "Wrong HEX-Value! ($a[3]) $a[2] Hex-value to short or long (must be 8 chars) or not hex (0-9 | a-f | A-F)" if ($a[2] eq "Techmar" && not $a[3] =~ /^[0-9a-fA-F]{8}$/s);
+	### [8 nibble] checks Techmar ###
+	if (($a[2] eq "Techmar") && not $a[3] =~ /^[0-9a-fA-F]{8}$/s) {
+		return "Wrong HEX-Value! ($a[3]) $a[2] Hex-value to short or long (must be 8 chars) or not hex (0-9 | a-f | A-F)";
+	}
 	### [9] checks Hoermann HS1-868-BS ###
 	return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short | long or not HEX (0-9 | a-f | A-F){9}" if ($a[2] eq "HS1_868_BS" && not $a[3] =~ /^[0-9a-fA-F]{9}/s);
 	### [14] checks LED_XM21_0 ###
@@ -817,6 +834,13 @@ sub SD_UT_Set($$$@) {
 			my $adr = sprintf( "%016b", hex($definition[1]));	# argument 1 - adress to binary with 16 bits
 			$msg = $models{$model}{Protocol} . "#" . $adr;
 			$msgEnd = "#R" . $repeats;
+		############ xavax ############
+		} elsif ($model eq "xavax") {
+			my $adr = sprintf( "%016b", hex($definition[1]));	# argument 1 - adress to binary with 16 bits
+			$msg = $models{$model}{Protocol} . "#" . $adr;
+			$adr =~ tr/01/10/;						# invert adr
+			$msg .= $adr;									# nibble 5-8 is inverted to nibble 0-3
+			$msgEnd = "0P#R" . $repeats;	# one pulse for end marker, pause, repeats
 		}
 	}
 	
@@ -1147,6 +1171,27 @@ sub SD_UT_Parse($$) {
 		}
 	}
 
+	if ($hlen == 10) {
+		if (!$def && $protocol == 26) {
+			### Remote control xavax [P26] ###
+			my $check = hex(substr($rawData,0,4)) + hex(substr($rawData,4,4));	# Nibble 0-3 is inverted to nibble 5-8
+			if ($check != 65535) {
+				Log3 $iohash, 3, "$ioname: SD_UT_Parse device xavax - check nibble 0-3 and nibble 5-8 - ERROR";
+				return "";
+			}
+			$check = hex(substr($rawData,8,1)) + hex(substr($rawData,9,1));	# Nibble 8 is inverted to nibble 9
+			if ($check != 15) {
+				Log3 $iohash, 3, "$ioname: SD_UT_Parse device xavax - check nibble 8 and nibble 9 - ERROR";
+				return "";
+			}
+			$deviceCode = substr($rawData,0,4);
+			$devicedef = "xavax " . $deviceCode;
+			$def = $modules{SD_UT}{defptr}{$devicedef};
+			$model = "xavax";
+			$name = "xavax_" . $deviceCode;
+		}
+	}
+
 	if ($hlen == 11 && $protocol == 69) {
 		### Remote control Hoermann HS1-868-BS [P69] ###
 		$deviceCode = substr($rawData,2,9);
@@ -1401,6 +1446,10 @@ sub SD_UT_Parse($$) {
 	### Remote control RCnoName20 [P20] ###
 	} elsif ($model eq "RCnoName20" && $protocol == 20) {
 		$state = substr($bitData,16,15);	# last bit is filled
+		$deviceCode = substr($rawData,0,4);
+	### Remote control xavax [P26] ###
+	} elsif ($model eq "xavax" && $protocol == 26) {
+		$state = substr($bitData,32,8);
 		$deviceCode = substr($rawData,0,4);
 	############ unknown ############
 	} else {
@@ -1700,6 +1749,7 @@ sub SD_UT_tristate2bin($) {
 	 <ul> - unitec remote door reed switch 47031 (Unitec 47121 | Unitec 47125 | Friedland)&nbsp;&nbsp;&nbsp;<small>(module model: Unitec_47031 | protocol 30)</small></ul>
 	 <ul> - Westinghouse Delancey ceiling fan (remote, 5 buttons without SET)&nbsp;&nbsp;&nbsp;<small>(module model: Buttons_five | protocol 29)</small></ul>
 	 <ul> - Westinghouse Delancey ceiling fan (remote, 9 buttons with SET)&nbsp;&nbsp;&nbsp;<small>(module model: RH787T | protocol 83)</small></ul>
+	 <ul> - xavax 00111939 (remote control, 10 buttons)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: xavax | protocol 26)</small></ul>
 	 <br><br>
 	<b>Define</b><br>
 	<ul><code>define &lt;NAME&gt; SD_UT &lt;model&gt; &lt;Hex-address&gt;</code><br><br>
@@ -1998,6 +2048,7 @@ sub SD_UT_tristate2bin($) {
 	 <ul> - unitec remote door reed switch 47031 (Unitec 47121 | Unitec 47125 | Friedland)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Unitec_47031 | Protokoll 30)</small></ul>
 	 <ul> - Westinghouse Deckenventilator (Fernbedienung, 5 Tasten ohne SET)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Buttons_five | Protokoll 29)</small></ul>
 	 <ul> - Westinghouse Delancey Deckenventilator (Fernbedienung, 9 Tasten mit SET)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: RH787T | Protokoll 83)</small></ul>
+	 <ul> - xavax 00111939 (Fernbedienung, 10 Tasten)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: xavax | Protokoll 26)</small></ul>
 	 <br><br>
 
 	<b>Define</b><br>

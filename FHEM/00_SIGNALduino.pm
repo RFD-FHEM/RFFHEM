@@ -68,7 +68,21 @@ our %defs;
 # Two options are possible to specify a get command 
 # Option 1 will send a serial command to the uC and wait for response. For this an array needs to be specified
 # Option 2 will call a anonymous sub which does some things
+
+
+
+#1. SIGNALduino_get
+#2. SIGNALduino_AddSendQueue
+#3. +0.1 sekunden SIGNALduino_HandleWriteQueue
+#4. SIGNALduino_SendFromQueue 
+#5. RemoveInternalTimer
+
+#6. SIGNALduino_Read
+#7. SIGNALduino_parseResponse
+#8. asyncOutput
 my %gets = (    # Name, Data to send to the SIGNALduino, Regexp for the answer
+
+
   "version"  => ["V", 'V\s.*SIGNAL(duino|ESP).*'],
   "freeram"  => ["R", '^[0-9]+'],
 #  "raw"      => ["", '.*'],
@@ -220,7 +234,7 @@ my %matchListSIGNALduino = (
 			"14:Dooya"						=> '^P16#[A-Fa-f0-9]+',
 			"15:SOMFY"						=> '^Ys[0-9A-F]+',
 			"16:SD_WS_Maverick"		=> '^P47#[A-Fa-f0-9]+',
-			"17:SD_UT"						=> '^P(?:14|20|29|30|34|46|68|69|76|81|83|86|90|91|91.1|92|93|95)#.*',	# universal - more devices with different protocols
+			"17:SD_UT"						=> '^P(?:14|20|26|29|30|34|46|68|69|76|81|83|86|90|91|91.1|92|93|95)#.*',	# universal - more devices with different protocols
 			"18:FLAMINGO"					=> '^P13\.?1?#[A-Fa-f0-9]+',							# Flamingo Smoke
 			"19:CUL_WS"						=> '^K[A-Fa-f0-9]{5,}',
 			"20:Revolt"						=> '^r[A-Fa-f0-9]{22}',

@@ -1,12 +1,10 @@
-2019-12-21 - Update 00_SIGNALduino.pm
-
-- delete </li>
-2019-12-21 - new command
-
-- added new command (raw Wseq) to write more than one register with one step https://github.com/RFD-FHEM/RFFHEM/issues/732
-- added CHANGED
-19.12.2019
-  00_SIGNALduino.pm: added new command (raw Wseq) to write more than one register with one step
+27.12.2019
+  00_SIGNALduino.pm: - added new command cc1101_reg + commandref
+	                   - sort lines and Indent for a better overview
+26.12.2019
+  14_SD_UT.pm: new protocol 26 - Remote control xavax 00111939
+  10_SD_GT.pm: add codes for button all in version 2
+  SD_ProtocolData.pm: add documentation for end, msgIntro and msgOutro
 18.12.2019
   14_SD_UT.pm:
     TR-502MSV bugfix, ident was only 8 bit, must be 12 bit long

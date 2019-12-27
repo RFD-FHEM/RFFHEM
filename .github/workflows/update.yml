@@ -35,9 +35,9 @@ jobs:
         git config --global user.email "action@github.com"
         git config --local user.name "GitHub Action"
         git add  CHANGED controls_signalduino.txt || true
-        git log -1 --name-only --pretty=format: | grep -Eo '[0-9]{2}_.*.pm$' && git commit CHANGED controls_signalduino.txt -m "Automaitc updated controls and CHANGED" || true
+        git log -1 --name-only --pretty=format: | grep -Eo '[0-9]{2}_.*.pm$|FHEM/lib/.*.pm$' && git commit CHANGED controls_signalduino.txt -m "Automaitc updated controls and CHANGED" || true
     - name: git push
       uses: ad-m/github-push-action@master
       with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
+        github_token: ${{ secrets.GH_TOKEN }}
         branch: ${{ steps.extract_branch.outputs.branch }}
