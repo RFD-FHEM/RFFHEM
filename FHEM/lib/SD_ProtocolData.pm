@@ -69,7 +69,7 @@ package lib::SD_ProtocolData;
 	use strict;
 	use warnings;
 	
-	our $VERSION = '1.13';
+	our $VERSION = '1.14';
 	our %protocols = (
 		"0"	=>	## various weather sensors (500 | 9100)
 						# ABS700 | Id:79 T: 3.3 Bat:low                MS;P1=-7949;P2=492;P3=-1978;P4=-3970;D=21232423232424242423232323232324242423232323232424;CP=2;SP=1;R=245;O;
@@ -788,9 +788,26 @@ package lib::SD_ProtocolData;
 				length_min    => '40',
 				length_max    => '40',
 			},
-
-		#"27"	=> can use
-
+		"27"	=>	## Temperatur-/Feuchtigkeitssensor EuroChron EFTH-800 (433 MHz)
+							# short pulse of 250 us followed by a 500 us gap is a 0 bit
+							# long pulse of 500 us followed by a 250 us gap is a 1 bit
+							# sync preamble of pulse, gap, 750 us each, repeated 4 times
+			{
+				name            => 'EFTH-800',
+				comment         => 'EuroChron EFTH-800',
+				id              => '27',
+				knownFreqs      => '',
+				one             => [2,-1],
+				zero            => [1,-2],
+				start           => [3,-3,3,-3,3,-3,3,-3],
+				clockabs        => '244',
+				reconstructBit  => '1',	# kann evtl. wieder weg, falls nur EOT-Puls
+				format          => 'twostate',
+				preamble        => 'u27#',
+				# clientmodule    => 'SD_WS',
+				length_min      => '48',	# 48 Bit + 1 Puls am Ende
+				length_max      => '52',
+			},
 		"28"	=>	## some remote code, send by aldi IC Ledspots
 			{
 				name						=> 'IC Ledspot',
