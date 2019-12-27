@@ -1,5 +1,5 @@
     ##############################################
-    # $Id: 14_SD_WS09.pm 16117 2017-09-25 22:00:00Z pejonp $
+    # $Id: 14_SD_WS09.pm 18672 2019-02-20 20:46:34Z Sidey $
     # 
     # The purpose of this module is to support serval 
     # weather sensors like WS-0101  (Sender 868MHz ASK   Epmfänger RX868SH-DV elv)
