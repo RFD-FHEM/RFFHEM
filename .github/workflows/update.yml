@@ -15,6 +15,7 @@ jobs:
       uses: actions/checkout@master
       with:
         fetch-depth: 0
+        persist-credentials: false
     - name: update controls files
       uses: fhem/fhem-controls-actions@master
       with:

@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 14_Hideki.pm 14395 2017-12-03 21:00:00Z v3.3.3-dev $
+# $Id: 14_Hideki.pm 18671 2019-02-20 20:38:21Z Sidey $
 # The file is taken from the SIGNALduino project
 # see http://www.fhemwiki.de/wiki/SIGNALduino
 # and was modified by a few additions

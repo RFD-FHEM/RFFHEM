@@ -1,5 +1,5 @@
 ##############################################################################
-# $Id: 14_SD_BELL.pm 18657 2019-09-06 23:10:24Z HomeAuto_User $
+# $Id: 14_SD_BELL.pm 20137 2019-09-09 15:58:29Z HomeAuto_User $
 #
 # The file is part of the SIGNALduino project.
 # The purpose of this module is to support many wireless BELL devices.

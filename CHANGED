@@ -1,6 +1,8 @@
-27.12.2019
+28.12.2019
   00_SIGNALduino.pm: - added new command cc1101_reg + commandref
 	                   - sort lines and Indent for a better overview
+27.12.2019
+  some modules from prohect: revised SVN ID numbers
 26.12.2019
   14_SD_UT.pm: new protocol 26 - Remote control xavax 00111939
   10_SD_GT.pm: add codes for button all in version 2
