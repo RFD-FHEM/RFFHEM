@@ -56,6 +56,7 @@ sub SD_WS_Initialize($)
 		"BresserTemeo.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "2:180"},
 		"SD_WH2.*"			=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "2:90"},
 		"SD_WS71_T.*"		=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4:Temp,", autocreateThreshold => "2:180"},
+		"SD_WS_27_TH_.*"	=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "3:180"},
 		"SD_WS_33_T_.*"	=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.* model:other", FILTER => "%NAME", GPLOT => "temp4:Temp,", autocreateThreshold => "2:180"},
 		"SD_WS_33_TH_.*"	=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.* model:other", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "2:180"},
 		"SD_WS_38_T_.*"	=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4:Temp,", autocreateThreshold => "3:180"},
@@ -172,6 +173,34 @@ sub SD_WS_Parse($$)
 			hum => 		sub {return undef;},
 			bat => 		sub {return undef;},
     	 	 },
+		27 =>
+			{
+				# Protokollbeschreibung: Temperatur-/Feuchtigkeitssensor EuroChron EFTH-800
+				# -----------------------------------------------------------------------------------
+				# 0    4    | 8    12   | 16   20   | 24   28   | 32   36   | 40   44
+				# 0000 1001 | 0001 0110 | 0001 0000 | 0000 0000 | 0100 1001 | 0100 0000
+				# ?ccc iiii | iiii iiii | bstt tttt | tttt ???? | hhhh hhhh | xxxx xxxx
+				# c:  3 bit channel valid channels are 0-7 (stands for channel 1-8)
+				# i: 12 bit random id (changes on power-loss)
+				# b:  1 bit battery indicator (0=>OK, 1=>LOW)
+				# s:  1 bit sign temperature (0=>negative, 1=>positive)
+				# t: 12 bit unsigned temperature, scaled by 10
+				# h:  8 bit relative humidity percentage (BCD)
+				# x:  8 bit CRC8
+				# ?: unknown (Bit 0, 28-31 always 0 ???)
+				# The sensor sends at intervals of about 47-48 seconds
+				sensortype => 'EFTH-800',
+				model      => 'SD_WS_27_TH',
+				prematch   => sub {my $msg = shift; return 1 if ($msg =~ /^[0-9A-F]{7}0[0-9]{2}[0-9A-F]{2}$/); },	# prematch 113C49A 0 47 AE
+				# prematch   => sub {my $msg = shift; return 1 if ($msg =~ /^[0-9A-F]{7}0[0-9A-F]{4}$/); },	# prematch 113C49A 0 4746
+				# prematch   => sub {my $msg = shift; return 1 if ($msg =~ /^[0-9A-F]{12}/); },		# min 12 nibbles
+				channel    => sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,1,3) + 1 ); },
+				id         =>	sub {my (undef,$bitData) = @_; return substr($rawData,1,3); },
+				bat        => sub {my (undef,$bitData) = @_; return substr($bitData,16,1) eq "0" ? "ok" : "low";},
+				temp       => sub {my (undef,$bitData) = @_; return substr($bitData,17,1) eq "0" ? ((SD_WS_binaryToNumber($bitData,18,27) - 1024) / 10.0) : (SD_WS_binaryToNumber($bitData,18,27) / 10.0);},
+				hum        => sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,32,35) * 10) + (SD_WS_binaryToNumber($bitData,36,39));},
+				crcok      => sub {return 1;},		# crc test method is so far unknown
+			} ,
      33 =>
    	 	 {
 			# Protokollbeschreibung: Conrad Temperatursensor S522 fuer Funk-Thermometer S521B

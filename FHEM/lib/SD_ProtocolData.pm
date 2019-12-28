@@ -789,24 +789,24 @@ package lib::SD_ProtocolData;
 				length_max    => '40',
 			},
 		"27"	=>	## Temperatur-/Feuchtigkeitssensor EuroChron EFTH-800 (433 MHz)
-							# short pulse of 250 us followed by a 500 us gap is a 0 bit
-							# long pulse of 500 us followed by a 250 us gap is a 1 bit
-							# sync preamble of pulse, gap, 750 us each, repeated 4 times
+							# short pulse of 244 us followed by a 488 us gap is a 0 bit
+							# long pulse of 488 us followed by a 244 us gap is a 1 bit
+							# sync preamble of pulse, gap, 732 us each, repeated 4 times
 			{
 				name            => 'EFTH-800',
-				comment         => 'EuroChron EFTH-800',
+				comment         => 'EuroChron weatherstation EFTH-800',
 				id              => '27',
-				knownFreqs      => '',
+				knownFreqs      => '433.92',
 				one             => [2,-1],
 				zero            => [1,-2],
 				start           => [3,-3,3,-3,3,-3,3,-3],
 				clockabs        => '244',
-				reconstructBit  => '1',	# kann evtl. wieder weg, falls nur EOT-Puls
 				format          => 'twostate',
-				preamble        => 'u27#',
-				# clientmodule    => 'SD_WS',
+				preamble        => 'W27#',
+				clientmodule    => 'SD_WS',
+				modulematch     => '^W27#.{12}',
 				length_min      => '48',	# 48 Bit + 1 Puls am Ende
-				length_max      => '52',
+				length_max      => '48',
 			},
 		"28"	=>	## some remote code, send by aldi IC Ledspots
 			{
