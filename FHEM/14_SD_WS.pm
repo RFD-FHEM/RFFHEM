@@ -191,7 +191,7 @@ sub SD_WS_Parse($$)
 				# The sensor sends at intervals of about 47-48 seconds
 				sensortype => 'EFTH-800',
 				model      => 'SD_WS_27_TH',
-				prematch   => sub {my $msg = shift; return 1 if ($msg =~ /^[0-9A-F]{7}0[0-9]{2}[0-9A-F]{2}$/); },	# prematch 113C49A 0 47 AE
+				prematch   => sub {my $rawData = shift; return 1 if ($rawData =~ /^[0-9A-F]{7}0[0-9]{2}[0-9A-F]{2}$/); },	# prematch 113C49A 0 47 AE
 				# prematch   => sub {my $msg = shift; return 1 if ($msg =~ /^[0-9A-F]{7}0[0-9A-F]{4}$/); },	# prematch 113C49A 0 4746
 				# prematch   => sub {my $msg = shift; return 1 if ($msg =~ /^[0-9A-F]{12}/); },		# min 12 nibbles
 				channel    => sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,1,3) + 1 ); },
@@ -199,7 +199,29 @@ sub SD_WS_Parse($$)
 				bat        => sub {my (undef,$bitData) = @_; return substr($bitData,16,1) eq "0" ? "ok" : "low";},
 				temp       => sub {my (undef,$bitData) = @_; return substr($bitData,17,1) eq "0" ? ((SD_WS_binaryToNumber($bitData,18,27) - 1024) / 10.0) : (SD_WS_binaryToNumber($bitData,18,27) / 10.0);},
 				hum        => sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,32,35) * 10) + (SD_WS_binaryToNumber($bitData,36,39));},
-				crcok      => sub {return 1;},		# crc test method is so far unknown
+				# crcok      => sub {return 1;},		# crc test method is so far unknown
+				crcok      => sub {my $rawData = shift;
+														my $rc = eval
+														{
+															require Digest::CRC;
+															Digest::CRC->import();
+															1;
+														};
+														if ($rc) {
+															my $datacheck1 = pack( 'H*', substr($rawData,0,10) );
+															my $crcmein1 = Digest::CRC->new(width => 8, poly => 0x31);
+															my $rr3 = $crcmein1->add($datacheck1)->hexdigest;
+															Log3 $name, 4, "$name: SD_WS_27 Parse msg $rawData, CRC $rr3";
+															if (hex($rr3) == hex(substr($rawData,-2))) {
+																return 1;
+															} else {
+																return 0;
+															}
+														} else {
+															Log3 $name, 1, "$name: SD_WS_27 Parse msg $rawData - ERROR CRC not load, please install modul Digest::CRC";
+															return 0;
+														}  
+													}
 			} ,
      33 =>
    	 	 {
@@ -843,12 +865,12 @@ sub SD_WS_Parse($$)
 	 	   	$SensorTyp=$decodingSubs{$protocol}{sensortype};
 		    if (!$decodingSubs{$protocol}{prematch}->( $rawData ))
 		    { 
-		   		Log3 $iohash, 4, "$name: SD_WS_Parse $rawData protocolid $protocol ($SensorTyp) - ERROR prematch" ;
+		   		Log3 $iohash, 3, "$name: SD_WS_Parse $rawData protocolid $protocol ($SensorTyp) - ERROR prematch" ;
 		    	return "";  
 	    	}
 		    my $retcrc=$decodingSubs{$protocol}{crcok}->( $rawData,$bitData );
 		    if (!$retcrc)		    { 
-		    	Log3 $iohash, 4, "$name: SD_WS_Parse $rawData protocolid $protocol ($SensorTyp) - ERROR CRC";
+		    	Log3 $iohash, 3, "$name: SD_WS_Parse $rawData protocolid $protocol ($SensorTyp) - ERROR CRC";
 		    	return "";  
 	    	}
 	    	$id=$decodingSubs{$protocol}{id}->( $rawData,$bitData );
