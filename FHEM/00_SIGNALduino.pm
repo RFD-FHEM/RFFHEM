@@ -31,7 +31,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.4.1_dev_21.12",
+	SDUINO_VERSION            => "v3.4.1_dev_28.12",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -4520,7 +4520,7 @@ sub SetPatable
 	my ($hash,@a) = @_;
 	my $paFreq = substr($a[0],-3);
 	my $pa = "x" . $patable{$paFreq}{$a[1]};
-	$hash->{logMethod}->($hash->{NAME}, 3, "$hash->{NAME}: Set, Setting patable $paFreq $a[1] $pa");
+	$hash->{logMethod}->($hash->{NAME}, 3, "$hash->{NAME}: SetPatable, Setting patable $paFreq $a[1] $pa");
 	main::SIGNALduino_AddSendQueue($hash,$pa);
 	main::SIGNALduino_WriteInit($hash);
 	return undef;
@@ -4528,20 +4528,20 @@ sub SetPatable
 
 sub SetRegisters  {
 	my ($hash, @a) = @_;
-	my $argadr;
 	
+	## check for four hex digits
+	my @nonHex = grep (!/^[0-9A-Fa-f]{4}$/,@a[1..$#a]) ;
+	return "ERROR: wrong parameter value @nonHex, only hexadecimal ​​four digits allowed" if (@nonHex);
+	
+	## check allowed register position
+	my (@wrongRegisters) = grep { !exists($cc1101_register{substr($_,0,2)}) } @a[1..$#a] ;
+	return "ERROR: unknown register position ".substr($wrongRegisters[0],0,2) if (@wrongRegisters);
+	
+	$hash->{logMethod}->($hash->{NAME}, 4, "$hash->{NAME}: SetRegisters, cc1101_reg @a[1..$#a]");
+	my @tmpSendQueue=();
 	foreach my $argcmd (@a[1..$#a]) {
-		if ($argcmd =~ /^[0-9A-Fa-f]{4}$/) {
-			## check allowed register position
-			return "ERROR: unknown register position ".substr($argcmd,0,2) if ! ($cc1101_register{substr($argcmd,0,2)});
-			
-			$argadr = hex(substr($argcmd,0,2)) + 2;
-			$argcmd = sprintf("W%02X%s",$argadr,substr($argcmd,2,2));
-			$hash->{logMethod}->($hash->{NAME}, 4, "$hash->{NAME}: Set, cc1101_reg $argcmd");
-			main::SIGNALduino_AddSendQueue($hash,$argcmd);
-		} else {
-			return "ERROR: wrong register value $argcmd, only hexadecimal ​​four digits allowed"
-		}
+		$argcmd = sprintf("W%02X%s",hex(substr($argcmd,0,2)) + 2,substr($argcmd,2,2));
+		main::SIGNALduino_AddSendQueue($hash,$argcmd);
 	}
 	main::SIGNALduino_WriteInit($hash);
 	return undef;

@@ -291,7 +291,6 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 			    	end();
     			};
 		    },
-		    #todo => sub { return todo("this command isn't implemented"); }
 		},
 		{
     		hasCC1101	=> 1,
@@ -303,7 +302,6 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
     			};
 		    },
 		    return => match qr/^ERROR: unknown register position/,
-		    #todo => sub { return todo("this command isn't implemented"); }
 		},
 		{
     		hasCC1101 => 0,
@@ -315,18 +313,17 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
     			};
 		    },
 		    return => "This command is only available with a cc1101 receiver",
-		    #todo => sub { return todo("this command isn't implemented"); }
 		},
 		{
     		hasCC1101 => 1,
-			testname=>  "set cc1101_regSet AP23 FF22 (wrong register)",
+			testname=>  "set cc1101_regSet AP23 FF22 (wrong register, nonhex)",
 			input	=>	"cc1101_reg AP23 FF22",
 			check =>  sub { 
 			    return array  {
 			    	end();
     			};
 		    },
-		    return =>  match qr/^ERROR: wrong register value AP23/
+		    return =>  match qr/^ERROR: wrong parameter value AP23/
 		},
 		{
 			testname=>  "set bad command",
