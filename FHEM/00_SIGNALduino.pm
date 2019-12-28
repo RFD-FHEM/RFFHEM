@@ -4546,6 +4546,7 @@ sub SetRegisters  {
 		}
 	}
 	main::SIGNALduino_WriteInit($hash);
+	return undef;
 }
 
 1;

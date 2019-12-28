@@ -285,7 +285,9 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 			check =>  sub { 
 			    return array  {
 			    	item 'W0D23';
-			    	item 'W0D22';
+			    	item 'W0B22';
+			    	item 'WS34';
+			    	item 'WS36';
 			    	end();
     			};
 		    },
@@ -293,17 +295,14 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 		},
 		{
     		hasCC1101	=> 1,
-			dummy		=> 1,
-			testname	=> "set cc1101_reg 0D23 0B22",
-			input		=> "cc1101_reg 0D23 0B22",
+			testname	=> "set cc1101_reg 0D23 3F55 (wrong register)",
+			input		=> "cc1101_reg 0D23 3F55",
 			check 		=> sub { 
 			    return array  {
-			    	item 'W0D23';
-			    	item 'W0D22';
 			    	end();
     			};
 		    },
-		    return => "This command is not available for dummies",
+		    return => match qr/^ERROR: unknown register position/,
 		    #todo => sub { return todo("this command isn't implemented"); }
 		},
 		{
