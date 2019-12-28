@@ -1487,27 +1487,19 @@ sub SIGNALduino_Read($) {
 			if ($regexp eq "^ccreg 00:") {
 				$rmsg =~ s/\s\sccreg/\\nccreg/g;
 
-				my @ccregnames = (
-					"00 IOCFG2  ","01 IOCFG1  ","02 IOCFG0  ","03 FIFOTHR ","04 SYNC1   ","05 SYNC0   ",
-					"06 PKTLEN  ","07 PKTCTRL1","08 PKTCTRL0","09 ADDR    ","0A CHANNR  ","0B FSCTRL1 ",
-					"0C FSCTRL0 ","0D FREQ2   ","0E FREQ1   ","0F FREQ0   ","10 MDMCFG4 ","11 MDMCFG3 ",
-					"12 MDMCFG2 ","13 MDMCFG1 ","14 MDMCFG0 ","15 DEVIATN ","16 MCSM2   ","17 MCSM1   ",
-					"18 MCSM0   ","19 FOCCFG  ","1A BSCFG   ","1B AGCCTRL2","1C AGCCTRL1","1D AGCCTRL0",
-					"1E WOREVT1 ","1F WOREVT0 ","20 WORCTRL ","21 FREND1  ","22 FREND0  ","23 FSCAL3  ",
-					"24 FSCAL2  ","25 FSCAL1  ","26 FSCAL0  ","27 RCCTRL1 ","28 RCCTRL0 ","29 FSTEST  ",
-					"2A PTEST   ","2B AGCTEST ","2C TEST2   ","2D TEST1   ","2E TEST0   " );
-
 				my $registerstring = $rmsg;
 				$registerstring =~ s/ccreg\s\d0:\s//g;
 				$registerstring =~ s/\\n/ /g;
 
 				my @ccreg = split(/\s/,$registerstring);
+				my $reg_cnt = -1;
 
 				$rmsg.= "\\n\\n";
 				$rmsg.= "Configuration Register Detail (address, name, value):\\n";
 
-				for(my $i=0;$i<=$#ccreg;$i++) {
-					$rmsg.= "0x".$ccregnames[$i]." - 0x".$ccreg[$i]."\\n";
+				foreach my $key (sort keys %cc1101_register) {
+					$reg_cnt++;
+					$rmsg.= "0x".$key." ".$cc1101_register{$key}. " - 0x".$ccreg[$reg_cnt]."\\n";
 				}
 			}
 			# string $rmsg have all linebreaks in "\n" format | logMethod view \n and not a linebreak #
