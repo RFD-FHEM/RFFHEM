@@ -317,28 +317,7 @@ my %sets;
   							],
   "cc1101_patable_433" 	=>	['-10_dBm,-5_dBm,0_dBm,5_dBm,7_dBm,10_dBm', \&cc1101::SetPatable ],
   "cc1101_patable_868" 	=> 	['-10_dBm,-5_dBm,0_dBm,5_dBm,7_dBm,10_dBm', \&cc1101::SetPatable ],
-  "cc1101_reg"					=> 	[ 'textFieldNL', sub {
-																my ($hash, @a) = @_;
-																my $arg = $a[1];
-																my @args = split(' ', $arg);
-																my $argadr;
-																
-																foreach my $argcmd (@args) {
-																	if ($argcmd =~ /^[0-9A-Fa-f]{4}$/) {
-																		## check allowed register position
-																		return "ERROR: unknown register position ".substr($argcmd,0,2) if ! ($cc1101_register{substr($argcmd,0,2)});
-																		
-																		$argadr = hex(substr($argcmd,0,2)) + 2;
-																		$argcmd = sprintf("W%02X%s",$argadr,substr($argcmd,2,2));
-																		$hash->{logMethod}->($hash->{NAME}, 4, "$hash->{NAME}: Set, cc1101_reg $argcmd");
-																		SIGNALduino_AddSendQueue($hash,$argcmd);
-																	} else {
-																		return "ERROR: wrong register value $argcmd, only hexadecimal ​​four digits allowed"
-																	}
-																}
-																SIGNALduino_WriteInit($hash);
-															}
-														],
+  "cc1101_reg"			=> 	[ 'textFieldNL', \&cc1101::SetRegisters ],
 );
 
 
@@ -4545,6 +4524,28 @@ sub SetPatable
 	main::SIGNALduino_AddSendQueue($hash,$pa);
 	main::SIGNALduino_WriteInit($hash);
 	return undef;
+}
+
+sub SetRegisters  {
+	my ($hash, @a) = @_;
+	my $arg = $a[1];
+	my @args = split(' ', $arg);
+	my $argadr;
+	
+	foreach my $argcmd (@args) {
+		if ($argcmd =~ /^[0-9A-Fa-f]{4}$/) {
+			## check allowed register position
+			return "ERROR: unknown register position ".substr($argcmd,0,2) if ! ($cc1101_register{substr($argcmd,0,2)});
+			
+			$argadr = hex(substr($argcmd,0,2)) + 2;
+			$argcmd = sprintf("W%02X%s",$argadr,substr($argcmd,2,2));
+			$hash->{logMethod}->($hash->{NAME}, 4, "$hash->{NAME}: Set, cc1101_reg $argcmd");
+			main::SIGNALduino_AddSendQueue($hash,$argcmd);
+		} else {
+			return "ERROR: wrong register value $argcmd, only hexadecimal ​​four digits allowed"
+		}
+	}
+	main::SIGNALduino_WriteInit($hash);
 }
 
 1;

@@ -280,8 +280,8 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 		},
 		{
     		hasCC1101 => 1,
-			testname=>  "set cc1101_regSet 0D23 0B22",
-			input	=>	"regSet 0D23 0B22",
+			testname=>  "set cc1101_reg 0D23 0B22",
+			input	=>	"cc1101_reg 0D23 0B22",
 			check =>  sub { 
 			    return array  {
 			    	item 'W0D23';
@@ -289,13 +289,13 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 			    	end();
     			};
 		    },
-		    todo => sub { return todo("this command isn't implemented"); }
+		    #todo => sub { return todo("this command isn't implemented"); }
 		},
 		{
     		hasCC1101	=> 1,
 			dummy		=> 1,
-			testname	=> "set cc1101_regSet 0D23 0B22",
-			input		=> "regSet 0D23 0B22",
+			testname	=> "set cc1101_reg 0D23 0B22",
+			input		=> "cc1101_reg 0D23 0B22",
 			check 		=> sub { 
 			    return array  {
 			    	item 'W0D23';
@@ -304,30 +304,30 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
     			};
 		    },
 		    return => "This command is not available for dummies",
-		    todo => sub { return todo("this command isn't implemented"); }
+		    #todo => sub { return todo("this command isn't implemented"); }
 		},
 		{
     		hasCC1101 => 0,
-			testname=>  "set cc1101_regSet 0D23 0B22",
-			input	=>	"regSet 0D23 0B22",
+			testname=>  "set cc1101_reg 0D23 0B22",
+			input	=>	"cc1101_reg 0D23 0B22",
 			check =>  sub { 
 			    return array  {
 			    	end();
     			};
 		    },
 		    return => "This command is only available with a cc1101 receiver",
-		    todo => sub { return todo("this command isn't implemented"); }
+		    #todo => sub { return todo("this command isn't implemented"); }
 		},
 		{
     		hasCC1101 => 1,
 			testname=>  "set cc1101_regSet AP23 FF22 (wrong register)",
-			input	=>	"regSet AP23 FF22",
+			input	=>	"cc1101_reg AP23 FF22",
 			check =>  sub { 
 			    return array  {
 			    	end();
     			};
 		    },
-		    todo => sub { return todo("this command isn't implemented"); }
+		    return =>  match qr/^ERROR: wrong register value AP23/
 		},
 		{
 			testname=>  "set bad command",
