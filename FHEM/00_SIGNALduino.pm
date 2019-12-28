@@ -321,8 +321,57 @@ my %sets;
 );
 
 
-
 my @modformat = ("2-FSK","GFSK","-","ASK/OOK","4-FSK","-","-","MSK"); # modulation format
+
+my %cc1101_register = (		# for get ccreg 99 and set cc1101_reg
+  "00" => 'IOCFG2  ',			# ! the values with spaces for output get ccreg 99 !
+	"01" => 'IOCFG1  ',
+	"02" => 'IOCFG0  ',
+	"03" => 'FIFOTHR ',
+	"04" => 'SYNC1   ',
+	"05" => 'SYNC0   ',
+	"06" => 'PKTLEN  ',
+	"07" => 'PKTCTRL1',
+	"08" => 'PKTCTRL0',
+	"09" => 'ADDR    ',
+	"0A" => 'CHANNR  ',
+	"0B" => 'FSCTRL1 ',
+	"0C" => 'FSCTRL0 ',
+	"0D" => 'FREQ2   ',
+	"0E" => 'FREQ1   ',
+	"0F" => 'FREQ0   ',
+	"10" => 'MDMCFG4 ',
+	"11" => 'MDMCFG3 ',
+	"12" => 'MDMCFG2 ',
+	"13" => 'MDMCFG1 ',
+	"14" => 'MDMCFG0 ',
+	"15" => 'DEVIATN ',
+	"16" => 'MCSM2   ',
+	"17" => 'MCSM1   ',
+	"18" => 'MCSM0   ',
+	"19" => 'FOCCFG  ',
+	"1A" => 'BSCFG   ',
+	"1B" => 'AGCCTRL2',
+	"1C" => 'AGCCTRL1',
+	"1D" => 'AGCCTRL0',
+	"1E" => 'WOREVT1 ',
+	"1F" => 'WOREVT0 ',
+	"20" => 'WORCTRL ',
+	"21" => 'FREND1  ',
+	"22" => 'FREND0  ',
+	"23" => 'FSCAL3  ',
+	"24" => 'FSCAL2  ',
+	"25" => 'FSCAL1  ',
+	"26" => 'FSCAL0  ',
+	"27" => 'RCCTRL1 ',
+	"28" => 'RCCTRL0 ',
+	"29" => 'FSTEST  ',
+	"2A" => 'PTEST   ',
+	"2B" => 'AGCTEST ',
+	"2C" => 'TEST2   ',
+	"2D" => 'TEST1   ',
+	"2E" => 'TEST0   ',
+);
 
 ## Supported Clients per default
 my $clientsSIGNALduino = ":IT:"
