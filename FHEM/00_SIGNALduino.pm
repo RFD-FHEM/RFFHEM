@@ -324,7 +324,7 @@ my %sets;
 my @modformat = ("2-FSK","GFSK","-","ASK/OOK","4-FSK","-","-","MSK"); # modulation format
 
 my %cc1101_register = (		# for get ccreg 99 and set cc1101_reg
-  "00" => 'IOCFG2  ',			# ! the values with spaces for output get ccreg 99 !
+ 	"00" => 'IOCFG2  ',			# ! the values with spaces for output get ccreg 99 !
 	"01" => 'IOCFG1  ',
 	"02" => 'IOCFG0  ',
 	"03" => 'FIFOTHR ',
@@ -4528,11 +4528,9 @@ sub SetPatable
 
 sub SetRegisters  {
 	my ($hash, @a) = @_;
-	my $arg = $a[1];
-	my @args = split(' ', $arg);
 	my $argadr;
 	
-	foreach my $argcmd (@args) {
+	foreach my $argcmd (@a[1..$#a]) {
 		if ($argcmd =~ /^[0-9A-Fa-f]{4}$/) {
 			## check allowed register position
 			return "ERROR: unknown register position ".substr($argcmd,0,2) if ! ($cc1101_register{substr($argcmd,0,2)});
