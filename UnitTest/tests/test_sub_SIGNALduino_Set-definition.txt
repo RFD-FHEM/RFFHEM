@@ -280,14 +280,14 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 		},
 		{
     		hasCC1101 => 1,
-			testname=>  "set cc1101_reg 0D23 W2E22",
+			testname=>  "set cc1101_reg 0D23 2E22",
 			input	=>	"cc1101_reg 0D23 2E22",
 			check =>  sub { 
 			    return array  {
-			    	item 'W0D23';
-			    	item 'W2E22';
-			    	item 'WS34';
+			    	item 'W0F23';
+			    	item 'W3022';
 			    	item 'WS36';
+			    	item 'WS34';
 			    	end();
     			};
 		    },
