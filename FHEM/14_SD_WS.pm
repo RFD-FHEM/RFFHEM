@@ -22,6 +22,7 @@
 # 02.05.2019 neues Protokoll 94: Atech wireless weather station (vermutlicher Name: WS-308)
 # 14.06.2019 neuer Sensor TECVANCE TV-4848 - Protokoll 84 angepasst (prematch)
 # 09.11.2019 neues Protokoll 53: Lidl AURIOL AHFL 433 B2 IAN 314695
+# 29.12.2019 neues Protokoll 27: Temperatur-/Feuchtigkeitssensor EuroChron EFTH-800
 
 package main;
 
@@ -184,22 +185,19 @@ sub SD_WS_Parse($$)
 				# i: 12 bit random id (changes on power-loss)
 				# b:  1 bit battery indicator (0=>OK, 1=>LOW)
 				# s:  1 bit sign temperature (0=>negative, 1=>positive)
-				# t: 12 bit unsigned temperature, scaled by 10
+				# t: 10 bit unsigned temperature, scaled by 10
 				# h:  8 bit relative humidity percentage (BCD)
 				# x:  8 bit CRC8
 				# ?: unknown (Bit 0, 28-31 always 0 ???)
-				# The sensor sends at intervals of about 47-48 seconds
+				# The sensor sends two messages at intervals of about 57-58 seconds
 				sensortype => 'EFTH-800',
 				model      => 'SD_WS_27_TH',
 				prematch   => sub {my $rawData = shift; return 1 if ($rawData =~ /^[0-9A-F]{7}0[0-9]{2}[0-9A-F]{2}$/); },	# prematch 113C49A 0 47 AE
-				# prematch   => sub {my $msg = shift; return 1 if ($msg =~ /^[0-9A-F]{7}0[0-9A-F]{4}$/); },	# prematch 113C49A 0 4746
-				# prematch   => sub {my $msg = shift; return 1 if ($msg =~ /^[0-9A-F]{12}/); },		# min 12 nibbles
 				channel    => sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,1,3) + 1 ); },
 				id         =>	sub {my (undef,$bitData) = @_; return substr($rawData,1,3); },
 				bat        => sub {my (undef,$bitData) = @_; return substr($bitData,16,1) eq "0" ? "ok" : "low";},
 				temp       => sub {my (undef,$bitData) = @_; return substr($bitData,17,1) eq "0" ? ((SD_WS_binaryToNumber($bitData,18,27) - 1024) / 10.0) : (SD_WS_binaryToNumber($bitData,18,27) / 10.0);},
 				hum        => sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,32,35) * 10) + (SD_WS_binaryToNumber($bitData,36,39));},
-				# crcok      => sub {return 1;},		# crc test method is so far unknown
 				crcok      => sub {my $rawData = shift;
 														my $rc = eval
 														{
@@ -865,12 +863,12 @@ sub SD_WS_Parse($$)
 	 	   	$SensorTyp=$decodingSubs{$protocol}{sensortype};
 		    if (!$decodingSubs{$protocol}{prematch}->( $rawData ))
 		    { 
-		   		Log3 $iohash, 3, "$name: SD_WS_Parse $rawData protocolid $protocol ($SensorTyp) - ERROR prematch" ;
+		   		Log3 $iohash, 4, "$name: SD_WS_Parse $rawData protocolid $protocol ($SensorTyp) - ERROR prematch" ;
 		    	return "";  
 	    	}
 		    my $retcrc=$decodingSubs{$protocol}{crcok}->( $rawData,$bitData );
 		    if (!$retcrc)		    { 
-		    	Log3 $iohash, 3, "$name: SD_WS_Parse $rawData protocolid $protocol ($SensorTyp) - ERROR CRC";
+		    	Log3 $iohash, 4, "$name: SD_WS_Parse $rawData protocolid $protocol ($SensorTyp) - ERROR CRC";
 		    	return "";  
 	    	}
 	    	$id=$decodingSubs{$protocol}{id}->( $rawData,$bitData );
@@ -1118,6 +1116,7 @@ sub SD_WS_WH2SHIFT($){
     <li>Bresser 7009994</li>
     <li>BresserTemeo</li>
     <li>Conrad S522</li>
+		<li>EuroChron EFTH-800 (temperature and humidity sensor)</li>
     <li>NC-3911, NC-3912 refrigerator thermometer</li>
 		<li>Opus XT300</li>
     <li>PV-8644 infactory Poolthermometer</li>
@@ -1215,6 +1214,7 @@ sub SD_WS_WH2SHIFT($){
     <li>Bresser 7009994</li>
     <li>BresserTemeo</li>
     <li>Conrad S522</li>
+		<li>EuroChron EFTH-800 (Temperatur- und Feuchtigkeitssensor)</li>
     <li>NC-3911, NC-3912 digitales Kuehl- und Gefrierschrank-Thermometer</li>
 		<li>Opus XT300</li>
     <li>PV-8644 infactory Poolthermometer</li>
