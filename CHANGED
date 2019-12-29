@@ -1,6 +1,7 @@
-2019-12-27 - revised old information (#740)
-
-- revised SVN ID numbers
+2019-12-28  
+  00_SIGNALduino.pm: 
+   Moved code for cc1101 set commands into cc1101 package 
+   Filtered possible set commands for dummy devices
 26.12.2019
   14_SD_UT.pm: new protocol 26 - Remote control xavax 00111939
   10_SD_GT.pm: add codes for button all in version 2
