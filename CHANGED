@@ -1,3 +1,7 @@
+2019-12-29 - update.yml
+
+changed detection if a new controls file has been written to diff
+fix for workflow add files to index only if they are not already there
 2019-12-28  
   00_SIGNALduino.pm: 
    Moved code for cc1101 set commands into cc1101 package 
