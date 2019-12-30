@@ -674,7 +674,7 @@ sub SIGNALduino_Set_FhemWebList {
 
 sub SIGNALduino_Set_raw {
 	my ($hash, @a) = @_;
-	$hash->{logMethod}->($hash->{NAME}, 4, "$hash->{NAME}: Set, ".join(" ",@a));
+	$hash->{logMethod}->($hash->{NAME}, 4, "$hash->{NAME}: Set_raw, ".join(" ",@a));
 	SIGNALduino_AddSendQueue($hash,$a[1]);
 	return undef;
 } 
@@ -740,7 +740,7 @@ sub SIGNALduino_Set_reset
 ###############################
 sub SIGNALduino_Set_sendMsg {
 	my ($hash, @a) = @_;
-	$hash->{logMethod}->($hash->{NAME}, 5, "$hash->{NAME}: Set, sendmsg msg=$a[1]");
+	$hash->{logMethod}->($hash->{NAME}, 5, "$hash->{NAME}: Set_sendMsg, msg=$a[1]");
 								
 	# Split args in serval variables
 	my ($protocol,$data,$repeats,$clock,$frequency,$datalength,$dataishex);
@@ -799,7 +799,7 @@ sub SIGNALduino_Set_sendMsg {
 		}
 
 		$sendData = $intro . "SM;" . ($repeats > 0 ? "R=$repeats;" : "") . "C=$clock;D=$data;" . $outro . $frequency; #	SM;R=2;C=400;D=AFAFAF;
-		$hash->{logMethod}->($hash->{NAME}, 5, "$hash->{NAME}: Set, sendmsg Preparing manchester protocol=$protocol, repeats=$repeats, clock=$clock data=$data");
+		$hash->{logMethod}->($hash->{NAME}, 5, "$hash->{NAME}: Set_sendMsg, Preparing manchester protocol=$protocol, repeats=$repeats, clock=$clock data=$data");
 
 	} else {
 		if ($protocol == 3 || substr($data,0,2) eq "is") {
@@ -807,7 +807,7 @@ sub SIGNALduino_Set_sendMsg {
 				$data = substr($data,2);   # is am Anfang entfernen
 			}
 			$data = SIGNALduino_ITV1_tristateToBit($data);
-			$hash->{logMethod}->($hash->{NAME}, 5, "$hash->{NAME}: Set, sendmsg IT V1 convertet tristate to bits=$data");
+			$hash->{logMethod}->($hash->{NAME}, 5, "$hash->{NAME}: Set_sendMsg, IT V1 convertet tristate to bits=$data");
 		}
 		if (!defined($clock)) {
 			$hash->{ITClock} = 250 if (!defined($hash->{ITClock}));   # Todo: Klaeren wo ITClock verwendet wird und ob wir diesen Teil nicht auf Protokoll 3,4 und 17 minimieren
@@ -821,7 +821,7 @@ sub SIGNALduino_Set_sendMsg {
 	        my $blen = $hlen * 4;
 	        $data = unpack("B$blen", pack("H$hlen", $data));
 		}
-		$hash->{logMethod}->($hash->{NAME}, 5, "$hash->{NAME}: Set, sendmsg Preparing rawsend command for protocol=$protocol, repeats=$repeats, clock=$clock bits=$data");
+		$hash->{logMethod}->($hash->{NAME}, 5, "$hash->{NAME}: Set_sendMsg, Preparing rawsend command for protocol=$protocol, repeats=$repeats, clock=$clock bits=$data");
 		
 		foreach my $item (qw(preSync sync start one zero float pause end universal))
 		{
@@ -855,7 +855,7 @@ sub SIGNALduino_Set_sendMsg {
 		$sendData = "SR;R=$repeats;$pattern$SignalData;$frequency";
 	}
 	SIGNALduino_AddSendQueue($hash,$sendData);
-	$hash->{logMethod}->($hash->{NAME}, 4, "$hash->{NAME}: Set, sending via SendMsg: $sendData");
+	$hash->{logMethod}->($hash->{NAME}, 4, "$hash->{NAME}: Set_sendMsg, sending : $sendData");
 } 
 
 ###############################
@@ -876,7 +876,7 @@ sub SIGNALduino_Set_MessageType
 		$argm = 'CD' . substr($a[1],-1,1);
 	}
 	SIGNALduino_AddSendQueue($hash,$argm);
-	$hash->{logMethod}->($hash->{NAME}, 4, "$hash->{NAME}: Set, $a[0] $a[1] $argm");
+	$hash->{logMethod}->($hash->{NAME}, 4, "$hash->{NAME}: Set_MessageType, $a[0] $a[1] $argm");
 }
 
 					
@@ -1238,13 +1238,15 @@ sub SIGNALduino_AddSendQueue($$) {
   #SIGNALduino_Log3 $hash , 5, Dumper($hash->{QUEUE});
   
   $hash->{logMethod}->($hash, 5,"$name: AddSendQueue, " . $hash->{NAME} . ": $msg (" . @{$hash->{QUEUE}} . ")");
-  InternalTimer(gettimeofday() + 0.1, "SIGNALduino_HandleWriteQueue", "HandleWriteQueue:$name") if (scalar @{$hash->{QUEUE}} == 1 && InternalVal($name,"sendworking",0));
+  InternalTimer(gettimeofday() + 0.1, "SIGNALduino_HandleWriteQueue", "HandleWriteQueue:$name") if (scalar @{$hash->{QUEUE}} == 1 && InternalVal($name,"sendworking",0) == 0);
 }
 
 ###############################
 sub SIGNALduino_SendFromQueue($$) {
   my ($hash, $msg) = @_;
   my $name = $hash->{NAME};
+	
+	$hash->{logMethod}->($name, 4, "$name: SendFromQueue, called");
   if($msg ne "") {
 	SIGNALduino_XmitLimitCheck($hash,$msg);
     #DevIo_SimpleWrite($hash, $msg . "\n", 2);
@@ -1277,7 +1279,8 @@ sub SIGNALduino_HandleWriteQueue($) {
   my $hash = $defs{$name};
   
   #my @arr = @{$hash->{QUEUE}};
-  
+
+	$hash->{logMethod}->($name, 4, "$name: HandleWriteQueue, called");  
   $hash->{sendworking} = 0;       # es wurde gesendet
   
   if (defined($hash->{getcmd}->{cmd}) && $hash->{getcmd}->{cmd} eq 'sendraw') {
