@@ -150,7 +150,7 @@ my %sets = (
   #Command name            [FhemWeb Argument type, code to run]
   "?"					=>	['', \&SIGNALduino_Set_FhemWebList ],
   "raw"    			   	=>	['textFieldNL',\&SIGNALduino_Set_raw ],
-  "flash"   		 	=> 	['textFieldNL', \&SIGNALduino_set_flash	],
+  "flash"   		 	=> 	['textFieldNL', \&SIGNALduino_Set_flash	],
   "reset"   			=> 	['noArg', \&SIGNALduino_Set_reset ],
   "close"     			=> 	['noArg', \&SIGNALduino_Set_close ],
   "enableMessagetype" 	=> 	['syncedMS,unsyncedMU,manchesterMC', \&SIGNALduino_Set_MessageType ],
@@ -680,7 +680,7 @@ sub SIGNALduino_Set_raw {
 } 
 							
 ###############################
- sub SIGNALduino_set_flash {
+ sub SIGNALduino_Set_flash {
   	my ($hash, @a) = @_;
 	my $name = $hash->{NAME};
 	return "Please define your hardware! (attr $name hardware <model of your receiver>) " if (AttrVal($name,"hardware","") eq "");
@@ -698,9 +698,9 @@ sub SIGNALduino_Set_raw {
     my $hexFile = "";
 	if( grep $args[0] eq $_ , split(",",$hash->{additionalSets}{flash}) )
 	{
-		$hash->{logMethod}->($hash, 3, "$name: Set, flash $args[0] try to fetch github assets for tag $args[0]");
+		$hash->{logMethod}->($hash, 3, "$name: Set_flash, $args[0] try to fetch github assets for tag $args[0]");
 		my $ghurl = "https://api.github.com/repos/RFD-FHEM/SIGNALDuino/releases/tags/$args[0]";
-		$hash->{logMethod}->($hash, 3, "$name: Set, flash $args[0] try to fetch release $ghurl");
+		$hash->{logMethod}->($hash, 3, "$name: Set_flash, $args[0] try to fetch release $ghurl");
 		
 	    $http_param{url} 		= $ghurl;
         $http_param{callback}	= \&SIGNALduino_githubParseHttpResponse; 	# Diese Funktion soll das Ergebnis dieser HTTP Anfrage bearbeiten
@@ -717,7 +717,7 @@ sub SIGNALduino_Set_raw {
     } else {
       $hexFile = $args[0];
     }
-	$hash->{logMethod}->($name, 3, "$name: Set, filename $hexFile provided, trying to flash");
+	$hash->{logMethod}->($name, 3, "$name: Set_flash, filename $hexFile provided, trying to flash");
 	# Only for Arduino , not for ESP
 	if (AttrVal($name,"hardware","") =~ m/(?:nano|mini|radino)/)
 	{
@@ -736,7 +736,7 @@ sub SIGNALduino_Set_reset
 	delete($hash->{initResetFlag}) if defined($hash->{initResetFlag});
 	return SIGNALduino_ResetDevice($hash);
 }
-						   	
+
 ###############################
 sub SIGNALduino_Set_sendMsg {
 	my ($hash, @a) = @_;
@@ -879,8 +879,6 @@ sub SIGNALduino_Set_MessageType
 	$hash->{logMethod}->($hash->{NAME}, 4, "$hash->{NAME}: Set_MessageType, $a[0] $a[1] $argm");
 }
 
-					
-							
 ###############################
 sub SIGNALduino_Get($@) {
 	my ($hash, @a) = @_;
