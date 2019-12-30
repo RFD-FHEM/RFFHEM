@@ -577,7 +577,7 @@ sub SIGNALduino_PrepareFlash {
 			last;
 		}
 	}
-	$hash->{logMethod}->($name, 5, "$name: Set, avrdude found = $avrdudefound");
+	$hash->{logMethod}->($name, 5, "$name: PrepareFlash, avrdude found = $avrdudefound");
 	return "avrdude is not installed. Please provide avrdude tool example: sudo apt-get install avrdude" if($avrdudefound == 0);
 
 	$log .= "flashing Arduino $name\n";
@@ -591,14 +591,14 @@ sub SIGNALduino_PrepareFlash {
 	my $flashCommand = AttrVal($name,"flashCommand",$defaultflashCommand);
 		
 	if ($defaultflashCommand eq $flashCommand)	{
-		$hash->{logMethod}->($name, 5, "$name: Set, standard flashCommand is used to flash.");
+		$hash->{logMethod}->($name, 5, "$name: PrepareFlash, standard flashCommand is used to flash.");
 	} else {
-		$hash->{logMethod}->($name, 3, "$name: Set, custom flashCommand is manual defined! $flashCommand");
+		$hash->{logMethod}->($name, 3, "$name: PrepareFlash, custom flashCommand is manual defined! $flashCommand");
 	}
 		
 	DevIo_CloseDev($hash);
 	if ($hardware eq "radinoCC1101" && $^O eq 'linux') {
-		$hash->{logMethod}->($name, 3, "$name: Set, forcing special reset for $hardware on $port");
+		$hash->{logMethod}->($name, 3, "$name: PrepareFlash, forcing special reset for $hardware on $port");
 		# Mit dem Linux-Kommando 'stty' die Port-Einstellungen setzen
 		use IPC::Open3;
 
@@ -619,13 +619,13 @@ sub SIGNALduino_PrepareFlash {
 	  		$hash->{helper}{stty_output} = join(" ",@outlines).join(" ",@errlines);
 		}
 		$port =~ s/usb-Unknown_radino/usb-In-Circuit_radino/g;
-		$hash->{logMethod}->($name ,3, "$name: Set, changed usb port to \"$port\" for avrdude flashcommand compatible with radino");
+		$hash->{logMethod}->($name ,3, "$name: PrepareFlash, changed usb port to \"$port\" for avrdude flashcommand compatible with radino");
 	}
 	$hash->{helper}{avrdudecmd} = $flashCommand;
 	$hash->{helper}{avrdudecmd}=~ s/\Q[PORT]\E/$port/g;
 	$hash->{helper}{avrdudecmd} =~ s/\Q[HEXFILE]\E/$hexFile/g;
 	if ($hardware =~ "^nano" && $^O eq 'linux') {
-		$hash->{logMethod}->($name ,5, "$name: Set, try additional flash with baudrate 115200 for optiboot");
+		$hash->{logMethod}->($name ,5, "$name: PrepareFlash, try additional flash with baudrate 115200 for optiboot");
 		$hash->{helper}{avrdudecmd} = $hash->{helper}{avrdudecmd}." || ". $hash->{helper}{avrdudecmd}; 
 		$hash->{helper}{avrdudecmd} =~ s/\Q[BAUDRATE]\E/$baudrate/;
 		$baudrate=115200;
