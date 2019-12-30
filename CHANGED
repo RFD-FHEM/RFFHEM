@@ -1,3 +1,7 @@
+2019-12-30 - Dev r34 fix flash (#752)
+
+* 00_SIGNALduino.pm
+Fixes #751 (fhem crash and not working flash command)
 2019-12-30 - 00_SIGNALduino.pm
 
 Fixes #751 (fhem crash and not working flash command)
