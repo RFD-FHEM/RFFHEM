@@ -664,7 +664,7 @@ sub SIGNALduino_Set($$@) {
 sub SIGNALduino_Set_FhemWebList { 
 	my ($hash, @a) = @_;
 	my @cList = sort map { "$_:@{$sets{$_}}[0]" }	grep { ($_ !~/^\?$/ && ( InternalVal($hash->{NAME},"hasCC1101",0) || (!InternalVal($hash->{NAME},"hasCC1101",0) && $_ !~ /^cc/)) &&  (!IsDummy($hash->{NAME}) || IsDummy($hash->{NAME}) && $_ =~ m/^(close|reset)/)) }  keys %sets;
-	$hash->{logMethod}->($hash->{NAME}, 4, "$hash->{NAME}: Set_FhemWebList, ".@cList);
+	$hash->{logMethod}->($hash->{NAME}, 4, "$hash->{NAME}: Set_FhemWebList, @cList");
 	map {
 		my $set_key=$_;
 		my ($index) = grep { $cList[$_] =~ /:$set_key$/ } (0 .. @cList-1);
