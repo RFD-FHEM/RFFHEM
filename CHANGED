@@ -1,3 +1,141 @@
+06.12.2019
+  00_SIGNALduino.pm: 
+    logoutput adjusted to standard -> $name: "sub", "Text"
+    remove unneeded get commands from webif for dummys
+    remove cc1101 get commands if no cc1101 connected
+    fixed serval Perlwarning and rare bug that caused fhem to crash
+    new Internal hasCC1101 added
+    allows flash nano328 and nanoCC1101 with new bootloader optiboot
+    allows flash radino with DEF /dev/serial/by-id/
+    new internal which provides error messages from flash     
+    during flash operation
+    add special reset for radinoCC1101
+    added specify arduino hardware type (ESP8266,ESP8266cc1101)
+    attribute ESP1_M is deleted
+    !! Please define new if hardware defined with old typ !!
+    fix some logging issues with disabled eventlogging
+    Optimze logging if eventlogging is 0 or unset
+    get availableFirmware - fix browser refresh
+    add support to flash microcontroller on Windows platform
+    New protocol TCM 218943, replaced u6 was in development
+    add definition for Medion OR28V RF Vista Remote Control
+  90_SIGNALduino_un.pm: 
+    clean some code
+  14_SD_RSL.PM: 
+    support for setExtensions added
+  14_SD_WS.pm: 
+    new weatherstation Lidl AURIOL AHFL 433 B2 IAN 314695
+  14_SD_Keeloq.pm: 
+    fix shade function
+    fix group control 9-16  | added enhancement (shade for groups)
+    reduced repeats for shade after test | fix serial send syntax
+    fixed Undefined subroutine &SD_Keeloq::FmtDateTime
+    fixed autocreate serial´s without 00 and displayview
+    added new model PR3-4207-002 (SCS Sentinel)
+    added new model RP_S1_HS_RF11 (Rademacher) 14_SD_WS_Maverick.pm:
+    added support for device TFA 14.1504
+    removed internals which are identical to readings
+    removed declaration of stateFormat
+    code optimization
+  14_SD_UT.pm: 
+    fixed Parse button all model RC_10 Forum#94327 & added model OR28V
+08.07.2019
+ 14_SD_UT.pm: Manax and mumbi device (RC_10) added send commands
+02.07.2019
+ 00_SIGNALduino.pm: add checksum for WS7035
+ SD_ProtocolData.pm: add reconstructBit for WS7035
+01.07.2019
+ 14_SD_UT.pm: rename model Manax to RC_10, added commandref !! OLD model Manax please delete | Manax and mumbi Devices autocreates to RC_10 !!
+29.06.2019
+ 14_SD_UT.pm: fixed (no Manax device created), added mumbi commandref
+22.06.2019
+ 14_SD_WS07.pm: new weather station Auriol AFW 2 A1, IAN: 297514
+16.06.2019
+ 00_SIGNALDuino.pm: Support MS signals with multiple syncs as 
+                    like Firmware 3.3.1-experimental
+14.06.2019
+ SD_ProtocolData.pm: ID 84 changed, added new device TV-4848
+ 14_SD_WS.pm: changed ID 84 for new sensor TECVANCE TV-4848
+07.06.2019
+ 00_SIGNALduino.pm: added check method for no break and fix PEARL WARNING
+01.06.2019
+ 14_SD_BELL.pm: fixed repeats model Heidemann_|_Heidemann_HX_|_VTX-BELL (https://github.com/RFD-FHEM/RFFHEM/issues/367#issuecomment-493764470)
+20.05.2019
+  SD_ProtocolData.pm: improved OpusXT300
+18.05.2019
+ SD_ProtocolData.pm: added ID 96 Grothe Mistral
+15.05.2019
+ 00_SIGNALduino.pm: Drop-down list for cc1101_bWidth, cc1101_rAmpl and cc1101_sens
+14.05.2019
+ 14_SD_WS.pm: New protocol for Atech wireless weather station (protocol #94)
+13.05.2019
+ SD_ProtocolData.pm: ID 91.1 revised preamble to P91
+11.05.2019
+  00_SIGNALduino.pm: Fixed protocols with float. Float is optional and must 
+                     not be included in transmission
+05.05.2019
+ 14_SD_Keeloq.pm: fix use channels 10-16 #issuecomment-488055600
+21.04.2019
+ 00_SIGNALduino.pm: added new internal, which will return LAST_Protocol_ID dispatch
+21.04.2019
+ 14_SD_RSL.pm: change set loglevel from 4 to 3
+               optimize log set
+15.04.2019
+ 14_SD_WS.pm: check protocol 33 added
+ SD_ProtocolData.pm: add definition for TFA 30.3200 (CP=750) and Tchibo weatherstation (CP=400)
+13.04.2019
+ 14_SD_UT.pm: New protocol for Techmar Garden Lights
+07.04.2019
+ 14_SD_WS.pm: correct longid from 12 to 8 bit, valid channels only 1-3
+05.04.2019
+ 00_SIGNALduino.pm added new internal, which will provide the protocolID in
+                    logical modules.
+25.03.2019
+ 14_SD_UT.pm: revised Tedsen models | TEDSEN_SKX1MD OLD rename to TEDSEN_SKX1xx because other new models TEDSEN_SKX2xx,TEDSEN_SKX4xx,TEDSEN_SKX6xx
+              !! Old model TEDSEN_SKX1MD delete and autocreate to TEDSEN_SKX1xx | remotes with different number of buttons !!
+ signalduino_protocols.pm: revised ID46 and ID78 (GEIGER blind motors) removed | ID 46 is now Tedsen remote for Berner Garagentorantrieb GA401 and Geiger Antriebstechnik Rolladensteuerung)
+                           added ID94 for https://github.com/RFD-FHEM/RFFHEM/issues/547 | Atech wireless weather station
+25.03.2019
+ 14_SD_RSL.pm: fix PERL WARNING: "my" variable $iodevice
+16.03.2019
+ 00_SIGNALduino.pm revised doc sendMSG
+12.03.2019
+ 00_SIGNALduino.pm fix DeviceOverview
+10.03.2019
+ 14_SD_WS07.pm: fix bug autocreate define
+                remove rssi
+                remove slider for offsets
+                remove reading battery
+09.03.2019
+ 14_SD_WS07.pm:  loglevel 4 for values out of range, hint added to commandref
+06.03.2019
+ 14_SD_WS.pm: New protocol for refrigerator thermometer NC-3911, NC-3912 (Rosenstein & Soehne, PEARL)
+05.03.2019
+ 14_SD_WS07.pm: fix bug autocreate define
+                remove rssi
+                remove slider for offsets
+                remove reading battery
+04.03.2019
+ 14_SD_Keeloq.pm: fix PERL WARNING if hlen a other typ of device, readings rename to FHEM standard (battery), revised doc
+27.02.2019
+ 14_SD_UT.pm: added model LIBRA TR-502MSV [receiver RC-710DX|RC-710] (LIDL)
+26.02.2019
+ signalduino_protocols.pm: set reconstructBit on ID87 + ID91 +91.1 | remove developId status ID 73
+25.02.2019
+ 00_SIGNALduino: change: load protocolData from another PerlModule instead of
+                         a text file. Fixes update via svn 
+24.02.2019
+ 14_SD_RSL.pm: fix IODEV not correctly assigned #484 | fix undef syntax | revised doc + revised log output´s
+ 00_SIGNALduino: feature: last bit of transmission is tried to be reconstructed
+                          if there is enough data available
+ 14_SD_Keeloq.pm: new module for Keeloq devices
+ 90_SIGNALduino_un.pm remove Roto output´s --> new module created
+22.02.2019
+ 00_SIGNALduino: bugfix: Load protocolHash from web if it is missing on fs 
+21.02.2019
+ 14_SD_UT.pm: new model KL_RF01 -> ESTO Lighting GmbH | revised doc Refsta Topdraft
+18.02.2019
+ ID 87 and 88 can now dispatch to SD_Keeloq Module
 12.02.2019
  00_SIGNALduino: feature: getAvailableFirmware returns only version for 
                   which a file could be found.

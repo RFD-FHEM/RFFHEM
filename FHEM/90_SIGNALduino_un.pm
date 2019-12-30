@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 90_SIGNALduino_un.pm 15479 2018-01-24 20:00:00 dev-r33 $
+# $Id: 90_SIGNALduino_un.pm 15479 2019-11-21 20:14:00 dev-r34 $
 #
 # The file is part of the SIGNALduino project
 # see http://www.fhemwiki.de/wiki/SIGNALduino to support debugging of unknown signal data
@@ -102,45 +102,7 @@ SIGNALduino_un_Parse($$)
 	my $bitData= unpack("B$blen", pack("H$hlen", $rawData)); 
 	Log3 $hash, 4, "$name converted to bits: $bitData";
 		
-	if ($protocol == "6" && length($bitData)>=36)  ## Eurochron 
-	{   
-
-		  # EuroChron / Tchibo
-		  #                /--------------------------- Channel, changes after every battery change      
-		  #               /        / ------------------ Battery state 0 == Ok      
-		  #              /        / /------------------ unknown      
-		  #             /        / /  / --------------- forced send      
-		  #            /        / /  /  / ------------- unknown      
-		  #           /        / /  /  /     / -------- Humidity      
-		  #          /        / /  /  /     /       / - neg Temp: if 1 then temp = temp - 2048
-		  #         /        / /  /  /     /       /  / Temp
-		  #         01100010 1 00 1  00000 0100011 0  00011011101
-		  # Bit     0        8 9  11 12    17      24 25        36
-
-		my $SensorTyp = "EuroChron";
-		my $channel = "";
-		my $bin = substr($bitData,0,8);
-		my $id = sprintf('%X', oct("0b$bin"));
-		my $bat = int(substr($bitData,8,1)) eq "0" ? "ok" : "critical";
-		my $trend = "";
-		my $sendMode = int(substr($bitData,11,1)) eq "0" ? "automatic" : "manual";
-		my $temp = SIGNALduino_un_bin2dec(substr($bitData,25,11));
-		if (substr($bitData,24,1) eq "1") {
-		  $temp = $temp - 2048
-		}
-		$temp = $temp / 10.0;
-		my $hum = SIGNALduino_un_bin2dec(substr($bitData,17,7));
-		my $val = "T: $temp H: $hum B: $bat";
-		Log3 $hash, 4, "$name decoded protocolid: 6  $SensorTyp, sensor id=$id, channel=$channel, temp=$temp\n" ;
-
-	} elsif ($protocol == "15" && length($bitData)>=64)  ## TCM 
-	{  
-		my $deviceCode = $a[4].$a[5].$a[6].$a[7].$a[8];
-
-
-		Log3 $hash, 4, "$name found TCM doorbell. devicecode=$deviceCode";
-
-	} elsif ($protocol == "21" && length($bitData)>=32)  ##Einhell doorshutter
+	if ($protocol == "21" && length($bitData)>=32)  ##Einhell doorshutter
 	{
 		Log3 $hash, 4, "$name / Einhell doorshutter received";
 		
@@ -166,35 +128,6 @@ SIGNALduino_un_Parse($$)
 		Log3 $hash, 4, "$name decoded protocolid: 7 ($SensorTyp / type=$type) mode=$sendMode, sensor id=$id, channel=$channel, temp=$temp, bat=$bat\n" ;
 
 
-	} elsif ($protocol == "78" && length($bitData)>=14)  ## geiger rohrmotor
-	{
-		my %bintotristate=(
- 		 	"00" => "0",
-		 	"10" => "F",
- 		 	"11" => "1"
-		);
-	  
-		my $tscode;
-		for (my $n=0; $n<length($bitData); $n=$n+2) {
-	      $tscode = $tscode . $bintotristate{substr($bitData,$n,2)};
-	    }
-			
-		
-		Log3 $hash, 4, "geiger message converted to tristate code: " . $tscode;
-		#Dispatch($hash, $tscode,undef);
-
-		
-	}	elsif ($protocol == "88" && length($rawData) == 17) {
-		my $serial = substr($bitData,32,28);
-		my $buttonbits = substr($bitData,60,4);
-		
-		my %buttons = (
- 		 	"0010" => "hoch",
-		 	"1001" => "runter",
- 		 	"1000" => "stop"
-		);
-		
-		Log3 $hash, 4, "$name: Roto shutter - Serialbits=$serial Serial=".oct( "0b$serial" )." Buttonbits=$buttonbits Button=$buttons{$buttonbits}";
 	}
 	
 	##############################################################################################
@@ -460,8 +393,8 @@ SIGNALduino_un_binflip($)
 	Dabei kann man sich leider nicht darauf verlassen, dass die Nachricht korrekt dekodiert wurde. Dieses Modul wird alle Nachrichten verarbeiten, welche von anderen Modulen nicht verarbeitet werden.<br>
 	<br>
 	Angelegte Ger&auml;te / Logfiles m&uuml;ssen manuell gel&ouml;scht werden nachdem aus dem Attribut <code>development</code> des SIGNALduinos das zu untersuchende Protokoll entfernt wurde. (Beispiel: u40,y84)
-	
-  <ul><br>
+  </ul>	
+  <br>
   <a name="SIGNALduino_unset"></a>
   <b>Set</b>
   <ul>write "Kommentar" - somit kann der User in das Logfile des Hilfsger&aumlt Kommentare setzen welche zeitlich zu seinen Bits des Ger&aumltes eingeordnet werden<br>

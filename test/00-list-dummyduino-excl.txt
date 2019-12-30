@@ -1,8 +1,0 @@
-   DMSG       .*
-   LASTDMSG   .*
-   NR         .*
-   TIME       .*
-   versionmodul v.*
-   DoubleMsgIDs: .*
-   .*   state           opened
-   .*   version         0
