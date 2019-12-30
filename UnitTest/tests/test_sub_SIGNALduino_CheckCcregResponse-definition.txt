@@ -1,0 +1,12 @@
+defmod test_sub_SIGNALduino_CheckCcregResponse UnitTest dummyDuino ( 
+{
+	subtest 'Test ccregAll response (ccreg 00: 00  ccreg 10: 57)' => sub {
+		plan tests => 2;
+		
+		my ($ret)=SIGNALduino_CheckCcregResponse($targetHash,"ccreg 00: 00  ccreg 10: 57");
+		like($ret,qr/^ccreg 00: 00/,"check begin of return message");
+		like($ret,qr/ccreg 10: 57/,"check second part of return message");
+	}; 
+	
+}
+)
