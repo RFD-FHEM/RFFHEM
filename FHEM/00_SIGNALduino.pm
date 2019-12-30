@@ -664,6 +664,7 @@ sub SIGNALduino_Set($$@) {
 sub SIGNALduino_Set_FhemWebList { 
 	my ($hash, @a) = @_;
 	my @cList = sort map { "$_:@{$sets{$_}}[0]" }	grep { ($_ !~/^\?$/ && ( InternalVal($hash->{NAME},"hasCC1101",0) || (!InternalVal($hash->{NAME},"hasCC1101",0) && $_ !~ /^cc/)) &&  (!IsDummy($hash->{NAME}) || IsDummy($hash->{NAME}) && $_ =~ m/^(close|reset)/)) }  keys %sets;
+	$hash->{logMethod}->($hash->{NAME}, 4, "$hash->{NAME}: Set_FhemWebList, ".@cList);
 	map {
 		my $set_key=$_;
 		my ($index) = grep { $cList[$_] =~ /:$set_key$/ } (0 .. @cList-1);
@@ -672,13 +673,14 @@ sub SIGNALduino_Set_FhemWebList {
 	return "Unknown argument $a[0], choose one of " . join(" ", @cList); 	
 }
 
+###############################
 sub SIGNALduino_Set_raw {
 	my ($hash, @a) = @_;
-	$hash->{logMethod}->($hash->{NAME}, 4, "$hash->{NAME}: Set, ".join(" ",@a));
+	$hash->{logMethod}->($hash->{NAME}, 4, "$hash->{NAME}: Set_raw, ".join(" ",@a));
 	SIGNALduino_AddSendQueue($hash,$a[1]);
 	return undef;
 } 
-							
+
 ###############################
  sub SIGNALduino_set_flash {
   	my ($hash, @a) = @_;
@@ -887,7 +889,7 @@ sub SIGNALduino_Get($@) {
 	my $type = $hash->{TYPE};
 	my $name = $hash->{NAME};
 	return "$name is not active, may firmware is not supported, please flash or reset" if (exists($hash->{DevState}) && $hash->{DevState} ne 'initialized');	
-		  
+
 	$hash->{logMethod}->($name, 5, "$name: Get, $type\" needs at least one parameter") if(@a < 2);
 	return "\"get $type\" needs at least one parameter" if(@a < 2);
 	if(!defined($gets{$a[1]})) {
@@ -896,14 +898,19 @@ sub SIGNALduino_Get($@) {
 		return "Unknown argument $a[1], choose one of " . join(" ", @cList);
 	}
 	return "no command to send, get aborted." if (ref $gets{$a[1]} eq 'ARRAY' && length($gets{$a[1]}[0]) == 0 && length($a[2]) == 0);
-	  
+
 	if (($a[1] eq "ccconf" || $a[1] eq "ccreg" || $a[1] eq "ccpatable") && !InternalVal($name,"hasCC1101",0)) {
 		return "This command is only available with a cc1101 receiver";
 	}
-	  
+
 	if (ref $gets{$a[1]} eq 'ARRAY') { # Option 1 
-		$hash->{logMethod}->($name, 5, "$name: Get, command for gets: " . $gets{$a[1]}[0] . " " . $a[2]);
-		SIGNALduino_AddSendQueue($hash, $gets{$a[1]}[0] . $a[2]); 
+		if ($a[2]) {
+			$hash->{logMethod}->($name, 5, "$name: Get, command for gets: " . $gets{$a[1]}[0] . " " . $a[2]);
+			SIGNALduino_AddSendQueue($hash, $gets{$a[1]}[0] . $a[2]);
+		} else {
+			$hash->{logMethod}->($name, 5, "$name: Get, command for gets: " . $gets{$a[1]}[0]);
+			SIGNALduino_AddSendQueue($hash, $gets{$a[1]}[0]);
+		}
 		$hash->{getcmd}->{cmd}=$a[1];
 		$hash->{getcmd}->{asyncOut}=$hash->{CL};
 		$hash->{getcmd}->{timenow}=time();
