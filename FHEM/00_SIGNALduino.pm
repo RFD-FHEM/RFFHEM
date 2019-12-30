@@ -666,8 +666,8 @@ sub SIGNALduino_Set_FhemWebList {
 	my @cList = sort map { "$_:@{$sets{$_}}[0]" }	grep { ($_ !~/^\?$/ && ( InternalVal($hash->{NAME},"hasCC1101",0) || (!InternalVal($hash->{NAME},"hasCC1101",0) && $_ !~ /^cc/)) &&  (!IsDummy($hash->{NAME}) || IsDummy($hash->{NAME}) && $_ =~ m/^(close|reset)/)) }  keys %sets;
 	map {
 		my $set_key=$_;
-		my ($index) = grep { $cList[$_] =~ /:$set_key$/ } (0 .. @cList-1);
-		$cList[$index] = "$set_key:".$hash->{additionalSets}{$set_key};  
+		my ($index) = grep { $cList[$_] =~ /^$set_key:/ } (0 .. $#cList-1);
+		$cList[$index] = "$set_key:".$hash->{additionalSets}{$set_key}  if (defined($index));
 	} keys %{$hash->{additionalSets}};
 	return "Unknown argument $a[0], choose one of " . join(" ", @cList); 	
 }
@@ -688,12 +688,12 @@ sub SIGNALduino_Set_raw {
 	my @args = @a[1..$#a];
 	return "ERROR: argument failed! flash [hexFile|url]" if (!$args[0]);
 	
-	my %http_param = {
+	my %http_param = (
 		timeout    => 5,
 		hash       => $hash,                                                                                 # Muss gesetzt werden, damit die Callback funktion wieder $hash hat
 		method     => "GET",                                                                                 # Lesen von Inhalten
 		header     => "User-Agent: perl_fhem\r\nAccept: application/json",  								 # Den Header gemaess abzufragender Daten aendern	
-	};
+	);
 								    
     my $hexFile = "";
 	if( grep $args[0] eq $_ , split(",",$hash->{additionalSets}{flash}) )
