@@ -1,3 +1,6 @@
+2019-12-30 - 00_SIGNALduino.pm
+
+Fixes #751 (fhem crash and not working flash command)
 2019-12-29 - update.yml
 
 changed detection if a new controls file has been written to diff
