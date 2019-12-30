@@ -900,6 +900,7 @@ sub SIGNALduino_Get($@) {
 	}
 	  
 	if (ref $gets{$a[1]} eq 'ARRAY') { # Option 1 
+		$a[2] = "" if !($a[2]);
 		$hash->{logMethod}->($name, 5, "$name: Get, command for gets: " . $gets{$a[1]}[0] . " " . $a[2]);
 		SIGNALduino_AddSendQueue($hash, $gets{$a[1]}[0] . $a[2]); 
 		$hash->{getcmd}->{cmd}=$a[1];
