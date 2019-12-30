@@ -905,10 +905,10 @@ sub SIGNALduino_Get($@) {
 
 	if (ref $gets{$a[1]} eq 'ARRAY') { # Option 1 
 		if ($a[2]) {
-			$hash->{logMethod}->($name, 5, "$name: Get, command for gets: " . $gets{$a[1]}[0] . " " . $a[2]);
+			$hash->{logMethod}->($name, 4, "$name: Get, command for gets: " . $gets{$a[1]}[0] . " " . $a[2]);
 			SIGNALduino_AddSendQueue($hash, $gets{$a[1]}[0] . $a[2]);
 		} else {
-			$hash->{logMethod}->($name, 5, "$name: Get, command for gets: " . $gets{$a[1]}[0]);
+			$hash->{logMethod}->($name, 4, "$name: Get, command for gets: " . $gets{$a[1]}[0]);
 			SIGNALduino_AddSendQueue($hash, $gets{$a[1]}[0]);
 		}
 		$hash->{getcmd}->{cmd}=$a[1];
@@ -1239,19 +1239,20 @@ sub SIGNALduino_Write($$$) {
 sub SIGNALduino_AddSendQueue($$) {
   my ($hash, $msg) = @_;
   my $name = $hash->{NAME};
-  
+
   push(@{$hash->{QUEUE}}, $msg);
-  
+
   #SIGNALduino_Log3 $hash , 5, Dumper($hash->{QUEUE});
-  
-  $hash->{logMethod}->($hash, 5,"$name: AddSendQueue, " . $hash->{NAME} . ": $msg (" . @{$hash->{QUEUE}} . ")");
-  InternalTimer(gettimeofday() + 0.1, "SIGNALduino_HandleWriteQueue", "HandleWriteQueue:$name") if (scalar @{$hash->{QUEUE}} == 1 && InternalVal($name,"sendworking",0));
+  $hash->{logMethod}->($hash, 4,"$name: AddSendQueue, " . $hash->{NAME} . ": $msg (" . @{$hash->{QUEUE}} . ")");
+  InternalTimer(gettimeofday() + 0.1, "SIGNALduino_HandleWriteQueue", "HandleWriteQueue:$name") if (scalar @{$hash->{QUEUE}} == 1 && InternalVal($name,"sendworking",0) == 0);
 }
 
 ###############################
 sub SIGNALduino_SendFromQueue($$) {
   my ($hash, $msg) = @_;
   my $name = $hash->{NAME};
+
+	$hash->{logMethod}->($name, 4, "$name: SendFromQueue, running");
   if($msg ne "") {
 	SIGNALduino_XmitLimitCheck($hash,$msg);
     #DevIo_SimpleWrite($hash, $msg . "\n", 2);
@@ -1284,14 +1285,15 @@ sub SIGNALduino_HandleWriteQueue($) {
   my $hash = $defs{$name};
   
   #my @arr = @{$hash->{QUEUE}};
-  
   $hash->{sendworking} = 0;       # es wurde gesendet
-  
+
   if (defined($hash->{getcmd}->{cmd}) && $hash->{getcmd}->{cmd} eq 'sendraw') {
     $hash->{logMethod}->($name, 4, "$name: HandleWriteQueue, sendraw no answer (timeout)");
     delete($hash->{getcmd});
   }
-	  
+
+	$hash->{logMethod}->($name, 4, "$name: HandleWriteQueue, running");
+
   if(exists($hash->{QUEUE}) && @{$hash->{QUEUE}}) {
     my $msg= shift(@{$hash->{QUEUE}});
 
