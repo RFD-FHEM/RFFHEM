@@ -1,16 +1,28 @@
 defmod test_get_availableFirmware UnitTest dummyDuino 
 (
  {
-	subtest 'Test get availableFirmware' => sub {
-		plan tests => 2;
+	subtest 'Test get availableFirmware - Dev initialized' => sub {
+		plan tests => 3;
 		$attr{$target}{updateChannelFW} = "stable";
 		$attr{$target}{hardware} = "0";
+		my $ret=InternalVal($target,"DevState",0);
+		note("after defmod ".$target." is initialized");
+		is($ret,"initialized","check Dev is initialized");
 		my $ret=SIGNALduino_Get($targetHash, $target, "availableFirmware");
 		like($ret,qr/.*get availableFirmware failed.*/,"check return contains failed");
-		
 		$attr{$target}{hardware} = "nano328";
 		$ret=SIGNALduino_Get($targetHash, $target, "availableFirmware");
 		is($ret,"availableFirmware: \n\nFetching stable firmware versions for nano328 from github\n","check return is fetching");
-	}; 
+	};
+
+	subtest 'Test get availableFirmware - Dev closed' => sub {
+		plan tests => 2;
+		note("after close ".$target." is closed");
+		$targetHash->{DevState} = 'closed';
+		my $ret=InternalVal($target,"DevState",0);
+		is($ret,"closed","check Dev is closed");
+		$ret=SIGNALduino_Get($targetHash, $target, "availableFirmware");
+		is($ret,"availableFirmware: \n\nFetching stable firmware versions for nano328 from github\n","check return is fetching");
+	};
 }
 )
