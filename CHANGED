@@ -1,15 +1,24 @@
-2019-12-30 - Dev r34 fix flash (#752)
+2019-12-31 - Dev r34 - fix get #750 (#753)
 
-* 00_SIGNALduino.pm
-Fixes #751 (fhem crash and not working flash command)
-2019-12-30 - 00_SIGNALduino.pm
-
-Fixes #751 (fhem crash and not working flash command)
-2019-12-29 - update.yml
-
-changed detection if a new controls file has been written to diff
-fix for workflow add files to index only if they are not already there
-2019-12-28  
+* Update 00_SIGNALduino.pm
+- rename wrong output (sub SIGNALduino_Set_raw)
+- fix sub SIGNALduino_AddSendQueue for https://github.com/RFD-FHEM/RFFHEM/issues/750
+- added logoutput for some "debugging"  (sub SIGNALduino_SendFromQueue & SIGNALduino_HandleWriteQueue)
+- revised logout sub SIGNALduino_Set_sendMsg to scheme
+- revised logout sub SIGNALduino_Set_MessageType to scheme
+- revised name SIGNALduino_Set_flash (SIGNALduino_set_flash -> SIGNALduino_Set_flash)
+- revised logout sub SIGNALduino_Set_flash to scheme
+- revised logout sub SIGNALduino_PrepareFlash to scheme
+- revised logout sub SIGNALduino_avrdude to scheme
+- fix PERL WARNING: Use of uninitialized value https://github.com/RFD-FHEM/RFFHEM/issues/750
+2019-12-31
+  00_SIGNALduino.pm: Fixes #750 (some get commands not work & WARNINGS)
+2019-12-30
+  00_SIGNALduino.pm: Fixes #751 (fhem crash and not working flash command)
+2019-12-29
+  update.yml: changed detection if a new controls file has been written to diff
+              fix for workflow add files to index only if they are not already there
+2019-12-28
   00_SIGNALduino.pm: 
    Moved code for cc1101 set commands into cc1101 package 
    Filtered possible set commands for dummy devices
