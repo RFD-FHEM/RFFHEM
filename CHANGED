@@ -1,3 +1,16 @@
+2019-12-31 - Dev r34 - fix get #750 (#753)
+
+* Update 00_SIGNALduino.pm
+- rename wrong output (sub SIGNALduino_Set_raw)
+- fix sub SIGNALduino_AddSendQueue for https://github.com/RFD-FHEM/RFFHEM/issues/750
+- added logoutput for some "debugging"  (sub SIGNALduino_SendFromQueue & SIGNALduino_HandleWriteQueue)
+- revised logout sub SIGNALduino_Set_sendMsg to scheme
+- revised logout sub SIGNALduino_Set_MessageType to scheme
+- revised name SIGNALduino_Set_flash (SIGNALduino_set_flash -> SIGNALduino_Set_flash)
+- revised logout sub SIGNALduino_Set_flash to scheme
+- revised logout sub SIGNALduino_PrepareFlash to scheme
+- revised logout sub SIGNALduino_avrdude to scheme
+- fix PERL WARNING: Use of uninitialized value https://github.com/RFD-FHEM/RFFHEM/issues/750
 2019-12-31
   00_SIGNALduino.pm: Fixes #750 (some get commands not work & WARNINGS)
 2019-12-30
