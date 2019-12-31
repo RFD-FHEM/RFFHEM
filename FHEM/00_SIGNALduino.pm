@@ -150,7 +150,7 @@ my %sets = (
   #Command name            [FhemWeb Argument type, code to run]
   "?"					=>	['', \&SIGNALduino_Set_FhemWebList ],
   "raw"    			   	=>	['textFieldNL',\&SIGNALduino_Set_raw ],
-  "flash"   		 	=> 	['textFieldNL', \&SIGNALduino_set_flash	],
+  "flash"   		 	=> 	['textFieldNL', \&SIGNALduino_Set_flash	],
   "reset"   			=> 	['noArg', \&SIGNALduino_Set_reset ],
   "close"     			=> 	['noArg', \&SIGNALduino_Set_close ],
   "enableMessagetype" 	=> 	['syncedMS,unsyncedMU,manchesterMC', \&SIGNALduino_Set_MessageType ],
@@ -529,11 +529,11 @@ sub SIGNALduino_avrdude($) {
 	if ($? != 0 )
 	{
 		readingsSingleUpdate($hash,"state","FIRMWARE UPDATE with error",1);    # processed in tests
-		$hash->{logMethod}->($name ,3, "$name: flash, ERROR: avrdude exited with error $?");
+		$hash->{logMethod}->($name ,3, "$name: avrdude, ERROR: avrdude exited with error $?");
 		FW_directNotify("FILTER=$name", "#FHEMWEB:WEB", "FW_okDialog('ERROR: avrdude exited with error, for details see last flashlog.')", "");
 		$hash->{FLASH_RESULT}="ERROR: avrdude exited with error";              # processed in tests
 	} else {
-		$hash->{logMethod}->($name ,3, "$name: flash, Firmware update was successfull");
+		$hash->{logMethod}->($name ,3, "$name: avrdude, Firmware update was successfull");
 		readingsSingleUpdate($hash,"state","FIRMWARE UPDATE successfull",1);   # processed in tests
 	}
 	 
@@ -577,7 +577,7 @@ sub SIGNALduino_PrepareFlash {
 			last;
 		}
 	}
-	$hash->{logMethod}->($name, 5, "$name: Set, avrdude found = $avrdudefound");
+	$hash->{logMethod}->($name, 5, "$name: PrepareFlash, avrdude found = $avrdudefound");
 	return "avrdude is not installed. Please provide avrdude tool example: sudo apt-get install avrdude" if($avrdudefound == 0);
 
 	$log .= "flashing Arduino $name\n";
@@ -591,14 +591,14 @@ sub SIGNALduino_PrepareFlash {
 	my $flashCommand = AttrVal($name,"flashCommand",$defaultflashCommand);
 		
 	if ($defaultflashCommand eq $flashCommand)	{
-		$hash->{logMethod}->($name, 5, "$name: Set, standard flashCommand is used to flash.");
+		$hash->{logMethod}->($name, 5, "$name: PrepareFlash, standard flashCommand is used to flash.");
 	} else {
-		$hash->{logMethod}->($name, 3, "$name: Set, custom flashCommand is manual defined! $flashCommand");
+		$hash->{logMethod}->($name, 3, "$name: PrepareFlash, custom flashCommand is manual defined! $flashCommand");
 	}
 		
 	DevIo_CloseDev($hash);
 	if ($hardware eq "radinoCC1101" && $^O eq 'linux') {
-		$hash->{logMethod}->($name, 3, "$name: Set, forcing special reset for $hardware on $port");
+		$hash->{logMethod}->($name, 3, "$name: PrepareFlash, forcing special reset for $hardware on $port");
 		# Mit dem Linux-Kommando 'stty' die Port-Einstellungen setzen
 		use IPC::Open3;
 
@@ -619,13 +619,13 @@ sub SIGNALduino_PrepareFlash {
 	  		$hash->{helper}{stty_output} = join(" ",@outlines).join(" ",@errlines);
 		}
 		$port =~ s/usb-Unknown_radino/usb-In-Circuit_radino/g;
-		$hash->{logMethod}->($name ,3, "$name: Set, changed usb port to \"$port\" for avrdude flashcommand compatible with radino");
+		$hash->{logMethod}->($name ,3, "$name: PrepareFlash, changed usb port to \"$port\" for avrdude flashcommand compatible with radino");
 	}
 	$hash->{helper}{avrdudecmd} = $flashCommand;
 	$hash->{helper}{avrdudecmd}=~ s/\Q[PORT]\E/$port/g;
 	$hash->{helper}{avrdudecmd} =~ s/\Q[HEXFILE]\E/$hexFile/g;
 	if ($hardware =~ "^nano" && $^O eq 'linux') {
-		$hash->{logMethod}->($name ,5, "$name: Set, try additional flash with baudrate 115200 for optiboot");
+		$hash->{logMethod}->($name ,5, "$name: PrepareFlash, try additional flash with baudrate 115200 for optiboot");
 		$hash->{helper}{avrdudecmd} = $hash->{helper}{avrdudecmd}." || ". $hash->{helper}{avrdudecmd}; 
 		$hash->{helper}{avrdudecmd} =~ s/\Q[BAUDRATE]\E/$baudrate/;
 		$baudrate=115200;
@@ -674,13 +674,13 @@ sub SIGNALduino_Set_FhemWebList {
 
 sub SIGNALduino_Set_raw {
 	my ($hash, @a) = @_;
-	$hash->{logMethod}->($hash->{NAME}, 4, "$hash->{NAME}: Set, ".join(" ",@a));
+	$hash->{logMethod}->($hash->{NAME}, 4, "$hash->{NAME}: Set_raw, ".join(" ",@a));
 	SIGNALduino_AddSendQueue($hash,$a[1]);
 	return undef;
 } 
 							
 ###############################
- sub SIGNALduino_set_flash {
+ sub SIGNALduino_Set_flash {
   	my ($hash, @a) = @_;
 	my $name = $hash->{NAME};
 	return "Please define your hardware! (attr $name hardware <model of your receiver>) " if (AttrVal($name,"hardware","") eq "");
@@ -698,9 +698,9 @@ sub SIGNALduino_Set_raw {
     my $hexFile = "";
 	if( grep $args[0] eq $_ , split(",",$hash->{additionalSets}{flash}) )
 	{
-		$hash->{logMethod}->($hash, 3, "$name: Set, flash $args[0] try to fetch github assets for tag $args[0]");
+		$hash->{logMethod}->($hash, 3, "$name: Set_flash, $args[0] try to fetch github assets for tag $args[0]");
 		my $ghurl = "https://api.github.com/repos/RFD-FHEM/SIGNALDuino/releases/tags/$args[0]";
-		$hash->{logMethod}->($hash, 3, "$name: Set, flash $args[0] try to fetch release $ghurl");
+		$hash->{logMethod}->($hash, 3, "$name: Set_flash, $args[0] try to fetch release $ghurl");
 		
 	    $http_param{url} 		= $ghurl;
         $http_param{callback}	= \&SIGNALduino_githubParseHttpResponse; 	# Diese Funktion soll das Ergebnis dieser HTTP Anfrage bearbeiten
@@ -717,7 +717,7 @@ sub SIGNALduino_Set_raw {
     } else {
       $hexFile = $args[0];
     }
-	$hash->{logMethod}->($name, 3, "$name: Set, filename $hexFile provided, trying to flash");
+	$hash->{logMethod}->($name, 3, "$name: Set_flash, filename $hexFile provided, trying to flash");
 	# Only for Arduino , not for ESP
 	if (AttrVal($name,"hardware","") =~ m/(?:nano|mini|radino)/)
 	{
@@ -736,11 +736,11 @@ sub SIGNALduino_Set_reset
 	delete($hash->{initResetFlag}) if defined($hash->{initResetFlag});
 	return SIGNALduino_ResetDevice($hash);
 }
-						   	
+
 ###############################
 sub SIGNALduino_Set_sendMsg {
 	my ($hash, @a) = @_;
-	$hash->{logMethod}->($hash->{NAME}, 5, "$hash->{NAME}: Set, sendmsg msg=$a[1]");
+	$hash->{logMethod}->($hash->{NAME}, 5, "$hash->{NAME}: Set_sendMsg, msg=$a[1]");
 								
 	# Split args in serval variables
 	my ($protocol,$data,$repeats,$clock,$frequency,$datalength,$dataishex);
@@ -799,7 +799,7 @@ sub SIGNALduino_Set_sendMsg {
 		}
 
 		$sendData = $intro . "SM;" . ($repeats > 0 ? "R=$repeats;" : "") . "C=$clock;D=$data;" . $outro . $frequency; #	SM;R=2;C=400;D=AFAFAF;
-		$hash->{logMethod}->($hash->{NAME}, 5, "$hash->{NAME}: Set, sendmsg Preparing manchester protocol=$protocol, repeats=$repeats, clock=$clock data=$data");
+		$hash->{logMethod}->($hash->{NAME}, 5, "$hash->{NAME}: Set_sendMsg, Preparing manchester protocol=$protocol, repeats=$repeats, clock=$clock data=$data");
 
 	} else {
 		if ($protocol == 3 || substr($data,0,2) eq "is") {
@@ -807,7 +807,7 @@ sub SIGNALduino_Set_sendMsg {
 				$data = substr($data,2);   # is am Anfang entfernen
 			}
 			$data = SIGNALduino_ITV1_tristateToBit($data);
-			$hash->{logMethod}->($hash->{NAME}, 5, "$hash->{NAME}: Set, sendmsg IT V1 convertet tristate to bits=$data");
+			$hash->{logMethod}->($hash->{NAME}, 5, "$hash->{NAME}: Set_sendMsg, IT V1 convertet tristate to bits=$data");
 		}
 		if (!defined($clock)) {
 			$hash->{ITClock} = 250 if (!defined($hash->{ITClock}));   # Todo: Klaeren wo ITClock verwendet wird und ob wir diesen Teil nicht auf Protokoll 3,4 und 17 minimieren
@@ -821,7 +821,7 @@ sub SIGNALduino_Set_sendMsg {
 	        my $blen = $hlen * 4;
 	        $data = unpack("B$blen", pack("H$hlen", $data));
 		}
-		$hash->{logMethod}->($hash->{NAME}, 5, "$hash->{NAME}: Set, sendmsg Preparing rawsend command for protocol=$protocol, repeats=$repeats, clock=$clock bits=$data");
+		$hash->{logMethod}->($hash->{NAME}, 5, "$hash->{NAME}: Set_sendMsg, Preparing rawsend command for protocol=$protocol, repeats=$repeats, clock=$clock bits=$data");
 		
 		foreach my $item (qw(preSync sync start one zero float pause end universal))
 		{
@@ -855,7 +855,7 @@ sub SIGNALduino_Set_sendMsg {
 		$sendData = "SR;R=$repeats;$pattern$SignalData;$frequency";
 	}
 	SIGNALduino_AddSendQueue($hash,$sendData);
-	$hash->{logMethod}->($hash->{NAME}, 4, "$hash->{NAME}: Set, sending via SendMsg: $sendData");
+	$hash->{logMethod}->($hash->{NAME}, 4, "$hash->{NAME}: Set_sendMsg, sending : $sendData");
 } 
 
 ###############################
@@ -876,11 +876,9 @@ sub SIGNALduino_Set_MessageType
 		$argm = 'CD' . substr($a[1],-1,1);
 	}
 	SIGNALduino_AddSendQueue($hash,$argm);
-	$hash->{logMethod}->($hash->{NAME}, 4, "$hash->{NAME}: Set, $a[0] $a[1] $argm");
+	$hash->{logMethod}->($hash->{NAME}, 4, "$hash->{NAME}: Set_MessageType, $a[0] $a[1] $argm");
 }
 
-					
-							
 ###############################
 sub SIGNALduino_Get($@) {
 	my ($hash, @a) = @_;
@@ -902,6 +900,7 @@ sub SIGNALduino_Get($@) {
 	}
 	  
 	if (ref $gets{$a[1]} eq 'ARRAY') { # Option 1 
+		$a[2] = "" if !($a[2]);
 		$hash->{logMethod}->($name, 5, "$name: Get, command for gets: " . $gets{$a[1]}[0] . " " . $a[2]);
 		SIGNALduino_AddSendQueue($hash, $gets{$a[1]}[0] . $a[2]); 
 		$hash->{getcmd}->{cmd}=$a[1];
@@ -1238,13 +1237,15 @@ sub SIGNALduino_AddSendQueue($$) {
   #SIGNALduino_Log3 $hash , 5, Dumper($hash->{QUEUE});
   
   $hash->{logMethod}->($hash, 5,"$name: AddSendQueue, " . $hash->{NAME} . ": $msg (" . @{$hash->{QUEUE}} . ")");
-  InternalTimer(gettimeofday() + 0.1, "SIGNALduino_HandleWriteQueue", "HandleWriteQueue:$name") if (scalar @{$hash->{QUEUE}} == 1 && InternalVal($name,"sendworking",0));
+  InternalTimer(gettimeofday() + 0.1, "SIGNALduino_HandleWriteQueue", "HandleWriteQueue:$name") if (scalar @{$hash->{QUEUE}} == 1 && InternalVal($name,"sendworking",0) == 0);
 }
 
 ###############################
 sub SIGNALduino_SendFromQueue($$) {
   my ($hash, $msg) = @_;
   my $name = $hash->{NAME};
+	
+	$hash->{logMethod}->($name, 4, "$name: SendFromQueue, called");
   if($msg ne "") {
 	SIGNALduino_XmitLimitCheck($hash,$msg);
     #DevIo_SimpleWrite($hash, $msg . "\n", 2);
@@ -1277,7 +1278,8 @@ sub SIGNALduino_HandleWriteQueue($) {
   my $hash = $defs{$name};
   
   #my @arr = @{$hash->{QUEUE}};
-  
+
+	$hash->{logMethod}->($name, 4, "$name: HandleWriteQueue, called");  
   $hash->{sendworking} = 0;       # es wurde gesendet
   
   if (defined($hash->{getcmd}->{cmd}) && $hash->{getcmd}->{cmd} eq 'sendraw') {
