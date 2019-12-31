@@ -1006,8 +1006,14 @@ sub SIGNALduino_parseResponse($$$) {
 sub SIGNALduino_ResetDevice($) {
 	my $hash = shift;
 	my $name = $hash->{NAME};
-	if (!defined($hash->{helper}{resetInProgress}))
-	{
+
+	if (InternalVal($name,"DeviceName","none") eq "none") { # for dummy device
+		$hash->{DevState} = "initialized";
+		readingsSingleUpdate($hash, "state", "opened", 1);
+		return;
+	}
+
+	if (!defined($hash->{helper}{resetInProgress})) {
 		my $hardware = AttrVal($name,"hardware","");
 		$hash->{logMethod}->($name, 3, "$name: ResetDevice, $hardware"); 
 		DevIo_CloseDev($hash);
