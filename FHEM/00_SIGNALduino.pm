@@ -879,15 +879,18 @@ sub SIGNALduino_Set_MessageType
 	$hash->{logMethod}->($hash->{NAME}, 4, "$hash->{NAME}: Set, $a[0] $a[1] $argm");
 }
 
-					
-							
 ###############################
 sub SIGNALduino_Get($@) {
 	my ($hash, @a) = @_;
 	my $type = $hash->{TYPE};
 	my $name = $hash->{NAME};
-	return "$name is not active, may firmware is not supported, please flash or reset" if (exists($hash->{DevState}) && $hash->{DevState} ne 'initialized');	
-		  
+
+	if (exists($hash->{DevState}) && $hash->{DevState} ne 'initialized') {
+		return $gets{$a[1]}->($hash,@a) if ($a[1] eq "availableFirmware");
+		return "Unknown argument $a[1], choose one of availableFirmware:noArg";
+		return "$name is not active, may firmware is not supported, please flash or reset" if ($a[0] ne "availableFirmware");
+	}
+
 	$hash->{logMethod}->($name, 5, "$name: Get, $type\" needs at least one parameter") if(@a < 2);
 	return "\"get $type\" needs at least one parameter" if(@a < 2);
 	if(!defined($gets{$a[1]})) {
