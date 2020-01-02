@@ -12,8 +12,9 @@ defmod test_reset_1 UnitTest dummyDuino
 	}	
 	
 	subtest 'reset without hardware parameter set' => sub {
-		plan tests => 2;
+		plan tests => 3;
 		$attr{$target}{dummy} = 0;
+		is (AttrVal($target, "dummy", 0),0,"check attrib dummy is 0");		
 		$attr{$target}{hardware} = "";
 		my $ret = SIGNALduino_Set($targetHash, $target, "reset" ,"");
 		is ($SD_connect->called_count,1,"check if SIGNALduino_Connect is called once");
