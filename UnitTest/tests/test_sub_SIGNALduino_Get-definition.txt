@@ -1,0 +1,186 @@
+defmod test_sub_SIGNALduino_Get UnitTest dummyDuino 
+(
+ {
+
+ 	use Test2::V0;
+	use Test2::Tools::Compare qw{    is like isnt unlike
+	    match mismatch validator
+	    hash array bag object meta number float rounded within string subset bool
+	    in_set not_in_set check_set
+	    item field call call_list call_hash prop check all_items all_keys all_vals all_values
+	    etc end filter_items
+	    T F D DNE FDNE E
+	    event fail_events
+	    exact_ref
+	};
+
+		
+	
+    my @mockData = (
+	    {
+			testname	=> "get version",
+			hasCC1101	=> 0,
+			input		=> "version",
+			check =>  array  {
+			    	item("V");
+			    	end();
+    			}
+	    },
+	    {
+			testname	=> "get freeram",
+			hasCC1101	=> 0,
+			input		=> "freeram",
+			check =>  array  {
+			    	item("R");
+			    	end();
+    			}
+	    },
+	    {
+			testname	=> "get uptime",
+			hasCC1101	=> 0,
+			input		=> "uptime",
+			check =>  array  {
+			    	item("t");
+			    	end();
+    			}
+	    },
+	    {
+			testname	=> "get ? ",
+			hasCC1101	=> 0,
+			input		=> "?",
+			check 		=>  array  {end(); },
+			return 		=> check_set match qr/^Unknown argument \?, choose one of.*/,!match qr/cc/
+	    },
+	    {
+			testname	=> "get ?",
+			hasCC1101	=> 1,
+			dummy		=> 0,
+			input		=> "?",
+			check 		=>  array  {end(); },
+			return 		=> check_set match qr/^Unknown argument \?, choose one of.*/,match qr/cc/
+	    },
+	    {
+			testname	=> "get ?",
+			hasCC1101	=> 1,
+			dummy		=> 1,
+			input		=> "?",
+			check 		=>  array  {end(); },
+			return 		=> check_set match qr/^Unknown argument \?, choose one of availableFirmware:noArg raw$/,!match qr/cc/
+	    },
+
+	    {
+			testname	=> "get ping ",
+			hasCC1101	=> 0,
+			input		=> "ping",
+			check =>  array  {
+			    	item("P");
+			    	end();
+    			}
+	    },
+	    {
+			testname	=> "get config ",
+			hasCC1101	=> 0,
+			input		=> "config",
+			check =>  array  {
+			    	item("CG");
+			    	end();
+    			}
+	    },
+	    {
+			testname	=> "get ccconf ",
+			hasCC1101	=> 1,
+			input		=> "ccconf",
+			check =>  array  {
+			    	item("C0DnF");
+			    	end();
+    			}
+	    },
+	    {
+			testname	=> "get ccconf ",
+			hasCC1101	=> 0,
+			input		=> "ccconf",
+			check =>  array  { end();	},
+    		return 		=> "This command is only available with a cc1101 receiver"
+	    },
+	    {
+			testname	=> "get ccreg ",
+			hasCC1101	=> 1,
+			input		=> "ccreg",
+			check =>  array  {
+			    	item("C");
+			    	end();
+    			}
+	    },
+	    {
+			testname	=> "get ccreg ",
+			hasCC1101	=> 0,
+			input		=> "ccreg",
+			check =>  array  { end();	},
+    		return 		=> "This command is only available with a cc1101 receiver"
+	    },
+	    {
+			testname	=> "get ccpatable ",
+			hasCC1101	=> 1,
+			input		=> "ccpatable",
+			check =>  array  {
+			    	item("C3E");
+			    	end();
+    			}
+	    },
+	    {
+			testname	=> "get ccpatable ",
+			hasCC1101	=> 0,
+			input		=> "ccpatable",
+			check =>  array  { end();	},
+    		return 		=> "This command is only available with a cc1101 receiver"
+			
+	    },
+
+    );
+
+	plan (scalar @mockData);	
+	my $todo=undef;
+	
+	foreach my $element (@mockData)
+	{
+		next if (!exists($element->{testname}));
+		$targetHash->{hasCC1101} = exists($element->{hasCC1101}) ? $element->{hasCC1101} : 0;
+		CommandAttr(undef,"$target dummy $element->{dummy}") if (exists($element->{dummy}));
+		
+		$targetHash->{hasCC1101} = exists($element->{hasCC1101}) ? $element->{hasCC1101} : 0;
+
+		$element->{pre_code}->() if (exists($element->{pre_code}));
+		$todo=$element->{todo}->() if (exists($element->{todo}));
+		
+		subtest "checking $element->{testname}". ($targetHash->{hasCC1101} ? " with cc1101" : " without cc1101") => sub {
+			plan (2);	
+			
+			my $ret = SIGNALduino_Get($targetHash,$target,split(" ",$element->{input}));
+			is($ret,$element->{return},"Verify return value");
+			is($targetHash->{QUEUE},$element->{check},"Verify expected queue element entrys", explain $targetHash->{QUEUE});
+
+			@{$targetHash->{QUEUE}}=();
+			
+		};
+		undef ($todo);
+		$element->{post_code}->() if (exists($element->{post_code}));
+	
+	};
+	
+	subtest 'Test get raw MS;P1=309;' => sub {
+		plan tests => 1;
+		my $mock = Mock::Sub->new;
+	 	my $SD_Parse = $mock->mock('SIGNALduino_Parse');
+		my $rawArg="MS;P1=309;";
+		my $ret=SIGNALduino_Get($targetHash, $target, "raw", $rawArg);
+		
+		if ($SD_Parse->called)
+		{
+			is( ($SD_Parse->called_with)[3], "\002".$rawArg."\003" , 'check if SIGNALduino_Parse was called' ) || diag(explain $SD_Parse);
+		} 
+		$SD_Parse->unmock;
+	}; 
+
+
+}
+)
