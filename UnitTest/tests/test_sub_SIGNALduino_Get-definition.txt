@@ -219,7 +219,7 @@ defmod test_sub_SIGNALduino_Get UnitTest dummyDuino
 	};
 	
 	subtest 'Test device with hardware attribute and dummy is 0' => sub {
-		plan tests => 3;
+		plan tests => 2;
 		subtest 'Test Attributes (hardware nano328)' => sub {
 			plan tests => 2;
 			$attr{$target}{dummy} = "0";
