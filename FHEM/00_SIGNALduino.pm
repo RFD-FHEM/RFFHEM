@@ -31,7 +31,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.4.2_dev_28.12",
+	SDUINO_VERSION            => "v3.4.2_dev_02.01",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -1011,10 +1011,17 @@ sub SIGNALduino_parseResponse($$$) {
 sub SIGNALduino_ResetDevice($) {
 	my $hash = shift;
 	my $name = $hash->{NAME};
-	if (!defined($hash->{helper}{resetInProgress}))
-	{
+
+	if (!defined($hash->{helper}{resetInProgress})) {
 		my $hardware = AttrVal($name,"hardware","");
 		$hash->{logMethod}->($name, 3, "$name: ResetDevice, $hardware"); 
+
+		if (IsDummy($name)) { # for dummy device
+			$hash->{DevState} = "initialized";
+			readingsSingleUpdate($hash, "state", "opened", 1);
+			return undef;
+		}
+
 		DevIo_CloseDev($hash);
 	 	if ($hardware eq "radinoCC1101" && $^O eq 'linux') {
 			# The reset is triggered when the Micro's virtual (CDC) serial / COM port is opened at 1200 baud and then closed.
