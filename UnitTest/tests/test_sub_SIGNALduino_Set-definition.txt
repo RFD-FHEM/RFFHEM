@@ -469,11 +469,64 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 			$RemoveInternalTimer->unmock;
 	};
 	
-	
-	
-	
-
+	subtest 'Test SIGNALduino without dummy attrib or value 0' => sub {
+		plan tests => 1;
+		subtest 'Test without hardware attribute' => sub {
+			plan tests => 2;
+			subtest 'Test Attributes (hardware undef)' => sub {
+				plan tests => 2;
+				$attr{$target}{dummy} = "0";
+				is(AttrVal($target, "dummy", 0),0,"check attrib dummy is 0");
+				CommandDeleteAttr($targetHash,"$target hardware") if (AttrVal($target, "hardware", undef));
+				delete($targetHash->{hasCC1101}) if ($targetHash->{hasCC1101});
+				is(AttrVal($target, "hardware", undef),undef,"check attrib hardware undef");
+			};
 		
+			subtest 'Test allowed - set commands' => sub {
+				my $ret=SIGNALduino_Set($targetHash, $target, "?");
+
+				my @tests = split(" ", substr($ret,index($ret,"one of")+7));
+				my $tests = scalar(@tests);
+				plan tests => $tests;
+
+				like($ret,qr/^Unknown argument \?, choose one .*close.*/,"check cmd close accepted");
+				like($ret,qr/^Unknown argument \?, choose one .*disableMessagetype.*/,"check cmd disableMessagetype accepted");
+				like($ret,qr/^Unknown argument \?, choose one .*enableMessagetype.*/,"check cmd enableMessagetype accepted");
+				like($ret,qr/^Unknown argument \?, choose one .*flash.*/,"check cmd flash accepted");
+				like($ret,qr/^Unknown argument \?, choose one .*raw.*/,"check cmd raw accepted");
+				like($ret,qr/^Unknown argument \?, choose one .*reset.*/,"check cmd reset accepted");
+				like($ret,qr/^Unknown argument \?, choose one .*sendMsg.*/,"check cmd sendMsg accepted");
+			};
+		};
+	};
+
+	subtest 'Test SIGNALduino with dummy attrib 1' => sub {
+		plan tests => 3;
+		subtest 'Test Attributes' => sub {
+			plan tests => 1;
+			$attr{$target}{dummy} = "1";
+			is(AttrVal($target, "dummy", 0),1,"check attrib dummy is 1");
+		};
+			
+		subtest 'Test allowed - set commands' => sub {
+			my $ret=SIGNALduino_Set($targetHash, $target, "?");
+			plan tests => 2;
+
+			like($ret,qr/^Unknown argument \?, choose one .*close.*/,"check cmd close accepted");
+			like($ret,qr/^Unknown argument \?, choose one .*reset.*/,"check cmd reset accepted");
+		};
+		
+		subtest 'Test not allowed - set commands' => sub {
+			plan tests => 6;
+			my $ret=SIGNALduino_Set($targetHash, $target, "?");
+
+			unlike($ret,qr/.*cc1101_.*/,"check cmd cc1101_.* not allowed");
+			unlike($ret,qr/.*disableMessagetype.*/,"check cmd disableMessagetype not allowed");
+			unlike($ret,qr/.*enableMessagetype.*/,"check cmd enableMessagetype not allowed");
+			unlike($ret,qr/.*flash.*/,"check cmd flash not allowed");
+			unlike($ret,qr/.*raw.*/,"check cmd raw not allowed");
+			unlike($ret,qr/.*sendMsg.*/,"check cmd sendMsg not allowed");
+		};
+	};
  }
 );
-    
