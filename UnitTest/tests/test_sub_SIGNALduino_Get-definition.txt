@@ -181,6 +181,91 @@ defmod test_sub_SIGNALduino_Get UnitTest dummyDuino
 		$SD_Parse->unmock;
 	}; 
 
+	subtest 'Test device with dummy attrib 1' => sub {
+		plan tests => 3;
 
+		subtest 'Test Attributes (hardware undef)' => sub {
+			plan tests => 2;
+			is(AttrVal($target, "dummy", 0),1,"check attrib dummy is 1");
+			delete $attr{$target}{hardware} if (AttrVal($target, "hardware", undef));
+			is(AttrVal($target, "hardware", undef),undef,"check attrib hardware undef");
+		};
+
+		subtest 'Test allowed - get commands' => sub {
+			my $rawArg="?";
+			my $ret=SIGNALduino_Get($targetHash, $target, "?", $rawArg);
+
+			my @tests = split(" ", substr($ret,index($ret,"one of")+7));
+			my $tests = scalar(@tests);
+			plan tests => $tests;
+
+			like($ret,qr/^Unknown argument \?, .*availableFirmware:noArg.*/,"check cmd availableFirmware accepted");
+			like($ret,qr/^Unknown argument \?, .*raw$/,"check cmd raw accepted");
+		};
+
+		subtest 'Test not allowed - get commands' => sub {
+			my $rawArg="?";
+			my $ret=SIGNALduino_Get($targetHash, $target, "?", $rawArg);
+			plan tests => 9;
+
+			unlike($ret,qr/.*ccconf.*/,"check cmd ccconf not allowed");
+			unlike($ret,qr/.*ccpatable.*/,"check cmd ccpatable not allowed");
+			unlike($ret,qr/.*ccreg.*/,"check cmd ccreg not allowed");
+			unlike($ret,qr/.*cmds.*/,"check cmd cmds not allowed");
+			unlike($ret,qr/.*config.*/,"check cmd config not allowed");
+			unlike($ret,qr/.*freeram.*/,"check cmd freeram not allowed");
+			unlike($ret,qr/.*ping.*/,"check cmd ping not allowed");
+			unlike($ret,qr/.*uptime.*/,"check cmd uptime not allowed");
+			unlike($ret,qr/.*version.*/,"check cmd version not allowed");
+		};
+	};
+	
+	subtest 'Test device with hardware attribute and dummy is 0' => sub {
+		plan tests => 3;
+		subtest 'Test Attributes (hardware nano328)' => sub {
+			plan tests => 2;
+			$attr{$target}{dummy} = "0";
+			$attr{$target}{hardware} = "nano328";
+			is(AttrVal($target, "dummy", 0),0,"check attrib dummy is 0");
+			is(AttrVal($target, "hardware", undef),"nano328","check attrib hardware set nano328");
+		};
+			
+		subtest 'Test allowed - set commands' => sub {
+			my $rawArg="?";
+			my $ret=SIGNALduino_Set($targetHash, $target, "?", $rawArg);
+
+			note("if a new command is developed, the test must be expanded --> otherwise error");
+			my @tests = split(" ", substr($ret,index($ret,"one of")+7));
+			my $tests = scalar(@tests);
+			plan tests => $tests;
+
+			like($ret,qr/^Unknown argument \?, choose one .*close.*/,"check cmd close accepted");
+			like($ret,qr/^Unknown argument \?, choose one .*disableMessagetype.*/,"check cmd disableMessagetype accepted");
+			like($ret,qr/^Unknown argument \?, choose one .*enableMessagetype.*/,"check cmd enableMessagetype accepted");
+			like($ret,qr/^Unknown argument \?, choose one .*flash.*/,"check cmd flash accepted");
+			like($ret,qr/^Unknown argument \?, choose one .*raw.*/,"check cmd raw accepted");
+			like($ret,qr/^Unknown argument \?, choose one .*reset.*/,"check cmd reset accepted");
+			like($ret,qr/^Unknown argument \?, choose one .*sendMsg.*/,"check cmd sendMsg accepted");
+		};
+			
+		subtest 'Test allowed - get commands' => sub {
+			my $rawArg="?";
+			my $ret=SIGNALduino_Get($targetHash, $target, "?", $rawArg);
+
+			note("if a new command is developed, the test must be expanded --> otherwise error");
+			my @tests = split(" ", substr($ret,index($ret,"one of")+7));
+			my $tests = scalar(@tests);
+			plan tests => $tests;
+
+			like($ret,qr/^Unknown argument \?, .*availableFirmware:noArg.*/,"check cmd availableFirmware accepted");
+			like($ret,qr/^Unknown argument \?, .*cmds.*/,"check cmd cmds accepted");
+			like($ret,qr/^Unknown argument \?, .*config.*/,"check cmd config accepted");
+			like($ret,qr/^Unknown argument \?, .*freeram.*/,"check cmd freeram accepted");
+			like($ret,qr/^Unknown argument \?, .*ping.*/,"check cmd ping accepted");
+			like($ret,qr/^Unknown argument \?, .*raw.*/,"check cmd raw accepted");
+			like($ret,qr/^Unknown argument \?, .*uptime.*/,"check cmd uptime accepted");
+			like($ret,qr/^Unknown argument \?, .*version.*/,"check cmd version accepted");
+		};
+	}
 }
 )
