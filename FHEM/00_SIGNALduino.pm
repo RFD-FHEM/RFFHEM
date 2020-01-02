@@ -1007,15 +1007,16 @@ sub SIGNALduino_ResetDevice($) {
 	my $hash = shift;
 	my $name = $hash->{NAME};
 
-	if (IsDummy($name)) { # for dummy device
-		$hash->{DevState} = "initialized";
-		readingsSingleUpdate($hash, "state", "opened", 1);
-		return;
-	}
-
 	if (!defined($hash->{helper}{resetInProgress})) {
 		my $hardware = AttrVal($name,"hardware","");
 		$hash->{logMethod}->($name, 3, "$name: ResetDevice, $hardware"); 
+
+		if (IsDummy($name)) { # for dummy device
+			$hash->{DevState} = "initialized";
+			readingsSingleUpdate($hash, "state", "opened", 1);
+			return undef;
+		}
+
 		DevIo_CloseDev($hash);
 	 	if ($hardware eq "radinoCC1101" && $^O eq 'linux') {
 			# The reset is triggered when the Micro's virtual (CDC) serial / COM port is opened at 1200 baud and then closed.
