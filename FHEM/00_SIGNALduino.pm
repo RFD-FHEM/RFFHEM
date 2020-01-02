@@ -31,7 +31,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.4.2_dev_28.12",
+	SDUINO_VERSION            => "v3.4.2_dev_02.01",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -1007,7 +1007,7 @@ sub SIGNALduino_ResetDevice($) {
 	my $hash = shift;
 	my $name = $hash->{NAME};
 
-	if (InternalVal($name,"DeviceName","none") eq "none") { # for dummy device
+	if (IsDummy($name)) { # for dummy device
 		$hash->{DevState} = "initialized";
 		readingsSingleUpdate($hash, "state", "opened", 1);
 		return;
