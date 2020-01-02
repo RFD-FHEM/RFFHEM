@@ -69,7 +69,7 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 			    	end();
     			};
 		    },
-		    return => "dummyDuino is not active, may firmware is not supported, please flash or reset"
+		    return => "$targetHash->{NAME} is not active, may firmware is not supported, please flash or reset"
 		},
 		
 		{	
