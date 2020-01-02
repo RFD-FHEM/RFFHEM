@@ -192,8 +192,7 @@ defmod test_sub_SIGNALduino_Get UnitTest dummyDuino
 		};
 
 		subtest 'Test allowed - get commands' => sub {
-			my $rawArg="?";
-			my $ret=SIGNALduino_Get($targetHash, $target, "?", $rawArg);
+			my $ret=SIGNALduino_Get($targetHash, $target, "?");
 
 			my @tests = split(" ", substr($ret,index($ret,"one of")+7));
 			my $tests = scalar(@tests);
@@ -204,8 +203,7 @@ defmod test_sub_SIGNALduino_Get UnitTest dummyDuino
 		};
 
 		subtest 'Test not allowed - get commands' => sub {
-			my $rawArg="?";
-			my $ret=SIGNALduino_Get($targetHash, $target, "?", $rawArg);
+			my $ret=SIGNALduino_Get($targetHash, $target, "?");
 			plan tests => 9;
 
 			unlike($ret,qr/.*ccconf.*/,"check cmd ccconf not allowed");
@@ -230,27 +228,8 @@ defmod test_sub_SIGNALduino_Get UnitTest dummyDuino
 			is(AttrVal($target, "hardware", undef),"nano328","check attrib hardware set nano328");
 		};
 			
-		subtest 'Test allowed - set commands' => sub {
-			my $rawArg="?";
-			my $ret=SIGNALduino_Set($targetHash, $target, "?", $rawArg);
-
-			note("if a new command is developed, the test must be expanded --> otherwise error");
-			my @tests = split(" ", substr($ret,index($ret,"one of")+7));
-			my $tests = scalar(@tests);
-			plan tests => $tests;
-
-			like($ret,qr/^Unknown argument \?, choose one .*close.*/,"check cmd close accepted");
-			like($ret,qr/^Unknown argument \?, choose one .*disableMessagetype.*/,"check cmd disableMessagetype accepted");
-			like($ret,qr/^Unknown argument \?, choose one .*enableMessagetype.*/,"check cmd enableMessagetype accepted");
-			like($ret,qr/^Unknown argument \?, choose one .*flash.*/,"check cmd flash accepted");
-			like($ret,qr/^Unknown argument \?, choose one .*raw.*/,"check cmd raw accepted");
-			like($ret,qr/^Unknown argument \?, choose one .*reset.*/,"check cmd reset accepted");
-			like($ret,qr/^Unknown argument \?, choose one .*sendMsg.*/,"check cmd sendMsg accepted");
-		};
-			
 		subtest 'Test allowed - get commands' => sub {
-			my $rawArg="?";
-			my $ret=SIGNALduino_Get($targetHash, $target, "?", $rawArg);
+			my $ret=SIGNALduino_Get($targetHash, $target, "?");
 
 			note("if a new command is developed, the test must be expanded --> otherwise error");
 			my @tests = split(" ", substr($ret,index($ret,"one of")+7));
