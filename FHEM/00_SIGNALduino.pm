@@ -634,11 +634,11 @@ sub SIGNALduino_Set($$@) {
 sub SIGNALduino_Set_FhemWebList { 
 	my ($hash, @a) = @_;
 	my @cList = sort map { "$_:@{$sets{$_}}[0]" }	grep { 
-		($_ !~/^\?$/ && 
+		($_ ne "?" && 
 			(
-				(IsDummy($hash->{NAME}) && $_ =~ m/^(?:close|reset)/) ||
+				(IsDummy($hash->{NAME}) && $_ =~ m/^(?:close|reset)/) || 
 				( InternalVal($hash->{NAME},"hasCC1101",0) || (!InternalVal($hash->{NAME},"hasCC1101",0) && $_ !~ /^cc/)) &&  
-				( defined(DevIo_IsOpen($hash)) ||  $_ =~ m/^(?:flash|reset)/  )
+				( !IsDummy($hash->{NAME}) && (defined(DevIo_IsOpen($hash)) || $_ =~ m/^(?:flash|reset)/)  ) 
 			)
 		)	 
 	}  keys %sets;
@@ -889,7 +889,7 @@ sub SIGNALduino_Get_FhemWebList {
 			( 
 				(IsDummy($hash->{NAME}) && $_ =~ m/^(?:availableFirmware|raw)/) || 
 				( InternalVal($hash->{NAME},"hasCC1101",0) || (!InternalVal($hash->{NAME},"hasCC1101",0) && $_ !~ /^cc/)) &&  
-				( defined(DevIo_IsOpen($hash)) ||  $_ =~ m/^(?:availableFirmware|raw)/  ) 
+				( !IsDummy($hash->{NAME}) && (defined(DevIo_IsOpen($hash))  ||  $_ =~ m/^(?:availableFirmware|raw)/  )) 
 			) 
 		) 
 	}  keys %gets;

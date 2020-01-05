@@ -360,8 +360,8 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 		    return => check_set match qr/^Unknown argument \?, choose one of.*/,!match qr/cc/
 		},
 		{
-			hasCC1101 => 1,
-			dummy => 0,
+			hasCC1101 	=> 1,
+			dummy 		=> 0,
 			DIODev		=> 1,
 			testname=>  "set ? command",
 			input	=>	"?",
@@ -533,7 +533,7 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 			plan(6);
 
 			unlike($ret,qr/.*cc1101_.*/,"check cmd cc1101_.* not allowed");
-			unlike($ret,qr/.*disableMessagetype.*/,"check cmd disableMessagetype not allowed",$ret);
+			unlike($ret,qr/.*disableMessagetype.*/,"check cmd disableMessagetype not allowed");
 			unlike($ret,qr/.*enableMessagetype.*/,"check cmd enableMessagetype not allowed");
 			unlike($ret,qr/.*flash.*/,"check cmd flash not allowed");
 			unlike($ret,qr/.*raw.*/,"check cmd raw not allowed");
