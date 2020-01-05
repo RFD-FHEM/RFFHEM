@@ -31,7 +31,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.4.2_dev_02.01",
+	SDUINO_VERSION            => "v3.4.2_dev_05.01",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -621,7 +621,7 @@ sub SIGNALduino_Set($$@) {
 		return "Unknown argument $a[0], choose one of supported commands"; 	
 	}
 	my $rcode=undef;  
-	if ( ($hash->{DevState} eq "initialized" || $a[0] eq "?" || $a[0] eq 'reset'|| $a[0] eq 'flash') && ref @{$sets{$a[0]}}[1] eq "CODE") { #
+	if ( ( (exists($hash->{DevState}) && $hash->{DevState} eq "initialized") || $a[0] eq "?" || $a[0] eq 'reset'|| $a[0] eq 'flash') && ref @{$sets{$a[0]}}[1] eq "CODE") { #Todo uninitalized value
     	$rcode= @{$sets{$a[0]}}[1]->($hash,@a); 
 	} elsif ($hash->{DevState} ne "initialized") {
 	  	$rcode= "$name is not active, may firmware is not supported, please flash or reset";
@@ -966,7 +966,7 @@ sub SIGNALduino_GetResponseUpdateReading
 sub SIGNALduino_CheckUptimeResponse
 {
     my $msg = sprintf("%d %02d:%02d:%02d", $_[1]/86400, ($_[1]%86400)/3600, ($_[1]%3600)/60, $_[1]%60);
-	readingsSingleUpdate($_[0], $_[0]->{getcmd}->{cmd}, $msg, 0);    	
+	#readingsSingleUpdate($_[0], $_[0]->{getcmd}->{cmd}, $msg, 0);    	
 	return ($msg,0);
 }
 
@@ -1059,7 +1059,7 @@ sub SIGNALduino_CheckCcregResponse
 
 ###############################
 ### Unused ###
-sub SIGNALduino_CheckSendrawResponse
+sub SIGNALduino_CheckSendRawResponse
 {
 	my $hash = shift;
 	my $msg = shift;
@@ -1267,13 +1267,18 @@ sub SIGNALduino_CheckVersionResp
 	my ($hash,$msg) = @_;
 	my $name = $hash->{NAME};
 	
-	if (exists($hash->{DevState}) && $hash->{DevState} eq 'waitInit') {
-		RemoveInternalTimer($hash);
-	}
-
+	
 	### ToDo, manchmal kommen Mu Nachrichten in $msg und somit ist keine Version feststellbar !!!
-	$msg =~ m/($gets{$hash->{getcmd}->{cmd}}[4])/;
-	$hash->{version} = $1;
+	if (defined($msg)) {
+		$hash->{logMethod}->($hash, 5, "$name: CheckVersionResp, called with $msg");
+		$msg =~ m/($gets{$hash->{getcmd}->{cmd}}[4])/;
+		$hash->{version} = $1;
+	} else {
+		$hash->{logMethod}->($hash, 5, "$name: CheckVersionResp, called without msg");
+		# Aufruf durch Timeout!
+		$msg="undef";
+		delete($hash->{getcmd});
+	}
 	
 	if (!defined($hash->{version}) ) {
 		$msg = "$name: CheckVersionResp, Not an SIGNALduino device, got for V: $msg";
@@ -1289,6 +1294,10 @@ sub SIGNALduino_CheckVersionResp
 		$hash->{DevState} = 'INACTIVE';
 		SIGNALduino_CloseDevice($hash);
 	} else {
+		if (exists($hash->{DevState}) && $hash->{DevState} eq 'waitInit') {
+			RemoveInternalTimer($hash);
+		}
+
 		readingsSingleUpdate($hash, "state", "opened", 1);
 		$hash->{logMethod}->($name, 2, "$name: CheckVersionResp, initialized " . SDUINO_VERSION);
 		$hash->{DevState} = 'initialized';
@@ -1595,13 +1604,15 @@ sub SIGNALduino_Read($) {
 			{
 				($returnMessage,$event) = $hash->{getcmd}->{responseSub}->($hash,$rmsg) ;
 				readingsSingleUpdate($hash, $hash->{getcmd}->{cmd}, $returnMessage, $event) if (defined($returnMessage) && defined($event));    	
+				if (exists($hash->{getcmd}->{asyncOut})) {
+					$hash->{logMethod}->($name, 5, "$name: Read, try ascyOutput of message $returnMessage");
+					my $ao = asyncOutput( $hash->{getcmd}->{asyncOut}, $hash->{getcmd}->{cmd}.": " . $returnMessage ) if (defined($returnMessage)); 
+					$hash->{logMethod}->($name, 5, "$name: Read, ascyOutput failed $ao") if ($ao);
+					
+				}
+				delete($hash->{getcmd});
 			}
-			if (exists($hash->{getcmd}->{asyncOut})) {
-				my $ao = asyncOutput( $hash->{getcmd}->{asyncOut}, $hash->{getcmd}->{cmd}.": " . $returnMessage ) if (defined($returnMessage)); 
-			}
-			delete($hash->{getcmd});
 
-			
 			if (exists($hash->{keepalive})) {
 				$hash->{keepalive}{ok}    = 1;
 				$hash->{keepalive}{retry} = 0;

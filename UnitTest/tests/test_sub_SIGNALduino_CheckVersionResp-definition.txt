@@ -43,7 +43,7 @@ defmod test_sub_SIGNALduino_CheckVersionResp UnitTest dummyDuino (
 		$hash->{getcmd}->{cmd} = "version";
 		# Simulate timeout behaviour
 		my ($ret,undef)=SIGNALduino_CheckVersionResp($targetHash);
-		like($ret,qr/^$target: CheckVersionResp, Not an SIGNALduino device, got for V: $/,"check return message");
+		like($ret,qr/^$target: CheckVersionResp, Not an SIGNALduino device, got for V: undef$/,"check return message");
 	}; 
 	
 }
