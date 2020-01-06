@@ -12,7 +12,9 @@ defmod test_reset_1 UnitTest dummyDuino
 	}	
 	
 	subtest 'reset without hardware parameter set' => sub {
-		plan tests => 2;
+		plan tests => 3;
+		$attr{$target}{dummy} = 0;
+		is (AttrVal($target, "dummy", 0),0,"check attrib dummy is 0");		
 		$attr{$target}{hardware} = "";
 		my $ret = SIGNALduino_Set($targetHash, $target, "reset" ,"");
 		is ($SD_connect->called_count,1,"check if SIGNALduino_Connect is called once");
@@ -65,9 +67,18 @@ defmod test_reset_1 UnitTest dummyDuino
 		$IntTimer->unmock;
 		
 		is ($targetHash->{helper}{resetInProgress},undef,"check reset in progress flag deleted");
-	}; 
-    CommandDefMod(undef,"$target $targetHash->{TYPE} $targetHash->{DEF}");
+	};
 
+	subtest 'reset for dummy device' => sub {
+		plan tests => 3;
+		$attr{$target}{dummy} = 1;
+		is (AttrVal($target, "dummy", 0),1,"check dummy attrib dummy is 1");
+		is (ReadingsVal($target,"state",""),"disconnected","check dummy state disconnected");
+		
+		SIGNALduino_ResetDevice($targetHash);
+		is (ReadingsVal($target,"state",""),"opened","check dummy state opened");
+	};
 
+   CommandDefMod(undef,"$target $targetHash->{TYPE} $targetHash->{DEF}");
 }
 )

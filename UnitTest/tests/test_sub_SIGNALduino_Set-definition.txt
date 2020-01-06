@@ -59,6 +59,19 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
     			};
 		    }
 		},
+		{
+			testname	=> "set enableMessagetype MU (inactive device)",
+			input		=> "enableMessagetype MU",
+			pre_code 	=> sub { $targetHash->{DevState} = 'disconnected' },
+			post_code	=> sub { $targetHash->{DevState} = 'initialized' },
+			check =>  sub { 
+			    return array  {
+			    	end();
+    			};
+		    },
+		    return => "$targetHash->{NAME} is not active, may firmware is not supported, please flash or reset"
+		},
+		
 		{	
     		hasCC1101 => 1,
 			testname=>  "set freq 868",
@@ -112,7 +125,8 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 		    return => "This command is only available with a cc1101 receiver"
 		},
 		{	
-			pre_code => sub { $targetHash->{cc1101_frequency} = "868" ; },
+			pre_code => sub { CommandAttr(undef,"$target cc1101_frequency 868") ; },
+			post_code => sub { CommandDeleteAttr(undef,"$target cc1101_frequency") ; },
 
     		hasCC1101 => 1,
 			testname =>  "set freq (defaults to 868)",
@@ -127,8 +141,6 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 			    	end();
     			};
 		    },
-		    todo => sub { return todo("seems to be a bug in implementation"); }
-		    
 		},
 
 		{
@@ -280,54 +292,50 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 		},
 		{
     		hasCC1101 => 1,
-			testname=>  "set cc1101_regSet 0D23 0B22",
-			input	=>	"regSet 0D23 0B22",
+			testname=>  "set cc1101_reg 0D23 2E22",
+			input	=>	"cc1101_reg 0D23 2E22",
 			check =>  sub { 
 			    return array  {
-			    	item 'W0D23';
-			    	item 'W0D22';
+			    	item 'W0F23';
+			    	item 'W3022';
+			    	item 'WS36';
+			    	item 'WS34';
 			    	end();
     			};
 		    },
-		    todo => sub { return todo("this command isn't implemented"); }
 		},
 		{
     		hasCC1101	=> 1,
-			dummy		=> 1,
-			testname	=> "set cc1101_regSet 0D23 0B22",
-			input		=> "regSet 0D23 0B22",
+			testname	=> "set cc1101_reg 0D23 3F55 (wrong register)",
+			input		=> "cc1101_reg 0D23 3F55",
 			check 		=> sub { 
 			    return array  {
-			    	item 'W0D23';
-			    	item 'W0D22';
 			    	end();
     			};
 		    },
-		    return => "This command is not available for dummies",
-		    todo => sub { return todo("this command isn't implemented"); }
+		    return => match qr/^ERROR: unknown register position/,
 		},
 		{
     		hasCC1101 => 0,
-			testname=>  "set cc1101_regSet 0D23 0B22",
-			input	=>	"regSet 0D23 0B22",
+			testname=>  "set cc1101_reg 0D23 0B22",
+			input	=>	"cc1101_reg 0D23 0B22",
 			check =>  sub { 
 			    return array  {
 			    	end();
     			};
 		    },
 		    return => "This command is only available with a cc1101 receiver",
-		    todo => sub { return todo("this command isn't implemented"); }
 		},
 		{
     		hasCC1101 => 1,
-			testname=>  "set cc1101_regSet AP23 FF22 (wrong register)",
-			input	=>	"regSet AP23 FF22",
+			testname=>  "set cc1101_regSet AP23 FF22 (wrong register, nonhex)",
+			input	=>	"cc1101_reg AP23 FF22",
 			check =>  sub { 
 			    return array  {
 			    	end();
     			};
 		    },
-		    todo => sub { return todo("this command isn't implemented"); }
+		    return =>  match qr/^ERROR: wrong parameter value AP23/
 		},
 		{
 			testname=>  "set bad command",
@@ -353,6 +361,7 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 		},
 		{
 			hasCC1101 => 1,
+			dummy => 0,
 			testname=>  "set ? command",
 			input	=>	"?",
 			check =>  sub { 
@@ -363,10 +372,11 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 		    return => check_set match qr/^Unknown argument \?, choose one of.*/,match qr/cc/
 		},
 		{
-			testname=>  "set ? command for dummy",
+			testname	=>  "set ? command for dummy",
+			dummy 		=> 1,
 			hasCC1101 => 0,
-			input	=>	"?",
-			check =>  sub { 
+			input		=>	"?",
+			check 		=>  sub { 
 			    return array  {
 			    	end();
     			};
@@ -375,6 +385,7 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 		},
 		{
 			testname	=>  "set ? command for dummy",
+			dummy 		=> 1,
 			hasCC1101 	=> 1,
 			check =>  sub { 
 			    return array  {
@@ -382,9 +393,35 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
     			};
 		    },
 			input		=>	"?",
-		    todo 		=> sub { return todo("dummy gets currently all set commands"); },
-		    return 		=> check_set match qr/close/,match qr/reset/,match qr/cc/
-		}
+		    return 		=> check_set match qr/close/,match qr/reset/,!match qr/cc/
+		},
+		{
+			testname	=>  "set ? command for inactive device",
+			hasCC1101 	=> 1,
+			pre_code 	=> sub { $targetHash->{DevState} = 'disconnected' },
+			post_code	=> sub { $targetHash->{DevState} = 'initialized' },
+			check =>  sub { 
+			    return array  {
+			    	end();
+    			};
+		    },
+			input		=>	"?",
+		    return 		=> check_set match qr/close/,match qr/reset/,!match qr/cc/
+		},
+		{
+			testname	=>  "set reset command for inactive device",
+			hasCC1101 	=> 1,
+			dummy 		=> 1,
+			pre_code 	=> sub { $targetHash->{DevState} = 'disconnected' },
+			post_code	=> sub { $targetHash->{DevState} = 'initialized' },
+			check =>  sub { 
+			    return array  {
+			    	end();
+    			};
+		    },
+			input		=>	"reset",
+		},
+		
 	);
 
 	plan (scalar @mockData);	
@@ -393,6 +430,9 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 	foreach my $element (@mockData)
 	{
 		next if (!exists($element->{testname}));
+		$targetHash->{hasCC1101} = exists($element->{hasCC1101}) ? $element->{hasCC1101} : 0;
+		CommandAttr(undef,"$target dummy $element->{dummy}") if (exists($element->{dummy}));
+		
 		$targetHash->{hasCC1101} = exists($element->{hasCC1101}) ? $element->{hasCC1101} : 0;
 
 		$element->{pre_code}->() if (exists($element->{pre_code}));
@@ -409,6 +449,7 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 			
 		};
 		undef ($todo);
+		$element->{post_code}->() if (exists($element->{post_code}));
 	
 	};
 	
@@ -428,11 +469,64 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 			$RemoveInternalTimer->unmock;
 	};
 	
-	
-	
-	
-
+	subtest 'Test SIGNALduino without dummy attrib or value 0' => sub {
+		plan tests => 1;
+		subtest 'Test without hardware attribute' => sub {
+			plan tests => 2;
+			subtest 'Test Attributes (hardware undef)' => sub {
+				plan tests => 2;
+				$attr{$target}{dummy} = "0";
+				is(AttrVal($target, "dummy", 0),0,"check attrib dummy is 0");
+				CommandDeleteAttr($targetHash,"$target hardware") if (AttrVal($target, "hardware", undef));
+				delete($targetHash->{hasCC1101}) if ($targetHash->{hasCC1101});
+				is(AttrVal($target, "hardware", undef),undef,"check attrib hardware undef");
+			};
 		
+			subtest 'Test allowed - set commands' => sub {
+				my $ret=SIGNALduino_Set($targetHash, $target, "?");
+
+				my @tests = split(" ", substr($ret,index($ret,"one of")+7));
+				my $tests = scalar(@tests);
+				plan tests => $tests;
+
+				like($ret,qr/^Unknown argument \?, choose one .*close.*/,"check cmd close accepted");
+				like($ret,qr/^Unknown argument \?, choose one .*disableMessagetype.*/,"check cmd disableMessagetype accepted");
+				like($ret,qr/^Unknown argument \?, choose one .*enableMessagetype.*/,"check cmd enableMessagetype accepted");
+				like($ret,qr/^Unknown argument \?, choose one .*flash.*/,"check cmd flash accepted");
+				like($ret,qr/^Unknown argument \?, choose one .*raw.*/,"check cmd raw accepted");
+				like($ret,qr/^Unknown argument \?, choose one .*reset.*/,"check cmd reset accepted");
+				like($ret,qr/^Unknown argument \?, choose one .*sendMsg.*/,"check cmd sendMsg accepted");
+			};
+		};
+	};
+
+	subtest 'Test SIGNALduino with dummy attrib 1' => sub {
+		plan tests => 3;
+		subtest 'Test Attributes' => sub {
+			plan tests => 1;
+			$attr{$target}{dummy} = "1";
+			is(AttrVal($target, "dummy", 0),1,"check attrib dummy is 1");
+		};
+			
+		subtest 'Test allowed - set commands' => sub {
+			my $ret=SIGNALduino_Set($targetHash, $target, "?");
+			plan tests => 2;
+
+			like($ret,qr/^Unknown argument \?, choose one .*close.*/,"check cmd close accepted");
+			like($ret,qr/^Unknown argument \?, choose one .*reset.*/,"check cmd reset accepted");
+		};
+		
+		subtest 'Test not allowed - set commands' => sub {
+			plan tests => 6;
+			my $ret=SIGNALduino_Set($targetHash, $target, "?");
+
+			unlike($ret,qr/.*cc1101_.*/,"check cmd cc1101_.* not allowed");
+			unlike($ret,qr/.*disableMessagetype.*/,"check cmd disableMessagetype not allowed");
+			unlike($ret,qr/.*enableMessagetype.*/,"check cmd enableMessagetype not allowed");
+			unlike($ret,qr/.*flash.*/,"check cmd flash not allowed");
+			unlike($ret,qr/.*raw.*/,"check cmd raw not allowed");
+			unlike($ret,qr/.*sendMsg.*/,"check cmd sendMsg not allowed");
+		};
+	};
  }
 );
-    

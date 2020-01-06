@@ -1,6 +1,11 @@
 defmod test_firmware_flash_1 UnitTest dummyDuino 
 (
  {
+ 
+  	use Test2::V0;
+	use Test2::Tools::Compare qw{  is like isnt unlike };
+ 
+ 
 	my $mock;
     my $system_call;
     my $OpenDev;
@@ -51,19 +56,19 @@ defmod test_firmware_flash_1 UnitTest dummyDuino
 		$IntTimer->unmock;
 		
 		ok($called_args[0] > gettimeofday(), "check arg 1 InternalTimer is called ");		
-		is($called_args[1], "SIGNALduino_flash", "check arg 2 InternalTimer is called ");		
+		is($called_args[1], "SIGNALduino_avrdude", "check arg 2 InternalTimer is called ");		
 		is($called_args[2], $target, "check arg 3 InternalTimer is called ");	
 		
 		$preparedavrdudecmd = $targetHash->{helper}{avrdudecmd};	
 	}; 
 	
-	subtest 'SIGNALduino_flash called not installed avrdude (nano328)' => sub {
+	subtest 'SIGNALduino_avrdude called not installed avrdude (nano328)' => sub {
 		plan tests => 12;
 		$attr{$target}{hardware} ="nano328";
 		$OpenDev->remock;
 		
 		$targetHash->{helper}{stty_pid} = "999494";	
-		my $ret = SIGNALduino_flash($target);
+		my $ret = SIGNALduino_avrdude($target);
 		
 		is($ret, "ERROR: avrdude exited with error", "check return value");		
 		is($targetHash->{FLASH_RESULT},$ret, "check internal value");		
@@ -76,7 +81,7 @@ defmod test_firmware_flash_1 UnitTest dummyDuino
 		$targetHash->{helper}{avrdudecmd} = $preparedavrdudecmd;	
 
 		CommandAttr(undef,"global logdir ./jiddsidio/log/");
-		$ret = SIGNALduino_flash($target);
+		$ret = SIGNALduino_avrdude($target);
 		
 		is($ret, "WARNING: avrdude created no log file", "check return value");		
 		is($targetHash->{FLASH_RESULT},$ret, "check internal value");		
@@ -91,13 +96,13 @@ defmod test_firmware_flash_1 UnitTest dummyDuino
 	}; 
 
 	
-	subtest 'SIGNALduino_flash called installed avrdude (nano328)' => sub {
+	subtest 'SIGNALduino_avrdude called installed avrdude (nano328)' => sub {
 		plan tests => 4;
 		$attr{$target}{hardware} ="nano328";
 		$OpenDev->remock;
 		$targetHash->{FLASH_RESULT} = "some dummy message";
 		$ENV{'PATH'}="/opt/fhem/contrib";
-		my $ret = SIGNALduino_flash($target);
+		my $ret = SIGNALduino_avrdude($target);
 		$ENV{'PATH'}=$path;
 		
 		is($ret, undef, "check return value");		
@@ -120,9 +125,9 @@ defmod test_firmware_flash_1 UnitTest dummyDuino
 		is($IntTimer->called_count, 1, "check if InternalTimer is called once");		
 		my @called_args=$IntTimer->called_with;
 
-		like($targetHash->{helper}{stty_output},'/^open3: exec of stty -F none ospeed 1200 ispeed 1200 failed/m',"check if stty was called");
+		like($targetHash->{helper}{stty_output},qr/^open3: exec of stty -F none ospeed 1200 ispeed 1200 failed/m,"check if stty was called");
 		ok($called_args[0] > gettimeofday(), "check arg 1 InternalTimer is called ");		
-		is($called_args[1], "SIGNALduino_flash", "check arg 2 InternalTimer is called ");		
+		is($called_args[1], "SIGNALduino_avrdude", "check arg 2 InternalTimer is called ");		
 		is($called_args[2], $target, "check arg 3 InternalTimer is called ");		
 		is($targetHash->{helper}{avrdudecmd},'avrdude -c avr109 -b 57600 -P none -p atmega32u4 -vv -D -U flash:w:./fhem/test.hex 2>[LOGFILE]',"check avrdude cmd");
 		
