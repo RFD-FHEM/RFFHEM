@@ -31,7 +31,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.4.2_dev_05.01",
+	SDUINO_VERSION            => "v3.4.2_dev_06.01",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -636,8 +636,8 @@ sub SIGNALduino_Set_FhemWebList {
 	my @cList = sort map { "$_:@{$sets{$_}}[0]" }	grep { 
 		($_ ne "?" && 
 			(
-				(IsDummy($hash->{NAME}) && $_ =~ m/^(?:close|reset)/) || 
-				( InternalVal($hash->{NAME},"hasCC1101",0) || (!InternalVal($hash->{NAME},"hasCC1101",0) && $_ !~ /^cc/)) &&  
+				( IsDummy($hash->{NAME}) && $_ =~ m/^(?:close|reset)/ ) || 
+				( InternalVal($hash->{NAME},"hasCC1101",0) || (!InternalVal($hash->{NAME},"hasCC1101",0) && $_ !~ /^cc/)) &&
 				( !IsDummy($hash->{NAME}) && (defined(DevIo_IsOpen($hash)) || $_ =~ m/^(?:flash|reset)/)  ) 
 			)
 		)	 
@@ -1035,24 +1035,23 @@ sub SIGNALduino_CheckCcregResponse
 	my $msg = shift;
 	my $name=$hash->{NAME};
 
-	$msg =~ s/\s\sccreg/\\nccreg/g;
+	$msg =~ s/\s\sccreg/\nccreg/g;
+	$msg =~ s/ccreg\s\d0:\s//g;
+	#my $registerstring = $msg;
+	#$registerstring =~ s/\\n/ /g;
 
-	my $registerstring = $msg;
-	$registerstring =~ s/ccreg\s\d0:\s//g;
-	$registerstring =~ s/\\n/ /g;
+	my @ccreg = split(/\s/,$msg);
 
-	my @ccreg = split(/\s/,$registerstring);
-
-	$msg.= "\\n\\n";
-	$msg.= "Configuration Register Detail (address, name, value):\\n";
+	$msg.= "\n\n";
+	$msg.= "Configuration Register Detail (address, name, value):\n";
 
 	my $reg_idx = 0;
 	foreach my $key (sort keys %cc1101_register) {
-		$msg.= "0x".$key." ".$cc1101_register{$key}. " - 0x".$ccreg[$reg_idx]."\\n";
+		$msg.= "0x".$key." ".$cc1101_register{$key}. " - 0x".$ccreg[$reg_idx]."\n";
 		$reg_idx++;
 	}
 	#$hash->{uC_cmds} = $msg;
-	return ($msg,undef);
+	return ("\n".$msg,undef);
 }
 
 
@@ -1605,9 +1604,9 @@ sub SIGNALduino_Read($) {
 				($returnMessage,$event) = $hash->{getcmd}->{responseSub}->($hash,$rmsg) ;
 				readingsSingleUpdate($hash, $hash->{getcmd}->{cmd}, $returnMessage, $event) if (defined($returnMessage) && defined($event));    	
 				if (exists($hash->{getcmd}->{asyncOut})) {
-					$hash->{logMethod}->($name, 5, "$name: Read, try ascyOutput of message $returnMessage");
+					$hash->{logMethod}->($name, 5, "$name: Read, try asyncOutput of message $returnMessage");
 					my $ao = asyncOutput( $hash->{getcmd}->{asyncOut}, $hash->{getcmd}->{cmd}.": " . $returnMessage ) if (defined($returnMessage)); 
-					$hash->{logMethod}->($name, 5, "$name: Read, ascyOutput failed $ao") if ($ao);
+					$hash->{logMethod}->($name, 5, "$name: Read, asyncOutput failed $ao") if ($ao);
 					
 				}
 				delete($hash->{getcmd});
