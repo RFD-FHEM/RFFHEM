@@ -1,12 +1,5 @@
-2019-12-29 - SD_ProtocolData.pm: add messages to protocol 27
-2019-12-29 - 14_SD_WS.pm: add documentation
-2019-12-28 - 14_SD_WS.pm: add CRC to protocol 27
-2019-12-28 - 14_SD_WS.pm: add protocol 27 for EuroChron EFTH-800
-2019-12-27 - 90_SIGNALduino_un.pm: add distance between messages in seconds
-2019-12-27 - new definition 27 for EuroChron EFTH-800
-2019-12-27 - revised old information (#740)
-
-- revised SVN ID numbers
+06.01.2020
+  14_SD_WS.pm: new protocol 27 for EuroChron EFTH-800
 26.12.2019
   14_SD_UT.pm: new protocol 26 - Remote control xavax 00111939
   10_SD_GT.pm: add codes for button all in version 2
