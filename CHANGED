@@ -1,3 +1,6 @@
+2020-01-06 - new protocol 27 for EuroChron EFTH-800 (#764)
+
+new protocol 27 for EuroChron EFTH-800
 2020-01-06 - 14_SD_WS.pm: new protocol 27 for EuroChron EFTH-800
 2020-01-02 - fix reset for dummy - #755 (#756)
 
