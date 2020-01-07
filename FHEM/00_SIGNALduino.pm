@@ -127,7 +127,7 @@ my %sets = (
   "disableMessagetype" 	=> 	['syncedMS,unsyncedMU,manchesterMC', \&SIGNALduino_Set_MessageType ],
   "sendMsg"				=> 	['textFieldNL',\&SIGNALduino_Set_sendMsg ],
   "cc1101_freq"    		=> 	['textFieldNL', \&cc1101::SetFreq ],
-  "cc1101_bWidth"  		=> 	['58,68,81,102,116,135,162,203,232,270,325,406,464,541,650,812', \&cc1101::SetbWidth ],
+  "cc1101_bWidth"  		=> 	['58,68,81,102,116,135,162,203,232,270,325,406,464,541,650,812', \&SIGNALduino_Set_bWidth ],
   "cc1101_rAmpl"   		=> 	['24,27,30,33,36,38,40,42',  \&cc1101::setrAmpl ],
   "cc1101_sens"    		=> 	['4,8,12,16', \&cc1101::SetSens ],
   "cc1101_patable_433" 	=>	['-10_dBm,-5_dBm,0_dBm,5_dBm,7_dBm,10_dBm', \&cc1101::SetPatable ],
@@ -858,6 +858,33 @@ sub SIGNALduino_Set_MessageType
 }
 
 ###############################
+sub SIGNALduino_Set_bWidth
+{
+	my ($hash, @a) = @_;
+	
+	if ($hash->{getcmd}->{cmd} eq "set_bWidth" && $a[1] =~ /^C10\s=\s(\d\d)$/ )
+	{
+		my ($ob,$bw) = cc1101::CalcbWidthReg($hash,$1,$hash->{getcmd}->{arg});
+		$hash->{logMethod}->($hash->{NAME}, 3, "$hash->{NAME}: Set_bWidth, bWidth: Setting MDMCFG4 (10) to $ob = $bw KHz");
+		# Toddo setRegisters verwenden
+		main::SIGNALduino_AddSendQueue($hash,"W12$ob");
+		main::SIGNALduino_WriteInit($hash);
+		return ("Setting MDMCFG4 (10) to $ob = $bw KHz" ,0);
+	} else {		
+		$hash->{logMethod}->($hash->{NAME}, 3, "$hash->{NAME}: Set_bWidth, Request register 10");
+		# Get Register 10
+		cc1101::GetRegister($hash,10);
+		
+		$hash->{getcmd}->{cmd} = "set_bWidth";
+		$hash->{getcmd}->{arg} = $a[1];  # Zielbandbreite
+		$hash->{getcmd}->{responseSub} = \&SIGNALduino_Set_bWidth;  	# Callback auf sich selbst setzen
+		$hash->{getcmd}->{asyncOut} = $hash->{CL}; 
+		return "Register 10 requsted";
+	}
+}
+
+
+###############################
 sub SIGNALduino_Get($@) {
 	my ($hash,$name, @a) = @_;
 	my $type = $hash->{TYPE};
@@ -1076,32 +1103,6 @@ sub SIGNALduino_CheckSendRawResponse
 	return (undef);
 }
 
-###############################
-#sub SIGNALduino_CheckbWidthResponse
-#{
-#	my $hash = shift;
-#	my $msg = shift;
-#	
-#	my $val = hex(substr($msg,6));
-#	my $arg = $hash->{getcmd}->{arg};
-#	my $ob = $val & 0x0f;
-#		
-#	my ($bits, $bw) = (0,0);
-#	OUTERLOOP:
-#	for (my $e = 0; $e < 4; $e++) {
-#		for (my $m = 0; $m < 4; $m++) {
-#			$bits = ($e<<6)+($m<<4);
-#			$bw  = int(26000/(8 * (4+$m) * (1 << $e))); # KHz
-#			last OUTERLOOP if($arg >= $bw);
-#		}
-#	}
-#		$ob = sprintf("%02x", $ob+$bits);
-#	$msg = "Setting MDMCFG4 (10) to $ob = $bw KHz";
-#	$hash->{logMethod}->($name, 3, "$name: CheckGetResponse, bWidth: Setting MDMCFG4 (10) to $ob = $bw KHz");
-#	SIGNALduino_AddSendQueue($hash,"W12$ob");
-#	SIGNALduino_WriteInit($hash);
-#	return ($msg,0);
-#} 
 
 
 ###############################
@@ -1316,6 +1317,7 @@ sub SIGNALduino_CheckVersionResp
 
 
 ###############################
+# Todo: SUB kann entfernt werden
 sub SIGNALduino_CheckCmdResp($) {
 	my ($hash) = @_;
 	my $name = $hash->{NAME};
@@ -1617,7 +1619,7 @@ sub SIGNALduino_Read($) {
 				$hash->{keepalive}{retry} = 0;
 			}
 		} else {
-			$hash->{logMethod}->($name, 4, "$name: Read, msg: Received answer ($rmsg) for ". $hash->{getcmd}->{cmd}." does not match $regexp"); 
+			$hash->{logMethod}->($name, 4, "$name: Read, msg: Received answer ($rmsg) for ". $hash->{getcmd}->{cmd}." does not match $regexp / coderef"); 
 		}
 	}
   }
@@ -4658,13 +4660,28 @@ sub setrAmpl  {
 	main::SIGNALduino_WriteInit($hash);
 	return undef;
 } 
-sub SetbWidth {
-	# Todo Prüfen wieso eine Abfrage eines Registers notwendig ist um die Bandbreite zu ändern
-	my ($hash, @a) = @_;
-	main::SIGNALduino_AddSendQueue($hash,"C10");
-	$hash->{getcmd}->{cmd} = "bWidth";
-	$hash->{getcmd}->{arg} = $a[1];
+sub GetRegister {
+	my ($hash, $reg) = @_;
+	main::SIGNALduino_AddSendQueue($hash,"C".$reg);
 	return undef;
+} 
+
+sub CalcbWidthReg {
+	my ($hash, $reg10, $bWith) = @_;
+	# Beispiel Rückmeldung, mit Ergebnis von Register 10: C10 = 57
+	my $ob = hex($reg10) & 0x0f;
+	my ($bits, $bw) = (0,0);
+	OUTERLOOP:
+	for (my $e = 0; $e < 4; $e++) {
+		for (my $m = 0; $m < 4; $m++) {
+			$bits = ($e<<6)+($m<<4);
+			$bw  = int(26000/(8 * (4+$m) * (1 << $e))); # KHz
+			last OUTERLOOP if($bWith >= $bw);
+		}
+	}
+	$ob = sprintf("%02x", $ob+$bits);
+	
+	return ($ob,$bw);
 } 
 
 sub SetSens {

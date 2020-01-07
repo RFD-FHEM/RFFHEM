@@ -145,19 +145,20 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 
 		{
     		hasCC1101 => 1,
-			testname=>  "set bWidth xxx",
-			input	=>	"cc1101_bWidth xxx",
+			testname=>  "set bWidth 102",
+			input	=>	"cc1101_bWidth 102",
 			check =>  sub { 
 			    return array  {
 			    	item 'C10';
 			    	end();
     			};
-		    }
+		    },
+		    return => "Register 10 requsted"
 		},
 		{
     		hasCC1101 => 0,
-			testname=>  "set bWidth xxx",
-			input	=>	"cc1101_bWidth xxx",
+			testname=>  "set bWidth 102",
+			input	=>	"cc1101_bWidth 102",
 			check =>  sub { 
 			    return array  {
 			    	end();
@@ -540,5 +541,49 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 			unlike($ret,qr/.*sendMsg.*/,"check cmd sendMsg not allowed");
 		};
 	};
+	
+	subtest 'Test bWidth (325 Khz)' => sub {
+		plan(3);
+		
+		subtest 'Test cc1101::CalcbWidthReg' => sub {
+			plan(2);
+			my ($ob,$bw) = cc1101::CalcbWidthReg($targetHash,57,325);
+			is($ob,57,"check new register value");
+			is($bw,325,"check calculated possible bWith value, will never be higher as provided");
+		};
+		@{$targetHash->{QUEUE}}=();
+	
+		subtest 'Test SIGNALduino_Set_bWidth (requesting value register 10)' => sub {
+			plan(3);
+			my $ret = SIGNALduino_Set_bWidth($targetHash,,"cc1101_bWidth","325");
+			is($ret,"Register 10 requsted","Verify return message / request register 10");
+			is($targetHash->{getcmd}->{cmd},"set_bWidth","check getcmd command");
+			is($targetHash->{getcmd}->{arg},"325","check getcmd arg");
+		};
+
+		# Todo: ggf mock DevIo_SimpleRead to return "C10 = 57"
+		# 		call SIGNALduino_Read($targetHash);		
+				
+		subtest 'Test SIGNALduino_Set_bWidth (Update registervalue)' => sub {
+			plan(2);
+			my ($ret,undef) = SIGNALduino_Set_bWidth($targetHash,"cc1101_bWidth","C10 = 57");
+			
+				
+			is($ret,"Setting MDMCFG4 (10) to 57 = 325 KHz","Verify return message");
+	
+			is($targetHash->{QUEUE},
+				array  {
+				    	item 'C10';
+				    	item 'W1257';
+				    	item 'WS36';
+				    	item 'WS34';
+					    end();
+					} ,"Verify expected queue element entrys", explain $targetHash->{QUEUE});
+		
+			@{$targetHash->{QUEUE}}=();
+		};
+	};
+
+	
  }
 );
