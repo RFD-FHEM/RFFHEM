@@ -1,9 +1,9 @@
-defmod test_SDWS UnitTest dummyDuino ( 
+defmod test_SD_WS_devices UnitTest dummyDuino ( 
 {
 	use Test2::V0;
 	use Test2::Tools::Compare qw{is};
 	use JSON; 
-	## for online testsytem: defmod test_SD_WS_devices UnitTest dummyDuino ##
+	## for online testsytem: defmod test_SDWS_devices UnitTest dummyDuino ##
 	my $testDataArray; 
 	
 	CommandAttr(undef,"autocreate verbose 5");
