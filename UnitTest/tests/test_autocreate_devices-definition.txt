@@ -21,11 +21,11 @@ defmod test_autocreate_devices UnitTest dummyDuino (
 		my $sensorname="SD_WS_38_T_1";
 		for my $i (1..2) {
 			Dispatch($targetHash,"W38#8B922397E");
-			ok(!IsDevice($sensorname), "check sensor not created with dispatch $i/3");
+			is(!IsDevice($sensorname), 0, "check sensor not created with dispatch $i/3");
 			sleep 3;
 		}
 		Dispatch($targetHash,"W38#8B922397E");
-		ok(IsDevice($sensorname), "check sensor created with 3. dispatch");
+		is(IsDevice($sensorname), 1, "check sensor created with 3. dispatch");
 		sleep 3;
 		Dispatch($targetHash,"W38#8B922397E");
 	};
