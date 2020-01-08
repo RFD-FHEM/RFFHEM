@@ -1,0 +1,39 @@
+defmod test_autocreate_devices UnitTest dummyDuino (
+{
+	use Test2::V0;
+	use Test2::Tools::Compare qw{is};
+	## for online testsytem: defmod test_autocreate_devices UnitTest dummyDuino ##
+
+	# for local test
+	my $attr_autocreateThreshold = AttrVal("autocreate" ,"autocreateThreshold",undef);
+	if ($attr_autocreateThreshold) {
+		note("local - attr autocreateThreshold read");
+		CommandDeleteAttr($targetHash,"autocreate autocreateThreshold")
+	}
+
+	CommandAttr(undef,"autocreate verbose 5");
+
+	subtest 'attrib autocreate is undef for right result' => sub {
+		is(AttrVal("autocreate" ,"autocreateThreshold",undef),undef,"check autocreate undef");
+	};
+
+	subtest 'Protocol 38 - autocreate' => sub {
+		my $sensorname="SD_WS_38_T_1";
+		for my $i (1..2) {
+			Dispatch($targetHash,"W38#8B922397E");
+			is(!IsDevice($sensorname), "check sensor not created with dispatch $i/3");
+			sleep 3;
+		}
+		Dispatch($targetHash,"W38#8B922397E");
+		is(IsDevice($sensorname), "check sensor created with 3. dispatch");
+		sleep 3;
+		Dispatch($targetHash,"W38#8B922397E");
+	};
+
+	# for local test, to reset attrib to old value
+	if ($attr_autocreateThreshold) {
+		CommandAttr($targetHash,"autocreate autocreateThreshold $attr_autocreateThreshold");
+		note("local - attr autocreateThreshold reset to old value");
+	}
+}
+)
