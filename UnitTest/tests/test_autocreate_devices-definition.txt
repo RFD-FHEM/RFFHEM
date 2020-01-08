@@ -17,6 +17,10 @@ defmod test_autocreate_devices UnitTest dummyDuino (
 		is(AttrVal("autocreate" ,"autocreateThreshold",undef),undef,"check autocreate undef");
 	};
 
+
+	## clean for test
+	CommandDelete(undef, "TYPE=SD_WS");
+ 
 	subtest 'Protocol 38 - autocreate' => sub {
 		my $sensorname="SD_WS_38_T_1";
 		for my $i (1..2) {
@@ -29,6 +33,9 @@ defmod test_autocreate_devices UnitTest dummyDuino (
 		sleep 3;
 		Dispatch($targetHash,"W38#8B922397E");
 	};
+	
+	## clean for next test
+	CommandDelete(undef, "TYPE=SD_WS");
 
 	# for local test, to reset attrib to old value
 	if ($attr_autocreateThreshold) {
