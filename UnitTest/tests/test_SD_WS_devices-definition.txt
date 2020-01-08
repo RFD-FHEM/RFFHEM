@@ -7,7 +7,7 @@ defmod test_SD_WS_devices UnitTest dummyDuino (
 	my $testDataArray; 
 
 	## clean for test
-	CommandDelete(undef, "delete TYPE=SD_WS");
+	CommandDelete(undef, "TYPE=SD_WS");
 	
 	subtest "Verify sensor´s from JSON" => sub {
 		sub loadJson
@@ -84,9 +84,9 @@ defmod test_SD_WS_devices UnitTest dummyDuino (
 			$todo = todo "Testing against pre-release testdata, correct test before push this to master";
 			goto TestLabel;
 		}
-	}
+	};
 	
 	## clean for next test
-	CommandDelete(undef, "delete TYPE=SD_WS");
+	CommandDelete(undef, "TYPE=SD_WS");
 }
 )
