@@ -6,9 +6,6 @@ defmod test_SD_WS_devices UnitTest dummyDuino (
 	## for online testsytem: defmod test_SDWS_devices UnitTest dummyDuino ##
 	my $testDataArray; 
 
-	## clean for test
-	CommandDelete(undef, "TYPE=SD_WS");
-	
 	subtest "Verify sensor´s from JSON" => sub {
 		sub loadJson
 		{
@@ -85,8 +82,5 @@ defmod test_SD_WS_devices UnitTest dummyDuino (
 			goto TestLabel;
 		}
 	};
-	
-	## clean for next test
-	CommandDelete(undef, "TYPE=SD_WS");
 }
 )

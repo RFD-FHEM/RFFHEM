@@ -1,8 +1,5 @@
 defmod test_proto84 UnitTest dummyDuino ( 
 {
- ## clean for test
- CommandDelete(undef, "TYPE=SD_WS");
- 
  my $rmsg="MU;P0=-21520;P1=235;P2=-855;P3=846;P4=620;P5=-236;P7=-614;D=012323232454545454545451717451717171745171717171717171717174517171745174517174517174545;CP=1;R=217;";      
  my %signal_parts=SIGNALduino_Split_Message($rmsg,$targetHash->{NAME});     
  is(SIGNALduino_Parse_MU($targetHash, $targetHash, $targetHash->{NAME}, $rmsg,%signal_parts) ,1,"MU Data dispatched");
@@ -30,8 +27,5 @@ defmod test_proto84 UnitTest dummyDuino (
    is(InternalVal($sensorname,$target."_Protocol_ID",undef),"84","check protocolid internal");
 
  };
-
- ## clean for next test
- CommandDelete(undef, "TYPE=SD_WS");
 } 
 )
