@@ -29,9 +29,9 @@ defmod test_proto84 UnitTest dummyDuino (
    is(ReadingsVal($sensorname,"sendmode","0"),"auto","check sendmode reading");
    is(InternalVal($sensorname,$target."_Protocol_ID",undef),"84","check protocolid internal");
 
- }
+ };
 
  ## clean for next test
-CommandDelete(undef, "TYPE=SD_WS");
+ CommandDelete(undef, "TYPE=SD_WS");
 } 
 )
