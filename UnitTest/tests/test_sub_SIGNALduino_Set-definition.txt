@@ -194,8 +194,38 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 		},
 		{
     		hasCC1101 => 1,
-			testname=>  "set patable_433 5_dBm",
-			input	=>	"cc1101_patable_433 5_dBm",
+			testname=>  "set patable 5_dBm (cc1101_frequency=433)",
+			input	=>	"cc1101_patable 5_dBm",
+			pre_code 	=> sub { $attr{$target}{cc1101_frequency} = '433' },
+			check =>  sub { 
+			    return array  {
+			    	item 'x84';
+			    	item 'WS36';
+			    	item 'WS34';
+			    	end();
+    			};
+		    }
+		},
+		{
+    		hasCC1101 => 1,
+			testname=>  "set patable 5_dBm (cc1101_frequency=868)",
+			input	=>	"cc1101_patable 5_dBm",
+			pre_code 	=> sub { $attr{$target}{cc1101_frequency} = '868' },
+			check =>  sub { 
+			    return array  {
+			    	item 'x81';
+			    	item 'WS36';
+			    	item 'WS34';
+			    	end();
+    			};
+		    }
+		},
+		{
+    		hasCC1101 => 1,
+			testname=>  "set patable 5_dBm (default cc1101_frequency)",
+			input	=>	"cc1101_patable 5_dBm",
+			pre_code 	=> sub { delete($attr{$target}{cc1101_frequency}) },
+			
 			check =>  sub { 
 			    return array  {
 			    	item 'x84';

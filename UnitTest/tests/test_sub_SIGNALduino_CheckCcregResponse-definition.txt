@@ -1,67 +1,25 @@
 defmod test_sub_SIGNALduino_CheckCcregResponse UnitTest dummyDuino ( 
 {
-	subtest 'Test ccregAll response (ccreg:\n 00 \n57\n\nConfiguration Register)' => sub {
-		plan tests => 5;
+	subtest 'Test ccregAll response' => sub {
+		plan tests => 6;
 		
-		my ($ret)=SIGNALduino_CheckCcregResponse($targetHash,"ccreg: 
-0D 2E 2D 47 D3 91 3D 04 32 00 00 06 00 21 65 E8
-57 C4 30 23 B9 00 07 00 18 14 6C 07 00 91 87 6B
-F8 B6 11 EF 2A 15 1F 41 00 59 7F 3F 88 31 0B 
-
-Configuration Register Detail (address, name, value):
-0x00 IOCFG2   - 0x0D
-0x01 IOCFG1   - 0x2E
-0x02 IOCFG0   - 0x2D
-0x03 FIFOTHR  - 0x47
-0x04 SYNC1    - 0xD3
-0x05 SYNC0    - 0x91
-0x06 PKTLEN   - 0x3D
-0x07 PKTCTRL1 - 0x04
-0x08 PKTCTRL0 - 0x32
-0x09 ADDR     - 0x00
-0x0A CHANNR   - 0x00
-0x0B FSCTRL1  - 0x06
-0x0C FSCTRL0  - 0x00
-0x0D FREQ2    - 0x21
-0x0E FREQ1    - 0x65
-0x0F FREQ0    - 0xE8
-0x10 MDMCFG4  - 0x57
-0x11 MDMCFG3  - 0xC4
-0x12 MDMCFG2  - 0x30
-0x13 MDMCFG1  - 0x23
-0x14 MDMCFG0  - 0xB9
-0x15 DEVIATN  - 0x00
-0x16 MCSM2    - 0x07
-0x17 MCSM1    - 0x00
-0x18 MCSM0    - 0x18
-0x19 FOCCFG   - 0x14
-0x1A BSCFG    - 0x6C
-0x1B AGCCTRL2 - 0x07
-0x1C AGCCTRL1 - 0x00
-0x1D AGCCTRL0 - 0x91
-0x1E WOREVT1  - 0x87
-0x1F WOREVT0  - 0x6B
-0x20 WORCTRL  - 0xF8
-0x21 FREND1   - 0xB6
-0x22 FREND0   - 0x11
-0x23 FSCAL3   - 0xEF
-0x24 FSCAL2   - 0x2A
-0x25 FSCAL1   - 0x15
-0x26 FSCAL0   - 0x1F
-0x27 RCCTRL1  - 0x41
-0x28 RCCTRL0  - 0x00
-0x29 FSTEST   - 0x59
-0x2A PTEST    - 0x7F
-0x2B AGCTEST  - 0x3F
-0x2C TEST2    - 0x88
-0x2D TEST1    - 0x31
-0x2E TEST0    - 0x0B");
-		like($ret,qr/^\sccreg:/,"check begin of return message");
-		like($ret,qr/\n0D/,"check first part of return message");
-		like($ret,qr/\n57/,"check second part of return message");
-		like($ret,qr/\n\nConfiguration/,"check heading - Detail part of return message");
-		like($ret,qr/:\n0x/,"check start Output - Detail part of return message");
+		my ($ret)=SIGNALduino_CheckCcregResponse($targetHash,"ccreg 00: 0D 2E 2D 47 D3 91 3D 04 32 00 00 06 00 10 B0 71 ccreg 10: 57 C4 30 23 B9 00 07 00 18 14 6C 07 00 91 87 6B ccreg 20: F8 B6 11 EF 0C 3C 1F 41");
+		like($ret,qr/^0D 2E 2D 47 D3 91/m,"check begin of return message");
+		unlike($ret,qr/^ccreg/m,"check removed ccreg in return");
+		like($ret,qr/^0x0D/m,"check first part of return message");
+		like($ret,qr/57$/m,"check second part of return message");
+		like($ret,qr/MDMCFG2/m,"check registername in output");
+		like($ret,qr/Configuration/m,"check heading - Detail part of return message");
 	}; 
 	
+	subtest 'Test ccreg 12 response (C12 = 30)' => sub {
+		plan tests => 4;
+		
+		my ($ret)=SIGNALduino_CheckCcregResponse($targetHash,"C12 = 30");
+		like($ret,qr/^Configuration Register Detail address/m,"check begin of return message");
+		like($ret,qr/^0x12/m,"begin of detail line in output");
+		like($ret,qr/MDMCFG2/m,"check registername in output");
+		like($ret,qr/0x30/m,"check registervalue in output");
+	}; 
 }
 )

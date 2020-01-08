@@ -31,7 +31,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.4.2_dev_07.01",
+	SDUINO_VERSION            => "v3.4.2_dev_09.01",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -65,7 +65,7 @@ sub SIGNALduino_Log3($$$);
 our %modules;  
 our %defs;
 
-my %gets = (    # NameOFCommand =>  StyleMod for Fhemweb, SubToCall if get is executed, String to send to uC, sub, regex to verify response, 
+my %gets = (    # NameOFCommand =>  StyleMod for Fhemweb, SubToCall if get is executed, String to send to uC, sub called with response, regex to verify response, 
 	"?"					=>	['', \&SIGNALduino_Get_FhemWebList ],
 	"version"			=>	['noArg', \&SIGNALduino_Get_Command, "V", \&SIGNALduino_CheckVersionResp, 'V\s.*SIGNAL(?:duino|ESP).*(?:\s\d\d:\d\d:\d\d)' ],
 	"freeram" 			=> 	['noArg', \&SIGNALduino_Get_Command, "R", \&SIGNALduino_GetResponseUpdateReading, '^[0-9]+' ] ,
@@ -74,22 +74,10 @@ my %gets = (    # NameOFCommand =>  StyleMod for Fhemweb, SubToCall if get is ex
 	"ping"     			=> 	['noArg', \&SIGNALduino_Get_Command, "P", \&SIGNALduino_GetResponseUpdateReading, '^OK$' ],
 	"config"   			=> 	['noArg', \&SIGNALduino_Get_Command, "CG", \&SIGNALduino_GetResponseUpdateReading, '^MS.*MU.*MC.*' ],
 	"ccconf"   			=> 	['noArg', \&SIGNALduino_Get_Command, "C0DnF", \&SIGNALduino_CheckccConfResponse, 'C0Dn11=[A-F0-9a-f]+'],
- 	"ccreg"    			=> 	['textFieldNL', \&SIGNALduino_Get_Command,"C", \&SIGNALduino_CheckCcregResponse, '^(?:C\d+\s=\s[0-9A-F]+$|ccreg 00:)'], 
+ 	"ccreg"    			=> 	['textFieldNL', \&SIGNALduino_Get_Command_CCReg,"C", \&SIGNALduino_CheckCcregResponse, '^(?:C[A-Fa-f0-9]{2}\s=\s[0-9A-Fa-f]+$|ccreg 00:)'], 
 	"ccpatable" 		=> 	['noArg', \&SIGNALduino_Get_Command, "C3E", \&SIGNALduino_CheckccPatableResponse, '^C3E\s=\s.*'],
  	"raw"    			=>	['textFieldNL', \&SIGNALduino_Get_Raw ], 
 	"availableFirmware" => 	['noArg', \&SIGNALduino_Get_availableFirmware ]
-);
-
-my %ucGetCmd =(
-		"V" 	=> 'V\s.*SIGNAL(?:duino|ESP).*',
-		"R" 	=> '^[0-9]+',
-		"t" 	=> '^[0-9]+',
-		"?" 	=> '.*Use one of[ 0-9A-Za-z]+[\r\n]*$',
-		"P" 	=> 'ÔK$',
-		"CG" 	=> '^MS.*MU.*MC.*',
-		"C0DnF"	=> 'C0Dn11.*',
-		"C"		=> '^C.* = .*',
-		"C3E"	=> '^C3E = .*',
 );
 
 
@@ -130,8 +118,8 @@ my %sets = (
   "cc1101_bWidth"  		=> 	['58,68,81,102,116,135,162,203,232,270,325,406,464,541,650,812', \&SIGNALduino_Set_bWidth ],
   "cc1101_rAmpl"   		=> 	['24,27,30,33,36,38,40,42',  \&cc1101::setrAmpl ],
   "cc1101_sens"    		=> 	['4,8,12,16', \&cc1101::SetSens ],
-  "cc1101_patable_433" 	=>	['-10_dBm,-5_dBm,0_dBm,5_dBm,7_dBm,10_dBm', \&cc1101::SetPatable ],
-  "cc1101_patable_868" 	=> 	['-10_dBm,-5_dBm,0_dBm,5_dBm,7_dBm,10_dBm', \&cc1101::SetPatable ],
+  "cc1101_patable" 		=>	['-10_dBm,-5_dBm,0_dBm,5_dBm,7_dBm,10_dBm', \&cc1101::SetPatable ],
+#  "cc1101_patable_868" 	=> 	['-10_dBm,-5_dBm,0_dBm,5_dBm,7_dBm,10_dBm', \&cc1101::SetPatable ],
   "cc1101_reg"			=> 	[ 'textFieldNL', \&cc1101::SetRegisters ],
 );
 
@@ -862,7 +850,7 @@ sub SIGNALduino_Set_bWidth
 {
 	my ($hash, @a) = @_;
 	
-	if ($hash->{getcmd}->{cmd} eq "set_bWidth" && $a[1] =~ /^C10\s=\s(\d\d)$/ )
+	if ($hash->{getcmd}->{cmd} eq "set_bWidth" && $a[1] =~ /^C10\s=\s([A-Fa-f0-9]{2})$/ )
 	{
 		my ($ob,$bw) = cc1101::CalcbWidthReg($hash,$1,$hash->{getcmd}->{arg});
 		$hash->{logMethod}->($hash->{NAME}, 3, "$hash->{NAME}: Set_bWidth, bWidth: Setting MDMCFG4 (10) to $ob = $bw KHz");
@@ -964,6 +952,20 @@ sub SIGNALduino_Get_Command
 	return undef;
 }
 
+
+###############################
+sub SIGNALduino_Get_Command_CCReg
+{
+	my ($hash, @a) = @_;
+	my $name=$hash->{NAME};
+	if (exists($cc1101_register{@_[2]}) || @_[2] =~ /^99$/ ) {
+		return SIGNALduino_Get_Command(@_);
+	} else {
+		return "unknown Register @_[2], please choose a valid cc1101 register";
+	}
+}
+
+
 ###############################
 sub SIGNALduino_Get_Raw {
 	my ($hash, @a) = @_;
@@ -1062,22 +1064,28 @@ sub SIGNALduino_CheckCcregResponse
 	my $msg = shift;
 	my $name=$hash->{NAME};
 
-	$msg =~ s/\s\sccreg/\nccreg/g;
-	$msg =~ s/ccreg\s\d0:\s//g;
-	#my $registerstring = $msg;
-	#$registerstring =~ s/\\n/ /g;
-
-	my @ccreg = split(/\s/,$msg);
-
-	$msg.= "\n\n";
-	$msg.= "Configuration Register Detail (address, name, value):\n";
-
-	my $reg_idx = 0;
-	foreach my $key (sort keys %cc1101_register) {
-		$msg.= "0x".$key." ".$cc1101_register{$key}. " - 0x".$ccreg[$reg_idx]."\n";
-		$reg_idx++;
+	if ($msg =~ /^ccreg/) {
+		
+		$msg =~ s/\s\sccreg/\nccreg/g;
+		$msg =~ s/ccreg\s\d0:\s//g;
+	
+		my @ccreg = split(/\s/,$msg);
+	
+		$msg.= "\n\n";
+		$msg.= "Configuration Register Detail (address, name, value):\n";
+	
+		my $reg_idx = 0;
+		foreach my $key (sort keys %cc1101_register) {
+			$msg.= "0x".$key." ".$cc1101_register{$key}. " - 0x".$ccreg[$reg_idx]."\n";
+			$reg_idx++;
+		}
+	} else {
+		$msg =~ /^C([A-Fa-f0-9]{2}) = ([A-Fa-f0-9]{2})$/;
+		my $reg = $1;
+		my $val = $2;
+		$msg = "Configuration Register Detail address (name) = value:\n";
+		$msg .= "0x$reg ( $cc1101_register{$reg}) = 0x$val\n";
 	}
-	#$hash->{uC_cmds} = $msg;
 	return ("\n".$msg,undef);
 }
 
@@ -1102,35 +1110,6 @@ sub SIGNALduino_CheckSendRawResponse
 	}
 	return (undef);
 }
-
-
-
-###############################
-sub SIGNALduino_CheckGetResponse 
-{
-	my $hash = shift;
-	my $msg = shift;
-
-	my $cmd = $hash->{getcmd}->{cmd};
-	
-  	#$msg =~ s/[\r\n]//g;
-	return undef if (!$msg =~ $gets{$cmd}[4]);
-	
-	my $name=$hash->{NAME};
-		
-  	#elsif($cmd eq "ccregAll")
-  	#{
-	#	$hash->{CC1101REGS} = $msg;
-	#	$msg = "\n\n" . $msg
-  	#}
-	if($cmd eq "bWidth") {								# Todo: Prüfen wieso es das hier gibt, obwohl es kein passenden get Kommando zu geben scheint
-	} else {
-		return undef;
-	}
-	
-  	return $msg;
-}
-
 
 ###############################
 sub SIGNALduino_ResetDevice($) {
@@ -4599,12 +4578,18 @@ package cc1101;
 sub SetPatable
 {
 	my ($hash,@a) = @_;
-	my $paFreq = substr($a[0],-3);
-	my $pa = "x" . $patable{$paFreq}{$a[1]};
-	$hash->{logMethod}->($hash->{NAME}, 3, "$hash->{NAME}: SetPatable, Setting patable $paFreq $a[1] $pa");
-	main::SIGNALduino_AddSendQueue($hash,$pa);
-	main::SIGNALduino_WriteInit($hash);
-	return undef;
+	my $paFreq = main::AttrVal($hash->{NAME},"cc1101_frequency","433");
+	if ( exists($patable{$paFreq}) )
+	{
+		#
+		my $pa = "x" . $patable{$paFreq}{$a[1]};
+		$hash->{logMethod}->($hash->{NAME}, 3, "$hash->{NAME}: SetPatable, Setting patable $paFreq $a[1] $pa");
+		main::SIGNALduino_AddSendQueue($hash,$pa);
+		main::SIGNALduino_WriteInit($hash);
+		return undef;
+	} else {
+		return "Frequency not supported";
+	}
 }
 
 sub SetRegisters  {

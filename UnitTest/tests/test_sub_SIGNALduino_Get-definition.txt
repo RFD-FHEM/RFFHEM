@@ -113,18 +113,36 @@ defmod test_sub_SIGNALduino_Get UnitTest dummyDuino
     		return 		=> "This command is only available with a cc1101 receiver"
 	    },
 	    {
-			testname	=> "get ccreg ",
+			testname	=> "get ccreg 12",
 			hasCC1101	=> 1,
-			input		=> "ccreg",
+			input		=> "ccreg 12",
 			check =>  array  {
-			    	item("C");
+			    	item("C12");
 			    	end();
     			}
 	    },
 	    {
-			testname	=> "get ccreg ",
+			testname	=> "get ccreg 98 (invalid register)",
+			hasCC1101	=> 1,
+			input		=> "ccreg 98",
+			check =>  array  {
+			    	end();
+    			},
+    		return => "unknown Register 98, please choose a valid cc1101 register"
+	    },
+	    {
+			testname	=> "get ccreg 99 (all)",
+			hasCC1101	=> 1,
+			input		=> "ccreg 99",
+			check =>  array  {
+			    	item("C99");
+			    	end();
+    			},
+	    },
+	    {
+			testname	=> "get ccreg 12 ",
 			hasCC1101	=> 0,
-			input		=> "ccreg",
+			input		=> "ccreg 12",
 			check =>  array  { end();	},
     		return 		=> "This command is only available with a cc1101 receiver"
 	    },
