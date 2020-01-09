@@ -1191,6 +1191,7 @@ package lib::SD_ProtocolData;
 				frequency			=> '10AB85550A',
 			},
 		"44"	=>	## Bresser Temeo Trend
+							# MU;P0=32001;P1=-1939;P2=1967;P3=3896;P4=-3895;D=01213424242124212121242121242121212124212424212121212121242421212421242121242124242421242421242424242124212124242424242421212424212424212121242121212;CP=2;R=39;
 			{
 				name					=> 'BresserTemeo',
 				comment				=> 'temperature / humidity sensor',
@@ -2086,28 +2087,29 @@ package lib::SD_ProtocolData;
 				length_max		=> '12',
 			},
 		"82"	=>	## Fernotron shutters and light switches
-							# https://github.com/RFD-FHEM/RFFHEM/issues/257
-							# MU;P0=-32001;P1=435;P2=-379;P4=-3201;P5=831;P6=-778;D=01212121212121214525252525252521652161452525252525252161652141652521652521652521614165252165252165216521416521616165216525216141652161616521652165214165252161616521652161416525216161652161652141616525252165252521614161652525216525216521452165252525252525;CP=1;O;
+							# https://github.com/RFD-FHEM/RFFHEM/issues/257 @zwiebert
+							# down | MU;P0=-200;P1=21748;P2=-25008;P3=410;P4=-388;P5=-3189;P6=811;P7=-785;CP=3;D=012343434343434343564646464376464646437356464646437646464376435643737373764376464373564373737376437643764356437373737373737643735643737373737373737643564376464376464646464356437646437646464373735376437646464646464643537643764646464643737353737646464646437643735373764646464643737643;e;
+							# stop | MU;P0=-32001;P1=441;P2=-355;P3=-3153;P4=842;P5=-757;CP=1;D=0121212121212121342424242154242424215134242424215424242154213421515151542154242151342151515154215421542134215151515151515421513421515151515151515421342154242421542424242134215424242154242151513151542424242424242421315154242424242421515131542424215424215421513154242421542421515421;e;
 							# the messages received are usual missing 12 bits at the end for some reason. So the checksum byte is missing.
 							# Fernotron protocol is unidirectional. Here we can only receive messages from controllers send to receivers.
 			{
-				name					=> 'Fernotron',
-				comment					=> 'shutters and light switches',
-				id						=> '82',				# protocol number
-				knownFreqs				=> '',
-				developId				=> 'm',
-				dispatchBin				=> '1',
-				paddingbits				=> '1',     		# disable padding
+				name          => 'Fernotron',
+				comment       => 'shutters and light switches',
+				id            => '82',
+				knownFreqs    => '',
+				developId     => 'm',
+				dispatchBin   => '1',
+				paddingbits   => '1',     		# disable padding
 				one						=> [1,-2],			# on=400us, off=800us
 				zero					=> [2,-1],			# on=800us, off=400us
 				float					=> [1,-8],			# on=400us, off=3200us. the preamble and each 10bit word has one [1,-8] in front
 				pause					=> [1,-1],			# preamble (5x)
-				clockabs				=> 400,				# 400us
-				format					=> 'twostate',
-				preamble				=> 'P82#',			# prepend our protocol number to converted message
-				clientmodule			=> 'Fernotron',
-				length_min				=> '100',			# actual 120 bit (12 x 10bit words to decode 6 bytes data), but last 20 are for checksum
-				length_max				=> '3360',			# 3360 bit (336 x 10bit words to decode 168 bytes data) for full timer message
+				clockabs      => 400,				  # 400us
+				format        => 'twostate',
+				preamble      => 'P82#',			# prepend our protocol number to converted message
+				clientmodule  => 'Fernotron',
+				length_min    => '100',			  # actual 120 bit (12 x 10bit words to decode 6 bytes data), but last 20 are for checksum
+				length_max    => '3360',			# 3360 bit (336 x 10bit words to decode 168 bytes data) for full timer message
 			},
 		"83"	=>	## Remote control RH787T based on MOSDESIGN SEMICONDUCTOR CORP (CMOS ASIC encoder) M1EN compatible HT12E
 							# for example Westinghouse Deckenventilator Delancey, 6 speed buttons, @zwiebelxxl
