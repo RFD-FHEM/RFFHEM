@@ -1,3 +1,6 @@
+2020-01-09 - Update SD_ProtocolData.pm (#770)
+
+- added doc ID 44 & ID 82 (no change of definition)
 2020-01-06 - new protocol 27 for EuroChron EFTH-800 (#764)
 
 new protocol 27 for EuroChron EFTH-800
