@@ -17,7 +17,8 @@ defmod test_autocreate_devices UnitTest dummyDuino (
 		is(AttrVal("autocreate" ,"autocreateThreshold",undef),undef,"check autocreate undef");
 	};
 
-	subtest 'Protocol 38 - autocreate' => sub {
+	subtest 'Protocol 38 - autocreate via DMSG' => sub {
+		plan(3);
 		my $sensorname="SD_WS_38_T_1";
 		for my $i (1..2) {
 			Dispatch($targetHash,"W38#8B922397E");
@@ -25,9 +26,47 @@ defmod test_autocreate_devices UnitTest dummyDuino (
 			sleep 3;
 		}
 		Dispatch($targetHash,"W38#8B922397E");
-		is(IsDevice($sensorname), 1, "check sensor created with 3. dispatch");
+		is(IsDevice($sensorname), 1, "check sensor created with dispatch 3");
 		sleep 3;
 		Dispatch($targetHash,"W38#8B922397E");
+	};
+	
+	subtest 'Protocol 44 - autocreate via RAWMSG' => sub {
+		plan(2);
+		my $rmsg="MU;P0=32001;P1=-1939;P2=1967;P3=3896;P4=-3895;D=01213424242124212121242121242121212124212424212121212121242421212421242121242124242421242421242424242124212124242424242421212424212424212121242121212;CP=2;R=39;";
+		my %signal_parts=SIGNALduino_Split_Message($rmsg,$targetHash->{NAME});     
+		my $sensorname="BresserTemeo_1";
+		SIGNALduino_Parse_MU($targetHash, $targetHash, $targetHash->{NAME}, $rmsg,%signal_parts);
+		sleep 3;
+		is(!IsDevice($sensorname), 1, "Sensor not created with single dispatch");
+		SIGNALduino_Parse_MU($targetHash, $targetHash, $targetHash->{NAME}, $rmsg,%signal_parts);
+		is(IsDevice($sensorname), 1,"check Sensor created with second dispatch");
+	};
+	
+	subtest 'Protocol 84 - autocreate via DMSG' => sub {
+		plan(2);
+		my $sensorname="SD_WS_84_TH_1";
+		Dispatch($targetHash,"W84#FE42004526");
+		is(!IsDevice($sensorname), 1, "Sensor not created with single dispatch");
+		sleep 3;
+		Dispatch($targetHash,"W84#FE42004526");
+		is(IsDevice($sensorname), 1, "check Sensor created with second dispatch");
+		sleep 3;
+	};
+	
+	subtest 'Protocol 85 - autocreate via RAWMSG' => sub {
+		plan(4);
+		my $rmsg="MU;P0=7944;P1=-724;P2=742;P3=241;P4=-495;P5=483;P6=-248;D=01212121343434345656343434563434345634565656343434565634343434343434345634345634345634343434343434343434345634565634345656345634343456563421212121343434345656343434563434345634565656343434565634343434343434345634345634345634343434343434343434345634565634;CP=3;R=47;O;";      
+		my %signal_parts=SIGNALduino_Split_Message($rmsg,$targetHash->{NAME});     
+		my $sensorname="SD_WS_85_THW_1";
+
+		for (my $i=1; $i <= 3; $i++) {
+			SIGNALduino_Parse_MU($targetHash, $targetHash, $targetHash->{NAME}, $rmsg,%signal_parts);
+			sleep 3;
+			is(!IsDevice($sensorname), 1, "Sensor not created with dispatch $i/3");
+		}
+		SIGNALduino_Parse_MU($targetHash, $targetHash, $targetHash->{NAME}, $rmsg,%signal_parts);
+		is(IsDevice($sensorname), 1,"check Sensor created with dispatch 4");
 	};
 	
 	# for local test, to reset attrib to old value
