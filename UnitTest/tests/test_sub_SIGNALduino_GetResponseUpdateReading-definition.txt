@@ -1,0 +1,10 @@
+defmod test_sub_SIGNALduino_GetResponseUpdateReading UnitTest dummyDuino ( 
+{
+	subtest 'Test SIGNALduino_GetResponseUpdateReading (ping OK) ' => sub {
+		plan tests => 1;
+		my ($ret,undef)=SIGNALduino_GetResponseUpdateReading($targetHash,"OK");
+		is($ret,"OK","check return message");
+	};
+	
+}
+)

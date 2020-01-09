@@ -1,0 +1,22 @@
+defmod test_sub_SIGNALduino_CheckUptimeResponse UnitTest dummyDuino ( 
+{
+	subtest 'Test SIGNALduino_CheckUptimeResponse (uptime 86410) ' => sub {
+		plan tests => 1;
+		my ($ret,undef)=SIGNALduino_CheckUptimeResponse($targetHash,"86410");
+		is($ret,"1 00:00:10","check return message");
+	};
+
+	subtest 'Test SIGNALduino_CheckUptimeResponse (uptime 10) ' => sub {
+		plan tests => 1;
+		my ($ret,undef)=SIGNALduino_CheckUptimeResponse($targetHash,"10");
+		is($ret,"0 00:00:10","check return message");
+	};
+
+	subtest 'Test SIGNALduino_CheckUptimeResponse (uptime 8641000) ' => sub {
+		plan tests => 1;
+		my ($ret,undef)=SIGNALduino_CheckUptimeResponse($targetHash,"8641001");
+		is($ret,"100 00:16:41","check return message");
+	};
+
+}
+)

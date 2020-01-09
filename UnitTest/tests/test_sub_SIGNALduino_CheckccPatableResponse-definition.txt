@@ -1,0 +1,36 @@
+defmod test_sub_SIGNALduino_CheckccPatableResponse UnitTest dummyDuino ( 
+{
+	subtest 'Test ccPatable response 433 Mhz (C3E = 00 84 00 00 00 00 00 00)' => sub {
+		plan tests => 3;
+		
+
+		subtest 'Test ccPatable response 433 Mhz (C3E = 00 84 00 00 00 00 00 00)' => sub {
+			plan tests => 2;
+			$attr{$target}{cc1101_frequency} = 433;
+			my ($ret)=SIGNALduino_CheckccPatableResponse ($targetHash,"C3E = 00 84 00 00 00 00 00 00");
+			is($ret,"C3E = 00 84 00 00 00 00 00 00 => 5_dBm","check return value");
+			is ($targetHash->{CC1101_PATABLE},"C3E = 00 84 00 00 00 00 00 00 => 5_dBm", "check internal value");
+		}; 
+
+		subtest 'Test ccPatable response 868 Mhz (C3E = 00 67 00 00 00 00 00 00)' => sub {
+			plan tests => 2;
+			$attr{$target}{cc1101_frequency} = 868;
+			my ($ret)=SIGNALduino_CheckccPatableResponse ($targetHash,"C3E = 00 67 00 00 00 00 00 00");
+			is($ret,"C3E = 00 67 00 00 00 00 00 00 => -5_dBm","check return value");
+			is ($targetHash->{CC1101_PATABLE},"C3E = 00 67 00 00 00 00 00 00 => -5_dBm", "check internal value");
+		}; 
+
+		subtest 'Test ccPatable response default Mhz (C3E = 00 84 00 00 00 00 00 00)' => sub {
+			plan tests => 2;
+			delete($attr{$target}{cc1101_frequency});
+			my ($ret)=SIGNALduino_CheckccPatableResponse ($targetHash,"C3E = 00 84 00 00 00 00 00 00");
+			is($ret,"C3E = 00 84 00 00 00 00 00 00 => 5_dBm","check return value");
+			is ($targetHash->{CC1101_PATABLE},"C3E = 00 84 00 00 00 00 00 00 => 5_dBm", "check internal value");
+		};
+		
+
+	}; 
+
+	
+}
+)
