@@ -5,7 +5,7 @@ defmod test_sub_SIGNALduino_Parse_MU UnitTest dummyDuino (
 	subtest 'Test Protocol 46 - MU Data dispatched' => sub {
 		my $rmsg="MU;P0=-1943;P1=1966;P2=-327;P3=247;P5=-15810;D=01230121212301230121212121230121230351230121212301230121212121230121230351230121212301230121212121230121230351230121212301230121212121230121230351230121212301230121212121230121230351230;CP=1;";
 		my %signal_parts=SIGNALduino_Split_Message($rmsg,$targetHash->{NAME});     
-		is(SIGNALduino_Parse_MU($targetHash, $targetHash, $targetHash->{NAME}, $rmsg,%signal_parts) ,1,"MU Data dispatched");
+		is(SIGNALduino_Parse_MU($targetHash, $targetHash, $targetHash->{NAME}, $rmsg,%signal_parts) ,4,"MU Data dispatched");
 	};
 
 	subtest 'Test Protocol 84 - MU Data dispatched' => sub {

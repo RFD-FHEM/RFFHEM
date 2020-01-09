@@ -1,4 +1,4 @@
-defmod test_sub_SIGNALduino_dispatch UnitTest dummyDuino ( 
+defmod test_sub_SIGNALduino_Dispatch UnitTest dummyDuino ( 
 { 
  note("Test can be extended to JSON MU data");
  
