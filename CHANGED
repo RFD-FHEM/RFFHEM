@@ -1,7 +1,11 @@
 2020-01-09 - 00_SIGNALduino.pm
+- code rewrite of get command handling
+- removed reading version and generated internal version
+- Updated commandref for cc1101_frequency
 
-Renamed internal getcmd to ucCmd because it is used for get and set commands
-Updated commandref for cc1101_frequency
+2020-01-09 - Update SD_ProtocolData.pm (#770)
+
+- added doc ID 44 & ID 82 (no change of definition)
 2020-01-06 - new protocol 27 for EuroChron EFTH-800 (#764)
 
 new protocol 27 for EuroChron EFTH-800

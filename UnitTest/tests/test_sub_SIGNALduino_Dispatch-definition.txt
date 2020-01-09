@@ -1,5 +1,7 @@
-defmod test_sub_SIGNALduino_dispatch UnitTest dummyDuino ( 
+defmod test_sub_SIGNALduino_Dispatch UnitTest dummyDuino ( 
 { 
+ note("Test can be extended to JSON MU data");
+ 
  my $mock = Mock::Sub->new; 	
  my $rmsg="MS;P2=463;P3=-1957;P5=-3906;P6=-9157;D=26232523252525232323232323252323232323232325252523252325252323252325232525;CP=2;SP=6;R=75;";
  my $dmsg="s5C080EB2B000";
