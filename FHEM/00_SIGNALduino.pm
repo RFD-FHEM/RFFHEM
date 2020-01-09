@@ -8,7 +8,7 @@
 # It routes Messages serval Modules which are already integrated in FHEM. But there are also modules which comes with it.
 # N. Butzek, S. Butzek, 2014-2015
 # S.Butzek,Ralf9 2016-2019
-
+# S.Butzek, Homeautouser, Elektronbbs 2019-2020
 
 package main;
 my $missingModulSIGNALduino="";
@@ -850,9 +850,9 @@ sub SIGNALduino_Set_bWidth
 {
 	my ($hash, @a) = @_;
 	
-	if ($hash->{getcmd}->{cmd} eq "set_bWidth" && $a[1] =~ /^C10\s=\s([A-Fa-f0-9]{2})$/ )
+	if ($hash->{ucCmd}->{cmd} eq "set_bWidth" && $a[1] =~ /^C10\s=\s([A-Fa-f0-9]{2})$/ )
 	{
-		my ($ob,$bw) = cc1101::CalcbWidthReg($hash,$1,$hash->{getcmd}->{arg});
+		my ($ob,$bw) = cc1101::CalcbWidthReg($hash,$1,$hash->{ucCmd}->{arg});
 		$hash->{logMethod}->($hash->{NAME}, 3, "$hash->{NAME}: Set_bWidth, bWidth: Setting MDMCFG4 (10) to $ob = $bw KHz");
 		# Toddo setRegisters verwenden
 		main::SIGNALduino_AddSendQueue($hash,"W12$ob");
@@ -863,10 +863,10 @@ sub SIGNALduino_Set_bWidth
 		# Get Register 10
 		cc1101::GetRegister($hash,10);
 		
-		$hash->{getcmd}->{cmd} = "set_bWidth";
-		$hash->{getcmd}->{arg} = $a[1];  # Zielbandbreite
-		$hash->{getcmd}->{responseSub} = \&SIGNALduino_Set_bWidth;  	# Callback auf sich selbst setzen
-		$hash->{getcmd}->{asyncOut} = $hash->{CL}; 
+		$hash->{ucCmd}->{cmd} = "set_bWidth";
+		$hash->{ucCmd}->{arg} = $a[1];  # Zielbandbreite
+		$hash->{ucCmd}->{responseSub} = \&SIGNALduino_Set_bWidth;  	# Callback auf sich selbst setzen
+		$hash->{ucCmd}->{asyncOut} = $hash->{CL}; 
 		return "Register 10 requsted";
 	}
 }
@@ -945,10 +945,10 @@ sub SIGNALduino_Get_Command
 	return "Unsupported command for the microcontroller" if (!exists(${$gets{$a[0]}}[2]));
 	$hash->{logMethod}->($name, 5, "$name: Get $a[0] executed");
 	SIGNALduino_AddSendQueue($hash, @{$gets{$a[0]}}[2] . (exists($a[1]) ? "$a[1]" : "")); 
-	$hash->{getcmd}->{cmd}=$a[0];
-	$hash->{getcmd}->{responseSub}=$gets{$a[0]}[3];
-	$hash->{getcmd}->{asyncOut}=$hash->{CL};
-	$hash->{getcmd}->{timenow}=time();
+	$hash->{ucCmd}->{cmd}=$a[0];
+	$hash->{ucCmd}->{responseSub}=$gets{$a[0]}[3];
+	$hash->{ucCmd}->{asyncOut}=$hash->{CL};
+	$hash->{ucCmd}->{timenow}=time();
 	return undef;
 }
 
@@ -995,7 +995,7 @@ sub SIGNALduino_GetResponseUpdateReading
 sub SIGNALduino_CheckUptimeResponse
 {
     my $msg = sprintf("%d %02d:%02d:%02d", $_[1]/86400, ($_[1]%86400)/3600, ($_[1]%3600)/60, $_[1]%60);
-	#readingsSingleUpdate($_[0], $_[0]->{getcmd}->{cmd}, $msg, 0);    	
+	#readingsSingleUpdate($_[0], $_[0]->{ucCmd}->{cmd}, $msg, 0);    	
 	return ($msg,0);
 }
 
@@ -1105,7 +1105,7 @@ sub SIGNALduino_CheckSendRawResponse
 		# zu testen der sendeQueue, kann wenn es funktioniert auf verbose 5
 		$hash->{logMethod}->($name, 4, "$name: CheckSendrawResponse, sendraw answer: $msg");
 		#RemoveInternalTimer("HandleWriteQueue:$name");
-		delete($hash->{getcmd});
+		delete($hash->{ucCmd});
 		SIGNALduino_HandleWriteQueue("x:$name");			
 	}
 	return (undef);
@@ -1230,8 +1230,8 @@ sub SIGNALduino_StartInit($) {
 		return;
 	}
 	else {
-		$hash->{getcmd}->{cmd} = "version";
-		$hash->{getcmd}->{responseSub} = \&SIGNALduino_CheckVersionResp;
+		$hash->{ucCmd}->{cmd} = "version";
+		$hash->{ucCmd}->{responseSub} = \&SIGNALduino_CheckVersionResp;
 		SIGNALduino_SimpleWrite($hash, "V");
 		#DevIo_SimpleWrite($hash, "V\n",2);
 		$hash->{DevState} = 'waitInit';
@@ -1250,13 +1250,13 @@ sub SIGNALduino_CheckVersionResp
 	### ToDo, manchmal kommen Mu Nachrichten in $msg und somit ist keine Version feststellbar !!!
 	if (defined($msg)) {
 		$hash->{logMethod}->($hash, 5, "$name: CheckVersionResp, called with $msg");
-		$msg =~ m/($gets{$hash->{getcmd}->{cmd}}[4])/;
+		$msg =~ m/($gets{$hash->{ucCmd}->{cmd}}[4])/;
 		$hash->{version} = $1;
 	} else {
 		$hash->{logMethod}->($hash, 5, "$name: CheckVersionResp, called without msg");
 		# Aufruf durch Timeout!
 		$msg="undef";
-		delete($hash->{getcmd});
+		delete($hash->{ucCmd});
 	}
 	
 	if (!defined($hash->{version}) ) {
@@ -1335,7 +1335,7 @@ sub SIGNALduino_CheckCmdResp($) {
 		}
 	}
 	else {
-		delete($hash->{getcmd});
+		delete($hash->{ucCmd});
 		$hash->{initretry} ++;
 		#InternalTimer(gettimeofday()+1, "SIGNALduino_StartInit", $hash, 0);
 		SIGNALduino_StartInit($hash);
@@ -1425,13 +1425,13 @@ sub SIGNALduino_SendFromQueue($$) {
     $hash->{sendworking} = 1;
     SIGNALduino_SimpleWrite($hash,$msg);
     if ($msg =~ m/^S[RCM];/) {
-       $hash->{getcmd}->{cmd} = 'sendraw';
-       $hash->{getcmd}->{responseSub} = \&SIGNALduino_CheckSendRawResponse;
+       $hash->{ucCmd}->{cmd} = 'sendraw';
+       $hash->{ucCmd}->{responseSub} = \&SIGNALduino_CheckSendRawResponse;
        $hash->{logMethod}->($name, 4, "$name: SendFromQueue, msg=$msg"); # zu testen der Queue, kann wenn es funktioniert auskommentiert werden
     } 
 #    elsif ($msg eq "C99") {
-#       $hash->{getcmd}->{cmd} = 'ccregAll';
-#       $hash->{getcmd}->{responseSub} = \&SIGNALduino_CheckCcregResponse;
+#       $hash->{ucCmd}->{cmd} = 'ccregAll';
+#       $hash->{ucCmd}->{responseSub} = \&SIGNALduino_CheckCcregResponse;
 #
 #    }
   }
@@ -1440,7 +1440,7 @@ sub SIGNALduino_SendFromQueue($$) {
   # Write the next buffer not earlier than 0.23 seconds
   # else it will be sent too early by the SIGNALduino, resulting in a collision, or may the last command is not finished
   
-  if (defined($hash->{getcmd}->{cmd}) && $hash->{getcmd}->{cmd} eq 'sendraw') {
+  if (defined($hash->{ucCmd}->{cmd}) && $hash->{ucCmd}->{cmd} eq 'sendraw') {
      InternalTimer(gettimeofday() + SDUINO_WRITEQUEUE_TIMEOUT, "SIGNALduino_HandleWriteQueue", "HandleWriteQueue:$name");
   } else {
      InternalTimer(gettimeofday() + SDUINO_WRITEQUEUE_NEXT, "SIGNALduino_HandleWriteQueue", "HandleWriteQueue:$name");
@@ -1458,9 +1458,9 @@ sub SIGNALduino_HandleWriteQueue($) {
   $hash->{logMethod}->($name, 4, "$name: HandleWriteQueue, called");  
   $hash->{sendworking} = 0;       # es wurde gesendet
   
-  if (exists($hash->{getcmd}->{cmd}) && $hash->{getcmd}->{cmd} eq 'sendraw') {
+  if (exists($hash->{ucCmd}->{cmd}) && $hash->{ucCmd}->{cmd} eq 'sendraw') {
     $hash->{logMethod}->($name, 4, "$name: HandleWriteQueue, sendraw no answer (timeout)");
-    delete($hash->{getcmd});
+    delete($hash->{ucCmd});
   }
 	  
   if(exists($hash->{QUEUE}) && @{$hash->{QUEUE}}) {
@@ -1572,25 +1572,25 @@ sub SIGNALduino_Read($) {
 		$hash->{logMethod}->($name, 4, "$name: Read, msg: $rmsg");
 	}
 
-	if ( $rmsg && !SIGNALduino_Parse($hash, $hash, $name, $rmsg) && exists($hash->{getcmd}) && defined($hash->{getcmd}->{cmd}))
+	if ( $rmsg && !SIGNALduino_Parse($hash, $hash, $name, $rmsg) && exists($hash->{ucCmd}) && defined($hash->{ucCmd}->{cmd}))
 	{
-		my $regexp = exists($gets{$hash->{getcmd}->{cmd}}[4]) ? $gets{$hash->{getcmd}->{cmd}}[4] : ".*";
-		if (exists($hash->{getcmd}->{responseSub}) && ref $hash->{getcmd}->{responseSub} eq "CODE") {
-			$hash->{logMethod}->($name, 5, "$name: Read, msg: regexp=$regexp cmd=$hash->{getcmd}->{cmd} msg=$rmsg");
+		my $regexp = exists($gets{$hash->{ucCmd}->{cmd}}[4]) ? $gets{$hash->{ucCmd}->{cmd}}[4] : ".*";
+		if (exists($hash->{ucCmd}->{responseSub}) && ref $hash->{ucCmd}->{responseSub} eq "CODE") {
+			$hash->{logMethod}->($name, 5, "$name: Read, msg: regexp=$regexp cmd=$hash->{ucCmd}->{cmd} msg=$rmsg");
 			
 			my $returnMessage ;
 			my $event;
-			if (!exists($gets{$hash->{getcmd}->{cmd}}[4]) || $rmsg =~ /$regexp/)
+			if (!exists($gets{$hash->{ucCmd}->{cmd}}[4]) || $rmsg =~ /$regexp/)
 			{
-				($returnMessage,$event) = $hash->{getcmd}->{responseSub}->($hash,$rmsg) ;
-				readingsSingleUpdate($hash, $hash->{getcmd}->{cmd}, $returnMessage, $event) if (defined($returnMessage) && defined($event));    	
-				if (exists($hash->{getcmd}->{asyncOut})) {
+				($returnMessage,$event) = $hash->{ucCmd}->{responseSub}->($hash,$rmsg) ;
+				readingsSingleUpdate($hash, $hash->{ucCmd}->{cmd}, $returnMessage, $event) if (defined($returnMessage) && defined($event));    	
+				if (exists($hash->{ucCmd}->{asyncOut})) {
 					$hash->{logMethod}->($name, 5, "$name: Read, try asyncOutput of message $returnMessage");
-					my $ao = asyncOutput( $hash->{getcmd}->{asyncOut}, $hash->{getcmd}->{cmd}.": " . $returnMessage ) if (defined($returnMessage)); 
+					my $ao = asyncOutput( $hash->{ucCmd}->{asyncOut}, $hash->{ucCmd}->{cmd}.": " . $returnMessage ) if (defined($returnMessage)); 
 					$hash->{logMethod}->($name, 5, "$name: Read, asyncOutput failed $ao") if ($ao);
 					
 				}
-				delete($hash->{getcmd});
+				delete($hash->{ucCmd});
 			}
 
 			if (exists($hash->{keepalive})) {
@@ -1598,7 +1598,7 @@ sub SIGNALduino_Read($) {
 				$hash->{keepalive}{retry} = 0;
 			}
 		} else {
-			$hash->{logMethod}->($name, 4, "$name: Read, msg: Received answer ($rmsg) for ". $hash->{getcmd}->{cmd}." does not match $regexp / coderef"); 
+			$hash->{logMethod}->($name, 4, "$name: Read, msg: Received answer ($rmsg) for ". $hash->{ucCmd}->{cmd}." does not match $regexp / coderef"); 
 		}
 	}
   }
@@ -1614,7 +1614,7 @@ sub SIGNALduino_KeepAlive($){
 	
 	#SIGNALduino_Log3 $name,4 , "$name: KeepAliveOk, " . $hash->{keepalive}{ok};
 	if (!$hash->{keepalive}{ok}) {
-		delete($hash->{getcmd});
+		delete($hash->{ucCmd});
 		if ($hash->{keepalive}{retry} >= SDUINO_KEEPALIVE_MAXRETRY) {
 			$hash->{logMethod}->($name,3 , "$name: KeepAlive, not ok, retry count reached. Reset");
 			$hash->{DevState} = 'INACTIVE';
@@ -1628,8 +1628,8 @@ sub SIGNALduino_KeepAlive($){
 				$logLevel = 4;
 			}
 			$hash->{logMethod}->($name, $logLevel, "$name: KeepAlive, not ok, retry = " . $hash->{keepalive}{retry} . " -> get ping");
-			$hash->{getcmd}->{cmd} = "ping";
-			$hash->{getcmd}->{responseSub} = \&SIGNALduino_GetResponseUpdateReading;
+			$hash->{ucCmd}->{cmd} = "ping";
+			$hash->{ucCmd}->{responseSub} = \&SIGNALduino_GetResponseUpdateReading;
 			SIGNALduino_AddSendQueue($hash, "P");
 		}
 	}
@@ -4766,7 +4766,7 @@ sub SetSens {
 		not affected.<br>
 		<ul>
 			<a name="cc1101_freq"></a>
-			<li><code>cc1101_freq</code> sets both the reception and transmission frequency. Note: Although the CC1101 can be set to frequencies between 315 and 915 MHz, the antenna interface and the antenna is tuned for exactly one frequency. Default is 433.920 MHz (or 868.350 MHz). If not set, frequency from <code>cc1101_frequency</code> attribute will be set.</li>
+			<li><code>cc1101_freq</code> sets both the reception and transmission frequency. Note: Although the CC1101 can be set to frequencies between 315 and 915 MHz, the antenna interface and the antenna is tuned for exactly one frequency. Default is 433.920 MHz (or 868.350 MHz). If not set, frequency from <code>cc1101_frequency</code> will be used.</li>
 			<a name="cc1101_bWidth"></a>
 			<li><code>cc1101_bWidth</code> can be set to values between 58 kHz and 812 kHz. Large values are susceptible to interference, but make possible to receive inaccurately calibrated transmitters. It affects tranmission too. Default is 325 kHz.</li>
 			<a name="cc1101_patable"></a>
@@ -4963,8 +4963,9 @@ sub SetSens {
         	</li><br>
         	<a name="cc1101_frequency"></a>
 		<li>cc1101_frequency<br>
-        	Since the PA table values are frequency-dependent, at 868 MHz a value greater 800 required.
-        	</li><br>
+        	Specify the frequency of your SIGNALduino. Default is 433 Mhz.<br>
+        	Since the PA table values are frequency-dependent,the specified frequency will be used.
+       	</li><br>
 		<a name="debug"></a>
 		<li>debug<br>
 		This will bring the module in a very verbose debug output. Usefull to find new signals and verify if the demodulation works correctly.
@@ -5398,8 +5399,9 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
 	</li><br>
 	<a name="cc1101_frequency"></a>
 	<li>cc1101_frequency<br>
-	Frequenzeinstellung des cc1101. | Bsp: 433.920 / 868.350
-	</li><br>
+  	Legt die Frequenz des SIGNALduino fest. Standard is 433 Mhz.<br>
+  	Da die Werte für PA Werte Frequenzabhängig sind, wird für das Setzen der Register die hier hinterlegte Frequenz verwendet.
+	<>/li><br>
 	<a name="debug"></a>
 	<li>debug<br>
 	Dies bringt das Modul in eine sehr ausf&uuml;hrliche Debug-Ausgabe im Logfile. Somit lassen sich neue Signale finden und Signale &uuml;berpr&uuml;fen, ob die Demodulation korrekt funktioniert.

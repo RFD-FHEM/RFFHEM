@@ -587,8 +587,8 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 			plan(3);
 			my $ret = SIGNALduino_Set_bWidth($targetHash,,"cc1101_bWidth","325");
 			is($ret,"Register 10 requsted","Verify return message / request register 10");
-			is($targetHash->{getcmd}->{cmd},"set_bWidth","check getcmd command");
-			is($targetHash->{getcmd}->{arg},"325","check getcmd arg");
+			is($targetHash->{ucCmd}->{cmd},"set_bWidth","check getcmd command");
+			is($targetHash->{ucCmd}->{arg},"325","check getcmd arg");
 		};
 
 		# Todo: ggf mock DevIo_SimpleRead to return "C10 = 57"
