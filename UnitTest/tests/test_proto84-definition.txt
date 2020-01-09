@@ -8,24 +8,12 @@ defmod test_proto84 UnitTest dummyDuino (
  SIGNALduino_Parse_MU($targetHash, $targetHash, $targetHash->{NAME}, $rmsg,%signal_parts);
  is( ($SD_Dispatch->called_with)[4], "84", "SIGNALduno_Dispatch check id" );
  is( ($SD_Dispatch->called_with)[2], "W84#FE42004526", "SIGNALduno_Dispatch check dmsg" );
+
  my $sensorname="SD_WS_84_TH_1";
  ok(!IsDevice($sensorname), "check Sensor not created with single dispatch");
  $SD_Dispatch->unmock;
  sleep 3;
  SIGNALduino_Parse_MU($targetHash, $targetHash, $targetHash->{NAME}, $rmsg,%signal_parts);
  ok(IsDevice("SD_WS_84_TH_1"), "check Sensor created with second dispatch");
- 
- subtest 'Checking readings' => sub {
-   plan tests => 6;
-   sleep 3;
-   SIGNALduino_Parse_MU($targetHash, $targetHash, $targetHash->{NAME}, $rmsg,%signal_parts);
-   is(ReadingsVal($sensorname,"temperature","0"),"6.9","check temperature reading");
-   is(ReadingsVal($sensorname,"humidity","0"),"66","check humidity reading");
-   is(ReadingsVal($sensorname,"batteryState","0"),"ok","check battery reading");
-   is(ReadingsVal($sensorname,"channel","0"),"1","check battery reading");
-   is(ReadingsVal($sensorname,"sendmode","0"),"auto","check sendmode reading");
-   is(InternalVal($sensorname,$target."_Protocol_ID",undef),"84","check protocolid internal");
-
- };
 } 
 )

@@ -30,6 +30,16 @@ defmod test_autocreate_devices UnitTest dummyDuino (
 		Dispatch($targetHash,"W38#8B922397E");
 	};
 	
+	subtest 'Protocol 84 - autocreate' => sub {
+		my $sensorname="SD_WS_84_TH_1";
+		Dispatch($targetHash,"W84#FE42004526");
+		is(!IsDevice($sensorname), 1, "Sensor not created with single dispatch");
+		sleep 3;
+		Dispatch($targetHash,"W84#FE42004526");
+		is(IsDevice($sensorname), 1, "check Sensor created with second dispatch");
+		sleep 3;
+	};
+	
 	# for local test, to reset attrib to old value
 	if ($attr_autocreateThreshold) {
 		CommandAttr($targetHash,"autocreate autocreateThreshold $attr_autocreateThreshold");
