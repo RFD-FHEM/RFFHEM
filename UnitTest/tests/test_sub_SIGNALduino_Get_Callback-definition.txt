@@ -8,7 +8,7 @@ defmod test_sub_SIGNALduino_Get_Callback UnitTest dummyDuino
 	
 	my $GlobalTestVar = undef;
 	
-	sub dummyCb { $GlobalTestVar = 1000; 	}
+	sub dummyCb { $GlobalTestVar = $_[1]; 	}
 	
 	subtest 'Test return values SIGNALduino_Get_Callback with wrong parameters' => sub {
 		plan(3);
@@ -50,7 +50,7 @@ defmod test_sub_SIGNALduino_Get_Callback UnitTest dummyDuino
 
 		is($GlobalTestVar,U,"verify testvar is undef before calling");
 		SIGNALduino_Read($targetHash);
-		is($GlobalTestVar,1000,"verify callback has changed testvar = 1000");
+		is($GlobalTestVar,"C12 = B4","verify callback has changed testvar = 1000");
 	};
 
 }
