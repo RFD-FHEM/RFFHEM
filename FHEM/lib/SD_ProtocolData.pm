@@ -182,13 +182,13 @@ package lib::SD_ProtocolData;
 							#	ABS700 | Id:69 T: 9.3 Bat:low     MS;P1=-7948;P2=471;P3=-1997;P4=-3964;D=21232423232324232423232323242323242423232323232424;CP=2;SP=1;R=246;O;m2;
 			{
 				name						=> 'weather (v6)',
-				comment					=> 'temperature / humidity or other sensors',
+				comment					=> 'temperature / humidity or other sensors | ABS700',
 				id							=> '0.5',
 				knownFreqs			=> '433.92',
 				one							=> [1,-8],
 				zero						=> [1,-4],
 				sync						=> [1,-16],
-				clockabs			  => '500',
+				clockabs			  => '475',
 				format					=> 'twostate',	# not used now
 				preamble				=> 's',					# prepend to converted message
 				postamble				=> '00',				# Append to converted message
