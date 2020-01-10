@@ -1,3 +1,13 @@
+2020-01-10 - doc Update SD_ProtocolData.pm (#771)
+
+* Update SD_ProtocolData.pm
+
+- added doc
+
+* Update SD_ProtocolData.pm
+
+- rename name
+- rename comment
 2020-01-09 - 00_SIGNALduino.pm
 - code rewrite of get command handling
 - removed reading version and generated internal version
