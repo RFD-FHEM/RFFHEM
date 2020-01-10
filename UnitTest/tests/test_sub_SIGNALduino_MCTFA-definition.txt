@@ -1,4 +1,4 @@
-defmod test_sub_MCTFA UnitTest dummyDuino ( 
+defmod test_sub_SIGNALduino_MCTFA UnitTest dummyDuino ( 
 { 
 	my $id=58;
 	subtest 'MCTFA single transmission' => sub {

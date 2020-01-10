@@ -1,5 +1,4 @@
-defmod test_callsub_1 UnitTest dummyDuino ( { 	
-
+defmod test_sub_SIGNALduino_callsub_1 UnitTest dummyDuino ( { 	
 
 	my $bad_testmethod = sub {	my ($name, @bit_msg) = @_;	return 1,"bad var"; };
 	my $good_testmethod = sub {	my ($name, @bit_msg) = @_;	return 1,qw(0 1 0 1); };

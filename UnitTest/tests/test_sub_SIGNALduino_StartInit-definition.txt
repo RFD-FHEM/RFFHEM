@@ -1,4 +1,4 @@
-defmod test_sub_StartInit UnitTest dummyDuino ( 
+defmod test_sub_SIGNALduino_StartInit UnitTest dummyDuino ( 
 { 
 	subtest 'Test with initretry=1' => sub {
 		plan tests => 4;
