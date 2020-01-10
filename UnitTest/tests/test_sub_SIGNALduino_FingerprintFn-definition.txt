@@ -1,4 +1,4 @@
-defmod test_fingerprint UnitTest dummyDuino ( 
+defmod test_sub_SIGNALduino_FingerprintFn UnitTest dummyDuino ( 
 { 
  my $dmsg ="W84#FE42004526";
  my ($ret_name,$ret_dmsg) = SIGNALduino_FingerprintFn($targetHash->{NAME},$dmsg);

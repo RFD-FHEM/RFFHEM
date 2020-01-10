@@ -1,4 +1,4 @@
-defmod test_read UnitTest dummyDuino 
+defmod test_sub_SIGNALduino_Read UnitTest dummyDuino 
 (
  {
 	use Test::Device::SerialPort;
