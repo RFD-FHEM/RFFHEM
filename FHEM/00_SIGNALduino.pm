@@ -31,7 +31,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.4.2_dev_09.01",
+	SDUINO_VERSION            => "v3.4.2_dev_10.01",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -618,6 +618,7 @@ sub SIGNALduino_Set($$@) {
 	return $rcode; # We will exit here, and give an output only, $rcode has some value
 }
 
+
 ###############################
 sub SIGNALduino_Set_FhemWebList { 
 	my ($hash, @a) = @_;
@@ -892,6 +893,29 @@ sub SIGNALduino_Get($@) {
 	  	$rcode= "$name is not active, may firmware is not supported, please flash or reset";
 	}
 		 
+	return $rcode; # We will exit here, and give an output only, $rcode has some value
+}
+
+
+
+###############################
+#SIGNALduino_Get_Callback($name, $callbackFn, @args);
+sub SIGNALduino_Get_Callback($$$) {
+	my ($name, $callbackFn, $arg) = @_;
+
+	my @a = split (" ",$arg);
+ 	return "\"get _Get_Callback\" needs at least two parameters" if(@a < 2);
+ 	return "\"$name\" is not a definition of type SIGNALduino" if (!IsDevice($name, "SIGNALduino"));
+	
+	my $hash = $defs{$name};
+	my $rcode = SIGNALduino_Get($hash,$name,@a);
+	
+	if (!defined($rcode))
+	{
+		$hash->{ucCmd}->{responseSub}=$callbackFn;
+		delete($hash->{ucCmd}->{asyncOut});
+	} 
+	
 	return $rcode; # We will exit here, and give an output only, $rcode has some value
 }
 
