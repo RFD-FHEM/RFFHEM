@@ -50,7 +50,7 @@ defmod test_sub_SIGNALduino_Get_Callback UnitTest dummyDuino
 
 		is($GlobalTestVar,U,"verify testvar is undef before calling");
 		SIGNALduino_Read($targetHash);
-		is($GlobalTestVar,"C12 = B4","verify callback has changed testvar = 1000");
+		is($GlobalTestVar,"C12 = B4","verify callback has changed testvar with response");
 	};
 
 }
