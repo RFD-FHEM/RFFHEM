@@ -388,8 +388,8 @@ package lib::SD_ProtocolData;
 						# https://forum.fhem.de/index.php/topic,39451.msg917042.html#msg917042 @greewoo
 						#	MU;P0=-96;P1=800;P2=-985;P3=485;P4=1421;P5=-8608;D=0123232323232323242324232324242324232324242324242324232323242324242323232324242424242424242424242424242424242424242424242424242424242424242424242424242424242324242424232323235;CP=4;R=0;
 			{
-				name						=> 'CTW 600',
-				comment					=> 'FunkWS WH1080/WH3080/CTW600',
+				name						=> 'weather',
+				comment					=> 'Weatherstation WH1080, WH3080, CTW600',
 				id							=> '9',
 				knownFreqs			=> '433.92 | 868.35',
 				zero						=> [3,-2],
