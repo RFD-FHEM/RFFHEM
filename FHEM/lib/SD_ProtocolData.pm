@@ -69,10 +69,9 @@ package lib::SD_ProtocolData;
 	use strict;
 	use warnings;
 	
-	our $VERSION = '1.14';
+	our $VERSION = '1.15';
 	our %protocols = (
 		"0"	=>	## various weather sensors (500 | 9100)
-						# ABS700 | Id:79 T: 3.3 Bat:low                MS;P1=-7949;P2=492;P3=-1978;P4=-3970;D=21232423232424242423232323232324242423232323232424;CP=2;SP=1;R=245;O;
 						# Mebus | Id:237 Ch:1 T: 1.9 Bat:low           MS;P0=-9298;P1=495;P2=-1980;P3=-4239;D=1012121312131313121313121312121212121212131212131312131212;CP=1;SP=0;R=223;O;m2;
 						# GT_WT_02 | Id:163 Ch:1 T: 2.9 H: 86 Bat:ok   MS;P0=531;P1=-9027;P3=-4126;P4=-2078;D=0103040304040403030404040404040404040404030303040303040304030304030304040403;CP=0;SP=1;R=249;O;m2;
 						# Prologue | Id:145 Ch:0 T: 2.6, Bat:ok        MS;P0=-4152;P1=643;P2=-2068;P3=-9066;D=1310121210121212101210101212121212121212121212121010121012121212121012101212;CP=1;SP=3;R=220;O;m2;
@@ -177,6 +176,27 @@ package lib::SD_ProtocolData;
 				length_min		=> '32',
 				length_max		=> '36',
 				paddingbits		=> '8',				 # pad up to 8 bits, default is 4
+			},
+		"0.5"	=>	## various weather sensors (500 | 8000)
+							# ABS700 | Id:79 T: 3.3 Bat:low     MS;P1=-7949;P2=492;P3=-1978;P4=-3970;D=21232423232424242423232323232324242423232323232424;CP=2;SP=1;R=245;O;
+							#	ABS700 | Id:69 T: 9.3 Bat:low     MS;P1=-7948;P2=471;P3=-1997;P4=-3964;D=21232423232324232423232323242323242423232323232424;CP=2;SP=1;R=246;O;m2;
+			{
+				name						=> 'weather (v6)',
+				comment					=> 'temperature / humidity or other sensors',
+				id							=> '0.5',
+				knownFreqs			=> '433.92',
+				one							=> [1,-8],
+				zero						=> [1,-4],
+				sync						=> [1,-16],
+				clockabs			  => '500',
+				format					=> 'twostate',	# not used now
+				preamble				=> 's',					# prepend to converted message
+				postamble				=> '00',				# Append to converted message
+				clientmodule		=> 'CUL_TCM97001',
+				#modulematch		=> '^s[A-Fa-f0-9]+',
+				length_min			=> '24',
+				length_max			=> '24',
+				paddingbits			=> '8',					# pad up to 8 bits, default is 4
 			},
 			"1"	=>	## Conrad RSL
 							# on   MS;P1=1154;P2=-697;P3=559;P4=-1303;P5=-7173;D=351234341234341212341212123412343412341234341234343434343434343434;CP=3;SP=5;R=247;O;
