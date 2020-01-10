@@ -177,7 +177,7 @@ package lib::SD_ProtocolData;
 				length_max		=> '36',
 				paddingbits		=> '8',				 # pad up to 8 bits, default is 4
 			},
-		"0.5"	=>	## various weather sensors (500 | 8000)
+		"0.5"	=>	## various weather sensors (475 | 8000)
 							# ABS700 | Id:79 T: 3.3 Bat:low     MS;P1=-7949;P2=492;P3=-1978;P4=-3970;D=21232423232424242423232323232324242423232323232424;CP=2;SP=1;R=245;O;
 							#	ABS700 | Id:69 T: 9.3 Bat:low     MS;P1=-7948;P2=471;P3=-1997;P4=-3964;D=21232423232324232423232323242323242423232323232424;CP=2;SP=1;R=246;O;m2;
 			{
@@ -188,7 +188,7 @@ package lib::SD_ProtocolData;
 				one							=> [1,-8],
 				zero						=> [1,-4],
 				sync						=> [1,-16],
-				clockabs			  => '475',
+				clockabs			  => 475,
 				format					=> 'twostate',	# not used now
 				preamble				=> 's',					# prepend to converted message
 				postamble				=> '00',				# Append to converted message
