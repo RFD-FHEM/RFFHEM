@@ -378,23 +378,35 @@ package lib::SD_ProtocolData;
 				remove_zero			=> 1,						# Removes leading zeros from output
 			},
 		"9"	=>	## Funk Wetterstation CTW600
+						### ! some message are decode as protocol 42 and 75 !
+						## WH3080 | UV: 4 Lux: 57970 | @Ralf
+						# MU;P0=-1424;P1=1417;P2=-1058;P3=453;P4=-24774;P6=288;P7=-788;D=01212121232343232323232323232123232323232121232121212123212121232123212321232121212123212121232321232321212121232323212321212121212121212323467323232323232323212323232323212123212121212321212123212321232123212121212321212123232123232121212123232321232121;CP=3;R=247;O;
+						## WH1080
+						# https://forum.fhem.de/index.php/topic,39451.msg844155.html#msg844155 | https://forum.fhem.de/index.php/topic,39451.msg848667.html#msg848667 @maddinthebrain
+						# MU;P0=-31072;P1=486;P2=-986;P3=1454;D=01212121212121212321232321232123232121232323212121212123232123232123212321232123232323232321232323232323212323232323232323232123212121212321232323232323232323212321212321232301212121212121212321232321232123232121232323212121212123232123232123212321232123;CP=1;R=29;O;
+						## CTW600
+						# https://forum.fhem.de/index.php/topic,39451.msg917042.html#msg917042 @greewoo
+						#	MU;P0=-96;P1=800;P2=-985;P3=485;P4=1421;P5=-8608;D=0123232323232323242324232324242324232324242324242324232323242324242323232324242424242424242424242424242424242424242424242424242424242424242424242424242424242324242424232323235;CP=4;R=0;
 			{
-				name					=> 'CTW 600',
+				name						=> 'CTW 600',
 				comment					=> 'FunkWS WH1080/WH3080/CTW600',
-				id					=> '9',
-				knownFreqs				=> '433.92 | 868.35',
-				zero					=> [3,-2],
-				one					=> [1,-2],
+				id							=> '9',
+				knownFreqs			=> '433.92 | 868.35',
+				zero						=> [3,-2],
+				one							=> [1,-2],
 				clockabs				=> 480,					# -1 = auto undef=noclock
 				format					=> 'pwm',				# tristate can't be migrated from bin into hex!
 				preamble				=> 'P9#',				# prepend to converted message
-				clientmodule			=> 'SD_WS09',
+				clientmodule		=> 'SD_WS09',
 				#modulematch			=> '^u9#.....',
 				length_min			=> '60',
 				length_max			=> '120',
 				reconstructBit  => '1',
 			},
 		"10"	=>	## Oregon Scientific 2
+							# https://forum.fhem.de/index.php/topic,60170.msg875919.html#msg875919 @David1
+							# MC;LL=-973;LH=984;SL=-478;SH=493;D=EF7E2DCC00000283AF5DF7CFEFEF7E2DCC;C=487;L=134;R=33;s5;b0;
+							#	MC;LL=-975;LH=976;SL=-491;SH=491;D=BEF9FDFDEFC5B98000005075EBBEF9FDFDEFC5;C=488;L=152;R=34;s1;b0;O;w;
 			{
 				name						=> 'Oregon Scientific v2|v3',
 				comment					=> 'temperature / humidity or other sensors',
