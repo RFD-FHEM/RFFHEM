@@ -53,7 +53,7 @@ defmod test_sub_SIGNALduino_CheckCmdResp UnitTest dummyDuino (
 
 		is($targetHash->{ucCmd}->{cmd},"version","ucCmd not removed");
 		is($targetHash->{DevState},"initialized","check DevState");
-		is($targetHash->{hasCC1101},undef,"check internal hasCC1101");
+		is($targetHash->{CC1101_Available},undef,"check internal CC1101_Available");
 		$SD_SimpleWrite->unmock;
 	}; 
 
@@ -71,7 +71,7 @@ defmod test_sub_SIGNALduino_CheckCmdResp UnitTest dummyDuino (
 
 		is($targetHash->{ucCmd}->{cmd},"version","ucCmd not removed");
 		is($targetHash->{DevState},"initialized","check DevState");
-		is($targetHash->{hasCC1101},1,"check internal hasCC1101");
+		is($targetHash->{CC1101_Available},1,"check internal CC1101_Available");
 		
 		$SD_SimpleWrite->unmock;
 	}; 
