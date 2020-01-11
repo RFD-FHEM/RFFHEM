@@ -1,17 +1,20 @@
+2020-01-10 - 00_SIGNALduino.pm
+- Implemented sub to be called by other modules to receive get command response
+-fixed two perlwarnings
+-Improved test
+
 2020-01-10 - Update SD_ProtocolData.pm (#773)
 
 * Update SD_ProtocolData.pm
-
 - added new def (clockabs autois very inconvenient)
 
 * Update SD_ProtocolData.pm
-
 - revised name
 - revised average clockabs
 
 * Update SD_ProtocolData.pm
-
 - revised doc
+
 2020-01-10 - doc Update SD_ProtocolData.pm (#771)
 
 * Update SD_ProtocolData.pm
