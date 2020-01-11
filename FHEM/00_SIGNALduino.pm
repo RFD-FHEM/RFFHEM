@@ -602,7 +602,7 @@ sub SIGNALduino_Set($$@) {
   
  	return "\"set SIGNALduino\" needs at least one parameter" if(@a < 1);
 
-	if (!InternalVal($name,"hasCC1101",0) && $a[0] =~ /^cc1101/) {
+	if (!InternalVal($name,"CC1101_Available",0) && $a[0] =~ /^cc1101/) {
 		return "This command is only available with a cc1101 receiver";
 	}
 	if (!exists($sets{$a[0]})) {
@@ -626,7 +626,7 @@ sub SIGNALduino_Set_FhemWebList {
 		($_ ne "?" && 
 			(
 				( IsDummy($hash->{NAME}) && $_ =~ m/^(?:close|reset)/ ) || 
-				( InternalVal($hash->{NAME},"hasCC1101",0) || (!InternalVal($hash->{NAME},"hasCC1101",0) && $_ !~ /^cc/)) &&
+				( InternalVal($hash->{NAME},"CC1101_Available",0) || (!InternalVal($hash->{NAME},"CC1101_Available",0) && $_ !~ /^cc/)) &&
 				( !IsDummy($hash->{NAME}) && (defined(DevIo_IsOpen($hash)) || $_ =~ m/^(?:flash|reset)/)  ) 
 			)
 		)	 
@@ -733,10 +733,10 @@ sub SIGNALduino_Set_sendMsg {
 
 	$repeats=1 if (!defined($repeats));
 
-	if (exists($ProtocolListSIGNALduino{$protocol}{frequency}) && InternalVal($hash->{NAME},"hasCC1101",0) && !defined($frequency)) {
+	if (exists($ProtocolListSIGNALduino{$protocol}{frequency}) && InternalVal($hash->{NAME},"CC1101_Available",0) && !defined($frequency)) {
 		$frequency = $ProtocolListSIGNALduino{$protocol}{frequency};
 	}
-	if (defined($frequency) && InternalVal($hash->{NAME},"hasCC1101",0)) {
+	if (defined($frequency) && InternalVal($hash->{NAME},"CC1101_Available",0)) {
 		$frequency="F=$frequency;";
 	} else {
 		$frequency="";
@@ -880,7 +880,7 @@ sub SIGNALduino_Get($@) {
 
  	return "\"get SIGNALduino\" needs at least one parameter" if(@a < 1);
 
-	if (!InternalVal($name,"hasCC1101",0) && $a[0] =~ /^cc/) {
+	if (!InternalVal($name,"CC1101_Available",0) && $a[0] =~ /^cc/) {
 		return "This command is only available with a cc1101 receiver";
 	}
 	if (!exists($gets{$a[0]})) {
@@ -927,7 +927,7 @@ sub SIGNALduino_Get_FhemWebList {
 		($_ ne "?" &&
 			( 
 				(IsDummy($hash->{NAME}) && $_ =~ m/^(?:availableFirmware|raw)/) || 
-				( InternalVal($hash->{NAME},"hasCC1101",0) || (!InternalVal($hash->{NAME},"hasCC1101",0) && $_ !~ /^cc/)) &&  
+				( InternalVal($hash->{NAME},"CC1101_Available",0) || (!InternalVal($hash->{NAME},"CC1101_Available",0) && $_ !~ /^cc/)) &&  
 				( !IsDummy($hash->{NAME}) && (defined(DevIo_IsOpen($hash))  ||  $_ =~ m/^(?:availableFirmware|raw)/  )) 
 			) 
 		) 
@@ -1312,7 +1312,7 @@ sub SIGNALduino_CheckVersionResp
 		$hash->{keepalive}{ok}    = 0;
 		$hash->{keepalive}{retry} = 0;
 		InternalTimer(gettimeofday() + SDUINO_KEEPALIVE_TIMEOUT, "SIGNALduino_KeepAlive", $hash, 0);
-	 	$hash->{hasCC1101} = 1  if ($hash->{version} =~ m/cc1101/);
+	 	$hash->{CC1101_Available} = 1  if ($hash->{version} =~ m/cc1101/);
 	 	$msg = $hash->{version};
 	}
 	return ($msg,undef);
@@ -1355,7 +1355,7 @@ sub SIGNALduino_CheckCmdResp($) {
 			$hash->{keepalive}{ok}    = 0;
 			$hash->{keepalive}{retry} = 0;
 			InternalTimer(gettimeofday() + SDUINO_KEEPALIVE_TIMEOUT, "SIGNALduino_KeepAlive", $hash, 0);
-		 	$hash->{hasCC1101} = 1  if ($ver =~ m/cc1101/);
+		 	$hash->{CC1101_Available} = 1  if ($ver =~ m/cc1101/);
 		}
 	}
 	else {
