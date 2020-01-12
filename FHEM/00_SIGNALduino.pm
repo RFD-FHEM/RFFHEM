@@ -648,10 +648,11 @@ sub SIGNALduino_Set_raw {
 							
 ###############################
  sub SIGNALduino_Set_flash {
-  	my ($hash, @a) = @_;
+  my ($hash, @a) = @_;
 	my $name = $hash->{NAME};
 	return "Please define your hardware! (attr $name hardware <model of your receiver>) " if (AttrVal($name,"hardware","") eq "");
-	
+	return "The function is under development. " if (AttrVal($name,"hardware","") =~ /^ESP/);
+
 	my @args = @a[1..$#a];
 	return "ERROR: argument failed! flash [hexFile|url]" if (!$args[0]);
 	
