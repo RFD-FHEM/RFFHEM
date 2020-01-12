@@ -1,3 +1,24 @@
+2020-01-12 - Update 00_SIGNALduino.pm - rename Internals (#775)
+
+* Update 00_SIGNALduino.pm
+
+- grouping cc1101
+
+* Update test_sub_SIGNALduino_Get-definition.txt
+
+- revised test
+
+* Update test_sub_SIGNALduino_CheckCmdResp-definition.txt
+
+- rename test parameter internal
+
+* Update test_sub_SIGNALduino_Get_Callback-definition.txt
+
+- rename test parameter internal
+
+* Update test_sub_SIGNALduino_Set-definition.txt
+
+- rename test parameter internal
 2020-01-12 - Delete 14_SD_Keeloq.pm - transfer to fhem org (#776)
 
 * Delete 14_SD_Keeloq.pm
