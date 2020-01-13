@@ -4,8 +4,8 @@ defmod test_sub_SIGNALduino_CheckccConfResponse UnitTest dummyDuino (
 		plan tests => 2;
 		
 		my ($ret)=SIGNALduino_CheckccConfResponse($targetHash,"C0Dn11=10B07157C43023B900070018146C070091");
-		is($ret,"\n\nFrequency:  %.3f MHz\nBandwidth:  %d KHz\nrAmpl:      %d dB\nsens:       %d dB\nData Rate:  %.2f Baud\nModulation: %s\nSyncmode:   %s","check return message");
-		is($targetHash->{CC1101_CONFIG},"freq:433.920MHz bWidth:325KHz rAmpl:42dB sens:8dB (DataRate:5603.79Baud, Modulation:ASK/OOK)","check internal value");
+		is($ret,"\n\nFrequency:  433.920 MHz\nBandwidth:  325 KHz\nrAmpl:      42 dB\nsens:       8 dB\nData Rate:  5603.79 Baud\nModulation: ASK/OOK\nSyncmode:   No preamble/sync","check return message");
+		is($targetHash->{CC1101_CONFIG},"\n\nFrequency:  433.920 MHz\nBandwidth:  325 KHz\nrAmpl:      42 dB\nsens:       8 dB\nData Rate:  5603.79 Baud\nModulation: ASK/OOK\nSyncmode:   No preamble/sync","check internal value");
 	}; 
 	
 }
