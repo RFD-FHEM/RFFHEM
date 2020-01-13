@@ -125,6 +125,8 @@ my %sets = (
 
 
 my @modformat = ("2-FSK","GFSK","-","ASK/OOK","4-FSK","-","-","MSK"); # modulation format
+my @syncmod = ("No preamble/sync","15/16 sync word bits detected","16/16 sync word bits detected","30/32 sync word bits detected", 
+               "No preamble/sync, carrier-sense above threshold, carrier-sense above threshold", "15/16 + carrier-sense above threshold", "16/16 + carrier-sense above threshold", "30/32 + carrier-sense above threshold");
 
 my %cc1101_register = (		# for get ccreg 99 and set cc1101_reg
  	"00" => 'IOCFG2  ',			# ! the values with spaces for output get ccreg 99 !
@@ -1047,13 +1049,14 @@ sub SIGNALduino_CheckccConfResponse
 		$var = substr($str,(hex($a)-13)*2, 2);
 		$r{$a} = hex($var);
 	}
-	my $msg = sprintf("freq:%.3fMHz bWidth:%dKHz rAmpl:%ddB sens:%ddB (DataRate:%.2fBaud, Modulation:%s)",
+	my $msg = sprintf("\n\nFrequency:  %.3f MHz\nBandwidth:  %d KHz\nrAmpl:      %d dB\nsens:       %d dB\nData Rate:  %.2f Baud\nModulation: %s\nSyncmode:   %s",
 		26*(($r{"0D"}*256+$r{"0E"})*256+$r{"0F"})/65536,                #Freq       | Register 0x0D,0x0E,0x0F
 		26000/(8 * (4+(($r{"10"}>>4)&3)) * (1 << (($r{"10"}>>6)&3))),   #Bw         | Register 0x10
 		$ampllist[$r{"1B"}&7],                                          #rAmpl      | Register 0x1B
 		4+4*($r{"1D"}&3),                                               #Sens       | Register 0x1D
 		((256+$r{"11"})*(2**($r{"10"} & 15 )))*26000000/(2**28),        #DataRate   | Register 0x10,0x11
-		$modformat[$r{"12"}>>4]                                         #Modulation | Register 0x12
+		$modformat[$r{"12"}>>4],                                        #Modulation | Register 0x12
+		$syncmod[($r{"12"})&7]                                          #Syncmod    | Register 0x12
 	);
 	$_[0]->{CC1101_CONFIG} = $msg;
 	return ($msg,undef);
