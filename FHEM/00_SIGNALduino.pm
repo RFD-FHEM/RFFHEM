@@ -8,7 +8,7 @@
 # It routes Messages serval Modules which are already integrated in FHEM. But there are also modules which comes with it.
 # N. Butzek, S. Butzek, 2014-2015
 # S.Butzek,Ralf9 2016-2019
-# S.Butzek, Homeautouser, Elektronbbs 2019-2020
+# S.Butzek, HomeAutoUser, Elektronbbs 2019-2020
 
 package main;
 my $missingModulSIGNALduino="";
@@ -123,8 +123,8 @@ my %sets = (
   "cc1101_reg"			=> 	[ 'textFieldNL', \&cc1101::SetRegisters ],
 );
 
-
-my @modformat = ("2-FSK","GFSK","-","ASK/OOK","4-FSK","-","-","MSK"); # modulation format
+## Supported config CC1101 ##
+my @modformat = ("2-FSK","GFSK","-","ASK/OOK","4-FSK","-","-","MSK");
 my @syncmod = ("No preamble/sync","15/16 sync word bits detected","16/16 sync word bits detected","30/32 sync word bits detected", 
                "No preamble/sync, carrier-sense above threshold, carrier-sense above threshold", "15/16 + carrier-sense above threshold", "16/16 + carrier-sense above threshold", "30/32 + carrier-sense above threshold");
 
@@ -604,7 +604,7 @@ sub SIGNALduino_Set($$@) {
   
  	return "\"set SIGNALduino\" needs at least one parameter" if(@a < 1);
 
-	if (!InternalVal($name,"CC1101_Available",0) && $a[0] =~ /^cc1101/) {
+	if (!InternalVal($name,"cc1101_available",0) && $a[0] =~ /^cc1101/) {
 		return "This command is only available with a cc1101 receiver";
 	}
 	if (!exists($sets{$a[0]})) {
@@ -628,7 +628,7 @@ sub SIGNALduino_Set_FhemWebList {
 		($_ ne "?" && 
 			(
 				( IsDummy($hash->{NAME}) && $_ =~ m/^(?:close|reset)/ ) || 
-				( InternalVal($hash->{NAME},"CC1101_Available",0) || (!InternalVal($hash->{NAME},"CC1101_Available",0) && $_ !~ /^cc/)) &&
+				( InternalVal($hash->{NAME},"cc1101_available",0) || (!InternalVal($hash->{NAME},"cc1101_available",0) && $_ !~ /^cc/)) &&
 				( !IsDummy($hash->{NAME}) && (defined(DevIo_IsOpen($hash)) || $_ =~ m/^(?:flash|reset)/)  ) 
 			)
 		)	 
@@ -735,10 +735,10 @@ sub SIGNALduino_Set_sendMsg {
 
 	$repeats=1 if (!defined($repeats));
 
-	if (exists($ProtocolListSIGNALduino{$protocol}{frequency}) && InternalVal($hash->{NAME},"CC1101_Available",0) && !defined($frequency)) {
+	if (exists($ProtocolListSIGNALduino{$protocol}{frequency}) && InternalVal($hash->{NAME},"cc1101_available",0) && !defined($frequency)) {
 		$frequency = $ProtocolListSIGNALduino{$protocol}{frequency};
 	}
-	if (defined($frequency) && InternalVal($hash->{NAME},"CC1101_Available",0)) {
+	if (defined($frequency) && InternalVal($hash->{NAME},"cc1101_available",0)) {
 		$frequency="F=$frequency;";
 	} else {
 		$frequency="";
@@ -882,7 +882,7 @@ sub SIGNALduino_Get($@) {
 
  	return "\"get SIGNALduino\" needs at least one parameter" if(@a < 1);
 
-	if (!InternalVal($name,"CC1101_Available",0) && $a[0] =~ /^cc/) {
+	if (!InternalVal($name,"cc1101_available",0) && $a[0] =~ /^cc/) {
 		return "This command is only available with a cc1101 receiver";
 	}
 	if (!exists($gets{$a[0]})) {
@@ -929,7 +929,7 @@ sub SIGNALduino_Get_FhemWebList {
 		($_ ne "?" &&
 			( 
 				(IsDummy($hash->{NAME}) && $_ =~ m/^(?:availableFirmware|raw)/) || 
-				( InternalVal($hash->{NAME},"CC1101_Available",0) || (!InternalVal($hash->{NAME},"CC1101_Available",0) && $_ !~ /^cc/)) &&  
+				( InternalVal($hash->{NAME},"cc1101_available",0) || (!InternalVal($hash->{NAME},"cc1101_available",0) && $_ !~ /^cc/)) &&  
 				( !IsDummy($hash->{NAME}) && (defined(DevIo_IsOpen($hash))  ||  $_ =~ m/^(?:availableFirmware|raw)/  )) 
 			) 
 		) 
@@ -1044,22 +1044,27 @@ sub SIGNALduino_CheckccConfResponse
 
 	my (undef,$str) = split('=', $_[1]);
 	my $var;
-	my %r = ( "0D"=>1,"0E"=>1,"0F"=>1,"10"=>1,"11"=>1,"12"=>1,"1B"=>1,"1D"=>1 );
+	my %r = ( "0D"=>1,"0E"=>1,"0F"=>1,"10"=>1,"11"=>1,"12"=>1,"1B"=>1,"1D"=>1, "15"=>1);
 	foreach my $a (sort keys %r) {
 		$var = substr($str,(hex($a)-13)*2, 2);
 		$r{$a} = hex($var);
 	}
-	my $msg = sprintf("\n\nFrequency:  %.3f MHz\nBandwidth:  %d KHz\nrAmpl:      %d dB\nsens:       %d dB\nData Rate:  %.2f Baud\nModulation: %s\nSyncmode:   %s",
+	my $msg = sprintf("Frequency: %.3fMHz, Bandwidth: %dKHz, rAmpl: %ddB, sens: %ddB, DataRate: %.2fBaud",
 		26*(($r{"0D"}*256+$r{"0E"})*256+$r{"0F"})/65536,                #Freq       | Register 0x0D,0x0E,0x0F
 		26000/(8 * (4+(($r{"10"}>>4)&3)) * (1 << (($r{"10"}>>6)&3))),   #Bw         | Register 0x10
 		$ampllist[$r{"1B"}&7],                                          #rAmpl      | Register 0x1B
 		4+4*($r{"1D"}&3),                                               #Sens       | Register 0x1D
-		((256+$r{"11"})*(2**($r{"10"} & 15 )))*26000000/(2**28),        #DataRate   | Register 0x10,0x11
-		$modformat[$r{"12"}>>4],                                        #Modulation | Register 0x12
-		$syncmod[($r{"12"})&7]                                          #Syncmod    | Register 0x12
+		((256+$r{"11"})*(2**($r{"10"} & 15 )))*26000000/(2**28)         #DataRate   | Register 0x10,0x11
 	);
-	$_[0]->{CC1101_CONFIG} = $msg;
-	return ($msg,undef);
+
+	my $msg2 = sprintf("Modulation: %s, Syncmod: %s",
+		$modformat[$r{"12"}>>4],                                        #Modulation | Register 0x12
+		$syncmod[($r{"12"})&7],                                         #Syncmod    | Register 0x12
+	);
+
+	$_[0]->{cc1101_config} = $msg;
+	$_[0]->{cc1101_config_plus} = $msg2;
+	return ($msg.", ".$msg2,undef);
 }
 
 
@@ -1315,7 +1320,7 @@ sub SIGNALduino_CheckVersionResp
 		$hash->{keepalive}{ok}    = 0;
 		$hash->{keepalive}{retry} = 0;
 		InternalTimer(gettimeofday() + SDUINO_KEEPALIVE_TIMEOUT, "SIGNALduino_KeepAlive", $hash, 0);
-	 	$hash->{CC1101_Available} = 1  if ($hash->{version} =~ m/cc1101/);
+	 	$hash->{cc1101_available} = 1  if ($hash->{version} =~ m/cc1101/);
 	 	$msg = $hash->{version};
 	}
 	return ($msg,undef);
@@ -1358,7 +1363,7 @@ sub SIGNALduino_CheckCmdResp($) {
 			$hash->{keepalive}{ok}    = 0;
 			$hash->{keepalive}{retry} = 0;
 			InternalTimer(gettimeofday() + SDUINO_KEEPALIVE_TIMEOUT, "SIGNALduino_KeepAlive", $hash, 0);
-		 	$hash->{CC1101_Available} = 1  if ($ver =~ m/cc1101/);
+		 	$hash->{cc1101_available} = 1  if ($ver =~ m/cc1101/);
 		}
 	}
 	else {

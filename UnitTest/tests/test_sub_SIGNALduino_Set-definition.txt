@@ -27,7 +27,7 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
     # Simple commands
     my @mockData = (
     	{	
-    		CC1101_Available => 1,
+    		cc1101_available => 1,
 			testname=>  "set raw W0D23#W0B22",
 			input	=>	"raw W0D23#W0B22",
 			check =>  sub { 
@@ -39,7 +39,7 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 		    }
 		},
     	{	
-    		CC1101_Available => 1,
+    		cc1101_available => 1,
 			testname=>  "set disableMessagetype MC",
 			input	=>	"disableMessagetype MC",
 			check =>  sub { 
@@ -50,7 +50,7 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 
 		},
     	{	
-    		CC1101_Available => 1,
+    		cc1101_available => 1,
 			testname=>  "set enableMessagetype MU",
 			input	=>	"enableMessagetype MU",
 			check =>  sub { 
@@ -73,7 +73,7 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 		},
 		
 		{	
-    		CC1101_Available => 1,
+    		cc1101_available => 1,
 			testname=>  "set freq 868",
 			input	=>	"cc1101_freq 868",
 			check =>  sub { 
@@ -88,7 +88,7 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 		    }
 		},
 		{	
-    		CC1101_Available => 0,
+    		cc1101_available => 0,
 			testname=>  "set freq 868",
 			input	=>	"cc1101_freq 868",
 			check =>  sub { 
@@ -99,7 +99,7 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 		    return => "This command is only available with a cc1101 receiver"
 		},
 		{	
-    		CC1101_Available => 1,
+    		cc1101_available => 1,
 			testname=>  "set freq (defaults to 433)",
 			input	=>	"cc1101_freq",
 			check =>  sub { 
@@ -114,7 +114,7 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 		    },	   
 		},
 		{	
-    		CC1101_Available => 0,
+    		cc1101_available => 0,
 			testname=>  "set freq (defaults to 433)",
 			input	=>	"cc1101_freq",
 			check =>  sub { 
@@ -128,7 +128,7 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 			pre_code => sub { CommandAttr(undef,"$target cc1101_frequency 868") ; },
 			post_code => sub { CommandDeleteAttr(undef,"$target cc1101_frequency") ; },
 
-    		CC1101_Available => 1,
+    		cc1101_available => 1,
 			testname =>  "set freq (defaults to 868)",
 			input	=>	"cc1101_freq",
 			check =>  sub { 
@@ -144,7 +144,7 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 		},
 
 		{
-    		CC1101_Available => 1,
+    		cc1101_available => 1,
 			testname=>  "set bWidth 102",
 			input	=>	"cc1101_bWidth 102",
 			check =>  sub { 
@@ -156,7 +156,7 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 		    return => "Register 10 requsted"
 		},
 		{
-    		CC1101_Available => 0,
+    		cc1101_available => 0,
 			testname=>  "set bWidth 102",
 			input	=>	"cc1101_bWidth 102",
 			check =>  sub { 
@@ -167,7 +167,7 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 		    return => "This command is only available with a cc1101 receiver"
 		},
 		{
-    		CC1101_Available => 1,
+    		cc1101_available => 1,
 			testname=>  "set rAmpl 24",
 			input	=>	"cc1101_rAmpl 24",
 			check =>  sub { 
@@ -180,7 +180,7 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 		    }
 		},
 		{
-    		CC1101_Available => 1,
+    		cc1101_available => 1,
 			testname=>  "set sens 8",
 			input	=>	"cc1101_sens 8",
 			check =>  sub { 
@@ -193,7 +193,7 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 		    }
 		},
 		{
-    		CC1101_Available => 1,
+    		cc1101_available => 1,
 			testname=>  "set patable 5_dBm (cc1101_frequency=433)",
 			input	=>	"cc1101_patable 5_dBm",
 			pre_code 	=> sub { $attr{$target}{cc1101_frequency} = '433' },
@@ -207,7 +207,7 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 		    }
 		},
 		{
-    		CC1101_Available => 1,
+    		cc1101_available => 1,
 			testname=>  "set patable 5_dBm (cc1101_frequency=868)",
 			input	=>	"cc1101_patable 5_dBm",
 			pre_code 	=> sub { $attr{$target}{cc1101_frequency} = '868' },
@@ -221,7 +221,7 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 		    }
 		},
 		{
-    		CC1101_Available => 1,
+    		cc1101_available => 1,
 			testname=>  "set patable 5_dBm (default cc1101_frequency)",
 			input	=>	"cc1101_patable 5_dBm",
 			pre_code 	=> sub { delete($attr{$target}{cc1101_frequency}) },
@@ -263,7 +263,7 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 		    }
 		},
 		{
-    		CC1101_Available => 1,
+    		cc1101_available => 1,
 			testname=>  "set sendMsg ID:43 (P43#0101#R3#C500#F10AB85550A) with fixed frequency",
 			input	=>	"sendMsg P43#0101#R3#C500#F10AB85550A",
 			check =>  sub { 
@@ -273,7 +273,7 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 		    }
 		},
 		{
-    		CC1101_Available => 0,
+    		cc1101_available => 0,
 			testname=>  "set sendMsg ID:43 (P43#0101#R3#C500#F10AB85550A) with fixed frequency",
 			input	=>	"sendMsg P43#0101#R3#C500#F10AB85550A",
 			check =>  sub { 
@@ -283,7 +283,7 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 		    }
 		},
 		{
-    		CC1101_Available => 1,
+    		cc1101_available => 1,
 			testname=>  "set sendMsg ID:43 (P43#0101#R3#C500) with default frequency",
 			input	=>	"sendMsg P43#0101#R3#C500",
 			check =>  sub { 
@@ -293,7 +293,7 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 		    }
 		},
 		{
-    		CC1101_Available => 0,
+    		cc1101_available => 0,
 			testname=>  "set sendMsg ID:43 (P43#0101#R3#C500) with default frequency",
 			input	=>	"sendMsg P43#0101#R3#C500",
 			check =>  sub { 
@@ -322,7 +322,7 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 		    todo => sub { return todo("this test isn't finished"); }
 		},
 		{
-    		CC1101_Available => 1,
+    		cc1101_available => 1,
 			testname=>  "set cc1101_reg 0D23 2E22",
 			input	=>	"cc1101_reg 0D23 2E22",
 			check =>  sub { 
@@ -336,7 +336,7 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 		    },
 		},
 		{
-    		CC1101_Available	=> 1,
+    		cc1101_available	=> 1,
 			testname	=> "set cc1101_reg 0D23 3F55 (wrong register)",
 			input		=> "cc1101_reg 0D23 3F55",
 			check 		=> sub { 
@@ -347,7 +347,7 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 		    return => match qr/^ERROR: unknown register position/,
 		},
 		{
-    		CC1101_Available => 0,
+    		cc1101_available => 0,
 			testname=>  "set cc1101_reg 0D23 0B22",
 			input	=>	"cc1101_reg 0D23 0B22",
 			check =>  sub { 
@@ -358,7 +358,7 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 		    return => "This command is only available with a cc1101 receiver",
 		},
 		{
-    		CC1101_Available => 1,
+    		cc1101_available => 1,
 			testname=>  "set cc1101_regSet AP23 FF22 (wrong register, nonhex)",
 			input	=>	"cc1101_reg AP23 FF22",
 			check =>  sub { 
@@ -370,7 +370,7 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 		},
 		{
 			testname=>  "set bad command",
-    		CC1101_Available => 0,
+    		cc1101_available => 0,
 			input	=>	"bla",
 			check =>  sub { 
 			    return array  {
@@ -381,7 +381,7 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 		},
 		{
 			testname=>  "set ? command",
-    		CC1101_Available => 0,
+    		cc1101_available => 0,
 			input	=>	"?",
 			check =>  sub { 
 			    return array  {
@@ -391,7 +391,7 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 		    return => check_set match qr/^Unknown argument \?, choose one of.*/,!match qr/cc/
 		},
 		{
-			CC1101_Available 	=> 1,
+			cc1101_available 	=> 1,
 			dummy 		=> 0,
 			DIODev		=> 1,
 			testname=>  "set ? command",
@@ -406,7 +406,7 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 		{
 			testname	=>  "set ? command for dummy",
 			dummy 		=> 1,
-			CC1101_Available => 0,
+			cc1101_available => 0,
 			input		=>	"?",
 			check 		=>  sub { 
 			    return array  {
@@ -418,7 +418,7 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 		{
 			testname	=>  "set ? command for dummy",
 			dummy 		=> 1,
-			CC1101_Available 	=> 1,
+			cc1101_available 	=> 1,
 			check =>  sub { 
 			    return array  {
 			    	end();
@@ -429,7 +429,7 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 		},
 		{
 			testname	=>  "set ? command for inactive device",
-			CC1101_Available 	=> 1,
+			cc1101_available 	=> 1,
 			DIODev		=> 0,
 			pre_code 	=> sub { $targetHash->{DevState} = 'disconnected' },
 			post_code	=> sub { $targetHash->{DevState} = 'initialized' },
@@ -443,7 +443,7 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 		},
 		{
 			testname	=>  "set reset command for inactive device",
-			CC1101_Available 	=> 1,
+			cc1101_available 	=> 1,
 			dummy 		=> 1,
 			DIODev		=> 0,
 			pre_code 	=> sub { $targetHash->{DevState} = 'disconnected' },
@@ -466,7 +466,7 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 		next if (!exists($element->{testname}));
 		
 		# Mock cc1101	
-		$targetHash->{CC1101_Available} = exists($element->{CC1101_Available}) ? $element->{CC1101_Available} : 0;
+		$targetHash->{cc1101_available} = exists($element->{cc1101_available}) ? $element->{cc1101_available} : 0;
 
 		# Mock dummy	
 		CommandAttr(undef,"$target dummy $element->{dummy}") if (exists($element->{dummy}));	
@@ -478,7 +478,7 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 		$element->{pre_code}->() if (exists($element->{pre_code}));
 		$todo=$element->{todo}->() if (exists($element->{todo}));
 		
-		subtest "checking $element->{testname}". ($targetHash->{CC1101_Available} ? " with cc1101" : " without cc1101"). " " . ($targetHash->{DIODev} ? " devIo open" : " devIo closed") => sub {
+		subtest "checking $element->{testname}". ($targetHash->{cc1101_available} ? " with cc1101" : " without cc1101"). " " . ($targetHash->{DIODev} ? " devIo open" : " devIo closed") => sub {
 			plan (2);	
 			
 			my $ret = SIGNALduino_Set($targetHash,$target,split(" ",$element->{input}));
@@ -519,7 +519,7 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 				is(AttrVal($target, "dummy", 0),0,"check attrib dummy is 0");
 				$targetHash->{DIODev} = 1;
 				CommandDeleteAttr($targetHash,"$target hardware") if (AttrVal($target, "hardware", undef));
-				delete($targetHash->{CC1101_Available}) if ($targetHash->{CC1101_Available});
+				delete($targetHash->{cc1101_available}) if ($targetHash->{cc1101_available});
 				is(AttrVal($target, "hardware", undef),undef,"check attrib hardware undef");
 				ok(DevIo_IsOpen($targetHash),"check DevIo_IsOpen returns true");
 			};
