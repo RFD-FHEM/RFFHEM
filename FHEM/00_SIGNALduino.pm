@@ -1049,7 +1049,7 @@ sub SIGNALduino_CheckccConfResponse
 		$var = substr($str,(hex($a)-13)*2, 2);
 		$r{$a} = hex($var);
 	}
-	my $msg = sprintf("Frequency: %.3fMHz, Bandwidth: %dKHz, rAmpl: %ddB, sens: %ddB, DataRate: %.2fBaud",
+	my $msg = sprintf("Freq: %.3f MHz, Bandwidth: %d KHz, rAmpl: %d dB, sens: %d dB, DataRate: %.2f Baud",
 		26*(($r{"0D"}*256+$r{"0E"})*256+$r{"0F"})/65536,                #Freq       | Register 0x0D,0x0E,0x0F
 		26000/(8 * (4+(($r{"10"}>>4)&3)) * (1 << (($r{"10"}>>6)&3))),   #Bw         | Register 0x10
 		$ampllist[$r{"1B"}&7],                                          #rAmpl      | Register 0x1B
@@ -1063,7 +1063,7 @@ sub SIGNALduino_CheckccConfResponse
 	);
 
 	$_[0]->{cc1101_config} = $msg;
-	$_[0]->{cc1101_config_plus} = $msg2;
+	$_[0]->{cc1101_config_ext} = $msg2;
 	return ($msg.", ".$msg2,undef);
 }
 
