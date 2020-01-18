@@ -985,7 +985,7 @@ sub SIGNALduino_Get_Command_CCReg
 	if (exists($cc1101_register{$_[2]}) || $_[2] =~ /^99$/ ) {
 		return SIGNALduino_Get_Command(@_);
 	} else {
-		return "unknown Register @_[2], please choose a valid cc1101 register";
+		return "unknown Register $_[2], please choose a valid cc1101 register";
 	}
 }
 
