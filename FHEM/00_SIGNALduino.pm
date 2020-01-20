@@ -31,7 +31,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.4.2_dev_10.01",
+	SDUINO_VERSION            => "v3.4.2_dev_20.01",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -4781,6 +4781,9 @@ sub SetSens {
 		<li><b>LASTDMSGID</b>: This shows the last dispatched Protocol ID.</li>
 		<li><b>NR_CMD_LAST_H</b>: Number of messages sent within the last hour.</li>
 		<li><b>RAWMSG</b>: last received RAWMSG</li>
+		<li><b>cc1101_available</b>: If a CC1101 was detected, this internal is displayed with the value 1.</li>
+		<li><b>cc1101_config</b>: The configuration of the CC1101 is output here. The values ​​for frequency, bandwidth, rAmpl, sens and DataRate are output.</li>
+		<li><b>cc1101_config_ext</b>: The extended configuration information of the CC1101 is displayed here. The modulation and sync mod of the CC1101 are output.</li>
 		<li><b>version</b>: This shows the version of the SIGNALduino microcontroller.</li>
 		<li><b>versionProtocols</b>: This shows the version of SIGNALduino protocol file.</li>
 		<li><b>versionmodule</b>: This shows the version of the SIGNALduino FHEM module itself.</li>
@@ -5206,10 +5209,13 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
 	<a name="SIGNALduinointernals"></a>
 	<b>Internals</b>
 	<ul>
-		<li><b>IDsNoDispatch</b>: Hier werden protokoll Eintr&auml;ge mit ihrer numerischen ID aufgelistet, f&uuml;r welche keine Weitergabe von Daten an logische Module aktiviert wurde. Um die Weitergabe zu aktivieren, kann die Men&uuml;option <a href="#SIGNALduinoDetail">Display protocollist</a> verwendet werden.</li>
+		<li><b>IDsNoDispatch</b>: Hier werden Protokolleintr&auml;ge mit ihrer numerischen ID aufgelistet, f&uuml;r welche keine Weitergabe von Daten an logische Module aktiviert wurde. Um die Weitergabe zu aktivieren, kann die Men&uuml;option <a href="#SIGNALduinoDetail">Display protocollist</a> verwendet werden.</li>
 		<li><b>LASTDMSGID</b>: Hier wird die zuletzt dispatchte Protocol ID angezeigt.</li>
 		<li><b>NR_CMD_LAST_H</b>: Anzahl der gesendeten Nachrichten innerhalb der letzten Stunde.</li>
 		<li><b>RAWMSG</b>: zuletzt empfangene RAWMSG</li>
+		<li><b>cc1101_available</b>: Wenn ein CC1101 erkannt wurde, so wird dieses Internal angezeigt mit dem Wert 1.</li>
+		<li><b>cc1101_config</b>: Hier wird die Konfiguration des CC1101 ausgegeben. Die Werte für Frquenz, Bandwidth, rAmpl, sens und DataRate werden ausgegeben.</li>
+		<li><b>cc1101_config_ext</b>: Hier werden die erweiterten Informationen der Konfiguration des CC1101 angezeigt. Die Modulation und der Syncmod des CC1101 werden ausgegeben.</li>
 		<li><b>version</b>: Hier wird die Version des SIGNALduino microcontrollers angezeigt.</li>
 		<li><b>versionProtocols</b>: Hier wird die Version der SIGNALduino Protokolldatei angezeigt.</li>
 		<li><b>versionmodule</b>: Hier wird die Version des SIGNALduino FHEM Modules selbst angezeigt.</li>
