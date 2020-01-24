@@ -19,7 +19,7 @@ defmod test_sub_SIGNALduino_Get UnitTest dummyDuino
     my @mockData = (
 	    {
 			testname	=> "get version",
-			CC1101_Available	=> 0,
+			cc1101_available	=> 0,
 			input		=> "version",
 			check =>  array  {
 			    	item("V");
@@ -28,7 +28,7 @@ defmod test_sub_SIGNALduino_Get UnitTest dummyDuino
 	    },
 	    {
 			testname	=> "get freeram",
-			CC1101_Available	=> 0,
+			cc1101_available	=> 0,
 			input		=> "freeram",
 			check =>  array  {
 			    	item("R");
@@ -37,7 +37,7 @@ defmod test_sub_SIGNALduino_Get UnitTest dummyDuino
 	    },
 	    {
 			testname	=> "get uptime",
-			CC1101_Available	=> 0,
+			cc1101_available	=> 0,
 			input		=> "uptime",
 			check =>  array  {
 			    	item("t");
@@ -46,14 +46,14 @@ defmod test_sub_SIGNALduino_Get UnitTest dummyDuino
 	    },
 	    {
 			testname	=> "get ? ",
-			CC1101_Available	=> 0,
+			cc1101_available	=> 0,
 			input		=> "?",
 			check 		=>  array  {end(); },
 			return 		=> check_set match qr/^Unknown argument \?, choose one of.*/,!match qr/cc/
 	    },
 	    {
 			testname	=> "get ?",
-			CC1101_Available	=> 1,
+			cc1101_available	=> 1,
 			dummy		=> 0,
 			DIODev		=> 1,
 			input		=> "?",
@@ -62,7 +62,7 @@ defmod test_sub_SIGNALduino_Get UnitTest dummyDuino
 	    },
 	    {
 			testname	=> "get ?",
-			CC1101_Available	=> 1,
+			cc1101_available	=> 1,
 			dummy		=> 0,
 			DIODev		=> 0,
 			input		=> "?",
@@ -71,7 +71,7 @@ defmod test_sub_SIGNALduino_Get UnitTest dummyDuino
 	    },
 	    {
 			testname	=> "get ?",
-			CC1101_Available	=> 1,
+			cc1101_available	=> 1,
 			dummy		=> 1,
 			input		=> "?",
 			check 		=>  array  {end(); },
@@ -80,7 +80,7 @@ defmod test_sub_SIGNALduino_Get UnitTest dummyDuino
 
 	    {
 			testname	=> "get ping ",
-			CC1101_Available	=> 0,
+			cc1101_available	=> 0,
 			input		=> "ping",
 			check =>  array  {
 			    	item("P");
@@ -89,7 +89,7 @@ defmod test_sub_SIGNALduino_Get UnitTest dummyDuino
 	    },
 	    {
 			testname	=> "get config ",
-			CC1101_Available	=> 0,
+			cc1101_available	=> 0,
 			input		=> "config",
 			check =>  array  {
 			    	item("CG");
@@ -98,7 +98,7 @@ defmod test_sub_SIGNALduino_Get UnitTest dummyDuino
 	    },
 	    {
 			testname	=> "get ccconf ",
-			CC1101_Available	=> 1,
+			cc1101_available	=> 1,
 			input		=> "ccconf",
 			check =>  array  {
 			    	item("C0DnF");
@@ -107,14 +107,14 @@ defmod test_sub_SIGNALduino_Get UnitTest dummyDuino
 	    },
 	    {
 			testname	=> "get ccconf ",
-			CC1101_Available	=> 0,
+			cc1101_available	=> 0,
 			input		=> "ccconf",
 			check =>  array  { end();	},
     		return 		=> "This command is only available with a cc1101 receiver"
 	    },
 	    {
 			testname	=> "get ccreg 12",
-			CC1101_Available	=> 1,
+			cc1101_available	=> 1,
 			input		=> "ccreg 12",
 			check =>  array  {
 			    	item("C12");
@@ -123,7 +123,7 @@ defmod test_sub_SIGNALduino_Get UnitTest dummyDuino
 	    },
 	    {
 			testname	=> "get ccreg 98 (invalid register)",
-			CC1101_Available	=> 1,
+			cc1101_available	=> 1,
 			input		=> "ccreg 98",
 			check =>  array  {
 			    	end();
@@ -132,7 +132,7 @@ defmod test_sub_SIGNALduino_Get UnitTest dummyDuino
 	    },
 	    {
 			testname	=> "get ccreg 99 (all)",
-			CC1101_Available	=> 1,
+			cc1101_available	=> 1,
 			input		=> "ccreg 99",
 			check =>  array  {
 			    	item("C99");
@@ -141,14 +141,14 @@ defmod test_sub_SIGNALduino_Get UnitTest dummyDuino
 	    },
 	    {
 			testname	=> "get ccreg 12 ",
-			CC1101_Available	=> 0,
+			cc1101_available	=> 0,
 			input		=> "ccreg 12",
 			check =>  array  { end();	},
     		return 		=> "This command is only available with a cc1101 receiver"
 	    },
 	    {
 			testname	=> "get ccpatable ",
-			CC1101_Available	=> 1,
+			cc1101_available	=> 1,
 			input		=> "ccpatable",
 			check =>  array  {
 			    	item("C3E");
@@ -157,7 +157,7 @@ defmod test_sub_SIGNALduino_Get UnitTest dummyDuino
 	    },
 	    {
 			testname	=> "get ccpatable ",
-			CC1101_Available	=> 0,
+			cc1101_available	=> 0,
 			input		=> "ccpatable",
 			check =>  array  { end();	},
     		return 		=> "This command is only available with a cc1101 receiver"
@@ -174,7 +174,7 @@ defmod test_sub_SIGNALduino_Get UnitTest dummyDuino
 		next if (!exists($element->{testname}));
 
 		# Mock cc1101	
-		$targetHash->{CC1101_Available} = exists($element->{CC1101_Available}) ? $element->{CC1101_Available} : 0;
+		$targetHash->{cc1101_available} = exists($element->{cc1101_available}) ? $element->{cc1101_available} : 0;
 
 		# Mock dummy	
 		CommandAttr(undef,"$target dummy $element->{dummy}") if (exists($element->{dummy}));	
@@ -186,7 +186,7 @@ defmod test_sub_SIGNALduino_Get UnitTest dummyDuino
 		$element->{pre_code}->() if (exists($element->{pre_code}));
 		$todo=$element->{todo}->() if (exists($element->{todo}));
 		
-		subtest "checking $element->{testname}". ($targetHash->{CC1101_Available} ? " with cc1101" : " without cc1101"). " " . ($targetHash->{DIODev} ? " devIo open" : " devIo closed") => sub {
+		subtest "checking $element->{testname}". ($targetHash->{cc1101_available} ? " with cc1101" : " without cc1101"). " " . ($targetHash->{DIODev} ? " devIo open" : " devIo closed") => sub {
 			plan (2);	
 			
 			my $ret = SIGNALduino_Get($targetHash,$target,split(" ",$element->{input}));

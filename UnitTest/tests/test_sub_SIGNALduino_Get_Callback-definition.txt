@@ -25,7 +25,7 @@ defmod test_sub_SIGNALduino_Get_Callback UnitTest dummyDuino
 	
 	subtest 'Test return values SIGNALduino_Get_Callback with correct parameters' => sub {
 		plan(4);
-		$targetHash->{CC1101_Available} = 1;
+		$targetHash->{cc1101_available} = 1;
 		
 		my $ret = SIGNALduino_Get_Callback($target,\&dummyCb, "ccreg 12");
 		is($ret,U,"check return SIGNALduino_Get_Callback");
@@ -38,7 +38,7 @@ defmod test_sub_SIGNALduino_Get_Callback UnitTest dummyDuino
 		ref_is($targetHash->{ucCmd}{responseSub}, \&dummyCb, "Verify callback stored in target hash");
 		is($targetHash->{ucCmd}{cmd}, "ccreg", "Verify called command stored in target hash");
 	
-		delete($targetHash->{CC1101_Available});
+		delete($targetHash->{cc1101_available});
 	};
 	
 	subtest 'Test SIGNALduino_read with callback' => sub {
