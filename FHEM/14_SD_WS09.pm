@@ -128,8 +128,28 @@
       my $rawData_merk;
       my $wfaktor = 1;
       my @windstat;
+      my $syncpos;
       
-      my $syncpos= index($bitData,"11111110");  #7x1 1x0 preamble
+      if ($hlen < 20) {		# WH3080 UV/Solar
+         $syncpos = index($bitData,"1111110111");   # FF7 UV/Solar
+         if ($syncpos >= 0 && $syncpos < 3) {
+               $model = "WH1080";
+               if ($syncpos < 2) {
+                  $rawData = SD_WS09_SHIFT($iohash, $rawData);
+                  Log3 $iohash, 4, "$name: SD_WS09_Parse_SHIFT_0 raw:$rawData";
+               }
+               if ($syncpos == 0) {
+                  $rawData = SD_WS09_SHIFT($iohash, $rawData);
+                  Log3 $iohash, 4, "$name: SD_WS09_Parse_SHIFT_1 raw:$rawData";
+               }
+            }
+            else {
+               Log3 $iohash, 4, "$name: SD_WS09_Parse WH1080 EXIT (sync no found): msg=$rawData length:".length($bitData);
+               return "";
+            }
+      }
+      else {
+        $syncpos= index($bitData,"11111110");  #7x1 1x0 preamble
     	Log3 $iohash, 4, "$name: SD_WS09_Parse0 msg=$rawData Bin=$bitData syncp=$syncpos length:".length($bitData) ;
 
     	if ($syncpos ==-1 || length($bitData)-$syncpos < $minL2)
@@ -137,6 +157,7 @@
     			Log3 $iohash, 4, "$name: SD_WS09_Parse EXIT: msg=$rawData syncp=$syncpos length:".length($bitData) ;
     			return undef;
     	}
+      }
       
       my $crcwh1080 = AttrVal($iohash->{NAME},'WS09_CRCAUS',0);
       Log3 $iohash, 4, "$name: SD_WS09_Parse CRC_AUS:$crcwh1080 " ;
@@ -151,43 +172,51 @@
 
     if($rc) # test ob  Digest::CRC geladen wurde
     {
-      $rr2 = SD_WS09_CRCCHECK($rawData);
+     $rr2 = SD_WS09_CRCCHECK($rawData);
+     if ($model eq "WH1080") {	# FF7 UV/Solar
+       if ($rr2 != 0) {
+         Log3 $iohash, 4, "$name: SD_WS09_Parse WH1080: sensorTyp: 7 UV/Solar, CRC_Error Exit: raw:$rawData CRC=$rr2";
+         return "";
+       }
+     }
+     else {
       if ($rr2 == 0 || (($rr2 == 49) && ($crcwh1080 == 2)) ) {
       # 1. OK
           $model = "WH1080";
-          Log3 $iohash, 4, "$name: SD_WS09_SHIFT_0 OK rwa:$rawData" ;
+          Log3 $iohash, 4, "$name: SD_WS09_Parse_SHIFT_0 OK raw:$rawData crc:$rr2";
       } else {
       # 1. nok
-          $rawData = SD_WS09_SHIFT($rawData);
-          Log3 $iohash, 4, "$name: SD_WS09_SHIFT_1 NOK  rwa:$rawData" ;
+          Log3 $iohash, 4, "$name: SD_WS09_Parse_SHIFT_1 NOK raw:$rawData crc:$rr2 -> shift";
+          $rawData = SD_WS09_SHIFT($iohash, $rawData);
           $rr2 = SD_WS09_CRCCHECK($rawData);
           if ($rr2 == 0 || (($rr2 == 49) && ($crcwh1080 == 2)) ) {
           # 2.ok
               $msg = $msg_vor.$rawData;
               $model = "WH1080";
-              Log3 $iohash, 4, "$name: SD_WS09_SHIFT_2 OK rwa:$rawData msg:$msg" ;
+              Log3 $iohash, 4, "$name: SD_WS09_Parse_SHIFT_2 OK raw:$rawData msg:$msg crc:$rr2";
           } else {
               # 2. nok
-              $rawData = SD_WS09_SHIFT($rawData);
-              Log3 $iohash, 4, "$name: SD_WS09_SHIFT_3 NOK rwa:$rawData" ;
+              Log3 $iohash, 4, "$name: SD_WS09_Parse_SHIFT_3 NOK raw:$rawData crc:$rr2 -> shift";
+              $rawData = SD_WS09_SHIFT($iohash, $rawData);
               $rr2 = SD_WS09_CRCCHECK($rawData);
               if ($rr2 == 0 || (($rr2 == 49) && ($crcwh1080 == 2)) ) {
                 # 3. ok
                 $msg = $msg_vor.$rawData;
                 $model = "WH1080";
-                Log3 $iohash, 4, "$name: SD_WS09_SHIFT_4 OK rwa:$rawData msg:$msg" ;
+                Log3 $iohash, 4, "$name: SD_WS09_Parse_SHIFT_4 OK raw:$rawData msg:$msg crc:$rr2";
               }else{
                # 3. nok
                 $rawData = $rawData_merk;
                 $msg = $msg_vor.$rawData;
-                Log3 $iohash, 4, "$name: SD_WS09_SHIFT_5 NOK rwa:$rawData msg:$msg" ;
+                Log3 $iohash, 4, "$name: SD_WS09_Parse_SHIFT_5 NOK raw:$rawData msg:$msg crc:$rr2";
              }
          }
       }
-     }else {
+     } 
+    }else {
       Log3 $iohash, 1, "$name: SD_WS09 CRC_not_load: Modul Digest::CRC fehlt: cpan install Digest::CRC or sudo apt-get install libdigest-crc-perl" ;
       return "";
-   }  
+    }
     
      $hlen = length($rawData);
      $blen = $hlen * 4;
@@ -197,6 +226,7 @@
          if( $model eq "WH1080") {
             $sensdata = substr($bitData,8);
             $whid = substr($sensdata,0,4);
+            Log3 $iohash, 5, "$name: SD_WS09_Parse_0 whid=$whid";
             
             if(  $whid == "1010" ){ # A  Wettermeldungen
                	  Log3 $iohash, 4, "$name: SD_WS09_Parse_1 msg=$sensdata length:".length($sensdata) ;
@@ -620,19 +650,20 @@
       return $BCD;
     }
     
-    sub SD_WS09_SHIFT($){
-         my $rawData = shift;
+    sub SD_WS09_SHIFT($$){
+         my ($hash, $rawData) = @_;
+         my $name = $hash->{NAME};
          my $hlen = length($rawData);
          my $blen = $hlen * 4;
          my $bitData = unpack("B$blen", pack("H$hlen", $rawData));
-    	   my $bitData2 = '1'.unpack("B$blen", pack("H$hlen", $rawData));
+         my $bitData2 = '1'.$bitData;
          my $bitData20 = substr($bitData2,0,length($bitData2)-1);
           $blen = length($bitData20);
           $hlen = $blen / 4;
           $rawData = uc(unpack("H$hlen", pack("B$blen", $bitData20)));
           $bitData = $bitData20;
-          Log3 "SD_WS09_SHIFT", 4, "SD_WS09_SHIFT_0  raw: $rawData length:".length($bitData) ;
-          Log3 "SD_WS09_SHIFT", 4, "SD_WS09_SHIFT_1  bitdata: $bitData" ;
+          #Log3 $hash, 4, "$name: SD_WS09_SHIFT_0 raw: $rawData length:".length($bitData);
+          Log3 $hash, 5, "$name: SD_WS09_SHIFT_1 bitdata: $bitData length:".length($bitData);
         return $rawData;  
     }
     
