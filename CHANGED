@@ -1,3 +1,17 @@
+2020-01-24 - Update 00_SIGNALduino.pm (#780)
+
+* revised internals
+- rename internal CC1101_Available to cc1101_available
+- rename internal CC1101_CONFIG to cc1101_config
+
+* - revised name / cut Frequency name in output
+- revised output to
+"ccconf: Freq: 433.920 MHz, Bandwidth: 325 KHz, rAmpl: 42 dB, sens: 8 dB, DataRate: 5603.79 Baud, Modulation: ASK/OOK, Syncmod: No preamble/sync"
+- internal cc1101_configto "Freq: 433.920 MHz, Bandwidth: 325 KHz, rAmpl: 42 dB, sens: 8 dB, DataRate: 5603.79 Baud"
+- internal cc1101_config_ext to "Modulation: ASK/OOK, Syncmod: No preamble/sync"
+
+* Update 00_SIGNALduino.pm
+- added commandref
 2020-01-18 - Fix Scalar value @_[2] better written as $_[2] (#783)
 
 * 00_SIGNALduino.pm
