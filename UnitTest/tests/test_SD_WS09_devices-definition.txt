@@ -34,7 +34,14 @@ defmod test_SD_WS09_devices UnitTest dummyDuino (
 					plan(3); # one for readings and one for internals
 					note("device is already defined on system, deleted for test");
 					CommandDelete(undef,$tData->{internals}{NAME});
-					Dispatch($targetHash,$tData->{dmsg});
+
+					for(my $dispatch_cnt=1; $dispatch_cnt < 6; $dispatch_cnt++) {
+						Dispatch($targetHash,$tData->{dmsg});
+						if(IsDevice($tData->{internals}{NAME}) == 1) {
+							note("device is new defined on system with $dispatch_cnt dispatch");
+							last;
+						};
+					}
 					is(IsDevice($tData->{internals}{NAME}),1,"Device new defined");
 				} else {
 					plan(3); # one for readings and one for internals and one for defmod
