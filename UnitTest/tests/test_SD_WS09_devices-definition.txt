@@ -34,8 +34,6 @@ defmod test_SD_WS09_devices UnitTest dummyDuino (
 					plan(3); # one for readings and one for internals
 					note("device is already defined on system, deleted for test");
 					CommandDelete(undef,$tData->{internals}{NAME});
-					
-					CommandDefine(undef,$tData->{DEF});   ## for the same operations local <-> online with one Dispatch
 					Dispatch($targetHash,$tData->{dmsg});
 					is(IsDevice($tData->{internals}{NAME}),1,"Device new defined");
 				} else {
