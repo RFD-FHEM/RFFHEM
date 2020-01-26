@@ -42,9 +42,12 @@ defmod test_SD_WS09_devices UnitTest dummyDuino (
 					sleep 1;
 					is(InternalVal($tData->{internals}{NAME}, "STATE", undef),$tData->{readings}{state},"Device STATE ready");
 				} else {
-					plan(3); # one for readings and one for internals and one for defmod
+					plan(4); # one for readings and one for internals and one for defmod
 					note("device will be defined temporary");
 					is(CommandDefMod(undef,"-temporary $tData->{internals}{NAME} $testSet->{module} $tData->{internals}{DEF}"),U(),"Verify device defmod") || diag explain $tData;
+					Dispatch($targetHash,$tData->{dmsg});
+					sleep 1;
+					is(InternalVal($tData->{internals}{NAME}, "STATE", undef),$tData->{readings}{state},"Device STATE ready");
 				}
 				
 				no strict "refs"; 
