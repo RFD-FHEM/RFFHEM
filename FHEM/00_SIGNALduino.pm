@@ -1085,7 +1085,7 @@ sub SIGNALduino_CheckccPatableResponse
 			last;
 		}
 	}
-	$hash->{CC1101_PATABLE} = $msg;
+	$hash->{cc1101_patable} = $msg;
 	return ($msg,undef);
 }
 
