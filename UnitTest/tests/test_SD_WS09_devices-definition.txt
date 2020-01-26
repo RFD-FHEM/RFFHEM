@@ -29,27 +29,24 @@ defmod test_SD_WS09_devices UnitTest dummyDuino (
 			#diag explain $tData;
 			
 			subtest "Checking module: $testSet->{module} device: $testSet->{name} TestNo: $tID " => sub {
+				subtest "Verify device" => sub {
+					plan(3);
+					note("Test status defined");
+					if (IsDevice($tData->{internals}{NAME})) {
+						CommandDelete(undef,$tData->{internals}{NAME});
+						is(IsDevice($tData->{internals}{NAME}),0,"Device are deleted");
+					} else {
+						is(IsDevice($tData->{internals}{NAME}),0,"Device is not exists");
+					}				
 
-				if (IsDevice($tData->{internals}{NAME})) {
-					plan(5); # one for readings and one for internals
-					note("device is already defined on system, deleted for test");
-					CommandDelete(undef,$tData->{internals}{NAME});
-					is(IsDevice($tData->{internals}{NAME}),0,"Device is delete");
 					Dispatch($targetHash,$tData->{dmsg});
 					sleep 1;
-					is(IsDevice($tData->{internals}{NAME}),1,"Device is new defined");
+					is(InternalVal($tData->{internals}{NAME}, "STATE", undef),"Defined","Device created with once dispatch");
 					Dispatch($targetHash,$tData->{dmsg});
 					sleep 1;
-					is(InternalVal($tData->{internals}{NAME}, "STATE", undef),$tData->{readings}{state},"Device STATE ready");
-				} else {
-					plan(4); # one for readings and one for internals and one for defmod
-					note("device will be defined temporary");
-					is(CommandDefMod(undef,"-temporary $tData->{internals}{NAME} $testSet->{module} $tData->{internals}{DEF}"),U(),"Verify device defmod") || diag explain $tData;
-					Dispatch($targetHash,$tData->{dmsg});
-					sleep 1;
-					is(InternalVal($tData->{internals}{NAME}, "STATE", undef),$tData->{readings}{state},"Device STATE ready");
-				}
-				
+					is(InternalVal($tData->{internals}{NAME}, "STATE", undef),$tData->{readings}{state},"Device STATE ready after new dispatch");
+				};
+
 				no strict "refs"; 
 				&{$modules{$testSet->{module}}{ParseFn}}($targetHash,$tData->{dmsg});
 				use strict "refs"; 
