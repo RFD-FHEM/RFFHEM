@@ -5,14 +5,16 @@ defmod test_SD_WS09_devices UnitTest dummyDuino (
 	use JSON; 
 	## for online testsytem: defmod test_SD_WS09_devices UnitTest dummyDuino ##
 
-	subtest "check Digest::CRC for Modul" => sub {
+	subtest "check requirements" => sub {
 		my $rc = eval {
       require Digest::CRC;
       Digest::CRC->import();
       1;
 		};
-		plan(1);
-		is($rc,1,"Dependency met");
+		plan(2);
+		is($rc,1,"Digest::CRC dependency");
+		CommandDeleteAttr(undef,"global dupTimeout");
+		is(AttrVal("global", "dupTimeout", undef),undef,"dupTimeout is not defined")
 	};
 
 	my $testDataArray; 
