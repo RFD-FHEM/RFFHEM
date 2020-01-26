@@ -9,5 +9,5 @@ requires 'Test::Device::SerialPort';
 requires 'Devel::Cover';
 requires 'Devel::Cover::Report::Coveralls';
 requires 'Net::SSLeay';
-required 'Digest::CRC';
-required 'Math::Trig';
+requires 'Digest::CRC';
+requires 'Math::Trig';
