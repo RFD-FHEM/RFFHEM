@@ -2,21 +2,14 @@ defmod test_SD_WS09_devices UnitTest dummyDuino (
 {
 	use Test2::V0;
 	use Test2::Tools::Compare qw{is};
+	use Test2::Require::Module 'Digest::CRC'; # need for SD_WS09 modul
 	use JSON; 
-	## for online testsytem: defmod test_SD_WS09_devices UnitTest dummyDuino ##
 
+	## for online testsytem: defmod test_SDWS09_devices UnitTest dummyDuino ##
 	subtest "check requirements" => sub {
-		my $rc = eval {
-      require Digest::CRC;
-      Digest::CRC->import();
-      1;
-		};
-		plan(3);
-		is($rc,1,"Digest::CRC dependency");
-		CommandDeleteAttr(undef,"global dupTimeout");
-		is(AttrVal("global", "dupTimeout", undef),undef,"dupTimeout is not defined");
-		CommandDeleteAttr(undef,"autocreate autocreateThreshold");
-		is(AttrVal("autocreate", "autocreateThreshold", undef),undef,"autocreateThreshold is not defined");
+		plan(1);
+		CommandAttr(undef,"global dupTimeout 0");
+		is(AttrVal("global", "dupTimeout", undef),0,"dupTimeout is set to 0");
 	};
 
 	my $testDataArray; 
@@ -30,7 +23,7 @@ defmod test_SD_WS09_devices UnitTest dummyDuino (
 	}
 
 	my $jsonSourceUrl = AttrVal($name,"Test_Data_URI","https://raw.githubusercontent.com/RFD-FHEM/SIGNALduino_TOOL/master/FHEM/lib/SD_Device_ProtocolList.json");
-	loadJson($jsonSourceUrl); 
+	loadJson($jsonSourceUrl);
 
   my $todo = undef;
   TestLabel:
@@ -43,27 +36,23 @@ defmod test_SD_WS09_devices UnitTest dummyDuino (
 			#diag explain $tData;
 			
 			subtest "Checking module: $testSet->{module} device: $testSet->{name} TestNo: $tID " => sub {
-				subtest "Verify device" => sub {
-					plan(3);
-					note("Test status defined");
-					if (IsDevice($tData->{internals}{NAME})) {
-						CommandDelete(undef,$tData->{internals}{NAME});
-						is(IsDevice($tData->{internals}{NAME}),0,"Device are deleted");
-					} else {
-						is(IsDevice($tData->{internals}{NAME}),0,"Device is not exists");
-					}				
-
-					Dispatch($targetHash,$tData->{dmsg});
-					sleep 1;
-					is(InternalVal($tData->{internals}{NAME}, "STATE", undef),"Defined","Device created with once dispatch");
-					Dispatch($targetHash,$tData->{dmsg});
-					sleep 1;
-					is(InternalVal($tData->{internals}{NAME}, "STATE", undef),$tData->{readings}{state},"Device STATE ready after new dispatch");
-				};
+				
+				if (IsDevice($tData->{internals}{NAME})) {
+					plan(2); # one for readings and one for internals
+					note("device is already defined on system, clearing readings");
+					while ( (my $rName, my $rValue) = each (%{$tData->{readings}}) ) {
+						CommandDeleteReading(undef, "$tData->{internals}{NAME} $rName");
+					}
+				} else {
+					plan(3); # one for readings and one for internals and one for defmod
+					note("device will be defined temporary");
+					is(CommandDefMod(undef,"-temporary $tData->{internals}{NAME} $testSet->{module} $tData->{internals}{DEF}"),U(),"Verify device defmod") || diag explain $tData;
+				}
 
 				no strict "refs"; 
 				&{$modules{$testSet->{module}}{ParseFn}}($targetHash,$tData->{dmsg});
 				use strict "refs"; 
+
 				subtest "Verify readings" => sub {
 					my $plan=0;
 					while ( (my $rName, my $rValue) = each (%{$tData->{readings}}) ) {
