@@ -37,9 +37,9 @@ defmod test_SD_WS09_devices UnitTest dummyDuino (
 
 					for(my $dispatch_cnt=1; $dispatch_cnt < 6; $dispatch_cnt++) {
 						Dispatch($targetHash,$tData->{dmsg});
-						sleep 1;
-						if(IsDevice($tData->{internals}{NAME}) == 1 && InternalVal($tData->{internals}{NAME}, "STATE", "defined") ne "defined") {
-							note("device is new defined on system with $dispatch_cnt dispatch and state already");
+						sleep 2;
+						if(IsDevice($tData->{internals}{NAME}) == 1) {
+							Dispatch($targetHash,$tData->{dmsg}); # to set readings
 							last;
 						};
 					}
