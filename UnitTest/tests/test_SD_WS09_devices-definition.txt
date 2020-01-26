@@ -5,6 +5,12 @@ defmod test_SD_WS09_devices UnitTest dummyDuino (
 	use Test2::Require::Module 'Digest::CRC'; # need for SD_WS09 modul
 	use JSON; 
 
+	# for local test
+	my $attr_dupTimeout = AttrVal("global" ,"dupTimeout",undef);
+	if ($attr_dupTimeout) {
+		note("local - attr dupTimeout read");
+	}
+
 	## for online testsytem: defmod test_SDWS09_devices UnitTest dummyDuino ##
 	subtest "check requirements" => sub {
 		plan(1);
@@ -79,6 +85,15 @@ defmod test_SD_WS09_devices UnitTest dummyDuino (
 		loadJson($jsonSourceUrl); 
 		$todo = todo "Testing against pre-release testdata, correct test before push this to master";
 		goto TestLabel;
+	}
+	
+	# for local test, to reset attrib to old value
+	if ($attr_dupTimeout) {
+		CommandAttr($targetHash,"global dupTimeout $attr_dupTimeout");
+		note("local - attr dupTimeout reset to old value");
+	} else {
+		CommandDeleteAttr(undef,"global dupTimeout");
+		note("local - attr dupTimeout deleted");
 	}
 }
 )
