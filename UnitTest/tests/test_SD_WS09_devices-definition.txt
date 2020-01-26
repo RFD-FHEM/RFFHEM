@@ -2,7 +2,8 @@ defmod test_SD_WS09_devices UnitTest dummyDuino (
 {
 	use Test2::V0;
 	use Test2::Tools::Compare qw{is};
-	use Test2::Require::Module 'Digest::CRC'; # need for SD_WS09 modul
+	use Test2::Require::Module 'Digest::CRC'; # need for SD_WS09 modul - SD_WS09_CRCCHECK
+	use Test2::Require::Module 'Math::Trig';	# need for SD_WS09 modul - SD_WS09_WindDirAverage
 	use JSON; 
 
 	# for local test
