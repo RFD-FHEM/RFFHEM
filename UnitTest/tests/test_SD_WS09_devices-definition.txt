@@ -5,6 +5,16 @@ defmod test_SD_WS09_devices UnitTest dummyDuino (
 	use JSON; 
 	## for online testsytem: defmod test_SD_WS09_devices UnitTest dummyDuino ##
 
+	subtest "check Digest::CRC for Modul" => sub {
+		my $rc = eval {
+      require Digest::CRC;
+      Digest::CRC->import();
+      1;
+		};
+		plan(1);
+		is($rc,1,"Dependency met");
+	};
+
 	my $testDataArray; 
 	sub loadJson {
 		my $jsonStr=GetFileFromURL($_[0],4,"",1,4);
