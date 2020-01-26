@@ -11,10 +11,12 @@ defmod test_SD_WS09_devices UnitTest dummyDuino (
       Digest::CRC->import();
       1;
 		};
-		plan(2);
+		plan(3);
 		is($rc,1,"Digest::CRC dependency");
-		CommandDeleteAttr(undef,"global dupTimeout");
-		is(AttrVal("global", "dupTimeout", undef),undef,"dupTimeout is not defined")
+		CommandDeleteAttr(undef,"global dupTimeout") if (AttrVal("global", "dupTimeout", undef));
+		is(AttrVal("global", "dupTimeout", undef),undef,"dupTimeout is not defined");
+		CommandDeleteAttr(undef,"autocreate autocreateThreshold") if (AttrVal("autocreate", "autocreateThreshold", undef));
+		is(AttrVal("autocreate", "autocreateThreshold", undef),undef,"autocreateThreshold is not defined");
 	};
 
 	my $testDataArray; 
