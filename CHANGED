@@ -1,3 +1,6 @@
+2020-01-26 - rename internal cc1101_patable (#787)
+
+rename internal CC1101_PATABLE in cc1101_patable
 2020-01-26 - rename internal CC1101_PATABLE in cc1101_patable
 2020-01-24 - Update 00_SIGNALduino.pm (#780)
 
