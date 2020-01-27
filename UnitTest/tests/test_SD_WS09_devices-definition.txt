@@ -47,7 +47,7 @@ defmod test_SD_WS09_devices UnitTest dummyDuino (
 				if (IsDevice($tData->{internals}{NAME})) {
 					plan(3); # one for readings and one for internals
 					note("device is already defined on system, clearing readings");
-					while ( (my $rName, my $rValue) = each (%{$tData->{readings}}) ) {
+					while ( (my $rName, my $rValue) = each (%{$defs{$testSet->{name}}->{READINGS}}) ) {
 						CommandDeleteReading(undef, "$tData->{internals}{NAME} $rName");
 					}
 				} else {
@@ -58,7 +58,7 @@ defmod test_SD_WS09_devices UnitTest dummyDuino (
 
 				subtest "check deleted readings" => sub {
 					my $cnt=0;
-					while ( (my $rName, my $rValue) = each (%{$tData->{readings}}) ) {
+					while ( (my $rName, my $rValue) = each (%{$defs{$testSet->{name}}->{READINGS}}) ) {
 						$cnt++;
 					}
 					plan(1);
