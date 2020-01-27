@@ -5,17 +5,17 @@
     # weather sensors like WS-0101  (Sender 868MHz ASK   Epmfänger RX868SH-DV elv)
     # Sidey79 & pejonp 2015  
     #
-    # 22.09.2017: rainTotal --> rain_total
-    # 23.09.2017: windDirAverage   SabineT https://forum.fhem.de/index.php/topic,75225.msg669950.html#msg669950
+    # 20170922: rainTotal --> rain_total
+    # 20170923: windDirAverage              - https://forum.fhem.de/index.php/topic,75225.msg669950.html#msg669950 @SabineT
+    # 20191003: UV/Solar Nachrichten WH2315 - https://forum.fhem.de/index.php/topic,67587.msg980092.html#msg980092 @Ralf
+    # 20200127: PERL WARNING                - https://forum.fhem.de/index.php/topic,67587.msg982425.html#msg982425 @rob
     # 
-    #
     
     package main;
     
     use strict;
     use warnings;
-    #use Math::Round qw/nearest/;
-    
+
     # werden benötigt, aber im Programm noch extra abgetestet 
     #use Digest::CRC qw(crc);
     #use Math::Trig;
@@ -96,13 +96,13 @@
       my $deviceCode = 0;
       my $model = "undef";  # 0xFFA -> WS0101/WH1080 alles andere -> CTW600 
       my $modelid;
-      my $windSpeed;
+      my $windSpeed = 0;
       my $windSpeed_kmh;
       my $windSpeed_fts;
       my $windSpeed_bft;
       my $windSpeed_mph;
       my $windSpeed_kn;
-      my $windguest;
+      my $windguest = 0;
       my $windguest_kmh;
       my $windguest_fts;
       my $windguest_bft;
