@@ -45,16 +45,23 @@ defmod test_SD_WS09_devices UnitTest dummyDuino (
 			subtest "Checking module: $testSet->{module} device: $testSet->{name} TestNo: $tID " => sub {
 				
 				if (IsDevice($tData->{internals}{NAME})) {
-					plan(2); # one for readings and one for internals
+					plan(3); # one for readings and one for internals
 					note("device is already defined on system, clearing readings");
-					while ( (my $rName, my $rValue) = each (%{$tData->{readings}}) ) {
-						CommandDeleteReading(undef, "$tData->{internals}{NAME} $rName");
-					}
+					CommandDeleteReading(undef, $tData->{internals}{NAME}." .*");
 				} else {
-					plan(3); # one for readings and one for internals and one for defmod
+					plan(4); # one for readings and one for internals and one for defmod
 					note("device will be defined temporary");
 					is(CommandDefMod(undef,"-temporary $tData->{internals}{NAME} $testSet->{module} $tData->{internals}{DEF}"),U(),"Verify device defmod") || diag explain $tData;
 				}
+
+				subtest "check deleted readings" => sub {
+					my $cnt=0;
+					while ( (my $rName, my $rValue) = each (%{$tData->{readings}}) ) {
+						$cnt++;
+					}
+					plan(1);
+					is($cnt,0,"all readings deleted");
+				};
 
 				no strict "refs"; 
 				&{$modules{$testSet->{module}}{ParseFn}}($targetHash,$tData->{dmsg});
