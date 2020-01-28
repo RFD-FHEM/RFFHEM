@@ -4,13 +4,7 @@ defmod test_SD_WS09_devices UnitTest dummyDuino (
 	use Test2::Tools::Compare qw{is};
 	use Test2::Require::Module 'Digest::CRC'; # need for SD_WS09 modul - SD_WS09_CRCCHECK
 	use Test2::Require::Module 'Math::Trig';	# need for SD_WS09 modul - SD_WS09_WindDirAverage
-	use JSON; 
-
-	# for local test
-	my $attr_dupTimeout = AttrVal("global" ,"dupTimeout",undef);
-	if ($attr_dupTimeout) {
-		note("local - attr dupTimeout read");
-	}
+	use JSON;
 
 	## for online testsytem: defmod test_SDWS09_devices UnitTest dummyDuino ##
 	subtest "check requirements" => sub {
@@ -19,12 +13,12 @@ defmod test_SD_WS09_devices UnitTest dummyDuino (
 		is(AttrVal("global", "dupTimeout", undef),0,"dupTimeout is set to 0");
 	};
 
-	my $testDataArray; 
+	my $testDataArray;
 	sub loadJson {
 		my $jsonStr=GetFileFromURL($_[0],4,"",1,4);
 		$testDataArray = eval { decode_json($jsonStr) };
 		if($@){
-			diag("open json file TestData was not possible $?"); 
+			diag("open json file TestData was not possible $?");
 			diag explain $jsonStr;
 		}
 	}
@@ -38,12 +32,12 @@ defmod test_SD_WS09_devices UnitTest dummyDuino (
 		next if (!defined($testSet->{module}) || $testSet->{module} ne "SD_WS09");
 		next if (!lib::SD_Protocols::exists($testSet->{id}));
 		next if (lib::SD_Protocols::checkProperty($testSet->{id},'developId',undef));
-	
+
 		while ( (my $tID, my $tData) = each (@{$testSet->{data}}) ) {
 			#diag explain $tData;
-			
+
 			subtest "Checking module: $testSet->{module} device: $testSet->{name} TestNo: $tID " => sub {
-				
+
 				if (IsDevice($tData->{internals}{NAME})) {
 					plan(3); # one for readings and one for internals
 					note("device is already defined on system, clearing readings");
@@ -56,6 +50,9 @@ defmod test_SD_WS09_devices UnitTest dummyDuino (
 					is(CommandDefMod(undef,"-temporary $tData->{internals}{NAME} $testSet->{module} $tData->{internals}{DEF}"),U(),"Verify device defmod") || diag explain $tData;
 				}
 
+				### note ###
+				## readings must all deleted, any DMSG create only some readings and not all
+				## without delete, always all readings exists
 				subtest "check deleted readings" => sub {
 					my $cnt=0;
 					while ( (my $rName, my $rValue) = each (%{$defs{$testSet->{name}}->{READINGS}}) ) {
@@ -65,9 +62,9 @@ defmod test_SD_WS09_devices UnitTest dummyDuino (
 					is($cnt,0,"all readings deleted");
 				};
 
-				no strict "refs"; 
-				&{$modules{$testSet->{module}}{ParseFn}}($targetHash,$tData->{dmsg});
-				use strict "refs"; 
+				no strict "refs";
+				&{$modules{$testSet->{module}}{ParseFn}}($targetHash,$tData->{dmsg});		# Handover DMSG
+				use strict "refs";
 
 				subtest "Verify readings" => sub {
 					my $plan=0;
@@ -77,33 +74,24 @@ defmod test_SD_WS09_devices UnitTest dummyDuino (
 					}
 					plan($plan);
 				};
-				
+
 				subtest "Verify internals" => sub {
 					my $plan=0;
 					while ( (my $iName, my $iValue) = each (%{$tData->{internals}}) ) {
 						$plan++;
-						is(InternalVal($tData->{internals}{NAME} ,$iName,"0"),$iValue,"check internal $iName");						
+						is(InternalVal($tData->{internals}{NAME} ,$iName,"0"),$iValue,"check internal $iName");
 					}
 					plan($plan);
 				};
 			}
 		}
 	}
-	
+
 	if ( !defined($todo) ) {
-		my $jsonSourceUrl = AttrVal($name,"Test_Data_URI","https://raw.githubusercontent.com/RFD-FHEM/SIGNALduino_TOOL/pre-release/FHEM/lib/SD_Device_ProtocolList.json");	
-		loadJson($jsonSourceUrl); 
+		my $jsonSourceUrl = AttrVal($name,"Test_Data_URI","https://raw.githubusercontent.com/RFD-FHEM/SIGNALduino_TOOL/pre-release/FHEM/lib/SD_Device_ProtocolList.json");
+		loadJson($jsonSourceUrl);
 		$todo = todo "Testing against pre-release testdata, correct test before push this to master";
 		goto TestLabel;
-	}
-	
-	# for local test, to reset attrib to old value
-	if ($attr_dupTimeout) {
-		CommandAttr($targetHash,"global dupTimeout $attr_dupTimeout");
-		note("local - attr dupTimeout reset to old value");
-	} else {
-		CommandDeleteAttr(undef,"global dupTimeout");
-		note("local - attr dupTimeout deleted");
 	}
 }
 )
