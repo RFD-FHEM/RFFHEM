@@ -41,9 +41,7 @@ defmod test_SD_WS09_devices UnitTest dummyDuino (
 				if (IsDevice($tData->{internals}{NAME})) {
 					plan(3); # one for readings and one for internals
 					note("device is already defined on system, clearing readings");
-					while ( (my $rName, my $rValue) = each (%{$defs{$testSet->{name}}->{READINGS}}) ) {
-						CommandDeleteReading(undef, "$tData->{internals}{NAME} $rName");
-					}
+					CommandDeleteReading(undef, "$tData->{internals}{NAME} .*");
 				} else {
 					plan(4); # one for readings and one for internals and one for defmod
 					note("device will be defined temporary");
