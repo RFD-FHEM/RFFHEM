@@ -1461,17 +1461,19 @@ package lib::SD_ProtocolData;
 		"52"	=>	## Oregon Scientific PIR Protocol
 							# https://forum.fhem.de/index.php/topic,63604.msg548256.html#msg548256 @Ralf_W.
 							# u52#00012AE7   MC;LL=-1045;LH=1153;SL=-494;SH=606;D=FFFED518;C=549;L=30;
+							## note: unfortunately, the user is no longer in possession of a SIGNALduino
 							#
 							# FFFED5 = Adresse, die per DIP einstellt wird, FFF ändert sich nie
 							# 1 = Kanal, per gesondertem DIP, bei mir bei beiden 1 (CH 1) oder 3 (CH 2)
 							# C = wechselt, 0, 4, 8, C - dann fängt es wieder mit 0 an und wiederholt sich bei jeder Bewegung
 			{
 				name						=> 'Oregon Scientific PIR',
+				comment					=> 'JMR868 / NR868',
 				id							=> '52',
 				knownFreqs      => '',
 				clockrange			=> [470,640],							# min , max
 				format					=> 'manchester',					# tristate can't be migrated from bin into hex!
-				clientmodule		=> 'OREGON',
+				#clientmodule		=> '',                    # OREGON module not for Motion Detectors
 				modulematch			=> '^u52#F{3}|0{3}.*',
 				preamble				=> 'u52#',
 				length_min			=> '30',
