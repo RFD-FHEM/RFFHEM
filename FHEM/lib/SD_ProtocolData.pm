@@ -1470,7 +1470,7 @@ package lib::SD_ProtocolData;
 				name						=> 'Oregon Scientific PIR',
 				comment					=> 'JMR868 / NR868',
 				id							=> '52',
-				knownFreqs      => '',
+				knownFreqs      => '433.92',
 				clockrange			=> [470,640],							# min , max
 				format					=> 'manchester',					# tristate can't be migrated from bin into hex!
 				#clientmodule		=> '',                    # OREGON module not for Motion Detectors
