@@ -1,5 +1,14 @@
-2020-01-29 - Tests added to verify modification
-2020-01-27 - bugfix set/get cc1101_patable
+2020-01-29 
+* bugfix set/get cc1101_patable
+* Update SD_ProtocolData.pm
+
+* Update SD_ProtocolData.pm - doc (#790)
+- revised documentation (https://github.com/RFD-FHEM/RFFHEM/issues/779#issuecomment-575949069)
+
+* Update SD_ProtocolData.pm
+
+- added knownFreqs from documentation
+2020-01-26 - rename internal cc1101_patable (#787)
 
 Missing values ​​added to the patable list.
 Restriction to permitted frequency ranges.
