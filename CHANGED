@@ -1,3 +1,12 @@
+2020-01-29 - Update SD_ProtocolData.pm - doc (#790)
+
+* Update SD_ProtocolData.pm
+
+- revised documentation (https://github.com/RFD-FHEM/RFFHEM/issues/779#issuecomment-575949069)
+
+* Update SD_ProtocolData.pm
+
+- added knownFreqs from documentation
 2020-01-26 - rename internal cc1101_patable (#787)
 
 rename internal CC1101_PATABLE in cc1101_patable
