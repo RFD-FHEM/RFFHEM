@@ -4629,7 +4629,7 @@ sub SetPatable
 		main::SIGNALduino_WriteInit($hash);
 		return undef;
 	} else {
-		return "$hash->{NAME}: Frequency $paFreq MHz not supported (supported frequency ranges: 433.05–434.79 MHz, 863.00–870.00 MHz).";
+		return "$hash->{NAME}: Frequency $paFreq MHz not supported (supported frequency ranges: 433.05-434.79 MHz, 863.00-870.00 MHz).";
 	}
 }
 
