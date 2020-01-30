@@ -208,6 +208,18 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 		},
 		{
     		cc1101_available => 1,
+			testname=>  "set patable 5_dBm (cc1101_frequency=432)",
+			input	=>	"cc1101_patable 5_dBm",
+			pre_code 	=> sub { $attr{$target}{cc1101_frequency} = '432' },
+			check =>  sub { 
+			    return array  {
+			    	end();
+    			};
+		    },
+		    return => "$target: Frequency 432 MHz not supported (supported frequency ranges: 433.05-434.79 MHz, 863.00-870.00 MHz)."
+		},
+		{
+    		cc1101_available => 1,
 			testname=>  "set patable 5_dBm (cc1101_frequency=868)",
 			input	=>	"cc1101_patable 5_dBm",
 			pre_code 	=> sub { $attr{$target}{cc1101_frequency} = '868' },

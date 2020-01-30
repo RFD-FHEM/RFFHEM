@@ -31,7 +31,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.4.2_dev_20.01",
+	SDUINO_VERSION            => "v3.4.2_dev_27.01",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -85,6 +85,9 @@ my %ProtocolListSIGNALduino;
 my %patable = (
   "433" =>
   {
+    "-30_dBm"  => '12',
+    "-20_dBm"  => '0E',
+    "-15_dBm"  => '1D',
     "-10_dBm"  => '34',
     "-5_dBm"   => '68',
     "0_dBm"    => '60',
@@ -94,6 +97,9 @@ my %patable = (
   },
   "868" =>
   {
+    "-30_dBm"  => '03',
+    "-20_dBm"  => '0F',
+    "-15_dBm"  => '1E',
     "-10_dBm"  => '27',
     "-5_dBm"   => '67',
     "0_dBm"    => '50',
@@ -118,8 +124,7 @@ my %sets = (
   "cc1101_bWidth"  		=> 	['58,68,81,102,116,135,162,203,232,270,325,406,464,541,650,812', \&SIGNALduino_Set_bWidth ],
   "cc1101_rAmpl"   		=> 	['24,27,30,33,36,38,40,42',  \&cc1101::setrAmpl ],
   "cc1101_sens"    		=> 	['4,8,12,16', \&cc1101::SetSens ],
-  "cc1101_patable" 		=>	['-10_dBm,-5_dBm,0_dBm,5_dBm,7_dBm,10_dBm', \&cc1101::SetPatable ],
-#  "cc1101_patable_868" 	=> 	['-10_dBm,-5_dBm,0_dBm,5_dBm,7_dBm,10_dBm', \&cc1101::SetPatable ],
+  "cc1101_patable" 		=>	['-30_dBm,-20_dBm,-15_dBm,-10_dBm,-5_dBm,0_dBm,5_dBm,7_dBm,10_dBm', \&cc1101::SetPatable ],
   "cc1101_reg"			=> 	[ 'textFieldNL', \&cc1101::SetRegisters ],
 );
 
@@ -1076,6 +1081,8 @@ sub SIGNALduino_CheckccPatableResponse
 	my $name=$hash->{NAME};
 
 	my $CC1101Frequency=AttrVal($name,"cc1101_frequency",433);
+	$CC1101Frequency = 433 if ($CC1101Frequency >= 433 && $CC1101Frequency <= 435);
+	$CC1101Frequency = 868 if ($CC1101Frequency >= 863 && $CC1101Frequency <= 870);
 	my $dBn = substr($msg,9,2);
 	$hash->{logMethod}->($name, 3, "$name: CheckCcpatableResponse, patable: $dBn");
 	foreach my $dB (keys %{ $patable{$CC1101Frequency} }) {
@@ -2857,17 +2864,18 @@ sub SIGNALduino_Attr(@) {
 			}
 		}
 	}
-	elsif ($aName eq "cc1101_frequency")
-	{
-		if ($aVal eq "" || $aVal < 800) {
-			$hash->{logMethod}->($name, 3, "$name: Attr, delete cc1101_frequency");
-			delete ($hash->{cc1101_frequency}) if (defined($hash->{cc1101_frequency}));
-		} else {
-			$hash->{logMethod}->($name, 3, "$name: Attr, setting cc1101_frequency to 868");
-			$hash->{cc1101_frequency} = 868;
-		}
-	}
-
+	####### Beginn kann wahrscheinlich weg #######
+	# elsif ($aName eq "cc1101_frequency")
+	# {
+		# if ($aVal eq "" || $aVal < 800) {
+			# $hash->{logMethod}->($name, 3, "$name: Attr, delete cc1101_frequency");
+			# delete ($hash->{cc1101_frequency}) if (defined($hash->{cc1101_frequency}));
+		# } else {
+			# $hash->{logMethod}->($name, 3, "$name: Attr, setting cc1101_frequency to 868");
+			# $hash->{cc1101_frequency} = 868;
+		# }
+	# }
+	####### Ende kann wahrscheinlich weg #######
 	elsif ($aName eq "hardware")	# to set flashCommand if hardware def or change
 	{
 		# to delete flashCommand if hardware delete
@@ -4606,21 +4614,22 @@ package cc1101;
 
 ####
 #### for set function to change the patable for 433 or 868 Mhz supported
-#### 
+#### 433.05–434.79 MHz, 863–870 MHz
 sub SetPatable
 {
 	my ($hash,@a) = @_;
 	my $paFreq = main::AttrVal($hash->{NAME},"cc1101_frequency","433");
+	$paFreq = 433 if ($paFreq >= 433 && $paFreq <= 435);
+	$paFreq = 868 if ($paFreq >= 863 && $paFreq <= 870);
 	if ( exists($patable{$paFreq}) )
 	{
-		#
 		my $pa = "x" . $patable{$paFreq}{$a[1]};
 		$hash->{logMethod}->($hash->{NAME}, 3, "$hash->{NAME}: SetPatable, Setting patable $paFreq $a[1] $pa");
 		main::SIGNALduino_AddSendQueue($hash,$pa);
 		main::SIGNALduino_WriteInit($hash);
 		return undef;
 	} else {
-		return "Frequency not supported";
+		return "$hash->{NAME}: Frequency $paFreq MHz not supported (supported frequency ranges: 433.05-434.79 MHz, 863.00-870.00 MHz).";
 	}
 }
 
