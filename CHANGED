@@ -1,3 +1,8 @@
+2020-01-30 - bug fix set/get cc1101_patable (#789)
+
+* bugfix set/get cc1101_patable
+Missing values ​​added to the patable list.
+Restriction to permitted frequency ranges.
 2020-01-29 
 * bugfix set/get cc1101_patable
 * Update SD_ProtocolData.pm
