@@ -71,6 +71,29 @@
 #     power button          -	get sduino_dummy raw MU;;P0=-756;;P1=718;;P2=354;;P3=-395;;P4=-16056;;D=01020202310231310202423102310231023102310202023102313102024231023102310231023102020231023131020242310231023102310231020202310231310202;;CP=2;;R=41;;
 #}    novy button           - get sduino_dummy raw MU;;P0=706;;P1=-763;;P2=370;;P3=-405;;P4=-15980;;D=0123012301230304230123012301230123012303042;;CP=2;;R=42;;
 ###############################################################################################################################################################################
+# - Remote Control Novy_840039 for Novy Cloud 230 kitchen hood [Protocol 86.1] (Länge je nach Taste 12 oder 18 Bit)
+#{    0111010011	"power_button"		- nur 10 Bit, SIGNALduino.pm hängt 2 Nullen an  
+#     0110110110	"cooking_light_on"				- i.O.
+#     0110110100	"cooking_light_off"				- i.O.
+#     0110110101	"cooking_light_dim_plus"		- i.O.
+#     0110110011	"cooking_light_dim_minus"		- i.O.
+#     0111001110	"cooking_light_cold"			- i.O.
+#     0111001011	"cooking_light_warm"			- i.O.
+#     0110111110	"ambient_light_on"				- i.O.
+#     0110111100	"ambient_light_off"				- i.O.
+#     0110111101	"ambient_light_dim_plus"		- i.O.
+#     0110111011	"ambient_light_dim_minus"		- i.O.
+#     0111010110	"ambient_light_cold"			- i.O.
+#     0111001101	"ambient_light_warm"			- i.O.
+#     0110			"fan_minus"						- i.O.
+#     0101			"fan_plus"						- i.O.
+#     0110011101	"fan_left"						- not assigned for Novy Cloud 230
+#     0110011010	"fan_right"						- not assigned for Novy Cloud 230
+#     https://github.com/RFD-FHEM/RFFHEM/issues/792
+#     power_button			get sduino_dummy raw MU;;P0=-749;;P1=378;;P2=-456;;P3=684;;P4=-16081;;D=01230101012301232301014123012301230123012301010123012323010141230123012301230123010101230123230101412;;CP=1;;R=66;; 
+#     cooking_light on 		get sduino_dummy raw MU;;P0=-750;;P1=375;;P2=-418;;P3=682;;P4=-16059;;P5=290;;P6=-5060;;D=0123010123010123010123412305230123012301230101230101230101234123012301230123012301012301012301012341230123012301230123010123010123010123416505230123010123010123010123412;;
+#}
+###############################################################################################################################################################################
 # - CAME Drehtor Antrieb - remote CAME_TOP_432EV [Protocol 86] and [additionally Protocol 81]
 #{    https://github.com/RFD-FHEM/RFFHEM/issues/151
 #     nibble 0-1 -> Ident | nibble 2 -> Tastencode
@@ -385,6 +408,27 @@ my %models = (
 											Protocol			=> "P86",
 											Typ						=> "remote"
 										},
+	"Novy_840039" =>	{	"0111010011"	=> "power_button", 
+     										"0110110110"  => "cooking_light_on",
+     										"0110110100"  => "cooking_light_off",
+     										"0110110101"  => "cooking_light_dim_plus",
+     										"0110110011"  => "cooking_light_dim_minus",
+     										"0111001110"  => "cooking_light_cold",
+     										"0111001011"  => "cooking_light_warm",
+     										"0110111110"  => "ambient_light_on",
+     										"0110111100"  => "ambient_light_off",
+     										"0110111101"  => "ambient_light_dim_plus",
+     										"0110111011"  => "ambient_light_dim_minus",
+     										"0111010110"  => "ambient_light_cold",
+     										"0111001101"  => "ambient_light_warm",
+     										"0110"        => "fan_minus",
+     										"0101"        => "fan_plus",
+     										"0110011101"  => "fan_left",
+     										"0110011010"  => "fan_right",
+     										hex_lengh			=> "3,5",
+     										Protocol			=> "P86.1",
+     										Typ						=> "remote"
+     									},
 	"QUIGG_DMV" =>	{	"11101110"	=> "Ch1_on",
 										"11111111"	=> "Ch1_off",
 										"01101100" 	=> "Ch2_on",
@@ -573,7 +617,7 @@ my %models = (
 #############################
 sub SD_UT_Initialize($) {
 	my ($hash) = @_;
-	$hash->{Match}			= "^P(?:14|29|30|34|46|68|69|76|81|83|86|90|91|91.1|92|93|95)#.*";
+	$hash->{Match}			= "^P(?:14|29|30|34|46|68|69|76|81|83|86|86.1|90|91|91.1|92|93|95)#.*";
 	$hash->{DefFn}			= "SD_UT_Define";
 	$hash->{UndefFn}		= "SD_UT_Undef";
 	$hash->{ParseFn}		= "SD_UT_Parse";
@@ -622,8 +666,8 @@ sub SD_UT_Define($$) {
 		}
 	}
 
-	### [2] checks CAME_TOP_432EV & Novy_840029 & Unitec_47031 & TR_502MSV ###
-	if (($a[2] eq "CAME_TOP_432EV" || $a[2] eq "Novy_840029" || $a[2] eq "Unitec_47031" || $a[2] eq "TR_502MSV") && not $a[3] =~ /^[0-9a-fA-F]{2}/s) {
+	### [2] checks CAME_TOP_432EV & Novy_840029 & Novy_840039 & Unitec_47031 ###
+	if (($a[2] eq "CAME_TOP_432EV" || $a[2] eq "Novy_840029" || $a[2] eq "Novy_840039" || $a[2] eq "Unitec_47031") && not $a[3] =~ /^[0-9a-fA-F]{2}/s) {
 		return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short | long or not HEX (0-9 | a-f | A-F){2}";
 	}
 	### [3] checks SA_434_1_mini & QUIGG_DMV ###
@@ -727,6 +771,12 @@ sub SD_UT_Set($$$@) {
 		$msgEnd = "P#R" . $repeats;		
 	############ Novy_840029 ############
 	} elsif ($model eq "Novy_840029" && $cmd ne "?") {
+		my @definition = split(" ", $hash->{DEF});																# split adress from def
+		my $adr = sprintf( "%08b", hex($definition[1])) if ($name ne "unknown");	# argument 1 - adress to binary with 8 digits
+		$msg = $models{$model}{Protocol} . "#" . $adr;
+		$msgEnd = "#R" . $repeats;
+	############ Novy_840039 ############
+	} elsif ($model eq "Novy_840039" && $cmd ne "?") {
 		my @definition = split(" ", $hash->{DEF});																# split adress from def
 		my $adr = sprintf( "%08b", hex($definition[1])) if ($name ne "unknown");	# argument 1 - adress to binary with 8 digits
 		$msg = $models{$model}{Protocol} . "#" . $adr;
@@ -984,6 +1034,12 @@ sub SD_UT_Parse($$) {
 		if (!$def && ($protocol == 86 || $protocol == 81)) {
 			$deviceCode = substr($rawData,0,2);
 			$devicedef = "Novy_840029 " . $deviceCode;
+			$def = $modules{SD_UT}{defptr}{$devicedef};
+		}
+		### Novy_840039 [P86.1] ###
+		if (!$def && ($protocol == 86.1 || $protocol == 86 || $protocol == 81)) {
+			$deviceCode = substr($rawData,0,2);
+			$devicedef = "Novy_840039 " . $deviceCode;
 			$def = $modules{SD_UT}{defptr}{$devicedef};
 		}
 	}
@@ -1291,6 +1347,14 @@ sub SD_UT_Parse($$) {
 			$state = substr($bitData,8,10);		# 10 Bit (letzte 2 Bit entfernen)
 		}
 		$deviceCode = substr($bitData,0,8);
+	############ Novy_840039 ############ Protocol 86 ############
+	} elsif ($model eq "Novy_840039" && ($protocol == 86.1 || $protocol == 86 || $protocol == 81)) {
+		if ($hlen == 3) {		# 12 Bit [3]
+			$state = substr($bitData,8);			# 4 Bit
+		} else {						# 20 Bit [5]
+			$state = substr($bitData,8,10);		# 10 Bit (letzte 2 Bit entfernen)
+		}
+		$deviceCode = substr($bitData,0,8);
 	############ CAME_TOP_432EV ############ Protocol 86 ############
 	} elsif ($model eq "CAME_TOP_432EV" && ($protocol == 86 || $protocol == 81)) {
 		$state = substr($bitData,8);
@@ -1509,6 +1573,11 @@ sub SD_UT_Attr(@) {
 				$deviceCode = substr($bitData,0,8);
 				$deviceCode = sprintf("%02X", oct( "0b$deviceCode" ) );
 				$devicename = $devicemodel."_".$deviceCode;
+			############ Novy_840039 ############
+			} elsif ($attrName eq "model" && $attrValue eq "Novy_840039") {
+				$deviceCode = substr($bitData,0,8);
+				$deviceCode = sprintf("%02X", oct( "0b$deviceCode" ) );
+				$devicename = $devicemodel."_".$deviceCode;
 			############ CAME_TOP_432EV ############
 			} elsif ($attrName eq "model" && $attrValue eq "CAME_TOP_432EV") {
 				$deviceCode = substr($bitData,0,8);
@@ -1669,6 +1738,7 @@ sub SD_UT_tristate2bin($) {
 	 <ul> - mumbi AFS300-s (remote control RC-10 | random code wireless switch RCS-22GS)&nbsp;&nbsp;&nbsp;<small>(module model: RC_10 | protocol 90)</small></ul>
 	 <ul> - NEFF or Refsta Topdraft (Tecnowind) kitchen hood&nbsp;&nbsp;&nbsp;<small>(module model: SF01_01319004 | protocol 86)</small></ul>
 	 <ul> - Novy Pureline 6830 kitchen hood&nbsp;&nbsp;&nbsp;<small>(module model: Novy_840029 | protocol 86)</small></ul>
+	 <ul> - Novy Cloud 230 kitchen hood&nbsp;&nbsp;&nbsp;<small>(module model: Novy_840039 | protocol 86.1)</small></ul>
 	 <ul> - QUIGG DMV-7000&nbsp;&nbsp;&nbsp;<small>(module model: QUIGG_DMV | protocol 34)</small></ul>
 	 <ul> - Remote control SA-434-1 mini 923301&nbsp;&nbsp;&nbsp;<small>(module model: SA_434_1_mini | protocol 81)</small></ul>
 	 <ul> - Remote control for Techmar Garden Lights &nbsp;&nbsp;&nbsp;<small>(Modulmodel: Techmar | Protokoll 95)</small></ul>
@@ -1897,13 +1967,13 @@ sub SD_UT_tristate2bin($) {
 	<ul><a name="model"></a>
 		<li>model<br>
 		The attribute indicates the model type of your device.<br>
-		(unknown, Buttons_five, CAME_TOP_432EV, Chilitec_22640, KL_RF01, HS1-868-BS, HSM4, QUIGG_DMV, LED_XM21_0, Novy_840029, OR28V, RC_10, RH787T, SA_434_1_mini, SF01_01319004, Tedsen_SKX1xx, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx, TR_502MSV, Unitec_47031)</li>
+		(unknown, Buttons_five, CAME_TOP_432EV, Chilitec_22640, KL_RF01, HS1-868-BS, HSM4, QUIGG_DMV, LED_XM21_0, Novy_840029, Novy_840039, OR28V, RC_10, RH787T, SA_434_1_mini, SF01_01319004, Tedsen_SKX1xx, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx, TR_502MSV, Unitec_47031)</li>
 	</ul><br>
 	<ul><li><a name="repeats">repeats</a><br>
 	This attribute can be used to adjust how many repetitions are sent. Default is 5.</li></ul><br>
 
 	<b><i>Generated readings of the models</i></b><br>
-	<ul><u>Buttons_five | CAME_TOP_432EV | Chilitec_22640 | HSM4 | KL_RF01 | LED_XM21_0 | Novy_840029 | OR28V | QUIGG_DMV | RC_10 | RH787T | SF01_01319004 | SF01_01319004_Typ2 | TR_502MSV</u><br>
+	<ul><u>Buttons_five | CAME_TOP_432EV | Chilitec_22640 | HSM4 | KL_RF01 | LED_XM21_0 | Novy_840029 | Novy_840039 | OR28V | QUIGG_DMV | RC_10 | RH787T | SF01_01319004 | SF01_01319004_Typ2 | TR_502MSV</u><br>
 	<li>deviceCode<br>
 	Device code of the system</li>
 	<li>LastAction<br>
@@ -1966,6 +2036,7 @@ sub SD_UT_tristate2bin($) {
 	 <ul> - mumbi AFS300-s (remote control RC-10 | random code wireless switch RCS-22GS)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: RC_10 | Protokoll 90)</small></ul>
 	 <ul> - NEFF oder Refsta Topdraft (Tecnowind) Dunstabzugshaube&nbsp;&nbsp;&nbsp;<small>(Modulmodel: SF01_01319004 | Protokoll 86)</small></ul>
 	 <ul> - Novy Pureline 6830 Dunstabzugshaube&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Novy_840029 | Protokoll 86)</small></ul>
+	 <ul> - Novy Cloud 230 Dunstabzugshaube&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Novy_840039 | Protokoll 86.1)</small></ul>
 	 <ul> - QUIGG DMV-7000&nbsp;&nbsp;&nbsp;<small>(Modulmodel: QUIGG_DMV | Protokoll 34)</small></ul>
 	 <ul> - Remote control SA-434-1 mini 923301&nbsp;&nbsp;&nbsp;<small>(Modulmodel: SA_434_1_mini | Protokoll 81)</small></ul>
 	 <ul> - Techmar Garden Lights &nbsp;&nbsp;&nbsp;<small>(Modulmodel: Techmar | Protokoll 95)</small></ul>
@@ -2195,13 +2266,13 @@ sub SD_UT_tristate2bin($) {
 	<ul><li><a href="#IODev">IODev</a></li></ul><br>
 	<ul><li><a name="model">model</a><br>
 		Das Attribut bezeichnet den Modelltyp Ihres Ger&auml;tes.<br>
-		(unknown, Buttons_five, CAME_TOP_432EV, Chilitec_22640, KL_RF01, HS1-868-BS, HSM4, QUIGG_DMV, LED_XM21_0, Novy_840029, OR28V, RC_10, RH787T, SA_434_1_mini, SF01_01319004, Tedsen_SKX1xx, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx, TR_502MSV, Unitec_47031)</li><a name=" "></a>
+		(unknown, Buttons_five, CAME_TOP_432EV, Chilitec_22640, KL_RF01, HS1-868-BS, HSM4, QUIGG_DMV, LED_XM21_0, Novy_840029, Novy_840039, OR28V, RC_10, RH787T, SA_434_1_mini, SF01_01319004, Tedsen_SKX1xx, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx, TR_502MSV, Unitec_47031)</li><a name=" "></a>
 	</ul><br>
 	<ul><li><a name="repeats">repeats</a><br>
 	Mit diesem Attribut kann angepasst werden, wie viele Wiederholungen sendet werden. Standard ist 5.</li></ul><br>
 
 	<b><i>Generierte Readings der Modelle</i></b><br>
-	<ul><u>Buttons_five | CAME_TOP_432EV | Chilitec_22640 | HSM4 | KL_RF01 | LED_XM21_0 | Novy_840029 | OR28V | QUIGG_DMV | RC_10 | RH787T | SF01_01319004 | SF01_01319004_Typ2 | TR_502MSV</u><br>
+	<ul><u>Buttons_five | CAME_TOP_432EV | Chilitec_22640 | HSM4 | KL_RF01 | LED_XM21_0 | Novy_840029 | Novy_840039 | OR28V | QUIGG_DMV | RC_10 | RH787T | SF01_01319004 | SF01_01319004_Typ2 | TR_502MSV</u><br>
 	<li>deviceCode<br>
 	Ger&auml;teCode des Systemes</li>
 	<li>LastAction<br>
