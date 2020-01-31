@@ -2176,6 +2176,26 @@ package lib::SD_ProtocolData;
 				length_min		=> '12',
 				length_max		=> '18',
 			},
+		"86.1"	=>  ### for remote controls:  Novy 840039
+							### remote control Novy 840039 for Novy Cloud 230 kitchen hood:
+							# 	  power_button			MU;P0=-749;P1=378;P2=-456;P3=684;P4=-16081;D=01230101012301232301014123012301230123012301010123012323010141230123012301230123010101230123230101412;CP=1;R=66; 
+							#	  cooking_light on 		MU;P0=-750;P1=375;P2=-418;P3=682;P4=-16059;P5=290;P6=-5060;D=0123010123010123010123412305230123012301230101230101230101234123012301230123012301012301012301012341230123012301230123010123010123010123416505230123010123010123010123412;
+			{
+				name					=> 'Novy',
+				comment				=> 'remote control Novy 840039',
+				id						=> '86.1',
+				knownFreqs		=> '433.92',
+				one						=> [-2,1],
+				zero					=> [-1,2],
+				start					=> [-44,1],
+				clockabs			=> 375,
+				format				=> 'twostate',
+				preamble			=> 'P86.1#',				# prepend to converted message
+				clientmodule	=> 'SD_UT',
+				#modulematch	=> '^P86.1#.*',
+				length_min		=> '12',
+				length_max		=> '18',
+			},
 		"87"	=>	## JAROLIFT Funkwandsender TDRC 16W / TDRCT 04W
 							# https://github.com/RFD-FHEM/RFFHEM/issues/380 @bismosa
 							# P87#E8119A34200065F100 | button=up   MS;P1=1524;P2=-413;P3=388;P4=-3970;P5=-815;P6=778;P7=-16024;D=34353535623562626262626235626262353562623535623562626235356235626262623562626262626262626262626262623535626235623535353535626262356262626262626267123232323232323232323232;CP=3;SP=4;R=226;O;m2;
