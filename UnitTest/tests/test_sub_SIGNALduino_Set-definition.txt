@@ -153,7 +153,7 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 			    	end();
     			};
 		    },
-		    return => "Register 10 requsted"
+		    return => "Register 10 requested"
 		},
 		{
     		cc1101_available => 0,
@@ -598,7 +598,7 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 		subtest 'Test SIGNALduino_Set_bWidth (requesting value register 10)' => sub {
 			plan(3);
 			my $ret = SIGNALduino_Set_bWidth($targetHash,,"cc1101_bWidth","325");
-			is($ret,"Register 10 requsted","Verify return message / request register 10");
+			is($ret,"Register 10 requested","Verify return message / request register 10");
 			is($targetHash->{ucCmd}->{cmd},"set_bWidth","check getcmd command");
 			is($targetHash->{ucCmd}->{arg},"325","check getcmd arg");
 		};

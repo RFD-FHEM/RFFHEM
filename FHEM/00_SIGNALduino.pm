@@ -858,7 +858,7 @@ sub SIGNALduino_Set_bWidth
 {
 	my ($hash, @a) = @_;
 
-	if (defined $hash->{ucCmd}->{cmd} && $hash->{ucCmd}->{cmd} eq "set_bWidth" && $a[0] =~ /^C10\s=\s([A-Fa-f0-9]{2})$/ )
+	if (exists($hash->{ucCmd}->{cmd}) && $hash->{ucCmd}->{cmd} eq "set_bWidth" && $a[1] =~ /^C10\s=\s([A-Fa-f0-9]{2})$/ )
 	{
 		my ($ob,$bw) = cc1101::CalcbWidthReg($hash,$1,$hash->{ucCmd}->{arg});
 		$hash->{logMethod}->($hash->{NAME}, 3, "$hash->{NAME}: Set_bWidth, bWidth: Setting MDMCFG4 (10) to $ob = $bw KHz");
@@ -876,7 +876,7 @@ sub SIGNALduino_Set_bWidth
 		$hash->{ucCmd}->{responseSub} = \&SIGNALduino_Set_bWidth;  	# Callback auf sich selbst setzen
 		$hash->{ucCmd}->{asyncOut} = $hash->{CL};
 		$hash->{ucCmd}->{timenow}=time();
-		return "Register 10 requsted";
+		return "Register 10 requested";
 	}
 }
 
@@ -936,9 +936,7 @@ sub SIGNALduino_Get_FhemWebList {
 			(
 				(IsDummy($hash->{NAME}) && $_ =~ m/^(?:availableFirmware|raw)/) ||
 				( InternalVal($hash->{NAME},"cc1101_available",0) || (!InternalVal($hash->{NAME},"cc1101_available",0) && $_ !~ /^cc/)) &&
-				( !IsDummy($hash->{NAME}) && (defined(DevIo_IsOpen($hash))  ||  $_ =~ m/^(?:availableFirmware|raw)/  )) &&
-				( $_ !~ m/^set_bWidth/ )
-			)
+				( !IsDummy($hash->{NAME}) && (defined(DevIo_IsOpen($hash))  ||  $_ =~ m/^(?:availableFirmware|raw)/  ))	)
 		)
 	}  keys %gets;
 	return "Unknown argument $a[0], choose one of " . join(" ", @cList);
@@ -1615,13 +1613,13 @@ sub SIGNALduino_Read($) {
 
 	if ( $rmsg && !SIGNALduino_Parse($hash, $hash, $name, $rmsg) && exists($hash->{ucCmd}) && defined($hash->{ucCmd}->{cmd}))
 	{
-		my $regexp = exists($gets{$hash->{ucCmd}->{cmd}}[4]) ? $gets{$hash->{ucCmd}->{cmd}}[4] : ".*";
+		my $regexp = exists($gets{$hash->{ucCmd}->{cmd}}) && exists($gets{$hash->{ucCmd}->{cmd}}[4]) ? $gets{$hash->{ucCmd}->{cmd}}[4] : ".*";
 		if (exists($hash->{ucCmd}->{responseSub}) && ref $hash->{ucCmd}->{responseSub} eq "CODE") {
 			$hash->{logMethod}->($name, 5, "$name: Read, msg: regexp=$regexp cmd=$hash->{ucCmd}->{cmd} msg=$rmsg");
 
 			my $returnMessage ;
 			my $event;
-			if (!exists($gets{$hash->{ucCmd}->{cmd}}[4]) || $rmsg =~ /$regexp/)
+			if (!exists($gets{$hash->{ucCmd}->{cmd}}) || !exists($gets{$hash->{ucCmd}->{cmd}}[4]) || $rmsg =~ /$regexp/)
 			{
 				($returnMessage,$event) = $hash->{ucCmd}->{responseSub}->($hash,$rmsg) ;
 				readingsSingleUpdate($hash, $hash->{ucCmd}->{cmd}, $returnMessage, $event) if (defined($returnMessage) && defined($event));
