@@ -608,7 +608,7 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 				
 		subtest 'Test SIGNALduino_Set_bWidth (Update registervalue)' => sub {
 			plan(2);
-			my ($ret,undef) = SIGNALduino_Set_bWidth($targetHash,"cc1101_bWidth","C10 = 57");
+			my ($ret,undef) = SIGNALduino_Set_bWidth($targetHash,"C10 = 57");
 			
 				
 			is($ret,"Setting MDMCFG4 (10) to 57 = 325 KHz","Verify return message");

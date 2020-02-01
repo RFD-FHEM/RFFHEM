@@ -859,7 +859,7 @@ sub SIGNALduino_Set_bWidth
 {
 	my ($hash, @a) = @_;
 
-	if (exists($hash->{ucCmd}->{cmd}) && $hash->{ucCmd}->{cmd} eq "set_bWidth" && $a[1] =~ /^C10\s=\s([A-Fa-f0-9]{2})$/ )
+	if (exists($hash->{ucCmd}->{cmd}) && $hash->{ucCmd}->{cmd} eq "set_bWidth" && $a[0] =~ /^C10\s=\s([A-Fa-f0-9]{2})$/ )
 	{
 		my ($ob,$bw) = cc1101::CalcbWidthReg($hash,$1,$hash->{ucCmd}->{arg});
 		$hash->{logMethod}->($hash->{NAME}, 3, "$hash->{NAME}: Set_bWidth, bWidth: Setting MDMCFG4 (10) to $ob = $bw KHz");
