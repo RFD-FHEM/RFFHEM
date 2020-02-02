@@ -1067,7 +1067,7 @@ sub SD_UT_Parse($$) {
 			$def = $modules{SD_UT}{defptr}{$devicedef};
 		}
 		### Novy_840039 [P86] ###
-		if (!$def && ($protocol == 86)) {
+		if (!$def && ($protocol == 86 || $protocol == 81)) {
 			$deviceCode = substr($rawData,0,2);
 			$devicedef = "Novy_840039 " . $deviceCode;
 			$def = $modules{SD_UT}{defptr}{$devicedef};
@@ -1399,16 +1399,8 @@ sub SD_UT_Parse($$) {
 	} elsif ($model eq "TR_502MSV" && $protocol == 34) {
 		$state = substr($bitData,12,8);
 		$deviceCode = substr($bitData,0,12);
-	############ Novy_840029 ############ Protocol 86 ############
-	} elsif ($model eq "Novy_840029" && ($protocol == 86 || $protocol == 81)) {
-		if ($hlen == 3) {		# 12 Bit [3]
-			$state = substr($bitData,8);			# 4 Bit
-		} else {						# 20 Bit [5]
-			$state = substr($bitData,8,10);		# 10 Bit (letzte 2 Bit entfernen)
-		}
-		$deviceCode = substr($bitData,0,8);
-	############ Novy_840039 ############ Protocol 86 ############
-	} elsif ($model eq "Novy_840039" && ($protocol == 86)) {
+	############ Novy_840029, Novy_840039 ############ Protocol 86 ############
+	} elsif ($model eq "Novy_840029" || $model eq "Novy_840039" && ($protocol == 86 || $protocol == 81)) {
 		if ($hlen == 3) {		# 12 Bit [3]
 			$state = substr($bitData,8);			# 4 Bit
 		} else {						# 20 Bit [5]
