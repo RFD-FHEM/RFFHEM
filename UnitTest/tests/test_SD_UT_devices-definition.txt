@@ -44,7 +44,7 @@ defmod test_SD_UT_devices UnitTest dummyDuino (
 			subtest "Checking module: $testSet->{module} device: $testSet->{name} TestNo: $tID " => sub {
 
 				if ($tData->{attributes}{model} =~ /Novy_8400../) {
-					note("Special feature, similar models with same ID -> delete all ".$testSet->{name});
+					note("Special feature, similar models with the same ID and DMSG -> delete all ".$testSet->{name});
 					CommandDelete(undef, "Novy_8400.*");
 				};
 
