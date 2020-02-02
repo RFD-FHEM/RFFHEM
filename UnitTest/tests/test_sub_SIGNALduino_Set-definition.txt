@@ -607,11 +607,11 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 		# 		call SIGNALduino_Read($targetHash);		
 				
 		subtest 'Test SIGNALduino_Set_bWidth (Update registervalue)' => sub {
-			plan(1);
+			plan(2);
 			my ($ret,undef) = SIGNALduino_Set_bWidth($targetHash,"C10 = 57");
 			
 				
-			#is($ret,"Setting MDMCFG4 (10) to 57 = 325 KHz","Verify return message");
+			is($ret,"Setting MDMCFG4 (10) to 57 = 325 KHz","Verify return message");
 	
 			is($targetHash->{QUEUE},
 				array  {

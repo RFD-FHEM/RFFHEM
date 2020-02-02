@@ -866,8 +866,7 @@ sub SIGNALduino_Set_bWidth
 		# Toddo setRegisters verwenden
 		main::SIGNALduino_AddSendQueue($hash,"W12$ob");
 		main::SIGNALduino_WriteInit($hash);
-		#return ("Setting MDMCFG4 (10) to $ob = $bw KHz" ,0);
-		return undef;
+		return ("Setting MDMCFG4 (10) to $ob = $bw KHz" ,undef);
 	} else {
 		$hash->{logMethod}->($hash->{NAME}, 3, "$hash->{NAME}: Set_bWidth, Request register 10");
 		# Get Register 10
