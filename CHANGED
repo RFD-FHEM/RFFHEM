@@ -1,3 +1,34 @@
+2020-02-05 - SD_UT new model Novy_840039, revised SIGNALduuino readme & tests (#794)
+
+* - added new model SD_UT & commandref
+- added new model Novy_840039
+- revised readme
+
+* Update 14_SD_UT.pm
+- revised code
+- model, extension to protocol 81
+
+* Update test_SD_UT_devices-definition.txt
+- revised test
+
+* Update test_SD_UT_devices-definition.txt
+- more understandable note
+
+* Update 14_SD_UT.pm
+- added commandref attrib UTclock
+
+* Update 14_SD_UT.pm
+- model Novy_840029, revised doc
+- model Novy_840039, rename button text power_button to power_on_off
+
+* Update 14_SD_UT.pm
+- fix UTClock for all models
+- revised doc Novy_840029
+- revised text for unknown devicecode
+- remove sort option
+
+* Update 14_SD_UT.pm
+- revised modulversion
 2020-01-30 - bug fix set/get cc1101_patable (#789)
 
 * bugfix set/get cc1101_patable
