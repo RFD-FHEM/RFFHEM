@@ -1023,11 +1023,11 @@ package lib::SD_ProtocolData;
 							# Ch1_off      MU;P0=697;P1=-1352;P2=-679;P3=1343;D=01010101010231023232323232323232323232323;CP=0;R=27;
 							## Mandolyn Funksteckdosen Set
 							# https://github.com/RFD-FHEM/RFFHEM/issues/716 @codeartisan-de
-							## Pollin ISOTRONIC - 12 Tasten remote | model 58608
+							## Pollin ISOTRONIC - 12 Tasten remote | model 58608 | SD_UT model QUIGG_DMV ???
 							# remote basicadresse with 12bit -> changed if push reset behind battery cover
 							# https://github.com/RFD-FHEM/RFFHEM/issues/44 @kaihs
-							# P34#891EE   MU;P0=-9584;P1=592;P2=-665;P3=1223;P4=-1311;D=01234141412341412341414123232323412323234;CP=1;R=0;
-							# P34#891FE   MU;P0=-12724;P1=597;P2=-667;P3=1253;P4=-1331;D=01234141412341412341414123232323232323232;CP=1;R=0;
+							# Ch1_on       MU;P0=-9584;P1=592;P2=-665;P3=1223;P4=-1311;D=01234141412341412341414123232323412323234;CP=1;R=0;
+							# Ch1_off      MU;P0=-12724;P1=597;P2=-667;P3=1253;P4=-1331;D=01234141412341412341414123232323232323232;CP=1;R=0;
 			{
 				name					=> 'QUIGG | LIBRA | Mandolyn | Pollin ISOTRONIC',
 				comment				=> 'remote control DMV-7000, TR-502MSV, 58608',
