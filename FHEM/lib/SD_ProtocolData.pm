@@ -1528,20 +1528,21 @@ package lib::SD_ProtocolData;
 							# MU;P0=-242;P1=-2076;P2=-13292;P3=242;P4=-718;P5=748;P6=-494;P7=481;CP=3;R=29;D=23454363670707036363670363670367070367070703636363670363636363670363636707036367070707036703670367036363636363636363636707036703636363154543636707070363636703636703670703670707036363636703636363636703636367070363670707070367036703670363636363636363636367;O;
 							# MU;P0=-236;P1=493;P2=235;P3=-503;P4=-2076;P5=734;P6=-728;CP=2;R=11;D=0101023101023245656232310101023232310232310231010231010102323232310232323232310102323101023102310231023102310231023232323232323232323101010231010232;e;i;
 			{
-				name         => 'TFA 30.3233.01',
-				comment      => 'Drop Rain gauge',
-				id           => '54',
-				knownFreqs   => '433.92',
-				one          => [2,-1],
-				zero         => [1,-2],
-				start        => [3,-3,3,-3], # can optionally be adjusted to [-3,3,-3] or [3,-3], must be tested extensively
-				clockabs     => 250,
+				name           => 'TFA 30.3233.01',
+				comment        => 'Drop Rain gauge',
+				id             => '54',
+				knownFreqs     => '433.92',
+				one            => [2,-1],
+				zero           => [1,-2],
+				start          => [3,-3,3,-3], # can optionally be adjusted to [-3,3,-3] or [3,-3], must be tested extensively
+				clockabs       => 250,
+				reconstructBit => '1',
 				#clientmodule => 'SD_WS',
-				format       => 'twostate',
-				preamble     => 'u54#',
-				#preamble     => 'W54#',
-				length_min   => '64',
-				length_max   => '68',
+				format         => 'twostate',
+				preamble       => 'u54#',
+				#preamble       => 'W54#',
+				length_min     => '64',
+				length_max     => '68',
 			},
 		"55"	=>	## QUIGG GT-1000
 			{
