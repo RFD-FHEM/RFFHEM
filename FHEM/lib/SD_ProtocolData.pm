@@ -57,8 +57,8 @@
 ##### notice #### or #### info ############################################################################################################
 # !!! Between the keys and values ​​no tabs, please use spaces !!!
 # !!! Please use first unused id for new protocols !!!
-# ID´s are currently unused: 27 | 31 | 54 | 78
-# ID´s need to be revised (preamble u): 5|6|19|21|22|23|24|25|28|36|40|42|52|56|59|63
+# ID´s are currently unused: 78
+# ID´s need to be revised (preamble u): 5|19|21|22|23|24|25|28|31|36|40|52|54|56|59|63
 ###########################################################################################################################################
 # Please provide at least three messages for each new MU/MC/MS protocol and a URL of issue in GitHub or discussion in FHEM Forum
 # https://forum.fhem.de/index.php/topic,58396.975.html | https://github.com/RFD-FHEM/RFFHEM
@@ -899,9 +899,25 @@ package lib::SD_ProtocolData;
 				length_min		=> '12',
 				length_max		=> '12',				# message has only 10 bit but is paddet to 12
 			},
-
-		#"31"	=> can use
-
+		"31"  =>	## LED Controller LTECH, LED M Serie RF RGBW - M4 & M4-5A
+							# https://forum.fhem.de/index.php/topic,107868.msg1018434.html#msg1018434 | https://forum.fhem.de/index.php/topic,107868.msg1020521.html#msg1020521 @Devirex
+							## note: command length 299, now - not supported by all firmware versions
+							# MU;P0=-16118;P1=315;P2=-281;P4=-1204;P5=-563;P6=618;P7=1204;D=01212121212121212121214151562151515151515151515621515621515626262156262626262626262626215626262626262626262626262626262151515151515151515151515151515151515151515151515626262626262626215151515151515156215156262626262626262626262621570121212121212121212121;CP=1;R=26;O;
+							# MU;P0=-32001;P1=314;P2=-285;P3=-1224;P4=-573;P5=601;P6=1204;P7=-15304;CP=1;R=31;D=012121212121212121212131414521414141414141414145214145214145252521452525252525252525252145252525252525252525252525252521414141414141414141414141414141452141414141414145252525252525252141414141414141414525252141452525252525214145214671212121212121212121213141452;p;i;
+			{
+				name            => 'LTECH',
+				comment					=> 'remote control for LED Controller M4-5A',
+				id              => '31',
+				knownFreqs      => '433.92',
+				one             => [1,-1.8],
+				zero            => [2,-0.9],
+				start           => [1,-0.9, 1,-0.9, 1,-3.8],
+				preSync         => [1,-0.9, 1,-0.9, 1,-0.9, 1,-0.9, 1,-0.9, 1,-0.9, 1,-0.9, 1,-0.9],
+				end             => [3.8, -51],
+				clockabs        => 315,
+				format          => 'twostate',
+				preamble        => 'u31#',
+			},
 		"32"	=>	## FreeTec PE-6946
 							# ! some message are decode as protocol 40 and protocol 62 !
 							# http://www.free-tec.de/Funkklingel-mit-Voic-PE-6946-919.shtml
@@ -1414,21 +1430,21 @@ package lib::SD_ProtocolData;
 							# CH:1 T: 18 H: 5   W50#FF55053AFF93    MU;P2=-962;P4=508;P5=1339;P6=-12350;D=46424242424242424252425242524252425252525252425242525242424252425242424242424242424252524252524240;CP=4;R=0;
 							# CH:3 T: 18 H: 5   W50#FF57053AFF95    MU;P2=510;P3=-947;P5=1334;P6=-12248;D=26232323232323232353235323532323235353535353235323535323232353235323232323232323232353532353235320;CP=2;R=0;
 			{
-				name					=> 'Opus_XT300',
-				comment					=> 'sensor for ground humidity',
-				id						=> '50',
-				knownFreqs				=> '433.92',
-				clockabs				=> 500,
-				zero					=> [3,-2],
-				one						=> [1,-2],
-				# start				  	=> [-25],				# Wenn das startsignal empfangen wird, fehlt das 1 bit
-				reconstructBit			=> '1',
-				format					=> 'twostate',
-				preamble				=> 'W50#',				# prepend to converted message
-				clientmodule			=> 'SD_WS',
-				modulematch				=> '^W50#.*',
-				length_min				=> '47',
-				length_max				=> '48',
+				name           => 'Opus_XT300',
+				comment        => 'sensor for ground humidity',
+				id             => '50',
+				knownFreqs     => '433.92',
+				clockabs       => 500,
+				zero           => [3,-2],
+				one            => [1,-2],
+				# start          => [-25],				# Wenn das startsignal empfangen wird, fehlt das 1 bit
+				reconstructBit  => '1',
+				format          => 'twostate',
+				preamble        => 'W50#',				# prepend to converted message
+				clientmodule    => 'SD_WS',
+				modulematch     => '^W50#.*',
+				length_min      => '47',
+				length_max      => '48',
 			},
 		"51"	=>	## weather sensors
 							# https://github.com/RFD-FHEM/RFFHEM/issues/118 @Stertzi
@@ -1502,9 +1518,31 @@ package lib::SD_ProtocolData;
 				length_min    => '42',
 				length_max    => '44',
 			},
-
-		#"54"	=> can use
-
+		"54"	=>	## TFA Drop 30.3233.01 - Rain gauge
+							# Sensor numbre 30.3233.01, Package with base station 47.3005.01
+							# https://github.com/merbanan/rtl_433/blob/master/src/devices/tfa_drop_30.3233.c | https://forum.fhem.de/index.php/topic,107998.0.html @sido
+							# @sido
+							# MU;P1=247;P2=-750;P3=722;P4=-489;P5=491;P6=-236;P7=-2184;D=1232141456565656145656141456565614141456141414145656141414141456561414141456561414145614561456145614141414141414145614145656145614141732321414565656561456561414565656141414561414141456561414141414565614141414565614141456145614561456141414141414141456141;CP=1;R=55;O;
+							# MU;P0=-1672;P1=740;P2=-724;P3=260;P4=-468;P5=504;P6=-230;D=012123434565656563456563434565656343434563434343456563434343456345634343434565634565656345634563456343434343434343456563434345634345656;CP=3;R=4;
+							# @punker
+							# MU;P0=-242;P1=-2076;P2=-13292;P3=242;P4=-718;P5=748;P6=-494;P7=481;CP=3;R=29;D=23454363670707036363670363670367070367070703636363670363636363670363636707036367070707036703670367036363636363636363636707036703636363154543636707070363636703636703670703670707036363636703636363636703636367070363670707070367036703670363636363636363636367;O;
+							# MU;P0=-236;P1=493;P2=235;P3=-503;P4=-2076;P5=734;P6=-728;CP=2;R=11;D=0101023101023245656232310101023232310232310231010231010102323232310232323232310102323101023102310231023102310231023232323232323232323101010231010232;e;i;
+			{
+				name         => 'TFA 30.3233.01',
+				comment      => 'Drop Rain gauge',
+				id           => '54',
+				knownFreqs   => '433.92',
+				one          => [2,-1],
+				zero         => [1,-2],
+				start        => [3,-3,3,-3], # can optionally be adjusted to [-3,3,-3] or [3,-3], must be tested extensively
+				clockabs     => 250,
+				#clientmodule => 'SD_WS',
+				format       => 'twostate',
+				preamble     => 'u54#',
+				#preamble     => 'W54#',
+				length_min   => '64',
+				length_max   => '68',
+			},
 		"55"	=>	## QUIGG GT-1000
 			{
 				name						=> 'QUIGG_GT-1000',
@@ -1583,7 +1621,7 @@ package lib::SD_ProtocolData;
 				name						=> 'AK-HD-4',
 				comment					=> 'remote control with 4 buttons',
 				id							=> '59',
-				knownFreqs      => '',
+				knownFreqs      => '433.92',
 				clockabs				=> 230,
 				zero						=> [-4,1],
 				one							=> [-1,4],
@@ -2527,31 +2565,6 @@ package lib::SD_ProtocolData;
 				length_min      => '40',
 				length_max      => '49',
 				method          => \&main::SIGNALduino_GROTHE,
-			},
-		"97"	=>	## TFA Drop 30.3233.01 - Rain gauge
-							# Sensor numbre 30.3233.01, Package with base station 47.3005.01
-							# https://github.com/merbanan/rtl_433/blob/master/src/devices/tfa_drop_30.3233.c | https://forum.fhem.de/index.php/topic,107998.0.html @sido
-							# @sido
-							# MU;P1=247;P2=-750;P3=722;P4=-489;P5=491;P6=-236;P7=-2184;D=1232141456565656145656141456565614141456141414145656141414141456561414141456561414145614561456145614141414141414145614145656145614141732321414565656561456561414565656141414561414141456561414141414565614141414565614141456145614561456141414141414141456141;CP=1;R=55;O;
-							# MU;P0=-1672;P1=740;P2=-724;P3=260;P4=-468;P5=504;P6=-230;D=012123434565656563456563434565656343434563434343456563434343456345634343434565634565656345634563456343434343434343456563434345634345656;CP=3;R=4;
-							# @punker
-							# MU;P0=-242;P1=-2076;P2=-13292;P3=242;P4=-718;P5=748;P6=-494;P7=481;CP=3;R=29;D=23454363670707036363670363670367070367070703636363670363636363670363636707036367070707036703670367036363636363636363636707036703636363154543636707070363636703636703670703670707036363636703636363636703636367070363670707070367036703670363636363636363636367;O;
-							# MU;P0=-236;P1=493;P2=235;P3=-503;P4=-2076;P5=734;P6=-728;CP=2;R=11;D=0101023101023245656232310101023232310232310231010231010102323232310232323232310102323101023102310231023102310231023232323232323232323101010231010232;e;i;
-			{
-				name         => 'TFA 30.3233.01',
-				comment      => 'Drop Rain gauge',
-				id           => '97',
-				knownFreqs   => '433.92',
-				one          => [2,-1],
-				zero         => [1,-2],
-				start        => [3,-3,3,-3],
-				clockabs     => 250,
-				#clientmodule => 'SD_WS',
-				format       => 'twostate',
-				preamble     => 'u97#',
-				#preamble     => 'W97#',
-				length_min   => '56',
-				length_max   => '68',
 			},
 
 		########################################################################
