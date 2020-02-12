@@ -1529,18 +1529,40 @@ package lib::SD_ProtocolData;
 							# MU;P0=-236;P1=493;P2=235;P3=-503;P4=-2076;P5=734;P6=-728;CP=2;R=11;D=0101023101023245656232310101023232310232310231010231010102323232310232323232310102323101023102310231023102310231023232323232323232323101010231010232;e;i;
 			{
 				name           => 'TFA 30.3233.01',
-				comment        => 'Drop Rain gauge',
+				comment        => 'Drop Rain gauge (MU decode)',
 				id             => '54',
 				knownFreqs     => '433.92',
 				one            => [2,-1],
 				zero           => [1,-2],
-				start          => [3,-3,3,-3], # can optionally be adjusted to [-3,3,-3] or [3,-3], must be tested extensively
+				start          => [3,-3], # can optionally be adjusted to [-3,3,-3] or [3,-3], must be tested extensively
 				clockabs       => 250,
 				reconstructBit => '1',
 				#clientmodule => 'SD_WS',
 				format         => 'twostate',
 				preamble       => 'u54#',
 				#preamble       => 'W54#',
+				length_min     => '64',
+				length_max     => '68',
+			},
+		"54.1" => ## TFA Drop 30.3233.01 - Rain gauge
+							# Sensor numbre 30.3233.01, Package with base station 47.3005.01
+							# https://github.com/merbanan/rtl_433/blob/master/src/devices/tfa_drop_30.3233.c | https://forum.fhem.de/index.php/topic,107998.0.html @punker
+							# @punker
+							# MS;P0=-241;P1=486;P2=241;P3=-488;P4=-2098;P5=738;P6=-730;D=24565623231010102323231023231023101023101010232323231023232323231023232310102323101010102310231023102323232323232323232310102310232323;CP=2;SP=4;R=30;O;b=19;s=1;m0;
+							# MS;P0=-491;P1=242;P2=476;P3=-248;P4=-2096;P5=721;P6=-745;D=14565610102323231010102310102310232310232323101010102310101010102323101023231023102310231023102310231010101010101010101023232310232310;CP=1;SP=4;R=10;O;b=135;s=1;m0;
+			{
+				name           => 'TFA 30.3233.01',
+				comment        => 'Drop Rain gauge (MS decode)',
+				id             => '54.1',
+				knownFreqs     => '433.92',
+				one            => [2,-1],
+				zero           => [1,-2],
+				sync           => [3,-3],	# message provided as MS
+				clockabs       => 250,
+				#clientmodule   => 'SD_WS',
+				format         => 'twostate',
+				#preamble       => 'W54#',
+				preamble       => 'u54#',				
 				length_min     => '64',
 				length_max     => '68',
 			},
