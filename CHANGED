@@ -1,3 +1,6 @@
+2020-02-15 - new protocol for rain sensor TFA 30.3233.01
+
+Update SD_ProtocolData.pm and 14_SD_WS.pm
 2020-02-05 - SD_UT new model Novy_840039, revised SIGNALduuino readme & tests (#794)
 
 * - added new model SD_UT & commandref
