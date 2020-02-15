@@ -5,6 +5,7 @@
 # weather sensors which use various protocol
 # Sidey79 & Ralf9  2016 - 2017
 # Joerg 2017
+# elektron-bbs 2018 - 
 # 17.04.2017 WH2 (TFA 30.3157 nur Temp, Hum = 255),es wird das Perlmodul Digest:CRC benoetigt fuer CRC-Pruefung benoetigt
 # 29.05.2017 Test ob Digest::CRC installiert
 # 22.07.2017 WH2 angepasst
@@ -23,6 +24,7 @@
 # 14.06.2019 neuer Sensor TECVANCE TV-4848 - Protokoll 84 angepasst (prematch)
 # 09.11.2019 neues Protokoll 53: Lidl AURIOL AHFL 433 B2 IAN 314695
 # 29.12.2019 neues Protokoll 27: Temperatur-/Feuchtigkeitssensor EuroChron EFTH-800
+# 09.02.2020 neues Protokoll 54: Regenmesser TFA Drop
 
 package main;
 
@@ -32,6 +34,7 @@ use warnings;
 # use Data::Dumper;
 
 # Forward declarations
+sub SD_WS_LFSR_digest8_reflect($$$$);
 sub SD_WS_bin2dec($);
 sub SD_WS_binaryToNumber;
 sub SD_WS_WH2CRCCHECK($);
@@ -63,6 +66,7 @@ sub SD_WS_Initialize($)
 		"SD_WS_38_T_.*"	=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4:Temp,", autocreateThreshold => "3:180"},
 		"SD_WS_51_TH.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "3:180"},
 		"SD_WS_53_TH.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "3:180"},
+		"SD_WS_54_R.*"	=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "rain4:Rain,", autocreateThreshold => "3:180"},
 		"SD_WS_58_TH.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "2:90"},
 		"SD_WS_84_TH_.*"	=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "2:120"},
 		"SD_WS_85_THW_.*"	=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "4:120"},
@@ -119,6 +123,7 @@ sub SD_WS_Parse($$)
 	my $SensorTyp;
 	my $id;
 	my $bat;
+	my $batChange;
 	my $sendmode;
 	my $channel;
 	my $rawTemp;
@@ -128,6 +133,10 @@ sub SD_WS_Parse($$)
 	my $trend;
 	my $trendTemp;
 	my $trendHum;
+	my $rain;
+	my $rain_total;
+	my $rawRainCounter;
+	my $sendCounter;
 	my $beep;
 	
 	my %decodingSubs  = (
@@ -378,6 +387,47 @@ sub SD_WS_Parse($$)
 				temp       => sub {my (undef,$bitData) = @_; return substr($bitData,12,1) eq "1" ? ((SD_WS_binaryToNumber($bitData,12,23) - 4096) / 10.0) : (SD_WS_binaryToNumber($bitData,12,23) / 10.0);},
 				hum        => sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,24,30) );},
 			},
+		54 => {			
+				# TFA Drop Rainmeter
+				# Protocol after conversion bits (Length varies from minimum ?? to maximum 68 bits.)
+				# It seems, that a minimum of 56 bits is required.
+				# ------------------------------------------------------------------------
+				# 0        8        16       24       32       40       48       56       64   - 01234567890123456
+				# 00111101 10011100 01000011 00001010 00011011 10101010 00000001 10001001 1000 - 3D9C430A1BAA01898
+				# 00111101 10011100 01000011 00000110 00011000 10101010 00000001 00110100 0000 - 3D9C430618AA01340
+				# PPPPIIII IIIIIIII IIIIIIII BCUUXXXU RRRRRRRR FFFFFFFF SSSSSSSS MMMMMMMM KKKK
+				# P: 4 bit message prefix, always 0x3
+				# I: 20 bits Sensor ID
+				# B: 1 bit, battery_low. 0 if battery OK, 1 if battery is low.
+				# C: 1 bit, device reset. Set to 1 briefly after battery insert.
+				# X: Transmission counter, rolls over.
+				# R: LSB of 16-bit little endian rain counter
+				# F: Fixed to 0xaa
+				# S: MSB of 16-bit little endian rain counter
+				# M: Checksum.
+				#    Compute with reverse Galois LFSR with byte reflection, generator 0x31 and key 0xf4.
+				# K: Unknown. Either b1011 or b0111. - Distribution: 50:50. ???
+				# U: Unknown
+				# Each tip of the bucket corresponds to 0.254mm of rain.
+				sensortype     => 'TFA 30.3233.01',
+				model          => 'SD_WS_54_R',
+				prematch   => sub {my $rawData = shift; return 1 if ($rawData =~ /^3[0-9A-F]{9}AA[0-9A-F]{4,5}$/); },	# prematch 3 BD9C430618 AA 01340
+				id             => sub {my ($rawData,undef) = @_; return substr($rawData,1,5); },
+				bat            => sub {my (undef,$bitData) = @_; return substr($bitData,24,1) eq "0" ? "ok" : "low";},
+				batChange      => sub {my (undef,$bitData) = @_; return substr($bitData,25,1);},
+				sendCounter    => sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,28,30));},
+				rawRainCounter => sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,32,39) + SD_WS_binaryToNumber($bitData,48,55) * 256);},
+				rain_total     => sub {my (undef,$bitData) = @_; return ((SD_WS_binaryToNumber($bitData,32,39) + SD_WS_binaryToNumber($bitData,48,55) * 256) * 0.254);},
+				crcok          => sub {my $rawData = shift;
+																my $checksum = SD_WS_LFSR_digest8_reflect(7, 0x31, 0xf4, $rawData );
+																if ($checksum == hex(substr($rawData,14,2))) {
+																	return 1;
+																} else {
+																	Log3 $name, 3, "$name: SD_WS_54 Parse msg $msg - ERROR checksum $checksum != " . hex(substr($rawData,14,2));
+																	return 0;
+																}
+															},
+		},
        58 => 
    	 	 {
      		sensortype => 'TFA 30.3208.0',
@@ -860,34 +910,37 @@ sub SD_WS_Parse($$)
    
 	elsif (defined($decodingSubs{$protocol}))		# durch den hash decodieren
 	{
-	 	   	$SensorTyp=$decodingSubs{$protocol}{sensortype};
-		    if (!$decodingSubs{$protocol}{prematch}->( $rawData ))
-		    { 
-		   		Log3 $iohash, 4, "$name: SD_WS_Parse $rawData protocolid $protocol ($SensorTyp) - ERROR prematch" ;
-		    	return "";  
-	    	}
-		    my $retcrc=$decodingSubs{$protocol}{crcok}->( $rawData,$bitData );
-		    if (!$retcrc)		    { 
-		    	Log3 $iohash, 4, "$name: SD_WS_Parse $rawData protocolid $protocol ($SensorTyp) - ERROR CRC";
-		    	return "";  
-	    	}
-	    	$id=$decodingSubs{$protocol}{id}->( $rawData,$bitData );
-	    	#my $temphex=$decodingSubs{$protocol}{temphex}->( $rawData,$bitData );
-	    	$temp=$decodingSubs{$protocol}{temp}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{temp}));
-	    	$hum=$decodingSubs{$protocol}{hum}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{hum}));
-	    	$windspeed=$decodingSubs{$protocol}{windspeed}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{windspeed}));
-	    	$channel=$decodingSubs{$protocol}{channel}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{channel}));
-	    	$model = $decodingSubs{$protocol}{model};
-			$bat = $decodingSubs{$protocol}{bat}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{bat}));
-			
-			$beep = $decodingSubs{$protocol}{beep}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{beep}));
-			if ($model eq "SD_WS_33_T") {			# for SD_WS_33 discrimination T - TH
-					$model = $decodingSubs{$protocol}{model}."H" if $hum != 0;				# for models with Humidity
-			} 
-	    	$sendmode = $decodingSubs{$protocol}{sendmode}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{sendmode}));
-	    	$trend = $decodingSubs{$protocol}{trend}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{trend}));
+		$SensorTyp=$decodingSubs{$protocol}{sensortype};
+		if (!$decodingSubs{$protocol}{prematch}->( $rawData )) { 
+			Log3 $iohash, 4, "$name: SD_WS_Parse $rawData protocolid $protocol ($SensorTyp) - ERROR prematch" ;
+			return "";
+		}
+		my $retcrc=$decodingSubs{$protocol}{crcok}->( $rawData,$bitData );
+		if (!$retcrc) {
+			Log3 $iohash, 4, "$name: SD_WS_Parse $rawData protocolid $protocol ($SensorTyp) - ERROR CRC";
+			return "";
+		}
+		$id=$decodingSubs{$protocol}{id}->( $rawData,$bitData );
+		#my $temphex=$decodingSubs{$protocol}{temphex}->( $rawData,$bitData );
+		$temp=$decodingSubs{$protocol}{temp}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{temp}));
+		$hum=$decodingSubs{$protocol}{hum}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{hum}));
+		$windspeed=$decodingSubs{$protocol}{windspeed}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{windspeed}));
+		$channel=$decodingSubs{$protocol}{channel}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{channel}));
+		$model = $decodingSubs{$protocol}{model};
+		$bat = $decodingSubs{$protocol}{bat}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{bat}));
+		$batChange = $decodingSubs{$protocol}{batChange}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{batChange}));
+		$rawRainCounter = $decodingSubs{$protocol}{rawRainCounter}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{rawRainCounter}));
+		$rain_total = $decodingSubs{$protocol}{rain_total}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{rain_total}));
+		$sendCounter = $decodingSubs{$protocol}{sendCounter}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{sendCounter}));
+		# $rain = $decodingSubs{$protocol}{rain}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{rain}));
+		$beep = $decodingSubs{$protocol}{beep}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{beep}));
+		if ($model eq "SD_WS_33_T") {			# for SD_WS_33 discrimination T - TH
+			$model = $decodingSubs{$protocol}{model}."H" if $hum != 0;				# for models with Humidity
+		} 
+		$sendmode = $decodingSubs{$protocol}{sendmode}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{sendmode}));
+		$trend = $decodingSubs{$protocol}{trend}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{trend}));
 
-				Log3 $iohash, 4, "$name: SD_WS_Parse decoded protocol-id $protocol ($SensorTyp), sensor-id $id";
+		Log3 $iohash, 4, "$name: SD_WS_Parse decoded protocol-id $protocol ($SensorTyp), sensor-id $id";
 	}
 	else {
 		Log3 $iohash, 2, "$name: SD_WS_Parse unknown message, please report. converted to bits: $bitData";
@@ -912,6 +965,7 @@ sub SD_WS_Parse($$)
 	} else {
 		$deviceCode = $model;	# for sensors without channel
 		$deviceCode .= '_' . $channel if (defined $channel);
+		$deviceCode .= '_' . $id if (!defined $channel);	# for sensors without channel
 	}
 	#print Dumper($modules{SD_WS}{defptr});
 	
@@ -1007,7 +1061,9 @@ sub SD_WS_Parse($$)
 		$state .= " " if (length($state) > 0);
 		$state .= "W: $windspeed"
 	}
-	
+	if (defined($rain_total)) {
+		$state .= "R: $rain_total"
+	}
 	### protocol 33 has different bits per sensor type
 	if ($protocol eq "33") {
 		if (AttrVal($name,'model',0) eq "S522") {									# Conrad S522
@@ -1029,6 +1085,7 @@ sub SD_WS_Parse($$)
 	readingsBulkUpdate($hash, "humidity", $hum)  if (defined($hum) && ($hum > 0 && $hum < 100 )) ;
 	readingsBulkUpdate($hash, "windspeed", $windspeed)  if (defined($windspeed)) ;
 	readingsBulkUpdate($hash, "batteryState", $bat) if (defined($bat) && length($bat) > 0) ;
+	readingsBulkUpdate($hash, "batteryChanged", $batChange) if (defined($batChange) && length($batChange) > 0 && $batChange eq "1") ;
 	readingsBulkUpdate($hash, "channel", $channel, 0) if (defined($channel)&& length($channel) > 0);
 	readingsBulkUpdate($hash, "trend", $trend) if (defined($trend) && length($trend) > 0);
 	readingsBulkUpdate($hash, "temperatureTrend", $trendTemp) if (defined($trendTemp) && length($trendTemp) > 0);
@@ -1036,6 +1093,11 @@ sub SD_WS_Parse($$)
 	readingsBulkUpdate($hash, "sendmode", $sendmode) if (defined($sendmode) && length($sendmode) > 0);
 	readingsBulkUpdate($hash, "type", $SensorTyp, 0)  if (defined($SensorTyp));
 	readingsBulkUpdate($hash, "beep", $beep)  if (defined($beep));
+	readingsBulkUpdate($hash, "rawRainCounter", $rawRainCounter)  if (defined($rawRainCounter));
+	# readingsBulkUpdate($hash, "dayRainCounter", $dayRainCounter)  if (defined($dayRainCounter));
+	readingsBulkUpdate($hash, "rain_total", $rain_total)  if (defined($rain_total));
+	readingsBulkUpdate($hash, "sendCounter", $sendCounter)  if (defined($sendCounter));
+	# readingsBulkUpdate($hash, "rain", $rain_total)  if (defined($rain));
 	readingsEndUpdate($hash, 1); # Notify is done by Dispatch
 	
 	return $name;
@@ -1055,6 +1117,34 @@ sub SD_WS_Attr(@)
 	delete($modules{SD_WS}{defptr}{$cde});
 	$modules{SD_WS}{defptr}{$iohash->{NAME} . "." . $cde} = $hash;
 	return undef;
+}
+
+# Pruefsummenberechnung "reverse Galois LFSR with byte reflection"
+# Wird nur fuer TFA Drop Protokoll benoetigt
+# TFA Drop Protokoll benoetigt als gen 0x31, als key 0xf4
+
+sub SD_WS_LFSR_digest8_reflect($$$$)
+{
+	my ($bytes, $gen, $key, $rawData) = @_;
+	my $sum = 0;
+	my $k = 0;
+        my $i = 0;
+	my $data = 0;
+	for ( $k = $bytes - 1; $k >= 0; $k = $k - 1 ) {
+		$data = hex(substr($rawData, $k*2, 2));
+		for ( $i = 0; $i < 8; $i = $i + 1 ) {
+			if ( ($data >> $i) & 0x01) {
+				$sum = $sum^$key;
+			}
+			if ( $key & 0x80 ) {
+				$key = ( $key << 1) ^ $gen;
+			} else {
+				$key = ( $key << 1);
+			}
+		}
+	}
+        $sum = $sum & 0xff;
+	return $sum;
 }
 
 sub SD_WS_bin2dec($)
@@ -1121,6 +1211,7 @@ sub SD_WS_WH2SHIFT($){
 		<li>Opus XT300</li>
     <li>PV-8644 infactory Poolthermometer</li>
     <li>Renkforce E0001PA</li>
+		<li>Regenmesser DROP TFA 47.3005.01 mit Regensensor TFA 30.3233.01</li>
 		<li>TECVANCE TV-4848</li>
 		<li>TX-EZ6 for Weatherstation TZS First Austria</li>
 		<li>WH2 (TFA Dostmann/Wertheim 30.3157 (sold in Germany), Agimex Rosenborg 66796 (sold in Denmark),ClimeMET CM9088 (Sold in UK)</li>
@@ -1144,12 +1235,14 @@ sub SD_WS_WH2SHIFT($){
 		Some devices may not support all readings, so they will not be presented<br>
 	</ul>
   <ul>
+  	<li>batteryChanged (1)</li>
     <li>batteryState (low or ok)</li>
     <li>channel (number of channel</li>
 		<li>humidity (humidity (1-100 % only if available)</li>
 		<li>humidityTrend (consistent, rising, falling)</li>
 		<li>sendmode (automatic or manual)</li>
-		<li>state (T: H: W:)</li>
+		<li>rain_total (l/m&sup2;))</li>
+		<li>state (T: H: W: R:)</li>
     <li>temperature (&deg;C)</li>
 		<li>temperatureTrend (consistent, rising, falling)</li>
 		<li>type (type of sensor)</li>
@@ -1218,6 +1311,7 @@ sub SD_WS_WH2SHIFT($){
     <li>NC-3911, NC-3912 digitales Kuehl- und Gefrierschrank-Thermometer</li>
 		<li>Opus XT300</li>
     <li>PV-8644 infactory Poolthermometer</li>
+		<li>Regenmesser DROP TFA 47.3005.01 mit Regensensor TFA 30.3233.01</li>
     <li>Renkforce E0001PA</li>
 		<li>TECVANCE TV-4848</li>
 		<li>TX-EZ6 fuer Wetterstation TZS First Austria</li>
@@ -1242,12 +1336,14 @@ sub SD_WS_WH2SHIFT($){
   <b>Generierte Readings:</b><br><br>
   <ul>(verschieden, je nach Typ des Sensors)</ul>
   <ul>
-  	<li>batteryState (low oder ok)</li>
+  	<li>batteryChanged (1)</li>
+		<li>batteryState (low oder ok)</li>
     <li>channel (Sensor-Kanal)</li>
     <li>humidity (Luftfeuchte (1-100 %)</li>
 		<li>humidityTrend (gleichbleibend, steigend, fallend)</li>
+		<li>rain_total (l/m&sup2;))</li>
     <li>sendmode (Der Sendemodus, automatic oder manuell mittels Taster am Sender)</li>
-		<li>state (T: H: W:)</li>
+		<li>state (T: H: W: R:)</li>
     <li>temperature (&deg;C)</li>
 		<li>temperatureTrend (gleichbleibend, steigend, fallend)</li>
 		<li>type (Sensortyp)</li>
