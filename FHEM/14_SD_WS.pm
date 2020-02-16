@@ -388,36 +388,52 @@ sub SD_WS_Parse($$)
 				hum        => sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,24,30) );},
 			},
 		54 => {			
-				# TFA Drop Rainmeter
-				# Protocol after conversion bits (Length varies from minimum ?? to maximum 68 bits.)
-				# It seems, that a minimum of 56 bits is required.
-				# ------------------------------------------------------------------------
+				# TFA Drop Rainmeter 30.3233.01
+				# ----------------------------------------------------------------------------------
 				# 0        8        16       24       32       40       48       56       64   - 01234567890123456
 				# 00111101 10011100 01000011 00001010 00011011 10101010 00000001 10001001 1000 - 3D9C430A1BAA01898
 				# 00111101 10011100 01000011 00000110 00011000 10101010 00000001 00110100 0000 - 3D9C430618AA01340
 				# PPPPIIII IIIIIIII IIIIIIII BCUUXXXU RRRRRRRR FFFFFFFF SSSSSSSS MMMMMMMM KKKK
-				# P: 4 bit message prefix, always 0x3
-				# I: 20 bits Sensor ID
-				# B: 1 bit, battery_low. 0 if battery OK, 1 if battery is low.
-				# C: 1 bit, device reset. Set to 1 briefly after battery insert.
-				# X: Transmission counter, rolls over.
-				# R: LSB of 16-bit little endian rain counter
-				# F: Fixed to 0xaa
-				# S: MSB of 16-bit little endian rain counter
-				# M: Checksum.
-				#    Compute with reverse Galois LFSR with byte reflection, generator 0x31 and key 0xf4.
-				# K: Unknown. Either b1011 or b0111. - Distribution: 50:50. ???
-				# U: Unknown
+				# P:  4 bit message prefix, always 0x3
+				# I: 20 bit Sensor ID
+				# B:  1 bit Battery indicator, 0 if battery OK, 1 if battery is low.
+				# C:  1 bit Device reset, set to 1 briefly after battery insert.
+				# X:  3 bit Transmission counter, rolls over.
+				# R:  8 bit LSB of 16-bit little endian rain counter
+				# F:  8 bit Fixed to 0xaa
+				# S:  8 bit MSB of 16-bit little endian rain counter
+				# M:  8 bit Checksum, compute with reverse Galois LFSR with byte reflection, generator 0x31 and key 0xf4.
+				# K:  4 bit Unknown, either b1011 or b0111. - Distribution: 50:50 ???
+				# U:        Unknown
+				# The rain counter starts at 65526 to indicate 0 tips of the bucket. The counter rolls over at 65535 to 0, which corresponds to 9 and 10 tips of the bucket.
 				# Each tip of the bucket corresponds to 0.254mm of rain.
+				# After battery insertion, the sensor will transmit 7 messages in rapid succession, one message every 3 seconds. After the first message,
+				# the remaining 6 messages have bit 1 of byte 3 set to 1. This could be some sort of reset indicator.
+				# For these 6 messages, the transmission counter does not increase. After the full 7 messages, one regular message is sent after 30s.
+				# Afterwards, messages are sent every 45s.
 				sensortype     => 'TFA 30.3233.01',
 				model          => 'SD_WS_54_R',
-				prematch   => sub {my $rawData = shift; return 1 if ($rawData =~ /^3[0-9A-F]{9}AA[0-9A-F]{4,5}$/); },	# prematch 3 BD9C430618 AA 01340
+				prematch   => sub {my $rawData = shift; return 1 if ($rawData =~ /^3[0-9A-F]{9}AA[0-9A-F]{4,5}$/); },	# prematch 3 E2E390CF9 AA FF8A0
 				id             => sub {my ($rawData,undef) = @_; return substr($rawData,1,5); },
 				bat            => sub {my (undef,$bitData) = @_; return substr($bitData,24,1) eq "0" ? "ok" : "low";},
 				batChange      => sub {my (undef,$bitData) = @_; return substr($bitData,25,1);},
 				sendCounter    => sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,28,30));},
-				rawRainCounter => sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,32,39) + SD_WS_binaryToNumber($bitData,48,55) * 256);},
-				rain_total     => sub {my (undef,$bitData) = @_; return ((SD_WS_binaryToNumber($bitData,32,39) + SD_WS_binaryToNumber($bitData,48,55) * 256) * 0.254);},
+				rawRainCounter => sub {my (undef,$bitData) = @_; 
+																my $rawRainCounterMessage = SD_WS_binaryToNumber($bitData,32,39) + SD_WS_binaryToNumber($bitData,48,55) * 256;
+																if ($rawRainCounterMessage > 65525) {
+																	return $rawRainCounterMessage - 65526;
+																} else {
+																	return $rawRainCounterMessage + 10;
+																}
+															},
+				rain_total     => sub {my (undef,$bitData) = @_; 
+																my $rawRainCounterMessage = SD_WS_binaryToNumber($bitData,32,39) + SD_WS_binaryToNumber($bitData,48,55) * 256;
+																if ($rawRainCounterMessage > 65525) {
+																	return ($rawRainCounterMessage - 65526) * 0.254;
+																} else {
+																	return ($rawRainCounterMessage + 10) * 0.254;
+																}
+															},
 				crcok          => sub {my $rawData = shift;
 																my $checksum = SD_WS_LFSR_digest8_reflect(7, 0x31, 0xf4, $rawData );
 																if ($checksum == hex(substr($rawData,14,2))) {
