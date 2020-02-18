@@ -57,7 +57,7 @@ defmod test_DeviceData_rmsg UnitTest dummyDuino (
             next if (!defined($tData->{rmsg}) || !defined($tData->{dmsg}) || !defined($tData->{internals}) );
 
             subtest "[$pID]: $testSet->{name}: [$tID] " => sub {
-              $attr{$target}{whitelist_IDs} = $testSet->{id};
+							CommandAttr($targetHash,"$target whitelist_IDs $testSet->{id}");
               is(AttrVal($target,"whitelist_IDs",undef), $testSet->{id}, "whitelist_IDs is ".AttrVal($target,"whitelist_IDs",undef));
               $SD_Dispatch->reset();
               $SD_Dispatch->side_effect(\&VerifyDispatch);
@@ -71,7 +71,7 @@ defmod test_DeviceData_rmsg UnitTest dummyDuino (
                 ok($id_matched,"SIGNALduno_Dispatch check id ") || note explain (($SD_Dispatch->called_with())[4] , " vs ", $testSet->{id});
                 ok($dmsg_matched,"SIGNALduno_Dispatch check dmsg ") || note explain (($SD_Dispatch->called_with())[2] , " vs ", $testSet->{dmsg});
 
-                my $expected_repeat=min(AttrVal($target,"maxMuMsgRepeat",4),$tData->{dispatch_repeats});
+                my $expected_repeat=min(AttrVal($target,"maxMuMsgRepeat",10),$tData->{dispatch_repeats});
                 is($tData->{dispatch_repeats}, $SD_Dispatch_calledCounter-1, "JSON dispatch_repeats accuracy ") if (defined($tData->{dispatch_repeats}));
               } else { diag "SIGNALduno_Dispatch was not called, this must be an error"; }
             };
@@ -101,7 +101,7 @@ defmod test_DeviceData_rmsg UnitTest dummyDuino (
           next if (!defined($tData->{rmsg}) || !defined($tData->{dmsg}) || !defined($tData->{internals}) );
 
           subtest "[$pID]: $testSet->{name}: [$tID] " => sub {
-            $attr{$target}{whitelist_IDs} = $testSet->{id};
+						CommandAttr($targetHash,"$target whitelist_IDs $testSet->{id}");
             is(AttrVal($target,"whitelist_IDs",undef), $testSet->{id}, "whitelist_IDs is ".AttrVal($target,"whitelist_IDs",undef));
             $SD_Dispatch->reset();
             $SD_Dispatch->side_effect(\&VerifyDispatch);
@@ -116,7 +116,7 @@ defmod test_DeviceData_rmsg UnitTest dummyDuino (
               ok($id_matched,"SIGNALduno_Dispatch check id ") || note explain (($SD_Dispatch->called_with())[4] , " vs ", $testSet->{id});
               ok($dmsg_matched,"SIGNALduno_Dispatch check dmsg ") || note explain (($SD_Dispatch->called_with())[2] , " vs ", $testSet->{dmsg});
 
-              my $expected_repeat=min(AttrVal($target,"maxMuMsgRepeat",4),$tData->{dispatch_repeats});
+              my $expected_repeat=min(AttrVal($target,"maxMuMsgRepeat",10),$tData->{dispatch_repeats});
               TODO: {
                 local $TODO = "Checking dispatches (all dispatches are counted across all modules)";
                 is($tData->{dispatch_repeats}, $SD_Dispatch_calledCounter-1, "JSON dispatch_repeats accuracy ".$testSet->{name}) if (defined($tData->{dispatch_repeats}));
