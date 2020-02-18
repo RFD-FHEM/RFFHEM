@@ -2,6 +2,8 @@ defmod test_DeviceData_rmsg UnitTest dummyDuino (
   {  
     my $whitelist_IDs = AttrVal($target,"whitelist_IDs",undef);	# save whitelist_IDs to set back
     note("save attribute whitelist_IDs from system");
+    my $maxMuMsgRepeat = AttrVal($target,"maxMuMsgRepeat",undef);	# save maxMuMsgRepeat to set back
+    note("save attribute maxMuMsgRepeat from system");
 
     my $mock = Mock::Sub->new; 
     use JSON; 
@@ -59,6 +61,7 @@ defmod test_DeviceData_rmsg UnitTest dummyDuino (
             subtest "[$pID]: $testSet->{name}: [$tID] " => sub {
 							CommandAttr($targetHash,"$target whitelist_IDs $testSet->{id}");
               is(AttrVal($target,"whitelist_IDs",undef), $testSet->{id}, "whitelist_IDs is ".AttrVal($target,"whitelist_IDs",undef));
+              CommandAttr($targetHash,"$target maxMuMsgRepeat 10");
               $SD_Dispatch->reset();
               $SD_Dispatch->side_effect(\&VerifyDispatch);
               $id_matched=0;
@@ -103,6 +106,7 @@ defmod test_DeviceData_rmsg UnitTest dummyDuino (
           subtest "[$pID]: $testSet->{name}: [$tID] " => sub {
 						CommandAttr($targetHash,"$target whitelist_IDs $testSet->{id}");
             is(AttrVal($target,"whitelist_IDs",undef), $testSet->{id}, "whitelist_IDs is ".AttrVal($target,"whitelist_IDs",undef));
+            CommandAttr($targetHash,"$target maxMuMsgRepeat 10");
             $SD_Dispatch->reset();
             $SD_Dispatch->side_effect(\&VerifyDispatch);
             #SIGNALduino_Log3 $target, 5,  Dumper($tData);
@@ -130,6 +134,10 @@ defmod test_DeviceData_rmsg UnitTest dummyDuino (
     };
 
     note("restore attribute whitelist_IDs from system");
-    $attr{$target}{whitelist_IDs} = $whitelist_IDs;	# reset whitelist_IDs to old value
+    CommandAttr($targetHash,"$target whitelist_IDs $whitelist_IDs"); 	 # reset whitelist_IDs to old value
+    if ($maxMuMsgRepeat) {
+      note("restore attribute maxMuMsgRepeat from system");
+      CommandAttr($targetHash,"$target maxMuMsgRepeat $maxMuMsgRepeat"); 	# reset maxMuMsgRepeat to old value		
+		}
   }
 );
