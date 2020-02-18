@@ -1,9 +1,11 @@
 defmod test_DeviceData_rmsg UnitTest dummyDuino ( 
   {  
     my $whitelist_IDs = AttrVal($target,"whitelist_IDs",undef);	# save whitelist_IDs to set back
-    note("save attribute whitelist_IDs from system");
+    note("attribute whitelist_IDs save from system");
     my $maxMuMsgRepeat = AttrVal($target,"maxMuMsgRepeat",undef);	# save maxMuMsgRepeat to set back
-    note("save attribute maxMuMsgRepeat from system");
+    note("attribute maxMuMsgRepeat save from system");
+    CommandAttr($targetHash,"$target maxMuMsgRepeat 10");
+    note("attribute maxMuMsgRepeat set to ".AttrVal($target,"maxMuMsgRepeat",undef));
 
     my $mock = Mock::Sub->new; 
     use JSON; 
@@ -42,7 +44,7 @@ defmod test_DeviceData_rmsg UnitTest dummyDuino (
 
     subtest 'Test with pre-release SD_Device_ProtocolList' => sub {
       TODO: {
-        local $TODO = "Checking with prerelease Version of SD_Device_ProtocolList which can fail";
+        local $TODO = "Checking with pre-release Version of SD_Device_ProtocolList which can fail";
         loadJson("https://raw.githubusercontent.com/RFD-FHEM/SIGNALduino_TOOL/pre-release/FHEM/lib/SD_Device_ProtocolList.json");
   
         my $pID;
@@ -61,7 +63,6 @@ defmod test_DeviceData_rmsg UnitTest dummyDuino (
             subtest "[$pID]: $testSet->{name}: [$tID] " => sub {
 							CommandAttr($targetHash,"$target whitelist_IDs $testSet->{id}");
               is(AttrVal($target,"whitelist_IDs",undef), $testSet->{id}, "whitelist_IDs is ".AttrVal($target,"whitelist_IDs",undef));
-              CommandAttr($targetHash,"$target maxMuMsgRepeat 10");
               $SD_Dispatch->reset();
               $SD_Dispatch->side_effect(\&VerifyDispatch);
               $id_matched=0;
@@ -75,7 +76,7 @@ defmod test_DeviceData_rmsg UnitTest dummyDuino (
                 ok($dmsg_matched,"SIGNALduno_Dispatch check dmsg ") || note explain (($SD_Dispatch->called_with())[2] , " vs ", $testSet->{dmsg});
 
                 my $expected_repeat=min(AttrVal($target,"maxMuMsgRepeat",10),$tData->{dispatch_repeats});
-                is($tData->{dispatch_repeats}, $SD_Dispatch_calledCounter-1, "JSON dispatch_repeats accuracy ") if (defined($tData->{dispatch_repeats}));
+                is($tData->{dispatch_repeats}, $SD_Dispatch_calledCounter-1, "JSON (pre-release) dispatch_repeats accuracy") if (defined($tData->{dispatch_repeats}));
               } else { diag "SIGNALduno_Dispatch was not called, this must be an error"; }
             };
           }
@@ -106,7 +107,6 @@ defmod test_DeviceData_rmsg UnitTest dummyDuino (
           subtest "[$pID]: $testSet->{name}: [$tID] " => sub {
 						CommandAttr($targetHash,"$target whitelist_IDs $testSet->{id}");
             is(AttrVal($target,"whitelist_IDs",undef), $testSet->{id}, "whitelist_IDs is ".AttrVal($target,"whitelist_IDs",undef));
-            CommandAttr($targetHash,"$target maxMuMsgRepeat 10");
             $SD_Dispatch->reset();
             $SD_Dispatch->side_effect(\&VerifyDispatch);
             #SIGNALduino_Log3 $target, 5,  Dumper($tData);
@@ -123,7 +123,7 @@ defmod test_DeviceData_rmsg UnitTest dummyDuino (
               my $expected_repeat=min(AttrVal($target,"maxMuMsgRepeat",10),$tData->{dispatch_repeats});
               TODO: {
                 local $TODO = "Checking dispatches (all dispatches are counted across all modules)";
-                is($tData->{dispatch_repeats}, $SD_Dispatch_calledCounter-1, "JSON dispatch_repeats accuracy ".$testSet->{name}) if (defined($tData->{dispatch_repeats}));
+                is($tData->{dispatch_repeats}, $SD_Dispatch_calledCounter-1, "JSON (master) dispatch_repeats accuracy ".$testSet->{name}) if (defined($tData->{dispatch_repeats}));
               };
             } else { diag "SIGNALduno_Dispatch was not called, this must be an error"; }
           };
@@ -133,10 +133,10 @@ defmod test_DeviceData_rmsg UnitTest dummyDuino (
       $SD_Dispatch->unmock;
     };
 
-    note("restore attribute whitelist_IDs from system");
+    note("attribute whitelist_IDs restore to old value from system");
     CommandAttr($targetHash,"$target whitelist_IDs $whitelist_IDs"); 	 # reset whitelist_IDs to old value
     if ($maxMuMsgRepeat) {
-      note("restore attribute maxMuMsgRepeat from system");
+      note("attribute maxMuMsgRepeat restore to old value from system");
       CommandAttr($targetHash,"$target maxMuMsgRepeat $maxMuMsgRepeat"); 	# reset maxMuMsgRepeat to old value		
 		}
   }
