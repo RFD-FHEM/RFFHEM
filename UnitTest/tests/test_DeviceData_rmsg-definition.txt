@@ -1,5 +1,7 @@
 defmod test_DeviceData_rmsg UnitTest dummyDuino ( 
   {  
+    note("versionmodul: ".InternalVal($target, "versionmodul", "unknown"));
+    note("versionProtocols: ".InternalVal($target, "versionProtocols", "unknown"));
     my $whitelist_IDs = AttrVal($target,"whitelist_IDs",undef);	# save whitelist_IDs to set back
     note("attribute whitelist_IDs save from system");
     my $maxMuMsgRepeat = AttrVal($target,"maxMuMsgRepeat",undef);	# save maxMuMsgRepeat to set back
