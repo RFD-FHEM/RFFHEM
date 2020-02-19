@@ -61,7 +61,7 @@ defmod test_DeviceData_rmsg UnitTest dummyDuino (
             next if (!defined($tData->{rmsg}) || !defined($tData->{dmsg}) || !defined($tData->{internals}) );
 
             subtest "[$pID]: $testSet->{name}: [$tID] " => sub {
-							CommandAttr($targetHash,"$target whitelist_IDs $testSet->{id}");
+			  CommandAttr($targetHash,"$target whitelist_IDs $testSet->{id}");
               is(AttrVal($target,"whitelist_IDs",undef), $testSet->{id}, "whitelist_IDs is ".AttrVal($target,"whitelist_IDs",undef));
               $SD_Dispatch->reset();
               $SD_Dispatch->side_effect(\&VerifyDispatch);
@@ -105,7 +105,7 @@ defmod test_DeviceData_rmsg UnitTest dummyDuino (
           next if (!defined($tData->{rmsg}) || !defined($tData->{dmsg}) || !defined($tData->{internals}) );
 
           subtest "[$pID]: $testSet->{name}: [$tID] " => sub {
-						CommandAttr($targetHash,"$target whitelist_IDs $testSet->{id}");
+			CommandAttr($targetHash,"$target whitelist_IDs $testSet->{id}");
             is(AttrVal($target,"whitelist_IDs",undef), $testSet->{id}, "whitelist_IDs is ".AttrVal($target,"whitelist_IDs",undef));
             $SD_Dispatch->reset();
             $SD_Dispatch->side_effect(\&VerifyDispatch);
@@ -134,7 +134,8 @@ defmod test_DeviceData_rmsg UnitTest dummyDuino (
     };
 
     note("attribute whitelist_IDs restore to old value from system");
-    CommandAttr($targetHash,"$target whitelist_IDs $whitelist_IDs"); 	 # reset whitelist_IDs to old value
+    
+    CommandAttr($targetHash,"$target whitelist_IDs $whitelist_IDs") if(defined($whitelist_IDs)); 	 # reset whitelist_IDs to old value
     if ($maxMuMsgRepeat) {
       note("attribute maxMuMsgRepeat restore to old value from system");
       CommandAttr($targetHash,"$target maxMuMsgRepeat $maxMuMsgRepeat"); 	# reset maxMuMsgRepeat to old value		
