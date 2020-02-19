@@ -77,7 +77,7 @@ defmod test_DeviceData_rmsg UnitTest dummyDuino (
 
                 my $expected_repeat=min(AttrVal($target,"maxMuMsgRepeat",10),$tData->{dispatch_repeats});
                 is($tData->{dispatch_repeats}, $SD_Dispatch_calledCounter-1, "JSON (pre-release) dispatch_repeats accuracy") if (defined($tData->{dispatch_repeats}));
-              } else { diag "SIGNALduno_Dispatch was not called, this must be an error"; }
+              } else { diag "SIGNALduno_Dispatch (pre-release ID".$testSet->{id}.") was not called, this must be an error"; }
             };
           }
         };
@@ -125,7 +125,7 @@ defmod test_DeviceData_rmsg UnitTest dummyDuino (
                 local $TODO = "Checking dispatches (all dispatches are counted across all modules)";
                 is($tData->{dispatch_repeats}, $SD_Dispatch_calledCounter-1, "JSON (master) dispatch_repeats accuracy ".$testSet->{name}) if (defined($tData->{dispatch_repeats}));
               };
-            } else { diag "SIGNALduno_Dispatch was not called, this must be an error"; }
+            } else { diag "SIGNALduno_Dispatch (master ID".$testSet->{id}.") was not called, this must be an error"; }
           };
         }
       };
