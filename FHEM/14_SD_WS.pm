@@ -384,6 +384,7 @@ sub SD_WS_Parse($$)
 		58 => {
 				# TFA 30.3208.0, Froggit FT007xx, Ambient Weather F007-xx, Renkforce FT007xx
 				# ----------------------------------------------------------------------------------
+				sensortype => 'TFA 30.3208.02, FT007xx',
 				model      => 'SD_WS_58_T', 
 				# prematch => sub {my $msg = shift; return 1 if ($msg =~ /^45[0-9A-F]{11}/); }, 							# prematch
 				prematch   => sub {my $msg = shift; return 1 if ($msg =~ /^4[5|6][0-9A-F]{11}/); },	# prematch, 45=FT007TH/TFA 30.3208.0, 46=FT007T/TFA 30.3228.02

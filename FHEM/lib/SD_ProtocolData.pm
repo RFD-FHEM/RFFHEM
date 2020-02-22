@@ -1567,6 +1567,7 @@ package lib::SD_ProtocolData;
 							# SD_WS_58_TH_84_2 Ch: 2 T: 23.9 H: 58 Bat: ok   MC;LL=-1005;LH=946;SL=-505;SH=496;D=0015D55F5C0E2B47800AEAAFAE0715A3C0057557D7;C=487;L=168;R=0;
 			{
 				name         => 'TFA 30.3208.0',
+				comment      => 'Temperature/humidity sensors (TFA 30.3208.02, 30.3228.02, 30.3229.02, Froggit/Renkforce FT007xx, Ambient Weather F007-xx)',
 				id           => '58',
 				knownFreqs   => '433.92',
 				clockrange   => [460,520],
