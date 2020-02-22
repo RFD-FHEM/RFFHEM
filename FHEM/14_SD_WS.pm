@@ -382,12 +382,24 @@ sub SD_WS_Parse($$)
 				hum        => sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,24,30) );},
 			},
 		58 => {
-				# TFA 30.3208.0, Froggit FT007xx, Ambient Weather F007-xx, Renkforce FT007xx
-				# ----------------------------------------------------------------------------------
+				# TFA 30.3208.02, TFA 30.3228.02, TFA 30.3229.02, Froggit FT007xx, Ambient Weather F007-xx, Renkforce FT007xx
+				# -----------------------------------------------------------------------------------------------------------
+				# 0    4    8    12   16   20   24   28   32   36   40   44   48
+				# 0100 0101 1100 0110 1001 0011 1100 1010 0011 0100 1100 0111 0000
+				# yyyy yyyy iiii iiii bccc tttt tttt tttt hhhh hhhh ssss ssss ????
+				# y   8 bit sensor type (45=>TH, 46=>T)
+				# i:  8 bit random id (changes on power-loss)
+				# b:  1 bit battery indicator (0=>OK, 1=>LOW)
+				# c:  3 bit channel (valid channels are 1-8)
+				# t: 12 bit temperature (Farenheit: subtract 400 and divide by 10, Celsius: subtract 720 and multiply by 0.0556)
+				# h:  8 bit humidity (only type 45, type 46 changes between 10 and 15)
+				# s:  8 bit check
+				# ?:  4 bit unknown
+				# frames sent every ~1 min (varies by channel), map of channel id to transmission interval: 1: 53s, 2: 57s, 3: 59s, 4: 61s, 5: 67s, 6: 71s, 7: 73s, 8: 79s
 				sensortype => 'TFA 30.3208.02, FT007xx',
 				model      => 'SD_WS_58_T', 
 				# prematch => sub {my $msg = shift; return 1 if ($msg =~ /^45[0-9A-F]{11}/); }, 							# prematch
-				prematch   => sub {my $msg = shift; return 1 if ($msg =~ /^4[5|6][0-9A-F]{11}/); },	# prematch, 45=FT007TH/TFA 30.3208.0, 46=FT007T/TFA 30.3228.02
+				prematch   => sub {my $msg = shift; return 1 if ($msg =~ /^4[5|6][0-9A-F]{11}/); },	# prematch, 45=FT007TH/TFA 30.3208.02, 46=FT007T/TFA 30.3228.02
 				crcok      => sub { my $msg = shift;
 														# my @buff = split(//,substr($msg,index($msg,"45"),10));
 														# my $idx = index($msg,"45");
@@ -431,7 +443,6 @@ sub SD_WS_Parse($$)
 				channel    => sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,17,19) + 1 ); },									# channel
 				temp       => sub {my (undef,$bitData) = @_; return round((SD_WS_binaryToNumber($bitData,20,31)-720)*0.0556,1); },	# temp
 				hum        => sub {my ($rawData,$bitData) = @_; return substr($rawData,1,1) eq "5" ? (SD_WS_binaryToNumber($bitData,32,39)) : 0;},	# hum
-				# hum        => sub {my ($rawData,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,32,39) if ($msg =~ /^45/)); },	# hum
    	 	 }   ,     
 		84 =>
 			{
@@ -1126,6 +1137,8 @@ sub SD_WS_WH2SHIFT($){
     <li>PV-8644 infactory Poolthermometer</li>
     <li>Renkforce E0001PA</li>
 		<li>TECVANCE TV-4848</li>
+		<li>Thermometer TFA 30.3228.02, TFA 30.3229.02, FT007T, FT007TP, F007T, F007TP</li>
+		<li>Thermo-Hygrometer TFA 30.3208.02, FT007TH, F007TH
 		<li>TX-EZ6 for Weatherstation TZS First Austria</li>
 		<li>WH2 (TFA Dostmann/Wertheim 30.3157 (sold in Germany), Agimex Rosenborg 66796 (sold in Denmark),ClimeMET CM9088 (Sold in UK)</li>
 		<li>Weatherstation Auriol IAN 283582 Version 06/2017 (Lidl), Modell-Nr.: HG02832D</li>
@@ -1224,6 +1237,8 @@ sub SD_WS_WH2SHIFT($){
     <li>PV-8644 infactory Poolthermometer</li>
     <li>Renkforce E0001PA</li>
 		<li>TECVANCE TV-4848</li>
+		<li>Temperatur-Sensor TFA 30.3228.02, TFA 30.3229.02, FT007T, FT007TP, F007T, F007TP</li>
+		<li>Temperatur/Feuchte-Sensor TFA 30.3208.02, FT007TH, F007TH
 		<li>TX-EZ6 fuer Wetterstation TZS First Austria</li>
 		<li>WH2 (TFA Dostmann/Wertheim 30.3157 (Deutschland), Agimex Rosenborg 66796 (Denmark), ClimeMET CM9088 (UK)</li>
 		<li>Wetterstation Auriol IAN 283582 Version 06/2017 (Lidl), Modell-Nr.: HG02832D</li>

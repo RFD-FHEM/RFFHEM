@@ -11,6 +11,7 @@ Supported Devices / Protocols
 
 |Device | Function|
 | ------------- | ----------- |
+|Ambient Weather F007T, F007TP, F007TH | Thermo-Hygrometer, Thermometer |
 |Arduino Sensor | multi purpose sensor based on arduino |
 |Atlantic Security | some sensors (MD-210R / MD_230R / MD-2018R / MD-2003R) |
 |Auriol IAN 60107, 114324, 275901, 283582, 297514, 314695 (Lidl) | Weather station |
@@ -34,6 +35,7 @@ Supported Devices / Protocols
 |FS20 | Remote control |
 |FT0073 | Weather sensors|
 |FreeTec PE-6946 | wireless bell |
+|Froggit FT007T, FT007TP, FT007TH | Thermo-Hygrometer, Thermometer |
 |GEIGER GF0x01, GF0x02, GF0x03 | Remote control (compatible to Tedsen) |
 |Grothe Mistral SE 03.1| wireless gong |
 |GT-9000| Remote control based on protocol GT-9000 with encoding (EASY HOME RCT DS1, Tec Star)|
@@ -66,8 +68,8 @@ Supported Devices / Protocols
 |Somfy RTS | Somfy blinds |
 |technoline Weatherstation WS 6750/TX70DTH| Weather sensor and station |
 |TCM 234759 Tchibo | wireless bell |
-|TCM97001,Logilink, Pearl NC, and similar,Lifetec LT3594 | Weather sensor
-|TFA 30.3209.02, 30.3208.0, 30.3200, 35.1140.01, 30.3221.02, 30.3222.02 | Weather sensors and stations |
+|TCM97001,Logilink, Pearl NC, and similar,Lifetec LT3594 | Weather sensor |
+|TFA 30.3200, 30.3208.02, 30.3209.02, 30.3221.02, 30.3222.02, 30.3228.02, 30.3229.02, 35.1140.01 | Weather sensors and stations |
 |TS-K108W11 | wireless bell |
 |Techmar Garden Lights | Remote control |
 |Technoline TX3  | Weather sensor |
