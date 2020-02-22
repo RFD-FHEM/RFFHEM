@@ -133,7 +133,6 @@ sub SD_WS_Parse($$)
 	my $trend;
 	my $trendTemp;
 	my $trendHum;
-	my $rain;
 	my $rain_total;
 	my $rawRainCounter;
 	my $sendCounter;
@@ -937,7 +936,6 @@ sub SD_WS_Parse($$)
 			return "";
 		}
 		$id=$decodingSubs{$protocol}{id}->( $rawData,$bitData );
-		#my $temphex=$decodingSubs{$protocol}{temphex}->( $rawData,$bitData );
 		$temp=$decodingSubs{$protocol}{temp}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{temp}));
 		$hum=$decodingSubs{$protocol}{hum}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{hum}));
 		$windspeed=$decodingSubs{$protocol}{windspeed}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{windspeed}));
@@ -948,7 +946,6 @@ sub SD_WS_Parse($$)
 		$rawRainCounter = $decodingSubs{$protocol}{rawRainCounter}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{rawRainCounter}));
 		$rain_total = $decodingSubs{$protocol}{rain_total}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{rain_total}));
 		$sendCounter = $decodingSubs{$protocol}{sendCounter}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{sendCounter}));
-		# $rain = $decodingSubs{$protocol}{rain}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{rain}));
 		$beep = $decodingSubs{$protocol}{beep}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{beep}));
 		if ($model eq "SD_WS_33_T") {			# for SD_WS_33 discrimination T - TH
 			$model = $decodingSubs{$protocol}{model}."H" if $hum != 0;				# for models with Humidity
@@ -1110,10 +1107,8 @@ sub SD_WS_Parse($$)
 	readingsBulkUpdate($hash, "type", $SensorTyp, 0)  if (defined($SensorTyp));
 	readingsBulkUpdate($hash, "beep", $beep)  if (defined($beep));
 	readingsBulkUpdate($hash, "rawRainCounter", $rawRainCounter)  if (defined($rawRainCounter));
-	# readingsBulkUpdate($hash, "dayRainCounter", $dayRainCounter)  if (defined($dayRainCounter));
 	readingsBulkUpdate($hash, "rain_total", $rain_total)  if (defined($rain_total));
 	readingsBulkUpdate($hash, "sendCounter", $sendCounter)  if (defined($sendCounter));
-	# readingsBulkUpdate($hash, "rain", $rain_total)  if (defined($rain));
 	readingsEndUpdate($hash, 1); # Notify is done by Dispatch
 	
 	return $name;
