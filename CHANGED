@@ -1,3 +1,7 @@
+2020-02-22
+  SD_ProtocolData.pm: - added LED Controller LTECH, LED M Serie RF RGBW - M4 & M4-5A
+                      - added TFA Drop 30.3233.01 - Rain gauge
+
 2020-02-05 - SD_UT new model Novy_840039, revised SIGNALduuino readme & tests (#794)
 
 * - added new model SD_UT & commandref
