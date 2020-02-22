@@ -1,3 +1,19 @@
+2020-02-22 - Update SD_ProtocolData.pm (#796)
+
+* Update SD_ProtocolData.pm
+- added ID 54 TFA Drop 30.3233.01 - Rain gauge
+- added ID 54.1 for message decode MS and not ID 54 MU
+- added new ID 31 LED Controller LTECH, LED M Serie RF RGBW - M4 & M4-5A
+- revised doc ID 34
+
+* Update test_DeviceData_rmsg-definition.txt
+- revised line indent
+- set attrib whitelist_IDs for test ID
+- revised direct hash to function
+- revised max maxMuMsgRepeat value
+
+* Update test_sub_SIGNALduino_Parse_MU-definition.txt
+- test extended because of a double dispatch of a similar protocol
 2020-02-22
   SD_ProtocolData.pm: - added LED Controller LTECH, LED M Serie RF RGBW - M4 & M4-5A
                       - added TFA Drop 30.3233.01 - Rain gauge
