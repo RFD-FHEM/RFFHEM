@@ -5,6 +5,7 @@
 # weather sensors which use various protocol
 # Sidey79 & Ralf9  2016 - 2017
 # Joerg 2017
+# elektron-bbs 2018 - 
 # 17.04.2017 WH2 (TFA 30.3157 nur Temp, Hum = 255),es wird das Perlmodul Digest:CRC benoetigt fuer CRC-Pruefung benoetigt
 # 29.05.2017 Test ob Digest::CRC installiert
 # 22.07.2017 WH2 angepasst
@@ -23,6 +24,7 @@
 # 14.06.2019 neuer Sensor TECVANCE TV-4848 - Protokoll 84 angepasst (prematch)
 # 09.11.2019 neues Protokoll 53: Lidl AURIOL AHFL 433 B2 IAN 314695
 # 29.12.2019 neues Protokoll 27: Temperatur-/Feuchtigkeitssensor EuroChron EFTH-800
+# 22.02.2020 Protokoll 58: neuer Sensor TFA 30.3228.02, FT007T Thermometer Sensor
 
 package main;
 
@@ -63,6 +65,7 @@ sub SD_WS_Initialize($)
 		"SD_WS_38_T_.*"	=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4:Temp,", autocreateThreshold => "3:180"},
 		"SD_WS_51_TH.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "3:180"},
 		"SD_WS_53_TH.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "3:180"},
+		"SD_WS_58_T_.*"	=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.* model:other", FILTER => "%NAME", GPLOT => "temp4:Temp,", autocreateThreshold => "2:90"},
 		"SD_WS_58_TH.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "2:90"},
 		"SD_WS_84_TH_.*"	=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "2:120"},
 		"SD_WS_85_THW_.*"	=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "4:120"},
@@ -378,56 +381,56 @@ sub SD_WS_Parse($$)
 				temp       => sub {my (undef,$bitData) = @_; return substr($bitData,12,1) eq "1" ? ((SD_WS_binaryToNumber($bitData,12,23) - 4096) / 10.0) : (SD_WS_binaryToNumber($bitData,12,23) / 10.0);},
 				hum        => sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,24,30) );},
 			},
-       58 => 
-   	 	 {
-     		sensortype => 'TFA 30.3208.0',
-        	model =>	'SD_WS_58_TH', 
-			prematch => sub {my $msg = shift; return 1 if ($msg =~ /^45[0-9A-F]{11}/); }, 							# prematch
-			crcok => 	sub {   my $msg = shift;
-							    my @buff = split(//,substr($msg,index($msg,"45"),10));
-							    my $crc_check = substr($msg,index($msg,"45")+10,2);
-							    my $mask = 0x7C;
-							    my $checksum = 0x64;
-							    my $data;
-							    my $nibbleCount;
-							    for ( $nibbleCount=0; $nibbleCount < scalar @buff; $nibbleCount+=2)
-							    {
-							        my $bitCnt;
-							        if ($nibbleCount+1 <scalar @buff)
-							        {
-							        	$data = hex($buff[$nibbleCount].$buff[$nibbleCount+1]);
-							        } else  {
-							        	$data = hex($buff[$nibbleCount]);	
-							        }
-							        for ( my $bitCnt= 7; $bitCnt >= 0 ; $bitCnt-- )
-							        {
-							            my $bit;
-							            # Rotate mask right
-							            $bit = $mask & 1;
-							            $mask = ($mask >> 1 ) | ($mask << 7) & 0xFF;
-							            if ( $bit )
-							            {
-							                $mask ^= 0x18 & 0xFF;
-							            }
-							            # XOR mask into checksum if data bit is 1
-							            if ( $data & 0x80 )
-							            {
-							                $checksum ^= $mask & 0xFF;
-							            }
-							            $data <<= 1 & 0xFF;
-							        }
-							    }
-							    if ($checksum == hex($crc_check)) {
-								    return 1;
-							    } else {
-							    	return 0;
-							    }
-							}, 																			
-			id => 		sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,8,15); },   							   # random id
-			bat => 		sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,16) eq "1" ? "low" : "ok";},  	   # bat?
-			channel => 	sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,17,19)+1 );  },						   # channel
-			temp => 	sub {my (undef,$bitData) = @_; return round((SD_WS_binaryToNumber($bitData,20,31)-720)*0.0556,1); }, 		   # temp
-			hum => 		sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,32,39));  }, 							   # hum
+		58 => {
+				# TFA 30.3208.0, Froggit FT007xx, Ambient Weather F007-xx, Renkforce FT007xx
+				# ----------------------------------------------------------------------------------
+				model      => 'SD_WS_58_T', 
+				# prematch => sub {my $msg = shift; return 1 if ($msg =~ /^45[0-9A-F]{11}/); }, 							# prematch
+				prematch   => sub {my $msg = shift; return 1 if ($msg =~ /^4[5|6][0-9A-F]{11}/); },	# prematch, 45=FT007TH/TFA 30.3208.0, 46=FT007T/TFA 30.3228.02
+				crcok      => sub { my $msg = shift;
+														# my @buff = split(//,substr($msg,index($msg,"45"),10));
+														# my $idx = index($msg,"45");
+														my @buff = split(//,substr($msg,0,10));
+														my $crc_check = substr($msg,10,2);
+														my $mask = 0x7C;
+														my $checksum = 0x64;
+														my $data;
+														my $nibbleCount;
+														for ( $nibbleCount=0; $nibbleCount < scalar @buff; $nibbleCount+=2) {
+															my $bitCnt;
+															if ($nibbleCount+1 <scalar @buff) {
+																$data = hex($buff[$nibbleCount].$buff[$nibbleCount+1]);
+															} else  {
+																$data = hex($buff[$nibbleCount]);	
+															}
+																for ( my $bitCnt= 7; $bitCnt >= 0 ; $bitCnt-- ) {
+																	my $bit;
+																	# Rotate mask right
+																	$bit = $mask & 1;
+																	$mask = ($mask >> 1 ) | ($mask << 7) & 0xFF;
+																	if ( $bit ) {
+																		$mask ^= 0x18 & 0xFF;
+																	}
+																	# XOR mask into checksum if data bit is 1
+																	if ( $data & 0x80 ) {
+																		$checksum ^= $mask & 0xFF;
+																	}
+																	$data <<= 1 & 0xFF;
+																}
+														}
+														if ($checksum == hex($crc_check)) {
+															return 1;
+														} else {
+															Log3 $name, 3, "$name: SD_WS_58 Parse msg $msg - ERROR checksum $checksum != " . hex($crc_check);
+															return 0;
+														}
+													},
+				id         => sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,8,15); },													# random id
+				bat        => sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,16) eq "1" ? "low" : "ok";},			# bat?
+				channel    => sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,17,19) + 1 ); },									# channel
+				temp       => sub {my (undef,$bitData) = @_; return round((SD_WS_binaryToNumber($bitData,20,31)-720)*0.0556,1); },	# temp
+				hum        => sub {my ($rawData,$bitData) = @_; return substr($rawData,1,1) eq "5" ? (SD_WS_binaryToNumber($bitData,32,39)) : 0;},	# hum
+				# hum        => sub {my ($rawData,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,32,39) if ($msg =~ /^45/)); },	# hum
    	 	 }   ,     
 		84 =>
 			{
@@ -881,7 +884,7 @@ sub SD_WS_Parse($$)
 			$bat = $decodingSubs{$protocol}{bat}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{bat}));
 			
 			$beep = $decodingSubs{$protocol}{beep}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{beep}));
-			if ($model eq "SD_WS_33_T") {			# for SD_WS_33 discrimination T - TH
+			if ($model eq "SD_WS_33_T" || $model eq "SD_WS_58_T") {			# for SD_WS_33 or SD_WS_58 discrimination T - TH
 					$model = $decodingSubs{$protocol}{model}."H" if $hum != 0;				# for models with Humidity
 			} 
 	    	$sendmode = $decodingSubs{$protocol}{sendmode}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{sendmode}));
