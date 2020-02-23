@@ -806,7 +806,7 @@ sub SIGNALduino_Set_sendMsg {
 			    if (!exists($patternHash{$p}))
 				{
 					$patternHash{$p}=$cnt;
-					$pattern.="P".$patternHash{$p}."=".$p*$clock.";";
+					$pattern.="P".$patternHash{$p}."=". int($p*$clock) .";";
 					$cnt++;
 				}
 		    	$signalHash{$item}.=$patternHash{$p};
