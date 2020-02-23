@@ -12,11 +12,11 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
     event fail_events
     exact_ref
 };
-    # Todo:  sendMsg ITV1 with is | protocol 3 command
+    # Todo:  
     #        sendMsg with L or remove this option
     # sendMsg is tested in test_set_sendMsg-definition.txt but can be removed
     # flash is tested in test_firmware_flash_1-definition.txt
-    # resez is tested in test_reset_1-definition.txt
+    # reset is tested in test_reset_1-definition.txt
     
 	my $check = bag {
 		# Uses the next index, in this case index 0;
