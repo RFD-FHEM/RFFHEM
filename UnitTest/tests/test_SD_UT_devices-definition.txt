@@ -4,10 +4,12 @@ defmod test_SD_UT_devices UnitTest dummyDuino (
 	use Test2::Tools::Compare qw{is};
 	use JSON; 
 	## for online testsytem: defmod test_SDUT_devices UnitTest dummyDuino ##
-	my $testDataArray; 
+	my $testDataArray;
+	my $jsonStr;
+
 	sub loadJson
 	{
-		my $jsonStr=GetFileFromURL($_[0],4,"",1,4);
+		$jsonStr=GetFileFromURL($_[0],4,"",1,4);
 		$testDataArray = eval { decode_json($jsonStr) };
 		if($@){
 			diag("open json file TestData was not possible $?"); 
@@ -18,6 +20,14 @@ defmod test_SD_UT_devices UnitTest dummyDuino (
 	my $jsonSourceUrl = AttrVal($name,"Test_Data_URI","https://raw.githubusercontent.com/RFD-FHEM/SIGNALduino_TOOL/master/FHEM/lib/SD_Device_ProtocolList.json");
 	loadJson($jsonSourceUrl); 
     
+	#### only local ####
+  #local $/; #Enable 'slurp' mode
+  #open my $fh, "<", "./FHEM/lib/SD_Device_ProtocolList.json";
+		#$jsonStr = <$fh>;
+  #close $fh;
+	#$testDataArray = eval { decode_json($jsonStr) };
+	#### local END ####
+
     my $todo = undef;
     TestLabel:
 	while ( (my $pID, my $testSet) = each  (@{$testDataArray}) )
@@ -32,20 +42,29 @@ defmod test_SD_UT_devices UnitTest dummyDuino (
 			#diag explain $tData;
 			
 			subtest "Checking module: $testSet->{module} device: $testSet->{name} TestNo: $tID " => sub {
-				
+
+				if ($tData->{attributes}{model} =~ /Novy_8400../) {
+					note("Special feature, similar models with the same ID and DMSG -> delete all ".$testSet->{name});
+					CommandDelete(undef, "Novy_8400.*");
+				};
+
 				if (IsDevice($tData->{internals}{NAME}))
 				{
-					plan(2); # one for readings and one for internals
+					plan(3); # one for readings and one for internals
 					note("device is already defined on system, clearing readings");
-					while ( (my $rName, my $rValue) = each (%{$tData->{readings}}) )
-					{
-						CommandDeleteReading(undef, "$tData->{internals}{NAME} $rName");
-					}
+					CommandDeleteReading(undef, "$tData->{internals}{NAME} .*");
 				}  else {
-					plan(3); # one for readings and one for internals and one for defmod
+					plan(4); # one for readings and one for internals and one for defmod
 					note("device will be defined temporary");
 					is(CommandDefMod(undef,"-temporary $tData->{internals}{NAME} $testSet->{module} $tData->{internals}{DEF}"),U(),"Verify device defmod") || diag explain $tData;
 				}
+
+				subtest "Verify attribute model" => sub {
+					plan(1); # one for readings and one for internals
+					is(AttrVal($tData->{internals}{NAME} ,"model","0"),$tData->{attributes}{model},"check attribute model");
+				};
+
+
 				no strict "refs"; 
 				&{$modules{$testSet->{module}}{ParseFn}}($targetHash,$tData->{dmsg});
 				use strict "refs"; 

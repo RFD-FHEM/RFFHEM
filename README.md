@@ -12,20 +12,20 @@ Supported Devices / Protocols
 |Device | Function|
 | ------------- | ----------- |
 |Arduino Sensor | multi purpose sensor based on arduino |
-|Atlantic Security | some sensors (MD-210R / MD-2018R / MD-2003R) |
-|Auriol IAN 60107, 114324, 275901, 283582, 297514, 314695 (Lidl) | Weatherstation |
+|Atlantic Security | some sensors (MD-210R / MD_230R / MD-2018R / MD-2003R) |
+|Auriol IAN 60107, 114324, 275901, 283582, 297514, 314695 (Lidl) | Weather station |
 |benon (Semexo OHG) | Remote control (BH-P)|
-|BOSCH / Neff | Remote control (SF01 01319004)|
+|BOSCH / Neff / Refsta Topdraft | Remote control (SF01 01319004, SF01 01319004 v2)|
 |CAME TOP 432EV | Remote control |
-|CTW600 WH1080 | Weather station WH3080 UV/Lux Sensor |
+|CTW600, WH1080, WH2315 | Weather station |
 |Clarus | remote power socket|
 |Conrad RSL | shutters |
 |Dooya | Shutters and blinds from various vendors like Rohrmotor24  |
-|Einhel - HS 434/6 | Garagedoor opener |
+|Einhell - HS 434/6 | Garagedoor opener |
 |Elro DB200, KANGTAI, unitec | wireless bell |
 |EM1000WZ | Energy-Monitor |
 |ESTO Lighting GmbH KL-RF01 | Remote control |
-|EuroChron EFTH-800 | Weather station (temperature and humidity |
+|EuroChron EFTH-800 | Weather station (temperature and humidity) |
 |FA21RF | Smoke detector | 
 |FHT80 | Roomthermostat (only receive) |
 |FHT80TF | door/window switch |
@@ -40,7 +40,7 @@ Supported Devices / Protocols
 |Hama TS33C, Bresser Thermo/Hygro Sensor  | Weather sensor |
 |Heidemann, Heidemann HX, VTX-BELL | wireless bell |
 |Hoermann HSM2, HSM4, HS1-868-BS | Remote control |
-|JCHENG SECURITY | PIR |
+|JCHENG SECURITY | PIR Detector |
 |KRINNER Lumix, XM21-0| Remote control LED XMAS|
 |les led  | Remote controlled LED lamp |
 |Livolo | Remote switches and sockets  |
@@ -50,17 +50,17 @@ Supported Devices / Protocols
 |Medion OR28V | Remote control |
 |Mumbi m-FS300 | Remote control |
 |NC-3911, NC-3912 | Refrigerator thermometer |
-|Novy 840029 | Remote control |
+|Novy 840029, 840039 | Remote control |
 |Opus XT300 | Soil moisture sensor |
-|Oregon NR868 | Motion sensor |
-|Oregon PIR sensor | motion sensor |
+|Oregon PIR sensor, NR868 | Motion sensor |
 |Oregon Scientific v2 and v3 Devices | Weather sensor |
-|QUIGG, LIBRA | Remote control |
+|LIBRA, LIDL, MANDOLYN, QUIGG | Remote control TR-502MSV (compatible GT-7008BS, GT-FSI-04, DMV-7008S, Powerfix RCB-I 3600) |
 |PT2262 and similar Devices | Remote switches like Intertechno V1+V3, Elro, door/window sensors|
 |Pollin 551227 | wireless bell |
 |RADEMACHER, Roto, Waeco | Remote control (HCS301 chip - only receive) |
-|revolt | Energy sensors |
 |RH787T, HT12E based | Remote control |
+|RIO, enjoy motors HS |  Remote control |
+|revolt | Energy sensors |
 |s014/TCM/Conrad | Weather sensor |
 |Somfy RTS | Shutters from Somfy|
 |Somfy RTS | Somfy blinds |
@@ -68,13 +68,14 @@ Supported Devices / Protocols
 |TCM 234759 Tchibo | wireless bell |
 |TCM97001,Logilink, Pearl NC, and similar,Lifetec LT3594 | Weather sensor
 |TFA 30.3209.02, 30.3208.0, 30.3200, 35.1140.01, 30.3221.02, 30.3222.02 | Weather sensors and stations |
-|TS-K108W11 | Doorbell |
+|TS-K108W11 | wireless bell |
 |Techmar Garden Lights | Remote control |
 |Technoline TX3  | Weather sensor |
 |Tedsen SKX1xx, SKX2xx, SKX4xx, SKX6xx | Remote control |
 |Visivon remote PT4450  | Remote control |
 |VLOXO | wireless bell |
 |WH2 | (TFA 30.3157 nur Temp, Hum = 255 -> nicht angezeigt)|
+|WH2315, WH3080 | UV/Lux Sensor |
 |WS-2000, WS-7000 | Series of various sensors |
 |WS-7035, WS-7053, WS7054 | Temperature sensor 433MHz |
 |xavax | Remote control |
