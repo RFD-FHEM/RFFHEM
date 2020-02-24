@@ -356,7 +356,7 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 			    	end();
     			};
 		    },
-		    return => match qr/^ERROR: unknown register position/,
+		    return => match qr/ERROR: unknown register position/,
 		},
 		{
     		cc1101_available => 0,
@@ -378,7 +378,7 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 			    	end();
     			};
 		    },
-		    return =>  match qr/^ERROR: wrong parameter value AP23/
+		    return =>  match qr/ERROR: wrong parameter value AP23/
 		},
 		{
 			testname=>  "set bad command",
