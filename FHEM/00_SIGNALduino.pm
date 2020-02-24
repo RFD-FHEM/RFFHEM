@@ -989,7 +989,7 @@ sub SIGNALduino_Get_Command_CCReg
 {
 	my ($hash, @a) = @_;
 	my $name=$hash->{NAME};
-	if (exists($cc1101_register{$_[2]}) || $_[2] =~ /^99$/ ) {
+	if (exists($cc1101_register{uc($_[2])}) || $_[2] =~ /^99$/ ) {
 		return SIGNALduino_Get_Command(@_);
 	} else {
 		return "unknown Register $_[2], please choose a valid cc1101 register";
@@ -4638,11 +4638,11 @@ sub SetRegisters  {
 	
 	## check for four hex digits
 	my @nonHex = grep (!/^[0-9A-Fa-f]{4}$/,@a[1..$#a]) ;
-	return "ERROR: wrong parameter value @nonHex, only hexadecimal ​​four digits allowed" if (@nonHex);
+	return "$hash->{NAME} ERROR: wrong parameter value @nonHex, only hexadecimal ​​four digits allowed" if (@nonHex);
 	
 	## check allowed register position
-	my (@wrongRegisters) = grep { !exists($cc1101_register{substr($_,0,2)}) } @a[1..$#a] ;
-	return "ERROR: unknown register position ".substr($wrongRegisters[0],0,2) if (@wrongRegisters);
+	my (@wrongRegisters) = grep { !exists($cc1101_register{uc(substr($_,0,2))}) } @a[1..$#a] ;
+	return "$hash->{NAME} ERROR: unknown register position ".substr($wrongRegisters[0],0,2) if (@wrongRegisters);
 	
 	$hash->{logMethod}->($hash->{NAME}, 4, "$hash->{NAME}: SetRegisters, cc1101_reg @a[1..$#a]");
 	my @tmpSendQueue=();
