@@ -12,11 +12,11 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
     event fail_events
     exact_ref
 };
-    # Todo:  sendMsg ITV1 with is | protocol 3 command
+    # Todo:  
     #        sendMsg with L or remove this option
     # sendMsg is tested in test_set_sendMsg-definition.txt but can be removed
     # flash is tested in test_firmware_flash_1-definition.txt
-    # resez is tested in test_reset_1-definition.txt
+    # reset is tested in test_reset_1-definition.txt
     
 	my $check = bag {
 		# Uses the next index, in this case index 0;
@@ -152,8 +152,8 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 			    	item 'C10';
 			    	end();
     			};
-		    },
-		    return => "Register 10 requsted"
+		    }
+		    #return => "Register 10 requested"
 		},
 		{
     		cc1101_available => 0,
@@ -596,9 +596,9 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 		@{$targetHash->{QUEUE}}=();
 	
 		subtest 'Test SIGNALduino_Set_bWidth (requesting value register 10)' => sub {
-			plan(3);
+			plan(2);
 			my $ret = SIGNALduino_Set_bWidth($targetHash,,"cc1101_bWidth","325");
-			is($ret,"Register 10 requsted","Verify return message / request register 10");
+			#is($ret,"Register 10 requested","Verify return message / request register 10");
 			is($targetHash->{ucCmd}->{cmd},"set_bWidth","check getcmd command");
 			is($targetHash->{ucCmd}->{arg},"325","check getcmd arg");
 		};
@@ -608,7 +608,7 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 				
 		subtest 'Test SIGNALduino_Set_bWidth (Update registervalue)' => sub {
 			plan(2);
-			my ($ret,undef) = SIGNALduino_Set_bWidth($targetHash,"cc1101_bWidth","C10 = 57");
+			my ($ret,undef) = SIGNALduino_Set_bWidth($targetHash,"C10 = 57");
 			
 				
 			is($ret,"Setting MDMCFG4 (10) to 57 = 325 KHz","Verify return message");
