@@ -1,3 +1,6 @@
+2020-02-25 - Allow lower case letters for hex values ​​in set / get cc1101_reg (#799)
+
+* Allow lower case letters for hex values ​​in set / get cc1101_reg
 2020-02-25 - Merge branch 'dev-r34' into dev-r34_set-get-cc1101-register
 2020-02-25 - Allow lower case letters for hex values in set / get cc1101_reg
 
