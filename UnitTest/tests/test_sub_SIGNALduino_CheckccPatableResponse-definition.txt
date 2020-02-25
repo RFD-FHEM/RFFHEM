@@ -1,8 +1,9 @@
 defmod test_sub_SIGNALduino_CheckccPatableResponse UnitTest dummyDuino ( 
 {
+		my $savedFreq = AttrVal($target,"cc1101_frequency",undef);
 		plan tests => 3;
 		
-
+		
 		subtest 'Test ccPatable response default Mhz (C3E = 00 84 00 00 00 00 00 00)' => sub {
 			plan tests => 2;
 			delete($attr{$target}{cc1101_frequency});
@@ -47,6 +48,11 @@ defmod test_sub_SIGNALduino_CheckccPatableResponse UnitTest dummyDuino (
 				is($ret,"C3E = 00 84 00 00 00 00 00 00","check return value");
 				is ($targetHash->{cc1101_patable},"C3E = 00 84 00 00 00 00 00 00", "check internal value");
 			};
-		}
+		};
+
+		$attr{$target}{cc1101_frequency} = $savedFreq if(defined($savedFreq));
+		delete($attr{$target}{cc1101_frequency}) if(! defined($savedFreq));
+		
+		
 }	
 )
