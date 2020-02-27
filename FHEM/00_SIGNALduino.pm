@@ -1,6 +1,6 @@
 # $Id: 00_SIGNALduino.pm 20746 2019-12-29 12:30:52Z Sidey $
 #
-# v3.4.2
+# v3.4.2 - https://github.com/RFD-FHEM/RFFHEM/tree/dev-r34
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incoming messages
 # see http://www.fhemwiki.de/wiki/SIGNALDuino
 # It was modified also to provide support for raw message handling which can be send from the SIGNALduino
@@ -9,7 +9,7 @@
 #
 # N. Butzek, S. Butzek, 2014-2015
 # S.Butzek,Ralf9 2016-2019
-# S.Butzek, HomeAutoUser, Elektronbbs 2019-2020
+# S.Butzek, HomeAutoUser, elektron-bbs 2019-2020
 
 package main;
 my $missingModulSIGNALduino="";
@@ -32,7 +32,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.4.2_dev_30.01",
+	SDUINO_VERSION            => "v3.4.2_dev_27.02",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -45,7 +45,8 @@ use constant {
 	SDUINO_DISPATCH_VERBOSE     => 5,      # default 5
 	SDUINO_MC_DISPATCH_VERBOSE  => 5,      # wenn kleiner 5, z.B. 3 dann wird vor dem dispatch mit loglevel 3 die ID und rmsg ausgegeben
 	SDUINO_MC_DISPATCH_LOG_ID   => '12.1', # die o.g. Ausgabe erfolgt nur wenn der Wert mit der ID uebereinstimmt
-	SDUINO_PARSE_DEFAULT_LENGHT_MIN => 8
+	SDUINO_PARSE_DEFAULT_LENGHT_MIN => 8,
+	SDUINO_GET_CONFIGQUERY_DELAY => 0.75   # delay for cmd to no overwrite a working cmd
 };
 
 
@@ -651,6 +652,7 @@ sub SIGNALduino_Set_raw {
 	my ($hash, @a) = @_;
 	$hash->{logMethod}->($hash->{NAME}, 4, "$hash->{NAME}: Set_raw, ".join(" ",@a));
 	SIGNALduino_AddSendQueue($hash,$a[1]);
+	InternalTimer(gettimeofday() + SDUINO_GET_CONFIGQUERY_DELAY, "SIGNALduino_Get_ConfigQuery", "SIGNALduino_Get_ConfigQuery:$hash->{NAME}:ccconf", 0) if ($a[1] eq "e");
 	return undef;
 }
 
@@ -866,6 +868,7 @@ sub SIGNALduino_Set_bWidth
 		# Toddo setRegisters verwenden
 		main::SIGNALduino_AddSendQueue($hash,"W12$ob");
 		main::SIGNALduino_WriteInit($hash);
+		main::InternalTimer(main::gettimeofday() + main::SDUINO_GET_CONFIGQUERY_DELAY, "SIGNALduino_Get_ConfigQuery", "SIGNALduino_Get_ConfigQuery:$hash->{NAME}:ccconf", 0);
 		return ("Setting MDMCFG4 (10) to $ob = $bw KHz" ,undef);
 	} else {
 		$hash->{logMethod}->($hash->{NAME}, 3, "$hash->{NAME}: Set_bWidth, Request register 10");
@@ -1023,6 +1026,16 @@ sub SIGNALduino_GetResponseUpdateReading
 	return ($_[1],1);
 }
 
+###############################
+sub SIGNALduino_Get_ConfigQuery($) {
+  my($param) = @_;
+  my(undef,$name,$cmd) = split(':', $param);
+  my $hash = $defs{$name};
+
+	$hash->{logMethod}->($hash->{NAME}, 5, "$name: SIGNALduino_Get_ConfigQuery, $cmd");
+	SIGNALduino_Get($hash,$name,$cmd);
+	RemoveInternalTimer("SIGNALduino_Get_ConfigQuery:$name:$cmd");
+}
 
 ###############################
 sub SIGNALduino_CheckUptimeResponse
@@ -1329,7 +1342,11 @@ sub SIGNALduino_CheckVersionResp
 		$hash->{keepalive}{ok}    = 0;
 		$hash->{keepalive}{retry} = 0;
 		InternalTimer(gettimeofday() + SDUINO_KEEPALIVE_TIMEOUT, "SIGNALduino_KeepAlive", $hash, 0);
-	 	$hash->{cc1101_available} = 1  if ($hash->{version} =~ m/cc1101/);
+		if ($hash->{version} =~ m/cc1101/) {
+			$hash->{cc1101_available} = 1;
+			InternalTimer(gettimeofday() + SDUINO_GET_CONFIGQUERY_DELAY, "SIGNALduino_Get_ConfigQuery", "SIGNALduino_Get_ConfigQuery:$name:ccconf", 0);
+			InternalTimer(gettimeofday() + SDUINO_GET_CONFIGQUERY_DELAY + 1, "SIGNALduino_Get_ConfigQuery", "SIGNALduino_Get_ConfigQuery:$name:ccpatable", 0);
+		}
 	 	$msg = $hash->{version};
 	}
 	return ($msg,undef);
@@ -4612,13 +4629,15 @@ sub SIGNALduino_githubParseHttpResponse($$$) {
 	return 0;
 }
 
+################################################
+########## Section & functions CC1101 ##########
+
 package cc1101;
 
-####
+################################################
 #### for set function to change the patable for 433 or 868 Mhz supported
 #### 433.05–434.79 MHz, 863–870 MHz
-sub SetPatable
-{
+sub SetPatable {
 	my ($hash,@a) = @_;
 	my $paFreq = main::AttrVal($hash->{NAME},"cc1101_frequency","433");
 	$paFreq = 433 if ($paFreq >= 433 && $paFreq <= 435);
@@ -4629,12 +4648,14 @@ sub SetPatable
 		$hash->{logMethod}->($hash->{NAME}, 3, "$hash->{NAME}: SetPatable, Setting patable $paFreq $a[1] $pa");
 		main::SIGNALduino_AddSendQueue($hash,$pa);
 		main::SIGNALduino_WriteInit($hash);
+		main::InternalTimer(main::gettimeofday() + main::SDUINO_GET_CONFIGQUERY_DELAY, "SIGNALduino_Get_ConfigQuery", "SIGNALduino_Get_ConfigQuery:$hash->{NAME}:ccpatable", 0);
 		return undef;
 	} else {
 		return "$hash->{NAME}: Frequency $paFreq MHz not supported (supported frequency ranges: 433.05-434.79 MHz, 863.00-870.00 MHz).";
 	}
 }
 
+################################################
 sub SetRegisters  {
 	my ($hash, @a) = @_;
 
@@ -4655,6 +4676,8 @@ sub SetRegisters  {
 	main::SIGNALduino_WriteInit($hash);
 	return undef;
 }
+
+################################################
 sub SetFreq  {
 	my ($hash, @a) = @_;
 
@@ -4672,8 +4695,11 @@ sub SetFreq  {
 	main::SIGNALduino_AddSendQueue($hash,"W10$f1");
 	main::SIGNALduino_AddSendQueue($hash,"W11$f0");
 	main::SIGNALduino_WriteInit($hash);
+	main::InternalTimer(main::gettimeofday() + main::SDUINO_GET_CONFIGQUERY_DELAY, "SIGNALduino_Get_ConfigQuery", "SIGNALduino_Get_ConfigQuery:$hash->{NAME}:ccconf", 0);
 	return undef;
 }
+
+################################################
 sub setrAmpl  {
 	my ($hash, @a) = @_;
 
@@ -4686,14 +4712,18 @@ sub setrAmpl  {
 	$hash->{logMethod}->($hash->{NAME}, 3, "$hash->{NAME}: setrAmpl, Setting AGCCTRL2 (1B) to $v / $w dB");
 	main::SIGNALduino_AddSendQueue($hash,"W1D$v");
 	main::SIGNALduino_WriteInit($hash);
+	main::InternalTimer(main::gettimeofday() + main::SDUINO_GET_CONFIGQUERY_DELAY, "SIGNALduino_Get_ConfigQuery", "SIGNALduino_Get_ConfigQuery:$hash->{NAME}:ccconf", 0);
 	return undef;
 }
+
+################################################ 
 sub GetRegister {
 	my ($hash, $reg) = @_;
 	main::SIGNALduino_AddSendQueue($hash,"C".$reg);
 	return undef;
 }
 
+################################################
 sub CalcbWidthReg {
 	my ($hash, $reg10, $bWith) = @_;
 	# Beispiel Rückmeldung, mit Ergebnis von Register 10: C10 = 57
@@ -4712,6 +4742,7 @@ sub CalcbWidthReg {
 	return ($ob,$bw);
 }
 
+################################################
 sub SetSens {
 	my ($hash, @a) = @_;
 
@@ -4722,9 +4753,13 @@ sub SetSens {
 	$hash->{logMethod}->($hash->{NAME}, 3, "$hash->{NAME}: SetSens, Setting AGCCTRL0 (1D) to $v / $w dB");
 	main::SIGNALduino_AddSendQueue($hash,"W1F$v");
 	main::SIGNALduino_WriteInit($hash);
+	main::InternalTimer(main::gettimeofday() + main::SDUINO_GET_CONFIGQUERY_DELAY, "SIGNALduino_Get_ConfigQuery", "SIGNALduino_Get_ConfigQuery:$hash->{NAME}:ccconf", 0);
 	return undef;
 }
 
+
+
+################################################################################################																																							
 1;
 
 =pod
