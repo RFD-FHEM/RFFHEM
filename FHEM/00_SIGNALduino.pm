@@ -4676,11 +4676,11 @@ sub SetFreq  {
 }
 sub setrAmpl  {
 	my ($hash, @a) = @_;
-
-	# Todo: Abfrage in Grep auf Array ändern
- 	return "a numerical value between 24 and 42 is expected" if($a[1] !~ m/^\d+$/ || $a[1] < 24 ||$a[1] > 42);
-	my ($v) = grep { $ampllist[$_] > $a[1] } (0 .. @ampllist-1);
-
+ 	return "$hash->{NAME}: A numerical value between 24 and 42 is expected." if($a[1] !~ m/^\d+$/ || $a[1] < 24 ||$a[1] > 42);
+	my $v;
+	for($v = 0; $v < @ampllist; $v++) {
+		last if($ampllist[$v] > $a[1]);
+	}
 	$v = sprintf("%02d", $v-1);
 	my $w = $ampllist[$v];
 	$hash->{logMethod}->($hash->{NAME}, 3, "$hash->{NAME}: setrAmpl, Setting AGCCTRL2 (1B) to $v / $w dB");
