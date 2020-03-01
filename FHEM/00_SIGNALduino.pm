@@ -652,7 +652,7 @@ sub SIGNALduino_Set_raw {
 	my ($hash, @a) = @_;
 	$hash->{logMethod}->($hash->{NAME}, 4, "$hash->{NAME}: Set_raw, ".join(" ",@a));
 	SIGNALduino_AddSendQueue($hash,$a[1]);
-	InternalTimer(gettimeofday() + SDUINO_GET_CONFIGQUERY_DELAY, "SIGNALduino_Get_ConfigQuery", "SIGNALduino_Get_ConfigQuery:$hash->{NAME}:ccconf", 0) if ($a[1] eq "e");
+	InternalTimer(gettimeofday() + SDUINO_GET_CONFIGQUERY_DELAY, "SIGNALduino_delayed_Get", "SIGNALduino_delayed_Get:$hash->{NAME}:ccconf", 0) if ($a[1] eq "e");
 	return undef;
 }
 
@@ -868,7 +868,7 @@ sub SIGNALduino_Set_bWidth
 		# Toddo setRegisters verwenden
 		main::SIGNALduino_AddSendQueue($hash,"W12$ob");
 		main::SIGNALduino_WriteInit($hash);
-		main::InternalTimer(main::gettimeofday() + main::SDUINO_GET_CONFIGQUERY_DELAY, "SIGNALduino_Get_ConfigQuery", "SIGNALduino_Get_ConfigQuery:$hash->{NAME}:ccconf", 0);
+		main::InternalTimer(main::gettimeofday() + main::SDUINO_GET_CONFIGQUERY_DELAY, "SIGNALduino_delayed_Get", "SIGNALduino_delayed_Get:$hash->{NAME}:ccconf", 0);
 		return ("Setting MDMCFG4 (10) to $ob = $bw KHz" ,undef);
 	} else {
 		$hash->{logMethod}->($hash->{NAME}, 3, "$hash->{NAME}: Set_bWidth, Request register 10");
@@ -1027,14 +1027,14 @@ sub SIGNALduino_GetResponseUpdateReading
 }
 
 ###############################
-sub SIGNALduino_Get_ConfigQuery($) {
+sub SIGNALduino_delayed_Get($) {
   my($param) = @_;
   my(undef,$name,$cmd) = split(':', $param);
   my $hash = $defs{$name};
 
-	$hash->{logMethod}->($hash->{NAME}, 5, "$name: SIGNALduino_Get_ConfigQuery, $cmd");
+	$hash->{logMethod}->($hash->{NAME}, 5, "$name: SIGNALduino_delayed_Get, $cmd");
 	SIGNALduino_Get($hash,$name,$cmd);
-	RemoveInternalTimer("SIGNALduino_Get_ConfigQuery:$name:$cmd");
+	RemoveInternalTimer("SIGNALduino_delayed_Get:$name:$cmd");
 }
 
 ###############################
@@ -1344,8 +1344,8 @@ sub SIGNALduino_CheckVersionResp
 		InternalTimer(gettimeofday() + SDUINO_KEEPALIVE_TIMEOUT, "SIGNALduino_KeepAlive", $hash, 0);
 		if ($hash->{version} =~ m/cc1101/) {
 			$hash->{cc1101_available} = 1;
-			InternalTimer(gettimeofday() + SDUINO_GET_CONFIGQUERY_DELAY, "SIGNALduino_Get_ConfigQuery", "SIGNALduino_Get_ConfigQuery:$name:ccconf", 0);
-			InternalTimer(gettimeofday() + SDUINO_GET_CONFIGQUERY_DELAY + 1, "SIGNALduino_Get_ConfigQuery", "SIGNALduino_Get_ConfigQuery:$name:ccpatable", 0);
+			InternalTimer(gettimeofday() + SDUINO_GET_CONFIGQUERY_DELAY, "SIGNALduino_delayed_Get", "SIGNALduino_delayed_Get:$name:ccconf", 0);
+			InternalTimer(gettimeofday() + SDUINO_GET_CONFIGQUERY_DELAY + 1, "SIGNALduino_delayed_Get", "SIGNALduino_delayed_Get:$name:ccpatable", 0);
 		}
 	 	$msg = $hash->{version};
 	}
@@ -4648,7 +4648,7 @@ sub SetPatable {
 		$hash->{logMethod}->($hash->{NAME}, 3, "$hash->{NAME}: SetPatable, Setting patable $paFreq $a[1] $pa");
 		main::SIGNALduino_AddSendQueue($hash,$pa);
 		main::SIGNALduino_WriteInit($hash);
-		main::InternalTimer(main::gettimeofday() + main::SDUINO_GET_CONFIGQUERY_DELAY, "SIGNALduino_Get_ConfigQuery", "SIGNALduino_Get_ConfigQuery:$hash->{NAME}:ccpatable", 0);
+		main::InternalTimer(main::gettimeofday() + main::SDUINO_GET_CONFIGQUERY_DELAY, "SIGNALduino_delayed_Get", "SIGNALduino_delayed_Get:$hash->{NAME}:ccpatable", 0);
 		return undef;
 	} else {
 		return "$hash->{NAME}: Frequency $paFreq MHz not supported (supported frequency ranges: 433.05-434.79 MHz, 863.00-870.00 MHz).";
@@ -4695,7 +4695,7 @@ sub SetFreq  {
 	main::SIGNALduino_AddSendQueue($hash,"W10$f1");
 	main::SIGNALduino_AddSendQueue($hash,"W11$f0");
 	main::SIGNALduino_WriteInit($hash);
-	main::InternalTimer(main::gettimeofday() + main::SDUINO_GET_CONFIGQUERY_DELAY, "SIGNALduino_Get_ConfigQuery", "SIGNALduino_Get_ConfigQuery:$hash->{NAME}:ccconf", 0);
+	main::InternalTimer(main::gettimeofday() + main::SDUINO_GET_CONFIGQUERY_DELAY, "SIGNALduino_delayed_Get", "SIGNALduino_delayed_Get:$hash->{NAME}:ccconf", 0);
 	return undef;
 }
 
@@ -4712,7 +4712,7 @@ sub setrAmpl  {
 	$hash->{logMethod}->($hash->{NAME}, 3, "$hash->{NAME}: setrAmpl, Setting AGCCTRL2 (1B) to $v / $w dB");
 	main::SIGNALduino_AddSendQueue($hash,"W1D$v");
 	main::SIGNALduino_WriteInit($hash);
-	main::InternalTimer(main::gettimeofday() + main::SDUINO_GET_CONFIGQUERY_DELAY, "SIGNALduino_Get_ConfigQuery", "SIGNALduino_Get_ConfigQuery:$hash->{NAME}:ccconf", 0);
+	main::InternalTimer(main::gettimeofday() + main::SDUINO_GET_CONFIGQUERY_DELAY, "SIGNALduino_delayed_Get", "SIGNALduino_delayed_Get:$hash->{NAME}:ccconf", 0);
 	return undef;
 }
 
@@ -4753,7 +4753,7 @@ sub SetSens {
 	$hash->{logMethod}->($hash->{NAME}, 3, "$hash->{NAME}: SetSens, Setting AGCCTRL0 (1D) to $v / $w dB");
 	main::SIGNALduino_AddSendQueue($hash,"W1F$v");
 	main::SIGNALduino_WriteInit($hash);
-	main::InternalTimer(main::gettimeofday() + main::SDUINO_GET_CONFIGQUERY_DELAY, "SIGNALduino_Get_ConfigQuery", "SIGNALduino_Get_ConfigQuery:$hash->{NAME}:ccconf", 0);
+	main::InternalTimer(main::gettimeofday() + main::SDUINO_GET_CONFIGQUERY_DELAY, "SIGNALduino_delayed_Get", "SIGNALduino_delayed_Get:$hash->{NAME}:ccconf", 0);
 	return undef;
 }
 
