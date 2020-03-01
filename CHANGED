@@ -1,3 +1,7 @@
+2020-02-29 - bug fixed set sduino cc1101_rAmpl 42 (#801)
+
+* bug fixed set sduino cc1101 rAmpl 42
+2020-02-28 - bug fixed set sduino cc1101 rAmpl 42
 2020-02-25 - Allow lower case letters for hex values ​​in set / get cc1101_reg (#799)
 
 * Allow lower case letters for hex values ​​in set / get cc1101_reg
