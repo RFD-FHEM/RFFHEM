@@ -32,7 +32,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.4.2_dev_27.02",
+	SDUINO_VERSION            => "v3.4.2_dev_02.03",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -1059,9 +1059,7 @@ sub SIGNALduino_CheckCmdsResponse
 }
 
 ###############################
-sub SIGNALduino_CheckccConfResponse
-{
-
+sub SIGNALduino_CheckccConfResponse {
 	my (undef,$str) = split('=', $_[1]);
 	my $var;
 	my %r = ( "0D"=>1,"0E"=>1,"0F"=>1,"10"=>1,"11"=>1,"12"=>1,"1B"=>1,"1D"=>1, "15"=>1);
@@ -1082,15 +1080,16 @@ sub SIGNALduino_CheckccConfResponse
 		$syncmod[($r{"12"})&7],                                         #Syncmod    | Register 0x12
 	);
 
-	$_[0]->{cc1101_config} = $msg;
-	$_[0]->{cc1101_config_ext} = $msg2;
+	readingsBeginUpdate($_[0]);
+	readingsBulkUpdate($_[0], "cc1101_config", $msg);
+	readingsBulkUpdate($_[0], "cc1101_config_ext", $msg2);
+	readingsEndUpdate($_[0], 1);
+
 	return ($msg.", ".$msg2,undef);
 }
 
-
 ###############################
-sub SIGNALduino_CheckccPatableResponse
-{
+sub SIGNALduino_CheckccPatableResponse {
 	my $hash = shift;
 	my $msg = shift;
 	my $name=$hash->{NAME};
@@ -1107,7 +1106,7 @@ sub SIGNALduino_CheckccPatableResponse
 			last;
 		}
 	}
-	$hash->{cc1101_patable} = $msg;
+	readingsSingleUpdate($hash, "cc1101_patable", $msg,1);
 	return ($msg,undef);
 }
 
