@@ -28,7 +28,12 @@ defmod test_sub_SIGNALduino_Parse_MU UnitTest dummyDuino (
 		is(SIGNALduino_Parse_MU($targetHash, $targetHash, $targetHash->{NAME}, $rmsg,%signal_parts) ,1,"MU Data dispatched");
 	};	
 
-	note("attribute whitelist_IDs restore to old value from system");
-	CommandAttr($targetHash,"$target whitelist_IDs $whitelist_IDs") if(defined($whitelist_IDs)); 	 # reset whitelist_IDs to old value
+    if(defined($whitelist_IDs)) {
+	    note("attribute whitelist_IDs restore to old value from system");
+    	CommandAttr($targetHash,"$target whitelist_IDs $whitelist_IDs"); 	 # reset whitelist_IDs to old value
+    } else {
+    	CommandDeleteAttr($targetHash,"$target whitelist_IDs");
+        note("attribute whitelist_IDs deleted ");
+    }
 }
 )
