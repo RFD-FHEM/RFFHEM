@@ -194,6 +194,8 @@ defmod test_sub_SIGNALduino_Get UnitTest dummyDuino
 			is($targetHash->{QUEUE},$element->{check},"Verify expected queue element entrys", explain $targetHash->{QUEUE});
 
 			@{$targetHash->{QUEUE}}=();
+			delete($targetHash->{ucCmd});
+			
 			
 		};
 		undef ($todo);
