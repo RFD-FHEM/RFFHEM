@@ -898,8 +898,8 @@ sub SIGNALduino_Get($@) {
 		return "Unknown argument $a[0], choose one of supported commands";
 	}
 	my $rcode=undef;
-	if (exists($hash->{ucCmd}) )
-		SIGNALduino_delayed_Get("SIGNALduino_delayed_Get:$name:".join(":"@a));
+	if (exists($hash->{ucCmd}) ) {
+		SIGNALduino_delayed_Get("SIGNALduino_delayed_Get:$name:".join(":",@a));
 	}
 	elsif ( ($hash->{DevState} eq "initialized" || $a[0] eq "?" || $a[0] eq 'availableFirmware') && ref @{$gets{$a[0]}}[1] eq "CODE") { #
     	$rcode= @{$gets{$a[0]}}[1]->($hash,@a);
@@ -1032,9 +1032,9 @@ sub SIGNALduino_delayed_Get($) {
 	my(undef,$name,@cmds) = split(':', shift);
 	my $hash = $defs{$name};
   
-	if (exists($hash->{ucCmd}) && $hash->{ucCmd}{timenow}+10 > time() )
+	if (exists($hash->{ucCmd}) && $hash->{ucCmd}{timenow}+10 > time() ) {
 		$hash->{logMethod}->($hash->{NAME}, 5, "$name: SIGNALduino_delayed_Get, ".split(":",@cmds)." delayed");
-		main::InternalTimer(main::gettimeofday() + main::SDUINO_GET_CONFIGQUERY_DELAY, "SIGNALduino_delayed_Get", "SIGNALduino_delayed_Get:$name:split(":",@cmds)", 0);
+		main::InternalTimer(main::gettimeofday() + main::SDUINO_GET_CONFIGQUERY_DELAY, "SIGNALduino_delayed_Get", "SIGNALduino_delayed_Get:$name:".split(":",@cmds), 0);
 	} else {
 		delete($hash->{ucCmd});	
 		$hash->{logMethod}->($hash->{NAME}, 5, "$name: SIGNALduino_delayed_Get, ".split(":",@cmds)." executed");
@@ -1349,8 +1349,8 @@ sub SIGNALduino_CheckVersionResp
 		InternalTimer(gettimeofday() + SDUINO_KEEPALIVE_TIMEOUT, "SIGNALduino_KeepAlive", $hash, 0);
 		if ($hash->{version} =~ m/cc1101/) {
 			$hash->{cc1101_available} = 1;
-			SIGNALduino_Get, $name,"ccconf");
-			SIGNALduino_Get, $name,"ccpatable");
+			SIGNALduino_Get($hash, $name,"ccconf");
+			SIGNALduino_Get($hash, $name,"ccpatable");
 		}
 	 	$msg = $hash->{version};
 	}
@@ -1491,7 +1491,7 @@ sub SIGNALduino_SendFromQueue($$) {
       	$hash->{ucCmd}->{cmd} = 'sendraw';
        	$hash->{ucCmd}->{responseSub} = \&SIGNALduino_CheckSendRawResponse;
       	$hash->{logMethod}->($name, 4, "$name: SendFromQueue, msg=$msg"); # zu testen der Queue, kann wenn es funktioniert auskommentiert werden
-    } elsif ($msg =~ "^(e|W11|W1D|W12|W1F)")
+    } elsif ($msg =~ "^(e|W11|W1D|W12|W1F)") {
     	SIGNALduino_Get($hash,$name,"ccconf");
     	SIGNALduino_Get($hash,$name,"ccpatable"); 
     } elsif ($msg eq "x") {
