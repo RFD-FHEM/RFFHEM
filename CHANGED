@@ -1,3 +1,6 @@
+2020-03-08 - 00_SIGNALduino.pm
+
+Idea to make multiple get commands more easy and robust to handle
 2020-02-29 - bug fixed set sduino cc1101_rAmpl 42 (#801)
 
 * bug fixed set sduino cc1101 rAmpl 42
