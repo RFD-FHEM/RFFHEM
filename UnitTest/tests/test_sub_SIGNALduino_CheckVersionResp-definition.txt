@@ -1,10 +1,15 @@
 defmod test_sub_SIGNALduino_CheckVersionResp UnitTest dummyDuino ( 
 {
 	subtest 'Test SIGNALduino_CheckVersionResp ' => sub {
-		plan tests => 1;
+		plan tests => 3;
 		$targetHash->{ucCmd}->{cmd} = "version";
+		my $mock = Mock::Sub->new;
+	 	my $SIGNALduino_Get = $mock->mock('SIGNALduino_Get');
 		my ($ret,undef)=SIGNALduino_CheckVersionResp($targetHash,"V 3.4.0-dev SIGNALESP cc1101 (chip CC1101) - compiled at Dec  4 2019 22:01:01");
 		is($ret,"V 3.4.0-dev SIGNALESP cc1101 (chip CC1101) - compiled at Dec  4 2019 22:01:01","check return message");
+		is($SIGNALduino_Get->called_count,2,"SIGNALduino_Get called two times");
+		is( ($SIGNALduino_Get->called_with)[2], "ccpatable", 'check last cmd send to SIGNALduino_Get' ); 
+		$SIGNALduino_Get->unmock;
 	};
 	
 	subtest 'Test SIGNALduino_CheckVersionResp with incomplete MU before' => sub {
