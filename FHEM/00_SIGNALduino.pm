@@ -1291,6 +1291,7 @@ sub SIGNALduino_StartInit($) {
 	else {
 		$hash->{ucCmd}->{cmd} = "version";
 		$hash->{ucCmd}->{responseSub} = \&SIGNALduino_CheckVersionResp;
+		$hash->{ucCmd}->{timenow} = time();
 		SIGNALduino_SimpleWrite($hash, "V");
 		#DevIo_SimpleWrite($hash, "V\n",2);
 		$hash->{DevState} = 'waitInit';
@@ -1489,6 +1490,7 @@ sub SIGNALduino_SendFromQueue($$) {
     SIGNALduino_SimpleWrite($hash,$msg);
     if ($msg =~ m/^S[RCM];/) {
       	$hash->{ucCmd}->{cmd} = 'sendraw';
+       	$hash->{ucCmd}->{timenow} = time();
        	$hash->{ucCmd}->{responseSub} = \&SIGNALduino_CheckSendRawResponse;
       	$hash->{logMethod}->($name, 4, "$name: SendFromQueue, msg=$msg"); # zu testen der Queue, kann wenn es funktioniert auskommentiert werden
     } elsif ($msg =~ "^(e|W11|W1D|W12|W1F)") {
@@ -1695,6 +1697,7 @@ sub SIGNALduino_KeepAlive($){
 			}
 			$hash->{logMethod}->($name, $logLevel, "$name: KeepAlive, not ok, retry = " . $hash->{keepalive}{retry} . " -> get ping");
 			$hash->{ucCmd}->{cmd} = "ping";
+			$hash->{ucCmd}->{timenow} = time();
 			$hash->{ucCmd}->{responseSub} = \&SIGNALduino_GetResponseUpdateReading;
 			SIGNALduino_AddSendQueue($hash, "P");
 		}
