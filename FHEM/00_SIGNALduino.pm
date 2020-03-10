@@ -898,7 +898,7 @@ sub SIGNALduino_Get($@) {
 		return "Unknown argument $a[0], choose one of supported commands";
 	}
 	my $rcode=undef;
-	if (exists($hash->{ucCmd}) ) {
+	if (exists($hash->{ucCmd}) && $a[0] ne "?" ) {
 		SIGNALduino_Get_delayed("SIGNALduino_Get_delayed:$name:".join(":",@a));
 	}
 	elsif ( ($hash->{DevState} eq "initialized" || $a[0] eq "?" || $a[0] eq 'availableFirmware') && ref @{$gets{$a[0]}}[1] eq "CODE") { #
@@ -1245,7 +1245,6 @@ sub SIGNALduino_DoInit($) {
 
 		#SIGNALduino_SimpleWrite($hash, "XQ"); # Disable receiver
 		InternalTimer(gettimeofday() + SDUINO_INIT_WAIT_XQ, "SIGNALduino_SimpleWrite_XQ", $hash, 0);
-
 		InternalTimer(gettimeofday() + SDUINO_INIT_WAIT, "SIGNALduino_StartInit", $hash, 0);
 	}
 	# Reset the counter
@@ -1335,11 +1334,14 @@ sub SIGNALduino_CheckVersionResp
 	} else {
 		if (exists($hash->{DevState}) && $hash->{DevState} eq 'waitInit') {
 			RemoveInternalTimer($hash);
+			if ($hash->{version} =~ m/cc1101/) {
+				SIGNALduino_Get($hash, $name,"ccconf");
+				SIGNALduino_Get($hash, $name,"ccpatable");
+			}
 		}
 
 		readingsSingleUpdate($hash, "state", "opened", 1);
 		$hash->{logMethod}->($name, 2, "$name: CheckVersionResp, initialized " . SDUINO_VERSION);
-		$hash->{DevState} = 'initialized';
 		delete($hash->{initResetFlag}) if defined($hash->{initResetFlag});
 		SIGNALduino_SimpleWrite($hash, "XE"); # Enable receiver
 		$hash->{logMethod}->($hash, 3, "$name: CheckVersionResp, enable receiver (XE) ");
@@ -1349,10 +1351,9 @@ sub SIGNALduino_CheckVersionResp
 		$hash->{keepalive}{retry} = 0;
 		InternalTimer(gettimeofday() + SDUINO_KEEPALIVE_TIMEOUT, "SIGNALduino_KeepAlive", $hash, 0);
 		if ($hash->{version} =~ m/cc1101/) {
-			$hash->{cc1101_available} = 1;
-			SIGNALduino_Get($hash, $name,"ccconf");
-			SIGNALduino_Get($hash, $name,"ccpatable");
+			$hash->{cc1101_available} = 1; 
 		}
+		$hash->{DevState} = 'initialized';
 	 	$msg = $hash->{version};
 	}
 	return ($msg,undef);
