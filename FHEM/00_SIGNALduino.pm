@@ -1039,12 +1039,12 @@ sub SIGNALduino_Get_delayed($) {
   	}
   	
 	if (exists($hash->{ucCmd})  && $hash->{ucCmd}->{timenow}+10 > time() ) {
-		$hash->{logMethod}->($hash->{NAME}, 5, "$name: Get_delayed, ".$cmds[0]." delayed");
-		main::InternalTimer(main::gettimeofday() + main::SDUINO_GET_CONFIGQUERY_DELAY, "SIGNALduino_Get_delayed", "SIGNALduino_Get_delayed:$name:".$cmds[0], 0);
+		$hash->{logMethod}->($hash->{NAME}, 5, "$name: Get_delayed, ".join(" ",@cmds)." delayed");
+		main::InternalTimer(main::gettimeofday() + main::SDUINO_GET_CONFIGQUERY_DELAY, "SIGNALduino_Get_delayed", "SIGNALduino_Get_delayed:$name:".join(" ",@cmds), 0);
 	} else {
 		delete($hash->{ucCmd});	
-		$hash->{logMethod}->($hash->{NAME}, 5, "$name: Get_delayed, ".$cmds[0]." executed");
-		RemoveInternalTimer("SIGNALduino_Get_delayed:$name:".$cmds[0]);
+		$hash->{logMethod}->($hash->{NAME}, 5, "$name: Get_delayed, ".join(" ",@cmds)." executed");
+		RemoveInternalTimer("SIGNALduino_Get_delayed:$name:".join(" ",@cmds));
 		SIGNALduino_Get($hash,$name,$cmds[0]);
 	}
 }
