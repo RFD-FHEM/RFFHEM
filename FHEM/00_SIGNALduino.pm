@@ -1032,12 +1032,18 @@ sub SIGNALduino_Get_delayed($) {
 	my(undef,$name,@cmds) = split(':', shift);
 	my $hash = $defs{$name};
   
-	if (exists($hash->{ucCmd}) && exists($hash->{ucCmd}->{timenow}) && $hash->{ucCmd}->{timenow}+10 > time() ) {
+  	if ( exists($hash->{ucCmd}) && !exists($hash->{ucCmd}->{timenow}) )
+  	{
+  		$hash->{ucCmd}->{timenow}=time();
+		Log3 ($hash->{NAME}, 5, "$name: Get_delayed, ".$hash->{ucCmd}." timenow was missing");
+  	}
+  	
+	if (exists($hash->{ucCmd})  && $hash->{ucCmd}->{timenow}+10 > time() ) {
 		$hash->{logMethod}->($hash->{NAME}, 5, "$name: Get_delayed, ".$cmds[0]." delayed");
 		main::InternalTimer(main::gettimeofday() + main::SDUINO_GET_CONFIGQUERY_DELAY, "SIGNALduino_Get_delayed", "SIGNALduino_Get_delayed:$name:".$cmds[0], 0);
 	} else {
 		delete($hash->{ucCmd});	
-		$hash->{logMethod}->($hash->{NAME}, 5, "$name: Get_delayed, "..$cmds[0]." executed");
+		$hash->{logMethod}->($hash->{NAME}, 5, "$name: Get_delayed, ".$cmds[0]." executed");
 		RemoveInternalTimer("SIGNALduino_Get_delayed:$name:".$cmds[0]);
 		SIGNALduino_Get($hash,$name,$cmds[0]);
 	}
@@ -1494,11 +1500,13 @@ sub SIGNALduino_SendFromQueue($$) {
        	$hash->{ucCmd}->{timenow} = time();
        	$hash->{ucCmd}->{responseSub} = \&SIGNALduino_CheckSendRawResponse;
       	$hash->{logMethod}->($name, 4, "$name: SendFromQueue, msg=$msg"); # zu testen der Queue, kann wenn es funktioniert auskommentiert werden
-    } elsif ($msg =~ "^(e|W11|W1D|W12|W1F)") {
+    } elsif ($msg =~ "^(e)") {												# Werkseinstellungen
     	SIGNALduino_Get($hash,$name,"ccconf");
     	SIGNALduino_Get($hash,$name,"ccpatable"); 
-    } elsif ($msg =~ "^(WS)") {
-			SIGNALduino_Get($hash,$name,"ccpatable"); 
+    } elsif ($msg =~ "^W(?:0F|10|11|1D|12|1F)") {	# SetFreq, setrAmpl, Set_bWidth, SetSens
+    	SIGNALduino_Get($hash,$name,"ccconf");
+    } elsif ($msg =~ "^x") {												# patable
+		SIGNALduino_Get($hash,$name,"ccpatable"); 
     }
 #    elsif ($msg eq "C99") {
 #       $hash->{ucCmd}->{cmd} = 'ccregAll';
