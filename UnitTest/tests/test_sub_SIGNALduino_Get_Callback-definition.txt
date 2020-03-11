@@ -21,6 +21,8 @@ defmod test_sub_SIGNALduino_Get_Callback UnitTest dummyDuino
 			
 		my $ret = SIGNALduino_Get_Callback("nonexistingdevice",\&dummyCb, "ccreg 12");
 		is($ret,"\"nonexistingdevice\" is not a definition of type SIGNALduino","check return to less parameters");
+		
+		delete($targetHash->{ucCmd});
 	};
 	
 	subtest 'Test return values SIGNALduino_Get_Callback with correct parameters' => sub {
