@@ -1,5 +1,8 @@
 2020-03-11 - 00_SIGNALduino.pm
 
+SIGNALduino_Get_delayed support more than one arg for cmds
+2020-03-11 - 00_SIGNALduino.pm
+
 log if timenow is not set
 corrected config requests per uC command
 2020-03-10 - 00_SIGNALduino.pm
