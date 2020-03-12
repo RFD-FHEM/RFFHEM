@@ -1,3 +1,7 @@
+2020-03-12 - Update 00_SIGNALduino.pm
+
+- revised logoutput -> $hash->{ucCmd}output always HASH, now ... Get_delayed, timenow was missing, set "value"
+- added option ccconf & ccconf if RESTART and programm shutdown restart
 2020-03-11 - 00_SIGNALduino.pm
 
 SIGNALduino_Get_delayed support more than one arg for cmds
