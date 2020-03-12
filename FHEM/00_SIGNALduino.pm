@@ -1032,11 +1032,10 @@ sub SIGNALduino_Get_delayed($) {
 	my(undef,$name,@cmds) = split(':', shift);
 	my $hash = $defs{$name};
   
-  	if ( exists($hash->{ucCmd}) && !exists($hash->{ucCmd}->{timenow}) )
-  	{
-  		$hash->{ucCmd}->{timenow}=time();
-		Log3 ($hash->{NAME}, 5, "$name: Get_delayed, ".$hash->{ucCmd}." timenow was missing");
-  	}
+  if ( exists($hash->{ucCmd}) && !exists($hash->{ucCmd}->{timenow}) ) {
+  	$hash->{ucCmd}->{timenow}=time();
+		Log3 ($hash->{NAME}, 5, "$name: Get_delayed, timenow was missing, set ".$hash->{ucCmd}->{timenow});
+  }
   	
 	if (exists($hash->{ucCmd})  && $hash->{ucCmd}->{timenow}+10 > time() ) {
 		$hash->{logMethod}->($hash->{NAME}, 5, "$name: Get_delayed, ".join(" ",@cmds)." delayed");
@@ -1330,8 +1329,7 @@ sub SIGNALduino_CheckVersionResp
 		readingsSingleUpdate($hash, "state", "no SIGNALduino found", 1); #uncoverable statement because state is overwritten by SIGNALduino_CloseDevice
  		$hash->{DevState} = 'INACTIVE';
 		SIGNALduino_CloseDevice($hash);
-	}
-	elsif($hash->{version} =~ m/^V 3\.1\./) {
+	}	elsif($hash->{version} =~ m/^V 3\.1\./) {
 		$msg = "$name: CheckVersionResp, Version of your arduino is not compatible, please flash new firmware. (device closed) Got for V: $msg";
 		readingsSingleUpdate($hash, "state", "unsupported firmware found", 1); #uncoverable statement because state is overwritten by SIGNALduino_CloseDevice
 		$hash->{logMethod}->($hash, 1, $msg);
@@ -1340,10 +1338,6 @@ sub SIGNALduino_CheckVersionResp
 	} else {
 		if (exists($hash->{DevState}) && $hash->{DevState} eq 'waitInit') {
 			RemoveInternalTimer($hash);
-			if ($hash->{version} =~ m/cc1101/) {
-				SIGNALduino_Get($hash, $name,"ccconf");
-				SIGNALduino_Get($hash, $name,"ccpatable");
-			}
 		}
 
 		readingsSingleUpdate($hash, "state", "opened", 1);
@@ -1357,7 +1351,10 @@ sub SIGNALduino_CheckVersionResp
 		$hash->{keepalive}{retry} = 0;
 		InternalTimer(gettimeofday() + SDUINO_KEEPALIVE_TIMEOUT, "SIGNALduino_KeepAlive", $hash, 0);
 		if ($hash->{version} =~ m/cc1101/) {
-			$hash->{cc1101_available} = 1; 
+			$hash->{cc1101_available} = 1;
+			$hash->{logMethod}->($name, 5, "$name: CheckVersionResp, cc1101 available");
+			SIGNALduino_Get($hash, $name,"ccconf");
+			SIGNALduino_Get($hash, $name,"ccpatable");
 		}
 		$hash->{DevState} = 'initialized';
 	 	$msg = $hash->{version};
