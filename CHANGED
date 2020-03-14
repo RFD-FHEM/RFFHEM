@@ -1,3 +1,6 @@
+2020-03-14 - Update 14_SD_WS.pm
+
+not using id for sensors without channel
 2020-03-14 - Merge branch 'dev-r34' into dev-r34_TFA_30_3233_01
 2020-03-14 - new protocol for rain sensor TFA 30.3233.01
 * Update SD_ProtocolData.pm and 14_SD_WS.pm protocol 54
