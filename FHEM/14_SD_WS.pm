@@ -969,7 +969,8 @@ sub SD_WS_Parse($$)
 	my $longids = AttrVal($ioname,'longids',0);
 	if (($longids ne "0") && ($longids eq "1" || $longids eq "ALL" || (",$longids," =~ m/,$model,/)))
 	{
-		$deviceCode = $model . '_' . $id . $channel;						# old form of longid
+		$deviceCode = $model . '_' . $id;								# for sensors without channel
+		$deviceCode .= $channel if (defined $channel);	# old form of longid
 		if (!defined($modules{SD_WS}{defptr}{$deviceCode})) {
 			$deviceCode = $model . '_' . $id;	# for sensors without channel
 			$deviceCode .= '_' . $channel if (defined $channel);	# new form of longid
@@ -978,7 +979,6 @@ sub SD_WS_Parse($$)
 	} else {
 		$deviceCode = $model;	# for sensors without channel
 		$deviceCode .= '_' . $channel if (defined $channel);
-		$deviceCode .= '_' . $id if (!defined $channel);	# for sensors without channel
 	}
 	#print Dumper($modules{SD_WS}{defptr});
 	
