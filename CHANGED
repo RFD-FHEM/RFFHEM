@@ -1,26 +1,22 @@
-2020-03-12 - Update 00_SIGNALduino.pm
+2020-03-17 - Update 00_SIGNALduino.pm
 
+* Update 00_SIGNALduino.pm
 - revised logoutput -> $hash->{ucCmd}output always HASH, now ... Get_delayed, timenow was missing, set "value"
 - added option ccconf & ccconf if RESTART and programm shutdown restart
-2020-03-11 - 00_SIGNALduino.pm
-
-SIGNALduino_Get_delayed support more than one arg for cmds
-2020-03-11 - 00_SIGNALduino.pm
-
-log if timenow is not set
-corrected config requests per uC command
-2020-03-10 - 00_SIGNALduino.pm
-
-try to query ccconf and ccpatable only if device is initalized
-2020-03-10 - Merge branch 'dev-r34_config_query_2' of github.com:RFD-FHEM/RFFHEM into dev-r34_config_query_2
-2020-03-10 - Update 00_SIGNALduino.pm
-
+- SIGNALduino_Get_delayed support more than one arg for cmds
+- log if timenow is not set
+- corrected config requests per uC command
+- try to query ccconf and ccpatable only if device is initalized
 - rename sub and revised logoutput
 - fix some parameter https://github.com/HomeAutoUser/RFFHEM/pull/9#issuecomment-596668609
-2020-03-08 - Merge branch 'dev-r34_config_query_2' of github.com:RFD-FHEM/RFFHEM into dev-r34_config_query_2
-2020-03-08 - 00_SIGNALduino.pm
+- Idea to make multiple get commands more easy and robust to handle
 
-Idea to make multiple get commands more easy and robust to handle
+2020-03-16 - new protocol for rain sensor TFA 30.3233.01 (#802)
+
+new protocol for rain sensor TFA 30.3233.01
+2020-03-14 - new protocol for rain sensor TFA 30.3233.01
+* Update SD_ProtocolData.pm and 14_SD_WS.pm protocol 54
+
 2020-02-29 - bug fixed set sduino cc1101_rAmpl 42 (#801)
 
 * bug fixed set sduino cc1101 rAmpl 42
