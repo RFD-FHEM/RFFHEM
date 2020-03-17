@@ -1,5 +1,49 @@
-2020-02-22 - Documentation in 14_SD_WS.pm and README.md
-2020-02-22 - new sensors protocol 58 TFA/Froggit/Renkforce/Ambient Weather only temperature
+2020-03-17 - new sensors protocol 58 TFA/Froggit/Renkforce/Ambient Weather only temperature
+* Update SD_ProtocolData.pm and 14_SD_WS.pm protocol 58
+
+2020-03-16 - new protocol 54 for rain sensor TFA 30.3233.01 (#802)
+* Update SD_ProtocolData.pm and 14_SD_WS.pm protocol 54
+
+2020-02-29 - bug fixed set sduino cc1101_rAmpl 42 (#801)
+
+* bug fixed set sduino cc1101 rAmpl 42
+2020-02-28 - bug fixed set sduino cc1101 rAmpl 42
+2020-02-25 - Allow lower case letters for hex values ​​in set / get cc1101_reg (#799)
+
+* Allow lower case letters for hex values ​​in set / get cc1101_reg
+2020-02-25 - Merge branch 'dev-r34' into dev-r34_set-get-cc1101-register
+2020-02-25 - Allow lower case letters for hex values in set / get cc1101_reg
+
+2020-02-24 - fix - Set_bWidth & PERL WARNING (#791)
+
+* Update 00_SIGNALduino.pm
+- fix Set_bWidth (https://github.com/RFD-FHEM/RFFHEM/pull/789#issuecomment-579444268)
+- fix datarate (https://github.com/RFD-FHEM/RFFHEM/pull/789#issuecomment-579946510)
+- fix get list , wrong value set_bWidth inside
+
+2020-02-23 - Update 00_SIGNALduino.pm (#798)
+
+- fix https://github.com/RFD-FHEM/RFFHEM/issues/782#issuecomment-581020586
+2020-02-22 - Update SD_ProtocolData.pm (#796)
+
+* Update SD_ProtocolData.pm
+- added ID 54 TFA Drop 30.3233.01 - Rain gauge
+- added ID 54.1 for message decode MS and not ID 54 MU
+- added new ID 31 LED Controller LTECH, LED M Serie RF RGBW - M4 & M4-5A
+- revised doc ID 34
+
+* Update test_DeviceData_rmsg-definition.txt
+- revised line indent
+- set attrib whitelist_IDs for test ID
+- revised direct hash to function
+- revised max maxMuMsgRepeat value
+
+* Update test_sub_SIGNALduino_Parse_MU-definition.txt
+- test extended because of a double dispatch of a similar protocol
+2020-02-22
+  SD_ProtocolData.pm: - added LED Controller LTECH, LED M Serie RF RGBW - M4 & M4-5A
+                      - added TFA Drop 30.3233.01 - Rain gauge
+
 2020-02-05 - SD_UT new model Novy_840039, revised SIGNALduuino readme & tests (#794)
 
 * - added new model SD_UT & commandref
