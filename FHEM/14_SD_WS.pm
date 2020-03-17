@@ -961,7 +961,7 @@ sub SD_WS_Parse($$)
 		$rain_total = $decodingSubs{$protocol}{rain_total}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{rain_total}));
 		$sendCounter = $decodingSubs{$protocol}{sendCounter}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{sendCounter}));
 		$beep = $decodingSubs{$protocol}{beep}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{beep}));
-		if ($model eq "SD_WS_33_T") {			# for SD_WS_33 discrimination T - TH
+		if ($model eq "SD_WS_33_T" || $model eq "SD_WS_58_T") {			# for SD_WS_33 or SD_WS_58 discrimination T - TH
 			$model = $decodingSubs{$protocol}{model}."H" if $hum != 0;				# for models with Humidity
 		} 
 		$sendmode = $decodingSubs{$protocol}{sendmode}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{sendmode}));
