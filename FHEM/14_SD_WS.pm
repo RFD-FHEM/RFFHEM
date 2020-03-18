@@ -388,7 +388,7 @@ sub SD_WS_Parse($$)
 				temp       => sub {my (undef,$bitData) = @_; return substr($bitData,12,1) eq "1" ? ((SD_WS_binaryToNumber($bitData,12,23) - 4096) / 10.0) : (SD_WS_binaryToNumber($bitData,12,23) / 10.0);},
 				hum        => sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,24,30) );},
 			},
-		54 => {			
+		54 => {
 				# TFA Drop Rainmeter 30.3233.01
 				# ----------------------------------------------------------------------------------
 				# 0        8        16       24       32       40       48       56       64   - 01234567890123456
@@ -444,7 +444,7 @@ sub SD_WS_Parse($$)
 																	return 0;
 																}
 															},
-		},
+			},
 		58 => {
 				# TFA 30.3208.02, TFA 30.3228.02, TFA 30.3229.02, Froggit FT007xx, Ambient Weather F007-xx, Renkforce FT007xx
 				# -----------------------------------------------------------------------------------------------------------
@@ -507,7 +507,7 @@ sub SD_WS_Parse($$)
 				channel    => sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,17,19) + 1 ); },									# channel
 				temp       => sub {my (undef,$bitData) = @_; return round((SD_WS_binaryToNumber($bitData,20,31)-720)*0.0556,1); },	# temp
 				hum        => sub {my ($rawData,$bitData) = @_; return substr($rawData,1,1) eq "5" ? (SD_WS_binaryToNumber($bitData,32,39)) : 0;},	# hum
-   	 	 } ,
+			} ,
 		84 =>
 			{
 				# Protokollbeschreibung: Funk Wetterstation Auriol IAN 283582 (Lidl)
