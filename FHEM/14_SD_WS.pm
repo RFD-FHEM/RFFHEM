@@ -462,7 +462,7 @@ sub SD_WS_Parse($$)
 				# frames sent every ~1 min (varies by channel), map of channel id to transmission interval: 1: 53s, 2: 57s, 3: 59s, 4: 61s, 5: 67s, 6: 71s, 7: 73s, 8: 79s
 				sensortype => 'TFA 30.3208.02, FT007xx',
 				model      => 'SD_WS_58_T', 
-				# prematch => sub {my $msg = shift; return 1 if ($msg =~ /^45[0-9A-F]{11}/); }, 							# prematch
+				# prematch => sub {my $msg = shift; return 1 if ($msg =~ /^45[0-9A-F]{11}/); },	# prematch
 				prematch   => sub {my $msg = shift; return 1 if ($msg =~ /^4[5|6][0-9A-F]{11}/); },	# prematch, 45=FT007TH/TFA 30.3208.02, 46=FT007T/TFA 30.3228.02
 				crcok      => sub { my $msg = shift;
 														# my @buff = split(//,substr($msg,index($msg,"45"),10));
