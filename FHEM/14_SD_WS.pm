@@ -25,6 +25,7 @@
 # 09.11.2019 neues Protokoll 53: Lidl AURIOL AHFL 433 B2 IAN 314695
 # 29.12.2019 neues Protokoll 27: Temperatur-/Feuchtigkeitssensor EuroChron EFTH-800
 # 09.02.2020 neues Protokoll 54: Regenmesser TFA Drop
+# 22.02.2020 Protokoll 58: neuer Sensor TFA 30.3228.02, FT007T Thermometer Sensor
 
 package main;
 
@@ -67,6 +68,7 @@ sub SD_WS_Initialize($)
 		"SD_WS_51_TH.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "3:180"},
 		"SD_WS_53_TH.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "3:180"},
 		"SD_WS_54_R.*"	=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "rain4:Rain,", autocreateThreshold => "3:180"},
+		"SD_WS_58_T_.*"	=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4:Temp,", autocreateThreshold => "2:90"},
 		"SD_WS_58_TH.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "2:90"},
 		"SD_WS_84_TH_.*"	=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "2:120"},
 		"SD_WS_85_THW_.*"	=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "4:120"},
@@ -95,7 +97,7 @@ sub SD_WS_Define($$)
 	return undef;
 }
 
-#####################################
+###################################
 sub SD_WS_Undef($$)
 {
 	my ($hash, $name) = @_;
@@ -386,7 +388,7 @@ sub SD_WS_Parse($$)
 				temp       => sub {my (undef,$bitData) = @_; return substr($bitData,12,1) eq "1" ? ((SD_WS_binaryToNumber($bitData,12,23) - 4096) / 10.0) : (SD_WS_binaryToNumber($bitData,12,23) / 10.0);},
 				hum        => sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,24,30) );},
 			},
-		54 => {			
+		54 => {
 				# TFA Drop Rainmeter 30.3233.01
 				# ----------------------------------------------------------------------------------
 				# 0        8        16       24       32       40       48       56       64   - 01234567890123456
@@ -442,58 +444,70 @@ sub SD_WS_Parse($$)
 																	return 0;
 																}
 															},
-		},
-       58 => 
-   	 	 {
-     		sensortype => 'TFA 30.3208.0',
-        	model =>	'SD_WS_58_TH', 
-			prematch => sub {my $msg = shift; return 1 if ($msg =~ /^45[0-9A-F]{11}/); }, 							# prematch
-			crcok => 	sub {   my $msg = shift;
-							    my @buff = split(//,substr($msg,index($msg,"45"),10));
-							    my $crc_check = substr($msg,index($msg,"45")+10,2);
-							    my $mask = 0x7C;
-							    my $checksum = 0x64;
-							    my $data;
-							    my $nibbleCount;
-							    for ( $nibbleCount=0; $nibbleCount < scalar @buff; $nibbleCount+=2)
-							    {
-							        my $bitCnt;
-							        if ($nibbleCount+1 <scalar @buff)
-							        {
-							        	$data = hex($buff[$nibbleCount].$buff[$nibbleCount+1]);
-							        } else  {
-							        	$data = hex($buff[$nibbleCount]);	
-							        }
-							        for ( my $bitCnt= 7; $bitCnt >= 0 ; $bitCnt-- )
-							        {
-							            my $bit;
-							            # Rotate mask right
-							            $bit = $mask & 1;
-							            $mask = ($mask >> 1 ) | ($mask << 7) & 0xFF;
-							            if ( $bit )
-							            {
-							                $mask ^= 0x18 & 0xFF;
-							            }
-							            # XOR mask into checksum if data bit is 1
-							            if ( $data & 0x80 )
-							            {
-							                $checksum ^= $mask & 0xFF;
-							            }
-							            $data <<= 1 & 0xFF;
-							        }
-							    }
-							    if ($checksum == hex($crc_check)) {
-								    return 1;
-							    } else {
-							    	return 0;
-							    }
-							}, 																			
-			id => 		sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,8,15); },   							   # random id
-			bat => 		sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,16) eq "1" ? "low" : "ok";},  	   # bat?
-			channel => 	sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,17,19)+1 );  },						   # channel
-			temp => 	sub {my (undef,$bitData) = @_; return round((SD_WS_binaryToNumber($bitData,20,31)-720)*0.0556,1); }, 		   # temp
-			hum => 		sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,32,39));  }, 							   # hum
-   	 	 }   ,     
+			},
+		58 => {
+				# TFA 30.3208.02, TFA 30.3228.02, TFA 30.3229.02, Froggit FT007xx, Ambient Weather F007-xx, Renkforce FT007xx
+				# -----------------------------------------------------------------------------------------------------------
+				# 0    4    8    12   16   20   24   28   32   36   40   44   48
+				# 0100 0101 1100 0110 1001 0011 1100 1010 0011 0100 1100 0111 0000
+				# yyyy yyyy iiii iiii bccc tttt tttt tttt hhhh hhhh ssss ssss ????
+				# y   8 bit sensor type (45=>TH, 46=>T)
+				# i:  8 bit random id (changes on power-loss)
+				# b:  1 bit battery indicator (0=>OK, 1=>LOW)
+				# c:  3 bit channel (valid channels are 1-8)
+				# t: 12 bit temperature (Farenheit: subtract 400 and divide by 10, Celsius: subtract 720 and multiply by 0.0556)
+				# h:  8 bit humidity (only type 45, type 46 changes between 10 and 15)
+				# s:  8 bit check
+				# ?:  4 bit unknown
+				# frames sent every ~1 min (varies by channel), map of channel id to transmission interval: 1: 53s, 2: 57s, 3: 59s, 4: 61s, 5: 67s, 6: 71s, 7: 73s, 8: 79s
+				sensortype => 'TFA 30.3208.02, FT007xx',
+				model      => 'SD_WS_58_T', 
+				# prematch => sub {my $msg = shift; return 1 if ($msg =~ /^45[0-9A-F]{11}/); },	# prematch
+				prematch   => sub {my $msg = shift; return 1 if ($msg =~ /^4[5|6][0-9A-F]{11}/); },	# prematch, 45=FT007TH/TFA 30.3208.02, 46=FT007T/TFA 30.3228.02
+				crcok      => sub { my $msg = shift;
+														# my @buff = split(//,substr($msg,index($msg,"45"),10));
+														# my $idx = index($msg,"45");
+														my @buff = split(//,substr($msg,0,10));
+														my $crc_check = substr($msg,10,2);
+														my $mask = 0x7C;
+														my $checksum = 0x64;
+														my $data;
+														my $nibbleCount;
+														for ( $nibbleCount=0; $nibbleCount < scalar @buff; $nibbleCount+=2) {
+															my $bitCnt;
+															if ($nibbleCount+1 <scalar @buff) {
+																$data = hex($buff[$nibbleCount].$buff[$nibbleCount+1]);
+															} else  {
+																$data = hex($buff[$nibbleCount]);	
+															}
+																for ( my $bitCnt= 7; $bitCnt >= 0 ; $bitCnt-- ) {
+																	my $bit;
+																	# Rotate mask right
+																	$bit = $mask & 1;
+																	$mask = ($mask >> 1 ) | ($mask << 7) & 0xFF;
+																	if ( $bit ) {
+																		$mask ^= 0x18 & 0xFF;
+																	}
+																	# XOR mask into checksum if data bit is 1
+																	if ( $data & 0x80 ) {
+																		$checksum ^= $mask & 0xFF;
+																	}
+																	$data <<= 1 & 0xFF;
+																}
+														}
+														if ($checksum == hex($crc_check)) {
+															return 1;
+														} else {
+															Log3 $name, 3, "$name: SD_WS_58 Parse msg $msg - ERROR checksum $checksum != " . hex($crc_check);
+															return 0;
+														}
+													},
+				id         => sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,8,15); },													# random id
+				bat        => sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,16) eq "1" ? "low" : "ok";},			# bat?
+				channel    => sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,17,19) + 1 ); },									# channel
+				temp       => sub {my (undef,$bitData) = @_; return round((SD_WS_binaryToNumber($bitData,20,31)-720)*0.0556,1); },	# temp
+				hum        => sub {my ($rawData,$bitData) = @_; return substr($rawData,1,1) eq "5" ? (SD_WS_binaryToNumber($bitData,32,39)) : 0;},	# hum
+			} ,
 		84 =>
 			{
 				# Protokollbeschreibung: Funk Wetterstation Auriol IAN 283582 (Lidl)
@@ -947,7 +961,7 @@ sub SD_WS_Parse($$)
 		$rain_total = $decodingSubs{$protocol}{rain_total}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{rain_total}));
 		$sendCounter = $decodingSubs{$protocol}{sendCounter}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{sendCounter}));
 		$beep = $decodingSubs{$protocol}{beep}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{beep}));
-		if ($model eq "SD_WS_33_T") {			# for SD_WS_33 discrimination T - TH
+		if ($model eq "SD_WS_33_T" || $model eq "SD_WS_58_T") {			# for SD_WS_33 or SD_WS_58 discrimination T - TH
 			$model = $decodingSubs{$protocol}{model}."H" if $hum != 0;				# for models with Humidity
 		} 
 		$sendmode = $decodingSubs{$protocol}{sendmode}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{sendmode}));
@@ -1224,6 +1238,8 @@ sub SD_WS_WH2SHIFT($){
     <li>Renkforce E0001PA</li>
 		<li>Regenmesser DROP TFA 47.3005.01 mit Regensensor TFA 30.3233.01</li>
 		<li>TECVANCE TV-4848</li>
+		<li>Thermometer TFA 30.3228.02, TFA 30.3229.02, FT007T, FT007TP, F007T, F007TP</li>
+		<li>Thermo-Hygrometer TFA 30.3208.02, FT007TH, F007TH
 		<li>TX-EZ6 for Weatherstation TZS First Austria</li>
 		<li>WH2 (TFA Dostmann/Wertheim 30.3157 (sold in Germany), Agimex Rosenborg 66796 (sold in Denmark),ClimeMET CM9088 (Sold in UK)</li>
 		<li>Weatherstation Auriol IAN 283582 Version 06/2017 (Lidl), Modell-Nr.: HG02832D</li>
@@ -1325,6 +1341,8 @@ sub SD_WS_WH2SHIFT($){
 		<li>Regenmesser DROP TFA 47.3005.01 mit Regensensor TFA 30.3233.01</li>
     <li>Renkforce E0001PA</li>
 		<li>TECVANCE TV-4848</li>
+		<li>Temperatur-Sensor TFA 30.3228.02, TFA 30.3229.02, FT007T, FT007TP, F007T, F007TP</li>
+		<li>Temperatur/Feuchte-Sensor TFA 30.3208.02, FT007TH, F007TH
 		<li>TX-EZ6 fuer Wetterstation TZS First Austria</li>
 		<li>WH2 (TFA Dostmann/Wertheim 30.3157 (Deutschland), Agimex Rosenborg 66796 (Denmark), ClimeMET CM9088 (UK)</li>
 		<li>Wetterstation Auriol IAN 283582 Version 06/2017 (Lidl), Modell-Nr.: HG02832D</li>

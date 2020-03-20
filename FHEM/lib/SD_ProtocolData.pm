@@ -1617,22 +1617,27 @@ package lib::SD_ProtocolData;
 				method					=> \&lib::SD_Protocols::MCRAW,	# Call to process this message
 				polarity				=> 'invert',
 			},
-		"58"	=>	## TFA 30.3208.0
-							# Ch:2 T: 18.9 H: 69 Bat:ok   MC;LL=-981;LH=964;SL=-480;SH=520;D=002BA37EBDBBA24F0015D1BF5EDDD127800AE8DFAF6EE893C;C=486;L=194;
+		"58"	=>	## TFA 30.3208.02, 30.3228.02, 30.3229.02, Froggit/Renkforce FT007TH, FT007PF, FT007T, FT007TP, Ambient Weather F007-TH, F007-T, F007-TP
+							# SD_WS_58_TH_200_2 Ch: 2 T: 18.9 H: 69 Bat: ok   MC;LL=-981;LH=964;SL=-480;SH=520;D=002BA37EBDBBA24F0015D1BF5EDDD127800AE8DFAF6EE893C;C=486;L=194;
+							# Froggit FT007T - https://forum.fhem.de/index.php/topic,58397.msg1023517.html#msg1023517
+							# SD_WS_58_T_135_2 Ch: 2 T: 22.2 Bat: ok   MC;LL=-1047;LH=903;SL=-545;SH=449;D=800AE5E3AE7FD44BC00572F1D73FEA25E002B9788;C=494;L=161;
+							# SD_WS_58_T_135_2 Ch: 2 T: 22.3 Bat: ok   MC;LL=-1047;LH=902;SL=-546;SH=452;D=0015CBC75CF7AA8F800AE5E3AE7BD547C00572F1D0;C=487;L=165;
+							# Renkforce FT007TH  - https://forum.fhem.de/index.php/topic,65680.msg963889.html#msg963889
+							# SD_WS_58_TH_84_2 Ch: 2 T: 23.9 H: 58 Bat: ok   MC;LL=-1005;LH=946;SL=-505;SH=496;D=0015D55F5C0E2B47800AEAAFAE0715A3C0057557D7;C=487;L=168;R=0;
 			{
-				name				=> 'TFA 30.3208.0',
-				comment				=> 'temperature / humidity sensor',
-				id				=> '58',
-				knownFreqs			=> '433.92',
-				clockrange			=> [460,520],			# min , max
-				format				=> 'manchester',	# tristate can't be migrated from bin into hex!
-				clientmodule			=> 'SD_WS',
-				modulematch			=> '^W58*',
-				preamble			=> 'W58#',
-				length_min			=> '52',	# 54
-				length_max			=> '52',	# 136
-				method				=> \&main::SIGNALduino_MCTFA, # Call to process this message
-				polarity			=> 'invert',
+				name         => 'TFA 30.3208.0',
+				comment      => 'Temperature/humidity sensors (TFA 30.3208.02, 30.3228.02, 30.3229.02, Froggit/Renkforce FT007xx, Ambient Weather F007-xx)',
+				id           => '58',
+				knownFreqs   => '433.92',
+				clockrange   => [460,520],
+				format       => 'manchester',
+				clientmodule => 'SD_WS',
+				modulematch  => '^W58*',
+				preamble     => 'W58#',
+				length_min   => '52',	# 54
+				length_max   => '52',	# 136
+				method       => \&main::SIGNALduino_MCTFA,
+				polarity     => 'invert',
 			},
 		"59"	=>	## AK-HD-4 remote | 4 Buttons
 							# https://github.com/RFD-FHEM/RFFHEM/issues/133 @stevedee78

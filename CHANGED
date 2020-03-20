@@ -1,7 +1,10 @@
-2020-03-16 - new protocol for rain sensor TFA 30.3233.01 (#802)
+2020-03-20 - Update 14_SD_WS.pm
 
-new protocol for rain sensor TFA 30.3233.01
-2020-03-14 - new protocol for rain sensor TFA 30.3233.01
+remove attribut "model" by protocol 58
+2020-03-17 - new sensors protocol 58 TFA/Froggit/Renkforce/Ambient Weather only temperature
+* Update SD_ProtocolData.pm and 14_SD_WS.pm protocol 58
+
+2020-03-16 - new protocol 54 for rain sensor TFA 30.3233.01 (#802)
 * Update SD_ProtocolData.pm and 14_SD_WS.pm protocol 54
 
 2020-02-29 - bug fixed set sduino cc1101_rAmpl 42 (#801)
