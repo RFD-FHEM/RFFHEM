@@ -1,3 +1,6 @@
+2020-03-20 - New sensor protocol 58 TFA/Froggit/Renkforce/Ambient Weather F007-T (#803)
+
+ New sensor protocol 58 TFA/Froggit/Renkforce/Ambient Weather F007-T only temperature
 2020-03-20 - Update 14_SD_WS.pm
 
 remove attribut "model" by protocol 58
