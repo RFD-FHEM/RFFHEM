@@ -1,3 +1,6 @@
+2020-03-20 - Update 14_SD_WS.pm
+
+remove attribut "model" by protocol 58
 2020-03-17 - new sensors protocol 58 TFA/Froggit/Renkforce/Ambient Weather only temperature
 * Update SD_ProtocolData.pm and 14_SD_WS.pm protocol 58
 
