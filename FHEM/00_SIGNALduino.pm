@@ -1497,7 +1497,7 @@ sub SIGNALduino_SendFromQueue($$) {
        	$hash->{ucCmd}->{timenow} = time();
        	$hash->{ucCmd}->{responseSub} = \&SIGNALduino_CheckSendRawResponse;
       	$hash->{logMethod}->($name, 4, "$name: SendFromQueue, msg=$msg"); # zu testen der Queue, kann wenn es funktioniert auskommentiert werden
-    } elsif ($msg =~ "^(e)") {												# Werkseinstellungen
+    } elsif ($msg =~ "^e") {											# Werkseinstellungen
     	SIGNALduino_Get($hash,$name,"ccconf");
     	SIGNALduino_Get($hash,$name,"ccpatable"); 
     } elsif ($msg =~ "^W(?:0F|10|11|1D|12|1F)") {	# SetFreq, setrAmpl, Set_bWidth, SetSens
