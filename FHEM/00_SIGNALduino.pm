@@ -1032,10 +1032,10 @@ sub SIGNALduino_Get_delayed($) {
 	my(undef,$name,@cmds) = split(':', shift);
 	my $hash = $defs{$name};
   
-  if ( exists($hash->{ucCmd}) && !exists($hash->{ucCmd}->{timenow}) ) {
-  	$hash->{ucCmd}->{timenow}=time();
-		Log3 ($hash->{NAME}, 5, "$name: Get_delayed, timenow was missing, set ".$hash->{ucCmd}->{timenow});
-  }
+	if ( exists($hash->{ucCmd}) && !exists($hash->{ucCmd}->{timenow}) ) {
+		$hash->{ucCmd}->{timenow}=time();
+		Log3 ($hash->{NAME}, 5, "$name: Get_delayed, timenow was missing, set ".$hash->{ucCmd}->{timenow});	
+	}
   	
 	if (exists($hash->{ucCmd})  && $hash->{ucCmd}->{timenow}+10 > time() ) {
 		$hash->{logMethod}->($hash->{NAME}, 5, "$name: Get_delayed, ".join(" ",@cmds)." delayed");
