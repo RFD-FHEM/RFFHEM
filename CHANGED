@@ -1,3 +1,56 @@
+2020-03-25 - Refresh cc1101 registers (#800)
+
+* Update 00_SIGNALduino.pm
+- automatic load cc1101 config after change value or restart
+- rename sub SIGNALduino_Get_ConfigQuery to SIGNALduino_delayed_Get
+- remove cc1101_config internals and set readings if config is queried
+- Idea to make multiple get commands more easy and robust to handle
+- rename sub and revised logoutput
+- fix some parameter https://github.com/HomeAutoUser/RFFHEM/pull/9#issuecomment-596668609
+- define $hash->{ucCmd}->{timenow} if ucCmd is specified on serval places
+- try to query ccconf and ccpatable only if device is initalized
+- log if timenow is not set
+- corrected config requests per uC command
+- SIGNALduino_Get_delayed support more than one arg for cmds
+- revised logoutput -> $hash->{ucCmd}output always HASH, now ... Get_delayed, timenow was missing, set "value"
+- added option ccconf & ccconf if RESTART and programm shutdown restart
+- indentation fixed
+- small regex fix
+- removed internals from commandref which are deleted
+
+* Update test_sub_SIGNALduino_CheckccConfResponse-definition.txt
+- revised test from internals to readings
+
+* tests revised from internals to readings
+- revised test from internals to readings
+- revised test descriptions
+
+* tests/test_sub_SIGNALduino_Get-definition.txt
+clear uCcmd after every subtest
+
+* tests/test_DeviceData_rmsg-definition.txt
+fix restore of attribute whitelist_IDs after subtests
+
+* tests/test_sub_SIGNALduino_Parse_MU-definition.txt
+fix restore of attribute whitelist_IDs after subtests
+
+* tests\test_sub_SIGNALduino_CheckVersionResp-definition.txt
+extended test to cover register query after valid version is rereived
+
+* tests/test_sun_SIGNALduino_Get_Callback-definition.txt
+ cleanup after test
+
+* tests/test_get_availableFirmware-definition.txt
+Cleanup getCmd before testing
+
+* UnitTest/tests/test_sub_SIGNALduino_Get_delayed-definition.txt
+added test to verify sub SIGNALduino_Get_delayed
+
+* UnitTest/tests/test_sub_SIGNALduino_SendFromQueue-definition.txt
+Added test to verfiy sub SIGNALduino_SendFromQueue
+
+* CHANGED
+cleaned
 2020-03-24 - CHANGED
 
 cleaned
