@@ -1,6 +1,6 @@
 # $Id: 00_SIGNALduino.pm 20746 2019-12-29 12:30:52Z Sidey $
 #
-# v3.4.2
+# v3.4.2 - https://github.com/RFD-FHEM/RFFHEM/tree/dev-r34
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incoming messages
 # see http://www.fhemwiki.de/wiki/SIGNALDuino
 # It was modified also to provide support for raw message handling which can be send from the SIGNALduino
@@ -9,7 +9,7 @@
 #
 # N. Butzek, S. Butzek, 2014-2015
 # S.Butzek,Ralf9 2016-2019
-# S.Butzek, HomeAutoUser, Elektronbbs 2019-2020
+# S.Butzek, HomeAutoUser, elektron-bbs 2019-2020
 
 package main;
 my $missingModulSIGNALduino="";
@@ -32,7 +32,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.4.2_dev_30.01",
+	SDUINO_VERSION            => "v3.4.2_dev_24.03",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -45,7 +45,8 @@ use constant {
 	SDUINO_DISPATCH_VERBOSE     => 5,      # default 5
 	SDUINO_MC_DISPATCH_VERBOSE  => 5,      # wenn kleiner 5, z.B. 3 dann wird vor dem dispatch mit loglevel 3 die ID und rmsg ausgegeben
 	SDUINO_MC_DISPATCH_LOG_ID   => '12.1', # die o.g. Ausgabe erfolgt nur wenn der Wert mit der ID uebereinstimmt
-	SDUINO_PARSE_DEFAULT_LENGHT_MIN => 8
+	SDUINO_PARSE_DEFAULT_LENGHT_MIN => 8,
+	SDUINO_GET_CONFIGQUERY_DELAY => 0.75   # delay for cmd to no overwrite a working cmd
 };
 
 
@@ -886,7 +887,7 @@ sub SIGNALduino_Set_bWidth
 ###############################
 sub SIGNALduino_Get($@) {
 	my ($hash,$name, @a) = @_;
-	my $type = $hash->{TYPE};
+	#my $type = $hash->{TYPE};
 
  	return "\"get SIGNALduino\" needs at least one parameter" if(@a < 1);
 
@@ -897,7 +898,10 @@ sub SIGNALduino_Get($@) {
 		return "Unknown argument $a[0], choose one of supported commands";
 	}
 	my $rcode=undef;
-	if ( ($hash->{DevState} eq "initialized" || $a[0] eq "?" || $a[0] eq 'availableFirmware') && ref @{$gets{$a[0]}}[1] eq "CODE") { #
+	if (exists($hash->{ucCmd}) && $a[0] ne "?" ) {
+		SIGNALduino_Get_delayed("SIGNALduino_Get_delayed:$name:".join(":",@a));
+	}
+	elsif ( ($hash->{DevState} eq "initialized" || $a[0] eq "?" || $a[0] eq 'availableFirmware') && ref @{$gets{$a[0]}}[1] eq "CODE") { #
     	$rcode= @{$gets{$a[0]}}[1]->($hash,@a);
 	} elsif ($hash->{DevState} ne "initialized") {
 	  	$rcode= "$name is not active, may firmware is not supported, please flash or reset";
@@ -1023,6 +1027,26 @@ sub SIGNALduino_GetResponseUpdateReading
 	return ($_[1],1);
 }
 
+###############################
+sub SIGNALduino_Get_delayed($) {
+	my(undef,$name,@cmds) = split(':', shift);
+	my $hash = $defs{$name};
+  
+	if ( exists($hash->{ucCmd}) && !exists($hash->{ucCmd}->{timenow}) ) {
+		$hash->{ucCmd}->{timenow}=time();
+		Log3 ($hash->{NAME}, 5, "$name: Get_delayed, timenow was missing, set ".$hash->{ucCmd}->{timenow});	
+	}
+  	
+	if (exists($hash->{ucCmd})  && $hash->{ucCmd}->{timenow}+10 > time() ) {
+		$hash->{logMethod}->($hash->{NAME}, 5, "$name: Get_delayed, ".join(" ",@cmds)." delayed");
+		main::InternalTimer(main::gettimeofday() + main::SDUINO_GET_CONFIGQUERY_DELAY, "SIGNALduino_Get_delayed", "SIGNALduino_Get_delayed:$name:".join(" ",@cmds), 0);
+	} else {
+		delete($hash->{ucCmd});	
+		$hash->{logMethod}->($hash->{NAME}, 5, "$name: Get_delayed, ".join(" ",@cmds)." executed");
+		RemoveInternalTimer("SIGNALduino_Get_delayed:$name:".join(" ",@cmds));
+		SIGNALduino_Get($hash,$name,$cmds[0]);
+	}
+}
 
 ###############################
 sub SIGNALduino_CheckUptimeResponse
@@ -1046,9 +1070,7 @@ sub SIGNALduino_CheckCmdsResponse
 }
 
 ###############################
-sub SIGNALduino_CheckccConfResponse
-{
-
+sub SIGNALduino_CheckccConfResponse {
 	my (undef,$str) = split('=', $_[1]);
 	my $var;
 	my %r = ( "0D"=>1,"0E"=>1,"0F"=>1,"10"=>1,"11"=>1,"12"=>1,"1B"=>1,"1D"=>1, "15"=>1);
@@ -1069,15 +1091,16 @@ sub SIGNALduino_CheckccConfResponse
 		$syncmod[($r{"12"})&7],                                         #Syncmod    | Register 0x12
 	);
 
-	$_[0]->{cc1101_config} = $msg;
-	$_[0]->{cc1101_config_ext} = $msg2;
+	readingsBeginUpdate($_[0]);
+	readingsBulkUpdate($_[0], "cc1101_config", $msg);
+	readingsBulkUpdate($_[0], "cc1101_config_ext", $msg2);
+	readingsEndUpdate($_[0], 1);
+
 	return ($msg.", ".$msg2,undef);
 }
 
-
 ###############################
-sub SIGNALduino_CheckccPatableResponse
-{
+sub SIGNALduino_CheckccPatableResponse {
 	my $hash = shift;
 	my $msg = shift;
 	my $name=$hash->{NAME};
@@ -1094,7 +1117,7 @@ sub SIGNALduino_CheckccPatableResponse
 			last;
 		}
 	}
-	$hash->{cc1101_patable} = $msg;
+	readingsSingleUpdate($hash, "cc1101_patable", $msg,1);
 	return ($msg,undef);
 }
 
@@ -1227,7 +1250,6 @@ sub SIGNALduino_DoInit($) {
 
 		#SIGNALduino_SimpleWrite($hash, "XQ"); # Disable receiver
 		InternalTimer(gettimeofday() + SDUINO_INIT_WAIT_XQ, "SIGNALduino_SimpleWrite_XQ", $hash, 0);
-
 		InternalTimer(gettimeofday() + SDUINO_INIT_WAIT, "SIGNALduino_StartInit", $hash, 0);
 	}
 	# Reset the counter
@@ -1273,6 +1295,7 @@ sub SIGNALduino_StartInit($) {
 	else {
 		$hash->{ucCmd}->{cmd} = "version";
 		$hash->{ucCmd}->{responseSub} = \&SIGNALduino_CheckVersionResp;
+		$hash->{ucCmd}->{timenow} = time();
 		SIGNALduino_SimpleWrite($hash, "V");
 		#DevIo_SimpleWrite($hash, "V\n",2);
 		$hash->{DevState} = 'waitInit';
@@ -1306,8 +1329,7 @@ sub SIGNALduino_CheckVersionResp
 		readingsSingleUpdate($hash, "state", "no SIGNALduino found", 1); #uncoverable statement because state is overwritten by SIGNALduino_CloseDevice
  		$hash->{DevState} = 'INACTIVE';
 		SIGNALduino_CloseDevice($hash);
-	}
-	elsif($hash->{version} =~ m/^V 3\.1\./) {
+	}	elsif($hash->{version} =~ m/^V 3\.1\./) {
 		$msg = "$name: CheckVersionResp, Version of your arduino is not compatible, please flash new firmware. (device closed) Got for V: $msg";
 		readingsSingleUpdate($hash, "state", "unsupported firmware found", 1); #uncoverable statement because state is overwritten by SIGNALduino_CloseDevice
 		$hash->{logMethod}->($hash, 1, $msg);
@@ -1320,7 +1342,6 @@ sub SIGNALduino_CheckVersionResp
 
 		readingsSingleUpdate($hash, "state", "opened", 1);
 		$hash->{logMethod}->($name, 2, "$name: CheckVersionResp, initialized " . SDUINO_VERSION);
-		$hash->{DevState} = 'initialized';
 		delete($hash->{initResetFlag}) if defined($hash->{initResetFlag});
 		SIGNALduino_SimpleWrite($hash, "XE"); # Enable receiver
 		$hash->{logMethod}->($hash, 3, "$name: CheckVersionResp, enable receiver (XE) ");
@@ -1329,7 +1350,13 @@ sub SIGNALduino_CheckVersionResp
 		$hash->{keepalive}{ok}    = 0;
 		$hash->{keepalive}{retry} = 0;
 		InternalTimer(gettimeofday() + SDUINO_KEEPALIVE_TIMEOUT, "SIGNALduino_KeepAlive", $hash, 0);
-	 	$hash->{cc1101_available} = 1  if ($hash->{version} =~ m/cc1101/);
+		if ($hash->{version} =~ m/cc1101/) {
+			$hash->{cc1101_available} = 1;
+			$hash->{logMethod}->($name, 5, "$name: CheckVersionResp, cc1101 available");
+			SIGNALduino_Get($hash, $name,"ccconf");
+			SIGNALduino_Get($hash, $name,"ccpatable");
+		}
+		$hash->{DevState} = 'initialized';
 	 	$msg = $hash->{version};
 	}
 	return ($msg,undef);
@@ -1389,7 +1416,7 @@ sub SIGNALduino_CheckCmdResp($) {
 sub SIGNALduino_XmitLimitCheck($$) {
   my ($hash,$fn) = @_;
 
-  return if ($fn !~ m/^(is|SR).*/);
+  return if ($fn !~ m/^(is|S[RCM]).*/);
 
   my $now = time();
 
@@ -1466,9 +1493,17 @@ sub SIGNALduino_SendFromQueue($$) {
     $hash->{sendworking} = 1;
     SIGNALduino_SimpleWrite($hash,$msg);
     if ($msg =~ m/^S[RCM];/) {
-       $hash->{ucCmd}->{cmd} = 'sendraw';
-       $hash->{ucCmd}->{responseSub} = \&SIGNALduino_CheckSendRawResponse;
-       $hash->{logMethod}->($name, 4, "$name: SendFromQueue, msg=$msg"); # zu testen der Queue, kann wenn es funktioniert auskommentiert werden
+      	$hash->{ucCmd}->{cmd} = 'sendraw';
+       	$hash->{ucCmd}->{timenow} = time();
+       	$hash->{ucCmd}->{responseSub} = \&SIGNALduino_CheckSendRawResponse;
+      	$hash->{logMethod}->($name, 4, "$name: SendFromQueue, msg=$msg"); # zu testen der Queue, kann wenn es funktioniert auskommentiert werden
+    } elsif ($msg =~ "^e") {											# Werkseinstellungen
+    	SIGNALduino_Get($hash,$name,"ccconf");
+    	SIGNALduino_Get($hash,$name,"ccpatable"); 
+    } elsif ($msg =~ "^W(?:0F|10|11|1D|12|1F)") {	# SetFreq, setrAmpl, Set_bWidth, SetSens
+    	SIGNALduino_Get($hash,$name,"ccconf");
+    } elsif ($msg =~ "^x") {												# patable
+		SIGNALduino_Get($hash,$name,"ccpatable"); 
     }
 #    elsif ($msg eq "C99") {
 #       $hash->{ucCmd}->{cmd} = 'ccregAll';
@@ -1618,7 +1653,6 @@ sub SIGNALduino_Read($) {
 		my $regexp = exists($gets{$hash->{ucCmd}->{cmd}}) && exists($gets{$hash->{ucCmd}->{cmd}}[4]) ? $gets{$hash->{ucCmd}->{cmd}}[4] : ".*";
 		if (exists($hash->{ucCmd}->{responseSub}) && ref $hash->{ucCmd}->{responseSub} eq "CODE") {
 			$hash->{logMethod}->($name, 5, "$name: Read, msg: regexp=$regexp cmd=$hash->{ucCmd}->{cmd} msg=$rmsg");
-
 			my $returnMessage ;
 			my $event;
 			if (!exists($gets{$hash->{ucCmd}->{cmd}}) || !exists($gets{$hash->{ucCmd}->{cmd}}[4]) || $rmsg =~ /$regexp/)
@@ -1629,7 +1663,6 @@ sub SIGNALduino_Read($) {
 					$hash->{logMethod}->($name, 5, "$name: Read, try asyncOutput of message $returnMessage");
 					my $ao = asyncOutput( $hash->{ucCmd}->{asyncOut}, $hash->{ucCmd}->{cmd}.": " . $returnMessage ) if (defined($returnMessage));
 					$hash->{logMethod}->($name, 5, "$name: Read, asyncOutput failed $ao") if ($ao);
-
 				}
 				delete($hash->{ucCmd});
 			}
@@ -1670,6 +1703,7 @@ sub SIGNALduino_KeepAlive($){
 			}
 			$hash->{logMethod}->($name, $logLevel, "$name: KeepAlive, not ok, retry = " . $hash->{keepalive}{retry} . " -> get ping");
 			$hash->{ucCmd}->{cmd} = "ping";
+			$hash->{ucCmd}->{timenow} = time();
 			$hash->{ucCmd}->{responseSub} = \&SIGNALduino_GetResponseUpdateReading;
 			SIGNALduino_AddSendQueue($hash, "P");
 		}
@@ -4612,13 +4646,15 @@ sub SIGNALduino_githubParseHttpResponse($$$) {
 	return 0;
 }
 
+################################################
+########## Section & functions CC1101 ##########
+
 package cc1101;
 
-####
+################################################
 #### for set function to change the patable for 433 or 868 Mhz supported
 #### 433.05–434.79 MHz, 863–870 MHz
-sub SetPatable
-{
+sub SetPatable {
 	my ($hash,@a) = @_;
 	my $paFreq = main::AttrVal($hash->{NAME},"cc1101_frequency","433");
 	$paFreq = 433 if ($paFreq >= 433 && $paFreq <= 435);
@@ -4635,6 +4671,7 @@ sub SetPatable
 	}
 }
 
+################################################
 sub SetRegisters  {
 	my ($hash, @a) = @_;
 
@@ -4655,6 +4692,8 @@ sub SetRegisters  {
 	main::SIGNALduino_WriteInit($hash);
 	return undef;
 }
+
+################################################
 sub SetFreq  {
 	my ($hash, @a) = @_;
 
@@ -4674,6 +4713,8 @@ sub SetFreq  {
 	main::SIGNALduino_WriteInit($hash);
 	return undef;
 }
+
+################################################
 sub setrAmpl  {
 	my ($hash, @a) = @_;
  	return "$hash->{NAME}: A numerical value between 24 and 42 is expected." if($a[1] !~ m/^\d+$/ || $a[1] < 24 ||$a[1] > 42);
@@ -4688,12 +4729,15 @@ sub setrAmpl  {
 	main::SIGNALduino_WriteInit($hash);
 	return undef;
 }
+
+################################################ 
 sub GetRegister {
 	my ($hash, $reg) = @_;
 	main::SIGNALduino_AddSendQueue($hash,"C".$reg);
 	return undef;
 }
 
+################################################
 sub CalcbWidthReg {
 	my ($hash, $reg10, $bWith) = @_;
 	# Beispiel Rückmeldung, mit Ergebnis von Register 10: C10 = 57
@@ -4712,6 +4756,7 @@ sub CalcbWidthReg {
 	return ($ob,$bw);
 }
 
+################################################
 sub SetSens {
 	my ($hash, @a) = @_;
 
@@ -4725,6 +4770,9 @@ sub SetSens {
 	return undef;
 }
 
+
+
+################################################################################################																																							
 1;
 
 =pod
@@ -4793,8 +4841,6 @@ sub SetSens {
 		<li><b>NR_CMD_LAST_H</b>: Number of messages sent within the last hour.</li>
 		<li><b>RAWMSG</b>: last received RAWMSG</li>
 		<li><b>cc1101_available</b>: If a CC1101 was detected, this internal is displayed with the value 1.</li>
-		<li><b>cc1101_config</b>: The configuration of the CC1101 is output here. The values ​​for frequency, bandwidth, rAmpl, sens and DataRate are output.</li>
-		<li><b>cc1101_config_ext</b>: The extended configuration information of the CC1101 is displayed here. The modulation and sync mod of the CC1101 are output.</li>
 		<li><b>version</b>: This shows the version of the SIGNALduino microcontroller.</li>
 		<li><b>versionProtocols</b>: This shows the version of SIGNALduino protocol file.</li>
 		<li><b>versionmodule</b>: This shows the version of the SIGNALduino FHEM module itself.</li>
@@ -5225,8 +5271,6 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
 		<li><b>NR_CMD_LAST_H</b>: Anzahl der gesendeten Nachrichten innerhalb der letzten Stunde.</li>
 		<li><b>RAWMSG</b>: zuletzt empfangene RAWMSG</li>
 		<li><b>cc1101_available</b>: Wenn ein CC1101 erkannt wurde, so wird dieses Internal angezeigt mit dem Wert 1.</li>
-		<li><b>cc1101_config</b>: Hier wird die Konfiguration des CC1101 ausgegeben. Die Werte für Frquenz, Bandwidth, rAmpl, sens und DataRate werden ausgegeben.</li>
-		<li><b>cc1101_config_ext</b>: Hier werden die erweiterten Informationen der Konfiguration des CC1101 angezeigt. Die Modulation und der Syncmod des CC1101 werden ausgegeben.</li>
 		<li><b>version</b>: Hier wird die Version des SIGNALduino microcontrollers angezeigt.</li>
 		<li><b>versionProtocols</b>: Hier wird die Version der SIGNALduino Protokolldatei angezeigt.</li>
 		<li><b>versionmodule</b>: Hier wird die Version des SIGNALduino FHEM Modules selbst angezeigt.</li>
