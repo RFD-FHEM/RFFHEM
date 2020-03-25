@@ -1,3 +1,4 @@
+2020-03-25 - several attempts to initialize the SIGNALduino
 2020-03-25 - Refresh cc1101 registers (#800)
 
 * Update 00_SIGNALduino.pm
