@@ -1234,7 +1234,6 @@ sub SIGNALduino_DoInit($) {
 
 	my ($ver, $try) = ("", 0);
 	#Dirty hack to allow initialisation of DirectIO Device for some debugging and tesing
-  	$hash->{logMethod}->($hash, 1, "$name: DoInit, ".$hash->{DEF});
 
 	delete($hash->{disConnFlag}) if defined($hash->{disConnFlag});
 
@@ -1324,17 +1323,11 @@ sub SIGNALduino_CheckVersionResp
 	}
 
 	if (!defined($hash->{version}) ) {
-		if ($hash->{initretry} <= SDUINO_INIT_MAXRETRY) {
-			delete($hash->{ucCmd});
-			$hash->{initretry} ++;
-			SIGNALduino_StartInit($hash);
-		} else {
-			$msg = "$name: CheckVersionResp, Not an SIGNALduino device, got for V: $msg";
-			$hash->{logMethod}->($hash, 1, $msg);
-			readingsSingleUpdate($hash, "state", "no SIGNALduino found", 1); #uncoverable statement because state is overwritten by SIGNALduino_CloseDevice
-			$hash->{DevState} = 'INACTIVE';
-			SIGNALduino_CloseDevice($hash);
-		}
+		$msg = "$name: CheckVersionResp, Not an SIGNALduino device, got for V: $msg";
+		$hash->{logMethod}->($hash, 1, $msg);
+		readingsSingleUpdate($hash, "state", "no SIGNALduino found", 1); #uncoverable statement because state is overwritten by SIGNALduino_CloseDevice
+		$hash->{initretry} ++;
+		SIGNALduino_StartInit($hash);
 	}	elsif($hash->{version} =~ m/^V 3\.1\./) {
 		$msg = "$name: CheckVersionResp, Version of your arduino is not compatible, please flash new firmware. (device closed) Got for V: $msg";
 		readingsSingleUpdate($hash, "state", "unsupported firmware found", 1); #uncoverable statement because state is overwritten by SIGNALduino_CloseDevice
