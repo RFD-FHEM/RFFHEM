@@ -1744,9 +1744,9 @@ sub SIGNALduino_ParseHttpResponse {
 			{
 				$filename = $1;
 			} else {  # Filename via path if not specifyied via Content-Disposition
-	    		($filename = $param->{path}) =~s/.*\///;
+	    		$param->{path} =~ /\/([-+.\w]+)$/;  	#(?:[^\/][\d\w\.]+)+$   \/([-+.\w]+)$	    		
+	    		$filename = $1;
 			}
-
 	    	$hash->{logMethod}->($name, 3, "$name: ParseHttpResponse, Downloaded $filename firmware from ".$param->{host});
 	    	$hash->{logMethod}->($name, 5, "$name: ParseHttpResponse, Header = ".$param->{httpheader});
 
