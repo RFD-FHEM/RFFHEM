@@ -8,8 +8,22 @@ defmod test_sub_SIGNALduino_Get_delayed UnitTest dummyDuino
 	
 	my $mock = Mock::Sub->new; 	
 	
+	subtest 'Test return values SIGNALduino_Get_delayed without existing command' => sub {
+		plan(2);
+
+		delete($targetHash->{ucCmd});
 	
-	subtest 'Test return values SIGNALduino_Get_deayed without timenow' => sub {
+		my $InternalTimer = $mock->mock("main::InternalTimer");  	
+
+		SIGNALduino_Get_delayed("dummy_func:$target:dummy_command");
+		ok($targetHash->{ucCmd}->{timenow}<=time(),"check timenow is set");
+		is($InternalTimer->called,0,"InternalTimer not called");
+		
+		$InternalTimer->unmock;
+	};
+
+	
+	subtest 'Test return values SIGNALduino_Get_delayed without timenow' => sub {
 		plan(3);
 
 		$targetHash->{ucCmd}{cmd} = "dummyCmd";
@@ -28,7 +42,7 @@ defmod test_sub_SIGNALduino_Get_delayed UnitTest dummyDuino
 	};
 	
 	
-	subtest 'Test return values SIGNALduino_Get_deayed timeout not reached' => sub {
+	subtest 'Test return values SIGNALduino_Get_delayed timeout not reached' => sub {
 		plan(3);
 
 		my $reftimenow = $targetHash->{ucCmd}->{timenow};
@@ -44,7 +58,7 @@ defmod test_sub_SIGNALduino_Get_delayed UnitTest dummyDuino
 		$InternalTimer->unmock;
 	};
 	
-	subtest 'Test return values SIGNALduino_Get_deayed timeout reached' => sub {
+	subtest 'Test return values SIGNALduino_Get_delayed timeout reached' => sub {
 		plan(3);
 
 		$targetHash->{ucCmd}->{timenow} = time()-11;
