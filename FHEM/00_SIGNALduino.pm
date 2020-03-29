@@ -876,7 +876,7 @@ sub SIGNALduino_Set_bWidth
 		$hash->{ucCmd}->{cmd} = "set_bWidth";
 		$hash->{ucCmd}->{arg} = $a[1];  # Zielbandbreite
 		$hash->{ucCmd}->{responseSub} = \&SIGNALduino_Set_bWidth;  	# Callback auf sich selbst setzen
-		$hash->{ucCmd}->{asyncOut} = $hash->{CL};
+		$hash->{ucCmd}->{asyncOut} = $hash->{CL} if (defined($hash->{CL}));
 		$hash->{ucCmd}->{timenow}=time();
 		#return "Register 10 requested";
 		return undef;
@@ -984,7 +984,7 @@ sub SIGNALduino_Get_Command
 	SIGNALduino_AddSendQueue($hash, @{$gets{$a[0]}}[2] . (exists($a[1]) ? "$a[1]" : ""));
 	$hash->{ucCmd}->{cmd}=$a[0];
 	$hash->{ucCmd}->{responseSub}=$gets{$a[0]}[3];
-	$hash->{ucCmd}->{asyncOut}=$hash->{CL};
+	$hash->{ucCmd}->{asyncOut}=$hash->{CL}  if (defined($hash->{CL}));
 	$hash->{ucCmd}->{timenow}=time();
 	return undef;
 }
@@ -1533,7 +1533,7 @@ sub SIGNALduino_HandleWriteQueue($) {
   $hash->{logMethod}->($name, 4, "$name: HandleWriteQueue, called");
   $hash->{sendworking} = 0;       # es wurde gesendet
 
-  if (exists($hash->{ucCmd}->{cmd}) && $hash->{ucCmd}->{cmd} eq 'sendraw') {
+  if (exists($hash->{ucCmd}) && exists($hash->{ucCmd}->{cmd}) && $hash->{ucCmd}->{cmd} eq 'sendraw') {
     $hash->{logMethod}->($name, 4, "$name: HandleWriteQueue, sendraw no answer (timeout)");
     delete($hash->{ucCmd});
   }
@@ -1743,9 +1743,9 @@ sub SIGNALduino_ParseHttpResponse {
 			{
 				$filename = $1;
 			} else {  # Filename via path if not specifyied via Content-Disposition
-	    		($filename = $param->{path}) =~s/.*\///;
+	    		$param->{path} =~ /\/([-+.\w]+)$/;  	#(?:[^\/][\d\w\.]+)+$   \/([-+.\w]+)$	    		
+	    		$filename = $1;
 			}
-
 	    	$hash->{logMethod}->($name, 3, "$name: ParseHttpResponse, Downloaded $filename firmware from ".$param->{host});
 	    	$hash->{logMethod}->($name, 5, "$name: ParseHttpResponse, Header = ".$param->{httpheader});
 
