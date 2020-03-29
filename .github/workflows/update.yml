@@ -37,7 +37,7 @@ jobs:
         git config --local user.name "GitHub Action"
         git ls-files --error-unmatch controls_signalduino.txt || git add controls_signalduino.txt 
         git ls-files --error-unmatch CHANGED || git add CHANGED
-        git diff --name-only --exit-code controls_signalduino.txt || git commit CHANGED controls_signalduino.txt -m "Automaitc updated controls and CHANGED" || true
+        git diff --name-only --exit-code controls_signalduino.txt || git commit CHANGED controls_signalduino.txt -m "Automatic updated controls and CHANGED" || true
     - name: git push
       uses: ad-m/github-push-action@master
       with:

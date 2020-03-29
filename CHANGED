@@ -1,5 +1,6 @@
-2020-03-28 - 00_SIGNALduino.pm
-
+2020-03-29 - 00_SIGNALduino.pm
+prevent asyncOut for get results if $hash->{CL} is not defined
+fixed #805  $hash->{ucCmd} was created while testing existens of {cmd} in SIGNALduino_HandleWriteQueue
 Flash via http: Fixed Filename extraction of URL if name is not found in http header
 2020-03-25 - Refresh cc1101 registers (#800)
 
