@@ -1,3 +1,8 @@
+2020-03-30 - several attempts to initialize the SIGNALduino (#804)
+
+* several attempts to initialize the SIGNALduino
+try to reduce call to SIGNALduino_StartInit
+removed duplicate logoutput DoInit, ...
 2020-03-29 - Merge branch 'dev-r34' into dev-r34_StartInit
 2020-03-29 - 00_SIGNALduino.pm
 try to reduce call to SIGNALduino_StartInit
