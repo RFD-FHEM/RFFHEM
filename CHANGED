@@ -1,5 +1,9 @@
-2020-03-29 - Merge branch 'dev-r34' into dev-r34_flashFilenameFix
+2020-03-29 - Merge branch 'dev-r34' into dev-r34_StartInit
 2020-03-29 - 00_SIGNALduino.pm
+try to reduce call to SIGNALduino_StartInit
+removed duplicate logoutput DoInit, ...
+fixed multiple attempts to initialize the SIGNALduino
+Merge branch 'dev-r34' into dev-r34_flashFilenameFix
 prevent asyncOut for get results if $hash->{CL} is not defined
 fixed #805  $hash->{ucCmd} was created while testing existens of {cmd} in SIGNALduino_HandleWriteQueue
 Flash via http: Fixed Filename extraction of URL if name is not found in http header
