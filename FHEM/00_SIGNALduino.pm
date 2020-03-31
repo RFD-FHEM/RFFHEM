@@ -5662,12 +5662,11 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
 	  "x_fhem_maintainer_github": [
 	    "Sidey",
 	    "homeautouser",
-	    "elektron-bbs"",
+	    "elektron-bbs",
 	  ],
    "description" : "This module interprets digitals signals provided from the signalduino hardware device and provides it to logical modules",
    "dynamic_config" : 1,
-   "generated_by" : "FHEM::Meta v0.6.5, 2020-03-29 22:58:26",
-   "keywords" : [
+  "keywords" : [
       "fhem-sonstige-systeme",
       "fhem-hausautomations-systeme",
       "fhem-mod",
@@ -5722,12 +5721,20 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
    "release_status" : "testing",
    "resources" : {
        bugtracker  => {
-		 ""web""    => 'https://github.com/RFD-FHEM/RFFHEM/issues/',
+		 "web"    => 'https://github.com/RFD-FHEM/RFFHEM/issues/',
        },
       "repository" : {
-         "type" : "git",
-         "url" : "https://github.com/RFD-FHEM/RFFHEM.git",
-         "web" : "https://github.com/RFD-FHEM/RFFHEM/tree/dev-r34",
+         "x_master": {
+	         "type" : "git",
+    	     "url" : "https://github.com/RFD-FHEM/RFFHEM.git",
+        	 "web" : "https://github.com/RFD-FHEM/RFFHEM/tree/dev-r34",
+         },
+         "type" : "svn",
+         "url" : "https://svn.fhem.de/fhem",
+         "web" : "https://svn.fhem.de/trac/browser/trunk/fhem/FHEM/00_SIGNALduino.pm",
+         "x_branch" : "trunk",
+         "x_filepath" : "fhem/FHEM/",
+         "x_raw" : "https://svn.fhem.de/trac/export/latest/trunk/fhem/FHEM/00_SIGNALduino.pm"
          "x_dev": {
 	        "type": "git",
 	        "url": "https://github.com/RFD-FHEM/RFFHEM.git",
