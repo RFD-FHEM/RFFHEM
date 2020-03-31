@@ -5761,7 +5761,7 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
 			"web": "https://wiki.fhem.de/wiki/SIGNALduino"
 		}
 	},
-	"version": "3.4.2-dev"
+	"version": "3.4.2"
 }
 =end :application/json;q=META.json
 =cut
