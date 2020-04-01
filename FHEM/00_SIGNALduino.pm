@@ -5650,8 +5650,8 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
 	"abstract": "supports the same low-cost receiver for digital signals",
 	"author": [
 		"Sidey <>",
-		"elektron-bbs",
 		"homeautouser",
+		"elektron-bbs",
 		"ralf9"
 	],
 	"x_fhem_maintainer": [
@@ -5761,7 +5761,7 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
 			"web": "https://wiki.fhem.de/wiki/SIGNALduino"
 		}
 	},
-	"version": "3.4.2"
+	"version": "v3.4.2"
 }
 =end :application/json;q=META.json
 =cut
