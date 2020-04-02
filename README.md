@@ -50,6 +50,7 @@ Supported Devices / Protocols
 |m-e VTX and BASIC | wireless bell |
 |Maverick | Wireless BBQ thermometer |
 |Medion OR28V | Remote control |
+|Momento | Remote control for wireless digital picture frame |
 |Mumbi m-FS300 | Remote control |
 |NC-3911, NC-3912 | Refrigerator thermometer |
 |Novy 840029, 840039 | Remote control |

@@ -69,7 +69,7 @@ package lib::SD_ProtocolData;
 	use strict;
 	use warnings;
 	
-	our $VERSION = '1.16';
+	our $VERSION = '1.17';
 	our %protocols = (
 		"0"	=>	## various weather sensors (500 | 9100)
 						# Mebus | Id:237 Ch:1 T: 1.9 Bat:low           MS;P0=-9298;P1=495;P2=-1980;P3=-4239;D=1012121312131313121313121312121212121212131212131312131212;CP=1;SP=0;R=223;O;m2;
@@ -2592,7 +2592,27 @@ package lib::SD_ProtocolData;
 				length_max      => '49',
 				method          => \&main::SIGNALduino_GROTHE,
 			},
-
+		"97"	=>	# Momento, remote control for wireless digital picture frame - elektron-bbs 2020-03-21
+							# Short press repeatedly message 3 times, long press repeatedly until release.
+							# When sending, the original message is not reproduced, but the recipient also reacts to the messages generated in this way.
+							# Momento_0000064 play/pause MU;P0=-294;P1=237;P2=5829;P3=-3887;P4=1001;P5=-523;P6=504;P7=-995;D=01010101010101010101010234545454545454545454545454545454545454545456767454567454545456745456745456745454523454545454545454545454545454545454545454545676745456745454545674545674545674545452345454545454545454545454545454545454545454567674545674545454567454;CP=4;R=45;O; 
+							# Momento_0000064 power      MU;P0=-998;P1=-273;P2=256;P3=5830;P4=-3906;P5=991;P6=-527;P7=508;D=12121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121345656565656565656565656565656565656565656567070565670565656565670567056565670707034565656565656565656565656565656565656565656707056567;CP=2;R=40;O;
+							# Momento_0000064 up         MU;P0=-1005;P1=-272;P2=258;P3=5856;P4=-3902;P5=1001;P6=-520;P7=508;D=0121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121213456565656565656565656565656565656565656565670705656705656567056565670565670567056345656565656565656565656565656565656565656567070565;CP=2;R=63;O;
+			{
+				name            => 'Momento',
+				comment         => 'Remote control for wireless digital picture frame',
+				id              => '97',
+				knownFreqs      => '433.92',
+				one             => [2,-4],		# 500, -1000
+				zero            => [4,-2],		# 1000, -500
+				start           => [23,-15],	# 5750, -3750
+				clockabs        => 250,
+				format          => 'twostate',
+				preamble        => 'P97#',
+				clientmodule    => 'SD_UT',
+				length_min      => '40',
+				length_max      => '40',
+			},
 		########################################################################
 		#### ### old information from incomplete implemented protocols #### ####
 
