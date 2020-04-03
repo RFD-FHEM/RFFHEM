@@ -4775,6 +4775,7 @@ sub SetSens {
 1;
 
 =pod
+=encoding utf8
 =item summary    supports the same low-cost receiver for digital signals
 =item summary_DE Unterstuetzt den gleichnamigen Low-Cost Empfaenger fuer digitale Signale
 =begin html
@@ -5643,4 +5644,123 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
 
 
 =end html_DE
+=for :application/json;q=META.json 00_SIGNALduino.pm
+{
+	"abstract": "supports the same low-cost receiver for digital signals",
+	"author": [
+		"Sidey <>",
+		"homeautouser",
+		"elektron-bbs",
+		"ralf9"
+	],
+	"x_fhem_maintainer": [
+		"Sidey",
+		"homeautouser",
+		"elektron-bbs"
+	],
+	"x_fhem_maintainer_github": [
+		"Sidey",
+		"homeautouser",
+		"elektron-bbs"
+	],
+	"description": "This module interprets digitals signals provided from the signalduino hardware device and provides it to logical modules",
+	"dynamic_config": 1,
+	"keywords": [
+		"fhem-sonstige-systeme",
+		"fhem-hausautomations-systeme",
+		"fhem-mod",
+		"signalduino"
+	],
+	"license": [
+		"GPL_2"
+	],
+	"meta-spec": {
+		"url": "https://metacpan.org/pod/CPAN::Meta::Spec",
+		"version": 2
+	},
+	"name": "FHEM::SIGNALduino",
+	"prereqs": {
+		"runtime": {
+			"requires": {
+				"HttpUtils": 0,
+				"perl": 5.018,
+				"IPC::Open3": "0",
+				"Symbol": "0",
+				"constant": "0",
+				"lib::SD_Protocols": "0",
+				"strict": "0",
+				"warnings": "0",
+				"Time::HiRes": "0",
+				"JSON": "0"
+			},
+			"recommends": {
+				"Data::Dumper": "0"
+			},
+			"suggests": {
+				"Scalar::Util": "0"
+			}
+		},
+		"develop": {
+			"requires": {
+				"IPC::Open3": "0",
+				"Symbol": "0",
+				"constant": "0",
+				"lib::SD_Protocols": "0",
+				"strict": "0",
+				"warnings": "0",
+				"Data::Dumper": "0",
+				"Time::HiRes": "0",
+				"JSON": "0"
+			},
+			"suggests": {
+				"Scalar::Util": "0"
+			}
+		}
+	},
+	"release_status": "testing",
+	"resources": {
+		"bugtracker": {
+			"web": "https://github.com/RFD-FHEM/RFFHEM/issues/"
+		},
+		"repository": {
+			"x_master": {
+				"type": "git",
+				"url": "https://github.com/RFD-FHEM/RFFHEM.git",
+				"web": "https://github.com/RFD-FHEM/RFFHEM/tree/dev-r34"
+			},
+			"type": "svn",
+			"url": "https://svn.fhem.de/fhem",
+			"web": "https://svn.fhem.de/trac/browser/trunk/fhem/FHEM/00_SIGNALduino.pm",
+			"x_branch": "trunk",
+			"x_filepath": "fhem/FHEM/",
+			"x_raw": "https://svn.fhem.de/trac/export/latest/trunk/fhem/FHEM/00_SIGNALduino.pm",
+			"x_dev": {
+				"type": "git",
+				"url": "https://github.com/RFD-FHEM/RFFHEM.git",
+				"web": "https://github.com/RFD-FHEM/RFFHEM/tree/dev-r34",
+				"x_branch": "dev-r34",
+				"x_filepath": "FHEM/",
+				"x_raw": "https://raw.githubusercontent.com/RFD-FHEM/RFFHEM/master/FHEM/00_SIGNALduino.pm"
+			}
+		},
+		"x_commandref": {
+			"web": "https://commandref.fhem.de/#SIGNALduino"
+		},
+		"x_support_community": {
+			"board": "Sonstige Systeme",
+			"boardId": "29",
+			"cat": "FHEM - Hausautomations-Systeme",
+			"description": "Sonstige Hausautomations-Systeme",
+			"forum": "FHEM Forum",
+			"rss": "https://forum.fhem.de/index.php?action=.xml;type=rss;board=29",
+			"title": "FHEM Forum: Sonstige Systeme",
+			"web": "https://forum.fhem.de/index.php/board,29.0.html"
+		},
+		"x_wiki": {
+			"web": "https://wiki.fhem.de/wiki/SIGNALduino"
+		}
+	},
+	"version": "v3.4.2"
+}
+=end :application/json;q=META.json
 =cut
