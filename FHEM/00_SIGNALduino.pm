@@ -32,7 +32,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.4.2_dev_30.03",
+	SDUINO_VERSION            => "v3.4.2",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -5717,7 +5717,7 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
 			}
 		}
 	},
-	"release_status": "testing",
+	"release_status": "stable",
 	"resources": {
 		"bugtracker": {
 			"web": "https://github.com/RFD-FHEM/RFFHEM/issues/"
