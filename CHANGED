@@ -76,7 +76,7 @@
     fix group control 9-16  | added enhancement (shade for groups)
     reduced repeats for shade after test | fix serial send syntax
     fixed Undefined subroutine &SD_Keeloq::FmtDateTime
-    fixed autocreate serialÂ´s without 00 and displayview
+    fixed autocreate serial´s without 00 and displayview
     added new model PR3-4207-002 (SCS Sentinel)
     added new model RP_S1_HS_RF11 (Rademacher) 14_SD_WS_Maverick.pm:
     added support for device TFA 14.1504
@@ -171,11 +171,11 @@
  00_SIGNALduino: change: load protocolData from another PerlModule instead of
                          a text file. Fixes update via svn 
 24.02.2019
- 14_SD_RSL.pm: fix IODEV not correctly assigned #484 | fix undef syntax | revised doc + revised log outputÂ´s
+ 14_SD_RSL.pm: fix IODEV not correctly assigned #484 | fix undef syntax | revised doc + revised log output´s
  00_SIGNALduino: feature: last bit of transmission is tried to be reconstructed
                           if there is enough data available
  14_SD_Keeloq.pm: new module for Keeloq devices
- 90_SIGNALduino_un.pm remove Roto outputÂ´s --> new module created
+ 90_SIGNALduino_un.pm remove Roto output´s --> new module created
 22.02.2019
  00_SIGNALduino: bugfix: Load protocolHash from web if it is missing on fs 
 21.02.2019
@@ -220,13 +220,13 @@
 14_SD_WS_Maverick: rename Readings, fit to Maverick_RFXTRX now
         added attribute inactivityInterval and updated commandref
 05.12.2017
- 00_SIGNALduino.pm commandref ins deutsche Ã¼bersetzte und fs20 Demodulation verbessert
- 14_Hideki.pm: commandref Ã¼berarbeitet
- 41_Oregon.pm: Deutsche commandref ergÃ¤nzt
+ 00_SIGNALduino.pm commandref ins deutsche übersetzte und fs20 Demodulation verbessert
+ 14_Hideki.pm: commandref überarbeitet
+ 41_Oregon.pm: Deutsche commandref ergänzt
 05.12.2017
- 00_SIGNALduino.pm commandref ins deutsche Ã¼bersetzte und fs20 Demodulation verbessert
- 14_Hideki.pm: commandref Ã¼berarbeitet
- 41_Oregon.pm: Deutsche commandref ergÃ¤nzt
+ 00_SIGNALduino.pm commandref ins deutsche übersetzte und fs20 Demodulation verbessert
+ 14_Hideki.pm: commandref überarbeitet
+ 41_Oregon.pm: Deutsche commandref ergänzt
 02.12.2017
  14_Hideki.pm implementing Hideki SecondChecksum
 
@@ -265,7 +265,7 @@
   mc or mu decoding is called)
   corrected readings for firmware version.
   new sendMsg Function
-  14_SD_WS09.pm WH1080 CRC-Berechung angepaÃŸt--> automatische Modelauswahl
+  14_SD_WS09.pm WH1080 CRC-Berechung angepaßt--> automatische Modelauswahl
 15.01.2016
  - Added 14_SD_WS09.pm Module for WH1080 (WS-0101, TFA30.3189) & CTW600 868MHz OOK/AS
 08.11.2015
@@ -404,7 +404,7 @@
 - Updated HEX files for Arduino, due to broken sync detection for pt2262 and similar
 
 13.04.2015
-- UnterstÃ¼tzung fÃ¼r Empfang von Conrad RSL Protokoll aufgenommen, senden geht noch nicht!
+- Unterstützung für Empfang von Conrad RSL Protokoll aufgenommen, senden geht noch nicht!
 
 08.04.2015
 - Initial Version of SIGNALduino. It supports IT V1 devices an Devices defined in logical Module CUL_TCM97001 and produces a lot of debug output
