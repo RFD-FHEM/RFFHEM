@@ -2741,20 +2741,19 @@ sub SIGNALduino_Parse_MN($$$$@) {
 	}
 
 	my $hlen = length($rawData);
-	my $matchflag;
 	my $match;
 	my $modulation;
 	my $id;
 	foreach $id (@{$hash->{mnIdList}}) {
-		$modulation = SIGNALduino_getProtoProp($id,"modulation","xFSK");
-		$match = SIGNALduino_getProtoProp($id,"match","");
-		$matchflag = 1;
-		if ($match eq "" || $rawData =~ m/$match/) {
+		$modulation = SIGNALduino_getProtoProp($id,"modulation",undef);
+		$match = SIGNALduino_getProtoProp($id,"match",undef);
+		if ( $modulation && $match && $rawData =~ m/$match/ ) {
+			$hash->{logMethod}->($name, 4, "$name: Parse_MN, Found $modulation Protocol id $id -> $ProtocolListSIGNALduino{$id}{name} with match $match");
+		} elsif (!$match && $modulation) {
 			$hash->{logMethod}->($name, 4, "$name: Parse_MN, Found $modulation Protocol id $id -> $ProtocolListSIGNALduino{$id}{name}");
 		} else {
-			$matchflag = 0;
+			next;
 		}
-		next if ($matchflag == 0);
 
 		if (!exists $ProtocolListSIGNALduino{$id}{method}) {
 			$hash->{logMethod}->($name, 3, "$name: Parse_MN, Error ID=$id, no method defined, it must be defined in the protocol hash!");
@@ -5130,13 +5129,16 @@ sub SetSens {
 		<li><b>version</b>: This shows the version of the SIGNALduino microcontroller.</li>
 		<li><b>versionProtocols</b>: This shows the version of SIGNALduino protocol file.</li>
 		<li><b>versionmodule</b>: This shows the version of the SIGNALduino FHEM module itself.</li>
-	</ul>
+	</ul><br>
 
 	<a name="SIGNALduinoset"></a>
 	<b>Set</b>
 	<ul>
+		<li>LaCrossePairForSec</li>
+		(Only with CC1101 receiver)<br>
+		Enable autocreate of new LaCrosse sensors for x seconds. If ignore_battery is not given only sensors sending the 'new battery' flag will be created.<br><br>
 		<li>freq / bWidth / patable / rAmpl / sens / registers<br>
-		Only with CC1101 receiver.<br>
+		(Only with CC1101 receiver)<br>
 		Set the sduino frequency / bandwidth / PA table / receiver-amplitude / sensitivity<br>
 
 		Use it with care, it may destroy your hardware and it even may be
@@ -5560,12 +5562,15 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
 		<li><b>version</b>: Hier wird die Version des SIGNALduino microcontrollers angezeigt.</li>
 		<li><b>versionProtocols</b>: Hier wird die Version der SIGNALduino Protokolldatei angezeigt.</li>
 		<li><b>versionmodule</b>: Hier wird die Version des SIGNALduino FHEM Modules selbst angezeigt.</li>
-	</ul>
+	</ul><br>
 
 
 	<a name="SIGNALduinoset"></a>
 	<b>SET</b>
 	<ul>
+		<li>LaCrossePairForSec</li>
+		(NUR bei Verwendung eines cc110x Funk-Moduls)<br>
+		Aktivieren Sie die automatische Erstellung neuer LaCrosse-Sensoren für "x" Sekunden. Wenn ignore_battery nicht angegeben wird, werden nur Sensoren erstellt, die das Flag 'Neue Batterie' senden.<br><br>
 		<li>cc1101_freq / cc1101_bWidth / cc1101_patable / cc1101_rAmpl / cc1101_sens / register <br>
 		(NUR bei Verwendung eines cc110x Funk-Moduls)<br><br>
 		Stellt die SIGNALduino-Frequenz / Bandbreite / PA-Tabelle / Empf&auml;nger-Amplitude / Empfindlichkeit ein.<br>
@@ -5584,7 +5589,7 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
 		<a name="cc1101_sens"></a>
 		<li><code>cc1101_sens</code> , ist die Entscheidungsgrenze zwischen den Ein- und Aus-Werten und betr&auml;gt 4, 8, 12 oder 16 dB. Kleinere Werte erlauben den Empfang von weniger klaren Signalen. Standard ist 4 dB.</li>
 		<a name="cc1101_reg"></a>
-		<li><code>cc1101_reg</code> Es können mehre Register auf einmal gesetzt werden. Das Register wird über seinen zweistelligen Hexadezimalwert angegeben, gefolgt von einem zweistelligen Wert. Mehrere Register werden via Leerzeichen getrennt angegeben</li>
+		<li><code>cc1101_reg</code> Es k&ouml;nnen mehrere Register auf einmal gesetzt werden. Das Register wird &uuml;ber seinen zweistelligen Hexadezimalwert angegeben, gefolgt von einem zweistelligen Wert. Mehrere Register werden via Leerzeichen getrennt angegeben</li>
 		</ul>
 		<br>
 		<a name="close"></a>
