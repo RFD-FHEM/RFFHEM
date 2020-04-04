@@ -543,6 +543,7 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 				my $tests = scalar(@tests);
 				plan($tests);
 
+				like($ret,qr/^Unknown argument \?, choose one .*LaCrossePairForSec.*/,"check cmd LaCrossePairForSec accepted");
 				like($ret,qr/^Unknown argument \?, choose one .*close.*/,"check cmd close accepted");
 				like($ret,qr/^Unknown argument \?, choose one .*disableMessagetype.*/,"check cmd disableMessagetype accepted");
 				like($ret,qr/^Unknown argument \?, choose one .*enableMessagetype.*/,"check cmd enableMessagetype accepted");
