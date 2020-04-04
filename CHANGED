@@ -1,3 +1,11 @@
+2020-04-04 - Update SD_ProtocolData.pm
+
+!!! extensions for https://github.com/RFD-FHEM/RFFHEM/issues/814
+* added xFSK doc
+* added Lacrosse, Mode 1 - IT+
+* added Lacrosse Mode 2 - IT+
+* added ELV PCA 301
+* added KoppFreeControl
 2020-04-04 - Update 00_SIGNALduino.pm
 
 !!! extensions for https://github.com/RFD-FHEM/RFFHEM/issues/814
