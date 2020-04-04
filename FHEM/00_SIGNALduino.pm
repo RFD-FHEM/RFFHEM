@@ -128,7 +128,7 @@ my %sets = (
   "cc1101_sens"    		=> 	['4,8,12,16', \&cc1101::SetSens ],
   "cc1101_patable" 		=>	['-30_dBm,-20_dBm,-15_dBm,-10_dBm,-5_dBm,0_dBm,5_dBm,7_dBm,10_dBm', \&cc1101::SetPatable ],
   "cc1101_reg"			=> 	[ 'textFieldNL', \&cc1101::SetRegisters ],
-  "LaCrossePairForSec" => 	['textFieldNL', \&SIGNALduino_Set_LaCrossePairForSec ], # ToDo: SIGNALduino_Set_FhemWebList Anpassung, no cmd if no cc1101 & freq 433 ???
+  "cc1101_LaCrossePairForSec" => 	['textFieldNL', \&SIGNALduino_Set_LaCrossePairForSec ], # ToDo: SIGNALduino_Set_FhemWebList Anpassung, no cmd if no cc1101 & freq 433 ???
 );
 
 ## Supported config CC1101 ##
@@ -653,8 +653,10 @@ sub SIGNALduino_Set_FhemWebList {
 	my @cList = sort map { "$_:@{$sets{$_}}[0]" }	grep {
 		($_ ne "?" &&
 			(
-				( IsDummy($hash->{NAME}) && $_ =~ m/^(?:close|reset)/ ) ||
-				( InternalVal($hash->{NAME},"cc1101_available",0) || (!InternalVal($hash->{NAME},"cc1101_available",0) && $_ !~ /^cc/)) &&
+				( IsDummy($hash->{NAME}) && $_ =~ m/^(?:close|reset|cc1101_LaCrossePairForSec)/ ) ||
+				( InternalVal($hash->{NAME},"cc1101_available",0) && 
+				($_ !~ m/^cc1101_LaCrossePairForSec/ || ($_ =~ m/^cc1101_LaCrossePairForSec/ && ReadingsVal($hash->{NAME},"cc1101_config_ext","") =~ "FSK") )
+				 || (!InternalVal($hash->{NAME},"cc1101_available",0) && $_ !~ /^cc/)) &&
 				( !IsDummy($hash->{NAME}) && (defined(DevIo_IsOpen($hash)) || $_ =~ m/^(?:flash|reset)/)  )
 			)
 		)
@@ -905,12 +907,14 @@ sub SIGNALduino_Set_bWidth
 ############################### LaCrosse sensor is comfortable to put on (own way from 36_LaCrosse.pm)
 sub SIGNALduino_Set_LaCrossePairForSec {
 	my ($hash, @a) = @_;
-  my $arg = join(" ", @a);
 
 	#              set NAME                a[0]              a[1]             a[2]
-	return "Usage: set $hash->{NAME} LaCrossePairForSec <seconds_active> [ignore_battery]" if(!$arg || !$a[1] || $a[1] !~ m/^\d+$/ || ( $a[2] && $a[2] ne "ignore_battery") );
+	return "Usage: set $hash->{NAME} $a[0] <seconds_active> [ignore_battery " if(!$a[0] || $a[1] !~ m/^\d+$/ || ($a[2] && $a[2] ne "ignore_battery") );
 	$hash->{LaCrossePair} = 1;  # LaCrosse autoCreateState: 0 = autoreate not defined | 1 = autocreate defined | 2 = autocreate active
 	$hash->{logMethod}->($hash->{NAME}, 4, "$hash->{NAME}: Set_LaCrossePairForSec, LaCrosse autocreate active for $a[1] seconds");
+
+
+
 	InternalTimer(gettimeofday()+$a[1], "SIGNALduino_RemoveLaCrossePair", $hash, 0);
 
 	return undef;
