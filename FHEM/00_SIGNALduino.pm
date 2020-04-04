@@ -3249,6 +3249,7 @@ sub SIGNALduino_IdList($@) {
 	@msIdList = sort {$a <=> $b} @msIdList;
 	@muIdList = sort {$a <=> $b} @muIdList;
 	@mcIdList = sort {$a <=> $b} @mcIdList;
+	@mnIdList = sort {$a <=> $b} @mnIdList;
 	@skippedDevId = sort {$a <=> $b} @skippedDevId;
 	@skippedBlackId = sort {$a <=> $b} @skippedBlackId;
 	@skippedWhiteId = sort {$a <=> $b} @skippedWhiteId;
@@ -3258,7 +3259,7 @@ sub SIGNALduino_IdList($@) {
 	$hash->{logMethod}->($name, 3, "$name: IdList, MS @msIdList");
 	$hash->{logMethod}->($name, 3, "$name: IdList, MU @muIdList");
 	$hash->{logMethod}->($name, 3, "$name: IdList, MC @mcIdList");
-	$hash->{logMethod}->($name, 3, "$name: IdList, MN @mcIdList");
+	$hash->{logMethod}->($name, 3, "$name: IdList, MN @mnIdList");  # ToDo: nur wenn Internal cc1101_available 1 ???
 	$hash->{logMethod}->($name, 5, "$name: IdList, not whitelisted skipped = @skippedWhiteId") if (scalar @skippedWhiteId > 0);
 	$hash->{logMethod}->($name, 4, "$name: IdList, blacklistId skipped = @skippedBlackId") if (scalar @skippedBlackId > 0);
 	$hash->{logMethod}->($name, 4, "$name: IdList, development skipped = @skippedDevId") if (scalar @skippedDevId > 0);
