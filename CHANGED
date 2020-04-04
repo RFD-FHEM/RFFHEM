@@ -1,3 +1,24 @@
+2020-04-04 - Update 00_SIGNALduino.pm
+
+!!! extensions for https://github.com/RFD-FHEM/RFFHEM/issues/814
+* added setlist with cmd LaCrossePairForSec (for LaCrosse)
+* sort clientsSIGNALduino
+* added LaCrosse, KOPP_FC, PCA301 clientsSIGNALduino
+* added LaCrosse, KOPP_FC, PCA301 matchListSIGNALduino
+* SIGNALduino_Initialize, added $hash->{mnIdList}
+* SIGNALduino_FingerprintFn, revised (for LaCrosse)
+* SIGNALduino_RemoveLaCrossePair, added (for LaCrosse)
+* SIGNALduino_Set_LaCrossePairForSec, added (for LaCrosse)
+* SIGNALduino_Get_Raw, revised for new message format MN
+* SIGNALduino_Parse_MN, added for new message format MN
+* SIGNALduino_Parse, revised for new message format MN
+* SIGNALduino_IdList, revised for new message format MN
+* SIGNALduino_CalculateCRC16, added for some processing (example, PCA301)
+* SIGNALduino_CalculateCRC, added for some processing (example, LaCrosse)
+* SIGNALduino_LaCrosse, added for some processing
+* SIGNALduino_PCA301, added for some processing
+* SIGNALduino_KoppFreeControl, added for some processing
+* SIGNALduino_FW_getProtocolList, revised for new message format MN
 2020-04-03 - added meta information to 00_SIGNALduino.pm (#811)
 
 00_SIGNALduino.pm
