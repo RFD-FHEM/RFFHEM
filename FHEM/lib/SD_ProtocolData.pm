@@ -54,6 +54,11 @@
 # modulematch => ' '       # RegEx on the exact message including preamble | if defined, it will be evaluated
 # polarity    => 'invert'  # only MC signals | invert bits of the signal
 #
+# xFSK - Information
+# datarate    => ' '       # transmission speed signal
+# modulation  => ' '       # modulation type of the signal
+# sync        => ' '       # sync parameter of signal in hex (example, 2DD4)
+#
 ##### notice #### or #### info ############################################################################################################
 # !!! Between the keys and values ​​no tabs, please use spaces !!!
 # !!! Please use first unused id for new protocols !!!
@@ -2613,6 +2618,64 @@ package lib::SD_ProtocolData;
 				length_min      => '40',
 				length_max      => '40',
 			},
+		"100"	=>	# Lacrosse, Mode 1 - IT+
+							# MN;D=9AA6362CC8AAAA000012F8F4;R=4;
+			{
+				name            => 'Lacrosse mode 1',
+				comment         => 'example: TX25-IT,TX27-IT,TX29-IT,TX29DTH-IT,TX37,30.3143.IT,30.3144.IT',
+				id              => '100',
+				knownFreqs      => '868.3',
+				datarate        => '17257.69',
+				sync            => '2DD4',
+				modulation      => '2-FSK',
+				match           => '^9.*',   # ToDo, check! fuer eine regexp Pruefung am Anfang vor dem method Aufruf
+				clientmodule    => 'LaCrosse',
+				method          => \&main::SIGNALduino_LaCrosse,
+			},
+		"101"	=>	# ELV PCA 301
+							# MN;D=0405019E8700AAAAAAAA0F13AA16ACC0540AAA49C814473A2774D208AC0B0167;N=3;R=6;
+							# MN;D=010503B7A101AAAAAAAA7492AA9885E53246E91113F897A4F80D30C8DE602BDF;N=3;
+			{
+				name            => 'PCA 301',
+				comment         => 'Energy socket',
+				id              => '101',
+				knownFreqs      => '868.950',
+				datarate        => '6620.41',
+				sync            => '2DD4',
+				modulation      => '2-FSK',
+				clientmodule    => 'PCA301',
+				length_min      => '24',
+				method          => \&main::SIGNALduino_PCA301,
+			},
+		"102"	=>	# KoppFreeControl
+							# MN;D=07FA5E1721CC0F02FE000000000000;
+			{
+				name            => 'KoppFreeControl',
+				comment         => 'example: remotes, switches',
+				id              => '102',
+				knownFreqs      => '868.3',
+				datarate        => '4785.5',
+				sync            => 'AA54',
+				modulation      => 'GFSK',
+				match           => '^0.*',   # ToDo, check! fuer eine regexp Pruefung am Anfang vor dem method Aufruf
+				clientmodule    => 'Kopp',
+				method          => \&main::SIGNALduino_KoppFreeControl,
+			},
+		"103"	=>	# Lacrosse Mode 2 - IT+
+							#
+			{
+				name            => 'Lacrosse mode 2',
+				comment         => 'example: TX35-IT,TX35DTH-IT,30.3155WD,30.3156WD,EMT7110',
+				id              => '103',
+				knownFreqs      => '868.3',
+				datarate        => '9.579',
+				sync            => '2DD4',
+				modulation      => '2-FSK',
+				match           => '^9.*',   # ToDo, check! fuer eine regexp Pruefung am Anfang vor dem method Aufruf
+				clientmodule    => 'LaCrosse',
+				method          => \&main::SIGNALduino_LaCrosse,
+			},
+
 		########################################################################
 		#### ### old information from incomplete implemented protocols #### ####
 
