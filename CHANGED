@@ -1,3 +1,14 @@
+2020-04-05 - 00_SIGNALduino.pm
+
+- Renamed set command LaCrossePairForSec to cc1101_LaCrossePairForSec
+- fixed SIGNALduino_Set_LaCrossePairForSec
+- cc1101_LaCrossePairForSec only available im FSK modulation is detected / if device is a dummy
+
+UnitTest/tests/test_sub_SIGNALduino_Set-definition.txt
+
+- Added / modified tests to verify new set command
+- modified existing test for inactive device (close is not provided as command)
+- numbered similar tests for easier identification
 2020-04-05 - Update 00_SIGNALduino.pm
 
 !!! extensions for https://github.com/RFD-FHEM/RFFHEM/issues/814
