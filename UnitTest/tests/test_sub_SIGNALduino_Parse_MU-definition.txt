@@ -1,0 +1,39 @@
+defmod test_sub_SIGNALduino_Parse_MU UnitTest dummyDuino ( 
+{
+	my $whitelist_IDs = AttrVal($target,"whitelist_IDs",undef);	# save whitelist_IDs to set back
+	note("attribute whitelist_IDs save from system");
+
+	subtest 'Test Protocol 44 - MU Data dispatched' => sub {
+		my $rmsg="MU;P0=32001;P1=-1939;P2=1967;P3=3896;P4=-3895;D=01213424242124212121242121242121212124212424212121212121242421212421242121242124242421242421242424242124212124242424242421212424212424212121242121212;CP=2;R=39;";
+		my %signal_parts=SIGNALduino_Split_Message($rmsg,$targetHash->{NAME});     
+		is(SIGNALduino_Parse_MU($targetHash, $targetHash, $targetHash->{NAME}, $rmsg,%signal_parts) ,1,"MU Data dispatched");
+	};
+
+	subtest 'Test Protocol 46 - MU Data dispatched' => sub {
+		my $rmsg="MU;P0=-1943;P1=1966;P2=-327;P3=247;P5=-15810;D=01230121212301230121212121230121230351230121212301230121212121230121230351230121212301230121212121230121230351230121212301230121212121230121230351230121212301230121212121230121230351230;CP=1;";
+		my %signal_parts=SIGNALduino_Split_Message($rmsg,$targetHash->{NAME});     
+		is(SIGNALduino_Parse_MU($targetHash, $targetHash, $targetHash->{NAME}, $rmsg,%signal_parts) ,4,"MU Data dispatched");
+	};
+
+	subtest 'Test Protocol 84 - MU Data dispatched' => sub {
+		my $rmsg="MU;P0=-21520;P1=235;P2=-855;P3=846;P4=620;P5=-236;P7=-614;D=012323232454545454545451717451717171745171717171717171717174517171745174517174517174545;CP=1;R=217;";      
+		my %signal_parts=SIGNALduino_Split_Message($rmsg,$targetHash->{NAME});     
+		is(SIGNALduino_Parse_MU($targetHash, $targetHash, $targetHash->{NAME}, $rmsg,%signal_parts) ,1,"MU Data dispatched");
+	};
+
+	subtest 'Test Protocol 85 - MU Data dispatched' => sub {
+		CommandAttr($targetHash,"$target whitelist_IDs 85"); # need whitelist_IDs, because one dispatched takes place at ID 63 & ID 85
+		my $rmsg="MU;P0=7944;P1=-724;P2=742;P3=241;P4=-495;P5=483;P6=-248;D=01212121343434345656343434563434345634565656343434565634343434343434345634345634345634343434343434343434345634565634345656345634343456563421212121343434345656343434563434345634565656343434565634343434343434345634345634345634343434343434343434345634565634;CP=3;R=47;O;";
+		my %signal_parts=SIGNALduino_Split_Message($rmsg,$targetHash->{NAME});     
+		is(SIGNALduino_Parse_MU($targetHash, $targetHash, $targetHash->{NAME}, $rmsg,%signal_parts) ,1,"MU Data dispatched");
+	};	
+
+    if(defined($whitelist_IDs)) {
+	    note("attribute whitelist_IDs restore to old value from system");
+    	CommandAttr($targetHash,"$target whitelist_IDs $whitelist_IDs"); 	 # reset whitelist_IDs to old value
+    } else {
+    	CommandDeleteAttr($targetHash,"$target whitelist_IDs");
+        note("attribute whitelist_IDs deleted ");
+    }
+}
+)

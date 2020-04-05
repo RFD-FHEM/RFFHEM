@@ -1,3 +1,52 @@
+2020-04-03 - 00_SIGNALduino.pm
+
+prepare as release
+<Releasedate>
+  00_SIGNALduino.pm 
+    new protocol 97 Momento remote control for wireless digital picture frame (#812)
+    automatic load cc1101 config after change value or restart
+    made multiple get commands more easy and robust to handle
+    new protocol 58 Weather F007-T (#803)
+    new protocol 27 for EuroChron EFTH-800 (#764)
+    extended cc1101 settings to ccconf reading
+
+    several retrys to initialize the SIGNALduino (#804)
+    prevent asyncOut if there is no client connected
+    flash via http: Fixed Filename extraction of URL if name is not found in http header
+    bug fixed set sduino cc1101_rAmpl 42 (#801)
+    Allow lower case letters for hex values ​​in set / get cc1101_reg
+    fixed set_bWidth command (#789)
+    bug fix set/get cc1101_patable (#789)
+    filtered possible set commands per device type 
+    new  protocol 26 - Remote control xavax 00111939
+    new protocol 20 - Remote control diesel heating
+
+    added meta information to 00_SIGNALduino.pm (#811)
+    missing values ​​added to the patable list.
+    restriction to permitted frequency ranges.
+
+  14_SD_WS.pm
+     new sensors added TFA/Froggit/Renkforce/Ambient Weather F007-T 
+     ew rain sensor TFA 30.3233.01 
+     implemented sub to be called by other modules to receive get command response
+     new sensor for EuroChron EFTH-800 (#764)
+
+  SD_UT.pm 
+     new model Novy_840039, revised SIGNALduuino readme & tests (#794)
+     new remote control xavax 00111939
+     new remote control with 4 buttons for diesel heating
+
+	 model Novy_840039, rename button text power_button to power_on_off
+     remove sort option
+
+     fix UTClock for all models
+     TR-502MSV bugfix, ident was only 8 bit, must be 12 bit long
+     RC_10 button set all work after renaming the device
+
+  10_SD_GT
+     add codes for button all in version 2
+     new modul for remote controls based on protocol GT-9000
+
 06.12.2019
   00_SIGNALduino.pm: 
     logoutput adjusted to standard -> $name: "sub", "Text"

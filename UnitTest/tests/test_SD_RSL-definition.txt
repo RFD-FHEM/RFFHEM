@@ -5,7 +5,7 @@ attr RSL_411B11_0_0 room SD_RSL;;
 setstate RSL_411B11_0_0 off;;
 setstate RSL_411B11_0_0 2018-06-14 18:24:38 state off;;
 
-defmod test_rsl UnitTest RSL_411B11_0_0 ( 
+defmod test_SD_RSL UnitTest RSL_411B11_0_0 ( 
 { 
 	subtest 'Test set questionmark' => sub {
 		plan tests => 4;

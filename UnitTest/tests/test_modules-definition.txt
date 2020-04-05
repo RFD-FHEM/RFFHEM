@@ -1,6 +1,6 @@
 defmod test_modules UnitTest dummyDuino (
  {
-	my @modulesToTest=qw/00_SIGNALduino 10_FS10 14_BresserTemeo 14_FLAMINGO 14_Hideki 14_SD_AS 14_SD_BELL 14_SD_Keeloq 14_SD_UT 14_SD_RSL 14_SD_WS 14_SD_WS_Maverick 14_SD_WS07 14_SD_WS09 41_OREGON 90_SIGNALduino_un 98_Dooya/;
+	my @modulesToTest=qw/00_SIGNALduino 10_FS10 10_SD_GT 14_BresserTemeo 14_FLAMINGO 14_Hideki 14_SD_AS 14_SD_BELL 14_SD_UT 14_SD_RSL 14_SD_WS 14_SD_WS_Maverick 14_SD_WS07 14_SD_WS09 41_OREGON 90_SIGNALduino_un 98_Dooya/;
 	
  	subtest 'Syntax Check Modules ' => sub {
 		plan tests => scalar @modulesToTest;

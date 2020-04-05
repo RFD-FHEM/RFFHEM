@@ -47,6 +47,18 @@ defmod test_firmware_download_1 UnitTest dummyDuino
 		my @called_args = $HTTP_CALL->called_with;
 		like( $called_args[0]{url}, qr/SIGNALDuino/, "Download URL set to SIGNALDuino Repo" );
 	};
+	
+	subtest 'flash via url parameter' => sub {
+		plan tests => 3;
+		$HTTP_CALL->reset;		
+		$attr{$target}{hardware} = "nano328";
+		my $ret = SIGNALduino_Set($targetHash, $target, "flash","https://github.com/RFD-FHEM/SIGNALDuino/releases/download/3.3.1/SIGNALDuino_nano3283.3.1.hex");
+		is($ret,undef,"return value fromSIGNALduino_Set");
+		is($HTTP_CALL->called_count, 1, "HttpUtils_NonblockingGet is called");
+		my @called_args = $HTTP_CALL->called_with;
+		is( $called_args[0]{url}, "https://github.com/RFD-FHEM/SIGNALDuino/releases/download/3.3.1/SIGNALDuino_nano3283.3.1.hex", "Download URL is hex file" );
+	};
+
 	$HTTP_CALL->unmock;
 	
 	subtest 'check prerelease without hardware parameter set' => sub {

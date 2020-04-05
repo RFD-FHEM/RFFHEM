@@ -1,7 +1,18 @@
-defmod test_read UnitTest dummyDuino 
+defmod test_sub_SIGNALduino_Read UnitTest dummyDuino 
 (
  {
 	use Test::Device::SerialPort;
+    use Test2::V0;
+	use Test2::Tools::Compare qw{    is like isnt unlike
+	    match mismatch validator
+	    hash array bag object meta number float rounded within string subset bool
+	    in_set not_in_set check_set
+	    item field call call_list call_hash prop check all_items all_keys all_vals all_values
+	    etc end filter_items
+	    T F D DNE FDNE E
+	    event fail_events
+	    exact_ref
+	};
     my %mockData = (
     '9'    => 
 		{	
@@ -30,7 +41,7 @@ defmod test_read UnitTest dummyDuino
 	
 
 		subtest "Checking read function without mred ID=$id" => sub {
-			plan tests => 2;	
+			plan (2);
 			$parsefn->reset();
 		
 			$PortObj->{"_fake_input"} = $mockData{$id}{real}."\n";
@@ -40,8 +51,8 @@ defmod test_read UnitTest dummyDuino
 		};
 	
 		subtest "Checking read function with mred ID=$id" => sub {
-			plan tests => 2;	
-		
+			plan (2);
+					
 			$parsefn->reset();
 			$PortObj->{"_fake_input"} = "";
 			$mockData{$id}{raw} =~ tr/ //d;
@@ -56,7 +67,46 @@ defmod test_read UnitTest dummyDuino
 			}
 		};
 	};
+	
+	subtest "Verify splitting of received getcmd" => sub {
+			plan (4);
+		
+			$parsefn->reset();
+			$PortObj->{"_fake_input"} = "V 3.4.0-dev SIGNALESP cc1101 (chip CC1101) - compiled at Dec";
+			SIGNALduino_Read($targetHash);
+			is($targetHash->{PARTIAL},"V 3.4.0-dev SIGNALESP cc1101 (chip CC1101) - compiled at Dec", "check PARTIAL");
+
+			$PortObj->{"_fake_input"} = "  4 2019 22:01:01";
+			SIGNALduino_Read($targetHash);
+			is($targetHash->{PARTIAL},"V 3.4.0-dev SIGNALESP cc1101 (chip CC1101) - compiled at Dec  4 2019 22:01:01", "check PARTIAL append");
+
+			$PortObj->{"_fake_input"} = "\nMs;???;???;???;???;";
+			$targetHash->{getcmd}->{cmd} = "version";
+			SIGNALduino_Read($targetHash);
+			is($targetHash->{PARTIAL},"Ms;???;???;???;???;", "check linebreak split");
+			is( ($parsefn->called_with)[3], 'V 3.4.0-dev SIGNALESP cc1101 (chip CC1101) - compiled at Dec  4 2019 22:01:01', 'check rmsg send to SIGNALduino_Parse' ); 
+
+	};
+	
+	
+	subtest 'Verify splitting of received getcmd with incomplete partial' => sub {
+		plan (3);
+		$parsefn->reset();
+		fhem("attr $target debug 1");
+		
+		$targetHash->{getcmd}->{cmd} = "version";
+		$targetHash->{PARTIAL}="MU;P0=-28704;P1=450;P2=-1064;P3=1422;CP=1;R=13;D=";
+		
+		$PortObj->{"_fake_input"} = "MU;P0=-28704;P1=450;P2=-1064;P3=1422;CP=1;R=13;D=01;\nMU;P0=-28704;P1=450;P2=-1064;P3=1422;CP=1;R=13;D=23;\nV 3.4.0-dev SIGNALduino cc1101 (chip CC1101) - compiled at Dec  4 2019 22:02:15\n";
+		SIGNALduino_Read($targetHash);
+		is( $targetHash->{PARTIAL}, "", 'check internal PARTIAL' ); 
+		is($targetHash->{getcmd}->{cmd},"version","verify getcmd is version");
+		is( ($parsefn->called_with)[3], 'V 3.4.0-dev SIGNALduino cc1101 (chip CC1101) - compiled at Dec  4 2019 22:02:15', 'check rmsg send to SIGNALduino_Parse' ); 
+		
+	}; 
+	
 	$parsefn->unmock;	
+	
 	fhem("attr $target debug 0");
 	$targetHash->{USBDev} = undef;
  }

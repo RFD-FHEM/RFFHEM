@@ -1,4 +1,4 @@
-defmod test_sub_StartInit UnitTest dummyDuino ( 
+defmod test_sub_SIGNALduino_StartInit UnitTest dummyDuino ( 
 { 
 	subtest 'Test with initretry=1' => sub {
 		plan tests => 4;
@@ -11,7 +11,7 @@ defmod test_sub_StartInit UnitTest dummyDuino (
 		is($SD_SimpleWrite->called,1,"SIGNALduino_SimpleWrite called");
 	    my @called_args = $SD_SimpleWrite->called_with;
 	    is( $called_args[1], "V", "SIGNALduino_SimpleWrite called with V" );
-		is($targetHash->{getcmd}->{cmd},"version","getcmd is version");
+		is($targetHash->{ucCmd}->{cmd},"version","ucCmd is version");
 		is($targetHash->{DevState},"waitInit","check DevState");
 		
 		$SD_SimpleWrite->unmock;

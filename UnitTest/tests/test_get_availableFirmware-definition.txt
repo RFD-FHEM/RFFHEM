@@ -5,10 +5,12 @@ defmod test_get_availableFirmware UnitTest dummyDuino
 		plan tests => 2;
 		$attr{$target}{updateChannelFW} = "stable";
 		$attr{$target}{hardware} = "0";
+		delete($targetHash->{ucCmd});
 		my $ret=SIGNALduino_Get($targetHash, $target, "availableFirmware");
 		like($ret,qr/.*get availableFirmware failed.*/,"check return contains failed");
 		
 		$attr{$target}{hardware} = "nano328";
+		delete($targetHash->{ucCmd});
 		$ret=SIGNALduino_Get($targetHash, $target, "availableFirmware");
 		is($ret,"availableFirmware: \n\nFetching stable firmware versions for nano328 from github\n","check return is fetching");
 	}; 

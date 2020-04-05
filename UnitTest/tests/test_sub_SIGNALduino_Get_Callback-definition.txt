@@ -1,0 +1,61 @@
+defmod test_sub_SIGNALduino_Get_Callback UnitTest dummyDuino 
+(
+ {
+
+ 	use Test2::V0;
+	use Test2::Tools::Compare qw{ is like unlike check array U};
+	use Test2::Tools::Ref;
+	
+	my $GlobalTestVar = undef;
+	
+	sub dummyCb { $GlobalTestVar = $_[1]; 	}
+	
+	subtest 'Test return values SIGNALduino_Get_Callback with wrong parameters' => sub {
+		plan(3);
+
+		my $ret = SIGNALduino_Get_Callback($target,\&dummyCb, "ccreg");
+		is($ret,"\"get _Get_Callback\" needs at least two parameters","check return to less parameters");
+	
+		my $ret = SIGNALduino_Get_Callback($name,\&dummyCb, "ccreg 12");
+		is($ret,"\"$name\" is not a definition of type SIGNALduino","check return to less parameters");
+			
+		my $ret = SIGNALduino_Get_Callback("nonexistingdevice",\&dummyCb, "ccreg 12");
+		is($ret,"\"nonexistingdevice\" is not a definition of type SIGNALduino","check return to less parameters");
+		
+		delete($targetHash->{ucCmd});
+	};
+	
+	subtest 'Test return values SIGNALduino_Get_Callback with correct parameters' => sub {
+		plan(4);
+		$targetHash->{cc1101_available} = 1;
+		
+		my $ret = SIGNALduino_Get_Callback($target,\&dummyCb, "ccreg 12");
+		is($ret,U,"check return SIGNALduino_Get_Callback");
+		
+		is($targetHash->{QUEUE},
+			array  {
+			    	item 'C12';
+				    end();
+				} ,"Verify expected queue element entrys", explain $targetHash->{QUEUE});
+		ref_is($targetHash->{ucCmd}{responseSub}, \&dummyCb, "Verify callback stored in target hash");
+		is($targetHash->{ucCmd}{cmd}, "ccreg", "Verify called command stored in target hash");
+	
+		delete($targetHash->{cc1101_available});
+	};
+	
+	subtest 'Test SIGNALduino_read with callback' => sub {
+		plan(2);
+
+		my $PortObj = Test::Device::SerialPort->new('/dev/ttyS0');
+		$targetHash->{USBDev} = $PortObj;
+		$PortObj->{"_fake_input"} = "C12 = B4\n";
+
+		is($GlobalTestVar,U,"verify testvar is undef before calling");
+		SIGNALduino_Read($targetHash);
+		is($GlobalTestVar,"C12 = B4","verify callback has changed testvar with response");
+	};
+
+}
+	
+	
+}
