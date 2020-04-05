@@ -902,14 +902,16 @@ sub SIGNALduino_Set_bWidth
 	}
 }
 
-############################### LaCrosse sensor is comfortable to put on
+############################### LaCrosse sensor is comfortable to put on (own way from 36_LaCrosse.pm)
 sub SIGNALduino_Set_LaCrossePairForSec {
 	my ($hash, @a) = @_;
   my $arg = join(" ", @a);
 
-	return "Usage: set $hash->{NAME} LaCrossePairForSec <seconds_active> [ignore_battery]" if(!$arg || $a[0] !~ m/^\d+$/ || ($a[1] && $a[1] ne "ignore_battery") );
-	$hash->{LaCrossePair} = $a[1]?2:1;
-	InternalTimer(gettimeofday()+$a[0], "SIGNALduino_RemoveLaCrossePair", $hash, 0);
+	#              set NAME                a[0]              a[1]             a[2]
+	return "Usage: set $hash->{NAME} LaCrossePairForSec <seconds_active> [ignore_battery]" if(!$arg || !$a[1] || $a[1] !~ m/^\d+$/ || ( $a[2] && $a[2] ne "ignore_battery") );
+	$hash->{LaCrossePair} = 1;  # LaCrosse autoCreateState: 0 = autoreate not defined | 1 = autocreate defined | 2 = autocreate active
+	$hash->{logMethod}->($hash->{NAME}, 4, "$hash->{NAME}: Set_LaCrossePairForSec, LaCrosse autocreate active for $a[1] seconds");
+	InternalTimer(gettimeofday()+$a[1], "SIGNALduino_RemoveLaCrossePair", $hash, 0);
 
 	return undef;
 }
