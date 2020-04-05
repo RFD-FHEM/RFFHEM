@@ -1,3 +1,7 @@
+2020-04-05 - Update 00_SIGNALduino.pm
+
+!!! extensions for https://github.com/RFD-FHEM/RFFHEM/issues/814
+* revised SIGNALduino_Set_LaCrossePairForSec and added logoutput
 2020-04-04 - Update 00_SIGNALduino.pm
 
 !!! extensions for https://github.com/RFD-FHEM/RFFHEM/issues/814
