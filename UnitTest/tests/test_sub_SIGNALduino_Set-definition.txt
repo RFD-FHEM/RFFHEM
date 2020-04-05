@@ -394,13 +394,14 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 		{
 			testname=>  "set ? command (1.0)",
     		cc1101_available => 0,
+			dummy => 0,
 			input	=>	"?",
 			check =>  sub { 
 			    return array  {
 			    	end();
     			};
 		    },
-		    return => check_set match qr/^Unknown argument \?, choose one of.*/,!match qr/cc1101_[^L]/,match qr/cc1101_LaCrossePairForSec/
+		    return => check_set match qr/^Unknown argument \?, choose one of.*/,!match qr/cc1101_[^L]/,!match qr/cc1101_LaCrossePairForSec/
 		},
 		{
 			cc1101_available 	=> 1,
