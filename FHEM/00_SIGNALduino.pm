@@ -32,7 +32,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.5_dev_04.04",
+	SDUINO_VERSION            => "v3.5_dev_04.06",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -630,7 +630,7 @@ sub SIGNALduino_Set($$@) {
 
  	return "\"set SIGNALduino\" needs at least one parameter" if(@a < 1);
 
-	if (!InternalVal($name,"cc1101_available",0) && $a[0] =~ /^cc1101/) {
+	if (InternalVal($name,"DeviceName","none") ne "none" && !InternalVal($name,"cc1101_available",0) && $a[0] =~ /^cc1101/) {
 		return "This command is only available with a cc1101 receiver";
 	}
 	if (!exists($sets{$a[0]})) {
