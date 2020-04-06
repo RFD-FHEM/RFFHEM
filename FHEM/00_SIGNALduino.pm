@@ -32,7 +32,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.5_dev_04.06",
+	SDUINO_VERSION            => "v3.5_dev_04.07",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -127,8 +127,8 @@ my %sets = (
   "cc1101_rAmpl"   		=> 	['24,27,30,33,36,38,40,42',  \&cc1101::setrAmpl ],
   "cc1101_sens"    		=> 	['4,8,12,16', \&cc1101::SetSens ],
   "cc1101_patable" 		=>	['-30_dBm,-20_dBm,-15_dBm,-10_dBm,-5_dBm,0_dBm,5_dBm,7_dBm,10_dBm', \&cc1101::SetPatable ],
-  "cc1101_reg"			=> 	[ 'textFieldNL', \&cc1101::SetRegisters ],
-  "cc1101_LaCrossePairForSec" => 	['textFieldNL', \&SIGNALduino_Set_LaCrossePairForSec ], # ToDo: SIGNALduino_Set_FhemWebList Anpassung, no cmd if no cc1101 & freq 433 ???
+  "cc1101_reg"			=> 	['textFieldNL', \&cc1101::SetRegisters ],
+  "LaCrossePairForSec" => 	['textFieldNL', \&SIGNALduino_Set_LaCrossePairForSec ],
 );
 
 ## Supported config CC1101 ##
@@ -630,7 +630,7 @@ sub SIGNALduino_Set($$@) {
 
  	return "\"set SIGNALduino\" needs at least one parameter" if(@a < 1);
 
-	if (InternalVal($name,"DeviceName","none") ne "none" && !InternalVal($name,"cc1101_available",0) && $a[0] =~ /^cc1101/) {
+	if (!InternalVal($name,"cc1101_available",0) && $a[0] =~ /^cc1101/) {
 		return "This command is only available with a cc1101 receiver";
 	}
 	if (!exists($sets{$a[0]})) {
@@ -653,10 +653,9 @@ sub SIGNALduino_Set_FhemWebList {
 	my @cList = sort map { "$_:@{$sets{$_}}[0]" }	grep {
 		($_ ne "?" &&
 			(
-				( IsDummy($hash->{NAME}) && $_ =~ m/^(?:close|reset|cc1101_LaCrossePairForSec)/ ) ||
-				( InternalVal($hash->{NAME},"cc1101_available",0) && 
-				($_ !~ m/^cc1101_LaCrossePairForSec/ || ($_ =~ m/^cc1101_LaCrossePairForSec/ && ReadingsVal($hash->{NAME},"cc1101_config_ext","") =~ "FSK") )
-				 || (!InternalVal($hash->{NAME},"cc1101_available",0) && $_ !~ /^cc/)) &&
+				( IsDummy($hash->{NAME}) && $_ =~ m/^(?:close|reset|LaCrossePairForSec)/ ) ||
+				($_ =~ m/^LaCrossePairForSec/ && ReadingsVal($hash->{NAME},"cc1101_config_ext","") =~ "2-FSK") ||				
+				( InternalVal($hash->{NAME},"cc1101_available",0) || (!InternalVal($hash->{NAME},"cc1101_available",0) && $_ !~ /^cc/ && $_ !~ m/^LaCrossePairForSec/)) &&
 				( !IsDummy($hash->{NAME}) && (defined(DevIo_IsOpen($hash)) || $_ =~ m/^(?:flash|reset)/)  )
 			)
 		)

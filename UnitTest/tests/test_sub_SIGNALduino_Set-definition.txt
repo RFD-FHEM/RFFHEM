@@ -401,7 +401,7 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 			    	end();
     			};
 		    },
-		    return => check_set match qr/^Unknown argument \?, choose one of.*/,!match qr/cc1101_[^L]/,!match qr/cc1101_LaCrossePairForSec/
+		    return => check_set match qr/^Unknown argument \?, choose one of.*/,!match qr/cc1101_[^L]/,!match qr/LaCrossePairForSec/
 		},
 		{
 			cc1101_available 	=> 1,
@@ -414,7 +414,7 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 			    	end();
     			};
 		    },
-		    return => check_set match qr/^Unknown argument \?, choose one of.*/,match qr/cc/,!match qr/LaCrossePairForSec/
+		    return => check_set match qr/^Unknown argument \?, choose one of.*/,match qr/cc/,match qr/LaCrossePairForSec/
 		},
 		{
 			cc1101_available 	=> 1,
@@ -441,7 +441,7 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 			    	end();
     			};
 		    },
-		    return => check_set match qr/close/,match qr/reset/,!match qr/cc1101_[^L]/,match qr/cc1101_LaCrossePairForSec/
+		    return => check_set match qr/close/,match qr/reset/,!match qr/cc1101_/,match qr/LaCrossePairForSec/
 		},
 		{
 			testname	=>  "set ? command for dummy (1.4)",
@@ -453,7 +453,7 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
     			};
 		    },
 			input		=>	"?",
-		    return 		=> check_set match qr/close/,match qr/reset/,!match qr/cc_1101[^L]/,match qr/LaCrossePairForSec/
+		    return 		=> check_set match qr/close/,match qr/reset/,!match qr/cc_1101/,match qr/LaCrossePairForSec/
 		},
 		{
 			testname	=>  "set ? command for inactive device (1.5)",
@@ -492,7 +492,7 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 			    	end();
     			};
 		    },
-			input		=>	"cc1101_LaCrossePairForSec abc",
+			input		=>	"LaCrossePairForSec abc",
 			return 		=> match qr/^Usage:/,
 		},
 		{
@@ -503,7 +503,7 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 			    	end();
     			};
 		    },
-			input		=>	"cc1101_LaCrossePairForSec 30 battery",
+			input		=>	"LaCrossePairForSec 30 battery",
 			return 		=> match qr/^Usage:/,
 		},
 		{
@@ -514,7 +514,29 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 			    	end();
     			};
 		    },
-			input		=>	"cc1101_LaCrossePairForSec 30",
+			input		=>	"LaCrossePairForSec 30",
+		},
+		{
+			testname	=>  "set LaCrossePairForSec 30 seconds for dummy",
+			dummy 		=> 1,
+			cc1101_available 	=> 1,
+			check =>  sub { 
+			    return array  {
+			    	end();
+    			};
+		    },
+			input		=>	"LaCrossePairForSec 30",
+		},
+		{
+			testname	=>  "set LaCrossePairForSec 30 seconds for dummy",
+			dummy 		=> 1,
+			cc1101_available 	=> 0,
+			check =>  sub { 
+			    return array  {
+			    	end();
+    			};
+		    },
+			input		=>	"LaCrossePairForSec 30",
 		},
 		
 	);
@@ -575,14 +597,15 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 		subtest 'Test without hardware attribute' => sub {
 			plan(2);
 			subtest 'Test Attributes (hardware undef)' => sub {
-				plan(3);
-				$attr{$target}{dummy} = "0";
+				plan(4);
+				$attr{$target}{dummy} = 0;
 				is(AttrVal($target, "dummy", 0),0,"check attrib dummy is 0");
 				$targetHash->{DIODev} = 1;
 				CommandDeleteAttr($targetHash,"$target hardware") if (AttrVal($target, "hardware", undef));
 				delete($targetHash->{cc1101_available}) if ($targetHash->{cc1101_available});
 				is(AttrVal($target, "hardware", undef),undef,"check attrib hardware undef");
 				ok(DevIo_IsOpen($targetHash),"check DevIo_IsOpen returns true");
+				unlike(ReadingsVal($target,"cc1101_config_ext","0"),qr/2-FSK/,"check reading cc1101_config_ext");
 			};
 		
 			subtest 'Test allowed - set commands' => sub {
@@ -603,19 +626,6 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 		};
 	};
 
-#	subtest 'Test allowed - set commands 2-FSK / cc1101' => sub {
-#		$targetHash->{cc1101_available} =1;
-#		my $ret=SIGNALduino_Set($targetHash, $target, "?");
-#
-#		my @tests = split(" ", substr($ret,index($ret,"one of")+7));
-#		my $tests = scalar(@tests);
-#		is($tests,13,"heck number of commands");
-#		unlike($ret,qr/LaCrossePairForSec.*/,"check cmd LaCrossePairForSec not present");
-#		
-#		plan(2);
-#
-#		delete($targetHash->{cc1101_available});
-#	};
 
 	subtest 'Test SIGNALduino with dummy attrib 1 / devio open' => sub {
 		plan(3);
@@ -638,7 +648,7 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 		subtest 'Test "not allowed" - set commands' => sub {
 			plan(6);
 
-			unlike($ret,qr/.*cc1101_[^L].*/,"check cmd cc1101_.* execpt cc1101_LaCrossePairForSec not allowed");
+			unlike($ret,qr/.*cc1101_[^L].*/,"check cmd cc1101_.* execpt LaCrossePairForSec not allowed");
 			unlike($ret,qr/.*disableMessagetype.*/,"check cmd disableMessagetype not allowed");
 			unlike($ret,qr/.*enableMessagetype.*/,"check cmd enableMessagetype not allowed");
 			unlike($ret,qr/.*flash.*/,"check cmd flash not allowed");
