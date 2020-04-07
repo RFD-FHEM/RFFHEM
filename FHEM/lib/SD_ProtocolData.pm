@@ -2658,7 +2658,7 @@ package lib::SD_ProtocolData;
 				sync            => 'AA54',
 				modulation      => 'GFSK',
 				match           => '^0.*',   # ToDo, check! fuer eine regexp Pruefung am Anfang vor dem method Aufruf
-				clientmodule    => 'Kopp',
+				clientmodule    => 'KOPP_FC',
 				method          => \&main::SIGNALduino_KoppFreeControl,
 			},
 		"103"	=>	# Lacrosse Mode 2 - IT+
