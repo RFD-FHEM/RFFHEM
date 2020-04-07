@@ -71,344 +71,54 @@ revised logoutput
 * SIGNALduino_PCA301, added for some processing
 * SIGNALduino_KoppFreeControl, added for some processing
 * SIGNALduino_FW_getProtocolList, revised for new message format MN
-2020-04-03 - added meta information to 00_SIGNALduino.pm (#811)
+--- Unreleases what comes up here ----
+
+07.04.2020
+  00_SIGNALduino.pm 
+    new protocol 97 Momento remote control for wireless digital picture frame (#812)
+    automatic load cc1101 config after change value or restart
+    made multiple get commands more easy and robust to handle
+    new protocol 58 Weather F007-T (#803)
+    new protocol 27 for EuroChron EFTH-800 (#764)
+    extended cc1101 settings to ccconf reading
+
+    several retrys to initialize the SIGNALduino (#804)
+    prevent asyncOut if there is no client connected
+    flash via http: Fixed Filename extraction of URL if name is not found in http header
+    bug fixed set sduino cc1101_rAmpl 42 (#801)
+    Allow lower case letters for hex values ​​in set / get cc1101_reg
+    fixed set_bWidth command (#789)
+    bug fix set/get cc1101_patable (#789)
+    filtered possible set commands per device type 
+    new  protocol 26 - Remote control xavax 00111939
+    new protocol 20 - Remote control diesel heating
+
+    added meta information to 00_SIGNALduino.pm (#811)
+    missing values ​​added to the patable list.
+    restriction to permitted frequency ranges.
+
+  14_SD_WS.pm
+     new sensors added TFA/Froggit/Renkforce/Ambient Weather F007-T 
+     ew rain sensor TFA 30.3233.01 
+     implemented sub to be called by other modules to receive get command response
+     new sensor for EuroChron EFTH-800 (#764)
+
+  SD_UT.pm 
+     new model Novy_840039, revised SIGNALduuino readme & tests (#794)
+     new remote control xavax 00111939
+     new remote control with 4 buttons for diesel heating
+
+	 model Novy_840039, rename button text power_button to power_on_off
+     remove sort option
+
+     fix UTClock for all models
+     TR-502MSV bugfix, ident was only 8 bit, must be 12 bit long
+     RC_10 button set all work after renaming the device
+
+  10_SD_GT
+     add codes for button all in version 2
+     new modul for remote controls based on protocol GT-9000
 
-00_SIGNALduino.pm
-
-added meta information to module
-
-2020-04-02 - Merge branch 'dev-r34' into dev-r34_meta
-2020-04-01 - 00_SIGNALduino.pm
-Updated meta information
-2020-03-30 - New protocol 97 Momento remote control for wireless digital picture frame (#812)
-2020-03-30 - New protocol 97 Momento remote control for wireless digital picture frame
-2020-03-30 - several attempts to initialize the SIGNALduino (#804)
-* several attempts to initialize the SIGNALduino
-try to reduce call to SIGNALduino_StartInit
-removed duplicate logoutput DoInit, ...
-2020-03-29 - Merge branch 'dev-r34' into dev-r34_StartInit
-2020-03-29 - 00_SIGNALduino.pm
-try to reduce call to SIGNALduino_StartInit
-removed duplicate logoutput DoInit, ...
-fixed multiple attempts to initialize the SIGNALduino
-Merge branch 'dev-r34' into dev-r34_flashFilenameFix
-prevent asyncOut for get results if $hash->{CL} is not defined
-fixed #805  $hash->{ucCmd} was created while testing existens of {cmd} in SIGNALduino_HandleWriteQueue
-Flash via http: Fixed Filename extraction of URL if name is not found in http header
-2020-03-25 - Refresh cc1101 registers (#800)
-
-* Update 00_SIGNALduino.pm
-- automatic load cc1101 config after change value or restart
-- rename sub SIGNALduino_Get_ConfigQuery to SIGNALduino_delayed_Get
-- remove cc1101_config internals and set readings if config is queried
-- Idea to make multiple get commands more easy and robust to handle
-- rename sub and revised logoutput
-- fix some parameter https://github.com/HomeAutoUser/RFFHEM/pull/9#issuecomment-596668609
-- define $hash->{ucCmd}->{timenow} if ucCmd is specified on serval places
-- try to query ccconf and ccpatable only if device is initalized
-- log if timenow is not set
-- corrected config requests per uC command
-- SIGNALduino_Get_delayed support more than one arg for cmds
-- revised logoutput -> $hash->{ucCmd}output always HASH, now ... Get_delayed, timenow was missing, set "value"
-- added option ccconf & ccconf if RESTART and programm shutdown restart
-- indentation fixed
-- small regex fix
-- removed internals from commandref which are deleted
-
-* Update test_sub_SIGNALduino_CheckccConfResponse-definition.txt
-- revised test from internals to readings
-
-* tests revised from internals to readings
-- revised test from internals to readings
-- revised test descriptions
-
-* tests/test_sub_SIGNALduino_Get-definition.txt
-clear uCcmd after every subtest
-
-* tests/test_DeviceData_rmsg-definition.txt
-fix restore of attribute whitelist_IDs after subtests
-
-* tests/test_sub_SIGNALduino_Parse_MU-definition.txt
-fix restore of attribute whitelist_IDs after subtests
-
-* tests\test_sub_SIGNALduino_CheckVersionResp-definition.txt
-extended test to cover register query after valid version is rereived
-
-* tests/test_sun_SIGNALduino_Get_Callback-definition.txt
- cleanup after test
-
-* tests/test_get_availableFirmware-definition.txt
-Cleanup getCmd before testing
-
-* UnitTest/tests/test_sub_SIGNALduino_Get_delayed-definition.txt
-added test to verify sub SIGNALduino_Get_delayed
-
-* UnitTest/tests/test_sub_SIGNALduino_SendFromQueue-definition.txt
-Added test to verfiy sub SIGNALduino_SendFromQueue
-
-* CHANGED
-cleaned
-2020-03-24 - CHANGED
-
-cleaned
-2020-03-24 - 00_SIGNALduino.pm
-- Update readings after changing registers automatic
-- Idea to make multiple get commands more easy and robust to handle
-
-2020-03-20 - New sensor protocol 58 TFA/Froggit/Renkforce/Ambient Weather F007-T (#803)
-
-New sensor protocol 58 TFA/Froggit/Renkforce/Ambient Weather F007-T only temperature
-2020-03-20 - Update 14_SD_WS.pm
-
-remove attribut "model" by protocol 58
-2020-03-17 - new sensors protocol 58 TFA/Froggit/Renkforce/Ambient Weather only temperature
-* Update SD_ProtocolData.pm and 14_SD_WS.pm protocol 58
-
-2020-03-16 - new protocol 54 for rain sensor TFA 30.3233.01 (#802)
-* Update SD_ProtocolData.pm and 14_SD_WS.pm protocol 54
-
-2020-02-29 - bug fixed set sduino cc1101_rAmpl 42 (#801)
-
-* bug fixed set sduino cc1101 rAmpl 42
-2020-02-28 - bug fixed set sduino cc1101 rAmpl 42
-2020-02-25 - Allow lower case letters for hex values ​​in set / get cc1101_reg (#799)
-
-* Allow lower case letters for hex values ​​in set / get cc1101_reg
-2020-02-25 - Merge branch 'dev-r34' into dev-r34_set-get-cc1101-register
-2020-02-25 - Allow lower case letters for hex values in set / get cc1101_reg
-
-2020-02-24 - fix - Set_bWidth & PERL WARNING (#791)
-
-* Update 00_SIGNALduino.pm
-- fix Set_bWidth (https://github.com/RFD-FHEM/RFFHEM/pull/789#issuecomment-579444268)
-- fix datarate (https://github.com/RFD-FHEM/RFFHEM/pull/789#issuecomment-579946510)
-- fix get list , wrong value set_bWidth inside
-
-2020-02-23 - Update 00_SIGNALduino.pm (#798)
-
-- fix https://github.com/RFD-FHEM/RFFHEM/issues/782#issuecomment-581020586
-2020-02-22 - Update SD_ProtocolData.pm (#796)
-
-* Update SD_ProtocolData.pm
-- added ID 54 TFA Drop 30.3233.01 - Rain gauge
-- added ID 54.1 for message decode MS and not ID 54 MU
-- added new ID 31 LED Controller LTECH, LED M Serie RF RGBW - M4 & M4-5A
-- revised doc ID 34
-
-* Update test_DeviceData_rmsg-definition.txt
-- revised line indent
-- set attrib whitelist_IDs for test ID
-- revised direct hash to function
-- revised max maxMuMsgRepeat value
-
-* Update test_sub_SIGNALduino_Parse_MU-definition.txt
-- test extended because of a double dispatch of a similar protocol
-2020-02-22
-  SD_ProtocolData.pm: - added LED Controller LTECH, LED M Serie RF RGBW - M4 & M4-5A
-                      - added TFA Drop 30.3233.01 - Rain gauge
-
-2020-02-05 - SD_UT new model Novy_840039, revised SIGNALduuino readme & tests (#794)
-
-* - added new model SD_UT & commandref
-- added new model Novy_840039
-- revised readme
-
-* Update 14_SD_UT.pm
-- revised code
-- model, extension to protocol 81
-
-* Update test_SD_UT_devices-definition.txt
-- revised test
-
-* Update test_SD_UT_devices-definition.txt
-- more understandable note
-
-* Update 14_SD_UT.pm
-- added commandref attrib UTclock
-
-* Update 14_SD_UT.pm
-- model Novy_840029, revised doc
-- model Novy_840039, rename button text power_button to power_on_off
-
-* Update 14_SD_UT.pm
-- fix UTClock for all models
-- revised doc Novy_840029
-- revised text for unknown devicecode
-- remove sort option
-
-* Update 14_SD_UT.pm
-- revised modulversion
-2020-01-30 - bug fix set/get cc1101_patable (#789)
-
-* bugfix set/get cc1101_patable
-Missing values ​​added to the patable list.
-Restriction to permitted frequency ranges.
-2020-01-29 
-* bugfix set/get cc1101_patable
-* Update SD_ProtocolData.pm
-
-* Update SD_ProtocolData.pm - doc (#790)
-- revised documentation (https://github.com/RFD-FHEM/RFFHEM/issues/779#issuecomment-575949069)
-
-* Update SD_ProtocolData.pm
-
-- added knownFreqs from documentation
-2020-01-26 - rename internal cc1101_patable (#787)
-
-Missing values ​​added to the patable list.
-Restriction to permitted frequency ranges.
-2020-01-26 - rename internal CC1101_PATABLE in cc1101_patable
-2020-01-24 - Update 00_SIGNALduino.pm (#780)
-
-* revised internals
-- rename internal CC1101_Available to cc1101_available
-- rename internal CC1101_CONFIG to cc1101_config
-
-* - revised name / cut Frequency name in output
-- revised output to
-"ccconf: Freq: 433.920 MHz, Bandwidth: 325 KHz, rAmpl: 42 dB, sens: 8 dB, DataRate: 5603.79 Baud, Modulation: ASK/OOK, Syncmod: No preamble/sync"
-- internal cc1101_configto "Freq: 433.920 MHz, Bandwidth: 325 KHz, rAmpl: 42 dB, sens: 8 dB, DataRate: 5603.79 Baud"
-- internal cc1101_config_ext to "Modulation: ASK/OOK, Syncmod: No preamble/sync"
-
-* Update 00_SIGNALduino.pm
-- added commandref
-2020-01-18 - Fix Scalar value @_[2] better written as $_[2] (#783)
-
-* 00_SIGNALduino.pm
-
-Fixes #781
-
-* Automaitc updated controls and CHANGED
-2020-01-18 - 00_SIGNALduino.pm
-
-Fixes #781
-2020-01-13 - Update SD_ProtocolData.pm (#778)
-
-- added doc new model
-2020-01-12 - Update 00_SIGNALduino.pm - rename Internals (#775)
-
-* Update 00_SIGNALduino.pm
-
-- grouping cc1101
-
-* Update test_sub_SIGNALduino_Get-definition.txt
-
-- revised test
-
-* Update test_sub_SIGNALduino_CheckCmdResp-definition.txt
-
-- rename test parameter internal
-
-* Update test_sub_SIGNALduino_Get_Callback-definition.txt
-
-- rename test parameter internal
-
-* Update test_sub_SIGNALduino_Set-definition.txt
-
-- rename test parameter internal
-2020-01-12 - Delete 14_SD_Keeloq.pm - transfer to fhem org (#776)
-
-* Delete 14_SD_Keeloq.pm
-
-- module ist transfer to https://github.com/fhem/SD_Keeloq
-
-* Update test_modules-definition.txt
-
-- delete name
-2020-01-11 - New sub for get commands from other modules (API) (#774)
-
-* 00_SIGNALduino.pm
-
-Fixes two perlwarnings
-new sub SIGNALduino_Get_Callback to allow other modules to perform a get request and receive response via callbackfn
-
-added new UnitTest/tests/test_sub_SIGNALduino_Get_Callback-definition.txt
-
-2020-01-10 - 00_SIGNALduino.pm
-- Implemented sub to be called by other modules to receive get command response
--fixed two perlwarnings
--Improved test
-
-2020-01-10 - Update SD_ProtocolData.pm (#773)
-
-* Update SD_ProtocolData.pm
-- added new def (clockabs autois very inconvenient)
-
-* Update SD_ProtocolData.pm
-- revised name
-- revised average clockabs
-
-* Update SD_ProtocolData.pm
-- revised doc
-
-2020-01-10 - doc Update SD_ProtocolData.pm (#771)
-
-* Update SD_ProtocolData.pm
-
-- added doc
-
-* Update SD_ProtocolData.pm
-
-- rename name
-- rename comment
-2020-01-09 - 00_SIGNALduino.pm
-- code rewrite of get command handling
-- removed reading version and generated internal version
-- Updated commandref for cc1101_frequency
-
-2020-01-09 - Update SD_ProtocolData.pm (#770)
-
-- added doc ID 44 & ID 82 (no change of definition)
-2020-01-06 - new protocol 27 for EuroChron EFTH-800 (#764)
-
-new protocol 27 for EuroChron EFTH-800
-2020-01-06 - 14_SD_WS.pm: new protocol 27 for EuroChron EFTH-800
-2020-01-02 - fix reset for dummy - #755 (#756)
-
-* Update 00_SIGNALduino.pm
-- added check for dummy, now dummy reset with command reset if closed  https://github.com/RFD-FHEM/RFFHEM/issues/755
-- revised code sub SIGNALduino_ResetDevice to check Dummy
-2019-12-31 - Dev r34 - fix get #750 (#753)
-
-* Update 00_SIGNALduino.pm
-- rename wrong output (sub SIGNALduino_Set_raw)
-- fix sub SIGNALduino_AddSendQueue for https://github.com/RFD-FHEM/RFFHEM/issues/750
-- added logoutput for some "debugging"  (sub SIGNALduino_SendFromQueue & SIGNALduino_HandleWriteQueue)
-- revised logout sub SIGNALduino_Set_sendMsg to scheme
-- revised logout sub SIGNALduino_Set_MessageType to scheme
-- revised name SIGNALduino_Set_flash (SIGNALduino_set_flash -> SIGNALduino_Set_flash)
-- revised logout sub SIGNALduino_Set_flash to scheme
-- revised logout sub SIGNALduino_PrepareFlash to scheme
-- revised logout sub SIGNALduino_avrdude to scheme
-- fix PERL WARNING: Use of uninitialized value https://github.com/RFD-FHEM/RFFHEM/issues/750
-2019-12-31
-  00_SIGNALduino.pm: Fixes #750 (some get commands not work & WARNINGS)
-2019-12-30
-  00_SIGNALduino.pm: Fixes #751 (fhem crash and not working flash command)
-2019-12-29
-  update.yml: changed detection if a new controls file has been written to diff
-              fix for workflow add files to index only if they are not already there
-2019-12-28
-  00_SIGNALduino.pm: 
-   Moved code for cc1101 set commands into cc1101 package 
-   Filtered possible set commands for dummy devices
-26.12.2019
-  14_SD_UT.pm: new protocol 26 - Remote control xavax 00111939
-  10_SD_GT.pm: add codes for button all in version 2
-  SD_ProtocolData.pm: add documentation for end, msgIntro and msgOutro
-18.12.2019
-  14_SD_UT.pm:
-    TR-502MSV bugfix, ident was only 8 bit, must be 12 bit long
-    new protocol 20 - Remote control with 4 buttons for diesel heating
-17.12.2019
-  14_SD_UT.pm: revised documentation
-15.12.2019 
-  10_SD_GT.pm: new modul for remote controls based on protocol GT-9000
-  SD_ProtocolData.pm: new protocol 49, 49.1 and 49.2 for SD_GT, delete protocol 26 and 27
-  14_SD_UT.pm: bugfix RC_10 button set all work after renaming the device
-  SD_ProtocolData.pm: ID34 revised doc & added reconstructBit | remove ID31 = same ID 34
-12.12.2019
-  00_SIGNALduino.pm: added modulationsinfo to ccconf, added commandref command raw
 06.12.2019
   00_SIGNALduino.pm: 
     logoutput adjusted to standard -> $name: "sub", "Text"
