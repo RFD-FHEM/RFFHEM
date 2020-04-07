@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 14_SD_WS09.pm 18672 2019-02-20 20:46:34Z Sidey $
+# $Id: 14_SD_WS09.pm 21622 2020-04-07 21:42:13Z Sidey $
 # 
 # The purpose of this module is to support serval 
 # weather sensors like WS-0101  (Sender 868MHz ASK   Epmfänger RX868SH-DV elv)
@@ -686,7 +686,7 @@ sub SD_WS09_CRCCHECK($) {
 
 =pod
 =item summary    Supports weather sensors (WH1080/3080/CTW-600) protocl 9 from SIGNALduino
-=item summary_DE Unterst&uumltzt Wettersensoren (WH1080/3080/CTW-600) mit Protokol 9 vom SIGNALduino
+=item summary_DE Unterstuetzt Wettersensoren (WH1080/3080/CTW-600) / Protokol 9 vom SIGNALduino
 =begin html
 
 <a name="SD_WS09"></a>
