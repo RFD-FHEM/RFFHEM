@@ -1,5 +1,6 @@
 defmod test_sub_SIGNALduino_LaCrosse UnitTest dummyDuino ( 
 {
+	# note: sub SIGNALduino_LaCrosse use sub SIGNALduino_CalculateCRC
 	my $mock = Mock::Sub->new;
 
 	subtest 'LaCrosse Tests' => sub {
