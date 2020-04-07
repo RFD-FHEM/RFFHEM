@@ -4346,7 +4346,7 @@ sub SIGNALduino_CalculateCRC($$) {
 ##############################################################
 # xFSK method functions
 
-sub SIGNALduino_LaCrosse() {
+sub SIGNALduino_LaCrosse {
 	my ($name,$dmsg,$id) = @_;
 	my $hash = $defs{$name};
 	
