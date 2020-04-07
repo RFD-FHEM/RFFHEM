@@ -414,7 +414,7 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 			    	end();
     			};
 		    },
-		    return => check_set match qr/^Unknown argument \?, choose one of.*/,match qr/cc/,match qr/LaCrossePairForSec/
+		    return => check_set match qr/^Unknown argument \?, choose one of.*/,match qr/cc/,!match qr/LaCrossePairForSec/
 		},
 		{
 			cc1101_available 	=> 1,
@@ -469,6 +469,21 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 		    },
 			input		=>	"?",
 		    return 		=> check_set match qr/reset/,!match qr/cc/,!match qr/LaCrossePairForSec/
+		},
+		{
+			cc1101_available 	=> 1,
+			testname=>  "set ? command (1.6)",
+			input	=>	"?",
+			dummy 		=> 0,
+			DIODev		=> 1,
+			pre_code 	=> sub { readingsSingleUpdate($targetHash,"cc1101_config_ext","Modulation: ASK/OOK, Syncmod: No preamble/sync",0); },
+			post_code	=> sub { CommandDeleteReading(undef,"$target cc1101_config_ext") ; },
+			check =>  sub { 
+			    return array  {
+			    	end();
+    			};
+		    },
+		    return => check_set match qr/^Unknown argument \?, choose one of.*/,match qr/cc/,!match qr/LaCrossePairForSec/
 		},
 		{
 			testname	=>  "set reset command for inactive device",
@@ -538,6 +553,7 @@ defmod test_sub_SIGNALduino_Set UnitTest dummyDuino
 		    },
 			input		=>	"LaCrossePairForSec 30",
 		},
+
 		
 	);
 

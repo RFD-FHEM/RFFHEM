@@ -655,7 +655,7 @@ sub SIGNALduino_Set_FhemWebList {
 			(
 				( IsDummy($hash->{NAME}) && $_ =~ m/^(?:close|reset|LaCrossePairForSec)/ ) ||
 				($_ =~ m/^LaCrossePairForSec/ && ReadingsVal($hash->{NAME},"cc1101_config_ext","") =~ "2-FSK") ||				
-				( InternalVal($hash->{NAME},"cc1101_available",0) || (!InternalVal($hash->{NAME},"cc1101_available",0) && $_ !~ /^cc/ && $_ !~ m/^LaCrossePairForSec/)) &&
+				( (InternalVal($hash->{NAME},"cc1101_available",0 ) || (!InternalVal($hash->{NAME},"cc1101_available",0) && $_ !~ /^cc/ )) && $_ !~ m/^LaCrossePairForSec/) &&
 				( !IsDummy($hash->{NAME}) && (defined(DevIo_IsOpen($hash)) || $_ =~ m/^(?:flash|reset)/)  )
 			)
 		)
