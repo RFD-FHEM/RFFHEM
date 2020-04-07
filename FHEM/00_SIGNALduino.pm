@@ -1,6 +1,6 @@
 # $Id: 00_SIGNALduino.pm 21620 2020-04-07 21:20:33Z Sidey $
 #
-# v3.4.2 - https://github.com/RFD-FHEM/RFFHEM/tree/dev-r34
+# v3.4.3 - https://github.com/RFD-FHEM/RFFHEM/tree/dev-r34
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incoming messages
 # see http://www.fhemwiki.de/wiki/SIGNALDuino
 # It was modified also to provide support for raw message handling which can be send from the SIGNALduino
@@ -32,7 +32,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.4.2",
+	SDUINO_VERSION            => "v3.4.3_dev_08.04",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
