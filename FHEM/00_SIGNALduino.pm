@@ -4346,10 +4346,10 @@ sub SIGNALduino_CalculateCRC($$) {
 ##############################################################
 # xFSK method functions
 
-sub SIGNALduino_LaCrosse() {
+sub SIGNALduino_LaCrosse($$$) {
 	my ($name,$dmsg,$id) = @_;
 	my $hash = $defs{$name};
-	
+
 	# Message Format:
 	#
 	# .- [0] -. .- [1] -. .- [2] -. .- [3] -. .- [4] -.
@@ -4408,10 +4408,11 @@ sub SIGNALduino_LaCrosse() {
 
 	$temperature = (($temperature* 10 + 1000) & 0xFFFF);
 	$dmsgMod .= " " . (($temperature >> 8) & 0xFF)  . " " . ($temperature & 0xFF) . " $humidity";
+
 	return (1,$dmsgMod);
 }
 
-sub SIGNALduino_PCA301() {
+sub SIGNALduino_PCA301($$$) {
 	my ($name,$rmsg,$id) = @_;
 	my $hash = $defs{$name};
 
@@ -4442,7 +4443,7 @@ sub SIGNALduino_PCA301() {
 	return (1,$dmsg);
 }
 
-sub SIGNALduino_KoppFreeControl() {
+sub SIGNALduino_KoppFreeControl($$$) {
 	my ($name,$dmsg,$id) = @_;
 	my $hash = $defs{$name};
 	my $anz = hex(substr($dmsg,0,2)) + 1;

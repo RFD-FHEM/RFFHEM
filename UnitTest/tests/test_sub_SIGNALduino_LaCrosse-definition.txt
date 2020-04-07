@@ -1,0 +1,32 @@
+defmod test_sub_SIGNALduino_LaCrosse UnitTest dummyDuino ( 
+{
+	# note: sub SIGNALduino_LaCrosse use sub SIGNALduino_CalculateCRC
+	my $mock = Mock::Sub->new;
+
+	subtest 'LaCrosse Tests' => sub {
+		plan tests => 2;
+	
+		subtest 'Test Protocol 100 (Lacrosse, Mode 1 - IT+) - sub work' => sub {
+			plan tests => 2;
+			my $dmsg="9AA6362CC8AAAA000012F8F4";
+			my $id=100;
+			my ($rcode,$dmsgMod);
+			($rcode,$dmsgMod)=SIGNALduino_LaCrosse($target,$dmsg,$id);
+		
+			is($rcode,1,"check returncode for single Lacrosse transmission");
+			is($dmsgMod,"OK 9 42 129 4 212 44","check result for single Lacrosse transmission");
+		};
+
+		subtest 'Test Protocol 103 (Lacrosse Mode 2 - IT+) - sub work' => sub {
+			plan tests => 2;
+			my $dmsg="9A05922F8180046818480800";
+			my $id=103;
+			my ($rcode,$dmsgMod);
+			($rcode,$dmsgMod)=SIGNALduino_LaCrosse($target,$dmsg,$id);
+		
+			is($rcode,1,"check returncode for single Lacrosse transmission");
+			is($dmsgMod,"OK 9 40 1 4 168 47","check result for single Lacrosse transmission");
+		};
+	};
+}
+)
