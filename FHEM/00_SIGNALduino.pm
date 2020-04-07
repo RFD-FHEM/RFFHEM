@@ -255,7 +255,7 @@ my %matchListSIGNALduino = (
 			"28:SD_Keeloq"				=> '^P(?:87|88)#.*',
 			"29:SD_GT"						=> '^P49#[A-Fa-f0-9]+',
 			"30:LaCrosse"					=> '^(\\S+\\s+9 |OK\\sWS\\s)',
-			"31:KOPP_FC"					=> '^kr..................',
+			"31:KOPP_FC"					=> '^kr.*',
 			"32:PCA301"						=> '^\\S+\\s+24',
 			"X:SIGNALduino_un"		=> '^[u]\d+#.*',
 );

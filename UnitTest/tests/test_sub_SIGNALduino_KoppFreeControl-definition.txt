@@ -1,0 +1,13 @@
+defmod test_sub_SIGNALduino_KoppFreeControl UnitTest dummyDuino ( 
+{
+	subtest 'Test sub KoppFreeControl' => sub {
+		plan tests => 2;
+		my $dmsg="07FA5E1721CC0F02FE000000000000";
+		my $id=102;
+		my ($rcode,$dmsgMod) = SIGNALduino_KoppFreeControl($target,$dmsg,$id);
+
+		is($rcode,1,"check rcode for KoppFreeControl dmsg");
+		is($dmsgMod,"kr07FA5E1721CC0F02","check dmsgMod for KoppFreeControl dmsg");
+	};
+}
+)
