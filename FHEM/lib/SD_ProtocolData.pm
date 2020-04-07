@@ -2619,7 +2619,7 @@ package lib::SD_ProtocolData;
 				length_max      => '40',
 			},
 		"100"	=>	# Lacrosse, Mode 1 - IT+
-							# MN;D=9AA6362CC8AAAA000012F8F4;R=4;
+							# ID=100, addr=42 temp=23.6 hum=44 bat=0 batInserted=128   MN;D=9AA6362CC8AAAA000012F8F4;R=4;
 			{
 				name            => 'Lacrosse mode 1',
 				comment         => 'example: TX25-IT,TX27-IT,TX29-IT,TX29DTH-IT,TX37,30.3143.IT,30.3144.IT',
@@ -2662,7 +2662,8 @@ package lib::SD_ProtocolData;
 				method          => \&main::SIGNALduino_KoppFreeControl,
 			},
 		"103"	=>	# Lacrosse Mode 2 - IT+
-							#
+							# ID=103, addr=40 temp=19.2 hum=47 bat=0 batInserted=0   MN;D=9A05922F8180046818480800;N=2;
+							# ID=103, addr=52 temp=21.5 hum=47 bat=0 batInserted=0   MN;D=9D06152F5484791062004090;N=2;
 			{
 				name            => 'Lacrosse mode 2',
 				comment         => 'example: TX35-IT,TX35DTH-IT,30.3155WD,30.3156WD,EMT7110',
