@@ -1,12 +1,14 @@
 defmod test_sub_SIGNALduino_CalculateCRC UnitTest dummyDuino ( 
 {
 	# note: sub SIGNALduino_CalculateCRC is for sub SIGNALduino_LaCrosse
+	use Test2::V0;
+	use Test2::Tools::Compare qw{is};
 
 	subtest 'sub CalculateCRC Tests' => sub {
-		plan tests => 2;
+		plan(2);
 	
 		subtest 'Test Protocol 100 (Lacrosse, Mode 1 - IT+) - sub work' => sub {
-			plan tests => 2;
+			plan(2);
 			my $dmsg="9AA6362CC8AAAA000012F8F4";
 			my ($calccrc,$crc) = SIGNALduino_CalculateCRC($dmsg,4);
 		
@@ -15,7 +17,7 @@ defmod test_sub_SIGNALduino_CalculateCRC UnitTest dummyDuino (
 		};
 
 		subtest 'Test Protocol 103 (Lacrosse Mode 2 - IT+) - sub work' => sub {
-			plan tests => 2;
+			plan(2);
 			my $dmsg="9A05922F8180046818480800";
 			my ($calccrc,$crc) = SIGNALduino_CalculateCRC($dmsg,4);
 		

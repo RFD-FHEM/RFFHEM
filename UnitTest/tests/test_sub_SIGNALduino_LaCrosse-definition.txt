@@ -1,12 +1,15 @@
 defmod test_sub_SIGNALduino_LaCrosse UnitTest dummyDuino ( 
 {
+	use Test2::V0;
+	use Test2::Tools::Compare qw{is};
+	
 	# note: sub SIGNALduino_LaCrosse use sub SIGNALduino_CalculateCRC
 
 	subtest 'LaCrosse Tests' => sub {
-		plan tests => 2;
+		plan(2);
 	
 		subtest 'Test Protocol 100 (Lacrosse, Mode 1 - IT+) - sub work' => sub {
-			plan tests => 2;
+			plan(2);
 			my $dmsg="9AA6362CC8AAAA000012F8F4";
 			my $id=100;
 			my ($rcode,$dmsgMod);
@@ -17,7 +20,7 @@ defmod test_sub_SIGNALduino_LaCrosse UnitTest dummyDuino (
 		};
 
 		subtest 'Test Protocol 103 (Lacrosse Mode 2 - IT+) - sub work' => sub {
-			plan tests => 2;
+			plan(2);
 			my $dmsg="9A05922F8180046818480800";
 			my $id=103;
 			my ($rcode,$dmsgMod);

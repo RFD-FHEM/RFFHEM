@@ -1,7 +1,10 @@
 defmod test_sub_SIGNALduino_KoppFreeControl UnitTest dummyDuino ( 
 {
+	use Test2::V0;
+	use Test2::Tools::Compare qw{is};
+
 	subtest 'Test sub KoppFreeControl' => sub {
-		plan tests => 2;
+		plan(2);
 		my $dmsg="07FA5E1721CC0F02FE000000000000";
 		my $id=102;
 		my ($rcode,$dmsgMod) = SIGNALduino_KoppFreeControl($target,$dmsg,$id);
