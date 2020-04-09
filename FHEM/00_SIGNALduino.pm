@@ -32,7 +32,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.5_dev_04.07",
+	SDUINO_VERSION            => "v3.5_dev_04.10",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -2760,10 +2760,16 @@ sub SIGNALduino_Parse_MN($$$$@) {
 			next;
 		}
 
+		if (defined(($ProtocolListSIGNALduino{$id}{length_min})) && $hlen < $ProtocolListSIGNALduino{$id}{length_min}) {
+			$hash->{logMethod}->($name, 3, "$name: Parse_MN, Error! ID=$id msg=$rawData ($hlen) too short, min=" . $ProtocolListSIGNALduino{$id}{length_min});
+			next;
+		}
+
 		if (!exists $ProtocolListSIGNALduino{$id}{method}) {
 			$hash->{logMethod}->($name, 3, "$name: Parse_MN, Error ID=$id, no method defined, it must be defined in the protocol hash!");
 			next;
 		}
+
 		my $method = $ProtocolListSIGNALduino{$id}{method};
 		if (!defined &$method) {
 			$hash->{logMethod}->($name, 3, "$name: Parse_MN, Error ID=$id, Unknown method. Please check it!");
