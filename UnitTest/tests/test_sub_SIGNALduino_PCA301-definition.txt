@@ -5,9 +5,9 @@ defmod test_sub_SIGNALduino_PCA301 UnitTest dummyDuino (
 	
 	# note: sub SIGNALduino_PCA301 use sub SIGNALduino_CalculateCRC16
 
-	subtest 'PCA301 Tests' => sub {
-		plan(3);
-
+	subtest 'Test rcode 1' => sub {
+		plan(2);
+		
 		subtest 'Test sub PCA301 with RAWMSG one' => sub {
 			note("MN;D=0405019E8700AAAAAAAA0F13AA16ACC0540AAA49C814473A2774D208AC0B0167;N=3;R=6;");
 
@@ -30,20 +30,20 @@ defmod test_sub_SIGNALduino_PCA301 UnitTest dummyDuino (
 
 			is($rcode,1,"check rcode for PCA301 dmsg two");
 			is($dmsgMod,"OK 24 1 5 3 183 161 1 170 170 170 170 7492","check dmsgMod for PCA301 dmsg two");
-		};
-		
-		subtest 'Test sub PCA301 with wrong RAWMSG' => sub {
-			note("MN;D=010503B7A101AAAAAAAA74000A9885E53246E91113F897A4F80D30C8DE602BDF;N=3;");
-			note("wrong checksum from dmsg");
+		};	
+	};
 
-			plan(2);
-			my $dmsg="010503B7A101AAAAAAAA74000A9885E53246E91113F897A4F80D30C8DE602BDF  ";
-			my $id=101;
-			my ($rcode,$dmsgMod) = SIGNALduino_PCA301($target,$dmsg,$id);
+	subtest 'Test rcode -1' => sub {
+		note("MN;D=010503B7A101AAAAAAAA74000A9885E53246E91113F897A4F80D30C8DE602BDF;N=3;");
+		note("wrong checksum from dmsg");
 
-			is($rcode,-1,"check rcode for PCA301 wrong dmsg with wrong checksum");
-			is($dmsgMod,"PCA301_convert: wrong checksum 7400","check dmsgMod for PCA301 wrong dmsg with wrong checksum");
-		};
+		plan(2);
+		my $dmsg="010503B7A101AAAAAAAA74000A9885E53246E91113F897A4F80D30C8DE602BDF  ";
+		my $id=101;
+		my ($rcode,$dmsgMod) = SIGNALduino_PCA301($target,$dmsg,$id);
+
+		is($rcode,-1,"check rcode for PCA301 wrong dmsg with wrong checksum");
+		is($dmsgMod,"PCA301_convert: wrong checksum 7400","check dmsgMod for PCA301 wrong dmsg with wrong checksum");	
 	};
 }
 )
