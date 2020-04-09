@@ -3,14 +3,26 @@ defmod test_sub_SIGNALduino_KoppFreeControl UnitTest dummyDuino (
 	use Test2::V0;
 	use Test2::Tools::Compare qw{is};
 
-	subtest 'Test sub KoppFreeControl' => sub {
+	my $id=102;
+	
+	subtest 'Test rcode 1' => sub {
 		plan(2);
+		note("MN;D=07FA5E1721CC0F02FE000000000000;");
 		my $dmsg="07FA5E1721CC0F02FE000000000000";
-		my $id=102;
-		my ($rcode,$dmsgMod) = SIGNALduino_KoppFreeControl($target,$dmsg,$id);
+			my ($rcode,$dmsgMod) = SIGNALduino_KoppFreeControl($target,$dmsg,$id);
 
 		is($rcode,1,"check rcode for KoppFreeControl dmsg");
-		is($dmsgMod,"kr07FA5E1721CC0F02","check dmsgMod for KoppFreeControl dmsg");
+		is($dmsgMod,"kr07FA5E1721CC0F02","check dmsgMod for KoppFreeControl dmsg");	
+	};
+
+	subtest 'Test rcode -1' => sub {
+		plan(2);
+		note("MN;D=07FF5E1721CC0F02FE000000000000;");
+		my $dmsg="07FF5E1721CC0F02FE000000000000";
+		my ($rcode,$dmsgMod) = SIGNALduino_KoppFreeControl($target,$dmsg,$id);
+
+		is($rcode,-1,"check rcode for KoppFreeControl dmsg");
+		is($dmsgMod,"KoppFreeControl checksum Error: msg=07FF5E1721CC0F02FE000000000000 checksumCalc=251 checksum=254","check dmsgMod with wrong checksum");
 	};
 }
 )
