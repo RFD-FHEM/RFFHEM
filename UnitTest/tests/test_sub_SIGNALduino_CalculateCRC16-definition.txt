@@ -4,25 +4,21 @@ defmod test_sub_SIGNALduino_CalculateCRC16 UnitTest dummyDuino (
 	use Test2::V0;
 	use Test2::Tools::Compare qw{is};
 
-	subtest 'Tests sub CalculateCRC16' => sub {
-		plan(1);
-	
-		subtest 'Test Protocol 101 (PCA 301) - sub work' => sub {
-			plan(2);
+	subtest 'Test sub CalculateCRC16' => sub {
+		note("Arduino CRC implemented in PERL");
+		note("https://github.com/heliflieger/a-culfw/blob/master/culfw/clib/lacrosse.c");
+		plan(2);
 
-			my $poly = 0x8005;
-			my $crc16 = 0x0000;
-			my $dmsg = "0405019E8700AAAAAAAA";
-			note("dmsg one - $dmsg");
+		my $poly = 0x8005;
+		my $crc16 = 0x0000;
 
-			my ($chk16) = SIGNALduino_CalculateCRC16($dmsg,$poly,$crc16);
-			is($chk16,3859,"check crc16 for PCA 301 dmsg one");
+		my $dmsg = "0405019E8700AAAAAAAA";
+		my ($chk16) = SIGNALduino_CalculateCRC16($dmsg,$poly,$crc16);
+		is($chk16,3859,"check return CalculateCRC16 dmsg $dmsg");
 
-			$dmsg = "010503B7A101AAAAAAAA";
-			note("dmsg two - $dmsg");
-			$chk16 = SIGNALduino_CalculateCRC16($dmsg,$poly,$crc16);
-			is($chk16,29842,"check crc16 for PCA 301 dmsg two");
-		};
+		$dmsg = "010503B7A101AAAAAAAA";
+		$chk16 = SIGNALduino_CalculateCRC16($dmsg,$poly,$crc16);
+		is($chk16,29842,"check return CalculateCRC16 dmsg $dmsg");
 	};
 }
 )
