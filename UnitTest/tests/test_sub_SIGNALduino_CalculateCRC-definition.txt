@@ -4,25 +4,27 @@ defmod test_sub_SIGNALduino_CalculateCRC UnitTest dummyDuino (
 	use Test2::V0;
 	use Test2::Tools::Compare qw{is};
 
-	subtest 'sub CalculateCRC Tests' => sub {
+	subtest 'Test sub CalculateCRC' => sub {
+		note("Arduino CRC implemented in PERL");
+		note("https://github.com/heliflieger/a-culfw/blob/master/culfw/clib/lacrosse.c");
+
 		plan(2);
-	
-		subtest 'Test Protocol 100 (Lacrosse, Mode 1 - IT+) - sub work' => sub {
+
+		my $dmsg="9AA6362CC8AAAA000012F8F4";
+		subtest 'Test with dmsg '.$dmsg => sub {
 			plan(2);
-			my $dmsg="9AA6362CC8AAAA000012F8F4";
 			my ($calccrc,$crc) = SIGNALduino_CalculateCRC($dmsg,4);
-		
-			is($calccrc,200,"check calccrc for Lacrosse dmsg");
-			is($crc,200,"check crc for Lacrosse dmsg");
+			is($calccrc,200,"check calccrc return");
+			is($crc,200,"check crc return");
 		};
 
-		subtest 'Test Protocol 103 (Lacrosse Mode 2 - IT+) - sub work' => sub {
+		$dmsg="9A05922F8180046818480800";
+		subtest 'Test with dmsg '.$dmsg => sub {
 			plan(2);
-			my $dmsg="9A05922F8180046818480800";
 			my ($calccrc,$crc) = SIGNALduino_CalculateCRC($dmsg,4);
-		
-			is($calccrc,129,"check calccrc for Lacrosse dmsg");
-			is($crc,129,"check crc for Lacrosse dmsg");
+
+			is($calccrc,129,"check calccrc return");
+			is($crc,129,"check crc return");		
 		};
 	};
 }

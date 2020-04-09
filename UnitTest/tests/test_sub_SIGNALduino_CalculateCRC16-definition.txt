@@ -5,8 +5,6 @@ defmod test_sub_SIGNALduino_CalculateCRC16 UnitTest dummyDuino (
 	use Test2::Tools::Compare qw{is};
 
 	subtest 'Test sub CalculateCRC16' => sub {
-		note("Arduino CRC implemented in PERL");
-		note("https://github.com/heliflieger/a-culfw/blob/master/culfw/clib/lacrosse.c");
 		plan(2);
 
 		my $poly = 0x8005;
