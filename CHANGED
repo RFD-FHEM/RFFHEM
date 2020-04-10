@@ -1,3 +1,10 @@
+2020-04-10 - Attribute IODev deleted in different modules (#822)
+
+* Attribute "IODev" in module 14_SD_WS.pm deleted.
+* Attribute "IODev" in module 14_Hideki.pm deleted.
+* Attribute "IODev" in module 14_SD_WS07.pm deleted.
+* Attribute "IODev" in module 14_SD_WS_Maverick.pm deleted.
+* Attribute "IODev" in module 14_SD_AS.pm.pm deleted.
 10.04.2020
     14_SD_AS.pm: Attribute "IODev" in module deleted.
     14_SD_WS_Maverick.pm: Attribute "IODev" in module deleted.
