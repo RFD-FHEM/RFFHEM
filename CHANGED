@@ -1,3 +1,7 @@
+2020-04-10 - 00_SIGNALduino.pm
+
+Fixes get raw command #820
+updated  versiondate
 2020-04-10 - Merge branch 'dev-r34' of github.com:RFD-FHEM/RFFHEM into dev-r34
 07.04.2020
   00_SIGNALduino.pm 
