@@ -32,7 +32,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.4.3_dev_08.04",
+	SDUINO_VERSION            => "v3.4.3_dev_10.04",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -1017,7 +1017,10 @@ sub SIGNALduino_Get_Raw {
 	{
 		$hash->{logMethod}->( $hash->{NAME}, 4, "$hash->{NAME}: msg get raw: $a[1]");
 		return SIGNALduino_Parse($hash, $hash, $hash->{NAME}, $a[1]);
+	} else {
+		return "This command is not supported via get raw.";
 	}
+	
 }
 
 
@@ -5028,9 +5031,7 @@ sub SetSens {
 		</li><br>
         <a name="raw"></a>
 		<li>raw<br>
-		Issue a SIGNALduino firmware command, and wait for one line of data returned by
-		the SIGNALduino. See the SIGNALduino firmware code  for details on SIGNALduino
-		commands. With this line, you can send almost any signal via a transmitter connected
+		Only for manual processing of messages (MS, MC, MU, ...). The get raw command does not send any commands to the microcontroller!
 		</li><br>
         <a name="uptime"></a>
 		<li>uptime<br>
@@ -5467,7 +5468,7 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
 		</li><br>
 		<a name="raw"></a>
 		<li>raw<br>
-		Abh&auml;ngig von der installierten Firmware! Somit k&ouml;nnen Sie einen SIGNALduino-Firmware-Befehl direkt ausf&uuml;hren.
+		Nur um Nachrichten (MS, MC, MU, ...) manuell verarbeiten zu können. Der get raw Befehl übergibt keine Kommandos an den verbundenen Microcontroller!
 		</li><br>
 		<a name="uptime"></a>
 		<li>uptime<br>
