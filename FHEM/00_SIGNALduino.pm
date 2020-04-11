@@ -51,11 +51,9 @@ use constant {
 
 
 sub SIGNALduino_Attr(@);
-#sub SIGNALduino_Clear($);           # wird nicht mehr benoetigt
 sub SIGNALduino_HandleWriteQueue($);
 sub SIGNALduino_Parse($$$$@);
 sub SIGNALduino_Read($);
-#sub SIGNALduino_ReadAnswer($$$$);  # wird nicht mehr benoetigt
 sub SIGNALduino_Ready($);
 sub SIGNALduino_Write($$$);
 sub SIGNALduino_SimpleWrite(@);
@@ -242,7 +240,7 @@ my %matchListSIGNALduino = (
 			"15:SOMFY"						=> '^Ys[0-9A-F]+',
 			"16:SD_WS_Maverick"		=> '^P47#[A-Fa-f0-9]+',
 			"17:SD_UT"						=> '^P(?:14|20|26|29|30|34|46|68|69|76|81|83|86|90|91|91.1|92|93|95|97)#.*',	# universal - more devices with different protocols
-			"18:FLAMINGO"					=> '^P13\.?1?#[A-Fa-f0-9]+',							# Flamingo Smoke
+			"18:FLAMINGO"					=> '^P13\.?1?#[A-Fa-f0-9]+',
 			"19:CUL_WS"						=> '^K[A-Fa-f0-9]{5,}',
 			"20:Revolt"						=> '^r[A-Fa-f0-9]{22}',
 			"21:FS10"							=> '^P61#[A-F0-9]+',
@@ -912,8 +910,6 @@ sub SIGNALduino_Set_LaCrossePairForSec {
 	$hash->{LaCrossePair} = 1;  # LaCrosse autoCreateState: 0 = autoreate not defined | 1 = autocreate defined | 2 = autocreate active
 	$hash->{logMethod}->($hash->{NAME}, 4, "$hash->{NAME}: Set_LaCrossePairForSec, LaCrosse autocreate active for $a[1] seconds");
 
-
-
 	InternalTimer(gettimeofday()+$a[1], "SIGNALduino_RemoveLaCrossePair", $hash, 0);
 
 	return undef;
@@ -1055,7 +1051,6 @@ sub SIGNALduino_Get_Raw {
 	} else {
 		return "This command is not supported via get raw.";
 	}
-	
 }
 
 
@@ -1940,6 +1935,7 @@ sub SIGNALduino_PatternExists {
 	#return ($valid ? @results : -1);  # return @pstr if $valid or -1
 }
 
+###############################
 #SIGNALduino_MatchSignalPattern{$hash,@array, %hash, @array, $scalar}; not used >v3.1.3
 sub SIGNALduino_MatchSignalPattern($\@\%\@$){
 
@@ -2195,7 +2191,7 @@ sub SIGNALduino_Parse_MS($$$$%) {
 	my $rssiStr= "";
 
 	if (defined($rssi)) {
-		$rssi = ($rssi>=128 ? (($rssi-256)/2-74) : ($rssi/2-74)); # todo: passt dies so? habe ich vom 00_cul.pm
+		$rssi = ($rssi>=128 ? (($rssi-256)/2-74) : ($rssi/2-74));
 		$rssiStr= " RSSI = $rssi"
 	}
 
@@ -2407,7 +2403,7 @@ sub SIGNALduino_Parse_MU($$$$@) {
 	my $rssiStr= "";
 
 	if (defined($rssi)) {
-		$rssi = ($rssi>=128 ? (($rssi-256)/2-74) : ($rssi/2-74)); # todo: passt dies so? habe ich vom 00_cul.pm
+		$rssi = ($rssi>=128 ? (($rssi-256)/2-74) : ($rssi/2-74));
 		$rssiStr= " RSSI = $rssi"
 	}
 
@@ -2632,7 +2628,7 @@ sub SIGNALduino_Parse_MC($$$$@) {
 	my $message_dispatched=0;
 	my $debug = AttrVal($iohash->{NAME},"debug",0);
 	if (defined($rssi)) {
-		$rssi = ($rssi>=128 ? (($rssi-256)/2-74) : ($rssi/2-74)); # todo: passt dies so? habe ich vom 00_cul.pm
+		$rssi = ($rssi>=128 ? (($rssi-256)/2-74) : ($rssi/2-74));
 	}
 
 	return undef if (!$clock);
@@ -2743,7 +2739,7 @@ sub SIGNALduino_Parse_MN($$$@) {
 	my $rssiStr= "";
 
 	if (defined($rssi)) {
-		$rssi = ($rssi>=128 ? (($rssi-256)/2-74) : ($rssi/2-74)); # todo: passt dies so? habe ich vom 00_cul.pm
+		$rssi = ($rssi>=128 ? (($rssi-256)/2-74) : ($rssi/2-74));
 		$rssiStr= " RSSI = $rssi"
 	}
 
