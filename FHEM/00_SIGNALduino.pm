@@ -7,9 +7,9 @@
 # The purpos is to use it as addition to the SIGNALduino which runs on an arduno nano or arduino uno.
 # It routes Messages serval Modules which are already integrated in FHEM. But there are also modules which comes with it.
 #
-# N. Butzek, S. Butzek, 2014-2015
-# S.Butzek,Ralf9 2016-2019
-# S.Butzek, HomeAutoUser, elektron-bbs 2019-2020
+# 2014-2015  S.Butzek, N.Butzek
+# 2016-2019  S.Butzek, Ralf9
+# 2019-2020  S.Butzek, HomeAutoUser, elektron-bbs
 
 package main;
 my $missingModulSIGNALduino="";
@@ -32,7 +32,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.5_dev_04.10",
+	SDUINO_VERSION            => "v3.5_dev_04.11",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -2735,12 +2735,11 @@ sub SIGNALduino_Parse_MC($$$$@) {
 }
 
 ###############################
-sub SIGNALduino_Parse_MN($$$$@) {
-	my ($hash, $iohash, $name, $rmsg,%msg_parts) = @_;
+sub SIGNALduino_Parse_MN($$$@) {
+	my ($hash, $name, $rmsg,%msg_parts) = @_;
 	my $rawData=$msg_parts{rawData};
 	my $rssi=$msg_parts{rssi};
 	my $dmsg;
-	my $debug = AttrVal($iohash->{NAME},"debug",0);
 	my $rssiStr= "";
 
 	if (defined($rssi)) {
@@ -2755,6 +2754,7 @@ sub SIGNALduino_Parse_MN($$$$@) {
 	foreach $id (@{$hash->{mnIdList}}) {
 		$modulation = SIGNALduino_getProtoProp($id,"modulation",undef);
 		$match = SIGNALduino_getProtoProp($id,"match",undef);
+
 		if ( $modulation && $match && $rawData =~ m/$match/ ) {
 			$hash->{logMethod}->($name, 4, "$name: Parse_MN, Found $modulation Protocol id $id -> $ProtocolListSIGNALduino{$id}{name} with match $match");
 		} elsif (!$match && $modulation) {
@@ -2808,7 +2808,6 @@ sub SIGNALduino_Parse($$$$@) {
 
 	my $debug = AttrVal($iohash->{NAME},"debug",0);
 
-
 	Debug "$name: incoming message: ($rmsg)\n" if ($debug);
 
 	if (AttrVal($name, "rawmsgEvent", 0)) {
@@ -2839,7 +2838,7 @@ sub SIGNALduino_Parse($$$$@) {
 	# Message xFSK   -> MN
   	elsif (@{$hash->{mnIdList}} && $rmsg=~ m/^MN;.*;/) 
 	{
-		$dispatched=  SIGNALduino_Parse_MN($hash, $iohash, $name, $rmsg,%signal_parts);
+		$dispatched=  SIGNALduino_Parse_MN($hash, $name, $rmsg,%signal_parts);
 	}
   	else {
 		Debug "$name: unknown Messageformat, aborting\n" if ($debug);
