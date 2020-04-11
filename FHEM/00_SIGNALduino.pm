@@ -2769,19 +2769,21 @@ sub SIGNALduino_Parse_MN($$$@) {
 		}
 
 		if (!exists $ProtocolListSIGNALduino{$id}{method}) {
-			$hash->{logMethod}->($name, 3, "$name: Parse_MN, Error ID=$id, no method defined, it must be defined in the protocol hash!");
+			$hash->{logMethod}->($name, 3, "$name: Parse_MN, Error! ID=$id, no method defined, it must be defined in the protocol hash!");
 			next;
 		}
 
 		my $method = $ProtocolListSIGNALduino{$id}{method};
 		if (!defined &$method) {
-			$hash->{logMethod}->($name, 3, "$name: Parse_MN, Error ID=$id, Unknown method. Please check it!");
+			$hash->{logMethod}->($name, 3, "$name: Parse_MN, Error! ID=$id, Unknown method. Please check it!");
 		} else {
 			my ($rcode,$res) = $method->($name,$rawData,$id);
 			if ($rcode != -1) {
 				$dmsg = $res;
 				$hash->{logMethod}->($name, 4, "$name: Parse_MN, Decoded matched MN Protocol id $id dmsg=$dmsg".$rssiStr);
 				SIGNALduno_Dispatch($hash,$rmsg,$dmsg,$rssi,$id);
+			} else {
+				$hash->{logMethod}->($name, 4, "$name: Parse_MN, Error! method $res");
 			}
 		}
 	}
