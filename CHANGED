@@ -1,20 +1,14 @@
-2020-04-11 - 00_SIGNALduino.pm
+xx.04.2020
+  00_SIGNALduino.pm
+   Workaround for bug #823, sending muliple commands causes collison
+   2020-04-10 - Attribute IODev deleted in different modules (#822)
+   Fix get raw command #820
+  14_SD_AS.pm: Attribute "IODev" in module deleted.
+  14_SD_WS_Maverick.pm: Attribute "IODev" in module deleted.
+  14_SD_WS07.pm: Attribute "IODev" in module deleted.
+  14_Hideki.pm: Attribute "IODev" in module deleted.
+  14_SD_WS.pm: Attribute "IODev" in module deleted.
 
-Workaround for bug #823, sending muliple commands causes collison
-2020-04-10 - Attribute IODev deleted in different modules (#822)
-
-* Attribute "IODev" in module 14_SD_WS.pm deleted.
-* Attribute "IODev" in module 14_Hideki.pm deleted.
-* Attribute "IODev" in module 14_SD_WS07.pm deleted.
-* Attribute "IODev" in module 14_SD_WS_Maverick.pm deleted.
-* Attribute "IODev" in module 14_SD_AS.pm.pm deleted.
-10.04.2020
-    14_SD_AS.pm: Attribute "IODev" in module deleted.
-    14_SD_WS_Maverick.pm: Attribute "IODev" in module deleted.
-    14_SD_WS07.pm: Attribute "IODev" in module deleted.
-    14_Hideki.pm: Attribute "IODev" in module deleted.
-    14_SD_WS.pm: Attribute "IODev" in module deleted.
-    00_SIGNALduino.pm: Fixes get raw command #820
 07.04.2020
   00_SIGNALduino.pm 
     new protocol 97 Momento remote control for wireless digital picture frame (#812)

@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 14_SD_WS07.pm 19859 2019-07-19 18:20:22Z Sidey $
+# $Id: 14_SD_WS07.pm v3.4.3 2019-07-19 18:20:22Z Sidey $
 # 
 # The purpose of this module is to support serval eurochron
 # weather sensors like eas8007 which use the same protocol
@@ -26,6 +26,7 @@
 
 package main;
 
+#use version 0.77; our $VERSION = version->declare('v3.4.3');
 
 use strict;
 use warnings;
