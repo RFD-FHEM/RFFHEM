@@ -32,7 +32,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.4.3_dev_10.04",
+	SDUINO_VERSION            => "v3.4.3_dev_11.04",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -1173,7 +1173,8 @@ sub SIGNALduino_CheckSendRawResponse
 		$hash->{logMethod}->($name, 4, "$name: CheckSendrawResponse, sendraw answer: $msg");
 		#RemoveInternalTimer("HandleWriteQueue:$name");
 		delete($hash->{ucCmd});
-		SIGNALduino_HandleWriteQueue("x:$name");
+		#SIGNALduino_HandleWriteQueue("x:$name"); # Todo #823 on github
+		InternalTimer(gettimeofday() + 0.1, "SIGNALduino_HandleWriteQueue", "HandleWriteQueue:$name") if (scalar @{$hash->{QUEUE}} > 0 && InternalVal($name,"sendworking",0) == 0);
 	}
 	return (undef);
 }
