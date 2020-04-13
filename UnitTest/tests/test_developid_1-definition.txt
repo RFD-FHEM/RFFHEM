@@ -228,7 +228,7 @@ defmod test_developid_1 UnitTest dummyDuino (
 	$subTestName='SIGNALduino_IdList developId "m" dispatch enabled/disabled tests';
 	subtest $subTestName => sub {
 		Log3 $name, 3 ,$subTestName." |->";
-		$logfilter="IdList, development Protocol is active";
+		$logfilter="IdList, development protocol is active";
 
 		plan tests => 2;
 		$regex_matched=0;
