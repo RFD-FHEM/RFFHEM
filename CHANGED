@@ -1,3 +1,4 @@
+2020-04-13 - new protocol 98 for wireless door bell GEA-028DB
 10.04.2020
     14_SD_AS.pm: Attribute "IODev" in module deleted.
     14_SD_WS_Maverick.pm: Attribute "IODev" in module deleted.
