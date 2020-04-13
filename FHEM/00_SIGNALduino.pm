@@ -2593,7 +2593,7 @@ sub SIGNALduino_Parse_MU($$$$@) {
 				if ( SIGNALduino_moduleMatch($name,$id,$dmsg) == 1)
 				{
 					$nrDispatch++;
-					$hash->{logMethod}->($name, 4, "$name: Parse_MU, Decoded matched MU protocol id $id dmsg $dmsg length $bit_length dispatch($nrDispatch/". AttrVal($name,'maxMuMsgRepeat', 4) . ")$rssiStr");
+					$hash->{logMethod}->($name, 4, "$name: Parse_MU, Decoded matched MU protocol id $id dmsg $dmsg length $bit_length dispatch($nrDispatch/". AttrVal($name,'maxMuMsgRepeat', 4) . ") $rssiStr");
 					SIGNALduno_Dispatch($hash,$rmsg,$dmsg,$rssi,$id);
 					if ( $nrDispatch == AttrVal($name,"maxMuMsgRepeat", 4))
 					{
@@ -2654,7 +2654,7 @@ sub SIGNALduino_Parse_MC($$$$@) {
 			Debug "clock and min length matched"  if ($debug);
 
 			if (defined($rssi)) {
-				$hash->{logMethod}->($name, 4, "$name: Parse_MC, Found manchester protocol id $id clock $clock RSSI $rssi -> $ProtocolListSIGNALduino{$id}{name}");
+				$hash->{logMethod}->($name, 4, "$name: Parse_MC, Found manchester protocol id $id clock $clock $rssiStr -> $ProtocolListSIGNALduino{$id}{name}");
 			} else {
 				$hash->{logMethod}->($name, 4, "$name: Parse_MC, Found manchester protocol id $id clock $clock -> $ProtocolListSIGNALduino{$id}{name}");
 			}
