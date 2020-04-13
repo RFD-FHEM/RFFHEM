@@ -1,4 +1,4 @@
-SIGNALduino - FHEM Modules stable Version 3.4.2
+SIGNALduino - FHEM Modules stable Version 3.4.3
 
 [![Coverage Status](https://coveralls.io/repos/github/RFD-FHEM/RFFHEM/badge.svg?branch=master)](https://coveralls.io/github/RFD-FHEM/RFFHEM?branch=master) [![Build Status](https://travis-ci.org/RFD-FHEM/RFFHEM.svg?branch=master)](https://travis-ci.org/RFD-FHEM/RFFHEM)
 

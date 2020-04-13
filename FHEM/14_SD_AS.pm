@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 14_SD_AS.pm 9830 2016-24-01 00:16:11
+# $Id: 14_SD_AS.pm 3.4.3 2016-24-01 00:16:11
 # The file is part of the SIGNALduino project
 # see http://www.fhemwiki.de/wiki/SIGNALduino
 # and was created to provide support for self build sensors.
@@ -9,6 +9,7 @@
 #
 
 package main;
+#use version 0.77; our $VERSION = version->declare('v3.4.3');
 
 use strict;
 use warnings;
@@ -46,9 +47,8 @@ SD_AS_Initialize($)
   $hash->{Match}     = "^P2#[A-Fa-f0-9]{7,8}";
   $hash->{DefFn}     = "SD_AS_Define";
   $hash->{UndefFn}   = "SD_AS_Undef";
-  $hash->{AttrFn}    = "SD_AS_Attr";
   $hash->{ParseFn}   = "SD_AS_Parse";
-  $hash->{AttrList}  = "IODev do_not_notify:0,1 showtime:0,1 ignore:0,1 ".$readingFnAttributes;
+  $hash->{AttrList}  = "do_not_notify:0,1 showtime:0,1 ignore:0,1 ".$readingFnAttributes;
   $hash->{AutoCreate}=
         { 
           "ArduinoSensor_temp.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4:Temp,", autocreateThreshold => "2:600"},
@@ -271,22 +271,6 @@ sub SD_AS_crc($$)
   return $lcrc;
 }
 
-
-sub
-SD_AS_Attr(@)
-{
-  my @a = @_;
-
-  # Make possible to use the same code for different logical devices when they
-  # are received through different physical devices.
-  return if($a[0] ne "set" || $a[2] ne "IODev");
-  my $hash = $defs{$a[1]};
-  my $iohash = $defs{$a[3]};
-  my $cde = $hash->{CODE};
-  delete($modules{AS}{defptr}{$cde});
-  $modules{AS}{defptr}{$iohash->{NAME} . "." . $cde} = $hash;
-  return undef;
-}
 
 1;
 

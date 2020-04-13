@@ -163,6 +163,20 @@ defmod test_sub_SIGNALduino_Get UnitTest dummyDuino
     		return 		=> "This command is only available with a cc1101 receiver"
 			
 	    },
+	    {
+			testname	=> "get raw e ",
+			cc1101_available	=> 0,
+			input		=> "raw e",
+			check =>  array  { end();	},
+    		return 		=> "This command is not supported via get raw."
+	    },
+	    {
+			testname	=> "get raw MS;P0=1500;D=0;",
+			cc1101_available	=> 0,
+			input		=> "raw MS;P0=1500;D=0;",
+			check =>  array  { end();	},
+ 			return 		=> undef		
+	    },
 
     );
 
