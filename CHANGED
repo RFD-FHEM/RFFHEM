@@ -1,3 +1,8 @@
+2020-04-13 - 00_SIGNALduino.pm - structure (#827)
+
+* 00_SIGNALduino.pm - structure
+- revised logoutput to one structure
+- added sub marker with package name
 2020-04-13 - 00_SIGNALduino.pm, test_developid_1-definition.txt
 
 * revision spelling Protocol to protocol https://github.com/RFD-FHEM/RFFHEM/pull/827#discussion_r407690909
