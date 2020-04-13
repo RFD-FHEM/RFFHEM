@@ -2181,7 +2181,7 @@ sub SIGNALduino_moduleMatch {
 
 ###############################
 # calculated RSSI and return string (RSSI = -77)
-sub SIGNALduino_calRSSI($) {
+sub SIGNALduino_calcRSSI($) {
 	my $rssi = shift;
 	$rssi = ($rssi>=128 ? (($rssi-256)/2-74) : ($rssi/2-74));
 	$rssi = "RSSI = $rssi";
@@ -2198,7 +2198,7 @@ sub SIGNALduino_Parse_MS($$$$%) {
 	my $rawData=$msg_parts{rawData};
 	my %patternList;
 	my $rssiStr= "";
-	$rssiStr = SIGNALduino_calRSSI($rssi) if (defined($rssi));
+	$rssiStr = SIGNALduino_calcRSSI($rssi) if (defined($rssi));
 
 	#Debug "Message splitted:";
 	#Debug Dumper(\@msg_parts);
@@ -2406,7 +2406,7 @@ sub SIGNALduino_Parse_MU($$$$@) {
 	my $message_dispatched=0;
 	my $debug = AttrVal($iohash->{NAME},"debug",0);
 	my $rssiStr= "";
-	$rssiStr = SIGNALduino_calRSSI($rssi) if (defined($rssi));
+	$rssiStr = SIGNALduino_calcRSSI($rssi) if (defined($rssi));
 
     Debug "$name: processing unsynced message\n" if ($debug);
 
@@ -2629,7 +2629,7 @@ sub SIGNALduino_Parse_MC($$$$@) {
 	my $dmsg;
 	my $message_dispatched=0;
 	my $debug = AttrVal($iohash->{NAME},"debug",0);
-	$rssiStr = SIGNALduino_calRSSI($rssi) if (defined($rssi));
+	$rssiStr = SIGNALduino_calcRSSI($rssi) if (defined($rssi));
 
 	return undef if (!$clock);
 	#my $protocol=undef;
@@ -2737,7 +2737,7 @@ sub SIGNALduino_Parse_MN($$$@) {
 	my $rssi=$msg_parts{rssi};
 	my $dmsg;
 	my $rssiStr= "";
-	$rssiStr = SIGNALduino_calRSSI($rssi) if (defined($rssi));
+	$rssiStr = SIGNALduino_calcRSSI($rssi) if (defined($rssi));
 
 	my $hlen = length($rawData);
 	my $match;
