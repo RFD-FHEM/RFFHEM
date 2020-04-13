@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 14_SD_WS_Maverick.pm 9346 2019-09-01 21:30:00Z v3.3 $
+# $Id: 14_SD_WS_Maverick.pm v3.4.3 2019-09-01 21:30:00Z v3.3 $
 # 
 # The purpose of this module is to support Maverick sensors
 # Sidey79 & Cruizer 2016
@@ -17,6 +17,7 @@
 
 package main;
 
+#use version 0.77; our $VERSION = version->declare('v3.4.3');
 
 use strict;
 use warnings;

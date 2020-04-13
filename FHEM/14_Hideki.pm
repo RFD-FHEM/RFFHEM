@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 14_Hideki.pm 18671 2019-02-20 20:38:21Z Sidey $
+# $Id: 14_Hideki.pm v3.4.3 2019-02-20 20:38:21Z Sidey $
 # The file is taken from the SIGNALduino project
 # see http://www.fhemwiki.de/wiki/SIGNALduino
 # and was modified by a few additions
@@ -9,6 +9,7 @@
 # changed the way crc and decrypt is used hjgode 20171129
 
 package main;
+#use version 0.77; our $VERSION = version->declare('v3.4.3');
 
 use strict;
 use warnings;

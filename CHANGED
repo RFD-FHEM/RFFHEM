@@ -79,13 +79,21 @@ UnitTest/tests/test_sub_SIGNALduino_Set-definition.txt
 
 --- --- --- Unreleases what comes up here ---- --- ---
 
-10.04.2020
-    14_SD_AS.pm: Attribute "IODev" in module deleted.
-    14_SD_WS_Maverick.pm: Attribute "IODev" in module deleted.
-    14_SD_WS07.pm: Attribute "IODev" in module deleted.
-    14_Hideki.pm: Attribute "IODev" in module deleted.
-    14_SD_WS.pm: Attribute "IODev" in module deleted.
-    00_SIGNALduino.pm: Fixes get raw command #820
+2020-04-13 - Bump dev-r34 to v3.4.4
+2020-04-13 - Merge remote-tracking branch 'remotes/origin/dev-r34' into v3.4.3
+
+13.04.2020
+  00_SIGNALduino.pm
+   Workaround for bug #823, sending muliple commands causes collison
+   2020-04-10 - Attribute IODev deleted in different modules (#822)
+   Fix get raw command #820
+   revised logoutput to one structure
+   Changed require DevIO to use DevIO #829
+  14_SD_AS.pm: Attribute "IODev" in module deleted.
+  14_SD_WS_Maverick.pm: Attribute "IODev" in module deleted.
+  14_SD_WS07.pm: Attribute "IODev" in module deleted.
+  14_Hideki.pm: Attribute "IODev" in module deleted.
+  14_SD_WS.pm: Attribute "IODev" in module deleted.
 
 07.04.2020
   00_SIGNALduino.pm 
