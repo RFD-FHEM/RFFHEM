@@ -1,6 +1,6 @@
 # $Id: 00_SIGNALduino.pm 21620 2020-04-07 21:20:33Z Sidey $
 #
-# v3.4.3 - https://github.com/RFD-FHEM/RFFHEM/tree/dev-r34
+# v3.5.x - https://github.com/RFD-FHEM/RFFHEM/tree/dev-r35-xFSK
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incoming messages
 # see http://www.fhemwiki.de/wiki/SIGNALDuino
 # It was modified also to provide support for raw message handling which can be send from the SIGNALduino
@@ -32,7 +32,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.5_dev_04.11",
+	SDUINO_VERSION            => "v3.5_dev_04.13",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -2180,6 +2180,15 @@ sub SIGNALduino_moduleMatch {
 }
 
 ###############################
+# calculated RSSI and return string (RSSI = -77)
+sub SIGNALduino_calRSSI($) {
+	my $rssi = shift;
+	$rssi = ($rssi>=128 ? (($rssi-256)/2-74) : ($rssi/2-74));
+	$rssi = "RSSI = $rssi";
+	return $rssi;
+}
+
+###############################
 sub SIGNALduino_Parse_MS($$$$%) {
 	my ($hash, $iohash, $name, $rmsg,%msg_parts) = @_;
 
@@ -2189,11 +2198,7 @@ sub SIGNALduino_Parse_MS($$$$%) {
 	my $rawData=$msg_parts{rawData};
 	my %patternList;
 	my $rssiStr= "";
-
-	if (defined($rssi)) {
-		$rssi = ($rssi>=128 ? (($rssi-256)/2-74) : ($rssi/2-74));
-		$rssiStr= " RSSI = $rssi"
-	}
+	$rssiStr = SIGNALduino_calRSSI($rssi) if (defined($rssi));
 
 	#Debug "Message splitted:";
 	#Debug Dumper(\@msg_parts);
@@ -2401,11 +2406,7 @@ sub SIGNALduino_Parse_MU($$$$@) {
 	my $message_dispatched=0;
 	my $debug = AttrVal($iohash->{NAME},"debug",0);
 	my $rssiStr= "";
-
-	if (defined($rssi)) {
-		$rssi = ($rssi>=128 ? (($rssi-256)/2-74) : ($rssi/2-74));
-		$rssiStr= " RSSI = $rssi"
-	}
+	$rssiStr = SIGNALduino_calRSSI($rssi) if (defined($rssi));
 
     Debug "$name: processing unsynced message\n" if ($debug);
 
@@ -2596,7 +2597,7 @@ sub SIGNALduino_Parse_MU($$$$@) {
 				if ( SIGNALduino_moduleMatch($name,$id,$dmsg) == 1)
 				{
 					$nrDispatch++;
-					$hash->{logMethod}->($name, 4, "$name: Parse_MU, Decoded matched MU Protocol id $id dmsg $dmsg length $bit_length dispatch($nrDispatch/". AttrVal($name,'maxMuMsgRepeat', 4) . ")$rssiStr");
+					$hash->{logMethod}->($name, 4, "$name: Parse_MU, Decoded matched MU Protocol id $id dmsg $dmsg length $bit_length dispatch($nrDispatch/". AttrVal($name,'maxMuMsgRepeat', 4) . ") $rssiStr");
 					SIGNALduno_Dispatch($hash,$rmsg,$dmsg,$rssi,$id);
 					if ( $nrDispatch == AttrVal($name,"maxMuMsgRepeat", 4))
 					{
@@ -2621,15 +2622,14 @@ sub SIGNALduino_Parse_MC($$$$@) {
 	my $clock=$msg_parts{clockabs};	     ## absolute clock
 	my $rawData=$msg_parts{rawData};
 	my $rssi=$msg_parts{rssi};
+	my $rssiStr= "";
 	my $mcbitnum=$msg_parts{mcbitnum};
 	my $messagetype=$msg_parts{messagetype};
 	my $bitData;
 	my $dmsg;
 	my $message_dispatched=0;
 	my $debug = AttrVal($iohash->{NAME},"debug",0);
-	if (defined($rssi)) {
-		$rssi = ($rssi>=128 ? (($rssi-256)/2-74) : ($rssi/2-74));
-	}
+	$rssiStr = SIGNALduino_calRSSI($rssi) if (defined($rssi));
 
 	return undef if (!$clock);
 	#my $protocol=undef;
@@ -2658,7 +2658,7 @@ sub SIGNALduino_Parse_MC($$$$@) {
 			Debug "clock and min length matched"  if ($debug);
 
 			if (defined($rssi)) {
-				$hash->{logMethod}->($name, 4, "$name: Parse_MC, Found manchester Protocol id $id clock $clock RSSI $rssi -> $ProtocolListSIGNALduino{$id}{name}");
+				$hash->{logMethod}->($name, 4, "$name: Parse_MC, Found manchester Protocol id $id clock $clock $rssiStr -> $ProtocolListSIGNALduino{$id}{name}");
 			} else {
 				$hash->{logMethod}->($name, 4, "$name: Parse_MC, Found manchester Protocol id $id clock $clock -> $ProtocolListSIGNALduino{$id}{name}");
 			}
@@ -2708,7 +2708,7 @@ sub SIGNALduino_Parse_MC($$$$@) {
 						if (SDUINO_MC_DISPATCH_VERBOSE < 5 && (SDUINO_MC_DISPATCH_LOG_ID eq '' || SDUINO_MC_DISPATCH_LOG_ID eq $id))
 						{
 							if (defined($rssi)) {
-								$hash->{logMethod}->($name, SDUINO_MC_DISPATCH_VERBOSE, "$name: Parse_MC, $id, $rmsg RSSI=$rssi");
+								$hash->{logMethod}->($name, SDUINO_MC_DISPATCH_VERBOSE, "$name: Parse_MC, $id, $rmsg $rssiStr");
 							} else
 							{
 								$hash->{logMethod}->($name, SDUINO_MC_DISPATCH_VERBOSE, "$name: Parse_MC, $id, $rmsg");
@@ -2737,11 +2737,7 @@ sub SIGNALduino_Parse_MN($$$@) {
 	my $rssi=$msg_parts{rssi};
 	my $dmsg;
 	my $rssiStr= "";
-
-	if (defined($rssi)) {
-		$rssi = ($rssi>=128 ? (($rssi-256)/2-74) : ($rssi/2-74));
-		$rssiStr= " RSSI = $rssi"
-	}
+	$rssiStr = SIGNALduino_calRSSI($rssi) if (defined($rssi));
 
 	my $hlen = length($rawData);
 	my $match;
@@ -2776,7 +2772,7 @@ sub SIGNALduino_Parse_MN($$$@) {
 			my ($rcode,$res) = $method->($name,$rawData,$id);
 			if ($rcode != -1) {
 				$dmsg = $res;
-				$hash->{logMethod}->($name, 4, "$name: Parse_MN, Decoded matched MN Protocol id $id dmsg=$dmsg".$rssiStr);
+				$hash->{logMethod}->($name, 4, "$name: Parse_MN, Decoded matched MN Protocol id $id dmsg=$dmsg $rssiStr");
 				SIGNALduno_Dispatch($hash,$rmsg,$dmsg,$rssi,$id);
 			} else {
 				$hash->{logMethod}->($name, 4, "$name: Parse_MN, Error! method $res");
