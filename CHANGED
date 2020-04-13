@@ -1,3 +1,7 @@
+2020-04-13 - 00_SIGNALduino.pm - structure
+
+- revised logoutput to one structure
+- added sub marker with package name
 2020-04-11 - 00_SIGNALduino.pm
 
 Workaround for bug #823, sending muliple commands causes collison
