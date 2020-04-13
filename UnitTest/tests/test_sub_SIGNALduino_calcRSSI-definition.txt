@@ -7,15 +7,15 @@ defmod test_sub_SIGNALduino_calcRSSI UnitTest dummyDuino (
 		plan(3);
 		my $rssiInput=0;
 		my ($rssiStr)=SIGNALduino_calcRSSI($rssiInput);
-		is($rssiStr,"RSSI = -74","check return RSSI string");
+		is($rssiStr,"RSSI = -74","check return RSSI string for input $rssiInput");
 
 		$rssiInput=83;
-		$rssiStr)=SIGNALduino_calcRSSI($rssiInput);
-		is($rssiStr,"RSSI = -32.5","check return message");
+		$rssiStr=SIGNALduino_calcRSSI($rssiInput);
+		is($rssiStr,"RSSI = -32.5","check return RSSI string for input $rssiInput");
 
 		$rssiInput=228;
-		$rssiStr)=SIGNALduino_calcRSSI($rssiInput);
-		is($rssiStr,"RSSI = -88","check return message");
+		$rssiStr=SIGNALduino_calcRSSI($rssiInput);
+		is($rssiStr,"RSSI = -88","check return RSSI string for input $rssiInput");
 	};
 }
 )
