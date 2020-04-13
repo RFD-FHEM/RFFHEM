@@ -1,77 +1,49 @@
 2020-04-13 - 00_SIGNALduino.pm, test_sub_SIGNALduino_calcRSSI
-
-00_SIGNALduino.pm
+- test_sub_SIGNALduino_calcRSSI-definition.txt
+* create test for sub
+- 00_SIGNALduino.pm
+* added new sub SIGNALduino_calRSSI to simplification code
 * rename sub SIGNALduino_calRSSI to SIGNALduino_calcRSSI
 
-test_sub_SIGNALduino_calcRSSI-definition.txt
-* create test for sub
-2020-04-13 - Update 00_SIGNALduino.pm
-
-added new sub SIGNALduino_calRSSI to simplification code
-2020-04-11 - Update 00_SIGNALduino.pm
-
-* revised comments & remove old comments
-2020-04-11 - Update 00_SIGNALduino.pm
-
-* revised logoutput
 2020-04-11 - 00_SIGNALduino, test_sub_SIGNALduino_Parse_MN-definition
-
-00_SIGNALduino.pm (https://github.com/RFD-FHEM/RFFHEM/issues/818)
-* revised comment
+- 00_SIGNALduino.pm (https://github.com/RFD-FHEM/RFFHEM/issues/818)
+* revised comments,logoutput & remove old comments
 * remove double parameter sub SIGNALduino_Parse_MN
-
-test_sub_SIGNALduino_Parse_MN-definition.txt
+- test_sub_SIGNALduino_Parse_MN-definition.txt
 * revised call sub SIGNALduino_Parse_MN
-2020-04-11 - Merge branch 'dev-r34' into dev-r35_xFSK
+
 2020-04-09 - Update 00_SIGNALduino.pm
-extension to check length_min
+* extension to check length_min
 
 2020-04-07 - 00_SIGNALduino, SD_ProtocolData, test_sub_SIGNALduino_KoppFreeControl
-- 00_SIGNALduino, revised match for modul
-- SD_ProtocolData, rename clientmodule
-- test_sub_SIGNALduino_KoppFreeControl created
+* 00_SIGNALduino, revised match for modul
+* SD_ProtocolData, rename clientmodule
+* test_sub_SIGNALduino_KoppFreeControl created
 
 2020-04-07 - Update SD_ProtocolData.pm
-added more doc
+* added more doc
 
 2020-04-07 - 00_SIGNALduino.pm - test_sub_SIGNALduino_LaCrosse
-- set number of arguments on new subs
-- added note
-
-2020-04-07 - Update 00_SIGNALduino.pm
-small "fix"
+* set number of arguments on new subs
+* added note
 
 2020-04-06 - 00_SIGNALduino.pm
-Modified LaCrossePairForSec
-- Available only if dummy or if modulation is set to 2-FSK
-
-2020-04-06 - Update 00_SIGNALduino.pm
 !!! extensions for https://github.com/RFD-FHEM/RFFHEM/issues/814
 * fix set cmd on Dummydevice
+* Modified LaCrossePairForSec
+* Available only if dummy or if modulation is set to 2-FSK
 
 2020-04-05 - 00_SIGNALduino.pm
-- Renamed set command LaCrossePairForSec to cc1101_LaCrossePairForSec
-- fixed SIGNALduino_Set_LaCrossePairForSec
-- cc1101_LaCrossePairForSec only available im FSK modulation is detected / if device is a dummy
-
-UnitTest/tests/test_sub_SIGNALduino_Set-definition.txt
-- Added / modified tests to verify new set command
-- modified existing test for inactive device (close is not provided as command)
-- numbered similar tests for easier identification
-
-2020-04-05 - Update 00_SIGNALduino.pm
 !!! extensions for https://github.com/RFD-FHEM/RFFHEM/issues/814
 * revised SIGNALduino_Set_LaCrossePairForSec and added logoutput
+* Renamed set command LaCrossePairForSec to cc1101_LaCrossePairForSec
+* fixed SIGNALduino_Set_LaCrossePairForSec
+* cc1101_LaCrossePairForSec only available im FSK modulation is detected / if device is a dummy
 
-2020-04-04 - Update 00_SIGNALduino.pm
-!!! extensions for https://github.com/RFD-FHEM/RFFHEM/issues/814
-* SIGNALduino_Parse_MN
-revised logoutput
-* added commandref LaCrossePairForSec
-
-2020-04-04 - Update 00_SIGNALduino.pm
-!!! extensions for https://github.com/RFD-FHEM/RFFHEM/issues/814
-- fix SIGNALduino_IdList logoutput
+UnitTest/tests/test_sub_SIGNALduino_Set-definition.txt
+* Added / modified tests to verify new set command
+* modified existing test for inactive device (close is not provided as command)
+* numbered similar tests for easier identification
 
 2020-04-04 - Update SD_ProtocolData.pm
 !!! extensions for https://github.com/RFD-FHEM/RFFHEM/issues/814
@@ -101,6 +73,9 @@ revised logoutput
 * SIGNALduino_PCA301, added for some processing
 * SIGNALduino_KoppFreeControl, added for some processing
 * SIGNALduino_FW_getProtocolList, revised for new message format MN
+* fix SIGNALduino_IdList logoutput
+* SIGNALduino_Parse_MN, revised logoutput
+* added commandref LaCrossePairForSec
 
 --- --- --- Unreleases what comes up here ---- --- ---
 

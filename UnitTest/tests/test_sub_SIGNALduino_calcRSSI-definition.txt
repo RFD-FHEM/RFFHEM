@@ -6,7 +6,7 @@ defmod test_sub_SIGNALduino_calcRSSI UnitTest dummyDuino (
 	subtest 'Test SIGNALduino_calcRSSI' => sub {
 		plan(3);
 		my $rssiInput=0;
-		my ($rssiStr)=SIGNALduino_calcRSSI($rssiInput);
+		my $rssiStr=SIGNALduino_calcRSSI($rssiInput);
 		is($rssiStr,"RSSI = -74","check return RSSI string for input $rssiInput");
 
 		$rssiInput=83;
