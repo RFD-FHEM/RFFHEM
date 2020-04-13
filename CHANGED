@@ -1,5 +1,7 @@
-2020-04-12 - Prepare master-3.4.3
-xx.04.2020
+2020-04-13 - 00_SIGNALduino.pm
+
+Changed require DevIO to use DevIO #829
+13.04.2020
   00_SIGNALduino.pm
    Workaround for bug #823, sending muliple commands causes collison
    2020-04-10 - Attribute IODev deleted in different modules (#822)

@@ -18,6 +18,7 @@ my $missingModulSIGNALduino="";
 
 use strict;
 use warnings;
+use DevIo;
 no warnings 'portable';
 
 eval "use Data::Dumper qw(Dumper);1";
@@ -263,7 +264,6 @@ my %symbol_map = (one => 1 , zero =>0 ,sync => '', float=> 'F', 'start' => '');
 sub SIGNALduino_Initialize($) {
   my ($hash) = @_;
 
-  require "$attr{global}{modpath}/FHEM/DevIo.pm";
 
   my $dev = "";
   if (index(SDUINO_VERSION, "dev") >= 0) {
