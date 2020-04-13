@@ -1,4 +1,4 @@
-# $Id: 00_SIGNALduino.pm v3.4.3 2020-04-07 21:20:33Z Sidey $
+# $Id: 00_SIGNALduino.pm 21664 2020-04-13 21:08:17Z Sidey $
 #
 # v3.4.3 - https://github.com/RFD-FHEM/RFFHEM/tree/dev-r34
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incoming messages
