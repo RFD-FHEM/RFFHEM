@@ -1,3 +1,10 @@
+2020-04-13 - 00_SIGNALduino.pm, test_sub_SIGNALduino_calcRSSI
+
+00_SIGNALduino.pm
+* rename sub SIGNALduino_calRSSI to SIGNALduino_calcRSSI
+
+test_sub_SIGNALduino_calcRSSI-definition.txt
+* create test for sub
 2020-04-13 - Update 00_SIGNALduino.pm
 
 added new sub SIGNALduino_calRSSI to simplification code
