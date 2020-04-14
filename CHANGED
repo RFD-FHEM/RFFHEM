@@ -1,3 +1,14 @@
+2020-04-14 - fix, extension tests
+
+00_SIGNALduino.pm
+* fix RSSI sub
+
+test_sub_SIGNALduino_calcRSSI-definition.txt
+* revised test
+
+test_sub_SIGNALduino_Dispatch-definition.txt
+* added note
+* revised to Test2
 2020-04-13 - Update 00_SIGNALduino.pm
 
 * revised lines which were lost by merging
