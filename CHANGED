@@ -1,3 +1,8 @@
+2020-04-14 - Update 00_SIGNALduino.pm
+
+* remove some not needed comments
+* sort AttrList
+* remove any not needed blank lines
 2020-04-14 - fix, extension tests
 
 00_SIGNALduino.pm
