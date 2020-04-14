@@ -69,7 +69,7 @@ package lib::SD_ProtocolData;
 	use strict;
 	use warnings;
 	
-	our $VERSION = '1.17';
+	our $VERSION = '1.18';
 	our %protocols = (
 		"0"	=>	## various weather sensors (500 | 9100)
 						# Mebus | Id:237 Ch:1 T: 1.9 Bat:low           MS;P0=-9298;P1=495;P2=-1980;P3=-4239;D=1012121312131313121313121312121212121212131212131312131212;CP=1;SP=0;R=223;O;m2;
@@ -2612,6 +2612,26 @@ package lib::SD_ProtocolData;
 				clientmodule    => 'SD_UT',
 				length_min      => '40',
 				length_max      => '40',
+			},
+		"99"	=>	# NAVARIS touch light switch Model No.: 44344.04
+							# https://github.com/RFD-FHEM/RFFHEM/issues/828
+							# Navaris_211073   MU;P0=-302;P1=180;P2=294;P3=-208;P4=419;P5=-423;D=01023101010101023232310102323451010231010101023101010231010101010232323101023234510102310101010231010102310101010102323231010232345101023101010102310101023101010101023232310102323451010231010101023101010231010101010232323101023234510102310101010231010102;CP=1;R=36;O;
+							# Navaris_13F8E3   MU;P0=406;P1=-294;P2=176;P3=286;P4=-191;P6=-415;D=01212134212134343434343434212121343434212121343406212121342121343434343434342121213434342121213434062121213421213434343434343421212134343421212134340621212134212134343434343434212121343434212121343406212121342121343434343434342121213434342121213434062121;CP=2;R=67;O;
+			{
+				name            => 'Navaris 44344.04',
+				comment         => 'Wireless touch light switch',
+				knownFreqs      => '433.92',
+				id              => '99',
+				one             => [3,-2],
+				zero            => [2,-3],
+				start           => [4,-4],
+				clockabs        => 100,
+				format          => 'twostate',
+				clientmodule    => 'SD_UT',
+				modulematch     => '^P99#',
+				preamble        => 'P99#',
+				length_min      => '24',
+				length_max      => '24',
 			},
 		########################################################################
 		#### ### old information from incomplete implemented protocols #### ####
