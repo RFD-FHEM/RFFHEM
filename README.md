@@ -51,6 +51,7 @@ Supported Devices / Protocols
 |Medion OR28V | Remote control |
 |Momento | Remote control for wireless digital picture frame |
 |Mumbi m-FS300 | Remote control |
+|Navaris 44344.04 | Touch light switch |
 |NC-3911, NC-3912 | Refrigerator thermometer |
 |Novy 840029, 840039 | Remote control |
 |Opus XT300 | Soil moisture sensor |
