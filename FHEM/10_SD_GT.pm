@@ -286,7 +286,7 @@ sub Parse($$) {
 	}
 	Log3 $ioname, 4, "$ioname: SD_GT_Parse $rawData, found version $version with systemCode $systemCode";
 
-	if ($version == 0 && $systemCode eq 0) {	# Version und systemCode nicht gefunden
+	if ($version == 0 && $systemCode == 0) {	# Version und systemCode nicht gefunden
 		$devicedef = "LEARN";
 	} else {																	# Version und systemCode gefunden
 		my $statecode = substr($rawData,4,1);
