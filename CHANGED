@@ -1,3 +1,6 @@
+2020-04-15 - 00_SIGNALduino.pm
+
+some operator fixes #835
 2020-04-14 - 00_SIGNALduino.pm
 
 Changed stringrefs to coderefs
