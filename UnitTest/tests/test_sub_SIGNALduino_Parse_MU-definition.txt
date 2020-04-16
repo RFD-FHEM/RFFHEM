@@ -1,5 +1,8 @@
 defmod test_sub_SIGNALduino_Parse_MU UnitTest dummyDuino ( 
 {
+	use Test2::V0;
+	use Test2::Tools::Compare qw{ is };
+
 	my $whitelist_IDs = AttrVal($target,"whitelist_IDs",undef);	# save whitelist_IDs to set back
 	note("attribute whitelist_IDs save from system");
 
