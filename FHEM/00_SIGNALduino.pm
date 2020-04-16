@@ -1,4 +1,4 @@
-# $Id: 00_SIGNALduino.pm v3.4.3 2020-04-07 21:20:33Z Sidey $
+# $Id: 00_SIGNALduino.pm v3.4.4 2020-04-07 21:20:33Z Sidey $
 #
 # v3.5.x - https://github.com/RFD-FHEM/RFFHEM/tree/dev-r35-xFSK
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incoming messages
@@ -13,7 +13,7 @@
 
 
 package main;
-#use version 0.77; our $VERSION = version->declare('v3.4.3');
+#use version 0.77; our $VERSION = version->declare('v3.4.4');
 
 my $missingModulSIGNALduino="";
 
@@ -393,15 +393,13 @@ sub SIGNALduino_Define($$) {
   #Debug "hardware: $hardware" if ($debug);
 
 
-  if($dev eq "none") {
+  if($dev eq 'none') {
     Log3 $name, 1, "$name: Define, device is none, commands will be echoed only";
     $attr{$name}{dummy} = 1;
     #return undef;
   }
 
-  if ($dev ne "none" && $dev =~ m/[a-zA-Z]/ && $dev !~ m/\@/) {    # bei einer IP wird kein \@57600 angehaengt
-	$dev .= "\@57600";
-  }
+  $dev .= "\@57600" if ($dev ne 'none' && $dev =~ m/[a-zA-Z]/ && $dev !~ m/\@/);   # bei einer IP wird kein \@57600 angehaengt
 
   #$hash->{CMDS} = "";
   $hash->{Clients} = $clientsSIGNALduino;
@@ -411,18 +409,18 @@ sub SIGNALduino_Define($$) {
 
   my $ret=undef;
 
-  InternalTimer(gettimeofday(), 'SIGNALduino_IdList',"sduino_IdList:$name",0);       # verzoegern bis alle Attribute eingelesen sind
+  InternalTimer(gettimeofday(), \&SIGNALduino_IdList,"sduino_IdList:$name",0);       # verzoegern bis alle Attribute eingelesen sind
 
-  if($dev ne "none") {
-    $ret = DevIo_OpenDev($hash, 0, "SIGNALduino_DoInit", 'SIGNALduino_Connect');
+  if($dev ne 'none') {
+    $ret = DevIo_OpenDev($hash, 0, \&SIGNALduino_DoInit, \&SIGNALduino_Connect);
   } else {
 		$hash->{DevState} = 'initialized';
-  		readingsSingleUpdate($hash, "state", "opened", 1);
+  		readingsSingleUpdate($hash, 'state', 'opened', 1);
   }
 
-  $hash->{DMSG}="nothing";
-  $hash->{LASTDMSG} = "nothing";
-  $hash->{LASTDMSGID} = "nothing";
+  $hash->{DMSG}='nothing';
+  $hash->{LASTDMSG} = 'nothing';
+  $hash->{LASTDMSGID} = 'nothing';
   $hash->{TIME}=time();
   $hash->{versionmodul} = SDUINO_VERSION;
   $hash->{versionProtocols} = lib::SD_Protocols::getProtocolVersion();
@@ -525,7 +523,7 @@ sub SIGNALduino_avrdude($) {
 		$hash->{FLASH_RESULT}= "WARNING: avrdude created no log file";         # processed in tests
 	}
 
-	DevIo_OpenDev($hash, 0, "SIGNALduino_DoInit", 'SIGNALduino_Connect');
+	DevIo_OpenDev($hash, 0, \&SIGNALduino_DoInit, \&SIGNALduino_Connect);
 	$hash->{helper}{avrdudelogs} .= "$name reopen started\n";
 	return $hash->{FLASH_RESULT};
 }
@@ -607,7 +605,7 @@ sub SIGNALduino_PrepareFlash {
 	}
 	$hash->{helper}{avrdudecmd} =~ s/\Q[BAUDRATE]\E/$baudrate/;
 	$log .= "command: $hash->{helper}{avrdudecmd}\n\n";
-	InternalTimer(gettimeofday() + 1,"SIGNALduino_avrdude",$name);
+	InternalTimer(gettimeofday() + 1,\&SIGNALduino_avrdude,$name);
  	$hash->{helper}{avrdudelogs} = $log;
     return undef;
 }
@@ -1061,7 +1059,7 @@ sub SIGNALduino_Get_delayed($) {
   	
 	if (exists($hash->{ucCmd})  && $hash->{ucCmd}->{timenow}+10 > time() ) {
 		$hash->{logMethod}->($hash->{NAME}, 5, "$name: Get_delayed, ".join(" ",@cmds)." delayed");
-		main::InternalTimer(main::gettimeofday() + main::SDUINO_GET_CONFIGQUERY_DELAY, "SIGNALduino_Get_delayed", "SIGNALduino_Get_delayed:$name:".join(" ",@cmds), 0);
+		main::InternalTimer(main::gettimeofday() + main::SDUINO_GET_CONFIGQUERY_DELAY, \&SIGNALduino_Get_delayed, "SIGNALduino_Get_delayed:$name:".join(" ",@cmds), 0);
 	} else {
 		delete($hash->{ucCmd});	
 		$hash->{logMethod}->($hash->{NAME}, 5, "$name: Get_delayed, ".join(" ",@cmds)." executed");
@@ -1192,7 +1190,7 @@ sub SIGNALduino_CheckSendRawResponse
 		#RemoveInternalTimer("HandleWriteQueue:$name");
 		delete($hash->{ucCmd});
 		#SIGNALduino_HandleWriteQueue("x:$name"); # Todo #823 on github
-		InternalTimer(gettimeofday() + 0.1, "SIGNALduino_HandleWriteQueue", "HandleWriteQueue:$name") if (scalar @{$hash->{QUEUE}} > 0 && InternalVal($name,"sendworking",0) == 0);
+		InternalTimer(gettimeofday() + 0.1, \&SIGNALduino_HandleWriteQueue, "HandleWriteQueue:$name") if (scalar @{$hash->{QUEUE}} > 0 && InternalVal($name,"sendworking",0) == 0);
 	}
 	return (undef);
 }
@@ -1224,14 +1222,14 @@ sub SIGNALduino_ResetDevice($) {
 			# Mit dem Linux-Kommando 'stty' die Port-Einstellungen setzen
 			system("stty -F $dev ospeed 1200 ispeed 1200");
 			$hash->{helper}{resetInProgress}=1;
-			InternalTimer(gettimeofday()+10,"SIGNALduino_ResetDevice",$hash);
+			InternalTimer(gettimeofday()+10,\&SIGNALduino_ResetDevice,$hash);
 			$hash->{logMethod}->($name, 3, "$name: ResetDevice, reopen delayed for 10 second");
 			return undef;
 		}
 	} else {
 		delete($hash->{helper}{resetInProgress});
 	}
- 	DevIo_OpenDev($hash, 0, "SIGNALduino_DoInit", 'SIGNALduino_Connect');
+ 	DevIo_OpenDev($hash, 0, \&SIGNALduino_DoInit, \&SIGNALduino_Connect);
 	return undef;
 }
 
@@ -1270,8 +1268,8 @@ sub SIGNALduino_DoInit($) {
 		RemoveInternalTimer($hash);
 
 		#SIGNALduino_SimpleWrite($hash, "XQ"); # Disable receiver
-		InternalTimer(gettimeofday() + SDUINO_INIT_WAIT_XQ, "SIGNALduino_SimpleWrite_XQ", $hash, 0);
-		InternalTimer(gettimeofday() + SDUINO_INIT_WAIT, "SIGNALduino_StartInit", $hash, 0);
+		InternalTimer(gettimeofday() + SDUINO_INIT_WAIT_XQ, \&SIGNALduino_SimpleWrite_XQ, $hash, 0);
+		InternalTimer(gettimeofday() + SDUINO_INIT_WAIT, \&SIGNALduino_StartInit, $hash, 0);
 	}
 	# Reset the counter
 	delete($hash->{XMIT_TIME});
@@ -1321,7 +1319,7 @@ sub SIGNALduino_StartInit($) {
 		#DevIo_SimpleWrite($hash, "V\n",2);
 		$hash->{DevState} = 'waitInit';
 		RemoveInternalTimer($hash);
-		InternalTimer(gettimeofday() + SDUINO_CMD_TIMEOUT, "SIGNALduino_CheckVersionResp", $hash, 0);
+		InternalTimer(gettimeofday() + SDUINO_CMD_TIMEOUT, \&SIGNALduino_CheckVersionResp, $hash, 0);
 	}
 }
 
@@ -1369,7 +1367,7 @@ sub SIGNALduino_CheckVersionResp
 		# initialize keepalive
 		$hash->{keepalive}{ok}    = 0;
 		$hash->{keepalive}{retry} = 0;
-		InternalTimer(gettimeofday() + SDUINO_KEEPALIVE_TIMEOUT, "SIGNALduino_KeepAlive", $hash, 0);
+		InternalTimer(gettimeofday() + SDUINO_KEEPALIVE_TIMEOUT, \&SIGNALduino_KeepAlive, $hash, 0);
 		if ($hash->{version} =~ m/cc1101/) {
 			$hash->{cc1101_available} = 1;
 			$hash->{logMethod}->($name, 5, "$name: CheckVersionResp, cc1101 available");
@@ -1418,7 +1416,7 @@ sub SIGNALduino_CheckCmdResp($) {
 			# initialize keepalive
 			$hash->{keepalive}{ok}    = 0;
 			$hash->{keepalive}{retry} = 0;
-			InternalTimer(gettimeofday() + SDUINO_KEEPALIVE_TIMEOUT, "SIGNALduino_KeepAlive", $hash, 0);
+			InternalTimer(gettimeofday() + SDUINO_KEEPALIVE_TIMEOUT, \&SIGNALduino_KeepAlive, $hash, 0);
 		 	$hash->{cc1101_available} = 1  if ($ver =~ m/cc1101/);
 		}
 	}
@@ -1498,7 +1496,7 @@ sub SIGNALduino_AddSendQueue($$) {
   #SIGNALduino_Log3 $hash , 5, Dumper($hash->{QUEUE});
 
   $hash->{logMethod}->($hash, 5,"$name: AddSendQueue, " . $hash->{NAME} . ": $msg (" . @{$hash->{QUEUE}} . ")");
-  InternalTimer(gettimeofday() + 0.1, "SIGNALduino_HandleWriteQueue", "HandleWriteQueue:$name") if (scalar @{$hash->{QUEUE}} == 1 && InternalVal($name,"sendworking",0) == 0);
+  InternalTimer(gettimeofday() + 0.1, \&SIGNALduino_HandleWriteQueue, "HandleWriteQueue:$name") if (scalar @{$hash->{QUEUE}} == 1 && InternalVal($name,"sendworking",0) == 0);
 }
 
 ############################# package main
@@ -1537,9 +1535,9 @@ sub SIGNALduino_SendFromQueue($$) {
   # else it will be sent too early by the SIGNALduino, resulting in a collision, or may the last command is not finished
 
   if (defined($hash->{ucCmd}->{cmd}) && $hash->{ucCmd}->{cmd} eq 'sendraw') {
-     InternalTimer(gettimeofday() + SDUINO_WRITEQUEUE_TIMEOUT, "SIGNALduino_HandleWriteQueue", "HandleWriteQueue:$name");
+     InternalTimer(gettimeofday() + SDUINO_WRITEQUEUE_TIMEOUT, \&SIGNALduino_HandleWriteQueue, "HandleWriteQueue:$name");
   } else {
-     InternalTimer(gettimeofday() + SDUINO_WRITEQUEUE_NEXT, "SIGNALduino_HandleWriteQueue", "HandleWriteQueue:$name");
+     InternalTimer(gettimeofday() + SDUINO_WRITEQUEUE_NEXT, \&SIGNALduino_HandleWriteQueue, "HandleWriteQueue:$name");
   }
 }
 
@@ -1733,7 +1731,7 @@ sub SIGNALduino_KeepAlive($){
 	}
 	$hash->{keepalive}{ok} = 0;
 
-	InternalTimer(gettimeofday() + SDUINO_KEEPALIVE_TIMEOUT, "SIGNALduino_KeepAlive", $hash);
+	InternalTimer(gettimeofday() + SDUINO_KEEPALIVE_TIMEOUT, \&SIGNALduino_KeepAlive, $hash);
 }
 
 
@@ -2824,7 +2822,7 @@ sub SIGNALduino_Ready($) {
 
   if ($hash->{STATE} eq 'disconnected') {
     $hash->{DevState} = 'disconnected';
-    return DevIo_OpenDev($hash, 1, "SIGNALduino_DoInit", 'SIGNALduino_Connect')
+    return DevIo_OpenDev($hash, 1, \&SIGNALduino_DoInit, \&SIGNALduino_Connect)
   }
 
   # This is relevant for windows/USB only

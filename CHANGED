@@ -1,105 +1,104 @@
-2020-04-14 - Update 00_SIGNALduino.pm
+2020-04-14
+  00_SIGNALduino.pm
+   * remove some not needed comments
+   * sort AttrList
+   * remove any not needed blank lines
+   * fix RSSI sub
+  test_sub_SIGNALduino_calcRSSI-definition.txt
+   * revised test
+  test_sub_SIGNALduino_Dispatch-definition.txt
+   * added note
+   * revised to Test2
 
-* remove some not needed comments
-* sort AttrList
-* remove any not needed blank lines
-2020-04-14 - fix, extension tests
+2020-04-13
+  00_SIGNALduino.pm
+   * added new sub SIGNALduino_calRSSI to simplification code
+   * rename sub SIGNALduino_calRSSI to SIGNALduino_calcRSSI
+   * revised lines which were lost by merging
+  test_sub_SIGNALduino_calcRSSI-definition.txt
+   * create test for sub
 
-00_SIGNALduino.pm
-* fix RSSI sub
+2020-04-11
+  00_SIGNALduino.pm (https://github.com/RFD-FHEM/RFFHEM/issues/818)
+   * revised comments,logoutput & remove old comments
+   * remove double parameter sub SIGNALduino_Parse_MN
+  test_sub_SIGNALduino_Parse_MN-definition.txt
+   * revised call sub SIGNALduino_Parse_MN
 
-test_sub_SIGNALduino_calcRSSI-definition.txt
-* revised test
+2020-04-09
+  00_SIGNALduino.pm
+   * extension to check length_min
 
-test_sub_SIGNALduino_Dispatch-definition.txt
-* added note
-* revised to Test2
-2020-04-13 - Update 00_SIGNALduino.pm
+2020-04-07
+  00_SIGNALduino.pm
+   * set number of arguments on new subs
+   * revised match for modul
+  SD_ProtocolData.pm
+   * added more doc
+   * rename clientmodule
+  test_sub_SIGNALduino_LaCrosse-definition.txt
+   * added note
+  test_sub_SIGNALduino_KoppFreeControl-definition.txt
+   * added
 
-* revised lines which were lost by merging
-2020-04-13 - 00_SIGNALduino.pm, test_sub_SIGNALduino_calcRSSI
-- test_sub_SIGNALduino_calcRSSI-definition.txt
-* create test for sub
-- 00_SIGNALduino.pm
-* added new sub SIGNALduino_calRSSI to simplification code
-* rename sub SIGNALduino_calRSSI to SIGNALduino_calcRSSI
+2020-04-06
+  00_SIGNALduino.pm
+   !!! extensions for https://github.com/RFD-FHEM/RFFHEM/issues/814
+   * fix set cmd on Dummydevice
+   * Modified LaCrossePairForSec
+   * Available only if dummy or if modulation is set to 2-FSK
 
-2020-04-11 - 00_SIGNALduino, test_sub_SIGNALduino_Parse_MN-definition
-- 00_SIGNALduino.pm (https://github.com/RFD-FHEM/RFFHEM/issues/818)
-* revised comments,logoutput & remove old comments
-* remove double parameter sub SIGNALduino_Parse_MN
-- test_sub_SIGNALduino_Parse_MN-definition.txt
-* revised call sub SIGNALduino_Parse_MN
+2020-04-05
+  00_SIGNALduino.pm
+   !!! extensions for https://github.com/RFD-FHEM/RFFHEM/issues/814
+   * revised SIGNALduino_Set_LaCrossePairForSec and added logoutput
+   * Renamed set command LaCrossePairForSec to cc1101_LaCrossePairForSec
+   * fixed SIGNALduino_Set_LaCrossePairForSec
+   * cc1101_LaCrossePairForSec only available im FSK modulation is detected / if device is a dummy
+  UnitTest/tests/test_sub_SIGNALduino_Set-definition.txt
+   * Added / modified tests to verify new set command
+   * modified existing test for inactive device (close is not provided as command)
+   * numbered similar tests for easier identification
 
-2020-04-09 - Update 00_SIGNALduino.pm
-* extension to check length_min
+2020-04-04
+  00_SIGNALduino.pm
+   !!! extensions for https://github.com/RFD-FHEM/RFFHEM/issues/814
+   * added setlist with cmd LaCrossePairForSec (for LaCrosse)
+   * sort clientsSIGNALduino
+   * added LaCrosse, KOPP_FC, PCA301 clientsSIGNALduino
+   * added LaCrosse, KOPP_FC, PCA301 matchListSIGNALduino
+   * SIGNALduino_Initialize, added $hash->{mnIdList}
+   * SIGNALduino_FingerprintFn, revised (for LaCrosse)
+   * SIGNALduino_RemoveLaCrossePair, added (for LaCrosse)
+   * SIGNALduino_Set_LaCrossePairForSec, added (for LaCrosse)
+   * SIGNALduino_Get_Raw, revised for new message format MN
+   * SIGNALduino_Parse_MN, added for new message format MN
+   * SIGNALduino_Parse, revised for new message format MN
+   * SIGNALduino_IdList, revised for new message format MN
+   * SIGNALduino_CalculateCRC16, added for some processing (example, PCA301)
+   * SIGNALduino_CalculateCRC, added for some processing (example, LaCrosse)
+   * SIGNALduino_LaCrosse, added for some processing
+   * SIGNALduino_PCA301, added for some processing
+   * SIGNALduino_KoppFreeControl, added for some processing
+   * SIGNALduino_FW_getProtocolList, revised for new message format MN
+   * fix SIGNALduino_IdList logoutput
+   * SIGNALduino_Parse_MN, revised logoutput
+   * added commandref LaCrossePairForSec
+  SD_ProtocolData.pm
+   !!! extensions for https://github.com/RFD-FHEM/RFFHEM/issues/814
+   * added xFSK doc
+   * added Lacrosse, Mode 1 - IT+
+   * added Lacrosse Mode 2 - IT+
+   * added ELV PCA 301
+   * added KoppFreeControl
 
-2020-04-07 - 00_SIGNALduino, SD_ProtocolData, test_sub_SIGNALduino_KoppFreeControl
-* 00_SIGNALduino, revised match for modul
-* SD_ProtocolData, rename clientmodule
-* test_sub_SIGNALduino_KoppFreeControl created
-
-2020-04-07 - Update SD_ProtocolData.pm
-* added more doc
-
-2020-04-07 - 00_SIGNALduino.pm - test_sub_SIGNALduino_LaCrosse
-* set number of arguments on new subs
-* added note
-
-2020-04-06 - 00_SIGNALduino.pm
-!!! extensions for https://github.com/RFD-FHEM/RFFHEM/issues/814
-* fix set cmd on Dummydevice
-* Modified LaCrossePairForSec
-* Available only if dummy or if modulation is set to 2-FSK
-
-2020-04-05 - 00_SIGNALduino.pm
-!!! extensions for https://github.com/RFD-FHEM/RFFHEM/issues/814
-* revised SIGNALduino_Set_LaCrossePairForSec and added logoutput
-* Renamed set command LaCrossePairForSec to cc1101_LaCrossePairForSec
-* fixed SIGNALduino_Set_LaCrossePairForSec
-* cc1101_LaCrossePairForSec only available im FSK modulation is detected / if device is a dummy
-
-UnitTest/tests/test_sub_SIGNALduino_Set-definition.txt
-* Added / modified tests to verify new set command
-* modified existing test for inactive device (close is not provided as command)
-* numbered similar tests for easier identification
-
-2020-04-04 - Update SD_ProtocolData.pm
-!!! extensions for https://github.com/RFD-FHEM/RFFHEM/issues/814
-* added xFSK doc
-* added Lacrosse, Mode 1 - IT+
-* added Lacrosse Mode 2 - IT+
-* added ELV PCA 301
-* added KoppFreeControl
-
-2020-04-04 - Update 00_SIGNALduino.pm
-!!! extensions for https://github.com/RFD-FHEM/RFFHEM/issues/814
-* added setlist with cmd LaCrossePairForSec (for LaCrosse)
-* sort clientsSIGNALduino
-* added LaCrosse, KOPP_FC, PCA301 clientsSIGNALduino
-* added LaCrosse, KOPP_FC, PCA301 matchListSIGNALduino
-* SIGNALduino_Initialize, added $hash->{mnIdList}
-* SIGNALduino_FingerprintFn, revised (for LaCrosse)
-* SIGNALduino_RemoveLaCrossePair, added (for LaCrosse)
-* SIGNALduino_Set_LaCrossePairForSec, added (for LaCrosse)
-* SIGNALduino_Get_Raw, revised for new message format MN
-* SIGNALduino_Parse_MN, added for new message format MN
-* SIGNALduino_Parse, revised for new message format MN
-* SIGNALduino_IdList, revised for new message format MN
-* SIGNALduino_CalculateCRC16, added for some processing (example, PCA301)
-* SIGNALduino_CalculateCRC, added for some processing (example, LaCrosse)
-* SIGNALduino_LaCrosse, added for some processing
-* SIGNALduino_PCA301, added for some processing
-* SIGNALduino_KoppFreeControl, added for some processing
-* SIGNALduino_FW_getProtocolList, revised for new message format MN
-* fix SIGNALduino_IdList logoutput
-* SIGNALduino_Parse_MN, revised logoutput
-* added commandref LaCrossePairForSec
 
 --- --- --- Unreleases what comes up here ---- --- ---
 
-2020-04-13 - Bump dev-r34 to v3.4.4
-2020-04-13 - Merge remote-tracking branch 'remotes/origin/dev-r34' into v3.4.3
+
+2020-04-14
+  00_SIGNALduino.pm
+   Changed stringrefs to coderefs
 
 13.04.2020
   00_SIGNALduino.pm
