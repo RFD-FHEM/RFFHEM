@@ -1,7 +1,7 @@
 defmod test_developid_1 UnitTest dummyDuino (
  { 
 	use Test2::V0;
-	use Test2::Tools::Compare qw{is};
+	use Test2::Tools::Compare qw{is isnt};
 
 	my %ProtocolListTest =  SIGNALduino_LoadProtocolHash("$attr{global}{modpath}/FHEM/lib/test_loadprotohash-ok.pm");
 	is($ProtocolListTest{error},undef,"load test protocol hash ");
