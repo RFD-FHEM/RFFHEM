@@ -1,7 +1,7 @@
 defmod test_module_devices UnitTest dummyDuino ( 
 {
 	use Test2::V0;
-	use Test2::Tools::Compare qw{is isnt unlike};
+	use Test2::Tools::Compare qw{ is };
 	use Data::Dumper;
 	use JSON; 
 
