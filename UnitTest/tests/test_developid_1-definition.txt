@@ -1,10 +1,12 @@
 defmod test_developid_1 UnitTest dummyDuino (
  { 
+	use Test2::V0;
+	use Test2::Tools::Compare qw{is};
 
 	my %ProtocolListTest =  SIGNALduino_LoadProtocolHash("$attr{global}{modpath}/FHEM/lib/test_loadprotohash-ok.pm");
 	is($ProtocolListTest{error},undef,"load test protocol hash ");
 
-	
+
 	foreach my $id (qw/9999 9998 9997 9996/)
 	{
 		is($ProtocolListTest{$id}{id},$id,"id $id exists");
@@ -16,7 +18,7 @@ defmod test_developid_1 UnitTest dummyDuino (
     }
 	%{$local_ProtocolListSIGNALduino} = ( %ProtocolListTest);
 
-	
+
 	my $msg;
 	my $regex;
 	my $regex_matched=0;
@@ -37,7 +39,7 @@ defmod test_developid_1 UnitTest dummyDuino (
 	my $subTestName='SIGNALduino_IdList developid "m" skip scenarios';
 	subtest $subTestName => sub {
 		Log3 $name, 3 ,$subTestName." |->";
-		plan tests => 3;
+		plan(3);
 		$regex_matched=0;
 		$regex=$ProtocolListTest{'9999'}{id};
 
@@ -61,7 +63,7 @@ defmod test_developid_1 UnitTest dummyDuino (
 	$subTestName='SIGNALduino_IdList developid "y" skip scenarios';
 	subtest $subTestName => sub {
 		Log3 $name, 3 ,$subTestName." |->";
-		plan tests => 4;
+		plan(4);
 		$regex_matched=0;
 		$regex=$ProtocolListTest{'9997'}{id};
 
@@ -92,7 +94,7 @@ defmod test_developid_1 UnitTest dummyDuino (
 	subtest $subTestName => sub {
 		Log3 $name, 3 ,$subTestName." |->";
 
-		plan tests => 4;
+		plan(4);
 		$regex=$ProtocolListTest{'9996'}{id};
 
 		$msg="attr whitelist=\"\", development=\"\"" ;
@@ -124,15 +126,15 @@ defmod test_developid_1 UnitTest dummyDuino (
 		$subTestName='SIGNALduino_IdList developid "m" not skipped scenarios';
 		subtest $subTestName => sub {
 			Log3 $name, 3 ,$subTestName." |->";
-			plan tests => 2;
+			plan(2);
 			$regex_matched=0;
 			$regex=$ProtocolListTest{'9999'}{id};
-	
+
 			$msg="attr whitelist=\"\", development=\"m9999\"" ;
 			SIGNALduino_IdList("x:$target","","","m9999");  
 				isnt($regex_matched,1,$msg) or diag("check log entrys for skipped with id 9999, they should not be there");
 			$regex_matched=0;
-	
+
 			$msg="attr whitelist=\"\", development=\"75 m9999 u73\"" ;
 			SIGNALduino_IdList("x:$target","","","m75 m9999 u73"); 
 			isnt($regex_matched,1,$msg) or diag("check log entrys for skipped with id 9999, they should not be there");
@@ -144,70 +146,65 @@ defmod test_developid_1 UnitTest dummyDuino (
 		$subTestName='SIGNALduino_IdList developid "y" not skipped scenarios';
 		subtest $subTestName => sub {
 			Log3 $name, 3 ,$subTestName." |->";
-			plan tests => 5;
+			plan(5);
 			$regex_matched=0;
 			$regex=$ProtocolListTest{'9997'}{id};
-	
+
 			$msg="attr whitelist=\"\", development=\"1\"" ;
 			SIGNALduino_IdList("x:$target","","","1");  
 			isnt($regex_matched,1,$msg) or diag("check log entrys for skipped with id 9997, they should not be there");
 			$regex_matched=0;
-	
+
 			$msg="attr whitelist=\"\", development=\"y\"" ;
 			SIGNALduino_IdList("x:$target","","","y");  
 			isnt($regex_matched,1,$msg) or diag("check log entrys for skipped with id 9997, they should not be there");
 			$regex_matched=0;
-	
+
 			$msg="attr whitelist=\"\", development=\"y9997\"" ;
 			SIGNALduino_IdList("x:$target","","","y9997");  
 			isnt($regex_matched,1,$msg) or diag("check log entrys for skipped with id 9997, they should not be there");
 			$regex_matched=0;
-	
+
 			$msg="attr whitelist=\"\", development=\"m75 y9997 u73\"" ;
 			SIGNALduino_IdList("x:$target","","","m75 y9997 u73"); 
 			isnt($regex_matched,1,$msg) or diag("check log entrys for skipped with id 9997, they should not be there");
 			$regex_matched=0;
-	
+
 			$msg="attr whitelist=\"9999\", development=\"\"" ;
 			SIGNALduino_IdList("x:$target","9997","",""); 
 			isnt($regex_matched,1,$msg) or diag("check log entrys for skipped with id 9997, they should not be there");
 			$regex_matched=0;
-	
+
 			$regex_matched=0;
 			Log3 $name, 3 ,$subTestName." <--|";
-	
 		};
 	
 		$subTestName='SIGNALduino_IdList multiple development statements';
 		subtest $subTestName => sub {
 			Log3 $name, 3 ,$subTestName." |->";
-	
-	
-			plan tests => 2;
+
+			plan(2);
 			$regex_matched=0;
 			$regex=$ProtocolListTest{'9997'}{id};
-	
+
 			$msg="attr whitelist=\"\", development=\"y m9999\"" ;
 			SIGNALduino_IdList("x:$target","","","y m9999");  
 			isnt($regex_matched,1,$msg) or diag("check log entrys for skipped with id $regex, this should not be skipped");
 			$regex_matched=0;
-			
+
 			$regex=$ProtocolListTest{'9999'}{id};
 			SIGNALduino_IdList("x:$target","","","y m9999");  
 			isnt($regex_matched,1,$msg) or diag("check log entrys for skipped with id $regex, this should not be skipped");
 			$regex_matched=0;
 			Log3 $name, 3 ,$subTestName." <--|";
-	
-		
 		};
-	
 	};
 	
 	$subTestName='SIGNALduino_IdList developid "p" not skipped scenarios';
 	subtest $subTestName => sub {
 		Log3 $name, 3 ,$subTestName." |->";
 		$ProtocolListTest{'9996'}{developId}="p";
-		plan tests => 2;
+		plan(2);
 		$regex_matched=0;
 		$regex=$ProtocolListTest{'9996'}{id};
 
@@ -221,16 +218,14 @@ defmod test_developid_1 UnitTest dummyDuino (
 		isnt($regex_matched,1,$msg) or diag("check log entrys for skipped with id 9996, they should not be there");
 		$regex_matched=0;
 		Log3 $name, 3 ,$subTestName." <--|";
-
 	};
-	
 	
 	$subTestName='SIGNALduino_IdList developId "m" dispatch enabled/disabled tests';
 	subtest $subTestName => sub {
 		Log3 $name, 3 ,$subTestName." |->";
 		$logfilter="IdList, development protocol is active";
 
-		plan tests => 2;
+		plan(2);
 		$regex_matched=0;
 		$regex=$ProtocolListTest{'9999'}{id};
 
@@ -241,7 +236,7 @@ defmod test_developid_1 UnitTest dummyDuino (
 
 		SKIP : {
 			skip "attribute development not supported in stable version", 1 if (index($targetHash->{versionmodule},"dev") == -1);
-			
+
 			$msg="attr whitelist=\"\", development=\"m9999\"" ;
 			SIGNALduino_IdList("x:$target","","","m9999");  
 			isnt($regex_matched,1,$msg) or diag("check log entrys for development protocol is active with id $regex, there shouldn't be a note");
