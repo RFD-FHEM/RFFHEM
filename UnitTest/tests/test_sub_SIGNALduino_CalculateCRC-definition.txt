@@ -2,13 +2,13 @@ defmod test_sub_SIGNALduino_CalculateCRC UnitTest dummyDuino (
 {
 	# note: sub SIGNALduino_CalculateCRC is for sub SIGNALduino_LaCrosse
 	use Test2::V0;
-	use Test2::Tools::Compare qw{is};
+	use Test2::Tools::Compare qw{is isnt};
 
 	subtest 'Test sub CalculateCRC' => sub {
 		note("Arduino CRC implemented in PERL");
 		note("https://github.com/heliflieger/a-culfw/blob/master/culfw/clib/lacrosse.c");
 
-		plan(2);
+		plan(3);
 
 		my $dmsg="9AA6362CC8AAAA000012F8F4";
 		subtest 'Test with dmsg '.$dmsg => sub {
@@ -25,6 +25,15 @@ defmod test_sub_SIGNALduino_CalculateCRC UnitTest dummyDuino (
 
 			is($calccrc,129,"check calccrc return");
 			is($crc,129,"check crc return");		
+		};
+
+		$dmsg="9A05922F8280046818480800";
+		subtest 'Test with (incorrect crc) dmsg '.$dmsg => sub {
+			plan(2);
+			my ($calccrc,$crc) = SIGNALduino_CalculateCRC($dmsg,4);
+
+			is($calccrc,129,"check calccrc return");
+			isnt($crc,129,"check crc return");		
 		};
 	};
 }
