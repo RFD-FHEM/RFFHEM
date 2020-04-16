@@ -36,7 +36,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.5_dev_04.14",
+	SDUINO_VERSION            => "v3.5_dev_04.16",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -268,11 +268,8 @@ my %symbol_map = (one => 1 , zero =>0 ,sync => '', float=> 'F', 'start' => '');
 sub SIGNALduino_Initialize($) {
   my ($hash) = @_;
 
-
   my $dev = "";
-  if (index(SDUINO_VERSION, "dev") >= 0) {
-     $dev = ",1";
-  }
+  $dev = ",1" if (index(SDUINO_VERSION, "dev") >= 0);
 
 # Provider
   $hash->{ReadFn}  = "SIGNALduino_Read";
@@ -320,7 +317,6 @@ sub SIGNALduino_Initialize($) {
   $hash->{mnIdList} = ();
 
   #our $attr;
-
 
   %ProtocolListSIGNALduino = SIGNALduino_LoadProtocolHash("$attr{global}{modpath}/FHEM/lib/SD_ProtocolData.pm");
 
@@ -391,7 +387,6 @@ sub SIGNALduino_Define($$) {
   #Debug "dev: $dev" if ($debug);
   #my $hardware=AttrVal($name,"hardware","nano");
   #Debug "hardware: $hardware" if ($debug);
-
 
   if($dev eq 'none') {
     Log3 $name, 1, "$name: Define, device is none, commands will be echoed only";
@@ -976,7 +971,7 @@ sub SIGNALduino_Get_availableFirmware {
 
 	if ($missingModulSIGNALduino =~ m/JSON/ )
 	{
-		$hash->{logMethod}->($hash->{NAME}, 1, "$hash->{NAME}: get $a[0] failed. Pleas install Perl module JSON. Example: sudo apt-get install libjson-perl");
+		$hash->{logMethod}->($hash->{NAME}, 1, "$hash->{NAME}: get $a[0] failed. Please install Perl module JSON. Example: sudo apt-get install libjson-perl");
 		return "$a[0]: \n\nFetching from github is not possible. Please install JSON. Example:<br><code>sudo apt-get install libjson-perl</code>";
 	}
 
