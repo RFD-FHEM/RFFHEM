@@ -49,7 +49,7 @@
 # method      => \&        # call to process this message
 #                            system method: lib::SD_Protocols::MCRAW -> returns bits without editing and length check included
 #
-#	frequency   => ' '       # frequency to set register cc1101 to send | example: 10AB85550A
+# frequency   => ' '       # frequency to set register cc1101 to send | example: 10AB85550A
 # format      => ' '       # twostate | pwm | manchester --> modulation type of the signal, only manchester use SIGNALduino internal, other types only comment
 # modulematch => ' '       # RegEx on the exact message including preamble | if defined, it will be evaluated
 # polarity    => 'invert'  # only MC signals | invert bits of the signal

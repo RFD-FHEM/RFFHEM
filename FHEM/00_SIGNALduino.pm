@@ -2696,6 +2696,11 @@ sub SIGNALduino_Parse_MN($$$@) {
 	my $id;
 
 	foreach $id (@{$hash->{mnIdList}}) {
+		if (defined(($ProtocolListSIGNALduino{$id}{length_min})) && $hlen < $ProtocolListSIGNALduino{$id}{length_min}) {
+			$hash->{logMethod}->($name, 3, "$name: Parse_MN, Error! ID=$id msg=$rawData ($hlen) too short, min=" . $ProtocolListSIGNALduino{$id}{length_min});
+			next;
+		}
+
 		$modulation = SIGNALduino_getProtoProp($id,"modulation",undef);
 		$match = SIGNALduino_getProtoProp($id,"match",undef);
 
@@ -2707,10 +2712,6 @@ sub SIGNALduino_Parse_MN($$$@) {
 			next;
 		}
 
-		if (defined(($ProtocolListSIGNALduino{$id}{length_min})) && $hlen < $ProtocolListSIGNALduino{$id}{length_min}) {
-			$hash->{logMethod}->($name, 3, "$name: Parse_MN, Error! ID=$id msg=$rawData ($hlen) too short, min=" . $ProtocolListSIGNALduino{$id}{length_min});
-			next;
-		}
 
 		if (!exists $ProtocolListSIGNALduino{$id}{method}) {
 			$hash->{logMethod}->($name, 3, "$name: Parse_MN, Error! ID=$id, no method defined, it must be defined in the protocol hash!");
