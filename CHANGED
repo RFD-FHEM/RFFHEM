@@ -1,34 +1,26 @@
-2020-04-18 - 00_SIGNALduino.pm, test_sub_SIGNALduino_CalculateCRC-definition.txt, test_sub_SIGNALduino_LaCrosse-definition.txt
+2020-04-18
+  00_SIGNALduino.pm
+   * remove SIGNALduino_CalculateCRC16 and use Digest::CRC
+   * fix https://github.com/RFD-FHEM/RFFHEM/commit/7b02f02dcf6a1c5b99cc6e28b11fbc196684af76#commitcomment-38585566
+   * remove SIGNALduino_CalculateCRC and use Digest::CRC
+   * revised logoutput
+  SD_Protocols.pm
+   * revised structure
+  test_sub_SIGNALduino_Parse_MN-definition.txt
+   * Added subtests for unspecified methos
+  test_sub_SIGNALduino_PCA301-definition.txt
+   * revised comment
+  test_sub_SIGNALduino_LaCrosse-definition.txt
+   * revised comments
+  test_sub_SIGNALduino_CalculateCRC16-definition.txt
+   * delete test
+  test_sub_SIGNALduino_CalculateCRC-definition.txt
+   * delete test
 
-00_SIGNALduino.pm
-* remove SIGNALduino_CalculateCRC and use Digest::CRC
-* revised logoutput
-test_sub_SIGNALduino_CalculateCRC-definition.txt
-* delete test
-test_sub_SIGNALduino_LaCrosse-definition.txt
-* revised comments
-2020-04-18 - Update 00_SIGNALduino.pm
-
-* fix https://github.com/RFD-FHEM/RFFHEM/commit/7b02f02dcf6a1c5b99cc6e28b11fbc196684af76#commitcomment-38585566
-2020-04-18 - 00_SIGNALduino.pm, test_sub_SIGNALduino_CalculateCRC16-definition.txt, test_sub_SIGNALduino_PCA301-definition.txt
-
-00_SIGNALduino.pm
-  * remove SIGNALduino_CalculateCRC16 and use Digest::CRC
-test_sub_SIGNALduino_CalculateCRC16-definition.txt
-  * delete test
-test_sub_SIGNALduino_PCA301-definition.txt
-  * revised comment
-2020-04-18 - Update SD_Protocols.pm
-
-* revised structure
-2020-04-18 - tests/test_sub_SIGNALduino_Parse_MN-definition.txt
-
-Added subtests for unspecified methos
 2020-04-16 - 00_SIGNALduino.pm
-
    * revised spelling mistake
    * remove any not needed blank lines
-2020-04-16 - Merge branch 'dev-r34' into dev-r35_xFSK
+
 2020-04-14
   00_SIGNALduino.pm
    * remove some not needed comments
