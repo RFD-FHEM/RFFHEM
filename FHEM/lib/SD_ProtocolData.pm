@@ -58,6 +58,7 @@
 # datarate    => ' '       # transmission speed signal
 # modulation  => ' '       # modulation type of the signal
 # sync        => ' '       # sync parameter of signal in hex (example, 2DD4)
+# regexMatch  => ' '       # Regex objct which must match on the raw message qr//
 #
 ##### notice #### or #### info ############################################################################################################
 # !!! Between the keys and values ​​no tabs, please use spaces !!!
@@ -2628,7 +2629,7 @@ package lib::SD_ProtocolData;
 				datarate        => '17257.69',
 				sync            => '2DD4',
 				modulation      => '2-FSK',
-				match           => '^9.*',   # ToDo, check! fuer eine regexp Pruefung am Anfang vor dem method Aufruf
+				regexMatch      => qr/^9/,   # ToDo, check! fuer eine regexp Pruefung am Anfang vor dem method Aufruf
 				clientmodule    => 'LaCrosse',
 				method          => \&main::SIGNALduino_LaCrosse,
 			},
@@ -2657,7 +2658,7 @@ package lib::SD_ProtocolData;
 				datarate        => '4785.5',
 				sync            => 'AA54',
 				modulation      => 'GFSK',
-				match           => '^0.*',   # ToDo, check! fuer eine regexp Pruefung am Anfang vor dem method Aufruf
+				regexMatch      => qr/^0/,   # ToDo, check! fuer eine regexp Pruefung am Anfang vor dem method Aufruf
 				clientmodule    => 'KOPP_FC',
 				method          => \&main::SIGNALduino_KoppFreeControl,
 			},
@@ -2672,7 +2673,7 @@ package lib::SD_ProtocolData;
 				datarate        => '9.579',
 				sync            => '2DD4',
 				modulation      => '2-FSK',
-				match           => '^9.*',   # ToDo, check! fuer eine regexp Pruefung am Anfang vor dem method Aufruf
+				regexMatch      => qr/^9/,   # ToDo, check! fuer eine regexp Pruefung am Anfang vor dem method Aufruf
 				clientmodule    => 'LaCrosse',
 				method          => \&main::SIGNALduino_LaCrosse,
 			},

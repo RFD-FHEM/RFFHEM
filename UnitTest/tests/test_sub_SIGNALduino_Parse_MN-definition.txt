@@ -3,28 +3,72 @@ defmod test_sub_SIGNALduino_Parse_MN UnitTest dummyDuino (
 	use Test2::V0;
 	use Test2::Tools::Compare qw{is};
 
-	my $mock = Mock::Sub->new;
-	my $DoTrigger = $mock->mock("DoTrigger");	
+	# my $mock = Mock::Sub->new;
+	# my $DoTrigger = $mock->mock("DoTrigger");	
 
 	subtest 'Test - MN Data good message' => sub {
 		plan(3);
 
 		my $rmsg="MN;D=9AA6362CC8AAAA000012F8F4;R=4;";
 		my %signal_parts=SIGNALduino_Split_Message($rmsg,$targetHash->{NAME});
-		is(SIGNALduino_Parse_MN($targetHash, $targetHash->{NAME}, $rmsg,%signal_parts) ,1,"MN Data dispatched - Protocol 100 (Lacrosse, Mode 1 - IT+)");
+		is(SIGNALduino_Parse_MN($targetHash, $rmsg, \%signal_parts) ,1,"MN Data dispatched - Protocol 100 (Lacrosse, Mode 1 - IT+)");
 
 		my $rmsg="MN;D=0405019E8700AAAAAAAA0F13AA16ACC0540AAA49C814473A2774D208AC0B0167;N=3;R=6;";
 		my %signal_parts=SIGNALduino_Split_Message($rmsg,$targetHash->{NAME});
-		is(SIGNALduino_Parse_MN($targetHash, $targetHash->{NAME}, $rmsg,%signal_parts) ,1,"MN Data dispatched - Protocol 101 (ELV PCA 301)");
+		is(SIGNALduino_Parse_MN($targetHash, $rmsg,\%signal_parts) ,1,"MN Data dispatched - Protocol 101 (ELV PCA 301)");
 
 		my $rmsg="MN;D=07FA5E1721CC0F02FE000000000000;";
 		my %signal_parts=SIGNALduino_Split_Message($rmsg,$targetHash->{NAME});
-		is(SIGNALduino_Parse_MN($targetHash, $targetHash->{NAME}, $rmsg,%signal_parts) ,1,"MN Data dispatched - Protocol 102 (KoppFreeControl)");
+		is(SIGNALduino_Parse_MN($targetHash, $rmsg,\%signal_parts) ,1,"MN Data dispatched - Protocol 102 (KoppFreeControl)");
 	};
 
-	note("Test - MN Data bad message");
-	note("Test - MN Data to short if length_min defined");
-	note("Test - MN Data if method not defined");
-	note("Test - MN Data if method not exists");
+	subtest 'SIGNALduino_parse_MN message does not match regex' => sub {
+		plan(1);
+
+		my $rmsg="MN;D=8AA6362CC8AAAA000012F8F4;R=4;";
+		my %signal_parts=SIGNALduino_Split_Message($rmsg,$targetHash->{NAME});
+
+		is(SIGNALduino_Parse_MN($targetHash, $rmsg, \%signal_parts),0 , "MN data not dispatched");
+	};
+
+
+	subtest 'SIGNALduino_parse_MN message to short' => sub {
+		plan(1);
+
+		my $rmsg="MN;D=01050;N=3;";
+		my %signal_parts=SIGNALduino_Split_Message($rmsg,$targetHash->{NAME});
+
+		is(SIGNALduino_Parse_MN($targetHash, $rmsg, \%signal_parts),0 , "MN data not dispatched");
+	};
+
+    my %local_ProtocolListSIGNALduino =  SIGNALduino_LoadProtocolHash("$attr{global}{modpath}/FHEM/lib/test_loadprotohash-ok.pm");
+    my $ProtocolListSIGNALduino_REF = SIGNALduino_getProtocolList();
+    %$ProtocolListSIGNALduino_REF = %local_ProtocolListSIGNALduino;
+	SIGNALduino_IdList("x:$target","","","");  
+
+
+	subtest 'SIGNALduino_parse_MN method not defined' => sub {
+		plan(1);
+
+		my $rmsg="MN;D=3645;R=4;";
+		my %signal_parts=SIGNALduino_Split_Message($rmsg,$targetHash->{NAME});
+
+		is(SIGNALduino_Parse_MN($targetHash, $rmsg, \%signal_parts),0 , "MN data not dispatched");
+	};
+
+	subtest 'SIGNALduino_parse_MN method does not exist' => sub {
+		plan(1);
+
+		my $rmsg="MN;D=3545;R=4;";
+		my %signal_parts=SIGNALduino_Split_Message($rmsg,$targetHash->{NAME});
+
+		is(SIGNALduino_Parse_MN($targetHash, $rmsg, \%signal_parts),0 , "MN data not dispatched");
+	};
+
+
+	undef %{$ProtocolListSIGNALduino_REF};
+	%{$ProtocolListSIGNALduino_REF} = SIGNALduino_LoadProtocolHash("$attr{global}{modpath}/FHEM/lib/SD_ProtocolData.pm");
+	SIGNALduino_IdList("x:$target","","","");  
+	
 }
 )

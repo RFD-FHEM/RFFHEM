@@ -2638,7 +2638,7 @@ sub SIGNALduino_Parse_MC($$$$@) {
 		   	my $method = lib::SD_Protocols::getProperty($id,"method");
 		    if (!exists &$method || !defined &{ $method })
 			{
-				$hash->{logMethod}->($name, 5, "$name: Parse_MC, Error: Unknown function=$method. Please define it in file $0");
+				$hash->{logMethod}->($name, 5, "$name: Parse_MC, Error: Unknown function=$method. Please define it in file SD_ProtocolData.pm");
 			} else {
 				$mcbitnum = length($bitData) if ($mcbitnum > length($bitData));
 				my ($rcode,$res) = $method->($name,$bitData,$id,$mcbitnum);
@@ -2682,10 +2682,11 @@ sub SIGNALduino_Parse_MC($$$$@) {
 }
 
 ############################# package main
-sub SIGNALduino_Parse_MN($$$@) {
-	my ($hash, $name, $rmsg,%msg_parts) = @_;
-	my $rawData=$msg_parts{rawData};
-	my $rssi=$msg_parts{rssi};
+sub SIGNALduino_Parse_MN {
+	my ($hash, $rmsg, $msg_parts) = @_;
+	my $name= $hash->{NAME};
+	my $rawData=$msg_parts->{rawData};
+	my $rssi=$msg_parts->{rssi};
 	my $dmsg;
 	my $rssiStr= "";
 	($rssi,$rssiStr) = SIGNALduino_calcRSSI($rssi) if (defined($rssi));
@@ -2694,45 +2695,45 @@ sub SIGNALduino_Parse_MN($$$@) {
 	my $match;
 	my $modulation;
 	my $id;
+	my $message_dispatched=0;
+	
 
 	foreach $id (@{$hash->{mnIdList}}) {
+		
+		my $method = lib::SD_Protocols::checkProperty($id,'method','unspecified');
+	#	if (ref $method ne 'CODE' || !exists &{$method})
+	    if (!exists &$method || !defined &{ $method })
+		{
+			$hash->{logMethod}->($name, 5, "$name: Parse_MN, Error: Unknown function=$method. Please define it in file SD_ProtocolData.pm");
+			next;
+		}
+		
 		if (defined(($ProtocolListSIGNALduino{$id}{length_min})) && $hlen < $ProtocolListSIGNALduino{$id}{length_min}) {
 			$hash->{logMethod}->($name, 3, "$name: Parse_MN, Error! ID=$id msg=$rawData ($hlen) too short, min=" . $ProtocolListSIGNALduino{$id}{length_min});
 			next;
 		}
 
-		$modulation = SIGNALduino_getProtoProp($id,"modulation",undef);
-		$match = SIGNALduino_getProtoProp($id,"match",undef);
-
-		if ( $modulation && $match && $rawData =~ m/$match/ ) {
+		$match = SIGNALduino_getProtoProp($id,'regexMatch',undef);
+		$modulation = SIGNALduino_getProtoProp($id,'modulation',undef);
+		if ( defined($match) && $rawData =~ m/$match/ ) {
 			$hash->{logMethod}->($name, 4, "$name: Parse_MN, Found $modulation Protocol id $id -> $ProtocolListSIGNALduino{$id}{name} with match $match");
-		} elsif (!$match && $modulation) {
+		} elsif (!defined($match) ) {
 			$hash->{logMethod}->($name, 4, "$name: Parse_MN, Found $modulation Protocol id $id -> $ProtocolListSIGNALduino{$id}{name}");
+		} 
+
+
+		my ($rcode,$res) = $method->($name,$rawData,$id);
+		if ($rcode != -1) {
+			$dmsg = $res;
+			$hash->{logMethod}->($name, 4, "$name: Parse_MN, Decoded matched MN Protocol id $id dmsg=$dmsg $rssiStr");
+			SIGNALduno_Dispatch($hash,$rmsg,$dmsg,$rssi,$id);
+			$message_dispatched=1;
 		} else {
-			next;
+			$hash->{logMethod}->($name, 4, "$name: Parse_MN, Error! method $res");
 		}
-
-
-		if (!exists $ProtocolListSIGNALduino{$id}{method}) {
-			$hash->{logMethod}->($name, 3, "$name: Parse_MN, Error! ID=$id, no method defined, it must be defined in the protocol hash!");
-			next;
-		}
-
-		my $method = $ProtocolListSIGNALduino{$id}{method};
-		if (!defined &$method) {
-			$hash->{logMethod}->($name, 3, "$name: Parse_MN, Error! ID=$id, Unknown method. Please check it!");
-		} else {
-			my ($rcode,$res) = $method->($name,$rawData,$id);
-			if ($rcode != -1) {
-				$dmsg = $res;
-				$hash->{logMethod}->($name, 4, "$name: Parse_MN, Decoded matched MN Protocol id $id dmsg=$dmsg $rssiStr");
-				SIGNALduno_Dispatch($hash,$rmsg,$dmsg,$rssi,$id);
-			} else {
-				$hash->{logMethod}->($name, 4, "$name: Parse_MN, Error! method $res");
-			}
-		}
+		
 	}
-	return 1;
+	return $message_dispatched;
 }
 
 ############################# package main
@@ -2783,7 +2784,7 @@ sub SIGNALduino_Parse($$$$@) {
 	# Message xFSK   -> MN
   	elsif (@{$hash->{mnIdList}} && $rmsg=~ m/^MN;.*;/) 
 	{
-		$dispatched=  SIGNALduino_Parse_MN($hash, $name, $rmsg,%signal_parts);
+		$dispatched=  SIGNALduino_Parse_MN($hash, $rmsg, \%signal_parts);
 	}
   	else {
 		Debug "$name: unknown Messageformat, aborting\n" if ($debug);
