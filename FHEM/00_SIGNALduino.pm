@@ -2720,8 +2720,9 @@ sub SIGNALduino_Parse_MN {
 			$hash->{logMethod}->($name, 4, "$name: Parse_MN, Found $modulation Protocol id $id -> $ProtocolListSIGNALduino{$id}{name} with match $match");
 		} elsif (!defined($match) ) {
 			$hash->{logMethod}->($name, 4, "$name: Parse_MN, Found $modulation Protocol id $id -> $ProtocolListSIGNALduino{$id}{name}");
-		} 
-
+		} else {
+			next;
+		}
 
 		my ($rcode,$res) = $method->($name,$rawData,$id);
 		if ($rcode != -1) {
