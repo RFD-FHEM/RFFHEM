@@ -1,3 +1,6 @@
+2020-04-18 - tests/test_sub_SIGNALduino_Parse_MN-definition.txt
+
+Added subtests for unspecified methos
 2020-04-16 - 00_SIGNALduino.pm
 
    * revised spelling mistake
