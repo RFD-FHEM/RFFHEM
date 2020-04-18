@@ -2697,15 +2697,12 @@ sub SIGNALduino_Parse_MN {
 	my $modulation;
 	my $id;
 	my $message_dispatched=0;
-	
 
 	foreach $id (@{$hash->{mnIdList}}) {
-		
 		my $method = lib::SD_Protocols::checkProperty($id,'method','unspecified');
 	#	if (ref $method ne 'CODE' || !exists &{$method})
-	    if (!exists &$method || !defined &{ $method })
-		{
-			$hash->{logMethod}->($name, 5, "$name: Parse_MN, Error: Unknown function=$method. Please define it in file SD_ProtocolData.pm");
+		if (!exists &$method || !defined &{ $method }) {
+			$hash->{logMethod}->($name, 5, "$name: Parse_MN, Error! unknown function=$method. Please define it in file SD_ProtocolData.pm");
 			next;
 		}
 		
@@ -2720,8 +2717,9 @@ sub SIGNALduino_Parse_MN {
 			$hash->{logMethod}->($name, 4, "$name: Parse_MN, Found $modulation Protocol id $id -> $ProtocolListSIGNALduino{$id}{name} with match $match");
 		} elsif (!defined($match) ) {
 			$hash->{logMethod}->($name, 4, "$name: Parse_MN, Found $modulation Protocol id $id -> $ProtocolListSIGNALduino{$id}{name}");
-		} 
-
+		} else {
+			next;
+		}
 
 		my ($rcode,$res) = $method->($name,$rawData,$id);
 		if ($rcode != -1) {
@@ -2732,7 +2730,6 @@ sub SIGNALduino_Parse_MN {
 		} else {
 			$hash->{logMethod}->($name, 4, "$name: Parse_MN, Error! method $res");
 		}
-		
 	}
 	return $message_dispatched;
 }
@@ -4240,37 +4237,6 @@ sub SIGNALduino_TestLength {
 	return (1,"");
 }
 
-############################# package main
-sub SIGNALduino_CalculateCRC($$) {
-	my ($dmsg,$len) = @_;
-	my $i;
-	my $j;
-	my $tmp;
-	my $val;
-	my $res = 0;
-	my @data = ();
-
-	for ($i=0; $i<5; $i++ ) {
-		push(@data,hex(substr($dmsg,$i*2,2)));
-	}
-	#Debug "data=@data\n";
-
-  for ($j = 0; $j < $len; $j++) {
-    $val = $data[$j];
-    for ($i = 0; $i < 8; $i++) {
-      $tmp = ($res ^ $val) & 0x80;
-      $res <<= 1;
-      $res = $res & 0xFF;
-      if ($tmp != 0) {
-        $res ^= 0x31;
-      }
-      $val <<= 1;
-    }
-  }
-  return ($res, $data[$len]);
-}
-
-
 ##############################################################
 # xFSK method functions
 
@@ -4299,11 +4265,17 @@ sub SIGNALduino_LaCrosse($$$) {
 	# |  | `---------- ID
 	# `---- START
 
-	#$hash->{LaCrossePair} = 2;
-	
-	my ($calccrc,$crc) = SIGNALduino_CalculateCRC($dmsg,4);
-	
-	if ($calccrc !=$crc) {
+	if ($missingModulSIGNALduino =~ m/Digest::CRC/ ) {
+		$hash->{logMethod}->($hash->{NAME}, 1, "$hash->{NAME}: LaCrosse_convert failed. Please install Perl module Digest::CRC. Example: sudo apt-get install libdigest-crc-perl");
+		return (-1,"LaCrosse_convert: Digest::CRC failed");
+	}
+
+	my $ctx = Digest::CRC->new(width=>8, poly=>0x31);
+	$ctx->add(pack 'H*', substr($dmsg,0,8));
+	my $calccrc = $ctx->digest;
+	my $crc = sprintf("%d", hex(substr($dmsg,8,2)));
+
+	if ($calccrc != $crc) {
 		$hash->{logMethod}->($name, 4, "$name: LaCrosse, Error! dmsg=$dmsg checksumCalc=$calccrc checksum=$crc");
 		return (-1,"LaCrosse_convert checksum Error: dmsg=$dmsg checksumCalc=$calccrc checksum=$crc");
 	}
