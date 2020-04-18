@@ -4345,10 +4345,11 @@ sub SIGNALduino_PCA301($$$) {
 	my ($name,$rmsg,$id) = @_;
 	my $hash = $defs{$name};
 
+	return  (-2,'Lengh to short') if (length($rmsg) < 24);
 	my $checksum = substr($rmsg,20,4);
 	my $dmsg = substr($rmsg,0,20);
 
-	if ($missingModulSIGNALduino =~ m/Digest::CRC/ ) {
+	if ($missingModulSIGNALduino =~ m/Digest::CRC/sxm ) {
 		$hash->{logMethod}->($hash->{NAME}, 1, "$hash->{NAME}: PCA301_convert failed. Please install Perl module Digest::CRC. Example: sudo apt-get install libdigest-crc-perl");
 		return (-1,"PCA301_convert: Digest::CRC failed");
 	}

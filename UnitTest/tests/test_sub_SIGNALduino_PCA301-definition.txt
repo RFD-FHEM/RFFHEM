@@ -45,5 +45,14 @@ defmod test_sub_SIGNALduino_PCA301 UnitTest dummyDuino (
 		is($rcode,-1,"check rcode for PCA301 wrong dmsg with wrong checksum");
 		is($dmsgMod,"PCA301_convert: wrong checksum 7400","check dmsgMod for PCA301 wrong dmsg with wrong checksum");	
 	};
+	
+	subtest 'Test rcode -1, length to short' => sub {
+		plan(1);
+		my $dmsg="010503B7A101AAAAAAAA";
+		my $id=101;
+		my ($rcode,$dmsgMod) = SIGNALduino_PCA301($target,$dmsg,$id);
+
+		is($rcode,-2,'check rcode for PCA301 length to short');
+	};
 }
 )
