@@ -3,13 +3,13 @@ defmod test_sub_SIGNALduino_LaCrosse UnitTest dummyDuino (
 	use Test2::V0;
 	use Test2::Tools::Compare qw{is};
 	
-	# note: sub SIGNALduino_LaCrosse use sub SIGNALduino_CalculateCRC
+	# note: sub SIGNALduino_LaCrosse use Digest::CRC
 
 	subtest 'Test Protocol 100 (Lacrosse, Mode 1 - IT+) - sub work' => sub {
 		plan(2);
 		my $id=100;
 
-		subtest 'Test rcode 1' => sub {
+		subtest 'Test rcode 1 , checksum ok' => sub {
 			plan(2);
 			my $dmsg="9AA6362CC8AAAA000012F8F4";
 			my ($rcode,$dmsgMod);
@@ -19,7 +19,7 @@ defmod test_sub_SIGNALduino_LaCrosse UnitTest dummyDuino (
 			is($dmsgMod,"OK 9 42 129 4 212 44","check result for right Lacrosse transmission");
 		};
 
-		subtest 'Test rcode -1' => sub {
+		subtest 'Test rcode -1 , checksum wrong' => sub {
 			plan(2);
 			my $dmsg="9BA6362CC8AAAA000012F8F4 ";
 			my ($rcode,$dmsgMod);
@@ -34,7 +34,7 @@ defmod test_sub_SIGNALduino_LaCrosse UnitTest dummyDuino (
 		plan(2);
 		my $id=103;
 
-		subtest 'Test rcode 1' => sub {
+		subtest 'Test rcode 1 , checksum ok' => sub {
 			plan(2);
 			my $dmsg="9A05922F8180046818480800";
 			my ($rcode,$dmsgMod);
@@ -44,7 +44,7 @@ defmod test_sub_SIGNALduino_LaCrosse UnitTest dummyDuino (
 			is($dmsgMod,"OK 9 40 1 4 168 47","check result for right Lacrosse transmission");
 		};
 		
-		subtest 'Test rcode -1' => sub {
+		subtest 'Test rcode -1 , checksum wrong' => sub {
 			plan(2);
 			my $dmsg="9B05922F8180046818480800 ";
 			my ($rcode,$dmsgMod);
