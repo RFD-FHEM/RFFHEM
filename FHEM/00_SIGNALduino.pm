@@ -23,6 +23,7 @@ use DevIo;
 no warnings 'portable';
 
 eval "use Data::Dumper qw(Dumper);1";
+eval "use Digest::CRC;1" or $missingModulSIGNALduino .= "Digest::CRC ";
 eval "use JSON;1" or $missingModulSIGNALduino .= "JSON ";
 
 eval "use Scalar::Util qw(looks_like_number);1";
@@ -36,7 +37,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.5_dev_04.16",
+	SDUINO_VERSION            => "v3.5_dev_04.18",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -4240,32 +4241,6 @@ sub SIGNALduino_TestLength {
 }
 
 ############################# package main
-sub SIGNALduino_CalculateCRC16($$$) {
-	my ($dmsg,$poly,$crc16) = @_;
-	my $len = length($dmsg);
-	my $i;
-	my $byte;
-	
-	for ($i=0; $i<$len; $i+=2) {
-		$byte = hex(substr($dmsg,$i,2)) * 0x100;	# in 16 Bit wandeln
-		for (0..7)	# 8 Bits pro Byte
-		{
-			#if (($byte & 0x8000) ^ ($crc16 & 0x8000)) {
-			if (($byte ^ $crc16) & 0x8000) {
-				$crc16 <<= 1;
-				$crc16 ^= $poly;
-			} else {
-				$crc16 <<= 1;
-			}
-			$crc16 &= 0xFFFF;
-			$byte <<= 1;
-			$byte &= 0xFFFF;
-		}
-	}
-	return $crc16;
-}
-
-############################# package main
 sub SIGNALduino_CalculateCRC($$) {
 	my ($dmsg,$len) = @_;
 	my $i;
@@ -4372,11 +4347,19 @@ sub SIGNALduino_PCA301($$$) {
 
 	my $checksum = substr($rmsg,20,4);
 	my $dmsg = substr($rmsg,0,20);
-	my $chk16 = SIGNALduino_CalculateCRC16($dmsg,0x8005,0x0000);
 
-	$hash->{logMethod}->($name, 5, "$name: PCA301, checksumCalc=$chk16 checksum=" . hex($checksum));
+	if ($missingModulSIGNALduino =~ m/Digest::CRC/ ) {
+		$hash->{logMethod}->($hash->{NAME}, 1, "$hash->{NAME}: PCA301_convert failed. Please install Perl module Digest::CRC. Example: sudo apt-get install libdigest-crc-perl");
+		return (-1,"PCA301_convert: Digest::CRC failed");
+	}
 
-	if ($chk16 == hex($checksum)) {
+	my $ctx = Digest::CRC->new(width=>16, poly=>0x8005, init=>0x0000, refin=>0, refout=>0, xorout=>0x0000);
+	$ctx->add(pack 'H*', $dmsg);
+	my $calccrc = $ctx->digest;
+
+	$hash->{logMethod}->($name, 5, "$name: PCA301, checksumCalc=".$calccrc." checksum=" . hex($checksum));
+
+	if ($calccrc == hex($checksum)) {
 		my $channel = hex(substr($rmsg,0,2));
 		my $command = hex(substr($rmsg,2,2));
 		my $addr1 = hex(substr($rmsg,4,2));

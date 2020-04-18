@@ -3,9 +3,9 @@ defmod test_sub_SIGNALduino_PCA301 UnitTest dummyDuino (
 	use Test2::V0;
 	use Test2::Tools::Compare qw{is};
 	
-	# note: sub SIGNALduino_PCA301 use sub SIGNALduino_CalculateCRC16
+	# note: sub SIGNALduino_PCA301 use Digest::CRC
 
-	subtest 'Test rcode 1' => sub {
+	subtest 'Test rcode 1 , checksum ok' => sub {
 		plan(2);
 		
 		subtest 'Test sub PCA301 with RAWMSG one' => sub {
@@ -33,7 +33,7 @@ defmod test_sub_SIGNALduino_PCA301 UnitTest dummyDuino (
 		};	
 	};
 
-	subtest 'Test rcode -1' => sub {
+	subtest 'Test rcode -1 , checksum wrong' => sub {
 		note("MN;D=010503B7A101AAAAAAAA74000A9885E53246E91113F897A4F80D30C8DE602BDF;N=3;");
 		note("wrong checksum from dmsg");
 
