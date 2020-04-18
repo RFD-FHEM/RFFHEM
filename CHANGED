@@ -1,3 +1,12 @@
+2020-04-18 - 00_SIGNALduino.pm, test_sub_SIGNALduino_CalculateCRC-definition.txt, test_sub_SIGNALduino_LaCrosse-definition.txt
+
+00_SIGNALduino.pm
+* remove SIGNALduino_CalculateCRC and use Digest::CRC
+* revised logoutput
+test_sub_SIGNALduino_CalculateCRC-definition.txt
+* delete test
+test_sub_SIGNALduino_LaCrosse-definition.txt
+* revised comments
 2020-04-18 - Update 00_SIGNALduino.pm
 
 * fix https://github.com/RFD-FHEM/RFFHEM/commit/7b02f02dcf6a1c5b99cc6e28b11fbc196684af76#commitcomment-38585566
