@@ -1,3 +1,7 @@
+2020-04-19 - lib/SD_Protocols.pm
+
+convert length error to warning and capture this in test
+sub still returns OK message if lengt is to long
 2020-04-19 - Merge branch 'dev-r35_xFSK' of github.com:RFD-FHEM/RFFHEM into dev-r35_xFSK
 2020-04-18 - Merge branch 'dev-r35_xFSK' of github.com:RFD-FHEM/RFFHEM into dev-r35_xFSK
 2020-04-18
