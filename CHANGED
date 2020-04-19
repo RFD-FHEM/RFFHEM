@@ -1,3 +1,6 @@
+2020-04-19 - lib/SD_Protocols.pm
+
+sub ID101_2_PCA301 modified and UnitTest/tests/test_sub_SIGNALduino_PCA301-definition.txt also adapted to cover this
 2020-04-19 - Update SD_Protocols.pm
 
 * Sub transfer parameters adjusted (in first always $name, second is $hexData)
