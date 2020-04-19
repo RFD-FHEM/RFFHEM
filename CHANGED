@@ -1,3 +1,4 @@
+2020-04-19 - fix wrong name
 2020-04-19 - lib/SD_Protocols.pm
 
 convert length error to warning and capture this in test
