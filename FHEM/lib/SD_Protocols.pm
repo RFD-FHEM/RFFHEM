@@ -203,9 +203,9 @@ sub ID100_2_Lacross {
 	croak 'Usage: Convert_ID100_2_Lacross($dataAsHex)' 
 		if (!defined( $hexData));
 	
-	croak 'Usage: Convert_ID100_2_Lacross($dataAsHex)' 
+	carp 'Usage: Arg1, $hexData needs to be at least 24 chars long' 
 		if (length($hexData) < 24);
-	return (-10,'message to short');   
+	#return (-10,'message to short');   
 
 	my $checksum = substr($hexData,20,4);
 
@@ -225,7 +225,7 @@ sub ID100_2_Lacross {
 	my $consumption1 = hex(substr($hexData,16,2));
 	my $consumption2 = hex(substr($hexData,18,2));
 	
-    return "OK 24 $channel $command $addr1 $addr2 $addr3 $plugstate $power1 $power2 consumption1 $consumption2 $checksum";
+    return "OK 24 $channel $command $addr1 $addr2 $addr3 $plugstate $power1 $power2 $consumption1 $consumption2 $checksum";
 }
 
 1;
