@@ -54,5 +54,19 @@ defmod test_sub_SIGNALduino_PCA301 UnitTest dummyDuino (
 
 		is($rcode,-2,'check rcode for PCA301 length to short');
 	};
+	
+	subtest 'test ID100_2_Lacross' => sub 	{
+			
+			use lib::SD_Protocols;
+			my $todo = todo('Subtest isn not finished');
+			my $hexMsg="010503B7A101AAAAAAAA";
+			eval {
+				my $dmsgMod = lib::SD_Protocols::ID100_2_Lacross($hexMsg);	
+			}
+			#is($rcode,-2,'check rcode for PCA301 length to short');
+			pass();
+	}
+	
+	
 }
 )

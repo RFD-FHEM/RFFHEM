@@ -12,6 +12,7 @@ package lib::SD_Protocols;
 our $VERSION = '0.21';
 use strict;
 use warnings;
+use Carp;
 
 
 ############################# package lib::SD_Protocols
@@ -197,4 +198,34 @@ sub MCRAW {
 #############################################################################
 
 # ... here
+sub ID100_2_Lacross {
+	my $hexData =shift;
+	croak 'Usage: Convert_ID100_2_Lacross($dataAsHex)' 
+		if (!defined( $hexData));
+	
+	croak 'Usage: Convert_ID100_2_Lacross($dataAsHex)' 
+		if (length($hexData) < 24);
+	return (-10,'message to short');   
+
+	my $checksum = substr($hexData,20,4);
+
+    my $ctx = Digest::CRC->new(width=>16, poly=>0x8005, init=>0x0000, refin=>0, refout=>0, xorout=>0x0000);
+	$ctx->add(pack 'H*');
+
+	croak 'checksumCalc='.$ctx->digest.' != checksum=' . hex($checksum) if ($ctx->digest != hex($checksum)) ;
+
+	my $channel = hex(substr($hexData,0,2));
+	my $command = hex(substr($hexData,2,2));
+	my $addr1 = hex(substr($hexData,4,2));
+	my $addr2 = hex(substr($hexData,6,2));
+	my $addr3 = hex(substr($hexData,8,2));
+	my $plugstate = substr($hexData,11,1);
+	my $power1 = hex(substr($hexData,12,2));
+	my $power2 = hex(substr($hexData,14,2));
+	my $consumption1 = hex(substr($hexData,16,2));
+	my $consumption2 = hex(substr($hexData,18,2));
+	
+    return "OK 24 $channel $command $addr1 $addr2 $addr3 $plugstate $power1 $power2 consumption1 $consumption2 $checksum";
+}
+
 1;
