@@ -199,18 +199,17 @@ sub MCRAW {
 
 # ... here
 sub ID101_2_PCA301 {
-	my $hexData =shift;
+	my ($name,$hexData,$id) = @_;
+
 	croak 'Usage: Convert_ID101_2_PCA301($dataAsHex)' 
 		if (!defined( $hexData));
 	
 	carp 'Usage: Arg1, $hexData needs to be at least 24 chars long' 
-		if (length($hexData) < 24);
-	#return (-10,'message to short');   
+		if (length($hexData) < 24); # check double, in def length_min set
 
 	my $checksum = substr($hexData,20,4);
-
-    my $ctx = Digest::CRC->new(width=>16, poly=>0x8005, init=>0x0000, refin=>0, refout=>0, xorout=>0x0000);
-	$ctx->add(pack 'H*');
+  my $ctx = Digest::CRC->new(width=>16, poly=>0x8005, init=>0x0000, refin=>0, refout=>0, xorout=>0x0000);
+	$ctx->add(pack 'H*', substr($hexData,0,20));
 
 	croak 'checksumCalc='.$ctx->digest.' != checksum=' . hex($checksum) if ($ctx->digest != hex($checksum)) ;
 
@@ -224,8 +223,8 @@ sub ID101_2_PCA301 {
 	my $power2 = hex(substr($hexData,14,2));
 	my $consumption1 = hex(substr($hexData,16,2));
 	my $consumption2 = hex(substr($hexData,18,2));
-	
-    return "OK 24 $channel $command $addr1 $addr2 $addr3 $plugstate $power1 $power2 $consumption1 $consumption2 $checksum";
+
+	return (1,"OK 24 $channel $command $addr1 $addr2 $addr3 $plugstate $power1 $power2 $consumption1 $consumption2 $checksum");
 }
 
 1;
