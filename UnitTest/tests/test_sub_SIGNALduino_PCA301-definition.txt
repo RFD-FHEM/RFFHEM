@@ -55,10 +55,10 @@ defmod test_sub_SIGNALduino_PCA301 UnitTest dummyDuino (
 		is($rcode,-2,'check rcode for PCA301 length to short');
 	};
 
+
 	my $todo = todo('Subtest is not finished');
-	
-	subtest 'test ID100_2_Lacross' => sub 	{
-			
+
+	subtest 'test ID101_2_PCA301' => sub 	{
 			use lib::SD_Protocols;
 			use Test2::Tools::Warnings qw/warns warning warnings no_warnings/;
 			
@@ -67,9 +67,9 @@ defmod test_sub_SIGNALduino_PCA301 UnitTest dummyDuino (
 			#eval {
 		    #		my $dmsgMod = ;	
 			#};
-			ok(warns { $ret=lib::SD_Protocols::ID100_2_Lacross($hexMsg) }, "ID100_2_Lacross gives warning");
+			ok(warns { $ret=lib::SD_Protocols::ID101_2_PCA301($hexMsg) }, "ID101_2_PCA301 gives warning");
 						
-			is($ret,U(),'check rcode for ID100_2_Lacross to be undefined');
+			is($ret,U(),'check rcode for ID101_2_PCA301 to be undefined');
 	}
 	
 	

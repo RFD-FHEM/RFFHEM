@@ -198,9 +198,9 @@ sub MCRAW {
 #############################################################################
 
 # ... here
-sub ID100_2_Lacross {
+sub ID101_2_PCA301 {
 	my $hexData =shift;
-	croak 'Usage: Convert_ID100_2_Lacross($dataAsHex)' 
+	croak 'Usage: Convert_ID101_2_PCA301($dataAsHex)' 
 		if (!defined( $hexData));
 	
 	carp 'Usage: Arg1, $hexData needs to be at least 24 chars long' 
