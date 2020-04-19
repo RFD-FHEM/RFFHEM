@@ -59,7 +59,7 @@ sub LoadHash {
 # This functons, will return true if the given ID exists otherwise false
 # =cut
 #  $id
-sub exists($) {
+sub exists {
 	return exists($lib::SD_ProtocolData::protocols{$_[0]});
 }
 
@@ -197,21 +197,36 @@ sub MCRAW {
 ###       all functions for RAWmsg processing or module preparation       ###
 #############################################################################
 
-# ... here
-sub ID101_2_PCA301 {
-	my ($name,$hexData,$id) = @_;
 
-	croak 'Usage: Convert_ID101_2_PCA301($dataAsHex)' 
-		if (!defined( $hexData));
+############################################################
+
+=item ID101_2_PCA301()
+
+This sub checks crc and converts data to a format which the PCA301 module can handle
+croaks if called with less than two parameters
+
+Input:  $name,$hexData
+
+Output:
+        scalar converted message on success 
+		or array (1,"Error message")
+
+=cut
+
+############################################################
+sub ID101_2_PCA301 {
+	my $name = shift;
+	my $hexData = shift // croak 'Error: called without $hexdata as second input';
 	
-	carp 'Usage: Arg1, $hexData needs to be at least 24 chars long' 
+	return (1,'Usage: Input #2, $hexData needs to be at least 24 chars long') 
 		if (length($hexData) < 24); # check double, in def length_min set
 
 	my $checksum = substr($hexData,20,4);
-  my $ctx = Digest::CRC->new(width=>16, poly=>0x8005, init=>0x0000, refin=>0, refout=>0, xorout=>0x0000);
-	$ctx->add(pack 'H*', substr($hexData,0,20));
+	my $ctx = Digest::CRC->new(width=>16, poly=>0x8005, init=>0x0000, refin=>0, refout=>0, xorout=>0x0000);
+	my $calcCrc = sprintf("%X", $ctx->add(pack 'H*', substr($hexData,0,20))->digest);
 
-	croak 'checksumCalc='.$ctx->digest.' != checksum=' . hex($checksum) if ($ctx->digest != hex($checksum)) ;
+	return (1,qq[checksumCalc:$calcCrc != checksum: $checksum]) if ($calcCrc != $checksum) ;
+	
 
 	my $channel = hex(substr($hexData,0,2));
 	my $command = hex(substr($hexData,2,2));
@@ -224,7 +239,7 @@ sub ID101_2_PCA301 {
 	my $consumption1 = hex(substr($hexData,16,2));
 	my $consumption2 = hex(substr($hexData,18,2));
 
-	return (1,"OK 24 $channel $command $addr1 $addr2 $addr3 $plugstate $power1 $power2 $consumption1 $consumption2 $checksum");
+	return ("OK 24 $channel $command $addr1 $addr2 $addr3 $plugstate $power1 $power2 $consumption1 $consumption2 $checksum");
 }
 
 1;
