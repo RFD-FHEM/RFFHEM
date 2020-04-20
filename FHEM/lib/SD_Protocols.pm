@@ -223,10 +223,9 @@ sub ID101_2_PCA301 {
 
 	my $checksum = substr($hexData,20,4);
 	my $ctx = Digest::CRC->new(width=>16, poly=>0x8005, init=>0x0000, refin=>0, refout=>0, xorout=>0x0000);
-	my $calcCrc = sprintf("%X", $ctx->add(pack 'H*', substr($hexData,0,20))->digest);
+	my $calcCrc = sprintf("%04X", $ctx->add(pack 'H*', substr($hexData,0,20))->digest);
 
-	return (1,qq[checksumCalc:$calcCrc != checksum: $checksum]) if ($calcCrc != $checksum) ;
-	
+	return (1,qq[ID101_2_PCA301, checksumCalc:$calcCrc != checksum: $checksum]) if ($calcCrc ne $checksum);
 
 	my $channel = hex(substr($hexData,0,2));
 	my $command = hex(substr($hexData,2,2));
