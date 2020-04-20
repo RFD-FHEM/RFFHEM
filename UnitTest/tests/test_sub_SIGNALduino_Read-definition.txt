@@ -105,6 +105,32 @@ defmod test_sub_SIGNALduino_Read UnitTest dummyDuino
 		
 	}; 
 	
+
+	subtest 'Verify sendraw split and regex' => sub {
+		my $todo = todo "test is not completed see github #823";
+		
+		plan (2);
+		$parsefn->reset();
+		fhem("attr $target debug 1");
+		
+		$targetHash->{getcmd}->{cmd} = "sendraw";
+       	$targetHash->{ucCmd}->{timenow} = time();
+       	$targetHash->{ucCmd}->{responseSub} = \&SIGNALduino_CheckSendRawResponse;
+		#$targetHash->{PARTIAL}="SR;";
+		
+		$PortObj->{"_fake_input"} = "SR;F\nR=6;P0=250;P1=-7750;P2=750;P3=-250;P4=-750";
+		# \nF\nR=6;P0=250;P1=-7750;P2=750;P3=-250;P4=-750;
+		SIGNALduino_Read($targetHash);
+		is( $targetHash->{PARTIAL}, "SR;", 'check internal PARTIAL' ); 
+		is($targetHash->{getcmd}->{cmd},"sendraw","verify getcmd is sendraw");
+		
+		#$PortObj->{"_fake_input"} = "R=6;P0=250;P1=-7750;P2=750;P3=-250;P4=-750;F\n";
+		#SIGNALduino_Read($targetHash);
+		#is( $targetHash->{PARTIAL}, "", 'check internal PARTIAL' ); 
+		#is($targetHash->{getcmd}->{cmd},"sendraw","verify getcmd is sendraw");
+		
+	}; 
+
 	$parsefn->unmock;	
 	
 	fhem("attr $target debug 0");

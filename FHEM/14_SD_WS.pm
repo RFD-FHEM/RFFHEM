@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 14_SD_WS.pm 21621 2020-04-07 21:31:57Z Sidey $
+# $Id: 14_SD_WS.pm v3.4.3 2020-04-07 21:31:57Z Sidey $
 #
 # The purpose of this module is to support serval
 # weather sensors which use various protocol
@@ -28,6 +28,8 @@
 # 22.02.2020 Protokoll 58: neuer Sensor TFA 30.3228.02, FT007T Thermometer Sensor
 
 package main;
+
+#use version 0.77; our $VERSION = version->declare('v3.4.3');
 
 use strict;
 use warnings;

@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 14_SD_AS.pm 9830 2016-24-01 00:16:11
+# $Id: 14_SD_AS.pm 3.4.3 2016-24-01 00:16:11
 # The file is part of the SIGNALduino project
 # see http://www.fhemwiki.de/wiki/SIGNALduino
 # and was created to provide support for self build sensors.
@@ -9,6 +9,7 @@
 #
 
 package main;
+#use version 0.77; our $VERSION = version->declare('v3.4.3');
 
 use strict;
 use warnings;
