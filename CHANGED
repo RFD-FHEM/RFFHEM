@@ -1,3 +1,6 @@
+2020-04-20 - Update SD_Protocols.pm
+
+* fix https://github.com/RFD-FHEM/RFFHEM/commit/cbc52712a48b812700660fef4a526f41447ce5c7#commitcomment-38613486
 2020-04-19 - 00_SIGNALduino.pm
 
 Sub SIGNALduino_Parse_MN prepared some code to witch to new method type
