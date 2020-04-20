@@ -197,7 +197,6 @@ sub MCRAW {
 ###       all functions for RAWmsg processing or module preparation       ###
 #############################################################################
 
-
 ############################################################
 
 =item ID101_2_PCA301()
@@ -225,7 +224,7 @@ sub ID101_2_PCA301 {
 	my $ctx = Digest::CRC->new(width=>16, poly=>0x8005, init=>0x0000, refin=>0, refout=>0, xorout=>0x0000);
 	my $calcCrc = sprintf("%04X", $ctx->add(pack 'H*', substr($hexData,0,20))->digest);
 
-	return (1,qq[ID101_2_PCA301, checksumCalc:$calcCrc != checksum: $checksum]) if ($calcCrc ne $checksum);
+	return (1,qq[ID101_2_PCA301, checksumCalc:$calcCrc != checksum:$checksum]) if ($calcCrc ne $checksum);
 
 	my $channel = hex(substr($hexData,0,2));
 	my $command = hex(substr($hexData,2,2));
@@ -239,6 +238,44 @@ sub ID101_2_PCA301 {
 	my $consumption2 = hex(substr($hexData,18,2));
 
 	return ("OK 24 $channel $command $addr1 $addr2 $addr3 $plugstate $power1 $power2 $consumption1 $consumption2 $checksum");
+}
+
+############################################################
+
+=item ID102_2_KoppFreeControl()
+
+This sub checks crc and converts data to a format which the KoppFreeControl module can handle
+croaks if called with less than two parameters
+
+Input:  $name,$hexData
+
+Output:
+        scalar converted message on success 
+		or array (1,"Error message")
+
+=cut
+
+############################################################
+sub ID102_2_KoppFreeControl {
+	my $name = shift;
+	my $hexData = shift // croak 'Error: called without $hexdata as second input';
+
+	return (1,'Usage: Input #2, $hexData needs to be at least 24 chars long')
+		if (length($hexData) < 24); # check double, in def length_min set
+
+	my $anz = hex(substr($hexData,0,2)) + 1;
+	my $blkck = 0xAA;
+	my $d;
+
+	for (my $i = 0; $i < $anz; $i++) {
+		$d = hex(substr($hexData,$i*2,2));
+		$blkck ^= $d;
+	}
+
+	my $checksum = hex(substr($hexData,$anz*2,2));
+
+	return (1,qq[ID102_2_KoppFreeControl, checksumCalc:$blkck != checksum:$checksum]) if ($blkck ne $checksum);
+	return ("kr" . substr($hexData,0,$anz*2));
 }
 
 1;
