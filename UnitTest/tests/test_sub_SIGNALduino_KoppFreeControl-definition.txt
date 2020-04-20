@@ -9,7 +9,7 @@ defmod test_sub_SIGNALduino_KoppFreeControl UnitTest dummyDuino (
 		plan(2);
 		note("MN;D=07FA5E1721CC0F02FE000000000000;");
 		my $dmsg="07FA5E1721CC0F02FE000000000000";
-			my ($rcode,$dmsgMod) = SIGNALduino_KoppFreeControl($target,$dmsg,$id);
+		my ($rcode,$dmsgMod) = SIGNALduino_KoppFreeControl($target,$dmsg,$id);
 
 		is($rcode,1,"check rcode for KoppFreeControl dmsg");
 		is($dmsgMod,"kr07FA5E1721CC0F02","check dmsgMod for KoppFreeControl dmsg");	
@@ -24,5 +24,31 @@ defmod test_sub_SIGNALduino_KoppFreeControl UnitTest dummyDuino (
 		is($rcode,-1,"check rcode for KoppFreeControl dmsg");
 		is($dmsgMod,"KoppFreeControl checksum Error: msg=07FF5E1721CC0F02FE000000000000 checksumCalc=251 checksum=254","check dmsgMod with wrong checksum");
 	};
+
+
+	subtest 'test ConvKoppFreeControl, checksum ok' => sub 	{
+		plan(1);
+		subtest 'msg MN;D=07FA5E1721CC0F02FE000000000000; (ID 102)' => sub {		
+			my $hexMsg='07FA5E1721CC0F02FE000000000000';
+			plan(2);
+			my @ret=lib::SD_Protocols::ConvKoppFreeControl($hexMsg) ;
+			is($#ret,0, 'ConvKoppFreeControl reported no error');
+			is($ret[0],'kr07FA5E1721CC0F02','check result for right KoppFreeControl transmission',@ret);
+		};
+	};
+
+	subtest 'test ConvKoppFreeControl, checksum wrong' => sub 	{
+		plan(1);
+		subtest 'msg MN;D=07FF5E1721CC0F02FE000000000000 (ID 102)' => sub {		
+			plan(2);
+			my $hexMsg='07FF5E1721CC0F02FE000000000000';
+			my @ret=lib::SD_Protocols::ConvKoppFreeControl($hexMsg) ;
+			is($#ret,1, 'ConvKoppFreeControl reported some error');
+			like($ret[1],qr/!= checksum/,'check error message');
+		}
+		
+		
+	};
+
 }
 )

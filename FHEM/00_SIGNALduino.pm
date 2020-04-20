@@ -2720,24 +2720,13 @@ sub SIGNALduino_Parse_MN {
 			next;
 		}
 
-		# Todo switch as soon as methods are migrated to lib::SD_Protocols and got new return handling
-		#my @methodReturn = $method->($name,$rawData,$id);
-		#if ($#methodReturn == 0) {
-		#	$hash->{logMethod}->($name, 4, "$name: Parse_MN, Decoded matched MN Protocol id $id dmsg=$methodReturn[0] $rssiStr");
-		#	SIGNALduno_Dispatch($hash,$rmsg,$methodReturn[0],$rssi,$id);
-		#	$message_dispatched++;
-		#} else {
-		#	$hash->{logMethod}->($name, 4, "$name: Parse_MN, Error! method $methodReturn[1]");
-		#}
-
-		my ($rcode,$res) = $method->($name,$rawData,$id);
-		if ($rcode != -1) {
-			$dmsg = $res;
-			$hash->{logMethod}->($name, 4, "$name: Parse_MN, Decoded matched MN Protocol id $id dmsg=$dmsg $rssiStr");
-			SIGNALduno_Dispatch($hash,$rmsg,$dmsg,$rssi,$id);
-			$message_dispatched=1;
+		my @methodReturn = $method->($rawData);
+		if ($#methodReturn == 0) {
+			$hash->{logMethod}->($name, 4, "$name: Parse_MN, Decoded matched MN Protocol id $id dmsg=$methodReturn[0] $rssiStr");
+			SIGNALduno_Dispatch($hash,$rmsg,$methodReturn[0],$rssi,$id);
+			$message_dispatched++;
 		} else {
-			$hash->{logMethod}->($name, 4, "$name: Parse_MN, Error! method $res");
+			$hash->{logMethod}->($name, 4, "$name: Parse_MN, Error! method $methodReturn[1]");
 		}
 	}
 	return $message_dispatched;

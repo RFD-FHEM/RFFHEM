@@ -2631,7 +2631,7 @@ package lib::SD_ProtocolData;
 				modulation      => '2-FSK',
 				regexMatch      => qr/^9/,   # ToDo, check! fuer eine regexp Pruefung am Anfang vor dem method Aufruf
 				clientmodule    => 'LaCrosse',
-				method          => \&main::SIGNALduino_LaCrosse,
+				method          => \&lib::SD_Protocols::ConvLaCrosse,
 			},
 		"101"	=>	# ELV PCA 301
 							# MN;D=0405019E8700AAAAAAAA0F13AA16ACC0540AAA49C814473A2774D208AC0B0167;N=3;R=6;
@@ -2646,7 +2646,7 @@ package lib::SD_ProtocolData;
 				modulation      => '2-FSK',
 				clientmodule    => 'PCA301',
 				length_min      => '24',
-				method          => \&main::SIGNALduino_PCA301,
+				method          => \&lib::SD_Protocols::ConvPCA301,
 			},
 		"102"	=>	# KoppFreeControl
 							# MN;D=07FA5E1721CC0F02FE000000000000;
@@ -2660,7 +2660,7 @@ package lib::SD_ProtocolData;
 				modulation      => 'GFSK',
 				regexMatch      => qr/^0/,   # ToDo, check! fuer eine regexp Pruefung am Anfang vor dem method Aufruf
 				clientmodule    => 'KOPP_FC',
-				method          => \&main::SIGNALduino_KoppFreeControl,
+				method          => \&lib::SD_Protocols::ConvKoppFreeControl,
 			},
 		"103"	=>	# Lacrosse Mode 2 - IT+
 							# ID=103, addr=40 temp=19.2 hum=47 bat=0 batInserted=0   MN;D=9A05922F8180046818480800;N=2;
@@ -2675,7 +2675,7 @@ package lib::SD_ProtocolData;
 				modulation      => '2-FSK',
 				regexMatch      => qr/^9/,   # ToDo, check! fuer eine regexp Pruefung am Anfang vor dem method Aufruf
 				clientmodule    => 'LaCrosse',
-				method          => \&main::SIGNALduino_LaCrosse,
+				method          => \&lib::SD_Protocols::ConvLaCrosse,
 			},
 
 		########################################################################

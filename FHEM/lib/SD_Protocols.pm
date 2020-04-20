@@ -199,12 +199,12 @@ sub MCRAW {
 
 ############################################################
 
-=item ID101_2_PCA301()
+=item ConvPCA301()
 
 This sub checks crc and converts data to a format which the PCA301 module can handle
-croaks if called with less than two parameters
+croaks if called with less than one parameters
 
-Input:  $name,$hexData
+Input:  $hexData
 
 Output:
         scalar converted message on success 
@@ -213,18 +213,17 @@ Output:
 =cut
 
 ############################################################
-sub ID101_2_PCA301 {
-	my $name = shift;
-	my $hexData = shift // croak 'Error: called without $hexdata as second input';
+sub ConvPCA301 {
+	my $hexData = shift // croak 'Error: called without $hexdata as input';
 	
-	return (1,'Usage: Input #2, $hexData needs to be at least 24 chars long') 
+	return (1,'ConvPCA301, Usage: Input #1, $hexData needs to be at least 24 chars long') 
 		if (length($hexData) < 24); # check double, in def length_min set
 
 	my $checksum = substr($hexData,20,4);
 	my $ctx = Digest::CRC->new(width=>16, poly=>0x8005, init=>0x0000, refin=>0, refout=>0, xorout=>0x0000);
 	my $calcCrc = sprintf("%04X", $ctx->add(pack 'H*', substr($hexData,0,20))->digest);
 
-	return (1,qq[ID101_2_PCA301, checksumCalc:$calcCrc != checksum:$checksum]) if ($calcCrc ne $checksum);
+	return (1,qq[ConvPCA301, checksumCalc:$calcCrc != checksum:$checksum]) if ($calcCrc ne $checksum);
 
 	my $channel = hex(substr($hexData,0,2));
 	my $command = hex(substr($hexData,2,2));
@@ -242,12 +241,12 @@ sub ID101_2_PCA301 {
 
 ############################################################
 
-=item ID102_2_KoppFreeControl()
+=item ConvKoppFreeControl()
 
 This sub checks crc and converts data to a format which the KoppFreeControl module can handle
-croaks if called with less than two parameters
+croaks if called with less than one parameters
 
-Input:  $name,$hexData
+Input:  $hexData
 
 Output:
         scalar converted message on success 
@@ -256,26 +255,99 @@ Output:
 =cut
 
 ############################################################
-sub ID102_2_KoppFreeControl {
-	my $name = shift;
-	my $hexData = shift // croak 'Error: called without $hexdata as second input';
+sub ConvKoppFreeControl {
+	my $hexData = shift // croak 'Error: called without $hexdata as input';
 
-	return (1,'Usage: Input #2, $hexData needs to be at least 24 chars long')
-		if (length($hexData) < 24); # check double, in def length_min set
+	return (1,'ConvKoppFreeControl, Usage: Input #1, $hexData needs to be at least 4 chars long')
+		if (length($hexData) < 4); # check double, in def length_min set
 
 	my $anz = hex(substr($hexData,0,2)) + 1;
 	my $blkck = 0xAA;
-	my $d;
 
 	for (my $i = 0; $i < $anz; $i++) {
-		$d = hex(substr($hexData,$i*2,2));
+		my $d = hex(substr($hexData,$i*2,2));
 		$blkck ^= $d;
 	}
+	return (1,'ConvKoppFreeControl, hexData is to short')
+		if (length($hexData) < $anz*2); # check double, in def length_min set
 
 	my $checksum = hex(substr($hexData,$anz*2,2));
 
-	return (1,qq[ID102_2_KoppFreeControl, checksumCalc:$blkck != checksum:$checksum]) if ($blkck ne $checksum);
+	return (1,qq[ConvKoppFreeControl, checksumCalc:$blkck != checksum:$checksum]) if ($blkck != $checksum);
 	return ("kr" . substr($hexData,0,$anz*2));
+}
+
+
+############################################################
+
+=item ConvLaCrosse()
+
+This sub checks crc and converts data to a format which the LaCrosse module can handle
+croaks if called with less than one parameter
+
+Input:  $hexData
+
+Output:
+        scalar converted message on success 
+		or array (1,"Error message")
+
+Message Format:
+	
+	 .- [0] -. .- [1] -. .- [2] -. .- [3] -. .- [4] -.
+	 |       | |       | |       | |       | |       |
+	 SSSS.DDDD DDN_.TTTT TTTT.TTTT WHHH.HHHH CCCC.CCCC
+	 |  | |     ||  |  | |  | |  | ||      | |       |
+	 |  | |     ||  |  | |  | |  | ||      | `--------- CRC
+	 |  | |     ||  |  | |  | |  | |`-------- Humidity
+	 |  | |     ||  |  | |  | |  | |
+	 |  | |     ||  |  | |  | |  | `---- weak battery
+	 |  | |     ||  |  | |  | |  |
+	 |  | |     ||  |  | |  | `----- Temperature T * 0.1
+	 |  | |     ||  |  | |  |
+	 |  | |     ||  |  | `---------- Temperature T * 1
+	 |  | |     ||  |  |
+	 |  | |     ||  `--------------- Temperature T * 10
+	 |  | |     | `--- new battery
+	 |  | `---------- ID
+	 `---- START
+
+=cut
+
+
+sub ConvLaCrosse {
+	my $hexData = shift // croak 'Error: called without $hexdata as input';
+
+	return (1,'ConvLaCrosse, Usage: Input #1, $hexData needs to be at least 8 chars long') 
+		if (length($hexData) < 8); # check number of length for this sub to not throw an error
+
+	my $ctx = Digest::CRC->new(width=>8, poly=>0x31);
+	my $calcCrc = $ctx->add(pack 'H*', substr($hexData,0,8))->digest;
+	my $checksum = sprintf("%d", hex(substr($hexData,8,2)));
+	return (1,qq[ConvLaCrosse, checksumCalc:$calcCrc != checksum:$checksum]) if ($calcCrc != $checksum);
+
+	my $addr = ((hex(substr($hexData,0,2)) & 0x0F) << 2) | ((hex(substr($hexData,2,2)) & 0xC0) >> 6);
+	my $temperature = ( ( ((hex(substr($hexData,2,2)) & 0x0F) * 100) + (((hex(substr($hexData,4,2)) & 0xF0) >> 4) * 10) + (hex(substr($hexData,4,2)) & 0x0F) ) / 10) - 40;
+	return (1,qq[ConvLaCrosse, temp:$temperature (out of Range)]) if ($temperature >= 60 || $temperature <= -40);   # Shoud be checked in logical module
+
+	my $humidity = hex(substr($hexData,6,2));
+	my $batInserted = (hex(substr($hexData,2,2)) & 0x20) << 2;
+	my $SensorType = 1;
+	
+	my $humObat = $humidity & 0x7F;
+
+	if ($humObat == 125) {	# Channel 2
+		$SensorType = 2;
+	}
+	elsif ($humObat > 99) { # Shoud be checked in logical module
+		return (-1,qq[ConvLaCrosse: hum:$humObat (out of Range)])
+	}
+
+	# build string for 36_LaCrosse.pm
+	$temperature = (($temperature* 10 + 1000) & 0xFFFF);
+	my $t1= ($temperature >> 8) & 0xFF;
+	my $t2= $temperature & 0xFF;
+	my $sensTypeBat = $SensorType | $batInserted;
+	return( qq[OK 9 $addr $sensTypeBat $t1 $t2 $humidity] )  ;
 }
 
 1;
