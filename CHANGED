@@ -1,51 +1,38 @@
-2020-04-21 - sub ConvKoppFreeControl & test
 
-* 00_SIGNALduino.pm, remove old sub SIGNALduino_KoppFreeControl
-* test_sub_SIGNALduino_KoppFreeControl-definition.txt rename to test_sub_ConvKoppFreeControl-definition.txt
-2020-04-21 - sub ConvLaCrosse & test
+2020-04-21
+  00_SIGNALduino.pm
+	 * remove old sub SIGNALduino_PCA301  
+   * remove old sub SIGNALduino_LaCrosse
+   * remove old sub SIGNALduino_KoppFreeControl
+	SD_Protocols.pm
+   * revised comment
+  test_sub_SIGNALduino_PCA301-definition.txt
+   * rename to test_sub_ConvPCA301-definition.txt
+  test_sub_SIGNALduino_LaCrosse-definition.txt
+	 * rename to test_sub_ConvLaCrosse-definition.txt
+  test_sub_SIGNALduino_KoppFreeControl-definition.txt
+	 * rename to test_sub_ConvKoppFreeControl-definition.txt
 
-* 00_SIGNALduino.pm, remove old sub SIGNALduino_LaCrosse
-* test_sub_SIGNALduino_LaCrosse-definition.txt rename to test_sub_ConvLaCrosse-definition.txt
-2020-04-21 - ConvPCA301 sub & test
+2020-04-20
+  SD_Protocols.pm
+   * Added subs ConvLaCrosse, ConvKoppFreeControl and ConvPCA301
+   * Added tests to test_sub_SIGNALduino_KoppFreeControl-definition.txt, test_sub_SIGNALduino_LaCrosse-definition.txt, test_sub_SIGNALduino_PCA301-definition.txt
+   * Changed method reference towards new subs
+   * fix https://github.com/RFD-FHEM/RFFHEM/commit/cbc52712a48b812700660fef4a526f41447ce5c7#commitcomment-38613486
+  00_SIGNALduino.pm
+   * Changed SIGNALduino_Parse_MN mrzhod call to new subs
 
-  * 00_SIGNALduino.pm, remove old sub SIGNALduino_PCA301
-  * test_sub_SIGNALduino_PCA301-definition.txt rename to test_sub_ConvPCA301-definition.txt
-2020-04-21 - Update SD_Protocols.pm
+2020-04-19
+  00_SIGNALduino.pm
+   * Sub SIGNALduino_Parse_MN prepared some code to witch to new method type
+  lib/SD_Protocols.pm
+   * sub ID101_2_PCA301 modified and UnitTest/tests/test_sub_SIGNALduino_PCA301-definition.txt also adapted to cover this
+   * Sub transfer parameters adjusted (in first always $name, second is $hexData)
+   * incorrect parameters CRC
+   * revised return, processing 00_SIGNALduino.pm --> if ($rcode != -1)
+   * convert length error to warning and capture this in test
+   * sub still returns OK message if lengt is to long
 
-* revised comment
-2020-04-20 - SD_Protocols.pm
-
-Added subs ConvLaCrosse, ConvKoppFreeControl and ConvPCA301
-Added tests to test_sub_SIGNALduino_KoppFreeControl-definition.txt, test_sub_SIGNALduino_LaCrosse-definition.txt, test_sub_SIGNALduino_PCA301-definition.txt
-
-00_SIGNALduino.pm
-Changed SIGNALduino_Parse_MN mrzhod call to new subs
-
-SD_ProtocolData.pm
-
-Changed method reference towards new subs
-2020-04-20 - Merge branch 'dev-r35_xFSK' of https://github.com/RFD-FHEM/RFFHEM into dev-r35_xFSK
-2020-04-20 - Update SD_Protocols.pm
-
-* fix https://github.com/RFD-FHEM/RFFHEM/commit/cbc52712a48b812700660fef4a526f41447ce5c7#commitcomment-38613486
-2020-04-19 - 00_SIGNALduino.pm
-
-Sub SIGNALduino_Parse_MN prepared some code to witch to new method type
-2020-04-19 - lib/SD_Protocols.pm
-
-sub ID101_2_PCA301 modified and UnitTest/tests/test_sub_SIGNALduino_PCA301-definition.txt also adapted to cover this
-2020-04-19 - Update SD_Protocols.pm
-
-* Sub transfer parameters adjusted (in first always $name, second is $hexData)
-* incorrect parameters CRC
-* revised return, processing 00_SIGNALduino.pm --> if ($rcode != -1)
-2020-04-19 - fix wrong name
-2020-04-19 - lib/SD_Protocols.pm
-
-convert length error to warning and capture this in test
-sub still returns OK message if lengt is to long
-2020-04-19 - Merge branch 'dev-r35_xFSK' of github.com:RFD-FHEM/RFFHEM into dev-r35_xFSK
-2020-04-18 - Merge branch 'dev-r35_xFSK' of github.com:RFD-FHEM/RFFHEM into dev-r35_xFSK
 2020-04-18
   00_SIGNALduino.pm
    * remove SIGNALduino_CalculateCRC16 and use Digest::CRC
@@ -167,9 +154,15 @@ sub still returns OK message if lengt is to long
 --- --- --- Unreleases what comes up here ---- --- ---
 
 
+2020-04-21
+  14_SD_UT: new protocol 99 NAVARIS touch light switch (#841)
+  14_SD_BELL: new protocol 98 for wireless door bell GEA-028DB (#839)
+
 2020-04-14
-  00_SIGNALduino.pm
-   Changed stringrefs to coderefs
+  00_SIGNALduino.pm - Changed stringrefs to coderefs
+
+2020-04-13 - Bump dev-r34 to v3.4.4
+2020-04-13 - Merge remote-tracking branch 'remotes/origin/dev-r34' into v3.4.3
 
 13.04.2020
   00_SIGNALduino.pm
