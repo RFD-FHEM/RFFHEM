@@ -4235,35 +4235,6 @@ sub SIGNALduino_TestLength {
 	return (1,"");
 }
 
-##############################################################
-# xFSK method functions
-
-############################# package main
-sub SIGNALduino_KoppFreeControl($$$) {
-	my ($name,$dmsg,$id) = @_;
-	my $hash = $defs{$name};
-	my $anz = hex(substr($dmsg,0,2)) + 1;
-	my $blkck = 0xAA;
-	my $chk;
-	my $d;
-
-	for (my $i = 0; $i < $anz; $i++) {
-		$d = hex(substr($dmsg,$i*2,2));
-		$blkck ^= $d;
-	}
-	$chk = hex(substr($dmsg,$anz*2,2));
-	
-	if ($blkck != $chk) {
-		#$hash->{logMethod}->($name, 4, "$name: KoppFreeControl, Error! dmsg=$dmsg checksumCalc=$blkck checksum=$chk");
-		return (-1,"KoppFreeControl checksum Error: msg=$dmsg checksumCalc=$blkck checksum=$chk");
-	} else {
-		$hash->{logMethod}->($name, 4, "$name: KoppFreeControl, dmsg=$dmsg anz=$anz checksum=$blkck ok");
-		return (1, "kr" . substr($dmsg,0,$anz*2));
-	}
-}
-
-##############################################################
-
 # - - - - - - - - - - - -
 #=item SIGNALduino_filterMC()
 #This functons, will act as a filter function. It will decode MU data via Manchester encoding
