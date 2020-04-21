@@ -1,3 +1,7 @@
+2020-04-21 - sub ConvKoppFreeControl & test
+
+* 00_SIGNALduino.pm, remove old sub SIGNALduino_KoppFreeControl
+* test_sub_SIGNALduino_KoppFreeControl-definition.txt rename to test_sub_ConvKoppFreeControl-definition.txt
 2020-04-21 - sub ConvLaCrosse & test
 
 * 00_SIGNALduino.pm, remove old sub SIGNALduino_LaCrosse
