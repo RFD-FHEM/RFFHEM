@@ -1,61 +1,10 @@
-defmod test_sub_SIGNALduino_LaCrosse UnitTest dummyDuino ( 
+defmod test_sub_ConvLaCrosse UnitTest dummyDuino ( 
 {
 	use Test2::V0;
 	use Test2::Tools::Compare qw{is};
 	
-	# note: sub SIGNALduino_LaCrosse use Digest::CRC
+	# note: sub ConvLaCrosse use Digest::CRC
 
-	subtest 'Test Protocol 100 (Lacrosse, Mode 1 - IT+) - sub work' => sub {
-		plan(2);
-		my $id=100;
-
-		subtest 'Test rcode 1 , checksum ok' => sub {
-			plan(2);
-			my $dmsg="9AA6362CC8AAAA000012F8F4";
-			my ($rcode,$dmsgMod);
-			($rcode,$dmsgMod)=SIGNALduino_LaCrosse($target,$dmsg,$id);
-		
-			is($rcode,1,"check returncode");
-			is($dmsgMod,"OK 9 42 129 4 212 44","check result for right Lacrosse transmission");
-		};
-
-		subtest 'Test rcode -1 , checksum wrong' => sub {
-			plan(2);
-			my $dmsg="9BA6362CC8AAAA000012F8F4 ";
-			my ($rcode,$dmsgMod);
-			($rcode,$dmsgMod)=SIGNALduino_LaCrosse($target,$dmsg,$id);
-
-			is($rcode,-1,"check returncode");
-			is($dmsgMod,"LaCrosse_convert checksum Error: dmsg=9BA6362CC8AAAA000012F8F4  checksumCalc=83 checksum=200","check result for checksum Error");
-		};
-	};
-
-	subtest 'Test Protocol 103 (Lacrosse Mode 2 - IT+) - sub work' => sub {
-		plan(2);
-		my $id=103;
-
-		subtest 'Test rcode 1 , checksum ok' => sub {
-			plan(2);
-			my $dmsg="9A05922F8180046818480800";
-			my ($rcode,$dmsgMod);
-			($rcode,$dmsgMod)=SIGNALduino_LaCrosse($target,$dmsg,$id);
-		
-			is($rcode,1,"check returncode");
-			is($dmsgMod,"OK 9 40 1 4 168 47","check result for right Lacrosse transmission");
-		};
-		
-		subtest 'Test rcode -1 , checksum wrong' => sub {
-			plan(2);
-			my $dmsg="9B05922F8180046818480800 ";
-			my ($rcode,$dmsgMod);
-			($rcode,$dmsgMod)=SIGNALduino_LaCrosse($target,$dmsg,$id);
-
-			is($rcode,-1,"check returncode");
-			is($dmsgMod,"LaCrosse_convert checksum Error: dmsg=9B05922F8180046818480800  checksumCalc=26 checksum=129","check result for checksum Error");
-		};
-	};
-	
-	
 	subtest 'test ConvLaCrosse, checksum ok' => sub 	{
 		plan(2);
 		subtest 'msg 9AA6362CC8AAAA000012F8F4 (ID 100)' => sub {		
@@ -73,9 +22,8 @@ defmod test_sub_SIGNALduino_LaCrosse UnitTest dummyDuino (
 			is($#ret,0, 'ConvLaCrosse reported no error');
 			is($ret[0],'OK 9 40 1 4 168 47','check result for right Lacrosse transmission');
 		};
-		
-		
 	};
+
 
 	subtest 'test ConvLaCrosse, checksum wrong' => sub 	{
 		plan(2);
@@ -94,9 +42,8 @@ defmod test_sub_SIGNALduino_LaCrosse UnitTest dummyDuino (
 			is($#ret,1, 'ConvLaCrosse reported some error');
 			like($ret[1],qr/!= checksum/,'check error message');
 		}
-		
-		
 	};
+
 
 	subtest 'test ConvLaCrosse, length to short ' => sub 	{
 		plan(2);
@@ -105,6 +52,7 @@ defmod test_sub_SIGNALduino_LaCrosse UnitTest dummyDuino (
 		is($#ret,1, "ConvLaCrosse reported some error");
 		like($ret[1],qr/at least \d* chars/,'check error message');
 	};
+
 	
 	subtest 'test ConvLaCrosse, not hexadezimal' => sub 	{
 		plan(2);

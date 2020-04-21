@@ -198,6 +198,13 @@ sub MCRAW {
 ###       all functions for RAWmsg processing or module preparation       ###
 #############################################################################
 
+# to simple transfer
+# SIGNALduino_HE800
+# SIGNALduino_HE_EU
+# SIGNALduino_postDemo_EM
+
+############################################################
+# xFSK method functions
 ############################################################
 
 =item ConvPCA301()
@@ -213,7 +220,7 @@ Output:
 
 =cut
 
-############################################################
+
 sub ConvPCA301 {
 	my $hexData = shift // croak 'Error: called without $hexdata as input';
 	
@@ -255,7 +262,6 @@ Output:
 
 =cut
 
-############################################################
 sub ConvKoppFreeControl {
 	my $hexData = shift // croak 'Error: called without $hexdata as input';
 

@@ -37,7 +37,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.5_dev_04.18",
+	SDUINO_VERSION            => "v3.5_dev_04.21",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -244,8 +244,8 @@ my %matchListSIGNALduino = (
 			"14:Dooya"						=> '^P16#[A-Fa-f0-9]+',
 			"15:SOMFY"						=> '^Ys[0-9A-F]+',
 			"16:SD_WS_Maverick"		=> '^P47#[A-Fa-f0-9]+',
-			"17:SD_UT"						=> '^P(?:14|20|26|29|30|34|46|68|69|76|81|83|86|90|91|91.1|92|93|95|97)#.*',	# universal - more devices with different protocols
-			"18:FLAMINGO"					=> '^P13\.?1?#[A-Fa-f0-9]+',
+			"17:SD_UT"						=> '^P(?:14|20|26|29|30|34|46|68|69|76|81|83|86|90|91|91.1|92|93|95|97|99)#.*',	# universal - more devices with different protocols
+			"18:FLAMINGO"					=> '^P13\.?1?#[A-Fa-f0-9]+',							# Flamingo Smoke
 			"19:CUL_WS"						=> '^K[A-Fa-f0-9]{5,}',
 			"20:Revolt"						=> '^r[A-Fa-f0-9]{22}',
 			"21:FS10"							=> '^P61#[A-F0-9]+',
@@ -254,7 +254,7 @@ my %matchListSIGNALduino = (
 			"24:FS20"							=> "^81..(04|0c)..0101a001",
 			"25:CUL_EM"						=> "^E0.................",
 			"26:Fernotron"				=> '^P82#.*',
-			"27:SD_BELL"					=> '^P(?:15|32|41|42|57|79|96)#.*',
+			"27:SD_BELL"					=> '^P(?:15|32|41|42|57|79|96|98)#.*',
 			"28:SD_Keeloq"				=> '^P(?:87|88)#.*',
 			"29:SD_GT"						=> '^P49#[A-Fa-f0-9]+',
 			"30:LaCrosse"					=> '^(\\S+\\s+9 |OK\\sWS\\s)',
@@ -4234,148 +4234,6 @@ sub SIGNALduino_TestLength {
 	}
 	return (1,"");
 }
-
-##############################################################
-# xFSK method functions
-
-############################# package main
-sub SIGNALduino_LaCrosse($$$) {
-	my ($name,$dmsg,$id) = @_;
-	my $hash = $defs{$name};
-
-	# Message Format:
-	#
-	# .- [0] -. .- [1] -. .- [2] -. .- [3] -. .- [4] -.
-	# |       | |       | |       | |       | |       |
-	# SSSS.DDDD DDN_.TTTT TTTT.TTTT WHHH.HHHH CCCC.CCCC
-	# |  | |     ||  |  | |  | |  | ||      | |       |
-	# |  | |     ||  |  | |  | |  | ||      | `--------- CRC
-	# |  | |     ||  |  | |  | |  | |`-------- Humidity
-	# |  | |     ||  |  | |  | |  | |
-	# |  | |     ||  |  | |  | |  | `---- weak battery
-	# |  | |     ||  |  | |  | |  |
-	# |  | |     ||  |  | |  | `----- Temperature T * 0.1
-	# |  | |     ||  |  | |  |
-	# |  | |     ||  |  | `---------- Temperature T * 1
-	# |  | |     ||  |  |
-	# |  | |     ||  `--------------- Temperature T * 10
-	# |  | |     | `--- new battery
-	# |  | `---------- ID
-	# `---- START
-
-	if ($missingModulSIGNALduino =~ m/Digest::CRC/ ) {
-		$hash->{logMethod}->($hash->{NAME}, 1, "$hash->{NAME}: LaCrosse_convert failed. Please install Perl module Digest::CRC. Example: sudo apt-get install libdigest-crc-perl");
-		return (-1,"LaCrosse_convert: Digest::CRC failed");
-	}
-
-	my $ctx = Digest::CRC->new(width=>8, poly=>0x31);
-	$ctx->add(pack 'H*', substr($dmsg,0,8));
-	my $calccrc = $ctx->digest;
-	my $crc = sprintf("%d", hex(substr($dmsg,8,2)));
-
-	if ($calccrc != $crc) {
-		$hash->{logMethod}->($name, 4, "$name: LaCrosse, Error! dmsg=$dmsg checksumCalc=$calccrc checksum=$crc");
-		return (-1,"LaCrosse_convert checksum Error: dmsg=$dmsg checksumCalc=$calccrc checksum=$crc");
-	}
-	
-	my $addr = ((hex(substr($dmsg,0,2)) & 0x0F) << 2) | ((hex(substr($dmsg,2,2)) & 0xC0) >> 6);
-	my $temperature = ( ( ((hex(substr($dmsg,2,2)) & 0x0F) * 100) + (((hex(substr($dmsg,4,2)) & 0xF0) >> 4) * 10) + (hex(substr($dmsg,4,2)) & 0x0F) ) / 10) - 40;
-	return (-1,"LaCrosse_convert: temp=$temperature") if ($temperature >= 60 || $temperature <= -40);
-
-	my $humidity = hex(substr($dmsg,6,2));
-	my $batInserted = ((hex(substr($dmsg,2,2)) & 0x20) << 2);
-	my $SensorType = 1;
-	my $channel = "";
-	my $humObat = $humidity & 0x7F;
-	if ($humObat == 106) {	# Kanal 1
-		$channel = " channel=1 no";
-	}
-	elsif ($humObat == 125) {	# Kanal 2
-		$SensorType = 2;
-		$channel = " channel=2 no";
-	}
-	elsif ($humObat > 99) {
-		return (-1,"LaCrosse_convert: hum=$humObat")
-	}
-
-	$hash->{logMethod}->($name, 4, "$name: LaCrosse, ID=$id, addr=$addr temp=$temperature " . $channel . "hum=$humObat bat=" . ($humidity & 0x80)  . " batInserted=$batInserted");
-	
-	# build string for 36_LaCrosse.pm
-	my $dmsgMod = "OK 9 $addr ";
-	$dmsgMod .= ($SensorType | $batInserted);
-
-	$temperature = (($temperature* 10 + 1000) & 0xFFFF);
-	$dmsgMod .= " " . (($temperature >> 8) & 0xFF)  . " " . ($temperature & 0xFF) . " $humidity";
-
-	return (1,$dmsgMod);
-}
-
-############################# package main
-sub SIGNALduino_PCA301($$$) {
-	my ($name,$rmsg,$id) = @_;
-	my $hash = $defs{$name};
-
-	return  (-2,'Lengh to short') if (length($rmsg) < 24);
-	my $checksum = substr($rmsg,20,4);
-	my $dmsg = substr($rmsg,0,20);
-
-	if ($missingModulSIGNALduino =~ m/Digest::CRC/sxm ) {
-		$hash->{logMethod}->($hash->{NAME}, 1, "$hash->{NAME}: PCA301_convert failed. Please install Perl module Digest::CRC. Example: sudo apt-get install libdigest-crc-perl");
-		return (-1,"PCA301_convert: Digest::CRC failed");
-	}
-
-	my $ctx = Digest::CRC->new(width=>16, poly=>0x8005, init=>0x0000, refin=>0, refout=>0, xorout=>0x0000);
-	$ctx->add(pack 'H*', $dmsg);
-	my $calccrc = $ctx->digest;
-
-	$hash->{logMethod}->($name, 5, "$name: PCA301, checksumCalc=".$calccrc." checksum=" . hex($checksum));
-
-	if ($calccrc == hex($checksum)) {
-		my $channel = hex(substr($rmsg,0,2));
-		my $command = hex(substr($rmsg,2,2));
-		my $addr1 = hex(substr($rmsg,4,2));
-		my $addr2 = hex(substr($rmsg,6,2));
-		my $addr3 = hex(substr($rmsg,8,2));
-		my $plugstate = substr($rmsg,11,1);
-		my $power1 = hex(substr($rmsg,12,2));
-		my $power2 = hex(substr($rmsg,14,2));
-		my $consumption1 = hex(substr($rmsg,16,2));
-		my $consumption2 = hex(substr($rmsg,18,2));
-		$dmsg = "OK 24 $channel $command $addr1 $addr2 $addr3 $plugstate $power1 $power2 $consumption1 $consumption2 $checksum";
-		$hash->{logMethod}->($name, 4, "$name: PCA301, translated native RF telegram PCA301 $dmsg");
-	}
-	else {
-		#Log3 $name, 4, "$name PCA301_convert: wrong checksum $checksum";
-		return (-1,"PCA301_convert: wrong checksum $checksum");
-	}
-	return (1,$dmsg);
-}
-
-############################# package main
-sub SIGNALduino_KoppFreeControl($$$) {
-	my ($name,$dmsg,$id) = @_;
-	my $hash = $defs{$name};
-	my $anz = hex(substr($dmsg,0,2)) + 1;
-	my $blkck = 0xAA;
-	my $chk;
-	my $d;
-
-	for (my $i = 0; $i < $anz; $i++) {
-		$d = hex(substr($dmsg,$i*2,2));
-		$blkck ^= $d;
-	}
-	$chk = hex(substr($dmsg,$anz*2,2));
-	
-	if ($blkck != $chk) {
-		#$hash->{logMethod}->($name, 4, "$name: KoppFreeControl, Error! dmsg=$dmsg checksumCalc=$blkck checksum=$chk");
-		return (-1,"KoppFreeControl checksum Error: msg=$dmsg checksumCalc=$blkck checksum=$chk");
-	} else {
-		$hash->{logMethod}->($name, 4, "$name: KoppFreeControl, dmsg=$dmsg anz=$anz checksum=$blkck ok");
-		return (1, "kr" . substr($dmsg,0,$anz*2));
-	}
-}
-
-##############################################################
 
 # - - - - - - - - - - - -
 #=item SIGNALduino_filterMC()
