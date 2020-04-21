@@ -27,7 +27,7 @@ defmod test_module_devices UnitTest dummyDuino (
     while ( (my $pID, my $testSet) = each  (@{$testDataArray}) )
 	{
 		next if (!defined($testSet->{module}) || $testSet->{module} ne "!!!!EXAMPLE_MODULE - CHANGE THIS !!");
-		next if (!lib::SD_Protocols::exists($testSet->{id}));
+		next if (!lib::SD_Protocols::protocolExists($testSet->{id}));
 		next if (lib::SD_Protocols::checkProperty($testSet->{id},'developId',undef));
 	
 		while ( (my $tID, my $tData) = each (@{$testSet->{data}}) ) 

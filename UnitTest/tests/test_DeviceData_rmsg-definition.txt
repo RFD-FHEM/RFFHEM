@@ -57,7 +57,7 @@ defmod test_DeviceData_rmsg UnitTest dummyDuino (
         use lib::SD_Protocols;
         while ( ($pID, $testSet) = each  (@{$testDataArray}) )
         {
-          next if (!lib::SD_Protocols::exists($testSet->{id}));
+          next if (!lib::SD_Protocols::protocolExists($testSet->{id}));
           while ( ($tID, $tData) = each (@{$testSet->{data}}) ) 
           {
             next if (!defined($tData->{rmsg}) || !defined($tData->{dmsg}) || !defined($tData->{internals}) );
@@ -100,7 +100,7 @@ defmod test_DeviceData_rmsg UnitTest dummyDuino (
       while ( ($pID, $testSet) = each  (@{$testDataArray}) )
       {
         #next if ($testSet->{name} ne "NC-3911-675" );
-        next if (!lib::SD_Protocols::exists($testSet->{id}));
+        next if (!lib::SD_Protocols::protocolExists($testSet->{id}));
         next if (lib::SD_Protocols::checkProperty($testSet->{id},'developId',undef));
         while ( ($tID, $tData) = each (@{$testSet->{data}}) ) 
         {

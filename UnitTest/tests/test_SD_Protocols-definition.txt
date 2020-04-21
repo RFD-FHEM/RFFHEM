@@ -32,8 +32,8 @@ defmod test_SD_Protocols UnitTest dummyDuino
 
 	subtest 'lib SD_Prococols test sub exists() ' => sub {
 		plan(2);
-		ok(lib::SD_Protocols::exists(9999),"exists() check existing protocol ");
-		ok(!lib::SD_Protocols::exists(0),"exists() check not existing protocol ");
+		ok(lib::SD_Protocols::protocolExists(9999),"exists() check existing protocol ");
+		ok(!lib::SD_Protocols::protocolExists(0),"exists() check not existing protocol ");
 	};
 
 	subtest 'lib SD_Prococols test sub getKeys() ' => sub {

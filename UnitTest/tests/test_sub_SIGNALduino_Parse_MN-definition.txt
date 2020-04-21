@@ -13,12 +13,12 @@ defmod test_sub_SIGNALduino_Parse_MN UnitTest dummyDuino (
 		my %signal_parts=SIGNALduino_Split_Message($rmsg,$targetHash->{NAME});
 		is(SIGNALduino_Parse_MN($targetHash, $rmsg, \%signal_parts) ,1,"MN Data dispatched - Protocol 100 (Lacrosse, Mode 1 - IT+)");
 
-		my $rmsg="MN;D=0405019E8700AAAAAAAA0F13AA16ACC0540AAA49C814473A2774D208AC0B0167;N=3;R=6;";
-		my %signal_parts=SIGNALduino_Split_Message($rmsg,$targetHash->{NAME});
+		$rmsg="MN;D=0405019E8700AAAAAAAA0F13AA16ACC0540AAA49C814473A2774D208AC0B0167;N=3;R=6;";
+		%signal_parts=SIGNALduino_Split_Message($rmsg,$targetHash->{NAME});
 		is(SIGNALduino_Parse_MN($targetHash, $rmsg,\%signal_parts) ,1,"MN Data dispatched - Protocol 101 (ELV PCA 301)");
 
-		my $rmsg="MN;D=07FA5E1721CC0F02FE000000000000;";
-		my %signal_parts=SIGNALduino_Split_Message($rmsg,$targetHash->{NAME});
+		$rmsg="MN;D=07FA5E1721CC0F02FE000000000000;";
+		%signal_parts=SIGNALduino_Split_Message($rmsg,$targetHash->{NAME});
 		is(SIGNALduino_Parse_MN($targetHash, $rmsg,\%signal_parts) ,1,"MN Data dispatched - Protocol 102 (KoppFreeControl)");
 	};
 

@@ -9,10 +9,10 @@
 ################################################################################
 package lib::SD_Protocols;
 
-our $VERSION = '0.21';
 use strict;
 use warnings;
 use Carp;
+our $VERSION = '0.21';
 
 
 ############################# package lib::SD_Protocols
@@ -29,7 +29,7 @@ sub new {
 	
 	## Do some initialisation needed here
 	
-	return undef;
+	return;
 }
 
 
@@ -41,13 +41,13 @@ sub new {
 # =cut
 #  $id
 
-sub LoadHash {	
+sub LoadHash {
 	if (! -e $_[0]) {
 		return \%{ {"error" => "File $_[0] does not exsits"}};
 	}
 	delete($INC{$_[0]});
-	if(  ! eval { require "$_[0]"; 1 }  ) {
-		return 	\%{ {"error" => $@}};
+	if(  ! eval { require $_[0]; 1 }  ) {
+		return \%{ {'error' => $@}};
 	}
 	setDefaults();
 	return getProtocolList();
@@ -55,11 +55,11 @@ sub LoadHash {
 
 
 ############################# package lib::SD_Protocols
-#=item exists()
+#=item protocolexists()
 # This functons, will return true if the given ID exists otherwise false
 # =cut
 #  $id
-sub exists {
+sub protocolExists {
 	return exists($lib::SD_ProtocolData::protocols{$_[0]});
 }
 
@@ -69,7 +69,7 @@ sub exists {
 # This functons, will return a reference to the protocol hash
 # =cut
 #  $id, $propertyname,
-sub getProtocolList()	{	
+sub getProtocolList {
 	return \%lib::SD_ProtocolData::protocols;
 }
 
@@ -82,7 +82,7 @@ sub getProtocolList()	{
 # =cut
 #  $id, $propertyname,
 
-sub getKeys() {
+sub getKeys {
 	return keys %lib::SD_ProtocolData::protocols;
 }
 
@@ -95,7 +95,7 @@ sub getKeys() {
 # =cut
 #  $id, $propertyname,$default
 
-sub checkProperty($$;$) {
+sub checkProperty {
 	return getProperty($_[0],$_[1]) if exists($lib::SD_ProtocolData::protocols{$_[0]}{$_[1]}) && defined($lib::SD_ProtocolData::protocols{$_[0]}{$_[1]});
 	return $_[2]; # Will return undef if $default is not provided
 }
@@ -109,7 +109,7 @@ sub checkProperty($$;$) {
 # =cut
 #  $id, $propertyname
 
-sub getProperty($$) {
+sub getProperty {
 	return $lib::SD_ProtocolData::protocols{$_[0]}{$_[1]};
 }
 
@@ -152,6 +152,7 @@ sub setDefaults {
 			$lib::SD_ProtocolData::protocols{$id}{length_min} = 8 if (!defined(checkProperty($id,"length_min")));
 		}
 	}
+	return;
 }
 
 

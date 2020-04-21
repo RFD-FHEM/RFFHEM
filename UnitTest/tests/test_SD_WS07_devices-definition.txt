@@ -86,7 +86,7 @@ defmod test_SD_WS07_devices UnitTest dummyDuino (
     TestLabel:
 		while ( (my $pID, my $testSet) = each  (@{$testDataArray}) ) {
 			next if (!defined($testSet->{module}) || $testSet->{module} ne "SD_WS07");
-			next if (!lib::SD_Protocols::exists($testSet->{id}));
+			next if (!lib::SD_Protocols::protocolExists($testSet->{id}));
 			next if (lib::SD_Protocols::checkProperty($testSet->{id},'developId',undef));
 	
 			while ( (my $tID, my $tData) = each (@{$testSet->{data}}) ) {

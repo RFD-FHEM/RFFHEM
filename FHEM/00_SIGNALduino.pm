@@ -2724,7 +2724,7 @@ sub SIGNALduino_Parse_MN {
 		if ($#methodReturn == 0) {
 			$hash->{logMethod}->($name, 4, "$name: Parse_MN, Decoded matched MN Protocol id $id dmsg=$methodReturn[0] $rssiStr");
 			SIGNALduno_Dispatch($hash,$rmsg,$methodReturn[0],$rssi,$id);
-			$message_dispatched++;
+			$message_dispatched=1; # Todo: Anzahl dispatches zählen
 		} else {
 			$hash->{logMethod}->($name, 4, "$name: Parse_MN, Error! method $methodReturn[1]");
 		}
