@@ -1,6 +1,9 @@
 defmod test_firmware_download_1 UnitTest dummyDuino 
 (
  {
+	use Test2::V0;
+	use Test2::Tools::Compare qw{is like unlike};
+
 	my $mock = Mock::Sub->new;
 	Log3 $name , 3, "Test starting";
 
@@ -8,7 +11,7 @@ defmod test_firmware_download_1 UnitTest dummyDuino
 	$targetHash->{additionalSets}{flash} = "r1.2.4";
 
 	subtest 'flash without hardware parameter set' => sub {
-		plan tests => 2;
+		plan(2);
 		$attr{$target}{hardware} = undef;
 		my $ret = SIGNALduino_Set($targetHash, $target, "flash" ,"r1.2.4");
 		like($ret,qr/Please define your hardware/,"return value fromSIGNALduino_Set");
@@ -16,7 +19,7 @@ defmod test_firmware_download_1 UnitTest dummyDuino
 	}; 
 	
 	subtest 'flash with esp8266cc1101 hardware parameter set' => sub {
-		plan tests => 3;
+		plan(3);
 		$HTTP_CALL->reset;
 		$attr{$target}{hardware} = "ESP8266cc1101";
 		my $ret = SIGNALduino_Set($targetHash, $target, "flash" ,"r1.2.4");
@@ -27,7 +30,7 @@ defmod test_firmware_download_1 UnitTest dummyDuino
 	}; 
 	
 	subtest 'flash with esp8266 hardware parameter set' => sub {
-		plan tests => 3;
+		plan(3);
 		$attr{$target}{hardware} = "ESP8266";
 		$HTTP_CALL->reset;
 		my $ret = SIGNALduino_Set($targetHash, $target, "flash" ,"r1.2.4");
@@ -38,7 +41,7 @@ defmod test_firmware_download_1 UnitTest dummyDuino
 	}; 
 	
 	subtest 'flash with nano hardware parameter set' => sub {
-		plan tests => 3;
+		plan(3);
 		$HTTP_CALL->reset;		
 		$attr{$target}{hardware} = "nano328";
 		my $ret = SIGNALduino_Set($targetHash, $target, "flash" ,"r1.2.4");
@@ -49,7 +52,7 @@ defmod test_firmware_download_1 UnitTest dummyDuino
 	};
 	
 	subtest 'flash via url parameter' => sub {
-		plan tests => 3;
+		plan(3);
 		$HTTP_CALL->reset;		
 		$attr{$target}{hardware} = "nano328";
 		my $ret = SIGNALduino_Set($targetHash, $target, "flash","https://github.com/RFD-FHEM/SIGNALDuino/releases/download/3.3.1/SIGNALDuino_nano3283.3.1.hex");
@@ -62,7 +65,7 @@ defmod test_firmware_download_1 UnitTest dummyDuino
 	$HTTP_CALL->unmock;
 	
 	subtest 'check prerelease without hardware parameter set' => sub {
-		plan tests => 2;
+		plan(2);
 		my $param = {
 			hash       => $targetHash,    
 			command    => "queryReleases"
@@ -83,7 +86,7 @@ defmod test_firmware_download_1 UnitTest dummyDuino
 	};
 	
 	subtest 'check prerelease with hardware parameter set to nano' => sub {
-		plan tests => 1;
+		plan(1);
 		my $param = {
 			hash       => $targetHash,    
 			command    => "queryReleases"
@@ -101,8 +104,9 @@ defmod test_firmware_download_1 UnitTest dummyDuino
 			diag("open json firmware file was not possible $error");
 		}
 	};
+
 	subtest 'check prerelease with hardware parameter set to ESP8266' => sub {
-		plan tests => 1;
+		plan(1);
 		my $param = {
 			hash       => $targetHash,    
 			command    => "queryReleases"
@@ -122,7 +126,7 @@ defmod test_firmware_download_1 UnitTest dummyDuino
 	};
 
 	subtest 'check stable with hardware parameter set to nanocc1101' => sub {
-		plan tests => 1;
+		plan(1);
 		my $param = {
 			hash       => $targetHash,    
 			command    => "queryReleases"
@@ -140,8 +144,9 @@ defmod test_firmware_download_1 UnitTest dummyDuino
 			diag("open json firmware file was not possible $error");
 		}
 	};
+
 	subtest 'check stable with hardware parameter set to nano' => sub {
-		plan tests => 1;
+		plan(1);
 		my $param = {
 			hash       => $targetHash,    
 			command    => "queryReleases"
@@ -159,7 +164,6 @@ defmod test_firmware_download_1 UnitTest dummyDuino
 			diag("open json firmware file was not possible $error");
 		}
 	};
-
 
 }
 )
