@@ -1,3 +1,7 @@
+2020-04-21 - sub ConvLaCrosse & test
+
+* 00_SIGNALduino.pm, remove old sub SIGNALduino_LaCrosse
+* test_sub_SIGNALduino_LaCrosse-definition.txt rename to test_sub_ConvLaCrosse-definition.txt
 2020-04-21 - ConvPCA301 sub & test
 
   * 00_SIGNALduino.pm, remove old sub SIGNALduino_PCA301
