@@ -1,3 +1,7 @@
+2020-04-21 - ConvPCA301 sub & test
+
+  * 00_SIGNALduino.pm, remove old sub SIGNALduino_PCA301
+  * test_sub_SIGNALduino_PCA301-definition.txt rename to test_sub_ConvPCA301-definition.txt
 2020-04-21 - Update SD_Protocols.pm
 
 * revised comment
