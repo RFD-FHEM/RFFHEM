@@ -37,7 +37,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.5_dev_04.18",
+	SDUINO_VERSION            => "v3.5_dev_04.21",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -4308,47 +4308,6 @@ sub SIGNALduino_LaCrosse($$$) {
 	$dmsgMod .= " " . (($temperature >> 8) & 0xFF)  . " " . ($temperature & 0xFF) . " $humidity";
 
 	return (1,$dmsgMod);
-}
-
-############################# package main
-sub SIGNALduino_PCA301($$$) {
-	my ($name,$rmsg,$id) = @_;
-	my $hash = $defs{$name};
-
-	return  (-2,'Lengh to short') if (length($rmsg) < 24);
-	my $checksum = substr($rmsg,20,4);
-	my $dmsg = substr($rmsg,0,20);
-
-	if ($missingModulSIGNALduino =~ m/Digest::CRC/sxm ) {
-		$hash->{logMethod}->($hash->{NAME}, 1, "$hash->{NAME}: PCA301_convert failed. Please install Perl module Digest::CRC. Example: sudo apt-get install libdigest-crc-perl");
-		return (-1,"PCA301_convert: Digest::CRC failed");
-	}
-
-	my $ctx = Digest::CRC->new(width=>16, poly=>0x8005, init=>0x0000, refin=>0, refout=>0, xorout=>0x0000);
-	$ctx->add(pack 'H*', $dmsg);
-	my $calccrc = $ctx->digest;
-
-	$hash->{logMethod}->($name, 5, "$name: PCA301, checksumCalc=".$calccrc." checksum=" . hex($checksum));
-
-	if ($calccrc == hex($checksum)) {
-		my $channel = hex(substr($rmsg,0,2));
-		my $command = hex(substr($rmsg,2,2));
-		my $addr1 = hex(substr($rmsg,4,2));
-		my $addr2 = hex(substr($rmsg,6,2));
-		my $addr3 = hex(substr($rmsg,8,2));
-		my $plugstate = substr($rmsg,11,1);
-		my $power1 = hex(substr($rmsg,12,2));
-		my $power2 = hex(substr($rmsg,14,2));
-		my $consumption1 = hex(substr($rmsg,16,2));
-		my $consumption2 = hex(substr($rmsg,18,2));
-		$dmsg = "OK 24 $channel $command $addr1 $addr2 $addr3 $plugstate $power1 $power2 $consumption1 $consumption2 $checksum";
-		$hash->{logMethod}->($name, 4, "$name: PCA301, translated native RF telegram PCA301 $dmsg");
-	}
-	else {
-		#Log3 $name, 4, "$name PCA301_convert: wrong checksum $checksum";
-		return (-1,"PCA301_convert: wrong checksum $checksum");
-	}
-	return (1,$dmsg);
 }
 
 ############################# package main
