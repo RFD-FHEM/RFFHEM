@@ -1,3 +1,6 @@
+2020-04-21 - Update SD_Protocols.pm
+
+* revised comment
 2020-04-20 - SD_Protocols.pm
 
 Added subs ConvLaCrosse, ConvKoppFreeControl and ConvPCA301
