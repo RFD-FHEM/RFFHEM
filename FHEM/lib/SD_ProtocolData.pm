@@ -69,7 +69,7 @@ package lib::SD_ProtocolData;
 	use strict;
 	use warnings;
 	
-	our $VERSION = '1.17';
+	our $VERSION = '1.18';
 	our %protocols = (
 		"0"	=>	## various weather sensors (500 | 9100)
 						# Mebus | Id:237 Ch:1 T: 1.9 Bat:low           MS;P0=-9298;P1=495;P2=-1980;P3=-4239;D=1012121312131313121313121312121212121212131212131312131212;CP=1;SP=0;R=223;O;m2;
@@ -2612,6 +2612,26 @@ package lib::SD_ProtocolData;
 				clientmodule    => 'SD_UT',
 				length_min      => '40',
 				length_max      => '40',
+			},
+		"98"	=>	# Funk-Tuer-Gong: Modell GEA-028DB, Ningbo Rui Xiang Electrical Co.,Ltd., Vertrieb durch Walter Werkzeuge Salzburg GmbH, Art. Nr. K612021A
+							# https://forum.fhem.de/index.php/topic,109952.0.html 2020-04-12
+							# SD_BELL_6A2C   MU;P0=1488;P1=-585;P2=520;P3=-1509;P4=1949;P5=-5468;CP=2;R=38;D=01232301230123010101230123230101454501232301230123010101230123230101454501232301230123010101230123230101454501232301230123010101230123230101454501232301230123010101230123230101454501232301230123010101230123230101454501232301230123010101230123230101454501;O;
+							# SD_BELL_6A2C   MU;P0=-296;P1=-1542;P2=1428;P3=-665;P4=483;P5=1927;P6=-5495;P7=92;CP=4;R=31;D=1234141232356562341412341234123232341234141232356562341412341234123232341234141232356562341412341234123232341234141232356562341412341234123232341234141232356562341412341234123232341234141232356562341412341234123232341234141232370;e;i;
+			{
+				name            => 'GEA-028DB',
+				comment         => 'Wireless doorbell',
+				knownFreqs      => '433.92',
+				id              => '98',
+				one             => [1,-3],
+				zero            => [3,-1],
+				start           => [4,-11,4,-11],
+				clockabs        => 500,
+				format          => 'twostate',
+				clientmodule    => 'SD_BELL',
+				modulematch     => '^P98#',
+				preamble        => 'P98#',
+				length_min      => '16',
+				length_max      => '16',
 			},
 		########################################################################
 		#### ### old information from incomplete implemented protocols #### ####
