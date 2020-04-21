@@ -304,6 +304,13 @@
 #   Momento_0000064 up         MU;P0=-1005;P1=-272;P2=258;P3=5856;P4=-3902;P5=1001;P6=-520;P7=508;D=0121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121213456565656565656565656565656565656565656565670705656705656567056565670565670567056345656565656565656565656565656565656565656567070565;CP=2;R=63;O;
 #}
 ###############################################################################################################################################################################
+# - NAVARIS touch light switch Model No.: 44344.04 [Protocol 99]
+#{  elektron-bbs 2020-04-14
+#		only one touch button
+#   Navaris_211073   MU;P0=-302;P1=180;P2=294;P3=-208;P4=419;P5=-423;D=01023101010101023232310102323451010231010101023101010231010101010232323101023234510102310101010231010102310101010102323231010232345101023101010102310101023101010101023232310102323451010231010101023101010231010101010232323101023234510102310101010231010102;CP=1;R=36;O;
+#   Navaris_13F8E3   MU;P0=406;P1=-294;P2=176;P3=286;P4=-191;P6=-415;D=01212134212134343434343434212121343434212121343406212121342121343434343434342121213434342121213434062121213421213434343434343421212134343421212134340621212134212134343434343434212121343434212121343406212121342121343434343434342121213434342121213434062121;CP=2;R=67;O;
+#}
+###############################################################################################################################################################################
 # !!! ToDo´s !!!
 #     - LED lights, counter battery-h reading --> commandref hour_counter module
 #     -
@@ -664,6 +671,11 @@ my %models = (
 									Protocol 	=> "P97",
 									Typ				=> "remote"
 								},
+	"Navaris" =>	{	"0"				=> "send",
+									hex_lengh	=> "6",
+									Protocol	=> "P99",
+									Typ				=> "remote"
+								},
 	"unknown" =>	{	Protocol	=> "any",
 									hex_lengh	=> "",
 									Typ				=> "not_exist"
@@ -673,7 +685,7 @@ my %models = (
 #############################
 sub SD_UT_Initialize($) {
 	my ($hash) = @_;
-	$hash->{Match}			= "^P(?:14|20|26|29|30|34|46|68|69|76|81|83|86|90|91|91.1|92|93|95|97)#.*";
+	$hash->{Match}			= "^P(?:14|20|26|29|30|34|46|68|69|76|81|83|86|90|91|91.1|92|93|95|97|99)#.*";
 	$hash->{DefFn}			= "SD_UT_Define";
 	$hash->{UndefFn}		= "SD_UT_Undef";
 	$hash->{ParseFn}		= "SD_UT_Parse";
@@ -744,8 +756,8 @@ sub SD_UT_Define($$) {
 		return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short | long or not HEX (0-9 | a-f | A-F){4}_[ABCD]|[all]";
 	}
 
-	### [6] checks MD_2003R | MD_210R | MD_2018R ###
-	return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short | long or not HEX (0-9 | a-f | A-F){6}" if (($a[2] eq "MD_2003R" || $a[2] eq "MD_210R" || $a[2] eq "MD_2018R") && not $a[3] =~ /^[0-9a-fA-F]{6}/s);
+	### [6] checks MD_2003R | MD_210R | MD_2018R | Navaris ###
+	return "wrong HEX-Value! ($a[3]) $a[2] Hex-value to short or long (must be 6 chars) or not hex (0-9 | a-f | A-F){6}" if (($a[2] eq "MD_2003R" || $a[2] eq "MD_210R" || $a[2] eq "MD_2018R" || $a[2] eq "Navaris") && not $a[3] =~ /^[0-9a-fA-F]{6}/s);
 	
 	### [7] checks Hoermann HSM4 | Krinner_LUMIX | Momento ###
 	if (($a[2] eq "HSM4" || $a[2] eq "Krinner_LUMIX" || $a[2] eq "Momento") && not $a[3] =~ /^[0-9a-fA-F]{7}/s) {
@@ -921,6 +933,11 @@ sub SD_UT_Set($$$@) {
 		############ Momento ############
 		} elsif ($model eq "Momento") {
 			my $adr = sprintf( "%028b", hex($definition[1]));	# argument 1 - adress to binary with 28 bits
+			$msg = $models{$model}{Protocol} . "#" . $adr;
+			$msgEnd = "#R" . $repeats;
+		############ Navaris ############
+		} elsif ($model eq "Navaris") {
+			my $adr = sprintf( "%024b", hex($definition[1]));	# argument 1 - adress to binary with 24 bits
 			$msg = $models{$model}{Protocol} . "#" . $adr;
 			$msgEnd = "#R" . $repeats;
 		############ xavax ############
@@ -1189,6 +1206,15 @@ sub SD_UT_Parse($$) {
 			### Remote control Krinner_LUMIX [P92] ###
 			$deviceCode = substr($rawData,0,7);
 			$devicedef = "Krinner_LUMIX " . $deviceCode;
+			$def = $modules{SD_UT}{defptr}{$devicedef};
+		}
+	}
+
+	if ($hlen == 6) {
+		### Remote control Navaris [P99] ###
+		if (!$def && $protocol == 99) {
+			$deviceCode = substr($rawData,0,6);
+			$devicedef = "Navaris " . $deviceCode;
 			$def = $modules{SD_UT}{defptr}{$devicedef};
 		}
 	}
@@ -1571,6 +1597,9 @@ sub SD_UT_Parse($$) {
 	} elsif ($model eq "Momento" && $protocol == 97) {
 		$state = substr($bitData,28,4);
 		$deviceCode = substr($rawData,0,7);
+	############ Navaris ############ Protocol 99 ############
+	} elsif ($model eq "Navaris" && $protocol == 99) {
+		$state = "receive";
 	############ unknown ############
 	} else {
 		readingsBulkUpdate($hash, "state", "???");
@@ -1582,7 +1611,8 @@ sub SD_UT_Parse($$) {
 	Log3 $name, 5, "$ioname: SD_UT_Parse devicedef=$devicedef attr_model=$model protocol=$protocol devicecode=$deviceCode state=$state" if($model ne "unknown" && defined($deviceCode));
 	Log3 $name, 5, "$ioname: SD_UT_Parse devicedef=$devicedef attr_model=$model typ=".$models{$model}{Typ}." (after check)";
 
-	if ($models{$model}{Typ} eq "remote" && ($model ne "SA_434_1_mini" || $model ne "HS1_868_BS")) {
+	# only models with more then one button
+	if ($models{$model}{Typ} eq "remote" && ($model ne "SA_434_1_mini" || $model ne "HS1_868_BS" || $model ne "Navaris")) {
 		### identify state bits to value from hash ###
 		foreach my $keys (sort keys %{ $models{$model}}) {
 			if ($keys eq $state) {
@@ -1756,6 +1786,10 @@ sub SD_UT_Attr(@) {
 				$deviceCode = substr($bitData,0,32);
 				$deviceCode = sprintf("%08X", oct( "0b$deviceCode" ) );
 				$devicename = $devicemodel."_".$deviceCode;
+			############ Navaris	############
+			} elsif ($attrName eq "model" && $attrValue eq "Navaris") {
+				$deviceCode = sprintf("%06X", oct( "0b$bitData" ) );
+				$devicename = $devicemodel."_".$deviceCode;
 			############ unknown ############
 			} else {
 				$devicename = "unknown_please_select_model";
@@ -1856,6 +1890,7 @@ sub SD_UT_tristate2bin($) {
 	 <ul> - Medion OR28V&nbsp;&nbsp;&nbsp;<small>(module model: OR28V | protocol 68)</small></ul>
 	 <ul> - mumbi AFS300-s (remote control RC-10 | random code wireless switch RCS-22GS)&nbsp;&nbsp;&nbsp;<small>(module model: RC_10 | protocol 90)</small></ul>
 	 <ul> - Momento (remote control for wireless digital picture frame)&nbsp;&nbsp;&nbsp;<small>(module model: Momento | protocol 97)</small></ul>
+	 <ul> - NAVARIS touch light switch Model No.: 44344.04&nbsp;&nbsp;&nbsp;<small>(module model: Navaris | protocol 99)</small></ul>
 	 <ul> - NEFF or Refsta Topdraft (Tecnowind) kitchen hood&nbsp;&nbsp;&nbsp;<small>(module model: SF01_01319004 | protocol 86)</small></ul>
 	 <ul> - Novy Cloud 230 kitchen hood&nbsp;&nbsp;&nbsp;<small>(module model: Novy_840039 | protocol 86)</small></ul>
 	 <ul> - Novy Pureline 6830 kitchen hood&nbsp;&nbsp;&nbsp;<small>(module model: Novy_840029 | protocol 86)</small></ul>
@@ -2089,7 +2124,7 @@ sub SD_UT_tristate2bin($) {
 	<ul><a name="model"></a>
 		<li>model<br>
 		The attribute indicates the model type of your device.<br>
-		(unknown, Buttons_five, CAME_TOP_432EV, Chilitec_22640, KL_RF01, HS1-868-BS, HSM4, QUIGG_DMV, LED_XM21_0, Momento, Novy_840029, Novy_840039, OR28V, RC_10, RH787T, SA_434_1_mini, SF01_01319004, Tedsen_SKX1xx, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx, TR_502MSV, Unitec_47031)</li>
+		(unknown, Buttons_five, CAME_TOP_432EV, Chilitec_22640, KL_RF01, HS1-868-BS, HSM4, QUIGG_DMV, LED_XM21_0, Momento, Navaris, Novy_840029, Novy_840039, OR28V, RC_10, RH787T, SA_434_1_mini, SF01_01319004, Tedsen_SKX1xx, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx, TR_502MSV, Unitec_47031)</li>
 	</ul><br>
 	<ul><li><a name="repeats">repeats</a><br>
 	This attribute can be used to adjust how many repetitions are sent. Default is 5.</li></ul><br>
@@ -2140,10 +2175,10 @@ sub SD_UT_tristate2bin($) {
 <a name="SD_UT"></a>
 <h3>SD_UT</h3>
 <ul>Das Modul SD_UT ist ein Universalmodul vom SIGNALduino f&uuml;r Ger&auml;te oder Sensoren.<br>
-	Nach dem ersten anlegen des Ger&auml;tes <code><b>unknown_please_select_model</b></code> muss der User das Ger&auml;t selber definieren via dem Attribut <code>model</code>.<br>
+	Nach dem ersten Anlegen des Ger&auml;tes <code><b>unknown_please_select_model</b></code> muss der User das Ger&auml;t selbst definieren mittels des Attributes <code>model</code>.<br>
 	Bei noch nicht unterst&uuml;tzen Ger&auml;ten k&ouml;nnen mit dem <code><b>unknown_please_select_model</b></code> Ger&auml;t Bitdaten gesammelt werden.<br><br>
 	<i><u><b>Hinweis:</b></u></i> Sobald das Attribut model eines definieren Ger&auml;tes verstellt oder gel&ouml;scht wird, so legt das Modul ein Ger&auml;t des gew&auml;hlten Typs neu an und mit Durchlauf einer neuen Nachricht wird das aktuelle Ger&auml;t gel&ouml;scht.
-	Das betreiben von Ger&auml;ten des <u>gleichen oder unterschiedliches Typs mit gleichem <code>deviceCode</code> f&uuml;hrt zu Fehlern</u>. BITTE achte stets auf einen unterschiedlichen <code>deviceCode</code>.<br><br>
+	Das Betreiben von Ger&auml;ten des <u>gleichen oder unterschiedliches Typs mit gleichem <code>deviceCode</code> f&uuml;hrt zu Fehlern</u>. BITTE achte stets auf einen unterschiedlichen <code>deviceCode</code>.<br><br>
 	 <u>Es werden bisher folgende Ger&auml;te unterst&uuml;tzt:</u><br>
 	 <ul> - Atlantic Security Sensoren&nbsp;&nbsp;&nbsp;<small>(Modulmodel: MD-2003R, MD-2018R,MD-210R | Protokoll 91|91.1)</small><br>
 	 <code>&nbsp;&nbsp;&nbsp;Hinweis: Das Model MD_230R (water) wird aufgrund von gleicher Hardwarekennung als MD-2018R erkannt!</code></ul>
@@ -2160,7 +2195,8 @@ sub SD_UT_tristate2bin($) {
 	 <ul> - Manax RCS250&nbsp;&nbsp;&nbsp;<small>(Modulmodel: RC_10 | Protokoll 90)</small></ul>
 	 <ul> - Medion OR28V&nbsp;&nbsp;&nbsp;<small>(Modulmodel: OR28V | Protokoll 68)</small></ul>
 	 <ul> - mumbi AFS300-s (remote control RC-10 | random code wireless switch RCS-22GS)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: RC_10 | Protokoll 90)</small></ul>
-	 <ul> - Momento (Fernbedienung f&uuml;r digitalen Bilderrahmen)&nbsp;&nbsp;&nbsp;<small>(module model: Momento | protocol 97)</small></ul>
+	 <ul> - Momento (Fernbedienung f&uuml;r digitalen Bilderrahmen)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Momento | protocol 97)</small></ul>
+	 <ul> - NAVARIS Funk-Licht-Schalter Model No.: 44344.04&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Navaris | protocol 99)</small></ul>
 	 <ul> - NEFF oder Refsta Topdraft (Tecnowind) Dunstabzugshaube&nbsp;&nbsp;&nbsp;<small>(Modulmodel: SF01_01319004 | Protokoll 86)</small></ul>
 	 <ul> - Novy Cloud 230 Dunstabzugshaube&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Novy_840039 | Protokoll 86)</small></ul>
 	 <ul> - Novy Pureline 6830 Dunstabzugshaube&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Novy_840029 | Protokoll 86)</small></ul>
@@ -2394,7 +2430,7 @@ sub SD_UT_tristate2bin($) {
 	<ul><li><a href="#IODev">IODev</a></li></ul><br>
 	<ul><li><a name="model">model</a><br>
 		Das Attribut bezeichnet den Modelltyp Ihres Ger&auml;tes.<br>
-		(unknown, Buttons_five, CAME_TOP_432EV, Chilitec_22640, KL_RF01, HS1-868-BS, HSM4, QUIGG_DMV, LED_XM21_0, Momento, Novy_840029, Novy_840039, OR28V, RC_10, RH787T, SA_434_1_mini, SF01_01319004, Tedsen_SKX1xx, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx, TR_502MSV, Unitec_47031)</li><a name=" "></a>
+		(unknown, Buttons_five, CAME_TOP_432EV, Chilitec_22640, KL_RF01, HS1-868-BS, HSM4, QUIGG_DMV, LED_XM21_0, Momento, Navaris, Novy_840029, Novy_840039, OR28V, RC_10, RH787T, SA_434_1_mini, SF01_01319004, Tedsen_SKX1xx, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx, TR_502MSV, Unitec_47031)</li><a name=" "></a>
 	</ul><br>
 	<ul><li><a name="repeats">repeats</a><br>
 	Mit diesem Attribut kann angepasst werden, wie viele Wiederholungen sendet werden. Standard ist 5.</li></ul><br>
