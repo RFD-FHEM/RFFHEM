@@ -1,0 +1,15 @@
+name: Perl Modules Unittests
+on: [push]
+
+jobs:
+  jsontest:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+    - uses: shogo82148/actions-setup-perl@v1
+      with:
+        perl-version: '5.26'
+    - run: cpanm --notest --installdeps .
+    - name: run prove (testscripts)
+      run: |
+        prove -I FHEM -r -j 2 t/ 

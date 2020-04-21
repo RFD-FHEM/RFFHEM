@@ -12,6 +12,7 @@ package lib::SD_Protocols;
 use strict;
 use warnings;
 use Carp;
+use Digest::CRC;
 our $VERSION = '0.21';
 
 
