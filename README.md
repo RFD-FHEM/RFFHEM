@@ -35,6 +35,7 @@ Supported Devices / Protocols
 |FT0073 | Weather sensors|
 |FreeTec PE-6946 | wireless bell |
 |Froggit FT007T, FT007TP, FT007TH | Thermo-Hygrometer, Thermometer |
+|GEA-028DB | Radio door chime |
 |GEIGER GF0x01, GF0x02, GF0x03 | Remote control (compatible to Tedsen) |
 |Grothe Mistral SE 03.1| wireless gong |
 |GT-9000| Remote control based on protocol GT-9000 with encoding (EASY HOME RCT DS1, Tec Star)|
@@ -51,6 +52,7 @@ Supported Devices / Protocols
 |Medion OR28V | Remote control |
 |Momento | Remote control for wireless digital picture frame |
 |Mumbi m-FS300 | Remote control |
+|Navaris 44344.04 | Touch light switch |
 |NC-3911, NC-3912 | Refrigerator thermometer |
 |Novy 840029, 840039 | Remote control |
 |Opus XT300 | Soil moisture sensor |
