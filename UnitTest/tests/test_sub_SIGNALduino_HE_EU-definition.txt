@@ -1,0 +1,42 @@
+defmod test_sub_SIGNALduino_HE_EU UnitTest dummyDuino ( 
+{ 
+	use Test2::V0;
+	use Test2::Tools::Compare qw{ is isnt };
+
+	subtest 'Test HE_EU, protolength < 72' => sub {
+		plan(2);
+
+		my @bits=qw(1 1 0 0 0 1 1 1 1 0 0 0 1 1 1 1 0 0 1 1 0 1 1 0 0 1 1 0 1 1 0 1 1 1 0 0 1 0 0 0 1 1 1 1 0 0 1 0 1 1 1 0 0 1 0 1 1 0 0 0);
+		my $rcode;
+		note('input '.@bits.' bits');
+
+		($rcode,@bits)=SIGNALduino_HE_EU($target,@bits);
+		is($rcode,1,'check returncode for HE_EU transmission');
+		is(@bits,72,'check result protolength');
+	};
+		
+	subtest 'Test HE_EU, protolength == 72' => sub {
+		plan(2);
+
+		my @bits=qw(1 1 0 0 0 1 1 1 1 0 0 0 1 1 1 1 0 0 1 1 0 1 1 0 0 1 1 0 1 1 0 1 1 1 0 0 1 0 0 0 1 1 1 1 0 0 1 0 1 1 1 0 0 1 0 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0);
+		my $rcode;
+
+		note('input '.@bits.' bits');
+		($rcode,@bits)=SIGNALduino_HE_EU($target,@bits);
+		is($rcode,1,'check returncode for HE_EU transmission');
+		is(@bits,72,'check result protolength');
+	};
+
+	subtest 'Test HE_EU, protolength > 72' => sub {
+		plan(2);
+
+		my @bits=qw(1 1 0 0 0 1 1 1 1 0 0 0 1 1 1 1 0 0 1 1 0 1 1 0 0 1 1 0 1 1 0 1 1 1 0 0 1 0 0 0 1 1 1 1 0 0 1 0 1 1 1 0 0 1 0 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0);
+		my $rcode;
+
+		note('input '.@bits.' bits');
+		($rcode,@bits)=SIGNALduino_HE_EU($target,@bits);
+		is($rcode,1,'check returncode for HE_EU transmission');
+		is(@bits,74,'check result protolength');
+	};
+}
+)
