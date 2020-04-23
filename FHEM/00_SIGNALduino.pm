@@ -4181,7 +4181,7 @@ sub SIGNALduino_Maverick {
 }
 
 ############################# package main
-sub SIGNALduino_OSPIR() {
+sub SIGNALduino_OSPIR {
 	my ($name,$bitData,$id,$mcbitnum) = @_;
 
 	if ($bitData =~ m/^.*(1{14}|0{14}).*/)
