@@ -4201,7 +4201,7 @@ sub SIGNALduino_OSPIR() {
 }
 
 ############################# package main
-sub SIGNALduino_SomfyRTS() {
+sub SIGNALduino_SomfyRTS {
 	my ($name, $bitData,$id,$mcbitnum) = @_;
 
     #(my $negBits = $bitData) =~ tr/10/01/;   # Todo: eventuell auf pack umstellen
