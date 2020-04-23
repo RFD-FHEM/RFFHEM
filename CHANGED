@@ -1,3 +1,7 @@
+2020-04-23 - Create test_sub_SIGNALduino_OSV1-definition.txt
+
+* create test OSV1
+* revised syntax sub SIGNALduino_OSV1
 2020-04-21 - Merge branch 'dev-r35_xFSK' of github.com:RFD-FHEM/RFFHEM into dev-r35_xFSK
 2020-04-21 - Merge branch 'dev-r34' into dev-r35_xFSK
 
