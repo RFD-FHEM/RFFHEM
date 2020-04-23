@@ -37,7 +37,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.5_dev_04.21",
+	SDUINO_VERSION            => "v3.5_dev_04.23",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -4022,7 +4022,7 @@ sub SIGNALduino_OSV2 {
 }
 
 ############################# package main
-sub SIGNALduino_OSV1() {
+sub SIGNALduino_OSV1 {
 	my ($name,$bitData,$id,$mcbitnum) = @_;
 	return (-1," message is to short") if (defined($ProtocolListSIGNALduino{$id}{length_min}) && $mcbitnum < $ProtocolListSIGNALduino{$id}{length_min} );
 	return (-1," message is to long") if (defined($ProtocolListSIGNALduino{$id}{length_max}) && $mcbitnum > $ProtocolListSIGNALduino{$id}{length_max} );
