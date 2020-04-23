@@ -4162,9 +4162,8 @@ sub	SIGNALduino_Hideki() {
 }
 
 ############################# package main
-sub SIGNALduino_Maverick() {
+sub SIGNALduino_Maverick {
 	my ($name,$bitData,$id,$mcbitnum) = @_;
-	my $debug = AttrVal($name,"debug",0);
 
 	if ($bitData =~ m/^.*(101010101001100110010101).*/)
 	{  # Valid Maverick header detected
@@ -4184,7 +4183,6 @@ sub SIGNALduino_Maverick() {
 ############################# package main
 sub SIGNALduino_OSPIR() {
 	my ($name,$bitData,$id,$mcbitnum) = @_;
-	my $debug = AttrVal($name,"debug",0);
 
 	if ($bitData =~ m/^.*(1{14}|0{14}).*/)
 	{  # Valid Oregon PIR detected
