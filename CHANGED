@@ -1,3 +1,7 @@
+2020-04-23 - Create test_sub_SIGNALduino_OSPIR-definition.txt
+
+* create test
+* 00_SIGNALduino.pm - revised syntax sub SIGNALduino_OSPIR
 2020-04-23 - Create test_sub_SIGNALduino_Maverick-definition.txt
 
   * create test
