@@ -1,22 +1,18 @@
-2020-04-23 - Create test_sub_SIGNALduino_OSPIR-definition.txt
-
-* create test
-* 00_SIGNALduino.pm - revised syntax sub SIGNALduino_OSPIR
-2020-04-23 - Create test_sub_SIGNALduino_Maverick-definition.txt
-
-  * create test
-  * 00_SIGNALduino.pm - revised syntax sub SIGNALduino_Maverick
-  * 00_SIGNALduino.pm - remove not used debug variable
-2020-04-23 - Create test_sub_SIGNALduino_SomfyRTS-definition.txt
-
-  * create test
-  * 00_SIGNALduino.pm - revised syntax sub SIGNALduino_SomfyRTS
-2020-04-23 - Create test_sub_SIGNALduino_OSV1-definition.txt
-
-* create test OSV1
-* revised syntax sub SIGNALduino_OSV1
-2020-04-21 - Merge branch 'dev-r35_xFSK' of github.com:RFD-FHEM/RFFHEM into dev-r35_xFSK
-2020-04-21 - Merge branch 'dev-r34' into dev-r35_xFSK
+2020-04-23
+  00_SIGNALduino.pm
+	 * revised syntax sub SIGNALduino_OSV1
+   * revised syntax sub SIGNALduino_SomfyRTS
+   * revised syntax sub SIGNALduino_Maverick
+   * remove not used debug variable
+   * revised syntax sub SIGNALduino_OSPIR
+  test_sub_SIGNALduino_OSV1-definition.txt
+   * create test
+  test_sub_SIGNALduino_SomfyRTS-definition.txt
+   * create test
+  test_sub_SIGNALduino_Maverick-definition.txt
+   * create test
+  test_sub_SIGNALduino_OSPIR-definition.txt
+   * create test
 
 2020-04-21
   00_SIGNALduino.pm
