@@ -3890,7 +3890,7 @@ sub SIGNALduino_OSV2 {
 			}
 			$rvosv2byte =~ tr/10/01/;
 
-			if (length($rvosv2byte) eq 8) {
+			if (length($rvosv2byte) == 8) {
 				$osv2hex=$osv2hex.sprintf('%02X', oct("0b$rvosv2byte"))  ;
 			} else {
 				$osv2hex=$osv2hex.sprintf('%X', oct("0b$rvosv2byte"))  ;
@@ -4002,11 +4002,11 @@ sub SIGNALduino_OSV1() {
 	my $newBitData = "00001010";                       # Byte 0:   Id1 = 0x0A
     $newBitData .= "01001101";                         # Byte 1:   Id2 = 0x4D
 	my $channel = substr($bitData,6,2);						# Byte 2 h: Channel
-	if ($channel == "00") {										# in 0 LSB first
+	if ($channel eq "00") {										# in 0 LSB first
 		$newBitData .= "0001";									# out 1 MSB first
-	} elsif ($channel == "10") {								# in 4 LSB first
+	} elsif ($channel eq "10") {								# in 4 LSB first
 		$newBitData .= "0010";									# out 2 MSB first
-	} elsif ($channel == "01") {								# in 4 LSB first
+	} elsif ($channel eq "01") {								# in 4 LSB first
 		$newBitData .= "0011";									# out 3 MSB first
 	} else {															# in 8 LSB first
 		return (-1,"$name: OSV1 - ERROR channel not valid: $channel");
