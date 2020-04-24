@@ -10,7 +10,7 @@ defmod test_sub_ConvHE800 UnitTest dummyDuino (
 		my $rcode;
 		note('input '.@bits.' bits');
 
-		($rcode,@bits)=ConvHE800($target,@bits);
+		($rcode,@bits)=lib::SD_Protocols::ConvHE800($target,@bits);
 		is($rcode,1,'check returncode for HE800 transmission');
 		is(@bits,40,'check result protolength');
 	};
@@ -22,7 +22,7 @@ defmod test_sub_ConvHE800 UnitTest dummyDuino (
 		my $rcode;
 
 		note('input '.@bits.' bits');
-		($rcode,@bits)=ConvHE800($target,@bits);
+		($rcode,@bits)=lib::SD_Protocols::ConvHE800($target,@bits);
 		is($rcode,1,'check returncode for HE800 transmission');
 		is(@bits,40,'check result protolength');
 	};
@@ -34,7 +34,7 @@ defmod test_sub_ConvHE800 UnitTest dummyDuino (
 		my $rcode;
 
 		note('input '.@bits.' bits');
-		($rcode,@bits)=ConvHE800($target,@bits);
+		($rcode,@bits)=lib::SD_Protocols::ConvHE800($target,@bits);
 		is($rcode,1,'check returncode for HE800 transmission');
 		is(@bits,42,'check result protolength');
 	};
