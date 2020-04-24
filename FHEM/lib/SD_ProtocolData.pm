@@ -1069,7 +1069,7 @@ package lib::SD_ProtocolData;
 				#modulematch			=> '',
 				length_min				=> '28',
 				length_max				=> '40',
-				postDemodulation	=> \&main::SIGNALduino_HE800,
+				postDemodulation	=> \&lib::SD_Protocols::ConvHE800,
 			},
 		"36"	=>	## remote - cheap wireless dimmer
 							# https://forum.fhem.de/index.php/topic,38831.msg394238.html#msg394238 @Steffenm
@@ -1791,7 +1791,7 @@ package lib::SD_ProtocolData;
 				clientmodule			=> 'IT',
 				length_min				=> '57',
 				length_max				=> '72',
-				postDemodulation	=> \&main::SIGNALduino_HE_EU,
+				postDemodulation	=> \&lib::SD_Protocols::ConvHE_EU,
 			},
 		"66"	=>	## TX2 Protocol (Remote Temp Transmitter & Remote Thermo Model 7035)
 							# https://github.com/RFD-FHEM/RFFHEM/issues/160 @elektron-bbs

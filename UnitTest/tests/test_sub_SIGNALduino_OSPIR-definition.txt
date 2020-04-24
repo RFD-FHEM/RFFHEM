@@ -1,0 +1,44 @@
+defmod test_sub_SIGNALduino_OSPIR UnitTest dummyDuino ( 
+{ 
+	use Test2::V0;
+	use Test2::Tools::Compare qw{ is };
+
+	# note: sub SIGNALduino_OSPIR use SIGNALduino_b2h
+
+	subtest 'Test OSPIR' => sub {
+		plan(3);
+		my $id=47;
+		my ($rcode,$hexresult);
+
+		subtest 'valid Oregon PIR header detected 0{14}' => sub {
+			plan(2);
+			my $bitdata='00000000000000010010101011100111';
+
+			($rcode,$hexresult)=SIGNALduino_OSPIR($target,$bitdata,$id,length $bitdata);
+			is($rcode,1,"check returncode for Oregon PIR transmission");
+			is($hexresult,'00012AE7','check result Oregon PIR');
+		};
+
+
+		subtest 'valid Oregon PIR header detected 1{14}' => sub {
+			plan(2);
+			my $bitdata='11111111111111110010101011100111';
+
+			($rcode,$hexresult)=SIGNALduino_OSPIR($target,$bitdata,$id,length $bitdata);
+			is($rcode,1,"check returncode for Oregon PIR transmission");
+			is($hexresult,'FFFF2AE7','check result Oregon PIR');
+		};
+
+
+		subtest 'no Oregon PIR header found' => sub {
+			plan(2);
+			my $bitdata='11000000000000010010101011100111';
+
+			($rcode,$hexresult)=SIGNALduino_OSPIR($target,$bitdata,$id,length $bitdata);
+			is($rcode,-1,"check returncode for Oregon PIR transmission");
+			is($hexresult,' header not found','check result no Oregon PIR header found');
+		};
+	};
+}
+)
+

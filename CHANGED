@@ -1,5 +1,43 @@
-2020-04-21 - Merge branch 'dev-r35_xFSK' of github.com:RFD-FHEM/RFFHEM into dev-r35_xFSK
-2020-04-21 - Merge branch 'dev-r34' into dev-r35_xFSK
+
+2020-04-24
+  00_SIGNALduino.pm
+   * remove sub SIGNALduino_HE_EU
+   * remove sub SIGNALduino_HE800
+   * revised syntax sub SIGNALduino_GROTHE
+  SD_ProtocolData.pm
+   * revised postDemodulation
+  SD_Protocols.pm
+   * added sub ConvHE_EU & revised comments
+   * added sub ConvHE800 & revised comments
+	 * revised comments
+  test_sub_SIGNALduino_HE_EU-definition.txt
+   * delete test
+  test_sub_SIGNALduino_HE800-definition.txt
+   * delete test
+  test_sub_ConvHE_EU-definition.txt
+   * create test
+  test_sub_ConvHE800-definition.txt
+  * create test
+  test_sub_SIGNALduino_GROTHE-definition.txt
+   * create test
+  test_sub_MCRAW-definition.txt
+   * create test
+
+2020-04-23
+  00_SIGNALduino.pm
+	 * revised syntax sub SIGNALduino_OSV1
+   * revised syntax sub SIGNALduino_SomfyRTS
+   * revised syntax sub SIGNALduino_Maverick
+   * remove not used debug variable
+   * revised syntax sub SIGNALduino_OSPIR
+  test_sub_SIGNALduino_OSV1-definition.txt
+   * create test
+  test_sub_SIGNALduino_SomfyRTS-definition.txt
+   * create test
+  test_sub_SIGNALduino_Maverick-definition.txt
+   * create test
+  test_sub_SIGNALduino_OSPIR-definition.txt
+   * create test
 
 2020-04-21
   00_SIGNALduino.pm
@@ -156,12 +194,17 @@
 --- --- --- Unreleases what comes up here ---- --- ---
 
 
-2020-04-21
-  14_SD_UT: new protocol 99 NAVARIS touch light switch (#841)
-  14_SD_BELL: new protocol 98 for wireless door bell GEA-028DB (#839)
+2020-04-22 - Merge branch 'dev-r34' into dev-r34_operatorFixes
+2020-04-22 - 00_SIGNALduino.pm - some operator fixes #835
+2020-04-21 - new protocol 99 NAVARIS touch light switch (#841)
+2020-04-21 - Merge branch 'dev-r34' into dev-r34_Navaris
+2020-04-21 - new protocol 99 NAVARIS touch light switch
+2020-04-21 - new protocol 98 for wireless door bell GEA-028DB (#839)
+2020-04-20 - Merge branch 'dev-r34' into dev-r34_GEA-028DB
+2020-04-20 - new protocol 98 for wireless door bell GEA-028DB
 
-2020-04-14
-  00_SIGNALduino.pm - Changed stringrefs to coderefs
+2020-04-14 - 00_SIGNALduino.pm
+Changed stringrefs to coderefs
 
 2020-04-13 - Bump dev-r34 to v3.4.4
 2020-04-13 - Merge remote-tracking branch 'remotes/origin/dev-r34' into v3.4.3

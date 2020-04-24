@@ -1,0 +1,42 @@
+defmod test_sub_ConvHE800 UnitTest dummyDuino ( 
+{ 
+	use Test2::V0;
+	use Test2::Tools::Compare qw{ is };
+
+	subtest 'Test HE800, protolength < 40' => sub {
+		plan(2);
+
+		my @bits=qw(0 0 0 1 1 0 1 0 1 1 1 0 0 0 1 0 1 0 0 0 0 0 1 0 1 0 1 0);
+		my $rcode;
+		note('input '.@bits.' bits');
+
+		($rcode,@bits)=lib::SD_Protocols::ConvHE800($target,@bits);
+		is($rcode,1,'check returncode for HE800 transmission');
+		is(@bits,40,'check result protolength');
+	};
+		
+	subtest 'Test HE800, protolength == 40' => sub {
+		plan(2);
+
+		my @bits=qw(0 0 0 1 1 0 1 0 1 1 1 0 0 0 1 0 1 0 0 0 0 0 1 0 1 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0);
+		my $rcode;
+
+		note('input '.@bits.' bits');
+		($rcode,@bits)=lib::SD_Protocols::ConvHE800($target,@bits);
+		is($rcode,1,'check returncode for HE800 transmission');
+		is(@bits,40,'check result protolength');
+	};
+
+	subtest 'Test HE800, protolength > 40' => sub {
+		plan(2);
+
+		my @bits=qw(0 0 0 1 1 0 1 0 1 1 1 0 0 0 1 0 1 0 0 0 0 0 1 0 1 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0);
+		my $rcode;
+
+		note('input '.@bits.' bits');
+		($rcode,@bits)=lib::SD_Protocols::ConvHE800($target,@bits);
+		is($rcode,1,'check returncode for HE800 transmission');
+		is(@bits,42,'check result protolength');
+	};
+}
+)

@@ -37,7 +37,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.5_dev_04.21",
+	SDUINO_VERSION            => "v3.5_dev_04.24",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -3363,32 +3363,6 @@ sub SIGNALduino_ITV1_tristateToBit($) {
 }
 
 ############################# package main
-sub SIGNALduino_HE800($@) {
-	my ($name, @bit_msg) = @_;
-	my $protolength = scalar @bit_msg;
-
-	if ($protolength < 40) {
-		for (my $i=0; $i<(40-$protolength); $i++) {
-			push(@bit_msg, 0);
-		}
-	}
-	return (1,@bit_msg);
-}
-
-############################# package main
-sub SIGNALduino_HE_EU($@) {
-	my ($name, @bit_msg) = @_;
-	my $protolength = scalar @bit_msg;
-
-	if ($protolength < 72) {
-		for (my $i=0; $i<(72-$protolength); $i++) {
-			push(@bit_msg, 0);
-		}
-	}
-	return (1,@bit_msg);
-}
-
-############################# package main
 sub SIGNALduino_postDemo_EM($@) {
 	my ($name, @bit_msg) = @_;
 	my $msg = join("",@bit_msg);
@@ -3790,9 +3764,8 @@ sub SIGNALduino_postDemo_WS7053($@) {
 
 # manchester method
 ############################# package main
-sub SIGNALduino_GROTHE() {
+sub SIGNALduino_GROTHE {
 	my ($name,$bitData,$id,$mcbitnum) = @_;
-	#my $debug = AttrVal($name,"debug",0);
 	my $bitLength;
 	$bitData = substr($bitData, 0, $mcbitnum);
 	my $preamble = "01000111";
@@ -3934,7 +3907,7 @@ sub SIGNALduino_OSV2 {
 			}
 			$rvosv2byte =~ tr/10/01/;
 
-			if (length($rvosv2byte) eq 8) {
+			if (length($rvosv2byte) == 8) {
 				$osv2hex=$osv2hex.sprintf('%02X', oct("0b$rvosv2byte"))  ;
 			} else {
 				$osv2hex=$osv2hex.sprintf('%X', oct("0b$rvosv2byte"))  ;
@@ -4022,7 +3995,7 @@ sub SIGNALduino_OSV2 {
 }
 
 ############################# package main
-sub SIGNALduino_OSV1() {
+sub SIGNALduino_OSV1 {
 	my ($name,$bitData,$id,$mcbitnum) = @_;
 	return (-1," message is to short") if (defined($ProtocolListSIGNALduino{$id}{length_min}) && $mcbitnum < $ProtocolListSIGNALduino{$id}{length_min} );
 	return (-1," message is to long") if (defined($ProtocolListSIGNALduino{$id}{length_max}) && $mcbitnum > $ProtocolListSIGNALduino{$id}{length_max} );
@@ -4045,11 +4018,11 @@ sub SIGNALduino_OSV1() {
 	my $newBitData = "00001010";                       # Byte 0:   Id1 = 0x0A
     $newBitData .= "01001101";                         # Byte 1:   Id2 = 0x4D
 	my $channel = substr($bitData,6,2);						# Byte 2 h: Channel
-	if ($channel == "00") {										# in 0 LSB first
+	if ($channel eq "00") {										# in 0 LSB first
 		$newBitData .= "0001";									# out 1 MSB first
-	} elsif ($channel == "10") {								# in 4 LSB first
+	} elsif ($channel eq "10") {								# in 4 LSB first
 		$newBitData .= "0010";									# out 2 MSB first
-	} elsif ($channel == "01") {								# in 4 LSB first
+	} elsif ($channel eq "01") {								# in 4 LSB first
 		$newBitData .= "0011";									# out 3 MSB first
 	} else {															# in 8 LSB first
 		return (-1,"$name: OSV1 - ERROR channel not valid: $channel");
@@ -4162,9 +4135,8 @@ sub	SIGNALduino_Hideki() {
 }
 
 ############################# package main
-sub SIGNALduino_Maverick() {
+sub SIGNALduino_Maverick {
 	my ($name,$bitData,$id,$mcbitnum) = @_;
-	my $debug = AttrVal($name,"debug",0);
 
 	if ($bitData =~ m/^.*(101010101001100110010101).*/)
 	{  # Valid Maverick header detected
@@ -4182,9 +4154,8 @@ sub SIGNALduino_Maverick() {
 }
 
 ############################# package main
-sub SIGNALduino_OSPIR() {
+sub SIGNALduino_OSPIR {
 	my ($name,$bitData,$id,$mcbitnum) = @_;
-	my $debug = AttrVal($name,"debug",0);
 
 	if ($bitData =~ m/^.*(1{14}|0{14}).*/)
 	{  # Valid Oregon PIR detected
@@ -4201,7 +4172,7 @@ sub SIGNALduino_OSPIR() {
 }
 
 ############################# package main
-sub SIGNALduino_SomfyRTS() {
+sub SIGNALduino_SomfyRTS {
 	my ($name, $bitData,$id,$mcbitnum) = @_;
 
     #(my $negBits = $bitData) =~ tr/10/01/;   # Todo: eventuell auf pack umstellen
