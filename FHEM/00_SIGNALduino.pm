@@ -3790,9 +3790,8 @@ sub SIGNALduino_postDemo_WS7053($@) {
 
 # manchester method
 ############################# package main
-sub SIGNALduino_GROTHE() {
+sub SIGNALduino_GROTHE {
 	my ($name,$bitData,$id,$mcbitnum) = @_;
-	#my $debug = AttrVal($name,"debug",0);
 	my $bitLength;
 	$bitData = substr($bitData, 0, $mcbitnum);
 	my $preamble = "01000111";
