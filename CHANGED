@@ -1,28 +1,23 @@
-2020-04-24 - transfer sub SIGNALduino_HE800 -> ConvHE800
 
-00_SIGNALduino.pm
-* remove sub SIGNALduino_HE800
-SD_ProtocolData.pm
-* revised postDemodulation
-SD_Protocols.pm
-* added sub ConvHE800 & revised comments
-test_sub_ConvHE800-definition.txt
-* create test
-test_sub_SIGNALduino_HE800-definition.txt
-* delete test
 2020-04-24
   00_SIGNALduino.pm
    * remove sub SIGNALduino_HE_EU
+   * remove sub SIGNALduino_HE800
    * revised syntax sub SIGNALduino_GROTHE
   SD_ProtocolData.pm
    * revised postDemodulation
   SD_Protocols.pm
    * added sub ConvHE_EU & revised comments
+   * added sub ConvHE800 & revised comments
 	 * revised comments
-  test_sub_ConvHE_EU-definition.txt
-   * create test
   test_sub_SIGNALduino_HE_EU-definition.txt
    * delete test
+  test_sub_SIGNALduino_HE800-definition.txt
+   * delete test
+  test_sub_ConvHE_EU-definition.txt
+   * create test
+  test_sub_ConvHE800-definition.txt
+  * create test
   test_sub_SIGNALduino_GROTHE-definition.txt
    * create test
   test_sub_MCRAW-definition.txt
