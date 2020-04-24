@@ -37,7 +37,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.5_dev_04.23",
+	SDUINO_VERSION            => "v3.5_dev_04.24",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -3369,19 +3369,6 @@ sub SIGNALduino_HE800($@) {
 
 	if ($protolength < 40) {
 		for (my $i=0; $i<(40-$protolength); $i++) {
-			push(@bit_msg, 0);
-		}
-	}
-	return (1,@bit_msg);
-}
-
-############################# package main
-sub SIGNALduino_HE_EU($@) {
-	my ($name, @bit_msg) = @_;
-	my $protolength = scalar @bit_msg;
-
-	if ($protolength < 72) {
-		for (my $i=0; $i<(72-$protolength); $i++) {
 			push(@bit_msg, 0);
 		}
 	}

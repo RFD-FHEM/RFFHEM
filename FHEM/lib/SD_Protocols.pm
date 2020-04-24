@@ -213,8 +213,35 @@ sub MCRAW {
 
 # to simple transfer
 # SIGNALduino_HE800
-# SIGNALduino_HE_EU
 # SIGNALduino_postDemo_EM
+
+############################################################
+# ASK/OOK method functions
+############################################################
+
+=item ConvHE_EU()
+
+This sub checks the length of the bits.
+If the length is less than 72, it adds a 0.
+
+Input:  $name, @bit_msg
+
+Output:
+        scalar converted message on success 
+
+=cut
+
+sub ConvHE_EU {
+	my ($name, @bit_msg) = @_;
+	my $protolength = scalar @bit_msg;
+
+	if ($protolength < 72) {
+		for (my $i=0; $i<(72-$protolength); $i++) {
+			push(@bit_msg, 0);
+		}
+	}
+	return (1,@bit_msg);
+}
 
 ############################################################
 # xFSK method functions
@@ -232,7 +259,6 @@ Output:
 		or array (1,"Error message")
 
 =cut
-
 
 sub ConvPCA301 {
 	my $hexData = shift // croak 'Error: called without $hexdata as input';

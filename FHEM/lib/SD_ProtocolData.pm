@@ -1791,7 +1791,7 @@ package lib::SD_ProtocolData;
 				clientmodule			=> 'IT',
 				length_min				=> '57',
 				length_max				=> '72',
-				postDemodulation	=> \&main::SIGNALduino_HE_EU,
+				postDemodulation	=> \&lib::SD_Protocols::ConvHE_EU,
 			},
 		"66"	=>	## TX2 Protocol (Remote Temp Transmitter & Remote Thermo Model 7035)
 							# https://github.com/RFD-FHEM/RFFHEM/issues/160 @elektron-bbs

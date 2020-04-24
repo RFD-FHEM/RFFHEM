@@ -1,7 +1,7 @@
-defmod test_sub_SIGNALduino_HE_EU UnitTest dummyDuino ( 
+defmod test_sub_ConvHE_EU UnitTest dummyDuino ( 
 { 
 	use Test2::V0;
-	use Test2::Tools::Compare qw{ is isnt };
+	use Test2::Tools::Compare qw{ is };
 
 	subtest 'Test HE_EU, protolength < 72' => sub {
 		plan(2);
@@ -10,7 +10,7 @@ defmod test_sub_SIGNALduino_HE_EU UnitTest dummyDuino (
 		my $rcode;
 		note('input '.@bits.' bits');
 
-		($rcode,@bits)=SIGNALduino_HE_EU($target,@bits);
+		($rcode,@bits)=lib::SD_Protocols::ConvHE_EU($target,@bits);
 		is($rcode,1,'check returncode for HE_EU transmission');
 		is(@bits,72,'check result protolength');
 	};
@@ -22,7 +22,7 @@ defmod test_sub_SIGNALduino_HE_EU UnitTest dummyDuino (
 		my $rcode;
 
 		note('input '.@bits.' bits');
-		($rcode,@bits)=SIGNALduino_HE_EU($target,@bits);
+		($rcode,@bits)=lib::SD_Protocols::ConvHE_EU($target,@bits);
 		is($rcode,1,'check returncode for HE_EU transmission');
 		is(@bits,72,'check result protolength');
 	};
@@ -34,7 +34,7 @@ defmod test_sub_SIGNALduino_HE_EU UnitTest dummyDuino (
 		my $rcode;
 
 		note('input '.@bits.' bits');
-		($rcode,@bits)=SIGNALduino_HE_EU($target,@bits);
+		($rcode,@bits)=lib::SD_Protocols::ConvHE_EU($target,@bits);
 		is($rcode,1,'check returncode for HE_EU transmission');
 		is(@bits,74,'check result protolength');
 	};
