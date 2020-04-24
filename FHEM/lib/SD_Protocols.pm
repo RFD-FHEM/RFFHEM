@@ -157,10 +157,15 @@ sub setDefaults {
 
 
 ############################# package lib::SD_Protocols
-#=item binStr2hexStr()
-# This functon will convert binary string into its hex representation as string
-# 
-# =cut
+=item binStr2hexStr()
+This functon will convert binary string into its hex representation as string
+
+Input:  binary string
+ 
+Output:
+        hex string
+
+=cut
 
 sub  binStr2hexStr {
     my $num   = shift;
@@ -182,10 +187,18 @@ sub  binStr2hexStr {
 
 
 ############################# package lib::SD_Protocols
-#=item MCRAW()
-# This functon is desired to be used as a default output helper for manchester signals. It will check for length_max and return a hex string
-# 
-# =cut
+=item MCRAW()
+This functon is desired to be used as a default output helper for manchester signals.
+It will check for length_max and return a hex string
+
+Input:  $name,$bitData,$id,$mcbitnum
+
+Output:
+        hex string
+		or array (-1,"Error message")
+		
+=cut
+
 sub MCRAW {
 	my ($name,$bitData,$id,$mcbitnum) = @_;
 
