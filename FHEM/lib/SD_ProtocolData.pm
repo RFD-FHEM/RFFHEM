@@ -1069,7 +1069,7 @@ package lib::SD_ProtocolData;
 				#modulematch			=> '',
 				length_min				=> '28',
 				length_max				=> '40',
-				postDemodulation	=> \&main::SIGNALduino_HE800,
+				postDemodulation	=> \&lib::SD_Protocols::ConvHE800,
 			},
 		"36"	=>	## remote - cheap wireless dimmer
 							# https://forum.fhem.de/index.php/topic,38831.msg394238.html#msg394238 @Steffenm

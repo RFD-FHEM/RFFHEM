@@ -3363,19 +3363,6 @@ sub SIGNALduino_ITV1_tristateToBit($) {
 }
 
 ############################# package main
-sub SIGNALduino_HE800($@) {
-	my ($name, @bit_msg) = @_;
-	my $protolength = scalar @bit_msg;
-
-	if ($protolength < 40) {
-		for (my $i=0; $i<(40-$protolength); $i++) {
-			push(@bit_msg, 0);
-		}
-	}
-	return (1,@bit_msg);
-}
-
-############################# package main
 sub SIGNALduino_postDemo_EM($@) {
 	my ($name, @bit_msg) = @_;
 	my $msg = join("",@bit_msg);

@@ -212,11 +212,36 @@ sub MCRAW {
 #############################################################################
 
 # to simple transfer
-# SIGNALduino_HE800
 # SIGNALduino_postDemo_EM
 
 ############################################################
 # ASK/OOK method functions
+############################################################
+
+=item ConvHE800()
+
+This sub checks the length of the bits.
+If the length is less than 40, it adds a 0.
+
+Input:  $name, @bit_msg
+
+Output:
+        scalar converted message on success 
+
+=cut
+
+sub ConvHE800 {
+	my ($name, @bit_msg) = @_;
+	my $protolength = scalar @bit_msg;
+
+	if ($protolength < 40) {
+		for (my $i=0; $i<(40-$protolength); $i++) {
+			push(@bit_msg, 0);
+		}
+	}
+	return (1,@bit_msg);
+}
+
 ############################################################
 
 =item ConvHE_EU()
@@ -323,7 +348,6 @@ sub ConvKoppFreeControl {
 	return ("kr" . substr($hexData,0,$anz*2));
 }
 
-
 ############################################################
 
 =item ConvLaCrosse()
@@ -358,7 +382,6 @@ Message Format:
 	 `---- START
 
 =cut
-
 
 sub ConvLaCrosse {
 	my $hexData = shift // croak 'Error: called without $hexdata as input';
