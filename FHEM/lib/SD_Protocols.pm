@@ -25,12 +25,16 @@ our $VERSION = '0.21';
 #  $id
 
 sub new {
-	my $ret = LoadHash(@_);
-	return $ret->{'error'} if (exists($ret->{'error'})); 
+	my class = shift;
+	my $self = {
+		_protocolFilename = shift;
+		_protocols = undef;
+		
+	};
+	bless $self, $class;
+	$self->{_protocols} = LoadHash($self->{_protocolFilename});
+	return $self;
 	
-	## Do some initialisation needed here
-	
-	return;
 }
 
 
@@ -47,6 +51,7 @@ sub LoadHash {
 		return \%{ {"error" => "File $_[0] does not exsits"}};
 	}
 	delete($INC{$_[0]});
+	
 	if(  ! eval { require $_[0]; 1 }  ) {
 		return \%{ {'error' => $@}};
 	}
