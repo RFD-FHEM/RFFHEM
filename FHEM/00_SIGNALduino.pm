@@ -4023,7 +4023,7 @@ sub SIGNALduino_OSV1 {
 }
 
 ############################# package main
-sub	SIGNALduino_AS() {
+sub	SIGNALduino_AS {
 	my ($name,$bitData,$id,$mcbitnum) = @_;
 	my $debug = AttrVal($name,"debug",0);
 
@@ -4050,7 +4050,7 @@ sub	SIGNALduino_AS() {
 }
 
 ############################# package main
-sub	SIGNALduino_Hideki() {
+sub	SIGNALduino_Hideki {
 	my ($name,$bitData,$id,$mcbitnum) = @_;
 	my $debug = AttrVal($name,"debug",0);
 
