@@ -3307,7 +3307,7 @@ sub SIGNALduino_bit2Arctec {
 	return (1,split("",$msg));
 }
 
-############################# package main
+############################# package main, test exists
 sub SIGNALduino_bit2itv1 {
 	my ($name, @bit_msg) = @_;
 	my $msg = join("",@bit_msg);
@@ -3321,7 +3321,7 @@ sub SIGNALduino_bit2itv1 {
 	}
 }
 
-############################# package main
+############################# package main, test exists
 sub SIGNALduino_ITV1_tristateToBit($) {
 	my ($msg) = @_;
 	# Convert 0 -> 00   1 -> 11 F => 01 to be compatible with IT Module
