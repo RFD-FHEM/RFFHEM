@@ -37,7 +37,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.5_dev_04.24",
+	SDUINO_VERSION            => "v3.5_dev_04.25",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -344,13 +344,13 @@ our $FW_detail;
 #
 # returns a hash with protocols if loaded without error. Returns a hash with {eror} => errormessage if there was an error
 
-############################# package main
+############################# package main, test exists
 sub SIGNALduino_LoadProtocolHash($) {
 	my $ret= lib::SD_Protocols::LoadHash($_[0]);
 	return %$ret;
 }
 
-############################# package main
+############################# package main, test exists
 sub SIGNALduino_FingerprintFn($$) {
   my ($name, $msg) = @_;
 
@@ -607,13 +607,13 @@ sub SIGNALduino_PrepareFlash {
 }
 
 #$hash,$name,"sendmsg","P17;R6#".substr($arg,2)
-############################# package main
+############################# package main, test exists
 sub SIGNALduino_RemoveLaCrossePair($) {
   my $hash = shift;
   delete($hash->{LaCrossePair});
 }
 
-############################# package main
+############################# package main, test exists
 sub SIGNALduino_Set($$@) {
 	my ($hash,$name, @a) = @_;
 
@@ -656,6 +656,7 @@ sub SIGNALduino_Set_FhemWebList {
 	return "Unknown argument $a[0], choose one of " . join(" ", @cList);
 }
 
+############################# package main
 sub SIGNALduino_Set_raw {
 	my ($hash, @a) = @_;
 	$hash->{logMethod}->($hash->{NAME}, 4, "$hash->{NAME}: Set_raw, ".join(" ",@a));
@@ -849,8 +850,7 @@ sub SIGNALduino_Set_close {
 }
 
 ############################# package main
-sub SIGNALduino_Set_MessageType
-{
+sub SIGNALduino_Set_MessageType {
 	my ($hash, @a) = @_;
 	my $argm;
 	if ($a[0] =~ /^enable/) {
@@ -863,8 +863,7 @@ sub SIGNALduino_Set_MessageType
 }
 
 ############################# package main
-sub SIGNALduino_Set_bWidth
-{
+sub SIGNALduino_Set_bWidth {
 	my ($hash, @a) = @_;
 
 	if (exists($hash->{ucCmd}->{cmd}) && $hash->{ucCmd}->{cmd} eq "set_bWidth" && $a[0] =~ /^C10\s=\s([A-Fa-f0-9]{2})$/ )
@@ -904,7 +903,7 @@ sub SIGNALduino_Set_LaCrossePairForSec {
 	return undef;
 }
 
-############################# package main
+############################# package main, test exists
 sub SIGNALduino_Get($@) {
 	my ($hash,$name, @a) = @_;
 	#my $type = $hash->{TYPE};
@@ -930,8 +929,7 @@ sub SIGNALduino_Get($@) {
 	return $rcode; # We will exit here, and give an output only, $rcode has some value
 }
 
-
-############################# package main
+############################# package main, test exists
 #SIGNALduino_Get_Callback($name, $callbackFn, @args);
 sub SIGNALduino_Get_Callback($$$) {
 	my ($name, $callbackFn, $arg) = @_;
@@ -992,8 +990,7 @@ sub SIGNALduino_Get_availableFirmware {
 }
 
 ############################# package main
-sub SIGNALduino_Get_Command
-{
+sub SIGNALduino_Get_Command {
 	my ($hash, @a) = @_;
 	my $name=$hash->{NAME};
 	return "Unsupported command for the microcontroller" if (!exists(${$gets{$a[0]}}[2]));
@@ -1007,8 +1004,7 @@ sub SIGNALduino_Get_Command
 }
 
 ############################# package main
-sub SIGNALduino_Get_Command_CCReg
-{
+sub SIGNALduino_Get_Command_CCReg {
 	my ($hash, @a) = @_;
 	my $name=$hash->{NAME};
 	if (exists($cc1101_register{uc($_[2])}) || $_[2] =~ /^99$/ ) {
@@ -1037,9 +1033,8 @@ sub SIGNALduino_Get_Raw {
 	}
 }
 
-############################# package main
-sub SIGNALduino_GetResponseUpdateReading
-{
+############################# package main, test exists
+sub SIGNALduino_GetResponseUpdateReading {
 	return ($_[1],1);
 }
 
@@ -1064,17 +1059,15 @@ sub SIGNALduino_Get_delayed($) {
 	}
 }
 
-############################# package main
-sub SIGNALduino_CheckUptimeResponse
-{
+############################# package main, test exists
+sub SIGNALduino_CheckUptimeResponse {
     my $msg = sprintf("%d %02d:%02d:%02d", $_[1]/86400, ($_[1]%86400)/3600, ($_[1]%3600)/60, $_[1]%60);
 	#readingsSingleUpdate($_[0], $_[0]->{ucCmd}->{cmd}, $msg, 0);
 	return ($msg,0);
 }
 
-############################# package main
-sub SIGNALduino_CheckCmdsResponse
-{
+############################# package main, test exists
+sub SIGNALduino_CheckCmdsResponse {
 	my $hash = shift;
 	my $msg = shift;
 	my $name=$hash->{NAME};
@@ -1085,7 +1078,7 @@ sub SIGNALduino_CheckCmdsResponse
    	return ($msg,0);
 }
 
-############################# package main
+############################# package main, test exists
 sub SIGNALduino_CheckccConfResponse {
 	my (undef,$str) = split('=', $_[1]);
 	my $var;
@@ -1115,7 +1108,7 @@ sub SIGNALduino_CheckccConfResponse {
 	return ($msg.", ".$msg2,undef);
 }
 
-############################# package main
+############################# package main, test exists
 sub SIGNALduino_CheckccPatableResponse {
 	my $hash = shift;
 	my $msg = shift;
@@ -1137,9 +1130,8 @@ sub SIGNALduino_CheckccPatableResponse {
 	return ($msg,undef);
 }
 
-############################# package main
-sub SIGNALduino_CheckCcregResponse
-{
+############################# package main, test exists
+sub SIGNALduino_CheckCcregResponse {
 	my $hash = shift;
 	my $msg = shift;
 	my $name=$hash->{NAME};
@@ -1172,8 +1164,7 @@ sub SIGNALduino_CheckCcregResponse
 
 ############################# package main
 ### Unused ??? ### in use
-sub SIGNALduino_CheckSendRawResponse
-{
+sub SIGNALduino_CheckSendRawResponse {
 	my $hash = shift;
 	my $msg = shift;
 
@@ -1287,7 +1278,7 @@ sub SIGNALduino_SimpleWrite_XQ($) {
 	#DevIo_SimpleWrite($hash, "XQ\n",2);
 }
 
-############################# package main
+############################# package main, test exists
 sub SIGNALduino_StartInit($) {
 	my ($hash) = @_;
 	my $name = $hash->{NAME};
@@ -1319,9 +1310,8 @@ sub SIGNALduino_StartInit($) {
 	}
 }
 
-############################# package main
-sub SIGNALduino_CheckVersionResp
-{
+############################# package main, test exists
+sub SIGNALduino_CheckVersionResp {
 	my ($hash,$msg) = @_;
 	my $name = $hash->{NAME};
 
@@ -1377,7 +1367,7 @@ sub SIGNALduino_CheckVersionResp
 }
 
 
-############################# package main
+############################# package main, test exists
 # Todo: SUB kann entfernt werden
 sub SIGNALduino_CheckCmdResp($) {
 	my ($hash) = @_;
@@ -1495,7 +1485,7 @@ sub SIGNALduino_AddSendQueue($$) {
   InternalTimer(gettimeofday() + 0.1, \&SIGNALduino_HandleWriteQueue, "HandleWriteQueue:$name") if (scalar @{$hash->{QUEUE}} == 1 && InternalVal($name,"sendworking",0) == 0);
 }
 
-############################# package main
+############################# package main, test exists
 sub SIGNALduino_SendFromQueue($$) {
   my ($hash, $msg) = @_;
   my $name = $hash->{NAME};
@@ -1567,7 +1557,7 @@ sub SIGNALduino_HandleWriteQueue($) {
   }
 }
 
-############################# package main
+############################# package main, test exists
 # called from the global loop, when the select for hash->{FD} reports data
 sub SIGNALduino_Read($) {
   my ($hash) = @_;
@@ -1949,7 +1939,7 @@ sub SIGNALduino_MatchSignalPattern($\@\%\@$){
 	}
 }
 
-############################# package main
+############################# package main, test exists
 sub SIGNALduino_b2h {
     my $num   = shift;
     my $WIDTH = 4;
@@ -2054,7 +2044,7 @@ sub SIGNALduino_Split_Message($$) {
 	return %ret;
 }
 
-############################# package main
+############################# package main, test exists
 # Function which dispatches a message if needed.
 sub SIGNALduno_Dispatch($$$$$) {
 	my ($hash, $rmsg, $dmsg, $rssi, $id) = @_;
@@ -2151,7 +2141,7 @@ sub SIGNALduino_moduleMatch {
 	return 0;
 }
 
-############################# package main
+############################# package main, test exists
 # calculated RSSI and RSSI value and RSSI string (-77,"RSSI = -77")
 sub SIGNALduino_calcRSSI($) {
 	my $rssi = shift;
@@ -2359,7 +2349,7 @@ sub SIGNALduino_getProtoProp {
 	#return undef;
 }
 
-############################# package main
+############################# package main, test exists
 sub SIGNALduino_Parse_MU($$$$@) {
 	my ($hash, $iohash, $name, $rmsg,%msg_parts) = @_;
 
@@ -2570,7 +2560,7 @@ sub SIGNALduino_Parse_MU($$$$@) {
 	}
 }
 
-############################# package main
+############################# package main, test exists
 sub SIGNALduino_Parse_MC($$$$@) {
 	my ($hash, $iohash, $name, $rmsg,%msg_parts) = @_;
 	my $clock=$msg_parts{clockabs};	     ## absolute clock
@@ -2682,7 +2672,7 @@ sub SIGNALduino_Parse_MC($$$$@) {
 	return 1;
 }
 
-############################# package main
+############################# package main, test exists
 sub SIGNALduino_Parse_MN {
 	my ($hash, $rmsg, $msg_parts) = @_;
 	my $name= $hash->{NAME};
@@ -3226,7 +3216,7 @@ sub SIGNALduino_IdList($@) {
 	$hash->{mnIdList} = \@mnIdList;
 }
 
-############################# package main
+############################# package main, test exists
 sub SIGNALduino_getAttrDevelopment {
 	my $name = shift;
 	my $develop = shift;
@@ -3242,7 +3232,7 @@ sub SIGNALduino_getAttrDevelopment {
 	return ($develop,$devFlag);
 }
 
-############################# package main
+############################# package main, test exists
 sub SIGNALduino_callsub {
 	my $funcname =shift;
 	my $method = shift;
@@ -3280,7 +3270,7 @@ sub SIGNALduino_callsub {
 	return (1,@args);
 }
 
-############################# package main
+############################# package main, test exists
 # calculates the hex (in bits) and adds it at the beginning of the message
 # input = @list
 # output = @list
@@ -3325,7 +3315,7 @@ sub SIGNALduino_dec2binppari {      # dec to bin . parity
 	return $result;
 }
 
-############################# package main
+############################# package main, test exists
 sub SIGNALduino_bit2Arctec {
 	my ($name, @bit_msg) = @_;
 	my $msg = join("",@bit_msg);
@@ -3362,7 +3352,7 @@ sub SIGNALduino_ITV1_tristateToBit($) {
 	return (1,$msg);
 }
 
-############################# package main
+############################# package main, test exists
 sub SIGNALduino_postDemo_EM($@) {
 	my ($name, @bit_msg) = @_;
 	my $msg = join("",@bit_msg);
@@ -3763,7 +3753,7 @@ sub SIGNALduino_postDemo_WS7053($@) {
 }
 
 # manchester method
-############################# package main
+############################# package main, test exists
 sub SIGNALduino_GROTHE {
 	my ($name,$bitData,$id,$mcbitnum) = @_;
 	my $bitLength;
@@ -3791,7 +3781,7 @@ sub SIGNALduino_GROTHE {
 	return (1,$hex); ## Return the bits unchanged in hex
 }
 
-############################# package main
+############################# package main, test exists
 sub SIGNALduino_MCTFA {
 	my ($name,$bitData,$id,$mcbitnum) = @_;
 
@@ -3853,7 +3843,7 @@ sub SIGNALduino_MCTFA {
 	return (-1,undef);
 }
 
-############################# package main
+############################# package main, test exists
 sub SIGNALduino_OSV2 {
 	my ($name,$bitData,$id,$mcbitnum) = @_;
 
@@ -3994,7 +3984,7 @@ sub SIGNALduino_OSV2 {
 	return (-1,undef);
 }
 
-############################# package main
+############################# package main, test exists
 sub SIGNALduino_OSV1 {
 	my ($name,$bitData,$id,$mcbitnum) = @_;
 	return (-1," message is to short") if (defined($ProtocolListSIGNALduino{$id}{length_min}) && $mcbitnum < $ProtocolListSIGNALduino{$id}{length_min} );
@@ -4134,7 +4124,7 @@ sub	SIGNALduino_Hideki() {
 	return (-1,"Start pattern (10101110) not found");
 }
 
-############################# package main
+############################# package main, test exists
 sub SIGNALduino_Maverick {
 	my ($name,$bitData,$id,$mcbitnum) = @_;
 
@@ -4153,7 +4143,7 @@ sub SIGNALduino_Maverick {
 	}
 }
 
-############################# package main
+############################# package main, test exists
 sub SIGNALduino_OSPIR {
 	my ($name,$bitData,$id,$mcbitnum) = @_;
 
@@ -4171,7 +4161,7 @@ sub SIGNALduino_OSPIR {
 	}
 }
 
-############################# package main
+############################# package main, test exists
 sub SIGNALduino_SomfyRTS {
 	my ($name, $bitData,$id,$mcbitnum) = @_;
 
