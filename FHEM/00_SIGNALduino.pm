@@ -1939,25 +1939,6 @@ sub SIGNALduino_MatchSignalPattern($\@\%\@$){
 	}
 }
 
-############################# package main, test exists
-sub SIGNALduino_b2h {
-    my $num   = shift;
-    my $WIDTH = 4;
-    my $index = length($num) - $WIDTH;
-    my $hex = '';
-    do {
-        my $width = $WIDTH;
-        if ($index < 0) {
-            $width += $index;
-            $index = 0;
-        }
-        my $cut_string = substr($num, $index, $width);
-        $hex = sprintf('%X', oct("0b$cut_string")) . $hex;
-        $index -= $WIDTH;
-    } while ($index > (-1 * $WIDTH));
-    return $hex;
-}
-
 ############################# package main
 sub SIGNALduino_Split_Message($$) {
 	my $rmsg = shift;
@@ -2297,7 +2278,7 @@ sub SIGNALduino_Parse_MS($$$$%) {
 			@bit_msg = @retvalue;
 			undef(@retvalue); undef($rcode);
 
-			my $dmsg = SIGNALduino_b2h(join "", @bit_msg);
+			my $dmsg = lib::SD_Protocols::binStr2hexStr(join "", @bit_msg);
 			my $postamble = $ProtocolListSIGNALduino{$id}{postamble};
 			$dmsg = "$dmsg".$postamble if (defined($postamble));
 			$dmsg = "$ProtocolListSIGNALduino{$id}{preamble}"."$dmsg" if (defined($ProtocolListSIGNALduino{$id}{preamble}));
@@ -2535,7 +2516,7 @@ sub SIGNALduino_Parse_MU($$$$@) {
 				my $bit_length=scalar @bit_msg;
 				@bit_msg=(); # clear bit_msg array
 
-				$dmsg = SIGNALduino_b2h($dmsg) if (SIGNALduino_getProtoProp($id,"dispatchBin",0) == 0 );
+				$dmsg = lib::SD_Protocols::binStr2hexStr($dmsg) if (SIGNALduino_getProtoProp($id,"dispatchBin",0) == 0 );
 
 				$dmsg =~ s/^0+//	 if (  SIGNALduino_getProtoProp($id,"remove_zero",0) );
 
@@ -3437,7 +3418,7 @@ sub SIGNALduino_postDemo_FS20($@) {
          } else {                                              ### FS20 length 54
             splice(@bit_msg, 40, 8);                                       # delete checksum
          }
-			my $dmsg = SIGNALduino_b2h(join "", @bit_msg);
+			my $dmsg = lib::SD_Protocols::binStr2hexStr(join "", @bit_msg);
 			$hash->{logMethod}->($name, 4, "$name: FS20, remote control post demodulation $dmsg length $protolength");
 			return (1, @bit_msg);											## FHT80TF ok
       }
@@ -3503,7 +3484,7 @@ sub SIGNALduino_postDemo_FHT80($@) {
          }
          splice(@bit_msg, 40, 8);                                       # delete checksum
          splice(@bit_msg, 24, 0, (0,0,0,0,0,0,0,0));# insert Byte 3
-         my $dmsg = SIGNALduino_b2h(join "", @bit_msg);
+         my $dmsg = lib::SD_Protocols::binStr2hexStr(join "", @bit_msg);
          $hash->{logMethod}->($name, 4, "$name: FHT80, roomthermostat post demodulation $dmsg");
          return (1, @bit_msg);											## FHT80 ok
       }
@@ -3562,7 +3543,7 @@ sub SIGNALduino_postDemo_FHT80TF($@) {
             return 0, undef;
          }
 			splice(@bit_msg, 32, 8);                                       # delete checksum
-				my $dmsg = SIGNALduino_b2h(join "", @bit_msg);
+				my $dmsg = lib::SD_Protocols::binStr2hexStr(join "", @bit_msg);
 				$hash->{logMethod}->($name, 4, "$name: FHT80TF, door/window switch post demodulation $dmsg");
 			return (1, @bit_msg);											## FHT80TF ok
       }
@@ -3776,7 +3757,7 @@ sub SIGNALduino_GROTHE {
 			return (-1,"$rtxt");
 		}
 	}
-	my $hex=SIGNALduino_b2h($bitData);
+	my $hex=lib::SD_Protocols::binStr2hexStr($bitData);
 	$hash->{logMethod}->( $name, 4, "$name: GROTHE, protocol id $id detected, $bitData ($bitLength)");
 	return (1,$hex); ## Return the bits unchanged in hex
 }
@@ -3817,7 +3798,7 @@ sub SIGNALduino_MCTFA {
 
 			my ($rcode, $rtxt) = SIGNALduino_TestLength($name, $id, $message_length, "TFA message part($i)");
 			if ($rcode) {
-				my $hex=SIGNALduino_b2h($part_str);
+				my $hex=lib::SD_Protocols::binStr2hexStr($part_str);
 				push (@messages,$hex);
 				$hash->{logMethod}->($name, 4, "$name: MCTFA, message part($i)=$hex");
 			}
@@ -4035,7 +4016,7 @@ sub SIGNALduino_OSV1 {
     $checksum = ($checksum - 0xa) & 0xff;
     $newBitData .= sprintf("%08b",$checksum);          # Byte 8:   new Checksum
     $newBitData .= "00000000";                         # Byte 9:   immer 0000 0000
-    my $osv1hex = "50" . SIGNALduino_b2h($newBitData); # output with length before
+    my $osv1hex = "50" . lib::SD_Protocols::binStr2hexStr($newBitData); # output with length before
     $hash->{logMethod}->($name, 4, "$name: OSV1, protocol id $id translated to RFXSensor format");
     $hash->{logMethod}->($name, 4, "$name: OSV1, converted to hex: $osv1hex");
     return (1,$osv1hex);
@@ -4135,7 +4116,7 @@ sub SIGNALduino_Maverick {
 
 		$hash->{logMethod}->($name, 4, "$name: Maverick, protocol detected: header_pos = $header_pos");
 
-		my $hex=SIGNALduino_b2h(substr($bitData,$header_pos,26*4));
+		my $hex=lib::SD_Protocols::binStr2hexStr(substr($bitData,$header_pos,26*4));
 
 		return  (1,$hex); ## Return the bits unchanged in hex
 	} else {
@@ -4153,7 +4134,7 @@ sub SIGNALduino_OSPIR {
 		my $hash=$defs{$name};
 		$hash->{logMethod}->($name, 4, "$name: OSPIR, protocol detected: header_pos = $header_pos");
 
-		my $hex=SIGNALduino_b2h($bitData);
+		my $hex=lib::SD_Protocols::binStr2hexStr($bitData);
 
 		return  (1,$hex); ## Return the bits unchanged in hex
 	} else {
@@ -4175,7 +4156,7 @@ sub SIGNALduino_SomfyRTS {
 			$hash->{logMethod}->($name, 4, "$name: SomfyRTS, bitdata: _$bitData (" . length($bitData) . "). Bit am Anfang entfernt");
 		}
 	}
-	my $encData = SIGNALduino_b2h($bitData);
+	my $encData = lib::SD_Protocols::binStr2hexStr($bitData);
 
 	#SIGNALduino_Log3 $name, 4, "$name: SomfyRTS, protocol enc: $encData";
 	return (1, $encData);
