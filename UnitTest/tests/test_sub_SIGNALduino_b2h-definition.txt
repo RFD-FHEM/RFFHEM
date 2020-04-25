@@ -1,0 +1,21 @@
+defmod test_sub_SIGNALduino_b2h UnitTest dummyDuino ( 
+{ 
+	use Test2::V0;
+	use Test2::Tools::Compare qw{ is };
+
+	subtest 'Tests b2h' => sub {
+		plan(3);
+
+		my $input = '111100011';
+
+		note("input binary $input");
+		ok( $input =~ m/^[0-1]{1,}$/, 'check input only binary');
+		TODO: {
+			local $TODO = "extension sub input only binary?";
+			my $output = SIGNALduino_b2h($input);
+			is($output,"1E3","check result output hexadecimal $output");
+		}
+		note('output preceding 0 at input? (example 00001111 to 0F)');
+	};
+}
+)
