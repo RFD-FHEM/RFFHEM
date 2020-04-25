@@ -4,7 +4,7 @@ defmod test_sub_SIGNALduino_b2h UnitTest dummyDuino (
 	use Test2::Tools::Compare qw{ is };
 
 	subtest 'Tests b2h' => sub {
-		plan(3);
+		plan(2);
 
 		my $input = '111100011';
 
