@@ -13,7 +13,7 @@ use strict;
 use warnings;
 use Carp;
 use Digest::CRC;
-our $VERSION = '0.21';
+our $VERSION = '1.00';
 
 
 ############################# package lib::SD_Protocols
@@ -25,12 +25,12 @@ our $VERSION = '0.21';
 #  $id
 
 sub new {
-	my class = shift;
-	my $self = {
-		_protocolFilename = shift;
-		_protocols = undef;
-		
-	};
+	my $class = shift;
+	my $self = {};
+	
+	$self->{_protocolFilename} = shift // "";
+	$self->{_protocols} = undef;
+
 	bless $self, $class;
 	$self->{_protocols} = LoadHash($self->{_protocolFilename});
 	return $self;
@@ -47,16 +47,23 @@ sub new {
 #  $id
 
 sub LoadHash {
-	if (! -e $_[0]) {
+	my $self = shift;
+	my $filename  = shift // $self->{_protocolFilename};
+	
+	if (! -e $filename) {
 		return \%{ {"error" => "File $_[0] does not exsits"}};
 	}
-	delete($INC{$_[0]});
 	
-	if(  ! eval { require $_[0]; 1 }  ) {
+	if(  ! eval { require $filename; 1 }  ) {
 		return \%{ {'error' => $@}};
 	}
-	setDefaults();
-	return getProtocolList();
+	$self->{_protocols} = $lib::SD_ProtocolData::protocols;
+	$self->{_protocolsVersion} = $lib::SD_ProtocolData::VERSION;
+	
+	#delete($INC{$filename}); # Unload package, because we only wanted the hash
+
+	$self->setDefaults();
+	return $self->getProtocolList();
 }
 
 
@@ -66,7 +73,8 @@ sub LoadHash {
 # =cut
 #  $id
 sub protocolExists {
-	return exists($lib::SD_ProtocolData::protocols{$_[0]});
+	my $self = shift ;
+	return exists($self->{protocols}{$_[0]});
 }
 
 
@@ -76,7 +84,8 @@ sub protocolExists {
 # =cut
 #  $id, $propertyname,
 sub getProtocolList {
-	return \%lib::SD_ProtocolData::protocols;
+	my $self = shift ;
+	return $self->{_protocols};
 }
 
 
@@ -89,7 +98,8 @@ sub getProtocolList {
 #  $id, $propertyname,
 
 sub getKeys {
-	return keys %lib::SD_ProtocolData::protocols;
+	my $self = shift ;
+	return keys %{$self->{_protocols}};
 }
 
 
@@ -102,7 +112,11 @@ sub getKeys {
 #  $id, $propertyname,$default
 
 sub checkProperty {
-	return getProperty($_[0],$_[1]) if exists($lib::SD_ProtocolData::protocols{$_[0]}{$_[1]}) && defined($lib::SD_ProtocolData::protocols{$_[0]}{$_[1]});
+	my $self = shift ;
+	my $id = shift // return;
+	my $valueName = shift // return;
+
+	return $self->{_protocols}($id,$valueName) if exists($self->{_protocols}{$id}{$valueName}) && defined($self->{_protocols}{$id}{$valueName});
 	return $_[2]; # Will return undef if $default is not provided
 }
 
@@ -116,7 +130,8 @@ sub checkProperty {
 #  $id, $propertyname
 
 sub getProperty {
-	return $lib::SD_ProtocolData::protocols{$_[0]}{$_[1]};
+	my $self = shift ;
+	return $self->{_protocols}{$_[0]}{$_[1]};
 }
 
 
@@ -127,7 +142,8 @@ sub getProperty {
 # =cut
 
 sub getProtocolVersion {
-	return $lib::SD_ProtocolData::VERSION;
+	my $self = shift ;
+	return $self->{_protocolsVersion};
 }
 
 
@@ -138,24 +154,25 @@ sub getProtocolVersion {
 # =cut
 
 sub setDefaults {
-	foreach my $id (getKeys())
+	my $self=shift;
+	
+	foreach my $id ($self->getKeys())
 	{
-		my $format = getProperty($id,"format");
+		my $format = $self->getProperty($id,"format");
 		
 		if (defined ($format) && $format eq "manchester")
 		{
 			# Manchester defaults :
-			$lib::SD_ProtocolData::protocols{$id}{method} = \&lib::SD_Protocols::MCRAW if (!defined(checkProperty($id,"method")));
+			$self->{_protocols}{$id}{method} = \&lib::SD_Protocols::MCRAW if (!defined($self->checkProperty($id,"method")));
 		}
 		elsif (getProperty($id,"sync"))
 		{
-			# Messages with sync defaults :
-			
+			# Messages with sync defaults :			
 		}
 		elsif (getProperty($id,"clockabs"))
 		{
 			# Messages without sync defaults :
-			$lib::SD_ProtocolData::protocols{$id}{length_min} = 8 if (!defined(checkProperty($id,"length_min")));
+			$self->{_protocols}{$id}{length_min} = 8 if (!defined($self->checkProperty($id,"length_min")));
 		}
 	}
 	return;
@@ -206,6 +223,8 @@ Output:
 =cut
 
 sub MCRAW {
+	my $self=shift;
+	
 	my ($name,$bitData,$id,$mcbitnum) = @_;
 
 	return (-1," message is to long") if ($mcbitnum > checkProperty($id,"length_max",0) );
@@ -237,6 +256,8 @@ Output:
 =cut
 
 sub ConvHE800 {
+	my $self=shift;
+	
 	my ($name, @bit_msg) = @_;
 	my $protolength = scalar @bit_msg;
 
