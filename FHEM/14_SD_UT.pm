@@ -527,19 +527,26 @@ my %models = (
 								Protocol	=> "P83",
 								Typ				=> "remote"
 							},
-	'TR60C1' =>	{	'111110000000'	=> 'light_off_fan_off',
-								'110110000000' 	=> 'light_off_fan_1',
-								'001110000000'	=> 'light_off_fan_2',
-								'101110000000'	=> 'light_off_fan_3',
-								'011110000000'	=> 'light_off_fan_4',
-								'111110001111'	=> 'light_on_fan_off',
-								'110110001111'	=> 'light_on_fan_1',
-								'001110001111'	=> 'light_on_fan_2',
-								'101110001111'	=> 'light_on_fan_3',
-								'011110001111'	=> 'light_on_fan_4',
-								hex_lengh	=> '4',
-								Protocol	=> 'P104',
-								Typ				=> 'remote'
+	'TR60C1' =>	{	'111110000000' => 'light_off_fan_off',
+								'110110000000' => 'light_off_fan_1',
+								'001110000000' => 'light_off_fan_2',
+								'101110000000' => 'light_off_fan_3',
+								'011110000000' => 'light_off_fan_4',
+								'111110001111' => 'light_on_fan_off',
+								'110110001111' => 'light_on_fan_1',
+								'001110001111' => 'light_on_fan_2',
+								'101110001111' => 'light_on_fan_3',
+								'011110001111' => 'light_on_fan_4',
+								'11111000' => 'fan_off', # is not sent directly
+								'11011000' => 'fan_1', # is not sent directly
+								'00111000' => 'fan_2', # is not sent directly
+								'10111000' => 'fan_3', # is not sent directly
+								'01111000' => 'fan_4', # is not sent directly
+								'0000' => 'light_off', # is not sent directly
+								'1111' => 'light_on', # is not sent directly
+								hex_lengh => '4',
+								Protocol => 'P104',
+								Typ => 'remote'
 							},
 	"SA_434_1_mini" =>	{	"0"				=> "send",
 												hex_lengh	=> "3",
@@ -844,16 +851,28 @@ sub SD_UT_Set($$$@) {
 		} elsif ($model eq 'TR60C1') {
 			my $adr = sprintf( "%04b", hex($definition[1]));	# argument 1 - adress to binary with 4 digits
 			$msg = $models{$model}{Protocol} . "#" . $adr;
+			if (length($cmd) < 10) {
+				my @oldstate = split('_',ReadingsVal($name, 'state', 'light_off_fan_off'));
+				if (scalar(@oldstate) == 4) {
+					if (length($cmd) < 8) { # fan
+						$cmd = $oldstate[0] . '_' . $oldstate[1] . '_' . $cmd;
+					} else { # light
+						$cmd .= '_' . $oldstate[2] . '_' . $oldstate[3];
+					}
+					Log3 $name, 4, "$ioname: SD_UT_Set $name oldstate=$oldstate[0]_$oldstate[1]_$oldstate[2]_$oldstate[3] newcmd=$cmd";
+				}
+			}
 			$msgEnd = "#R" . $repeats;
 		############ Westinghouse Buttons_five ############
 		} elsif ($model eq "Buttons_five") {
 			my $adr = sprintf( "%04b", hex($definition[1]));	# argument 1 - adress to binary with 4 digits
 			$msg = $models{$model}{Protocol} . "#";
 			$msgEnd .= "11".$adr."#R" . $repeats;
-		############ SA_434_1_mini ############
+		############ SA_434_1_mini only one button ############
 		} elsif ($model eq "SA_434_1_mini") {
 			my $bitData = sprintf( "%012b", hex($definition[1]));	# argument 1 - adress to binary with 12 digits
 			$msg = $models{$model}{Protocol} . "#" . $bitData . "#R" . $repeats;
+			$cmd = 'send';
 		############ Tedsen_SKX1xx, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx ############
 		} elsif ($model eq "Tedsen_SKX1xx" || $model eq "Tedsen_SKX2xx" || $model eq "Tedsen_SKX4xx" || $model eq "Tedsen_SKX6xx") {
 			my $adr = SD_UT_tristate2bin($definition[1]);	# argument 1 - adress tristate to bin with 18 bits
@@ -890,11 +909,12 @@ sub SD_UT_Set($$$@) {
 			my $adr = sprintf( "%016b", hex($definition[1]));	# argument 1 - adress to binary with 16 digits
 			$msg = $models{$model}{Protocol} . "#" . substr($adr,0,14);
 			$msgEnd = "#R" . $repeats;
-		############ Hoermann HS1-868-BS ############
+		############ Hoermann HS1-868-BS only 1 button ############
 		} elsif ($model eq "HS1_868_BS") {
 			my $bitData = "00000000";
 			$bitData .= sprintf( "%036b", hex($definition[1]));	# argument 1 - adress to binary with 36 digits
 			$msg = $models{$model}{Protocol} . "#" . $bitData . "#R" . $repeats;
+			$cmd = 'send';
 		############ Hoermann HSM4 ############
 		} elsif ($model eq "HSM4") {
 			my $adr = sprintf( "%028b", hex($definition[1]));	# argument 1 - adress to binary with 28 digits
@@ -959,11 +979,11 @@ sub SD_UT_Set($$$@) {
 			my $adr = sprintf( "%028b", hex($definition[1]));	# argument 1 - adress to binary with 28 bits
 			$msg = $models{$model}{Protocol} . "#" . $adr;
 			$msgEnd = "#R" . $repeats;
-		############ Navaris ############
+		############ Navaris only one button ############
 		} elsif ($model eq "Navaris") {
 			my $adr = sprintf( "%024b", hex($definition[1]));	# argument 1 - adress to binary with 24 bits
-			$msg = $models{$model}{Protocol} . "#" . $adr;
-			$msgEnd = "#R" . $repeats;
+			$msg = $models{$model}{Protocol} . "#" . $adr . "#R" . $repeats;
+			$cmd = 'send';
 		############ xavax ############
 		} elsif ($model eq "xavax") {
 			my $adr = sprintf( "%016b", hex($definition[1]));	# argument 1 - adress to binary with 16 bits
@@ -993,7 +1013,8 @@ sub SD_UT_Set($$$@) {
 					last if ($value eq $cmd);
 				}
 			}
-
+			return "$name Unkown set command!" if ($value ne $cmd);
+			
 			############ KL_RF01 ############
 			if ($model eq "KL_RF01") {
 				my $save2 = $save;
@@ -1051,7 +1072,6 @@ sub SD_UT_Set($$$@) {
 		Log3 $name, 3, "$ioname: $name set $cmd";
 
 		## for hex output ##
-
 		my @split = split("#", $msg);
 		my $hexvalue = $split[1];
 		$hexvalue =~ s/P+//g;															# if P parameter, replace P with nothing
