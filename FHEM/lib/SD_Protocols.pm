@@ -11,10 +11,9 @@ package lib::SD_Protocols;
 
 use strict;
 use warnings;
-use Carp;
+use Carp qw(croak carp);
 use Digest::CRC;
 our $VERSION = '1.00';
-
 
 ############################# package lib::SD_Protocols
 #=item new($)
@@ -26,15 +25,16 @@ our $VERSION = '1.00';
 
 sub new {
 	my $class = shift;
-	my $self = {};
+	croak "Illegal parameter list has odd number of values" if @_ % 2;
+    my %args = @_; 
+ 	my $self = {};
 	
-	$self->{_protocolFilename} = shift // "";
+	$self->{_protocolFilename} = $args{filename} //  "";
 	$self->{_protocols} = undef;
-
 	bless $self, $class;
-	$self->{_protocols} = LoadHash($self->{_protocolFilename});
-	return $self;
-	
+
+	$self->LoadHash($self->{_protocolFilename}) if ($self->{_protocolFilename});
+	return $self;	
 }
 
 
@@ -42,28 +42,27 @@ sub new {
 #=item LoadHash($)
 # This functons, will load protocol hash from file into a hash.
 # First Parameter is for filename (full or relativ path) to be loaded
-# Returns a reference to error or the hash
+# Returns error or undef on success
 # =cut
 #  $id
 
 sub LoadHash {
 	my $self = shift;
-	my $filename  = shift // $self->{_protocolFilename};
+	my $filename = shift // $self->{_protocolFilename};
 	
 	if (! -e $filename) {
-		return \%{ {"error" => "File $_[0] does not exsits"}};
+		return qq[File $filename does not exsits];
 	}
 	
-	if(  ! eval { require $filename; 1 }  ) {
-		return \%{ {'error' => $@}};
-	}
+	return $@ if(  ! eval { require $filename; 1 }  );
+	
 	$self->{_protocols} = $lib::SD_ProtocolData::protocols;
 	$self->{_protocolsVersion} = $lib::SD_ProtocolData::VERSION;
 	
 	#delete($INC{$filename}); # Unload package, because we only wanted the hash
 
 	$self->setDefaults();
-	return $self->getProtocolList();
+	return ;
 }
 
 
@@ -74,7 +73,8 @@ sub LoadHash {
 #  $id
 sub protocolExists {
 	my $self = shift ;
-	return exists($self->{protocols}{$_[0]});
+	my $pId= shift // carp "Illegal parameter number, protocol id was not specified";
+	return exists($self->{_protocols}->{$pId});
 }
 
 
