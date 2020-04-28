@@ -1,3 +1,6 @@
+2020-04-28 - Update 14_SD_UT.pm
+
+Restrict command "attr device repeats x" to valid values.
 2020-04-26 - Update 14_SD_UT.pm
 
 Send commands added
