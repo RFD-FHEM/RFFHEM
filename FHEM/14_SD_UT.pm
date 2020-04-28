@@ -1716,6 +1716,10 @@ sub SD_UT_Attr(@) {
 	my $bitData;
 	my $hex_lengh = length(InternalVal($name, "lastMSG", "0"));
 
+	if ($cmd eq "set" && $attrName eq 'repeats' && $attrValue !~ m/^[1-9]$/i) {
+		return "$name: Unallowed value $attrValue for the attribute repetition (must be 1 - 9)!";
+	}
+
 	############ chance device models ############
 	if ($cmd eq "set" && $attrName eq "model" && $attrValue ne $oldmodel) {
 
