@@ -3265,7 +3265,7 @@ sub SIGNALduino_lengtnPrefix {
 	return (1,split("",$msg));
 }
 
-############################# package main
+############################# package main, test exists
 sub SIGNALduino_PreparingSend_FS20_FHT($$$) {
 	my ($id, $sum, $msg) = @_;
 	my $temp = 0;
@@ -3284,7 +3284,7 @@ sub SIGNALduino_PreparingSend_FS20_FHT($$$) {
 	return $newmsg;
 }
 
-############################# package main
+############################# package main, test exists
 sub SIGNALduino_dec2binppari {      # dec to bin . parity
 	my $num = shift;
 	my $parity = 0;
