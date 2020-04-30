@@ -8,7 +8,7 @@ jobs:
     - uses: actions/checkout@master
     - uses: shogo82148/actions-setup-perl@v1
       with:
-        perl-version: '5.26'
+        perl-version: '5.22'
     - run: cpanm --notest --installdeps .
     - name: run prove (testscripts)
       run: |
