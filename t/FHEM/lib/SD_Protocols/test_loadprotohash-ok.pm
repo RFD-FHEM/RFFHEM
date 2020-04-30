@@ -236,7 +236,7 @@ package lib::SD_ProtocolData;
 				datarate        => '17257.69',
 				sync            => '2DD4',
 				modulation      => '2-FSK',
-				regexMatch      => qr/^35/,   
+				regexMatch      => 'qr/^35/',   
 				clientmodule    => 'LaCrosse',
 				method			=> \&lib::SD_Protocols::Not_Existing_Sub,	
 			},

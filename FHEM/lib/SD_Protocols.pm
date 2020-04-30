@@ -14,6 +14,10 @@ use warnings;
 use Carp qw(croak carp);
 use Digest::CRC;
 our $VERSION = '1.00';
+use Storable qw(dclone);
+
+
+use Data::Dumper;
 
 ############################# package lib::SD_Protocols
 #=item new($)
@@ -31,16 +35,56 @@ sub new {
 	
 	$self->{_protocolFilename} = $args{filename} //  "";
 	$self->{_protocols} = undef;
+	$self->{_filetype} = $args{filetype} // "PerlModule";
 	bless $self, $class;
 
-	$self->LoadHash($self->{_protocolFilename}) if ($self->{_protocolFilename});
+	if ($self->{_filetype} eq "json")
+	{
+		$self->LoadHashFromJson($self->{_protocolFilename}) if ($self->{_protocolFilename});
+	} else {
+		$self->LoadHash($self->{_protocolFilename}) if ($self->{_protocolFilename});
+	}
+	
 	return $self;	
 }
 
 
 ############################# package lib::SD_Protocols
+#=item LoadHashFromJson($)
+# This functons, will load protocol hash from json file into a hash.
+# First Parameter is for filename (full or relativ path) to be loaded
+# Returns error or undef on success
+# =cut
+#  $id
+
+sub LoadHashFromJson {
+	my $self = shift;
+	my $filename = shift // $self->{_protocolFilename};
+
+	return if ($self->{_filetype} ne "json");
+	
+	if (! -e $filename) {
+		return qq[File $filename does not exsits];
+	}
+	
+	my $json_text = do {
+	   open(my $json_fh, "<:encoding(UTF-8)", $filename)
+	      or die("Can't open \$filename\": $!\n");
+	   local $/;
+	   <$json_fh>
+	};
+	use JSON;
+	my $json = JSON->new;
+	$self->{_protocols} = $json->decode($json_text);
+	$self->{_protocolsVersion} = "0.xx"; # ToDo: Version must be saved in json
+
+	#$self->setDefaults();
+	return ;
+}
+
+############################# package lib::SD_Protocols
 #=item LoadHash($)
-# This functons, will load protocol hash from file into a hash.
+# This functons, will load protocol hash from perlmodule file .
 # First Parameter is for filename (full or relativ path) to be loaded
 # Returns error or undef on success
 # =cut
@@ -49,14 +93,15 @@ sub new {
 sub LoadHash {
 	my $self = shift;
 	my $filename = shift // $self->{_protocolFilename};
+
+	return if ($self->{_filetype} ne "PerlModule");
 	
 	if (! -e $filename) {
 		return qq[File $filename does not exsits];
 	}
 	
 	return $@ if(  ! eval { require $filename; 1 }  );
-	
-	$self->{_protocols} = $lib::SD_ProtocolData::protocols;
+	$self->{_protocols} = \%lib::SD_ProtocolData::protocols;
 	$self->{_protocolsVersion} = $lib::SD_ProtocolData::VERSION;
 	
 	#delete($INC{$filename}); # Unload package, because we only wanted the hash
@@ -116,7 +161,7 @@ sub checkProperty {
 	my $id = shift // return;
 	my $valueName = shift // return;
 
-	return $self->{_protocols}($id,$valueName) if exists($self->{_protocols}{$id}{$valueName}) && defined($self->{_protocols}{$id}{$valueName});
+	return $self->{_protocols}->{$id}->{$valueName} if exists($self->{_protocols}->{$id}->{$valueName}) && defined($self->{_protocols}->{$id}->{$valueName});
 	return $_[2]; # Will return undef if $default is not provided
 }
 
@@ -131,7 +176,10 @@ sub checkProperty {
 
 sub getProperty {
 	my $self = shift ;
-	return $self->{_protocols}{$_[0]}{$_[1]};
+	my $id = shift // return;
+	my $valueName = shift // return;
+	
+	return $self->{_protocols}->{$id}->{$valueName} // undef; 
 }
 
 
@@ -158,9 +206,9 @@ sub setDefaults {
 	
 	foreach my $id ($self->getKeys())
 	{
-		my $format = $self->getProperty($id,"format");
+		my $format = $self->getProperty($id,'format');
 		
-		if (defined ($format) && $format eq "manchester")
+		if (defined ($format) && $format eq 'manchester')
 		{
 			# Manchester defaults :
 			$self->{_protocols}{$id}{method} = \&lib::SD_Protocols::MCRAW if (!defined($self->checkProperty($id,"method")));

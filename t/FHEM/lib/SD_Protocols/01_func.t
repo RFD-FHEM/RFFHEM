@@ -6,6 +6,7 @@ use Test2::V0;
 use Test2::Tools::Class;
 use lib::SD_Protocols qw(:ALL);
 use Test2::Tools::Exception qw/dies lives/;
+use Test2::Tools::Compare qw{hash is like};
 
 my $className = 'lib::SD_Protocols';
 
@@ -29,7 +30,7 @@ subtest 'lib SD_Prococols test sub LoadHash() ' => sub {
 
 	$ret = $Protocols->LoadHash(
 		'./t/FHEM/lib/SD_Protocols/test_loadprotohash-ok.pm');
-	is( $ret, U(), 'valid file without errors' );
+	is( $ret, U(), 'valid file without errors');
 };
 
 subtest 'lib SD_Prococols test sub new() ' => sub {
@@ -47,18 +48,32 @@ subtest 'lib SD_Prococols test sub new() ' => sub {
 };
 
 
-subtest 'lib SD_Prococols protocolExists' => sub {
-	plan(3);
-	my $Protocols =
-	  new $className( filename => './t/FHEM/lib/SD_Protocols/test_loadprotohash-ok.pm' );
+subtest 'lib SD_Prococols protocolExists()' => sub {
 
-    like(warning { $Protocols->protocolExists() },qr/Illegal parameter number, protocol id was not specified/,'check warning on missing parameter');
 
-	ok($Protocols->protocolExists(9999),'check existing protocol ID');
-#	ok($Protocols->protocolExists(10),'check not existing protocol ID');
+	subtest 'from json' => sub {
+		plan(5);
+		my $Protocols =
+		  new $className( filetype => 'json', filename => './t/FHEM/lib/SD_Protocols/test_protocolData.json' );
+		is($Protocols->{_protocols},hash { field '9999' => T(); etc();},"Verify we have a hash loaded");
+	    like(warning { $Protocols->protocolExists() },qr/Illegal parameter number, protocol id was not specified/,'check warning on missing parameter');
+	
+		ok($Protocols->protocolExists(9999),'check existing protocol ID');
+		ok(!$Protocols->protocolExists(10),'check not existing protocol ID');
+		like($Protocols->{_protocols}->{9999}{name},qr/Unittest/,"valid element hashref");
+	};
 
-	like($Protocols->{_protocols}->{9999}{name},qr/Unittest/,"valid element hashref");
-
-	#is($ret->{error},undef,"valid file error check");
+	subtest 'from PerlModule' => sub {
+		plan(5);
+		my $Protocols =
+		  new $className( filename => './t/FHEM/lib/SD_Protocols/test_loadprotohash-ok.pm' );
+		is($Protocols->{_protocols},hash { field '9999' => T(); etc();},"Verify we have a hash loaded");
+	    like(warning { $Protocols->protocolExists() },qr/Illegal parameter number, protocol id was not specified/,'check warning on missing parameter');
+	
+		ok($Protocols->protocolExists(9999),'check existing protocol ID');
+		ok(!$Protocols->protocolExists(10),'check not existing protocol ID');
+		like($Protocols->{_protocols}->{9999}{name},qr/Unittest/,"valid element hashref");
+	};
+	
 };
 done_testing();
