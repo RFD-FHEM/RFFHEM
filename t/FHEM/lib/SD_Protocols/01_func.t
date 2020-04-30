@@ -10,6 +10,10 @@ use Test2::Tools::Compare qw{hash bag is like};
 
 my $className = 'lib::SD_Protocols';
 
+use JSON;
+my $json = JSON->new;
+my $backend = $json->backend;
+note(qq[json backend is $backend]);
 
 subtest 'lib SD_Prococols test sub LoadHash() ' => sub {
 	plan(5);
