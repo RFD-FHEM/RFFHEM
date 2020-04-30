@@ -6,9 +6,11 @@ use Test2::V0;
 use Test2::Tools::Class;
 use lib::SD_Protocols qw(:ALL);
 use Test2::Tools::Exception qw/dies lives/;
-use Test2::Tools::Compare qw{hash is like};
+use Test2::Tools::Compare qw{hash bag is like};
 
 my $className = 'lib::SD_Protocols';
+
+
 
 subtest 'lib SD_Prococols test sub LoadHash() ' => sub {
 	plan(5);
@@ -76,4 +78,119 @@ subtest 'lib SD_Prococols protocolExists()' => sub {
 	};
 	
 };
+
+subtest 'lib SD_Prococols getProtocolList()' => sub {
+	plan(2);
+	my $Protocols =
+	  new $className( filename => './t/FHEM/lib/SD_Protocols/test_loadprotohash-ok.pm' );
+
+	ref_ok($Protocols->getProtocolList, 'HASH', 'verify we got a hashref' );
+	is($Protocols->getProtocolList,hash { 
+	    field '9999' => T(); 
+	    field '9987' => T();
+	    etc();
+	  },
+	  "Verify we have got a hash with keys 9999, 9987");
+
+};
+
+
+subtest 'lib SD_Prococols getKeys()' => sub {
+	plan(2);
+	my $todo = todo 'here is a bug in getkeys i think';
+	my $Protocols =
+	  new $className( filetype => 'json', filename => './t/FHEM/lib/SD_Protocols/test_protocolData.json' );
+
+
+	use Data::Dumper;
+	my (@key_list) = $Protocols->getKeys;
+	ref_ok(\@key_list , 'ARRAY', 'verify we got an array' );
+	is(\@key_list ,bag { 
+	    item '9999' => T(); 
+	    item '9987' => T();
+	    etc();
+	  },
+	  "Verify we have got a array with items 9999, 9987");
+
+};
+
+
+subtest 'lib SD_Prococols checkProperty()' => sub {
+	plan(7);
+	my $Protocols =
+	  new $className( filetype => 'json', filename => './t/FHEM/lib/SD_Protocols/test_protocolData.json' );
+
+	is($Protocols->checkProperty(9999,'developId'),'m','verify existing property is received without default');
+	is($Protocols->checkProperty(9999,'developId','p'),'m','verify existing property is received with default');
+	is($Protocols->checkProperty(9999,'bla','p'),'p','verify not existing property is received with default');
+	is($Protocols->checkProperty(9999,'bla'),U(),'verify not existing property is received with undef default');
+	is($Protocols->checkProperty(10,'developId'),U(),'verify not existing id returns undef');
+
+	is($Protocols->checkProperty(10),U(),'verify returns undef with only one arg');
+	is($Protocols->checkProperty(),U(),'verify returns undef with no arg');
+
+
+};
+
+subtest 'lib SD_Prococols getProperty()' => sub {
+	plan(7);
+	my $Protocols =
+	  new $className( filetype => 'json', filename => './t/FHEM/lib/SD_Protocols/test_protocolData.json' );
+	
+	is($Protocols->getProperty(9999,'developId'),'m','verify existing property is received without default');
+	is($Protocols->getProperty(9999,'bla'),U(),'verify not existing property is received with undef default');
+	is($Protocols->getProperty(10,'developId'),U(),'verify not existing id returns undef');
+	
+	is($Protocols->getProperty(10),U(),'verify returns undef with only one arg');
+	is($Protocols->getProperty(),U(),'verify returns undef with no arg');
+	
+	ok(defined($Protocols->getProperty(9991,'clockabs')),'verify clockabs can be retrieved');
+	delete($Protocols->{_protocols}->{9991}->{clockabs});
+	ok(!defined($Protocols->getProperty(9991,'clockabs')),'verify clockabs brings undef after deletion');
+	
+};
+
+subtest 'lib SD_Prococols getProtocolVersion()' => sub {
+	plan(1);
+	my $Protocols =
+	  new $className( filetype => 'json', filename => './t/FHEM/lib/SD_Protocols/test_protocolData.json' );
+
+	is($Protocols->getProtocolVersion,'0.1','verify versionstring');
+};
+
+subtest 'lib SD_Prococols setDefaults()' => sub {
+	plan(5);
+	my $Protocols =
+	  new $className( filetype => 'json', filename => './t/FHEM/lib/SD_Protocols/test_protocolData.json' );
+	# Mock some Data
+	delete($Protocols->{_protocols}->{9991}->{length_min});
+	is($Protocols->setDefaults,U(),'verify return value');
+	is($Protocols->{_protocols}->{9991}->{length_min},8,'verify length_min for 9991');
+	
+	delete($Protocols->{_protocols}->{9989}->{method});
+	is($Protocols->setDefaults,U(),'verify return value');
+	ref_ok($Protocols->{_protocols}->{9989}->{method},'CODE','verify method is a coderef now');
+	is($Protocols->{_protocols}->{9989}->{method},\&lib::SD_Protocols::MCRAW,'verify method is default coderef');
+	
+};
+
+subtest 'lib SD_Prococols binStr2hexStr()' => sub {
+	plan(9);
+	my $Protocols =
+	  new $className( filetype => 'json', filename => './t/FHEM/lib/SD_Protocols/test_protocolData.json' );
+		
+	is(lib::SD_Protocols::binStr2hexStr('1111'),'F','verify F returned for b1111');
+	is(lib::SD_Protocols::binStr2hexStr('1010'),'A','verify A returned for b1010');
+	is(lib::SD_Protocols::binStr2hexStr('101011111010'),'AFA','verify A returned for b1010');
+	is(lib::SD_Protocols::binStr2hexStr('11'),'3','verify C returned for b11');
+	is(lib::SD_Protocols::binStr2hexStr('0000'),'0','verify C returned for b11');
+	is(lib::SD_Protocols::binStr2hexStr('00000000'),'00','verify C returned for b11');
+	is(lib::SD_Protocols::binStr2hexStr('0x00000000'),U(),'verify undef returned for not binary number');
+	is(lib::SD_Protocols::binStr2hexStr('00000002'),U(),'verify undef returned for not binary number');
+	is(lib::SD_Protocols::binStr2hexStr('111100001111000011110000111100001111000011110000111100001111000011110000111100001111000011110000111100001111000011110000111100001111000011110000111100001111000011110000111100001111000011110000'),'F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0','verify super long binary ');
+
+};
+
+
 done_testing();
+

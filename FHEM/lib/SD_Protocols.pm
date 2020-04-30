@@ -58,7 +58,7 @@ sub new {
 #  $id
 
 sub LoadHashFromJson {
-	my $self = shift;
+	my $self = shift // carp "Not called within an object";
 	my $filename = shift // $self->{_protocolFilename};
 
 	return if ($self->{_filetype} ne "json");
@@ -75,10 +75,11 @@ sub LoadHashFromJson {
 	};
 	use JSON;
 	my $json = JSON->new;
-	$self->{_protocols} = $json->decode($json_text);
-	$self->{_protocolsVersion} = "0.xx"; # ToDo: Version must be saved in json
+	$json = $json->relaxed(1);
+	($self->{_protocolsVersion},$self->{_protocols}) = $json->incr_parse($json_text);
+	$self->{_protocolsVersion} = $self->{_protocolsVersion}{version} // "undef"; 
 
-	#$self->setDefaults();
+	$self->setDefaults();
 	return ;
 }
 
@@ -91,7 +92,7 @@ sub LoadHashFromJson {
 #  $id
 
 sub LoadHash {
-	my $self = shift;
+	my $self = shift // carp "Not called within an object";
 	my $filename = shift // $self->{_protocolFilename};
 
 	return if ($self->{_filetype} ne "PerlModule");
@@ -117,7 +118,7 @@ sub LoadHash {
 # =cut
 #  $id
 sub protocolExists {
-	my $self = shift ;
+	my $self = shift // carp "Not called within an object";
 	my $pId= shift // carp "Illegal parameter number, protocol id was not specified";
 	return exists($self->{_protocols}->{$pId});
 }
@@ -129,7 +130,7 @@ sub protocolExists {
 # =cut
 #  $id, $propertyname,
 sub getProtocolList {
-	my $self = shift ;
+	my $self = shift // carp "Not called within an object";
 	return $self->{_protocols};
 }
 
@@ -138,13 +139,12 @@ sub getProtocolList {
 #=item getKeys()
 # This functons, will return all keys from the protocol hash
 # 
-# returns "" if the var is not defined
 # =cut
-#  $id, $propertyname,
 
 sub getKeys {
-	my $self = shift ;
-	return keys %{$self->{_protocols}};
+	my $self=shift // carp "Not called within an object";
+	my (@ret) = keys %{$self->{_protocols}};
+	return @ret;
 }
 
 
@@ -152,17 +152,18 @@ sub getKeys {
 #=item checkProperty()
 # This functons, will return a value from the Protocolist and check if the key exists and a value is defined optional you can specify a optional default value that will be returned
 # 
-# returns "" if the var is not defined
+# returns undef if the var is not defined
 # =cut
 #  $id, $propertyname,$default
 
 sub checkProperty {
-	my $self = shift ;
+	my $self=shift // carp "Not called within an object";
 	my $id = shift // return;
 	my $valueName = shift // return;
-
+ 	my $default= shift // undef;
+	
 	return $self->{_protocols}->{$id}->{$valueName} if exists($self->{_protocols}->{$id}->{$valueName}) && defined($self->{_protocols}->{$id}->{$valueName});
-	return $_[2]; # Will return undef if $default is not provided
+	return $default; # Will return undef if $default is not provided
 }
 
 
@@ -170,16 +171,17 @@ sub checkProperty {
 #=item getProperty()
 # This functons, will return a value from the Protocolist without any checks
 # 
-# returns "" if the var is not defined
+# returns undef if the var is not defined
 # =cut
 #  $id, $propertyname
 
 sub getProperty {
-	my $self = shift ;
-	my $id = shift // return;
-	my $valueName = shift // return;
+	my $self = shift // carp "Not called within an object";
+	my $id = shift // return ;
+	my $valueName = shift // return ;
 	
-	return $self->{_protocols}->{$id}->{$valueName} // undef; 
+	return $self->{_protocols}->{$id}->{$valueName} if ( exists($self->{_protocols}->{$id}->{$valueName}) );
+	return; 
 }
 
 
@@ -190,7 +192,7 @@ sub getProperty {
 # =cut
 
 sub getProtocolVersion {
-	my $self = shift ;
+	my $self = shift // carp "Not called within an object";
 	return $self->{_protocolsVersion};
 }
 
@@ -202,27 +204,29 @@ sub getProtocolVersion {
 # =cut
 
 sub setDefaults {
-	my $self=shift;
+	my $self = shift // carp "Not called within an object";
 	
-	foreach my $id ($self->getKeys())
+	for my $id ( $self->getKeys() )
 	{
 		my $format = $self->getProperty($id,'format');
-		
+			
 		if (defined ($format) && $format eq 'manchester')
 		{
 			# Manchester defaults :
-			$self->{_protocols}{$id}{method} = \&lib::SD_Protocols::MCRAW if (!defined($self->checkProperty($id,"method")));
+			$self->{_protocols}->{$id}->{method} = \&lib::SD_Protocols::MCRAW if (!defined($self->checkProperty($id,'method')));
 		}
-		elsif (getProperty($id,"sync"))
+		elsif (defined($self->getProperty($id,'sync')))
 		{
 			# Messages with sync defaults :			
 		}
-		elsif (getProperty($id,"clockabs"))
+		elsif (defined($self->getProperty($id,'clockabs')))
 		{
 			# Messages without sync defaults :
-			$self->{_protocols}{$id}{length_min} = 8 if (!defined($self->checkProperty($id,"length_min")));
+			$self->{_protocols}->{$id}->{length_min} = 8 if (!defined($self->checkProperty($id,'length_min')));
+		} else {
+		
 		}
-	}
+	}	
 	return;
 }
 
@@ -239,7 +243,8 @@ Output:
 =cut
 
 sub  binStr2hexStr {
-    my $num   = shift;
+    my $num   = shift // return;
+	return if ($num !~ /^[01]*$/);
     my $WIDTH = 4;
     my $index = length($num) - $WIDTH;
     my $hex = '';
