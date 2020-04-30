@@ -56,7 +56,7 @@ subtest 'lib SD_Prococols protocolExists()' => sub {
 		plan(5);
 		my $Protocols =
 		  new $className( filetype => 'json', filename => './t/FHEM/lib/SD_Protocols/test_protocolData.json' );
-		is($Protocols->{_protocols},hash { field '9999' => T(); etc();},"Verify we have a hash loaded");
+		is($Protocols->{_protocols},hash { field '9999' => T(); etc();},"Verify we have a hash loaded",diag $Protocols->{_protocols});
 	    like(warning { $Protocols->protocolExists() },qr/Illegal parameter number, protocol id was not specified/,'check warning on missing parameter');
 	
 		ok($Protocols->protocolExists(9999),'check existing protocol ID');
