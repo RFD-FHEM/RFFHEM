@@ -1,3 +1,9 @@
+2020-04-30 - lib/SD_Protocols.pm
+
+fixed serval subs while writing unittests: t/FHEM/lib/SD_Protocols/01_func.t
+
+test_protocolData.json
+Added version Object and comments to json file
 2020-04-30 - Merge branch 'dev-r35_xFSK_oo' of github.com:RFD-FHEM/RFFHEM into dev-r35_xFSK_oo
 2020-04-27 - FHEM/lib/SD_Protocols.pm
 
