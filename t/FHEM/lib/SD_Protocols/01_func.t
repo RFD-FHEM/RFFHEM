@@ -11,7 +11,6 @@ use Test2::Tools::Compare qw{hash bag is like};
 my $className = 'lib::SD_Protocols';
 
 
-
 subtest 'lib SD_Prococols test sub LoadHash() ' => sub {
 	plan(5);
 	my $Protocols = new $className( filename => './dummyDefault.pm' );
@@ -102,7 +101,6 @@ subtest 'lib SD_Prococols getKeys()' => sub {
 	  new $className( filetype => 'json', filename => './t/FHEM/lib/SD_Protocols/test_protocolData.json' );
 
 
-	use Data::Dumper;
 	my (@key_list) = $Protocols->getKeys;
 	ref_ok(\@key_list , 'ARRAY', 'verify we got an array' );
 	is(\@key_list ,bag { 
