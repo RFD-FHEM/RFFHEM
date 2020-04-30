@@ -1,3 +1,4 @@
+2020-04-30 - Merge branch 'dev-r35_xFSK_oo' of github.com:RFD-FHEM/RFFHEM into dev-r35_xFSK_oo
 2020-04-27 - FHEM/lib/SD_Protocols.pm
 
 Migrated to perl object syntax. Some adjustments still needed
