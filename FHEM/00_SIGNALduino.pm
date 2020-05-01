@@ -3366,7 +3366,7 @@ sub SIGNALduino_postDemo_EM($@) {
 	return 0, undef;
 }
 
-############################# package main
+############################# package main, test exists
 sub SIGNALduino_postDemo_FS20($@) {
 	my ($name, @bit_msg) = @_;
 	my $datastart = 0;
