@@ -1,0 +1,38 @@
+defmod test_sub_SIGNALduino_bit2itv1 UnitTest dummyDuino ( 
+{ 
+	use Test2::V0;
+	use Test2::Tools::Compare qw{ is };
+
+	subtest 'Test bit2itv1' => sub {
+		plan(2);
+		
+		note('Convert 0F -> 01 (F) to be compatible with CUL');
+		my $rcode;
+		
+		subtest 'input bits with F' => sub {
+			plan(2);
+
+			# MS;P1=309;P2=-1130;P3=1011;P4=-429;P5=-11466;D=15123412121234123412141214121412141212123412341234;CP=1;SP=5;R=38;
+			my @bits=qw(0 1 0 0 0 1 0 1 0 F 0 F 0 F 0 F 0 0 0 1 0 1 0 1);
+
+			($rcode,@bits)=SIGNALduino_bit2itv1($target,@bits);
+
+			is($rcode,1,'check returncode for input with F');
+			is(join("",@bits),'010001010101010100010101','check result for input with F');
+		};
+
+
+		subtest 'input bits without F' => sub {
+			plan(2);
+
+			# MS;P1=309;P2=-1130;P3=1011;P4=-429;P5=-11466;D=15123412121234123412141214121412141212123412341234;CP=1;SP=5;R=38;
+			my @bits=qw(0 1 0 0 0 1 0 1 0 1 0 1 0 1 0 1 0 0 0 1 0 1 0 1);
+
+			($rcode,@bits)=SIGNALduino_bit2itv1($target,@bits);
+
+			is($rcode,1,'check returncode for input without F');
+			is(join("",@bits),'010001010101010100010101','check result for input without F');
+		};
+	};
+}
+)
