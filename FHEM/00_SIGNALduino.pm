@@ -3498,7 +3498,7 @@ sub SIGNALduino_postDemo_FHT80($@) {
    return 0, undef;
 }
 
-############################# package main
+############################# package main, test exists
 sub SIGNALduino_postDemo_FHT80TF($@) {
 	my ($name, @bit_msg) = @_;
 	my $datastart = 0;
