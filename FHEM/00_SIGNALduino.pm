@@ -3551,7 +3551,7 @@ sub SIGNALduino_postDemo_FHT80TF($@) {
    return 0, undef;
 }
 
-############################# package main
+############################# package main, test exists
 sub SIGNALduino_postDemo_WS7035($@) {
 	my ($name, @bit_msg) = @_;
 	my $msg = join("",@bit_msg);
