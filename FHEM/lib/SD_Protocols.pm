@@ -76,8 +76,11 @@ sub LoadHashFromJson {
 	use JSON;
 	my $json = JSON->new;
 	$json = $json->relaxed(1);
-	($self->{_protocolsVersion},$self->{_protocols}) = $json->incr_parse($json_text);
-	$self->{_protocolsVersion} = $self->{_protocolsVersion}{version} // "undef"; 
+	my $ver = $json->incr_parse($json_text);
+	my $prot = $json->incr_parse();
+	
+	$self->{_protocols} = $prot // "undef"; 
+	$self->{_protocolsVersion} = $ver->{version} // "undef"; 
 
 	$self->setDefaults();
 	return ;

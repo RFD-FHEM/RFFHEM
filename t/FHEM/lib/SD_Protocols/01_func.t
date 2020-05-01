@@ -1,6 +1,7 @@
 #!/usr/bin/env perl
 use strict;
 use warnings;
+BEGIN { $ENV{PERL_JSON_BACKEND}='JSON::backportPP'; }
 
 use Test2::V0;
 use Test2::Tools::Class;
@@ -10,10 +11,6 @@ use Test2::Tools::Compare qw{hash bag is like};
 
 my $className = 'lib::SD_Protocols';
 
-use JSON;
-my $json = JSON->new;
-my $backend = $json->backend;
-note(qq[json backend is $backend]);
 
 subtest 'lib SD_Prococols test sub LoadHash() ' => sub {
 	plan(5);
