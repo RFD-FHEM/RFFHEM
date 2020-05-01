@@ -158,37 +158,36 @@ subtest 'lib SD_Prococols getProtocolVersion()' => sub {
 };
 
 subtest 'lib SD_Prococols setDefaults()' => sub {
-	plan(5);
+	plan(3);
 	my $Protocols =
 	  new $className( filetype => 'json', filename => './t/FHEM/lib/SD_Protocols/test_protocolData.json' );
 	# Mock some Data
-	delete($Protocols->{_protocols}->{9991}->{length_min});
-	is($Protocols->setDefaults,U(),'verify return value');
-	is($Protocols->{_protocols}->{9991}->{length_min},8,'verify length_min for 9991');
-	
-	delete($Protocols->{_protocols}->{9989}->{method});
-	is($Protocols->setDefaults,U(),'verify return value');
-	ref_ok($Protocols->{_protocols}->{9989}->{method},'CODE','verify method is a coderef now');
-	is($Protocols->{_protocols}->{9989}->{method},\&lib::SD_Protocols::MCRAW,'verify method is default coderef');
-	
+
+	subtest 'length_min default if clockabs is set' => sub {
+		plan(2);
+		delete($Protocols->{_protocols}->{9991}->{length_min});
+		is($Protocols->setDefaults,U(),'verify return value');
+		is($Protocols->{_protocols}->{9991}->{length_min},8,'verify length_min for 9991');
+	};
+
+	subtest 'method default for MC protocol' => sub {
+		plan(3);
+		delete($Protocols->{_protocols}->{9989}->{method});
+		is($Protocols->setDefaults,U(),'verify return value');
+		ref_ok($Protocols->{_protocols}->{9989}->{method},'CODE','verify method is a coderef now');
+		is($Protocols->{_protocols}->{9989}->{method},\&lib::SD_Protocols::MCRAW,'verify method is default coderef');
+	};
+	subtest 'method explicit specified' => sub {
+		plan(3);
+		$Protocols->{_protocols}->{9989}->{method}='lib::SD_Protocols::ConvHE800';
+		is($Protocols->setDefaults,U(),'verify return value');
+		ref_ok($Protocols->{_protocols}->{9989}->{method},'CODE','verify method is a coderef now');
+		is($Protocols->{_protocols}->{9989}->{method},\&lib::SD_Protocols::ConvHE800,'verify method is ConvHE800 coderef');
+	};	
 };
 
-subtest 'lib SD_Prococols binStr2hexStr()' => sub {
-	plan(9);
-	my $Protocols =
-	  new $className( filetype => 'json', filename => './t/FHEM/lib/SD_Protocols/test_protocolData.json' );
-		
-	is(lib::SD_Protocols::binStr2hexStr('1111'),'F','verify F returned for b1111');
-	is(lib::SD_Protocols::binStr2hexStr('1010'),'A','verify A returned for b1010');
-	is(lib::SD_Protocols::binStr2hexStr('101011111010'),'AFA','verify A returned for b1010');
-	is(lib::SD_Protocols::binStr2hexStr('11'),'3','verify C returned for b11');
-	is(lib::SD_Protocols::binStr2hexStr('0000'),'0','verify C returned for b11');
-	is(lib::SD_Protocols::binStr2hexStr('00000000'),'00','verify C returned for b11');
-	is(lib::SD_Protocols::binStr2hexStr('0x00000000'),U(),'verify undef returned for not binary number');
-	is(lib::SD_Protocols::binStr2hexStr('00000002'),U(),'verify undef returned for not binary number');
-	is(lib::SD_Protocols::binStr2hexStr('111100001111000011110000111100001111000011110000111100001111000011110000111100001111000011110000111100001111000011110000111100001111000011110000111100001111000011110000111100001111000011110000'),'F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0','verify super long binary ');
 
-};
+
 
 
 done_testing();
