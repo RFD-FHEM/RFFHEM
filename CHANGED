@@ -1,5 +1,12 @@
-2020-05-01 - Update 00_SIGNALduino.pm
-2020-05-01 - Create test_sub_SIGNALduino_postDemo_FHT80-definition.txt
+
+2020-05-01
+  00_SIGNALduino.pm
+   * revised comments	
+  test_sub_SIGNALduino_postDemo_FHT80-definition.txt
+   * create test
+  test_sub_SIGNALduino_postDemo_FS20-definition.txt
+   * create test
+
 2020-04-29
   00_SIGNALduino.pm
    * revised comments
