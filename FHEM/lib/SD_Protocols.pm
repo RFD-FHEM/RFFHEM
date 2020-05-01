@@ -217,6 +217,11 @@ sub setDefaults {
 		{
 			# Manchester defaults :
 			$self->{_protocols}->{$id}->{method} = \&lib::SD_Protocols::MCRAW if (!defined($self->checkProperty($id,'method')));
+
+			my $cref = $self->checkProperty($id,'method');
+			$cref =~ s/^\\&//;
+			$self->{_protocols}->{$id}->{method} = eval {\&$cref} if (ref $cref ne 'CODE');
+
 		}
 		elsif (defined($self->getProperty($id,'sync')))
 		{
@@ -283,7 +288,7 @@ sub MCRAW {
 	
 	my ($name,$bitData,$id,$mcbitnum) = @_;
 
-	return (-1," message is to long") if ($mcbitnum > checkProperty($id,"length_max",0) );
+	return (-1," message is to long") if ($mcbitnum > $self->checkProperty($id,"length_max",0) );
 	return(1,binStr2hexStr($bitData)); 
 }
 
