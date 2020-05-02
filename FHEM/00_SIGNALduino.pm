@@ -20,6 +20,7 @@ my $missingModulSIGNALduino="";
 use strict;
 use warnings;
 use DevIo;
+use Carp;
 no warnings 'portable';
 
 eval "use Data::Dumper qw(Dumper);1";
@@ -2043,7 +2044,7 @@ sub SIGNALduno_Dispatch($$$$$) {
 
    if ($DMSGgleich) {
 	#Dispatch if dispatchequals is provided in protocol definition or only if $dmsg is different from last $dmsg, or if 2 seconds are between transmits
-	if ( (SIGNALduino_getProtoProp($id,'dispatchequals',0) eq 'true') || ($hash->{DMSG} ne $dmsg) || ($hash->{TIME}+2 < time() ) )   {
+	if ( ($hash->{protocolObject}->checkProperty($id,'dispatchequals',0) eq 'true') || ($hash->{DMSG} ne $dmsg) || ($hash->{TIME}+2 < time() ) )   {
 		$hash->{MSGCNT}++;
 		$hash->{TIME} = time();
 		$hash->{DMSG} = $dmsg;
@@ -2081,7 +2082,7 @@ sub SIGNALduno_Dispatch($$$$$) {
    }
 }
 
-############################# package main
+############################# package main  todo: move to lib::SD_Protocols
 # param #1 is name of definition
 # param #2 is protocol id
 # param #3 is dispatched message to check against
@@ -2090,15 +2091,16 @@ sub SIGNALduno_Dispatch($$$$$) {
 # returns 0 if message does not match modulematch
 # return -1 if message is not activated via whitelistIDs but has developID=m flag
 sub SIGNALduino_moduleMatch {
-	my $name = shift;
+	my $name = shift // carp q[arg name must be provided];
 	my $id = shift;
 	my $dmsg = shift;
 	my $debug = AttrVal($name,"debug",0);
-	my $modMatchRegex=SIGNALduino_getProtoProp($id,"modulematch",undef);
+	my $hash = %defs{$name} // carp q[$name does not exist];
+	my $modMatchRegex=$hash->{protocolObject}->checkProperty($id,"modulematch",undef);
 
 	if (!defined($modMatchRegex) || $dmsg =~ m/$modMatchRegex/) {
 		Debug "$name: modmatch passed for: $dmsg" if ($debug);
-		my $developID = SIGNALduino_getProtoProp($id,"developId","");
+		my $developID = $hash->{protocolObject}->checkProperty($id,"developId","");
 		my $IDsNoDispatch = "," . InternalVal($name,"IDsNoDispatch","") . ",";
 		if ($IDsNoDispatch ne ",," && index($IDsNoDispatch, ",$id,") >= 0) {	# kein dispatch wenn die Id im Internal IDsNoDispatch steht
 			Log3 $name, 3, "$name: moduleMatch, ID=$id skipped dispatch (developId=m). To use, please add $id to the attr whitelist_IDs";
@@ -2134,7 +2136,7 @@ sub SIGNALduino_Parse_MS($$$$%) {
 	#Debug "Message splitted:";
 	#Debug Dumper(\@msg_parts);
 
-	my $debug = AttrVal($iohash->{NAME},"debug",0);
+	my $debug = AttrVal($iohash->{NAME},"debug",1);
 
 	if (defined($clockidx) and defined($syncidx))
 	{
@@ -2161,15 +2163,15 @@ sub SIGNALduino_Parse_MS($$$$%) {
 		IDLOOP:
 		foreach $id (@{$hash->{msIdList}}) {
 
-			Debug qq[Testing against protocol id $id -> $hash->{protocolObject}->getProperty($id,'name')]  if ($debug);
+			Debug qq[Testing against protocol id $id -> ].$hash->{protocolObject}->getProperty($id,'name')  if ($debug);
 
 			# Check Clock if is it in range
 			if ($hash->{protocolObject}->checkProperty($id,'clockabs',0) > 0) {
 				if (!SIGNALduino_inTol($hash->{protocolObject}->getProperty($id,'clockabs'),$clockabs,$clockabs*0.30)) {
-					Debug qq[protocClock=$hash->{protocolObject}->getProperty($id,'clockabs'), msgClock=$clockabs is not in tol=].$clockabs*0.30 if ($debug);
+					Debug qq[protocClock=].$hash->{protocolObject}->getProperty($id,'clockabs').qq[, msgClock=$clockabs is not in tol=].$clockabs*0.30 if ($debug);
 					next;
 				} elsif ($debug) {
-					Debug qq[protocClock=$hash->{protocolObject}->getProperty($id,'clockabs'), msgClock=$clockabs is in tol="] . $clockabs*0.30;
+					Debug qq[protocClock=].$hash->{protocolObject}->getProperty($id,'clockabs').qq[, msgClock=$clockabs is in tol="] . $clockabs*0.30;
 				}
 			}
 
@@ -2204,7 +2206,7 @@ sub SIGNALduino_Parse_MS($$$$%) {
 			}
 			next if (scalar keys %patternLookupHash == 0);  # Keine Eingträge im patternLookupHash
 
-			$hash->{logMethod}->($name, 4, qq[$name: Parse_MS, Matched MS protocol id $id -> $hash->{protocolObject}->getProperty($id.'name')]);
+			$hash->{logMethod}->($name, 4, qq[$name: Parse_MS, Matched MS protocol id $id -> ].$hash->{protocolObject}->getProperty($id,'name'));
 			my @bit_msg;							# array to store decoded signal bits
 			$hash->{logMethod}->($name, 5, qq[$name: Parse_MS, Starting demodulation at Position $message_start]);
 			for (my $i=$message_start;$i<length($rawData);$i+=$signal_width)
@@ -2235,7 +2237,7 @@ sub SIGNALduino_Parse_MS($$$$%) {
 			Debug "$name: decoded message raw (@bit_msg), ".@bit_msg." bits\n" if ($debug);
 
 			#Check converted message against lengths
-			my ($rcode, $rtxt) = SIGNALduino_TestLength(undef,$id,scalar @bit_msg,undef);
+			my ($rcode, $rtxt) = SIGNALduino_TestLength($name,$id,scalar @bit_msg,undef);
 			if (!$rcode)
 			{
 			  Debug "$name: decoded $rtxt" if ($debug);
@@ -2267,9 +2269,8 @@ sub SIGNALduino_Parse_MS($$$$%) {
 
 			my $dmsg = lib::SD_Protocols::binStr2hexStr(join '', @bit_msg);
 			my $postamble = $hash->{protocolObject}->checkProperty($id,'postamble','');
-			$dmsg = qq[$dmsg$postamble];
-			$dmsg = qq[$hash->{protocolObject}->checkProperty($id,'preamble','')$dmsg];
-
+			$dmsg = $hash->{protocolObject}->checkProperty($id,'preamble','').qq[$dmsg$postamble];
+			
 			#my ($rcode,@retvalue) = SIGNALduino_callsub('preDispatchfunc',$ProtocolListSIGNALduino{$id}{preDispatchfunc},$name,$dmsg);
 			#next if (!$rcode);
 			#$dmsg = @retvalue;
@@ -2354,8 +2355,8 @@ sub SIGNALduino_Parse_MU($$$$@) {
 				%patternList = map { $_ => round($patternListRaw{$_}/$clockabs,1) } keys %patternListRaw;
 			}
 
-			Debug qq[Testing against protocol id $id -> $hash->{protocolObject}->getProperty($id,'name'}]  if ($debug);
-			Debug qq[Searching in patternList: Dumper(\%patternList)] if($debug);
+			Debug qq[Testing against protocol id $id -> ]. $hash->{protocolObject}->getProperty($id,'name')  if ($debug);
+			Debug qq[Searching in patternList: ].Dumper(\%patternList) if($debug);
 
 			my $startStr=""; # Default match if there is no start pattern available
 			my $message_start=0 ;
@@ -2367,7 +2368,7 @@ sub SIGNALduino_Parse_MU($$$$@) {
 
 				if ( ($startStr=SIGNALduino_PatternExists($hash,\@{$hash->{protocolObject}->getProperty($id,'start')},\%patternList,\$rawData)) eq -1)
 				{
-					$hash->{logMethod}->($name, 5, qq[$name: Parse_MU, start pattern for MU protocol id $id -> $hash->{protocolObject}->getProperty($id,'name') not found, aborting]);
+					$hash->{logMethod}->($name, 5, qq[$name: Parse_MU, start pattern for MU protocol id $id -> ].$hash->{protocolObject}->getProperty($id,'name'). qq[ not found, aborting]);
 					next;
 				}
 				Debug "startStr is: $startStr" if ($debug);
@@ -2551,9 +2552,9 @@ sub SIGNALduino_Parse_MC($$$$@) {
 			Debug "clock and min length matched"  if ($debug);
 
 			if (defined($rssi)) {
-				$hash->{logMethod}->($name, 4, qq[$name: Parse_MC, Found manchester protocol id $id clock $clock $rssiStr -> $hash->{protocolObject}->getProperty($id,'name')]);
+				$hash->{logMethod}->($name, 4, qq[$name: Parse_MC, Found manchester protocol id $id clock $clock $rssiStr -> ].$hash->{protocolObject}->getProperty($id,'name'));
 			} else {
-				$hash->{logMethod}->($name, 4, qq[$name: Parse_MC, Found manchester protocol id $id clock $clock -> $hash->{protocolObject}->getProperty($id,'name')]);
+				$hash->{logMethod}->($name, 4, qq[$name: Parse_MC, Found manchester protocol id $id clock $clock -> ].$hash->{protocolObject}->getProperty($id,'name'));
 			}
 
 			my $polarityInvert = ($hash->{protocolObject}->checkProperty($id,'polarity','') eq 'invert') ? 1 : 0;
@@ -2580,8 +2581,7 @@ sub SIGNALduino_Parse_MC($$$$@) {
 				$mcbitnum = length($bitData) if ($mcbitnum > length($bitData));
 				my ($rcode,$res) = $method->($name,$bitData,$id,$mcbitnum);
 				if ($rcode != -1) {
-					$dmsg = $res;
-					$dmsg= qq[$hash->{protocolObject}->checkProperty$id,'preamble','')$dmsg];
+					$dmsg = $hash->{protocolObject}->checkProperty($id,'preamble','').$res;
 					my $modulematch = $hash->{protocolObject}->checkProperty($id,'modulematch');
 
 					if (!defined($modulematch) || $dmsg =~ m/$modulematch/) {
@@ -2640,17 +2640,18 @@ sub SIGNALduino_Parse_MN {
 			next mnIDLoop; 
 		}
 
-		if ($hlen < $hash->{protocolObject}->checkProperty($id,'length_min',-1)) {
-			$hash->{logMethod}->($name, 3, qq[$name: Parse_MN, Error! ID=$id msg=$rawData ($hlen) too short, min= $hash->{protocolObject}->getProperty($id,'length_min')]);
+		my $length_min=$hash->{protocolObject}->checkProperty($id,'length_min',-1);
+		if ($hlen < $length_min) {
+			$hash->{logMethod}->($name, 3, qq[$name: Parse_MN, Error! ID=$id msg=$rawData ($hlen) too short, min=$length_min]);
 			next mnIDLoop;
 		}
 
 		$match = $hash->{protocolObject}->checkProperty($id,'regexMatch',undef);
 		$modulation = $hash->{protocolObject}->checkProperty($id,'modulation',undef);
 		if ( defined($match) && $rawData =~ m/$match/x ) {
-			$hash->{logMethod}->($name, 4, qq[$name: Parse_MN, Found $modulation Protocol id $id -> $hash->{protocolObject}->getProperty($id,'name') with match $match]);
+			$hash->{logMethod}->($name, 4, qq[$name: Parse_MN, Found $modulation Protocol id $id -> ].$hash->{protocolObject}->getProperty($id,'name').q[ with match $match]);
 		} elsif (!defined($match) ) {
-			$hash->{logMethod}->($name, 4, qq[$name: Parse_MN, Found $modulation Protocol id $id -> $hash->{protocolObject}->getProperty($id,'name')]);
+			$hash->{logMethod}->($name, 4, qq[$name: Parse_MN, Found $modulation Protocol id $id -> ].$hash->{protocolObject}->getProperty($id,'name'));
 		} else {
 			next mnIDLoop;
 		}
@@ -4127,16 +4128,19 @@ sub SIGNALduino_SomfyRTS {
 }
 
 ############################# package main
+# Move to lib::SD_Protocols
 sub SIGNALduino_TestLength {
-	my ($name, $id, $message_length, $logMsg) = @_;
-	my $hash=$defs{$name} if (defined($name) && exists($defs{$name}));
+	my $name = shift // carp q[first arg must be provided];
+	my ($id, $message_length, $logMsg) = @_;
+	my $hash=$defs{$name} // return (0,qq[$name does not exists]);
+	
 	if ($message_length < $hash->{protocolObject}->checkProperty($id,'length_min',-1)) {
-		$hash->{logMethod}->($name, 4, "$name: $logMsg: message with length=$message_length is to short") if (defined($logMsg));
-		return (0, "message is to short");
+		$hash->{logMethod}->($name, 4, qq[$name: $logMsg: message with length=$message_length is to short]) if (defined($logMsg));
+		return (0, 'message is to short');
 	}
 	elsif (defined $hash->{protocolObject}->getProperty($id,'length_max') && $message_length > $hash->{protocolObject}->getProperty($id,'length_max')) {
-		$hash->{logMethod}->($name, 4, "$name: $logMsg: message with length=$message_length is to long") if (defined($logMsg));
-		return (0, "message is to long");
+		$hash->{logMethod}->($name, 4, qq[$name: $logMsg: message with length=$message_length is to long]) if (defined($logMsg));
+		return (0, 'message is to long');
 	}
 	return (1,"");
 }
