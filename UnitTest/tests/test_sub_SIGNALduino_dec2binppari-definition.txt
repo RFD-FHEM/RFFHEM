@@ -1,0 +1,18 @@
+defmod test_sub_SIGNALduino_dec2binppari UnitTest dummyDuino ( 
+{ 
+	use Test2::V0;
+	use Test2::Tools::Compare qw{ is };
+
+	subtest 'Test dec2binppari' => sub {
+		plan(2);
+
+		my $input=32;
+		my $result=SIGNALduino_dec2binppari($input);
+		is($result,'001000001',"check result input $input");
+
+		$input=204;
+		$result=SIGNALduino_dec2binppari($input);
+		is($result,'110011000',"check result input $input");
+	};
+}
+)

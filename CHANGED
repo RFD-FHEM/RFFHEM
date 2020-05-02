@@ -1,4 +1,33 @@
 
+2020-05-01
+  00_SIGNALduino.pm
+   * revised comments
+  test_sub_SIGNALduino_postDemo_FHT80-definition.txt
+   * create test
+  test_sub_SIGNALduino_postDemo_FS20-definition.txt
+   * create test
+  test_sub_SIGNALduino_postDemo_WS7035-definition.txt
+   * create test
+
+2020-04-29
+  00_SIGNALduino.pm
+   * revised comments
+
+2020-04-25
+  00_SIGNALduino.pm
+   * more comments to better overview
+   * remove sub SIGNALduino_b2h
+   * revised entries from SIGNALduino_b2h to lib::SD_Protocols::binStr2hexStr
+   * revised syntax sub SIGNALduino_AS & SIGNALduino_Hideki
+  90_SIGNALduino_un.pm
+   * revised entries from SIGNALduino_b2h to lib::SD_Protocols::binStr2hexStr
+  test_sub_SIGNALduino_b2h-definition.txt
+   * rename to test_sub_binStr2hexStr-definition.txt
+  test_sub_SIGNALduino_ITV1_tristateToBit-definition.txt
+   * create test
+  test_sub_SIGNALduino_bit2itv1-definition.txt
+   * create test
+
 2020-04-24
   00_SIGNALduino.pm
    * remove sub SIGNALduino_HE_EU
