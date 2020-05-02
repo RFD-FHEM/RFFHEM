@@ -2413,7 +2413,7 @@ sub SIGNALduino_Parse_MU($$$$@) {
 			}
 			$signalRegex .= ")";
 
-			$hash->{logMethod}->($name, 4, "$name: Parse_MU, Fingerprint for MU protocol id $id -> $hash->{protocolObject}->getProperty($id,name) matches, trying to demodulate");
+			$hash->{logMethod}->($name, 4, qq[$name: Parse_MU, Fingerprint for MU protocol id $id -> ].$hash->{protocolObject}->getProperty($id,'name').q[ matches, trying to demodulate]);
 
 			my $signal_width= @{$hash->{protocolObject}->getProperty($id,'one')};
 			my $length_min = $hash->{protocolObject}->getProperty($id,'length_min');
@@ -2434,7 +2434,7 @@ sub SIGNALduino_Parse_MU($$$$@) {
 			while ( $rawData =~ m/$regex/g)		{
 				my $length_str="";
 				$nrRestart++;
-				$hash->{logMethod}->($name, 5, qq[$name: Parse_MU, part is $1 starts at position $-[0] and ends at pos $rawData]);
+				$hash->{logMethod}->($name, 5, qq{$name: Parse_MU, part is $1 starts at position $-[0] and ends at }.pos $rawData);
 
 				my @pairs = unpack "(a$signal_width)*", $1;
 
@@ -2445,7 +2445,7 @@ sub SIGNALduino_Parse_MU($$$$@) {
 				}
 
 				if ($nrRestart == 1) {
-					$hash->{logMethod}->($name, 5, qq[$name: Parse_MU, Starting demodulation ($startLogStr regex: $regex Pos $message_start) length_min_max ($length_min..$length_max) length=scalar @pairs]);
+					$hash->{logMethod}->($name, 5, qq[$name: Parse_MU, Starting demodulation ($startLogStr regex: $regex Pos $message_start) length_min_max ($length_min..$length_max) length=].scalar @pairs);
 				} else {
 					$hash->{logMethod}->($name, 5, qq{$name: Parse_MU, $nrRestart. try demodulation$length_str at Pos $-[0]});
 				}
@@ -2485,7 +2485,7 @@ sub SIGNALduino_Parse_MU($$$$@) {
 				my $bit_length=scalar @bit_msg;
 				@bit_msg=(); # clear bit_msg array
 
-				$dmsg = lib::SD_Protocols::binStr2hexStr($dmsg) if (SIGNALduino_getProtoProp($id,"dispatchBin",0) == 0 );
+				$dmsg = lib::SD_Protocols::binStr2hexStr($dmsg) if ($hash->{protocolObject}->checkProperty($id,"dispatchBin",0) == 0 );
 
 				$dmsg =~ s/^0+//	 if (  $hash->{protocolObject}->checkProperty($id,"remove_zero",0) );
 
