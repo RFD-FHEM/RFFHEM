@@ -1,3 +1,6 @@
+2020-05-02 - new protocol 104 for remote control TR60C-1 (#844)
+
+* Update 14_SD_UT.pm
 2020-05-02 - Merge branch 'dev-r34' into dev-r34_TR60C-1
 2020-05-02 - new protocol 104 for remote control TR60C-1
 2020-04-22 - Merge branch 'dev-r34' into dev-r34_operatorFixes
