@@ -76,6 +76,7 @@ Supported Devices / Protocols
 |Techmar Garden Lights | Remote control |
 |Technoline TX3  | Weather sensor |
 |Tedsen SKX1xx, SKX2xx, SKX4xx, SKX6xx | Remote control |
+|TR60C-1 | Remote control with touch screen |
 |Visivon remote PT4450  | Remote control |
 |VLOXO | wireless bell |
 |WH2 | (TFA 30.3157 nur Temp, Hum = 255 -> nicht angezeigt)|
