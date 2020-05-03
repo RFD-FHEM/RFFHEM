@@ -11,3 +11,4 @@ requires 'Devel::Cover::Report::Coveralls';
 requires 'Net::SSLeay';
 requires 'Digest::CRC';
 requires 'Math::Trig';
+requires 'Storable'; # This is needed for unittesting because core ships an old version which doesn't allow cloning of regexp
