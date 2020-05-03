@@ -15,7 +15,7 @@ defmod test_defineDefaults UnitTest dummyDuino (
 	 	is(InternalVal($name,"DMSG", undef),"nothing","check DMSG");
 	 	is(InternalVal($name,"LASTDMSG", undef),"nothing","check LASTDMSG");
 	 	is(InternalVal($name,"versionmodul", undef),SDUINO_VERSION,"check versionmodul");
-	 	is(InternalVal($name,"versionProtocols", undef),lib::SD_Protocols::getProtocolVersion(),"check versionProtocols");
+	 	is(InternalVal($name,"versionProtocols", undef),$targetHash->{protocolObject}->getProtocolVersion(),"check versionProtocols");
 	}; 
  };
 );
