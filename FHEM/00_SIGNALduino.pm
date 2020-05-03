@@ -2095,7 +2095,7 @@ sub SIGNALduino_moduleMatch {
 	my $id = shift;
 	my $dmsg = shift;
 	my $debug = AttrVal($name,"debug",0);
-	my $hash = %defs{$name} // carp q[$name does not exist];
+	my $hash = $defs{$name} // carp q[$name does not exist];
 	my $modMatchRegex=$hash->{protocolObject}->checkProperty($id,"modulematch",undef);
 
 	if (!defined($modMatchRegex) || $dmsg =~ m/$modMatchRegex/) {
@@ -2259,8 +2259,9 @@ sub SIGNALduino_Parse_MS($$$$%) {
 				$hash->{logMethod}->($name, 5, "$name: Parse_MS, dispatching bits: @bit_msg with $i Paddingbits 0");
 			}
 
-			my $evalcheck = ($hash->{protocolObject}->checkProperty($id,"developId","") =~ 'p') ? 1 : undef;
-			($rcode,my @retvalue) = SIGNALduino_callsub('postDemodulation',$hash->{protocolObject}->checkProperty($id,'postDemodulation'),$evalcheck,$name,@bit_msg);
+			my $evalcheck = ($hash->{protocolObject}->checkProperty($id,'developId','') =~ 'p') ? 1 : undef;
+
+			($rcode,my @retvalue) = SIGNALduino_callsub('postDemodulation',$hash->{protocolObject}->checkProperty($id,'postDemodulation',undef),$evalcheck,$name,@bit_msg);
 			next if ($rcode < 1 );
 			#SIGNALduino_Log3 $name, 5, "$name: Parse_MS, postdemodulation value @retvalue";
 
@@ -2465,8 +2466,8 @@ sub SIGNALduino_Parse_MU($$$$@) {
 
 				Debug "$name: demodulated message raw (@bit_msg), ".@bit_msg." bits\n" if ($debug);
 
-				my $evalcheck = ($hash->{protocolObject}->checkProperty($id,"developId","") =~ 'p') ? 1 : undef;
-				my ($rcode,@retvalue) = SIGNALduino_callsub('postDemodulation',$hash->{protocolObject}->getProperty($id,'postDemodulation'),$evalcheck,$name,@bit_msg);
+				my $evalcheck = ($hash->{protocolObject}->checkProperty($id,'developId','') =~ 'p') ? 1 : undef;
+				my ($rcode,@retvalue) = SIGNALduino_callsub('postDemodulation',$hash->{protocolObject}->checkProperty($id,'postDemodulation',undef),$evalcheck,$name,@bit_msg);
 
 				next if ($rcode < 1 );
 				@bit_msg = @retvalue;
@@ -3179,8 +3180,8 @@ sub SIGNALduino_getAttrDevelopment {
 ############################# package main, test exists
 sub SIGNALduino_callsub {
 	my $funcname =shift;
-	my $method = shift;
-	my $evalFirst = shift;
+	my $method = shift // undef;
+	my $evalFirst = shift // undef;
 	my $name = shift;
 
 	my @args = @_;
