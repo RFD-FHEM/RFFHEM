@@ -3,20 +3,14 @@ defmod test_developid_1 UnitTest dummyDuino (
 	use Test2::V0;
 	use Test2::Tools::Compare qw{is isnt};
 
-	my %ProtocolListTest =  SIGNALduino_LoadProtocolHash("$attr{global}{modpath}/FHEM/lib/test_loadprotohash-ok.pm");
-	is($ProtocolListTest{error},undef,"load test protocol hash ");
+	my $LoadResult =  $targetHash->{protocolObject}->LoadHash("$attr{global}{modpath}/FHEM/lib/test_loadprotohash-ok.pm");
+	is($LoadResult,undef,"load test protocol hash ");
 
-
+	my %ProtocolListTest = %{$targetHash->{protocolObject}->getProtocolList()};
 	foreach my $id (qw/9999 9998 9997 9996/)
 	{
-		is($ProtocolListTest{$id}{id},$id,"id $id exists");
+		is($targetHash->{protocolObject}->protocolExists($id),1,"id $id exists");
 	}
-	my $local_ProtocolListSIGNALduino = SIGNALduino_getProtocolList();
-	foreach (keys %$local_ProtocolListSIGNALduino)
-    {
-        delete $local_ProtocolListSIGNALduino->{$_};
-    }
-	%{$local_ProtocolListSIGNALduino} = ( %ProtocolListTest);
 
 
 	my $msg;
@@ -244,16 +238,15 @@ defmod test_developid_1 UnitTest dummyDuino (
 		}
 		Log3 $name, 3 ,$subTestName." <--|";
 	};
-	undef %{$local_ProtocolListSIGNALduino};
-	
-	%{$local_ProtocolListSIGNALduino} = SIGNALduino_LoadProtocolHash("$attr{global}{modpath}/FHEM/lib/SD_ProtocolData.pm");
-	
+	my $LoadResult =  $targetHash->{protocolObject}->LoadHash("$attr{global}{modpath}/FHEM/lib/SD_ProtocolData.pm");
+	is($LoadResult,undef,"load test protocol hash ");
+
 	SIGNALduino_IdList("x:$target","","","");  
 	foreach my $id (qw/9999 9998 9997 9996/)
 	{
-		isnt($local_ProtocolListSIGNALduino->{$id}{id},$id,"check if id $id is deleted");
+		isnt($targetHash->{protocolObject}->protocolExists($id),1,"id $id does not exists");
 	}
 
-	};
+ };
 );
 

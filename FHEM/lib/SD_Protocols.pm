@@ -108,7 +108,7 @@ sub LoadHash {
 	$self->{_protocols} = \%lib::SD_ProtocolData::protocols;
 	$self->{_protocolsVersion} = $lib::SD_ProtocolData::VERSION;
 	
-	#delete($INC{$filename}); # Unload package, because we only wanted the hash
+	delete($INC{$filename}); # Unload package, because we only wanted the hash
 
 	$self->setDefaults();
 	return ;
