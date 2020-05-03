@@ -1,29 +1,21 @@
-2020-05-03 - 00_SIGNALduino.pm
 
-bugfixing
-2020-05-02 - 00_SIGNALduino.pm
+2020-05-03
+  00_SIGNALduino.pm
+   * bugfixing
 
-fixed bugs detected via test_3 and qq behaivior using methods
+2020-05-03 - Merge branch 'dev-r34' into dev-r35_xFSK
+
+2020-05-02
+  00_SIGNALduino.pm
+   * fixed bugs detected via test_3 and qq behaivior using methods
+
 2020-05-02 - Merge branch 'dev-r35_xFSK_oo' of github.com:RFD-FHEM/RFFHEM into dev-r35_xFSK_oo
-2020-05-01 - t/FHEM/lib/SD_Protocols/01_func.t
-
-moved convert methods out to separate testfiles
-2020-05-01 - SD_Protocols.pm
-
-made LoadHashFromJson compatible with JSON:PP
-2020-04-30 - lib/SD_Protocols.pm
-
-fixed serval subs while writing unittests: t/FHEM/lib/SD_Protocols/01_func.t
-
-test_protocolData.json
-Added version Object and comments to json file
-2020-04-30 - Merge branch 'dev-r35_xFSK_oo' of github.com:RFD-FHEM/RFFHEM into dev-r35_xFSK_oo
-2020-04-27 - FHEM/lib/SD_Protocols.pm
-
-Migrated to perl object syntax. Some adjustments still needed
-Basic tests added, but not finished
 
 2020-05-01
+  SD_Protocols.pm
+   * made LoadHashFromJson compatible with JSON:PP
+  t/FHEM/lib/SD_Protocols/01_func.t
+   * moved convert methods out to separate testfiles
   00_SIGNALduino.pm
    * revised comments
   test_sub_SIGNALduino_postDemo_FHT80-definition.txt
@@ -33,9 +25,22 @@ Basic tests added, but not finished
   test_sub_SIGNALduino_postDemo_WS7035-definition.txt
    * create test
 
+2020-04-30
+  lib/SD_Protocols.pm
+   * fixed serval subs while writing unittests: t/FHEM/lib/SD_Protocols/01_func.t
+  test_protocolData.json
+	 * Added version Object and comments to json file
+
+2020-04-30 - Merge branch 'dev-r35_xFSK_oo' of github.com:RFD-FHEM/RFFHEM into dev-r35_xFSK_oo
+
 2020-04-29
   00_SIGNALduino.pm
    * revised comments
+
+2020-04-27
+  FHEM/lib/SD_Protocols.pm
+   * Migrated to perl object syntax. Some adjustments still needed
+   * Basic tests added, but not finished
 
 2020-04-25
   00_SIGNALduino.pm
@@ -247,14 +252,15 @@ Basic tests added, but not finished
 --- --- --- Unreleases what comes up here ---- --- ---
 
 
+2020-05-02 - new protocol 104 for remote control TR60C-1 (#844)
+
+* Update 14_SD_UT.pm
+2020-05-02 - Merge branch 'dev-r34' into dev-r34_TR60C-1
+2020-05-02 - new protocol 104 for remote control TR60C-1
 2020-04-22 - Merge branch 'dev-r34' into dev-r34_operatorFixes
 2020-04-22 - 00_SIGNALduino.pm - some operator fixes #835
 2020-04-21 - new protocol 99 NAVARIS touch light switch (#841)
-2020-04-21 - Merge branch 'dev-r34' into dev-r34_Navaris
-2020-04-21 - new protocol 99 NAVARIS touch light switch
 2020-04-21 - new protocol 98 for wireless door bell GEA-028DB (#839)
-2020-04-20 - Merge branch 'dev-r34' into dev-r34_GEA-028DB
-2020-04-20 - new protocol 98 for wireless door bell GEA-028DB
 
 2020-04-14 - 00_SIGNALduino.pm
 Changed stringrefs to coderefs

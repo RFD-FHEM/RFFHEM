@@ -69,7 +69,7 @@ defmod test_SD_WS07_devices UnitTest dummyDuino (
 		};
 	};
 
-	subtest "Verify sensor´s from JSON" => sub {
+	subtest "Verify sensors from JSON" => sub {
 		sub loadJson {
 			my $jsonStr=GetFileFromURL($_[0],4,"",1,4);
 			$testDataArray = eval { decode_json($jsonStr) };

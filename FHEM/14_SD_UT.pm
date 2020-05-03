@@ -25,6 +25,11 @@
 #     Adresse 8 | 1000 (off|on|on|on): I - fan minimum speed |  get sduino_dummy raw MU;;P0=-11250;;P1=-200;;P2=263;;P3=-116;;P4=-374;;P5=578;;P6=-697;;D=1232456245454562626245626262024562454545626262456262620245624545456262624562626202456245454562626245626262024562454545626262456262620245624545456262624562626202456245454562626245626262024562454545626262456262620245624545456262624562626202456245454562626;;CP=2;;R=49;;O;;
 #     Adresse c | 1100 (off|off|on|on): fan_off              |  get sduino_dummy raw MU;;P0=-720;;P1=235;;P2=-386;;P3=561;;P4=-11254;;D=01230141230101232301010101012301412301012323010101010123014123010123230101010101010141230101232301010101010101412301012323010101010101014123010123230101010101010;;CP=1;;R=242;;
 #}    Adresse c | 1100 (off|off|on|on): fan_off              |  get sduino_dummy raw MU;;P0=-11230;;P1=258;;P2=-390;;P3=571;;P4=-699;;D=0123414123234141414141234101234141232341414141412341012341412323414141414123410123414123234141414141234101234141232341414141412341012341412323414141414123410123414123234141414141234101234141232341414141412341012341412323414141414123410123414123234141414;;CP=1;;R=246;;O;;
+####################################################################################################################################
+# - Deckenventilator mit Licht Westinghouse Bendan (remote control TR60C-1 with touch screen) [Protocol 104]
+#{    Adresse 0 | DIP 0000 Licht aus/Ventilator aus | get sduino_dummy raw MU;P0=18280;P1=-737;P2=419;P3=-331;P4=799;P5=-9574;P6=-7080;D=012121234343434341212121212121252121212123434343434121212121212125212121212343434343412121212121212521212121234343434341212121212121252121212123434343434121212121212126;CP=2;R=2;
+#     Adresse 8 | DIP 1000 Licht an/Ventilator aus  | get sduino_dummy raw MU;P0=-2496;P1=778;P2=-755;P3=379;P4=-358;P5=-9582;D=0123232341414141412323234141414153412323234141414141232323414141415341232323414141414123232341414141534123232341414141412323234141414153412323234141414141232323414141415341232323414141414123232341414141;CP=3;R=12;
+#}    Adresse B | DIP 1011 Licht an/Ventilator aus  | get sduino_dummy raw MU;P0=25688;P1=-764;P2=381;P3=-371;P4=773;P5=-9586;P6=-20664;P7=-176;D=012343434343434341212123434343452341234343434343434121212343434345234123434343434343412121234343434523412343434343434341212123434343452341234343434343434121212343434345234123434343434343412121234343434627;CP=4;R=3;
 ###############################################################################################################################################################################
 # - Remote control SA-434-1 mini 923301 [Protocol 81] and [additionally Protocol 83 + Protocol 86]
 #{    one Button, 434 MHz
@@ -522,6 +527,27 @@ my %models = (
 								Protocol	=> "P83",
 								Typ				=> "remote"
 							},
+	'TR60C1' =>	{	'111110000000' => 'light_off_fan_off',
+								'110110000000' => 'light_off_fan_1',
+								'001110000000' => 'light_off_fan_2',
+								'101110000000' => 'light_off_fan_3',
+								'011110000000' => 'light_off_fan_4',
+								'111110001111' => 'light_on_fan_off',
+								'110110001111' => 'light_on_fan_1',
+								'001110001111' => 'light_on_fan_2',
+								'101110001111' => 'light_on_fan_3',
+								'011110001111' => 'light_on_fan_4',
+								'11111000' => 'fan_off', # is not sent directly
+								'11011000' => 'fan_1', # is not sent directly
+								'00111000' => 'fan_2', # is not sent directly
+								'10111000' => 'fan_3', # is not sent directly
+								'01111000' => 'fan_4', # is not sent directly
+								'0000' => 'light_off', # is not sent directly
+								'1111' => 'light_on', # is not sent directly
+								hex_lengh => '4',
+								Protocol => 'P104',
+								Typ => 'remote'
+							},
 	"SA_434_1_mini" =>	{	"0"				=> "send",
 												hex_lengh	=> "3",
 												Protocol	=> "P81",
@@ -685,7 +711,7 @@ my %models = (
 #############################
 sub SD_UT_Initialize($) {
 	my ($hash) = @_;
-	$hash->{Match}			= "^P(?:14|20|26|29|30|34|46|68|69|76|81|83|86|90|91|91.1|92|93|95|97|99)#.*";
+	$hash->{Match}			= "^P(?:14|20|26|29|30|34|46|68|69|76|81|83|86|90|91|91.1|92|93|95|97|99|104)#.*";
 	$hash->{DefFn}			= "SD_UT_Define";
 	$hash->{UndefFn}		= "SD_UT_Undef";
 	$hash->{ParseFn}		= "SD_UT_Parse";
@@ -719,13 +745,13 @@ sub SD_UT_Define($$) {
 	### checks unknown ###
 	return "wrong define: <model> $a[2] need no HEX-Value to define!" if($a[2] eq "unknown" && $a[3] && length($a[3]) >= 1);
 
-	### checks Westinghouse_Delancey RH787T & WestinghouseButtons_five ###
-	if ($a[2] eq "RH787T" || $a[2] eq "Buttons_five") {
+	### checks Westinghouse_Delancey RH787T & WestinghouseButtons_five & TR60C-1 ###
+	if ($a[2] eq "RH787T" || $a[2] eq "Buttons_five" || $a[2] eq 'TR60C1') {
 		if (length($a[3]) > 1) {
-			return "wrong HEX-Value! $a[2] have one HEX-Value";
+			return "Wrong HEX-Value! $a[2] must have one HEX-Value";
 		}
 		if (not $a[3] =~ /^[0-9a-fA-F]{1}/s) {
-			return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value are not (0-9 | a-f | A-F)";
+			return "Wrong HEX-Value! ($a[3]) $a[2] HEX-Value are not (0-9 | a-f | A-F)";
 		}
 	}
 
@@ -821,15 +847,32 @@ sub SD_UT_Set($$$@) {
 			my $adr = sprintf( "%04b", hex($definition[1]));	# argument 1 - adress to binary with 4 digits
 			$msg = $models{$model}{Protocol} . "#0" . $adr ."1";
 			$msgEnd = "#R" . $repeats;
+		############ Westinghouse TR60C-1 ############
+		} elsif ($model eq 'TR60C1') {
+			my $adr = sprintf( "%04b", hex($definition[1]));	# argument 1 - adress to binary with 4 digits
+			$msg = $models{$model}{Protocol} . "#" . $adr;
+			if (length($cmd) < 10) {
+				my @oldstate = split('_',ReadingsVal($name, 'state', 'light_off_fan_off'));
+				if (scalar(@oldstate) == 4) {
+					if (length($cmd) < 8) { # fan
+						$cmd = $oldstate[0] . '_' . $oldstate[1] . '_' . $cmd;
+					} else { # light
+						$cmd .= '_' . $oldstate[2] . '_' . $oldstate[3];
+					}
+					Log3 $name, 4, "$ioname: SD_UT_Set $name oldstate=$oldstate[0]_$oldstate[1]_$oldstate[2]_$oldstate[3] newcmd=$cmd";
+				}
+			}
+			$msgEnd = "#R" . $repeats;
 		############ Westinghouse Buttons_five ############
 		} elsif ($model eq "Buttons_five") {
 			my $adr = sprintf( "%04b", hex($definition[1]));	# argument 1 - adress to binary with 4 digits
 			$msg = $models{$model}{Protocol} . "#";
 			$msgEnd .= "11".$adr."#R" . $repeats;
-		############ SA_434_1_mini ############
+		############ SA_434_1_mini only one button ############
 		} elsif ($model eq "SA_434_1_mini") {
 			my $bitData = sprintf( "%012b", hex($definition[1]));	# argument 1 - adress to binary with 12 digits
 			$msg = $models{$model}{Protocol} . "#" . $bitData . "#R" . $repeats;
+			$cmd = 'send';
 		############ Tedsen_SKX1xx, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx ############
 		} elsif ($model eq "Tedsen_SKX1xx" || $model eq "Tedsen_SKX2xx" || $model eq "Tedsen_SKX4xx" || $model eq "Tedsen_SKX6xx") {
 			my $adr = SD_UT_tristate2bin($definition[1]);	# argument 1 - adress tristate to bin with 18 bits
@@ -866,11 +909,12 @@ sub SD_UT_Set($$$@) {
 			my $adr = sprintf( "%016b", hex($definition[1]));	# argument 1 - adress to binary with 16 digits
 			$msg = $models{$model}{Protocol} . "#" . substr($adr,0,14);
 			$msgEnd = "#R" . $repeats;
-		############ Hoermann HS1-868-BS ############
+		############ Hoermann HS1-868-BS only 1 button ############
 		} elsif ($model eq "HS1_868_BS") {
 			my $bitData = "00000000";
 			$bitData .= sprintf( "%036b", hex($definition[1]));	# argument 1 - adress to binary with 36 digits
 			$msg = $models{$model}{Protocol} . "#" . $bitData . "#R" . $repeats;
+			$cmd = 'send';
 		############ Hoermann HSM4 ############
 		} elsif ($model eq "HSM4") {
 			my $adr = sprintf( "%028b", hex($definition[1]));	# argument 1 - adress to binary with 28 digits
@@ -935,11 +979,11 @@ sub SD_UT_Set($$$@) {
 			my $adr = sprintf( "%028b", hex($definition[1]));	# argument 1 - adress to binary with 28 bits
 			$msg = $models{$model}{Protocol} . "#" . $adr;
 			$msgEnd = "#R" . $repeats;
-		############ Navaris ############
+		############ Navaris only one button ############
 		} elsif ($model eq "Navaris") {
 			my $adr = sprintf( "%024b", hex($definition[1]));	# argument 1 - adress to binary with 24 bits
-			$msg = $models{$model}{Protocol} . "#" . $adr;
-			$msgEnd = "#R" . $repeats;
+			$msg = $models{$model}{Protocol} . "#" . $adr . "#R" . $repeats;
+			$cmd = 'send';
 		############ xavax ############
 		} elsif ($model eq "xavax") {
 			my $adr = sprintf( "%016b", hex($definition[1]));	# argument 1 - adress to binary with 16 bits
@@ -969,7 +1013,8 @@ sub SD_UT_Set($$$@) {
 					last if ($value eq $cmd);
 				}
 			}
-
+			return "$name Unkown set command!" if ($value ne $cmd);
+			
 			############ KL_RF01 ############
 			if ($model eq "KL_RF01") {
 				my $save2 = $save;
@@ -1027,7 +1072,6 @@ sub SD_UT_Set($$$@) {
 		Log3 $name, 3, "$ioname: $name set $cmd";
 
 		## for hex output ##
-
 		my @split = split("#", $msg);
 		my $hexvalue = $split[1];
 		$hexvalue =~ s/P+//g;															# if P parameter, replace P with nothing
@@ -1136,6 +1180,15 @@ sub SD_UT_Parse($$) {
 		}
 	}
 
+	if ($hlen == 4) {
+		### Westinghouse TR60C-1 [P104] ###
+		if (!$def && $protocol == 104) {
+			$deviceCode = substr($rawData,0,1);
+			$devicedef = 'TR60C1 ' . $deviceCode;
+			$def = $modules{SD_UT}{defptr}{$devicedef};
+		}
+	}
+
 	if ($hlen == 5) {
 		### Chilitec_22640 [P14] ###
 		if (!$def && $protocol == 14) {
@@ -1193,6 +1246,15 @@ sub SD_UT_Parse($$) {
 		}
 	}
 
+	if ($hlen == 6) {
+		### Remote control Navaris [P99] ###
+		if (!$def && $protocol == 99) {
+			$deviceCode = substr($rawData,0,6);
+			$devicedef = "Navaris " . $deviceCode;
+			$def = $modules{SD_UT}{defptr}{$devicedef};
+		}
+	}
+
 	if ($hlen == 8) {
 		if (!$def && $protocol == 20) {
 			### Remote control RCnoName20 [P20] ###
@@ -1206,15 +1268,6 @@ sub SD_UT_Parse($$) {
 			### Remote control Krinner_LUMIX [P92] ###
 			$deviceCode = substr($rawData,0,7);
 			$devicedef = "Krinner_LUMIX " . $deviceCode;
-			$def = $modules{SD_UT}{defptr}{$devicedef};
-		}
-	}
-
-	if ($hlen == 6) {
-		### Remote control Navaris [P99] ###
-		if (!$def && $protocol == 99) {
-			$deviceCode = substr($rawData,0,6);
-			$devicedef = "Navaris " . $deviceCode;
 			$def = $modules{SD_UT}{defptr}{$devicedef};
 		}
 	}
@@ -1600,6 +1653,10 @@ sub SD_UT_Parse($$) {
 	############ Navaris ############ Protocol 99 ############
 	} elsif ($model eq "Navaris" && $protocol == 99) {
 		$state = "receive";
+		### Westinghouse TR60C-1 [P104] ###
+	} elsif ($model eq 'TR60C1' && $protocol == 104) {
+		$state = substr($bitData,4,12);
+		$deviceCode = substr($rawData,0,1);
 	############ unknown ############
 	} else {
 		readingsBulkUpdate($hash, "state", "???");
@@ -1659,6 +1716,10 @@ sub SD_UT_Attr(@) {
 	my $bitData;
 	my $hex_lengh = length(InternalVal($name, "lastMSG", "0"));
 
+	if ($cmd eq "set" && $attrName eq 'repeats' && $attrValue !~ m/^[1-9]$/i) {
+		return "$name: Unallowed value $attrValue for the attribute repetition (must be 1 - 9)!";
+	}
+
 	############ chance device models ############
 	if ($cmd eq "set" && $attrName eq "model" && $attrValue ne $oldmodel) {
 
@@ -1693,6 +1754,11 @@ sub SD_UT_Attr(@) {
 			############ Westinghouse_Delancey RH787T ############
 			if ($attrName eq "model" && $attrValue eq "RH787T") {
 				$deviceCode = substr($bitData,1,4);
+				$deviceCode = sprintf("%X", oct( "0b$deviceCode" ) );
+				$devicename = $devicemodel."_".$deviceCode;
+			############ Westinghouse TR60C-1 ############
+			} elsif ($attrName eq 'model' && $attrValue eq 'TR60C1') {
+				$deviceCode = substr($bitData,0,4);
 				$deviceCode = sprintf("%X", oct( "0b$deviceCode" ) );
 				$devicename = $devicemodel."_".$deviceCode;
 			############ Westinghouse Buttons_five ############
@@ -1909,6 +1975,7 @@ sub SD_UT_tristate2bin($) {
 	 <ul> - unitec remote door reed switch 47031 (Unitec 47121 | Unitec 47125 | Friedland)&nbsp;&nbsp;&nbsp;<small>(module model: Unitec_47031 | protocol 30)</small></ul>
 	 <ul> - Westinghouse Delancey ceiling fan (remote, 5 buttons without SET)&nbsp;&nbsp;&nbsp;<small>(module model: Buttons_five | protocol 29)</small></ul>
 	 <ul> - Westinghouse Delancey ceiling fan (remote, 9 buttons with SET)&nbsp;&nbsp;&nbsp;<small>(module model: RH787T | protocol 83)</small></ul>
+	 <ul> - Westinghouse ceiling fan Bendan (remote control TR60C-1, touch screen)&nbsp;&nbsp;&nbsp;<small>(module model: TR60C1 | protocol 104)</small></ul>
 	 <ul> - xavax 00111939 (remote control, 10 buttons)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: xavax | protocol 26)</small></ul>
 	 <br><br>
 	<b>Define</b><br>
@@ -2124,7 +2191,7 @@ sub SD_UT_tristate2bin($) {
 	<ul><a name="model"></a>
 		<li>model<br>
 		The attribute indicates the model type of your device.<br>
-		(unknown, Buttons_five, CAME_TOP_432EV, Chilitec_22640, KL_RF01, HS1-868-BS, HSM4, QUIGG_DMV, LED_XM21_0, Momento, Navaris, Novy_840029, Novy_840039, OR28V, RC_10, RH787T, SA_434_1_mini, SF01_01319004, Tedsen_SKX1xx, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx, TR_502MSV, Unitec_47031)</li>
+		(unknown, Buttons_five, CAME_TOP_432EV, Chilitec_22640, KL_RF01, HS1-868-BS, HSM4, QUIGG_DMV, LED_XM21_0, Momento, Navaris, Novy_840029, Novy_840039, OR28V, RC_10, RH787T, SA_434_1_mini, SF01_01319004, TR60C1, Tedsen_SKX1xx, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx, TR_502MSV, Unitec_47031)</li>
 	</ul><br>
 	<ul><li><a name="repeats">repeats</a><br>
 	This attribute can be used to adjust how many repetitions are sent. Default is 5.</li></ul><br>
@@ -2214,6 +2281,7 @@ sub SD_UT_tristate2bin($) {
 	 <ul> - unitec remote door reed switch 47031 (Unitec 47121 | Unitec 47125 | Friedland)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Unitec_47031 | Protokoll 30)</small></ul>
 	 <ul> - Westinghouse Deckenventilator (Fernbedienung, 5 Tasten ohne SET)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Buttons_five | Protokoll 29)</small></ul>
 	 <ul> - Westinghouse Delancey Deckenventilator (Fernbedienung, 9 Tasten mit SET)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: RH787T | Protokoll 83)</small></ul>
+	 <ul> - Westinghouse Deckenventilator Bendan (Fernbedienung TR60C-1, Touch screen)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: TR60C1 | Protokoll 104)</small></ul>
 	 <ul> - xavax 00111939 (Fernbedienung, 10 Tasten)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: xavax | Protokoll 26)</small></ul>
 	 <br><br>
 
@@ -2430,7 +2498,7 @@ sub SD_UT_tristate2bin($) {
 	<ul><li><a href="#IODev">IODev</a></li></ul><br>
 	<ul><li><a name="model">model</a><br>
 		Das Attribut bezeichnet den Modelltyp Ihres Ger&auml;tes.<br>
-		(unknown, Buttons_five, CAME_TOP_432EV, Chilitec_22640, KL_RF01, HS1-868-BS, HSM4, QUIGG_DMV, LED_XM21_0, Momento, Navaris, Novy_840029, Novy_840039, OR28V, RC_10, RH787T, SA_434_1_mini, SF01_01319004, Tedsen_SKX1xx, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx, TR_502MSV, Unitec_47031)</li><a name=" "></a>
+		(unknown, Buttons_five, CAME_TOP_432EV, Chilitec_22640, KL_RF01, HS1-868-BS, HSM4, QUIGG_DMV, LED_XM21_0, Momento, Navaris, Novy_840029, Novy_840039, OR28V, RC_10, RH787T, SA_434_1_mini, SF01_01319004, TR60C1, Tedsen_SKX1xx, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx, TR_502MSV, Unitec_47031)</li><a name=" "></a>
 	</ul><br>
 	<ul><li><a name="repeats">repeats</a><br>
 	Mit diesem Attribut kann angepasst werden, wie viele Wiederholungen sendet werden. Standard ist 5.</li></ul><br>
