@@ -6,7 +6,7 @@ defmod test_SD_WS_devices UnitTest dummyDuino (
 	## for online testsytem: defmod test_SDWS_devices UnitTest dummyDuino ##
 	my $testDataArray; 
 
-	subtest "Verify sensor´s from JSON" => sub {
+	subtest 'Verify sensors from JSON' => sub {
 		sub loadJson
 		{
 			my $jsonStr=GetFileFromURL($_[0],4,"",1,4);
@@ -50,7 +50,7 @@ defmod test_SD_WS_devices UnitTest dummyDuino (
 					no strict "refs"; 
 					&{$modules{$testSet->{module}}{ParseFn}}($targetHash,$tData->{dmsg});
 					use strict "refs"; 
-					subtest "Verify readings" => sub {
+					subtest 'Verify readings' => sub {
 						my $plan=0;
 						while ( (my $rName, my $rValue) = each (%{$tData->{readings}}) )
 						{
@@ -60,7 +60,7 @@ defmod test_SD_WS_devices UnitTest dummyDuino (
 						plan($plan);
 					};
 
-					subtest "Verify internals" => sub {
+					subtest 'Verify internals' => sub {
 						my $plan=0;
 						while ( (my $iName, my $iValue) = each (%{$tData->{internals}}) )
 						{

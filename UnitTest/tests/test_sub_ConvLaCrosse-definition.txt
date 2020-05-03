@@ -5,7 +5,7 @@ defmod test_sub_ConvLaCrosse UnitTest dummyDuino (
 	
 	# note: sub ConvLaCrosse use Digest::CRC
 
-	subtest 'test ConvLaCrosse, checksum ok' => sub 	{
+	subtest 'Test ConvLaCrosse, checksum ok' => sub 	{
 		plan(2);
 		subtest 'msg 9AA6362CC8AAAA000012F8F4 (ID 100)' => sub {		
 			my $hexMsg='9AA6362CC8AAAA000012F8F4';
@@ -25,7 +25,7 @@ defmod test_sub_ConvLaCrosse UnitTest dummyDuino (
 	};
 
 
-	subtest 'test ConvLaCrosse, checksum wrong' => sub 	{
+	subtest 'Test ConvLaCrosse, checksum wrong' => sub 	{
 		plan(2);
 		subtest 'msg 9AA6362CC8AAAA000012F8F4 (ID 100)' => sub {		
 			plan(2);
@@ -45,7 +45,7 @@ defmod test_sub_ConvLaCrosse UnitTest dummyDuino (
 	};
 
 
-	subtest 'test ConvLaCrosse, length to short ' => sub 	{
+	subtest 'Test ConvLaCrosse, length to short ' => sub 	{
 		plan(2);
 		my $hexMsg='0105A';
 		my @ret=lib::SD_Protocols::ConvLaCrosse($hexMsg) ;
@@ -54,7 +54,7 @@ defmod test_sub_ConvLaCrosse UnitTest dummyDuino (
 	};
 
 	
-	subtest 'test ConvLaCrosse, not hexadezimal' => sub 	{
+	subtest 'Test ConvLaCrosse, not hexadezimal' => sub 	{
 		plan(2);
 		my $hexMsg='010503B7PA1041AAAAAAAAPF';
 		my @ret=lib::SD_Protocols::ConvLaCrosse($hexMsg) ;
