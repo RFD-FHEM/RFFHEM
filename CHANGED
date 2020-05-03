@@ -1,3 +1,6 @@
+2020-05-03 - UnitTest/tests/test_developid_1-definition.txt
+
+Fixed test because loading a hash has changed a little bit
 2020-05-03 - Merge branch 'dev-r35_xFSK_oo' of github.com:RFD-FHEM/RFFHEM into dev-r35_xFSK_oo
 2020-05-03 - Merge branch 'dev-r35_xFSK' into dev-r35_xFSK_oo
 
