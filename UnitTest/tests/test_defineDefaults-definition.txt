@@ -6,7 +6,7 @@ defmod test_defineDefaults UnitTest dummyDuino (
 	CommandDefMod(undef,"-temporary testDuino SIGNALduino none");
  	
  	subtest 'Check internal defaults ' => sub {
-		plan tests => 5;
+		plan(5);
 		my $name ="testDuino";
 
 		use lib::SD_Protocols;
