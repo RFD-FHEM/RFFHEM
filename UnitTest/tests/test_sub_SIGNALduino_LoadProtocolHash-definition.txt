@@ -6,16 +6,18 @@ defmod test_sub_SIGNALduino_LoadProtocolHash UnitTest dummyDuino
 
     plan(3);
 
-    subtest 'Check filename' => sub {
+    subtest 'Check filename and filetype' => sub {
 			plan(2);
 
 			my $LoadResult = $targetHash->{protocolObject}->LoadHash(qq[$attr{global}{modpath}/FHEM/lib/SD_ProtocolNothing.pm]);
-			ok($LoadResult ne '','wrong filename or nothing found');
+			ok($LoadResult =~ m/^File ./FHEM/lib/SD_ProtocolNothing.pm does not exists/,'wrong filename or does not exists');
+
+			#$LoadResult = $targetHash->{protocolObject}->LoadHash(qq[$attr{global}{modpath}/FHEM/lib/SD_ProtocolData.txt]);
+			#is($LoadResult,undef,'load wrong filetype');
 
 			$LoadResult = $targetHash->{protocolObject}->LoadHash(qq[$attr{global}{modpath}/FHEM/lib/SD_ProtocolData.pm]);
-			ok($LoadResult eq '','right filename and syntax ok');
-    };
-
+			is($LoadResult,undef,'right filename and syntax ok');
+		};
 
     subtest 'Check good SD_PROTOCL_DATA' => sub {
     	plan(1);
