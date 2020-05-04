@@ -10,10 +10,12 @@ defmod test_sub_SIGNALduino_LoadProtocolHash UnitTest dummyDuino
 			plan(2);
 
 			my $LoadResult = $targetHash->{protocolObject}->LoadHash(qq[$attr{global}{modpath}/FHEM/lib/SD_ProtocolNothing.pm]);
-			ok($LoadResult ne '','wrong filename or nothing found');
+			like($LoadResult, qr/File .* does not exists/,'wrong filename or does not exists');
 
 			$LoadResult = $targetHash->{protocolObject}->LoadHash(qq[$attr{global}{modpath}/FHEM/lib/SD_ProtocolData.pm]);
-			ok($LoadResult eq '','right filename and syntax ok');
+			is($LoadResult,undef,'right filename and syntax ok');
+
+			note('Test filetype realizable ? / if ($self->{_filetype} ne "PerlModule")');
     };
 
 
