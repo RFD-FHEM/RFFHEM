@@ -4,26 +4,37 @@ defmod test_sub_SIGNALduino_LoadProtocolHash UnitTest dummyDuino
     use Test2::V0;
     use Test2::Tools::Compare qw{ is };
 
-		plan(3);
-    my %ret= SIGNALduino_LoadProtocolHash("dummy.hash");
-    ok(exists($ret{error}),"check with wrong filename");
+    plan(3);
 
-  subtest 'Good SD_PROTOCL_DATA' => sub {
+    subtest 'Check filename' => sub {
+			plan(2);
+
+			my $LoadResult = $targetHash->{protocolObject}->LoadHash(qq[$attr{global}{modpath}/FHEM/lib/SD_ProtocolNothing.pm]);
+			ok($LoadResult ne '','wrong filename or nothing found');
+
+			$LoadResult = $targetHash->{protocolObject}->LoadHash(qq[$attr{global}{modpath}/FHEM/lib/SD_ProtocolData.pm]);
+			ok($LoadResult eq '','right filename and syntax ok');
+    };
+
+
+    subtest 'Check good SD_PROTOCL_DATA' => sub {
     	plan(1);
-    
-    	%ret= SIGNALduino_LoadProtocolHash("$attr{global}{modpath}/FHEM/lib/test_loadprotohash-ok.pm");
-    	is($ret{error},undef,"check filename and syntax ok ");
-	};
 
-	subtest 'Bad SD_PROTOCL_DATA' => sub {
+			my $LoadResult = $targetHash->{protocolObject}->LoadHash(qq[$attr{global}{modpath}/FHEM/lib/test_loadprotohash-ok.pm]);
+			is($LoadResult,undef,'load test protocol hash');
+    };
+
+
+    subtest 'Check bad SD_PROTOCL_DATA' => sub {
     	plan(1);
-	 
-    	%ret= SIGNALduino_LoadProtocolHash("$attr{global}{modpath}/FHEM/lib/test_loadprotohash-nok.pm");
-    	ok(exists($ret{error}),"check filename and syntax not ok "); 
-	};
 
-	our %ProtocolListSIGNALduino = SIGNALduino_LoadProtocolHash("$attr{global}{modpath}/FHEM/lib/SD_ProtocolData.pm");
+    	my $LoadResult = $targetHash->{protocolObject}->LoadHash(qq[$attr{global}{modpath}/FHEM/lib/test_loadprotohash-nok.pm]);
+			ok($LoadResult =~ m/syntax error/, 'filename ok and syntax file not ok');
+    };
 
-    SIGNALduino_IdList("x:$target","","","");  
+
+		our %ProtocolListSIGNALduino = $targetHash->{protocolObject}->LoadHash(qq[$attr{global}{modpath}/FHEM/lib/SD_ProtocolData.pm]);
+
+    SIGNALduino_IdList("x:$target","","","");
  }
 );
