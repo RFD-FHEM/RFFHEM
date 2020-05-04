@@ -21,10 +21,10 @@ subtest 'lib SD_Prococols test sub LoadHash() ' => sub {
 		'./dummyDefault.pm', 'check internal filename variable' );
 
 	$ret = $Protocols->LoadHash(' ');
-	like( $ret, qr/does not exsits/, 'use default, wrong filename' );
+	like( $ret, qr/does not exists/, 'use default, wrong filename' );
 
 	$ret = $Protocols->LoadHash('customDummy.pm');
-	like( $ret, qr/does not exsits/, 'wrong costum filename' );
+	like( $ret, qr/does not exists/, 'wrong costum filename' );
 
 	$ret = $Protocols->LoadHash(
 		'./t/FHEM/lib/SD_Protocols/test_loadprotohash-nok.pm');
