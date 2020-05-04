@@ -101,7 +101,7 @@ sub LoadHash {
 	return if ($self->{_filetype} ne "PerlModule");
 	
 	if (! -e $filename) {
-		return qq[File $filename does not exsits];
+		return qq[File $filename does not exists];
 	}
 	
 	return $@ if(  ! eval { require $filename; 1 }  );

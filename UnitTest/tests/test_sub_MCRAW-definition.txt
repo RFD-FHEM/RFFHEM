@@ -14,7 +14,7 @@ defmod test_sub_MCRAW UnitTest dummyDuino (
 
 			my $bitData="001010101010010010100111";
 		
-			($rcode,$hexstring)=lib::SD_Protocols::MCRAW($target,$bitData,$id,length $bitData);
+			($rcode,$hexstring)=$targetHash->{protocolObject}->MCRAW($target,$bitData,$id,length $bitData);
 			is($rcode,1,'check returncode for MCRAW');
 			is($hexstring,'2AA4A7','check result hex string');
 		};
@@ -25,7 +25,7 @@ defmod test_sub_MCRAW UnitTest dummyDuino (
 
 			my $bitData="0010101010100100101001110011";
 		
-			($rcode,$hexstring)=lib::SD_Protocols::MCRAW($target,$bitData,$id,length $bitData);
+			($rcode,$hexstring)=$targetHash->{protocolObject}->MCRAW($target,$bitData,$id,length $bitData);
 			is($rcode,-1,'check returncode for MCRAW');
 			is($hexstring,' message is to long','check result message is to long');
 		};
