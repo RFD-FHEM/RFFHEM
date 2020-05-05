@@ -1,5 +1,8 @@
 2020-05-05 - 00_SIGNALduino.pm
 
+method call in SIGNALduino_Parse_MN adapted to object oriented mode
+2020-05-05 - 00_SIGNALduino.pm
+
 Fixed method call in SIGNALduino_Parse_MC and did some code cleanup
 2020-05-04 - t/FHEM/lib/SD_Protocols/01_func.t
 
