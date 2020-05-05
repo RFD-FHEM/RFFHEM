@@ -318,7 +318,7 @@ Output:
 =cut
 
 sub ConvHE800 {
-	my $self=shift;
+	my $self = shift // carp "Not called within an object";
 	
 	my ($name, @bit_msg) = @_;
 	my $protolength = scalar @bit_msg;
@@ -375,6 +375,7 @@ Output:
 =cut
 
 sub ConvPCA301 {
+	my $self = shift // carp "Not called within an object";
 	my $hexData = shift // croak 'Error: called without $hexdata as input';
 	
 	return (1,'ConvPCA301, Usage: Input #1, $hexData needs to be at least 24 chars long') 
@@ -416,6 +417,7 @@ Output:
 =cut
 
 sub ConvKoppFreeControl {
+	my $self = shift // carp "Not called within an object";
 	my $hexData = shift // croak 'Error: called without $hexdata as input';
 
 	return (1,'ConvKoppFreeControl, Usage: Input #1, $hexData needs to be at least 4 chars long')
@@ -473,6 +475,7 @@ Message Format:
 =cut
 
 sub ConvLaCrosse {
+	my $self = shift // carp "Not called within an object";
 	my $hexData = shift // croak 'Error: called without $hexdata as input';
 
 	return (1,'ConvLaCrosse, Usage: Input #1, $hexData needs to be at least 8 chars long') 

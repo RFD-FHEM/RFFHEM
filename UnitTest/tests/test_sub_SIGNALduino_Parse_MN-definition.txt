@@ -42,9 +42,8 @@ defmod test_sub_SIGNALduino_Parse_MN UnitTest dummyDuino (
 		is(SIGNALduino_Parse_MN($targetHash, $rmsg, \%signal_parts),0 , "MN data not dispatched");
 	};
 
-    my %local_ProtocolListSIGNALduino =  SIGNALduino_LoadProtocolHash("$attr{global}{modpath}/FHEM/lib/test_loadprotohash-ok.pm");
-    my $ProtocolListSIGNALduino_REF = SIGNALduino_getProtocolList();
-    %$ProtocolListSIGNALduino_REF = %local_ProtocolListSIGNALduino;
+	my $LoadResult =  $targetHash->{protocolObject}->LoadHash("$attr{global}{modpath}/FHEM/lib/test_loadprotohash-ok.pm");
+	is($LoadResult,undef,"load test protocol hash ");
 	SIGNALduino_IdList("x:$target","","","");  
 
 
@@ -66,10 +65,9 @@ defmod test_sub_SIGNALduino_Parse_MN UnitTest dummyDuino (
 		is(SIGNALduino_Parse_MN($targetHash, $rmsg, \%signal_parts),0 , "MN data not dispatched");
 	};
 
+	my $LoadResult =  $targetHash->{protocolObject}->LoadHash("$attr{global}{modpath}/FHEM/lib/SD_ProtocolData.pm");
+	is($LoadResult,undef,"load test protocol hash ");
 
-	undef %{$ProtocolListSIGNALduino_REF};
-	%{$ProtocolListSIGNALduino_REF} = SIGNALduino_LoadProtocolHash("$attr{global}{modpath}/FHEM/lib/SD_ProtocolData.pm");
 	SIGNALduino_IdList("x:$target","","","");  
-	
 }
 )

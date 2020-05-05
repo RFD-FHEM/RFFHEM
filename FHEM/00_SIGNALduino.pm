@@ -2629,11 +2629,12 @@ sub SIGNALduino_Parse_MN {
 	my $match;
 	my $modulation;
 	my $message_dispatched=0;
+use Data::Dumper;
 
 	mnIDLoop:
 	foreach my $id (@{$hash->{mnIdList}}) {
+Debug $id;
 		my $method = $hash->{protocolObject}->checkProperty($id,'method','unspecified');
-	#	if (ref $method ne 'CODE' || !exists &{$method})
 		if (!exists &$method || !defined &{ $method }) {
 			$hash->{logMethod}->($name, 5, qq[$name: Parse_MN, Error! unknown function=$method. Please define it in file SD_ProtocolData.pm]);
 			next mnIDLoop; 
@@ -2655,7 +2656,7 @@ sub SIGNALduino_Parse_MN {
 			next mnIDLoop;
 		}
 
-		my @methodReturn = $method->($rawData);
+		my @methodReturn = $method->($hash->{protocolObject},$rawData);
 		if ($#methodReturn == 0) {
 			$hash->{logMethod}->($name, 4, qq[$name: Parse_MN, Decoded matched MN Protocol id $id dmsg=$methodReturn[0] $rssiStr]);
 			SIGNALduno_Dispatch($hash,$rmsg,$methodReturn[0],$rssi,$id);
