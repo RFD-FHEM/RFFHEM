@@ -14,7 +14,7 @@ subtest 'test ConvKoppFreeControl, checksum ok' => sub 	{
 	subtest 'msg MN;D=07FA5E1721CC0F02FE000000000000; (ID 102)' => sub {		
 		my $hexMsg='07FA5E1721CC0F02FE000000000000';
 		plan(2);
-		my @ret=lib::SD_Protocols::ConvKoppFreeControl($hexMsg) ;
+		my @ret=lib::SD_Protocols::ConvKoppFreeControl(undef,$hexMsg) ;
 		is($#ret,0, 'ConvKoppFreeControl reported no error');
 		is($ret[0],'kr07FA5E1721CC0F02','check result for right KoppFreeControl transmission',@ret);
 	};
@@ -26,7 +26,7 @@ subtest 'test ConvKoppFreeControl, checksum wrong' => sub 	{
 	subtest 'msg MN;D=07FF5E1721CC0F02FE000000000000 (ID 102)' => sub {		
 		plan(2);
 		my $hexMsg='07FF5E1721CC0F02FE000000000000';
-		my @ret=lib::SD_Protocols::ConvKoppFreeControl($hexMsg) ;
+		my @ret=lib::SD_Protocols::ConvKoppFreeControl(undef,$hexMsg) ;
 		is($#ret,1, 'ConvKoppFreeControl reported some error');
 		like($ret[1],qr/!= checksum/,'check error message');
 	}
