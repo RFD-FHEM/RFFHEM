@@ -3,22 +3,15 @@ defmod test_modulematch_1 UnitTest dummyDuino (
 	use Test2::V0;
 	use Test2::Tools::Compare qw{ is isnt };
 
-	my %ProtocolListTest =  SIGNALduino_LoadProtocolHash("$attr{global}{modpath}/FHEM/lib/test_loadprotohash-ok.pm");
-	is($ProtocolListTest{error},undef,"load test protocol hash ");
+	my $LoadResult =  $targetHash->{protocolObject}->LoadHash("$attr{global}{modpath}/FHEM/lib/test_loadprotohash-ok.pm");
+	is($LoadResult,undef,"load test protocol hash ");
+  	my $local_ProtocolListSIGNALduino = $targetHash->{protocolObject}->getProtocolList();
 
 	
 	foreach my $id (qw/9999 9998/)
 	{
-		is($ProtocolListTest{$id}{id},$id,"id $id exists");
+		is($targetHash->{protocolObject}->protocolExists($id),1,"id $id exists");
 	}
-	my $local_ProtocolListSIGNALduino = SIGNALduino_getProtocolList();
-	foreach (keys %{$local_ProtocolListSIGNALduino})
-    {
-        delete $local_ProtocolListSIGNALduino->{$_};
-    }
-    %$local_ProtocolListSIGNALduino = %ProtocolListTest;
-
-	
  
 	subtest 'SIGNALduino_moduleMatch scenarios without whitlistIDs and development attr' => sub {
 		plan(4);
@@ -63,14 +56,14 @@ defmod test_modulematch_1 UnitTest dummyDuino (
 		}
 		is(SIGNALduino_moduleMatch($target,'9999',"Y3332222"),0,"check returncode with not matching modulematch");
 	};
-	undef %{$local_ProtocolListSIGNALduino};
 	
-	%{$local_ProtocolListSIGNALduino} = SIGNALduino_LoadProtocolHash("$attr{global}{modpath}/FHEM/lib/SD_ProtocolData.pm");
-	
+	$LoadResult =  $targetHash->{protocolObject}->LoadHash("$attr{global}{modpath}/FHEM/lib/SD_ProtocolData.pm");
+	is($LoadResult,undef,"load test protocol hash ");
+
 	SIGNALduino_IdList("x:$target","","","");  
 	foreach my $id (qw/9999 9998 9997 9996/)
 	{
-		isnt($local_ProtocolListSIGNALduino->{$id}{id},$id,"check if id $id is deleted");
+		isnt($targetHash->{protocolObject}->protocolExists($id),1,"id $id does not exists");
 	}
 
  }
