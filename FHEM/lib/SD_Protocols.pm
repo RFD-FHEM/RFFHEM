@@ -216,7 +216,7 @@ sub setDefaults {
 		if (defined ($format) && $format eq 'manchester')
 		{
 			# Manchester defaults :
-			$self->{_protocols}->{$id}->{method} = \&lib::SD_Protocols::MCRAW if (!defined($self->checkProperty($id,'method')));
+			$self->{_protocols}->{$id}->{method} = \&lib::SD_Protocols::MCRAW if (!defined $self->checkProperty($id,'method') );
 
 			my $cref = $self->checkProperty($id,'method');
 			$cref =~ s/^\\&//;
@@ -284,9 +284,10 @@ Output:
 =cut
 
 sub MCRAW {
-	my $self=shift;
+	my $self = shift // carp "Not called within an object";
 	
 	my ($name,$bitData,$id,$mcbitnum) = @_;
+	
 
 	return (-1," message is to long") if ($mcbitnum > $self->checkProperty($id,"length_max",0) );
 	return(1,binStr2hexStr($bitData)); 

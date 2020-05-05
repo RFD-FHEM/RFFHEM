@@ -38,7 +38,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.5_dev_05.03",
+	SDUINO_VERSION            => "v3.5_dev_05.05",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -2031,11 +2031,10 @@ sub SIGNALduno_Dispatch($$$$$) {
 	if ($dmsg eq $hash->{LASTDMSG}) {
 		$hash->{logMethod}->($name, SDUINO_DISPATCH_VERBOSE, "$name: Dispatch, $dmsg, test gleich");
 	} else {
-		if (defined($hash->{DoubleMsgIDs}{$id})) {
+		if ( defined $hash->{DoubleMsgIDs}{$id} ) {
 			$DMSGgleich = 0;
 			$hash->{logMethod}->($name, SDUINO_DISPATCH_VERBOSE, "$name: Dispatch, $dmsg, test ungleich");
-		}
-		else {
+		} else {
 			$hash->{logMethod}->($name, SDUINO_DISPATCH_VERBOSE, "$name: Dispatch, $dmsg, test ungleich: disabled");
 		}
 		$hash->{LASTDMSG} = $dmsg;
@@ -2044,7 +2043,10 @@ sub SIGNALduno_Dispatch($$$$$) {
 
    if ($DMSGgleich) {
 	#Dispatch if dispatchequals is provided in protocol definition or only if $dmsg is different from last $dmsg, or if 2 seconds are between transmits
-	if ( ($hash->{protocolObject}->checkProperty($id,'dispatchequals',0) eq 'true') || ($hash->{DMSG} ne $dmsg) || ($hash->{TIME}+2 < time() ) )   {
+	if (  (	$hash->{protocolObject}->checkProperty($id,'dispatchequals','false') eq 'true') 
+			|| ($hash->{DMSG} ne $dmsg) 
+			|| ($hash->{TIME}+2 < time() )  )   
+	{
 		$hash->{MSGCNT}++;
 		$hash->{TIME} = time();
 		$hash->{DMSG} = $dmsg;
@@ -2523,7 +2525,7 @@ sub SIGNALduino_Parse_MC($$$$@) {
 	my $bitData;
 	my $dmsg;
 	my $message_dispatched=0;
-	my $debug = AttrVal($iohash->{NAME},"debug",1);
+	my $debug = AttrVal($iohash->{NAME},"debug",0);
 	($rssi,$rssiStr) = SIGNALduino_calcRSSI($rssi) if (defined($rssi));
 
 	#my $protocol=undef;
@@ -2548,31 +2550,26 @@ sub SIGNALduino_Parse_MC($$$$@) {
 		#next if ($blen < $ProtocolListSIGNALduino{$id}{length_min} || $blen > $ProtocolListSIGNALduino{$id}{length_max});
 		#if ( $clock >$ProtocolListSIGNALduino{$id}{clockrange}[0] and $clock <$ProtocolListSIGNALduino{$id}{clockrange}[1]);
 		my @clockrange = @{$hash->{protocolObject}->getProperty($id,'clockrange')};
-		use Data::Dumper;
-		print Dumper(\@clockrange);
 		if ( $clock > $clockrange[0] && $clock < $clockrange[1] && length($rawData)*4 >= $hash->{protocolObject}->getProperty($id,'length_min') )
 		{
 			Debug "clock and min length matched"  if ($debug);
 
-			if (defined($rssi)) {
-				$hash->{logMethod}->($name, 4, qq[$name: Parse_MC, Found manchester protocol id $id clock $clock $rssiStr -> ].$hash->{protocolObject}->getProperty($id,'name'));
-			} else {
-				$hash->{logMethod}->($name, 4, qq[$name: Parse_MC, Found manchester protocol id $id clock $clock -> ].$hash->{protocolObject}->getProperty($id,'name'));
-			}
+			(defined $rssi ) ? 	$hash->{logMethod}->($name, 4, qq[$name: Parse_MC, Found manchester protocol id $id clock $clock $rssiStr -> ].$hash->{protocolObject}->getProperty($id,'name'))
+								 :	$hash->{logMethod}->($name, 4, qq[$name: Parse_MC, Found manchester protocol id $id clock $clock -> ].$hash->{protocolObject}->getProperty($id,'name'));
+			
 
-			my $polarityInvert = ($hash->{protocolObject}->checkProperty($id,'polarity','') eq 'invert') ? 1 : 0;
-
-			if ($messagetype eq 'Mc' || (defined($hash->{version}) && substr($hash->{version},0,6) eq 'V 3.2.'))
+			my $polarityInvert = ( $hash->{protocolObject}->checkProperty($id,'polarity','') eq 'invert' ) ? 1 : 0;
+			Debug "$name: polarityInvert=$polarityInvert" if ($debug); 
+			if ( 	$messagetype eq 'Mc' 
+					|| ( defined $hash->{version}  && substr $hash->{version},0,6 eq 'V 3.2.')   )
 			{
 				$polarityInvert = $polarityInvert ^ 1;
 			}
-			if ($polarityInvert == 1)
-			{
-		   		$bitData= unpack("B$blen", pack("H$hlen", $rawDataInverted));
-
-			} else {
-		   		$bitData= unpack("B$blen", pack("H$hlen", $rawData));
-			}
+			
+			$bitData = ($polarityInvert == 1 )
+								?	unpack("B$blen", pack("H$hlen", $rawDataInverted))
+								:	unpack("B$blen", pack("H$hlen", $rawData));
+			
 			Debug "$name: extracted data $bitData (bin)\n" if ($debug); ## Convert Message from hex to bits
 		   	$hash->{logMethod}->($name, 5, "$name: Parse_MC, extracted data $bitData (bin)");
 
@@ -2582,13 +2579,15 @@ sub SIGNALduino_Parse_MC($$$$@) {
 				$hash->{logMethod}->($name, 5, "$name: Parse_MC, Error: Unknown function=$method. Please define it in file SD_ProtocolData.pm");
 			} else {
 				$mcbitnum = length($bitData) if ($mcbitnum > length($bitData));
-				my ($rcode,$res) = $method->($name,$bitData,$id,$mcbitnum);
+				my ($rcode,$res) = $method->($hash->{protocolObject},$name,$bitData,$id,$mcbitnum);
 				if ($rcode != -1) {
-					$dmsg = $hash->{protocolObject}->checkProperty($id,'preamble','').$res;
+					$dmsg = sprintf('%s%s',$hash->{protocolObject}->checkProperty($id,'preamble',''),$res);
 					my $modulematch = $hash->{protocolObject}->checkProperty($id,'modulematch',undef);
 
-					if (!defined($modulematch) || $dmsg =~ m/$modulematch/) {
+					if (!defined $modulematch || $dmsg =~ m/$modulematch/) {
+						
 						if (substr($hash->{protocolObject}->checkProperty($id,'developId',' '),0,1) eq "m") {
+							
 							my $devid = "m$id";
 							my $develop = lc(AttrVal($name,"development",""));
 							if ($develop !~ m/$devid/) {		# kein dispatch wenn die Id nicht im Attribut development steht
@@ -2596,14 +2595,11 @@ sub SIGNALduino_Parse_MC($$$$@) {
 								next;
 							}
 						}
-						if (SDUINO_MC_DISPATCH_VERBOSE < 5 && (SDUINO_MC_DISPATCH_LOG_ID eq '' || SDUINO_MC_DISPATCH_LOG_ID eq $id))
+						if ( SDUINO_MC_DISPATCH_VERBOSE < 5 
+						     && (SDUINO_MC_DISPATCH_LOG_ID eq '' || SDUINO_MC_DISPATCH_LOG_ID eq $id) )
 						{
-							if (defined($rssi)) {
-								$hash->{logMethod}->($name, SDUINO_MC_DISPATCH_VERBOSE, qq[$name: Parse_MC, $id, $rmsg $rssiStr]);
-							} else
-							{
-								$hash->{logMethod}->($name, SDUINO_MC_DISPATCH_VERBOSE, qq[$name: Parse_MC, $id, $rmsg]);
-							}
+							defined($rssi)	?	$hash->{logMethod}->($name, SDUINO_MC_DISPATCH_VERBOSE, qq[$name: Parse_MC, $id, $rmsg $rssiStr])
+											:	 $hash->{logMethod}->($name, SDUINO_MC_DISPATCH_VERBOSE, qq[$name: Parse_MC, $id, $rmsg]);
 						}
 						SIGNALduno_Dispatch($hash,$rmsg,$dmsg,$rssi,$id);
 						$message_dispatched=1;

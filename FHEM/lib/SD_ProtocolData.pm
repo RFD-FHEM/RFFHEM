@@ -1609,17 +1609,17 @@ package lib::SD_ProtocolData;
 							# P57#2AA4A7 | ring   MC;LL=-654;LH=678;SL=-314;SH=351;D=D55B58;C=332;L=21;
 							# P57#2AA4A7 | ring   MC;LL=-653;LH=679;SL=-310;SH=351;D=D55B58;C=332;L=21;
 			{
-				name						=> 'm-e',
+				name					=> 'm-e',
 				comment					=> 'radio gong transmitter for FG- and Basic-Serie',
-				id							=> '57',
-				knownFreqs      => '',
-				clockrange			=> [300,360],						# min , max
+				id						=> '57',
+				knownFreqs      		=> '',
+				clockrange				=> [300,360],						# min , max
 				format					=> 'manchester',				# tristate can't be migrated from bin into hex!
-				clientmodule		=> 'SD_BELL',
-				modulematch			=> '^P57#.*',
+				clientmodule			=> 'SD_BELL',
+				modulematch				=> '^P57#.*',
 				preamble				=> 'P57#',
-				length_min			=> '21',
-				length_max			=> '24',
+				length_min				=> '21',
+				length_max				=> '24',
 				method					=> \&lib::SD_Protocols::MCRAW,	# Call to process this message
 				polarity				=> 'invert',
 			},

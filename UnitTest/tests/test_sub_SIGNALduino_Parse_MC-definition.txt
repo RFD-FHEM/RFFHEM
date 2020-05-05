@@ -31,8 +31,8 @@ defmod test_sub_SIGNALduino_Parse_MC UnitTest dummyDuino (
 			my $rmsg="MC;LL=-653;LH=679;SL=-310;SH=351;D=D55B58;C=332;L=21;";
 			my %signal_parts=SIGNALduino_Split_Message($rmsg,$targetHash->{NAME});     
 			my $SD_Dispatch = $mock->mock("SIGNALduno_Dispatch");  	
-			is(SIGNALduino_Parse_MC($targetHash, $targetHash, $targetHash->{NAME}, $rmsg,%signal_parts),1 , "check to good MC data dispatched");
-			$SD_Dispatch->unmock();
+			is(SIGNALduino_Parse_MC($targetHash, $targetHash, $targetHash->{NAME}, $rmsg,%signal_parts),1 , "check good MC data dispatched");
+			$SD_Dispatch->unmock;
 		};
 	};
 }
