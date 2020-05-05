@@ -33,8 +33,8 @@ defmod test_SD_UT_devices UnitTest dummyDuino (
 	while ( (my $pID, my $testSet) = each  (@{$testDataArray}) )
 	{
 		next if (!defined($testSet->{module}) || $testSet->{module} ne "SD_UT");
-		next if (!lib::SD_Protocols::protocolExists($testSet->{id}));
-		next if (lib::SD_Protocols::checkProperty($testSet->{id},'developId',undef));
+		next if (!$targetHash->{protocolObject}->protocolExists($testSet->{id}));
+		next if ($targetHash->{protocolObject}->checkProperty($testSet->{id},'developId',undef));
 		#next if ($testSet->{id} != 91.1 && $testSet->{id} != 91);
 	
 		while ( (my $tID, my $tData) = each (@{$testSet->{data}}) ) 
