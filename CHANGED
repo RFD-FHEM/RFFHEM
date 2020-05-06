@@ -1,3 +1,6 @@
+2020-05-06 - 00_SIGNALduino.pm
+
+Fixed bug and cnverted some code for better readabilify
 2020-05-05 - 00_SIGNALduino.pm
 
 method call in SIGNALduino_Parse_MN adapted to object oriented mode
