@@ -1231,18 +1231,18 @@ package lib::SD_ProtocolData;
 			{
 				name					=> 'Somfy RTS',
 				id						=> '43',
-				knownFreqs		=> '',
-				clockrange		=> [610,680],								# min , max
-				format				=> 'manchester',
-				preamble			=> 'Ys',
-				clientmodule	=> 'SOMFY',									# not used now
-				modulematch		=> '^Ys[0-9A-F]{14}',
-				length_min		=> '56',
-				length_max		=> '57',
-				method				=> \&main::SIGNALduino_SomfyRTS,	# Call to process this message
-				msgIntro			=> 'SR;P0=-2560;P1=2560;P3=-640;D=10101010101010113;',
-				#msgOutro			=> 'SR;P0=-30415;D=0;',
-				frequency			=> '10AB85550A',
+				knownFreqs				=> '',
+				clockrange				=> [610,680],								# min , max
+				format					=> 'manchester',
+				preamble				=> 'Ys',
+				clientmodule			=> 'SOMFY',									# not used now
+				modulematch				=> '^Ys[0-9A-F]{14}',
+				length_min				=> '56',
+				length_max				=> '57',
+				method					=> \&main::SIGNALduino_SomfyRTS,	# Call to process this message
+				msgIntro				=> 'SR;P0=-2560;P1=2560;P3=-640;D=10101010101010113;',
+				#msgOutro				=> 'SR;P0=-30415;D=0;',
+				frequency				=> '10AB85550A',
 			},
 		"44"	=>	## Bresser Temeo Trend
 							# MU;P0=32001;P1=-1939;P2=1967;P3=3896;P4=-3895;D=01213424242124212121242121242121212124212424212121212121242421212421242121242124242421242421242424242124212124242424242421212424212424212121242121212;CP=2;R=39;

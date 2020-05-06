@@ -727,42 +727,36 @@ sub SIGNALduino_Set_sendMsg {
 	    } else {
 	    	    if ($c eq 'R') { $repeats = substr($s,1);  }
 	    		elsif ($c eq 'C') { $clock = substr($s,1);   }
-	    		elsif ($c eq 'F') { $frequency = substr($s,1);  }
+	    		elsif ($c eq 'F' && InternalVal($hash->{NAME},"cc1101_available",0)) { $frequency = substr($s,1);  }
 	    		elsif ($c eq 'L') { $datalength = substr($s,1);   }
 	    }
 	    $n++;
 	};
 	return "$hash->{NAME}: sendmsg, unknown protocol: $protocol" if (!$hash->{protocolObject}->protocolExists($protocol));
 
-	$repeats=1 if (!defined($repeats));
-
-	if (!defined($frequency) && $hash->{protocolObject}->getProperty($protocol,'frequency') && InternalVal($hash->{NAME},"cc1101_available",0)) {
+	$repeats //= 1 ;
+	
+	if (InternalVal($hash->{NAME},"cc1101_available",0))
+	{
 		$frequency = $hash->{protocolObject}->getProperty($protocol,'frequency');
+		$frequency = "F=$frequency;" // ';';
 	}
-	if (defined($frequency) && InternalVal($hash->{NAME},"cc1101_available",0)) {
-		$frequency="F=$frequency;";
-	} else {
-		$frequency="";
-	}
-
 	my %signalHash;
 	my %patternHash;
-	my $pattern="";
+	my $pattern='';
 	my $cnt=0;
 
 	my $sendData;
 	if  (defined($hash->{protocolObject}->getProperty($protocol,'format')) && $hash->{protocolObject}->getProperty($protocol,'format') eq 'manchester')
 	{
-		$clock += $_ for(@{$hash->{protocolObject}->getProperty($protocol,'clockrange')});
+		$clock += $_ for( @{$hash->{protocolObject}->getProperty($protocol,'clockrange')} );
 		$clock = round($clock/2,0);
 
 		my $intro;
 		my $outro;
 
 		$intro = $hash->{protocolObject}->checkProperty($protocol,'msgIntro','');
-		$outro = $hash->{protocolObject}->checkProperty($protocol,'msgOutro',undef);
-		$outro //= $outro.';';
-		
+		$outro = sprintf('%s',$hash->{protocolObject}->checkProperty($protocol,'msgOutro',''));
 
 		if ($intro ne '' || $outro ne '')
 		{
@@ -781,9 +775,11 @@ sub SIGNALduino_Set_sendMsg {
 			$data = SIGNALduino_ITV1_tristateToBit($data);
 			$hash->{logMethod}->($hash->{NAME}, 5, "$hash->{NAME}: Set_sendMsg, IT V1 convertet tristate to bits=$data");
 		}
-		if (!defined($clock)) {
-			$hash->{ITClock} = 250 if (!defined($hash->{ITClock}));   # Todo: Klaeren wo ITClock verwendet wird und ob wir diesen Teil nicht auf Protokoll 3,4 und 17 minimieren
-			$clock= $hash->{protocolObject}->checkProperty($protocol,'clockabs',0) > 1 ? $hash->{protocolObject}->getProperty($protocol,'clockabs') : $hash->{ITClock};
+		if (!defined $clock ) {
+			$hash->{ITClock} = 250 if (!defined $hash->{ITClock} );   # Todo: Klaeren wo ITClock verwendet wird und ob wir diesen Teil nicht auf Protokoll 3,4 und 17 minimieren
+			$clock= $hash->{protocolObject}->checkProperty($protocol,'clockabs',0) > 1 
+				? $hash->{protocolObject}->getProperty($protocol,'clockabs')
+				: $hash->{ITClock};
 		}
 
 		if ($dataishex == 1)
@@ -795,11 +791,12 @@ sub SIGNALduino_Set_sendMsg {
 		}
 		$hash->{logMethod}->($hash->{NAME}, 5, "$hash->{NAME}: Set_sendMsg, Preparing rawsend command for protocol=$protocol, repeats=$repeats, clock=$clock bits=$data");
 
-		foreach my $item (qw(preSync sync start one zero float pause end universal))
+		for my $item (qw(preSync sync start one zero float pause end universal))
 		{
-		    next if (!defined($hash->{protocolObject}->getProperty($protocol,$item)));
+		    my $value = $hash->{protocolObject}->getProperty($protocol,$item);
+		    next if (!defined $value );
 
-			foreach my $p (@{$hash->{protocolObject}->getProperty($protocol,$item)})
+			for my $p ( @{$value} )
 			{
 			    if (!exists($patternHash{$p}))
 				{
@@ -2629,11 +2626,9 @@ sub SIGNALduino_Parse_MN {
 	my $match;
 	my $modulation;
 	my $message_dispatched=0;
-use Data::Dumper;
 
 	mnIDLoop:
-	foreach my $id (@{$hash->{mnIdList}}) {
-Debug $id;
+	for my $id (@{$hash->{mnIdList}}) {
 		my $method = $hash->{protocolObject}->checkProperty($id,'method','unspecified');
 		if (!exists &$method || !defined &{ $method }) {
 			$hash->{logMethod}->($name, 5, qq[$name: Parse_MN, Error! unknown function=$method. Please define it in file SD_ProtocolData.pm]);
@@ -2648,6 +2643,7 @@ Debug $id;
 
 		$match = $hash->{protocolObject}->checkProperty($id,'regexMatch',undef);
 		$modulation = $hash->{protocolObject}->checkProperty($id,'modulation',undef);
+		
 		if ( defined($match) && $rawData =~ m/$match/x ) {
 			$hash->{logMethod}->($name, 4, qq[$name: Parse_MN, Found $modulation Protocol id $id -> ].$hash->{protocolObject}->getProperty($id,'name').q[ with match $match]);
 		} elsif (!defined($match) ) {
@@ -3045,11 +3041,9 @@ sub SIGNALduino_IdList($@) {
 	$hash->{logMethod}->($name, 3, "$name: IdList, development version active, development attribute = $develop") if ($devFlag == 1);
 
 	if ($aVal eq "" || substr($aVal,0 ,1) eq '#') {		# whitelist nicht aktiv
-		if ($devFlag == 1) {
-			$hash->{logMethod}->($name, 3, "$name: IdList, attr whitelist disabled or not defined (all IDs are enabled, except blacklisted): $aVal");
-		}
-		else {
-			$hash->{logMethod}->($name, 3, "$name: IdList, attr whitelist disabled or not defined (all IDs are enabled, except blacklisted and instable IDs): $aVal");
+		($devFlag == 1) 
+			?	$hash->{logMethod}->($name, 3, "$name: IdList, attr whitelist disabled or not defined (all IDs are enabled, except blacklisted): $aVal");
+			:	$hash->{logMethod}->($name, 3, "$name: IdList, attr whitelist disabled or not defined (all IDs are enabled, except blacklisted and instable IDs): $aVal");
 		}
 	}
 	else {
@@ -3168,8 +3162,7 @@ sub SIGNALduino_getAttrDevelopment {
 	if (index(SDUINO_VERSION, "dev") >= 0) {  	# development version
 		$develop = AttrVal($name,"development", 0) if (!defined($develop));
 		$devFlag = 1 if ($develop eq "1" || (substr($develop,0,1) eq "y" && $develop !~ m/^y\d/));	# Entwicklerversion, y ist nur zur Abwaertskompatibilitaet und kann in einer der naechsten Versionen entfernt werden
-	}
-	else {
+	} else {
 		$develop = "0";
 		Log3 $name, 3, "$name: getAttrDevelopment, IdList ### Attribute development is in this version ignored ###";
 	}

@@ -183,7 +183,7 @@ sub getProperty {
 	my $id = shift // return ;
 	my $valueName = shift // return ;
 	
-	return $self->{_protocols}->{$id}->{$valueName} if ( exists($self->{_protocols}->{$id}->{$valueName}) );
+	return $self->{_protocols}->{$id}->{$valueName} if ( exists $self->{_protocols}->{$id}->{$valueName} );
 	return; 
 }
 
