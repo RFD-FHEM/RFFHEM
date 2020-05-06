@@ -719,7 +719,7 @@ sub SD_UT_Initialize($) {
 	$hash->{AttrFn}			= "SD_UT_Attr";
 	$hash->{AttrList}		= "repeats:1,2,3,4,5,6,7,8,9 IODev do_not_notify:1,0 ".
 												"ignore:0,1 showtime:1,0 model:".join(",", sort keys %models).
-												" $readingFnAttributes UTclock";
+												" $readingFnAttributes UTclock UTfrequency";
 	$hash->{AutoCreate} =
 	{
 		"MD_2003R.*"	 => {ATTR => "model:MD_2003R", FILTER => "%NAME", autocreateThreshold => "3:180", GPLOT => ""},
@@ -1064,6 +1064,17 @@ sub SD_UT_Set($$$@) {
 		}
 
 		$msg .= '#C' . $UTclock if (defined($UTclock));  # optional Clockpulse
+
+		my $f = AttrVal($name,'UTfrequency',undef);
+		if (defined($f)) {
+			$f = $f / 26 * 65536;
+			my $f2 = sprintf("%02x", $f / 65536);
+			my $f1 = sprintf("%02x", int($f % 65536) / 256);
+			my $f0 = sprintf("%02x", $f % 256);
+			my $arg = sprintf("%.3f", (hex($f2)*65536+hex($f1)*256+hex($f0))/65536*26);
+			Log3 $hash, 3, "$ioname: SD_UT_Set setting UTfrequency (0D,0E,0F) to $f2 $f1 $f0 = $arg MHz";
+			$msg .="#F$f2$f1$f0";
+		}
 
 		readingsSingleUpdate($hash, "LastAction", "send", 0) if ($models{$model}{Typ} eq "remote");
 		readingsSingleUpdate($hash, "state" , $cmd, 1);
