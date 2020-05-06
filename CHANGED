@@ -1,3 +1,4 @@
+2020-05-06 - SD_UT new attribute UTfrequency for individual transmission frequency
 2020-05-02 - new protocol 104 for remote control TR60C-1 (#844)
 
 * Update 14_SD_UT.pm
