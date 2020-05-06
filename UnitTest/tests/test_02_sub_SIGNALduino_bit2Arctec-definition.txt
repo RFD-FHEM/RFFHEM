@@ -1,0 +1,22 @@
+defmod test_02_sub_SIGNALduino_bit2Arctec UnitTest dummyDuino ( 
+{ 
+	use Test2::V0;
+	use Test2::Tools::Compare qw{ is isnt };
+
+	subtest 'Test bit2Arctec' => sub {
+		plan(2);
+
+		my @bits=qw(0 0 0 1 0 1 0 0 1 1 0 0 1 1 1 1 1 1 0 0 0 0 0 1 1 0 0 0 0 0 0 0);
+		my $rcode;
+		my $msg;
+
+		note('Convert 0 -> 01   1 -> 10 to be compatible with IT Module');
+		note("input @bits");
+
+		($rcode,@bits)=SIGNALduino_bit2Arctec($target,@bits);
+		is($rcode,1,'check returncode for bit2Arctec transmission');
+		note("output @bits");
+		is(join("",@bits),'0101011001100101101001011010101010100101010101101001010101010101','check result bit2Arctec');
+	};
+}
+)

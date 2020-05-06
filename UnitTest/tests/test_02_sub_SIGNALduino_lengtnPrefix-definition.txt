@@ -1,0 +1,20 @@
+defmod test_02_sub_SIGNALduino_lengtnPrefix UnitTest dummyDuino ( 
+{ 
+	use Test2::V0;
+	use Test2::Tools::Compare qw{ is isnt };
+
+	subtest 'Test lengtnPrefix' => sub {
+		plan(2);
+
+		my @bits=qw(0 1 0 0 0 1 0 1 0 1 0 0 1 0 1 0 1 0 0 0 0 1 0 0 0 1 1 1 1 0 1 1 1 1 0 1 0 1 1 1 0);
+		my $rcode;
+		note('calculates the hex (in bits) and adds it at the beginning of the message');
+		note("input @bits");
+
+		($rcode,@bits)=SIGNALduino_lengtnPrefix($target,@bits);
+		is($rcode,1,'check returncode for X10 transmission');
+		note("output @bits");
+		is(join("",@bits),'0010100101000101010010101000010001111011110101110','check result X10 transmission');
+	};
+}
+)
