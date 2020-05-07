@@ -8,25 +8,27 @@ SD_Protocols.pm
 tests
   * added 02_convITV1_tristateToBit.t
   * delete test_02_sub_SIGNALduino_ITV1_tristateToBit-definition.txt
+
 2020-05-06 - 00_SIGNALduino.pm
-
 Fixed bug and cnverted some code for better readabilify
-2020-05-05 - 00_SIGNALduino.pm
 
+2020-05-05 - 00_SIGNALduino.pm
 method call in SIGNALduino_Parse_MN adapted to object oriented mode
+
 2020-05-05 - 00_SIGNALduino.pm
-
 Fixed method call in SIGNALduino_Parse_MC and did some code cleanup
+
 2020-05-04 - t/FHEM/lib/SD_Protocols/01_func.t
-
 fix typo in test
+
 2020-05-04 - Update SD_Protocols.pm
+
 2020-05-03 - Update 00_SIGNALduino.pm
-
 * little changed for test
-2020-05-03 - UnitTest/tests/test_developid_1-definition.txt
 
+2020-05-03 - UnitTest/tests/test_developid_1-definition.txt
 Fixed test because loading a hash has changed a little bit
+
 2020-05-03 - Merge branch 'dev-r35_xFSK_oo' of github.com:RFD-FHEM/RFFHEM into dev-r35_xFSK_oo
 2020-05-03 - Merge branch 'dev-r35_xFSK' into dev-r35_xFSK_oo
 
