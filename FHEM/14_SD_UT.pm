@@ -1727,167 +1727,167 @@ sub SD_UT_Attr(@) {
 	my $bitData;
 	my $hex_lengh = length(InternalVal($name, "lastMSG", "0"));
 
-	if ($cmd eq "set" && $attrName eq 'repeats' && $attrValue !~ m/^[1-9]$/i) {
-		return "$name: Unallowed value $attrValue for the attribute repetition (must be 1 - 9)!";
-	}
+	if ($cmd eq 'set') {
+		if ($attrName eq 'repeats' && $attrValue !~ m/^[1-9]$/xms) {
+			return "$name: Unallowed value $attrValue for the attribute repetition (must be 1 - 9)!";
+		}
+		if ($attrName eq 'UTfrequency' && ($attrValue !~ m/^[1-9]{1}[0-9]{0,2}\.?[0-9]*$/xms || $attrValue >= 1000.0)) {
+			return "$name: Invalid value $attrValue for the UTfrequency attribute. Values ​​such as: 433.92 are permitted.";
+		}
 
-	############ chance device models ############
-	if ($cmd eq "set" && $attrName eq "model" && $attrValue ne $oldmodel) {
+		############ change device models ############
+		if ($attrName eq 'model' && $attrValue ne $oldmodel) {
+			if (InternalVal($name, "bitMSG", "no data") ne "no data") {
+				my $devicemodel;
 
-		if (InternalVal($name, "bitMSG", "no data") ne "no data") {
-			my $devicemodel;
-
-			### ERROR for Users
-			my $allowed_models;
-			foreach my $keys (keys %models) {	# read allowed_models with the same hex_lengh
-				$allowed_models.= $keys.", " if ($models{$keys}{hex_lengh} eq $hex_lengh);
-			}
-
-			Log3 $name, 4, "SD_UT_Attr Check for the change, $oldmodel hex_lengh=$hex_lengh, attrValue=$attrValue needed hex_lengh=".$models{$attrValue}{hex_lengh};
-			return "ERROR! You want to choose the $oldmodel model to $attrValue.\nPlease check your selection.\nThe length of RAWMSG must be the same!\n\nAllowed models are: $allowed_models" if ($models{$attrValue}{hex_lengh} !~ /$hex_lengh/ && $oldmodel ne "unknown");	# variants one
-			return "ERROR! You want to choose the unknown model to $attrValue.\nPlease check your selection.\nRAWMSG length is wrong!\n\nAllowed models are: $allowed_models" if (not ($models{$attrValue}{hex_lengh} =~ /($hex_lengh)/ ) && $oldmodel eq "unknown");				  # variants two/three
-			### #### #### ###
-
-			if ($attrName eq "model" && $attrValue eq "unknown") {
-				readingsSingleUpdate($hash, "state", " Please define your model with attributes! ", 0);
-			}
-
-			foreach my $keys (sort keys %models) {
-				if($keys eq $attrValue) {
-					$attr{$name}{model}	= $attrValue;				# set new model
-					$bitData = InternalVal($name, "bitMSG", "-");
-					$devicemodel = $keys;
-					$state = "Defined";
-					last;
+				### ERROR for Users
+				my $allowed_models;
+				foreach my $keys (keys %models) {	# read allowed_models with the same hex_lengh
+					$allowed_models.= $keys.", " if ($models{$keys}{hex_lengh} eq $hex_lengh);
 				}
-			}
+				Log3 $name, 4, "SD_UT_Attr Check for the change, $oldmodel hex_lengh=$hex_lengh, attrValue=$attrValue needed hex_lengh=".$models{$attrValue}{hex_lengh};
+				return "ERROR! You want to choose the $oldmodel model to $attrValue.\nPlease check your selection.\nThe length of RAWMSG must be the same!\n\nAllowed models are: $allowed_models" if ($models{$attrValue}{hex_lengh} !~ /$hex_lengh/ && $oldmodel ne "unknown");	# variants one
+				return "ERROR! You want to choose the unknown model to $attrValue.\nPlease check your selection.\nRAWMSG length is wrong!\n\nAllowed models are: $allowed_models" if (not ($models{$attrValue}{hex_lengh} =~ /($hex_lengh)/ ) && $oldmodel eq "unknown");				  # variants two/three
 
-			############ Westinghouse_Delancey RH787T ############
-			if ($attrName eq "model" && $attrValue eq "RH787T") {
-				$deviceCode = substr($bitData,1,4);
-				$deviceCode = sprintf("%X", oct( "0b$deviceCode" ) );
-				$devicename = $devicemodel."_".$deviceCode;
-			############ Westinghouse TR60C-1 ############
-			} elsif ($attrName eq 'model' && $attrValue eq 'TR60C1') {
-				$deviceCode = substr($bitData,0,4);
-				$deviceCode = sprintf("%X", oct( "0b$deviceCode" ) );
-				$devicename = $devicemodel."_".$deviceCode;
-			############ Westinghouse Buttons_five ############
-			} elsif ($attrName eq "model" && $attrValue eq "Buttons_five") {
-				$deviceCode = substr($bitData,8,4);
-				$deviceCode = sprintf("%X", oct( "0b$deviceCode" ) );
-				$devicename = $devicemodel."_".$deviceCode;
-			############ SA_434_1_mini	############
-			} elsif ($attrName eq "model" && $attrValue eq "SA_434_1_mini") {
-				$deviceCode = sprintf("%03X", oct( "0b$bitData" ) );
-				$devicename = $devicemodel."_".$deviceCode;
-			############ Tedsen_SKX1xx, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx	############
-			} elsif ($attrName eq "model" && ($attrValue eq "Tedsen_SKX1xx" || $attrValue eq "Tedsen_SKX2xx" || $attrValue eq "Tedsen_SKX4xx" || $attrValue eq "Tedsen_SKX6xx")) {
-				$deviceCode = SD_UT_bin2tristate(substr($bitData,0,14));					# only 14 bit from bitdata to tristate
-				$devicename = $devicemodel."_".$deviceCode;
-			############ Unitec_47031	############
-			} elsif ($attrName eq "model" && $attrValue eq "Unitec_47031") {
-				$deviceCode = substr($bitData,0,8);																# unklar derzeit! 10Dil auf Bild
-				$deviceCode = sprintf("%02X", oct( "0b$deviceCode" ) );
-				$devicename = $devicemodel."_".$deviceCode;
-			############ QUIGG_DMV ############
-			} elsif ($attrName eq "model" && $attrValue eq "QUIGG_DMV") {
-				$deviceCode = substr($bitData,0,12);
-				$deviceCode = sprintf("%03X", oct( "0b$deviceCode" ) );
-				$devicename = $devicemodel."_".$deviceCode;
-			############ TR_502MSV ############
-			} elsif ($attrName eq "model" && $attrValue eq "TR_502MSV") {
-				$deviceCode = substr($bitData,0,12);
-				$deviceCode = sprintf("%03X", oct( "0b$deviceCode" ) );
-				$devicename = $devicemodel."_".$deviceCode;
-			############ Novy_840029 || Novy_840039 ############
-			} elsif ($attrName eq "model" && ($attrValue eq "Novy_840029" || $attrValue eq "Novy_840039") ) {
-				$deviceCode = substr($bitData,0,8);
-				$deviceCode = sprintf("%02X", oct( "0b$deviceCode" ) );
-				$devicename = $devicemodel."_".$deviceCode;
-			############ CAME_TOP_432EV ############
-			} elsif ($attrName eq "model" && $attrValue eq "CAME_TOP_432EV") {
-				$deviceCode = substr($bitData,0,8);
-				$deviceCode = sprintf("%X", oct( "0b$deviceCode" ) );
-				$devicename = $devicemodel."_".$deviceCode;
-			############ NEFF SF01_01319004 || BOSCH SF01_01319004_Typ2 || Refsta Topdraft (Tecnowind) ############
-			} elsif ($attrName eq "model" && ($attrValue eq "SF01_01319004" || $attrValue eq "SF01_01319004_Typ2")) {
-				$deviceCode = substr($bitData,0,14) . "00";
-				$deviceCode = sprintf("%04X", oct( "0b$deviceCode" ) );
-				$devicename = $devicemodel."_".$deviceCode;
-			############ Hoermann HS1-868-BS	############
-			} elsif ($attrName eq "model" && $attrValue eq "HS1_868_BS") {
-				$deviceCode = sprintf("%09X", oct( "0b$bitData" ) );
-				$devicename = $devicemodel."_".$deviceCode;
-			############ Hoermann HSM4	############
-			} elsif ($attrName eq "model" && $attrValue eq "HSM4") {
-				$deviceCode = substr($bitData,8,28);
-				$deviceCode = sprintf("%07X", oct( "0b$deviceCode" ) );
-				$devicename = $devicemodel."_".$deviceCode;
-			############ Chilitec_22640	############
-			} elsif ($attrName eq "model" && $attrValue eq "Chilitec_22640") {
-				$deviceCode = substr($bitData,0,16);
-				$deviceCode = sprintf("%04X", oct( "0b$deviceCode" ) );
-				$devicename = $devicemodel."_".$deviceCode;
-			############ LED_XM21_0	############
-			} elsif ($attrName eq "model" && $attrValue eq "LED_XM21_0") {
-				$deviceCode = substr($bitData,0,56);
-				$deviceCode = sprintf("%14X", oct( "0b$deviceCode" ) );
-				$devicename = $devicemodel."_".$deviceCode;
-			############ Krinner_LUMIX	############
-			} elsif ($attrName eq "model" && $attrValue eq "Krinner_LUMIX") {
-				$deviceCode = substr($bitData,0,28);
-				$deviceCode = sprintf("%07X", oct( "0b$deviceCode" ) );
-				$devicename = $devicemodel."_".$deviceCode;
-			############ Manax | mumbi ############
-			} elsif ($attrName eq "model" && $attrValue eq "RC_10") {
-				$deviceCode = substr($bitData,0,16);
-				$deviceCode = sprintf("%04X", oct( "0b$deviceCode" ) );
-				
-				my $button = substr($bitData,20,3);
-				foreach my $keys (sort keys %{$models{RC_10}{buttons}}) {
-					if ($keys eq $button) {
-						$deviceCode = $deviceCode."_".$models{RC_10}{buttons}{$keys};
+				if ($attrValue eq "unknown") {
+					readingsSingleUpdate($hash, "state", " Please define your model with attributes! ", 0);
+				}
+
+				foreach my $keys (keys %models) {
+					if($keys eq $attrValue) {
+						$attr{$name}{model}	= $attrValue;				# set new model
+						$bitData = InternalVal($name, "bitMSG", "-");
+						$devicemodel = $keys;
+						$state = "Defined";
 						last;
 					}
 				}
-				
-				$devicename = $devicemodel."_".$deviceCode;
-			############ ESTO KL_RF01 ############
-			} elsif ($attrName eq "model" && $attrValue eq "KL_RF01") {
-				$deviceCode = substr($bitData,0,16);
-				$deviceCode = sprintf("%04X", oct( "0b$deviceCode" ) );
-				$devicename = $devicemodel."_".$deviceCode;
-			############ Techmar Garden Lights ############
-			} elsif ($attrName eq "model" && $attrValue eq "Techmar") {
-				$deviceCode = substr($bitData,0,32);
-				$deviceCode = sprintf("%08X", oct( "0b$deviceCode" ) );
-				$devicename = $devicemodel."_".$deviceCode;
-			############ Navaris	############
-			} elsif ($attrName eq "model" && $attrValue eq "Navaris") {
-				$deviceCode = sprintf("%06X", oct( "0b$bitData" ) );
-				$devicename = $devicemodel."_".$deviceCode;
-			############ unknown ############
+
+				############ Westinghouse_Delancey RH787T ############
+				if ($attrValue eq "RH787T") {
+					$deviceCode = substr($bitData,1,4);
+					$deviceCode = sprintf("%X", oct( "0b$deviceCode" ) );
+					$devicename = $devicemodel."_".$deviceCode;
+				############ Westinghouse TR60C-1 ############
+				} elsif ($attrValue eq 'TR60C1') {
+					$deviceCode = substr($bitData,0,4);
+					$deviceCode = sprintf("%X", oct( "0b$deviceCode" ) );
+					$devicename = $devicemodel."_".$deviceCode;
+				############ Westinghouse Buttons_five ############
+				} elsif ($attrValue eq "Buttons_five") {
+					$deviceCode = substr($bitData,8,4);
+					$deviceCode = sprintf("%X", oct( "0b$deviceCode" ) );
+					$devicename = $devicemodel."_".$deviceCode;
+				############ SA_434_1_mini	############
+				} elsif ($attrValue eq "SA_434_1_mini") {
+					$deviceCode = sprintf("%03X", oct( "0b$bitData" ) );
+					$devicename = $devicemodel."_".$deviceCode;
+				############ Tedsen_SKX1xx, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx	############
+				} elsif ($attrValue eq "Tedsen_SKX1xx" || $attrValue eq "Tedsen_SKX2xx" || $attrValue eq "Tedsen_SKX4xx" || $attrValue eq "Tedsen_SKX6xx") {
+					$deviceCode = SD_UT_bin2tristate(substr($bitData,0,14));					# only 14 bit from bitdata to tristate
+					$devicename = $devicemodel."_".$deviceCode;
+				############ Unitec_47031	############
+				} elsif ($attrValue eq "Unitec_47031") {
+					$deviceCode = substr($bitData,0,8);																# unklar derzeit! 10Dil auf Bild
+					$deviceCode = sprintf("%02X", oct( "0b$deviceCode" ) );
+					$devicename = $devicemodel."_".$deviceCode;
+				############ QUIGG_DMV ############
+				} elsif ($attrValue eq "QUIGG_DMV") {
+					$deviceCode = substr($bitData,0,12);
+					$deviceCode = sprintf("%03X", oct( "0b$deviceCode" ) );
+					$devicename = $devicemodel."_".$deviceCode;
+				############ TR_502MSV ############
+				} elsif ($attrValue eq "TR_502MSV") {
+					$deviceCode = substr($bitData,0,12);
+					$deviceCode = sprintf("%03X", oct( "0b$deviceCode" ) );
+					$devicename = $devicemodel."_".$deviceCode;
+				############ Novy_840029 || Novy_840039 ############
+				} elsif ($attrValue eq "Novy_840029" || $attrValue eq "Novy_840039") {
+					$deviceCode = substr($bitData,0,8);
+					$deviceCode = sprintf("%02X", oct( "0b$deviceCode" ) );
+					$devicename = $devicemodel."_".$deviceCode;
+				############ CAME_TOP_432EV ############
+				} elsif ($attrValue eq "CAME_TOP_432EV") {
+					$deviceCode = substr($bitData,0,8);
+					$deviceCode = sprintf("%X", oct( "0b$deviceCode" ) );
+					$devicename = $devicemodel."_".$deviceCode;
+				############ NEFF SF01_01319004 || BOSCH SF01_01319004_Typ2 || Refsta Topdraft (Tecnowind) ############
+				} elsif ($attrValue eq "SF01_01319004" || $attrValue eq "SF01_01319004_Typ2") {
+					$deviceCode = substr($bitData,0,14) . "00";
+					$deviceCode = sprintf("%04X", oct( "0b$deviceCode" ) );
+					$devicename = $devicemodel."_".$deviceCode;
+				############ Hoermann HS1-868-BS	############
+				} elsif ($attrValue eq "HS1_868_BS") {
+					$deviceCode = sprintf("%09X", oct( "0b$bitData" ) );
+					$devicename = $devicemodel."_".$deviceCode;
+				############ Hoermann HSM4	############
+				} elsif ($attrValue eq "HSM4") {
+					$deviceCode = substr($bitData,8,28);
+					$deviceCode = sprintf("%07X", oct( "0b$deviceCode" ) );
+					$devicename = $devicemodel."_".$deviceCode;
+				############ Chilitec_22640	############
+				} elsif ($attrValue eq "Chilitec_22640") {
+					$deviceCode = substr($bitData,0,16);
+					$deviceCode = sprintf("%04X", oct( "0b$deviceCode" ) );
+					$devicename = $devicemodel."_".$deviceCode;
+				############ LED_XM21_0	############
+				} elsif ($attrValue eq "LED_XM21_0") {
+					$deviceCode = substr($bitData,0,56);
+					$deviceCode = sprintf("%14X", oct( "0b$deviceCode" ) );
+					$devicename = $devicemodel."_".$deviceCode;
+				############ Krinner_LUMIX	############
+				} elsif ($attrValue eq "Krinner_LUMIX") {
+					$deviceCode = substr($bitData,0,28);
+					$deviceCode = sprintf("%07X", oct( "0b$deviceCode" ) );
+					$devicename = $devicemodel."_".$deviceCode;
+				############ Manax | mumbi ############
+				} elsif ($attrValue eq "RC_10") {
+					$deviceCode = substr($bitData,0,16);
+					$deviceCode = sprintf("%04X", oct( "0b$deviceCode" ) );
+					my $button = substr($bitData,20,3);
+					foreach my $keys (sort keys %{$models{RC_10}{buttons}}) {
+						if ($keys eq $button) {
+							$deviceCode = $deviceCode."_".$models{RC_10}{buttons}{$keys};
+							last;
+						}
+					}
+					$devicename = $devicemodel."_".$deviceCode;
+				############ ESTO KL_RF01 ############
+				} elsif ($attrValue eq "KL_RF01") {
+					$deviceCode = substr($bitData,0,16);
+					$deviceCode = sprintf("%04X", oct( "0b$deviceCode" ) );
+					$devicename = $devicemodel."_".$deviceCode;
+				############ Techmar Garden Lights ############
+				} elsif ($attrValue eq "Techmar") {
+					$deviceCode = substr($bitData,0,32);
+					$deviceCode = sprintf("%08X", oct( "0b$deviceCode" ) );
+					$devicename = $devicemodel."_".$deviceCode;
+				############ Navaris	############
+				} elsif ($attrValue eq "Navaris") {
+					$deviceCode = sprintf("%06X", oct( "0b$bitData" ) );
+					$devicename = $devicemodel."_".$deviceCode;
+				############ unknown ############
+				} else {
+					$devicename = "unknown_please_select_model";
+					Log3 $name, 3, "SD_UT_Attr UNDEFINED sensor $attrValue (model=unknown)";
+				}
+
+				Log3 $name, 3, "SD_UT_Attr UNDEFINED sensor $attrValue detected, code $deviceCode (DoTrigger)" if ($devicemodel ne "unknown");
+
+				$modules{SD_UT}{defptr}{deletecache} = $name;	# delete old device
+				Log3 $name, 5, "SD_UT: Attr cmd=$cmd devicename=$name attrName=$attrName attrValue=$attrValue oldmodel=$oldmodel";
+
+				readingsSingleUpdate($hash, "state", $state, 0);
+
+				DoTrigger ("global","UNDEFINED unknown_please_select_model SD_UT unknown") if ($devicename eq "unknown_please_select_model");		# if user push attr return to unknown
+				DoTrigger ("global","UNDEFINED $devicename SD_UT $devicemodel $deviceCode") if ($devicename ne "unknown_please_select_model");	# create new device
+
+				$attr{$devicename}{model}	= "$attrValue"; # set model
+
 			} else {
-				$devicename = "unknown_please_select_model";
-				Log3 $name, 3, "SD_UT_Attr UNDEFINED sensor $attrValue (model=unknown)";
+				readingsSingleUpdate($hash, "state", "Please press button again!", 0);
+				return "Please press button again or receive more messages!\nOnly with another message can the model be defined.\nWe need bitMSG from message.";
 			}
-
-			Log3 $name, 3, "SD_UT_Attr UNDEFINED sensor $attrValue detected, code $deviceCode (DoTrigger)" if ($devicemodel ne "unknown");
-
-			$modules{SD_UT}{defptr}{deletecache} = $name;	# delete old device
-			Log3 $name, 5, "SD_UT: Attr cmd=$cmd devicename=$name attrName=$attrName attrValue=$attrValue oldmodel=$oldmodel";
-
-			readingsSingleUpdate($hash, "state", $state, 0);
-
-			DoTrigger ("global","UNDEFINED unknown_please_select_model SD_UT unknown") if ($devicename eq "unknown_please_select_model");		# if user push attr return to unknown
-			DoTrigger ("global","UNDEFINED $devicename SD_UT $devicemodel $deviceCode") if ($devicename ne "unknown_please_select_model");	# create new device
-
-			$attr{$devicename}{model}	= "$attrValue";				# set model
-
-		} else {
-			readingsSingleUpdate($hash, "state", "Please press button again!", 0);
-			return "Please press button again or receive more messages!\nOnly with another message can the model be defined.\nWe need bitMSG from message.";
 		}
 	}
 
@@ -2209,6 +2209,8 @@ sub SD_UT_tristate2bin($) {
 	<ul><li><a name="UTclock">UTclock</a><br>
 	This attribute set the clock pulse when sending. There is no standard value.<br>
 	<small><u>exception:</u></small> The model Novy_840039 has a preset clock pulse of 375. You can manually adjust this individually with the attribute.</li></ul><br>
+	<ul><li><a name="UTfrequency">UTfrequency</a><br>
+	An individual transmission frequency can be set with this attribute. If this attribute is not set, the frequency is used by the SIGNALduino.</li></ul><br>
 
 	<b><i>Generated readings of the models</i></b><br>
 	<ul><u>Buttons_five | CAME_TOP_432EV | Chilitec_22640 | HSM4 | KL_RF01 | LED_XM21_0 | Momento | Novy_840029 | Novy_840039 | OR28V | QUIGG_DMV | RC_10 | RH787T | SF01_01319004 | SF01_01319004_Typ2 | TR_502MSV</u><br>
@@ -2512,11 +2514,13 @@ sub SD_UT_tristate2bin($) {
 		(unknown, Buttons_five, CAME_TOP_432EV, Chilitec_22640, KL_RF01, HS1-868-BS, HSM4, QUIGG_DMV, LED_XM21_0, Momento, Navaris, Novy_840029, Novy_840039, OR28V, RC_10, RH787T, SA_434_1_mini, SF01_01319004, TR60C1, Tedsen_SKX1xx, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx, TR_502MSV, Unitec_47031)</li><a name=" "></a>
 	</ul><br>
 	<ul><li><a name="repeats">repeats</a><br>
-	Mit diesem Attribut kann angepasst werden, wie viele Wiederholungen sendet werden. Standard ist 5.</li></ul><br>
+	Mit diesem Attribut kann angepasst werden, wie viele Wiederholungen gesendet werden. Standard ist 5.</li></ul><br>
 	<ul><li><a name="UTclock">UTclock</a><br>
-	Mit diesem Attribut kann der Clockpulse beim senden eingestellt werden. Einen Standardwert gibt es nicht.<br>
+	Mit diesem Attribut kann der Clockpulse beim Senden eingestellt werden. Einen Standardwert gibt es nicht.<br>
 	<small><u>Ausnahme:</u></small> Das Model Novy_840039 hat einen voreingestellten Clockpulse von 375. Diesen kann man manuell mit dem Attribut individuell anpassen.</li></ul><br>
-
+	<ul><li><a name="UTfrequency">UTfrequency</a><br>
+	Mit diesem Attribut kann eine individuelle Sendefrequenz eingestellt werden. Ist dieses Attribut nicht gesetzt, wird die Frequenz vom SIGNALduino verwendet.</li></ul><br>
+	
 	<b><i>Generierte Readings der Modelle</i></b><br>
 	<ul><u>Buttons_five | CAME_TOP_432EV | Chilitec_22640 | HSM4 | KL_RF01 | LED_XM21_0 | Momento | Novy_840029 | Novy_840039 | OR28V | QUIGG_DMV | RC_10 | RH787T | SF01_01319004 | SF01_01319004_Typ2 | TR_502MSV</u><br>
 	<li>deviceCode<br>
