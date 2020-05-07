@@ -772,7 +772,7 @@ sub SIGNALduino_Set_sendMsg {
 			if (substr($data,0,2) eq "is") {
 				$data = substr($data,2);   # is am Anfang entfernen
 			}
-			$data = SIGNALduino_ITV1_tristateToBit($data);
+			$data = lib::SD_Protocols::ConvITV1_tristateToBit($data);
 			$hash->{logMethod}->($hash->{NAME}, 5, "$hash->{NAME}: Set_sendMsg, IT V1 convertet tristate to bits=$data");
 		}
 		if (!defined $clock ) {
@@ -3275,18 +3275,6 @@ sub SIGNALduino_bit2itv1 {
 	} else {
 		return (0,0);
 	}
-}
-
-############################# package main, test exists
-sub SIGNALduino_ITV1_tristateToBit($) {
-	my ($msg) = @_;
-	# Convert 0 -> 00   1 -> 11 F => 01 to be compatible with IT Module
-	$msg =~ s/0/00/g;
-	$msg =~ s/1/11/g;
-	$msg =~ s/F/01/g;
-	$msg =~ s/D/10/g;
-
-	return (1,$msg);
 }
 
 ############################# package main, test exists

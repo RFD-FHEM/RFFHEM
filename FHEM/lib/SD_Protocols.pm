@@ -358,6 +358,31 @@ sub ConvHE_EU {
 }
 
 ############################################################
+
+=item ConvITV1_tristateToBit()
+
+This sub Convert 0 -> 00, 1 -> 11, F => 01 to be compatible with IT Module.
+
+Input:  $msg
+
+Output:
+        converted message
+
+=cut
+
+sub ConvITV1_tristateToBit {
+	my ($msg) = @_;
+	# Convert 0 -> 00   1 -> 11 F => 01 to be compatible with IT Module
+	$msg =~ s/0/00/g;
+	$msg =~ s/1/11/g;
+	$msg =~ s/F/01/g;
+	$msg =~ s/D/10/g;
+
+	return (1,$msg);
+}
+
+
+############################################################
 # xFSK method functions
 ############################################################
 
