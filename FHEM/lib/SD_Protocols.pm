@@ -213,10 +213,10 @@ sub setDefaults {
 	{
 		my $format = $self->getProperty($id,'format');
 			
-		if (defined ($format) && $format eq 'manchester')
+		if ( defined $format && ($format eq 'manchester' || $format eq '2-FSK') )
 		{
 			# Manchester defaults :
-			$self->{_protocols}->{$id}->{method} = \&lib::SD_Protocols::MCRAW if (!defined $self->checkProperty($id,'method') );
+			$self->{_protocols}->{$id}->{method} = \&lib::SD_Protocols::MCRAW if ( !defined $self->checkProperty($id,'method') && $format eq 'manchester' );
 
 			my $cref = $self->checkProperty($id,'method');
 			$cref =~ s/^\\&//;
