@@ -1,3 +1,6 @@
+2020-05-08 - 00_SIGNALduino.pm
+
+syntax fixed
 2020-05-07 - transfer sub SIGNALduino_ITV1_tristateToBit to lib::SD_Protocols::ConvITV1_tristateToBit
 
 00_SIGNALduino.pm
