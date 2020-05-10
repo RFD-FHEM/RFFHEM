@@ -38,7 +38,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.5_dev_05.09",
+	SDUINO_VERSION            => "v3.5_dev_05.10",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -2629,12 +2629,12 @@ sub SIGNALduino_Parse_MN {
 
 	mnIDLoop:
 	for my $id (@{$hash->{mnIdList}}) {
-		my $method = $hash->{protocolObject}->checkProperty($id,'method','unspecified');
-		if (!exists &$method || !defined &{ $method }) {
+#		my $method = $hash->{protocolObject}->checkProperty($id,'method','unspecified');
+	   	my $method = $hash->{protocolObject}->getProperty($id,'method');
+	    if (!exists &$method || !defined &{ $method }) {
 			$hash->{logMethod}->($name, 5, qq[$name: Parse_MN, Error! unknown function=$method. Please define it in file SD_ProtocolData.pm]);
 			next mnIDLoop; 
 		}
-
 		my $length_min=$hash->{protocolObject}->checkProperty($id,'length_min',-1);
 		if ($hlen < $length_min) {
 			$hash->{logMethod}->($name, 3, qq[$name: Parse_MN, Error! ID=$id msg=$rawData ($hlen) too short, min=$length_min]);
@@ -2643,7 +2643,6 @@ sub SIGNALduino_Parse_MN {
 
 		$match = $hash->{protocolObject}->checkProperty($id,'regexMatch',undef);
 		$modulation = $hash->{protocolObject}->checkProperty($id,'modulation',undef);
-		
 		if ( defined($match) && $rawData =~ m/$match/x ) {
 			$hash->{logMethod}->($name, 4, qq[$name: Parse_MN, Found $modulation Protocol id $id -> ].$hash->{protocolObject}->getProperty($id,'name').q[ with match $match]);
 		} elsif (!defined($match) ) {
