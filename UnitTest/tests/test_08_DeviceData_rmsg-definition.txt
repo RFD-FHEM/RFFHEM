@@ -58,6 +58,7 @@ defmod test_08_DeviceData_rmsg UnitTest dummyDuino (
         my $noTestRun=1;
         while ( ($pID, $testSet) = each  (@{$testDataArray}) )
         {
+          #next if ($testSet->{id} != 45);
           next if (!$targetHash->{protocolObject}->protocolExists($testSet->{id}));
           while ( ($tID, $tData) = each (@{$testSet->{data}}) ) 
           {
@@ -99,6 +100,7 @@ defmod test_08_DeviceData_rmsg UnitTest dummyDuino (
       my $noTestRun=1;
       while ( ($pID, $testSet) = each  (@{$testDataArray}) )
       {
+        #next if ($testSet->{id} != 45);
         #next if ($testSet->{name} ne "NC-3911-675" );
         next if (!$targetHash->{protocolObject}->protocolExists($testSet->{id}));
         next if ($targetHash->{protocolObject}->checkProperty($testSet->{id},'developId',undef));

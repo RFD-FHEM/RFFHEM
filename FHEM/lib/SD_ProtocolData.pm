@@ -1292,7 +1292,7 @@ package lib::SD_ProtocolData;
 				modulematch				=> '^r[A-Fa-f0-9]{22}',
 				length_min				=> '84',
 				length_max				=> '120',
-				postDemodulation	=> sub {	my ($name, @bit_msg) = @_;	my @new_bitmsg = splice @bit_msg, 0,88;	return 1,@new_bitmsg; },
+				postDemodulation		=> sub { my $self=shift;	my ($name, @bit_msg) = @_;	my @new_bitmsg = splice @bit_msg, 0,88;	return 1,@new_bitmsg; },
 			},
 		"46"	=>	## Tedsen Fernbedienungen u.a. für Berner Garagentorantrieb GA401 und Geiger Antriebstechnik Rolladensteuerung
 							# https://github.com/RFD-FHEM/RFFHEM/issues/91
