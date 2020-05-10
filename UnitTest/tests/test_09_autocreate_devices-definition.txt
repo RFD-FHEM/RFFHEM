@@ -1,4 +1,4 @@
-defmod test_autocreate_devices UnitTest dummyDuino (
+defmod test_09_autocreate_devices UnitTest dummyDuino (
 {
 	use Test2::V0;
 	use Test2::Tools::Compare qw{is};
