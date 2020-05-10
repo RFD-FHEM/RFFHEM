@@ -1,3 +1,15 @@
+2020-05-10 - 00_SIGNALduino.pm
+
+Updated subs / calling to postDemodulation calling method
+
+UnitTest\tests\test_02_sub_SIGNALduino_callsub_1-definition.txt
+UnitTest\tests\test_02_sub_SIGNALduino_postDemo_EM-definition.txt
+UnitTest\tests\test_02_sub_SIGNALduino_postDemo_FHT80-definition.txt
+UnitTest\tests\test_02_sub_SIGNALduino_postDemo_FHT80TF-definition.txt
+UnitTest\tests\test_02_sub_SIGNALduino_postDemo_FS20-definition.txt
+UnitTest\tests\test_02_sub_SIGNALduino_postDemo_WS7035-definition.txt
+
+Updated tests
 2020-05-10 - lib/SD_Protocols.pm
 
 Added thaw and freeze hooks, because cloning the method subrefs doesn't work as expected. So instead of copying the datastructure we only save filenmae and format and reload the protocol during a clone. This gives us a working object
