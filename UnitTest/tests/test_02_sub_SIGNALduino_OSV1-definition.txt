@@ -13,7 +13,7 @@ defmod test_02_sub_SIGNALduino_OSV1 UnitTest dummyDuino (
 
 				my $bitdata="11100101101011100000000010111000";
 
-				($rcode,$hexresult)=SIGNALduino_OSV1($target,$bitdata,$id,length $bitdata);
+				($rcode,$hexresult)=SIGNALduino_OSV1(undef,$target,$bitdata,$id,length $bitdata);
 				is($rcode,1,"check returncode for single OSV1 transmission");
 				is($hexresult,"500A4D3007500700002700","check result for single OSV1 transmission");			
 			};
@@ -24,7 +24,7 @@ defmod test_02_sub_SIGNALduino_OSV1 UnitTest dummyDuino (
 
 				my $bitdata="11100101101000000000000010111000";
 
-				($rcode,$hexresult)=SIGNALduino_OSV1($target,$bitdata,$id,length $bitdata);
+				($rcode,$hexresult)=SIGNALduino_OSV1(undef,$target,$bitdata,$id,length $bitdata);
 				is($rcode,-1,"check returncode for single OSV1 transmission");
 				is($hexresult,"OSV1 - ERROR checksum not equal: 172 != 29","check ERROR checksum");			
 			};
@@ -35,7 +35,7 @@ defmod test_02_sub_SIGNALduino_OSV1 UnitTest dummyDuino (
 
 				my $bitdata="111001011010111000000000101110";
 
-				($rcode,$hexresult)=SIGNALduino_OSV1($target,$bitdata,$id,length $bitdata);
+				($rcode,$hexresult)=SIGNALduino_OSV1(undef,$target,$bitdata,$id,length $bitdata);
 				is($rcode,-1,"check returncode for single OSV1 transmission");
 				is($hexresult," message is to short","check result message to short");
 			};
@@ -46,7 +46,7 @@ defmod test_02_sub_SIGNALduino_OSV1 UnitTest dummyDuino (
 
 				my $bitdata="1110010110101110000000001011100011";
 
-				($rcode,$hexresult)=SIGNALduino_OSV1($target,$bitdata,$id,length $bitdata);
+				($rcode,$hexresult)=SIGNALduino_OSV1(undef,$target,$bitdata,$id,length $bitdata);
 				is($rcode,-1,"check returncode for single OSV1 transmission");
 				is($hexresult," message is to long","check result message to long");
 			};

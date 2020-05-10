@@ -349,7 +349,7 @@ sub SIGNALduino_FingerprintFn($$) {
 ############################# package main
 sub SIGNALduino_Define($$) {
   my ($hash, $def) = @_;
-  my @a = split("[ \t][ \t]*", $def);
+  my @a =split m{\s+}xms, $def;
 
   if(@a != 3) {
     my $msg = "Define, wrong syntax: define <name> SIGNALduino {none | devicename[\@baudrate] | devicename\@directio | hostname:port}";
@@ -1003,13 +1003,13 @@ sub SIGNALduino_Get_Command_CCReg {
 sub SIGNALduino_Get_Raw {
 	my ($hash, @a) = @_;
  	return "\"get raw\" needs at least a parameter" if (@a < 2);
- 	if ($a[1] =~ /^M[CcSUN];.*/)
+ 	if ($a[1] =~ /^M[CcSUN];.+/)
   	{
 		$a[1]="\002$a[1]\003";  	## Add start end end marker if not already there
 		$hash->{logMethod}->($hash->{NAME}, 5, "$hash->{NAME}: msg adding start and endmarker to message");
 	}
 
-	if ($a[1] =~ /\002M.;.*;\003$/)
+	if ($a[1] =~ /\002M\w;.+;\003$/)
 	{
 		$hash->{logMethod}->( $hash->{NAME}, 4, "$hash->{NAME}: msg get raw: $a[1]");
 		return SIGNALduino_Parse($hash, $hash, $hash->{NAME}, $a[1]);
@@ -2135,7 +2135,7 @@ sub SIGNALduino_Parse_MS($$$$%) {
 	#Debug "Message splitted:";
 	#Debug Dumper(\@msg_parts);
 
-	my $debug = AttrVal($iohash->{NAME},"debug",1);
+	my $debug = AttrVal($iohash->{NAME},"debug",0);
 
 	if (defined($clockidx) and defined($syncidx))
 	{
@@ -3677,6 +3677,8 @@ sub SIGNALduino_postDemo_WS7053($@) {
 # manchester method
 ############################# package main, test exists
 sub SIGNALduino_GROTHE {
+	my $self = shift; #just make compatibility with object 
+	
 	my ($name,$bitData,$id,$mcbitnum) = @_;
 	my $bitLength;
 	$bitData = substr($bitData, 0, $mcbitnum);
@@ -3705,6 +3707,7 @@ sub SIGNALduino_GROTHE {
 
 ############################# package main, test exists
 sub SIGNALduino_MCTFA {
+	my $self = shift; #just make compatibility with object 
 	my ($name,$bitData,$id,$mcbitnum) = @_;
 
 	my $preamble_pos;
@@ -3767,6 +3770,7 @@ sub SIGNALduino_MCTFA {
 
 ############################# package main, test exists
 sub SIGNALduino_OSV2 {
+	my $self = shift; #just make compatibility with object 
 	my ($name,$bitData,$id,$mcbitnum) = @_;
 
 	my $preamble_pos;
@@ -3908,7 +3912,10 @@ sub SIGNALduino_OSV2 {
 
 ############################# package main, test exists
 sub SIGNALduino_OSV1 {
-	my ($name,$bitData,$id,$mcbitnum) = @_;
+	my $self = shift; #just make compatibility with object 
+	my $name = shift // carp "error name must be provided";
+	
+	my ($bitData,$id,$mcbitnum) = @_;
 	my $hash=$defs{$name};
 	
 	return (-1," message is to short") if ($mcbitnum < $hash->{protocolObject}->checkProperty($id,'length_min',-1) );
@@ -3966,6 +3973,7 @@ sub SIGNALduino_OSV1 {
 
 ############################# package main
 sub	SIGNALduino_AS {
+	my $self = shift; #just make compatibility with object 
 	my ($name,$bitData,$id,$mcbitnum) = @_;
 	my $hash=$defs{$name};
 	my $debug = AttrVal($name,"debug",0);
@@ -3994,6 +4002,7 @@ sub	SIGNALduino_AS {
 
 ############################# package main
 sub	SIGNALduino_Hideki {
+	my $self = shift; #just make compatibility with object 
 	my ($name,$bitData,$id,$mcbitnum) = @_;
 	my $debug = AttrVal($name,"debug",0);
 	my $hash=$defs{$name};
@@ -4050,6 +4059,7 @@ sub	SIGNALduino_Hideki {
 
 ############################# package main, test exists
 sub SIGNALduino_Maverick {
+	my $self = shift; #just make compatibility with object 
 	my ($name,$bitData,$id,$mcbitnum) = @_;
 
 	if ($bitData =~ m/^.*(101010101001100110010101).*/)
@@ -4069,6 +4079,7 @@ sub SIGNALduino_Maverick {
 
 ############################# package main, test exists
 sub SIGNALduino_OSPIR {
+	my $self = shift; #just make compatibility with object 
 	my ($name,$bitData,$id,$mcbitnum) = @_;
 
 	if ($bitData =~ m/^.*(1{14}|0{14}).*/)
@@ -4087,6 +4098,7 @@ sub SIGNALduino_OSPIR {
 
 ############################# package main, test exists
 sub SIGNALduino_SomfyRTS {
+	my $self = shift; #just make compatibility with object 
 	my ($name, $bitData,$id,$mcbitnum) = @_;
 
     #(my $negBits = $bitData) =~ tr/10/01/;   # Todo: eventuell auf pack umstellen

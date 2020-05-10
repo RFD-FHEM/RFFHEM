@@ -14,7 +14,7 @@ defmod test_02_sub_SIGNALduino_GROTHE UnitTest dummyDuino (
 			plan(2);
 			my $bitData='00100011110000010010100111011001111001111';
 
-			($rcode,$hexresult)=SIGNALduino_GROTHE($target,$bitData,$id,length $bitData);
+			($rcode,$hexresult)=SIGNALduino_GROTHE(undef,$target,$bitData,$id,length $bitData);
 			is($rcode,1,'check returncode for GROTHE good message');
 			is($hexresult,'478253B3CF','check result GROTHE good message');
 		};
@@ -24,7 +24,7 @@ defmod test_02_sub_SIGNALduino_GROTHE UnitTest dummyDuino (
 			plan(2);
 			my $bitData='00101011110000010010100111011001111001111';
 
-			($rcode,$hexresult)=SIGNALduino_GROTHE($target,$bitData,$id,length $bitData);
+			($rcode,$hexresult)=SIGNALduino_GROTHE(undef,$target,$bitData,$id,length $bitData);
 			is($rcode,-1,'check returncode for GROTHE without preamble');
 			is($hexresult,'Start pattern (01000111) not found','check result GROTHE without preamble');
 		};
@@ -34,7 +34,7 @@ defmod test_02_sub_SIGNALduino_GROTHE UnitTest dummyDuino (
 			plan(2);
 			my $bitData='001000111100000100101001110110011110011';
 
-			($rcode,$hexresult)=SIGNALduino_GROTHE($target,$bitData,$id,length $bitData);
+			($rcode,$hexresult)=SIGNALduino_GROTHE(undef,$target,$bitData,$id,length $bitData);
 			is($rcode,-1,'check returncode for GROTHE message to short');
 			is($hexresult,'message is to short','check result GROTHE message to short');
 		};
@@ -44,7 +44,7 @@ defmod test_02_sub_SIGNALduino_GROTHE UnitTest dummyDuino (
 			plan(2);
 			my $bitData='00100011110000010010100111011001111001111000000000000000000000000000';
 
-			($rcode,$hexresult)=SIGNALduino_GROTHE($target,$bitData,$id,length $bitData);
+			($rcode,$hexresult)=SIGNALduino_GROTHE(undef,$target,$bitData,$id,length $bitData);
 			is($rcode,-1,'check returncode for GROTHE message to long');
 			is($hexresult,'message is to long','check result GROTHE message to long');
 		};

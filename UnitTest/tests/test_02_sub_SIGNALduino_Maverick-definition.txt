@@ -14,7 +14,7 @@ defmod test_02_sub_SIGNALduino_Maverick UnitTest dummyDuino (
 			plan(2);
 			my $bitdata='10101010100110011001010101011001100101011001100110101001010110011001100101100110100110011010100101101001';
 
-			($rcode,$hexresult)=SIGNALduino_Maverick($target,$bitdata,$id,length $bitdata);
+			($rcode,$hexresult)=SIGNALduino_Maverick(undef,$target,$bitdata,$id,length $bitdata);
 			is($rcode,1,"check returncode for Maverick transmission");
 			is($hexresult,'599599A959996699A969','check result Maverick');
 		};
@@ -24,7 +24,7 @@ defmod test_02_sub_SIGNALduino_Maverick UnitTest dummyDuino (
 			plan(2);
 			my $bitdata='11111110100110011001010101011001100101011001100110101001010110011001100101100110100110011010100101101001';
 
-			($rcode,$hexresult)=SIGNALduino_Maverick($target,$bitdata,$id,length $bitdata);
+			($rcode,$hexresult)=SIGNALduino_Maverick(undef,$target,$bitdata,$id,length $bitdata);
 			is($rcode,-1,"check returncode for Maverick transmission");
 			is($hexresult,' header not found','check result no Maverick header found');
 		};
