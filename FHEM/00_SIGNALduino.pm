@@ -3169,10 +3169,10 @@ sub SIGNALduino_getAttrDevelopment {
 ############################# package main, test exists
 sub SIGNALduino_callsub {
 	my $obj=shift; #comatibility thing
-	my $funcname =shift;
+	my $funcname =shift // carp "to less arguments,functionname is required";;
 	my $method = shift // undef;
 	my $evalFirst = shift // undef;
-	my $name = shift;
+	my $name = shift // carp "to less arguments, name is required";
 
 	my @args = @_;
 
@@ -3210,6 +3210,7 @@ sub SIGNALduino_callsub {
 # input = @list
 # output = @list
 sub SIGNALduino_lengtnPrefix {
+	my $self = shift; #just make compatibility with object 
 	my ($name, @bit_msg) = @_;
 
 	my $msg = join("",@bit_msg);
@@ -3221,6 +3222,7 @@ sub SIGNALduino_lengtnPrefix {
 
 ############################# package main, test exists
 sub SIGNALduino_PreparingSend_FS20_FHT($$$) {
+	my $self = shift; #just make compatibility with object 
 	my ($id, $sum, $msg) = @_;
 	my $temp = 0;
 	my $newmsg = "P$id#0000000000001";                  # 12 Bit Praeambel, 1 bit
@@ -3252,6 +3254,7 @@ sub SIGNALduino_dec2binppari {      # dec to bin . parity
 
 ############################# package main, test exists
 sub SIGNALduino_bit2Arctec {
+	my $self = shift; #just make compatibility with object 
 	my ($name, @bit_msg) = @_;
 	my $msg = join("",@bit_msg);
 	# Convert 0 -> 01   1 -> 10 to be compatible with IT Module
@@ -3263,6 +3266,8 @@ sub SIGNALduino_bit2Arctec {
 
 ############################# package main, test exists
 sub SIGNALduino_bit2itv1 {
+	my $self = shift; #just make compatibility with object 
+
 	my ($name, @bit_msg) = @_;
 	my $msg = join("",@bit_msg);
 
