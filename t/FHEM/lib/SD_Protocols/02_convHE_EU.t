@@ -20,7 +20,7 @@ subtest 'Test HE_EU, protolength < 72' => sub {
 	my $rcode;
 	note('input '.@bits.' bits');
 
-	($rcode,@bits)=lib::SD_Protocols::ConvHE_EU($target,@bits);
+	($rcode,@bits)=lib::SD_Protocols::ConvHE_EU($Protocols,$target,@bits);
 	is($rcode,1,'check returncode for HE_EU transmission');
 	is(@bits,72,'check result protolength');
 };
@@ -32,7 +32,7 @@ subtest 'Test HE_EU, protolength == 72' => sub {
 	my $rcode;
 
 	note('input '.@bits.' bits');
-	($rcode,@bits)=lib::SD_Protocols::ConvHE_EU($target,@bits);
+	($rcode,@bits)=lib::SD_Protocols::ConvHE_EU($Protocols,$target,@bits);
 	is($rcode,1,'check returncode for HE_EU transmission');
 	is(@bits,72,'check result protolength');
 };
@@ -44,7 +44,7 @@ subtest 'Test HE_EU, protolength > 72' => sub {
 	my $rcode;
 
 	note('input '.@bits.' bits');
-	($rcode,@bits)=lib::SD_Protocols::ConvHE_EU($target,@bits);
+	($rcode,@bits)=lib::SD_Protocols::ConvHE_EU($Protocols,$target,@bits);
 	is($rcode,1,'check returncode for HE_EU transmission');
 	is(@bits,74,'check result protolength');
 };

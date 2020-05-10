@@ -362,6 +362,7 @@ Output:
 =cut
 
 sub ConvHE_EU {
+	my $self = shift; #just make compatibility with object 
 	my ($name, @bit_msg) = @_;
 	my $protolength = scalar @bit_msg;
 
