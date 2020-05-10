@@ -2772,7 +2772,4 @@ package lib::SD_ProtocolData;
 		########################################################################
 
 	);
-	sub getProtocolList	{	
-		return \%protocols;	
-	}
 }
