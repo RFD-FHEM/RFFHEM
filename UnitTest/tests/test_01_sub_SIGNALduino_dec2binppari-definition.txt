@@ -1,4 +1,4 @@
-defmod test_02_sub_SIGNALduino_dec2binppari UnitTest dummyDuino ( 
+defmod test_01_sub_SIGNALduino_dec2binppari UnitTest dummyDuino ( 
 { 
 	use Test2::V0;
 	use Test2::Tools::Compare qw{ is };

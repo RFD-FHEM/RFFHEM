@@ -1445,12 +1445,12 @@ sub SIGNALduino_Write($$$) {
   elsif($fn eq "04" && substr($msg,0,6) eq "010101") {   # FS20
     $fn="sendMsg";
     $msg = substr($msg,6);
-    $msg = SIGNALduino_PreparingSend_FS20_FHT(74, 6, $msg);
+    $msg = SIGNALduino_PreparingSend_FS20_FHT(undef,74, 6, $msg);
   }
   elsif($fn eq "04" && substr($msg,0,6) eq "020183") {   # FHT
     $fn="sendMsg";
     $msg = substr($msg,6,4) . substr($msg,10);     # was ist der Unterschied zu "$msg = substr($msg,6);" ?
-    $msg = SIGNALduino_PreparingSend_FS20_FHT(73, 12, $msg);
+    $msg = SIGNALduino_PreparingSend_FS20_FHT(undef,73, 12, $msg);
   }
   $hash->{logMethod}->($name, 5, "$name: Write, sending via Set $fn $msg");
 
@@ -3221,7 +3221,7 @@ sub SIGNALduino_lengtnPrefix {
 }
 
 ############################# package main, test exists
-sub SIGNALduino_PreparingSend_FS20_FHT($$$) {
+sub SIGNALduino_PreparingSend_FS20_FHT {
 	my $self = shift; #just make compatibility with object 
 	my ($id, $sum, $msg) = @_;
 	my $temp = 0;
