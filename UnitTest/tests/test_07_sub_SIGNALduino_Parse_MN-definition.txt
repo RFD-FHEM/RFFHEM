@@ -3,12 +3,8 @@ defmod test_07_sub_SIGNALduino_Parse_MN UnitTest dummyDuino (
 	use Test2::V0;
 	use Test2::Tools::Compare qw{is};
 
-	# my $mock = Mock::Sub->new;
-	# my $DoTrigger = $mock->mock("DoTrigger");	
-
 	subtest 'Test - MN Data good message' => sub {
 		plan(3);
-
 		my $rmsg="MN;D=9AA6362CC8AAAA000012F8F4;R=4;";
 		my %signal_parts=SIGNALduino_Split_Message($rmsg,$targetHash->{NAME});
 		# note: dispatch on Protocol 100 and Protocol 103
@@ -25,7 +21,6 @@ defmod test_07_sub_SIGNALduino_Parse_MN UnitTest dummyDuino (
 
 	subtest 'SIGNALduino_parse_MN message does not match regex' => sub {
 		plan(1);
-
 		my $rmsg="MN;D=8AA6362CC8AAAA000012F8F4;R=4;";
 		my %signal_parts=SIGNALduino_Split_Message($rmsg,$targetHash->{NAME});
 
@@ -65,9 +60,5 @@ defmod test_07_sub_SIGNALduino_Parse_MN UnitTest dummyDuino (
 		is(SIGNALduino_Parse_MN($targetHash, $rmsg, \%signal_parts),0 , "MN data not dispatched");
 	};
 
-	my $LoadResult =  $targetHash->{protocolObject}->LoadHash("$attr{global}{modpath}/FHEM/lib/SD_ProtocolData.pm");
-	is($LoadResult,undef,"load test protocol hash ");
-
-	SIGNALduino_IdList("x:$target","","","");  
 }
 )

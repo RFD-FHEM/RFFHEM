@@ -155,7 +155,6 @@ defmod test_06_firmware_flash_1 UnitTest dummyDuino
 		$ENV{'PATH'}=$path;
 	}; 
 
-	CommandDefMod(undef,"$target $targetHash->{TYPE} $targetHash->{DEF}");
-
+	#CommandDefMod(undef,"$target $targetHash->{TYPE} $targetHash->{DEF}");
 }
 )

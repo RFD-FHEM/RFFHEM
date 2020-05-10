@@ -48,6 +48,18 @@ sub new {
 	return $self;	
 }
 
+sub STORABLE_freeze {
+        my $self = shift;
+        return join(":", ($self->{_protocolFilename}, $self->{_filetype}));
+}
+ 
+sub STORABLE_thaw {
+        my ($self, $cloning, $frozen) = @_;
+        ($self->{_protocolFilename}, $self->{_filetype}) = split(/:/, $frozen);
+		$self->LoadHash();
+		$self->LoadHashFromJson();
+}
+
 
 ############################# package lib::SD_Protocols
 #=item LoadHashFromJson($)
@@ -83,6 +95,7 @@ sub LoadHashFromJson {
 	$self->{_protocolsVersion} = $ver->{version} // "undef"; 
 
 	$self->setDefaults();
+	$self->{_protocolFilename} = $filename;
 	return ;
 }
 
@@ -111,6 +124,7 @@ sub LoadHash {
 	delete($INC{$filename}); # Unload package, because we only wanted the hash
 
 	$self->setDefaults();
+	$self->{_protocolFilename} = $filename;
 	return ;
 }
 
@@ -213,14 +227,16 @@ sub setDefaults {
 	{
 		my $format = $self->getProperty($id,'format');
 			
-		if ( defined $format && ($format eq 'manchester' || $format eq '2-FSK') )
+		if ( defined $format && ($format eq 'manchester' || $format =~ 'FSK') )
 		{
 			# Manchester defaults :
-			$self->{_protocols}->{$id}->{method} = \&lib::SD_Protocols::MCRAW if ( !defined $self->checkProperty($id,'method') && $format eq 'manchester' );
-
 			my $cref = $self->checkProperty($id,'method');
-			$cref =~ s/^\\&//;
-			$self->{_protocols}->{$id}->{method} = eval {\&$cref} if (ref $cref ne 'CODE');
+			$self->{_protocols}->{$id}->{method} = \&lib::SD_Protocols::MCRAW if ( !defined $cref && $format eq 'manchester' );
+
+			if (defined $cref) {
+				$cref =~ s/^\\&//;
+				$self->{_protocols}->{$id}->{method} = eval {\&$cref} if (ref $cref ne 'CODE');
+			}
 
 		}
 		elsif (defined($self->getProperty($id,'sync')))
