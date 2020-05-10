@@ -11,7 +11,7 @@ defmod test_02_sub_SIGNALduino_lengtnPrefix UnitTest dummyDuino (
 		note('calculates the hex (in bits) and adds it at the beginning of the message');
 		note("input @bits");
 
-		($rcode,@bits)=SIGNALduino_lengtnPrefix($target,@bits);
+		($rcode,@bits)=SIGNALduino_lengtnPrefix(undef,$target,@bits);
 		is($rcode,1,'check returncode for X10 transmission');
 		note("output @bits");
 		is(join("",@bits),'0010100101000101010010101000010001111011110101110','check result X10 transmission');

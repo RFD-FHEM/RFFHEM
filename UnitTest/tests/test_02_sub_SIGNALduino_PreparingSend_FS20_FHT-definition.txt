@@ -13,12 +13,12 @@ defmod test_02_sub_SIGNALduino_PreparingSend_FS20_FHT UnitTest dummyDuino (
 		my $msg='202c4132';
 
 		note("example: FHT set to desired-temp 25.5");
-		my $newmsg=SIGNALduino_PreparingSend_FS20_FHT($id, $sum, $msg);
+		my $newmsg=SIGNALduino_PreparingSend_FS20_FHT(undef,$id, $sum, $msg);
 		is($newmsg,'P73#00000000000010010000010010110010100000100011001011100101110P#R2','check result send newmsg');
 
 		note("example: FHT set manu-temp 11.0");
 		$msg='202c4516';
-		$newmsg=SIGNALduino_PreparingSend_FS20_FHT($id, $sum, $msg);
+		$newmsg=SIGNALduino_PreparingSend_FS20_FHT(undef,$id, $sum, $msg);
 		is($newmsg,'P73#00000000000010010000010010110010100010110001011011011001110P#R2','check result send newmsg');
 	};
 }
