@@ -1,3 +1,6 @@
+2020-05-10 - lib/SD_Protocols.pm
+
+fixed first parameter for method ConvHE_EU to accecpt object class as first parameter
 2020-05-10 - 00_SIGNALduino.pm
 
 Updated subs / calling to postDemodulation calling method
