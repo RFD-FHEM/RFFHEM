@@ -1436,21 +1436,28 @@ sub SIGNALduino_XmitLimitCheck($$) {
 ############################# package main
 ## API to logical modules: Provide as Hash of IO Device, type of function ; command to call ; message to send
 sub SIGNALduino_Write($$$) {
-  my ($hash,$fn,$msg) = @_;
+  my $hash 	= shift // carp 'must be called with hash of iodevice as first param';
+  my $fn	= shift // 'RAW';
+  my $msg	= shift // return;
+  
   my $name = $hash->{NAME};
-
-  if ($fn eq "") {
-    $fn="RAW" ;
-  }
-  elsif($fn eq "04" && substr($msg,0,6) eq "010101") {   # FS20
-    $fn="sendMsg";
-    $msg = substr($msg,6);
-    $msg = SIGNALduino_PreparingSend_FS20_FHT(undef,74, 6, $msg);
-  }
-  elsif($fn eq "04" && substr($msg,0,6) eq "020183") {   # FHT
-    $fn="sendMsg";
-    $msg = substr($msg,6,4) . substr($msg,10);     # was ist der Unterschied zu "$msg = substr($msg,6);" ?
-    $msg = SIGNALduino_PreparingSend_FS20_FHT(undef,73, 12, $msg);
+  
+  if ($fn eq '') {
+    $fn='RAW' ;
+  } elsif($fn eq '04') {
+  	my $id;
+  	my $sum;
+    $fn='sendMsg';
+  	if (substr($msg,0,6) eq '010101') {   # FS20
+	    $msg = substr($msg,6);
+	    $id 	= 74;
+	    $sum 	= 6;
+  	} elsif(substr($msg,0,6) eq '020183') {   # FHT
+		$msg = substr($msg,6,4) . substr($msg,10);     # was ist der Unterschied zu "$msg = substr($msg,6);" ?
+	    $id 	= 73;
+	    $sum	= 12;
+  	}
+    $msg = $hash->{protocolObject}->PreparingSend_FS20_FHT($id, $sum, $msg);
   }
   $hash->{logMethod}->($name, 5, "$name: Write, sending via Set $fn $msg");
 
@@ -3220,65 +3227,7 @@ sub SIGNALduino_lengtnPrefix {
 	return (1,split("",$msg));
 }
 
-############################# package main, test exists
-sub SIGNALduino_PreparingSend_FS20_FHT {
-	my $self = shift; #just make compatibility with object 
-	my ($id, $sum, $msg) = @_;
-	my $temp = 0;
-	my $newmsg = "P$id#0000000000001";                  # 12 Bit Praeambel, 1 bit
 
-	for (my $i=0; $i<length($msg); $i+=2) {
-		$temp = hex(substr($msg, $i, 2));
-		$sum += $temp;
-		$newmsg .= SIGNALduino_dec2binppari($temp);
-	}
-
-	$newmsg .= SIGNALduino_dec2binppari($sum & 0xFF);   # Checksum
-	my $repeats = $id - 71;                             # FS20(74)=3, FHT(73)=2
-	$newmsg .= "0P#R" . $repeats;                       # EOT, Pause, 3 Repeats
-
-	return $newmsg;
-}
-
-############################# package main, test exists
-sub SIGNALduino_dec2binppari {      # dec to bin . parity
-	my $num = shift;
-	my $parity = 0;
-	my $nbin = sprintf("%08b",$num);
-	foreach my $c (split //, $nbin) {
-		$parity ^= $c;
-	}
-	my $result = $nbin . $parity;		# bin(num) . paritybit
-	return $result;
-}
-
-############################# package main, test exists
-sub SIGNALduino_bit2Arctec {
-	my $self = shift; #just make compatibility with object 
-	my ($name, @bit_msg) = @_;
-	my $msg = join("",@bit_msg);
-	# Convert 0 -> 01   1 -> 10 to be compatible with IT Module
-	$msg =~ s/0/z/g;
-	$msg =~ s/1/10/g;
-	$msg =~ s/z/01/g;
-	return (1,split("",$msg));
-}
-
-############################# package main, test exists
-sub SIGNALduino_bit2itv1 {
-	my $self = shift; #just make compatibility with object 
-
-	my ($name, @bit_msg) = @_;
-	my $msg = join("",@bit_msg);
-
-	$msg =~ s/0F/01/g;		# Convert 0F -> 01 (F) to be compatible with CUL
-#	$msg =~ s/0F/11/g;		# Convert 0F -> 11 (1) float
-	if (index($msg,'F') == -1) {
-		return (1,split("",$msg));
-	} else {
-		return (0,0);
-	}
-}
 
 ############################# package main, test exists
 sub SIGNALduino_postDemo_EM($@) {

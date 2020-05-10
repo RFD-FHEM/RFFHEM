@@ -553,4 +553,56 @@ sub ConvLaCrosse {
 	return( qq[OK 9 $addr $sensTypeBat $t1 $t2 $humidity] )  ;
 }
 
+sub bit2Arctec {
+	my $self = shift // carp "Not called within an object";
+	shift;
+	my $msg = join("",@_) // carp "no bitmsg provided";
+	my @replace = qw(01 10); 
+
+	# Convert 0 -> 01   1 -> 10 to be compatible with IT Module
+	$msg =~ s/(0|1)/$replace[$1]/g;
+	return (1,split("",$msg));
+}
+
+sub bit2itv1 {
+	my $self = shift // carp "Not called within an object";
+	shift;
+	my $msg = join("",@_) // carp "no bitmsg provided";
+
+	$msg =~ s/0F/01/g;		# Convert 0F -> 01 (F) to be compatible with CUL
+	return (1,split("",$msg)) if (index($msg,'F') == -1);
+	return (0,0);
+}
+
+sub PreparingSend_FS20_FHT {
+	my $self 	= shift // carp "Not called within an object";
+	my $id		= shift // carp 'no idprovided';
+	my $sum 	= shift // carp 'no sum provided';
+	my $msg 	= shift // carp 'no msg provided';
+	
+	return if ( $id > 74 || $id < 73); 
+	
+	my $temp = 0;
+	my $newmsg = q[P].$id.q[#0000000000001];                  # 12 Bit Praeambel, 1 bit
+
+	for (my $i=0; $i<length($msg); $i+=2) {
+		$temp = hex(substr($msg, $i, 2));
+		$sum += $temp;
+		$newmsg .= dec2binppari($temp);
+	}
+
+	$newmsg .= dec2binppari($sum & 0xFF); 				# Checksum
+	my $repeats = $id - 71;                            	# FS20(74)=3, FHT(73)=2
+	return $newmsg.q[0P#R].$repeats;                   # EOT, Pause, 3 Repeats
+}
+
+sub dec2binppari {      # dec to bin . parity
+	my $num = shift // carp 'must be called with an number';
+	my $parity = 0;
+	my $nbin = sprintf("%08b",$num);
+	for my $c (split //, $nbin) {
+		$parity ^= $c;
+	}
+	return  qq[$nbin$parity];		# bin(num) . paritybit
+}
 1;
