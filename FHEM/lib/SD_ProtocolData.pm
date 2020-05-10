@@ -1055,21 +1055,21 @@ package lib::SD_ProtocolData;
 		"35"	=>	## Homeeasy
 							# off | vHE800   MS;P0=907;P1=-376;P2=266;P3=-1001;P6=-4860;D=2601010123230123012323230101012301230101010101230123012301;CP=2;SP=6;
 			{
-				name							=> 'HomeEasy HE800',
-				id								=> '35',
+				name					=> 'HomeEasy HE800',
+				id						=> '35',
 				knownFreqs				=> '',
-				one								=> [1,-4],
-				zero							=> [3.4,-1],
-				sync							=> [1,-18],
-				clockabs					=> '280',
-				format						=> 'twostate',		# not used now
-				preamble					=> 'ih',					# prepend to converted message
-				postamble					=> '',						# Append to converted message
+				one						=> [1,-4],
+				zero					=> [3.4,-1],
+				sync					=> [1,-18],
+				clockabs				=> '280',
+				format					=> 'twostate',		# not used now
+				preamble				=> 'ih',					# prepend to converted message
+				postamble				=> '',						# Append to converted message
 				clientmodule			=> 'IT',
 				#modulematch			=> '',
 				length_min				=> '28',
 				length_max				=> '40',
-				postDemodulation	=> \&lib::SD_Protocols::ConvHE800,
+				postDemodulation		=> \&lib::SD_Protocols::ConvHE800,
 			},
 		"36"	=>	## remote - cheap wireless dimmer
 							# https://forum.fhem.de/index.php/topic,38831.msg394238.html#msg394238 @Steffenm

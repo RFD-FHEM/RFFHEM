@@ -2260,7 +2260,7 @@ sub SIGNALduino_Parse_MS($$$$%) {
 
 			my $evalcheck = ($hash->{protocolObject}->checkProperty($id,'developId','') =~ 'p') ? 1 : undef;
 
-			($rcode,my @retvalue) = SIGNALduino_callsub('postDemodulation',$hash->{protocolObject}->checkProperty($id,'postDemodulation',undef),$evalcheck,$name,@bit_msg);
+			($rcode,my @retvalue) = SIGNALduino_callsub($hash->{protocolObject},'postDemodulation',$hash->{protocolObject}->checkProperty($id,'postDemodulation',undef),$evalcheck,$name,@bit_msg);
 			next if ($rcode < 1 );
 			#SIGNALduino_Log3 $name, 5, "$name: Parse_MS, postdemodulation value @retvalue";
 
@@ -2466,7 +2466,7 @@ sub SIGNALduino_Parse_MU($$$$@) {
 				Debug "$name: demodulated message raw (@bit_msg), ".@bit_msg." bits\n" if ($debug);
 
 				my $evalcheck = ($hash->{protocolObject}->checkProperty($id,'developId','') =~ 'p') ? 1 : undef;
-				my ($rcode,@retvalue) = SIGNALduino_callsub('postDemodulation',$hash->{protocolObject}->checkProperty($id,'postDemodulation',undef),$evalcheck,$name,@bit_msg);
+				my ($rcode,@retvalue) = SIGNALduino_callsub($hash->{protocolObject},'postDemodulation',$hash->{protocolObject}->checkProperty($id,'postDemodulation',undef),$evalcheck,$name,@bit_msg);
 
 				next if ($rcode < 1 );
 				@bit_msg = @retvalue;
@@ -3168,6 +3168,7 @@ sub SIGNALduino_getAttrDevelopment {
 
 ############################# package main, test exists
 sub SIGNALduino_callsub {
+	my $obj=shift; #comatibility thing
 	my $funcname =shift;
 	my $method = shift // undef;
 	my $evalFirst = shift // undef;
@@ -3189,7 +3190,7 @@ sub SIGNALduino_callsub {
 		#my $subname = @{[eval {&$method}, $@ =~ /.*/]};
 		$hash->{logMethod}->($hash, 5, "$name: callsub, applying $funcname, value before: @args"); # method $subname"
 
-		my ($rcode, @returnvalues) = $method->($name, @args) ;
+		my ($rcode, @returnvalues) = $method->($obj,$name, @args) ;
 
 		if (@returnvalues && defined($returnvalues[0])) {
 	    	$hash->{logMethod}->($name, 5, "$name: callsub, rcode=$rcode, modified value after $funcname: @returnvalues");
@@ -3276,6 +3277,8 @@ sub SIGNALduino_bit2itv1 {
 
 ############################# package main, test exists
 sub SIGNALduino_postDemo_EM($@) {
+	my $self=shift;
+	
 	my ($name, @bit_msg) = @_;
 	my $msg = join("",@bit_msg);
 	my $msg_start = index($msg, "0000000001");				# find start
@@ -3309,6 +3312,7 @@ sub SIGNALduino_postDemo_EM($@) {
 
 ############################# package main, test exists
 sub SIGNALduino_postDemo_FS20($@) {
+	my $self=shift;
 	my ($name, @bit_msg) = @_;
 	my $datastart = 0;
    my $protolength = scalar @bit_msg;
@@ -3375,6 +3379,7 @@ sub SIGNALduino_postDemo_FS20($@) {
 
 ############################# package main, test exists
 sub SIGNALduino_postDemo_FHT80($@) {
+	my $self=shift;
 	my ($name, @bit_msg) = @_;
 	my $datastart = 0;
 	my $protolength = scalar @bit_msg;
@@ -3441,6 +3446,7 @@ sub SIGNALduino_postDemo_FHT80($@) {
 
 ############################# package main, test exists
 sub SIGNALduino_postDemo_FHT80TF($@) {
+	my $self=shift;
 	my ($name, @bit_msg) = @_;
 	my $datastart = 0;
 	my $protolength = scalar @bit_msg;
@@ -3494,6 +3500,7 @@ sub SIGNALduino_postDemo_FHT80TF($@) {
 
 ############################# package main, test exists
 sub SIGNALduino_postDemo_WS7035($@) {
+	my $self=shift;
 	my ($name, @bit_msg) = @_;
 	my $msg = join("",@bit_msg);
 	my $parity = 0;					# Parity even
@@ -3528,6 +3535,7 @@ sub SIGNALduino_postDemo_WS7035($@) {
 
 ############################# package main
 sub SIGNALduino_postDemo_WS2000($@) {
+	my $self=shift;
 	my ($name, @bit_msg) = @_;
 	my @new_bit_msg = "";
 	my $protolength = scalar @bit_msg;
@@ -3637,6 +3645,7 @@ sub SIGNALduino_postDemo_WS2000($@) {
 
 ############################# package main
 sub SIGNALduino_postDemo_WS7053($@) {
+	my $self=shift;
 	my ($name, @bit_msg) = @_;
 	my $msg = join("",@bit_msg);
 	my $parity = 0;	                       # Parity even
