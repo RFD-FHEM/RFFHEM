@@ -297,7 +297,7 @@ package lib::SD_ProtocolData;
 				modulematch				=> '^i......',
 				length_min				=> '24',
 				length_max				=> '24',				# Don't know maximal lenth of a valid message
-				postDemodulation	=> \&lib::SD_Protocols::bit2itv1,
+				postDemodulation	=> \&lib::SD_Protocols::Convbit2itv1,
 			},
 		"4"	=>	## arctech2
 						# need more Device Infos / User Message
@@ -621,7 +621,7 @@ package lib::SD_ProtocolData;
 				modulematch				=> '^i......',
 				length_min				=> '32',
 				length_max				=> '34',				# Don't know maximal lenth of a valid message
-				postDemodulation	=> \&lib::SD_Protocols::bit2Arctec,
+				postDemodulation	=> \&lib::SD_Protocols::Convbit2Arctec,
 			},
 		"17.1"	=>	## intertechno --> MU anstatt sonst MS (ID 17)
 								# no decode!   MU;P0=344;P1=-1230;P2=-200;D=01020201020101020102020102010102010201020102010201020201020102010201020101020102020102010201020102010201010200;CP=0;R=0;
@@ -644,7 +644,7 @@ package lib::SD_ProtocolData;
 				modulematch				=> '^i......',
 				length_min				=> '32',
 				length_max				=> '34',				# Don't know maximal lenth of a valid message
-				postDemodulation	=> \&main::SIGNALduino_bit2Arctec,
+				postDemodulation	=> \&main::Convbit2Arctec,
 			},
 		"18"	=>	## Oregon Scientific v1
 							# Id:3 T: 7.5 BAT:ok   MC;LL=-2721;LH=3139;SL=-1246;SH=1677;D=1A51FF47;C=1463;L=32;R=12;

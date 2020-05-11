@@ -553,7 +553,7 @@ sub ConvLaCrosse {
 	return( qq[OK 9 $addr $sensTypeBat $t1 $t2 $humidity] )  ;
 }
 
-sub bit2Arctec {
+sub Convbit2Arctec {
 	my $self = shift // carp "Not called within an object";
 	shift;
 	my $msg = join("",@_) // carp "no bitmsg provided";
@@ -564,7 +564,7 @@ sub bit2Arctec {
 	return (1,split("",$msg));
 }
 
-sub bit2itv1 {
+sub Convbit2itv1 {
 	my $self = shift // carp "Not called within an object";
 	shift;
 	my $msg = join("",@_) // carp "no bitmsg provided";
@@ -588,15 +588,15 @@ sub PreparingSend_FS20_FHT {
 	for (my $i=0; $i<length($msg); $i+=2) {
 		$temp = hex(substr($msg, $i, 2));
 		$sum += $temp;
-		$newmsg .= dec2binppari($temp);
+		$newmsg .= _dec2binppari($temp);
 	}
 
-	$newmsg .= dec2binppari($sum & 0xFF); 				# Checksum
+	$newmsg .= _dec2binppari($sum & 0xFF); 				# Checksum
 	my $repeats = $id - 71;                            	# FS20(74)=3, FHT(73)=2
 	return $newmsg.q[0P#R].$repeats;                   # EOT, Pause, 3 Repeats
 }
 
-sub dec2binppari {      # dec to bin . parity
+sub _dec2binppari {      # dec to bin . parity
 	my $num = shift // carp 'must be called with an number';
 	my $parity = 0;
 	my $nbin = sprintf("%08b",$num);
