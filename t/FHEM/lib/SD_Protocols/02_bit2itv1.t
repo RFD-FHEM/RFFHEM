@@ -16,8 +16,7 @@ my $msg;
 
 
 plan(2);
-	
-my $rcode;
+
 subtest 'input bits with F' => sub {
 	plan(2);
 
