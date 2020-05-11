@@ -13,7 +13,7 @@ use strict;
 use warnings;
 use Carp qw(croak carp);
 use Digest::CRC;
-our $VERSION = '1.00';
+our $VERSION = '1.01';
 use Storable qw(dclone);
 
 
@@ -48,10 +48,20 @@ sub new {
 	return $self;	
 }
 
+############################# package lib::SD_Protocols
+#=item STORABLE_freeze()
+# This function is not currently explained.
+# =cut
+
 sub STORABLE_freeze {
         my $self = shift;
         return join(":", ($self->{_protocolFilename}, $self->{_filetype}));
 }
+
+############################# package lib::SD_Protocols
+#=item STORABLE_thaw()
+# This function is not currently explained.
+# =cut
  
 sub STORABLE_thaw {
         my ($self, $cloning, $frozen) = @_;
@@ -62,7 +72,7 @@ sub STORABLE_thaw {
 
 
 ############################# package lib::SD_Protocols
-#=item LoadHashFromJson($)
+#=item LoadHashFromJson()
 # This functons, will load protocol hash from json file into a hash.
 # First Parameter is for filename (full or relativ path) to be loaded
 # Returns error or undef on success
@@ -100,7 +110,7 @@ sub LoadHashFromJson {
 }
 
 ############################# package lib::SD_Protocols
-#=item LoadHash($)
+#=item LoadHash()
 # This functons, will load protocol hash from perlmodule file .
 # First Parameter is for filename (full or relativ path) to be loaded
 # Returns error or undef on success
@@ -237,7 +247,6 @@ sub setDefaults {
 				$cref =~ s/^\\&//;
 				$self->{_protocols}->{$id}->{method} = eval {\&$cref} if (ref $cref ne 'CODE');
 			}
-
 		}
 		elsif (defined($self->getProperty($id,'sync')))
 		{
@@ -314,11 +323,77 @@ sub MCRAW {
 ###       all functions for RAWmsg processing or module preparation       ###
 #############################################################################
 
-# to simple transfer
-# SIGNALduino_postDemo_EM
-
 ############################################################
 # ASK/OOK method functions
+############################################################
+
+=item bit2Arctec()
+
+This sub convert 0 -> 01, 1 -> 10 to be compatible with IT Module.
+
+Input:  $msg
+
+Output:
+        converted message
+
+=cut
+
+sub bit2Arctec {
+	my $self = shift // carp "Not called within an object";
+	shift;
+	my $msg = join("",@_) // carp "no bitmsg provided";
+	my @replace = qw(01 10); 
+
+	$msg =~ s/(0|1)/$replace[$1]/g;
+	return (1,split("",$msg));
+}
+
+############################################################
+
+=item bit2itv1()
+
+This sub convert 0F -> 01 (F) to be compatible with CUL.
+
+Input:  $msg
+
+Output:
+        converted message
+
+=cut
+
+sub bit2itv1 {
+	my $self = shift // carp "Not called within an object";
+	shift;
+	my $msg = join("",@_) // carp "no bitmsg provided";
+
+	$msg =~ s/0F/01/g;
+	return (1,split("",$msg)) if (index($msg,'F') == -1);
+	return (0,0);
+}
+
+############################################################
+
+=item dec2binppari()
+
+This sub ...
+
+Input:  $num
+
+Output:
+        ...
+
+=cut
+
+sub dec2binppari {      # dec to bin . parity
+	my $num = shift // carp 'must be called with an number';
+	my $parity = 0;
+	my $nbin = sprintf("%08b",$num);
+	for my $c (split //, $nbin) {
+		$parity ^= $c;
+	}
+	return  qq[$nbin$parity];		# bin(num) . paritybit
+}
+
 ############################################################
 
 =item ConvHE800()
@@ -389,13 +464,48 @@ Output:
 
 sub ConvITV1_tristateToBit {
 	my ($msg) = @_;
-	# Convert 0 -> 00   1 -> 11 F => 01 to be compatible with IT Module
+
 	$msg =~ s/0/00/g;
 	$msg =~ s/1/11/g;
 	$msg =~ s/F/01/g;
 	$msg =~ s/D/10/g;
 
 	return (1,$msg);
+}
+
+############################################################
+
+=item PreparingSend_FS20_FHT()
+
+This sub prepares the send message.
+
+Input:  $id,$sum,$msg
+
+Output:
+        prepares message
+
+=cut
+
+sub PreparingSend_FS20_FHT {
+	my $self 	= shift // carp "Not called within an object";
+	my $id		= shift // carp 'no idprovided';
+	my $sum 	= shift // carp 'no sum provided';
+	my $msg 	= shift // carp 'no msg provided';
+	
+	return if ( $id > 74 || $id < 73); 
+	
+	my $temp = 0;
+	my $newmsg = q[P].$id.q[#0000000000001];    # 12 Bit Praeambel, 1 bit
+
+	for (my $i=0; $i<length($msg); $i+=2) {
+		$temp = hex(substr($msg, $i, 2));
+		$sum += $temp;
+		$newmsg .= dec2binppari($temp);
+	}
+
+	$newmsg .= dec2binppari($sum & 0xFF);       # Checksum
+	my $repeats = $id - 71;                     # FS20(74)=3, FHT(73)=2
+	return $newmsg.q[0P#R].$repeats;            # EOT, Pause, 3 Repeats
 }
 
 
@@ -553,56 +663,4 @@ sub ConvLaCrosse {
 	return( qq[OK 9 $addr $sensTypeBat $t1 $t2 $humidity] )  ;
 }
 
-sub bit2Arctec {
-	my $self = shift // carp "Not called within an object";
-	shift;
-	my $msg = join("",@_) // carp "no bitmsg provided";
-	my @replace = qw(01 10); 
-
-	# Convert 0 -> 01   1 -> 10 to be compatible with IT Module
-	$msg =~ s/(0|1)/$replace[$1]/g;
-	return (1,split("",$msg));
-}
-
-sub bit2itv1 {
-	my $self = shift // carp "Not called within an object";
-	shift;
-	my $msg = join("",@_) // carp "no bitmsg provided";
-
-	$msg =~ s/0F/01/g;		# Convert 0F -> 01 (F) to be compatible with CUL
-	return (1,split("",$msg)) if (index($msg,'F') == -1);
-	return (0,0);
-}
-
-sub PreparingSend_FS20_FHT {
-	my $self 	= shift // carp "Not called within an object";
-	my $id		= shift // carp 'no idprovided';
-	my $sum 	= shift // carp 'no sum provided';
-	my $msg 	= shift // carp 'no msg provided';
-	
-	return if ( $id > 74 || $id < 73); 
-	
-	my $temp = 0;
-	my $newmsg = q[P].$id.q[#0000000000001];                  # 12 Bit Praeambel, 1 bit
-
-	for (my $i=0; $i<length($msg); $i+=2) {
-		$temp = hex(substr($msg, $i, 2));
-		$sum += $temp;
-		$newmsg .= dec2binppari($temp);
-	}
-
-	$newmsg .= dec2binppari($sum & 0xFF); 				# Checksum
-	my $repeats = $id - 71;                            	# FS20(74)=3, FHT(73)=2
-	return $newmsg.q[0P#R].$repeats;                   # EOT, Pause, 3 Repeats
-}
-
-sub dec2binppari {      # dec to bin . parity
-	my $num = shift // carp 'must be called with an number';
-	my $parity = 0;
-	my $nbin = sprintf("%08b",$num);
-	for my $c (split //, $nbin) {
-		$parity ^= $c;
-	}
-	return  qq[$nbin$parity];		# bin(num) . paritybit
-}
 1;
