@@ -2210,7 +2210,7 @@ sub SD_UT_tristate2bin($) {
 	This attribute set the clock pulse when sending. There is no standard value.<br>
 	<small><u>exception:</u></small> The model Novy_840039 has a preset clock pulse of 375. You can manually adjust this individually with the attribute.</li></ul><br>
 	<ul><li><a name="UTfrequency">UTfrequency</a><br>
-	An individual transmission frequency can be set with this attribute. If this attribute is not set, the frequency is used by the SIGNALduino.</li></ul><br>
+	An individual transmission frequency can be set with this attribute. If this attribute is not set, the transmission frequency of the IO device (e.g. Signalduino) is used.</li></ul><br>
 
 	<b><i>Generated readings of the models</i></b><br>
 	<ul><u>Buttons_five | CAME_TOP_432EV | Chilitec_22640 | HSM4 | KL_RF01 | LED_XM21_0 | Momento | Novy_840029 | Novy_840039 | OR28V | QUIGG_DMV | RC_10 | RH787T | SF01_01319004 | SF01_01319004_Typ2 | TR_502MSV</u><br>
@@ -2519,7 +2519,7 @@ sub SD_UT_tristate2bin($) {
 	Mit diesem Attribut kann der Clockpulse beim Senden eingestellt werden. Einen Standardwert gibt es nicht.<br>
 	<small><u>Ausnahme:</u></small> Das Model Novy_840039 hat einen voreingestellten Clockpulse von 375. Diesen kann man manuell mit dem Attribut individuell anpassen.</li></ul><br>
 	<ul><li><a name="UTfrequency">UTfrequency</a><br>
-	Mit diesem Attribut kann eine individuelle Sendefrequenz eingestellt werden. Ist dieses Attribut nicht gesetzt, wird die Frequenz vom SIGNALduino verwendet.</li></ul><br>
+	Mit diesem Attribut kann eine individuelle Sendefrequenz eingestellt werden. Ist dieses Attribut nicht gesetzt, wird die Sendefrequenz des IO Devices (z.B. Signalduino) verwendet.</li></ul><br>
 	
 	<b><i>Generierte Readings der Modelle</i></b><br>
 	<ul><u>Buttons_five | CAME_TOP_432EV | Chilitec_22640 | HSM4 | KL_RF01 | LED_XM21_0 | Momento | Novy_840029 | Novy_840039 | OR28V | QUIGG_DMV | RC_10 | RH787T | SF01_01319004 | SF01_01319004_Typ2 | TR_502MSV</u><br>
