@@ -36,6 +36,7 @@ sub new {
 	$self->{_protocolFilename} = $args{filename} //  "";
 	$self->{_protocols} = undef;
 	$self->{_filetype} = $args{filetype} // "PerlModule";
+	$self->{logCallback} = undef;
 	bless $self, $class;
 
 	if ($self->{_filetype} eq "json")
@@ -396,6 +397,44 @@ sub dec2binppari {      # dec to bin . parity
 
 ############################################################
 
+=item registerLogCallback()
+
+=cut
+
+sub registerLogCallback
+{
+	my $self = shift // carp 'Not called within an object';
+	my $callback = shift // carp 'coderef must be provided';
+	
+	(ref $callback eq 'CODE') ? $self->{_logCallback} = $callback
+		: carp 'coderef must be provided for callback';
+}
+
+
+
+############################################################
+
+=item _logging()
+	$self->_logging('something happend','3')
+
+=cut
+
+sub _logging {
+	my $self = shift // carp 'Not called within an object';
+	my $message = shift // carp 'message must be provided';
+	my $level = shift // 3;
+	
+	
+	if (defined $self->{logCallback})
+	{
+		$self->{_logCallback}->($message,$level);
+	}
+	
+}
+
+
+############################################################
+
 =item ConvHE800()
 
 This sub checks the length of the bits.
@@ -682,28 +721,6 @@ sub Convbit2itv1 {
 	$msg =~ s/0F/01/g;		# Convert 0F -> 01 (F) to be compatible with CUL
 	return (1,split("",$msg)) if (index($msg,'F') == -1);
 	return (0,0);
-}
-
-sub PreparingSend_FS20_FHT {
-	my $self 	= shift // carp "Not called within an object";
-	my $id		= shift // carp 'no idprovided';
-	my $sum 	= shift // carp 'no sum provided';
-	my $msg 	= shift // carp 'no msg provided';
-	
-	return if ( $id > 74 || $id < 73); 
-	
-	my $temp = 0;
-	my $newmsg = q[P].$id.q[#0000000000001];                  # 12 Bit Praeambel, 1 bit
-
-	for (my $i=0; $i<length($msg); $i+=2) {
-		$temp = hex(substr($msg, $i, 2));
-		$sum += $temp;
-		$newmsg .= _dec2binppari($temp);
-	}
-
-	$newmsg .= _dec2binppari($sum & 0xFF); 				# Checksum
-	my $repeats = $id - 71;                            	# FS20(74)=3, FHT(73)=2
-	return $newmsg.q[0P#R].$repeats;                   # EOT, Pause, 3 Repeats
 }
 
 sub _dec2binppari {      # dec to bin . parity
