@@ -1,3 +1,7 @@
+2020-05-12 - SD_Protocols.pm
+
+new subs registerLogCallback, _logging to support creating logfuncion which accepts a codred to log via
+Added tess for new subs
 2020-05-11 - Merge remote-tracking branch 'remotes/origin/dev-r35_xFSK_oo' into dev-r35_xFSK_oo
 2020-05-11 - Update SD_Protocols.pm
 
