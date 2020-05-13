@@ -1,3 +1,10 @@
+2020-05-13 - remove double sub´s
+
+SD_Protocols.pm
+  * remove double sub´s (subs were already in file but without a "Conv" prefix)
+Tests
+  * rename bit2Arctec -> Convbit2Arctec
+  * rename bit2itv1-> Convbit2itv1
 2020-05-12 - SD_Protocols.pm
 
 new subs registerLogCallback, _logging to support creating logfuncion which accepts a codred to log via
