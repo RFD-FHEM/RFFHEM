@@ -36,7 +36,7 @@ sub new {
 	$self->{_protocolFilename} = $args{filename} //  "";
 	$self->{_protocols} = undef;
 	$self->{_filetype} = $args{filetype} // "PerlModule";
-	$self->{logCallback} = undef;
+	$self->{_logCallback} = undef;
 	bless $self, $class;
 
 	if ($self->{_filetype} eq "json")
@@ -46,7 +46,7 @@ sub new {
 		$self->LoadHash($self->{_protocolFilename}) if ($self->{_protocolFilename});
 	}
 	
-	return $self;	
+	return $self;
 }
 
 ############################# package lib::SD_Protocols
@@ -65,10 +65,11 @@ sub STORABLE_freeze {
 # =cut
  
 sub STORABLE_thaw {
-        my ($self, $cloning, $frozen) = @_;
-        ($self->{_protocolFilename}, $self->{_filetype}) = split(/:/, $frozen);
-		$self->LoadHash();
-		$self->LoadHashFromJson();
+	my ($self, $cloning, $frozen) = @_;
+    ($self->{_protocolFilename}, $self->{_filetype}) = split(/:/xms, $frozen);
+	$self->LoadHash();
+	$self->LoadHashFromJson();
+	return ;
 }
 
 
@@ -81,29 +82,30 @@ sub STORABLE_thaw {
 #  $id
 
 sub LoadHashFromJson {
-	my $self = shift // carp "Not called within an object";
+	my $self = shift // carp 'Not called within an object';
 	my $filename = shift // $self->{_protocolFilename};
 
-	return if ($self->{_filetype} ne "json");
+	return if ($self->{_filetype} ne 'json');
 	
 	if (! -e $filename) {
 		return qq[File $filename does not exsits];
 	}
 	
-	my $json_text = do {
-	   open(my $json_fh, "<:encoding(UTF-8)", $filename)
-	      or die("Can't open \$filename\": $!\n");
-	   local $/;
-	   <$json_fh>
-	};
+	 
+	
+	open(my $json_fh, '<:encoding(UTF-8)', $filename)
+	      or croak("Can't open \$filename\": $!\n");
+	my $json_text = do { local $/ = undef; <$json_fh> };
+	close $json_fh or croak "Can't close '$filename' after reading";
+	
 	use JSON;
 	my $json = JSON->new;
 	$json = $json->relaxed(1);
 	my $ver = $json->incr_parse($json_text);
 	my $prot = $json->incr_parse();
 	
-	$self->{_protocols} = $prot // "undef"; 
-	$self->{_protocolsVersion} = $ver->{version} // "undef"; 
+	$self->{_protocols} = $prot // 'undef'; 
+	$self->{_protocolsVersion} = $ver->{version} // 'undef'; 
 
 	$self->setDefaults();
 	$self->{_protocolFilename} = $filename;
@@ -119,7 +121,7 @@ sub LoadHashFromJson {
 #  $id
 
 sub LoadHash {
-	my $self = shift // carp "Not called within an object";
+	my $self = shift // carp 'Not called within an object';
 	my $filename = shift // $self->{_protocolFilename};
 
 	return if ($self->{_filetype} ne "PerlModule");
@@ -146,7 +148,7 @@ sub LoadHash {
 # =cut
 #  $id
 sub protocolExists {
-	my $self = shift // carp "Not called within an object";
+	my $self = shift // carp 'Not called within an object';
 	my $pId= shift // carp "Illegal parameter number, protocol id was not specified";
 	return exists($self->{_protocols}->{$pId});
 }
@@ -158,7 +160,7 @@ sub protocolExists {
 # =cut
 #  $id, $propertyname,
 sub getProtocolList {
-	my $self = shift // carp "Not called within an object";
+	my $self = shift // carp 'Not called within an object';
 	return $self->{_protocols};
 }
 
@@ -170,7 +172,7 @@ sub getProtocolList {
 # =cut
 
 sub getKeys {
-	my $self=shift // carp "Not called within an object";
+	my $self=shift // carp 'Not called within an object';
 	my (@ret) = keys %{$self->{_protocols}};
 	return @ret;
 }
@@ -185,7 +187,7 @@ sub getKeys {
 #  $id, $propertyname,$default
 
 sub checkProperty {
-	my $self=shift // carp "Not called within an object";
+	my $self=shift // carp 'Not called within an object';
 	my $id = shift // return;
 	my $valueName = shift // return;
  	my $default= shift // undef;
@@ -204,7 +206,7 @@ sub checkProperty {
 #  $id, $propertyname
 
 sub getProperty {
-	my $self = shift // carp "Not called within an object";
+	my $self = shift // carp 'Not called within an object';
 	my $id = shift // return ;
 	my $valueName = shift // return ;
 	
@@ -220,7 +222,7 @@ sub getProperty {
 # =cut
 
 sub getProtocolVersion {
-	my $self = shift // carp "Not called within an object";
+	my $self = shift // carp 'Not called within an object';
 	return $self->{_protocolsVersion};
 }
 
@@ -232,7 +234,7 @@ sub getProtocolVersion {
 # =cut
 
 sub setDefaults {
-	my $self = shift // carp "Not called within an object";
+	my $self = shift // carp 'Not called within an object';
 	
 	for my $id ( $self->getKeys() )
 	{
@@ -245,7 +247,7 @@ sub setDefaults {
 			$self->{_protocols}->{$id}->{method} = \&lib::SD_Protocols::MCRAW if ( !defined $cref && $format eq 'manchester' );
 
 			if (defined $cref) {
-				$cref =~ s/^\\&//;
+				$cref =~ s/^\\&//xms;
 				$self->{_protocols}->{$id}->{method} = eval {\&$cref} if (ref $cref ne 'CODE');
 			}
 		}
@@ -260,7 +262,7 @@ sub setDefaults {
 		} else {
 		
 		}
-	}	
+	}
 	return;
 }
 
@@ -278,7 +280,7 @@ Output:
 
 sub  binStr2hexStr {
     my $num   = shift // return;
-	return if ($num !~ /^[01]*$/);
+	return if ($num !~ /^[01]*$/xms);
     my $WIDTH = 4;
     my $index = length($num) - $WIDTH;
     my $hex = '';
@@ -310,9 +312,8 @@ Output:
 =cut
 
 sub MCRAW {
-	my $self = shift // carp "Not called within an object";
-	
-	my ($name,$bitData,$id,$mcbitnum) = @_;
+	my ($self,$name,$bitData,$id,$mcbitnum) = @_;
+	$self // carp 'Not called within an object' ;
 	
 
 	return (-1," message is to long") if ($mcbitnum > $self->checkProperty($id,"length_max",0) );
@@ -332,6 +333,8 @@ sub registerLogCallback
 	
 	(ref $callback eq 'CODE') ? $self->{_logCallback} = $callback
 		: carp 'coderef must be provided for callback';
+
+	return ;
 }
 
 ############################# package lib::SD_Protocols
@@ -347,11 +350,11 @@ sub _logging {
 	my $level = shift // 3;
 	
 	
-	if (defined $self->{logCallback})
+	if (defined $self->{_logCallback})
 	{
 		$self->{_logCallback}->($message,$level);
 	}
-	
+	return ;
 }
 
 ######################### package lib::SD_Protocols #########################
@@ -380,7 +383,7 @@ sub dec2binppari {      # dec to bin . parity
 	for my $c (split //, $nbin) {
 		$parity ^= $c;
 	}
-	return  qq[$nbin$parity];		# bin(num) . paritybit
+	return  qq[$nbin$parity];  # bin(num) . paritybit
 }
 
 ############################################################
@@ -397,14 +400,15 @@ Output:
 =cut
 
 sub Convbit2Arctec {
-	my $self = shift // carp "Not called within an object";
-	shift;
-	my $msg = join("",@_) // carp "no bitmsg provided";
+	my ($self,undef,@bitmsg) = @_;
+	$self // carp 'Not called within an object';
+	@bitmsg // carp 'no bitmsg provided';
+	my $convmsg = join("",@bitmsg);
 	my @replace = qw(01 10); 
 
 	# Convert 0 -> 01   1 -> 10 to be compatible with IT Module
-	$msg =~ s/(0|1)/$replace[$1]/g;
-	return (1,split("",$msg));
+	$convmsg =~ s/(0|1)/$replace[$1]/gx;
+	return (1,split(//,$convmsg));
 }
 
 ############################################################
@@ -421,11 +425,12 @@ Output:
 =cut
 
 sub Convbit2itv1 {
-	my $self = shift // carp "Not called within an object";
-	shift;
-	my $msg = join("",@_) // carp "no bitmsg provided";
-
-	$msg =~ s/0F/01/g;		# Convert 0F -> 01 (F) to be compatible with CUL
+	my ($self,undef,@bitmsg) = @_;
+	$self // carp 'Not called within an object';
+	@bitmsg // carp 'no bitmsg provided';
+	my $msg = join("",@bitmsg);
+	
+	$msg =~ s/0F/01/g;  # Convert 0F -> 01 (F) to be compatible with CUL
 	return (1,split("",$msg)) if (index($msg,'F') == -1);
 	return (0,0);
 }
@@ -445,9 +450,9 @@ Output:
 =cut
 
 sub ConvHE800 {
-	my $self = shift // carp "Not called within an object";
+	my ($self,$name, @bit_msg) = @_;
+	$self // carp 'Not called within an object';
 	
-	my ($name, @bit_msg) = @_;
 	my $protolength = scalar @bit_msg;
 
 	if ($protolength < 40) {
@@ -473,8 +478,7 @@ Output:
 =cut
 
 sub ConvHE_EU {
-	my $self = shift; #just make compatibility with object 
-	my ($name, @bit_msg) = @_;
+	my ($self,$name, @bit_msg) = @_;
 	my $protolength = scalar @bit_msg;
 
 	if ($protolength < 72) {
@@ -523,10 +527,10 @@ Output:
 =cut
 
 sub PreparingSend_FS20_FHT {
-	my $self 	= shift // carp "Not called within an object";
-	my $id		= shift // carp 'no idprovided';
-	my $sum 	= shift // carp 'no sum provided';
-	my $msg 	= shift // carp 'no msg provided';
+	my $self = shift // carp 'Not called within an object';
+	my $id   = shift // carp 'no idprovided';
+	my $sum  = shift // carp 'no sum provided';
+	my $msg  = shift // carp 'no msg provided';
 	
 	return if ( $id > 74 || $id < 73); 
 	
@@ -563,7 +567,7 @@ Output:
 =cut
 
 sub ConvPCA301 {
-	my $self = shift // carp "Not called within an object";
+	my $self = shift // carp 'Not called within an object';
 	my $hexData = shift // croak 'Error: called without $hexdata as input';
 	
 	return (1,'ConvPCA301, Usage: Input #1, $hexData needs to be at least 24 chars long') 
@@ -605,7 +609,7 @@ Output:
 =cut
 
 sub ConvKoppFreeControl {
-	my $self = shift // carp "Not called within an object";
+	my $self = shift // carp 'Not called within an object';
 	my $hexData = shift // croak 'Error: called without $hexdata as input';
 
 	return (1,'ConvKoppFreeControl, Usage: Input #1, $hexData needs to be at least 4 chars long')
@@ -663,7 +667,7 @@ Message Format:
 =cut
 
 sub ConvLaCrosse {
-	my $self = shift // carp "Not called within an object";
+	my $self = shift // carp 'Not called within an object';
 	my $hexData = shift // croak 'Error: called without $hexdata as input';
 
 	return (1,'ConvLaCrosse, Usage: Input #1, $hexData needs to be at least 8 chars long') 
@@ -684,7 +688,7 @@ sub ConvLaCrosse {
 	
 	my $humObat = $humidity & 0x7F;
 
-	if ($humObat == 125) {	# Channel 2
+	if ($humObat == 125) {  # Channel 2
 		$SensorType = 2;
 	}
 	elsif ($humObat > 99) { # Shoud be checked in logical module
