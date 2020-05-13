@@ -328,7 +328,7 @@ sub MCRAW {
 # ASK/OOK method functions
 ############################################################
 
-=item bit2Arctec()
+=item Convbit2Arctec()
 
 This sub convert 0 -> 01, 1 -> 10 to be compatible with IT Module.
 
@@ -339,19 +339,20 @@ Output:
 
 =cut
 
-sub bit2Arctec {
+sub Convbit2Arctec {
 	my $self = shift // carp "Not called within an object";
 	shift;
 	my $msg = join("",@_) // carp "no bitmsg provided";
 	my @replace = qw(01 10); 
 
+	# Convert 0 -> 01   1 -> 10 to be compatible with IT Module
 	$msg =~ s/(0|1)/$replace[$1]/g;
 	return (1,split("",$msg));
 }
 
 ############################################################
 
-=item bit2itv1()
+=item Convbit2itv1()
 
 This sub convert 0F -> 01 (F) to be compatible with CUL.
 
@@ -362,12 +363,12 @@ Output:
 
 =cut
 
-sub bit2itv1 {
+sub Convbit2itv1 {
 	my $self = shift // carp "Not called within an object";
 	shift;
 	my $msg = join("",@_) // carp "no bitmsg provided";
 
-	$msg =~ s/0F/01/g;
+	$msg =~ s/0F/01/g;		# Convert 0F -> 01 (F) to be compatible with CUL
 	return (1,split("",$msg)) if (index($msg,'F') == -1);
 	return (0,0);
 }
@@ -702,34 +703,4 @@ sub ConvLaCrosse {
 	return( qq[OK 9 $addr $sensTypeBat $t1 $t2 $humidity] )  ;
 }
 
-sub Convbit2Arctec {
-	my $self = shift // carp "Not called within an object";
-	shift;
-	my $msg = join("",@_) // carp "no bitmsg provided";
-	my @replace = qw(01 10); 
-
-	# Convert 0 -> 01   1 -> 10 to be compatible with IT Module
-	$msg =~ s/(0|1)/$replace[$1]/g;
-	return (1,split("",$msg));
-}
-
-sub Convbit2itv1 {
-	my $self = shift // carp "Not called within an object";
-	shift;
-	my $msg = join("",@_) // carp "no bitmsg provided";
-
-	$msg =~ s/0F/01/g;		# Convert 0F -> 01 (F) to be compatible with CUL
-	return (1,split("",$msg)) if (index($msg,'F') == -1);
-	return (0,0);
-}
-
-sub _dec2binppari {      # dec to bin . parity
-	my $num = shift // carp 'must be called with an number';
-	my $parity = 0;
-	my $nbin = sprintf("%08b",$num);
-	for my $c (split //, $nbin) {
-		$parity ^= $c;
-	}
-	return  qq[$nbin$parity];		# bin(num) . paritybit
-}
 1;
