@@ -110,7 +110,7 @@ sub LoadHashFromJson {
 	return ;
 }
 
-############################# package lib::SD_Protocols
+############################# package lib::SD_Protocols, test exists
 #=item LoadHash()
 # This functons, will load protocol hash from perlmodule file .
 # First Parameter is for filename (full or relativ path) to be loaded
@@ -140,7 +140,7 @@ sub LoadHash {
 }
 
 
-############################# package lib::SD_Protocols
+############################# package lib::SD_Protocols, test exists
 #=item protocolexists()
 # This functons, will return true if the given ID exists otherwise false
 # =cut
@@ -152,7 +152,7 @@ sub protocolExists {
 }
 
 
-############################# package lib::SD_Protocols
+############################# package lib::SD_Protocols, test exists
 #=item getProtocolList()
 # This functons, will return a reference to the protocol hash
 # =cut
@@ -163,7 +163,7 @@ sub getProtocolList {
 }
 
 
-############################# package lib::SD_Protocols
+############################# package lib::SD_Protocols, test exists
 #=item getKeys()
 # This functons, will return all keys from the protocol hash
 # 
@@ -176,7 +176,7 @@ sub getKeys {
 }
 
 
-############################# package lib::SD_Protocols
+############################# package lib::SD_Protocols, test exists
 #=item checkProperty()
 # This functons, will return a value from the Protocolist and check if the key exists and a value is defined optional you can specify a optional default value that will be returned
 # 
@@ -195,7 +195,7 @@ sub checkProperty {
 }
 
 
-############################# package lib::SD_Protocols
+############################# package lib::SD_Protocols, test exists
 #=item getProperty()
 # This functons, will return a value from the Protocolist without any checks
 # 
@@ -213,7 +213,7 @@ sub getProperty {
 }
 
 
-############################# package lib::SD_Protocols
+############################# package lib::SD_Protocols, test exists
 #=item getProtocolVersion()
 # This functons, will return a version value of the Protocolist
 # 
@@ -225,7 +225,7 @@ sub getProtocolVersion {
 }
 
 
-############################# package lib::SD_Protocols
+############################# package lib::SD_Protocols, test exists
 #=item setDefaults()
 # This functon will add common Defaults to the Protocollist
 # 
@@ -265,7 +265,7 @@ sub setDefaults {
 }
 
 
-############################# package lib::SD_Protocols
+############################# package lib::SD_Protocols, test exists
 =item binStr2hexStr()
 This functon will convert binary string into its hex representation as string
 
@@ -296,7 +296,7 @@ sub  binStr2hexStr {
 }
 
 
-############################# package lib::SD_Protocols
+############################# package lib::SD_Protocols, test exists
 =item MCRAW()
 This functon is desired to be used as a default output helper for manchester signals.
 It will check for length_max and return a hex string
@@ -319,6 +319,40 @@ sub MCRAW {
 	return(1,binStr2hexStr($bitData)); 
 }
 
+############################# package lib::SD_Protocols, test exists
+
+=item registerLogCallback()
+
+=cut
+
+sub registerLogCallback
+{
+	my $self = shift // carp 'Not called within an object';
+	my $callback = shift // carp 'coderef must be provided';
+	
+	(ref $callback eq 'CODE') ? $self->{_logCallback} = $callback
+		: carp 'coderef must be provided for callback';
+}
+
+############################# package lib::SD_Protocols
+
+=item _logging()
+	$self->_logging('something happend','3')
+
+=cut
+
+sub _logging {
+	my $self = shift // carp 'Not called within an object';
+	my $message = shift // carp 'message must be provided';
+	my $level = shift // 3;
+	
+	
+	if (defined $self->{logCallback})
+	{
+		$self->{_logCallback}->($message,$level);
+	}
+	
+}
 
 ######################### package lib::SD_Protocols #########################
 ###       all functions for RAWmsg processing or module preparation       ###
@@ -326,6 +360,29 @@ sub MCRAW {
 
 ############################################################
 # ASK/OOK method functions
+############################################################
+
+=item dec2binppari()
+
+This sub ...
+
+Input:  $num
+
+Output:
+        ...
+
+=cut
+
+sub dec2binppari {      # dec to bin . parity
+	my $num = shift // carp 'must be called with an number';
+	my $parity = 0;
+	my $nbin = sprintf("%08b",$num);
+	for my $c (split //, $nbin) {
+		$parity ^= $c;
+	}
+	return  qq[$nbin$parity];		# bin(num) . paritybit
+}
+
 ############################################################
 
 =item Convbit2Arctec()
@@ -372,67 +429,6 @@ sub Convbit2itv1 {
 	return (1,split("",$msg)) if (index($msg,'F') == -1);
 	return (0,0);
 }
-
-############################################################
-
-=item dec2binppari()
-
-This sub ...
-
-Input:  $num
-
-Output:
-        ...
-
-=cut
-
-sub dec2binppari {      # dec to bin . parity
-	my $num = shift // carp 'must be called with an number';
-	my $parity = 0;
-	my $nbin = sprintf("%08b",$num);
-	for my $c (split //, $nbin) {
-		$parity ^= $c;
-	}
-	return  qq[$nbin$parity];		# bin(num) . paritybit
-}
-
-############################################################
-
-=item registerLogCallback()
-
-=cut
-
-sub registerLogCallback
-{
-	my $self = shift // carp 'Not called within an object';
-	my $callback = shift // carp 'coderef must be provided';
-	
-	(ref $callback eq 'CODE') ? $self->{_logCallback} = $callback
-		: carp 'coderef must be provided for callback';
-}
-
-
-
-############################################################
-
-=item _logging()
-	$self->_logging('something happend','3')
-
-=cut
-
-sub _logging {
-	my $self = shift // carp 'Not called within an object';
-	my $message = shift // carp 'message must be provided';
-	my $level = shift // 3;
-	
-	
-	if (defined $self->{logCallback})
-	{
-		$self->{_logCallback}->($message,$level);
-	}
-	
-}
-
 
 ############################################################
 
