@@ -2153,19 +2153,19 @@ package lib::SD_ProtocolData;
 							# https://github.com/RFD-FHEM/RFFHEM/issues/253
 							# CNT:91 CUM:14.560 5MIN:0.240 TOP:0.170   MU;P1=-417;P2=385;P3=-815;P4=-12058;D=42121212121212121212121212121212121232321212121212121232321212121212121232323212323212321232121212321212123232121212321212121232323212121212121232121212121212121232323212121212123232321232121212121232123232323212321;CP=2;R=87;
 			{
-				name							=> 'EM1000WZ',
-				comment						=> 'EM (Energy-Monitor)',
-				id								=> '80',
-				knownFreqs				=> '868.35',
-				one								=> [1,-2],	# 800
-				zero							=> [1,-1],	# 400
-				clockabs					=> 400,
-				format						=> 'twostate', # not used now
-				clientmodule			=> 'CUL_EM',
-				preamble					=> 'E',
-				length_min				=> '104',
-				length_max				=> '114',
-				postDemodulation	=> \&main::SIGNALduino_postDemo_EM,
+				name              => 'EM1000WZ',
+				comment           => 'EM (Energy-Monitor)',
+				id                => '80',
+				knownFreqs        => '868.35',
+				one               => [1,-2],     # 800
+				zero              => [1,-1],     # 400
+				clockabs          => 400,
+				format            => 'twostate', # not used now
+				clientmodule      => 'CUL_EM',
+				preamble          => 'E',
+				length_min        => '104',
+				length_max        => '114',
+				postDemodulation  => \&lib::SD_Protocols::postDemo_EM,
 			},
 		"81"	=>	## Remote control SA-434-1 based on HT12E @elektron-bbs
 							# P86#115 | receive   MU;P0=-485;P1=188;P2=-6784;P3=508;P5=1010;P6=-974;P7=-17172;D=0123050505630505056305630563730505056305050563056305637305050563050505630563056373050505630505056305630563730505056305050563056305637305050563050505630563056373050505630505056305630563730505056305050563056305637305050563050505630563056373050505630505056;CP=3;R=0;

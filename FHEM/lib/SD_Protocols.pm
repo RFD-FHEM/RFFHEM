@@ -522,6 +522,53 @@ sub ConvITV1_tristateToBit {
 
 ############################################################
 
+=item postDemo_EM()
+
+This sub prepares the send message.
+
+Input:  $id,$sum,$msg
+
+Output:
+        prepares message
+
+=cut
+
+sub postDemo_EM {
+	my $self = shift // carp "Not called within an object";
+	
+	my ($name, @bit_msg) = @_;
+	my $msg = join("",@bit_msg);
+	my $msg_start = index($msg, "0000000001");      # find start
+	my $count;
+	$msg = substr($msg,$msg_start + 10);            # delete preamble + 1 bit
+	my $new_msg = "";
+	my $crcbyte;
+	my $msgcrc = 0;
+
+	if ($msg_start > 0 && length $msg == 89) {
+		for ($count = 0; $count < length ($msg) ; $count +=9) {
+			$crcbyte = substr($msg,$count,8);
+			if ($count < (length($msg) - 10)) {
+				$new_msg.= join "", reverse @bit_msg[$msg_start + 10 + $count.. $msg_start + 17 + $count];
+				$msgcrc = $msgcrc ^ oct( "0b$crcbyte" );
+			}
+		}
+		if ($msgcrc == oct( "0b$crcbyte" )) {
+			return (1,split("",$new_msg));
+		} else {
+			#$hash->{logMethod}->($name, 3, "$name: EM, protocol - CRC ERROR");
+			# new output with Callback
+			return 0, undef;
+		}
+	}
+	
+	#$hash->{logMethod}->($name, 3, "$name: EM, protocol - Start not found or length msg (".length $msg.") not correct");
+	# new output with Callback
+	return 0, undef;
+}
+
+############################################################
+
 =item PreparingSend_FS20_FHT()
 
 This sub prepares the send message.
