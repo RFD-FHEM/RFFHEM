@@ -346,6 +346,7 @@ sub SIGNALduino_FingerprintFn($$) {
   return ("", $msg);
 }
 
+
 ############################# package main
 sub SIGNALduino_Define($$) {
   my ($hash, $def) = @_;
@@ -387,6 +388,7 @@ sub SIGNALduino_Define($$) {
 
   my $ret=undef;
   my $Protocols = new lib::SD_Protocols();
+  $Protocols->registerLogCallback(SIGNALduino_createLogCallback($hash));
   my $error = $Protocols->LoadHash(qq[$attr{global}{modpath}/FHEM/lib/SD_ProtocolData.pm]);
   $hash->{protocolObject} = $Protocols;
 
@@ -4322,6 +4324,21 @@ sub SIGNALduino_Log3($$$) {
 sub SIGNALduino_getProtocolList() {
 	#return \%ProtocolListSIGNALduino
 }
+
+############################# package main
+# Helper to create a individual callback per definition which can receive log output from perl modules
+sub SIGNALduino_createLogCallback {
+	my $hash = shift // return ;
+	(ref $hash ne 'HASH') // return ;
+
+	return sub  {
+		my $message = shift // carp "message must be provided";
+		my $level = shift // 0;
+				
+		$hash->{logMethod}->($hash->{NAME}, $level,qq[$hash->{NAME}: $message]);
+	};
+};
+
 
 ############################# package main
 sub SIGNALduino_FW_getProtocolList {
