@@ -550,11 +550,14 @@ sub postDemo_EM {
 		} else {
 			#$hash->{logMethod}->($name, 3, "$name: EM, protocol - CRC ERROR");
 			# new output with Callback
+			$self->_logging(q[lib/postDemo_EM, protocol - CRC ERROR],3);
 			return 0, undef;
 		}
 	}
 	
 	#$hash->{logMethod}->($name, 3, "$name: EM, protocol - Start not found or length msg (".length $msg.") not correct");
+	my $msgLength = length $msg;
+	$self->_logging(qq[lib/postDemo_EM, protocol - Start not found or length msg ($msgLength) not correct],3);
 	# new output with Callback
 	return 0, undef;
 }

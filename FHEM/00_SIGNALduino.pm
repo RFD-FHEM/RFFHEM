@@ -38,7 +38,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.5_dev_05.10",
+	SDUINO_VERSION            => "v3.5_dev_05.14",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -378,7 +378,7 @@ sub SIGNALduino_Define($$) {
     #return undef;
   }
 
-  $dev .= "\@57600" if ($dev ne 'none' && $dev =~ m/[a-zA-Z]/ && $dev !~ m/\@/);   # bei einer IP wird kein \@57600 angehaengt
+  $dev .= "\@57600" if ($dev ne 'none' && $dev =~ m/[a-zA-Z]/xms && $dev !~ m/\@/);   # bei einer IP wird kein \@57600 angehaengt
 
   #$hash->{CMDS} = "";
   $hash->{Clients} = $clientsSIGNALduino;
