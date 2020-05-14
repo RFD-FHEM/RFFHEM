@@ -526,37 +526,33 @@ Output:
 =cut
 
 sub postDemo_EM {
-	my $self = shift // carp "Not called within an object";
-	
+	my $self = shift // carp 'Not called within an object';
 	my ($name, @bit_msg) = @_;
-	my $msg = join("",@bit_msg);
-	my $msg_start = index($msg, "0000000001");      # find start
-	my $count;
+	my $msg = join(q[],@bit_msg);
+	my $msg_start = index($msg, '0000000001');      # find start
 	$msg = substr($msg,$msg_start + 10);            # delete preamble + 1 bit
-	my $new_msg = "";
+	my $new_msg = q[];
 	my $crcbyte;
 	my $msgcrc = 0;
-
-	if ($msg_start > 0 && length $msg == 89) {
-		for ($count = 0; $count < length ($msg) ; $count +=9) {
+	my $msgLength = length $msg;
+	
+	if ($msg_start > 0 && $msgLength == 89) {
+		for my $count (0..$msgLength) {
+			next if $count % 9 != 0;
 			$crcbyte = substr($msg,$count,8);
 			if ($count < (length($msg) - 10)) {
-				$new_msg.= join "", reverse @bit_msg[$msg_start + 10 + $count.. $msg_start + 17 + $count];
+				$new_msg.= join q[], reverse @bit_msg[$msg_start + 10 + $count.. $msg_start + 17 + $count];
 				$msgcrc = $msgcrc ^ oct( "0b$crcbyte" );
 			}
 		}
-		if ($msgcrc == oct( "0b$crcbyte" )) {
-			return (1,split("",$new_msg));
-		} else {
-			#$hash->{logMethod}->($name, 3, "$name: EM, protocol - CRC ERROR");
-			# new output with Callback
-			$self->_logging(q[lib/postDemo_EM, protocol - CRC ERROR],3);
-			return 0, undef;
-		}
+		return (1,split(//xms,$new_msg)) if ($msgcrc == oct( "0b$crcbyte" ));
+		
+		$self->_logging(q[lib/postDemo_EM, protocol - CRC ERROR],3);
+		return 0, undef;
+		
 	}
 	
 	#$hash->{logMethod}->($name, 3, "$name: EM, protocol - Start not found or length msg (".length $msg.") not correct");
-	my $msgLength = length $msg;
 	$self->_logging(qq[lib/postDemo_EM, protocol - Start not found or length msg ($msgLength) not correct],3);
 	# new output with Callback
 	return 0, undef;
@@ -583,8 +579,10 @@ sub PreparingSend_FS20_FHT {
 	
 	my $temp = 0;
 	my $newmsg = q[P].$id.q[#0000000000001];    # 12 Bit Praeambel, 1 bit
+	my $msgLength = length $msg;
 
-	for (my $i=0; $i<length($msg); $i+=2) {
+	for my $i (0..$msgLength) {
+		next if $i % 2 != 0;
 		$temp = hex(substr($msg, $i, 2));
 		$sum += $temp;
 		$newmsg .= dec2binppari($temp);
@@ -661,7 +659,8 @@ sub ConvKoppFreeControl {
 	my $anz = hex(substr($hexData,0,2)) + 1;
 	my $blkck = 0xAA;
 
-	for (my $i = 0; $i < $anz; $i++) {
+
+	for my $i (0..$anz) {
 		my $d = hex(substr($hexData,$i*2,2));
 		$blkck ^= $d;
 	}
