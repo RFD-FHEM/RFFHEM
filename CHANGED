@@ -1,3 +1,6 @@
+2020-05-14 - FHEM/lib/SD_Protocols.pm
+
+Implemented logging into sub postDemo_EM
 2020-05-14 - 00_SIGNALduino.pm
 
 added new sub SIGNALduino_createLogCallback
