@@ -1,3 +1,7 @@
+2020-05-14 - FHEM/lib/SD_Protocols.pm
+
+Fixed bug introduced with last commit in
+subs PreparingSend_FS20_FH  and ConvKoppFreeContro
 2020-05-14 - Merge branch 'dev-r35_xFSK_oo' of github.com:RFD-FHEM/RFFHEM into dev-r35_xFSK_oo
 2020-05-14 - FHEM/lib/SD_Protocols.pm
 
