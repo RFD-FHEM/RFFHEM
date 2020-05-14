@@ -581,7 +581,7 @@ sub PreparingSend_FS20_FHT {
 	my $newmsg = q[P].$id.q[#0000000000001];    # 12 Bit Praeambel, 1 bit
 	my $msgLength = length $msg;
 
-	for my $i (0..$msgLength) {
+	for my $i (0..$msgLength-1) {
 		next if $i % 2 != 0;
 		$temp = hex(substr($msg, $i, 2));
 		$sum += $temp;
@@ -660,7 +660,7 @@ sub ConvKoppFreeControl {
 	my $blkck = 0xAA;
 
 
-	for my $i (0..$anz) {
+	for my $i (0..$anz-1) {
 		my $d = hex(substr($hexData,$i*2,2));
 		$blkck ^= $d;
 	}
