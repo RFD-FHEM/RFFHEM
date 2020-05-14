@@ -1,3 +1,4 @@
+2020-05-14 - Merge branch 'dev-r35_xFSK_oo' of github.com:RFD-FHEM/RFFHEM into dev-r35_xFSK_oo
 2020-05-14 - FHEM/lib/SD_Protocols.pm
 
 Implemented logging into sub postDemo_EM
