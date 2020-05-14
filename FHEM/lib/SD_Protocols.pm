@@ -164,19 +164,18 @@ sub getProtocolList {
 	return $self->{_protocols};
 }
 
-
 ############################# package lib::SD_Protocols, test exists
-#=item getKeys()
-# This functons, will return all keys from the protocol hash
-# 
-# =cut
+
+=item getKeys()
+This functons, will return all keys from the protocol hash
+
+=cut
 
 sub getKeys {
 	my $self=shift // carp 'Not called within an object';
 	my (@ret) = keys %{$self->{_protocols}};
 	return @ret;
 }
-
 
 ############################# package lib::SD_Protocols, test exists
 #=item checkProperty()
@@ -216,22 +215,22 @@ sub getProperty {
 
 
 ############################# package lib::SD_Protocols, test exists
-#=item getProtocolVersion()
-# This functons, will return a version value of the Protocolist
-# 
-# =cut
+=item getProtocolVersion()
+This functons, will return a version value of the Protocolist
+
+=cut
 
 sub getProtocolVersion {
 	my $self = shift // carp 'Not called within an object';
 	return $self->{_protocolsVersion};
 }
 
-
 ############################# package lib::SD_Protocols, test exists
-#=item setDefaults()
-# This functon will add common Defaults to the Protocollist
-# 
-# =cut
+
+=item setDefaults()
+This functon will add common Defaults to the Protocollist
+
+=cut
 
 sub setDefaults {
 	my $self = shift // carp 'Not called within an object';
@@ -274,11 +273,11 @@ sub setDefaults {
 
 
 ############################# package lib::SD_Protocols, test exists
+
 =item binStr2hexStr()
 This functon will convert binary string into its hex representation as string
 
 Input:  binary string
- 
 Output:
         hex string
 
@@ -346,7 +345,9 @@ sub registerLogCallback
 ############################# package lib::SD_Protocols
 
 =item _logging()
-	$self->_logging('something happend','3')
+
+The sub transfers the data to the sub which is referenced by the code ref.
+example: $self->_logging('something happend','3')
 
 =cut
 
@@ -372,12 +373,10 @@ sub _logging {
 ############################################################
 
 =item dec2binppari()
-
 This sub calculated. It converts a decimal number with a width of 8 bits into binary format,
 calculates the parity, appends the parity bit and returns this 9 bit.
 
 Input:  $num
-
 Output:
         calculated number binary with parity
 
@@ -421,11 +420,9 @@ sub Convbit2Arctec {
 ############################################################
 
 =item Convbit2itv1()
-
 This sub convert 0F -> 01 (F) to be compatible with CUL.
 
 Input:  $msg
-
 Output:
         converted message
 
@@ -473,12 +470,10 @@ sub ConvHE800 {
 ############################################################
 
 =item ConvHE_EU()
-
 This sub checks the length of the bits.
 If the length is less than 72, it adds a 0.
 
 Input:  $name, @bit_msg
-
 Output:
         scalar converted message on success 
 
@@ -499,7 +494,6 @@ sub ConvHE_EU {
 ############################################################
 
 =item ConvITV1_tristateToBit()
-
 This sub Convert 0 -> 00, 1 -> 11, F => 01 to be compatible with IT Module.
 
 Input:  $msg
@@ -523,11 +517,9 @@ sub ConvITV1_tristateToBit {
 ############################################################
 
 =item postDemo_EM()
-
-This sub prepares the send message.
+This sub checks the bit sequence. On an error in the CRC or no start, it issues an output.
 
 Input:  $id,$sum,$msg
-
 Output:
         prepares message
 
@@ -570,11 +562,9 @@ sub postDemo_EM {
 ############################################################
 
 =item PreparingSend_FS20_FHT()
-
 This sub prepares the send message.
 
 Input:  $id,$sum,$msg
-
 Output:
         prepares message
 
@@ -608,12 +598,10 @@ sub PreparingSend_FS20_FHT {
 ############################################################
 
 =item ConvPCA301()
-
 This sub checks crc and converts data to a format which the PCA301 module can handle
 croaks if called with less than one parameters
 
 Input:  $hexData
-
 Output:
         scalar converted message on success 
 		or array (1,"Error message")
@@ -650,12 +638,10 @@ sub ConvPCA301 {
 ############################################################
 
 =item ConvKoppFreeControl()
-
 This sub checks crc and converts data to a format which the KoppFreeControl module can handle
 croaks if called with less than one parameters
 
 Input:  $hexData
-
 Output:
         scalar converted message on success 
 		or array (1,"Error message")
@@ -688,12 +674,10 @@ sub ConvKoppFreeControl {
 ############################################################
 
 =item ConvLaCrosse()
-
 This sub checks crc and converts data to a format which the LaCrosse module can handle
 croaks if called with less than one parameter
 
 Input:  $hexData
-
 Output:
         scalar converted message on success 
 		or array (1,"Error message")
