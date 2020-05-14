@@ -373,12 +373,13 @@ sub _logging {
 
 =item dec2binppari()
 
-This sub ...
+This sub calculated. It converts a decimal number with a width of 8 bits into binary format,
+calculates the parity, appends the parity bit and returns this 9 bit.
 
 Input:  $num
 
 Output:
-        ...
+        calculated number binary with parity
 
 =cut
 
@@ -398,7 +399,7 @@ sub dec2binppari {      # dec to bin . parity
 
 This sub convert 0 -> 01, 1 -> 10 to be compatible with IT Module.
 
-Input:  $msg
+Input:  @bit_msg
 
 Output:
         converted message
