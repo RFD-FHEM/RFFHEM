@@ -1,3 +1,11 @@
+2020-05-15 - remove old sub SIGNALduino_postDemo_EM
+
+00_SIGNALduino.pm
+  * remove old sub SIGNALduino_postDemo_EM
+SD_Protocols.pm
+  * remove old lines
+02_postDemo_EM.t
+  * test added
 2020-05-14 - FHEM/lib/SD_Protocols.pm
 
 Fixed bug introduced with last commit in
