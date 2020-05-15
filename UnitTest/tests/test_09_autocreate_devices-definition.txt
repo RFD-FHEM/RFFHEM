@@ -3,7 +3,6 @@ defmod test_09_autocreate_devices UnitTest dummyDuino (
 	use Test2::V0;
 	use Test2::Tools::Compare qw{is};
 	## for online testsytem: defmod test_autocreate_devices UnitTest dummyDuino ##
-
 	# for local test
 	my $attr_autocreateThreshold = AttrVal("autocreate" ,"autocreateThreshold",undef);
 	if ($attr_autocreateThreshold) {
@@ -16,6 +15,8 @@ defmod test_09_autocreate_devices UnitTest dummyDuino (
 	subtest 'attrib autocreate is undef for right result' => sub {
 		is(AttrVal("autocreate" ,"autocreateThreshold",undef),undef,"check autocreate undef");
 	};
+	# Dirty hack to clean autocreate data before running this test
+	delete($defs{autocreate}{received}{SD_WS});
 
 	subtest 'Protocol 38 - autocreate via DMSG' => sub {
 		plan(3);
