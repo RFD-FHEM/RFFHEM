@@ -23,8 +23,8 @@ subtest 'Test CRC OK' => sub {
 	my @bits=qw(0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 0 0 0 0 0 0 0 1 1 0 0 0 0 0 0 0 1 1 1 0 1 1 0 1 0 1 0 0 0 1 0 0 0 1 1 0 0 0 1 0 0 0 0 1 1 1 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 1 1 1 0 0 0 0 0 1 1 1 0 1 0 0 0 0 0 1 0 1 1 1 1 0 1 0);
 
 	($rcode,@bits)=lib::SD_Protocols::postDemo_EM($Protocols,$target,@bits);
-	is($rcode,1,'check returncode for EM, CRC OK');
-	is(join("",@bits),'000000010000000101011011100010000000100000000011000000001000001100000101','check result EM, CRC OK');
+	is($rcode,1,'check returncode for postDemo_EM, CRC OK');
+	is(join("",@bits),'000000010000000101011011100010000000100000000011000000001000001100000101','check result postDemo_EM, CRC OK');
 };
 
 
@@ -35,8 +35,8 @@ subtest 'Test CRC ERROR' => sub {
 	my @bits=qw(0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 0 0 0 0 0 0 0 1 1 0 0 0 0 0 0 0 1 1 1 0 1 1 0 1 0 1 0 0 0 1 0 0 0 1 1 0 0 0 1 0 0 0 0 1 1 1 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 1 1 1 0 0 0 0 0 1 1 1 0 1 1 0 0 0 1 1 0 1 1 1 1 0 1 0);
 
 	($rcode,$output)=lib::SD_Protocols::postDemo_EM($Protocols,$target,@bits);
-	is($rcode,0,'check returncode for EM, CRC ERROR');
-	is($output,undef,'check result EM, CRC ERROR');
+	is($rcode,0,'check returncode for postDemo_EM, CRC ERROR');
+	is($output,undef,'check result postDemo_EM, CRC ERROR');
 };
 
 
@@ -48,8 +48,8 @@ subtest 'Test length 89 not correct' => sub {
 	note('input '.@bits.' bits');
 
 	($rcode,$output)=lib::SD_Protocols::postDemo_EM($Protocols,$target,@bits);
-	is($rcode,0,'check returncode for EM, length not correct');
-	is($output,undef,'check result EM, length not correct');
+	is($rcode,0,'check returncode for postDemo_EM, length not correct');
+	is($output,undef,'check result postDemo_EM, length not correct');
 };
 
 
@@ -61,6 +61,6 @@ subtest 'Test start not found ' => sub {
 	note('msg start 0000000001, index '.index(join("",@bits), '0000000001'));
 
 	($rcode,@bits)=lib::SD_Protocols::postDemo_EM($Protocols,$target,@bits);
-	is($rcode,0,'check returncode for EM, Start not found');
-	is($output,undef,'check result EM, Start not found');
+	is($rcode,0,'check returncode for postDemo_EM, Start not found');
+	is($output,undef,'check result postDemo_EM, Start not found');
 };
