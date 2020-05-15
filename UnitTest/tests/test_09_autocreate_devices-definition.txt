@@ -40,9 +40,9 @@ defmod test_09_autocreate_devices UnitTest dummyDuino (
 		
 		SIGNALduino_Parse_MU($targetHash, $targetHash, $targetHash->{NAME}, $rmsg,%signal_parts);
 		$targetHash->{TIME} -=3;
-		is(!IsDevice($sensorname), 1, "Sensor not created with single dispatch");
+		is(!IsDevice($sensorname), 1, "Sensor not created with single dispatch",q[Devices (TYPE=SD_WS):]. join q{},devspec2array('TYPE=SD_WS'));
 		SIGNALduino_Parse_MU($targetHash, $targetHash, $targetHash->{NAME}, $rmsg,%signal_parts);
-		is(IsDevice($sensorname), 1,"check Sensor created with second dispatch");
+		is(IsDevice($sensorname), 1,"check Sensor created with second dispatch",q[Devices (TYPE=SD_WS):]. join q{},devspec2array('TYPE=SD_WS'));
 	};
 	
 	subtest 'Protocol 84 - autocreate via DMSG' => sub {
@@ -67,11 +67,11 @@ defmod test_09_autocreate_devices UnitTest dummyDuino (
 
 		for my $i (1..3) {
 			SIGNALduino_Parse_MU($targetHash, $targetHash, $targetHash->{NAME}, $rmsg,%signal_parts);
-			is(IsDevice($sensorname), 0, "Sensor not created with dispatch $i/3");
+			is(IsDevice($sensorname), 0, "Sensor not created with dispatch $i/3",q[Devices (TYPE=SD_WS):]. join q{},devspec2array('TYPE=SD_WS'));
 			$targetHash->{TIME} -=3;
 		}
 		SIGNALduino_Parse_MU($targetHash, $targetHash, $targetHash->{NAME}, $rmsg,%signal_parts);
-		is(IsDevice($sensorname), 1,"check Sensor created with dispatch 4");
+		is(IsDevice($sensorname), 1,"check Sensor created with dispatch 4",q[Devices (TYPE=SD_WS):]. join q{},devspec2array('TYPE=SD_WS'));
 	};
 	
 	# for local test, to reset attrib to old value
