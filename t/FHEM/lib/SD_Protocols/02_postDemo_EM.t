@@ -36,7 +36,7 @@ subtest 'Test CRC ERROR' => sub {
 
 	($rcode,$output)=lib::SD_Protocols::postDemo_EM($Protocols,$target,@bits);
 	is($rcode,0,'check returncode for EM, CRC ERROR');
-	is($output,'postDemo_EM, protocol - CRC ERROR','check result EM, CRC ERROR');
+	is($output,undef,'check result EM, CRC ERROR');
 };
 
 
@@ -49,7 +49,7 @@ subtest 'Test length 89 not correct' => sub {
 
 	($rcode,$output)=lib::SD_Protocols::postDemo_EM($Protocols,$target,@bits);
 	is($rcode,0,'check returncode for EM, length not correct');
-	is($output,'postDemo_EM, protocol - Start not found or length msg (length 100000001100000001110110101000100011000100001110000001000000001110000011101000001011110101010) not correct','check result EM, length not correct');
+	is($output,undef,'check result EM, length not correct');
 };
 
 
@@ -57,10 +57,10 @@ subtest 'Test start not found ' => sub {
 	plan(2);
 
 	# MU;P1=-417;P2=385;P3=-815;P4=-12058;D=42121212121212121212121212121212121212121212121212121232321212121212121232323212323212321232121212321212123232121212321212121232323212121212121232121212121212121232323212121212123232321232121212121232123232323212321;CP=2;R=87;
-	my @bits=qw(0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 0 0 0 0 0 0 0 1 1 1 0 1 1 0 1 0 1 0 0 0 1 0 0 0 1 1 0 0 0 1 0 0 0 0 1 1 1 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 1 1 1 0 0 0 0 0 1 1 1 0 1 0 0 0 0 0 1 0 1 1 1 1 0 1 0);
-	note('input '.@bits.' bits');
+	my @bits=qw(0 0 0 0 0 1 1 0 0 0 0 0 0 0 1 1 1 0 1 1 0 1 0 1 0 0 0 1 0 0 0 1 1 0 0 0 1 0 0 0 0 1 1 1 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 1 1 1 0 0 0 0 0 1 1 1 0 1 0 0 0 0 0 1 0 1 1 1 1 0 1 0);
+	note('msg start 0000000001, index '.index(join("",@bits), '0000000001'));
 
 	($rcode,@bits)=lib::SD_Protocols::postDemo_EM($Protocols,$target,@bits);
 	is($rcode,0,'check returncode for EM, Start not found');
-	is($output,'postDemo_EM, protocol - Start not found or length msg (length 100000001100000001110110101000100011000100001110000001000000001110000011101000001011110101010) not correct','check result EM, Start not found');
+	is($output,undef,'check result EM, Start not found');
 };
