@@ -38,7 +38,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.5_dev_05.14",
+	SDUINO_VERSION            => "v3.5_dev_05.15",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -3227,43 +3227,6 @@ sub SIGNALduino_lengtnPrefix {
 	$msg=sprintf('%08b', length($msg)).$msg;
 
 	return (1,split("",$msg));
-}
-
-
-
-############################# package main, test exists
-sub SIGNALduino_postDemo_EM($@) {
-	my $self=shift;
-	
-	my ($name, @bit_msg) = @_;
-	my $msg = join("",@bit_msg);
-	my $msg_start = index($msg, "0000000001");				# find start
-	my $count;
-	$msg = substr($msg,$msg_start + 10);						# delete preamble + 1 bit
-	my $new_msg = "";
-	my $crcbyte;
-	my $msgcrc = 0;
-	my $hash = $defs{$name};
-
-	if ($msg_start > 0 && length $msg == 89) {
-		for ($count = 0; $count < length ($msg) ; $count +=9) {
-			$crcbyte = substr($msg,$count,8);
-			if ($count < (length($msg) - 10)) {
-				$new_msg.= join "", reverse @bit_msg[$msg_start + 10 + $count.. $msg_start + 17 + $count];
-				$msgcrc = $msgcrc ^ oct( "0b$crcbyte" );
-			}
-		}
-		if ($msgcrc == oct( "0b$crcbyte" )) {
-			$hash->{logMethod}->($name, 4, "$name: EM, protocol - CRC OK");
-			return (1,split("",$new_msg));
-		} else {
-			$hash->{logMethod}->($name, 3, "$name: EM, protocol - CRC ERROR");
-			return 0, undef;
-		}
-	}
-
-	$hash->{logMethod}->($name, 3, "$name: EM, protocol - Start not found or length msg (".length $msg.") not correct");
-	return 0, undef;
 }
 
 ############################# package main, test exists

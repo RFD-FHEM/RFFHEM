@@ -546,15 +546,13 @@ sub postDemo_EM {
 			}
 		}
 		return (1,split(//xms,$new_msg)) if ($msgcrc == oct( "0b$crcbyte" ));
-		
+
 		$self->_logging(q[lib/postDemo_EM, protocol - CRC ERROR],3);
 		return 0, undef;
 		
 	}
 	
-	#$hash->{logMethod}->($name, 3, "$name: EM, protocol - Start not found or length msg (".length $msg.") not correct");
 	$self->_logging(qq[lib/postDemo_EM, protocol - Start not found or length msg ($msgLength) not correct],3);
-	# new output with Callback
 	return 0, undef;
 }
 
