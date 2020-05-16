@@ -2006,7 +2006,7 @@ package lib::SD_ProtocolData;
 				preamble			=> '810b04f70101a001',
 				length_min			=> '50',
 				length_max			=> '67',
-				postDemodulation	=> \&main::SIGNALduino_postDemo_FS20,
+				postDemodulation	=> \&lib::SD_Protocols::postDemo_FS20,
 			},
 		"74.1"	=>	## FS20 - Remote Control (868Mhz) @HomeAutoUser
 								# dim100%   MS;P1=-356;P2=448;P3=653;P4=-551;P5=-10412;D=2521212121212121212121212134212121343421212121213421213421212121212121212121212121212121342121212134213434342134342134;CP=2;SP=5;R=72;O;!;4;
@@ -2026,7 +2026,7 @@ package lib::SD_ProtocolData;
 				paddingbits      => '1',      # disable padding
 				length_min       => '50',
 				length_max       => '67',
-				postDemodulation => \&main::SIGNALduino_postDemo_FS20,
+				postDemodulation => \&lib::SD_Protocols::postDemo_FS20,
 			},
 		"75"	=>	## Conrad RSL (Erweiterung v2) @litronics https://github.com/RFD-FHEM/SIGNALDuino/issues/69
 							# ! same definition how ID 5, but other length !
