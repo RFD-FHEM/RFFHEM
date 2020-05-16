@@ -1,3 +1,7 @@
+2020-05-16 - 00_SIGNALduino.pm -> SD_Protocols.pm
+
+moved SIGNALduino_postDemo_FS20 to lib::SD_Protocols postDemo_FS20
+Moved test to t\FHEM\lib\SD_Protocols\02_postDemo_FS20.t
 2020-05-16 - t/FHEM/00_SIGNALduino/09_autocreate_devices.t
 
 Added autocreate devices unittest as fhem native unittest, so check how migration can be done
