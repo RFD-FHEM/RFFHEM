@@ -1248,18 +1248,18 @@ package lib::SD_ProtocolData;
 							# MU;P0=32001;P1=-1939;P2=1967;P3=3896;P4=-3895;D=01213424242124212121242121242121212124212424212121212121242421212421242121242124242421242421242424242124212124242424242421212424212424212121242121212;CP=2;R=39;
 			{
 				name					=> 'BresserTemeo',
-				comment				=> 'temperature / humidity sensor',
+				comment					=> 'temperature / humidity sensor',
 				id						=> '44',
-				knownFreqs		=> '',
-				clockabs			=> 500,
+				knownFreqs				=> '',
+				clockabs				=> 500,
 				zero					=> [4,-4],
 				one						=> [4,-8],
 				start					=> [8,-8],
-				preamble			=> 'W44#',
-				clientmodule	=> 'SD_WS',
-				modulematch		=> '^W44#[A-F0-9]{18}',
-				length_min		=> '64',
-				length_max		=> '72',
+				preamble				=> 'W44#',
+				clientmodule			=> 'SD_WS',
+				modulematch				=> '^W44#[A-F0-9]{18}',
+				length_min				=> '64',
+				length_max				=> '72',
 			},
 		"44.1"	=>	## Bresser Temeo Trend
 			{

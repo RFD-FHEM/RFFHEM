@@ -263,7 +263,7 @@ sub setDefaults {
 			# Messages without sync defaults :
 			( !defined($self->checkProperty($id,'length_min')) ) ? 
 				$self->{_protocols}->{$id}->{length_min} = 8
-				: '' ;
+				: undef ;
 		} else {
 		
 		}
