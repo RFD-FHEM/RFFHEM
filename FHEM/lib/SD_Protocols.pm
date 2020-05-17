@@ -560,7 +560,7 @@ Output:
 
 =cut
 
-sub postDemo_FS20($@) {
+sub postDemo_FS20 {
 	my $self 		= shift // carp 'Not called within an object';
 	my $name 		= shift // carp 'no $name provided';
 	my @bit_msg  	= @_;
@@ -645,7 +645,7 @@ Output:
 =cut
 
 
-sub postDemo_FHT80($@) {
+sub postDemo_FHT80 {
 	my $self 		= shift // carp 'Not called within an object';
 	my $name 		= shift // carp 'no $name provided';
 	my @bit_msg  	= @_;
@@ -721,7 +721,7 @@ Output:
 
 =cut
 
-sub postDemo_FHT80TF($@) {
+sub postDemo_FHT80TF {
 	my $self 		= shift // carp 'Not called within an object';
 	my $name 		= shift // carp 'no $name provided';
 	my @bit_msg  	= @_;
@@ -783,7 +783,7 @@ Output:
         (returncode = 1 on success, prepared message or undef)
 
 =cut
-sub postDemo_WS7035($@) {
+sub postDemo_WS7035 {
 	my $self 		= shift // carp 'Not called within an object';
 	my $name 		= shift // carp 'no $name provided';
 	my @bit_msg  	= @_;
@@ -828,7 +828,7 @@ Output:
 
 =cut
 
-sub postDemo_WS2000($@) {
+sub postDemo_WS2000 {
 	my $self 		= shift // carp 'Not called within an object';
 	my $name 		= shift // carp 'no $name provided';
 	my @bit_msg  	= @_;
@@ -935,6 +935,58 @@ sub postDemo_WS2000($@) {
 			}
 		}
 		return (1, @new_bit_msg);
+	}
+}
+
+
+
+=item postDemo_WS7053()
+This sub checks the bit sequence. On an error in the CRC or no start, it issues an output.
+
+Input:  $object,$name,@bit_msg
+Output:
+        (returncode = 0 on failure, prepared message or undef)
+
+=cut
+
+sub postDemo_WS7053 {
+	my $self 		= shift // carp 'Not called within an object';
+	my $name 		= shift // carp 'no $name provided';
+	my @bit_msg  	= @_;
+
+	my $msg = join("",@bit_msg);
+	my $parity = 0;	                       # Parity even
+	$self->_logging(qq[lib/postDemo_WS7053, MSG = $msg],4);
+	my $msg_start = index($msg, '10100000');
+	if ($msg_start > 0) {                  # start not correct
+		$msg = substr($msg, $msg_start);
+		$msg .= '0';
+		$self->_logging(qq[lib/postDemo_WS7053, cut $msg_start char(s) at begin],5);
+	}
+	if ($msg_start < 0) {                  # start not found
+		$self->_logging(qq[lib/postDemo_WS7053, ERROR - Ident 10100000 not found],3);
+		return 0, undef;
+	} else {
+		if (length($msg) < 32) {             # msg too short
+			$self->_logging(qq[lib/postDemo_WS7053, ERROR - msg too short, length ] . length($msg),3);
+		return 0, undef;
+		} else {
+			for(my $i = 15; $i < 28; $i++) {   # Parity over bit 15 and 12 bit temperature
+				$parity += substr($msg, $i, 1);
+			}
+			if ($parity % 2 != 0) {
+				$self->_logging(qq[lib/postDemo_WS7053, ERROR - Parity not even] . length($msg),3);
+				return 0, undef;
+			} else {
+				# Todo substr durch regex ersetzen
+				$self->_logging(qq[lib/postDemo_WS7053, before: ] . substr($msg,0,4) ." ". substr($msg,4,4) ." ". substr($msg,8,4) ." ". substr($msg,12,4) ." ". substr($msg,16,4) ." ". substr($msg,20,4) ." ". substr($msg,24,4) ." ". substr($msg,28,4),5);
+				# Format from 7053:  Bit 0-7 Ident, Bit 8-15 Rolling Code/Parity, Bit 16-27 Temperature (12.3), Bit 28-31 Zero
+				my $new_msg = substr($msg,0,28) . substr($msg,16,8) . substr($msg,28,4);
+				# Format for CUL_TX: Bit 0-7 Ident, Bit 8-15 Rolling Code/Parity, Bit 16-27 Temperature (12.3), Bit 28 - 35 Temperature (12), Bit 36-39 Zero
+				$self->_logging(qq[lib/postDemo_WS7053, after: ] .  substr($new_msg,0,4) ." ". substr($new_msg,4,4) ." ". substr($new_msg,8,4) ." ". substr($new_msg,12,4) ." ". substr($new_msg,16,4) ." ". substr($new_msg,20,4) ." ". substr($new_msg,24,4) ." ". substr($new_msg,28,4) ." ". substr($new_msg,32,4) ." ". substr($new_msg,36,4),5);
+				return (1,split("",$new_msg));
+			}
+		}
 	}
 }
 
