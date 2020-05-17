@@ -634,7 +634,7 @@ sub mcBit2OSV1 {
 	my $name				= shift // 'anonymous';
 	my $bitData				= shift // carp 'bitData must be perovided' && return (0,'no bitData provided');
 	my $id					= shift // carp 'protocol ID must be provided' && return (0,'no protocolId provided');;;
-	my $mcbitnum   	= shift // length $bitData;
+	my $mcbitnum   			= shift // length $bitData;
 	
 	return (-1,' message is to short') if ($mcbitnum < $self->checkProperty($id,'length_min',-1) );
 	return (-1,' message is to long') if (defined $self->getProperty($id,'length_max') && $mcbitnum > $self->getProperty($id,'length_max') );
@@ -688,6 +688,46 @@ sub mcBit2OSV1 {
  	$self->_logging( qq[lib/mcBit2OSV1, converted to hex: $osv1hex], 4 );
    
     return (1,$osv1hex);
+}
+
+
+=item mcBit2AS()
+extract the message from the bitdata if it looks like valid data
+
+Input:  ($object,$name,$bitData,$protocolID, optional: length $bitData);
+
+Output:
+		on success array (returnCode=1, hexData)
+		otherwise array (returncode=-1,"Error message")
+=cut
+sub mcBit2AS {
+	my $self    			= shift // carp 'Not called within an object' && return (0,'no object provided');
+	my $name				= shift // 'anonymous';
+	my $bitData				= shift // carp 'bitData must be perovided' && return (0,'no bitData provided');
+	my $id					= shift // carp 'protocol ID must be provided' && return (0,'no protocolId provided');
+	my $mcbitnum   			= shift // length $bitData;
+
+
+	if(index($bitData,'1100',16) >= 0) # $rawData =~ m/^A{2,3}/)
+	{  # Valid AS detected!
+		my $message_start = index($bitData,'1100',16);
+	 	$self->_logging( qq[lib/mcBit2AS, AS protocol detected], 5 );
+
+		my $message_end=index($bitData,'1100',$message_start+16);
+		$message_end = length($bitData) if ($message_end == -1);
+		my $message_length = $message_end - $message_start;
+
+		return (-1,' message is to short') if ($message_length < $self->checkProperty($id,'length_min',-1) );
+		return (-1,' message is to long') if (defined $self->getProperty($id,'length_max' ) && $message_length > $self->getProperty($id,'length_max') );
+
+		my $msgbits =substr($bitData,$message_start);
+	 	my $ashex = lib::SD_Protocols::binStr2hexStr($msgbits); # output with length before
+	 	
+	 	$self->_logging( qq[$name: AS, protocol converted to hex: ($ashex) with length ($message_length) bits \n], 5 );
+
+		return (1,$ashex);
+	}
+	return (-1,undef);
 }
 
 ############################# package lib::SD_Protocols, test exists

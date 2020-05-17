@@ -448,18 +448,18 @@ package lib::SD_ProtocolData;
 			},
 		"11"	=>	## Arduino Sensor
 			{
-				name						=> 'Arduino',
+				name					=> 'Arduino',
 				comment					=> 'for Arduino based sensors',
-				id							=> '11',
-				knownFreqs      => '',
-				clockrange			=> [380,425],						# min , max
+				id						=> '11',
+				knownFreqs     			=> '',
+				clockrange				=> [380,425],						# min , max
 				format					=> 'manchester',				# tristate can't be migrated from bin into hex!
 				preamble				=> 'P2#',								# prepend to converted message
-				clientmodule		=> 'SD_AS',
-				modulematch			=> '^P2#.{7,8}',
-				length_min			=> '52',
-				length_max			=> '56',
-				method					=> \&main::SIGNALduino_AS			# Call to process this message
+				clientmodule			=> 'SD_AS',
+				modulematch				=> '^P2#.{7,8}',
+				length_min				=> '52',
+				length_max				=> '56',
+				method					=> \&lib::SD_Protocols::mcBit2AS			# Call to process this message
 			},
 		"12"	=>	## Hideki
 							# Id:31 Ch:1 T: 22.7 Bat:ok   MC;LL=-1040;LH=904;SL=-542;SH=426;D=A8C233B53A3E0A0783;C=485;L=72;R=213;

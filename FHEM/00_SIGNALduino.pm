@@ -3220,35 +3220,6 @@ sub SIGNALduino_callsub {
 
 
 ############################# package main
-sub	SIGNALduino_AS {
-	my $self = shift; #just make compatibility with object 
-	my ($name,$bitData,$id,$mcbitnum) = @_;
-	my $hash=$defs{$name};
-	my $debug = AttrVal($name,"debug",0);
-
-	if(index($bitData,"1100",16) >= 0) # $rawData =~ m/^A{2,3}/)
-	{  # Valid AS detected!
-		my $message_start = index($bitData,"1100",16);
-		Debug "$name: AS protocol detected \n" if ($debug);
-
-		my $message_end=index($bitData,"1100",$message_start+16);
-		$message_end = length($bitData) if ($message_end == -1);
-		my $message_length = $message_end - $message_start;
-
-		return (-1," message is to short") if ($message_length < $hash->{protocolObject}->checkProperty($id,'length_min',-1) );
-		return (-1," message is to long") if (defined $hash->{protocolObject}->getProperty($id,'length_max' ) && $message_length > $hash->{protocolObject}->getProperty($id,'length_max') );
-
-		my $msgbits =substr($bitData,$message_start);
-		my $ashex=sprintf('%02X', oct("0b$msgbits"));
-		my $hash=$defs{$name};
-		$hash->{logMethod}->($name, 5, "$name: AS, protocol converted to hex: ($ashex) with length ($message_length) bits \n");
-
-		return (1,$bitData);
-	}
-	return (-1,undef);
-}
-
-############################# package main
 sub	SIGNALduino_Hideki {
 	my $self = shift; #just make compatibility with object 
 	my ($name,$bitData,$id,$mcbitnum) = @_;
