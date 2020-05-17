@@ -3219,67 +3219,6 @@ sub SIGNALduino_callsub {
 
 
 
-############################# package main, test exists
-sub SIGNALduino_OSV1 {
-	my $self = shift; #just make compatibility with object 
-	my $name = shift // carp "error name must be provided";
-	
-	my ($bitData,$id,$mcbitnum) = @_;
-	my $hash=$defs{$name};
-	
-	return (-1," message is to short") if ($mcbitnum < $hash->{protocolObject}->checkProperty($id,'length_min',-1) );
-	return (-1," message is to long") if (defined $hash->{protocolObject}->getProperty($id,'length_max') && $mcbitnum > $hash->{protocolObject}->getProperty($id,'length_max') );
-
-	if (substr($bitData,20,1) != 0) {
-		$bitData =~ tr/01/10/; # invert message and check if it is possible to deocde now
-	}
-	my $calcsum = oct( "0b" . reverse substr($bitData,0,8));
-	$calcsum += oct( "0b" . reverse substr($bitData,8,8));
-	$calcsum += oct( "0b" . reverse substr($bitData,16,8));
-	$calcsum = ($calcsum & 0xFF) + ($calcsum >> 8);
-	my $checksum = oct( "0b" . reverse substr($bitData,24,8));
-
-	if ($calcsum != $checksum) {	                        # Checksum
-		return (-1,"OSV1 - ERROR checksum not equal: $calcsum != $checksum");
-	}
-
-	$hash->{logMethod}->($name, 4, "$name: OSV1, input data: $bitData");
-	my $newBitData = "00001010";                       # Byte 0:   Id1 = 0x0A
-    $newBitData .= "01001101";                         # Byte 1:   Id2 = 0x4D
-	my $channel = substr($bitData,6,2);						# Byte 2 h: Channel
-	if ($channel eq "00") {										# in 0 LSB first
-		$newBitData .= "0001";									# out 1 MSB first
-	} elsif ($channel eq "10") {								# in 4 LSB first
-		$newBitData .= "0010";									# out 2 MSB first
-	} elsif ($channel eq "01") {								# in 4 LSB first
-		$newBitData .= "0011";									# out 3 MSB first
-	} else {															# in 8 LSB first
-		return (-1,"$name: OSV1 - ERROR channel not valid: $channel");
-    }
-    $newBitData .= "0000";                             # Byte 2 l: ????
-    $newBitData .= "0000";                             # Byte 3 h: address
-    $newBitData .= reverse substr($bitData,0,4);       # Byte 3 l: address (Rolling Code)
-    $newBitData .= reverse substr($bitData,8,4);       # Byte 4 h: T 0,1
-    $newBitData .= "0" . substr($bitData,23,1) . "00"; # Byte 4 l: Bit 2 - Batterie 0=ok, 1=low (< 2,5 Volt)
-    $newBitData .= reverse substr($bitData,16,4);      # Byte 5 h: T 10
-    $newBitData .= reverse substr($bitData,12,4);      # Byte 5 l: T 1
-    $newBitData .= "0000";                             # Byte 6 h: immer 0000
-    $newBitData .= substr($bitData,21,1) . "000";      # Byte 6 l: Bit 3 - Temperatur 0=pos | 1=neg, Rest 0
-    $newBitData .= "00000000";                         # Byte 7: immer 0000 0000
-    # calculate new checksum over first 16 nibbles
-    $checksum = 0;
-    for (my $i = 0; $i < 64; $i = $i + 4) {
-       $checksum += oct( "0b" . substr($newBitData, $i, 4));
-    }
-    $checksum = ($checksum - 0xa) & 0xff;
-    $newBitData .= sprintf("%08b",$checksum);          # Byte 8:   new Checksum
-    $newBitData .= "00000000";                         # Byte 9:   immer 0000 0000
-    my $osv1hex = "50" . lib::SD_Protocols::binStr2hexStr($newBitData); # output with length before
-    $hash->{logMethod}->($name, 4, "$name: OSV1, protocol id $id translated to RFXSensor format");
-    $hash->{logMethod}->($name, 4, "$name: OSV1, converted to hex: $osv1hex");
-    return (1,$osv1hex);
-}
-
 ############################# package main
 sub	SIGNALduino_AS {
 	my $self = shift; #just make compatibility with object 

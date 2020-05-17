@@ -648,19 +648,19 @@ package lib::SD_ProtocolData;
 		"18"	=>	## Oregon Scientific v1
 							# Id:3 T: 7.5 BAT:ok   MC;LL=-2721;LH=3139;SL=-1246;SH=1677;D=1A51FF47;C=1463;L=32;R=12;
 			{
-				name						=> 'Oregon Scientific v1',
+				name					=> 'Oregon Scientific v1',
 				comment					=> 'temperature / humidity or other sensors',
-				id							=> '18',
-				knownFreqs      => '',
-				clockrange			=> [1400,1500],					# min , max
+				id						=> '18',
+				knownFreqs     			=> '',
+				clockrange				=> [1400,1500],					# min , max
 				format					=> 'manchester',				# tristate can't be migrated from bin into hex!
 				preamble				=> '',
-				clientmodule		=> 'OREGON',
-				modulematch			=> '^[0-9A-F].*',
-				length_min			=> '32',
-				length_max			=> '32',
+				clientmodule			=> 'OREGON',
+				modulematch				=> '^[0-9A-F].*',
+				length_min				=> '32',
+				length_max				=> '32',
 				polarity				=> 'invert',						# invert bits
-				method					=> \&main::SIGNALduino_OSV1		# Call to process this message
+				method					=> \&lib::SD_Protocols::mcBit2OSV1	# Call to process this message
 			},
 		"19"	=>	## minify Funksteckdose
 							# https://github.com/RFD-FHEM/RFFHEM/issues/114 @zag-o-mat
