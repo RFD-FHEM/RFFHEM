@@ -24,7 +24,7 @@ subtest 'Test good message' => sub {
 	my $rcode;
 	my @bits=qw(0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 1 1 0 0 0 0 0 1 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 1 0 1 1 1 0 1 1 0 1);
 
-	($rcode,@bits)=$Protocols->postDemo_FS20(undef,$target, @bits);
+	($rcode,@bits)=$Protocols->postDemo_FS20($target, @bits);
 	is($rcode,1, 'check returncode for good message');
 	is(join("",@bits),'0001100001001000000000000000000000010000','check result for good message');
 };
@@ -39,7 +39,7 @@ subtest 'Test bad message, all bit are zeros' => sub {
 	my @bits=qw(0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0);
 	my $rcode;
 
-	($rcode,$return)=$Protocols->postDemo_FS20(undef,$target, @bits);
+	($rcode,$return)=$Protocols->postDemo_FS20($target, @bits);
 	is($rcode,0, 'check returncode for bad message, all bit are zeros');
 	is($return,undef,'check result for bad message, all bit are zeros');
 };
@@ -51,7 +51,7 @@ subtest 'Test bad message, Detection aborted' => sub {
 	my @bits=qw(0 0 0 0 0 0 0 0 0 0 0 1 0 0 1 0 0 0 0 0 1 0 0 1 0 1 1 0 0 1 0 0 0 0 0 0 0 0 0 1 0 1 0 0 1 1 0 0 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 0 1);
 	my $rcode;
 
-	($rcode,$return)=$Protocols->postDemo_FS20(undef,$target, @bits);
+	($rcode,$return)=$Protocols->postDemo_FS20($target, @bits);
 	is($rcode,0, 'check returncode for bad message, Detection aborted');
 	is($return,undef,'check result for bad message, Detection aborted');
 };
@@ -63,7 +63,7 @@ subtest 'Test bad message, wrong length' => sub {
 	my @bits=qw(0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 1 0 0 0 0 0 1 0 0 1 0 1 1 0 0 1 0 0 0 0 0 0 0 0 0 1 0 1 0 0 1 1 0 0 0 0 0 0 0 0 0 0 0);
 	my $rcode;
 
-	($rcode,$return)=$Protocols->postDemo_FS20(undef,$target, @bits);
+	($rcode,$return)=$Protocols->postDemo_FS20($target, @bits);
 	is($rcode,0, 'check returncode for bad message, wrong length');
 	is($return,undef,'check result for bad message, wrong length');
 };

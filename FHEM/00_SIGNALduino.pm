@@ -38,7 +38,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.5_dev_05.15",
+	SDUINO_VERSION            => "v3.5_dev_05.17",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -3190,7 +3190,7 @@ sub SIGNALduino_callsub {
 	{
 		if (defined($evalFirst) && $evalFirst)
 		{
-			eval( $method->($name, @args));
+			eval( $method->($obj,$name, @args));
 			if($@) {
 				$hash->{logMethod}->($name, 5, "$name: callsub, Error: $funcname, has an error and will not be executed: $@ please report at github.");
 				return (0,undef);
@@ -3230,161 +3230,6 @@ sub SIGNALduino_lengtnPrefix {
 }
 
 
-############################# package main, test exists
-sub SIGNALduino_postDemo_FHT80($@) {
-	my $self=shift;
-	my ($name, @bit_msg) = @_;
-	my $datastart = 0;
-	my $protolength = scalar @bit_msg;
-	my $sum = 12;
-	my $b = 0;
-	my $i = 0;
-    my $hash=$defs{$name};
-	for ($datastart = 0; $datastart < $protolength; $datastart++) {   # Start bei erstem Bit mit Wert 1 suchen
-		last if $bit_msg[$datastart] eq "1";
-	}
-	if ($datastart == $protolength) {                                 # all bits are 0
-		$hash->{logMethod}->($name, 3, "$name: FHT80, ERROR message all bit are zeros");
-		return 0, undef;
-   }
-   splice(@bit_msg, 0, $datastart + 1);                             	# delete preamble + 1 bit
-   $protolength = scalar @bit_msg;
-   $hash->{logMethod}->($name, 5, "$name: FHT80, pos=$datastart length=$protolength");
-   if ($protolength == 55) {						# If it 1 bit too long, then it will be removed (EOT-Bit)
-      pop(@bit_msg);
-      $protolength--;
-   }
-   if ($protolength == 54) {                       		### FHT80 fixed length
-      for($b = 0; $b < 45; $b += 9) {	                             # build sum over first 5 bytes
-         $sum += oct( "0b".(join "", @bit_msg[$b .. $b + 7]));
-      }
-      my $checksum = oct( "0b".(join "", @bit_msg[45 .. 52]));          # Checksum Byte 6
-      if ((($sum - 6) & 0xFF) == $checksum) {		## Message from FS20 remote control
-         $hash->{logMethod}->($name, 5, "$name: FHT80, Detection aborted, checksum matches FS20 code");
-         return 0, undef;
-      }
-      if (($sum & 0xFF) == $checksum) {								## FHT80 Raumthermostat
-         for($b = 0; $b < 54; $b += 9) {	                              # check parity over 6 byte
-            my $parity = 0;					                              # Parity even
-			            for($i = $b; $i < $b + 9; $i++) {			                  # Parity over 1 byte + 1 bit
-               $parity += $bit_msg[$i];
-            }
-            if ($parity % 2 != 0) {
-               $hash->{logMethod}->($name, 3, "$name: FHT80, ERROR - Parity not even");
-               return 0, undef;
-            }
-         }																					# parity ok
-         for($b = 53; $b > 0; $b -= 9) {	                              # delete 6 parity bits
-            splice(@bit_msg, $b, 1);
-         }
-         if ($bit_msg[26] != 1) {                                       # Bit 5 Byte 3 must 1
-            $hash->{logMethod}->($name, 3, "$name: FHT80, ERROR - byte 3 bit 5 not 1");
-            return 0, undef;
-         }
-         splice(@bit_msg, 40, 8);                                       # delete checksum
-         splice(@bit_msg, 24, 0, (0,0,0,0,0,0,0,0));# insert Byte 3
-         my $dmsg = lib::SD_Protocols::binStr2hexStr(join "", @bit_msg);
-         $hash->{logMethod}->($name, 4, "$name: FHT80, roomthermostat post demodulation $dmsg");
-         return (1, @bit_msg);											## FHT80 ok
-      }
-      else {
-         $hash->{logMethod}->($name, 4, "$name: FHT80, ERROR - wrong checksum");
-      }
-   }
-   else {
-      $hash->{logMethod}->($name, 5, "$name: FHT80, ERROR - wrong length=$protolength (must be 54)");
-   }
-   return 0, undef;
-}
-
-############################# package main, test exists
-sub SIGNALduino_postDemo_FHT80TF($@) {
-	my $self=shift;
-	my ($name, @bit_msg) = @_;
-	my $datastart = 0;
-	my $protolength = scalar @bit_msg;
-	my $sum = 12;
-	my $b = 0;
-	my $hash=$defs{$name};
-	if ($protolength < 46) {                                        	# min 5 bytes + 6 bits
-		$hash->{logMethod}->($name, 4, "$name: FHT80TF, ERROR lenght of message < 46");
-		return 0, undef;
-   }
-   for ($datastart = 0; $datastart < $protolength; $datastart++) {   # Start bei erstem Bit mit Wert 1 suchen
-      last if $bit_msg[$datastart] eq "1";
-   }
-   if ($datastart == $protolength) {                                 # all bits are 0
-		$hash->{logMethod}->($name, 3, "$name: FHT80TF, ERROR message all bit are zeros");
-		return 0, undef;
-   }
-   splice(@bit_msg, 0, $datastart + 1);                             	# delete preamble + 1 bit
-   $protolength = scalar @bit_msg;
-   if ($protolength == 45) {                       		      ### FHT80TF fixed length
-      for(my $b = 0; $b < 36; $b += 9) {	                             # build sum over first 4 bytes
-         $sum += oct( "0b".(join "", @bit_msg[$b .. $b + 7]));
-      }
-      my $checksum = oct( "0b".(join "", @bit_msg[36 .. 43]));          # Checksum Byte 5
-      if (($sum & 0xFF) == $checksum) {									## FHT80TF Tuer-/Fensterkontakt
-			for(my $b = 0; $b < 45; $b += 9) {	                           # check parity over 5 byte
-				my $parity = 0;					                              # Parity even
-				for(my $i = $b; $i < $b + 9; $i++) {			               # Parity over 1 byte + 1 bit
-					$parity += $bit_msg[$i];
-				}
-				if ($parity % 2 != 0) {
-					$hash->{logMethod}->($name, 4, "$name: FHT80TF, ERROR - Parity not even");
-					return 0, undef;
-				}
-			}																					# parity ok
-			for(my $b = 44; $b > 0; $b -= 9) {	                           # delete 5 parity bits
-				splice(@bit_msg, $b, 1);
-			}
-         if ($bit_msg[26] != 0) {                                       # Bit 5 Byte 3 must 0
-            $hash->{logMethod}->($name, 3, "$name: FHT80TF, ERROR - byte 3 bit 5 not 0");
-            return 0, undef;
-         }
-			splice(@bit_msg, 32, 8);                                       # delete checksum
-				my $dmsg = lib::SD_Protocols::binStr2hexStr(join "", @bit_msg);
-				$hash->{logMethod}->($name, 4, "$name: FHT80TF, door/window switch post demodulation $dmsg");
-			return (1, @bit_msg);											## FHT80TF ok
-      }
-   }
-   return 0, undef;
-}
-
-############################# package main, test exists
-sub SIGNALduino_postDemo_WS7035($@) {
-	my $self=shift;
-	my ($name, @bit_msg) = @_;
-	my $msg = join("",@bit_msg);
-	my $parity = 0;					# Parity even
-	my $sum = 0;						# checksum
-	my $hash=$defs{$name};
-	$hash->{logMethod}->($name, 4, "$name: WS7035, $msg");
-	if (substr($msg,0,8) ne "10100000") {		# check ident
-		$hash->{logMethod}->($name, 3, "$name: WS7035, ERROR - Ident not 1010 0000");
-		return 0, undef;
-	} else {
-		for(my $i = 15; $i < 28; $i++) {			# Parity over bit 15 and 12 bit temperature
-	      $parity += substr($msg, $i, 1);
-		}
-		if ($parity % 2 != 0) {
-			$hash->{logMethod}->($name, 3, "$name: WS7035, ERROR - Parity not even");
-			return 0, undef;
-		} else {
-			for(my $i = 0; $i < 39; $i += 4) {			# Sum over nibble 0 - 9
-				$sum += oct("0b".substr($msg,$i,4));
-			}
-			if (($sum &= 0x0F) != oct("0b".substr($msg,40,4))) {
-				$hash->{logMethod}->($name, 3, "$name: WS7035, ERROR - wrong checksum");
-				return 0, undef;
-			} else {
-				$hash->{logMethod}->($name, 4, "$name: WS7035, " . substr($msg,0,4) ." ". substr($msg,4,4) ." ". substr($msg,8,4) ." ". substr($msg,12,4) ." ". substr($msg,16,4) ." ". substr($msg,20,4) ." ". substr($msg,24,4) ." ". substr($msg,28,4) ." ". substr($msg,32,4) ." ". substr($msg,36,4) ." ". substr($msg,40));
-				substr($msg, 27, 4, '');			# delete nibble 8
-				return (1,split("",$msg));
-			}
-		}
-	}
-}
 
 ############################# package main
 sub SIGNALduino_postDemo_WS2000($@) {

@@ -1813,7 +1813,7 @@ package lib::SD_ProtocolData;
 				modulematch				=> '^TX......',
 				length_min				=> '43',
 				length_max				=> '44',
-				postDemodulation	=> \&main::SIGNALduino_postDemo_WS7035,
+				postDemodulation	=> \&lib::SD_Protocols::postDemo_WS7035,
 			},
 		"67"	=>	## TX2 Protocol (Remote Datalink & Remote Thermo Model 7053, 7054)
 							# https://github.com/RFD-FHEM/RFFHEM/issues/162 @elektron-bbs
@@ -1906,7 +1906,7 @@ package lib::SD_ProtocolData;
 				preamble					=> 'T',
 				length_min				=> '50',
 				length_max				=> '58',
-				postDemodulation	=> \&main::SIGNALduino_postDemo_FHT80TF,
+				postDemodulation	=> \&lib::SD_Protocols::postDemo_FHT80TF,
 			},
 		"71"	=>	## PEARL infactory Poolthermometer (PV-8644)
 							# Ch:1 T: 24.2   MU;P0=1735;P1=-1160;P2=591;P3=-876;D=0123012323010101230101232301230123010101010123012301012323232323232301232323232323232323012301012;CP=2;R=97;
@@ -1987,16 +1987,16 @@ package lib::SD_ProtocolData;
 				preamble					=> '810c04xx0909a001',
 				length_min				=> '59',
 				length_max				=> '67',
-				postDemodulation	=> \&main::SIGNALduino_postDemo_FHT80,
+				postDemodulation	=> \&lib::SD_Protocols::postDemo_FHT80,
 			},
 		"74"	=>	## FS20 - Remote Control (868Mhz) @HomeAutoUser
 							# dim100%   MU;P0=-10420;P1=-92;P2=398;P3=-417;P5=596;P6=-592;D=1232323232323232323232323562323235656232323232356232356232623232323232323232323232323235623232323562356565623565623562023232323232323232323232356232323565623232323235623235623232323232323232323232323232323562323232356235656562356562356202323232323232323;CP=2;R=72;
 			{
 				name				=> 'FS20',
 				comment				=> 'remote control (decode as MU)',
-				id				=> '74',
+				id					=> '74',
 				knownFreqs			=> '868.35',
-				one				=> [1.5,-1.5],	# 600
+				one					=> [1.5,-1.5],	# 600
 				zero				=> [1,-1],	# 400
 				pause				=> [-25],
 				clockabs			=> 400,

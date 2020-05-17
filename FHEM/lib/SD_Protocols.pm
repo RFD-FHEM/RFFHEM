@@ -551,20 +551,22 @@ sub postDemo_EM {
 	return 0, undef;
 }
 
-=item postDemo_EM()
+=item postDemo_FS20()
 This sub checks the bit sequence. On an error in the CRC or no start, it issues an output.
 
-Input:  $id,$sum,$msg
+Input:  $object,$name,@bit_msg
 Output:
-        prepares message
+        (returncode = 0 on success, prepared message or undef)
 
 =cut
 
 sub postDemo_FS20($@) {
-	my $self = shift;
-	my ( $name, @bit_msg ) = @_;
-	my $datastart   = 0;
+	my $self 		= shift // carp 'Not called within an object';
+	my $name 		= shift // carp 'no $name provided';
+	my @bit_msg  	= @_;
+
 	my $protolength = scalar @bit_msg;
+	my $datastart   = 0;
 	my $sum         = 6;
 	my $b           = 0;
 	my $i           = 0;
@@ -631,6 +633,190 @@ sub postDemo_FS20($@) {
 		$self->_logging(qq[lib/postDemo_FS20, ERROR - wrong length=$protolength (must be 45 or 54)], 5 );
 	}
 	return 0, undef;
+}
+
+=item postDemo_FHT80()
+This sub checks the bit sequence. On an error in the CRC or no start, it issues an output.
+
+Input:  $object,$name,@bit_msg
+Output:
+        (returncode = 0 on success, prepared message or undef)
+
+=cut
+
+
+sub postDemo_FHT80($@) {
+	my $self 		= shift // carp 'Not called within an object';
+	my $name 		= shift // carp 'no $name provided';
+	my @bit_msg  	= @_;
+
+	my $datastart = 0;
+	my $protolength = scalar @bit_msg;
+	my $sum = 12;
+	my $b = 0;
+	my $i = 0;
+	for ($datastart = 0; $datastart < $protolength; $datastart++) {   # Start bei erstem Bit mit Wert 1 suchen
+		last if $bit_msg[$datastart] == 1;
+	}
+	if ($datastart == $protolength) {                                 # all bits are 0
+		$self->_logging(qq[lib/postDemo_FHT80, ERROR message all bit are zeros], 3 );
+		return 0, undef;
+   }
+   splice(@bit_msg, 0, $datastart + 1);                             	# delete preamble + 1 bit
+   $protolength = scalar @bit_msg;
+   $self->_logging(qq[lib/postDemo_FHT80, pos=$datastart length=$protolength], 5 );
+   if ($protolength == 55) {						# If it 1 bit too long, then it will be removed (EOT-Bit)
+      pop(@bit_msg);
+      $protolength--;
+   }
+   if ($protolength == 54) {                       		### FHT80 fixed length
+      for($b = 0; $b < 45; $b += 9) {	                             # build sum over first 5 bytes
+         $sum += oct( "0b".(join "", @bit_msg[$b .. $b + 7]));
+      }
+      my $checksum = oct( "0b".(join "", @bit_msg[45 .. 52]));          # Checksum Byte 6
+      if ((($sum - 6) & 0xFF) == $checksum) {		## Message from FS20 remote contro
+         $self->_logging(qq[lib/postDemo_FHT80, Detection aborted, checksum matches FS20 code], 5 );
+         return 0, undef;
+      }
+      if (($sum & 0xFF) == $checksum) {								## FHT80 Raumthermostat
+         for($b = 0; $b < 54; $b += 9) {	                              # check parity over 6 byte
+            my $parity = 0;					                              # Parity even
+			for($i = $b; $i < $b + 9; $i++) {			                  # Parity over 1 byte + 1 bit
+               $parity += $bit_msg[$i];
+            }
+            if ($parity % 2 != 0) {
+               $self->_logging(qq[lib/postDemo_FHT80, ERROR - Parity not even], 3 );
+               return 0, undef;
+            }
+         }																					# parity ok
+         for($b = 53; $b > 0; $b -= 9) {	                              # delete 6 parity bits
+            splice(@bit_msg, $b, 1);
+         }
+         if ($bit_msg[26] != 1) {                                       # Bit 5 Byte 3 must 1
+	        $self->_logging(qq[lib/postDemo_FHT80, ERROR - byte 3 bit 5 not 1], 3 );
+            return 0, undef;
+         }
+         splice(@bit_msg, 40, 8);                                       # delete checksum
+         splice(@bit_msg, 24, 0, (0,0,0,0,0,0,0,0));# insert Byte 3
+         my $dmsg = lib::SD_Protocols::binStr2hexStr(join "", @bit_msg);
+         $self->_logging(qq[lib/postDemo_FHT80, roomthermostat post demodulation $dmsg], 4 );
+         return (1, @bit_msg);											## FHT80 ok
+      }
+      else {
+         $self->_logging(qq[lib/postDemo_FHT80, ERROR - wrong checksum], 4 );
+      }
+   }
+   else {
+   	$self->_logging(qq[lib/postDemo_FHT80, ERROR - wrong length=$protolength (must be 54)], 5 );
+   }
+   return 0, undef;
+}
+
+=item postDemo_FHT80TF()
+This sub checks the bit sequence. On an error in the CRC or no start, it issues an output.
+
+Input:  $object,$name,@bit_msg
+Output:
+        (returncode = 0 on success, prepared message or undef)
+
+=cut
+
+sub postDemo_FHT80TF($@) {
+	my $self 		= shift // carp 'Not called within an object';
+	my $name 		= shift // carp 'no $name provided';
+	my @bit_msg  	= @_;
+
+	my $protolength = scalar @bit_msg;
+	my $datastart = 0;
+	my $sum = 12;
+	my $b = 0;
+	if ($protolength < 46) {                                        	# min 5 bytes + 6 bits
+	   	$self->_logging(qq[lib/postDemo_FHT80TF, ERROR lenght of message < 46], 4 );
+		return 0, undef;
+   }
+   for ($datastart = 0; $datastart < $protolength; $datastart++) {   # Start bei erstem Bit mit Wert 1 suchen
+      last if $bit_msg[$datastart] == 1;
+   }
+   if ($datastart == $protolength) {                                 # all bits are 0
+   		$self->_logging(qq[lib/postDemo_FHT80TF, ERROR message all bit are zeros], 3 );
+		return 0, undef;
+   }
+   splice(@bit_msg, 0, $datastart + 1);                             	# delete preamble + 1 bit
+   $protolength = scalar @bit_msg;
+   if ($protolength == 45) {                       		      ### FHT80TF fixed length
+      for(my $b = 0; $b < 36; $b += 9) {	                             # build sum over first 4 bytes
+         $sum += oct( "0b".(join "", @bit_msg[$b .. $b + 7]));
+      }
+      my $checksum = oct( "0b".(join "", @bit_msg[36 .. 43]));          # Checksum Byte 5
+      if (($sum & 0xFF) == $checksum) {									## FHT80TF Tuer-/Fensterkontakt
+			for(my $b = 0; $b < 45; $b += 9) {	                           # check parity over 5 byte
+				my $parity = 0;					                              # Parity even
+				for(my $i = $b; $i < $b + 9; $i++) {			               # Parity over 1 byte + 1 bit
+					$parity += $bit_msg[$i];
+				}
+				if ($parity % 2 != 0) {
+				   	$self->_logging(qq[lib/postDemo_FHT80TF, ERROR Parity not even], 4 );
+					return 0, undef;
+				}
+			}																					# parity ok
+			for(my $b = 44; $b > 0; $b -= 9) {	                           # delete 5 parity bits
+				splice(@bit_msg, $b, 1);
+			}
+         if ($bit_msg[26] != 0) {                                       # Bit 5 Byte 3 must 0
+           	$self->_logging(qq[lib/postDemo_FHT80TF, ERROR - byte 3 bit 5 not 0], 3 );
+            return 0, undef;
+         }
+         splice(@bit_msg, 32, 8);                                       # delete checksum
+         my $dmsg = lib::SD_Protocols::binStr2hexStr(join "", @bit_msg);
+         $self->_logging(qq[lib/postDemo_FHT80TF, door/window switch post demodulation $dmsg], 4 );
+         return (1, @bit_msg);											## FHT80TF ok
+      }
+   }
+   return 0, undef;
+}
+
+=item postDemo_WS7035()
+This sub checks the bit sequence. On an error in the CRC or no start, it issues an output.
+
+Input:  $object,$name,@bit_msg
+Output:
+        (returncode = 0 on success, prepared message or undef)
+
+=cut
+sub postDemo_WS7035($@) {
+	my $self 		= shift // carp 'Not called within an object';
+	my $name 		= shift // carp 'no $name provided';
+	my @bit_msg  	= @_;
+
+	my $msg = join('',@bit_msg);
+	my $parity = 0;					# Parity even
+	my $sum = 0;						# checksum
+    $self->_logging(qq[lib/postDemo_WS7035, $msg], 4 );
+	if (substr($msg,0,8) ne '10100000') {		# check ident
+	    $self->_logging(qq[lib/postDemo_WS7035, ERROR - Ident not 1010 0000],3 );
+		return 0, undef;
+	} else {
+		for(my $i = 15; $i < 28; $i++) {			# Parity over bit 15 and 12 bit temperature
+	      $parity += substr($msg, $i, 1);
+		}
+		if ($parity % 2 != 0) {
+		    $self->_logging(qq[lib/postDemo_WS7035, ERROR - Parity not even],3 );
+			return 0, undef;
+		} else {
+			for(my $i = 0; $i < 39; $i += 4) {			# Sum over nibble 0 - 9
+				$sum += oct('0b'.substr($msg,$i,4));
+			}
+			if (($sum &= 0x0F) != oct('0b'.substr($msg,40,4))) {
+			    $self->_logging(qq[lib/postDemo_WS7035, ERROR - wrong checksum],3 );
+				return 0, undef;
+			} else {
+				# Todo: Regex anstelle der viele substr einfügen
+			    $self->_logging(qq[lib/postDemo_WS7035, ERROR - wrong checksum]. substr($msg,0,4) ." ". substr($msg,4,4) ." ". substr($msg,8,4) ." ". substr($msg,12,4) ." ". substr($msg,16,4) ." ". substr($msg,20,4) ." ". substr($msg,24,4) ." ". substr($msg,28,4) ." ". substr($msg,32,4) ." ". substr($msg,36,4) ." ". substr($msg,40),4 );
+				substr($msg, 27, 4, '');			# delete nibble 8
+				return (1,split(//,$msg));
+			}
+		}
+	}
 }
 
 ############################################################
