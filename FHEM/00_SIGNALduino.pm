@@ -3214,25 +3214,6 @@ sub SIGNALduino_callsub {
 	return (1,@args);
 }
 
-############################# package main, test exists
-# calculates the hex (in bits) and adds it at the beginning of the message
-# input = @list
-# output = @list
-sub SIGNALduino_lengtnPrefix {
-	my $self = shift; #just make compatibility with object 
-	my ($name, @bit_msg) = @_;
-
-	my $msg = join("",@bit_msg);
-	#$msg = unpack("B8", pack("N", length($msg))).$msg;
-	$msg=sprintf('%08b', length($msg)).$msg;
-
-	return (1,split("",$msg));
-}
-
-
-
-
-
 
 
 # manchester method

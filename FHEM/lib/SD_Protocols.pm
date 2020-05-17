@@ -386,6 +386,7 @@ sub dec2binppari {    # dec to bin . parity
 	return qq[$nbin$parity];    # bin(num) . paritybit
 }
 
+
 ############################################################
 
 =item Convbit2Arctec()
@@ -989,6 +990,28 @@ sub postDemo_WS7053 {
 		}
 	}
 }
+
+
+=item postDemo_lengtnPrefix()
+calculates the hex (in bits) and adds it at the beginning of the message
+
+Input:  $object,$name,@bit_msg
+Output:
+        (returncode = 0 on failure, prepared message or undef)
+
+=cut
+
+sub postDemo_lengtnPrefix {
+	my $self 		= shift // carp 'Not called within an object';
+	my $name 		= shift // carp 'no $name provided';
+	my @bit_msg  	= @_;
+
+	my $msg = join('',@bit_msg);
+	$msg=sprintf('%08b', length($msg)).$msg;
+
+	return (1,split('',$msg));
+}
+
 
 ############################################################
 

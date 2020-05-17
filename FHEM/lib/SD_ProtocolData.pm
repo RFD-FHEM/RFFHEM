@@ -644,7 +644,7 @@ package lib::SD_ProtocolData;
 				modulematch				=> '^i......',
 				length_min				=> '32',
 				length_max				=> '34',				# Don't know maximal lenth of a valid message
-				postDemodulation	=> \&main::Convbit2Arctec,
+				postDemodulation	=> \&lib::SD_Protocols::Convbit2Arctec,
 			},
 		"18"	=>	## Oregon Scientific v1
 							# Id:3 T: 7.5 BAT:ok   MC;LL=-2721;LH=3139;SL=-1246;SH=1677;D=1A51FF47;C=1463;L=32;R=12;
@@ -1154,7 +1154,7 @@ package lib::SD_ProtocolData;
 				length_min				=> '32',
 				length_max				=> '44',
 				paddingbits				=> '8',
-				postDemodulation	=> \&main::SIGNALduino_lengtnPrefix,
+				postDemodulation	=> \&lib::SD_Protocols::postDemo_lengtnPrefix,
 				filterfunc				=> 'SIGNALduino_compPattern',
 			},
 		"40"	=>	## Romotec
@@ -1837,7 +1837,7 @@ package lib::SD_ProtocolData;
 				modulematch				=> '^TX......',
 				length_min				=> '32',
 				length_max				=> '34',
-				postDemodulation	=> \&main::SIGNALduino_postDemo_WS7053,
+				postDemodulation	=> \&lib::SD_Protocols::postDemo_WS7053,
 			},
 		"68"	=>	## Medion OR28V RF Vista Remote Control (Made in china by X10)
 							# sendet zwei verschiedene Codes pro Taste
