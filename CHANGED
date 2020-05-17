@@ -1,3 +1,7 @@
+2020-05-17 - 00_SIGNALduino.pm -> lib/SD_Protocols.pm
+
+moved SIGNALduino_lengtnPrefix to lib::SD_Protocols
+moved test
 2020-05-17 - Merge branch 'dev-r35_xFSK_oo' of github.com:RFD-FHEM/RFFHEM into dev-r35_xFSK_oo
 2020-05-16 - 00_SIGNALduino.pm -> SD_Protocols.pm
 
