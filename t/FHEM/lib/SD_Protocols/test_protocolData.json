@@ -5,6 +5,13 @@
     "version": 0.1
 }{
 # Protocol Data begins here
+    "9986": {
+      "comment": "ony for running automated tests",
+      "id": "96",
+      "name": "Unittest MC Grothe Protocol",
+      "length_min" : "40",
+      "length_max" : "49",
+    },
     "9987": {
       "datarate": "17257.69",
       "comment": "ony for running automated tests",

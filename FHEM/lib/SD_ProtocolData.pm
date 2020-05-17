@@ -2596,7 +2596,7 @@ package lib::SD_ProtocolData;
 				preamble        => 'P96#',
 				length_min      => '40',
 				length_max      => '49',
-				method          => \&main::SIGNALduino_GROTHE,
+				method          => \&lib::SD_Protocols::mcBit2Grothe,
 			},
 		"97"	=>	# Momento, remote control for wireless digital picture frame - elektron-bbs 2020-03-21
 							# Short press repeatedly message 3 times, long press repeatedly until release.

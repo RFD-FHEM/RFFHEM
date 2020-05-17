@@ -282,7 +282,7 @@ Output:
 
 sub binStr2hexStr {
 	my $num = shift // return;
-	return if ( $num !~ /^[01]*$/xms );
+	return if ( $num !~ /^[01]+$/xms );
 	my $WIDTH = 4;
 	my $index = length($num) - $WIDTH;
 	my $hex   = '';
@@ -299,13 +299,40 @@ sub binStr2hexStr {
 	return $hex;
 }
 
+
+=item LengthInRange()
+This functon checks if a given length is in range of the valid min and max length for the given protocolId
+
+Input:  ($object,$protocolID,$message_length);
+
+Output:
+		on success array (returnCode=1, '')
+		otherwise array (returncode=0,"Error message")
+=cut
+sub LengthInRange {
+	my $self    			= shift // carp 'Not called within an object';
+	my $id					= shift // carp 'protocol ID must be provided';
+	my $message_length   	= shift // return (0,'no message_length provided');
+
+	return (0,'protocol does not exists') if (!$self->protocolExists($id));
+	
+	if ($message_length < $self->checkProperty($id,'length_min',-1)) {
+		return (0, 'message is to short');
+	}
+	elsif (defined $self->getProperty($id,'length_max') && $message_length > $self->getProperty($id,'length_max')) {
+		return (0, 'message is to long');
+	}
+	return (1,q{});
+}
+
+
 ############################# package lib::SD_Protocols, test exists
 
 =item MCRAW()
 This functon is desired to be used as a default output helper for manchester signals.
 It will check for length_max and return a hex string
 
-Input:  $name,$bitData,$id,$mcbitnum
+Input:  $object,$name,$bitData,$id,$mcbitnum
 
 Output:
         hex string
@@ -319,6 +346,48 @@ sub MCRAW {
 
 	return (-1," message is to long") if ($mcbitnum > $self->checkProperty($id,"length_max",0) );
 	return(1,binStr2hexStr($bitData)); 
+}
+
+
+=item mcBit2Grothe()
+extract the message from the bitdata if it looks like valid data
+
+Input:  ($object,$name,$bitData,$protocolID, optional: length $bitData);
+
+Output:
+		on success array (returnCode=1, hexData)
+		otherwise array (returncode=-1,"Error message")
+=cut
+
+sub mcBit2Grothe {
+	my $self    			= shift // carp 'Not called within an object' && return (0,'no object provided');
+	my $name				= shift // "anonymous";
+	my $bitData				= shift // carp 'bitData must be perovided' && return (0,'no bitData provided');
+	my $id					= shift // carp 'protocol ID must be provided' && return (0,'no protocolId provided');;;
+	my $message_length   	= shift // length $bitData;
+
+	my $bitLength;
+	
+	$bitData = substr($bitData, 0, $message_length);
+	my $preamble = '01000111';
+	my $pos = index($bitData, $preamble);
+	if ($pos < 0 || $pos > 5) {
+		$self->_logging( q[lib/mcBit2Grothe, protocol id $id, start pattern ($preamble) not found], 3 );
+		return (-1,"Start pattern ($preamble) not found");
+	} else {
+		if ($pos == 1) {		# eine Null am Anfang zuviel
+			$bitData =~ s/^0//;		# eine Null am Anfang entfernen
+		}
+		$bitLength = length($bitData);
+		my ($rcode, $rtxt) = $self->LengthInRange($id, $bitLength);
+		if (!$rcode) {
+			$self->_logging( q[lib/mcBit2Grothe, protocol id $id, $rtxt], 3 );
+			return (-1,qq[$rtxt]);
+		}
+	}
+	my $hex = lib::SD_Protocols::binStr2hexStr($bitData);
+	$self->_logging( q[lib/mcBit2Grothe, protocol id $id detected, $bitData ($bitLength], 4 );
+	return (1,$hex); ## Return the bits unchanged in hex
 }
 
 ############################# package lib::SD_Protocols, test exists
@@ -1011,6 +1080,9 @@ sub postDemo_lengtnPrefix {
 
 	return (1,split('',$msg));
 }
+
+
+
 
 
 ############################################################

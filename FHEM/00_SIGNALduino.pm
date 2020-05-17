@@ -3216,36 +3216,6 @@ sub SIGNALduino_callsub {
 
 
 
-# manchester method
-############################# package main, test exists
-sub SIGNALduino_GROTHE {
-	my $self = shift; #just make compatibility with object 
-	
-	my ($name,$bitData,$id,$mcbitnum) = @_;
-	my $bitLength;
-	$bitData = substr($bitData, 0, $mcbitnum);
-	my $preamble = "01000111";
-	my $pos = index($bitData, $preamble);
-	my $hash=$defs{$name};
-
-	if ($pos < 0 || $pos > 5) {
-		$hash->{logMethod}->( $name, 3, "$name: GROTHE, protocol id $id, start pattern ($preamble) not found");
-		return (-1,"Start pattern ($preamble) not found");
-	} else {
-		if ($pos == 1) {		# eine Null am Anfang zuviel
-			$bitData =~ s/^0//;		# eine Null am Anfang entfernen
-		}
-		$bitLength = length($bitData);
-		my ($rcode, $rtxt) = SIGNALduino_TestLength($name, $id, $bitLength, "GROTHE ID=$id");
-		if (!$rcode) {
-			$hash->{logMethod}->( $name, 3, "$name: GROTHE, protocol id $id, $rtxt");
-			return (-1,"$rtxt");
-		}
-	}
-	my $hex=lib::SD_Protocols::binStr2hexStr($bitData);
-	$hash->{logMethod}->( $name, 4, "$name: GROTHE, protocol id $id detected, $bitData ($bitLength)");
-	return (1,$hex); ## Return the bits unchanged in hex
-}
 
 ############################# package main, test exists
 sub SIGNALduino_MCTFA {
@@ -3660,7 +3630,7 @@ sub SIGNALduino_SomfyRTS {
 }
 
 ############################# package main
-# Move to lib::SD_Protocols
+# Move to lib::SD_Protocols -> LengthInRange
 sub SIGNALduino_TestLength {
 	my $name = shift // carp q[first arg must be provided];
 	my ($id, $message_length, $logMsg) = @_;
