@@ -465,7 +465,158 @@ sub mcBit2TFA {
 
 
 
+=item mcBit2OSV2()
+extract the message from the bitdata if it looks like valid data
 
+Input:  ($object,$name,$bitData,$protocolID, optional: length $bitData);
+
+Output:
+		on success array (returnCode=1, hexData)
+		otherwise array (returncode=-1,"Error message")
+=cut
+sub mcBit2OSV2o3 {
+	my $self    			= shift // carp 'Not called within an object' && return (0,'no object provided');
+	my $name				= shift // "anonymous";
+	my $bitData				= shift // carp 'bitData must be perovided' && return (0,'no bitData provided');
+	my $id					= shift // carp 'protocol ID must be provided' && return (0,'no protocolId provided');;;
+	my $mcbitnum   	= shift // length $bitData;
+
+	my $preamble_pos;
+	my $message_end;
+	my $message_length;
+	my $msg_start;
+
+	#$bitData =~ tr/10/01/;
+	if ($bitData =~ m/^.?(01){12,17}.?10011001/xms)
+	{
+		# Valid OSV2 detected!
+		#$preamble_pos=index($bitData,"10011001",24);
+		$preamble_pos=$+[1];
+
+		$self->_logging( qq[lib/mcBit2OSV2, mesprotocol detected: preamble_pos = $preamble_pos], 4 );
+		return return (-1," sync not found") if ($preamble_pos <24);
+
+		$message_end=$-[1] if ($bitData =~ m/^.{44,}(01){16,17}.?10011001/); #Todo regex .{44,} 44 should be calculated from $preamble_pos+ min message lengh (44)
+		if (!defined($message_end) || $message_end < $preamble_pos) {
+			$message_end = length($bitData);
+		} else {
+			$message_end += 16;
+			$self->_logging( qq[lib/mcBit2OSV2, message end pattern found at pos $message_end  lengthBitData=].length($bitData), 4 );
+		}
+		$message_length = ($message_end - $preamble_pos)/2;
+
+		return (-1," message is to short") if ($message_length < $self->checkProperty($id,'length_min',-1));
+		return (-1," message is to long") if (defined $self->getProperty($id,'length_max') && $message_length > $self->getProperty($id,'length_max') );
+
+		my $idx=0;
+		my $osv2bits="";
+		my $osv2hex ="";
+
+		for ($idx=$preamble_pos;$idx<$message_end;$idx=$idx+16)
+		{
+			if ($message_end-$idx < 8 )
+			{
+			  last;
+			}
+			my $osv2byte=substr($bitData,$idx,16);
+
+			my $rvosv2byte=q{};
+
+			for (my $p=0;$p<length($osv2byte);$p=$p+2)
+			{
+				$rvosv2byte = substr($osv2byte,$p,1).$rvosv2byte;
+			}
+			$rvosv2byte =~ tr/10/01/;
+
+			if (length($rvosv2byte) == 8) {
+				$osv2hex=$osv2hex.sprintf('%02X', oct("0b$rvosv2byte"))  ;
+			} else {
+				$osv2hex=$osv2hex.sprintf('%X', oct("0b$rvosv2byte"))  ;
+			}
+			$osv2bits = $osv2bits.$rvosv2byte;
+		}
+		my $osv2len=length($osv2hex)*4;
+		$osv2hex = sprintf '%02X%s', $osv2len,$osv2hex;
+		
+		$self->_logging( qq[lib/mcBit2OSV2, protocol converted to hex: ($osv2hex) with length $osv2len bits], 4 );
+		
+		#$found=1;
+		#$dmsg=$osv2hex;
+		return (1,$osv2hex);
+	}
+	elsif ($bitData =~ m/1{12,24}(0101)/g) {  # min Preamble 12 x 1, Valid OSV3 detected!
+		$preamble_pos = $-[1];
+		$msg_start = $preamble_pos + 4;
+		if ($bitData =~ m/\G.+?(1{24})0101/xms) {		#  preamble + sync der zweiten Nachricht
+			$message_end = $-[1];
+			$self->_logging( qq[lib/mcBit2OSV2, protocol OSV3 with two messages detected: length of second message = ] . ($mcbitnum - $message_end - 28), 4 );
+		}
+		else {		# es wurde keine zweite Nachricht gefunden
+			$message_end = $mcbitnum;
+		}
+		$message_length = $message_end - $msg_start;
+		$self->_logging( qq[lib/mcBit2OSV2, protocol OSV3 detected: msg_start = $msg_start, message_length = $message_length], 4 );
+		
+		return (-1," message with length ($message_length) is to short") if ($message_length < $self->checkProperty($id,'length_min',-1) );
+
+		my $idx=0;
+		my $osv3hex =q{};
+
+		for ($idx=$msg_start; $idx<$message_end; $idx=$idx+4)
+		{
+			if (length($bitData)-$idx  < 4 )
+			{
+			  last;
+			}
+			my $osv3nibble = q{};
+			#$osv3nibble=NULL;
+			$osv3nibble=substr($bitData,$idx,4);
+
+			my $rvosv3nibble = q{};
+
+			for (my $p=0;$p<length($osv3nibble);$p++)
+			{
+				$rvosv3nibble = substr($osv3nibble,$p,1).$rvosv3nibble;
+			}
+			$osv3hex=$osv3hex.sprintf('%X', oct("0b$rvosv3nibble"));
+			#$osv3bits = $osv3bits.$rvosv3nibble;
+		}
+		$self->_logging( qq[lib/mcBit2OSV2, protocol OSV3 = $osv3hex], 4 );
+		
+		my $korr = 10;
+		# Check if nibble 1 is A
+		if (substr($osv3hex,1,1) ne 'A')
+		{
+			my $n1=substr($osv3hex,1,1);
+			$korr = hex(substr($osv3hex,3,1));
+			substr($osv3hex,1,1,'A');  # nibble 1 = A
+			substr($osv3hex,3,1,$n1); # nibble 3 = nibble1
+		}
+		# Korrektur nibble
+		my $insKorr = sprintf('%X', $korr);
+		# Check for ending 00
+		if (substr($osv3hex,-2,2) eq '00')
+		{
+			#substr($osv3hex,1,-2);  # remove 00 at end
+			$osv3hex = substr($osv3hex, 0, length($osv3hex)-2);
+		}
+		my $osv3len = length($osv3hex);
+		$osv3hex .= '0';
+		my $turn0 = substr($osv3hex,5, $osv3len-4);
+		my $turn = '';
+		for ($idx=0; $idx<$osv3len-5; $idx=$idx+2) {
+			$turn = $turn . substr($turn0,$idx+1,1) . substr($turn0,$idx,1);
+		}
+		$osv3hex = substr($osv3hex,0,5) . $insKorr . $turn;
+		$osv3hex = substr($osv3hex,0,$osv3len+1);
+		$osv3hex = sprintf("%02X", length($osv3hex)*4).$osv3hex;
+		$self->_logging( qq[lib/mcBit2OSV2, protocol OSV3 converted to hex: ($osv3hex) with length (].((length($osv3hex)-2)*4).q[) bits], 4 );
+		#$found=1;
+		#$dmsg=$osv2hex;
+		return (1,$osv3hex);
+	}
+	return (-1,undef);
+}
 
 ############################# package lib::SD_Protocols, test exists
 

@@ -434,17 +434,16 @@ package lib::SD_ProtocolData;
 							# MC;LL=-973;LH=984;SL=-478;SH=493;D=EF7E2DCC00000283AF5DF7CFEFEF7E2DCC;C=487;L=134;R=33;s5;b0;
 							#	MC;LL=-975;LH=976;SL=-491;SH=491;D=BEF9FDFDEFC5B98000005075EBBEF9FDFDEFC5;C=488;L=152;R=34;s1;b0;O;w;
 			{
-				name						=> 'Oregon Scientific v2|v3',
+				name					=> 'Oregon Scientific v2|v3',
 				comment					=> 'temperature / humidity or other sensors',
-				id							=> '10',
-				knownFreqs      => '',
-				clockrange			=> [300,520],						# min , max
+				id						=> '10',
+				knownFreqs      		=> '',
+				clockrange				=> [300,520],						# min , max
 				format					=> 'manchester',				# tristate can't be migrated from bin into hex!
-				clientmodule		=> 'OREGON',
-				modulematch			=> '^(3[8-9A-F]|[4-6][0-9A-F]|7[0-8]).*',
-				length_min			=> '64',
-				length_max			=> '220',
-				method					=> \&main::SIGNALduino_OSV2,	# Call to process this message
+				modulematch				=> '^(3[8-9A-F]|[4-6][0-9A-F]|7[0-8]).*',
+				length_min				=> '64',
+				length_max				=> '220',
+				method					=> \&lib::SD_Protocols::mcBit2OSV2o3,	# Call to process this message
 				polarity				=> 'invert',
 			},
 		"11"	=>	## Arduino Sensor
