@@ -3217,68 +3217,7 @@ sub SIGNALduino_callsub {
 
 
 
-############################# package main, test exists
-sub SIGNALduino_MCTFA {
-	my $self = shift; #just make compatibility with object 
-	my ($name,$bitData,$id,$mcbitnum) = @_;
 
-	my $preamble_pos;
-	my $message_end;
-	my $message_length;
-
-	#if ($bitData =~ m/^.?(1){16,24}0101/)  {
-	if ($bitData =~ m/(1{9}101)/ )
-	{
-		my $hash=$defs{$name};
-		$preamble_pos=$+[1];
-		$hash->{logMethod}->($name, 4, "$name: MCTFA, 30.3208.0 preamble_pos = $preamble_pos");
-		return return (-1," sync not found") if ($preamble_pos <=0);
-		my @messages;
-
-		my $i=1;
-		my $retmsg = "";
-		do
-		{
-			$message_end = index($bitData,"1111111111101",$preamble_pos);
-			if ($message_end < $preamble_pos)
-			{
-				$message_end=$mcbitnum;		# length($bitData);
-			}
-			$message_length = ($message_end - $preamble_pos);
-
-			my $part_str=substr($bitData,$preamble_pos,$message_length);
-			#$part_str = substr($part_str,0,52) if (length($part_str)) > 52;
-
-			$hash->{logMethod}->($name, 4, "$name: MCTFA, message start($i)=$preamble_pos end=$message_end with length=$message_length");
-			$hash->{logMethod}->($name, 5, "$name: MCTFA, message part($i)=$part_str");
-
-			my ($rcode, $rtxt) = SIGNALduino_TestLength($name, $id, $message_length, "TFA message part($i)");
-			if ($rcode) {
-				my $hex=lib::SD_Protocols::binStr2hexStr($part_str);
-				push (@messages,$hex);
-				$hash->{logMethod}->($name, 4, "$name: MCTFA, message part($i)=$hex");
-			}
-			else {
-				$retmsg = ", " . $rtxt;
-			}
-
-			$preamble_pos=index($bitData,"1101",$message_end)+4;
-			$i++;
-		}  while ($message_end < $mcbitnum);
-
-		my %seen;
-		my @dupmessages = map { 1==$seen{$_}++ ? $_ : () } @messages;
-
-		return ($i,"loop error, please report this data $bitData") if ($i==10);
-		if (scalar(@dupmessages) > 0 ) {
-			$hash->{logMethod}->($name, 4, "$name: MCTFA, repeated hex ".$dupmessages[0]." found ".$seen{$dupmessages[0]}." times");
-			return  (1,$dupmessages[0]);
-		} else {
-			return (-1," no duplicate found$retmsg");
-		}
-	}
-	return (-1,undef);
-}
 
 ############################# package main, test exists
 sub SIGNALduino_OSV2 {

@@ -1642,7 +1642,7 @@ package lib::SD_ProtocolData;
 				preamble     => 'W58#',
 				length_min   => '52',	# 54
 				length_max   => '52',	# 136
-				method       => \&main::SIGNALduino_MCTFA,
+				method       => \&lib::SD_Protocols::mcBit2TFA,
 				polarity     => 'invert',
 			},
 		"59"	=>	## AK-HD-4 remote | 4 Buttons

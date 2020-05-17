@@ -372,8 +372,8 @@ sub mcBit2Grothe {
 	my $preamble = '01000111';
 	my $pos = index($bitData, $preamble);
 	if ($pos < 0 || $pos > 5) {
-		$self->_logging( q[lib/mcBit2Grothe, protocol id $id, start pattern ($preamble) not found], 3 );
-		return (-1,"Start pattern ($preamble) not found");
+		$self->_logging( qq[lib/mcBit2Grothe, protocol id $id, start pattern ($preamble) not found], 3 );
+		return (-1,qq[Start pattern ($preamble) not found]);
 	} else {
 		if ($pos == 1) {		# eine Null am Anfang zuviel
 			$bitData =~ s/^0//;		# eine Null am Anfang entfernen
@@ -381,7 +381,7 @@ sub mcBit2Grothe {
 		$bitLength = length($bitData);
 		my ($rcode, $rtxt) = $self->LengthInRange($id, $bitLength);
 		if (!$rcode) {
-			$self->_logging( q[lib/mcBit2Grothe, protocol id $id, $rtxt], 3 );
+			$self->_logging( qq[lib/mcBit2Grothe, protocol id $id, $rtxt], 3 );
 			return (-1,qq[$rtxt]);
 		}
 	}
@@ -389,6 +389,83 @@ sub mcBit2Grothe {
 	$self->_logging( q[lib/mcBit2Grothe, protocol id $id detected, $bitData ($bitLength], 4 );
 	return (1,$hex); ## Return the bits unchanged in hex
 }
+
+
+
+=item mcBit2TFA()
+extract the message from the bitdata if it looks like valid data
+
+Input:  ($object,$name,$bitData,$protocolID, optional: length $bitData);
+
+Output:
+		on success array (returnCode=1, hexData)
+		otherwise array (returncode=-1,"Error message")
+=cut
+sub mcBit2TFA {
+	my $self    			= shift // carp 'Not called within an object' && return (0,'no object provided');
+	my $name				= shift // "anonymous";
+	my $bitData				= shift // carp 'bitData must be perovided' && return (0,'no bitData provided');
+	my $id					= shift // carp 'protocol ID must be provided' && return (0,'no protocolId provided');;;
+	my $mcbitnum   	= shift // length $bitData;
+
+	my $preamble_pos;
+	my $message_end;
+	my $message_length;
+
+	#if ($bitData =~ m/^.?(1){16,24}0101/)  {
+	if ($bitData =~ m/(1{9}101)/xms )
+	{
+		$preamble_pos=$+[1];
+		$self->_logging( qq[lib/mcBit2TFA, 30.3208.0 preamble_pos = $preamble_pos], 4 );
+		return return (-1,q[ sync not found]) if ($preamble_pos <=0);
+		my @messages;
+
+		my $i=1;
+		my $retmsg = q{};
+		do
+		{
+			$message_end = index($bitData,'1111111111101',$preamble_pos);
+			if ($message_end < $preamble_pos)
+			{
+				$message_end=$mcbitnum;		# length($bitData);
+			}
+			$message_length = ($message_end - $preamble_pos);
+
+			my $part_str=substr($bitData,$preamble_pos,$message_length);
+			$self->_logging( qq[lib/mcBit2TFA, message start($i)=$preamble_pos end=$message_end with length=$message_length], 4 );
+			$self->_logging( qq[lib/mcBit2TFA, message part($i)=$part_str], 5 );
+
+			my ($rcode, $rtxt) = $self->LengthInRange($id, $message_length);
+			if ($rcode) {
+				my $hex=lib::SD_Protocols::binStr2hexStr($part_str);
+				push (@messages,$hex);
+				$self->_logging( qq[lib/mcBit2TFA, message part($i)=$hex], 4 );
+			}
+			else {
+				$retmsg = q[, ] . $rtxt;
+			}
+
+			$preamble_pos=index($bitData,'1101',$message_end)+4;
+			$i++;
+		}  while ($message_end < $mcbitnum);
+
+		my %seen;
+		my @dupmessages = map { 1==$seen{$_}++ ? $_ : () } @messages;
+
+		return ($i,q[loop error, please report this data $bitData]) if ($i==10);
+		if (scalar(@dupmessages) > 0 ) {
+			$self->_logging( qq[lib/mcBit2TFA, repeated hex $dupmessages[0] found $seen{$dupmessages[0]} times"], 4 );
+			return  (1,$dupmessages[0]);
+		} else {
+			return (-1,qq[ no duplicate found$retmsg]);
+		}
+	}
+	return (-1,undef);
+}
+
+
+
+
 
 ############################# package lib::SD_Protocols, test exists
 
