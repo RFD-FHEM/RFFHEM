@@ -1746,21 +1746,18 @@ sub SD_UT_Attr(@) {
 					$allowed_models.= $keys.", " if ($models{$keys}{hex_lengh} eq $hex_lengh);
 				}
 				Log3 $name, 4, "SD_UT_Attr Check for the change, $oldmodel hex_lengh=$hex_lengh, attrValue=$attrValue needed hex_lengh=".$models{$attrValue}{hex_lengh};
-				return "ERROR! You want to choose the $oldmodel model to $attrValue.\nPlease check your selection.\nThe length of RAWMSG must be the same!\n\nAllowed models are: $allowed_models" if ($models{$attrValue}{hex_lengh} !~ /$hex_lengh/ && $oldmodel ne "unknown");	# variants one
-				return "ERROR! You want to choose the unknown model to $attrValue.\nPlease check your selection.\nRAWMSG length is wrong!\n\nAllowed models are: $allowed_models" if (not ($models{$attrValue}{hex_lengh} =~ /($hex_lengh)/ ) && $oldmodel eq "unknown");				  # variants two/three
+				return "ERROR! $name: You want to choose the $oldmodel model to $attrValue.\nPlease check your selection.\nThe length of RAWMSG must be the same!\n\nAllowed models are: $allowed_models" if ($models{$attrValue}{hex_lengh} !~ /$hex_lengh/ && $oldmodel ne "unknown");	# variants one
+				return "ERROR! $name: You want to choose the unknown model to $attrValue.\nPlease check your selection.\nRAWMSG length is wrong!\n\nAllowed models are: $allowed_models" if (not ($models{$attrValue}{hex_lengh} =~ /($hex_lengh)/ ) && $oldmodel eq "unknown");				  # variants two/three
 
 				if ($attrValue eq "unknown") {
 					readingsSingleUpdate($hash, "state", " Please define your model with attributes! ", 0);
 				}
 
-				foreach my $keys (keys %models) {
-					if($keys eq $attrValue) {
-						$attr{$name}{model}	= $attrValue;				# set new model
-						$bitData = InternalVal($name, "bitMSG", "-");
-						$devicemodel = $keys;
-						$state = "Defined";
-						last;
-					}
+				if ( exists $models{$attrValue} ) {
+					$attr{$name}{model}	= $attrValue;				# set new model
+					$bitData = InternalVal($name, "bitMSG", "-");
+					$devicemodel = $attrValue;
+					$state = "Defined";
 				}
 
 				############ Westinghouse_Delancey RH787T ############
@@ -2286,7 +2283,7 @@ sub SD_UT_tristate2bin($) {
 		<li>Novy Cloud 230 Dunstabzugshaube&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Novy_840039, Protokoll 86)</small></li>
 		<li>Novy Pureline 6830 Dunstabzugshaube&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Novy_840029, Protokoll 86)</small></li>
 		<li>QUIGG DMV-7000&nbsp;&nbsp;&nbsp;<small>(Modulmodel: QUIGG_DMV, Protokoll 34)</small></li>
-		<li>Remote control SA-434-1 mini 923301&nbsp;&nbsp;&nbsp;<small>(Modulmodel: SA_434_1_mini, Protokoll 81)</small></li>
+		<li>SA-434-1 mini 923301&nbsp;&nbsp;&nbsp;<small>(Modulmodel: SA_434_1_mini, Protokoll 81)</small></li>
 		<li>Techmar Garden Lights &nbsp;&nbsp;&nbsp;<small>(Modulmodel: Techmar, Protokoll 95)</small></li>
 		<li>Tedsen Teletaster <small>(Protokoll 46)</small>:
 		<ul><small>
@@ -2294,7 +2291,7 @@ sub SD_UT_tristate2bin($) {
 			<li>SKX2xx, 2 Tasten (GEIGER_GF0x01) - Modulmodel: Tedsen_SKX2xx</li>
 			<li>SKX4xx, 4 Tasten (GEIGER_GF0x02) - Modulmodel: Tedsen_SKX4xx</li>
 			<li>SKX6xx, 6 Tasten (GEIGER_GF0x03) - Modulmodel: Tedsen_SKX6xx</li>
-		</ul></small>
+		</small></ul>
 		<li>unitec Magnetkontakt 47031 (f&uuml;r Alarmanlagen Unitec 47121, Unitec 47125, Friedland)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Unitec_47031, Protokoll 30)</small></li>
 		<li>Westinghouse Deckenventilator (Fernbedienung, 5 Tasten ohne SET)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Buttons_five, Protokoll 29)</small></li>
 		<li>Westinghouse Delancey Deckenventilator (Fernbedienung, 9 Tasten mit SET)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: RH787T, Protokoll 83)</small></li>
@@ -2358,7 +2355,7 @@ sub SD_UT_tristate2bin($) {
 			<a name="off"></a><li>off: Taste O auf der Fernbedienung</li>
 		</ul><br>
 
-		<u>Remote control SA-434-1 mini 923301, Hoermann HS1-868-BS, Tedsen_SKX1xx</u>
+		<u>Fernbedienungen SA-434-1 mini 923301, Hoermann HS1-868-BS, Tedsen_SKX1xx</u>
 		<ul>
 			<a name="send"></a><li>send: Tastendruck <small>(Sendet immer den gleichen Befehl, auch wenn der Benutzer einen anderen Set-Befehl via Konsole sendet.)</small></li>
 		</ul><br>
