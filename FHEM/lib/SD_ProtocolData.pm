@@ -1689,7 +1689,7 @@ package lib::SD_ProtocolData;
 				clientmodule				=> 'CUL_WS',
 				length_min					=> '38',			# 46, letztes Bit fehlt = 45, 10 Bit Preambel = 35 Bit Daten
 				length_max					=> '82',
-				postDemodulation		=> \&main::SIGNALduino_postDemo_WS2000,
+				postDemodulation		=> \&lib::SD_Protocols::postDemo_WS2000,
 			},
 		"61"	=>	## ELV FS10
 							# tested transmitter:   FS10-S8, FS10-S4, FS10-ZE
