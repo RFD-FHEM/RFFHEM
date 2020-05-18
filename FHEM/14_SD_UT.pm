@@ -937,7 +937,7 @@ sub SD_UT_Set($$$@) {
 			$msgEnd .= "#R" . $repeats;
 		############ Manax | mumbi ############
 		} elsif ($model eq "RC_10") {
-			return "ERROR: to send, please push button on and off again on remote" if ( (ReadingsVal($name, "x_n5-8_on", "0") eq "0") || (ReadingsVal($name, "x_n5-8_off", "0") eq "0") || (ReadingsVal($name, "x_n4", "0") eq "0") );
+			return "ERROR! $name: To send, please push button on and off again on remote." if ( (ReadingsVal($name, "x_n5-8_on", "0") eq "0") || (ReadingsVal($name, "x_n5-8_off", "0") eq "0") || (ReadingsVal($name, "x_n4", "0") eq "0") );
 			$definition[1] = substr($definition[1],0,4);
 			my $adr = sprintf( "%016b", hex($definition[1]));	# argument 1 - adress to binary with 16 digits
 			my $unknown1 = ReadingsVal($name, "x_n4", "0");
@@ -1842,11 +1842,8 @@ sub SD_UT_Attr(@) {
 					$deviceCode = substr($bitData,0,16);
 					$deviceCode = sprintf("%04X", oct( "0b$deviceCode" ) );
 					my $button = substr($bitData,20,3);
-					foreach my $keys (sort keys %{$models{RC_10}{buttons}}) {
-						if ($keys eq $button) {
-							$deviceCode = $deviceCode."_".$models{RC_10}{buttons}{$keys};
-							last;
-						}
+					if ( exists $models{RC_10}{buttons}{$button} ) {
+						$deviceCode = $deviceCode."_".$models{RC_10}{buttons}{$button};
 					}
 					$devicename = $devicemodel."_".$deviceCode;
 				############ ESTO KL_RF01 ############
