@@ -13,7 +13,7 @@ use strict;
 use warnings;
 use Carp qw(croak carp);
 use Digest::CRC;
-our $VERSION = '1.01';
+our $VERSION = '2.02';
 use Storable qw(dclone);
 
 use Data::Dumper;
@@ -730,7 +730,165 @@ sub mcBit2AS {
 	return (-1,undef);
 }
 
+
+
+
+=item mcBit2Hideki()
+extract the message from the bitdata if it looks like valid data
+
+Input:  ($object,$name,$bitData,$protocolID, optional: length $bitData);
+
+Output:
+		on success array (returnCode=1, hexData)
+		otherwise array (returncode=-1,"Error message")
+=cut
+sub mcBit2Hideki {
+	my $self    			= shift // carp 'Not called within an object' && return (0,'no object provided');
+	my $name				= shift // 'anonymous';
+	my $bitData				= shift // carp 'bitData must be perovided' && return (0,'no bitData provided');
+	my $id					= shift // carp 'protocol ID must be provided' && return (0,'no protocolId provided');
+	my $mcbitnum   			= shift // length $bitData;
+
+	my $message_start = index($bitData,'10101110');
+	my $invert = 0;
+
+	if ($message_start < 0) {
+		$bitData =~ tr/01/10/;									# invert message
+		$message_start = index($bitData,'10101110');			# 0x75 but in reverse order
+		$invert = 1;
+	}
+
+	if ($message_start >= 0 )   # 0x75 but in reverse order
+	{
+	 	$self->_logging( qq[lib/mcBit2Hideki, Hideki protocol (invert=$invert) detected], 5 );
+
+		# Todo: Mindest Laenge fuer startpunkt vorspringen
+		# Todo: Wiederholung auch an das Modul weitergeben, damit es dort geprueft werden kann
+		my $message_end = index($bitData,'10101110',$message_start+71); # pruefen auf ein zweites 0x75,  mindestens 72 bit nach 1. 0x75, da der Regensensor minimum 8 Byte besitzt je byte haben wir 9 bit
+        $message_end = length($bitData) if ($message_end == -1);
+        my $message_length = $message_end - $message_start;
+
+		return (-1,' message is to short') if ($message_length < $self->checkProperty($id,'length_min',-1) );
+		return (-1,' message is to long') if (defined $self->getProperty($id,'length_max' ) && $message_length > $self->getProperty($id,'length_max') );
+
+		my $hidekihex = q{};
+		my $idx;
+
+		for ($idx=$message_start; $idx<$message_end; $idx=$idx+9)
+		{
+			my $byte = q{};
+			$byte= substr($bitData,$idx,8); ## Ignore every 9th bit
+		 	$self->_logging( qq[lib/mcBit2Hideki, byte in order $byte], 5 );
+			$byte = scalar reverse $byte;
+		 	$self->_logging( qq[lib/mcBit2Hideki, byte reversed $byte , as hex: "].sprintf('%X', oct("0b$byte")), 5 );
+
+			$hidekihex=$hidekihex.sprintf('%02X', oct("0b$byte"));
+		}
+
+		($invert == 0) 
+			?	$self->_logging( qq[lib/mcBit2Hideki, receive data is not inverted], 4 )
+			:	$self->_logging( qq[lib/mcBit2Hideki, receive data is inverted], 4 );
+				
+	 	$self->_logging( qq[lib/mcBit2Hideki, protocol converted to hex: $hidekihex with $message_length bits, messagestart $message_start], 4 );
+
+		return  (1,$hidekihex); ## Return only the original bits, include length
+	}
+ 	$self->_logging( qq[lib/mcBit2Hideki, start pattern (10101110) not found], 4 );
+	return (-1,undef);
+}
 ############################# package lib::SD_Protocols, test exists
+
+
+
+=item mcBit2OSPIR()
+extract the message from the bitdata if it looks like valid data
+
+Input:  ($object,$name,$bitData,$protocolID, optional: length $bitData);
+
+Output:
+		on success array (returnCode=1, hexData)
+		otherwise array (returncode=-1,"Error message")
+=cut
+sub mcBit2OSPIR {
+	my $self    			= shift // carp 'Not called within an object' && return (0,'no object provided');
+	my $name				= shift // 'anonymous';
+	my $bitData				= shift // carp 'bitData must be perovided' && return (0,'no bitData provided');
+	my $id					= shift // carp 'protocol ID must be provided' && return (0,'no protocolId provided');
+	my $mcbitnum   			= shift // length $bitData;
+
+	if ($bitData =~ m/^.*(1{14}|0{14}).*/)
+	{  # Valid Oregon PIR detected
+		my $header_pos=$+[1];
+	 	$self->_logging( qq[lib/mcBit2OSPIR, protocol detected: header_pos = $header_pos], 4 );
+
+		my $hex=lib::SD_Protocols::binStr2hexStr($bitData);
+
+		return  (1,$hex); ## Return the bits unchanged in hex
+	} else {
+		return return (-1,undef);
+	}
+}
+
+
+
+=item mcBit2Mavericks()
+extract the message from the bitdata if it looks like valid data
+
+Input:  ($object,$name,$bitData,$protocolID, optional: length $bitData);
+
+Output:
+		on success array (returnCode=1, hexData)
+		otherwise array (returncode=-1,"Error message")
+=cut
+sub mcBit2Maverick {
+	my $self    			= shift // carp 'Not called within an object' && return (0,'no object provided');
+	my $name				= shift // 'anonymous';
+	my $bitData				= shift // carp 'bitData must be perovided' && return (0,'no bitData provided');
+	my $id					= shift // carp 'protocol ID must be provided' && return (0,'no protocolId provided');
+	my $mcbitnum   			= shift // length $bitData;
+
+
+	if ($bitData =~ m/^.*(101010101001100110010101).*/)
+	{  # Valid Maverick header detected
+		my $header_pos=$+[1];
+
+	 	$self->_logging( qq[lib/mcBit2Maverick, protocol detected: header_pos = $header_pos], 4 );
+
+		my $hex=lib::SD_Protocols::binStr2hexStr(substr($bitData,$header_pos,26*4));
+
+		return  (1,$hex); ## Return the bits unchanged in hex
+	} else {
+		return return (-1,undef);
+	}
+}
+
+=item mcBit2SomfyRTS()
+extract the message from the bitdata if it looks like valid data
+
+Input:  ($object,$name,$bitData,$protocolID, optional: length $bitData);
+
+Output:
+		on success array (returnCode=1, hexData)
+		otherwise array (returncode=-1,"Error message")
+=cut
+sub mcBit2SomfyRTS {
+	my $self    			= shift // carp 'Not called within an object' && return (0,'no object provided');
+	my $name				= shift // 'anonymous';
+	my $bitData				= shift // carp 'bitData must be perovided' && return (0,'no bitData provided');
+	my $id					= shift // carp 'protocol ID must be provided' && return (0,'no protocolId provided');
+	my $mcbitnum   			= shift // length $bitData;
+
+	$self->_logging( qq[lib/mcBit2SomfyRTS, bitdata: $bitData ($mcbitnum)], 4 );
+		
+	if ($mcbitnum == 57) {
+		$bitData = substr($bitData, 1, 56);
+		$self->_logging( qq[lib/mcBit2SomfyRTS, bitdata: $bitData, truncated to length: ]. length($bitData), 4 );
+	}
+	my $encData = lib::SD_Protocols::binStr2hexStr($bitData);
+
+	return (1, $encData);
+}
+
 
 =item registerLogCallback()
 
@@ -1588,15 +1746,12 @@ sub ConvLaCrosse {
 	my $self    = shift // carp 'Not called within an object';
 	my $hexData = shift // croak 'Error: called without $hexdata as input';
 
-	return ( 1,
-'ConvLaCrosse, Usage: Input #1, $hexData needs to be at least 8 chars long'
-	  )
-	  if ( length($hexData) < 8 )
-	  ;    # check number of length for this sub to not throw an error
+	return ( 1,'ConvLaCrosse, Usage: Input #1, $hexData needs to be at least 8 chars long'  )
+	  if ( length($hexData) < 8 )  ;    # check number of length for this sub to not throw an error
 
 	my $ctx = Digest::CRC->new( width => 8, poly => 0x31 );
 	my $calcCrc = $ctx->add( pack 'H*', substr( $hexData, 0, 8 ) )->digest;
-	my $checksum = sprintf( "%d", hex( substr( $hexData, 8, 2 ) ) );
+	my $checksum = sprintf( "%d", hex( substr( $hexData, 8, 2 ) ) );  # Todo: Needs some check to be hexadzimal conform
 	return ( 1, qq[ConvLaCrosse, checksumCalc:$calcCrc != checksum:$checksum] )
 	  if ( $calcCrc != $checksum );
 

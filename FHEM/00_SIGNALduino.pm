@@ -38,7 +38,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.5_dev_05.17",
+	SDUINO_VERSION            => "v3.5_dev_05.21",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -2245,7 +2245,7 @@ sub SIGNALduino_Parse_MS($$$$%) {
 			Debug "$name: decoded message raw (@bit_msg), ".@bit_msg." bits\n" if ($debug);
 
 			#Check converted message against lengths
-			my ($rcode, $rtxt) = SIGNALduino_TestLength($name,$id,scalar @bit_msg,undef);
+			my ($rcode, $rtxt) = $hash->{protocolObject}->LengthInRange($id,scalar @bit_msg);
 			if (!$rcode)
 			{
 			  Debug "$name: decoded $rtxt" if ($debug);
@@ -2300,6 +2300,7 @@ sub SIGNALduino_Parse_MS($$$$%) {
 
 ############################# package main
 ## //Todo: check list as reference
+# // Todo: Make this sub robust and use it
 sub SIGNALduino_padbits(\@$) {
 	my $i=@{$_[0]} % $_[1];
 	while (@{$_[0]} % $_[1] > 0)  ## will pad up full nibbles per default or full byte if specified in protocol
@@ -3215,144 +3216,6 @@ sub SIGNALduino_callsub {
 }
 
 
-
-
-
-
-############################# package main
-sub	SIGNALduino_Hideki {
-	my $self = shift; #just make compatibility with object 
-	my ($name,$bitData,$id,$mcbitnum) = @_;
-	my $debug = AttrVal($name,"debug",0);
-	my $hash=$defs{$name};
-
-    Debug "$name: search in $bitData \n" if ($debug);
-	my $message_start = index($bitData,"10101110");
-	my $invert = 0;
-
-	if ($message_start < 0) {
-	$bitData =~ tr/01/10/;									# invert message
-	$message_start = index($bitData,"10101110");			# 0x75 but in reverse order
-	$invert = 1;
-	}
-
-	if ($message_start >= 0 )   # 0x75 but in reverse order
-	{
-		Debug "$name: Hideki protocol (invert=$invert) detected \n" if ($debug);
-
-		# Todo: Mindest Laenge fuer startpunkt vorspringen
-		# Todo: Wiederholung auch an das Modul weitergeben, damit es dort geprueft werden kann
-		my $message_end = index($bitData,"10101110",$message_start+71); # pruefen auf ein zweites 0x75,  mindestens 72 bit nach 1. 0x75, da der Regensensor minimum 8 Byte besitzt je byte haben wir 9 bit
-        $message_end = length($bitData) if ($message_end == -1);
-        my $message_length = $message_end - $message_start;
-
-		return (-1,"message is to short") if ($message_length < $hash->{protocolObject}->checkProperty($id,'length_min',-1) );
-		return (-1,"message is to long") if (defined $hash->{protocolObject}->getProperty($id,'length_max') && $message_length > $hash->{protocolObject}->getProperty($id,'length_max') );
-
-		my $hidekihex = "";
-		my $idx;
-
-		for ($idx=$message_start; $idx<$message_end; $idx=$idx+9)
-		{
-			my $byte = "";
-			$byte= substr($bitData,$idx,8); ## Ignore every 9th bit
-			Debug "$name: byte in order $byte " if ($debug);
-			$byte = scalar reverse $byte;
-			Debug "$name: byte reversed $byte , as hex: ".sprintf('%X', oct("0b$byte"))."\n" if ($debug);
-
-			$hidekihex=$hidekihex.sprintf('%02X', oct("0b$byte"));
-		}
-
-		if ($invert == 0) {
-			$hash->{logMethod}->($name, 4, "$name: Hideki, receive protocol not inverted");
-		} else {
-			$hash->{logMethod}->($name, 4, "$name: Hideki, receive protocol inverted");
-		}
-		$hash->{logMethod}->($name, 4, "$name: Hideki, protocol converted to hex: $hidekihex with " .$message_length ." bits, messagestart $message_start");
-
-		return  (1,$hidekihex); ## Return only the original bits, include length
-	}
-	$hash->{logMethod}->($name, 4, "$name: Hideki, start pattern (10101110) not found");
-	return (-1,"Start pattern (10101110) not found");
-}
-
-############################# package main, test exists
-sub SIGNALduino_Maverick {
-	my $self = shift; #just make compatibility with object 
-	my ($name,$bitData,$id,$mcbitnum) = @_;
-
-	if ($bitData =~ m/^.*(101010101001100110010101).*/)
-	{  # Valid Maverick header detected
-		my $header_pos=$+[1];
-		my $hash=$defs{$name};
-
-		$hash->{logMethod}->($name, 4, "$name: Maverick, protocol detected: header_pos = $header_pos");
-
-		my $hex=lib::SD_Protocols::binStr2hexStr(substr($bitData,$header_pos,26*4));
-
-		return  (1,$hex); ## Return the bits unchanged in hex
-	} else {
-		return return (-1," header not found");
-	}
-}
-
-############################# package main, test exists
-sub SIGNALduino_OSPIR {
-	my $self = shift; #just make compatibility with object 
-	my ($name,$bitData,$id,$mcbitnum) = @_;
-
-	if ($bitData =~ m/^.*(1{14}|0{14}).*/)
-	{  # Valid Oregon PIR detected
-		my $header_pos=$+[1];
-		my $hash=$defs{$name};
-		$hash->{logMethod}->($name, 4, "$name: OSPIR, protocol detected: header_pos = $header_pos");
-
-		my $hex=lib::SD_Protocols::binStr2hexStr($bitData);
-
-		return  (1,$hex); ## Return the bits unchanged in hex
-	} else {
-		return return (-1," header not found");
-	}
-}
-
-############################# package main, test exists
-sub SIGNALduino_SomfyRTS {
-	my $self = shift; #just make compatibility with object 
-	my ($name, $bitData,$id,$mcbitnum) = @_;
-
-    #(my $negBits = $bitData) =~ tr/10/01/;   # Todo: eventuell auf pack umstellen
-
-	if (defined($mcbitnum)) {
-		my $hash=$defs{$name};
-		$hash->{logMethod}->($name, 4, "$name: SomfyRTS, bitdata: $bitData ($mcbitnum)");
-		if ($mcbitnum == 57) {
-			$bitData = substr($bitData, 1, 56);
-			$hash->{logMethod}->($name, 4, "$name: SomfyRTS, bitdata: _$bitData (" . length($bitData) . "). Bit am Anfang entfernt");
-		}
-	}
-	my $encData = lib::SD_Protocols::binStr2hexStr($bitData);
-
-	#SIGNALduino_Log3 $name, 4, "$name: SomfyRTS, protocol enc: $encData";
-	return (1, $encData);
-}
-
-############################# package main
-# Move to lib::SD_Protocols -> LengthInRange
-sub SIGNALduino_TestLength {
-	my $name = shift // carp q[first arg must be provided];
-	my ($id, $message_length, $logMsg) = @_;
-	my $hash=$defs{$name} // return (0,qq[$name does not exists]);
-	
-	if ($message_length < $hash->{protocolObject}->checkProperty($id,'length_min',-1)) {
-		$hash->{logMethod}->($name, 4, qq[$name: $logMsg: message with length=$message_length is to short]) if (defined($logMsg));
-		return (0, 'message is to short');
-	}
-	elsif (defined $hash->{protocolObject}->getProperty($id,'length_max') && $message_length > $hash->{protocolObject}->getProperty($id,'length_max')) {
-		$hash->{logMethod}->($name, 4, qq[$name: $logMsg: message with length=$message_length is to long]) if (defined($logMsg));
-		return (0, 'message is to long');
-	}
-	return (1,"");
-}
 
 # - - - - - - - - - - - -
 #=item SIGNALduino_filterMC()

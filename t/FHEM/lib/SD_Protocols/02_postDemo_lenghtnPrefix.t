@@ -20,7 +20,6 @@ my $rcode;
 plan(2);
 
 my @bits=qw(0 1 0 0 0 1 0 1 0 1 0 0 1 0 1 0 1 0 0 0 0 1 0 0 0 1 1 1 1 0 1 1 1 1 0 1 0 1 1 1 0);
-my $rcode;
 note('calculates the hex (in bits) and adds it at the beginning of the message');
 note("input @bits");
 

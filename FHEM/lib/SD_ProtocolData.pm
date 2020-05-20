@@ -465,18 +465,18 @@ package lib::SD_ProtocolData;
 							# Id:31 Ch:1 T: 22.7 Bat:ok   MC;LL=-1040;LH=904;SL=-542;SH=426;D=A8C233B53A3E0A0783;C=485;L=72;R=213;
 			{
 				name						=> 'Hideki',
-				comment					=> 'temperature / humidity or other sensors',
+				comment						=> 'temperature / humidity or other sensors',
 				id							=> '12',
-				knownFreqs      => '433.92',
-				clockrange			=> [420,510],							# min, max better for Bresser Sensors, OK for hideki/Hideki/TFA too
-				format					=> 'manchester',
-				preamble				=> 'P12#',								# prepend to converted message
-				clientmodule		=> 'Hideki',
-				modulematch			=> '^P12#75.+',
-				length_min			=> '71',
-				length_max			=> '128',
-				method					=> \&main::SIGNALduino_Hideki,	# Call to process this message
-				#polarity				=> 'invert',
+				knownFreqs      			=> '433.92',
+				clockrange					=> [420,510],							# min, max better for Bresser Sensors, OK for hideki/Hideki/TFA too
+				format						=> 'manchester',
+				preamble					=> 'P12#',								# prepend to converted message
+				clientmodule				=> 'Hideki',
+				modulematch					=> '^P12#75.+',
+				length_min					=> '71',
+				length_max					=> '128',
+				method						=> \&lib::SD_Protocols::mcBit2Hideki,	# Call to process this message
+				#polarity					=> 'invert',
 			},
 		"13"	=>	## FLAMINGO FA21
 							# https://github.com/RFD-FHEM/RFFHEM/issues/21 @sidey79
@@ -1238,7 +1238,7 @@ package lib::SD_ProtocolData;
 				modulematch				=> '^Ys[0-9A-F]{14}',
 				length_min				=> '56',
 				length_max				=> '57',
-				method					=> \&main::SIGNALduino_SomfyRTS,	# Call to process this message
+				method					=> \&lib::SD_Protocols::mcBit2SomfyRTS,	# Call to process this message
 				msgIntro				=> 'SR;P0=-2560;P1=2560;P3=-640;D=10101010101010113;',
 				#msgOutro				=> 'SR;P0=-30415;D=0;',
 				frequency				=> '10AB85550A',
@@ -1328,18 +1328,18 @@ package lib::SD_ProtocolData;
 							# Food: 23 BBQ: 22   MC;LL=-507;LH=490;SL=-258;SH=239;D=AA9995599599A959996699A969;C=248;L=104;
 							# https://github.com/RFD-FHEM/RFFHEM/issues/167
 			{
-				name						=> 'Maverick',
+				name					=> 'Maverick',
 				comment					=> 'BBQ / food thermometer',
-				id							=> '47',
-				knownFreqs      => '433.92',
-				clockrange			=> [180,260],
+				id						=> '47',
+				knownFreqs      		=> '433.92',
+				clockrange				=> [180,260],
 				format					=> 'manchester',
 				preamble				=> 'P47#',						# prepend to converted message
-				clientmodule		=> 'SD_WS_Maverick',
-				modulematch			=> '^P47#[569A]{12}.*',
-				length_min			=> '100',
-				length_max			=> '108',
-				method					=> \&main::SIGNALduino_Maverick,		# Call to process this message
+				clientmodule			=> 'SD_WS_Maverick',
+				modulematch				=> '^P47#[569A]{12}.*',
+				length_min				=> '100',
+				length_max				=> '108',
+				method					=> \&lib::SD_Protocols::mcBit2Maverick,		# Call to process this message
 				#polarity				=> 'invert'
 			},
 		"48"	=>	## Joker Dostmann TFA 30.3055.01
@@ -1489,18 +1489,18 @@ package lib::SD_ProtocolData;
 							# C = wechselt, 0, 4, 8, C - dann fängt es wieder mit 0 an und wiederholt sich bei jeder Bewegung
 			{
 				name						=> 'Oregon Scientific PIR',
-				comment					=> 'JMR868 / NR868',
+				comment						=> 'JMR868 / NR868',
 				id							=> '52',
-				knownFreqs      => '433.92',
-				clockrange			=> [470,640],							# min , max
-				format					=> 'manchester',					# tristate can't be migrated from bin into hex!
-				#clientmodule		=> '',                    # OREGON module not for Motion Detectors
-				modulematch			=> '^u52#F{3}|0{3}.*',
-				preamble				=> 'u52#',
-				length_min			=> '30',
-				length_max			=> '30',
-				method					=> \&main::SIGNALduino_OSPIR,		# Call to process this message
-				polarity				=> 'invert',
+				knownFreqs     				 => '433.92',
+				clockrange					=> [470,640],							# min , max
+				format						=> 'manchester',					# tristate can't be migrated from bin into hex!
+				#clientmodule				=> '',                    # OREGON module not for Motion Detectors
+				modulematch					=> '^u52#F{3}|0{3}.*',
+				preamble					=> 'u52#',
+				length_min					=> '30',
+				length_max					=> '30',
+				method						=> \&lib::SD_Protocols::mcBit2OSPIR,		# Call to process this message
+				polarity					=> 'invert',
 			},
 		"53"	=>	## Lidl AURIOL AHFL 433 B2 IAN 314695
 							# https://github.com/RFD-FHEM/RFFHEM/issues/663 @Kreidler1221 05.10.2019
