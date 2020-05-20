@@ -1,3 +1,7 @@
+2020-05-20 - Update 14_SD_UT.pm
+
+replace "foreach my $keys (keys %models)" with "grep { $models{$_}{hex_lengh} =~ /$hex_lengh/ } keys %models;" in line 1745
+delete "$attr{$name}{room}	= "SD_UT"	if( not defined( $attr{$name}{room} ) );"
 2020-05-18 - Update 14_SD_UT.pm
 
 replace "foreach my $keys (sort keys %{$models{RC_10}{buttons}})" with "if ( exists $models{RC_10}{buttons}{$button} )" in line 1845
