@@ -818,7 +818,6 @@ sub SD_UT_Define($$) {
 	} else {
 		$attr{$name}{model}	= $devicetyp	if( not defined( $attr{$name}{model} ) );
 	}
-	$attr{$name}{room}	= "SD_UT"	if( not defined( $attr{$name}{room} ) );
 
 	AssignIoPort($hash, $iodevice);
 }
@@ -1740,14 +1739,12 @@ sub SD_UT_Attr(@) {
 			if (InternalVal($name, "bitMSG", "no data") ne "no data") {
 				my $devicemodel;
 
-				### ERROR for Users
-				my $allowed_models;
-				foreach my $keys (keys %models) {	# read allowed_models with the same hex_lengh
-					$allowed_models.= $keys.", " if ($models{$keys}{hex_lengh} eq $hex_lengh);
-				}
+				### ERROR for users when change attribute model
+				my @allowed_models_list = grep { $models{$_}{hex_lengh} =~ /$hex_lengh/ } keys %models;	# read allowed_models with the same hex_lengh
+				my $allowed_models = join(', ' , @allowed_models_list); # convert to string
 				Log3 $name, 4, "SD_UT_Attr Check for the change, $oldmodel hex_lengh=$hex_lengh, attrValue=$attrValue needed hex_lengh=".$models{$attrValue}{hex_lengh};
-				return "ERROR! $name: You want to choose the $oldmodel model to $attrValue.\nPlease check your selection.\nThe length of RAWMSG must be the same!\n\nAllowed models are: $allowed_models" if ($models{$attrValue}{hex_lengh} !~ /$hex_lengh/ && $oldmodel ne "unknown");	# variants one
-				return "ERROR! $name: You want to choose the unknown model to $attrValue.\nPlease check your selection.\nRAWMSG length is wrong!\n\nAllowed models are: $allowed_models" if (not ($models{$attrValue}{hex_lengh} =~ /($hex_lengh)/ ) && $oldmodel eq "unknown");				  # variants two/three
+				return "ERROR! $name: You want to choose the $oldmodel model to $attrValue.\nPlease check your selection.\nThe length of DMSG must be the same!\n\nAllowed models are: $allowed_models" if ($models{$attrValue}{hex_lengh} !~ /$hex_lengh/ && $oldmodel ne "unknown"); # variants one
+				return "ERROR! $name: You want to choose the unknown model to $attrValue.\nPlease check your selection.\nThe length of DMSG is wrong!\n\nAllowed models are: $allowed_models" if (not ($models{$attrValue}{hex_lengh} =~ /($hex_lengh)/ ) && $oldmodel eq "unknown"); # variants two/three
 
 				if ($attrValue eq "unknown") {
 					readingsSingleUpdate($hash, "state", " Please define your model with attributes! ", 0);
