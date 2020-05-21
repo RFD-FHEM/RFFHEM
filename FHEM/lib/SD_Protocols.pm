@@ -816,7 +816,7 @@ sub mcBit2OSPIR {
 	my $id					= shift // carp 'protocol ID must be provided' && return (0,'no protocolId provided');
 	my $mcbitnum   			= shift // length $bitData;
 
-	if ($bitData =~ m/^.*(1{14}|0{14}).*/)
+	if ($bitData =~ m/(1{14}|0{14})/xms)
 	{  # Valid Oregon PIR detected
 		my $header_pos=$+[1];
 	 	$self->_logging( qq[lib/mcBit2OSPIR, protocol detected: header_pos = $header_pos], 4 );
@@ -848,7 +848,7 @@ sub mcBit2Maverick {
 	my $mcbitnum   			= shift // length $bitData;
 
 
-	if ($bitData =~ m/^.*(101010101001100110010101).*/)
+	if ($bitData =~ m/(101010101001100110010101)/xms)
 	{  # Valid Maverick header detected
 		my $header_pos=$+[1];
 
