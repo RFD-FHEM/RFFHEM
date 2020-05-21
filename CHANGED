@@ -1,3 +1,6 @@
+2020-05-21 - SD_Protocols.pm
+
+updated regex in mcBit2OSPIR and mcBit2Mavericks
 2020-05-21 - 00_SIGNALduino.pm -> lib/SD_Protocols.pm
 
 Migrated mc subs for Maverick, OSPIR, HIDEKI, SomfyRTS sub to lib::SD_Protocols
