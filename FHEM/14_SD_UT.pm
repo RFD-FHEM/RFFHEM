@@ -70,32 +70,32 @@
 #     0111010011	"power_on_off"		- nur 10 Bit, SIGNALduino.pm hängt 2 Nullen an
 #    https://github.com/RFD-FHEM/RFFHEM/issues/331
 #			nibble 0-1 -> Ident | nibble 2-4 -> Tastencode
-#     light_on_off   - hex_lengh 5  get sduino_dummy raw MU;;P0=710;;P1=353;;P2=-403;;P4=-761;;P6=-16071;;D=20204161204120412041204120414141204120202041612041204120412041204141412041202020416120412041204120412041414120412020204161204120412041204120414141204120202041;;CP=1;;R=40;;
-#     novy           - hex_lengh 3  get sduino_dummy raw MU;;P0=706;;P1=-763;;P2=370;;P3=-405;;P4=-15980;;D=0123012301230304230123012301230123012303042;;CP=2;;R=42;;
-#     power_on_off   - hex_lengh 5  get sduino_dummy raw MU;;P0=-756;;P1=718;;P2=354;;P3=-395;;P4=-16056;;D=01020202310231310202423102310231023102310202023102313102024231023102310231023102020231023131020242310231023102310231020202310231310202;;CP=2;;R=41;;
-#     speed_minus    - hex_lengh 3  get sduino_dummy raw MU;;P0=-8032;;P1=364;;P2=-398;;P3=700;;P4=-760;;P5=-15980;;D=0123412341234123412341412351234123412341234123414123512341234123412341234141235123412341234123412341412351234123412341234123414123;;CP=1;;R=40;;
-#}    speed_plus     - hex_lengh 3  get sduino_dummy raw MU;;P0=22808;;P1=-24232;;P2=701;;P3=-765;;P4=357;;P5=-15970;;P7=-406;;D=012345472347234723472347234723454723472347234723472347234547234723472347234723472345472347234723472347234723454723472347234723472347234;;CP=4;;R=39;;
+#     light_on_off   - hex_length 5  get sduino_dummy raw MU;;P0=710;;P1=353;;P2=-403;;P4=-761;;P6=-16071;;D=20204161204120412041204120414141204120202041612041204120412041204141412041202020416120412041204120412041414120412020204161204120412041204120414141204120202041;;CP=1;;R=40;;
+#     novy           - hex_length 3  get sduino_dummy raw MU;;P0=706;;P1=-763;;P2=370;;P3=-405;;P4=-15980;;D=0123012301230304230123012301230123012303042;;CP=2;;R=42;;
+#     power_on_off   - hex_length 5  get sduino_dummy raw MU;;P0=-756;;P1=718;;P2=354;;P3=-395;;P4=-16056;;D=01020202310231310202423102310231023102310202023102313102024231023102310231023102020231023131020242310231023102310231020202310231310202;;CP=2;;R=41;;
+#     speed_minus    - hex_length 3  get sduino_dummy raw MU;;P0=-8032;;P1=364;;P2=-398;;P3=700;;P4=-760;;P5=-15980;;D=0123412341234123412341412351234123412341234123414123512341234123412341234141235123412341234123412341412351234123412341234123414123;;CP=1;;R=40;;
+#}    speed_plus     - hex_length 3  get sduino_dummy raw MU;;P0=22808;;P1=-24232;;P2=701;;P3=-765;;P4=357;;P5=-15970;;P7=-406;;D=012345472347234723472347234723454723472347234723472347234547234723472347234723472345472347234723472347234723454723472347234723472347234;;CP=4;;R=39;;
 ###
 # - Remote Control Novy_840039 for Novy Cloud 230 kitchen hood [Protocol 86] (Länge je nach Taste 12 oder 18 Bit) [additionally Protocol 81]
 #	https://github.com/RFD-FHEM/RFFHEM/issues/792 | https://forum.fhem.de/index.php/topic,107867.0.html
 #{		nibble 0-1 -> Ident | nibble 2-4 -> Tastencode
-#     0111010011	"power_on_off"            - nur 10 Bit, SIGNALduino.pm hängt 2 Nullen an   hex_lengh 5  get sduino_dummy raw MU;;P0=-749;;P1=378;;P2=-456;;P3=684;;P4=-16081;;D=01230101012301232301014123012301230123012301010123012323010141230123012301230123010101230123230101412;;CP=1;;R=66;;
-#     0110110110	"cooking_light_on"				- i.O.                                           hex_lengh 5  get sduino_dummy raw MU;;P0=-4768;;P1=380;;P2=-397;;P3=690;;P4=-755;;P5=-16077;;CP=1;;R=39;;D=0123412341234123412341412341412341412351234123412341234123414123414123414123;;O;;w=0;;
-#     0110110100	"cooking_light_off"				- i.O.                                           hex_lengh 5  get sduino_dummy raw MU;;P0=382;;P1=200;;P2=-745;;P4=-394;;P5=696;;P6=-16083;;CP=0;;R=81;;D=1204520204520204520454560452045204520452045202045202045204545;;O;;w=0;;
-#     0110110101	"cooking_light_dim_plus"  - i.O.                                           hex_lengh 5  get sduino_dummy raw MU;;P0=-753;;P1=387;;P2=-419;;P3=679;;P6=-16050;;CP=1;;R=58;;D=0123012301012301012301230161230123012301230123010123010123012301;;p;;w=0;;
-#     0110110011	"cooking_light_dim_minus" - i.O.                                           hex_lengh 5  get sduino_dummy raw MU;;P1=386;;P2=-394;;P3=694;;P4=-794;;P5=-16064;;CP=1;;R=51;;D=123412341234123412341412341412323414151234123412341234123414123414123234141;;p;;w=0;;
-#     0111001110	"cooking_light_cold"			- i.O.                                           hex_lengh 5  get sduino_dummy raw MU;;P0=-92;;P1=371;;P2=-738;;P4=-393;;P5=702;;P6=-16072;;CP=1;;R=69;;D=012145214521212145452121214561452145214521452145212121454521212145;;e;;w=0;;
-#     0111001011	"cooking_light_warm"			- i.O.                                           hex_lengh 5  get sduino_dummy raw MU;;P0=-17440;;P1=381;;P2=-415;;P3=668;;P4=-756;;P6=-6786;;CP=1;;R=85;;D=0123412341234123412341414123234123414101634123414141232341234141;;e;;w=0;;
-#     0110111110	"ambient_light_on"				- i.O.                                           hex_lengh 5  get sduino_dummy raw MU;;P0=-9524;;P1=364;;P2=-414;;P3=669;;P4=-755;;P5=-16076;;CP=1;;R=83;;D=0123412341234123412341412341414141412351234123412341234123414123414141414123;;e;;w=0;;
-#     0110111100	"ambient_light_off"				- i.O.                                           hex_lengh 5  get sduino_dummy raw MU;;P1=371;;P2=-406;;P3=685;;P4=-744;;P6=-16050;;CP=1;;R=88;;D=123412341234123412341412341414141232361234123412341234123414123414141412323;;e;;w=0;;
-#     0110111101	"ambient_light_dim_plus"  - i.O.                                           hex_lengh 5  get sduino_dummy raw MU;;P0=-10584;;P1=362;;P2=-417;;P3=678;;P4=-765;;P5=-16075;;CP=1;;R=67;;D=0123412341234123412341412341414141234151234123412341234123414123414141412341;;O;;w=0;;
-#     0110111011	"ambient_light_dim_minus" - i.O.                                           hex_lengh 5  get sduino_dummy raw MU;;P2=-14541;;P3=-396;;P4=707;;P5=-733;;P6=367;;CP=6;;R=86;;D=62634563456345634563456563456565634565626345634563456345634565634565656345656;;p;;w=0;;
-#     0111010110	"ambient_light_cold"			- i.O.                                           hex_lengh 5  get sduino_dummy raw MU;;P1=363;;P2=-416;;P3=683;;P4=-755;;P5=-16073;;CP=1;;R=74;;D=123412341234123412341414123412341412351234123412341234123414141234123414123;;p;;w=0;;
-#     0111001101	"ambient_light_warm"			- i.O.                                           hex_lengh 5  get sduino_dummy raw MU;;P0=381;;P2=-751;;P4=-419;;P5=678;;P6=-16060;;CP=0;;R=78;;D=6045204520452045204520202045452020452060452045204520452045202020454520204520;;p;;w=1;;
-#     0110        "fan_minus"               - i.O.                                           hex_lengh 3  get sduino_dummy raw MU;;P0=388;;P1=-756;;P2=264;;P3=-399;;P4=683;;P5=-16082;;CP=0;;R=67;;D=0123410341034103410341050341034103410341034103410;;e;;w=0;;
-#     0101        "fan_plus"                - i.O.                                           hex_lengh 3  get sduino_dummy raw MU;;P1=-16074;;P2=366;;P3=-757;;P6=-422;;P7=680;;CP=2;;R=81;;D=671267326732673267326732326712673267326732673267323267;;e;;w=0;;
-#     0110011101	"fan_left"                - not assigned for Novy Cloud 230                hex_lengh 5  get sduino_dummy raw MU;;P0=378;;P2=-788;;P3=-434;;P4=649;;P5=-16070;;CP=0;;R=79;;D=02034203420203434202020342050342034203420342034202034342020203420;;p;;w=0;;
-#     0110011010	"fan_right"               - not assigned for Novy Cloud 230                hex_lengh 5  get sduino_dummy raw MU;;P0=-16705;;P1=361;;P2=-2704;;P3=663;;P4=-778;;P5=-423;;CP=1;;R=68;;D=012341534153415341415353414153415301534153415341534153414153534141534153;;O;;w=0;;
+#     0111010011	"power_on_off"            - nur 10 Bit, SIGNALduino.pm hängt 2 Nullen an   hex_length 5  get sduino_dummy raw MU;;P0=-749;;P1=378;;P2=-456;;P3=684;;P4=-16081;;D=01230101012301232301014123012301230123012301010123012323010141230123012301230123010101230123230101412;;CP=1;;R=66;;
+#     0110110110	"cooking_light_on"				- i.O.                                           hex_length 5  get sduino_dummy raw MU;;P0=-4768;;P1=380;;P2=-397;;P3=690;;P4=-755;;P5=-16077;;CP=1;;R=39;;D=0123412341234123412341412341412341412351234123412341234123414123414123414123;;O;;w=0;;
+#     0110110100	"cooking_light_off"				- i.O.                                           hex_length 5  get sduino_dummy raw MU;;P0=382;;P1=200;;P2=-745;;P4=-394;;P5=696;;P6=-16083;;CP=0;;R=81;;D=1204520204520204520454560452045204520452045202045202045204545;;O;;w=0;;
+#     0110110101	"cooking_light_dim_plus"  - i.O.                                           hex_length 5  get sduino_dummy raw MU;;P0=-753;;P1=387;;P2=-419;;P3=679;;P6=-16050;;CP=1;;R=58;;D=0123012301012301012301230161230123012301230123010123010123012301;;p;;w=0;;
+#     0110110011	"cooking_light_dim_minus" - i.O.                                           hex_length 5  get sduino_dummy raw MU;;P1=386;;P2=-394;;P3=694;;P4=-794;;P5=-16064;;CP=1;;R=51;;D=123412341234123412341412341412323414151234123412341234123414123414123234141;;p;;w=0;;
+#     0111001110	"cooking_light_cold"			- i.O.                                           hex_length 5  get sduino_dummy raw MU;;P0=-92;;P1=371;;P2=-738;;P4=-393;;P5=702;;P6=-16072;;CP=1;;R=69;;D=012145214521212145452121214561452145214521452145212121454521212145;;e;;w=0;;
+#     0111001011	"cooking_light_warm"			- i.O.                                           hex_length 5  get sduino_dummy raw MU;;P0=-17440;;P1=381;;P2=-415;;P3=668;;P4=-756;;P6=-6786;;CP=1;;R=85;;D=0123412341234123412341414123234123414101634123414141232341234141;;e;;w=0;;
+#     0110111110	"ambient_light_on"				- i.O.                                           hex_length 5  get sduino_dummy raw MU;;P0=-9524;;P1=364;;P2=-414;;P3=669;;P4=-755;;P5=-16076;;CP=1;;R=83;;D=0123412341234123412341412341414141412351234123412341234123414123414141414123;;e;;w=0;;
+#     0110111100	"ambient_light_off"				- i.O.                                           hex_length 5  get sduino_dummy raw MU;;P1=371;;P2=-406;;P3=685;;P4=-744;;P6=-16050;;CP=1;;R=88;;D=123412341234123412341412341414141232361234123412341234123414123414141412323;;e;;w=0;;
+#     0110111101	"ambient_light_dim_plus"  - i.O.                                           hex_length 5  get sduino_dummy raw MU;;P0=-10584;;P1=362;;P2=-417;;P3=678;;P4=-765;;P5=-16075;;CP=1;;R=67;;D=0123412341234123412341412341414141234151234123412341234123414123414141412341;;O;;w=0;;
+#     0110111011	"ambient_light_dim_minus" - i.O.                                           hex_length 5  get sduino_dummy raw MU;;P2=-14541;;P3=-396;;P4=707;;P5=-733;;P6=367;;CP=6;;R=86;;D=62634563456345634563456563456565634565626345634563456345634565634565656345656;;p;;w=0;;
+#     0111010110	"ambient_light_cold"			- i.O.                                           hex_length 5  get sduino_dummy raw MU;;P1=363;;P2=-416;;P3=683;;P4=-755;;P5=-16073;;CP=1;;R=74;;D=123412341234123412341414123412341412351234123412341234123414141234123414123;;p;;w=0;;
+#     0111001101	"ambient_light_warm"			- i.O.                                           hex_length 5  get sduino_dummy raw MU;;P0=381;;P2=-751;;P4=-419;;P5=678;;P6=-16060;;CP=0;;R=78;;D=6045204520452045204520202045452020452060452045204520452045202020454520204520;;p;;w=1;;
+#     0110        "fan_minus"               - i.O.                                           hex_length 3  get sduino_dummy raw MU;;P0=388;;P1=-756;;P2=264;;P3=-399;;P4=683;;P5=-16082;;CP=0;;R=67;;D=0123410341034103410341050341034103410341034103410;;e;;w=0;;
+#     0101        "fan_plus"                - i.O.                                           hex_length 3  get sduino_dummy raw MU;;P1=-16074;;P2=366;;P3=-757;;P6=-422;;P7=680;;CP=2;;R=81;;D=671267326732673267326732326712673267326732673267323267;;e;;w=0;;
+#     0110011101	"fan_left"                - not assigned for Novy Cloud 230                hex_length 5  get sduino_dummy raw MU;;P0=378;;P2=-788;;P3=-434;;P4=649;;P5=-16070;;CP=0;;R=79;;D=02034203420203434202020342050342034203420342034202034342020203420;;p;;w=0;;
+#     0110011010	"fan_right"               - not assigned for Novy Cloud 230                hex_length 5  get sduino_dummy raw MU;;P0=-16705;;P1=361;;P2=-2704;;P3=663;;P4=-778;;P5=-423;;CP=1;;R=68;;D=012341534153415341415353414153415301534153415341534153414153534141534153;;O;;w=0;;
 #}
 ###############################################################################################################################################################################
 # - CAME Drehtor Antrieb - remote CAME_TOP_432EV [Protocol 86] and [additionally Protocol 81]
@@ -341,13 +341,13 @@ my %models = (
 											"111101" 	=> "3_fan_high_speed",
 											"101111" 	=> "light_on_off",
 											"111110"	=> "fan_off",
-											hex_lengh	=> "3",
+											hex_length => [3],
 											Protocol 	=> "P29",
 											Typ				=> "remote"
 										},
 	"CAME_TOP_432EV" =>	{	"1110"		=> "left_button",
 												"1101"		=> "right_button",
-												hex_lengh	=> "3",
+												hex_length => [3],
 												Protocol	=> "P86",
 												Typ				=> "remote"
 											},
@@ -357,12 +357,12 @@ my %models = (
 												"1000"    => "power_on",
 												"1010"    => "flickering_slowly",
 												"1100"    => "brightness_plus",
-												hex_lengh	=> "5",
+												hex_length => [5],
 												Protocol  => "P14",
 												Typ       => "remote"
 											},
 	"HS1_868_BS" =>	{ "0"				=> "send",
-										hex_lengh	=> "11",
+										hex_length => [11],
 										Protocol	=> "P69",
 										Typ				=> "remote"
 									},
@@ -370,14 +370,14 @@ my %models = (
 							"1011"		=> "button_2",
 							"1110"		=> "button_3",
 							"1101"		=> "button_4",
-							hex_lengh	=> "11",
+							hex_length => [11],
 							Protocol 	=> "P69",
 							Typ				=> "remote"
 						},
 	"Krinner_LUMIX" =>	{	"0000"			=> "off",
 												"0001"			=> "on",
 												Protocol		=> "P92",
-												hex_lengh		=> "8",
+												hex_length => [8],
 												Typ					=> "remote"
 											},
 	"OR28V" =>	{	"000000"  => "volume_mute",
@@ -426,7 +426,7 @@ my %models = (
 								"110111"  => "*",
 								"111000"  => "#",
 								Protocol	=> "P68",
-								hex_lengh	=> "5",
+								hex_length => [5],
 								Typ				=> "remote"
 							},
 	"Novy_840029" => 	{	"0100"        => "novy",
@@ -434,7 +434,7 @@ my %models = (
 											"0110"        => "speed_minus",
 											"0111010001"  => "light_on_off",	# 0111010000
 											"0111010011"  => "power_on_off",	# 0111010010
-											hex_lengh			=> "3,5",           # 3 or 5, not 3.5
+											hex_length => [3,5],           # 3 or 5, not 3.5
 											Protocol			=> "P86",
 											Typ						=> "remote"
 										},
@@ -455,7 +455,7 @@ my %models = (
 											"0101"        => "fan_plus",                # Novy_840029 same code!
 											"0110011101"  => "fan_left",
 											"0110011010"  => "fan_right",
-											hex_lengh			=> "3,5",                     # 3 or 5, not 3.5
+											hex_length => [3,5],           # 3 or 5, not 3.5
 											Protocol			=> "P86",
 											Typ						=> "remote"
 										},
@@ -471,7 +471,7 @@ my %models = (
 										"00011110" 	=> "Master_off",
 										"00010100" 	=> "Unknown_up",
 										"00000101" 	=> "Unknown_down",
-										hex_lengh		=> "5",
+										hex_length => [5],
 										Protocol		=> "P34",
 										Typ					=> "remote"
 									},
@@ -485,7 +485,7 @@ my %models = (
 								"11010010" 	=> "Ch4_off",		# 11011010101010110010010101010100 11010010
 								"10100101" 	=> "Master_on",	# 11011010101010110010010101010100 10100101
 								"01011010" 	=> "Master_off",# 11011010101010110010010101010100 01011010
-								hex_lengh		=> "10",
+								hex_length => [10],
 								Protocol		=> "P26",
 								Typ					=> "remote"
 							},
@@ -509,7 +509,7 @@ my %models = (
 										"10100101"	=> "Ch3_dim_down",	# after CH3 on/off
 										"00110110"	=> "Ch4_dim_up",		# after CH4 on/off
 										"00100111"	=> "Ch4_dim_down",	# after CH4 on/off
-										hex_lengh		=> "5",
+										hex_length => [5],
 										Protocol		=> "P34",
 										Typ					=> "remote"
 									},
@@ -523,7 +523,7 @@ my %models = (
 								"111101"	=> "fan_off",
 								"111110"	=> "light_on_off",
 								"101101"	=> "set",
-								hex_lengh	=> "3",
+								hex_length => [3],
 								Protocol	=> "P83",
 								Typ				=> "remote"
 							},
@@ -544,12 +544,12 @@ my %models = (
 								'01111000' => 'fan_4', # is not sent directly
 								'0000' => 'light_off', # is not sent directly
 								'1111' => 'light_on', # is not sent directly
-								hex_lengh => '4',
+								hex_length => [4],
 								Protocol => 'P104',
 								Typ => 'remote'
 							},
 	"SA_434_1_mini" =>	{	"0"				=> "send",
-												hex_lengh	=> "3",
+												hex_length => [3],
 												Protocol	=> "P81",
 												Typ				=> "remote"
 											},
@@ -573,18 +573,18 @@ my %models = (
 									"00000100"	=> "Group_9_off",		# 0x04
 									"00010011"	=> "All_on",				# 0x13
 									"00010100"	=> "All_off",				# 0x14
-									hex_lengh		=> "13",
+									hex_length => [13],
 									Protocol	=> "P95",
 									Typ				=> "remote"
 								},
 	"Tedsen_SKX1xx" =>	{	"1100"		=> "Button_1",	# tristate 10
-												hex_lengh	=> "5",
+												hex_length => [5],
 												Protocol	=> "P46",
 												Typ				=> "remote"
 											},
 	"Tedsen_SKX2xx" =>	{	"1000"		=> "Button_1",	#	tristate F0 = GEIGER Ab:  0-
 												"1010"		=> "Button_2",	# tristate FF = GEIGER Auf: 00
-												hex_lengh	=> "5",
+												hex_length => [5],
 												Protocol	=> "P46",
 												Typ				=> "remote"
 											},
@@ -592,7 +592,7 @@ my %models = (
 												"1010"		=> "Button_2",	# tristate FF = GEIGER Auf: 00
 												"0000"		=> "Button_3",	# tristate 00 = GEIGER Ab:  --
 												"0010"		=> "Button_4",	# tristate 0F = GEIGER Auf: -0
-												hex_lengh	=> "5",
+												hex_length => [5],
 												Protocol	=> "P46",
 												Typ				=> "remote"
 											},
@@ -602,18 +602,18 @@ my %models = (
 												"0010"		=> "Button_4",	# tristate 0F = GEIGER Auf: -0
 												"1110"		=> "Button_5",	# tristate 1F = GEIGER Ab:  +0
 												"1011"		=> "Button_6",	# tristate F1 = GEIGER Auf: 0+
-												hex_lengh	=> "5",
+												hex_length => [5],
 												Protocol	=> "P46",
 												Typ				=> "remote"
 											},
 	"Unitec_47031" =>	{ Protocol	=> "P30",
-											hex_lengh	=> "3",
+											hex_length => [3],
 											Typ				=> "switch"
 										},
 	"LED_XM21_0" =>	{	"1100"			=> "off",
 										"11111111"	=> "on",
 										Protocol		=> "P76",
-										hex_lengh		=> "15,16",
+										hex_length => [15,16],
 										Typ					=> "remote"
 									},
 	"SF01_01319004" =>	{ "1100"		=> "plus",
@@ -621,7 +621,7 @@ my %models = (
 												"1101"		=> "interval",
 												"1110"		=> "light_on_off",
 												"1001"		=> "delay",
-												hex_lengh	=> "5",
+												hex_length => [5],
 												Protocol 	=> "P86",
 												Typ				=> "remote"
 											},
@@ -630,7 +630,7 @@ my %models = (
 														"0101"		=> "interval",
 														"0110"		=> "light_on_off",
 														"0001"		=> "delay",
-														hex_lengh	=> "5",
+														hex_length => [5],
 														Protocol 	=> "P86",
 														Typ				=> "remote"
 													},
@@ -644,19 +644,19 @@ my %models = (
 									"1100" => "dimdown",
 									"1110" => "dimup",
 									Protocol	=> "P93",
-									hex_lengh	=> "9",
+									hex_length => [9],
 									Typ				=> "remote"
 								},
 	"MD_2003R" =>	{	Protocol	=> "P91", 	#P91.1
-									hex_lengh	=> "9",
+									hex_length => [9],
 									Typ				=> "gas"
 								},
 	"MD_210R" =>	{	Protocol	=> "P91", 	#P91.1
-									hex_lengh	=> "9",
+									hex_length => [9],
 									Typ				=> "switch"
 								},
 	"MD_2018R" =>	{	Protocol	=> "P91", 	#P91.1
-									hex_lengh	=> "9",
+									hex_length => [9],
 									Typ				=> "vibration"
 								},
 	"RC_10" =>	{	"1" => "on",
@@ -670,14 +670,14 @@ my %models = (
 									"100" => "all",
 								},
 								Protocol	=> "P90",
-								hex_lengh	=> "9",
+								hex_length => [9],
 								Typ				=> "remote"
 							},
 	"RCnoName20" =>	{	"000010001111000" => "plus",
 										"000000101000100" => "minus",
 										"000001010000100" => "off",
 										"000100011011000" => "on",
-										hex_lengh	=> "8",
+										hex_length => [8],
 										Protocol 	=> "P20",
 										Typ				=> "remote"
 									},
@@ -693,17 +693,17 @@ my %models = (
 									"1010" => "info",
 									"1011" => "mode",
 									"1100" => "help",
-									hex_lengh	=> "10",
+									hex_length => [10],
 									Protocol 	=> "P97",
 									Typ				=> "remote"
 								},
 	"Navaris" =>	{	"0"				=> "send",
-									hex_lengh	=> "6",
+									hex_length => [6],
 									Protocol	=> "P99",
 									Typ				=> "remote"
 								},
 	"unknown" =>	{	Protocol	=> "any",
-									hex_lengh	=> "",
+									hex_length => [],
 									Typ				=> "not_exist"
 								}
 );
@@ -1724,7 +1724,7 @@ sub SD_UT_Attr(@) {
 	my $state;
 	my $oldmodel = AttrVal($name, "model", "unknown");
 	my $bitData;
-	my $hex_lengh = length(InternalVal($name, "lastMSG", "0"));
+	my $hex_length = length(InternalVal($name, "lastMSG", "0"));
 
 	if ($cmd eq 'set') {
 		if ($attrName eq 'repeats' && $attrValue !~ m/^[1-9]$/xms) {
@@ -1739,12 +1739,17 @@ sub SD_UT_Attr(@) {
 			if (InternalVal($name, "bitMSG", "no data") ne "no data") {
 				my $devicemodel;
 
-				### ERROR for users when change attribute model
-				my @allowed_models_list = grep { $models{$_}{hex_lengh} =~ /$hex_lengh/ } keys %models;	# read allowed_models with the same hex_lengh
-				my $allowed_models = join(', ' , @allowed_models_list); # convert to string
-				Log3 $name, 4, "SD_UT_Attr Check for the change, $oldmodel hex_lengh=$hex_lengh, attrValue=$attrValue needed hex_lengh=".$models{$attrValue}{hex_lengh};
-				return "ERROR! $name: You want to choose the $oldmodel model to $attrValue.\nPlease check your selection.\nThe length of DMSG must be the same!\n\nAllowed models are: $allowed_models" if ($models{$attrValue}{hex_lengh} !~ /$hex_lengh/ && $oldmodel ne "unknown"); # variants one
-				return "ERROR! $name: You want to choose the unknown model to $attrValue.\nPlease check your selection.\nThe length of DMSG is wrong!\n\nAllowed models are: $allowed_models" if (not ($models{$attrValue}{hex_lengh} =~ /($hex_lengh)/ ) && $oldmodel eq "unknown"); # variants two/three
+				### ERROR for users when change attribute model (search allowed models with the same hex_length)
+				my @all_models = keys %models;
+				my @allowed_model_list;
+				for my $i (0 .. @all_models - 1) {
+					if ( grep {$_ == $hex_length } @{$models{$all_models[$i]}{hex_length}} ) {
+						push @allowed_model_list, $all_models[$i];
+					}
+				}
+				my $allowed_models = join(', ' , sort @allowed_model_list); # convert to sorted string for output
+				Log3 $name, 4, "SD_UT_Attr Check for the change, $oldmodel hex_length=$hex_length, attrValue=$attrValue needed hex_length=@{$models{$attrValue}{hex_length}}";
+				return "ERROR! $name: You want to choose the $oldmodel model to $attrValue.\nPlease check your selection.\nThe length of DMSG must be the same!\n\nAllowed models are:\n$allowed_models" if ( not grep {$_ eq $attrValue} @allowed_model_list );
 
 				if ($attrValue eq "unknown") {
 					readingsSingleUpdate($hash, "state", " Please define your model with attributes! ", 0);
