@@ -1,3 +1,10 @@
+2020-05-23 - rename test & doc
+
+SD_Protocols.pm
+  * added comments and revised doc
+  * sort sub in method
+Test
+  * 02_mcBitAS.t renamed to 02_mcBit2AS.t
 2020-05-21 - SD_Protocols.pm
 
 updated regex in mcBit2OSPIR and mcBit2Mavericks
