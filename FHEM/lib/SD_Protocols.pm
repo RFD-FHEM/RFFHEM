@@ -620,14 +620,14 @@ sub mcBit2OSV2o3 {
 		#$dmsg=$osv2hex;
 		return (1,$osv2hex);
 	}
-	elsif ($bitData =~ m/1{12,24}(0101)/g) {  # min Preamble 12 x 1, Valid OSV3 detected!
+	elsif ($bitData =~ m/1{12,24}(0101)/g) {           # min Preamble 12 x 1, Valid OSV3 detected!
 		$preamble_pos = $-[1];
 		$msg_start = $preamble_pos + 4;
-		if ($bitData =~ m/\G.+?(1{24})0101/xms) {		#  preamble + sync der zweiten Nachricht
+		if ($bitData =~ m/\G.+?(1{24})0101/xms) {      #  preamble + sync der zweiten Nachricht
 			$message_end = $-[1];
 			$self->_logging( qq[lib/mcBit2OSV2, protocol OSV3 with two messages detected: length of second message = ] . ($mcbitnum - $message_end - 28), 4 );
 		}
-		else {		# es wurde keine zweite Nachricht gefunden
+		else {                                         # es wurde keine zweite Nachricht gefunden
 			$message_end = $mcbitnum;
 		}
 		$message_length = $message_end - $msg_start;
@@ -717,7 +717,7 @@ sub mcBit2OSV1 {
 	return (-1,' message is to long') if (defined $self->getProperty($id,'length_max') && $mcbitnum > $self->getProperty($id,'length_max') );
 
 	if (substr($bitData,20,1) != 0) {
-		$bitData =~ tr/01/10/; # invert message and check if it is possible to deocde now
+		$bitData =~ tr/01/10/;                         # invert message and check if it is possible to deocde now
 	}
 	my $calcsum = oct( '0b' . reverse substr($bitData,0,8));
 	$calcsum += oct( '0b' . reverse substr($bitData,8,8));
@@ -725,21 +725,21 @@ sub mcBit2OSV1 {
 	$calcsum = ($calcsum & 0xFF) + ($calcsum >> 8);
 	my $checksum = oct( '0b' . reverse substr($bitData,24,8));
 
-	if ($calcsum != $checksum) {	                        # Checksum
+	if ($calcsum != $checksum) {	                   # Checksum
 		return (-1,qq[OSV1 - ERROR checksum not equal: $calcsum != $checksum]);
 	}
 
 	$self->_logging( qq[lib/mcBit2OSV1, input data: $bitData], 4 );
 	my $newBitData = '00001010';                       # Byte 0:   Id1 = 0x0A
     $newBitData .= '01001101';                         # Byte 1:   Id2 = 0x4D
-	my $channel = substr($bitData,6,2);						# Byte 2 h: Channel
-	if ($channel eq '00') {										# in 0 LSB first
-		$newBitData .= '0001';									# out 1 MSB first
-	} elsif ($channel eq '10') {								# in 4 LSB first
-		$newBitData .= '0010';									# out 2 MSB first
-	} elsif ($channel eq '01') {								# in 4 LSB first
-		$newBitData .= '0011';									# out 3 MSB first
-	} else {															# in 8 LSB first
+	my $channel = substr($bitData,6,2);                # Byte 2 h: Channel
+	if ($channel eq '00') {                            # in 0 LSB first
+		$newBitData .= '0001';                         # out 1 MSB first
+	} elsif ($channel eq '10') {                       # in 4 LSB first
+		$newBitData .= '0010';                         # out 2 MSB first
+	} elsif ($channel eq '01') {                       # in 4 LSB first
+		$newBitData .= '0011';                         # out 3 MSB first
+	} else {                                           # in 8 LSB first
 		return (-1,qq[$name: OSV1 - ERROR channel not valid: $channel]);
     }
     $newBitData .= '0000';                             # Byte 2 l: ????
@@ -1038,7 +1038,7 @@ sub postDemo_FS20 {
 	    # Start bei erstem Bit mit Wert 1 suchen
 		last if $bit_msg[$datastart] == 1;
 	}
-	if ( $datastart == $protolength ) {    # all bits are 0
+	if ( $datastart == $protolength ) {       # all bits are 0
 		$self->_logging(qq[lib/postDemo_FS20, ERROR message all bits are zeros], 3 );
 		return 0, undef;
 	}
@@ -1050,7 +1050,7 @@ sub postDemo_FS20 {
 		pop(@bit_msg);
 		$protolength--;
 	}
-	if ( $protolength == 45 || $protolength == 54 ) {   ### FS20 length 45 or 54
+	if ( $protolength == 45 || $protolength == 54 ) {  ### FS20 length 45 or 54
 		
 		my $b=0;
 		for ( my $b = 0 ; $b < $protolength - 9 ; $b += 9 ) 	{    
@@ -1063,31 +1063,31 @@ sub postDemo_FS20 {
 			$self->_logging(qq[lib/postDemo_FS20, FS20, Detection aborted, checksum matches FHT code], 5 );
 			return 0, undef;
 		}
-		if ( ( $sum & 0xFF ) == $checksum ) {    ## FH20 remote control
+		if ( ( $sum & 0xFF ) == $checksum ) {          ## FH20 remote control
 			for my $b ($b..$protolength-1) {
 				next if $b % 9 != 0;	
-				my $parity = 0;    # Parity even
-				for my $i ($b..$b+8) { # Parity over 1 byte + 1 bit
+				my $parity = 0;                        # Parity even
+				for my $i ($b..$b+8) {                 # Parity over 1 byte + 1 bit
 					$parity += $bit_msg[$i];
 				}
 				if ( $parity % 2 != 0 ) {
 					$self->_logging(qq[lib/postDemo_FS20, FS20, ERROR - Parity not even], 3 );
 					return 0, undef;
 				}
-			}    # parity ok
+			}                                                        # parity ok
 			for ( my $b = $protolength - 1 ; $b > 0 ; $b -= 9 ) {    # delete 5 or 6 parity bits
 				splice( @bit_msg, $b, 1 );
 			}
-			if ( $protolength == 45 ) {    ### FS20 length 45
-				splice( @bit_msg, 32, 8 );    # delete checksum
+			if ( $protolength == 45 ) {                                ### FS20 length 45
+				splice( @bit_msg, 32, 8 );                             # delete checksum
 				splice( @bit_msg, 24, 0, ( 0, 0, 0, 0, 0, 0, 0, 0 ) ); # insert Byte 3
 			}
-			else {                            ### FS20 length 54
-				splice( @bit_msg, 40, 8 );    # delete checksum
+			else {                                                     ### FS20 length 54
+				splice( @bit_msg, 40, 8 );                             # delete checksum
 			}
 			my $dmsg = lib::SD_Protocols::binStr2hexStr( join "", @bit_msg );
 			$self->_logging(qq[lib/postDemo_FS20, remote control post demodulation $dmsg length $protolength], 4 );
-			return ( 1, @bit_msg );           ## FHT80TF ok
+			return ( 1, @bit_msg );                                    ## FHT80TF ok
 		}
 		else {
 			$self->_logging(qq[lib/postDemo_FS20, ERROR - wrong checksum], 4 );
@@ -1128,45 +1128,45 @@ sub postDemo_FHT80 {
 		$self->_logging(qq[lib/postDemo_FHT80, ERROR message all bit are zeros], 3 );
 		return 0, undef;
    }
-   splice(@bit_msg, 0, $datastart + 1);                             	# delete preamble + 1 bit
+   splice(@bit_msg, 0, $datastart + 1);                               # delete preamble + 1 bit
    $protolength = scalar @bit_msg;
    $self->_logging(qq[lib/postDemo_FHT80, pos=$datastart length=$protolength], 5 );
-   if ($protolength == 55) {						# If it 1 bit too long, then it will be removed (EOT-Bit)
+   if ($protolength == 55) {                                          # If it 1 bit too long, then it will be removed (EOT-Bit)
       pop(@bit_msg);
       $protolength--;
    }
-   if ($protolength == 54) {                       		### FHT80 fixed length
+   if ($protolength == 54) {                       		             ### FHT80 fixed length
       for($b = 0; $b < 45; $b += 9) {	                             # build sum over first 5 bytes
          $sum += oct( "0b".(join "", @bit_msg[$b .. $b + 7]));
       }
-      my $checksum = oct( "0b".(join "", @bit_msg[45 .. 52]));          # Checksum Byte 6
-      if ((($sum - 6) & 0xFF) == $checksum) {		## Message from FS20 remote contro
+      my $checksum = oct( "0b".(join "", @bit_msg[45 .. 52]));       # Checksum Byte 6
+      if ((($sum - 6) & 0xFF) == $checksum) {		                 ## Message from FS20 remote contro
          $self->_logging(qq[lib/postDemo_FHT80, Detection aborted, checksum matches FS20 code], 5 );
          return 0, undef;
       }
-      if (($sum & 0xFF) == $checksum) {								## FHT80 Raumthermostat
-         for($b = 0; $b < 54; $b += 9) {	                              # check parity over 6 byte
-            my $parity = 0;					                              # Parity even
-			for($i = $b; $i < $b + 9; $i++) {			                  # Parity over 1 byte + 1 bit
+      if (($sum & 0xFF) == $checksum) {								 ## FHT80 Raumthermostat
+         for($b = 0; $b < 54; $b += 9) {                             # check parity over 6 byte
+            my $parity = 0;                                          # Parity even
+			for($i = $b; $i < $b + 9; $i++) {                        # Parity over 1 byte + 1 bit
                $parity += $bit_msg[$i];
             }
             if ($parity % 2 != 0) {
                $self->_logging(qq[lib/postDemo_FHT80, ERROR - Parity not even], 3 );
                return 0, undef;
             }
-         }																					# parity ok
-         for($b = 53; $b > 0; $b -= 9) {	                              # delete 6 parity bits
+         }                                                           # parity ok
+         for($b = 53; $b > 0; $b -= 9) {                             # delete 6 parity bits
             splice(@bit_msg, $b, 1);
          }
-         if ($bit_msg[26] != 1) {                                       # Bit 5 Byte 3 must 1
+         if ($bit_msg[26] != 1) {                                    # Bit 5 Byte 3 must 1
 	        $self->_logging(qq[lib/postDemo_FHT80, ERROR - byte 3 bit 5 not 1], 3 );
             return 0, undef;
          }
-         splice(@bit_msg, 40, 8);                                       # delete checksum
-         splice(@bit_msg, 24, 0, (0,0,0,0,0,0,0,0));# insert Byte 3
+         splice(@bit_msg, 40, 8);                                    # delete checksum
+         splice(@bit_msg, 24, 0, (0,0,0,0,0,0,0,0));                 # insert Byte 3
          my $dmsg = lib::SD_Protocols::binStr2hexStr(join "", @bit_msg);
          $self->_logging(qq[lib/postDemo_FHT80, roomthermostat post demodulation $dmsg], 4 );
-         return (1, @bit_msg);											## FHT80 ok
+         return (1, @bit_msg);                                       ## FHT80 ok
       }
       else {
          $self->_logging(qq[lib/postDemo_FHT80, ERROR - wrong checksum], 4 );
@@ -1198,7 +1198,7 @@ sub postDemo_FHT80TF {
 	my $datastart = 0;
 	my $sum = 12;
 	my $b = 0;
-	if ($protolength < 46) {                                        	# min 5 bytes + 6 bits
+	if ($protolength < 46) {                                         # min 5 bytes + 6 bits
 	   	$self->_logging(qq[lib/postDemo_FHT80TF, ERROR lenght of message < 46], 4 );
 		return 0, undef;
    }
@@ -1209,35 +1209,35 @@ sub postDemo_FHT80TF {
    		$self->_logging(qq[lib/postDemo_FHT80TF, ERROR message all bit are zeros], 3 );
 		return 0, undef;
    }
-   splice(@bit_msg, 0, $datastart + 1);                             	# delete preamble + 1 bit
+   splice(@bit_msg, 0, $datastart + 1);                              # delete preamble + 1 bit
    $protolength = scalar @bit_msg;
-   if ($protolength == 45) {                       		      ### FHT80TF fixed length
-      for(my $b = 0; $b < 36; $b += 9) {	                             # build sum over first 4 bytes
+   if ($protolength == 45) {                                         ### FHT80TF fixed length
+      for(my $b = 0; $b < 36; $b += 9) {                             # build sum over first 4 bytes
          $sum += oct( "0b".(join "", @bit_msg[$b .. $b + 7]));
       }
-      my $checksum = oct( "0b".(join "", @bit_msg[36 .. 43]));          # Checksum Byte 5
-      if (($sum & 0xFF) == $checksum) {									## FHT80TF Tuer-/Fensterkontakt
-			for(my $b = 0; $b < 45; $b += 9) {	                           # check parity over 5 byte
-				my $parity = 0;					                              # Parity even
-				for(my $i = $b; $i < $b + 9; $i++) {			               # Parity over 1 byte + 1 bit
+      my $checksum = oct( "0b".(join "", @bit_msg[36 .. 43]));       # Checksum Byte 5
+      if (($sum & 0xFF) == $checksum) {                              ## FHT80TF Tuer-/Fensterkontakt
+			for(my $b = 0; $b < 45; $b += 9) {                       # check parity over 5 byte
+				my $parity = 0;                                      # Parity even
+				for(my $i = $b; $i < $b + 9; $i++) {                 # Parity over 1 byte + 1 bit
 					$parity += $bit_msg[$i];
 				}
 				if ($parity % 2 != 0) {
 				   	$self->_logging(qq[lib/postDemo_FHT80TF, ERROR Parity not even], 4 );
 					return 0, undef;
 				}
-			}																					# parity ok
-			for(my $b = 44; $b > 0; $b -= 9) {	                           # delete 5 parity bits
+			}                                                        # parity ok
+			for(my $b = 44; $b > 0; $b -= 9) {                       # delete 5 parity bits
 				splice(@bit_msg, $b, 1);
 			}
-         if ($bit_msg[26] != 0) {                                       # Bit 5 Byte 3 must 0
+         if ($bit_msg[26] != 0) {                                    # Bit 5 Byte 3 must 0
            	$self->_logging(qq[lib/postDemo_FHT80TF, ERROR - byte 3 bit 5 not 0], 3 );
             return 0, undef;
          }
-         splice(@bit_msg, 32, 8);                                       # delete checksum
+         splice(@bit_msg, 32, 8);                                    # delete checksum
          my $dmsg = lib::SD_Protocols::binStr2hexStr(join "", @bit_msg);
          $self->_logging(qq[lib/postDemo_FHT80TF, door/window switch post demodulation $dmsg], 4 );
-         return (1, @bit_msg);											## FHT80TF ok
+         return (1, @bit_msg);                                       ## FHT80TF ok
       }
    }
    return 0, undef;
@@ -1260,21 +1260,21 @@ sub postDemo_WS7035 {
 	my @bit_msg  	= @_;
 
 	my $msg = join('',@bit_msg);
-	my $parity = 0;					# Parity even
-	my $sum = 0;						# checksum
+	my $parity = 0;                                      # Parity even
+	my $sum = 0;                                         # checksum
     $self->_logging(qq[lib/postDemo_WS7035, $msg], 4 );
-	if (substr($msg,0,8) ne '10100000') {		# check ident
+	if (substr($msg,0,8) ne '10100000') {                # check ident
 	    $self->_logging(qq[lib/postDemo_WS7035, ERROR - Ident not 1010 0000],3 );
 		return 0, undef;
 	} else {
-		for(my $i = 15; $i < 28; $i++) {			# Parity over bit 15 and 12 bit temperature
+		for(my $i = 15; $i < 28; $i++) {                 # Parity over bit 15 and 12 bit temperature
 	      $parity += substr($msg, $i, 1);
 		}
 		if ($parity % 2 != 0) {
 		    $self->_logging(qq[lib/postDemo_WS7035, ERROR - Parity not even],3 );
 			return 0, undef;
 		} else {
-			for(my $i = 0; $i < 39; $i += 4) {			# Sum over nibble 0 - 9
+			for(my $i = 0; $i < 39; $i += 4) {           # Sum over nibble 0 - 9
 				$sum += oct('0b'.substr($msg,$i,4));
 			}
 			if (($sum &= 0x0F) != oct('0b'.substr($msg,40,4))) {
@@ -1283,7 +1283,7 @@ sub postDemo_WS7035 {
 			} else {
 				# Todo: Regex anstelle der viele substr einf¸gen
 			    $self->_logging(qq[lib/postDemo_WS7035, ERROR - wrong checksum]. substr($msg,0,4) ." ". substr($msg,4,4) ." ". substr($msg,8,4) ." ". substr($msg,12,4) ." ". substr($msg,16,4) ." ". substr($msg,20,4) ." ". substr($msg,24,4) ." ". substr($msg,28,4) ." ". substr($msg,32,4) ." ". substr($msg,36,4) ." ". substr($msg,40),4 );
-				substr($msg, 27, 4, '');			# delete nibble 8
+				substr($msg, 27, 4, '');                 # delete nibble 8
 				return (1,split(//,$msg));
 			}
 		}
@@ -1330,15 +1330,15 @@ sub postDemo_WS2000 {
 		'Kombi'
 		);
 
-	for ($datastart = 0; $datastart < $protolength; $datastart++) {   # Start bei erstem Bit mit Wert 1 suchen
+	for ($datastart = 0; $datastart < $protolength; $datastart++) {  # Start bei erstem Bit mit Wert 1 suchen
 		last if $bit_msg[$datastart] == 1;
 	}
-	if ($datastart == $protolength) {                                 # all bits are 0
+	if ($datastart == $protolength) {                                # all bits are 0
 	    $self->_logging(qq[lib/postDemo_WS2000, ERROR message all bit are zeros],4);
 		return 0, undef;
 	}
 	$datalength = $protolength - $datastart;
-	$datalength1 = $datalength - ($datalength % 5);  		# modulo 5
+	$datalength1 = $datalength - ($datalength % 5);                  # modulo 5
     $self->_logging(qq[lib/postDemo_WS2000, protolength: $protolength, datastart: $datastart, datalength $datalength],5);
 	$typ = oct( '0b'.(join "", reverse @bit_msg[$datastart + 1.. $datastart + 4]));		# Sensortyp
 	if ($typ > 7) {
@@ -1346,28 +1346,28 @@ sub postDemo_WS2000 {
 		return 0, undef;
 	}
 	if ($typ == 1 && ($datalength == 45 || $datalength == 46)) {$datalength1 += 5;}		# Typ 1 ohne Summe
-	if ($datalenghtws[$typ] != $datalength1) {												# check lenght of message
+	if ($datalenghtws[$typ] != $datalength1) {                                          # check lenght of message
 	    $self->_logging(qq[lib/postDemo_WS2000, Sensortyp $typ - ERROR lenght of message $datalength1 ($datalenghtws[$typ])],4);
 		return 0, undef;
-	} elsif ($datastart > 10) {									# max 10 Bit preamble
+	} elsif ($datastart > 10) {                                      # max 10 Bit preamble
 	    $self->_logging(qq[lib/postDemo_WS2000, ERROR preamble > 10 ($datastart)],4);
 		return 0, undef;
 	} else {
 		do {
-			if ($bit_msg[$index + $datastart] != 1) {			# jedes 5. Bit muss 1 sein
+			if ($bit_msg[$index + $datastart] != 1) {                # jedes 5. Bit muss 1 sein
 	    		$self->_logging(qq[lib/postDemo_WS2000, Sensortyp $typ - ERROR checking bit $index],4);
 				return (0, undef);
 			}
 			$dataindex = $index + $datastart + 1;
 			$data = oct( '0b'.(join '', reverse @bit_msg[$dataindex .. $dataindex + 3]));
-			if ($index == 5) {$adr = ($data & 0x07)}			# Sensoradresse
-			if ($datalength == 45 || $datalength == 46) { 	# Typ 1 ohne Summe
+			if ($index == 5) {$adr = ($data & 0x07)}                 # Sensoradresse
+			if ($datalength == 45 || $datalength == 46) {            # Typ 1 ohne Summe
 				if ($index <= $datalength - 5) {
-					$check = $check ^ $data;		# Check - Typ XOR Adresse XOR  bis XOR Check muss 0 ergeben
+					$check = $check ^ $data;                         # Check - Typ XOR Adresse XOR bis XOR Check muss 0 ergeben
 				}
 			} else {
 				if ($index <= $datalength - 10) {
-					$check = $check ^ $data;		# Check - Typ XOR Adresse XOR  bis XOR Check muss 0 ergeben
+					$check = $check ^ $data;                         # Check - Typ XOR Adresse XOR bis XOR Check muss 0 ergeben
 					$sum += $data;
 				}
 			}
@@ -1378,7 +1378,7 @@ sub postDemo_WS2000 {
    		$self->_logging(qq[lib/postDemo_WS2000, Sensortyp $typ Adr $adr - ERROR check XOR],4);
 		return (0, undef);
 	} else {
-		if ($datalength < 45 || $datalength > 46) { 			# Summe pruefen, auﬂer Typ 1 ohne Summe
+		if ($datalength < 45 || $datalength > 46) {                  # Summe pruefen, auﬂer Typ 1 ohne Summe
 			$data = oct( "0b".(join '', reverse @bit_msg[$dataindex .. $dataindex + 3]));
 			if ($data != ($sum & 0x0F)) {
    				$self->_logging(qq[lib/postDemo_WS2000, Sensortyp $typ Adr $adr - ERROR sum],4);
@@ -1386,20 +1386,20 @@ sub postDemo_WS2000 {
 			}
 		}
 		$self->_logging(qq[lib/postDemo_WS2000, Sensortyp $typ Adr $adr - $sensors[$typ]],4);
-		$datastart += 1;																							# [x] - 14_CUL_WS
-		@new_bit_msg[4 .. 7] = reverse @bit_msg[$datastart .. $datastart+3];							# [2]  Sensortyp
-		@new_bit_msg[0 .. 3] = reverse @bit_msg[$datastart+5 .. $datastart+8];						# [1]  Sensoradresse
+		$datastart += 1;                                                                        # [x] - 14_CUL_WS
+		@new_bit_msg[4 .. 7] = reverse @bit_msg[$datastart .. $datastart+3];                    # [2]  Sensortyp
+		@new_bit_msg[0 .. 3] = reverse @bit_msg[$datastart+5 .. $datastart+8];                  # [1]  Sensoradresse
 		@new_bit_msg[12 .. 15] = reverse @bit_msg[$datastart+10 .. $datastart+13];				# [4]  T 0.1, R LSN, Wi 0.1, B   1, Py   1
-		@new_bit_msg[8 .. 11] = reverse @bit_msg[$datastart+15 .. $datastart+18];					# [3]  T   1, R MID, Wi   1, B  10, Py  10
-		if ($typ == 0 || $typ == 2) {		# Thermo (AS3), Rain (S2000R, WS7000-16)
+		@new_bit_msg[8 .. 11] = reverse @bit_msg[$datastart+15 .. $datastart+18];               # [3]  T   1, R MID, Wi   1, B  10, Py  10
+		if ($typ == 0 || $typ == 2) {                                                         # Thermo (AS3), Rain (S2000R, WS7000-16)
 			@new_bit_msg[16 .. 19] = reverse @bit_msg[$datastart+20 .. $datastart+23];			# [5]  T  10, R MSN
 		} else {
 			@new_bit_msg[20 .. 23] = reverse @bit_msg[$datastart+20 .. $datastart+23];			# [6]  T  10, 			Wi  10, B 100, Py 100
 			@new_bit_msg[16 .. 19] = reverse @bit_msg[$datastart+25 .. $datastart+28];			# [5]  H 0.1, 			Wr   1, B Fak, Py Fak
-			if ($typ == 1 || $typ == 3 || $typ == 4 || $typ == 7) {	# Thermo/Hygro, Wind, Thermo/Hygro/Baro, Kombi
+			if ($typ == 1 || $typ == 3 || $typ == 4 || $typ == 7) {                           # Thermo/Hygro, Wind, Thermo/Hygro/Baro, Kombi
 				@new_bit_msg[28 .. 31] = reverse @bit_msg[$datastart+30 .. $datastart+33];		# [8]  H   1,			Wr  10
 				@new_bit_msg[24 .. 27] = reverse @bit_msg[$datastart+35 .. $datastart+38];		# [7]  H  10,			Wr 100
-				if ($typ == 4) {	# Thermo/Hygro/Baro (S2001I, S2001ID)
+				if ($typ == 4) {                                                              # Thermo/Hygro/Baro (S2001I, S2001ID)
 					@new_bit_msg[36 .. 39] = reverse @bit_msg[$datastart+40 .. $datastart+43];	# [10] P    1
 					@new_bit_msg[32 .. 35] = reverse @bit_msg[$datastart+45 .. $datastart+48];	# [9]  P   10
 					@new_bit_msg[44 .. 47] = reverse @bit_msg[$datastart+50 .. $datastart+53];	# [12] P  100
@@ -1428,23 +1428,23 @@ sub postDemo_WS7053 {
 	my @bit_msg  	= @_;
 
 	my $msg = join("",@bit_msg);
-	my $parity = 0;	                       # Parity even
+	my $parity = 0;	                          # Parity even
 	$self->_logging(qq[lib/postDemo_WS7053, MSG = $msg],4);
 	my $msg_start = index($msg, '10100000');
-	if ($msg_start > 0) {                  # start not correct
+	if ($msg_start > 0) {                     # start not correct
 		$msg = substr($msg, $msg_start);
 		$msg .= '0';
 		$self->_logging(qq[lib/postDemo_WS7053, cut $msg_start char(s) at begin],5);
 	}
-	if ($msg_start < 0) {                  # start not found
+	if ($msg_start < 0) {                     # start not found
 		$self->_logging(qq[lib/postDemo_WS7053, ERROR - Ident 10100000 not found],3);
 		return 0, undef;
 	} else {
-		if (length($msg) < 32) {             # msg too short
+		if (length($msg) < 32) {              # msg too short
 			$self->_logging(qq[lib/postDemo_WS7053, ERROR - msg too short, length ] . length($msg),3);
 		return 0, undef;
 		} else {
-			for(my $i = 15; $i < 28; $i++) {   # Parity over bit 15 and 12 bit temperature
+			for(my $i = 15; $i < 28; $i++) {  # Parity over bit 15 and 12 bit temperature
 				$parity += substr($msg, $i, 1);
 			}
 			if ($parity % 2 != 0) {
@@ -1808,7 +1808,7 @@ sub ConvLaCrosse {
 	if ( $humObat == 125 ) {    # Channel 2
 		$SensorType = 2;
 	}
-	elsif ( $humObat > 99 ) {    # Shoud be checked in logical module
+	elsif ( $humObat > 99 ) {   # Shoud be checked in logical module
 		return ( -1, qq[ConvLaCrosse: hum:$humObat (out of Range)] );
 	}
 
