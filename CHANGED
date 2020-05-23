@@ -1,5 +1,9 @@
 2020-05-23 - 00_SIGNALduino.pm
 
+try to fix sendMsg bug with frequency
+updated t/FHEM/00_SIGNALduino/01_Set_sendMsg.t to catch bug
+2020-05-23 - 00_SIGNALduino.pm
+
 fixed bug in SIGNALduino_Set_sendMsg with unset $frequency
 2020-05-23 - Update SD_ProtocolData.pm
 
