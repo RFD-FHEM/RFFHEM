@@ -1,7 +1,7 @@
 use Test2::V0;
 use Test2::Tools::Compare qw{is};
 use Mock::Sub;
-use Test2::Tools::Compare qw{is item D};
+use Test2::Tools::Compare qw{is item D match};
 use Test2::Todo;
 
 
@@ -10,6 +10,18 @@ use Test2::Todo;
 # ->Split into 	($protocol,$data,$repeats,$clock,$frequency);
 # catch SIGNALduino_AddSendQueue
     my @mockData = (
+		{
+	#		todoReason => "reason",
+			deviceName => q[dummyDuino],
+			plan => 1,
+			testname =>  q[Unknown protocol set sendMsg ID:109990 (P109990#0101#R3#C500)],
+			input	=>	q[sendMsg P109990#0101#R3#C500],
+			check =>  array  {
+					item D();
+			    	item 'SR;R=3;P0=500;P1=-8000;P2=-3500;P3=-1500;D=0103020302;';
+    			},
+    		rValue => match qr/unknown protocol/,	
+		},		
 		{
 	#		todoReason => "reason",
 			deviceName => q[dummyDuino],
@@ -75,18 +87,26 @@ InternalTimer(time()+1, sub() {
 		#$todo=$element->{todo}->() if (exists($element->{todo}));
 		
 		subtest "checking $element->{testname} on $element->{deviceName}" => sub {
-			plan (4);	
-			
+			my $p = $element->{plan} // 4;
+			plan ($p);	
+
 			my $ret = SIGNALduino_Set_sendMsg($targetHash,split(" ",$element->{input}));
+			for my $i (1..$p)
+			{
+				$i == 1 && do { is($ret,$element->{rValue},"Verify return value") } ;
+				$i == 2 && do { is($SIGNALduino_AddSendQueue->called,1,"Verify SIGNALduino_AddSendQueue is called") };
+				
+				$i == 3 && do {
+					is($SIGNALduino_AddSendQueue->called,1,"Verify SIGNALduino_AddSendQueue is called");
+					my @called_args = $SIGNALduino_AddSendQueue->called_with;
+					is(\@called_args,$element->{check},"Verify SIGNALduino_AddSendQueue parameters");
+				};
+													
+			}					
 		
-			is($ret,$element->{return},"Verify return value");
-			is($SIGNALduino_AddSendQueue->called,1,"Verify SIGNALduino_AddSendQueue is called");
-			return if ( $SIGNALduino_AddSendQueue->called == 0);
+			#return if ( $SIGNALduino_AddSendQueue->called == 0);
 			
-			my @called_args = $SIGNALduino_AddSendQueue->called_with;
-			is(\@called_args,$element->{check},"Verify SIGNALduino_AddSendQueue parameters");
 		
-			is($ret,U(),"Verify SIGNALduino_AddSendQueue returned undef");
 		
 			$SIGNALduino_AddSendQueue->reset;
 		};
