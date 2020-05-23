@@ -740,8 +740,7 @@ sub SIGNALduino_Set_sendMsg {
 	
 	if (InternalVal($hash->{NAME},"cc1101_available",0))
 	{
-		$frequency = $hash->{protocolObject}->getProperty($protocol,'frequency');
-		$frequency = "F=$frequency;" // ';';
+		$frequency = q[F=]. ($hash->{protocolObject}->getProperty($protocol,'frequency') // q{}).q[;];
 	}
 	my %signalHash;
 	my %patternHash;
