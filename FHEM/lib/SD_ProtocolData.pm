@@ -70,11 +70,11 @@
 # https://forum.fhem.de/index.php/topic,58396.975.html | https://github.com/RFD-FHEM/RFFHEM
 ###########################################################################################################################################
 
+use strict;
+use warnings;
+
 package lib::SD_ProtocolData;
 { 
-	use strict;
-	use warnings;
-	
 	our $VERSION = '1.19';
 	our %protocols = (
 		"0"	=>	## various weather sensors (500 | 9100)
