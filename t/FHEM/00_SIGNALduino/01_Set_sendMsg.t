@@ -11,7 +11,6 @@ use Test2::Todo;
 # catch SIGNALduino_AddSendQueue
     my @mockData = (
 		{
-	#		todoReason => "reason",
 			deviceName => q[dummyDuino],
 			plan => 1,
 			testname =>  q[Unknown protocol set sendMsg ID:109990 (P109990#0101#R3#C500)],
@@ -25,6 +24,16 @@ use Test2::Todo;
 		{
 	#		todoReason => "reason",
 			deviceName => q[dummyDuino],
+			testname =>  q[set sendMsg ID:0 (P0#0101#R3#C500)],
+			input	=>	q[sendMsg P0#0101#R3#C500],
+			check =>  array  {
+					item D();
+			    	item 'SR;R=3;P0=500;P1=-8000;P2=-3500;P3=-1500;D=0103020302;';
+    			},
+		},
+		{
+	#		todoReason => "reason",
+			deviceName => q[cc1101dummyDuino],
 			testname =>  q[set sendMsg ID:0 (P0#0101#R3#C500)],
 			input	=>	q[sendMsg P0#0101#R3#C500],
 			check =>  array  {
@@ -59,7 +68,6 @@ use Test2::Todo;
 			check =>  array  {
 					item D();
 			    	item 'SC;R=3;SR;P0=-2560;P1=2560;P3=-640;D=10101010101010113;SM;C=895;D=0101;F=10AB85550A;';
-    	
 		    },
 		},
 
@@ -67,8 +75,11 @@ use Test2::Todo;
 	plan (scalar @mockData);	
 
 my ($mock, $SIGNALduino_AddSendQueue);
+
+$defs{cc1101dummyDuino}->{cc1101_available} = 1;
 	
 BEGIN {
+
 	$mock = Mock::Sub->new;
 	$SIGNALduino_AddSendQueue = $mock->mock('main::SIGNALduino_AddSendQueue');
 };
@@ -85,6 +96,7 @@ InternalTimer(time()+1, sub() {
 			: undef;
 		#$element->{pre_code}->() if (exists($element->{pre_code}));
 		#$todo=$element->{todo}->() if (exists($element->{todo}));
+		# Mock cc1101	
 		
 		subtest "checking $element->{testname} on $element->{deviceName}" => sub {
 			my $p = $element->{plan} // 4;
@@ -103,10 +115,6 @@ InternalTimer(time()+1, sub() {
 				};
 													
 			}					
-		
-			#return if ( $SIGNALduino_AddSendQueue->called == 0);
-			
-		
 		
 			$SIGNALduino_AddSendQueue->reset;
 		};
