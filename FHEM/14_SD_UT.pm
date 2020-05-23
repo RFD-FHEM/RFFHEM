@@ -1942,309 +1942,212 @@ sub SD_UT_tristate2bin($) {
 
 <a name="SD_UT"></a>
 <h3>SD_UT</h3>
-<ul>The module SD_UT is a universal module of SIGNALduino for devices or sensors.<br>
+<ul>
+	The module SD_UT is a universal module of SIGNALduino for devices or sensors.<br>
 	After the first creation of the device <code><b>unknown_please_select_model</b></code>, the user must define the device himself via the <code>model</code> attribute.<br>
-	If the device is not supported yet, bit data can be collected with the unknown_please_select_model device.<br><br>
+	If the device is not supported yet, bit data can be collected with the unknown_please_select_model device.
+	<br><br>
 	<i><u><b>Note:</b></u></i> As soon as the attribute model of a defined device is changed or deleted, the module re-creates a device of the selected type, and when a new message is run, the current device is deleted.
-	Devices of <u>the same or different type with the same deviceCode will result in errors</u>. PLEASE use different <code>deviceCode</code>.<br><br>
-	 <u>The following devices are supported:</u><br>
-	 <ul> - Atlantic Security sensors&nbsp;&nbsp;&nbsp;<small>(module model: MD-2003R, MD-2018R,MD-210R | Protokoll 91|91.1)</small><br>
-	 <code>&nbsp;&nbsp;&nbsp;note: the model MD_230R (water) is recognized as MD-2018R due to the same hardware ID!</code></ul>
-	 <ul> - BOSCH ceiling fan&nbsp;&nbsp;&nbsp;<small>(module model: SF01_01319004_Typ2 | protocol 86)</small></ul>
-	 <ul> - CAME swing gate drive&nbsp;&nbsp;&nbsp;<small>(module model: CAME_TOP_432EV | protocol 86)</small></ul>
-	 <ul> - ChiliTec LED X-Mas light&nbsp;&nbsp;&nbsp;<small>(module model: Chilitec_22640 | protocol 14)</small></ul>
-	 <ul> - ESTO ceiling lamp&nbsp;&nbsp;&nbsp;<small>(model: KL_RF01 | protocol 93)</small></ul>
-	 <ul> - Hoermann HS1-868-BS&nbsp;&nbsp;&nbsp;<small>(module model: HS1_868_BS | protocol 69)</small></ul>
-	 <ul> - Hoermann HSM4&nbsp;&nbsp;&nbsp;<small>(module model: HSM4 | protocol 69)</small></ul>
-	 <ul> - Krinner LUMIX X-Mas light string&nbsp;&nbsp;&nbsp;<small>(module model: Krinner_LUMIX | protocol 92)</small></ul>
-	 <ul> - LED_XM21_0 X-Mas light string&nbsp;&nbsp;&nbsp;<small>(module model: LED_XM21_0 | protocol 76)</small></ul>
-	 <ul> - TR-502MSV (LIDL, LIBRA, MANDOLYN, QUIGG), compatible GT-7008BS, GT-FSI-04, DMV-7008S, Powerfix RCB-I 3600&nbsp;&nbsp;&nbsp;<small>(module model: TR_502MSV | protocol 34)</small></ul>
-	 <ul> - Manax RCS250&nbsp;&nbsp;&nbsp;<small>(module model: RC_10 | protocol 90)</small></ul>
-	 <ul> - Medion OR28V&nbsp;&nbsp;&nbsp;<small>(module model: OR28V | protocol 68)</small></ul>
-	 <ul> - mumbi AFS300-s (remote control RC-10 | random code wireless switch RCS-22GS)&nbsp;&nbsp;&nbsp;<small>(module model: RC_10 | protocol 90)</small></ul>
-	 <ul> - Momento (remote control for wireless digital picture frame)&nbsp;&nbsp;&nbsp;<small>(module model: Momento | protocol 97)</small></ul>
-	 <ul> - NAVARIS touch light switch Model No.: 44344.04&nbsp;&nbsp;&nbsp;<small>(module model: Navaris | protocol 99)</small></ul>
-	 <ul> - NEFF or Refsta Topdraft (Tecnowind) kitchen hood&nbsp;&nbsp;&nbsp;<small>(module model: SF01_01319004 | protocol 86)</small></ul>
-	 <ul> - Novy Cloud 230 kitchen hood&nbsp;&nbsp;&nbsp;<small>(module model: Novy_840039 | protocol 86)</small></ul>
-	 <ul> - Novy Pureline 6830 kitchen hood&nbsp;&nbsp;&nbsp;<small>(module model: Novy_840029 | protocol 86)</small></ul>
-	 <ul> - QUIGG DMV-7000&nbsp;&nbsp;&nbsp;<small>(module model: QUIGG_DMV | protocol 34)</small></ul>
-	 <ul> - Remote control SA-434-1 mini 923301&nbsp;&nbsp;&nbsp;<small>(module model: SA_434_1_mini | protocol 81)</small></ul>
-	 <ul> - Remote control for Techmar Garden Lights &nbsp;&nbsp;&nbsp;<small>(Modulmodel: Techmar | Protokoll 95)</small></ul>
-	 <ul> - Remote control with 4 buttons for diesel heating &nbsp;&nbsp;&nbsp;<small>(Modulmodel: RCnoName20 | Protokoll 20)</small></ul>
-	 <ul> - Tedsen Teletaster <small>(protocol 46)</small>:
-			<small>
-			<ul>SKX1xx, 1 button - module model: Tedsen_SKX1xx</ul>
-			<ul>SKX2xx, 2 button (GEIGER_GF0x01) - module model: Tedsen_SKX2xx</ul>
-			<ul>SKX4xx, 4 button (GEIGER_GF0x02) - module model: Tedsen_SKX4xx</ul>
-			<ul>SKX6xx, 6 button (GEIGER_GF0x03) - module model: Tedsen_SKX6xx</ul>
-			</small>
-	 </ul>
-	 <ul> - unitec remote door reed switch 47031 (Unitec 47121 | Unitec 47125 | Friedland)&nbsp;&nbsp;&nbsp;<small>(module model: Unitec_47031 | protocol 30)</small></ul>
-	 <ul> - Westinghouse Delancey ceiling fan (remote, 5 buttons without SET)&nbsp;&nbsp;&nbsp;<small>(module model: Buttons_five | protocol 29)</small></ul>
-	 <ul> - Westinghouse Delancey ceiling fan (remote, 9 buttons with SET)&nbsp;&nbsp;&nbsp;<small>(module model: RH787T | protocol 83)</small></ul>
-	 <ul> - Westinghouse ceiling fan Bendan (remote control TR60C-1, touch screen)&nbsp;&nbsp;&nbsp;<small>(module model: TR60C1 | protocol 104)</small></ul>
-	 <ul> - xavax 00111939 (remote control, 10 buttons)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: xavax | protocol 26)</small></ul>
-	 <br><br>
-	<b>Define</b><br>
-	<ul><code>define &lt;NAME&gt; SD_UT &lt;model&gt; &lt;Hex-address&gt;</code><br><br>
-	<u>examples:</u>
-		<ul>
-		define &lt;NAME&gt; SD_UT RH787T A<br>
-		define &lt;NAME&gt; SD_UT SA_434_1_mini ffd<br>
-		define &lt;NAME&gt; SD_UT unknown<br>
-		</ul>	</ul><br><br>
-	<b>Set</b><br>
-	<ul>Different transmission commands are available.</ul><br>
-		<ul><u>BOSCH (SF01_01319004_Typ2) | NEFF / Refsta Topdraft (SF01_01319004)</u></ul>
-	<ul><a name="delay"></a>
-		<li>delay<br>
-		button one on the remote</li>
-	</ul>
-	<ul><a name="interval"></a>
-		<li>interval<br>
-		button two on the remote</li>
-	</ul>
-	<ul><a name="light_on_off"></a>
-		<li>light_on_off<br>
-		button three on the remote</li>
-	</ul>
-	<ul><a name="minus"></a>
-		<li>minus<br>
-		button four on the remote</li>
-	</ul>
-	<ul><a name="plus"></a>
-		<li>plus<br>
-		button five on the remote</li>
-	</ul><br>
+	Devices of <u>the same or different type with the same deviceCode will result in errors</u>. PLEASE use different <code>deviceCode</code>.
+	<br><br>
 
-	<ul><u>ChiliTec LED X-Mas light</u></ul>
-	<ul><a name="power_on"></a>
-		<li>power_on<br>
-		button ON on the remote</li>
-	</ul>
-	<ul><a name="power_off"></a>
-		<li>power_off<br>
-		button OFF on the remote</li>
-	</ul>
-	<ul><a name="flickering_slowly"></a>
-		<li>flickering_slowly<br>
-		button SL on the remote</li>
-	</ul>
-	<ul><a name="flickering_fast"></a>
-		<li>flickering_fast<br>
-		button SF on the remote</li>
-	</ul>
-	<ul><a name="brightness_minus"></a>
-		<li>brightness_minus<br>
-		button - on the remote</li>
-	</ul>
-	<ul><a name="brightness_plus"></a>
-		<li>brightness_plus<br>
-		button + on the remote</li>
-	</ul><br>
-
-		<ul><u>ESTO KL_RF01</u></ul>
-	<ul><a name="on"></a>
-		<li>on<br>
-		button ON on the remote</li>
-	</ul>
-	<ul><a name="off"></a>
-		<li>off<br>
-		button OFF on the remote</li>
-	</ul>
-	<ul><a name="alternating_full_luminosity"></a>
-		<li>alternating_full_luminosity<br>
-		button alternating_full_luminosity on the remote</li>
-	</ul>
-	<ul><a name="full_brightness"></a>
-		<li>full_brightness<br>
-		button full_brightness on the remote</li>
-	</ul>
-	<ul><a name="light_color_warm_white"></a>
-		<li>light_color_warm_white<br>
-		button light_color_warm_white on the remote</li>
-	</ul>
-	<ul><a name="light_color_cold_white"></a>
-		<li>light_color_cold_white<br>
-		button light_color_cold_white on the remote</li>
-	</ul>
-	<ul><a name="dimup"></a>
-		<li>dimup<br>
-		button DIMUP on the remote</li>
-	</ul>
-		<ul><a name="dimdown"></a>
-		<li>dimdown<br>
-		button DIMDOWN on the remote</li>
-	</ul>
-	<ul><a name="night_mode"></a>
-		<li>night_mode<br>
-		button moon on the remote</li>
-	</ul><br>
-
-	<ul><u>LED_XM21_0 light string</u></ul>
-	<ul><a name="on"></a>
-		<li>on<br>
-		button I on the remote</li>
-	</ul>
-	<ul><a name="off"></a>
-		<li>off<br>
-		button O on the remote</li>
-	</ul><br>
-
-	<ul><u>Remote control SA-434-1 mini 923301&nbsp;&nbsp;|&nbsp;&nbsp;Hoermann HS1-868-BS&nbsp;&nbsp;|&nbsp;&nbsp;Tedsen_SKX1/2/4/6xx</u></ul>
+	<u>The following devices are supported:</u><br>
 	<ul>
-		<li>send<br>
-		button <small>(Always send the same, even if the user sends another set command via console.)</small></li>
-	</ul><br>
+		<li>Atlantic Security sensors&nbsp;&nbsp;&nbsp;<small>(module model: MD-2003R, MD-2018R,MD-210R, protocol 91|91.1)</small><br>
+		<code>&nbsp;&nbsp;&nbsp;Note: The model MD_230R (water) is recognized as MD-2018R due to the same hardware ID!</code></li>
+		<li>BOSCH ceiling fan&nbsp;&nbsp;&nbsp;<small>(module model: SF01_01319004_Typ2, protocol 86)</small></li>
+		<li>CAME swing gate drive&nbsp;&nbsp;&nbsp;<small>(module model: CAME_TOP_432EV, protocol 86)</small></li>
+		<li>ChiliTec LED X-Mas light&nbsp;&nbsp;&nbsp;<small>(module model: Chilitec_22640, protocol 14)</small></li>
+		<li>ESTO ceiling lamp&nbsp;&nbsp;&nbsp;<small>(module model: KL_RF01, protocol 93)</small></li>
+		<li>Remote control with 4 buttons for diesel heating&nbsp;&nbsp;&nbsp;<small>(module model: RCnoName20, protocol 20)</small></li>
+		<li>Hoermann HS1-868-BS&nbsp;&nbsp;&nbsp;<small>(module model: HS1_868_BS, protocol 69)</small></li>
+		<li>Hoermann HSM4&nbsp;&nbsp;&nbsp;<small>(module model: HSM4, protocol 69)</small></li>
+		<li>Krinner LUMIX X-Mas light string&nbsp;&nbsp;&nbsp;<small>(module model: Krinner_LUMIX, Protokol 92)</small></li>
+		<li>LED_XM21_0 X-Mas light string&nbsp;&nbsp;&nbsp;<small>(module model: LED_XM21_0, Protokol 76)</small></li>
+		<li>TR-502MSV (LIDL, LIBRA, MANDOLYN, QUIGG), compatible GT-7008BS, GT-FSI-04, DMV-7008S, Powerfix RCB-I 3600&nbsp;&nbsp;&nbsp;<small>(module model: TR_502MSV, protocol 34)</small></li>
+		<li>Manax RCS250&nbsp;&nbsp;&nbsp;<small>(module model: RC_10, protocol 90)</small></li>
+		<li>Medion OR28V&nbsp;&nbsp;&nbsp;<small>(module model: OR28V, protocol 68)</small></li>
+		<li>mumbi AFS300-s (remote control RC-10, wireless socket RCS-22GS)&nbsp;&nbsp;&nbsp;<small>(module model: RC_10, protocol 90)</small></li>
+		<li>Momento (remote control for wireless digital picture frame)&nbsp;&nbsp;&nbsp;<small>(module model: Momento, protocol 97)</small></li>
+		<li>NAVARIS touch light switch Model No.: 44344.04&nbsp;&nbsp;&nbsp;<small>(module model: Navaris, protocol 99)</small></li>
+		<li>NEFF or Refsta Topdraft (Tecnowind) kitchen hood&nbsp;&nbsp;&nbsp;<small>(module model: SF01_01319004, protocol 86)</small></li>
+		<li>Novy Cloud 230 kitchen hood&nbsp;&nbsp;&nbsp;<small>(module model: Novy_840039, protocol 86)</small></li>
+		<li>Novy Pureline 6830 kitchen hood&nbsp;&nbsp;&nbsp;<small>(module model: Novy_840029, protocol 86)</small></li>
+		<li>QUIGG DMV-7000&nbsp;&nbsp;&nbsp;<small>(module model: QUIGG_DMV, protocol 34)</small></li>
+		<li>SA-434-1 mini 923301&nbsp;&nbsp;&nbsp;<small>(module model: SA_434_1_mini, protocol 81)</small></li>
+		<li>Techmar Garden Lights &nbsp;&nbsp;&nbsp;<small>(module model: Techmar, protocol 95)</small></li>
+		<li>Tedsen Teletaster <small>(protocol 46)</small>:
+		<ul><small>
+			<li>SKX1xx, 1 button - module model: Tedsen_SKX1xx</li>
+			<li>SKX2xx, 2 button (GEIGER_GF0x01) - module model: Tedsen_SKX2xx</li>
+			<li>SKX4xx, 4 button (GEIGER_GF0x02) - module model: Tedsen_SKX4xx</li>
+			<li>SKX6xx, 6 button (GEIGER_GF0x03) - module model: Tedsen_SKX6xx</li>
+		</small></ul></li>
+		<li>unitec magnetic contact 47031 (for alarm systems Unitec 47121, Unitec 47125, Friedland)&nbsp;&nbsp;&nbsp;<small>(module model: Unitec_47031, protocol 30)</small></li>
+		<li>Westinghouse ceiling fan (remote control, 5 buttons without SET)&nbsp;&nbsp;&nbsp;<small>(module model: Buttons_five, protocol 29)</small></li>
+		<li>Westinghouse Delancey ceiling fan (remote control, 9 buttons with SET)&nbsp;&nbsp;&nbsp;<small>(module model: RH787T, protocol 83)</small></li>
+		<li>Westinghouse ceiling fan Bendan (remote control TR60C-1, touch screen)&nbsp;&nbsp;&nbsp;<small>(module model: TR60C1, protocol 104)</small></li>
+		<li>xavax 00111939 (remote control, 10 button)&nbsp;&nbsp;&nbsp;<small>(module model: xavax, protocol 26)</small></li>
+	</ul>
+	<br><br>
 
-	<ul><u>Hoermann HSM4 (remote with 4 buttons)</u></ul>
-	<ul><a name="button_1"></a>
-		<li>button_1<br>
-		Button one on the remote</li>
+	<b>Define</b><br>
+	<ul>
+		<code>define &lt;NAME&gt; SD_UT &lt;model&gt; &lt;Hex-address&gt;</code><br><br>
+		<u>examples:</u>
+		<ul>
+			define &lt;NAME&gt; SD_UT RH787T A<br>
+			define &lt;NAME&gt; SD_UT SA_434_1_mini ffd<br>
+			define &lt;NAME&gt; SD_UT unknown<br>
+		</ul>
 	</ul>
-	<ul><a name="button_2"></a>
-		<li>button_2<br>
-		Button two on the remote</li>
-	</ul>
-	<ul><a name="button_3"></a>
-		<li>button_3<br>
-		Button three on the remote</li>
-	</ul>
-	<ul><a name="button_4"></a>
-		<li>button_4<br>
-		Button four on the remote</li>
-	</ul><br>
+	<br><br>
 
-	<ul><u>Techmar Garden Lights (remote control with 10 buttons)</u></ul>
-	<ul><li>Group_1 ... Group_9<br>
-		Group 1 to 9, on / off</li>
-	</ul>
-	<ul><li>All_on / All_off<br>
-		All Groups on / off</li>
-	</ul><br>
-	
-	<ul><u>Westinghouse ceiling fan (remote with 5 buttons and without SET)</u></ul>
-	<ul><a name="1_fan_low_speed"></a>
-		<li>1_fan_low_speed<br>
-		Button LOW on the remote</li>
-	</ul>
-	<ul><a name="2_fan_medium_speed"></a>
-		<li>2_fan_medium_speed<br>
-		Button MED on the remote</li>
-	</ul>
-	<ul><a name="3_fan_high_speed"></a>
-		<li>3_fan_high_speed<br>
-		Button HI on the remote</li>
-	</ul>
-	<ul><a name="light_on_off"></a>
-		<li>light_on_off<br>
-		switch light on or off</li>
-	</ul>
-	<ul><a name="fan_off"></a>
-		<li>fan_off<br>
-		turns off the fan</li>
-	</ul><br><a name=" "></a>
+	<b>Set</b><br>
+	<ul>
+		Different transmission commands are available.
+		<br><br>
+		
+		<u>BOSCH (SF01_01319004_Typ2), NEFF / Refsta Topdraft (SF01_01319004)</u>
+		<ul>
+			<li>delay: button 1 on the remote</li>
+			<li>interval: button 2 on the remote</li>
+			<li>light_on_off: button 3 on the remote</li>
+			<li>minus: button 4 on the remote</li>
+			<li>plus: button 5 on the remote</li>
+		</ul><br>
 
-	<ul><u>Westinghouse Delancey ceiling fan (remote RH787T with 9 buttons and SET)</u></ul>
-	<ul><a name="1_fan_minimum_speed"></a>
-		<li>1_fan_minimum_speed<br>
-		Button I on the remote</li>
-	</ul>
-	<ul><a name="2_fan_low_speed"></a>
-		<li>2_fan_low_speed<br>
-		Button II on the remote</li>
-	</ul>
-	<ul><a name="3_fan_medium_low_speed"></a>
-		<li>3_fan_medium_low_speed<br>
-		Button III on the remote</li>
-	</ul>
-	<ul><a name="4_fan_medium_speed"></a>
-		<li>4_fan_medium_speed<br>
-		Button IV on the remote</li>
-	</ul>
-	<ul><a name="5_fan_medium_high_speed"></a>
-		<li>5_fan_medium_high_speed<br>
-		Button V on the remote</li>
-	</ul>
-	<ul><a name="6_fan_high_speed"></a>
-		<li>6_fan_high_speed<br>
-		Button VI on the remote</li>
-	</ul>
-	<ul><a name="fan_off"></a>
-		<li>fan_off<br>
-		turns off the fan</li>
-	</ul>
-	<ul><a name="fan_direction"></a>
-		<li>fan_direction<br>
-		Defining the direction of rotation</li>
-	</ul>
-	<ul><a name="light_on_off"></a>
-		<li>light_on_off<br>
-		switch light on or off</li>
-	</ul>
-	<ul><a name="set"></a>
-		<li>set<br>
-		Button SET in the remote</li><a name=" "></a>
+		<u>ChiliTec LED X-Mas light</u>
+		<ul>
+			<a name="power_on"></a><li>power_on: button ON on the remote</li>
+			<a name="power_off"></a><li>power_off: button OFF on the remote</li>
+			<a name="flickering_slowly"></a><li>flickering_slowly: button SL on the remote</li>
+			<a name="flickering_fast"></a><li>flickering_fast: button SF on the remote</li>
+			<a name="brightness_minus"></a><li>brightness_minus: button - on the remote</li>
+			<a name="brightness_plus"></a><li>brightness_plus: button + on the remote</li>
+		</ul><br>
+
+		<u>ESTO KL_RF01</u>
+		<ul>
+			<a name="on"></a><li>on: button ON on the remote</li>
+			<a name="off"></a><li>off: button OFF on the remote</li>
+			<a name="alternating_full_luminosity"></a><li>alternating_full_luminosity: button alternating_full_luminosity on the remote</li>
+			<a name="full_brightness"></a><li>full_brightness: button full_brightness on the remote</li>
+			<a name="light_color_warm_white"></a><li>light_color_warm_white: button light_color_warm_white on the remote</li>
+			<a name="light_color_cold_white"></a><li>light_color_cold_white: button light_color_cold_white on the remote</li>
+			<a name="dimup"></a><li>dimup: button DIMUP on the remote</li>
+			<a name="dimdown"></a><li>dimdown: button DIMDOWN on the remote</li>
+			<a name="night_mode"></a><li>night_mode: button moon on the remote</li>
+		</ul><br>
+
+		<u>LED_XM21_0 light string</u>
+		<ul>
+			<a name="on"></a><li>on: button I on the remote</li>
+			<a name="off"></a><li>off: button O on the remote</li>
+		</ul><br>
+
+		<u>Remote control SA-434-1 mini 923301, Hoermann HS1-868-BS, Tedsen_SKX1xx</u>
+		<ul>
+			<a name="send"></a><li>send: button <small>(Always send the same, even if the user sends another set command via console.)</small></li>
+		</ul><br>
+
+		<u>Hoermann HSM4 (Remote control with 4 button)</u>
+		<ul>
+			<a name="button_1"></a><li>button_1: button 1 on the remote</li>
+			<a name="button_2"></a><li>button_2: button 2 on the remote</li>
+			<a name="button_3"></a><li>button_3: button 3 on the remote</li>
+			<a name="button_4"></a><li>button_4: button 4 on the remote</li>
+		</ul><br>
+
+		<u>Techmar Garden Lights (Remote control with 10 button)</u>
+		<ul>
+			<li>Group_1 ... Group_9: Group 1 to 9, on / off</li>
+			<li>All_on / All_off: All Groups on / off</li>
+		</ul><br>
+
+		<u>Westinghouse ceiling fan (Remote control with 5 button)</u>
+		<ul>
+			<a name="1_fan_low_speed"></a><li>1_fan_low_speed: button LOW on the remote</li>
+			<a name="2_fan_medium_speed"></a><li>2_fan_medium_speed: button MED on the remote</li>
+			<a name="3_fan_high_speed"></a><li>3_fan_high_speed: button HI on the remote</li>
+			<a name="light_on_off"></a><li>light_on_off: switch light on or off</li>
+			<a name="fan_off"></a><li>fan_off: turns off the fan</li>
+		</ul><br>
+
+		<u>Westinghouse Delancey ceiling fan (Remote control RH787T with 9 button + SET)</u>
+		<ul>
+			<a name="1_fan_minimum_speed"></a><li>1_fan_minimum_speed: button I on the remote</li>
+			<a name="2_fan_low_speed"></a><li>2_fan_low_speed: button II on the remote</li>
+			<a name="3_fan_medium_low_speed"></a><li>3_fan_medium_low_speed: button III on the remote</li>
+			<a name="4_fan_medium_speed"></a><li>4_fan_medium_speed: button IV on the remote</li>
+			<a name="5_fan_medium_high_speed"></a><li>5_fan_medium_high_speed: button V on the remote</li>
+			<a name="6_fan_high_speed"></a><li>6_fan_high_speed: button VI on the remote</li>
+			<a name="fan_off"></a><li>fan_off: turns off the fan</li>
+			<a name="fan_direction"></a><li>fan_direction: defining the direction of rotation</li>
+			<a name="light_on_off"></a><li>light_on_off: switch light on or off</li>
+			<a name="set"></a><li>set: button SET on the remote</li><a name=" "></a>
+		</ul>
 	</ul>
 	<br><br>
 
 	<b>Get</b><br>
-	<ul>N/A</ul><br><br>
+	<ul>N/A</ul>
+	<br><br>
 
-	<b>Attribute</b><br>
-	<ul><li><a href="#do_not_notify">do_not_notify</a></li></ul><br>
-	<ul><li><a href="#ignore">ignore</a></li></ul><br>
-	<ul><li><a href="#IODev">IODev</a></li></ul><br>
-	<ul><a name="model"></a>
-		<li>model<br>
-		The attribute indicates the model type of your device.<br>
-		(unknown, Buttons_five, CAME_TOP_432EV, Chilitec_22640, KL_RF01, HS1-868-BS, HSM4, QUIGG_DMV, LED_XM21_0, Momento, Navaris, Novy_840029, Novy_840039, OR28V, RC_10, RH787T, SA_434_1_mini, SF01_01319004, TR60C1, Tedsen_SKX1xx, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx, TR_502MSV, Unitec_47031)</li>
-	</ul><br>
-	<ul><li><a name="repeats">repeats</a><br>
-	This attribute can be used to adjust how many repetitions are sent. Default is 5.</li></ul><br>
-	<ul><li><a name="UTclock">UTclock</a><br>
-	This attribute set the clock pulse when sending. There is no standard value.<br>
-	<small><u>exception:</u></small> The model Novy_840039 has a preset clock pulse of 375. You can manually adjust this individually with the attribute.</li></ul><br>
-	<ul><li><a name="UTfrequency">UTfrequency</a><br>
-	An individual transmission frequency can be set with this attribute. If this attribute is not set, the transmission frequency of the IO device (e.g. Signalduino) is used.</li></ul><br>
+	<b>Attributes</b><br>
+	<ul>
+		<li><a href="#do_not_notify">do_not_notify</a></li>
+		<li><a href="#ignore">ignore</a></li>
+		<li><a href="#IODev">IODev</a></li>
+		<li><a name="model"></a>model<br>
+			The attribute indicates the model type of your device (Buttons_five, CAME_TOP_432EV, Chilitec_22640, KL_RF01, HS1-868-BS, HSM4, QUIGG_DMV, LED_XM21_0, Momento, Navaris, Novy_840029, Novy_840039, OR28V, RC_10, RH787T, SA_434_1_mini, SF01_01319004, TR60C1, Tedsen_SKX1xx, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx, TR_502MSV, Unitec_47031, unknown).
+		</li>
+		<li><a name="repeats"></a>repeats<br>
+			This attribute can be used to adjust how many repetitions are sent. Default is 5.
+		</li>
+		<li><a name="UTclock"></a>UTclock<br>
+			This attribute set the base clock when sending. There is no standard value.<br>
+			Exception: The model Novy_840039 has a preset base clock of 375. You can manually adjust this individually with this attribute.
+		</li>
+		<li><a name="UTfrequency"></a>UTfrequency<br>
+			An individual transmission frequency can be set with this attribute. If this attribute is not set, the transmission frequency of the IO device (e.g. Signalduino) is used.
+		</li>
+	</ul>
+	<br><br>
+	
+	<b>Generated readings of the models</b><br>
+	<ul>
+		<u>Buttons_five, CAME_TOP_432EV, Chilitec_22640, HSM4, KL_RF01, LED_XM21_0, Momento, Novy_840029, Novy_840039, OR28V, QUIGG_DMV, RC_10, RH787T, SF01_01319004, SF01_01319004_Typ2, TR_502MSV</u>
+		<ul>
+			<li>deviceCode: Device code of the system</li>
+			<li>LastAction: Last executed action of the device (<code>receive</code> for command received | <code>send</code> for command send).</li>
+			<li>state: Current state of the device</li>
+		</ul><br>
 
-	<b><i>Generated readings of the models</i></b><br>
-	<ul><u>Buttons_five | CAME_TOP_432EV | Chilitec_22640 | HSM4 | KL_RF01 | LED_XM21_0 | Momento | Novy_840029 | Novy_840039 | OR28V | QUIGG_DMV | RC_10 | RH787T | SF01_01319004 | SF01_01319004_Typ2 | TR_502MSV</u><br>
-	<li>deviceCode<br>
-	Device code of the system</li>
-	<li>LastAction<br>
-	Last executed action of the device. <code>receive</code> for command received | <code>send</code> for command send</li>
-	<li>state<br>
-	Last executed keystroke of the remote control</li></ul><br>
+		<u>MD_2003R (gas), MD_2018R (vibration), MD_210R (door/window switch), MD_230R (water)</u>
+		<ul>
+			<li>contact: State of the internal alarm contact.</li>
+			<li>deviceTyp: Model type of the sensor.</li>
+			<li>sabotage: State of sabotage contact.</li>
+			<li>state: Current state of the device</li>
+		</ul><br>
 
-	<ul><u>MD_2003R (gas)&nbsp;&nbsp;|&nbsp;&nbsp;MD_2018R (vibration)&nbsp;&nbsp;|&nbsp;&nbsp;MD_210R (door/windows switch)&nbsp;&nbsp;|&nbsp;&nbsp;MD_230R (water)</u><br>
-	<li>contact<br>
-	Status of the internal alarm contact</li>
-	<li>deviceTyp<br>
-	Model type of your sensor</li>
-	<li>sabotage<br>
-	State of sabotage contact</li>
-	<li>state<br>
-	State of the device</li></ul><br>
+		<u>HS1-868-BS, SA_434_1_mini, Tedsen_SKX1, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx</u>
+		<ul>
+			<li>LastAction: Last executed action of the device (<code>receive</code> for command received | <code>send</code> for command send).</li>
+			<li>state: Current state of the device</li>
+		</ul><br>
 
-	<ul><u>HS1-868-BS&nbsp;&nbsp;|&nbsp;&nbsp;SA_434_1_mini&nbsp;&nbsp;|&nbsp;&nbsp;Tedsen_SKX1xx&nbsp;&nbsp;|&nbsp;&nbsp;Tedsen_SKX2xx&nbsp;&nbsp;|&nbsp;&nbsp;Tedsen_SKX4xx&nbsp;&nbsp;|&nbsp;&nbsp;Tedsen_SKX6xx</u><br>
-	<li>LastAction<br>
-	Last executed action of FHEM. <code>send</code> for command send.</li>
-	<li>state<br>
-	Last executed action of the device. <code>receive</code> for command received | <code>send</code> for command send</li></ul><br>
-
-	<ul><u>Unitec_47031</u><br>
-	<li>System-Housecode<br>
-	System or house code of the device</li>
-	<li>state<br>
-	Condition of contact (prepared, unconfirmed)</li>
-	<li>Zone<br>
-	Zone of the device</li>
-	<li>Usersystem<br>
-	Group of the system</li>
-	</ul><br>
-
+		<u>Unitec_47031</u>
+		<ul>
+			<li>System-Housecode: System or house code of the device</li>
+			<li>state: Condition of contact (prepared, unconfirmed)</li>
+			<li>Zone: Zone of the device</li>
+			<li>Usersystem: Group of the system</li>
+		</ul>
+	</ul>
 </ul>
+
 =end html
 =begin html_DE
 
@@ -2290,7 +2193,7 @@ sub SD_UT_tristate2bin($) {
 			<li>SKX2xx, 2 Tasten (GEIGER_GF0x01) - Modulmodel: Tedsen_SKX2xx</li>
 			<li>SKX4xx, 4 Tasten (GEIGER_GF0x02) - Modulmodel: Tedsen_SKX4xx</li>
 			<li>SKX6xx, 6 Tasten (GEIGER_GF0x03) - Modulmodel: Tedsen_SKX6xx</li>
-		</small></ul>
+		</small></ul></li>
 		<li>unitec Magnetkontakt 47031 (f&uuml;r Alarmanlagen Unitec 47121, Unitec 47125, Friedland)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Unitec_47031, Protokoll 30)</small></li>
 		<li>Westinghouse Deckenventilator (Fernbedienung, 5 Tasten ohne SET)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Buttons_five, Protokoll 29)</small></li>
 		<li>Westinghouse Delancey Deckenventilator (Fernbedienung, 9 Tasten mit SET)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: RH787T, Protokoll 83)</small></li>
@@ -2452,7 +2355,7 @@ sub SD_UT_tristate2bin($) {
 			<li>state: Zustand des Kontaktes (vorbereitet, unbest&auml;tigt)</li>
 			<li>Zone: Eingestellte Zone des Ger&auml;tes</li>
 			<li>Usersystem: Bezeichnung Systemes</li>
-		</ul><br>
+		</ul>
 	</ul>
 </ul>
 
