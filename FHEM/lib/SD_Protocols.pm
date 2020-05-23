@@ -299,6 +299,7 @@ sub binStr2hexStr {
 	return $hex;
 }
 
+############################# package lib::SD_Protocols, test exists
 
 =item LengthInRange()
 This functon checks if a given length is in range of the valid min and max length for the given protocolId
@@ -309,6 +310,7 @@ Output:
 		on success array (returnCode=1, '')
 		otherwise array (returncode=0,"Error message")
 =cut
+
 sub LengthInRange {
 	my $self    			= shift // carp 'Not called within an object';
 	my $id					= shift // carp 'protocol ID must be provided';
@@ -348,6 +350,78 @@ sub MCRAW {
 	return(1,binStr2hexStr($bitData)); 
 }
 
+############################# package lib::SD_Protocols
+
+=item registerLogCallback()
+
+=cut
+
+sub registerLogCallback {
+	my $self     = shift // carp 'Not called within an object';
+	my $callback = shift // carp 'coderef must be provided';
+
+	( ref $callback eq 'CODE' )
+	  ? $self->{_logCallback} = $callback
+	  : carp 'coderef must be provided for callback';
+
+	return;
+}
+
+############################# package lib::SD_Protocols
+
+=item _logging()
+
+The sub transfers the data to the sub which is referenced by the code ref.
+example: $self->_logging('something happend','3')
+
+=cut
+
+sub _logging {
+	my $self    = shift // carp 'Not called within an object';
+	my $message = shift // carp 'message must be provided';
+	my $level   = shift // 3;
+
+	if ( defined $self->{_logCallback} ) {
+		$self->{_logCallback}->( $message, $level );
+	}
+	return;
+}
+
+######################### package lib::SD_Protocols #########################
+###       all functions for RAWmsg processing or module preparation       ###
+#############################################################################
+
+############################
+# ASK/OOK method functions #
+############################
+
+sub _ASK_OOK_methods_behind_here {
+  # only for functionslist - no function!
+}
+
+############################# package lib::SD_Protocols, test exists
+
+=item dec2binppari()
+This sub calculated. It converts a decimal number with a width of 8 bits into binary format,
+calculates the parity, appends the parity bit and returns this 9 bit.
+
+Input:  $num
+Output:
+        calculated number binary with parity
+
+=cut
+
+sub dec2binppari {    # dec to bin . parity
+	my $num    = shift // carp 'must be called with an number';
+	my $parity = 0;
+	my $nbin   = sprintf( "%08b", $num );
+	for my $c ( split //, $nbin ) {
+		$parity ^= $c;
+	}
+	return qq[$nbin$parity];    # bin(num) . paritybit
+}
+
+############################# package lib::SD_Protocols, test exists
 
 =item mcBit2Grothe()
 extract the message from the bitdata if it looks like valid data
@@ -390,7 +464,7 @@ sub mcBit2Grothe {
 	return (1,$hex); ## Return the bits unchanged in hex
 }
 
-
+############################# package lib::SD_Protocols, test exists
 
 =item mcBit2TFA()
 extract the message from the bitdata if it looks like valid data
@@ -401,6 +475,7 @@ Output:
 		on success array (returnCode=1, hexData)
 		otherwise array (returncode=-1,"Error message")
 =cut
+
 sub mcBit2TFA {
 	my $self    			= shift // carp 'Not called within an object' && return (0,'no object provided');
 	my $name				= shift // "anonymous";
@@ -463,9 +538,9 @@ sub mcBit2TFA {
 	return (-1,undef);
 }
 
+############################# package lib::SD_Protocols, test exists
 
-
-=item mcBit2OSV2()
+=item mcBit2OSV2o3()
 extract the message from the bitdata if it looks like valid data
 
 Input:  ($object,$name,$bitData,$protocolID, optional: length $bitData);
@@ -474,6 +549,7 @@ Output:
 		on success array (returnCode=1, hexData)
 		otherwise array (returncode=-1,"Error message")
 =cut
+
 sub mcBit2OSV2o3 {
 	my $self    			= shift // carp 'Not called within an object' && return (0,'no object provided');
 	my $name				= shift // "anonymous";
@@ -618,7 +694,7 @@ sub mcBit2OSV2o3 {
 	return (-1,undef);
 }
 
-
+############################# package lib::SD_Protocols, test exists
 
 =item mcBit2OSV1()
 extract the message from the bitdata if it looks like valid data
@@ -629,6 +705,7 @@ Output:
 		on success array (returnCode=1, hexData)
 		otherwise array (returncode=-1,"Error message")
 =cut
+
 sub mcBit2OSV1 {
 	my $self    			= shift // carp 'Not called within an object' && return (0,'no object provided');
 	my $name				= shift // 'anonymous';
@@ -690,6 +767,7 @@ sub mcBit2OSV1 {
     return (1,$osv1hex);
 }
 
+############################# package lib::SD_Protocols, test exists
 
 =item mcBit2AS()
 extract the message from the bitdata if it looks like valid data
@@ -730,8 +808,7 @@ sub mcBit2AS {
 	return (-1,undef);
 }
 
-
-
+############################# package lib::SD_Protocols, test failed
 
 =item mcBit2Hideki()
 extract the message from the bitdata if it looks like valid data
@@ -742,6 +819,7 @@ Output:
 		on success array (returnCode=1, hexData)
 		otherwise array (returncode=-1,"Error message")
 =cut
+
 sub mcBit2Hideki {
 	my $self    			= shift // carp 'Not called within an object' && return (0,'no object provided');
 	my $name				= shift // 'anonymous';
@@ -796,9 +874,8 @@ sub mcBit2Hideki {
  	$self->_logging( qq[lib/mcBit2Hideki, start pattern (10101110) not found], 4 );
 	return (-1,undef);
 }
-############################# package lib::SD_Protocols, test exists
 
-
+############################# package lib::SD_Protocols, test failed
 
 =item mcBit2OSPIR()
 extract the message from the bitdata if it looks like valid data
@@ -829,9 +906,9 @@ sub mcBit2OSPIR {
 	}
 }
 
+############################# package lib::SD_Protocols, test failed
 
-
-=item mcBit2Mavericks()
+=item mcBit2Maverick()
 extract the message from the bitdata if it looks like valid data
 
 Input:  ($object,$name,$bitData,$protocolID, optional: length $bitData);
@@ -840,6 +917,7 @@ Output:
 		on success array (returnCode=1, hexData)
 		otherwise array (returncode=-1,"Error message")
 =cut
+
 sub mcBit2Maverick {
 	my $self    			= shift // carp 'Not called within an object' && return (0,'no object provided');
 	my $name				= shift // 'anonymous';
@@ -862,6 +940,8 @@ sub mcBit2Maverick {
 	}
 }
 
+############################# package lib::SD_Protocols, test failed
+
 =item mcBit2SomfyRTS()
 extract the message from the bitdata if it looks like valid data
 
@@ -871,6 +951,7 @@ Output:
 		on success array (returnCode=1, hexData)
 		otherwise array (returncode=-1,"Error message")
 =cut
+
 sub mcBit2SomfyRTS {
 	my $self    			= shift // carp 'Not called within an object' && return (0,'no object provided');
 	my $name				= shift // 'anonymous';
@@ -889,194 +970,7 @@ sub mcBit2SomfyRTS {
 	return (1, $encData);
 }
 
-
-=item registerLogCallback()
-
-=cut
-
-sub registerLogCallback {
-	my $self     = shift // carp 'Not called within an object';
-	my $callback = shift // carp 'coderef must be provided';
-
-	( ref $callback eq 'CODE' )
-	  ? $self->{_logCallback} = $callback
-	  : carp 'coderef must be provided for callback';
-
-	return;
-}
-
-############################# package lib::SD_Protocols
-
-=item _logging()
-
-The sub transfers the data to the sub which is referenced by the code ref.
-example: $self->_logging('something happend','3')
-
-=cut
-
-sub _logging {
-	my $self    = shift // carp 'Not called within an object';
-	my $message = shift // carp 'message must be provided';
-	my $level   = shift // 3;
-
-	if ( defined $self->{_logCallback} ) {
-		$self->{_logCallback}->( $message, $level );
-	}
-	return;
-}
-
-######################### package lib::SD_Protocols #########################
-###       all functions for RAWmsg processing or module preparation       ###
-#############################################################################
-
-############################################################
-# ASK/OOK method functions
-############################################################
-
-=item dec2binppari()
-This sub calculated. It converts a decimal number with a width of 8 bits into binary format,
-calculates the parity, appends the parity bit and returns this 9 bit.
-
-Input:  $num
-Output:
-        calculated number binary with parity
-
-=cut
-
-sub dec2binppari {    # dec to bin . parity
-	my $num    = shift // carp 'must be called with an number';
-	my $parity = 0;
-	my $nbin   = sprintf( "%08b", $num );
-	for my $c ( split //, $nbin ) {
-		$parity ^= $c;
-	}
-	return qq[$nbin$parity];    # bin(num) . paritybit
-}
-
-
-############################################################
-
-=item Convbit2Arctec()
-
-This sub convert 0 -> 01, 1 -> 10 to be compatible with IT Module.
-
-Input:  @bit_msg
-
-Output:
-        converted message
-
-=cut
-
-sub Convbit2Arctec {
-	my ( $self, undef, @bitmsg ) = @_;
-	$self   // carp 'Not called within an object';
-	@bitmsg // carp 'no bitmsg provided';
-	my $convmsg = join( "", @bitmsg );
-	my @replace = qw(01 10);
-
-	# Convert 0 -> 01   1 -> 10 to be compatible with IT Module
-	$convmsg =~ s/(0|1)/$replace[$1]/gx;
-	return ( 1, split( //, $convmsg ) );
-}
-
-############################################################
-
-=item Convbit2itv1()
-This sub convert 0F -> 01 (F) to be compatible with CUL.
-
-Input:  $msg
-Output:
-        converted message
-
-=cut
-
-sub Convbit2itv1 {
-	my ( $self, undef, @bitmsg ) = @_;
-	$self   // carp 'Not called within an object';
-	@bitmsg // carp 'no bitmsg provided';
-	my $msg = join( "", @bitmsg );
-
-	$msg =~ s/0F/01/gsm;    # Convert 0F -> 01 (F) to be compatible with CUL
-	return ( 1, split( //, $msg ) ) if ( index( $msg, 'F' ) == -1 );
-	return ( 0, 0 );
-}
-
-############################################################
-
-=item ConvHE800()
-
-This sub checks the length of the bits.
-If the length is less than 40, it adds a 0.
-
-Input:  $name, @bit_msg
-
-Output:
-        scalar converted message on success 
-
-=cut
-
-sub ConvHE800 {
-	my ( $self, $name, @bit_msg ) = @_;
-	$self // carp 'Not called within an object';
-
-	my $protolength = scalar @bit_msg;
-
-	if ( $protolength < 40 ) {
-		for ( my $i = 0 ; $i < ( 40 - $protolength ) ; $i++ ) {
-			push( @bit_msg, 0 );
-		}
-	}
-	return ( 1, @bit_msg );
-}
-
-############################################################
-
-=item ConvHE_EU()
-This sub checks the length of the bits.
-If the length is less than 72, it adds a 0.
-
-Input:  $name, @bit_msg
-Output:
-        scalar converted message on success 
-
-=cut
-
-sub ConvHE_EU {
-	my ( $self, $name, @bit_msg ) = @_;
-	my $protolength = scalar @bit_msg;
-
-	if ( $protolength < 72 ) {
-		for ( my $i = 0 ; $i < ( 72 - $protolength ) ; $i++ ) {
-			push( @bit_msg, 0 );
-		}
-	}
-	return ( 1, @bit_msg );
-}
-
-############################################################
-
-=item ConvITV1_tristateToBit()
-This sub Convert 0 -> 00, 1 -> 11, F => 01 to be compatible with IT Module.
-
-Input:  $msg
-
-Output:
-        converted message
-
-=cut
-
-sub ConvITV1_tristateToBit {
-	my ($msg) = @_;
-
-	$msg =~ s/0/00/gsm;
-	$msg =~ s/1/11/gsm;
-	$msg =~ s/F/01/gsm;
-	$msg =~ s/D/10/gsm;
-
-	return ( 1, $msg );
-}
-
-############################################################
+############################# package lib::SD_Protocols, test exists
 
 =item postDemo_EM()
 This sub checks the bit sequence. On an error in the CRC or no start, it issues an output.
@@ -1118,6 +1012,8 @@ sub postDemo_EM {
 	$self->_logging(qq[lib/postDemo_EM, protocol - Start not found or length msg ($msgLength) not correct],	3);
 	return 0, undef;
 }
+
+############################# package lib::SD_Protocols, test exists
 
 =item postDemo_FS20()
 This sub checks the bit sequence. On an error in the CRC or no start, it issues an output.
@@ -1203,6 +1099,8 @@ sub postDemo_FS20 {
 	return 0, undef;
 }
 
+############################# package lib::SD_Protocols, test exists
+
 =item postDemo_FHT80()
 This sub checks the bit sequence. On an error in the CRC or no start, it issues an output.
 
@@ -1280,6 +1178,8 @@ sub postDemo_FHT80 {
    return 0, undef;
 }
 
+############################# package lib::SD_Protocols, test exists
+
 =item postDemo_FHT80TF()
 This sub checks the bit sequence. On an error in the CRC or no start, it issues an output.
 
@@ -1343,6 +1243,8 @@ sub postDemo_FHT80TF {
    return 0, undef;
 }
 
+############################# package lib::SD_Protocols, test exists
+
 =item postDemo_WS7035()
 This sub checks the bit sequence. On an error in the CRC or no start, it issues an output.
 
@@ -1351,6 +1253,7 @@ Output:
         (returncode = 1 on success, prepared message or undef)
 
 =cut
+
 sub postDemo_WS7035 {
 	my $self 		= shift // carp 'Not called within an object';
 	my $name 		= shift // carp 'no $name provided';
@@ -1387,7 +1290,9 @@ sub postDemo_WS7035 {
 	}
 }
 
-=item postDemo_WS7035()
+############################# package lib::SD_Protocols, test exists
+
+=item postDemo_WS2000()
 This sub checks the bit sequence. On an error in the CRC or no start, it issues an output.
 
 Input:  $object,$name,@bit_msg
@@ -1506,7 +1411,7 @@ sub postDemo_WS2000 {
 	}
 }
 
-
+############################# package lib::SD_Protocols, test exists
 
 =item postDemo_WS7053()
 This sub checks the bit sequence. On an error in the CRC or no start, it issues an output.
@@ -1558,6 +1463,7 @@ sub postDemo_WS7053 {
 	}
 }
 
+############################# package lib::SD_Protocols, test exists
 
 =item postDemo_lengtnPrefix()
 calculates the hex (in bits) and adds it at the beginning of the message
@@ -1579,11 +1485,129 @@ sub postDemo_lengtnPrefix {
 	return (1,split('',$msg));
 }
 
+############################# package lib::SD_Protocols, test exists
 
+=item Convbit2Arctec()
 
+This sub convert 0 -> 01, 1 -> 10 to be compatible with IT Module.
 
+Input:  @bit_msg
 
-############################################################
+Output:
+        converted message
+
+=cut
+
+sub Convbit2Arctec {
+	my ( $self, undef, @bitmsg ) = @_;
+	$self   // carp 'Not called within an object';
+	@bitmsg // carp 'no bitmsg provided';
+	my $convmsg = join( "", @bitmsg );
+	my @replace = qw(01 10);
+
+	# Convert 0 -> 01   1 -> 10 to be compatible with IT Module
+	$convmsg =~ s/(0|1)/$replace[$1]/gx;
+	return ( 1, split( //, $convmsg ) );
+}
+
+############################# package lib::SD_Protocols, test exists
+
+=item Convbit2itv1()
+This sub convert 0F -> 01 (F) to be compatible with CUL.
+
+Input:  $msg
+Output:
+        converted message
+
+=cut
+
+sub Convbit2itv1 {
+	my ( $self, undef, @bitmsg ) = @_;
+	$self   // carp 'Not called within an object';
+	@bitmsg // carp 'no bitmsg provided';
+	my $msg = join( "", @bitmsg );
+
+	$msg =~ s/0F/01/gsm;    # Convert 0F -> 01 (F) to be compatible with CUL
+	return ( 1, split( //, $msg ) ) if ( index( $msg, 'F' ) == -1 );
+	return ( 0, 0 );
+}
+
+############################# package lib::SD_Protocols, test exists
+
+=item ConvHE800()
+
+This sub checks the length of the bits.
+If the length is less than 40, it adds a 0.
+
+Input:  $name, @bit_msg
+
+Output:
+        scalar converted message on success 
+
+=cut
+
+sub ConvHE800 {
+	my ( $self, $name, @bit_msg ) = @_;
+	$self // carp 'Not called within an object';
+
+	my $protolength = scalar @bit_msg;
+
+	if ( $protolength < 40 ) {
+		for ( my $i = 0 ; $i < ( 40 - $protolength ) ; $i++ ) {
+			push( @bit_msg, 0 );
+		}
+	}
+	return ( 1, @bit_msg );
+}
+
+############################# package lib::SD_Protocols, test exists
+
+=item ConvHE_EU()
+This sub checks the length of the bits.
+If the length is less than 72, it adds a 0.
+
+Input:  $name, @bit_msg
+Output:
+        scalar converted message on success 
+
+=cut
+
+sub ConvHE_EU {
+	my ( $self, $name, @bit_msg ) = @_;
+	my $protolength = scalar @bit_msg;
+
+	if ( $protolength < 72 ) {
+		for ( my $i = 0 ; $i < ( 72 - $protolength ) ; $i++ ) {
+			push( @bit_msg, 0 );
+		}
+	}
+	return ( 1, @bit_msg );
+}
+
+############################# package lib::SD_Protocols, test exists
+
+=item ConvITV1_tristateToBit()
+This sub Convert 0 -> 00, 1 -> 11, F => 01 to be compatible with IT Module.
+
+Input:  $msg
+
+Output:
+        converted message
+
+=cut
+
+sub ConvITV1_tristateToBit {
+	my ($msg) = @_;
+
+	$msg =~ s/0/00/gsm;
+	$msg =~ s/1/11/gsm;
+	$msg =~ s/F/01/gsm;
+	$msg =~ s/D/10/gsm;
+
+	return ( 1, $msg );
+}
+
+############################# package lib::SD_Protocols, test exists
 
 =item PreparingSend_FS20_FHT()
 This sub prepares the send message.
@@ -1618,9 +1642,15 @@ sub PreparingSend_FS20_FHT {
 	return $newmsg . q[0P#R] . $repeats;               # EOT, Pause, 3 Repeats
 }
 
-############################################################
-# xFSK method functions
-############################################################
+#########################
+# xFSK method functions #
+#########################
+
+sub _xFSK_methods_behind_here {
+  # only for functionslist - no function!
+}
+
+############################# package lib::SD_Protocols, test exists
 
 =item ConvPCA301()
 This sub checks crc and converts data to a format which the PCA301 module can handle
@@ -1670,7 +1700,7 @@ sub ConvPCA301 {
 	return ("OK 24 $channel $command $addr1 $addr2 $addr3 $plugstate $power1 $power2 $consumption1 $consumption2 $checksum"	);
 }
 
-############################################################
+############################# package lib::SD_Protocols, test exists
 
 =item ConvKoppFreeControl()
 This sub checks crc and converts data to a format which the KoppFreeControl module can handle
@@ -1709,7 +1739,7 @@ sub ConvKoppFreeControl {
 	return ( "kr" . substr( $hexData, 0, $anz * 2 ) );
 }
 
-############################################################
+############################# package lib::SD_Protocols, test exists
 
 =item ConvLaCrosse()
 This sub checks crc and converts data to a format which the LaCrosse module can handle
