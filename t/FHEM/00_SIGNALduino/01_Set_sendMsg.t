@@ -1,9 +1,10 @@
 use Test2::V0;
-use Test2::Tools::Compare qw{is};
+use Test2::Tools::Compare qw{is item U D match hash array bag};
 use Mock::Sub;
-use Test2::Tools::Compare qw{is item D match};
 use Test2::Todo;
 
+# Mock cc1101	
+$defs{cc1101dummyDuino}{cc1101_available} = 1;
 
 
 #SIGNALduino_Set_sendMsg $hash set P0#0101#R3#C500
@@ -62,8 +63,7 @@ use Test2::Todo;
 		},
 		{
 			deviceName => q[cc1101dummyDuino],
-    		cc1101_available => 1,
-			testname=>  "set sendMsg ID:43 (P43#0101#R3#C500) with default frequency",
+   			testname=>  "set sendMsg ID:43 (P43#0101#R3#C500) with default frequency",
 			input	=>	"sendMsg P43#0101#R3#C500",
 			check =>  array  {
 					item D();
@@ -76,7 +76,6 @@ use Test2::Todo;
 
 my ($mock, $SIGNALduino_AddSendQueue);
 
-$defs{cc1101dummyDuino}->{cc1101_available} = 1;
 	
 BEGIN {
 
@@ -85,7 +84,17 @@ BEGIN {
 };
 
 InternalTimer(time()+1, sub() {
-
+	is($defs{cc1101dummyDuino},hash {
+			field cc1101_available => 1; 
+			etc();
+		},
+		'check mocked cc1101dummyDuino hash');
+	is($defs{dummyDuino},hash 	{
+			field cc1101_available => U(); 
+			etc();
+		},
+		'check mocked dummyDuino hash');
+	
 	while (@mockData)
 	{
 		my $element = pop(@mockData);
@@ -96,7 +105,6 @@ InternalTimer(time()+1, sub() {
 			: undef;
 		#$element->{pre_code}->() if (exists($element->{pre_code}));
 		#$todo=$element->{todo}->() if (exists($element->{todo}));
-		# Mock cc1101	
 		
 		subtest "checking $element->{testname} on $element->{deviceName}" => sub {
 			my $p = $element->{plan} // 4;

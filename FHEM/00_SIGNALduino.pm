@@ -713,7 +713,7 @@ sub SIGNALduino_Set_reset
 sub SIGNALduino_Set_sendMsg {
 	my ($hash, @a) = @_;
 	$hash->{logMethod}->($hash->{NAME}, 5, "$hash->{NAME}: Set_sendMsg, msg=$a[1]");
-
+	return "Error: $hash->{NAME} does not exists" if (!IsDevice($hash->{NAME}));
 	# Split args in serval variables
 	my ($protocol,$data,$repeats,$clock,$frequency,$datalength,$dataishex);
 	my $n=0;
@@ -740,7 +740,9 @@ sub SIGNALduino_Set_sendMsg {
 	
 	if (InternalVal($hash->{NAME},"cc1101_available",0))
 	{
-		$frequency = q[F=]. ($hash->{protocolObject}->getProperty($protocol,'frequency') // q{}).q[;];
+		 defined $hash->{protocolObject}->getProperty($protocol,'frequency') 
+			 ? 	$frequency = q[F=].$hash->{protocolObject}->getProperty($protocol,'frequency'). q[;]
+			 :  $frequency = qq[];
 	}
 	my %signalHash;
 	my %patternHash;
