@@ -775,7 +775,7 @@ sub SIGNALduino_Set_sendMsg {
 			if (substr($data,0,2) eq "is") {
 				$data = substr($data,2);   # is am Anfang entfernen
 			}
-			$data = lib::SD_Protocols::ConvITV1_tristateToBit($data);
+			$data = $hash->{protocolObject}->ConvITV1_tristateToBit($data);
 			$hash->{logMethod}->($hash->{NAME}, 5, "$hash->{NAME}: Set_sendMsg, IT V1 convertet tristate to bits=$data");
 		}
 		if (!defined $clock ) {

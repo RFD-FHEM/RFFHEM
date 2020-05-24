@@ -1658,7 +1658,8 @@ Output:
 =cut
 
 sub ConvITV1_tristateToBit {
-	my ($msg) = @_;
+	my $self = shift // carp 'Not called within an object';
+	my $msg  = shift // carp 'no bits';
 
 	$msg =~ s/0/00/gsm;
 	$msg =~ s/1/11/gsm;

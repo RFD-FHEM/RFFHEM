@@ -19,7 +19,7 @@ subtest 'Test ConvITV1_tristateToBit' => sub {
 	my $rcode;
 
 	note("input $msg");
-	($rcode,$msg)=lib::SD_Protocols::ConvITV1_tristateToBit($msg);
+	($rcode,$msg)=$Protocols->ConvITV1_tristateToBit($msg);
 	is($rcode,1,'check returncode for ITV1_tristateToBit');
 	is($msg,'010000010000010101010100','check result ITV1_tristateToBit');
 	note("output $msg");
