@@ -15,6 +15,7 @@ use Carp qw(croak carp);
 use Digest::CRC;
 our $VERSION = '2.02';
 use Storable qw(dclone);
+use Scalar::Util qw(blessed);
 
 use Data::Dumper;
 
@@ -23,7 +24,7 @@ use Data::Dumper;
 
 This function will initialize the given Filename containing a valid protocolHash.
 First Parameter is for filename (full or relativ path) to be loaded.
-Returns string with error value or undef
+Returns created object
 
 =cut
 
@@ -81,6 +82,38 @@ sub STORABLE_thaw {
 	$self->LoadHashFromJson();
 	return;
 }
+
+
+############################# package lib::SD_Protocols
+=item _checkInvocant()
+
+This function, checks if input param is a valid object otherwise it will croak with error message
+Input:  ($object);
+Output: $object or croak if not an object
+
+=cut
+
+sub _checkInvocant {
+    my $thing = shift;
+
+    my $caller = caller;
+
+    if( !defined $thing ) {
+        croak "The invocant is not defined";
+    }
+    elsif( !ref $thing ) {
+        croak "The invocant is not a reference";
+    }
+    elsif( !blessed $thing ) {
+        croak "The invocant is not an object";
+    }
+    elsif( !$thing->isa($caller) ) {
+        croak "The invocant is not a subclass of $caller";
+    }
+
+    return $thing;
+}
+
 
 ############################# package lib::SD_Protocols
 =item LoadHashFromJson()
@@ -322,6 +355,8 @@ Output:
 =cut
 
 sub binStr2hexStr {
+    shift if ref $_[0] eq __PACKAGE__;
+    
 	my $num = shift // return;
 	return if ( $num !~ /^[01]+$/xms );
 	my $WIDTH = 4;
@@ -454,6 +489,7 @@ Output:
 =cut
 
 sub dec2binppari {    # dec to bin . parity
+    shift if ref $_[0] eq __PACKAGE__;
 	my $num    = shift // carp 'must be called with an number';
 	my $parity = 0;
 	my $nbin   = sprintf( "%08b", $num );
@@ -1583,8 +1619,8 @@ Output:
 =cut
 
 sub Convbit2itv1 {
-	my ( $self, undef, @bitmsg ) = @_;
-	$self   // carp 'Not called within an object';
+    shift if ref $_[0] eq __PACKAGE__;
+	my ( undef, @bitmsg ) = @_;
 	@bitmsg // carp 'no bitmsg provided';
 	my $msg = join( "", @bitmsg );
 
@@ -1658,6 +1694,7 @@ Output:
 =cut
 
 sub ConvITV1_tristateToBit {
+    shift if ref $_[0] eq __PACKAGE__;
 	my ($msg) = @_;
 
 	$msg =~ s/0/00/gsm;
