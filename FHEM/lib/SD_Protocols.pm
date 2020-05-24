@@ -808,7 +808,7 @@ sub mcBit2AS {
 	return (-1,undef);
 }
 
-############################# package lib::SD_Protocols, test failed
+############################# package lib::SD_Protocols, test exists
 
 =item mcBit2Hideki()
 extract the message from the bitdata if it looks like valid data
@@ -875,7 +875,7 @@ sub mcBit2Hideki {
 	return (-1,undef);
 }
 
-############################# package lib::SD_Protocols, test failed
+############################# package lib::SD_Protocols, test exists
 
 =item mcBit2OSPIR()
 extract the message from the bitdata if it looks like valid data
@@ -906,7 +906,7 @@ sub mcBit2OSPIR {
 	}
 }
 
-############################# package lib::SD_Protocols, test failed
+############################# package lib::SD_Protocols, test exists
 
 =item mcBit2Maverick()
 extract the message from the bitdata if it looks like valid data
@@ -940,7 +940,7 @@ sub mcBit2Maverick {
 	}
 }
 
-############################# package lib::SD_Protocols, test failed
+############################# package lib::SD_Protocols, test exists
 
 =item mcBit2SomfyRTS()
 extract the message from the bitdata if it looks like valid data
