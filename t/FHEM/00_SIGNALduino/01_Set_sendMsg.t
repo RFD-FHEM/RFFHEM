@@ -76,7 +76,7 @@ $defs{cc1101dummyDuino}{cc1101_available} = 1;
 		},
 
 	);
-	plan (scalar @mockData);	
+	plan (scalar @mockData + 2);	
 
 my ($mock, $SIGNALduino_AddSendQueue);
 
