@@ -1,3 +1,11 @@
+2020-05-24 - revised ConvITV1_tristateToBit
+
+SD_Protocols.pm
+  * added $self
+00_SIGNALduino.pm
+  * revised call
+02_ConvITV1_tristateToBit.t
+  * revised call
 2020-05-24 - Update 00_SIGNALduino.pm
 
 * fixed, IT send
