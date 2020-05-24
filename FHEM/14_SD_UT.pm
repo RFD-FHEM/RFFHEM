@@ -2101,6 +2101,7 @@ sub SD_UT_tristate2bin($) {
 		<li><a href="#IODev">IODev</a></li>
 		<li><a name="model"></a>model<br>
 			The attribute indicates the model type of your device (Buttons_five, CAME_TOP_432EV, Chilitec_22640, KL_RF01, HS1-868-BS, HSM4, QUIGG_DMV, LED_XM21_0, Momento, Navaris, Novy_840029, Novy_840039, OR28V, RC_10, RH787T, SA_434_1_mini, SF01_01319004, TR60C1, Tedsen_SKX1xx, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx, TR_502MSV, Unitec_47031, unknown).
+			If the attribute is changed, a new device is created using <a href="#autocreate">autocreate</a>. Autocreate must be activated for this.
 		</li>
 		<li><a name="repeats"></a>repeats<br>
 			This attribute can be used to adjust how many repetitions are sent. Default is 5.
@@ -2312,6 +2313,7 @@ sub SD_UT_tristate2bin($) {
 		<li><a href="#IODev">IODev</a></li>
 		<li><a name="model"></a>model<br>
 			Diese Attribut bezeichnet den Modelltyp Ihres Ger&auml;tes (Buttons_five, CAME_TOP_432EV, Chilitec_22640, KL_RF01, HS1-868-BS, HSM4, QUIGG_DMV, LED_XM21_0, Momento, Navaris, Novy_840029, Novy_840039, OR28V, RC_10, RH787T, SA_434_1_mini, SF01_01319004, TR60C1, Tedsen_SKX1xx, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx, TR_502MSV, Unitec_47031, unknown).
+			Bei &Auml;nderung des Attributes wird ein neues Gerät mittels <a href="#autocreate">autocreate</a> erzeugt. Autocreate muss dazu aktiviert sein.
 		</li>
 		<li><a name="repeats"></a>repeats<br>
 			Mit diesem Attribut kann angepasst werden, wie viele Wiederholungen gesendet werden. Standard ist 5.
