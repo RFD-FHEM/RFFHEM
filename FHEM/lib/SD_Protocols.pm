@@ -19,12 +19,13 @@ use Storable qw(dclone);
 use Data::Dumper;
 
 ############################# package lib::SD_Protocols
-#=item new($)
-# This functons, will initialize the given Filename containing a valid protocolHash
-# First Parameter is for filename (full or relativ path) to be loaded
-# Returns string with error value or undef
-# =cut
-#  $id
+=item new()
+
+This function will initialize the given Filename containing a valid protocolHash.
+First Parameter is for filename (full or relativ path) to be loaded.
+Returns string with error value or undef
+
+=cut
 
 sub new {
 	my $class = shift;
@@ -48,9 +49,14 @@ sub new {
 }
 
 ############################# package lib::SD_Protocols
-#=item STORABLE_freeze()
-# This function is not currently explained.
-# =cut
+=item STORABLE_freeze()
+
+This function is not currently explained.
+
+Input:
+Output:
+
+=cut
 
 sub STORABLE_freeze {
 	my $self = shift;
@@ -58,9 +64,14 @@ sub STORABLE_freeze {
 }
 
 ############################# package lib::SD_Protocols
-#=item STORABLE_thaw()
-# This function is not currently explained.
-# =cut
+=item STORABLE_thaw()
+
+This function is not currently explained.
+
+Input:
+Output:
+
+=cut
 
 sub STORABLE_thaw {
 	my ( $self, $cloning, $frozen ) = @_;
@@ -72,12 +83,16 @@ sub STORABLE_thaw {
 }
 
 ############################# package lib::SD_Protocols
-#=item LoadHashFromJson()
-# This functons, will load protocol hash from json file into a hash.
-# First Parameter is for filename (full or relativ path) to be loaded
-# Returns error or undef on success
-# =cut
-#  $id
+=item LoadHashFromJson()
+
+This function, will load protocol hash from json file into a hash.
+First Parameter is for filename (full or relativ path) to be loaded.
+Returns error or undef on success
+
+Input:  ($object,$filename);
+Output:
+
+=cut
 
 sub LoadHashFromJson {
 	my $self     = shift // carp 'Not called within an object';
@@ -109,12 +124,16 @@ sub LoadHashFromJson {
 }
 
 ############################# package lib::SD_Protocols, test exists
-#=item LoadHash()
-# This functons, will load protocol hash from perlmodule file .
-# First Parameter is for filename (full or relativ path) to be loaded
-# Returns error or undef on success
-# =cut
-#  $id
+=item LoadHash()
+
+This function, will load protocol hash from perlmodule file.
+First Parameter is for filename (full or relativ path) to be loaded.
+Returns error or undef on success
+
+Input:  ($object,$filename);
+Output:
+
+=cut
 
 sub LoadHash {
 	my $self     = shift // carp 'Not called within an object';
@@ -138,10 +157,15 @@ sub LoadHash {
 }
 
 ############################# package lib::SD_Protocols, test exists
-#=item protocolexists()
-# This functons, will return true if the given ID exists otherwise false
-# =cut
-#  $id
+=item protocolexists()
+
+This function, will return true if the given ID exists otherwise false
+
+Input:  ($object,$protocolID);
+Output:
+
+=cut
+
 sub protocolExists {
 	my $self = shift // carp 'Not called within an object';
 	my $pId= shift // carp "Illegal parameter number, protocol id was not specified";
@@ -149,10 +173,12 @@ sub protocolExists {
 }
 
 ############################# package lib::SD_Protocols, test exists
-#=item getProtocolList()
-# This functons, will return a reference to the protocol hash
-# =cut
-#  $id, $propertyname,
+=item getProtocolList()
+
+This function, will return a reference to the protocol hash
+
+=cut
+
 sub getProtocolList {
 	my $self = shift // carp 'Not called within an object';
 	return $self->{_protocols};
@@ -161,7 +187,8 @@ sub getProtocolList {
 ############################# package lib::SD_Protocols, test exists
 
 =item getKeys()
-This functons, will return all keys from the protocol hash
+
+This function, will return all keys from the protocol hash
 
 =cut
 
@@ -172,12 +199,18 @@ sub getKeys {
 }
 
 ############################# package lib::SD_Protocols, test exists
-#=item checkProperty()
-# This functons, will return a value from the Protocolist and check if the key exists and a value is defined optional you can specify a optional default value that will be returned
-#
-# returns undef if the var is not defined
-# =cut
-#  $id, $propertyname,$default
+=item checkProperty()
+
+This function, will return a value from the Protocolist and 
+check if the key exists and a value is defined optional you can specify a optional default value that will be returned
+
+returns undef if the var is not defined
+
+Input:  ($object,$id,$valueName);
+Output:
+
+=cut
+
 
 sub checkProperty {
 	my $self      = shift // carp 'Not called within an object';
@@ -192,12 +225,17 @@ sub checkProperty {
 }
 
 ############################# package lib::SD_Protocols, test exists
-#=item getProperty()
-# This functons, will return a value from the Protocolist without any checks
-#
-# returns undef if the var is not defined
-# =cut
-#  $id, $propertyname
+=item getProperty()
+
+This function, will return a value from the Protocolist without any checks
+
+returns undef if the var is not defined
+
+Input:  ($object,$protocolID,$valueName);
+Output:
+
+=cut
+
 
 sub getProperty {
 	my $self      = shift // carp 'Not called within an object';
@@ -212,7 +250,8 @@ sub getProperty {
 ############################# package lib::SD_Protocols, test exists
 
 =item getProtocolVersion()
-This functons, will return a version value of the Protocolist
+
+This function, will return a version value of the Protocolist
 
 =cut
 
@@ -224,7 +263,8 @@ sub getProtocolVersion {
 ############################# package lib::SD_Protocols, test exists
 
 =item setDefaults()
-This functon will add common Defaults to the Protocollist
+
+This function will add common Defaults to the Protocollist
 
 =cut
 
@@ -272,7 +312,8 @@ sub setDefaults {
 ############################# package lib::SD_Protocols, test exists
 
 =item binStr2hexStr()
-This functon will convert binary string into its hex representation as string
+
+This function will convert binary string into its hex representation as string
 
 Input:  binary string
 Output:
@@ -302,10 +343,10 @@ sub binStr2hexStr {
 ############################# package lib::SD_Protocols, test exists
 
 =item LengthInRange()
-This functon checks if a given length is in range of the valid min and max length for the given protocolId
+
+This function checks if a given length is in range of the valid min and max length for the given protocolId
 
 Input:  ($object,$protocolID,$message_length);
-
 Output:
 		on success array (returnCode=1, '')
 		otherwise array (returncode=0,"Error message")
@@ -331,11 +372,11 @@ sub LengthInRange {
 ############################# package lib::SD_Protocols, test exists
 
 =item MCRAW()
-This functon is desired to be used as a default output helper for manchester signals.
+
+This function is desired to be used as a default output helper for manchester signals.
 It will check for length_max and return a hex string
 
 Input:  $object,$name,$bitData,$id,$mcbitnum
-
 Output:
         hex string
 		or array (-1,"Error message")
@@ -371,7 +412,7 @@ sub registerLogCallback {
 
 =item _logging()
 
-The sub transfers the data to the sub which is referenced by the code ref.
+This function transfers the data to the sub which is referenced by the code ref.
 example: $self->_logging('something happend','3')
 
 =cut
@@ -402,7 +443,8 @@ sub _ASK_OOK_methods_behind_here {
 ############################# package lib::SD_Protocols, test exists
 
 =item dec2binppari()
-This sub calculated. It converts a decimal number with a width of 8 bits into binary format,
+
+This function calculated. It converts a decimal number with a width of 8 bits into binary format,
 calculates the parity, appends the parity bit and returns this 9 bit.
 
 Input:  $num
@@ -424,13 +466,14 @@ sub dec2binppari {    # dec to bin . parity
 ############################# package lib::SD_Protocols, test exists
 
 =item mcBit2Grothe()
+
 extract the message from the bitdata if it looks like valid data
 
 Input:  ($object,$name,$bitData,$protocolID, optional: length $bitData);
-
 Output:
 		on success array (returnCode=1, hexData)
 		otherwise array (returncode=-1,"Error message")
+
 =cut
 
 sub mcBit2Grothe {
@@ -467,13 +510,14 @@ sub mcBit2Grothe {
 ############################# package lib::SD_Protocols, test exists
 
 =item mcBit2TFA()
+
 extract the message from the bitdata if it looks like valid data
 
 Input:  ($object,$name,$bitData,$protocolID, optional: length $bitData);
-
 Output:
 		on success array (returnCode=1, hexData)
 		otherwise array (returncode=-1,"Error message")
+
 =cut
 
 sub mcBit2TFA {
@@ -541,13 +585,14 @@ sub mcBit2TFA {
 ############################# package lib::SD_Protocols, test exists
 
 =item mcBit2OSV2o3()
+
 extract the message from the bitdata if it looks like valid data
 
 Input:  ($object,$name,$bitData,$protocolID, optional: length $bitData);
-
 Output:
 		on success array (returnCode=1, hexData)
 		otherwise array (returncode=-1,"Error message")
+
 =cut
 
 sub mcBit2OSV2o3 {
@@ -697,13 +742,14 @@ sub mcBit2OSV2o3 {
 ############################# package lib::SD_Protocols, test exists
 
 =item mcBit2OSV1()
+
 extract the message from the bitdata if it looks like valid data
 
 Input:  ($object,$name,$bitData,$protocolID, optional: length $bitData);
-
 Output:
 		on success array (returnCode=1, hexData)
 		otherwise array (returncode=-1,"Error message")
+
 =cut
 
 sub mcBit2OSV1 {
@@ -770,14 +816,16 @@ sub mcBit2OSV1 {
 ############################# package lib::SD_Protocols, test exists
 
 =item mcBit2AS()
+
 extract the message from the bitdata if it looks like valid data
 
 Input:  ($object,$name,$bitData,$protocolID, optional: length $bitData);
-
 Output:
 		on success array (returnCode=1, hexData)
 		otherwise array (returncode=-1,"Error message")
+
 =cut
+
 sub mcBit2AS {
 	my $self    			= shift // carp 'Not called within an object' && return (0,'no object provided');
 	my $name				= shift // 'anonymous';
@@ -811,13 +859,14 @@ sub mcBit2AS {
 ############################# package lib::SD_Protocols, test exists
 
 =item mcBit2Hideki()
+
 extract the message from the bitdata if it looks like valid data
 
 Input:  ($object,$name,$bitData,$protocolID, optional: length $bitData);
-
 Output:
 		on success array (returnCode=1, hexData)
 		otherwise array (returncode=-1,"Error message")
+
 =cut
 
 sub mcBit2Hideki {
@@ -878,14 +927,16 @@ sub mcBit2Hideki {
 ############################# package lib::SD_Protocols, test exists
 
 =item mcBit2OSPIR()
-extract the message from the bitdata if it looks like valid data
+
+This function extract the message from the bitdata if it looks like valid data
 
 Input:  ($object,$name,$bitData,$protocolID, optional: length $bitData);
-
 Output:
 		on success array (returnCode=1, hexData)
 		otherwise array (returncode=-1,"Error message")
+
 =cut
+
 sub mcBit2OSPIR {
 	my $self    			= shift // carp 'Not called within an object' && return (0,'no object provided');
 	my $name				= shift // 'anonymous';
@@ -909,13 +960,14 @@ sub mcBit2OSPIR {
 ############################# package lib::SD_Protocols, test exists
 
 =item mcBit2Maverick()
-extract the message from the bitdata if it looks like valid data
+
+This function extract the message from the bitdata if it looks like valid data
 
 Input:  ($object,$name,$bitData,$protocolID, optional: length $bitData);
-
 Output:
 		on success array (returnCode=1, hexData)
 		otherwise array (returncode=-1,"Error message")
+
 =cut
 
 sub mcBit2Maverick {
@@ -943,13 +995,14 @@ sub mcBit2Maverick {
 ############################# package lib::SD_Protocols, test exists
 
 =item mcBit2SomfyRTS()
-extract the message from the bitdata if it looks like valid data
+
+This function extract the message from the bitdata if it looks like valid data
 
 Input:  ($object,$name,$bitData,$protocolID, optional: length $bitData);
-
 Output:
 		on success array (returnCode=1, hexData)
 		otherwise array (returncode=-1,"Error message")
+
 =cut
 
 sub mcBit2SomfyRTS {
@@ -973,7 +1026,8 @@ sub mcBit2SomfyRTS {
 ############################# package lib::SD_Protocols, test exists
 
 =item postDemo_EM()
-This sub checks the bit sequence. On an error in the CRC or no start, it issues an output.
+
+This function checks the bit sequence. On an error in the CRC or no start, it issues an output.
 
 Input:  $id,$sum,$msg
 Output:
@@ -1016,7 +1070,8 @@ sub postDemo_EM {
 ############################# package lib::SD_Protocols, test exists
 
 =item postDemo_FS20()
-This sub checks the bit sequence. On an error in the CRC or no start, it issues an output.
+
+This function checks the bit sequence. On an error in the CRC or no start, it issues an output.
 
 Input:  $object,$name,@bit_msg
 Output:
@@ -1102,7 +1157,8 @@ sub postDemo_FS20 {
 ############################# package lib::SD_Protocols, test exists
 
 =item postDemo_FHT80()
-This sub checks the bit sequence. On an error in the CRC or no start, it issues an output.
+
+This function checks the bit sequence. On an error in the CRC or no start, it issues an output.
 
 Input:  $object,$name,@bit_msg
 Output:
@@ -1181,7 +1237,8 @@ sub postDemo_FHT80 {
 ############################# package lib::SD_Protocols, test exists
 
 =item postDemo_FHT80TF()
-This sub checks the bit sequence. On an error in the CRC or no start, it issues an output.
+
+This function checks the bit sequence. On an error in the CRC or no start, it issues an output.
 
 Input:  $object,$name,@bit_msg
 Output:
@@ -1246,7 +1303,8 @@ sub postDemo_FHT80TF {
 ############################# package lib::SD_Protocols, test exists
 
 =item postDemo_WS7035()
-This sub checks the bit sequence. On an error in the CRC or no start, it issues an output.
+
+This function checks the bit sequence. On an error in the CRC or no start, it issues an output.
 
 Input:  $object,$name,@bit_msg
 Output:
@@ -1293,7 +1351,8 @@ sub postDemo_WS7035 {
 ############################# package lib::SD_Protocols, test exists
 
 =item postDemo_WS2000()
-This sub checks the bit sequence. On an error in the CRC or no start, it issues an output.
+
+This function checks the bit sequence. On an error in the CRC or no start, it issues an output.
 
 Input:  $object,$name,@bit_msg
 Output:
@@ -1414,7 +1473,8 @@ sub postDemo_WS2000 {
 ############################# package lib::SD_Protocols, test exists
 
 =item postDemo_WS7053()
-This sub checks the bit sequence. On an error in the CRC or no start, it issues an output.
+
+This function checks the bit sequence. On an error in the CRC or no start, it issues an output.
 
 Input:  $object,$name,@bit_msg
 Output:
@@ -1466,6 +1526,7 @@ sub postDemo_WS7053 {
 ############################# package lib::SD_Protocols, test exists
 
 =item postDemo_lengtnPrefix()
+
 calculates the hex (in bits) and adds it at the beginning of the message
 
 Input:  $object,$name,@bit_msg
@@ -1489,10 +1550,9 @@ sub postDemo_lengtnPrefix {
 
 =item Convbit2Arctec()
 
-This sub convert 0 -> 01, 1 -> 10 to be compatible with IT Module.
+This function convert 0 -> 01, 1 -> 10 to be compatible with IT Module.
 
 Input:  @bit_msg
-
 Output:
         converted message
 
@@ -1513,7 +1573,8 @@ sub Convbit2Arctec {
 ############################# package lib::SD_Protocols, test exists
 
 =item Convbit2itv1()
-This sub convert 0F -> 01 (F) to be compatible with CUL.
+
+This function convert 0F -> 01 (F) to be compatible with CUL.
 
 Input:  $msg
 Output:
@@ -1536,11 +1597,10 @@ sub Convbit2itv1 {
 
 =item ConvHE800()
 
-This sub checks the length of the bits.
+This function checks the length of the bits.
 If the length is less than 40, it adds a 0.
 
 Input:  $name, @bit_msg
-
 Output:
         scalar converted message on success 
 
@@ -1563,7 +1623,8 @@ sub ConvHE800 {
 ############################# package lib::SD_Protocols, test exists
 
 =item ConvHE_EU()
-This sub checks the length of the bits.
+
+This function checks the length of the bits.
 If the length is less than 72, it adds a 0.
 
 Input:  $name, @bit_msg
@@ -1587,10 +1648,10 @@ sub ConvHE_EU {
 ############################# package lib::SD_Protocols, test exists
 
 =item ConvITV1_tristateToBit()
-This sub Convert 0 -> 00, 1 -> 11, F => 01 to be compatible with IT Module.
+
+This function Convert 0 -> 00, 1 -> 11, F => 01 to be compatible with IT Module.
 
 Input:  $msg
-
 Output:
         converted message
 
@@ -1610,7 +1671,8 @@ sub ConvITV1_tristateToBit {
 ############################# package lib::SD_Protocols, test exists
 
 =item PreparingSend_FS20_FHT()
-This sub prepares the send message.
+
+This function prepares the send message.
 
 Input:  $id,$sum,$msg
 Output:
@@ -1653,7 +1715,8 @@ sub _xFSK_methods_behind_here {
 ############################# package lib::SD_Protocols, test exists
 
 =item ConvPCA301()
-This sub checks crc and converts data to a format which the PCA301 module can handle
+
+This function checks crc and converts data to a format which the PCA301 module can handle
 croaks if called with less than one parameters
 
 Input:  $hexData
@@ -1703,7 +1766,8 @@ sub ConvPCA301 {
 ############################# package lib::SD_Protocols, test exists
 
 =item ConvKoppFreeControl()
-This sub checks crc and converts data to a format which the KoppFreeControl module can handle
+
+This function checks crc and converts data to a format which the KoppFreeControl module can handle
 croaks if called with less than one parameters
 
 Input:  $hexData
@@ -1742,7 +1806,8 @@ sub ConvKoppFreeControl {
 ############################# package lib::SD_Protocols, test exists
 
 =item ConvLaCrosse()
-This sub checks crc and converts data to a format which the LaCrosse module can handle
+
+This function checks crc and converts data to a format which the LaCrosse module can handle
 croaks if called with less than one parameter
 
 Input:  $hexData
