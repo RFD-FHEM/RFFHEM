@@ -1591,11 +1591,12 @@ package lib::SD_ProtocolData;
 				length_min      => '24',
 				length_max      => '24',
 			},
-		"56"	=>	## Celexon
+		"56"	=>	## Celexon Motorleinwand
+							# https://forum.fhem.de/index.php/topic,52025.0.html @Horst12345
 			{
 				name            => 'Celexon',
 				id              => '56',
-				knownFreqs      => '',
+				knownFreqs      => '433.92',
 				clockabs        => 200,
 				zero            => [1,-3],
 				one             => [3,-1],
