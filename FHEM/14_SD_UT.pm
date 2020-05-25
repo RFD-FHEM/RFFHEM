@@ -70,32 +70,32 @@
 #     0111010011	"power_on_off"		- nur 10 Bit, SIGNALduino.pm hängt 2 Nullen an
 #    https://github.com/RFD-FHEM/RFFHEM/issues/331
 #			nibble 0-1 -> Ident | nibble 2-4 -> Tastencode
-#     light_on_off   - hex_lengh 5  get sduino_dummy raw MU;;P0=710;;P1=353;;P2=-403;;P4=-761;;P6=-16071;;D=20204161204120412041204120414141204120202041612041204120412041204141412041202020416120412041204120412041414120412020204161204120412041204120414141204120202041;;CP=1;;R=40;;
-#     novy           - hex_lengh 3  get sduino_dummy raw MU;;P0=706;;P1=-763;;P2=370;;P3=-405;;P4=-15980;;D=0123012301230304230123012301230123012303042;;CP=2;;R=42;;
-#     power_on_off   - hex_lengh 5  get sduino_dummy raw MU;;P0=-756;;P1=718;;P2=354;;P3=-395;;P4=-16056;;D=01020202310231310202423102310231023102310202023102313102024231023102310231023102020231023131020242310231023102310231020202310231310202;;CP=2;;R=41;;
-#     speed_minus    - hex_lengh 3  get sduino_dummy raw MU;;P0=-8032;;P1=364;;P2=-398;;P3=700;;P4=-760;;P5=-15980;;D=0123412341234123412341412351234123412341234123414123512341234123412341234141235123412341234123412341412351234123412341234123414123;;CP=1;;R=40;;
-#}    speed_plus     - hex_lengh 3  get sduino_dummy raw MU;;P0=22808;;P1=-24232;;P2=701;;P3=-765;;P4=357;;P5=-15970;;P7=-406;;D=012345472347234723472347234723454723472347234723472347234547234723472347234723472345472347234723472347234723454723472347234723472347234;;CP=4;;R=39;;
+#     light_on_off   - hex_length 5  get sduino_dummy raw MU;;P0=710;;P1=353;;P2=-403;;P4=-761;;P6=-16071;;D=20204161204120412041204120414141204120202041612041204120412041204141412041202020416120412041204120412041414120412020204161204120412041204120414141204120202041;;CP=1;;R=40;;
+#     novy           - hex_length 3  get sduino_dummy raw MU;;P0=706;;P1=-763;;P2=370;;P3=-405;;P4=-15980;;D=0123012301230304230123012301230123012303042;;CP=2;;R=42;;
+#     power_on_off   - hex_length 5  get sduino_dummy raw MU;;P0=-756;;P1=718;;P2=354;;P3=-395;;P4=-16056;;D=01020202310231310202423102310231023102310202023102313102024231023102310231023102020231023131020242310231023102310231020202310231310202;;CP=2;;R=41;;
+#     speed_minus    - hex_length 3  get sduino_dummy raw MU;;P0=-8032;;P1=364;;P2=-398;;P3=700;;P4=-760;;P5=-15980;;D=0123412341234123412341412351234123412341234123414123512341234123412341234141235123412341234123412341412351234123412341234123414123;;CP=1;;R=40;;
+#}    speed_plus     - hex_length 3  get sduino_dummy raw MU;;P0=22808;;P1=-24232;;P2=701;;P3=-765;;P4=357;;P5=-15970;;P7=-406;;D=012345472347234723472347234723454723472347234723472347234547234723472347234723472345472347234723472347234723454723472347234723472347234;;CP=4;;R=39;;
 ###
 # - Remote Control Novy_840039 for Novy Cloud 230 kitchen hood [Protocol 86] (Länge je nach Taste 12 oder 18 Bit) [additionally Protocol 81]
 #	https://github.com/RFD-FHEM/RFFHEM/issues/792 | https://forum.fhem.de/index.php/topic,107867.0.html
 #{		nibble 0-1 -> Ident | nibble 2-4 -> Tastencode
-#     0111010011	"power_on_off"            - nur 10 Bit, SIGNALduino.pm hängt 2 Nullen an   hex_lengh 5  get sduino_dummy raw MU;;P0=-749;;P1=378;;P2=-456;;P3=684;;P4=-16081;;D=01230101012301232301014123012301230123012301010123012323010141230123012301230123010101230123230101412;;CP=1;;R=66;;
-#     0110110110	"cooking_light_on"				- i.O.                                           hex_lengh 5  get sduino_dummy raw MU;;P0=-4768;;P1=380;;P2=-397;;P3=690;;P4=-755;;P5=-16077;;CP=1;;R=39;;D=0123412341234123412341412341412341412351234123412341234123414123414123414123;;O;;w=0;;
-#     0110110100	"cooking_light_off"				- i.O.                                           hex_lengh 5  get sduino_dummy raw MU;;P0=382;;P1=200;;P2=-745;;P4=-394;;P5=696;;P6=-16083;;CP=0;;R=81;;D=1204520204520204520454560452045204520452045202045202045204545;;O;;w=0;;
-#     0110110101	"cooking_light_dim_plus"  - i.O.                                           hex_lengh 5  get sduino_dummy raw MU;;P0=-753;;P1=387;;P2=-419;;P3=679;;P6=-16050;;CP=1;;R=58;;D=0123012301012301012301230161230123012301230123010123010123012301;;p;;w=0;;
-#     0110110011	"cooking_light_dim_minus" - i.O.                                           hex_lengh 5  get sduino_dummy raw MU;;P1=386;;P2=-394;;P3=694;;P4=-794;;P5=-16064;;CP=1;;R=51;;D=123412341234123412341412341412323414151234123412341234123414123414123234141;;p;;w=0;;
-#     0111001110	"cooking_light_cold"			- i.O.                                           hex_lengh 5  get sduino_dummy raw MU;;P0=-92;;P1=371;;P2=-738;;P4=-393;;P5=702;;P6=-16072;;CP=1;;R=69;;D=012145214521212145452121214561452145214521452145212121454521212145;;e;;w=0;;
-#     0111001011	"cooking_light_warm"			- i.O.                                           hex_lengh 5  get sduino_dummy raw MU;;P0=-17440;;P1=381;;P2=-415;;P3=668;;P4=-756;;P6=-6786;;CP=1;;R=85;;D=0123412341234123412341414123234123414101634123414141232341234141;;e;;w=0;;
-#     0110111110	"ambient_light_on"				- i.O.                                           hex_lengh 5  get sduino_dummy raw MU;;P0=-9524;;P1=364;;P2=-414;;P3=669;;P4=-755;;P5=-16076;;CP=1;;R=83;;D=0123412341234123412341412341414141412351234123412341234123414123414141414123;;e;;w=0;;
-#     0110111100	"ambient_light_off"				- i.O.                                           hex_lengh 5  get sduino_dummy raw MU;;P1=371;;P2=-406;;P3=685;;P4=-744;;P6=-16050;;CP=1;;R=88;;D=123412341234123412341412341414141232361234123412341234123414123414141412323;;e;;w=0;;
-#     0110111101	"ambient_light_dim_plus"  - i.O.                                           hex_lengh 5  get sduino_dummy raw MU;;P0=-10584;;P1=362;;P2=-417;;P3=678;;P4=-765;;P5=-16075;;CP=1;;R=67;;D=0123412341234123412341412341414141234151234123412341234123414123414141412341;;O;;w=0;;
-#     0110111011	"ambient_light_dim_minus" - i.O.                                           hex_lengh 5  get sduino_dummy raw MU;;P2=-14541;;P3=-396;;P4=707;;P5=-733;;P6=367;;CP=6;;R=86;;D=62634563456345634563456563456565634565626345634563456345634565634565656345656;;p;;w=0;;
-#     0111010110	"ambient_light_cold"			- i.O.                                           hex_lengh 5  get sduino_dummy raw MU;;P1=363;;P2=-416;;P3=683;;P4=-755;;P5=-16073;;CP=1;;R=74;;D=123412341234123412341414123412341412351234123412341234123414141234123414123;;p;;w=0;;
-#     0111001101	"ambient_light_warm"			- i.O.                                           hex_lengh 5  get sduino_dummy raw MU;;P0=381;;P2=-751;;P4=-419;;P5=678;;P6=-16060;;CP=0;;R=78;;D=6045204520452045204520202045452020452060452045204520452045202020454520204520;;p;;w=1;;
-#     0110        "fan_minus"               - i.O.                                           hex_lengh 3  get sduino_dummy raw MU;;P0=388;;P1=-756;;P2=264;;P3=-399;;P4=683;;P5=-16082;;CP=0;;R=67;;D=0123410341034103410341050341034103410341034103410;;e;;w=0;;
-#     0101        "fan_plus"                - i.O.                                           hex_lengh 3  get sduino_dummy raw MU;;P1=-16074;;P2=366;;P3=-757;;P6=-422;;P7=680;;CP=2;;R=81;;D=671267326732673267326732326712673267326732673267323267;;e;;w=0;;
-#     0110011101	"fan_left"                - not assigned for Novy Cloud 230                hex_lengh 5  get sduino_dummy raw MU;;P0=378;;P2=-788;;P3=-434;;P4=649;;P5=-16070;;CP=0;;R=79;;D=02034203420203434202020342050342034203420342034202034342020203420;;p;;w=0;;
-#     0110011010	"fan_right"               - not assigned for Novy Cloud 230                hex_lengh 5  get sduino_dummy raw MU;;P0=-16705;;P1=361;;P2=-2704;;P3=663;;P4=-778;;P5=-423;;CP=1;;R=68;;D=012341534153415341415353414153415301534153415341534153414153534141534153;;O;;w=0;;
+#     0111010011	"power_on_off"            - nur 10 Bit, SIGNALduino.pm hängt 2 Nullen an   hex_length 5  get sduino_dummy raw MU;;P0=-749;;P1=378;;P2=-456;;P3=684;;P4=-16081;;D=01230101012301232301014123012301230123012301010123012323010141230123012301230123010101230123230101412;;CP=1;;R=66;;
+#     0110110110	"cooking_light_on"				- i.O.                                           hex_length 5  get sduino_dummy raw MU;;P0=-4768;;P1=380;;P2=-397;;P3=690;;P4=-755;;P5=-16077;;CP=1;;R=39;;D=0123412341234123412341412341412341412351234123412341234123414123414123414123;;O;;w=0;;
+#     0110110100	"cooking_light_off"				- i.O.                                           hex_length 5  get sduino_dummy raw MU;;P0=382;;P1=200;;P2=-745;;P4=-394;;P5=696;;P6=-16083;;CP=0;;R=81;;D=1204520204520204520454560452045204520452045202045202045204545;;O;;w=0;;
+#     0110110101	"cooking_light_dim_plus"  - i.O.                                           hex_length 5  get sduino_dummy raw MU;;P0=-753;;P1=387;;P2=-419;;P3=679;;P6=-16050;;CP=1;;R=58;;D=0123012301012301012301230161230123012301230123010123010123012301;;p;;w=0;;
+#     0110110011	"cooking_light_dim_minus" - i.O.                                           hex_length 5  get sduino_dummy raw MU;;P1=386;;P2=-394;;P3=694;;P4=-794;;P5=-16064;;CP=1;;R=51;;D=123412341234123412341412341412323414151234123412341234123414123414123234141;;p;;w=0;;
+#     0111001110	"cooking_light_cold"			- i.O.                                           hex_length 5  get sduino_dummy raw MU;;P0=-92;;P1=371;;P2=-738;;P4=-393;;P5=702;;P6=-16072;;CP=1;;R=69;;D=012145214521212145452121214561452145214521452145212121454521212145;;e;;w=0;;
+#     0111001011	"cooking_light_warm"			- i.O.                                           hex_length 5  get sduino_dummy raw MU;;P0=-17440;;P1=381;;P2=-415;;P3=668;;P4=-756;;P6=-6786;;CP=1;;R=85;;D=0123412341234123412341414123234123414101634123414141232341234141;;e;;w=0;;
+#     0110111110	"ambient_light_on"				- i.O.                                           hex_length 5  get sduino_dummy raw MU;;P0=-9524;;P1=364;;P2=-414;;P3=669;;P4=-755;;P5=-16076;;CP=1;;R=83;;D=0123412341234123412341412341414141412351234123412341234123414123414141414123;;e;;w=0;;
+#     0110111100	"ambient_light_off"				- i.O.                                           hex_length 5  get sduino_dummy raw MU;;P1=371;;P2=-406;;P3=685;;P4=-744;;P6=-16050;;CP=1;;R=88;;D=123412341234123412341412341414141232361234123412341234123414123414141412323;;e;;w=0;;
+#     0110111101	"ambient_light_dim_plus"  - i.O.                                           hex_length 5  get sduino_dummy raw MU;;P0=-10584;;P1=362;;P2=-417;;P3=678;;P4=-765;;P5=-16075;;CP=1;;R=67;;D=0123412341234123412341412341414141234151234123412341234123414123414141412341;;O;;w=0;;
+#     0110111011	"ambient_light_dim_minus" - i.O.                                           hex_length 5  get sduino_dummy raw MU;;P2=-14541;;P3=-396;;P4=707;;P5=-733;;P6=367;;CP=6;;R=86;;D=62634563456345634563456563456565634565626345634563456345634565634565656345656;;p;;w=0;;
+#     0111010110	"ambient_light_cold"			- i.O.                                           hex_length 5  get sduino_dummy raw MU;;P1=363;;P2=-416;;P3=683;;P4=-755;;P5=-16073;;CP=1;;R=74;;D=123412341234123412341414123412341412351234123412341234123414141234123414123;;p;;w=0;;
+#     0111001101	"ambient_light_warm"			- i.O.                                           hex_length 5  get sduino_dummy raw MU;;P0=381;;P2=-751;;P4=-419;;P5=678;;P6=-16060;;CP=0;;R=78;;D=6045204520452045204520202045452020452060452045204520452045202020454520204520;;p;;w=1;;
+#     0110        "fan_minus"               - i.O.                                           hex_length 3  get sduino_dummy raw MU;;P0=388;;P1=-756;;P2=264;;P3=-399;;P4=683;;P5=-16082;;CP=0;;R=67;;D=0123410341034103410341050341034103410341034103410;;e;;w=0;;
+#     0101        "fan_plus"                - i.O.                                           hex_length 3  get sduino_dummy raw MU;;P1=-16074;;P2=366;;P3=-757;;P6=-422;;P7=680;;CP=2;;R=81;;D=671267326732673267326732326712673267326732673267323267;;e;;w=0;;
+#     0110011101	"fan_left"                - not assigned for Novy Cloud 230                hex_length 5  get sduino_dummy raw MU;;P0=378;;P2=-788;;P3=-434;;P4=649;;P5=-16070;;CP=0;;R=79;;D=02034203420203434202020342050342034203420342034202034342020203420;;p;;w=0;;
+#     0110011010	"fan_right"               - not assigned for Novy Cloud 230                hex_length 5  get sduino_dummy raw MU;;P0=-16705;;P1=361;;P2=-2704;;P3=663;;P4=-778;;P5=-423;;CP=1;;R=68;;D=012341534153415341415353414153415301534153415341534153414153534141534153;;O;;w=0;;
 #}
 ###############################################################################################################################################################################
 # - CAME Drehtor Antrieb - remote CAME_TOP_432EV [Protocol 86] and [additionally Protocol 81]
@@ -341,13 +341,13 @@ my %models = (
 											"111101" 	=> "3_fan_high_speed",
 											"101111" 	=> "light_on_off",
 											"111110"	=> "fan_off",
-											hex_lengh	=> "3",
+											hex_length => [3],
 											Protocol 	=> "P29",
 											Typ				=> "remote"
 										},
 	"CAME_TOP_432EV" =>	{	"1110"		=> "left_button",
 												"1101"		=> "right_button",
-												hex_lengh	=> "3",
+												hex_length => [3],
 												Protocol	=> "P86",
 												Typ				=> "remote"
 											},
@@ -357,12 +357,12 @@ my %models = (
 												"1000"    => "power_on",
 												"1010"    => "flickering_slowly",
 												"1100"    => "brightness_plus",
-												hex_lengh	=> "5",
+												hex_length => [5],
 												Protocol  => "P14",
 												Typ       => "remote"
 											},
 	"HS1_868_BS" =>	{ "0"				=> "send",
-										hex_lengh	=> "11",
+										hex_length => [11],
 										Protocol	=> "P69",
 										Typ				=> "remote"
 									},
@@ -370,14 +370,14 @@ my %models = (
 							"1011"		=> "button_2",
 							"1110"		=> "button_3",
 							"1101"		=> "button_4",
-							hex_lengh	=> "11",
+							hex_length => [11],
 							Protocol 	=> "P69",
 							Typ				=> "remote"
 						},
 	"Krinner_LUMIX" =>	{	"0000"			=> "off",
 												"0001"			=> "on",
 												Protocol		=> "P92",
-												hex_lengh		=> "8",
+												hex_length => [8],
 												Typ					=> "remote"
 											},
 	"OR28V" =>	{	"000000"  => "volume_mute",
@@ -426,7 +426,7 @@ my %models = (
 								"110111"  => "*",
 								"111000"  => "#",
 								Protocol	=> "P68",
-								hex_lengh	=> "5",
+								hex_length => [5],
 								Typ				=> "remote"
 							},
 	"Novy_840029" => 	{	"0100"        => "novy",
@@ -434,7 +434,7 @@ my %models = (
 											"0110"        => "speed_minus",
 											"0111010001"  => "light_on_off",	# 0111010000
 											"0111010011"  => "power_on_off",	# 0111010010
-											hex_lengh			=> "3,5",           # 3 or 5, not 3.5
+											hex_length => [3,5],           # 3 or 5, not 3.5
 											Protocol			=> "P86",
 											Typ						=> "remote"
 										},
@@ -455,7 +455,7 @@ my %models = (
 											"0101"        => "fan_plus",                # Novy_840029 same code!
 											"0110011101"  => "fan_left",
 											"0110011010"  => "fan_right",
-											hex_lengh			=> "3,5",                     # 3 or 5, not 3.5
+											hex_length => [3,5],           # 3 or 5, not 3.5
 											Protocol			=> "P86",
 											Typ						=> "remote"
 										},
@@ -471,7 +471,7 @@ my %models = (
 										"00011110" 	=> "Master_off",
 										"00010100" 	=> "Unknown_up",
 										"00000101" 	=> "Unknown_down",
-										hex_lengh		=> "5",
+										hex_length => [5],
 										Protocol		=> "P34",
 										Typ					=> "remote"
 									},
@@ -485,7 +485,7 @@ my %models = (
 								"11010010" 	=> "Ch4_off",		# 11011010101010110010010101010100 11010010
 								"10100101" 	=> "Master_on",	# 11011010101010110010010101010100 10100101
 								"01011010" 	=> "Master_off",# 11011010101010110010010101010100 01011010
-								hex_lengh		=> "10",
+								hex_length => [10],
 								Protocol		=> "P26",
 								Typ					=> "remote"
 							},
@@ -509,7 +509,7 @@ my %models = (
 										"10100101"	=> "Ch3_dim_down",	# after CH3 on/off
 										"00110110"	=> "Ch4_dim_up",		# after CH4 on/off
 										"00100111"	=> "Ch4_dim_down",	# after CH4 on/off
-										hex_lengh		=> "5",
+										hex_length => [5],
 										Protocol		=> "P34",
 										Typ					=> "remote"
 									},
@@ -523,7 +523,7 @@ my %models = (
 								"111101"	=> "fan_off",
 								"111110"	=> "light_on_off",
 								"101101"	=> "set",
-								hex_lengh	=> "3",
+								hex_length => [3],
 								Protocol	=> "P83",
 								Typ				=> "remote"
 							},
@@ -544,12 +544,12 @@ my %models = (
 								'01111000' => 'fan_4', # is not sent directly
 								'0000' => 'light_off', # is not sent directly
 								'1111' => 'light_on', # is not sent directly
-								hex_lengh => '4',
+								hex_length => [4],
 								Protocol => 'P104',
 								Typ => 'remote'
 							},
 	"SA_434_1_mini" =>	{	"0"				=> "send",
-												hex_lengh	=> "3",
+												hex_length => [3],
 												Protocol	=> "P81",
 												Typ				=> "remote"
 											},
@@ -573,18 +573,18 @@ my %models = (
 									"00000100"	=> "Group_9_off",		# 0x04
 									"00010011"	=> "All_on",				# 0x13
 									"00010100"	=> "All_off",				# 0x14
-									hex_lengh		=> "13",
+									hex_length => [13],
 									Protocol	=> "P95",
 									Typ				=> "remote"
 								},
 	"Tedsen_SKX1xx" =>	{	"1100"		=> "Button_1",	# tristate 10
-												hex_lengh	=> "5",
+												hex_length => [5],
 												Protocol	=> "P46",
 												Typ				=> "remote"
 											},
 	"Tedsen_SKX2xx" =>	{	"1000"		=> "Button_1",	#	tristate F0 = GEIGER Ab:  0-
 												"1010"		=> "Button_2",	# tristate FF = GEIGER Auf: 00
-												hex_lengh	=> "5",
+												hex_length => [5],
 												Protocol	=> "P46",
 												Typ				=> "remote"
 											},
@@ -592,7 +592,7 @@ my %models = (
 												"1010"		=> "Button_2",	# tristate FF = GEIGER Auf: 00
 												"0000"		=> "Button_3",	# tristate 00 = GEIGER Ab:  --
 												"0010"		=> "Button_4",	# tristate 0F = GEIGER Auf: -0
-												hex_lengh	=> "5",
+												hex_length => [5],
 												Protocol	=> "P46",
 												Typ				=> "remote"
 											},
@@ -602,18 +602,18 @@ my %models = (
 												"0010"		=> "Button_4",	# tristate 0F = GEIGER Auf: -0
 												"1110"		=> "Button_5",	# tristate 1F = GEIGER Ab:  +0
 												"1011"		=> "Button_6",	# tristate F1 = GEIGER Auf: 0+
-												hex_lengh	=> "5",
+												hex_length => [5],
 												Protocol	=> "P46",
 												Typ				=> "remote"
 											},
 	"Unitec_47031" =>	{ Protocol	=> "P30",
-											hex_lengh	=> "3",
+											hex_length => [3],
 											Typ				=> "switch"
 										},
 	"LED_XM21_0" =>	{	"1100"			=> "off",
 										"11111111"	=> "on",
 										Protocol		=> "P76",
-										hex_lengh		=> "15,16",
+										hex_length => [15,16],
 										Typ					=> "remote"
 									},
 	"SF01_01319004" =>	{ "1100"		=> "plus",
@@ -621,7 +621,7 @@ my %models = (
 												"1101"		=> "interval",
 												"1110"		=> "light_on_off",
 												"1001"		=> "delay",
-												hex_lengh	=> "5",
+												hex_length => [5],
 												Protocol 	=> "P86",
 												Typ				=> "remote"
 											},
@@ -630,7 +630,7 @@ my %models = (
 														"0101"		=> "interval",
 														"0110"		=> "light_on_off",
 														"0001"		=> "delay",
-														hex_lengh	=> "5",
+														hex_length => [5],
 														Protocol 	=> "P86",
 														Typ				=> "remote"
 													},
@@ -644,19 +644,19 @@ my %models = (
 									"1100" => "dimdown",
 									"1110" => "dimup",
 									Protocol	=> "P93",
-									hex_lengh	=> "9",
+									hex_length => [9],
 									Typ				=> "remote"
 								},
 	"MD_2003R" =>	{	Protocol	=> "P91", 	#P91.1
-									hex_lengh	=> "9",
+									hex_length => [9],
 									Typ				=> "gas"
 								},
 	"MD_210R" =>	{	Protocol	=> "P91", 	#P91.1
-									hex_lengh	=> "9",
+									hex_length => [9],
 									Typ				=> "switch"
 								},
 	"MD_2018R" =>	{	Protocol	=> "P91", 	#P91.1
-									hex_lengh	=> "9",
+									hex_length => [9],
 									Typ				=> "vibration"
 								},
 	"RC_10" =>	{	"1" => "on",
@@ -670,14 +670,14 @@ my %models = (
 									"100" => "all",
 								},
 								Protocol	=> "P90",
-								hex_lengh	=> "9",
+								hex_length => [9],
 								Typ				=> "remote"
 							},
 	"RCnoName20" =>	{	"000010001111000" => "plus",
 										"000000101000100" => "minus",
 										"000001010000100" => "off",
 										"000100011011000" => "on",
-										hex_lengh	=> "8",
+										hex_length => [8],
 										Protocol 	=> "P20",
 										Typ				=> "remote"
 									},
@@ -693,17 +693,17 @@ my %models = (
 									"1010" => "info",
 									"1011" => "mode",
 									"1100" => "help",
-									hex_lengh	=> "10",
+									hex_length => [10],
 									Protocol 	=> "P97",
 									Typ				=> "remote"
 								},
 	"Navaris" =>	{	"0"				=> "send",
-									hex_lengh	=> "6",
+									hex_length => [6],
 									Protocol	=> "P99",
 									Typ				=> "remote"
 								},
 	"unknown" =>	{	Protocol	=> "any",
-									hex_lengh	=> "",
+									hex_length => [],
 									Typ				=> "not_exist"
 								}
 );
@@ -719,7 +719,7 @@ sub SD_UT_Initialize($) {
 	$hash->{AttrFn}			= "SD_UT_Attr";
 	$hash->{AttrList}		= "repeats:1,2,3,4,5,6,7,8,9 IODev do_not_notify:1,0 ".
 												"ignore:0,1 showtime:1,0 model:".join(",", sort keys %models).
-												" $readingFnAttributes UTclock";
+												" $readingFnAttributes UTclock UTfrequency";
 	$hash->{AutoCreate} =
 	{
 		"MD_2003R.*"	 => {ATTR => "model:MD_2003R", FILTER => "%NAME", autocreateThreshold => "3:180", GPLOT => ""},
@@ -818,7 +818,6 @@ sub SD_UT_Define($$) {
 	} else {
 		$attr{$name}{model}	= $devicetyp	if( not defined( $attr{$name}{model} ) );
 	}
-	$attr{$name}{room}	= "SD_UT"	if( not defined( $attr{$name}{room} ) );
 
 	AssignIoPort($hash, $iodevice);
 }
@@ -937,7 +936,7 @@ sub SD_UT_Set($$$@) {
 			$msgEnd .= "#R" . $repeats;
 		############ Manax | mumbi ############
 		} elsif ($model eq "RC_10") {
-			return "ERROR: to send, please push button on and off again on remote" if ( (ReadingsVal($name, "x_n5-8_on", "0") eq "0") || (ReadingsVal($name, "x_n5-8_off", "0") eq "0") || (ReadingsVal($name, "x_n4", "0") eq "0") );
+			return "ERROR! $name: To send, please push button on and off again on remote." if ( (ReadingsVal($name, "x_n5-8_on", "0") eq "0") || (ReadingsVal($name, "x_n5-8_off", "0") eq "0") || (ReadingsVal($name, "x_n4", "0") eq "0") );
 			$definition[1] = substr($definition[1],0,4);
 			my $adr = sprintf( "%016b", hex($definition[1]));	# argument 1 - adress to binary with 16 digits
 			my $unknown1 = ReadingsVal($name, "x_n4", "0");
@@ -1064,6 +1063,17 @@ sub SD_UT_Set($$$@) {
 		}
 
 		$msg .= '#C' . $UTclock if (defined($UTclock));  # optional Clockpulse
+
+		my $f = AttrVal($name,'UTfrequency',undef);
+		if (defined($f)) {
+			$f = $f / 26 * 65536;
+			my $f2 = sprintf("%02x", $f / 65536);
+			my $f1 = sprintf("%02x", int($f % 65536) / 256);
+			my $f0 = sprintf("%02x", $f % 256);
+			my $arg = sprintf("%.3f", (hex($f2)*65536+hex($f1)*256+hex($f0))/65536*26);
+			Log3 $hash, 3, "$ioname: SD_UT_Set setting UTfrequency (0D,0E,0F) to $f2 $f1 $f0 = $arg MHz";
+			$msg .="#F$f2$f1$f0";
+		}
 
 		readingsSingleUpdate($hash, "LastAction", "send", 0) if ($models{$model}{Typ} eq "remote");
 		readingsSingleUpdate($hash, "state" , $cmd, 1);
@@ -1714,169 +1724,166 @@ sub SD_UT_Attr(@) {
 	my $state;
 	my $oldmodel = AttrVal($name, "model", "unknown");
 	my $bitData;
-	my $hex_lengh = length(InternalVal($name, "lastMSG", "0"));
+	my $hex_length = length(InternalVal($name, "lastMSG", "0"));
 
-	if ($cmd eq "set" && $attrName eq 'repeats' && $attrValue !~ m/^[1-9]$/i) {
-		return "$name: Unallowed value $attrValue for the attribute repetition (must be 1 - 9)!";
-	}
+	if ($cmd eq 'set') {
+		if ($attrName eq 'repeats' && $attrValue !~ m/^[1-9]$/xms) {
+			return "$name: Unallowed value $attrValue for the attribute repetition (must be 1 - 9)!";
+		}
+		if ($attrName eq 'UTfrequency' && ($attrValue !~ m/^[1-9]{1}[0-9]{0,2}\.?[0-9]*$/xms || $attrValue >= 1000.0)) {
+			return "$name: Invalid value $attrValue for the UTfrequency attribute. Values ​​such as: 433.92 are permitted.";
+		}
 
-	############ chance device models ############
-	if ($cmd eq "set" && $attrName eq "model" && $attrValue ne $oldmodel) {
+		############ change device models ############
+		if ($attrName eq 'model' && $attrValue ne $oldmodel) {
+			if (InternalVal($name, "bitMSG", "no data") ne "no data") {
+				my $devicemodel;
 
-		if (InternalVal($name, "bitMSG", "no data") ne "no data") {
-			my $devicemodel;
-
-			### ERROR for Users
-			my $allowed_models;
-			foreach my $keys (keys %models) {	# read allowed_models with the same hex_lengh
-				$allowed_models.= $keys.", " if ($models{$keys}{hex_lengh} eq $hex_lengh);
-			}
-
-			Log3 $name, 4, "SD_UT_Attr Check for the change, $oldmodel hex_lengh=$hex_lengh, attrValue=$attrValue needed hex_lengh=".$models{$attrValue}{hex_lengh};
-			return "ERROR! You want to choose the $oldmodel model to $attrValue.\nPlease check your selection.\nThe length of RAWMSG must be the same!\n\nAllowed models are: $allowed_models" if ($models{$attrValue}{hex_lengh} !~ /$hex_lengh/ && $oldmodel ne "unknown");	# variants one
-			return "ERROR! You want to choose the unknown model to $attrValue.\nPlease check your selection.\nRAWMSG length is wrong!\n\nAllowed models are: $allowed_models" if (not ($models{$attrValue}{hex_lengh} =~ /($hex_lengh)/ ) && $oldmodel eq "unknown");				  # variants two/three
-			### #### #### ###
-
-			if ($attrName eq "model" && $attrValue eq "unknown") {
-				readingsSingleUpdate($hash, "state", " Please define your model with attributes! ", 0);
-			}
-
-			foreach my $keys (sort keys %models) {
-				if($keys eq $attrValue) {
-					$attr{$name}{model}	= $attrValue;				# set new model
-					$bitData = InternalVal($name, "bitMSG", "-");
-					$devicemodel = $keys;
-					$state = "Defined";
-					last;
-				}
-			}
-
-			############ Westinghouse_Delancey RH787T ############
-			if ($attrName eq "model" && $attrValue eq "RH787T") {
-				$deviceCode = substr($bitData,1,4);
-				$deviceCode = sprintf("%X", oct( "0b$deviceCode" ) );
-				$devicename = $devicemodel."_".$deviceCode;
-			############ Westinghouse TR60C-1 ############
-			} elsif ($attrName eq 'model' && $attrValue eq 'TR60C1') {
-				$deviceCode = substr($bitData,0,4);
-				$deviceCode = sprintf("%X", oct( "0b$deviceCode" ) );
-				$devicename = $devicemodel."_".$deviceCode;
-			############ Westinghouse Buttons_five ############
-			} elsif ($attrName eq "model" && $attrValue eq "Buttons_five") {
-				$deviceCode = substr($bitData,8,4);
-				$deviceCode = sprintf("%X", oct( "0b$deviceCode" ) );
-				$devicename = $devicemodel."_".$deviceCode;
-			############ SA_434_1_mini	############
-			} elsif ($attrName eq "model" && $attrValue eq "SA_434_1_mini") {
-				$deviceCode = sprintf("%03X", oct( "0b$bitData" ) );
-				$devicename = $devicemodel."_".$deviceCode;
-			############ Tedsen_SKX1xx, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx	############
-			} elsif ($attrName eq "model" && ($attrValue eq "Tedsen_SKX1xx" || $attrValue eq "Tedsen_SKX2xx" || $attrValue eq "Tedsen_SKX4xx" || $attrValue eq "Tedsen_SKX6xx")) {
-				$deviceCode = SD_UT_bin2tristate(substr($bitData,0,14));					# only 14 bit from bitdata to tristate
-				$devicename = $devicemodel."_".$deviceCode;
-			############ Unitec_47031	############
-			} elsif ($attrName eq "model" && $attrValue eq "Unitec_47031") {
-				$deviceCode = substr($bitData,0,8);																# unklar derzeit! 10Dil auf Bild
-				$deviceCode = sprintf("%02X", oct( "0b$deviceCode" ) );
-				$devicename = $devicemodel."_".$deviceCode;
-			############ QUIGG_DMV ############
-			} elsif ($attrName eq "model" && $attrValue eq "QUIGG_DMV") {
-				$deviceCode = substr($bitData,0,12);
-				$deviceCode = sprintf("%03X", oct( "0b$deviceCode" ) );
-				$devicename = $devicemodel."_".$deviceCode;
-			############ TR_502MSV ############
-			} elsif ($attrName eq "model" && $attrValue eq "TR_502MSV") {
-				$deviceCode = substr($bitData,0,12);
-				$deviceCode = sprintf("%03X", oct( "0b$deviceCode" ) );
-				$devicename = $devicemodel."_".$deviceCode;
-			############ Novy_840029 || Novy_840039 ############
-			} elsif ($attrName eq "model" && ($attrValue eq "Novy_840029" || $attrValue eq "Novy_840039") ) {
-				$deviceCode = substr($bitData,0,8);
-				$deviceCode = sprintf("%02X", oct( "0b$deviceCode" ) );
-				$devicename = $devicemodel."_".$deviceCode;
-			############ CAME_TOP_432EV ############
-			} elsif ($attrName eq "model" && $attrValue eq "CAME_TOP_432EV") {
-				$deviceCode = substr($bitData,0,8);
-				$deviceCode = sprintf("%X", oct( "0b$deviceCode" ) );
-				$devicename = $devicemodel."_".$deviceCode;
-			############ NEFF SF01_01319004 || BOSCH SF01_01319004_Typ2 || Refsta Topdraft (Tecnowind) ############
-			} elsif ($attrName eq "model" && ($attrValue eq "SF01_01319004" || $attrValue eq "SF01_01319004_Typ2")) {
-				$deviceCode = substr($bitData,0,14) . "00";
-				$deviceCode = sprintf("%04X", oct( "0b$deviceCode" ) );
-				$devicename = $devicemodel."_".$deviceCode;
-			############ Hoermann HS1-868-BS	############
-			} elsif ($attrName eq "model" && $attrValue eq "HS1_868_BS") {
-				$deviceCode = sprintf("%09X", oct( "0b$bitData" ) );
-				$devicename = $devicemodel."_".$deviceCode;
-			############ Hoermann HSM4	############
-			} elsif ($attrName eq "model" && $attrValue eq "HSM4") {
-				$deviceCode = substr($bitData,8,28);
-				$deviceCode = sprintf("%07X", oct( "0b$deviceCode" ) );
-				$devicename = $devicemodel."_".$deviceCode;
-			############ Chilitec_22640	############
-			} elsif ($attrName eq "model" && $attrValue eq "Chilitec_22640") {
-				$deviceCode = substr($bitData,0,16);
-				$deviceCode = sprintf("%04X", oct( "0b$deviceCode" ) );
-				$devicename = $devicemodel."_".$deviceCode;
-			############ LED_XM21_0	############
-			} elsif ($attrName eq "model" && $attrValue eq "LED_XM21_0") {
-				$deviceCode = substr($bitData,0,56);
-				$deviceCode = sprintf("%14X", oct( "0b$deviceCode" ) );
-				$devicename = $devicemodel."_".$deviceCode;
-			############ Krinner_LUMIX	############
-			} elsif ($attrName eq "model" && $attrValue eq "Krinner_LUMIX") {
-				$deviceCode = substr($bitData,0,28);
-				$deviceCode = sprintf("%07X", oct( "0b$deviceCode" ) );
-				$devicename = $devicemodel."_".$deviceCode;
-			############ Manax | mumbi ############
-			} elsif ($attrName eq "model" && $attrValue eq "RC_10") {
-				$deviceCode = substr($bitData,0,16);
-				$deviceCode = sprintf("%04X", oct( "0b$deviceCode" ) );
-				
-				my $button = substr($bitData,20,3);
-				foreach my $keys (sort keys %{$models{RC_10}{buttons}}) {
-					if ($keys eq $button) {
-						$deviceCode = $deviceCode."_".$models{RC_10}{buttons}{$keys};
-						last;
+				### ERROR for users when change attribute model (search allowed models with the same hex_length)
+				my @all_models = keys %models;
+				my @allowed_model_list;
+				for my $i (0 .. @all_models - 1) {
+					if ( grep {$_ == $hex_length } @{$models{$all_models[$i]}{hex_length}} ) {
+						push @allowed_model_list, $all_models[$i];
 					}
 				}
-				
-				$devicename = $devicemodel."_".$deviceCode;
-			############ ESTO KL_RF01 ############
-			} elsif ($attrName eq "model" && $attrValue eq "KL_RF01") {
-				$deviceCode = substr($bitData,0,16);
-				$deviceCode = sprintf("%04X", oct( "0b$deviceCode" ) );
-				$devicename = $devicemodel."_".$deviceCode;
-			############ Techmar Garden Lights ############
-			} elsif ($attrName eq "model" && $attrValue eq "Techmar") {
-				$deviceCode = substr($bitData,0,32);
-				$deviceCode = sprintf("%08X", oct( "0b$deviceCode" ) );
-				$devicename = $devicemodel."_".$deviceCode;
-			############ Navaris	############
-			} elsif ($attrName eq "model" && $attrValue eq "Navaris") {
-				$deviceCode = sprintf("%06X", oct( "0b$bitData" ) );
-				$devicename = $devicemodel."_".$deviceCode;
-			############ unknown ############
+				my $allowed_models = join(', ' , sort @allowed_model_list); # convert to sorted string for output
+				Log3 $name, 4, "SD_UT_Attr Check for the change, $oldmodel hex_length=$hex_length, attrValue=$attrValue needed hex_length=@{$models{$attrValue}{hex_length}}";
+				return "ERROR! $name: You want to choose the $oldmodel model to $attrValue.\nPlease check your selection.\nThe length of DMSG must be the same!\n\nAllowed models are:\n$allowed_models" if ( not grep {$_ eq $attrValue} @allowed_model_list );
+
+				if ($attrValue eq "unknown") {
+					readingsSingleUpdate($hash, "state", " Please define your model with attributes! ", 0);
+				}
+
+				if ( exists $models{$attrValue} ) {
+					$attr{$name}{model}	= $attrValue;				# set new model
+					$bitData = InternalVal($name, "bitMSG", "-");
+					$devicemodel = $attrValue;
+					$state = "Defined";
+				}
+
+				############ Westinghouse_Delancey RH787T ############
+				if ($attrValue eq "RH787T") {
+					$deviceCode = substr($bitData,1,4);
+					$deviceCode = sprintf("%X", oct( "0b$deviceCode" ) );
+					$devicename = $devicemodel."_".$deviceCode;
+				############ Westinghouse TR60C-1 ############
+				} elsif ($attrValue eq 'TR60C1') {
+					$deviceCode = substr($bitData,0,4);
+					$deviceCode = sprintf("%X", oct( "0b$deviceCode" ) );
+					$devicename = $devicemodel."_".$deviceCode;
+				############ Westinghouse Buttons_five ############
+				} elsif ($attrValue eq "Buttons_five") {
+					$deviceCode = substr($bitData,8,4);
+					$deviceCode = sprintf("%X", oct( "0b$deviceCode" ) );
+					$devicename = $devicemodel."_".$deviceCode;
+				############ SA_434_1_mini	############
+				} elsif ($attrValue eq "SA_434_1_mini") {
+					$deviceCode = sprintf("%03X", oct( "0b$bitData" ) );
+					$devicename = $devicemodel."_".$deviceCode;
+				############ Tedsen_SKX1xx, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx	############
+				} elsif ($attrValue eq "Tedsen_SKX1xx" || $attrValue eq "Tedsen_SKX2xx" || $attrValue eq "Tedsen_SKX4xx" || $attrValue eq "Tedsen_SKX6xx") {
+					$deviceCode = SD_UT_bin2tristate(substr($bitData,0,14));					# only 14 bit from bitdata to tristate
+					$devicename = $devicemodel."_".$deviceCode;
+				############ Unitec_47031	############
+				} elsif ($attrValue eq "Unitec_47031") {
+					$deviceCode = substr($bitData,0,8);																# unklar derzeit! 10Dil auf Bild
+					$deviceCode = sprintf("%02X", oct( "0b$deviceCode" ) );
+					$devicename = $devicemodel."_".$deviceCode;
+				############ QUIGG_DMV ############
+				} elsif ($attrValue eq "QUIGG_DMV") {
+					$deviceCode = substr($bitData,0,12);
+					$deviceCode = sprintf("%03X", oct( "0b$deviceCode" ) );
+					$devicename = $devicemodel."_".$deviceCode;
+				############ TR_502MSV ############
+				} elsif ($attrValue eq "TR_502MSV") {
+					$deviceCode = substr($bitData,0,12);
+					$deviceCode = sprintf("%03X", oct( "0b$deviceCode" ) );
+					$devicename = $devicemodel."_".$deviceCode;
+				############ Novy_840029 || Novy_840039 ############
+				} elsif ($attrValue eq "Novy_840029" || $attrValue eq "Novy_840039") {
+					$deviceCode = substr($bitData,0,8);
+					$deviceCode = sprintf("%02X", oct( "0b$deviceCode" ) );
+					$devicename = $devicemodel."_".$deviceCode;
+				############ CAME_TOP_432EV ############
+				} elsif ($attrValue eq "CAME_TOP_432EV") {
+					$deviceCode = substr($bitData,0,8);
+					$deviceCode = sprintf("%X", oct( "0b$deviceCode" ) );
+					$devicename = $devicemodel."_".$deviceCode;
+				############ NEFF SF01_01319004 || BOSCH SF01_01319004_Typ2 || Refsta Topdraft (Tecnowind) ############
+				} elsif ($attrValue eq "SF01_01319004" || $attrValue eq "SF01_01319004_Typ2") {
+					$deviceCode = substr($bitData,0,14) . "00";
+					$deviceCode = sprintf("%04X", oct( "0b$deviceCode" ) );
+					$devicename = $devicemodel."_".$deviceCode;
+				############ Hoermann HS1-868-BS	############
+				} elsif ($attrValue eq "HS1_868_BS") {
+					$deviceCode = sprintf("%09X", oct( "0b$bitData" ) );
+					$devicename = $devicemodel."_".$deviceCode;
+				############ Hoermann HSM4	############
+				} elsif ($attrValue eq "HSM4") {
+					$deviceCode = substr($bitData,8,28);
+					$deviceCode = sprintf("%07X", oct( "0b$deviceCode" ) );
+					$devicename = $devicemodel."_".$deviceCode;
+				############ Chilitec_22640	############
+				} elsif ($attrValue eq "Chilitec_22640") {
+					$deviceCode = substr($bitData,0,16);
+					$deviceCode = sprintf("%04X", oct( "0b$deviceCode" ) );
+					$devicename = $devicemodel."_".$deviceCode;
+				############ LED_XM21_0	############
+				} elsif ($attrValue eq "LED_XM21_0") {
+					$deviceCode = substr($bitData,0,56);
+					$deviceCode = sprintf("%14X", oct( "0b$deviceCode" ) );
+					$devicename = $devicemodel."_".$deviceCode;
+				############ Krinner_LUMIX	############
+				} elsif ($attrValue eq "Krinner_LUMIX") {
+					$deviceCode = substr($bitData,0,28);
+					$deviceCode = sprintf("%07X", oct( "0b$deviceCode" ) );
+					$devicename = $devicemodel."_".$deviceCode;
+				############ Manax | mumbi ############
+				} elsif ($attrValue eq "RC_10") {
+					$deviceCode = substr($bitData,0,16);
+					$deviceCode = sprintf("%04X", oct( "0b$deviceCode" ) );
+					my $button = substr($bitData,20,3);
+					if ( exists $models{RC_10}{buttons}{$button} ) {
+						$deviceCode = $deviceCode."_".$models{RC_10}{buttons}{$button};
+					}
+					$devicename = $devicemodel."_".$deviceCode;
+				############ ESTO KL_RF01 ############
+				} elsif ($attrValue eq "KL_RF01") {
+					$deviceCode = substr($bitData,0,16);
+					$deviceCode = sprintf("%04X", oct( "0b$deviceCode" ) );
+					$devicename = $devicemodel."_".$deviceCode;
+				############ Techmar Garden Lights ############
+				} elsif ($attrValue eq "Techmar") {
+					$deviceCode = substr($bitData,0,32);
+					$deviceCode = sprintf("%08X", oct( "0b$deviceCode" ) );
+					$devicename = $devicemodel."_".$deviceCode;
+				############ Navaris	############
+				} elsif ($attrValue eq "Navaris") {
+					$deviceCode = sprintf("%06X", oct( "0b$bitData" ) );
+					$devicename = $devicemodel."_".$deviceCode;
+				############ unknown ############
+				} else {
+					$devicename = "unknown_please_select_model";
+					Log3 $name, 3, "SD_UT_Attr UNDEFINED sensor $attrValue (model=unknown)";
+				}
+
+				Log3 $name, 3, "SD_UT_Attr UNDEFINED sensor $attrValue detected, code $deviceCode (DoTrigger)" if ($devicemodel ne "unknown");
+
+				$modules{SD_UT}{defptr}{deletecache} = $name;	# delete old device
+				Log3 $name, 5, "SD_UT: Attr cmd=$cmd devicename=$name attrName=$attrName attrValue=$attrValue oldmodel=$oldmodel";
+
+				readingsSingleUpdate($hash, "state", $state, 0);
+
+				DoTrigger ("global","UNDEFINED unknown_please_select_model SD_UT unknown") if ($devicename eq "unknown_please_select_model");		# if user push attr return to unknown
+				DoTrigger ("global","UNDEFINED $devicename SD_UT $devicemodel $deviceCode") if ($devicename ne "unknown_please_select_model");	# create new device
+
+				$attr{$devicename}{model}	= "$attrValue"; # set model
+
 			} else {
-				$devicename = "unknown_please_select_model";
-				Log3 $name, 3, "SD_UT_Attr UNDEFINED sensor $attrValue (model=unknown)";
+				readingsSingleUpdate($hash, "state", "Please press button again!", 0);
+				return "Please press button again or receive more messages!\nOnly with another message can the model be defined.\nWe need bitMSG from message.";
 			}
-
-			Log3 $name, 3, "SD_UT_Attr UNDEFINED sensor $attrValue detected, code $deviceCode (DoTrigger)" if ($devicemodel ne "unknown");
-
-			$modules{SD_UT}{defptr}{deletecache} = $name;	# delete old device
-			Log3 $name, 5, "SD_UT: Attr cmd=$cmd devicename=$name attrName=$attrName attrValue=$attrValue oldmodel=$oldmodel";
-
-			readingsSingleUpdate($hash, "state", $state, 0);
-
-			DoTrigger ("global","UNDEFINED unknown_please_select_model SD_UT unknown") if ($devicename eq "unknown_please_select_model");		# if user push attr return to unknown
-			DoTrigger ("global","UNDEFINED $devicename SD_UT $devicemodel $deviceCode") if ($devicename ne "unknown_please_select_model");	# create new device
-
-			$attr{$devicename}{model}	= "$attrValue";				# set model
-
-		} else {
-			readingsSingleUpdate($hash, "state", "Please press button again!", 0);
-			return "Please press button again or receive more messages!\nOnly with another message can the model be defined.\nWe need bitMSG from message.";
 		}
 	}
 
@@ -1935,613 +1942,424 @@ sub SD_UT_tristate2bin($) {
 
 <a name="SD_UT"></a>
 <h3>SD_UT</h3>
-<ul>The module SD_UT is a universal module of SIGNALduino for devices or sensors.<br>
+<ul>
+	The module SD_UT is a universal module of SIGNALduino for devices or sensors.<br>
 	After the first creation of the device <code><b>unknown_please_select_model</b></code>, the user must define the device himself via the <code>model</code> attribute.<br>
-	If the device is not supported yet, bit data can be collected with the unknown_please_select_model device.<br><br>
+	If the device is not supported yet, bit data can be collected with the unknown_please_select_model device.
+	<br><br>
 	<i><u><b>Note:</b></u></i> As soon as the attribute model of a defined device is changed or deleted, the module re-creates a device of the selected type, and when a new message is run, the current device is deleted.
-	Devices of <u>the same or different type with the same deviceCode will result in errors</u>. PLEASE use different <code>deviceCode</code>.<br><br>
-	 <u>The following devices are supported:</u><br>
-	 <ul> - Atlantic Security sensors&nbsp;&nbsp;&nbsp;<small>(module model: MD-2003R, MD-2018R,MD-210R | Protokoll 91|91.1)</small><br>
-	 <code>&nbsp;&nbsp;&nbsp;note: the model MD_230R (water) is recognized as MD-2018R due to the same hardware ID!</code></ul>
-	 <ul> - BOSCH ceiling fan&nbsp;&nbsp;&nbsp;<small>(module model: SF01_01319004_Typ2 | protocol 86)</small></ul>
-	 <ul> - CAME swing gate drive&nbsp;&nbsp;&nbsp;<small>(module model: CAME_TOP_432EV | protocol 86)</small></ul>
-	 <ul> - ChiliTec LED X-Mas light&nbsp;&nbsp;&nbsp;<small>(module model: Chilitec_22640 | protocol 14)</small></ul>
-	 <ul> - ESTO ceiling lamp&nbsp;&nbsp;&nbsp;<small>(model: KL_RF01 | protocol 93)</small></ul>
-	 <ul> - Hoermann HS1-868-BS&nbsp;&nbsp;&nbsp;<small>(module model: HS1_868_BS | protocol 69)</small></ul>
-	 <ul> - Hoermann HSM4&nbsp;&nbsp;&nbsp;<small>(module model: HSM4 | protocol 69)</small></ul>
-	 <ul> - Krinner LUMIX X-Mas light string&nbsp;&nbsp;&nbsp;<small>(module model: Krinner_LUMIX | protocol 92)</small></ul>
-	 <ul> - LED_XM21_0 X-Mas light string&nbsp;&nbsp;&nbsp;<small>(module model: LED_XM21_0 | protocol 76)</small></ul>
-	 <ul> - TR-502MSV (LIDL, LIBRA, MANDOLYN, QUIGG), compatible GT-7008BS, GT-FSI-04, DMV-7008S, Powerfix RCB-I 3600&nbsp;&nbsp;&nbsp;<small>(module model: TR_502MSV | protocol 34)</small></ul>
-	 <ul> - Manax RCS250&nbsp;&nbsp;&nbsp;<small>(module model: RC_10 | protocol 90)</small></ul>
-	 <ul> - Medion OR28V&nbsp;&nbsp;&nbsp;<small>(module model: OR28V | protocol 68)</small></ul>
-	 <ul> - mumbi AFS300-s (remote control RC-10 | random code wireless switch RCS-22GS)&nbsp;&nbsp;&nbsp;<small>(module model: RC_10 | protocol 90)</small></ul>
-	 <ul> - Momento (remote control for wireless digital picture frame)&nbsp;&nbsp;&nbsp;<small>(module model: Momento | protocol 97)</small></ul>
-	 <ul> - NAVARIS touch light switch Model No.: 44344.04&nbsp;&nbsp;&nbsp;<small>(module model: Navaris | protocol 99)</small></ul>
-	 <ul> - NEFF or Refsta Topdraft (Tecnowind) kitchen hood&nbsp;&nbsp;&nbsp;<small>(module model: SF01_01319004 | protocol 86)</small></ul>
-	 <ul> - Novy Cloud 230 kitchen hood&nbsp;&nbsp;&nbsp;<small>(module model: Novy_840039 | protocol 86)</small></ul>
-	 <ul> - Novy Pureline 6830 kitchen hood&nbsp;&nbsp;&nbsp;<small>(module model: Novy_840029 | protocol 86)</small></ul>
-	 <ul> - QUIGG DMV-7000&nbsp;&nbsp;&nbsp;<small>(module model: QUIGG_DMV | protocol 34)</small></ul>
-	 <ul> - Remote control SA-434-1 mini 923301&nbsp;&nbsp;&nbsp;<small>(module model: SA_434_1_mini | protocol 81)</small></ul>
-	 <ul> - Remote control for Techmar Garden Lights &nbsp;&nbsp;&nbsp;<small>(Modulmodel: Techmar | Protokoll 95)</small></ul>
-	 <ul> - Remote control with 4 buttons for diesel heating &nbsp;&nbsp;&nbsp;<small>(Modulmodel: RCnoName20 | Protokoll 20)</small></ul>
-	 <ul> - Tedsen Teletaster <small>(protocol 46)</small>:
-			<small>
-			<ul>SKX1xx, 1 button - module model: Tedsen_SKX1xx</ul>
-			<ul>SKX2xx, 2 button (GEIGER_GF0x01) - module model: Tedsen_SKX2xx</ul>
-			<ul>SKX4xx, 4 button (GEIGER_GF0x02) - module model: Tedsen_SKX4xx</ul>
-			<ul>SKX6xx, 6 button (GEIGER_GF0x03) - module model: Tedsen_SKX6xx</ul>
-			</small>
-	 </ul>
-	 <ul> - unitec remote door reed switch 47031 (Unitec 47121 | Unitec 47125 | Friedland)&nbsp;&nbsp;&nbsp;<small>(module model: Unitec_47031 | protocol 30)</small></ul>
-	 <ul> - Westinghouse Delancey ceiling fan (remote, 5 buttons without SET)&nbsp;&nbsp;&nbsp;<small>(module model: Buttons_five | protocol 29)</small></ul>
-	 <ul> - Westinghouse Delancey ceiling fan (remote, 9 buttons with SET)&nbsp;&nbsp;&nbsp;<small>(module model: RH787T | protocol 83)</small></ul>
-	 <ul> - Westinghouse ceiling fan Bendan (remote control TR60C-1, touch screen)&nbsp;&nbsp;&nbsp;<small>(module model: TR60C1 | protocol 104)</small></ul>
-	 <ul> - xavax 00111939 (remote control, 10 buttons)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: xavax | protocol 26)</small></ul>
-	 <br><br>
-	<b>Define</b><br>
-	<ul><code>define &lt;NAME&gt; SD_UT &lt;model&gt; &lt;Hex-address&gt;</code><br><br>
-	<u>examples:</u>
-		<ul>
-		define &lt;NAME&gt; SD_UT RH787T A<br>
-		define &lt;NAME&gt; SD_UT SA_434_1_mini ffd<br>
-		define &lt;NAME&gt; SD_UT unknown<br>
-		</ul>	</ul><br><br>
-	<b>Set</b><br>
-	<ul>Different transmission commands are available.</ul><br>
-		<ul><u>BOSCH (SF01_01319004_Typ2) | NEFF / Refsta Topdraft (SF01_01319004)</u></ul>
-	<ul><a name="delay"></a>
-		<li>delay<br>
-		button one on the remote</li>
-	</ul>
-	<ul><a name="interval"></a>
-		<li>interval<br>
-		button two on the remote</li>
-	</ul>
-	<ul><a name="light_on_off"></a>
-		<li>light_on_off<br>
-		button three on the remote</li>
-	</ul>
-	<ul><a name="minus"></a>
-		<li>minus<br>
-		button four on the remote</li>
-	</ul>
-	<ul><a name="plus"></a>
-		<li>plus<br>
-		button five on the remote</li>
-	</ul><br>
+	Devices of <u>the same or different type with the same deviceCode will result in errors</u>. PLEASE use different <code>deviceCode</code>.
+	<br><br>
 
-	<ul><u>ChiliTec LED X-Mas light</u></ul>
-	<ul><a name="power_on"></a>
-		<li>power_on<br>
-		button ON on the remote</li>
-	</ul>
-	<ul><a name="power_off"></a>
-		<li>power_off<br>
-		button OFF on the remote</li>
-	</ul>
-	<ul><a name="flickering_slowly"></a>
-		<li>flickering_slowly<br>
-		button SL on the remote</li>
-	</ul>
-	<ul><a name="flickering_fast"></a>
-		<li>flickering_fast<br>
-		button SF on the remote</li>
-	</ul>
-	<ul><a name="brightness_minus"></a>
-		<li>brightness_minus<br>
-		button - on the remote</li>
-	</ul>
-	<ul><a name="brightness_plus"></a>
-		<li>brightness_plus<br>
-		button + on the remote</li>
-	</ul><br>
-
-		<ul><u>ESTO KL_RF01</u></ul>
-	<ul><a name="on"></a>
-		<li>on<br>
-		button ON on the remote</li>
-	</ul>
-	<ul><a name="off"></a>
-		<li>off<br>
-		button OFF on the remote</li>
-	</ul>
-	<ul><a name="alternating_full_luminosity"></a>
-		<li>alternating_full_luminosity<br>
-		button alternating_full_luminosity on the remote</li>
-	</ul>
-	<ul><a name="full_brightness"></a>
-		<li>full_brightness<br>
-		button full_brightness on the remote</li>
-	</ul>
-	<ul><a name="light_color_warm_white"></a>
-		<li>light_color_warm_white<br>
-		button light_color_warm_white on the remote</li>
-	</ul>
-	<ul><a name="light_color_cold_white"></a>
-		<li>light_color_cold_white<br>
-		button light_color_cold_white on the remote</li>
-	</ul>
-	<ul><a name="dimup"></a>
-		<li>dimup<br>
-		button DIMUP on the remote</li>
-	</ul>
-		<ul><a name="dimdown"></a>
-		<li>dimdown<br>
-		button DIMDOWN on the remote</li>
-	</ul>
-	<ul><a name="night_mode"></a>
-		<li>night_mode<br>
-		button moon on the remote</li>
-	</ul><br>
-
-	<ul><u>LED_XM21_0 light string</u></ul>
-	<ul><a name="on"></a>
-		<li>on<br>
-		button I on the remote</li>
-	</ul>
-	<ul><a name="off"></a>
-		<li>off<br>
-		button O on the remote</li>
-	</ul><br>
-
-	<ul><u>Remote control SA-434-1 mini 923301&nbsp;&nbsp;|&nbsp;&nbsp;Hoermann HS1-868-BS&nbsp;&nbsp;|&nbsp;&nbsp;Tedsen_SKX1/2/4/6xx</u></ul>
+	<u>The following devices are supported:</u><br>
 	<ul>
-		<li>send<br>
-		button <small>(Always send the same, even if the user sends another set command via console.)</small></li>
-	</ul><br>
+		<li>Atlantic Security sensors&nbsp;&nbsp;&nbsp;<small>(module model: MD-2003R, MD-2018R,MD-210R, protocol 91|91.1)</small><br>
+		<code>&nbsp;&nbsp;&nbsp;Note: The model MD_230R (water) is recognized as MD-2018R due to the same hardware ID!</code></li>
+		<li>BOSCH ceiling fan&nbsp;&nbsp;&nbsp;<small>(module model: SF01_01319004_Typ2, protocol 86)</small></li>
+		<li>CAME swing gate drive&nbsp;&nbsp;&nbsp;<small>(module model: CAME_TOP_432EV, protocol 86)</small></li>
+		<li>ChiliTec LED X-Mas light&nbsp;&nbsp;&nbsp;<small>(module model: Chilitec_22640, protocol 14)</small></li>
+		<li>ESTO ceiling lamp&nbsp;&nbsp;&nbsp;<small>(module model: KL_RF01, protocol 93)</small></li>
+		<li>Remote control with 4 buttons for diesel heating&nbsp;&nbsp;&nbsp;<small>(module model: RCnoName20, protocol 20)</small></li>
+		<li>Hoermann HS1-868-BS&nbsp;&nbsp;&nbsp;<small>(module model: HS1_868_BS, protocol 69)</small></li>
+		<li>Hoermann HSM4&nbsp;&nbsp;&nbsp;<small>(module model: HSM4, protocol 69)</small></li>
+		<li>Krinner LUMIX X-Mas light string&nbsp;&nbsp;&nbsp;<small>(module model: Krinner_LUMIX, Protokol 92)</small></li>
+		<li>LED_XM21_0 X-Mas light string&nbsp;&nbsp;&nbsp;<small>(module model: LED_XM21_0, Protokol 76)</small></li>
+		<li>TR-502MSV (LIDL, LIBRA, MANDOLYN, QUIGG), compatible GT-7008BS, GT-FSI-04, DMV-7008S, Powerfix RCB-I 3600&nbsp;&nbsp;&nbsp;<small>(module model: TR_502MSV, protocol 34)</small></li>
+		<li>Manax RCS250&nbsp;&nbsp;&nbsp;<small>(module model: RC_10, protocol 90)</small></li>
+		<li>Medion OR28V&nbsp;&nbsp;&nbsp;<small>(module model: OR28V, protocol 68)</small></li>
+		<li>mumbi AFS300-s (remote control RC-10, wireless socket RCS-22GS)&nbsp;&nbsp;&nbsp;<small>(module model: RC_10, protocol 90)</small></li>
+		<li>Momento (remote control for wireless digital picture frame)&nbsp;&nbsp;&nbsp;<small>(module model: Momento, protocol 97)</small></li>
+		<li>NAVARIS touch light switch Model No.: 44344.04&nbsp;&nbsp;&nbsp;<small>(module model: Navaris, protocol 99)</small></li>
+		<li>NEFF or Refsta Topdraft (Tecnowind) kitchen hood&nbsp;&nbsp;&nbsp;<small>(module model: SF01_01319004, protocol 86)</small></li>
+		<li>Novy Cloud 230 kitchen hood&nbsp;&nbsp;&nbsp;<small>(module model: Novy_840039, protocol 86)</small></li>
+		<li>Novy Pureline 6830 kitchen hood&nbsp;&nbsp;&nbsp;<small>(module model: Novy_840029, protocol 86)</small></li>
+		<li>QUIGG DMV-7000&nbsp;&nbsp;&nbsp;<small>(module model: QUIGG_DMV, protocol 34)</small></li>
+		<li>SA-434-1 mini 923301&nbsp;&nbsp;&nbsp;<small>(module model: SA_434_1_mini, protocol 81)</small></li>
+		<li>Techmar Garden Lights &nbsp;&nbsp;&nbsp;<small>(module model: Techmar, protocol 95)</small></li>
+		<li>Tedsen Teletaster <small>(protocol 46)</small>:
+		<ul><small>
+			<li>SKX1xx, 1 button - module model: Tedsen_SKX1xx</li>
+			<li>SKX2xx, 2 button (GEIGER_GF0x01) - module model: Tedsen_SKX2xx</li>
+			<li>SKX4xx, 4 button (GEIGER_GF0x02) - module model: Tedsen_SKX4xx</li>
+			<li>SKX6xx, 6 button (GEIGER_GF0x03) - module model: Tedsen_SKX6xx</li>
+		</small></ul></li>
+		<li>unitec magnetic contact 47031 (for alarm systems Unitec 47121, Unitec 47125, Friedland)&nbsp;&nbsp;&nbsp;<small>(module model: Unitec_47031, protocol 30)</small></li>
+		<li>Westinghouse ceiling fan (remote control, 5 buttons without SET)&nbsp;&nbsp;&nbsp;<small>(module model: Buttons_five, protocol 29)</small></li>
+		<li>Westinghouse Delancey ceiling fan (remote control, 9 buttons with SET)&nbsp;&nbsp;&nbsp;<small>(module model: RH787T, protocol 83)</small></li>
+		<li>Westinghouse ceiling fan Bendan (remote control TR60C-1, touch screen)&nbsp;&nbsp;&nbsp;<small>(module model: TR60C1, protocol 104)</small></li>
+		<li>xavax 00111939 (remote control, 10 button)&nbsp;&nbsp;&nbsp;<small>(module model: xavax, protocol 26)</small></li>
+	</ul>
+	<br><br>
 
-	<ul><u>Hoermann HSM4 (remote with 4 buttons)</u></ul>
-	<ul><a name="button_1"></a>
-		<li>button_1<br>
-		Button one on the remote</li>
+	<b>Define</b><br>
+	<ul>
+		<code>define &lt;NAME&gt; SD_UT &lt;model&gt; &lt;Hex-address&gt;</code><br><br>
+		<u>examples:</u>
+		<ul>
+			define &lt;NAME&gt; SD_UT RH787T A<br>
+			define &lt;NAME&gt; SD_UT SA_434_1_mini ffd<br>
+			define &lt;NAME&gt; SD_UT unknown<br>
+		</ul>
 	</ul>
-	<ul><a name="button_2"></a>
-		<li>button_2<br>
-		Button two on the remote</li>
-	</ul>
-	<ul><a name="button_3"></a>
-		<li>button_3<br>
-		Button three on the remote</li>
-	</ul>
-	<ul><a name="button_4"></a>
-		<li>button_4<br>
-		Button four on the remote</li>
-	</ul><br>
+	<br><br>
 
-	<ul><u>Techmar Garden Lights (remote control with 10 buttons)</u></ul>
-	<ul><li>Group_1 ... Group_9<br>
-		Group 1 to 9, on / off</li>
-	</ul>
-	<ul><li>All_on / All_off<br>
-		All Groups on / off</li>
-	</ul><br>
-	
-	<ul><u>Westinghouse ceiling fan (remote with 5 buttons and without SET)</u></ul>
-	<ul><a name="1_fan_low_speed"></a>
-		<li>1_fan_low_speed<br>
-		Button LOW on the remote</li>
-	</ul>
-	<ul><a name="2_fan_medium_speed"></a>
-		<li>2_fan_medium_speed<br>
-		Button MED on the remote</li>
-	</ul>
-	<ul><a name="3_fan_high_speed"></a>
-		<li>3_fan_high_speed<br>
-		Button HI on the remote</li>
-	</ul>
-	<ul><a name="light_on_off"></a>
-		<li>light_on_off<br>
-		switch light on or off</li>
-	</ul>
-	<ul><a name="fan_off"></a>
-		<li>fan_off<br>
-		turns off the fan</li>
-	</ul><br><a name=" "></a>
+	<b>Set</b><br>
+	<ul>
+		Different transmission commands are available.
+		<br><br>
+		
+		<u>BOSCH (SF01_01319004_Typ2), NEFF / Refsta Topdraft (SF01_01319004)</u>
+		<ul>
+			<li>delay: button 1 on the remote</li>
+			<li>interval: button 2 on the remote</li>
+			<li>light_on_off: button 3 on the remote</li>
+			<li>minus: button 4 on the remote</li>
+			<li>plus: button 5 on the remote</li>
+		</ul><br>
 
-	<ul><u>Westinghouse Delancey ceiling fan (remote RH787T with 9 buttons and SET)</u></ul>
-	<ul><a name="1_fan_minimum_speed"></a>
-		<li>1_fan_minimum_speed<br>
-		Button I on the remote</li>
-	</ul>
-	<ul><a name="2_fan_low_speed"></a>
-		<li>2_fan_low_speed<br>
-		Button II on the remote</li>
-	</ul>
-	<ul><a name="3_fan_medium_low_speed"></a>
-		<li>3_fan_medium_low_speed<br>
-		Button III on the remote</li>
-	</ul>
-	<ul><a name="4_fan_medium_speed"></a>
-		<li>4_fan_medium_speed<br>
-		Button IV on the remote</li>
-	</ul>
-	<ul><a name="5_fan_medium_high_speed"></a>
-		<li>5_fan_medium_high_speed<br>
-		Button V on the remote</li>
-	</ul>
-	<ul><a name="6_fan_high_speed"></a>
-		<li>6_fan_high_speed<br>
-		Button VI on the remote</li>
-	</ul>
-	<ul><a name="fan_off"></a>
-		<li>fan_off<br>
-		turns off the fan</li>
-	</ul>
-	<ul><a name="fan_direction"></a>
-		<li>fan_direction<br>
-		Defining the direction of rotation</li>
-	</ul>
-	<ul><a name="light_on_off"></a>
-		<li>light_on_off<br>
-		switch light on or off</li>
-	</ul>
-	<ul><a name="set"></a>
-		<li>set<br>
-		Button SET in the remote</li><a name=" "></a>
+		<u>ChiliTec LED X-Mas light</u>
+		<ul>
+			<a name="power_on"></a><li>power_on: button ON on the remote</li>
+			<a name="power_off"></a><li>power_off: button OFF on the remote</li>
+			<a name="flickering_slowly"></a><li>flickering_slowly: button SL on the remote</li>
+			<a name="flickering_fast"></a><li>flickering_fast: button SF on the remote</li>
+			<a name="brightness_minus"></a><li>brightness_minus: button - on the remote</li>
+			<a name="brightness_plus"></a><li>brightness_plus: button + on the remote</li>
+		</ul><br>
+
+		<u>ESTO KL_RF01</u>
+		<ul>
+			<a name="on"></a><li>on: button ON on the remote</li>
+			<a name="off"></a><li>off: button OFF on the remote</li>
+			<a name="alternating_full_luminosity"></a><li>alternating_full_luminosity: button alternating_full_luminosity on the remote</li>
+			<a name="full_brightness"></a><li>full_brightness: button full_brightness on the remote</li>
+			<a name="light_color_warm_white"></a><li>light_color_warm_white: button light_color_warm_white on the remote</li>
+			<a name="light_color_cold_white"></a><li>light_color_cold_white: button light_color_cold_white on the remote</li>
+			<a name="dimup"></a><li>dimup: button DIMUP on the remote</li>
+			<a name="dimdown"></a><li>dimdown: button DIMDOWN on the remote</li>
+			<a name="night_mode"></a><li>night_mode: button moon on the remote</li>
+		</ul><br>
+
+		<u>LED_XM21_0 light string</u>
+		<ul>
+			<a name="on"></a><li>on: button I on the remote</li>
+			<a name="off"></a><li>off: button O on the remote</li>
+		</ul><br>
+
+		<u>Remote control SA-434-1 mini 923301, Hoermann HS1-868-BS, Tedsen_SKX1xx</u>
+		<ul>
+			<a name="send"></a><li>send: button <small>(Always send the same, even if the user sends another set command via console.)</small></li>
+		</ul><br>
+
+		<u>Hoermann HSM4 (Remote control with 4 button)</u>
+		<ul>
+			<a name="button_1"></a><li>button_1: button 1 on the remote</li>
+			<a name="button_2"></a><li>button_2: button 2 on the remote</li>
+			<a name="button_3"></a><li>button_3: button 3 on the remote</li>
+			<a name="button_4"></a><li>button_4: button 4 on the remote</li>
+		</ul><br>
+
+		<u>Techmar Garden Lights (Remote control with 10 button)</u>
+		<ul>
+			<li>Group_1 ... Group_9: Group 1 to 9, on / off</li>
+			<li>All_on / All_off: All Groups on / off</li>
+		</ul><br>
+
+		<u>Westinghouse ceiling fan (Remote control with 5 button)</u>
+		<ul>
+			<a name="1_fan_low_speed"></a><li>1_fan_low_speed: button LOW on the remote</li>
+			<a name="2_fan_medium_speed"></a><li>2_fan_medium_speed: button MED on the remote</li>
+			<a name="3_fan_high_speed"></a><li>3_fan_high_speed: button HI on the remote</li>
+			<a name="light_on_off"></a><li>light_on_off: switch light on or off</li>
+			<a name="fan_off"></a><li>fan_off: turns off the fan</li>
+		</ul><br>
+
+		<u>Westinghouse Delancey ceiling fan (Remote control RH787T with 9 button + SET)</u>
+		<ul>
+			<a name="1_fan_minimum_speed"></a><li>1_fan_minimum_speed: button I on the remote</li>
+			<a name="2_fan_low_speed"></a><li>2_fan_low_speed: button II on the remote</li>
+			<a name="3_fan_medium_low_speed"></a><li>3_fan_medium_low_speed: button III on the remote</li>
+			<a name="4_fan_medium_speed"></a><li>4_fan_medium_speed: button IV on the remote</li>
+			<a name="5_fan_medium_high_speed"></a><li>5_fan_medium_high_speed: button V on the remote</li>
+			<a name="6_fan_high_speed"></a><li>6_fan_high_speed: button VI on the remote</li>
+			<a name="fan_off"></a><li>fan_off: turns off the fan</li>
+			<a name="fan_direction"></a><li>fan_direction: defining the direction of rotation</li>
+			<a name="light_on_off"></a><li>light_on_off: switch light on or off</li>
+			<a name="set"></a><li>set: button SET on the remote</li><a name=" "></a>
+		</ul>
 	</ul>
 	<br><br>
 
 	<b>Get</b><br>
-	<ul>N/A</ul><br><br>
+	<ul>N/A</ul>
+	<br><br>
 
-	<b>Attribute</b><br>
-	<ul><li><a href="#do_not_notify">do_not_notify</a></li></ul><br>
-	<ul><li><a href="#ignore">ignore</a></li></ul><br>
-	<ul><li><a href="#IODev">IODev</a></li></ul><br>
-	<ul><a name="model"></a>
-		<li>model<br>
-		The attribute indicates the model type of your device.<br>
-		(unknown, Buttons_five, CAME_TOP_432EV, Chilitec_22640, KL_RF01, HS1-868-BS, HSM4, QUIGG_DMV, LED_XM21_0, Momento, Navaris, Novy_840029, Novy_840039, OR28V, RC_10, RH787T, SA_434_1_mini, SF01_01319004, TR60C1, Tedsen_SKX1xx, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx, TR_502MSV, Unitec_47031)</li>
-	</ul><br>
-	<ul><li><a name="repeats">repeats</a><br>
-	This attribute can be used to adjust how many repetitions are sent. Default is 5.</li></ul><br>
-	<ul><li><a name="UTclock">UTclock</a><br>
-	This attribute set the clock pulse when sending. There is no standard value.<br>
-	<small><u>exception:</u></small> The model Novy_840039 has a preset clock pulse of 375. You can manually adjust this individually with the attribute.</li></ul><br>
+	<b>Attributes</b><br>
+	<ul>
+		<li><a href="#do_not_notify">do_not_notify</a></li>
+		<li><a href="#ignore">ignore</a></li>
+		<li><a href="#IODev">IODev</a></li>
+		<li><a name="model"></a>model<br>
+			The attribute indicates the model type of your device (Buttons_five, CAME_TOP_432EV, Chilitec_22640, KL_RF01, HS1-868-BS, HSM4, QUIGG_DMV, LED_XM21_0, Momento, Navaris, Novy_840029, Novy_840039, OR28V, RC_10, RH787T, SA_434_1_mini, SF01_01319004, TR60C1, Tedsen_SKX1xx, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx, TR_502MSV, Unitec_47031, unknown).
+			If the attribute is changed, a new device is created using <a href="#autocreate">autocreate</a>. Autocreate must be activated for this.
+		</li>
+		<li><a name="repeats"></a>repeats<br>
+			This attribute can be used to adjust how many repetitions are sent. Default is 5.
+		</li>
+		<li><a name="UTclock"></a>UTclock<br>
+			This attribute set the base clock when sending. There is no standard value.<br>
+			Exception: The model Novy_840039 has a preset base clock of 375. You can manually adjust this individually with this attribute.
+		</li>
+		<li><a name="UTfrequency"></a>UTfrequency<br>
+			An individual transmission frequency can be set with this attribute. If this attribute is not set, the transmission frequency of the IO device (e.g. Signalduino) is used.
+		</li>
+	</ul>
+	<br><br>
+	
+	<b>Generated readings of the models</b><br>
+	<ul>
+		<u>Buttons_five, CAME_TOP_432EV, Chilitec_22640, HSM4, KL_RF01, LED_XM21_0, Momento, Novy_840029, Novy_840039, OR28V, QUIGG_DMV, RC_10, RH787T, SF01_01319004, SF01_01319004_Typ2, TR_502MSV</u>
+		<ul>
+			<li>deviceCode: Device code of the system</li>
+			<li>LastAction: Last executed action of the device (<code>receive</code> for command received | <code>send</code> for command send).</li>
+			<li>state: Current state of the device</li>
+		</ul><br>
 
-	<b><i>Generated readings of the models</i></b><br>
-	<ul><u>Buttons_five | CAME_TOP_432EV | Chilitec_22640 | HSM4 | KL_RF01 | LED_XM21_0 | Momento | Novy_840029 | Novy_840039 | OR28V | QUIGG_DMV | RC_10 | RH787T | SF01_01319004 | SF01_01319004_Typ2 | TR_502MSV</u><br>
-	<li>deviceCode<br>
-	Device code of the system</li>
-	<li>LastAction<br>
-	Last executed action of the device. <code>receive</code> for command received | <code>send</code> for command send</li>
-	<li>state<br>
-	Last executed keystroke of the remote control</li></ul><br>
+		<u>MD_2003R (gas), MD_2018R (vibration), MD_210R (door/window switch), MD_230R (water)</u>
+		<ul>
+			<li>contact: State of the internal alarm contact.</li>
+			<li>deviceTyp: Model type of the sensor.</li>
+			<li>sabotage: State of sabotage contact.</li>
+			<li>state: Current state of the device</li>
+		</ul><br>
 
-	<ul><u>MD_2003R (gas)&nbsp;&nbsp;|&nbsp;&nbsp;MD_2018R (vibration)&nbsp;&nbsp;|&nbsp;&nbsp;MD_210R (door/windows switch)&nbsp;&nbsp;|&nbsp;&nbsp;MD_230R (water)</u><br>
-	<li>contact<br>
-	Status of the internal alarm contact</li>
-	<li>deviceTyp<br>
-	Model type of your sensor</li>
-	<li>sabotage<br>
-	State of sabotage contact</li>
-	<li>state<br>
-	State of the device</li></ul><br>
+		<u>HS1-868-BS, SA_434_1_mini, Tedsen_SKX1, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx</u>
+		<ul>
+			<li>LastAction: Last executed action of the device (<code>receive</code> for command received | <code>send</code> for command send).</li>
+			<li>state: Current state of the device</li>
+		</ul><br>
 
-	<ul><u>HS1-868-BS&nbsp;&nbsp;|&nbsp;&nbsp;SA_434_1_mini&nbsp;&nbsp;|&nbsp;&nbsp;Tedsen_SKX1xx&nbsp;&nbsp;|&nbsp;&nbsp;Tedsen_SKX2xx&nbsp;&nbsp;|&nbsp;&nbsp;Tedsen_SKX4xx&nbsp;&nbsp;|&nbsp;&nbsp;Tedsen_SKX6xx</u><br>
-	<li>LastAction<br>
-	Last executed action of FHEM. <code>send</code> for command send.</li>
-	<li>state<br>
-	Last executed action of the device. <code>receive</code> for command received | <code>send</code> for command send</li></ul><br>
-
-	<ul><u>Unitec_47031</u><br>
-	<li>System-Housecode<br>
-	System or house code of the device</li>
-	<li>state<br>
-	Condition of contact (prepared, unconfirmed)</li>
-	<li>Zone<br>
-	Zone of the device</li>
-	<li>Usersystem<br>
-	Group of the system</li>
-	</ul><br>
-
+		<u>Unitec_47031</u>
+		<ul>
+			<li>System-Housecode: System or house code of the device</li>
+			<li>state: Condition of contact (prepared, unconfirmed)</li>
+			<li>Zone: Zone of the device</li>
+			<li>Usersystem: Group of the system</li>
+		</ul>
+	</ul>
 </ul>
+
 =end html
 =begin html_DE
 
 <a name="SD_UT"></a>
 <h3>SD_UT</h3>
-<ul>Das Modul SD_UT ist ein Universalmodul vom SIGNALduino f&uuml;r Ger&auml;te oder Sensoren.<br>
+<ul>
+	Das Modul SD_UT ist ein Universalmodul vom SIGNALduino f&uuml;r Ger&auml;te oder Sensoren.<br>
 	Nach dem ersten Anlegen des Ger&auml;tes <code><b>unknown_please_select_model</b></code> muss der User das Ger&auml;t selbst definieren mittels des Attributes <code>model</code>.<br>
-	Bei noch nicht unterst&uuml;tzen Ger&auml;ten k&ouml;nnen mit dem <code><b>unknown_please_select_model</b></code> Ger&auml;t Bitdaten gesammelt werden.<br><br>
-	<i><u><b>Hinweis:</b></u></i> Sobald das Attribut model eines definieren Ger&auml;tes verstellt oder gel&ouml;scht wird, so legt das Modul ein Ger&auml;t des gew&auml;hlten Typs neu an und mit Durchlauf einer neuen Nachricht wird das aktuelle Ger&auml;t gel&ouml;scht.
-	Das Betreiben von Ger&auml;ten des <u>gleichen oder unterschiedliches Typs mit gleichem <code>deviceCode</code> f&uuml;hrt zu Fehlern</u>. BITTE achte stets auf einen unterschiedlichen <code>deviceCode</code>.<br><br>
-	 <u>Es werden bisher folgende Ger&auml;te unterst&uuml;tzt:</u><br>
-	 <ul> - Atlantic Security Sensoren&nbsp;&nbsp;&nbsp;<small>(Modulmodel: MD-2003R, MD-2018R,MD-210R | Protokoll 91|91.1)</small><br>
-	 <code>&nbsp;&nbsp;&nbsp;Hinweis: Das Model MD_230R (water) wird aufgrund von gleicher Hardwarekennung als MD-2018R erkannt!</code></ul>
-	 <ul> - BOSCH Deckenl&uuml;fter&nbsp;&nbsp;&nbsp;<small>(Modulmodel: SF01_01319004_Typ2 | Protokoll 86)</small></ul>
-	 <ul> - CAME Drehtor Antrieb&nbsp;&nbsp;&nbsp;<small>(Modulmodel: CAME_TOP_432EV | Protokoll 86)</small></ul>
-	 <ul> - ChiliTec LED Christbaumkerzen&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Chilitec_22640 | Protokoll 14)</small></ul>
-	 <ul> - ESTO Deckenlampe&nbsp;&nbsp;&nbsp;<small>(Modulmodel: KL_RF01 | Protokoll 93)</small></ul>
-	 <ul> - Fernbedienung mit 4 Tasten f&uuml;r Diesel-Heizung &nbsp;&nbsp;&nbsp;<small>(Modulmodel: RCnoName20 | Protokoll 20)</small></ul>
-	 <ul> - Hoermann HS1-868-BS&nbsp;&nbsp;&nbsp;<small>(Modulmodel: HS1_868_BS | Protokoll 69)</small></ul>
-	 <ul> - Hoermann HSM4&nbsp;&nbsp;&nbsp;<small>(Modulmodel: HSM4 | Protokoll 69)</small></ul>
-	 <ul> - Krinner LUMIX Christbaumkerzen&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Krinner_LUMIX | Protokol 92)</small></ul>
-	 <ul> - LED_XM21_0 Christbaumkerzen&nbsp;&nbsp;&nbsp;<small>(Modulmodel: LED_XM21_0 | Protokol 76)</small></ul>
-	 <ul> - TR-502MSV (LIDL, LIBRA, MANDOLYN, QUIGG), kompatibel GT-7008BS, GT-FSI-04, DMV-7008S, Powerfix RCB-I 3600&nbsp;&nbsp;&nbsp;<small>(module model: TR_502MSV | protocol 34)</small></ul>
-	 <ul> - Manax RCS250&nbsp;&nbsp;&nbsp;<small>(Modulmodel: RC_10 | Protokoll 90)</small></ul>
-	 <ul> - Medion OR28V&nbsp;&nbsp;&nbsp;<small>(Modulmodel: OR28V | Protokoll 68)</small></ul>
-	 <ul> - mumbi AFS300-s (remote control RC-10 | random code wireless switch RCS-22GS)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: RC_10 | Protokoll 90)</small></ul>
-	 <ul> - Momento (Fernbedienung f&uuml;r digitalen Bilderrahmen)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Momento | protocol 97)</small></ul>
-	 <ul> - NAVARIS Funk-Licht-Schalter Model No.: 44344.04&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Navaris | protocol 99)</small></ul>
-	 <ul> - NEFF oder Refsta Topdraft (Tecnowind) Dunstabzugshaube&nbsp;&nbsp;&nbsp;<small>(Modulmodel: SF01_01319004 | Protokoll 86)</small></ul>
-	 <ul> - Novy Cloud 230 Dunstabzugshaube&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Novy_840039 | Protokoll 86)</small></ul>
-	 <ul> - Novy Pureline 6830 Dunstabzugshaube&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Novy_840029 | Protokoll 86)</small></ul>
-	 <ul> - QUIGG DMV-7000&nbsp;&nbsp;&nbsp;<small>(Modulmodel: QUIGG_DMV | Protokoll 34)</small></ul>
-	 <ul> - Remote control SA-434-1 mini 923301&nbsp;&nbsp;&nbsp;<small>(Modulmodel: SA_434_1_mini | Protokoll 81)</small></ul>
-	 <ul> - Techmar Garden Lights &nbsp;&nbsp;&nbsp;<small>(Modulmodel: Techmar | Protokoll 95)</small></ul>
-	 <ul> - Tedsen Teletaster <small>(Protokoll 46)</small>:
-			<small>
-			<ul>SKX1xx, 1 Taste - Modulmodel: Tedsen_SKX1xx</ul>
-			<ul>SKX2xx, 2 Tasten (GEIGER_GF0x01) - Modulmodel: Tedsen_SKX2xx</ul>
-			<ul>SKX4xx, 4 Tasten (GEIGER_GF0x02) - Modulmodel: Tedsen_SKX4xx</ul>
-			<ul>SKX6xx, 6 Tasten (GEIGER_GF0x03) - Modulmodel: Tedsen_SKX6xx</ul>
-			</small>
-	 </ul>
-	 <ul> - unitec remote door reed switch 47031 (Unitec 47121 | Unitec 47125 | Friedland)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Unitec_47031 | Protokoll 30)</small></ul>
-	 <ul> - Westinghouse Deckenventilator (Fernbedienung, 5 Tasten ohne SET)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Buttons_five | Protokoll 29)</small></ul>
-	 <ul> - Westinghouse Delancey Deckenventilator (Fernbedienung, 9 Tasten mit SET)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: RH787T | Protokoll 83)</small></ul>
-	 <ul> - Westinghouse Deckenventilator Bendan (Fernbedienung TR60C-1, Touch screen)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: TR60C1 | Protokoll 104)</small></ul>
-	 <ul> - xavax 00111939 (Fernbedienung, 10 Tasten)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: xavax | Protokoll 26)</small></ul>
-	 <br><br>
+	Bei noch nicht unterst&uuml;tzen Ger&auml;ten k&ouml;nnen mit dem <code><b>unknown_please_select_model</b></code> Ger&auml;t Bitdaten gesammelt werden.
+	<br><br>
+	<i><u><b>Hinweis:</b></u></i> Sobald das Attribut model eines definierten Ger&auml;tes verstellt oder gel&ouml;scht wird, so legt das Modul ein Ger&auml;t des gew&auml;hlten Typs neu an und mit Durchlauf einer neuen Nachricht wird das aktuelle Ger&auml;t gel&ouml;scht.
+	Das Betreiben von Ger&auml;ten des <u>gleichen oder unterschiedliches Typs mit gleichem <code>deviceCode</code> f&uuml;hrt zu Fehlern</u>. BITTE achte stets auf einen unterschiedlichen <code>deviceCode</code>.
+	<br><br>
+
+	<u>Es werden bisher folgende Ger&auml;te unterst&uuml;tzt:</u><br>
+	<ul>
+		<li>Atlantic Security Sensoren&nbsp;&nbsp;&nbsp;<small>(Modulmodel: MD-2003R, MD-2018R,MD-210R, Protokoll 91|91.1)</small><br>
+		<code>&nbsp;&nbsp;&nbsp;Hinweis: Das Model MD_230R (water) wird aufgrund gleicher Hardwarekennung als MD-2018R erkannt!</code></li>
+		<li>BOSCH Deckenl&uuml;fter&nbsp;&nbsp;&nbsp;<small>(Modulmodel: SF01_01319004_Typ2, Protokoll 86)</small></li>
+		<li>CAME Drehtor Antrieb&nbsp;&nbsp;&nbsp;<small>(Modulmodel: CAME_TOP_432EV, Protokoll 86)</small></li>
+		<li>ChiliTec LED Christbaumkerzen&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Chilitec_22640, Protokoll 14)</small></li>
+		<li>ESTO Deckenlampe&nbsp;&nbsp;&nbsp;<small>(Modulmodel: KL_RF01, Protokoll 93)</small></li>
+		<li>Fernbedienung mit 4 Tasten f&uuml;r Diesel-Heizung &nbsp;&nbsp;&nbsp;<small>(Modulmodel: RCnoName20, Protokoll 20)</small></li>
+		<li>Hoermann HS1-868-BS&nbsp;&nbsp;&nbsp;<small>(Modulmodel: HS1_868_BS, Protokoll 69)</small></li>
+		<li>Hoermann HSM4&nbsp;&nbsp;&nbsp;<small>(Modulmodel: HSM4, Protokoll 69)</small></li>
+		<li>Krinner LUMIX Christbaumkerzen&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Krinner_LUMIX, Protokol 92)</small></li>
+		<li>LED_XM21_0 Christbaumkerzen&nbsp;&nbsp;&nbsp;<small>(Modulmodel: LED_XM21_0, Protokol 76)</small></li>
+		<li>TR-502MSV (LIDL, LIBRA, MANDOLYN, QUIGG), kompatibel GT-7008BS, GT-FSI-04, DMV-7008S, Powerfix RCB-I 3600&nbsp;&nbsp;&nbsp;<small>(Modulmodel: TR_502MSV, Protokoll 34)</small></li>
+		<li>Manax RCS250&nbsp;&nbsp;&nbsp;<small>(Modulmodel: RC_10, Protokoll 90)</small></li>
+		<li>Medion OR28V&nbsp;&nbsp;&nbsp;<small>(Modulmodel: OR28V, Protokoll 68)</small></li>
+		<li>mumbi AFS300-s (Fernbedienung RC-10, Funksteckdose RCS-22GS)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: RC_10, Protokoll 90)</small></li>
+		<li>Momento (Fernbedienung f&uuml;r digitalen Bilderrahmen)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Momento, Protokoll 97)</small></li>
+		<li>NAVARIS Funk-Licht-Schalter Model No.: 44344.04&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Navaris, Protokoll 99)</small></li>
+		<li>NEFF oder Refsta Topdraft (Tecnowind) Dunstabzugshaube&nbsp;&nbsp;&nbsp;<small>(Modulmodel: SF01_01319004, Protokoll 86)</small></li>
+		<li>Novy Cloud 230 Dunstabzugshaube&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Novy_840039, Protokoll 86)</small></li>
+		<li>Novy Pureline 6830 Dunstabzugshaube&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Novy_840029, Protokoll 86)</small></li>
+		<li>QUIGG DMV-7000&nbsp;&nbsp;&nbsp;<small>(Modulmodel: QUIGG_DMV, Protokoll 34)</small></li>
+		<li>SA-434-1 mini 923301&nbsp;&nbsp;&nbsp;<small>(Modulmodel: SA_434_1_mini, Protokoll 81)</small></li>
+		<li>Techmar Garden Lights &nbsp;&nbsp;&nbsp;<small>(Modulmodel: Techmar, Protokoll 95)</small></li>
+		<li>Tedsen Teletaster <small>(Protokoll 46)</small>:
+		<ul><small>
+			<li>SKX1xx, 1 Taste - Modulmodel: Tedsen_SKX1xx</li>
+			<li>SKX2xx, 2 Tasten (GEIGER_GF0x01) - Modulmodel: Tedsen_SKX2xx</li>
+			<li>SKX4xx, 4 Tasten (GEIGER_GF0x02) - Modulmodel: Tedsen_SKX4xx</li>
+			<li>SKX6xx, 6 Tasten (GEIGER_GF0x03) - Modulmodel: Tedsen_SKX6xx</li>
+		</small></ul></li>
+		<li>unitec Magnetkontakt 47031 (f&uuml;r Alarmanlagen Unitec 47121, Unitec 47125, Friedland)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Unitec_47031, Protokoll 30)</small></li>
+		<li>Westinghouse Deckenventilator (Fernbedienung, 5 Tasten ohne SET)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Buttons_five, Protokoll 29)</small></li>
+		<li>Westinghouse Delancey Deckenventilator (Fernbedienung, 9 Tasten mit SET)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: RH787T, Protokoll 83)</small></li>
+		<li>Westinghouse Deckenventilator Bendan (Fernbedienung TR60C-1, Touch screen)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: TR60C1, Protokoll 104)</small></li>
+		<li>xavax 00111939 (Fernbedienung, 10 Tasten)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: xavax, Protokoll 26)</small></li>
+	</ul>
+	<br><br>
 
 	<b>Define</b><br>
-	<ul><code>define &lt;NAME&gt; SD_UT &lt;model&gt; &lt;Hex-Adresse&gt;</code><br><br>
-	<u>Beispiele:</u>
+	<ul>
+		<code>define &lt;NAME&gt; SD_UT &lt;model&gt; &lt;Hex-Adresse&gt;</code><br><br>
+		<u>Beispiele:</u>
 		<ul>
-		define &lt;NAME&gt; SD_UT RH787T A<br>
-		define &lt;NAME&gt; SD_UT SA_434_1_mini ffd<br>
-		define &lt;NAME&gt; SD_UT unknown<br>
-		</ul></ul><br><br>
+			define &lt;NAME&gt; SD_UT RH787T A<br>
+			define &lt;NAME&gt; SD_UT SA_434_1_mini ffd<br>
+			define &lt;NAME&gt; SD_UT unknown<br>
+		</ul>
+	</ul>
+	<br><br>
 
 	<b>Set</b><br>
-	<ul>Je nach Ger&auml;t sind unterschiedliche Sendebefehle verf&uuml;gbar.</ul><br>
-	<ul><u>BOSCH (SF01_01319004_Typ2) | NEFF / Refsta Topdraft (SF01_01319004)</u></ul>
-	<ul><a name="delay"></a>
-		<li>delay<br>
-		Taste 1 auf der Fernbedienung</li>
-	</ul>
-	<ul><a name="interval"></a>
-		<li>interval<br>
-		Taste 2 auf der Fernbedienung</li>
-	</ul>
-	<ul><a name="light_on_off"></a>
-		<li>light_on_off<br>
-		Taste 3 auf der Fernbedienung</li>
-	</ul>
-	<ul><a name="minus"></a>
-		<li>minus<br>
-		Taste 4 auf der Fernbedienung</li>
-	</ul>
-	<ul><a name="plus"></a>
-		<li>plus<br>
-		Taste 5 auf der Fernbedienung</li>
-	</ul><br>
-
-	<ul><u>ChiliTec LED Christbaumkerzen</u></ul>
-	<ul><a name="power_on"></a>
-		<li>power_on<br>
-		Taste ON auf der Fernbedienung</li>
-	</ul>
-	<ul><a name="power_off"></a>
-		<li>power_off<br>
-		Taste OFF auf der Fernbedienung</li>
-	</ul>
-	<ul><a name="flickering_slowly"></a>
-		<li>flickering_slowly<br>
-		Taste SL auf der Fernbedienung</li>
-	</ul>
-	<ul><a name="flickering_fast"></a>
-		<li>flickering_fast<br>
-		Taste SF auf der Fernbedienung</li>
-	</ul>
-	<ul><a name="brightness_minus"></a>
-		<li>brightness_minus<br>
-		Taste - auf der Fernbedienung</li>
-	</ul>
-	<ul><a name="brightness_plus"></a>
-		<li>brightness_plus<br>
-		Taste + auf der Fernbedienung</li>
-	</ul><br>
-
-	<ul><u>ESTO KL_RF01</u></ul>
-	<ul><a name="on"></a>
-		<li>on<br>
-		Taste ON auf der Fernbedienung</li>
-	</ul>
-	<ul><a name="off"></a>
-		<li>off<br>
-		Taste OFF auf der Fernbedienung</li>
-	</ul>
-	<ul><a name="alternating_full_luminosity"></a>
-		<li>alternating_full_luminosity<br>
-		Taste ABWECHSELNDE_LEUCHTKRAFT auf der Fernbedienung</li>
-	</ul>
-	<ul><a name="full_brightness"></a>
-		<li>full_brightness<br>
-		Taste VOLLE_HELLIGKEIT auf der Fernbedienung</li>
-	</ul>
-	<ul><a name="light_color_warm_white"></a>
-		<li>light_color_warm_white<br>
-		Taste LICHTFARBE_WARMWEIß auf der Fernbedienung</li>
-	</ul>
-	<ul><a name="light_color_cold_white"></a>
-		<li>light_color_cold_white<br>
-		Taste LICHTFARBE_KALTWEIß auf der Fernbedienung</li>
-	</ul>
-	<ul><a name="dimup"></a>
-		<li>dimup<br>
-		Taste DIMUP auf der Fernbedienung</li>
-	</ul>
-		<ul><a name="dimdown"></a>
-		<li>dimdown<br>
-		Taste DIMDOWN auf der Fernbedienung</li>
-	</ul>
-	<ul><a name="night_mode"></a>
-		<li>night_mode<br>
-		Taste MOND auf der Fernbedienung</li>
-	</ul><br>
-
-	<ul><u>LED_XM21_0 Christbaumkerzen</u></ul>
-	<ul><a name="on"></a>
-		<li>on<br>
-		Taste I auf der Fernbedienung</li>
-	</ul>
-	<ul><a name="off"></a>
-		<li>off<br>
-		Taste O auf der Fernbedienung</li>
-	</ul><br>
-
-	<ul><u>Remote control SA-434-1 mini 923301&nbsp;&nbsp;|&nbsp;&nbsp;Hoermann HS1-868-BS&nbsp;&nbsp;|&nbsp;&nbsp;Tedsen_SKX1xx</u></ul>
 	<ul>
-		<li>send<br>
-		Knopfdruck <small>(Sendet immer das selbe, auch wenn der Benutzer einen anderen Set-Befehl via Konsole sendet.)</small></li>
-	</ul><br>
+		Je nach Ger&auml;t sind unterschiedliche Sendebefehle verf&uuml;gbar.
+		<br><br>
+		
+		<u>BOSCH (SF01_01319004_Typ2), NEFF / Refsta Topdraft (SF01_01319004)</u>
+		<ul>
+			<li>delay: Taste 1 auf der Fernbedienung</li>
+			<li>interval: Taste 2 auf der Fernbedienung</li>
+			<li>light_on_off: Taste 3 auf der Fernbedienung</li>
+			<li>minus: Taste 4 auf der Fernbedienung</li>
+			<li>plus: Taste 5 auf der Fernbedienung</li>
+		</ul><br>
 
-	<ul><u>Hoermann HSM4 (Fernbedienung mit 4 Tasten)</u></ul>
-	<ul><a name="button_1"></a>
-		<li>button_1<br>
-		Taste 1 auf der Fernbedienung</li>
-	</ul>
-	<ul><a name="button_2"></a>
-		<li>button_2<br>
-		Taste 2 auf der Fernbedienung</li>
-	</ul>
-	<ul><a name="button_3"></a>
-		<li>button_3<br>
-		Taste 3 auf der Fernbedienung</li>
-	</ul>
-	<ul><a name="button_4"></a>
-		<li>button_4<br>
-		Taste 4 auf der Fernbedienung</li>
-	</ul><br>
+		<u>ChiliTec LED Christbaumkerzen</u>
+		<ul>
+			<a name="power_on"></a><li>power_on: Taste ON auf der Fernbedienung</li>
+			<a name="power_off"></a><li>power_off: Taste OFF auf der Fernbedienung</li>
+			<a name="flickering_slowly"></a><li>flickering_slowly: Taste SL auf der Fernbedienung</li>
+			<a name="flickering_fast"></a><li>flickering_fast: Taste SF auf der Fernbedienung</li>
+			<a name="brightness_minus"></a><li>brightness_minus: Taste - auf der Fernbedienung</li>
+			<a name="brightness_plus"></a><li>brightness_plus: Taste + auf der Fernbedienung</li>
+		</ul><br>
 
-	<ul><u>Techmar Garden Lights (Fernbedienung mit 10 Tasten)</u></ul>
-	<ul><li>Group_1 ... Group_9<br>
-		Gruppe 1 bis 9, jeweils ein und aus</li>
-	</ul>
-	<ul><li>All_on / All_off<br>
-		Alle Gruppen ein / aus</li>
-	</ul><br>
+		<u>ESTO KL_RF01</u>
+		<ul>
+			<a name="on"></a><li>on: Taste ON auf der Fernbedienung</li>
+			<a name="off"></a><li>off: Taste OFF auf der Fernbedienung</li>
+			<a name="alternating_full_luminosity"></a><li>alternating_full_luminosity: Taste ABWECHSELNDE_LEUCHTKRAFT auf der Fernbedienung</li>
+			<a name="full_brightness"></a><li>full_brightness: Taste VOLLE_HELLIGKEIT auf der Fernbedienung</li>
+			<a name="light_color_warm_white"></a><li>light_color_warm_white: Taste LICHTFARBE_WARMWEIß auf der Fernbedienung</li>
+			<a name="light_color_cold_white"></a><li>light_color_cold_white: Taste LICHTFARBE_KALTWEIß auf der Fernbedienung</li>
+			<a name="dimup"></a><li>dimup: Taste DIMUP auf der Fernbedienung</li>
+			<a name="dimdown"></a><li>dimdown: Taste DIMDOWN auf der Fernbedienung</li>
+			<a name="night_mode"></a><li>night_mode: Taste MOND auf der Fernbedienung</li>
+		</ul><br>
 
-	<ul><u>Westinghouse Deckenventilator (Fernbedienung mit 5 Tasten)</u></ul>
-	<ul><a name="1_fan_low_speed"></a>
-		<li>1_fan_low_speed<br>
-		Taste LOW auf der Fernbedienung</li>
-	</ul>
-	<ul><a name="2_fan_medium_speed"></a>
-		<li>2_fan_medium_speed<br>
-		Taste MED auf der Fernbedienung</li>
-	</ul>
-	<ul><a name="3_fan_high_speed"></a>
-		<li>3_fan_high_speed<br>
-		Taste HI auf der Fernbedienung</li>
-	</ul>
-	<ul><a name="light_on_off"></a>
-		<li>light_on_off<br>
-		Licht ein-/ausschalten</li>
-	</ul>
-	<ul><a name="fan_off"></a>
-		<li>fan_off<br>
-		Ventilator ausschalten</li>
-	</ul><br>
+		<u>LED_XM21_0 Christbaumkerzen</u>
+		<ul>
+			<a name="on"></a><li>on: Taste I auf der Fernbedienung</li>
+			<a name="off"></a><li>off: Taste O auf der Fernbedienung</li>
+		</ul><br>
 
-	<ul><a name=" "></a><u>Westinghouse Delancey Deckenventilator (Fernbedienung RH787T mit 9 Tasten + SET)</u></ul>
-	<ul><a name="1_fan_minimum_speed"></a>
-		<li>1_fan_minimum_speed<br>
-		Taste I auf der Fernbedienung</li>
-	</ul>
-	<ul><a name="2_fan_low_speed"></a>
-		<li>2_fan_low_speed<br>
-		Taste II auf der Fernbedienung</li>
-	</ul>
+		<u>Fernbedienungen SA-434-1 mini 923301, Hoermann HS1-868-BS, Tedsen_SKX1xx</u>
+		<ul>
+			<a name="send"></a><li>send: Tastendruck <small>(Sendet immer den gleichen Befehl, auch wenn der Benutzer einen anderen Set-Befehl via Konsole sendet.)</small></li>
+		</ul><br>
 
-	<ul><a name="3_fan_medium_low_speed"></a>
-		<li>3_fan_medium_low_speed<br>
-		Taste III auf der Fernbedienung</li>
-	</ul>
-	<ul><a name="4_fan_medium_speed"></a>
-		<li>4_fan_medium_speed<br>
-		Taste IV auf der Fernbedienung</li>
-	</ul>
-	<ul><a name="5_fan_medium_high_speed"></a>
-		<li>5_fan_medium_high_speed<br>
-		Taste V auf der Fernbedienung</li>
-	</ul>
-	<ul><a name="6_fan_high_speed"></a>
-		<li>6_fan_high_speed<br>
-		Taste VI auf der Fernbedienung</li>
-	</ul>
-	<ul><a name="fan_off"></a>
-		<li>fan_off<br>
-		Ventilator ausschalten</li></ul>
-	<ul><a name="fan_direction"></a>
-		<li>fan_direction<br>
-		Drehrichtung festlegen</li>
-	</ul>
-	<ul><a name="light_on_off"></a>
-		<li>light_on_off<br>
-		Licht ein-/ausschalten</li>
-	</ul>
-	<ul><a name="set"></a>
-		<li>set<br>
-		Taste SET in der Fernbedienung</li><a name=" "></a>
+		<u>Hoermann HSM4 (Fernbedienung mit 4 Tasten)</u>
+		<ul>
+			<a name="button_1"></a><li>button_1: Taste 1 auf der Fernbedienung</li>
+			<a name="button_2"></a><li>button_2: Taste 2 auf der Fernbedienung</li>
+			<a name="button_3"></a><li>button_3: Taste 3 auf der Fernbedienung</li>
+			<a name="button_4"></a><li>button_4: Taste 4 auf der Fernbedienung</li>
+		</ul><br>
+
+		<u>Techmar Garden Lights (Fernbedienung mit 10 Tasten)</u>
+		<ul>
+			<li>Group_1 ... Group_9: Gruppe 1 bis 9, jeweils ein und aus</li>
+			<li>All_on / All_off: Alle Gruppen ein / aus</li>
+		</ul><br>
+
+		<u>Westinghouse Deckenventilator (Fernbedienung mit 5 Tasten)</u>
+		<ul>
+			<a name="1_fan_low_speed"></a><li>1_fan_low_speed: Taste LOW auf der Fernbedienung</li>
+			<a name="2_fan_medium_speed"></a><li>2_fan_medium_speed: Taste MED auf der Fernbedienung</li>
+			<a name="3_fan_high_speed"></a><li>3_fan_high_speed: Taste HI auf der Fernbedienung</li>
+			<a name="light_on_off"></a><li>light_on_off: Licht ein-/ausschalten</li>
+			<a name="fan_off"></a><li>fan_off: Ventilator ausschalten</li>
+		</ul><br>
+
+		<u>Westinghouse Delancey Deckenventilator (Fernbedienung RH787T mit 9 Tasten + SET)</u>
+		<ul>
+			<a name="1_fan_minimum_speed"></a><li>1_fan_minimum_speed: Taste I auf der Fernbedienung</li>
+			<a name="2_fan_low_speed"></a><li>2_fan_low_speed: Taste II auf der Fernbedienung</li>
+			<a name="3_fan_medium_low_speed"></a><li>3_fan_medium_low_speed: Taste III auf der Fernbedienung</li>
+			<a name="4_fan_medium_speed"></a><li>4_fan_medium_speed: Taste IV auf der Fernbedienung</li>
+			<a name="5_fan_medium_high_speed"></a><li>5_fan_medium_high_speed: Taste V auf der Fernbedienung</li>
+			<a name="6_fan_high_speed"></a><li>6_fan_high_speed: Taste VI auf der Fernbedienung</li>
+			<a name="fan_off"></a><li>fan_off: Ventilator ausschalten</li>
+			<a name="fan_direction"></a><li>fan_direction: Drehrichtung festlegen</li>
+			<a name="light_on_off"></a><li>light_on_off: Licht ein-/ausschalten</li>
+			<a name="set"></a><li>set: Taste SET in der Fernbedienung</li><a name=" "></a>
+		</ul>
 	</ul>
 	<br><br>
 
 	<b>Get</b><br>
-	<ul>N/A</ul><br><br>
+	<ul>N/A</ul>
+	<br><br>
 
 	<b>Attribute</b><br>
-	<ul><li><a href="#do_not_notify">do_not_notify</a></li></ul><br>
-	<ul><li><a href="#ignore">ignore</a></li></ul><br>
-	<ul><li><a href="#IODev">IODev</a></li></ul><br>
-	<ul><li><a name="model">model</a><br>
-		Das Attribut bezeichnet den Modelltyp Ihres Ger&auml;tes.<br>
-		(unknown, Buttons_five, CAME_TOP_432EV, Chilitec_22640, KL_RF01, HS1-868-BS, HSM4, QUIGG_DMV, LED_XM21_0, Momento, Navaris, Novy_840029, Novy_840039, OR28V, RC_10, RH787T, SA_434_1_mini, SF01_01319004, TR60C1, Tedsen_SKX1xx, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx, TR_502MSV, Unitec_47031)</li><a name=" "></a>
-	</ul><br>
-	<ul><li><a name="repeats">repeats</a><br>
-	Mit diesem Attribut kann angepasst werden, wie viele Wiederholungen sendet werden. Standard ist 5.</li></ul><br>
-	<ul><li><a name="UTclock">UTclock</a><br>
-	Mit diesem Attribut kann der Clockpulse beim senden eingestellt werden. Einen Standardwert gibt es nicht.<br>
-	<small><u>Ausnahme:</u></small> Das Model Novy_840039 hat einen voreingestellten Clockpulse von 375. Diesen kann man manuell mit dem Attribut individuell anpassen.</li></ul><br>
+	<ul>
+		<li><a href="#do_not_notify">do_not_notify</a></li>
+		<li><a href="#ignore">ignore</a></li>
+		<li><a href="#IODev">IODev</a></li>
+		<li><a name="model"></a>model<br>
+			Diese Attribut bezeichnet den Modelltyp Ihres Ger&auml;tes (Buttons_five, CAME_TOP_432EV, Chilitec_22640, KL_RF01, HS1-868-BS, HSM4, QUIGG_DMV, LED_XM21_0, Momento, Navaris, Novy_840029, Novy_840039, OR28V, RC_10, RH787T, SA_434_1_mini, SF01_01319004, TR60C1, Tedsen_SKX1xx, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx, TR_502MSV, Unitec_47031, unknown).
+			Bei &Auml;nderung des Attributes wird ein neues Gerät mittels <a href="#autocreate">autocreate</a> erzeugt. Autocreate muss dazu aktiviert sein.
+		</li>
+		<li><a name="repeats"></a>repeats<br>
+			Mit diesem Attribut kann angepasst werden, wie viele Wiederholungen gesendet werden. Standard ist 5.
+		</li>
+		<li><a name="UTclock"></a>UTclock<br>
+			Mit diesem Attribut kann der Basistakt beim Senden eingestellt werden. Einen Standardwert gibt es nicht.<br>
+			Ausnahme: Das Model Novy_840039 hat einen voreingestellten Basistakt von 375. Auch diesen kann man mit dem Attribut individuell anpassen.
+		</li>
+		<li><a name="UTfrequency"></a>UTfrequency<br>
+			Mit diesem Attribut kann eine individuelle Sendefrequenz eingestellt werden. Ist dieses Attribut nicht gesetzt, wird die Sendefrequenz des IO Devices (z.B. Signalduino) verwendet.
+		</li>
+	</ul>
+	<br><br>
+	
+	<b>Generierte Readings der Modelle</b><br>
+	<ul>
+		<u>Buttons_five, CAME_TOP_432EV, Chilitec_22640, HSM4, KL_RF01, LED_XM21_0, Momento, Novy_840029, Novy_840039, OR28V, QUIGG_DMV, RC_10, RH787T, SF01_01319004, SF01_01319004_Typ2, TR_502MSV</u>
+		<ul>
+			<li>deviceCode: Ger&auml;teCode des Systemes</li>
+			<li>LastAction: Zuletzt ausgef&uuml;hrte Aktion des Ger&auml;tes (<code>receive</code> f&uuml;r Kommando empfangen, <code>send</code> f&uuml;r Kommando gesendet).</li>
+			<li>state: Aktueller Zustand des Ger&auml;tes</li>
+		</ul><br>
 
-	<b><i>Generierte Readings der Modelle</i></b><br>
-	<ul><u>Buttons_five | CAME_TOP_432EV | Chilitec_22640 | HSM4 | KL_RF01 | LED_XM21_0 | Momento | Novy_840029 | Novy_840039 | OR28V | QUIGG_DMV | RC_10 | RH787T | SF01_01319004 | SF01_01319004_Typ2 | TR_502MSV</u><br>
-	<li>deviceCode<br>
-	Ger&auml;teCode des Systemes</li>
-	<li>LastAction<br>
-	Zuletzt ausgef&uuml;hrte Aktion des Ger&auml;tes. <code>receive</code> f&uuml;r Kommando empfangen | <code>send</code> f&uuml;r Kommando gesendet</li>
-	<li>state<br>
-	Zuletzt ausgef&uuml;hrter Tastendruck der Fernbedienung</li></ul><br>
+		<u>MD_2003R (gas), MD_2018R (vibration), MD_210R (door/windows switch), MD_230R (water)</u>
+		<ul>
+			<li>contact: Zustand des internen Alarmkontaktes.</li>
+			<li>deviceTyp: Modeltyp des Sensors.</li>
+			<li>sabotage: Zustand des Sabotagekontaktes.</li>
+			<li>state: Zustand des Ger&auml;tes.</li>
+		</ul><br>
 
-	<ul><u>MD_2003R (gas)&nbsp;&nbsp;|&nbsp;&nbsp;MD_2018R (vibration)&nbsp;&nbsp;|&nbsp;&nbsp;MD_210R (door/windows switch)&nbsp;&nbsp;|&nbsp;&nbsp;MD_230R (water)</u><br>
-	<li>contact<br>
-	Zustand des internen Alarmkontaktes.</li>
-	<li>deviceTyp<br>
-	Modeltyp Ihres Sensors.</li>
-	<li>sabotage<br>
-	Zustand des Sabotagekontaktes.</li>
-	<li>state<br>
-	Zustand des Ger&auml;tes.</li></ul><br>
+		<u>HS1-868-BS, SA_434_1_mini, Tedsen_SKX1, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx</u>
+		<ul>
+			<li>LastAction: Zuletzt ausgef&uuml;hrte Aktion des Ger&auml;tes (<code>receive</code> f&uuml;r Kommando empfangen, <code>send</code> f&uuml;r Kommando gesendet).</li>
+			<li>state: Aktueller Zustand des Ger&auml;tes</li>
+		</ul><br>
 
-	<ul><u>HS1-868-BS&nbsp;&nbsp;|&nbsp;&nbsp;SA_434_1_mini&nbsp;&nbsp;|&nbsp;&nbsp;Tedsen_SKX1xx&nbsp;&nbsp;|&nbsp;&nbsp;Tedsen_SKX2xx&nbsp;&nbsp;|&nbsp;&nbsp;Tedsen_SKX4xx&nbsp;&nbsp;|&nbsp;&nbsp;Tedsen_SKX6xx</u><br>
-	<li>LastAction<br>
-	Zuletzt ausgef&uuml;hrte Aktion aus FHEM. <code>send</code> f&uuml;r Kommando gesendet.</li>
-	<li>state<br>
-	Zuletzt ausgef&uuml;hrte Aktion des Ger&auml;tes. <code>receive</code> f&uuml;r Kommando empfangen.</li></ul><br>
-
-	<ul><u>Unitec_47031</u><br>
-	<li>System-Housecode<br>
-	Eingestellter System bzw. Hauscode des Ger&auml;tes</li>
-	<li>state<br>
-	Zustand des Kontaktes (vorbereitet, unbest&auml;tigt)</li>
-	<li>Zone<br>
-	Eingestellte Zone des Ger&auml;tes</li>
-	<li>Usersystem<br>
-	Bezeichnung Systemes</li>
-	</ul><br>
-
+		<u>Unitec_47031</u>
+		<ul>
+			<li>System-Housecode: Eingestellter System- bzw. Hauscode des Ger&auml;tes</li>
+			<li>state: Zustand des Kontaktes (vorbereitet, unbest&auml;tigt)</li>
+			<li>Zone: Eingestellte Zone des Ger&auml;tes</li>
+			<li>Usersystem: Bezeichnung Systemes</li>
+		</ul>
+	</ul>
 </ul>
+
 =end html_DE
 =cut
