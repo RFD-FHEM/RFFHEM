@@ -1,12 +1,15 @@
-##############################################
-# $Id: 14_Hideki.pm v3.4.3 2019-02-20 20:38:21Z Sidey $
+#########################################################################################
+# $Id: 14_Hideki.pm 21666 2020-04-13 21:14:57Z Sidey $
+#
 # The file is taken from the SIGNALduino project
 # see http://www.fhemwiki.de/wiki/SIGNALduino
 # and was modified by a few additions
 # to support Hideki Sensors
-# S. Butzek, HJGode, Ralf9 2015-2017
 #
-# changed the way crc and decrypt is used hjgode 20171129
+# 2015-2017 S.Butzek, Ralf9, HJGode
+# 2017-2020 S.Butzek, Ralf9, HomeAutoUser, elektron-bbs
+#
+# changed the way crc and decrypt is used HJGode 20171129
 
 package main;
 #use version 0.77; our $VERSION = version->declare('v3.4.3');

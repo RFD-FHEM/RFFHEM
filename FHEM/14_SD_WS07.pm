@@ -1,10 +1,11 @@
-##############################################
-# $Id: 14_SD_WS07.pm v3.4.3 2019-07-19 18:20:22Z Sidey $
+#########################################################################################
+# $Id: 14_SD_WS07.pm 21666 2020-04-13 21:14:57Z Sidey $
 # 
 # The purpose of this module is to support serval eurochron
 # weather sensors like eas8007 which use the same protocol
-# Sidey79, Ralf9  2015-2017
-# Sidey79, elektron-bbs 2018-2019
+#
+# 2015-2017 Sidey79, Ralf9
+# 2018-2020 Sidey79, elektron-bbs
 #
 #  Nexus sensor protocol with ID, temperature and optional humidity 
 #  also FreeTec NC-7345 sensors for FreeTec Weatherstation NC-7344. 

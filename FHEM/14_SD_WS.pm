@@ -1,11 +1,13 @@
-##############################################
-# $Id: 14_SD_WS.pm v3.4.3 2020-04-07 21:31:57Z Sidey $
+#########################################################################################
+# $Id: 14_SD_WS.pm 21666 2020-04-13 21:14:57Z Sidey $
 #
 # The purpose of this module is to support serval
 # weather sensors which use various protocol
-# Sidey79 & Ralf9  2016 - 2017
-# Joerg 2017
-# elektron-bbs 2018 - 
+#
+# 2016-2017 Sidey79, Ralf9
+# 2017      Joerg
+# 2018-2020 elektron-bbs
+#
 # 17.04.2017 WH2 (TFA 30.3157 nur Temp, Hum = 255),es wird das Perlmodul Digest:CRC benoetigt fuer CRC-Pruefung benoetigt
 # 29.05.2017 Test ob Digest::CRC installiert
 # 22.07.2017 WH2 angepasst
