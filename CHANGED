@@ -1,3 +1,13 @@
+2020-05-25 - add attribute UTfrequency in 14_SD_UT.pm (#845)
+
+* SD_UT new attribute UTfrequency for individual transmission frequency
+Multiple query "$ attrName eq 'model'" removed
+change commandref
+replace "foreach my $keys (keys %models)" with "if ( exists $models{$attrValue}" in line 1756
+replace "foreach my $keys (sort keys %{$models{RC_10}{buttons}})" with "if ( exists $models{RC_10}{buttons}{$button} )" in line 1845
+replace "foreach my $keys (keys %models)" with "grep { $models{$_}{hex_lengh} =~ /$hex_lengh/ } keys %models;" in line 1745
+delete "$attr{$name}{room}	= "SD_UT"	if( not defined( $attr{$name}{room} ) );"
+change search for models with same hex_length
 2020-05-24 - Update 14_SD_UT.pm
 
 Reference to autocreate added
