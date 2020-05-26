@@ -1,6 +1,12 @@
-2020-05-25 - SVN Versionsauskunft
+2020-05-26 - SVN Versionsauskunft
 
 https://github.com/RFD-FHEM/RFFHEM/issues/719#issuecomment-633471643
+
+2020-05-26 - 10_SD_GT revised for perlcritic (#847)
+2020-05-25 - Update 10_SD_GT.pm
+
+Code revised for perlcritic
+
 2020-05-25 - add attribute UTfrequency in 14_SD_UT.pm (#845)
 
 * SD_UT new attribute UTfrequency for individual transmission frequency
