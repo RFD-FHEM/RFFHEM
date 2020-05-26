@@ -457,6 +457,10 @@ Fixed test because loading a hash has changed a little bit
 --- --- --- Unreleases what comes up here ---- --- ---
 
 
+2020-05-26 - 10_SD_GT revised for perlcritic (#847)
+2020-05-25 - Update 10_SD_GT.pm
+Code revised for perlcritic
+
 2020-05-25 - add attribute UTfrequency in 14_SD_UT.pm (#845)
 * SD_UT new attribute UTfrequency for individual transmission frequency
 Multiple query "$ attrName eq 'model'" removed
