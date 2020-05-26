@@ -1,3 +1,6 @@
+2020-05-26 - Update SD_ProtocolData.pm
+
+* ID 56 fix def & added doc https://github.com/RFD-FHEM/RFFHEM/issues/848
 2020-05-26 - 10_SD_GT revised for perlcritic (#847)
 2020-05-25 - Update 10_SD_GT.pm
 
