@@ -1338,54 +1338,6 @@ sub postDemo_FHT80TF {
 
 ############################# package lib::SD_Protocols, test exists
 
-=item postDemo_WS7035()
-
-This function checks the bit sequence. On an error in the CRC or no start, it issues an output.
-
-Input:  $object,$name,@bit_msg
-Output:
-        (returncode = 1 on success, prepared message or undef)
-
-=cut
-
-sub postDemo_WS7035 {
-	my $self 		= shift // carp 'Not called within an object';
-	my $name 		= shift // carp 'no $name provided';
-	my @bit_msg  	= @_;
-
-	my $msg = join('',@bit_msg);
-	my $parity = 0;                                      # Parity even
-	my $sum = 0;                                         # checksum
-    $self->_logging(qq[lib/postDemo_WS7035, $msg], 4 );
-	if (substr($msg,0,8) ne '10100000') {                # check ident
-	    $self->_logging(qq[lib/postDemo_WS7035, ERROR - Ident not 1010 0000],3 );
-		return 0, undef;
-	} else {
-		for(my $i = 15; $i < 28; $i++) {                 # Parity over bit 15 and 12 bit temperature
-	      $parity += substr($msg, $i, 1);
-		}
-		if ($parity % 2 != 0) {
-		    $self->_logging(qq[lib/postDemo_WS7035, ERROR - Parity not even],3 );
-			return 0, undef;
-		} else {
-			for(my $i = 0; $i < 39; $i += 4) {           # Sum over nibble 0 - 9
-				$sum += oct('0b'.substr($msg,$i,4));
-			}
-			if (($sum &= 0x0F) != oct('0b'.substr($msg,40,4))) {
-			    $self->_logging(qq[lib/postDemo_WS7035, ERROR - wrong checksum],3 );
-				return 0, undef;
-			} else {
-				# Todo: Regex anstelle der viele substr einfügen
-			    $self->_logging(qq[lib/postDemo_WS7035, ERROR - wrong checksum]. substr($msg,0,4) ." ". substr($msg,4,4) ." ". substr($msg,8,4) ." ". substr($msg,12,4) ." ". substr($msg,16,4) ." ". substr($msg,20,4) ." ". substr($msg,24,4) ." ". substr($msg,28,4) ." ". substr($msg,32,4) ." ". substr($msg,36,4) ." ". substr($msg,40),4 );
-				substr($msg, 27, 4, '');                 # delete nibble 8
-				return (1,split(//,$msg));
-			}
-		}
-	}
-}
-
-############################# package lib::SD_Protocols, test exists
-
 =item postDemo_WS2000()
 
 This function checks the bit sequence. On an error in the CRC or no start, it issues an output.
@@ -1503,6 +1455,54 @@ sub postDemo_WS2000 {
 			}
 		}
 		return (1, @new_bit_msg);
+	}
+}
+
+############################# package lib::SD_Protocols, test exists
+
+=item postDemo_WS7035()
+
+This function checks the bit sequence. On an error in the CRC or no start, it issues an output.
+
+Input:  $object,$name,@bit_msg
+Output:
+        (returncode = 1 on success, prepared message or undef)
+
+=cut
+
+sub postDemo_WS7035 {
+	my $self 		= shift // carp 'Not called within an object';
+	my $name 		= shift // carp 'no $name provided';
+	my @bit_msg  	= @_;
+
+	my $msg = join('',@bit_msg);
+	my $parity = 0;                                      # Parity even
+	my $sum = 0;                                         # checksum
+    $self->_logging(qq[lib/postDemo_WS7035, $msg], 4 );
+	if (substr($msg,0,8) ne '10100000') {                # check ident
+	    $self->_logging(qq[lib/postDemo_WS7035, ERROR - Ident not 1010 0000],3 );
+		return 0, undef;
+	} else {
+		for(my $i = 15; $i < 28; $i++) {                 # Parity over bit 15 and 12 bit temperature
+	      $parity += substr($msg, $i, 1);
+		}
+		if ($parity % 2 != 0) {
+		    $self->_logging(qq[lib/postDemo_WS7035, ERROR - Parity not even],3 );
+			return 0, undef;
+		} else {
+			for(my $i = 0; $i < 39; $i += 4) {           # Sum over nibble 0 - 9
+				$sum += oct('0b'.substr($msg,$i,4));
+			}
+			if (($sum &= 0x0F) != oct('0b'.substr($msg,40,4))) {
+			    $self->_logging(qq[lib/postDemo_WS7035, ERROR - wrong checksum],3 );
+				return 0, undef;
+			} else {
+				### ToDo: Regex anstelle der viele substr einfuegen ##
+			    $self->_logging(qq[lib/postDemo_WS7035, ERROR - wrong checksum ]. substr($msg,0,4) ." ". substr($msg,4,4) ." ". substr($msg,8,4) ." ". substr($msg,12,4) ." ". substr($msg,16,4) ." ". substr($msg,20,4) ." ". substr($msg,24,4) ." ". substr($msg,28,4) ." ". substr($msg,32,4) ." ". substr($msg,36,4) ." ". substr($msg,40),4 );
+				substr($msg, 27, 4, '');                 # delete nibble 8
+				return (1,split(//,$msg));
+			}
+		}
 	}
 }
 
