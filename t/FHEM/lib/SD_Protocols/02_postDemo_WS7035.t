@@ -43,6 +43,19 @@ subtest 'Test bad message, Ident not 1010 0000' => sub {
 };
 
 
+subtest 'Test bad message, Parity not even' => sub {
+	plan(2);
+
+	# MU;P0=13312;P1=-2785;P2=4985;P3=1124;P4=-6442;P5=3181;P6=-31980;D=0121345434545454545434545454543454545454343454543434545434545454545454343434545434343434545;CP=3;R=73;
+	my @bits=qw(1 0 1 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 1 0 0 1 1 0 0 1 0 0 0 0 0 0 1 1 1 0 0 1 1 1 1 0 0);
+	my $return;
+
+	($rcode,$return)=$Protocols->postDemo_WS7035($target, @bits);
+	is($rcode,0, 'check returncode for bad message, Parity not even');
+	is($return,undef,'check result for bad message, Parity not even');
+};
+
+
 subtest 'Test bad message, wrong checksum' => sub {
 	plan(2);
 

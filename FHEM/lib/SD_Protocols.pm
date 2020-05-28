@@ -1498,7 +1498,7 @@ sub postDemo_WS7035 {
 				return 0, undef;
 			} else {
 				### ToDo: Regex anstelle der viele substr einfuegen ##
-			    $self->_logging(qq[lib/postDemo_WS7035, ERROR - wrong checksum ]. substr($msg,0,4) ." ". substr($msg,4,4) ." ". substr($msg,8,4) ." ". substr($msg,12,4) ." ". substr($msg,16,4) ." ". substr($msg,20,4) ." ". substr($msg,24,4) ." ". substr($msg,28,4) ." ". substr($msg,32,4) ." ". substr($msg,36,4) ." ". substr($msg,40),4 );
+				$self->_logging(qq[lib/postDemo_WS7035, ]. substr($msg,0,4) ." ". substr($msg,4,4) ." ". substr($msg,8,4) ." ". substr($msg,12,4) ." ". substr($msg,16,4) ." ". substr($msg,20,4) ." ". substr($msg,24,4) ." ". substr($msg,28,4) ." ". substr($msg,32,4) ." ". substr($msg,36,4) ." ". substr($msg,40),4 );
 				substr($msg, 27, 4, '');                 # delete nibble 8
 				return (1,split(//,$msg));
 			}
