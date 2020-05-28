@@ -1,3 +1,7 @@
+2020-05-28 - postDemo_WS7035
+
+* added test Parity not even
+* revised logoutput sub (RAW without error)
 2020-05-27 - Update SD_Protocols.pm
 
 * revised space in output & sub position
