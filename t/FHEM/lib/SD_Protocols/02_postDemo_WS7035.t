@@ -16,7 +16,7 @@ my $output;
 my $rcode;
 
 
-plan(3);
+plan(4);
 
 subtest 'Test good message' => sub {
 	plan(2);
