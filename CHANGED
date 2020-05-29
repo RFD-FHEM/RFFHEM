@@ -1,3 +1,7 @@
+2020-05-29 - Update SD_ProtocolData.pm
+
+* revised doc
+* ID 101 added dispatchequals
 2020-05-29 - Merge branch 'dev-r34' into dev-r35_xFSK_oo
 2020-05-28 - postDemo_WS7035
 
