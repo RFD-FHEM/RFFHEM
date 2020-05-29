@@ -290,7 +290,7 @@ package lib::SD_ProtocolData;
 				name             => 'itv1_sync40',
 				comment          => 'IT remote control PAR 1000, ITS-150, AB440R',
 				id               => '3',
-				knownFreqs       => '',
+				knownFreqs       => '433.92',
 				one              => [3.5,-1],
 				zero             => [1,-3.8],
 				float            => [1,-1],			# fuer Gruppentaste (nur bei ITS-150,ITR-3500 und ITR-300), siehe Kommentar in sub SIGNALduino_bit2itv1
@@ -417,7 +417,7 @@ package lib::SD_ProtocolData;
 						# MU;P0=-31072;P1=486;P2=-986;P3=1454;D=01212121212121212321232321232123232121232323212121212123232123232123212321232123232323232321232323232323212323232323232323232123212121212321232323232323232323212321212321232301212121212121212321232321232123232121232323212121212123232123232123212321232123;CP=1;R=29;O;
 						## CTW600
 						# https://forum.fhem.de/index.php/topic,39451.msg917042.html#msg917042 @greewoo
-						#	MU;P0=-96;P1=800;P2=-985;P3=485;P4=1421;P5=-8608;D=0123232323232323242324232324242324232324242324242324232323242324242323232324242424242424242424242424242424242424242424242424242424242424242424242424242424242324242424232323235;CP=4;R=0;
+						# MU;P0=-96;P1=800;P2=-985;P3=485;P4=1421;P5=-8608;D=0123232323232323242324232324242324232324242324242324232323242324242323232324242424242424242424242424242424242424242424242424242424242424242424242424242424242324242424232323235;CP=4;R=0;
 			{
 				name             => 'weather',
 				comment          => 'Weatherstation WH1080, WH3080, CTW600',
@@ -437,7 +437,7 @@ package lib::SD_ProtocolData;
 		"10"	=>	## Oregon Scientific 2
 							# https://forum.fhem.de/index.php/topic,60170.msg875919.html#msg875919 @David1
 							# MC;LL=-973;LH=984;SL=-478;SH=493;D=EF7E2DCC00000283AF5DF7CFEFEF7E2DCC;C=487;L=134;R=33;s5;b0;
-							#	MC;LL=-975;LH=976;SL=-491;SH=491;D=BEF9FDFDEFC5B98000005075EBBEF9FDFDEFC5;C=488;L=152;R=34;s1;b0;O;w;
+							# MC;LL=-975;LH=976;SL=-491;SH=491;D=BEF9FDFDEFC5B98000005075EBBEF9FDFDEFC5;C=488;L=152;R=34;s1;b0;O;w;
 			{
 				name             => 'Oregon Scientific v2|v3',
 				comment          => 'temperature / humidity or other sensors',
@@ -609,7 +609,7 @@ package lib::SD_ProtocolData;
 			{
 				name             => 'arctech / Intertechno',
 				id               => '17',
-				knownFreqs       => '',
+				knownFreqs       => '433.92',
 				one              => [1,-5,1,-1],
 				zero             => [1,-1,1,-5],
 				#one              => [1,-5],
@@ -656,7 +656,7 @@ package lib::SD_ProtocolData;
 				name            => 'Oregon Scientific v1',
 				comment         => 'temperature / humidity or other sensors',
 				id              => '18',
-				knownFreqs      => '',
+				knownFreqs      => '433.92',
 				clockrange      => [1400,1500],					# min , max
 				format          => 'manchester',				# tristate can't be migrated from bin into hex!
 				preamble        => '',
@@ -1113,7 +1113,7 @@ package lib::SD_ProtocolData;
 				name             => 'Bresser 7009994',
 				comment          => 'temperature / humidity sensor',
 				id               => '37',
-				knownFreqs       => '',
+				knownFreqs       => '433.92',
 				one              => [2,-1],
 				zero             => [1,-2],
 				start            => [3,-3,3,-3],
@@ -1236,6 +1236,7 @@ package lib::SD_ProtocolData;
 				length_max      => '120',
 			},
 		"43"	=>	## Somfy RTS
+							# https://forum.fhem.de/index.php/topic,64141.msg642800.html#msg642800 @Elektrolurch
 							# received=40, parsestate=on   MC;LL=-1405;LH=1269;SL=-723;SH=620;D=98DBD153D631BB;C=669;L=56;R=229;
 			{
 				name            => 'Somfy RTS',
@@ -1259,7 +1260,7 @@ package lib::SD_ProtocolData;
 				name            => 'BresserTemeo',
 				comment         => 'temperature / humidity sensor',
 				id              => '44',
-				knownFreqs      => '',
+				knownFreqs      => '433.92',
 				clockabs        => 500,
 				zero            => [4,-4],
 				one             => [4,-8],
@@ -1275,7 +1276,7 @@ package lib::SD_ProtocolData;
 				name            => 'BresserTemeo',
 				comment         => 'temperature / humidity sensor',
 				id              => '44',
-				knownFreqs		=> '',
+				knownFreqs		=> '433.92',
 				clockabs        => 500,
 				zero            => [4,-4],
 				one             => [4,-8],
@@ -1361,7 +1362,7 @@ package lib::SD_ProtocolData;
 				name            => 'TFA Dostmann',
 				comment         => 'Funk-Thermometer Joker TFA 30.3055.01',
 				id              => '48',
-				knownFreqs      => '',
+				knownFreqs      => '433.92',
 				clockabs        => 250, 						# In real it is 500 but this leads to unprceise demodulation
 				one             => [-4,6],
 				zero            => [-4,2],
@@ -1601,19 +1602,19 @@ package lib::SD_ProtocolData;
 							# MU;P0=5036;P1=-624;P2=591;P3=-227;P4=187;P5=-5048;D=0123412341414123234141414141414141412341232341414141232323234123234141414141414123414141414141414141234141414123234141412341232323250123412341414123234141414141414141412341232341414141232323234123234141414141414123414141414141414141234141414123234141412;CP=4;O;
 							# MU;P0=-228;P1=185;P2=-625;P3=593;P4=-5050;P5=5050;D=012121234523012301212123030121212121212121212301230301212121230303030123030303030301212123452301230121212303012121212121212121230123030121212123030303012303012121212121212301212121212121212121230121230121230303030301212123;CP=1;
 			{
-				name						=> 'Celexon',
-				id							=> '56',
-				knownFreqs      => '',
-				clockabs				=> 200,
-				zero						=> [1,-3],
-				one							=> [3,-1],
-				start						=> [25,-3],
-				format					=> 'twostate',
-				preamble				=> 'u56#',						# prepend to converted message
-				#clientmodule		=> '',
-				#modulematch			=> '',
-				length_min			=> '56',
-				length_max			=> '68',
+				name            => 'Celexon',
+				id              => '56',
+				knownFreqs      => '433.92',
+				clockabs        => 200,
+				zero            => [1,-3],
+				one             => [3,-1],
+				start           => [25,-3],
+				format          => 'twostate',
+				preamble        => 'u56#',						# prepend to converted message
+				#clientmodule    => '',
+				#modulematch     => '',
+				length_min      => '56',
+				length_max      => '68',
 			},
 		"57"	=>	## m-e doorbell fuer FG- und Basic-Serie
 							# https://forum.fhem.de/index.php/topic,64251.0.html @rippi46
@@ -1949,7 +1950,7 @@ package lib::SD_ProtocolData;
 				comment          => 'message decode as MU',
 				id               => '72',
 				knownFreqs       => '',
-				dispatchequals   =>  'true',
+				dispatchequals   => 'true',
 				one              => [2,-1.2],		# 680, -400
 				zero             => [1,-2.2],		# 340, -750
 				start            => [14,-4.4],		# 4800,-1520
@@ -2672,6 +2673,7 @@ package lib::SD_ProtocolData;
 				length_max      => '24',
 			},
 		"100"	=>	# Lacrosse, Mode 1 - IT+
+							# https://forum.fhem.de/index.php/topic,106594.msg1034378.html#msg1034378 @Ralf9
 							# ID=100, addr=42 temp=23.6 hum=44 bat=0 batInserted=128   MN;D=9AA6362CC8AAAA000012F8F4;R=4;
 			{
 				name            => 'Lacrosse mode 1',
@@ -2697,10 +2699,12 @@ package lib::SD_ProtocolData;
 				sync            => '2DD4',
 				modulation      => '2-FSK',
 				clientmodule    => 'PCA301',
+				dispatchequals  => 'true',
 				length_min      => '24',
 				method          => \&lib::SD_Protocols::ConvPCA301,
 			},
 		"102"	=>	# KoppFreeControl
+							# https://forum.fhem.de/index.php/topic,106594.msg1008936.html?PHPSESSID=er8d3f2ar1alq3rcijmu4efffo#msg1008936 @Ralf9
 							# MN;D=07FA5E1721CC0F02FE000000000000;
 			{
 				name            => 'KoppFreeControl',
@@ -2715,7 +2719,9 @@ package lib::SD_ProtocolData;
 				method          => \&lib::SD_Protocols::ConvKoppFreeControl,
 			},
 		"103"	=>	# Lacrosse Mode 2 - IT+
+							# https://forum.fhem.de/index.php/topic,106278.msg1048506.html#msg1048506 @Ralf9
 							# ID=103, addr=40 temp=19.2 hum=47 bat=0 batInserted=0   MN;D=9A05922F8180046818480800;N=2;
+							# https://forum.fhem.de/index.php/topic,106594.msg1034378.html#msg1034378 @Ralf9
 							# ID=103, addr=52 temp=21.5 hum=47 bat=0 batInserted=0   MN;D=9D06152F5484791062004090;N=2;
 			{
 				name            => 'Lacrosse mode 2',
