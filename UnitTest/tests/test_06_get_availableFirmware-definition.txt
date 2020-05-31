@@ -1,0 +1,21 @@
+defmod test_06_get_availableFirmware UnitTest dummyDuino 
+(
+ {
+	use Test2::V0;
+	use Test2::Tools::Compare qw{ is like };
+
+	subtest 'Test get availableFirmware' => sub {
+		plan(2);
+		$attr{$target}{updateChannelFW} = "stable";
+		$attr{$target}{hardware} = "0";
+		delete($targetHash->{ucCmd});
+		my $ret=SIGNALduino_Get($targetHash, $target, "availableFirmware");
+		like($ret,qr/.*get availableFirmware failed.*/,"check return contains failed");
+		
+		$attr{$target}{hardware} = "nano328";
+		delete($targetHash->{ucCmd});
+		$ret=SIGNALduino_Get($targetHash, $target, "availableFirmware");
+		is($ret,"availableFirmware: \n\nFetching stable firmware versions for nano328 from github\n","check return is fetching");
+	}; 
+}
+)

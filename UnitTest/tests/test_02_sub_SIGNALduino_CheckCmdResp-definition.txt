@@ -1,0 +1,82 @@
+defmod test_02_sub_SIGNALduino_CheckCmdResp UnitTest dummyDuino ( 
+{ 
+	use Test2::V0;
+	use Test2::Tools::Compare qw{ is };
+
+	subtest 'Test with unset version' => sub {
+		plan(2);
+
+		my $mock = Mock::Sub->new;
+	 	my $SD_StartInit = $mock->mock('SIGNALduino_StartInit');
+		delete($targetHash->{version});
+		$targetHash->{ucCmd}->{cmd} = "version";
+
+		my $ret=SIGNALduino_CheckCmdResp($targetHash);
+		is($SD_StartInit->called,1,"Version not found and SIGNALduino_StartInit called");
+		is($targetHash->{ucCmd}->{cmd},undef,"ucCmd removed");
+
+		$SD_StartInit->unmock;
+	}; 
+
+	subtest 'Test with wrong version' => sub {
+		plan(3);
+
+		$targetHash->{version} = "SIGNALdummy";
+		$targetHash->{ucCmd}->{cmd} = "version";
+
+		my $ret=SIGNALduino_CheckCmdResp($targetHash);
+		is(ReadingsVal($target,"state",undef),"closed","SIGNALDuino not found");
+		is($targetHash->{ucCmd}->{cmd},"version","ucCmd not removed");
+		is($targetHash->{DevState},"INACTIVE","check DevState");
+	}; 
+
+	subtest 'Test with old version' => sub {
+		plan(3);
+
+		$targetHash->{version} = "V 3.1.2 SIGNALduino cc1101 (chip CC1101) - compiled at Sep 22 2019 22:53:27";
+		$targetHash->{ucCmd}->{cmd} = "version";
+
+		my $ret=SIGNALduino_CheckCmdResp($targetHash);
+		is(ReadingsVal($target,"state",undef),"closed","SIGNALDuino Firmware to old");
+		is($targetHash->{ucCmd}->{cmd},"version","ucCmd not removed");
+		is($targetHash->{DevState},"INACTIVE","check DevState");
+	}; 
+	
+	subtest 'Test with good version without cc1101' => sub {
+		plan(5);
+
+		my $mock = Mock::Sub->new;
+	 	my $SD_SimpleWrite = $mock->mock('SIGNALduino_SimpleWrite');
+
+		$targetHash->{version} = "V 3.3.1 SIGNALduino - compiled at Sep 22 2019 22:53:27";
+		$targetHash->{ucCmd}->{cmd} = "version";
+		my $ret=SIGNALduino_CheckCmdResp($targetHash);
+		is(ReadingsVal($target,"state",undef),"opened","SIGNALDuino firmware version ok");
+		is($SD_SimpleWrite->called,1,"SIGNALduino_SimpleWrite called");
+
+		is($targetHash->{ucCmd}->{cmd},"version","ucCmd not removed");
+		is($targetHash->{DevState},"initialized","check DevState");
+		is($targetHash->{cc1101_available},undef,"check internal cc1101_available");
+		$SD_SimpleWrite->unmock;
+	}; 
+
+	subtest 'Test with good version' => sub {
+		plan(5);
+
+		my $mock = Mock::Sub->new;
+	 	my $SD_SimpleWrite = $mock->mock('SIGNALduino_SimpleWrite');
+
+		$targetHash->{version} = "V 3.3.1 SIGNALduino cc1101 (chip CC1101) - compiled at Sep 22 2019 22:53:27";
+		$targetHash->{ucCmd}->{cmd} = "version";
+		my $ret=SIGNALduino_CheckCmdResp($targetHash);
+		is(ReadingsVal($target,"state",undef),"opened","SIGNALDuino firmware version ok");
+		is($SD_SimpleWrite->called,1,"SIGNALduino_SimpleWrite called");
+
+		is($targetHash->{ucCmd}->{cmd},"version","ucCmd not removed");
+		is($targetHash->{DevState},"initialized","check DevState");
+		is($targetHash->{cc1101_available},1,"check internal cc1101_available");
+
+		$SD_SimpleWrite->unmock;
+	}; 
+} 
+)

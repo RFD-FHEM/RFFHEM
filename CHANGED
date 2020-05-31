@@ -1,22 +1,3 @@
-2020-05-03 - Update 00_SIGNALduino.pm
-
-* littel changed for test
-2020-05-03 - Merge branch 'dev-r34' into dev-r35_xFSK
-
-2020-05-01
-  00_SIGNALduino.pm
-   * revised comments
-  test_sub_SIGNALduino_postDemo_FHT80-definition.txt
-   * create test
-  test_sub_SIGNALduino_postDemo_FS20-definition.txt
-   * create test
-  test_sub_SIGNALduino_postDemo_WS7035-definition.txt
-   * create test
-
-2020-04-29
-  00_SIGNALduino.pm
-   * revised comments
-
 2020-04-25
   00_SIGNALduino.pm
    * more comments to better overview
@@ -227,8 +208,63 @@
 --- --- --- Unreleases what comes up here ---- --- ---
 
 
-2020-05-02 - new protocol 104 for remote control TR60C-1 (#844)
+2020-05-28 - Dev r34 - id56 - #848 (#849)
 
+Update SD_ProtocolData.pm
+* ID 56 fix def & added doc https://github.com/RFD-FHEM/RFFHEM/issues/848
+2020-05-26 - Update SD_ProtocolData.pm
+
+* ID 56 fix def & added doc https://github.com/RFD-FHEM/RFFHEM/issues/848
+
+2020-05-26 - 10_SD_GT revised for perlcritic (#847)
+2020-05-25 - Update 10_SD_GT.pm
+Code revised for perlcritic
+
+2020-05-25 - add attribute UTfrequency in 14_SD_UT.pm (#845)
+* SD_UT new attribute UTfrequency for individual transmission frequency
+Multiple query "$ attrName eq 'model'" removed
+change commandref
+replace "foreach my $keys (keys %models)" with "if ( exists $models{$attrValue}" in line 1756
+replace "foreach my $keys (sort keys %{$models{RC_10}{buttons}})" with "if ( exists $models{RC_10}{buttons}{$button} )" in line 1845
+replace "foreach my $keys (keys %models)" with "grep { $models{$_}{hex_lengh} =~ /$hex_lengh/ } keys %models;" in line 1745
+delete "$attr{$name}{room}	= "SD_UT"	if( not defined( $attr{$name}{room} ) );"
+change search for models with same hex_length
+
+2020-05-24 - Update 14_SD_UT.pm
+Reference to autocreate added
+
+2020-05-23 - Update 14_SD_UT.pm
+change commandref engl.
+
+2020-05-22 - Update 14_SD_UT.pm
+change search for models with same hex_length
+rename  hex_lengh in hex_length
+
+2020-05-20 - Update 14_SD_UT.pm
+replace "foreach my $keys (keys %models)" with "grep { $models{$_}{hex_lengh} =~ /$hex_lengh/ } keys %models;" in line 1745
+delete "$attr{$name}{room}	= "SD_UT"	if( not defined( $attr{$name}{room} ) );"
+
+2020-05-18 - Update 14_SD_UT.pm
+replace "foreach my $keys (sort keys %{$models{RC_10}{buttons}})" with "if ( exists $models{RC_10}{buttons}{$button} )" in line 1845
+
+2020-05-17 - Update 14_SD_UT.pm
+replace "foreach my $keys (keys %models)" with "if ( exists $models{$attrValue}" in line 1756
+minor corrections in html_DE
+
+2020-05-17 - Update 14_SD_UT.pm
+update html_DE
+
+2020-05-12 - Update 14_SD_UT.pm - change commandref
+change commandref
+
+2020-05-07 - Update 14_SD_UT.pm
+Check values ​​attribute UTfrequency added
+Documentation for UTfrequency attribute added
+Multiple query "$ attrName eq 'model'" removed
+
+2020-05-06 - SD_UT new attribute UTfrequency for individual transmission frequency
+
+2020-05-02 - new protocol 104 for remote control TR60C-1 (#844)
 * Update 14_SD_UT.pm
 2020-05-02 - Merge branch 'dev-r34' into dev-r34_TR60C-1
 2020-05-02 - new protocol 104 for remote control TR60C-1

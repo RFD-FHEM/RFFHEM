@@ -11,3 +11,4 @@ requires 'Devel::Cover::Report::Coveralls';
 requires 'Net::SSLeay';
 requires 'Digest::CRC';
 requires 'Math::Trig';
+requires 'Storable'; 

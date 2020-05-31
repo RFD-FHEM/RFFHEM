@@ -1,0 +1,11 @@
+defmod test_02_sub_SIGNALduino_RemoveLaCrossePair UnitTest dummyDuino ( 
+{
+	use Test2::V0;
+	use Test2::Tools::Compare qw{ U };
+	plan(1);
+	$targetHash->{LaCrossePair} = 1;
+	SIGNALduino_RemoveLaCrossePair($targetHash);
+	is(InternalVal($target,"LaCrossePair",undef),U(),"Verify LaCrossePair is removed");
+	
+}
+)
