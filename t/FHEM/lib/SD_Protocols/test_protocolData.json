@@ -1,0 +1,363 @@
+# This is a test file for unittesting the correctness of the protocol parsing. Its syntax is json based, but with these comments not realy valid
+{
+# Version notes
+
+    "version": 0.1
+}{
+# Protocol Data begins here
+    "9986": {
+      "comment": "ony for running automated tests",
+      "id": "96",
+      "name": "Unittest MC Grothe Protocol",
+      "length_min" : "40",
+      "length_max" : "49",
+    },
+    "9987": {
+      "datarate": "17257.69",
+      "comment": "ony for running automated tests",
+      "id": "100",
+      "regexMatch": {
+        "type": "Regexp",
+        "value": "(?^:^36)"
+      },
+      "sync": "2DD4",
+      "modulation": "2-FSK",
+      "name": "Unittest MN Protocol",
+      "knownFreqs": "868.3",
+      "clientmodule": "LaCrosse"
+    },
+    "9988": {
+      "knownFreqs": "868.3",
+      "method": {
+        "value": "\"\\\\&Not_Existing_Sub\"",
+        "type": "CODE"
+      },
+      "clientmodule": "LaCrosse",
+      "name": "Unittest MN Protocol",
+      "modulation": "2-FSK",
+      "regexMatch": "qr/^35/",
+      "sync": "2DD4",
+      "datarate": "17257.69",
+      "id": "100",
+      "comment": "ony for running automated tests"
+    },
+    "9989": {
+      "method": {
+        "type": "CODE",
+        "value": "\"\\\\&Not_Existing_Sub\""
+      },
+      "format": "manchester",
+      "name": "Unittest MC Protocol",
+      "length_max": "24",
+      "polarity": "invert",
+      "length_min": "1",
+      "clockrange": [
+        300,
+        360
+      ],
+      "id": "9989",
+      "comment": "ony for running automated tests"
+    },
+    "9990": {
+      "id": "9990",
+      "comment": "ony for running automated tests",
+      "length_min": "2",
+      "clockrange": [
+        300,
+        360
+      ],
+      "name": "Unittest MC Protocol",
+      "length_max": "8",
+      "format": "manchester"
+    },
+    "9991": {
+      "comment": "ony for running automated tests",
+      "id": "9991",
+      "preamble": "#",
+      "length_min": "60",
+# It allows an extension for unittesing protocoldata
+      "test_data": {
+        "test_mu_1": [
+          {
+            "desc": "mu reconstruct lastbit is 1 ",
+            "input": "MU;P0=-987;P1=144;P2=522;P3=1495;CP=2;R=244;D=0102020202020202020203020303030202020203030303030203020202020203020302030302030302030303030303030303030303030303020303030302020303030202030202020303030303020202030302020303020202;",
+            "output": [
+              1,
+              1,
+              9991,
+              "#FFA3C17D4900010C6E0E67"
+            ]
+          },
+          {
+            "input": "MU;P0=-987;P1=144;P2=522;P3=1495;CP=2;R=244;D=0102020202020202020203020303030202020203030303030203020202020203020302030302030302030303030303030303030303030303020303030302020303030202030202020303030303020202030302020303020203;",
+            "output": [
+              1,
+              1,
+              9991,
+              "#FFA3C17D4900010C6E0E66"
+            ],
+            "desc": "mu reconstruct lastbit is 0 "
+          }
+        ]
+      },
+      "reconstructBit": "1",
+      "one": [
+        1,
+        -2
+      ],
+      "zero": [
+        3,
+        -2
+      ],
+      "format": "pwm",
+      "length_max": "120",
+      "clockabs": 480,
+      "name": "Unittest MU Protocol"
+    },
+    "9992": {
+      "name": "Unittest MU Protocol ",
+      "length_max": "28",
+      "clockabs": 400,
+      "zero": [
+        1,
+        -3
+      ],
+      "format": "twostate",
+      "one": [
+        2,
+        -1.2
+      ],
+      "start": [
+        6,
+        -15
+      ],
+      "length_min": "22",
+      "test_data": {
+        "test_mu_1": [
+          {
+            "desc": "mu signal starting at first char in rmsg",
+            "input": "MU;P0=-563;P1=479;P2=991;P3=-423;P4=361;P5=-1053;P6=3008;P7=-7110;D=6720151515201520201515201520201520201520201515151567201515152015202015152015202015202015202015151515672015151520152020151520152020152020152020151515156720151515201520201515201520201520201520201515151;CP=1;R=21;",
+            "output": [
+              4,
+              4,
+              9992,
+              "#8B2DB0"
+            ]
+          },
+          {
+            "input": "MU;P0=-563;P1=479;P2=991;P3=-423;P4=361;P5=-1053;P6=3008;P7=-7110;D=2345454523452323454523452323452323452323454545456720151515201520201515201520201520201520201515151567201515152015202015152015202015202015202015151515672015151520152020151520152020152020152020151515156720151515201520201515201520201520201520201515151;CP=1;R=21;",
+            "output": [
+              4,
+              4,
+              9992,
+              "#8B2DB0"
+            ],
+            "desc": "mu signal starting not at first char in rmsg "
+          }
+        ]
+      },
+      "id": "9992",
+      "comment": "ony for running automated tests",
+      "preamble": "#"
+    },
+    "9993": {
+      "postDemodulation": {
+        "value": "\"\\\\&SIGNALduino_bit2itv1\"",
+        "type": "CODE"
+      },
+      "one": [
+        3.5,
+        -1
+      ],
+      "clockabs": -1,
+      "length_max": "24",
+      "name": "Unittest MS Protocol with float",
+      "format": "twostate",
+      "zero": [
+        1,
+        -3.8
+      ],
+      "float": [
+        1,
+        -1
+      ],
+      "preamble": "#",
+      "comment": "ony for running automated tests",
+      "id": "9993",
+      "sync": [
+        1,
+        -44
+      ],
+      "test_data": {
+        "test_MS_2": [
+          {
+            "desc": "ms signal with float at end of signal",
+            "output": [
+              1,
+              1,
+              9993,
+              "#455515"
+            ],
+            "input": " MS;P1=309;P2=-1130;P3=1011;P4=-429;P5=-11466;D=15123412121234123412141214121412141212123412341214;CP=1;SP=5;R=38;"
+          }
+        ]
+      },
+      "length_min": "24"
+    },
+    "9994": {
+      "comment": "ony for running automated tests",
+      "id": "9994",
+      "preamble": "#",
+      "length_min": "32",
+      "sync": [
+        -10,
+        1
+      ],
+      "test_data": {
+        "test_MS_2": [
+          {
+            "output": [
+              1,
+              1,
+              9994,
+              "#34EB281E7"
+            ],
+            "input": "MS;P1=-403;P2=813;P3=-812;P4=396;P5=-4005;D=45412123434123412123434341234123434121234123412121212121234343434121234343;CP=4;SP=5;",
+            "desc": "ms signal with reconstruct at end of signal"
+          },
+          {
+            "output": [
+              1,
+              1,
+              9994,
+              "#34EB281E7"
+            ],
+            "input": "MS;P1=-403;P2=813;P3=-812;P4=396;P5=-4005;P6=5000;D=454121234341234121234343412341234341212341234121212121212343434341212343436;CP=4;SP=5;",
+            "desc": "ms signal with reconstruct at middle of signal"
+          },
+          {
+            "output": [
+              1,
+              1,
+              9994,
+              "#34EB281E"
+            ],
+            "input": "MS;P1=-403;P2=813;P3=-812;P4=396;P5=-4005;P6=5000;D=45412123434123412123434341234123434121234123412121212121234343434141;CP=4;SP=5;",
+            "desc": "ms signal with reconstruct 32  bits (long enough)"
+          },
+          {
+            "desc": "ms signal with reconstruct 31  bits (to short)",
+            "input": "MS;P1=-403;P2=813;P3=-812;P4=396;P5=-4005;P6=5000;D=454121234341234121234343412341234341212341234121212121212343434341;CP=4;SP=5;",
+            "output": [
+              0
+            ]
+          },
+          {
+            "output": [
+              0
+            ],
+            "input": "MS;P1=-403;P2=813;P3=-812;P4=396;P5=-4005;P6=5000;D=4541212343412341212343434123412343412123412341212121212123434343412123434343;CP=4;SP=5;",
+            "desc": "ms signal with reconstruct and 37 bits (to long)"
+          }
+        ]
+      },
+      "reconstructBit": 1,
+      "one": [
+        -2,
+        1
+      ],
+      "length_max": "36",
+      "name": "Unittest MS Protocol",
+      "clockabs": 400,
+      "format": "twostate",
+      "zero": [
+        -1,
+        2
+      ]
+    },
+    "9995": {
+      "preamble": "#",
+      "id": "9995",
+      "comment": "ony for running automated tests",
+      "sync": [
+        -10,
+        1
+      ],
+      "test_data": {
+        "test_MS_2": [
+          {
+            "input": "MS;P1=-403;P2=813;P3=-812;P4=396;P5=-4005;D=45412123434123412123434341234123434121234123412121212121234343434121234343;CP=4;SP=5;",
+            "output": [
+              1,
+              1,
+              9995,
+              "#34EB281E6"
+            ],
+            "desc": "ms signal without reconstruct at end of signal"
+          },
+          {
+            "desc": "ms signal without reconstruct at middle of signal",
+            "input": "MS;P1=-403;P2=813;P3=-812;P4=396;P5=-4005;P6=5000;D=454121234341234121234343412341234341212341234121212121212343434341212343436;CP=4;SP=5;",
+            "output": [
+              1,
+              1,
+              9995,
+              "#34EB281E6"
+            ]
+          },
+          {
+            "desc": "ms signal without reconstruct and 31 bits (to short)",
+            "input": "MS;P1=-403;P2=813;P3=-812;P4=396;P5=-4005;P6=5000;D=45412123434123412123434341234123434121234123412121212121234343434141;CP=4;SP=5;",
+            "output": [
+              0
+            ]
+          },
+          {
+            "desc": "ms signal without reconstruct and 37 bits (to long)",
+            "output": [
+              0
+            ],
+            "input": "MS;P1=-403;P2=813;P3=-812;P4=396;P5=-4005;P6=5000;D=45412123434123412123434341234123434121234123412121212121234343434121234343434;CP=4;SP=5;"
+          }
+        ]
+      },
+      "length_min": "32",
+      "one": [
+        -2,
+        1
+      ],
+      "clockabs": 400,
+      "length_max": "36",
+      "name": "Unittest MS Protocol",
+      "zero": [
+        -1,
+        2
+      ],
+      "format": "twostate"
+    },
+    "9996": {
+      "comment": "ony for running automated tests",
+      "id": "9996",
+      "developId": "p",
+      "name": "Unittest Protocol  with developId=p"
+    },
+    "9997": {
+      "name": "Unittest Protocol  with developId=y",
+      "developId": "y",
+      "comment": "ony for running automated tests",
+      "id": "9997"
+    },
+    "9998": {
+      "name": "Unittest Protocol  with developId=m",
+      "comment": "ony  for running automated tests",
+      "id": "9998",
+      "developId": "m"
+    },
+    "9999": {
+      "developId": "m",
+      "comment": "ony for running automated tests",
+      "modulematch": "^X[A-Fa-f0-9]+",
+      "id": "9999",
+      "name": "Unittest Protocol with developId=m"
+    }
+  }
