@@ -501,6 +501,49 @@ sub dec2binppari {    # dec to bin . parity
 
 ############################# package lib::SD_Protocols, test exists
 
+=item mcBit2AS()
+
+extract the message from the bitdata if it looks like valid data
+
+Input:  ($object,$name,$bitData,$protocolID, optional: length $bitData);
+Output:
+		on success array (returnCode=1, hexData)
+		otherwise array (returncode=-1,"Error message")
+
+=cut
+
+sub mcBit2AS {
+	my $self    			= shift // carp 'Not called within an object' && return (0,'no object provided');
+	my $name				= shift // 'anonymous';
+	my $bitData				= shift // carp 'bitData must be perovided' && return (0,'no bitData provided');
+	my $id					= shift // carp 'protocol ID must be provided' && return (0,'no protocolId provided');
+	my $mcbitnum   			= shift // length $bitData;
+
+
+	if(index($bitData,'1100',16) >= 0) # $rawData =~ m/^A{2,3}/)
+	{  # Valid AS detected!
+		my $message_start = index($bitData,'1100',16);
+	 	$self->_logging( qq[lib/mcBit2AS, AS protocol detected], 5 );
+
+		my $message_end=index($bitData,'1100',$message_start+16);
+		$message_end = length($bitData) if ($message_end == -1);
+		my $message_length = $message_end - $message_start;
+
+		return (-1,' message is to short') if ($message_length < $self->checkProperty($id,'length_min',-1) );
+		return (-1,' message is to long') if (defined $self->getProperty($id,'length_max' ) && $message_length > $self->getProperty($id,'length_max') );
+
+		my $msgbits =substr($bitData,$message_start);
+	 	my $ashex = lib::SD_Protocols::binStr2hexStr($msgbits); # output with length before
+	 	
+	 	$self->_logging( qq[$name: AS, protocol converted to hex: ($ashex) with length ($message_length) bits \n], 5 );
+
+		return (1,$ashex);
+	}
+	return (-1,undef);
+}
+
+############################# package lib::SD_Protocols, test exists
+
 =item mcBit2Grothe()
 
 extract the message from the bitdata if it looks like valid data
@@ -545,7 +588,7 @@ sub mcBit2Grothe {
 
 ############################# package lib::SD_Protocols, test exists
 
-=item mcBit2TFA()
+=item mcBit2Hideki()
 
 extract the message from the bitdata if it looks like valid data
 
@@ -556,66 +599,168 @@ Output:
 
 =cut
 
-sub mcBit2TFA {
+sub mcBit2Hideki {
 	my $self    			= shift // carp 'Not called within an object' && return (0,'no object provided');
-	my $name				= shift // "anonymous";
+	my $name				= shift // 'anonymous';
+	my $bitData				= shift // carp 'bitData must be perovided' && return (0,'no bitData provided');
+	my $id					= shift // carp 'protocol ID must be provided' && return (0,'no protocolId provided');
+	my $mcbitnum   			= shift // length $bitData;
+
+	my $message_start = index($bitData,'10101110');
+	my $invert = 0;
+
+	if ($message_start < 0) {
+		$bitData =~ tr/01/10/;									# invert message
+		$message_start = index($bitData,'10101110');			# 0x75 but in reverse order
+		$invert = 1;
+	}
+
+	if ($message_start >= 0 )   # 0x75 but in reverse order
+	{
+	 	$self->_logging( qq[lib/mcBit2Hideki, Hideki protocol (invert=$invert) detected], 5 );
+
+		# Todo: Mindest Laenge fuer startpunkt vorspringen
+		# Todo: Wiederholung auch an das Modul weitergeben, damit es dort geprueft werden kann
+		my $message_end = index($bitData,'10101110',$message_start+71); # pruefen auf ein zweites 0x75,  mindestens 72 bit nach 1. 0x75, da der Regensensor minimum 8 Byte besitzt je byte haben wir 9 bit
+        $message_end = length($bitData) if ($message_end == -1);
+        my $message_length = $message_end - $message_start;
+
+		return (-1,' message is to short') if ($message_length < $self->checkProperty($id,'length_min',-1) );
+		return (-1,' message is to long') if (defined $self->getProperty($id,'length_max' ) && $message_length > $self->getProperty($id,'length_max') );
+
+		my $hidekihex = q{};
+		my $idx;
+
+		for ($idx=$message_start; $idx<$message_end; $idx=$idx+9)
+		{
+			my $byte = q{};
+			$byte= substr($bitData,$idx,8); ## Ignore every 9th bit
+		 	$self->_logging( qq[lib/mcBit2Hideki, byte in order $byte], 5 );
+			$byte = scalar reverse $byte;
+		 	$self->_logging( qq[lib/mcBit2Hideki, byte reversed $byte , as hex: "].sprintf('%X', oct("0b$byte")), 5 );
+
+			$hidekihex=$hidekihex.sprintf('%02X', oct("0b$byte"));
+		}
+
+		($invert == 0) 
+			?	$self->_logging( qq[lib/mcBit2Hideki, receive data is not inverted], 4 )
+			:	$self->_logging( qq[lib/mcBit2Hideki, receive data is inverted], 4 );
+				
+	 	$self->_logging( qq[lib/mcBit2Hideki, protocol converted to hex: $hidekihex with $message_length bits, messagestart $message_start], 4 );
+
+		return  (1,$hidekihex); ## Return only the original bits, include length
+	}
+ 	$self->_logging( qq[lib/mcBit2Hideki, start pattern (10101110) not found], 4 );
+	return (-1,undef);
+}
+
+############################# package lib::SD_Protocols, test exists
+
+=item mcBit2Maverick()
+
+This function extract the message from the bitdata if it looks like valid data
+
+Input:  ($object,$name,$bitData,$protocolID, optional: length $bitData);
+Output:
+		on success array (returnCode=1, hexData)
+		otherwise array (returncode=-1,"Error message")
+
+=cut
+
+sub mcBit2Maverick {
+	my $self    			= shift // carp 'Not called within an object' && return (0,'no object provided');
+	my $name				= shift // 'anonymous';
+	my $bitData				= shift // carp 'bitData must be perovided' && return (0,'no bitData provided');
+	my $id					= shift // carp 'protocol ID must be provided' && return (0,'no protocolId provided');
+	my $mcbitnum   			= shift // length $bitData;
+
+
+	if ($bitData =~ m/(101010101001100110010101)/xms)
+	{  # Valid Maverick header detected
+		my $header_pos=$+[1];
+
+	 	$self->_logging( qq[lib/mcBit2Maverick, protocol detected: header_pos = $header_pos], 4 );
+
+		my $hex=lib::SD_Protocols::binStr2hexStr(substr($bitData,$header_pos,26*4));
+
+		return  (1,$hex); ## Return the bits unchanged in hex
+	} else {
+		return return (-1,undef);
+	}
+}
+
+############################# package lib::SD_Protocols, test exists
+
+=item mcBit2OSV1()
+
+extract the message from the bitdata if it looks like valid data
+
+Input:  ($object,$name,$bitData,$protocolID, optional: length $bitData);
+Output:
+		on success array (returnCode=1, hexData)
+		otherwise array (returncode=-1,"Error message")
+
+=cut
+
+sub mcBit2OSV1 {
+	my $self    			= shift // carp 'Not called within an object' && return (0,'no object provided');
+	my $name				= shift // 'anonymous';
 	my $bitData				= shift // carp 'bitData must be perovided' && return (0,'no bitData provided');
 	my $id					= shift // carp 'protocol ID must be provided' && return (0,'no protocolId provided');;;
-	my $mcbitnum   	= shift // length $bitData;
+	my $mcbitnum   			= shift // length $bitData;
+	
+	return (-1,' message is to short') if ($mcbitnum < $self->checkProperty($id,'length_min',-1) );
+	return (-1,' message is to long') if (defined $self->getProperty($id,'length_max') && $mcbitnum > $self->getProperty($id,'length_max') );
 
-	my $preamble_pos;
-	my $message_end;
-	my $message_length;
-
-	#if ($bitData =~ m/^.?(1){16,24}0101/)  {
-	if ($bitData =~ m/(1{9}101)/xms )
-	{
-		$preamble_pos=$+[1];
-		$self->_logging( qq[lib/mcBit2TFA, 30.3208.0 preamble_pos = $preamble_pos], 4 );
-		return return (-1,q[ sync not found]) if ($preamble_pos <=0);
-		my @messages;
-
-		my $i=1;
-		my $retmsg = q{};
-		do
-		{
-			$message_end = index($bitData,'1111111111101',$preamble_pos);
-			if ($message_end < $preamble_pos)
-			{
-				$message_end=$mcbitnum;		# length($bitData);
-			}
-			$message_length = ($message_end - $preamble_pos);
-
-			my $part_str=substr($bitData,$preamble_pos,$message_length);
-			$self->_logging( qq[lib/mcBit2TFA, message start($i)=$preamble_pos end=$message_end with length=$message_length], 4 );
-			$self->_logging( qq[lib/mcBit2TFA, message part($i)=$part_str], 5 );
-
-			my ($rcode, $rtxt) = $self->LengthInRange($id, $message_length);
-			if ($rcode) {
-				my $hex=lib::SD_Protocols::binStr2hexStr($part_str);
-				push (@messages,$hex);
-				$self->_logging( qq[lib/mcBit2TFA, message part($i)=$hex], 4 );
-			}
-			else {
-				$retmsg = q[, ] . $rtxt;
-			}
-
-			$preamble_pos=index($bitData,'1101',$message_end)+4;
-			$i++;
-		}  while ($message_end < $mcbitnum);
-
-		my %seen;
-		my @dupmessages = map { 1==$seen{$_}++ ? $_ : () } @messages;
-
-		return ($i,q[loop error, please report this data $bitData]) if ($i==10);
-		if (scalar(@dupmessages) > 0 ) {
-			$self->_logging( qq[lib/mcBit2TFA, repeated hex $dupmessages[0] found $seen{$dupmessages[0]} times"], 4 );
-			return  (1,$dupmessages[0]);
-		} else {
-			return (-1,qq[ no duplicate found$retmsg]);
-		}
+	if (substr($bitData,20,1) != 0) {
+		$bitData =~ tr/01/10/;                         # invert message and check if it is possible to deocde now
 	}
-	return (-1,undef);
+	my $calcsum = oct( '0b' . reverse substr($bitData,0,8));
+	$calcsum += oct( '0b' . reverse substr($bitData,8,8));
+	$calcsum += oct( '0b' . reverse substr($bitData,16,8));
+	$calcsum = ($calcsum & 0xFF) + ($calcsum >> 8);
+	my $checksum = oct( '0b' . reverse substr($bitData,24,8));
+
+	if ($calcsum != $checksum) {	                   # Checksum
+		return (-1,qq[OSV1 - ERROR checksum not equal: $calcsum != $checksum]);
+	}
+
+	$self->_logging( qq[lib/mcBit2OSV1, input data: $bitData], 4 );
+	my $newBitData = '00001010';                       # Byte 0:   Id1 = 0x0A
+    $newBitData .= '01001101';                         # Byte 1:   Id2 = 0x4D
+	my $channel = substr($bitData,6,2);                # Byte 2 h: Channel
+	if ($channel eq '00') {                            # in 0 LSB first
+		$newBitData .= '0001';                         # out 1 MSB first
+	} elsif ($channel eq '10') {                       # in 4 LSB first
+		$newBitData .= '0010';                         # out 2 MSB first
+	} elsif ($channel eq '01') {                       # in 4 LSB first
+		$newBitData .= '0011';                         # out 3 MSB first
+	} else {                                           # in 8 LSB first
+		return (-1,qq[$name: OSV1 - ERROR channel not valid: $channel]);
+    }
+    $newBitData .= '0000';                             # Byte 2 l: ????
+    $newBitData .= '0000';                             # Byte 3 h: address
+    $newBitData .= reverse substr($bitData,0,4);       # Byte 3 l: address (Rolling Code)
+    $newBitData .= reverse substr($bitData,8,4);       # Byte 4 h: T 0,1
+    $newBitData .= '0' . substr($bitData,23,1) . '00'; # Byte 4 l: Bit 2 - Batterie 0=ok, 1=low (< 2,5 Volt)
+    $newBitData .= reverse substr($bitData,16,4);      # Byte 5 h: T 10
+    $newBitData .= reverse substr($bitData,12,4);      # Byte 5 l: T 1
+    $newBitData .= '0000';                             # Byte 6 h: immer 0000
+    $newBitData .= substr($bitData,21,1) . '000';      # Byte 6 l: Bit 3 - Temperatur 0=pos | 1=neg, Rest 0
+    $newBitData .= '00000000';                         # Byte 7: immer 0000 0000
+    # calculate new checksum over first 16 nibbles
+    $checksum = 0;
+    for (my $i = 0; $i < 64; $i = $i + 4) {
+       $checksum += oct( '0b' . substr($newBitData, $i, 4));
+    }
+    $checksum = ($checksum - 0xa) & 0xff;
+    $newBitData .= sprintf('%08b',$checksum);          # Byte 8:   new Checksum
+    $newBitData .= '00000000';                         # Byte 9:   immer 0000 0000
+    my $osv1hex = '50' . lib::SD_Protocols::binStr2hexStr($newBitData); # output with length before
+ 	$self->_logging( qq[lib/mcBit2OSV1, protocol id $id translated to RFXSensor format], 4 );
+ 	$self->_logging( qq[lib/mcBit2OSV1, converted to hex: $osv1hex], 4 );
+   
+    return (1,$osv1hex);
 }
 
 ############################# package lib::SD_Protocols, test exists
@@ -777,191 +922,6 @@ sub mcBit2OSV2o3 {
 
 ############################# package lib::SD_Protocols, test exists
 
-=item mcBit2OSV1()
-
-extract the message from the bitdata if it looks like valid data
-
-Input:  ($object,$name,$bitData,$protocolID, optional: length $bitData);
-Output:
-		on success array (returnCode=1, hexData)
-		otherwise array (returncode=-1,"Error message")
-
-=cut
-
-sub mcBit2OSV1 {
-	my $self    			= shift // carp 'Not called within an object' && return (0,'no object provided');
-	my $name				= shift // 'anonymous';
-	my $bitData				= shift // carp 'bitData must be perovided' && return (0,'no bitData provided');
-	my $id					= shift // carp 'protocol ID must be provided' && return (0,'no protocolId provided');;;
-	my $mcbitnum   			= shift // length $bitData;
-	
-	return (-1,' message is to short') if ($mcbitnum < $self->checkProperty($id,'length_min',-1) );
-	return (-1,' message is to long') if (defined $self->getProperty($id,'length_max') && $mcbitnum > $self->getProperty($id,'length_max') );
-
-	if (substr($bitData,20,1) != 0) {
-		$bitData =~ tr/01/10/;                         # invert message and check if it is possible to deocde now
-	}
-	my $calcsum = oct( '0b' . reverse substr($bitData,0,8));
-	$calcsum += oct( '0b' . reverse substr($bitData,8,8));
-	$calcsum += oct( '0b' . reverse substr($bitData,16,8));
-	$calcsum = ($calcsum & 0xFF) + ($calcsum >> 8);
-	my $checksum = oct( '0b' . reverse substr($bitData,24,8));
-
-	if ($calcsum != $checksum) {	                   # Checksum
-		return (-1,qq[OSV1 - ERROR checksum not equal: $calcsum != $checksum]);
-	}
-
-	$self->_logging( qq[lib/mcBit2OSV1, input data: $bitData], 4 );
-	my $newBitData = '00001010';                       # Byte 0:   Id1 = 0x0A
-    $newBitData .= '01001101';                         # Byte 1:   Id2 = 0x4D
-	my $channel = substr($bitData,6,2);                # Byte 2 h: Channel
-	if ($channel eq '00') {                            # in 0 LSB first
-		$newBitData .= '0001';                         # out 1 MSB first
-	} elsif ($channel eq '10') {                       # in 4 LSB first
-		$newBitData .= '0010';                         # out 2 MSB first
-	} elsif ($channel eq '01') {                       # in 4 LSB first
-		$newBitData .= '0011';                         # out 3 MSB first
-	} else {                                           # in 8 LSB first
-		return (-1,qq[$name: OSV1 - ERROR channel not valid: $channel]);
-    }
-    $newBitData .= '0000';                             # Byte 2 l: ????
-    $newBitData .= '0000';                             # Byte 3 h: address
-    $newBitData .= reverse substr($bitData,0,4);       # Byte 3 l: address (Rolling Code)
-    $newBitData .= reverse substr($bitData,8,4);       # Byte 4 h: T 0,1
-    $newBitData .= '0' . substr($bitData,23,1) . '00'; # Byte 4 l: Bit 2 - Batterie 0=ok, 1=low (< 2,5 Volt)
-    $newBitData .= reverse substr($bitData,16,4);      # Byte 5 h: T 10
-    $newBitData .= reverse substr($bitData,12,4);      # Byte 5 l: T 1
-    $newBitData .= '0000';                             # Byte 6 h: immer 0000
-    $newBitData .= substr($bitData,21,1) . '000';      # Byte 6 l: Bit 3 - Temperatur 0=pos | 1=neg, Rest 0
-    $newBitData .= '00000000';                         # Byte 7: immer 0000 0000
-    # calculate new checksum over first 16 nibbles
-    $checksum = 0;
-    for (my $i = 0; $i < 64; $i = $i + 4) {
-       $checksum += oct( '0b' . substr($newBitData, $i, 4));
-    }
-    $checksum = ($checksum - 0xa) & 0xff;
-    $newBitData .= sprintf('%08b',$checksum);          # Byte 8:   new Checksum
-    $newBitData .= '00000000';                         # Byte 9:   immer 0000 0000
-    my $osv1hex = '50' . lib::SD_Protocols::binStr2hexStr($newBitData); # output with length before
- 	$self->_logging( qq[lib/mcBit2OSV1, protocol id $id translated to RFXSensor format], 4 );
- 	$self->_logging( qq[lib/mcBit2OSV1, converted to hex: $osv1hex], 4 );
-   
-    return (1,$osv1hex);
-}
-
-############################# package lib::SD_Protocols, test exists
-
-=item mcBit2AS()
-
-extract the message from the bitdata if it looks like valid data
-
-Input:  ($object,$name,$bitData,$protocolID, optional: length $bitData);
-Output:
-		on success array (returnCode=1, hexData)
-		otherwise array (returncode=-1,"Error message")
-
-=cut
-
-sub mcBit2AS {
-	my $self    			= shift // carp 'Not called within an object' && return (0,'no object provided');
-	my $name				= shift // 'anonymous';
-	my $bitData				= shift // carp 'bitData must be perovided' && return (0,'no bitData provided');
-	my $id					= shift // carp 'protocol ID must be provided' && return (0,'no protocolId provided');
-	my $mcbitnum   			= shift // length $bitData;
-
-
-	if(index($bitData,'1100',16) >= 0) # $rawData =~ m/^A{2,3}/)
-	{  # Valid AS detected!
-		my $message_start = index($bitData,'1100',16);
-	 	$self->_logging( qq[lib/mcBit2AS, AS protocol detected], 5 );
-
-		my $message_end=index($bitData,'1100',$message_start+16);
-		$message_end = length($bitData) if ($message_end == -1);
-		my $message_length = $message_end - $message_start;
-
-		return (-1,' message is to short') if ($message_length < $self->checkProperty($id,'length_min',-1) );
-		return (-1,' message is to long') if (defined $self->getProperty($id,'length_max' ) && $message_length > $self->getProperty($id,'length_max') );
-
-		my $msgbits =substr($bitData,$message_start);
-	 	my $ashex = lib::SD_Protocols::binStr2hexStr($msgbits); # output with length before
-	 	
-	 	$self->_logging( qq[$name: AS, protocol converted to hex: ($ashex) with length ($message_length) bits \n], 5 );
-
-		return (1,$ashex);
-	}
-	return (-1,undef);
-}
-
-############################# package lib::SD_Protocols, test exists
-
-=item mcBit2Hideki()
-
-extract the message from the bitdata if it looks like valid data
-
-Input:  ($object,$name,$bitData,$protocolID, optional: length $bitData);
-Output:
-		on success array (returnCode=1, hexData)
-		otherwise array (returncode=-1,"Error message")
-
-=cut
-
-sub mcBit2Hideki {
-	my $self    			= shift // carp 'Not called within an object' && return (0,'no object provided');
-	my $name				= shift // 'anonymous';
-	my $bitData				= shift // carp 'bitData must be perovided' && return (0,'no bitData provided');
-	my $id					= shift // carp 'protocol ID must be provided' && return (0,'no protocolId provided');
-	my $mcbitnum   			= shift // length $bitData;
-
-	my $message_start = index($bitData,'10101110');
-	my $invert = 0;
-
-	if ($message_start < 0) {
-		$bitData =~ tr/01/10/;									# invert message
-		$message_start = index($bitData,'10101110');			# 0x75 but in reverse order
-		$invert = 1;
-	}
-
-	if ($message_start >= 0 )   # 0x75 but in reverse order
-	{
-	 	$self->_logging( qq[lib/mcBit2Hideki, Hideki protocol (invert=$invert) detected], 5 );
-
-		# Todo: Mindest Laenge fuer startpunkt vorspringen
-		# Todo: Wiederholung auch an das Modul weitergeben, damit es dort geprueft werden kann
-		my $message_end = index($bitData,'10101110',$message_start+71); # pruefen auf ein zweites 0x75,  mindestens 72 bit nach 1. 0x75, da der Regensensor minimum 8 Byte besitzt je byte haben wir 9 bit
-        $message_end = length($bitData) if ($message_end == -1);
-        my $message_length = $message_end - $message_start;
-
-		return (-1,' message is to short') if ($message_length < $self->checkProperty($id,'length_min',-1) );
-		return (-1,' message is to long') if (defined $self->getProperty($id,'length_max' ) && $message_length > $self->getProperty($id,'length_max') );
-
-		my $hidekihex = q{};
-		my $idx;
-
-		for ($idx=$message_start; $idx<$message_end; $idx=$idx+9)
-		{
-			my $byte = q{};
-			$byte= substr($bitData,$idx,8); ## Ignore every 9th bit
-		 	$self->_logging( qq[lib/mcBit2Hideki, byte in order $byte], 5 );
-			$byte = scalar reverse $byte;
-		 	$self->_logging( qq[lib/mcBit2Hideki, byte reversed $byte , as hex: "].sprintf('%X', oct("0b$byte")), 5 );
-
-			$hidekihex=$hidekihex.sprintf('%02X', oct("0b$byte"));
-		}
-
-		($invert == 0) 
-			?	$self->_logging( qq[lib/mcBit2Hideki, receive data is not inverted], 4 )
-			:	$self->_logging( qq[lib/mcBit2Hideki, receive data is inverted], 4 );
-				
-	 	$self->_logging( qq[lib/mcBit2Hideki, protocol converted to hex: $hidekihex with $message_length bits, messagestart $message_start], 4 );
-
-		return  (1,$hidekihex); ## Return only the original bits, include length
-	}
- 	$self->_logging( qq[lib/mcBit2Hideki, start pattern (10101110) not found], 4 );
-	return (-1,undef);
-}
-
-############################# package lib::SD_Protocols, test exists
-
 =item mcBit2OSPIR()
 
 This function extract the message from the bitdata if it looks like valid data
@@ -986,41 +946,6 @@ sub mcBit2OSPIR {
 	 	$self->_logging( qq[lib/mcBit2OSPIR, protocol detected: header_pos = $header_pos], 4 );
 
 		my $hex=lib::SD_Protocols::binStr2hexStr($bitData);
-
-		return  (1,$hex); ## Return the bits unchanged in hex
-	} else {
-		return return (-1,undef);
-	}
-}
-
-############################# package lib::SD_Protocols, test exists
-
-=item mcBit2Maverick()
-
-This function extract the message from the bitdata if it looks like valid data
-
-Input:  ($object,$name,$bitData,$protocolID, optional: length $bitData);
-Output:
-		on success array (returnCode=1, hexData)
-		otherwise array (returncode=-1,"Error message")
-
-=cut
-
-sub mcBit2Maverick {
-	my $self    			= shift // carp 'Not called within an object' && return (0,'no object provided');
-	my $name				= shift // 'anonymous';
-	my $bitData				= shift // carp 'bitData must be perovided' && return (0,'no bitData provided');
-	my $id					= shift // carp 'protocol ID must be provided' && return (0,'no protocolId provided');
-	my $mcbitnum   			= shift // length $bitData;
-
-
-	if ($bitData =~ m/(101010101001100110010101)/xms)
-	{  # Valid Maverick header detected
-		my $header_pos=$+[1];
-
-	 	$self->_logging( qq[lib/mcBit2Maverick, protocol detected: header_pos = $header_pos], 4 );
-
-		my $hex=lib::SD_Protocols::binStr2hexStr(substr($bitData,$header_pos,26*4));
 
 		return  (1,$hex); ## Return the bits unchanged in hex
 	} else {
@@ -1057,6 +982,81 @@ sub mcBit2SomfyRTS {
 	my $encData = lib::SD_Protocols::binStr2hexStr($bitData);
 
 	return (1, $encData);
+}
+
+############################# package lib::SD_Protocols, test exists
+
+=item mcBit2TFA()
+
+extract the message from the bitdata if it looks like valid data
+
+Input:  ($object,$name,$bitData,$protocolID, optional: length $bitData);
+Output:
+		on success array (returnCode=1, hexData)
+		otherwise array (returncode=-1,"Error message")
+
+=cut
+
+sub mcBit2TFA {
+	my $self    			= shift // carp 'Not called within an object' && return (0,'no object provided');
+	my $name				= shift // "anonymous";
+	my $bitData				= shift // carp 'bitData must be perovided' && return (0,'no bitData provided');
+	my $id					= shift // carp 'protocol ID must be provided' && return (0,'no protocolId provided');;;
+	my $mcbitnum   	= shift // length $bitData;
+
+	my $preamble_pos;
+	my $message_end;
+	my $message_length;
+
+	#if ($bitData =~ m/^.?(1){16,24}0101/)  {
+	if ($bitData =~ m/(1{9}101)/xms )
+	{
+		$preamble_pos=$+[1];
+		$self->_logging( qq[lib/mcBit2TFA, 30.3208.0 preamble_pos = $preamble_pos], 4 );
+		return return (-1,q[ sync not found]) if ($preamble_pos <=0);
+		my @messages;
+
+		my $i=1;
+		my $retmsg = q{};
+		do
+		{
+			$message_end = index($bitData,'1111111111101',$preamble_pos);
+			if ($message_end < $preamble_pos)
+			{
+				$message_end=$mcbitnum;		# length($bitData);
+			}
+			$message_length = ($message_end - $preamble_pos);
+
+			my $part_str=substr($bitData,$preamble_pos,$message_length);
+			$self->_logging( qq[lib/mcBit2TFA, message start($i)=$preamble_pos end=$message_end with length=$message_length], 4 );
+			$self->_logging( qq[lib/mcBit2TFA, message part($i)=$part_str], 5 );
+
+			my ($rcode, $rtxt) = $self->LengthInRange($id, $message_length);
+			if ($rcode) {
+				my $hex=lib::SD_Protocols::binStr2hexStr($part_str);
+				push (@messages,$hex);
+				$self->_logging( qq[lib/mcBit2TFA, message part($i)=$hex], 4 );
+			}
+			else {
+				$retmsg = q[, ] . $rtxt;
+			}
+
+			$preamble_pos=index($bitData,'1101',$message_end)+4;
+			$i++;
+		}  while ($message_end < $mcbitnum);
+
+		my %seen;
+		my @dupmessages = map { 1==$seen{$_}++ ? $_ : () } @messages;
+
+		return ($i,q[loop error, please report this data $bitData]) if ($i==10);
+		if (scalar(@dupmessages) > 0 ) {
+			$self->_logging( qq[lib/mcBit2TFA, repeated hex $dupmessages[0] found $seen{$dupmessages[0]} times"], 4 );
+			return  (1,$dupmessages[0]);
+		} else {
+			return (-1,qq[ no duplicate found$retmsg]);
+		}
+	}
+	return (-1,undef);
 }
 
 ############################# package lib::SD_Protocols, test exists
