@@ -21,7 +21,7 @@ plan(4);
 
 subtest 'Test good message' => sub {
 	plan(2);
-	#MU;P0=32001;P1=-381;P2=835;P3=354;P4=-857;D=01212121212121212121343421212134342121213434342121343421212134213421213421212121342121212134212121213421212121343421343430;CP=2;R=53;
+	#MU;P0=3381;P1=-672;P2=-4628;P3=1142;P4=-30768;D=010232023202020202023202023202020232023232320232320202020202020202040102320232020202020232020232020202320232323202323202020202020202020;CP=0;R=45;
 	my @bits=qw(1 0 1 0 0 0 0 0 1 0 0 1 0 0 0 0 0 1 1 1 0 1 0 0 0 0 1 1 0 0 0 0);
 
 	($rcode,@bits)=$Protocols->postDemo_WS7053($target, @bits);
@@ -30,11 +30,10 @@ subtest 'Test good message' => sub {
 };
 
 
-
 subtest 'Test bad message, ident' => sub {
 	plan(2);
-
-	my @bits=qw(1 0 0 1 0 0 0 0 1 0 0 1 0 0 0 0 0 1 1 1 0 1 0 0 0 0 1 1 0 0 0 0);
+	#MU;P0=3381;P1=-672;P2=-4628;P3=1142;P4=-30768;D=010232023202023202023202023202020232023232320232320202020202020202040102320232020202020232020232020202320232323202323202020202020202020;CP=0;R=45;
+	my @bits=qw(1 0 1 0 0 1 0 0 1 0 0 1 0 0 0 1 0 1 1 1 0 1 1 0 0 0 0 0 0 0 0 0);
 	my $return;
 
 	($rcode,$return)=$Protocols->postDemo_WS7053($target, @bits);
@@ -42,14 +41,10 @@ subtest 'Test bad message, ident' => sub {
 	is($return,undef,'check result for bad message, ident not found');
 };
 
-# Start the todo
-my $todo = Test2::Todo->new(reason => 'This test is not prepared, just demo');
-
 
 subtest 'Test bad message, length' => sub {
 	plan(2);
-
-	my @bits=qw(1 0 1 0 0 0 0 0 1 0 0 1 0 0 0 0 0 1 1 1 0 1 0 0 0 0 1 1 0 0 0);
+	my @bits=qw(1 0 1 0 0 0 0 0 1 0 0 1 0 0 0 1 0 1 1 1 0 1 1 0 0 0 0 0 0 0 0);
 	my $return;
 
 	($rcode,$return)=$Protocols->postDemo_WS7053($target, @bits);
@@ -60,15 +55,11 @@ subtest 'Test bad message, length' => sub {
 
 subtest 'Test bad message, parity' => sub {
 	plan(2);
-
-	my @bits=qw(1 0 1 0 0 0 0 0 1 0 0 1 0 0 0 0 0 1 1 1 0 1 0 0 0 0 1 1 0 0 0 0);
+	#MU;P0=3381;P1=-672;P2=-4628;P3=1142;P4=-30768;D=0102320232020202020202020202020202020232323202323202020202020202020;CP=0;R=45;
+	my @bits=qw(1 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 0 1 1 0 0 0 0 0 0 0 0 0);
 	my $return;
 
 	($rcode,$return)=$Protocols->postDemo_WS7053($target, @bits);
 	is($rcode,0, 'check returncode for bad message, parity not even');
 	is($return,undef,'check result for bad message, parity not even');
 };
-
-
-# End the todo
-$todo->end;
