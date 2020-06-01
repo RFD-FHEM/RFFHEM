@@ -30,14 +30,30 @@ jobs:
 #      uses: mxschmitt/action-tmate@v1
     - name: run prove on perl modules (testscripts)
       run: |
-        prove --exec 'perl -MDevel::Cover -I FHEM ' -I FHEM -r -v t/FHEM/lib 
-    - name: run prove fhem testsuite
+        prove --exec 'perl -MDevel::Cover=-silent,1 -I FHEM ' -I FHEM -r -v t/FHEM/lib 
+    - name: Create clover report  
+      run: cover -report clover
+    - uses: codecov/codecov-action@v1
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        file: ./cover_db/clover.xml
+        flags: unittests,perl,modules
+        name: perl modules (testscripts) ${{ matrix.perl }}
+    - name: run prove fhem testsuite ${{ matrix.perl }}
       run: |
         cp -r FHEM/* ${FHEM_DIR}/FHEM/
         cd ${FHEM_DIR}
-        prove --exec 'perl -MDevel::Cover fhem.pl -t' -I FHEM -r -vv  ${GITHUB_WORKSPACE}/t/FHEM/00_SIGNALduino/*.t  
+        prove --exec 'perl -MDevel::Cover=-silent,1 fhem.pl -t' -I FHEM -r -vv  ${GITHUB_WORKSPACE}/t/FHEM/00_SIGNALduino/*.t  
       env:
         FHEM_DIR: /opt/fhem
+    - name: Create clover report  
+      run: cover -report clover
+    - uses: codecov/codecov-action@v1
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        file: ./cover_db/clover.xml
+        flags: unittests,fhem,modules
+        name: fhem (testscripts) ${{ matrix.perl }}
     - name: run make test (classic fhem unittest module)
       run: |
         timeout 40 bash -c 'while /usr/bin/pgrep perl >> /dev/null; do sleep 1; echo .; done;'
@@ -55,6 +71,6 @@ jobs:
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         file: ./cover_db/clover.xml
-        flags: unittests
-        name: code coverage 
+        flags: unittest
+        name: unittest module ${{ matrix.perl }}
         
