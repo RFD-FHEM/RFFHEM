@@ -57,13 +57,13 @@ use constant {
 
 
 sub SIGNALduino_Attr(@);
-sub SIGNALduino_HandleWriteQueue($);
+sub SIGNALduino_HandleWriteQueue;
 sub SIGNALduino_Parse($$$$@);
-sub SIGNALduino_Read($);
-sub SIGNALduino_Ready($);
-sub SIGNALduino_Write($$$);
+sub SIGNALduino_Read;
+sub SIGNALduino_Ready;
+sub SIGNALduino_Write;
 sub SIGNALduino_SimpleWrite(@);
-sub SIGNALduino_Log3($$$);
+sub SIGNALduino_Log3;
 
 #my $debug=0;
 
@@ -265,7 +265,7 @@ my %matchListSIGNALduino = (
 my %symbol_map = (one => 1 , zero =>0 ,sync => '', float=> 'F', 'start' => '');
 
 ############################# package main
-sub SIGNALduino_Initialize($) {
+sub SIGNALduino_Initialize {
   my ($hash) = @_;
 
   my $dev = "";
@@ -333,7 +333,7 @@ our $FW_detail;
 
 
 ############################# package main, test exists
-sub SIGNALduino_FingerprintFn($$) {
+sub SIGNALduino_FingerprintFn {
   my ($name, $msg) = @_;
 
 	# Das FingerprintFn() darf nur im physikalischen oder logischem Modul aktiv sein.
@@ -348,7 +348,7 @@ sub SIGNALduino_FingerprintFn($$) {
 
 
 ############################# package main
-sub SIGNALduino_Define($$) {
+sub SIGNALduino_Define {
   my ($hash, $def) = @_;
   my @a =split m{\s+}xms, $def;
 
@@ -417,7 +417,7 @@ sub SIGNALduino_Define($$) {
 }
 
 ############################# package main
-sub SIGNALduino_Connect($$) {
+sub SIGNALduino_Connect {
 	my ($hash, $err) = @_;
 
 	# damit wird die err-msg nur einmal ausgegeben
@@ -428,7 +428,7 @@ sub SIGNALduino_Connect($$) {
 }
 
 ############################# package main
-sub SIGNALduino_Undef($$) {
+sub SIGNALduino_Undef {
   my ($hash, $arg) = @_;
   my $name = $hash->{NAME};
 
@@ -451,7 +451,7 @@ sub SIGNALduino_Undef($$) {
 }
 
 ############################# package main
-sub SIGNALduino_Shutdown($) {
+sub SIGNALduino_Shutdown {
   my ($hash) = @_;
   #DevIo_SimpleWrite($hash, "XQ\n",2);
   SIGNALduino_SimpleWrite($hash, "XQ");  # Switch reception off, it may hang up the SIGNALduino
@@ -459,7 +459,7 @@ sub SIGNALduino_Shutdown($) {
 }
 
 ############################# package main
-sub SIGNALduino_avrdude($) {
+sub SIGNALduino_avrdude {
 	my $name = shift;
 	my $hash = $defs{$name};
 
@@ -596,7 +596,7 @@ sub SIGNALduino_PrepareFlash {
 
 #$hash,$name,"sendmsg","P17;R6#".substr($arg,2)
 ############################# package main, test exists
-sub SIGNALduino_RemoveLaCrossePair($) {
+sub SIGNALduino_RemoveLaCrossePair {
   my $hash = shift;
   delete($hash->{LaCrossePair});
 }
@@ -920,7 +920,7 @@ sub SIGNALduino_Get($@) {
 
 ############################# package main, test exists
 #SIGNALduino_Get_Callback($name, $callbackFn, @args);
-sub SIGNALduino_Get_Callback($$$) {
+sub SIGNALduino_Get_Callback {
 	my ($name, $callbackFn, $arg) = @_;
 
 	my @a = split (" ",$arg);
@@ -1028,7 +1028,7 @@ sub SIGNALduino_GetResponseUpdateReading {
 }
 
 ############################# package main
-sub SIGNALduino_Get_delayed($) {
+sub SIGNALduino_Get_delayed {
 	my(undef,$name,@cmds) = split(':', shift);
 	my $hash = $defs{$name};
   
@@ -1172,7 +1172,7 @@ sub SIGNALduino_CheckSendRawResponse {
 }
 
 ############################# package main
-sub SIGNALduino_ResetDevice($) {
+sub SIGNALduino_ResetDevice {
 	my $hash = shift;
 	my $name = $hash->{NAME};
 
@@ -1210,7 +1210,7 @@ sub SIGNALduino_ResetDevice($) {
 }
 
 ############################# package main
-sub SIGNALduino_CloseDevice($) {
+sub SIGNALduino_CloseDevice {
 	my ($hash) = @_;
 
 	$hash->{logMethod}->($hash->{NAME}, 2, "$hash->{NAME}: CloseDevice, closed");
@@ -1222,7 +1222,7 @@ sub SIGNALduino_CloseDevice($) {
 }
 
 ############################# package main
-sub SIGNALduino_DoInit($) {
+sub SIGNALduino_DoInit {
 	my $hash = shift;
 	my $name = $hash->{NAME};
 	my $err;
@@ -1258,7 +1258,7 @@ sub SIGNALduino_DoInit($) {
 
 ############################# package main
 # Disable receiver
-sub SIGNALduino_SimpleWrite_XQ($) {
+sub SIGNALduino_SimpleWrite_XQ {
 	my ($hash) = @_;
 	my $name = $hash->{NAME};
 
@@ -1268,7 +1268,7 @@ sub SIGNALduino_SimpleWrite_XQ($) {
 }
 
 ############################# package main, test exists
-sub SIGNALduino_StartInit($) {
+sub SIGNALduino_StartInit {
 	my ($hash) = @_;
 	my $name = $hash->{NAME};
 	$hash->{version} = undef;
@@ -1358,7 +1358,7 @@ sub SIGNALduino_CheckVersionResp {
 
 ############################# package main, test exists
 # Todo: SUB kann entfernt werden
-sub SIGNALduino_CheckCmdResp($) {
+sub SIGNALduino_CheckCmdResp {
 	my ($hash) = @_;
 	my $name = $hash->{NAME};
 	my $msg = undef;
@@ -1406,7 +1406,7 @@ sub SIGNALduino_CheckCmdResp($) {
 
 ############################# package main
 # Check if the 1% limit is reached and trigger notifies
-sub SIGNALduino_XmitLimitCheck($$) {
+sub SIGNALduino_XmitLimitCheck {
   my ($hash,$fn) = @_;
 
   return if ($fn !~ m/^(is|S[RCM]).*/);
@@ -1439,7 +1439,7 @@ sub SIGNALduino_XmitLimitCheck($$) {
 
 ############################# package main
 ## API to logical modules: Provide as Hash of IO Device, type of function ; command to call ; message to send
-sub SIGNALduino_Write($$$) {
+sub SIGNALduino_Write {
   my $hash 	= shift // carp 'must be called with hash of iodevice as first param';
   my $fn	= shift // 'RAW';
   my $msg	= shift // return;
@@ -1469,7 +1469,7 @@ sub SIGNALduino_Write($$$) {
 }
 
 ############################# package main
-sub SIGNALduino_AddSendQueue($$) {
+sub SIGNALduino_AddSendQueue {
   my ($hash, $msg) = @_;
   my $name = $hash->{NAME};
 
@@ -1482,7 +1482,7 @@ sub SIGNALduino_AddSendQueue($$) {
 }
 
 ############################# package main, test exists
-sub SIGNALduino_SendFromQueue($$) {
+sub SIGNALduino_SendFromQueue {
   my ($hash, $msg) = @_;
   my $name = $hash->{NAME};
 
@@ -1524,7 +1524,7 @@ sub SIGNALduino_SendFromQueue($$) {
 }
 
 ############################# package main
-sub SIGNALduino_HandleWriteQueue($) {
+sub SIGNALduino_HandleWriteQueue {
   my($param) = @_;
   my(undef,$name) = split(':', $param);
   my $hash = $defs{$name};
@@ -1555,7 +1555,7 @@ sub SIGNALduino_HandleWriteQueue($) {
 
 ############################# package main, test exists
 # called from the global loop, when the select for hash->{FD} reports data
-sub SIGNALduino_Read($) {
+sub SIGNALduino_Read {
   my ($hash) = @_;
 
   my $buf = DevIo_SimpleRead($hash);
@@ -1680,7 +1680,7 @@ sub SIGNALduino_Read($) {
 }
 
 ############################# package main
-sub SIGNALduino_KeepAlive($){
+sub SIGNALduino_KeepAlive{
 	my ($hash) = @_;
 	my $name = $hash->{NAME};
 
@@ -1778,7 +1778,7 @@ sub SIGNALduino_splitMsg {
 
 ############################# package main
 # $value  - $set <= $tolerance
-sub SIGNALduino_inTol($$$) {
+sub SIGNALduino_inTol {
 	#Debug "sduino abs \($_[0] - $_[1]\) <= $_[2] ";
 	return (abs($_[0]-$_[1])<=$_[2]);
 }
@@ -1935,7 +1935,7 @@ sub SIGNALduino_MatchSignalPattern($\@\%\@$){
 }
 
 ############################# package main
-sub SIGNALduino_Split_Message($$) {
+sub SIGNALduino_Split_Message {
 	my $rmsg = shift;
 	my $name = shift;
 	my %patternList;
@@ -2022,7 +2022,7 @@ sub SIGNALduino_Split_Message($$) {
 
 ############################# package main, test exists
 # Function which dispatches a message if needed.
-sub SIGNALduno_Dispatch($$$$$) {
+sub SIGNALduno_Dispatch {
 	my ($hash, $rmsg, $dmsg, $rssi, $id) = @_;
 	my $name = $hash->{NAME};
 
@@ -2122,7 +2122,7 @@ sub SIGNALduino_moduleMatch {
 
 ############################# package main, test exists
 # calculated RSSI and RSSI value and RSSI string (-77,"RSSI = -77")
-sub SIGNALduino_calcRSSI($) {
+sub SIGNALduino_calcRSSI {
 	my $rssi = shift;
 	my $rssiStr = "";
 	$rssi = ($rssi>=128 ? (($rssi-256)/2-74) : ($rssi/2-74));
@@ -2751,7 +2751,7 @@ sub SIGNALduino_Parse($$$$@) {
 
 
 ############################# package main
-sub SIGNALduino_Ready($) {
+sub SIGNALduino_Ready {
   my ($hash) = @_;
 
   if ($hash->{STATE} eq 'disconnected') {
@@ -2769,7 +2769,7 @@ sub SIGNALduino_Ready($) {
 }
 
 ############################# package main
-sub SIGNALduino_WriteInit($) {
+sub SIGNALduino_WriteInit {
   my ($hash) = @_;
 
   # todo: ist dies so ausreichend, damit die Aenderungen uebernommen werden?
@@ -3426,7 +3426,7 @@ sub SIGNALduino_compPattern($$$%) {
 
 ############################# package main
 # the new Log with integrated loglevel checking
-sub SIGNALduino_Log3($$$) {
+sub SIGNALduino_Log3 {
   my ($dev, $loglevel, $text) = @_;
   my $name =$dev;
   $name= $dev->{NAME} if(defined($dev) && ref($dev) eq "HASH");
@@ -3618,8 +3618,8 @@ sub SIGNALduino_querygithubreleases {
 
 ############################# package main
 #return -10 = hardeware attribute is not set
-sub SIGNALduino_githubParseHttpResponse($$$) {
-    my ($param, $err, $data) = @_;
+sub SIGNALduino_githubParseHttpResponse {
+    my ($param, $err, $data) = @_
     my $hash = $param->{hash};
     my $name = $hash->{NAME};
     my $hardware=AttrVal($name,"hardware",undef);
