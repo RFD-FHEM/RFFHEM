@@ -3619,7 +3619,7 @@ sub SIGNALduino_querygithubreleases {
 ############################# package main
 #return -10 = hardeware attribute is not set
 sub SIGNALduino_githubParseHttpResponse {
-    my ($param, $err, $data) = @_
+    my ($param, $err, $data) = @_;
     my $hash = $param->{hash};
     my $name = $hash->{NAME};
     my $hardware=AttrVal($name,"hardware",undef);
