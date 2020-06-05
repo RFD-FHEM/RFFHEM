@@ -38,7 +38,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.5_dev_06.04",
+	SDUINO_VERSION            => "v3.5_dev_06.05",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -1353,8 +1353,8 @@ sub SIGNALduino_CheckVersionResp {
 			$hash->{logMethod}->($hash, 5, "$name: CheckVersionResp, delete old READINGS from cc1101 device");
 			delete($hash->{cc1101_available}) if defined( $hash->{cc1101_available} );
 
-			foreach my $reading (keys %{$hash->{READINGS}}) {
-				readingsDelete($hash,$reading) if ($reading =~ m/cc1101/);
+			foreach my $value ( qw(cc1101_config cc1101_config_ext cc1101_patable) ) {
+				readingsDelete($hash,$value) if ( ReadingsVal($name, $value, undef) );
 			}
 		}
 		$hash->{DevState} = 'initialized';
@@ -2914,7 +2914,11 @@ sub SIGNALduino_Attr(@) {
 			Log3 $name, 3, "$name: Attr, Disable eventlogging";
 		}
 	}
-
+	elsif ($aName eq "userReadings")	# look reserved cc1101 readings
+	{
+		return "Note, please use other userReadings names.\nReserved names from $name are: cc1101_config, cc1101_config_ext, cc1101_patable"
+			if ($aVal =~ /cc1101_(config(_ext)?|patable)(\s|{)/);
+	}
  	return ;
 }
 
