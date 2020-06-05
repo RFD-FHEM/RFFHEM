@@ -1,5 +1,9 @@
 2020-06-05 - Update 00_SIGNALduino.pm
 
+* revised readingsDelete loop
+* added output note for user if use attrib userReadings with reserved cc1101 readingnames
+2020-06-05 - Update 00_SIGNALduino.pm
+
   * delete old readings from device with cc1101_available = 1
 2020-06-04 - 00_SIGNALduino.pm
 
