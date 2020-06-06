@@ -1,5 +1,8 @@
 2020-06-06 - Update 14_SD_UT.pm
 
+remove uc
+2020-06-06 - Update 14_SD_UT.pm
+
 If the device is created manually with IODev, then DEF is wrong.
 2020-05-28 - Dev r34 - id56 - #848 (#849)
 
