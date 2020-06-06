@@ -1,3 +1,8 @@
+2020-06-06 - Update 00_SIGNALduino.pm
+
+* revised code https://github.com/RFD-FHEM/RFFHEM/pull/854#pullrequestreview-425673188
+* revised RegEx https://github.com/RFD-FHEM/RFFHEM/pull/854#pullrequestreview-425673677
+* revised loop code for PERL critic https://github.com/RFD-FHEM/RFFHEM/pull/854#pullrequestreview-425673841
 2020-06-05 - Update 00_SIGNALduino.pm
 
 * revised readingsDelete loop
