@@ -1351,10 +1351,10 @@ sub SIGNALduino_CheckVersionResp {
 		} else {
 			# connect device without cc1101 to port where a device with cc1101 was previously connected (example DEF with /dev/ttyUSB0@57600) #
 			$hash->{logMethod}->($hash, 5, "$name: CheckVersionResp, delete old READINGS from cc1101 device");
-			delete($hash->{cc1101_available}) if defined( $hash->{cc1101_available} );
+			delete($hash->{cc1101_available}) if exists( $hash->{cc1101_available} );
 
-			foreach my $value ( qw(cc1101_config cc1101_config_ext cc1101_patable) ) {
-				readingsDelete($hash,$value) if ( ReadingsVal($name, $value, undef) );
+			for my $readingName  ( qw(cc1101_config cc1101_config_ext cc1101_patable) ) {
+				readingsDelete($hash,$readingName ) if ( ReadingsVal($name, $readingName, undef) );
 			}
 		}
 		$hash->{DevState} = 'initialized';
@@ -2917,7 +2917,7 @@ sub SIGNALduino_Attr(@) {
 	elsif ($aName eq "userReadings")	# look reserved cc1101 readings
 	{
 		return "Note, please use other userReadings names.\nReserved names from $name are: cc1101_config, cc1101_config_ext, cc1101_patable"
-			if ($aVal =~ /cc1101_(config(_ext)?|patable)(\s|{)/);
+			if ($aVal =~ /cc1101_(?:config(?:_ext)?|patable)(?:\s|{)/);
 	}
  	return ;
 }
