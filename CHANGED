@@ -1,5 +1,9 @@
 2020-06-06 - Update 00_SIGNALduino.pm
 
+* revised if code https://github.com/RFD-FHEM/RFFHEM/pull/854#pullrequestreview-425727766
+* remove if query https://github.com/RFD-FHEM/RFFHEM/pull/854#discussion_r436254436
+2020-06-06 - Update 00_SIGNALduino.pm
+
 * revised code https://github.com/RFD-FHEM/RFFHEM/pull/854#pullrequestreview-425673188
 * revised RegEx https://github.com/RFD-FHEM/RFFHEM/pull/854#pullrequestreview-425673677
 * revised loop code for PERL critic https://github.com/RFD-FHEM/RFFHEM/pull/854#pullrequestreview-425673841
