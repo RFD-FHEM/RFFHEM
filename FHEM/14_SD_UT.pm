@@ -739,7 +739,7 @@ sub SD_UT_Define($$) {
 	my ($hash, $def) = @_;
 	my @a = split("[ \t][ \t]*", $def);
 
-	# Argument					   0	 1		2		3				4
+	# Argument                    0     1      2       3           4
 	return "wrong syntax: define <name> SD_UT <model> <HEX-Value> <optional IODEV>" if(int(@a) < 3 || int(@a) > 5);
 	return "wrong <model> $a[2]\n\n(allowed modelvalues: " . join(" | ", sort keys %models).")" if $a[2] && ( !grep { $_ eq $a[2] } %models );
 	### checks unknown ###
@@ -814,8 +814,10 @@ sub SD_UT_Define($$) {
 	### Attributes | model set after codesyntax ###
 	my $devicetyp = $a[2];
 	if ($devicetyp eq "unknown") {
+		$hash->{DEF} = $devicetyp; # model
 		$attr{$name}{model}	= "unknown"	if( not defined( $attr{$name}{model} ) );
 	} else {
+		$hash->{DEF} = $devicetyp . q{ } . uc $a[3]; # model HEX-Value
 		$attr{$name}{model}	= $devicetyp	if( not defined( $attr{$name}{model} ) );
 	}
 
