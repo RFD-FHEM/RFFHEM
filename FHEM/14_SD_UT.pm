@@ -817,7 +817,7 @@ sub SD_UT_Define($$) {
 		$hash->{DEF} = $devicetyp; # model
 		$attr{$name}{model}	= "unknown"	if( not defined( $attr{$name}{model} ) );
 	} else {
-		$hash->{DEF} = $devicetyp . q{ } . uc $a[3]; # model HEX-Value
+		$hash->{DEF} = $devicetyp . q{ } . $a[3]; # model HEX-Value
 		$attr{$name}{model}	= $devicetyp	if( not defined( $attr{$name}{model} ) );
 	}
 
