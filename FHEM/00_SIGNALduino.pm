@@ -38,7 +38,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.5_dev_06.04",
+	SDUINO_VERSION            => "v3.5_dev_06.05",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -1348,6 +1348,16 @@ sub SIGNALduino_CheckVersionResp {
 			$hash->{logMethod}->($name, 5, "$name: CheckVersionResp, cc1101 available");
 			SIGNALduino_Get($hash, $name,"ccconf");
 			SIGNALduino_Get($hash, $name,"ccpatable");
+		} else {
+			# connect device without cc1101 to port where a device with cc1101 was previously connected (example DEF with /dev/ttyUSB0@57600) #
+			$hash->{logMethod}->($hash, 5, "$name: CheckVersionResp, delete old READINGS from cc1101 device");
+			if ( exists($hash->{cc1101_available}) ) {
+				delete($hash->{cc1101_available});
+			};
+
+			for my $readingName  ( qw(cc1101_config cc1101_config_ext cc1101_patable) ) {
+				readingsDelete($hash,$readingName);
+			}
 		}
 		$hash->{DevState} = 'initialized';
 	 	$msg = $hash->{version};
@@ -2906,7 +2916,11 @@ sub SIGNALduino_Attr(@) {
 			Log3 $name, 3, "$name: Attr, Disable eventlogging";
 		}
 	}
-
+	elsif ($aName eq "userReadings")	# look reserved cc1101 readings
+	{
+		return "Note, please use other userReadings names.\nReserved names from $name are: cc1101_config, cc1101_config_ext, cc1101_patable"
+			if ($aVal =~ /cc1101_(?:config(?:_ext)?|patable)(?:\s|{)/);
+	}
  	return ;
 }
 
