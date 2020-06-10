@@ -29,6 +29,8 @@ eval "use JSON;1" or $missingModulSIGNALduino .= "JSON ";
 
 eval "use Scalar::Util qw(looks_like_number);1";
 eval "use Time::HiRes qw(gettimeofday);1" ;
+eval { use FHEM::Timer::Helper;1 } ;
+
 use lib::SD_Protocols;
 
 #$| = 1;		#Puffern abschalten, Hilfreich fuer PEARL WARNINGS Search
@@ -391,9 +393,9 @@ sub SIGNALduino_Define {
   $Protocols->registerLogCallback(SIGNALduino_createLogCallback($hash));
   my $error = $Protocols->LoadHash(qq[$attr{global}{modpath}/FHEM/lib/SD_ProtocolData.pm]);
   $hash->{protocolObject} = $Protocols;
-
-  InternalTimer(gettimeofday(), \&SIGNALduino_IdList,"sduino_IdList:$name",0);       # verzoegern bis alle Attribute eingelesen sind
-
+  FHEM::timer::helper::addTimer($name, time(), \&SIGNALduino_IdList,"sduino_IdList:$name",0 );
+  #InternalTimer(gettimeofday(), \&SIGNALduino_IdList,"sduino_IdList:$name",0);       # verzoegern bis alle Attribute eingelesen sind
+  
   if($dev ne 'none') {
   	$ret = DevIo_OpenDev($hash, 0, \&SIGNALduino_DoInit, \&SIGNALduino_Connect);
   } else {
@@ -447,6 +449,7 @@ sub SIGNALduino_Undef {
 
   DevIo_CloseDev($hash);
   RemoveInternalTimer($hash);
+  FHEM::timer::helper::removeTimer($name); 
   return ;
 }
 

@@ -20,10 +20,9 @@ subtest 'Delete $defs{name} and check if internal timers causes crash' => sub {
 	
 	my $todo = Test2::Todo->new(reason => 'This crash needs a fix');
 	
-	like(
+	ok(
 	    lives   { HandleTimeout() },
-	    qr/Can't use an undefined value/,
-	    'Got exception'
+	    'Got no exception'
 	);
 };
 
@@ -35,12 +34,9 @@ subtest 'CommandDelete and check if internal timers causes crash' => sub {
 	CommandDelete(undef,'raceDuino');
 	is(IsDevice('raceDuino'),0,'check definition is deleted');
 	
-	my $todo = Test2::Todo->new(reason => 'This crash needs a fix');
-	
-	like(
+	ok(
 	    lives   { HandleTimeout() },
-	    qr/Can't use an undefined value/,
-	    'Got exception'
+	    'Got no exception'
 	);
 };
 
@@ -50,10 +46,9 @@ subtest ' check if sub SIGNALduino_IdList causes crash if name does not exists' 
 	
 	my $todo = Test2::Todo->new(reason => 'This crash needs a fix');
 
-	like(
+	ok(
 	    lives   { SIGNALduino_IdList('sduino_IdList:DeviceDoesNotExists'); },
-	    qr/Can't use an undefined value/,
-	    'Got exception'
+	    'Got no exception'
 	);
 	
 };
