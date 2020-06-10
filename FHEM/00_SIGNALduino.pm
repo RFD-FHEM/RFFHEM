@@ -393,7 +393,7 @@ sub SIGNALduino_Define {
   $Protocols->registerLogCallback(SIGNALduino_createLogCallback($hash));
   my $error = $Protocols->LoadHash(qq[$attr{global}{modpath}/FHEM/lib/SD_ProtocolData.pm]);
   $hash->{protocolObject} = $Protocols;
-  FHEM::timer::helper::addTimer($name, time(), \&SIGNALduino_IdList,"sduino_IdList:$name",0 );
+  FHEM::Timer::Helper::addTimer($name, time(), \&SIGNALduino_IdList,"sduino_IdList:$name",0 );
   #InternalTimer(gettimeofday(), \&SIGNALduino_IdList,"sduino_IdList:$name",0);       # verzoegern bis alle Attribute eingelesen sind
   
   if($dev ne 'none') {
@@ -449,7 +449,7 @@ sub SIGNALduino_Undef {
 
   DevIo_CloseDev($hash);
   RemoveInternalTimer($hash);
-  FHEM::timer::helper::removeTimer($name); 
+  FHEM::Timer::Helper::removeTimer($name); 
   return ;
 }
 
