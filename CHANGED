@@ -1,5 +1,8 @@
 2020-06-10 - FHEM\00_SIGNALduino.pm
 
+corrected package to uppercase
+2020-06-10 - FHEM\00_SIGNALduino.pm
+
 Added usage of FHEM::Timer::Helper package to clean timer which are known
 2020-06-04 - 00_SIGNALduino.pm
 
