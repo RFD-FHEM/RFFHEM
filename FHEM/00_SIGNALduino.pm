@@ -29,7 +29,7 @@ eval "use JSON;1" or $missingModulSIGNALduino .= "JSON ";
 
 eval "use Scalar::Util qw(looks_like_number);1";
 eval "use Time::HiRes qw(gettimeofday);1" ;
-eval { use FHEM::Timer::Helper;1 } ;
+eval { use FHEM::Core::Timer::Helper qw(addTimer removeTimer);1 } ;
 
 use lib::SD_Protocols;
 
@@ -393,7 +393,7 @@ sub SIGNALduino_Define {
   $Protocols->registerLogCallback(SIGNALduino_createLogCallback($hash));
   my $error = $Protocols->LoadHash(qq[$attr{global}{modpath}/FHEM/lib/SD_ProtocolData.pm]);
   $hash->{protocolObject} = $Protocols;
-  FHEM::Timer::Helper::addTimer($name, time(), \&SIGNALduino_IdList,"sduino_IdList:$name",0 );
+  addTimer($name, time(), \&SIGNALduino_IdList,"sduino_IdList:$name",0 );
   #InternalTimer(gettimeofday(), \&SIGNALduino_IdList,"sduino_IdList:$name",0);       # verzoegern bis alle Attribute eingelesen sind
   
   if($dev ne 'none') {
@@ -449,7 +449,7 @@ sub SIGNALduino_Undef {
 
   DevIo_CloseDev($hash);
   RemoveInternalTimer($hash);
-  FHEM::Timer::Helper::removeTimer($name); 
+  removeTimer($name); 
   return ;
 }
 
