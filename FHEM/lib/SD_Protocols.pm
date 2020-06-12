@@ -1907,12 +1907,13 @@ sub ConvLaCrosse {
 
 	my $humObat = $humidity & 0x7F;
 
-	if ( $humObat == 125 ) {    # Channel 2
+	if ( $humObat == 125 ) {    # Channel 2 ??? doubtful
 		$SensorType = 2;
 	}
-	elsif ( $humObat > 99 ) {   # Shoud be checked in logical module
-		return ( -1, qq[ConvLaCrosse: hum:$humObat (out of Range)] );
-	}
+	### humidity check is in Lacrosse module and some sensors without hum, send a value over 100 ###
+	# elsif ( $humObat > 99 ) {   # Shoud be checked in logical module
+		# return ( -1, qq[ConvLaCrosse: hum:$humObat (out of Range)] );
+	# }
 
 	# build string for 36_LaCrosse.pm
 	$temperature = ( ( $temperature * 10 + 1000 ) & 0xFFFF );
