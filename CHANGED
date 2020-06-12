@@ -1,3 +1,11 @@
+2020-06-12 - dev-r35_xFSK - Lacrosse | Logoutput and Sensors without Hum (#859)
+
+00_SIGNALduino.pm
+  * fix syntax for logout with variable
+SD_Protocols.pm
+  * Lacrosse code, remove humidity check -> some sensors without hum send value > 100
+   (check humidity in Lacrosse modul)
+   https://svn.fhem.de/trac/browser/trunk/fhem/FHEM/36_LaCrosse.pm#L469
 2020-06-12 - Lacrosse code revised
 
 00_SIGNALduino.pm
