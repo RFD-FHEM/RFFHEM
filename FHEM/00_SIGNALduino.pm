@@ -38,7 +38,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.5_dev_06.05",
+	SDUINO_VERSION            => "v3.5_dev_200612",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -2664,7 +2664,7 @@ sub SIGNALduino_Parse_MN {
 		$match = $hash->{protocolObject}->checkProperty($id,'regexMatch',undef);
 		$modulation = $hash->{protocolObject}->checkProperty($id,'modulation',undef);
 		if ( defined($match) && $rawData =~ m/$match/x ) {
-			$hash->{logMethod}->($name, 4, qq[$name: Parse_MN, Found $modulation Protocol id $id -> ].$hash->{protocolObject}->getProperty($id,'name').q[ with match $match]);
+			$hash->{logMethod}->($name, 4, qq[$name: Parse_MN, Found $modulation Protocol id $id -> ].$hash->{protocolObject}->getProperty($id,'name').qq[ with match $match]);
 		} elsif (!defined($match) ) {
 			$hash->{logMethod}->($name, 4, qq[$name: Parse_MN, Found $modulation Protocol id $id -> ].$hash->{protocolObject}->getProperty($id,'name'));
 		} else {
