@@ -74,7 +74,7 @@ my %models = (
 
 sub Initialize {
 	my ($hash) = @_;
-	foreach my $k (keys %codes) {
+	for my $k (keys %codes) {
 		$fs10_c2b{$codes{$k}} = $k; # reverse codes
 	}
 	$hash->{Match}      = '^P61#[a-fA-F0-9]{8,12}';
@@ -247,7 +247,7 @@ sub Define {
 	return 'Define FS10 wrong syntax, must be: housecode_button' if (!defined $housecode || !defined $btncode);
 	return 'Define FS10 wrong housecode format: specify a 1 digit value [1-8]' if ($housecode !~ m/^[1-8]$/xms );
 	return 'Define FS10 wrong button format: specify a 2 digit value [0-7]' if ($btncode !~ m/^[0-7]{2}$/xms ); # Ebene Low, Ebene High
-	if (int(@a) == 4) { $iodevice = $a[3] };
+	if (scalar @a == 4) { $iodevice = $a[3] };
 
 	$hash->{DEF} = $a[2];
 	$hash->{HC} = $housecode;
@@ -256,7 +256,7 @@ sub Define {
 	$hash->{VersionModule} = $VERSION;
 
 	$modules{FS10}{defptr}{$hash->{DEF}} = $hash;
-	if (exists $modules{FS10}{defptr}{ioname} && !$iodevice) { $ioname = $modules{FS10}{defptr}{ioname} };
+	if (exists $modules{FS10}{defptr}{ioname} && !defined $iodevice) { $ioname = $modules{FS10}{defptr}{ioname} };
 	if (not $iodevice) { $iodevice = $ioname }
 	AssignIoPort($hash, $iodevice);
 
