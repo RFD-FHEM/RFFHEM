@@ -257,7 +257,7 @@ sub Define {
 
 	$modules{FS10}{defptr}{$hash->{DEF}} = $hash;
 	if (exists $modules{FS10}{defptr}{ioname} && !defined $iodevice) { $ioname = $modules{FS10}{defptr}{ioname} };
-	if (not $iodevice) { $iodevice = $ioname }
+	if (!defined $iodevice) { $iodevice = $ioname }
 	AssignIoPort($hash, $iodevice);
 
 	Log3 $name, 4, "FS10_Define: $a[0] HC=$housecode BTN=$btncode";
