@@ -80,7 +80,11 @@ use warnings;
 
 package lib::SD_ProtocolData;
 { 
-	our $VERSION = '1.19';
+	use strict;
+	use warnings;
+	
+	our $VERSION = '1.20';
+
 	our %protocols = (
 		"0"	=>	## various weather sensors (500 | 9100)
 						# Mebus | Id:237 Ch:1 T: 1.9 Bat:low           MS;P0=-9298;P1=495;P2=-1980;P3=-4239;D=1012121312131313121313121312121212121212131212131312131212;CP=1;SP=0;R=223;O;m2;
@@ -1727,7 +1731,6 @@ package lib::SD_ProtocolData;
 				preamble        => 'P61#',			# prepend to converted message
 				postamble       => '',				# Append to converted message
 				clientmodule	=> 'FS10',
-				#modulematch	 => '',
 				length_min      => '38',			# eigentlich 41 oder 46 (Pruefsumme nicht bei allen)
 				length_max      => '48',			# eigentlich 46
 			},
