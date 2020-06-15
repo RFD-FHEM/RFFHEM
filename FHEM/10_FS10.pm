@@ -328,7 +328,7 @@ sub Parse {
 	($err, $dev) = nibble2dec(substr $bitData,20,5); # housecode
 	$gesErr += $err;
 	$sum += $dev;
-	($err, $rsum) = nibble2dec(substr $bitData,25,5);    # Summe
+	($err, $rsum) = nibble2dec(substr $bitData,25,5); # Summe
 	$gesErr += $err;
 
 	$sum = (10 - $sum) & 7;
@@ -349,7 +349,7 @@ sub Parse {
 
 	Log3 $ioname, 5, "$ioname: FS10_Parse cde=$cde $v ebeneHL=$btn u=$u hc=$dev rsum=$rsum";
 
-	$v =~ s/_[1,2]$//xms; # _1 oder _2 am Ende abschneiden
+	$v =~ s/_[12]$//xms; # _1 oder _2 am Ende abschneiden
 
 	my $def = $modules{FS10}{defptr}{$iohash->{NAME} . q{.} . $deviceCode};
 	$modules{FS10}{defptr}{ioname} = $ioname;
