@@ -69,7 +69,7 @@ package lib::SD_ProtocolData;
 	use strict;
 	use warnings;
 	
-	our $VERSION = '1.19';
+	our $VERSION = '1.20';
 	our %protocols = (
 		"0"	=>	## various weather sensors (500 | 9100)
 						# Mebus | Id:237 Ch:1 T: 1.9 Bat:low           MS;P0=-9298;P1=495;P2=-1980;P3=-4239;D=1012121312131313121313121312121212121212131212131312131212;CP=1;SP=0;R=223;O;m2;
@@ -1699,21 +1699,20 @@ package lib::SD_ProtocolData;
 							#  Bit 0      Bit 1
 							# kurz 400 mikroSek / lang 800 mikroSek / gesamt 800 mikroSek = 0, gesamt 1200 mikroSek = 1 - Sollzeiten
 			{
-				name					=> 'FS10',
-				comment				=> 'remote control',
-				id						=> '61',
-				knownFreqs		=> '433.92',
-				one						=> [1,-2],
-				zero					=> [1,-1],
-				clockabs			=> 400,
-				pause					=> [-81],				# 400*81=32400*6=194400 - pause between repeats of send messages (clockabs*pause must be < 32768)
-				format				=> 'twostate',
-				preamble			=> 'P61#',			# prepend to converted message
-				postamble			=> '',					# Append to converted message
-				clientmodule	=> 'FS10',
-				#modulematch	=> '',
-				length_min		=> '38',				# eigentlich 41 oder 46 (Pruefsumme nicht bei allen)
-				length_max		=> '48',				# eigentlich 46
+				name         => 'FS10',
+				comment      => 'remote control',
+				id           => '61',
+				knownFreqs   => '433.92',
+				one          => [1,-2],
+				zero         => [1,-1],
+				clockabs     => 400,
+				pause        => [-81],      # 400*81=32400*6=194400 - pause between repeats of send messages (clockabs*pause must be < 32768)
+				format       => 'twostate',
+				preamble     => 'P61#',     # prepend to converted message
+				postamble    => '',         # Append to converted message
+				clientmodule => 'FS10',
+				length_min   => '30',       # 43-1=42 (letztes Bit fehlt) 42-12=30 (12 Bit Preambel)
+				length_max   => '48',
 			},
 		"62"	=>	## Clarus_Switch
 							# ! some message are decode as protocol 32 !
