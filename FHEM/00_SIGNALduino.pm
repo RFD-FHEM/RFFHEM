@@ -1045,7 +1045,7 @@ sub SIGNALduino_Get_delayed {
 	} else {
 		delete($hash->{ucCmd});	
 		$hash->{logMethod}->($hash->{NAME}, 5, "$name: Get_delayed, ".join(" ",@cmds)." executed");
-		RemoveTimer($hash->{NAME},"SIGNALduino_Get_delayed:$name:".join(" ",@cmds));
+		removeTimer($hash->{NAME},"SIGNALduino_Get_delayed:$name:".join(" ",@cmds));
 		SIGNALduino_Get($hash,$name,$cmds[0]);
 	}
 }
@@ -1216,7 +1216,7 @@ sub SIGNALduino_CloseDevice {
 	my ($hash) = @_;
 
 	$hash->{logMethod}->($hash->{NAME}, 2, "$hash->{NAME}: CloseDevice, closed");
-	RemoveTimer($hash->{NAME});
+	removeTimer($hash->{NAME});
 	DevIo_CloseDev($hash);
 	readingsSingleUpdate($hash, "state", "closed", 1);
 
@@ -1235,7 +1235,7 @@ sub SIGNALduino_DoInit {
 
 	delete($hash->{disConnFlag}) if defined($hash->{disConnFlag});
 
-	RemovelTimer($hash->{NAME},\&SIGNALduino_HandleWriteQueue,"HandleWriteQueue:$name");
+	removeTimer($hash->{NAME},\&SIGNALduino_HandleWriteQueue,"HandleWriteQueue:$name");
     @{$hash->{QUEUE}} = ();
     $hash->{sendworking} = 0;
 
@@ -1243,7 +1243,7 @@ sub SIGNALduino_DoInit {
 	{
 		$hash->{logMethod}->($hash, 1, "$name: DoInit, ".$hash->{DEF});
 		$hash->{initretry} = 0;
-		RemoveTimer($hash->{NAME});
+		removeTimer($hash->{NAME});
 
 		#SIGNALduino_SimpleWrite($hash, "XQ"); # Disable receiver
 		addTimer($hash->{NAME},gettimeofday() + SDUINO_INIT_WAIT_XQ, \&SIGNALduino_SimpleWrite_XQ, $hash, 0);
@@ -1296,7 +1296,7 @@ sub SIGNALduino_StartInit {
 		SIGNALduino_SimpleWrite($hash, "V");
 		#DevIo_SimpleWrite($hash, "V\n",2);
 		$hash->{DevState} = 'waitInit';
-		RemoveTimer($hash->{NAME});
+		removeTimer($hash->{NAME});
 		addTimer($hash->{NAME},gettimeofday() + SDUINO_CMD_TIMEOUT, \&SIGNALduino_CheckVersionResp, $hash, 0);
 	}
 }
@@ -1332,7 +1332,7 @@ sub SIGNALduino_CheckVersionResp {
 		SIGNALduino_CloseDevice($hash);
 	} else {
 		if (exists($hash->{DevState}) && $hash->{DevState} eq 'waitInit') {
-			RemoveTimer($hash->{NAME});
+			removeTimer($hash->{NAME});
 		}
 
 		readingsSingleUpdate($hash, "state", "opened", 1);
@@ -1550,7 +1550,7 @@ sub SIGNALduino_HandleWriteQueue {
     }
   } else {
   	 $hash->{logMethod}->($name, 4, "$name: HandleWriteQueue, nothing to send, stopping timer");
-  	 RemoveTimer($hash->{NAME},\&SIGNALduino_HandleWriteQueue,"HandleWriteQueue:$name");
+  	 removeTimer($hash->{NAME},\&SIGNALduino_HandleWriteQueue,"HandleWriteQueue:$name");
   }
 }
 
