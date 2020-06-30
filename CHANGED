@@ -1,14 +1,49 @@
-2020-06-29 - Merge branch 'dev-r35_xFSK_Timer' of ssh://github.com/RFD-FHEM/RFFHEM into dev-r35_xFSK_Timer
-2020-06-11 - 00_SIGNALduino.pm
+2020-06-30 - FHEM\00_SIGNALduino.pm
+Added usage of FHEM::Core:Timer::Helper package to clean timer which are known
+2020-06-15 - Merge branch 'dev-r34' into dev-r35_xFSK
+2020-06-12 - dev-r35_xFSK - Lacrosse | Logoutput and Sensors without Hum (#859)
 
-Replaced internalTimer removeInternalTimer whith addTimer and removeTimer
-2020-06-11 - Merge branch 'dev-r35_xFSK_Timer' of ssh://github.com/RFD-FHEM/RFFHEM into dev-r35_xFSK_Timer
-2020-06-10 - FHEM\00_SIGNALduino.pm
+00_SIGNALduino.pm
+  * fix syntax for logout with variable
+SD_Protocols.pm
+  * Lacrosse code, remove humidity check -> some sensors without hum send value > 100
+   (check humidity in Lacrosse modul)
+   https://svn.fhem.de/trac/browser/trunk/fhem/FHEM/36_LaCrosse.pm#L469
+2020-06-12 - Lacrosse code revised
 
-corrected package to uppercase
-2020-06-10 - FHEM\00_SIGNALduino.pm
+00_SIGNALduino.pm
+  * fix syntax for logout with variable
+SD_Protocols.pm
+  * remove humidity check -> some sensors without hum send value > 100
+  (check humidity in Lacrosse modul)
+  https://svn.fhem.de/trac/browser/trunk/fhem/FHEM/36_LaCrosse.pm#L469
+2020-06-09 - 00_SIGNALduino.pm - old readings, if user changes to a new device without cc1101 (#854)
 
-Added usage of FHEM::Timer::Helper package to clean timer which are known
+* Update 00_SIGNALduino.pm
+  * delete old readings from device with cc1101_available = 1
+ * revised code https://github.com/RFD-FHEM/RFFHEM/pull/854#pullrequestreview-425673188
+ * revised RegEx https://github.com/RFD-FHEM/RFFHEM/pull/854#pullrequestreview-425673677
+ * revised loop code for PERL critic https://github.com/RFD-FHEM/RFFHEM/pull/854#pullrequestreview-425673841
+
+* Update 00_SIGNALduino.pm
+ * revised if code https://github.com/RFD-FHEM/RFFHEM/pull/854#pullrequestreview-425727766
+ * remove if query https://github.com/RFD-FHEM/RFFHEM/pull/854#discussion_r436254436
+2020-06-06 - Update 00_SIGNALduino.pm
+
+* revised if code https://github.com/RFD-FHEM/RFFHEM/pull/854#pullrequestreview-425727766
+* remove if query https://github.com/RFD-FHEM/RFFHEM/pull/854#discussion_r436254436
+2020-06-06 - Update 00_SIGNALduino.pm
+
+* revised code https://github.com/RFD-FHEM/RFFHEM/pull/854#pullrequestreview-425673188
+* revised RegEx https://github.com/RFD-FHEM/RFFHEM/pull/854#pullrequestreview-425673677
+* revised loop code for PERL critic https://github.com/RFD-FHEM/RFFHEM/pull/854#pullrequestreview-425673841
+2020-06-05 - Update 00_SIGNALduino.pm
+
+* revised readingsDelete loop
+* added output note for user if use attrib userReadings with reserved cc1101 readingnames
+2020-06-05 - Update 00_SIGNALduino.pm
+
+  * delete old readings from device with cc1101_available = 1
 2020-06-04 - 00_SIGNALduino.pm
 
 syntaxfix last commit
@@ -228,64 +263,34 @@ some perlciritc 5 fixes
 --- --- --- Unreleases what comes up here ---- --- ---
 
 
+2020-06-15 - 10_FS10 revised for perlcritic (#860)
+2020-06-15 - Update 10_FS10.pm
+2020-06-14 - Update 10_FS10.pm
+2020-06-14 - Update 10_FS10.pm
+2020-06-13 - 10_FS10 revised for perlcritic
+2020-06-06 - SD_UT wrong DEF (#857)
+  Update 14_SD_UT.pm - If the device is created manually with IODev, then DEF is wrong.
+
 2020-05-28 - Dev r34 - id56 - #848 (#849)
-
-Update SD_ProtocolData.pm
-* ID 56 fix def & added doc https://github.com/RFD-FHEM/RFFHEM/issues/848
-2020-05-26 - Update SD_ProtocolData.pm
-
-* ID 56 fix def & added doc https://github.com/RFD-FHEM/RFFHEM/issues/848
+  Update SD_ProtocolData.pm - ID 56 fix def & added doc https://github.com/RFD-FHEM/RFFHEM/issues/848
 
 2020-05-26 - 10_SD_GT revised for perlcritic (#847)
-2020-05-25 - Update 10_SD_GT.pm
-Code revised for perlcritic
 
 2020-05-25 - add attribute UTfrequency in 14_SD_UT.pm (#845)
-* SD_UT new attribute UTfrequency for individual transmission frequency
-Multiple query "$ attrName eq 'model'" removed
-change commandref
-replace "foreach my $keys (keys %models)" with "if ( exists $models{$attrValue}" in line 1756
-replace "foreach my $keys (sort keys %{$models{RC_10}{buttons}})" with "if ( exists $models{RC_10}{buttons}{$button} )" in line 1845
-replace "foreach my $keys (keys %models)" with "grep { $models{$_}{hex_lengh} =~ /$hex_lengh/ } keys %models;" in line 1745
-delete "$attr{$name}{room}	= "SD_UT"	if( not defined( $attr{$name}{room} ) );"
-change search for models with same hex_length
-
-2020-05-24 - Update 14_SD_UT.pm
-Reference to autocreate added
-
-2020-05-23 - Update 14_SD_UT.pm
-change commandref engl.
-
-2020-05-22 - Update 14_SD_UT.pm
-change search for models with same hex_length
-rename  hex_lengh in hex_length
-
-2020-05-20 - Update 14_SD_UT.pm
-replace "foreach my $keys (keys %models)" with "grep { $models{$_}{hex_lengh} =~ /$hex_lengh/ } keys %models;" in line 1745
-delete "$attr{$name}{room}	= "SD_UT"	if( not defined( $attr{$name}{room} ) );"
-
-2020-05-18 - Update 14_SD_UT.pm
-replace "foreach my $keys (sort keys %{$models{RC_10}{buttons}})" with "if ( exists $models{RC_10}{buttons}{$button} )" in line 1845
-
-2020-05-17 - Update 14_SD_UT.pm
-replace "foreach my $keys (keys %models)" with "if ( exists $models{$attrValue}" in line 1756
-minor corrections in html_DE
-
-2020-05-17 - Update 14_SD_UT.pm
-update html_DE
-
-2020-05-12 - Update 14_SD_UT.pm - change commandref
-change commandref
-
-2020-05-07 - Update 14_SD_UT.pm
-Check values ​​attribute UTfrequency added
-Documentation for UTfrequency attribute added
-Multiple query "$ attrName eq 'model'" removed
-
-2020-05-06 - SD_UT new attribute UTfrequency for individual transmission frequency
+  new attribute UTfrequency for individual transmission frequency
+  Multiple query "$ attrName eq 'model'" removed
+  change commandref
+  replace "foreach my $keys (keys %models)" with "if ( exists $models{$attrValue}" in line 1756
+  replace "foreach my $keys (sort keys %{$models{RC_10}{buttons}})" with "if ( exists $models{RC_10}{buttons}{$button} )" in line 1845
+  replace "foreach my $keys (keys %models)" with "grep { $models{$_}{hex_lengh} =~ /$hex_lengh/ } keys %models;" in line 1745
+  delete "$attr{$name}{room} = "SD_UT"	if( not defined( $attr{$name}{room} ) );"
+  change search for models with same hex_length
+  Reference to autocreate added
+  rename  hex_lengh in hex_length
+  Check values attribute UTfrequency added
+  Documentation for UTfrequency attribute added
 
 2020-05-02 - new protocol 104 for remote control TR60C-1 (#844)
-* Update 14_SD_UT.pm
 2020-05-02 - Merge branch 'dev-r34' into dev-r34_TR60C-1
 2020-05-02 - new protocol 104 for remote control TR60C-1
 2020-04-22 - Merge branch 'dev-r34' into dev-r34_operatorFixes
@@ -294,7 +299,7 @@ Multiple query "$ attrName eq 'model'" removed
 2020-04-21 - new protocol 98 for wireless door bell GEA-028DB (#839)
 
 2020-04-14 - 00_SIGNALduino.pm
-Changed stringrefs to coderefs
+  Changed stringrefs to coderefs
 
 2020-04-13 - Bump dev-r34 to v3.4.4
 2020-04-13 - Merge remote-tracking branch 'remotes/origin/dev-r34' into v3.4.3
