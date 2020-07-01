@@ -316,6 +316,16 @@
 #   Navaris_13F8E3   MU;P0=406;P1=-294;P2=176;P3=286;P4=-191;P6=-415;D=01212134212134343434343434212121343434212121343406212121342121343434343434342121213434342121213434062121213421213434343434343421212134343421212134340621212134212134343434343434212121343434212121343406212121342121343434343434342121213434342121213434062121;CP=2;R=67;O;
 #}
 ###############################################################################################################################################################################
+# - Remote control BF-301 from Shenzhen BOFU Mechanic & Electronic Co., Ltd. [Protocol 105]
+#{  elektron-bbs 2020-06-28
+#   Protocol description found on https://github.com/akirjavainen/markisol/blob/master/Markisol.ino
+#   original remotes repeat 8 (multi) or 10 (single) times by default
+#   https://github.com/RFD-FHEM/RFFHEM/issues/861 stsirakidis 2020-06-27
+#   BF_301_FAD0 down   MU;P0=-697;P1=5629;P2=291;P3=3952;P4=-2459;P5=1644;P6=-298;P7=689;D=34567676767676207620767620762020202076202020762020207620202020207676762076202020767614567676767676207620767620762020202076202020762020207620202020207676762076202020767614567676767676207620767620762020202076202020762020207620202020207676762076202020767614;CP=2;R=41;O;
+#   BF_301_FAD0 stop   MU;P0=5630;P1=3968;P2=-2458;P3=1642;P4=-285;P5=690;P6=282;P7=-704;D=12345454545454675467545467546767676754676767546754675467676767675454546754676767675402345454545454675467545467546767676754676767546754675467676767675454546754676767675402345454545454675467545467546767676754676767546754675467676767675454546754676767675402;CP=6;R=47;O;
+#   BF_301_FAD0 up     MU;P0=-500;P1=5553;P2=-2462;P3=1644;P4=-299;P5=679;P6=298;P7=-687;D=01234545454545467546754546754676767675467676767675454546767676767545454675467546767671234545454545467546754546754676767675467676767675454546767676767545454675467546767671234545454545467546754546754676767675467676767675454546767676767545454675467546767671;CP=6;R=48;O;
+#}
+###############################################################################################################################################################################
 # !!! ToDo´s !!!
 #     - LED lights, counter battery-h reading --> commandref hour_counter module
 #     -
@@ -702,6 +712,16 @@ my %models = (
 									Protocol	=> "P99",
 									Typ				=> "remote"
 								},
+	'BF_301' =>	{	'1000' => 'down',
+								'1010' => 'stop',
+								'0011' => 'up',
+								'0010' => 'confirm',
+								'0100' => 'limit',
+								'0001' => 'direction',
+								hex_length => [10],
+								Protocol => 'P105',
+								Typ => 'remote'
+							},
 	"unknown" =>	{	Protocol	=> "any",
 									hex_length => [],
 									Typ				=> "not_exist"
@@ -711,7 +731,7 @@ my %models = (
 #############################
 sub SD_UT_Initialize($) {
 	my ($hash) = @_;
-	$hash->{Match}			= "^P(?:14|20|26|29|30|34|46|68|69|76|81|83|86|90|91|91.1|92|93|95|97|99|104)#.*";
+	$hash->{Match}			= '^P(?:14|20|26|29|30|34|46|68|69|76|81|83|86|90|91|91.1|92|93|95|97|99|104|105)#.*';
 	$hash->{DefFn}			= "SD_UT_Define";
 	$hash->{UndefFn}		= "SD_UT_Undef";
 	$hash->{ParseFn}		= "SD_UT_Parse";
@@ -729,7 +749,8 @@ sub SD_UT_Initialize($) {
 		"OR28V.*"	 => {ATTR => "model:OR28V", FILTER => "%NAME", autocreateThreshold => "3:180", GPLOT => ""},
 		"RCnoName20.*"	 => {ATTR => "model:RCnoName20", FILTER => "%NAME", autocreateThreshold => "3:180", GPLOT => ""},
 		"Techmar.*"	 => {ATTR => "model:Techmar", FILTER => "%NAME", autocreateThreshold => "3:180", GPLOT => ""},
-		"xavax.*"	 => {ATTR => "model:xavax", FILTER => "%NAME", autocreateThreshold => "3:180", GPLOT => ""},
+		"xavax.*" => {ATTR => "model:xavax", FILTER => "%NAME", autocreateThreshold => "3:180", GPLOT => ""},
+		'BF_301.*' => {ATTR => 'model:BF_301', FILTER => '%NAME', autocreateThreshold => '3:180', GPLOT => q{}},
 		"unknown_please_select_model"	=> {ATTR => "model:unknown", FILTER => "%NAME", autocreateThreshold => "5:180", GPLOT => ""},
 	};
 }
@@ -773,8 +794,8 @@ sub SD_UT_Define($$) {
 	if (($a[2] eq "SA_434_1_mini" || $a[2] eq "QUIGG_DMV" || $a[2] eq "TR_502MSV") && not $a[3] =~ /^[0-9a-fA-F]{3}/s) {
 		return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short or long (must be 3 chars) or not HEX (0-9 | a-f | A-F){3}";
 	}
-	### [4 nibble] checks Neff SF01_01319004 & BOSCH SF01_01319004_Typ2 & Chilitec_22640 & ESTO KL_RF01 & RCnoName20 & xavax ###
-	if (($a[2] eq "SF01_01319004" || $a[2] eq "SF01_01319004_Typ2" || $a[2] eq "Chilitec_22640" || $a[2] eq "KL_RF01" || $a[2] eq "RCnoName20" || $a[2] eq "xavax") && not $a[3] =~ /^[0-9a-fA-F]{4}/s) {
+	### [4 nibble] checks Neff SF01_01319004 & BOSCH SF01_01319004_Typ2 & Chilitec_22640 & ESTO KL_RF01 & RCnoName20 & xavax & BF_301###
+	if (($a[2] eq 'SF01_01319004' || $a[2] eq 'SF01_01319004_Typ2' || $a[2] eq 'Chilitec_22640' || $a[2] eq 'KL_RF01' || $a[2] eq 'RCnoName20' || $a[2] eq 'xavax' || $a[2] eq 'BF_301') && not $a[3] =~ /^[0-9a-fA-F]{4}/xms) {
 		return "Wrong HEX-Value! ($a[3]) $a[2] Hex-value to short or long (must be 4 chars) or not hex (0-9 | a-f | A-F) {4}";
 	}
 	### [6] checks Manax | mumbi ###
@@ -992,6 +1013,12 @@ sub SD_UT_Set($$$@) {
 			$adr =~ tr/01/10/;						# invert adr
 			$msg .= $adr;									# nibble 5-8 is inverted to nibble 0-3
 			$msgEnd = "0P#R" . $repeats;	# one pulse for end marker, pause, repeats
+		############ BF_301 ############
+		} elsif ($model eq 'BF_301') {
+			my $adr = sprintf '%016b' , hex $definition[1]; # argument 1 - adress to binary with 16 bits
+			$msg = $models{$model}{Protocol} . q{#} . $adr;
+			$msg .= '1000'; # channel
+			$msgEnd = '#R' . $repeats;
 		}
 	}
 
@@ -1058,6 +1085,16 @@ sub SD_UT_Set($$$@) {
 				$msg .= $msgEnd;
 				Log3 $name, 5, "$ioname: SD_UT_Set $name msg=$msg checksum=$checksum";
 				readingsSingleUpdate($hash, "bit0" , $bit0, 0);
+			############ BF_301 ############
+			} elsif ($model eq 'BF_301') {
+				$msg .= $save; # command
+				$msg .= '10000011'; # model
+				my @split = split /[#]/xms , $msg;
+				my $sum = oct ('0b'.reverse substr $split[1],0,8) + oct ('0b'.reverse substr $split[1],8,8) + oct ('0b'.reverse substr $split[1],16,8) + oct ('0b'.reverse substr $split[1],24,8);
+				Log3 $name, 5, "$ioname: SD_UT_Set $name bits=$split[1] sum=$sum";
+				$sum = 257 - ($sum & 0xFF);
+				$msg .= reverse sprintf '%08b' , $sum;
+				$msg .= $msgEnd;
 			} else {
 				$msg .= $save.$msgEnd;
 			}
@@ -1397,6 +1434,23 @@ sub SD_UT_Parse($$) {
 			$model = "Momento";
 			$name = "Momento_" . $deviceCode;
 		}
+		if (!$def && $protocol == 105) {
+			### Remote control BF_301 [P105] ###
+			my $sum = oct ('0b'.reverse substr $bitData,0,8) + oct ('0b'.reverse substr $bitData,8,8) + oct ('0b'.reverse substr $bitData,16,8) + oct ('0b'.reverse substr $bitData,24,8) + oct ('0b'.reverse substr $bitData,32,8);
+			if (($sum & 0xFF) != 1) {
+				Log3 $iohash, 3, "$ioname: SD_UT_Parse device BF_301 - ERROR checksum != 1";
+				return q{};
+			}
+			if (substr($rawData,6,2) ne '83') { # 83 = BF-301
+				Log3 $iohash, 3, "$ioname: SD_UT_Parse device BF_301 - ERROR model != 83";
+				return q{};
+			}
+			$deviceCode = substr $rawData,0,4;
+			$devicedef = 'BF_301 ' . $deviceCode;
+			$def = $modules{SD_UT}{defptr}{$devicedef};
+			$model = 'BF_301';
+			$name = 'BF_301_' . $deviceCode;
+		}
 	}
 
 	if ($hlen == 11 && $protocol == 69) {
@@ -1669,6 +1723,10 @@ sub SD_UT_Parse($$) {
 	} elsif ($model eq 'TR60C1' && $protocol == 104) {
 		$state = substr($bitData,4,12);
 		$deviceCode = substr($rawData,0,1);
+	############ BF-301 [P105] ############
+	} elsif ($model eq 'BF_301' && $protocol == 105) {
+		$state = substr $bitData,20,4;
+		$deviceCode = substr $rawData,0,4;
 	############ unknown ############
 	} else {
 		readingsBulkUpdate($hash, "state", "???");
@@ -1957,6 +2015,7 @@ sub SD_UT_tristate2bin($) {
 	<ul>
 		<li>Atlantic Security sensors&nbsp;&nbsp;&nbsp;<small>(module model: MD-2003R, MD-2018R,MD-210R, protocol 91|91.1)</small><br>
 		<code>&nbsp;&nbsp;&nbsp;Note: The model MD_230R (water) is recognized as MD-2018R due to the same hardware ID!</code></li>
+		<li>BF-301 remote control&nbsp;&nbsp;&nbsp;<small>(module model: BF_301, protocol 105)</small></li>
 		<li>BOSCH ceiling fan&nbsp;&nbsp;&nbsp;<small>(module model: SF01_01319004_Typ2, protocol 86)</small></li>
 		<li>CAME swing gate drive&nbsp;&nbsp;&nbsp;<small>(module model: CAME_TOP_432EV, protocol 86)</small></li>
 		<li>ChiliTec LED X-Mas light&nbsp;&nbsp;&nbsp;<small>(module model: Chilitec_22640, protocol 14)</small></li>
@@ -2169,6 +2228,7 @@ sub SD_UT_tristate2bin($) {
 	<ul>
 		<li>Atlantic Security Sensoren&nbsp;&nbsp;&nbsp;<small>(Modulmodel: MD-2003R, MD-2018R,MD-210R, Protokoll 91|91.1)</small><br>
 		<code>&nbsp;&nbsp;&nbsp;Hinweis: Das Model MD_230R (water) wird aufgrund gleicher Hardwarekennung als MD-2018R erkannt!</code></li>
+		<li>BF-301 Fernbedienung&nbsp;&nbsp;&nbsp;<small>(Modulmodel: BF_301, Protokoll 105)</small></li>
 		<li>BOSCH Deckenl&uuml;fter&nbsp;&nbsp;&nbsp;<small>(Modulmodel: SF01_01319004_Typ2, Protokoll 86)</small></li>
 		<li>CAME Drehtor Antrieb&nbsp;&nbsp;&nbsp;<small>(Modulmodel: CAME_TOP_432EV, Protokoll 86)</small></li>
 		<li>ChiliTec LED Christbaumkerzen&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Chilitec_22640, Protokoll 14)</small></li>
