@@ -1,6 +1,6 @@
-# $Id: 00_SIGNALduino.pm v3.4.4 2020-04-07 21:20:33Z Sidey $
+# $Id: 00_SIGNALduino.pm v3.5.0 2020-07-02 21:20:33Z Sidey $
 #
-# v3.5.x - https://github.com/RFD-FHEM/RFFHEM/tree/dev-r35-xFSK
+# v3.5.0 - https://github.com/RFD-FHEM/RFFHEM/tree/master
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incoming messages
 # see http://www.fhemwiki.de/wiki/SIGNALDuino
 # It was modified also to provide support for raw message handling which can be send from the SIGNALduino
@@ -15,7 +15,7 @@
 package main;
 use strict;
 use warnings;
-#use version 0.77; our $VERSION = version->declare('v3.4.4');
+#use version 0.77; our $VERSION = version->declare('v3.5.0');
 
 my $missingModulSIGNALduino="";
 
@@ -38,7 +38,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.5_dev_200702",
+	SDUINO_VERSION            => "v3.5.0",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
