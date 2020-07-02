@@ -38,7 +38,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.5_dev_200612",
+	SDUINO_VERSION            => "v3.5_dev_200702",
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -72,7 +72,7 @@ our %defs;
 
 my %gets = (    # NameOFCommand =>  StyleMod for Fhemweb, SubToCall if get is executed, String to send to uC, sub called with response, regex to verify response,
 	"?"					=>	['', \&SIGNALduino_Get_FhemWebList ],
-	"version"			=>	['noArg', \&SIGNALduino_Get_Command, "V", \&SIGNALduino_CheckVersionResp, 'V\s.*SIGNAL(?:duino|ESP).*(?:\s\d\d:\d\d:\d\d)' ],
+	"version"			=>	['noArg', \&SIGNALduino_Get_Command, "V", \&SIGNALduino_CheckVersionResp, 'V\s.*SIGNAL(?:duino|ESP|STM).*(?:\s\d\d:\d\d:\d\d)' ],
 	"freeram" 			=> 	['noArg', \&SIGNALduino_Get_Command, "R", \&SIGNALduino_GetResponseUpdateReading, '^[0-9]+' ] ,
 	"uptime"   			=> 	['noArg', \&SIGNALduino_Get_Command, "t", \&SIGNALduino_CheckUptimeResponse, '^[0-9]+' ],
 	"cmds"     			=> 	['noArg', \&SIGNALduino_Get_Command, "?", \&SIGNALduino_CheckCmdsResponse, '.*' ],
