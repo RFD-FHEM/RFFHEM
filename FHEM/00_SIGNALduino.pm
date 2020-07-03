@@ -210,7 +210,7 @@ my $clientsSIGNALduino = ":CUL_EM:"
 						."RFXX10REC:"
 						."Revolt:"
 						."SD_AS:"
-						." :"					# Zeilenumbruch						
+						." :"					# Zeilenumbruch
 						."SD_BELL:"
 						."SD_GT:"
 						."SD_Keeloq:"
@@ -221,7 +221,7 @@ my $clientsSIGNALduino = ":CUL_EM:"
 						."SD_WS:"
 						."SD_WS_Maverick:"
 						."SOMFY:"
-						." :"					# Zeilenumbruch						
+						." :"					# Zeilenumbruch
 						."Siro:"
 						."SIGNALduino_un:"
 					;
@@ -302,6 +302,7 @@ sub SIGNALduino_Initialize {
 					  ." minsecs"
 					  ." noMsgVerbose:0,1,2,3,4,5"
 					  ." rawmsgEvent:1,0"
+					  ." rfmode:Kopp_FC,Lacrosse_mode1,Lacrosse_mode2,PCA301,SlowRF"
 					  ." suppressDeviceRawmsg:1,0"
 					  ." updateChannelFW:stable,testing"
 					  ." whitelist_IDs"
@@ -2920,6 +2921,32 @@ sub SIGNALduino_Attr(@) {
 	{
 		return "Note, please use other userReadings names.\nReserved names from $name are: cc1101_config, cc1101_config_ext, cc1101_patable"
 			if ($aVal =~ /cc1101_(?:config(?:_ext)?|patable)(?:\s|{)/);
+	}
+	elsif ($aName eq "rfmode")	# change receive mode
+	{
+		my %modes = (           # xFSK - arrays with changed value
+			'adresse'        => ['00','02','03','04','05','06','07','08','0D','0E','0F','10','11','12','13','14','15','17','18','19','1B','1C','1D','23','25','26','2B'],
+			'Kopp_FC'        => ['01','06','04','AA','54','0F','E0','00','21','65','6A','97','83','16','63','F8','47','0C','29','36','43','40','91','E9','00','11','3E'],
+			'Lacrosse_mode1' => ['01','46','02','2D','D4','FF','00','02','21','65','6A','89','5C','06','22','F8','56','00','18','16','43','68','91','EC','17','11','3E'],
+			'Lacrosse_mode2' => ['01','46','02','2D','D4','FF','00','02','21','65','6A','88','82','06','22','F8','56','00','18','16','43','68','91','EC','16','11','3E'],
+			'PCA301'         => ['01','46','07','2D','D4','FF','00','02','21','6B','D0','88','0B','06','22','F8','53','00','18','16','43','68','91','ED','17','11','3E']
+		);
+
+		my $oldAttrib = AttrVal($name, 'rfmode', 'SlowRF');
+
+		if ($aVal ne $oldAttrib) {
+			$hash->{logMethod}->($name, 3, "$name: Attr, $aName set to $aVal (please check protocollist)");
+			if ($aVal ne 'SlowRF') {
+				for my $i (0...scalar(@{$modes{$aVal}})-1) {
+					$hash->{logMethod}->($name, 5, "$name: Attr, $aName - write adress " . @{$modes{'adresse'}}[$i] . " -> " . @{$modes{$aVal}}[$i]);
+					my $adrOFFset = sprintf("%02X", hex(@{$modes{'adresse'}}[$i]) + 2 );
+					$hash->{logMethod}->($name, 5, "$name: Attr, $aName - offset adress " . $adrOFFset );
+					main::SIGNALduino_AddSendQueue($hash,'W' . $adrOFFset . @{$modes{$aVal}}[$i]);
+				}
+			} else {
+				main::SIGNALduino_AddSendQueue($hash,'e');
+			}
+		}
 	}
  	return ;
 }
