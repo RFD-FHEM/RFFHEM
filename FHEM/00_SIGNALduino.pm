@@ -38,7 +38,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-	SDUINO_VERSION            => "v3.5.0",
+	SDUINO_VERSION            => 'v3.5.0',
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -4240,6 +4240,27 @@ attr sduino longids BTHR918N
 <li>rawmsgEvent<br>
 When set to "1" received raw messages triggers events
 </li><br>
+<a name="rfmode"></a>
+<li>rfmode<br>
+Configures the RF transceiver of the SIGNALduino (CC1101). Available arguments are:
+<ul>
+	<li>KOPP_FC<br>
+	Modulation GFSK, DataRate=4785.5, Sync Word=AA54, Frequency 868.3MHz
+	</li>
+	<li>Lacrosse_mode1<br>
+	Modulation 2-FSK, DataRate=17257.69, Sync Word=2DD4, Frequency 868.3MHz
+	</li>
+	<li>Lacrosse_mode2<br>
+	Modulation 2-FSK, DataRate=9.579, Sync Word=2DD4, Frequency 868.3MHz
+	</li>
+	<li>PCA301<br>
+	Modulation 2-FSK, DataRate=6620.41, Sync Word=2DD4, Frequency 868.950MHz
+	</li>
+	<li>SlowRF<br>
+	Modulation ASK/OOK, <b>default setting</b>
+	</li>
+</ul>
+</li><br>
 <a name="suppressDeviceRawmsg"></a>
 <li>suppressDeviceRawmsg<br>
 When set to 1, the internal "RAWMSG" will not be updated with the received messages
@@ -4680,6 +4701,27 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
 		<a name="rawmsgEvent"></a>
 		<li>rawmsgEvent<br>
 		Bei der Einstellung "1", l&ouml;sen empfangene Rohnachrichten Ereignisse aus.
+		</li><br>
+		<a name="rfmode"></a>
+		<li>rfmode<br>
+		Konfiguriert den RF Transceiver des SIGNALduino (CC1101). Verf&uuml;gbare Argumente sind:
+		<ul>
+			<li>KOPP_FC<br>
+			Modulation GFSK, DataRate=4785.5, Sync Word=AA54, Frequenz 868.3MHz
+			</li>
+			<li>Lacrosse_mode1<br>
+			Modulation 2-FSK, DataRate=17257.69, Sync Word=2DD4, Frequenz 868.3MHz
+			</li>
+			<li>Lacrosse_mode2<br>
+			Modulation 2-FSK, DataRate=9.579, Sync Word=2DD4, Frequenz 868.3MHz
+			</li>
+			<li>PCA301<br>
+			Modulation 2-FSK, DataRate=6620.41, Sync Word=2DD4, Frequenz 868.950MHz
+			</li>
+			<li>SlowRF<br>
+			Modulation ASK/OOK, <b>Standardeinstellung</b>
+			</li>
+		</ul>
 		</li><br>
 		<a name="suppressDeviceRawmsg"></a>
 		<li>suppressDeviceRawmsg<br>
