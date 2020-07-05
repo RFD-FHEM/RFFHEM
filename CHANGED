@@ -1,5 +1,9 @@
 2020-07-05 - Update 00_SIGNALduino.pm
 
+  * fix logoutput
+  * added output for user to see, time expired
+2020-07-05 - Update 00_SIGNALduino.pm
+
   * remove manufacturer specific´s settings for xFSK in own package
 2020-07-04 - Update 00_SIGNALduino.pm
 
