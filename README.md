@@ -1,6 +1,6 @@
-SIGNALduino - FHEM Modules stable Version 3.4.3
+SIGNALduino - FHEM Modules development Version 3.4.4
 
-[![Coverage Status](https://coveralls.io/repos/github/RFD-FHEM/RFFHEM/badge.svg?branch=master)](https://coveralls.io/github/RFD-FHEM/RFFHEM?branch=master) [![Build Status](https://travis-ci.org/RFD-FHEM/RFFHEM.svg?branch=master)](https://travis-ci.org/RFD-FHEM/RFFHEM)
+[![Coverage Status](https://coveralls.io/repos/github/RFD-FHEM/RFFHEM/badge.svg?branch=dev-r34)](https://coveralls.io/github/RFD-FHEM/RFFHEM?branch=dev-r34) [![Build Status](https://travis-ci.org/RFD-FHEM/RFFHEM.svg?branch=dev-r34)](https://travis-ci.org/RFD-FHEM/RFFHEM)
 
 Counterpart of SIGNALDuino uC, it's the code for FHEM to work with the data received from the uC
 
@@ -35,6 +35,7 @@ Supported Devices / Protocols
 |FT0073 | Weather sensors|
 |FreeTec PE-6946 | wireless bell |
 |Froggit FT007T, FT007TP, FT007TH | Thermo-Hygrometer, Thermometer |
+|GEA-028DB | Radio door chime |
 |GEIGER GF0x01, GF0x02, GF0x03 | Remote control (compatible to Tedsen) |
 |Grothe Mistral SE 03.1| wireless gong |
 |GT-9000| Remote control based on protocol GT-9000 with encoding (EASY HOME RCT DS1, Tec Star)|
@@ -51,6 +52,7 @@ Supported Devices / Protocols
 |Medion OR28V | Remote control |
 |Momento | Remote control for wireless digital picture frame |
 |Mumbi m-FS300 | Remote control |
+|Navaris 44344.04 | Touch light switch |
 |NC-3911, NC-3912 | Refrigerator thermometer |
 |Novy 840029, 840039 | Remote control |
 |Opus XT300 | Soil moisture sensor |
@@ -74,6 +76,7 @@ Supported Devices / Protocols
 |Techmar Garden Lights | Remote control |
 |Technoline TX3  | Weather sensor |
 |Tedsen SKX1xx, SKX2xx, SKX4xx, SKX6xx | Remote control |
+|TR60C-1 | Remote control with touch screen |
 |Visivon remote PT4450  | Remote control |
 |VLOXO | wireless bell |
 |WH2 | (TFA 30.3157 nur Temp, Hum = 255 -> nicht angezeigt)|
@@ -87,7 +90,7 @@ How to install
 ======
 The Perl modules can be loaded directly into your FHEM installation:
 
-```update all https://raw.githubusercontent.com/RFD-FHEM/RFFHEM/master/controls_signalduino.txt```
+```update all https://raw.githubusercontent.com/RFD-FHEM/RFFHEM/dev-r34/controls_signalduino.txt```
 
 Prepare your Arduino nano. Look at http://www.fhemwiki.de/wiki/Datei:Fhemduino_schematic.png
 for hardware setup.

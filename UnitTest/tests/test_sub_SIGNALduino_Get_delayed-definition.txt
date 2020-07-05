@@ -35,7 +35,7 @@ defmod test_sub_SIGNALduino_Get_delayed UnitTest dummyDuino
 		ok($targetHash->{ucCmd}->{timenow}<=time(),"check timenow is set");
 
 		if ($InternalTimer->called) {
-			is(($InternalTimer->called_with)[1], "SIGNALduino_Get_delayed", "InternalTimer called with SIGNALduino_Get_delayed" );
+			is(($InternalTimer->called_with)[1], \&SIGNALduino_Get_delayed, "InternalTimer called with SIGNALduino_Get_delayed" );
 			is(($InternalTimer->called_with)[2], "SIGNALduino_Get_delayed:$target:dummy_command", "InternalTimer called with SIGNALduino_Get_delayed" );
 		}
 		$InternalTimer->unmock;
@@ -52,7 +52,7 @@ defmod test_sub_SIGNALduino_Get_delayed UnitTest dummyDuino
 		is($targetHash->{ucCmd}->{timenow},$reftimenow,"check timenow isn't changed");
 
 		if ($InternalTimer->called) {
-			is(($InternalTimer->called_with)[1], "SIGNALduino_Get_delayed", "InternalTimer called with SIGNALduino_Get_delayed" );
+			is(($InternalTimer->called_with)[1], \&SIGNALduino_Get_delayed, "InternalTimer called with SIGNALduino_Get_delayed" );
 			is(($InternalTimer->called_with)[2], "SIGNALduino_Get_delayed:$target:dummy_command", "InternalTimer called with SIGNALduino_Get_delayed" );
 		}
 		$InternalTimer->unmock;

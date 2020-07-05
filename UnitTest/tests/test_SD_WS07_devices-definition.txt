@@ -2,7 +2,8 @@ defmod test_SD_WS07_devices UnitTest dummyDuino (
 {
 	use Test2::V0;
 	use Test2::Tools::Compare qw{is};
-	use JSON; 
+	use JSON;
+
 	## for online testsytem: defmod test_SD_WS07_devices UnitTest dummyDuino ##
 	my $testDataArray; 
 
@@ -11,7 +12,7 @@ defmod test_SD_WS07_devices UnitTest dummyDuino (
 
 		my $sensorname="SD_WS07_TH_1";
 		subtest "Check autocreate $sensorname" => sub {
-			plan tests => 3;
+			plan(3);
 			Dispatch($targetHash,"P7#6300C6F0B");
 			ok(!IsDevice($sensorname), "check sensor not created with single dispatch");
 			sleep 2;
@@ -20,10 +21,10 @@ defmod test_SD_WS07_devices UnitTest dummyDuino (
 			CommandDelete(undef,$sensorname);
 			ok(!IsDevice($sensorname), "check sensor deleted correctly");
 		};
-	
+
 		sleep 2;
 		subtest "Check Dispatch() with existing definition only channel $sensorname" => sub {
-			plan tests => 4 ;
+			plan(4);
 			ok(!IsDevice($sensorname), "check sensor deleted correctly");
 			CommandDefine(undef,"$sensorname SD_WS07 1");
 			ok(IsDevice($sensorname), "check sensor not created with single dispatch");
@@ -34,8 +35,8 @@ defmod test_SD_WS07_devices UnitTest dummyDuino (
 		};
 
 		sleep 2;
-			subtest "Check Dispatch() with existing definition model_channel $sensorname" => sub {
-			plan tests => 4;
+		subtest "Check Dispatch() with existing definition model_channel $sensorname" => sub {
+			plan(4);
 			ok(!IsDevice($sensorname), "check sensor deleted correctly");
 
 			CommandDefine(undef,"$sensorname SD_WS07 SD_WS07_TH_1");
@@ -50,7 +51,7 @@ defmod test_SD_WS07_devices UnitTest dummyDuino (
 		sleep 2;
 		subtest "Check autocreate with longid $sensorname" => sub {
 			CommandAttr(undef,"$target longids 1");
-			plan tests => 4;
+			plan(4);
 
 			Dispatch($targetHash,"P7#6300C6F0B");
 			ok(!IsDevice($sensorname), "check sensor not created with single dispatch");
@@ -92,7 +93,6 @@ defmod test_SD_WS07_devices UnitTest dummyDuino (
 				#diag explain $tData;
 			
 				subtest "Checking module: $testSet->{module} device: $testSet->{name} TestNo: $tID " => sub {
-				
 					if (IsDevice($tData->{internals}{NAME})) {
 						plan(2); # one for readings and one for internals
 						note("device is already defined on system, clearing readings");

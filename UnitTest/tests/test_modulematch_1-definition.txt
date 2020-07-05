@@ -1,5 +1,8 @@
 defmod test_modulematch_1 UnitTest dummyDuino (
  { 
+	use Test2::V0;
+	use Test2::Tools::Compare qw{ is isnt };
+
 	my %ProtocolListTest =  SIGNALduino_LoadProtocolHash("$attr{global}{modpath}/FHEM/lib/test_loadprotohash-ok.pm");
 	is($ProtocolListTest{error},undef,"load test protocol hash ");
 
@@ -18,7 +21,7 @@ defmod test_modulematch_1 UnitTest dummyDuino (
 	
  
 	subtest 'SIGNALduino_moduleMatch scenarios without whitlistIDs and development attr' => sub {
-		plan tests => 4;
+		plan(4);
 		$local_ProtocolListSIGNALduino->{'9999'}{developId}="m";
 		SIGNALduino_IdList("x:$target","","","");
 
@@ -32,7 +35,7 @@ defmod test_modulematch_1 UnitTest dummyDuino (
 	
 	
 	subtest 'SIGNALduino_moduleMatch scenarios with whitlistIDs, whithout development attr' => sub {
-		plan tests => 4;
+		plan(4);
 		SIGNALduino_IdList("x:$target","9999","","");
 
 		is(SIGNALduino_moduleMatch($target,'9999',"X3332222"),1,"check returncode without modulematch");
@@ -47,7 +50,7 @@ defmod test_modulematch_1 UnitTest dummyDuino (
 	};
 	
 	subtest 'SIGNALduino_moduleMatch scenarios without whitlistIDs but development attr' => sub {
-		plan tests => 3;
+		plan(3);
 
 		SIGNALduino_IdList("x:$target","","","m");
 		is(SIGNALduino_moduleMatch($target,'9999',"X3332222"),-1,"check returncode with matching modulematch but wrong development attr");

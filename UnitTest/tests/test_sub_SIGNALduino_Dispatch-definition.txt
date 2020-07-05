@@ -1,5 +1,8 @@
 defmod test_sub_SIGNALduino_Dispatch UnitTest dummyDuino ( 
 { 
+ use Test2::V0;
+ use Test2::Tools::Compare qw{ is };
+
  note("Test can be extended to JSON MU data");
  
  my $mock = Mock::Sub->new; 	

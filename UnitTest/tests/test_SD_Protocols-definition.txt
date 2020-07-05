@@ -3,10 +3,12 @@ defmod test_SD_Protocols UnitTest dummyDuino
  {
 	require_ok('lib::SD_Protocols'); 
 	require lib::SD_Protocols;
+
 	use Test2::V0;
+	use Test2::Tools::Compare qw{ is isnt like };
 
 	subtest 'lib SD_Prococols test sub LoadHash() ' => sub {
-		plan tests => 5;
+		plan(5);
 		my $ret;
 		
 		$ret=lib::SD_Protocols::LoadHash("./dummy.pm");
@@ -19,52 +21,49 @@ defmod test_SD_Protocols UnitTest dummyDuino
 		like($ret->{9999}{name},qr/Unittest/,"valid element hashref");
 
 		is($ret->{error},undef,"valid file error check");
-		
 	};
 	
 	subtest 'lib SD_Prococols test sub new() ' => sub {
-		plan tests => 3;
+		plan(3);
 		isnt(lib::SD_Protocols::new("dummy.pm"),undef," not existing filename provided ");
 		isnt(lib::SD_Protocols::new("$attr{global}{modpath}/FHEM/lib/test_loadprotohash-nok.pm"),undef,"file with syntax error ");
 		is(lib::SD_Protocols::new("$attr{global}{modpath}/FHEM/lib/test_loadprotohash-ok.pm"),undef,"valid file checked ");
 	};
 
-	
 	subtest 'lib SD_Prococols test sub exists() ' => sub {
-		plan tests => 2;
+		plan(2);
 		ok(lib::SD_Protocols::exists(9999),"exists() check existing protocol ");
 		ok(!lib::SD_Protocols::exists(0),"exists() check not existing protocol ");
 	};
-	
+
 	subtest 'lib SD_Prococols test sub getKeys() ' => sub {
-		plan tests => 3;
+		plan(3);
 		cmp_ok( lib::SD_Protocols::getKeys(),'>=',"9",' more than 8 keys returnd' );
 		like(join(",",lib::SD_Protocols::getKeys()), qr/9999/, 'protocol id 9999 is in keys');
 		ok( !grep(/^0$/, lib::SD_Protocols::getKeys()), 'protocol id 0 is not in keys' );
-		
 	};
-	
+
 	subtest 'lib SD_Prococols test sub checkProperty() ' => sub {
-		plan tests => 3;
+		plan(3);
 		is(lib::SD_Protocols::checkProperty(9999,"developId"), 'm', 'check existing property developID');
 		is(lib::SD_Protocols::checkProperty(9999,"clockabs"), undef, 'check missing property clockabs');
 		is(lib::SD_Protocols::checkProperty(9999,"clockabs",200), 200, 'check missing property clockabs with default');
 	};
 
 	subtest 'lib SD_Prococols test sub getProperty() ' => sub {
-		plan tests => 2;
+		plan(2);
 		is(lib::SD_Protocols::getProperty(9999,"developId"), 'm', 'check existing property developID');
 		is(lib::SD_Protocols::getProperty(9999,"clockabs"), undef, 'check missing property clockabs');
 	};
-	
+
 	subtest 'lib SD_Prococols test sub setDefaults() ' => sub {
-		plan tests => 2;
+		plan(2);
 		is_deeply(lib::SD_Protocols::getProperty(9990,"method"), \&lib::SD_Protocols::MCRAW, 'check if default for method is applied ');
 		is(defined(&{lib::SD_Protocols::getProperty(9989,"method")}), '', 'check if default does not override existing method ');
 	};
-	
+
 	subtest 'lib SD_Prococols test sub MCRAW() ' => sub {
-		plan tests => 2;
+		plan(2);
 		TODO: {
 		local $TODO = "Syntax fix needed";
 		}
