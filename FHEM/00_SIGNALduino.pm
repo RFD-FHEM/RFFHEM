@@ -600,6 +600,7 @@ sub SIGNALduino_PrepareFlash {
 sub SIGNALduino_RemoveLaCrossePair {
   my $hash = shift;
   delete($hash->{LaCrossePair});
+  $hash->{logMethod}->($hash->{NAME}, 4, "$hash->{NAME}: Set_LaCrossePairForSec, time expired, LaCrosse autocreate deactivate");
 }
 
 ############################# package main, test exists
@@ -885,7 +886,7 @@ sub SIGNALduino_Set_LaCrossePairForSec {
 	my ($hash, @a) = @_;
 
 	#              set NAME                a[0]              a[1]             a[2]
-	return "Usage: set $hash->{NAME} $a[0] <seconds_active> [ignore_battery " if(!$a[0] || $a[1] !~ m/^\d+$/ || ($a[2] && $a[2] ne "ignore_battery") );
+	return "Usage: set $hash->{NAME} $a[0] <seconds_active> [ignore_battery]" if(!$a[0] || $a[1] !~ m/^\d+$/ || ($a[2] && $a[2] ne "ignore_battery") );
 	$hash->{LaCrossePair} = 1;  # LaCrosse autoCreateState: 0 = autoreate not defined | 1 = autocreate defined | 2 = autocreate active
 	$hash->{logMethod}->($hash->{NAME}, 4, "$hash->{NAME}: Set_LaCrossePairForSec, LaCrosse autocreate active for $a[1] seconds");
 	InternalTimer(gettimeofday()+$a[1], "SIGNALduino_RemoveLaCrossePair", $hash, 0);
