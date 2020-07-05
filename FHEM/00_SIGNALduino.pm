@@ -1,4 +1,4 @@
-# $Id: 00_SIGNALduino.pm v3.5.0 2020-07-02 21:20:33Z Sidey $
+# $Id: 00_SIGNALduino.pm v3.5.0 2020-07-05 21:20:33Z Sidey $
 #
 # v3.5.0 - https://github.com/RFD-FHEM/RFFHEM/tree/master
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incoming messages
@@ -2924,31 +2924,24 @@ sub SIGNALduino_Attr(@) {
 	}
 	elsif ($aName eq "rfmode")	# change receive mode
 	{
-		my %modes = (           # xFSK - arrays with changed value
-			'adresse'        => ['00','02','03','04','05','06','07','08','0D','0E','0F','10','11','12','13','14','15','17','18','19','1B','1C','1D','23','25','26','2B'],
-			'Kopp_FC'        => ['01','06','04','AA','54','0F','E0','00','21','65','6A','97','83','16','63','F8','47','0C','29','36','43','40','91','E9','00','11','3E'],
-			'Lacrosse_mode1' => ['01','46','02','2D','D4','FF','00','02','21','65','6A','89','5C','06','22','F8','56','00','18','16','43','68','91','EC','17','11','3E'],
-			'Lacrosse_mode2' => ['01','46','02','2D','D4','FF','00','02','21','65','6A','88','82','06','22','F8','56','00','18','16','43','68','91','EC','16','11','3E'],
-			'PCA301'         => ['01','46','07','2D','D4','FF','00','02','21','6B','D0','88','0B','06','22','F8','53','00','18','16','43','68','91','ED','17','11','3E']
-		);
-
 		my $oldAttrib = AttrVal($name, 'rfmode', 'SlowRF');
 
 		if ($aVal ne $oldAttrib) {
 			$hash->{logMethod}->($name, 3, "$name: Attr, $aName set to $aVal (please check protocollist)");
 			if ($aVal ne 'SlowRF') {
-				for my $i (0...scalar(@{$modes{$aVal}})-1) {
-					$hash->{logMethod}->($name, 5, "$name: Attr, $aName - write adress " . @{$modes{'adresse'}}[$i] . " -> " . @{$modes{$aVal}}[$i]);
-					my $adrOFFset = sprintf("%02X", hex(@{$modes{'adresse'}}[$i]) + 2 );
+				my ($manu, $adr) = cc1101_manspecific::Register($aVal);         # return array with cc1101 manufacturer specific´s register settings
+				for my $i (0...scalar(@{$manu})-1) {
+					$hash->{logMethod}->($name, 5, "$name: Attr, $aName - write adress " . @{$adr}[$i] . " -> " . @{$manu}[$i]);
+					my $adrOFFset = sprintf("%02X", hex(@{$adr}[$i]) + 2 );
 					$hash->{logMethod}->($name, 5, "$name: Attr, $aName - offset adress " . $adrOFFset );
-					main::SIGNALduino_AddSendQueue($hash,'W' . $adrOFFset . @{$modes{$aVal}}[$i]);
+					main::SIGNALduino_AddSendQueue($hash,'W' . $adrOFFset . @{$manu}[$i]);
 				}
 			} else {
 				main::SIGNALduino_AddSendQueue($hash,'e');
 			}
 		}
 	}
- 	return ;
+	return ;
 }
 
 ############################# package main
@@ -3854,8 +3847,26 @@ sub SetSens {
 }
 
 
+############################################################################
+########## Section & cc1101 settings for manufacturer specific´s  ##########
+package cc1101_manspecific;
 
-################################################################################################																																							
+sub Register {
+	my ($aVal) = @_;
+
+	my %modes = (
+		# adress to write from cc1101 register
+		'address'        => ['00','02','03','04','05','06','07','08','0D','0E','0F','10','11','12','13','14','15','17','18','19','1B','1C','1D','23','25','26','2B'],
+		# manufacturer specific´s register values
+		'Kopp_FC'        => ['01','06','04','AA','54','0F','E0','00','21','65','6A','97','83','16','63','F8','47','0C','29','36','43','40','91','E9','00','11','3E'],
+		'Lacrosse_mode1' => ['01','46','02','2D','D4','FF','00','02','21','65','6A','89','5C','06','22','F8','56','00','18','16','43','68','91','EC','17','11','3E'],
+		'Lacrosse_mode2' => ['01','46','02','2D','D4','FF','00','02','21','65','6A','88','82','06','22','F8','56','00','18','16','43','68','91','EC','16','11','3E'],
+		'PCA301'         => ['01','46','07','2D','D4','FF','00','02','21','6B','D0','88','0B','06','22','F8','53','00','18','16','43','68','91','ED','17','11','3E']
+	);
+	return ($modes{$aVal}, $modes{'address'});
+}
+
+################################################################################################
 1;
 
 =pod
