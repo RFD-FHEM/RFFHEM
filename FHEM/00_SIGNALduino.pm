@@ -38,7 +38,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-	SDUINO_VERSION            => 'v3.5.0',
+	SDUINO_VERSION            => '3.5.0',
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -302,7 +302,7 @@ sub SIGNALduino_Initialize {
 					  ." minsecs"
 					  ." noMsgVerbose:0,1,2,3,4,5"
 					  ." rawmsgEvent:1,0"
-					  ." rfmode:Kopp_FC,Lacrosse_mode1,Lacrosse_mode2,PCA301,SlowRF"
+					  ." rfmode:Kopp_FC,Lacrosse_mode1,Lacrosse_mode2,Lacrosse_mode4,PCA301,SlowRF"
 					  ." suppressDeviceRawmsg:1,0"
 					  ." updateChannelFW:stable,testing"
 					  ." whitelist_IDs"
@@ -3862,6 +3862,7 @@ sub Register {
 		'Kopp_FC'        => ['01','06','04','AA','54','0F','E0','00','21','65','6A','97','83','16','63','F8','47','0C','29','36','43','40','91','E9','00','11','3E'],
 		'Lacrosse_mode1' => ['01','46','02','2D','D4','FF','00','02','21','65','6A','89','5C','06','22','F8','56','00','18','16','43','68','91','EC','17','11','3E'],
 		'Lacrosse_mode2' => ['01','46','02','2D','D4','FF','00','02','21','65','6A','88','82','06','22','F8','56','00','18','16','43','68','91','EC','16','11','3E'],
+		'Lacrosse_mode4' => ['01','46','02','2D','D4','FF','00','02','21','65','6A','8C','65','06','22','F8','56','00','18','16','43','68','91','EC','16','11','3E'],
 		'PCA301'         => ['01','46','07','2D','D4','FF','00','02','21','6B','D0','88','0B','06','22','F8','53','00','18','16','43','68','91','ED','17','11','3E']
 	);
 	return ($modes{$aVal}, $modes{'address'});
@@ -4257,16 +4258,22 @@ When set to "1" received raw messages triggers events
 Configures the RF transceiver of the SIGNALduino (CC1101). Available arguments are:
 <ul>
 	<li>KOPP_FC<br>
-	Modulation GFSK, DataRate=4785.5, Sync Word=AA54, Frequency 868.3MHz
+	Modulation GFSK, DataRate=4.7855 kbps, Sync Word=AA54, Frequency 868.3MHz
 	</li>
 	<li>Lacrosse_mode1<br>
-	Modulation 2-FSK, DataRate=17257.69, Sync Word=2DD4, Frequency 868.3MHz
+	Modulation 2-FSK, DataRate=17.25769 kbps, Sync Word=2DD4, Frequency 868.3MHz<br>
+	<ul><small>example: TX25-IT, TX27-IT, TX29-IT, TX29DTH-IT, TX37, 30.3143.IT, 30.3144.IT</small></ul>
 	</li>
 	<li>Lacrosse_mode2<br>
-	Modulation 2-FSK, DataRate=9.579, Sync Word=2DD4, Frequency 868.3MHz
+	Modulation 2-FSK, DataRate=9.579 kbps, Sync Word=2DD4, Frequency 868.3MHz<br>
+	<ul><small>example: TX35TH-IT, TX35DTH-IT, TX38-IT, 30.3155WD, 30.3156WD</small></ul>
+	</li>
+	<li>Lacrosse_mode4<br>
+	Modulation 2-FSK, DataRate=8.842 kbps, Sync Word=2DD4, Frequency 868.3MHz<br>
+	<ul><small>example: TX22 (WS 1600)</small></ul>
 	</li>
 	<li>PCA301<br>
-	Modulation 2-FSK, DataRate=6620.41, Sync Word=2DD4, Frequency 868.950MHz
+	Modulation 2-FSK, DataRate=6.62041 kbps, Sync Word=2DD4, Frequency 868.950MHz
 	</li>
 	<li>SlowRF<br>
 	Modulation ASK/OOK, <b>default setting</b>
@@ -4719,19 +4726,25 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
 		Konfiguriert den RF Transceiver des SIGNALduino (CC1101). Verf&uuml;gbare Argumente sind:
 		<ul>
 			<li>KOPP_FC<br>
-			Modulation GFSK, DataRate=4785.5, Sync Word=AA54, Frequenz 868.3MHz
+			Modulation GFSK, DataRate=4.7855 kbps, Sync Word=AA54, Frequency 868.3MHz
 			</li>
 			<li>Lacrosse_mode1<br>
-			Modulation 2-FSK, DataRate=17257.69, Sync Word=2DD4, Frequenz 868.3MHz
+			Modulation 2-FSK, DataRate=17.25769 kbps, Sync Word=2DD4, Frequency 868.3MHz<br>
+			<ul><small>Beispiel: TX25-IT, TX27-IT, TX29-IT, TX29DTH-IT, TX37, 30.3143.IT, 30.3144.IT</small></ul>
 			</li>
 			<li>Lacrosse_mode2<br>
-			Modulation 2-FSK, DataRate=9.579, Sync Word=2DD4, Frequenz 868.3MHz
+			Modulation 2-FSK, DataRate=9.579 kbps, Sync Word=2DD4, Frequency 868.3MHz<br>
+			<ul><small>Beispiel: TX35TH-IT, TX35DTH-IT, TX38-IT, 30.3155WD, 30.3156WD</small></ul>
+			</li>
+			<li>Lacrosse_mode4<br>
+			Modulation 2-FSK, DataRate=8.842 kbps, Sync Word=2DD4, Frequency 868.3MHz<br>
+			<ul><small>Beispiel: TX22 (WS 1600)</small></ul>
 			</li>
 			<li>PCA301<br>
-			Modulation 2-FSK, DataRate=6620.41, Sync Word=2DD4, Frequenz 868.950MHz
+			Modulation 2-FSK, DataRate=6.62041 kbps, Sync Word=2DD4, Frequency 868.950MHz
 			</li>
 			<li>SlowRF<br>
-			Modulation ASK/OOK, <b>Standardeinstellung</b>
+			Modulation ASK/OOK, <b>default setting</b>
 			</li>
 		</ul>
 		</li><br>
