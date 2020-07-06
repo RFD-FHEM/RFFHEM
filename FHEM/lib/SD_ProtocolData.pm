@@ -62,8 +62,10 @@
 # xFSK - Information
 # datarate         => ' '       # transmission speed signal
 # modulation       => ' '       # modulation type of the signal
-# sync             => ' '       # sync parameter of signal in hex (example, 2DD4)
 # regexMatch       => ' '       # Regex objct which must match on the raw message qr//
+# register         => ' '       # specifics cc1101 settings [$adr$value]
+# rfmode           => ' '       # mode
+# sync             => ' '       # sync parameter of signal in hex (example, 2DD4)
 #
 ##### notice #### or #### info ############################################################################################################
 # !!! Between the keys and values ​​no tabs, please use spaces !!!
@@ -83,7 +85,7 @@ package lib::SD_ProtocolData;
 	use strict;
 	use warnings;
 	
-	our $VERSION = '1.20';
+	our $VERSION = '1.21';
 
 	our %protocols = (
 		"0"	=>	## various weather sensors (500 | 9100)
@@ -2686,6 +2688,8 @@ package lib::SD_ProtocolData;
 				datarate        => '17257.69',
 				sync            => '2DD4',
 				modulation      => '2-FSK',
+				rfmode          => 'Lacrosse_mode1',
+				register        => ['0001','0246','0302','042D','05D4','06FF','0700','0802','0D21','0E65','0F6A','1089','115C','1206','1322','14F8','1556','1700','1818','1916','1B43','1C68','1D91','23EC','2517','2611','2B3E'],
 				regexMatch      => qr/^9/,   # ToDo, check! fuer eine regexp Pruefung am Anfang vor dem method Aufruf
 				clientmodule    => 'LaCrosse',
 				method          => \&lib::SD_Protocols::ConvLaCrosse,
@@ -2701,6 +2705,8 @@ package lib::SD_ProtocolData;
 				datarate        => '6620.41',
 				sync            => '2DD4',
 				modulation      => '2-FSK',
+				rfmode          => 'PCA301',
+				register        => ['0001','0246','0307','042D','05D4','06FF','0700','0802','0D21','0E6B','0FD0','1088','110B','1206','1322','14F8','1553','1700','1818','1916','1B43','1C68','1D91','23ED','2517','2611','2B3E'],
 				clientmodule    => 'PCA301',
 				dispatchequals  => 'true',
 				length_min      => '24',
@@ -2717,6 +2723,8 @@ package lib::SD_ProtocolData;
 				datarate        => '4785.5',
 				sync            => 'AA54',
 				modulation      => 'GFSK',
+				rfmode          => 'Kopp_FC',
+				register        => ['0001','0206','0304','04AA','0554','060F','07E0','0800','0D21','0E65','0F6A','1097','1183','1216','1363','14F8','1547','170C','1829','1936','1B43','1C40','1D91','23E9','2500','2611','2B3E'],
 				regexMatch      => qr/^0/,   # ToDo, check! fuer eine regexp Pruefung am Anfang vor dem method Aufruf
 				clientmodule    => 'KOPP_FC',
 				method          => \&lib::SD_Protocols::ConvKoppFreeControl,
@@ -2734,6 +2742,8 @@ package lib::SD_ProtocolData;
 				datarate        => '9.579',
 				sync            => '2DD4',
 				modulation      => '2-FSK',
+				rfmode          => 'Lacrosse_mode2',
+				register        => ['0001','0246','0302','042D','05D4','06FF','0700','0802','0D21','0E65','0F6A','1088','1182','1206','1322','14F8','1556','1700','1818','1916','1B43','1C68','1D91','23EC','2516','2611','2B3E'],
 				regexMatch      => qr/^9/,   # ToDo, check! fuer eine regexp Pruefung am Anfang vor dem method Aufruf
 				clientmodule    => 'LaCrosse',
 				method          => \&lib::SD_Protocols::ConvLaCrosse,
