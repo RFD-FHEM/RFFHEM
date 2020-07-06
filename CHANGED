@@ -1,3 +1,10 @@
+2020-07-06 - transport manufacturer specific´s settings to SD_ProtocolData.pm
+
+00_SIGNALduino.pm
+  * revised rfmode change
+  * remove manufacturer specific´s to SD_ProtocolData.pm
+SD_ProtocolData.pm
+  * added rfmode & register rubric
 2020-07-05 - Update 00_SIGNALduino.pm
 
   * revised commandref
