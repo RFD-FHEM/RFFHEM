@@ -2946,8 +2946,8 @@ sub SIGNALduino_Attr(@) {
 								my $argcmd = sprintf("W%02X%s",hex(substr(@{$register}[$i],0,2)) + 2,substr(@{$register}[$i],2,2));
 								main::SIGNALduino_AddSendQueue($hash,$argcmd);
 							}
-							main::SIGNALduino_WriteInit($hash);
-							# Todo: from AOK/OOK -> xFSK need Reset | xFSK -> AOK/OOK no Reset ?? Strobe Commands ??
+							main::SIGNALduino_WriteInit($hash);  # Todo: from AOK/OOK -> xFSK need Reset | xFSK -> AOK/OOK no Reset ?? Strobe Commands ??
+							last;                                # found $rfmode, exit loop
 						}
 					}
 				}
