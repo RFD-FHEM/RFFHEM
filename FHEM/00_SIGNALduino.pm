@@ -2927,7 +2927,7 @@ sub SIGNALduino_Attr(@) {
 	{
 		my $oldAttrib = AttrVal($name, 'rfmode', 'SlowRF');
 
-		if ( ($aVal ne $oldAttrib) && ($hash->{DevState} = 'initialized') && (InternalVal($hash->{NAME},"cc1101_available",0) == 1) ) {
+		if ( ($aVal ne $oldAttrib) && ($hash->{DevState} eq 'initialized') && (InternalVal($hash->{NAME},"cc1101_available",0) == 1) ) {
 			$hash->{logMethod}->($name, 3, "$name: Attr, $aName set to $aVal (please check protocollist)");
 
 			if ($aVal ne 'SlowRF') {

@@ -64,7 +64,7 @@
 # modulation       => ' '       # modulation type of the signal
 # regexMatch       => ' '       # Regex objct which must match on the raw message qr//
 # register         => ' '       # specifics cc1101 settings [$adr$value]
-# rfmode           => ' '       # mode
+# rfmode           => ' '       # receive mode, default SlowRF -> ASK/OOK
 # sync             => ' '       # sync parameter of signal in hex (example, 2DD4)
 #
 ##### notice #### or #### info ############################################################################################################
