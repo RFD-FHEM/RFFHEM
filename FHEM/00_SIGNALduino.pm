@@ -1,4 +1,4 @@
-# $Id: 00_SIGNALduino.pm v3.5.0 2020-07-06 21:20:33Z Sidey $
+# $Id: 00_SIGNALduino.pm v3.5.0 2020-07-08 21:20:33Z Sidey $
 #
 # v3.5.0 - https://github.com/RFD-FHEM/RFFHEM/tree/master
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incoming messages
@@ -885,8 +885,8 @@ sub SIGNALduino_Set_bWidth {
 sub SIGNALduino_Set_LaCrossePairForSec {
 	my ($hash, @a) = @_;
 
-	#              set NAME                a[0]              a[1]             a[2]
-	return "Usage: set $hash->{NAME} $a[0] <seconds_active> [ignore_battery]" if(!$a[0] || $a[1] !~ m/^\d+$/ || ($a[2] && $a[2] ne "ignore_battery") );
+	#              set NAME           a[0]      a[1]             a[2]
+	return "Usage: set $hash->{NAME} $a[0] <seconds_active> [ignore_battery]" if(!$a[0] || $a[1] !~ m/^\d+$/xms || (defined $a[2] && $a[2] ne "ignore_battery") );
 	$hash->{LaCrossePair} = 2;  # LaCrosse autoCreateState: 0 = autoreate not defined | 1 = autocreate defined | 2 = autocreate active
 	$hash->{logMethod}->($hash->{NAME}, 4, "$hash->{NAME}: Set_LaCrossePairForSec, LaCrosse autocreate active for $a[1] seconds");
 	InternalTimer(gettimeofday()+$a[1], "SIGNALduino_RemoveLaCrossePair", $hash, 0);
@@ -2931,6 +2931,7 @@ sub SIGNALduino_Attr(@) {
 			$hash->{logMethod}->($name, 3, "$name: Attr, $aName set to $aVal (please check protocollist)");
 
 			if ($aVal ne 'SlowRF') {
+				MNIDLIST:
 				for my $id (@{$hash->{mnIdList}}) {
 					my $rfmode=$hash->{protocolObject}->checkProperty($id,'rfmode',-1);
 
@@ -2946,8 +2947,8 @@ sub SIGNALduino_Attr(@) {
 								my $argcmd = sprintf("W%02X%s",hex(substr(@{$register}[$i],0,2)) + 2,substr(@{$register}[$i],2,2));
 								main::SIGNALduino_AddSendQueue($hash,$argcmd);
 							}
-							main::SIGNALduino_WriteInit($hash);  # Todo: from AOK/OOK -> xFSK need Reset | xFSK -> AOK/OOK no Reset ?? Strobe Commands ??
-							last;                                # found $rfmode, exit loop
+							main::SIGNALduino_WriteInit($hash);
+							last MNIDLIST;	# found $rfmode, exit loop
 						}
 					}
 				}
