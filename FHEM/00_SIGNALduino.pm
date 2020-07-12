@@ -1159,7 +1159,7 @@ sub SIGNALduino_CheckSendRawResponse {
 	my $hash = shift;
 	my $msg = shift;
 
-	if ($msg =~ /^S[RCM];/ )
+	if ($msg =~ /^S[RCMN];/ )
 	{
 		my $name=$hash->{NAME};
 
@@ -1504,7 +1504,7 @@ sub SIGNALduino_SendFromQueue {
     #DevIo_SimpleWrite($hash, $msg . "\n", 2);
     $hash->{sendworking} = 1;
     SIGNALduino_SimpleWrite($hash,$msg);
-    if ($msg =~ m/^S[RCM];/) {
+    if ($msg =~ m/^S[RCMN];/) {
       	$hash->{ucCmd}->{cmd} = 'sendraw';
        	$hash->{ucCmd}->{timenow} = time();
        	$hash->{ucCmd}->{responseSub} = \&SIGNALduino_CheckSendRawResponse;
