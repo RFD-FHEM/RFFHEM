@@ -1,3 +1,6 @@
+2020-07-12 - Update 00_SIGNALduino.pm
+
+  * added N to send SN  xFSK sendCommand
 2020-07-08 - Update 00_SIGNALduino.pm
 
   * added LABEL for loop - https://github.com/RFD-FHEM/RFFHEM/pull/866#discussion_r451150288
