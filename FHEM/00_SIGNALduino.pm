@@ -4271,6 +4271,10 @@ Configures the RF transceiver of the SIGNALduino (CC1101). Available arguments a
 	<li>PCA301<br>
 	Modulation 2-FSK, DataRate=6.62041 kbps, Sync Word=2DD4, Frequency 868.950MHz
 	</li>
+	<li>RIO<br>
+	Modulation GFSK, DataRate=24.796 kbps, Frequency 868.302MHz, Bandwidth = 58.036 kHz<br>
+	<ul><small>example: HS-8</small></ul>
+	</li>
 	<li>SlowRF<br>
 	Modulation ASK/OOK, <b>default setting</b>
 	</li>
@@ -4722,22 +4726,26 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
 		Konfiguriert den RF Transceiver des SIGNALduino (CC1101). Verf&uuml;gbare Argumente sind:
 		<ul>
 			<li>KOPP_FC<br>
-			Modulation GFSK, DataRate=4.7855 kbps, Sync Word=AA54, Frequency 868.3MHz
+			Modulation GFSK, Datenrate=4.7855 kbps, Sync Word=AA54, Frequenz 868.3MHz
 			</li>
 			<li>Lacrosse_mode1<br>
-			Modulation 2-FSK, DataRate=17.25769 kbps, Sync Word=2DD4, Frequency 868.3MHz<br>
+			Modulation 2-FSK, Datenrate=17.25769 kbps, Sync Word=2DD4, Frequenz 868.3MHz<br>
 			<ul><small>Beispiel: TX25-IT, TX27-IT, TX29-IT, TX29DTH-IT, TX37, 30.3143.IT, 30.3144.IT</small></ul>
 			</li>
 			<li>Lacrosse_mode2<br>
-			Modulation 2-FSK, DataRate=9.579 kbps, Sync Word=2DD4, Frequency 868.3MHz<br>
+			Modulation 2-FSK, Datenrate=9.579 kbps, Sync Word=2DD4, Frequenz 868.3MHz<br>
 			<ul><small>Beispiel: TX35TH-IT, TX35DTH-IT, TX38-IT, 30.3155WD, 30.3156WD</small></ul>
 			</li>
 			<li>Lacrosse_mode4<br>
-			Modulation 2-FSK, DataRate=8.842 kbps, Sync Word=2DD4, Frequency 868.3MHz<br>
+			Modulation 2-FSK, Datenrate=8.842 kbps, Sync Word=2DD4, Frequenz 868.3MHz<br>
 			<ul><small>Beispiel: TX22 (WS 1600)</small></ul>
 			</li>
 			<li>PCA301<br>
-			Modulation 2-FSK, DataRate=6.62041 kbps, Sync Word=2DD4, Frequency 868.950MHz
+			Modulation 2-FSK, Datenrate=6.62041 kbps, Sync Word=2DD4, Frequenz 868.950MHz
+			</li>
+			<li>RIO<br>
+			Modulation GFSK, Datenrate=24.796 kbps, Frequenz 868.302MHz, Bandbreite=58.036 kHz<br>
+			<ul><small>Beispiel: HS-8</small></ul>
 			</li>
 			<li>SlowRF<br>
 			Modulation ASK/OOK, <b>default setting</b>
