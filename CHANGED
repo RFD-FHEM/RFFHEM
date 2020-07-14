@@ -1,18 +1,11 @@
 2020-07-14 - Merge branch 'dev-r35_xFSK' into dev-r35_xFSK_TEST
-2020-07-14 - dev-r35_xFSK - eventlogging logoutput (#867)
 
-Update 00_SIGNALduino.pm
-  * fix logoutput on eventlogging
 2020-07-14 - Update 00_SIGNALduino.pm
-
+  * fix some perlcritic (#868) warnings
   * fix logoutput on eventlogging
-2020-07-14 - Update 00_SIGNALduino.pm
-
   * added new attrib & set cmd for users one default register (if not SlowRF, uC goes to default)
   * revised commandref
-2020-07-14 - Merge branch 'dev-r35_xFSK' into dev-r35_xFSK_TEST
-2020-07-14 - Update 00_SIGNALduino.pm
-* remove old lines after "merge into"
+  * remove old lines after "merge into"
 
 2020-07-14 - Merge branch 'dev-r34' into dev-r35_xFSK
 
