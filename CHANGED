@@ -1,50 +1,46 @@
-2020-07-13 - commandref & information
+2020-07-14 - Update 00_SIGNALduino.pm
+* remove old lines after "merge into"
 
+2020-07-14 - Merge branch 'dev-r34' into dev-r35_xFSK
+
+2020-07-13 - commandref & information
 00_SIGNALduino.pm
+  * RETURN added
   * revised commandref & translate words
 SD_ProtocolData.pm
   * added some register information
-2020-07-13 - Update 00_SIGNALduino.pm
 
-** RETURN added
 2020-07-12 - Update 00_SIGNALduino.pm
-
   * added N to send SN  xFSK sendCommand
-2020-07-08 - Update 00_SIGNALduino.pm
 
+2020-07-08 - Update 00_SIGNALduino.pm
   * added LABEL for loop - https://github.com/RFD-FHEM/RFFHEM/pull/866#discussion_r451150288
   * revised query & comment https://github.com/RFD-FHEM/RFFHEM/pull/866#pullrequestreview-444258042
-2020-07-06 - revised code
 
+2020-07-06 - revised code
 00_SIGNALduino.pm
   * wrong syntax fixed
-SD_ProtocolData.pm
-  * added comment with default note
-2020-07-06 - Merge branch 'dev-r35_xFSK_TEST' of https://github.com/HomeAutoUser/RFFHEM into dev-r35_xFSK_TEST
-2020-07-06 - transport manufacturer specific´s settings to SD_ProtocolData.pm
-
-00_SIGNALduino.pm
   * revised rfmode change
   * remove manufacturer specific´s to SD_ProtocolData.pm
 SD_ProtocolData.pm
+  * added comment with default note
   * added rfmode & register rubric
-2020-07-05 - Update 00_SIGNALduino.pm
 
-  * revised commandref
-2020-07-05 - Merge branch 'dev-r35_xFSK_TEST' of https://github.com/HomeAutoUser/RFFHEM into dev-r35_xFSK_TEST
 2020-07-05 - Update 00_SIGNALduino.pm
-
   * fix logoutput
   * added output for user to see, time expired
-2020-07-05 - Update 00_SIGNALduino.pm
+  * revised commandref
 
-  * remove manufacturer specific´s settings for xFSK in own package
-2020-07-04 - Update 00_SIGNALduino.pm
-
+2020-07-04 - Fix some perlcritic 5 warnings in 3.4 (#863)
+* 00_SIGNALduino.pm
+  * Fix some perlcritic 5 warnings
   * added commandref for attrib rfmode
-2020-07-03 - Update 00_SIGNALduino.pm
 
+2020-07-03 - Update 00_SIGNALduino.pm
   * added new attrib rfmode to changed to xFSK
+
+2020-07-03 - Merge remote-tracking branch 'remotes/origin/dev-r34' into dev-r34-perlcritic5
+
 2020-07-02 - Merge branch 'master' into dev-r35_xFSK
 2020-07-02 - Release 3.5.0
 
@@ -75,16 +71,46 @@ SD_ProtocolData.pm:
  Change: Multiple query "$ attrName eq 'model'" removed
  Change:  change commandref
 
-
 14_SD_UT: 
   Bugfix:14_SD_UT.pm - If the device is created manually with IODev, then DEF is wrong. (#857)
 
 10_SD_GT:
   Change: revised for perlcritic (#847)
 
+2020-06-15 - 10_FS10 revised for perlcritic (#860)
 
-2020-04-13 - Update to svn revision number
+2020-05-28 - Dev r34 - id56 - #848 (#849)
+  Update SD_ProtocolData.pm - ID 56 fix def & added doc https://github.com/RFD-FHEM/RFFHEM/issues/848
 
+2020-05-26 - 10_SD_GT revised for perlcritic (#847)
+
+2020-05-25 - add attribute UTfrequency in 14_SD_UT.pm (#845)
+  new attribute UTfrequency for individual transmission frequency
+  Multiple query "$ attrName eq 'model'" removed
+  change commandref
+  replace "foreach my $keys (keys %models)" with "if ( exists $models{$attrValue}" in line 1756
+  replace "foreach my $keys (sort keys %{$models{RC_10}{buttons}})" with "if ( exists $models{RC_10}{buttons}{$button} )" in line 1845
+  replace "foreach my $keys (keys %models)" with "grep { $models{$_}{hex_lengh} =~ /$hex_lengh/ } keys %models;" in line 1745
+  delete "$attr{$name}{room} = "SD_UT"	if( not defined( $attr{$name}{room} ) );"
+  change search for models with same hex_length
+  Reference to autocreate added
+  rename  hex_lengh in hex_length
+  Check values attribute UTfrequency added
+  Documentation for UTfrequency attribute added
+
+2020-05-02 - new protocol 104 for remote control TR60C-1 (#844)
+2020-04-23 - 00_SIGNALduino.pm Fix some perlcritic 5
+2020-04-22 - 00_SIGNALduino.pm - some operator fixes #835
+2020-04-21 - new protocol 99 NAVARIS touch light switch (#841)
+2020-04-21 - new protocol 98 for wireless door bell GEA-028DB (#839)
+
+2020-04-14 - 00_SIGNALduino.pm
+  Changed stringrefs to coderefs
+
+2020-04-13 - Bump dev-r34 to v3.4.4
+2020-04-13 - Merge remote-tracking branch 'remotes/origin/dev-r34' into v3.4.3
+
+13.04.2020
   00_SIGNALduino.pm
    Workaround for bug #823, sending muliple commands causes collison
    2020-04-10 - Attribute IODev deleted in different modules (#822)
