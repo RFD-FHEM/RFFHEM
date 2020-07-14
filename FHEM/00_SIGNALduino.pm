@@ -3443,7 +3443,16 @@ sub SIGNALduino_Log3 {
   my $name =$dev;
   $name= $dev->{NAME} if(defined($dev) && ref($dev) eq "HASH");
 
-  DoTrigger($dev,"$name $loglevel: $text");
+  #DoTrigger($dev,"$name $loglevel: $text");
+  #2020-07-14_12:47:01 sduino_USB_SB_Test sduino_USB_SB_Test 4: sduino_USB_SB_Test: HandleWriteQueue, called
+
+  if ($text =~ /$dev/) {
+		$text =~ s/$dev//g;
+		$text =~ s/^: //g;
+	}
+
+  DoTrigger($dev,"$loglevel: $text");
+  #2020-07-14_14:15:19 sduino_USB_SB_Test 4: HandleWriteQueue, called
   return Log3($name,$loglevel,$text);
 }
 
