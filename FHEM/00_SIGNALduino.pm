@@ -23,12 +23,12 @@ use DevIo;
 use Carp;
 no warnings 'portable';
 
-eval "use Data::Dumper qw(Dumper);1";
-eval "use Digest::CRC;1" or $missingModulSIGNALduino .= "Digest::CRC ";
-eval "use JSON;1" or $missingModulSIGNALduino .= "JSON ";
+eval {use Data::Dumper qw(Dumper);1};
+eval {use Digest::CRC;1 or $missingModulSIGNALduino .= 'Digest::CRC '};
+eval {use JSON;1 or $missingModulSIGNALduino .= 'JSON '};
 
-eval "use Scalar::Util qw(looks_like_number);1";
-eval "use Time::HiRes qw(gettimeofday);1" ;
+eval {use Scalar::Util qw(looks_like_number);1};
+eval {use Time::HiRes qw(gettimeofday);1} ;
 use lib::SD_Protocols;
 
 #$| = 1;		#Puffern abschalten, Hilfreich fuer PEARL WARNINGS Search
@@ -56,14 +56,15 @@ use constant {
 };
 
 
-sub SIGNALduino_Attr(@);
-sub SIGNALduino_HandleWriteQueue;
-sub SIGNALduino_Parse($$$$@);
-sub SIGNALduino_Read;
-sub SIGNALduino_Ready;
-sub SIGNALduino_Write;
-sub SIGNALduino_SimpleWrite(@);
-sub SIGNALduino_Log3;
+#sub SIGNALduino_Attr(@);
+sub SIGNALduino_HandleWriteQueue($);
+#sub SIGNALduino_Parse($$$$@);
+#sub SIGNALduino_Read($);
+#sub SIGNALduino_Ready($);
+#sub SIGNALduino_Write($$$);
+#sub SIGNALduino_SimpleWrite(@);
+#sub SIGNALduino_LoadProtocolHash($);
+#sub SIGNALduino_Log3($$$);
 
 #my $debug=0;
 
@@ -272,17 +273,17 @@ sub SIGNALduino_Initialize {
   $dev = ",1" if (index(SDUINO_VERSION, "dev") >= 0);
 
 # Provider
-  $hash->{ReadFn}  = "SIGNALduino_Read";
-  $hash->{WriteFn} = "SIGNALduino_Write";
-  $hash->{ReadyFn} = "SIGNALduino_Ready";
+  $hash->{ReadFn}  = \&SIGNALduino_Read;
+  $hash->{WriteFn} = \&SIGNALduino_Write;
+  $hash->{ReadyFn} = \&SIGNALduino_Ready;
 
 # Normal devices
-  $hash->{DefFn}  		 	= "SIGNALduino_Define";
-  $hash->{FingerprintFn} 	= "SIGNALduino_FingerprintFn";
-  $hash->{UndefFn} 		 	= "SIGNALduino_Undef";
-  $hash->{GetFn}   			= "SIGNALduino_Get";
-  $hash->{SetFn}   			= "SIGNALduino_Set";
-  $hash->{AttrFn}  			= "SIGNALduino_Attr";
+  $hash->{DefFn}  		 	= \&SIGNALduino_Define;
+  $hash->{FingerprintFn} 	= \&SIGNALduino_FingerprintFn;
+  $hash->{UndefFn} 		 	= \&SIGNALduino_Undef;
+  $hash->{GetFn}   			= \&SIGNALduino_Get;
+  $hash->{SetFn}   			= \&SIGNALduino_Set;
+  $hash->{AttrFn}  			= \&SIGNALduino_Attr;
   $hash->{AttrList}			=
 					  "Clients MatchList do_not_notify:1,0 dummy:1,0"
 					  ." WS09_CRCAUS:0,1,2"
@@ -317,6 +318,15 @@ sub SIGNALduino_Initialize {
   $hash->{mnIdList} = ();
 
   #our $attr;
+
+
+  %ProtocolListSIGNALduino = SIGNALduino_LoadProtocolHash("$attr{global}{modpath}/FHEM/lib/SD_ProtocolData.pm");
+
+  if (exists($ProtocolListSIGNALduino{error})  ) {
+  	Log3 "SIGNALduino", 1, "Error loading Protocol Hash. Module is in inoperable mode error message:($ProtocolListSIGNALduino{error})";
+  	delete($ProtocolListSIGNALduino{error});
+  	return ;
+  }
 }
 #
 # Predeclare Variables from other modules may be loaded later from fhem
@@ -1671,8 +1681,9 @@ sub SIGNALduino_Read {
 				readingsSingleUpdate($hash, $hash->{ucCmd}->{cmd}, $returnMessage, $event) if (defined($returnMessage) && defined($event));
 				if (exists($hash->{ucCmd}->{asyncOut})) {
 					$hash->{logMethod}->($name, 5, "$name: Read, try asyncOutput of message $returnMessage");
-					my $ao = asyncOutput( $hash->{ucCmd}->{asyncOut}, $hash->{ucCmd}->{cmd}.": " . $returnMessage ) if (defined($returnMessage));
-					$hash->{logMethod}->($name, 5, "$name: Read, asyncOutput failed $ao") if ($ao);
+					my $ao = undef;
+					$ao = asyncOutput( $hash->{ucCmd}->{asyncOut}, $hash->{ucCmd}->{cmd}.": " . $returnMessage ) if (defined($returnMessage));
+					$hash->{logMethod}->($name, 5, "$name: Read, asyncOutput failed $ao") if (defined($ao));
 				}
 				delete($hash->{ucCmd});
 			}
@@ -2163,7 +2174,7 @@ sub SIGNALduino_Parse_MS($$$$%) {
 		## Make a lookup table for our pattern index ids
 		#Debug "List of pattern:";
 		my $clockabs= $msg_parts{pattern}{$msg_parts{clockidx}};
-		return  if ($clockabs == 0);
+		return if ($clockabs == 0);
 		$patternList{$_} = round($msg_parts{pattern}{$_}/$clockabs,1) for keys %{$msg_parts{pattern}};
 
  		#Debug Dumper(\%patternList);
@@ -2319,8 +2330,6 @@ sub SIGNALduino_padbits(\@$) {
 	}
 	return " padded $i bits to bit_msg array";
 }
-
-
 
 ############################# package main, test exists
 sub SIGNALduino_Parse_MU($$$$@) {
@@ -2545,6 +2554,7 @@ sub SIGNALduino_Parse_MC($$$$@) {
 	my $debug = AttrVal($iohash->{NAME},"debug",0);
 	($rssi,$rssiStr) = SIGNALduino_calcRSSI($rssi) if (defined($rssi));
 
+	return if (!$clock);
 	#my $protocol=undef;
 	#my %patternListRaw = %msg_parts{patternList};
 
@@ -2557,7 +2567,6 @@ sub SIGNALduino_Parse_MC($$$$@) {
 	#} else {
 		$blen = $hlen * 4;
 	#}
-
 
 	my $rawDataInverted;
 	($rawDataInverted = $rawData) =~ tr/0123456789ABCDEF/FEDCBA9876543210/;   # Some Manchester Data is inverted
@@ -2825,7 +2834,7 @@ sub SIGNALduino_Attr(@) {
 	} elsif( $aName eq "MatchList" ) {	## Change matchList
 		my $match_list;
 		if( $cmd eq "set" ) {
-			$match_list = eval $aVal ;
+			$match_list = eval {$aVal};
 			if( $@ ) {
 				$hash->{logMethod}->($name, 2, $name .": Attr, $aVal: ". $@);
 			}
