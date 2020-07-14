@@ -130,6 +130,7 @@ my %sets = (
   "cc1101_rAmpl"   		=> 	['24,27,30,33,36,38,40,42',  \&cc1101::setrAmpl ],
   "cc1101_sens"    		=> 	['4,8,12,16', \&cc1101::SetSens ],
   "cc1101_patable" 		=>	['-30_dBm,-20_dBm,-15_dBm,-10_dBm,-5_dBm,0_dBm,5_dBm,7_dBm,10_dBm', \&cc1101::SetPatable ],
+  "cc1101_reg_user"	=> 	['noArg', \&cc1101::SetRegistersUser ],
   "cc1101_reg"			=> 	['textFieldNL', \&cc1101::SetRegisters ],
   "LaCrossePairForSec" => 	['textFieldNL', \&SIGNALduino_Set_LaCrossePairForSec ],
 );
@@ -290,6 +291,7 @@ sub SIGNALduino_Initialize {
 					  ." addvaltrigger"
 					  ." blacklist_IDs"
 					  ." cc1101_frequency"
+					  ." cc1101_reg_user"
 					  ." debug:0$dev"
 					  ." development:0$dev"
 					  ." doubleMsgCheck_IDs"
@@ -1511,6 +1513,12 @@ sub SIGNALduino_SendFromQueue {
     } elsif ($msg =~ "^e") {											# Werkseinstellungen
     	SIGNALduino_Get($hash,$name,"ccconf");
     	SIGNALduino_Get($hash,$name,"ccpatable"); 
+
+			## set rfmode to default from uC
+    	my $rfmode = AttrVal($name, 'rfmode', undef);
+    	#CommandAttr($hash,"$name rfmode SlowRF") if (defined $rfmode && $rfmode ne 'SlowRF');  # option with save question mark
+    	$attr{$name}{rfmode} = 'SlowRF' if (defined $rfmode && $rfmode ne 'SlowRF');            # option without save question mark
+
     } elsif ($msg =~ "^W(?:0F|10|11|1D|12|1F)") {	# SetFreq, setrAmpl, Set_bWidth, SetSens
     	SIGNALduino_Get($hash,$name,"ccconf");
     } elsif ($msg =~ "^x") {												# patable
@@ -2921,7 +2929,13 @@ sub SIGNALduino_Attr(@) {
 		return "Note, please use other userReadings names.\nReserved names from $name are: cc1101_config, cc1101_config_ext, cc1101_patable"
 			if ($aVal =~ /cc1101_(?:config(?:_ext)?|patable)(?:\s|{)/);
 	}
-	elsif ($aName eq "rfmode")	# change receive mode
+	elsif ($aName eq 'cc1101_reg_user')	# set default register
+	{
+		return 'ERROR: This attribute is only available for a receiver with CC1101.' if ( ($init_done == 1) && (InternalVal($hash->{NAME},"cc1101_available",0) == 0) );
+		$aVal = $aVal.',' if ($aVal !~ /,$/gx);
+		return 'ERROR: Your attribute value is wrong!' if ( $aVal !~ /^([0-2]{1}[0-9a-fA-F]{3},)+$/gx );
+	}
+	elsif ($aName eq 'rfmode')	# change receive mode
 	{
 		return 'ERROR: This attribute is only available for a receiver with CC1101.' if ( ($init_done == 1) && (InternalVal($hash->{NAME},"cc1101_available",0) == 0) );
 
@@ -2952,8 +2966,6 @@ sub SIGNALduino_Attr(@) {
 						}
 					}
 				}
-			} else {
-				main::SIGNALduino_AddSendQueue($hash,'e');
 			}
 		}
 	}
@@ -3786,6 +3798,21 @@ sub SetRegisters  {
 }
 
 ############################# package cc1101
+sub SetRegistersUser  {
+	my ($hash) = @_;
+
+	my $cc1101User = main::AttrVal($hash->{NAME}, 'cc1101_reg_user', undef);
+
+	## look, user defined self default register values via attribute
+	if (defined $cc1101User) {
+		$hash->{logMethod}->($hash->{NAME}, 3, "$hash->{NAME}: SetRegistersUser, write CC1101 defaults from attribute");
+		$cc1101User = '0815,'.$cc1101User; # for SetRegisters, value for register starts on pos 1 in array
+		cc1101::SetRegisters($hash, split(',', $cc1101User) );
+	}
+	return ;
+}
+
+############################# package cc1101
 sub SetFreq  {
 	my ($hash, @a) = @_;
 
@@ -3963,6 +3990,8 @@ sub SetSens {
 			<li><code>cc1101_sens</code> is the decision boundary between the on and off values, and it is 4, 8, 12 or 16 dB.  Smaller values allow reception of less clear signals. Default is 4 dB.</li>
 			<a name="cc1101_reg"></a>
 			<li><code>cc1101_reg</code> You can set multiple registers at one. Specify the register with its two digit hex code followed by the register value separate multiple registers via space.</li>
+			<a name="cc1101_reg_user"></a>
+			<li><code>cc1101_reg_user</code> sets the self-defined register values ​​from the attribute cc1101_reg_user</li>
 		</ul>
 		</li><br>
 		<a name="close"></a>
@@ -4150,6 +4179,10 @@ sub SetSens {
         	Specify the frequency of your SIGNALduino. Default is 433 Mhz.<br>
         	Since the PA table values are frequency-dependent,the specified frequency will be used.
        	</li><br>
+		<li>cc1101_reg_user<br>
+	  	Defines self-defined default values ​​of the CC1101.<br>
+	  	Multiple entries are separated by commas. example: 012E,022D (adr 01 gets register value 2E, adr 02 gets register value 2D)
+	  </li><br>
 		<a name="debug"></a>
 		<li>debug<br>
 		This will bring the module in a very verbose debug output. Usefull to find new signals and verify if the demodulation works correctly.
@@ -4425,6 +4458,8 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
 		<li><code>cc1101_sens</code> , ist die Entscheidungsgrenze zwischen den Ein- und Aus-Werten und betr&auml;gt 4, 8, 12 oder 16 dB. Kleinere Werte erlauben den Empfang von weniger klaren Signalen. Standard ist 4 dB.</li>
 		<a name="cc1101_reg"></a>
 		<li><code>cc1101_reg</code> Es k&ouml;nnen mehrere Register auf einmal gesetzt werden. Das Register wird &uuml;ber seinen zweistelligen Hexadezimalwert angegeben, gefolgt von einem zweistelligen Wert. Mehrere Register werden via Leerzeichen getrennt angegeben</li>
+		<a name="cc1101_reg_user"></a>
+		<li><code>cc1101_reg_user</code> , setzt die selbst definierten Registerwerte aus dem Attribut cc1101_reg_user</li>
 	</ul>
 	<br>
 	<a name="close"></a>
@@ -4622,6 +4657,10 @@ When set to 1, the internal "RAWMSG" will not be updated with the received messa
 	  	Legt die Frequenz des SIGNALduino fest. Standard is 433 Mhz.<br>
 	  	Da die Werte für PA Werte Frequenzabhängig sind, wird für das Setzen der Register die hier hinterlegte Frequenz verwendet.
 		</li><br>
+		<li>cc1101_reg_user<br>
+	  	Legt selbst definierte Standardwerte des CC1101 fest.<br>
+	  	Mehrere Eintr&auml;ge werden mit Komma getrennt. Beispiel: 012E,022D (Adr 01 erh&auml;lt Registerwert 2E, Adr 02 erh&auml;lt Registerwert 2D)
+	  </li><br>
 		<a name="debug"></a>
 		<li>debug<br>
 		Dies bringt das Modul in eine sehr ausf&uuml;hrliche Debug-Ausgabe im Logfile. Somit lassen sich neue Signale finden und Signale &uuml;berpr&uuml;fen, ob die Demodulation korrekt funktioniert.
