@@ -57,7 +57,7 @@ use constant {
 
 
 #sub SIGNALduino_Attr(@);
-sub SIGNALduino_HandleWriteQueue($);
+#sub SIGNALduino_HandleWriteQueue($);
 #sub SIGNALduino_Parse($$$$@);
 #sub SIGNALduino_Read($);
 #sub SIGNALduino_Ready($);
@@ -319,24 +319,13 @@ sub SIGNALduino_Initialize {
 
   #our $attr;
 
-
-  %ProtocolListSIGNALduino = SIGNALduino_LoadProtocolHash("$attr{global}{modpath}/FHEM/lib/SD_ProtocolData.pm");
-
-  if (exists($ProtocolListSIGNALduino{error})  ) {
-  	Log3 "SIGNALduino", 1, "Error loading Protocol Hash. Module is in inoperable mode error message:($ProtocolListSIGNALduino{error})";
-  	delete($ProtocolListSIGNALduino{error});
-  	return ;
-  }
 }
+
 #
 # Predeclare Variables from other modules may be loaded later from fhem
 #
 our $FW_wname;
 our $FW_ME;
-
-#
-# Predeclare Variables from other modules may be loaded later from fhem
-#
 our $FW_CSRF;
 our $FW_detail;
 
