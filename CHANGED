@@ -1,5 +1,8 @@
 2020-07-14 - Update 00_SIGNALduino.pm
 
+  * fix logoutput on eventlogging
+2020-07-14 - Update 00_SIGNALduino.pm
+
 * remove old lines after "merge into"
 2020-07-14 - Merge branch 'dev-r34' into dev-r35_xFSK
 2020-07-04 - Fix some perlcritic 5 warnings in 3.4 (#863)
