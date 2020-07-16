@@ -1,3 +1,6 @@
+2020-07-16 - Update SD_ProtocolData.pm
+
+Replaced svn revision with version from repo
 2020-07-16 - lib\SD_ProtocolData.pm
 
 Update $ID$ / needed for  SVN commit
