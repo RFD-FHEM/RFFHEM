@@ -63,7 +63,7 @@
 # Please provide at least three messages for each new MU/MC/MS protocol and a URL of issue in GitHub or discussion in FHEM Forum
 # https://forum.fhem.de/index.php/topic,58396.975.html | https://github.com/RFD-FHEM/RFFHEM
 ###########################################################################################################################################
-
+# $Id: SD_ProtocolData.pm 3.4.4 2020-07-16 20:04:45Z Sidey $
 package lib::SD_ProtocolData;
 { 
 	use strict;
