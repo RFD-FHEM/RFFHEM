@@ -155,6 +155,24 @@ defmod test_06_firmware_flash_1 UnitTest dummyDuino
 		$ENV{'PATH'}=$path;
 	}; 
 
+
+	subtest 'set flash avrdude installed (MAPLEMINI_F103CB,MAPLEMINI_F103CBcc1101)' => sub {
+		plan(2);
+		$ENV{'PATH'}="/opt/fhem/contrib";
+
+		$attr{$target}{hardware} ="MAPLEMINI_F103CB";
+		my $ret = SIGNALduino_Set($targetHash, $target, "flash" ,"./fhem/test.hex");
+		is($ret, "Sorry, Flashing your STM32 via Module is currently not supported.", "check return value for MAPLEMINI_F103CB");		
+		
+		$attr{$target}{hardware} ="MAPLEMINI_F103CBcc1101";
+		$ret = SIGNALduino_Set($targetHash, $target, "flash" ,"./fhem/test.hex");
+		is($ret, "Sorry, Flashing your STM32 via Module is currently not supported.", "check return value for MAPLEMINI_F103CBcc1101");		
+
+
+		$ENV{'PATH'}=$path;
+	}; 
+
+
 	#CommandDefMod(undef,"$target $targetHash->{TYPE} $targetHash->{DEF}");
 }
 )
