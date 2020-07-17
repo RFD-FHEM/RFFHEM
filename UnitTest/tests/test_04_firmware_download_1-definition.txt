@@ -50,6 +50,28 @@ defmod test_04_firmware_download_1 UnitTest dummyDuino
 		my @called_args = $HTTP_CALL->called_with;
 		like( $called_args[0]{url}, qr/SIGNALDuino/, "Download URL set to SIGNALDuino Repo" );
 	};
+
+	subtest 'flash with MAPLEMINI_F103CBcc1101 hardware parameter set' => sub {
+		plan(3);
+		$attr{$target}{hardware} = "MAPLEMINI_F103CBcc1101";
+		$HTTP_CALL->reset;
+		my $ret = SIGNALduino_Set($targetHash, $target, "flash" ,"r1.2.4");
+		is($ret,undef,"return value fromSIGNALduino_Set");
+		is($HTTP_CALL->called_count, 1, "HttpUtils_NonblockingGet is called");
+		my @called_args = $HTTP_CALL->called_with;
+		like( $called_args[0]{url}, qr/SIGNALDuino/, "Download URL set to SIGNALDuino Repo" );
+	}; 
+
+	subtest 'flash with MAPLEMINI_F103CB hardware parameter set' => sub {
+		plan(3);
+		$attr{$target}{hardware} = "MAPLEMINI_F103CB";
+		$HTTP_CALL->reset;
+		my $ret = SIGNALduino_Set($targetHash, $target, "flash" ,"r1.2.4");
+		is($ret,undef,"return value fromSIGNALduino_Set");
+		is($HTTP_CALL->called_count, 1, "HttpUtils_NonblockingGet is called");
+		my @called_args = $HTTP_CALL->called_with;
+		like( $called_args[0]{url}, qr/SIGNALDuino/, "Download URL set to SIGNALDuino Repo" );
+	}; 
 	
 	subtest 'flash via url parameter' => sub {
 		plan(3);
@@ -160,6 +182,66 @@ defmod test_04_firmware_download_1 UnitTest dummyDuino
 			my $jsonstr=join ("\n",@json);
 			SIGNALduino_githubParseHttpResponse($param,"",$jsonstr);
 			like($targetHash->{additionalSets}{flash},qr/3.3.0/,"check if testing firmware is found");
+		} else {
+			diag("open json firmware file was not possible $error");
+		}
+	};
+
+	subtest 'check stable with hardware parameter set to MAPLEMINI_F103CB' => sub {
+		plan(1);
+		my $param = {
+			hash       => $targetHash,    
+			command    => "queryReleases"
+		};
+		$attr{$target}{hardware} = "MAPLEMINI_F103CB";
+		$attr{$target}{updateChannelFW} = 'stable';
+
+		my ($error, @json) = FileRead($attr{global}{modpath}."/FHEM/lib/test_firmware_releases.json");
+		if ($error eq "") {
+			Log3 $name , 3, "json @json";
+			my $jsonstr=join ("\n",@json);
+			SIGNALduino_githubParseHttpResponse($param,"",$jsonstr);
+			like($targetHash->{additionalSets}{flash},qr/3.4.0/,"check if testing firmware is found");
+		} else {
+			diag("open json firmware file was not possible $error");
+		}
+	};
+
+	subtest 'check stable with hardware parameter set to MAPLEMINI_F103CBcc1101' => sub {
+		plan(1);
+		my $param = {
+			hash       => $targetHash,    
+			command    => "queryReleases"
+		};
+		$attr{$target}{hardware} = "MAPLEMINI_F103CBcc1101";
+		$attr{$target}{updateChannelFW} = 'stable';
+
+		my ($error, @json) = FileRead($attr{global}{modpath}."/FHEM/lib/test_firmware_releases.json");
+		if ($error eq "") {
+			Log3 $name , 3, "json @json";
+			my $jsonstr=join ("\n",@json);
+			SIGNALduino_githubParseHttpResponse($param,"",$jsonstr);
+			like($targetHash->{additionalSets}{flash},qr/3.4.0/,"check if testing firmware is found");
+		} else {
+			diag("open json firmware file was not possible $error");
+		}
+	};
+
+	subtest 'check stable with hardware parameter set to ESP32' => sub {
+		plan(1);
+		my $param = {
+			hash       => $targetHash,    
+			command    => "queryReleases"
+		};
+		$attr{$target}{hardware} = "ESP32";
+		$attr{$target}{updateChannelFW} = 'stable';
+
+		my ($error, @json) = FileRead($attr{global}{modpath}."/FHEM/lib/test_firmware_releases.json");
+		if ($error eq "") {
+			Log3 $name , 3, "json @json";
+			my $jsonstr=join ("\n",@json);
+			SIGNALduino_githubParseHttpResponse($param,"",$jsonstr);
+			like($targetHash->{additionalSets}{flash},qr/3.4.0/,"check if testing firmware is found");
 		} else {
 			diag("open json firmware file was not possible $error");
 		}
