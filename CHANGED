@@ -1,3 +1,7 @@
+2020-07-17 - dev-r35_xFSK - perlcritic (#873)
+
+* Update SD_ProtocolData.pm
+  * fix perlcritic Severity 3 - hard tabs
 2020-07-17 - Update SD_ProtocolData.pm
 
   * fix perlcritic Severity 3 - hard tabs
