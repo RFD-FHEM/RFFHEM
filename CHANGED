@@ -1,13 +1,14 @@
-2020-07-16 - Merge branch 'dev-r35_xFSK' into dev-r35_xFSK_doc
-2020-07-16 - Update 00_SIGNALduino.pm
-
-  * fix logoutput on eventlogging (old regex cut to much in fhem logfile)
-
-2020-07-15 - Update 00_SIGNALduino.pm
-
-  * revisions indented ( no tabs, only spaces ) and checked syntax with perl ./contrib/commandref_join.pl
+2020-07-17 - adjust logoutput & loglevel
+00_SIGNALduino.pm
+  * revised loglevel from Parse_MN
+  * revised logoutput text SIGNALduino_Get_Command
+  * log output adapted to hardware
+  * revisions indented ( no tabs, only spaces ) and checked syntax with perl ./ontrib/commandref_join.pl
   * compare documentation DE <-> EN
   * added attribute ESP32cc1101
+2020-07-16 - Update 00_SIGNALduino.pm
+  * fix logoutput on eventlogging (old regex cut to much in fhem logfile)
+2020-07-15 - Update 00_SIGNALduino.pm
 
 2020-07-14 - dev-r35_xFSK - perlcritic (#868)
 

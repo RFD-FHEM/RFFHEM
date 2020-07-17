@@ -690,13 +690,15 @@ sub SIGNALduino_Set_raw {
       $hexFile = $args[0];
     }
 	$hash->{logMethod}->($name, 3, "$name: Set_flash, filename $hexFile provided, trying to flash");
+
 	# Only for Arduino , not for ESP
-	if (AttrVal($name,'hardware','') =~ m/(?:nano|mini|radino)/)
+	my $hardware = AttrVal($name,'hardware','');
+	if ($hardware =~ m/(?:nano|mini|radino)/)
 	{
 		SIGNALduino_PrepareFlash($hash,$hexFile);
 	} else {
-		FW_directNotify("FILTER=$name", "#FHEMWEB:WEB", "FW_okDialog('<u>ERROR:</u><br>Sorry, flashing your ESP is currently not supported.<br>The file is only downloaded in /opt/fhem/FHEM/firmware.')", '');
-		return 'Sorry, Flashing your ESP via Module is currently not supported.';    # processed in tests
+		FW_directNotify("FILTER=$name", "#FHEMWEB:WEB", "FW_okDialog('<u>ERROR:</u><br>Sorry, flashing your $hardware is currently not supported.<br>The file is only downloaded in /opt/fhem/FHEM/firmware.')", '');
+		return "Sorry, Flashing your $hardware via Module is currently not supported.";    # processed in tests
 	}
 }
 
@@ -982,7 +984,7 @@ sub SIGNALduino_Get_Command {
 	my ($hash, @a) = @_;
 	my $name=$hash->{NAME};
 	return 'Unsupported command for the microcontroller' if (!exists(${$gets{$a[0]}}[2]));
-	$hash->{logMethod}->($name, 5, "$name: Get $a[0] executed");
+	$hash->{logMethod}->($name, 5, "$name: Get_Command $a[0] executed");
 	SIGNALduino_AddSendQueue($hash, @{$gets{$a[0]}}[2] . (exists($a[1]) ? "$a[1]" : ''));
 	$hash->{ucCmd}->{cmd}=$a[0];
 	$hash->{ucCmd}->{responseSub}=$gets{$a[0]}[3];
@@ -2655,7 +2657,7 @@ sub SIGNALduino_Parse_MN {
 		}
 		my $length_min=$hash->{protocolObject}->checkProperty($id,'length_min',-1);
 		if ($hlen < $length_min) {
-			$hash->{logMethod}->($name, 3, qq[$name: Parse_MN, Error! ID=$id msg=$rawData ($hlen) too short, min=$length_min]);
+			$hash->{logMethod}->($name, 4, qq[$name: Parse_MN, Error! ID=$id msg=$rawData ($hlen) too short, min=$length_min]);
 			next mnIDLoop;
 		}
 
