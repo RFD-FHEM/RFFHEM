@@ -1,5 +1,26 @@
 [
-   
+   {
+     "tag_name": "3.4.0",
+     "name": "Release 3.4.0",
+     "prerelease": false,
+     "assets": [
+       {
+         "name": "SIGNALDuino_ESP323.4.0.hex",
+         "created_at": "2020-07-16T20:54:23Z",
+         "browser_download_url": "https://github.com/RFD-FHEM/SIGNALDuino/releases/download/3.4.0/SIGNALDuino_ESP323.4.0.hex"
+       },
+       {
+         "name": "SIGNALDuino_MAPLEMINI_F103CB3.4.0.hex",
+         "created_at": "2020-07-16T20:56:45Z",
+         "browser_download_url": "https://github.com/RFD-FHEM/SIGNALDuino/releases/download/3.4.0/SIGNALDuino_MAPLEMINI_F103CB3.4.0.hex"
+       },
+       {
+         "name": "SIGNALDuino_MAPLEMINI_F103CBcc11013.4.0.hex",
+         "created_at": "2020-07-16T20:55:28Z",
+         "browser_download_url": "https://github.com/RFD-FHEM/SIGNALDuino/releases/download/3.4.0/SIGNALDuino_MAPLEMINI_F103CBcc11013.4.0.hex"
+       }
+     ]
+   },
    {
      "tag_name": "3.3.1-RC10",
      "name": "Release 3.3.1 RC10",
