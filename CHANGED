@@ -1,7 +1,45 @@
-2020-07-16 - Merge branch 'dev-r35_xFSK' into dev-r35_xFSK_TEST
-2020-07-16 - Update 00_SIGNALduino.pm
+2020-07-17 - dev-r35_xFSK - perlcritic (#873)
 
+* Update SD_ProtocolData.pm
+  * fix perlcritic Severity 3 - hard tabs
+2020-07-17 - Update SD_ProtocolData.pm
+
+  * fix perlcritic Severity 3 - hard tabs
+2020-07-17 - Hardware MAPLEMINI_F103CB added / documentation tabs replaced with whitespace (#869)
+
+* Update 00_SIGNALduino.pm
+  * revisions indented ( no tabs, only spaces ) and checked syntax with perl ./contrib/commandref_join.pl
+  * compare documentation DE <-> EN
+  * added attribute ESP32cc1101
+  * revised loglevel from Parse_MN
+  * revised logoutput text SIGNALduino_Get_Command
+  * log output adapted to hardware
+
+* UnitTest\tests\test_04_firmware_download_1-definition.txt
+Added tests to firmware download for MAPLEMINI_F103CBcc1101, MAPLEMINI_F103CB, ESP32
+
+* UnitTest\tests\test_06_firmware_flash_1-definition.txt
+Added tests for MAPLEMINI_F103CBcc1101 and MAPLEMINI_F103CB regarding flash operation
+
+* UnitTest\FHEM\lib\test_firmware_releases.json
+Added maple and maple with cc1101 to test json
+
+test_firmware_releases.json
+  * extension data
+2020-07-17 - Merge branch 'dev-r35_xFSK_doc' of github.com:HomeAutoUser/RFFHEM into dev-r35_xFSK_doc
+2020-07-17 - adjust logoutput & loglevel
+00_SIGNALduino.pm
+  * revised loglevel from Parse_MN
+  * revised logoutput text SIGNALduino_Get_Command
+  * log output adapted to hardware
+  * revisions indented ( no tabs, only spaces ) and checked syntax with perl ./ontrib/commandref_join.pl
+  * compare documentation DE <-> EN
+  * added attribute ESP32cc1101
+
+2020-07-16 - Update 00_SIGNALduino.pm
   * fix logoutput on eventlogging (old regex cut to much in fhem logfile)
+2020-07-15 - Update 00_SIGNALduino.pm
+
 2020-07-14 - dev-r35_xFSK - perlcritic (#868)
 
 2020-07-14 - Update 00_SIGNALduino.pm
