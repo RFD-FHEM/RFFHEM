@@ -753,6 +753,7 @@ sub SD_UT_Initialize($) {
 		'BF_301.*' => {ATTR => 'model:BF_301', FILTER => '%NAME', autocreateThreshold => '3:180', GPLOT => q{}},
 		"unknown_please_select_model"	=> {ATTR => "model:unknown", FILTER => "%NAME", autocreateThreshold => "5:180", GPLOT => ""},
 	};
+	return;
 }
 
 #############################
@@ -824,7 +825,6 @@ sub SD_UT_Define($$) {
 
 	$hash->{lastMSG} =  "no data";
 	$hash->{bitMSG} =  "no data";
-	$hash->{STATE} =  "Defined";
 	my $iodevice = $a[4] if($a[4]);
 	my $name = $hash->{NAME};
 
@@ -843,6 +843,7 @@ sub SD_UT_Define($$) {
 	}
 
 	AssignIoPort($hash, $iodevice);
+	return;
 }
 
 ###################################
