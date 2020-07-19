@@ -1,3 +1,6 @@
+2020-07-19 - Update 14_SD_UT.pm
+
+change "if" to "elsif"
 2020-07-18 - update 14_SD_UT.pm
 2020-07-01 - 14_SD_UT new protocol 105 for remote control BF-301
 2020-06-15 - 10_FS10 revised for perlcritic (#860)
