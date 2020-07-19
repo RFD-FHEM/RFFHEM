@@ -1421,8 +1421,7 @@ sub SD_UT_Parse($$) {
 			$def = $modules{SD_UT}{defptr}{$devicedef};
 			$model = "xavax";
 			$name = "xavax_" . $deviceCode;
-		}
-		if (!$def && $protocol == 97) {
+		} elsif (!$def && $protocol == 97) {
 			### Remote control Momento [P97] ###
 			my $sum = hex(substr($rawData,0,2)) + hex(substr($rawData,2,2)) + hex(substr($rawData,4,2)) + hex(substr($rawData,6,2));
 			if ($sum != hex(substr($rawData,8,2))) {
@@ -1434,8 +1433,7 @@ sub SD_UT_Parse($$) {
 			$def = $modules{SD_UT}{defptr}{$devicedef};
 			$model = "Momento";
 			$name = "Momento_" . $deviceCode;
-		}
-		if (!$def && $protocol == 105) {
+		} elsif (!$def && $protocol == 105) {
 			### Remote control BF_301 [P105] ###
 			my $sum = oct ('0b'.reverse substr $bitData,0,8) + oct ('0b'.reverse substr $bitData,8,8) + oct ('0b'.reverse substr $bitData,16,8) + oct ('0b'.reverse substr $bitData,24,8) + oct ('0b'.reverse substr $bitData,32,8);
 			if (($sum & 0xFF) != 1) {
