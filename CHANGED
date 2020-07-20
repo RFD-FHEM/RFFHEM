@@ -1,3 +1,4 @@
+2020-07-20 - Merge branch 'master' into dev-r34_SD_BF-301
 2020-07-20 - 14_SD_UT new protocol 105 for remote control BF-301
 2020-07-16 - Update SD_ProtocolData.pm
   Replaced svn revision with version from repo
