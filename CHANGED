@@ -1,3 +1,8 @@
+2020-07-20 - new protocol for remote control BF-301 (#874)
+
+* 14_SD_UT new protocol 105 for remote control BF-301
+
+Co-authored-by: Udo <info@elektron-bbs.de>
 2020-07-20 - Merge branch 'master' into dev-r34_SD_BF-301
 2020-07-20 - 14_SD_UT new protocol 105 for remote control BF-301
 2020-07-16 - Update SD_ProtocolData.pm
