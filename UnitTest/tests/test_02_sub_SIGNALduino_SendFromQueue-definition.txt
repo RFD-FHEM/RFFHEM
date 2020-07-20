@@ -6,7 +6,7 @@ defmod test_02_sub_SIGNALduino_SendFromQueue UnitTest dummyDuino
 	#use Test2::Tools::Ref;
 	
 	my $mock = Mock::Sub->new; 	
-	foreach (qw/SR SC SM/) {
+	foreach (qw/SR SC SM SN/) {
 		subtest "Test SendCommands ($_) SIGNALduino_SendFromQueue called" => sub {
 			plan(3);
 			my $check =  hash {
