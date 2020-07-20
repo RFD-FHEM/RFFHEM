@@ -14,6 +14,7 @@ Supported Devices / Protocols
 |Arduino Sensor | multi purpose sensor based on arduino |
 |Atlantic Security | some sensors (MD-210R / MD_230R / MD-2018R / MD-2003R) |
 |Auriol IAN 60107, 114324, 275901, 283582, 297514, 314695 (Lidl) | Weather station |
+|BF-301 | Remote control|
 |benon (Semexo OHG) | Remote control (BH-P)|
 |BOSCH / Neff / Refsta Topdraft | Remote control (SF01 01319004, SF01 01319004 v2)|
 |CAME TOP 432EV | Remote control |
