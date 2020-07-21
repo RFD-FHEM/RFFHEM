@@ -412,7 +412,7 @@ package lib::SD_ProtocolData;
         modulematch      => '^TX......',
         length_min       => '43',
         length_max       => '44',
-        remove_zero      => 1,
+        remove_zero      => 1,            # Removes leading zeros from output
       },
     "9"  => ## Funk Wetterstation CTW600
             ### ! some message are decode as protocol 42 and 75 !
@@ -451,6 +451,7 @@ package lib::SD_ProtocolData;
         knownFreqs       => '',
         clockrange       => [300,520],             # min , max
         format           => 'manchester',          # tristate can't be migrated from bin into hex!
+        clientmodule     => 'OREGON',
         modulematch      => '^(3[8-9A-F]|[4-6][0-9A-F]|7[0-8]).*',
         length_min       => '64',
         length_max       => '220',
@@ -1733,7 +1734,7 @@ package lib::SD_ProtocolData;
         preamble        => 'P61#',
         postamble       => '',
         clientmodule    => 'FS10',
-        length_min      => '38',       # eigentlich 41 oder 46 (Pruefsumme nicht bei allen)
+        length_min      => '30',       # 43-1=42 (letztes Bit fehlt) 42-12=30 (12 Bit Preambel)
         length_max      => '48',       # eigentlich 46
       },
     "62"  =>  ## Clarus_Switch
@@ -2762,10 +2763,32 @@ package lib::SD_ProtocolData;
         length_min      => '16',
         length_max      => '16',
       },
+    "105" =>  # Remote control BF-301 from Shenzhen BOFU Mechanic & Electronic Co., Ltd.
+              # Protocol description found on https://github.com/akirjavainen/markisol/blob/master/Markisol.ino
+              # original remotes repeat 8 (multi) or 10 (single) times by default
+              # https://github.com/RFD-FHEM/RFFHEM/issues/861 stsirakidis 2020-06-27
+              # BF_301_FAD0 down   MU;P0=-697;P1=5629;P2=291;P3=3952;P4=-2459;P5=1644;P6=-298;P7=689;D=34567676767676207620767620762020202076202020762020207620202020207676762076202020767614567676767676207620767620762020202076202020762020207620202020207676762076202020767614567676767676207620767620762020202076202020762020207620202020207676762076202020767614;CP=2;R=41;O;
+              # BF_301_FAD0 stop   MU;P0=5630;P1=3968;P2=-2458;P3=1642;P4=-285;P5=690;P6=282;P7=-704;D=12345454545454675467545467546767676754676767546754675467676767675454546754676767675402345454545454675467545467546767676754676767546754675467676767675454546754676767675402345454545454675467545467546767676754676767546754675467676767675454546754676767675402;CP=6;R=47;O;
+              # BF_301_FAD0 up     MU;P0=-500;P1=5553;P2=-2462;P3=1644;P4=-299;P5=679;P6=298;P7=-687;D=01234545454545467546754546754676767675467676767675454546767676767545454675467546767671234545454545467546754546754676767675467676767675454546767676767545454675467546767671234545454545467546754546754676767675467676767675454546767676767545454675467546767671;CP=6;R=48;O;
+      {
+        name            => 'BF-301',
+        comment         => 'Remote control',
+        id              => '105',
+        knownFreqs      => '433.92',
+        one             => [2,-1],       # 660,-330
+        zero            => [1,-2],       # 330,-660
+        start           => [17,-7,5,-1], # 5610,-2310,1650,-330
+        clockabs        => 330,
+        format          => 'twostate',
+        clientmodule    => 'SD_UT',
+        modulematch     => '^P105#',
+        preamble        => 'P105#',
+        length_min      => '40',
+        length_max      => '40',
+      },
 
-    ########################################################################
-    #### ### old information from incomplete implemented protocols #### ####
-    ########################################################################
+		########################################################################
+		#### ### old information from incomplete implemented protocols #### ####
 
           # ""  =>  ## Livolo
           # https://github.com/RFD-FHEM/RFFHEM/issues/29
@@ -2795,6 +2818,5 @@ package lib::SD_ProtocolData;
       # },
 
     ########################################################################
-
   );
 }
