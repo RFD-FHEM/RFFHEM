@@ -1,3 +1,4 @@
+2020-07-21 - Merge branch 'master' into dev-r35_xFSK_TEST
 2020-07-20 - new protocol for remote control BF-301 (#874)
 
 * 14_SD_UT new protocol 105 for remote control BF-301
