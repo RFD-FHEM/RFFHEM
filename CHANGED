@@ -1,5 +1,8 @@
 2020-07-22 - Update 14_SD_UT.pm
 
+  * return to old syntax ( new systax bring 'Too many arguments for main:: ...'  unclear mistakes )
+2020-07-22 - Update 14_SD_UT.pm
+
   * revised for perl critic
 2020-07-20 - new protocol for remote control BF-301 (#874)
 
