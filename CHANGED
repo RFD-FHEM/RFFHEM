@@ -1,5 +1,9 @@
 2020-07-22 - Update 14_SD_UT.pm
 
+  * revised code https://github.com/RFD-FHEM/RFFHEM/pull/877#pullrequestreview-453692819
+  * revised code https://github.com/RFD-FHEM/RFFHEM/pull/877#pullrequestreview-453693240
+2020-07-22 - Update 14_SD_UT.pm
+
   * return to old syntax ( new systax bring 'Too many arguments for main:: ...'  unclear mistakes )
 2020-07-22 - Update 14_SD_UT.pm
 
