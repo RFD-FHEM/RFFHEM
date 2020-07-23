@@ -1,3 +1,8 @@
+2020-07-23 - Update 00_SIGNALduino.pm
+
+  * revised logoutput for user
+  * added jump to SlowRF with logoutput
+  * added commandref rfmode & cc1101_reg_user
 2020-07-23 - Merge branch 'dev-r35_xFSK_TEST' of https://github.com/HomeAutoUser/RFFHEM into dev-r35_xFSK_TEST
 2020-07-23 - Update SD_ProtocolData.pm
 
