@@ -237,9 +237,19 @@ sub Set($$$@) {
 ###################################
 sub Undef($$) {
   my ($hash, $name) = @_;
-  delete($modules{SD_BELL}{defptr}{$hash->{DEF}}) if(defined($hash->{DEF}) && defined($modules{SD_BELL}{defptr}{$hash->{DEF}}));
-  delete($modules{SD_BELL}{defptr}{doubleCode}) if(defined($modules{SD_BELL}{defptr}{defptr}{doubleCode}));
-  delete($modules{SD_BELL}{defptr}{doubleCode_Time}) if(defined($modules{SD_BELL}{defptr}{defptr}{doubleCode_Time}));
+
+  if(defined($hash->{DEF}) && defined($modules{SD_BELL}{defptr}{$hash->{DEF}})) {
+    delete($modules{SD_BELL}{defptr}{$hash->{DEF}});
+  }
+
+  if(defined($modules{SD_BELL}{defptr}{defptr}{doubleCode})) {
+    delete($modules{SD_BELL}{defptr}{doubleCode});
+  }
+
+  if(defined($modules{SD_BELL}{defptr}{defptr}{doubleCode_Time})) {
+    delete($modules{SD_BELL}{defptr}{doubleCode_Time});
+  }
+
   return;
 }
 
