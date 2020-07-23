@@ -1,7 +1,6 @@
-2020-07-23 - Update 14_SD_BELL.pm - PerlCritic (#878)
-
-* Update 14_SD_BELL.pm
+2020-07-23 - Update 14_SD_UT.pm
   * revised for perl critic
+
 2020-07-23 - Update 14_SD_BELL.pm
   * revised for perl critic
   
