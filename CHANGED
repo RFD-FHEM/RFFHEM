@@ -1,3 +1,8 @@
+2020-07-23 - Update SD_ProtocolData.pm
+
+  * added register & rfmode on xFSK protocols
+(Data was lost due to a merge or PR conflict)
+  * added comments from other modulations
 2020-07-21 - Merge branch 'master' into dev-r35_xFSK_TEST
 2020-07-20 - new protocol for remote control BF-301 (#874)
 
