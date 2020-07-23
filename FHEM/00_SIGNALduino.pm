@@ -259,7 +259,7 @@ my %matchListSIGNALduino = (
 			'28:SD_Keeloq'				=> '^P(?:87|88)#.*',
 			'29:SD_GT'						=> '^P49#[A-Fa-f0-9]+',
 			'30:LaCrosse'					=> '^(\\S+\\s+9 |OK\\sWS\\s)',
-			'31:KOPP_FC'					=> '^kr.*',
+			'31:KOPP_FC'					=> '^kr..................',
 			'32:PCA301'						=> '^\\S+\\s+24',
 			'X:SIGNALduino_un'		=> '^[u]\d+#.*',
 );
@@ -1477,6 +1477,8 @@ sub SIGNALduino_Write {
 	    $sum	= 12;
   	}
     $msg = $hash->{protocolObject}->PreparingSend_FS20_FHT($id, $sum, $msg);
+  } elsif($fn eq 'k') {   # KOPP_FC
+		$hash->{logMethod}->($name, 4, "$name: Write, cmd $fn sending KOPP_FC");
   }
   $hash->{logMethod}->($name, 5, "$name: Write, sending via Set $fn $msg");
 
@@ -2946,10 +2948,11 @@ sub SIGNALduino_Attr(@) {
 		if ( ($aVal ne $oldAttrib) && ($hash->{DevState} eq 'initialized') && (InternalVal($hash->{NAME},"cc1101_available",0) == 1) ) {
 			$hash->{logMethod}->($name, 3, "$name: Attr, $aName set to $aVal (please check protocollist)");
 
+			my $rfmode;
 			if ($aVal ne 'SlowRF') {
 				MNIDLIST:
 				for my $id (@{$hash->{mnIdList}}) {
-					my $rfmode=$hash->{protocolObject}->checkProperty($id,'rfmode',-1);
+					$rfmode=$hash->{protocolObject}->checkProperty($id,'rfmode',-1);
 
 					if ($rfmode eq $aVal) {
 						$hash->{logMethod}->($name, 5, qq[$name: Attr, rfmode found on ID=$id]);
@@ -2965,9 +2968,12 @@ sub SIGNALduino_Attr(@) {
 							}
 							main::SIGNALduino_WriteInit($hash);
 							last MNIDLIST;	# found $rfmode, exit loop
+						} else {
+							$hash->{logMethod}->($name, 1, "$name: Attr, $aName set to $aVal (ID $id, nothing register entry found on SD_ProtocolData)");
 						}
 					}
 				}
+				$hash->{logMethod}->($name, 3, "$name: Attr, $aName set to $aVal (nothing rfmode entry found on SD_ProtocolData)") if($rfmode eq '-1');
 			}
 		}
 	}
