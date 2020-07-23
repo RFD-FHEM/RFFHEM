@@ -2690,6 +2690,8 @@ package lib::SD_ProtocolData;
         sync            => '2DD4',
         modulation      => '2-FSK',
         regexMatch      => qr/^9/,   # ToDo, check! fuer eine regexp Pruefung am Anfang vor dem method Aufruf
+        register        => ['0001','0246','0302','042D','05D4','06FF','0700','0802','0D21','0E65','0F6A','1089','115C','1206','1322','14F8','1556','1700','1818','1916','1B43','1C68','1D91','23EC','2517','2611','2B3E'],
+        rfmode          => 'Lacrosse_mode1',
         clientmodule    => 'LaCrosse',
         method          => \&lib::SD_Protocols::ConvLaCrosse,
       },
@@ -2704,6 +2706,8 @@ package lib::SD_ProtocolData;
         datarate        => '6620.41',
         sync            => '2DD4',
         modulation      => '2-FSK',
+        register        => ['0001','0246','0307','042D','05D4','06FF','0700','0802','0D21','0E6B','0FD0','1088','110B','1206','1322','14F8','1553','1700','1818','1916','1B43','1C68','1D91','23ED','2517','2611','2B3E'],
+        rfmode          => 'PCA301',
         clientmodule    => 'PCA301',
         dispatchequals  => 'true',
         length_min      => '24',
@@ -2721,6 +2725,8 @@ package lib::SD_ProtocolData;
         sync            => 'AA54',
         modulation      => 'GFSK',
         regexMatch      => qr/^0/,   # ToDo, check! fuer eine regexp Pruefung am Anfang vor dem method Aufruf
+        register        => ['0001','0206','0304','04AA','0554','060F','07E0','0800','0D21','0E65','0F6A','1097','1183','1216','1363','14F8','1547','170C','1829','1936','1B43','1C40','1D91','23E9','2500','2611','2B3E'],
+        rfmode          => 'Kopp_FC',
         clientmodule    => 'KOPP_FC',
         method          => \&lib::SD_Protocols::ConvKoppFreeControl,
       },
@@ -2738,6 +2744,8 @@ package lib::SD_ProtocolData;
         sync            => '2DD4',
         modulation      => '2-FSK',
         regexMatch      => qr/^9/,   # ToDo, check! fuer eine regexp Pruefung am Anfang vor dem method Aufruf
+        register        => ['0001','0246','0302','042D','05D4','06FF','0700','0802','0D21','0E65','0F6A','1088','1182','1206','1322','14F8','1556','1700','1818','1916','1B43','1C68','1D91','23EC','2516','2611','2B3E'],
+        rfmode          => 'Lacrosse_mode2',
         clientmodule    => 'LaCrosse',
         method          => \&lib::SD_Protocols::ConvLaCrosse,
       },
@@ -2787,8 +2795,112 @@ package lib::SD_ProtocolData;
         length_max      => '40',
       },
 
-		########################################################################
-		#### ### old information from incomplete implemented protocols #### ####
+    ########################################################################
+    #### ###  register informations from other hardware protocols  #### ####
+
+    # "993" =>  # HomeMatic
+              # # settings from CUL
+      # {
+        # name            => 'HomeMatic',
+        # comment         => '',
+        # id              => '993',
+        # developId       => 'm',
+        # knownFreqs      => '868.3',
+        # datarate        => '',
+        # sync            => 'E9CA',
+        # modulation      => '2-FSK',
+        # rfmode          => 'HomeMatic',
+        # register        => ['0007','012E','022E','030D','04E9','05CA','06FF','070C','0845','0900','0A00','0B06','0C00','0D21','0E65','0F6A','10C8','1193','1203','1322','14F8','1534','1607','1733','1818','1916','1A6C','1B43','1C40','1D91','1E87','1F6B','2000','2159','227F','233E','2481','2535','260B','2700'],
+      # },
+    # "994" =>  # LaCrosse_mode_4
+              # # https://wiki.fhem.de/wiki/JeeLink
+              # # https://forum.fhem.de/index.php/topic,106594.0.html?PHPSESSID=g0k1ruul2e3hmddm0uojaeurfl
+      # {
+        # name            => 'LaCrosse_mode_4',
+        # comment         => 'example: TX22 (WS 1600)',
+        # id              => '994',
+        # developId       => 'm',
+        # knownFreqs      => '868.3',
+        # datarate        => '8.842',
+        # sync            => '2DD4',
+        # modulation      => '2-FSK',
+        # rfmode          => 'LaCrosse_mode_4',
+        # register        => ['0001','012E','0246','0302','042D','05D4','06FF','0700','0802','0900','0A00','0B06','0C00','0D21','0E65','0F6A','1088','1165','1206','1322','14F8','1556','1607','1700','1818','1916','1A6C','1B43','1C68','1D91','1E87','1F6B','20F8','2156','2211','23EC','242A','2517','2611','2741'],
+      # },
+    # "995" =>  # MAX
+              # # settings from CUL
+      # {
+        # name            => 'MAX',
+        # comment         => '',
+        # id              => '995',
+        # developId       => 'm',
+        # knownFreqs      => '',
+        # datarate        => '',
+        # sync            => 'C626',
+        # modulation      => '2-FSK',
+        # rfmode          => 'MAX',
+        # register        => ['0007','012E','0246','0307','04C6','0526','06FF','070C','0845','0900','0A00','0B06','0C00','0D21','0E65','0F6A','10C8','1193','1203','1322','14F8','1534','1607','173F','1828','1916','1A6C','1B43','1C40','1D91','1E87','1F6B','2000','2159','227F','233E','2481','2535','260B','2700'],
+      # },
+    # "996" =>  # RIO-Funkprotokoll
+              # # https://forum.fhem.de/index.php/topic,107239.msg1011812.html#msg1011812
+              # # send RIO in GFSK
+              # # https://wiki.fhem.de/wiki/Unbekannte_Funkprotokolle
+      # {
+        # name            => 'RIO Protocol, send GFSK',
+        # comment         => 'example: HS-8',
+        # id              => '996',
+        # developId       => 'm',
+        # knownFreqs      => '868.3',
+        # datarate        => '24.796',
+        # modulation      => 'GFSK',
+        # rfmode          => 'RIO',
+        # register        => ['000D','012E','022D','0347','04D3','0591','063D','0704','0832','0900','0A00','0B06','0C00','0D21','0E65','0F6F','1086','1190','1218','1323','14B9','1540','1607','1700','1818','1914','1A6C','1B07','1C00','1D91','1E87','1F6B','20F8','21B6','2211','23EF','240D','253E','261F','2741'],
+      # },
+    # "997" =>  # WMBus_C
+              # # settings from CUL
+      # {
+        # name            => 'WMBus_C',
+        # comment         => '',
+        # id              => '997',
+        # developId       => 'm',
+        # knownFreqs      => '',
+        # datarate        => '',
+        # modulation      => '2-FSK',
+        # rfmode          => 'WMBus_C',
+        # register        => ['0029','012E','023F','0307','04D3','0591','06FF','0704','0845','0900','0A00','0B0F','0C00','0D1E','0EC4','0FEC','108C','1122','1202','1322','14F8','1547','1607','1730','1804','1976','1A6C','1B03','1C40','1D91','1E87','1F6B','2000','2159','227F','233F','2488','2531','260B','2700'],
+        # #regexMatch      => qr/^9/,   # ToDo, check! fuer eine regexp Pruefung am Anfang vor dem method Aufruf
+      # },
+    # "998" =>  # WMBus_S
+              # # settings from CUL
+      # {
+        # name            => 'WMBus_S',
+        # comment         => '',
+        # id              => '998',
+        # developId       => 'm',
+        # knownFreqs      => '',
+        # datarate        => '',
+        # modulation      => '2-FSK',
+        # rfmode          => 'WMBus_S',
+        # register        => ['0006','012E','0200','0300','0476','0596','06FF','0704','0802','0900','0A00','0B08','0C00','0D21','0E65','0F6A','106A','114A','1206','1322','14F8','1547','1607','1700','1818','192E','1A6D','1B04','1C09','1DB2','1E87','1F6B','2000','2159','227F','2337','2481','2535','2609','2700'],
+        # #regexMatch      => qr/^9/,   # ToDo, check! fuer eine regexp Pruefung am Anfang vor dem method Aufruf
+      # },
+    # "999" =>  # WMBus_T
+              # # settings from CUL
+      # {
+        # name            => 'WMBus_T',
+        # comment         => '',
+        # id              => '999',
+        # developId       => 'm',
+        # knownFreqs      => '',
+        # datarate        => '',
+        # modulation      => '2-FSK',
+        # rfmode          => 'WMBus_T',
+        # register        => ['0006','012E','0200','0300','0454','053D','06FF','0704','0802','0900','0A00','0B08','0C00','0D21','0E6B','0FD0','105C','1104','1206','1322','14F8','1544','1607','1700','1818','192E','1ABF','1B43','1C09','1DB5','1E87','1F6B','2000','2159','227F','233E','2481','2535','2609','2700'],
+        # #regexMatch      => qr/^9/,   # ToDo, check! fuer eine regexp Pruefung am Anfang vor dem method Aufruf
+      # },
+
+    ########################################################################
+    #### ### old information from incomplete implemented protocols #### ####
 
           # ""  =>  ## Livolo
           # https://github.com/RFD-FHEM/RFFHEM/issues/29
