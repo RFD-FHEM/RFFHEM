@@ -1137,8 +1137,9 @@ sub SD_UT_Set {
 #####################################
 sub SD_UT_Undef {
   my ($hash, $name) = @_;
-  delete($modules{SD_UT}{defptr}{$hash->{DEF}})
-    if(defined($hash->{DEF}) && defined($modules{SD_UT}{defptr}{$hash->{DEF}}));
+  if(defined($hash->{DEF}) && defined($modules{SD_UT}{defptr}{$hash->{DEF}})) {
+    delete($modules{SD_UT}{defptr}{$hash->{DEF}})
+  };
   return;
 }
 
@@ -1962,7 +1963,7 @@ sub SD_UT_Attr {
 
 ###################################
 sub SD_UT_bin2tristate {
-  my $bitData = shift;
+  my $bitData = shift // return $bitData;
   my %bintotristate=(
      '00' => '0',
      '10' => 'F',
