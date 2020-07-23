@@ -729,7 +729,7 @@ my %models = (
 );
 
 #############################
-sub SD_UT_Initialize() {
+sub SD_UT_Initialize {
   my ($hash) = @_;
   $hash->{Match}      = '^P(?:14|20|26|29|30|34|46|68|69|76|81|83|86|90|91|91.1|92|93|95|97|99|104|105)#.*';
   $hash->{DefFn}      = 'SD_UT_Define';
@@ -757,7 +757,7 @@ sub SD_UT_Initialize() {
 }
 
 #############################
-sub SD_UT_Define() {
+sub SD_UT_Define {
   my ($hash, $def) = @_;
   my @a = split("[ \t][ \t]*", $def);
   my $iodevice;
@@ -849,7 +849,7 @@ sub SD_UT_Define() {
 }
 
 ###################################
-sub SD_UT_Set() {
+sub SD_UT_Set {
   my ( $hash, $name, @a ) = @_;
   my $cmd = $a[0];
   my $ioname = $hash->{IODev}{NAME};
@@ -1135,7 +1135,7 @@ sub SD_UT_Set() {
 }
 
 #####################################
-sub SD_UT_Undef() {
+sub SD_UT_Undef {
   my ($hash, $name) = @_;
   delete($modules{SD_UT}{defptr}{$hash->{DEF}})
     if(defined($hash->{DEF}) && defined($modules{SD_UT}{defptr}{$hash->{DEF}}));
@@ -1144,7 +1144,7 @@ sub SD_UT_Undef() {
 
 
 ###################################
-sub SD_UT_Parse() {
+sub SD_UT_Parse {
   my ($iohash, $msg) = @_;
   my $ioname = $iohash->{NAME};
   my ($protocol,$rawData) = split('#',$msg);
@@ -1774,7 +1774,7 @@ sub SD_UT_Parse() {
 }
 
 ###################################
-sub SD_UT_Attr() {
+sub SD_UT_Attr {
   my ($cmd, $name, $attrName, $attrValue) = @_;
   my $hash = $defs{$name};
   my $typ = $hash->{TYPE};
