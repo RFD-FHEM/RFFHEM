@@ -2946,7 +2946,7 @@ sub SIGNALduino_Attr(@) {
 		my $oldAttrib = AttrVal($name, 'rfmode', 'SlowRF');
 
 		if ( ($aVal ne $oldAttrib) && ($hash->{DevState} eq 'initialized') && (InternalVal($hash->{NAME},"cc1101_available",0) == 1) ) {
-			$hash->{logMethod}->($name, 3, "$name: Attr, $aName set to $aVal (please check protocollist)");
+			$hash->{logMethod}->($name, 3, "$name: Attr, $aName set to $aVal (please check activated protocols via 'Display protocollist')");
 
 			my $rfmode;
 			if ($aVal ne 'SlowRF') {
@@ -2974,7 +2974,10 @@ sub SIGNALduino_Attr(@) {
 					}
 				}
 				$hash->{logMethod}->($name, 3, "$name: Attr, $aName set to $aVal (nothing rfmode entry found on SD_ProtocolData)") if($rfmode eq '-1');
-			}
+			} else {
+        SIGNALduino_AddSendQueue($hash,'e');
+        $hash->{logMethod}->($name, 1, "$name: Attr, $aName set to $aVal (ASK/OOK mode load default register settings from uC)");
+      }
 		}
 	}
 	return ;
@@ -4262,6 +4265,11 @@ USB-connected devices (SIGNALduino):<br>
     Specify the frequency of your SIGNALduino. Default is 433 Mhz.<br>
     Since the PA table values are frequency-dependent,the specified frequency will be used.
   </li><br>
+  <a name="cc1101_reg_user"></a>
+  <li>cc1101_reg_user<br>
+    Storage space for individual register configurations or values. One or more values ​​can be saved.<br>
+    <u>note:</u> The value consists of the register address followed by the value. Multiple values ​​are separated by commas. example: 04D3,0591
+  </li><br>
   <a name="debug"></a>
   <li>debug<br>
     This will bring the module in a very verbose debug output. Usefull to find new signals and verify if the demodulation works correctly.
@@ -4366,6 +4374,29 @@ USB-connected devices (SIGNALduino):<br>
   <a name="rawmsgEvent"></a>
   <li>rawmsgEvent<br>
     When set to "1" received raw messages triggers events
+  </li><br>
+  <a name="rfmode"></a>
+  <li>rfmode<br>
+    Configures the RF transceiver of the SIGNALduino (CC1101). The available arguments:
+    <ul>
+      <li>KOPP_FC<br>
+        modulation GFSK, Datarate=4.7855 kbps, Sync Word=AA54, frequency 868.3MHz
+      </li>
+      <li>Lacrosse_mode1<br>
+        modulation 2-FSK, Datarate=17.25769 kbps, Sync Word=2DD4, frequency 868.3MHz<br>
+        <ul><small>example: TX25-IT, TX27-IT, TX29-IT, TX29DTH-IT, TX37, 30.3143.IT, 30.3144.IT</small></ul>
+      </li>
+      <li>Lacrosse_mode2<br>
+        modulation 2-FSK, Datarate=9.579 kbps, Sync Word=2DD4, frequency 868.3MHz<br>
+        <ul><small>example: TX35TH-IT, TX35DTH-IT, TX38-IT, 30.3155WD, 30.3156WD</small></ul>
+      </li>
+      <li>PCA301<br>
+        modulation 2-FSK, Datarate=6.62041 kbps, Sync Word=2DD4, frequency 868.950MHz
+      </li>
+      <li>SlowRF<br>
+        modulation ASK/OOK, <b>loads the standard setting from the uC</b>
+      </li>
+    </ul>
   </li><br>
   <a name="suppressDeviceRawmsg"></a>
   <li>suppressDeviceRawmsg<br>
@@ -4776,6 +4807,11 @@ USB-connected devices (SIGNALduino):<br>
     Legt die Frequenz des SIGNALduino fest. Standard is 433 Mhz.<br>
     Da die Werte für PA Werte Frequenzabhängig sind, wird für das Setzen der Register die hier hinterlegte Frequenz verwendet.
   </li><br>
+  <a name="cc1101_reg_user"></a>
+  <li>cc1101_reg_user<br>
+    Speicherplatz für individuelle Registerkonfigurationen bzw. Werte. Es k&ouml;nnen einzelne oder mehrere Werte gespeichert werden.<br>
+    <u>Hinweis:</u> Der Wert ist bestehend aus der Registeradresse gefolgt vom Wert. Mehrere Werte werden mit Komma getrennt. Beispiel: 04D3,0591
+  </li><br>
   <a name="debug"></a>
   <li>debug<br>
     Dies bringt das Modul in eine sehr ausf&uuml;hrliche Debug-Ausgabe im Logfile. Somit lassen sich neue Signale finden und Signale &uuml;berpr&uuml;fen, ob die Demodulation korrekt funktioniert.
@@ -4878,6 +4914,29 @@ USB-connected devices (SIGNALduino):<br>
   <a name="rawmsgEvent"></a>
   <li>rawmsgEvent<br>
     Bei der Einstellung "1", l&ouml;sen empfangene Rohnachrichten Ereignisse aus.
+  </li><br>
+  <a name="rfmode"></a>
+  <li>rfmode<br>
+    Konfiguriert den RF Transceiver des SIGNALduino (CC1101). Verf&uuml;gbare Argumente sind:
+    <ul>
+      <li>KOPP_FC<br>
+        Modulation GFSK, Datenrate=4.7855 kbps, Sync Word=AA54, Frequenz 868.3MHz
+      </li>
+      <li>Lacrosse_mode1<br>
+        Modulation 2-FSK, Datenrate=17.25769 kbps, Sync Word=2DD4, Frequenz 868.3MHz<br>
+        <ul><small>Beispiel: TX25-IT, TX27-IT, TX29-IT, TX29DTH-IT, TX37, 30.3143.IT, 30.3144.IT</small></ul>
+      </li>
+      <li>Lacrosse_mode2<br>
+        Modulation 2-FSK, Datenrate=9.579 kbps, Sync Word=2DD4, Frequenz 868.3MHz<br>
+        <ul><small>Beispiel: TX35TH-IT, TX35DTH-IT, TX38-IT, 30.3155WD, 30.3156WD</small></ul>
+      </li>
+      <li>PCA301<br>
+        Modulation 2-FSK, Datenrate=6.62041 kbps, Sync Word=2DD4, Frequenz 868.950MHz
+      </li>
+      <li>SlowRF<br>
+        Modulation ASK/OOK, <b>l&auml;d die Standard Einstellung vom uC</b>
+      </li>
+    </ul>
   </li><br>
   <a name="suppressDeviceRawmsg"></a>
   <li>suppressDeviceRawmsg<br>
