@@ -338,7 +338,8 @@ package main;
 use strict;
 use warnings;
 no warnings 'portable';  # Support for 64-bit ints required
-#use SetExtensions;
+
+our $VERSION = '200723';
 
 sub SD_UT_bin2tristate;
 sub SD_UT_tristate2bin;
@@ -862,8 +863,8 @@ sub SD_UT_Set {
   my $repeats = AttrVal($name,'repeats', '5');
   my $UTclock = AttrVal($name,'UTclock', undef);
 
-  Log3 $name, 4, "$ioname: SD_UT_Set attr_model=$model name=$name (before check)" if($cmd ne '?');
-  return $ret if ($defs{$name}->{DEF} eq 'unknown');  # no setlist
+  if ($cmd ne '?') { Log3 $name, 4, "$ioname: SD_UT_Set attr_model=$model name=$name (before check)" };
+  if ($defs{$name}->{DEF} eq 'unknown') { return $ret };  # no setlist
 
   my @definition = split(' ', $hash->{DEF});          # split adress from def
   if ($cmd ne '?') {
@@ -1963,7 +1964,7 @@ sub SD_UT_Attr {
 
 ###################################
 sub SD_UT_bin2tristate {
-  my $bitData = shift // return $bitData;
+  my $bitData = shift // return undef;
   my %bintotristate=(
      '00' => '0',
      '10' => 'F',
@@ -1978,7 +1979,7 @@ sub SD_UT_bin2tristate {
 
 ###################################
 sub SD_UT_tristate2bin {
-  my $tsData = shift;
+  my $tsData = shift // return undef;
   my %tristatetobin=(
      '0' => '00',
      'F' => '10',
