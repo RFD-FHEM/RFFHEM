@@ -1,20 +1,11 @@
 2020-07-23 - Update 14_SD_UT.pm
-
-  * revised code
-2020-07-23 - Merge branch 'master_SD_UT_perlcritic' of https://github.com/HomeAutoUser/RFFHEM into master_SD_UT_perlcritic
-2020-07-23 - Update 14_SD_UT.pm
-
-  * revised spelling
-2020-07-22 - Update 14_SD_UT.pm
-
-  * revised code https://github.com/RFD-FHEM/RFFHEM/pull/877#pullrequestreview-453692819
-  * revised code https://github.com/RFD-FHEM/RFFHEM/pull/877#pullrequestreview-453693240
-2020-07-22 - Update 14_SD_UT.pm
-
-  * return to old syntax ( new systax bring 'Too many arguments for main:: ...'  unclear mistakes )
-2020-07-22 - Update 14_SD_UT.pm
-
   * revised for perl critic
+
+2020-07-23 - Update 14_SD_BELL.pm - PerlCritic (#878)
+  
+2020-07-23 - Update 14_SD_BELL.pm
+  * revised for perl critic
+  
 2020-07-20 - new protocol for remote control BF-301 (#874)
 
 * 14_SD_UT new protocol 105 for remote control BF-301
