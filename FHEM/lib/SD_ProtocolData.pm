@@ -2742,7 +2742,7 @@ package lib::SD_ProtocolData;
         comment         => 'example: TX35-IT,TX35DTH-IT,30.3155WD,30.3156WD,EMT7110',
         id              => '103',
         knownFreqs      => '868.3',
-        datarate        => '9.579',
+        datarate        => '9579',
         sync            => '2DD4',
         modulation      => '2-FSK',
         regexMatch      => qr/^9/,   # ToDo, check! fuer eine regexp Pruefung am Anfang vor dem method Aufruf
@@ -2859,6 +2859,7 @@ package lib::SD_ProtocolData;
         # register        => ['000D','012E','022D','0347','04D3','0591','063D','0704','0832','0900','0A00','0B06','0C00','0D21','0E65','0F6F','1086','1190','1218','1323','14B9','1540','1607','1700','1818','1914','1A6C','1B07','1C00','1D91','1E87','1F6B','20F8','21B6','2211','23EF','240D','253E','261F','2741'],
       # },
     # "997" =>  # WMBus_C
+              # # https://wiki.fhem.de/wiki/WMBUS
               # # settings from CUL
       # {
         # name            => 'WMBus_C',
@@ -2873,6 +2874,7 @@ package lib::SD_ProtocolData;
         # #regexMatch      => qr/^9/,   # ToDo, check! fuer eine regexp Pruefung am Anfang vor dem method Aufruf
       # },
     # "998" =>  # WMBus_S
+              # # https://wiki.fhem.de/wiki/WMBUS
               # # settings from CUL
       # {
         # name            => 'WMBus_S',
@@ -2887,6 +2889,7 @@ package lib::SD_ProtocolData;
         # #regexMatch      => qr/^9/,   # ToDo, check! fuer eine regexp Pruefung am Anfang vor dem method Aufruf
       # },
     # "999" =>  # WMBus_T
+              # # https://wiki.fhem.de/wiki/WMBUS
               # # settings from CUL
       # {
         # name            => 'WMBus_T',

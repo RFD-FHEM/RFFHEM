@@ -2658,18 +2658,28 @@ sub SIGNALduino_Parse_MN {
 	my $match;
 	my $modulation;
 	my $message_dispatched=0;
+  my $rfmodeAttr = AttrVal($name,'rfmode','SlowRF');
 
 	mnIDLoop:
 	for my $id (@{$hash->{mnIdList}}) {
-#		my $method = $hash->{protocolObject}->checkProperty($id,'method','unspecified');
-	   	my $method = $hash->{protocolObject}->getProperty($id,'method');
+	  my $rfmode = $hash->{protocolObject}->getProperty($id,'rfmode');
+    if (!defined $rfmode) {
+			$hash->{logMethod}->($name, 5, qq[$name: Parse_MN, Error! id $id has no rfmode. Please define it in file SD_ProtocolData.pm]);
+			next mnIDLoop;
+    } elsif ($rfmode ne $rfmodeAttr) {
+			$hash->{logMethod}->($name, 5, qq[$name: Parse_MN, Error! id $id wrong rfmode (attribute $rfmodeAttr vs $rfmode)]);
+			next mnIDLoop;
+    }
+
+	  my $method = $hash->{protocolObject}->getProperty($id,'method');
 	    if (!exists &$method || !defined &{ $method }) {
-			$hash->{logMethod}->($name, 5, qq[$name: Parse_MN, Error! unknown function=$method. Please define it in file SD_ProtocolData.pm]);
+			$hash->{logMethod}->($name, 5, qq[$name: Parse_MN, Error! id $id unknown function=$method. Please define it in file SD_ProtocolData.pm]);
 			next mnIDLoop; 
 		}
+
 		my $length_min=$hash->{protocolObject}->checkProperty($id,'length_min',-1);
 		if ($hlen < $length_min) {
-			$hash->{logMethod}->($name, 4, qq[$name: Parse_MN, Error! ID=$id msg=$rawData ($hlen) too short, min=$length_min]);
+			$hash->{logMethod}->($name, 4, qq[$name: Parse_MN, Error! id $id msg=$rawData ($hlen) too short, min=$length_min]);
 			next mnIDLoop;
 		}
 
