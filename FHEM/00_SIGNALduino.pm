@@ -305,7 +305,7 @@ sub SIGNALduino_Initialize {
 					  .' minsecs'
 					  .' noMsgVerbose:0,1,2,3,4,5'
 					  .' rawmsgEvent:1,0'
-					  .' rfmode:Kopp_FC,Lacrosse_mode1,Lacrosse_mode2,Lacrosse_mode4,PCA301,SlowRF'
+					  .' rfmode:KOPP_FC,Lacrosse_mode1,Lacrosse_mode2,Lacrosse_mode4,PCA301,SlowRF'
 					  .' suppressDeviceRawmsg:1,0'
 					  .' updateChannelFW:stable,testing'
 					  .' whitelist_IDs'
@@ -2955,7 +2955,7 @@ sub SIGNALduino_Attr(@) {
 					$rfmode=$hash->{protocolObject}->checkProperty($id,'rfmode',-1);
 
 					if ($rfmode eq $aVal) {
-						$hash->{logMethod}->($name, 5, qq[$name: Attr, rfmode found on ID=$id]);
+						$hash->{logMethod}->($name, 4, qq[$name: Attr, rfmode found on ID=$id]);
 						my $register=$hash->{protocolObject}->checkProperty($id,'register', -1);
 
 						if ($register != -1) {
@@ -2973,7 +2973,7 @@ sub SIGNALduino_Attr(@) {
 						}
 					}
 				}
-				$hash->{logMethod}->($name, 3, "$name: Attr, $aName set to $aVal (nothing rfmode entry found on SD_ProtocolData)") if($rfmode eq '-1');
+				if($rfmode eq '-1') { $hash->{logMethod}->($name, 3, "$name: Attr, $aName set to $aVal (nothing rfmode entry found on SD_ProtocolData)") };
 			} else {
         SIGNALduino_AddSendQueue($hash,'e');
         $hash->{logMethod}->($name, 1, "$name: Attr, $aName set to $aVal (ASK/OOK mode load default register settings from uC)");
