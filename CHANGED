@@ -1,3 +1,7 @@
+2020-07-25 - Update 00_SIGNALduino.pm
+
+  * added send KOPP_FC
+    (tested with CUL & aCUL from SIGNALDuino)
 2020-07-25 - Merge remote-tracking branch 'upstream/master' into dev-r35_xFSK_TEST
 2020-07-25 - revised test after attr rfmode & Parse_MN adaptation
 
