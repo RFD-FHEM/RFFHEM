@@ -1,3 +1,9 @@
+2020-07-25 - revised test after attr rfmode & Parse_MN adaptation
+
+00_SIGNALduino.pm
+  * attribute rfmode needs on dummy device
+test_07_sub_SIGNALduino_Parse_MN-definition.txt
+  * revised and extension tests
 2020-07-24 - optimize & comments
 
 00_SIGNALduino.pm
