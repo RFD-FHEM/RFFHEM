@@ -2951,7 +2951,9 @@ sub SIGNALduino_Attr(@) {
 	}
 	elsif ($aName eq 'rfmode')	# change receive mode
 	{
-		return 'ERROR: This attribute is only available for a receiver with CC1101.' if ( ($init_done == 1) && (InternalVal($hash->{NAME},"cc1101_available",0) == 0) );
+		if ( ($init_done == 1) && (InternalVal($hash->{NAME},"cc1101_available",0) == 0) && (AttrVal($name, 'dummy', '0') != 1) ) {
+      return 'ERROR: This attribute is only available for a receiver with CC1101.';
+    }
 
 		my $oldAttrib = AttrVal($name, 'rfmode', 'SlowRF');
 
