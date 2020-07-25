@@ -889,7 +889,7 @@ sub SIGNALduino_Set_LaCrossePairForSec {
 	my ($hash, @a) = @_;
 
 	#              set NAME           a[0]      a[1]             a[2]
-	return "Usage: set $hash->{NAME} $a[0] <seconds_active> [ignore_battery " if(!$a[0] || $a[1] !~ m/^\d+$/xms || (defined $a[2] && $a[2] ne 'ignore_battery') );
+	return "Usage: set $hash->{NAME} $a[0] <seconds_active> [ignore_battery]" if(!$a[0] || $a[1] !~ m/^\d+$/xms || (defined $a[2] && $a[2] ne 'ignore_battery') );
 	$hash->{LaCrossePair} = 2;  # LaCrosse autoCreateState: 0 = autoreate not defined | 1 = autocreate defined | 2 = autocreate active
 	$hash->{logMethod}->($hash->{NAME}, 4, "$hash->{NAME}: Set_LaCrossePairForSec, LaCrosse autocreate active for $a[1] seconds");
 	InternalTimer(gettimeofday()+$a[1], 'SIGNALduino_RemoveLaCrossePair', $hash, 0);
@@ -1477,8 +1477,67 @@ sub SIGNALduino_Write {
 	    $sum	= 12;
   	}
     $msg = $hash->{protocolObject}->PreparingSend_FS20_FHT($id, $sum, $msg);
-  } elsif($fn eq 'k') {   # KOPP_FC
-		$hash->{logMethod}->($name, 4, "$name: Write, cmd $fn sending KOPP_FC");
+  } elsif($fn eq 'k') {   # KOPP_FC   (no outsourcing  in SD_Protocols.pm due to loop and set hash values)
+    $hash->{logMethod}->($name, 4, "$name: Write, cmd $fn sending KOPP_FC");
+    $fn='raw';
+
+    # https://wiki.fhem.de/wiki/Kopp_Allgemein | https://github.com/heliflieger/a-culfw/blob/master/culfw/clib/kopp-fc.c
+    #kr07C2AD1A30CC0F0328
+    #||  ||||  ||    ++-------- Transmitter Code 2
+    #||  ||||  ++-------------- Keycode
+    #||  ++++------------------ Transmitter Code 1
+    #++------------------------ kr wird von der culfw bei Empfang einer Kopp Botschaft als Kennung gesendet
+
+    # $message = "s"
+    #  . $keycodehex
+    #  . $hash->{TRANSMITTERCODE1}
+    #  . $hash->{TRANSMITTERCODE2}
+    #  . $hash->{TIMEOUT}
+    #  . "N";                       # N for do not print messages (FHEM will write error messages to log files if CCD/CUL sends status info
+
+    my $Keycode = substr($msg,1,2);
+    my $TransCode1 = substr($msg,3,4);
+    my $TransCode2 = substr($msg,7,2);
+    my $blkck = 0xAA;
+    my $d;
+
+    ### The device to be sent stores something in own hash. Search for names to access them ###
+    #### The variant with the loop does not require any adjustment in the original Kopp module. ####
+    my $KOPPname;
+    KOPPname:
+    foreach my $d (keys %defs) {
+      if(defined($defs{$d}) && $defs{$d}{TYPE} eq 'KOPP_FC') {
+        if ( (exists $defs{$d}->{TRANSMITTERCODE1} && $defs{$d}->{TRANSMITTERCODE1} eq $TransCode1) && 
+              (exists $defs{$d}->{TRANSMITTERCODE2} && $defs{$d}->{TRANSMITTERCODE2} eq $TransCode2) && 
+                (exists $defs{$d}->{KEYCODE} && $defs{$d}->{KEYCODE} eq $Keycode)
+              ) {
+          $hash->{logMethod}->($name, 5, "$name: Write, PreparingSend KOPP_FC found device with name $d");
+          $KOPPname = $d;
+        }
+        last KOPPname;
+      }
+    }
+
+    ## Internals blkctr initialize if not available
+    if (!exists($defs{$KOPPname}->{blkctr})) {
+      $defs{$KOPPname}->{blkctr} = 0;
+      $hash->{logMethod}->($name, 5, "$name: Write, PreparingSend KOPP_FC set blkctr in hash $KOPPname");
+    ## Internals blkctr increases with each send
+    }
+
+    my $dmsg = '07' . $TransCode1 . sprintf("%02x",$defs{$KOPPname}->{blkctr}) . $Keycode . 'CC0F' . $TransCode2;
+
+    ## checksum to calculate
+    for (my $i = 0; $i < 8; $i++) {
+      $d = hex(substr($dmsg,$i*2,2));
+      $blkck ^= $d;
+    }
+
+    $dmsg.= sprintf("%02x",$blkck) . '000000000000;';
+    $msg = 'SN;R=13;N=4;D=' . $dmsg;            # N=4 | to compatible @Ralf
+
+    $defs{$KOPPname}->{blkctr}++;
+    $hash->{logMethod}->($name, 5, "$name: Write, PreparingSend KOPP_FC set blkctr in hash $KOPPname to ".$defs{$KOPPname}->{blkctr});
   }
   $hash->{logMethod}->($name, 5, "$name: Write, sending via Set $fn $msg");
 
@@ -2672,9 +2731,9 @@ sub SIGNALduino_Parse_MN {
     }
 
 	  my $method = $hash->{protocolObject}->getProperty($id,'method');
-	    if (!exists &$method || !defined &{ $method }) {
+	  if (!exists &$method || !defined &{ $method }) {
 			$hash->{logMethod}->($name, 5, qq[$name: Parse_MN, Error! id $id unknown function=$method. Please define it in file SD_ProtocolData.pm]);
-			next mnIDLoop; 
+			next mnIDLoop;
 		}
 
 		my $length_min=$hash->{protocolObject}->checkProperty($id,'length_min',-1);
