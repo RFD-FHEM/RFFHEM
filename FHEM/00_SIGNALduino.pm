@@ -38,7 +38,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-	SDUINO_VERSION            => 'v3.5.0',
+	SDUINO_VERSION            => '3.5.0',
 	SDUINO_INIT_WAIT_XQ       => 1.5,       # wait disable device
 	SDUINO_INIT_WAIT          => 2,
 	SDUINO_INIT_MAXRETRY      => 3,
@@ -258,7 +258,7 @@ my %matchListSIGNALduino = (
 			'28:SD_Keeloq'				=> '^P(?:87|88)#.*',
 			'29:SD_GT'						=> '^P49#[A-Fa-f0-9]+',
 			'30:LaCrosse'					=> '^(\\S+\\s+9 |OK\\sWS\\s)',
-			'31:KOPP_FC'					=> '^kr.*',
+			'31:KOPP_FC'					=> '^kr..................',
 			'32:PCA301'						=> '^\\S+\\s+24',
 			'X:SIGNALduino_un'		=> '^[u]\d+#.*',
 );
@@ -885,8 +885,8 @@ sub SIGNALduino_Set_LaCrossePairForSec {
 	my ($hash, @a) = @_;
 
 	#              set NAME                a[0]              a[1]             a[2]
-	return "Usage: set $hash->{NAME} $a[0] <seconds_active> [ignore_battery " if(!$a[0] || $a[1] !~ m/^\d+$/ || ($a[2] && $a[2] ne 'ignore_battery') );
-	$hash->{LaCrossePair} = 1;  # LaCrosse autoCreateState: 0 = autoreate not defined | 1 = autocreate defined | 2 = autocreate active
+	return "Usage: set $hash->{NAME} $a[0] <seconds_active> [ignore_battery]" if(!$a[0] || $a[1] !~ m/^\d+$/ || ($a[2] && $a[2] ne 'ignore_battery') );
+	$hash->{LaCrossePair} = 2;  # LaCrosse autoCreateState: 0 = autoreate not defined | 1 = autocreate defined | 2 = autocreate active
 	$hash->{logMethod}->($hash->{NAME}, 4, "$hash->{NAME}: Set_LaCrossePairForSec, LaCrosse autocreate active for $a[1] seconds");
 	InternalTimer(gettimeofday()+$a[1], 'SIGNALduino_RemoveLaCrossePair', $hash, 0);
 

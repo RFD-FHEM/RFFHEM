@@ -1,10 +1,22 @@
-2020-07-17 - dev-r35_xFSK - perlcritic (#873)
+2020-07-23 - Update 14_SD_UT.pm - PerlCritic (#877)
 
-* Update SD_ProtocolData.pm
-  * fix perlcritic Severity 3 - hard tabs
-2020-07-17 - Update SD_ProtocolData.pm
+* Update 14_SD_UT.pm
 
-  * fix perlcritic Severity 3 - hard tabs
+  * revised for perl critic
+
+2020-07-23 - Update 14_SD_UT.pm
+  * revised for perl critic
+
+2020-07-23 - Update 14_SD_BELL.pm
+  * revised for perl critic
+  
+2020-07-20 - new protocol for remote control BF-301 (#874)
+
+* 14_SD_UT new protocol 105 for remote control BF-301
+
+2020-07-20 - Merge branch 'master' into dev-r34_SD_BF-301
+2020-07-20 - 14_SD_UT new protocol 105 for remote control BF-301
+
 2020-07-17 - Hardware MAPLEMINI_F103CB added / documentation tabs replaced with whitespace (#869)
 
 * Update 00_SIGNALduino.pm
@@ -26,112 +38,47 @@ Added maple and maple with cc1101 to test json
 
 test_firmware_releases.json
   * extension data
-2020-07-17 - Merge branch 'dev-r35_xFSK_doc' of github.com:HomeAutoUser/RFFHEM into dev-r35_xFSK_doc
-2020-07-17 - adjust logoutput & loglevel
-00_SIGNALduino.pm
-  * revised loglevel from Parse_MN
-  * revised logoutput text SIGNALduino_Get_Command
-  * log output adapted to hardware
-  * revisions indented ( no tabs, only spaces ) and checked syntax with perl ./ontrib/commandref_join.pl
-  * compare documentation DE <-> EN
-  * added attribute ESP32cc1101
 
-2020-07-16 - Update 00_SIGNALduino.pm
-  * fix logoutput on eventlogging (old regex cut to much in fhem logfile)
-2020-07-15 - Update 00_SIGNALduino.pm
+* Update SD_ProtocolData.pm
+  * fix perlcritic Severity 3 - hard tabs
 
-2020-07-14 - dev-r35_xFSK - perlcritic (#868)
-
-Update 00_SIGNALduino.pm
-  * fix some perlcritic warnings
+2020-07-16 - Update SD_ProtocolData.pm
+  Replaced svn revision with version from repo
+2020-07-16 - lib\SD_ProtocolData.pm
+  Update $ID$ / needed for  SVN commit
 2020-07-14 - Update 00_SIGNALduino.pm
+  Bugfix: fix logoutput on eventlogging
+  Bugfix: eventlogging logoutput (#867)
+  Bugfix: fix some perlcritic warnings (#868)
+2020-07-04 - Merge branch 'master' into rel-3.4.4
 
-  * fix some perlcritic warnings
-2020-07-14 - dev-r35_xFSK - eventlogging logoutput (#867)
+07.05.2020
+  00_SIGNALduino.pm:
+          Bugfix: Fix some perlcritic 5 warnings
+          Bugfix: some operator fixes #835
+          Bugfix: Changed stingrefs to coderefs
+  10_FS10
+          Bugfix: revised for perlcritic
+  10_SD_GT
+          Bugfix: revised for perlcritic (#847)
 
-Update 00_SIGNALduino.pm
-  * fix logoutput on eventlogging
-2020-07-14 - Update 00_SIGNALduino.pm
+  14_SD_UT.pm
+          Feature: add attribute UTfrequency in (#845)
+          change: delete "$attr{$name}{room} = "SD_UT" if( not defined( $attr{$name}{room} ) );"
 
-  * fix logoutput on eventlogging
-2020-07-14 - Update 00_SIGNALduino.pm
+  SD_ProtocolData.pm
+          feature: new protocol 104 for remote control TR60C-1 (#844)
+          feature: new protocol 99 NAVARIS touch light switch (#841)
+          feature: new protocol 98 for wireless door bell GEA-028DB (#839)
 
-* remove old lines after "merge into"
-2020-07-14 - Merge branch 'dev-r34' into dev-r35_xFSK
 2020-07-04 - Fix some perlcritic 5 warnings in 3.4 (#863)
-* 00_SIGNALduino.pm
-Fix some perlcritic 5 warnings
-
-2020-07-03 - Merge remote-tracking branch 'remotes/origin/dev-r34' into dev-r34-perlcritic5
-
-2020-07-02 - Merge branch 'master' into dev-r35_xFSK
-2020-07-02 - Release 3.5.0
-
-00_SIGNALduino.pm:
-   Change: remove old readings, if user changes to a new device without cc1101 (#854)
-   Change: delete old readings from device with cc1101_available = 1
-   Change: revised loop code for PERL critic
-   Change: simple prototypes removed for PERL critic removed
-   Change: removed sub SIGNALduino_b2h
-   Change: added new sub SIGNALduino_calcRSSI to simplification code
-   New: added set cmd LaCrossePairForSec (for LaCrosse)
-   Bugfix: some operator fixes #835
-   Change: Changed stringrefs to coderefs
-
-SD_Protocols.pm:
-   Change: moved subs for converting in own package
-                 ConvLaCrosse, ConvKoppFreeControl and ConvPCA301
-
-SD_ProtocolData.pm: 
-  Bugfix: ID 56 fixed 
-  Feature: new protocol 104 for remote control TR60C-1 (#844)
-  Feature: new protocol 99 NAVARIS touch light switch (#841)
-  Feature: new protocol 98 for wireless door bell GEA-028DB (#839)
-
-10_FS10:
- Change: revised for perlcritic (#860)
- Feature: add attribute UTfrequency in 14_SD_UT.pm (#845) 
- Change: Multiple query "$ attrName eq 'model'" removed
- Change:  change commandref
-
-14_SD_UT: 
-  Bugfix:14_SD_UT.pm - If the device is created manually with IODev, then DEF is wrong. (#857)
-
-10_SD_GT:
-  Change: revised for perlcritic (#847)
-
-2020-06-15 - 10_FS10 revised for perlcritic (#860)
+  00_SIGNALduino.pm:
+          Fix some perlcritic 5 warnings
 
 2020-05-28 - Dev r34 - id56 - #848 (#849)
-  Update SD_ProtocolData.pm - ID 56 fix def & added doc https://github.com/RFD-FHEM/RFFHEM/issues/848
+  SD_ProtocolData.pm - ID 56 fix def & added doc https://github.com/RFD-FHEM/RFFHEM/issues/848
 
-2020-05-26 - 10_SD_GT revised for perlcritic (#847)
-
-2020-05-25 - add attribute UTfrequency in 14_SD_UT.pm (#845)
-  new attribute UTfrequency for individual transmission frequency
-  Multiple query "$ attrName eq 'model'" removed
-  change commandref
-  replace "foreach my $keys (keys %models)" with "if ( exists $models{$attrValue}" in line 1756
-  replace "foreach my $keys (sort keys %{$models{RC_10}{buttons}})" with "if ( exists $models{RC_10}{buttons}{$button} )" in line 1845
-  replace "foreach my $keys (keys %models)" with "grep { $models{$_}{hex_lengh} =~ /$hex_lengh/ } keys %models;" in line 1745
-  delete "$attr{$name}{room} = "SD_UT"	if( not defined( $attr{$name}{room} ) );"
-  change search for models with same hex_length
-  Reference to autocreate added
-  rename  hex_lengh in hex_length
-  Check values attribute UTfrequency added
-  Documentation for UTfrequency attribute added
-
-2020-05-02 - new protocol 104 for remote control TR60C-1 (#844)
-2020-04-23 - 00_SIGNALduino.pm Fix some perlcritic 5
-2020-04-22 - 00_SIGNALduino.pm - some operator fixes #835
-2020-04-21 - new protocol 99 NAVARIS touch light switch (#841)
-2020-04-21 - new protocol 98 for wireless door bell GEA-028DB (#839)
-
-2020-04-14 - 00_SIGNALduino.pm
-  Changed stringrefs to coderefs
-
-2020-04-13 - Bump dev-r34 to v3.4.4
-2020-04-13 - Merge remote-tracking branch 'remotes/origin/dev-r34' into v3.4.3
+2020-04-13 -  Update to svn revision number
 
 13.04.2020
   00_SIGNALduino.pm

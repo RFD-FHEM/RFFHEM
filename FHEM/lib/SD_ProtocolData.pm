@@ -62,8 +62,10 @@
 # xFSK - Information
 # datarate         => ' '       # transmission speed signal
 # modulation       => ' '       # modulation type of the signal
-# sync             => ' '       # sync parameter of signal in hex (example, 2DD4)
 # regexMatch       => ' '       # Regex objct which must match on the raw message qr//
+# register         => ' '       # specifics cc1101 settings [$adr$value]
+# rfmode           => ' '       # receive mode, default SlowRF -> ASK/OOK
+# sync             => ' '       # sync parameter of signal in hex (example, 2DD4)
 #
 ##### notice #### or #### info ############################################################################################################
 # !!! Between the keys and values ​​no tabs, please use spaces !!!
@@ -83,7 +85,7 @@ package lib::SD_ProtocolData;
   use strict;
   use warnings;
 
-  our $VERSION = '1.20';
+  our $VERSION = '1.21';
 
   our %protocols = (
     "0" =>  ## various weather sensors (500 | 9100)
@@ -449,6 +451,7 @@ package lib::SD_ProtocolData;
         knownFreqs       => '',
         clockrange       => [300,520],             # min , max
         format           => 'manchester',          # tristate can't be migrated from bin into hex!
+        clientmodule     => 'OREGON',
         modulematch      => '^(3[8-9A-F]|[4-6][0-9A-F]|7[0-8]).*',
         length_min       => '64',
         length_max       => '220',
@@ -1731,7 +1734,7 @@ package lib::SD_ProtocolData;
         preamble        => 'P61#',
         postamble       => '',
         clientmodule    => 'FS10',
-        length_min      => '38',       # eigentlich 41 oder 46 (Pruefsumme nicht bei allen)
+        length_min      => '30',       # 43-1=42 (letztes Bit fehlt) 42-12=30 (12 Bit Preambel)
         length_max      => '48',       # eigentlich 46
       },
     "62"  =>  ## Clarus_Switch
@@ -2687,10 +2690,13 @@ package lib::SD_ProtocolData;
         sync            => '2DD4',
         modulation      => '2-FSK',
         regexMatch      => qr/^9/,   # ToDo, check! fuer eine regexp Pruefung am Anfang vor dem method Aufruf
+        register        => ['0001','0246','0302','042D','05D4','06FF','0700','0802','0D21','0E65','0F6A','1089','115C','1206','1322','14F8','1556','1700','1818','1916','1B43','1C68','1D91','23EC','2517','2611','2B3E'],
+        rfmode          => 'Lacrosse_mode1',
         clientmodule    => 'LaCrosse',
         method          => \&lib::SD_Protocols::ConvLaCrosse,
       },
     "101" =>  # ELV PCA 301
+              # https://wiki.fhem.de/wiki/PCA301_Funkschaltsteckdose_mit_Energieverbrauchsmessung
               # MN;D=0405019E8700AAAAAAAA0F13AA16ACC0540AAA49C814473A2774D208AC0B0167;N=3;R=6;
               # MN;D=010503B7A101AAAAAAAA7492AA9885E53246E91113F897A4F80D30C8DE602BDF;N=3;
       {
@@ -2701,6 +2707,8 @@ package lib::SD_ProtocolData;
         datarate        => '6620.41',
         sync            => '2DD4',
         modulation      => '2-FSK',
+        register        => ['0001','0246','0307','042D','05D4','06FF','0700','0802','0D21','0E6B','0FD0','1088','110B','1206','1322','14F8','1553','1700','1818','1916','1B43','1C68','1D91','23ED','2517','2611','2B3E'],
+        rfmode          => 'PCA301',
         clientmodule    => 'PCA301',
         dispatchequals  => 'true',
         length_min      => '24',
@@ -2708,6 +2716,7 @@ package lib::SD_ProtocolData;
       },
     "102" =>  # KoppFreeControl
               # https://forum.fhem.de/index.php/topic,106594.msg1008936.html?PHPSESSID=er8d3f2ar1alq3rcijmu4efffo#msg1008936 @Ralf9
+              # https://wiki.fhem.de/wiki/Kopp_Allgemein
               # MN;D=07FA5E1721CC0F02FE000000000000;
       {
         name            => 'KoppFreeControl',
@@ -2718,6 +2727,8 @@ package lib::SD_ProtocolData;
         sync            => 'AA54',
         modulation      => 'GFSK',
         regexMatch      => qr/^0/,   # ToDo, check! fuer eine regexp Pruefung am Anfang vor dem method Aufruf
+        register        => ['0001','012E','0246','0304','04AA','0554','060F','07E0','0800','0900','0A00','0B06','0C00','0D21','0E65','0F6A','1097','1183','1216','1363','14B9','1547','1607','170C','1829','1936','1A6C','1B07','1C40','1D91','1E87','1F6B','20F8','2156','2211','23EF','240A','253D','261F','2741'],
+        rfmode          => 'KOPP_FC',
         clientmodule    => 'KOPP_FC',
         method          => \&lib::SD_Protocols::ConvKoppFreeControl,
       },
@@ -2731,10 +2742,12 @@ package lib::SD_ProtocolData;
         comment         => 'example: TX35-IT,TX35DTH-IT,30.3155WD,30.3156WD,EMT7110',
         id              => '103',
         knownFreqs      => '868.3',
-        datarate        => '9.579',
+        datarate        => '9579',
         sync            => '2DD4',
         modulation      => '2-FSK',
         regexMatch      => qr/^9/,   # ToDo, check! fuer eine regexp Pruefung am Anfang vor dem method Aufruf
+        register        => ['0001','0246','0302','042D','05D4','06FF','0700','0802','0D21','0E65','0F6A','1088','1182','1206','1322','14F8','1556','1700','1818','1916','1B43','1C68','1D91','23EC','2516','2611','2B3E'],
+        rfmode          => 'Lacrosse_mode2',
         clientmodule    => 'LaCrosse',
         method          => \&lib::SD_Protocols::ConvLaCrosse,
       },
@@ -2760,10 +2773,32 @@ package lib::SD_ProtocolData;
         length_min      => '16',
         length_max      => '16',
       },
+    "105" =>  # Remote control BF-301 from Shenzhen BOFU Mechanic & Electronic Co., Ltd.
+              # Protocol description found on https://github.com/akirjavainen/markisol/blob/master/Markisol.ino
+              # original remotes repeat 8 (multi) or 10 (single) times by default
+              # https://github.com/RFD-FHEM/RFFHEM/issues/861 stsirakidis 2020-06-27
+              # BF_301_FAD0 down   MU;P0=-697;P1=5629;P2=291;P3=3952;P4=-2459;P5=1644;P6=-298;P7=689;D=34567676767676207620767620762020202076202020762020207620202020207676762076202020767614567676767676207620767620762020202076202020762020207620202020207676762076202020767614567676767676207620767620762020202076202020762020207620202020207676762076202020767614;CP=2;R=41;O;
+              # BF_301_FAD0 stop   MU;P0=5630;P1=3968;P2=-2458;P3=1642;P4=-285;P5=690;P6=282;P7=-704;D=12345454545454675467545467546767676754676767546754675467676767675454546754676767675402345454545454675467545467546767676754676767546754675467676767675454546754676767675402345454545454675467545467546767676754676767546754675467676767675454546754676767675402;CP=6;R=47;O;
+              # BF_301_FAD0 up     MU;P0=-500;P1=5553;P2=-2462;P3=1644;P4=-299;P5=679;P6=298;P7=-687;D=01234545454545467546754546754676767675467676767675454546767676767545454675467546767671234545454545467546754546754676767675467676767675454546767676767545454675467546767671234545454545467546754546754676767675467676767675454546767676767545454675467546767671;CP=6;R=48;O;
+      {
+        name            => 'BF-301',
+        comment         => 'Remote control',
+        id              => '105',
+        knownFreqs      => '433.92',
+        one             => [2,-1],       # 660,-330
+        zero            => [1,-2],       # 330,-660
+        start           => [17,-7,5,-1], # 5610,-2310,1650,-330
+        clockabs        => 330,
+        format          => 'twostate',
+        clientmodule    => 'SD_UT',
+        modulematch     => '^P105#',
+        preamble        => 'P105#',
+        length_min      => '40',
+        length_max      => '40',
+      },
 
     ########################################################################
     #### ### old information from incomplete implemented protocols #### ####
-    ########################################################################
 
           # ""  =>  ## Livolo
           # https://github.com/RFD-FHEM/RFFHEM/issues/29
@@ -2793,6 +2828,5 @@ package lib::SD_ProtocolData;
       # },
 
     ########################################################################
-
   );
 }
