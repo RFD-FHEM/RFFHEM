@@ -259,7 +259,7 @@ my %matchListSIGNALduino = (
 			'28:SD_Keeloq'				=> '^P(?:87|88)#.*',
 			'29:SD_GT'						=> '^P49#[A-Fa-f0-9]+',
 			'30:LaCrosse'					=> '^(\\S+\\s+9 |OK\\sWS\\s)',
-			'31:KOPP_FC'					=> '^kr..................',
+			'31:KOPP_FC'					=> '^kr\w{18,}',
 			'32:PCA301'						=> '^\\S+\\s+24',
 			'X:SIGNALduino_un'		=> '^[u]\d+#.*',
 );
@@ -1522,21 +1522,20 @@ sub SIGNALduino_Write {
     if (!exists($defs{$KOPPname}->{blkctr})) {
       $defs{$KOPPname}->{blkctr} = 0;
       $hash->{logMethod}->($name, 5, "$name: Write, PreparingSend KOPP_FC set blkctr in hash $KOPPname");
-    ## Internals blkctr increases with each send
     }
 
     my $dmsg = '07' . $TransCode1 . sprintf("%02x",$defs{$KOPPname}->{blkctr}) . $Keycode . 'CC0F' . $TransCode2;
 
     ## checksum to calculate
-    for (my $i = 0; $i < 8; $i++) {
+    for my $i (0..7) {
       $d = hex(substr($dmsg,$i*2,2));
       $blkck ^= $d;
     }
 
     $dmsg.= sprintf("%02x",$blkck) . '000000000000;';
-    $msg = 'SN;R=13;N=4;D=' . $dmsg;            # N=4 | to compatible @Ralf
+    $msg = 'SN;R=13;N=4;D=' . $dmsg;                     # N=4 | to compatible @Ralf
 
-    $defs{$KOPPname}->{blkctr}++;
+    $defs{$KOPPname}->{blkctr}++;                        # Internals blkctr increases with each send
     $hash->{logMethod}->($name, 5, "$name: Write, PreparingSend KOPP_FC set blkctr in hash $KOPPname to ".$defs{$KOPPname}->{blkctr});
   }
   $hash->{logMethod}->($name, 5, "$name: Write, sending via Set $fn $msg");
