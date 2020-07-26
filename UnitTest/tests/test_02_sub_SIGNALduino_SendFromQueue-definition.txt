@@ -2,7 +2,7 @@ defmod test_02_sub_SIGNALduino_SendFromQueue UnitTest dummyDuino
 (
  {
  	use Test2::V0;
-	use Test2::Tools::Compare qw{is like check hash within field};
+	use Test2::Tools::Compare qw{is like check hash within field U};
 	#use Test2::Tools::Ref;
 	
 	my $mock = Mock::Sub->new; 	
@@ -28,14 +28,23 @@ defmod test_02_sub_SIGNALduino_SendFromQueue UnitTest dummyDuino
 
 
 	subtest "Test cmd (e) SIGNALduino_SendFromQueue called" => sub {
-		plan(2);
+		plan(3);
 		my $SIGNALduino_Get = $mock->mock("SIGNALduino_Get");  	
 		
 		SIGNALduino_SendFromQueue($targetHash,"e");
 		is($SIGNALduino_Get->called_count,2,"SIGNALduino_Get called twice");
 		is(($SIGNALduino_Get->called_with)[2], "ccpatable", "check get with ccpatable is executed" );
 		$SIGNALduino_Get->unmock;
+		is($attr{$target}{rfmode},U,'verify attr rfmode');
 	};
+
+	subtest 'Test cmd (e) SIGNALduino_SendFromQueue called rfmode != SlowRF' => sub {
+		plan(1);
+		$attr{$target}{rfmode}='HomeMatic';
+		SIGNALduino_SendFromQueue($targetHash,'e');
+		is($attr{$target}{rfmode},'SlowRF','verify reset of attr rfmode');
+	};
+
 	
 	subtest "Test cmd (x) SIGNALduino_SendFromQueue called" => sub {
 		plan(2);
