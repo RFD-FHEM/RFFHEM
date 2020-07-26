@@ -1477,29 +1477,13 @@ sub SIGNALduino_Write {
 	    $sum	= 12;
   	}
     $msg = $hash->{protocolObject}->PreparingSend_FS20_FHT($id, $sum, $msg);
-  } elsif($fn eq 'k') {   # KOPP_FC   (no outsourcing  in SD_Protocols.pm due to loop and set hash values)
+  } elsif($fn eq 'k') {   # KOPP_FC   (one part outsourcing in SD_Protocols.pm, main part here due to loop and set hash values)
     $hash->{logMethod}->($name, 4, "$name: Write, cmd $fn sending KOPP_FC");
     $fn='raw';
-
-    # https://wiki.fhem.de/wiki/Kopp_Allgemein | https://github.com/heliflieger/a-culfw/blob/master/culfw/clib/kopp-fc.c
-    #kr07C2AD1A30CC0F0328
-    #||  ||||  ||    ++-------- Transmitter Code 2
-    #||  ||||  ++-------------- Keycode
-    #||  ++++------------------ Transmitter Code 1
-    #++------------------------ kr wird von der culfw bei Empfang einer Kopp Botschaft als Kennung gesendet
-
-    # $message = "s"
-    #  . $keycodehex
-    #  . $hash->{TRANSMITTERCODE1}
-    #  . $hash->{TRANSMITTERCODE2}
-    #  . $hash->{TIMEOUT}
-    #  . "N";                       # N for do not print messages (FHEM will write error messages to log files if CCD/CUL sends status info
 
     my $Keycode = substr($msg,1,2);
     my $TransCode1 = substr($msg,3,4);
     my $TransCode2 = substr($msg,7,2);
-    my $blkck = 0xAA;
-    my $d;
 
     ### The device to be sent stores something in own hash. Search for names to access them ###
     #### The variant with the loop does not require any adjustment in the original Kopp module. ####
@@ -1524,16 +1508,11 @@ sub SIGNALduino_Write {
       $hash->{logMethod}->($name, 5, "$name: Write, PreparingSend KOPP_FC set blkctr in hash $KOPPname");
     }
 
-    my $dmsg = '07' . $TransCode1 . sprintf("%02x",$defs{$KOPPname}->{blkctr}) . $Keycode . 'CC0F' . $TransCode2;
+    $msg = $hash->{protocolObject}->PreparingSend_KOPP_FC(sprintf("%02x",$defs{$KOPPname}->{blkctr}),$Keycode,$TransCode1,$TransCode2);
 
-    ## checksum to calculate
-    for my $i (0..7) {
-      $d = hex(substr($dmsg,$i*2,2));
-      $blkck ^= $d;
-    }
-
-    $dmsg.= sprintf("%02x",$blkck) . '000000000000;';
-    $msg = 'SN;R=13;N=4;D=' . $dmsg;                     # N=4 | to compatible @Ralf
+    if (!defined $msg) {
+      return;
+    };
 
     $defs{$KOPPname}->{blkctr}++;                        # Internals blkctr increases with each send
     $hash->{logMethod}->($name, 5, "$name: Write, PreparingSend KOPP_FC set blkctr in hash $KOPPname to ".$defs{$KOPPname}->{blkctr});

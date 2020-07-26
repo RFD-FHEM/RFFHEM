@@ -1923,4 +1923,66 @@ sub ConvLaCrosse {
 	return (qq[OK 9 $addr $sensTypeBat $t1 $t2 $humidity]);
 }
 
+############################# package lib::SD_Protocols, test not exists
+
+=item PreparingSend_KOPP_FC()
+
+This function calculated crc and prepares the send message.
+
+Input:  $blkctrInternal,$Keycode,$TransCode1,$TransCode2
+Output:
+        prepares message
+
+Message Format:
+
+  https://wiki.fhem.de/wiki/Kopp_Allgemein | https://github.com/heliflieger/a-culfw/blob/master/culfw/clib/kopp-fc.c
+  kr07C2AD1A30CC0F0328
+  ||  ||||  ||    ++-------- Transmitter Code 2
+  ||  ||||  ++-------------- Keycode
+  ||  ++++------------------ Transmitter Code 1
+  ++------------------------ kr wird von der culfw bei Empfang einer Kopp Botschaft als Kennung gesendet
+
+  # $message = "s"
+  #  . $keycodehex
+  #  . $hash->{TRANSMITTERCODE1}
+  #  . $hash->{TRANSMITTERCODE2}
+  #  . $hash->{TIMEOUT}
+  #  . "N";                       # N for do not print messages (FHEM will write error messages to log files if CCD/CUL sends status info
+
+=cut
+
+sub PreparingSend_KOPP_FC {
+  my $self           = shift // carp 'Not called within an object';
+  my $blkctrInternal = shift // carp 'Error: called without Internal blkctr as input';
+  my $Keycode        = shift // carp 'Error: called without $Keycode as input';
+  my $TransCode1     = shift // carp 'Error: called without $TransCode1 as input';
+  my $TransCode2     = shift // carp 'Error: called without $TransCode2 as input';
+
+  my $blkck = 0xAA;
+  my $d;
+
+  # check from Keycode, TransCode1 and TransCode2 direct in modul 10_KOPP_FC.pm
+  $self->_logging(qq[lib/PreparingSend_KOPP_FC, called with all parameters],5);
+
+  my $dmsg = '07' . $TransCode1 . $blkctrInternal . $Keycode . 'CC0F' . $TransCode2;
+
+  ## checksum to calculate
+  for my $i (0..7) {
+    $d = hex(substr($dmsg,$i*2,2));
+    $blkck ^= $d;
+  }
+
+  $dmsg.= sprintf("%02x",$blkck) . '000000000000;';
+
+  ## additional length check | ToDo: must be checked, CUL data without preamble kr == 18
+  # if (length($dmsg) != 31) {  # working dmsg with comma == 31 (30 + 1)
+    # $self->_logging(qq[lib/PreparingSend_KOPP_FC, ERROR! dmsg wrong length - STOPPING send],2);
+    # return;
+  # }
+  
+  my $msg = 'SN;R=13;N=4;D=' . $dmsg;                     # N=4 | to compatible @Ralf
+
+  return $msg;
+}
+
 1;
