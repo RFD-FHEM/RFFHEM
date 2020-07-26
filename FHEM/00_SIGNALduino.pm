@@ -1486,14 +1486,13 @@ sub SIGNALduino_Write {
     my $TransCode2 = substr($msg,7,2);
 
     ### The device to be sent stores something in own hash. Search for names to access them ###
-    #### The variant with the loop does not require any adjustment in the original Kopp module. ####
-    my $KOPPname;
+    #### The variant with devspec2array does not require any adjustment in the original Kopp module. ####
 
     my @Liste = devspec2array("TYPE=KOPP_FC:FILTER=TRANSMITTERCODE1=$TransCode1:FILTER=TRANSMITTERCODE2=$TransCode2:FILTER=KEYCODE=$Keycode");
-    $KOPPname = $Liste[0];
+    my $KOPPname = $Liste[0];
 
     if (scalar @Liste != 1) {
-      $hash->{logMethod}->($name, 4, "$name: Write, PreparingSend KOPP_FC found ". scalar @Liste ." device\'s with same DEF (SIGNALDuino used $KOPPname)");
+      $hash->{logMethod}->($name, 4, "$name: Write, PreparingSend KOPP_FC found ". scalar @Liste ." device\'s with same DEF (SIGNALduino used $KOPPname)");
     } else {
       $hash->{logMethod}->($name, 5, "$name: Write, PreparingSend KOPP_FC found device with name $KOPPname");
     }
@@ -1501,7 +1500,7 @@ sub SIGNALduino_Write {
     ## Internals blkctr initialize if not available
     if (!exists($defs{$KOPPname}->{blkctr})) {
       $defs{$KOPPname}->{blkctr} = 0;
-      $hash->{logMethod}->($name, 5, "$name: Write, PreparingSend KOPP_FC set blkctr in hash $KOPPname");
+      $hash->{logMethod}->($name, 5, "$name: Write, PreparingSend KOPP_FC set Internals blkctr on device $KOPPname to 0");
     }
 
     $msg = $hash->{protocolObject}->PreparingSend_KOPP_FC(sprintf("%02x",$defs{$KOPPname}->{blkctr}),$Keycode,$TransCode1,$TransCode2);
@@ -1511,7 +1510,7 @@ sub SIGNALduino_Write {
     };
 
     $defs{$KOPPname}->{blkctr}++;                        # Internals blkctr increases with each send
-    $hash->{logMethod}->($name, 5, "$name: Write, PreparingSend KOPP_FC set blkctr in hash $KOPPname to ".$defs{$KOPPname}->{blkctr});
+    $hash->{logMethod}->($name, 5, "$name: Write, PreparingSend KOPP_FC set Internals blkctr on device $KOPPname to ".$defs{$KOPPname}->{blkctr});
   }
   $hash->{logMethod}->($name, 5, "$name: Write, sending via Set $fn $msg");
 
