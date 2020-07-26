@@ -1488,18 +1488,14 @@ sub SIGNALduino_Write {
     ### The device to be sent stores something in own hash. Search for names to access them ###
     #### The variant with the loop does not require any adjustment in the original Kopp module. ####
     my $KOPPname;
-    KOPPname:
-    foreach my $d (keys %defs) {
-      if(defined($defs{$d}) && $defs{$d}{TYPE} eq 'KOPP_FC') {
-        if ( (exists $defs{$d}->{TRANSMITTERCODE1} && $defs{$d}->{TRANSMITTERCODE1} eq $TransCode1) && 
-              (exists $defs{$d}->{TRANSMITTERCODE2} && $defs{$d}->{TRANSMITTERCODE2} eq $TransCode2) && 
-                (exists $defs{$d}->{KEYCODE} && $defs{$d}->{KEYCODE} eq $Keycode)
-              ) {
-          $hash->{logMethod}->($name, 5, "$name: Write, PreparingSend KOPP_FC found device with name $d");
-          $KOPPname = $d;
-        }
-        last KOPPname;
-      }
+
+    my @Liste = devspec2array("TYPE=KOPP_FC:FILTER=TRANSMITTERCODE1=$TransCode1:FILTER=TRANSMITTERCODE2=$TransCode2:FILTER=KEYCODE=$Keycode");
+    $KOPPname = $Liste[0];
+
+    if (scalar @Liste != 1) {
+      $hash->{logMethod}->($name, 4, "$name: Write, PreparingSend KOPP_FC found ". scalar @Liste ." device\'s with same DEF (SIGNALDuino used $KOPPname)");
+    } else {
+      $hash->{logMethod}->($name, 5, "$name: Write, PreparingSend KOPP_FC found device with name $KOPPname");
     }
 
     ## Internals blkctr initialize if not available
