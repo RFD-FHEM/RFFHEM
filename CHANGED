@@ -8,6 +8,7 @@ SD_Protocols.pm
 
   * revised RegEx for KOPP_FC
   * revised for loop (perlcritic)
+2020-07-25 - Merge branch 'master' into dev-r35_xFSK
 2020-07-25 - Merge branch 'dev-r35_xFSK_TEST' of https://github.com/HomeAutoUser/RFFHEM into dev-r35_xFSK_TEST
 2020-07-25 - Update 00_SIGNALduino.pm
 
@@ -35,7 +36,9 @@ SD_ProtocolData.pm
   * revised informations & registers
 
 2020-07-23 - Update 14_SD_UT.pm - PerlCritic (#877)
+
 * Update 14_SD_UT.pm
+
   * revised for perl critic
 
 2020-07-23 - Update 14_SD_UT.pm
@@ -43,7 +46,7 @@ SD_ProtocolData.pm
 
 2020-07-23 - Update 14_SD_BELL.pm
   * revised for perl critic
-
+  
 2020-07-23 - Update 00_SIGNALduino.pm
 
   * revised logoutput for user
@@ -61,7 +64,6 @@ SD_ProtocolData.pm
 
 * 14_SD_UT new protocol 105 for remote control BF-301
 
-Co-authored-by: Udo <info@elektron-bbs.de>
 2020-07-20 - Merge branch 'master' into dev-r34_SD_BF-301
 2020-07-20 - 14_SD_UT new protocol 105 for remote control BF-301
 
@@ -95,14 +97,8 @@ Added maple and maple with cc1101 to test json
 test_firmware_releases.json
   * extension data
 
-2020-07-17 - adjust logoutput & loglevel
-00_SIGNALduino.pm
-  * revised loglevel from Parse_MN
-  * revised logoutput text SIGNALduino_Get_Command
-  * log output adapted to hardware
-  * revisions indented ( no tabs, only spaces ) and checked syntax with perl ./ontrib/commandref_join.pl
-  * compare documentation DE <-> EN
-  * added attribute ESP32cc1101
+* Update SD_ProtocolData.pm
+  * fix perlcritic Severity 3 - hard tabs
 
 2020-07-16 - Update SD_ProtocolData.pm
   Replaced svn revision with version from repo
@@ -240,13 +236,12 @@ SD_ProtocolData.pm:
           feature: new protocol 99 NAVARIS touch light switch (#841)
           feature: new protocol 98 for wireless door bell GEA-028DB (#839)
 
-2020-04-23 - 00_SIGNALduino.pm Fix some perlcritic 5
-2020-04-22 - 00_SIGNALduino.pm - some operator fixes #835
-2020-04-21 - new protocol 99 NAVARIS touch light switch (#841)
-2020-04-21 - new protocol 98 for wireless door bell GEA-028DB (#839)
+2020-07-04 - Fix some perlcritic 5 warnings in 3.4 (#863)
+  00_SIGNALduino.pm:
+          Fix some perlcritic 5 warnings
 
-2020-04-14 - 00_SIGNALduino.pm
-  Changed stringrefs to coderefs
+2020-05-28 - Dev r34 - id56 - #848 (#849)
+  SD_ProtocolData.pm - ID 56 fix def & added doc https://github.com/RFD-FHEM/RFFHEM/issues/848
 
 2020-04-13 -  Update to svn revision number
 
