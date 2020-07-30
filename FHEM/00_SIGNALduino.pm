@@ -1171,7 +1171,7 @@ sub SIGNALduino_CheckSendRawResponse {
 		#RemoveInternalTimer("HandleWriteQueue:$name");
 		delete($hash->{ucCmd});
 		#SIGNALduino_HandleWriteQueue("x:$name"); # Todo #823 on github
-		InternalTimer(gettimeofday() + 0.1, \&SIGNALduino_HandleWriteQueue, "HandleWriteQueue:$name") if (scalar @{$hash->{QUEUE}} > 0 && InternalVal($name,'sendworking',0) == 0);
+		InternalTimer(gettimeofday() + 0.1, \&SIGNALduino_HandleWriteQueue, 'HandleWriteQueue:$name') if (scalar @{$hash->{QUEUE}} > 0 && InternalVal($name,'sendworking',0) == 0);
 	}
 	return (undef);
 }
@@ -1505,9 +1505,7 @@ sub SIGNALduino_Write {
 
     $msg = $hash->{protocolObject}->PreparingSend_KOPP_FC(sprintf("%02x",$defs{$KOPPname}->{blkctr}),$Keycode,$TransCode1,$TransCode2);
 
-    if (!defined $msg) {
-      return;
-    };
+    return if (!defined $msg);
 
     $defs{$KOPPname}->{blkctr}++;                        # Internals blkctr increases with each send
     $hash->{logMethod}->($name, 5, "$name: Write, PreparingSend KOPP_FC set Internals blkctr on device $KOPPname to ".$defs{$KOPPname}->{blkctr});
@@ -1535,7 +1533,7 @@ sub SIGNALduino_SendFromQueue {
   my ($hash, $msg) = @_;
   my $name = $hash->{NAME};
 
-	$hash->{logMethod}->($name, 4, "$name: SendFromQueue, called");
+  $hash->{logMethod}->($name, 4, "$name: SendFromQueue, called");
   if($msg ne '') {
 	SIGNALduino_XmitLimitCheck($hash,$msg);
     #DevIo_SimpleWrite($hash, $msg . "\n", 2);
@@ -1550,11 +1548,10 @@ sub SIGNALduino_SendFromQueue {
     	SIGNALduino_Get($hash,$name,'ccconf');
     	SIGNALduino_Get($hash,$name,'ccpatable'); 
 
-			## set rfmode to default from uC
+		## set rfmode to default from uC
     	my $rfmode = AttrVal($name, 'rfmode', undef);
     	#CommandAttr($hash,"$name rfmode SlowRF") if (defined $rfmode && $rfmode ne 'SlowRF');  # option with save question mark
     	$attr{$name}{rfmode} = 'SlowRF' if (defined $rfmode && $rfmode ne 'SlowRF');            # option without save question mark
-
     } elsif ($msg =~ "^W(?:0F|10|11|1D|12|1F)") {	# SetFreq, setrAmpl, Set_bWidth, SetSens
     	SIGNALduino_Get($hash,$name,'ccconf');
     } elsif ($msg =~ "^x") {												# patable
