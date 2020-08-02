@@ -715,6 +715,54 @@ sub SIGNALduino_Set_reset
 }
 
 ############################# package main
+sub SIGNALduino_Set_rfmode {
+  my $hash = shift;
+  my $aVal = shift;
+
+  if ( (InternalVal($hash->{NAME},"cc1101_available",0) == 0) && (!IsDummy($hash->{NAME})) ) {
+    return 'ERROR: This attribute is only available for a receiver with CC1101.';
+  }
+
+  ## DevState waitInit is on first start after FHEM restart | initialized is after cc1101 available
+  if ( ($hash->{DevState} eq 'initialized') && (InternalVal($hash->{NAME},"cc1101_available",0) == 1) ) {
+    $hash->{logMethod}->($hash->{NAME}, 3, "$hash->{NAME}: Set_rfmode, set to $aVal on DevState $hash->{DevState} (please check activated protocols via 'Display protocollist')");
+
+    my $rfmode;
+    if ($aVal ne 'SlowRF') {
+      MNIDLIST:
+      for my $id (@{$hash->{mnIdList}}) {
+        $rfmode=$hash->{protocolObject}->checkProperty($id,'rfmode',-1);
+
+        if ($rfmode eq $aVal) {
+          $hash->{logMethod}->($hash->{NAME}, 4, qq[$hash->{NAME}: Set_rfmode, rfmode found on ID=$id]);
+          my $register=$hash->{protocolObject}->checkProperty($id,'register', -1);
+
+          if ($register != -1) {
+            $hash->{logMethod}->($hash->{NAME}, 5, qq[$hash->{NAME}: Set_rfmode, register settings exist on ID=$id ]);
+
+            for my $i (0...scalar(@{$register})-1) {
+              $hash->{logMethod}->($hash->{NAME}, 5, "$hash->{NAME}: Set_rfmode, write value " . @{$register}[$i]);
+              my $argcmd = sprintf("W%02X%s",hex(substr(@{$register}[$i],0,2)) + 2,substr(@{$register}[$i],2,2));
+              main::SIGNALduino_AddSendQueue($hash,$argcmd);
+            }
+            main::SIGNALduino_WriteInit($hash);
+            last MNIDLIST;	# found $rfmode, exit loop
+          } else {
+            $hash->{logMethod}->($hash->{NAME}, 1, "$hash->{NAME}: Set_rfmode, set to $aVal (ID $id, nothing register entry found on SD_ProtocolData)");
+          }
+        }
+      }
+      if($rfmode eq '-1') { $hash->{logMethod}->($hash->{NAME}, 3, "$hash->{NAME}: Set_rfmode, set to $aVal (nothing rfmode entry found on SD_ProtocolData)") };
+    } else {
+      SIGNALduino_AddSendQueue($hash,'e');
+      $hash->{logMethod}->($hash->{NAME}, 1, "$hash->{NAME}: Set_rfmode, set to $aVal (ASK/OOK mode load default register settings from uC)");
+    }
+  }
+
+  return;
+}
+
+############################# package main
 sub SIGNALduino_Set_sendMsg {
 	my ($hash, @a) = @_;
 	$hash->{logMethod}->($hash->{NAME}, 5, "$hash->{NAME}: Set_sendMsg, msg=$a[1]");
@@ -1552,8 +1600,7 @@ sub SIGNALduino_SendFromQueue {
 
 			## set rfmode to default from uC
     	my $rfmode = AttrVal($name, 'rfmode', undef);
-    	#CommandAttr($hash,"$name rfmode SlowRF") if (defined $rfmode && $rfmode ne 'SlowRF');  # option with save question mark
-    	$attr{$name}{rfmode} = 'SlowRF' if (defined $rfmode && $rfmode ne 'SlowRF');            # option without save question mark
+      CommandAttr($hash,"$name rfmode SlowRF") if (defined $rfmode && $rfmode ne 'SlowRF');  # option with save question mark
 
     } elsif ($msg =~ "^W(?:0F|10|11|1D|12|1F)") {	# SetFreq, setrAmpl, Set_bWidth, SetSens
     	SIGNALduino_Get($hash,$name,'ccconf');
@@ -2983,48 +3030,12 @@ sub SIGNALduino_Attr(@) {
 	}
 	elsif ($aName eq 'rfmode')	# change receive mode
 	{
-		if ( ($init_done == 1) && (InternalVal($hash->{NAME},"cc1101_available",0) == 0) && (!IsDummy($name)) ) {
-      return 'ERROR: This attribute is only available for a receiver with CC1101.';
+    if ($init_done) {
+      $hash->{logMethod}->($name, 3, "$name: Attr, $aName switched to $aVal");
+      main::SIGNALduino_Set_rfmode($hash,$aVal);
     }
-
-		my $oldAttrib = AttrVal($name, 'rfmode', 'SlowRF');
-
-		if ( ($aVal ne $oldAttrib) && ($hash->{DevState} eq 'initialized') && (InternalVal($hash->{NAME},"cc1101_available",0) == 1) ) {
-			$hash->{logMethod}->($name, 3, "$name: Attr, $aName set to $aVal (please check activated protocols via 'Display protocollist')");
-
-			my $rfmode;
-			if ($aVal ne 'SlowRF') {
-				MNIDLIST:
-				for my $id (@{$hash->{mnIdList}}) {
-					$rfmode=$hash->{protocolObject}->checkProperty($id,'rfmode',-1);
-
-					if ($rfmode eq $aVal) {
-						$hash->{logMethod}->($name, 4, qq[$name: Attr, rfmode found on ID=$id]);
-						my $register=$hash->{protocolObject}->checkProperty($id,'register', -1);
-
-						if ($register != -1) {
-							$hash->{logMethod}->($name, 5, qq[$name: Attr, register settings exist on ID=$id ]);
-
-							for my $i (0...scalar(@{$register})-1) {
-								$hash->{logMethod}->($name, 5, "$name: Attr, $aName - write value " . @{$register}[$i]);
-								my $argcmd = sprintf("W%02X%s",hex(substr(@{$register}[$i],0,2)) + 2,substr(@{$register}[$i],2,2));
-								main::SIGNALduino_AddSendQueue($hash,$argcmd);
-							}
-							main::SIGNALduino_WriteInit($hash);
-							last MNIDLIST;	# found $rfmode, exit loop
-						} else {
-							$hash->{logMethod}->($name, 1, "$name: Attr, $aName set to $aVal (ID $id, nothing register entry found on SD_ProtocolData)");
-						}
-					}
-				}
-				if($rfmode eq '-1') { $hash->{logMethod}->($name, 3, "$name: Attr, $aName set to $aVal (nothing rfmode entry found on SD_ProtocolData)") };
-			} else {
-        SIGNALduino_AddSendQueue($hash,'e');
-        $hash->{logMethod}->($name, 1, "$name: Attr, $aName set to $aVal (ASK/OOK mode load default register settings from uC)");
-      }
-		}
-	}
-	return ;
+  }
+  return ;
 }
 
 ############################# package main
