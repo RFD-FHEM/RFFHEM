@@ -716,8 +716,8 @@ sub SIGNALduino_Set_reset
 
 ############################# package main
 sub SIGNALduino_Set_rfmode {
-  my $hash = shift;
-  my $aVal = shift;
+  my $hash = shift // carp 'must be called with hash of iodevice as first param';
+  my $aVal = shift // return;
 
   if ( (InternalVal($hash->{NAME},"cc1101_available",0) == 0) && (!IsDummy($hash->{NAME})) ) {
     return 'ERROR: This attribute is only available for a receiver with CC1101.';
@@ -3030,6 +3030,13 @@ sub SIGNALduino_Attr(@) {
 	}
 	elsif ($aName eq 'rfmode')	# change receive mode
 	{
+    my @supported = ('KOPP_FC','Lacrosse_mode1','Lacrosse_mode2','Lacrosse_mode4','PCA301','SlowRF');
+
+    if (not grep /$aVal/, @supported) {
+      $hash->{logMethod}->($name, 1, "$name: Attr, $aName $aVal is not supported");
+      return "ERROR: The rfmode is not supported";
+    }
+
     if ($init_done) {
       $hash->{logMethod}->($name, 3, "$name: Attr, $aName switched to $aVal");
       main::SIGNALduino_Set_rfmode($hash,$aVal);
