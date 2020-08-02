@@ -3852,42 +3852,42 @@ package cc1101;
 #### for set function to change the patable for 433 or 868 Mhz supported
 #### 433.05–434.79 MHz, 863–870 MHz
 sub SetPatable {
-	my ($hash,@a) = @_;
-	my $paFreq = main::AttrVal($hash->{NAME},'cc1101_frequency','433');
-	$paFreq = 433 if ($paFreq >= 433 && $paFreq <= 435);
-	$paFreq = 868 if ($paFreq >= 863 && $paFreq <= 870);
-	if ( exists($patable{$paFreq}) )
-	{
-		my $pa = "x" . $patable{$paFreq}{$a[1]};
-		$hash->{logMethod}->($hash->{NAME}, 3, "$hash->{NAME}: SetPatable, Setting patable $paFreq $a[1] $pa");
-		main::SIGNALduino_AddSendQueue($hash,$pa);
-		main::SIGNALduino_WriteInit($hash);
-		return ;
-	} else {
-		return "$hash->{NAME}: Frequency $paFreq MHz not supported (supported frequency ranges: 433.05-434.79 MHz, 863.00-870.00 MHz).";
-	}
+  my ($hash,@a) = @_;
+  my $paFreq = main::AttrVal($hash->{NAME},'cc1101_frequency','433');
+  $paFreq = 433 if ($paFreq >= 433 && $paFreq <= 435);
+  $paFreq = 868 if ($paFreq >= 863 && $paFreq <= 870);
+  if ( exists($patable{$paFreq}) )
+  {
+    my $pa = "x" . $patable{$paFreq}{$a[1]};
+    $hash->{logMethod}->($hash->{NAME}, 3, "$hash->{NAME}: SetPatable, Setting patable $paFreq $a[1] $pa");
+    main::SIGNALduino_AddSendQueue($hash,$pa);
+    main::SIGNALduino_WriteInit($hash);
+    return ;
+  } else {
+    return "$hash->{NAME}: Frequency $paFreq MHz not supported (supported frequency ranges: 433.05-434.79 MHz, 863.00-870.00 MHz).";
+  }
 }
 
 ############################# package cc1101
 sub SetRegisters  {
-	my ($hash, @a) = @_;
+  my ($hash, @a) = @_;
 
-	## check for four hex digits
-	my @nonHex = grep (!/^[0-9A-Fa-f]{4}$/,@a[1..$#a]) ;
-	return "$hash->{NAME} ERROR: wrong parameter value @nonHex, only hexadecimal ​​four digits allowed" if (@nonHex);
-	
-	## check allowed register position
-	my (@wrongRegisters) = grep { !exists($cc1101_register{uc(substr($_,0,2))}) } @a[1..$#a] ;
-	return "$hash->{NAME} ERROR: unknown register position ".substr($wrongRegisters[0],0,2) if (@wrongRegisters);
-	
-	$hash->{logMethod}->($hash->{NAME}, 4, "$hash->{NAME}: SetRegisters, cc1101_reg @a[1..$#a]");
-	my @tmpSendQueue=();
-	foreach my $argcmd (@a[1..$#a]) {
-		$argcmd = sprintf("W%02X%s",hex(substr($argcmd,0,2)) + 2,substr($argcmd,2,2));
-		main::SIGNALduino_AddSendQueue($hash,$argcmd);
-	}
-	main::SIGNALduino_WriteInit($hash);
-	return ;
+  ## check for four hex digits
+  my @nonHex = grep (!/^[0-9A-Fa-f]{4}$/,@a[1..$#a]) ;
+  return "$hash->{NAME} ERROR: wrong parameter value @nonHex, only hexadecimal ​​four digits allowed" if (@nonHex);
+
+  ## check allowed register position
+  my (@wrongRegisters) = grep { !exists($cc1101_register{uc(substr($_,0,2))}) } @a[1..$#a] ;
+  return "$hash->{NAME} ERROR: unknown register position ".substr($wrongRegisters[0],0,2) if (@wrongRegisters);
+
+  $hash->{logMethod}->($hash->{NAME}, 4, "$hash->{NAME}: SetRegisters, cc1101_reg @a[1..$#a]");
+  my @tmpSendQueue=();
+  foreach my $argcmd (@a[1..$#a]) {
+    $argcmd = sprintf("W%02X%s",hex(substr($argcmd,0,2)) + 2,substr($argcmd,2,2));
+    main::SIGNALduino_AddSendQueue($hash,$argcmd);
+  }
+  main::SIGNALduino_WriteInit($hash);
+  return ;
 }
 
 ############################# package cc1101
@@ -3907,79 +3907,79 @@ sub SetRegistersUser  {
 
 ############################# package cc1101
 sub SetFreq  {
-	my ($hash, @a) = @_;
+  my ($hash, @a) = @_;
 
-	my $arg = $a[1];
-	if (!defined($arg)) {
-		$arg = main::AttrVal($hash->{NAME},'cc1101_frequency', 433.92);
-	}
-	my $f = $arg/26*65536;
-	my $f2 = sprintf("%02x", $f / 65536);
-	my $f1 = sprintf("%02x", int($f % 65536) / 256);
-	my $f0 = sprintf("%02x", $f % 256);
-	$arg = sprintf("%.3f", (hex($f2)*65536+hex($f1)*256+hex($f0))/65536*26);
-	$hash->{logMethod}->($hash->{NAME}, 3, "$hash->{NAME}: SetFreq, Setting FREQ2..0 (0D,0E,0F) to $f2 $f1 $f0 = $arg MHz");
-	main::SIGNALduino_AddSendQueue($hash,"W0F$f2");
-	main::SIGNALduino_AddSendQueue($hash,"W10$f1");
-	main::SIGNALduino_AddSendQueue($hash,"W11$f0");
-	main::SIGNALduino_WriteInit($hash);
-	return ;
+  my $arg = $a[1];
+  if (!defined($arg)) {
+    $arg = main::AttrVal($hash->{NAME},'cc1101_frequency', 433.92);
+  }
+  my $f = $arg/26*65536;
+  my $f2 = sprintf("%02x", $f / 65536);
+  my $f1 = sprintf("%02x", int($f % 65536) / 256);
+  my $f0 = sprintf("%02x", $f % 256);
+  $arg = sprintf("%.3f", (hex($f2)*65536+hex($f1)*256+hex($f0))/65536*26);
+  $hash->{logMethod}->($hash->{NAME}, 3, "$hash->{NAME}: SetFreq, Setting FREQ2..0 (0D,0E,0F) to $f2 $f1 $f0 = $arg MHz");
+  main::SIGNALduino_AddSendQueue($hash,"W0F$f2");
+  main::SIGNALduino_AddSendQueue($hash,"W10$f1");
+  main::SIGNALduino_AddSendQueue($hash,"W11$f0");
+  main::SIGNALduino_WriteInit($hash);
+  return ;
 }
 
 ############################# package cc1101
 sub setrAmpl  {
-	my ($hash, @a) = @_;
- 	return "$hash->{NAME}: A numerical value between 24 and 42 is expected." if($a[1] !~ m/^\d+$/ || $a[1] < 24 ||$a[1] > 42);
-	my $v;
-	for($v = 0; $v < @ampllist; $v++) {
-		last if($ampllist[$v] > $a[1]);
-	}
-	$v = sprintf("%02d", $v-1);
-	my $w = $ampllist[$v];
-	$hash->{logMethod}->($hash->{NAME}, 3, "$hash->{NAME}: setrAmpl, Setting AGCCTRL2 (1B) to $v / $w dB");
-	main::SIGNALduino_AddSendQueue($hash,"W1D$v");
-	main::SIGNALduino_WriteInit($hash);
-	return ;
+  my ($hash, @a) = @_;
+  return "$hash->{NAME}: A numerical value between 24 and 42 is expected." if($a[1] !~ m/^\d+$/ || $a[1] < 24 ||$a[1] > 42);
+  my $v;
+  for($v = 0; $v < @ampllist; $v++) {
+    last if($ampllist[$v] > $a[1]);
+  }
+  $v = sprintf("%02d", $v-1);
+  my $w = $ampllist[$v];
+  $hash->{logMethod}->($hash->{NAME}, 3, "$hash->{NAME}: setrAmpl, Setting AGCCTRL2 (1B) to $v / $w dB");
+  main::SIGNALduino_AddSendQueue($hash,"W1D$v");
+  main::SIGNALduino_WriteInit($hash);
+  return ;
 }
 
 ############################# package cc1101
 sub GetRegister {
-	my ($hash, $reg) = @_;
-	main::SIGNALduino_AddSendQueue($hash,'C'.$reg);
-	return ;
+  my ($hash, $reg) = @_;
+  main::SIGNALduino_AddSendQueue($hash,'C'.$reg);
+  return ;
 }
 
 ############################# package cc1101
 sub CalcbWidthReg {
-	my ($hash, $reg10, $bWith) = @_;
-	# Beispiel Rückmeldung, mit Ergebnis von Register 10: C10 = 57
-	my $ob = hex($reg10) & 0x0f;
-	my ($bits, $bw) = (0,0);
-	OUTERLOOP:
-	for (my $e = 0; $e < 4; $e++) {
-		for (my $m = 0; $m < 4; $m++) {
-			$bits = ($e<<6)+($m<<4);
-			$bw  = int(26000/(8 * (4+$m) * (1 << $e))); # KHz
-			last OUTERLOOP if($bWith >= $bw);
-		}
-	}
-	$ob = sprintf("%02x", $ob+$bits);
+  my ($hash, $reg10, $bWith) = @_;
+  # Beispiel Rückmeldung, mit Ergebnis von Register 10: C10 = 57
+  my $ob = hex($reg10) & 0x0f;
+  my ($bits, $bw) = (0,0);
+  OUTERLOOP:
+  for (my $e = 0; $e < 4; $e++) {
+    for (my $m = 0; $m < 4; $m++) {
+      $bits = ($e<<6)+($m<<4);
+      $bw  = int(26000/(8 * (4+$m) * (1 << $e))); # KHz
+      last OUTERLOOP if($bWith >= $bw);
+    }
+  }
+  $ob = sprintf("%02x", $ob+$bits);
 
-	return ($ob,$bw);
+  return ($ob,$bw);
 }
 
 ############################# package cc1101
 sub SetSens {
-	my ($hash, @a) = @_;
+  my ($hash, @a) = @_;
 
-	# Todo: Abfrage in Grep auf Array ändern
-	return 'a numerical value between 4 and 16 is expected' if($a[1] !~ m/^\d+$/ || $a[1] < 4 || $a[1] > 16);
-	my $w = int($a[1]/4)*4;
-	my $v = sprintf("9%d",$a[1]/4-1);
-	$hash->{logMethod}->($hash->{NAME}, 3, "$hash->{NAME}: SetSens, Setting AGCCTRL0 (1D) to $v / $w dB");
-	main::SIGNALduino_AddSendQueue($hash,"W1F$v");
-	main::SIGNALduino_WriteInit($hash);
-	return ;
+  # Todo: Abfrage in Grep auf Array ändern
+  return 'a numerical value between 4 and 16 is expected' if($a[1] !~ m/^\d+$/ || $a[1] < 4 || $a[1] > 16);
+  my $w = int($a[1]/4)*4;
+  my $v = sprintf("9%d",$a[1]/4-1);
+  $hash->{logMethod}->($hash->{NAME}, 3, "$hash->{NAME}: SetSens, Setting AGCCTRL0 (1D) to $v / $w dB");
+  main::SIGNALduino_AddSendQueue($hash,"W1F$v");
+  main::SIGNALduino_WriteInit($hash);
+  return ;
 }
 
 ################################################################################################

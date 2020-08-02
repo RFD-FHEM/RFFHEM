@@ -6,7 +6,10 @@
   * added separat sub SIGNALduino_Set_rfmode
     (better overview code & simply to test)
   * revised attribute change rfmode to see save question mark
-2020-08-02 - Merge branch 'dev-r35_xFSK' into dev-r35_xFSK_TEST
+
+2020-08-02 - Update 00_SIGNALduino.pm
+  * revised hard tabs to spaces (perlcritic) on package cc1101 (#882)
+
 2020-07-31 - dev-r35_xFSK - part metainformation perlcritic (#879)
 
 Update 00_SIGNALduino.pm
