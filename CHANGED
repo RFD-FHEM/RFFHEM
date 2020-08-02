@@ -1,8 +1,6 @@
 2020-08-02 - Update 00_SIGNALduino.pm
 
   * added check for supported attr rfmode
-2020-08-02 - Update 00_SIGNALduino.pm
-
   * added separat sub SIGNALduino_Set_rfmode
     (better overview code & simply to test)
   * revised attribute change rfmode to see save question mark
@@ -15,8 +13,6 @@ Update 00_SIGNALduino.pm
 2020-07-26 - Update 00_SIGNALduino.pm
 
   * smale changes (cosmetics)
-2020-07-26 - Update 00_SIGNALduino.pm
-
   * revised code, remove $defs loop and added intern function
     devspec2array
 2020-07-26 - Merge branch 'dev-r35_xFSK' into dev-r35_xFSK_TEST
