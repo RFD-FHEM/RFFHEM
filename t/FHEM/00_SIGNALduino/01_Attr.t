@@ -74,7 +74,7 @@ my @mockData = (
 				field rfmode => DNE;
 				etc();
     		},
-    	rValue => U(),
+    	rValue => 'ERROR: The rfmode is not supported',
 	},
 	{
 		cmd => q[set],
@@ -87,7 +87,7 @@ my @mockData = (
 				etc();
    		},
 		hashCheck =>  hash  {
-				field QUEUE  => DNE; 
+				field QUEUE => bag { item 'e'; etc() ; };
 				etc();
    		},
     	rValue => U(),
@@ -151,7 +151,7 @@ InternalTimer(time()+1, sub() {
 		
 		subtest "checking $element->{testname} on $element->{deviceName}" => sub {
 			my $p = $element->{plan} // 4;
-			plan ($p);	
+			plan ($p);
 
 			my ($attrname,$value) = split(" ",$element->{input});
 			if (!exists $element->{pre_code}) {
@@ -175,7 +175,7 @@ InternalTimer(time()+1, sub() {
 					is($defs{$element->{deviceName}},$element->{hashCheck},'Verify $hash content');
 					next;
 				};
-			}					
+			}
 		};
 		if (defined($todo)) {
 			$todo->end;

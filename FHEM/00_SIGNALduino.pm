@@ -3034,7 +3034,7 @@ sub SIGNALduino_Attr(@) {
 
     if (not grep /$aVal/, @supported) {
       $hash->{logMethod}->($name, 1, "$name: Attr, $aName $aVal is not supported");
-      return;
+      return 'ERROR: The rfmode is not supported';
     }
 
     if ($init_done) {
