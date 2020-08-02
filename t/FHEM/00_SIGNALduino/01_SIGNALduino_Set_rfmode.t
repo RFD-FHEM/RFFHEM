@@ -23,7 +23,7 @@ InternalTimer(time()+1, sub() {
       },
     'check mocked dummyDuino hash');
 
-  my $todo = Test2::Todo->new(reason => 'added TEST for Set_rfmode');
+  my $todo = Test2::Todo->new(reason => 'added TEST for 1_SIGNALduino_Set_rfmode.t');
   if (defined($todo)) {
     ok(1, "needs extension");
     $todo->end;
