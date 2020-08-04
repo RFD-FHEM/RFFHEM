@@ -3134,220 +3134,220 @@ function SD_plistWindow(txt)
 
 ############################# package main
 sub SIGNALduino_FW_saveWhitelist {
-	my $name = shift;
-	my $wl_attr = shift;
+  my $name = shift;
+  my $wl_attr = shift;
 
-	if (!IsDevice($name)) {
-		Log3 undef, 3, "$name: FW_saveWhitelist, is not a valid definition, operation aborted.";
-		return;
-	}
+  if (!IsDevice($name)) {
+    Log3 undef, 3, "$name: FW_saveWhitelist, is not a valid definition, operation aborted.";
+    return;
+  }
 
-	if ($wl_attr eq '') {	# da ein Attribut nicht leer sein kann, kommt ein Komma rein
-		$wl_attr = ',';
-	}
-	elsif ($wl_attr !~ /\d+(?:,\d.?\d?)*$/ ) {
-		Log3 $name, 3, "$name: FW_saveWhitelist, attr whitelist_IDs can not be updated";
-		return;
-	}
-	else {
-		$wl_attr =~ s/,$//;			# Komma am Ende entfernen
-	}
-	$attr{$name}{whitelist_IDs} = $wl_attr;
-	Log3 $name, 3, "$name: FW_saveWhitelist, $wl_attr";
-	SIGNALduino_IdList("x:$name", $wl_attr);
+  if ($wl_attr eq '') {   # da ein Attribut nicht leer sein kann, kommt ein Komma rein
+    $wl_attr = ',';
+  }
+  elsif ($wl_attr !~ /\d+(?:,\d.?\d?)*$/ ) {
+    Log3 $name, 3, "$name: FW_saveWhitelist, attr whitelist_IDs can not be updated";
+    return;
+  }
+  else {
+    $wl_attr =~ s/,$//;   # Komma am Ende entfernen
+  }
+  $attr{$name}{whitelist_IDs} = $wl_attr;
+  Log3 $name, 3, "$name: FW_saveWhitelist, $wl_attr";
+  SIGNALduino_IdList("x:$name", $wl_attr);
 }
 
 ############################# package main      - test is missing
 sub SIGNALduino_IdList($@) {
-	my ($param, $aVal, $blacklist, $develop0) = @_;
-	my (undef,$name) = split(':', $param);
-	my $hash = $defs{$name};
+  my ($param, $aVal, $blacklist, $develop0) = @_;
+  my (undef,$name) = split(':', $param);
+  my $hash = $defs{$name};
 
-	my @msIdList = ();
-	my @muIdList = ();
-	my @mcIdList = ();
-	my @mnIdList = ();
-	my @skippedDevId = ();
-	my @skippedBlackId = ();
-	my @skippedWhiteId = ();
-	my @devModulId = ();
-	my %WhitelistIDs;
-	my %BlacklistIDs;
-	my $wflag = 0;		# whitelist flag, 0=disabled
+  my @msIdList = ();
+  my @muIdList = ();
+  my @mcIdList = ();
+  my @mnIdList = ();
+  my @skippedDevId = ();
+  my @skippedBlackId = ();
+  my @skippedWhiteId = ();
+  my @devModulId = ();
+  my %WhitelistIDs;
+  my %BlacklistIDs;
+  my $wflag = 0;            # whitelist flag, 0=disabled
 
-	delete ($hash->{IDsNoDispatch}) if (defined($hash->{IDsNoDispatch}));
+  delete ($hash->{IDsNoDispatch}) if (defined($hash->{IDsNoDispatch}));
 
-	if (!defined($aVal)) {
-		$aVal = AttrVal($name,'whitelist_IDs','');
-	}
+  if (!defined($aVal)) {
+    $aVal = AttrVal($name,'whitelist_IDs','');
+  }
 
-	my ($develop,$devFlag) = SIGNALduino_getAttrDevelopment($name, $develop0);	# $devFlag = 1 -> alle developIDs y aktivieren
-	$hash->{logMethod}->($name, 3, "$name: IdList, development version active, development attribute = $develop") if ($devFlag == 1);
+  my ($develop,$devFlag) = SIGNALduino_getAttrDevelopment($name, $develop0);  # $devFlag = 1 -> alle developIDs y aktivieren
+  $hash->{logMethod}->($name, 3, "$name: IdList, development version active, development attribute = $develop") if ($devFlag == 1);
 
-	if ($aVal eq '' || substr($aVal,0 ,1) eq '#') {		# whitelist nicht aktiv
-		($devFlag == 1) 
-			?	$hash->{logMethod}->($name, 3, "$name: IdList, attr whitelist disabled or not defined (all IDs are enabled, except blacklisted): $aVal")
-			:	$hash->{logMethod}->($name, 3, "$name: IdList, attr whitelist disabled or not defined (all IDs are enabled, except blacklisted and instable IDs): $aVal");
-	} else {
-		%WhitelistIDs = map {$_ => undef} split(',', $aVal);			# whitelist in Hash wandeln
-		#my $w = join ',' => map "$_" => keys %WhitelistIDs;
-		$hash->{logMethod}->($name, 3, "$name: IdList, attr whitelist: $aVal");
-		$wflag = 1;
-	}
-	#SIGNALduino_Log3 $name, 3, "$name IdList: attr whitelistIds=$aVal" if ($aVal);
+  if ($aVal eq '' || substr($aVal,0 ,1) eq '#') {           # whitelist nicht aktiv
+    ($devFlag == 1) 
+      ?	$hash->{logMethod}->($name, 3, "$name: IdList, attr whitelist disabled or not defined (all IDs are enabled, except blacklisted): $aVal")
+      :	$hash->{logMethod}->($name, 3, "$name: IdList, attr whitelist disabled or not defined (all IDs are enabled, except blacklisted and instable IDs): $aVal");
+  } else {
+    %WhitelistIDs = map {$_ => undef} split(',', $aVal);    # whitelist in Hash wandeln
+    #my $w = join ',' => map "$_" => keys %WhitelistIDs;
+    $hash->{logMethod}->($name, 3, "$name: IdList, attr whitelist: $aVal");
+    $wflag = 1;
+  }
+  #SIGNALduino_Log3 $name, 3, "$name IdList: attr whitelistIds=$aVal" if ($aVal);
 
-	if ($wflag == 0) {			# whitelist not aktive
-		if (!defined($blacklist)) {
-			$blacklist = AttrVal($name,'blacklist_IDs','');
-		}
-		if (length($blacklist) > 0) {							# Blacklist in Hash wandeln
-			$hash->{logMethod}->($name, 3, "$name: IdList, attr blacklistIds=$blacklist");
-			%BlacklistIDs = map { $_ => 1 } split(',', $blacklist);
-			#my $w = join ', ' => map "$_" => keys %BlacklistIDs;
-			#SIGNALduino_Log3 $name, 3, "$name IdList, Attr blacklist $w";
-		}
-	}
-	for my $id ($hash->{protocolObject}->getKeys())
-	{
-		if ($wflag == 1)				# whitelist active
-		{
-			if (!exists($WhitelistIDs{$id}))		# Id wurde in der whitelist nicht gefunden
-			{
-				push (@skippedWhiteId, $id);
-				next;
-			}
-		}
-		else {						# whitelist not active
-			if (exists($BlacklistIDs{$id})) {
-				#SIGNALduino_Log3 $name, 3, "$name: IdList, skip Blacklist ID $id";
-				push (@skippedBlackId, $id);
-				next;
-			}
+  if ($wflag == 0) {                      # whitelist not aktive
+    if (!defined($blacklist)) {
+      $blacklist = AttrVal($name,'blacklist_IDs','');
+    }
+    if (length($blacklist) > 0) {							# Blacklist in Hash wandeln
+      $hash->{logMethod}->($name, 3, "$name: IdList, attr blacklistIds=$blacklist");
+      %BlacklistIDs = map { $_ => 1 } split(',', $blacklist);
+      #my $w = join ', ' => map "$_" => keys %BlacklistIDs;
+      #SIGNALduino_Log3 $name, 3, "$name IdList, Attr blacklist $w";
+    }
+  }
+  for my $id ($hash->{protocolObject}->getKeys())
+  {
+    if ($wflag == 1)                      # whitelist active
+    {
+      if (!exists($WhitelistIDs{$id}))    # Id wurde in der whitelist nicht gefunden
+      {
+        push (@skippedWhiteId, $id);
+        next;
+      }
+    }
+    else {                                # whitelist not active
+      if (exists($BlacklistIDs{$id})) {
+        #SIGNALduino_Log3 $name, 3, "$name: IdList, skip Blacklist ID $id";
+        push (@skippedBlackId, $id);
+        next;
+      }
 
-			# wenn es keine developId gibt, dann die folgenden Abfragen ueberspringen
-			if (defined $hash->{protocolObject}->getProperty($id,'developId'))
-			{
-				if ($hash->{protocolObject}->getProperty($id,'developId') eq 'm') {
-					if ($develop !~ m/m$id/) {  # ist nur zur Abwaertskompatibilitaet und kann in einer der naechsten Versionen entfernt werden
-						push (@devModulId, $id);
-						if ($devFlag == 0) {
-							push (@skippedDevId, $id);
-							next;
-						}
-					}
-				}
-				elsif ($hash->{protocolObject}->getProperty($id,'developId') eq 'p') {
-					$hash->{logMethod}->($name, 5, "$name: IdList, ID=$id skipped (developId=p), caution, protocol can cause crashes, use only if advised to do");
-					next;
-				}
-				elsif ($devFlag == 0 && $hash->{protocolObject}->getProperty($id,'developId') eq 'y' && $develop !~ m/y$id/) {
-					#SIGNALduino_Log3 $name, 3, "$name: IdList, ID=$id skipped (developId=y)";
-					push (@skippedDevId, $id);
-					next;
-				}
-			}
-		}
+      # wenn es keine developId gibt, dann die folgenden Abfragen ueberspringen
+      if (defined $hash->{protocolObject}->getProperty($id,'developId'))
+      {
+        if ($hash->{protocolObject}->getProperty($id,'developId') eq 'm') {
+          if ($develop !~ m/m$id/) {  # ist nur zur Abwaertskompatibilitaet und kann in einer der naechsten Versionen entfernt werden
+            push (@devModulId, $id);
+            if ($devFlag == 0) {
+              push (@skippedDevId, $id);
+              next;
+            }
+          }
+        }
+        elsif ($hash->{protocolObject}->getProperty($id,'developId') eq 'p') {
+          $hash->{logMethod}->($name, 5, "$name: IdList, ID=$id skipped (developId=p), caution, protocol can cause crashes, use only if advised to do");
+          next;
+        }
+        elsif ($devFlag == 0 && $hash->{protocolObject}->getProperty($id,'developId') eq 'y' && $develop !~ m/y$id/) {
+          #SIGNALduino_Log3 $name, 3, "$name: IdList, ID=$id skipped (developId=y)";
+          push (@skippedDevId, $id);
+          next;
+        }
+      }
+    }
 
-		if (defined($hash->{protocolObject}->getProperty($id,'format')) && $hash->{protocolObject}->getProperty($id,'format') eq 'manchester')
-		{
-			push (@mcIdList, $id);
-		}
-		elsif (defined $hash->{protocolObject}->getProperty($id,'modulation'))
-		{
-			push (@mnIdList, $id);
-		}
-		elsif (defined $hash->{protocolObject}->getProperty($id,'sync'))
-		{
-			push (@msIdList, $id);
-		}
-		elsif (defined $hash->{protocolObject}->getProperty($id,'clockabs'))
-		{
-			# $ProtocolListSIGNALduino{$id}{length_min} = SDUINO_PARSE_DEFAULT_LENGHT_MIN if (!exists($ProtocolListSIGNALduino{$id}{length_min}));
-			push (@muIdList, $id);
-		}
-	}
+    if (defined($hash->{protocolObject}->getProperty($id,'format')) && $hash->{protocolObject}->getProperty($id,'format') eq 'manchester')
+    {
+      push (@mcIdList, $id);
+    }
+    elsif (defined $hash->{protocolObject}->getProperty($id,'modulation'))
+    {
+      push (@mnIdList, $id);
+    }
+    elsif (defined $hash->{protocolObject}->getProperty($id,'sync'))
+    {
+      push (@msIdList, $id);
+    }
+    elsif (defined $hash->{protocolObject}->getProperty($id,'clockabs'))
+    {
+      # $ProtocolListSIGNALduino{$id}{length_min} = SDUINO_PARSE_DEFAULT_LENGHT_MIN if (!exists($ProtocolListSIGNALduino{$id}{length_min}));
+      push (@muIdList, $id);
+    }
+  }
 
-	@msIdList = sort {$a <=> $b} @msIdList;
-	@muIdList = sort {$a <=> $b} @muIdList;
-	@mcIdList = sort {$a <=> $b} @mcIdList;
-	@mnIdList = sort {$a <=> $b} @mnIdList;
-	@skippedDevId = sort {$a <=> $b} @skippedDevId;
-	@skippedBlackId = sort {$a <=> $b} @skippedBlackId;
-	@skippedWhiteId = sort {$a <=> $b} @skippedWhiteId;
+  @msIdList = sort {$a <=> $b} @msIdList;
+  @muIdList = sort {$a <=> $b} @muIdList;
+  @mcIdList = sort {$a <=> $b} @mcIdList;
+  @mnIdList = sort {$a <=> $b} @mnIdList;
+  @skippedDevId = sort {$a <=> $b} @skippedDevId;
+  @skippedBlackId = sort {$a <=> $b} @skippedBlackId;
+  @skippedWhiteId = sort {$a <=> $b} @skippedWhiteId;
 
-	@devModulId = sort {$a <=> $b} @devModulId;
+  @devModulId = sort {$a <=> $b} @devModulId;
 
-	$hash->{logMethod}->($name, 3, "$name: IdList, MS @msIdList");
-	$hash->{logMethod}->($name, 3, "$name: IdList, MU @muIdList");
-	$hash->{logMethod}->($name, 3, "$name: IdList, MC @mcIdList");
-	$hash->{logMethod}->($name, 3, "$name: IdList, MN @mnIdList");  # ToDo: nur wenn Internal cc1101_available 1 ???
-	$hash->{logMethod}->($name, 5, "$name: IdList, not whitelisted skipped = @skippedWhiteId") if (scalar @skippedWhiteId > 0);
-	$hash->{logMethod}->($name, 4, "$name: IdList, blacklistId skipped = @skippedBlackId") if (scalar @skippedBlackId > 0);
-	$hash->{logMethod}->($name, 4, "$name: IdList, development skipped = @skippedDevId") if (scalar @skippedDevId > 0);
-	if (scalar @devModulId > 0)
-	{
-		$hash->{logMethod}->($name, 3, "$name: IdList, development protocol is active (to activate dispatch to not finshed logical module, enable desired protocol via whitelistIDs) = @devModulId");
-		$hash->{IDsNoDispatch} = join(',', @devModulId);
-	}
+  $hash->{logMethod}->($name, 3, "$name: IdList, MS @msIdList");
+  $hash->{logMethod}->($name, 3, "$name: IdList, MU @muIdList");
+  $hash->{logMethod}->($name, 3, "$name: IdList, MC @mcIdList");
+  $hash->{logMethod}->($name, 3, "$name: IdList, MN @mnIdList");  # ToDo: nur wenn Internal cc1101_available 1 ???
+  $hash->{logMethod}->($name, 5, "$name: IdList, not whitelisted skipped = @skippedWhiteId") if (scalar @skippedWhiteId > 0);
+  $hash->{logMethod}->($name, 4, "$name: IdList, blacklistId skipped = @skippedBlackId") if (scalar @skippedBlackId > 0);
+  $hash->{logMethod}->($name, 4, "$name: IdList, development skipped = @skippedDevId") if (scalar @skippedDevId > 0);
+  if (scalar @devModulId > 0)
+  {
+    $hash->{logMethod}->($name, 3, "$name: IdList, development protocol is active (to activate dispatch to not finshed logical module, enable desired protocol via whitelistIDs) = @devModulId");
+    $hash->{IDsNoDispatch} = join(',', @devModulId);
+  }
 
-	$hash->{msIdList} = \@msIdList;
-	$hash->{muIdList} = \@muIdList;
-	$hash->{mcIdList} = \@mcIdList;
-	$hash->{mnIdList} = \@mnIdList;
+  $hash->{msIdList} = \@msIdList;
+  $hash->{muIdList} = \@muIdList;
+  $hash->{mcIdList} = \@mcIdList;
+  $hash->{mnIdList} = \@mnIdList;
 }
 
 ############################# package main, test exists
 sub SIGNALduino_getAttrDevelopment {
-	my $name = shift;
-	my $develop = shift;
-	my $devFlag = 0;
-	if (index(SDUINO_VERSION, 'dev') >= 0) {  	# development version
-		$develop = AttrVal($name,'development', 0) if (!defined($develop));
-		$devFlag = 1 if ($develop eq '1' || (substr($develop,0,1) eq 'y' && $develop !~ m/^y\d/));	# Entwicklerversion, y ist nur zur Abwaertskompatibilitaet und kann in einer der naechsten Versionen entfernt werden
-	} else {
-		$develop = '0';
-		Log3 $name, 3, "$name: getAttrDevelopment, IdList ### Attribute development is in this version ignored ###";
-	}
-	return ($develop,$devFlag);
+  my $name = shift;
+  my $develop = shift;
+  my $devFlag = 0;
+  if (index(SDUINO_VERSION, 'dev') >= 0) {                                                      # development version
+    $develop = AttrVal($name,'development', 0) if (!defined($develop));
+    $devFlag = 1 if ($develop eq '1' || (substr($develop,0,1) eq 'y' && $develop !~ m/^y\d/));  # Entwicklerversion, y ist nur zur Abwaertskompatibilitaet und kann in einer der naechsten Versionen entfernt werden
+  } else {
+    $develop = '0';
+    Log3 $name, 3, "$name: getAttrDevelopment, IdList ### Attribute development is in this version ignored ###";
+  }
+  return ($develop,$devFlag);
 }
 
 ############################# package main, test exists
 sub SIGNALduino_callsub {
-	my $obj=shift; #comatibility thing
-	my $funcname =shift // carp 'to less arguments,functionname is required';;
-	my $method = shift // undef;
-	my $evalFirst = shift // undef;
-	my $name = shift // carp 'to less arguments, name is required';
+  my $obj=shift; #comatibility thing
+  my $funcname =shift // carp 'to less arguments,functionname is required';;
+  my $method = shift // undef;
+  my $evalFirst = shift // undef;
+  my $name = shift // carp 'to less arguments, name is required';
 
-	my @args = @_;
+  my @args = @_;
 
-	my $hash = $defs{$name};
-	if ( defined $method && defined &$method )
-	{
-		if (defined($evalFirst) && $evalFirst)
-		{
-			eval( $method->($obj,$name, @args));
-			if($@) {
-				$hash->{logMethod}->($name, 5, "$name: callsub, Error: $funcname, has an error and will not be executed: $@ please report at github.");
-				return (0,undef);
-			}
-		}
-		#my $subname = @{[eval {&$method}, $@ =~ /.*/]};
-		$hash->{logMethod}->($hash, 5, "$name: callsub, applying $funcname, value before: @args"); # method $subname"
+  my $hash = $defs{$name};
+  if ( defined $method && defined &$method )
+  {
+    if (defined($evalFirst) && $evalFirst)
+    {
+      eval( $method->($obj,$name, @args));
+      if($@) {
+        $hash->{logMethod}->($name, 5, "$name: callsub, Error: $funcname, has an error and will not be executed: $@ please report at github.");
+        return (0,undef);
+      }
+    }
+    #my $subname = @{[eval {&$method}, $@ =~ /.*/]};
+    $hash->{logMethod}->($hash, 5, "$name: callsub, applying $funcname, value before: @args"); # method $subname"
 
-		my ($rcode, @returnvalues) = $method->($obj,$name, @args) ;
+    my ($rcode, @returnvalues) = $method->($obj,$name, @args) ;
 
-		if (@returnvalues && defined($returnvalues[0])) {
-	    	$hash->{logMethod}->($name, 5, "$name: callsub, rcode=$rcode, modified value after $funcname: @returnvalues");
-		} else {
-	   		$hash->{logMethod}->($name, 5, "$name: callsub, rcode=$rcode, after calling $funcname");
-	    }
-	    return ($rcode, @returnvalues);
-	} elsif (defined $method ) {
-		$hash->{logMethod}->($name, 5, "$name: callsub, Error: Unknown method $funcname pease report at github");
-		return (0,undef);
-	}
-	return (1,@args);
+    if (@returnvalues && defined($returnvalues[0])) {
+      $hash->{logMethod}->($name, 5, "$name: callsub, rcode=$rcode, modified value after $funcname: @returnvalues");
+    } else {
+      $hash->{logMethod}->($name, 5, "$name: callsub, rcode=$rcode, after calling $funcname");
+    }
+    return ($rcode, @returnvalues);
+  } elsif (defined $method ) {
+    $hash->{logMethod}->($name, 5, "$name: callsub, Error: Unknown method $funcname pease report at github");
+    return (0,undef);
+  }
+  return (1,@args);
 }
 
 
@@ -3360,64 +3360,64 @@ sub SIGNALduino_callsub {
 # =cut
 ############################# package main
 sub SIGNALduino_filterMC($$$%) {
-	## Warema Implementierung : Todo variabel gestalten
-	my ($name,$id,$rawData,%patternListRaw) = @_;
-	my $hash=$defs{$name};
-	my $debug = AttrVal($name,'debug',0);
+  ## Warema Implementierung : Todo variabel gestalten
+  my ($name,$id,$rawData,%patternListRaw) = @_;
+  my $hash=$defs{$name};
+  my $debug = AttrVal($name,'debug',0);
 
-	my ($ht, $hasbit, $value) = 0;
-	$value=1 if (!$debug);
-	my @bitData;
-	my @sigData = split '',$rawData;
-	my $clockabs;
-	
-	foreach my $pulse (@sigData)
-	{
-	  next if (!defined($patternListRaw{$pulse}));
-	  #SIGNALduino_Log3 $name, 4, "$name: pulese: ".$patternListRaw{$pulse};
-	  $clockabs = $hash->{protocolObject}->getProperty($id,'clockabs');
+  my ($ht, $hasbit, $value) = 0;
+  $value=1 if (!$debug);
+  my @bitData;
+  my @sigData = split '',$rawData;
+  my $clockabs;
 
-	  if (SIGNALduino_inTol($clockabs,abs($patternListRaw{$pulse}),$clockabs*0.5))
-	  {
-		# Short
-		$hasbit=$ht;
-		$ht = $ht ^ 0b00000001;
-		$value='S' if($debug);
-		#SIGNALduino_Log3 $name, 4, "$name: filter S ";
-	  } elsif ( SIGNALduino_inTol($clockabs*2,abs($patternListRaw{$pulse}),$clockabs*0.5)) {
-	  	# Long
-	  	$hasbit=1;
-		$ht=1;
-		$value='L' if($debug);
-		#SIGNALduino_Log3 $name, 4, "$name: filter L ";
-	  } elsif ( SIGNALduino_inTol($hash->{protocolObject}->getProperty($id,'syncabs')+(2*$clockabs),abs($patternListRaw{$pulse}),$clockabs*0.5))  {
-	  	$hasbit=1;
-		$ht=1;
-		$value='L' if($debug);
-	  	#SIGNALduino_Log3 $name, 4, "$name: sync L ";
-	  } else {
-	  	# No Manchester Data
-	  	$ht=0;
-	  	$hasbit=0;
-	  	#SIGNALduino_Log3 $name, 4, "$name: filter n ";
-	  }
+  foreach my $pulse (@sigData)
+  {
+    next if (!defined($patternListRaw{$pulse}));
+    #SIGNALduino_Log3 $name, 4, "$name: pulese: ".$patternListRaw{$pulse};
+    $clockabs = $hash->{protocolObject}->getProperty($id,'clockabs');
 
-	  if ($hasbit && $value) {
-	  	$value = lc($value) if($debug && $patternListRaw{$pulse} < 0);
-	  	my $bit=$patternListRaw{$pulse} > 0 ? 1 : 0;
-	  	#SIGNALduino_Log3 $name, 5, "$name: adding value: ".$bit;
+    if (SIGNALduino_inTol($clockabs,abs($patternListRaw{$pulse}),$clockabs*0.5))
+    {
+      # Short
+      $hasbit=$ht;
+      $ht = $ht ^ 0b00000001;
+      $value='S' if($debug);
+      #SIGNALduino_Log3 $name, 4, "$name: filter S ";
+    } elsif ( SIGNALduino_inTol($clockabs*2,abs($patternListRaw{$pulse}),$clockabs*0.5)) {
+      # Long
+      $hasbit=1;
+      $ht=1;
+      $value='L' if($debug);
+      #SIGNALduino_Log3 $name, 4, "$name: filter L ";
+    } elsif ( SIGNALduino_inTol($hash->{protocolObject}->getProperty($id,'syncabs')+(2*$clockabs),abs($patternListRaw{$pulse}),$clockabs*0.5))  {
+      $hasbit=1;
+      $ht=1;
+      $value='L' if($debug);
+      #SIGNALduino_Log3 $name, 4, "$name: sync L ";
+    } else {
+      # No Manchester Data
+      $ht=0;
+      $hasbit=0;
+      #SIGNALduino_Log3 $name, 4, "$name: filter n ";
+    }
 
-	  	push @bitData, $bit ;
-	  }
-	}
+    if ($hasbit && $value) {
+      $value = lc($value) if($debug && $patternListRaw{$pulse} < 0);
+      my $bit=$patternListRaw{$pulse} > 0 ? 1 : 0;
+      #SIGNALduino_Log3 $name, 5, "$name: adding value: ".$bit;
 
-	my %patternListRawFilter;
-	$patternListRawFilter{0} = 0;
-	$patternListRawFilter{1} = $clockabs;
+      push @bitData, $bit ;
+    }
+  }
 
-	#SIGNALduino_Log3 $name, 5, "$name: filterbits: ".@bitData;
-	$rawData = join '', @bitData;
-	return (undef ,$rawData, %patternListRawFilter);
+  my %patternListRawFilter;
+  $patternListRawFilter{0} = 0;
+  $patternListRawFilter{1} = $clockabs;
+
+  #SIGNALduino_Log3 $name, 5, "$name: filterbits: ".@bitData;
+  $rawData = join '', @bitData;
+  return (undef ,$rawData, %patternListRawFilter);
 }
 
 
@@ -3429,64 +3429,64 @@ sub SIGNALduino_filterMC($$$%) {
 # =cut
 ############################# package main
 sub SIGNALduino_filterSign($$$%) {
-	my ($name,$id,$rawData,%patternListRaw) = @_;
-	my $debug = AttrVal($name,'debug',0);
+  my ($name,$id,$rawData,%patternListRaw) = @_;
+  my $debug = AttrVal($name,'debug',0);
 
-	my %buckets;
-	# Remove Sign
-    %patternListRaw = map { $_ => abs($patternListRaw{$_})} keys %patternListRaw;  ## remove sign from all
+  my %buckets;
+  # Remove Sign
+  %patternListRaw = map { $_ => abs($patternListRaw{$_})} keys %patternListRaw;  ## remove sign from all
 
-    my $intol=0;
-    my $cnt=0;
+  my $intol=0;
+  my $cnt=0;
 
-    # compress pattern hash
-    foreach my $key (keys %patternListRaw) {
+  # compress pattern hash
+  foreach my $key (keys %patternListRaw) {
 
-		#print 'chk:'.$patternListRaw{$key};
-    	#print "\n";
+    #print 'chk:'.$patternListRaw{$key};
+    #print "\n";
 
-        $intol=0;
-		foreach my $b_key (keys %buckets){
-			#print 'with:'.$buckets{$b_key};
-			#print "\n";
+    $intol=0;
+    foreach my $b_key (keys %buckets){
+      #print 'with:'.$buckets{$b_key};
+      #print "\n";
 
-			# $value  - $set <= $tolerance
-			if (SIGNALduino_inTol($patternListRaw{$key},$buckets{$b_key},$buckets{$b_key}*0.25))
-			{
-		    	#print"\t". $patternListRaw{$key}."($key) is intol of ".$buckets{$b_key}."($b_key) \n";
-				$cnt++;
-				eval "\$rawData =~ tr/$key/$b_key/";
+      # $value  - $set <= $tolerance
+      if (SIGNALduino_inTol($patternListRaw{$key},$buckets{$b_key},$buckets{$b_key}*0.25))
+      {
+        #print"\t". $patternListRaw{$key}."($key) is intol of ".$buckets{$b_key}."($b_key) \n";
+        $cnt++;
+        eval "\$rawData =~ tr/$key/$b_key/";
 
-				#if ($key == $msg_parts{clockidx})
-				#{
-			#		$msg_pats{syncidx} = $buckets{$key};
-			#	}
-			#	elsif ($key == $msg_parts{syncidx})
-			#	{
-			#		$msg_pats{syncidx} = $buckets{$key};
-			#	}
+        #if ($key == $msg_parts{clockidx})
+        #{
+        #		$msg_pats{syncidx} = $buckets{$key};
+        #	}
+        #	elsif ($key == $msg_parts{syncidx})
+        #	{
+        #		$msg_pats{syncidx} = $buckets{$key};
+        #	}
 
-				$buckets{$b_key} = ($buckets{$b_key} + $patternListRaw{$key}) /2;
-				#print"\t recalc to ". $buckets{$b_key}."\n";
+        $buckets{$b_key} = ($buckets{$b_key} + $patternListRaw{$key}) /2;
+        #print"\t recalc to ". $buckets{$b_key}."\n";
 
-				delete ($patternListRaw{$key});  # deletes the compressed entry
-				$intol=1;
-				last;
-			}
-		}
-		if ($intol == 0) {
-			$buckets{$key}=abs($patternListRaw{$key});
-		}
-	}
+        delete ($patternListRaw{$key});  # deletes the compressed entry
+        $intol=1;
+        last;
+      }
+    }
+    if ($intol == 0) {
+      $buckets{$key}=abs($patternListRaw{$key});
+    }
+  }
 
-	return ($cnt,$rawData, %patternListRaw);
-	#print 'rdata: '.$msg_parts{rawData}."\n";
+  return ($cnt,$rawData, %patternListRaw);
+  #print 'rdata: '.$msg_parts{rawData}."\n";
 
-	#print Dumper (%buckets);
-	#print Dumper (%msg_parts);
+  #print Dumper (%buckets);
+  #print Dumper (%msg_parts);
 
-	#modify msg_parts pattern hash
-	#$patternListRaw = \%buckets;
+  #modify msg_parts pattern hash
+  #$patternListRaw = \%buckets;
 }
 
 
@@ -3498,64 +3498,64 @@ sub SIGNALduino_filterSign($$$%) {
 # =cut
 ############################# package main
 sub SIGNALduino_compPattern($$$%) {
-	my ($name,$id,$rawData,%patternListRaw) = @_;
-	my $debug = AttrVal($name,'debug',0);
+  my ($name,$id,$rawData,%patternListRaw) = @_;
+  my $debug = AttrVal($name,'debug',0);
 
-	my %buckets;
-	# Remove Sign
-    #%patternListRaw = map { $_ => abs($patternListRaw{$_})} keys %patternListRaw;  ## remove sing from all
+  my %buckets;
+  # Remove Sign
+  #%patternListRaw = map { $_ => abs($patternListRaw{$_})} keys %patternListRaw;  ## remove sing from all
 
-    my $intol=0;
-    my $cnt=0;
+  my $intol=0;
+  my $cnt=0;
 
-    # compress pattern hash
-    foreach my $key (keys %patternListRaw) {
+  # compress pattern hash
+  foreach my $key (keys %patternListRaw) {
 
-		#print 'chk:'.$patternListRaw{$key};
-    	#print "\n";
+    #print 'chk:'.$patternListRaw{$key};
+    #print "\n";
 
-        $intol=0;
-		foreach my $b_key (keys %buckets){
-			#print 'with:'.$buckets{$b_key};
-			#print "\n";
+    $intol=0;
+    foreach my $b_key (keys %buckets){
+      #print 'with:'.$buckets{$b_key};
+      #print "\n";
 
-			# $value  - $set <= $tolerance
-			if (SIGNALduino_inTol($patternListRaw{$key},$buckets{$b_key},$buckets{$b_key}*0.4))
-			{
-		    	#print"\t". $patternListRaw{$key}."($key) is intol of ".$buckets{$b_key}."($b_key) \n";
-				$cnt++;
-				eval "\$rawData =~ tr/$key/$b_key/";
+      # $value  - $set <= $tolerance
+      if (SIGNALduino_inTol($patternListRaw{$key},$buckets{$b_key},$buckets{$b_key}*0.4))
+      {
+        #print"\t". $patternListRaw{$key}."($key) is intol of ".$buckets{$b_key}."($b_key) \n";
+        $cnt++;
+        eval "\$rawData =~ tr/$key/$b_key/";
 
-				#if ($key == $msg_parts{clockidx})
-				#{
-			#		$msg_pats{syncidx} = $buckets{$key};
-			#	}
-			#	elsif ($key == $msg_parts{syncidx})
-			#	{
-			#		$msg_pats{syncidx} = $buckets{$key};
-			#	}
+        #if ($key == $msg_parts{clockidx})
+        #{
+        #		$msg_pats{syncidx} = $buckets{$key};
+        #	}
+        #	elsif ($key == $msg_parts{syncidx})
+        #	{
+        #		$msg_pats{syncidx} = $buckets{$key};
+        #	}
 
-				$buckets{$b_key} = ($buckets{$b_key} + $patternListRaw{$key}) /2;
-				#print"\t recalc to ". $buckets{$b_key}."\n";
+        $buckets{$b_key} = ($buckets{$b_key} + $patternListRaw{$key}) /2;
+        #print"\t recalc to ". $buckets{$b_key}."\n";
 
-				delete ($patternListRaw{$key});  # deletes the compressed entry
-				$intol=1;
-				last;
-			}
-		}
-		if ($intol == 0) {
-			$buckets{$key}=$patternListRaw{$key};
-		}
-	}
+        delete ($patternListRaw{$key});  # deletes the compressed entry
+        $intol=1;
+        last;
+      }
+    }
+    if ($intol == 0) {
+      $buckets{$key}=$patternListRaw{$key};
+    }
+  }
 
-	return ($cnt,$rawData, %patternListRaw);
-	#print 'rdata: '.$msg_parts{rawData}."\n";
+  return ($cnt,$rawData, %patternListRaw);
+  #print 'rdata: '.$msg_parts{rawData}."\n";
 
-	#print Dumper (%buckets);
-	#print Dumper (%msg_parts);
+  #print Dumper (%buckets);
+  #print Dumper (%msg_parts);
 
-	#modify msg_parts pattern hash
-	#$patternListRaw = \%buckets;
+  #modify msg_parts pattern hash
+  #$patternListRaw = \%buckets;
 }
 
 
@@ -3593,254 +3593,256 @@ sub SIGNALduino_Log3 {
 
 ############################# package main
 # Helper to get a reference of the protocolList Hash
+# ?? ToDo - wird diese Sub noch beoetigt ???
 sub SIGNALduino_getProtocolList() {
-	#return \%ProtocolListSIGNALduino
+  #return \%ProtocolListSIGNALduino
 }
 
 ############################# package main
 # Helper to create a individual callback per definition which can receive log output from perl modules
 sub SIGNALduino_createLogCallback {
-	my $hash = shift // return ;
-	(ref $hash ne 'HASH') // return ;
+  my $hash = shift // return ;
+  (ref $hash ne 'HASH') // return ;
 
-	return sub  {
-		my $message = shift // carp 'message must be provided';
-		my $level = shift // 0;
-				
-		$hash->{logMethod}->($hash->{NAME}, $level,qq[$hash->{NAME}: $message]);
-	};
+  return sub  {
+    my $message = shift // carp 'message must be provided';
+    my $level = shift // 0;
+
+    $hash->{logMethod}->($hash->{NAME}, $level,qq[$hash->{NAME}: $message]);
+  };
 };
 
 
 ############################# package main
 sub SIGNALduino_FW_getProtocolList {
-	my $name = shift;
+  my $name = shift;
 
-	my $hash = $defs{$name};
-	my $ret;
-	my $devText = '';
-	my $blackTxt = '';
-	my %BlacklistIDs;
-	my @IdList = ();
-	my $comment;
-	my $knownFreqs;
+  my $hash = $defs{$name};
+  my $ret;
+  my $devText = '';
+  my $blackTxt = '';
+  my %BlacklistIDs;
+  my @IdList = ();
+  my $comment;
+  my $knownFreqs;
 
-	my $blacklist = AttrVal($name,'blacklist_IDs','');
-	if (length($blacklist) > 0) {							# Blacklist in Hash wandeln
-		#SIGNALduino_Log3 $name, 5, "$name getProtocolList: attr blacklistIds=$blacklist";
-		%BlacklistIDs = map { $_ => 1 } split(',', $blacklist);;
-	}
+  my $blacklist = AttrVal($name,'blacklist_IDs','');
+  if (length($blacklist) > 0) {                                     # Blacklist in Hash wandeln
+    #SIGNALduino_Log3 $name, 5, "$name getProtocolList: attr blacklistIds=$blacklist";
+    %BlacklistIDs = map { $_ => 1 } split(',', $blacklist);;
+  }
 
-	my $whitelist = AttrVal($name,'whitelist_IDs','#');
-	if (AttrVal($name,'blacklist_IDs','') ne '') {				# wenn es eine blacklist gibt, dann '.' an die Ueberschrift anhaengen
-		$blackTxt = '.';
-	}
+  my $whitelist = AttrVal($name,'whitelist_IDs','#');
+  if (AttrVal($name,'blacklist_IDs','') ne '') {                    # wenn es eine blacklist gibt, dann '.' an die Ueberschrift anhaengen
+    $blackTxt = '.';
+  }
 
-	my ($develop,$devFlag) = SIGNALduino_getAttrDevelopment($name);	# $devFlag = 1 -> alle developIDs y aktivieren
-	$devText = 'development version - ' if ($devFlag == 1);
+  my ($develop,$devFlag) = SIGNALduino_getAttrDevelopment($name);   # $devFlag = 1 -> alle developIDs y aktivieren
+  $devText = 'development version - ' if ($devFlag == 1);
 
-	my %activeIdHash;
-	@activeIdHash{@{$hash->{msIdList}}, @{$hash->{muIdList}}, @{$hash->{mcIdList}}, @{$hash->{mnIdList}}} = (undef);
-	#SIGNALduino_Log3 $name,4, "$name IdList: $mIdList";
+  my %activeIdHash;
+  @activeIdHash{@{$hash->{msIdList}}, @{$hash->{muIdList}}, @{$hash->{mcIdList}}, @{$hash->{mnIdList}}} = (undef);
+  #SIGNALduino_Log3 $name,4, "$name IdList: $mIdList";
 
-	my %IDsNoDispatch;
-	if (defined($hash->{IDsNoDispatch})) {
-		%IDsNoDispatch = map { $_ => 1 } split(',', $hash->{IDsNoDispatch});
-		#SIGNALduino_Log3 $name,4, "$name IdList IDsNoDispatch=" . join ', ' => map "$_" => keys %IDsNoDispatch;
-	}
+  my %IDsNoDispatch;
+  if (defined($hash->{IDsNoDispatch})) {
+    %IDsNoDispatch = map { $_ => 1 } split(',', $hash->{IDsNoDispatch});
+    #SIGNALduino_Log3 $name,4, "$name IdList IDsNoDispatch=" . join ', ' => map "$_" => keys %IDsNoDispatch;
+  }
 
-	for my $id ($hash->{protocolObject}->getKeys())
-	{
-		push (@IdList, $id);
-	}
-	@IdList = sort { $a <=> $b } @IdList;
+  for my $id ($hash->{protocolObject}->getKeys())
+  {
+    push (@IdList, $id);
+  }
+  @IdList = sort { $a <=> $b } @IdList;
 
-	$ret = "<table class=\"block wide internals wrapcolumns\">";
+  $ret = "<table class=\"block wide internals wrapcolumns\">";
 
-	$ret .="<caption id=\"SD_protoCaption\">$devText";
-	if (substr($whitelist,0,1) ne '#') {
-		$ret .="whitelist active$blackTxt</caption>";
-	}
-	else {
-		$ret .="whitelist not active (save activate it)$blackTxt</caption>";
-	}
-	$ret .= "<thead style=\"text-align:center\"><td>act.</td><td>dev</td><td>ID</td><td>Msg Type</td><td>modulname</td><td>protocolname</td> <td># comment</td></thead>";
-	$ret .="<tbody>";
-	my $oddeven="odd";
-	my $checked;
-	my $checkAll;
+  $ret .="<caption id=\"SD_protoCaption\">$devText";
+  if (substr($whitelist,0,1) ne '#') {
+    $ret .="whitelist active$blackTxt</caption>";
+  }
+  else {
+    $ret .="whitelist not active (save activate it)$blackTxt</caption>";
+  }
+  $ret .= "<thead style=\"text-align:center\"><td>act.</td><td>dev</td><td>ID</td><td>Msg Type</td><td>modulname</td><td>protocolname</td> <td># comment</td></thead>";
+  $ret .="<tbody>";
+  my $oddeven="odd";
+  my $checked;
+  my $checkAll;
 
-	foreach my $id (@IdList)
-	{
-		my $msgtype = '';
-		my $chkbox;
+  foreach my $id (@IdList)
+  {
+    my $msgtype = '';
+    my $chkbox;
 
-		if (defined $hash->{protocolObject}->getProperty($id,'format') && $hash->{protocolObject}->getProperty($id,'format' eq 'manchester'))
-		{
-			$msgtype = 'MC';
-		}
-		elsif (defined $hash->{protocolObject}->getProperty($id,'modulation'))
-		{
-			$msgtype = 'MN';
-		}
-		elsif (defined $hash->{protocolObject}->getProperty($id,'sync'))
-		{
-			$msgtype = 'MS';
-		}
-		elsif (defined $hash->{protocolObject}->getProperty($id,'clockabs'))
-		{
-			$msgtype = 'MU';
-		}
+    if (defined $hash->{protocolObject}->getProperty($id,'format') && $hash->{protocolObject}->getProperty($id,'format' eq 'manchester'))
+    {
+      $msgtype = 'MC';
+    }
+    elsif (defined $hash->{protocolObject}->getProperty($id,'modulation'))
+    {
+      $msgtype = 'MN';
+    }
+    elsif (defined $hash->{protocolObject}->getProperty($id,'sync'))
+    {
+      $msgtype = 'MS';
+    }
+    elsif (defined $hash->{protocolObject}->getProperty($id,'clockabs'))
+    {
+      $msgtype = 'MU';
+    }
 
-		$checked='';
+    $checked='';
 
-		if (substr($whitelist,0,1) ne '#') {	# whitelist aktiv, dann ermitteln welche ids bei select all nicht checked sein sollen
-			$checkAll = 'SDcheck';
-			if (exists($BlacklistIDs{$id})) {
-				$checkAll = 'SDnotCheck';
-			}
-			elsif (defined $hash->{protocolObject}->getProperty($id,'developId')) {
-				if ($devFlag == 1 && $hash->{protocolObject}->getProperty($id,'developId') eq 'p') {
-					$checkAll = 'SDnotCheck';
-				}
-				elsif ($devFlag == 0 && $hash->{protocolObject}->getProperty($id,'developId') eq 'y' && $develop !~ m/y$id/) {
-					$checkAll = 'SDnotCheck';
-				}
-				elsif ($devFlag == 0 && $hash->{protocolObject}->getProperty($id,'developId') eq 'm') {
-					$checkAll = 'SDnotCheck';
-				}
-			}
-		}
-		else {
-			$checkAll = 'SDnotCheck';
-		}
+    if (substr($whitelist,0,1) ne '#') {  # whitelist aktiv, dann ermitteln welche ids bei select all nicht checked sein sollen
+      $checkAll = 'SDcheck';
+      if (exists($BlacklistIDs{$id})) {
+        $checkAll = 'SDnotCheck';
+      }
+      elsif (defined $hash->{protocolObject}->getProperty($id,'developId')) {
+        if ($devFlag == 1 && $hash->{protocolObject}->getProperty($id,'developId') eq 'p') {
+          $checkAll = 'SDnotCheck';
+        }
+        elsif ($devFlag == 0 && $hash->{protocolObject}->getProperty($id,'developId') eq 'y' && $develop !~ m/y$id/) {
+          $checkAll = 'SDnotCheck';
+        }
+        elsif ($devFlag == 0 && $hash->{protocolObject}->getProperty($id,'developId') eq 'm') {
+          $checkAll = 'SDnotCheck';
+        }
+      }
+    }
+    else {
+      $checkAll = 'SDnotCheck';
+    }
 
-		if (exists($activeIdHash{$id}))
-		{
-			$checked='checked';
-			if (substr($whitelist,0,1) eq '#') {	# whitelist nicht aktiv, dann entspricht select all dem $activeIdHash
-				$checkAll = 'SDcheck';
-			}
-		}
+    if (exists($activeIdHash{$id}))
+    {
+      $checked='checked';
+      if (substr($whitelist,0,1) eq '#') {	# whitelist nicht aktiv, dann entspricht select all dem $activeIdHash
+        $checkAll = 'SDcheck';
+      }
+    }
 
-		if ($devFlag == 0 && defined $hash->{protocolObject}->getProperty($id,'developId') && $hash->{protocolObject}->getProperty($id,'developId') eq 'p') {
-			$chkbox="<div> </div>";
-		}
-		else {
-			$chkbox=sprintf("<INPUT type=\"checkbox\" name=\"%s\" value=\"%s\" %s/>", $checkAll, $id, $checked);
-		}
+    if ($devFlag == 0 && defined $hash->{protocolObject}->getProperty($id,'developId') && $hash->{protocolObject}->getProperty($id,'developId') eq 'p') {
+      $chkbox="<div> </div>";
+    }
+    else {
+      $chkbox=sprintf("<INPUT type=\"checkbox\" name=\"%s\" value=\"%s\" %s/>", $checkAll, $id, $checked);
+    }
 
-		$comment = $hash->{protocolObject}->checkProperty($id,'comment','');
-		if (exists($IDsNoDispatch{$id})) {
-			$comment .= ' (dispatch is only with a active whitelist possible)';
-		}
+    $comment = $hash->{protocolObject}->checkProperty($id,'comment','');
+    if (exists($IDsNoDispatch{$id})) {
+      $comment .= ' (dispatch is only with a active whitelist possible)';
+    }
 
-		$knownFreqs = $hash->{protocolObject}->checkProperty($id,'knownFreqs','');
+    $knownFreqs = $hash->{protocolObject}->checkProperty($id,'knownFreqs','');
 
-		if ($msgtype eq 'MN') {		# xFSK
-			$comment .= ' (Mod. ' . $hash->{protocolObject}->checkProperty($id,'modulation','') . ', DataRate=' . $hash->{protocolObject}->checkProperty($id,'datarate','') . ', Sync Word=' . $hash->{protocolObject}->checkProperty($id,'sync','');
-			if (length($knownFreqs) > 2) {
-				$comment .= ', Freq. ' . $knownFreqs . 'MHz';
-			}
-			$comment .= ')';
-		}
+    if ($msgtype eq 'MN') {		# xFSK
+      $comment .= ' (Mod. ' . $hash->{protocolObject}->checkProperty($id,'modulation','') . ', DataRate=' . $hash->{protocolObject}->checkProperty($id,'datarate','') . ', Sync Word=' . $hash->{protocolObject}->checkProperty($id,'sync','');
+      if (length($knownFreqs) > 2) {
+        $comment .= ', Freq. ' . $knownFreqs . 'MHz';
+      }
+      $comment .= ')';
+    }
 
-		$ret .= sprintf("<tr class=\"%s\"><td>%s</td><td><div>%s</div></td><td><div>%3s</div></td><td><div>%s</div></td><td><div>%s</div></td><td><div>%s</div></td><td><div>%s</div></td></tr>",$oddeven,$chkbox,$hash->{protocolObject}->checkProperty($id,'developId',''),$id,$msgtype,$hash->{protocolObject}->checkProperty($id,'clientmodule',''),$hash->{protocolObject}->checkProperty($id,'name',''),$comment);
-		$oddeven= $oddeven eq "odd" ? "even" : "odd" ;
+    $ret .= sprintf("<tr class=\"%s\"><td>%s</td><td><div>%s</div></td><td><div>%3s</div></td><td><div>%s</div></td><td><div>%s</div></td><td><div>%s</div></td><td><div>%s</div></td></tr>",$oddeven,$chkbox,$hash->{protocolObject}->checkProperty($id,'developId',''),$id,$msgtype,$hash->{protocolObject}->checkProperty($id,'clientmodule',''),$hash->{protocolObject}->checkProperty($id,'name',''),$comment);
+    $oddeven= $oddeven eq "odd" ? "even" : "odd" ;
 
-		$ret .= "\n";
-	}
-	$ret .= "</tbody></table>";
-	return $ret;
+    $ret .= "\n";
+  }
+  $ret .= "</tbody></table>";
+  return $ret;
 }
 
 ############################# package main
 sub SIGNALduino_querygithubreleases {
-    my ($hash) = @_;
-    my $name = $hash->{NAME};
-    my $param = {
-                    url        => 'https://api.github.com/repos/RFD-FHEM/SIGNALDuino/releases',
-                    timeout    => 5,
-                    hash       => $hash,                                                                                 # Muss gesetzt werden, damit die Callback funktion wieder $hash hat
-                    method     => 'GET',                                                                                 # Lesen von Inhalten
-                    header     => "User-Agent: perl_fhem\r\nAccept: application/json",  								 # Den Header gemaess abzufragender Daten aendern
-                    callback   =>  \&SIGNALduino_githubParseHttpResponse,                                                # Diese Funktion soll das Ergebnis dieser HTTP Anfrage bearbeiten
-                    command    => "queryReleases"
+  my ($hash) = @_;
+  my $name = $hash->{NAME};
+  my $param = {
+                url        => 'https://api.github.com/repos/RFD-FHEM/SIGNALDuino/releases',
+                timeout    => 5,
+                hash       => $hash,                                                    # Muss gesetzt werden, damit die Callback funktion wieder $hash hat
+                method     => 'GET',                                                    # Lesen von Inhalten
+                header     => "User-Agent: perl_fhem\r\nAccept: application/json",      # Den Header gemaess abzufragender Daten aendern
+                callback   =>  \&SIGNALduino_githubParseHttpResponse,                   # Diese Funktion soll das Ergebnis dieser HTTP Anfrage bearbeiten
+                command    => "queryReleases"
+              };
 
-                };
-	HttpUtils_NonblockingGet($param);                                                                                     # Starten der HTTP Abfrage. Es gibt keinen Return-Code.
+  HttpUtils_NonblockingGet($param);                                                     # Starten der HTTP Abfrage. Es gibt keinen Return-Code.
 }
 
 ############################# package main
 #return -10 = hardeware attribute is not set
 sub SIGNALduino_githubParseHttpResponse {
-    my ($param, $err, $data) = @_;
-    my $hash = $param->{hash};
-    my $name = $hash->{NAME};
-    my $hardware=AttrVal($name,'hardware',undef);
+  my ($param, $err, $data) = @_;
+  my $hash = $param->{hash};
+  my $name = $hash->{NAME};
+  my $hardware=AttrVal($name,'hardware',undef);
 
-    if($err ne '')                                                                                                         # wenn ein Fehler bei der HTTP Abfrage aufgetreten ist
-    {
-        Log3 $name, 3, "$name: githubParseHttpResponse, error while requesting ".$param->{url}." - $err (command: $param->{command}";                                                  # Eintrag fuers Log
-        #readingsSingleUpdate($hash, 'fullResponse', 'ERROR');                                                              # Readings erzeugen
+  if($err ne '')                                                                                                        # wenn ein Fehler bei der HTTP Abfrage aufgetreten ist
+  {
+    Log3 $name, 3, "$name: githubParseHttpResponse, error while requesting ".$param->{url}." - $err (command: $param->{command}";   # Eintrag fuers Log
+    #readingsSingleUpdate($hash, 'fullResponse', 'ERROR');                                                              # Readings erzeugen
+  }
+  elsif($data ne '' && defined($hardware))                                                                              # wenn die Abfrage erfolgreich war ($data enthaelt die Ergebnisdaten des HTTP Aufrufes)
+  {
+    my $json_array = decode_json($data);
+    #print  Dumper($json_array);
+    if ($param->{command} eq 'queryReleases') {
+      #Log3 $name, 3, "$name: githubParseHttpResponse, url ".$param->{url}." returned: $data";                          # Eintrag fuers Log
+
+      my $releaselist='';
+      if (ref($json_array) eq "ARRAY") {
+        foreach my $item( @$json_array ) {
+          next if (AttrVal($name,'updateChannelFW','stable') eq 'stable' && $item->{prerelease});
+
+          #Debug ' item = '.Dumper($item);
+
+          foreach my $asset (@{$item->{assets}})
+          {
+            next if ($asset->{name} !~ m/$hardware/i);
+            $releaselist.=$item->{tag_name}.',' ;
+            last;
+          }
+        }
+      }
+
+      $releaselist =~ s/,$//;
+      $hash->{additionalSets}{flash} = $releaselist;
+    } elsif ($param->{command} eq 'getReleaseByTag' && defined($hardware)) {
+      #Debug ' json response = '.Dumper($json_array);
+
+      my @fwfiles;
+      foreach my $asset (@{$json_array->{assets}})
+      {
+        my %fileinfo;
+        if ( $asset->{name} =~ m/$hardware/i)
+        {
+          $fileinfo{filename} = $asset->{name};
+          $fileinfo{dlurl} = $asset->{browser_download_url};
+          $fileinfo{create_date} = $asset->{created_at};
+          #Debug ' firmwarefiles = '.Dumper(@fwfiles);
+          push @fwfiles, \%fileinfo;
+
+          my $set_return = SIGNALduino_Set($hash,$name,'flash',$asset->{browser_download_url}); # $hash->{SetFn
+          if(defined($set_return))
+          {
+            $hash->{logMethod}->($name, 3, "$name: githubParseHttpResponse, Error while trying to download firmware: $set_return");
+          }
+          last;
+        }
+      }
+
     }
-    elsif($data ne '' && defined($hardware))                                                                                                     # wenn die Abfrage erfolgreich war ($data enthaelt die Ergebnisdaten des HTTP Aufrufes)
-    {
-    	my $json_array = decode_json($data);
-    	#print  Dumper($json_array);
-       	if ($param->{command} eq 'queryReleases') {
-	        #Log3 $name, 3, "$name: githubParseHttpResponse, url ".$param->{url}." returned: $data";                                                            # Eintrag fuers Log
-
-			my $releaselist='';
-			if (ref($json_array) eq "ARRAY") {
-				foreach my $item( @$json_array ) {
-					next if (AttrVal($name,'updateChannelFW','stable') eq 'stable' && $item->{prerelease});
-
-					#Debug ' item = '.Dumper($item);
-
-					foreach my $asset (@{$item->{assets}})
-					{
-						next if ($asset->{name} !~ m/$hardware/i);
-						$releaselist.=$item->{tag_name}.',' ;
-						last;
-					}
-				}
-			}
-
-			$releaselist =~ s/,$//;
-		  	$hash->{additionalSets}{flash} = $releaselist;
-    	} elsif ($param->{command} eq 'getReleaseByTag' && defined($hardware)) {
-			#Debug ' json response = '.Dumper($json_array);
-
-			my @fwfiles;
-			foreach my $asset (@{$json_array->{assets}})
-			{
-				my %fileinfo;
-				if ( $asset->{name} =~ m/$hardware/i)
-				{
-					$fileinfo{filename} = $asset->{name};
-					$fileinfo{dlurl} = $asset->{browser_download_url};
-					$fileinfo{create_date} = $asset->{created_at};
-					#Debug ' firmwarefiles = '.Dumper(@fwfiles);
-					push @fwfiles, \%fileinfo;
-
-					my $set_return = SIGNALduino_Set($hash,$name,'flash',$asset->{browser_download_url}); # $hash->{SetFn
-					if(defined($set_return))
-					{
-						$hash->{logMethod}->($name, 3, "$name: githubParseHttpResponse, Error while trying to download firmware: $set_return");
-					}
-					last;
-				}
-			}
-
-    	}
-    } elsif (!defined($hardware))  {
-    	$hash->{logMethod}->($name, 5, "$name: githubParseHttpResponse, hardware is not defined");
-    }                                                                                              # wenn
-    # Damit ist die Abfrage zuende.
-    # Evtl. einen InternalTimer neu schedulen
-    FW_directNotify("FILTER=$name", "#FHEMWEB:$FW_wname", "location.reload('true')", '');
-	return 0;
+  } elsif (!defined($hardware))  {
+    $hash->{logMethod}->($name, 5, "$name: githubParseHttpResponse, hardware is not defined");
+  }
+  # wenn
+  # Damit ist die Abfrage zuende.
+  # Evtl. einen InternalTimer neu schedulen
+  FW_directNotify("FILTER=$name", "#FHEMWEB:$FW_wname", "location.reload('true')", '');
+  return 0;
 }
 
 
