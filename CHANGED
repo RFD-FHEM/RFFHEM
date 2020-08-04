@@ -1,3 +1,6 @@
+2020-08-02 - Update 00_SIGNALduino.pm
+
+* revised hard tabs to spaces (perlcritic) on some functions (part one)
 2020-08-02 - dev-r35_xFSK - part package cc1101 perlcritic (#882)
 
 Update 00_SIGNALduino.pm
