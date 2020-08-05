@@ -17,11 +17,11 @@ jobs:
         fetch-depth: 0
         persist-credentials: false
     - name: update controls files
-      uses: fhem/fhem-controls-actions@master
+      uses: fhem/fhem-controls-actions@v1.11
       with:
         filename: controls_signalduino.txt 
     - name: update controls files lib
-      uses: fhem/fhem-controls-actions@master
+      uses: fhem/fhem-controls-actions@1.11
       with:
         filename: controls_signalduino.txt 
         directory: FHEM/lib
