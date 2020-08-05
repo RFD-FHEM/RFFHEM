@@ -4022,9 +4022,9 @@ USB-connected devices (SIGNALduino):<br>
 
     To send some raw data look at these examples:
     P<protocol id>#binarydata#R<num of repeats>#C<optional clock>   (#C is optional)<br>
-    <br>Example 1: <code>set sduino raw SR;R=3;P0=500;P1=-9000;P2=-4000;P3=-2000;D=0302030</code>  sends the data in raw mode 3 times repeated
-    <br>Example 2: <code>set sduino raw SM;R=3;P0=500;C=250;D=A4F7FDDE</code>  sends the data manchester encoded with a clock of 250uS
-    <br>Example 3: <code>set sduino raw SC;R=3;SR;P0=5000;SM;P0=500;C=250;D=A4F7FDDE</code>  sends a combined message of raw and manchester encoded repeated 3 times
+    <br>Example 1: <code>set sduino raw SR;R=3;P0=500;P1=-9000;P2=-4000;P3=-2000;D=0302030;</code>  sends the data in raw mode 3 times repeated
+    <br>Example 2: <code>set sduino raw SM;R=3;P0=500;C=250;D=A4F7FDDE;</code>  sends the data manchester encoded with a clock of 250uS
+    <br>Example 3: <code>set sduino raw SC;R=3;SR;P0=5000;SM;P0=500;C=250;D=A4F7FDDE;</code>  sends a combined message of raw and manchester encoded repeated 3 times
     <ul><br>
       <b>note: The wrong use of the upcoming options can lead to malfunctions of the SIGNALduino!</b><br><br>
 
@@ -4538,9 +4538,9 @@ USB-connected devices (SIGNALduino):<br>
     Geben Sie einen SIGNALduino-Firmware-Befehl aus, ohne auf die vom SIGNALduino zur&uuml;ckgegebenen Daten zu warten. Ausf&uuml;hrliche Informationen zu SIGNALduino-Befehlen finden Sie im SIGNALduino-Firmware-Code. Mit dieser Linie k&ouml;nnen Sie fast jedes Signal &uuml;ber einen angeschlossenen Sender senden.<br>
     Um einige Rohdaten zu senden, schauen Sie sich diese Beispiele an: P#binarydata#R#C (#C is optional)<br><br>
 
-    Beispiel 1: <code>set sduino raw SR;R=3;P0=500;P1=-9000;P2=-4000;P3=-2000;D=0302030</code> , sendet die Daten im Raw-Modus dreimal wiederholt<br>
-    Beispiel 2: <code>set sduino raw SM;R=3;P0=500;C=250;D=A4F7FDDE</code> , sendet die Daten Manchester codiert mit einem clock von 250&micro;S<br>
-    Beispiel 3: <code>set sduino raw SC;R=3;SR;P0=5000;SM;P0=500;C=250;D=A4F7FDDE</code> , sendet eine kombinierte Nachricht von Raw und Manchester codiert 3 mal wiederholt<br><br>
+    Beispiel 1: <code>set sduino raw SR;R=3;P0=500;P1=-9000;P2=-4000;P3=-2000;D=0302030;</code> , sendet die Daten im Raw-Modus dreimal wiederholt<br>
+    Beispiel 2: <code>set sduino raw SM;R=3;P0=500;C=250;D=A4F7FDDE;</code> , sendet die Daten Manchester codiert mit einem clock von 250&micro;S<br>
+    Beispiel 3: <code>set sduino raw SC;R=3;SR;P0=5000;SM;P0=500;C=250;D=A4F7FDDE;</code> , sendet eine kombinierte Nachricht von Raw und Manchester codiert 3 mal wiederholt<br><br>
 
     <ul>
       <b>Hinweis: Die falsche Benutzung der kommenden Optionen kann zu Fehlfunktionen des SIGNALduinos f&uuml;hren!</b><br><br>
