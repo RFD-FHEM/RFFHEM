@@ -20,7 +20,7 @@ jobs:
       uses: fhem/fhem-controls-actions@master
       with:
         filename: controls_signalduino.txt 
-    - name: update controls files
+    - name: update controls files lib
       uses: fhem/fhem-controls-actions@master
       with:
         filename: controls_signalduino.txt 
