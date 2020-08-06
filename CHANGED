@@ -1,3 +1,6 @@
+2020-08-06 - Update SD_ProtocolData.pm
+
+* optimization register LaCrosse
 2020-08-06 - Merge branch 'dev-r35_xFSK' into dev-r35_xFSK_TEST
 2020-08-05 - Update controls_signalduino.txt
 2020-08-04 - Merge branch 'dev-r35_xFSK' into dev-r35_xFSK_TEST
