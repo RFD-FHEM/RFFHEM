@@ -2690,7 +2690,7 @@ package lib::SD_ProtocolData;
         sync            => '2DD4',
         modulation      => '2-FSK',
         regexMatch      => qr/^9/,   # ToDo, check! fuer eine regexp Pruefung am Anfang vor dem method Aufruf
-        register        => ['0001','0246','0302','042D','05D4','06FF','0700','0802','0D21','0E65','0F6A','1089','115C','1206','1322','14F8','1556','1700','1818','1916','1B43','1C68','1D91','23EC','2517','2611','2B3E'],
+        register        => ['0001','0246','0301','042D','05D4','06FF','0700','0802','0D21','0E65','0F6A','1089','115C','1206','1322','14F8','1556','1700','1818','1916','1B43','1C68','1D91','23EC','2517','2611','2B3E'],
         rfmode          => 'Lacrosse_mode1',
         clientmodule    => 'LaCrosse',
         method          => \&lib::SD_Protocols::ConvLaCrosse,
@@ -2746,7 +2746,7 @@ package lib::SD_ProtocolData;
         sync            => '2DD4',
         modulation      => '2-FSK',
         regexMatch      => qr/^9/,   # ToDo, check! fuer eine regexp Pruefung am Anfang vor dem method Aufruf
-        register        => ['0001','0246','0302','042D','05D4','06FF','0700','0802','0D21','0E65','0F6A','1088','1182','1206','1322','14F8','1556','1700','1818','1916','1B43','1C68','1D91','23EC','2516','2611','2B3E'],
+        register        => ['0001','0246','0301','042D','05D4','06FF','0700','0802','0D21','0E65','0F6A','1088','1182','1206','1322','14F8','1556','1700','1818','1916','1B43','1C68','1D91','23EC','2516','2611','2B3E'],
         rfmode          => 'Lacrosse_mode2',
         clientmodule    => 'LaCrosse',
         method          => \&lib::SD_Protocols::ConvLaCrosse,
