@@ -729,30 +729,34 @@ sub SIGNALduino_Set_rfmode {
 
     my $rfmode;
     if ($aVal ne 'SlowRF') {
-      MNIDLIST:
-      for my $id (@{$hash->{mnIdList}}) {
-        $rfmode=$hash->{protocolObject}->checkProperty($id,'rfmode',-1);
+      if ( scalar( @{$hash->{mnIdList}} ) >= 1 ) {
+        MNIDLIST:
+        for my $id (@{$hash->{mnIdList}}) {
+          $rfmode=$hash->{protocolObject}->checkProperty($id,'rfmode',-1);
 
-        if ($rfmode eq $aVal) {
-          $hash->{logMethod}->($hash->{NAME}, 4, qq[$hash->{NAME}: Set_rfmode, rfmode found on ID=$id]);
-          my $register=$hash->{protocolObject}->checkProperty($id,'register', -1);
+          if ($rfmode eq $aVal) {
+            $hash->{logMethod}->($hash->{NAME}, 4, qq[$hash->{NAME}: Set_rfmode, rfmode found on ID=$id]);
+            my $register=$hash->{protocolObject}->checkProperty($id,'register', -1);
 
-          if ($register != -1) {
-            $hash->{logMethod}->($hash->{NAME}, 5, qq[$hash->{NAME}: Set_rfmode, register settings exist on ID=$id ]);
+            if ($register != -1) {
+              $hash->{logMethod}->($hash->{NAME}, 5, qq[$hash->{NAME}: Set_rfmode, register settings exist on ID=$id ]);
 
-            for my $i (0...scalar(@{$register})-1) {
-              $hash->{logMethod}->($hash->{NAME}, 5, "$hash->{NAME}: Set_rfmode, write value " . @{$register}[$i]);
-              my $argcmd = sprintf("W%02X%s",hex(substr(@{$register}[$i],0,2)) + 2,substr(@{$register}[$i],2,2));
-              main::SIGNALduino_AddSendQueue($hash,$argcmd);
+              for my $i (0...scalar(@{$register})-1) {
+                $hash->{logMethod}->($hash->{NAME}, 5, "$hash->{NAME}: Set_rfmode, write value " . @{$register}[$i]);
+                my $argcmd = sprintf("W%02X%s",hex(substr(@{$register}[$i],0,2)) + 2,substr(@{$register}[$i],2,2));
+                main::SIGNALduino_AddSendQueue($hash,$argcmd);
+              }
+              main::SIGNALduino_WriteInit($hash);
+              last MNIDLIST;	# found $rfmode, exit loop
+            } else {
+              $hash->{logMethod}->($hash->{NAME}, 1, "$hash->{NAME}: Set_rfmode, set to $aVal (ID $id, nothing register entry found on SD_ProtocolData)");
             }
-            main::SIGNALduino_WriteInit($hash);
-            last MNIDLIST;	# found $rfmode, exit loop
-          } else {
-            $hash->{logMethod}->($hash->{NAME}, 1, "$hash->{NAME}: Set_rfmode, set to $aVal (ID $id, nothing register entry found on SD_ProtocolData)");
           }
         }
+        if(!$rfmode) { $hash->{logMethod}->($hash->{NAME}, 3, "$hash->{NAME}: Set_rfmode, set to $aVal (nothing rfmode entry found on SD_ProtocolData)") };
+      } else {
+        $hash->{logMethod}->($hash->{NAME}, 3, "$hash->{NAME}: Set_rfmode, nothing MN protocols in 'Display protocollist' activated");
       }
-      if($rfmode eq '-1') { $hash->{logMethod}->($hash->{NAME}, 3, "$hash->{NAME}: Set_rfmode, set to $aVal (nothing rfmode entry found on SD_ProtocolData)") };
     } else {
       SIGNALduino_AddSendQueue($hash,'e');
       $hash->{logMethod}->($hash->{NAME}, 1, "$hash->{NAME}: Set_rfmode, set to $aVal (ASK/OOK mode load default register settings from uC)");
