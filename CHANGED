@@ -1,3 +1,6 @@
+2020-08-17 - Update 14_FLAMINGO.pm
+
+  * fix some perlcritic 5 warnings
 2020-07-23 - Update 14_SD_UT.pm - PerlCritic (#877)
 
 * Update 14_SD_UT.pm
