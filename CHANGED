@@ -1,4 +1,3 @@
-2020-08-05 - Update update.yml
 2020-08-04 - Update 00_SIGNALduino.pm
 
   * revised hard tabs to spaces (perlcritic) on rest code (last part)
