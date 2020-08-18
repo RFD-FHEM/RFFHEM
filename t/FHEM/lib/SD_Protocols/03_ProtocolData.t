@@ -12,8 +12,7 @@ plan(2);
 
 
 my $check_hash = hash
-{
-	
+{	
 	field '100' => hash {
 		field modulation => '2-FSK';
 		field register => array { 
