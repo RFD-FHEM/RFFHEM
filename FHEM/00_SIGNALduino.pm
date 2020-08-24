@@ -749,13 +749,13 @@ sub SIGNALduino_Set_rfmode {
               main::SIGNALduino_WriteInit($hash);
               last MNIDLIST;	# found $rfmode, exit loop
             } else {
-              $hash->{logMethod}->($hash->{NAME}, 1, "$hash->{NAME}: Set_rfmode, set to $aVal (ID $id, nothing register entry found on SD_ProtocolData)");
+              $hash->{logMethod}->($hash->{NAME}, 1, "$hash->{NAME}: Set_rfmode, set to $aVal (ID $id, no register entry found in protocols)");
             }
           }
         }
-        if(!$rfmode) { $hash->{logMethod}->($hash->{NAME}, 3, "$hash->{NAME}: Set_rfmode, set to $aVal (nothing rfmode entry found on SD_ProtocolData)") };
+        if(!$rfmode) { $hash->{logMethod}->($hash->{NAME}, 3, "$hash->{NAME}: Set_rfmode, set to $aVal rfmode value not found in protocols)") };
       } else {
-        $hash->{logMethod}->($hash->{NAME}, 3, "$hash->{NAME}: Set_rfmode, nothing MN protocols in 'Display protocollist' activated");
+        $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: Set_rfmode, no MN protocols in 'Display protocollist' activated]);
       }
     } else {
       SIGNALduino_AddSendQueue($hash,'e');
