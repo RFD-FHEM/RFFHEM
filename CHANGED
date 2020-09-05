@@ -1,3 +1,12 @@
+2020-09-05 - revised names & code #866
+
+00_SIGNALduino.pm
+  * rename SIGNALduino_Set_rfmode to  SIGNALduino_Attr_rfmode
+  * revised if(!$rfmode) to if ! defined($rfmode)
+tests
+  * renamed to 01_SIGNALduino_Attr_rfmode.cfg & 01_SIGNALduino_Attr_rfmode.t
+SD_Protocols.pm
+  * revised hard tabs and remove free lines
 2020-08-25 - FHEM\00_SIGNALduino.pm
 
 corrected some text messages
