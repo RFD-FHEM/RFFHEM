@@ -752,8 +752,8 @@ sub SIGNALduino_Attr_rfmode {
               $hash->{logMethod}->($hash->{NAME}, 1, "$hash->{NAME}: Set_rfmode, set to $aVal (ID $id, no register entry found in protocols)");
             }
           }
-        }
-        if ! defined($rfmode) { $hash->{logMethod}->($hash->{NAME}, 3, "$hash->{NAME}: Set_rfmode, set to $aVal rfmode value not found in protocols)") };
+        };
+        if (not defined $rfmode) { $hash->{logMethod}->($hash->{NAME}, 3, "$hash->{NAME}: Set_rfmode, set to $aVal rfmode value not found in protocols)") };
       } else {
         $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: Set_rfmode, no MN protocols in 'Display protocollist' activated]);
       }
