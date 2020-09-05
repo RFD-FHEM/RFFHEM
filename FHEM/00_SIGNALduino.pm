@@ -715,7 +715,7 @@ sub SIGNALduino_Set_reset
 }
 
 ############################# package main
-sub SIGNALduino_Set_rfmode {
+sub SIGNALduino_Attr_rfmode {
   my $hash = shift // carp 'must be called with hash of iodevice as first param';
   my $aVal = shift // return;
 
@@ -753,7 +753,7 @@ sub SIGNALduino_Set_rfmode {
             }
           }
         }
-        if(!$rfmode) { $hash->{logMethod}->($hash->{NAME}, 3, "$hash->{NAME}: Set_rfmode, set to $aVal rfmode value not found in protocols)") };
+        if ! defined($rfmode) { $hash->{logMethod}->($hash->{NAME}, 3, "$hash->{NAME}: Set_rfmode, set to $aVal rfmode value not found in protocols)") };
       } else {
         $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: Set_rfmode, no MN protocols in 'Display protocollist' activated]);
       }
@@ -3024,7 +3024,7 @@ sub SIGNALduino_Attr(@) {
 
     if ($init_done) {
       $hash->{logMethod}->($name, 3, "$name: Attr, $aName switched to $aVal");
-      main::SIGNALduino_Set_rfmode($hash,$aVal);
+      main::SIGNALduino_Attr_rfmode($hash,$aVal);
     }
   }
   return ;
