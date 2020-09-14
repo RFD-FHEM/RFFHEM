@@ -1219,7 +1219,7 @@ sub SD_WS_WH2SHIFT($){
     <li>Bresser 7009994</li>
     <li>BresserTemeo</li>
     <li>Conrad S522</li>
-	<li>EuroChron EFTH-800 (temperature and humidity sensor)</li>
+    <li>EuroChron EFTH-800, EFS-3110A (temperature and humidity sensor)</li>
     <li>NC-3911, NC-3912 refrigerator thermometer</li>
 		<li>Opus XT300</li>
     <li>PV-8644 infactory Poolthermometer</li>
@@ -1322,7 +1322,7 @@ sub SD_WS_WH2SHIFT($){
     <li>Bresser 7009994</li>
     <li>BresserTemeo</li>
     <li>Conrad S522</li>
-		<li>EuroChron EFTH-800 (Temperatur- und Feuchtigkeitssensor)</li>
+    <li>EuroChron EFTH-800, EFS-3110A (Temperatur- und Feuchtigkeitssensor)</li>
     <li>NC-3911, NC-3912 digitales Kuehl- und Gefrierschrank-Thermometer</li>
 		<li>Opus XT300</li>
     <li>PV-8644 infactory Poolthermometer</li>
