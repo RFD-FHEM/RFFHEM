@@ -1,3 +1,8 @@
+2020-08-17 - 14_FLAMINGO.pm - perlcritic (#887)
+
+* Update 14_FLAMINGO.pm
+  * fix some perlcritic 5 warnings
+2020-08-05 - Update controls_signalduino.txt
 2020-08-04 - Update 00_SIGNALduino.pm
 
   * revised hard tabs to spaces (perlcritic) on rest code (last part)
@@ -24,6 +29,7 @@ Update 00_SIGNALduino.pm
 
   * revised hard tabs to spaces (perlcritic)
 2020-07-25 - Merge branch 'master' into dev-r35_xFSK
+
 2020-07-23 - Update 14_SD_UT.pm - PerlCritic (#877)
 
 * Update 14_SD_UT.pm
