@@ -1,6 +1,4 @@
-2020-09-16 - Merge branch 'master' into dev-r35_xFSK_TEST
-2020-09-16
-  00_SIGNALduino.pm:
+2020-09-16 - 00_SIGNALduino.pm:
           Feature: xFSK processing
           Change: added N to send SN  xFSK sendCommand
           Change: added new sub SIGNALduino_calcRSSI to simplification code
@@ -14,11 +12,11 @@
           New: added new attrib rfmode to changed to xFSK & revised commandref
           New: added separat sub SIGNALduino_Attr_rfmode
           New: added set cmd LaCrossePairForSec (for LaCrosse)
-  SD_Protocols.pm:
+  2020-09-16 - SD_Protocols.pm:
           Change: moved subs for converting in own package
                   ConvLaCrosse, ConvKoppFreeControl and ConvPCA301
           New: added function PreparingSend_KOPP_FC
-  SD_ProtocolData.pm
+  2020-09-16 - SD_ProtocolData.pm
           New: added rfmode, register rubric & comments
           Change: fix perlcritic Severity 3 - hard tabs
 
