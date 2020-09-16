@@ -1,111 +1,36 @@
-2020-09-05 - Update 00_SIGNALduino.pm
+2020-09-16
+  00_SIGNALduino.pm:
+          Feature: xFSK processing
+          Change: added N to send SN  xFSK sendCommand
+          Change: added new sub SIGNALduino_calcRSSI to simplification code
+          Change: fix some perlcritic warnings
+          Change: revised Parse_MN and loglevel
+          Change: revised logoutput text SIGNALduino_Get_Command
+          Change: revisions indented ( no tabs, only spaces ) and checked
+                  syntax with perl ./contrib/commandref_join.pl
+          New: added commandref rfmode & cc1101_reg_user
+          New: added hardware ESP32cc1101, MAPLEMINI_F103CB on attribute
+          New: added new attrib rfmode to changed to xFSK & revised commandref
+          New: added separat sub SIGNALduino_Attr_rfmode
+          New: added set cmd LaCrossePairForSec (for LaCrosse)
+  SD_Protocols.pm:
+          Change: moved subs for converting in own package
+                  ConvLaCrosse, ConvKoppFreeControl and ConvPCA301
+          New: added function PreparingSend_KOPP_FC
+  SD_ProtocolData.pm
+          New: added rfmode, register rubric & comments
+          Change: fix perlcritic Severity 3 - hard tabs
 
-  * fix 866#issuecomment-680234463 logoutput "...rfmode value not found in protocols"
-2020-09-05 - Update 00_SIGNALduino.pm
+2020-09-15 - 14_SD_WS 
+ - protocol 27 new sensor EFS-3110A (#890)
 
-  * fix code
-2020-09-05 - revised names & code #866
-
-00_SIGNALduino.pm
-  * rename SIGNALduino_Set_rfmode to  SIGNALduino_Attr_rfmode
-  * revised if(!$rfmode) to if ! defined($rfmode)
-tests
-  * renamed to 01_SIGNALduino_Attr_rfmode.cfg & 01_SIGNALduino_Attr_rfmode.t
-SD_Protocols.pm
-  * revised hard tabs and remove free lines
-2020-08-25 - FHEM\00_SIGNALduino.pm
-
-corrected some text messages
 2020-08-17 - 14_FLAMINGO.pm - perlcritic (#887)
 
 * Update 14_FLAMINGO.pm
   * fix some perlcritic 5 warnings
-2020-08-10 - Update 00_SIGNALduino.pm
+2020-08-17 - Update 14_FLAMINGO.pm
 
-  * extended log output for users if nothing is activated
-2020-08-06 - Update SD_ProtocolData.pm
-
-* optimization register LaCrosse
-2020-08-06 - Merge branch 'dev-r35_xFSK' into dev-r35_xFSK_TEST
-2020-08-05 - Update controls_signalduino.txt
-2020-08-04 - Merge branch 'dev-r35_xFSK' into dev-r35_xFSK_TEST
-2020-08-04 - Update 00_SIGNALduino.pm
-
-  * revised hard tabs to spaces (perlcritic) on rest code (last part)
-  * sort some comments
-
-2020-08-04 - dev-r35_xFSK - part one perlcritic on some functions (#883)
-
-Update 00_SIGNALduino.pm
-* revised hard tabs to spaces (perlcritic) on some functions (part one)
-
-2020-08-02 - Merge branch 'dev-r35_xFSK' into dev-r35_xFSK_TEST
-2020-08-02 - revised test 01_Attr.t
-2020-08-02 - Update 00_SIGNALduino.pm
-
-  * added return value rfmode
-  * added check for supported attr rfmode
-  * added separat sub SIGNALduino_Set_rfmode
-    (better overview code & simply to test)
-  * revised attribute change rfmode to see save question mark
-
-2020-08-02 - Update 00_SIGNALduino.pm
-
-* revised hard tabs to spaces (perlcritic) on some functions (part one)
-2020-08-02 - dev-r35_xFSK - part package cc1101 perlcritic (#882)
-
-2020-08-02 - Update 00_SIGNALduino.pm
-  * revised hard tabs to spaces (perlcritic) on package cc1101 (#882)
-
-2020-07-31 - dev-r35_xFSK - part metainformation perlcritic (#879)
-
-Update 00_SIGNALduino.pm
-  * revised hard tabs to spaces (perlcritic)
-
-2020-07-26 - Update 00_SIGNALduino.pm
-
-  * smale changes (cosmetics)
-  * revised code, remove $defs loop and added intern function
-    devspec2array
-2020-07-26 - Merge branch 'dev-r35_xFSK' into dev-r35_xFSK_TEST
-2020-07-26 - function for KOPP_FC revised
-
-SD_Protocols.pm
-  * added function PreparingSend_KOPP_FC
-00_SIGNALduino.pm
-  * remove any KOPP_FC processing
-2020-07-26 - Update 00_SIGNALduino.pm
-
-  * revised RegEx for KOPP_FC
-  * revised for loop (perlcritic)
-
-2020-07-25 - Merge branch 'master' into dev-r35_xFSK
-2020-07-25 - Merge branch 'dev-r35_xFSK_TEST' of https://github.com/HomeAutoUser/RFFHEM into dev-r35_xFSK_TEST
-2020-07-25 - Update 00_SIGNALduino.pm
-
-  * added send KOPP_FC
-    (tested with CUL & aCUL from SIGNALDuino)
-2020-07-25 - Merge remote-tracking branch 'upstream/master' into dev-r35_xFSK_TEST
-2020-07-25 - revised test after attr rfmode & Parse_MN adaptation
-
-00_SIGNALduino.pm
-  * attribute rfmode needs on dummy device
-test_07_sub_SIGNALduino_Parse_MN-definition.txt
-  * revised and extension tests
-2020-07-24 - optimize & comments
-
-00_SIGNALduino.pm
-  * optimized ParseMN & revised comments
-SD_ProtocolData.pm
-  * added comments
-2020-07-24 - informations & registervalues
-
-00_SIGNALduino.pm
-  * revised attributename & logoutputlevel
-  * revised if code for PERLCRITIC
-SD_ProtocolData.pm
-  * revised informations & registers
-
+  * fix some perlcritic 5 warnings
 2020-07-23 - Update 14_SD_UT.pm - PerlCritic (#877)
 
 * Update 14_SD_UT.pm
@@ -118,177 +43,19 @@ SD_ProtocolData.pm
 2020-07-23 - Update 14_SD_BELL.pm
   * revised for perl critic
   
-2020-07-23 - Update 00_SIGNALduino.pm
-
-  * revised logoutput for user
-  * added jump to SlowRF with logoutput
-  * added commandref rfmode & cc1101_reg_user
-
-2020-07-23 - Update SD_ProtocolData.pm
-
-  * added register & rfmode on xFSK protocols
-(Data was lost due to a merge or PR conflict)
-  * added comments from other modulations
-2020-07-21 - Merge branch 'master' into dev-r35_xFSK_TEST
-
 2020-07-20 - new protocol for remote control BF-301 (#874)
 
 * 14_SD_UT new protocol 105 for remote control BF-301
 
+Co-authored-by: Udo <info@elektron-bbs.de>
 2020-07-20 - Merge branch 'master' into dev-r34_SD_BF-301
 2020-07-20 - 14_SD_UT new protocol 105 for remote control BF-301
-
-2020-07-17 - dev-r35_xFSK - perlcritic (#873)
-
-* Update SD_ProtocolData.pm
-  * fix perlcritic Severity 3 - hard tabs
-
-2020-07-17 - Update SD_ProtocolData.pm
-
-  * fix perlcritic Severity 3 - hard tabs
-2020-07-17 - Hardware MAPLEMINI_F103CB added / documentation tabs replaced with whitespace (#869)
-
-* Update 00_SIGNALduino.pm
-  * revisions indented ( no tabs, only spaces ) and checked syntax with perl ./contrib/commandref_join.pl
-  * compare documentation DE <-> EN
-  * added attribute ESP32cc1101
-  * revised loglevel from Parse_MN
-  * revised logoutput text SIGNALduino_Get_Command
-  * log output adapted to hardware
-
-* UnitTest\tests\test_04_firmware_download_1-definition.txt
-Added tests to firmware download for MAPLEMINI_F103CBcc1101, MAPLEMINI_F103CB, ESP32
-
-* UnitTest\tests\test_06_firmware_flash_1-definition.txt
-Added tests for MAPLEMINI_F103CBcc1101 and MAPLEMINI_F103CB regarding flash operation
-
-* UnitTest\FHEM\lib\test_firmware_releases.json
-Added maple and maple with cc1101 to test json
-
-test_firmware_releases.json
-  * extension data
-
-* Update SD_ProtocolData.pm
-  * fix perlcritic Severity 3 - hard tabs
-
 2020-07-16 - Update SD_ProtocolData.pm
   Replaced svn revision with version from repo
-
 2020-07-16 - lib\SD_ProtocolData.pm
   Update $ID$ / needed for  SVN commit
-
-2020-07-16 - Update 00_SIGNALduino.pm
-  * fix logoutput on eventlogging (old regex cut to much in fhem logfile)
-
-2020-07-14 - dev-r35_xFSK - perlcritic (#868)
-
-2020-07-14 - Update 00_SIGNALduino.pm
-  * fix some perlcritic (#868) warnings
-  * fix logoutput on eventlogging
-  * added new attrib & set cmd for users one default register (if not SlowRF, uC goes to default)
-  * revised commandref
-  * remove old lines after "merge into"
-
-2020-07-13 - commandref & information
-00_SIGNALduino.pm
-  * RETURN added
-  * revised commandref & translate words
-SD_ProtocolData.pm
-  * added some register information
-
-2020-07-12 - Update 00_SIGNALduino.pm
-  * added N to send SN  xFSK sendCommand
-
-2020-07-08 - Update 00_SIGNALduino.pm
-  * added LABEL for loop - https://github.com/RFD-FHEM/RFFHEM/pull/866#discussion_r451150288
-  * revised query & comment https://github.com/RFD-FHEM/RFFHEM/pull/866#pullrequestreview-444258042
-
-2020-07-06 - revised code
-00_SIGNALduino.pm
-  * wrong syntax fixed
-  * revised rfmode change
-  * remove manufacturer specific´s to SD_ProtocolData.pm
-SD_ProtocolData.pm
-  * added comment with default note
-  * added rfmode & register rubric
-
-2020-07-05 - Update 00_SIGNALduino.pm
-  * fix logoutput
-  * added output for user to see, time expired
-  * revised commandref
-
-2020-07-04 - Fix some perlcritic 5 warnings in 3.4 (#863)
-* 00_SIGNALduino.pm
-  * Fix some perlcritic 5 warnings
-  * added commandref for attrib rfmode
-
 2020-07-04 - Merge branch 'master' into rel-3.4.4
-
-2020-07-03 - Update 00_SIGNALduino.pm
-  * added new attrib rfmode to changed to xFSK
-
-2020-07-03 - Merge remote-tracking branch 'remotes/origin/dev-r34' into dev-r34-perlcritic5
-
-2020-07-02 - Merge branch 'master' into dev-r35_xFSK
-2020-07-02 - Release 3.5.0
-
-00_SIGNALduino.pm:
-   Change: remove old readings, if user changes to a new device without cc1101 (#854)
-   Change: delete old readings from device with cc1101_available = 1
-   Change: revised loop code for PERL critic
-   Change: simple prototypes removed for PERL critic removed
-   Change: removed sub SIGNALduino_b2h
-   Change: added new sub SIGNALduino_calcRSSI to simplification code
-   New: added set cmd LaCrossePairForSec (for LaCrosse)
-   Bugfix: some operator fixes #835
-   Change: Changed stringrefs to coderefs
-
-SD_Protocols.pm:
-   Change: moved subs for converting in own package
-                 ConvLaCrosse, ConvKoppFreeControl and ConvPCA301
-
-SD_ProtocolData.pm: 
-  Bugfix: ID 56 fixed 
-  Feature: new protocol 104 for remote control TR60C-1 (#844)
-  Feature: new protocol 99 NAVARIS touch light switch (#841)
-  Feature: new protocol 98 for wireless door bell GEA-028DB (#839)
-
-10_FS10:
- Change: revised for perlcritic (#860)
- Feature: add attribute UTfrequency in 14_SD_UT.pm (#845) 
- Change: Multiple query "$ attrName eq 'model'" removed
- Change:  change commandref
-
-14_SD_UT: 
-  Bugfix:14_SD_UT.pm - If the device is created manually with IODev, then DEF is wrong. (#857)
-
-10_SD_GT:
-  Change: revised for perlcritic (#847)
-
-2020-06-15 - 10_FS10 revised for perlcritic (#860)
-
-2020-05-28 - Dev r34 - id56 - #848 (#849)
-  Update SD_ProtocolData.pm - ID 56 fix def & added doc https://github.com/RFD-FHEM/RFFHEM/issues/848
-
-2020-05-26 - 10_SD_GT revised for perlcritic (#847)
-
-2020-05-25 - add attribute UTfrequency in 14_SD_UT.pm (#845)
-  new attribute UTfrequency for individual transmission frequency
-  Multiple query "$ attrName eq 'model'" removed
-  change commandref
-  replace "foreach my $keys (keys %models)" with "if ( exists $models{$attrValue}" in line 1756
-  replace "foreach my $keys (sort keys %{$models{RC_10}{buttons}})" with "if ( exists $models{RC_10}{buttons}{$button} )" in line 1845
-  replace "foreach my $keys (keys %models)" with "grep { $models{$_}{hex_lengh} =~ /$hex_lengh/ } keys %models;" in line 1745
-  delete "$attr{$name}{room} = "SD_UT"	if( not defined( $attr{$name}{room} ) );"
-  change search for models with same hex_length
-  Reference to autocreate added
-  rename  hex_lengh in hex_length
-  Check values attribute UTfrequency added
-  Documentation for UTfrequency attribute added
-
-2020-05-02 - new protocol 104 for remote control TR60C-1 (#844)
-
-07.05.2020
+07.05.2020  
   00_SIGNALduino.pm:
           Bugfix: Fix some perlcritic 5 warnings
           Bugfix: some operator fixes #835
@@ -299,20 +66,13 @@ SD_ProtocolData.pm:
           Bugfix: revised for perlcritic (#847)
 
   14_SD_UT.pm
-          Feature: add attribute UTfrequency in (#845)
+          feature: add attribute UTfrequency in (#845)
           change: delete "$attr{$name}{room} = "SD_UT" if( not defined( $attr{$name}{room} ) );"
 
   SD_ProtocolData.pm
           feature: new protocol 104 for remote control TR60C-1 (#844)
           feature: new protocol 99 NAVARIS touch light switch (#841)
           feature: new protocol 98 for wireless door bell GEA-028DB (#839)
-
-2020-07-04 - Fix some perlcritic 5 warnings in 3.4 (#863)
-  00_SIGNALduino.pm:
-          Fix some perlcritic 5 warnings
-
-2020-05-28 - Dev r34 - id56 - #848 (#849)
-  SD_ProtocolData.pm - ID 56 fix def & added doc https://github.com/RFD-FHEM/RFFHEM/issues/848
 
 2020-04-13 -  Update to svn revision number
 
