@@ -26,7 +26,7 @@ Supported Devices / Protocols
 |Elro DB200, KANGTAI, unitec | wireless bell |
 |EM1000WZ | Energy-Monitor |
 |ESTO Lighting GmbH KL-RF01 | Remote control |
-|EuroChron EFTH-800 | Weather station (temperature and humidity) |
+|EuroChron EFTH-800, EFS-3110A | Weather station (temperature and humidity) |
 |FA21RF | Smoke detector | 
 |FHT80 | Roomthermostat (only receive) |
 |FHT80TF | door/window switch |
