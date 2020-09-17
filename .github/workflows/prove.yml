@@ -1,5 +1,5 @@
 name: Perl Modules&FHEM Unittests
-on: [push]
+on: [push, pull_request]
 
 jobs:
   libModTests:

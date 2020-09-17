@@ -1,35 +1,35 @@
+2020-09-16 - 00_SIGNALduino.pm:
+          Feature: xFSK processing
+          Change: added N to send SN  xFSK sendCommand
+          Change: added new sub SIGNALduino_calcRSSI to simplification code
+          Change: fix some perlcritic warnings
+          Change: revised Parse_MN and loglevel
+          Change: revised logoutput text SIGNALduino_Get_Command
+          Change: revisions indented ( no tabs, only spaces ) and checked
+                  syntax with perl ./contrib/commandref_join.pl
+          New: added commandref rfmode & cc1101_reg_user
+          New: added hardware ESP32cc1101, MAPLEMINI_F103CB on attribute
+          New: added new attrib rfmode to changed to xFSK & revised commandref
+          New: added separat sub SIGNALduino_Attr_rfmode
+          New: added set cmd LaCrossePairForSec (for LaCrosse)
+  2020-09-16 - SD_Protocols.pm:
+          Change: moved subs for converting in own package
+                  ConvLaCrosse, ConvKoppFreeControl and ConvPCA301
+          New: added function PreparingSend_KOPP_FC
+  2020-09-16 - SD_ProtocolData.pm
+          New: added rfmode, register rubric & comments
+          Change: fix perlcritic Severity 3 - hard tabs
+
+2020-09-15 - 14_SD_WS 
+ - protocol 27 new sensor EFS-3110A (#890)
+
 2020-08-17 - 14_FLAMINGO.pm - perlcritic (#887)
 
 * Update 14_FLAMINGO.pm
   * fix some perlcritic 5 warnings
-2020-08-05 - Update controls_signalduino.txt
-2020-08-04 - Update 00_SIGNALduino.pm
+2020-08-17 - Update 14_FLAMINGO.pm
 
-  * revised hard tabs to spaces (perlcritic) on rest code (last part)
-  * sort some comments
-2020-08-04 - dev-r35_xFSK - part one perlcritic on some functions (#883)
-
-Update 00_SIGNALduino.pm
-* revised hard tabs to spaces (perlcritic) on some functions (part one)
-2020-08-02 - Update 00_SIGNALduino.pm
-
-* revised hard tabs to spaces (perlcritic) on some functions (part one)
-2020-08-02 - dev-r35_xFSK - part package cc1101 perlcritic (#882)
-
-Update 00_SIGNALduino.pm
-* revised hard tabs to spaces (perlcritic) on package cc1101
-2020-08-02 - Update 00_SIGNALduino.pm
-
-* revised hard tabs to spaces (perlcritic) on package cc1101
-2020-07-31 - dev-r35_xFSK - part metainformation perlcritic (#879)
-
-Update 00_SIGNALduino.pm
-  * revised hard tabs to spaces (perlcritic)
-2020-07-25 - Update 00_SIGNALduino.pm
-
-  * revised hard tabs to spaces (perlcritic)
-2020-07-25 - Merge branch 'master' into dev-r35_xFSK
-
+  * fix some perlcritic 5 warnings
 2020-07-23 - Update 14_SD_UT.pm - PerlCritic (#877)
 
 * Update 14_SD_UT.pm
@@ -46,45 +46,15 @@ Update 00_SIGNALduino.pm
 
 * 14_SD_UT new protocol 105 for remote control BF-301
 
+Co-authored-by: Udo <info@elektron-bbs.de>
 2020-07-20 - Merge branch 'master' into dev-r34_SD_BF-301
 2020-07-20 - 14_SD_UT new protocol 105 for remote control BF-301
-
-2020-07-17 - Hardware MAPLEMINI_F103CB added / documentation tabs replaced with whitespace (#869)
-
-* Update 00_SIGNALduino.pm
-  * revisions indented ( no tabs, only spaces ) and checked syntax with perl ./contrib/commandref_join.pl
-  * compare documentation DE <-> EN
-  * added attribute ESP32cc1101
-  * revised loglevel from Parse_MN
-  * revised logoutput text SIGNALduino_Get_Command
-  * log output adapted to hardware
-
-* UnitTest\tests\test_04_firmware_download_1-definition.txt
-Added tests to firmware download for MAPLEMINI_F103CBcc1101, MAPLEMINI_F103CB, ESP32
-
-* UnitTest\tests\test_06_firmware_flash_1-definition.txt
-Added tests for MAPLEMINI_F103CBcc1101 and MAPLEMINI_F103CB regarding flash operation
-
-* UnitTest\FHEM\lib\test_firmware_releases.json
-Added maple and maple with cc1101 to test json
-
-test_firmware_releases.json
-  * extension data
-
-* Update SD_ProtocolData.pm
-  * fix perlcritic Severity 3 - hard tabs
-
 2020-07-16 - Update SD_ProtocolData.pm
   Replaced svn revision with version from repo
 2020-07-16 - lib\SD_ProtocolData.pm
   Update $ID$ / needed for  SVN commit
-2020-07-14 - Update 00_SIGNALduino.pm
-  Bugfix: fix logoutput on eventlogging
-  Bugfix: eventlogging logoutput (#867)
-  Bugfix: fix some perlcritic warnings (#868)
 2020-07-04 - Merge branch 'master' into rel-3.4.4
-
-07.05.2020
+07.05.2020  
   00_SIGNALduino.pm:
           Bugfix: Fix some perlcritic 5 warnings
           Bugfix: some operator fixes #835
@@ -95,20 +65,13 @@ test_firmware_releases.json
           Bugfix: revised for perlcritic (#847)
 
   14_SD_UT.pm
-          Feature: add attribute UTfrequency in (#845)
+          feature: add attribute UTfrequency in (#845)
           change: delete "$attr{$name}{room} = "SD_UT" if( not defined( $attr{$name}{room} ) );"
 
   SD_ProtocolData.pm
           feature: new protocol 104 for remote control TR60C-1 (#844)
           feature: new protocol 99 NAVARIS touch light switch (#841)
           feature: new protocol 98 for wireless door bell GEA-028DB (#839)
-
-2020-07-04 - Fix some perlcritic 5 warnings in 3.4 (#863)
-  00_SIGNALduino.pm:
-          Fix some perlcritic 5 warnings
-
-2020-05-28 - Dev r34 - id56 - #848 (#849)
-  SD_ProtocolData.pm - ID 56 fix def & added doc https://github.com/RFD-FHEM/RFFHEM/issues/848
 
 2020-04-13 -  Update to svn revision number
 

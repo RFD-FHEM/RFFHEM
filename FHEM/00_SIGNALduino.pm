@@ -130,7 +130,8 @@ my %sets = (
   'cc1101_sens'         =>  ['4,8,12,16', \&cc1101::SetSens ],
   'cc1101_patable'      =>  ['-30_dBm,-20_dBm,-15_dBm,-10_dBm,-5_dBm,0_dBm,5_dBm,7_dBm,10_dBm', \&cc1101::SetPatable ],
   'cc1101_reg'          =>  ['textFieldNL', \&cc1101::SetRegisters ],
-  'LaCrossePairForSec'  =>   ['textFieldNL', \&SIGNALduino_Set_LaCrossePairForSec ],
+  'cc1101_reg_user'     =>  ['noArg', \&cc1101::SetRegistersUser ],
+  'LaCrossePairForSec'  =>  ['textFieldNL', \&SIGNALduino_Set_LaCrossePairForSec ],
 );
 
 ## Supported config CC1101 ##
@@ -259,7 +260,7 @@ my %matchListSIGNALduino = (
       '28:SD_Keeloq'        => '^P(?:87|88)#.*',
       '29:SD_GT'            => '^P49#[A-Fa-f0-9]+',
       '30:LaCrosse'         => '^(\\S+\\s+9 |OK\\sWS\\s)',
-      '31:KOPP_FC'          => '^kr..................',
+      '31:KOPP_FC'          => '^kr\w{18,}',
       '32:PCA301'           => '^\\S+\\s+24',
       'X:SIGNALduino_un'    => '^[u]\d+#.*',
 );
@@ -291,6 +292,7 @@ sub SIGNALduino_Initialize {
             .' addvaltrigger'
             .' blacklist_IDs'
             .' cc1101_frequency'
+            .' cc1101_reg_user'
             ." debug:0$dev"
             ." development:0$dev"
             .' doubleMsgCheck_IDs'
@@ -304,6 +306,7 @@ sub SIGNALduino_Initialize {
             .' minsecs'
             .' noMsgVerbose:0,1,2,3,4,5'
             .' rawmsgEvent:1,0'
+            .' rfmode:KOPP_FC,Lacrosse_mode1,Lacrosse_mode2,Lacrosse_mode4,PCA301,SlowRF'
             .' suppressDeviceRawmsg:1,0'
             .' updateChannelFW:stable,testing'
             .' whitelist_IDs'
@@ -599,6 +602,7 @@ sub SIGNALduino_PrepareFlash {
 sub SIGNALduino_RemoveLaCrossePair {
   my $hash = shift;
   delete($hash->{LaCrossePair});
+  $hash->{logMethod}->($hash->{NAME}, 4, "$hash->{NAME}: Set_LaCrossePairForSec, time expired, LaCrosse autocreate deactivate");
 }
 
 ############################# package main, test exists
@@ -708,6 +712,59 @@ sub SIGNALduino_Set_reset
   my $hash = shift;
   delete($hash->{initResetFlag}) if defined($hash->{initResetFlag});
   return SIGNALduino_ResetDevice($hash);
+}
+
+############################# package main
+sub SIGNALduino_Attr_rfmode {
+  my $hash = shift // carp 'must be called with hash of iodevice as first param';
+  my $aVal = shift // return;
+
+  if ( (InternalVal($hash->{NAME},"cc1101_available",0) == 0) && (!IsDummy($hash->{NAME})) ) {
+    return 'ERROR: This attribute is only available for a receiver with CC1101.';
+  }
+
+  ## DevState waitInit is on first start after FHEM restart | initialized is after cc1101 available
+  if ( ($hash->{DevState} eq 'initialized') && (InternalVal($hash->{NAME},"cc1101_available",0) == 1) ) {
+    $hash->{logMethod}->($hash->{NAME}, 3, "$hash->{NAME}: Set_rfmode, set to $aVal on DevState $hash->{DevState} (please check activated protocols via 'Display protocollist')");
+
+    my $rfmode;
+    if ($aVal ne 'SlowRF') {
+      if ( scalar( @{$hash->{mnIdList}} ) >= 1 ) {
+        MNIDLIST:
+        for my $id (@{$hash->{mnIdList}}) {
+          $rfmode=$hash->{protocolObject}->checkProperty($id,'rfmode',-1);
+
+          if ($rfmode eq $aVal) {
+            $hash->{logMethod}->($hash->{NAME}, 4, qq[$hash->{NAME}: Set_rfmode, rfmode found on ID=$id]);
+            my $register=$hash->{protocolObject}->checkProperty($id,'register', -1);
+
+            if ($register != -1) {
+              $hash->{logMethod}->($hash->{NAME}, 5, qq[$hash->{NAME}: Set_rfmode, register settings exist on ID=$id ]);
+
+              for my $i (0...scalar(@{$register})-1) {
+                $hash->{logMethod}->($hash->{NAME}, 5, "$hash->{NAME}: Set_rfmode, write value " . @{$register}[$i]);
+                my $argcmd = sprintf("W%02X%s",hex(substr(@{$register}[$i],0,2)) + 2,substr(@{$register}[$i],2,2));
+                main::SIGNALduino_AddSendQueue($hash,$argcmd);
+              }
+              main::SIGNALduino_WriteInit($hash);
+              last MNIDLIST;	# found $rfmode, exit loop
+            } else {
+              $hash->{logMethod}->($hash->{NAME}, 1, "$hash->{NAME}: Set_rfmode, set to $aVal (ID $id, no register entry found in protocols)");
+            }
+          }
+        };
+        ## rfmode is always set if it is available / if the set supported is not available, it is always unequal
+        if ($rfmode ne $aVal) { $hash->{logMethod}->($hash->{NAME}, 3, "$hash->{NAME}: Set_rfmode, set to $aVal rfmode value not found in protocols)") };
+      } else {
+        $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: Set_rfmode, no MN protocols in 'Display protocollist' activated]);
+      }
+    } else {
+      SIGNALduino_AddSendQueue($hash,'e');
+      $hash->{logMethod}->($hash->{NAME}, 1, "$hash->{NAME}: Set_rfmode, set to $aVal (ASK/OOK mode load default register settings from uC)");
+    }
+  }
+
+  return;
 }
 
 ############################# package main
@@ -884,8 +941,8 @@ sub SIGNALduino_Set_bWidth {
 sub SIGNALduino_Set_LaCrossePairForSec {
   my ($hash, @a) = @_;
 
-  #              set NAME                a[0]              a[1]             a[2]
-  return "Usage: set $hash->{NAME} $a[0] <seconds_active> [ignore_battery]" if(!$a[0] || $a[1] !~ m/^\d+$/ || ($a[2] && $a[2] ne 'ignore_battery') );
+  #              set NAME           a[0]       a[1]             a[2]
+  return "Usage: set $hash->{NAME} $a[0] <seconds_active> [ignore_battery]" if(!$a[0] || $a[1] !~ m/^\d+$/xms || (defined $a[2] && $a[2] ne 'ignore_battery') );
   $hash->{LaCrossePair} = 2;  # LaCrosse autoCreateState: 0 = autoreate not defined | 1 = autocreate defined | 2 = autocreate active
   $hash->{logMethod}->($hash->{NAME}, 4, "$hash->{NAME}: Set_LaCrossePairForSec, LaCrosse autocreate active for $a[1] seconds");
   InternalTimer(gettimeofday()+$a[1], 'SIGNALduino_RemoveLaCrossePair', $hash, 0);
@@ -1158,10 +1215,9 @@ sub SIGNALduino_CheckSendRawResponse {
   my $hash = shift;
   my $msg = shift;
 
-  if ($msg =~ /^S[RCM];/ )
+  if ($msg =~ /^S[RCMN];/ )
   {
     my $name=$hash->{NAME};
-
     # zu testen der sendeQueue, kann wenn es funktioniert auf verbose 5
     $hash->{logMethod}->($name, 4, "$name: CheckSendrawResponse, sendraw answer: $msg");
     #RemoveInternalTimer("HandleWriteQueue:$name");
@@ -1467,6 +1523,40 @@ sub SIGNALduino_Write {
       $sum  = 12;
     }
     $msg = $hash->{protocolObject}->PreparingSend_FS20_FHT($id, $sum, $msg);
+  } elsif($fn eq 'k') {   # KOPP_FC   (one part outsourcing in SD_Protocols.pm, main part here due to loop and set hash values)
+    $hash->{logMethod}->($name, 4, "$name: Write, cmd $fn sending KOPP_FC");
+    $fn='raw';
+
+    my $Keycode = substr($msg,1,2);
+    my $TransCode1 = substr($msg,3,4);
+    my $TransCode2 = substr($msg,7,2);
+
+    ### The device to be sent stores something in own hash. Search for names to access them ###
+    #### The variant with devspec2array does not require any adjustment in the original Kopp module. ####
+
+    my @Liste = devspec2array("TYPE=KOPP_FC:FILTER=TRANSMITTERCODE1=$TransCode1:FILTER=TRANSMITTERCODE2=$TransCode2:FILTER=KEYCODE=$Keycode");
+    my $KOPPname = $Liste[0];
+
+    if (scalar @Liste != 1) {
+      $hash->{logMethod}->($name, 4, "$name: Write, PreparingSend KOPP_FC found ". scalar @Liste ." device\'s with same DEF (SIGNALduino used $KOPPname)");
+    } else {
+      $hash->{logMethod}->($name, 5, "$name: Write, PreparingSend KOPP_FC found device with name $KOPPname");
+    }
+
+    ## Internals blkctr initialize if not available
+    if (!exists($defs{$KOPPname}->{blkctr})) {
+      $defs{$KOPPname}->{blkctr} = 0;
+      $hash->{logMethod}->($name, 5, "$name: Write, PreparingSend KOPP_FC set Internals blkctr on device $KOPPname to 0");
+    }
+
+    $msg = $hash->{protocolObject}->PreparingSend_KOPP_FC(sprintf("%02x",$defs{$KOPPname}->{blkctr}),$Keycode,$TransCode1,$TransCode2);
+
+    if (!defined $msg) {
+      return;
+    };
+
+    $defs{$KOPPname}->{blkctr}++;                        # Internals blkctr increases with each send
+    $hash->{logMethod}->($name, 5, "$name: Write, PreparingSend KOPP_FC set Internals blkctr on device $KOPPname to ".$defs{$KOPPname}->{blkctr});
   }
   $hash->{logMethod}->($name, 5, "$name: Write, sending via Set $fn $msg");
 
@@ -1497,18 +1587,23 @@ sub SIGNALduino_SendFromQueue {
     #DevIo_SimpleWrite($hash, $msg . "\n", 2);
     $hash->{sendworking} = 1;
     SIGNALduino_SimpleWrite($hash,$msg);
-    if ($msg =~ m/^S[RCM];/) {
+    if ($msg =~ m/^S[RCMN];/) {
         $hash->{ucCmd}->{cmd} = 'sendraw';
         $hash->{ucCmd}->{timenow} = time();
         $hash->{ucCmd}->{responseSub} = \&SIGNALduino_CheckSendRawResponse;
         $hash->{logMethod}->($name, 4, "$name: SendFromQueue, msg=$msg");   # zu testen der Queue, kann wenn es funktioniert auskommentiert werden
     } elsif ($msg =~ "^e") {                                                # Werkseinstellungen
       SIGNALduino_Get($hash,$name,'ccconf');
-      SIGNALduino_Get($hash,$name,'ccpatable'); 
+      SIGNALduino_Get($hash,$name,'ccpatable');
+
+      ## set rfmode to default from uC
+      my $rfmode = AttrVal($name, 'rfmode', undef);
+      CommandAttr($hash,"$name rfmode SlowRF") if (defined $rfmode && $rfmode ne 'SlowRF');  # option with save question mark
+
     } elsif ($msg =~ "^W(?:0F|10|11|1D|12|1F)") {                           # SetFreq, setrAmpl, Set_bWidth, SetSens
       SIGNALduino_Get($hash,$name,'ccconf');
     } elsif ($msg =~ "^x") {                                                # patable
-    SIGNALduino_Get($hash,$name,'ccpatable'); 
+      SIGNALduino_Get($hash,$name,'ccpatable'); 
     }
 #    elsif ($msg eq 'C99') {
 #       $hash->{ucCmd}->{cmd} = 'ccregAll';
@@ -2630,18 +2725,26 @@ sub SIGNALduino_Parse_MN {
   my $match;
   my $modulation;
   my $message_dispatched=0;
+  my $rfmodeAttr = AttrVal($name,'rfmode','SlowRF');
 
   mnIDLoop:
   for my $id (@{$hash->{mnIdList}}) {
-    # my $method = $hash->{protocolObject}->checkProperty($id,'method','unspecified');
+    my $rfmode = $hash->{protocolObject}->getProperty($id,'rfmode');
+    if (!defined $rfmode) {
+      $hash->{logMethod}->($name, 5, qq[$name: Parse_MN, Error! id $id has no rfmode. Please define it in file SD_ProtocolData.pm]);
+      next mnIDLoop;
+    } elsif ($rfmode ne $rfmodeAttr) {
+      $hash->{logMethod}->($name, 5, qq[$name: Parse_MN, Error! id $id wrong rfmode (attribute $rfmodeAttr vs $rfmode)]);
+      next mnIDLoop;
+    }
     my $method = $hash->{protocolObject}->getProperty($id,'method');
     if (!exists &$method || !defined &{ $method }) {
-      $hash->{logMethod}->($name, 5, qq[$name: Parse_MN, Error! unknown function=$method. Please define it in file SD_ProtocolData.pm]);
+      $hash->{logMethod}->($name, 5, qq[$name: Parse_MN, Error! id $id unknown function=$method. Please define it in file SD_ProtocolData.pm]);
       next mnIDLoop; 
     }
     my $length_min=$hash->{protocolObject}->checkProperty($id,'length_min',-1);
     if ($hlen < $length_min) {
-      $hash->{logMethod}->($name, 4, qq[$name: Parse_MN, Error! ID=$id msg=$rawData ($hlen) too short, min=$length_min]);
+      $hash->{logMethod}->($name, 4, qq[$name: Parse_MN, Error! id $id msg=$rawData ($hlen) too short, min=$length_min]);
       next mnIDLoop;
     }
 
@@ -2902,6 +3005,28 @@ sub SIGNALduino_Attr(@) {
   {
     return "Note, please use other userReadings names.\nReserved names from $name are: cc1101_config, cc1101_config_ext, cc1101_patable"
       if ($aVal =~ /cc1101_(?:config(?:_ext)?|patable)(?:\s|{)/);
+  }
+  ## Change cc1101_reg_user
+  elsif ($aName eq 'cc1101_reg_user') # set default register
+  {
+    return 'ERROR: This attribute is only available for a receiver with CC1101.' if ( ($init_done == 1) && (InternalVal($hash->{NAME},"cc1101_available",0) == 0) );
+    $aVal = $aVal.',' if ($aVal !~ /,$/gx);
+    return 'ERROR: Your attribute value is wrong!' if ( $aVal !~ /^([0-2]{1}[0-9a-fA-F]{3},)+$/gx );
+  }
+  ## Change rfmode
+  elsif ($aName eq 'rfmode')          # change receive mode
+  {
+    my @supported = ('KOPP_FC','Lacrosse_mode1','Lacrosse_mode2','Lacrosse_mode4','PCA301','SlowRF');
+
+    if (not grep /$aVal/, @supported) {
+      $hash->{logMethod}->($name, 1, "$name: Attr, $aName $aVal is not supported");
+      return 'ERROR: The rfmode is not supported';
+    }
+
+    if ($init_done) {
+      $hash->{logMethod}->($name, 3, "$name: Attr, $aName switched to $aVal");
+      main::SIGNALduino_Attr_rfmode($hash,$aVal);
+    }
   }
   return ;
 }
@@ -3754,6 +3879,21 @@ sub SetRegisters  {
 }
 
 ############################# package cc1101
+sub SetRegistersUser  {
+	my ($hash) = @_;
+
+	my $cc1101User = main::AttrVal($hash->{NAME}, 'cc1101_reg_user', undef);
+
+	## look, user defined self default register values via attribute
+	if (defined $cc1101User) {
+		$hash->{logMethod}->($hash->{NAME}, 3, "$hash->{NAME}: SetRegistersUser, write CC1101 defaults from attribute");
+		$cc1101User = '0815,'.$cc1101User; # for SetRegisters, value for register starts on pos 1 in array
+		cc1101::SetRegisters($hash, split(',', $cc1101User) );
+	}
+	return ;
+}
+
+############################# package cc1101
 sub SetFreq  {
   my ($hash, @a) = @_;
 
@@ -3829,8 +3969,6 @@ sub SetSens {
   main::SIGNALduino_WriteInit($hash);
   return ;
 }
-
-
 
 ################################################################################################
 1;
@@ -4177,6 +4315,11 @@ USB-connected devices (SIGNALduino):<br>
     Specify the frequency of your SIGNALduino. Default is 433 Mhz.<br>
     Since the PA table values are frequency-dependent,the specified frequency will be used.
   </li><br>
+  <a name="cc1101_reg_user"></a>
+  <li>cc1101_reg_user<br>
+    Storage space for individual register configurations or values. One or more values ​​can be saved.<br>
+    <u>note:</u> The value consists of the register address followed by the value. Multiple values ​​are separated by commas. example: 04D3,0591
+  </li><br>
   <a name="debug"></a>
   <li>debug<br>
     This will bring the module in a very verbose debug output. Usefull to find new signals and verify if the demodulation works correctly.
@@ -4281,6 +4424,29 @@ USB-connected devices (SIGNALduino):<br>
   <a name="rawmsgEvent"></a>
   <li>rawmsgEvent<br>
     When set to "1" received raw messages triggers events
+  </li><br>
+  <a name="rfmode"></a>
+  <li>rfmode<br>
+    Configures the RF transceiver of the SIGNALduino (CC1101). The available arguments:
+    <ul>
+      <li>KOPP_FC<br>
+        modulation GFSK, Datarate=4.7855 kbps, Sync Word=AA54, frequency 868.3MHz
+      </li>
+      <li>Lacrosse_mode1<br>
+        modulation 2-FSK, Datarate=17.25769 kbps, Sync Word=2DD4, frequency 868.3MHz<br>
+        <ul><small>example: TX25-IT, TX27-IT, TX29-IT, TX29DTH-IT, TX37, 30.3143.IT, 30.3144.IT</small></ul>
+      </li>
+      <li>Lacrosse_mode2<br>
+        modulation 2-FSK, Datarate=9.579 kbps, Sync Word=2DD4, frequency 868.3MHz<br>
+        <ul><small>example: TX35TH-IT, TX35DTH-IT, TX38-IT, 30.3155WD, 30.3156WD</small></ul>
+      </li>
+      <li>PCA301<br>
+        modulation 2-FSK, Datarate=6.62041 kbps, Sync Word=2DD4, frequency 868.950MHz
+      </li>
+      <li>SlowRF<br>
+        modulation ASK/OOK, <b>loads the standard setting from the uC</b>
+      </li>
+    </ul>
   </li><br>
   <a name="suppressDeviceRawmsg"></a>
   <li>suppressDeviceRawmsg<br>
@@ -4691,6 +4857,11 @@ USB-connected devices (SIGNALduino):<br>
     Legt die Frequenz des SIGNALduino fest. Standard is 433 Mhz.<br>
     Da die Werte für PA Werte Frequenzabhängig sind, wird für das Setzen der Register die hier hinterlegte Frequenz verwendet.
   </li><br>
+  <a name="cc1101_reg_user"></a>
+  <li>cc1101_reg_user<br>
+    Speicherplatz für individuelle Registerkonfigurationen bzw. Werte. Es k&ouml;nnen einzelne oder mehrere Werte gespeichert werden.<br>
+    <u>Hinweis:</u> Der Wert ist bestehend aus der Registeradresse gefolgt vom Wert. Mehrere Werte werden mit Komma getrennt. Beispiel: 04D3,0591
+  </li><br>
   <a name="debug"></a>
   <li>debug<br>
     Dies bringt das Modul in eine sehr ausf&uuml;hrliche Debug-Ausgabe im Logfile. Somit lassen sich neue Signale finden und Signale &uuml;berpr&uuml;fen, ob die Demodulation korrekt funktioniert.
@@ -4793,6 +4964,29 @@ USB-connected devices (SIGNALduino):<br>
   <a name="rawmsgEvent"></a>
   <li>rawmsgEvent<br>
     Bei der Einstellung "1", l&ouml;sen empfangene Rohnachrichten Ereignisse aus.
+  </li><br>
+  <a name="rfmode"></a>
+  <li>rfmode<br>
+    Konfiguriert den RF Transceiver des SIGNALduino (CC1101). Verf&uuml;gbare Argumente sind:
+    <ul>
+      <li>KOPP_FC<br>
+        Modulation GFSK, Datenrate=4.7855 kbps, Sync Word=AA54, Frequenz 868.3MHz
+      </li>
+      <li>Lacrosse_mode1<br>
+        Modulation 2-FSK, Datenrate=17.25769 kbps, Sync Word=2DD4, Frequenz 868.3MHz<br>
+        <ul><small>Beispiel: TX25-IT, TX27-IT, TX29-IT, TX29DTH-IT, TX37, 30.3143.IT, 30.3144.IT</small></ul>
+      </li>
+      <li>Lacrosse_mode2<br>
+        Modulation 2-FSK, Datenrate=9.579 kbps, Sync Word=2DD4, Frequenz 868.3MHz<br>
+        <ul><small>Beispiel: TX35TH-IT, TX35DTH-IT, TX38-IT, 30.3155WD, 30.3156WD</small></ul>
+      </li>
+      <li>PCA301<br>
+        Modulation 2-FSK, Datenrate=6.62041 kbps, Sync Word=2DD4, Frequenz 868.950MHz
+      </li>
+      <li>SlowRF<br>
+        Modulation ASK/OOK, <b>l&auml;d die Standard Einstellung vom uC</b>
+      </li>
+    </ul>
   </li><br>
   <a name="suppressDeviceRawmsg"></a>
   <li>suppressDeviceRawmsg<br>

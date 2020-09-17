@@ -412,7 +412,7 @@ package lib::SD_ProtocolData;
         modulematch      => '^TX......',
         length_min       => '43',
         length_max       => '44',
-        remove_zero      => 1,
+        remove_zero      => 1,            # Removes leading zeros from output
       },
     "9"  => ## Funk Wetterstation CTW600
             ### ! some message are decode as protocol 42 and 75 !
@@ -426,7 +426,7 @@ package lib::SD_ProtocolData;
             # MU;P0=-96;P1=800;P2=-985;P3=485;P4=1421;P5=-8608;D=0123232323232323242324232324242324232324242324242324232323242324242323232324242424242424242424242424242424242424242424242424242424242424242424242424242424242324242424232323235;CP=4;R=0;
       {
         name             => 'weather',
-        comment          => 'Weatherstation WH1080, WH3080, CTW600',
+        comment          => 'Weatherstation WH1080, WH3080, WH5300SE, CTW600',
         id               => '9',
         knownFreqs       => '433.92 | 868.35',
         zero             => [3,-2],
@@ -842,17 +842,18 @@ package lib::SD_ProtocolData;
         length_min      => '40',
         length_max      => '40',
       },
-    "27"  =>  ## Temperatur-/Feuchtigkeitssensor EuroChron EFTH-800 (433 MHz)
+    "27"  =>  ## Temperatur-/Feuchtigkeitssensor EuroChron EFTH-800 (433 MHz) - https://github.com/RFD-FHEM/RFFHEM/issues/739
               # SD_WS_27_TH_2 - T: 15.5 H: 48 - MU;P0=-224;P1=258;P2=-487;P3=505;P4=-4884;P5=743;P6=-718;D=0121212301212303030301212123012123012123030123030121212121230121230121212121212121230301214565656561212123012121230121230303030121212301212301212303012303012121212123012123012121212121212123030121;CP=1;R=53;
               # SD_WS_27_TH_3 - T:  3.8 H: 76 - MU;P0=-241;P1=251;P2=-470;P3=500;P4=-4868;P5=743;P6=-718;D=012121212303030123012301212123012121212301212303012121212121230303012303012123030303012123014565656561212301212121230303012301230121212301212121230121230301212121212123030301230301212303030301212301;CP=1;R=23;
               # SD_WS_27_TH_3 - T:  5.3 H: 75 - MU;P0=-240;P1=253;P2=-487;P3=489;P4=-4860;P5=746;P6=-725;D=012121212303030123012301212123012121212303012301230121212121230303012301230303012303030301214565656561212301212121230303012301230121212301212121230301230123012121212123030301230123030301230303030121;CP=1;R=19;
+              # Eurochron Zusatzsensor fuer EFS-3110A - https://github.com/RFD-FHEM/RFFHEM/issues/889
               # short pulse of 244 us followed by a 488 us gap is a 0 bit
               # long pulse of 488 us followed by a 244 us gap is a 1 bit
               # sync preamble of pulse, gap, 732 us each, repeated 4 times
               # sensor sends two messages at intervals of about 57-58 seconds
       {
         name            => 'EFTH-800',
-        comment         => 'EuroChron weatherstation EFTH-800',
+        comment         => 'EuroChron weatherstation EFTH-800, EFS-3110A',
         id              => '27',
         knownFreqs      => '433.92',
         one             => [2,-1],
@@ -2690,7 +2691,7 @@ package lib::SD_ProtocolData;
         sync            => '2DD4',
         modulation      => '2-FSK',
         regexMatch      => qr/^9/,   # ToDo, check! fuer eine regexp Pruefung am Anfang vor dem method Aufruf
-        register        => ['0001','0246','0302','042D','05D4','06FF','0700','0802','0D21','0E65','0F6A','1089','115C','1206','1322','14F8','1556','1700','1818','1916','1B43','1C68','1D91','23EC','2517','2611','2B3E'],
+        register        => ['0001','0246','0301','042D','05D4','06FF','0700','0802','0D21','0E65','0F6A','1089','115C','1206','1322','14F8','1556','1700','1818','1916','1B43','1C68','1D91','23EC','2517','2611','2B3E'],
         rfmode          => 'Lacrosse_mode1',
         clientmodule    => 'LaCrosse',
         method          => \&lib::SD_Protocols::ConvLaCrosse,
@@ -2746,7 +2747,7 @@ package lib::SD_ProtocolData;
         sync            => '2DD4',
         modulation      => '2-FSK',
         regexMatch      => qr/^9/,   # ToDo, check! fuer eine regexp Pruefung am Anfang vor dem method Aufruf
-        register        => ['0001','0246','0302','042D','05D4','06FF','0700','0802','0D21','0E65','0F6A','1088','1182','1206','1322','14F8','1556','1700','1818','1916','1B43','1C68','1D91','23EC','2516','2611','2B3E'],
+        register        => ['0001','0246','0301','042D','05D4','06FF','0700','0802','0D21','0E65','0F6A','1088','1182','1206','1322','14F8','1556','1700','1818','1916','1B43','1C68','1D91','23EC','2516','2611','2B3E'],
         rfmode          => 'Lacrosse_mode2',
         clientmodule    => 'LaCrosse',
         method          => \&lib::SD_Protocols::ConvLaCrosse,
@@ -2796,6 +2797,113 @@ package lib::SD_ProtocolData;
         length_min      => '40',
         length_max      => '40',
       },
+
+    ########################################################################
+    #### ###  register informations from other hardware protocols  #### ####
+
+    # "993" =>  # HomeMatic
+              # # settings from CUL
+      # {
+        # name            => 'HomeMatic',
+        # comment         => '',
+        # id              => '993',
+        # developId       => 'm',
+        # knownFreqs      => '868.3',
+        # datarate        => '',
+        # sync            => 'E9CA',
+        # modulation      => '2-FSK',
+        # rfmode          => 'HomeMatic',
+        # register        => ['0007','012E','022E','030D','04E9','05CA','06FF','070C','0845','0900','0A00','0B06','0C00','0D21','0E65','0F6A','10C8','1193','1203','1322','14F8','1534','1607','1733','1818','1916','1A6C','1B43','1C40','1D91','1E87','1F6B','20F8','2156','2210','23AC','240A','253D','2611','2741'],
+      # },
+    # "994" =>  # LaCrosse_mode_4
+              # # https://wiki.fhem.de/wiki/JeeLink
+              # # https://forum.fhem.de/index.php/topic,106594.0.html?PHPSESSID=g0k1ruul2e3hmddm0uojaeurfl
+      # {
+        # name            => 'LaCrosse_mode_4',
+        # comment         => 'example: TX22 (WS 1600)',
+        # id              => '994',
+        # developId       => 'm',
+        # knownFreqs      => '868.3',
+        # datarate        => '8.842',
+        # sync            => '2DD4',
+        # modulation      => '2-FSK',
+        # rfmode          => 'LaCrosse_mode_4',
+        # register        => ['0001','012E','0246','0302','042D','05D4','06FF','0700','0802','0900','0A00','0B06','0C00','0D21','0E65','0F6A','1088','1165','1206','1322','14F8','1556','1607','1700','1818','1916','1A6C','1B43','1C68','1D91','1E87','1F6B','20F8','2156','2211','23EC','242A','2517','2611','2741'],
+      # },
+    # "995" =>  # MAX
+              # # settings from CUL
+      # {
+        # name            => 'MAX',
+        # comment         => '',
+        # id              => '995',
+        # developId       => 'm',
+        # knownFreqs      => '',
+        # datarate        => '',
+        # sync            => 'C626',
+        # modulation      => '2-FSK',
+        # rfmode          => 'MAX',
+        # register        => ['0007','012E','0246','0307','04C6','0526','06FF','070C','0845','0900','0A00','0B06','0C00','0D21','0E65','0F6A','10C8','1193','1203','1322','14F8','1534','1607','173F','1828','1916','1A6C','1B43','1C40','1D91','1E87','1F6B','20F8','2156','2210','23AC','240A','253D','2611','2741'],
+      # },
+    # "996" =>  # RIO-Funkprotokoll
+              # # https://forum.fhem.de/index.php/topic,107239.msg1011812.html#msg1011812
+              # # send RIO in GFSK
+              # # https://wiki.fhem.de/wiki/Unbekannte_Funkprotokolle
+      # {
+        # name            => 'RIO Protocol, send GFSK',
+        # comment         => 'example: HS-8',
+        # id              => '996',
+        # developId       => 'm',
+        # knownFreqs      => '868.3',
+        # datarate        => '24.796',
+        # modulation      => 'GFSK',
+        # rfmode          => 'RIO',
+        # register        => ['000D','012E','022D','0347','04D3','0591','063D','0704','0832','0900','0A00','0B06','0C00','0D21','0E65','0F6F','1086','1190','1218','1323','14B9','1540','1607','1700','1818','1914','1A6C','1B07','1C00','1D91','1E87','1F6B','20F8','21B6','2211','23EF','240D','253E','261F','2741'],
+      # },
+    # "997" =>  # WMBus_C
+              # # https://wiki.fhem.de/wiki/WMBUS
+              # # settings from CUL
+      # {
+        # name            => 'WMBus_C',
+        # comment         => '',
+        # id              => '997',
+        # developId       => 'm',
+        # knownFreqs      => '',
+        # datarate        => '',
+        # modulation      => '2-FSK',
+        # rfmode          => 'WMBus_C',
+        # register        => ['0029','012E','023F','0307','04D3','0591','06FF','0704','0845','0900','0A00','0B0F','0C00','0D1E','0EC4','0FEC','108C','1122','1202','1322','14F8','1547','1607','1730','1804','1976','1A6C','1B03','1C40','1D91','1E87','1F6B','20F8','2156','2210','23A9','240A','2520','260D','2741'],
+        # #regexMatch      => qr/^9/,   # ToDo, check! fuer eine regexp Pruefung am Anfang vor dem method Aufruf
+      # },
+    # "998" =>  # WMBus_S
+              # # https://wiki.fhem.de/wiki/WMBUS
+              # # settings from CUL
+      # {
+        # name            => 'WMBus_S',
+        # comment         => '',
+        # id              => '998',
+        # developId       => 'm',
+        # knownFreqs      => '',
+        # datarate        => '',
+        # modulation      => '2-FSK',
+        # rfmode          => 'WMBus_S',
+        # register        => ['0006','012E','0200','0300','0476','0596','06FF','0704','0802','0900','0A00','0B08','0C00','0D21','0E65','0F6A','106A','114A','1206','1322','14F8','1547','1607','1700','1818','192E','1A6D','1B04','1C09','1DB2','1E87','1F6B','20F8','21B6','2210','23EF','242A','2512','261F','2741'],
+        # #regexMatch      => qr/^9/,   # ToDo, check! fuer eine regexp Pruefung am Anfang vor dem method Aufruf
+      # },
+    # "999" =>  # WMBus_T
+              # # https://wiki.fhem.de/wiki/WMBUS
+              # # settings from CUL
+      # {
+        # name            => 'WMBus_T',
+        # comment         => '',
+        # id              => '999',
+        # developId       => 'm',
+        # knownFreqs      => '',
+        # datarate        => '',
+        # modulation      => '2-FSK',
+        # rfmode          => 'WMBus_T',
+        # register        => ['0006','012E','0200','0300','0454','053D','06FF','0704','0802','0900','0A00','0B08','0C00','0D21','0E6B','0FD0','105C','1104','1206','1322','14F8','1544','1607','1700','1818','192E','1ABF','1B43','1C09','1DB5','1E87','1F6B','20F8','21B6','2210','23EF','242A','2513','261F','2741'],
+        # #regexMatch      => qr/^9/,   # ToDo, check! fuer eine regexp Pruefung am Anfang vor dem method Aufruf
+      # },
 
     ########################################################################
     #### ### old information from incomplete implemented protocols #### ####
