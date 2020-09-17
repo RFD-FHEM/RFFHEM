@@ -1,3 +1,26 @@
+2020-09-17 - dev-r35_xFSK - enhancement (#866)
+
+2020-09-16 - 00_SIGNALduino.pm:
+          Feature: xFSK processing
+          Change: added N to send SN  xFSK sendCommand
+          Change: added new sub SIGNALduino_calcRSSI to simplification code
+          Change: fix some perlcritic warnings
+          Change: revised Parse_MN and loglevel
+          Change: revised logoutput text SIGNALduino_Get_Command
+          Change: revisions indented ( no tabs, only spaces ) and checked
+                  syntax with perl ./contrib/commandref_join.pl
+          New: added commandref rfmode & cc1101_reg_user
+          New: added hardware ESP32cc1101, MAPLEMINI_F103CB on attribute
+          New: added new attrib rfmode to changed to xFSK & revised commandref
+          New: added separat sub SIGNALduino_Attr_rfmode
+          New: added set cmd LaCrossePairForSec (for LaCrosse)
+  2020-09-16 - SD_Protocols.pm:
+          Change: moved subs for converting in own package
+                  ConvLaCrosse, ConvKoppFreeControl and ConvPCA301
+          New: added function PreparingSend_KOPP_FC
+  2020-09-16 - SD_ProtocolData.pm
+          New: added rfmode, register rubric & comments
+          Change: fix perlcritic Severity 3 - hard tabs
 2020-09-16 - 00_SIGNALduino.pm:
           Feature: xFSK processing
           Change: added N to send SN  xFSK sendCommand
