@@ -1,309 +1,64 @@
-2020-06-30 - Merge branch 'dev-r35_xFSK' into dev-r35_xFSK_Timer
-2020-06-30 - FHEM\00_SIGNALduino.pm
-Added usage of FHEM::Core:Timer::Helper package to clean timer which are known
-2020-06-15 - Merge branch 'dev-r34' into dev-r35_xFSK
-2020-06-12 - dev-r35_xFSK - Lacrosse | Logoutput and Sensors without Hum (#859)
-
-00_SIGNALduino.pm
-  * fix syntax for logout with variable
-SD_Protocols.pm
-  * Lacrosse code, remove humidity check -> some sensors without hum send value > 100
-   (check humidity in Lacrosse modul)
-   https://svn.fhem.de/trac/browser/trunk/fhem/FHEM/36_LaCrosse.pm#L469
-2020-06-12 - Lacrosse code revised
-
-00_SIGNALduino.pm
-  * fix syntax for logout with variable
-SD_Protocols.pm
-  * remove humidity check -> some sensors without hum send value > 100
-  (check humidity in Lacrosse modul)
-  https://svn.fhem.de/trac/browser/trunk/fhem/FHEM/36_LaCrosse.pm#L469
-2020-06-09 - 00_SIGNALduino.pm - old readings, if user changes to a new device without cc1101 (#854)
-
-* Update 00_SIGNALduino.pm
-  * delete old readings from device with cc1101_available = 1
- * revised code https://github.com/RFD-FHEM/RFFHEM/pull/854#pullrequestreview-425673188
- * revised RegEx https://github.com/RFD-FHEM/RFFHEM/pull/854#pullrequestreview-425673677
- * revised loop code for PERL critic https://github.com/RFD-FHEM/RFFHEM/pull/854#pullrequestreview-425673841
-
-* Update 00_SIGNALduino.pm
- * revised if code https://github.com/RFD-FHEM/RFFHEM/pull/854#pullrequestreview-425727766
- * remove if query https://github.com/RFD-FHEM/RFFHEM/pull/854#discussion_r436254436
-2020-06-06 - Update 00_SIGNALduino.pm
-
-* revised if code https://github.com/RFD-FHEM/RFFHEM/pull/854#pullrequestreview-425727766
-* remove if query https://github.com/RFD-FHEM/RFFHEM/pull/854#discussion_r436254436
-2020-06-06 - Update 00_SIGNALduino.pm
-
-* revised code https://github.com/RFD-FHEM/RFFHEM/pull/854#pullrequestreview-425673188
-* revised RegEx https://github.com/RFD-FHEM/RFFHEM/pull/854#pullrequestreview-425673677
-* revised loop code for PERL critic https://github.com/RFD-FHEM/RFFHEM/pull/854#pullrequestreview-425673841
-2020-06-05 - Update 00_SIGNALduino.pm
-
-* revised readingsDelete loop
-* added output note for user if use attrib userReadings with reserved cc1101 readingnames
-2020-06-05 - Update 00_SIGNALduino.pm
-
-  * delete old readings from device with cc1101_available = 1
-2020-06-04 - 00_SIGNALduino.pm
-
-syntaxfix last commit
-2020-06-04 - 00_SIGNALduino.pm
-
-simple prototypes removed
-2020-06-04 - 00_SIGNALduino.pm
-
-some perlciritc 5 fixes
-2020-04-25
-  00_SIGNALduino.pm
-   * more comments to better overview
-   * remove sub SIGNALduino_b2h
-   * revised entries from SIGNALduino_b2h to lib::SD_Protocols::binStr2hexStr
-   * revised syntax sub SIGNALduino_AS & SIGNALduino_Hideki
-  90_SIGNALduino_un.pm
-   * revised entries from SIGNALduino_b2h to lib::SD_Protocols::binStr2hexStr
-  test_sub_SIGNALduino_b2h-definition.txt
-   * rename to test_sub_binStr2hexStr-definition.txt
-  test_sub_SIGNALduino_ITV1_tristateToBit-definition.txt
-   * create test
-  test_sub_SIGNALduino_bit2itv1-definition.txt
-   * create test
-
-2020-04-24
-  00_SIGNALduino.pm
-   * remove sub SIGNALduino_HE_EU
-   * remove sub SIGNALduino_HE800
-   * revised syntax sub SIGNALduino_GROTHE
+2020-09-26 
+    00_SIGNALduino.pm:
+          Feature: xFSK processing
+          Change: added N to send SN  xFSK sendCommand
+          Change: added new sub SIGNALduino_calcRSSI to simplification code
+          Change: fix some perlcritic warnings
+          Change: revised Parse_MN and loglevel
+          Change: revised logoutput text SIGNALduino_Get_Command
+          Change: revisions indented ( no tabs, only spaces ) and checked
+                  syntax with perl ./contrib/commandref_join.pl
+          New: added commandref rfmode & cc1101_reg_user
+          New: added hardware ESP32cc1101, MAPLEMINI_F103CB on attribute
+          New: added new attrib rfmode to changed to xFSK & revised commandref
+          New: added separat sub SIGNALduino_Attr_rfmode
+          New: added set cmd LaCrossePairForSec (for LaCrosse
+  SD_Protocols.pm:
+          Change: moved subs for converting in own package
+                  ConvLaCrosse, ConvKoppFreeControl and ConvPCA301
+          New: added function PreparingSend_KOPP_FC
   SD_ProtocolData.pm
-   * revised postDemodulation
-  SD_Protocols.pm
-   * added sub ConvHE_EU & revised comments
-   * added sub ConvHE800 & revised comments
-	 * revised comments
-  test_sub_SIGNALduino_HE_EU-definition.txt
-   * delete test
-  test_sub_SIGNALduino_HE800-definition.txt
-   * delete test
-  test_sub_ConvHE_EU-definition.txt
-   * create test
-  test_sub_ConvHE800-definition.txt
-  * create test
-  test_sub_SIGNALduino_GROTHE-definition.txt
-   * create test
-  test_sub_MCRAW-definition.txt
-   * create test
+          New: added rfmode, register rubric & comments
+          Change: fix perlcritic Severity 3 - hard tabs
 
-2020-04-23
-  00_SIGNALduino.pm
-	 * revised syntax sub SIGNALduino_OSV1
-   * revised syntax sub SIGNALduino_SomfyRTS
-   * revised syntax sub SIGNALduino_Maverick
-   * remove not used debug variable
-   * revised syntax sub SIGNALduino_OSPIR
-  test_sub_SIGNALduino_OSV1-definition.txt
-   * create test
-  test_sub_SIGNALduino_SomfyRTS-definition.txt
-   * create test
-  test_sub_SIGNALduino_Maverick-definition.txt
-   * create test
-  test_sub_SIGNALduino_OSPIR-definition.txt
-   * create test
+2020-09-15
+  14_SD_WS,pm: 
+         feature: protocol 27 new sensor EFS-3110A (#890)
 
-2020-04-21
-  00_SIGNALduino.pm
-	 * remove old sub SIGNALduino_PCA301  
-   * remove old sub SIGNALduino_LaCrosse
-   * remove old sub SIGNALduino_KoppFreeControl
-	SD_Protocols.pm
-   * revised comment
-  test_sub_SIGNALduino_PCA301-definition.txt
-   * rename to test_sub_ConvPCA301-definition.txt
-  test_sub_SIGNALduino_LaCrosse-definition.txt
-	 * rename to test_sub_ConvLaCrosse-definition.txt
-  test_sub_SIGNALduino_KoppFreeControl-definition.txt
-	 * rename to test_sub_ConvKoppFreeControl-definition.txt
+2020-08-17
+  14_FLAMINGO.pm: 
+         Change: Perlcritic (#887)
 
-2020-04-20
-  SD_Protocols.pm
-   * Added subs ConvLaCrosse, ConvKoppFreeControl and ConvPCA301
-   * Added tests to test_sub_SIGNALduino_KoppFreeControl-definition.txt, test_sub_SIGNALduino_LaCrosse-definition.txt, test_sub_SIGNALduino_PCA301-definition.txt
-   * Changed method reference towards new subs
-   * fix https://github.com/RFD-FHEM/RFFHEM/commit/cbc52712a48b812700660fef4a526f41447ce5c7#commitcomment-38613486
-  00_SIGNALduino.pm
-   * Changed SIGNALduino_Parse_MN mrzhod call to new subs
+2020-07-23 
+  14_SD_UT.pm:
+         Change: PerlCritic (#877)
 
-2020-04-19
-  00_SIGNALduino.pm
-   * Sub SIGNALduino_Parse_MN prepared some code to witch to new method type
-  lib/SD_Protocols.pm
-   * sub ID101_2_PCA301 modified and UnitTest/tests/test_sub_SIGNALduino_PCA301-definition.txt also adapted to cover this
-   * Sub transfer parameters adjusted (in first always $name, second is $hexData)
-   * incorrect parameters CRC
-   * revised return, processing 00_SIGNALduino.pm --> if ($rcode != -1)
-   * convert length error to warning and capture this in test
-   * sub still returns OK message if lengt is to long
+ 14_SD_BELL.pm:
+         Change: PerlCritic (#877)
 
-2020-04-18
-  00_SIGNALduino.pm
-   * remove SIGNALduino_CalculateCRC16 and use Digest::CRC
-   * fix https://github.com/RFD-FHEM/RFFHEM/commit/7b02f02dcf6a1c5b99cc6e28b11fbc196684af76#commitcomment-38585566
-   * remove SIGNALduino_CalculateCRC and use Digest::CRC
-   * revised logoutput
-  SD_Protocols.pm
-   * revised structure
-  test_sub_SIGNALduino_Parse_MN-definition.txt
-   * Added subtests for unspecified methos
-  test_sub_SIGNALduino_PCA301-definition.txt
-   * revised comment
-  test_sub_SIGNALduino_LaCrosse-definition.txt
-   * revised comments
-  test_sub_SIGNALduino_CalculateCRC16-definition.txt
-   * delete test
-  test_sub_SIGNALduino_CalculateCRC-definition.txt
-   * delete test
+2020-07-20 
+  14_SD_UT.pm:
+      feature: new protocol 105 for remote control BF-301
 
-2020-04-16 - 00_SIGNALduino.pm
-   * revised spelling mistake
-   * remove any not needed blank lines
+07.05.2020  
+  00_SIGNALduino.pm:
+          Bugfix: Fix some perlcritic 5 warnings
+          Bugfix: some operator fixes #835
+          Bugfix: Changed stingrefs to coderefs
+  10_FS10
+          Bugfix: revised for perlcritic
+  10_SD_GT
+          Bugfix: revised for perlcritic (#847)
 
-2020-04-14
-  00_SIGNALduino.pm
-   * remove some not needed comments
-   * sort AttrList
-   * remove any not needed blank lines
-   * fix RSSI sub
-  test_sub_SIGNALduino_calcRSSI-definition.txt
-   * revised test
-  test_sub_SIGNALduino_Dispatch-definition.txt
-   * added note
-   * revised to Test2
+  14_SD_UT.pm
+          feature: add attribute UTfrequency in (#845)
+          change: delete "$attr{$name}{room} = "SD_UT" if( not defined( $attr{$name}{room} ) );"
 
-2020-04-13
-  00_SIGNALduino.pm
-   * added new sub SIGNALduino_calRSSI to simplification code
-   * rename sub SIGNALduino_calRSSI to SIGNALduino_calcRSSI
-   * revised lines which were lost by merging
-  test_sub_SIGNALduino_calcRSSI-definition.txt
-   * create test for sub
-
-2020-04-11
-  00_SIGNALduino.pm (https://github.com/RFD-FHEM/RFFHEM/issues/818)
-   * revised comments,logoutput & remove old comments
-   * remove double parameter sub SIGNALduino_Parse_MN
-  test_sub_SIGNALduino_Parse_MN-definition.txt
-   * revised call sub SIGNALduino_Parse_MN
-
-2020-04-09
-  00_SIGNALduino.pm
-   * extension to check length_min
-
-2020-04-07
-  00_SIGNALduino.pm
-   * set number of arguments on new subs
-   * revised match for modul
   SD_ProtocolData.pm
-   * added more doc
-   * rename clientmodule
-  test_sub_SIGNALduino_LaCrosse-definition.txt
-   * added note
-  test_sub_SIGNALduino_KoppFreeControl-definition.txt
-   * added
+          feature: new protocol 104 for remote control TR60C-1 (#844)
+          feature: new protocol 99 NAVARIS touch light switch (#841)
+          feature: new protocol 98 for wireless door bell GEA-028DB (#839)
 
-2020-04-06
-  00_SIGNALduino.pm
-   !!! extensions for https://github.com/RFD-FHEM/RFFHEM/issues/814
-   * fix set cmd on Dummydevice
-   * Modified LaCrossePairForSec
-   * Available only if dummy or if modulation is set to 2-FSK
-
-2020-04-05
-  00_SIGNALduino.pm
-   !!! extensions for https://github.com/RFD-FHEM/RFFHEM/issues/814
-   * revised SIGNALduino_Set_LaCrossePairForSec and added logoutput
-   * Renamed set command LaCrossePairForSec to cc1101_LaCrossePairForSec
-   * fixed SIGNALduino_Set_LaCrossePairForSec
-   * cc1101_LaCrossePairForSec only available im FSK modulation is detected / if device is a dummy
-  UnitTest/tests/test_sub_SIGNALduino_Set-definition.txt
-   * Added / modified tests to verify new set command
-   * modified existing test for inactive device (close is not provided as command)
-   * numbered similar tests for easier identification
-
-2020-04-04
-  00_SIGNALduino.pm
-   !!! extensions for https://github.com/RFD-FHEM/RFFHEM/issues/814
-   * added setlist with cmd LaCrossePairForSec (for LaCrosse)
-   * sort clientsSIGNALduino
-   * added LaCrosse, KOPP_FC, PCA301 clientsSIGNALduino
-   * added LaCrosse, KOPP_FC, PCA301 matchListSIGNALduino
-   * SIGNALduino_Initialize, added $hash->{mnIdList}
-   * SIGNALduino_FingerprintFn, revised (for LaCrosse)
-   * SIGNALduino_RemoveLaCrossePair, added (for LaCrosse)
-   * SIGNALduino_Set_LaCrossePairForSec, added (for LaCrosse)
-   * SIGNALduino_Get_Raw, revised for new message format MN
-   * SIGNALduino_Parse_MN, added for new message format MN
-   * SIGNALduino_Parse, revised for new message format MN
-   * SIGNALduino_IdList, revised for new message format MN
-   * SIGNALduino_CalculateCRC16, added for some processing (example, PCA301)
-   * SIGNALduino_CalculateCRC, added for some processing (example, LaCrosse)
-   * SIGNALduino_LaCrosse, added for some processing
-   * SIGNALduino_PCA301, added for some processing
-   * SIGNALduino_KoppFreeControl, added for some processing
-   * SIGNALduino_FW_getProtocolList, revised for new message format MN
-   * fix SIGNALduino_IdList logoutput
-   * SIGNALduino_Parse_MN, revised logoutput
-   * added commandref LaCrossePairForSec
-  SD_ProtocolData.pm
-   !!! extensions for https://github.com/RFD-FHEM/RFFHEM/issues/814
-   * added xFSK doc
-   * added Lacrosse, Mode 1 - IT+
-   * added Lacrosse Mode 2 - IT+
-   * added ELV PCA 301
-   * added KoppFreeControl
-
-
---- --- --- Unreleases what comes up here ---- --- ---
-
-
-2020-06-15 - 10_FS10 revised for perlcritic (#860)
-2020-06-15 - Update 10_FS10.pm
-2020-06-14 - Update 10_FS10.pm
-2020-06-14 - Update 10_FS10.pm
-2020-06-13 - 10_FS10 revised for perlcritic
-2020-06-06 - SD_UT wrong DEF (#857)
-  Update 14_SD_UT.pm - If the device is created manually with IODev, then DEF is wrong.
-
-2020-05-28 - Dev r34 - id56 - #848 (#849)
-  Update SD_ProtocolData.pm - ID 56 fix def & added doc https://github.com/RFD-FHEM/RFFHEM/issues/848
-
-2020-05-26 - 10_SD_GT revised for perlcritic (#847)
-
-2020-05-25 - add attribute UTfrequency in 14_SD_UT.pm (#845)
-  new attribute UTfrequency for individual transmission frequency
-  Multiple query "$ attrName eq 'model'" removed
-  change commandref
-  replace "foreach my $keys (keys %models)" with "if ( exists $models{$attrValue}" in line 1756
-  replace "foreach my $keys (sort keys %{$models{RC_10}{buttons}})" with "if ( exists $models{RC_10}{buttons}{$button} )" in line 1845
-  replace "foreach my $keys (keys %models)" with "grep { $models{$_}{hex_lengh} =~ /$hex_lengh/ } keys %models;" in line 1745
-  delete "$attr{$name}{room} = "SD_UT"	if( not defined( $attr{$name}{room} ) );"
-  change search for models with same hex_length
-  Reference to autocreate added
-  rename  hex_lengh in hex_length
-  Check values attribute UTfrequency added
-  Documentation for UTfrequency attribute added
-
-2020-05-02 - new protocol 104 for remote control TR60C-1 (#844)
-2020-05-02 - Merge branch 'dev-r34' into dev-r34_TR60C-1
-2020-05-02 - new protocol 104 for remote control TR60C-1
-2020-04-22 - Merge branch 'dev-r34' into dev-r34_operatorFixes
-2020-04-22 - 00_SIGNALduino.pm - some operator fixes #835
-2020-04-21 - new protocol 99 NAVARIS touch light switch (#841)
-2020-04-21 - new protocol 98 for wireless door bell GEA-028DB (#839)
-
-2020-04-14 - 00_SIGNALduino.pm
-  Changed stringrefs to coderefs
-
-2020-04-13 - Bump dev-r34 to v3.4.4
-2020-04-13 - Merge remote-tracking branch 'remotes/origin/dev-r34' into v3.4.3
 
 13.04.2020
   00_SIGNALduino.pm
