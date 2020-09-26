@@ -1,0 +1,43 @@
+defmod test_07_mu_1 UnitTest dummyDuino (
+ {
+	use Test2::V0;
+	use Test2::Tools::Compare qw{ is isnt };
+
+  	my $mock = Mock::Sub->new;
+	my $SD_Dispatch = $mock->mock("SIGNALduno_Dispatch");
+	
+	my $LoadResult =  $targetHash->{protocolObject}->LoadHash("$attr{global}{modpath}/FHEM/lib/test_loadprotohash-ok.pm");
+	is($LoadResult,undef,"load test protocol hash ");
+
+  	my %local_ProtocolListSIGNALduino = %{$targetHash->{protocolObject}->getProtocolList()};
+    foreach my $pID (keys %local_ProtocolListSIGNALduino)
+	{
+		next if (!exists($local_ProtocolListSIGNALduino{$pID}{test_data}{$name}));
+    	foreach my $testData (values @{$local_ProtocolListSIGNALduino{$pID}{test_data}{$name}}) 
+        {
+          subtest "$testData->{desc}" => sub {
+              SIGNALduino_IdList("sduino_IdList:$target",$pID);
+              $SD_Dispatch->reset();
+              my $rmsg=$testData->{input};
+
+              plan(scalar @{$testData->{output}});
+              my %signal_parts=SIGNALduino_Split_Message($rmsg,$targetHash->{NAME});
+              is(SIGNALduino_Parse_MU($targetHash, $targetHash, $targetHash->{NAME}, $rmsg, %signal_parts),$testData->{output}[0] ,"check return code SIGNALduino_Parse_MU") if (defined($testData->{output}[0]));
+              is($SD_Dispatch->called_count, $testData->{output}[1], "check number of dispatch attempts") if (defined($testData->{output}[1]));
+              is( ($SD_Dispatch->called_with)[4], $testData->{output}[2], "SIGNALduno_Dispatch check id " ) if (defined($testData->{output}[2]));
+              is( ($SD_Dispatch->called_with)[2], $testData->{output}[3], "SIGNALduno_Dispatch check dmsg" ) if (defined($testData->{output}[3]));
+          };
+        }
+    };
+	$SD_Dispatch->unmock();
+	my $LoadResult =  $targetHash->{protocolObject}->LoadHash("$attr{global}{modpath}/FHEM/lib/SD_ProtocolData.pm");
+	is($LoadResult,undef,"load test protocol hash ");
+
+	SIGNALduino_IdList("x:$target","","","");  
+	foreach my $id (qw/9999 9998 9997 9996/)
+	{
+		isnt($targetHash->{protocolObject}->protocolExists($id),1,"id $id does not exists");
+	}
+ }
+);
+

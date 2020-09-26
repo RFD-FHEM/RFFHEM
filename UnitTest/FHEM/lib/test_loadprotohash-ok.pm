@@ -227,6 +227,31 @@ package lib::SD_ProtocolData;
 				method				=> \&lib::SD_Protocols::Not_Existing_Sub,	
 				polarity			=> 'invert',
 		},
+		"9988"	=>	
+			{
+				name			=> 'Unittest MN Protocol',
+				comment			=> 'ony for running automated tests',
+				id              => '100',
+				knownFreqs      => '868.3',
+				datarate        => '17257.69',
+				sync            => '2DD4',
+				modulation      => '2-FSK',
+				regexMatch      => qr/^35/,   
+				clientmodule    => 'LaCrosse',
+				method			=> \&lib::SD_Protocols::Not_Existing_Sub,	
+			},
+		"9987"	=>	
+			{
+				name			=> 'Unittest MN Protocol',
+				comment			=> 'ony for running automated tests',
+				id              => '100',
+				knownFreqs      => '868.3',
+				datarate        => '17257.69',
+				sync            => '2DD4',
+				modulation      => '2-FSK',
+				regexMatch      => qr/^36/,   
+				clientmodule    => 'LaCrosse',
+			},
 		
 	);
 	no warnings 'redefine';

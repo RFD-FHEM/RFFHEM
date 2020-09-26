@@ -26,7 +26,8 @@ before_install:
  - wget -qO - http://debian.fhem.de/archive.key | sudo apt-key add - || true
  - echo "deb http://debian.fhem.de/nightly/ /" | sudo tee -a /etc/apt/sources.list || true
 install:
- - cpanm --notest --installdeps --skip-installed .
+ - cpanm --notest --skip-installed --installdeps .
+ - cpanm Storable
  - sudo apt-get update -qq
  - sudo apt-get install fhem -y || (curl -sLO http://fhem.de/fhem-5.9.deb && sudo apt install ./fhem-5.9.deb)
  - sudo chown travis -R /opt/fhem

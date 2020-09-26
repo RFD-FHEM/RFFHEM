@@ -1,0 +1,13 @@
+defmod test_02_sub_SIGNALduino_CheckCmdsResponse UnitTest dummyDuino ( 
+{
+	use Test2::V0;
+	use Test2::Tools::Compare qw{ is };
+
+	subtest 'Test SIGNALduino_CheckCmdsResponse ' => sub {
+		plan(1);
+		my ($ret,undef)=SIGNALduino_CheckCmdsResponse($targetHash,"$target cmds => .*Use one of V R t X S P C r W s x e");
+		is($ret," V R t X S P C r W s x e","check return value");
+	}; 
+
+}
+)

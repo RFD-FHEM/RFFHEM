@@ -1,0 +1,76 @@
+name: Perl Modules&FHEM Unittests
+on: [push, pull_request]
+
+jobs:
+  libModTests:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: ['ubuntu-latest']
+        perl: [ '5.22', '5.24', '5.26' ]
+    name: Perl ${{ matrix.perl }} on ${{ matrix.os }}
+    steps:
+    - uses: actions/checkout@master
+    - uses: shogo82148/actions-setup-perl@v1
+      with:
+        perl-version: ${{ matrix.perl }}
+    - run: |
+        cpanm --notest --installdeps .
+        cpanm --notest Devel::Cover::Report::Clover
+        cpanm Storable
+    - name: install fhem via deb package
+      run: |
+        wget -qO - http://debian.fhem.de/archive.key | sudo apt-key add -
+        echo "deb http://debian.fhem.de/nightly/ /" | sudo tee -a /etc/apt/sources.list
+        sudo apt-get update -qq
+        sudo apt-get install fhem -y
+        sudo chown -R --reference=Makefile /opt/fhem
+        sudo systemctl stop fhem
+#    - name: Setup tmate session
+#      uses: mxschmitt/action-tmate@v1
+    - name: run prove on perl modules (testscripts)
+      run: |
+        prove --exec 'perl -MDevel::Cover=-silent,1 -I FHEM ' -I FHEM -r -v t/FHEM/lib 
+    - name: Create clover report  
+      run: cover -report clover
+    - uses: codecov/codecov-action@v1
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        file: ./cover_db/clover.xml
+        flags: unittests,perl,modules
+        name: perl modules (testscripts) ${{ matrix.perl }}
+    - name: run prove fhem testsuite ${{ matrix.perl }}
+      run: |
+        cp -r FHEM/* ${FHEM_DIR}/FHEM/
+        cd ${FHEM_DIR}
+        prove --exec 'perl -MDevel::Cover=-silent,1 fhem.pl -t' -I FHEM -r -vv  ${GITHUB_WORKSPACE}/t/FHEM/00_SIGNALduino/*.t  
+      env:
+        FHEM_DIR: /opt/fhem
+    - name: Create clover report  
+      run: cover -report clover
+    - uses: codecov/codecov-action@v1
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        file: ./cover_db/clover.xml
+        flags: unittests,fhem,modules
+        name: fhem (testscripts) ${{ matrix.perl }}
+    - name: run make test (classic fhem unittest module)
+      run: |
+        timeout 40 bash -c 'while /usr/bin/pgrep perl >> /dev/null; do sleep 1; echo .; done;'
+        make test PERL_OPTS="-MDevel::Cover" 2>make_error.txt && sudo pkill "^perl"
+        cat make_error.txt
+        timeout 40 bash -c 'while /usr/bin/pgrep perl >> /dev/null; do sleep 1; echo .; done;' || sudo pkill "^perl"
+        sleep 3
+        cp -R /opt/fhem/cover_db ./
+#       grep -oP "^make:.*\[(.*)\].*Error" make_error.txt | awk -F'[][]' '{print $2}'
+      shell: bash {0}
+    - name: Create clover report  
+#      run: cover -report codecov
+      run: cover -report clover
+    - uses: codecov/codecov-action@v1
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        file: ./cover_db/clover.xml
+        flags: unittest
+        name: unittest module ${{ matrix.perl }}
+        

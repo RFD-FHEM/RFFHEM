@@ -1,0 +1,74 @@
+defmod test_02_sub_SIGNALduino_SendFromQueue UnitTest dummyDuino 
+(
+ {
+ 	use Test2::V0;
+	use Test2::Tools::Compare qw{is like check hash within field U};
+	#use Test2::Tools::Ref;
+	
+	my $mock = Mock::Sub->new; 	
+	foreach (qw/SR SC SM SN/) {
+		subtest "Test SendCommands ($_) SIGNALduino_SendFromQueue called" => sub {
+			plan(3);
+			my $check =  hash {
+				    	field cmd => 'sendraw';
+				    	field timenow => within(time(), 10);
+				    	field responseSub => \&SIGNALduino_CheckSendRawResponse;
+				    	end();
+			};
+	
+			my $SIGNALduino_SimpleWrite = $mock->mock("SIGNALduino_SimpleWrite");  	
+			SIGNALduino_SendFromQueue($targetHash,"$_;");
+			is($SIGNALduino_SimpleWrite->called,1,"SIGNALduino_SimpleWrite called");
+			is(($SIGNALduino_SimpleWrite->called_with)[1], "$_;", "check msg given to SIGNALduino_SimpleWrite" );
+			is($targetHash->{ucCmd},$check,"Verify ucCmd hash");
+		
+			$SIGNALduino_SimpleWrite->unmock;
+		};
+	};
+
+
+	subtest "Test cmd (e) SIGNALduino_SendFromQueue called" => sub {
+		plan(3);
+		my $SIGNALduino_Get = $mock->mock("SIGNALduino_Get");  	
+		
+		SIGNALduino_SendFromQueue($targetHash,"e");
+		is($SIGNALduino_Get->called_count,2,"SIGNALduino_Get called twice");
+		is(($SIGNALduino_Get->called_with)[2], "ccpatable", "check get with ccpatable is executed" );
+		$SIGNALduino_Get->unmock;
+		is($attr{$target}{rfmode},U,'verify attr rfmode');
+	};
+
+	subtest 'Test cmd (e) SIGNALduino_SendFromQueue called rfmode != SlowRF' => sub {
+		plan(1);
+		$attr{$target}{rfmode}='HomeMatic';
+		SIGNALduino_SendFromQueue($targetHash,'e');
+		is($attr{$target}{rfmode},'SlowRF','verify reset of attr rfmode');
+	};
+
+	
+	subtest "Test cmd (x) SIGNALduino_SendFromQueue called" => sub {
+		plan(2);
+		my $SIGNALduino_Get = $mock->mock("SIGNALduino_Get");  	
+		
+		SIGNALduino_SendFromQueue($targetHash,"x");
+		is($SIGNALduino_Get->called_count,1,"SIGNALduino_Get called once");
+		is(($SIGNALduino_Get->called_with)[2], "ccpatable", "check get with ccpatable is executed" );
+		$SIGNALduino_Get->unmock;
+	};
+	foreach (qw/W0F W10 W11 W1D W12 W1F/) {
+
+		subtest "Test cmd ($_) SIGNALduino_SendFromQueue called" => sub {
+			plan(2);
+			my $SIGNALduino_Get = $mock->mock("SIGNALduino_Get");  	
+			
+			SIGNALduino_SendFromQueue($targetHash,"$_");
+			is($SIGNALduino_Get->called_count,1,"SIGNALduino_Get called once");
+			is(($SIGNALduino_Get->called_with)[2], "ccconf", "check get with ccconf is executed" );
+			$SIGNALduino_Get->unmock;
+		};
+	}
+
+	delete($targetHash->{ucCmd});
+
+}
+}
