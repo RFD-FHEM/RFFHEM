@@ -1,3 +1,6 @@
+2020-09-27 - 00_SIGNALduino.pm
+
+Readded changes to migrate to FHEM::Core::Timer::Helper
 2020-09-26 - Merge branch 'master' into dev-r35_xFSK_Timer
 2020-09-26 
     00_SIGNALduino.pm:
