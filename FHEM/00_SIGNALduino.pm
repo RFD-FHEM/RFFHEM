@@ -673,7 +673,7 @@ sub SIGNALduino_Set_raw {
   );
 
   my $hexFile = '';
-  if( grep $args[0] eq $_ , split(',',$hash->{additionalSets}{flash}) )
+  if( ( exists $hash->{additionalSets}{flash} ) && ( grep $args[0] eq $_ , split(',',$hash->{additionalSets}{flash}) ) )
   {
     $hash->{logMethod}->($hash, 3, "$name: Set_flash, $args[0] try to fetch github assets for tag $args[0]");
     my $ghurl = "https://api.github.com/repos/RFD-FHEM/SIGNALDuino/releases/tags/$args[0]";
