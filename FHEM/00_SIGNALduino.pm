@@ -26,6 +26,7 @@ no warnings 'portable';
 eval {use Data::Dumper qw(Dumper);1};
 eval {use Digest::CRC;1 or $missingModulSIGNALduino .= 'Digest::CRC '};
 eval {use JSON;1 or $missingModulSIGNALduino .= 'JSON '};
+eval { use FHEM::Core::Timer::Helper qw(addTimer removeTimer);1 } ;
 
 eval {use Scalar::Util qw(looks_like_number);1};
 eval {use Time::HiRes qw(gettimeofday);1} ;
@@ -395,12 +396,12 @@ sub SIGNALduino_Define {
   my $error = $Protocols->LoadHash(qq[$attr{global}{modpath}/FHEM/lib/SD_ProtocolData.pm]);
   $hash->{protocolObject} = $Protocols;
 
-  addTimer($hash->{NAME},gettimeofday(), \&SIGNALduino_IdList,"sduino_IdList:$name",0);        # verzoegern bis alle Attribute eingelesen sind
+  addTimer($hash->{NAME},gettimeofday()+0.1, \&SIGNALduino_IdList,"sduino_IdList:$name",0);        # verzoegern bis alle Attribute eingelesen sind
   
   if($dev ne 'none') {
     $ret = DevIo_OpenDev($hash, 0, \&SIGNALduino_DoInit, \&SIGNALduino_Connect);
   } else {
-  $hash->{DevState} = 'initialized';
+    $hash->{DevState} = 'initialized';
     readingsSingleUpdate($hash, 'state', 'opened', 1);
   }
 
@@ -945,7 +946,7 @@ sub SIGNALduino_Set_LaCrossePairForSec {
   return "Usage: set $hash->{NAME} $a[0] <seconds_active> [ignore_battery]" if(!$a[0] || $a[1] !~ m/^\d+$/xms || (defined $a[2] && $a[2] ne 'ignore_battery') );
   $hash->{LaCrossePair} = 2;  # LaCrosse autoCreateState: 0 = autoreate not defined | 1 = autocreate defined | 2 = autocreate active
   $hash->{logMethod}->($hash->{NAME}, 4, "$hash->{NAME}: Set_LaCrossePairForSec, LaCrosse autocreate active for $a[1] seconds");
-  addTimer($hash->{NAME},gettimeofday()+$a[1], 'SIGNALduino_RemoveLaCrossePair', $hash, 0);
+  addTimer($hash->{NAME},gettimeofday()+$a[1], \&SIGNALduino_RemoveLaCrossePair, $hash, 0);
 
   return ;
 }
@@ -1101,7 +1102,7 @@ sub SIGNALduino_Get_delayed {
   } else {
     delete($hash->{ucCmd}); 
     $hash->{logMethod}->($hash->{NAME}, 5, "$name: Get_delayed, ".join(' ',@cmds).' executed');
-	removeTimer($hash->{NAME},"SIGNALduino_Get_delayed:$name:".join(' ',@cmds));
+	removeTimer($hash->{NAME},\&SIGNALduino_Get_delayed,"SIGNALduino_Get_delayed:$name:".join(' ',@cmds));
     SIGNALduino_Get($hash,$name,$cmds[0]);
   }
 }
@@ -1224,6 +1225,7 @@ sub SIGNALduino_CheckSendRawResponse {
     delete($hash->{ucCmd});
     #SIGNALduino_HandleWriteQueue("x:$name"); # Todo #823 on github
     addTimer($hash->{NAME},gettimeofday() + 0.1, \&SIGNALduino_HandleWriteQueue, "HandleWriteQueue:$name") if (scalar @{$hash->{QUEUE}} > 0 && InternalVal($name,"sendworking",0) == 0);
+  }
   return (undef);
 }
 
@@ -1650,7 +1652,7 @@ sub SIGNALduino_HandleWriteQueue {
     }
   } else {
      $hash->{logMethod}->($name, 4, "$name: HandleWriteQueue, nothing to send, stopping timer");
-     removeTimer($hash->{NAME},\&SIGNALduino_HandleWriteQueue,"HandleWriteQueue:$name")
+     removeTimer($hash->{NAME},\&SIGNALduino_HandleWriteQueue,"HandleWriteQueue:$name");
   }
 }
 
@@ -3145,7 +3147,7 @@ sub SIGNALduino_FW_saveWhitelist {
 }
 
 ############################# package main      - test is missing
-sub SIGNALduino_IdList($@) {
+sub SIGNALduino_IdList {
   my ($param, $aVal, $blacklist, $develop0) = @_;
   my (undef,$name) = split(':', $param);
   my $hash = $defs{$name};
@@ -5122,7 +5124,7 @@ USB-connected devices (SIGNALduino):<br>
       "x_master": {
         "type": "git",
         "url": "https://github.com/RFD-FHEM/RFFHEM.git",
-        "web": "https://github.com/RFD-FHEM/RFFHEM/tree/dev-r34"
+        "web": "https://github.com/RFD-FHEM/RFFHEM/tree/master"
       },
       "type": "svn",
       "url": "https://svn.fhem.de/fhem",
@@ -5156,7 +5158,7 @@ USB-connected devices (SIGNALduino):<br>
       "web": "https://wiki.fhem.de/wiki/SIGNALduino"
     }
   },
-  "version": "v3.4.2"
+  "version": "v3.5.1"
 }
 =end :application/json;q=META.json
 =cut
