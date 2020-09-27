@@ -87,7 +87,7 @@ package lib::SD_ProtocolData;
   use strict;
   use warnings;
 
-  our $VERSION = '1.21';
+  our $VERSION = '1.22';
 
   our %protocols = (
     "0" =>  ## various weather sensors (500 | 9100)
@@ -2799,7 +2799,28 @@ package lib::SD_ProtocolData;
         length_min      => '40',
         length_max      => '40',
       },
-
+    "106" =>  ## BBQ temperature sensor GT-TMBBQ-01s (Sender), GT-TMBBQ-01e (Empfaenger)
+              # https://forum.fhem.de/index.php/topic,114437.0.html KoelnSolar 2020-09-23
+              # https://github.com/RFD-FHEM/RFFHEM/issues/892 Ralf9 2020-09-24
+              # SD_WS_106_T  T: 22.6  MS;P0=525;P1=-2051;P3=-8905;P4=-4062;D=0301010401010404010101040401010401040401040404;CP=0;SP=3;R=35;e;b=2;m0;
+              # SD_WS_106_T  T: 88.1  MS;P1=-8514;P2=488;P3=-4075;P4=-2068;D=2123242423232423242423242324232323232423242324;CP=2;SP=1;R=31;e;b=70;s=4;m0;
+              # SD_WS_106_T  T: 97.8  MS;P1=-9144;P2=469;P3=-4101;P4=-2099;D=2123242423232423242423242323232423242423242424;CP=2;SP=1;R=58;O;b=70;s=4;m0;
+              # Sensor sends every 5 seconds 1 message.
+      {
+        name            => 'GT-TMBBQ-01',
+        comment         => 'BBQ temperature sensor',
+        id              => '106',
+        one             => [1,-8],  # 500,-4000
+        zero            => [1,-4],  # 500,-2000
+        sync            => [1,-18], # 500,-9000
+        clockabs        => 500,
+        format          => 'twostate',
+        preamble        => 'W106#',
+        clientmodule    => 'SD_WS',
+        modulematch     => '^W106#',
+        length_min      => '22',
+        length_max      => '22',
+      }
     ########################################################################
     #### ###  register informations from other hardware protocols  #### ####
 

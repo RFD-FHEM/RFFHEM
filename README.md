@@ -40,6 +40,7 @@ Supported Devices / Protocols
 |GEIGER GF0x01, GF0x02, GF0x03 | Remote control (compatible to Tedsen) |
 |Grothe Mistral SE 03.1| wireless gong |
 |GT-9000| Remote control based on protocol GT-9000 with encoding (EASY HOME RCT DS1, Tec Star)|
+|GT-TMBBQ-01| BBQ temperature sensor|
 |Hama TS33C, Bresser Thermo/Hygro Sensor  | Weather sensor |
 |Heidemann, Heidemann HX, VTX-BELL | wireless bell |
 |Hoermann HSM2, HSM4, HS1-868-BS | Remote control |
@@ -91,7 +92,7 @@ How to install
 ======
 The Perl modules can be loaded directly into your FHEM installation:
 
-```update all https://raw.githubusercontent.com/RFD-FHEM/RFFHEM/dev-r35_xFSK/controls_signalduino.txt```
+```update all https://raw.githubusercontent.com/RFD-FHEM/RFFHEM/master/controls_signalduino.txt```
 
 Prepare your Arduino nano. Look at http://www.fhemwiki.de/wiki/Datei:Fhemduino_schematic.png
 for hardware setup.
