@@ -673,7 +673,7 @@ sub SIGNALduino_Set_raw {
   );
 
   my $hexFile = '';
-  if( grep $args[0] eq $_ , split(',',$hash->{additionalSets}{flash}) )
+  if( ( exists $hash->{additionalSets}{flash} ) && ( grep $args[0] eq $_ , split(',',$hash->{additionalSets}{flash}) ) )
   {
     $hash->{logMethod}->($hash, 3, "$name: Set_flash, $args[0] try to fetch github assets for tag $args[0]");
     my $ghurl = "https://api.github.com/repos/RFD-FHEM/SIGNALDuino/releases/tags/$args[0]";
@@ -5121,7 +5121,7 @@ USB-connected devices (SIGNALduino):<br>
       "x_master": {
         "type": "git",
         "url": "https://github.com/RFD-FHEM/RFFHEM.git",
-        "web": "https://github.com/RFD-FHEM/RFFHEM/tree/dev-r34"
+        "web": "https://github.com/RFD-FHEM/RFFHEM/tree/master"
       },
       "type": "svn",
       "url": "https://svn.fhem.de/fhem",
@@ -5132,7 +5132,7 @@ USB-connected devices (SIGNALduino):<br>
       "x_dev": {
         "type": "git",
         "url": "https://github.com/RFD-FHEM/RFFHEM.git",
-        "web": "https://github.com/RFD-FHEM/RFFHEM/tree/dev-r34",
+        "web": "https://github.com/RFD-FHEM/RFFHEM/tree/master",
         "x_branch": "dev-r34",
         "x_filepath": "FHEM/",
         "x_raw": "https://raw.githubusercontent.com/RFD-FHEM/RFFHEM/master/FHEM/00_SIGNALduino.pm"
@@ -5155,7 +5155,7 @@ USB-connected devices (SIGNALduino):<br>
       "web": "https://wiki.fhem.de/wiki/SIGNALduino"
     }
   },
-  "version": "v3.4.2"
+  "version": "v3.5.0"
 }
 =end :application/json;q=META.json
 =cut
