@@ -27,6 +27,7 @@
 # 09.02.2020 neues Protokoll 54: Regenmesser TFA Drop
 # 22.02.2020 Protokoll 58: neuer Sensor TFA 30.3228.02, FT007T Thermometer Sensor
 # 25.08.2020 Protokoll 27: neuer Sensor EFS-3110A
+# 27.09.2020 neues Protokoll 106: BBQ Temperature Sensor GT-TMBBQ-01s (Sender), GT-TMBBQ-01e (Empfaenger)
 
 package main;
 
@@ -76,6 +77,7 @@ sub SD_WS_Initialize($)
 		"SD_WS_85_THW_.*"	=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "4:120"},
 		"SD_WS_89_TH.*"	=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "3:180"},
 		"SD_WS_94_T.*"	=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4:Temp,", autocreateThreshold => "3:180"},
+		"SD_WS_106_T.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4:Temp,", autocreateThreshold => "5:60"},
 	};
 
 }
@@ -644,6 +646,26 @@ sub SD_WS_Parse($$)
 				},
 				crcok      => sub {return 1;},		# crc test method is so far unknown
 		},
+		106 => {
+				# BBQ temperature sensor MODELL: GT-TMBBQ-01s (Sender), GT-TMBBQ-01e (Empfaenger)
+				# -------------------------------------------------------------------------------
+				# 0    4    | 8    12   | 16   20
+				# 1101 1111 | 0011 0100 | 0100 00
+				# iiii iiii | tttt tttt | tttt tt
+				# i:  8 bit id, changes each time the sensor is switched on
+				# t: 14 bit unsigned fahrenheit offset by 90 and scaled by 20
+				sensortype => 'GT-TMBBQ-01',
+				model      => 'SD_WS_106_T',
+				prematch   => sub { return 1; }, # no precheck known
+				id         =>	sub { my ($rawData,undef) = @_; return substr($rawData,0,2); },
+				temp       => sub {	my (undef,$bitData) = @_;
+														$rawTemp = 	SD_WS_binaryToNumber($bitData,8,21);
+														my $tempFh = $rawTemp / 20 - 90; # Grad Fahrenheit
+														Log3 $name, 4, "$name: SD_WS_106_T tempraw = $rawTemp, temp = $tempFh Fahrenheit";
+														return (round((($tempFh - 32) * 5 / 9) , 1)); # Grad Celsius
+													},
+				crcok      => sub {return 1;}, # CRC test method does not exist
+		} ,
 	);
 
 	Log3 $name, 4, "$name: SD_WS_Parse protocol $protocol, rawData $rawData";
@@ -1012,7 +1034,7 @@ sub SD_WS_Parse($$)
 	return "" if(IsIgnored($name));
 
 	if (defined $temp) {
-		if ($temp < -30 || $temp > 70) {
+		if (($temp < -30 || $temp > 70) && $protocol ne '106') { # not forBBQ temperature sensor GT-TMBBQ-01s
 			Log3 $iohash, 3, "$ioname: SD_WS_Parse $deviceCode - ERROR temperature $temp";
 			return "";  
 		}
@@ -1111,7 +1133,7 @@ sub SD_WS_Parse($$)
 
 	readingsBeginUpdate($hash);
 	readingsBulkUpdate($hash, "state", $state);
-	readingsBulkUpdate($hash, "temperature", $temp)  if (defined($temp) && ($temp > -60 && $temp < 70 ));
+	readingsBulkUpdate($hash, "temperature", $temp)  if (defined($temp) && (($temp > -60 && $temp < 70 ) || $protocol eq '106'));
 	readingsBulkUpdate($hash, "humidity", $hum)  if (defined($hum) && ($hum > 0 && $hum < 100 )) ;
 	readingsBulkUpdate($hash, "windspeed", $windspeed)  if (defined($windspeed)) ;
 	readingsBulkUpdate($hash, "batteryState", $bat) if (defined($bat) && length($bat) > 0) ;
@@ -1216,6 +1238,7 @@ sub SD_WS_WH2SHIFT($){
   <b>Known models:</b>
   <ul>
     <li>Atech wireless weather station</li>
+    <li>BBQ temperature sensor GT-TMBBQ-01s (transmitter), GT-TMBBQ-01e (receiver)</li>
     <li>Bresser 7009994</li>
     <li>BresserTemeo</li>
     <li>Conrad S522</li>
@@ -1319,6 +1342,7 @@ sub SD_WS_WH2SHIFT($){
   <b>Unterst&uumltzte Modelle:</b><br><br>
   <ul>
     <li>Atech Wetterstation</li>
+    <li>BBQ Temperatur Sensor GT-TMBBQ-01s (Sender), GT-TMBBQ-01e (Empfaenger)</li>
     <li>Bresser 7009994</li>
     <li>BresserTemeo</li>
     <li>Conrad S522</li>

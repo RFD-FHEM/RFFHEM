@@ -1,17 +1,10 @@
-2020-09-28 - Master - fix PERL WARNING (#895)
-
-Update 00_SIGNALduino.pm
-  * fix PERL WARNING on flash command
-2020-09-28 - Merge branch 'master' into master_fix_PW
-2020-09-28 - Update 00_SIGNALduino.pm
-  * fix PERL WARNING on flash command
-
-2020-09-27
-* Update README.md (#893)
-Updated branch of badges and update url
-
-* Update 00_SIGNALduino.pm
-Updated branch and version in embedded meta
+2020-09-28 
+    14_SD_WS.pm:
+          feature: new protocol 106 for GT-TMBBQ-0   
+    SD_ProtocolData.pm:
+          new: protocol 106 for BBQ temperature sensor GT-TMBBQ-01
+    00_SIGNALduino.pm:
+          bugfix: fix PERL WARNING (#895)
 
 2020-09-26 
     00_SIGNALduino.pm:
