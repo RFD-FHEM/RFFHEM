@@ -1,9 +1,11 @@
+2020-10-01 - feature update 14_SD_AS
+
+new sensor type "raw"
+new CRC8 check (optional)
+Adjustment of log outputs
+new reading "batteryState"
+new reading "batteryVoltage"
 2020-09-30 - new protocol for BBQ temperature sensor GT-TMBBQ-01 (#894)
-
-* new protocol 106 for GT-TMBBQ-01
-
-SD_ProtocolData.pm: new: protocol 106 for BBQ temperature sensor GT-TMBBQ-01
-14_SD_WS.pm: new: protocol 106 for BBQ temperature sensor GT-TMBBQ-01
 2020-09-28 
     14_SD_WS.pm:
           feature: new protocol 106 for GT-TMBBQ-0   
