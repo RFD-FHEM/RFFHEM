@@ -1,3 +1,11 @@
+2020-10-03 - feature update 14_SD_AS (#896)
+
+* feature update 14_SD_AS
+new sensor type "raw"
+new CRC8 check (optional)
+Adjustment of log outputs
+new reading "batteryState"
+new reading "batteryVoltage"
 2020-10-01 - feature update 14_SD_AS
 
 new sensor type "raw"
