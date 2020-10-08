@@ -1051,13 +1051,16 @@ sub SIGNALduino_Get_Command {
 }
 
 ############################# package main
-sub SIGNALduino_Get_Command_CCReg {
+sub SIGNALduino_Get_Command_CCReg{
   my ($hash, @a) = @_;
+  return 'not enough number of arguments' if $#a < 1;
+  return 'Wrong command provided' if $a[0] ne 'ccreg';
+  
   my $name=$hash->{NAME};
-  if (exists($cc1101_register{uc($_[2])}) || $_[2] =~ /^99$/ ) {
+  if (exists($cc1101_register{uc($a[1])}) || $a[1] eq '99' ) {
     return SIGNALduino_Get_Command(@_);
   } else {
-    return "unknown Register $_[2], please choose a valid cc1101 register";
+    return "unknown Register $a[1], please choose a valid cc1101 register";
   }
 }
 
