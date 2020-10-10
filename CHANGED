@@ -1,19 +1,16 @@
 2020-10-10 - Bugfix cc1101_reg_user
+2020-10-08 - Bugfix 898 (#899)
+  00_SIGNALduino.pm:
+    bugfix: get ccreg command caused stacktrace #898
+2020-10-08 - Merge branch 'bugfix-898' of ssh://github.com/RFD-FHEM/RFFHEM into bugfix-898
+2020-10-08 - 00_SIGNALduino.pm
 2020-10-03 - feature update 14_SD_AS (#896)
-
-* feature update 14_SD_AS
-new sensor type "raw"
-new CRC8 check (optional)
-Adjustment of log outputs
-new reading "batteryState"
-new reading "batteryVoltage"
-2020-10-01 - feature update 14_SD_AS
-
-new sensor type "raw"
-new CRC8 check (optional)
-Adjustment of log outputs
-new reading "batteryState"
-new reading "batteryVoltage"
+  update 14_SD_AS
+    new sensor type "raw"
+    new CRC8 check (optional)
+    Adjustment of log outputs
+    new reading "batteryState"
+    new reading "batteryVoltage"
 2020-09-30 - new protocol for BBQ temperature sensor GT-TMBBQ-01 (#894)
 2020-09-28 
     14_SD_WS.pm:
