@@ -3011,7 +3011,7 @@ sub SIGNALduino_Attr(@) {
   {
     return 'ERROR: This attribute is only available for a receiver with CC1101.' if ( ($init_done == 1) && (InternalVal($hash->{NAME},"cc1101_available",0) == 0) );
     $aVal = $aVal.',' if ($aVal !~ /,$/gx);
-    return 'ERROR: Your attribute value is wrong!' if ( $aVal !~ /^([0-2]{1}[0-9a-fA-F]{3},)+$/gx );
+    return 'ERROR: Your attribute value is wrong!' if ( $aVal !~ /^([0-2]{1}[0-9a-fA-F]{3},)+$/gx && $cmd eq 'set');
   }
   ## Change rfmode
   elsif ($aName eq 'rfmode')          # change receive mode
