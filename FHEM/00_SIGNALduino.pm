@@ -3010,11 +3010,11 @@ sub SIGNALduino_Attr(@) {
       if ($aVal =~ /cc1101_(?:config(?:_ext)?|patable)(?:\s|{)/);
   }
   ## Change cc1101_reg_user
-  elsif ($aName eq 'cc1101_reg_user') # set default register
+  elsif ($aName eq 'cc1101_reg_user' && $cmd eq 'set') # set default register
   {
     return 'ERROR: This attribute is only available for a receiver with CC1101.' if ( ($init_done == 1) && (InternalVal($hash->{NAME},"cc1101_available",0) == 0) );
     $aVal = $aVal.',' if ($aVal !~ /,$/gx);
-    return 'ERROR: Your attribute value is wrong!' if ( $aVal !~ /^([0-2]{1}[0-9a-fA-F]{3},)+$/gx );
+    return 'ERROR: Your attribute value is wrong!' if ( $aVal !~ /^([0-2]{1}[0-9a-fA-F]{3},)+$/gx);
   }
   ## Change rfmode
   elsif ($aName eq 'rfmode')          # change receive mode
