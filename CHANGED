@@ -1,3 +1,7 @@
+2020-10-25 - Update 14_SD_UT.pm
+
+* extension command https://github.com/HomeAutoUser/RFFHEM/issues/11
+* sorted order
 2020-10-11 - bugfix cc1101_reg_user (#900)
 2020-10-11 - Update 00_SIGNALduino.pm
 2020-10-10 - Merge branch 'master' into master_bugfix-cc1101_reg_user
