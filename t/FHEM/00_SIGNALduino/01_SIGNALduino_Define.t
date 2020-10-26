@@ -30,7 +30,7 @@ InternalTimer(time()+1, sub() {
   $hash{DEF}   = q{/dev/serial/by-id/something4@115200};
   subtest "checking $hash{DEF} on $hash{NAME}" => sub {
 
-	plan => 2;
+	plan(2);
 
     my $ret = SIGNALduino_Define(\%hash,qq{$hash{NAME} $hash{TYPE} $hash{DEF} });
 
@@ -49,7 +49,7 @@ InternalTimer(time()+1, sub() {
   # Prepare HASH for test
   $hash{DEF}   = q{/dev/serial/by-id/something4};
   subtest "checking $hash{DEF} on $hash{NAME}" => sub {
-	plan => 2;
+	plan (2);
 
     my $ret = SIGNALduino_Define(\%hash,qq{$hash{NAME} $hash{TYPE} $hash{DEF} });
 
@@ -68,7 +68,7 @@ InternalTimer(time()+1, sub() {
   # Prepare HASH for test
   $hash{DEF}   = q{/dev/serial/by-id/something4@57600};
   subtest "checking $hash{DEF} on $hash{NAME}" => sub {
-	plan => 2;
+	plan (2);
 
     my $ret = SIGNALduino_Define(\%hash,qq{$hash{NAME} $hash{TYPE} $hash{DEF} });
 
@@ -87,7 +87,7 @@ InternalTimer(time()+1, sub() {
   # Prepare HASH for test
   $hash{DEF}   = q{/dev/serial/by-path/platform-3f980000.usb-usb-0:1.1.3:1.0-port0@57600};
   subtest "checking $hash{DEF} on $hash{NAME}" => sub {
-	plan => 2;
+	plan (2);
 
     my $ret = SIGNALduino_Define(\%hash,qq{$hash{NAME} $hash{TYPE} $hash{DEF} });
 
@@ -106,7 +106,7 @@ InternalTimer(time()+1, sub() {
   # Prepare HASH for test
   $hash{DEF}   = q{/dev/ttyACM1@57600};
   subtest "checking $hash{DEF} on $hash{NAME}" => sub {
-	plan => 2;
+	plan (2);
 
     my $ret = SIGNALduino_Define(\%hash,qq{$hash{NAME} $hash{TYPE} $hash{DEF} });
 
@@ -126,7 +126,7 @@ InternalTimer(time()+1, sub() {
   # Prepare HASH for test
   $hash{DEF}   = q{Hostname:65536};
   subtest "checking $hash{DEF} on $hash{NAME}" => sub {
-	plan => 2;
+	plan (2);
 
     my $ret = SIGNALduino_Define(\%hash,qq{$hash{NAME} $hash{TYPE} $hash{DEF} });
 
@@ -146,7 +146,7 @@ InternalTimer(time()+1, sub() {
     # Prepare HASH for test
   $hash{DEF}   = q{192:168:122:56:45476};
   subtest "checking $hash{DEF} on $hash{NAME}" => sub {
-	plan => 2;
+	plan (2);
 
     my $ret = SIGNALduino_Define(\%hash,qq{$hash{NAME} $hash{TYPE} $hash{DEF} });
 
@@ -164,7 +164,7 @@ InternalTimer(time()+1, sub() {
   
   $hash{DEF}   = q{192.168.122.56:44323};
   subtest "checking $hash{DEF} on $hash{NAME}" => sub {
-	plan => 2;
+	plan (2);
 
     my $ret = SIGNALduino_Define(\%hash,qq{$hash{NAME} $hash{TYPE} $hash{DEF} });
 
@@ -182,7 +182,7 @@ InternalTimer(time()+1, sub() {
   
   $hash{DEF}   = q{192.168.122.56};
   subtest "checking $hash{DEF} on $hash{NAME}" => sub {
-	plan => 2;
+	plan (2);
 
     my $ret = SIGNALduino_Define(\%hash,qq{$hash{NAME} $hash{TYPE} $hash{DEF} });
 
@@ -200,7 +200,7 @@ InternalTimer(time()+1, sub() {
 
   $hash{DEF}   = q{192.168.122:44323};
   subtest "checking $hash{DEF} on $hash{NAME}" => sub {
-	plan => 2;
+	plan (2);
 
     my $ret = SIGNALduino_Define(\%hash,qq{$hash{NAME} $hash{TYPE} $hash{DEF} });
 
@@ -219,7 +219,7 @@ InternalTimer(time()+1, sub() {
 
   $hash{DEF}   = q{sernetgw:44323};
   subtest "checking $hash{DEF} on $hash{NAME}" => sub {
-	plan => 2;
+	plan (2);
 
     my $ret = SIGNALduino_Define(\%hash,qq{$hash{NAME} $hash{TYPE} $hash{DEF} });
 
@@ -237,7 +237,7 @@ InternalTimer(time()+1, sub() {
 
   $hash{DEF}   = q{sernetgw.local.host:44323};
   subtest "checking $hash{DEF} on $hash{NAME}" => sub {
-	plan => 2;
+	plan (2);
 
     my $ret = SIGNALduino_Define(\%hash,qq{$hash{NAME} $hash{TYPE} $hash{DEF} });
 
@@ -255,7 +255,7 @@ InternalTimer(time()+1, sub() {
   
   $hash{DEF}   = q{sernetgw.local.host};
   subtest "checking $hash{DEF} on $hash{NAME}" => sub {
-	plan => 2;
+	plan (2);
 
     my $ret = SIGNALduino_Define(\%hash,qq{$hash{NAME} $hash{TYPE} $hash{DEF} });
 
@@ -271,6 +271,23 @@ InternalTimer(time()+1, sub() {
     delete $hash{DeviceName};
   };
   
+  $hash{DEF}   = q{COM3};
+  subtest "checking $hash{DEF} on $hash{NAME}" => sub {
+	plan (2);
+
+    my $ret = SIGNALduino_Define(\%hash,qq{$hash{NAME} $hash{TYPE} $hash{DEF} });
+
+    is ($ret, U(), 'check retutnvalue SIGNALduino_Define');
+    is(\%hash,hash {
+        field STTAE => q{???}; 
+        field DeviceName => q{COM3\@57600};
+        field DEF => q{COM3};
+        etc();
+      },
+      'check hash after SIGNALduino_Define'
+    );
+    delete $hash{DeviceName};
+  };
   
   done_testing();
   exit(0);
