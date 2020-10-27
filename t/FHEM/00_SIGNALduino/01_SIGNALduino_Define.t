@@ -288,7 +288,45 @@ InternalTimer(time()+1, sub() {
     );
     delete $hash{DeviceName};
   };
-  
+
+  $hash{DEF}   = q{none};
+  subtest "checking $hash{DEF} on $hash{NAME}" => sub {
+	plan (2);
+
+    my $ret = SIGNALduino_Define(\%hash,qq{$hash{NAME} $hash{TYPE} $hash{DEF} });
+
+    is ($ret, U(), 'check retutnvalue SIGNALduino_Define');
+    is(\%hash,hash {
+        field STTAE => q{???}; 
+        field DeviceName => q{none};
+        field DEF => q{none};
+        etc();
+      },
+      'check hash after SIGNALduino_Define'
+    );
+    delete $hash{DeviceName};
+  };
+
+
+  $hash{DEF}   = q{/dev/some@directio};
+  subtest "checking $hash{DEF} on $hash{NAME}" => sub {
+	plan (2);
+
+    my $ret = SIGNALduino_Define(\%hash,qq{$hash{NAME} $hash{TYPE} $hash{DEF} });
+
+    is ($ret, U(), 'check retutnvalue SIGNALduino_Define');
+    is(\%hash,hash {
+        field STTAE => q{???}; 
+        field DeviceName => q{/dev/some@directio};
+        field DEF => q{/dev/some@directio};
+        etc();
+      },
+      'check hash after SIGNALduino_Define'
+    );
+    delete $hash{DeviceName};
+  };
+
+    
   done_testing();
   exit(0);
 
