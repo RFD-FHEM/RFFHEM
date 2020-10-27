@@ -1,3 +1,7 @@
+2020-10-27 - FHEM\00_SIGNALduino.pm
+
+Extended regex to match all RFC valid hostnames and ipv4 addresses
+Added support for directio and none. Optimized code a little bit
 2020-10-11 - bugfix cc1101_reg_user (#900)
 2020-10-11 - Update 00_SIGNALduino.pm
 2020-10-10 - Merge branch 'master' into master_bugfix-cc1101_reg_user
