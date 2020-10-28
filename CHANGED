@@ -1,3 +1,9 @@
+2020-10-28 - SD_UT - new command for Novy_840039 (#902)
+
+* Update 14_SD_UT.pm
+
+* extension command https://github.com/HomeAutoUser/RFFHEM/issues/11  
+* sorted order
 2020-10-25 - Update 14_SD_UT.pm
   * extension command for Novy_840039 (reset_clean_led)
   * sorted order
