@@ -196,7 +196,20 @@ InternalTimer(time()+1, sub() {
       },
       rValue => U(), 
   },  
-     
+
+  { 
+  	DEF => q{ESP-0CAD2F:23},
+    testname =>  q[Hostname|Linux|Valid:],
+    check =>  hash {
+         field STTAE => q{???}; 
+         field DeviceName => q{ESP-0CAD2F:23};
+         field DEF => q{ESP-0CAD2F:23};
+         etc();
+      },
+      rValue => U(), 
+  },    
+    
+    
   { 
   	DEF => q{none},
     testname =>  q[none|Valid:],
