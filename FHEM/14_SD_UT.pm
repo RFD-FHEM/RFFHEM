@@ -339,7 +339,7 @@ use strict;
 use warnings;
 no warnings 'portable';  # Support for 64-bit ints required
 
-our $VERSION = '200723';
+our $VERSION = '201025';
 
 sub SD_UT_bin2tristate;
 sub SD_UT_tristate2bin;
@@ -449,23 +449,24 @@ my %models = (
                       Protocol     => 'P86',
                       Typ          => 'remote'
                     },
-  'Novy_840039' =>  { '0111010011' => 'power_on_off',            # Novy_840029 same code!
-                      '0110110110' => 'cooking_light_on',
+  'Novy_840039' =>  { '0101'       => 'fan_plus',                # Novy_840029 same code!
+                      '0110'       => 'fan_minus',               # Novy_840029 same code!
+                      '0110011010' => 'fan_right',
+                      '0110011101' => 'fan_left',
+                      '0110110011' => 'cooking_light_dim_minus',
                       '0110110100' => 'cooking_light_off',
                       '0110110101' => 'cooking_light_dim_plus',
-                      '0110110011' => 'cooking_light_dim_minus',
-                      '0111001110' => 'cooking_light_cold',
-                      '0111001011' => 'cooking_light_warm',
-                      '0110111110' => 'ambient_light_on',
+                      '0110110110' => 'cooking_light_on',
+                      '0110111011' => 'ambient_light_dim_minus',
                       '0110111100' => 'ambient_light_off',
                       '0110111101' => 'ambient_light_dim_plus',
-                      '0110111011' => 'ambient_light_dim_minus',
-                      '0111010110' => 'ambient_light_cold',
+                      '0110111110' => 'ambient_light_on',
+                      '0111001000' => 'reset_clean_led',
+                      '0111001011' => 'cooking_light_warm',
                       '0111001101' => 'ambient_light_warm',
-                      '0110'       => 'fan_minus',               # Novy_840029 same code!
-                      '0101'       => 'fan_plus',                # Novy_840029 same code!
-                      '0110011101' => 'fan_left',
-                      '0110011010' => 'fan_right',
+                      '0111001110' => 'cooking_light_cold',
+                      '0111010011' => 'power_on_off',            # Novy_840029 same code!
+                      '0111010110' => 'ambient_light_cold',
                       hex_length   => [3,5],                     # 3 or 5, not 3.5
                       Protocol     => 'P86',
                       Typ          => 'remote'
