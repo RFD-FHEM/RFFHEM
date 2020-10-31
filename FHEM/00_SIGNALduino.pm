@@ -378,11 +378,20 @@ sub SIGNALduino_Define {
   if($dev eq 'none') {
     Log3 $name, 1, "$name: Define, device is none, commands will be echoed only";
     $attr{$name}{dummy} = 1;
-    #return ;
+  }  elsif ($dev !~ m/\@/) { 
+    if ( ($dev =~ m~^(?:/[^/ ]*)+?$~xms || $dev =~ m~^COM\d$~xms) )  # bei einer IP oder hostname wird kein \@57600 angehaengt
+    {
+      $dev .= '@57600' 
+    } elsif ($dev !~ /@\d+$/ && ($dev !~ /^
+      (?: (?:[a-z0-9-]+(?:\.[a-z]{2,6})?)*|(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])\.){3}
+          (?:25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9]))
+      : (?:6553[0-5]|655[0-2]\d|65[0-4]\d{2}|6[0-4]\d{3}|[1-5]\d{4}|[1-9]\d{0,3})$/xmsi) ) { 
+      my $msg = 'Define, wrong hostname/port syntax: define <name> SIGNALduino {none | devicename[\@baudrate] | devicename\@directio | hostname:port}';
+      Log3 undef, 2, $msg;
+      return $msg;
+    }
   }
-
-  $dev .= '\@57600' if ($dev ne 'none' && $dev =~ m/[a-zA-Z]/xms && $dev !~ m/\@/);   # bei einer IP wird kein \@57600 angehaengt
-
+  
   #$hash->{CMDS} = '';
   $hash->{Clients}    = $clientsSIGNALduino;
   $hash->{MatchList}  = \%matchListSIGNALduino;
