@@ -1,3 +1,7 @@
+2020-11-16 - Update 00_SIGNALduino.pm
+
+* simplification when a new xFSK protocol is added
+* direct notice for users added
 2020-10-31 - Bugfix define with hostname 901 (#904)
 
 * FHEM\00_SIGNALduino.pm  Bugfix: valid definitions
