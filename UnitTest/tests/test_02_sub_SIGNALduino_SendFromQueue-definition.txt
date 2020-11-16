@@ -42,6 +42,7 @@ defmod test_02_sub_SIGNALduino_SendFromQueue UnitTest dummyDuino
 		plan(1);
 		$attr{$target}{rfmode}='HomeMatic';
 		SIGNALduino_SendFromQueue($targetHash,'e');
+		sleep 2;
 		is($attr{$target}{rfmode},'SlowRF','verify reset of attr rfmode');
 	};
 
