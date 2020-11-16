@@ -61,9 +61,9 @@ InternalTimer(time()+1, sub() {
   subtest 'Call as initalized cc1101dummyDuino receiver' => sub {
 
     subtest 'rfmode set to SlowRF ' => sub {
-    my $ret = SIGNALduino_Attr_rfmode($defs{cc1101dummyDuino},'SlowRF');
-    is($ret,U(),q[verify return undef if initalized]);
-    is($defs{cc1101dummyDuino},hash {
+      my $ret = SIGNALduino_Attr_rfmode($defs{cc1101dummyDuino},'SlowRF');
+      is($ret,U(),q[verify return undef if initalized]);
+      is($defs{cc1101dummyDuino},hash {
                field QUEUE => bag 
                  { 
                         item 'e'; 
@@ -74,7 +74,7 @@ InternalTimer(time()+1, sub() {
 
     subtest 'rfmode set to blafasel' => sub {
       my $ret = SIGNALduino_Attr_rfmode($defs{cc1101dummyDuino},'blafasel');  
-      is($ret,U(),q[verify return undef ]);
+      is($ret,q[ERROR: protocol blafasel is not activated in 'Display protocollist'],q[verify return is not activated ]);
       is(FhemTestUtils_gotLog(".*rfmode value not found in protocols.*"), 1, 'Verify rfmode not found message');
     };
 
@@ -89,7 +89,7 @@ InternalTimer(time()+1, sub() {
     subtest 'rfmode set to Lacrosse_mode1 without protocol id enabled' => sub {
       CommandAttr(undef, qq[cc1101dummyDuino whitelist_IDs 1]);    
       my $ret = SIGNALduino_Attr_rfmode($defs{cc1101dummyDuino},'Lacrosse_mode1');  
-      is($ret,U(),q[verify return undef ]);
+      is($ret,q[ERROR: no MN protocols activated in 'Display protocollist'],q[verify return without id enabled ]);
       is(FhemTestUtils_gotLog(".*no MN protocols in 'Display protocollist' activated.*"), 1, 'Verify no MN protocol activated');
     };
   };
