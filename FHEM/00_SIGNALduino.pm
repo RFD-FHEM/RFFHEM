@@ -3043,7 +3043,7 @@ sub SIGNALduino_Attr(@) {
     if ($init_done) {
       my $ret = main::SIGNALduino_Attr_rfmode($hash,$aVal);
 
-      if ($ret) {
+      if (defined $ret) {
         return $ret;
       } else {
         $hash->{logMethod}->($name, 3, "$name: Attr, $aName switched to $aVal");
