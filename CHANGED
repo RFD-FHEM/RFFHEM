@@ -1,3 +1,7 @@
+2020-11-22 - First init for decoding protocol 56
+
+Alphavision Slender Line Plus motor canvas, remote control AC114-01B
+see https://github.com/RFD-FHEM/RFFHEM/issues/906
 2020-10-31 - Bugfix define with hostname 901 (#904)
 
 * FHEM\00_SIGNALduino.pm  Bugfix: valid definitions
