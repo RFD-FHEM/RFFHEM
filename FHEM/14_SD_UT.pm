@@ -724,6 +724,15 @@ my %models = (
                 Protocol   => 'P105',
                 Typ        => 'remote'
               },
+  'AC114_01B' =>  { '00001011' => 'up',
+                    '00100011' => 'stop',
+                    '00100100' => 'after_updown',
+                    '01000011' => 'down',
+                    '01010011' => 'program',
+                    hex_length => [17],
+                    Protocol   => 'P56',
+                    Typ        => 'remote'
+                  },
   'unknown' =>  { Protocol   => 'any',
                   hex_length => [],
                   Typ        => 'not_exist'
@@ -745,6 +754,7 @@ sub SD_UT_Initialize {
   $hash->{AutoCreate} =
   {
     'BF_301.*'     => {ATTR => 'model:BF_301', FILTER => '%NAME', autocreateThreshold => '3:180', GPLOT => q{}},
+    'AC114_01B.*'    => {ATTR => 'model:AC114_01B', FILTER => '%NAME', autocreateThreshold => '3:180', GPLOT => q{}},
     'MD_2003R.*'   => {ATTR => 'model:MD_2003R', FILTER => '%NAME', autocreateThreshold => '3:180', GPLOT => q{}},
     'MD_2018R.*'   => {ATTR => 'model:MD_2018R', FILTER => '%NAME', autocreateThreshold => '3:180', GPLOT => q{}},
     'MD_210R.*'    => {ATTR => 'model:MD_210R', FILTER => '%NAME', autocreateThreshold => '3:180', GPLOT => q{}},
@@ -808,8 +818,10 @@ sub SD_UT_Define {
     return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short | long or not HEX (0-9 | a-f | A-F){4}_[ABCD]|[all]";
   }
 
-  ### [6] checks MD_2003R | MD_210R | MD_2018R | Navaris ###
-  return "wrong HEX-Value! ($a[3]) $a[2] Hex-value to short or long (must be 6 chars) or not hex (0-9 | a-f | A-F){6}" if (($a[2] eq 'MD_2003R' || $a[2] eq 'MD_210R' || $a[2] eq 'MD_2018R' || $a[2] eq 'Navaris') && not $a[3] =~ /^[0-9a-fA-F]{6}/xms);
+  ### [6] checks MD_2003R | MD_210R | MD_2018R | Navaris | AC114_01B ###
+  if (($a[2] eq 'MD_2003R' || $a[2] eq 'MD_210R' || $a[2] eq 'MD_2018R' || $a[2] eq 'Navaris' || $a[2] eq 'AC114_01B') && not $a[3] =~ /^[0-9a-fA-F]{6}/xms) {
+    return "Wrong HEX-Value! ($a[3]) $a[2] Hex-value to short or long (must be 6 chars) or not hex (0-9 | a-f | A-F){6}";
+  }
 
   ### [7] checks Hoermann HSM4 | Krinner_LUMIX | Momento ###
   if (($a[2] eq 'HSM4' || $a[2] eq 'Krinner_LUMIX' || $a[2] eq 'Momento') && not $a[3] =~ /^[0-9a-fA-F]{7}/xms) {
@@ -1024,6 +1036,14 @@ sub SD_UT_Set {
       $msg = $models{$model}{Protocol} . q{#} . $adr;
       $msg .= '1000'; # channel
       $msgEnd = '#R' . $repeats;
+    ############ AC114_01B ############
+    } elsif ($model eq 'AC114_01B') {
+      my $adr = sprintf '%024b' , hex $definition[1]; # argument 1 - adress to binary with 24 bits
+      $msg = $models{$model}{Protocol} . q{#};
+      $msg .= '10100011'; # fest ???
+      $msg .= $adr;
+      $msg .= '0000000100000000'; # fest ???
+      $msgEnd = '1#R' . $repeats; # EOT
     }
   }
 
@@ -1090,7 +1110,7 @@ sub SD_UT_Set {
         $msg .= $msgEnd;
         Log3 $name, 5, "$ioname: SD_UT_Set $name msg=$msg checksum=$checksum";
         readingsSingleUpdate($hash, 'bit0' , $bit0, 0);
-      ############ BF_301 ############
+      ############ BF_301 ############AC114_01B
       } elsif ($model eq 'BF_301') {
         $msg .= $save; # command
         $msg .= '10000011'; # model
@@ -1099,6 +1119,15 @@ sub SD_UT_Set {
         Log3 $name, 5, "$ioname: SD_UT_Set $name bits=$split[1] sum=$sum";
         $sum = 257 - ($sum & 0xFF);
         $msg .= reverse sprintf '%08b' , $sum;
+        $msg .= $msgEnd;
+      ############ AC114_01B ############
+      } elsif ($model eq 'AC114_01B') {
+        $msg .= $save; # command
+        my @split = split /[#]/xms , $msg;
+        my $sum = oct ('0b'. substr $split[1],0,8) + oct ('0b'. substr $split[1],8,8) + oct ('0b'. substr $split[1],16,8) + oct ('0b'. substr $split[1],24,8) + oct ('0b'. substr $split[1],32,8) + oct ('0b'. substr $split[1],40,8) + oct ('0b'. substr $split[1],48,8);
+        $sum = (93 + $sum) & 0xFF;
+        Log3 $name, 5, "$ioname: SD_UT_Set $name bits=$split[1] sum=$sum";
+        $msg .= sprintf '%08b' , $sum;
         $msg .= $msgEnd;
       } else {
         $msg .= $save.$msgEnd;
@@ -1493,6 +1522,21 @@ sub SD_UT_Parse {
     $def = $modules{SD_UT}{defptr}{$devicedef};
   }
 
+  if ($hlen == 17 && $protocol == 56) {
+    ### Remote control Celexon/Alphavision AC114-01B [P56] ###
+    Log3 $iohash, 4, "$ioname: SD_UT_Parse device Celexon/Alphavision - check length and protocol number - OK";
+    my $sum = (93 + hex(substr($rawData,0,2)) + hex(substr($rawData,2,2)) + hex(substr($rawData,4,2)) + hex(substr($rawData,6,2)) + hex(substr($rawData,8,2)) + hex(substr($rawData,10,2)) + hex(substr($rawData,12,2))) & 0xff;
+    if ($sum != hex(substr($rawData,14,2))) {
+      Log3 $iohash, 3, "$ioname: SD_UT_Parse device Celexon/Alphavision - ERROR checksum $sum != " . hex(substr($rawData,14,2));
+      return '';
+    }
+    $deviceCode = substr($rawData,2,6);
+    $devicedef = 'AC114_01B ' . $deviceCode if (!$def);
+    $def = $modules{SD_UT}{defptr}{$devicedef} if (!$def);
+    $model = 'AC114_01B';
+    $name = 'AC114_01B_' . $deviceCode;
+  }
+
   ### unknown ###
   $devicedef = 'unknown' if(!$def);
   $def = $modules{SD_UT}{defptr}{$devicedef} if(!$def);
@@ -1731,6 +1775,10 @@ sub SD_UT_Parse {
   } elsif ($model eq 'BF_301' && $protocol == 105) {
     $state = substr $bitData,20,4;
     $deviceCode = substr $rawData,0,4;
+  ############ Remote control Celexon/Alphavision AC114-01B [P56] ############
+  } elsif ($model eq 'AC114_01B' && $protocol == 56) {
+    $state = substr $bitData,48,8;
+    $deviceCode = substr $rawData,2,6;
   ############ unknown ############
   } else {
     readingsBulkUpdate($hash, 'state', '???');

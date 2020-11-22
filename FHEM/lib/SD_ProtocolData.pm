@@ -87,7 +87,7 @@ package lib::SD_ProtocolData;
   use strict;
   use warnings;
 
-  our $VERSION = '1.23';
+  our $VERSION = '1.24';
 
   our %protocols = (
     "0" =>  ## various weather sensors (500 | 9100)
@@ -787,22 +787,24 @@ package lib::SD_ProtocolData;
     "24"  =>  ## visivon
               # https://github.com/RFD-FHEM/RFFHEM/issues/39 @sidey79
               # u24#9F7DF825029C10   MU;P0=132;P1=500;P2=-233;P3=-598;P4=-980;P5=4526;D=012120303030303120303030453120303121212121203121212121203121212121212030303030312030312031203030303030312031203031212120303030303120303030453120303121212121203121212121203121212121212030303030312030312031203030303030312031203031212120303030;CP=0;O;
+              # https://forum.fhem.de/index.php/topic,42273.0.html
       {
         name            => 'visivon remote',
+        comment         => 'Remote control for motorized screen from Visivon',
         id              => '24',
-        knownFreqs      => '',
+        knownFreqs      => '315',
         one             => [3,-2],
         zero            => [1,-5],
         #one             => [3,-2],
         #zero            => [1,-1],
         start           => [30,-5],
-        clockabs        => 150,          #ca 150us
+        clockabs        => 150,
         format          => 'twostate',
         preamble        => 'u24#',
         #clientmodule    => '',
         #modulematch     => '',
-        length_min      => '54',
-        length_max      => '58',
+        length_min      => '56', # war '54',
+        length_max      => '56', # war '58',
       },
     "25"  =>  ## LES remote for led lamp
               # https://github.com/RFD-FHEM/RFFHEM/issues/40 @sidey79
@@ -1611,22 +1613,28 @@ package lib::SD_ProtocolData;
       },
     "56"  =>  ## Celexon Motorleinwand
               # https://forum.fhem.de/index.php/topic,52025.0.html @Horst12345
-              # MU;P0=5036;P1=-624;P2=591;P3=-227;P4=187;P5=-5048;D=0123412341414123234141414141414141412341232341414141232323234123234141414141414123414141414141414141234141414123234141412341232323250123412341414123234141414141414141412341232341414141232323234123234141414141414123414141414141414141234141414123234141412;CP=4;O;
-              # MU;P0=-228;P1=185;P2=-625;P3=593;P4=-5050;P5=5050;D=012121234523012301212123030121212121212121212301230301212121230303030123030303030301212123452301230121212303012121212121212121230123030121212123030303012303012121212121212301212121212121212121230121230121230303030301212123;CP=1;
+              # u56#A300587B010043178 MU;P0=5036;P1=-624;P2=591;P3=-227;P4=187;P5=-5048;D=0123412341414123234141414141414141412341232341414141232323234123234141414141414123414141414141414141234141414123234141412341232323250123412341414123234141414141414141412341232341414141232323234123234141414141414123414141414141414141234141414123234141412;CP=4;O;
+              # u56#A300587B010024F88 MU;P0=-228;P1=185;P2=-625;P3=593;P4=-5050;P5=5050;D=012121234523012301212123030121212121212121212301230301212121230303030123030303030301212123452301230121212303012121212121212121230123030121212123030303012303012121212121212301212121212121212121230121230121230303030301212123;CP=1;
+              # Alphavision Slender Line Plus motor canvas, remote control AC114-01B
+              # https://github.com/RFD-FHEM/RFFHEM/issues/906 @TheChatty
+              # u56#A347969601000B7F8 MU;P0=-16412;P1=5195;P2=-598;P3=585;P4=-208;P5=192;D=01234523452525234345234525252343434345252345234345234525234523434525252525252525234525252525252525252525252345234345234343434343434341234523452525234345234525252343434345252345234345234525234523434525252525252525234525252525252525252525252345234345234343;CP=5;R=105;O;
       {
-        name            => 'Celexon',
+        name           => 'AC114-xxB',
+        comment        => 'Remote control for motorized screen from Alphavision, Celexon',
         id              => '56',
         knownFreqs      => '433.92',
+        zero           => [1,-3],  #  200,-600
+        one            => [3,-1],  #  600,-200
+        start          => [25,-3], # 5000,-600
+        pause          => [-25],   # pause between repeats of send messages (clockabs*pause must be < 32768)
         clockabs        => 200,
-        zero            => [1,-3],
-        one             => [3,-1],
-        start           => [25,-3],
+        reconstructBit => '1',
         format          => 'twostate',
-        preamble        => 'u56#',
-        #clientmodule    => '',
-        #modulematch     => '',
-        length_min      => '56',
-        length_max      => '68',
+        preamble       => 'P56#',
+        clientmodule   => 'SD_UT',
+        modulematch    => '^P56#',
+        length_min     => '64', # war '56',
+        length_max     => '68', # normal 65 Bit, 3 Bit aufgefuellt
       },
     "57"  =>  ## m-e doorbell fuer FG- und Basic-Serie
               # https://forum.fhem.de/index.php/topic,64251.0.html @rippi46
