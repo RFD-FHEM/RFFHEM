@@ -731,7 +731,7 @@ sub SIGNALduino_Attr_rfmode {
   my $hash = shift // carp 'must be called with hash of iodevice as first param';
   my $aVal = shift // return;
 
-  if ( ( (not defined InternalVal($hash->{NAME},"cc1101_available",undef)) || (InternalVal($hash->{NAME},"cc1101_available",0) == 0) ) && (!IsDummy($hash->{NAME})) ) {
+  if ( (InternalVal($hash->{NAME},"cc1101_available",0) == 0) && (!IsDummy($hash->{NAME})) ) {
     return 'ERROR: This attribute is only available for a receiver with CC1101.';
   }
 
