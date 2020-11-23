@@ -339,7 +339,7 @@ use strict;
 use warnings;
 no warnings 'portable';  # Support for 64-bit ints required
 
-our $VERSION = '201025';
+our $VERSION = '2020-11-25';
 
 sub SD_UT_bin2tristate;
 sub SD_UT_tristate2bin;
@@ -726,7 +726,7 @@ my %models = (
               },
   'AC114_01B' =>  { '00001011' => 'up',
                     '00100011' => 'stop',
-                    '00100100' => 'after_updown',
+                    # '00100100' => 'after_updown', # Command 2, remote sends it after up or down
                     '01000011' => 'down',
                     '01010011' => 'program',
                     hex_length => [17],
@@ -1043,7 +1043,7 @@ sub SD_UT_Set {
       $msg .= '10100011'; # fest ???
       $msg .= $adr;
       $msg .= '0000000100000000'; # fest ???
-      $msgEnd = '1#R' . $repeats; # EOT
+      $msgEnd = '1P#R' . $repeats; # EOT, Pause, Repeats
     }
   }
 
@@ -1110,7 +1110,7 @@ sub SD_UT_Set {
         $msg .= $msgEnd;
         Log3 $name, 5, "$ioname: SD_UT_Set $name msg=$msg checksum=$checksum";
         readingsSingleUpdate($hash, 'bit0' , $bit0, 0);
-      ############ BF_301 ############AC114_01B
+      ############ BF_301 ############
       } elsif ($model eq 'BF_301') {
         $msg .= $save; # command
         $msg .= '10000011'; # model
@@ -1153,14 +1153,7 @@ sub SD_UT_Set {
 
     IOWrite($hash, 'sendMsg', $msg);
     Log3 $name, 3, "$ioname: $name set $cmd";
-
-    ## for hex output ##
-    my @split = split('#', $msg);
-    my $hexvalue = $split[1];
-    $hexvalue =~ s/P+//g;                             # if P parameter, replace P with nothing
-    $hexvalue = sprintf("%X", oct( "0b$hexvalue" ) );
-    ###################
-    Log3 $name, 4, "$ioname: $name SD_UT_Set sendMsg $msg, rawData $hexvalue";
+    Log3 $name, 4, "$ioname: $name SD_UT_Set sendMsg $msg";
   }
   return $ret;
 }
@@ -1779,6 +1772,10 @@ sub SD_UT_Parse {
   } elsif ($model eq 'AC114_01B' && $protocol == 56) {
     $state = substr $bitData,48,8;
     $deviceCode = substr $rawData,2,6;
+    if ($state eq '00100100') { # Command 2, remote sends it after up or down
+      Log3 $name, 4, "$ioname: SD_UT_Parse device $name - receive command 2, remote sends it after up or down";
+      return $name;
+    }
   ############ unknown ############
   } else {
     readingsBulkUpdate($hash, 'state', '???');
@@ -1970,6 +1967,11 @@ sub SD_UT_Attr {
           $devicename = $devicemodel.'_'.$deviceCode;
         ############ Navaris  ############
         } elsif ($attrValue eq 'Navaris') {
+          $deviceCode = sprintf("%06X", oct( "0b$bitData" ) );
+          $devicename = $devicemodel.'_'.$deviceCode;
+        ############ AC114_01B  ############
+        } elsif ($attrValue eq 'AC114_01B') {
+          $deviceCode = substr $bitData,8,24;
           $deviceCode = sprintf("%06X", oct( "0b$bitData" ) );
           $devicename = $devicemodel.'_'.$deviceCode;
         ############ unknown ############
