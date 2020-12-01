@@ -3011,7 +3011,7 @@ sub SIGNALduino_Attr(@) {
   ## Change eventlogging
   elsif ($aName eq 'eventlogging')  # enable / disable eventlogging
   {
-    if ($aVal == 1) {
+    if ($cmd eq 'set' && $aVal == 1) {
       $hash->{logMethod} = \&::SIGNALduino_Log3;
       Log3 $name, 3, "$name: Attr, Enable eventlogging";
     } else {
