@@ -267,6 +267,9 @@ my %matchListSIGNALduino = (
 
 my %symbol_map = (one => 1 , zero =>0 ,sync => '', float=> 'F', 'start' => '');
 
+## rfmode for attrib & supported rfmodes
+my @rfmode = ('KOPP_FC','Lacrosse_mode1','Lacrosse_mode2','Lacrosse_mode4','PCA301','SlowRF');
+
 ############################# package main
 sub SIGNALduino_Initialize {
   my ($hash) = @_;
@@ -306,7 +309,7 @@ sub SIGNALduino_Initialize {
             .' minsecs'
             .' noMsgVerbose:0,1,2,3,4,5'
             .' rawmsgEvent:1,0'
-            .' rfmode:KOPP_FC,Lacrosse_mode1,Lacrosse_mode2,Lacrosse_mode4,PCA301,SlowRF'
+            .' rfmode:'.join(',', @rfmode)
             .' suppressDeviceRawmsg:1,0'
             .' updateChannelFW:stable,testing'
             .' whitelist_IDs'
@@ -763,9 +766,13 @@ sub SIGNALduino_Attr_rfmode {
           }
         };
         ## rfmode is always set if it is available / if the set supported is not available, it is always unequal
-        if ($rfmode ne $aVal) { $hash->{logMethod}->($hash->{NAME}, 3, "$hash->{NAME}: Set_rfmode, set to $aVal rfmode value not found in protocols)") };
+        if ($rfmode ne $aVal) {
+          $hash->{logMethod}->($hash->{NAME}, 3, "$hash->{NAME}: Set_rfmode, set to $aVal rfmode value not found in protocols");
+          return 'ERROR: protocol '.$aVal.' is not activated in \'Display protocollist\'';
+        };
       } else {
         $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: Set_rfmode, no MN protocols in 'Display protocollist' activated]);
+        return 'ERROR: no MN protocols activated in \'Display protocollist\'';
       }
     } else {
       SIGNALduino_AddSendQueue($hash,'e');
@@ -3028,16 +3035,19 @@ sub SIGNALduino_Attr(@) {
   ## Change rfmode
   elsif ($aName eq 'rfmode')          # change receive mode
   {
-    my @supported = ('KOPP_FC','Lacrosse_mode1','Lacrosse_mode2','Lacrosse_mode4','PCA301','SlowRF');
-
-    if (not grep /$aVal/, @supported) {
+    if (not grep /$aVal/, @rfmode) {
       $hash->{logMethod}->($name, 1, "$name: Attr, $aName $aVal is not supported");
       return 'ERROR: The rfmode is not supported';
     }
 
     if ($init_done) {
-      $hash->{logMethod}->($name, 3, "$name: Attr, $aName switched to $aVal");
-      main::SIGNALduino_Attr_rfmode($hash,$aVal);
+      my $ret = main::SIGNALduino_Attr_rfmode($hash,$aVal);
+
+      if (defined $ret) {
+        return $ret;
+      } else {
+        $hash->{logMethod}->($name, 3, "$name: Attr, $aName switched to $aVal");
+      }
     }
   }
   return ;
