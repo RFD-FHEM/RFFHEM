@@ -2,9 +2,7 @@
 
 * Update 00_SIGNALduino.pm
   * fix PERL WARNING
-2020-12-01 - Update 00_SIGNALduino.pm
 
-  * fix PERL WARNING
 2020-12-01 - Update 00_SIGNALduino.pm - simplification (#905)
 
 * Update 00_SIGNALduino.pm
@@ -17,12 +15,6 @@
 * UnitTest\tests\test_02_sub_SIGNALduino_SendFromQueue-definition.txt
  * fixed unitest
 
-* Update 00_SIGNALduino.pm
-  * improvement code
- | https://github.com/RFD-FHEM/RFFHEM/pull/905#discussion_r524933897
-
-* Update 00_SIGNALduino.pm
-  * remove duplicate syntax https://github.com/RFD-FHEM/RFFHEM/pull/905#discussion_r524550787
 2020-11-24 - Update 00_SIGNALduino.pm
 
 * simplification when a new xFSK protocol is added

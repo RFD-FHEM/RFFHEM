@@ -1343,7 +1343,7 @@ package lib::SD_ProtocolData;
         preamble        => 'P46#',
         clientmodule    => 'SD_UT',
         modulematch     => '^P46#.*',
-        length_min      => '14',       # ???
+        length_min      => '18',       # old 14 -> too short to evaluate
         length_max      => '18',
       },
     "47"  =>  ## Maverick ET-732, ET-733; TFA 14.1504
