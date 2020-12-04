@@ -87,7 +87,7 @@ package lib::SD_ProtocolData;
   use strict;
   use warnings;
 
-  our $VERSION = '1.23';
+  our $VERSION = '1.24';
 
   our %protocols = (
     "0" =>  ## various weather sensors (500 | 9100)
@@ -1343,7 +1343,7 @@ package lib::SD_ProtocolData;
         preamble        => 'P46#',
         clientmodule    => 'SD_UT',
         modulematch     => '^P46#.*',
-        length_min      => '14',       # ???
+        length_min      => '17',       # old 14 -> too short to evaluate
         length_max      => '18',
       },
     "47"  =>  ## Maverick ET-732, ET-733; TFA 14.1504
