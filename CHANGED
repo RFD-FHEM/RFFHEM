@@ -1,39 +1,23 @@
-2020-12-05 - Update 14_SD_UT.pm
-2020-12-05 - Update SD_ProtocolData.pm
-2020-11-23 - Update 14_SD_UT.pm
-2020-11-23 - Update SD_ProtocolData.pm
-2020-11-23 - Update SD_ProtocolData.pm
 2020-11-22 - First init for decoding protocol 56
-
-Alphavision Slender Line Plus motor canvas, remote control AC114-01B
-see https://github.com/RFD-FHEM/RFFHEM/issues/906
+  14_SD_UT.pm
+    feature: new remote control AC114-01B Alphavision Slender Line Plus motor canvas
+  SD_ProtocolData.pm
+    change: change protocol 56 from u56 to P56 
 2020-10-31 - Bugfix define with hostname 901 (#904)
-
-* FHEM\00_SIGNALduino.pm  Bugfix: valid definitions
-Extended regex to match all RFC valid hostnames and ipv4 addresses
+  FHEM\00_SIGNALduino.pm  Bugfix: valid definitions
+  Extended regex to match all RFC valid hostnames and ipv4 addresses
 2020-10-29 - bugfix-901
   update FHEM\00_SIGNALduino.pm
     Extended regex to match all RFC valid hostnames and ipv4 addresses
     Added support for directio and none. Optimized code a little bit
-
 2020-10-28 - SD_UT - new command for Novy_840039 (#902)
-
-* Update 14_SD_UT.pm
-
-* extension command https://github.com/HomeAutoUser/RFFHEM/issues/11  
-* sorted order
-2020-10-25 - Update 14_SD_UT.pm
-  * extension command for Novy_840039 (reset_clean_led)
-  * sorted order
+  Update 14_SD_UT.pm
+    extension command for Novy_840039 (reset_clean_led)
+    sorted order
 2020-10-11 - bugfix cc1101_reg_user (#900)
-2020-10-11 - Update 00_SIGNALduino.pm
-2020-10-10 - Merge branch 'master' into master_bugfix-cc1101_reg_user
-2020-10-10 - Bugfix cc1101_reg_user
 2020-10-08 - Bugfix 898 (#899)
   00_SIGNALduino.pm:
     bugfix: get ccreg command caused stacktrace #898
-2020-10-08 - Merge branch 'bugfix-898' of ssh://github.com/RFD-FHEM/RFFHEM into bugfix-898
-2020-10-08 - 00_SIGNALduino.pm
 2020-10-03 - feature update 14_SD_AS (#896)
   update 14_SD_AS
     new sensor type "raw"
