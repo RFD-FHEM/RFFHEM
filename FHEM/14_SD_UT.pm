@@ -1,11 +1,11 @@
 #########################################################################################
-# $Id: 14_SD_UT.pm 22449 2020-07-22 22:15:57Z HomeAuto_User $
+# $Id: 14_SD_UT.pm 0 2020-12-03 22:15:57Z HomeAuto_User $
 #
 # The file is part of the SIGNALduino project.
 # The purpose of this module is universal support for devices.
 #
 # 2016      - 1.fhemtester
-# 2018-2020 - HomeAuto_User, elektron-bbs
+# 2018-     - HomeAuto_User, elektron-bbs
 #
 # - unitec Modul alte Variante bis 20180901 (Typ unitec-Sound) --> keine MU MSG!
 # - unitec Funkfernschalterset (Typ uniTEC_48110) ??? EIM-826 Funksteckdosen --> keine MU MSG!
@@ -328,6 +328,19 @@
 #     BF_301_FAD0 up     MU;P0=-500;P1=5553;P2=-2462;P3=1644;P4=-299;P5=679;P6=298;P7=-687;D=01234545454545467546754546754676767675467676767675454546767676767545454675467546767671234545454545467546754546754676767675467676767675454546767676767545454675467546767671234545454545467546754546754676767675467676767675454546767676767545454675467546767671;CP=6;R=48;O;
 #}
 ###############################################################################################################################################################################
+# - Remote control AC114-01B from Shenzhen A-OK Technology Grand Development Co. [Protocol 56]
+#{    elektron-bbs 2020-12-04
+#     Protocol description found on https://github.com/akirjavainen/A-OK
+#     Command is sent repeatedly at least 3 times, followed by a second command at least 3 times for button up and down. This command is always the same and is not evaluated.
+#     Series of various remote controls with different numbers of channels: AC114-01, AC114-02, AC114-06, AC114-16. Currently only AC114-01B implemented.
+#     https://forum.fhem.de/index.php/topic,52025.0.html @Horst12345
+#     AC114_01B_00587B down MU;P0=5036;P1=-624;P2=591;P3=-227;P4=187;P5=-5048;D=0123412341414123234141414141414141412341232341414141232323234123234141414141414123414141414141414141234141414123234141412341232323250123412341414123234141414141414141412341232341414141232323234123234141414141414123414141414141414141234141414123234141412;CP=4;O;
+#     Alphavision Slender Line Plus motor canvas, remote control AC114-01B:
+#     https://github.com/RFD-FHEM/RFFHEM/issues/906 @TheChatty
+#     AC114_01B_479696 up   MU;P0=-16412;P1=5195;P2=-598;P3=585;P4=-208;P5=192;D=01234523452525234345234525252343434345252345234345234525234523434525252525252525234525252525252525252525252345234345234343434343434341234523452525234345234525252343434345252345234345234525234523434525252525252525234525252525252525252525252345234345234343;CP=5;R=105;O;
+#     AC114_01B_479696 stop MU;P0=-2341;P1=5206;P2=-571;P3=591;P4=-211;P5=207;D=01234523452525234345234525252343434345252345234345234525234523434525252525252525234525252525252525252523452525234343452523452343434341234523452525234345234525252343434345252345234345234525234523434525252525252525234525252525252525252523452525234343452523;CP=5;R=107;O;
+#}
+###############################################################################################################################################################################
 # !!! ToDo´s !!!
 #     - LED lights, counter battery-h reading --> commandref hour_counter module
 #     -
@@ -339,7 +352,7 @@ use strict;
 use warnings;
 no warnings 'portable';  # Support for 64-bit ints required
 
-our $VERSION = '2020-11-25';
+our $VERSION = '2020-12-05';
 
 sub SD_UT_bin2tristate;
 sub SD_UT_tristate2bin;
@@ -839,6 +852,7 @@ sub SD_UT_Define {
   ### [14] checks LED_XM21_0 ###
   return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short | long or not HEX (0-9 | a-f | A-F){14}" if ($a[2] eq 'LED_XM21_0' && not $a[3] =~ /^[0-9a-fA-F]{14}/xms);
 
+  $hash->{versionModule} = $VERSION;
   $hash->{lastMSG} =  'no data';
   $hash->{bitMSG} =  'no data';
   $iodevice = $a[4] if($a[4]);
@@ -2021,7 +2035,7 @@ sub SD_UT_bin2tristate {
      '10' => 'F',
      '11' => '1'
   );
-  my $tscode;
+  my $tscode = '';
   for (my $n=0; $n < length($bitData); $n = $n + 2) {
     $tscode = $tscode . $bintotristate{substr($bitData,$n,2)};
   }
@@ -2036,7 +2050,7 @@ sub SD_UT_tristate2bin {
      'F' => '10',
      '1' => '11'
   );
-  my $bitData;
+  my $bitData = '';
   for (my $n=0; $n < length($tsData); $n++) {
     $bitData = $bitData . $tristatetobin{substr($tsData,$n,1)};
   }
@@ -2065,6 +2079,7 @@ sub SD_UT_tristate2bin {
 
   <u>The following devices are supported:</u><br>
   <ul>
+    <li>AC114-01 remote control&nbsp;&nbsp;&nbsp;<small>(module model: AC114_01, Protokoll 56)</small></li>
     <li>Atlantic Security sensors&nbsp;&nbsp;&nbsp;<small>(module model: MD-2003R, MD-2018R,MD-210R, protocol 91|91.1)</small><br>
     <code>&nbsp;&nbsp;&nbsp;Note: The model MD_230R (water) is recognized as MD-2018R due to the same hardware ID!</code></li>
     <li>BF-301 remote control&nbsp;&nbsp;&nbsp;<small>(module model: BF_301, protocol 105)</small></li>
@@ -2213,7 +2228,7 @@ sub SD_UT_tristate2bin {
     <li><a href="#ignore">ignore</a></li>
     <li><a href="#IODev">IODev</a></li>
     <li><a name="model"></a>model<br>
-      The attribute indicates the model type of your device (Buttons_five, CAME_TOP_432EV, Chilitec_22640, KL_RF01, HS1-868-BS, HSM4, QUIGG_DMV, LED_XM21_0, Momento, Navaris, Novy_840029, Novy_840039, OR28V, RC_10, RH787T, SA_434_1_mini, SF01_01319004, TR60C1, Tedsen_SKX1xx, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx, TR_502MSV, Unitec_47031, unknown).
+      The attribute indicates the model type of your device	(Buttons_five, CAME_TOP_432EV, Chilitec_22640, KL_RF01, HS1-868-BS, HSM4, QUIGG_DMV, LED_XM21_0, Momento, Navaris, Novy_840029, Novy_840039, OR28V, RC_10, RH787T, SA_434_1_mini, SF01_01319004, TR60C1, Tedsen_SKX1xx, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx, TR_502MSV, Unitec_47031, unknown).
       If the attribute is changed, a new device is created using <a href="#autocreate">autocreate</a>. Autocreate must be activated for this.
     </li>
     <li><a name="repeats"></a>repeats<br>
@@ -2231,7 +2246,7 @@ sub SD_UT_tristate2bin {
 
   <b>Generated readings of the models</b><br>
   <ul>
-    <u>Buttons_five, CAME_TOP_432EV, Chilitec_22640, HSM4, KL_RF01, LED_XM21_0, Momento, Novy_840029, Novy_840039, OR28V, QUIGG_DMV, RC_10, RH787T, SF01_01319004, SF01_01319004_Typ2, TR_502MSV</u>
+    <u>AC114-01, Buttons_five, CAME_TOP_432EV, Chilitec_22640, HSM4, KL_RF01, LED_XM21_0, Momento, Novy_840029, Novy_840039, OR28V, QUIGG_DMV, RC_10, RH787T, SF01_01319004, SF01_01319004_Typ2, TR_502MSV</u>
     <ul>
       <li>deviceCode: Device code of the system</li>
       <li>LastAction: Last executed action of the device (<code>receive</code> for command received | <code>send</code> for command send).</li>
@@ -2278,6 +2293,7 @@ sub SD_UT_tristate2bin {
 
   <u>Es werden bisher folgende Ger&auml;te unterst&uuml;tzt:</u><br>
   <ul>
+    <li>AC114-01 Fernbedienung&nbsp;&nbsp;&nbsp;<small>(Modulmodel: AC114_01, Protokoll 56)</small></li>
     <li>Atlantic Security Sensoren&nbsp;&nbsp;&nbsp;<small>(Modulmodel: MD-2003R, MD-2018R,MD-210R, Protokoll 91|91.1)</small><br>
     <code>&nbsp;&nbsp;&nbsp;Hinweis: Das Model MD_230R (water) wird aufgrund gleicher Hardwarekennung als MD-2018R erkannt!</code></li>
     <li>BF-301 Fernbedienung&nbsp;&nbsp;&nbsp;<small>(Modulmodel: BF_301, Protokoll 105)</small></li>
@@ -2444,7 +2460,7 @@ sub SD_UT_tristate2bin {
 
   <b>Generierte Readings der Modelle</b><br>
   <ul>
-    <u>Buttons_five, CAME_TOP_432EV, Chilitec_22640, HSM4, KL_RF01, LED_XM21_0, Momento, Novy_840029, Novy_840039, OR28V, QUIGG_DMV, RC_10, RH787T, SF01_01319004, SF01_01319004_Typ2, TR_502MSV</u>
+    <u>AC114-01, Buttons_five, CAME_TOP_432EV, Chilitec_22640, HSM4, KL_RF01, LED_XM21_0, Momento, Novy_840029, Novy_840039, OR28V, QUIGG_DMV, RC_10, RH787T, SF01_01319004, SF01_01319004_Typ2, TR_502MSV</u>
     <ul>
       <li>deviceCode: Ger&auml;teCode des Systemes</li>
       <li>LastAction: Zuletzt ausgef&uuml;hrte Aktion des Ger&auml;tes (<code>receive</code> f&uuml;r Kommando empfangen, <code>send</code> f&uuml;r Kommando gesendet).</li>
