@@ -29,13 +29,13 @@
 # msgIntro         => ' '       # only MC - make combined message msgIntro.MC for sending ('SR;P0=-2560;P1=2560;P3=-640;D=10101010101010113;',)
 # msgOutro         => ' '       # only MC - make combined message MC.msgOutro for sending ('SR;P0=-8500;D=0;',)
 #
-# length_min       => ' '       # minimum number of bits of message length
+# length_min       => ' '       # minimum number of bits of message length (If reconstructBit is set, then set length_min=length_min-1)
 # length_max       => ' '       # maximum number of bits of message length
 # paddingbits      => ' '       # pad up to x bits before call module, default is 4. | --> option is active if paddingbits not defined in message definition !
 # paddingbits      => '1'       # will disable padding, use this setting when using dispatchBin
 # paddingbits      => '2'       # is padded to an even number, that is a maximum of 1 bit
 # remove_zero      => 1         # removes leading zeros from output
-# reconstructBit   => 1         # if set, then the last bit is reconstructed if the rest is missing
+# reconstructBit   => 1         # If set, then the last bit is reconstructed if the rest is missing. (If reconstructBit is set, then set length_min=length_min-1)
 #
 # developId        => 'm'       # logical module is under development
 # developId        => 'p'       # protocol is under development or to reserve IDs, the ID in the development attribute with developId => 'p' are only used without the other entries
@@ -87,7 +87,7 @@ package lib::SD_ProtocolData;
   use strict;
   use warnings;
 
-  our $VERSION = '1.24';
+  our $VERSION = '1.25';
 
   our %protocols = (
     "0" =>  ## various weather sensors (500 | 9100)
@@ -1614,7 +1614,7 @@ package lib::SD_ProtocolData;
     "56"  =>  ## Celexon Motorleinwand
               # https://forum.fhem.de/index.php/topic,52025.0.html @Horst12345
               # AC114_01B_00587B down MU;P0=5036;P1=-624;P2=591;P3=-227;P4=187;P5=-5048;D=0123412341414123234141414141414141412341232341414141232323234123234141414141414123414141414141414141234141414123234141412341232323250123412341414123234141414141414141412341232341414141232323234123234141414141414123414141414141414141234141414123234141412;CP=4;O;
-              # Alphavision Slender Line Plus motor canvas, remote control AC114-01B
+              # Alphavision Slender Line Plus motor canvas, remote control AC114-01B from Shenzhen A-OK Technology Grand Development Co.
               # https://github.com/RFD-FHEM/RFFHEM/issues/906 @TheChatty
               # AC114_01B_479696 up   MU;P0=-16412;P1=5195;P2=-598;P3=585;P4=-208;P5=192;D=01234523452525234345234525252343434345252345234345234525234523434525252525252525234525252525252525252525252345234345234343434343434341234523452525234345234525252343434345252345234345234525234523434525252525252525234525252525252525252525252345234345234343;CP=5;R=105;O;
               # AC114_01B_479696 stop MU;P0=-2341;P1=5206;P2=-571;P3=591;P4=-211;P5=207;D=01234523452525234345234525252343434345252345234345234525234523434525252525252525234525252525252525252523452525234343452523452343434341234523452525234345234525252343434345252345234345234525234523434525252525252525234525252525252525252523452525234343452523;CP=5;R=107;O;
@@ -1626,14 +1626,14 @@ package lib::SD_ProtocolData;
         zero           => [1,-3],  #  200,-600
         one            => [3,-1],  #  600,-200
         start          => [25,-3], # 5000,-600
-        pause          => [-25],   # pause between repeats of send messages (clockabs*pause must be < 32768)
+        pause          => [-25],   # -5000, pause between repeats of send messages (clockabs*pause must be < 32768)
         clockabs        => 200,
         reconstructBit => '1',
         format          => 'twostate',
         preamble       => 'P56#',
         clientmodule   => 'SD_UT',
         modulematch    => '^P56#',
-        length_min     => '64', # war '56',
+        length_min     => '64', # 65 - reconstructBit = 64
         length_max     => '65', # normal 65 Bit, 3 Bit werden aufgefuellt
       },
     "57"  =>  ## m-e doorbell fuer FG- und Basic-Serie
@@ -2495,7 +2495,7 @@ package lib::SD_ProtocolData;
         clockabs        => 400,
         format          => 'twostate',
         preamble        => 'P91#',
-        length_min      => '36',
+        length_min      => '35', # 36 - reconstructBit = 35
         length_max      => '36',
         clientmodule    => 'SD_UT',
         #modulematch     => '^P91#.*',
