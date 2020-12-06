@@ -87,7 +87,7 @@ package lib::SD_ProtocolData;
   use strict;
   use warnings;
 
-  our $VERSION = '1.21';
+  our $VERSION = '1.24';
 
   our %protocols = (
     "0" =>  ## various weather sensors (500 | 9100)
@@ -238,6 +238,9 @@ package lib::SD_ProtocolData;
         length_max       => '40',          # 24 | userMSG 32 ?
       },
     "2"  =>   ## Self build arduino sensor
+             # ArduinoSensor_temp_2      T: 21.0  MS;P1=-463;P2=468;P3=-1043;P5=-9981;D=252121212121232321232321212121232123232123212123212321212121212121232321212123212324;CP=2;SP=5;R=16;O;m2;
+             # ArduinoSensor_humidity_2  H: 61.9  MS;P0=-491;P2=523;P4=-991;P7=-9972;D=272020202024202024242420202020242020242420242024242420202020202420202424242420242426;CP=2;SP=7;m2;
+             # ArduinoSensor_voltage_2   V: 3.65  MS;P0=-10406;P1=513;P2=-437;P4=-1013;D=10121212121412121214141212121214121212141414141214121212121414141212141214141214121;CP=1;SP=0;
       {
         name             => 'Arduino',
         comment          => 'self build arduino sensor (developModule. SD_AS module only in github)',
@@ -251,10 +254,9 @@ package lib::SD_ProtocolData;
         format           => 'twostate',
         preamble         => 'P2#',
         clientmodule     => 'SD_AS',
-        modulematch      => '^P2#.{7,8}',
-        length_min       => '32',
-        length_max       => '34',        # Don't know maximal lenth of a valid message
-        paddingbits      => '8',         # pad up to 8 bits, default is 4
+        modulematch      => '^P2#.{8,10}',
+        length_min       => '32', # without CRC
+        length_max       => '40', # with CRC
       },
     "3"  =>  ## itv1 - remote with IC PT2262 example: ELRO | REWE | Intertek Modell 1946518 | WOFI Lamp // PIR JCHENG with Wireless Coding EV1527
              ## (real CP=300 | repeatpause=9300)
@@ -1341,7 +1343,7 @@ package lib::SD_ProtocolData;
         preamble        => 'P46#',
         clientmodule    => 'SD_UT',
         modulematch     => '^P46#.*',
-        length_min      => '14',       # ???
+        length_min      => '17',       # old 14 -> too short to evaluate
         length_max      => '18',
       },
     "47"  =>  ## Maverick ET-732, ET-733; TFA 14.1504
@@ -2799,7 +2801,28 @@ package lib::SD_ProtocolData;
         length_min      => '40',
         length_max      => '40',
       },
-
+    "106" =>  ## BBQ temperature sensor GT-TMBBQ-01s (Sender), GT-TMBBQ-01e (Empfaenger)
+              # https://forum.fhem.de/index.php/topic,114437.0.html KoelnSolar 2020-09-23
+              # https://github.com/RFD-FHEM/RFFHEM/issues/892 Ralf9 2020-09-24
+              # SD_WS_106_T  T: 22.6  MS;P0=525;P1=-2051;P3=-8905;P4=-4062;D=0301010401010404010101040401010401040401040404;CP=0;SP=3;R=35;e;b=2;m0;
+              # SD_WS_106_T  T: 88.1  MS;P1=-8514;P2=488;P3=-4075;P4=-2068;D=2123242423232423242423242324232323232423242324;CP=2;SP=1;R=31;e;b=70;s=4;m0;
+              # SD_WS_106_T  T: 97.8  MS;P1=-9144;P2=469;P3=-4101;P4=-2099;D=2123242423232423242423242323232423242423242424;CP=2;SP=1;R=58;O;b=70;s=4;m0;
+              # Sensor sends every 5 seconds 1 message.
+      {
+        name            => 'GT-TMBBQ-01',
+        comment         => 'BBQ temperature sensor',
+        id              => '106',
+        one             => [1,-8],  # 500,-4000
+        zero            => [1,-4],  # 500,-2000
+        sync            => [1,-18], # 500,-9000
+        clockabs        => 500,
+        format          => 'twostate',
+        preamble        => 'W106#',
+        clientmodule    => 'SD_WS',
+        modulematch     => '^W106#',
+        length_min      => '22',
+        length_max      => '22',
+      }
     ########################################################################
     #### ###  register informations from other hardware protocols  #### ####
 

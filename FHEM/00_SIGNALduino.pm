@@ -268,6 +268,9 @@ my %matchListSIGNALduino = (
 
 my %symbol_map = (one => 1 , zero =>0 ,sync => '', float=> 'F', 'start' => '');
 
+## rfmode for attrib & supported rfmodes
+my @rfmode = ('KOPP_FC','Lacrosse_mode1','Lacrosse_mode2','Lacrosse_mode4','PCA301','SlowRF');
+
 ############################# package main
 sub SIGNALduino_Initialize {
   my ($hash) = @_;
@@ -307,7 +310,7 @@ sub SIGNALduino_Initialize {
             .' minsecs'
             .' noMsgVerbose:0,1,2,3,4,5'
             .' rawmsgEvent:1,0'
-            .' rfmode:KOPP_FC,Lacrosse_mode1,Lacrosse_mode2,Lacrosse_mode4,PCA301,SlowRF'
+            .' rfmode:'.join(',', @rfmode)
             .' suppressDeviceRawmsg:1,0'
             .' updateChannelFW:stable,testing'
             .' whitelist_IDs'
@@ -379,11 +382,20 @@ sub SIGNALduino_Define {
   if($dev eq 'none') {
     Log3 $name, 1, "$name: Define, device is none, commands will be echoed only";
     $attr{$name}{dummy} = 1;
-    #return ;
+  }  elsif ($dev !~ m/\@/) { 
+    if ( ($dev =~ m~^(?:/[^/ ]*)+?$~xms || $dev =~ m~^COM\d$~xms) )  # bei einer IP oder hostname wird kein \@57600 angehaengt
+    {
+      $dev .= '@57600' 
+    } elsif ($dev !~ /@\d+$/ && ($dev !~ /^
+      (?: (?:[a-z0-9-]+(?:\.[a-z]{2,6})?)*|(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])\.){3}
+          (?:25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9]))
+      : (?:6553[0-5]|655[0-2]\d|65[0-4]\d{2}|6[0-4]\d{3}|[1-5]\d{4}|[1-9]\d{0,3})$/xmsi) ) { 
+      my $msg = 'Define, wrong hostname/port syntax: define <name> SIGNALduino {none | devicename[\@baudrate] | devicename\@directio | hostname:port}';
+      Log3 undef, 2, $msg;
+      return $msg;
+    }
   }
-
-  $dev .= '\@57600' if ($dev ne 'none' && $dev =~ m/[a-zA-Z]/xms && $dev !~ m/\@/);   # bei einer IP wird kein \@57600 angehaengt
-
+  
   #$hash->{CMDS} = '';
   $hash->{Clients}    = $clientsSIGNALduino;
   $hash->{MatchList}  = \%matchListSIGNALduino;
@@ -674,7 +686,7 @@ sub SIGNALduino_Set_raw {
   );
 
   my $hexFile = '';
-  if( grep $args[0] eq $_ , split(',',$hash->{additionalSets}{flash}) )
+  if( ( exists $hash->{additionalSets}{flash} ) && ( grep $args[0] eq $_ , split(',',$hash->{additionalSets}{flash}) ) )
   {
     $hash->{logMethod}->($hash, 3, "$name: Set_flash, $args[0] try to fetch github assets for tag $args[0]");
     my $ghurl = "https://api.github.com/repos/RFD-FHEM/SIGNALDuino/releases/tags/$args[0]";
@@ -755,9 +767,13 @@ sub SIGNALduino_Attr_rfmode {
           }
         };
         ## rfmode is always set if it is available / if the set supported is not available, it is always unequal
-        if ($rfmode ne $aVal) { $hash->{logMethod}->($hash->{NAME}, 3, "$hash->{NAME}: Set_rfmode, set to $aVal rfmode value not found in protocols)") };
+        if ($rfmode ne $aVal) {
+          $hash->{logMethod}->($hash->{NAME}, 3, "$hash->{NAME}: Set_rfmode, set to $aVal rfmode value not found in protocols");
+          return 'ERROR: protocol '.$aVal.' is not activated in \'Display protocollist\'';
+        };
       } else {
         $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: Set_rfmode, no MN protocols in 'Display protocollist' activated]);
+        return 'ERROR: no MN protocols activated in \'Display protocollist\'';
       }
     } else {
       SIGNALduino_AddSendQueue($hash,'e');
@@ -1052,13 +1068,16 @@ sub SIGNALduino_Get_Command {
 }
 
 ############################# package main
-sub SIGNALduino_Get_Command_CCReg {
+sub SIGNALduino_Get_Command_CCReg{
   my ($hash, @a) = @_;
+  return 'not enough number of arguments' if $#a < 1;
+  return 'Wrong command provided' if $a[0] ne 'ccreg';
+  
   my $name=$hash->{NAME};
-  if (exists($cc1101_register{uc($_[2])}) || $_[2] =~ /^99$/ ) {
+  if (exists($cc1101_register{uc($a[1])}) || $a[1] eq '99' ) {
     return SIGNALduino_Get_Command(@_);
   } else {
-    return "unknown Register $_[2], please choose a valid cc1101 register";
+    return "unknown Register $a[1], please choose a valid cc1101 register";
   }
 }
 
@@ -2995,7 +3014,7 @@ sub SIGNALduino_Attr(@) {
   ## Change eventlogging
   elsif ($aName eq 'eventlogging')  # enable / disable eventlogging
   {
-    if ($aVal == 1) {
+    if ($cmd eq 'set' && $aVal == 1) {
       $hash->{logMethod} = \&::SIGNALduino_Log3;
       Log3 $name, 3, "$name: Attr, Enable eventlogging";
     } else {
@@ -3010,25 +3029,28 @@ sub SIGNALduino_Attr(@) {
       if ($aVal =~ /cc1101_(?:config(?:_ext)?|patable)(?:\s|{)/);
   }
   ## Change cc1101_reg_user
-  elsif ($aName eq 'cc1101_reg_user') # set default register
+  elsif ($aName eq 'cc1101_reg_user' && $cmd eq 'set') # set default register
   {
     return 'ERROR: This attribute is only available for a receiver with CC1101.' if ( ($init_done == 1) && (InternalVal($hash->{NAME},"cc1101_available",0) == 0) );
     $aVal = $aVal.',' if ($aVal !~ /,$/gx);
-    return 'ERROR: Your attribute value is wrong!' if ( $aVal !~ /^([0-2]{1}[0-9a-fA-F]{3},)+$/gx );
+    return 'ERROR: Your attribute value is wrong!' if ( $aVal !~ /^([0-2]{1}[0-9a-fA-F]{3},)+$/gx);
   }
   ## Change rfmode
   elsif ($aName eq 'rfmode')          # change receive mode
   {
-    my @supported = ('KOPP_FC','Lacrosse_mode1','Lacrosse_mode2','Lacrosse_mode4','PCA301','SlowRF');
-
-    if (not grep /$aVal/, @supported) {
+    if (not grep /$aVal/, @rfmode) {
       $hash->{logMethod}->($name, 1, "$name: Attr, $aName $aVal is not supported");
       return 'ERROR: The rfmode is not supported';
     }
 
     if ($init_done) {
-      $hash->{logMethod}->($name, 3, "$name: Attr, $aName switched to $aVal");
-      main::SIGNALduino_Attr_rfmode($hash,$aVal);
+      my $ret = main::SIGNALduino_Attr_rfmode($hash,$aVal);
+
+      if (defined $ret) {
+        return $ret;
+      } else {
+        $hash->{logMethod}->($name, 3, "$name: Attr, $aName switched to $aVal");
+      }
     }
   }
   return ;
@@ -5135,7 +5157,7 @@ USB-connected devices (SIGNALduino):<br>
       "x_dev": {
         "type": "git",
         "url": "https://github.com/RFD-FHEM/RFFHEM.git",
-        "web": "https://github.com/RFD-FHEM/RFFHEM/tree/dev-r34",
+        "web": "https://github.com/RFD-FHEM/RFFHEM/tree/master",
         "x_branch": "dev-r34",
         "x_filepath": "FHEM/",
         "x_raw": "https://raw.githubusercontent.com/RFD-FHEM/RFFHEM/master/FHEM/00_SIGNALduino.pm"
@@ -5158,7 +5180,7 @@ USB-connected devices (SIGNALduino):<br>
       "web": "https://wiki.fhem.de/wiki/SIGNALduino"
     }
   },
-  "version": "v3.5.1"
+  "version": "v3.5.0"
 }
 =end :application/json;q=META.json
 =cut
