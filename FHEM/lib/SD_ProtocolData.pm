@@ -803,7 +803,7 @@ package lib::SD_ProtocolData;
         preamble        => 'u24#',
         #clientmodule    => '',
         #modulematch     => '',
-        length_min      => '56', # war '54',
+        length_min      => '55', # war '54',
         length_max      => '56', # war '58',
       },
     "25"  =>  ## LES remote for led lamp
@@ -1345,7 +1345,7 @@ package lib::SD_ProtocolData;
         preamble        => 'P46#',
         clientmodule    => 'SD_UT',
         modulematch     => '^P46#.*',
-        length_min      => '14',       # ???
+        length_min      => '17',       # old 14 -> too short to evaluate
         length_max      => '18',
       },
     "47"  =>  ## Maverick ET-732, ET-733; TFA 14.1504
