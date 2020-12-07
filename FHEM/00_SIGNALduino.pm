@@ -15,7 +15,7 @@
 package main;
 use strict;
 use warnings;
-#use version 0.77; our $VERSION = version->declare('v3.5.0');
+#use version 0.77; our $VERSION = version->declare('v3.5.1');
 
 my $missingModulSIGNALduino = '';
 
@@ -5177,7 +5177,7 @@ USB-connected devices (SIGNALduino):<br>
       "web": "https://wiki.fhem.de/wiki/SIGNALduino"
     }
   },
-  "version": "v3.5.0"
+  "version": "v3.5.1"
 }
 =end :application/json;q=META.json
 =cut
