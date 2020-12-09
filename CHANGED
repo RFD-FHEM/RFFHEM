@@ -1,3 +1,8 @@
+2020-12-09 - decode and send protocol 56 remote control AC114-01B (#910)
+
+Alphavision Slender Line Plus motor canvas, remote control AC114-01B
+see https://github.com/RFD-FHEM/RFFHEM/issues/906
+* change version from 3.5.0 to 3.5.1
 2020-12-07 - Update 00_SIGNALduino.pm
 
 Updated Version number
