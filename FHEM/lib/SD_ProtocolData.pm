@@ -29,13 +29,13 @@
 # msgIntro         => ' '       # only MC - make combined message msgIntro.MC for sending ('SR;P0=-2560;P1=2560;P3=-640;D=10101010101010113;',)
 # msgOutro         => ' '       # only MC - make combined message MC.msgOutro for sending ('SR;P0=-8500;D=0;',)
 #
-# length_min       => ' '       # minimum number of bits of message length
+# length_min       => ' '       # minimum number of bits of message length (If reconstructBit is set, then set length_min=length_min-1)
 # length_max       => ' '       # maximum number of bits of message length
 # paddingbits      => ' '       # pad up to x bits before call module, default is 4. | --> option is active if paddingbits not defined in message definition !
 # paddingbits      => '1'       # will disable padding, use this setting when using dispatchBin
 # paddingbits      => '2'       # is padded to an even number, that is a maximum of 1 bit
 # remove_zero      => 1         # removes leading zeros from output
-# reconstructBit   => 1         # if set, then the last bit is reconstructed if the rest is missing
+# reconstructBit   => 1         # If set, then the last bit is reconstructed if the rest is missing. (If reconstructBit is set, then set length_min=length_min-1)
 #
 # developId        => 'm'       # logical module is under development
 # developId        => 'p'       # protocol is under development or to reserve IDs, the ID in the development attribute with developId => 'p' are only used without the other entries
@@ -87,7 +87,7 @@ package lib::SD_ProtocolData;
   use strict;
   use warnings;
 
-  our $VERSION = '1.24';
+  our $VERSION = '1.25';
 
   our %protocols = (
     "0" =>  ## various weather sensors (500 | 9100)
@@ -787,22 +787,24 @@ package lib::SD_ProtocolData;
     "24"  =>  ## visivon
               # https://github.com/RFD-FHEM/RFFHEM/issues/39 @sidey79
               # u24#9F7DF825029C10   MU;P0=132;P1=500;P2=-233;P3=-598;P4=-980;P5=4526;D=012120303030303120303030453120303121212121203121212121203121212121212030303030312030312031203030303030312031203031212120303030303120303030453120303121212121203121212121203121212121212030303030312030312031203030303030312031203031212120303030;CP=0;O;
+              # https://forum.fhem.de/index.php/topic,42273.0.html
       {
         name            => 'visivon remote',
+        comment         => 'Remote control for motorized screen from Visivon',
         id              => '24',
-        knownFreqs      => '',
+        knownFreqs      => '315',
         one             => [3,-2],
         zero            => [1,-5],
         #one             => [3,-2],
         #zero            => [1,-1],
         start           => [30,-5],
-        clockabs        => 150,          #ca 150us
+        clockabs        => 150,
         format          => 'twostate',
         preamble        => 'u24#',
         #clientmodule    => '',
         #modulematch     => '',
-        length_min      => '54',
-        length_max      => '58',
+        length_min      => '55', # war '54',
+        length_max      => '56', # war '58',
       },
     "25"  =>  ## LES remote for led lamp
               # https://github.com/RFD-FHEM/RFFHEM/issues/40 @sidey79
@@ -1611,22 +1613,28 @@ package lib::SD_ProtocolData;
       },
     "56"  =>  ## Celexon Motorleinwand
               # https://forum.fhem.de/index.php/topic,52025.0.html @Horst12345
-              # MU;P0=5036;P1=-624;P2=591;P3=-227;P4=187;P5=-5048;D=0123412341414123234141414141414141412341232341414141232323234123234141414141414123414141414141414141234141414123234141412341232323250123412341414123234141414141414141412341232341414141232323234123234141414141414123414141414141414141234141414123234141412;CP=4;O;
-              # MU;P0=-228;P1=185;P2=-625;P3=593;P4=-5050;P5=5050;D=012121234523012301212123030121212121212121212301230301212121230303030123030303030301212123452301230121212303012121212121212121230123030121212123030303012303012121212121212301212121212121212121230121230121230303030301212123;CP=1;
+              # AC114_01B_00587B down MU;P0=5036;P1=-624;P2=591;P3=-227;P4=187;P5=-5048;D=0123412341414123234141414141414141412341232341414141232323234123234141414141414123414141414141414141234141414123234141412341232323250123412341414123234141414141414141412341232341414141232323234123234141414141414123414141414141414141234141414123234141412;CP=4;O;
+              # Alphavision Slender Line Plus motor canvas, remote control AC114-01B from Shenzhen A-OK Technology Grand Development Co.
+              # https://github.com/RFD-FHEM/RFFHEM/issues/906 @TheChatty
+              # AC114_01B_479696 up   MU;P0=-16412;P1=5195;P2=-598;P3=585;P4=-208;P5=192;D=01234523452525234345234525252343434345252345234345234525234523434525252525252525234525252525252525252525252345234345234343434343434341234523452525234345234525252343434345252345234345234525234523434525252525252525234525252525252525252525252345234345234343;CP=5;R=105;O;
+              # AC114_01B_479696 stop MU;P0=-2341;P1=5206;P2=-571;P3=591;P4=-211;P5=207;D=01234523452525234345234525252343434345252345234345234525234523434525252525252525234525252525252525252523452525234343452523452343434341234523452525234345234525252343434345252345234345234525234523434525252525252525234525252525252525252523452525234343452523;CP=5;R=107;O;
       {
-        name            => 'Celexon',
+        name           => 'AC114-xxB',
+        comment        => 'Remote control for motorized screen from Alphavision, Celexon',
         id              => '56',
         knownFreqs      => '433.92',
+        zero           => [1,-3],  #  200,-600
+        one            => [3,-1],  #  600,-200
+        start          => [25,-3], # 5000,-600
+        pause          => [-25],   # -5000, pause between repeats of send messages (clockabs*pause must be < 32768)
         clockabs        => 200,
-        zero            => [1,-3],
-        one             => [3,-1],
-        start           => [25,-3],
+        reconstructBit => '1',
         format          => 'twostate',
-        preamble        => 'u56#',
-        #clientmodule    => '',
-        #modulematch     => '',
-        length_min      => '56',
-        length_max      => '68',
+        preamble       => 'P56#',
+        clientmodule   => 'SD_UT',
+        modulematch    => '^P56#',
+        length_min     => '64', # 65 - reconstructBit = 64
+        length_max     => '65', # normal 65 Bit, 3 Bit werden aufgefuellt
       },
     "57"  =>  ## m-e doorbell fuer FG- und Basic-Serie
               # https://forum.fhem.de/index.php/topic,64251.0.html @rippi46
@@ -2487,7 +2495,7 @@ package lib::SD_ProtocolData;
         clockabs        => 400,
         format          => 'twostate',
         preamble        => 'P91#',
-        length_min      => '36',
+        length_min      => '35', # 36 - reconstructBit = 35
         length_max      => '36',
         clientmodule    => 'SD_UT',
         #modulematch     => '^P91#.*',

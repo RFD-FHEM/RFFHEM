@@ -1,6 +1,6 @@
-# $Id: 00_SIGNALduino.pm v3.5.0 2020-07-02 21:20:33Z Sidey $
+# $Id: 00_SIGNALduino.pm v3.5.1 2020-07-02 21:20:33Z Sidey $
 #
-# v3.5.0 - https://github.com/RFD-FHEM/RFFHEM/tree/master
+# v3.5.1 - https://github.com/RFD-FHEM/RFFHEM/tree/master
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incoming messages
 # see http://www.fhemwiki.de/wiki/SIGNALDuino
 # It was modified also to provide support for raw message handling which can be send from the SIGNALduino
@@ -15,7 +15,7 @@
 package main;
 use strict;
 use warnings;
-#use version 0.77; our $VERSION = version->declare('v3.5.0');
+#use version 0.77; our $VERSION = version->declare('v3.5.1');
 
 my $missingModulSIGNALduino = '';
 
@@ -37,7 +37,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-  SDUINO_VERSION                  => '3.5.0',
+  SDUINO_VERSION                  => '3.5.1',
   SDUINO_INIT_WAIT_XQ             => 1.5,     # wait disable device
   SDUINO_INIT_WAIT                => 2,
   SDUINO_INIT_MAXRETRY            => 3,
@@ -246,7 +246,7 @@ my %matchListSIGNALduino = (
       '14:Dooya'            => '^P16#[A-Fa-f0-9]+',
       '15:SOMFY'            => '^Ys[0-9A-F]+',
       '16:SD_WS_Maverick'   => '^P47#[A-Fa-f0-9]+',
-      '17:SD_UT'            => '^P(?:14|20|26|29|30|34|46|68|69|76|81|83|86|90|91|91.1|92|93|95|97|99|104)#.*', # universal - more devices with different protocols
+      '17:SD_UT'            => '^P(?:14|20|26|29|30|34|46|56|68|69|76|81|83|86|90|91|91.1|92|93|95|97|99|104)#.*', # universal - more devices with different protocols
       '18:FLAMINGO'         => '^P13\.?1?#[A-Fa-f0-9]+',              # Flamingo Smoke
       '19:CUL_WS'           => '^K[A-Fa-f0-9]{5,}',
       '20:Revolt'           => '^r[A-Fa-f0-9]{22}',
@@ -5177,7 +5177,7 @@ USB-connected devices (SIGNALduino):<br>
       "web": "https://wiki.fhem.de/wiki/SIGNALduino"
     }
   },
-  "version": "v3.5.0"
+  "version": "v3.5.1"
 }
 =end :application/json;q=META.json
 =cut

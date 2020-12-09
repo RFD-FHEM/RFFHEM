@@ -1,11 +1,11 @@
 #########################################################################################
-# $Id: 14_SD_UT.pm 22449 2020-07-22 22:15:57Z HomeAuto_User $
+# $Id: 14_SD_UT.pm 0 2020-12-03 22:15:57Z HomeAuto_User $
 #
 # The file is part of the SIGNALduino project.
 # The purpose of this module is universal support for devices.
 #
 # 2016      - 1.fhemtester
-# 2018-2020 - HomeAuto_User, elektron-bbs
+# 2018-     - HomeAuto_User, elektron-bbs
 #
 # - unitec Modul alte Variante bis 20180901 (Typ unitec-Sound) --> keine MU MSG!
 # - unitec Funkfernschalterset (Typ uniTEC_48110) ??? EIM-826 Funksteckdosen --> keine MU MSG!
@@ -328,6 +328,19 @@
 #     BF_301_FAD0 up     MU;P0=-500;P1=5553;P2=-2462;P3=1644;P4=-299;P5=679;P6=298;P7=-687;D=01234545454545467546754546754676767675467676767675454546767676767545454675467546767671234545454545467546754546754676767675467676767675454546767676767545454675467546767671234545454545467546754546754676767675467676767675454546767676767545454675467546767671;CP=6;R=48;O;
 #}
 ###############################################################################################################################################################################
+# - Remote control AC114-01B from Shenzhen A-OK Technology Grand Development Co. [Protocol 56]
+#{    elektron-bbs 2020-12-04
+#     Protocol description found on https://github.com/akirjavainen/A-OK
+#     Command is sent repeatedly at least 3 times, followed by a second command at least 3 times for button up and down. This command is always the same and is not evaluated.
+#     Series of various remote controls with different numbers of channels: AC114-01, AC114-02, AC114-06, AC114-16. Currently only AC114-01B implemented.
+#     https://forum.fhem.de/index.php/topic,52025.0.html @Horst12345
+#     AC114_01B_00587B down MU;P0=5036;P1=-624;P2=591;P3=-227;P4=187;P5=-5048;D=0123412341414123234141414141414141412341232341414141232323234123234141414141414123414141414141414141234141414123234141412341232323250123412341414123234141414141414141412341232341414141232323234123234141414141414123414141414141414141234141414123234141412;CP=4;O;
+#     Alphavision Slender Line Plus motor canvas, remote control AC114-01B:
+#     https://github.com/RFD-FHEM/RFFHEM/issues/906 @TheChatty
+#     AC114_01B_479696 up   MU;P0=-16412;P1=5195;P2=-598;P3=585;P4=-208;P5=192;D=01234523452525234345234525252343434345252345234345234525234523434525252525252525234525252525252525252525252345234345234343434343434341234523452525234345234525252343434345252345234345234525234523434525252525252525234525252525252525252525252345234345234343;CP=5;R=105;O;
+#     AC114_01B_479696 stop MU;P0=-2341;P1=5206;P2=-571;P3=591;P4=-211;P5=207;D=01234523452525234345234525252343434345252345234345234525234523434525252525252525234525252525252525252523452525234343452523452343434341234523452525234345234525252343434345252345234345234525234523434525252525252525234525252525252525252523452525234343452523;CP=5;R=107;O;
+#}
+###############################################################################################################################################################################
 # !!! ToDo´s !!!
 #     - LED lights, counter battery-h reading --> commandref hour_counter module
 #     -
@@ -339,7 +352,7 @@ use strict;
 use warnings;
 no warnings 'portable';  # Support for 64-bit ints required
 
-our $VERSION = '201025';
+our $VERSION = '2020-12-05';
 
 sub SD_UT_bin2tristate;
 sub SD_UT_tristate2bin;
@@ -724,6 +737,15 @@ my %models = (
                 Protocol   => 'P105',
                 Typ        => 'remote'
               },
+  'AC114_01B' =>  { '00001011' => 'up',
+                    '00100011' => 'stop',
+                    # '00100100' => 'after_updown', # Command 2, remote sends it after up or down
+                    '01000011' => 'down',
+                    '01010011' => 'program',
+                    hex_length => [17],
+                    Protocol   => 'P56',
+                    Typ        => 'remote'
+                  },
   'unknown' =>  { Protocol   => 'any',
                   hex_length => [],
                   Typ        => 'not_exist'
@@ -745,6 +767,7 @@ sub SD_UT_Initialize {
   $hash->{AutoCreate} =
   {
     'BF_301.*'     => {ATTR => 'model:BF_301', FILTER => '%NAME', autocreateThreshold => '3:180', GPLOT => q{}},
+    'AC114_01B.*'    => {ATTR => 'model:AC114_01B', FILTER => '%NAME', autocreateThreshold => '3:180', GPLOT => q{}},
     'MD_2003R.*'   => {ATTR => 'model:MD_2003R', FILTER => '%NAME', autocreateThreshold => '3:180', GPLOT => q{}},
     'MD_2018R.*'   => {ATTR => 'model:MD_2018R', FILTER => '%NAME', autocreateThreshold => '3:180', GPLOT => q{}},
     'MD_210R.*'    => {ATTR => 'model:MD_210R', FILTER => '%NAME', autocreateThreshold => '3:180', GPLOT => q{}},
@@ -808,8 +831,10 @@ sub SD_UT_Define {
     return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short | long or not HEX (0-9 | a-f | A-F){4}_[ABCD]|[all]";
   }
 
-  ### [6] checks MD_2003R | MD_210R | MD_2018R | Navaris ###
-  return "wrong HEX-Value! ($a[3]) $a[2] Hex-value to short or long (must be 6 chars) or not hex (0-9 | a-f | A-F){6}" if (($a[2] eq 'MD_2003R' || $a[2] eq 'MD_210R' || $a[2] eq 'MD_2018R' || $a[2] eq 'Navaris') && not $a[3] =~ /^[0-9a-fA-F]{6}/xms);
+  ### [6] checks MD_2003R | MD_210R | MD_2018R | Navaris | AC114_01B ###
+  if (($a[2] eq 'MD_2003R' || $a[2] eq 'MD_210R' || $a[2] eq 'MD_2018R' || $a[2] eq 'Navaris' || $a[2] eq 'AC114_01B') && not $a[3] =~ /^[0-9a-fA-F]{6}/xms) {
+    return "Wrong HEX-Value! ($a[3]) $a[2] Hex-value to short or long (must be 6 chars) or not hex (0-9 | a-f | A-F){6}";
+  }
 
   ### [7] checks Hoermann HSM4 | Krinner_LUMIX | Momento ###
   if (($a[2] eq 'HSM4' || $a[2] eq 'Krinner_LUMIX' || $a[2] eq 'Momento') && not $a[3] =~ /^[0-9a-fA-F]{7}/xms) {
@@ -827,6 +852,7 @@ sub SD_UT_Define {
   ### [14] checks LED_XM21_0 ###
   return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short | long or not HEX (0-9 | a-f | A-F){14}" if ($a[2] eq 'LED_XM21_0' && not $a[3] =~ /^[0-9a-fA-F]{14}/xms);
 
+  $hash->{versionModule} = $VERSION;
   $hash->{lastMSG} =  'no data';
   $hash->{bitMSG} =  'no data';
   $iodevice = $a[4] if($a[4]);
@@ -1024,6 +1050,14 @@ sub SD_UT_Set {
       $msg = $models{$model}{Protocol} . q{#} . $adr;
       $msg .= '1000'; # channel
       $msgEnd = '#R' . $repeats;
+    ############ AC114_01B ############
+    } elsif ($model eq 'AC114_01B') {
+      my $adr = sprintf '%024b' , hex $definition[1]; # argument 1 - adress to binary with 24 bits
+      $msg = $models{$model}{Protocol} . q{#};
+      $msg .= '10100011'; # fest ???
+      $msg .= $adr;
+      $msg .= '0000000100000000'; # fest ???
+      $msgEnd = '1P#R' . $repeats; # EOT, Pause, Repeats
     }
   }
 
@@ -1100,6 +1134,15 @@ sub SD_UT_Set {
         $sum = 257 - ($sum & 0xFF);
         $msg .= reverse sprintf '%08b' , $sum;
         $msg .= $msgEnd;
+      ############ AC114_01B ############
+      } elsif ($model eq 'AC114_01B') {
+        $msg .= $save; # command
+        my @split = split /[#]/xms , $msg;
+        my $sum = oct ('0b'. substr $split[1],0,8) + oct ('0b'. substr $split[1],8,8) + oct ('0b'. substr $split[1],16,8) + oct ('0b'. substr $split[1],24,8) + oct ('0b'. substr $split[1],32,8) + oct ('0b'. substr $split[1],40,8) + oct ('0b'. substr $split[1],48,8);
+        $sum = (93 + $sum) & 0xFF;
+        Log3 $name, 5, "$ioname: SD_UT_Set $name bits=$split[1] sum=$sum";
+        $msg .= sprintf '%08b' , $sum;
+        $msg .= $msgEnd;
       } else {
         $msg .= $save.$msgEnd;
       }
@@ -1124,14 +1167,7 @@ sub SD_UT_Set {
 
     IOWrite($hash, 'sendMsg', $msg);
     Log3 $name, 3, "$ioname: $name set $cmd";
-
-    ## for hex output ##
-    my @split = split('#', $msg);
-    my $hexvalue = $split[1];
-    $hexvalue =~ s/P+//g;                             # if P parameter, replace P with nothing
-    $hexvalue = sprintf("%X", oct( "0b$hexvalue" ) );
-    ###################
-    Log3 $name, 4, "$ioname: $name SD_UT_Set sendMsg $msg, rawData $hexvalue";
+    Log3 $name, 4, "$ioname: $name SD_UT_Set sendMsg $msg";
   }
   return $ret;
 }
@@ -1493,6 +1529,21 @@ sub SD_UT_Parse {
     $def = $modules{SD_UT}{defptr}{$devicedef};
   }
 
+  if ($hlen == 17 && $protocol == 56) {
+    ### Remote control Celexon/Alphavision AC114-01B [P56] ###
+    Log3 $iohash, 4, "$ioname: SD_UT_Parse device Celexon/Alphavision - check length and protocol number - OK";
+    my $sum = (93 + hex(substr($rawData,0,2)) + hex(substr($rawData,2,2)) + hex(substr($rawData,4,2)) + hex(substr($rawData,6,2)) + hex(substr($rawData,8,2)) + hex(substr($rawData,10,2)) + hex(substr($rawData,12,2))) & 0xff;
+    if ($sum != hex(substr($rawData,14,2))) {
+      Log3 $iohash, 3, "$ioname: SD_UT_Parse device Celexon/Alphavision - ERROR checksum $sum != " . hex(substr($rawData,14,2));
+      return '';
+    }
+    $deviceCode = substr($rawData,2,6);
+    $devicedef = 'AC114_01B ' . $deviceCode if (!$def);
+    $def = $modules{SD_UT}{defptr}{$devicedef} if (!$def);
+    $model = 'AC114_01B';
+    $name = 'AC114_01B_' . $deviceCode;
+  }
+
   ### unknown ###
   $devicedef = 'unknown' if(!$def);
   $def = $modules{SD_UT}{defptr}{$devicedef} if(!$def);
@@ -1731,6 +1782,14 @@ sub SD_UT_Parse {
   } elsif ($model eq 'BF_301' && $protocol == 105) {
     $state = substr $bitData,20,4;
     $deviceCode = substr $rawData,0,4;
+  ############ Remote control Celexon/Alphavision AC114-01B [P56] ############
+  } elsif ($model eq 'AC114_01B' && $protocol == 56) {
+    $state = substr $bitData,48,8;
+    $deviceCode = substr $rawData,2,6;
+    if ($state eq '00100100') { # Command 2, remote sends it after up or down
+      Log3 $name, 4, "$ioname: SD_UT_Parse device $name - receive command 2, remote sends it after up or down";
+      return $name;
+    }
   ############ unknown ############
   } else {
     readingsBulkUpdate($hash, 'state', '???');
@@ -1924,6 +1983,11 @@ sub SD_UT_Attr {
         } elsif ($attrValue eq 'Navaris') {
           $deviceCode = sprintf("%06X", oct( "0b$bitData" ) );
           $devicename = $devicemodel.'_'.$deviceCode;
+        ############ AC114_01B  ############
+        } elsif ($attrValue eq 'AC114_01B') {
+          $deviceCode = substr $bitData,8,24;
+          $deviceCode = sprintf("%06X", oct( "0b$bitData" ) );
+          $devicename = $devicemodel.'_'.$deviceCode;
         ############ unknown ############
         } else {
           $devicename = 'unknown_please_select_model';
@@ -1971,7 +2035,7 @@ sub SD_UT_bin2tristate {
      '10' => 'F',
      '11' => '1'
   );
-  my $tscode;
+  my $tscode = '';
   for (my $n=0; $n < length($bitData); $n = $n + 2) {
     $tscode = $tscode . $bintotristate{substr($bitData,$n,2)};
   }
@@ -1986,7 +2050,7 @@ sub SD_UT_tristate2bin {
      'F' => '10',
      '1' => '11'
   );
-  my $bitData;
+  my $bitData = '';
   for (my $n=0; $n < length($tsData); $n++) {
     $bitData = $bitData . $tristatetobin{substr($tsData,$n,1)};
   }
@@ -2015,6 +2079,7 @@ sub SD_UT_tristate2bin {
 
   <u>The following devices are supported:</u><br>
   <ul>
+    <li>AC114-01 remote control&nbsp;&nbsp;&nbsp;<small>(module model: AC114_01, Protokoll 56)</small></li>
     <li>Atlantic Security sensors&nbsp;&nbsp;&nbsp;<small>(module model: MD-2003R, MD-2018R,MD-210R, protocol 91|91.1)</small><br>
     <code>&nbsp;&nbsp;&nbsp;Note: The model MD_230R (water) is recognized as MD-2018R due to the same hardware ID!</code></li>
     <li>BF-301 remote control&nbsp;&nbsp;&nbsp;<small>(module model: BF_301, protocol 105)</small></li>
@@ -2163,7 +2228,7 @@ sub SD_UT_tristate2bin {
     <li><a href="#ignore">ignore</a></li>
     <li><a href="#IODev">IODev</a></li>
     <li><a name="model"></a>model<br>
-      The attribute indicates the model type of your device (Buttons_five, CAME_TOP_432EV, Chilitec_22640, KL_RF01, HS1-868-BS, HSM4, QUIGG_DMV, LED_XM21_0, Momento, Navaris, Novy_840029, Novy_840039, OR28V, RC_10, RH787T, SA_434_1_mini, SF01_01319004, TR60C1, Tedsen_SKX1xx, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx, TR_502MSV, Unitec_47031, unknown).
+      The attribute indicates the model type of your device	(Buttons_five, CAME_TOP_432EV, Chilitec_22640, KL_RF01, HS1-868-BS, HSM4, QUIGG_DMV, LED_XM21_0, Momento, Navaris, Novy_840029, Novy_840039, OR28V, RC_10, RH787T, SA_434_1_mini, SF01_01319004, TR60C1, Tedsen_SKX1xx, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx, TR_502MSV, Unitec_47031, unknown).
       If the attribute is changed, a new device is created using <a href="#autocreate">autocreate</a>. Autocreate must be activated for this.
     </li>
     <li><a name="repeats"></a>repeats<br>
@@ -2181,7 +2246,7 @@ sub SD_UT_tristate2bin {
 
   <b>Generated readings of the models</b><br>
   <ul>
-    <u>Buttons_five, CAME_TOP_432EV, Chilitec_22640, HSM4, KL_RF01, LED_XM21_0, Momento, Novy_840029, Novy_840039, OR28V, QUIGG_DMV, RC_10, RH787T, SF01_01319004, SF01_01319004_Typ2, TR_502MSV</u>
+    <u>AC114-01, Buttons_five, CAME_TOP_432EV, Chilitec_22640, HSM4, KL_RF01, LED_XM21_0, Momento, Novy_840029, Novy_840039, OR28V, QUIGG_DMV, RC_10, RH787T, SF01_01319004, SF01_01319004_Typ2, TR_502MSV</u>
     <ul>
       <li>deviceCode: Device code of the system</li>
       <li>LastAction: Last executed action of the device (<code>receive</code> for command received | <code>send</code> for command send).</li>
@@ -2228,6 +2293,7 @@ sub SD_UT_tristate2bin {
 
   <u>Es werden bisher folgende Ger&auml;te unterst&uuml;tzt:</u><br>
   <ul>
+    <li>AC114-01 Fernbedienung&nbsp;&nbsp;&nbsp;<small>(Modulmodel: AC114_01, Protokoll 56)</small></li>
     <li>Atlantic Security Sensoren&nbsp;&nbsp;&nbsp;<small>(Modulmodel: MD-2003R, MD-2018R,MD-210R, Protokoll 91|91.1)</small><br>
     <code>&nbsp;&nbsp;&nbsp;Hinweis: Das Model MD_230R (water) wird aufgrund gleicher Hardwarekennung als MD-2018R erkannt!</code></li>
     <li>BF-301 Fernbedienung&nbsp;&nbsp;&nbsp;<small>(Modulmodel: BF_301, Protokoll 105)</small></li>
@@ -2394,7 +2460,7 @@ sub SD_UT_tristate2bin {
 
   <b>Generierte Readings der Modelle</b><br>
   <ul>
-    <u>Buttons_five, CAME_TOP_432EV, Chilitec_22640, HSM4, KL_RF01, LED_XM21_0, Momento, Novy_840029, Novy_840039, OR28V, QUIGG_DMV, RC_10, RH787T, SF01_01319004, SF01_01319004_Typ2, TR_502MSV</u>
+    <u>AC114-01, Buttons_five, CAME_TOP_432EV, Chilitec_22640, HSM4, KL_RF01, LED_XM21_0, Momento, Novy_840029, Novy_840039, OR28V, QUIGG_DMV, RC_10, RH787T, SF01_01319004, SF01_01319004_Typ2, TR_502MSV</u>
     <ul>
       <li>deviceCode: Ger&auml;teCode des Systemes</li>
       <li>LastAction: Zuletzt ausgef&uuml;hrte Aktion des Ger&auml;tes (<code>receive</code> f&uuml;r Kommando empfangen, <code>send</code> f&uuml;r Kommando gesendet).</li>
