@@ -246,7 +246,7 @@ my %matchListSIGNALduino = (
       '14:Dooya'            => '^P16#[A-Fa-f0-9]+',
       '15:SOMFY'            => '^Ys[0-9A-F]+',
       '16:SD_WS_Maverick'   => '^P47#[A-Fa-f0-9]+',
-      '17:SD_UT'            => '^P(?:14|20|26|29|30|34|46|56|68|69|76|81|83|86|90|91|91.1|92|93|95|97|99|104)#.*', # universal - more devices with different protocols
+      '17:SD_UT'            => '^P(?:14|20|24|26|29|30|34|46|56|68|69|76|81|83|86|90|91|91.1|92|93|95|97|99|104)#.*', # universal - more devices with different protocols
       '18:FLAMINGO'         => '^P13\.?1?#[A-Fa-f0-9]+',              # Flamingo Smoke
       '19:CUL_WS'           => '^K[A-Fa-f0-9]{5,}',
       '20:Revolt'           => '^r[A-Fa-f0-9]{22}',
@@ -4782,21 +4782,21 @@ USB-connected devices (SIGNALduino):<br>
       <ul>
         <li>P<protocol id>#binarydata#R<anzahl der wiederholungen>#C<optional taktrate>   (#C is optional)
           <br>Beispiel binarydata: <code>set sduino sendMsg P0#0101#R3#C500</code>
-          <br>Wird eine sende Kommando fuer die Bitfolge 0101 anhand der protocol id 0 erzeugen. Als Takt wird 500 verwendet.
+          <br>Dieser Befehl erzeugt ein Sendekommando fuer die Bitfolge 0101 anhand der protocol id 0. Als Takt wird 500 verwendet.
           <br>SR;R=3;P0=500;P1=-9000;P2=-4000;P3=-2000;D=03020302;<br>
         </li>
       </ul><br>
       <ul>
         <li>P<protocol id>#0xhexdata#R<anzahl der wiederholungen>#C<optional taktrate>    (#C is optional)
           <br>Beispiel 0xhexdata: <code>set sduino sendMsg P29#0xF7E#R4</code>
-          <br>Wird eine sende Kommando fuer die Hexfolge F7E anhand der protocol id 29 erzeugen. Die Nachricht soll 4x gesendet werden.
+          <br>Dieser Befehl erzeugt ein Sendekommando fuer die Hexfolge F7E anhand der protocol id 29. Die Nachricht soll 4x gesendet werden.
           <br>SR;R=4;P0=-8360;P1=220;P2=-440;P3=-220;P4=440;D=01212121213421212121212134;
         </li>
       </ul><br>
       <ul>
         <li>P<protocol id>#0xhexdata#R<anzahl der wiederholungen>#C<optional taktrate>#F<optional Frequenz>    (#C #F is optional)
           <br>Beispiel 0xhexdata: <code>set sduino sendMsg P36#0xF7#R6#Fxxxxxxxxxx</code> (xxxxxxxxxx = Registerwert des CC1101)
-          <br>Wird eine sende Kommando fuer die Hexfolge F7 anhand der protocol id 36 erzeugen. Die Nachricht soll 6x gesendet werden mit der angegebenen Frequenz.
+          <br>Dieser Befehl erzeugt ein Sendekommando fuer die Hexfolge F7 anhand der protocol id 36. Die Nachricht soll 6x gesendet werden mit der angegebenen Frequenz.
           <br>SR;R=6;P0=-8360;P1=220;P2=-440;P3=-220;P4=440;D=012323232324232323;F= (Registerwert des CC1101);
         </li>
       </ul>

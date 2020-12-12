@@ -80,7 +80,7 @@ Supported Devices / Protocols
 |Technoline TX3  | Weather sensor |
 |Tedsen SKX1xx, SKX2xx, SKX4xx, SKX6xx | Remote control |
 |TR60C-1 | Remote control with touch screen |
-|Visivon remote PT4450  | Remote control |
+|Visivo | Remote control for motorized screen |
 |VLOXO | wireless bell |
 |WH2 | (TFA 30.3157 nur Temp, Hum = 255 -> nicht angezeigt)|
 |WH2315, WH3080 | UV/Lux Sensor |
