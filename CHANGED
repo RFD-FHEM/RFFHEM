@@ -1,3 +1,7 @@
+2020-12-12 - Completion of the decoding protocol 24
+
+SD_ProtocolData.pm: change protocol u24 to P24
+14_SD_UT.pm: decode and send protocol for Visivo remote control
 2020-12-09 - decode and send protocol 56 remote control AC114-01B (#910)
 
 Alphavision Slender Line Plus motor canvas, remote control AC114-01B
