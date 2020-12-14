@@ -4185,6 +4185,7 @@ USB-connected devices (SIGNALduino):<br>
     <br>Example 1: <code>set sduino raw SR;R=3;P0=500;P1=-9000;P2=-4000;P3=-2000;D=0302030;</code>  sends the data in raw mode 3 times repeated
     <br>Example 2: <code>set sduino raw SM;R=3;P0=500;C=250;D=A4F7FDDE;</code>  sends the data manchester encoded with a clock of 250uS
     <br>Example 3: <code>set sduino raw SC;R=3;SR;P0=5000;SM;P0=500;C=250;D=A4F7FDDE;</code>  sends a combined message of raw and manchester encoded repeated 3 times
+    <br>Example 4: <code>set sduino raw SN;R=3;D=9A46036AC8D3923EAEB470AB;</code>  sends a xFSK message of raw and repeated 3 times
     <ul><br>
       <b>note: The wrong use of the upcoming options can lead to malfunctions of the SIGNALduino!</b><br><br>
 
@@ -4728,7 +4729,9 @@ USB-connected devices (SIGNALduino):<br>
 
     Beispiel 1: <code>set sduino raw SR;R=3;P0=500;P1=-9000;P2=-4000;P3=-2000;D=0302030;</code> , sendet die Daten im Raw-Modus dreimal wiederholt<br>
     Beispiel 2: <code>set sduino raw SM;R=3;P0=500;C=250;D=A4F7FDDE;</code> , sendet die Daten Manchester codiert mit einem clock von 250&micro;S<br>
-    Beispiel 3: <code>set sduino raw SC;R=3;SR;P0=5000;SM;P0=500;C=250;D=A4F7FDDE;</code> , sendet eine kombinierte Nachricht von Raw und Manchester codiert 3 mal wiederholt<br><br>
+    Beispiel 3: <code>set sduino raw SC;R=3;SR;P0=5000;SM;P0=500;C=250;D=A4F7FDDE;</code> , sendet eine kombinierte Nachricht von Raw und Manchester codiert 3 mal wiederholt<br>
+    Beispiel 4: <code>set sduino raw SN;R=3;D=9A46036AC8D3923EAEB470AB;</code> , sendet die xFSK - Daten dreimal wiederholt<br>
+    <br>
 
     <ul>
       <b>Hinweis: Die falsche Benutzung der kommenden Optionen kann zu Fehlfunktionen des SIGNALduinos f&uuml;hren!</b><br><br>
@@ -4782,21 +4785,21 @@ USB-connected devices (SIGNALduino):<br>
       <ul>
         <li>P<protocol id>#binarydata#R<anzahl der wiederholungen>#C<optional taktrate>   (#C is optional)
           <br>Beispiel binarydata: <code>set sduino sendMsg P0#0101#R3#C500</code>
-          <br>Wird eine sende Kommando fuer die Bitfolge 0101 anhand der protocol id 0 erzeugen. Als Takt wird 500 verwendet.
+          <br>Dieser Befehl erzeugt ein Sendekommando fuer die Bitfolge 0101 anhand der protocol id 0. Als Takt wird 500 verwendet.
           <br>SR;R=3;P0=500;P1=-9000;P2=-4000;P3=-2000;D=03020302;<br>
         </li>
       </ul><br>
       <ul>
         <li>P<protocol id>#0xhexdata#R<anzahl der wiederholungen>#C<optional taktrate>    (#C is optional)
           <br>Beispiel 0xhexdata: <code>set sduino sendMsg P29#0xF7E#R4</code>
-          <br>Wird eine sende Kommando fuer die Hexfolge F7E anhand der protocol id 29 erzeugen. Die Nachricht soll 4x gesendet werden.
+          <br>Dieser Befehl erzeugt ein Sendekommando fuer die Hexfolge F7E anhand der protocol id 29. Die Nachricht soll 4x gesendet werden.
           <br>SR;R=4;P0=-8360;P1=220;P2=-440;P3=-220;P4=440;D=01212121213421212121212134;
         </li>
       </ul><br>
       <ul>
         <li>P<protocol id>#0xhexdata#R<anzahl der wiederholungen>#C<optional taktrate>#F<optional Frequenz>    (#C #F is optional)
           <br>Beispiel 0xhexdata: <code>set sduino sendMsg P36#0xF7#R6#Fxxxxxxxxxx</code> (xxxxxxxxxx = Registerwert des CC1101)
-          <br>Wird eine sende Kommando fuer die Hexfolge F7 anhand der protocol id 36 erzeugen. Die Nachricht soll 6x gesendet werden mit der angegebenen Frequenz.
+          <br>Dieser Befehl erzeugt ein Sendekommando fuer die Hexfolge F7 anhand der protocol id 36. Die Nachricht soll 6x gesendet werden mit der angegebenen Frequenz.
           <br>SR;R=6;P0=-8360;P1=220;P2=-440;P3=-220;P4=440;D=012323232324232323;F= (Registerwert des CC1101);
         </li>
       </ul>
