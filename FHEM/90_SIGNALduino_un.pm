@@ -40,8 +40,8 @@ sub SIGNALduino_un_Define {
 
   return ' wrong syntax: define <name> SIGNALduino_un <code> <optional IODEV> ('.int(@a).')' if(int(@a) < 3 || int(@a) > 4);
 
-  $hash->{lastMSG} =  '';
-  $hash->{bitMSG} =  '';
+  $hash->{lastMSG} = '';
+  $hash->{bitMSG} = '';
   $hash->{STATE} = 'Defined';
   my $name = $hash->{NAME};
 
