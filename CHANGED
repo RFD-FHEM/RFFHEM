@@ -1,5 +1,8 @@
 2020-12-17 - Update 90_SIGNALduino_un.pm
 
+* revised code to coderef https://github.com/RFD-FHEM/RFFHEM/pull/914#discussion_r545363173
+2020-12-17 - Update 90_SIGNALduino_un.pm
+
 * remove prototypes on subroutine (PerlCritic)
 * replaced " with ' in strings without a variable (PerlCritic)
 * replaced hard tabs (PerlCritic)
