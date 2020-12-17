@@ -1,3 +1,13 @@
+2020-12-17 - 90_SIGNALduino_un.pm - PerlCritic / commandref (#914)
+
+* Update 90_SIGNALduino_un.pm
+
+* remove prototypes on subroutine (PerlCritic)
+* replaced " with ' in strings without a variable (PerlCritic)
+* replaced hard tabs (PerlCritic)
+* replaced return undef with return and added return (PerlCritic)
+* revised commandref
+* revised code to coderef
 2020-12-17 - Update 90_SIGNALduino_un.pm
 
 * remove prototypes on subroutine (PerlCritic)
