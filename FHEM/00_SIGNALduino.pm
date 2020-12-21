@@ -2801,6 +2801,41 @@ sub SIGNALduino_Parse($$$$@) {
     return ;
   }
 
+  ### advance message checks ###
+  # --> abort for invalid messages
+  # --> detection of errors in firmware or incorrect transfer in the project
+
+  $hash->{logMethod}->($name, AttrVal($name,'noMsgVerbose',5), "$name: Parse, Msg found: $rmsg");
+  if ($rmsg =~ /^MU/)
+  {
+    if ($rmsg !~ /^MU;P\d=.*;D=\d+;CP=\d;(R=\d+;)?(O;)?$/){
+      $hash->{logMethod}->($name, 3, "$name: Parse, Msg with ERROR: $rmsg");
+      return;
+    }
+  }
+  if ($rmsg =~ /^M[cC];/)
+  {
+    if ($rmsg !~ /^M[cC];LL=-\d+;LH=\d+;SL=-\d+;SH=\d+;D=[0-9a-fA-F]+;C=\d+;L=\d+;(R=\d+;)?$/){
+      $hash->{logMethod}->($name, 3, "$name: Parse, Msg with ERROR: $rmsg");
+      return;
+    }
+  }
+  if ($rmsg =~ /^M[Ss];/)
+  {
+    if ($rmsg !~ /^M[Ss];P\d=-?\d+.*;D=\d+;CP=\d;SP=\d;(R=\d+;)?(O;)?(m\d;)?$/){
+      $hash->{logMethod}->($name, 3, "$name: Parse, Msg with ERROR: $rmsg");
+      return;
+    }
+  }
+  if ($rmsg =~ /^MN;/)
+  {
+    if ($rmsg !~ /^MN;D=[0-9a-fA-F]+;(N=\d;)?(R=\d+;)?$/){
+      $hash->{logMethod}->($name, 3, "$name: Parse, Msg with ERROR: $rmsg");
+      return;
+    }
+  }
+  ### advance message checks - END ###
+
   if (defined($hash->{keepalive})) {
     $hash->{keepalive}{ok}    = 1;
     $hash->{keepalive}{retry} = 0;
