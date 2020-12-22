@@ -2259,6 +2259,12 @@ sub SIGNALduino_Parse_MS($$$$%) {
   #Debug 'Message splitted:';
   #Debug Dumper(\@msg_parts);
 
+  ### advance MS message checks ###
+  if ($rmsg !~ /^M[Ss];P\d=-?\d+.*;D=\d+;CP=\d;SP=\d;(R=\d+;)?(O;)?(m\d;)?$/){
+    $hash->{logMethod}->($name, 3, "$name: Parse_MS, faulty msg: $rmsg");
+    return;
+  }
+
   my $debug = AttrVal($iohash->{NAME},'debug',0);
 
   if (defined($clockidx) and defined($syncidx))
@@ -2437,7 +2443,13 @@ sub SIGNALduino_Parse_MU($$$$@) {
   my $rssiStr= '';
   ($rssi,$rssiStr) = SIGNALduino_calcRSSI($rssi) if (defined($rssi));
 
-    Debug "$name: processing unsynced message\n" if ($debug);
+  Debug "$name: processing unsynced message\n" if ($debug);
+
+  ### advance MU message checks ###
+  if ($rmsg !~ /^MU;P\d=.*;D=\d+;CP=\d;(R=\d+;)?(O;)?$/){
+    $hash->{logMethod}->($name, 3, "$name: Parse_MU, faulty msg: $rmsg");
+    return;
+  }
 
   my $clockabs = 1;  #Clock will be fetched from protocol if possible
   #$patternListRaw{$_} = floor($msg_parts{pattern}{$_}/$clockabs) for keys $msg_parts{pattern};
@@ -2644,6 +2656,12 @@ sub SIGNALduino_Parse_MC($$$$@) {
   my $debug = AttrVal($iohash->{NAME},'debug',0);
   ($rssi,$rssiStr) = SIGNALduino_calcRSSI($rssi) if (defined($rssi));
 
+  ### advance MC message checks ###
+  if ($rmsg !~ /^M[cC];LL=-\d+;LH=\d+;SL=-\d+;SH=\d+;D=[0-9a-fA-F]+;C=\d+;L=\d+;(R=\d+;)?$/){
+    $hash->{logMethod}->($name, 3, "$name: Parse_MC, faulty msg: $rmsg");
+    return;
+  }
+
   return if (!$clock);
   #my $protocol=undef;
   #my %patternListRaw = %msg_parts{patternList};
@@ -2746,6 +2764,12 @@ sub SIGNALduino_Parse_MN {
   my $message_dispatched=0;
   my $rfmodeAttr = AttrVal($name,'rfmode','SlowRF');
 
+  ### advance MN message checks ###
+  if ($rmsg !~ /^MN;D=[0-9a-fA-F]+;(N=\d;)?(R=\d+;)?$/){
+    $hash->{logMethod}->($name, 3, "$name: Parse_MN, faulty msg: $rmsg");
+    return;
+  }
+
   mnIDLoop:
   for my $id (@{$hash->{mnIdList}}) {
     my $rfmode = $hash->{protocolObject}->getProperty($id,'rfmode');
@@ -2801,40 +2825,7 @@ sub SIGNALduino_Parse($$$$@) {
     return ;
   }
 
-  ### advance message checks ###
-  # --> abort for invalid messages
-  # --> detection of errors in firmware or incorrect transfer in the project
-
   $hash->{logMethod}->($name, AttrVal($name,'noMsgVerbose',5), "$name: Parse, Msg found: $rmsg");
-  if ($rmsg =~ /^MU/)
-  {
-    if ($rmsg !~ /^MU;P\d=.*;D=\d+;CP=\d;(R=\d+;)?(O;)?$/){
-      $hash->{logMethod}->($name, 3, "$name: Parse, Msg with ERROR: $rmsg");
-      return;
-    }
-  }
-  if ($rmsg =~ /^M[cC];/)
-  {
-    if ($rmsg !~ /^M[cC];LL=-\d+;LH=\d+;SL=-\d+;SH=\d+;D=[0-9a-fA-F]+;C=\d+;L=\d+;(R=\d+;)?$/){
-      $hash->{logMethod}->($name, 3, "$name: Parse, Msg with ERROR: $rmsg");
-      return;
-    }
-  }
-  if ($rmsg =~ /^M[Ss];/)
-  {
-    if ($rmsg !~ /^M[Ss];P\d=-?\d+.*;D=\d+;CP=\d;SP=\d;(R=\d+;)?(O;)?(m\d;)?$/){
-      $hash->{logMethod}->($name, 3, "$name: Parse, Msg with ERROR: $rmsg");
-      return;
-    }
-  }
-  if ($rmsg =~ /^MN;/)
-  {
-    if ($rmsg !~ /^MN;D=[0-9a-fA-F]+;(N=\d;)?(R=\d+;)?$/){
-      $hash->{logMethod}->($name, 3, "$name: Parse, Msg with ERROR: $rmsg");
-      return;
-    }
-  }
-  ### advance message checks - END ###
 
   if (defined($hash->{keepalive})) {
     $hash->{keepalive}{ok}    = 1;
@@ -2857,22 +2848,22 @@ sub SIGNALduino_Parse($$$$@) {
 
   if (@{$hash->{msIdList}} && $rmsg=~ m/^MS;(P\d=-?\d+;){3,8}D=\d+;CP=\d;SP=\d;/)
   {
-    $dispatched= SIGNALduino_Parse_MS($hash, $iohash, $name, $rmsg,%signal_parts);
+    $dispatched = SIGNALduino_Parse_MS($hash, $iohash, $name, $rmsg,%signal_parts);
   }
   # Message unsynced type   -> MU
     elsif (@{$hash->{muIdList}} && $rmsg=~ m/^MU;(P\d=-?\d+;){3,8}((CP|R)=\d+;){0,2}D=\d+;/)
   {
-    $dispatched=  SIGNALduino_Parse_MU($hash, $iohash, $name, $rmsg,%signal_parts);
+    $dispatched = SIGNALduino_Parse_MU($hash, $iohash, $name, $rmsg,%signal_parts);
   }
   # Manchester encoded Data   -> MC
     elsif (@{$hash->{mcIdList}} && $rmsg=~ m/^M[cC];.*;/)
   {
-    $dispatched=  SIGNALduino_Parse_MC($hash, $iohash, $name, $rmsg,%signal_parts);
+    $dispatched = SIGNALduino_Parse_MC($hash, $iohash, $name, $rmsg,%signal_parts);
   }
   # Message xFSK   -> MN
     elsif (@{$hash->{mnIdList}} && $rmsg=~ m/^MN;.*;/) 
   {
-    $dispatched=  SIGNALduino_Parse_MN($hash, $rmsg, \%signal_parts);
+    $dispatched = SIGNALduino_Parse_MN($hash, $rmsg, \%signal_parts);
   }
     else {
     Debug "$name: unknown Messageformat, aborting\n" if ($debug);
