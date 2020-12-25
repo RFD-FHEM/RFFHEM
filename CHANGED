@@ -1,3 +1,6 @@
+2020-12-25 - Update 00_SIGNALduino.pm
+
+move %cc1101_status_register and %cc1101_version in package cc1101
 2020-12-23 - Update 00_SIGNALduino.pm
 
 Extension of the CC1101 configuration register with standard values
