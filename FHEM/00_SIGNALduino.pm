@@ -191,35 +191,6 @@ my %cc1101_register = (   # for get ccreg 99 and set cc1101_reg
   '2E' => 'TEST0    - N/A ',
 );
 
-my %cc1101_status_register = ( # for get ccreg 30-3D status registers
-  '30' => 'PARTNUM       ',
-  '31' => 'VERSION       ',
-  '32' => 'FREQEST       ',
-  '33' => 'LQI           ',
-  '34' => 'RSSI          ',
-  '35' => 'MARCSTATE     ',
-  '36' => 'WORTIME1      ',
-  '37' => 'WORTIME0      ',
-  '38' => 'PKTSTATUS     ',
-  '39' => 'VCO_VC_DAC    ',
-  '3A' => 'TXBYTES       ',
-  '3B' => 'RXBYTES       ',
-  '3C' => 'RCCTRL1_STATUS',
-  '3D' => 'RCCTRL0_STATUS',
-);
-
-my %cc1101_version = ( # Status register 0x31 (0xF1): VERSION – Chip ID
-  '03' => 'CC1100',
-  '04' => 'CC1101',
-  '14' => 'CC1101',
-  '05' => 'CC1100E',
-  '07' => 'CC110L',
-  '17' => 'CC110L',
-  '08' => 'CC113L',
-  '18' => 'CC113L',
-  '15' => 'CC115L',
-);
-
 ## Supported Clients per default
 my $clientsSIGNALduino = ':CUL_EM:'
             .'CUL_FHTTK:'
@@ -1249,9 +1220,9 @@ sub SIGNALduino_CheckCcregResponse {
     my $val = $2;
     if ( $reg =~ /^3[0-9a-dA-D]$/ ) { # Status register
       $msg = "\nStatus register detail:\n---------------------------\nadd.  name             cur.\n";
-      $msg .= "0x$reg  $cc1101_status_register{$reg} - 0x$val";
-      if ( $reg eq '31' && exists $cc1101_version{$val}) { # VERSION – Chip ID
-        $msg .= " Chip $cc1101_version{$val}";
+      $msg .= "0x$reg  $cc1101::cc1101_status_register{$reg} - 0x$val";
+      if ( $reg eq '31' && exists $cc1101::cc1101_version{$val}) { # VERSION – Chip ID
+        $msg .= " Chip $cc1101::cc1101_version{$val}";
       }
     } else { # Configuration Register
       $msg = "\nConfiguration register detail:\n------------------------------\nadd.  name       def.   cur.\n";
@@ -3892,6 +3863,35 @@ sub SIGNALduino_githubParseHttpResponse {
 ################################################
 ########## Section & functions cc1101 ##########
 package cc1101;
+
+our %cc1101_status_register = ( # for get ccreg 30-3D status registers
+  '30' => 'PARTNUM       ',
+  '31' => 'VERSION       ',
+  '32' => 'FREQEST       ',
+  '33' => 'LQI           ',
+  '34' => 'RSSI          ',
+  '35' => 'MARCSTATE     ',
+  '36' => 'WORTIME1      ',
+  '37' => 'WORTIME0      ',
+  '38' => 'PKTSTATUS     ',
+  '39' => 'VCO_VC_DAC    ',
+  '3A' => 'TXBYTES       ',
+  '3B' => 'RXBYTES       ',
+  '3C' => 'RCCTRL1_STATUS',
+  '3D' => 'RCCTRL0_STATUS',
+);
+
+our %cc1101_version = ( # Status register 0x31 (0xF1): VERSION – Chip ID
+  '03' => 'CC1100',
+  '04' => 'CC1101',
+  '14' => 'CC1101',
+  '05' => 'CC1100E',
+  '07' => 'CC110L',
+  '17' => 'CC110L',
+  '08' => 'CC113L',
+  '18' => 'CC113L',
+  '15' => 'CC115L',
+);
 
 ############################# package cc1101
 #### for set function to change the patable for 433 or 868 Mhz supported
