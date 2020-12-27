@@ -1,3 +1,6 @@
+2020-12-27 - 00_SIGNALduino.pm
+
+ -Wrong version assignment in SIGNALduino_CheckVersionResp fixed and tests corrected
 2020-12-20 - Decoding and sending protocol 24 (#915)
 
   SD_ProtocolData.pm: change protocol u24 to P24
