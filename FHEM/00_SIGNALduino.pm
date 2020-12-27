@@ -1382,7 +1382,6 @@ sub SIGNALduino_CheckVersionResp {
   ### ToDo, manchmal kommen Mu Nachrichten in $msg und somit ist keine Version feststellbar !!!
   if (defined($msg)) {
     $hash->{logMethod}->($hash, 5, "$name: CheckVersionResp, called with $msg");
-    delete $hash->{version};
     if ($msg =~ m/($gets{$hash->{ucCmd}->{cmd}}[4])/ ) {
        $hash->{version} = $1;
     } else {
