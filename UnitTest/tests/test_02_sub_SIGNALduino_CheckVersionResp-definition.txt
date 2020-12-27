@@ -41,9 +41,9 @@ defmod test_02_sub_SIGNALduino_CheckVersionResp UnitTest dummyDuino (
 	subtest 'Test SIGNALduino_CheckVersionResp timeout' => sub {
 		plan(1);
 		# mock like SIGNALduino_StartInit
-		$hash->{DevState} = 'waitInit';
-		$hash->{ucCmd}->{responseSub} = \&SIGNALduino_CheckVersionResp;
-		$hash->{ucCmd}->{cmd} = "version";
+		$targetHash->{DevState} = 'waitInit';
+		$targetHash->{ucCmd}->{responseSub} = \&SIGNALduino_CheckVersionResp;
+		$targetHash->{ucCmd}->{cmd} = "version";
 		# Simulate timeout behaviour
 		my ($ret,undef)=SIGNALduino_CheckVersionResp($targetHash);
 		like($ret,qr/^$target: CheckVersionResp, Not an SIGNALduino device, got for V: undef$/,"check return message");
