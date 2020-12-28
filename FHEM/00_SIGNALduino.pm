@@ -142,53 +142,53 @@ my @syncmod = ( 'No preamble/sync','15/16 sync word bits detected','16/16 sync w
               );
 
 my %cc1101_register = (   # for get ccreg 99 and set cc1101_reg
-  '00' => 'IOCFG2  ',     # ! the values with spaces for output get ccreg 99 !
-  '01' => 'IOCFG1  ',
-  '02' => 'IOCFG0  ',
-  '03' => 'FIFOTHR ',
-  '04' => 'SYNC1   ',
-  '05' => 'SYNC0   ',
-  '06' => 'PKTLEN  ',
-  '07' => 'PKTCTRL1',
-  '08' => 'PKTCTRL0',
-  '09' => 'ADDR    ',
-  '0A' => 'CHANNR  ',
-  '0B' => 'FSCTRL1 ',
-  '0C' => 'FSCTRL0 ',
-  '0D' => 'FREQ2   ',
-  '0E' => 'FREQ1   ',
-  '0F' => 'FREQ0   ',
-  '10' => 'MDMCFG4 ',
-  '11' => 'MDMCFG3 ',
-  '12' => 'MDMCFG2 ',
-  '13' => 'MDMCFG1 ',
-  '14' => 'MDMCFG0 ',
-  '15' => 'DEVIATN ',
-  '16' => 'MCSM2   ',
-  '17' => 'MCSM1   ',
-  '18' => 'MCSM0   ',
-  '19' => 'FOCCFG  ',
-  '1A' => 'BSCFG   ',
-  '1B' => 'AGCCTRL2',
-  '1C' => 'AGCCTRL1',
-  '1D' => 'AGCCTRL0',
-  '1E' => 'WOREVT1 ',
-  '1F' => 'WOREVT0 ',
-  '20' => 'WORCTRL ',
-  '21' => 'FREND1  ',
-  '22' => 'FREND0  ',
-  '23' => 'FSCAL3  ',
-  '24' => 'FSCAL2  ',
-  '25' => 'FSCAL1  ',
-  '26' => 'FSCAL0  ',
-  '27' => 'RCCTRL1 ',
-  '28' => 'RCCTRL0 ',
-  '29' => 'FSTEST  ',
-  '2A' => 'PTEST   ',
-  '2B' => 'AGCTEST ',
-  '2C' => 'TEST2   ',
-  '2D' => 'TEST1   ',
-  '2E' => 'TEST0   ',
+  '00' => 'IOCFG2   - 0x0D',			# ! the values with spaces for output get ccreg 99 !
+  '01' => 'IOCFG1   - 0x2E',
+  '02' => 'IOCFG0   - 0x2D',
+  '03' => 'FIFOTHR  - 0x47',
+  '04' => 'SYNC1    - 0xD3',
+  '05' => 'SYNC0    - 0x91',
+  '06' => 'PKTLEN   - 0x3D',
+  '07' => 'PKTCTRL1 - 0x04',
+  '08' => 'PKTCTRL0 - 0x32',
+  '09' => 'ADDR     - 0x00',
+  '0A' => 'CHANNR   - 0x00',
+  '0B' => 'FSCTRL1  - 0x06',
+  '0C' => 'FSCTRL0  - 0x00',
+  '0D' => 'FREQ2    - 0x10',
+  '0E' => 'FREQ1    - 0xB0',
+  '0F' => 'FREQ0    - 0x71',
+  '10' => 'MDMCFG4  - 0x57',
+  '11' => 'MDMCFG3  - 0xC4',
+  '12' => 'MDMCFG2  - 0x30',
+  '13' => 'MDMCFG1  - 0x23',
+  '14' => 'MDMCFG0  - 0xB9',
+  '15' => 'DEVIATN  - 0x00',
+  '16' => 'MCSM2    - 0x07',
+  '17' => 'MCSM1    - 0x00',
+  '18' => 'MCSM0    - 0x18',
+  '19' => 'FOCCFG   - 0x14',
+  '1A' => 'BSCFG    - 0x6C',
+  '1B' => 'AGCCTRL2 - 0x07',
+  '1C' => 'AGCCTRL1 - 0x00',
+  '1D' => 'AGCCTRL0 - 0x91',
+  '1E' => 'WOREVT1  - 0x87',
+  '1F' => 'WOREVT0  - 0x6B',
+  '20' => 'WORCTRL  - 0xF8',
+  '21' => 'FREND1   - 0xB6',
+  '22' => 'FREND0   - 0x11',
+  '23' => 'FSCAL3   - 0xE9',
+  '24' => 'FSCAL2   - 0x2A',
+  '25' => 'FSCAL1   - 0x00',
+  '26' => 'FSCAL0   - 0x1F',
+  '27' => 'RCCTRL1  - 0x41',
+  '28' => 'RCCTRL0  - 0x00',
+  '29' => 'FSTEST   - N/A ',
+  '2A' => 'PTEST    - N/A ',
+  '2B' => 'AGCTEST  - N/A ',
+  '2C' => 'TEST2    - N/A ',
+  '2D' => 'TEST1    - N/A ',
+  '2E' => 'TEST0    - N/A ',
 );
 
 ## Supported Clients per default
@@ -1067,13 +1067,12 @@ sub SIGNALduino_Get_Command {
 }
 
 ############################# package main
-sub SIGNALduino_Get_Command_CCReg{
+sub SIGNALduino_Get_Command_CCReg {
   my ($hash, @a) = @_;
   return 'not enough number of arguments' if $#a < 1;
   return 'Wrong command provided' if $a[0] ne 'ccreg';
-  
   my $name=$hash->{NAME};
-  if (exists($cc1101_register{uc($a[1])}) || $a[1] eq '99' ) {
+  if (exists($cc1101_register{uc($a[1])}) || $a[1] eq '99' || $a[1] =~ /^3[0-9a-dA-D]$/ ) {
     return SIGNALduino_Get_Command(@_);
   } else {
     return "unknown Register $a[1], please choose a valid cc1101 register";
@@ -1201,28 +1200,35 @@ sub SIGNALduino_CheckCcregResponse {
   my $hash = shift;
   my $msg = shift;
   my $name=$hash->{NAME};
-
+  $hash->{logMethod}->($name, 5, "$name: CheckCcregResponse, msg $msg");
   if ($msg =~ /^ccreg/) {
-
-    $msg =~ s/\s\sccreg/\nccreg/g;
-    $msg =~ s/ccreg\s\d0:\s//g;
-
-    my @ccreg = split(/\s/,$msg);
-
-    $msg.= "\n\n";
-    $msg.= "Configuration Register Detail (address, name, value):\n";
-
+    my $msg1 = $msg;
+    $msg =~ s/\s\s/\n/g;
+    $msg = "\nConfiguration register overview:\n---------------------------------------------------------\n" . $msg;
+    $msg.= "\n\nConfiguration register detail:\n---------------------------------------------------------\nadd.  name       def.   cur.\n";
+    $msg1 =~ s/ccreg\s\d0:\s//g;
+    $msg1 =~ s/\s\s/ /g;
+    my @ccreg = split(/\s/,$msg1);
     my $reg_idx = 0;
     foreach my $key (sort keys %cc1101_register) {
-      $msg.= "0x".$key.' '.$cc1101_register{$key}. " - 0x".$ccreg[$reg_idx]."\n";
+      $msg.= '0x'.$key.'  '.$cc1101_register{$key}. ' - 0x'.$ccreg[$reg_idx]."\n";
       $reg_idx++;
     }
   } else {
     $msg =~ /^C([A-Fa-f0-9]{2}) = ([A-Fa-f0-9]{2})$/;
     my $reg = $1;
     my $val = $2;
-    $msg = "Configuration Register Detail address (name) = value:\n";
-    $msg .= "0x$reg ( $cc1101_register{$reg}) = 0x$val\n";
+    if ( $reg =~ /^3[0-9a-dA-D]$/ ) { # Status register
+      $msg = "\nStatus register detail:\n---------------------------\nadd.  name             cur.\n";
+      $msg .= "0x$reg  $cc1101::cc1101_status_register{$reg} - 0x$val";
+      if ( $reg eq '31' && exists $cc1101::cc1101_version{$val}) { # VERSION – Chip ID
+        $msg .= " Chip $cc1101::cc1101_version{$val}";
+      }
+    } else { # Configuration Register
+      $msg = "\nConfiguration register detail:\n------------------------------\nadd.  name       def.   cur.\n";
+      $msg .= "0x$reg  $cc1101_register{$reg} - 0x$val";
+    }
+    $msg .= "\n";
   }
   return ("\n".$msg,undef);
 }
@@ -3860,6 +3866,35 @@ sub SIGNALduino_githubParseHttpResponse {
 ################################################
 ########## Section & functions cc1101 ##########
 package cc1101;
+
+our %cc1101_status_register = ( # for get ccreg 30-3D status registers
+  '30' => 'PARTNUM       ',
+  '31' => 'VERSION       ',
+  '32' => 'FREQEST       ',
+  '33' => 'LQI           ',
+  '34' => 'RSSI          ',
+  '35' => 'MARCSTATE     ',
+  '36' => 'WORTIME1      ',
+  '37' => 'WORTIME0      ',
+  '38' => 'PKTSTATUS     ',
+  '39' => 'VCO_VC_DAC    ',
+  '3A' => 'TXBYTES       ',
+  '3B' => 'RXBYTES       ',
+  '3C' => 'RCCTRL1_STATUS',
+  '3D' => 'RCCTRL0_STATUS',
+);
+
+our %cc1101_version = ( # Status register 0x31 (0xF1): VERSION – Chip ID
+  '03' => 'CC1100',
+  '04' => 'CC1101',
+  '14' => 'CC1101',
+  '05' => 'CC1100E',
+  '07' => 'CC110L',
+  '17' => 'CC110L',
+  '08' => 'CC113L',
+  '18' => 'CC113L',
+  '15' => 'CC115L',
+);
 
 ############################# package cc1101
 #### for set function to change the patable for 433 or 868 Mhz supported
