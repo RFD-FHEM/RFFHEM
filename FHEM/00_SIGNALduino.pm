@@ -81,7 +81,7 @@ my %gets = (  # NameOFCommand =>  StyleMod for Fhemweb, SubToCall if get is exec
   'ccconf'            =>  ['noArg', \&SIGNALduino_Get_Command, "C0DnF", \&SIGNALduino_CheckccConfResponse, 'C0Dn11=[A-F0-9a-f]+'],
   'ccreg'             =>  ['textFieldNL', \&SIGNALduino_Get_Command_CCReg,"C", \&SIGNALduino_CheckCcregResponse, '^(?:C[A-Fa-f0-9]{2}\s=\s[0-9A-Fa-f]+$|ccreg 00:)'],
   'ccpatable'         =>  ['noArg', \&SIGNALduino_Get_Command, "C3E", \&SIGNALduino_CheckccPatableResponse, '^C3E\s=\s.*'],
-  'raw'               =>  ['textFieldNL', \&SIGNALduino_Get_Raw ],
+  'rawmsg'            =>  ['textFieldNL', \&SIGNALduino_Get_RawMsg ],
   'availableFirmware' =>  ['noArg', \&SIGNALduino_Get_availableFirmware ]
 );
 
@@ -1080,7 +1080,7 @@ sub SIGNALduino_Get_Command_CCReg {
 }
 
 ############################# package main
-sub SIGNALduino_Get_Raw {
+sub SIGNALduino_Get_RawMsg {
   my ($hash, @a) = @_;
   return "\"get raw\" needs at least a parameter" if (@a < 2);
   if ($a[1] =~ /^M[CcSUN];.+/)
@@ -1092,9 +1092,10 @@ sub SIGNALduino_Get_Raw {
   if ($a[1] =~ /\002M\w;.+;\003$/)
   {
     $hash->{logMethod}->( $hash->{NAME}, 4, "$hash->{NAME}: msg get raw: $a[1]");
-    return SIGNALduino_Parse($hash, $hash, $hash->{NAME}, $a[1]);
+    SIGNALduino_Parse($hash, $hash, $hash->{NAME}, $a[1]);
+    return 'Parse raw msg.';
   } else {
-    return 'This command is not supported via get raw.';
+    return 'This command is not supported via get rawmsg.';
   }
 }
 
@@ -4346,9 +4347,12 @@ USB-connected devices (SIGNALduino):<br>
   <li>ping<br>
     Check the communication with the SIGNALduino.
   </li><br>
-  <a name="raw"></a>
-  <li>raw<br>
-    Only for manual processing of messages (MS, MC, MU, ...). The get raw command does not send any commands to the microcontroller!
+  <a name="rawmsg"></a>
+  <li>rawmsg<br>
+    Processes messages (MS, MC, MU, ...) as if they were received by the SIGNALduino. The get raw command does not send any commands to the microcontroller!<br><br>
+    For example, this message would:
+    <code>MS;P0=-7871;P2=-1960;P3=578;P4=-3954;D=030323232323434343434323232323234343434323234343234343234343232323432323232323232343234;CP=3;SP=0;R=0;m=0;</code><br>
+    after executing the command several times, create a sensor SD_WS_33_TH_1.
   </li><br>
   <a name="uptime"></a>
   <li>uptime<br>
@@ -4889,9 +4893,12 @@ USB-connected devices (SIGNALduino):<br>
   <li>ping<br>
     Pr&uuml;ft die Kommunikation mit dem SIGNALduino.
   </li><br>
-  <a name="raw"></a>
-  <li>raw<br>
-    Nur um Nachrichten (MS, MC, MU, ...) manuell verarbeiten zu können. Der get raw Befehl übergibt keine Kommandos an den verbundenen Microcontroller!
+  <a name="rawmsg"></a>
+  <li>rawmsg<br>
+    Verarbeitet Nachrichten (MS, MC, MU, ...), als ob sie vom SIGNALduino empfangen wurden. Der Befehl "get raw" übergibt keine Kommandos an den verbundenen Microcontroller!<br><br>
+    Beispielsweise würde diese Nachricht:<br>
+    <code>MS;P0=-7871;P2=-1960;P3=578;P4=-3954;D=030323232323434343434323232323234343434323234343234343234343232323432323232323232343234;CP=3;SP=0;R=0;m=0;</code><br>
+    nach mehrmaligem Ausführen des Befehles einen Sensor SD_WS_33_TH_1 anlegen.
   </li><br>
   <a name="uptime"></a>
   <li>uptime<br>
