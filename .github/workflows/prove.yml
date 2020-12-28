@@ -55,9 +55,11 @@ jobs:
         flags: unittests,fhem,modules
         name: fhem (testscripts) ${{ matrix.perl }}
     - name: run make test (classic fhem unittest module)
+      id: classic_make_test
       run: |
         timeout 40 bash -c 'while /usr/bin/pgrep perl >> /dev/null; do sleep 1; echo .; done;'
         make test PERL_OPTS="-MDevel::Cover" 2>make_error.txt && sudo pkill "^perl"
+        echo "::set-output name=exitcode::$(echo $?)"
         cat make_error.txt
         timeout 40 bash -c 'while /usr/bin/pgrep perl >> /dev/null; do sleep 1; echo .; done;' || sudo pkill "^perl"
         sleep 3
@@ -73,4 +75,8 @@ jobs:
         file: ./cover_db/clover.xml
         flags: unittest
         name: unittest module ${{ matrix.perl }}
+    - name: Fail if there was an error during tests
+      run: exit 1
+      if: ${{ steps.classic_make_test.outputs.exitcode != 0 }} 
+
         
