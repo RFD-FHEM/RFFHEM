@@ -3877,7 +3877,7 @@ sub SIGNALduino_githubParseHttpResponse {
 
 ############################# package main, candidate for fhem core utility lib
 sub _limit_to_number {
-  my $number = shift;
+  my $number = shift // return;
   return $number if ($number =~ /^\d+/);
   return ;
 }
@@ -3885,7 +3885,7 @@ sub _limit_to_number {
 
 ############################# package main, candidate for fhem core utility lib
 sub _limit_to_hex {
-  my $hex = shift;
+  my $hex = shift // return;
   return $hex if ($hex =~ /^[0-9A-F]+$/i);
   return;
 }
@@ -3893,7 +3893,7 @@ sub _limit_to_hex {
 
 ############################# package main
 sub _limit_to_MC_pattern {
-  my $pattern = shift;
+  my $pattern = shift // return;
   my @allowed = qw/SH SL LL LH/;  # allowed MC abbreviation
 
   for my $abbreviation (keys %{$pattern}) {

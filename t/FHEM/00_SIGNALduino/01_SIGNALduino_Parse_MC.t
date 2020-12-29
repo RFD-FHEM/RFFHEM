@@ -4,7 +4,6 @@ use warnings;
 
 use Test2::V0;
 use Test2::Tools::Compare qw{is item U D match hash array bag};
-use Mock::Sub;
 use Test2::Todo;
 
 
@@ -17,7 +16,6 @@ my @mockData = (
         input =>  q[MC;LL=-2883;LH=2982;��j����ښ!�1509;D=AF7EFF2E;C=1466;L=31;R=14;],
         rValue => U(), 
         todoReason => q[This data should not be processed]
-
     },
     {
         deviceName => q[dummyDuino],
@@ -68,6 +66,30 @@ my @mockData = (
         rValue => U(), 
         todoReason => q[This data should not be processed]
     },
+    {
+        deviceName => q[dummyDuino],
+        plan => 2,
+        testname =>  q[To long MC data (protocol 57)],
+        input =>  q[MC;LL=-762;LH=544;SL=-402;SH=345;D=DB6D5B54;C=342;L=30;R=32;],
+        rValue => U(), 
+        todoReason => q[This data should not be processed / dispatched]
+    },
+    {
+        deviceName => q[dummyDuino],
+        plan => 2,
+        testname =>  q[To short MC data (protocol 57)],
+        input =>  q[MC;LL=-762;LH=544;SL=-402;SH=345;D=DB6;C=342;L=12;R=32;],
+        rValue => U(), 
+        todoReason => q[This data should not be processed / dispatched]
+    },
+    {
+        deviceName => q[dummyDuino],
+        plan => 2,
+        testname =>  q[Good MC Data (protocol 57)],
+        input =>  q[MC;LL=-653;LH=679;SL=-310;SH=351;D=D55B58;C=332;L=21;],
+        rValue => 1, 
+    },
+
 );
 plan (scalar @mockData );  
 
@@ -104,7 +126,7 @@ InternalTimer(time()+1, sub() {
     }
 
   };
-
+ 
   done_testing();
   exit(0);
 
