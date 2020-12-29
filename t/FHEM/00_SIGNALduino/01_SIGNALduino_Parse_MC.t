@@ -89,9 +89,9 @@ InternalTimer(time()+1, sub() {
     subtest "checking $element->{testname} on $element->{deviceName}" => sub {
       my $p = $element->{plan} // 1;
       plan ($p);  
-      my %signal_parts=SIGNALduino_Split_Message($element->{input},$element->{deviceName});   
+      #my %signal_parts=SIGNALduino_Split_Message($element->{input},$element->{deviceName});   
       
-      my $ret = SIGNALduino_Parse_MC($targetHash,$targetHash,$element->{deviceName},$element->{input},%signal_parts);
+      my $ret = SIGNALduino_Parse_MC($targetHash,$element->{input});
       for my $i (1..$p)
       {
         $i == 1 && do { is($ret,$element->{rValue},"Verify return value") } ;
