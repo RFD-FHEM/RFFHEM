@@ -1092,8 +1092,12 @@ sub SIGNALduino_Get_RawMsg {
   if ($a[1] =~ /\002M\w;.+;\003$/)
   {
     $hash->{logMethod}->( $hash->{NAME}, 4, "$hash->{NAME}: msg get raw: $a[1]");
-    SIGNALduino_Parse($hash, $hash, $hash->{NAME}, $a[1]);
-    return 'Parse raw msg.';
+    my $cnt = SIGNALduino_Parse($hash, $hash, $hash->{NAME}, $a[1]);
+    if (defined $cnt) {
+      return "Parse raw msg, number of messages passed to modules: $cnt";
+    } else {
+      return "Parse raw msg, no suitable protocol recognized.";
+    }
   } else {
     return 'This command is not supported via get rawmsg.';
   }
