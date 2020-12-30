@@ -1,35 +1,25 @@
+2020-12-30 - Display number of messages passed to modules.
+2020-12-28 - rename "get raw" to "get rawmsg"
+
+For "set raw" and "get raw", the same help was misleadingly displayed.
+"get raw" renamed to "get rawmsg".
+This will display the appropriate help.
 2020-12-28 - Extension for "get sduino ccreg" (#918)
-
-* Update 00_SIGNALduino.pm
-  Extension of the CC1101 configuration register with standard values
-  Query CC1101 status register incorporated
-  Integrated table for CC11xx chip versions
-* Update test_02_sub_SIGNALduino_CheckCcregResponse-definition.txt
-2020-12-28 - Merge branch 'master' into master_feature_ccreg
-2020-12-28 - Update 00_SIGNALduino.pm
-
-move %cc1101_status_register and %cc1101_version in package cc1101
-Extension of the CC1101 configuration register with standard values
-Query CC1101 status register incorporated
-Integrated table for CC11xx chip versions
+  * Update 00_SIGNALduino.pm
+    Extension of the CC1101 configuration register with standard values
+    Query CC1101 status register incorporated
+    Integrated table for CC11xx chip versions
+  * Update test_02_sub_SIGNALduino_CheckCcregResponse-definition.txt
 
 2020-12-28 - Fix unittest error in actions and failing SIGNALduino_CheckVersionResp test (#923)
-
-* prove.yml
-- try to catch error in classic tests
-
-(cherry picked from commit 657680e0b8cf71a9a364df4d525e3aded590d337)
+  * prove.yml
+    - try to catch error in classic tests
+      (cherry picked from commit 657680e0b8cf71a9a364df4d525e3aded590d337)
 
 2020-12-28 - 00_SIGNALduino.pm
-
- -Wrong version assignment in SIGNALduino_CheckVersionResp fixed and tests corrected
+  -Wrong version assignment in SIGNALduino_CheckVersionResp fixed and tests corrected
 
 2020-12-20 - Decoding and sending protocol 24 (#915)
-
-  SD_ProtocolData.pm: change protocol u24 to P24
-  14_SD_UT.pm: decode and send protocol for Visivo remote control
-2020-12-20 - Merge branch 'master' into master_feature_visivio
-2020-12-20 - Completion of the decoding protocol 24
   SD_ProtocolData.pm: change protocol u24 to P24
   14_SD_UT.pm: decode and send protocol for Visivo remote control
 
@@ -51,7 +41,6 @@ Integrated table for CC11xx chip versions
   see https://github.com/RFD-FHEM/RFFHEM/issues/906
   change: change protocol 56 from u56 to P56 
 
-2020-12-07 - Merge branch 'master_feature_AC114-xxB' of https://github.com/RFD-FHEM/RFFHEM into master_feature_AC114-xxB
 2020-12-07 - change version from 3.5.0 to 3.5.1
 
 2020-12-04 - fix length_min & clean CHANGED (#908)
@@ -62,11 +51,7 @@ Integrated table for CC11xx chip versions
     * revised length_min ID 46
 
 2020-12-02 - Update SD_ProtocolData.pm
-2020-12-02 - fix length_min & clean
-  CHANGED
-    * clean old comments
-  SD_ProtocolData.pm
-    * revised length_min ID 46
+
 2020-12-02 - Master fix - PERL WARNING (#907)
   * Update 00_SIGNALduino.pm
     * fix PERL WARNING
