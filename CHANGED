@@ -1,3 +1,4 @@
+2020-12-30 - Display number of messages passed to modules.
 2020-12-28 - rename "get raw" to "get rawmsg"
 
 For "set raw" and "get raw", the same help was misleadingly displayed.
