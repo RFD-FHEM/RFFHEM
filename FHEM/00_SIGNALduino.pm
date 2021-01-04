@@ -1245,10 +1245,14 @@ sub SIGNALduino_CheckSendRawResponse {
     my $name=$hash->{NAME};
     # zu testen der sendeQueue, kann wenn es funktioniert auf verbose 5
     $hash->{logMethod}->($name, 4, "$name: CheckSendrawResponse, sendraw answer: $msg");
-    #RemoveInternalTimer("HandleWriteQueue:$name");
     delete($hash->{ucCmd});
-    #SIGNALduino_HandleWriteQueue("x:$name"); # Todo #823 on github
-    InternalTimer(gettimeofday() + 0.1, \&SIGNALduino_HandleWriteQueue, "HandleWriteQueue:$name") if (scalar @{$hash->{QUEUE}} > 0 && InternalVal($name,'sendworking',0) == 0);
+    if ($msg =~ /D=[A-Za-z0-9]+;/ && InternalVal($name,'sendworking',0) == 0 )
+    {
+      RemoveInternalTimer("HandleWriteQueue:$name");
+      SIGNALduino_HandleWriteQueue("x:$name"); # Todo #823 on github
+    } else {
+      InternalTimer(gettimeofday() + 0.1, \&SIGNALduino_HandleWriteQueue, "HandleWriteQueue:$name") if (scalar @{$hash->{QUEUE}} > 0 && InternalVal($name,'sendworking',0) == 0);
+    }
   }
   return (undef);
 }
