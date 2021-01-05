@@ -1,3 +1,5 @@
+2021-01-05 - Multiple set commands are not processed
+Fixes #823  for firmware 3.4.0 without delay
 2020-12-28 - Extension for "get sduino ccreg" (#918)
 
 * Update 00_SIGNALduino.pm
