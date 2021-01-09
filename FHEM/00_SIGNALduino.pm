@@ -9,7 +9,7 @@
 #
 # 2014-2015  S.Butzek, N.Butzek
 # 2016-2019  S.Butzek, Ralf9
-# 2019-2020  S.Butzek, HomeAutoUser, elektron-bbs
+# 2019-2021  S.Butzek, HomeAutoUser, elektron-bbs
 
 
 package main;
@@ -37,7 +37,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-  SDUINO_VERSION                  => '3.5.2+05012021',
+  SDUINO_VERSION                  => '3.5.2+09012021',
   SDUINO_INIT_WAIT_XQ             => 1.5,     # wait disable device
   SDUINO_INIT_WAIT                => 2,
   SDUINO_INIT_MAXRETRY            => 3,
