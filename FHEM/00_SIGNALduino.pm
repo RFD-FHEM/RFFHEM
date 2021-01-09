@@ -1246,7 +1246,7 @@ sub SIGNALduino_CheckSendRawResponse {
     # zu testen der sendeQueue, kann wenn es funktioniert auf verbose 5
     $hash->{logMethod}->($name, 4, "$name: CheckSendrawResponse, sendraw answer: $msg");
     delete($hash->{ucCmd});
-    if ($msg =~ /D=[A-Za-z0-9]+;/ && InternalVal($name,'sendworking',0) == 0 )
+    if ($msg =~ /D=[A-Za-z0-9]+;/ )
     {
       RemoveInternalTimer("HandleWriteQueue:$name");
       SIGNALduino_HandleWriteQueue("x:$name"); # Todo #823 on github
