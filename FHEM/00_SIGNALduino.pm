@@ -1789,15 +1789,17 @@ sub SIGNALduino_Read {
         my $event;
         if (!exists($gets{$hash->{ucCmd}->{cmd}}) || !exists($gets{$hash->{ucCmd}->{cmd}}[4]) || $rmsg =~ /$regexp/)
         {
-          ($returnMessage,$event) = $hash->{ucCmd}->{responseSub}->($hash,$rmsg) ;
+          ($returnMessage,$event) = $hash->{ucCmd}->{}->($hash,$rmsg) ;
           readingsSingleUpdate($hash, $hash->{ucCmd}->{cmd}, $returnMessage, $event) if (defined($returnMessage) && defined($event));
           if (exists($hash->{ucCmd}->{asyncOut})) {
             $hash->{logMethod}->($name, 5, "$name: Read, try asyncOutput of message $returnMessage");
             my $ao = undef;
             $ao = asyncOutput( $hash->{ucCmd}->{asyncOut}, $hash->{ucCmd}->{cmd}.': ' . $returnMessage ) if (defined($returnMessage));
-          $hash->{logMethod}->($name, 5, "$name: Read, asyncOutput failed $ao") if (defined($ao));
+            $hash->{logMethod}->($name, 5, "$name: Read, asyncOutput failed $ao") if (defined($ao));
           }
-          delete($hash->{ucCmd});
+          if ( hash->{ucCmd}->{cmd} ne "sendraw "} ) {
+            delete($hash->{ucCmd});
+          }
         }
 
         if (exists($hash->{keepalive})) {
