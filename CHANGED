@@ -1,3 +1,4 @@
+2021-01-17 - Check if hashref exists to avoid warning
 2021-01-17 - Merge branch 'sidey79/issue823' of ssh://github.com/RFD-FHEM/RFFHEM into sidey79/issue823
 2021-01-17 - Avoid timeout after response 2. send, do not delte $hash->{ucCmd} because we can send again if there is something in the queue
 2021-01-17 - Merge branch 'sidey79/issue823' of ssh://github.com/RFD-FHEM/RFFHEM into sidey79/issue823
