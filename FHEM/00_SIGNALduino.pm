@@ -1251,7 +1251,7 @@ sub SIGNALduino_CheckSendRawResponse {
       RemoveInternalTimer("HandleWriteQueue:$name");
       SIGNALduino_HandleWriteQueue("x:$name"); # Todo #823 on github
     } else {
-      InternalTimer(gettimeofday() + 0.1, \&SIGNALduino_HandleWriteQueue, "HandleWriteQueue:$name") if (scalar @{$hash->{QUEUE}} > 0 && InternalVal($name,'sendworking',0) == 0);
+      InternalTimer(gettimeofday() , \&SIGNALduino_HandleWriteQueue, "HandleWriteQueue:$name") if (scalar @{$hash->{QUEUE}} > 0 && InternalVal($name,'sendworking',0) == 0);
     }
   }
   return (undef);
@@ -1605,7 +1605,7 @@ sub SIGNALduino_AddSendQueue {
   #SIGNALduino_Log3 $hash , 5, Dumper($hash->{QUEUE});
 
   $hash->{logMethod}->($hash, 5,"$name: AddSendQueue, " . $hash->{NAME} . ": $msg (" . @{$hash->{QUEUE}} . ')');
-  InternalTimer(gettimeofday() + 0.1, \&SIGNALduino_HandleWriteQueue, "HandleWriteQueue:$name") if (scalar @{$hash->{QUEUE}} == 1 && InternalVal($name,'sendworking',0) == 0);
+  InternalTimer(gettimeofday(), \&SIGNALduino_HandleWriteQueue, "HandleWriteQueue:$name") if (scalar @{$hash->{QUEUE}} == 1 && InternalVal($name,'sendworking',0) == 0);
 }
 
 ############################# package main, test exists
