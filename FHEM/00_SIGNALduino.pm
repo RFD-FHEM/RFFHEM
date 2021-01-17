@@ -1797,7 +1797,7 @@ sub SIGNALduino_Read {
             $ao = asyncOutput( $hash->{ucCmd}->{asyncOut}, $hash->{ucCmd}->{cmd}.': ' . $returnMessage ) if (defined($returnMessage));
             $hash->{logMethod}->($name, 5, "$name: Read, asyncOutput failed $ao") if (defined($ao));
           }
-          if ( $hash->{ucCmd}->{cmd} ne "sendraw" ) {
+          if ( exists $hash->{ucCmd} && defined $hash->{ucCmd}->{cmd} &&  $hash->{ucCmd}->{cmd} ne "sendraw" ) {
             delete $hash->{ucCmd} ;
           }
         }
