@@ -1798,6 +1798,7 @@ sub SIGNALduino_Read {
             $hash->{logMethod}->($name, 5, "$name: Read, asyncOutput failed $ao") if (defined($ao));
           }
           if ( $hash->{ucCmd}->{cmd} ne "sendraw "} ) {
+
             delete($hash->{ucCmd});
           }
         }
