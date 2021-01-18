@@ -1,6 +1,10 @@
 name: controlsFile
 
-on: [push]
+on:
+  push:
+    paths: 
+      - 'FHEM/**'
+      - '.github/workflows/update.yml'
 
 jobs:
   update:
@@ -12,16 +16,16 @@ jobs:
       run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
       id: extract_branch
     - name: Checkout Repostory
-      uses: actions/checkout@master
+      uses: actions/checkout@v2
       with:
         fetch-depth: 0
         persist-credentials: false
     - name: update controls files
-      uses: fhem/fhem-controls-actions@master
+      uses: fhem/fhem-controls-actions@v2
       with:
         filename: controls_signalduino.txt 
     - name: update controls files
-      uses: fhem/fhem-controls-actions@master
+      uses: fhem/fhem-controls-actions@v2
       with:
         filename: controls_signalduino.txt 
         directory: FHEM/lib
@@ -39,7 +43,7 @@ jobs:
         git ls-files --error-unmatch CHANGED || git add CHANGED
         git diff --name-only --exit-code controls_signalduino.txt || git commit CHANGED controls_signalduino.txt -m "Automatic updated controls and CHANGED" || true
     - name: git push
-      uses: ad-m/github-push-action@master
+      uses: ad-m/github-push-action@v0.6.0
       with:
         github_token: ${{ secrets.GH_TOKEN }}
         branch: ${{ steps.extract_branch.outputs.branch }}
