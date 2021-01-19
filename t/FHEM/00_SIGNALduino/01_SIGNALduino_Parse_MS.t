@@ -30,7 +30,7 @@ my @mockData = (
     {
         deviceName => q[dummyDuino],
         plan => 2,
-        testname =>  q[Corrupt MS data, special char and Argument "1q" isn't numeric],
+        testname =>  q[Corrupt MS data, R= Argument "1q" isn't numeric],
         input =>  q[MS;P1=-8043;P2=505;P3=-1979;P4=-3960;D=2121232323242424232423242323232323242324232424232324242323232323232323232323232323242423;CP=2;SP=1;R=1q;],
         rValue => U(), 
         todoReason => q[This data should not be processed]
