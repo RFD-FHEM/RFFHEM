@@ -58,6 +58,14 @@ my @mockData = (
         rValue => U(), 
         todoReason => q[This data should not be processed]
     },
+    {
+        deviceName => q[dummyDuino],
+        plan => 2,
+        testname =>  q[Corrupt MU data, R= Argument "1q" isn't numeric],
+        input =>  q[MU;P0=439;P1=-196;P3=-356;P4=634;P5=-556;P6=-7244;D=010303030303030303030303034503454503034545030345454503034503454545450345454503034545030303030345030345034545034503454506;CP=0;R=1q;],
+        rValue => U(), 
+        todoReason => q[This data should not be processed]
+    },
 );
 plan (scalar @mockData );  
 
