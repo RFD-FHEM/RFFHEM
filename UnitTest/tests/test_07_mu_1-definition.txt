@@ -21,8 +21,7 @@ defmod test_07_mu_1 UnitTest dummyDuino (
               my $rmsg=$testData->{input};
 
               plan(scalar @{$testData->{output}});
-              my %signal_parts=SIGNALduino_Split_Message($rmsg,$targetHash->{NAME});
-              is(SIGNALduino_Parse_MU($targetHash, $targetHash, $targetHash->{NAME}, $rmsg, %signal_parts),$testData->{output}[0] ,"check return code SIGNALduino_Parse_MU") if (defined($testData->{output}[0]));
+              is(SIGNALduino_Parse_MU($targetHash, $rmsg),$testData->{output}[0] ,"check return code SIGNALduino_Parse_MU") if (defined($testData->{output}[0]));
               is($SD_Dispatch->called_count, $testData->{output}[1], "check number of dispatch attempts") if (defined($testData->{output}[1]));
               is( ($SD_Dispatch->called_with)[4], $testData->{output}[2], "SIGNALduno_Dispatch check id " ) if (defined($testData->{output}[2]));
               is( ($SD_Dispatch->called_with)[2], $testData->{output}[3], "SIGNALduno_Dispatch check dmsg" ) if (defined($testData->{output}[3]));
