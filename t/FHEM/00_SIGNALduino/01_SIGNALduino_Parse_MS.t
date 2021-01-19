@@ -22,11 +22,18 @@ my @mockData = (
     {
         deviceName => q[dummyDuino],
         plan => 2,
-        testname =>  q[Corrupt MC data, special char and structure broken],
+        testname =>  q[Corrupt MS data, special char and structure broken],
         input =>  q[MS;P1=;L=L=-1015;L=H=944;S=L=-512;S=H=456;D=353531313436304235313330433137433244353036423130;C==487;L==89;R==45;],
         rValue => U(), 
         todoReason => q[This data should not be processed]
-
+    },
+    {
+        deviceName => q[dummyDuino],
+        plan => 2,
+        testname =>  q[Corrupt MS data, special char and Argument "1q" isn't numeric],
+        input =>  q[MS;P1=-8043;P2=505;P3=-1979;P4=-3960;D=2121232323242424232423242323232323242324232424232324242323232323232323232323232323242423;CP=2;SP=1;R=1q;],
+        rValue => U(), 
+        todoReason => q[This data should not be processed]
     },
 );
 plan (scalar @mockData );  
@@ -50,7 +57,7 @@ InternalTimer(time()+1, sub() {
       my $p = $element->{plan} // 1;
       plan ($p);  
       my %signal_parts=SIGNALduino_Split_Message($element->{input},$element->{deviceName});   
-      
+
       my $ret = SIGNALduino_Parse_MS($targetHash,$targetHash,$element->{deviceName},$element->{input},%signal_parts);
       for my $i (1..$p)
       {
