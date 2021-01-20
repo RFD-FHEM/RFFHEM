@@ -1,0 +1,45 @@
+name: controlsFile
+
+on: [push]
+
+jobs:
+  update:
+    env:
+      CONTROLS_FILENAME: controls_signalduino.txt 
+    runs-on: ubuntu-latest
+    steps: 
+    - name: Extract branch name
+      run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+      id: extract_branch
+    - name: Checkout Repostory
+      uses: actions/checkout@master
+      with:
+        fetch-depth: 0
+        persist-credentials: false
+    - name: update controls files
+      uses: fhem/fhem-controls-actions@master
+      with:
+        filename: controls_signalduino.txt 
+    - name: update controls files
+      uses: fhem/fhem-controls-actions@master
+      with:
+        filename: controls_signalduino.txt 
+        directory: FHEM/lib
+        writemode: a
+    - name: update CHANGED
+      run: |
+        LOG=$(date +"%Y-%m-%d") 
+        LOG+=" - $(git log -1 --pretty=%B)"
+        echo "$LOG" | cat - CHANGED > temp && mv temp CHANGED
+    - name: git commit back
+      run: |
+        git config --global user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git ls-files --error-unmatch controls_signalduino.txt || git add controls_signalduino.txt 
+        git ls-files --error-unmatch CHANGED || git add CHANGED
+        git diff --name-only --exit-code controls_signalduino.txt || git commit CHANGED controls_signalduino.txt -m "Automatic updated controls and CHANGED" || true
+    - name: git push
+      uses: ad-m/github-push-action@master
+      with:
+        github_token: ${{ secrets.GH_TOKEN }}
+        branch: ${{ steps.extract_branch.outputs.branch }}

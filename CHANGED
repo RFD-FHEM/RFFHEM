@@ -1,3 +1,236 @@
+2020-12-30 - rename "get raw" to "get rawmsg" (#925)
+
+* rename "get raw" to "get rawmsg"
+2020-12-30 - Display number of messages passed to modules.
+2020-12-28 - rename "get raw" to "get rawmsg"
+
+For "set raw" and "get raw", the same help was misleadingly displayed.
+"get raw" renamed to "get rawmsg".
+This will display the appropriate help.
+2020-12-28 - Extension for "get sduino ccreg" (#918)
+  * Update 00_SIGNALduino.pm
+    Extension of the CC1101 configuration register with standard values
+    Query CC1101 status register incorporated
+    Integrated table for CC11xx chip versions
+  * Update test_02_sub_SIGNALduino_CheckCcregResponse-definition.txt
+
+2020-12-28 - Fix unittest error in actions and failing SIGNALduino_CheckVersionResp test (#923)
+  * prove.yml
+    - try to catch error in classic tests
+      (cherry picked from commit 657680e0b8cf71a9a364df4d525e3aded590d337)
+
+2020-12-28 - 00_SIGNALduino.pm
+  -Wrong version assignment in SIGNALduino_CheckVersionResp fixed and tests corrected
+
+2020-12-20 - Decoding and sending protocol 24 (#915)
+  SD_ProtocolData.pm: change protocol u24 to P24
+  14_SD_UT.pm: decode and send protocol for Visivo remote control
+
+2020-12-17 - 90_SIGNALduino_un.pm - PerlCritic / commandref (#914)
+  * Update 90_SIGNALduino_un.pm
+  * remove prototypes on subroutine (PerlCritic)
+  * replaced " with ' in strings without a variable (PerlCritic)
+  * replaced hard tabs (PerlCritic)
+  * replaced return undef with return and added return (PerlCritic)
+  * revised commandref
+  * revised code to coderef
+
+2020-12-14 - Update 00_SIGNALduino.pm - commandref (#912)
+  * Update 00_SIGNALduino.pm
+  * documentation  revised
+
+2020-12-09 - decode and send protocol 56 remote control AC114-01B (#910)
+  Alphavision Slender Line Plus motor canvas, remote control AC114-01B
+  see https://github.com/RFD-FHEM/RFFHEM/issues/906
+  change: change protocol 56 from u56 to P56 
+
+2020-12-07 - change version from 3.5.0 to 3.5.1
+
+2020-12-04 - fix length_min & clean CHANGED (#908)
+    * fix length_min & clean
+  CHANGED
+    * clean old comments
+  SD_ProtocolData.pm
+    * revised length_min ID 46
+
+2020-12-02 - Update SD_ProtocolData.pm
+
+2020-12-02 - Master fix - PERL WARNING (#907)
+  * Update 00_SIGNALduino.pm
+    * fix PERL WARNING
+
+2020-12-01 - Update 00_SIGNALduino.pm - simplification (#905)
+  * Update 00_SIGNALduino.pm
+    * simplification when a new xFSK protocol is added
+    * direct notice for users added
+  * Update 01_SIGNALduino_Attr_rfmode.t
+    * revision tests for output
+  * UnitTest\tests\test_02_sub_SIGNALduino_SendFromQueue-definition.txt
+    * fixed unitest
+
+2020-11-24 - Update 00_SIGNALduino.pm
+  * simplification when a new xFSK protocol is added
+  * direct notice for users added
+
+2020-10-31 - Bugfix define with hostname 901 (#904)
+  FHEM\00_SIGNALduino.pm  Bugfix: valid definitions
+  Extended regex to match all RFC valid hostnames and ipv4 addresses
+
+2020-10-29 - bugfix-901
+  update FHEM\00_SIGNALduino.pm
+    Extended regex to match all RFC valid hostnames and ipv4 addresses
+    Added support for directio and none. Optimized code a little bit
+
+2020-10-28 - SD_UT - new command for Novy_840039 (#902)
+  Update 14_SD_UT.pm
+    extension command for Novy_840039 (reset_clean_led)
+    sorted order
+
+2020-10-11 - bugfix cc1101_reg_user (#900)
+
+2020-10-08 - Bugfix 898 (#899)
+  00_SIGNALduino.pm:
+    bugfix: get ccreg command caused stacktrace #898
+
+2020-10-03 - feature update 14_SD_AS (#896)
+  update 14_SD_AS
+    new sensor type "raw"
+    new CRC8 check (optional)
+    Adjustment of log outputs
+    new reading "batteryState"
+    new reading "batteryVoltage"
+
+2020-09-30 - new protocol for BBQ temperature sensor GT-TMBBQ-01 (#894)
+
+2020-09-28 
+    14_SD_WS.pm:
+          feature: new protocol 106 for GT-TMBBQ-0   
+    SD_ProtocolData.pm:
+          new: protocol 106 for BBQ temperature sensor GT-TMBBQ-01
+    00_SIGNALduino.pm:
+          bugfix: fix PERL WARNING (#895)
+
+2020-09-26 
+    00_SIGNALduino.pm:
+          Feature: xFSK processing
+          Change: added N to send SN  xFSK sendCommand
+          Change: added new sub SIGNALduino_calcRSSI to simplification code
+          Change: fix some perlcritic warnings
+          Change: revised Parse_MN and loglevel
+          Change: revised logoutput text SIGNALduino_Get_Command
+          Change: revisions indented ( no tabs, only spaces ) and checked
+                  syntax with perl ./contrib/commandref_join.pl
+          New: added commandref rfmode & cc1101_reg_user
+          New: added hardware ESP32cc1101, MAPLEMINI_F103CB on attribute
+          New: added new attrib rfmode to changed to xFSK & revised commandref
+          New: added separat sub SIGNALduino_Attr_rfmode
+          New: added set cmd LaCrossePairForSec (for LaCrosse
+  SD_Protocols.pm:
+          Change: moved subs for converting in own package
+                  ConvLaCrosse, ConvKoppFreeControl and ConvPCA301
+          New: added function PreparingSend_KOPP_FC
+  SD_ProtocolData.pm
+          New: added rfmode, register rubric & comments
+          Change: fix perlcritic Severity 3 - hard tabs
+
+2020-09-15
+  14_SD_WS,pm: 
+         feature: protocol 27 new sensor EFS-3110A (#890)
+
+2020-08-17
+  14_FLAMINGO.pm: 
+         Change: Perlcritic (#887)
+
+2020-07-23 
+  14_SD_UT.pm:
+         Change: PerlCritic (#877)
+
+ 14_SD_BELL.pm:
+         Change: PerlCritic (#877)
+
+2020-07-20 
+  14_SD_UT.pm:
+      feature: new protocol 105 for remote control BF-301
+
+07.05.2020  
+  00_SIGNALduino.pm:
+          Bugfix: Fix some perlcritic 5 warnings
+          Bugfix: some operator fixes #835
+          Bugfix: Changed stingrefs to coderefs
+  10_FS10
+          Bugfix: revised for perlcritic
+  10_SD_GT
+          Bugfix: revised for perlcritic (#847)
+
+  14_SD_UT.pm
+          feature: add attribute UTfrequency in (#845)
+          change: delete "$attr{$name}{room} = "SD_UT" if( not defined( $attr{$name}{room} ) );"
+
+  SD_ProtocolData.pm
+          feature: new protocol 104 for remote control TR60C-1 (#844)
+          feature: new protocol 99 NAVARIS touch light switch (#841)
+          feature: new protocol 98 for wireless door bell GEA-028DB (#839)
+
+
+13.04.2020
+  00_SIGNALduino.pm
+   Workaround for bug #823, sending muliple commands causes collison
+   2020-04-10 - Attribute IODev deleted in different modules (#822)
+   Fix get raw command #820
+   revised logoutput to one structure
+   Changed require DevIO to use DevIO #829
+  14_SD_AS.pm: Attribute "IODev" in module deleted.
+  14_SD_WS_Maverick.pm: Attribute "IODev" in module deleted.
+  14_SD_WS07.pm: Attribute "IODev" in module deleted.
+  14_Hideki.pm: Attribute "IODev" in module deleted.
+  14_SD_WS.pm: Attribute "IODev" in module deleted.
+
+07.04.2020
+  00_SIGNALduino.pm 
+    new protocol 97 Momento remote control for wireless digital picture frame (#812)
+    automatic load cc1101 config after change value or restart
+    made multiple get commands more easy and robust to handle
+    new protocol 58 Weather F007-T (#803)
+    new protocol 27 for EuroChron EFTH-800 (#764)
+    extended cc1101 settings to ccconf reading
+
+    several retrys to initialize the SIGNALduino (#804)
+    prevent asyncOut if there is no client connected
+    flash via http: Fixed Filename extraction of URL if name is not found in http header
+    bug fixed set sduino cc1101_rAmpl 42 (#801)
+    Allow lower case letters for hex values ​​in set / get cc1101_reg
+    fixed set_bWidth command (#789)
+    bug fix set/get cc1101_patable (#789)
+    filtered possible set commands per device type 
+    new  protocol 26 - Remote control xavax 00111939
+    new protocol 20 - Remote control diesel heating
+
+    added meta information to 00_SIGNALduino.pm (#811)
+    missing values ​​added to the patable list.
+    restriction to permitted frequency ranges.
+
+  14_SD_WS.pm
+     new sensors added TFA/Froggit/Renkforce/Ambient Weather F007-T 
+     ew rain sensor TFA 30.3233.01 
+     implemented sub to be called by other modules to receive get command response
+     new sensor for EuroChron EFTH-800 (#764)
+
+  SD_UT.pm 
+     new model Novy_840039, revised SIGNALduuino readme & tests (#794)
+     new remote control xavax 00111939
+     new remote control with 4 buttons for diesel heating
+
+	 model Novy_840039, rename button text power_button to power_on_off
+     remove sort option
+
+     fix UTClock for all models
+     TR-502MSV bugfix, ident was only 8 bit, must be 12 bit long
+     RC_10 button set all work after renaming the device
+
+  10_SD_GT
+     add codes for button all in version 2
+     new modul for remote controls based on protocol GT-9000
+
 06.12.2019
   00_SIGNALduino.pm: 
     logoutput adjusted to standard -> $name: "sub", "Text"

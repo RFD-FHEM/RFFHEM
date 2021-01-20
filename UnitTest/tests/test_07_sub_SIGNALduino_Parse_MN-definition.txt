@@ -1,0 +1,105 @@
+defmod test_07_sub_SIGNALduino_Parse_MN UnitTest dummyDuino ( 
+{
+	use Test2::V0;
+	use Test2::Tools::Compare qw{is};
+
+	subtest 'Test - MN Data good message without set attribute rfmode' => sub {
+    # to delete attribute rfmode if a value set
+    note('rfmode attribute deleted');
+    CommandDeleteAttr(undef,"$target rfmode");
+
+		plan(3);
+		my $rmsg="MN;D=9AA6362CC8AAAA000012F8F4;R=4;";
+		my %signal_parts=SIGNALduino_Split_Message($rmsg,$targetHash->{NAME});
+		# note: dispatch on Protocol 100 and Protocol 103
+		is(SIGNALduino_Parse_MN($targetHash, $rmsg, \%signal_parts) ,0,"MN Data not dispatched - Protocol 100 (Lacrosse, Mode 1 - IT+)");
+
+		$rmsg="MN;D=0405019E8700AAAAAAAA0F13AA16ACC0540AAA49C814473A2774D208AC0B0167;N=3;R=6;";
+		%signal_parts=SIGNALduino_Split_Message($rmsg,$targetHash->{NAME});
+		is(SIGNALduino_Parse_MN($targetHash, $rmsg,\%signal_parts) ,0,"MN Data not dispatched - Protocol 101 (ELV PCA 301)");
+
+		$rmsg="MN;D=07FA5E1721CC0F02FE000000000000;";
+		%signal_parts=SIGNALduino_Split_Message($rmsg,$targetHash->{NAME});
+		is(SIGNALduino_Parse_MN($targetHash, $rmsg,\%signal_parts) ,0,"MN Data not dispatched - Protocol 102 (KoppFreeControl)");
+	};
+
+	subtest 'Test - MN Data good message with set attribute rfmode ' => sub {
+    # rfmodes are KOPP_FC,Lacrosse_mode1,Lacrosse_mode2,Lacrosse_mode4,MAX,PCA301,SlowRF
+		plan(4);
+
+    my $rfmode = 'Lacrosse_mode1'; # to set attribute rfmode to value
+    note("set rfmode to $rfmode");
+    CommandAttr(undef,"$target rfmode $rfmode");
+
+		my $rmsg="MN;D=9AA6362CC8AAAA000012F8F4;R=4;";
+		my %signal_parts=SIGNALduino_Split_Message($rmsg,$targetHash->{NAME});
+		# note: dispatch on Protocol 100 and Protocol 103
+		is(SIGNALduino_Parse_MN($targetHash, $rmsg, \%signal_parts) ,1,"MN Data dispatched - Protocol 100 (Lacrosse, Mode 1 - IT+)");
+
+    $rfmode = 'PCA301'; # to set attribute rfmode to value
+    note("set rfmode to $rfmode");
+    CommandAttr(undef,"$target rfmode $rfmode");
+		$rmsg="MN;D=0405019E8700AAAAAAAA0F13AA16ACC0540AAA49C814473A2774D208AC0B0167;N=3;R=6;";
+		%signal_parts=SIGNALduino_Split_Message($rmsg,$targetHash->{NAME});
+		is(SIGNALduino_Parse_MN($targetHash, $rmsg,\%signal_parts) ,1,"MN Data dispatched - Protocol 101 (ELV PCA 301)");
+
+    $rfmode = 'KOPP_FC'; # to set attribute rfmode to value
+    note("set rfmode to $rfmode");
+    CommandAttr(undef,"$target rfmode $rfmode");
+		$rmsg="MN;D=07FA5E1721CC0F02FE000000000000;";
+		%signal_parts=SIGNALduino_Split_Message($rmsg,$targetHash->{NAME});
+		is(SIGNALduino_Parse_MN($targetHash, $rmsg,\%signal_parts) ,1,"MN Data dispatched - Protocol 102 (KoppFreeControl)");
+
+    $rfmode = 'Lacrosse_mode2'; # to set attribute rfmode to value
+    note("set rfmode to $rfmode");
+    CommandAttr(undef,"$target rfmode $rfmode");
+		$rmsg="MN;D=9A05922F8180046818480800;N=2;";
+		%signal_parts=SIGNALduino_Split_Message($rmsg,$targetHash->{NAME});
+		is(SIGNALduino_Parse_MN($targetHash, $rmsg,\%signal_parts) ,1,"MN Data dispatched - Protocol 103 (Lacrosse, Mode 2 - IT+)");
+    note('rfmode attribute deleted');
+    CommandDeleteAttr(undef,"$target rfmode");
+	};
+
+	subtest 'SIGNALduino_parse_MN message does not match regex' => sub {
+		plan(1);
+		my $rmsg="MN;D=8AA6362CC8AAAA000012F8F4;R=4;";
+		my %signal_parts=SIGNALduino_Split_Message($rmsg,$targetHash->{NAME});
+
+		is(SIGNALduino_Parse_MN($targetHash, $rmsg, \%signal_parts),0 , "MN data not dispatched");
+	};
+
+
+	subtest 'SIGNALduino_parse_MN message to short' => sub {
+		plan(1);
+
+		my $rmsg="MN;D=01050;N=3;";
+		my %signal_parts=SIGNALduino_Split_Message($rmsg,$targetHash->{NAME});
+
+		is(SIGNALduino_Parse_MN($targetHash, $rmsg, \%signal_parts),0 , "MN data not dispatched");
+	};
+
+	my $LoadResult =  $targetHash->{protocolObject}->LoadHash("$attr{global}{modpath}/FHEM/lib/test_loadprotohash-ok.pm");
+	is($LoadResult,undef,"load test protocol hash ");
+	SIGNALduino_IdList("x:$target","","","");  
+
+
+	subtest 'SIGNALduino_parse_MN method not defined' => sub {
+		plan(1);
+
+		my $rmsg="MN;D=3645;R=4;";
+		my %signal_parts=SIGNALduino_Split_Message($rmsg,$targetHash->{NAME});
+
+		is(SIGNALduino_Parse_MN($targetHash, $rmsg, \%signal_parts),0 , "MN data not dispatched");
+	};
+
+	subtest 'SIGNALduino_parse_MN method does not exist' => sub {
+		plan(1);
+
+		my $rmsg="MN;D=3545;R=4;";
+		my %signal_parts=SIGNALduino_Split_Message($rmsg,$targetHash->{NAME});
+
+		is(SIGNALduino_Parse_MN($targetHash, $rmsg, \%signal_parts),0 , "MN data not dispatched");
+	};
+
+}
+)

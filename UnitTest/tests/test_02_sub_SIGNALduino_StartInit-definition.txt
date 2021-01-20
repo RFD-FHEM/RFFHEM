@@ -1,0 +1,44 @@
+defmod test_02_sub_SIGNALduino_StartInit UnitTest dummyDuino ( 
+{
+	use Test2::V0;
+	use Test2::Tools::Compare qw{ is };
+
+	subtest 'Test with initretry=1' => sub {
+		plan(4);
+
+		my $mock = Mock::Sub->new;
+	 	my $SD_SimpleWrite = $mock->mock('SIGNALduino_SimpleWrite');
+		$targetHash->{initretry} = 1;
+
+		my $ret=SIGNALduino_StartInit($targetHash);
+		is($SD_SimpleWrite->called,1,"SIGNALduino_SimpleWrite called");
+	    my @called_args = $SD_SimpleWrite->called_with;
+	    is( $called_args[1], "V", "SIGNALduino_SimpleWrite called with V" );
+		is($targetHash->{ucCmd}->{cmd},"version","ucCmd is version");
+		is($targetHash->{DevState},"waitInit","check DevState");
+
+		$SD_SimpleWrite->unmock;
+	}; 
+
+	subtest 'Test with initretry=3' => sub {
+		plan(5);
+
+		my $mock = Mock::Sub->new;
+	 	my $SD_ResetDevice = $mock->mock('SIGNALduino_ResetDevice');
+		$targetHash->{initretry} = 3;
+
+		is($targetHash->{initResetFlag},undef,"check initResetFlag before beginning");
+		my $ret=SIGNALduino_StartInit($targetHash);
+		is($SD_ResetDevice->called,1,"SIGNALduino_ResetDevice called");
+		is($targetHash->{DevState},"INACTIVE","check DevState");
+		is($targetHash->{initResetFlag},1,"check initResetFlag");
+		$SD_ResetDevice->unmock;
+
+		my $SD_CloseDevice = $mock->mock('SIGNALduino_CloseDevice');
+		my $ret=SIGNALduino_StartInit($targetHash);
+		is($SD_CloseDevice->called,1,"SIGNALduino_CloseDevice called");
+		$SD_CloseDevice->unmock;
+	}; 
+
+} 
+)
