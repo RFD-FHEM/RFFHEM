@@ -1,3 +1,4 @@
+2021-01-22 - Merge branch 'master_feature_BeSmart_Sx' of https://github.com/RFD-FHEM/RFFHEM into master_feature_BeSmart_Sx
 2021-01-22 - Set commands changed
 2020-12-21 - new protocol for BeSmart S4 remote control
 2020-12-20 - Decoding and sending protocol 24 (#915)
