@@ -352,8 +352,13 @@
 ###############################################################################################################################################################################
 # - Remote control SEAV BeSmart S4 for BEST Cirrus Draw (07F57800) Deckenluefter [Protocol 78]
 #{    elektron-bbs 2020-12-21
-#     The protocol could not be fully verified as only messages from a remote control were available.
+#     The protocol could not be fully verified as only messages from one remote control were available.
+#     This remote control is also available with a neutral keyboard. The set commands were set up according to the user's wishes.
 #     https://github.com/RFD-FHEM/RFFHEM/issues/909 @TheChatty
+#     BeSmart_S4_534 light_toggle MU;P0=-19987;P1=205;P2=-530;P3=501;P4=-253;P6=-4094;D=01234123412123434123412123412123412121216123412341212343412341212341212341212121612341234121234341234121234121234121212161234123412123434123412123412123412121216123412341212343412341212341212341212121;CP=1;R=70;
+#     BeSmart_S4_534 5min_boost   MU;P0=-23944;P1=220;P2=-529;P3=483;P4=-252;P5=-3828;D=01234123412123434123412123412121212121235123412341212343412341212341212121212123512341234121234341234121234121212121212351234123412123434123412123412121212121235123412341212343412341212341212121212123;CP=1;R=74;
+#     BeSmart_S4_534 level_up     MU;P0=-8617;P1=204;P2=-544;P3=490;P4=-246;P6=-4106;D=01234123412123434123412123412121234121216123412341212343412341212341212123412121612341234121234341234121234121212341212161234123412123434123412123412121234121216123412341212343412341212341212123412121;CP=1;R=70;
+#     BeSmart_S4_534 level_down   MU;P0=-14542;P1=221;P2=-522;P3=492;P4=-240;P5=-4114;D=01234123412123434123412123412121212341215123412341212343412341212341212121234121512341234121234341234121234121212123412151234123412123434123412123412121212341215123412341212343412341212341212121234121;CP=1;R=62;
 #}
 ###############################################################################################################################################################################
 # !!! ToDo´s !!!
@@ -367,7 +372,7 @@ use strict;
 use warnings;
 no warnings 'portable';  # Support for 64-bit ints required
 
-our $VERSION = '2020-12-21';
+our $VERSION = '2021-01-22';
 
 sub SD_UT_bin2tristate;
 sub SD_UT_tristate2bin;
@@ -769,10 +774,10 @@ my %models = (
                 Protocol   => 'P24',
                 Typ        => 'remote'
               },
-  'BeSmart_S4' => { '10001000' => 'up',
-                    '10000100' => 'down',
-                    '10010000' => 'left',
-                    '10000001' => 'right',
+	'BeSmart_S4' => { '10001000' => 'level_up',     # was 'up'
+                    '10000100' => 'level_down',   # was 'down'
+                    '10010000' => 'light_toggle', # was 'left'
+                    '10000001' => '5min_boost',   # was 'right'
                     hex_length => [5],
                     Protocol   => 'P78',
                     Typ        => 'remote'
