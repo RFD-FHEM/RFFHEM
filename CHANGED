@@ -1,3 +1,4 @@
+2021-01-22 - Set commands changed
 2020-12-21 - new protocol for BeSmart S4 remote control
 2020-12-20 - Decoding and sending protocol 24 (#915)
   SD_ProtocolData.pm: change protocol u24 to P24
