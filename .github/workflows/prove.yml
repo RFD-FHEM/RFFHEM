@@ -10,14 +10,15 @@ jobs:
         perl: [ '5.22', '5.24', '5.26' ]
     name: Perl ${{ matrix.perl }} on ${{ matrix.os }}
     steps:
-    - uses: actions/checkout@master
-    - uses: shogo82148/actions-setup-perl@v1
+    - uses: actions/checkout@v2
+    - uses: shogo82148/actions-setup-perl@v1.9.5
       with:
         perl-version: ${{ matrix.perl }}
-    - run: |
-        cpanm --notest --installdeps .
-        cpanm --notest Devel::Cover::Report::Clover
-        cpanm Storable
+    - name: Install deps via cpanm
+      run: |
+        cpanm --notest --no-interactive -v --installdeps .
+        cpanm --notest --no-interactive -v Devel::Cover::Report::Clover
+        cpanm --no-interactive -v Storable
     - name: install fhem via deb package
       run: |
         wget -qO - http://debian.fhem.de/archive.key | sudo apt-key add -
@@ -55,9 +56,11 @@ jobs:
         flags: unittests,fhem,modules
         name: fhem (testscripts) ${{ matrix.perl }}
     - name: run make test (classic fhem unittest module)
+      id: classic_make_test
       run: |
         timeout 40 bash -c 'while /usr/bin/pgrep perl >> /dev/null; do sleep 1; echo .; done;'
         make test PERL_OPTS="-MDevel::Cover" 2>make_error.txt && sudo pkill "^perl"
+        echo "::set-output name=exitcode::$(echo $?)"
         cat make_error.txt
         timeout 40 bash -c 'while /usr/bin/pgrep perl >> /dev/null; do sleep 1; echo .; done;' || sudo pkill "^perl"
         sleep 3
@@ -65,7 +68,6 @@ jobs:
 #       grep -oP "^make:.*\[(.*)\].*Error" make_error.txt | awk -F'[][]' '{print $2}'
       shell: bash {0}
     - name: Create clover report  
-#      run: cover -report codecov
       run: cover -report clover
     - uses: codecov/codecov-action@v1
       with:
@@ -73,4 +75,8 @@ jobs:
         file: ./cover_db/clover.xml
         flags: unittest
         name: unittest module ${{ matrix.perl }}
+    - name: Fail if there was an error during tests
+      run: exit 1
+      if: ${{ steps.classic_make_test.outputs.exitcode != 0 }} 
+
         

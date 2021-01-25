@@ -75,7 +75,7 @@ defmod test_02_sub_SIGNALduino_Get UnitTest dummyDuino
 			dummy		=> 1,
 			input		=> "?",
 			check 		=>  array  {end(); },
-			return 		=> match qr/^Unknown argument \?, choose one of availableFirmware:noArg raw:textFieldNL$/		
+			return 		=> match qr/^Unknown argument \?, choose one of availableFirmware:noArg rawmsg:textFieldNL$/		
 	    },
 
 	    {
@@ -168,14 +168,14 @@ defmod test_02_sub_SIGNALduino_Get UnitTest dummyDuino
 			cc1101_available	=> 0,
 			input		=> "raw e",
 			check =>  array  { end();	},
-    		return 		=> "This command is not supported via get raw."
+    		return 		=> "Unknown argument raw, choose one of supported commands"
 	    },
 	    {
-			testname	=> "get raw MS;P0=1500;D=0;",
+			testname	=> "get rawmsg MS;P0=1500;D=0;",
 			cc1101_available	=> 0,
-			input		=> "raw MS;P0=1500;D=0;",
+			input		=> "rawmsg MS;P0=1500;D=0;",
 			check =>  array  { end();	},
- 			return 		=> undef		
+ 			return 		=> "Parse raw msg, no suitable protocol recognized."		
 	    },
 
     );
@@ -217,13 +217,13 @@ defmod test_02_sub_SIGNALduino_Get UnitTest dummyDuino
 	
 	};
 	
-	subtest 'Test get raw MS;P1=309;' => sub {
+	subtest 'Test get rawmsg MS;P1=309;' => sub {
 		plan (2);
 		my $mock = Mock::Sub->new;
 	 	my $SD_Parse = $mock->mock('SIGNALduino_Parse');
 		my $rawArg="MS;P1=309;";
-		my $ret=SIGNALduino_Get($targetHash, $target, "raw", $rawArg);
-		is($ret,undef,"Verify return value");
+		my $ret=SIGNALduino_Get($targetHash, $target, "rawmsg", $rawArg);
+		is($ret,"Parse raw msg, no suitable protocol recognized.","Verify return value");
 		
 		if ($SD_Parse->called)
 		{
@@ -250,7 +250,7 @@ defmod test_02_sub_SIGNALduino_Get UnitTest dummyDuino
 			plan($tests);
 
 			like($ret,qr/^Unknown argument \?, .*availableFirmware:noArg.*/,"check cmd availableFirmware accepted");
-			like($ret,qr/^Unknown argument \?, .*raw/,"check cmd raw accepted");
+			like($ret,qr/^Unknown argument \?, .*rawmsg/,"check cmd rawmsg accepted");
 		};
 
 		subtest 'Test not allowed - get commands' => sub {
@@ -296,7 +296,7 @@ defmod test_02_sub_SIGNALduino_Get UnitTest dummyDuino
 			like($ret,qr/^Unknown argument \?, .*config.*/,"check cmd config accepted");
 			like($ret,qr/^Unknown argument \?, .*freeram.*/,"check cmd freeram accepted");
 			like($ret,qr/^Unknown argument \?, .*ping.*/,"check cmd ping accepted");
-			like($ret,qr/^Unknown argument \?, .*raw.*/,"check cmd raw accepted");
+			like($ret,qr/^Unknown argument \?, .*rawmsg.*/,"check cmd rawmsg accepted");
 			like($ret,qr/^Unknown argument \?, .*uptime.*/,"check cmd uptime accepted");
 			like($ret,qr/^Unknown argument \?, .*version.*/,"check cmd version accepted");
 		};
