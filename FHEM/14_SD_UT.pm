@@ -1340,26 +1340,19 @@ sub SD_UT_Parse {
   }
 
   if ($hlen == 5) {
-    ### Chilitec_22640 [P14] ###
-    if (!$def && $protocol == 14) {
+    if (!$def && $protocol == 14) { ### Chilitec_22640 [P14] ###
       $deviceCode = substr($rawData,0,4);
       $devicedef = 'Chilitec_22640 ' . $deviceCode;
       $def = $modules{SD_UT}{defptr}{$devicedef};
-    }
-    ### QUIGG_DMV [P34] ###
-    if (!$def && $protocol == 34) {
+    } elsif (!$def && $protocol == 34) { ### QUIGG_DMV [P34] ###
       $deviceCode = substr($rawData,0,3);
       $devicedef = 'QUIGG_DMV ' . $deviceCode;
       $def = $modules{SD_UT}{defptr}{$devicedef};
-    }
-    ### TR_502MSV [P34] ###
-    if (!$def && $protocol == 34) {
+    } elsif (!$def && $protocol == 34) { ### TR_502MSV [P34] ###
       $deviceCode = substr($rawData,0,3);
       $devicedef = 'TR_502MSV ' . $deviceCode;
       $def = $modules{SD_UT}{defptr}{$devicedef};
-    }
-    ### Remote control Tedsen_SKX2xx [P46] ###
-    if (!$def && $protocol == 46) {
+    } elsif (!$def && $protocol == 46) { ### Remote control Tedsen_SKX2xx [P46] ###
       $deviceCode = SD_UT_bin2tristate(substr($bitData,0,14));    # only 14 bit from bitdata to tristate
       $devicedef = 'Tedsen_SKX1xx ' . $deviceCode if (!$def);
       $def = $modules{SD_UT}{defptr}{$devicedef} if (!$def);
@@ -1369,9 +1362,7 @@ sub SD_UT_Parse {
       $def = $modules{SD_UT}{defptr}{$devicedef} if (!$def);
       $devicedef = 'Tedsen_SKX6xx ' . $deviceCode if (!$def);
       $def = $modules{SD_UT}{defptr}{$devicedef} if (!$def);
-    }
-    ### OR28V [P68] ###
-    if ($protocol == 68) {
+    } elsif ($protocol == 68) { ### OR28V [P68] ###
       my $check = (oct( "0b".substr($bitData,9,7) ) + oct( "0b".substr($bitData,16,4)."0000" ) + 85) & 0x7f;
       if ($check != oct( "0b".substr($bitData,1,7))) {
         Log3 $iohash, 3, "$ioname: SD_UT_Parse device OR28V - checksum - ERROR (rawData:$rawData)";
@@ -1384,15 +1375,11 @@ sub SD_UT_Parse {
         $model = 'OR28V';
         $name = $model.'_' . $deviceCode;
       }
-    }
-    ### BeSmart_S4 [P78] ###
-    if (!$def && $protocol == 78) {
+    } elsif (!$def && $protocol == 78) { ### BeSmart_S4 [P78] ###
       $deviceCode = substr($rawData,0,3);
       $devicedef = 'BeSmart_S4 ' . $deviceCode;
       $def = $modules{SD_UT}{defptr}{$devicedef};
-    }
-    ### NEFF SF01_01319004 || BOSCH SF01_01319004_Typ2 [P86] ###
-    if (!$def && $protocol == 86) {
+    } elsif (!$def && $protocol == 86) { ### NEFF SF01_01319004 || BOSCH SF01_01319004_Typ2 [P86] ###
       $deviceCode = substr($bitData,0,14) . "00";
       $deviceCode = sprintf("%X", oct( "0b$deviceCode" ) );
       $devicedef = 'SF01_01319004 ' . $deviceCode if (!$def);

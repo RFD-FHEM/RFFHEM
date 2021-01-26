@@ -2147,7 +2147,6 @@ package lib::SD_ProtocolData;
         knownFreqs      => '433.92',
         zero            => [1,-2], # 250,-500
         one             => [2,-1], # 500,-250
-        # end             => [-14],  # -3500 wird bei Dekodierung nicht ausgewertet, nur beim Senden
         start           => [-14],  # -3500 + low time from last bit
         clockabs        => 250,
         reconstructBit  => '1',
