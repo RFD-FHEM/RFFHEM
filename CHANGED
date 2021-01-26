@@ -1,3 +1,7 @@
+2021-01-26 - Update 14_SD_UT.pm
+
+change elsif to if
+TR_502MSV [P34] funktionierte nicht mehr
 2021-01-26 - Update 14_SD_UT.pm and SD_ProtocolData.pm
 
 change if to elsif
