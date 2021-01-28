@@ -1,3 +1,7 @@
+2021-01-28 - Remote control SEAV BeSmart S4 (#933)
+
+* new protocol for BeSmart S4 remote control
+* Update 14_SD_UT.pm and SD_ProtocolData.pm
 2021-01-26 - Update 14_SD_UT.pm
 
 change elsif to if
