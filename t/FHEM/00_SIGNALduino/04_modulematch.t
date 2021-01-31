@@ -1,18 +1,32 @@
-defmod test_04_modulematch_1 UnitTest dummyDuino (
- { 
-	use Test2::V0;
-	use Test2::Tools::Compare qw{ is isnt };
+use strict;
+use warnings;
+use Test2::V0;
+use Test2::Tools::Compare qw{is isnt};
+use Test2::Mock;
 
-	my $LoadResult =  $targetHash->{protocolObject}->LoadHash("$attr{global}{modpath}/FHEM/lib/test_loadprotohash-ok.pm");
+use File::Basename;
+our %defs;
+our %attr;
+
+InternalTimer(time()+1, sub {
+	my $target = shift;
+	my $targetHash = $defs{$target};
+	plan (6);	
+
+	my $path=dirname(__FILE__);
+	my $LoadResult =  $targetHash->{protocolObject}->LoadHash($path."/test_loadprotohash-ok.pm");
+
 	is($LoadResult,undef,"load test protocol hash ");
   	my $local_ProtocolListSIGNALduino = $targetHash->{protocolObject}->getProtocolList();
 
-	
-	foreach my $id (qw/9999 9998/)
-	{
-		is($targetHash->{protocolObject}->protocolExists($id),1,"id $id exists");
-	}
- 
+	subtest 'verify protocolList loaded correctly'=> sub {
+
+		foreach my $id (qw/9999 9998/)
+		{
+			is($targetHash->{protocolObject}->protocolExists($id),1,"id $id exists");
+		}
+	};
+
 	subtest 'SIGNALduino_moduleMatch scenarios without whitlistIDs and development attr' => sub {
 		plan(4);
 		$local_ProtocolListSIGNALduino->{'9999'}{developId}="m";
@@ -51,21 +65,25 @@ defmod test_04_modulematch_1 UnitTest dummyDuino (
 		SIGNALduino_IdList("x:$target","","","m9999");
 		$local_ProtocolListSIGNALduino->{'9999'}{modulematch}="^X[A-Fa-f0-9]+";
 		SKIP : {
-			skip "attribute development not supported in stable version", 1 if (index($targetHash->{versionmodule},"dev") == -1);
+			skip ("attribute development not supported in stable version", 1) if (index($targetHash->{versionmodul},"dev") == -1);
 			is(SIGNALduino_moduleMatch($target,'9999',"X3332222"),1,"check returncode with matching modulematch and right development attr");
 		}
 		is(SIGNALduino_moduleMatch($target,'9999',"Y3332222"),0,"check returncode with not matching modulematch");
 	};
-	
-	$LoadResult =  $targetHash->{protocolObject}->LoadHash("$attr{global}{modpath}/FHEM/lib/SD_ProtocolData.pm");
-	is($LoadResult,undef,"load test protocol hash ");
+	subtest 'test normal hash reloaded correctly' => sub {
+		plan(5);
 
-	SIGNALduino_IdList("x:$target","","","");  
-	foreach my $id (qw/9999 9998 9997 9996/)
-	{
-		isnt($targetHash->{protocolObject}->protocolExists($id),1,"id $id does not exists");
-	}
+		$LoadResult =  $targetHash->{protocolObject}->LoadHash("$attr{global}{modpath}/FHEM/lib/SD_ProtocolData.pm");
+		is($LoadResult,undef,"load test protocol hash ");
 
- }
-);
+		SIGNALduino_IdList("x:$target","","","");  
+		foreach my $id (qw/9999 9998 9997 9996/)
+		{
+			isnt($targetHash->{protocolObject}->protocolExists($id),1,"id $id does not exists");
+		}
+	};
 
+	exit(0);
+},'dummyDuino');
+
+1;
