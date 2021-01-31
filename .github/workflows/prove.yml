@@ -44,7 +44,7 @@ jobs:
       run: |
         cp -r FHEM/* ${FHEM_DIR}/FHEM/
         cd ${FHEM_DIR}
-        prove --exec 'perl -MDevel::Cover=-silent,1 fhem.pl -t' -I FHEM -r -vv  ${GITHUB_WORKSPACE}/t/FHEM/00_SIGNALduino/*.t  
+        prove --exec 'perl -MDevel::Cover=-silent,1 fhem.pl -t' -I FHEM -r -vv -r ${GITHUB_WORKSPACE}/t/FHEM/[0_9][0-9]_*/  
       env:
         FHEM_DIR: /opt/fhem
     - name: Create clover report  

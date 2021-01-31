@@ -1,9 +1,8 @@
 #!/usr/bin/env perl
 use strict;
 use warnings;
-
 use Test2::V0;
-use Test2::Tools::Compare qw{is field U D match hash bag };
+use Test2::Tools::Compare qw{is field U D match array hash bag };
 use Test2::Todo;
 use Test2::Mock;
 use Data::Dumper;
@@ -13,11 +12,9 @@ $defs{cc1101dummyDuino}{cc1101_available} = 1;
 
 my ($mock);
 
-BEGIN {
+our %defs;
 
-};
-
-InternalTimer(time()+1, sub() {
+InternalTimer(time()+1, sub {
   $mock = Test2::Mock->new(
     track => 1, # enable call tracking if desired
       class => 'lib::SD_Protocols',
