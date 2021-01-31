@@ -1,17 +1,30 @@
-defmod test_04_developid_1 UnitTest dummyDuino (
- { 
-	use Test2::V0;
-	use Test2::Tools::Compare qw{is isnt};
+use strict;
+use warnings;
+use Test2::V0;
+use Test2::Tools::Compare qw{is isnt};
+use Test2::Mock;
 
-	my $LoadResult =  $targetHash->{protocolObject}->LoadHash("$attr{global}{modpath}/FHEM/lib/test_loadprotohash-ok.pm");
+use File::Basename;
+our %defs;
+our %attr;
+
+InternalTimer(time()+1, sub {
+
+	my $target = shift;
+	my $targetHash = $defs{$target};
+	plan (10);	
+	my $path=dirname(__FILE__);
+	my $LoadResult =  $targetHash->{protocolObject}->LoadHash($path."/test_loadprotohash-ok.pm");
 	is($LoadResult,undef,"load test protocol hash ");
 
 	my %ProtocolListTest = %{$targetHash->{protocolObject}->getProtocolList()};
-	foreach my $id (qw/9999 9998 9997 9996/)
-	{
-		is($targetHash->{protocolObject}->protocolExists($id),1,"id $id exists");
-	}
-
+	subtest 'verify protocolList loaded correctly'=> sub {
+		plan(4);
+		foreach my $id (qw/9999 9998 9997 9996/)
+		{
+			is($targetHash->{protocolObject}->protocolExists($id),1,"id $id exists");
+		}
+	};
 
 	my $msg;
 	my $regex;
@@ -32,7 +45,6 @@ defmod test_04_developid_1 UnitTest dummyDuino (
 	
 	my $subTestName='SIGNALduino_IdList developid "m" skip scenarios';
 	subtest $subTestName => sub {
-		Log3 $name, 3 ,$subTestName." |->";
 		plan(3);
 		$regex_matched=0;
 		$regex=$ProtocolListTest{'9999'}{id};
@@ -51,12 +63,10 @@ defmod test_04_developid_1 UnitTest dummyDuino (
 		SIGNALduino_IdList("x:$target","",9999,0);
 		ok($regex_matched,$msg) or diag("check log entrys for skipped with id 9999, they where not found");
 		$regex_matched=0;
-		Log3 $name, 3 ,$subTestName." <--|";
 	};
 	
 	$subTestName='SIGNALduino_IdList developid "y" skip scenarios';
 	subtest $subTestName => sub {
-		Log3 $name, 3 ,$subTestName." |->";
 		plan(4);
 		$regex_matched=0;
 		$regex=$ProtocolListTest{'9997'}{id};
@@ -81,12 +91,10 @@ defmod test_04_developid_1 UnitTest dummyDuino (
 		SIGNALduino_IdList("x:$target","","","m9997");  
 		ok($regex_matched,$msg) or diag("check log entrys for skipped with id 9997, they where not found");
 		$regex_matched=0;
-		Log3 $name, 3 ,$subTestName." <--|";
 	};
 
 	$subTestName='SIGNALduino_IdList developid "p" skip scenarios';
 	subtest $subTestName => sub {
-		Log3 $name, 3 ,$subTestName." |->";
 
 		plan(4);
 		$regex=$ProtocolListTest{'9996'}{id};
@@ -110,16 +118,14 @@ defmod test_04_developid_1 UnitTest dummyDuino (
 		SIGNALduino_IdList("x:$target","","","m9996"); 
 		ok($regex_matched,$msg) or diag("check log entrys for skipped with id 9996, they where not found");
 		$regex_matched=0;
-		Log3 $name, 3 ,$subTestName." <--|";
 
 	};
 	
 	SKIP: {
-		skip "attribute development not supported in stable version", 2 if (index($targetHash->{versionmodule},"dev") == -1);
+		skip ("attribute development not supported in stable version", 2) if ( index($targetHash->{versionmodul},"dev") == -1);
 	
 		$subTestName='SIGNALduino_IdList developid "m" not skipped scenarios';
 		subtest $subTestName => sub {
-			Log3 $name, 3 ,$subTestName." |->";
 			plan(2);
 			$regex_matched=0;
 			$regex=$ProtocolListTest{'9999'}{id};
@@ -133,13 +139,11 @@ defmod test_04_developid_1 UnitTest dummyDuino (
 			SIGNALduino_IdList("x:$target","","","m75 m9999 u73"); 
 			isnt($regex_matched,1,$msg) or diag("check log entrys for skipped with id 9999, they should not be there");
 			$regex_matched=0;
-			Log3 $name, 3 ,$subTestName." <--|";
 		};
 	
 	
 		$subTestName='SIGNALduino_IdList developid "y" not skipped scenarios';
 		subtest $subTestName => sub {
-			Log3 $name, 3 ,$subTestName." |->";
 			plan(5);
 			$regex_matched=0;
 			$regex=$ProtocolListTest{'9997'}{id};
@@ -170,12 +174,10 @@ defmod test_04_developid_1 UnitTest dummyDuino (
 			$regex_matched=0;
 
 			$regex_matched=0;
-			Log3 $name, 3 ,$subTestName." <--|";
 		};
 	
 		$subTestName='SIGNALduino_IdList multiple development statements';
 		subtest $subTestName => sub {
-			Log3 $name, 3 ,$subTestName." |->";
 
 			plan(2);
 			$regex_matched=0;
@@ -190,13 +192,11 @@ defmod test_04_developid_1 UnitTest dummyDuino (
 			SIGNALduino_IdList("x:$target","","","y m9999");  
 			isnt($regex_matched,1,$msg) or diag("check log entrys for skipped with id $regex, this should not be skipped");
 			$regex_matched=0;
-			Log3 $name, 3 ,$subTestName." <--|";
 		};
 	};
 	
 	$subTestName='SIGNALduino_IdList developid "p" not skipped scenarios';
 	subtest $subTestName => sub {
-		Log3 $name, 3 ,$subTestName." |->";
 		$ProtocolListTest{'9996'}{developId}="p";
 		plan(2);
 		$regex_matched=0;
@@ -211,12 +211,10 @@ defmod test_04_developid_1 UnitTest dummyDuino (
 		SIGNALduino_IdList("x:$target","9996","","m75 u73"); 
 		isnt($regex_matched,1,$msg) or diag("check log entrys for skipped with id 9996, they should not be there");
 		$regex_matched=0;
-		Log3 $name, 3 ,$subTestName." <--|";
 	};
 	
 	$subTestName='SIGNALduino_IdList developId "m" dispatch enabled/disabled tests';
 	subtest $subTestName => sub {
-		Log3 $name, 3 ,$subTestName." |->";
 		$logfilter="IdList, development protocol is active";
 
 		plan(2);
@@ -229,24 +227,27 @@ defmod test_04_developid_1 UnitTest dummyDuino (
 		$regex_matched=0;
 
 		SKIP : {
-			skip "attribute development not supported in stable version", 1 if (index($targetHash->{versionmodule},"dev") == -1);
-
+			skip ('attribute development not supported in stable version', 1) if (index($targetHash->{versionmodul},'dev') == -1);
 			$msg="attr whitelist=\"\", development=\"m9999\"" ;
 			SIGNALduino_IdList("x:$target","","","m9999");  
 			isnt($regex_matched,1,$msg) or diag("check log entrys for development protocol is active with id $regex, there shouldn't be a note");
 			$regex_matched=0;
 		}
-		Log3 $name, 3 ,$subTestName." <--|";
 	};
-	my $LoadResult =  $targetHash->{protocolObject}->LoadHash("$attr{global}{modpath}/FHEM/lib/SD_ProtocolData.pm");
-	is($LoadResult,undef,"load test protocol hash ");
+	subtest 'test normal hash reloaded correctly' => sub {
+		plan(5);
 
-	SIGNALduino_IdList("x:$target","","","");  
-	foreach my $id (qw/9999 9998 9997 9996/)
-	{
-		isnt($targetHash->{protocolObject}->protocolExists($id),1,"id $id does not exists");
-	}
+		my $LoadResult =  $targetHash->{protocolObject}->LoadHash("$attr{global}{modpath}/FHEM/lib/SD_ProtocolData.pm");
+		is($LoadResult,undef,"load test protocol hash ");
 
- };
-);
+		SIGNALduino_IdList("x:$target","","","");  
+		foreach my $id (qw/9999 9998 9997 9996/)
+		{
+			isnt($targetHash->{protocolObject}->protocolExists($id),1,"id $id does not exists");
+		}
+	};
 
+	exit(0);
+},'dummyDuino');
+
+1;
