@@ -246,7 +246,7 @@ my %matchListSIGNALduino = (
       '14:Dooya'            => '^P16#[A-Fa-f0-9]+',
       '15:SOMFY'            => '^Ys[0-9A-F]+',
       '16:SD_WS_Maverick'   => '^P47#[A-Fa-f0-9]+',
-      '17:SD_UT'            => '^P(?:14|20|24|26|29|30|34|46|56|68|69|76|81|83|86|90|91|91.1|92|93|95|97|99|104)#.*', # universal - more devices with different protocols
+      '17:SD_UT'            => '^P(?:14|20|24|26|29|30|34|46|56|68|69|76|78|81|83|86|90|91|91.1|92|93|95|97|99|104|105)#.*', # universal - more devices with different protocols
       '18:FLAMINGO'         => '^P13\.?1?#[A-Fa-f0-9]+',              # Flamingo Smoke
       '19:CUL_WS'           => '^K[A-Fa-f0-9]{5,}',
       '20:Revolt'           => '^r[A-Fa-f0-9]{22}',
@@ -1091,7 +1091,7 @@ sub SIGNALduino_Get_RawMsg {
 
   if ($a[1] =~ /\002M\w;.+;\003$/)
   {
-    $hash->{logMethod}->( $hash->{NAME}, 4, "$hash->{NAME}: msg get raw: $a[1]");
+    $hash->{logMethod}->( $hash->{NAME}, 4, "$hash->{NAME}: get rawmsg: $a[1]");
     my $cnt = SIGNALduino_Parse($hash, $hash, $hash->{NAME}, $a[1]);
     if (defined $cnt) {
       return "Parse raw msg, number of messages passed to modules: $cnt";

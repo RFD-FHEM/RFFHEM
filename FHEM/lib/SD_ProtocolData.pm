@@ -72,8 +72,8 @@
 ##### notice #### or #### info ############################################################################################################
 # !!! Between the keys and values ​​no tabs, please use spaces !!!
 # !!! Please use first unused id for new protocols !!!
-# ID´s are currently unused: 78
-# ID´s need to be revised (preamble u): 5|19|21|22|23|24|25|28|31|36|40|52|54|56|59|63
+# ID´s are currently unused: 107 - 
+# ID´s need to be revised (preamble u): 5|19|21|22|23|25|28|31|36|40|52|59|63
 ###########################################################################################################################################
 # Please provide at least three messages for each new MU/MC/MS protocol and a URL of issue in GitHub or discussion in FHEM Forum
 # https://forum.fhem.de/index.php/topic,58396.975.html | https://github.com/RFD-FHEM/RFFHEM
@@ -87,7 +87,7 @@ package lib::SD_ProtocolData;
   use strict;
   use warnings;
 
-  our $VERSION = '1.26';
+  our $VERSION = '1.27';
 
   our %protocols = (
     "0" =>  ## various weather sensors (500 | 9100)
@@ -2134,28 +2134,29 @@ package lib::SD_ProtocolData;
         length_max      => '44',
         remove_zero     => 1,          # Removes leading zeros from output
       },
-    # "78"  =>  ## GEIGER blind motors
-                # https://forum.fhem.de/index.php/topic,39153.0.html @fasch
-                # MU;P0=313;P1=1212;P2=-309;P4=-2024;P5=-16091;P6=2014;D=01204040562620404626204040404040462046204040562620404626204040404040462046204040562620404626204040404040462046204040562620404626204040404040462046204040;CP=0;R=236;
-                # MU;P0=-15770;P1=2075;P2=-264;P3=326;P4=-2016;P5=948;D=012121234121234341212121234341234343012125;CP=3;R=208;
-      # {
-        # name            => 'GEIGER blind motors',
-        # comment         => 'example remote control GF0001',
-        # id              => '78',
-        # knownFreqs      => '',
-        # developId       => 'y',
-        # zero            => [1,-6.6],
-        # one             => [6.6,-1],
-        # start           => [-53],
-        # clockabs        => 300,
-        # format          => 'twostate',
-        # preamble        => 'u78#',
-        # clientmodule    => 'SIGNALduino_un',
-        # #modulematch     => '^TX......',
-        # length_min      => '14',
-        # length_max      => '18',
-        # paddingbits     => '2'        # pad 1 bit, default is 4
-      # },
+    "78"  =>  ## Remote control SEAV BeSmart S4 for BEST Cirrus Draw (07F57800) Deckenluefter
+                # https://github.com/RFD-FHEM/RFFHEM/issues/909 @TheChatty
+                # BeSmart_S4_534 light_toggle MU;P0=-19987;P1=205;P2=-530;P3=501;P4=-253;P6=-4094;D=01234123412123434123412123412123412121216123412341212343412341212341212341212121612341234121234341234121234121234121212161234123412123434123412123412123412121216123412341212343412341212341212341212121;CP=1;R=70;
+                # BeSmart_S4_534 5min_boost   MU;P0=-23944;P1=220;P2=-529;P3=483;P4=-252;P5=-3828;D=01234123412123434123412123412121212121235123412341212343412341212341212121212123512341234121234341234121234121212121212351234123412123434123412123412121212121235123412341212343412341212341212121212123;CP=1;R=74;
+                # BeSmart_S4_534 level_up     MU;P0=-8617;P1=204;P2=-544;P3=490;P4=-246;P6=-4106;D=01234123412123434123412123412121234121216123412341212343412341212341212123412121612341234121234341234121234121212341212161234123412123434123412123412121234121216123412341212343412341212341212123412121;CP=1;R=70;
+                # BeSmart_S4_534 level_down   MU;P0=-14542;P1=221;P2=-522;P3=492;P4=-240;P5=-4114;D=01234123412123434123412123412121212341215123412341212343412341212341212121234121512341234121234341234121234121212123412151234123412123434123412123412121212341215123412341212343412341212341212121234121;CP=1;R=62;
+      {
+        name            => 'BeSmart_Sx',
+        comment         => 'Remote control SEAV BeSmart S4',
+        id              => '78',
+        knownFreqs      => '433.92',
+        zero            => [1,-2], # 250,-500
+        one             => [2,-1], # 500,-250
+        start           => [-14],  # -3500 + low time from last bit
+        clockabs        => 250,
+        reconstructBit  => '1',
+        format          => 'twostate',
+        preamble        => 'P78#',
+        clientmodule    => 'SD_UT',
+        modulematch     => '^P78#',
+        length_min      => '19', # length - reconstructBit = length_min
+        length_max      => '20',
+      },
     "79"  =>  ## Heidemann | Heidemann HX | VTX-BELL
               # https://github.com/RFD-FHEM/SIGNALDuino/issues/84
               # P79#A5E | ring   MU;P0=656;P1=-656;P2=335;P3=-326;P4=-5024;D=0123012123012303030301 24 230123012123012303030301 24 230123012123012303030301 24 2301230121230123030303012423012301212301230303030124230123012123012303030301242301230121230123030303012423012301212301230303030124230123012123012303030301242301230121230123030303;CP=2;O;

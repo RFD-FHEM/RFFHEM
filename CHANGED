@@ -1,12 +1,22 @@
+2021-01-28 - Remote control SEAV BeSmart S4 (#933)
+
+* new protocol for BeSmart S4 remote control
+* Update 14_SD_UT.pm and SD_ProtocolData.pm
+2021-01-26 - Update 14_SD_UT.pm
+
+change elsif to if
+TR_502MSV [P34] funktionierte nicht mehr
+2021-01-26 - Update 14_SD_UT.pm and SD_ProtocolData.pm
+
+change if to elsif
+delete comment
+2021-01-25 - Merge branch 'master' into master_feature_BeSmart_Sx
+2021-01-25 - new protocol for BeSmart S4 remote control
+2021-01-22 - Merge branch 'master_feature_BeSmart_Sx' of https://github.com/RFD-FHEM/RFFHEM into master_feature_BeSmart_Sx
+2021-01-22 - Set commands changed
 2020-12-30 - rename "get raw" to "get rawmsg" (#925)
-
-* rename "get raw" to "get rawmsg"
+  * rename "get raw" to "get rawmsg"
 2020-12-30 - Display number of messages passed to modules.
-2020-12-28 - rename "get raw" to "get rawmsg"
-
-For "set raw" and "get raw", the same help was misleadingly displayed.
-"get raw" renamed to "get rawmsg".
-This will display the appropriate help.
 2020-12-28 - Extension for "get sduino ccreg" (#918)
   * Update 00_SIGNALduino.pm
     Extension of the CC1101 configuration register with standard values
