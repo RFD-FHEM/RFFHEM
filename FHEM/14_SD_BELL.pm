@@ -154,8 +154,8 @@ sub Define {
   return 'SD_BELL: wrong syntax: define <name> SD_BELL <Protocol> <HEX-Value> <optional IODEV>' if(int(@a) < 3 || int(@a) > 5);
   ### checks - doubleCode yes ###
   return "SD_BELL: wrong <protocol> $a[2]" if not($a[2] =~ /^(?:15|32|41|42|57|79|96|98)/xms);
-  return "SD_BELL: wrong HEX-Value! Protocol $a[2] HEX-Value <$a[3]> not HEX (0-9 | a-f | A-F)" if (($protocol != 41) && !$a[3] =~ /^[0-9a-fA-F]*$/xms);
-  return "SD_BELL: wrong HEX-Value! Protocol $a[2] HEX-Value <$a[3]> not HEX (0-9 | a-f | A-F) or length wrong!" if (($protocol == 41) && !$a[3] =~ /^[0-9a-fA-F]{8}_[0-9a-fA-F]{8}$/xms);
+  return "SD_BELL: wrong HEX-Value! Protocol $a[2] HEX-Value <$a[3]> not HEX (0-9 | a-f | A-F)" if (($protocol != 41) && not $a[3] =~ /^[0-9a-fA-F]*$/xms);
+  return "SD_BELL: wrong HEX-Value! Protocol $a[2] HEX-Value <$a[3]> not HEX (0-9 | a-f | A-F) or length wrong!" if (($protocol == 41) && not $a[3] =~ /^[0-9a-fA-F]{8}_[0-9a-fA-F]{8}$/xms);
 
   ($hash_name) = grep { $models{$_}{Protocol} eq $protocol } keys %models;    # search protocol --> model
   $doubleCode = $models{$hash_name}{doubleCode};                              # read note doubleCode
