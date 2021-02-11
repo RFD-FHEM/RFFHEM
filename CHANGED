@@ -1,3 +1,4 @@
+2021-02-07 - Fixed return from prepare_fash
 2021-02-07 - Merge branch 'unittest-2-prove' of ssh://github.com/RFD-FHEM/RFFHEM into unittest-2-prove
 2020-12-30 - rename "get raw" to "get rawmsg" (#925)
 
