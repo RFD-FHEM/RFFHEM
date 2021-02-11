@@ -92,15 +92,15 @@ InternalTimer(time()+1, sub {
 			{
 				SKIP: {
 					# skip 'Testset id not in scope' if (!defined $testSet->{id} || $testSet->{id} ne '79');
-					# skip 'Protocol does not exsists in ProtocolObject' if ( !$targetHash->{protocolObject}->protocolExists($testSet->{id}) );
-					# skip 'Protocol is under development' if ( defined $targetHash->{protocolObject}->checkProperty($testSet->{id},'developId',undef) );
+					skip 'Protocol does not exsists in ProtocolObject' if ( !$ioHash->{protocolObject}->protocolExists($testSet->{id}) );
+					# skip 'Protocol is under development' if ( defined $ioHash->{protocolObject}->checkProperty($testSet->{id},'developId',undef) );
 					while ( (my $tID, my $tData) = each (@{$testSet->{data}}) ) 
 					{
 						subtest "Checking module: $testSet->{module} device: $testSet->{name} TestNo: $tID " => sub {
 							
 							plan(3); # one for readings and one for internals and one for defmod
 							note("device will be defined temporary");
-							is(CommandDefMod(undef,"-temporary $tData->{internals}{NAME} $testSet->{module} $tData->{internals}{DEF}"),U(),"Verify device defmod") || diag  $tData;
+							is(CommandDefMod(undef,"-temporary $tData->{internals}{NAME} $testSet->{module} $tData->{internals}{DEF}"),U(),"Verify device defmod",$tData);
 							
 							no strict "refs"; 
 							&{$modules{$testSet->{module}}{ParseFn}}($ioHash,$tData->{dmsg});
@@ -118,9 +118,10 @@ InternalTimer(time()+1, sub {
 								plan(scalar keys %{$tData->{internals}} );
 								while ( (my $iName, my $iValue) = each (%{$tData->{internals}}) )
 								{
-									is(InternalVal($tData->{internals}{NAME} ,$iName,'0'),$iValue,'check internal $iName');						
+									is(InternalVal($tData->{internals}{NAME} ,$iName,'0'),$iValue,"check internal $iName");						
 								}
 							};
+							CommandDelete(undef,$tData->{internals}{NAME});
 						} # subtest
 					} # while testSet
 				} # SKIP

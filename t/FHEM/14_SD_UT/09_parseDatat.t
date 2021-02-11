@@ -121,6 +121,7 @@ InternalTimer(time()+1, sub {
 									is(InternalVal($tData->{internals}{NAME} ,$iName,'0'),$iValue,"check internal $iName");						
 								}
 							};
+							CommandDelete(undef,$tData->{internals}{NAME});
 						} # subtest
 					} # while testSet
 				} # SKIP
