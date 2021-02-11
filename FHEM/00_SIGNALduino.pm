@@ -20,6 +20,7 @@ use warnings;
 my $missingModulSIGNALduino = '';
 
 use DevIo;
+require "99_Utils.pm";
 use Carp;
 no warnings 'portable';
 
@@ -502,7 +503,10 @@ sub SIGNALduino_avrdude {
   {
     readingsSingleUpdate($hash,'state','FIRMWARE UPDATE with error',1);    # processed in tests
     $hash->{logMethod}->($name ,3, "$name: avrdude, ERROR: avrdude exited with error $?");
-    FW_directNotify("FILTER=$name", "#FHEMWEB:WEB", "FW_okDialog('ERROR: avrdude exited with error, for details see last flashlog.')", '');
+    if (defined $FW_wname)
+    {
+      FW_directNotify("FILTER=$name", "FHEMWEB:$FW_wname", "FW_okDialog('ERROR: avrdude exited with error, for details see last flashlog.')", '');
+    }
     $hash->{FLASH_RESULT}='ERROR: avrdude exited with error';              # processed in tests
   } else {
     $hash->{logMethod}->($name ,3, "$name: avrdude, Firmware update was successfull");
@@ -557,7 +561,9 @@ sub SIGNALduino_PrepareFlash {
   $log .= "port: $port\n";
 
   # prepare default Flashcommand
-  my $defaultflashCommand = ($hardware eq 'radinoCC1101' ? 'avrdude -c avr109 -b [BAUDRATE] -P [PORT] -p atmega32u4 -vv -D -U flash:w:[HEXFILE] 2>[LOGFILE]' : 'avrdude -c arduino -b [BAUDRATE] -P [PORT] -p atmega328p -vv -U flash:w:[HEXFILE] 2>[LOGFILE]');
+  my $defaultflashCommand = ($hardware eq 'radinoCC1101' 
+    ? 'avrdude -c avr109 -b [BAUDRATE] -P [PORT] -p atmega32u4 -vv -D -U flash:w:[HEXFILE] 2>[LOGFILE]' 
+    : 'avrdude -c arduino -b [BAUDRATE] -P [PORT] -p atmega328p -vv -U flash:w:[HEXFILE] 2>[LOGFILE]');
 
   # get User defined Flashcommand
   my $flashCommand = AttrVal($name,'flashCommand',$defaultflashCommand);
@@ -691,14 +697,14 @@ sub SIGNALduino_Set_raw {
     my $ghurl = "https://api.github.com/repos/RFD-FHEM/SIGNALDuino/releases/tags/$args[0]";
     $hash->{logMethod}->($hash, 3, "$name: Set_flash, $args[0] try to fetch release $ghurl");
 
-    $http_param{url}    = $ghurl;
-    $http_param{callback} = \&SIGNALduino_githubParseHttpResponse;  # Diese Funktion soll das Ergebnis dieser HTTP Anfrage bearbeiten
+    $http_param{url}        = $ghurl;
+    $http_param{callback}   = \&SIGNALduino_githubParseHttpResponse;  # Diese Funktion soll das Ergebnis dieser HTTP Anfrage bearbeiten
     $http_param{command}    = 'getReleaseByTag';
     HttpUtils_NonblockingGet(\%http_param);                         # Starten der HTTP Abfrage. Es gibt keinen Return-Code.
     return;
   } elsif ($args[0] =~ m/^https?:\/\// ) {
-    $http_param{url}    = $args[0];
-    $http_param{callback} = \&SIGNALduino_ParseHttpResponse;        # Diese Funktion soll das Ergebnis dieser HTTP Anfrage bearbeiten
+    $http_param{url}        = $args[0];
+    $http_param{callback}   = \&SIGNALduino_ParseHttpResponse;        # Diese Funktion soll das Ergebnis dieser HTTP Anfrage bearbeiten
     $http_param{command}    = 'flash';
     HttpUtils_NonblockingGet(\%http_param);
     return;
@@ -713,7 +719,10 @@ sub SIGNALduino_Set_raw {
   {
     return SIGNALduino_PrepareFlash($hash,$hexFile);
   } else {
-    FW_directNotify("FILTER=$name", "#FHEMWEB:WEB", "FW_okDialog('<u>ERROR:</u><br>Sorry, flashing your $hardware is currently not supported.<br>The file is only downloaded in /opt/fhem/FHEM/firmware.')", '');
+    if (defined $FW_wname)
+    {
+      FW_directNotify("FILTER=$name", "#FHEMWEB:$FW_wname", "FW_okDialog('<u>ERROR:</u><br>Sorry, flashing your $hardware is currently not supported.<br>The file is only downloaded in /opt/fhem/FHEM/firmware.')", '');
+    }
     return "Sorry, Flashing your $hardware via Module is currently not supported.";    # processed in tests
   }
 }
@@ -3863,7 +3872,10 @@ sub SIGNALduino_githubParseHttpResponse {
   # wenn
   # Damit ist die Abfrage zuende.
   # Evtl. einen InternalTimer neu schedulen
-  FW_directNotify("FILTER=$name", "#FHEMWEB:$FW_wname", "location.reload('true')", '');
+  if (defined $FW_wname)
+  {
+     FW_directNotify("FILTER=$name", "#FHEMWEB:$FW_wname", "location.reload('true')", '');
+  }
   return 0;
 }
 
