@@ -4,10 +4,10 @@ use warnings;
 
 use Test2::V0;
 use Test2::Tools::Compare qw{is item U D match hash array bag};
-use Mock::Sub;
 use Test2::Todo;
 
 
+our %defs;
 
 my @mockData = (
     {
@@ -67,6 +67,20 @@ my @mockData = (
         input =>  q[MC;LL=-2738;LH=3121;SL=-1268;SH=1667;D=GGD9FF0E;C=1465;L=32;R=246;],
         rValue => U(), 
         todoReason => q[This data should not be processed]
+    },
+    {
+        deviceName => q[dummyDuino],
+        plan => 2,
+        testname =>  q[Data is to short],
+        input =>  q[MC;LL=-762;LH=544;SL=-402;SH=345;D=DB6;C=342;L=12;R=32;],
+        rValue => F(), 
+    },
+    {
+        deviceName => q[dummyDuino],
+        plan => 2,
+        testname =>  q[Test Protocol 57 - MC Data good message],
+        input =>  q[MC;LL=-653;LH=679;SL=-310;SH=351;D=D55B58;C=332;L=21;],
+        rValue => 1, 
     },
 );
 plan (scalar @mockData );  

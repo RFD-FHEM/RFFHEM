@@ -558,13 +558,46 @@ InternalTimer(time()+1, sub {
 			input		=>	"LaCrossePairForSec 30",
 		},
 		{
-			testname	=>  "set reset command for device",
+			testname	=>  'set reset command for device',
 			check =>  sub { 
 			    return array  {
 			    	end();
     			};
 		    },
-			input		=>	"reset",
+			input		=>	'reset',
+		},
+		{
+			testname	=>  'seset flash without hardware parameter set',
+			attr		=>  ( {hardware => undef} ),
+			check =>  sub { 
+			    return array  {
+			    	end();
+    			};
+		    },
+			input		=>	'flash',
+			return		=> 	qr/^Please define your hardware!/
+		},
+		{
+			testname	=>  'set flash without argument passed (nano328)',
+			attr		=>  ( {hardware => 'nano328'} ),
+			check =>  sub { 
+			    return array  {
+			    	end();
+    			};
+		    },
+			input		=>	'flash',
+			return		=> 	qr/^ERROR: argument failed! flash/
+		},
+		{
+			testname	=>  'set flash without avrdude installed (nano328)',
+			check =>  sub { 
+			    return array  {
+			    	end();
+    			};
+		    },
+			attr		=>  ( {hardware => 'nano328'} ),
+			input		=>	'flash ./fhem/test.hex',
+			return		=> 	qr/^avrdude is not installed./
 		},
 
 
@@ -587,15 +620,20 @@ InternalTimer(time()+1, sub {
 		# Mock for DevIo_IsOpen
 		$targetHash->{DIODev} = exists($element->{DIODev}) ? $element->{DIODev} : undef;
 
-
-		$element->{pre_code}->() if (exists($element->{pre_code}));
+		#Mock attr
+		while (my ($key,$value) = each %{$element->{attr}} ) {
+			defined $value 
+				?	CommandAttr(undef,qq[$target $key $value])
+				:	CommandAttr(undef,qq[-r $target $key])
+		}
+		$element->{pre_code}->($target) if (exists($element->{pre_code}));
 		$todo=$element->{todo}->() if (exists($element->{todo}));
 		
 		subtest "checking $element->{testname};". ($targetHash->{cc1101_available} ? " with cc1101" : " without cc1101"). " " . ($targetHash->{DIODev} ? " devIo open" : " devIo closed") => sub {
 			plan (2);	
 			
 			my $ret = SIGNALduino_Set($targetHash,$target,split(" ",$element->{input}));
-			is($ret,$element->{return},"Verify return value");
+			like($ret,$element->{return},"Verify return value");
 			is($targetHash->{QUEUE},$element->{check}->(),"Verify expected queue element entrys");
 
 			@{$targetHash->{QUEUE}}=();
