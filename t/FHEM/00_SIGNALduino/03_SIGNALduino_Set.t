@@ -1,17 +1,21 @@
-defmod test_03_sub_SIGNALduino_Set UnitTest dummyDuino 
-(
- {
- 	use Test2::V0;
-	use Test2::Tools::Compare qw{    is like isnt unlike
-    match mismatch validator
-    hash array bag object meta number float rounded within string subset bool
-    in_set not_in_set check_set
-    item field call call_list call_hash prop check all_items all_keys all_vals all_values
-    etc end filter_items
-    T F D DNE FDNE E
-    event fail_events
-    exact_ref
-};
+use strict;
+use warnings;
+use Test2::V0;
+use Test2::Tools::Compare qw{is bag check array like unlike};
+use Test2::Mock;
+
+our %defs;
+our %attr;
+
+InternalTimer(time()+1, sub {
+	my $target = shift;
+	my $targetHash = $defs{$target};
+	my $mock = Test2::Mock->new(
+		track => 1,
+		class => 'main'
+	);	 	
+	my $tracking = $mock->sub_tracking;
+
     # Todo:  
     #        sendMsg with L or remove this option
     # sendMsg is tested in test_set_sendMsg-definition.txt but can be removed
@@ -557,7 +561,7 @@ defmod test_03_sub_SIGNALduino_Set UnitTest dummyDuino
 		
 	);
 
-	plan (scalar @mockData);	
+	plan (scalar @mockData + 4);	
 	my $todo=undef;
 	
 	foreach my $element (@mockData)
@@ -582,7 +586,7 @@ defmod test_03_sub_SIGNALduino_Set UnitTest dummyDuino
 			
 			my $ret = SIGNALduino_Set($targetHash,$target,split(" ",$element->{input}));
 			is($ret,$element->{return},"Verify return value");
-			is($targetHash->{QUEUE},$element->{check}->(),"Verify expected queue element entrys", explain $targetHash->{QUEUE});
+			is($targetHash->{QUEUE},$element->{check}->(),"Verify expected queue element entrys");
 
 			@{$targetHash->{QUEUE}}=();
 			
@@ -594,18 +598,18 @@ defmod test_03_sub_SIGNALduino_Set UnitTest dummyDuino
 	
 	subtest "checking set close " => sub {
 			plan (3);	
-			my $mock = Mock::Sub->new;
-		 	my $DevIo_CloseDev = $mock->mock('DevIo_CloseDev');
-			my $RemoveInternalTimer = $mock->mock('RemoveInternalTimer');
+			$mock->override('DevIo_CloseDev' => sub { pass('DevIo_CloseDev is called') } );
+			$mock->override('RemoveInternalTimer' => sub { pass('RemoveInternalTimer is called') } );
+
 			
 			SIGNALduino_Set($targetHash,$target,"close");
 			is(ReadingsVal($target,"state",""),"closed","check reading state");
 			
-			ok($DevIo_CloseDev->called, "DevIo_CloseDev is called");
-			ok($RemoveInternalTimer->called, "RemoveInternalTimer is called");
+			#ok($DevIo_CloseDev->called, "DevIo_CloseDev is called");
+			#ok($RemoveInternalTimer->called, "RemoveInternalTimer is called");
 			
-			$DevIo_CloseDev->unmock;
-			$RemoveInternalTimer->unmock;
+			$mock->restore('DevIo_CloseDev');
+			$mock->restore('RemoveInternalTimer');
 	};
 	
 	subtest 'Test SIGNALduino without dummy attrib or value 0 / devio open' => sub {
@@ -709,12 +713,13 @@ defmod test_03_sub_SIGNALduino_Set UnitTest dummyDuino
 				    	item 'WS36';
 				    	item 'WS34';
 					    end();
-					} ,"Verify expected queue element entrys", explain $targetHash->{QUEUE});
+					} ,"Verify expected queue element entrys");
 		
 			@{$targetHash->{QUEUE}}=();
 		};
 	};
 
-	
- }
-);
+	exit(0);
+},'dummyDuino');
+
+1;
