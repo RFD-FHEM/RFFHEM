@@ -7,7 +7,7 @@ our %defs;
 InternalTimer(time()+1, sub {
     my $target		= shift;
     my $targetHash 	= $defs{$target};
-	plan(3);
+	plan(6);
 
 	subtest 'Test SIGNALduino_CheckVersionResp ' => sub {
 		plan(1);
@@ -54,6 +54,8 @@ InternalTimer(time()+1, sub {
 		my ($ret,undef)=SIGNALduino_CheckVersionResp($targetHash);
 		like($ret,qr/^$target: CheckVersionResp, Not an SIGNALduino device, got for V: undef$/,"check return message");
 	}; 
-	
-}
-)
+
+	exit(0);
+},'dummyDuino');
+
+1;
