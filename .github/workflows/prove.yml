@@ -40,12 +40,12 @@ jobs:
         file: ./cover_db/clover.xml
         flags: unittests,perl,modules
         name: perl modules (testscripts) ${{ matrix.perl }}
-        verbose: true
     - name: run prove fhem testsuite ${{ matrix.perl }}
       run: |
         cp -R ${GITHUB_WORKSPACE}/FHEM/* ${FHEM_DIR}/FHEM/
         # cp -R ${GITHUB_WORKSPACE}/lib/* ${FHEM_DIR}/lib/
-        prove --exec 'perl -MDevel::Cover=-silent,1 fhem.pl -t' -I FHEM -r -vv -r ${GITHUB_WORKSPACE}/t/FHEM/[0_9][0-9]_*/  
+        find ${GITHUB_WORKSPACE}/t/FHEM -maxdepth 1  -regex '.*/t/FHEM/[0-9][0-9]_.*' -print0 | xargs -0 -I'{}' prove --exec 'perl -MDevel::Cover=-silent,1 fhem.pl -t' -I FHEM -r -vv -r "{}"
+        #prove --exec 'perl -MDevel::Cover=-silent,1 fhem.pl -t' -I FHEM -r -vv -r ${GITHUB_WORKSPACE}/t/FHEM/[0_9][0-9]_*/  
       working-directory: /opt/fhem/
       env:
         FHEM_DIR: /opt/fhem
@@ -58,6 +58,5 @@ jobs:
         file: /opt/fhem/cover_db/clover.xml
         flags: unittests,fhem,modules
         name: fhem (testscripts) ${{ matrix.perl }} 
-        verbose: true
 
    
