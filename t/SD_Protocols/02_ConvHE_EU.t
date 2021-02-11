@@ -10,7 +10,7 @@ use Test2::Tools::Compare qw{is like};
 
 plan(3);
 my $Protocols =
-  new lib::SD_Protocols( filetype => 'json', filename => './t/FHEM/lib/SD_Protocols/test_protocolData.json' );
+  new lib::SD_Protocols( filetype => 'json', filename => './t/SD_Protocols/test_protocolData.json' );
 my $target='some_devcice_name';
 
 subtest 'Test HE_EU, protolength < 72' => sub {

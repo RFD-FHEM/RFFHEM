@@ -8,7 +8,7 @@ use lib::SD_Protocols;
 use Test2::Tools::Compare qw{ is };
 
 my $Protocols =
-	new lib::SD_Protocols( filetype => 'json', filename => './t/FHEM/lib/SD_Protocols/test_protocolData.json' );
+	new lib::SD_Protocols( filetype => 'json', filename => './t/SD_Protocols/test_protocolData.json' );
 my $target='some_device_name';
 
 

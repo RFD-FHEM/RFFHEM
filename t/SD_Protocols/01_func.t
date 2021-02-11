@@ -27,11 +27,11 @@ subtest 'lib SD_Prococols test sub LoadHash() ' => sub {
 	like( $ret, qr/does not exists/, 'wrong costum filename' );
 
 	$ret = $Protocols->LoadHash(
-		'./t/FHEM/lib/SD_Protocols/test_loadprotohash-nok.pm');
+		'./t/SD_Protocols/test_loadprotohash-nok.pm');
 	like( $ret, qr/syntax error at/, 'file with syntax error' );
 
 	$ret = $Protocols->LoadHash(
-		'./t/FHEM/lib/SD_Protocols/test_loadprotohash-ok.pm');
+		'./t/SD_Protocols/test_loadprotohash-ok.pm');
 	is( $ret, U(), 'valid file without errors');
 };
 
@@ -41,11 +41,11 @@ subtest 'lib SD_Prococols test sub new() ' => sub {
 	is( $Protocols->{_protocols}, U(), 'wrong filename' );
 
 	$Protocols =
-	  new $className( filename => './t/FHEM/lib/SD_Protocols/test_loadprotohash-nok.pm' );
+	  new $className( filename => './t/SD_Protocols/test_loadprotohash-nok.pm' );
 	is( $Protocols->{_protocols}, U(), 'file with syntax error' );
 
 	$Protocols =
-	  new $className( filename => './t/FHEM/lib/SD_Protocols/test_loadprotohash-ok.pm' );
+	  new $className( filename => './t/SD_Protocols/test_loadprotohash-ok.pm' );
 	ref_ok( $Protocols->{_protocols}, 'HASH', 'valid file without errors' );
 };
 
@@ -56,7 +56,7 @@ subtest 'lib SD_Prococols protocolExists()' => sub {
 	subtest 'from json' => sub {
 		plan(5);
 		my $Protocols =
-		  new $className( filetype => 'json', filename => './t/FHEM/lib/SD_Protocols/test_protocolData.json' );
+		  new $className( filetype => 'json', filename => './t/SD_Protocols/test_protocolData.json' );
 		is($Protocols->{_protocols},hash { field '9999' => T(); etc();},"Verify we have a hash loaded",diag $Protocols->{_protocols});
 	    like(warning { $Protocols->protocolExists() },qr/Illegal parameter number, protocol id was not specified/,'check warning on missing parameter');
 	
@@ -68,7 +68,7 @@ subtest 'lib SD_Prococols protocolExists()' => sub {
 	subtest 'from PerlModule' => sub {
 		plan(5);
 		my $Protocols =
-		  new $className( filename => './t/FHEM/lib/SD_Protocols/test_loadprotohash-ok.pm' );
+		  new $className( filename => './t/SD_Protocols/test_loadprotohash-ok.pm' );
 		is($Protocols->{_protocols},hash { field '9999' => T(); etc();},"Verify we have a hash loaded");
 	    like(warning { $Protocols->protocolExists() },qr/Illegal parameter number, protocol id was not specified/,'check warning on missing parameter');
 	
@@ -82,7 +82,7 @@ subtest 'lib SD_Prococols protocolExists()' => sub {
 subtest 'lib SD_Prococols getProtocolList()' => sub {
 	plan(2);
 	my $Protocols =
-	  new $className( filename => './t/FHEM/lib/SD_Protocols/test_loadprotohash-ok.pm' );
+	  new $className( filename => './t/SD_Protocols/test_loadprotohash-ok.pm' );
 
 	ref_ok($Protocols->getProtocolList, 'HASH', 'verify we got a hashref' );
 	is($Protocols->getProtocolList,hash { 
@@ -99,7 +99,7 @@ subtest 'lib SD_Prococols getKeys()' => sub {
 	plan(2);
 	my $todo = todo 'here is a bug in getkeys i think';
 	my $Protocols =
-	  new $className( filetype => 'json', filename => './t/FHEM/lib/SD_Protocols/test_protocolData.json' );
+	new $className( filetype => 'json', filename => './t/SD_Protocols/test_protocolData.json' );
 
 
 	my (@key_list) = $Protocols->getKeys;
@@ -117,7 +117,7 @@ subtest 'lib SD_Prococols getKeys()' => sub {
 subtest 'lib SD_Prococols checkProperty()' => sub {
 	plan(7);
 	my $Protocols =
-	  new $className( filetype => 'json', filename => './t/FHEM/lib/SD_Protocols/test_protocolData.json' );
+	  new $className( filetype => 'json', filename => './t/SD_Protocols/test_protocolData.json' );
 
 	is($Protocols->checkProperty(9999,'developId'),'m','verify existing property is received without default');
 	is($Protocols->checkProperty(9999,'developId','p'),'m','verify existing property is received with default');
@@ -134,7 +134,7 @@ subtest 'lib SD_Prococols checkProperty()' => sub {
 subtest 'lib SD_Prococols getProperty()' => sub {
 	plan(7);
 	my $Protocols =
-	  new $className( filetype => 'json', filename => './t/FHEM/lib/SD_Protocols/test_protocolData.json' );
+	  new $className( filetype => 'json', filename => './t/SD_Protocols/test_protocolData.json' );
 	
 	is($Protocols->getProperty(9999,'developId'),'m','verify existing property is received without default');
 	is($Protocols->getProperty(9999,'bla'),U(),'verify not existing property is received with undef default');
@@ -152,7 +152,7 @@ subtest 'lib SD_Prococols getProperty()' => sub {
 subtest 'lib SD_Prococols getProtocolVersion()' => sub {
 	plan(1);
 	my $Protocols =
-	  new $className( filetype => 'json', filename => './t/FHEM/lib/SD_Protocols/test_protocolData.json' );
+	  new $className( filetype => 'json', filename => './t/SD_Protocols/test_protocolData.json' );
 
 	is($Protocols->getProtocolVersion,'0.1','verify versionstring');
 };
@@ -160,7 +160,7 @@ subtest 'lib SD_Prococols getProtocolVersion()' => sub {
 subtest 'lib SD_Prococols setDefaults()' => sub {
 	plan(3);
 	my $Protocols =
-	  new $className( filetype => 'json', filename => './t/FHEM/lib/SD_Protocols/test_protocolData.json' );
+	  new $className( filetype => 'json', filename => './t/SD_Protocols/test_protocolData.json' );
 	# Mock some Data
 
 	subtest 'length_min default if clockabs is set' => sub {

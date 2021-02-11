@@ -8,7 +8,7 @@ use lib::SD_Protocols;
 use Test2::Tools::Compare qw{is isnt};
 
 my $Protocols =
-new lib::SD_Protocols( filetype => 'json', filename => './t/FHEM/lib/SD_Protocols/test_protocolData.json' );
+new lib::SD_Protocols( filetype => 'json', filename => './t/sSD_Protocols/test_protocolData.json' );
 	
 
 my $rcode;

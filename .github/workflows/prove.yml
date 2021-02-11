@@ -31,7 +31,7 @@ jobs:
 #      uses: mxschmitt/action-tmate@v1
     - name: run prove on perl modules (testscripts)
       run: |
-        prove --exec 'perl -MDevel::Cover=-silent,1 -I FHEM ' -I FHEM -r -v t/FHEM/lib 
+        prove --exec 'perl -MDevel::Cover=-silent,1 -I FHEM ' -I FHEM -r -v t/SD_Protoco* 
     - name: Create clover report  
       run: cover -report clover
     - uses: codecov/codecov-action@v1

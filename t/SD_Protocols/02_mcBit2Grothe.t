@@ -12,7 +12,7 @@ plan(4);
 my $id=9986;
 my ($rcode,$hexresult);
 my $Protocols =
-  new lib::SD_Protocols( filetype => 'json', filename => './t/FHEM/lib/SD_Protocols/test_protocolData.json' );
+  new lib::SD_Protocols( filetype => 'json', filename => './t/SD_Protocols/test_protocolData.json' );
 
 subtest 'message good' => sub {
 	plan(2);

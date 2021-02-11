@@ -9,7 +9,7 @@ use Test2::Tools::Compare qw{is};
 use Carp qw(croak carp);
 
 my $Protocols =
-new lib::SD_Protocols( filetype => 'json', filename => './t/FHEM/lib/SD_Protocols/test_protocolData.json' );
+new lib::SD_Protocols( filetype => 'json', filename => './t/sssSD_Protocols/test_protocolData.json' );
 
 
 plan(1);

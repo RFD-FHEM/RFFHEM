@@ -12,7 +12,7 @@ plan(5);
 my $id=5058;
 my ($rcode,$hexresult);
 my $Protocols =
-  new lib::SD_Protocols( filetype => 'json', filename => './t/FHEM/lib/SD_Protocols/test_protocolData.json' );
+  new lib::SD_Protocols( filetype => 'json', filename => './t/SD_Protocols/test_protocolData.json' );
 
 # Mock protocol for this test
 $Protocols->{_protocols}->{5058}{length_min} = 51;

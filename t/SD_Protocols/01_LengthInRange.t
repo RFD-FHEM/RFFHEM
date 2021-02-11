@@ -12,7 +12,7 @@ plan(4);
 my $id=9990;
 my ($rcode,$message);
 my $Protocols =
-  new lib::SD_Protocols( filetype => 'json', filename => './t/FHEM/lib/SD_Protocols/test_protocolData.json' );
+  new lib::SD_Protocols( filetype => 'json', filename => './t/SD_Protocols/test_protocolData.json' );
 
 
 subtest 'length inside range' => sub {

@@ -10,7 +10,7 @@ use Test2::Tools::Compare qw{is like};
 plan(2);
 
 my $Protocols =
-  new lib::SD_Protocols( filetype => 'json', filename => './t/FHEM/lib/SD_Protocols/test_protocolData.json' );
+  new lib::SD_Protocols( filetype => 'json', filename => './t/SD_Protocols/test_protocolData.json' );
 
 subtest 'test ConvKoppFreeControl, checksum ok' => sub 	{
 	plan(1);

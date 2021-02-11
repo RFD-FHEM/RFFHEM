@@ -13,7 +13,7 @@ plan(4);
 
 
 my $Protocols =
-new lib::SD_Protocols( filetype => 'json', filename => './t/FHEM/lib/SD_Protocols/test_protocolData.json' );
+new lib::SD_Protocols( filetype => 'json', filename => './t/SD_Protocols/test_protocolData.json' );
 my $hash->{NAME} = "testName";
 
 sub createCallback {

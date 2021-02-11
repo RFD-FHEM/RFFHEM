@@ -11,7 +11,7 @@ plan(4);
 
 # note: ConvPCA301 use Digest::CRC
 my $Protocols =
-  new lib::SD_Protocols( filetype => 'json', filename => './t/FHEM/lib/SD_Protocols/test_protocolData.json' );
+  new lib::SD_Protocols( filetype => 'json', filename => './t/SD_Protocols/test_protocolData.json' );
 
 subtest 'test ConvPCA301, checksum ok ' => sub 	{
 	plan(2);
