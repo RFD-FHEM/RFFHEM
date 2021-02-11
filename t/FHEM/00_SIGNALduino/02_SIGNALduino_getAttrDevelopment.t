@@ -9,9 +9,8 @@ our %defs;
 InternalTimer(time(), sub {
 	my $target = shift;
 	my $targetHash = $defs{$target};
-	
 	CommandAttr(undef,"$target Whitelist_IDs 1,2,3");
-	index($targetHash->{versionmodule},"dev") == -1 ? plan(2) : plan(4);
+	plan(4);
 
 	subtest 'development attr set to 0' => sub {
 		plan(2);
