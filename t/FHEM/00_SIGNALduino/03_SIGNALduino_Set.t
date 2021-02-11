@@ -7,6 +7,9 @@ use Test2::Mock;
 our %defs;
 our %attr;
 
+
+my $tvar;
+
 InternalTimer(time()+1, sub {
 	my $target = shift;
 	my $targetHash = $defs{$target};
@@ -595,9 +598,15 @@ InternalTimer(time()+1, sub {
 			    	end();
     			};
 		    },
-			attr		=>  ( {hardware => 'nano328'} ),
+			pre_code => sub {
+				$tvar = $ENV{PATH};
+				$ENV{PATH}= '';
+			},
+			post_code => sub {
+				$ENV{PATH} = $tvar;
+			},			attr		=>  ( {hardware => 'nano328'} ),
 			input		=>	'flash ./fhem/test.hex',
-			return		=> 	U()
+			return		=> 	'avrdude is not installed. Please provide avrdude tool example: sudo apt-get install avrdude'
 		},
 
 
