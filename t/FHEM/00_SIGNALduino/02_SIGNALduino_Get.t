@@ -170,6 +170,32 @@ BEGIN {
 			check =>  array  { end();	},
  			return 		=> "Parse raw msg, no suitable protocol recognized."		
 	    },
+	    {
+			testname			=> 	'get availableFirmware without hardware',
+			cc1101_available	=>	 0,
+			input				=> 	'availableFirmware',
+			check 				=>  array  { end();	},
+			pre_code			=> 	sub {
+										my $target = shift;
+										$attr{$target}{updateChannelFW} = 'stable';
+										$attr{$target}{hardware} 		= '0';
+									},
+ 			return 				=> qr/.*get availableFirmware failed.*/		
+	    },
+	    {
+			testname			=> 	'get availableFirmware with hardware',
+			cc1101_available	=>	 0,
+			input				=> 	'availableFirmware',
+			check 				=>  array  { end();	},
+			pre_code			=> 	sub {
+										my $target = shift;
+										$attr{$target}{updateChannelFW} = 'stable';
+										$attr{$target}{hardware} 		= 'nano328';
+									},
+ 			return 				=> 'availableFirmware: \n\nFetching stable firmware versions for nano328 from github\n'
+	    },
+
+
 
     );
 }
@@ -194,14 +220,14 @@ InternalTimer(time()+1, sub {
 		# Mock for DevIo_IsOpen
 		$targetHash->{DIODev} = exists($element->{DIODev}) ? $element->{DIODev} : undef;
 
-		$element->{pre_code}->() if (exists($element->{pre_code}));
-		$todo=$element->{todo}->() if (exists($element->{todo}));
+		$element->{pre_code}->($target) if (exists $element->{pre_code} );
+		$todo=$element->{todo}->() if (exists $element->{todo} );
 		
 		subtest "checking $element->{testname}". ($targetHash->{cc1101_available} ? " with cc1101" : " without cc1101"). " " . ($targetHash->{DIODev} ? " devIo open" : " devIo closed") => sub {
 			plan (2);	
 			
 			my $ret = SIGNALduino_Get($targetHash,$target,split(" ",$element->{input}));
-			is($ret,$element->{return},"Verify return value");
+			like($ret,$element->{return},'Verify return value');
 			is($targetHash->{QUEUE},$element->{check},"Verify expected queue element entrys");
 
 			@{$targetHash->{QUEUE}}=();

@@ -557,6 +557,16 @@ InternalTimer(time()+1, sub {
 		    },
 			input		=>	"LaCrossePairForSec 30",
 		},
+		{
+			testname	=>  "set reset command for device",
+			check =>  sub { 
+			    return array  {
+			    	end();
+    			};
+		    },
+			input		=>	"reset",
+		},
+
 
 		
 	);
