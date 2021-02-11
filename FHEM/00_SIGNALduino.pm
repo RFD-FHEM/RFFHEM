@@ -711,7 +711,7 @@ sub SIGNALduino_Set_raw {
   my $hardware = AttrVal($name,'hardware','');
   if ($hardware =~ m/(?:nano|mini|radino)/)
   {
-    SIGNALduino_PrepareFlash($hash,$hexFile);
+    return SIGNALduino_PrepareFlash($hash,$hexFile);
   } else {
     FW_directNotify("FILTER=$name", "#FHEMWEB:WEB", "FW_okDialog('<u>ERROR:</u><br>Sorry, flashing your $hardware is currently not supported.<br>The file is only downloaded in /opt/fhem/FHEM/firmware.')", '');
     return "Sorry, Flashing your $hardware via Module is currently not supported.";    # processed in tests

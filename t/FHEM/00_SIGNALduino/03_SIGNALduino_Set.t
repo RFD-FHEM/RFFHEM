@@ -567,7 +567,7 @@ InternalTimer(time()+1, sub {
 			input		=>	'reset',
 		},
 		{
-			testname	=>  'seset flash without hardware parameter set',
+			testname	=>  'set flash without hardware parameter set',
 			attr		=>  ( {hardware => undef} ),
 			check =>  sub { 
 			    return array  {
@@ -597,7 +597,7 @@ InternalTimer(time()+1, sub {
 		    },
 			attr		=>  ( {hardware => 'nano328'} ),
 			input		=>	'flash ./fhem/test.hex',
-			return		=> 	qr/^avrdude is not installed./
+			return		=> 	U()
 		},
 
 
