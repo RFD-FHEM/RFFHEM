@@ -57,7 +57,7 @@ my @TestList = (
 	{
 		testname	=> 'Test with master SD_Device_ProtocolList',
 		url		=> 'https://raw.githubusercontent.com/RFD-FHEM/SIGNALduino_TOOL/master/FHEM/lib/SD_Device_ProtocolList.json',
-		#todo  => 'Checking with master Version of SD_Device_ProtocolList which can fail',
+		todo  => 'Checking with master Version of SD_Device_ProtocolList which can fail',
 	},
 #	{
 #		testname	=> 'Test with patched SD_Device_ProtocolList',
