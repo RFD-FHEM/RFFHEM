@@ -192,7 +192,7 @@ BEGIN {
 										$attr{$target}{updateChannelFW} = 'stable';
 										$attr{$target}{hardware} 		= 'nano328';
 									},
- 			return 				=> 'availableFirmware: \n\nFetching stable firmware versions for nano328 from github\n'
+ 			return 				=> "availableFirmware: \n\nFetching stable firmware versions for nano328 from github\n"
 	    },
 
 
