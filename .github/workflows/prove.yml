@@ -40,20 +40,24 @@ jobs:
         file: ./cover_db/clover.xml
         flags: unittests,perl,modules
         name: perl modules (testscripts) ${{ matrix.perl }}
+        verbose: true
     - name: run prove fhem testsuite ${{ matrix.perl }}
       run: |
-        cp -r FHEM/* ${FHEM_DIR}/FHEM/
-        cd ${FHEM_DIR}
+        cp -R ${GITHUB_WORKSPACE}/FHEM/* ${FHEM_DIR}/FHEM/
+        # cp -R ${GITHUB_WORKSPACE}/lib/* ${FHEM_DIR}/lib/
         prove --exec 'perl -MDevel::Cover=-silent,1 fhem.pl -t' -I FHEM -r -vv -r ${GITHUB_WORKSPACE}/t/FHEM/[0_9][0-9]_*/  
+      working-directory: /opt/fhem/
       env:
         FHEM_DIR: /opt/fhem
-    - name: Create clover report  
+    - name: Create clover report
+      working-directory: /opt/fhem/
       run: cover -report clover
     - uses: codecov/codecov-action@v1
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
-        file: ./cover_db/clover.xml
+        file: /opt/fhem/cover_db/clover.xml
         flags: unittests,fhem,modules
         name: fhem (testscripts) ${{ matrix.perl }} 
+        verbose: true
 
-        
+   
