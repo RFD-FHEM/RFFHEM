@@ -4,10 +4,9 @@ use warnings;
 
 use Test2::V0;
 use Test2::Tools::Compare qw{is item U D match hash array bag};
-use Mock::Sub;
 use Test2::Todo;
 
-
+our %defs;
 
 my @mockData = (
     {
@@ -17,7 +16,6 @@ my @mockData = (
         input =>  q[MS;�=0;L=L=-1020;L=H=935;S=L=-525;S=H=444;D=354133323044313642333731303246303541423044364430;C==487;L==89;R==24;],
         rValue => U(), 
         todoReason => q[This data should not be processed]
-
     },
     {
         deviceName => q[dummyDuino],
@@ -35,11 +33,15 @@ my @mockData = (
         rValue => U(), 
         todoReason => q[This data should not be processed]
     },
+    {
+        deviceName =>  q[dummyDuino],
+        plan       =>  2,
+        testname   =>  q[Correct MC CUL_TCM_97001],
+        input      =>  q[MS;P1=502;P2=-9212;P3=-1939;P4=-3669;D=12131413141414131313131313141313131313131314141414141413131313141413131413;CP=1;SP=2;],
+        rValue     =>  T()
+    },
 );
 plan (scalar @mockData );  
-
-BEGIN {
-};
 
 InternalTimer(time()+1, sub() {
   while (@mockData)
@@ -56,15 +58,13 @@ InternalTimer(time()+1, sub() {
     subtest "checking $element->{testname} on $element->{deviceName}" => sub {
       my $p = $element->{plan} // 1;
       plan ($p);  
-      my %signal_parts=SIGNALduino_Split_Message($element->{input},$element->{deviceName});   
 
-      my $ret = SIGNALduino_Parse_MS($targetHash,$targetHash,$element->{deviceName},$element->{input},%signal_parts);
+      my $ret = SIGNALduino_Parse_MS($targetHash,$element->{input});
       for my $i (1..$p)
       {
-        $i == 1 && do { is($ret,$element->{rValue},"Verify return value") } ;
-        $i == 2 && do { is(FhemTestUtils_gotLog("PERL WARNING:"), 0, "No Warnings in logfile"); } ;
+        $i == 1 && do { is($ret,$element->{rValue},'Verify return value for SIGNALduino_Parse_MS') } ;
+        $i == 2 && do { is(FhemTestUtils_gotLog('PERL WARNING:'), 0, 'No Warnings in logfile'); } ;
       }
-
     };
     if (defined($todo)) {
       $todo->end;

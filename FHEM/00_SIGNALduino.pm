@@ -20,6 +20,7 @@ use warnings;
 my $missingModulSIGNALduino = '';
 
 use DevIo;
+require "99_Utils.pm";
 use Carp;
 no warnings 'portable';
 
@@ -37,7 +38,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-  SDUINO_VERSION                  => '3.5.1',
+  SDUINO_VERSION                  => '3.5.1+20210212',
   SDUINO_INIT_WAIT_XQ             => 1.5,     # wait disable device
   SDUINO_INIT_WAIT                => 2,
   SDUINO_INIT_MAXRETRY            => 3,
@@ -81,7 +82,7 @@ my %gets = (  # NameOFCommand =>  StyleMod for Fhemweb, SubToCall if get is exec
   'ccconf'            =>  ['noArg', \&SIGNALduino_Get_Command, "C0DnF", \&SIGNALduino_CheckccConfResponse, 'C0Dn11=[A-F0-9a-f]+'],
   'ccreg'             =>  ['textFieldNL', \&SIGNALduino_Get_Command_CCReg,"C", \&SIGNALduino_CheckCcregResponse, '^(?:C[A-Fa-f0-9]{2}\s=\s[0-9A-Fa-f]+$|ccreg 00:)'],
   'ccpatable'         =>  ['noArg', \&SIGNALduino_Get_Command, "C3E", \&SIGNALduino_CheckccPatableResponse, '^C3E\s=\s.*'],
-  'raw'               =>  ['textFieldNL', \&SIGNALduino_Get_Raw ],
+  'rawmsg'            =>  ['textFieldNL', \&SIGNALduino_Get_RawMsg ],
   'availableFirmware' =>  ['noArg', \&SIGNALduino_Get_availableFirmware ]
 );
 
@@ -246,7 +247,7 @@ my %matchListSIGNALduino = (
       '14:Dooya'            => '^P16#[A-Fa-f0-9]+',
       '15:SOMFY'            => '^Ys[0-9A-F]+',
       '16:SD_WS_Maverick'   => '^P47#[A-Fa-f0-9]+',
-      '17:SD_UT'            => '^P(?:14|20|24|26|29|30|34|46|56|68|69|76|81|83|86|90|91|91.1|92|93|95|97|99|104)#.*', # universal - more devices with different protocols
+      '17:SD_UT'            => '^P(?:14|20|24|26|29|30|34|46|56|68|69|76|78|81|83|86|90|91|91.1|92|93|95|97|99|104|105)#.*', # universal - more devices with different protocols
       '18:FLAMINGO'         => '^P13\.?1?#[A-Fa-f0-9]+',              # Flamingo Smoke
       '19:CUL_WS'           => '^K[A-Fa-f0-9]{5,}',
       '20:Revolt'           => '^r[A-Fa-f0-9]{22}',
@@ -502,7 +503,10 @@ sub SIGNALduino_avrdude {
   {
     readingsSingleUpdate($hash,'state','FIRMWARE UPDATE with error',1);    # processed in tests
     $hash->{logMethod}->($name ,3, "$name: avrdude, ERROR: avrdude exited with error $?");
-    FW_directNotify("FILTER=$name", "#FHEMWEB:WEB", "FW_okDialog('ERROR: avrdude exited with error, for details see last flashlog.')", '');
+    if (defined $FW_wname)
+    {
+      FW_directNotify("FILTER=$name", "FHEMWEB:$FW_wname", "FW_okDialog('ERROR: avrdude exited with error, for details see last flashlog.')", '');
+    }
     $hash->{FLASH_RESULT}='ERROR: avrdude exited with error';              # processed in tests
   } else {
     $hash->{logMethod}->($name ,3, "$name: avrdude, Firmware update was successfull");
@@ -557,7 +561,9 @@ sub SIGNALduino_PrepareFlash {
   $log .= "port: $port\n";
 
   # prepare default Flashcommand
-  my $defaultflashCommand = ($hardware eq 'radinoCC1101' ? 'avrdude -c avr109 -b [BAUDRATE] -P [PORT] -p atmega32u4 -vv -D -U flash:w:[HEXFILE] 2>[LOGFILE]' : 'avrdude -c arduino -b [BAUDRATE] -P [PORT] -p atmega328p -vv -U flash:w:[HEXFILE] 2>[LOGFILE]');
+  my $defaultflashCommand = ($hardware eq 'radinoCC1101' 
+    ? 'avrdude -c avr109 -b [BAUDRATE] -P [PORT] -p atmega32u4 -vv -D -U flash:w:[HEXFILE] 2>[LOGFILE]' 
+    : 'avrdude -c arduino -b [BAUDRATE] -P [PORT] -p atmega328p -vv -U flash:w:[HEXFILE] 2>[LOGFILE]');
 
   # get User defined Flashcommand
   my $flashCommand = AttrVal($name,'flashCommand',$defaultflashCommand);
@@ -691,14 +697,14 @@ sub SIGNALduino_Set_raw {
     my $ghurl = "https://api.github.com/repos/RFD-FHEM/SIGNALDuino/releases/tags/$args[0]";
     $hash->{logMethod}->($hash, 3, "$name: Set_flash, $args[0] try to fetch release $ghurl");
 
-    $http_param{url}    = $ghurl;
-    $http_param{callback} = \&SIGNALduino_githubParseHttpResponse;  # Diese Funktion soll das Ergebnis dieser HTTP Anfrage bearbeiten
+    $http_param{url}        = $ghurl;
+    $http_param{callback}   = \&SIGNALduino_githubParseHttpResponse;  # Diese Funktion soll das Ergebnis dieser HTTP Anfrage bearbeiten
     $http_param{command}    = 'getReleaseByTag';
     HttpUtils_NonblockingGet(\%http_param);                         # Starten der HTTP Abfrage. Es gibt keinen Return-Code.
     return;
   } elsif ($args[0] =~ m/^https?:\/\// ) {
-    $http_param{url}    = $args[0];
-    $http_param{callback} = \&SIGNALduino_ParseHttpResponse;        # Diese Funktion soll das Ergebnis dieser HTTP Anfrage bearbeiten
+    $http_param{url}        = $args[0];
+    $http_param{callback}   = \&SIGNALduino_ParseHttpResponse;        # Diese Funktion soll das Ergebnis dieser HTTP Anfrage bearbeiten
     $http_param{command}    = 'flash';
     HttpUtils_NonblockingGet(\%http_param);
     return;
@@ -711,9 +717,12 @@ sub SIGNALduino_Set_raw {
   my $hardware = AttrVal($name,'hardware','');
   if ($hardware =~ m/(?:nano|mini|radino)/)
   {
-    SIGNALduino_PrepareFlash($hash,$hexFile);
+    return SIGNALduino_PrepareFlash($hash,$hexFile);
   } else {
-    FW_directNotify("FILTER=$name", "#FHEMWEB:WEB", "FW_okDialog('<u>ERROR:</u><br>Sorry, flashing your $hardware is currently not supported.<br>The file is only downloaded in /opt/fhem/FHEM/firmware.')", '');
+    if (defined $FW_wname)
+    {
+      FW_directNotify("FILTER=$name", "#FHEMWEB:$FW_wname", "FW_okDialog('<u>ERROR:</u><br>Sorry, flashing your $hardware is currently not supported.<br>The file is only downloaded in /opt/fhem/FHEM/firmware.')", '');
+    }
     return "Sorry, Flashing your $hardware via Module is currently not supported.";    # processed in tests
   }
 }
@@ -1080,7 +1089,7 @@ sub SIGNALduino_Get_Command_CCReg {
 }
 
 ############################# package main
-sub SIGNALduino_Get_Raw {
+sub SIGNALduino_Get_RawMsg {
   my ($hash, @a) = @_;
   return "\"get raw\" needs at least a parameter" if (@a < 2);
   if ($a[1] =~ /^M[CcSUN];.+/)
@@ -1091,10 +1100,15 @@ sub SIGNALduino_Get_Raw {
 
   if ($a[1] =~ /\002M\w;.+;\003$/)
   {
-    $hash->{logMethod}->( $hash->{NAME}, 4, "$hash->{NAME}: msg get raw: $a[1]");
-    return SIGNALduino_Parse($hash, $hash, $hash->{NAME}, $a[1]);
+    $hash->{logMethod}->( $hash->{NAME}, 4, "$hash->{NAME}: get rawmsg: $a[1]");
+    my $cnt = SIGNALduino_Parse($hash, $hash, $hash->{NAME}, $a[1]);
+    if (defined $cnt) {
+      return "Parse raw msg, number of messages passed to modules: $cnt";
+    } else {
+      return "Parse raw msg, no suitable protocol recognized.";
+    }
   } else {
-    return 'This command is not supported via get raw.';
+    return 'This command is not supported via get rawmsg.';
   }
 }
 
@@ -2253,7 +2267,20 @@ sub SIGNALduino_calcRSSI {
   return ($rssi,$rssiStr);
 }
 
+
+
+
+=item SIGNALduino_Parse_MS
+
+This sub parses a MS rawdata string and dispatches it if a protocol matched the cirteria.
+
+Input:  $iohash, $rawMessage 
+
+Output: { Number of times dispatch was called, 0 if dispatch isn't called }
+
+=cut
 ############################# package main
+
 sub SIGNALduino_Parse_MS {
   my $hash = shift // return;    #return if no hash  is provided
   my $rmsg = shift // return;    #return if no rmsg is provided
@@ -2444,6 +2471,16 @@ sub SIGNALduino_padbits(\@$) {
   }
   return " padded $i bits to bit_msg array";
 }
+
+=item SIGNALduino_Parse_MU
+
+This sub parses a MU rawdata string and dispatches it if a protocol matched the cirteria.
+
+Input:  $iohash, $rawMessage 
+
+Output: { Number of times dispatch was called, 0 if dispatch isn't called }
+
+=cut
 
 ############################# package main, test exists
 sub SIGNALduino_Parse_MU {
@@ -2663,6 +2700,16 @@ sub SIGNALduino_Parse_MU {
     return $message_dispatched;
   }
 }
+
+=item SIGNALduino_Parse_MC
+
+This sub parses a MC rawdata string and dispatches it if a protocol matched the cirteria.
+
+Input:  $iohash, $rawMessage 
+
+Output: { Number of times dispatch was called, 0 if dispatch isn't called }
+
+=cut
 
 ############################# package main, test exists
 sub SIGNALduino_Parse_MC {
@@ -3908,7 +3955,10 @@ sub SIGNALduino_githubParseHttpResponse {
   # wenn
   # Damit ist die Abfrage zuende.
   # Evtl. einen InternalTimer neu schedulen
-  FW_directNotify("FILTER=$name", "#FHEMWEB:$FW_wname", "location.reload('true')", '');
+  if (defined $FW_wname)
+  {
+     FW_directNotify("FILTER=$name", "#FHEMWEB:$FW_wname", "location.reload('true')", '');
+  }
   return 0;
 }
 
@@ -4427,9 +4477,12 @@ USB-connected devices (SIGNALduino):<br>
   <li>ping<br>
     Check the communication with the SIGNALduino.
   </li><br>
-  <a name="raw"></a>
-  <li>raw<br>
-    Only for manual processing of messages (MS, MC, MU, ...). The get raw command does not send any commands to the microcontroller!
+  <a name="rawmsg"></a>
+  <li>rawmsg<br>
+    Processes messages (MS, MC, MU, ...) as if they were received by the SIGNALduino. The get raw command does not send any commands to the microcontroller!<br><br>
+    For example, this message would:
+    <code>MS;P0=-7871;P2=-1960;P3=578;P4=-3954;D=030323232323434343434323232323234343434323234343234343234343232323432323232323232343234;CP=3;SP=0;R=0;m=0;</code><br>
+    after executing the command several times, create a sensor SD_WS_33_TH_1.
   </li><br>
   <a name="uptime"></a>
   <li>uptime<br>
@@ -4970,9 +5023,12 @@ USB-connected devices (SIGNALduino):<br>
   <li>ping<br>
     Pr&uuml;ft die Kommunikation mit dem SIGNALduino.
   </li><br>
-  <a name="raw"></a>
-  <li>raw<br>
-    Nur um Nachrichten (MS, MC, MU, ...) manuell verarbeiten zu können. Der get raw Befehl übergibt keine Kommandos an den verbundenen Microcontroller!
+  <a name="rawmsg"></a>
+  <li>rawmsg<br>
+    Verarbeitet Nachrichten (MS, MC, MU, ...), als ob sie vom SIGNALduino empfangen wurden. Der Befehl "get raw" übergibt keine Kommandos an den verbundenen Microcontroller!<br><br>
+    Beispielsweise würde diese Nachricht:<br>
+    <code>MS;P0=-7871;P2=-1960;P3=578;P4=-3954;D=030323232323434343434323232323234343434323234343234343234343232323432323232323232343234;CP=3;SP=0;R=0;m=0;</code><br>
+    nach mehrmaligem Ausführen des Befehles einen Sensor SD_WS_33_TH_1 anlegen.
   </li><br>
   <a name="uptime"></a>
   <li>uptime<br>

@@ -7,6 +7,7 @@ use Test2::Tools::Compare qw{is item U D match hash array bag};
 use Test2::Todo;
 
 
+our %defs;
 
 my @mockData = (
     {
@@ -111,7 +112,6 @@ InternalTimer(time()+1, sub() {
     subtest "checking $element->{testname} on $element->{deviceName}" => sub {
       my $p = $element->{plan} // 1;
       plan ($p);  
-      #my %signal_parts=SIGNALduino_Split_Message($element->{input},$element->{deviceName});   
       
       my $ret = SIGNALduino_Parse_MC($targetHash,$element->{input});
       for my $i (1..$p)

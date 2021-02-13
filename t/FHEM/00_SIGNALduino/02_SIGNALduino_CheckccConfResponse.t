@@ -1,0 +1,25 @@
+use strict;
+use warnings;
+use Test2::V0;
+use Test2::Tools::Compare qw{ is };
+
+
+our %defs;
+
+InternalTimer(time(), sub {
+	plan(1);
+	
+	subtest 'Test cconf response (C0Dn11=10B07157C43023B900070018146C070091)' => sub {
+		plan(3);
+		my $target='dummyDuino';
+		my $targetHash = $defs{$target};
+
+		my ($ret)=SIGNALduino_CheckccConfResponse($targetHash,"C0Dn11=10B07157C43023B900070018146C070091");
+		is($ret,"Freq: 433.920 MHz, Bandwidth: 325 KHz, rAmpl: 42 dB, sens: 8 dB, DataRate: 5603.79 Baud, Modulation: ASK/OOK, Syncmod: No preamble/sync","check return message");
+		is(ReadingsVal($target,"cc1101_config",undef),"Freq: 433.920 MHz, Bandwidth: 325 KHz, rAmpl: 42 dB, sens: 8 dB, DataRate: 5603.79 Baud","check reading cc1101_config value");
+		is(ReadingsVal($target,"cc1101_config_ext",undef),"Modulation: ASK/OOK, Syncmod: No preamble/sync","check reading cc1101_config_ext value");
+	}; 
+	exit(0);
+}, 0);
+
+1;
