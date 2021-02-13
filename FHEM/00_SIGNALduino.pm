@@ -2115,19 +2115,16 @@ sub SIGNALduino_Split_Message {
       Debug "$name: extracted  data $rawData\n" if ($debug);
       $ret{rawData} = $rawData;
     }
-    elsif($_ =~ m/^SP=\d{1}/)                                     #### Sync Pulse Index
+    elsif($_ =~ m/^SP=([0-9])$/)                                     #### Sync Pulse Index
     {
-      (undef, $syncidx) = split(/=/,$_);
-      Debug "$name: extracted  syncidx $syncidx\n" if ($debug);
+      Debug "$name: extracted  syncidx $1\n" if ($debug);
       #return undef if (!defined($patternList{$syncidx}));
-      $ret{syncidx} = $syncidx;
+      $ret{syncidx} = $1;
     }
-    elsif($_ =~ m/^CP=\d{1}/)                                     #### Clock Pulse Index
+    elsif($_ =~ m/^CP=([0-9])$/)                                     #### Clock Pulse Index
     {
-      (undef, $clockidx) = split(/=/,$_);
-      Debug "$name: extracted  clockidx $clockidx\n" if ($debug);;
-      #return undef if (!defined($patternList{$clockidx}));
-      $ret{clockidx} = $clockidx;
+      Debug "$name: extracted  clockidx $1\n" if ($debug);;
+      $ret{clockidx} = $1;
     }
     elsif($_ =~ m/^L=\d/)                                         #### MC bit length
     {
@@ -2285,7 +2282,7 @@ sub SIGNALduino_Parse_MS {
   my $hash = shift // return;    #return if no hash  is provided
   my $rmsg = shift // return;    #return if no rmsg is provided
 
-  if ($rmsg !~ /^MU;(?:P[0-7]=-?\d+;){3,8}D=[0-7]+;CP=[0-9];SP=[0-9];(?:R=\d+;)?$/){   
+  if ($rmsg !~ /^MS;(?:P[0-7]=-?\d+;){3,8}D=[0-7]+;CP=[0-9];SP=[0-9];(?:R=\d+;)?(?:O;)?(?:m=?[0-9];)?$/){   
     $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: Parse_MS, faulty msg: $rmsg]);
     return ; # Abort here if not successfull
   }
@@ -2294,8 +2291,9 @@ sub SIGNALduino_Parse_MS {
   my %msg_parts = SIGNALduino_Split_Message($rmsg, $hash->{NAME});
 
   # Verify if extracted hash has the correct values:
-  my $clockidx = _limit_to_number($msg_parts{clockabs}) // $hash->{logMethod}->($hash->{name}, 3, qq[$hash->{name}: Parse_MS, faulty clock: $msg_parts{clockabs}])     &&  return ;      
-  my $syncidx  = _limit_to_number($msg_parts{syncidx})  // $hash->{logMethod}->($hash->{name}, 3, qq[$hash->{name}: Parse_MS, faulty sync: $msg_parts{syncidx}])      &&  return ;      
+  
+  my $clockidx = _limit_to_number($msg_parts{clockidx}) // $hash->{logMethod}->($hash->{name}, 3, qq[$hash->{name}: Parse_MS, faulty clock: $msg_parts{clockidx}])     &&  return ;      
+  my $syncidx  = _limit_to_number($msg_parts{syncidx})  // $hash->{logMethod}->($hash->{name}, 3, qq[$hash->{name}: Parse_MS, faulty sync: $msg_parts{syncidx}])       &&  return ;      
   my $rawData  = _limit_to_number($msg_parts{rawData})  // $hash->{logMethod}->($hash->{name}, 3, qq[$hash->{name}: Parse_MS, faulty rawData D=: $msg_parts{rawData}]) &&  return ; 
   my $rssi     = _limit_to_hex($msg_parts{rssi});
   my $messagetype=$msg_parts{messagetype};
@@ -2487,7 +2485,7 @@ sub SIGNALduino_Parse_MU {
   my $hash = shift // return;    #return if no hash  is provided
   my $rmsg = shift // return;    #return if no rmsg is provided
   
-  if ($rmsg !~ /^MU;(?:P[0-7]=-?\d+;){3,8}D=[0-7]+;CP=[0-9];(?:R=\d+;)?$/){   
+  if ($rmsg !~ /^MU;(?:P[0-7]=-?\d+;){3,8}D=[0-7]+;CP=[0-9];(?:R=\d+;)?(?:O;)?$/){   
     $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: Parse_MU, faulty msg: $rmsg]);
     return ; # Abort here if not successfull
   }
@@ -2829,7 +2827,7 @@ sub SIGNALduino_Parse_MN {
   my $hash = shift // return;   #return if no hash  is provided
   my $rmsg = shift // return;   #return if no rmsg is provided
  
-  if ($rmsg !~ /^MN;D=[0-9A-F];(?:R=[0-9]+;)?$/){
+  if ($rmsg !~ /^MN;D=[0-9A-F]+;(?:R=[0-9]+;)?$/){
     $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: Parse_MN, faulty msg: $rmsg]);
     return ; # Abort here if not successfull
   }
@@ -2888,7 +2886,7 @@ sub SIGNALduino_Parse_MN {
     if ($#methodReturn == 0) {
       $hash->{logMethod}->($name, 4, qq[$name: Parse_MN, Decoded matched MN Protocol id $id dmsg=$methodReturn[0] $rssiStr]);
       SIGNALduno_Dispatch($hash,$rmsg,$methodReturn[0],$rssi,$id);
-      $message_dispatched=1; # Todo: Anzahl dispatches zählen
+      $message_dispatched++;
     } else {
       $hash->{logMethod}->($name, 4, qq{$name: Parse_MN, Error! method $methodReturn[1]});
     }
