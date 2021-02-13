@@ -1,3 +1,13 @@
+2021-02-13 - Migrated 98 Unittest Tests to FHEM compatible prove test (#940)
+
+* Migrate tests based on 98_unittest to fhem prove compatible test mode
+
+* Migrated more tests and testdat
+
+* Fixed return from prepare_fash
+
+* Move Lib Tests to t Folder,to avoid running these tests under fhem testevn
+
 2021-02-12 - Merge branch 'master' into unittest-2-prove
 2021-02-12 
   00_SIGNALDuino: Bugfix, module runs now without fhemweb instance 
