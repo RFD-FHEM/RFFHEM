@@ -1,3 +1,5 @@
+2021-02-13 - 00_SIGNALduino:
+  corrected rmsg regexes
 2021-02-13 - 
   00_SIGNALduino:
     Modified SIGNALduino_Parse_MC to use less parameters and check data to be more robust
