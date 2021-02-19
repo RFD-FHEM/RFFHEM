@@ -1,3 +1,6 @@
+2021-02-19 - 00_SIGNALduino
+  Addd test for _limit_to_number and _limit_to_hex
+  Removed sub _limit_to_MC_pattern
 2021-02-15 - Merge branch 'feature_parse-Optimize' of ssh://github.com/RFD-FHEM/RFFHEM into feature_parse-Optimize
 2021-02-13 - 00_SIGNALduino:
   corrected rmsg regexes
