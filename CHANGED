@@ -1,28 +1,17 @@
 2021-02-27 - Automatic update of the reading config
-
-Automatic update of the reading config with set enable/disable MessageType or set raw CER/CDR.
+  00_SIGNALDuino: Automatic update of the reading config with set enable/disable MessageType or set raw CER/CDR.
+	
 2021-02-13 - Migrated 98 Unittest Tests to FHEM compatible prove test (#940)
-
-* Migrate tests based on 98_unittest to fhem prove compatible test mode
-
-* Migrated more tests and testdat
-
-* Fixed return from prepare_fash
-
-* Move Lib Tests to t Folder,to avoid running these tests under fhem testevn
+  * Migrate tests based on 98_unittest to fhem prove compatible test mode
+  * Migrated more tests and testdat
+  * Fixed return from prepare_fash
+  * Move Lib Tests to t Folder,to avoid running these tests under fhem testevn
 
 2021-02-12 - Merge branch 'master' into unittest-2-prove
 2021-02-12 
   00_SIGNALDuino: Bugfix, module runs now without fhemweb instance 
 
 2021-01-28 - Remote control SEAV BeSmart S4 (#933)
-change elsif to if
-TR_502MSV [P34] funktionierte nicht mehr
-
-2021-01-26 - Update 14_SD_UT.pm and SD_ProtocolData.pm
-change if to elsif
-delete comment
-
 2021-01-25 - new protocol for BeSmart S4 remote control
 2021-01-22 - Set commands changed
 2020-12-30 - rename "get raw" to "get rawmsg" (#925)
