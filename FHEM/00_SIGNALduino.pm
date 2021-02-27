@@ -671,6 +671,9 @@ sub SIGNALduino_Set_raw {
   my ($hash, @a) = @_;
   $hash->{logMethod}->($hash->{NAME}, 4, "$hash->{NAME}: Set_raw, ".join(' ',@a));
   SIGNALduino_AddSendQueue($hash,$a[1]);
+  if ($a[1] =~ m/^C[D|E]R/) { # enable/disable data reduction
+    SIGNALduino_Get_Command($hash,'config');
+  }
   return ;
 }
 
@@ -931,6 +934,7 @@ sub SIGNALduino_Set_MessageType {
     $argm = 'CD' . substr($a[1],-1,1);
   }
   SIGNALduino_AddSendQueue($hash,$argm);
+  SIGNALduino_Get_Command($hash,'config');
   $hash->{logMethod}->($hash->{NAME}, 4, "$hash->{NAME}: Set_MessageType, $a[0] $a[1] $argm");
 }
 
