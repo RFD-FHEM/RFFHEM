@@ -1,3 +1,6 @@
+2021-02-27 - Display protocol list
+
+Msg type MC is not displayed in the protocol list
 2021-02-13 - Migrated 98 Unittest Tests to FHEM compatible prove test (#940)
 
 * Migrate tests based on 98_unittest to fhem prove compatible test mode
