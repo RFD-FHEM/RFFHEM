@@ -1,3 +1,6 @@
+2021-02-27 - Automatic update of the reading config
+
+Automatic update of the reading config with set enable/disable MessageType or set raw CER/CDR.
 2021-02-13 - Migrated 98 Unittest Tests to FHEM compatible prove test (#940)
 
 * Migrate tests based on 98_unittest to fhem prove compatible test mode
