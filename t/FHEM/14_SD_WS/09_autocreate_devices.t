@@ -43,16 +43,15 @@ InternalTimer(time()+1, sub {
 	subtest 'Protocol 85 - autocreate via RAWMSG' => sub {
 		plan(4);
 		my $rmsg="MU;P0=7944;P1=-724;P2=742;P3=241;P4=-495;P5=483;P6=-248;D=01212121343434345656343434563434345634565656343434565634343434343434345634345634345634343434343434343434345634565634345656345634343456563421212121343434345656343434563434345634565656343434565634343434343434345634345634345634343434343434343434345634565634;CP=3;R=47;O;";      
-		my %signal_parts=SIGNALduino_Split_Message($rmsg,$ioHash->{NAME});     
 		my $sensorname="SD_WS_85_THW_1";
 		CommandDelete(undef,$sensorname);
 	
 		for my $i (1..3) {
-			SIGNALduino_Parse_MU($ioHash, $ioHash, $ioHash->{NAME}, $rmsg,%signal_parts);
+			SIGNALduino_Parse_MU($ioHash, $rmsg);
 			is(IsDevice($sensorname), 0, "Sensor not created with dispatch $i/3");
 			$ioHash->{TIME} -=3;
 		}
-		SIGNALduino_Parse_MU($ioHash, $ioHash, $ioHash->{NAME}, $rmsg,%signal_parts);
+		SIGNALduino_Parse_MU($ioHash, $rmsg);
 		is(IsDevice($sensorname), 1,"check Sensor created with dispatch 4");
 	};
 	
