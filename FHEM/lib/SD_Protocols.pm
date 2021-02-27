@@ -1392,7 +1392,7 @@ sub postDemo_WS2000 {
       $self->_logging(qq[lib/postDemo_WS2000, Sensortyp $typ Adr $adr - ERROR check XOR],4);
     return (0, undef);
   } else {
-    if ($datalength < 45 || $datalength > 46) {                  # Summe pruefen, auﬂer Typ 1 ohne Summe
+    if ($datalength < 45 || $datalength > 46) {                  # Summe pruefen, auÔøΩer Typ 1 ohne Summe
       $data = oct( "0b".(join '', reverse @bit_msg[$dataindex .. $dataindex + 3]));
       if ($data != ($sum & 0x0F)) {
           $self->_logging(qq[lib/postDemo_WS2000, Sensortyp $typ Adr $adr - ERROR sum],4);

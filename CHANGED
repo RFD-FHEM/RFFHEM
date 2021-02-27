@@ -1,18 +1,41 @@
-2021-01-28 - Remote control SEAV BeSmart S4 (#933)
+2021-02-27 - Master bugfix protocol list (#947)
 
-* new protocol for BeSmart S4 remote control
-* Update 14_SD_UT.pm and SD_ProtocolData.pm
-2021-01-26 - Update 14_SD_UT.pm
+* Display protocol list
+  Msg type MC is not displayed in the protocol list
+* Added test for SIGNALduino_FW_getProtocolList to check if MS, MC, MU, MN Tag is included
+  Co-authored-by: sidey79 <7968127+sidey79@users.noreply.github.com>
+2021-02-27 - Merge branch 'master' into master_bugfix_protolist and updated CHANGED
+2021-02-27 - Display protocol list
+  bugfix:
+    00_SIGNALDuino: 
+      Msg type MC is not displayed in the protocol list
 
-change elsif to if
-TR_502MSV [P34] funktionierte nicht mehr
-2021-01-26 - Update 14_SD_UT.pm and SD_ProtocolData.pm
+  Feature: 
+    00_SIGNALduino.pm: Feature parse optimize (#926)
+      Modified parse_Mx subs to two arguments, and improved input validation to avoid 
+      perl warnigs if corrupt data is processed.
+      Addd tests for input validation subs: _limit_to_number and _limit_to_hex
+      Reworked existing tests to be compatible with new sub format
 
-change if to elsif
-delete comment
-2021-01-25 - Merge branch 'master' into master_feature_BeSmart_Sx
-2021-01-25 - new protocol for BeSmart S4 remote control
-2021-01-22 - Merge branch 'master_feature_BeSmart_Sx' of https://github.com/RFD-FHEM/RFFHEM into master_feature_BeSmart_Sx
+2021-02-19 
+  00_SIGNALduino:
+  Addd test for _limit_to_number and _limit_to_hex
+  Removed sub _limit_to_MC_pattern
+
+2021-02-13 
+
+  - Migrated 98 Unittest Tests to FHEM compatible prove test (#940)
+  * Migrate tests based on 98_unittest to fhem prove compatible test mode
+  * Migrated more tests and testdat
+  * Fixed return from prepare_fash
+  * Move Lib Tests to t Folder,to avoid running these tests under fhem testevn
+
+2021-02-12 
+  00_SIGNALDuino: Bugfix, module runs now without fhemweb instance 
+
+2021-01-28 - 
+  Feature: Remote control SEAV BeSmart S4 (#933)
+
 2021-01-22 - Set commands changed
 2020-12-30 - rename "get raw" to "get rawmsg" (#925)
   * rename "get raw" to "get rawmsg"
