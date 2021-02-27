@@ -1,26 +1,28 @@
-2021-02-13 - Migrated 98 Unittest Tests to FHEM compatible prove test (#940)
+2021-02-19 - 00_SIGNALduino
+  Addd test for _limit_to_number and _limit_to_hex
+  Removed sub _limit_to_MC_pattern
+2021-02-15 - Merge branch 'feature_parse-Optimize' of ssh://github.com/RFD-FHEM/RFFHEM into feature_parse-Optimize
+2021-02-13 - 00_SIGNALduino:
+  corrected rmsg regexes
+2021-02-13 - 
+  00_SIGNALduino:
+    Modified SIGNALduino_Parse_MC to use less parameters and check data to be more robust
+    SIGNALduino_Parse | check raw´s | extension code for no warnings #917
 
-* Migrate tests based on 98_unittest to fhem prove compatible test mode
-
-* Migrated more tests and testdat
-
-* Fixed return from prepare_fash
-
-* Move Lib Tests to t Folder,to avoid running these tests under fhem testevn
-
-2021-02-12 - Merge branch 'master' into unittest-2-prove
-2021-02-12 
-  00_SIGNALDuino: Bugfix, module runs now without fhemweb instance 
+2021-02-13 - 
+  Tests:
+    Migrated 98 Unittest Tests to FHEM compatible prove test (#940)
+    Migrate tests based on 98_unittest to fhem prove compatible test mode
+    Migrated more tests and testdat
+    Fixed return from prepare_fash
+    Move Lib Tests to t Folder,to avoid running these tests under fhem testevn
+  00_SIGNALDuino:
+    Bugfix, module runs now without fhemweb instance 
 
 2021-01-28 - Remote control SEAV BeSmart S4 (#933)
 change elsif to if
 TR_502MSV [P34] funktionierte nicht mehr
 
-2021-01-26 - Update 14_SD_UT.pm and SD_ProtocolData.pm
-change if to elsif
-delete comment
-
-2021-01-25 - new protocol for BeSmart S4 remote control
 2021-01-22 - Set commands changed
 2020-12-30 - rename "get raw" to "get rawmsg" (#925)
   * rename "get raw" to "get rawmsg"
