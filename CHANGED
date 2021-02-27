@@ -1,3 +1,9 @@
+2021-02-27 - Master bugfix protocol list (#947)
+
+* Display protocol list
+  Msg type MC is not displayed in the protocol list
+* Added test for SIGNALduino_FW_getProtocolList to check if MS, MC, MU, MN Tag is included
+  Co-authored-by: sidey79 <7968127+sidey79@users.noreply.github.com>
 2021-02-27 - Merge branch 'master' into master_bugfix_protolist and updated CHANGED
 2021-02-27 - Display protocol list
   bugfix:
