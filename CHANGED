@@ -1,15 +1,11 @@
-2021-02-28 - Update 00_SIGNALduino.pm
-
-Update  Commandref
-2021-02-28 - Merge branch 'master' into master_feature_update-config
 2021-02-28 - Automatic update of the reading config
-  00_SIGNALDuino: Automatic update of the reading config with set enable/disable MessageType or set raw CER/CDR.
-	
+  00_SIGNALDuino: Automatic update of the reading config with set 
+                  enable/disable MessageType or set raw CER/CDR.
+                  Update  Commandref, removed unsupported raw commands	
 2021-02-27 - Master bugfix protocol list (#947)
   * Display protocol list
     Msg type MC is not displayed in the protocol list
   * Added test for SIGNALduino_FW_getProtocolList to check if MS, MC, MU, MN Tag is included
-    Co-authored-by: sidey79 <7968127+sidey79@users.noreply.github.com>
 
   Feature: 
     00_SIGNALduino.pm: Feature parse optimize (#926)
@@ -30,12 +26,11 @@ Update  Commandref
   * Fixed return from prepare_fash
   * Move Lib Tests to t Folder,to avoid running these tests under fhem testevn
 
-2021-02-12 - Merge branch 'master' into unittest-2-prove
 2021-02-12 
   00_SIGNALDuino: Bugfix, module runs now without fhemweb instance 
 
-2021-01-28 - Feature: Remote control SEAV BeSmart S4 (#933)
-2021-01-25 - new protocol for BeSmart S4 remote control
+2021-01-28 
+  - Feature: Remote control SEAV BeSmart S4 (#933)
 
 2021-01-22 - Set commands changed
 2020-12-30 - rename "get raw" to "get rawmsg" (#925)
