@@ -38,7 +38,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-  SDUINO_VERSION                  => '3.5.1+20210212',
+  SDUINO_VERSION                  => '3.5.1+20210227',
   SDUINO_INIT_WAIT_XQ             => 1.5,     # wait disable device
   SDUINO_INIT_WAIT                => 2,
   SDUINO_INIT_MAXRETRY            => 3,
@@ -2119,19 +2119,16 @@ sub SIGNALduino_Split_Message {
       Debug "$name: extracted  data $rawData\n" if ($debug);
       $ret{rawData} = $rawData;
     }
-    elsif($_ =~ m/^SP=\d{1}/)                                     #### Sync Pulse Index
+    elsif($_ =~ m/^SP=([0-9])$/)                                     #### Sync Pulse Index
     {
-      (undef, $syncidx) = split(/=/,$_);
-      Debug "$name: extracted  syncidx $syncidx\n" if ($debug);
+      Debug "$name: extracted  syncidx $1\n" if ($debug);
       #return undef if (!defined($patternList{$syncidx}));
-      $ret{syncidx} = $syncidx;
+      $ret{syncidx} = $1;
     }
-    elsif($_ =~ m/^CP=\d{1}/)                                     #### Clock Pulse Index
+    elsif($_ =~ m/^CP=([0-9])$/)                                     #### Clock Pulse Index
     {
-      (undef, $clockidx) = split(/=/,$_);
-      Debug "$name: extracted  clockidx $clockidx\n" if ($debug);;
-      #return undef if (!defined($patternList{$clockidx}));
-      $ret{clockidx} = $clockidx;
+      Debug "$name: extracted  clockidx $1\n" if ($debug);;
+      $ret{clockidx} = $1;
     }
     elsif($_ =~ m/^L=\d/)                                         #### MC bit length
     {
@@ -2271,22 +2268,52 @@ sub SIGNALduino_calcRSSI {
   return ($rssi,$rssiStr);
 }
 
-############################# package main
-sub SIGNALduino_Parse_MS($$$$%) {
-  my ($hash, $iohash, $name, $rmsg,%msg_parts) = @_;
 
-  my $syncidx=$msg_parts{syncidx};
-  my $clockidx=$msg_parts{clockidx};
-  my $rssi=$msg_parts{rssi};
-  my $rawData=$msg_parts{rawData};
-  my %patternList;
+
+
+=item SIGNALduino_Parse_MS
+
+This sub parses a MS rawdata string and dispatches it if a protocol matched the cirteria.
+
+Input:  $iohash, $rawMessage 
+
+Output: { Number of times dispatch was called, 0 if dispatch isn't called }
+
+=cut
+############################# package main
+
+sub SIGNALduino_Parse_MS {
+  my $hash = shift // return;    #return if no hash  is provided
+  my $rmsg = shift // return;    #return if no rmsg is provided
+
+  if ($rmsg !~ /^MS;(?:P[0-7]=-?\d+;){3,8}D=[0-7]+;(?:[CS]P=[0-7];){2}((?:R=\d+;)|(?:O;)?|(?:m=?[0-9];)|(?:[sbeECA=0-9]+;))*$/){   
+    $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: Parse_MS, faulty msg: $rmsg]);
+    return ; # Abort here if not successfull
+  }
+
+  # Extract Data from rmsg:
+  my %msg_parts = SIGNALduino_Split_Message($rmsg, $hash->{NAME});
+
+  # Verify if extracted hash has the correct values:
+  
+  my $clockidx = _limit_to_number($msg_parts{clockidx}) // $hash->{logMethod}->($hash->{name}, 3, qq[$hash->{name}: Parse_MS, faulty clock: $msg_parts{clockidx}])     &&  return ;      
+  my $syncidx  = _limit_to_number($msg_parts{syncidx})  // $hash->{logMethod}->($hash->{name}, 3, qq[$hash->{name}: Parse_MS, faulty sync: $msg_parts{syncidx}])       &&  return ;      
+  my $rawData  = _limit_to_number($msg_parts{rawData})  // $hash->{logMethod}->($hash->{name}, 3, qq[$hash->{name}: Parse_MS, faulty rawData D=: $msg_parts{rawData}]) &&  return ; 
+  my $rssi;
   my $rssiStr= '';
-  ($rssi,$rssiStr) = SIGNALduino_calcRSSI($rssi) if (defined($rssi));
+  if ( defined $msg_parts{rssi} ){
+     $rssi = _limit_to_hex($msg_parts{rssi}) // $hash->{logMethod}->($hash->{name}, 3, qq[$hash->{name}: Parse_MS, faulty rssi R=: $msg_parts{rssi}]) &&  return ; 
+    ($rssi,$rssiStr) = SIGNALduino_calcRSSI($rssi);
+  };
+  my $messagetype=$msg_parts{messagetype};
+  my $name = $hash->{NAME};
+
+  my %patternList;
 
   #Debug 'Message splitted:';
   #Debug Dumper(\@msg_parts);
 
-  my $debug = AttrVal($iohash->{NAME},'debug',0);
+  my $debug = AttrVal($hash->{NAME},'debug',0);
 
   if (defined($clockidx) and defined($syncidx))
   {
@@ -2450,24 +2477,50 @@ sub SIGNALduino_padbits(\@$) {
   return " padded $i bits to bit_msg array";
 }
 
+=item SIGNALduino_Parse_MU
+
+This sub parses a MU rawdata string and dispatches it if a protocol matched the cirteria.
+
+Input:  $iohash, $rawMessage 
+
+Output: { Number of times dispatch was called, 0 if dispatch isn't called }
+
+=cut
+
 ############################# package main, test exists
-sub SIGNALduino_Parse_MU($$$$@) {
-  my ($hash, $iohash, $name, $rmsg,%msg_parts) = @_;
+sub SIGNALduino_Parse_MU {
+  my $hash = shift // return;    #return if no hash  is provided
+  my $rmsg = shift // return;    #return if no rmsg is provided
+  
+  if ($rmsg !~ /^MU;(?:P[0-7]=-?[0-9]+;){3,8}?((?:D=[0-7]+;)|(?:CP=[0-7];)|(?:R=\d+;)|(?:O;)?|(?:[A-Za-z0-9=]+;)*)*$/){   
+    $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: Parse_MU, faulty msg: $rmsg]);
+    return ; # Abort here if not successfull
+  }
+
+  # Extract Data from rmsg:
+  my %msg_parts = SIGNALduino_Split_Message($rmsg, $hash->{NAME});
+
+  # Verify if extracted hash has the correct values:
+  my $clockidx = _limit_to_number($msg_parts{clockidx}) // $hash->{logMethod}->($hash->{name}, 3, qq[$hash->{name}: Parse_MU, faulty clock: $msg_parts{clockidx}])     &&  return ;      
+  my $rawData  = _limit_to_number($msg_parts{rawData})  // $hash->{logMethod}->($hash->{name}, 3, qq[$hash->{name}: Parse_MI, faulty rawData D=: $msg_parts{rawData}]) &&  return ; 
+  my $rssi;
+  my $rssiStr= '';
+  if ( defined $msg_parts{rssi} ){
+     $rssi = _limit_to_hex($msg_parts{rssi}) // $hash->{logMethod}->($hash->{name}, 3, qq[$hash->{name}: Parse_MU, faulty rssi R=: $msg_parts{rssi}]) &&  return ; 
+    ($rssi,$rssiStr) = SIGNALduino_calcRSSI($rssi);
+  };
+  my $messagetype=$msg_parts{messagetype};
+  my $name = $hash->{NAME};
+
 
   my $protocolid;
-  my $clockidx=$msg_parts{clockidx};
-  my $rssi=$msg_parts{rssi};
-  my $rawData;
   my %patternListRaw;
   my $message_dispatched=0;
-  my $debug = AttrVal($iohash->{NAME},'debug',0);
-  my $rssiStr= '';
-  ($rssi,$rssiStr) = SIGNALduino_calcRSSI($rssi) if (defined($rssi));
+  my $debug = AttrVal($hash->{NAME},'debug',0);
 
-    Debug "$name: processing unsynced message\n" if ($debug);
+  Debug "$name: processing unsynced message\n" if ($debug);
 
   my $clockabs = 1;  #Clock will be fetched from protocol if possible
-  #$patternListRaw{$_} = floor($msg_parts{pattern}{$_}/$clockabs) for keys $msg_parts{pattern};
   $patternListRaw{$_} = $msg_parts{pattern}{$_} for keys %{$msg_parts{pattern}};
 
   if (defined($clockidx))
@@ -2656,24 +2709,48 @@ sub SIGNALduino_Parse_MU($$$$@) {
   }
 }
 
+=item SIGNALduino_Parse_MC
+
+This sub parses a MC rawdata string and dispatches it if a protocol matched the cirteria.
+
+Input:  $iohash, $rawMessage 
+
+Output: { Number of times dispatch was called, 0 if dispatch isn't called }
+
+=cut
+
 ############################# package main, test exists
-sub SIGNALduino_Parse_MC($$$$@) {
-  my ($hash, $iohash, $name, $rmsg,%msg_parts) = @_;
-  my $clock=$msg_parts{clockabs} // return ;       ## absolute clock
-  my $rawData=$msg_parts{rawData};
-  my $rssi=$msg_parts{rssi};
+sub SIGNALduino_Parse_MC {
+  my $hash = shift // return;    #return if no hash  is provided
+  my $rmsg = shift // return;    #return if no rmsg is provided
+  
+  if ($rmsg !~ /^M[cC];LL=-\d+;LH=\d+;SL=-\d+;SH=\d+;D=[0-9A-F]+;C=\d+;L=\d+;(?:R=\d+;)?$/){
+    $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: Parse_MC, faulty msg: $rmsg]);
+    return ; # Abort here if not successfull
+  }
+
+  # Extract Data from rmsg:
+  my %msg_parts = SIGNALduino_Split_Message($rmsg, $hash->{NAME});
+
+  # Verify if extracted hash has the correct values:
+  my $clock    = _limit_to_number($msg_parts{clockabs}) // $hash->{logMethod}->($hash->{name}, 3, qq[$hash->{name}: Parse_MC, faulty clock: $msg_parts{clockabs}])     &&  return ;      
+  my $mcbitnum = _limit_to_number($msg_parts{mcbitnum}) // $hash->{logMethod}->($hash->{name}, 3, qq[$hash->{name}: Parse_MC, faulty mcbitnum: $msg_parts{mcbitnum}])  &&  return ;      
+  my $rawData  = _limit_to_hex($msg_parts{rawData})     // $hash->{logMethod}->($hash->{name}, 3, qq[$hash->{name}: Parse_MC, faulty rawData D=: $msg_parts{rawData}]) &&  return ; 
+  my $rssi;
   my $rssiStr= '';
-  my $mcbitnum=$msg_parts{mcbitnum};
+  if ( defined $msg_parts{rssi} ){
+     $rssi = _limit_to_hex($msg_parts{rssi}) // $hash->{logMethod}->($hash->{name}, 3, qq[$hash->{name}: Parse_MC, faulty rssi R=: $msg_parts{rssi}]) &&  return ; 
+    ($rssi,$rssiStr) = SIGNALduino_calcRSSI($rssi);
+  };
   my $messagetype=$msg_parts{messagetype};
+  my $name = $hash->{NAME};
+
+  
   my $bitData;
   my $dmsg;
   my $message_dispatched=0;
-  my $debug = AttrVal($iohash->{NAME},'debug',0);
-  ($rssi,$rssiStr) = SIGNALduino_calcRSSI($rssi) if (defined($rssi));
+  my $debug = AttrVal($hash->{NAME},'debug',0);
 
-  return if (!$clock);
-  #my $protocol=undef;
-  #my %patternListRaw = %msg_parts{patternList};
 
   Debug "$name: processing manchester messag len:".length($rawData) if ($debug);
 
@@ -2759,13 +2836,30 @@ sub SIGNALduino_Parse_MC($$$$@) {
 
 ############################# package main, test exists
 sub SIGNALduino_Parse_MN {
-  my ($hash, $rmsg, $msg_parts) = @_;
-  my $name= $hash->{NAME};
-  my $rawData=$msg_parts->{rawData};
-  my $rssi=$msg_parts->{rssi};
-  my $dmsg;
+
+  my $hash = shift // return;   #return if no hash  is provided
+  my $rmsg = shift // return;   #return if no rmsg is provided
+ 
+  if ($rmsg !~ /^MN;D=[0-9A-F]+;(?:R=[0-9]+;)?$/){
+    $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: Parse_MN, faulty msg: $rmsg]);
+    return ; # Abort here if not successfull
+  }
+
+  # Extract Data from rmsg:
+  my %msg_parts = SIGNALduino_Split_Message($rmsg, $hash->{NAME});
+
+  # Verify if extracted hash has the correct values:
+  my $rawData  = _limit_to_hex($msg_parts{rawData})     // $hash->{logMethod}->($hash->{name}, 3, qq[$hash->{name}: Parse_MN, faulty rawData D=: $msg_parts{rawData}]) &&  return ; 
+  my $rssi;
   my $rssiStr= '';
-  ($rssi,$rssiStr) = SIGNALduino_calcRSSI($rssi) if (defined($rssi));
+  if ( defined $msg_parts{rssi} ){
+     $rssi = _limit_to_hex($msg_parts{rssi}) // $hash->{logMethod}->($hash->{name}, 3, qq[$hash->{name}: Parse_MN, faulty rssi R=: $msg_parts{rssi}]) &&  return ; 
+    ($rssi,$rssiStr) = SIGNALduino_calcRSSI($rssi);
+  };
+  my $messagetype=$msg_parts{messagetype};
+  my $name = $hash->{NAME};
+
+  my $dmsg;
 
   my $hlen = length($rawData);
   my $match;
@@ -2808,7 +2902,7 @@ sub SIGNALduino_Parse_MN {
     if ($#methodReturn == 0) {
       $hash->{logMethod}->($name, 4, qq[$name: Parse_MN, Decoded matched MN Protocol id $id dmsg=$methodReturn[0] $rssiStr]);
       SIGNALduno_Dispatch($hash,$rmsg,$methodReturn[0],$rssi,$id);
-      $message_dispatched=1; # Todo: Anzahl dispatches zählen
+      $message_dispatched++;
     } else {
       $hash->{logMethod}->($name, 4, qq{$name: Parse_MN, Error! method $methodReturn[1]});
     }
@@ -2841,32 +2935,31 @@ sub SIGNALduino_Parse($$$$@) {
     DoTrigger($name, 'RAWMSG ' . $rmsg);
   }
 
-  my %signal_parts=SIGNALduino_Split_Message($rmsg,$name);   ## Split message and save anything in an hash %signal_parts
-  #Debug 'raw data '. $signal_parts{rawData};
-
   my $dispatched;
-  # Message Synced type   -> M#
+ 
+  # Message Synced type   -> MS
+  my $mType = uc substr $rmsg,0,2 ;
 
-  if (@{$hash->{msIdList}} && $rmsg=~ m/^MS;(P\d=-?\d+;){3,8}D=\d+;CP=\d;SP=\d;/)
+  if (@{$hash->{msIdList}} && $mType eq  'MS' )
   {
-    $dispatched= SIGNALduino_Parse_MS($hash, $iohash, $name, $rmsg,%signal_parts);
+    $dispatched= SIGNALduino_Parse_MS($hash, $rmsg);
   }
   # Message unsynced type   -> MU
-    elsif (@{$hash->{muIdList}} && $rmsg=~ m/^MU;(P\d=-?\d+;){3,8}((CP|R)=\d+;){0,2}D=\d+;/)
+  elsif (@{$hash->{muIdList}} && $mType eq  'MU')
   {
-    $dispatched=  SIGNALduino_Parse_MU($hash, $iohash, $name, $rmsg,%signal_parts);
+    $dispatched=  SIGNALduino_Parse_MU($hash, $rmsg);
   }
   # Manchester encoded Data   -> MC
-    elsif (@{$hash->{mcIdList}} && $rmsg=~ m/^M[cC];.*;/)
+    elsif (@{$hash->{mcIdList}} && $mType eq  'MC')
   {
-    $dispatched=  SIGNALduino_Parse_MC($hash, $iohash, $name, $rmsg,%signal_parts);
+    $dispatched=  SIGNALduino_Parse_MC($hash, $rmsg);
   }
   # Message xFSK   -> MN
-    elsif (@{$hash->{mnIdList}} && $rmsg=~ m/^MN;.*;/) 
+    elsif (@{$hash->{mnIdList}} && $mType eq  'MN') 
   {
-    $dispatched=  SIGNALduino_Parse_MN($hash, $rmsg, \%signal_parts);
+    $dispatched=  SIGNALduino_Parse_MN($hash, $rmsg);
   }
-    else {
+   else {
     Debug "$name: unknown Messageformat, aborting\n" if ($debug);
     return ;
   }
@@ -3711,7 +3804,7 @@ sub SIGNALduino_FW_getProtocolList {
     my $msgtype = '';
     my $chkbox;
 
-    if (defined $hash->{protocolObject}->getProperty($id,'format') && $hash->{protocolObject}->getProperty($id,'format' eq 'manchester'))
+    if (defined $hash->{protocolObject}->getProperty($id,'format') && $hash->{protocolObject}->getProperty($id,'format') eq 'manchester')
     {
       $msgtype = 'MC';
     }
@@ -3881,6 +3974,23 @@ sub SIGNALduino_githubParseHttpResponse {
      FW_directNotify("FILTER=$name", "#FHEMWEB:$FW_wname", "location.reload('true')", '');
   }
   return 0;
+}
+
+
+
+############################# package main, candidate for fhem core utility lib
+sub _limit_to_number {
+  my $number = shift // return;
+  return $number if ($number =~ /^[0-9]+$/);
+  return ;
+}
+
+
+############################# package main, candidate for fhem core utility lib
+sub _limit_to_hex {
+  my $hex = shift // return;
+  return $hex if ($hex =~ /^[0-9A-F]+$/i);
+  return;
 }
 
 
