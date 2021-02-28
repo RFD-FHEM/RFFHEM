@@ -1,3 +1,4 @@
+2021-02-28 - Merge branch 'master' into master_feature_update-config
 2021-02-28 - Automatic update of the reading config
   00_SIGNALDuino: Automatic update of the reading config with set enable/disable MessageType or set raw CER/CDR.
 	
