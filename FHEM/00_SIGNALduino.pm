@@ -38,7 +38,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-  SDUINO_VERSION                  => '3.5.1+20210227',
+  SDUINO_VERSION                  => '3.5.1+20210228',
   SDUINO_INIT_WAIT_XQ             => 1.5,     # wait disable device
   SDUINO_INIT_WAIT                => 2,
   SDUINO_INIT_MAXRETRY            => 3,
@@ -671,6 +671,9 @@ sub SIGNALduino_Set_raw {
   my ($hash, @a) = @_;
   $hash->{logMethod}->($hash->{NAME}, 4, "$hash->{NAME}: Set_raw, ".join(' ',@a));
   SIGNALduino_AddSendQueue($hash,$a[1]);
+  if ($a[1] =~ m/^C[D|E]R/) { # enable/disable data reduction
+    SIGNALduino_Get_Command($hash,'config');
+  }
   return ;
 }
 
@@ -931,6 +934,7 @@ sub SIGNALduino_Set_MessageType {
     $argm = 'CD' . substr($a[1],-1,1);
   }
   SIGNALduino_AddSendQueue($hash,$argm);
+  SIGNALduino_Get_Command($hash,'config');
   $hash->{logMethod}->($hash->{NAME}, 4, "$hash->{NAME}: Set_MessageType, $a[0] $a[1] $argm");
 }
 
@@ -4353,18 +4357,8 @@ USB-connected devices (SIGNALduino):<br>
     <br>Example 4: <code>set sduino raw SN;R=3;D=9A46036AC8D3923EAEB470AB;</code>  sends a xFSK message of raw and repeated 3 times
     <ul><br>
       <b>note: The wrong use of the upcoming options can lead to malfunctions of the SIGNALduino!</b><br><br>
-
-      <u>ONLY for DEBUG | <small>commands are dependent from firmware version!</small></u><br>
-      <li>CED -> Debug output on</li>
-      <li>CDD -> Debug output off</li>
-      <li>CDL -> LED off</li>
-      <li>CEL -> LED on</li>
       <li>CER -> turn on data compression (config: Mred=1)</li>
-      <li>CDR -> disable data compression (config: Mred=0)</li>
-      <li>CSmscnt=[Wert] -> repetition counter for the split of MS messages</li>
-      <li>CSmuthresh=[Wert] -> threshold for the split of MU messages (0=off)</li>
-      <li>CSmcmbl=[Wert] -> minbitlen for MC messages</li>
-      <li>CSfifolimit=[Wert] -> threshold for debug Output of the number of pulses in the FIFO buffer</li><br>
+      <li>CDR -> disable data compression (config: Mred=0)</li><br>
 
       <u>Register commands for a CC1101</u>
       <li>e -> default settings</li>
@@ -4903,18 +4897,8 @@ USB-connected devices (SIGNALduino):<br>
 
     <ul>
       <b>Hinweis: Die falsche Benutzung der kommenden Optionen kann zu Fehlfunktionen des SIGNALduinos f&uuml;hren!</b><br><br>
-      <u>NUR f&uuml;r DEBUG Nutzung | <small>Befehle sind abh&auml;nging vom Firmwarestand!</small></u>
-      <li>CED -> Debugausgaben ein</li>
-      <li>CDD -> Debugausgaben aus</li>
-      <li>CDL -> LED aus</li>
-      <li>CEL -> LED ein</li>
       <li>CER -> Einschalten der Datenkomprimierung (config: Mred=1)</li>
-      <li>CDR -> Abschalten der Datenkomprimierung (config: Mred=0)</li>
-      <li>CSmscnt=[Wert] -> Wiederholungsz&auml;hler f&uuml;r den split von MS Nachrichten</li>
-      <li>CSmuthresh=[Wert] -> Schwellwert f&uuml;r den split von MU Nachrichten (0=aus)</li>
-      <li>CSmcmbl=[Wert] -> minbitlen f&uuml;r MC-Nachrichten</li>
-      <li>CSfifolimit=[Wert] -> Schwellwert f&uuml;r debug Ausgabe der Pulsanzahl im FIFO Puffer</li>
-      <br>
+      <li>CDR -> Abschalten der Datenkomprimierung (config: Mred=0)</li><br>
       <u>Register Befehle bei einem CC1101</u>
       <li>e -> Werkseinstellungen</li>
       <li>x -> gibt die ccpatable zur&uuml;ck</li>
