@@ -1,3 +1,8 @@
+2021-03-01 -  update reading  config when change settings (#948)
+
+Automatic update of the reading config with set enable/disable MessageType or set raw CER/CDR.
+* Added Test for raw command CDR and CDE
+Co-authored-by: sidey79 <7968127+sidey79@users.noreply.github.com>
 2021-02-28 - Automatic update of the reading config
   00_SIGNALDuino: Automatic update of the reading config with set 
                   enable/disable MessageType or set raw CER/CDR.
