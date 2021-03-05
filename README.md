@@ -1,9 +1,11 @@
-SIGNALduino - FHEM Modules Version 3.5.1
+SIGNALduino - FHEM Modules Version 3.5.1+
 
-[![Coverage Status](https://coveralls.io/repos/github/RFD-FHEM/RFFHEM/badge.svg?branch=master)](https://coveralls.io/github/RFD-FHEM/RFFHEM?branch=master) [![Build Status](https://travis-ci.org/RFD-FHEM/RFFHEM.svg?branch=master)](https://travis-ci.org/RFD-FHEM/RFFHEM)
+Base Branch:
 
+[![codecov](https://codecov.io/gh/RFD-FHEM/RFFHEM/branch/master/graph/badge.svg?token=szkoYvQwNV)](https://codecov.io/gh/RFD-FHEM/RFFHEM)
+![Perl Modules&FHEM Unittests](https://github.com/RFD-FHEM/RFFHEM/workflows/Perl%20Modules&FHEM%20Unittests/badge.svg)
+![controlsFile](https://github.com/RFD-FHEM/RFFHEM/workflows/controlsFile/badge.svg)
 Counterpart of SIGNALDuino uC, it's the code for FHEM to work with the data received from the uC
-
 
 Supported Devices / Protocols
 ======
@@ -11,6 +13,7 @@ Supported Devices / Protocols
 |Device | Function|
 | ------------- | ----------- |
 |AC114-01B | Remote control |
+|BeSmart S4 | Remote control |
 |Ambient Weather F007T, F007TP, F007TH | Thermo-Hygrometer, Thermometer |
 |Arduino Sensor | multi purpose sensor based on arduino |
 |Atlantic Security | some sensors (MD-210R / MD_230R / MD-2018R / MD-2003R) |

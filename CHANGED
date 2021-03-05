@@ -1,47 +1,66 @@
-2021-01-17 - Updated version string
-2021-01-17 - Check if hashref exists to avoid warning
-2021-01-17 - Merge branch 'sidey79/issue823' of ssh://github.com/RFD-FHEM/RFFHEM into sidey79/issue823
-2021-01-17 - Avoid timeout after response 2. send, do not delte $hash->{ucCmd} because we can send again if there is something in the queue
-2021-01-17 - Merge branch 'sidey79/issue823' of ssh://github.com/RFD-FHEM/RFFHEM into sidey79/issue823
-2021-01-09 - Updated version
-2021-01-09 - Merge branch 'sidey79/issue823' of ssh://github.com/RFD-FHEM/RFFHEM into sidey79/issue823
-2021-01-05 - Update 00_SIGNALduino.pm
+2021-03-05 - Multiple set commands are not processed
+         00_SIGNALDuino: Fixes #823  for firmware 3.4.0 without delay
 
-Version changed
-2021-01-05 - Multiple set commands are not processed
-Fixes #823  for firmware 3.4.0 without delay
+2021-03-01 -  update reading  config when change settings (#948)
+
+Automatic update of the reading config with set enable/disable MessageType or set raw CER/CDR.
+* Added Test for raw command CDR and CDE
+Co-authored-by: sidey79 <7968127+sidey79@users.noreply.github.com>
+2021-02-28 - Automatic update of the reading config
+  00_SIGNALDuino: Automatic update of the reading config with set 
+                  enable/disable MessageType or set raw CER/CDR.
+                  Update  Commandref, removed unsupported raw commands	
+2021-02-27 - Master bugfix protocol list (#947)
+  * Display protocol list
+    Msg type MC is not displayed in the protocol list
+  * Added test for SIGNALduino_FW_getProtocolList to check if MS, MC, MU, MN Tag is included
+
+  Feature: 
+    00_SIGNALduino.pm: Feature parse optimize (#926)
+      Modified parse_Mx subs to two arguments, and improved input validation to avoid 
+      perl warnigs if corrupt data is processed.
+      Addd tests for input validation subs: _limit_to_number and _limit_to_hex
+      Reworked existing tests to be compatible with new sub format
+
+2021-02-19 
+  00_SIGNALduino:
+  Addd test for _limit_to_number and _limit_to_hex
+  Removed sub _limit_to_MC_pattern
+
+2021-02-13 
+  - Migrated 98 Unittest Tests to FHEM compatible prove test (#940)
+  * Migrate tests based on 98_unittest to fhem prove compatible test mode
+  * Migrated more tests and testdat
+  * Fixed return from prepare_fash
+  * Move Lib Tests to t Folder,to avoid running these tests under fhem testevn
+
+2021-02-12 
+  00_SIGNALDuino: Bugfix, module runs now without fhemweb instance 
+
+2021-01-28 
+  - Feature: Remote control SEAV BeSmart S4 (#933)
+
+2021-01-22 - Set commands changed
+2020-12-30 - rename "get raw" to "get rawmsg" (#925)
+  * rename "get raw" to "get rawmsg"
+2020-12-30 - Display number of messages passed to modules.
+>>>>>>> master
 2020-12-28 - Extension for "get sduino ccreg" (#918)
-
-* Update 00_SIGNALduino.pm
-  Extension of the CC1101 configuration register with standard values
-  Query CC1101 status register incorporated
-  Integrated table for CC11xx chip versions
-* Update test_02_sub_SIGNALduino_CheckCcregResponse-definition.txt
-2020-12-28 - Merge branch 'master' into master_feature_ccreg
-2020-12-28 - Update 00_SIGNALduino.pm
-
-move %cc1101_status_register and %cc1101_version in package cc1101
-Extension of the CC1101 configuration register with standard values
-Query CC1101 status register incorporated
-Integrated table for CC11xx chip versions
+  * Update 00_SIGNALduino.pm
+    Extension of the CC1101 configuration register with standard values
+    Query CC1101 status register incorporated
+    Integrated table for CC11xx chip versions
+  * Update test_02_sub_SIGNALduino_CheckCcregResponse-definition.txt
 
 2020-12-28 - Fix unittest error in actions and failing SIGNALduino_CheckVersionResp test (#923)
-
-* prove.yml
-- try to catch error in classic tests
-
-(cherry picked from commit 657680e0b8cf71a9a364df4d525e3aded590d337)
+  * prove.yml
+    - try to catch error in classic tests
+      (cherry picked from commit 657680e0b8cf71a9a364df4d525e3aded590d337)
 
 2020-12-28 - 00_SIGNALduino.pm
-
- -Wrong version assignment in SIGNALduino_CheckVersionResp fixed and tests corrected
+  -Wrong version assignment in SIGNALduino_CheckVersionResp fixed and tests corrected
 
 2020-12-20 - Decoding and sending protocol 24 (#915)
-
-  SD_ProtocolData.pm: change protocol u24 to P24
-  14_SD_UT.pm: decode and send protocol for Visivo remote control
-2020-12-20 - Merge branch 'master' into master_feature_visivio
-2020-12-20 - Completion of the decoding protocol 24
   SD_ProtocolData.pm: change protocol u24 to P24
   14_SD_UT.pm: decode and send protocol for Visivo remote control
 
@@ -63,7 +82,6 @@ Integrated table for CC11xx chip versions
   see https://github.com/RFD-FHEM/RFFHEM/issues/906
   change: change protocol 56 from u56 to P56 
 
-2020-12-07 - Merge branch 'master_feature_AC114-xxB' of https://github.com/RFD-FHEM/RFFHEM into master_feature_AC114-xxB
 2020-12-07 - change version from 3.5.0 to 3.5.1
 
 2020-12-04 - fix length_min & clean CHANGED (#908)
@@ -74,11 +92,7 @@ Integrated table for CC11xx chip versions
     * revised length_min ID 46
 
 2020-12-02 - Update SD_ProtocolData.pm
-2020-12-02 - fix length_min & clean
-  CHANGED
-    * clean old comments
-  SD_ProtocolData.pm
-    * revised length_min ID 46
+
 2020-12-02 - Master fix - PERL WARNING (#907)
   * Update 00_SIGNALduino.pm
     * fix PERL WARNING
