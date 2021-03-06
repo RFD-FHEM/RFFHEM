@@ -1,4 +1,6 @@
 2021-03-05 - Multiple set commands are not processed
+Fixes #823
+2021-03-05 - Multiple set commands are not processed
          00_SIGNALDuino: Fixes #823  for firmware 3.4.0 without delay
 
 2021-03-01 -  update reading  config when change settings (#948)
