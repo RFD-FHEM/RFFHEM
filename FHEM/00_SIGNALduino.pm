@@ -20,7 +20,7 @@ use warnings;
 my $missingModulSIGNALduino = '';
 
 use DevIo;
-require "99_Utils.pm";
+require "99_Utils.pm" if (!defined $modules{"Utils"} || !exists $modules{"Utils"}{"LOADED"} );
 use Carp;
 no warnings 'portable';
 
