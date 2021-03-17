@@ -2,7 +2,6 @@
 
  * added internal FVERSION for version from modul via
    FHEM::Meta
-2021-03-17 - Update 14_SD_BELL.pm
  * added useful informations
  * revised code for PerlCritic
  * revised comments
@@ -12,11 +11,11 @@
 
 Automatic update of the reading config with set enable/disable MessageType or set raw CER/CDR.
 * Added Test for raw command CDR and CDE
-Co-authored-by: sidey79 <7968127+sidey79@users.noreply.github.com>
+
 2021-02-28 - Automatic update of the reading config
   00_SIGNALDuino: Automatic update of the reading config with set 
                   enable/disable MessageType or set raw CER/CDR.
-                  Update  Commandref, removed unsupported raw commands	
+                  Update  Commandref, removed unsupported raw commands
 2021-02-27 - Master bugfix protocol list (#947)
   * Display protocol list
     Msg type MC is not displayed in the protocol list
