@@ -1,4 +1,8 @@
 2021-03-17 - Update 14_SD_BELL.pm
+
+ * added internal FVERSION for version from modul via
+   FHEM::Meta
+2021-03-17 - Update 14_SD_BELL.pm
  * added useful informations
  * revised code for PerlCritic
  * revised comments
