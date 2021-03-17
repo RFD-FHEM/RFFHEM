@@ -4,10 +4,10 @@ use warnings;
 
 use Test2::V0;
 use Test2::Tools::Compare qw{is item U D match hash array bag};
-use Mock::Sub;
 use Test2::Todo;
 
 
+our %defs;
 
 my @mockData = (
     {
@@ -58,6 +58,43 @@ my @mockData = (
         rValue => U(), 
         todoReason => q[This data should not be processed]
     },
+    {
+        deviceName => q[dummyDuino],
+        plan => 2,
+        testname =>  q[Corrupt MU data, R= Argument "1q" isn't numeric],
+        input =>  q[MU;P0=439;P1=-196;P3=-356;P4=634;P5=-556;P6=-7244;D=010303030303030303030303034503454503034545030345454503034503454545450345454503034545030303030345030345034545034503454506;CP=0;R=1q;],
+        rValue => U(), 
+        todoReason => q[This data should not be processed]
+    },
+    {
+        deviceName => q[dummyDuino],
+        plan       => 2,
+        testname   =>  q[Test Protocol 44 - MU Data dispatched],
+        input      =>  q[MU;P0=32001;P1=-1939;P2=1967;P3=3896;P4=-3895;D=01213424242124212121242121242121212124212424212121212121242421212421242121242124242421242421242424242124212124242424242421212424212424212121242121212;CP=2;R=39;],
+        rValue     => 1,
+    },
+    {
+        deviceName => q[dummyDuino],
+        plan => 2,
+        testname =>  q[Test Protocol 46 - MU Data dispatched],
+        input =>  q[MU;P0=-1943;P1=1966;P2=-327;P3=247;P5=-15810;D=01230121212301230121212121230121230351230121212301230121212121230121230351230121212301230121212121230121230351230121212301230121212121230121230351230121212301230121212121230121230351230;CP=1;],
+        rValue => 4,
+    },
+    {
+        deviceName => q[dummyDuino],
+        plan => 2,
+        testname =>  q[Test Protocol 84 - MU Data dispatched],
+        input =>  q[MU;P0=-21520;P1=235;P2=-855;P3=846;P4=620;P5=-236;P7=-614;D=012323232454545454545451717451717171745171717171717171717174517171745174517174517174545;CP=1;R=217;],
+        rValue => 1,
+    },
+    {
+        deviceName => q[dummyDuino],
+        plan => 2,
+        testname =>  q[Test Protocol 85 - MU Data dispatched],
+        input =>  q[MU;P0=7944;P1=-724;P2=742;P3=241;P4=-495;P5=483;P6=-248;D=01212121343434345656343434563434345634565656343434565634343434343434345634345634345634343434343434343434345634565634345656345634343456563421212121343434345656343434563434345634565656343434565634343434343434345634345634345634343434343434343434345634565634;CP=3;R=47;],
+        rValue => 2,
+    },
+
 );
 plan (scalar @mockData );  
 
@@ -79,9 +116,8 @@ InternalTimer(time()+1, sub() {
     subtest "checking $element->{testname} on $element->{deviceName}" => sub {
       my $p = $element->{plan} // 1;
       plan ($p);  
-      my %signal_parts=SIGNALduino_Split_Message($element->{input},$element->{deviceName});   
       
-      my $ret = SIGNALduino_Parse_MU($targetHash,$targetHash,$element->{deviceName},$element->{input},%signal_parts);
+      my $ret = SIGNALduino_Parse_MU($targetHash,$element->{input});
       for my $i (1..$p)
       {
         $i == 1 && do { is($ret,$element->{rValue},"Verify return value") } ;
