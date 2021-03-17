@@ -1,5 +1,5 @@
 ##############################################################################
-# $Id: 14_SD_BELL.pm 0 2021-02-04 21:27:08Z HomeAuto_User $
+# $Id: 14_SD_BELL.pm 0 2021-03-17 21:27:08Z HomeAuto_User $
 #
 # The file is part of the SIGNALduino project.
 # The purpose of this module is to support many wireless BELL devices.
@@ -43,6 +43,7 @@ package main;
 use strict;
 use warnings;
 use lib::SD_Protocols;
+use FHEM::Meta;         # https://wiki.fhem.de/wiki/Meta for SVN Revision
 
 ### HASH for all modul models ###
 my %models = (
@@ -101,7 +102,7 @@ sub SD_BELL_Initialize {
   $hash->{AttrList}   = 'repeats:1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,20,25,30 IODev do_not_notify:1,0 ignore:0,1 showtime:1,0 model:'.join(',', sort keys %models) . " $main::readingFnAttributes";
   $hash->{AutoCreate} = {'SD_BELL.*' => {FILTER => '%NAME', autocreateThreshold => '4:180', GPLOT => ''}};
 
-  return;
+  return FHEM::Meta::InitMod( __FILE__, $hash );
 }
 
 ### unterer Teil ###
@@ -113,9 +114,6 @@ use POSIX;
 
 use GPUtils qw(:all);  # wird für den Import der FHEM Funktionen aus der fhem.pl benötigt
 
-use constant {
-  SD_BELL_VERSION => '2021-02-04',
-};
 
 my $missingModul = '';
 
@@ -166,7 +164,6 @@ sub Define {
   $hash->{doubleCode} =  'Code alternates between two RAWMSG' if($protocol == 41);
   $hash->{bitMSG} =  '';
   $hash->{lastMSG} =  '';
-  $hash->{version_modul} = SD_BELL_VERSION;
 
   $iodevice = $a[4] if($a[4]);
 
@@ -179,6 +176,7 @@ sub Define {
 
   AssignIoPort($hash, $iodevice);
 
+  return $@ unless ( FHEM::Meta::SetInternals($hash) );
   return;
 }
 
