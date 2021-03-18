@@ -1,3 +1,8 @@
+2021-03-18 - require 99_Utils only if really needed (#950)
+
+* 00_SIGNALduino.pm
+
+Check if 99_Utils is already loaded to avoid perl warnings
 2021-03-16 - Update 00_SIGNALduino.pm
 
 Updated version
