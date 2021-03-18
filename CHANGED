@@ -1,6 +1,7 @@
-2021-03-17 - Update 00_SIGNALduino.pm
+2021-03-18 
+ - bugfix 00_SIGNALduino.pm: require 99_Utils only if really needed (#950)
+                             incorrect varible ref corrected
 
-  * incorrect hash value corrected
 2021-03-01 -  update reading  config when change settings (#948)
 
 Automatic update of the reading config with set enable/disable MessageType or set raw CER/CDR.
