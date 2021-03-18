@@ -1,3 +1,8 @@
+2021-03-18 - 00_SIGNALduino.pm - incorrect logoutput (#951)
+
+* Update 00_SIGNALduino.pm
+
+  * incorrect hash value corrected
 2021-03-18 - Merge branch 'master' into master_syntax
 2021-03-18 
  - bugfix 00_SIGNALduino.pm: require 99_Utils only if really needed (#950)
