@@ -1,22 +1,44 @@
+2021-03-22 - 14_SD_BELL.pm - Adjusted little things (#937)
+
+* Update 14_SD_BELL.pm
+
+ * revised code for PerlCritic
+ * revised comments
+ * remove fixed room allocation
+ * added useful informations
+ * added internal FVERSION for version from modul via
+   FHEM::Meta
+
+* Automatic updated controls and CHANGED
+
+* Update CHANGED
+2021-03-22 - Update 14_SD_BELL.pm
+
+ * added + revised META informations
+2021-03-19 - Update 14_SD_BELL.pm
+ * added internal FVERSION for version from modul via
+   FHEM::Meta
+ * added useful informations
+ * revised code for PerlCritic
+ * revised comments
+ * remove fixed room allocation
+
 2021-03-18 - 00_SIGNALduino.pm - incorrect logoutput (#951)
-
-* Update 00_SIGNALduino.pm
-
   * incorrect hash value corrected
-2021-03-18 - Merge branch 'master' into master_syntax
-2021-03-18 
- - bugfix 00_SIGNALduino.pm: require 99_Utils only if really needed (#950)
-                             incorrect varible ref corrected
+
+2021-03-18 - bugfix 00_SIGNALduino.pm
+  * require 99_Utils only if really needed (#950)
+  * incorrect varible ref corrected
 
 2021-03-01 -  update reading  config when change settings (#948)
 
 Automatic update of the reading config with set enable/disable MessageType or set raw CER/CDR.
 * Added Test for raw command CDR and CDE
-Co-authored-by: sidey79 <7968127+sidey79@users.noreply.github.com>
+
 2021-02-28 - Automatic update of the reading config
   00_SIGNALDuino: Automatic update of the reading config with set 
                   enable/disable MessageType or set raw CER/CDR.
-                  Update  Commandref, removed unsupported raw commands	
+                  Update  Commandref, removed unsupported raw commands
 2021-02-27 - Master bugfix protocol list (#947)
   * Display protocol list
     Msg type MC is not displayed in the protocol list
