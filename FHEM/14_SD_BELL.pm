@@ -1,5 +1,5 @@
 ##############################################################################
-# $Id: 14_SD_BELL.pm 0 2021-03-22 08:30:35Z HomeAuto_User $
+# $Id: 14_SD_BELL.pm 0 2021-03-22 22:30:35Z HomeAuto_User $
 #
 # The file is part of the SIGNALduino project.
 # The purpose of this module is to support many wireless BELL devices.
@@ -589,7 +589,7 @@ sub Attr {
         "FHEM::Meta": 0.001006,
         "GPUtils": 0,
         "lib::SD_Protocols": "0",
-        "perl": 5.014,
+        "perl": 5.018,
         "strict": "0",
         "warnings": "0"
       }
@@ -634,6 +634,7 @@ sub Attr {
     "x_support_community": {
       "board": "Sonstige Systeme",
       "boardId": "29",
+      "cat": "FHEM - Hausautomations-Systeme",
       "title": "FHEM - Hausautomations-Systeme >> Sonstige Systeme",
       "web": "https://forum.fhem.de/index.php/board,29.0.html"
     },
