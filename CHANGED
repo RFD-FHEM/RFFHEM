@@ -1,3 +1,17 @@
+2021-03-22 - 14_SD_BELL.pm - Adjusted little things (#937)
+
+* Update 14_SD_BELL.pm
+
+ * revised code for PerlCritic
+ * revised comments
+ * remove fixed room allocation
+ * added useful informations
+ * added internal FVERSION for version from modul via
+   FHEM::Meta
+
+* Automatic updated controls and CHANGED
+
+* Update CHANGED
 2021-03-22 - Update 14_SD_BELL.pm
 
  * added + revised META informations
