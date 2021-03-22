@@ -1,3 +1,6 @@
+2021-03-22 - Update 14_SD_BELL.pm
+
+ * added MEATA informations
 2021-03-19 - Update 14_SD_BELL.pm
  * added internal FVERSION for version from modul via
    FHEM::Meta
