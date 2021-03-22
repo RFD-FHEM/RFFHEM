@@ -1,5 +1,5 @@
 ##############################################################################
-# $Id: 14_SD_BELL.pm 0 2021-03-17 21:27:08Z HomeAuto_User $
+# $Id: 14_SD_BELL.pm 0 2021-03-22 07:27:08Z HomeAuto_User $
 #
 # The file is part of the SIGNALduino project.
 # The purpose of this module is to support many wireless BELL devices.
@@ -493,10 +493,10 @@ sub Attr {
 
   <b>Set</b><br>
   <ul>ring</ul><br>
-  
+
   <b>Get</b><br>
   <ul>N/A</ul><br>
-  
+
   <b>Attribute</b><br>
   <ul><li><a href="#do_not_notify">do_not_notify</a></li></ul>
   <ul><li><a href="#ignore">ignore</a></li></ul>
@@ -541,10 +541,10 @@ sub Attr {
 
   <b>Set</b><br>
   <ul>ring</ul><br>
-  
+
   <b>Get</b><br>
   <ul>N/A</ul><br>
-  
+
   <b>Attribute</b><br>
   <ul><li><a href="#do_not_notify">do_not_notify</a></li></ul>
   <ul><li><a href="#ignore">ignore</a></li></ul>
@@ -559,4 +559,33 @@ sub Attr {
   <br><br>
 </ul>
 =end html_DE
+
+=for :application/json;q=META.json 14_SD_BELL.pm
+{
+  "version": "v1.0.0",
+  "release_status": "stable",
+  "keywords": [
+    "fhem-sonstige-systeme",
+    "fhem-hausautomations-systeme",
+    "fhem-mod",
+    "signalduino"
+  ],
+  "prereqs": {
+    "runtime": {
+      "requires": {
+        "FHEM": 5.00918623,
+        "FHEM::Meta": 0.001006,
+        "GPUtils": 0,
+        "perl": 5.014
+      }
+    }
+  },
+  "resources": {
+    "bugtracker": {
+      "web": "https://github.com/RFD-FHEM/RFFHEM/issues"
+    }
+  }
+}
+=end :application/json;q=META.json
+
 =cut
