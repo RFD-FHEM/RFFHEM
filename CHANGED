@@ -1,3 +1,7 @@
+2021-04-03 - FSK optimization
+
+More than one FSK protocol can also be received.
+Method lib::SD_Protocols::... not strictly necessary.
 2021-03-18 - 00_SIGNALduino.pm - incorrect logoutput (#951)
 
 * Update 00_SIGNALduino.pm
