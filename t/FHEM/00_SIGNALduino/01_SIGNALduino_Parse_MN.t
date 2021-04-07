@@ -15,7 +15,7 @@ my @mockData = (
         plan         => 2,
         testname     => q[Good MN data],
         input        => q[MN;D=9AA6362CC8AAAA000012F8F4;R=4;],
-        rValue       => 0, 
+        rValue       => T(), 
     },
     {
         deviceName  => q[dummyDuino],
@@ -48,30 +48,30 @@ my @mockData = (
     {
         deviceName  => q[dummyDuino],
         plan        => 2,
-        testname    => q[Good MN data, without RSSI, but without set attribute rfmode],
+        testname    => q[Good MN data, with RSSI, but without set attribute rfmode],
         input       => q[MN;D=9AA6362CC8AAAA000012F8F4;R=4;],
-        rValue      => F(), 
+        rValue      => T(), 
     },
     {
         deviceName  => q[dummyDuino],
         plan        => 2,
-        testname    => q[Good MN data, without RSSI, but without set attribute rfmode],
+        testname    => q[Good MN data, with RSSI, but without set attribute rfmode],
         input       => q[MN;D=0405019E8700AAAAAAAA0F13AA16ACC0540AAA49C814473A2774D208AC0B0167;R=6;],
-        rValue      => F(), 
+        rValue      => T(), 
     },
     {
         deviceName  => q[dummyDuino],
         plan        => 2,
         testname    => q[Good MN data, without RSSI, but without set attribute rfmode],
         input       => q[MN;D=07FA5E1721CC0F02FE000000000000;],
-        rValue      => F(), 
+        rValue      => T(), 
     },
     {
         deviceName  => q[dummyDuino],
         plan        => 2,
-        testname    => q[Good MN data, without RSSI, with set attribute rfmode=Lacrosse_mode1],
+        testname    => q[Good MN data, with RSSI, with set attribute rfmode=Lacrosse_mode1],
         input       => q[MN;D=9AA6362CC8AAAA000012F8F4;R=4;],
-        rValue      => 1,
+        rValue      => T(),
         rfmode      => 'Lacrosse_mode1' 
     },
     {
@@ -95,13 +95,13 @@ my @mockData = (
         plan        => 2,
         testname    => q[Good MN data, without RSSI, with set attribute rfmode=Lacrosse_mode2],
         input       => q[MN;D=9A05922F8180046818480800;],
-        rValue      => 1,
+        rValue      => T(),
         rfmode      => 'Lacrosse_mode2' 
     },
     {
         deviceName  => q[dummyDuino],
         plan        => 2,
-        testname    => q[Good MN data, without RSSI, but not matching regex],
+        testname    => q[Good MN data, with RSSI, but not matching regex],
         input       => q[MN;D=8AA6362CC8AAAA000012F8F4;R=4;],
         rValue      => 0,
         rfmode      => 'Lacrosse_mode2' 
