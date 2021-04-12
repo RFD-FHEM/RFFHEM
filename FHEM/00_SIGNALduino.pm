@@ -38,7 +38,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-  SDUINO_VERSION                  => '3.5.1+20210318',
+  SDUINO_VERSION                  => '3.5.1+20210403',
   SDUINO_INIT_WAIT_XQ             => 1.5,     # wait disable device
   SDUINO_INIT_WAIT                => 2,
   SDUINO_INIT_MAXRETRY            => 3,
@@ -2865,7 +2865,6 @@ sub SIGNALduino_Parse_MN {
   my $match;
   my $modulation;
   my $message_dispatched=0;
-  my $rfmodeAttr = AttrVal($name,'rfmode','SlowRF');
 
   mnIDLoop:
   for my $id (@{$hash->{mnIdList}}) {
@@ -2873,14 +2872,6 @@ sub SIGNALduino_Parse_MN {
     if (!defined $rfmode) {
       $hash->{logMethod}->($name, 5, qq[$name: Parse_MN, Error! id $id has no rfmode. Please define it in file SD_ProtocolData.pm]);
       next mnIDLoop;
-    } elsif ($rfmode ne $rfmodeAttr) {
-      $hash->{logMethod}->($name, 5, qq[$name: Parse_MN, Error! id $id wrong rfmode (attribute $rfmodeAttr vs $rfmode)]);
-      next mnIDLoop;
-    }
-    my $method = $hash->{protocolObject}->getProperty($id,'method');
-    if (!exists &$method || !defined &{ $method }) {
-      $hash->{logMethod}->($name, 5, qq[$name: Parse_MN, Error! id $id unknown function=$method. Please define it in file SD_ProtocolData.pm]);
-      next mnIDLoop; 
     }
     my $length_min=$hash->{protocolObject}->checkProperty($id,'length_min',-1);
     if ($hlen < $length_min) {
@@ -2895,17 +2886,21 @@ sub SIGNALduino_Parse_MN {
     } elsif (!defined($match) ) {
       $hash->{logMethod}->($name, 4, qq[$name: Parse_MN, Found $modulation Protocol id $id -> ].$hash->{protocolObject}->getProperty($id,'name'));
     } else {
+      $hash->{logMethod}->($name, 4, qq[$name: Parse_MN, $modulation Protocol id $id ].$hash->{protocolObject}->getProperty($id,'name').qq[ msg $rawData not match $match]);
       next mnIDLoop;
     }
 
-    my @methodReturn = $method->($hash->{protocolObject},$rawData);
-    if ($#methodReturn == 0) {
-      $hash->{logMethod}->($name, 4, qq[$name: Parse_MN, Decoded matched MN Protocol id $id dmsg=$methodReturn[0] $rssiStr]);
-      SIGNALduno_Dispatch($hash,$rmsg,$methodReturn[0],$rssi,$id);
-      $message_dispatched++;
-    } else {
+    my $method = $hash->{protocolObject}->getProperty($id,'method',undef);
+    my @methodReturn = defined $method ? $method->($hash->{protocolObject},$rawData) : ($rawData);
+    if ($#methodReturn != 0) {
       $hash->{logMethod}->($name, 4, qq{$name: Parse_MN, Error! method $methodReturn[1]});
+      next mnIDLoop;
     }
+    $dmsg = sprintf('%s%s',$hash->{protocolObject}->checkProperty($id,'preamble',''),$methodReturn[0]);
+    $hash->{logMethod}->($name, 5, qq[$name: Parse_MN, Decoded matched MN Protocol id $id dmsg=$dmsg $rssiStr]);
+    SIGNALduno_Dispatch($hash,$rmsg,$dmsg,$rssi,$id);
+    $message_dispatched++;
+    
   }
   return $message_dispatched;
 }
