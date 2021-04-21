@@ -13,7 +13,7 @@ use strict;
 use warnings;
 use Carp qw(croak carp);
 use Digest::CRC;
-our $VERSION = '2.02';
+our $VERSION = '2.03';
 use Storable qw(dclone);
 use Scalar::Util qw(blessed);
 
@@ -1073,6 +1073,42 @@ sub postDemo_EM {
 
   $self->_logging(qq[lib/postDemo_EM, protocol - Start not found or length msg ($msgLength) not correct], 3);
   return 0, undef;
+}
+
+############################# package lib::SD_Protocols, test exists
+=item postDemo_Revolt()
+
+This function checks the bit sequence. On an error in the CRC, it issues an output.
+
+Input:  $object,$name,@bit_msg
+Output:
+        (returncode = 0 on success, prepared message or undef)
+
+=cut
+
+sub postDemo_Revolt {
+  my $self    = shift // carp 'Not called within an object';
+  my $name    = shift // carp 'no $name provided';
+  my @bit_msg = @_;
+
+  my $protolength = scalar @bit_msg;
+  my $sum         = 0;
+
+  my $checksum = oct( '0b' . ( join "", @bit_msg[ 88 .. 95 ] ) );
+  $self->_logging( qq[lib/postDemo_Revolt, length=$protolength], 5 );
+  for ( my $b = 0 ; $b < 88 ; $b += 8 ) {
+    # build sum over first 11 bytes
+    $sum += oct( '0b' . ( join "", @bit_msg[ $b .. $b + 7 ] ) );
+  }
+  $sum = $sum & 0xFF;
+
+  if ($sum != $checksum) {
+    my $dmsg = lib::SD_Protocols::binStr2hexStr( join "", @bit_msg[ 0 .. 95 ] );
+    $self->_logging(qq[lib/postDemo_Revolt, ERROR checksum mismatch, $sum != $checksum in msg $dmsg], 3 );
+    return 0, undef;
+  }
+  my @new_bitmsg = splice @bit_msg, 0,88;
+  return 1, @new_bitmsg;
 }
 
 ############################# package lib::SD_Protocols, test exists
