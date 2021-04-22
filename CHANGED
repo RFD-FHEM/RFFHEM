@@ -1,14 +1,10 @@
 2021-04-10 - FSK optimization (#953)
-
-* FSK optimization
   More than one FSK protocol can also be received.
   Method lib::SD_Protocols::... not strictly necessary.
   Modified tests, to adapt new dispatch behaviour, which is independent from attribute rfmode
   Co-authored-by: sidey79 <7968127+sidey79@users.noreply.github.com>
+
 2021-04-08 - Reworked code
-2021-04-03 - FSK optimization
-  More than one FSK protocol can also be received.
-  Method lib::SD_Protocols::... not strictly necessary.
 
 2021-03-22 - 14_SD_BELL.pm - Adjusted little things (#937)
  * Update 14_SD_BELL.pm

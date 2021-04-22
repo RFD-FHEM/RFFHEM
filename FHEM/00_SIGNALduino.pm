@@ -38,7 +38,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-  SDUINO_VERSION                  => '3.5.1+20210403',
+  SDUINO_VERSION                  => '3.5.1+20210422',
   SDUINO_INIT_WAIT_XQ             => 1.5,     # wait disable device
   SDUINO_INIT_WAIT                => 2,
   SDUINO_INIT_MAXRETRY            => 3,
@@ -3150,20 +3150,20 @@ sub SIGNALduino_Attr(@) {
   ## Change rfmode
   elsif ($aName eq 'rfmode')          # change receive mode
   {
-    if (not grep /$aVal/, @rfmode) {
-      $hash->{logMethod}->($name, 1, "$name: Attr, $aName $aVal is not supported");
-      return 'ERROR: The rfmode is not supported';
-    }
-
-    if ($init_done) {
-      my $ret = main::SIGNALduino_Attr_rfmode($hash,$aVal);
-
-      if (defined $ret) {
-        return $ret;
-      } else {
-        $hash->{logMethod}->($name, 3, "$name: Attr, $aName switched to $aVal");
+    if( $cmd eq 'set' ) {
+      if (not grep /$aVal/, @rfmode) {
+        $hash->{logMethod}->($name, 1, "$name: Attr, $aName $aVal is not supported");
+        return 'ERROR: The rfmode is not supported';
       }
-    }
+      if ($init_done) {
+        my $ret = main::SIGNALduino_Attr_rfmode($hash,$aVal);
+        if (defined $ret) {
+          return $ret;
+        } else {
+          $hash->{logMethod}->($name, 3, "$name: Attr, $aName switched to $aVal");
+        }
+      }
+		}
   }
   return ;
 }
