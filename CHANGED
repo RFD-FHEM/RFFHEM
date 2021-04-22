@@ -1,3 +1,6 @@
+2021-04-22 - delete attribute rfmode
+
+"Rfmode" attribute could not be deleted.
 2021-04-10 - FSK optimization (#953)
   More than one FSK protocol can also be received.
   Method lib::SD_Protocols::... not strictly necessary.
