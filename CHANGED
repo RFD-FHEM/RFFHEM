@@ -1,3 +1,4 @@
+2021-04-24 - Update 00_SIGNALduino.pm
 2021-04-22 - delete attribute rfmode
 
 "Rfmode" attribute could not be deleted.
