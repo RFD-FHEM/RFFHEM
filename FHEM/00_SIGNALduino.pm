@@ -3163,7 +3163,7 @@ sub SIGNALduino_Attr(@) {
           $hash->{logMethod}->($name, 3, "$name: Attr, $aName switched to $aVal");
         }
       }
-		}
+    }
   }
   return ;
 }
