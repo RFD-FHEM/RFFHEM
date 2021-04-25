@@ -87,7 +87,7 @@ package lib::SD_ProtocolData;
   use strict;
   use warnings;
 
-  our $VERSION = '1.27';
+  our $VERSION = '1.28';
 
   our %protocols = (
     "0" =>  ## various weather sensors (500 | 9100)
@@ -1316,9 +1316,9 @@ package lib::SD_ProtocolData;
         preamble         => 'r',
         clientmodule     => 'Revolt',
         modulematch      => '^r[A-Fa-f0-9]{22}',
-        length_min       => '84',
+        length_min       => '96',
         length_max       => '120',
-        postDemodulation => sub { my $self=shift;  my ($name, @bit_msg) = @_;  my @new_bitmsg = splice @bit_msg, 0,88;  return 1,@new_bitmsg; },
+        postDemodulation => \&lib::SD_Protocols::postDemo_Revolt,
       },
     "46"  =>  ## Tedsen Fernbedienungen u.a. für Berner Garagentorantrieb GA401 und Geiger Antriebstechnik Rolladensteuerung
               # https://github.com/RFD-FHEM/RFFHEM/issues/91
