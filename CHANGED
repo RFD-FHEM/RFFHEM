@@ -1,3 +1,8 @@
+2021-04-23 - 00_SIGNALduino.pm - verify Revolt checksums
+  SD_ProtocolData.pm: add new postDemo_Revolt which drops Revolt messages with
+                      invalid checksums
+  SD_Protocols.pm: drop Revolt messages without checksum byte
+
 2021-04-10 - FSK optimization (#953)
 
 * FSK optimization
