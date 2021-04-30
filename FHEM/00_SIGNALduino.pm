@@ -31,6 +31,7 @@ eval {use JSON;1 or $missingModulSIGNALduino .= 'JSON '};
 eval {use Scalar::Util qw(looks_like_number);1};
 eval {use Time::HiRes qw(gettimeofday);1} ;
 use lib::SD_Protocols;
+use List::Util qw(first);
 
 #$| = 1;    #Puffern abschalten, Hilfreich fuer PEARL WARNINGS Search
 
@@ -38,7 +39,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-  SDUINO_VERSION                  => '3.5.1+20210422',
+  SDUINO_VERSION                  => '3.5.1+20210430',
   SDUINO_INIT_WAIT_XQ             => 1.5,     # wait disable device
   SDUINO_INIT_WAIT                => 2,
   SDUINO_INIT_MAXRETRY            => 3,
@@ -3151,7 +3152,7 @@ sub SIGNALduino_Attr(@) {
   elsif ($aName eq 'rfmode')          # change receive mode
   {
     if( $cmd eq 'set' ) {
-      if (not grep /$aVal/, @rfmode) {
+      if (!first { $_ eq $aVal } @rfmode) {
         $hash->{logMethod}->($name, 1, "$name: Attr, $aName $aVal is not supported");
         return 'ERROR: The rfmode is not supported';
       }
