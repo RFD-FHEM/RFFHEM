@@ -13,7 +13,7 @@ use strict;
 use warnings;
 use Carp qw(croak carp);
 use Digest::CRC;
-our $VERSION = '2.03';
+our $VERSION = '2.04';
 use Storable qw(dclone);
 use Scalar::Util qw(blessed);
 
@@ -1741,6 +1741,42 @@ sub PreparingSend_FS20_FHT {
 
 sub _xFSK_methods_behind_here {
   # only for functionslist - no function!
+}
+
+=item ConvBresser_5in1()
+
+This function checks number/count of set bits within bytes 14-25 and inverted data of 13 byte further.
+Delete inverted data (nibble 1-27)and reduce message length (nibble 53).
+
+Input:  $hexData
+Output: $hexData
+        scalar converted message on success 
+        or array (1,"Error message")
+
+=cut
+
+sub ConvBresser_5in1 {
+  my $self    = shift // carp 'Not called within an object';
+  my $hexData = shift // croak 'Error: called without $hexdata as input';
+  
+	my $d2;
+	my $bit;
+	my $bitsumRef;
+  my $bitadd = 0;
+	for (my $i = 0; $i < 13; $i++) {
+		$d2 = hex(substr($hexData,($i+13)*2,2));
+    return ( 1, qq[ConvBresser_5in1, inverted data at pos $i] ) if ((hex(substr($hexData,$i*2,2)) ^ $d2) != 255);
+		if ($i == 0) {
+			$bitsumRef = $d2;
+		}	else {
+			$bit = sprintf("%08b", $d2);
+			for (my $j = 0; $j < 8; $j++) {
+				$bitadd += substr($bit,$j,1);
+			}
+		}
+	}
+  return ( 1, qq[ConvBresser_5in1, bitsum $bitadd != $bitsumRef] ) if ($bitadd != $bitsumRef);
+  return substr($hexData, 28, 24);
 }
 
 ############################# package lib::SD_Protocols, test exists
