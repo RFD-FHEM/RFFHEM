@@ -1758,23 +1758,22 @@ Output: $hexData
 sub ConvBresser_5in1 {
   my $self    = shift // carp 'Not called within an object';
   my $hexData = shift // croak 'Error: called without $hexdata as input';
-  
-	my $d2;
-	my $bit;
-	my $bitsumRef;
+  my $d2;
+  my $bit;
+  my $bitsumRef;
   my $bitadd = 0;
-	for (my $i = 0; $i < 13; $i++) {
-		$d2 = hex(substr($hexData,($i+13)*2,2));
+  for (my $i = 0; $i < 13; $i++) {
+    $d2 = hex(substr($hexData,($i+13)*2,2));
     return ( 1, qq[ConvBresser_5in1, inverted data at pos $i] ) if ((hex(substr($hexData,$i*2,2)) ^ $d2) != 255);
-		if ($i == 0) {
-			$bitsumRef = $d2;
-		}	else {
-			$bit = sprintf("%08b", $d2);
-			for (my $j = 0; $j < 8; $j++) {
-				$bitadd += substr($bit,$j,1);
-			}
-		}
-	}
+    if ($i == 0) {
+      $bitsumRef = $d2;
+    }	else {
+      $bit = sprintf("%08b", $d2);
+      for (my $j = 0; $j < 8; $j++) {
+        $bitadd += substr($bit,$j,1);
+      }
+    }
+  }
   return ( 1, qq[ConvBresser_5in1, bitsum $bitadd != $bitsumRef] ) if ($bitadd != $bitsumRef);
   return substr($hexData, 28, 24);
 }
