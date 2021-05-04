@@ -87,7 +87,7 @@ package lib::SD_ProtocolData;
   use strict;
   use warnings;
 
-  our $VERSION = '1.28';
+  our $VERSION = '1.30';
 
   our %protocols = (
     "0" =>  ## various weather sensors (500 | 9100)
@@ -2833,7 +2833,26 @@ package lib::SD_ProtocolData;
         modulematch     => '^W106#',
         length_min      => '22',
         length_max      => '22',
-      }
+      },
+    "109" =>  ## Rojaflex HSR-1, HSR-5, HSR-15, HSTR-5, HSTR-15, RHSM1
+              # only tested HSR-15
+              # https://github.com/RFD-FHEM/RFFHEM/issues/955
+      {
+        name            => 'Rojaflex',
+        comment         => 'Rojaflex remote controls',
+        id              => '109',
+        knownFreqs      => '434.92',
+        datarate        => '9992.60',
+        sync            => 'D391',
+        modulation      => '2-FSK',
+        rfmode          => 'Rojaflex',
+        register        => ['0001','0246','0303','04D3','0591','06FF','0700','0802','0D10','0EB0','0F71','10C8','1193','1203','1322','14F8','1534','1916','1B43','1C40','2156','2210'],
+        preamble        => 'u109#',
+        # clientmodule    => 'SD_WS',
+        length_min      => '30',
+        length_max      => '32', # funktioniert evtl. nicht, Nachrichten von Protokoll 108 mit Laenge 56 als Unknown code u109 im Log?
+        # method          => \&lib::SD_Protocols::ConvBresser_5in1,
+      },
     ########################################################################
     #### ###  register informations from other hardware protocols  #### ####
 
