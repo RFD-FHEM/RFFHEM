@@ -1,3 +1,4 @@
+2021-05-04 - new protocol 109 for Rojaflex remote controls
 2021-05-01 - enable delete attribute rfmode (#958)
 
 * 00_SIGNALduino.pm
