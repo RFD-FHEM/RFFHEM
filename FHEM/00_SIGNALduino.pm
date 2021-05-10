@@ -215,6 +215,7 @@ my $clientsSIGNALduino = ':CUL_EM:'
             .'RFXX10REC:'
             .'Revolt:'
             .'SD_AS:'
+            .'SD_Rojaflex:'
             .' :'         # Zeilenumbruch
             .'SD_BELL:'
             .'SD_GT:'
@@ -264,6 +265,7 @@ my %matchListSIGNALduino = (
       '30:LaCrosse'         => '^(\\S+\\s+9 |OK\\sWS\\s)',
       '31:KOPP_FC'          => '^kr\w{18,}',
       '32:PCA301'           => '^\\S+\\s+24',
+      '33:SD_Rojaflex'      => '^P109#[A-Fa-f0-9]+',
       'X:SIGNALduino_un'    => '^[u]\d+#.*',
 );
 

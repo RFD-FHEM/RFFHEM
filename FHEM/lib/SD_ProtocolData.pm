@@ -2839,19 +2839,18 @@ package lib::SD_ProtocolData;
               # https://github.com/RFD-FHEM/RFFHEM/issues/955
       {
         name            => 'Rojaflex',
-        comment         => 'Rojaflex remote controls',
+        comment         => 'Rojaflex shutter',
         id              => '109',
         knownFreqs      => '434.92',
         datarate        => '9992.60',
         sync            => 'D391',
         modulation      => '2-FSK',
         rfmode          => 'Rojaflex',
-        register        => ['0001','0246','0303','04D3','0591','06FF','0700','0802','0D10','0EB0','0F71','10C8','1193','1203','1322','14F8','1534','1916','1B43','1C40','2156','2210'],
-        preamble        => 'u109#',
-        # clientmodule    => 'SD_WS',
-        length_min      => '30',
-        length_max      => '32', # funktioniert evtl. nicht, Nachrichten von Protokoll 108 mit Laenge 56 als Unknown code u109 im Log?
-        # method          => \&lib::SD_Protocols::ConvBresser_5in1,
+        register        => ['0001','0246','0302','04D3','0591','06FF','0700','0805','0D10','0EB0','0F71','10C8','1193','1203','1322','14F8','1535','1916','1B43','1C40','2156','2210'],
+        preamble        => 'P109#',
+        clientmodule    => 'SD_Rojaflex',
+        length_min      => '18',
+        length_max      => '18',
       },
     ########################################################################
     #### ###  register informations from other hardware protocols  #### ####
