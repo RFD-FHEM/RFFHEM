@@ -1334,30 +1334,36 @@ sub SD_WS_WH2SHIFT($){
   <ul>
     <li>Atech wireless weather station</li>
     <li>BBQ temperature sensor GT-TMBBQ-01s (transmitter), GT-TMBBQ-01e (receiver)</li>
-    <li>Bresser 7009994</li>
-    <li>BresserTemeo</li>
+    <li>Bresser 5-in-1 Comfort Weather Center, 7009994, Professional rain gauge, Temeo</li>
     <li>Conrad S522</li>
     <li>EuroChron EFTH-800, EFS-3110A (temperature and humidity sensor)</li>
     <li>NC-3911, NC-3912 refrigerator thermometer</li>
-		<li>Opus XT300</li>
+    <li>Opus XT300</li>
     <li>PV-8644 infactory Poolthermometer</li>
     <li>Renkforce E0001PA</li>
-	<li>Regenmesser DROP TFA 47.3005.01 mit Regensensor TFA 30.3233.01</li>
-	<li>TECVANCE TV-4848</li>
-	<li>Thermometer TFA 30.3228.02, TFA 30.3229.02, FT007T, FT007TP, F007T, F007TP</li>
-	<li>Thermo-Hygrometer TFA 30.3208.02, FT007TH, F007TH</li>
-	<li>TX-EZ6 for Weatherstation TZS First Austria</li>
-	<li>WH2 (TFA Dostmann/Wertheim 30.3157 (sold in Germany), Agimex Rosenborg 66796 (sold in Denmark),ClimeMET CM9088 (Sold in UK)</li>
-	<li>Weatherstation Auriol IAN 283582 Version 06/2017 (Lidl), Modell-Nr.: HG02832D</li>
-	<li>Weatherstation Auriol AHFL 433 B2, IAN 314695 (Lidl)</li>
-	<li>Weatherstation TFA 35.1140.01 with temperature / humidity sensor TFA 30.3221.02 and temperature / humidity / windspeed sensor TFA 30.3222.02</li>
+    <li>Regenmesser DROP TFA 47.3005.01 mit Regensensor TFA 30.3233.01</li>
+    <li>TECVANCE TV-4848</li>
+    <li>Thermometer TFA 30.3228.02, TFA 30.3229.02, FT007T, FT007TP, F007T, F007TP</li>
+    <li>Thermo-Hygrometer TFA 30.3208.02, FT007TH, F007TH</li>
+    <li>TX-EZ6 for Weatherstation TZS First Austria</li>
+    <li>WH2 (TFA Dostmann/Wertheim 30.3157 (sold in Germany), Agimex Rosenborg 66796 (sold in Denmark),ClimeMET CM9088 (Sold in UK)</li>
+    <li>Weatherstation Auriol IAN 283582 Version 06/2017 (Lidl), Modell-Nr.: HG02832D</li>
+    <li>Weatherstation Auriol AHFL 433 B2, IAN 314695 (Lidl)</li>
+    <li>Weatherstation TFA 35.1140.01 with temperature / humidity sensor TFA 30.3221.02 and temperature / humidity / windspeed sensor TFA 30.3222.02</li>
   </ul><br><br>
 
   <a name="SD_WS_Define"></a>
   <b>Define</b><br><br>
   <ul>
-		Newly received sensors are usually automatically created in FHEM via autocreate.<br>
-		It is also possible to set up the devices manually with the following command:<br><br>
+    Newly received sensors are usually automatically created in FHEM via autocreate.<br>
+    Sensors that support a channel number are created, for example, in the following form:<br>
+    <code>SD_WS_33_1</code><br>
+    The 1 indicates that the sensor with channel 1 was created.
+    Sensors that do not offer a channel selection are created without a channel number, such as:<br>
+    <code>SD_WS_108</code><br>
+    If several sensors with no or the same channel number are received,
+    so you can set the attribute "longids" with the SIGNALduino.		
+    It is also possible to set up the devices manually with the following command:<br><br>
     <code>define &lt;name&gt; SD_WS &lt;code&gt; </code> <br><br>
     &lt;code&gt; is the channel or individual identifier used to identify the sensor.<br>
   </ul><br><br>
@@ -1368,17 +1374,22 @@ sub SD_WS_WH2SHIFT($){
 		Some devices may not support all readings, so they will not be presented<br>
 	</ul>
   <ul>
-  	<li>batteryChanged (1)</li>
+    <li>batteryChanged (1)</li>
     <li>batteryState (low or ok)</li>
     <li>channel (number of channel</li>
-		<li>humidity (humidity (1-100 % only if available)</li>
-		<li>humidityTrend (consistent, rising, falling)</li>
-		<li>sendmode (automatic or manual)</li>
-		<li>rain_total (l/m&sup2;))</li>
-		<li>state (T: H: W: R:)</li>
+    <li>humidity (humidity (1-100 % only if available)</li>
+    <li>humidityTrend (consistent, rising, falling)</li>
+    <li>sendmode (automatic or manual)</li>
+    <li>rain (l/m&sup2;))</li>
+    <li>rain_total (l/m&sup2;))</li>
+    <li>state (T: H: W: R:)</li>
     <li>temperature (&deg;C)</li>
-		<li>temperatureTrend (consistent, rising, falling)</li>
-		<li>type (type of sensor)</li>
+    <li>temperatureTrend (consistent, rising, falling)</li>
+    <li>type (type of sensor)</li>
+    <li>winddir (Wind direction, 0-337,5°, in Schritten von 22,5°)</li>
+    <li>winddirtxt (Wind direction, N, NNE, NE, ENE, E, ESE, SE, SSE, S, SSW, SW, WSW, W, WNW, NW, NNW)</li>
+    <li>windgust (Gust of wind, m/s)</li>
+    <li>windspeed (Wind speed, m/s)</li>
   </ul><br><br>
 
   <a name="SD_WS Attribute"></a>
