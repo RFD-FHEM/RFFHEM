@@ -706,7 +706,7 @@ sub SD_WS_Parse($$)
 				# T = temperature in 1/10 °C, BCD coded, TTxT = 1203 => 31.2 °C
 				# t = temperature sign, minus if unequal 0
 				# H = humidity in percent, BCD coded, HH = 23 => 23 %
-				# R = rain in mm, BCD coded, RRxR = 1203 => 31.2 mm
+				# R = rain in mm, BCD coded, RRxR = 1203 => 31.2 mm - elektron-bbs changed: RRRR = 1243 => 431.2 mm
 				# B = Battery. 0=Ok, 8=Low.
 				#
 				# Only nibbles 28 to 52 are transferred to the module. Preprocessing in SD_Protocols.pm sub sub ConvBresser_5in1.
@@ -714,7 +714,7 @@ sub SD_WS_Parse($$)
 				# 012345678901234567890123
 				# ------------------------
 				# 7C8008000410210085760000
-				# IISSGGDGWW WTT THHRR RBt
+				# IISSGGDGWW WTT THHRRRRBt
 				sensortype => 'Bresser_5in1, Bresser_rain_gauge',
 				model      => 'SD_WS_108',
 				prematch   => sub {my $rawData = shift; return 1 if ($rawData =~ /^[0-9A-F]{8}[0-9]{2}[0-9A-F]{1}[0-9]{3}[0-9A-F]{1}[0-9]{5}[0-9A-F]{1}[0-9]{1}/); },
@@ -742,7 +742,7 @@ sub SD_WS_Parse($$)
 														return substr($rawData,16,2) + 0;
 													},
 				rain       => sub {my ($rawData,undef) = @_;
-														$rain = (substr($rawData,21,1) . substr($rawData,18,2)) / 10;
+														$rain = (substr($rawData,20,2) . substr($rawData,18,2)) / 10;
 														$rain *= 2.5 if (substr($rawData,3,1) eq '9'); # Bresser Professional Rain Gauge
 														return $rain;
 													},
