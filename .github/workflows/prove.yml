@@ -34,7 +34,7 @@ jobs:
         prove --exec 'perl -MDevel::Cover=-silent,1 -I FHEM ' -I FHEM -r -v t/SD_Protoco* 
     - name: Create clover report  
       run: cover -report clover
-    - uses: codecov/codecov-action@v1
+    - uses: codecov/codecov-action@v1.5.0
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         file: ./cover_db/clover.xml
@@ -52,7 +52,7 @@ jobs:
     - name: Create clover report
       working-directory: /opt/fhem/
       run: cover -report clover
-    - uses: codecov/codecov-action@v1
+    - uses: codecov/codecov-action@v1.5.0
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         file: /opt/fhem/cover_db/clover.xml
