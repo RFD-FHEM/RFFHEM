@@ -87,7 +87,7 @@ package lib::SD_ProtocolData;
   use strict;
   use warnings;
 
-  our $VERSION = '1.28';
+  our $VERSION = '1.31';
 
   our %protocols = (
     "0" =>  ## various weather sensors (500 | 9100)
@@ -2833,7 +2833,26 @@ package lib::SD_ProtocolData;
         modulematch     => '^W106#',
         length_min      => '22',
         length_max      => '22',
-      }
+      },
+    "110" =>  # ADE WS1907 Wetterstation mit Funk-Regenmesser 
+              # https://github.com/RFD-FHEM/RFFHEM/issues/965 docolli 2021-05-14
+      {
+        name            => 'ADE_WS_1907',
+        comment         => 'Weather station with rain gauge',
+        id              => '110',
+        knownFreqs      => '433.92',
+        one             => [-3,1], # 2700,-900
+        zero            => [-1,3], # -900,2700
+        start           => [8],    # 7200
+        clockabs        => 900,
+        format          => 'twostate',
+        clientmodule    => 'SD_WS',
+        modulematch     => '^W110#',
+        preamble        => 'W110#',
+        reconstructBit   => '1',
+        length_min      => '65',
+        length_max      => '66',
+      },
     ########################################################################
     #### ###  register informations from other hardware protocols  #### ####
 

@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 14_SD_WS.pm 21666 2020-04-13 21:14:53Z Sidey $
+# $Id: 14_SD_WS.pm 21666 2020-05-15 17:00:00Z Sidey $
 #
 # The purpose of this module is to support serval
 # weather sensors which use various protocol
@@ -28,6 +28,7 @@
 # 22.02.2020 Protokoll 58: neuer Sensor TFA 30.3228.02, FT007T Thermometer Sensor
 # 25.08.2020 Protokoll 27: neuer Sensor EFS-3110A
 # 27.09.2020 neues Protokoll 106: BBQ Temperature Sensor GT-TMBBQ-01s (Sender), GT-TMBBQ-01e (Empfaenger)
+# 15.05.2021 neues Protokoll 110: ADE WS1907 Weather station with rain gauge
 
 package main;
 
@@ -78,6 +79,7 @@ sub SD_WS_Initialize($)
 		"SD_WS_89_TH.*"	=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "3:180"},
 		"SD_WS_94_T.*"	=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4:Temp,", autocreateThreshold => "3:180"},
 		"SD_WS_106_T.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4:Temp,", autocreateThreshold => "5:60"},
+		'SD_WS_110_TR.*' => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4:Temp,', autocreateThreshold => '3:180'},
 	};
 
 }
@@ -666,6 +668,25 @@ sub SD_WS_Parse($$)
 													},
 				crcok      => sub {return 1;}, # CRC test method does not exist
 		} ,
+		110 => {
+				# ADE WS1907 Weather station with rain gauge
+				# 0         1         2         3         4         5         6         7         8
+				# 0    4    8    12   16   20   24   28   32   36   40   44   48   52   56   60   64
+				# 1011 1111 1001 1010 0110 0001 1011 0100 1001 0001 1011 1111 1001 1010 0110 0001 01
+				# iiii iiii iiii iiii ???? ???? ???? ???? ???? ???? tttt tttt tttt tttt ???? ???? ??
+				# i = ID
+				# ? = unknown
+				# t: Temperature (MSB-first, 16 bit unsigned fahrenheit offset by 90 and scaled by 10)
+				sensortype => 'ADE WS1907',
+				model      => 'SD_WS_110_TR',
+				prematch   => sub {return 1;}, # no precheck known
+				crcok      => sub {return 1;}, # crc is unknown
+				id         =>	sub {my (undef,$bitData) = @_; return substr($rawData,0,4);}, # long-id in hex
+				# sendmode   => sub {my (undef,$bitData) = @_; return substr($bitData,12,1) eq "1" ? "manual" : "auto";},
+				# bat        => sub {my (undef,$bitData) = @_; return substr($bitData,13,1) eq "1" ? "low" : "ok";},
+				temp       => sub {my (undef,$bitData) = @_; return round(((SD_WS_binaryToNumber($bitData,48,55) * 256 + SD_WS_binaryToNumber($bitData,40,47)) - 1220) * 5 / 90.0 , 1); },
+				# channel    => sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,38,39) );},
+		},
 	);
 
 	Log3 $name, 4, "$name: SD_WS_Parse protocol $protocol, rawData $rawData";
