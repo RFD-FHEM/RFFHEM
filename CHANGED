@@ -1,3 +1,4 @@
+2021-05-15 - new protocol 110 for ADE WS1907 Weather station
 2021-05-15 - FSK check msg length (#959)
 
 * check message lenght FSK
