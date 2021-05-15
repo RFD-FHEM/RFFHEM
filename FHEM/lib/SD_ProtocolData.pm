@@ -2846,6 +2846,7 @@ package lib::SD_ProtocolData;
         sync            => 'D391',
         modulation      => '2-FSK',
         rfmode          => 'Rojaflex',
+        regexMatch      => qr/^08/,
         register        => ['0001','0246','0302','04D3','0591','06FF','0700','0805','0D10','0EB0','0F71','10C8','1193','1203','1322','14F8','1535','1916','1B43','1C40','2156','2211'],
         preamble        => 'P109#',
         clientmodule    => 'SD_Rojaflex',

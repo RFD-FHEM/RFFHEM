@@ -28,7 +28,11 @@ BEGIN {
 		IsIgnored
 		Log3
 		modules
+		ReadingsVal
 		SetExtensions
+		readingsBeginUpdate
+		readingsBulkUpdate
+		readingsEndUpdate
 		readingsSingleUpdate
 	))
 };
@@ -38,7 +42,6 @@ my %codes = (
 	'0' => 'stop',
 	'1' => 'up',
 	'8' => 'down',
-	'E' => 'request',
 );
 
 sub Initialize {
@@ -53,7 +56,7 @@ sub Initialize {
 	$hash->{ParseFn}    = \&Parse;
 	$hash->{AttrFn}     = \&Attr;
 	$hash->{AttrList}   = 'IODev '.
-	                      'do_not_notify:1,0 repetition:1,2,3,4,5,6,7,8,9 '.
+	                      'do_not_notify:1,0 '.
 	                      'ignore:1,0 dummy:1,0 showtime:1,0 '.
 	                      "$main::readingFnAttributes";
 	$hash->{AutoCreate} = {'SD_Rojaflex.*' => {FILTER => '%NAME', autocreateThreshold => '5:180', GPLOT => q{}}};
@@ -79,12 +82,59 @@ sub Set {
 	my ($hash, $name, @a) = @_;
 	my $ioname = $hash->{IODev}{NAME};
 	my $ret = undef;
-	my $na = int @a; # Anzahl in Array
-
-	return 'no set value specified' if ($na < 1); # if ($na < 2 || $na > 3);
+	my $na = scalar @a; # Anzahl in Array
+	my $cmd = $a[0];
+	my $state;
+	
+	return "$name, no set value specified" if ($na < 1);
 	return "Dummydevice $hash->{NAME}: will not set data" if (IsDummy($hash->{NAME}));
 
-	my $state;
+	if ($cmd eq '?') {;
+		$ret .= 'down:noArg ' if defined(ReadingsVal($name, 'MsgDown', undef));
+		$ret .= 'stop:noArg ' if defined(ReadingsVal($name, 'MsgStop', undef));
+		$ret .= 'up:noArg ' if defined(ReadingsVal($name, 'MsgUp', undef));
+		return $ret; # return setlist
+	}
+
+	if ($cmd eq 'pct') { # for homebridge
+		# External request fits internal data format 0 = closed ,100 = open
+		$cmd = 'stop';
+		if ($na > 1) {
+			$cmd = 'up' if ($a[1] eq '100'); # Do open
+			$cmd = 'down' if ($a[1] eq '0'); # Do close
+		}
+	}
+	
+	my @setCodesAr;
+	push @setCodesAr,'down' if defined(ReadingsVal($name, 'MsgDown', undef));
+	push @setCodesAr,'stop' if defined(ReadingsVal($name, 'MsgStop', undef));
+	push @setCodesAr,'up' if defined(ReadingsVal($name, 'MsgUp', undef));
+	$na = scalar @setCodesAr; # Anzahl in Array
+
+	if ($na > 0) {
+		if (grep {/$cmd/xms} @setCodesAr) { # Code vorhanden
+			my $msg = 'SN;R=1;D=';
+			$msg .= ReadingsVal($name, 'MsgDown', undef) if ($cmd eq 'down');
+			$msg .= ReadingsVal($name, 'MsgStop', undef) if ($cmd eq 'stop');
+			$msg .= ReadingsVal($name, 'MsgUp', undef) if ($cmd eq 'up');
+			$msg .= ';';
+			IOWrite($hash, 'raw', $msg) if (length($msg) == 28);
+			$state = $cmd;
+			Log3 $name, 3, "$ioname: SD_Rojaflex set $name $state";
+		} else {
+			if ($cmd eq 'down' || $cmd eq 'stop' || $cmd eq 'up') {
+				$state = "command still unknown, press the button \"$cmd\" on the remote control";
+				Log3 $name, 3, "$ioname: $name, $state";
+			} else {
+				$state = "command \"$cmd\" is not supported";
+				Log3 $name, 3, "$ioname: $name, $state";
+			}	
+		}
+	} else {
+		$state = 'no set commands available, press a button on the remote control';
+		Log3 $name, 3, "$ioname: $name, $state";
+	}
+	
 	readingsSingleUpdate($hash, 'state', $state, 1);
 	return $ret;
 }
@@ -132,13 +182,13 @@ sub Parse {
 	$protocol =~ s/^[P](\d+)/$1/xms; # extract protocol
 	my $EMPTY = q{};
 
-	Log3 $ioname, 3, "$ioname: SD_Rojaflex_Parse, Protocol $protocol, rawData $rawData";
+	Log3 $ioname, 4, "$ioname: SD_Rojaflex_Parse, Protocol $protocol, rawData $rawData";
 
 	my $housecode = substr($rawData,2,6);
 	my $channel = hex(substr($rawData,9,1));
 	my $deviceCode = $housecode . q{_} . $channel;
 
-	Log3 $ioname, 3, "$ioname: SD_Rojaflex_Parse, deviceCode $deviceCode, housecode $housecode, channel $channel";
+	Log3 $ioname, 4, "$ioname: SD_Rojaflex_Parse, deviceCode $deviceCode, housecode $housecode, channel $channel";
 
 	my $def = $modules{SD_Rojaflex}{defptr}{$iohash->{NAME} . q{_} . $deviceCode};
 	$modules{SD_Rojaflex}{defptr}{ioname} = $ioname;
@@ -152,13 +202,40 @@ sub Parse {
 	my $hash = $def;
 	my $name = $hash->{NAME};
 	return $EMPTY if (IsIgnored($name));
-	Log3 $name, 3, "$ioname: SD_Rojaflex_Parse, $name data=$rawData";
 
 	my $state;
+	my $MsgDown;
+	my $MsgStop;
+	my $MsgUp;
 	my $cmd = substr($rawData,10,1); # (0x0 = stop, 0x1 = up,0x8 = down, 0xE = Request)
-	$state = $codes{$cmd};
+	my $dev = substr($rawData,11,1); # (0xA = remote control, 0x5 = tubular motor)
 
-	readingsSingleUpdate($hash, 'state', $state, 1);
+	if ($dev eq 'A') { # remote control
+		$state = $codes{$cmd};
+		$MsgDown = ReadingsVal($name, 'MsgDown', undef) if ($cmd eq '8');
+		$MsgStop = ReadingsVal($name, 'MsgStop', undef) if ($cmd eq '0');
+		$MsgUp = ReadingsVal($name, 'MsgUp', undef) if ($cmd eq '1');
+	}
+	
+	my $pct;
+	if ($dev eq '5') { # tubular motor
+		$pct = hex(substr($rawData,12,2));
+		$state = 'down' if ($pct == 100);
+		$state = 'up' if ($pct == 0);
+	}
+	
+	readingsBeginUpdate($hash);
+	readingsBulkUpdate($hash, 'state', $state) if (defined $state);
+	if ($dev eq 'A') { # remote control
+		readingsBulkUpdate($hash, 'MsgDown', $rawData, 0) if ($cmd eq '8' && !defined $MsgDown);
+		readingsBulkUpdate($hash, 'MsgStop', $rawData, 0) if ($cmd eq '0' && !defined $MsgStop);
+		readingsBulkUpdate($hash, 'MsgUp', $rawData, 0) if ($cmd eq '1' && !defined $MsgUp);
+	}
+	if ($dev eq '5') { # tubular motor
+		readingsBulkUpdate($hash, 'percentClosed', $pct) if (defined $pct);
+		readingsBulkUpdate($hash, 'pct', 100 - $pct) if (defined $pct); # for homebridge
+	}
+	readingsEndUpdate($hash, 1);
 	return $name;
 }
 
@@ -204,7 +281,6 @@ __END__
 			<li>down</li>
 			<li>up</li>
 			<li>stop</li>
-			<li>request</li>
 		</ul>
 		<br><br>
 		The <a href="#setExtensions">set extensions</a> are supported.
@@ -256,7 +332,6 @@ __END__
 			<li>down</li>
 			<li>up</li>
 			<li>stop</li>
-			<li>request</li>
 		</ul>
 		Optional kann mit &lt;anz&gt; die Anzahl der Wiederholungen im Bereich von 1 bis 9 angegeben werden.
 		<br><br>
