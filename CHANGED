@@ -1,3 +1,7 @@
+2021-05-05 - check message lenght FSK
+
+before: check only min message length
+after: chek min and max message lenght
 2021-05-01 - enable delete attribute rfmode (#958)
 
 * 00_SIGNALduino.pm
