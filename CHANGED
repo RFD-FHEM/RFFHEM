@@ -1,3 +1,8 @@
+2021-05-15 - FSK check msg length (#959)
+
+* check message lenght FSK
+before: check only min message length
+after: chek min and max message lenght
 2021-05-05 - check message lenght FSK
 
 before: check only min message length
