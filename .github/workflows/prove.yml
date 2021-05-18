@@ -15,10 +15,7 @@ jobs:
       with:
         perl-version: ${{ matrix.perl }}
         install-modules-with: cpanm
-        install-modules-args: --notest --no-interactive -v --installdeps
-        install-modules: |
-           Devel::Cover::Report::Clover 
-           Storable
+        install-modules-args: --no-interactive -v --installdeps
 
     #- name: Install deps via cpanm
       #run: |
