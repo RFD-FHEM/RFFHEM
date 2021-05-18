@@ -16,7 +16,7 @@ jobs:
         perl-version: ${{ matrix.perl }}
         install-modules-with: cpanm
         install-modules-args: --notest --no-interactive -v --installdeps
-        install-modules: 
+        install-modules: |
            Devel::Cover::Report::Clover 
            Storable
 
