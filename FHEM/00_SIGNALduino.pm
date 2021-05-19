@@ -31,6 +31,7 @@ eval {use JSON;1 or $missingModulSIGNALduino .= 'JSON '};
 eval {use Scalar::Util qw(looks_like_number);1};
 eval {use Time::HiRes qw(gettimeofday);1} ;
 use lib::SD_Protocols;
+use List::Util qw(first);
 
 #$| = 1;    #Puffern abschalten, Hilfreich fuer PEARL WARNINGS Search
 
@@ -38,7 +39,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-  SDUINO_VERSION                  => '3.5.1+20210403',
+  SDUINO_VERSION                  => '3.5.1+20210505',
   SDUINO_INIT_WAIT_XQ             => 1.5,     # wait disable device
   SDUINO_INIT_WAIT                => 2,
   SDUINO_INIT_MAXRETRY            => 3,
@@ -2861,7 +2862,6 @@ sub SIGNALduino_Parse_MN {
 
   my $dmsg;
 
-  my $hlen = length($rawData);
   my $match;
   my $modulation;
   my $message_dispatched=0;
@@ -2873,9 +2873,10 @@ sub SIGNALduino_Parse_MN {
       $hash->{logMethod}->($name, 5, qq[$name: Parse_MN, Error! id $id has no rfmode. Please define it in file SD_ProtocolData.pm]);
       next mnIDLoop;
     }
-    my $length_min=$hash->{protocolObject}->checkProperty($id,'length_min',-1);
-    if ($hlen < $length_min) {
-      $hash->{logMethod}->($name, 4, qq[$name: Parse_MN, Error! id $id msg=$rawData ($hlen) too short, min=$length_min]);
+
+    my ($rcode, $rtxt) = $hash->{protocolObject}->LengthInRange($id,length($rawData)); # Check message length
+    if (!$rcode) {
+      $hash->{logMethod}->($name, 4, qq[$name: Parse_MN, Error! id $id msg=$rawData, $rtxt]);
       next mnIDLoop;
     }
 
@@ -3150,18 +3151,18 @@ sub SIGNALduino_Attr(@) {
   ## Change rfmode
   elsif ($aName eq 'rfmode')          # change receive mode
   {
-    if (not grep /$aVal/, @rfmode) {
-      $hash->{logMethod}->($name, 1, "$name: Attr, $aName $aVal is not supported");
-      return 'ERROR: The rfmode is not supported';
-    }
-
-    if ($init_done) {
-      my $ret = main::SIGNALduino_Attr_rfmode($hash,$aVal);
-
-      if (defined $ret) {
-        return $ret;
-      } else {
-        $hash->{logMethod}->($name, 3, "$name: Attr, $aName switched to $aVal");
+    if( $cmd eq 'set' ) {
+      if (!first { $_ eq $aVal } @rfmode) {
+        $hash->{logMethod}->($name, 1, "$name: Attr, $aName $aVal is not supported");
+        return 'ERROR: The rfmode is not supported';
+      }
+      if ($init_done) {
+        my $ret = main::SIGNALduino_Attr_rfmode($hash,$aVal);
+        if (defined $ret) {
+          return $ret;
+        } else {
+          $hash->{logMethod}->($name, 3, "$name: Attr, $aName switched to $aVal");
+        }
       }
     }
   }

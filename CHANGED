@@ -1,14 +1,33 @@
-2021-04-10 - FSK optimization (#953)
+2021-05-15 - FSK check msg length (#959)
 
-* FSK optimization
+* check message lenght FSK
+before: check only min message length
+after: chek min and max message lenght
+2021-05-05 - check message lenght FSK
+
+before: check only min message length
+after: chek min and max message lenght
+2021-05-01 - enable delete attribute rfmode (#958)
+
+* 00_SIGNALduino.pm
+ - enable delete attribute rfmode
+ - Added tests for delete and partial rfmode attr
+ - Added exact match of rfmode instead of pattern matching
+Co-authored-by: sidey79 <7968127+sidey79@users.noreply.github.com>
+2021-04-30 - 00_SIGNALduino.pm
+ - Added tests for delete and partial rfmode attr
+ - Added exact match of rfmode instead of pattern matching
+2021-04-26 - delete attribute rfmode
+  00_SIGNALduinio.pm: Bugfix: "Rfmode" attribute could not be deleted.
+2021-04-25 - Revolt enhacement (#956)
+  SD_ProtocolData.pm: Feature: Added crc checksum verification to avoid autocrate on broken transmissions
+  SD_Protocols.pm: changed length 
+
+2021-04-10 - FSK optimization (#953)
   More than one FSK protocol can also be received.
   Method lib::SD_Protocols::... not strictly necessary.
   Modified tests, to adapt new dispatch behaviour, which is independent from attribute rfmode
   Co-authored-by: sidey79 <7968127+sidey79@users.noreply.github.com>
-2021-04-08 - Reworked code
-2021-04-03 - FSK optimization
-  More than one FSK protocol can also be received.
-  Method lib::SD_Protocols::... not strictly necessary.
 
 2021-03-22 - 14_SD_BELL.pm - Adjusted little things (#937)
  * Update 14_SD_BELL.pm

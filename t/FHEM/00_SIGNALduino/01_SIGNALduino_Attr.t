@@ -7,6 +7,8 @@ use Test2::Tools::Compare qw{is field U D match hash bag };
 use Mock::Sub;
 use Test2::Todo;
 
+our %defs;
+our %attr;
 # Mock cc1101 
 $defs{cc1101dummyDuino}{cc1101_available} = 1;
 
@@ -70,6 +72,18 @@ my @mockData = (
     plan => 2,
     testname =>  q[unsupported mode attr rfmode blafasel],
     input =>  q[rfmode blafasel],
+    attrCheck =>  hash  {
+        field rfmode => DNE;
+        etc();
+        },
+      rValue => 'ERROR: The rfmode is not supported',
+  },
+  {
+    cmd => q[set],
+    deviceName => q[cc1101dummyDuino],
+    plan => 2,
+    testname =>  q[unsupported mode attr rfmode Lacrosse],
+    input =>  q[rfmode Lacrosse],
     attrCheck =>  hash  {
         field rfmode => DNE;
         etc();

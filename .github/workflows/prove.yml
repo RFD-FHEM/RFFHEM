@@ -10,8 +10,8 @@ jobs:
         perl: [ '5.22', '5.24', '5.26' ]
     name: Perl ${{ matrix.perl }} on ${{ matrix.os }}
     steps:
-    - uses: actions/checkout@v2
-    - uses: shogo82148/actions-setup-perl@v1.10.1
+    - uses: actions/checkout@v2.3.4
+    - uses: shogo82148/actions-setup-perl@v1.12.0
       with:
         perl-version: ${{ matrix.perl }}
     - name: Install deps via cpanm
@@ -34,7 +34,7 @@ jobs:
         prove --exec 'perl -MDevel::Cover=-silent,1 -I FHEM ' -I FHEM -r -v t/SD_Protoco* 
     - name: Create clover report  
       run: cover -report clover
-    - uses: codecov/codecov-action@v1
+    - uses: codecov/codecov-action@v1.5.0
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         file: ./cover_db/clover.xml
@@ -52,7 +52,7 @@ jobs:
     - name: Create clover report
       working-directory: /opt/fhem/
       run: cover -report clover
-    - uses: codecov/codecov-action@v1
+    - uses: codecov/codecov-action@v1.5.0
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         file: /opt/fhem/cover_db/clover.xml
