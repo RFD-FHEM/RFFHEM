@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 14_SD_WS.pm 21666 2020-05-15 17:00:00Z Sidey $
+# $Id: 14_SD_WS.pm 21666 2020-05-22 21:30:00Z Sidey $
 #
 # The purpose of this module is to support serval
 # weather sensors which use various protocol
@@ -1298,6 +1298,7 @@ sub SD_WS_WH2SHIFT($){
   The SD_WS module processes the messages from various environmental sensors received from an IO device (CUL, CUN, SIGNALDuino, SignalESP etc.).<br><br>
   <b>Known models:</b>
   <ul>
+    <li>ADE WS1907 Weather station with rain gauge</li>
     <li>Atech wireless weather station</li>
     <li>BBQ temperature sensor GT-TMBBQ-01s (transmitter), GT-TMBBQ-01e (receiver)</li>
     <li>Bresser 7009994</li>
@@ -1403,6 +1404,7 @@ sub SD_WS_WH2SHIFT($){
   <br>
   <b>Unterst&uumltzte Modelle:</b><br><br>
   <ul>
+    <li>ADE WS1907 Wetterstation mit Regenmesser</li>
     <li>Atech Wetterstation</li>
     <li>BBQ Temperatur Sensor GT-TMBBQ-01s (Sender), GT-TMBBQ-01e (Empfaenger)</li>
     <li>Bresser 7009994</li>
