@@ -1,20 +1,6 @@
-2021-05-23 - Update SD_ProtocolData.pm
-2021-05-20 - Update SD_ProtocolData.pm
-2021-05-12 - Update 14_SD_WS.pm
-
-Reading rain changed from 3 to 4 nibble
-2021-05-11 - Update SD_ProtocolData.pm
-2021-05-11 - Update 14_SD_WS.pm
-
-English documentation added
-2021-05-03 - Merge branch 'master_bresser5in1' of https://github.com/RFD-FHEM/RFFHEM into master_bresser5in1
-2021-05-03 - Update SD_Protocols.pm
-
-Corrected line indentation
-2021-05-02 - Merge branch 'master_bresser5in1' of https://github.com/RFD-FHEM/RFFHEM into master_bresser5in1
 2021-05-02 - new protocol 108
+   BRESSER 5-in-1 Weather Center and BRESSER Professional Rain Gauge
 
-BRESSER 5-in-1 Weather Center and BRESSER Professional Rain Gauge
 2021-05-01 - enable delete attribute rfmode (#958)
 
 * 00_SIGNALduino.pm
