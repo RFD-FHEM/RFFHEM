@@ -1,3 +1,9 @@
+2021-05-23 - new protocol 110 for ADE WS1907 Weather station (#970)
+
+* new protocol 110 for ADE WS1907 Weather station
+* Update 14_SD_WS.pm
+* Update SD_ProtocolData.pm
+* Update README.md
 2021-05-22 - new protocol 110 for ADE WS1907 Weather station
 
 2021-05-15 - FSK check msg length (#959)
