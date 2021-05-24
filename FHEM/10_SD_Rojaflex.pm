@@ -8,7 +8,7 @@ use strict;
 use warnings;
 use GPUtils qw(GP_Import GP_Export);
 
-our $VERSION = '0.1';
+our $VERSION = '0.2';
 
 GP_Export(qw(
 	Initialize
@@ -23,6 +23,7 @@ BEGIN {
 		attr
 		CommandDefine
 		CommandDelete
+		defs
 		IOWrite
 		IsDummy
 		IsIgnored
@@ -56,8 +57,10 @@ sub Initialize {
 	$hash->{ParseFn}    = \&Parse;
 	$hash->{AttrFn}     = \&Attr;
 	$hash->{AttrList}   = 'IODev '.
-	                      'do_not_notify:1,0 '.
-	                      'ignore:1,0 dummy:1,0 showtime:1,0 '.
+	                      'do_not_notify:0,1 '.
+	                      'inversePosition:0,1 '.
+	                      'repetition:1,2,3,4,5,6,7,8,9 '.
+	                      'ignore:1,0 dummy:0,1 showtime:0,1 '.
 	                      "$main::readingFnAttributes";
 	$hash->{AutoCreate} = {'SD_Rojaflex.*' => {FILTER => '%NAME', autocreateThreshold => '5:180', GPLOT => q{}}};
 	return
@@ -69,10 +72,23 @@ sub Attr {
 	# $name - Geraetename
 	# $attrName - Attribut-Name
 	# $attrValue - Attribut-Wert
+	my $hash = $defs{$name};
+	return "\"Attr: \" $name does not exist" if (!defined($hash));
 
 	if ($cmd eq 'set') {
 		if ($attrName eq 'repetition') {
 			if ($attrValue !~ m/^[1-9]$/xms) { return "$name: Unallowed value $attrValue for the attribute repetition (must be 1 - 9)!" };
+		}
+		if ($attrName eq 'inversePosition') {
+			my $oldinvers = AttrVal($name, 'inversePosition', 0);
+			if ($attrValue ne $oldinvers) {
+				my $pct = ReadingsVal($name, 'pct', 0);
+				$pct = 100 - $pct;
+				readingsBeginUpdate($hash);
+				readingsBulkUpdate($hash, 'pct', $pct, 1);
+				readingsBulkUpdate($hash, 'state', $pct, 1) if ($pct > 0 && $pct < 100);
+				readingsEndUpdate($hash, 1);
+			}
 		}
 	}
 	return;
@@ -97,11 +113,13 @@ sub Set {
 	}
 
 	if ($cmd eq 'pct') { # for homebridge
-		# External request fits internal data format 0 = closed ,100 = open
+		# External request does not fits internal data format 0 = closed ,100 = open
 		$cmd = 'stop';
 		if ($na > 1) {
-			$cmd = 'up' if ($a[1] eq '100'); # Do open
-			$cmd = 'down' if ($a[1] eq '0'); # Do close
+			my $pct = $a[1];
+			$pct = 100 - $pct if (AttrVal($name,'inversePosition',0) eq '1'); # inverse position
+			$cmd = 'up' if ($pct eq '0');
+			$cmd = 'down' if ($pct eq '100');
 		}
 	}
 	
@@ -118,7 +136,10 @@ sub Set {
 			$msg .= ReadingsVal($name, 'MsgStop', undef) if ($cmd eq 'stop');
 			$msg .= ReadingsVal($name, 'MsgUp', undef) if ($cmd eq 'up');
 			$msg .= ';';
-			IOWrite($hash, 'raw', $msg) if (length($msg) == 28);
+			for my $i (1 .. AttrVal($name, 'repetition', 1)) {
+				# Eine Wiederholung erfolgt bei der Fernbedienung nach 3,5 mS, so ist der Abstand groesser
+				IOWrite($hash, 'raw', $msg) if (length($msg) == 28);
+			}
 			$state = $cmd;
 			Log3 $name, 3, "$ioname: SD_Rojaflex set $name $state";
 		} else {
@@ -131,7 +152,7 @@ sub Set {
 			}	
 		}
 	} else {
-		$state = 'no set commands available, press a button on the remote control';
+		$state = 'no set commands available, press all buttons on the remote control';
 		Log3 $name, 3, "$ioname: $name, $state";
 	}
 	
@@ -220,8 +241,10 @@ sub Parse {
 	my $pct;
 	if ($dev eq '5') { # tubular motor
 		$pct = hex(substr($rawData,12,2));
-		$state = 'down' if ($pct == 100);
-		$state = 'up' if ($pct == 0);
+		$state = $pct if ($pct > 0 && $pct < 100);
+		$state = 'closed' if ($pct == 100);
+		$state = 'open' if ($pct == 0);
+		$pct = 100 - $pct if (AttrVal($name,'inversePosition',0) eq '1'); # inverse position
 	}
 	
 	readingsBeginUpdate($hash);
@@ -232,8 +255,7 @@ sub Parse {
 		readingsBulkUpdate($hash, 'MsgUp', $rawData, 0) if ($cmd eq '1' && !defined $MsgUp);
 	}
 	if ($dev eq '5') { # tubular motor
-		readingsBulkUpdate($hash, 'percentClosed', $pct) if (defined $pct);
-		readingsBulkUpdate($hash, 'pct', 100 - $pct) if (defined $pct); # for homebridge
+		readingsBulkUpdate($hash, 'pct', $pct) if (defined $pct); # for homebridge
 	}
 	readingsEndUpdate($hash, 1);
 	return $name;
@@ -334,20 +356,33 @@ __END__
 			<li>stop</li>
 		</ul>
 		Optional kann mit &lt;anz&gt; die Anzahl der Wiederholungen im Bereich von 1 bis 9 angegeben werden.
-		<br><br>
-		Die <a href="#setExtensions">set extensions</a> werden unterst&uuml;tzt.
 	</ul>
 	<br><br>
 
 	<b>Attribute</b>
 	<ul>
 		<li><a href="#IODev">IODev</a></li>
+		<a name="inversePosition"></a>
+		<li>inversePosition (aktuelle Position pct umkehren)</li>
 		<li><a href="#do_not_notify">do_not_notify</a></li>
 		<li><a href="#eventMap">eventMap</a></li>
 		<li><a href="#ignore">ignore</a></li>
 		<li><a href="#readingFnAttributes">readingFnAttributes</a></li>
+		<a name="repetition"></a>
 		<li>repetition (Anzahl Wiederholungen der Sendebefehle)</li>
 	</ul>
+	<br><br>
+
+	<b>Readings</b>
+	<ul>
+		<li>IODev (Gerät, das zum Senden verwendet wird)</li>
+		<li>MsgDown (Nachricht, die bei set down gesendet wird)</li>
+		<li>MsgStop (Nachricht, die bei set stop gesendet wird)</li>
+		<li>MsgUp (Nachricht, die bei set up gesendet wird)</li>
+		<li>pct (aktuelle Position in Prozent)</li>
+		<li>state (aktueller Status)</li>
+	</ul>
+
 </ul>
 
 =end html_DE
