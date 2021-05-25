@@ -1,5 +1,4 @@
-##############################################
-# $Id: 14_SD_WS.pm 21666 2020-05-02 16:00:53Z Sidey $
+# $Id: 14_SD_WS.pm 21666 2021-05-25 16:00:53Z Sidey $
 #
 # The purpose of this module is to support serval
 # weather sensors which use various protocol
@@ -29,6 +28,7 @@
 # 25.08.2020 Protokoll 27: neuer Sensor EFS-3110A
 # 27.09.2020 neues Protokoll 106: BBQ Temperature Sensor GT-TMBBQ-01s (Sender), GT-TMBBQ-01e (Empfaenger)
 # 01.05.2021 neues Protokoll 108: Bresser 5-in-1 Comfort Wetter Center, Profi Regenmesser
+# 15.05.2021 neues Protokoll 110: ADE WS1907 Weather station with rain gauge
 
 package main;
 
@@ -80,6 +80,7 @@ sub SD_WS_Initialize($)
 		"SD_WS_94_T.*"	=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4:Temp,", autocreateThreshold => "3:180"},
 		"SD_WS_106_T.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4:Temp,", autocreateThreshold => "5:60"},
 		'SD_WS_108.*' => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4:Temp,', autocreateThreshold => '5:120'},
+		'SD_WS_110_TR.*' => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4:Temp,', autocreateThreshold => '3:180'},
 	};
 
 }
@@ -748,6 +749,56 @@ sub SD_WS_Parse($$)
 													},
 				bat        => sub {my ($rawData,undef) = @_; return substr($rawData,22,1) eq '0' ? 'ok' : 'low';},
 				crcok      => sub {return 1;}, # checks are in SD_Protocols.pm sub ConvBresser_5in1
+		110 => {
+				# ADE WS1907 Weather station with rain gauge
+				# 0         1         2         3         4         5         6         7         8
+				# 0    4    8    12   16   20   24   28   32   36   40   44   48   52   56   60   64
+				# 1011 1111 1001 1010 0110 0001 1011 0100 1001 0001 1011 1111 1001 1010 0110 0001 01
+				# iiii iiii iiii iiii bd?? ccc? rrrr rrrr rrrr rrrr tttt tttt tttt tttt ssss ssss ??
+				# i: 16 bit ID
+				# b:  1 bit battery indicator, 0 if battery ok, 1 if battery is low.
+				# d:  1 bit device reset, set to 1 briefly after battery insert
+				# c:  3 bit transmission counter, rolls over
+				# r: 16 bit rain counter (LSB first)
+				# t: 16 bit temperature (LSB first, unsigned fahrenheit offset by 90 and scaled by 10)
+				# s:  8 bit checksum over byte 0 - 6 & 0xFF
+				# ?:    unknown
+				sensortype => 'ADE WS1907',
+				model      => 'SD_WS_110_TR',
+				prematch   => sub {return 1;}, # no precheck known
+				id         =>	sub {my (undef,$bitData) = @_; return substr($rawData,0,4);}, # long-id in hex
+				bat            => sub {my (undef,$bitData) = @_; return substr($bitData,16,1) eq "0" ? "ok" : "low";},
+				batChange      => sub {my (undef,$bitData) = @_; return substr($bitData,17,1);},
+				sendCounter    => sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,20,22));},
+				rawRainCounter => sub {my (undef,$bitData) = @_; 
+																my $rawRainCounterMessage = SD_WS_binaryToNumber($bitData,32,39) * 256 + SD_WS_binaryToNumber($bitData,24,31);
+																if ($rawRainCounterMessage > 65525) {
+																	return $rawRainCounterMessage - 65526;
+																} else {
+																	return $rawRainCounterMessage + 10;
+																}
+															},
+				rain           => sub {my (undef,$bitData) = @_; 
+																my $rawRainCounterMessage = SD_WS_binaryToNumber($bitData,32,39) * 256 + SD_WS_binaryToNumber($bitData,24,31);
+																if ($rawRainCounterMessage > 65525) {
+																	return ($rawRainCounterMessage - 65526) * 0.1;
+																} else {
+																	return ($rawRainCounterMessage + 10) * 0.1;
+																}
+															},
+				temp       => sub {my (undef,$bitData) = @_; return round(((SD_WS_binaryToNumber($bitData,48,55) * 256 + SD_WS_binaryToNumber($bitData,40,47)) - 1220) * 5 / 90.0 , 1); },
+				crcok          => sub {	my (undef,$bitData) = @_;
+																my $sum = 0;
+																for (my $n = 0; $n < 56; $n += 8) {
+																	$sum += SD_WS_binaryToNumber($bitData, $n, $n + 7)
+																}
+																if (($sum &= 0xFF) == SD_WS_binaryToNumber($bitData, 56, 63)) {
+																	return 1;
+																} else {
+																	Log3 $name, 3, "$name: SD_WS_110 Parse msg $msg - ERROR checksum $sum != " . SD_WS_binaryToNumber($bitData, 56, 63);
+																	return 0;
+																}
+															},
 		},
 	);
 
@@ -1332,6 +1383,7 @@ sub SD_WS_WH2SHIFT($){
   The SD_WS module processes the messages from various environmental sensors received from an IO device (CUL, CUN, SIGNALDuino, SignalESP etc.).<br><br>
   <b>Known models:</b>
   <ul>
+    <li>ADE WS1907 Weather station with rain gauge</li>
     <li>Atech wireless weather station</li>
     <li>BBQ temperature sensor GT-TMBBQ-01s (transmitter), GT-TMBBQ-01e (receiver)</li>
     <li>Bresser 5-in-1 Comfort Weather Center, 7009994, Professional rain gauge, Temeo</li>
@@ -1447,6 +1499,7 @@ sub SD_WS_WH2SHIFT($){
   <br>
   <b>Unterst&uumltzte Modelle:</b><br><br>
   <ul>
+    <li>ADE WS1907 Wetterstation mit Regenmesser</li>
     <li>Atech Wetterstation</li>
     <li>BBQ Temperatur Sensor GT-TMBBQ-01s (Sender), GT-TMBBQ-01e (Empfaenger)</li>
 		<li>Bresser 5-in-1 Comfort Wetter Center, 7009994, Profi Regenmesser, Temeo</li>
@@ -1491,7 +1544,7 @@ sub SD_WS_WH2SHIFT($){
   <ul>(verschieden, je nach Typ des Sensors)</ul>
   <ul>
 		<li>batteryChanged (1)</li>
-	<li>batteryState (low oder ok)</li>
+		<li>batteryState (low oder ok)</li>
 		<li>channel (Sensor-Kanal)</li>
 		<li>humidity (Luftfeuchte, 1-100 %)</li>
 		<li>humidityTrend (Trend Luftfeuchte, gleichbleibend, steigend, fallend)</li>

@@ -12,6 +12,7 @@ Supported Devices / Protocols
 
 |Device | Function|
 | ------------- | ----------- |
+|ADE WS1907 | Weather station with rain gauge |
 |AC114-01B | Remote control |
 |Ambient Weather F007T, F007TP, F007TH | Thermo-Hygrometer, Thermometer |
 |Arduino Sensor | multi purpose sensor based on arduino |
