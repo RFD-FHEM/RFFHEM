@@ -749,6 +749,7 @@ sub SD_WS_Parse($$)
 													},
 				bat        => sub {my ($rawData,undef) = @_; return substr($rawData,22,1) eq '0' ? 'ok' : 'low';},
 				crcok      => sub {return 1;}, # checks are in SD_Protocols.pm sub ConvBresser_5in1
+		} ,
 		110 => {
 				# ADE WS1907 Weather station with rain gauge
 				# 0         1         2         3         4         5         6         7         8
