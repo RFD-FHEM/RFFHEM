@@ -590,12 +590,21 @@ sub mcBit2Hideki {
   my $id        = shift // carp 'protocol ID must be provided' && return (0,'no protocolId provided');
   my $mcbitnum  = shift // length $bitData;
 
-  my $message_start = index($bitData,'10101110');
-  my $invert = 0;
+  if ($mcbitnum == 89) {                                   # optimization when the beginning was missing
+    my $bit0 = substr($bitData,0,1);
+    $bit0 = $bit0 ^ 1;
+    $bitData = $bit0 . $bitData;
+    $self->_logging( qq[lib/mcBit2Hideki, L=$mcbitnum add bit $bit0 at begin $bitData], 5 );
+  }
 
-  if ($message_start < 0) {
-    $bitData =~ tr/01/10/;                  # invert message
-    $message_start = index($bitData,'10101110');      # 0x75 but in reverse order
+  my $message_start = index($bitData,'10101110');         # normal rawMSG
+  my $invert = 0;
+  my $message_start_invert = index($bitData,'01010001');  # invert rawMSG
+  # 10101110 can occur again in raw MSG -> comparison with inverted start 01010001
+
+  if ( $message_start < 0 || ( $message_start_invert!= -1 && $message_start > 0 && ($message_start_invert < $message_start) ) ) {
+    $bitData =~ tr/01/10/;                                # invert message
+    $message_start = index($bitData,'10101110');          # 0x75 but in reverse order
     $invert = 1;
   }
 
@@ -606,8 +615,8 @@ sub mcBit2Hideki {
     # Todo: Mindest Laenge fuer startpunkt vorspringen
     # Todo: Wiederholung auch an das Modul weitergeben, damit es dort geprueft werden kann
     my $message_end = index($bitData,'10101110',$message_start+71); # pruefen auf ein zweites 0x75,  mindestens 72 bit nach 1. 0x75, da der Regensensor minimum 8 Byte besitzt je byte haben wir 9 bit
-        $message_end = length($bitData) if ($message_end == -1);
-        my $message_length = $message_end - $message_start;
+    $message_end = length($bitData) if ($message_end == -1);
+    my $message_length = $message_end - $message_start;
 
     return (-1,' message is to short') if ($message_length < $self->checkProperty($id,'length_min',-1) );
     return (-1,' message is to long') if (defined $self->getProperty($id,'length_max' ) && $message_length > $self->getProperty($id,'length_max') );
