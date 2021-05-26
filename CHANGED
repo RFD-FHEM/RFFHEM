@@ -1,3 +1,14 @@
+2021-05-26 - PERL WARNING - Kopp Fix - https://github.com/RFD-FHEM/RFFHEM/issues/968 (#972)
+
+* Update SD_Protocols.pm
+  * fix https://github.com/RFD-FHEM/RFFHEM/issues/968
+
+* 02_ConvKoppFreeControl.t
+  * added test with to short data
+  * Anzahl geplanter tests korrigiert
+2021-05-25 - Update SD_Protocols.pm
+
+ * fix https://github.com/RFD-FHEM/RFFHEM/issues/968
 2021-05-23 - new protocol 110 for ADE WS1907 Weather station (#970)
 
 * new protocol 110 for ADE WS1907 Weather station
