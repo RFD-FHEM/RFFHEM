@@ -7,7 +7,7 @@ use Test2::V0;
 use lib::SD_Protocols qw(:ALL);
 use Test2::Tools::Compare qw{is like};
 
-plan(2);
+plan(3);
 
 my $Protocols =
   new lib::SD_Protocols( filetype => 'json', filename => './t/SD_Protocols/test_protocolData.json' );
