@@ -14,11 +14,14 @@ jobs:
     - uses: shogo82148/actions-setup-perl@v1.12.0
       with:
         perl-version: ${{ matrix.perl }}
-    - name: Install deps via cpanm
-      run: |
-        cpanm --notest --no-interactive -v --installdeps .
-        cpanm --notest --no-interactive -v Devel::Cover::Report::Clover
-        cpanm --no-interactive -v Storable
+        install-modules-with: cpanm
+        install-modules-args: --no-interactive -v --installdeps
+
+    #- name: Install deps via cpanm
+      #run: |
+        #cpanm --notest --no-interactive -v --installdeps .
+        #cpanm --notest --no-interactive -v Devel::Cover::Report::Clover
+        #cpanm --no-interactive -v Storable
     - name: install fhem via deb package
       run: |
         wget -qO - http://debian.fhem.de/archive.key | sudo apt-key add -
