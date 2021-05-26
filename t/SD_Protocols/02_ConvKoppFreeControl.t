@@ -34,3 +34,15 @@ subtest 'test ConvKoppFreeControl, checksum wrong' => sub 	{
 		like($ret[1],qr/!= checksum/,'check error message');
 	}
 };
+
+
+subtest 'test ConvKoppFreeControl, message to short' => sub 	{
+	plan(1);
+	subtest 'msg MN;D=0A018200CA043A90;R=204; (ID 102)' => sub {		
+		plan(2);
+		my $hexMsg='0A018200CA043A90';
+		my @ret=$Protocols->ConvKoppFreeControl($hexMsg) ;
+		is($#ret,1, 'ConvKoppFreeControl reported some error');
+		like($ret[1],qr/to\sshort/,'check error message');
+	}
+};
