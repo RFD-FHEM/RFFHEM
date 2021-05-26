@@ -1,10 +1,10 @@
 ################################################################################
 #
 # The file is part of the SIGNALduino project
-# v3.5.x - https://github.com/RFD-FHEM/RFFHEM/tree/dev-r35-xFSK
+# v3.5.x - https://github.com/RFD-FHEM/RFFHEM
 #
 # 2016-2019  S.Butzek, Ralf9
-# 2019-2020  S.Butzek, HomeAutoUser, elektron-bbs
+# 2019-2021  S.Butzek, HomeAutoUser, elektron-bbs
 #
 ################################################################################
 package lib::SD_Protocols;
@@ -13,7 +13,7 @@ use strict;
 use warnings;
 use Carp qw(croak carp);
 use Digest::CRC;
-our $VERSION = '2.03';
+our $VERSION = '2.04';
 use Storable qw(dclone);
 use Scalar::Util qw(blessed);
 
@@ -1810,19 +1810,30 @@ sub ConvKoppFreeControl {
   my $self    = shift // carp 'Not called within an object';
   my $hexData = shift // croak 'Error: called without $hexdata as input';
 
+  # kr07C2AD1A30CC0F0328
+  # ||  ||||  ||    ++-------- Transmitter Code 2
+  # ||  ||||  ++-------------- Keycode
+  # ||  ++++------------------ Transmitter Code 1
+  # ++------------------------ kr wird von der culfw bei Empfang einer Kopp Botschaft als Kennung gesendet
+  #
+  # right rawMSG  MN;D=07FA5E1721CC0F02FE000000000000;
+  # wrong rawMSG  MN;D=0A018200CA043A90;
+
   return ( 1,
 'ConvKoppFreeControl, Usage: Input #1, $hexData needs to be at least 4 chars long'
   ) if ( length($hexData) < 4 );    # check double, in def length_min set
 
   my $anz = hex( substr( $hexData, 0, 2 ) ) + 1;
+
+  return ( 1, 'ConvKoppFreeControl, hexData is to short' )
+    if ( length($hexData) < $anz * 2 );  # check double, in def length_min set
+
   my $blkck = 0xAA;
 
   for my $i ( 0 .. $anz - 1 ) {
     my $d = hex( substr( $hexData, $i * 2, 2 ) );
     $blkck ^= $d;
   }
-  return ( 1, 'ConvKoppFreeControl, hexData is to short' )
-    if ( length($hexData) < $anz * 2 );  # check double, in def length_min set
 
   my $checksum = hex( substr( $hexData, $anz * 2, 2 ) );
 
