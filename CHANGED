@@ -1,3 +1,4 @@
+2021-05-27 - Merge branch 'master' into master_bresser5in1
 2021-05-27 - new protocol 108 for BRESSER 5-in-1 Weather Center and BRESSER Professional Rain Gauge
 
 2021-05-26 - PERL WARNING - Kopp Fix - https://github.com/RFD-FHEM/RFFHEM/issues/968 (#972)
