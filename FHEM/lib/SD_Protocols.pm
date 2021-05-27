@@ -1762,19 +1762,25 @@ sub ConvBresser_5in1 {
   my $bit;
   my $bitsumRef;
   my $bitadd = 0;
+  my $hexLength = length ($hexData);
+
+  return ( 1, 'ConvBresser_5in1, hexData is to short' )
+    if ( $hexLength < 52 );  # check double, in def length_min set
+  
   for (my $i = 0; $i < 13; $i++) {
     $d2 = hex(substr($hexData,($i+13)*2,2));
     return ( 1, qq[ConvBresser_5in1, inverted data at pos $i] ) if ((hex(substr($hexData,$i*2,2)) ^ $d2) != 255);
     if ($i == 0) {
       $bitsumRef = $d2;
     }	else {
-      $bit = sprintf("%08b", $d2);
-      for (my $j = 0; $j < 8; $j++) {
-        $bitadd += substr($bit,$j,1);
+  
+      while ($d2) {
+        $bitadd += $d2 & 1;
+        $d2 >>= 1;
       }
     }
   }
-  return ( 1, qq[ConvBresser_5in1, bitsum $bitadd != $bitsumRef] ) if ($bitadd != $bitsumRef);
+  return (1, qq[ConvBresser_5in1, checksumCalc:$bitadd != checksum:$bitsumRef ]  ) if ($bitadd != $bitsumRef);
   return substr($hexData, 28, 24);
 }
 
