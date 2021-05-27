@@ -1,3 +1,8 @@
+2021-05-27 - SD_Protocols.pm
+
+- Fehlermeldung von bitsum auf checksum geändert
+- Prüfung auf Mindestlänge um Perl Warnings zu vermeiden
+- Berechnung der checksumme vereinfacht
 2021-05-27 - Merge branch 'master' into master_bresser5in1
 2021-05-27 - new protocol 108 for BRESSER 5-in-1 Weather Center and BRESSER Professional Rain Gauge
 
