@@ -11,14 +11,17 @@ jobs:
     name: Perl ${{ matrix.perl }} on ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v2.3.4
-    - uses: shogo82148/actions-setup-perl@v1.12.0
+    - uses: shogo82148/actions-setup-perl@v1.12.2
       with:
         perl-version: ${{ matrix.perl }}
-    - name: Install deps via cpanm
-      run: |
-        cpanm --notest --no-interactive -v --installdeps .
-        cpanm --notest --no-interactive -v Devel::Cover::Report::Clover
-        cpanm --no-interactive -v Storable
+        install-modules-with: cpanm
+        install-modules-args: --no-interactive -v --installdeps
+
+    #- name: Install deps via cpanm
+      #run: |
+        #cpanm --notest --no-interactive -v --installdeps .
+        #cpanm --notest --no-interactive -v Devel::Cover::Report::Clover
+        #cpanm --no-interactive -v Storable
     - name: install fhem via deb package
       run: |
         wget -qO - http://debian.fhem.de/archive.key | sudo apt-key add -
