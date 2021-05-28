@@ -87,7 +87,7 @@ package lib::SD_ProtocolData;
   use strict;
   use warnings;
 
-  our $VERSION = '1.29';
+  our $VERSION = '1.30';
 
   our %protocols = (
     "0" =>  ## various weather sensors (500 | 9100)
@@ -2833,6 +2833,29 @@ package lib::SD_ProtocolData;
         modulematch     => '^W106#',
         length_min      => '22',
         length_max      => '22',
+      },
+    "108" =>  ## BRESSER 5-in-1 Weather Center, Bresser Professional Rain Gauge - elektron-bbs 2021-05-02
+              # https://github.com/RFD-FHEM/RFFHEM/issues/607
+              # https://forum.fhem.de/index.php/topic,106594.msg1151467.html#msg1151467
+              # T: 11 H: 43 W: 1.7 R: 7.6     MN;D=E6837FD73FE8EFEFFEBC89FFFF197C8028C017101001437600000001;R=230;
+              # elektron-bbs
+              # T: 20.7 H: 28 W: 0.8 R: 354.4  MN;D=E7527FF78FF7EFF8FDD7BBCAFF18AD80087008100702284435000002;R=213;
+              # T: -2.8 H: 78 W: 0 R: 354.4    MN;D=E8527FFF2FFFEFD7FF87BBCAF717AD8000D000102800784435080000;R=214;
+              # T: 8 H: 88 W: 1.3 R: 364.8     MN;D=E6527FEB0FECEF7FFF77B7C9FF19AD8014F013108000884836000003;R=211;
+      {
+        name            => 'Bresser 5in1',
+        comment         => 'BRESSER 5-in-1 weather center, rain gauge',
+        id              => '108',
+        knownFreqs      => '868.35',
+        datarate        => '8.207',
+        sync            => '2DD4',
+        modulation      => '2-FSK',
+        rfmode          => 'Bresser_5in1',
+        register        => ['0001','0246','0306','042D','05D4','06FF','07C0','0802','0D21','0E65','0FE8','1088','114C','1202','1322','14F8','1551','1916','1B43','1C68'],
+        preamble        => 'W108#',
+        clientmodule    => 'SD_WS',
+        length_min      => '52',
+        method          => \&lib::SD_Protocols::ConvBresser_5in1,
       },
     "110" =>  # ADE WS1907 Wetterstation mit Funk-Regenmesser 
               # https://github.com/RFD-FHEM/RFFHEM/issues/965 docolli 2021-05-14
