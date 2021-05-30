@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 10_SD_Rojaflex.pm 1 2021-05-10 16:00:00Z elektron-bbs $
+# $Id: 10_SD_Rojaflex.pm 3 2021-05-30 16:00:00Z elektron-bbs $
 #
 
 package SD_Rojaflex;
@@ -8,7 +8,7 @@ use strict;
 use warnings;
 use GPUtils qw(GP_Import GP_Export);
 
-our $VERSION = '0.2';
+our $VERSION = '0.3';
 
 GP_Export(qw(
 	Initialize
@@ -21,20 +21,20 @@ BEGIN {
 		AssignIoPort
 		AttrVal
 		attr
-		CommandDefine
-		CommandDelete
+		CommandSet
 		defs
+		gettimeofday
+		InternalTimer
 		IOWrite
 		IsDummy
 		IsIgnored
 		Log3
 		modules
 		ReadingsVal
-		SetExtensions
+		RemoveInternalTimer
 		readingsBeginUpdate
 		readingsBulkUpdate
 		readingsEndUpdate
-		readingsSingleUpdate
 	))
 };
 
@@ -60,6 +60,9 @@ sub Initialize {
 	                      'do_not_notify:0,1 '.
 	                      'inversePosition:0,1 '.
 	                      'repetition:1,2,3,4,5,6,7,8,9 '.
+	                      'noPositionUpdates:0,1 '.
+	                      'timeToClose '.
+	                      'timeToOpen '.
 	                      'ignore:1,0 dummy:0,1 showtime:0,1 '.
 	                      "$main::readingFnAttributes";
 	$hash->{AutoCreate} = {'SD_Rojaflex.*' => {FILTER => '%NAME', autocreateThreshold => '5:180', GPLOT => q{}}};
@@ -90,6 +93,12 @@ sub Attr {
 				readingsEndUpdate($hash, 1);
 			}
 		}
+		if ($attrName eq 'noPositionUpdates') {
+			if ($attrValue !~ m/^[0-1]$/xms) { return "$name: Unallowed value $attrValue for the attribute noPositionUpdates (must be 0 - 1)!" };
+		}
+		if ($attrName eq 'timeToClose' || $attrName eq 'timeToOpen') {
+			if ($attrValue !~ m/^\d{1,3}$/xms || $attrValue < 1) { return "$name: Unallowed value $attrValue for the attribute $attrName (must be 1 - 999)!" };
+		}
 	}
 	return;
 }
@@ -101,7 +110,12 @@ sub Set {
 	my $na = scalar @a; # Anzahl in Array
 	my $cmd = $a[0];
 	my $state;
-	
+	my $motor = ReadingsVal($name, 'motor', 'stop');
+	my $cpos  = ReadingsVal($name, 'cpos', 50);
+	$cpos = 100 - $cpos if (AttrVal($name,'inversePosition',0) eq '1'); # inverse position
+	my $tpos = ReadingsVal($name, 'tpos', 50);
+	$tpos = 100 - $tpos if (AttrVal($name,'inversePosition',0) eq '1'); # inverse position
+
 	return "$name, no set value specified" if ($na < 1);
 	return "Dummydevice $hash->{NAME}: will not set data" if (IsDummy($hash->{NAME}));
 
@@ -109,17 +123,36 @@ sub Set {
 		$ret .= 'down:noArg ' if defined(ReadingsVal($name, 'MsgDown', undef));
 		$ret .= 'stop:noArg ' if defined(ReadingsVal($name, 'MsgStop', undef));
 		$ret .= 'up:noArg ' if defined(ReadingsVal($name, 'MsgUp', undef));
+		# $ret .= 'pct:slider,0,1,100' if (defined(ReadingsVal($name, 'MsgDown', undef)) && defined(ReadingsVal($name, 'MsgStop', undef)) && defined(ReadingsVal($name, 'MsgUp', undef)));
+		$ret .= 'pct:0,10,20,30,40,50,60,70,80,90,100' if (defined(ReadingsVal($name, 'MsgDown', undef)) && defined(ReadingsVal($name, 'MsgStop', undef)) && defined(ReadingsVal($name, 'MsgUp', undef)));
 		return $ret; # return setlist
 	}
 
-	if ($cmd eq 'pct') { # for homebridge
-		# External request does not fits internal data format 0 = closed ,100 = open
-		$cmd = 'stop';
-		if ($na > 1) {
-			my $pct = $a[1];
-			$pct = 100 - $pct if (AttrVal($name,'inversePosition',0) eq '1'); # inverse position
-			$cmd = 'up' if ($pct eq '0');
-			$cmd = 'down' if ($pct eq '100');
+	if ($cmd eq 'pct') {
+		if ($na > 1) { # 0 = open ,100 = closed
+			my $timeToClose = AttrVal($name,'timeToClose',30);
+			my $timeToOpen = AttrVal($name,'timeToOpen',30);
+			my $tmp = $a[1];
+			$tmp = 100 - $tmp if (AttrVal($name,'inversePosition',0) eq '1'); # inverse position
+			$tpos = $tmp;
+			$cmd = 'up' if ($tmp eq '0'); # Fahr hoch
+			$cmd = 'down' if ($tmp eq '100'); # Fahr runter
+			Log3 $name, 3, "$ioname: SD_Rojaflex set $name pct $tmp";
+			if($tmp > 0 && $tmp < 100) {
+				my $duration;
+				if($tmp > ($cpos + 1)) { # Rolladen steht höher soll position
+					$cmd = 'down'; # Fahr runter
+					$duration = ($tmp - $cpos) * $timeToClose / 100;
+				}
+				if($cpos > ($tmp + 1)) { # Rolladen steht niedriger soll position
+				  $cmd = 'up';# Fahr hoch
+					$duration = ($cpos - $tmp) * $timeToOpen / 100;
+				}
+				Log3 $name, 4, "$ioname: SD_Rojaflex set $name duration running time $duration s";
+				InternalTimer( (gettimeofday() + $duration), \&SD_Rojaflex_pctStop, $name );
+			}
+		} else {
+			$cmd = 'stop';
 		}
 	}
 	
@@ -127,9 +160,8 @@ sub Set {
 	push @setCodesAr,'down' if defined(ReadingsVal($name, 'MsgDown', undef));
 	push @setCodesAr,'stop' if defined(ReadingsVal($name, 'MsgStop', undef));
 	push @setCodesAr,'up' if defined(ReadingsVal($name, 'MsgUp', undef));
-	$na = scalar @setCodesAr; # Anzahl in Array
 
-	if ($na > 0) {
+	if (scalar @setCodesAr > 1) {
 		if (grep {/$cmd/xms} @setCodesAr) { # Code vorhanden
 			my $msg = 'SN;R=1;D=';
 			$msg .= ReadingsVal($name, 'MsgDown', undef) if ($cmd eq 'down');
@@ -140,6 +172,36 @@ sub Set {
 				# Eine Wiederholung erfolgt bei der Fernbedienung nach 3,5 mS, so ist der Abstand groesser
 				IOWrite($hash, 'raw', $msg) if (length($msg) == 28);
 			}
+
+			# Calculate target position and motor state
+			if($cmd eq 'down') {
+				$tpos  = '100' if ($na == 1); # nicht bei "set pct xx"
+				$motor = 'down' if ($cpos ne $tpos); # Wenn nicht schon unten.
+				$motor = 'stop' if ($cpos eq $tpos); # Wenn unten.
+			}
+			if($cmd eq 'up') {
+				$tpos = '0' if ($na == 1); # nicht bei "set pct xx"
+				$motor = 'up'   if ($cpos ne $tpos); # Wenn nicht schon oben.
+				$motor = 'stop' if ($cpos eq $tpos); # Wenn oben.
+			}
+			if($cmd eq 'stop') {
+				# $tpos = $cpos;
+				$motor = 'stop';
+			}
+
+			# Wenn keine PositionUpdates vom Motor kommen, setze gleich die finale Position
+			if (AttrVal($name,'noPositionUpdates',0) eq '1') {
+				# Jump direct to the final position, because we have no position updates and set motor stop
+				$cpos = $tpos;
+				$motor = 'stop';
+				# Save current position
+				$cpos = 100 - $cpos if (AttrVal($name,'inversePosition',0) eq '1'); # inverse position
+				readingsBeginUpdate($hash);
+				readingsBulkUpdate($hash, 'pct', $cpos, 1);
+				readingsBulkUpdate($hash, 'cpos', $cpos, 1);
+				readingsEndUpdate($hash, 1);
+			}
+
 			$state = $cmd;
 			Log3 $name, 3, "$ioname: SD_Rojaflex set $name $state";
 		} else {
@@ -155,9 +217,22 @@ sub Set {
 		$state = 'no set commands available, press all buttons on the remote control';
 		Log3 $name, 3, "$ioname: $name, $state";
 	}
-	
-	readingsSingleUpdate($hash, 'state', $state, 1);
+
+	$tpos = 100 - $tpos if (AttrVal($name,'inversePosition',0) eq '1'); # inverse position			
+	readingsBeginUpdate($hash);
+	readingsBulkUpdate($hash, 'tpos', $tpos, 1);
+	readingsBulkUpdate($hash, 'motor', $motor, 1);
+	readingsBulkUpdate($hash, 'state', $state, 1);
+	readingsEndUpdate($hash, 1);
 	return $ret;
+}
+
+sub SD_Rojaflex_pctStop {
+	my ($name) = @_;
+	my $hash = $defs{$name};
+	RemoveInternalTimer(\&SD_Rojaflex_pctStop, $name);
+	CommandSet($hash, "$name stop");
+	return;
 }
 
 sub Define {
@@ -231,31 +306,66 @@ sub Parse {
 	my $cmd = substr($rawData,10,1); # (0x0 = stop, 0x1 = up,0x8 = down, 0xE = Request)
 	my $dev = substr($rawData,11,1); # (0xA = remote control, 0x5 = tubular motor)
 
+	my $motor = ReadingsVal($name, 'motor', 'stop');
+	my $cpos  = ReadingsVal($name, 'cpos', 50);
+	$cpos = 100 - $cpos if (AttrVal($name,'inversePosition',0) eq '1'); # inverse position
+	my $tpos = ReadingsVal($name, 'tpos', 50);
+	$tpos = 100 - $tpos if (AttrVal($name,'inversePosition',0) eq '1'); # inverse position
+
 	if ($dev eq 'A') { # remote control
 		$state = $codes{$cmd};
 		$MsgDown = ReadingsVal($name, 'MsgDown', undef) if ($cmd eq '8');
 		$MsgStop = ReadingsVal($name, 'MsgStop', undef) if ($cmd eq '0');
-		$MsgUp = ReadingsVal($name, 'MsgUp', undef) if ($cmd eq '1');
+		$MsgUp   = ReadingsVal($name, 'MsgUp',   undef) if ($cmd eq '1');
+		
+		# Calculate target position and motor state
+		if($cmd eq '8') { # down
+			$tpos = '100';
+			$motor = 'down' if ($cpos ne $tpos); #Wenn nicht schon unten
+			$motor = 'stop' if ($cpos eq $tpos); #Wenn unten
+		}
+		if($cmd eq '1') { # up
+			$tpos = '0';
+			$motor = 'up'   if ($cpos ne $tpos); #Wenn nicht schon oben
+			$motor = 'stop' if ($cpos eq $tpos); #Wenn oben
+		}
+		if($cmd eq '0') { # stop
+			$motor = 'stop';
+		}
+	}
+
+	if ($dev eq '5') { # tubular motor
+		$cpos = hex(substr($rawData,12,2));
+		$state = $cpos if ($cpos > 0 && $cpos < 100);
+		$state = 'closed' if ($cpos == 100);
+		$state = 'open' if ($cpos == 0);
+		# Calculate target position and motor state
+		if($cpos eq '0' && $motor eq 'up') { #open
+			$motor = 'stop';
+		}
+		if($cpos eq '100' && $motor eq 'down') { #closed
+			$motor = 'stop';
+		}
+		# if($motor eq 'stop') {
+			# $tpos = $cpos;
+		# }
 	}
 	
-	my $pct;
-	if ($dev eq '5') { # tubular motor
-		$pct = hex(substr($rawData,12,2));
-		$state = $pct if ($pct > 0 && $pct < 100);
-		$state = 'closed' if ($pct == 100);
-		$state = 'open' if ($pct == 0);
-		$pct = 100 - $pct if (AttrVal($name,'inversePosition',0) eq '1'); # inverse position
-	}
+	$cpos = 100 - $cpos if (AttrVal($name,'inversePosition',0) eq '1'); # inverse position
+	$tpos = 100 - $tpos if (AttrVal($name,'inversePosition',0) eq '1'); # inverse position
 	
 	readingsBeginUpdate($hash);
 	readingsBulkUpdate($hash, 'state', $state) if (defined $state);
+	readingsBulkUpdate($hash, 'motor', $motor) if (defined $motor);
+	readingsBulkUpdate($hash, 'tpos', $tpos) if (defined $tpos);
 	if ($dev eq 'A') { # remote control
 		readingsBulkUpdate($hash, 'MsgDown', $rawData, 0) if ($cmd eq '8' && !defined $MsgDown);
 		readingsBulkUpdate($hash, 'MsgStop', $rawData, 0) if ($cmd eq '0' && !defined $MsgStop);
 		readingsBulkUpdate($hash, 'MsgUp', $rawData, 0) if ($cmd eq '1' && !defined $MsgUp);
 	}
 	if ($dev eq '5') { # tubular motor
-		readingsBulkUpdate($hash, 'pct', $pct) if (defined $pct); # for homebridge
+		readingsBulkUpdate($hash, 'pct', $cpos) if (defined $cpos);
+		readingsBulkUpdate($hash, 'cpos', $cpos) if (defined $cpos); # for Homekit
 	}
 	readingsEndUpdate($hash, 1);
 	return $name;
@@ -305,7 +415,6 @@ __END__
 			<li>stop</li>
 		</ul>
 		<br><br>
-		The <a href="#setExtensions">set extensions</a> are supported.
 	</ul>
 	<br><br>
 
@@ -361,26 +470,36 @@ __END__
 
 	<b>Attribute</b>
 	<ul>
-		<li><a href="#IODev">IODev</a></li>
-		<a name="inversePosition"></a>
-		<li>inversePosition (aktuelle Position pct umkehren)</li>
+		<li><a href="#IODev">IODev</a>Setzt das Gerät, welches zum Senden der Signale verwendet werden soll.</li>
 		<li><a href="#do_not_notify">do_not_notify</a></li>
-		<li><a href="#eventMap">eventMap</a></li>
-		<li><a href="#ignore">ignore</a></li>
-		<li><a href="#readingFnAttributes">readingFnAttributes</a></li>
+		<a name="inversePosition"></a>
+		<li>inversePosition - Die Readings der Positionen pct, cpos und tpos umkehren.</li>
+		<a name="dummy"></a>
+		<li>dummy - Wenn das Attribut gesetzt ist, kann nicht mehr gesendet werden.</li>
+		<li><a href="#ignore">ignore</a> - Das Gerät wird in Zuknft ignoriert, wenn diese Attribut gesetzt ist.</li>
+		<a name="noPositionUpdates"></a>
+		<li>noPositionUpdates - Falls vom Antrieb keine Rückmeldungen erfolgen, werden die Readings pct, cpos und tpos errechnet.</li>
 		<a name="repetition"></a>
-		<li>repetition (Anzahl Wiederholungen der Sendebefehle)</li>
+		<li>repetition - Anzahl Wiederholungen der Sendebefehle</li>
+		<li><a href="#showtime">showtime</a> - Wird im FHEMWEB verwendet, um die Zeit der letzten Aktivitätanstelle des Status in der Gesamtansicht anzuzeigen.</li>
+		<a name="timeToClose"></a>
+		<li>timeToClose - Dauer für komplettes Schließen in Sekunden.</li>
+		<a name="timeToOpen"></a>
+		<li>timeToOpen - Dauer für komplettes Öffnen in Sekunden.</li>
 	</ul>
 	<br><br>
 
 	<b>Readings</b>
 	<ul>
-		<li>IODev (Gerät, das zum Senden verwendet wird)</li>
-		<li>MsgDown (Nachricht, die bei set down gesendet wird)</li>
-		<li>MsgStop (Nachricht, die bei set stop gesendet wird)</li>
-		<li>MsgUp (Nachricht, die bei set up gesendet wird)</li>
-		<li>pct (aktuelle Position in Prozent)</li>
-		<li>state (aktueller Status)</li>
+		<li>IODev - Gerät, das zum Senden verwendet wird.</li>
+		<li>MsgDown - Nachricht, die bei set down gesendet wird.</li>
+		<li>MsgStop - Nachricht, die bei set stop gesendet wird.</li>
+		<li>MsgUp - Nachricht, die bei set up gesendet wird.</li>
+		<li>cpos - aktuelle Position in Prozent</li>
+		<li>motor - Zustand des Antriebes</li>
+		<li>pct - aktuelle Position in Prozent</li>
+		<li>state - aktueller Status</li>
+		<li>tpos - Zielposition in Prozent</li>
 	</ul>
 
 </ul>
