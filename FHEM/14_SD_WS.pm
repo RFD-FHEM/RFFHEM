@@ -1,5 +1,4 @@
-##############################################
-# $Id: 14_SD_WS.pm 21666 2020-05-22 21:30:00Z Sidey $
+# $Id: 14_SD_WS.pm 21666 2021-05-25 16:00:53Z Sidey $
 #
 # The purpose of this module is to support serval
 # weather sensors which use various protocol
@@ -28,6 +27,7 @@
 # 22.02.2020 Protokoll 58: neuer Sensor TFA 30.3228.02, FT007T Thermometer Sensor
 # 25.08.2020 Protokoll 27: neuer Sensor EFS-3110A
 # 27.09.2020 neues Protokoll 106: BBQ Temperature Sensor GT-TMBBQ-01s (Sender), GT-TMBBQ-01e (Empfaenger)
+# 01.05.2021 neues Protokoll 108: Bresser 5-in-1 Comfort Wetter Center, Profi Regenmesser
 # 15.05.2021 neues Protokoll 110: ADE WS1907 Weather station with rain gauge
 
 package main;
@@ -79,6 +79,7 @@ sub SD_WS_Initialize($)
 		"SD_WS_89_TH.*"	=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "3:180"},
 		"SD_WS_94_T.*"	=> { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4:Temp,", autocreateThreshold => "3:180"},
 		"SD_WS_106_T.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4:Temp,", autocreateThreshold => "5:60"},
+		'SD_WS_108.*' => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4:Temp,', autocreateThreshold => '5:120'},
 		'SD_WS_110_TR.*' => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4:Temp,', autocreateThreshold => '3:180'},
 	};
 
@@ -138,6 +139,10 @@ sub SD_WS_Parse($$)
 	my $temp;
 	my $hum;
 	my $windspeed;
+	my $winddir;
+	my $winddirtxt;
+	my @winddirtxtar=('N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW');
+	my $windgust;
 	my $trend;
 	my $trendTemp;
 	my $trendHum;
@@ -669,6 +674,82 @@ sub SD_WS_Parse($$)
 													},
 				crcok      => sub {return 1;}, # CRC test method does not exist
 		} ,
+		108 => {
+				# https://github.com/merbanan/rtl_433/blob/master/src/devices/bresser_5in1.c
+				# The compact 5-in-1 multifunction outdoor sensor transmits the data on 868.3 MHz.
+				# The device uses FSK-PCM encoding, the device sends a transmission every 12 seconds.
+				# A transmission starts with a preamble of 0xAA.
+				# Preamble: aa aa aa aa aa 2d d4
+				# Packet payload without preamble (203 bits):
+				#  0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25
+				# -----------------------------------------------------------------------------
+				# ed ee 46 ff ff ff ef 9f ff 8b 7d eb ff 12 11 b9 00 00 00 10 60 00 74 82 14 00 00 00 (Rain Gauge)
+				# e9 ee 46 ff ff ff ef 99 ff 8b 8b eb ff 16 11 b9 00 00 00 10 66 00 74 74 14 00 00 00 (Rain Gauge)
+				# e3 fd 7f 89 7e 8a ed 68 fe af 9b fd ff 1c 02 80 76 81 75 12 97 01 50 64 02 00 00 00 (Large Wind Values, Gust=37.4m/s Avg=27.5m/s from https://github.com/merbanan/rtl_433/issues/1315)
+				# ef a1 ff ff 1f ff ef dc ff de df ff 7f 10 5e 00 00 e0 00 10 23 00 21 20 00 80 00 00 (low batt +ve temp)
+				# ed a1 ff ff 1f ff ef 8f ff d6 df ff 77 12 5e 00 00 e0 00 10 70 00 29 20 00 88 00 00 (low batt -ve temp -7.0C)
+				# ec 91 ff ff 1f fb ef e7 fe ad ed ff f7 13 6e 00 00 e0 04 10 18 01 52 12 00 08 00 00 (good batt -ve temp)
+				# CC CC CC CC CC CC CC CC CC CC CC CC CC uu II SS GG DG WW  W TT  T HH RR  R Bt
+				#                                           G-MSB ^     ^ W-MSB  (strange but consistent order)
+				#
+				#           1         2         3         4         5     
+				# 01234567890123456789012345678901234567890123456789012345
+				# --------------------------------------------------------
+				# EC837FF7FFFBEFDEFF7A89FFFF137C80080004102100857600000001   56 Nibble from SIGNALduino
+				# CCCCCCCCCCCCCCCCCCCCCCCCCCuuIISSGGDGWW WTT THHRR RBt       52 Nibble
+				# C = check, inverted data of 13 byte further
+				# u = checksum (number/count of set bits within bytes 14-25)
+				# I = station ID
+				# S = sensor type, only low nibble used, 0x9 for Bresser Professional Rain Gauge
+				# G = wind gust in 1/10 m/s, normal binary coded, GGxG = 0x76D1 => 0x0176 = 256 + 118 = 374 => 37.4 m/s.  MSB is out of sequence.
+				# D = wind direction 0..F = N..NNE..E..S..W..NNW
+				# W = wind speed in 1/10 m/s, BCD coded, WWxW = 0x7512 => 0x0275 = 275 => 27.5 m/s. MSB is out of sequence.
+				# T = temperature in 1/10 °C, BCD coded, TTxT = 1203 => 31.2 °C
+				# t = temperature sign, minus if unequal 0
+				# H = humidity in percent, BCD coded, HH = 23 => 23 %
+				# R = rain in mm, BCD coded, RRxR = 1203 => 31.2 mm - elektron-bbs changed: RRRR = 1243 => 431.2 mm
+				# B = Battery. 0=Ok, 8=Low.
+				#
+				# Only nibbles 28 to 52 are transferred to the module. Preprocessing in SD_Protocols.pm sub sub ConvBresser_5in1.
+				#           1         2
+				# 012345678901234567890123
+				# ------------------------
+				# 7C8008000410210085760000
+				# IISSGGDGWW WTT THHRRRRBt
+				sensortype => 'Bresser_5in1, Bresser_rain_gauge',
+				model      => 'SD_WS_108',
+				prematch   => sub {my $rawData = shift; return 1 if ($rawData =~ /^[0-9A-F]{8}[0-9]{2}[0-9A-F]{1}[0-9]{3}[0-9A-F]{1}[0-9]{5}[0-9A-F]{1}[0-9]{1}/); },
+				id         => sub {my ($rawData,undef) = @_; return substr($rawData,0,2); },
+				winddir    => sub {my ($rawData,undef) = @_;
+														return undef if (substr($rawData,3,1) eq '9'); # Bresser Professional Rain Gauge
+														my $winddirraw = hex(substr($rawData,6,1));
+														return ($winddirraw * 22.5, $winddirtxtar[$winddirraw]);
+													},
+				windgust   => sub {my ($rawData,undef) = @_;
+														return undef if (substr($rawData,3,1) eq '9'); # Bresser Professional Rain Gauge
+														return (hex(substr($rawData,7,1)) * 256 + hex(substr($rawData,4,2))) / 10;
+													},
+				windspeed  => sub {my ($rawData,undef) = @_;
+														return undef if (substr($rawData,3,1) eq '9'); # Bresser Professional Rain Gauge
+														return (substr($rawData,11,1) . substr($rawData,8,2)) / 10;
+													},
+				temp       => sub {my ($rawData,undef) = @_;
+														my $sgn = substr($rawData,23,1) eq "0" ? 1 : -1;
+														$rawTemp = 	$sgn * (substr($rawData,15,1) . substr($rawData,12,1) . '.' .substr($rawData,13,1));
+														return $rawTemp;
+													},
+				hum        => sub {my ($rawData,undef) = @_;
+														return undef if (substr($rawData,3,1) eq '9'); # Bresser Professional Rain Gauge
+														return substr($rawData,16,2) + 0;
+													},
+				rain       => sub {my ($rawData,undef) = @_;
+														$rain = (substr($rawData,20,2) . substr($rawData,18,2)) / 10;
+														$rain *= 2.5 if (substr($rawData,3,1) eq '9'); # Bresser Professional Rain Gauge
+														return $rain;
+													},
+				bat        => sub {my ($rawData,undef) = @_; return substr($rawData,22,1) eq '0' ? 'ok' : 'low';},
+				crcok      => sub {return 1;}, # checks are in SD_Protocols.pm sub ConvBresser_5in1
+		} ,
 		110 => {
 				# ADE WS1907 Weather station with rain gauge
 				# 0         1         2         3         4         5         6         7         8
@@ -1032,6 +1113,8 @@ sub SD_WS_Parse($$)
 		$temp=$decodingSubs{$protocol}{temp}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{temp}));
 		$hum=$decodingSubs{$protocol}{hum}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{hum}));
 		$windspeed=$decodingSubs{$protocol}{windspeed}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{windspeed}));
+		($winddir,$winddirtxt)=$decodingSubs{$protocol}{winddir}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{winddir}));
+		$windgust=$decodingSubs{$protocol}{windgust}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{windgust}));
 		$channel=$decodingSubs{$protocol}{channel}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{channel}));
 		$model = $decodingSubs{$protocol}{model};
 		$bat = $decodingSubs{$protocol}{bat}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{bat}));
@@ -1195,7 +1278,10 @@ sub SD_WS_Parse($$)
 	readingsBulkUpdate($hash, "state", $state);
 	readingsBulkUpdate($hash, "temperature", $temp)  if (defined($temp) && (($temp > -60 && $temp < 70 ) || $protocol eq '106'));
 	readingsBulkUpdate($hash, "humidity", $hum)  if (defined($hum) && ($hum > 0 && $hum < 100 )) ;
-	readingsBulkUpdate($hash, "windspeed", $windspeed)  if (defined($windspeed)) ;
+	readingsBulkUpdate($hash, 'windspeed', $windspeed)  if (defined($windspeed)) ;
+	readingsBulkUpdate($hash, 'winddir', $winddir)  if (defined($winddir)) ;
+	readingsBulkUpdate($hash, 'winddirtxt', $winddirtxt)  if (defined($winddirtxt)) ;
+	readingsBulkUpdate($hash, 'windgust', $windgust)  if (defined($windgust)) ;
 	readingsBulkUpdate($hash, "batteryState", $bat) if (defined($bat) && length($bat) > 0) ;
 	readingsBulkUpdate($hash, "batteryChanged", $batChange) if (defined($batChange) && length($batChange) > 0 && $batChange eq "1") ;
 	readingsBulkUpdate($hash, "channel", $channel, 0) if (defined($channel)&& length($channel) > 0);
@@ -1301,30 +1387,36 @@ sub SD_WS_WH2SHIFT($){
     <li>ADE WS1907 Weather station with rain gauge</li>
     <li>Atech wireless weather station</li>
     <li>BBQ temperature sensor GT-TMBBQ-01s (transmitter), GT-TMBBQ-01e (receiver)</li>
-    <li>Bresser 7009994</li>
-    <li>BresserTemeo</li>
+    <li>Bresser 5-in-1 Comfort Weather Center, 7009994, Professional rain gauge, Temeo</li>
     <li>Conrad S522</li>
     <li>EuroChron EFTH-800, EFS-3110A (temperature and humidity sensor)</li>
     <li>NC-3911, NC-3912 refrigerator thermometer</li>
-		<li>Opus XT300</li>
+    <li>Opus XT300</li>
     <li>PV-8644 infactory Poolthermometer</li>
     <li>Renkforce E0001PA</li>
-	<li>Regenmesser DROP TFA 47.3005.01 mit Regensensor TFA 30.3233.01</li>
-	<li>TECVANCE TV-4848</li>
-	<li>Thermometer TFA 30.3228.02, TFA 30.3229.02, FT007T, FT007TP, F007T, F007TP</li>
-	<li>Thermo-Hygrometer TFA 30.3208.02, FT007TH, F007TH</li>
-	<li>TX-EZ6 for Weatherstation TZS First Austria</li>
-	<li>WH2 (TFA Dostmann/Wertheim 30.3157 (sold in Germany), Agimex Rosenborg 66796 (sold in Denmark),ClimeMET CM9088 (Sold in UK)</li>
-	<li>Weatherstation Auriol IAN 283582 Version 06/2017 (Lidl), Modell-Nr.: HG02832D</li>
-	<li>Weatherstation Auriol AHFL 433 B2, IAN 314695 (Lidl)</li>
-	<li>Weatherstation TFA 35.1140.01 with temperature / humidity sensor TFA 30.3221.02 and temperature / humidity / windspeed sensor TFA 30.3222.02</li>
+    <li>Regenmesser DROP TFA 47.3005.01 mit Regensensor TFA 30.3233.01</li>
+    <li>TECVANCE TV-4848</li>
+    <li>Thermometer TFA 30.3228.02, TFA 30.3229.02, FT007T, FT007TP, F007T, F007TP</li>
+    <li>Thermo-Hygrometer TFA 30.3208.02, FT007TH, F007TH</li>
+    <li>TX-EZ6 for Weatherstation TZS First Austria</li>
+    <li>WH2 (TFA Dostmann/Wertheim 30.3157 (sold in Germany), Agimex Rosenborg 66796 (sold in Denmark),ClimeMET CM9088 (Sold in UK)</li>
+    <li>Weatherstation Auriol IAN 283582 Version 06/2017 (Lidl), Modell-Nr.: HG02832D</li>
+    <li>Weatherstation Auriol AHFL 433 B2, IAN 314695 (Lidl)</li>
+    <li>Weatherstation TFA 35.1140.01 with temperature / humidity sensor TFA 30.3221.02 and temperature / humidity / windspeed sensor TFA 30.3222.02</li>
   </ul><br><br>
 
   <a name="SD_WS_Define"></a>
   <b>Define</b><br><br>
   <ul>
-		Newly received sensors are usually automatically created in FHEM via autocreate.<br>
-		It is also possible to set up the devices manually with the following command:<br><br>
+    Newly received sensors are usually automatically created in FHEM via autocreate.<br>
+    Sensors that support a channel number are created, for example, in the following form:<br>
+    <code>SD_WS_33_1</code><br>
+    The 1 indicates that the sensor with channel 1 was created.
+    Sensors that do not offer a channel selection are created without a channel number, such as:<br>
+    <code>SD_WS_108</code><br>
+    If several sensors with no or the same channel number are received,
+    so you can set the attribute "longids" with the SIGNALduino.		
+    It is also possible to set up the devices manually with the following command:<br><br>
     <code>define &lt;name&gt; SD_WS &lt;code&gt; </code> <br><br>
     &lt;code&gt; is the channel or individual identifier used to identify the sensor.<br>
   </ul><br><br>
@@ -1335,18 +1427,22 @@ sub SD_WS_WH2SHIFT($){
 		Some devices may not support all readings, so they will not be presented<br>
 	</ul>
   <ul>
-  	<li>batteryChanged (1)</li>
+    <li>batteryChanged (1)</li>
     <li>batteryState (low or ok)</li>
     <li>channel (number of channel</li>
-		<li>humidity (humidity (1-100 % only if available)</li>
-		<li>humidityTrend (consistent, rising, falling)</li>
-		<li>sendmode (automatic or manual)</li>
-		<li>rain (l/m&sup2;))</li>
-		<li>rain_total (l/m&sup2;))</li>
-		<li>state (T: H: W: R:)</li>
+    <li>humidity (humidity (1-100 % only if available)</li>
+    <li>humidityTrend (consistent, rising, falling)</li>
+    <li>sendmode (automatic or manual)</li>
+    <li>rain (l/m&sup2;))</li>
+    <li>rain_total (l/m&sup2;))</li>
+    <li>state (T: H: W: R:)</li>
     <li>temperature (&deg;C)</li>
-		<li>temperatureTrend (consistent, rising, falling)</li>
-		<li>type (type of sensor)</li>
+    <li>temperatureTrend (consistent, rising, falling)</li>
+    <li>type (type of sensor)</li>
+    <li>winddir (Wind direction, 0-337,5°, in Schritten von 22,5°)</li>
+    <li>winddirtxt (Wind direction, N, NNE, NE, ENE, E, ESE, SE, SSE, S, SSW, SW, WSW, W, WNW, NW, NNW)</li>
+    <li>windgust (Gust of wind, m/s)</li>
+    <li>windspeed (Wind speed, m/s)</li>
   </ul><br><br>
 
   <a name="SD_WS Attribute"></a>
@@ -1407,8 +1503,7 @@ sub SD_WS_WH2SHIFT($){
     <li>ADE WS1907 Wetterstation mit Regenmesser</li>
     <li>Atech Wetterstation</li>
     <li>BBQ Temperatur Sensor GT-TMBBQ-01s (Sender), GT-TMBBQ-01e (Empfaenger)</li>
-    <li>Bresser 7009994</li>
-    <li>BresserTemeo</li>
+		<li>Bresser 5-in-1 Comfort Wetter Center, 7009994, Profi Regenmesser, Temeo</li>
     <li>Conrad S522</li>
     <li>EuroChron EFTH-800, EFS-3110A (Temperatur- und Feuchtigkeitssensor)</li>
     <li>NC-3911, NC-3912 digitales Kuehl- und Gefrierschrank-Thermometer</li>
@@ -1431,6 +1526,14 @@ sub SD_WS_WH2SHIFT($){
   <b>Define</b><br><br>
   <ul>
 		Neu empfangene Sensoren werden in FHEM normalerweise per autocreate automatisch angelegt.<br>
+		Sensoren, die eine Kanalnummer unterstützen, werden z.B. in folgender Form angelegt:<br>
+		<code>SD_WS_33_1</code><br>
+		Dabei kennzeichnet die 1 das der Sensor mit Kanal 1 angelegt wurde.
+		Sensoren, die keine Kanalauswahl bieten, werden ohne Kanalnuummer angelegt, wie z.B.:<br>
+		<code>SD_WS_108</code><br>
+		Sollten mehrere Sensoren ohne oder mit gleicher Kanalnummer empfangen werden,
+		so kann man beim SIGNALduino das Attribut "longids" setzen.
+		Jeder Sensor bekommt dann eine eindeutige Ident zugeordnet, die sich allerdings beim Batteriewechsel oder Neustart ändern kann.<br>
 		Es ist auch m&ouml;glich, die Ger&auml;te manuell mit folgendem Befehl einzurichten:<br><br>
     <code>define &lt;name&gt; SD_WS &lt;code&gt; </code> <br><br>
     &lt;code&gt; ist der Kanal oder eine individuelle Ident, mit dem der Sensor identifiziert wird.<br>
@@ -1441,18 +1544,22 @@ sub SD_WS_WH2SHIFT($){
   <b>Generierte Readings:</b><br><br>
   <ul>(verschieden, je nach Typ des Sensors)</ul>
   <ul>
-  	<li>batteryChanged (1)</li>
-	<li>batteryState (low oder ok)</li>
-    <li>channel (Sensor-Kanal)</li>
-    <li>humidity (Luftfeuchte (1-100 %)</li>
-	<li>humidityTrend (gleichbleibend, steigend, fallend)</li>
+		<li>batteryChanged (1)</li>
+		<li>batteryState (low oder ok)</li>
+		<li>channel (Sensor-Kanal)</li>
+		<li>humidity (Luftfeuchte, 1-100 %)</li>
+		<li>humidityTrend (Trend Luftfeuchte, gleichbleibend, steigend, fallend)</li>
 		<li>rain (Regenmenge l/m&sup2;))</li>
-	<li>rain_total (l/m&sup2;))</li>
-    <li>sendmode (Der Sendemodus, automatic oder manuell mittels Taster am Sender)</li>
-	<li>state (T: H: W: R:)</li>
-    <li>temperature (&deg;C)</li>
-	<li>temperatureTrend (gleichbleibend, steigend, fallend)</li>
-	<li>type (Sensortyp)</li>
+		<li>rain_total (Regenmenge l/m&sup2;))</li>
+		<li>sendmode (Sendemodus, automatic oder manuell mittels Taster am Sender)</li>
+		<li>state (T: H: W: R:)</li>
+		<li>temperature (Temperatur &deg;C)</li>
+		<li>temperatureTrend (Trend Temperatur gleichbleibend, steigend, fallend)</li>
+		<li>type (Sensortypen)</li>
+		<li>winddir (Windrichtung, 0-337,5°, in Schritten von 22,5°)</li>
+		<li>winddirtxt (Windrichtung, N, NNE, NE, ENE, E, ESE, SE, SSE, S, SSW, SW, WSW, W, WNW, NW, NNW)</li>
+		<li>windgust (Windboe, m/s)</li>
+		<li>windspeed (Windgeschwindigkeit, m/s)</li>
   </ul>
   <br><br>
 
