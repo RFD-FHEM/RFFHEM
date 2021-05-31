@@ -14,14 +14,15 @@ Supported Devices / Protocols
 | ------------- | ----------- |
 |ADE WS1907 | Weather station with rain gauge |
 |AC114-01B | Remote control |
-|BeSmart S4 | Remote control |
 |Ambient Weather F007T, F007TP, F007TH | Thermo-Hygrometer, Thermometer |
 |Arduino Sensor | multi purpose sensor based on arduino |
 |Atlantic Security | some sensors (MD-210R / MD_230R / MD-2018R / MD-2003R) |
 |Auriol IAN 60107, 114324, 275901, 283582, 297514, 314695 (Lidl) | Weather station |
+|BeSmart S4 | Remote control |
 |BF-301 | Remote control|
 |benon (Semexo OHG) | Remote control (BH-P)|
 |BOSCH / Neff / Refsta Topdraft | Remote control (SF01 01319004, SF01 01319004 v2)|
+|BRESSER 5-in-1, Professional Rain Gauge, TemeoTrend | Weather Station, Rain Gauge, Thermo-/Hygro Sensor |
 |CAME TOP 432EV | Remote control |
 |CTW600, WH1080, WH2315 | Weather station |
 |Clarus | remote power socket|
@@ -74,7 +75,6 @@ Supported Devices / Protocols
 |revolt | Energy sensors |
 |s014/TCM/Conrad | Weather sensor |
 |Somfy RTS | Shutters from Somfy|
-|Somfy RTS | Somfy blinds |
 |technoline Weatherstation WS 6750/TX70DTH| Weather sensor and station |
 |TCM 234759 Tchibo | wireless bell |
 |TCM97001,Logilink, Pearl NC, and similar,Lifetec LT3594 | Weather sensor |
@@ -91,7 +91,6 @@ Supported Devices / Protocols
 |WS-2000, WS-7000 | Series of various sensors |
 |WS-7035, WS-7053, WS7054 | Temperature sensor 433MHz |
 |xavax | Remote control |
-||Remote sockets from serval brands|
 
 How to install
 ======

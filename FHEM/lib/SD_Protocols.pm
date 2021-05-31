@@ -1743,6 +1743,47 @@ sub _xFSK_methods_behind_here {
   # only for functionslist - no function!
 }
 
+=item ConvBresser_5in1()
+
+This function checks number/count of set bits within bytes 14-25 and inverted data of 13 byte further.
+Delete inverted data (nibble 1-27)and reduce message length (nibble 53).
+
+Input:  $hexData
+Output: $hexData
+        scalar converted message on success 
+        or array (1,"Error message")
+
+=cut
+
+sub ConvBresser_5in1 {
+  my $self    = shift // carp 'Not called within an object';
+  my $hexData = shift // croak 'Error: called without $hexdata as input';
+  my $d2;
+  my $bit;
+  my $bitsumRef;
+  my $bitadd = 0;
+  my $hexLength = length ($hexData);
+
+  return ( 1, 'ConvBresser_5in1, hexData is to short' )
+    if ( $hexLength < 52 );  # check double, in def length_min set
+  
+  for (my $i = 0; $i < 13; $i++) {
+    $d2 = hex(substr($hexData,($i+13)*2,2));
+    return ( 1, qq[ConvBresser_5in1, inverted data at pos $i] ) if ((hex(substr($hexData,$i*2,2)) ^ $d2) != 255);
+    if ($i == 0) {
+      $bitsumRef = $d2;
+    }	else {
+  
+      while ($d2) {
+        $bitadd += $d2 & 1;
+        $d2 >>= 1;
+      }
+    }
+  }
+  return (1, qq[ConvBresser_5in1, checksumCalc:$bitadd != checksum:$bitsumRef ]  ) if ($bitadd != $bitsumRef);
+  return substr($hexData, 28, 24);
+}
+
 ############################# package lib::SD_Protocols, test exists
 =item ConvPCA301()
 

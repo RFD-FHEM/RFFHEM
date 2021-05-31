@@ -1,21 +1,35 @@
-2021-05-26 - PERL WARNING - Kopp Fix - https://github.com/RFD-FHEM/RFFHEM/issues/968 (#972)
+2021-05-28 - new protocol 108 for BRESSER 5-in-1 Weather Center, Bresser Professional Rain Gauge (#973)
 
+* Update 14_SD_WS.pm
+* Update README.md
+* Update SD_ProtocolData.pm
+created test for sub
+not all tests are finished, need some more testdata
+* SD_Protocols.pm
+- Fehlermeldung von bitsum auf checksum geändert
+- Prüfung auf Mindestlänge um Perl Warnings zu vermeiden
+- Berechnung der checksumme vereinfacht
+Co-authored-by: sidey79 <7968127+sidey79@users.noreply.github.com>
+2021-05-27 - SD_Protocols.pm
+
+- Fehlermeldung von bitsum auf checksum geändert
+- Prüfung auf Mindestlänge um Perl Warnings zu vermeiden
+- Berechnung der checksumme vereinfacht
+2021-05-27 - Merge branch 'master' into master_bresser5in1
+2021-05-27 - new protocol 108 for BRESSER 5-in-1 Weather Center and BRESSER Professional Rain Gauge
+
+2021-05-26 - PERL WARNING - Kopp Fix - https://github.com/RFD-FHEM/RFFHEM/issues/968 (#972)
 * Update SD_Protocols.pm
   * fix https://github.com/RFD-FHEM/RFFHEM/issues/968
-
 * 02_ConvKoppFreeControl.t
   * added test with to short data
   * Anzahl geplanter tests korrigiert
-2021-05-25 - Update SD_Protocols.pm
 
- * fix https://github.com/RFD-FHEM/RFFHEM/issues/968
 2021-05-23 - new protocol 110 for ADE WS1907 Weather station (#970)
-
 * new protocol 110 for ADE WS1907 Weather station
 * Update 14_SD_WS.pm
 * Update SD_ProtocolData.pm
 * Update README.md
-2021-05-22 - new protocol 110 for ADE WS1907 Weather station
 
 2021-05-15 - FSK check msg length (#959)
   before: check only min message length
