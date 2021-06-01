@@ -75,12 +75,12 @@ subtest 'message is inverted' => sub {
 };
 
 
-subtest 'message ha 89 bits' => sub {
+subtest 'message had 89 bits' => sub {
 	plan(2);
 
-	my $bitdata='101010001100100100110100010110101110100110111110000010101110111101101010110000000110111001000';
+	my $bitdata='01010001100100100110100010110101110100110111110000010101110111101101010110000000110111001000';
 
-	($rcode,$hexresult)=$Protocols->mcBit2Hideki(undef,$bitdata,$id,length $bitdata);
+	($rcode,$hexresult)=$Protocols->mcBit2Hideki(undef,$bitdata,$id,89);
 	is($rcode,1,'check returncode for Hideki transmission');
 	is($hexresult,'75DBBA8A13BE11A9FE6203','check result');
 };
