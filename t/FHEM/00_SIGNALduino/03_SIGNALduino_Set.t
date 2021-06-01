@@ -46,6 +46,31 @@ InternalTimer(time()+1, sub {
 		    }
 		},
     	{	
+			testname=>  "set raw Config disable messagereduction",
+			input	=>	"raw CDR",
+			check =>  sub { 
+			    return bag  {
+					# Uses the next index, in this case index 0;
+					item 'CDR';
+					item 'CG';
+					end(); # Ensure no other indexes exist.
+    			};
+		    }
+		},
+    	{	
+			testname=>  "set raw Config enable messagereduction",
+			input	=>	"raw CER",
+			check =>  sub { 
+			    return bag  {
+					# Uses the next index, in this case index 0;
+					item 'CER';
+					item 'CG';
+					end(); # Ensure no other indexes exist.
+    			};
+		    }
+		},
+
+    	{	
     		cc1101_available => 1,
 			testname=>  "set disableMessagetype MC",
 			input	=>	"disableMessagetype MC",
