@@ -1,22 +1,28 @@
-SIGNALduino - FHEM Modules development Version 3.5.1
+SIGNALduino - FHEM Modules Version 3.5.1+
 
-[![Coverage Status](https://coveralls.io/repos/github/RFD-FHEM/RFFHEM/badge.svg?branch=master)](https://coveralls.io/github/RFD-FHEM/RFFHEM?branch=master) [![Build Status](https://travis-ci.org/RFD-FHEM/RFFHEM.svg?branch=master)](https://travis-ci.org/RFD-FHEM/RFFHEM)
+Base Branch:
 
+[![codecov](https://codecov.io/gh/RFD-FHEM/RFFHEM/branch/master/graph/badge.svg?token=szkoYvQwNV)](https://codecov.io/gh/RFD-FHEM/RFFHEM)
+![Perl Modules&FHEM Unittests](https://github.com/RFD-FHEM/RFFHEM/workflows/Perl%20Modules&FHEM%20Unittests/badge.svg)
+![controlsFile](https://github.com/RFD-FHEM/RFFHEM/workflows/controlsFile/badge.svg)
 Counterpart of SIGNALDuino uC, it's the code for FHEM to work with the data received from the uC
-
 
 Supported Devices / Protocols
 ======
 
 |Device | Function|
 | ------------- | ----------- |
+|ADE WS1907 | Weather station with rain gauge |
+|AC114-01B | Remote control |
 |Ambient Weather F007T, F007TP, F007TH | Thermo-Hygrometer, Thermometer |
 |Arduino Sensor | multi purpose sensor based on arduino |
 |Atlantic Security | some sensors (MD-210R / MD_230R / MD-2018R / MD-2003R) |
 |Auriol IAN 60107, 114324, 275901, 283582, 297514, 314695 (Lidl) | Weather station |
+|BeSmart S4 | Remote control |
 |BF-301 | Remote control|
 |benon (Semexo OHG) | Remote control (BH-P)|
 |BOSCH / Neff / Refsta Topdraft | Remote control (SF01 01319004, SF01 01319004 v2)|
+|BRESSER 5-in-1, Professional Rain Gauge, TemeoTrend | Weather Station, Rain Gauge, Thermo-/Hygro Sensor |
 |CAME TOP 432EV | Remote control |
 |CTW600, WH1080, WH2315 | Weather station |
 |Clarus | remote power socket|
@@ -69,7 +75,6 @@ Supported Devices / Protocols
 |revolt | Energy sensors |
 |s014/TCM/Conrad | Weather sensor |
 |Somfy RTS | Shutters from Somfy|
-|Somfy RTS | Somfy blinds |
 |technoline Weatherstation WS 6750/TX70DTH| Weather sensor and station |
 |TCM 234759 Tchibo | wireless bell |
 |TCM97001,Logilink, Pearl NC, and similar,Lifetec LT3594 | Weather sensor |
@@ -79,14 +84,13 @@ Supported Devices / Protocols
 |Technoline TX3  | Weather sensor |
 |Tedsen SKX1xx, SKX2xx, SKX4xx, SKX6xx | Remote control |
 |TR60C-1 | Remote control with touch screen |
-|Visivon remote PT4450  | Remote control |
+|Visivo | Remote control for motorized screen |
 |VLOXO | wireless bell |
 |WH2 | (TFA 30.3157 nur Temp, Hum = 255 -> nicht angezeigt)|
 |WH2315, WH3080 | UV/Lux Sensor |
 |WS-2000, WS-7000 | Series of various sensors |
 |WS-7035, WS-7053, WS7054 | Temperature sensor 433MHz |
 |xavax | Remote control |
-||Remote sockets from serval brands|
 
 How to install
 ======

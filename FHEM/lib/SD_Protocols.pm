@@ -1,10 +1,10 @@
 ################################################################################
 #
 # The file is part of the SIGNALduino project
-# v3.5.x - https://github.com/RFD-FHEM/RFFHEM/tree/dev-r35-xFSK
+# v3.5.x - https://github.com/RFD-FHEM/RFFHEM
 #
 # 2016-2019  S.Butzek, Ralf9
-# 2019-2020  S.Butzek, HomeAutoUser, elektron-bbs
+# 2019-2021  S.Butzek, HomeAutoUser, elektron-bbs
 #
 ################################################################################
 package lib::SD_Protocols;
@@ -13,7 +13,7 @@ use strict;
 use warnings;
 use Carp qw(croak carp);
 use Digest::CRC;
-our $VERSION = '2.02';
+our $VERSION = '2.04';
 use Storable qw(dclone);
 use Scalar::Util qw(blessed);
 
@@ -1076,6 +1076,42 @@ sub postDemo_EM {
 }
 
 ############################# package lib::SD_Protocols, test exists
+=item postDemo_Revolt()
+
+This function checks the bit sequence. On an error in the CRC, it issues an output.
+
+Input:  $object,$name,@bit_msg
+Output:
+        (returncode = 0 on success, prepared message or undef)
+
+=cut
+
+sub postDemo_Revolt {
+  my $self    = shift // carp 'Not called within an object';
+  my $name    = shift // carp 'no $name provided';
+  my @bit_msg = @_;
+
+  my $protolength = scalar @bit_msg;
+  my $sum         = 0;
+
+  my $checksum = oct( '0b' . ( join "", @bit_msg[ 88 .. 95 ] ) );
+  $self->_logging( qq[lib/postDemo_Revolt, length=$protolength], 5 );
+  for ( my $b = 0 ; $b < 88 ; $b += 8 ) {
+    # build sum over first 11 bytes
+    $sum += oct( '0b' . ( join "", @bit_msg[ $b .. $b + 7 ] ) );
+  }
+  $sum = $sum & 0xFF;
+
+  if ($sum != $checksum) {
+    my $dmsg = lib::SD_Protocols::binStr2hexStr( join "", @bit_msg[ 0 .. 95 ] );
+    $self->_logging(qq[lib/postDemo_Revolt, ERROR checksum mismatch, $sum != $checksum in msg $dmsg], 3 );
+    return 0, undef;
+  }
+  my @new_bitmsg = splice @bit_msg, 0,88;
+  return 1, @new_bitmsg;
+}
+
+############################# package lib::SD_Protocols, test exists
 =item postDemo_FS20()
 
 This function checks the bit sequence. On an error in the CRC or no start, it issues an output.
@@ -1392,7 +1428,7 @@ sub postDemo_WS2000 {
       $self->_logging(qq[lib/postDemo_WS2000, Sensortyp $typ Adr $adr - ERROR check XOR],4);
     return (0, undef);
   } else {
-    if ($datalength < 45 || $datalength > 46) {                  # Summe pruefen, auﬂer Typ 1 ohne Summe
+    if ($datalength < 45 || $datalength > 46) {                  # Summe pruefen, auÔøΩer Typ 1 ohne Summe
       $data = oct( "0b".(join '', reverse @bit_msg[$dataindex .. $dataindex + 3]));
       if ($data != ($sum & 0x0F)) {
           $self->_logging(qq[lib/postDemo_WS2000, Sensortyp $typ Adr $adr - ERROR sum],4);
@@ -1707,6 +1743,47 @@ sub _xFSK_methods_behind_here {
   # only for functionslist - no function!
 }
 
+=item ConvBresser_5in1()
+
+This function checks number/count of set bits within bytes 14-25 and inverted data of 13 byte further.
+Delete inverted data (nibble 1-27)and reduce message length (nibble 53).
+
+Input:  $hexData
+Output: $hexData
+        scalar converted message on success 
+        or array (1,"Error message")
+
+=cut
+
+sub ConvBresser_5in1 {
+  my $self    = shift // carp 'Not called within an object';
+  my $hexData = shift // croak 'Error: called without $hexdata as input';
+  my $d2;
+  my $bit;
+  my $bitsumRef;
+  my $bitadd = 0;
+  my $hexLength = length ($hexData);
+
+  return ( 1, 'ConvBresser_5in1, hexData is to short' )
+    if ( $hexLength < 52 );  # check double, in def length_min set
+  
+  for (my $i = 0; $i < 13; $i++) {
+    $d2 = hex(substr($hexData,($i+13)*2,2));
+    return ( 1, qq[ConvBresser_5in1, inverted data at pos $i] ) if ((hex(substr($hexData,$i*2,2)) ^ $d2) != 255);
+    if ($i == 0) {
+      $bitsumRef = $d2;
+    }	else {
+  
+      while ($d2) {
+        $bitadd += $d2 & 1;
+        $d2 >>= 1;
+      }
+    }
+  }
+  return (1, qq[ConvBresser_5in1, checksumCalc:$bitadd != checksum:$bitsumRef ]  ) if ($bitadd != $bitsumRef);
+  return substr($hexData, 28, 24);
+}
+
 ############################# package lib::SD_Protocols, test exists
 =item ConvPCA301()
 
@@ -1774,19 +1851,30 @@ sub ConvKoppFreeControl {
   my $self    = shift // carp 'Not called within an object';
   my $hexData = shift // croak 'Error: called without $hexdata as input';
 
+  # kr07C2AD1A30CC0F0328
+  # ||  ||||  ||    ++-------- Transmitter Code 2
+  # ||  ||||  ++-------------- Keycode
+  # ||  ++++------------------ Transmitter Code 1
+  # ++------------------------ kr wird von der culfw bei Empfang einer Kopp Botschaft als Kennung gesendet
+  #
+  # right rawMSG  MN;D=07FA5E1721CC0F02FE000000000000;
+  # wrong rawMSG  MN;D=0A018200CA043A90;
+
   return ( 1,
 'ConvKoppFreeControl, Usage: Input #1, $hexData needs to be at least 4 chars long'
   ) if ( length($hexData) < 4 );    # check double, in def length_min set
 
   my $anz = hex( substr( $hexData, 0, 2 ) ) + 1;
+
+  return ( 1, 'ConvKoppFreeControl, hexData is to short' )
+    if ( length($hexData) < $anz * 2 );  # check double, in def length_min set
+
   my $blkck = 0xAA;
 
   for my $i ( 0 .. $anz - 1 ) {
     my $d = hex( substr( $hexData, $i * 2, 2 ) );
     $blkck ^= $d;
   }
-  return ( 1, 'ConvKoppFreeControl, hexData is to short' )
-    if ( length($hexData) < $anz * 2 );  # check double, in def length_min set
 
   my $checksum = hex( substr( $hexData, $anz * 2, 2 ) );
 
