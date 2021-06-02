@@ -1,3 +1,18 @@
+2021-06-02 - Hideki fix inverted message (#974)
+
+* Update SD_Protocols.pm
+
+ - fix https://github.com/RFD-FHEM/RFFHEM/issues/944
+
+* 02_mcBit2Hideki.t
+
+ - added test with inverted bitmessage
+ - test für spezielle Bitlänge 89 erstellt
+ - provide number of bits for test
+2021-05-31 - Merge branch 'master' into master_hideki_fix
+2021-05-31 - Update SD_Protocols.pm
+
+  * fix https://github.com/RFD-FHEM/RFFHEM/issues/944
 2021-05-28 - new protocol 108 for BRESSER 5-in-1 Weather Center, Bresser Professional Rain Gauge (#973)
 
 * Update 14_SD_WS.pm
@@ -9,7 +24,6 @@ not all tests are finished, need some more testdata
 - Fehlermeldung von bitsum auf checksum geändert
 - Prüfung auf Mindestlänge um Perl Warnings zu vermeiden
 - Berechnung der checksumme vereinfacht
-Co-authored-by: sidey79 <7968127+sidey79@users.noreply.github.com>
 2021-05-27 - SD_Protocols.pm
 
 - Fehlermeldung von bitsum auf checksum geändert
@@ -32,26 +46,24 @@ Co-authored-by: sidey79 <7968127+sidey79@users.noreply.github.com>
 * Update README.md
 
 2021-05-15 - FSK check msg length (#959)
-  before: check only min message length
-  after: chek min and max message lenght
+ * before: check only min message length
+ * after: chek min and max message lenght
 
 2021-04-30 - enable delete attribute rfmode
- - Added tests for delete and partial rfmode attr
- - Added exact match of rfmode instead of pattern matching
-   Co-authored-by: sidey79 <7968127+sidey79@users.noreply.github.com>
+ * Added tests for delete and partial rfmode attr
+ * Added exact match of rfmode instead of pattern matching
 
 2021-04-26 - delete attribute rfmode
-  00_SIGNALduinio.pm: Bugfix: "Rfmode" attribute could not be deleted.
+ * 00_SIGNALduinio.pm: Bugfix: "Rfmode" attribute could not be deleted.
 
 2021-04-25 - Revolt enhacement (#956)
-  SD_ProtocolData.pm: Feature: Added crc checksum verification to avoid autocrate on broken transmissions
-  SD_Protocols.pm: changed length 
+ * SD_ProtocolData.pm: Feature: Added crc checksum verification to avoid autocrate on broken transmissions
+ * SD_Protocols.pm: changed length 
 
 2021-04-10 - FSK optimization (#953)
-  More than one FSK protocol can also be received.
-  Method lib::SD_Protocols::... not strictly necessary.
-  Modified tests, to adapt new dispatch behaviour, which is independent from attribute rfmode
-  Co-authored-by: sidey79 <7968127+sidey79@users.noreply.github.com>
+ * More than one FSK protocol can also be received.
+ * Method lib::SD_Protocols::... not strictly necessary.
+ * Modified tests, to adapt new dispatch behaviour, which is independent from attribute rfmode
 
 2021-03-22 - 14_SD_BELL.pm - Adjusted little things (#937)
  * Update 14_SD_BELL.pm
