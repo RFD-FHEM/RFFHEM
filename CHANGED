@@ -1,3 +1,14 @@
+2021-06-02 - Hideki fix inverted message (#974)
+
+* Update SD_Protocols.pm
+
+ - fix https://github.com/RFD-FHEM/RFFHEM/issues/944
+
+* 02_mcBit2Hideki.t
+
+ - added test with inverted bitmessage
+ - test für spezielle Bitlänge 89 erstellt
+ - provide number of bits for test
 2021-05-31 - Merge branch 'master' into master_hideki_fix
 2021-05-31 - Update SD_Protocols.pm
 
