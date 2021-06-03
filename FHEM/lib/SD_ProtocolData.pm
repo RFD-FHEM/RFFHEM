@@ -87,7 +87,7 @@ package lib::SD_ProtocolData;
   use strict;
   use warnings;
 
-  our $VERSION = '1.27';
+  our $VERSION = '1.30';
 
   our %protocols = (
     "0" =>  ## various weather sensors (500 | 9100)
@@ -1316,9 +1316,9 @@ package lib::SD_ProtocolData;
         preamble         => 'r',
         clientmodule     => 'Revolt',
         modulematch      => '^r[A-Fa-f0-9]{22}',
-        length_min       => '84',
+        length_min       => '96',
         length_max       => '120',
-        postDemodulation => sub { my $self=shift;  my ($name, @bit_msg) = @_;  my @new_bitmsg = splice @bit_msg, 0,88;  return 1,@new_bitmsg; },
+        postDemodulation => \&lib::SD_Protocols::postDemo_Revolt,
       },
     "46"  =>  ## Tedsen Fernbedienungen u.a. für Berner Garagentorantrieb GA401 und Geiger Antriebstechnik Rolladensteuerung
               # https://github.com/RFD-FHEM/RFFHEM/issues/91
@@ -2833,7 +2833,53 @@ package lib::SD_ProtocolData;
         modulematch     => '^W106#',
         length_min      => '22',
         length_max      => '22',
-      }
+      },
+    "108" =>  ## BRESSER 5-in-1 Weather Center, Bresser Professional Rain Gauge - elektron-bbs 2021-05-02
+              # https://github.com/RFD-FHEM/RFFHEM/issues/607
+              # https://forum.fhem.de/index.php/topic,106594.msg1151467.html#msg1151467
+              # T: 11 H: 43 W: 1.7 R: 7.6     MN;D=E6837FD73FE8EFEFFEBC89FFFF197C8028C017101001437600000001;R=230;
+              # elektron-bbs
+              # T: 20.7 H: 28 W: 0.8 R: 354.4  MN;D=E7527FF78FF7EFF8FDD7BBCAFF18AD80087008100702284435000002;R=213;
+              # T: -2.8 H: 78 W: 0 R: 354.4    MN;D=E8527FFF2FFFEFD7FF87BBCAF717AD8000D000102800784435080000;R=214;
+              # T: 8 H: 88 W: 1.3 R: 364.8     MN;D=E6527FEB0FECEF7FFF77B7C9FF19AD8014F013108000884836000003;R=211;
+      {
+        name            => 'Bresser 5in1',
+        comment         => 'BRESSER 5-in-1 weather center, rain gauge',
+        id              => '108',
+        knownFreqs      => '868.35',
+        datarate        => '8.207',
+        sync            => '2DD4',
+        modulation      => '2-FSK',
+        rfmode          => 'Bresser_5in1',
+        register        => ['0001','0246','0306','042D','05D4','06FF','07C0','0802','0D21','0E65','0FE8','1088','114C','1202','1322','14F8','1551','1916','1B43','1C68'],
+        preamble        => 'W108#',
+        clientmodule    => 'SD_WS',
+        length_min      => '52',
+        method          => \&lib::SD_Protocols::ConvBresser_5in1,
+      },
+    "110" =>  # ADE WS1907 Wetterstation mit Funk-Regenmesser 
+              # https://github.com/RFD-FHEM/RFFHEM/issues/965 docolli 2021-05-14
+              # T: 16.3 R: 26.6   MU;P0=970;P1=-112;P2=516;P3=-984;P4=2577;P5=-2692;P6=7350;D=01234343450503450503434343434505034343434343434343434343434343434505050503450345034343434343450345050345034505034503456503434505050343434343450503450503434343434505034343434343434343434343434343434505050503450345034343434343450345050345034505034503456503;CP=0;R=12;O;
+              # T: 12.6 R: 80.8   MU;P0=7344;P1=384;P2=-31380;P3=272;P4=-972;P5=2581;P6=-2689;P7=990;D=12345454545676745676745454545456745454545456767676745454545454545676767456745456767674545454545674567674545456745454545606745456767674545454545676745676745454545456745454545456767676745454545454545676767456745456767674545454545674567674545456745454545606;CP=7;R=19;O;
+              # T: 11.8 R: 82.1   MU;P0=-5332;P1=6864;P2=-2678;P3=994;P4=-977;P5=2693;D=01234545232323454545454523234523234545454545234545454523452345232345454545454523232345452323454545454545454523452323454545452323454521234545232323454545454523234523234545454545234545454523452345232345454545454523232345452323454545454545454523452323454545;CP=3;R=248;O;
+              # The sensor sends about every 45 seconds.
+      {
+        name            => 'ADE_WS_1907',
+        comment         => 'Weather station with rain gauge',
+        id              => '110',
+        knownFreqs      => '433.92',
+        one             => [-3,1], # 2700,-900
+        zero            => [-1,3], # -900,2700
+        start           => [8],    # 7200
+        clockabs        => 900,
+        format          => 'twostate',
+        clientmodule    => 'SD_WS',
+        modulematch     => '^W110#',
+        preamble        => 'W110#',
+        reconstructBit   => '1',
+        length_min      => '65',
+        length_max      => '66',
+      },
     ########################################################################
     #### ###  register informations from other hardware protocols  #### ####
 

@@ -20,7 +20,7 @@ use warnings;
 my $missingModulSIGNALduino = '';
 
 use DevIo;
-require "99_Utils.pm";
+require "99_Utils.pm" if (!defined $modules{"Utils"} || !exists $modules{"Utils"}{"LOADED"} );
 use Carp;
 no warnings 'portable';
 
@@ -31,6 +31,7 @@ eval {use JSON;1 or $missingModulSIGNALduino .= 'JSON '};
 eval {use Scalar::Util qw(looks_like_number);1};
 eval {use Time::HiRes qw(gettimeofday);1} ;
 use lib::SD_Protocols;
+use List::Util qw(first);
 
 #$| = 1;    #Puffern abschalten, Hilfreich fuer PEARL WARNINGS Search
 
@@ -38,7 +39,7 @@ use lib::SD_Protocols;
 
 
 use constant {
-  SDUINO_VERSION                  => '3.5.2+20210305',
+  SDUINO_VERSION                  => '3.5.2+20210604',
   SDUINO_INIT_WAIT_XQ             => 1.5,     # wait disable device
   SDUINO_INIT_WAIT                => 2,
   SDUINO_INIT_MAXRETRY            => 3,
@@ -269,7 +270,7 @@ my %matchListSIGNALduino = (
 my %symbol_map = (one => 1 , zero =>0 ,sync => '', float=> 'F', 'start' => '');
 
 ## rfmode for attrib & supported rfmodes
-my @rfmode = ('KOPP_FC','Lacrosse_mode1','Lacrosse_mode2','Lacrosse_mode4','PCA301','SlowRF');
+my @rfmode = ('Bresser_5in1','KOPP_FC','Lacrosse_mode1','Lacrosse_mode2','Lacrosse_mode4','PCA301','SlowRF');
 
 ############################# package main
 sub SIGNALduino_Initialize {
@@ -2302,13 +2303,13 @@ sub SIGNALduino_Parse_MS {
 
   # Verify if extracted hash has the correct values:
   
-  my $clockidx = _limit_to_number($msg_parts{clockidx}) // $hash->{logMethod}->($hash->{name}, 3, qq[$hash->{name}: Parse_MS, faulty clock: $msg_parts{clockidx}])     &&  return ;      
-  my $syncidx  = _limit_to_number($msg_parts{syncidx})  // $hash->{logMethod}->($hash->{name}, 3, qq[$hash->{name}: Parse_MS, faulty sync: $msg_parts{syncidx}])       &&  return ;      
-  my $rawData  = _limit_to_number($msg_parts{rawData})  // $hash->{logMethod}->($hash->{name}, 3, qq[$hash->{name}: Parse_MS, faulty rawData D=: $msg_parts{rawData}]) &&  return ; 
+  my $clockidx = _limit_to_number($msg_parts{clockidx}) // $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: Parse_MS, faulty clock: $msg_parts{clockidx}])     &&  return ;      
+  my $syncidx  = _limit_to_number($msg_parts{syncidx})  // $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: Parse_MS, faulty sync: $msg_parts{syncidx}])       &&  return ;      
+  my $rawData  = _limit_to_number($msg_parts{rawData})  // $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: Parse_MS, faulty rawData D=: $msg_parts{rawData}]) &&  return ; 
   my $rssi;
   my $rssiStr= '';
   if ( defined $msg_parts{rssi} ){
-     $rssi = _limit_to_hex($msg_parts{rssi}) // $hash->{logMethod}->($hash->{name}, 3, qq[$hash->{name}: Parse_MS, faulty rssi R=: $msg_parts{rssi}]) &&  return ; 
+     $rssi = _limit_to_hex($msg_parts{rssi}) // $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: Parse_MS, faulty rssi R=: $msg_parts{rssi}]) &&  return ; 
     ($rssi,$rssiStr) = SIGNALduino_calcRSSI($rssi);
   };
   my $messagetype=$msg_parts{messagetype};
@@ -2507,12 +2508,12 @@ sub SIGNALduino_Parse_MU {
   my %msg_parts = SIGNALduino_Split_Message($rmsg, $hash->{NAME});
 
   # Verify if extracted hash has the correct values:
-  my $clockidx = _limit_to_number($msg_parts{clockidx}) // $hash->{logMethod}->($hash->{name}, 3, qq[$hash->{name}: Parse_MU, faulty clock: $msg_parts{clockidx}])     &&  return ;      
-  my $rawData  = _limit_to_number($msg_parts{rawData})  // $hash->{logMethod}->($hash->{name}, 3, qq[$hash->{name}: Parse_MI, faulty rawData D=: $msg_parts{rawData}]) &&  return ; 
+  my $clockidx = _limit_to_number($msg_parts{clockidx}) // $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: Parse_MU, faulty clock: $rmsg])     &&  return ;      
+  my $rawData  = _limit_to_number($msg_parts{rawData})  // $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: Parse_MU, faulty rawData D=: $msg_parts{rawData}]) &&  return ; 
   my $rssi;
   my $rssiStr= '';
   if ( defined $msg_parts{rssi} ){
-     $rssi = _limit_to_hex($msg_parts{rssi}) // $hash->{logMethod}->($hash->{name}, 3, qq[$hash->{name}: Parse_MU, faulty rssi R=: $msg_parts{rssi}]) &&  return ; 
+     $rssi = _limit_to_hex($msg_parts{rssi}) // $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: Parse_MU, faulty rssi R=: $msg_parts{rssi}]) &&  return ; 
     ($rssi,$rssiStr) = SIGNALduino_calcRSSI($rssi);
   };
   my $messagetype=$msg_parts{messagetype};
@@ -2739,13 +2740,13 @@ sub SIGNALduino_Parse_MC {
   my %msg_parts = SIGNALduino_Split_Message($rmsg, $hash->{NAME});
 
   # Verify if extracted hash has the correct values:
-  my $clock    = _limit_to_number($msg_parts{clockabs}) // $hash->{logMethod}->($hash->{name}, 3, qq[$hash->{name}: Parse_MC, faulty clock: $msg_parts{clockabs}])     &&  return ;      
-  my $mcbitnum = _limit_to_number($msg_parts{mcbitnum}) // $hash->{logMethod}->($hash->{name}, 3, qq[$hash->{name}: Parse_MC, faulty mcbitnum: $msg_parts{mcbitnum}])  &&  return ;      
-  my $rawData  = _limit_to_hex($msg_parts{rawData})     // $hash->{logMethod}->($hash->{name}, 3, qq[$hash->{name}: Parse_MC, faulty rawData D=: $msg_parts{rawData}]) &&  return ; 
+  my $clock    = _limit_to_number($msg_parts{clockabs}) // $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: Parse_MC, faulty clock: $msg_parts{clockabs}])     &&  return ;      
+  my $mcbitnum = _limit_to_number($msg_parts{mcbitnum}) // $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: Parse_MC, faulty mcbitnum: $msg_parts{mcbitnum}])  &&  return ;      
+  my $rawData  = _limit_to_hex($msg_parts{rawData})     // $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: Parse_MC, faulty rawData D=: $msg_parts{rawData}]) &&  return ; 
   my $rssi;
   my $rssiStr= '';
   if ( defined $msg_parts{rssi} ){
-     $rssi = _limit_to_hex($msg_parts{rssi}) // $hash->{logMethod}->($hash->{name}, 3, qq[$hash->{name}: Parse_MC, faulty rssi R=: $msg_parts{rssi}]) &&  return ; 
+     $rssi = _limit_to_hex($msg_parts{rssi}) // $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: Parse_MC, faulty rssi R=: $msg_parts{rssi}]) &&  return ; 
     ($rssi,$rssiStr) = SIGNALduino_calcRSSI($rssi);
   };
   my $messagetype=$msg_parts{messagetype};
@@ -2855,11 +2856,11 @@ sub SIGNALduino_Parse_MN {
   my %msg_parts = SIGNALduino_Split_Message($rmsg, $hash->{NAME});
 
   # Verify if extracted hash has the correct values:
-  my $rawData  = _limit_to_hex($msg_parts{rawData})     // $hash->{logMethod}->($hash->{name}, 3, qq[$hash->{name}: Parse_MN, faulty rawData D=: $msg_parts{rawData}]) &&  return ; 
+  my $rawData  = _limit_to_hex($msg_parts{rawData})     // $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: Parse_MN, faulty rawData D=: $msg_parts{rawData}]) &&  return ; 
   my $rssi;
   my $rssiStr= '';
   if ( defined $msg_parts{rssi} ){
-     $rssi = _limit_to_hex($msg_parts{rssi}) // $hash->{logMethod}->($hash->{name}, 3, qq[$hash->{name}: Parse_MN, faulty rssi R=: $msg_parts{rssi}]) &&  return ; 
+     $rssi = _limit_to_hex($msg_parts{rssi}) // $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: Parse_MN, faulty rssi R=: $msg_parts{rssi}]) &&  return ; 
     ($rssi,$rssiStr) = SIGNALduino_calcRSSI($rssi);
   };
   my $messagetype=$msg_parts{messagetype};
@@ -2867,11 +2868,9 @@ sub SIGNALduino_Parse_MN {
 
   my $dmsg;
 
-  my $hlen = length($rawData);
   my $match;
   my $modulation;
   my $message_dispatched=0;
-  my $rfmodeAttr = AttrVal($name,'rfmode','SlowRF');
 
   mnIDLoop:
   for my $id (@{$hash->{mnIdList}}) {
@@ -2879,18 +2878,11 @@ sub SIGNALduino_Parse_MN {
     if (!defined $rfmode) {
       $hash->{logMethod}->($name, 5, qq[$name: Parse_MN, Error! id $id has no rfmode. Please define it in file SD_ProtocolData.pm]);
       next mnIDLoop;
-    } elsif ($rfmode ne $rfmodeAttr) {
-      $hash->{logMethod}->($name, 5, qq[$name: Parse_MN, Error! id $id wrong rfmode (attribute $rfmodeAttr vs $rfmode)]);
-      next mnIDLoop;
     }
-    my $method = $hash->{protocolObject}->getProperty($id,'method');
-    if (!exists &$method || !defined &{ $method }) {
-      $hash->{logMethod}->($name, 5, qq[$name: Parse_MN, Error! id $id unknown function=$method. Please define it in file SD_ProtocolData.pm]);
-      next mnIDLoop; 
-    }
-    my $length_min=$hash->{protocolObject}->checkProperty($id,'length_min',-1);
-    if ($hlen < $length_min) {
-      $hash->{logMethod}->($name, 4, qq[$name: Parse_MN, Error! id $id msg=$rawData ($hlen) too short, min=$length_min]);
+
+    my ($rcode, $rtxt) = $hash->{protocolObject}->LengthInRange($id,length($rawData)); # Check message length
+    if (!$rcode) {
+      $hash->{logMethod}->($name, 4, qq[$name: Parse_MN, Error! id $id msg=$rawData, $rtxt]);
       next mnIDLoop;
     }
 
@@ -2901,17 +2893,21 @@ sub SIGNALduino_Parse_MN {
     } elsif (!defined($match) ) {
       $hash->{logMethod}->($name, 4, qq[$name: Parse_MN, Found $modulation Protocol id $id -> ].$hash->{protocolObject}->getProperty($id,'name'));
     } else {
+      $hash->{logMethod}->($name, 4, qq[$name: Parse_MN, $modulation Protocol id $id ].$hash->{protocolObject}->getProperty($id,'name').qq[ msg $rawData not match $match]);
       next mnIDLoop;
     }
 
-    my @methodReturn = $method->($hash->{protocolObject},$rawData);
-    if ($#methodReturn == 0) {
-      $hash->{logMethod}->($name, 4, qq[$name: Parse_MN, Decoded matched MN Protocol id $id dmsg=$methodReturn[0] $rssiStr]);
-      SIGNALduno_Dispatch($hash,$rmsg,$methodReturn[0],$rssi,$id);
-      $message_dispatched++;
-    } else {
+    my $method = $hash->{protocolObject}->getProperty($id,'method',undef);
+    my @methodReturn = defined $method ? $method->($hash->{protocolObject},$rawData) : ($rawData);
+    if ($#methodReturn != 0) {
       $hash->{logMethod}->($name, 4, qq{$name: Parse_MN, Error! method $methodReturn[1]});
+      next mnIDLoop;
     }
+    $dmsg = sprintf('%s%s',$hash->{protocolObject}->checkProperty($id,'preamble',''),$methodReturn[0]);
+    $hash->{logMethod}->($name, 5, qq[$name: Parse_MN, Decoded matched MN Protocol id $id dmsg=$dmsg $rssiStr]);
+    SIGNALduno_Dispatch($hash,$rmsg,$dmsg,$rssi,$id);
+    $message_dispatched++;
+    
   }
   return $message_dispatched;
 }
@@ -3161,18 +3157,18 @@ sub SIGNALduino_Attr(@) {
   ## Change rfmode
   elsif ($aName eq 'rfmode')          # change receive mode
   {
-    if (not grep /$aVal/, @rfmode) {
-      $hash->{logMethod}->($name, 1, "$name: Attr, $aName $aVal is not supported");
-      return 'ERROR: The rfmode is not supported';
-    }
-
-    if ($init_done) {
-      my $ret = main::SIGNALduino_Attr_rfmode($hash,$aVal);
-
-      if (defined $ret) {
-        return $ret;
-      } else {
-        $hash->{logMethod}->($name, 3, "$name: Attr, $aName switched to $aVal");
+    if( $cmd eq 'set' ) {
+      if (!first { $_ eq $aVal } @rfmode) {
+        $hash->{logMethod}->($name, 1, "$name: Attr, $aName $aVal is not supported");
+        return 'ERROR: The rfmode is not supported';
+      }
+      if ($init_done) {
+        my $ret = main::SIGNALduino_Attr_rfmode($hash,$aVal);
+        if (defined $ret) {
+          return $ret;
+        } else {
+          $hash->{logMethod}->($name, 3, "$name: Attr, $aName switched to $aVal");
+        }
       }
     }
   }
