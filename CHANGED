@@ -1,3 +1,8 @@
+2021-06-04 - some PerlCritic points - Update 14_SD_WS.pm (#976)
+
+* Update 14_SD_WS.pm
+
+ - revised hardTabs PerlCritic points & indentations
 2021-06-03 - Update 14_SD_WS.pm
 
  - revised hardTabs PerlCritic points & indentations
