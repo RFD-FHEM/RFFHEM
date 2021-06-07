@@ -87,7 +87,7 @@ package lib::SD_ProtocolData;
   use strict;
   use warnings;
 
-  our $VERSION = '1.30';
+  our $VERSION = '1.31';
 
   our %protocols = (
     "0" =>  ## various weather sensors (500 | 9100)
@@ -2884,6 +2884,27 @@ package lib::SD_ProtocolData;
         reconstructBit   => '1',
         length_min      => '65',
         length_max      => '66',
+      },
+    "111" =>  # Water Tank Level Monitor TS-FT002
+              # https://github.com/RFD-FHEM/RFFHEM/issues/977 docolli 2021-06-05
+              # MU;P0=-21110;P1=484;P2=-971;P3=-488;D=01213121212121213121312121312121213131312131313131212131313131312121212131313121313131213131313121213131312131313131313131313131212131312131312101213121212121213121312121312121213131312131313131212131313131312121212131313121313131213131313121213131312131;CP=1;R=26;O;
+      {
+        name            => 'TS-FT002',
+        comment         => 'Water tank level monitor with temperature',
+        id              => '111',
+        knownFreqs      => '433.92',
+        one             => [1,-2], # 480,-960
+        zero            => [1,-1], # 480,-480
+        start           => [-47],  # -22560
+        # start           => [-33],  # -15840
+        clockabs        => 480,
+        format          => 'twostate',
+        clientmodule    => 'SD_WS',
+        modulematch     => '^W111#',
+        preamble        => 'W111#',
+        reconstructBit   => '1', # wird nicht funktionieren, da High-Puls bei 0 und 1 gleich lang
+        length_min      => '71',
+        length_max      => '72',
       },
     ########################################################################
     #### ###  register informations from other hardware protocols  #### ####

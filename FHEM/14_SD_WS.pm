@@ -32,6 +32,7 @@
 # 01.05.2021 neues Protokoll 108: Bresser 5-in-1 Comfort Wetter Center, Profi Regenmesser
 # 15.05.2021 neues Protokoll 110: ADE WS1907 Weather station with rain gauge
 # 03.06.2021 PerlCritic - HardTabs durch Leerzeichen ersetzt & Einrueckungen sortiert (keine Code/Syntaxaenderung vorgenommen)
+# 06.06.2021 neues Protokoll 111: TS-FT002 Water tank level monitor with temperature
 
 package main;
 
@@ -39,8 +40,6 @@ package main;
 
 use strict;
 use warnings;
-# use Digest::CRC qw(crc);
-# use Data::Dumper;
 
 # Forward declarations
 sub SD_WS_LFSR_digest8_reflect($$$$);
@@ -85,6 +84,7 @@ sub SD_WS_Initialize($)
     "SD_WS_94_T.*"    => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4:Temp,", autocreateThreshold => "3:180"},
     'SD_WS_108.*'     => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4:Temp,', autocreateThreshold => '5:120'},
     'SD_WS_110_TR.*'  => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4:Temp,', autocreateThreshold => '3:180'},
+    'SD_WS_111_TL.*'   => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4:Temp,', autocreateThreshold => '3:600'},
   };
 
 }
@@ -117,12 +117,10 @@ sub SD_WS_Undef($$)
   return undef;
 }
 
-
 #############################
 sub SD_WS_Parse($$)
 {
   my ($iohash, $msg) = @_;
-  #my $rawData = substr($msg, 2);
   my $name = $iohash->{NAME};
   my $ioname = $iohash->{NAME};
   my ($protocol,$rawData) = split("#",$msg);
@@ -155,8 +153,10 @@ sub SD_WS_Parse($$)
   my $rawRainCounter;
   my $sendCounter;
   my $beep;
-
-  my %decodingSubs  = (
+  my $depth;
+  my $interval;
+  
+	my %decodingSubs  = (
     50 => # Protocol 50
      # FF550545FF9E
      # FF550541FF9A 
@@ -818,7 +818,46 @@ sub SD_WS_Parse($$)
                                 }
                               },
     },
+    111 => {
+        # TS-FT002 Water tank level monitor with temperature 
+        # 0         1         2         3         4         5         6         7         8
+        # 0    4    8    12   16   20   24   28   32   36   40   44   48   52   56   60   64   68   - 0  2  4  6  8  10 12 14 16
+        # 0101 1111 0101 1011 1000 1000 0110 0000 1111 0001 0001 0000 1100 0100 0000 0000 1100 1001 - 5F 5B 88 60 F1 10 C4 00 C9
+        # cccc cccc iiii iiii yyyy yyyy dddd dddd dddd bbbb tttt vvvv tttt tttt rrrr rrrr ssss ssss
+        # c:  8 bit Sync, always 0x5F
+        # i:  8 bit ID
+        # y:  8 bit Type, always 0x88
+        # d: 12 bit Depth, med, migh, low (value in hex = cm, fill with 5DC on invalid, range 0 - 15 m)
+        # b:  4 bit battery indicator, (0 = OK, any other value = low)
+        # v:  4 bit interval (bit 3 = 0 180 s, bit 3 = 1 30 s, bit 0-2 = 1 5 s)
+        # t: 12 bit temperature (offset by 400 and scaled by 10)
+        # r:  8 bit rain (not used in XC-0331 and TS-FT002)
+        # s:  8 bit XOR of values from bytes 0 to 7 = revesed byte 8
+        # all nibbles reversed, lsb first
+        sensortype => 'TS-FT002',
+        model      => 'SD_WS_111_TL',
+        prematch   => sub {return 1;}, # no precheck known
+        id         => sub {my ($rawData,undef) = @_; return substr($rawData,2,2);}, # long-id in hex
+        depth      => sub {my (undef,$bitData) = @_; return (SD_WS_bin2dec(reverse(substr($bitData,24,4))) * 16 + SD_WS_bin2dec(reverse(substr($bitData,28,4))) * 256 + SD_WS_bin2dec(reverse(substr($bitData,32,4))));},
+        bat        => sub {my (undef,$bitData) = @_; return substr($bitData,36,4) eq '0000' ? "ok" : "low";},
+        interval   => sub {my (undef,$bitData) = @_; return '180' if substr($bitData,44,4) eq '0000';
+                                                     return '30' if substr($bitData,44,4) eq '1000';
+                                                     return '5' if substr($bitData,44,4) eq '0111';
+                                                     return '0';
+                              },
+        temp       => sub {my (undef,$bitData) = @_; return ((SD_WS_bin2dec(reverse(substr($bitData,48,4))) * 16 + SD_WS_bin2dec(reverse(substr($bitData,52,4))) * 256 + SD_WS_bin2dec(reverse(substr($bitData,40,4))) - 400 ) / 10);},
+        crcok      => sub {return 1;},
+    },
   );
+
+  if ($protocol == 111) { # TS-FT002
+    if (substr($bitData,0,7) eq '1011111') { # Bit 0 at the beginning is missing
+      $bitData = '0' . substr($bitData,0,71);
+      Log3 $name, 4, "$name: SD_WS_Parse protocol $protocol, new bitData $bitData";
+      $rawData = lib::SD_Protocols::binStr2hexStr($bitData);
+      Log3 $name, 4, "$name: SD_WS_Parse protocol $protocol, new rawData $rawData";
+    }
+  }
 
   Log3 $name, 4, "$name: SD_WS_Parse protocol $protocol, rawData $rawData";
 
@@ -1142,12 +1181,13 @@ sub SD_WS_Parse($$)
     $rain_total = $decodingSubs{$protocol}{rain_total}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{rain_total}));
     $sendCounter = $decodingSubs{$protocol}{sendCounter}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{sendCounter}));
     $beep = $decodingSubs{$protocol}{beep}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{beep}));
-
+    $depth = $decodingSubs{$protocol}{depth}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{depth}));
     if ($model eq "SD_WS_33_T" || $model eq "SD_WS_58_T") {      # for SD_WS_33 or SD_WS_58 discrimination T - TH
       $model = $decodingSubs{$protocol}{model}."H" if $hum != 0; # for models with Humidity
     }
     $sendmode = $decodingSubs{$protocol}{sendmode}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{sendmode}));
     $trend = $decodingSubs{$protocol}{trend}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{trend}));
+    $interval = $decodingSubs{$protocol}{interval}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{interval}));
 
     Log3 $iohash, 4, "$name: SD_WS_Parse decoded protocol-id $protocol ($SensorTyp), sensor-id $id";
   }
@@ -1176,7 +1216,6 @@ sub SD_WS_Parse($$)
     $deviceCode = $model; # for sensors without channel
     $deviceCode .= '_' . $channel if (defined $channel);
   }
-  #print Dumper($modules{SD_WS}{defptr});
 
   my $def = $modules{SD_WS}{defptr}{$deviceCode};
   $def = $modules{SD_WS}{defptr}{$deviceCode} if(!$def);
@@ -1314,6 +1353,8 @@ sub SD_WS_Parse($$)
   readingsBulkUpdate($hash, "rawRainCounter", $rawRainCounter)  if (defined($rawRainCounter));
   readingsBulkUpdate($hash, "rain_total", $rain_total)  if (defined($rain_total));
   readingsBulkUpdate($hash, "sendCounter", $sendCounter)  if (defined($sendCounter));
+  readingsBulkUpdate($hash, "depth", $depth)  if (defined($depth));
+  readingsBulkUpdate($hash, "interval", $interval)  if (defined($interval));
   readingsEndUpdate($hash, 1); # Notify is done by Dispatch
 
   return $name;
