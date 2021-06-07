@@ -1,3 +1,10 @@
+2021-06-07 - Update doc - SD_ProtocolData.pm (#975)
+
+* Update SD_ProtocolData.pm
+
+ * added doc Normstahl Garage DOORS
+2021-06-04 - Update SD_ProtocolData.pm
+
 2021-06-04 - some PerlCritic points - Update 14_SD_WS.pm (#976)
 
 * Update 14_SD_WS.pm
@@ -10,6 +17,9 @@
 
 * Update SD_Protocols.pm
 
+ * added doc Normstahl Garage DOORS
+2021-06-02 - Hideki fix inverted message (#974)
+ * Update SD_Protocols.pm
  - fix https://github.com/RFD-FHEM/RFFHEM/issues/944
 
 * 02_mcBit2Hideki.t
@@ -17,7 +27,6 @@
  - added test with inverted bitmessage
  - test für spezielle Bitlänge 89 erstellt
  - provide number of bits for test
-2021-05-31 - Merge branch 'master' into master_hideki_fix
 2021-05-31 - Update SD_Protocols.pm
 
   * fix https://github.com/RFD-FHEM/RFFHEM/issues/944
@@ -37,7 +46,6 @@ not all tests are finished, need some more testdata
 - Fehlermeldung von bitsum auf checksum geändert
 - Prüfung auf Mindestlänge um Perl Warnings zu vermeiden
 - Berechnung der checksumme vereinfacht
-2021-05-27 - Merge branch 'master' into master_bresser5in1
 2021-05-27 - new protocol 108 for BRESSER 5-in-1 Weather Center and BRESSER Professional Rain Gauge
 
 2021-05-26 - PERL WARNING - Kopp Fix - https://github.com/RFD-FHEM/RFFHEM/issues/968 (#972)
