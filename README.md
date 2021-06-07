@@ -51,8 +51,11 @@ Supported Devices / Protocols
 |Heidemann, Heidemann HX, VTX-BELL | wireless bell |
 |Hoermann HSM2, HSM4, HS1-868-BS | Remote control |
 |JCHENG SECURITY | PIR Detector |
+|KoppFreeControl| Remotes and switches|
 |KRINNER Lumix, XM21-0| Remote control LED XMAS|
 |les led  | Remote controlled LED lamp |
+|Lacrosse Mode 1 / 30.3143.IT, 30.3144.IT, TX25-IT, TX27-IT, TX29-IT, TX29DTH-IT, TX37 | Weather sensors  |
+|Lacrosse Mode 2 / 30.3155WD, 30.3156WD, EMT7110, TX35-IT, TX35DTH-IT | Weather sensors  |
 |Livolo | Remote switches and sockets  |
 |MANAX MX-RCS250 | Remote control |
 |m-e VTX and BASIC | wireless bell |
@@ -63,10 +66,12 @@ Supported Devices / Protocols
 |Navaris 44344.04 | Touch light switch |
 |NC-3911, NC-3912 | Refrigerator thermometer |
 |Novy 840029, 840039 | Remote control |
+|Normstahl | Remote control for Garage DOORS |
 |Opus XT300 | Soil moisture sensor |
 |Oregon PIR sensor, NR868 | Motion sensor |
 |Oregon Scientific v2 and v3 Devices | Weather sensor |
 |LIBRA, LIDL, MANDOLYN, QUIGG | Remote control TR-502MSV (compatible GT-7008BS, GT-FSI-04, DMV-7008S, Powerfix RCB-I 3600) |
+|PCA 301 | Energy socket|
 |PT2262 and similar Devices | Remote switches like Intertechno V1+V3, Elro, door/window sensors|
 |Pollin 551227 | wireless bell |
 |RADEMACHER, Roto, Waeco | Remote control (HCS301 chip - only receive) |
