@@ -80,7 +80,7 @@ OREGON_Define($$)
   $modules{OREGON}{defptr}{$code} = $hash;
   AssignIoPort($hash);
 
-  return undef;
+  return ;
 }
 
 #####################################
@@ -89,7 +89,7 @@ OREGON_Undef($$)
 {
   my ($hash, $name) = @_;
   delete($modules{OREGON}{defptr}{$name});
-  return undef;
+  return ;
 }
 
 
