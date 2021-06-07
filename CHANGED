@@ -1,3 +1,11 @@
+2021-06-07 - Fix Multiple Send delay (#941)
+
+* Multiple set commands are not processed
+Fixes #823  for firmware 3.4.0 without delay
+
+2021-06-07 - 00_SIGNALduino.pm
+
+Version updated to current date
 2021-06-07 - Update doc - SD_ProtocolData.pm (#975)
 
 * Update SD_ProtocolData.pm
