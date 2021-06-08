@@ -87,7 +87,7 @@ package lib::SD_ProtocolData;
   use strict;
   use warnings;
 
-  our $VERSION = '1.30';
+  our $VERSION = '1.31';
 
   our %protocols = (
     "0" =>  ## various weather sensors (500 | 9100)
