@@ -1,3 +1,6 @@
+2021-06-08 - Update SD_ProtocolData.pm
+
+ * added AVANTEK DB-LE
 2021-06-07 - Fix Multiple Send delay (#941)
 
 * Multiple set commands are not processed
