@@ -1,6 +1,6 @@
-# $Id: 00_SIGNALduino.pm v3.5.1 2020-07-02 21:20:33Z Sidey $
+# $Id: 00_SIGNALduino.pm v3.5.2 2020-07-02 21:20:33Z Sidey $
 #
-# v3.5.1 - https://github.com/RFD-FHEM/RFFHEM/tree/master
+# v3.5.2 - https://github.com/RFD-FHEM/RFFHEM/tree/master
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incoming messages
 # see http://www.fhemwiki.de/wiki/SIGNALDuino
 # It was modified also to provide support for raw message handling which can be send from the SIGNALduino
@@ -39,7 +39,7 @@ use List::Util qw(first);
 
 
 use constant {
-  SDUINO_VERSION                  => '3.5.2+20210607',
+  SDUINO_VERSION                  => '3.5.2+20210608',
   SDUINO_INIT_WAIT_XQ             => 1.5,     # wait disable device
   SDUINO_INIT_WAIT                => 2,
   SDUINO_INIT_MAXRETRY            => 3,
@@ -270,7 +270,7 @@ my %matchListSIGNALduino = (
 my %symbol_map = (one => 1 , zero =>0 ,sync => '', float=> 'F', 'start' => '');
 
 ## rfmode for attrib & supported rfmodes
-my @rfmode = ('Bresser_5in1','KOPP_FC','Lacrosse_mode1','Lacrosse_mode2','Lacrosse_mode4','PCA301','SlowRF');
+my @rfmode = ('Avantek','Bresser_5in1','KOPP_FC','Lacrosse_mode1','Lacrosse_mode2','Lacrosse_mode4','PCA301','SlowRF');
 
 ############################# package main
 sub SIGNALduino_Initialize {
