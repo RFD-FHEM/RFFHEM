@@ -2885,6 +2885,29 @@ package lib::SD_ProtocolData;
         length_min      => '65',
         length_max      => '66',
       },
+
+    # "111" => reserved @elektron-bbs
+
+    "112" =>  ## AVANTEK DB-LE
+              # Wireless doorbell & LED night light
+              # FSK SIGNAL with Preambel: 55555421a4230452110 | MN;D=42304521121C53AF;R=54;
+              # Sample: 20 Microseconds | 3 Repeats with ca. 1,57ms Pause
+              # !!! receiver hardware is required to complete in SD_BELL module !!!
+      {
+        name            => 'Avantek',
+        comment         => 'Wireless doorbell & LED night light',
+        id              => '112',
+        knownFreqs      => '433.3',
+        datarate        => '50.087',
+        sync            => '421A',
+        modulation      => '2-FSK',
+        rfmode          => 'Avantek',
+        register        => ['0001','0246','0301','0442','051A','06FF','0784','0802','0D10','0EAA','0F56','108A','11F9','1202','1322','14F8','1553','1916','1B43','1C40','20FB','2156','2210'],
+        preamble        => 'u112#',
+        #clientmodule    => 'SD_BELL',
+        length_min      => '16',
+        length_max      => '16',
+      },
     ########################################################################
     #### ###  register informations from other hardware protocols  #### ####
 
