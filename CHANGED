@@ -1,3 +1,7 @@
+2021-06-12 - Changes to protocol 111
+
+update SD_ProtocolData.pm
+update 14_SD_WS.pm
 2021-06-07 - new protocol 11 for: TS-FT002 water tank level monitor with temperature
 2021-06-07 - Update doc - SD_ProtocolData.pm (#975)
 
