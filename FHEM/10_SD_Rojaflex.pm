@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 10_SD_Rojaflex.pm 3 2021-05-30 16:00:00Z elektron-bbs $
+# $Id: 10_SD_Rojaflex.pm 4 2021-06-14 16:00:00Z elektron-bbs $
 #
 
 package SD_Rojaflex;
@@ -8,7 +8,7 @@ use strict;
 use warnings;
 use GPUtils qw(GP_Import GP_Export);
 
-our $VERSION = '0.3';
+our $VERSION = '0.4';
 
 GP_Export(qw(
 	Initialize
@@ -43,6 +43,8 @@ my %codes = (
 	'0' => 'stop',
 	'1' => 'up',
 	'8' => 'down',
+	'9' => 'savefav',
+	'd' => 'gotofav',
 );
 
 sub Initialize {
@@ -71,7 +73,7 @@ sub Initialize {
 
 sub Attr {
 	my ( $cmd, $name, $attrName, $attrValue ) = @_;
-	# $cmd  - Vorgangsart, kann die Werte "del" (loeschen) oder "set" (setzen) annehmen
+	# $cmd - Vorgangsart, kann die Werte "del" (loeschen) oder "set" (setzen) annehmen
 	# $name - Geraetename
 	# $attrName - Attribut-Name
 	# $attrValue - Attribut-Wert
@@ -87,9 +89,21 @@ sub Attr {
 			if ($attrValue ne $oldinvers) {
 				my $pct = ReadingsVal($name, 'pct', 0);
 				$pct = 100 - $pct;
+				my $cpos = ReadingsVal($name, 'cpos', 0);
+				$cpos = 100 - $cpos;
+				my $tpos = ReadingsVal($name, 'tpos', 0);
+				$tpos = 100 - $tpos;
+				my $state;
+				$state = $pct if ($pct > 0 && $pct < 100);
+				$state = 'down' if (ReadingsVal($name, 'state', 0) eq 'up');
+				$state = 'up' if (ReadingsVal($name, 'state', 0) eq 'down');
+				$state = 'closed' if (ReadingsVal($name, 'state', 0) eq 'open');
+				$state = 'open' if (ReadingsVal($name, 'state', 0) eq 'closed');
 				readingsBeginUpdate($hash);
 				readingsBulkUpdate($hash, 'pct', $pct, 1);
-				readingsBulkUpdate($hash, 'state', $pct, 1) if ($pct > 0 && $pct < 100);
+				readingsBulkUpdate($hash, 'cpos', $cpos, 1);
+				readingsBulkUpdate($hash, 'tpos', $tpos, 1);
+				readingsBulkUpdate($hash, 'state', $state, 1);
 				readingsEndUpdate($hash, 1);
 			}
 		}
@@ -111,10 +125,12 @@ sub Set {
 	my $cmd = $a[0];
 	my $state;
 	my $motor = ReadingsVal($name, 'motor', 'stop');
-	my $cpos  = ReadingsVal($name, 'cpos', 50);
-	$cpos = 100 - $cpos if (AttrVal($name,'inversePosition',0) eq '1'); # inverse position
+	my $cpos = ReadingsVal($name, 'cpos', 50);
 	my $tpos = ReadingsVal($name, 'tpos', 50);
-	$tpos = 100 - $tpos if (AttrVal($name,'inversePosition',0) eq '1'); # inverse position
+	if (AttrVal($name,'inversePosition',0) eq '1') {
+		$cpos = 100 - $cpos; # inverse position
+		$tpos = 100 - $tpos; # inverse position
+	}
 
 	return "$name, no set value specified" if ($na < 1);
 	return "Dummydevice $hash->{NAME}: will not set data" if (IsDummy($hash->{NAME}));
@@ -123,6 +139,8 @@ sub Set {
 		$ret .= 'down:noArg ' if defined(ReadingsVal($name, 'MsgDown', undef));
 		$ret .= 'stop:noArg ' if defined(ReadingsVal($name, 'MsgStop', undef));
 		$ret .= 'up:noArg ' if defined(ReadingsVal($name, 'MsgUp', undef));
+		$ret .= 'savefav:noArg ' if defined(ReadingsVal($name, 'MsgSave', undef));
+		$ret .= 'gotofav:noArg ' if defined(ReadingsVal($name, 'MsgGoto', undef));
 		# $ret .= 'pct:slider,0,1,100' if (defined(ReadingsVal($name, 'MsgDown', undef)) && defined(ReadingsVal($name, 'MsgStop', undef)) && defined(ReadingsVal($name, 'MsgUp', undef)));
 		$ret .= 'pct:0,10,20,30,40,50,60,70,80,90,100' if (defined(ReadingsVal($name, 'MsgDown', undef)) && defined(ReadingsVal($name, 'MsgStop', undef)) && defined(ReadingsVal($name, 'MsgUp', undef)));
 		return $ret; # return setlist
@@ -130,26 +148,32 @@ sub Set {
 
 	if ($cmd eq 'pct') {
 		if ($na > 1) { # 0 = open ,100 = closed
-			my $timeToClose = AttrVal($name,'timeToClose',30);
-			my $timeToOpen = AttrVal($name,'timeToOpen',30);
 			my $tmp = $a[1];
 			$tmp = 100 - $tmp if (AttrVal($name,'inversePosition',0) eq '1'); # inverse position
-			$tpos = $tmp;
-			$cmd = 'up' if ($tmp eq '0'); # Fahr hoch
-			$cmd = 'down' if ($tmp eq '100'); # Fahr runter
-			Log3 $name, 3, "$ioname: SD_Rojaflex set $name pct $tmp";
-			if($tmp > 0 && $tmp < 100) {
+			if ($tmp != $cpos) {
+				$tpos = $tmp;
+				my $timeToClose = AttrVal($name,'timeToClose',30);
+				my $timeToOpen = AttrVal($name,'timeToOpen',30);
+				# $cmd = 'up' if ($tmp eq '0'); # Fahr hoch
+				# $cmd = 'down' if ($tmp eq '100'); # Fahr runter
+				Log3 $name, 3, "$ioname: SD_Rojaflex set $name pct $tmp";
+				# if($tmp > 0 && $tmp < 100) {
 				my $duration;
-				if($tmp > ($cpos + 1)) { # Rolladen steht höher soll position
+				if ($tmp > $cpos) { # Rolladen steht höher soll position
+				# if($tmp > ($cpos + 1)) { # Rolladen steht höher soll position
 					$cmd = 'down'; # Fahr runter
 					$duration = ($tmp - $cpos) * $timeToClose / 100;
 				}
-				if($cpos > ($tmp + 1)) { # Rolladen steht niedriger soll position
-				  $cmd = 'up';# Fahr hoch
+				if ($tmp < $cpos) { # Rolladen steht niedriger soll position
+				# if($cpos > ($tmp + 1)) { # Rolladen steht niedriger soll position
+					$cmd = 'up';# Fahr hoch
 					$duration = ($cpos - $tmp) * $timeToOpen / 100;
 				}
 				Log3 $name, 4, "$ioname: SD_Rojaflex set $name duration running time $duration s";
 				InternalTimer( (gettimeofday() + $duration), \&SD_Rojaflex_pctStop, $name );
+			# }
+			} else {
+				$cmd = 'stop';
 			}
 		} else {
 			$cmd = 'stop';
@@ -160,6 +184,8 @@ sub Set {
 	push @setCodesAr,'down' if defined(ReadingsVal($name, 'MsgDown', undef));
 	push @setCodesAr,'stop' if defined(ReadingsVal($name, 'MsgStop', undef));
 	push @setCodesAr,'up' if defined(ReadingsVal($name, 'MsgUp', undef));
+	push @setCodesAr,'savefav' if defined(ReadingsVal($name, 'MsgSave', undef));
+	push @setCodesAr,'gotofav' if defined(ReadingsVal($name, 'MsgGoto', undef));
 
 	if (scalar @setCodesAr > 1) {
 		if (grep {/$cmd/xms} @setCodesAr) { # Code vorhanden
@@ -167,6 +193,8 @@ sub Set {
 			$msg .= ReadingsVal($name, 'MsgDown', undef) if ($cmd eq 'down');
 			$msg .= ReadingsVal($name, 'MsgStop', undef) if ($cmd eq 'stop');
 			$msg .= ReadingsVal($name, 'MsgUp', undef) if ($cmd eq 'up');
+			$msg .= ReadingsVal($name, 'MsgSave', undef) if ($cmd eq 'savefav');
+			$msg .= ReadingsVal($name, 'MsgGoto', undef) if ($cmd eq 'gotofav');
 			$msg .= ';';
 			for my $i (1 .. AttrVal($name, 'repetition', 1)) {
 				# Eine Wiederholung erfolgt bei der Fernbedienung nach 3,5 mS, so ist der Abstand groesser
@@ -175,18 +203,26 @@ sub Set {
 
 			# Calculate target position and motor state
 			if($cmd eq 'down') {
-				$tpos  = '100' if ($na == 1); # nicht bei "set pct xx"
+				$tpos = '100' if ($na == 1); # nicht bei "set pct xx"
 				$motor = 'down' if ($cpos ne $tpos); # Wenn nicht schon unten.
 				$motor = 'stop' if ($cpos eq $tpos); # Wenn unten.
 			}
 			if($cmd eq 'up') {
 				$tpos = '0' if ($na == 1); # nicht bei "set pct xx"
-				$motor = 'up'   if ($cpos ne $tpos); # Wenn nicht schon oben.
+				$motor = 'up' if ($cpos ne $tpos); # Wenn nicht schon oben.
 				$motor = 'stop' if ($cpos eq $tpos); # Wenn oben.
 			}
 			if($cmd eq 'stop') {
 				# $tpos = $cpos;
 				$motor = 'stop';
+			}
+			if($cmd eq 'savefav') {
+				# $tpos = $cpos;
+				$motor = 'stop';
+			}
+			if($cmd eq 'gotofav') {
+				# $tpos = $cpos;
+				$motor = 'run';
 			}
 
 			# Wenn keine PositionUpdates vom Motor kommen, setze gleich die finale Position
@@ -205,7 +241,7 @@ sub Set {
 			$state = $cmd;
 			Log3 $name, 3, "$ioname: SD_Rojaflex set $name $state";
 		} else {
-			if ($cmd eq 'down' || $cmd eq 'stop' || $cmd eq 'up') {
+			if ($cmd eq 'down' || $cmd eq 'stop' || $cmd eq 'up' || $cmd eq 'savefav' || $cmd eq 'gotofav') {
 				$state = "command still unknown, press the button \"$cmd\" on the remote control";
 				Log3 $name, 3, "$ioname: $name, $state";
 			} else {
@@ -303,20 +339,25 @@ sub Parse {
 	my $MsgDown;
 	my $MsgStop;
 	my $MsgUp;
-	my $cmd = substr($rawData,10,1); # (0x0 = stop, 0x1 = up,0x8 = down, 0xE = Request)
+	my $MsgSave;
+	my $MsgGoto;
+	my $cmd = substr($rawData,10,1); # (0x0 = stop, 0x1 = up,0x8 = down, 0xE = Request, 0x9 = save/clear Pos, 0xD = goto Pos)
 	my $dev = substr($rawData,11,1); # (0xA = remote control, 0x5 = tubular motor)
-
 	my $motor = ReadingsVal($name, 'motor', 'stop');
-	my $cpos  = ReadingsVal($name, 'cpos', 50);
-	$cpos = 100 - $cpos if (AttrVal($name,'inversePosition',0) eq '1'); # inverse position
+	my $cpos = ReadingsVal($name, 'cpos', 50);
 	my $tpos = ReadingsVal($name, 'tpos', 50);
-	$tpos = 100 - $tpos if (AttrVal($name,'inversePosition',0) eq '1'); # inverse position
+	if (AttrVal($name,'inversePosition',0) eq '1') {
+		$cpos = 100 - $cpos; # inverse position
+		$tpos = 100 - $tpos; # inverse position
+	}
 
 	if ($dev eq 'A') { # remote control
 		$state = $codes{$cmd};
 		$MsgDown = ReadingsVal($name, 'MsgDown', undef) if ($cmd eq '8');
 		$MsgStop = ReadingsVal($name, 'MsgStop', undef) if ($cmd eq '0');
-		$MsgUp   = ReadingsVal($name, 'MsgUp',   undef) if ($cmd eq '1');
+		$MsgUp = ReadingsVal($name, 'MsgUp', undef) if ($cmd eq '1');
+		$MsgSave = ReadingsVal($name, 'MsgSave', undef) if ($cmd eq '9');
+		$MsgGoto = ReadingsVal($name, 'MsgGoto', undef) if ($cmd eq 'D');
 		
 		# Calculate target position and motor state
 		if($cmd eq '8') { # down
@@ -326,7 +367,7 @@ sub Parse {
 		}
 		if($cmd eq '1') { # up
 			$tpos = '0';
-			$motor = 'up'   if ($cpos ne $tpos); #Wenn nicht schon oben
+			$motor = 'up' if ($cpos ne $tpos); #Wenn nicht schon oben
 			$motor = 'stop' if ($cpos eq $tpos); #Wenn oben
 		}
 		if($cmd eq '0') { # stop
@@ -351,8 +392,10 @@ sub Parse {
 		# }
 	}
 	
-	$cpos = 100 - $cpos if (AttrVal($name,'inversePosition',0) eq '1'); # inverse position
-	$tpos = 100 - $tpos if (AttrVal($name,'inversePosition',0) eq '1'); # inverse position
+	if (AttrVal($name,'inversePosition',0) eq '1') {
+		$cpos = 100 - $cpos; # inverse position
+		$tpos = 100 - $tpos; # inverse position
+	}
 	
 	readingsBeginUpdate($hash);
 	readingsBulkUpdate($hash, 'state', $state) if (defined $state);
@@ -362,6 +405,8 @@ sub Parse {
 		readingsBulkUpdate($hash, 'MsgDown', $rawData, 0) if ($cmd eq '8' && !defined $MsgDown);
 		readingsBulkUpdate($hash, 'MsgStop', $rawData, 0) if ($cmd eq '0' && !defined $MsgStop);
 		readingsBulkUpdate($hash, 'MsgUp', $rawData, 0) if ($cmd eq '1' && !defined $MsgUp);
+		readingsBulkUpdate($hash, 'MsgSave', $rawData, 0) if ($cmd eq '9' && !defined $MsgSave);
+		readingsBulkUpdate($hash, 'MsgGoto', $rawData, 0) if ($cmd eq 'D' && !defined $MsgGoto);
 	}
 	if ($dev eq '5') { # tubular motor
 		readingsBulkUpdate($hash, 'pct', $cpos) if (defined $cpos);
@@ -413,6 +458,9 @@ __END__
 			<li>down</li>
 			<li>up</li>
 			<li>stop</li>
+			<li>pct</li>
+			<li>gotofav</li>
+			<li>savefav</li>
 		</ul>
 		<br><br>
 	</ul>
@@ -436,7 +484,7 @@ __END__
 <a name="SD_Rojaflex"></a>
 <h3>SD_Rojaflex</h3>
 <ul>
-	Das SD_Rojaflex-Modul entschl&uuml;sselt und sendet Nachrichten vom Typ Rojaflex, die vom SIGNALduino verarbeitet werden.
+	Das SD_Rojaflex-Modul entschl&uuml;sselt und sendet Nachrichten, die vom SIGNALduino verarbeitet werden.
 	Unterst&uuml;tzt werden z.Z. folgende Typen: Rojaflex HSR-1, HSR-5, HSR-15, HSTR-5, HSTR-15, RHSM1.
 	<br><br>
 
@@ -461,10 +509,14 @@ __END__
 		<code>&lt;value&gt;</code> kann einer der folgenden Werte sein:<br>
 		<ul>
 			<li>down</li>
-			<li>up</li>
+			<li>gotofav</li>
+			<li>pct</li>
+			<li>savefav</li>
 			<li>stop</li>
+			<li>up</li>
 		</ul>
-		Optional kann mit &lt;anz&gt; die Anzahl der Wiederholungen im Bereich von 1 bis 9 angegeben werden.
+		Optional kann mit &lt;anz&gt; die Anzahl der Wiederholungen im Bereich von 1 bis 9 angegeben werden.<br>
+		Bei <code>&lt;pct&gt;</code> kann als Zielposition aus einer Dropdown-Liste ein prozentualer Wert gewählt werden.
 	</ul>
 	<br><br>
 
@@ -495,6 +547,8 @@ __END__
 		<li>MsgDown - Nachricht, die bei set down gesendet wird.</li>
 		<li>MsgStop - Nachricht, die bei set stop gesendet wird.</li>
 		<li>MsgUp - Nachricht, die bei set up gesendet wird.</li>
+		<li>MsgGoto - Nachricht, die bei set gotofav gesendet wird.</li>
+		<li>MsgSave - Nachricht, die bei set savefav gesendet wird.</li>
 		<li>cpos - aktuelle Position in Prozent</li>
 		<li>motor - Zustand des Antriebes</li>
 		<li>pct - aktuelle Position in Prozent</li>
