@@ -1,3 +1,9 @@
+2021-06-14 - Update
+
+SD_ProtocolData.pm
+  change reg 0x00, 0x07
+10_SD_Rojaflex.pm
+  add set savefav, gotofav
 2021-05-30 - Update 10_SD_Rojaflex.pm
 
 Extension for approaching intermediate positions.
