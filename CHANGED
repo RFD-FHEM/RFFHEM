@@ -1,3 +1,7 @@
+2021-06-15 - Update SD_ProtocolData.pm
+
+ * revised comments
+ * optimized parameters
 2021-06-08 - AVANTEK reception added
 * Update 00_SIGNALduino.pm
  - added AVANTEK rfmode
