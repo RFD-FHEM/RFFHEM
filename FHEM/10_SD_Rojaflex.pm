@@ -44,7 +44,7 @@ my %codes = (
 	'1' => 'up',
 	'8' => 'down',
 	'9' => 'savefav',
-	'd' => 'gotofav',
+	'D' => 'gotofav',
 );
 
 sub Initialize {
