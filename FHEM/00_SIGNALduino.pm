@@ -39,7 +39,7 @@ use List::Util qw(first);
 
 
 use constant {
-  SDUINO_VERSION                  => '3.5.1+20210504',
+  SDUINO_VERSION                  => '3.5.2+20210607',
   SDUINO_INIT_WAIT_XQ             => 1.5,     # wait disable device
   SDUINO_INIT_WAIT                => 2,
   SDUINO_INIT_MAXRETRY            => 3,
@@ -272,7 +272,7 @@ my %matchListSIGNALduino = (
 my %symbol_map = (one => 1 , zero =>0 ,sync => '', float=> 'F', 'start' => '');
 
 ## rfmode for attrib & supported rfmodes
-my @rfmode = ('KOPP_FC','Lacrosse_mode1','Lacrosse_mode2','Lacrosse_mode4','PCA301','Rojaflex','SlowRF');
+my @rfmode = ('Bresser_5in1','KOPP_FC','Lacrosse_mode1','Lacrosse_mode2','Lacrosse_mode4','PCA301','Rojaflex','SlowRF');
 
 ############################# package main
 sub SIGNALduino_Initialize {
@@ -1266,10 +1266,14 @@ sub SIGNALduino_CheckSendRawResponse {
     my $name=$hash->{NAME};
     # zu testen der sendeQueue, kann wenn es funktioniert auf verbose 5
     $hash->{logMethod}->($name, 4, "$name: CheckSendrawResponse, sendraw answer: $msg");
-    #RemoveInternalTimer("HandleWriteQueue:$name");
     delete($hash->{ucCmd});
-    #SIGNALduino_HandleWriteQueue("x:$name"); # Todo #823 on github
-    InternalTimer(gettimeofday() + 0.1, \&SIGNALduino_HandleWriteQueue, "HandleWriteQueue:$name") if (scalar @{$hash->{QUEUE}} > 0 && InternalVal($name,'sendworking',0) == 0);
+    if ($msg =~ /D=[A-Za-z0-9]+;/ )
+    {
+      RemoveInternalTimer("HandleWriteQueue:$name");
+      SIGNALduino_HandleWriteQueue("x:$name"); # Todo #823 on github
+    } else {
+      InternalTimer(gettimeofday() , \&SIGNALduino_HandleWriteQueue, "HandleWriteQueue:$name") if (scalar @{$hash->{QUEUE}} > 0 && InternalVal($name,'sendworking',0) == 0);
+    }
   }
   return (undef);
 }
@@ -1622,7 +1626,7 @@ sub SIGNALduino_AddSendQueue {
   #SIGNALduino_Log3 $hash , 5, Dumper($hash->{QUEUE});
 
   $hash->{logMethod}->($hash, 5,"$name: AddSendQueue, " . $hash->{NAME} . ": $msg (" . @{$hash->{QUEUE}} . ')');
-  InternalTimer(gettimeofday() + 0.1, \&SIGNALduino_HandleWriteQueue, "HandleWriteQueue:$name") if (scalar @{$hash->{QUEUE}} == 1 && InternalVal($name,'sendworking',0) == 0);
+  InternalTimer(gettimeofday(), \&SIGNALduino_HandleWriteQueue, "HandleWriteQueue:$name") if (scalar @{$hash->{QUEUE}} == 1 && InternalVal($name,'sendworking',0) == 0);
 }
 
 ############################# package main, test exists
@@ -1812,9 +1816,11 @@ sub SIGNALduino_Read {
             $hash->{logMethod}->($name, 5, "$name: Read, try asyncOutput of message $returnMessage");
             my $ao = undef;
             $ao = asyncOutput( $hash->{ucCmd}->{asyncOut}, $hash->{ucCmd}->{cmd}.': ' . $returnMessage ) if (defined($returnMessage));
-          $hash->{logMethod}->($name, 5, "$name: Read, asyncOutput failed $ao") if (defined($ao));
+            $hash->{logMethod}->($name, 5, "$name: Read, asyncOutput failed $ao") if (defined($ao));
           }
-          delete($hash->{ucCmd});
+          if ( exists $hash->{ucCmd} && defined $hash->{ucCmd}->{cmd} &&  $hash->{ucCmd}->{cmd} ne "sendraw" ) {
+            delete $hash->{ucCmd} ;
+          }
         }
 
         if (exists($hash->{keepalive})) {
@@ -2864,7 +2870,6 @@ sub SIGNALduino_Parse_MN {
 
   my $dmsg;
 
-  my $hlen = length($rawData);
   my $match;
   my $modulation;
   my $message_dispatched=0;
@@ -2876,9 +2881,10 @@ sub SIGNALduino_Parse_MN {
       $hash->{logMethod}->($name, 5, qq[$name: Parse_MN, Error! id $id has no rfmode. Please define it in file SD_ProtocolData.pm]);
       next mnIDLoop;
     }
-    my $length_min=$hash->{protocolObject}->checkProperty($id,'length_min',-1);
-    if ($hlen < $length_min) {
-      $hash->{logMethod}->($name, 4, qq[$name: Parse_MN, Error! id $id msg=$rawData ($hlen) too short, min=$length_min]);
+
+    my ($rcode, $rtxt) = $hash->{protocolObject}->LengthInRange($id,length($rawData)); # Check message length
+    if (!$rcode) {
+      $hash->{logMethod}->($name, 4, qq[$name: Parse_MN, Error! id $id msg=$rawData, $rtxt]);
       next mnIDLoop;
     }
 

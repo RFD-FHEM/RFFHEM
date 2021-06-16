@@ -12,15 +12,17 @@ Supported Devices / Protocols
 
 |Device | Function|
 | ------------- | ----------- |
+|ADE WS1907 | Weather station with rain gauge |
 |AC114-01B | Remote control |
-|BeSmart S4 | Remote control |
 |Ambient Weather F007T, F007TP, F007TH | Thermo-Hygrometer, Thermometer |
 |Arduino Sensor | multi purpose sensor based on arduino |
 |Atlantic Security | some sensors (MD-210R / MD_230R / MD-2018R / MD-2003R) |
 |Auriol IAN 60107, 114324, 275901, 283582, 297514, 314695 (Lidl) | Weather station |
+|BeSmart S4 | Remote control |
 |BF-301 | Remote control|
 |benon (Semexo OHG) | Remote control (BH-P)|
 |BOSCH / Neff / Refsta Topdraft | Remote control (SF01 01319004, SF01 01319004 v2)|
+|BRESSER 5-in-1, Professional Rain Gauge, TemeoTrend | Weather Station, Rain Gauge, Thermo-/Hygro Sensor |
 |CAME TOP 432EV | Remote control |
 |CTW600, WH1080, WH2315 | Weather station |
 |Clarus | remote power socket|
@@ -49,8 +51,11 @@ Supported Devices / Protocols
 |Heidemann, Heidemann HX, VTX-BELL | wireless bell |
 |Hoermann HSM2, HSM4, HS1-868-BS | Remote control |
 |JCHENG SECURITY | PIR Detector |
+|KoppFreeControl| Remotes and switches|
 |KRINNER Lumix, XM21-0| Remote control LED XMAS|
 |les led  | Remote controlled LED lamp |
+|Lacrosse Mode 1 / 30.3143.IT, 30.3144.IT, TX25-IT, TX27-IT, TX29-IT, TX29DTH-IT, TX37 | Weather sensors  |
+|Lacrosse Mode 2 / 30.3155WD, 30.3156WD, EMT7110, TX35-IT, TX35DTH-IT | Weather sensors  |
 |Livolo | Remote switches and sockets  |
 |MANAX MX-RCS250 | Remote control |
 |m-e VTX and BASIC | wireless bell |
@@ -61,10 +66,12 @@ Supported Devices / Protocols
 |Navaris 44344.04 | Touch light switch |
 |NC-3911, NC-3912 | Refrigerator thermometer |
 |Novy 840029, 840039 | Remote control |
+|Normstahl | Remote control for Garage DOORS |
 |Opus XT300 | Soil moisture sensor |
 |Oregon PIR sensor, NR868 | Motion sensor |
 |Oregon Scientific v2 and v3 Devices | Weather sensor |
 |LIBRA, LIDL, MANDOLYN, QUIGG | Remote control TR-502MSV (compatible GT-7008BS, GT-FSI-04, DMV-7008S, Powerfix RCB-I 3600) |
+|PCA 301 | Energy socket|
 |PT2262 and similar Devices | Remote switches like Intertechno V1+V3, Elro, door/window sensors|
 |Pollin 551227 | wireless bell |
 |RADEMACHER, Roto, Waeco | Remote control (HCS301 chip - only receive) |
@@ -73,7 +80,6 @@ Supported Devices / Protocols
 |revolt | Energy sensors |
 |s014/TCM/Conrad | Weather sensor |
 |Somfy RTS | Shutters from Somfy|
-|Somfy RTS | Somfy blinds |
 |technoline Weatherstation WS 6750/TX70DTH| Weather sensor and station |
 |TCM 234759 Tchibo | wireless bell |
 |TCM97001,Logilink, Pearl NC, and similar,Lifetec LT3594 | Weather sensor |
@@ -90,7 +96,6 @@ Supported Devices / Protocols
 |WS-2000, WS-7000 | Series of various sensors |
 |WS-7035, WS-7053, WS7054 | Temperature sensor 433MHz |
 |xavax | Remote control |
-||Remote sockets from serval brands|
 
 How to install
 ======

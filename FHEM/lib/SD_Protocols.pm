@@ -1,10 +1,10 @@
 ################################################################################
 #
 # The file is part of the SIGNALduino project
-# v3.5.x - https://github.com/RFD-FHEM/RFFHEM/tree/dev-r35-xFSK
+# v3.5.x - https://github.com/RFD-FHEM/RFFHEM
 #
 # 2016-2019  S.Butzek, Ralf9
-# 2019-2020  S.Butzek, HomeAutoUser, elektron-bbs
+# 2019-2021  S.Butzek, HomeAutoUser, elektron-bbs
 #
 ################################################################################
 package lib::SD_Protocols;
@@ -13,7 +13,7 @@ use strict;
 use warnings;
 use Carp qw(croak carp);
 use Digest::CRC;
-our $VERSION = '2.03';
+our $VERSION = '2.04';
 use Storable qw(dclone);
 use Scalar::Util qw(blessed);
 
@@ -590,12 +590,21 @@ sub mcBit2Hideki {
   my $id        = shift // carp 'protocol ID must be provided' && return (0,'no protocolId provided');
   my $mcbitnum  = shift // length $bitData;
 
-  my $message_start = index($bitData,'10101110');
-  my $invert = 0;
+  if ($mcbitnum == 89) {                                   # optimization when the beginning was missing
+    my $bit0 = substr($bitData,0,1);
+    $bit0 = $bit0 ^ 1;
+    $bitData = $bit0 . $bitData;
+    $self->_logging( qq[lib/mcBit2Hideki, L=$mcbitnum add bit $bit0 at begin $bitData], 5 );
+  }
 
-  if ($message_start < 0) {
-    $bitData =~ tr/01/10/;                  # invert message
-    $message_start = index($bitData,'10101110');      # 0x75 but in reverse order
+  my $message_start = index($bitData,'10101110');         # normal rawMSG
+  my $invert = 0;
+  my $message_start_invert = index($bitData,'01010001');  # invert rawMSG
+  # 10101110 can occur again in raw MSG -> comparison with inverted start 01010001
+
+  if ( $message_start < 0 || ( $message_start_invert!= -1 && $message_start > 0 && ($message_start_invert < $message_start) ) ) {
+    $bitData =~ tr/01/10/;                                # invert message
+    $message_start = index($bitData,'10101110');          # 0x75 but in reverse order
     $invert = 1;
   }
 
@@ -606,8 +615,8 @@ sub mcBit2Hideki {
     # Todo: Mindest Laenge fuer startpunkt vorspringen
     # Todo: Wiederholung auch an das Modul weitergeben, damit es dort geprueft werden kann
     my $message_end = index($bitData,'10101110',$message_start+71); # pruefen auf ein zweites 0x75,  mindestens 72 bit nach 1. 0x75, da der Regensensor minimum 8 Byte besitzt je byte haben wir 9 bit
-        $message_end = length($bitData) if ($message_end == -1);
-        my $message_length = $message_end - $message_start;
+    $message_end = length($bitData) if ($message_end == -1);
+    my $message_length = $message_end - $message_start;
 
     return (-1,' message is to short') if ($message_length < $self->checkProperty($id,'length_min',-1) );
     return (-1,' message is to long') if (defined $self->getProperty($id,'length_max' ) && $message_length > $self->getProperty($id,'length_max') );
@@ -1743,6 +1752,47 @@ sub _xFSK_methods_behind_here {
   # only for functionslist - no function!
 }
 
+=item ConvBresser_5in1()
+
+This function checks number/count of set bits within bytes 14-25 and inverted data of 13 byte further.
+Delete inverted data (nibble 1-27)and reduce message length (nibble 53).
+
+Input:  $hexData
+Output: $hexData
+        scalar converted message on success 
+        or array (1,"Error message")
+
+=cut
+
+sub ConvBresser_5in1 {
+  my $self    = shift // carp 'Not called within an object';
+  my $hexData = shift // croak 'Error: called without $hexdata as input';
+  my $d2;
+  my $bit;
+  my $bitsumRef;
+  my $bitadd = 0;
+  my $hexLength = length ($hexData);
+
+  return ( 1, 'ConvBresser_5in1, hexData is to short' )
+    if ( $hexLength < 52 );  # check double, in def length_min set
+  
+  for (my $i = 0; $i < 13; $i++) {
+    $d2 = hex(substr($hexData,($i+13)*2,2));
+    return ( 1, qq[ConvBresser_5in1, inverted data at pos $i] ) if ((hex(substr($hexData,$i*2,2)) ^ $d2) != 255);
+    if ($i == 0) {
+      $bitsumRef = $d2;
+    }	else {
+  
+      while ($d2) {
+        $bitadd += $d2 & 1;
+        $d2 >>= 1;
+      }
+    }
+  }
+  return (1, qq[ConvBresser_5in1, checksumCalc:$bitadd != checksum:$bitsumRef ]  ) if ($bitadd != $bitsumRef);
+  return substr($hexData, 28, 24);
+}
+
 ############################# package lib::SD_Protocols, test exists
 =item ConvPCA301()
 
@@ -1810,19 +1860,30 @@ sub ConvKoppFreeControl {
   my $self    = shift // carp 'Not called within an object';
   my $hexData = shift // croak 'Error: called without $hexdata as input';
 
+  # kr07C2AD1A30CC0F0328
+  # ||  ||||  ||    ++-------- Transmitter Code 2
+  # ||  ||||  ++-------------- Keycode
+  # ||  ++++------------------ Transmitter Code 1
+  # ++------------------------ kr wird von der culfw bei Empfang einer Kopp Botschaft als Kennung gesendet
+  #
+  # right rawMSG  MN;D=07FA5E1721CC0F02FE000000000000;
+  # wrong rawMSG  MN;D=0A018200CA043A90;
+
   return ( 1,
 'ConvKoppFreeControl, Usage: Input #1, $hexData needs to be at least 4 chars long'
   ) if ( length($hexData) < 4 );    # check double, in def length_min set
 
   my $anz = hex( substr( $hexData, 0, 2 ) ) + 1;
+
+  return ( 1, 'ConvKoppFreeControl, hexData is to short' )
+    if ( length($hexData) < $anz * 2 );  # check double, in def length_min set
+
   my $blkck = 0xAA;
 
   for my $i ( 0 .. $anz - 1 ) {
     my $d = hex( substr( $hexData, $i * 2, 2 ) );
     $blkck ^= $d;
   }
-  return ( 1, 'ConvKoppFreeControl, hexData is to short' )
-    if ( length($hexData) < $anz * 2 );  # check double, in def length_min set
 
   my $checksum = hex( substr( $hexData, $anz * 2, 2 ) );
 
