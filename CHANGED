@@ -1,3 +1,4 @@
+2021-06-16 - Merge branch 'master' into master_rojaflex
 2021-06-07 - Fix Multiple Send delay (#941)
 * Multiple set commands are not processed
 Fixes #823  for firmware 3.4.0 without delay
