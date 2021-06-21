@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 10_SD_Rojaflex.pm 4 2021-06-14 16:00:00Z elektron-bbs $
+# $Id: 10_SD_Rojaflex.pm 5 2021-06-21 21:00:00Z elektron-bbs $
 #
 
 package SD_Rojaflex;
@@ -8,7 +8,7 @@ use strict;
 use warnings;
 use GPUtils qw(GP_Import GP_Export);
 
-our $VERSION = '0.4';
+our $VERSION = '0.5';
 
 GP_Export(qw(
 	Initialize
@@ -141,19 +141,20 @@ sub Set {
 		$ret .= 'up:noArg ' if defined(ReadingsVal($name, 'MsgUp', undef));
 		$ret .= 'savefav:noArg ' if defined(ReadingsVal($name, 'MsgSave', undef));
 		$ret .= 'gotofav:noArg ' if defined(ReadingsVal($name, 'MsgGoto', undef));
+		$ret .= 'clearfav:noArg ' if defined(ReadingsVal($name, 'MsgStop', undef)) && defined(ReadingsVal($name, 'MsgGoto', undef)) && defined(ReadingsVal($name, 'MsgSave', undef));
 		# $ret .= 'pct:slider,0,1,100' if (defined(ReadingsVal($name, 'MsgDown', undef)) && defined(ReadingsVal($name, 'MsgStop', undef)) && defined(ReadingsVal($name, 'MsgUp', undef)));
 		$ret .= 'pct:0,10,20,30,40,50,60,70,80,90,100' if (defined(ReadingsVal($name, 'MsgDown', undef)) && defined(ReadingsVal($name, 'MsgStop', undef)) && defined(ReadingsVal($name, 'MsgUp', undef)));
 		return $ret; # return setlist
 	}
 
+	my $timeToClose = AttrVal($name,'timeToClose',30);
+	my $timeToOpen = AttrVal($name,'timeToOpen',30);
 	if ($cmd eq 'pct') {
 		if ($na > 1) { # 0 = open ,100 = closed
 			my $tmp = $a[1];
 			$tmp = 100 - $tmp if (AttrVal($name,'inversePosition',0) eq '1'); # inverse position
 			if ($tmp != $cpos) {
 				$tpos = $tmp;
-				my $timeToClose = AttrVal($name,'timeToClose',30);
-				my $timeToOpen = AttrVal($name,'timeToOpen',30);
 				# $cmd = 'up' if ($tmp eq '0'); # Fahr hoch
 				# $cmd = 'down' if ($tmp eq '100'); # Fahr runter
 				Log3 $name, 3, "$ioname: SD_Rojaflex set $name pct $tmp";
@@ -186,6 +187,7 @@ sub Set {
 	push @setCodesAr,'up' if defined(ReadingsVal($name, 'MsgUp', undef));
 	push @setCodesAr,'savefav' if defined(ReadingsVal($name, 'MsgSave', undef));
 	push @setCodesAr,'gotofav' if defined(ReadingsVal($name, 'MsgGoto', undef));
+	push @setCodesAr,'clearfav ' if defined(ReadingsVal($name, 'MsgStop', undef)) && defined(ReadingsVal($name, 'MsgGoto', undef)) && defined(ReadingsVal($name, 'MsgSave', undef));
 
 	if (scalar @setCodesAr > 1) {
 		if (grep {/$cmd/xms} @setCodesAr) { # Code vorhanden
@@ -195,10 +197,17 @@ sub Set {
 			$msg .= ReadingsVal($name, 'MsgUp', undef) if ($cmd eq 'up');
 			$msg .= ReadingsVal($name, 'MsgSave', undef) if ($cmd eq 'savefav');
 			$msg .= ReadingsVal($name, 'MsgGoto', undef) if ($cmd eq 'gotofav');
+			$msg .= ReadingsVal($name, 'MsgGoto', undef) if ($cmd eq 'clearfav');
 			$msg .= ';';
 			for my $i (1 .. AttrVal($name, 'repetition', 1)) {
 				# Eine Wiederholung erfolgt bei der Fernbedienung nach 3,5 mS, so ist der Abstand groesser
 				IOWrite($hash, 'raw', $msg) if (length($msg) == 28);
+			}
+			if ($cmd eq 'clearfav') {
+				my $timelongest = $timeToOpen;
+				$timelongest = $timeToClose if ($timeToClose > $timeToOpen);
+				Log3 $name, 4, "$ioname: SD_Rojaflex set $name clearFav running time $timelongest s";
+				InternalTimer( (gettimeofday() + $timelongest), \&SD_Rojaflex_clearfav, $name );
 			}
 
 			# Calculate target position and motor state
@@ -213,17 +222,14 @@ sub Set {
 				$motor = 'stop' if ($cpos eq $tpos); # Wenn oben.
 			}
 			if($cmd eq 'stop') {
-				# $tpos = $cpos;
 				$motor = 'stop';
 			}
 			if($cmd eq 'savefav') {
-				# $tpos = $cpos;
 				$motor = 'stop';
 			}
-			if($cmd eq 'gotofav') {
-				# $tpos = $cpos;
-				$motor = 'run';
-			}
+			# if($cmd eq 'gotofav') {
+				# $motor = 'run';
+			# }
 
 			# Wenn keine PositionUpdates vom Motor kommen, setze gleich die finale Position
 			if (AttrVal($name,'noPositionUpdates',0) eq '1') {
@@ -268,6 +274,16 @@ sub SD_Rojaflex_pctStop {
 	my $hash = $defs{$name};
 	RemoveInternalTimer(\&SD_Rojaflex_pctStop, $name);
 	CommandSet($hash, "$name stop");
+	return;
+}
+
+sub SD_Rojaflex_clearfav {
+	my ($name) = @_;
+	my $hash = $defs{$name};
+	RemoveInternalTimer(\&SD_Rojaflex_clearfav, $name);
+	CommandSet($hash, "$name stop");
+	CommandSet($hash, "$name stop");
+	CommandSet($hash, "$name savefav");
 	return;
 }
 
@@ -432,7 +448,7 @@ __END__
 <h3>SD_Rojaflex</h3>
 <ul>
 	The SD_Rojaflex module decrypts and sends Rojaflex messages, which are processed by the SIGNALduino.
-	The following types are supported at the moment: Rojaflex HSR-1, HSR-5, HSR-15, HSTR-5, HSTR-15, RHSM1.
+	The following types are supported at the moment: Rojaflex HSR-15.
 	<br><br>
 
 	<b>Define</b>
@@ -451,16 +467,20 @@ __END__
 
 	<b>Set</b>
 	<ul>
+		Before the set commands can be used, all codes must be learned once with the associated remote control.
+		That the codes have been learned can be seen from the readings "MsgDown", "MsgStop", "MsgUp" etc. (see readings).
+		<br><br>
 		<code>set &lt;name&gt; &lt;value&gt; [&lt;anz&gt;]</code>
 		<br><br>
 		<code>&lt;value&gt;</code> can be one of the following values::<br>
 		<ul>
+			<li>clearFav</li>
 			<li>down</li>
-			<li>up</li>
-			<li>stop</li>
-			<li>pct</li>
 			<li>gotofav</li>
+			<li>pct</li>
 			<li>savefav</li>
+			<li>stop</li>
+			<li>up</li>
 		</ul>
 		<br><br>
 	</ul>
@@ -485,7 +505,7 @@ __END__
 <h3>SD_Rojaflex</h3>
 <ul>
 	Das SD_Rojaflex-Modul entschl&uuml;sselt und sendet Nachrichten, die vom SIGNALduino verarbeitet werden.
-	Unterst&uuml;tzt werden z.Z. folgende Typen: Rojaflex HSR-1, HSR-5, HSR-15, HSTR-5, HSTR-15, RHSM1.
+	Unterst&uuml;tzt werden z.Z. folgende Typen: Rojaflex HSR-15.
 	<br><br>
 
 	<b>Define</b>
@@ -504,10 +524,14 @@ __END__
 
 	<b>Set</b>
 	<ul>
+		Bevor die Set-Befehle verwendet werden können, müssen sämtliche Kodes einmal mit der zugehörigen Fernbedienung angelernt werden.
+		Das die Kodes angelernt wurden, erkennt man an den Readings "MsgDown", "MsgStop", "MsgUp" u.s.w. (siehe Readings).
+		<br><br>
 		<code>set &lt;name&gt; &lt;value&gt; [&lt;anz&gt;]</code>
 		<br><br>
 		<code>&lt;value&gt;</code> kann einer der folgenden Werte sein:<br>
 		<ul>
+			<li>clearFav</li>
 			<li>down</li>
 			<li>gotofav</li>
 			<li>pct</li>
@@ -522,18 +546,18 @@ __END__
 
 	<b>Attribute</b>
 	<ul>
-		<li><a href="#IODev">IODev</a>Setzt das Gerät, welches zum Senden der Signale verwendet werden soll.</li>
+		<li><a href="#IODev">IODev</a> - Setzt das Gerät, welches zum Senden der Signale verwendet werden soll.</li>
 		<li><a href="#do_not_notify">do_not_notify</a></li>
 		<a name="inversePosition"></a>
 		<li>inversePosition - Die Readings der Positionen pct, cpos und tpos umkehren.</li>
 		<a name="dummy"></a>
 		<li>dummy - Wenn das Attribut gesetzt ist, kann nicht mehr gesendet werden.</li>
-		<li><a href="#ignore">ignore</a> - Das Gerät wird in Zuknft ignoriert, wenn diese Attribut gesetzt ist.</li>
+		<li><a href="#ignore">ignore</a> - Das Gerät wird in Zukunft ignoriert, wenn dieses Attribut gesetzt ist.</li>
 		<a name="noPositionUpdates"></a>
 		<li>noPositionUpdates - Falls vom Antrieb keine Rückmeldungen erfolgen, werden die Readings pct, cpos und tpos errechnet.</li>
 		<a name="repetition"></a>
 		<li>repetition - Anzahl Wiederholungen der Sendebefehle</li>
-		<li><a href="#showtime">showtime</a> - Wird im FHEMWEB verwendet, um die Zeit der letzten Aktivitätanstelle des Status in der Gesamtansicht anzuzeigen.</li>
+		<li><a href="#showtime">showtime</a> - Wird im FHEMWEB verwendet, um die Zeit der letzten Aktivität anstelle des Status in der Gesamtansicht anzuzeigen.</li>
 		<a name="timeToClose"></a>
 		<li>timeToClose - Dauer für komplettes Schließen in Sekunden.</li>
 		<a name="timeToOpen"></a>
