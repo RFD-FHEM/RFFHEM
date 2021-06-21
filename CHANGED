@@ -1,12 +1,13 @@
-2021-06-15 - Update SD_ProtocolData.pm
-
- * revised comments
- * optimized parameters
-2021-06-08 - AVANTEK reception added
+2021-06-21 - AVANTEK reception added
 * Update 00_SIGNALduino.pm
  - added AVANTEK rfmode
 * SD_ProtocolData.pm
  - added AVANTEK DB-LE
+
+2021-06-20 - little fix - attr whitelist_IDs (#983)
+* Update 00_SIGNALduino.pm
+
+ * revised save option whitelist_IDs (user see now ? on Save config)
 
 2021-06-07 - Fix Multiple Send delay (#941)
 
