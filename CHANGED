@@ -1,3 +1,9 @@
+2021-06-21 - AVANTEK to modul
+
+* SD_ProtocolData.pm
+ * Register optimized
+* 14_SD_BELL.pm
+ * added AVANTEK
 2021-06-21 - Merge branch 'master' into master_Avantek
 2021-06-21 - AVANTEK reception added
 * Update 00_SIGNALduino.pm
