@@ -493,6 +493,7 @@ sub Attr {
     <li>Heidemann | Heidemann HX | VTX-BELL_Funkklingel  [Protocol 79]</li>
     <li>Grothe Mistral SE 01.1 (40 bit), 03.1 (48 bit) [Protocol 96]</li>
     <li>GEA-028DB [Protokoll 98]</li>
+    <li>AVANTEK DB-LE [Protokoll 112]</li>
     <br>
     <u><i>Special feature Protocol 41, 2 different codes will be sent one after the other!</u></i>
   </ul>
@@ -542,6 +543,7 @@ sub Attr {
     <li>Heidemann | Heidemann HX | VTX-BELL_Funkklingel  [Protokoll 79]</li>
     <li>Grothe Mistral SE 01.1 (40 bit), 03.1 (48 bit) [Protokoll 96]</li>
     <li>GEA-028DB [Protokoll 98]</li>
+    <li>AVANTEK DB-LE [Protokoll 112]</li>
     <br>
     <u><i>Besonderheit Protokoll 41, es sendet 2 verschiedene Codes nacheinader!</u></i>
   </ul>
