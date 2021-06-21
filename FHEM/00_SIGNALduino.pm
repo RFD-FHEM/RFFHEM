@@ -39,7 +39,7 @@ use List::Util qw(first);
 
 
 use constant {
-  SDUINO_VERSION                  => '3.5.2+20210607',
+  SDUINO_VERSION                  => '3.5.2+20210616',
   SDUINO_INIT_WAIT_XQ             => 1.5,     # wait disable device
   SDUINO_INIT_WAIT                => 2,
   SDUINO_INIT_MAXRETRY            => 3,
@@ -3266,6 +3266,7 @@ function SD_plistWindow(txt)
 sub SIGNALduino_FW_saveWhitelist {
   my $name = shift;
   my $wl_attr = shift;
+  my $hash = $defs{$name};
 
   if (!IsDevice($name)) {
     Log3 undef, 3, "$name: FW_saveWhitelist, is not a valid definition, operation aborted.";
@@ -3282,7 +3283,7 @@ sub SIGNALduino_FW_saveWhitelist {
   else {
     $wl_attr =~ s/,$//;   # Komma am Ende entfernen
   }
-  $attr{$name}{whitelist_IDs} = $wl_attr;
+  CommandAttr($hash,"$name whitelist_IDs $wl_attr");
   Log3 $name, 3, "$name: FW_saveWhitelist, $wl_attr";
   SIGNALduino_IdList("x:$name", $wl_attr);
 }

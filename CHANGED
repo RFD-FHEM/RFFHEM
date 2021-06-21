@@ -1,3 +1,11 @@
+2021-06-20 - little fix - attr whitelist_IDs (#983)
+
+* Update 00_SIGNALduino.pm
+
+ * revised save option whitelist_IDs (user see now ? on Save config)
+2021-06-16 - Update 00_SIGNALduino.pm
+
+ * revised save option whitelist_IDs (user see now ? on Save config)
 2021-06-07 - Fix Multiple Send delay (#941)
 
 * Multiple set commands are not processed
