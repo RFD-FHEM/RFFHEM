@@ -1,5 +1,5 @@
 ##############################################################################
-# $Id: 14_SD_BELL.pm 0 2021-03-22 22:30:35Z HomeAuto_User $
+# $Id: 14_SD_BELL.pm 0 2021-06-21 22:30:35Z HomeAuto_User $
 #
 # The file is part of the SIGNALduino project.
 # The purpose of this module is to support many wireless BELL devices.
@@ -31,6 +31,9 @@
 ####################################################################################################################################
 # - GEA-028DB  [Protocol 98] length 16 (4)
 #     MU;P0=1488;P1=-585;P2=520;P3=-1509;P4=1949;P5=-5468;CP=2;R=38;D=01232301230123010101230123230101454501232301230123010101230123230101454501232301230123010101230123230101454501232301230123010101230123230101454501232301230123010101230123230101454501232301230123010101230123230101454501232301230123010101230123230101454501;O;
+####################################################################################################################################
+# - AVANTEK DB-LE  [Protocol 112] length 16 (4)
+#     MN;D=08C114844FDA5CA2;R=48;
 ####################################################################################################################################
 # !!! ToDo´s !!!
 #     - KANGTAI doubleCode must CEHCK | only one Code? - MORE USER MSG needed
@@ -88,12 +91,16 @@ my %models = (
                     Protocol    => '98',
                     doubleCode  => 'no'
                   },
+  'AVANTEK' =>  { hex_lengh   => '9',
+                  Protocol    => '112',
+                  doubleCode  => 'no'
+                },
 );
 
 
 sub SD_BELL_Initialize {
   my ($hash) = @_;
-  $hash->{Match}      = '^P(?:15|32|41|42|57|79|96|98)#.*';
+  $hash->{Match}      = '^P(?:15|32|41|42|57|79|96|98|112)#.*';
   $hash->{DefFn}      = 'SD_BELL::Define';
   $hash->{UndefFn}    = 'SD_BELL::Undef';
   $hash->{ParseFn}    = 'SD_BELL::Parse';
@@ -144,17 +151,14 @@ sub Define {
   my $hash_name;
   my $name = $hash->{NAME};
   my $protocol = $a[2];
-  my $hex_lengh = length($a[3]);
   my $doubleCode = 'no';
   my $iodevice;
   my $ioname;
 
-  #Log3 $name, 3, "SD_BELL_Def name=$a[0] protocol=$protocol HEX-Value=$a[3] hex_lengh=$hex_lengh";
-
   # Argument                              0     1         2         3           4
   return 'SD_BELL: wrong syntax: define <name> SD_BELL <Protocol> <HEX-Value> <optional IODEV>' if(int(@a) < 3 || int(@a) > 5);
   ### checks - doubleCode yes ###
-  return "SD_BELL: wrong <protocol> $a[2]" if not($a[2] =~ /^(?:15|32|41|42|57|79|96|98)/xms);
+  return "SD_BELL: wrong <protocol> $a[2]" if not($a[2] =~ /^(?:15|32|41|42|57|79|96|98|112)/xms);
   return "SD_BELL: wrong HEX-Value! Protocol $a[2] HEX-Value <$a[3]> not HEX (0-9 | a-f | A-F)" if (($protocol != 41) && not $a[3] =~ /^[0-9a-fA-F]*$/xms);
   return "SD_BELL: wrong HEX-Value! Protocol $a[2] HEX-Value <$a[3]> not HEX (0-9 | a-f | A-F) or length wrong!" if (($protocol == 41) && not $a[3] =~ /^[0-9a-fA-F]{8}_[0-9a-fA-F]{8}$/xms);
 
@@ -209,6 +213,15 @@ sub Set {
       $msg .= $checksum;
       $model = AttrVal($name,'model', 'Grothe_Mistral_SE_01');
       $msg .= '3F' if ($model eq 'Grothe_Mistral_SE_03');   # only Grothe_Mistral_SE_03
+      $msg .= ';';
+      IOWrite($hash, 'raw', $msg);
+      Log3 $name, 4, "$ioname: $name $msg";
+    } elsif ($protocol == 112) {; # only AVANTEK
+      my $msg = 'SN;R=';
+      $msg .= $repeats;
+      $msg .= ';D=';
+      $msg .= $split[1];
+      $msg .= '98ABCDE'; # cc1101 RX FIFO 4,8 ..... Bytes
       $msg .= ';';
       IOWrite($hash, 'raw', $msg);
       Log3 $name, 4, "$ioname: $name $msg";
@@ -392,7 +405,11 @@ sub Parse {
     $state = 'Alarm' if (substr($bitData,8,1) eq '1');
     $bat = substr($bitData,41,1) eq '0' ? 'ok' : 'low' if ($hlen == 12);  # only Grothe_Mistral_SE_03
     Log3 $iohash, 4, "$ioname: SD_BELL_Parse Grothe_Mistral_SE P$protocol - $rawData";
-
+  ### AVANTEK length 16 ###
+  } elsif ($protocol == 112) {
+    Log3 $iohash, 4, "$ioname: SD_BELL_Parse AVANTEK P$protocol - $rawData";
+    $deviceCode = substr($deviceCode,0,9);
+    $devicedef = $protocol . ' ' .$deviceCode;
   ### doubleCode no without P41 ###
   } else {
     $devicedef = $protocol . ' ' .$deviceCode;
