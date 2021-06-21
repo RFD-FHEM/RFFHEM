@@ -1,18 +1,11 @@
-2021-06-21 - Update 14_SD_BELL.pm
-
-* added commandref
-2021-06-21 - AVANTEK to modul
+2021-06-21 - AVANTEK reception added
 
 * SD_ProtocolData.pm
- * Register optimized
+ * added AVANTEK DB-LE & register optimized
 * 14_SD_BELL.pm
- * added AVANTEK
-2021-06-21 - Merge branch 'master' into master_Avantek
-2021-06-21 - AVANTEK reception added
+ * added AVANTEK & commandref
 * Update 00_SIGNALduino.pm
  - added AVANTEK rfmode
-* SD_ProtocolData.pm
- - added AVANTEK DB-LE
 
 2021-06-20 - little fix - attr whitelist_IDs (#983)
 * Update 00_SIGNALduino.pm
