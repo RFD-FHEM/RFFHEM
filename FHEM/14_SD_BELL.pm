@@ -1,5 +1,5 @@
 ##############################################################################
-# $Id: 14_SD_BELL.pm 0 2021-06-21 22:30:35Z HomeAuto_User $
+# $Id: 14_SD_BELL.pm 0 2021-06-25 14:30:35Z HomeAuto_User $
 #
 # The file is part of the SIGNALduino project.
 # The purpose of this module is to support many wireless BELL devices.
@@ -33,7 +33,7 @@
 #     MU;P0=1488;P1=-585;P2=520;P3=-1509;P4=1949;P5=-5468;CP=2;R=38;D=01232301230123010101230123230101454501232301230123010101230123230101454501232301230123010101230123230101454501232301230123010101230123230101454501232301230123010101230123230101454501232301230123010101230123230101454501232301230123010101230123230101454501;O;
 ####################################################################################################################################
 # - AVANTEK DB-LE  [Protocol 112] length 16 (4)
-#     MN;D=08C114844FDA5CA2;R=48;
+#     MN;D=84608A4220EF87FF;R=48;
 ####################################################################################################################################
 # !!! ToDo´s !!!
 #     - KANGTAI doubleCode must CEHCK | only one Code? - MORE USER MSG needed
@@ -217,12 +217,8 @@ sub Set {
       IOWrite($hash, 'raw', $msg);
       Log3 $name, 4, "$ioname: $name $msg";
     } elsif ($protocol == 112) {; # only AVANTEK
-      my $msg = 'SN;R=';
-      $msg .= $repeats;
-      $msg .= ';D=';
-      $msg .= $split[1];
-      $msg .= '98ABCDE'; # cc1101 RX FIFO 4,8 ..... Bytes
-      $msg .= ';';
+      # SN;R=1;D=84608A42298ABCDE; -> 'SN;R=' $repeats ';D=' $split[1] '98ABCDE;' # 98ABCDE -> cc1101 RX FIFO 4,8 ..... Bytes
+      my $msg = qq[SN;R=$repeats;D=$split[1]98ABCDE;];
       IOWrite($hash, 'raw', $msg);
       Log3 $name, 4, "$ioname: $name $msg";
     } else {
