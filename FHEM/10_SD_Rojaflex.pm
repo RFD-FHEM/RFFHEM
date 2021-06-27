@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 10_SD_Rojaflex.pm 5 2021-06-21 21:00:00Z elektron-bbs $
+# $Id: 10_SD_Rojaflex.pm 5 2021-06-27 15:00:00Z elektron-bbs $
 #
 
 package SD_Rojaflex;
@@ -8,7 +8,7 @@ use strict;
 use warnings;
 use GPUtils qw(GP_Import GP_Export);
 
-our $VERSION = '0.5';
+our $VERSION = '0.6';
 
 GP_Export(qw(
 	Initialize
@@ -149,30 +149,28 @@ sub Set {
 
 	my $timeToClose = AttrVal($name,'timeToClose',30);
 	my $timeToOpen = AttrVal($name,'timeToOpen',30);
+
 	if ($cmd eq 'pct') {
 		if ($na > 1) { # 0 = open ,100 = closed
-			my $tmp = $a[1];
-			$tmp = 100 - $tmp if (AttrVal($name,'inversePosition',0) eq '1'); # inverse position
-			if ($tmp != $cpos) {
-				$tpos = $tmp;
-				# $cmd = 'up' if ($tmp eq '0'); # Fahr hoch
-				# $cmd = 'down' if ($tmp eq '100'); # Fahr runter
-				Log3 $name, 3, "$ioname: SD_Rojaflex set $name pct $tmp";
-				# if($tmp > 0 && $tmp < 100) {
-				my $duration;
-				if ($tmp > $cpos) { # Rolladen steht höher soll position
-				# if($tmp > ($cpos + 1)) { # Rolladen steht höher soll position
-					$cmd = 'down'; # Fahr runter
-					$duration = ($tmp - $cpos) * $timeToClose / 100;
+			$tpos = $a[1];
+			$tpos = 100 - $tpos if (AttrVal($name,'inversePosition',0) eq '1'); # inverse position
+			if ($tpos != $cpos) {
+				$cmd = 'up' if ($tpos eq '0'); # Fahr hoch
+				$cmd = 'down' if ($tpos eq '100'); # Fahr runter
+				Log3 $name, 3, "$ioname: SD_Rojaflex set $name pct $tpos";
+				if($tpos > 0 && $tpos < 100) {
+					my $duration;
+					if ($tpos > $cpos) { # Rolladen steht höher soll position
+						$cmd = 'down'; # Fahr runter
+						$duration = ($tpos - $cpos) * $timeToClose / 100;
+					}
+					if ($tpos < $cpos) { # Rolladen steht niedriger soll position
+						$cmd = 'up';# Fahr hoch
+						$duration = ($cpos - $tpos) * $timeToOpen / 100;
+					}
+					Log3 $name, 4, "$ioname: SD_Rojaflex set $name duration running time $duration s";
+					InternalTimer( (gettimeofday() + $duration), \&SD_Rojaflex_pctStop, $name );
 				}
-				if ($tmp < $cpos) { # Rolladen steht niedriger soll position
-				# if($cpos > ($tmp + 1)) { # Rolladen steht niedriger soll position
-					$cmd = 'up';# Fahr hoch
-					$duration = ($cpos - $tmp) * $timeToOpen / 100;
-				}
-				Log3 $name, 4, "$ioname: SD_Rojaflex set $name duration running time $duration s";
-				InternalTimer( (gettimeofday() + $duration), \&SD_Rojaflex_pctStop, $name );
-			# }
 			} else {
 				$cmd = 'stop';
 			}
@@ -208,6 +206,7 @@ sub Set {
 				$timelongest = $timeToClose if ($timeToClose > $timeToOpen);
 				Log3 $name, 4, "$ioname: SD_Rojaflex set $name clearFav running time $timelongest s";
 				InternalTimer( (gettimeofday() + $timelongest), \&SD_Rojaflex_clearfav, $name );
+				$hash->{clearfavcount} = 0;
 			}
 
 			# Calculate target position and motor state
@@ -247,13 +246,14 @@ sub Set {
 			$state = $cmd;
 			Log3 $name, 3, "$ioname: SD_Rojaflex set $name $state";
 		} else {
-			if ($cmd eq 'down' || $cmd eq 'stop' || $cmd eq 'up' || $cmd eq 'savefav' || $cmd eq 'gotofav') {
+			if ($cmd eq 'down' || $cmd eq 'stop' || $cmd eq 'up') {
 				$state = "command still unknown, press the button \"$cmd\" on the remote control";
-				Log3 $name, 3, "$ioname: $name, $state";
+			} elsif ($cmd eq 'savefav' || $cmd eq 'gotofav' || $cmd eq 'clearfav') {
+				$state = "command still unknown, execute commands for setting the intermediate position with the remote control";
 			} else {
 				$state = "command \"$cmd\" is not supported";
-				Log3 $name, 3, "$ioname: $name, $state";
 			}	
+			Log3 $name, 3, "$ioname: $name, $state";
 		}
 	} else {
 		$state = 'no set commands available, press all buttons on the remote control';
@@ -281,9 +281,14 @@ sub SD_Rojaflex_clearfav {
 	my ($name) = @_;
 	my $hash = $defs{$name};
 	RemoveInternalTimer(\&SD_Rojaflex_clearfav, $name);
-	CommandSet($hash, "$name stop");
-	CommandSet($hash, "$name stop");
-	CommandSet($hash, "$name savefav");
+	$hash->{clearfavcount} += 1;
+	if ($hash->{clearfavcount} < 4) {
+		CommandSet($hash, "$name stop");
+		InternalTimer( (gettimeofday() + 1), \&SD_Rojaflex_clearfav, $name );
+	} else {
+		CommandSet($hash, "$name savefav");
+		delete($hash->{clearfavcount});
+	}
 	return;
 }
 
