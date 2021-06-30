@@ -1,3 +1,8 @@
+2021-06-30 - little fix - SD_WS - Log3 output (#987)
+
+* Update 14_SD_WS.pm
+
+ * fix Log3 output
 2021-06-30 - Update 14_SD_WS.pm
 
  * fix Log3 output
