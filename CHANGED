@@ -1,4 +1,3 @@
-2021-06-30 - Merge branch 'master' into master_Avantek
 2021-06-30 - added AVANTEK protocol
 * 14_SD_BELL.pm
   * revised send cmd AVANTEK protocol
@@ -6,8 +5,8 @@
 * 00_SIGNALduino.pm
   * revised cmd sendMsg for xFSK
 
-2021-06-30 - Update 14_SD_WS.pm
-
+2021-06-30 - little fix - SD_WS - Log3 output (#987)
+* Update 14_SD_WS.pm
  * fix Log3 output
 
 2021-06-20 - little fix - attr whitelist_IDs (#983)
@@ -19,8 +18,7 @@
 * Update 00_SIGNALduino.pm
  - added AVANTEK rfmode
 
-2021-06-20 - little fix - attr whitelist_IDs (#983)
-* Update 00_SIGNALduino.pm
+2021-06-20 - Update 00_SIGNALduino.pm
 
  * revised save option whitelist_IDs (user see now ? on Save config)
 
