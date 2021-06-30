@@ -39,7 +39,7 @@ use List::Util qw(first);
 
 
 use constant {
-  SDUINO_VERSION                  => '3.5.2+20210621',
+  SDUINO_VERSION                  => '3.5.2+20210630',
   SDUINO_INIT_WAIT_XQ             => 1.5,     # wait disable device
   SDUINO_INIT_WAIT                => 2,
   SDUINO_INIT_MAXRETRY            => 3,
@@ -838,6 +838,7 @@ sub SIGNALduino_Set_sendMsg {
   my $cnt=0;
 
   my $sendData;
+  ## modulation ASK/OOK - MC
   if (defined($hash->{protocolObject}->getProperty($protocol,'format')) && $hash->{protocolObject}->getProperty($protocol,'format') eq 'manchester')
   {
     $clock += $_ for( @{$hash->{protocolObject}->getProperty($protocol,'clockrange')} );
@@ -858,6 +859,11 @@ sub SIGNALduino_Set_sendMsg {
     $sendData = $intro . 'SM;' . ($repeats > 0 ? "R=$repeats;" : '') . "C=$clock;D=$data;" . $outro . $frequency; # SM;R=2;C=400;D=AFAFAF;
     $hash->{logMethod}->($hash->{NAME}, 5, "$hash->{NAME}: Set_sendMsg, Preparing manchester protocol=$protocol, repeats=$repeats, clock=$clock data=$data");
 
+  ## modulation xFSK
+  } elsif (defined($hash->{protocolObject}->getProperty($protocol,'register')) && defined($hash->{protocolObject}->getProperty($protocol,'rfmode'))) {
+    $hash->{logMethod}->($hash->{NAME}, 5, "$hash->{NAME}: Set_sendMsg, Preparing ".$hash->{protocolObject}->getProperty($protocol,'rfmode')." protocol=$protocol, repeats=$repeats,data=$data");
+    $sendData = 'SN;' . ($repeats > 0 ? "R=$repeats;" : '') . "D=$data;" # SN;R=1;D=08C11484498ABCDE;
+  ## modulation ASK/OOK - MS MU
   } else {
     if ($protocol == 3 || substr($data,0,2) eq 'is') {
       if (substr($data,0,2) eq 'is') {
