@@ -1,5 +1,5 @@
 ##############################################################################
-# $Id: 14_SD_BELL.pm 0 2021-06-25 14:30:35Z HomeAuto_User $
+# $Id: 14_SD_BELL.pm 0 2021-06-30 15:30:35Z HomeAuto_User $
 #
 # The file is part of the SIGNALduino project.
 # The purpose of this module is to support many wireless BELL devices.
@@ -216,11 +216,6 @@ sub Set {
       $msg .= ';';
       IOWrite($hash, 'raw', $msg);
       Log3 $name, 4, "$ioname: $name $msg";
-    } elsif ($protocol == 112) {; # only AVANTEK
-      # SN;R=1;D=84608A42298ABCDE; -> 'SN;R=' $repeats ';D=' $split[1] '98ABCDE;' # 98ABCDE -> cc1101 RX FIFO 4,8 ..... Bytes
-      my $msg = qq[SN;R=$repeats;D=$split[1]98ABCDE;];
-      IOWrite($hash, 'raw', $msg);
-      Log3 $name, 4, "$ioname: $name $msg";
     } else {
       my $rawDatasend = $split[1];                          # hex value from def without protocol
       if ($rawDatasend =~ /[0-9a-fA-F]_[0-9a-fA-F]/xms) {   # check doubleCode in def
@@ -232,11 +227,16 @@ sub Set {
       }
 
       Log3 $name, 4, "$ioname: SD_BELL_Set_doubleCodeCheck doubleCodeCheck=$doubleCodeCheck splitCode[0]=$rawDatasend";
-
-      my $hlen = length($rawDatasend);
-      my $blen = $hlen * 4;
-      my $bitData = unpack("B$blen", pack("H$hlen", $rawDatasend));
-      my $msg = "P$protocol#" . $bitData;
+    
+      my $msg = "P$protocol#";
+      if ($protocol == 112) {
+        $msg .= $rawDatasend;
+      } else {
+        my $hlen = length($rawDatasend);
+        my $blen = $hlen * 4;
+        my $bitData = unpack("B$blen", pack("H$hlen", $rawDatasend));
+        $msg .= $bitData;
+      }
     
       if ($model eq 'Heidemann_|_Heidemann_HX_|_VTX-BELL') {
         $msg .= '#R135';
