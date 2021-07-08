@@ -1266,8 +1266,13 @@ sub SIGNALduino_CheckSendRawResponse {
     $hash->{logMethod}->($name, 4, "$name: CheckSendrawResponse, sendraw answer: $msg");
     #RemoveInternalTimer("HandleWriteQueue:$name");
     delete($hash->{ucCmd});
-    #SIGNALduino_HandleWriteQueue("x:$name"); # Todo #823 on github
-    InternalTimer(gettimeofday() + 0.1, \&SIGNALduino_HandleWriteQueue, "HandleWriteQueue:$name") if (scalar @{$hash->{QUEUE}} > 0 && InternalVal($name,'sendworking',0) == 0);
+    if ($msg =~ /D=[A-Za-z0-9]+;/ )
+    {
+      RemoveInternalTimer("HandleWriteQueue:$name");
+      SIGNALduino_HandleWriteQueue("x:$name"); # Todo #823 on github
+    } else {
+      InternalTimer(gettimeofday() , \&SIGNALduino_HandleWriteQueue, "HandleWriteQueue:$name") if (scalar @{$hash->{QUEUE}} > 0 && InternalVal($name,'sendworking',0) == 0);
+    }
   }
   return (undef);
 }
@@ -1620,7 +1625,7 @@ sub SIGNALduino_AddSendQueue {
   #SIGNALduino_Log3 $hash , 5, Dumper($hash->{QUEUE});
 
   $hash->{logMethod}->($hash, 5,"$name: AddSendQueue, " . $hash->{NAME} . ": $msg (" . @{$hash->{QUEUE}} . ')');
-  InternalTimer(gettimeofday() + 0.1, \&SIGNALduino_HandleWriteQueue, "HandleWriteQueue:$name") if (scalar @{$hash->{QUEUE}} == 1 && InternalVal($name,'sendworking',0) == 0);
+  InternalTimer(gettimeofday(), \&SIGNALduino_HandleWriteQueue, "HandleWriteQueue:$name") if (scalar @{$hash->{QUEUE}} == 1 && InternalVal($name,'sendworking',0) == 0);
 }
 
 ############################# package main, test exists
@@ -1810,9 +1815,11 @@ sub SIGNALduino_Read {
             $hash->{logMethod}->($name, 5, "$name: Read, try asyncOutput of message $returnMessage");
             my $ao = undef;
             $ao = asyncOutput( $hash->{ucCmd}->{asyncOut}, $hash->{ucCmd}->{cmd}.': ' . $returnMessage ) if (defined($returnMessage));
-          $hash->{logMethod}->($name, 5, "$name: Read, asyncOutput failed $ao") if (defined($ao));
           }
-          delete($hash->{ucCmd});
+          if ( exists $hash->{ucCmd} && defined $hash->{ucCmd}->{cmd} &&  $hash->{ucCmd}->{cmd} ne "sendraw" ) {
+            delete $hash->{ucCmd} ;
+            $hash->{logMethod}->($name, 5, "$name: Read, asyncOutput failed $ao") if (defined($ao));
+          }
         }
 
         if (exists($hash->{keepalive})) {
@@ -3274,6 +3281,7 @@ function SD_plistWindow(txt)
 sub SIGNALduino_FW_saveWhitelist {
   my $name = shift;
   my $wl_attr = shift;
+  my $hash = $defs{$name};
 
   if (!IsDevice($name)) {
     Log3 undef, 3, "$name: FW_saveWhitelist, is not a valid definition, operation aborted.";
@@ -3290,7 +3298,7 @@ sub SIGNALduino_FW_saveWhitelist {
   else {
     $wl_attr =~ s/,$//;   # Komma am Ende entfernen
   }
-  $attr{$name}{whitelist_IDs} = $wl_attr;
+  CommandAttr($hash,"$name whitelist_IDs $wl_attr");
   Log3 $name, 3, "$name: FW_saveWhitelist, $wl_attr";
   SIGNALduino_IdList("x:$name", $wl_attr);
 }
