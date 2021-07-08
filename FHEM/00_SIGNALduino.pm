@@ -1264,7 +1264,6 @@ sub SIGNALduino_CheckSendRawResponse {
     my $name=$hash->{NAME};
     # zu testen der sendeQueue, kann wenn es funktioniert auf verbose 5
     $hash->{logMethod}->($name, 4, "$name: CheckSendrawResponse, sendraw answer: $msg");
-    #RemoveInternalTimer("HandleWriteQueue:$name");
     delete($hash->{ucCmd});
     if ($msg =~ /D=[A-Za-z0-9]+;/ )
     {
@@ -1815,10 +1814,10 @@ sub SIGNALduino_Read {
             $hash->{logMethod}->($name, 5, "$name: Read, try asyncOutput of message $returnMessage");
             my $ao = undef;
             $ao = asyncOutput( $hash->{ucCmd}->{asyncOut}, $hash->{ucCmd}->{cmd}.': ' . $returnMessage ) if (defined($returnMessage));
+            $hash->{logMethod}->($name, 5, "$name: Read, asyncOutput failed $ao") if (defined($ao));
           }
           if ( exists $hash->{ucCmd} && defined $hash->{ucCmd}->{cmd} &&  $hash->{ucCmd}->{cmd} ne "sendraw" ) {
             delete $hash->{ucCmd} ;
-            $hash->{logMethod}->($name, 5, "$name: Read, asyncOutput failed $ao") if (defined($ao));
           }
         }
 
