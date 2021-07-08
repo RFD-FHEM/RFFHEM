@@ -1192,13 +1192,13 @@ sub SD_WS_Parse($$)
 
   if (defined $temp) {
     if (($temp < -30 || $temp > 70) && $protocol ne '106') { # not forBBQ temperature sensor GT-TMBBQ-01s
-      Log3 $iohash, 3, "$ioname: SD_WS_Parse $deviceCode - ERROR temperature $temp";
+      Log3 $name, 3, "$ioname: SD_WS_Parse $deviceCode - ERROR temperature $temp";
       return "";  
     }
   }
   if (defined $hum) {
     if ($hum > 100) {
-      Log3 $iohash, 3, "$ioname: SD_WS_Parse $deviceCode - ERROR humidity $hum";
+      Log3 $name, 3, "$ioname: SD_WS_Parse $deviceCode - ERROR humidity $hum";
       return "";  
     }
   }

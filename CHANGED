@@ -1,13 +1,13 @@
-2021-07-08 - Merge branch 'sidey79/issue986' of https://github.com/RFD-FHEM/RFFHEM into sidey79/issue986
-2021-07-08 - 00_SIGNALduino.pm
-
-removed some unwanted changes
-2021-07-08 - 00_SIGNALduino.pm
-
- 00_SIGNALduino
-
 SIGNALduino_PatternExists überarbeitet um hohe CPU Last und Speicherverbrauch zu umgehen
 Fixes High memory and CPU usage  in SIGNALduino_PatternExists  #986
+
+2021-06-30 - little fix - SD_WS - Log3 output (#987)
+* Update 14_SD_WS.pm
+* fix Log3 output
+
+2021-06-30 - Update 14_SD_WS.pm
+* fix Log3 output
+
 2021-06-20 - little fix - attr whitelist_IDs (#983)
 
 * Update 00_SIGNALduino.pm
