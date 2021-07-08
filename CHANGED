@@ -1,5 +1,8 @@
 2021-07-08 - 00_SIGNALduino.pm
 
+removed some unwanted changes
+2021-07-08 - 00_SIGNALduino.pm
+
  00_SIGNALduino
 
 SIGNALduino_PatternExists überarbeitet um hohe CPU Last und Speicherverbrauch zu umgehen
