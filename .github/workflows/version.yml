@@ -1,5 +1,10 @@
 name: VersionReplace
-on: [pull_request]
+
+on:
+  push:
+    pull_request: 
+      - 'FHEM/**'
+      - '.github/workflows/version.yml'
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -14,3 +19,13 @@ jobs:
           find: \w+\s+=>\s\'\d.\d.\d(\+\d+)\'
           replace: "${{ steps.date.outputs.date }}"
           include: "00_SIGNALduino.pm" 
+      - name: git commit back
+        run: |
+          git config --global user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git commit -m "Update Versiondate" -a
+      - name: git push
+        uses: ad-m/github-push-action@v0.6.0
+        with:
+          github_token: ${{ secrets.GH_TOKEN }}
+          branch: ${{ github.ref }}
