@@ -87,7 +87,7 @@ package lib::SD_ProtocolData;
   use strict;
   use warnings;
 
-  our $VERSION = '1.30';
+  our $VERSION = '1.31';
 
   our %protocols = (
     "0" =>  ## various weather sensors (500 | 9100)
@@ -2884,6 +2884,38 @@ package lib::SD_ProtocolData;
         reconstructBit   => '1',
         length_min      => '65',
         length_max      => '66',
+      },
+
+    # "111" => reserved @elektron-bbs
+
+    "112" =>  ## AVANTEK DB-LE
+              # Wireless doorbell & LED night light
+              # Sample: 20 Microseconds | 3 Repeats with ca. 1,57ms Pause
+              # A7129 -> FSK/GFSK Sub 1GHz Transceiver
+              #
+              #       PPPPPSSSSDDDDDDDDDD
+              #       |    |   |--------> Data
+              #       |    ||||---------> Sync
+              #       |||||-------------> Preambel
+              #
+              # URH:  aaaaa843484608a4224
+              # FHEM: MN;D=08C114844FDA5CA2;R=48;
+              #       MN;D=08C11484435D873B;R=47;
+              # !!! receiver hardware is required to complete in SD_BELL module !!!
+      {
+        name            => 'Avantek',
+        comment         => 'Wireless doorbell & LED night light',
+        id              => '112',
+        knownFreqs      => '433.3',
+        datarate        => '50.087',
+        sync            => '0869',
+        modulation      => '2-FSK',
+        rfmode          => 'Avantek',
+        register        => ['0001','0246','0301','0408','0569','06FF','0780','0802','0D10','0EAA','0F56','108A','11F8','1202','1322','14F8','1551','1916','1B43','1C40','20FB','2156','2211'],
+        preamble        => 'P112#',
+        clientmodule    => 'SD_BELL',
+        length_min      => '16',
+        length_max      => '16',
       },
     ########################################################################
     #### ###  register informations from other hardware protocols  #### ####
