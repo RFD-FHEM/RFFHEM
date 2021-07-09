@@ -1,6 +1,6 @@
-# $Id: 00_SIGNALduino.pm v3.5.1 2020-07-02 21:20:33Z Sidey $
+# $Id: 00_SIGNALduino.pm v3.5.2 2020-07-02 21:20:33Z Sidey $
 #
-# v3.5.1 - https://github.com/RFD-FHEM/RFFHEM/tree/master
+# v3.5.2 - https://github.com/RFD-FHEM/RFFHEM/tree/master
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incoming messages
 # see http://www.fhemwiki.de/wiki/SIGNALDuino
 # It was modified also to provide support for raw message handling which can be send from the SIGNALduino
@@ -39,7 +39,7 @@ use List::Util qw(first);
 
 
 use constant {
-  SDUINO_VERSION                  => '3.5.1+20210525',
+  SDUINO_VERSION                  => '3.5.2+20210630',
   SDUINO_INIT_WAIT_XQ             => 1.5,     # wait disable device
   SDUINO_INIT_WAIT                => 2,
   SDUINO_INIT_MAXRETRY            => 3,
@@ -270,7 +270,7 @@ my %matchListSIGNALduino = (
 my %symbol_map = (one => 1 , zero =>0 ,sync => '', float=> 'F', 'start' => '');
 
 ## rfmode for attrib & supported rfmodes
-my @rfmode = ('Bresser_5in1','KOPP_FC','Lacrosse_mode1','Lacrosse_mode2','Lacrosse_mode4','PCA301','SlowRF');
+my @rfmode = ('Avantek','Bresser_5in1','KOPP_FC','Lacrosse_mode1','Lacrosse_mode2','Lacrosse_mode4','PCA301','SlowRF');
 
 ############################# package main
 sub SIGNALduino_Initialize {
@@ -838,6 +838,7 @@ sub SIGNALduino_Set_sendMsg {
   my $cnt=0;
 
   my $sendData;
+  ## modulation ASK/OOK - MC
   if (defined($hash->{protocolObject}->getProperty($protocol,'format')) && $hash->{protocolObject}->getProperty($protocol,'format') eq 'manchester')
   {
     $clock += $_ for( @{$hash->{protocolObject}->getProperty($protocol,'clockrange')} );
@@ -858,6 +859,11 @@ sub SIGNALduino_Set_sendMsg {
     $sendData = $intro . 'SM;' . ($repeats > 0 ? "R=$repeats;" : '') . "C=$clock;D=$data;" . $outro . $frequency; # SM;R=2;C=400;D=AFAFAF;
     $hash->{logMethod}->($hash->{NAME}, 5, "$hash->{NAME}: Set_sendMsg, Preparing manchester protocol=$protocol, repeats=$repeats, clock=$clock data=$data");
 
+  ## modulation xFSK
+  } elsif (defined($hash->{protocolObject}->getProperty($protocol,'register')) && defined($hash->{protocolObject}->getProperty($protocol,'rfmode'))) {
+    $hash->{logMethod}->($hash->{NAME}, 5, "$hash->{NAME}: Set_sendMsg, Preparing ".$hash->{protocolObject}->getProperty($protocol,'rfmode')." protocol=$protocol, repeats=$repeats,data=$data");
+    $sendData = 'SN;' . ($repeats > 0 ? "R=$repeats;" : '') . "D=$data;" # SN;R=1;D=08C11484498ABCDE;
+  ## modulation ASK/OOK - MS MU
   } else {
     if ($protocol == 3 || substr($data,0,2) eq 'is') {
       if (substr($data,0,2) eq 'is') {
@@ -1264,10 +1270,14 @@ sub SIGNALduino_CheckSendRawResponse {
     my $name=$hash->{NAME};
     # zu testen der sendeQueue, kann wenn es funktioniert auf verbose 5
     $hash->{logMethod}->($name, 4, "$name: CheckSendrawResponse, sendraw answer: $msg");
-    #RemoveInternalTimer("HandleWriteQueue:$name");
     delete($hash->{ucCmd});
-    #SIGNALduino_HandleWriteQueue("x:$name"); # Todo #823 on github
-    InternalTimer(gettimeofday() + 0.1, \&SIGNALduino_HandleWriteQueue, "HandleWriteQueue:$name") if (scalar @{$hash->{QUEUE}} > 0 && InternalVal($name,'sendworking',0) == 0);
+    if ($msg =~ /D=[A-Za-z0-9]+;/ )
+    {
+      RemoveInternalTimer("HandleWriteQueue:$name");
+      SIGNALduino_HandleWriteQueue("x:$name"); # Todo #823 on github
+    } else {
+      InternalTimer(gettimeofday() , \&SIGNALduino_HandleWriteQueue, "HandleWriteQueue:$name") if (scalar @{$hash->{QUEUE}} > 0 && InternalVal($name,'sendworking',0) == 0);
+    }
   }
   return (undef);
 }
@@ -1620,7 +1630,7 @@ sub SIGNALduino_AddSendQueue {
   #SIGNALduino_Log3 $hash , 5, Dumper($hash->{QUEUE});
 
   $hash->{logMethod}->($hash, 5,"$name: AddSendQueue, " . $hash->{NAME} . ": $msg (" . @{$hash->{QUEUE}} . ')');
-  InternalTimer(gettimeofday() + 0.1, \&SIGNALduino_HandleWriteQueue, "HandleWriteQueue:$name") if (scalar @{$hash->{QUEUE}} == 1 && InternalVal($name,'sendworking',0) == 0);
+  InternalTimer(gettimeofday(), \&SIGNALduino_HandleWriteQueue, "HandleWriteQueue:$name") if (scalar @{$hash->{QUEUE}} == 1 && InternalVal($name,'sendworking',0) == 0);
 }
 
 ############################# package main, test exists
@@ -1810,9 +1820,11 @@ sub SIGNALduino_Read {
             $hash->{logMethod}->($name, 5, "$name: Read, try asyncOutput of message $returnMessage");
             my $ao = undef;
             $ao = asyncOutput( $hash->{ucCmd}->{asyncOut}, $hash->{ucCmd}->{cmd}.': ' . $returnMessage ) if (defined($returnMessage));
-          $hash->{logMethod}->($name, 5, "$name: Read, asyncOutput failed $ao") if (defined($ao));
+            $hash->{logMethod}->($name, 5, "$name: Read, asyncOutput failed $ao") if (defined($ao));
           }
-          delete($hash->{ucCmd});
+          if ( exists $hash->{ucCmd} && defined $hash->{ucCmd}->{cmd} &&  $hash->{ucCmd}->{cmd} ne "sendraw" ) {
+            delete $hash->{ucCmd} ;
+          }
         }
 
         if (exists($hash->{keepalive})) {
@@ -3260,6 +3272,7 @@ function SD_plistWindow(txt)
 sub SIGNALduino_FW_saveWhitelist {
   my $name = shift;
   my $wl_attr = shift;
+  my $hash = $defs{$name};
 
   if (!IsDevice($name)) {
     Log3 undef, 3, "$name: FW_saveWhitelist, is not a valid definition, operation aborted.";
@@ -3276,7 +3289,7 @@ sub SIGNALduino_FW_saveWhitelist {
   else {
     $wl_attr =~ s/,$//;   # Komma am Ende entfernen
   }
-  $attr{$name}{whitelist_IDs} = $wl_attr;
+  CommandAttr($hash,"$name whitelist_IDs $wl_attr");
   Log3 $name, 3, "$name: FW_saveWhitelist, $wl_attr";
   SIGNALduino_IdList("x:$name", $wl_attr);
 }
