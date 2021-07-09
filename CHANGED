@@ -1,3 +1,31 @@
+2021-07-09 - added AVANTEK Wireless doorbell & LED night light (#981)
+
+* Update SD_ProtocolData.pm
+
+ * added AVANTEK DB-LE
+ * Register optimized
+ * revised comments
+ * optimized parameters
+
+* Update README.md
+
+* Update 00_SIGNALduino.pm
+ * added AVANTEK rfmode
+
+* Update 14_SD_BELL.pm
+
+ * https://github.com/RFD-FHEM/RFFHEM/pull/981#discussion_r658270036 changed line
+ * added AVANTEK
+ * revised send cmd AVANTEK protocol
+ * added commandref
+
+* Update 00_SIGNALduino.pm
+
+ * revised cmd sendMsg for xFSK
+
+* Update 01_SIGNALduino_Set_sendMsg.t
+
+ * revised test sendMsg & added data to test
 2021-06-30 - added AVANTEK protocol
 * 14_SD_BELL.pm
   * revised send cmd AVANTEK protocol
