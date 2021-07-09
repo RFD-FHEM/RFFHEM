@@ -1,15 +1,55 @@
-2021-06-30 - Merge remote-tracking branch 'upstream/master'
-2021-06-30 - Update 14_SD_WS.pm
+2021-07-09 - added AVANTEK Wireless doorbell & LED night light (#981)
 
- * fix Log3 output
-2021-06-20 - little fix - attr whitelist_IDs (#983)
+* Update SD_ProtocolData.pm
+
+ * added AVANTEK DB-LE
+ * Register optimized
+ * revised comments
+ * optimized parameters
+
+* Update README.md
+
+* Update 00_SIGNALduino.pm
+ * added AVANTEK rfmode
+
+* Update 14_SD_BELL.pm
+
+ * https://github.com/RFD-FHEM/RFFHEM/pull/981#discussion_r658270036 changed line
+ * added AVANTEK
+ * revised send cmd AVANTEK protocol
+ * added commandref
 
 * Update 00_SIGNALduino.pm
 
- * revised save option whitelist_IDs (user see now ? on Save config)
-2021-06-16 - Update 00_SIGNALduino.pm
+ * revised cmd sendMsg for xFSK
+
+* Update 01_SIGNALduino_Set_sendMsg.t
+
+ * revised test sendMsg & added data to test
+2021-06-30 - added AVANTEK protocol
+* 14_SD_BELL.pm
+  * revised send cmd AVANTEK protocol
+  * https://github.com/RFD-FHEM/RFFHEM/pull/981#discussion_r658270036 changed line
+* 00_SIGNALduino.pm
+  * revised cmd sendMsg for xFSK
+
+2021-06-30 - little fix - SD_WS - Log3 output (#987)
+* Update 14_SD_WS.pm
+ * fix Log3 output
+
+2021-06-20 - little fix - attr whitelist_IDs (#983)
+
+* SD_ProtocolData.pm
+ * added AVANTEK DB-LE & register optimized
+* 14_SD_BELL.pm
+ * added AVANTEK & commandref
+* Update 00_SIGNALduino.pm
+ - added AVANTEK rfmode
+
+2021-06-20 - Update 00_SIGNALduino.pm
 
  * revised save option whitelist_IDs (user see now ? on Save config)
+
 2021-06-07 - Fix Multiple Send delay (#941)
 
 * Multiple set commands are not processed
