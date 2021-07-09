@@ -15,7 +15,7 @@
 package main;
 use strict;
 use warnings;
-#use version 0.77; our $VERSION = version->declare('v3.5.1');
+#use version 0.77; our $VERSION = version->declare('v3.5.2');
 
 my $missingModulSIGNALduino = '';
 
@@ -39,7 +39,7 @@ use List::Util qw(first);
 
 
 use constant {
-  20210709,
+  SDUINO_VERSION                  => '3.5.2+20210630',
   SDUINO_INIT_WAIT_XQ             => 1.5,     # wait disable device
   SDUINO_INIT_WAIT                => 2,
   SDUINO_INIT_MAXRETRY            => 3,
