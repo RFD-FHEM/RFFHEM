@@ -35,8 +35,8 @@ jobs:
           JSON="{\"include\":["
 
           # Loop by lines
-          IFS=","
-          for v in '${{ steps.file_changes.outputs.files_modified}}'
+          IFS=, read -ra values <<< "${{ steps.file_changes.outputs.files_modified}}"
+          for v in "${values[@]}"
           do
             # Add build to the matrix only if it is not already included
             JSONline="{\"file\": \"$v\"},"
@@ -58,7 +58,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: metadata
     strategy:
-      matrix: ${{ fromJson(needs.metadata.outputs.matrix) }}
+      matrix: ${{ fromJson(needs.metadata.outputs.matrix.file) }}
     steps:
       - uses: actions/checkout@v2
       - name: Update SDUINO_VERSION date
