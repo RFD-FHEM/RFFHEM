@@ -12,6 +12,7 @@ jobs:
       date: ${{ steps.date.outputs.date }}
       datetime: ${{ steps.date.outputs.datetimestr }}
     runs-on: ubuntu-latest
+    steps:
       - id: file_changes
         uses: trilom/file-changes-action@v1.2.3
       - name: test
