@@ -6,22 +6,43 @@ on:
       - 'FHEM/**'
       - '.github/workflows/version.yml'
 jobs:
-  build:
+  metadata:
+    outputs:
+      matrix: ${{ steps.file_changes.outputs.files_modified }}
+      date: ${{ steps.date.outputs.date }}
+      datetime: ${{ steps.date.outputs.datetimestr }}
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
+      - id: file_changes
+        uses: trilom/file-changes-action@v1.2.3
+      - name: test
+        run: |
+          cat $HOME/files.json
+          cat $HOME/files_modified.json
+          cat $HOME/files_added.json
+          cat $HOME/files_removed.json
+          echo '${{ steps.file_changes.outputs.files}}'
+          echo '${{ steps.file_changes.outputs.files_modified}}'
+          echo '${{ steps.file_changes.outputs.files_added}}'
+          echo '${{ steps.file_changes.outputs.files_removed}}'
       - name: Get current date
         id: date
         run: |
           echo "::set-output name=date::$(date +'%Y%m%d')"
           echo "::set-output name=datetimestr::$(date +'%Y-%m-%d %T')"
+ build:
+    runs-on: ubuntu-latest
+    needs: matrixgen
+    strategy:
+      matrix: ${{ fromJson(needs.metadata.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v2
       - name: Update SDUINO_VERSION date
         uses: jacobtomlinson/gha-find-replace@master
         with:
           find: \w+\s+=>\s\'\d.\d.\d\+\d+\'
           replace: "SDUINO_VERSION                  => '3.5.2+${{ steps.date.outputs.date }}'"
           include: "00_SIGNALduino.pm" 
-      - name: Update Date in ID line
+        - name: Update Date in ID line
         uses: jacobtomlinson/gha-find-replace@master
         with:
           find: \d\d\d\d-\d\d-\d\d\s\d\d:\d\d:\d\dZ\s\w+\s\$$
