@@ -30,7 +30,7 @@ jobs:
         run: |
           echo "::set-output name=date::$(date +'%Y%m%d')"
           echo "::set-output name=datetimestr::$(date +'%Y-%m-%d %T')"
- build:
+  build:
     runs-on: ubuntu-latest
     needs: matrixgen
     strategy:
