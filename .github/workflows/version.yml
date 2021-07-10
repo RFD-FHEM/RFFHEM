@@ -27,7 +27,7 @@ jobs:
           echo '${{ steps.file_changes.outputs.files_modified}}'
           echo '${{ steps.file_changes.outputs.files_added}}'
           echo '${{ steps.file_changes.outputs.files_removed}}'
-          echo "::set-output name=files_modified::[${{ steps.file_changes.outputs.files_modified }}]"
+          echo "::set-output name=files_modified::${{ steps.file_changes.outputs.files_modified }}"
       - name: Get current date
         id: date
         run: |
