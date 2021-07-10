@@ -1,9 +1,11 @@
 name: VersionReplace
 
 on:
-  pull_request: 
-    - 'FHEM/**'
-    - '.github/workflows/version.yml'
+  pull_request:
+    paths: 
+      - 'FHEM/**'
+      - '.github/workflows/version.yml'
+
 jobs:
   metadata:
     outputs:
