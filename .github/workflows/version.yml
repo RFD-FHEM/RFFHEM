@@ -98,8 +98,9 @@ jobs:
         working-directory: ${{ github.workspace	}}
       - name: replace files from artifacts
         run: |
-          for i in ~/updated-files/*.pm; do 
-              find ./FHEM -name "$i" -exec cp ~/updates-files/$i "{}" \;
+          for FPATH in ~/updated-files/*.pm; do 
+              FILE=$(basename $FPATH)
+              find ./FHEM -name "$FILE" -exec cp $FPATH "{}" \;
           done
       - name: git commit back
         run: |
