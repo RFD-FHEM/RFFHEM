@@ -79,7 +79,7 @@ jobs:
       - name: Save updated Files in artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: dist-without-markdown
+          name: updated-modules
           path: |
             ${{ matrix.file }}
   commit:
@@ -93,6 +93,10 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           path: ${{ github.workspace	}}
+      - name: Display structure of downloaded files
+        run: ls -R
+        working-directory: ${{ github.workspace	}}
+
       - name: git commit back
         run: |
           git config --global user.email "action@github.com"
