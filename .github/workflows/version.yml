@@ -25,9 +25,9 @@ jobs:
           echo "::set-output name=datetimestr::$(date -u +'%Y-%m-%d %T')"
       - name: output
         env:
-          HCO: ${{ toJson(github.event.head_commit) }}
-          ZCO: ${{ toJson(github.event.commits) }}
-          OCO: ${{ toJson(github.event.commits[0]) }}
+          HCO: ${{ toJSON(github.event.head_commit) }}
+          ZCO: ${{ toJSON(github.event.commits) }}
+          OCO: ${{ toJSON(github.event.commits[0]) }}
         run: |
           echo "$HCO"
           echo "$ZCO"
