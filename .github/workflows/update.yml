@@ -17,10 +17,11 @@ jobs:
       env:
         SENDER: ${{ toJson(github.event.sender) }}
         PR: ${{ toJson(github.event.push) }}
-        PUSHER: §${{ toJson(github.event.pusher.name) }}
+        PUSHER: §${{ toJson(github.event.pusher) }}
       run: |
         echo "$SENDER"
         echo "$PR"
+        echo "$PUSHER"
     - name: Extract branch name
       run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
       id: extract_branch
