@@ -16,17 +16,21 @@ jobs:
       - name: Get current date
         id: date
         run: |
-          echo "::set-output name=date::$(date +'%Y%m%d')"
-          echo "::set-output name=datetimestr::$(date +'%Y-%m-%d %T')"
+          echo "::set-output name=date::$(date -u +'%Y%m%d')"
+          echo "::set-output name=datetimestr::$(date -u +'%Y-%m-%d %T')"
       - name: Set matrix for build
         id: set-matrix
         run: |
           JSON="{\"include\":["
-
           # Loop by lines
           IFS=, read -ra values <<< "${{ steps.file_changes.outputs.files_modified}}"
           for v in "${values[@]}"
           do
+            # Exclude non pm files
+            if [[ "$v" != *.pm ]]; then 
+              continue
+            fi; 
+            
             # Add build to the matrix only if it is not already included
             JSONline="{\"file\": \"$v\"},"
             if [[ "$JSON" != *"$JSONline"* ]]; then
@@ -51,7 +55,6 @@ jobs:
       matrix: ${{ fromJson(needs.metadata.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v2.3.4
-        if: endsWith(matrix.file, '.pm')
       - name: Update SDUINO_VERSION date
         if: endsWith(matrix.file, '00_SIGNALduino.pm')
         uses: jacobtomlinson/gha-find-replace@master
@@ -84,8 +87,6 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           path: ${{ github.workspace	}}
-      - name: Display structure of downloaded files
-        run: ls -R ./updated-files/
         working-directory: ${{ github.workspace	}}
       - name: replace files from artifacts
         run: |
@@ -93,6 +94,16 @@ jobs:
               FILE=$(basename $FPATH)
               find ./FHEM -name "$FILE" -exec cp $FPATH "{}" \;
           done
+      - name: update controls file (FHEM)
+        uses: fhem/fhem-controls-actions@v2.0.1
+        with:
+          filename: controls_signalduino.txt 
+      - name: update controls file (lib)
+        uses: fhem/fhem-controls-actions@v2.0.1
+        with:
+          filename: controls_signalduino.txt 
+          directory: FHEM/lib
+          writemode: a
       - name: git commit back
         id: commit
         run: |
@@ -104,9 +115,3 @@ jobs:
         with:
           github_token: ${{ secrets.GH_TOKEN }}
           branch: ${{ github.head_ref }}
-      - name: Repository Dispatch
-        uses: peter-evans/repository-dispatch@v1
-        if: ${{ steps.commit.outputs.status == 'true' }}
-        with:
-          token: ${{ secrets.GH_TOKEN }}
-          event-type: version_trigger

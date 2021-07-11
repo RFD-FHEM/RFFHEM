@@ -6,10 +6,6 @@ on:
       - 'FHEM/**'
       - '.github/workflows/update.yml'
   
-  repository_dispatch:
-    types: 
-      - version_trigger
-
 jobs:
   update:
     env:
