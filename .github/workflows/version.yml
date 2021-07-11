@@ -99,7 +99,9 @@ jobs:
       - name: replace files from artifacts
         run: |
           for FPATH in ~/updated-files/*.pm; do 
+              echo "$FPATH"
               FILE=$(basename $FPATH)
+              echo "$FILE"
               find ./FHEM -name "$FILE" -exec cp $FPATH "{}" \;
           done
       - name: git commit back
