@@ -98,7 +98,7 @@ jobs:
         working-directory: ${{ github.workspace	}}
       - name: replace files from artifacts
         run: |
-          for FPATH in ~/updated-files/*.pm; do 
+          for FPATH in ./updated-files/*.pm; do 
               echo "$FPATH"
               FILE=$(basename $FPATH)
               echo "$FILE"
