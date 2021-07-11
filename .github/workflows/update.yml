@@ -13,6 +13,13 @@ jobs:
       CONTROLS_FILENAME: controls_signalduino.txt 
     runs-on: ubuntu-latest
     steps: 
+    - name: output
+      env:
+        SENDER: ${{ toJson(github.event.sender) }}
+        PR: ${{ toJson(github.event.push) }}
+      run: |
+        echo "$SENDER"
+        echo "$PR"
     - name: Extract branch name
       run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
       id: extract_branch
