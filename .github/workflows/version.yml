@@ -89,6 +89,8 @@ jobs:
       - uses: actions/checkout@v2
       - name: Download all modified artifacts
         uses: actions/download-artifact@v2
+        with:
+          path: ${{ github.workspace	}}
       - name: git commit back
         run: |
           git config --global user.email "action@github.com"
