@@ -54,15 +54,17 @@ jobs:
 
           # Set output
           echo "::set-output name=matrix::$( echo "$JSON" )"
-  build:
+  modify:
+    continue-on-error: true
     runs-on: ubuntu-latest
     needs: metadata
     strategy:
       matrix: ${{ fromJson(needs.metadata.outputs.matrix) }}
+    if: endsWith(matrix.file, '.pm')
     steps:
       - uses: actions/checkout@v2
       - name: Update SDUINO_VERSION date
-        if: ${{ matrix.file == '00_SIGNALduino.pm' }}
+        if: endsWith(matrix.file, '00_SIGNALduino.pm')
         uses: jacobtomlinson/gha-find-replace@master
         with:
           find: \w+\s+=>\s\'\d.\d.\d\+\d+\'
@@ -73,7 +75,19 @@ jobs:
         with:
           find: \d\d\d\d-\d\d-\d\d\s\d\d:\d\d:\d\dZ\s\w+\s\$$
           replace: "${{ needs.metadata.outputs.datetime }}Z ${{ github.event.pull_request.user.login }} $"
-          include: "${{ matrix.app }}"
+          include: "${{ matrix.file }}"
+      - name: Save updated Files in artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: dist-without-markdown
+          path: |
+            ${{ matrix.file }}
+  commit:
+    runs-on: ubuntu-latest
+    needs: modify
+      - uses: actions/checkout@v2
+      - name: Download all modified artifacts
+        uses: actions/download-artifact@v2
       - name: git commit back
         run: |
           git config --global user.email "action@github.com"
