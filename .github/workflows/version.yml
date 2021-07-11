@@ -79,7 +79,7 @@ jobs:
       - name: Save updated Files in artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: updated-modules
+          name: ${{ matrix.file }}
           path: |
             ${{ matrix.file }}
   commit:
