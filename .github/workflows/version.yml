@@ -25,11 +25,13 @@ jobs:
           echo "::set-output name=datetimestr::$(date -u +'%Y-%m-%d %T')"
       - name: output
         env:
-          HCO: ${{ toJSON(github.event.head_commit) }}
-          ZCO: ${{ toJSON(github.event.commits) }}
-          OCO: ${{ toJSON(github.event.commits[0]) }}
+          HCO: ${{ github.event.head_commit.message }}
+          ACO: ${{ github.event.head_commit.author }}
+          ZCO: ${{ github.event.commits }}
+          OCO: ${{ github.event.commits[0].message }}
         run: |
           echo "$HCO"
+          echo "$ACO"
           echo "$ZCO"
           echo "$OCO"
       - name: Set matrix for build
