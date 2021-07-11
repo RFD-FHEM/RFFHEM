@@ -25,9 +25,13 @@ jobs:
           echo "::set-output name=datetimestr::$(date -u +'%Y-%m-%d %T')"
       - name: output
         env:
-          CO: ${{ toJson(github.event) }}
+          HCO: ${{ toJson(github.event.head_commit) }}
+          ZCO: ${{ toJson(github.event.commits) }}
+          OCO: ${{ toJson(github.event.commits[0]) }}
         run: |
-          echo "$CO"
+          echo "$HCO"
+          echo "$ZCO"
+          echo "$OCO"
       - name: Set matrix for build
         id: set-matrix
         if: ${{ github.event.sender != 'actions-user' }}
