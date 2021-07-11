@@ -8,7 +8,7 @@ on:
   
 jobs:
   update:
-    if: ${{ github.event.sender != 'actions-user' }}
+    if: ${{ github.event.pusher.name != 'actions-user' }}
     env:
       CONTROLS_FILENAME: controls_signalduino.txt 
     runs-on: ubuntu-latest
@@ -17,6 +17,7 @@ jobs:
       env:
         SENDER: ${{ toJson(github.event.sender) }}
         PR: ${{ toJson(github.event.push) }}
+        PUSHER: §${{ github.event.pusher.name }}
       run: |
         echo "$SENDER"
         echo "$PR"
