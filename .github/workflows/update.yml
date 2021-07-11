@@ -8,6 +8,7 @@ on:
   
 jobs:
   update:
+    if: ${{ github.event.sender != 'actions-user' }}
     env:
       CONTROLS_FILENAME: controls_signalduino.txt 
     runs-on: ubuntu-latest
