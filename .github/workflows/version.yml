@@ -18,6 +18,10 @@ jobs:
         run: |
           echo "::set-output name=date::$(date -u +'%Y%m%d')"
           echo "::set-output name=datetimestr::$(date -u +'%Y-%m-%d %T')"
+      - name: output
+        run: |
+          echo "toJSON(github.event.sender)"
+          echo "toJSON(github.event.pull_request)"
       - name: Set matrix for build
         id: set-matrix
         if: ${{ github.event.pull_request.sender.login != 'actions-user' }}
