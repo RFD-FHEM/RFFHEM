@@ -14,23 +14,6 @@ jobs:
       datetime: ${{ steps.date.outputs.datetimestr }}
     runs-on: ubuntu-latest
     steps:
-      - name: Expose git commit data
-        uses: rlespinasse/git-commit-data-action@v1.x
-
-      - name: Print git commit data
-        run: |
-          echo "Get author info"
-          echo " - ${{ env.GIT_COMMIT_AUTHOR }}"
-          echo " - ${{ env.GIT_COMMIT_AUTHOR_NAME }}"
-          echo " - ${{ env.GIT_COMMIT_AUTHOR_EMAIL }}"
-          echo "Get committer info"
-          echo " - ${{ env.GIT_COMMIT_COMMITTER }}"
-          echo " - ${{ env.GIT_COMMIT_COMMITTER_NAME }}"
-          echo " - ${{ env.GIT_COMMIT_COMMITTER_EMAIL }}"
-          echo "Get message info"
-          echo " - ${{ env.GIT_COMMIT_MESSAGE_SUBJECT }}"
-          echo " - ${{ env.GIT_COMMIT_MESSAGE_SUBJECT_SANITIZED }}"
-          echo " - ${{ env.GIT_COMMIT_MESSAGE_BODY }}"
       - id: file_changes
         uses: trilom/file-changes-action@v1.2.3
         with:
@@ -42,11 +25,9 @@ jobs:
           echo "::set-output name=datetimestr::$(date -u +'%Y-%m-%d %T')"
       - name: output
         env:
-          SENDER: ${{ toJson(github.event.sender) }}
-          PR: ${{ toJson(github.event.pull_request) }}
+          CO: ${{ toJson(github.event) }}
         run: |
-          echo "$SENDER"
-          echo "$PR"
+          echo "$CO"
       - name: Set matrix for build
         id: set-matrix
         if: ${{ github.event.sender != 'actions-user' }}
