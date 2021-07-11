@@ -106,7 +106,7 @@ jobs:
           branch: ${{ github.head_ref }}
       - name: Repository Dispatch
         uses: peter-evans/repository-dispatch@v1
-        if: steps.commit.outputs.status == "true"
+        if: ${{ steps.commit.outputs.status == 'true' }}
         with:
           token: ${{ secrets.GH_TOKEN }}
           event-type: version_trigger
