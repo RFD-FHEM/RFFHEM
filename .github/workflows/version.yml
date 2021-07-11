@@ -60,9 +60,9 @@ jobs:
     needs: metadata
     strategy:
       matrix: ${{ fromJson(needs.metadata.outputs.matrix) }}
-    if: endsWith(matrix.file, '.pm')
     steps:
       - uses: actions/checkout@v2
+        if: endsWith(matrix.file, '.pm')
       - name: Update SDUINO_VERSION date
         if: endsWith(matrix.file, '00_SIGNALduino.pm')
         uses: jacobtomlinson/gha-find-replace@master
