@@ -20,6 +20,7 @@ jobs:
           echo "::set-output name=datetimestr::$(date -u +'%Y-%m-%d %T')"
       - name: Set matrix for build
         id: set-matrix
+        if: ${{ github.event.pull_request.sender.login != 'actions-user' }}
         run: |
           JSON="{\"include\":["
           # Loop by lines
@@ -30,7 +31,6 @@ jobs:
             if [[ "$v" != *.pm ]]; then 
               continue
             fi; 
-            
             # Add build to the matrix only if it is not already included
             JSONline="{\"file\": \"$v\"},"
             if [[ "$JSON" != *"$JSONline"* ]]; then
@@ -65,7 +65,7 @@ jobs:
       - name: Update Date in ID line
         uses: jacobtomlinson/gha-find-replace@master
         with:
-          find: \d\d\d\d-\d\d-\d\d\s\d\d:\d\d:\d\dZ\s\w+\s
+          find: \d\d\d\d-\d\d-\d\d\s\d\d:\d\d:\d\dZ\s\w+\s   
           replace: "${{ needs.metadata.outputs.datetime }}Z ${{ github.event.pull_request.user.login }} "
           include: "${{ matrix.file }}"
       - name: Save updated Files in artifacts
