@@ -79,7 +79,7 @@ jobs:
       - name: Save updated Files in artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: ${{ matrix.file }}
+          name: updated-files
           path: |
             ${{ matrix.file }}
   commit:
@@ -96,7 +96,11 @@ jobs:
       - name: Display structure of downloaded files
         run: ls -R
         working-directory: ${{ github.workspace	}}
-
+      - name: replace files from artifacts
+        run: |
+          for i in ~/updates-files/*.pm; do 
+              find ./FHEM -name "$i" --exec cp ~/updates-files/$i "{}" \;
+          done
       - name: git commit back
         run: |
           git config --global user.email "action@github.com"
