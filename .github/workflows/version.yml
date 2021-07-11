@@ -74,8 +74,8 @@ jobs:
         if: endsWith(matrix.file, '.pm')
         uses: jacobtomlinson/gha-find-replace@master
         with:
-          find: \d\d\d\d-\d\d-\d\d\s\d\d:\d\d:\d\dZ\s\w+\s\$
-          replace: "${{ needs.metadata.outputs.datetime }}Z ${{ github.event.pull_request.user.login }} \$"
+          find: \d\d\d\d-\d\d-\d\d\s\d\d:\d\d:\d\dZ\s\w+\s
+          replace: "${{ needs.metadata.outputs.datetime }}Z ${{ github.event.pull_request.user.login }} "
           include: "${{ matrix.file }}"
       - name: Save updated Files in artifacts
         if: endsWith(matrix.file, '.pm')
