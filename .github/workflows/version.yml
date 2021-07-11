@@ -71,12 +71,14 @@ jobs:
           replace: "SDUINO_VERSION                  => '3.5.2+${{ needs.metadata.outputs.date }}'"
           include: "${{ matrix.file }}"
       - name: Update Date in ID line
+        if: endsWith(matrix.file, '.pm')
         uses: jacobtomlinson/gha-find-replace@master
         with:
-          find: \d\d\d\d-\d\d-\d\d\s\d\d:\d\d:\d\dZ\s\w+\s\$$
-          replace: "${{ needs.metadata.outputs.datetime }}Z ${{ github.event.pull_request.user.login }} $"
+          find: \d\d\d\d-\d\d-\d\d\s\d\d:\d\d:\d\dZ\s\w+\s\$
+          replace: "${{ needs.metadata.outputs.datetime }}Z ${{ github.event.pull_request.user.login }} \$"
           include: "${{ matrix.file }}"
       - name: Save updated Files in artifacts
+        if: endsWith(matrix.file, '.pm')
         uses: actions/upload-artifact@v2
         with:
           name: updated-files
