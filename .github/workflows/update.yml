@@ -7,7 +7,9 @@ on:
       - '.github/workflows/update.yml'
 
 jobs:
-  pull_check:
+  pr_check:
+    outputs:
+      result: ${{ steps.checkbranch.outputs.result }}
     runs-on: ubuntu-latest
     steps:
     - name: Extract branch name
@@ -34,7 +36,8 @@ jobs:
         #env:
           #BRANCH_NAME: ${{ steps.extract_branch.outputs.BRANCH_NAME }}
   update:
-    if: steps.checkbranch.outputs.result != 'true'
+    needs: pr_check
+    if: needs.pr_check.outputs.result != 'true'
     env:
       CONTROLS_FILENAME: controls_signalduino.txt 
     runs-on: ubuntu-latest
