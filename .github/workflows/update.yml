@@ -5,7 +5,7 @@ on:
     paths: 
       - 'FHEM/**'
       - '.github/workflows/update.yml'
-      
+
 jobs:
   pull_check:
     steps:
@@ -17,8 +17,7 @@ jobs:
     - name: Check if Branch is in PR
       if: github.event_name == 'push'
       id: checkbranch
-    - uses: actions/github-script@v4
-      id: set-result
+      uses: actions/github-script@v4
       with:
         script: |
           const resp = await github.pulls.list{
