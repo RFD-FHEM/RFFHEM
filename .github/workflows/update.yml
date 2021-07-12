@@ -5,10 +5,36 @@ on:
     paths: 
       - 'FHEM/**'
       - '.github/workflows/update.yml'
-  
+
 jobs:
+  pre:
+    steps:
+    - name: Extract branch name
+      id: extract_branch
+      run: |
+        echo ${GITHUB_REF##*/}
+        echo ::set-output name=BRANCH_NAME::${GITHUB_REF#refs/*/}
+    - name: Check if Branch is in PR
+      if: github.event_name == 'push'
+      id: checkbranch
+    - uses: actions/github-script@v4
+      id: set-result
+      with:
+        script: |
+          const resp = await github.pulls.list{
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+          });
+          if (resp.data) {
+            const pullRequestsWithBranch = resp.data.filter(it => it.head.ref == process.env.BRANCH_NAME)
+            console.log(pullRequestsWithBranch)
+            return pullRequestsWithBranch.length >= 1
+          }
+          return false
+        env:
+          BRANCH_NAME: ${{ steps.extract_branch.outputs.BRANCH_NAME }}
   update:
-    if: ${{ github.event.pusher.name != 'actions-user' }}
+    if:  steps.checkbranch.outputs.result != 'true'
     env:
       CONTROLS_FILENAME: controls_signalduino.txt 
     runs-on: ubuntu-latest
