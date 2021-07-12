@@ -1,3 +1,12 @@
+2021-07-12 - Update 00_SIGNALduino.pm
+
+ * sort cc1101 sets alphabetical
+ * revised hardtabs for Perl::Critic
+ * added cc1101_dataRate to setlist
+ * added cc1101_deviatn to setlist
+ * revised output DataRate to kBaud
+ * revised spelling mistake Bandwidth kHz
+ * revised commandref
 2021-07-10 - Fixes CPU and MEM usage patternExists (#988)
 
 * 00_SIGNALduino.pm
