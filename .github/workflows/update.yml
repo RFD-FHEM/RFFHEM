@@ -31,8 +31,8 @@ jobs:
             return pullRequestsWithBranch.length >= 1
           }
           return false
-        env:
-          BRANCH_NAME: ${{ steps.extract_branch.outputs.BRANCH_NAME }}
+        #env:
+          #BRANCH_NAME: ${{ steps.extract_branch.outputs.BRANCH_NAME }}
   update:
     if: steps.checkbranch.outputs.result != 'true'
     env:
