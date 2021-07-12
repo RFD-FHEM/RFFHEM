@@ -8,6 +8,7 @@ on:
 
 jobs:
   pull_check:
+    runs-on: ubuntu-latest
     steps:
     - name: Extract branch name
       id: extract_branch
