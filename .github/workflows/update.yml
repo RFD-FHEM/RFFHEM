@@ -5,8 +5,9 @@ on:
     paths: 
       - 'FHEM/**'
       - '.github/workflows/update.yml'
+      
 jobs:
-  pre:
+  pull_check:
     steps:
     - name: Extract branch name
       id: extract_branch
@@ -33,7 +34,7 @@ jobs:
         env:
           BRANCH_NAME: ${{ steps.extract_branch.outputs.BRANCH_NAME }}
   update:
-    if:  steps.checkbranch.outputs.result != 'true'
+    if: steps.checkbranch.outputs.result != 'true'
     env:
       CONTROLS_FILENAME: controls_signalduino.txt 
     runs-on: ubuntu-latest
