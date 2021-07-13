@@ -15,7 +15,6 @@ jobs:
     - name: Extract branch name
       id: extract_branch
       run: |
-        echo ${GITHUB_REF##*/}
         echo ::set-output name=BRANCH_NAME::${GITHUB_REF#refs/*/}
     - name: Check if Branch is in PR
       if: github.event_name == 'push'
@@ -85,5 +84,5 @@ jobs:
     - name: git push
       uses: ad-m/github-push-action@v0.6.0
       with:
-        github_token: ${{ secrets.GH_TOKEN }}
+        github_token: ${{ secrets.GITHUB_TOKEN }}
         branch: ${{ steps.extract_branch.outputs.branch }}

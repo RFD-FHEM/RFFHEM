@@ -23,17 +23,6 @@ jobs:
         run: |
           echo "::set-output name=date::$(date -u +'%Y%m%d')"
           echo "::set-output name=datetimestr::$(date -u +'%Y-%m-%d %T')"
-      - name: output
-        env:
-          HCO: ${{ github.event.head_commit.message }}
-          ACO: ${{ github.event.head_commit.author }}
-          ZCO: ${{ github.event.commits }}
-          OCO: ${{ github.event.commits[0].message }}
-        run: |
-          echo "$HCO"
-          echo "$ACO"
-          echo "$ZCO"
-          echo "$OCO"
       - name: Set matrix for build
         id: set-matrix
         if: ${{ github.event.sender != 'actions-user' }}
@@ -73,13 +62,13 @@ jobs:
       - uses: actions/checkout@v2.3.4
       - name: Update SDUINO_VERSION date
         if: endsWith(matrix.file, '00_SIGNALduino.pm')
-        uses: jacobtomlinson/gha-find-replace@master
+        uses: jacobtomlinson/gha-find-replace@v0.1.4
         with:
           find: \w+\s+=>\s\'\d.\d.\d\+\d+\'
           replace: "SDUINO_VERSION                  => '3.5.2+${{ needs.metadata.outputs.date }}'"
           include: "${{ matrix.file }}"
       - name: Update Date in ID line
-        uses: jacobtomlinson/gha-find-replace@master
+        uses: jacobtomlinson/gha-find-replace@v0.1.4
         with:
           find: \d\d\d\d-\d\d-\d\d\s\d\d:\d\d:\d\dZ\s\w+\s   
           replace: "${{ needs.metadata.outputs.datetime }}Z ${{ github.event.pull_request.user.login }} "
@@ -88,6 +77,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: updated-files
+          retention-days: 1
           path: |
             ${{ matrix.file }}
   commit:
@@ -109,16 +99,16 @@ jobs:
               FILE=$(basename $FPATH)
               find ./FHEM -name "$FILE" -exec cp $FPATH "{}" \;
           done
-      #- name: update controls file (FHEM)
-      #  uses: fhem/fhem-controls-actions@v2.0.1
-      #  with:
-      #    filename: controls_signalduino.txt 
-      #- name: update controls file (lib)
-      #  uses: fhem/fhem-controls-actions@v2.0.1
-      #  with:
-      #    filename: controls_signalduino.txt 
-      #    directory: FHEM/lib
-      #    writemode: a
+      - name: update controls file (FHEM)
+        uses: fhem/fhem-controls-actions@v2.0.1
+        with:
+          filename: controls_signalduino.txt 
+      - name: update controls file (lib)
+        uses: fhem/fhem-controls-actions@v2.0.1
+        with:
+          filename: controls_signalduino.txt 
+          directory: FHEM/lib
+          writemode: a
       - name: git commit back
         id: commit
         run: |
