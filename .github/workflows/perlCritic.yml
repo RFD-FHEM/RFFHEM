@@ -1,0 +1,14 @@
+name: Perlcritic
+on: [workflow_dispatch,push]
+
+jobs:
+  critic:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Perl Critic
+      uses: Difegue/action-perlcritic@2.0.0
+      env:
+        GITHUB_TOKEN:  ${{ secrets.GITHUB_TOKEN }}
+      with:
+          args: FHEM/* 
