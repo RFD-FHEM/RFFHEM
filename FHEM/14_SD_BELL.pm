@@ -1,5 +1,5 @@
 ##############################################################################
-# $Id: 14_SD_BELL.pm 0 2021-06-30 15:30:35Z HomeAuto_User $
+# $Id: 14_SD_BELL.pm 0 2021-07-12 22:30:35Z HomeAuto_User $
 #
 # The file is part of the SIGNALduino project.
 # The purpose of this module is to support many wireless BELL devices.
@@ -230,7 +230,7 @@ sub Set {
     
       my $msg = "P$protocol#";
       if ($protocol == 112) {
-        $msg .= $rawDatasend;
+        $msg .= $rawDatasend . '0123456'; # cc1101 RX FIFO 4, 8 ... Bytes
       } else {
         my $hlen = length($rawDatasend);
         my $blen = $hlen * 4;
