@@ -87,7 +87,7 @@ package lib::SD_ProtocolData;
   use strict;
   use warnings;
 
-  our $VERSION = '1.31';
+  our $VERSION = '1.33';
 
   our %protocols = (
     "0" =>  ## various weather sensors (500 | 9100)
@@ -2916,6 +2916,26 @@ package lib::SD_ProtocolData;
         clientmodule    => 'SD_BELL',
         length_min      => '16',
         length_max      => '16',
+      },
+    "113" =>  ## Wireless Grill Thermometer, Model name: GFGT 433 B1, WDJ7036, FCC ID: 2AJ9O-GFGT433B1, 
+              # https://github.com/RFD-FHEM/RFFHEM/issues/992 @ muede-de 2021-07-13
+              # Sensor sends every 5 seconds 1 message.
+      {
+        name            => 'GFGT_433_B1',
+        comment         => 'Wireless Grill Thermometer',
+        id              => '113',
+        knownFreqs      => '433.92',
+        one             => [3,-1],  # 750,-250
+        zero            => [1,-3],  # 250,-750
+        sync            => [1,-12], # 250,-3000
+        clockabs        => 250,
+        format          => 'twostate',
+        preamble        => 'u113#',
+        # preamble        => 'W113#',
+        # clientmodule    => 'SD_WS',
+        # modulematch     => '^W113#',
+        length_min      => '48',
+        length_max      => '48',
       },
     ########################################################################
     #### ###  register informations from other hardware protocols  #### ####
