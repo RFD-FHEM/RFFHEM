@@ -1,3 +1,11 @@
+2021-07-13 - AVANTEK - small fix send data (#991)
+
+* Update 14_SD_BELL.pm
+
+ * fix AVANTEK (RX FIFO)
+2021-07-12 - Update 14_SD_BELL.pm
+
+ * fix AVANTEK (RX FIFO)
 2021-07-10 - Fixes CPU and MEM usage patternExists (#988)
 
 * 00_SIGNALduino.pm
