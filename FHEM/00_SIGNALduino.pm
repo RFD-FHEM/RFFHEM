@@ -39,7 +39,7 @@ use List::Util qw(first);
 
 
 use constant {
-  SDUINO_VERSION                  => '3.5.2+20210630',
+  SDUINO_VERSION                  => '3.5.2+20210709',
   SDUINO_INIT_WAIT_XQ             => 1.5,     # wait disable device
   SDUINO_INIT_WAIT                => 2,
   SDUINO_INIT_MAXRETRY            => 3,
@@ -1980,15 +1980,16 @@ sub SIGNALduino_PatternExists {
   #Debug 'plist: '.Dumper($patternList) if($debug);
   #Debug 'searchlist: '.Dumper($search) if($debug);
 
-  my $valid=1;
-  my @pstr;
   my $debug = AttrVal($hash->{NAME},'debug',0);
   my $i=0;
-  my $maxcol=0;
+  my @indexer;
+  my @sumlist;
+  my %plist=();
 
-  foreach my $searchpattern (@{$search})    # z.B. [1, -4]
+  for my $searchpattern (@{$search})    # z.B. [1, -4]
   {
-    #my $patt_id;
+    next if (exists $plist{$searchpattern});
+
     # Calculate tolernace for search
     #my $tol=abs(abs($searchpattern)>=2 ?$searchpattern*0.3:$searchpattern*1.5);
     my $tol=abs(abs($searchpattern)>3 ? abs($searchpattern)>16 ? $searchpattern*0.18 : $searchpattern*0.3 : 1);  #tol is minimum 1 or higer, depending on our searched pulselengh
@@ -2004,53 +2005,66 @@ sub SIGNALduino_PatternExists {
       # Extract fist pattern, which is nearst to our searched value
       my @closestidx = (sort {$pattern_gap{$a} <=> $pattern_gap{$b}} keys %pattern_gap);
 
-      my $idxstr='';
-      my $r=0;
-
-      while (my ($item) = splice(@closestidx, 0, 1))
-      {
-        $pstr[$i][$r]=$item;
-        $r++;
-        Debug "closest pattern has index: $item" if($debug);
-      }
-      $valid=1;
+      $plist{$searchpattern} = 1;
+      push @indexer, $searchpattern; 
+      push @sumlist, [@closestidx];  
     } else {
       # search is not found, return -1
       return -1;
-      last;
     }
     $i++;
-    #return ($valid ? $pstr : -1);  # return $pstr if $valid or -1
-
-    #foreach $patt_id (keys %$patternList) {
-      #Debug "$patt_id. chk ->intol $patternList->{$patt_id} $searchpattern $tol";
-      #$valid =  SIGNALduino_inTol($patternList->{$patt_id}, $searchpattern, $tol);
-      #if ( $valid) #one pulse found in tolerance, search next one
-      #{
-      # $pstr="$pstr$patt_id";
-      # # provide this index for further lookup table -> {$patt_id =  $searchpattern}
-      # Debug 'pulse found';
-      # last ; ## Exit foreach loop if searched pattern matches pattern in list
-      #}
-    #}
-    #last if (!$valid);  ## Exit loop if a complete iteration has not found anything
   }
-  my @results = ('');
 
-  foreach my $subarray (@pstr)
+  sub cartesian_product {
+    use List::Util qw(reduce);
+    reduce {
+      [ map {
+        my $item = $_;
+        map [ @$_, $item ], @$a
+      } @$b ]
+    } [[]], @_
+  }
+  my @res = cartesian_product @sumlist;
+  Debug qq[sumlists is: ].Dumper @sumlist if($debug);
+  Debug qq[res is: ].Dumper $res[0] if($debug);
+  Debug qq[indexer is: ].Dumper \@indexer if($debug);
+
+  OUTERLOOP:
+  for my $i (0..$#{$res[0]})
   {
-    @results = map {my $res = $_; map $res.$_, @$subarray } @results;
+
+    ## Check if we have same patternindex for different values and skip this invalid ones
+    my %count;  
+    for (@{$res[0][$i]}) 
+    { 
+      $count{$_}++; 
+      next OUTERLOOP if ($count{$_} > 1)
+    };
+    
+    # Create a mapping table to exchange the values later on
+    for (my $x=0;$x <= $#indexer;$x++)
+    {
+      $plist{$indexer[$x]}  = $res[0][$i][$x]; 
+    }
+    Debug qq[plist is for this check ].Dumper(\%plist) if($debug);
+
+    # Create our searchstring with our mapping table
+    my @patternVariant= @{$search};
+    for my $v (@patternVariant)
+    {
+      #Debug qq[value before is: $v ] if($debug);
+      $v = $plist{$v};
+      #Debug qq[after: $v ] if($debug);
+
+    }
+    Debug qq[patternVariant is ].Dumper(\@patternVariant) if($debug);
+    my $search_pattern = join '', @patternVariant;
+
+    (index ($$data, $search_pattern) > -1) ? return $search_pattern : next;
+    
   }
+  return -1;  
 
-  foreach my $search (@results)
-  {
-    Debug "looking for substr $search" if($debug);
-    return $search if (index( ${$data}, $search) >= 0);
-  }
-
-  return -1;
-
-  #return ($valid ? @results : -1);  # return @pstr if $valid or -1
 }
 
 ############################# package main
