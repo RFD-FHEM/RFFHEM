@@ -7,8 +7,8 @@ use Test2::Todo;
 our %defs;
 
 InternalTimer(time(), sub {
-	my $target = shift;
-	my $targetHash = $defs{$target};
+  my $target = shift;
+  my $targetHash = $defs{$target};
 
     
     subtest 'setPatable' => sub {
@@ -70,7 +70,9 @@ InternalTimer(time(), sub {
     };
 
     subtest 'CalcDataRate' => sub {
-
+      # sub input: 57 , 150
+      # sub output: 5c , 7a
+      # return FHEM WEB: set_dataRate: Setting MDMCFG4..MDMCFG3 to 5c 7a = 150 kHz
     };
 
     subtest 'SetDeviatn' => sub {
@@ -99,7 +101,7 @@ InternalTimer(time(), sub {
 
     $todo->end;
     plan(11);
-	exit(0);
+  exit(0);
 },'cc1101dummyDuino');
 
 1;
