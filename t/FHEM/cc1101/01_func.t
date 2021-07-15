@@ -22,9 +22,9 @@ InternalTimer(time(), sub {
             is(cc1101::SetPatable($targetHash,@paval),U(),q[verify return]);
             is($targetHash->{QUEUE},array {
                 item 'x12';
+                etc();
             } ,"Verify expected queue element entrys");
             @{$targetHash->{QUEUE}}=();
-
         };
 
 
@@ -62,6 +62,7 @@ InternalTimer(time(), sub {
       # -> transfer to sub SIGNALduino_AddSendQueue:  W0791
       # -> transfer to sub SIGNALduino_WriteInit:     HASH(0x1b29c88)
       # sub output: return
+
     };
 
     subtest 'SetRegistersUser' => sub {
@@ -88,6 +89,7 @@ InternalTimer(time(), sub {
       # sub input:  57, 150
       # sub output: 5c, 7a
     };
+    $todo->end;
 
     subtest 'SetDeviatn' => sub {
       # sub input:  HASH(0x1b29c88) , cc1101_deviatn 150
@@ -111,15 +113,18 @@ InternalTimer(time(), sub {
       is(cc1101::SetFreq($targetHash,@SetFreq),U(),q[verify return]);
       is($targetHash->{QUEUE},array {
         item 'W0F11';
+        etc();
       } ,"Verify expected queue element entrys");
       is($targetHash->{QUEUE},array {
         item 'W0F11';
         item 'W101a';
+        etc();
       } ,"Verify expected queue element entrys");
       is($targetHash->{QUEUE},array {
         item 'W0F11';
         item 'W101a';
         item 'W116f';
+        etc();
       } ,"Verify expected queue element entrys");
       @{$targetHash->{QUEUE}}=();
     };
@@ -135,6 +140,7 @@ InternalTimer(time(), sub {
       is(cc1101::setrAmpl($targetHash,@setrAmpl),U(),q[verify return]);
       is($targetHash->{QUEUE},array {
         item 'W1D06';
+        etc();
       } ,"Verify expected queue element entrys");
       @{$targetHash->{QUEUE}}=();
     };
@@ -149,14 +155,19 @@ InternalTimer(time(), sub {
       is(cc1101::GetRegister($targetHash,@GetRegister),U(),q[verify return]);
       is($targetHash->{QUEUE},array {
         item 'C10';
+        end();
       } ,"Verify expected queue element entrys");
       @{$targetHash->{QUEUE}}=();
     };
+
+    my $todo = Test2::Todo->new(reason => 'Tests needs to be implemented');
 
     subtest 'CalcbWidthReg' => sub {
       # sub input:  HASH(0x1b29c88), 67, 270
       # sub output: 67,270
     };
+
+    $todo->end;
 
     subtest 'SetSens' => sub {
       # sub input:                                    HASH(0x1b29c88), cc1101_sens 12
@@ -169,11 +180,11 @@ InternalTimer(time(), sub {
       is(cc1101::SetSens($targetHash,@SetSens),U(),q[verify return]);
       is($targetHash->{QUEUE},array {
         item 'W1F92';
+        etc();
       } ,"Verify expected queue element entrys");
       @{$targetHash->{QUEUE}}=();
     };
 
-    $todo->end;
     plan(11);
     exit(0);
 },'cc1101dummyDuino');
