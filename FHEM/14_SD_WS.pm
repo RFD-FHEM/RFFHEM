@@ -1,4 +1,4 @@
-# $Id: 14_SD_WS.pm 21666 2021-06-03 16:00:53Z Sidey $
+# $Id: 14_SD_WS.pm 21666 2021-07-16 16:00:53Z Sidey $
 #
 # The purpose of this module is to support serval
 # weather sensors which use various protocol
@@ -32,6 +32,7 @@
 # 01.05.2021 neues Protokoll 108: Bresser 5-in-1 Comfort Wetter Center, Profi Regenmesser
 # 15.05.2021 neues Protokoll 110: ADE WS1907 Weather station with rain gauge
 # 03.06.2021 PerlCritic - HardTabs durch Leerzeichen ersetzt & Einrueckungen sortiert (keine Code/Syntaxaenderung vorgenommen)
+# 16.07.2021 neues Protokoll 113: Wireless Grill Thermometer, Model name: GFGT 433 B1
 
 package main;
 
@@ -39,8 +40,6 @@ package main;
 
 use strict;
 use warnings;
-# use Digest::CRC qw(crc);
-# use Data::Dumper;
 
 # Forward declarations
 sub SD_WS_LFSR_digest8_reflect($$$$);
@@ -85,6 +84,7 @@ sub SD_WS_Initialize($)
     "SD_WS_94_T.*"    => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4:Temp,", autocreateThreshold => "3:180"},
     'SD_WS_108.*'     => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4:Temp,', autocreateThreshold => '5:120'},
     'SD_WS_110_TR.*'  => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4:Temp,', autocreateThreshold => '3:180'},
+    'SD_WS_113_T.*'   => { ATTR => 'event-min-interval:.*:60 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4:Temp,', autocreateThreshold => '10:180'},
   };
 
 }
@@ -117,12 +117,10 @@ sub SD_WS_Undef($$)
   return undef;
 }
 
-
 #############################
 sub SD_WS_Parse($$)
 {
   my ($iohash, $msg) = @_;
-  #my $rawData = substr($msg, 2);
   my $name = $iohash->{NAME};
   my $ioname = $iohash->{NAME};
   my ($protocol,$rawData) = split("#",$msg);
@@ -141,6 +139,7 @@ sub SD_WS_Parse($$)
   my $channel;
   my $rawTemp;
   my $temp;
+  my $temp2;
   my $hum;
   my $windspeed;
   my $winddir;
@@ -818,6 +817,34 @@ sub SD_WS_Parse($$)
                                 }
                               },
     },
+    113 => {
+        # Wireless Grill Thermometer, Model name: GFGT 433 B1
+        # ---------------------------------------------------------------------
+        # 0    4    | 8    12   | 16   20   | 24   28   | 32   36   | 40   44
+        # 0010 1111 | 0000 0110 | 1110 0100 | 0111 0000 | 1101 0001 | 0011 1110 - 2F06E470D13E, T: 201, T2: 279
+        # iiii iiii | ???? tt22 | tttt tttt | 2222 2222 | ???? ???? | ???? ????
+        # i:  8 bit id, changes each time the sensor is switched on
+        # t: 10 bit unsigned temperature 1 fahrenheit offset by 90
+        # 2: 10 bit unsigned temperature 2 fahrenheit offset by 90
+
+        sensortype => 'GFGT_433_B1',
+        model      => 'SD_WS_113_T',
+        prematch   => sub { return 1; }, # no precheck known
+        id         => sub { my ($rawData,undef) = @_; return substr($rawData,0,2); },
+        temp       => sub { my (undef,$bitData) = @_;
+                            $rawTemp =  SD_WS_binaryToNumber($bitData,12,13) * 256 + SD_WS_binaryToNumber($bitData,16,23);
+                            my $tempFh = $rawTemp - 90; # Grad Fahrenheit
+                            Log3 $name, 4, "$name: SD_WS_113_T tempraw1 = $rawTemp, temp1 = $tempFh Grad Fahrenheit";
+                            return (round((($tempFh - 32) * 5 / 9) , 0)); # Grad Celsius
+                          },
+        temp2      => sub { my (undef,$bitData) = @_;
+                            $rawTemp =  SD_WS_binaryToNumber($bitData,14,15) * 256 + SD_WS_binaryToNumber($bitData,24,31);
+                            my $tempFh = $rawTemp - 90; # Grad Fahrenheit
+                            Log3 $name, 4, "$name: SD_WS_113_T tempraw2 = $rawTemp, temp2 = $tempFh Grad Fahrenheit";
+                            return (round((($tempFh - 32) * 5 / 9) , 0)); # Grad Celsius
+                          },
+        crcok      => sub {return 1;}, # Check could not be determined yet.
+    } ,
   );
 
   Log3 $name, 4, "$name: SD_WS_Parse protocol $protocol, rawData $rawData";
@@ -1129,6 +1156,7 @@ sub SD_WS_Parse($$)
     }
     $id = $decodingSubs{$protocol}{id}->( $rawData,$bitData );
     $temp = $decodingSubs{$protocol}{temp}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{temp}));
+    $temp2 = $decodingSubs{$protocol}{temp2}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{temp2}));
     $hum = $decodingSubs{$protocol}{hum}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{hum}));
     $windspeed = $decodingSubs{$protocol}{windspeed}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{windspeed}));
     ($winddir,$winddirtxt) = $decodingSubs{$protocol}{winddir}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{winddir}));
@@ -1142,7 +1170,6 @@ sub SD_WS_Parse($$)
     $rain_total = $decodingSubs{$protocol}{rain_total}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{rain_total}));
     $sendCounter = $decodingSubs{$protocol}{sendCounter}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{sendCounter}));
     $beep = $decodingSubs{$protocol}{beep}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{beep}));
-
     if ($model eq "SD_WS_33_T" || $model eq "SD_WS_58_T") {      # for SD_WS_33 or SD_WS_58 discrimination T - TH
       $model = $decodingSubs{$protocol}{model}."H" if $hum != 0; # for models with Humidity
     }
@@ -1176,7 +1203,6 @@ sub SD_WS_Parse($$)
     $deviceCode = $model; # for sensors without channel
     $deviceCode .= '_' . $channel if (defined $channel);
   }
-  #print Dumper($modules{SD_WS}{defptr});
 
   my $def = $modules{SD_WS}{defptr}{$deviceCode};
   $def = $modules{SD_WS}{defptr}{$deviceCode} if(!$def);
@@ -1191,7 +1217,7 @@ sub SD_WS_Parse($$)
   return "" if(IsIgnored($name));
 
   if (defined $temp) {
-    if (($temp < -30 || $temp > 70) && $protocol ne '106') { # not forBBQ temperature sensor GT-TMBBQ-01s
+    if (($temp < -30 || $temp > 70) && $protocol ne '106' && $protocol ne '113') { # not forBBQ temperature sensor GT-TMBBQ-01s and Wireless Grill Thermometer GFGT 433 B1
       Log3 $name, 3, "$ioname: SD_WS_Parse $deviceCode - ERROR temperature $temp";
       return "";  
     }
@@ -1204,7 +1230,7 @@ sub SD_WS_Parse($$)
   }
 
   # Sanity checks
-  if($def) {
+  if($def && $protocol ne '106' && $protocol ne '113') { # not forBBQ temperature sensor GT-TMBBQ-01s and Wireless Grill Thermometer GFGT 433 B1
     my $timeSinceLastUpdate = abs(ReadingsAge($name, "state", 0));
     # temperature
     if (defined($temp) && defined(ReadingsVal($name, "temperature", undef))) {
@@ -1295,7 +1321,8 @@ sub SD_WS_Parse($$)
 
   readingsBeginUpdate($hash);
   readingsBulkUpdate($hash, "state", $state);
-  readingsBulkUpdate($hash, "temperature", $temp)  if (defined($temp) && (($temp > -60 && $temp < 70 ) || $protocol eq '106'));
+  readingsBulkUpdate($hash, "temperature", $temp)  if (defined($temp) && (($temp > -60 && $temp < 70 ) || $protocol eq '106' || $protocol eq '113'));
+  readingsBulkUpdate($hash, "temperature2", $temp2)  if (defined($temp2) && (($temp2 > -60 && $temp < 70 ) || $protocol eq '113'));
   readingsBulkUpdate($hash, "humidity", $hum)  if (defined($hum) && ($hum > 0 && $hum < 100 )) ;
   readingsBulkUpdate($hash, 'windspeed', $windspeed)  if (defined($windspeed)) ;
   readingsBulkUpdate($hash, 'winddir', $winddir)  if (defined($winddir)) ;
@@ -1415,7 +1442,7 @@ sub SD_WS_WH2SHIFT($){
     <li>Opus XT300</li>
     <li>PV-8644 infactory Poolthermometer</li>
     <li>Renkforce E0001PA</li>
-    <li>Regenmesser DROP TFA 47.3005.01 mit Regensensor TFA 30.3233.01</li>
+    <li>Rain gauge DROP TFA 47.3005.01 with sensor TFA 30.3233.01</li>
     <li>TECVANCE TV-4848</li>
     <li>Thermometer TFA 30.3228.02, TFA 30.3229.02, FT007T, FT007TP, F007T, F007TP</li>
     <li>Thermo-Hygrometer TFA 30.3208.02, FT007TH, F007TH</li>

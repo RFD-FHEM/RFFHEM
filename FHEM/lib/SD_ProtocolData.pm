@@ -2919,7 +2919,7 @@ package lib::SD_ProtocolData;
       },
     "113" =>  ## Wireless Grill Thermometer, Model name: GFGT 433 B1, WDJ7036, FCC ID: 2AJ9O-GFGT433B1, 
               # https://github.com/RFD-FHEM/RFFHEM/issues/992 @ muede-de 2021-07-13
-              # Sensor sends every 5 seconds 1 message.
+              # The sensor sends more than 12 messages every 2 seconds.
       {
         name            => 'GFGT_433_B1',
         comment         => 'Wireless Grill Thermometer',
@@ -2930,11 +2930,11 @@ package lib::SD_ProtocolData;
         sync            => [1,-12], # 250,-3000
         clockabs        => 250,
         format          => 'twostate',
-        preamble        => 'u113#',
-        # preamble        => 'W113#',
-        # clientmodule    => 'SD_WS',
-        # modulematch     => '^W113#',
-        length_min      => '48',
+        preamble        => 'W113#',
+        clientmodule    => 'SD_WS',
+        modulematch     => '^W113#',
+        reconstructBit   => '1',
+        length_min      => '47',
         length_max      => '48',
       },
     ########################################################################
