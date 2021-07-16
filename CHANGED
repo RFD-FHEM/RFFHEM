@@ -1,3 +1,7 @@
+2021-07-16 - Change protocol u113 to W133
+
+14_SD_WS.pm - new protocol 113
+SD_ProtocolData.pm - update protocol 113
 2021-07-13 - new protocol 113 for GFGT 433 B1
 
 SD_ProtocolData.pm - new 113
