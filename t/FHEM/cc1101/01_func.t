@@ -9,6 +9,7 @@ our %defs;
 InternalTimer(time(), sub {
   my $target = shift;
   my $targetHash = $defs{$target};
+  $targetHash->{cc1101_available} = 1;
 
     subtest 'setPatable' => sub {
         plan(3);
@@ -23,7 +24,7 @@ InternalTimer(time(), sub {
             is($targetHash->{QUEUE},array {
                 item 'x12';
                 etc();
-            } ,"Verify expected queue element entrys");
+            } ,q[Verify expected queue element entrys]);
             @{$targetHash->{QUEUE}}=();
         };
 
@@ -36,7 +37,7 @@ InternalTimer(time(), sub {
             is(cc1101::SetPatable($targetHash,@paval),D(),q[verify return]);
             is($targetHash->{QUEUE},array {
                 end();
-            } ,"Verify expected queue element entrys");
+            } ,q[Verify expected queue element entrys]);
             $todo->end;
             @{$targetHash->{QUEUE}}=();
         };
@@ -49,12 +50,11 @@ InternalTimer(time(), sub {
             is(cc1101::SetPatable($targetHash,@paval),U(),q[verify return]);
             is($targetHash->{QUEUE},array {
                 item 'x03';
-            } ,"Verify expected queue element entrys");
+            } ,q[Verify expected queue element entrys]);
             @{$targetHash->{QUEUE}}=();
         };
     };
 
-    my $todo = Test2::Todo->new(reason => 'Tests needs to be implemented');
 
     subtest 'SetRegisters' => sub {
       # sub input:  HASH(0x1b29c88), 0815 04D3 0591
@@ -62,6 +62,14 @@ InternalTimer(time(), sub {
       # -> transfer to sub SIGNALduino_AddSendQueue:  W0791
       # -> transfer to sub SIGNALduino_WriteInit:     HASH(0x1b29c88)
       # sub output: return
+      plan(2);
+      is(cc1101::SetRegisters($targetHash,qw (0815 04D3 0591)),U(),q[verify return]);
+      is($targetHash->{QUEUE},array {
+        item 'W06D3';
+        item 'W0791';
+        etc();
+      } ,q[Verify expected queue element entrys]);
+      @{$targetHash->{QUEUE}}=();
 
     };
 
@@ -70,6 +78,16 @@ InternalTimer(time(), sub {
       # -> check cc1101_reg_user (value: 04D3,0591)
       # -> transfer to sub SetRegisters: HASH(0x1b29c88),(04D3,0591)
       # sub output: return
+
+      plan(2);
+      CommandAttr(undef,qq[$target cc1101_reg_user 04D3,0591]);
+      is(cc1101::SetRegistersUser($targetHash),U(),q[verify return]);
+      is($targetHash->{QUEUE},array {
+        item 'W06D3';
+        item 'W0791';
+        etc();
+      } ,q[Verify expected queue element entrys]);
+      @{$targetHash->{QUEUE}}=();
     };
 
     subtest 'SetDataRate' => sub {
@@ -83,12 +101,37 @@ InternalTimer(time(), sub {
       # -> transfer to sub SIGNALduino_AddSendQueue:  HASH(0x1b29c88), W132e
       # -> transfer to sub SIGNALduino_WriteInit:     HASH(0x1b29c88)
       # sub output: "Setting MDMCFG4..MDMCFG3 to 67 2e = 3.75 kHz", undef
+      plan(4);
+      is(cc1101::SetDataRate($targetHash,(undef,q[3.75])),U(),q[verify return]);
+
+      is($targetHash->{ucCmd},hash {
+        field 'cmd' => 'set_dataRate';
+        field 'arg' => '3.75';
+        etc();
+      } ,q[Verify expected ucCMD element entrys]);
+      @{$targetHash->{QUEUE}}=();
+
+      is(cc1101::SetDataRate($targetHash,q[C10 = 67]),U(),q[verify return]);
+      is($targetHash->{QUEUE},array {
+        item 'W1267';
+        item 'W132e';
+        etc();
+      } ,q[Verify expected queue element entrys]);
+      @{$targetHash->{QUEUE}}=();
     };
 
+    my $todo = Test2::Todo->new(reason => 'Tests needs to be corrected');
     subtest 'CalcDataRate' => sub {
       # sub input:  57, 150
       # sub output: 5c, 7a
+      plan(1);
+      is(cc1101::CalcDataRate($targetHash,qw(57 150])),array {
+          item '5c'; 
+          item '7a'; 
+          end();
+        }, q[verify return values]);
     };
+
     $todo->end;
 
     subtest 'SetDeviatn' => sub {
@@ -108,18 +151,9 @@ InternalTimer(time(), sub {
       # -> transfer to sub SIGNALduino_AddSendQueue:  HASH(0x1b29c88), W116f
       # sub output:                                   return
 
-      plan(4);
+      plan(2);
       my @SetFreq = ('cc1101_freq','444.685');
       is(cc1101::SetFreq($targetHash,@SetFreq),U(),q[verify return]);
-      is($targetHash->{QUEUE},array {
-        item 'W0F11';
-        etc();
-      } ,"Verify expected queue element entrys");
-      is($targetHash->{QUEUE},array {
-        item 'W0F11';
-        item 'W101a';
-        etc();
-      } ,"Verify expected queue element entrys");
       is($targetHash->{QUEUE},array {
         item 'W0F11';
         item 'W101a';
