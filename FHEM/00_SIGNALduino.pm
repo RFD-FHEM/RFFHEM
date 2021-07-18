@@ -4134,7 +4134,6 @@ sub SetDataRate  {
     $hash->{ucCmd}->{responseSub} = \&cc1101::SetDataRate;                  # Callback auf sich selbst setzen
     $hash->{ucCmd}->{asyncOut}    = $hash->{CL} if (defined($hash->{CL}));
     $hash->{ucCmd}->{timenow}     = time();
-    return;
   }
   return ;
 }
