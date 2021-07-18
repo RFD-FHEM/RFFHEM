@@ -194,13 +194,20 @@ InternalTimer(time(), sub {
       @{$targetHash->{QUEUE}}=();
     };
 
+    
     my $todo = Test2::Todo->new(reason => 'Tests needs to be implemented');
 
     subtest 'CalcbWidthReg' => sub {
       # sub input:  HASH(0x1b29c88), 67, 270
       # sub output: 67,270
+      plan(1);
+      is(cc1101::CalcbWidthReg($targetHash,qw(67 270])),array {
+          item '67'; 
+          item '270'; 
+          end();
+        }, q[verify return values]);
+  
     };
-
     $todo->end;
 
     subtest 'SetSens' => sub {
