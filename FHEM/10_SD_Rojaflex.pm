@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 10_SD_Rojaflex.pm 5 2021-07-06 21:00:00Z elektron-bbs $
+# $Id: 10_SD_Rojaflex.pm 5 2021-07-26 21:00:00Z elektron-bbs $
 #
 
 package SD_Rojaflex;
@@ -8,7 +8,7 @@ use strict;
 use warnings;
 use GPUtils qw(GP_Import GP_Export);
 
-our $VERSION = '0.7';
+our $VERSION = '0.8';
 
 GP_Export(qw(
 	Initialize
@@ -123,6 +123,7 @@ sub Set {
 	my $ret = undef;
 	my $na = scalar @a; # Anzahl in Array
 	my $cmd = $a[0];
+	my $protocol = 109;
 	my $state;
 	my $motor = ReadingsVal($name, 'motor', 'stop');
 	my $cpos = ReadingsVal($name, 'cpos', 50);
@@ -179,27 +180,26 @@ sub Set {
 		}
 	}
 
-	my @setCodesAr;
-	if (defined(ReadingsVal($name, 'MsgDown', undef))) {push @setCodesAr,'down'};
-	if (defined(ReadingsVal($name, 'MsgStop', undef))) {push @setCodesAr,'stop'};
-	if (defined(ReadingsVal($name, 'MsgUp', undef))) {push @setCodesAr,'up'};
-	if (defined(ReadingsVal($name, 'MsgSave', undef))) {push @setCodesAr,'savefav'};
-	if (defined(ReadingsVal($name, 'MsgGoto', undef))) {push @setCodesAr,'gotofav'};
-	if (defined(ReadingsVal($name, 'MsgStop', undef)) && defined(ReadingsVal($name, 'MsgGoto', undef)) && defined(ReadingsVal($name, 'MsgSave', undef))) {push @setCodesAr,'clearfav '};
+	my %setCodesAr = ();
+	if (defined(ReadingsVal($name, 'MsgDown', undef))) {$setCodesAr{down} = 'MsgDown'};
+	if (defined(ReadingsVal($name, 'MsgStop', undef))) {$setCodesAr{stop} = 'MsgStop'};
+	if (defined(ReadingsVal($name, 'MsgUp', undef))) {$setCodesAr{up} = 'MsgUp'};
+	if (defined(ReadingsVal($name, 'MsgSave', undef))) {$setCodesAr{savefav} = 'MsgSave'};
+	if (defined(ReadingsVal($name, 'MsgGoto', undef))) {$setCodesAr{gotofav} = 'MsgGoto'};
+	if (defined(ReadingsVal($name, 'MsgStop', undef)) && defined(ReadingsVal($name, 'MsgGoto', undef)) && defined(ReadingsVal($name, 'MsgSave', undef))) {$setCodesAr{clearfav} = 'MsgGoto'};
 
-	if (scalar @setCodesAr > 1) {
-		if (grep {/$cmd/xms} @setCodesAr) { # Code vorhanden
-			my $msg = 'SN;R=1;D=';
-			if ($cmd eq 'down') {$msg .= ReadingsVal($name, 'MsgDown', undef)};
-			if ($cmd eq 'stop') {$msg .= ReadingsVal($name, 'MsgStop', undef)};
-			if ($cmd eq 'up') {$msg .= ReadingsVal($name, 'MsgUp', undef)};
-			if ($cmd eq 'savefav') {$msg .= ReadingsVal($name, 'MsgSave', undef)};
-			if ($cmd eq 'gotofav') {$msg .= ReadingsVal($name, 'MsgGoto', undef)};
-			if ($cmd eq 'clearfav') {$msg .= ReadingsVal($name, 'MsgGoto', undef)};
-			$msg .= q(;);
+	if (%setCodesAr) {
+		if (exists($setCodesAr{$cmd})) { # Code vorhanden
+			my $msg = ReadingsVal($name, $setCodesAr{$cmd}, '');
+			if (length($msg) != 18) {
+				Log3 $name, 3, "$ioname: SD_Rojaflex set, $setCodesAr{$cmd} wrong length (must be 18)";
+				return $ret;
+			}
+			$msg = "P$protocol#$msg";
+			Log3 $name, 4, "$ioname: $name sendMsg=$msg";
 			for my $i (1 .. AttrVal($name, 'repetition', 1)) {
 				# Eine Wiederholung erfolgt bei der Fernbedienung nach 3,5 mS, so ist der Abstand groesser
-				if (length($msg) == 28) {IOWrite($hash, 'raw', $msg)}; # raw ist nicht erwuenscht!
+				IOWrite($hash, 'sendMsg', $msg);
 			}
 			if ($cmd eq 'clearfav') {
 				my $timelongest = $timeToOpen;
