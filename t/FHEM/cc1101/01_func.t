@@ -63,7 +63,7 @@ InternalTimer(time(), sub {
       # -> transfer to sub SIGNALduino_WriteInit:     HASH(0x1b29c88)
       # sub output: return
       plan(2);
-      is(cc1101::SetRegisters($targetHash,qw (0815 04D3 0591)),U(),q[verify return]);
+      is(cc1101::SetRegisters($targetHash,qw(0815 04D3 0591)),U(),q[verify return]);
       is($targetHash->{QUEUE},array {
         item 'W06D3';
         item 'W0791';
@@ -120,19 +120,12 @@ InternalTimer(time(), sub {
       @{$targetHash->{QUEUE}}=();
     };
 
-    my $todo = Test2::Todo->new(reason => 'Tests needs to be corrected');
     subtest 'CalcDataRate' => sub {
       # sub input:  57, 150
       # sub output: 5c, 7a
       plan(1);
-      is(cc1101::CalcDataRate($targetHash,qw(57 150])),array {
-          item '5c'; 
-          item '7a'; 
-          end();
-        }, q[verify return values]);
+      is(cc1101::CalcDataRate($targetHash,qw(57 150)),qw(5c 7a), q[verify return values]);
     };
-
-    $todo->end;
 
     subtest 'SetDeviatn' => sub {
       # sub input:  HASH(0x1b29c88) , cc1101_deviatn 150
@@ -194,21 +187,12 @@ InternalTimer(time(), sub {
       @{$targetHash->{QUEUE}}=();
     };
 
-    
-    my $todo = Test2::Todo->new(reason => 'Tests needs to be implemented');
-
     subtest 'CalcbWidthReg' => sub {
-      # sub input:  HASH(0x1b29c88), 67, 270
-      # sub output: 67,270
+      # sub input:  HASH(0x1b29c88), 0B, 270
+      # sub output: 6B,270
       plan(1);
-      is(cc1101::CalcbWidthReg($targetHash,qw(67 270])),array {
-          item '67'; 
-          item '270'; 
-          end();
-        }, q[verify return values]);
-  
+      is(cc1101::CalcbWidthReg($targetHash,qw(0B 270])),qw(6B 270), q[verify return values]);
     };
-    $todo->end;
 
     subtest 'SetSens' => sub {
       # sub input:                                    HASH(0x1b29c88), cc1101_sens 12
