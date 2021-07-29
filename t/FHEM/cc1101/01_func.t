@@ -124,12 +124,12 @@ InternalTimer(time(), sub {
       # sub input:  57, 150
       # sub output: 5c, 7a
       plan(1);
-      my @ret = cc1101::CalcDataRate($targetHash,qw(57 150));  
-      is(@ret,array {
-          item '5c'; 
-          item '7a'; 
-          end();
-        }, q[verify return values], @ret);
+      my @ret = cc1101::CalcDataRate($targetHash,qw(57 150));
+      is([$ret[0], $ret[1]], array {
+        item '5c';
+        item '7a';
+        etc();
+      }, q[verify return values], @ret);
     };
 
     subtest 'SetDeviatn' => sub {
@@ -196,11 +196,12 @@ InternalTimer(time(), sub {
       # sub input:  HASH(0x1b29c88), 0B, 270
       # sub output: 6B,270
       plan(1);
-      is(cc1101::CalcbWidthReg($targetHash,qw(67 270])),array {
-          item '6B'; 
+      my @ret = cc1101::CalcbWidthReg($targetHash,qw(0B 270]));
+      is([$ret[0],$ret[1]],array {
+          item '6b'; 
           item '270'; 
           end();
-        }, q[verify return values]);
+        }, q[verify return values], @ret);
     };
 
     subtest 'SetSens' => sub {
