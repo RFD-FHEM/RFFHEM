@@ -1,4 +1,4 @@
-# $Id: 00_SIGNALduino.pm v3.5.2 2020-07-02 21:20:33Z Sidey $
+# $Id: 00_SIGNALduino.pm v3.5.2 2021-07-18 20:27:24Z sidey79 $
 #
 # v3.5.2 - https://github.com/RFD-FHEM/RFFHEM/tree/master
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incoming messages
@@ -15,7 +15,7 @@
 package main;
 use strict;
 use warnings;
-#use version 0.77; our $VERSION = version->declare('v3.5.1');
+#use version 0.77; our $VERSION = version->declare('v3.5.2');
 
 my $missingModulSIGNALduino = '';
 
@@ -39,7 +39,7 @@ use List::Util qw(first);
 
 
 use constant {
-  SDUINO_VERSION                  => '3.5.2+20210709',
+  SDUINO_VERSION                  => '3.5.2+20210718',  # Datum wird automatisch bei jedem pull request aktualisiert
   SDUINO_INIT_WAIT_XQ             => 1.5,     # wait disable device
   SDUINO_INIT_WAIT                => 2,
   SDUINO_INIT_MAXRETRY            => 3,
