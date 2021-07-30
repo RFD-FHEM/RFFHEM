@@ -1298,7 +1298,7 @@ sub SD_WS_Parse($$)
   readingsBulkUpdate($hash, "temperature", $temp)  if (defined($temp) && (($temp > -60 && $temp < 70 ) || $protocol eq '106'));
   readingsBulkUpdate($hash, "humidity", $hum)  if (defined($hum) && ($hum > 0 && $hum < 100 )) ;
   readingsBulkUpdate($hash, 'windSpeed', $windspeed)  if (defined($windspeed)) ;
-  readingsBulkUpdate($hash, 'windDirection', $winddir)  if (defined($winddir)) ;
+  readingsBulkUpdate($hash, 'windDirectionDegree', $winddir)  if (defined($winddir)) ;
   readingsBulkUpdate($hash, 'windDirectionText', $winddirtxt)  if (defined($winddirtxt)) ;
   readingsBulkUpdate($hash, 'windGust', $windgust)  if (defined($windgust)) ;
   readingsBulkUpdate($hash, "batteryState", $bat) if (defined($bat) && length($bat) > 0) ;
@@ -1460,7 +1460,7 @@ sub SD_WS_WH2SHIFT($){
     <li>temperature (&deg;C)</li>
     <li>temperatureTrend (consistent, rising, falling)</li>
     <li>type (type of sensor)</li>
-    <li>windDirection (Wind direction, 0-337,5°, in Schritten von 22,5°)</li>
+    <li>windDirectionDegree (Wind direction, 0-337,5°, in steps of 22,5°)</li>
     <li>windDirectionText (Wind direction, N, NNE, NE, ENE, E, ESE, SE, SSE, S, SSW, SW, WSW, W, WNW, NW, NNW)</li>
     <li>windGust (Gust of wind, m/s)</li>
     <li>windSpeed (Wind speed, m/s)</li>
@@ -1577,7 +1577,7 @@ sub SD_WS_WH2SHIFT($){
     <li>temperature (Temperatur &deg;C)</li>
     <li>temperatureTrend (Trend Temperatur gleichbleibend, steigend, fallend)</li>
     <li>type (Sensortypen)</li>
-    <li>windDirection (Windrichtung, 0-337,5°, in Schritten von 22,5°)</li>
+    <li>windDirectionDegree (Windrichtung, 0-337,5°, in Schritten von 22,5°)</li>
     <li>windDirectionText (Windrichtung, N, NNE, NE, ENE, E, ESE, SE, SSE, S, SSW, SW, WSW, W, WNW, NW, NNW)</li>
     <li>windGust (Windboe, m/s)</li>
     <li>windSpeed (Windgeschwindigkeit, m/s)</li>
