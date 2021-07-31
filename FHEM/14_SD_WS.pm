@@ -1,4 +1,4 @@
-# $Id: 14_SD_WS.pm 21666 2021-06-03 16:00:53Z Sidey $
+# $Id: 14_SD_WS.pm 21666 2021-07-31 16:00:53Z Sidey $
 #
 # The purpose of this module is to support serval
 # weather sensors which use various protocol
@@ -32,6 +32,7 @@
 # 01.05.2021 neues Protokoll 108: Bresser 5-in-1 Comfort Wetter Center, Profi Regenmesser
 # 15.05.2021 neues Protokoll 110: ADE WS1907 Weather station with rain gauge
 # 03.06.2021 PerlCritic - HardTabs durch Leerzeichen ersetzt & Einrueckungen sortiert (keine Code/Syntaxaenderung vorgenommen)
+# 31.07.2021 neues Protokoll 115: Bresser 6-in-1 Comfort Wetter Center
 
 package main;
 
@@ -85,6 +86,7 @@ sub SD_WS_Initialize($)
     "SD_WS_94_T.*"    => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4:Temp,", autocreateThreshold => "3:180"},
     'SD_WS_108.*'     => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4:Temp,', autocreateThreshold => '5:120'},
     'SD_WS_110_TR.*'  => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4:Temp,', autocreateThreshold => '3:180'},
+    'SD_WS_115.*'     => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4:Temp,', autocreateThreshold => '5:120'},
   };
 
 }
@@ -117,12 +119,10 @@ sub SD_WS_Undef($$)
   return undef;
 }
 
-
 #############################
 sub SD_WS_Parse($$)
 {
   my ($iohash, $msg) = @_;
-  #my $rawData = substr($msg, 2);
   my $name = $iohash->{NAME};
   my $ioname = $iohash->{NAME};
   my ($protocol,$rawData) = split("#",$msg);
@@ -155,7 +155,7 @@ sub SD_WS_Parse($$)
   my $rawRainCounter;
   my $sendCounter;
   my $beep;
-
+	my $uv;
   my %decodingSubs  = (
     50 => # Protocol 50
      # FF550545FF9E
@@ -818,6 +818,84 @@ sub SD_WS_Parse($$)
                                 }
                               },
     },
+    115 => {
+        # https://github.com/merbanan/rtl_433/blob/master/src/devices/bresser_6in1.c
+        # The compact 6-in-1 multifunction outdoor sensor transmits the data on 868.3 MHz.
+        # The device uses FSK-PCM encoding, the device sends a transmission every 12 seconds.
+        # There are at least two different message types:
+        # temperatur, hum, uv and rain (alternating messages)
+        # wind data (every message)
+        # A transmission starts with a preamble of 0xAA.
+        # Preamble: aa aa aa aa aa 2d d4
+        #
+        #           1         2         3         
+        # 0123456789012345678901234567890123456789
+        # ----------------------------------------
+        # 5EAA188002C318FA8FFB2768118481FFF0720000  40 Nibble from SIGNALduino
+        # CCCCIIIIIIIIFFGGGWWWDDD?TTT?HH????SS      Msg 1, 36 Nibble 
+        # CCCCIIIIIIIIFFGGGWWWDDD?ffRRRRVVV?SS      Msg 2, 36 Nibble 
+        # C = CRC16
+        # I = station ID
+        # F = flags, 4 bit (1: weather station, 2: indoor?, 4: soil probe), 1 bit battery (1=ok, 0=low), 3 bit channel
+        # G = wind gust in 1/10 m/s, inverted, BCD coded, GGG = FE6 =~ 019 => 1.9 m/s.
+        # W = wind speed in 1/10 m/s, inverted, BCD coded, LSB first nibble, MSB last two nibble, WWW = EFE =~ 101 => 1.1 m/s.
+        # D = wind direction in grad, BCD coded, DDD = 158 => 158 °
+        # ? = unknown, always 0x8
+        # T = temperature in 1/10 °C, only if byte 12 ne 0xFF, BCD coded, TTT = 312 => 31.2 °C
+        # ? = unknown
+        # H = humidity in percent, only if byte 12 ne 0xFF, BCD coded, HH = 23 => 23 %
+        # R = rain counter, only if byte 12 eq 0xFF, inverted, BCD coded
+        # V = uv, only if byte 12 eq 0xFF and byte 15/16 not 0xFF01, inverted, BCD coded
+        # ? = unknown
+        # S = checksum (sum over byte 2 - 17 must be 255)
+        sensortype => 'Bresser_6in1, new Bresser_5in1',
+        model      => 'SD_WS_115',
+        prematch   => sub { return 1; }, # no precheck known
+        # prematch   => sub {my $rawData = shift; return 1 if ($rawData =~ /^[0-9A-F]{8}[0-9]{2}[0-9A-F]{1}[0-9]{3}[0-9A-F]{1}[0-9]{5}[0-9A-F]{1}[0-9]{1}/); },
+        id         => sub {my ($rawData,undef) = @_; return substr($rawData,2,8); },
+        bat        => sub {my (undef,$bitData) = @_; return substr($bitData,52,1) eq '1' ? 'ok' : 'low';},
+        channel    => sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,53,55));},
+        windgust   => sub {my ($rawData,undef) = @_;
+                            $windgust = substr($rawData,14,3);
+                            $windgust =~ tr/0123456789ABCDEF/FEDCBA9876543210/;
+                            return undef if ($windgust !~ m/^\d+$/xms);
+                            return $windgust * 0.1;
+                          },
+        windspeed  => sub {my ($rawData,undef) = @_;
+                            $windspeed = substr($rawData,18,2) . substr($rawData,17,1);
+                            $windspeed =~ tr/0123456789ABCDEF/FEDCBA9876543210/;
+                            return undef if ($windspeed !~ m/^\d+$/xms);
+                            return $windspeed * 0.1;
+                          },
+        winddir    => sub {my ($rawData,undef) = @_;
+                            $winddir = substr($rawData,20,3);
+                            return undef if ($winddir !~ m/^\d+$/xms);
+                            return $winddir * 1;
+                          },
+        temp       => sub {my ($rawData,undef) = @_;
+                            return undef if (substr($rawData,24,2) eq 'FF');
+                            $rawTemp =  (substr($rawData,24,1) . substr($rawData,25,1) . substr($rawData,26,1)) * 0.1;
+                            if ($rawTemp > 60) {$rawTemp -= 100};
+                            return $rawTemp;
+                          },
+        hum        => sub {my ($rawData,undef) = @_;
+                            return undef if (substr($rawData,24,2) eq 'FF');
+                            return substr($rawData,28,2) + 0;
+                          },
+        rain       => sub {my ($rawData,undef) = @_;
+                            return undef if (substr($rawData,24,2) ne 'FF');
+                            $rain = substr($rawData,26,4);
+                            $rain =~ tr/0123456789ABCDEF/FEDCBA9876543210/;
+                            return $rain * 0.1;
+                          },
+        uv         => sub {my ($rawData,undef) = @_;
+                            return undef if (substr($rawData,24,2) ne 'FF' || substr($rawData,30,3) !~ m/^\d+$/xms);
+                            $uv = substr($rawData,30,3);
+                            return undef if ($uv !~ m/^\d+$/xms);
+                            return $uv * 0.1;
+                          },
+        crcok      => sub {return 1;}, # checks are in SD_Protocols.pm sub ConvBresser_6in1
+    },
   );
 
   Log3 $name, 4, "$name: SD_WS_Parse protocol $protocol, rawData $rawData";
@@ -1142,13 +1220,12 @@ sub SD_WS_Parse($$)
     $rain_total = $decodingSubs{$protocol}{rain_total}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{rain_total}));
     $sendCounter = $decodingSubs{$protocol}{sendCounter}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{sendCounter}));
     $beep = $decodingSubs{$protocol}{beep}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{beep}));
-
     if ($model eq "SD_WS_33_T" || $model eq "SD_WS_58_T") {      # for SD_WS_33 or SD_WS_58 discrimination T - TH
       $model = $decodingSubs{$protocol}{model}."H" if $hum != 0; # for models with Humidity
     }
     $sendmode = $decodingSubs{$protocol}{sendmode}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{sendmode}));
     $trend = $decodingSubs{$protocol}{trend}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{trend}));
-
+    $uv = $decodingSubs{$protocol}{uv}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{uv}));
     Log3 $iohash, 4, "$name: SD_WS_Parse decoded protocol-id $protocol ($SensorTyp), sensor-id $id";
   }
   else {
@@ -1176,7 +1253,6 @@ sub SD_WS_Parse($$)
     $deviceCode = $model; # for sensors without channel
     $deviceCode .= '_' . $channel if (defined $channel);
   }
-  #print Dumper($modules{SD_WS}{defptr});
 
   my $def = $modules{SD_WS}{defptr}{$deviceCode};
   $def = $modules{SD_WS}{defptr}{$deviceCode} if(!$def);
@@ -1297,10 +1373,10 @@ sub SD_WS_Parse($$)
   readingsBulkUpdate($hash, "state", $state);
   readingsBulkUpdate($hash, "temperature", $temp)  if (defined($temp) && (($temp > -60 && $temp < 70 ) || $protocol eq '106'));
   readingsBulkUpdate($hash, "humidity", $hum)  if (defined($hum) && ($hum > 0 && $hum < 100 )) ;
-  readingsBulkUpdate($hash, 'windspeed', $windspeed)  if (defined($windspeed)) ;
-  readingsBulkUpdate($hash, 'winddir', $winddir)  if (defined($winddir)) ;
-  readingsBulkUpdate($hash, 'winddirtxt', $winddirtxt)  if (defined($winddirtxt)) ;
-  readingsBulkUpdate($hash, 'windgust', $windgust)  if (defined($windgust)) ;
+  readingsBulkUpdate($hash, 'windSpeed', $windspeed)  if (defined($windspeed)) ;
+  readingsBulkUpdate($hash, 'windDirectionDegree', $winddir)  if (defined($winddir)) ;
+  readingsBulkUpdate($hash, 'windDirectionText', $winddirtxt)  if (defined($winddirtxt)) ;
+  readingsBulkUpdate($hash, 'windGust', $windgust)  if (defined($windgust)) ;
   readingsBulkUpdate($hash, "batteryState", $bat) if (defined($bat) && length($bat) > 0) ;
   readingsBulkUpdate($hash, "batteryChanged", $batChange) if (defined($batChange) && length($batChange) > 0 && $batChange eq "1") ;
   readingsBulkUpdate($hash, "channel", $channel, 0) if (defined($channel)&& length($channel) > 0);
@@ -1314,6 +1390,7 @@ sub SD_WS_Parse($$)
   readingsBulkUpdate($hash, "rawRainCounter", $rawRainCounter)  if (defined($rawRainCounter));
   readingsBulkUpdate($hash, "rain_total", $rain_total)  if (defined($rain_total));
   readingsBulkUpdate($hash, "sendCounter", $sendCounter)  if (defined($sendCounter));
+  readingsBulkUpdate($hash, "uv", $uv)  if (defined($uv));
   readingsEndUpdate($hash, 1); # Notify is done by Dispatch
 
   return $name;
@@ -1408,7 +1485,7 @@ sub SD_WS_WH2SHIFT($){
     <li>ADE WS1907 Weather station with rain gauge</li>
     <li>Atech wireless weather station</li>
     <li>BBQ temperature sensor GT-TMBBQ-01s (transmitter), GT-TMBBQ-01e (receiver)</li>
-    <li>Bresser 5-in-1 Comfort Weather Center, 7009994, Professional rain gauge, Temeo</li>
+    <li>Bresser 5-in-1 and 6-in-1 Comfort Weather Center, 7009994, Professional rain gauge, Temeo</li>
     <li>Conrad S522</li>
     <li>EuroChron EFTH-800, EFS-3110A (temperature and humidity sensor)</li>
     <li>NC-3911, NC-3912 refrigerator thermometer</li>
@@ -1460,10 +1537,10 @@ sub SD_WS_WH2SHIFT($){
     <li>temperature (&deg;C)</li>
     <li>temperatureTrend (consistent, rising, falling)</li>
     <li>type (type of sensor)</li>
-    <li>winddir (Wind direction, 0-337,5°, in Schritten von 22,5°)</li>
-    <li>winddirtxt (Wind direction, N, NNE, NE, ENE, E, ESE, SE, SSE, S, SSW, SW, WSW, W, WNW, NW, NNW)</li>
-    <li>windgust (Gust of wind, m/s)</li>
-    <li>windspeed (Wind speed, m/s)</li>
+    <li>windDirectionDegree (Wind direction, grad)</li>
+    <li>windDirectionText (Wind direction, N, NNE, NE, ENE, E, ESE, SE, SSE, S, SSW, SW, WSW, W, WNW, NW, NNW)</li>
+    <li>windGust (Gust of wind, m/s)</li>
+    <li>windSpeed (Wind speed, m/s)</li>
   </ul><br><br>
 
   <a name="SD_WS Attribute"></a>
@@ -1524,7 +1601,7 @@ sub SD_WS_WH2SHIFT($){
     <li>ADE WS1907 Wetterstation mit Regenmesser</li>
     <li>Atech Wetterstation</li>
     <li>BBQ Temperatur Sensor GT-TMBBQ-01s (Sender), GT-TMBBQ-01e (Empfaenger)</li>
-    <li>Bresser 5-in-1 Comfort Wetter Center, 7009994, Profi Regenmesser, Temeo</li>
+    <li>Bresser 5-in-1 und 6-in-1 Comfort Wetter Center, 7009994, Profi Regenmesser, Temeo</li>
     <li>Conrad S522</li>
     <li>EuroChron EFTH-800, EFS-3110A (Temperatur- und Feuchtigkeitssensor)</li>
     <li>NC-3911, NC-3912 digitales Kuehl- und Gefrierschrank-Thermometer</li>
@@ -1577,10 +1654,10 @@ sub SD_WS_WH2SHIFT($){
     <li>temperature (Temperatur &deg;C)</li>
     <li>temperatureTrend (Trend Temperatur gleichbleibend, steigend, fallend)</li>
     <li>type (Sensortypen)</li>
-    <li>winddir (Windrichtung, 0-337,5°, in Schritten von 22,5°)</li>
-    <li>winddirtxt (Windrichtung, N, NNE, NE, ENE, E, ESE, SE, SSE, S, SSW, SW, WSW, W, WNW, NW, NNW)</li>
-    <li>windgust (Windboe, m/s)</li>
-    <li>windspeed (Windgeschwindigkeit, m/s)</li>
+    <li>windDirectionDegree (Windrichtung, Grad)</li>
+    <li>windDirectionText (Windrichtung, N, NNE, NE, ENE, E, ESE, SE, SSE, S, SSW, SW, WSW, W, WNW, NW, NNW)</li>
+    <li>windGust (Windboe, m/s)</li>
+    <li>windSpeed (Windgeschwindigkeit, m/s)</li>
   </ul>
   <br><br>
 
