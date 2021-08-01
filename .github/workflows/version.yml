@@ -46,6 +46,7 @@ jobs:
   metadata:
     # Do not run this job again if the last commit was a Update Versondate which comes from this workflow!
     if: "!contains(needs.pre_ci.outputs.commit_message, 'Update Versiondate')"
+    needs: pre_ci
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
       date: ${{ steps.date.outputs.date }}
