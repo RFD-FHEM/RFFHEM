@@ -114,7 +114,7 @@ jobs:
         run: |
           git config --global user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git commit -m "Update Versiondate" -a && echo "::set-output name=status::true" || true
+          git commit -m "Update Versiondate [skip actions]" -a && echo "::set-output name=status::true" || true
       - name: git push
         uses: ad-m/github-push-action@v0.6.0
         with:
