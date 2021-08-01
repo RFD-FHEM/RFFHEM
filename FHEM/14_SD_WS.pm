@@ -86,7 +86,7 @@ sub SD_WS_Initialize($)
     "SD_WS_94_T.*"    => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4:Temp,", autocreateThreshold => "3:180"},
     'SD_WS_108.*'     => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4:Temp,', autocreateThreshold => '5:120'},
     'SD_WS_110_TR.*'  => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4:Temp,', autocreateThreshold => '3:180'},
-    'SD_WS_115.*'     => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4:Temp,', autocreateThreshold => '5:120'},
+    'SD_WS_115.*'     => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4hum4:Temp/Hum,', autocreateThreshold => '5:120'},
   };
 
 }
@@ -831,7 +831,7 @@ sub SD_WS_Parse($$)
         #           1         2         3         
         # 0123456789012345678901234567890123456789
         # ----------------------------------------
-        # 5EAA188002C318FA8FFB2768118481FFF0720000  40 Nibble from SIGNALduino
+        # 3DA820B00C1618FFFFFF1808152294FFF01E0000  Msg 1, 40 Nibble from SIGNALduino, T: 15.2 H: 94 G:0 W: 0 D:180
         # CCCCIIIIIIIIFFGGGWWWDDD?TTT?HH????SS      Msg 1, 36 Nibble 
         # CCCCIIIIIIIIFFGGGWWWDDD?ffRRRRVVV?SS      Msg 2, 36 Nibble 
         # C = CRC16
@@ -852,7 +852,7 @@ sub SD_WS_Parse($$)
         model      => 'SD_WS_115',
         prematch   => sub { return 1; }, # no precheck known
         # prematch   => sub {my $rawData = shift; return 1 if ($rawData =~ /^[0-9A-F]{8}[0-9]{2}[0-9A-F]{1}[0-9]{3}[0-9A-F]{1}[0-9]{5}[0-9A-F]{1}[0-9]{1}/); },
-        id         => sub {my ($rawData,undef) = @_; return substr($rawData,2,8); },
+        id         => sub {my ($rawData,undef) = @_; return substr($rawData,4,8); },
         bat        => sub {my (undef,$bitData) = @_; return substr($bitData,52,1) eq '1' ? 'ok' : 'low';},
         channel    => sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,53,55));},
         windgust   => sub {my ($rawData,undef) = @_;
@@ -870,7 +870,7 @@ sub SD_WS_Parse($$)
         winddir    => sub {my ($rawData,undef) = @_;
                             $winddir = substr($rawData,20,3);
                             return undef if ($winddir !~ m/^\d+$/xms);
-                            return $winddir * 1;
+                            return ($winddir * 1, $winddirtxtar[round(($winddir / 22.5),0)]);
                           },
         temp       => sub {my ($rawData,undef) = @_;
                             return undef if (substr($rawData,24,2) eq 'FF');
