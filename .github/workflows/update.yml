@@ -62,6 +62,7 @@ jobs:
         fetch-depth: 0
         persist-credentials: false
     - name: update controls file (FHEM)
+      if: needs.pr_check.outputs.result != 'true'
       uses: fhem/fhem-controls-actions@v2.0.1
       with:
         filename: controls_signalduino.txt 
