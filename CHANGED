@@ -1,3 +1,14 @@
+2021-08-01 - Bresser 5in1 2 - Rename readings windDirection, windDirectionText, windGust and windSpeed (#995)
+
+* Renaming Readings wind. *
+
+14_SD_WS.pm - Rename readings windDirection, windDirectionText, windGust and windSpeed
+SD_ProtocolData.pm - change register 0x03, Design Note DN009 - FIFOTHR.ADC_RETENTION - CC1101 will wake up with optimal ADC settings for low data rate (≤ 100 kbps)
+
+2021-07-29 - Update update.yml
+
+- Use Admin pat, to allow passing branch protection rules
+
 2021-07-13 - AVANTEK - small fix send data (#991)
 
 * Update 14_SD_BELL.pm

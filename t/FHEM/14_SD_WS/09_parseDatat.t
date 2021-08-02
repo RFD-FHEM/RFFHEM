@@ -101,7 +101,12 @@ InternalTimer(time()+1, sub {
 							plan(3); # one for readings and one for internals and one for defmod
 							note("device will be defined temporary");
 							is(CommandDefMod(undef,"-temporary $tData->{internals}{NAME} $testSet->{module} $tData->{internals}{DEF}"),U(),"Verify device defmod",$tData);
-							
+
+							if ($tData->{attributes}{model}) {
+								note("device attribute model $tData->{attributes}{model} set for right result");
+								CommandAttr(undef,"$tData->{internals}{NAME} model $tData->{attributes}{model}"); # set attribute
+							}
+
 							no strict "refs"; 
 							&{$modules{$testSet->{module}}{ParseFn}}($ioHash,$tData->{dmsg});
 							use strict "refs"; 

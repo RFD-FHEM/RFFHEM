@@ -1,4 +1,4 @@
-# $Id: 14_SD_WS.pm 21666 2021-06-03 16:00:53Z Sidey $
+# $Id: 14_SD_WS.pm 21666 2021-07-29 20:39:27Z elektron-bbs $
 #
 # The purpose of this module is to support serval
 # weather sensors which use various protocol
@@ -1297,10 +1297,10 @@ sub SD_WS_Parse($$)
   readingsBulkUpdate($hash, "state", $state);
   readingsBulkUpdate($hash, "temperature", $temp)  if (defined($temp) && (($temp > -60 && $temp < 70 ) || $protocol eq '106'));
   readingsBulkUpdate($hash, "humidity", $hum)  if (defined($hum) && ($hum > 0 && $hum < 100 )) ;
-  readingsBulkUpdate($hash, 'windspeed', $windspeed)  if (defined($windspeed)) ;
-  readingsBulkUpdate($hash, 'winddir', $winddir)  if (defined($winddir)) ;
-  readingsBulkUpdate($hash, 'winddirtxt', $winddirtxt)  if (defined($winddirtxt)) ;
-  readingsBulkUpdate($hash, 'windgust', $windgust)  if (defined($windgust)) ;
+  readingsBulkUpdate($hash, 'windSpeed', $windspeed)  if (defined($windspeed)) ;
+  readingsBulkUpdate($hash, 'windDirectionDegree', $winddir)  if (defined($winddir)) ;
+  readingsBulkUpdate($hash, 'windDirectionText', $winddirtxt)  if (defined($winddirtxt)) ;
+  readingsBulkUpdate($hash, 'windGust', $windgust)  if (defined($windgust)) ;
   readingsBulkUpdate($hash, "batteryState", $bat) if (defined($bat) && length($bat) > 0) ;
   readingsBulkUpdate($hash, "batteryChanged", $batChange) if (defined($batChange) && length($batChange) > 0 && $batChange eq "1") ;
   readingsBulkUpdate($hash, "channel", $channel, 0) if (defined($channel)&& length($channel) > 0);
@@ -1415,7 +1415,7 @@ sub SD_WS_WH2SHIFT($){
     <li>Opus XT300</li>
     <li>PV-8644 infactory Poolthermometer</li>
     <li>Renkforce E0001PA</li>
-    <li>Regenmesser DROP TFA 47.3005.01 mit Regensensor TFA 30.3233.01</li>
+    <li>Rain gauge DROP TFA 47.3005.01 with rain sensor TFA 30.3233.01</li>
     <li>TECVANCE TV-4848</li>
     <li>Thermometer TFA 30.3228.02, TFA 30.3229.02, FT007T, FT007TP, F007T, F007TP</li>
     <li>Thermo-Hygrometer TFA 30.3208.02, FT007TH, F007TH</li>
@@ -1460,10 +1460,10 @@ sub SD_WS_WH2SHIFT($){
     <li>temperature (&deg;C)</li>
     <li>temperatureTrend (consistent, rising, falling)</li>
     <li>type (type of sensor)</li>
-    <li>winddir (Wind direction, 0-337,5°, in Schritten von 22,5°)</li>
-    <li>winddirtxt (Wind direction, N, NNE, NE, ENE, E, ESE, SE, SSE, S, SSW, SW, WSW, W, WNW, NW, NNW)</li>
-    <li>windgust (Gust of wind, m/s)</li>
-    <li>windspeed (Wind speed, m/s)</li>
+    <li>windDirectionDegree (Wind direction, 0-337,5°, in steps of 22,5°)</li>
+    <li>windDirectionText (Wind direction, N, NNE, NE, ENE, E, ESE, SE, SSE, S, SSW, SW, WSW, W, WNW, NW, NNW)</li>
+    <li>windGust (Gust of wind, m/s)</li>
+    <li>windSpeed (Wind speed, m/s)</li>
   </ul><br><br>
 
   <a name="SD_WS Attribute"></a>
@@ -1577,10 +1577,10 @@ sub SD_WS_WH2SHIFT($){
     <li>temperature (Temperatur &deg;C)</li>
     <li>temperatureTrend (Trend Temperatur gleichbleibend, steigend, fallend)</li>
     <li>type (Sensortypen)</li>
-    <li>winddir (Windrichtung, 0-337,5°, in Schritten von 22,5°)</li>
-    <li>winddirtxt (Windrichtung, N, NNE, NE, ENE, E, ESE, SE, SSE, S, SSW, SW, WSW, W, WNW, NW, NNW)</li>
-    <li>windgust (Windboe, m/s)</li>
-    <li>windspeed (Windgeschwindigkeit, m/s)</li>
+    <li>windDirectionDegree (Windrichtung, 0-337,5°, in Schritten von 22,5°)</li>
+    <li>windDirectionText (Windrichtung, N, NNE, NE, ENE, E, ESE, SE, SSE, S, SSW, SW, WSW, W, WNW, NW, NNW)</li>
+    <li>windGust (Windboe, m/s)</li>
+    <li>windSpeed (Windgeschwindigkeit, m/s)</li>
   </ul>
   <br><br>
 
