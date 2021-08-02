@@ -1,5 +1,5 @@
 ##############################################################################
-# $Id: 14_SD_BELL.pm 0 2021-03-22 22:30:35Z HomeAuto_User $
+# $Id: 14_SD_BELL.pm 0 2021-07-12 22:30:35Z HomeAuto_User $
 #
 # The file is part of the SIGNALduino project.
 # The purpose of this module is to support many wireless BELL devices.
@@ -31,6 +31,9 @@
 ####################################################################################################################################
 # - GEA-028DB  [Protocol 98] length 16 (4)
 #     MU;P0=1488;P1=-585;P2=520;P3=-1509;P4=1949;P5=-5468;CP=2;R=38;D=01232301230123010101230123230101454501232301230123010101230123230101454501232301230123010101230123230101454501232301230123010101230123230101454501232301230123010101230123230101454501232301230123010101230123230101454501232301230123010101230123230101454501;O;
+####################################################################################################################################
+# - AVANTEK DB-LE  [Protocol 112] length 16 (4)
+#     MN;D=84608A4220EF87FF;R=48;
 ####################################################################################################################################
 # !!! ToDo´s !!!
 #     - KANGTAI doubleCode must CEHCK | only one Code? - MORE USER MSG needed
@@ -88,12 +91,16 @@ my %models = (
                     Protocol    => '98',
                     doubleCode  => 'no'
                   },
+  'AVANTEK' =>  { hex_lengh   => '9',
+                  Protocol    => '112',
+                  doubleCode  => 'no'
+                },
 );
 
 
 sub SD_BELL_Initialize {
   my ($hash) = @_;
-  $hash->{Match}      = '^P(?:15|32|41|42|57|79|96|98)#.*';
+  $hash->{Match}      = '^P(?:15|32|41|42|57|79|96|98|112)#.*';
   $hash->{DefFn}      = 'SD_BELL::Define';
   $hash->{UndefFn}    = 'SD_BELL::Undef';
   $hash->{ParseFn}    = 'SD_BELL::Parse';
@@ -144,17 +151,14 @@ sub Define {
   my $hash_name;
   my $name = $hash->{NAME};
   my $protocol = $a[2];
-  my $hex_lengh = length($a[3]);
   my $doubleCode = 'no';
   my $iodevice;
   my $ioname;
 
-  #Log3 $name, 3, "SD_BELL_Def name=$a[0] protocol=$protocol HEX-Value=$a[3] hex_lengh=$hex_lengh";
-
   # Argument                              0     1         2         3           4
   return 'SD_BELL: wrong syntax: define <name> SD_BELL <Protocol> <HEX-Value> <optional IODEV>' if(int(@a) < 3 || int(@a) > 5);
   ### checks - doubleCode yes ###
-  return "SD_BELL: wrong <protocol> $a[2]" if not($a[2] =~ /^(?:15|32|41|42|57|79|96|98)/xms);
+  return "SD_BELL: wrong <protocol> $a[2]" if not($a[2] =~ /^(?:15|32|41|42|57|79|96|98|112)/xms);
   return "SD_BELL: wrong HEX-Value! Protocol $a[2] HEX-Value <$a[3]> not HEX (0-9 | a-f | A-F)" if (($protocol != 41) && not $a[3] =~ /^[0-9a-fA-F]*$/xms);
   return "SD_BELL: wrong HEX-Value! Protocol $a[2] HEX-Value <$a[3]> not HEX (0-9 | a-f | A-F) or length wrong!" if (($protocol == 41) && not $a[3] =~ /^[0-9a-fA-F]{8}_[0-9a-fA-F]{8}$/xms);
 
@@ -223,11 +227,16 @@ sub Set {
       }
 
       Log3 $name, 4, "$ioname: SD_BELL_Set_doubleCodeCheck doubleCodeCheck=$doubleCodeCheck splitCode[0]=$rawDatasend";
-
-      my $hlen = length($rawDatasend);
-      my $blen = $hlen * 4;
-      my $bitData = unpack("B$blen", pack("H$hlen", $rawDatasend));
-      my $msg = "P$protocol#" . $bitData;
+    
+      my $msg = "P$protocol#";
+      if ($protocol == 112) {
+        $msg .= $rawDatasend . '0123456'; # cc1101 RX FIFO 4, 8 ... Bytes
+      } else {
+        my $hlen = length($rawDatasend);
+        my $blen = $hlen * 4;
+        my $bitData = unpack("B$blen", pack("H$hlen", $rawDatasend));
+        $msg .= $bitData;
+      }
     
       if ($model eq 'Heidemann_|_Heidemann_HX_|_VTX-BELL') {
         $msg .= '#R135';
@@ -392,7 +401,11 @@ sub Parse {
     $state = 'Alarm' if (substr($bitData,8,1) eq '1');
     $bat = substr($bitData,41,1) eq '0' ? 'ok' : 'low' if ($hlen == 12);  # only Grothe_Mistral_SE_03
     Log3 $iohash, 4, "$ioname: SD_BELL_Parse Grothe_Mistral_SE P$protocol - $rawData";
-
+  ### AVANTEK length 16 ###
+  } elsif ($protocol == 112) {
+    Log3 $iohash, 4, "$ioname: SD_BELL_Parse AVANTEK P$protocol - $rawData";
+    $deviceCode = substr($deviceCode,0,9);
+    $devicedef = $protocol . ' ' .$deviceCode;
   ### doubleCode no without P41 ###
   } else {
     $devicedef = $protocol . ' ' .$deviceCode;
@@ -476,6 +489,7 @@ sub Attr {
     <li>Heidemann | Heidemann HX | VTX-BELL_Funkklingel  [Protocol 79]</li>
     <li>Grothe Mistral SE 01.1 (40 bit), 03.1 (48 bit) [Protocol 96]</li>
     <li>GEA-028DB [Protokoll 98]</li>
+    <li>AVANTEK DB-LE [Protokoll 112]</li>
     <br>
     <u><i>Special feature Protocol 41, 2 different codes will be sent one after the other!</u></i>
   </ul>
@@ -525,6 +539,7 @@ sub Attr {
     <li>Heidemann | Heidemann HX | VTX-BELL_Funkklingel  [Protokoll 79]</li>
     <li>Grothe Mistral SE 01.1 (40 bit), 03.1 (48 bit) [Protokoll 96]</li>
     <li>GEA-028DB [Protokoll 98]</li>
+    <li>AVANTEK DB-LE [Protokoll 112]</li>
     <br>
     <u><i>Besonderheit Protokoll 41, es sendet 2 verschiedene Codes nacheinader!</u></i>
   </ul>

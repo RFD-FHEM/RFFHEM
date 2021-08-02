@@ -1,6 +1,6 @@
-# $Id: 00_SIGNALduino.pm v3.5.1 2020-07-02 21:20:33Z Sidey $
+# $Id: 00_SIGNALduino.pm v3.5.2 2021-07-18 20:27:24Z sidey79 $
 #
-# v3.5.1 - https://github.com/RFD-FHEM/RFFHEM/tree/master
+# v3.5.2 - https://github.com/RFD-FHEM/RFFHEM/tree/master
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incoming messages
 # see http://www.fhemwiki.de/wiki/SIGNALDuino
 # It was modified also to provide support for raw message handling which can be send from the SIGNALduino
@@ -15,7 +15,7 @@
 package main;
 use strict;
 use warnings;
-#use version 0.77; our $VERSION = version->declare('v3.5.1');
+#use version 0.77; our $VERSION = version->declare('v3.5.2');
 
 my $missingModulSIGNALduino = '';
 
@@ -39,7 +39,7 @@ use List::Util qw(first);
 
 
 use constant {
-  SDUINO_VERSION                  => '3.5.1+20210525',
+  SDUINO_VERSION                  => '3.5.2+20210718',  # Datum wird automatisch bei jedem pull request aktualisiert
   SDUINO_INIT_WAIT_XQ             => 1.5,     # wait disable device
   SDUINO_INIT_WAIT                => 2,
   SDUINO_INIT_MAXRETRY            => 3,
@@ -270,7 +270,7 @@ my %matchListSIGNALduino = (
 my %symbol_map = (one => 1 , zero =>0 ,sync => '', float=> 'F', 'start' => '');
 
 ## rfmode for attrib & supported rfmodes
-my @rfmode = ('Bresser_5in1','KOPP_FC','Lacrosse_mode1','Lacrosse_mode2','Lacrosse_mode4','PCA301','SlowRF');
+my @rfmode = ('Avantek','Bresser_5in1','KOPP_FC','Lacrosse_mode1','Lacrosse_mode2','Lacrosse_mode4','PCA301','SlowRF');
 
 ############################# package main
 sub SIGNALduino_Initialize {
@@ -838,6 +838,7 @@ sub SIGNALduino_Set_sendMsg {
   my $cnt=0;
 
   my $sendData;
+  ## modulation ASK/OOK - MC
   if (defined($hash->{protocolObject}->getProperty($protocol,'format')) && $hash->{protocolObject}->getProperty($protocol,'format') eq 'manchester')
   {
     $clock += $_ for( @{$hash->{protocolObject}->getProperty($protocol,'clockrange')} );
@@ -858,6 +859,11 @@ sub SIGNALduino_Set_sendMsg {
     $sendData = $intro . 'SM;' . ($repeats > 0 ? "R=$repeats;" : '') . "C=$clock;D=$data;" . $outro . $frequency; # SM;R=2;C=400;D=AFAFAF;
     $hash->{logMethod}->($hash->{NAME}, 5, "$hash->{NAME}: Set_sendMsg, Preparing manchester protocol=$protocol, repeats=$repeats, clock=$clock data=$data");
 
+  ## modulation xFSK
+  } elsif (defined($hash->{protocolObject}->getProperty($protocol,'register')) && defined($hash->{protocolObject}->getProperty($protocol,'rfmode'))) {
+    $hash->{logMethod}->($hash->{NAME}, 5, "$hash->{NAME}: Set_sendMsg, Preparing ".$hash->{protocolObject}->getProperty($protocol,'rfmode')." protocol=$protocol, repeats=$repeats,data=$data");
+    $sendData = 'SN;' . ($repeats > 0 ? "R=$repeats;" : '') . "D=$data;" # SN;R=1;D=08C11484498ABCDE;
+  ## modulation ASK/OOK - MS MU
   } else {
     if ($protocol == 3 || substr($data,0,2) eq 'is') {
       if (substr($data,0,2) eq 'is') {
@@ -1264,10 +1270,14 @@ sub SIGNALduino_CheckSendRawResponse {
     my $name=$hash->{NAME};
     # zu testen der sendeQueue, kann wenn es funktioniert auf verbose 5
     $hash->{logMethod}->($name, 4, "$name: CheckSendrawResponse, sendraw answer: $msg");
-    #RemoveInternalTimer("HandleWriteQueue:$name");
     delete($hash->{ucCmd});
-    #SIGNALduino_HandleWriteQueue("x:$name"); # Todo #823 on github
-    InternalTimer(gettimeofday() + 0.1, \&SIGNALduino_HandleWriteQueue, "HandleWriteQueue:$name") if (scalar @{$hash->{QUEUE}} > 0 && InternalVal($name,'sendworking',0) == 0);
+    if ($msg =~ /D=[A-Za-z0-9]+;/ )
+    {
+      RemoveInternalTimer("HandleWriteQueue:$name");
+      SIGNALduino_HandleWriteQueue("x:$name"); # Todo #823 on github
+    } else {
+      InternalTimer(gettimeofday() , \&SIGNALduino_HandleWriteQueue, "HandleWriteQueue:$name") if (scalar @{$hash->{QUEUE}} > 0 && InternalVal($name,'sendworking',0) == 0);
+    }
   }
   return (undef);
 }
@@ -1620,7 +1630,7 @@ sub SIGNALduino_AddSendQueue {
   #SIGNALduino_Log3 $hash , 5, Dumper($hash->{QUEUE});
 
   $hash->{logMethod}->($hash, 5,"$name: AddSendQueue, " . $hash->{NAME} . ": $msg (" . @{$hash->{QUEUE}} . ')');
-  InternalTimer(gettimeofday() + 0.1, \&SIGNALduino_HandleWriteQueue, "HandleWriteQueue:$name") if (scalar @{$hash->{QUEUE}} == 1 && InternalVal($name,'sendworking',0) == 0);
+  InternalTimer(gettimeofday(), \&SIGNALduino_HandleWriteQueue, "HandleWriteQueue:$name") if (scalar @{$hash->{QUEUE}} == 1 && InternalVal($name,'sendworking',0) == 0);
 }
 
 ############################# package main, test exists
@@ -1810,9 +1820,11 @@ sub SIGNALduino_Read {
             $hash->{logMethod}->($name, 5, "$name: Read, try asyncOutput of message $returnMessage");
             my $ao = undef;
             $ao = asyncOutput( $hash->{ucCmd}->{asyncOut}, $hash->{ucCmd}->{cmd}.': ' . $returnMessage ) if (defined($returnMessage));
-          $hash->{logMethod}->($name, 5, "$name: Read, asyncOutput failed $ao") if (defined($ao));
+            $hash->{logMethod}->($name, 5, "$name: Read, asyncOutput failed $ao") if (defined($ao));
           }
-          delete($hash->{ucCmd});
+          if ( exists $hash->{ucCmd} && defined $hash->{ucCmd}->{cmd} &&  $hash->{ucCmd}->{cmd} ne "sendraw" ) {
+            delete $hash->{ucCmd} ;
+          }
         }
 
         if (exists($hash->{keepalive})) {
@@ -1968,15 +1980,16 @@ sub SIGNALduino_PatternExists {
   #Debug 'plist: '.Dumper($patternList) if($debug);
   #Debug 'searchlist: '.Dumper($search) if($debug);
 
-  my $valid=1;
-  my @pstr;
   my $debug = AttrVal($hash->{NAME},'debug',0);
   my $i=0;
-  my $maxcol=0;
+  my @indexer;
+  my @sumlist;
+  my %plist=();
 
-  foreach my $searchpattern (@{$search})    # z.B. [1, -4]
+  for my $searchpattern (@{$search})    # z.B. [1, -4]
   {
-    #my $patt_id;
+    next if (exists $plist{$searchpattern});
+
     # Calculate tolernace for search
     #my $tol=abs(abs($searchpattern)>=2 ?$searchpattern*0.3:$searchpattern*1.5);
     my $tol=abs(abs($searchpattern)>3 ? abs($searchpattern)>16 ? $searchpattern*0.18 : $searchpattern*0.3 : 1);  #tol is minimum 1 or higer, depending on our searched pulselengh
@@ -1992,53 +2005,66 @@ sub SIGNALduino_PatternExists {
       # Extract fist pattern, which is nearst to our searched value
       my @closestidx = (sort {$pattern_gap{$a} <=> $pattern_gap{$b}} keys %pattern_gap);
 
-      my $idxstr='';
-      my $r=0;
-
-      while (my ($item) = splice(@closestidx, 0, 1))
-      {
-        $pstr[$i][$r]=$item;
-        $r++;
-        Debug "closest pattern has index: $item" if($debug);
-      }
-      $valid=1;
+      $plist{$searchpattern} = 1;
+      push @indexer, $searchpattern; 
+      push @sumlist, [@closestidx];  
     } else {
       # search is not found, return -1
       return -1;
-      last;
     }
     $i++;
-    #return ($valid ? $pstr : -1);  # return $pstr if $valid or -1
-
-    #foreach $patt_id (keys %$patternList) {
-      #Debug "$patt_id. chk ->intol $patternList->{$patt_id} $searchpattern $tol";
-      #$valid =  SIGNALduino_inTol($patternList->{$patt_id}, $searchpattern, $tol);
-      #if ( $valid) #one pulse found in tolerance, search next one
-      #{
-      # $pstr="$pstr$patt_id";
-      # # provide this index for further lookup table -> {$patt_id =  $searchpattern}
-      # Debug 'pulse found';
-      # last ; ## Exit foreach loop if searched pattern matches pattern in list
-      #}
-    #}
-    #last if (!$valid);  ## Exit loop if a complete iteration has not found anything
   }
-  my @results = ('');
 
-  foreach my $subarray (@pstr)
+  sub cartesian_product {
+    use List::Util qw(reduce);
+    reduce {
+      [ map {
+        my $item = $_;
+        map [ @$_, $item ], @$a
+      } @$b ]
+    } [[]], @_
+  }
+  my @res = cartesian_product @sumlist;
+  Debug qq[sumlists is: ].Dumper @sumlist if($debug);
+  Debug qq[res is: ].Dumper $res[0] if($debug);
+  Debug qq[indexer is: ].Dumper \@indexer if($debug);
+
+  OUTERLOOP:
+  for my $i (0..$#{$res[0]})
   {
-    @results = map {my $res = $_; map $res.$_, @$subarray } @results;
+
+    ## Check if we have same patternindex for different values and skip this invalid ones
+    my %count;  
+    for (@{$res[0][$i]}) 
+    { 
+      $count{$_}++; 
+      next OUTERLOOP if ($count{$_} > 1)
+    };
+    
+    # Create a mapping table to exchange the values later on
+    for (my $x=0;$x <= $#indexer;$x++)
+    {
+      $plist{$indexer[$x]}  = $res[0][$i][$x]; 
+    }
+    Debug qq[plist is for this check ].Dumper(\%plist) if($debug);
+
+    # Create our searchstring with our mapping table
+    my @patternVariant= @{$search};
+    for my $v (@patternVariant)
+    {
+      #Debug qq[value before is: $v ] if($debug);
+      $v = $plist{$v};
+      #Debug qq[after: $v ] if($debug);
+
+    }
+    Debug qq[patternVariant is ].Dumper(\@patternVariant) if($debug);
+    my $search_pattern = join '', @patternVariant;
+
+    (index ($$data, $search_pattern) > -1) ? return $search_pattern : next;
+    
   }
+  return -1;  
 
-  foreach my $search (@results)
-  {
-    Debug "looking for substr $search" if($debug);
-    return $search if (index( ${$data}, $search) >= 0);
-  }
-
-  return -1;
-
-  #return ($valid ? @results : -1);  # return @pstr if $valid or -1
 }
 
 ############################# package main
@@ -3260,6 +3286,7 @@ function SD_plistWindow(txt)
 sub SIGNALduino_FW_saveWhitelist {
   my $name = shift;
   my $wl_attr = shift;
+  my $hash = $defs{$name};
 
   if (!IsDevice($name)) {
     Log3 undef, 3, "$name: FW_saveWhitelist, is not a valid definition, operation aborted.";
@@ -3276,7 +3303,7 @@ sub SIGNALduino_FW_saveWhitelist {
   else {
     $wl_attr =~ s/,$//;   # Komma am Ende entfernen
   }
-  $attr{$name}{whitelist_IDs} = $wl_attr;
+  CommandAttr($hash,"$name whitelist_IDs $wl_attr");
   Log3 $name, 3, "$name: FW_saveWhitelist, $wl_attr";
   SIGNALduino_IdList("x:$name", $wl_attr);
 }

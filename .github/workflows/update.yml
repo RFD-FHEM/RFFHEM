@@ -7,11 +7,50 @@ on:
       - '.github/workflows/update.yml'
 
 jobs:
+  pr_check:
+    outputs:
+      result: ${{ steps.checkbranch.outputs.result }}
+    runs-on: ubuntu-latest
+    steps:
+    - name: Extract branch name
+      id: extract_branch
+      run: |
+        echo ::set-output name=BRANCH_NAME::${GITHUB_REF#refs/*/}
+    - name: Check if Branch is in PR
+      if: github.event_name == 'push'
+      id: checkbranch
+      uses: actions/github-script@v4
+      with:
+        script: |
+          console.log(process.env.BRANCH_NAME)
+          const resp = await github.pulls.list({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+          });
+          if (resp.data) {
+            const pullRequestsWithBranch = resp.data.filter(it => it.head.ref == process.env.BRANCH_NAME)
+            console.log(pullRequestsWithBranch)
+            return pullRequestsWithBranch.length >= 1
+          }
+          return false
+      env:
+          BRANCH_NAME: ${{ steps.extract_branch.outputs.BRANCH_NAME }}
   update:
+    needs: pr_check
+    if: needs.pr_check.outputs.result != 'true'
     env:
       CONTROLS_FILENAME: controls_signalduino.txt 
     runs-on: ubuntu-latest
     steps: 
+    - name: output
+      env:
+        SENDER: ${{ toJson(github.event.sender) }}
+        PR: ${{ toJson(github.event.push) }}
+        PUSHER: §${{ toJson(github.event.pusher) }}
+      run: |
+        echo "$SENDER"
+        echo "$PR"
+        echo "$PUSHER"
     - name: Extract branch name
       run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
       id: extract_branch
@@ -20,11 +59,11 @@ jobs:
       with:
         fetch-depth: 0
         persist-credentials: false
-    - name: update controls files
+    - name: update controls file (FHEM)
       uses: fhem/fhem-controls-actions@v2.0.1
       with:
         filename: controls_signalduino.txt 
-    - name: update controls files
+    - name: update controls file (lib)
       uses: fhem/fhem-controls-actions@v2.0.1
       with:
         filename: controls_signalduino.txt 

@@ -1,5 +1,5 @@
 ###########################################################################################################################################
-# $Id: SD_ProtocolData.pm 3.4.4 2020-07-16 20:04:45Z Sidey $
+# $Id: SD_ProtocolData.pm 3.4.4 2021-07-29 20:39:27Z elektron-bbs $
 #
 # The file is part of the SIGNALduino project.
 # All protocol definitions are contained in this file.
@@ -87,7 +87,7 @@ package lib::SD_ProtocolData;
   use strict;
   use warnings;
 
-  our $VERSION = '1.30';
+  our $VERSION = '1.31';
 
   our %protocols = (
     "0" =>  ## various weather sensors (500 | 9100)
@@ -2416,10 +2416,15 @@ package lib::SD_ProtocolData;
               # P88#31EB8B8A008B48058 | button=up    MS;P1=399;P2=-421;P3=-4034;P4=800;P5=-815;P6=-15516;D=1342421515424242151515154215421515154242421542151515424242154215424242424242424242154242421542151542154242154242424242424242154215161212121212121212121212;CP=1;SP=3;R=86;O;m2;
               # P88#54F58AA3008B48038 | button=down  MS;P1=415;P2=-400;P3=-4034;P4=810;P5=-803;P6=-15468;D=1342154215421542421515151542154215154242421542154215421542424215154242424242424242154242421542151542154242154242424242424242421515161212121212121212121212;CP=1;SP=3;R=84;O;m2;
               # P88#CBDA84D2008B48018 | button=stop  MS;P1=417;P2=-400;P3=-4032;P4=-789;P5=811;P6=-15540;D=1314145252145214141414521414521452145252525214525214145214525214525252525252525252145252521452141452145252145252525252525252525214161212121212121212121212;CP=1;SP=3;R=86;O;m2;
+              ## remote Normstahl Garage DOORS - 1k AM HS 433MHz | AKHS 433-61 | one button @HomeAutoUser
+              # P88#A4630395D55800014 | buttone one  MS;P1=314;P2=-433;P3=-3801;P4=-799;P5=680;P6=-15288;D=131452145252145252521414525252141452525252525214141452521452145214141452145214521452145214145252525252525252525252525252525252521452161212121212121212121212;CP=1;SP=3;R=56;O;m2;
+              # P88#8B6988E6D55800014 | buttone one  MS;P0=684;P1=-436;P2=316;P3=-799;P4=-15280;P5=-3796;D=252301010123012323012323012301012323010101230101012323230101232301232301230123012301230123230101010101010101010101010101010101012301242121212121212121212121;CP=2;SP=5;R=18;O;m1;
+              # P88#CAADF1BFD55800010 | buttone one  MS;P1=-437;P2=311;P3=-3786;P4=-806;P5=676;P6=-14940;D=232424515124512451245124512424512424242424515151242451242424242424242451245124512451245124245151515151515151515151515151515151512451562121212121212121212121;CP=2;SP=3;R=55;O;m2;
+              # P88#CAD0BB54D55800010 | buttone one  MS;P0=686;P1=-425;P2=317;P3=-3796;P4=-802;P5=-14916;P6=240;D=232424010124012401242401240101010124012424240124240124012401240101242401240124012401240124240101010101010101010101010101010101012401052161616161616161212121;CP=2;SP=3;R=59;O;m2;
               ## KeeLoq is a registered trademark of Microchip Technology Inc.
       {
         name            => 'HCS300/HCS301',
-        comment         => 'remote controls Aurel TX-nM-HCS, enjoy motors HS, Rademacher RP-S1-HS-RF11, SCS Sentinel PR3-4207-002, Waeco MA650_TX',
+        comment         => 'remote controls Aurel TX-nM-HCS, enjoy motors HS, Normstahl ,Rademacher RP-S1-HS-RF11, SCS Sentinel PR3-4207-002, Waeco MA650_TX',
         id              => '88',
         knownFreqs      => '433.92 | 868.35',
         one             => [1,-2],        # PWM bit pulse width typ. 1.2 mS
@@ -2851,7 +2856,7 @@ package lib::SD_ProtocolData;
         sync            => '2DD4',
         modulation      => '2-FSK',
         rfmode          => 'Bresser_5in1',
-        register        => ['0001','0246','0306','042D','05D4','06FF','07C0','0802','0D21','0E65','0FE8','1088','114C','1202','1322','14F8','1551','1916','1B43','1C68'],
+        register        => ['0001','0246','0346','042D','05D4','06FF','07C0','0802','0D21','0E65','0FE8','1088','114C','1202','1322','14F8','1551','1916','1B43','1C68'],
         preamble        => 'W108#',
         clientmodule    => 'SD_WS',
         length_min      => '52',
@@ -2879,6 +2884,38 @@ package lib::SD_ProtocolData;
         reconstructBit   => '1',
         length_min      => '65',
         length_max      => '66',
+      },
+
+    # "111" => reserved @elektron-bbs
+
+    "112" =>  ## AVANTEK DB-LE
+              # Wireless doorbell & LED night light
+              # Sample: 20 Microseconds | 3 Repeats with ca. 1,57ms Pause
+              # A7129 -> FSK/GFSK Sub 1GHz Transceiver
+              #
+              #       PPPPPSSSSDDDDDDDDDD
+              #       |    |   |--------> Data
+              #       |    ||||---------> Sync
+              #       |||||-------------> Preambel
+              #
+              # URH:  aaaaa843484608a4224
+              # FHEM: MN;D=08C114844FDA5CA2;R=48;
+              #       MN;D=08C11484435D873B;R=47;
+              # !!! receiver hardware is required to complete in SD_BELL module !!!
+      {
+        name            => 'Avantek',
+        comment         => 'Wireless doorbell & LED night light',
+        id              => '112',
+        knownFreqs      => '433.3',
+        datarate        => '50.087',
+        sync            => '0869',
+        modulation      => '2-FSK',
+        rfmode          => 'Avantek',
+        register        => ['0001','0246','0301','0408','0569','06FF','0780','0802','0D10','0EAA','0F56','108A','11F8','1202','1322','14F8','1551','1916','1B43','1C40','20FB','2156','2211'],
+        preamble        => 'P112#',
+        clientmodule    => 'SD_BELL',
+        length_min      => '16',
+        length_max      => '16',
       },
     ########################################################################
     #### ###  register informations from other hardware protocols  #### ####
