@@ -107,7 +107,7 @@ InternalTimer(time(), sub {
       is($targetHash->{ucCmd},hash {
         field 'cmd' => 'set_dataRate';
         field 'arg' => '3.75';
-        etc();
+        end();
       } ,q[Verify expected ucCMD element entrys]);
       @{$targetHash->{QUEUE}}=();
 
