@@ -1,3 +1,14 @@
+2021-08-02 - Repair check results (#997)
+
+* Update update.yml
+
+- skip steps instead of complete job
+- add job dependency
+
+* PULL_REQUEST_TEMPLATE.md
+
+- spell fix
+
 2021-08-01 - Bresser 5in1 2 - Rename readings windDirection, windDirectionText, windGust and windSpeed (#995)
 
 * Renaming Readings wind. *
