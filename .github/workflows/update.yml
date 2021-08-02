@@ -37,12 +37,12 @@ jobs:
           BRANCH_NAME: ${{ steps.extract_branch.outputs.BRANCH_NAME }}
   update:
     needs: pr_check
-    if: needs.pr_check.outputs.result != 'true'
     env:
       CONTROLS_FILENAME: controls_signalduino.txt 
     runs-on: ubuntu-latest
     steps: 
     - name: output
+      if: needs.pr_check.outputs.result != 'true'
       env:
         SENDER: ${{ toJson(github.event.sender) }}
         PR: ${{ toJson(github.event.push) }}
@@ -52,29 +52,35 @@ jobs:
         echo "$PR"
         echo "$PUSHER"
     - name: Extract branch name
+      if: needs.pr_check.outputs.result != 'true'
       run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
       id: extract_branch
     - name: Checkout Repostory
+      if: needs.pr_check.outputs.result != 'true'
       uses: actions/checkout@v2.3.4
       with:
         fetch-depth: 0
         persist-credentials: false
     - name: update controls file (FHEM)
+      if: needs.pr_check.outputs.result != 'true'
       uses: fhem/fhem-controls-actions@v2.0.1
       with:
         filename: controls_signalduino.txt 
     - name: update controls file (lib)
+      if: needs.pr_check.outputs.result != 'true'
       uses: fhem/fhem-controls-actions@v2.0.1
       with:
         filename: controls_signalduino.txt 
         directory: FHEM/lib
         writemode: a
     - name: update CHANGED
+      if: needs.pr_check.outputs.result != 'true'
       run: |
         LOG=$(date +"%Y-%m-%d") 
         LOG+=" - $(git log -1 --pretty=%B)"
         echo "$LOG" | cat - CHANGED > temp && mv temp CHANGED
     - name: git commit back
+      if: needs.pr_check.outputs.result != 'true'
       run: |
         git config --global user.email "action@github.com"
         git config --local user.name "GitHub Action"
@@ -82,6 +88,7 @@ jobs:
         git ls-files --error-unmatch CHANGED || git add CHANGED
         git diff --name-only --exit-code controls_signalduino.txt || git commit CHANGED controls_signalduino.txt -m "Automatic updated controls and CHANGED" || true
     - name: git push
+      if: needs.pr_check.outputs.result != 'true'
       uses: ad-m/github-push-action@v0.6.0
       with:
         github_token: ${{ secrets.GH_TOKEN }}

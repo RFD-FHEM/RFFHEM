@@ -6,7 +6,7 @@
 
 <!--Please specify if this is a bugfix, feature or update of docs  -->
 * **What kind of change does this PR introduce?** (Bug fix, feature, docs update, ...)
-- [ ] Bugfix (pleas link issue)
+- [ ] Bugfix (please link issue)
 - [ ] Feature enhancement
 - [ ] Documentation update
 - [ ] Unittest enhancement
