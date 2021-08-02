@@ -85,7 +85,7 @@ InternalTimer(time(), sub {
       is($targetHash->{QUEUE},array {
         item 'W06D3';
         item 'W0791';
-        etc();
+        end();
       } ,q[Verify expected queue element entrys]);
       @{$targetHash->{QUEUE}}=();
     };
