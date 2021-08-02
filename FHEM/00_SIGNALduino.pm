@@ -126,13 +126,15 @@ my %sets = (
   'enableMessagetype'   =>  ['syncedMS,unsyncedMU,manchesterMC', \&SIGNALduino_Set_MessageType ],
   'disableMessagetype'  =>  ['syncedMS,unsyncedMU,manchesterMC', \&SIGNALduino_Set_MessageType ],
   'sendMsg'             =>  ['textFieldNL',\&SIGNALduino_Set_sendMsg ],
-  'cc1101_freq'         =>  ['textFieldNL', \&cc1101::SetFreq ],
   'cc1101_bWidth'       =>  ['58,68,81,102,116,135,162,203,232,270,325,406,464,541,650,812', \&SIGNALduino_Set_bWidth ],
-  'cc1101_rAmpl'        =>  ['24,27,30,33,36,38,40,42',  \&cc1101::setrAmpl ],
-  'cc1101_sens'         =>  ['4,8,12,16', \&cc1101::SetSens ],
+  'cc1101_dataRate'     =>  ['textFieldNL', \&cc1101::SetDataRate ],
+  'cc1101_deviatn'      =>  ['textFieldNL', \&cc1101::SetDeviatn ],
+  'cc1101_freq'         =>  ['textFieldNL', \&cc1101::SetFreq ],
   'cc1101_patable'      =>  ['-30_dBm,-20_dBm,-15_dBm,-10_dBm,-5_dBm,0_dBm,5_dBm,7_dBm,10_dBm', \&cc1101::SetPatable ],
+  'cc1101_rAmpl'        =>  ['24,27,30,33,36,38,40,42',  \&cc1101::setrAmpl ],
   'cc1101_reg'          =>  ['textFieldNL', \&cc1101::SetRegisters ],
   'cc1101_reg_user'     =>  ['noArg', \&cc1101::SetRegistersUser ],
+  'cc1101_sens'         =>  ['4,8,12,16', \&cc1101::SetSens ],
   'LaCrossePairForSec'  =>  ['textFieldNL', \&SIGNALduino_Set_LaCrossePairForSec ],
 );
 
@@ -144,7 +146,7 @@ my @syncmod = ( 'No preamble/sync','15/16 sync word bits detected','16/16 sync w
               );
 
 my %cc1101_register = (   # for get ccreg 99 and set cc1101_reg
-  '00' => 'IOCFG2   - 0x0D',			# ! the values with spaces for output get ccreg 99 !
+  '00' => 'IOCFG2   - 0x0D',      # ! the values with spaces for output get ccreg 99 !
   '01' => 'IOCFG1   - 0x2E',
   '02' => 'IOCFG0   - 0x2D',
   '03' => 'FIFOTHR  - 0x47',
@@ -772,7 +774,7 @@ sub SIGNALduino_Attr_rfmode {
                 main::SIGNALduino_AddSendQueue($hash,$argcmd);
               }
               main::SIGNALduino_WriteInit($hash);
-              last MNIDLIST;	# found $rfmode, exit loop
+              last MNIDLIST;  # found $rfmode, exit loop
             } else {
               $hash->{logMethod}->($hash->{NAME}, 1, "$hash->{NAME}: Set_rfmode, set to $aVal (ID $id, no register entry found in protocols)");
             }
@@ -1177,18 +1179,22 @@ sub SIGNALduino_CheckccConfResponse {
     $var = substr($str,(hex($a)-13)*2, 2);
     $r{$a} = hex($var);
   }
-  my $msg = sprintf("Freq: %.3f MHz, Bandwidth: %d KHz, rAmpl: %d dB, sens: %d dB, DataRate: %.2f Baud",
-    26*(($r{"0D"}*256+$r{"0E"})*256+$r{"0F"})/65536,                #Freq       | Register 0x0D,0x0E,0x0F
-    26000/(8 * (4+(($r{"10"}>>4)&3)) * (1 << (($r{"10"}>>6)&3))),   #Bw         | Register 0x10
-    $ampllist[$r{"1B"}&7],                                          #rAmpl      | Register 0x1B
-    4+4*($r{"1D"}&3),                                               #Sens       | Register 0x1D
-    ((256+$r{"11"})*(2**($r{"10"} & 15 )))*26000000/(2**28)         #DataRate   | Register 0x10,0x11
+  my $msg = sprintf("Freq: %.3f MHz, Bandwidth: %d kHz, rAmpl: %d dB, sens: %d dB, DataRate: %.2f kBaud",
+    26*(($r{"0D"}*256+$r{"0E"})*256+$r{"0F"})/65536,                 #Freq       | Register 0x0D,0x0E,0x0F
+    26000/(8 * (4+(($r{"10"}>>4)&3)) * (1 << (($r{"10"}>>6)&3))),    #Bw         | Register 0x10
+    $ampllist[$r{"1B"}&7],                                           #rAmpl      | Register 0x1B
+    4+4*($r{"1D"}&3),                                                #Sens       | Register 0x1D
+    (((256+$r{"11"})*(2**($r{"10"} & 15 )))*26000000/(2**28) / 1000) #DataRate   | Register 0x10,0x11
   );
 
-  my $msg2 = sprintf("Modulation: %s, Syncmod: %s",
+  my $msg2 = sprintf("Modulation: %s",
     $modformat[$r{"12"}>>4],                                        #Modulation | Register 0x12
-    $syncmod[($r{"12"})&7],                                         #Syncmod    | Register 0x12
   );
+
+  if ($msg2 !~ /Modulation:\sASK\/OOK/) {
+    $msg2 .= ", Syncmod: ".$syncmod[($r{"12"})&7];                                                    #Syncmod    | Register 0x12
+    $msg2 .= ", Deviation: ".round((8+($r{"15"}&7))*(2**(($r{"15"}>>4)&7)) *26000/(2**17),2) .' kHz'; #Deviation  | Register 0x15
+  }
 
   readingsBeginUpdate($_[0]);
   readingsBulkUpdate($_[0], 'cc1101_config', $msg);
@@ -1657,7 +1663,7 @@ sub SIGNALduino_SendFromQueue {
       my $rfmode = AttrVal($name, 'rfmode', undef);
       CommandAttr($hash,"$name rfmode SlowRF") if (defined $rfmode && $rfmode ne 'SlowRF');  # option with save question mark
 
-    } elsif ($msg =~ "^W(?:0F|10|11|1D|12|1F)") {                           # SetFreq, setrAmpl, Set_bWidth, SetSens
+    } elsif ($msg =~ "^W(?:0F|10|11|1D|12|17|1F)") {                        # SetFreq, setrAmpl, Set_bWidth, SetDeviatn, SetSens
       SIGNALduino_Get($hash,$name,'ccconf');
     } elsif ($msg =~ "^x") {                                                # patable
       SIGNALduino_Get($hash,$name,'ccpatable'); 
@@ -2055,16 +2061,14 @@ sub SIGNALduino_PatternExists {
       #Debug qq[value before is: $v ] if($debug);
       $v = $plist{$v};
       #Debug qq[after: $v ] if($debug);
-
     }
     Debug qq[patternVariant is ].Dumper(\@patternVariant) if($debug);
     my $search_pattern = join '', @patternVariant;
 
     (index ($$data, $search_pattern) > -1) ? return $search_pattern : next;
-    
   }
-  return -1;  
 
+  return -1;
 }
 
 ############################# package main
@@ -4094,17 +4098,125 @@ sub SetRegisters  {
 
 ############################# package cc1101
 sub SetRegistersUser  {
-	my ($hash) = @_;
+  my ($hash) = @_;
 
-	my $cc1101User = main::AttrVal($hash->{NAME}, 'cc1101_reg_user', undef);
+  my $cc1101User = main::AttrVal($hash->{NAME}, 'cc1101_reg_user', undef);
 
-	## look, user defined self default register values via attribute
-	if (defined $cc1101User) {
-		$hash->{logMethod}->($hash->{NAME}, 3, "$hash->{NAME}: SetRegistersUser, write CC1101 defaults from attribute");
-		$cc1101User = '0815,'.$cc1101User; # for SetRegisters, value for register starts on pos 1 in array
-		cc1101::SetRegisters($hash, split(',', $cc1101User) );
-	}
-	return ;
+  ## look, user defined self default register values via attribute
+  if (defined $cc1101User) {
+    $hash->{logMethod}->($hash->{NAME}, 3, "$hash->{NAME}: SetRegistersUser, write CC1101 defaults from attribute");
+    $cc1101User = '0815,'.$cc1101User; # for SetRegisters, value for register starts on pos 1 in array
+    cc1101::SetRegisters($hash, split(',', $cc1101User) );
+  }
+  return ;
+}
+
+############################# package cc1101
+sub SetDataRate  {
+  my ($hash, @a) = @_;
+  my $arg = $a[1];
+
+  if (exists($hash->{ucCmd}->{cmd}) && $hash->{ucCmd}->{cmd} eq 'set_dataRate' && $a[0] =~ /^C10\s=\s([A-Fa-f0-9]{2})$/) {
+    my ($ob1,$ob2) = cc1101::CalcDataRate($hash,$1,$hash->{ucCmd}->{arg});
+    main::SIGNALduino_AddSendQueue($hash,"W12$ob1");
+    main::SIGNALduino_AddSendQueue($hash,"W13$ob2");
+    main::SIGNALduino_WriteInit($hash);
+    return ("Setting MDMCFG4..MDMCFG3 to $ob1 $ob2 = $hash->{ucCmd}->{arg} kHz" ,undef);
+  } else {
+    if ($arg !~ m/\d/) { return qq[$hash->{NAME}: ERROR, unsupported DataRate value]; }
+    if ($arg > 1621.83) { $arg = 1621.83; }     # max 1621.83      kBaud DataRate
+    if ($arg < 0.0247955) { $arg = 0.0247955; } # min    0.0247955 kBaud DataRate
+
+    cc1101::GetRegister($hash,10);              # Get Register 10
+
+    $hash->{ucCmd}->{cmd}         = 'set_dataRate';
+    $hash->{ucCmd}->{arg}         = $arg;                                   # ZielDataRate
+    $hash->{ucCmd}->{responseSub} = \&cc1101::SetDataRate;                  # Callback auf sich selbst setzen
+    $hash->{ucCmd}->{asyncOut}    = $hash->{CL} if (defined($hash->{CL}));
+    $hash->{ucCmd}->{timenow}     = time();
+  }
+  return ;
+}
+
+############################# package cc1101
+sub CalcDataRate {
+  # register 0x10 3:0 & register 0x11 7:0
+  my ($hash, $ob10, $dr) = @_;
+  $ob10 = hex($ob10) & 0xf0;
+
+  my $DRATE_E = ($dr*1000) * (2**20) / 26000000;
+  $DRATE_E = log($DRATE_E) / log(2);
+  $DRATE_E = int($DRATE_E);
+
+  my $DRATE_M = (($dr*1000) * (2**28) / (26000000 * (2**$DRATE_E))) - 256;
+  my $DRATE_Mr = main::round($DRATE_M,0);
+  $DRATE_M = int($DRATE_M);
+
+  my $datarate0 = ( ((256+$DRATE_M)*(2**($DRATE_E & 15 )))*26000000/(2**28) / 1000);
+  my $DRATE_M1 = $DRATE_M + 1;
+  my $DRATE_E1 = $DRATE_E;
+
+  if ($DRATE_M1 == 256) {
+    $DRATE_M1 = 0;
+    $DRATE_E1++;
+  }
+
+  my $datarate1 = ( ((256+$DRATE_M1)*(2**($DRATE_E1 & 15 )))*26000000/(2**28) / 1000);
+
+  if ($DRATE_Mr != $DRATE_M) {
+    $DRATE_M = $DRATE_M1;
+    $DRATE_E = $DRATE_E1;
+  }
+
+  my $ob11 = sprintf("%02x",$DRATE_M);
+  $ob10 = sprintf("%02x", $ob10+$DRATE_E);
+
+  $hash->{logMethod}->($hash->{NAME}, 5, qq[$hash->{NAME}: CalcDataRate, DataRate $hash->{ucCmd}->{arg} kHz step from $datarate0 to $datarate1 kHz]);
+  $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: CalcDataRate, DataRate MDMCFG4..MDMCFG3 to $ob10 $ob11 = $hash->{ucCmd}->{arg} kHz]);
+
+  return ($ob10,$ob11);
+}
+
+############################# package cc1101
+sub SetDeviatn {
+  my ($hash, @a) = @_;
+  my $arg = $a[1];
+
+  if ($arg !~ m/\d/) { return qq[$hash->{NAME}: ERROR, unsupported Deviation value]; }
+  if ($arg > 380.859375) { $arg = 380.859375; }   # max 380.859375 kHz Deviation
+  if ($arg < 1.586914) { $arg = 1.586914; }       # min   1.586914 kHz Deviation
+
+  my $deviatn_val;
+  my $bits;
+  my $devlast = 0;
+  my $bitlast = 0;
+
+  CalcDeviatn:
+  for (my $DEVIATION_E=0; $DEVIATION_E<8; $DEVIATION_E++) {
+    for (my $DEVIATION_M=0; $DEVIATION_M<8; $DEVIATION_M++) {
+      $deviatn_val = (8+$DEVIATION_M)*(2**$DEVIATION_E) *26000/(2**17);
+      $bits = $DEVIATION_M + ($DEVIATION_E << 4);
+      if ($arg > $deviatn_val) {
+        $devlast = $deviatn_val;
+        $bitlast = $bits;
+      } else {
+        if (($deviatn_val - $arg) < ($arg - $devlast)) {
+          $devlast = $deviatn_val;
+          $bitlast = $bits;
+        }
+        last CalcDeviatn;
+      }
+    }
+  }
+
+  my $reg15 = sprintf("%02x",$bitlast);
+  my $deviatn_str =  sprintf("% 5.2f",$devlast);
+  $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: SetDeviatn, Setting DEVIATN (15) to $reg15 = $deviatn_str kHz]);
+
+  main::SIGNALduino_AddSendQueue($hash,"W17$reg15");
+  main::SIGNALduino_WriteInit($hash);
+
+  return;
 }
 
 ############################# package cc1101
@@ -4272,7 +4384,7 @@ USB-connected devices (SIGNALduino):<br>
   <li>LaCrossePairForSec</li>
   (Only with CC1101 receiver)<br>
   Enable autocreate of new LaCrosse sensors for x seconds. If ignore_battery is not given only sensors sending the 'new battery' flag will be created.<br><br>
-  <li>freq / bWidth / patable / rAmpl / sens / registers<br>
+  <li>cc1101_bWidth / cc1101_dataRate / cc1101_deviatn / cc1101_freq / cc1101_patable / cc1101_rAmpl / cc1101_reg / cc1101_sens<br>
     (Only with CC1101 receiver)<br>
     Set the sduino frequency / bandwidth / PA table / receiver-amplitude / sensitivity<br>
 
@@ -4280,22 +4392,29 @@ USB-connected devices (SIGNALduino):<br>
     illegal to do so. Note: The parameters used for RFR transmission are
     not affected.<br>
     <ul>
-      <a name="cc1101_freq"></a>
-      <li><code>cc1101_freq</code> sets both the reception and transmission frequency. Note: Although the CC1101 can be set to frequencies between 315 and 915 MHz, the antenna interface and the antenna is tuned for exactly one frequency. Default is 433.920 MHz (or 868.350 MHz). If not set, frequency from <code>cc1101_frequency</code> will be used.
-      </li>
       <a name="cc1101_bWidth"></a>
       <li><code>cc1101_bWidth</code> can be set to values between 58 kHz and 812 kHz. Large values are susceptible to interference, but make possible to receive inaccurately calibrated transmitters. It affects tranmission too. Default is 325 kHz.
       </li>
+      <a name="cc1101_dataRate"></a>
+      <li><code>cc1101_dataRate</code> , can be set to values ​​between 0.0247955 kBaud and 1621.83 kBaud.
+      </li>
+      <a name="cc1101_deviatn"></a>
+      <li><code>cc1101_deviatn</code> , can be set to values ​​between 1.586914 kHz and 380.859375 kHz.
+      </li>
+      <a name="cc1101_freq"></a>
+      <li><code>cc1101_freq</code> sets both the reception and transmission frequency. Note: Although the CC1101 can be set to frequencies between 315 and 915 MHz, the antenna interface and the antenna is tuned for exactly one frequency. Default is 433.920 MHz (or 868.350 MHz). If not set, frequency from <code>cc1101_frequency</code> will be used.
+      </li>
       <a name="cc1101_patable"></a>
-      <li><code>cc1101_patable</code> change the PA table (power amplification for RF sending)</li>
+      <li><code>cc1101_patable</code> change the PA table (power amplification for RF sending)
+      </li>
       <a name="cc1101_rAmpl"></a>
       <li><code>cc1101_rAmpl</code> is receiver amplification, with values between 24 and 42 dB. Bigger values allow reception of weak signals. Default is 42.
       </li>
-      <a name="cc1101_sens"></a>
-      <li><code>cc1101_sens</code> is the decision boundary between the on and off values, and it is 4, 8, 12 or 16 dB.  Smaller values allow reception of less clear signals. Default is 4 dB.
-      </li>
       <a name="cc1101_reg"></a>
       <li><code>cc1101_reg</code> You can set multiple registers at one. Specify the register with its two digit hex code followed by the register value separate multiple registers via space.
+      </li>
+      <a name="cc1101_sens"></a>
+      <li><code>cc1101_sens</code> is the decision boundary between the on and off values, and it is 4, 8, 12 or 16 dB.  Smaller values allow reception of less clear signals. Default is 4 dB.
       </li>
     </ul>
   </li><br>
@@ -4809,19 +4928,25 @@ USB-connected devices (SIGNALduino):<br>
   (NUR bei Verwendung eines cc110x Funk-Moduls)<br>
   Aktivieren Sie die automatische Erstellung neuer LaCrosse-Sensoren für "x" Sekunden. Wenn ignore_battery nicht angegeben wird, werden nur Sensoren erstellt, die das Flag 'Neue Batterie' senden.<br><br>
   <li>
-    cc1101_freq / cc1101_bWidth / cc1101_patable / cc1101_rAmpl / cc1101_sens / register <br>
+    cc1101_bWidth / cc1101_dataRate / cc1101_deviatn / cc1101_freq / cc1101_patable / cc1101_rAmpl / cc1101_reg / cc1101_sens <br>
     (NUR bei Verwendung eines cc110x Funk-Moduls)<br><br>
     Stellt die SIGNALduino-Frequenz / Bandbreite / PA-Tabelle / Empf&auml;nger-Amplitude / Empfindlichkeit ein.<br>
     Verwenden Sie es mit Vorsicht. Es kann Ihre Hardware zerst&ouml;ren und es kann sogar illegal sein, dies zu tun.<br>
     Hinweis: Die f&uuml;r die RFR-&Uuml;bertragung verwendeten Parameter sind nicht betroffen.<br>
   </li>
   <ul>
+    <a name="cc1101_bWidth"></a>
+    <li><code>cc1101_bWidth</code> , kann auf Werte zwischen 58 kHz und 812 kHz eingestellt werden. Große Werte sind st&ouml;ranf&auml;llig, erm&ouml;glichen jedoch den Empfang von ungenau kalibrierten Sendern. Es wirkt sich auch auf die &Uuml;bertragung aus. Standard ist 325 kHz.
+    </li>
+    <a name="cc1101_dataRate"></a>
+    <li><code>cc1101_dataRate</code> , kann auf Werte zwischen 0.0247955 kBaud und 1621.83 kBaud eingestellt werden.
+    </li>
+    <a name="cc1101_deviatn"></a>
+    <li><code>cc1101_deviatn</code> , kann auf Werte zwischen 1.586914 kHz und 380.859375 kHz eingestellt werden.
+    </li>
     <a name="cc1101_freq"></a>
     <li><code>cc1101_freq</code> , legt sowohl die Empfangsfrequenz als auch die &Uuml;bertragungsfrequenz fest.<br>
       Hinweis: Obwohl der CC1101 auf Frequenzen zwischen 315 und 915 MHz eingestellt werden kann, ist die Antennenschnittstelle und die Antenne auf genau eine Frequenz abgestimmt. Standard ist 433.920 MHz (oder 868.350 MHz). Wenn keine Frequenz angegeben wird, dann wird die Frequenz aus dem Attribut <code>cc1101_frequency</code> geholt.
-    </li>
-    <a name="cc1101_bWidth"></a>
-    <li><code>cc1101_bWidth</code> , kann auf Werte zwischen 58 kHz und 812 kHz eingestellt werden. Große Werte sind st&ouml;ranf&auml;llig, erm&ouml;glichen jedoch den Empfang von ungenau kalibrierten Sendern. Es wirkt sich auch auf die &Uuml;bertragung aus. Standard ist 325 kHz.
     </li>
     <a name="cc1101_patable"></a>
     <li><code>cc1101_patable</code> , &Auml;nderung der PA-Tabelle (Leistungsverst&auml;rkung f&uuml;r HF-Senden)
@@ -4829,11 +4954,11 @@ USB-connected devices (SIGNALduino):<br>
     <a name="cc1101_rAmpl"></a>
     <li><code>cc1101_rAmpl</code> , ist die Empf&auml;ngerverst&auml;rkung mit Werten zwischen 24 und 42 dB. Gr&ouml;ßere Werte erlauben den Empfang schwacher Signale. Der Standardwert ist 42.
     </li>
-    <a name="cc1101_sens"></a>
-    <li><code>cc1101_sens</code> , ist die Entscheidungsgrenze zwischen den Ein- und Aus-Werten und betr&auml;gt 4, 8, 12 oder 16 dB. Kleinere Werte erlauben den Empfang von weniger klaren Signalen. Standard ist 4 dB.
-    </li>
     <a name="cc1101_reg"></a>
     <li><code>cc1101_reg</code> Es k&ouml;nnen mehrere Register auf einmal gesetzt werden. Das Register wird &uuml;ber seinen zweistelligen Hexadezimalwert angegeben, gefolgt von einem zweistelligen Wert. Mehrere Register werden via Leerzeichen getrennt angegeben
+    </li>
+    <a name="cc1101_sens"></a>
+    <li><code>cc1101_sens</code> , ist die Entscheidungsgrenze zwischen den Ein- und Aus-Werten und betr&auml;gt 4, 8, 12 oder 16 dB. Kleinere Werte erlauben den Empfang von weniger klaren Signalen. Standard ist 4 dB.
     </li>
   </ul>
   <br>

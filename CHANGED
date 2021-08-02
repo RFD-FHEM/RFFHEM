@@ -1,3 +1,4 @@
+2021-08-02 - Merge branch 'master' into master_cc110x_commands
 2021-08-02 - Repair check results (#997)
 
 * Update update.yml
@@ -8,6 +9,7 @@
 * PULL_REQUEST_TEMPLATE.md
 
 - spell fix
+
 
 2021-08-01 - Bresser 5in1 2 - Rename readings windDirection, windDirectionText, windGust and windSpeed (#995)
 
@@ -25,9 +27,7 @@ SD_ProtocolData.pm - change register 0x03, Design Note DN009 - FIFOTHR.ADC_RETEN
 * Update 14_SD_BELL.pm
 
  * fix AVANTEK (RX FIFO)
-2021-07-12 - Update 14_SD_BELL.pm
 
- * fix AVANTEK (RX FIFO)
 2021-07-10 - Fixes CPU and MEM usage patternExists (#988)
 
 * 00_SIGNALduino.pm
