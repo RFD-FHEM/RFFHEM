@@ -1,8 +1,139 @@
-2021-06-12 - Changes to protocol 111
+2021-08-02 - xFSK - cc110x commands & commandref (#990)
 
-update SD_ProtocolData.pm
-update 14_SD_WS.pm
-2021-06-07 - new protocol 11 for: TS-FT002 water tank level monitor with temperature
+* Update 00_SIGNALduino.pm
+ * sort cc1101 sets alphabetical
+ * revised hardtabs for Perl::Critic
+ * added cc1101_dataRate to setlist
+ * added cc1101_deviatn to setlist
+ * revised output DataRate to kBaud
+ * revised spelling mistake Bandwidth kHz
+ * revised commandref
+
+* Update 02_SIGNALduino_CheckccConfResponse.t
+ * revised test with new data
+
+* t/FHEM/cc1101/01_func.t
+ * Basis Testgerüst für package cc1101 erstellt
+
+* Unittest auf cc1101 erweitert
+
+* Update 01_func.t
+ * revised PERL::Critic
+ * added CalcDataRate notes
+
+* Corrected unittest
+
+* 00_SIGNALduino.pm
+ * removed unneeded codepath
+
+* 01_func.t
+ * tried to add test CalcbWidthReg
+
+* Update 01_func.t
+ * correction tests for comparison of all contents
+
+* Update 01_func.t
+ * revised test https://github.com/RFD-FHEM/RFFHEM/pull/990/files/436ca626de1bcd8c76e1111f97235c7dfa259fe9#r681258066
+
+* Update 01_func.t
+ * revised test https://github.com/RFD-FHEM/RFFHEM/pull/990#pullrequestreview-720601023
+2021-08-02 - Merge branch 'master' into master_cc110x_commands
+2021-08-02 - Repair check results (#997)
+
+* Update update.yml
+
+- skip steps instead of complete job
+- add job dependency
+
+* PULL_REQUEST_TEMPLATE.md
+
+- spell fix
+
+
+2021-08-01 - Bresser 5in1 2 - Rename readings windDirection, windDirectionText, windGust and windSpeed (#995)
+
+* Renaming Readings wind. *
+
+14_SD_WS.pm - Rename readings windDirection, windDirectionText, windGust and windSpeed
+SD_ProtocolData.pm - change register 0x03, Design Note DN009 - FIFOTHR.ADC_RETENTION - CC1101 will wake up with optimal ADC settings for low data rate (≤ 100 kbps)
+
+2021-07-29 - Update update.yml
+
+- Use Admin pat, to allow passing branch protection rules
+
+2021-07-13 - AVANTEK - small fix send data (#991)
+
+* Update 14_SD_BELL.pm
+
+ * fix AVANTEK (RX FIFO)
+
+2021-07-10 - Fixes CPU and MEM usage patternExists (#988)
+
+* 00_SIGNALduino.pm
+
+SIGNALduino_PatternExists überarbeitet um hohe CPU Last und Speicherverbrauch zu umgehen
+Fixes High memory and CPU usage  in SIGNALduino_PatternExists  #986
+2021-07-09 - Merge branch 'master' into sidey79/issue986
+2021-07-09 - added AVANTEK Wireless doorbell & LED night light (#981)
+
+* Update SD_ProtocolData.pm
+
+ * added AVANTEK DB-LE
+ * Register optimized
+ * revised comments
+ * optimized parameters
+
+* Update README.md
+
+* Update 00_SIGNALduino.pm
+ * added AVANTEK rfmode
+
+* Update 14_SD_BELL.pm
+
+ * https://github.com/RFD-FHEM/RFFHEM/pull/981#discussion_r658270036 changed line
+ * added AVANTEK
+ * revised send cmd AVANTEK protocol
+ * added commandref
+
+* Update 00_SIGNALduino.pm
+
+ * revised cmd sendMsg for xFSK
+
+* Update 01_SIGNALduino_Set_sendMsg.t
+
+ * revised test sendMsg & added data to test
+2021-06-30 - added AVANTEK protocol
+* 14_SD_BELL.pm
+  * revised send cmd AVANTEK protocol
+  * https://github.com/RFD-FHEM/RFFHEM/pull/981#discussion_r658270036 changed line
+* 00_SIGNALduino.pm
+  * revised cmd sendMsg for xFSK
+
+2021-06-30 - little fix - SD_WS - Log3 output (#987)
+* Update 14_SD_WS.pm
+ * fix Log3 output
+
+2021-06-20 - little fix - attr whitelist_IDs (#983)
+
+* SD_ProtocolData.pm
+ * added AVANTEK DB-LE & register optimized
+* 14_SD_BELL.pm
+ * added AVANTEK & commandref
+* Update 00_SIGNALduino.pm
+ - added AVANTEK rfmode
+
+2021-06-20 - Update 00_SIGNALduino.pm
+
+ * revised save option whitelist_IDs (user see now ? on Save config)
+
+2021-06-07 - Fix Multiple Send delay (#941)
+
+* Multiple set commands are not processed
+Fixes #823  for firmware 3.4.0 without delay
+
+2021-06-07 - 00_SIGNALduino.pm
+
+Version updated to current date
 2021-06-07 - Update doc - SD_ProtocolData.pm (#975)
 
 * Update SD_ProtocolData.pm

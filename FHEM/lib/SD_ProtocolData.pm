@@ -1,5 +1,5 @@
 ###########################################################################################################################################
-# $Id: SD_ProtocolData.pm 3.4.4 2020-07-16 20:04:45Z Sidey $
+# $Id: SD_ProtocolData.pm 3.4.4 2021-07-29 20:39:27Z elektron-bbs $
 #
 # The file is part of the SIGNALduino project.
 # All protocol definitions are contained in this file.
@@ -2856,7 +2856,7 @@ package lib::SD_ProtocolData;
         sync            => '2DD4',
         modulation      => '2-FSK',
         rfmode          => 'Bresser_5in1',
-        register        => ['0001','0246','0306','042D','05D4','06FF','07C0','0802','0D21','0E65','0FE8','1088','114C','1202','1322','14F8','1551','1916','1B43','1C68'],
+        register        => ['0001','0246','0346','042D','05D4','06FF','07C0','0802','0D21','0E65','0FE8','1088','114C','1202','1322','14F8','1551','1916','1B43','1C68'],
         preamble        => 'W108#',
         clientmodule    => 'SD_WS',
         length_min      => '52',
@@ -2885,27 +2885,37 @@ package lib::SD_ProtocolData;
         length_min      => '65',
         length_max      => '66',
       },
-    "111" =>  # Water Tank Level Monitor TS-FT002
-              # https://github.com/RFD-FHEM/RFFHEM/issues/977 docolli 2021-06-05
-              # T: 16.8 D: 111   MU;P0=-21110;P1=484;P2=-971;P3=-488;D=01213121212121213121312121312121213131312131313131212131313131312121212131313121313131213131313121213131312131313131313131313131212131312131312101213121212121213121312121312121213131312131313131212131313131312121212131313121313131213131313121213131312131;CP=1;R=26;O;
-							# T: 19 D: 47      MU;P0=-31628;P1=469;P2=-980;P3=-499;P4=-22684;D=01213121212121213121312121312121213131312131313131213131313131312121212131313121312121213131313131312131312131313131313131313131312121312131312141213121212121213121312121312121213131312131313131213131313131312121212131313121312121213131313131312131312131;CP=1;R=38;O;
-							# T: 20 D: 47      MU;P0=-5980;P1=464;P2=-988;P3=-511;P4=-22660;D=01213121212121213121312121312121213131312131313131213131313131312121212131313121313131213131313121312131312131313131313131313131213131312131312141213121212121213121312121312121213131312131313131213131313131312121212131313121313131213131313121312131312131;CP=1;R=38;O;
-              # The sensor sends normally every 180 seconds.
+
+    # "111" => reserved @elektron-bbs
+
+    "112" =>  ## AVANTEK DB-LE
+              # Wireless doorbell & LED night light
+              # Sample: 20 Microseconds | 3 Repeats with ca. 1,57ms Pause
+              # A7129 -> FSK/GFSK Sub 1GHz Transceiver
+              #
+              #       PPPPPSSSSDDDDDDDDDD
+              #       |    |   |--------> Data
+              #       |    ||||---------> Sync
+              #       |||||-------------> Preambel
+              #
+              # URH:  aaaaa843484608a4224
+              # FHEM: MN;D=08C114844FDA5CA2;R=48;
+              #       MN;D=08C11484435D873B;R=47;
+              # !!! receiver hardware is required to complete in SD_BELL module !!!
       {
-        name            => 'TS-FT002',
-        comment         => 'Water tank level monitor with temperature',
-        id              => '111',
-        knownFreqs      => '433.92',
-        one             => [1,-2], # 480,-960
-        zero            => [1,-1], # 480,-480
-        start	          => [1,-2, 1,-1, 1,-2, 1,-2, 1,-2, 1,-2, 1,-2], # Sync 101.1111
-        clockabs        => 480,
-        format          => 'twostate',
-        clientmodule    => 'SD_WS',
-        modulematch     => '^W111#',
-        preamble        => 'W111#5F', # add sync 0101.1111
-        length_min      => '64',
-        length_max      => '64',
+        name            => 'Avantek',
+        comment         => 'Wireless doorbell & LED night light',
+        id              => '112',
+        knownFreqs      => '433.3',
+        datarate        => '50.087',
+        sync            => '0869',
+        modulation      => '2-FSK',
+        rfmode          => 'Avantek',
+        register        => ['0001','0246','0301','0408','0569','06FF','0780','0802','0D10','0EAA','0F56','108A','11F8','1202','1322','14F8','1551','1916','1B43','1C40','20FB','2156','2211'],
+        preamble        => 'P112#',
+        clientmodule    => 'SD_BELL',
+        length_min      => '16',
+        length_max      => '16',
       },
     ########################################################################
     #### ###  register informations from other hardware protocols  #### ####
