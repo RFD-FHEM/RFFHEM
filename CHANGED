@@ -1,3 +1,8 @@
+2021-08-04 - AVANTEK - Fix (#999)
+
+* Update 00_SIGNALduino.pm
+
+ * fix matchListSIGNALduino for AVANTEK (protocol 112 forget)
 2021-08-02 - xFSK - cc110x commands & commandref (#990)
 
 * Update 00_SIGNALduino.pm
