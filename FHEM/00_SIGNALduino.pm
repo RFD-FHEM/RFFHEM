@@ -1,4 +1,4 @@
-# $Id: 00_SIGNALduino.pm v3.5.2 2021-08-01 21:18:40Z sidey79 $
+# $Id: 00_SIGNALduino.pm v3.5.2 2021-08-03 20:09:51Z HomeAutoUser $
 #
 # v3.5.2 - https://github.com/RFD-FHEM/RFFHEM/tree/master
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incoming messages
@@ -39,7 +39,7 @@ use List::Util qw(first);
 
 
 use constant {
-  SDUINO_VERSION                  => '3.5.2+20210801',  # Datum wird automatisch bei jedem pull request aktualisiert
+  SDUINO_VERSION                  => '3.5.2+20210803',  # Datum wird automatisch bei jedem pull request aktualisiert
   SDUINO_INIT_WAIT_XQ             => 1.5,     # wait disable device
   SDUINO_INIT_WAIT                => 2,
   SDUINO_INIT_MAXRETRY            => 3,
@@ -260,7 +260,7 @@ my %matchListSIGNALduino = (
       '24:FS20'             => '^81..(04|0c)..0101a001',
       '25:CUL_EM'           => '^E0.................',
       '26:Fernotron'        => '^P82#.*',
-      '27:SD_BELL'          => '^P(?:15|32|41|42|57|79|96|98)#.*',
+      '27:SD_BELL'          => '^P(?:15|32|41|42|57|79|96|98|112)#.*',
       '28:SD_Keeloq'        => '^P(?:87|88)#.*',
       '29:SD_GT'            => '^P49#[A-Fa-f0-9]+',
       '30:LaCrosse'         => '^(\\S+\\s+9 |OK\\sWS\\s)',
