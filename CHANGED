@@ -1,14 +1,8 @@
-2021-08-03 - new protocol 111 for TS-FT002 water tank level monitor with temperature
 
 2021-08-04 - AVANTEK - Fix (#999)
 * Update 00_SIGNALduino.pm
  * fix matchListSIGNALduino for AVANTEK (protocol 112 forget)
 
-2021-08-02 - xFSK - cc110x commands & commandref (#990)
-SD_ProtocolData.pm - new definition protocol 111
-14_SD_WS.pm - new decoder for protocol 111
-README.md - TS-FT002 added
-CHANGED - cleaned up
 2021-08-02 - xFSK - cc110x commands & commandref (#990)
 * Update 00_SIGNALduino.pm
  * sort cc1101 sets alphabetical
