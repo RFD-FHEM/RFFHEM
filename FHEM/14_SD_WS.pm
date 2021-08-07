@@ -867,9 +867,12 @@ sub SD_WS_Parse($$)
         # 0    4    | 8    12   | 16   20   | 24   28   | 32   36   | 40   44
         # 0010 1111 | 0000 0110 | 1110 0100 | 0111 0000 | 1101 0001 | 0011 1110 - 2F06E470D13E, T: 201, T2: 279
         # iiii iiii | ???? tt22 | tttt tttt | 2222 2222 | ???? ???? | ???? ????
-        # i:  8 bit id, changes each time the sensor is switched on
+        # i:  8 bit id, changes after changing the battery
+        # ?:  4 bit unknown, always 0000
         # t: 10 bit unsigned temperature 1 fahrenheit offset by 90
         # 2: 10 bit unsigned temperature 2 fahrenheit offset by 90
+        # ?:  8 bit unknown, changes with id
+        # ?:  8 bit unknown, always changes
         sensortype => 'GFGT_433_B1',
         model      => 'SD_WS_113_T',
         prematch   => sub { return 1; }, # no precheck known
@@ -1332,6 +1335,10 @@ sub SD_WS_Parse($$)
   if (defined($temp)) {
     $state .= "T: $temp"
   }
+  if (defined($temp2)) {
+    $state .= ' ' if (length($state) > 0);
+    $state .= "T2: $temp2";
+  }
   if (defined($hum) && ($hum > 0 && $hum < 100)) {
     $state .= " H: $hum"
   }
@@ -1500,6 +1507,7 @@ sub SD_WS_WH2SHIFT($){
     <li>Weatherstation Auriol IAN 283582 Version 06/2017 (Lidl), Modell-Nr.: HG02832D</li>
     <li>Weatherstation Auriol AHFL 433 B2, IAN 314695 (Lidl)</li>
     <li>Weatherstation TFA 35.1140.01 with temperature / humidity sensor TFA 30.3221.02 and temperature / humidity / windspeed sensor TFA 30.3222.02</li>
+    <li>Wireless Grill Thermometer, Model name: GFGT 433 B1</li>
   </ul><br><br>
 
   <a name="SD_WS_Define"></a>
@@ -1604,6 +1612,7 @@ sub SD_WS_WH2SHIFT($){
     <li>Bresser 5-in-1 Comfort Wetter Center, 7009994, Profi Regenmesser, Temeo</li>
     <li>Conrad S522</li>
     <li>EuroChron EFTH-800, EFS-3110A (Temperatur- und Feuchtigkeitssensor)</li>
+    <li>Kabelloses Grillthermometer, Modellname: GFGT 433 B1</li>
     <li>NC-3911, NC-3912 digitales Kuehl- und Gefrierschrank-Thermometer</li>
     <li>Opus XT300</li>
     <li>PV-8644 infactory Poolthermometer</li>
