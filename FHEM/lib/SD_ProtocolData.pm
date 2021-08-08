@@ -1,6 +1,5 @@
 ###########################################################################################################################################
-# $Id: SD_ProtocolData.pm 3.4.4 2021-08-06 06:37:05Z HomeAutoUser $
-#
+# $Id: SD_ProtocolData.pm 3.4.4 2021-08-08 12:01:00Z elektron-bbs $
 # The file is part of the SIGNALduino project.
 # All protocol definitions are contained in this file.
 #
@@ -87,7 +86,7 @@ package lib::SD_ProtocolData;
   use strict;
   use warnings;
 
-  our $VERSION = '1.32';
+  our $VERSION = '1.33';
 
   our %protocols = (
     "0" =>  ## various weather sensors (500 | 9100)
@@ -2941,10 +2940,30 @@ package lib::SD_ProtocolData;
         length_min      => '16',
         length_max      => '16',
       },
-
-    # "113" => reserved @elektron-bbs
-
-      "114" =>  ## TR401 (Well-Light)
+    "113" =>  ## Wireless Grill Thermometer, Model name: GFGT 433 B1, WDJ7036, FCC ID: 2AJ9O-GFGT433B1, 
+              # https://github.com/RFD-FHEM/RFFHEM/issues/992 @ muede-de 2021-07-13
+              # The sensor sends more than 12 messages every 2 seconds.
+              # T:  24 T2:  29   MS;P1=-761;P2=249;P4=-3005;P5=718;P6=-270;D=24212156215656565621212121212121215621562121562156562156215656562156562156212121562121212121565621;CP=2;SP=4;R=34;O;m2;
+              # T: 203 T2: 300   MS;P1=-262;P2=237;P3=-760;P6=-2972;P7=721;D=26232371237171717123232323237171237171712371232323712323712371712371712371232323712371232371717123;CP=2;SP=6;R=1;O;m2;
+              # T: 201 T2: 257   MS;P2=-754;P3=247;P5=-2996;P6=718;P7=-272;D=35323267326767676732323232326767326767673232326767326732326732323267673267323232673232323232326732;CP=3;SP=5;R=3;O;m2;
+      {
+        name            => 'GFGT_433_B1',
+        comment         => 'Wireless Grill Thermometer',
+        id              => '113',
+        knownFreqs      => '433.92',
+        one             => [3,-1],  # 750,-250
+        zero            => [1,-3],  # 250,-750
+        sync            => [1,-12], # 250,-3000
+        clockabs        => 250,
+        format          => 'twostate',
+        preamble        => 'W113#',
+        clientmodule    => 'SD_WS',
+        modulematch     => '^W113#',
+        reconstructBit   => '1',
+        length_min      => '47',
+        length_max      => '48',
+      },
+    "114" =>  ## TR401 (Well-Light)
                 # https://forum.fhem.de/index.php/topic,121103.0.html @Jake @Ralf9
                 # TR401_0_2 off  MU;P0=311;P1=585;P2=-779;P3=1255;P4=-1445;P5=-23617;P7=-5646;CP=1;R=230;D=12323234141414141514123414123232341414141415141234141232323414141414151412341412323234141414141514123414123232341414141415141234141232323414141414151412341412323234141414141517141232323414141414150;p;
                 # TR401_0_2 off  MU;P0=-14293;P1=611;P2=-1424;P3=-753;P4=1277;P5=-23626;P6=-9108;P7=214;CP=1;R=240;D=1213421213434342121212121512134212134343421212121216701213421213434342121212121512134212134343421212121215121342121343434212121212151213421213434342121212121512134212134343421212121215121342121343434212121212151213421213434342121212121512134212134343421212121215121342121343434212121212151;p;

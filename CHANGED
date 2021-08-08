@@ -1,15 +1,10 @@
-2021-08-06 - new protocol 114 for TR401
+2021-08-08 - new protocol 113 for GFGT 433 B1 Wireless Grill Thermometer (#1003)
 
- * Update 00_SIGNALduino.pm
-   * added protocol 114 to SD_UT match
- * Update SD_ProtocolData.pm
-    * added protocol 114
- * Update 14_SD_UT.pm
-   * added model TR401
-   * revised commandref
- * Update README.md
+ * SD_ProtocolData.pm - Definition for protocol 113 added
+ * 14_SD_WS.pm - Demodulation for protocol 113 added
+ * README.md - Entry for GFGT 433 B1 added 
+
 2021-08-05 - new protocol 111 for TS-FT002 water tank level monitor with temperature (#1000)
-
 * SD_ProtocolData.pm - new definition protocol 111
 * 14_SD_WS.pm - new decoder for protocol 111
 * README.md - TS-FT002 added
