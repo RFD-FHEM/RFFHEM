@@ -45,6 +45,7 @@ Supported Devices / Protocols
 |Froggit FT007T, FT007TP, FT007TH | Thermo-Hygrometer, Thermometer |
 |GEA-028DB | Radio door chime |
 |GEIGER GF0x01, GF0x02, GF0x03 | Remote control (compatible to Tedsen) |
+|GFGT 433 B1 | Wireless Grill Thermometer |
 |Grothe Mistral SE 03.1| wireless gong |
 |GT-9000| Remote control based on protocol GT-9000 with encoding (EASY HOME RCT DS1, Tec Star)|
 |GT-TMBBQ-01| BBQ temperature sensor|
@@ -89,7 +90,9 @@ Supported Devices / Protocols
 |Techmar Garden Lights | Remote control |
 |Technoline TX3  | Weather sensor |
 |Tedsen SKX1xx, SKX2xx, SKX4xx, SKX6xx | Remote control |
+|TR401 | Remote control |
 |TR60C-1 | Remote control with touch screen |
+|TS-FT002 | Water tank level monitor with temperature |
 |Visivo | Remote control for motorized screen |
 |VLOXO | wireless bell |
 |WH2 | (TFA 30.3157 nur Temp, Hum = 255 -> nicht angezeigt)|
