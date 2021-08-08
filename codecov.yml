@@ -1,0 +1,24 @@
+coverage:
+  status:
+    project:
+      default:
+        # basic
+        target: auto
+        threshold: 1%
+        base: auto 
+        paths: 
+          - "FHEM"
+       # advanced settings
+        if_ci_failed: error #success, failure, error, ignore
+        informational: false
+        only_pulls: false
+    patch:
+      default:
+        # basic
+        target: auto
+        threshold: 10%
+        base: auto 
+        if_ci_failed: error #success, failure, error, ignore
+        only_pulls: false
+        paths: 
+          - "FHEM"
