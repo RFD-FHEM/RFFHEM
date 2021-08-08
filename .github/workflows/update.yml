@@ -74,7 +74,7 @@ jobs:
         directory: FHEM/lib
         writemode: a
     - name: update CHANGED
-      if: steps.extract_branch.outputs.BRANCH_NAME == 'master'
+      if: steps.extract_branch.outputs.branch == 'master'
       run: |
         LOG=$(date +"%Y-%m-%d") 
         LOG+=" - $(git log -1 --pretty=%B)"
