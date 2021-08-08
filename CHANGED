@@ -1,3 +1,8 @@
+2021-08-08 - new protocol 113 for GFGT 433 B1 Wireless Grill Thermometer (#1003)
+
+ * SD_ProtocolData.pm - Definition for protocol 113 added
+ * 14_SD_WS.pm - Demodulation for protocol 113 added
+ * README.md - Entry for GFGT 433 B1 added 
 
 2021-08-05 - new protocol 111 for TS-FT002 water tank level monitor with temperature (#1000)
 * SD_ProtocolData.pm - new definition protocol 111
