@@ -90,6 +90,7 @@ Supported Devices / Protocols
 |Techmar Garden Lights | Remote control |
 |Technoline TX3  | Weather sensor |
 |Tedsen SKX1xx, SKX2xx, SKX4xx, SKX6xx | Remote control |
+|TR401 | Remote control |
 |TR60C-1 | Remote control with touch screen |
 |TS-FT002 | Water tank level monitor with temperature |
 |Visivo | Remote control for motorized screen |
