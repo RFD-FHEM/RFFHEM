@@ -1,6 +1,5 @@
 ###########################################################################################################################################
-# $Id: SD_ProtocolData.pm 3.4.4 2021-08-08 12:01:00Z elektron-bbs $
-#
+# $Id: SD_ProtocolData.pm 3.4.4 2021-08-08 16:56:40Z HomeAutoUser $
 # The file is part of the SIGNALduino project.
 # All protocol definitions are contained in this file.
 #
@@ -2839,6 +2838,9 @@ package lib::SD_ProtocolData;
         length_min      => '22',
         length_max      => '22',
       },
+
+    # "107" => reserved @elektron-bbs
+
     "108" =>  ## BRESSER 5-in-1 Weather Center, Bresser Professional Rain Gauge - elektron-bbs 2021-05-02
               # https://github.com/RFD-FHEM/RFFHEM/issues/607
               # https://forum.fhem.de/index.php/topic,106594.msg1151467.html#msg1151467
@@ -2862,6 +2864,8 @@ package lib::SD_ProtocolData;
         length_min      => '52',
         method          => \&lib::SD_Protocols::ConvBresser_5in1,
       },
+
+    # "109" => reserved @elektron-bbs
     "110" =>  # ADE WS1907 Wetterstation mit Funk-Regenmesser 
               # https://github.com/RFD-FHEM/RFFHEM/issues/965 docolli 2021-05-14
               # T: 16.3 R: 26.6   MU;P0=970;P1=-112;P2=516;P3=-984;P4=2577;P5=-2692;P6=7350;D=01234343450503450503434343434505034343434343434343434343434343434505050503450345034343434343450345050345034505034503456503434505050343434343450503450503434343434505034343434343434343434343434343434505050503450345034343434343450345050345034505034503456503;CP=0;R=12;O;
@@ -2958,6 +2962,27 @@ package lib::SD_ProtocolData;
         reconstructBit   => '1',
         length_min      => '47',
         length_max      => '48',
+      },
+    "114" =>  ## TR401 (Well-Light)
+                # https://forum.fhem.de/index.php/topic,121103.0.html @Jake @Ralf9
+                # TR401_0_2 off  MU;P0=311;P1=585;P2=-779;P3=1255;P4=-1445;P5=-23617;P7=-5646;CP=1;R=230;D=12323234141414141514123414123232341414141415141234141232323414141414151412341412323234141414141514123414123232341414141415141234141232323414141414151412341412323234141414141517141232323414141414150;p;
+                # TR401_0_2 off  MU;P0=-14293;P1=611;P2=-1424;P3=-753;P4=1277;P5=-23626;P6=-9108;P7=214;CP=1;R=240;D=1213421213434342121212121512134212134343421212121216701213421213434342121212121512134212134343421212121215121342121343434212121212151213421213434342121212121512134212134343421212121215121342121343434212121212151213421213434342121212121512134212134343421212121215121342121343434212121212151;p;
+                # TR401_0_2 on   MU;P0=-1426;P1=599;P2=-23225;P3=-748;P4=1281;P5=372;P6=111;P7=268;CP=1;R=235;D=0121343401013434340101010101252621343401013434340101010101252705012134340101343434010101010125;p;
+                # TR401_0_2 on   MU;P0=-14148;P1=-23738;P2=607;P3=-737;P4=1298;P5=-1419;P6=340;P7=134;CP=2;R=236;D=12343452523434345252525252161712343452523434345252525252160;p;
+      {
+        name            => 'TR401',
+        comment         => 'Remote control for example for Well-Light',
+        id              => '114',
+        one             => [-7,3],     #  -1400,600
+        zero            => [-4,6],     #  -800,1200
+        start           => [-118,3],   # -23600,600
+        clockabs        => 200,
+        format          => 'twostate',
+        preamble        => 'P114#',
+        modulematch     => '^P114#[13569BDE][13579BDF]F$',
+        clientmodule    => 'SD_UT',
+        length_min      => '12',
+        length_max      => '12',
       },
     ########################################################################
     #### ###  register informations from other hardware protocols  #### ####
