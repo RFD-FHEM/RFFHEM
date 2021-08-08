@@ -1,5 +1,5 @@
-2021-08-05 - new protocol 111 for TS-FT002 water tank level monitor with temperature (#1000)
 
+2021-08-05 - new protocol 111 for TS-FT002 water tank level monitor with temperature (#1000)
 * SD_ProtocolData.pm - new definition protocol 111
 * 14_SD_WS.pm - new decoder for protocol 111
 * README.md - TS-FT002 added
