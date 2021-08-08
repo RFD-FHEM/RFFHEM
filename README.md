@@ -45,6 +45,7 @@ Supported Devices / Protocols
 |Froggit FT007T, FT007TP, FT007TH | Thermo-Hygrometer, Thermometer |
 |GEA-028DB | Radio door chime |
 |GEIGER GF0x01, GF0x02, GF0x03 | Remote control (compatible to Tedsen) |
+|GFGT 433 B1 | Wireless Grill Thermometer |
 |Grothe Mistral SE 03.1| wireless gong |
 |GT-9000| Remote control based on protocol GT-9000 with encoding (EASY HOME RCT DS1, Tec Star)|
 |GT-TMBBQ-01| BBQ temperature sensor|
