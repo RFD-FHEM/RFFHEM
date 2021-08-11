@@ -1,4 +1,4 @@
-# $Id: 14_SD_WS.pm 21666 2021-08-08 12:01:00Z elektron-bbs $
+# $Id: 14_SD_WS.pm 21666 2021-08-10 19:51:16Z sidey79 $
 #
 # The purpose of this module is to support serval
 # weather sensors which use various protocol
@@ -106,17 +106,17 @@ sub SD_WS_Define($$)
   $modules{SD_WS}{defptr}{$a[2]} = $hash;
   $hash->{STATE} = "Defined";
 
-  my $name= $hash->{NAME};
-  return undef;
+	my $name= $hash->{NAME};
+	return ;
 }
 
 #############################
 sub SD_WS_Undef($$)
 {
-  my ($hash, $name) = @_;
-  delete($modules{SD_WS}{defptr}{$hash->{CODE}})
-  if(defined($hash->{CODE}) && defined($modules{SD_WS}{defptr}{$hash->{CODE}}));
-  return undef;
+	my ($hash, $name) = @_;
+	delete($modules{SD_WS}{defptr}{$hash->{CODE}})
+	if(defined($hash->{CODE}) && defined($modules{SD_WS}{defptr}{$hash->{CODE}}));
+	return ;
 }
 
 #############################

@@ -56,7 +56,7 @@ BresserTemeo_Define($$)
   $hash->{STATE} = "Defined";
 
   #AssignIoPort($hash);
-  return undef;
+  return ;
 }
 
 #####################################
@@ -65,7 +65,7 @@ BresserTemeo_Undef($$)
 {
   my ($hash, $name) = @_;
   delete($modules{BresserTemeo}{defptr}{$hash->{CODE}}) if($hash && $hash->{CODE});
-  return undef;
+  return ;
 }
 
 
@@ -240,7 +240,7 @@ BresserTemeo_Attr(@)
   my $cde = $hash->{CODE};
   delete($modules{BresserTemeo}{defptr}{$cde});
   $modules{BresserTemeo}{defptr}{$iohash->{NAME} . "." . $cde} = $hash;
-  return undef;
+  return ;
 }
 
 
