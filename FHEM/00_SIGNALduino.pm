@@ -2292,7 +2292,7 @@ sub SIGNALduino_moduleMatch {
 ############################# package main, test exists
 # calculated RSSI and RSSI value and RSSI string (-77,'RSSI = -77')
 sub SIGNALduino_calcRSSI {
-  my $rssi = shift;
+  my $rssi = shift // return ;
   my $rssiStr = '';
   $rssi = ($rssi>=128 ? (($rssi-256)/2-74) : ($rssi/2-74));
   $rssiStr = "RSSI = $rssi";
