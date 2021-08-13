@@ -1,4 +1,4 @@
-# $Id: 14_SD_WS.pm 21666 2021-08-10 19:51:16Z sidey79 $
+# $Id: 14_SD_WS.pm 21666 2021-08-12 18:48:36Z elektron-bbs $
 #
 # The purpose of this module is to support serval
 # weather sensors which use various protocol
@@ -106,17 +106,16 @@ sub SD_WS_Define($$)
   $modules{SD_WS}{defptr}{$a[2]} = $hash;
   $hash->{STATE} = "Defined";
 
-	my $name= $hash->{NAME};
-	return ;
+  my $name= $hash->{NAME};
+  return;
 }
 
 #############################
 sub SD_WS_Undef($$)
 {
-	my ($hash, $name) = @_;
-	delete($modules{SD_WS}{defptr}{$hash->{CODE}})
-	if(defined($hash->{CODE}) && defined($modules{SD_WS}{defptr}{$hash->{CODE}}));
-	return ;
+  my ($hash, $name) = @_;
+  delete($modules{SD_WS}{defptr}{$hash->{CODE}}) if(defined($hash->{CODE}) && defined($modules{SD_WS}{defptr}{$hash->{CODE}}));
+  return;
 }
 
 #############################
@@ -199,8 +198,6 @@ sub SD_WS_Parse($$)
         id         => sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,4,11); },                   # id
         temp       => sub {my (undef,$bitData) = @_; return ((SD_WS_binaryToNumber($bitData,12,23) - 2448) / 10); },  # temp
         channel    => sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,26,27); },                  # channel
-        hum        => sub {return undef;},
-        bat        => sub {return undef;},
       },
     27 =>
       {
@@ -594,21 +591,21 @@ sub SD_WS_Parse($$)
                             if (substr($bitData,30,2) eq "01") {    # message 1 thermo/hygro
                               return ((SD_WS_binaryToNumber($bitData,32,43) - 500) / 10.0);
                             } else {
-                              return undef;
+                              return;
                             }
                           },
         hum        => sub {my (undef,$bitData) = @_;
                             if (substr($bitData,30,2) eq "01") {    # message 1 thermo/hygro
                               return SD_WS_binaryToNumber($bitData,48,55);
                             } else {
-                              return undef;
+                              return;
                             }
                           },
         windspeed  => sub {my (undef,$bitData) = @_;
                             if (substr($bitData,30,2) eq "10") {    # message 2 windspeed
                               return (SD_WS_binaryToNumber($bitData,32,43) / 10.0);
                             } else {
-                              return undef;
+                              return;
                             }
                           },
       } ,
@@ -739,16 +736,16 @@ sub SD_WS_Parse($$)
         prematch   => sub {my $rawData = shift; return 1 if ($rawData =~ /^[0-9A-F]{8}[0-9]{2}[0-9A-F]{1}[0-9]{3}[0-9A-F]{1}[0-9]{5}[0-9A-F]{1}[0-9]{1}/); },
         id         => sub {my ($rawData,undef) = @_; return substr($rawData,0,2); },
         winddir    => sub {my ($rawData,undef) = @_;
-                            return undef if (substr($rawData,3,1) eq '9'); # Bresser Professional Rain Gauge
+                            return if (substr($rawData,3,1) eq '9'); # Bresser Professional Rain Gauge
                             my $winddirraw = hex(substr($rawData,6,1));
                             return ($winddirraw * 22.5, $winddirtxtar[$winddirraw]);
                           },
         windgust   => sub {my ($rawData,undef) = @_;
-                            return undef if (substr($rawData,3,1) eq '9'); # Bresser Professional Rain Gauge
+                            return if (substr($rawData,3,1) eq '9'); # Bresser Professional Rain Gauge
                             return (hex(substr($rawData,7,1)) * 256 + hex(substr($rawData,4,2))) / 10;
                           },
         windspeed  => sub {my ($rawData,undef) = @_;
-                            return undef if (substr($rawData,3,1) eq '9'); # Bresser Professional Rain Gauge
+                            return if (substr($rawData,3,1) eq '9'); # Bresser Professional Rain Gauge
                             return (substr($rawData,11,1) . substr($rawData,8,2)) / 10;
                           },
         temp       => sub {my ($rawData,undef) = @_;
@@ -757,7 +754,7 @@ sub SD_WS_Parse($$)
                             return $rawTemp;
                           },
         hum        => sub {my ($rawData,undef) = @_;
-                            return undef if (substr($rawData,3,1) eq '9'); # Bresser Professional Rain Gauge
+                            return if (substr($rawData,3,1) eq '9'); # Bresser Professional Rain Gauge
                             return substr($rawData,16,2) + 0;
                           },
         rain       => sub {my ($rawData,undef) = @_;
@@ -1226,11 +1223,11 @@ sub SD_WS_Parse($$)
   }
   else {
     Log3 $iohash, 2, "$name: SD_WS_Parse unknown message, please report. converted to bits: $bitData";
-    return undef;
+    return;
   }
 
   if (!defined($model)) {
-    return undef;
+    return;
   }
 
   my $deviceCode;
