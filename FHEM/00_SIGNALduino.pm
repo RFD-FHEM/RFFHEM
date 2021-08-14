@@ -1,4 +1,4 @@
-# $Id: 00_SIGNALduino.pm v3.5.2 2021-08-08 16:56:40Z HomeAutoUser $
+# $Id: 00_SIGNALduino.pm v3.5.2 2021-08-13 20:19:26Z sidey79 $
 #
 # v3.5.2 - https://github.com/RFD-FHEM/RFFHEM/tree/master
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incoming messages
@@ -39,7 +39,7 @@ use List::Util qw(first);
 
 
 use constant {
-  SDUINO_VERSION                  => '3.5.2+20210808',  # Datum wird automatisch bei jedem pull request aktualisiert
+  SDUINO_VERSION                  => '3.5.2+20210813',  # Datum wird automatisch bei jedem pull request aktualisiert
   SDUINO_INIT_WAIT_XQ             => 1.5,     # wait disable device
   SDUINO_INIT_WAIT                => 2,
   SDUINO_INIT_MAXRETRY            => 3,
@@ -2292,7 +2292,7 @@ sub SIGNALduino_moduleMatch {
 ############################# package main, test exists
 # calculated RSSI and RSSI value and RSSI string (-77,'RSSI = -77')
 sub SIGNALduino_calcRSSI {
-  my $rssi = shift;
+  my $rssi = shift // return ;
   my $rssiStr = '';
   $rssi = ($rssi>=128 ? (($rssi-256)/2-74) : ($rssi/2-74));
   $rssiStr = "RSSI = $rssi";
