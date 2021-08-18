@@ -1,3 +1,9 @@
+2021-08-18 - Update protocol 64 for sensor WH2A (#1009)
+
+  SD_ProtocolData.pm - correction length_max
+  14_SD_WS.pm - fix sub SD_WS_Parse, changes due to perlcritic
+  README.md - change of entry WH2
+
 2021-08-14 - SIGNALduino_calcRSSI check input parameter (#1007)
 
 * 02_SIGNALduino_calcRSSI.t:
