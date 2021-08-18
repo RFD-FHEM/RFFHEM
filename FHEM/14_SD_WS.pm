@@ -1,4 +1,4 @@
-# $Id: 14_SD_WS.pm 21666 2021-08-12 18:48:36Z elektron-bbs $
+# $Id: 14_SD_WS.pm 21666 2021-08-17 19:14:52Z elektron-bbs $
 #
 # The purpose of this module is to support serval
 # weather sensors which use various protocol
@@ -65,7 +65,7 @@ sub SD_WS_Initialize($)
   $hash->{AutoCreate} =
   {
     "BresserTemeo.*"  => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "2:180"},
-    "SD_WH2.*"        => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "2:90"},
+    "SD_WS_WH2.*"     => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "2:120"},
     "SD_WS37_TH.*"    => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "2:180"},
     "SD_WS50_SM.*"    => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "2:180"},
     "SD_WS71_T.*"     => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4:Temp,", autocreateThreshold => "2:180"},
@@ -88,7 +88,7 @@ sub SD_WS_Initialize($)
     'SD_WS_111_TL.*'   => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4:Temp,', autocreateThreshold => '3:600'},
     'SD_WS_113_T.*'   => { ATTR => 'event-min-interval:.*:60 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4:Temp,', autocreateThreshold => '10:180'},
   };
-
+  return;
 }
 
 #############################
@@ -178,7 +178,6 @@ sub SD_WS_Parse($$)
           temp       => sub {my $msg = shift; return  ((hex(substr($msg,6,2)))-40)  },                           # temp
           hum        => sub {my $msg = shift; return hex(substr($msg,4,2));  },                                  # hum
           channel    => sub {my (undef,$bitData) = @_; return ( SD_WS_binaryToNumber($bitData,12,15)&0x03 );  }, # channel
-          bat        => sub { return "";},
         },
      71 =>
      # 5C2A909F792F
@@ -661,7 +660,7 @@ sub SD_WS_Parse($$)
           my $rawtemp1  = SD_WS_binaryToNumber($_[1],20,23);
           if ($rawtemp100 > 9 || $rawtemp10 > 9 || $rawtemp1 > 9) {
             Log3 $iohash, 3, "$name: SD_WS_Parse $model ERROR - BCD of temperature ($rawtemp100 $rawtemp10 $rawtemp1)";
-            return "";
+            return;
           };
           my $temp = ($rawtemp100 * 10 + $rawtemp10 + $rawtemp1 / 10) * ( substr($_[1],10,1) == 1 ? -1.0 : 1.0);
         },
@@ -1116,6 +1115,7 @@ sub SD_WS_Parse($$)
             $rawData = SD_WS_WH2SHIFT($rawData);
             $msg = $msg_vor.$rawData;
             $bitData = unpack("B$blen", pack("H$hlen", $rawData));
+            $temptyp = substr($bitData,0,8);
             Log3 $iohash, 4, "$name: SD_WS_WH2_1 msg=$msg length:".length($bitData) ;
             Log3 $iohash, 4, "$name: SD_WS_WH2_1 bitdata: $bitData" ;
           } else {
@@ -1124,6 +1124,7 @@ sub SD_WS_Parse($$)
             $rawData = SD_WS_WH2SHIFT($rawData);
             $msg = $msg_vor.$rawData;
             $bitData = unpack("B$blen", pack("H$hlen", $rawData));
+            $temptyp = substr($bitData,0,8);
             Log3 $iohash, 4, "$name: SD_WS_WH2_2 msg=$msg length:".length($bitData) ;
             Log3 $iohash, 4, "$name: SD_WS_WH2_2 bitdata: $bitData" ;
             }
@@ -1163,11 +1164,11 @@ sub SD_WS_Parse($$)
       $bitData = unpack("B$blen", pack("H$hlen", $rawData)); 
       Log3 $iohash, 4, "$name: converted to bits WH2 " . $bitData;    
       $model = "SD_WS_WH2";
-      $SensorTyp = "WH2";
+      $SensorTyp = "WH2, WH2A";
       $id =   SD_WS_bin2dec(substr($bitData,$vorpre + 4,6));
       $id = sprintf('%03X', $id); 
       $channel =  0;
-      $bat = SD_WS_binaryToNumber($bitData,$vorpre + 20) eq "1" ? "low" : "ok";
+      $bat = SD_WS_binaryToNumber($bitData,$vorpre + 24) eq "1" ? "low" : "ok";
 
       $sign = SD_WS_bin2dec(substr($bitData,$vorpre + 12,1)); 
 
@@ -1500,7 +1501,7 @@ sub SD_WS_WH2SHIFT($){
     <li>Thermo-Hygrometer TFA 30.3208.02, FT007TH, F007TH</li>
     <li>TS-FT002 Water tank level monitor with temperature</li>
     <li>TX-EZ6 for Weatherstation TZS First Austria</li>
-    <li>WH2 (TFA Dostmann/Wertheim 30.3157 (sold in Germany), Agimex Rosenborg 66796 (sold in Denmark),ClimeMET CM9088 (Sold in UK)</li>
+    <li>WH2, WH2A (TFA Dostmann/Wertheim 30.3157 (sold in Germany), Agimex Rosenborg 66796 (sold in Denmark),ClimeMET CM9088 (Sold in UK)</li>
     <li>Weatherstation Auriol IAN 283582 Version 06/2017 (Lidl), Modell-Nr.: HG02832D</li>
     <li>Weatherstation Auriol AHFL 433 B2, IAN 314695 (Lidl)</li>
     <li>Weatherstation TFA 35.1140.01 with temperature / humidity sensor TFA 30.3221.02 and temperature / humidity / windspeed sensor TFA 30.3222.02</li>
@@ -1620,7 +1621,7 @@ sub SD_WS_WH2SHIFT($){
     <li>Temperatur/Feuchte-Sensor TFA 30.3208.02, FT007TH, F007TH</li>
     <li>TS-FT002 Wassertank Füllstandswächter mit Temperatur</li>
     <li>TX-EZ6 fuer Wetterstation TZS First Austria</li>
-    <li>WH2 (TFA Dostmann/Wertheim 30.3157 (Deutschland), Agimex Rosenborg 66796 (Denmark), ClimeMET CM9088 (UK)</li>
+    <li>WH2, WH2A (TFA Dostmann/Wertheim 30.3157 (Deutschland), Agimex Rosenborg 66796 (Denmark), ClimeMET CM9088 (UK)</li>
     <li>Wetterstation Auriol IAN 283582 Version 06/2017 (Lidl), Modell-Nr.: HG02832D</li>
     <li>Wetterstation Auriol AHFL 433 B2, IAN 314695 (Lidl)</li>
     <li>Wetterstation TFA 35.1140.01 mit Temperatur-/Feuchtesensor TFA 30.3221.02 und Temperatur-/Feuchte- und Windsensor TFA 30.3222.02</li>
