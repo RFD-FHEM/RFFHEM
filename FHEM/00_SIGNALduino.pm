@@ -272,7 +272,7 @@ my %matchListSIGNALduino = (
 my %symbol_map = (one => 1 , zero =>0 ,sync => '', float=> 'F', 'start' => '');
 
 ## rfmode for attrib & supported rfmodes
-my @rfmode = ('Avantek','Bresser_5in1','KOPP_FC','Lacrosse_mode1','Lacrosse_mode2','Lacrosse_mode4','PCA301','SlowRF');
+my @rfmode = ('Avantek','Bresser_5in1','Bresser_6in1','KOPP_FC','Lacrosse_mode1','Lacrosse_mode2','Lacrosse_mode4','PCA301','SlowRF');
 
 ############################# package main
 sub SIGNALduino_Initialize {

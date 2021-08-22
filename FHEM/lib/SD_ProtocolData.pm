@@ -86,7 +86,7 @@ package lib::SD_ProtocolData;
   use strict;
   use warnings;
 
-  our $VERSION = '1.34';
+  our $VERSION = '1.35';
 
   our %protocols = (
     "0" =>  ## various weather sensors (500 | 9100)
@@ -2983,9 +2983,26 @@ package lib::SD_ProtocolData;
         length_min      => '12',
         length_max      => '12',
       },
-			
-    # "115" => reserved @elektron-bbs
-
+    "115" =>  ## BRESSER 6-in-1 Weather Center, Bresser new 5-in-1 sensors 7002550
+              # https://github.com/RFD-FHEM/RFFHEM/issues/607#issuecomment-888542022 @ Alex-S1981 2021-07-28
+              # The sensor alternately sends two different messages every 12 seconds.
+              # T: 15.2 H: 93 W: 0.8   MN;D=3BF120B00C1618FF77FF0458152293FFF06B0000;R=242;
+              # W: 0.6 R: 5.6          MN;D=1E6C20B00C1618FF99FF0458FFFFA9FF015B0000;R=241;
+      {
+        name            => 'Bresser 6in1',
+        comment         => 'BRESSER 6-in-1 weather center',
+        id              => '115',
+        knownFreqs      => '868.35',
+        datarate        => '8.207',
+        sync            => '2DD4',
+        modulation      => '2-FSK',
+        rfmode          => 'Bresser_6in1',
+        register        => ['0001','0246','0344','042D','05D4','06FF','07C0','0802','0D21','0E65','0FE8','1088','114C','1202','1322','14F8','1551','1916','1B43','1C68'],
+        preamble        => 'W115#',
+        clientmodule    => 'SD_WS',
+        length_min      => '36',
+        method          => \&lib::SD_Protocols::ConvBresser_6in1,
+      },
     ########################################################################
     #### ###  register informations from other hardware protocols  #### ####
 
