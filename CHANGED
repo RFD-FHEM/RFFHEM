@@ -1,54 +1,125 @@
-2021-08-01 - Update 14_SD_WS.pm
 
-Ident corrected
-windDirectionText added
-2021-07-31 - new protocol 115 for BRESSER 6-in-1 Weather Center
-2021-07-29 - Update update.yml
+2021-08-18 - Update protocol 64 for sensor WH2A (#1009)
+  SD_ProtocolData.pm - correction length_max
+  14_SD_WS.pm - fix sub SD_WS_Parse, changes due to perlcritic
+  README.md - change of entry WH2
 
-- Use Admin pat, to allow passing branch protection rules
-2021-07-13 - AVANTEK - small fix send data (#991)
-
-* Update 14_SD_BELL.pm
-
- * fix AVANTEK (RX FIFO)
-2021-07-12 - Update 14_SD_BELL.pm
-
- * fix AVANTEK (RX FIFO)
-2021-07-10 - Fixes CPU and MEM usage patternExists (#988)
-
+2021-08-14 - SIGNALduino_calcRSSI check input parameter (#1007)
+* 02_SIGNALduino_calcRSSI.t:
+- Test extended
+- Bug reproduced
 * 00_SIGNALduino.pm
+- SIGNALduino_calcRSSI Check input parameters
 
+2021-08-13 - Fixes perlcritic return undef in 14_SD_WS (#1006)
+
+2021-08-11 - Fixes perlcritic return undef; (#979)
+14_BresserTemeo.pm:
+   Fixes perlcritic return undef;
+14_SD_RSL.pm:
+   Fixes perlcritic return undef;
+14_SD_WS.pm:
+   Fixes perlcritic return undef;
+14_SD_WS09.pm:
+   Fixes perlcritic return undef;
+41_OREGON.pm:
+   Fixes perlcritic return undef;
+
+2021-08-08 - new protocol 114 for TR401 (#1002)
+ * 00_SIGNALduino.pm:   added protocol 114 to SD_UT match
+ * SD_ProtocolData.pm:   added protocol 114
+ * 14_SD_UT.pm:  added model TR401
+ * README.md: Updated
+
+2021-08-08 - new protocol 113 for GFGT 433 B1 Wireless Grill Thermometer (#1003)
+ * SD_ProtocolData.pm - Definition for protocol 113 added
+ * 14_SD_WS.pm - Demodulation for protocol 113 added
+ * README.md - Entry for GFGT 433 B1 added 
+
+2021-08-05 - new protocol 111 for TS-FT002 water tank level monitor with temperature (#1000)
+* SD_ProtocolData.pm - new definition protocol 111
+* 14_SD_WS.pm - new decoder for protocol 111
+* README.md - TS-FT002 added
+
+2021-08-04 - AVANTEK - Fix (#999)
+* Update 00_SIGNALduino.pm
+ * fix matchListSIGNALduino for AVANTEK (protocol 112 forget)
+
+2021-08-02 - xFSK - cc110x commands & commandref (#990)
+* Update 00_SIGNALduino.pm
+ * sort cc1101 sets alphabetical
+ * revised hardtabs for Perl::Critic
+ * added cc1101_dataRate to setlist
+ * added cc1101_deviatn to setlist
+ * revised output DataRate to kBaud
+ * revised spelling mistake Bandwidth kHz
+ * revised commandref
+* Update 02_SIGNALduino_CheckccConfResponse.t
+ * revised test with new data
+* t/FHEM/cc1101/01_func.t
+ * Basis Testgerüst für package cc1101 erstellt
+* Unittest auf cc1101 erweitert
+* Update 01_func.t
+ * revised PERL::Critic
+ * added CalcDataRate notes
+* Corrected unittest
+* 00_SIGNALduino.pm
+ * removed unneeded codepath
+* 01_func.t
+ * tried to add test CalcbWidthReg
+* Update 01_func.t
+ * correction tests for comparison of all contents
+* Update 01_func.t
+ * revised test https://github.com/RFD-FHEM/RFFHEM/pull/990/files/436ca626de1bcd8c76e1111f97235c7dfa259fe9#r681258066
+* Update 01_func.t
+ * revised test https://github.com/RFD-FHEM/RFFHEM/pull/990#pullrequestreview-720601023
+
+2021-08-02 - Merge branch 'master' into master_cc110x_commands
+
+2021-08-02 - Repair check results (#997)
+* Update update.yml
+- skip steps instead of complete job
+- add job dependency
+* PULL_REQUEST_TEMPLATE.md
+- spell fix
+
+2021-08-01 - Bresser 5in1 2 - Rename readings windDirection, windDirectionText, windGust and windSpeed (#995)
+  14_SD_WS.pm - Rename readings windDirection, windDirectionText, windGust and windSpeed
+  SD_ProtocolData.pm - change register 0x03, Design Note DN009 - FIFOTHR.ADC_RETENTION - CC1101 will wake up with optimal ADC settings for low data rate (≤ 100 kbps)
+
+2021-07-29 - Update update.yml
+- Use Admin pat, to allow passing branch protection rules
+
+2021-07-13 - AVANTEK - small fix send data (#991)
+* Update 14_SD_BELL.pm
+ * fix AVANTEK (RX FIFO)
+
+2021-07-10 - Fixes CPU and MEM usage patternExists (#988)
+* 00_SIGNALduino.pm
 SIGNALduino_PatternExists überarbeitet um hohe CPU Last und Speicherverbrauch zu umgehen
 Fixes High memory and CPU usage  in SIGNALduino_PatternExists  #986
+
 2021-07-09 - Merge branch 'master' into sidey79/issue986
+
 2021-07-09 - added AVANTEK Wireless doorbell & LED night light (#981)
-
 * Update SD_ProtocolData.pm
-
  * added AVANTEK DB-LE
  * Register optimized
  * revised comments
  * optimized parameters
-
 * Update README.md
-
 * Update 00_SIGNALduino.pm
  * added AVANTEK rfmode
-
 * Update 14_SD_BELL.pm
-
  * https://github.com/RFD-FHEM/RFFHEM/pull/981#discussion_r658270036 changed line
  * added AVANTEK
  * revised send cmd AVANTEK protocol
  * added commandref
-
 * Update 00_SIGNALduino.pm
-
  * revised cmd sendMsg for xFSK
-
 * Update 01_SIGNALduino_Set_sendMsg.t
-
  * revised test sendMsg & added data to test
+
 2021-06-30 - added AVANTEK protocol
 * 14_SD_BELL.pm
   * revised send cmd AVANTEK protocol
@@ -61,7 +132,6 @@ Fixes High memory and CPU usage  in SIGNALduino_PatternExists  #986
  * fix Log3 output
 
 2021-06-20 - little fix - attr whitelist_IDs (#983)
-
 * SD_ProtocolData.pm
  * added AVANTEK DB-LE & register optimized
 * 14_SD_BELL.pm
@@ -70,51 +140,44 @@ Fixes High memory and CPU usage  in SIGNALduino_PatternExists  #986
  - added AVANTEK rfmode
 
 2021-06-20 - Update 00_SIGNALduino.pm
-
  * revised save option whitelist_IDs (user see now ? on Save config)
 
 2021-06-07 - Fix Multiple Send delay (#941)
-
 * Multiple set commands are not processed
 Fixes #823  for firmware 3.4.0 without delay
 
 2021-06-07 - 00_SIGNALduino.pm
-
 Version updated to current date
+
 2021-06-07 - Update doc - SD_ProtocolData.pm (#975)
-
 * Update SD_ProtocolData.pm
-
  * added doc Normstahl Garage DOORS
+
 2021-06-04 - Update SD_ProtocolData.pm
 
 2021-06-04 - some PerlCritic points - Update 14_SD_WS.pm (#976)
-
 * Update 14_SD_WS.pm
-
  - revised hardTabs PerlCritic points & indentations
+
 2021-06-03 - Update 14_SD_WS.pm
-
  - revised hardTabs PerlCritic points & indentations
+
 2021-06-02 - Hideki fix inverted message (#974)
-
 * Update SD_Protocols.pm
-
  * added doc Normstahl Garage DOORS
+
 2021-06-02 - Hideki fix inverted message (#974)
  * Update SD_Protocols.pm
  - fix https://github.com/RFD-FHEM/RFFHEM/issues/944
-
 * 02_mcBit2Hideki.t
-
  - added test with inverted bitmessage
  - test für spezielle Bitlänge 89 erstellt
  - provide number of bits for test
+
 2021-05-31 - Update SD_Protocols.pm
-
   * fix https://github.com/RFD-FHEM/RFFHEM/issues/944
-2021-05-28 - new protocol 108 for BRESSER 5-in-1 Weather Center, Bresser Professional Rain Gauge (#973)
 
+2021-05-28 - new protocol 108 for BRESSER 5-in-1 Weather Center, Bresser Professional Rain Gauge (#973)
 * Update 14_SD_WS.pm
 * Update README.md
 * Update SD_ProtocolData.pm
@@ -124,11 +187,12 @@ not all tests are finished, need some more testdata
 - Fehlermeldung von bitsum auf checksum geändert
 - Prüfung auf Mindestlänge um Perl Warnings zu vermeiden
 - Berechnung der checksumme vereinfacht
-2021-05-27 - SD_Protocols.pm
 
+2021-05-27 - SD_Protocols.pm
 - Fehlermeldung von bitsum auf checksum geändert
 - Prüfung auf Mindestlänge um Perl Warnings zu vermeiden
 - Berechnung der checksumme vereinfacht
+
 2021-05-27 - new protocol 108 for BRESSER 5-in-1 Weather Center and BRESSER Professional Rain Gauge
 
 2021-05-26 - PERL WARNING - Kopp Fix - https://github.com/RFD-FHEM/RFFHEM/issues/968 (#972)

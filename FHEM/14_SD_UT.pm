@@ -1,5 +1,5 @@
 #########################################################################################
-# $Id: 14_SD_UT.pm 0 2020-12-03 22:15:57Z HomeAuto_User $
+# $Id: 14_SD_UT.pm 0 2021-08-08 16:56:40Z HomeAutoUser $
 #
 # The file is part of the SIGNALduino project.
 # The purpose of this module is universal support for devices.
@@ -361,6 +361,16 @@
 #     BeSmart_S4_534 level_down   MU;P0=-14542;P1=221;P2=-522;P3=492;P4=-240;P5=-4114;D=01234123412123434123412123412121212341215123412341212343412341212341212121234121512341234121234341234121234121212123412151234123412123434123412123412121212341215123412341212343412341212341212121234121;CP=1;R=62;
 #}
 ###############################################################################################################################################################################
+# - Remote control TR401 [Protocol 114]
+#{    Ralf9 2021-05-16 and added 2021-07-28 after a notice from user Ralf9 & Jake
+#     Well-Light is only distributor, manufacturer CIXI CITY Sanity Light-Marking Co. Ltd. / China
+#     https://forum.fhem.de/index.php/topic,121103
+#     TR401_0_2 off  MU;P0=311;P1=585;P2=-779;P3=1255;P4=-1445;P5=-23617;P7=-5646;CP=1;R=230;D=12323234141414141514123414123232341414141415141234141232323414141414151412341412323234141414141514123414123232341414141415141234141232323414141414151412341412323234141414141517141232323414141414150;p;
+#     TR401_0_2 off  MU;P0=-14293;P1=611;P2=-1424;P3=-753;P4=1277;P5=-23626;P6=-9108;P7=214;CP=1;R=240;D=1213421213434342121212121512134212134343421212121216701213421213434342121212121512134212134343421212121215121342121343434212121212151213421213434342121212121512134212134343421212121215121342121343434212121212151213421213434342121212121512134212134343421212121215121342121343434212121212151;p;
+#     TR401_0_2 on   MU;P0=-1426;P1=599;P2=-23225;P3=-748;P4=1281;P5=372;P6=111;P7=268;CP=1;R=235;D=0121343401013434340101010101252621343401013434340101010101252705012134340101343434010101010125;p;
+#     TR401_0_2 on   MU;P0=-14148;P1=-23738;P2=607;P3=-737;P4=1298;P5=-1419;P6=340;P7=134;CP=2;R=236;D=12343452523434345252525252161712343452523434345252525252160;p;
+#}
+###############################################################################################################################################################################
 # !!! ToDo´s !!!
 #     - LED lights, counter battery-h reading --> commandref hour_counter module
 #     -
@@ -372,7 +382,7 @@ use strict;
 use warnings;
 no warnings 'portable';  # Support for 64-bit ints required
 
-our $VERSION = '2021-01-22';
+our $VERSION = '2021-08-05';
 
 sub SD_UT_bin2tristate;
 sub SD_UT_tristate2bin;
@@ -774,7 +784,7 @@ my %models = (
                 Protocol   => 'P24',
                 Typ        => 'remote'
               },
-	'BeSmart_S4' => { '10001000' => 'level_up',     # was 'up'
+  'BeSmart_S4' => { '10001000' => 'level_up',     # was 'up'
                     '10000100' => 'level_down',   # was 'down'
                     '10010000' => 'light_toggle', # was 'left'
                     '10000001' => '5min_boost',   # was 'right'
@@ -782,6 +792,22 @@ my %models = (
                     Protocol   => 'P78',
                     Typ        => 'remote'
                   },
+  'TR401' =>  { '0'   => 'on',
+                '1'   => 'off',
+                'ch'  => {
+                            '001' => '1',
+                            '011' => '2',
+                            '101' => '3',
+                            '110' => '4',
+                            '1'   => '001',
+                            '2'   => '011',
+                            '3'   => '101',
+                            '4'   => '110',
+                          },
+                hex_length => [3],
+                Protocol   => 'P114',
+                Typ        => 'remote'
+              },
   'unknown' =>  { Protocol   => 'any',
                   hex_length => [],
                   Typ        => 'not_exist'
@@ -791,25 +817,26 @@ my %models = (
 #############################
 sub SD_UT_Initialize {
   my ($hash) = @_;
-  $hash->{Match}      = '^P(?:14|20|24|26|29|30|34|46|68|69|76|78|81|83|86|90|91|91.1|92|93|95|97|99|104|105)#.*';
+  $hash->{Match}      = '^P(?:14|20|24|26|29|30|34|46|68|69|76|78|81|83|86|90|91|91.1|92|93|95|97|99|104|105|114)#.*';
   $hash->{DefFn}      = 'SD_UT_Define';
   $hash->{UndefFn}    = 'SD_UT_Undef';
   $hash->{ParseFn}    = 'SD_UT_Parse';
   $hash->{SetFn}      = 'SD_UT_Set';
   $hash->{AttrFn}     = 'SD_UT_Attr';
-  $hash->{AttrList}   = 'repeats:1,2,3,4,5,6,7,8,9 IODev do_not_notify:1,0 '.
+  $hash->{AttrList}   = 'repeats:1,2,3,4,5,6,7,8,9,12,15 IODev do_not_notify:1,0 '.
                         'ignore:0,1 showtime:1,0 model:'.join(',', sort keys %models).
                         " $readingFnAttributes UTclock UTfrequency";
   $hash->{AutoCreate} =
   {
-    'BF_301.*'     => {ATTR => 'model:BF_301', FILTER => '%NAME', autocreateThreshold => '3:180', GPLOT => q{}},
     'AC114_01B.*'  => {ATTR => 'model:AC114_01B', FILTER => '%NAME', autocreateThreshold => '3:180', GPLOT => q{}},
+    'BF_301.*'     => {ATTR => 'model:BF_301', FILTER => '%NAME', autocreateThreshold => '3:180', GPLOT => q{}},
     'MD_2003R.*'   => {ATTR => 'model:MD_2003R', FILTER => '%NAME', autocreateThreshold => '3:180', GPLOT => q{}},
     'MD_2018R.*'   => {ATTR => 'model:MD_2018R', FILTER => '%NAME', autocreateThreshold => '3:180', GPLOT => q{}},
     'MD_210R.*'    => {ATTR => 'model:MD_210R', FILTER => '%NAME', autocreateThreshold => '3:180', GPLOT => q{}},
     'Momento.*'    => {ATTR => 'model:Momento', FILTER => '%NAME', autocreateThreshold => '3:180', GPLOT => q{}},
     'OR28V.*'      => {ATTR => 'model:OR28V', FILTER => '%NAME', autocreateThreshold => '3:180', GPLOT => q{}},
     'RCnoName20.*' => {ATTR => 'model:RCnoName20', FILTER => '%NAME', autocreateThreshold => '3:180', GPLOT => q{}},
+    'TR401.*'      => {ATTR => 'model:TR401', FILTER => '%NAME', autocreateThreshold => '3:180', GPLOT => q{}},
     'Techmar.*'    => {ATTR => 'model:Techmar', FILTER => '%NAME', autocreateThreshold => '3:180', GPLOT => q{}},
     'Visivo.*'     => {ATTR => 'model:Visivo', FILTER => '%NAME', autocreateThreshold => '3:180', GPLOT => q{}},
     'xavax.*'      => {ATTR => 'model:xavax', FILTER => '%NAME', autocreateThreshold => '3:180', GPLOT => q{}},
@@ -834,10 +861,10 @@ sub SD_UT_Define {
   ### checks Westinghouse_Delancey RH787T & WestinghouseButtons_five & TR60C-1 ###
   if ($a[2] eq 'RH787T' || $a[2] eq 'Buttons_five' || $a[2] eq 'TR60C1') {
     if (length($a[3]) > 1) {
-      return "Wrong HEX-Value! $a[2] must have one HEX-Value";
+      return "wrong HEX-Value! $a[2] must have one HEX-Value";
     }
     if (not $a[3] =~ /^[0-9a-fA-F]{1}/xms) {
-      return "Wrong HEX-Value! ($a[3]) $a[2] HEX-Value are not (0-9 | a-f | A-F)";
+      return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value are not (0-9 | a-f | A-F)";
     }
   }
 
@@ -870,24 +897,29 @@ sub SD_UT_Define {
 
   ### [6] checks MD_2003R | MD_210R | MD_2018R | Navaris | AC114_01B | Visivo ###
   if (($a[2] eq 'MD_2003R' || $a[2] eq 'MD_210R' || $a[2] eq 'MD_2018R' || $a[2] eq 'Navaris' || $a[2] eq 'AC114_01B' || $a[2] eq 'Visivo') && not $a[3] =~ /^[0-9a-fA-F]{6}/xms) {
-    return "Wrong HEX-Value! ($a[3]) $a[2] Hex-value to short or long (must be 6 chars) or not hex (0-9 | a-f | A-F){6}";
+    return "wrong HEX-Value! ($a[3]) $a[2] Hex-value to short or long (must be 6 chars) or not hex (0-9 | a-f | A-F){6}";
   }
 
   ### [7] checks Hoermann HSM4 | Krinner_LUMIX | Momento ###
   if (($a[2] eq 'HSM4' || $a[2] eq 'Krinner_LUMIX' || $a[2] eq 'Momento') && not $a[3] =~ /^[0-9a-fA-F]{7}/xms) {
-    return "Wrong HEX-Value! ($a[3]) $a[2]  Hex-value to short or long (must be 7 chars) or not hex (0-9 | a-f | A-F){7}";
+    return "wrong HEX-Value! ($a[3]) $a[2]  Hex-value to short or long (must be 7 chars) or not hex (0-9 | a-f | A-F){7}";
   }
 
   ### [7] checks Tedsen_SKX1xx, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx (tristate code)###
-  return "Wrong tristate code! ($a[3]) $a[2] code to short or long (must be 7 chars) or values not 0, 1 or F" if (($a[2] eq 'Tedsen_SKX1xx' || $a[2] eq 'Tedsen_SKX2xx' || $a[2] eq 'Tedsen_SKX4xx' || $a[2] eq 'Tedsen_SKX6xx') && not $a[3] =~ /^[01fF]{7}$/xms);
+  return "wrong tristate code! ($a[3]) $a[2] code to short or long (must be 7 chars) or values not 0, 1 or F" if (($a[2] eq 'Tedsen_SKX1xx' || $a[2] eq 'Tedsen_SKX2xx' || $a[2] eq 'Tedsen_SKX4xx' || $a[2] eq 'Tedsen_SKX6xx') && not $a[3] =~ /^[01fF]{7}$/xms);
   ### [8 nibble] checks Techmar ###
   if (($a[2] eq 'Techmar') && not $a[3] =~ /^[0-9a-fA-F]{8}$/xms) {
-    return "Wrong HEX-Value! ($a[3]) $a[2] Hex-value to short or long (must be 8 chars) or not hex (0-9 | a-f | A-F)";
+    return "wrong HEX-Value! ($a[3]) $a[2] Hex-value to short or long (must be 8 chars) or not hex (0-9 | a-f | A-F)";
   }
   ### [9] checks Hoermann HS1-868-BS ###
   return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short | long or not HEX (0-9 | a-f | A-F){9}" if ($a[2] eq 'HS1_868_BS' && not $a[3] =~ /^[0-9a-fA-F]{9}/xms);
   ### [14] checks LED_XM21_0 ###
   return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short | long or not HEX (0-9 | a-f | A-F){14}" if ($a[2] eq 'LED_XM21_0' && not $a[3] =~ /^[0-9a-fA-F]{14}/xms);
+
+  ### [3] checks TR401 (Well-Light) ###
+  if ($a[2] eq 'TR401' && not $a[3] =~ /^[0-9]_[1-4]/xms) {
+    return "wrong devicecode! ($a[3]) $a[2] must be [0-9]_[1-4]";
+  }
 
   $hash->{versionModule} = $VERSION;
   $hash->{lastMSG} =  'no data';
@@ -1108,6 +1140,10 @@ sub SD_UT_Set {
       $msg = $models{$model}{Protocol} . q{#};
       $msg .= $adr;
       $msgEnd = '#R' . $repeats;
+    ############ TR401 (Well-Light) ############
+    } elsif ($model eq 'TR401') {
+      $msg = $models{$model}{Protocol} . q{#};
+      $msgEnd = '#R' . $repeats;
     }
   }
 
@@ -1202,6 +1238,12 @@ sub SD_UT_Set {
         Log3 $name, 5, "$ioname: SD_UT_Set $name bits=$split[1] sum=$sum";
         $msg .= sprintf '%08b' , $sum;
         $msg .= $msgEnd;
+      ########### TR401 (Well-Light) #########
+      } elsif ($model eq 'TR401') {
+        my ($housecode, $ch) = split('_', $definition[1]);
+        $msg .= $save . $models{$model}{ch}{$ch};
+        $msg .= sprintf('%03b', $housecode);
+        $msg .= '11111' . $msgEnd;
       } else {
         $msg .= $save.$msgEnd;
       }
@@ -1312,6 +1354,22 @@ sub SD_UT_Parse {
       $deviceCode = substr($rawData,0,2);
       $devicedef = 'CAME_TOP_432EV ' . $deviceCode;
       $def = $modules{SD_UT}{defptr}{$devicedef};
+    }
+    ### TR401 (Well-Light) [P114] ###
+    if (!$def && $protocol == 114 && substr($bitData,-5) eq '11111') {
+      $model = 'TR401';
+      my $housecode = substr($rawData,1,1) >> 1;
+      my $ch = substr($bitData,1,3);
+      if ( exists $models{$model}{ch}{$ch} ) {
+        $ch = $models{$model}{ch}{$ch};
+        $deviceCode = $housecode .'_'. $ch;
+        $devicedef = $model .' '. $deviceCode;
+        $def = $modules{SD_UT}{defptr}{$devicedef};
+        $name = $model .'_'. $deviceCode;
+        Log3 $iohash, 5, "$ioname: SD_UT_Parse device TR401 - housecode=$housecode ch=$ch";
+      } else {
+        return '';
+      }
     }
   }
 
@@ -1882,6 +1940,11 @@ sub SD_UT_Parse {
       Log3 $name, 4, "$ioname: SD_UT_Parse device $name - receive command 2, remote sends it after up or down";
       return $name;
     }
+  ############ Remote TR401 (Well-Light) [P114] ############
+  } elsif ($model eq 'TR401') {
+    $state = substr($bitData,0,1);
+    $deviceCode = substr($rawData,1,1) >> 1;
+
   ############ unknown ############
   } else {
     readingsBulkUpdate($hash, 'state', '???');
@@ -2193,8 +2256,9 @@ sub SD_UT_tristate2bin {
     <li>Remote control with 4 buttons for diesel heating&nbsp;&nbsp;&nbsp;<small>(module model: RCnoName20, protocol 20)</small></li>
     <li>Hoermann HS1-868-BS&nbsp;&nbsp;&nbsp;<small>(module model: HS1_868_BS, protocol 69)</small></li>
     <li>Hoermann HSM4&nbsp;&nbsp;&nbsp;<small>(module model: HSM4, protocol 69)</small></li>
-    <li>Krinner LUMIX X-Mas light string&nbsp;&nbsp;&nbsp;<small>(module model: Krinner_LUMIX, Protokol 92)</small></li>
-    <li>LED_XM21_0 X-Mas light string&nbsp;&nbsp;&nbsp;<small>(module model: LED_XM21_0, Protokol 76)</small></li>
+    <li>Krinner LUMIX X-Mas light string&nbsp;&nbsp;&nbsp;<small>(module model: Krinner_LUMIX, protocol 92)</small></li>
+    <li>LED_XM21_0 X-Mas light string&nbsp;&nbsp;&nbsp;<small>(module model: LED_XM21_0, protocol 76)</small></li>
+    <li>TR401 (Well-Light, remote control with 4 buttons)&nbsp;&nbsp;&nbsp;<small>(module model: TR401, protocol 114)</small></li>
     <li>TR-502MSV (LIDL, LIBRA, MANDOLYN, QUIGG), compatible GT-7008BS, GT-FSI-04, DMV-7008S, Powerfix RCB-I 3600&nbsp;&nbsp;&nbsp;<small>(module model: TR_502MSV, protocol 34)</small></li>
     <li>Manax RCS250&nbsp;&nbsp;&nbsp;<small>(module model: RC_10, protocol 90)</small></li>
     <li>Medion OR28V&nbsp;&nbsp;&nbsp;<small>(module model: OR28V, protocol 68)</small></li>
@@ -2332,7 +2396,7 @@ sub SD_UT_tristate2bin {
     <li><a href="#ignore">ignore</a></li>
     <li><a href="#IODev">IODev</a></li>
     <li><a name="model"></a>model<br>
-      The attribute indicates the model type of your device	(AC114_01B, BeSmart_S4, Buttons_five, CAME_TOP_432EV, Chilitec_22640, KL_RF01, HS1-868-BS, HSM4, QUIGG_DMV, LED_XM21_0, Momento, Navaris, Novy_840029, Novy_840039, OR28V, RC_10, RH787T, SA_434_1_mini, SF01_01319004, TR60C1, Tedsen_SKX1xx, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx, TR_502MSV, Unitec_47031, unknown).
+      The attribute indicates the model type of your device (AC114_01B, BeSmart_S4, Buttons_five, CAME_TOP_432EV, Chilitec_22640, KL_RF01, HS1-868-BS, HSM4, QUIGG_DMV, LED_XM21_0, Momento, Navaris, Novy_840029, Novy_840039, OR28V, RC_10, RH787T, SA_434_1_mini, SF01_01319004, TR60C1, Tedsen_SKX1xx, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx, TR_502MSV, Unitec_47031, unknown).
       If the attribute is changed, a new device is created using <a href="#autocreate">autocreate</a>. Autocreate must be activated for this.
     </li>
     <li><a name="repeats"></a>repeats<br>
@@ -2350,7 +2414,7 @@ sub SD_UT_tristate2bin {
 
   <b>Generated readings of the models</b><br>
   <ul>
-    <u>AC114-01, Buttons_five, CAME_TOP_432EV, Chilitec_22640, HSM4, KL_RF01, LED_XM21_0, Momento, Novy_840029, Novy_840039, OR28V, QUIGG_DMV, RC_10, RH787T, SF01_01319004, SF01_01319004_Typ2, TR_502MSV, Visivo</u>
+    <u>AC114-01, Buttons_five, CAME_TOP_432EV, Chilitec_22640, HSM4, KL_RF01, LED_XM21_0, Momento, Novy_840029, Novy_840039, OR28V, QUIGG_DMV, RC_10, RH787T, SF01_01319004, SF01_01319004_Typ2, TR401, TR_502MSV, Visivo</u>
     <ul>
       <li>deviceCode: Device code of the system</li>
       <li>LastAction: Last executed action of the device (<code>receive</code> for command received | <code>send</code> for command send).</li>
@@ -2412,6 +2476,7 @@ sub SD_UT_tristate2bin {
     <li>Krinner LUMIX Christbaumkerzen&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Krinner_LUMIX, Protokol 92)</small></li>
     <li>LED_XM21_0 Christbaumkerzen&nbsp;&nbsp;&nbsp;<small>(Modulmodel: LED_XM21_0, Protokol 76)</small></li>
     <li>TR-502MSV (LIDL, LIBRA, MANDOLYN, QUIGG), kompatibel GT-7008BS, GT-FSI-04, DMV-7008S, Powerfix RCB-I 3600&nbsp;&nbsp;&nbsp;<small>(Modulmodel: TR_502MSV, Protokoll 34)</small></li>
+    <li>TR401 (Well-Light, Fernbedienung 4 Tasten)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: TR401, Protokoll 114)</small></li>
     <li>Manax RCS250&nbsp;&nbsp;&nbsp;<small>(Modulmodel: RC_10, Protokoll 90)</small></li>
     <li>Medion OR28V&nbsp;&nbsp;&nbsp;<small>(Modulmodel: OR28V, Protokoll 68)</small></li>
     <li>mumbi AFS300-s (Fernbedienung RC-10, Funksteckdose RCS-22GS)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: RC_10, Protokoll 90)</small></li>
@@ -2566,7 +2631,7 @@ sub SD_UT_tristate2bin {
 
   <b>Generierte Readings der Modelle</b><br>
   <ul>
-    <u>AC114-01, BeSmart_S4, Buttons_five, CAME_TOP_432EV, Chilitec_22640, HSM4, KL_RF01, LED_XM21_0, Momento, Novy_840029, Novy_840039, OR28V, QUIGG_DMV, RC_10, RH787T, SF01_01319004, SF01_01319004_Typ2, TR_502MSV, Visivo</u>
+    <u>AC114-01, BeSmart_S4, Buttons_five, CAME_TOP_432EV, Chilitec_22640, HSM4, KL_RF01, LED_XM21_0, Momento, Novy_840029, Novy_840039, OR28V, QUIGG_DMV, RC_10, RH787T, SF01_01319004, SF01_01319004_Typ2, TR401, TR_502MSV, Visivo</u>
     <ul>
       <li>deviceCode: Ger&auml;teCode des Systemes</li>
       <li>LastAction: Zuletzt ausgef&uuml;hrte Aktion des Ger&auml;tes (<code>receive</code> f&uuml;r Kommando empfangen, <code>send</code> f&uuml;r Kommando gesendet).</li>
