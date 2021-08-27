@@ -50,6 +50,7 @@ InternalTimer(time(), sub {
             is(cc1101::SetPatable($targetHash,@paval),U(),q[verify return]);
             is($targetHash->{QUEUE},array {
                 item 'x03';
+                etc();
             } ,q[Verify expected queue element entrys]);
             @{$targetHash->{QUEUE}}=();
         };
@@ -196,7 +197,7 @@ InternalTimer(time(), sub {
       # sub input:  HASH(0x1b29c88), 0B, 270
       # sub output: 6B,270
       plan(1);
-      my @ret = cc1101::CalcbWidthReg($targetHash,qw(0B 270]));
+      my @ret = cc1101::CalcbWidthReg($targetHash,qw(0B 270));
       is([$ret[0],$ret[1]],array {
           item '6b'; 
           item '270'; 

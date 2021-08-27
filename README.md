@@ -95,7 +95,7 @@ Supported Devices / Protocols
 |TS-FT002 | Water tank level monitor with temperature |
 |Visivo | Remote control for motorized screen |
 |VLOXO | wireless bell |
-|WH2 | (TFA 30.3157 nur Temp, Hum = 255 -> nicht angezeigt)|
+|WH2, WH2A | Temperature/humidity sensor (TFA 30.3157 only temp)|
 |WH2315, WH3080 | UV/Lux Sensor |
 |WS-2000, WS-7000 | Series of various sensors |
 |WS-7035, WS-7053, WS7054 | Temperature sensor 433MHz |

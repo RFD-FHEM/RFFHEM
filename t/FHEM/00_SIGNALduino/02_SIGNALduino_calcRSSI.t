@@ -6,7 +6,7 @@ use Test2::Tools::Compare qw{is};
 our %defs;
 
 InternalTimer(time()+1, sub {
-	plan(2);
+	plan(3);
     my $targetHash = $defs{dummyDuino};
 
 	subtest 'Test SIGNALduino_calcRSSI with fixed values' => sub {
@@ -48,6 +48,16 @@ InternalTimer(time()+1, sub {
 		is($rssi,-36.5,'check return value -36.5 for input '.$signal_parts{rssi});
 		is($rssiStr,'RSSI = -36.5','check return string RSSI = -36.5 for input '.$signal_parts{rssi});
 	};
+
+
+	subtest 'Test SIGNALduino_calcRSSI with undef' => sub {
+		plan(2);
+
+		my ($rssi,$rssiStr)=SIGNALduino_calcRSSI(undef);
+		is($rssi,undef,'check if return is undef');
+		is($rssiStr,undef,'check if return is undef');
+	};
+
 	exit(0);
 
 }, 0);
