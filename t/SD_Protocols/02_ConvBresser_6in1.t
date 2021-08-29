@@ -14,17 +14,17 @@ my $Protocols =
   new lib::SD_Protocols( filetype => 'json', filename => './t/SD_Protocols/test_protocolData.json' );
 
 subtest 'test ConvBresser_6in1, checksum ok ' => sub 	{
-    my $hexMsg='E7527FF78FF7EFF8FDD7BBCAFF18AD80087008100702284435000002';
+    my $hexMsg='3BF120B00C1618FF77FF0458152293FFF06B0000';
     plan(2);
     my @ret=$Protocols->ConvBresser_6in1($hexMsg) ;
     is($#ret,0, 'ConvBresser_6in1 reported no error');
-    is($ret[0],'AD8008700810070228443500','check retured message');
+    is($ret[0],'3BF120B00C1618FF77FF0458152293FFF06B0000','check retured message');
 
 };
 
 subtest 'test ConvBresser_6in1, wrong checksum ' => sub 	{
 	plan(2);
-	my $hexMsg='E8837FFF1FFFEFEAFF6989FF07177C8000E000101500967600F80001';
+	my $hexMsg='3AF120B00C1618FF77FF0458152293FFF06B0000';
 	my @ret=$Protocols->ConvBresser_6in1($hexMsg) ;
 	is($#ret,1, "ConvBresser_6in1 reported some error");
 	like($ret[1],qr/ != checksum/,'check error message');
@@ -32,7 +32,7 @@ subtest 'test ConvBresser_6in1, wrong checksum ' => sub 	{
 
 subtest 'test ConvBresser_6in1, wrong sum ' => sub 	{
 	plan(2);
-	my $hexMsg='E8837FFF1FFFEFEAFF6989FF07177C8000E000101500967600F80001';
+	my $hexMsg='FD0620A00C1618FF77FF0458152293FFF06B0000';
 	my @ret=$Protocols->ConvBresser_6in1($hexMsg) ;
 	is($#ret,1, "ConvBresser_6in1 reported some error");
 	like($ret[1],qr/ != 255/,'check error message');
