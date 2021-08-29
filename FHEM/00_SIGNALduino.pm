@@ -1,4 +1,4 @@
-# $Id: 00_SIGNALduino.pm v3.5.2 2021-08-22 15:25:05Z elektron-bbs $
+# $Id: 00_SIGNALduino.pm v3.5.2 2021-08-29 10:59:33Z elektron-bbs $
 #
 # v3.5.2 - https://github.com/RFD-FHEM/RFFHEM/tree/master
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incoming messages
@@ -39,7 +39,7 @@ use List::Util qw(first);
 
 
 use constant {
-  SDUINO_VERSION                  => '3.5.2+20210822',  # Datum wird automatisch bei jedem pull request aktualisiert
+  SDUINO_VERSION                  => '3.5.2+20210829',  # Datum wird automatisch bei jedem pull request aktualisiert
   SDUINO_INIT_WAIT_XQ             => 1.5,     # wait disable device
   SDUINO_INIT_WAIT                => 2,
   SDUINO_INIT_MAXRETRY            => 3,
