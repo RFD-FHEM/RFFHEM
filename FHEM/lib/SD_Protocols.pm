@@ -1815,7 +1815,7 @@ sub ConvBresser_6in1 {
   my $ctx = Digest::CRC->new(width => 16, poly => 0x1021);
   my $calcCrc = sprintf( "%04X", $ctx->add( pack 'H*', substr( $hexData, 4, 30 ) )->digest );
   $self->_logging(qq[ConvBresser_6in1, calcCRC16 = 0x$calcCrc, CRC16 = 0x$crc],5);
-  return ( 1, qq[ConvBresser_6in1, calcCRC 0x$calcCrc != CRC 0x$crc] ) if ($calcCrc ne $crc);
+  return ( 1, qq[ConvBresser_6in1, checksumCalc:0x$calcCrc != checksum:0x$crc] ) if ($calcCrc ne $crc);
 
   my $sum = 0;
   for (my $i = 2; $i < 18; $i++) {
