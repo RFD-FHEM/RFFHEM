@@ -1,3 +1,14 @@
+2021-08-30 - new protocol 115 for Bresser 6-in-1 and new 5-in-1 Comfort Wetter Center (#1010)
+
+* 00_SIGNALduino.pm - add rfmode Bresser_6in1
+* 14_SD_WS.pm - add protocol 115
+* SD_ProtocolData.pm - add definition for protocol 115
+* SD_Protocols.pm - add check for Bresser 6-in-1
+* README.md - add entry for Bresser 6-in-1 Comfort Wetter Center 
+Co-authored-by: sidey79 <7968127+sidey79@users.noreply.github.com>
+* 02_ConvBresser_6in1.t - Added test for new sub
+* SD_Protocols.pm - Error messaage adapted like other subs
+* SD_Protocolst - Testdata corrected
 
 2021-08-18 - Update protocol 64 for sensor WH2A (#1009)
   SD_ProtocolData.pm - correction length_max
