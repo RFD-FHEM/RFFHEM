@@ -1,4 +1,4 @@
-# $Id: 00_SIGNALduino.pm v3.5.2 2021-08-13 20:19:26Z sidey79 $
+# $Id: 00_SIGNALduino.pm v3.5.2 2021-08-29 21:54:48Z elektron-bbs $
 #
 # v3.5.2 - https://github.com/RFD-FHEM/RFFHEM/tree/master
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incoming messages
@@ -39,7 +39,7 @@ use List::Util qw(first);
 
 
 use constant {
-  SDUINO_VERSION                  => '3.5.2+20210813',  # Datum wird automatisch bei jedem pull request aktualisiert
+  SDUINO_VERSION                  => '3.5.2+20210829',  # Datum wird automatisch bei jedem pull request aktualisiert
   SDUINO_INIT_WAIT_XQ             => 1.5,     # wait disable device
   SDUINO_INIT_WAIT                => 2,
   SDUINO_INIT_MAXRETRY            => 3,
@@ -272,7 +272,7 @@ my %matchListSIGNALduino = (
 my %symbol_map = (one => 1 , zero =>0 ,sync => '', float=> 'F', 'start' => '');
 
 ## rfmode for attrib & supported rfmodes
-my @rfmode = ('Avantek','Bresser_5in1','KOPP_FC','Lacrosse_mode1','Lacrosse_mode2','Lacrosse_mode4','PCA301','SlowRF');
+my @rfmode = ('Avantek','Bresser_5in1','Bresser_6in1','KOPP_FC','Lacrosse_mode1','Lacrosse_mode2','Lacrosse_mode4','PCA301','SlowRF');
 
 ############################# package main
 sub SIGNALduino_Initialize {
@@ -4756,6 +4756,12 @@ USB-connected devices (SIGNALduino):<br>
   <li>rfmode<br>
     Configures the RF transceiver of the SIGNALduino (CC1101). The available arguments:
     <ul>
+      <li>Bresser_5in1<br>
+        modulation 2-FSK, Datarate=8.23 kbps, Sync Word=2DD4, FIFO-THR=28 Byte, frequency 868.35 MHz
+      </li>
+      <li>Bresser_6in1<br>
+        modulation 2-FSK, Datarate=8.23 kbps, Sync Word=2DD4, FIFO-THR=20 Byte, frequency 868.35 MHz
+      </li>
       <li>KOPP_FC<br>
         modulation GFSK, Datarate=4.7855 kbps, Sync Word=AA54, frequency 868.3MHz
       </li>
@@ -5297,6 +5303,12 @@ USB-connected devices (SIGNALduino):<br>
   <li>rfmode<br>
     Konfiguriert den RF Transceiver des SIGNALduino (CC1101). Verf&uuml;gbare Argumente sind:
     <ul>
+      <li>Bresser_5in1<br>
+        Modulation 2-FSK, Datenrate=8.23 kbps, Sync Word=2DD4, FIFO-THR=28 Byte, Frequenz 868.35 MHz
+      </li>
+      <li>Bresser_6in1<br>
+        Modulation 2-FSK, Datenrate=8.23 kbps, Sync Word=2DD4, FIFO-THR=20 Byte, Frequenz 868.35 MHz
+      </li>
       <li>KOPP_FC<br>
         Modulation GFSK, Datenrate=4.7855 kbps, Sync Word=AA54, Frequenz 868.3MHz
       </li>

@@ -1793,6 +1793,41 @@ sub ConvBresser_5in1 {
   return substr($hexData, 28, 24);
 }
 
+=item ConvBresser_6in1()
+
+This function checks CRC16 over bytes 2 - 17 and sum over bytes 2 - 17 (must be 255).
+
+Input:  $hexData
+Output: $hexData
+        scalar converted message on success 
+        or array (1,"Error message")
+
+=cut
+
+sub ConvBresser_6in1 {
+  my $self    = shift // carp 'Not called within an object';
+  my $hexData = shift // croak 'Error: called without $hexdata as input';
+  my $hexLength = length ($hexData);
+
+  return ( 1, 'ConvBresser_6in1, hexData is to short' ) if ( $hexLength < 36 ); # check double, in def length_min set
+		
+  my $crc = substr( $hexData, 0, 4 );
+  my $ctx = Digest::CRC->new(width => 16, poly => 0x1021);
+  my $calcCrc = sprintf( "%04X", $ctx->add( pack 'H*', substr( $hexData, 4, 30 ) )->digest );
+  $self->_logging(qq[ConvBresser_6in1, calcCRC16 = 0x$calcCrc, CRC16 = 0x$crc],5);
+  return ( 1, qq[ConvBresser_6in1, checksumCalc:0x$calcCrc != checksum:0x$crc] ) if ($calcCrc ne $crc);
+
+  my $sum = 0;
+  for (my $i = 2; $i < 18; $i++) {
+    $sum += hex(substr($hexData,($i) * 2, 2));
+  }
+  $sum &= 0xFF;
+  $self->_logging(qq[ConvBresser_6in1, sum = $sum],5);
+  return ( 1, qq[ConvBresser_6in1, sum $sum != 255] ) if ($sum != 255);
+
+  return $hexData;
+}
+
 ############################# package lib::SD_Protocols, test exists
 =item ConvPCA301()
 
