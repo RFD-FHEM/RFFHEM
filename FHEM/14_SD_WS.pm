@@ -1513,15 +1513,15 @@ sub SD_WS_LFSR_digest8_reflect {
 
 #############################
 sub SD_WS_bin2dec {
-  my $h = shift;
+  my $h = shift // return;
   my $int = unpack("N", pack("B32",substr("0" x 32 . $h, -32))); 
   return sprintf("%d", $int); 
 }
 
 #############################
 sub SD_WS_binaryToNumber {
-  my $binstr=shift;
-  my $fbit=shift;
+  my $binstr=shift // return;
+  my $fbit=shift // return;
   my $lbit=$fbit;
   $lbit=shift if @_;
   return oct("0b".substr($binstr,$fbit,($lbit-$fbit)+1));
@@ -1529,7 +1529,7 @@ sub SD_WS_binaryToNumber {
 
 #############################
 sub SD_WS_WH2CRCCHECK {
-  my $rawData = shift;
+  my $rawData = shift // return;
   my $datacheck1 = pack( 'H*', substr($rawData,2,length($rawData)-2) );
   my $crcmein1 = Digest::CRC->new(width => 8, poly => 0x31);
   my $rr3 = $crcmein1->add($datacheck1)->hexdigest;
@@ -1540,7 +1540,7 @@ sub SD_WS_WH2CRCCHECK {
 
 #############################
 sub SD_WS_WH2SHIFT {
-  my $rawData = shift;
+  my $rawData = shift // return;
   my $hlen = length($rawData);
   my $blen = $hlen * 4;
   my $bitData = unpack("B$blen", pack("H$hlen", $rawData));
