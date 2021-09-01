@@ -43,6 +43,7 @@ package main;
 
 use strict;
 use warnings;
+use Carp qw(carp);
 
 # Forward declarations
 sub SD_WS_LFSR_digest8_reflect;
@@ -1489,7 +1490,10 @@ sub SD_WS_Parse
 # TFA Drop Protokoll benoetigt als gen 0x31, als key 0xf4
 
 sub SD_WS_LFSR_digest8_reflect {
-  my ($bytes, $gen, $key, $rawData) = @_;
+  my $bytes = shift // carp 'no bytes data provided';
+  my $gen = shift // carp 'no gen provided';
+  my $key = shift // carp 'no key provided';
+  my $rawData = shift // carp 'no raw msg provided';
   my $sum = 0;
   my $k = 0;
   my $i = 0;
