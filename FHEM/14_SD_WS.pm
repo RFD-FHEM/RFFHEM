@@ -95,8 +95,8 @@ sub SD_WS_Initialize {
 
 #############################
 sub SD_WS_Define {
-  carp 'SD_WS_Undef, too few arguments' if @_ < 2;
   my ($hash, $def) = @_;
+  carp "SD_WS_Define, too few arguments ($hash, $def)" if @_ < 2;
   my @a = split("[ \t][ \t]*", $def);
 
   return "wrong syntax: define <name> SD_WS <code> ".int(@a) if(int(@a) < 3 );
@@ -114,16 +114,16 @@ sub SD_WS_Define {
 
 #############################
 sub SD_WS_Undef {
-  carp 'SD_WS_Undef, too few arguments' if @_ < 2;
   my ($hash, $name) = @_;
+  carp "SD_WS_Undef, too few arguments ($hash, $name)" if @_ < 2;
   delete($modules{SD_WS}{defptr}{$hash->{CODE}}) if(defined($hash->{CODE}) && defined($modules{SD_WS}{defptr}{$hash->{CODE}}));
   return;
 }
 
 #############################
 sub SD_WS_Parse {
-  carp 'SD_WS_Parse, too few arguments' if @_ < 2;
   my ($iohash, $msg) = @_;
+  carp "SD_WS_Parse, too few arguments ($iohash, $msg)" if @_ < 2;
   my $name = $iohash->{NAME};
   my $ioname = $iohash->{NAME};
   my ($protocol,$rawData) = split("#",$msg);
@@ -1488,8 +1488,8 @@ sub SD_WS_Parse {
 # TFA Drop Protokoll benoetigt als gen 0x31, als key 0xf4
 
 sub SD_WS_LFSR_digest8_reflect {
-  carp 'SD_WS_LFSR_digest8_reflect, too few arguments' if @_ < 4;
   my ($bytes, $gen, $key, $rawData) = @_;
+  carp "SD_WS_LFSR_digest8_reflect, too few arguments ($bytes, $gen, $key, $rawData)" if @_ < 4;
   my $sum = 0;
   my $k = 0;
   my $i = 0;
