@@ -52,10 +52,8 @@ sub SD_WS_binaryToNumber;
 sub SD_WS_WH2CRCCHECK;
 sub SD_WS_WH2SHIFT;
 
-sub SD_WS_Initialize
-{
-  my ($hash) = @_;
-
+sub SD_WS_Initialize {
+  my $hash = shift // return;
   $hash->{Match}    = '^W\d+x{0,1}#.*';
   $hash->{DefFn}    = "SD_WS_Define";
   $hash->{UndefFn}  = "SD_WS_Undef";
@@ -96,8 +94,8 @@ sub SD_WS_Initialize
 }
 
 #############################
-sub SD_WS_Define
-{
+sub SD_WS_Define {
+  carp 'SD_WS_Undef, too few arguments' if @_ < 2;
   my ($hash, $def) = @_;
   my @a = split("[ \t][ \t]*", $def);
 
@@ -115,16 +113,16 @@ sub SD_WS_Define
 }
 
 #############################
-sub SD_WS_Undef
-{
+sub SD_WS_Undef {
+  carp 'SD_WS_Undef, too few arguments' if @_ < 2;
   my ($hash, $name) = @_;
   delete($modules{SD_WS}{defptr}{$hash->{CODE}}) if(defined($hash->{CODE}) && defined($modules{SD_WS}{defptr}{$hash->{CODE}}));
   return;
 }
 
 #############################
-sub SD_WS_Parse
-{
+sub SD_WS_Parse {
+  carp 'SD_WS_Parse, too few arguments' if @_ < 2;
   my ($iohash, $msg) = @_;
   my $name = $iohash->{NAME};
   my $ioname = $iohash->{NAME};
@@ -1490,10 +1488,8 @@ sub SD_WS_Parse
 # TFA Drop Protokoll benoetigt als gen 0x31, als key 0xf4
 
 sub SD_WS_LFSR_digest8_reflect {
-  my $bytes = shift // carp 'no bytes data provided';
-  my $gen = shift // carp 'no gen provided';
-  my $key = shift // carp 'no key provided';
-  my $rawData = shift // carp 'no raw msg provided';
+  carp 'SD_WS_LFSR_digest8_reflect, too few arguments' if @_ < 4;
+  my ($bytes, $gen, $key, $rawData) = @_;
   my $sum = 0;
   my $k = 0;
   my $i = 0;
@@ -1524,10 +1520,11 @@ sub SD_WS_bin2dec {
 
 #############################
 sub SD_WS_binaryToNumber {
-  my $binstr=shift // return;
-  my $fbit=shift // return;
+  carp 'SD_WS_binaryToNumber, too few arguments' if @_ < 2;
+  my $binstr=shift;
+  my $fbit=shift;
   my $lbit=$fbit;
-  $lbit=shift if @_;
+  $lbit = shift // $lbit;
   return oct("0b".substr($binstr,$fbit,($lbit-$fbit)+1));
 }
 
