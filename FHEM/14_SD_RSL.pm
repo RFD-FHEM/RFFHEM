@@ -112,7 +112,7 @@ sub SD_RSL_Define($$) {
 	
   AssignIoPort($hash, $iodevice);
 
-  return undef;
+  return ;
 }
 
 ##########################################################
@@ -135,7 +135,7 @@ sub SD_RSL_Set($@) {
 		return SetExtensions($hash, $cmdList, $name, @a)
 	}
 	
-	return undef;
+	return ;
 }
 
 ###################################################################
@@ -239,7 +239,7 @@ sub SD_RSL_Undef($$) {
   my ($hash, $name) = @_;
   SetExtensionsCancel($hash);
   delete($modules{SD_RSL}{defptr}{$hash->{DEF}}) if($hash && $hash->{DEF});
-  return undef;
+  return ;
 }
 
 ########################################################
@@ -254,7 +254,7 @@ sub SD_RSL_Attr(@) {
   my $cde = $hash->{DEF};
   delete($modules{SD_RSL}{defptr}{$cde});
   $modules{SD_RSL}{defptr}{$iohash->{NAME} . "." . $cde} = $hash;
-  return undef;
+  return ;
 }
 
 1;

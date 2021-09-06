@@ -1,6 +1,5 @@
 ###########################################################################################################################################
-# $Id: SD_ProtocolData.pm 3.4.4 2020-07-16 20:04:45Z Sidey $
-#
+# $Id: SD_ProtocolData.pm 3.4.4 2021-08-29 21:54:48Z elektron-bbs $
 # The file is part of the SIGNALduino project.
 # All protocol definitions are contained in this file.
 #
@@ -72,7 +71,7 @@
 ##### notice #### or #### info ############################################################################################################
 # !!! Between the keys and values ​​no tabs, please use spaces !!!
 # !!! Please use first unused id for new protocols !!!
-# ID´s are currently unused: 107 - 
+# ID´s are currently unused: 116 - 
 # ID´s need to be revised (preamble u): 5|19|21|22|23|25|28|31|36|40|52|59|63
 ###########################################################################################################################################
 # Please provide at least three messages for each new MU/MC/MS protocol and a URL of issue in GitHub or discussion in FHEM Forum
@@ -87,7 +86,7 @@ package lib::SD_ProtocolData;
   use strict;
   use warnings;
 
-  our $VERSION = '1.31';
+  our $VERSION = '1.35';
 
   our %protocols = (
     "0" =>  ## various weather sensors (500 | 9100)
@@ -1790,25 +1789,24 @@ package lib::SD_ProtocolData;
         #length_max      => '',     # missing
         filterfunc      => 'SIGNALduino_filterMC',
       },
-    "64"  =>  ## WH2
-              # no decode!   MU;P0=-32001;P1=457;P2=-1064;P3=1438;D=0123232323212121232123232321212121212121212323212121232321;CP=1;R=63;
-              # no decode!   MU;P0=-32001;P1=473;P2=-1058;P3=1454;D=0123232323212121232123232121212121212121212121232321212321;CP=1;R=51;
-              # no value!    MU;P0=134;P1=-113;P3=412;P4=-1062;P5=1379;D=01010101013434343434343454345454345454545454345454545454343434545434345454345454545454543454543454345454545434545454345;CP=3;
+    "64"  =>  ## Fine Offset Electronics WH2, WH2A Temperature/Humidity sensor
+              # T: 17.4 H: 74   MU;P0=-28888;P1=461;P2=-1012;P3=1440;D=01212121212121232123232123212121232121232323232123212321212123232123232123212323232321212123232323232321212121;CP=1;R=202;
+              # T: 28.3 H: 42   MU;P0=-25696;P1=479;P2=-985;P3=1461;D=01212121212121232123232123212121232121232323212323232121232121232321232123212323232323232121212321232321232323;CP=1;R=215;
+              # T: 23   H: 64   MU;P0=134;P1=-113;P3=412;P4=-1062;P5=1379;D=01010101013434343434343454345454345454545454345454545454343434545434345454345454545454543454543454345454545434545454345;CP=3;
       {
         name            => 'WH2',
         comment         => 'temperature / humidity sensor',
         id              => '64',
-        knownFreqs      => '',
+        knownFreqs      => '433.92',
         one             => [1,-2],
         zero            => [3,-2],
         clockabs        => 490,
         clientmodule    => 'SD_WS',
         modulematch     => '^W64*',
         preamble        => 'W64#',
-        postamble       => '',
-        #clientmodule    => '',
+        clientmodule    => 'SD_WS',
         length_min      => '48',
-        length_max      => '54',
+        length_max      => '56',
       },
     "65"  =>  ## Homeeasy
               # on | vHE_EU   MS;P1=231;P2=-1336;P4=-312;P5=-8920;D=15121214141412121212141414121212121414121214121214141212141212141212121414121414141212121214141214121212141412141212;CP=1;SP=5;
@@ -2839,6 +2837,9 @@ package lib::SD_ProtocolData;
         length_min      => '22',
         length_max      => '22',
       },
+
+    # "107" => reserved @elektron-bbs
+
     "108" =>  ## BRESSER 5-in-1 Weather Center, Bresser Professional Rain Gauge - elektron-bbs 2021-05-02
               # https://github.com/RFD-FHEM/RFFHEM/issues/607
               # https://forum.fhem.de/index.php/topic,106594.msg1151467.html#msg1151467
@@ -2856,7 +2857,7 @@ package lib::SD_ProtocolData;
         sync            => '2DD4',
         modulation      => '2-FSK',
         rfmode          => 'Bresser_5in1',
-        register        => ['0001','0246','0306','042D','05D4','06FF','07C0','0802','0D21','0E65','0FE8','1088','114C','1202','1322','14F8','1551','1916','1B43','1C68'],
+        register        => ['0001','0246','0346','042D','05D4','06FF','07C0','0802','0D21','0E65','0FE8','1088','114C','1202','1322','14F8','1551','1916','1B43','1C68'],
         preamble        => 'W108#',
         clientmodule    => 'SD_WS',
         length_min      => '52',
@@ -2907,9 +2908,28 @@ package lib::SD_ProtocolData;
         length_min      => '65',
         length_max      => '66',
       },
-
-    # "111" => reserved @elektron-bbs
-
+    "111" =>  # Water Tank Level Monitor TS-FT002
+              # https://github.com/RFD-FHEM/RFFHEM/issues/977 docolli 2021-06-05
+              # T: 16.8 D: 111   MU;P0=-21110;P1=484;P2=-971;P3=-488;D=01213121212121213121312121312121213131312131313131212131313131312121212131313121313131213131313121213131312131313131313131313131212131312131312101213121212121213121312121312121213131312131313131212131313131312121212131313121313131213131313121213131312131;CP=1;R=26;O;
+              # T: 19 D: 47      MU;P0=-31628;P1=469;P2=-980;P3=-499;P4=-22684;D=01213121212121213121312121312121213131312131313131213131313131312121212131313121312121213131313131312131312131313131313131313131312121312131312141213121212121213121312121312121213131312131313131213131313131312121212131313121312121213131313131312131312131;CP=1;R=38;O;
+              # T: 20 D: 47      MU;P0=-5980;P1=464;P2=-988;P3=-511;P4=-22660;D=01213121212121213121312121312121213131312131313131213131313131312121212131313121313131213131313121312131312131313131313131313131213131312131312141213121212121213121312121312121213131312131313131213131313131312121212131313121313131213131313121312131312131;CP=1;R=38;O;
+              # The sensor sends normally every 180 seconds.
+      {
+        name            => 'TS-FT002',
+        comment         => 'Water tank level monitor with temperature',
+        id              => '111',
+        knownFreqs      => '433.92',
+        one             => [1,-2], # 480,-960
+        zero            => [1,-1], # 480,-480
+        start	          => [1,-2, 1,-1, 1,-2, 1,-2, 1,-2, 1,-2, 1,-2], # Sync 101.1111
+        clockabs        => 480,
+        format          => 'twostate',
+        clientmodule    => 'SD_WS',
+        modulematch     => '^W111#',
+        preamble        => 'W111#5F', # add sync 0101.1111
+        length_min      => '64',
+        length_max      => '64',
+      },
     "112" =>  ## AVANTEK DB-LE
               # Wireless doorbell & LED night light
               # Sample: 20 Microseconds | 3 Repeats with ca. 1,57ms Pause
@@ -2938,6 +2958,70 @@ package lib::SD_ProtocolData;
         clientmodule    => 'SD_BELL',
         length_min      => '16',
         length_max      => '16',
+      },
+    "113" =>  ## Wireless Grill Thermometer, Model name: GFGT 433 B1, WDJ7036, FCC ID: 2AJ9O-GFGT433B1, 
+              # https://github.com/RFD-FHEM/RFFHEM/issues/992 @ muede-de 2021-07-13
+              # The sensor sends more than 12 messages every 2 seconds.
+              # T:  24 T2:  29   MS;P1=-761;P2=249;P4=-3005;P5=718;P6=-270;D=24212156215656565621212121212121215621562121562156562156215656562156562156212121562121212121565621;CP=2;SP=4;R=34;O;m2;
+              # T: 203 T2: 300   MS;P1=-262;P2=237;P3=-760;P6=-2972;P7=721;D=26232371237171717123232323237171237171712371232323712323712371712371712371232323712371232371717123;CP=2;SP=6;R=1;O;m2;
+              # T: 201 T2: 257   MS;P2=-754;P3=247;P5=-2996;P6=718;P7=-272;D=35323267326767676732323232326767326767673232326767326732326732323267673267323232673232323232326732;CP=3;SP=5;R=3;O;m2;
+      {
+        name            => 'GFGT_433_B1',
+        comment         => 'Wireless Grill Thermometer',
+        id              => '113',
+        knownFreqs      => '433.92',
+        one             => [3,-1],  # 750,-250
+        zero            => [1,-3],  # 250,-750
+        sync            => [1,-12], # 250,-3000
+        clockabs        => 250,
+        format          => 'twostate',
+        preamble        => 'W113#',
+        clientmodule    => 'SD_WS',
+        modulematch     => '^W113#',
+        reconstructBit   => '1',
+        length_min      => '47',
+        length_max      => '48',
+      },
+    "114" =>  ## TR401 (Well-Light)
+                # https://forum.fhem.de/index.php/topic,121103.0.html @Jake @Ralf9
+                # TR401_0_2 off  MU;P0=311;P1=585;P2=-779;P3=1255;P4=-1445;P5=-23617;P7=-5646;CP=1;R=230;D=12323234141414141514123414123232341414141415141234141232323414141414151412341412323234141414141514123414123232341414141415141234141232323414141414151412341412323234141414141517141232323414141414150;p;
+                # TR401_0_2 off  MU;P0=-14293;P1=611;P2=-1424;P3=-753;P4=1277;P5=-23626;P6=-9108;P7=214;CP=1;R=240;D=1213421213434342121212121512134212134343421212121216701213421213434342121212121512134212134343421212121215121342121343434212121212151213421213434342121212121512134212134343421212121215121342121343434212121212151213421213434342121212121512134212134343421212121215121342121343434212121212151;p;
+                # TR401_0_2 on   MU;P0=-1426;P1=599;P2=-23225;P3=-748;P4=1281;P5=372;P6=111;P7=268;CP=1;R=235;D=0121343401013434340101010101252621343401013434340101010101252705012134340101343434010101010125;p;
+                # TR401_0_2 on   MU;P0=-14148;P1=-23738;P2=607;P3=-737;P4=1298;P5=-1419;P6=340;P7=134;CP=2;R=236;D=12343452523434345252525252161712343452523434345252525252160;p;
+      {
+        name            => 'TR401',
+        comment         => 'Remote control for example for Well-Light',
+        id              => '114',
+        one             => [-7,3],     #  -1400,600
+        zero            => [-4,6],     #  -800,1200
+        start           => [-118,3],   # -23600,600
+        clockabs        => 200,
+        format          => 'twostate',
+        preamble        => 'P114#',
+        modulematch     => '^P114#[13569BDE][13579BDF]F$',
+        clientmodule    => 'SD_UT',
+        length_min      => '12',
+        length_max      => '12',
+      },
+    "115" =>  ## BRESSER 6-in-1 Weather Center, Bresser new 5-in-1 sensors 7002550
+              # https://github.com/RFD-FHEM/RFFHEM/issues/607#issuecomment-888542022 @ Alex-S1981 2021-07-28
+              # The sensor alternately sends two different messages every 12 seconds.
+              # T: 15.2 H: 93 W: 0.8   MN;D=3BF120B00C1618FF77FF0458152293FFF06B0000;R=242;
+              # W: 0.6 R: 5.6          MN;D=1E6C20B00C1618FF99FF0458FFFFA9FF015B0000;R=241;
+      {
+        name            => 'Bresser 6in1',
+        comment         => 'BRESSER 6-in-1 weather center',
+        id              => '115',
+        knownFreqs      => '868.35',
+        datarate        => '8.207',
+        sync            => '2DD4',
+        modulation      => '2-FSK',
+        rfmode          => 'Bresser_6in1',
+        register        => ['0001','0246','0344','042D','05D4','06FF','07C0','0802','0D21','0E65','0FE8','1088','114C','1202','1322','14F8','1551','1916','1B43','1C68'],
+        preamble        => 'W115#',
+        clientmodule    => 'SD_WS',
+        length_min      => '36',
+        method          => \&lib::SD_Protocols::ConvBresser_6in1,
       },
     ########################################################################
     #### ###  register informations from other hardware protocols  #### ####
