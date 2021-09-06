@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 10_SD_Rojaflex.pm 5 2021-07-26 21:00:00Z elektron-bbs $
+# $Id: 10_SD_Rojaflex.pm 5 2021-09-05 16:00:00Z elektron-bbs $
 #
 
 package SD_Rojaflex;
@@ -8,7 +8,7 @@ use strict;
 use warnings;
 use GPUtils qw(GP_Import GP_Export);
 
-our $VERSION = '0.8';
+our $VERSION = '0.9';
 
 GP_Export(qw(
 	Initialize
@@ -45,6 +45,8 @@ my %codes = (
 	'8' => 'down',
 	'9' => 'savefav',
 	'D' => 'gotofav',
+	'E' => 'request',
+	'x' => 'pct',
 );
 
 sub Initialize {
@@ -59,16 +61,16 @@ sub Initialize {
 	$hash->{ParseFn}    = \&Parse;
 	$hash->{AttrFn}     = \&Attr;
 	$hash->{AttrList}   = 'IODev '.
+	                      'bidirectional:0,1 '.
 	                      'do_not_notify:0,1 '.
 	                      'inversePosition:0,1 '.
 	                      'repetition:1,2,3,4,5,6,7,8,9 '.
-	                      'noPositionUpdates:0,1 '.
 	                      'timeToClose '.
 	                      'timeToOpen '.
 	                      'ignore:1,0 dummy:0,1 showtime:0,1 '.
 	                      "$main::readingFnAttributes";
 	$hash->{AutoCreate} = {'SD_Rojaflex.*' => {FILTER => '%NAME', autocreateThreshold => '5:180', GPLOT => q{}}};
-	return
+	return;
 }
 
 sub Attr {
@@ -107,8 +109,8 @@ sub Attr {
 				readingsEndUpdate($hash, 1);
 			}
 		}
-		if ($attrName eq 'noPositionUpdates') {
-			if ($attrValue !~ m/^[0-1]$/xms) { return "$name: Unallowed value $attrValue for the attribute noPositionUpdates (must be 0 - 1)!" };
+		if ($attrName eq 'bidirectional') {
+			if ($attrValue !~ m/^[0-1]$/xms) { return "$name: Unallowed value $attrValue for the attribute bidirectional (must be 0 - 1)!" };
 		}
 		if ($attrName eq 'timeToClose' || $attrName eq 'timeToOpen') {
 			if ($attrValue !~ m/^\d{1,3}$/xms || $attrValue < 1) { return "$name: Unallowed value $attrValue for the attribute $attrName (must be 1 - 999)!" };
@@ -120,10 +122,15 @@ sub Attr {
 sub Set {
 	my ($hash, $name, @a) = @_;
 	my $ioname = $hash->{IODev}{NAME};
-	my $ret = undef;
 	my $na = scalar @a; # Anzahl in Array
 	my $cmd = $a[0];
-	my $protocol = 109;
+
+	return q(down:noArg stop:noArg up:noArg savefav:noArg gotofav:noArg clearfav:noArg pct:0,10,20,30,40,50,60,70,80,90,100) if ($cmd eq q(?));
+	return qq($name, no set command specified) if ($na < 1);
+	return qq($name, invalid set command) if (not exists $rev_codes{$cmd});
+	return qq($name, invalid parameter for command pct) if ($cmd eq 'pct' && $a[1] !~ m/^\d+$/xms);
+	return qq(Dummydevice $name: will not set data) if (IsDummy($name));
+
 	my $state;
 	my $motor = ReadingsVal($name, 'motor', 'stop');
 	my $cpos = ReadingsVal($name, 'cpos', 50);
@@ -132,27 +139,12 @@ sub Set {
 		$cpos = 100 - $cpos; # inverse position
 		$tpos = 100 - $tpos; # inverse position
 	}
-
-	return "$name, no set value specified" if ($na < 1);
-	return "Dummydevice $hash->{NAME}: will not set data" if (IsDummy($hash->{NAME}));
-
-	if ($cmd eq q(?)) {;
-		if (defined(ReadingsVal($name, 'MsgDown', undef))) {$ret .= 'down:noArg '};
-		if (defined(ReadingsVal($name, 'MsgStop', undef))) {$ret .= 'stop:noArg '};
-		if (defined(ReadingsVal($name, 'MsgUp', undef))) {$ret .= 'up:noArg '};
-		if (defined(ReadingsVal($name, 'MsgSave', undef))) {$ret .= 'savefav:noArg '};
-		if (defined(ReadingsVal($name, 'MsgGoto', undef))) {$ret .= 'gotofav:noArg '};
-		if (defined(ReadingsVal($name, 'MsgStop', undef)) && defined(ReadingsVal($name, 'MsgGoto', undef)) && defined(ReadingsVal($name, 'MsgSave', undef))) {$ret .= 'clearfav:noArg '};
-		# if (defined(ReadingsVal($name, 'MsgDown', undef)) && defined(ReadingsVal($name, 'MsgStop', undef)) && defined(ReadingsVal($name, 'MsgUp', undef))) {$ret .= 'pct:slider,0,1,100'};
-		if (defined(ReadingsVal($name, 'MsgDown', undef)) && defined(ReadingsVal($name, 'MsgStop', undef)) && defined(ReadingsVal($name, 'MsgUp', undef))) {$ret .= 'pct:0,10,20,30,40,50,60,70,80,90,100'};
-		return $ret; # return setlist
-	}
-
 	my $timeToClose = AttrVal($name,'timeToClose',30);
 	my $timeToOpen = AttrVal($name,'timeToOpen',30);
 
 	if ($cmd eq 'pct') {
 		if ($na > 1) { # 0 = open ,100 = closed
+			if ($a[1] > 100) {$a[1] = 100};
 			$tpos = $a[1];
 			if (AttrVal($name,'inversePosition',0) eq '1') {$tpos = 100 - $tpos}; # inverse position
 			if ($tpos != $cpos) {
@@ -180,93 +172,81 @@ sub Set {
 		}
 	}
 
-	my %setCodesAr = ();
-	if (defined(ReadingsVal($name, 'MsgDown', undef))) {$setCodesAr{down} = 'MsgDown'};
-	if (defined(ReadingsVal($name, 'MsgStop', undef))) {$setCodesAr{stop} = 'MsgStop'};
-	if (defined(ReadingsVal($name, 'MsgUp', undef))) {$setCodesAr{up} = 'MsgUp'};
-	if (defined(ReadingsVal($name, 'MsgSave', undef))) {$setCodesAr{savefav} = 'MsgSave'};
-	if (defined(ReadingsVal($name, 'MsgGoto', undef))) {$setCodesAr{gotofav} = 'MsgGoto'};
-	if (defined(ReadingsVal($name, 'MsgStop', undef)) && defined(ReadingsVal($name, 'MsgGoto', undef)) && defined(ReadingsVal($name, 'MsgSave', undef))) {$setCodesAr{clearfav} = 'MsgGoto'};
-
-	if (%setCodesAr) {
-		if (exists($setCodesAr{$cmd})) { # Code vorhanden
-			my $msg = ReadingsVal($name, $setCodesAr{$cmd}, '');
-			if (length($msg) != 18) {
-				Log3 $name, 3, "$ioname: SD_Rojaflex set, $setCodesAr{$cmd} wrong length (must be 18)";
-				return $ret;
-			}
-			$msg = "P$protocol#$msg";
-			Log3 $name, 4, "$ioname: $name sendMsg=$msg";
-			for my $i (1 .. AttrVal($name, 'repetition', 1)) {
-				# Eine Wiederholung erfolgt bei der Fernbedienung nach 3,5 mS, so ist der Abstand groesser
-				IOWrite($hash, 'sendMsg', $msg);
-			}
-			if ($cmd eq 'clearfav') {
-				my $timelongest = $timeToOpen;
-				if ($timeToClose > $timeToOpen) {$timelongest = $timeToClose};
-				Log3 $name, 4, "$ioname: SD_Rojaflex set $name clearFav running time $timelongest s";
-				InternalTimer( (gettimeofday() + $timelongest), \&SD_Rojaflex_clearfav, $name );
-				$hash->{clearfavcount} = 0;
-			}
-
-			# Calculate target position and motor state
-			if ($cmd eq 'down') {
-				if ($na == 1) {$tpos = '100'}; # nicht bei "set pct xx"
-				if ($cpos ne $tpos) {$motor = 'down'}; # Wenn nicht schon unten.
-				if ($cpos eq $tpos) {$motor = 'stop'}; # Wenn unten.
-			}
-			if ($cmd eq 'up') {
-				if ($na == 1) {$tpos = '0'}; # nicht bei "set pct xx"
-				if ($cpos ne $tpos) {$motor = 'up'}; # Wenn nicht schon oben.
-				if ($cpos eq $tpos) {$motor = 'stop'}; # Wenn oben.
-			}
-			if ($cmd eq 'stop') {
-				$motor = 'stop';
-			}
-			if ($cmd eq 'savefav') {
-				$motor = 'stop';
-			}
-			# if ($cmd eq 'gotofav') {
-				# $motor = 'run';
-			# }
-
-			# Wenn keine PositionUpdates vom Motor kommen, setze gleich die finale Position
-			if (AttrVal($name,'noPositionUpdates',0) eq '1') {
-				# Jump direct to the final position, because we have no position updates and set motor stop
-				$cpos = $tpos;
-				$motor = 'stop';
-				# Save current position
-				if (AttrVal($name,'inversePosition',0) eq '1') {$cpos = 100 - $cpos}; # inverse position
-				readingsBeginUpdate($hash);
-				readingsBulkUpdate($hash, 'pct', $cpos, 1);
-				readingsBulkUpdate($hash, 'cpos', $cpos, 1);
-				readingsEndUpdate($hash, 1);
-			}
-
-			$state = $cmd;
-			Log3 $name, 3, "$ioname: SD_Rojaflex set $name $state";
-		} else {
-			if ($cmd eq 'down' || $cmd eq 'stop' || $cmd eq 'up') {
-				$state = "command still unknown, press the button \"$cmd\" on the remote control";
-			} elsif ($cmd eq 'savefav' || $cmd eq 'gotofav' || $cmd eq 'clearfav') {
-				$state = q(command still unknown, execute commands for setting the intermediate position with the remote control);
-			} else {
-				$state = "command \"$cmd\" is not supported";
-			}
-			Log3 $name, 3, "$ioname: $name, $state";
-		}
+	# Build msg and send it
+	my ($ident,$channel) = split m/[_]/xms,$hash->{DEF};
+	my $msg = q(P109#08) . $ident . sprintf('%X',$channel);
+	if ($cmd eq 'clearfav') {
+		$msg .= q(D);
 	} else {
-		$state = 'no set commands available, press all buttons on the remote control';
-		Log3 $name, 3, "$ioname: $name, $state";
+		$msg .= $rev_codes{$cmd};
+	}
+	$msg .= q(A01);
+	if ($cmd eq 'clearfav') {
+		$msg .= q(D);
+	} else {
+		$msg .= $rev_codes{$cmd};
+	}
+	$msg .= q(A);
+  my $sum = 0;
+  for (my $i = 7; $i < 20; $i += 2) {
+    $sum += hex(substr($msg, $i, 2));
+  }
+  $sum &= 0xFF;
+	$msg .= sprintf('%02X',$sum);
+	Log3 $name, 4, "$ioname: $name sendMsg=$msg";
+	for my $i (1 .. AttrVal($name, 'repetition', 1)) {
+		IOWrite($hash, 'sendMsg', $msg);
+	}
+	if ($cmd eq 'clearfav') {
+		my $timelongest = $timeToOpen;
+		if ($timeToClose > $timeToOpen) {$timelongest = $timeToClose};
+		Log3 $name, 4, "$ioname: SD_Rojaflex set $name clearFav running time $timelongest s";
+		InternalTimer( (gettimeofday() + $timelongest), \&SD_Rojaflex_clearfav, $name );
+		$hash->{clearfavcount} = 0;
 	}
 
-	if (AttrVal($name,'inversePosition',0) eq '1') {$tpos = 100 - $tpos}; # inverse position
+	# Calculate target position and motor state
+	if ($cmd eq 'down') {
+		if ($na == 1) {$tpos = '100'}; # nicht bei "set pct xx"
+		if ($cpos ne $tpos) {$motor = 'down'}; # Wenn nicht schon unten.
+		if ($cpos eq $tpos) {$motor = 'stop'}; # Wenn unten.
+	}
+	if ($cmd eq 'up') {
+		if ($na == 1) {$tpos = '0'}; # nicht bei "set pct xx"
+		if ($cpos ne $tpos) {$motor = 'up'}; # Wenn nicht schon oben.
+		if ($cpos eq $tpos) {$motor = 'stop'}; # Wenn oben.
+	}
+	if ($cmd eq 'stop') {
+		$motor = 'stop';
+	}
+	if ($cmd eq 'savefav') {
+		$motor = 'stop';
+	}
+	# if ($cmd eq 'gotofav') {
+		# $motor = 'run';
+	# }
+
 	readingsBeginUpdate($hash);
+	# Wenn keine PositionUpdates vom Motor kommen, setze gleich die finale Position
+	if (AttrVal($name,'bidirectional',0) eq '0') {
+		# Jump direct to the final position, because we have no position updates and set motor stop
+		$cpos = $tpos;
+		$motor = 'stop';
+		# Save current position
+		if (AttrVal($name,'inversePosition',0) eq '1') {$cpos = 100 - $cpos}; # inverse position
+		readingsBulkUpdate($hash, 'pct', $cpos, 1);
+		readingsBulkUpdate($hash, 'cpos', $cpos, 1);
+	}
+
+	$state = $cmd;
+	Log3 $name, 3, "$ioname: SD_Rojaflex set $name $state";
+
+	if (AttrVal($name,'inversePosition',0) eq '1') {$tpos = 100 - $tpos}; # inverse position
 	readingsBulkUpdate($hash, 'tpos', $tpos, 1);
 	readingsBulkUpdate($hash, 'motor', $motor, 1);
 	readingsBulkUpdate($hash, 'state', $state, 1);
 	readingsEndUpdate($hash, 1);
-	return $ret;
+	return;
 }
 
 sub SD_Rojaflex_pctStop {
@@ -282,7 +262,7 @@ sub SD_Rojaflex_clearfav {
 	my $hash = $defs{$name};
 	RemoveInternalTimer(\&SD_Rojaflex_clearfav, $name);
 	$hash->{clearfavcount} += 1;
-	if ($hash->{clearfavcount} < 4) {
+	if ($hash->{clearfavcount} < 4) { # 3 mal stop senden
 		CommandSet($hash, "$name stop");
 		InternalTimer( (gettimeofday() + 1), \&SD_Rojaflex_clearfav, $name );
 	} else {
@@ -294,9 +274,9 @@ sub SD_Rojaflex_clearfav {
 
 sub Define {
 	# define <name> SD_Rojaflex <hauscode>_<channel>
-	# define SD_Rojaflex_Test_11 SD_Rojaflex 7AE312_11
+	# define SD_Rojaflex_Test_11 SD_Rojaflex 7AE3121_11
 	# define <name> SD_Rojaflex <hauscode>_<channel> <iodevice>
-	# define SD_Rojaflex_Test_11 SD_Rojaflex 7AE312_11 sduino434
+	# define SD_Rojaflex_Test_11 SD_Rojaflex 7AE3121_11 sduino434
 	my ($hash, $def) = @_;
 	my @a = split m{\s+}xms , $def;
 	my $name = $hash->{NAME};
@@ -306,8 +286,8 @@ sub Define {
 	return 'Define SD_Rojaflex wrong syntax: define <name> SD_Rojaflex housecode_channel' if (int(@a) < 3);
 	my ($housecode, $channel) = split /[_]/xms , $a[2], 2;
 	return 'Define SD_Rojaflex wrong syntax, must be: housecode_channel' if (!defined $housecode || !defined $channel);
-	return 'Define SD_Rojaflex wrong housecode format: specify a 6 digit hex value [a-fA-F0-9]' if ($housecode !~ m/^[a-fA-F0-9]{6}$/xms );
-	return 'Define SD_Rojaflex wrong channel format: specify a decimal value [1-15] or "a" for all' if ($channel !~ m/^[0-9]{1,2}|[aA]$/xms );
+	return 'Define SD_Rojaflex wrong housecode format: specify a 7 digit hex value [a-fA-F0-9]' if ($housecode !~ m/^[a-fA-F0-9]{7}$/xms );
+	return 'Define SD_Rojaflex wrong channel format: specify a decimal value [0-15] or "a" for all' if ($channel !~ m/^[0-9]{1,2}|[aA]$/xms );
 	if (scalar @a == 4) { $iodevice = $a[3] };
 
 	$hash->{DEF} = $a[2];
@@ -317,6 +297,8 @@ sub Define {
 	if (exists $modules{SD_Rojaflex}{defptr}{ioname} && !defined $iodevice) { $ioname = $modules{SD_Rojaflex}{defptr}{ioname} };
 	if (!defined $iodevice) { $iodevice = $ioname }
 	AssignIoPort($hash, $iodevice);
+
+	if (not defined($attr{$name}{webCmd})) {$attr{$name}{webCmd} = 'up:stop:down'};
 
 	Log3 $name, 4, "SD_Rojaflex_Define: $a[0] HC=$housecode CHN=$channel";
 	return;
@@ -337,7 +319,7 @@ sub Parse {
 
 	Log3 $ioname, 4, "$ioname: SD_Rojaflex_Parse, Protocol $protocol, rawData $rawData";
 
-	my $housecode = substr $rawData,2,6;
+	my $housecode = substr $rawData,2,7;
 	my $channel = hex substr $rawData,9,1;
 	my $deviceCode = $housecode . q{_} . $channel;
 
@@ -357,11 +339,6 @@ sub Parse {
 	return $EMPTY if (IsIgnored($name));
 
 	my $state;
-	my $MsgDown;
-	my $MsgStop;
-	my $MsgUp;
-	my $MsgSave;
-	my $MsgGoto;
 	my $cmd = substr $rawData,10,1; # (0x0 = stop, 0x1 = up,0x8 = down, 0xE = Request, 0x9 = save/clear Pos, 0xD = goto Pos)
 	my $dev = substr $rawData,11,1; # (0xA = remote control, 0x5 = tubular motor)
 	my $motor = ReadingsVal($name, 'motor', 'stop');
@@ -374,20 +351,16 @@ sub Parse {
 
 	if ($dev eq 'A') { # remote control
 		$state = $codes{$cmd};
-		if ($cmd eq '8') {$MsgDown = ReadingsVal($name, 'MsgDown', undef)};
-		if ($cmd eq '0') {$MsgStop = ReadingsVal($name, 'MsgStop', undef)};
-		if ($cmd eq '1') {$MsgUp = ReadingsVal($name, 'MsgUp', undef)};
-		if ($cmd eq '9') {$MsgSave = ReadingsVal($name, 'MsgSave', undef)};
-		if ($cmd eq 'D') {$MsgGoto = ReadingsVal($name, 'MsgGoto', undef)};
-
 		# Calculate target position and motor state
 		if ($cmd eq '8') { # down
 			$tpos = '100';
+			if (AttrVal($name,'bidirectional',0) eq '0') {$cpos = $tpos};
 			if ($cpos ne $tpos) {$motor = 'down'}; # Wenn nicht schon unten
 			if ($cpos eq $tpos) {$motor = 'stop'}; # Wenn unten
 		}
 		if ($cmd eq '1') { # up
 			$tpos = '0';
+			if (AttrVal($name,'bidirectional',0) eq '0') {$cpos = $tpos};
 			if ($cpos ne $tpos) {$motor = 'up'}; # Wenn nicht schon oben
 			if ($cpos eq $tpos) {$motor = 'stop'}; # Wenn oben
 		}
@@ -412,22 +385,11 @@ sub Parse {
 	}
 
 	readingsBeginUpdate($hash);
-	if (defined $state) {readingsBulkUpdate($hash, 'state', $state)};
-	if (defined $motor) {readingsBulkUpdate($hash, 'motor', $motor)};
-	if (defined $tpos) {readingsBulkUpdate($hash, 'tpos', $tpos)};
-	if ($dev eq 'A') { # remote control
-		if ($cmd eq '8' && !defined $MsgDown) {readingsBulkUpdate($hash, 'MsgDown', $rawData, 0)};
-		if ($cmd eq '0' && !defined $MsgStop) {readingsBulkUpdate($hash, 'MsgStop', $rawData, 0)};
-		if ($cmd eq '1' && !defined $MsgUp) {readingsBulkUpdate($hash, 'MsgUp', $rawData, 0)};
-		if ($cmd eq '9' && !defined $MsgSave) {readingsBulkUpdate($hash, 'MsgSave', $rawData, 0)};
-		if ($cmd eq 'D' && !defined $MsgGoto) {readingsBulkUpdate($hash, 'MsgGoto', $rawData, 0)};
-	}
-	if ($dev eq '5') { # tubular motor
-		if (defined $cpos) {
-			readingsBulkUpdate($hash, 'pct', $cpos);
-			readingsBulkUpdate($hash, 'cpos', $cpos)
-		}
-	}
+	readingsBulkUpdate($hash, 'state', $state);
+	readingsBulkUpdate($hash, 'motor', $motor);
+	readingsBulkUpdate($hash, 'tpos', $tpos);
+	readingsBulkUpdate($hash, 'pct', $cpos);
+	readingsBulkUpdate($hash, 'cpos', $cpos);
 	readingsEndUpdate($hash, 1);
 	return $name;
 }
@@ -458,8 +420,8 @@ sub Parse {
 		<code>define &lt;name&gt; SD_Rojaflex &lt;housecode&gt;_&lt;channel&gt;</code>
 		<br><br>
 		<code>&lt;name&gt;</code> is any name assigned to the device.
-		For a better overview, we recommend a name in the form &quot;SD_Rojaflex_AE22F3_12&quot; to use,
-		in which &quot;AE22F3&quot; the house code used and &quot;12&quot; represents the channel.
+		For a better overview, we recommend a name in the form &quot;SD_Rojaflex_AE22F31_12&quot; to use,
+		in which &quot;AE22F31&quot; the house code used and &quot;12&quot; represents the channel.
 		<br><br>
 		<code>&lt;housecode&gt;</code> corresponds to the house code of the remote control used or of the device that is to be controlled.
 		<br><br>
@@ -471,9 +433,6 @@ sub Parse {
 	<a id="SD_Rojaflex-set"></a>
 	<b>Set</b>
 	<ul>
-		Before the set commands can be used, all codes must be learned once with the associated remote control.
-		You can tell that the codes have been learned from the readings "MsgDown", "MsgStop", "MsgUp" etc. (see Readings).
-		<br><br>
 		<code>set &lt;name&gt; &lt;value&gt; [&lt;num&gt;]</code>
 		<br><br>
 		<code>&lt;value&gt;</code> can be one of the following values:<br>
@@ -503,6 +462,8 @@ sub Parse {
 	<ul>
 		<a id="SD_Rojaflex-attr-IODev"></a>
 		<li><a href="#IODev">IODev</a> - Sets the device that is to be used to send the signals.</li>
+		<a id="SD_Rojaflex-attr-bidirectional"></a>
+		<li>bidirectional - If there is no feedback from the drive, the readings pct, cpos and tpos are calculated.</li>
 		<a id="SD_Rojaflex-attr-do_not_notify"></a>
 		<li><a href="#do_not_notify">do_not_notify</a> - Disable FileLog/notify/inform notification for a device. This affects the received signal, the set and trigger commands.</li>
 		<a id="SD_Rojaflex-attr-inversePosition"></a>
@@ -511,8 +472,6 @@ sub Parse {
 		<li>dummy - If the attribute is set, it is no longer possible to send.</li>
 		<a id="SD_Rojaflex-attr-ignore"></a>
 		<li><a href="#ignore">ignore</a> - The device will be ignored in the future if this attribute is set.</li>
-		<a id="SD_Rojaflex-attr-noPositionUpdates"></a>
-		<li>noPositionUpdates - If there is no feedback from the drive, the readings pct, cpos and tpos are calculated.</li>
 		<a id="SD_Rojaflex-attr-repetition"></a>
 		<li>repetition - Number of repetitions of the send commands.</li>
 		<a id="SD_Rojaflex-attr-showtime"></a>
@@ -527,11 +486,6 @@ sub Parse {
 	<b>Readings</b>
 	<ul>
 		<li>IODev - Device used for sending.</li>
-		<li>MsgDown - Message that is sent when set down.</li>
-		<li>MsgStop - Message that is sent when set stop.</li>
-		<li>MsgUp - Message that is sent when set up.</li>
-		<li>MsgGoto - Message that is sent when set gotofav.</li>
-		<li>MsgSave - Message that is sent when set savefav.</li>
 		<li>cpos - Current position in percent.</li>
 		<li>motor - State of the drive.</li>
 		<li>pct - Current position in percent.</li>
@@ -556,13 +510,13 @@ sub Parse {
 	<b>Define</b>
 	<ul>
 		Neu empfangene Geräte werden in FHEM normalerweise per autocreate automatisch in folgender Form angelegt:<br>
-		<code>SD_Rojaflex_3122FD_9</code><br><br>
+		<code>SD_Rojaflex_3122FD1_9</code><br><br>
 		Es ist aber auch möglich, die Geräte selbst zu definieren:<br>
 		<code>define &lt;name&gt; SD_Rojaflex &lt;hauscode&gt;_&lt;kanal&gt;</code>
 		<br><br>
 		<code>&lt;name&gt;</code> ist ein beliebiger Name, der dem Ger&auml;t zugewiesen wird.
-		Zur besseren &Uuml;bersicht wird empfohlen einen Namen in der Form &quot;SD_Rojaflex_AE22F3_12&quot; zu verwenden,
-		wobei &quot;AE22F3&quot; den verwendeten Hauscode und &quot;12&quot; den Kanal darstellt.
+		Zur besseren &Uuml;bersicht wird empfohlen einen Namen in der Form &quot;SD_Rojaflex_AE22F31_12&quot; zu verwenden,
+		wobei &quot;AE22F31&quot; den verwendeten Hauscode und &quot;12&quot; den Kanal darstellt.
 		<br><br>
 		<code>&lt;hauscode&gt;</code> entspricht dem Hauscode der verwendeten Fernbedienung bzw. des Ger&auml;tes, das gesteuert werden soll.
 		<br><br>
@@ -574,9 +528,6 @@ sub Parse {
 	<a id="SD_Rojaflex-set"></a>
 	<b>Set</b>
 	<ul>
-		Bevor die Set-Befehle verwendet werden können, müssen sämtliche Kodes einmal mit der zugehörigen Fernbedienung angelernt werden.
-		Das die Kodes angelernt wurden, erkennt man an den Readings "MsgDown", "MsgStop", "MsgUp" u.s.w. (siehe Readings).
-		<br><br>
 		<code>set &lt;name&gt; &lt;value&gt; [&lt;anz&gt;]</code>
 		<br><br>
 		<code>&lt;value&gt;</code> kann einer der folgenden Werte sein:<br>
@@ -606,6 +557,8 @@ sub Parse {
 	<ul>
 		<a id="SD_Rojaflex-attr-IODev"></a>
 		<li><a href="#IODev">IODev</a> - Setzt das Gerät, welches zum Senden der Signale verwendet werden soll.</li>
+		<a id="SD_Rojaflex-attr-bidirectional"></a>
+		<li>bidirectional - Falls vom Antrieb keine Rückmeldungen erfolgen, werden die Readings pct, cpos und tpos errechnet.</li>
 		<a id="SD_Rojaflex-attr-do_not_notify"></a>
 		<li><a href="#do_not_notify">do_not_notify</a> - Deaktiviert die Benachrichtigungen FileLog/notify/inform für das Gerät. Dies betrifft das empfangene Signal, die Set- und Triggerbefehle.</li>
 		<a id="SD_Rojaflex-attr-inversePosition"></a>
@@ -614,8 +567,6 @@ sub Parse {
 		<li>dummy - Wenn das Attribut gesetzt ist, kann nicht mehr gesendet werden.</li>
 		<a id="SD_Rojaflex-attr-ignore"></a>
 		<li><a href="#ignore">ignore</a> - Das Gerät wird in Zukunft ignoriert, wenn dieses Attribut gesetzt ist.</li>
-		<a id="SD_Rojaflex-attr-noPositionUpdates"></a>
-		<li>noPositionUpdates - Falls vom Antrieb keine Rückmeldungen erfolgen, werden die Readings pct, cpos und tpos errechnet.</li>
 		<a id="SD_Rojaflex-attr-repetition"></a>
 		<li>repetition - Anzahl Wiederholungen der Sendebefehle.</li>
 		<a id="SD_Rojaflex-attr-showtime"></a>
@@ -630,11 +581,6 @@ sub Parse {
 	<b>Readings</b>
 	<ul>
 		<li>IODev - Gerät, das zum Senden verwendet wird.</li>
-		<li>MsgDown - Nachricht, die bei set down gesendet wird.</li>
-		<li>MsgStop - Nachricht, die bei set stop gesendet wird.</li>
-		<li>MsgUp - Nachricht, die bei set up gesendet wird.</li>
-		<li>MsgGoto - Nachricht, die bei set gotofav gesendet wird.</li>
-		<li>MsgSave - Nachricht, die bei set savefav gesendet wird.</li>
 		<li>cpos - Aktuelle Position in Prozent.</li>
 		<li>motor - Zustand des Antriebes.</li>
 		<li>pct - Aktuelle Position in Prozent.</li>
