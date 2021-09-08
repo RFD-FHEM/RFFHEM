@@ -1,4 +1,4 @@
-# $Id: 14_SD_WS.pm 21666 2021-08-29 21:54:48Z elektron-bbs $
+# $Id: 14_SD_WS.pm 21666 2021-09-08 15:09:03Z elektron-bbs $
 #
 # The purpose of this module is to support serval
 # weather sensors which use various protocol
@@ -35,6 +35,7 @@
 # 06.06.2021 neues Protokoll 111: TS-FT002 Water tank level monitor with temperature
 # 16.07.2021 neues Protokoll 113: Wireless Grill Thermometer, Model name: GFGT 433 B1
 # 31.07.2021 neues Protokoll 115: Bresser 6-in-1 Comfort Wetter Center
+# 30.08.2021 PerlCritic - fixes for severity level 5 and 4
 
 package main;
 
@@ -42,18 +43,17 @@ package main;
 
 use strict;
 use warnings;
+use Carp qw(carp);
 
 # Forward declarations
-sub SD_WS_LFSR_digest8_reflect($$$$);
-sub SD_WS_bin2dec($);
+sub SD_WS_LFSR_digest8_reflect;
+sub SD_WS_bin2dec;
 sub SD_WS_binaryToNumber;
-sub SD_WS_WH2CRCCHECK($);
-sub SD_WS_WH2SHIFT($);
+sub SD_WS_WH2CRCCHECK;
+sub SD_WS_WH2SHIFT;
 
-sub SD_WS_Initialize($)
-{
-  my ($hash) = @_;
-
+sub SD_WS_Initialize {
+  my $hash = shift // return;
   $hash->{Match}    = '^W\d+x{0,1}#.*';
   $hash->{DefFn}    = "SD_WS_Define";
   $hash->{UndefFn}  = "SD_WS_Undef";
@@ -94,9 +94,9 @@ sub SD_WS_Initialize($)
 }
 
 #############################
-sub SD_WS_Define($$)
-{
+sub SD_WS_Define {
   my ($hash, $def) = @_;
+  carp "SD_WS_Define, too few arguments ($hash, $def)" if @_ < 2;
   my @a = split("[ \t][ \t]*", $def);
 
   return "wrong syntax: define <name> SD_WS <code> ".int(@a) if(int(@a) < 3 );
@@ -113,17 +113,17 @@ sub SD_WS_Define($$)
 }
 
 #############################
-sub SD_WS_Undef($$)
-{
+sub SD_WS_Undef {
   my ($hash, $name) = @_;
+  carp "SD_WS_Undef, too few arguments ($hash, $name)" if @_ < 2;
   delete($modules{SD_WS}{defptr}{$hash->{CODE}}) if(defined($hash->{CODE}) && defined($modules{SD_WS}{defptr}{$hash->{CODE}}));
   return;
 }
 
 #############################
-sub SD_WS_Parse($$)
-{
+sub SD_WS_Parse {
   my ($iohash, $msg) = @_;
+  carp "SD_WS_Parse, too few arguments ($iohash, $msg)" if @_ < 2;
   my $name = $iohash->{NAME};
   my $ioname = $iohash->{NAME};
   my ($protocol,$rawData) = split("#",$msg);
@@ -294,11 +294,11 @@ sub SD_WS_Parse($$)
                           $crc = ($crc>>1) ^ 12;
                         }
                       }
-                      $crc ^= SD_WS_bin2dec(reverse(substr($bitData, 34, 4)));
-                      if ($crc == SD_WS_bin2dec(reverse(substr($bitData, 38, 4)))) {
+                      $crc ^= SD_WS_bin2dec(scalar(reverse(substr($bitData, 34, 4))));
+                      if ($crc == SD_WS_bin2dec(scalar(reverse(substr($bitData, 38, 4))))) {
                         return 1;
                       } else {
-                        Log3 $name, 3, "$name: SD_WS_33 Parse msg $msg - ERROR check $crc != " . SD_WS_bin2dec(reverse(substr($bitData, 38, 4)));
+                        Log3 $name, 3, "$name: SD_WS_33 Parse msg $msg - ERROR check $crc != " . SD_WS_bin2dec(scalar(reverse(substr($bitData, 38, 4))));
                         return 0;
                       }
                     },
@@ -839,14 +839,14 @@ sub SD_WS_Parse($$)
         model      => 'SD_WS_111_TL',
         prematch   => sub {my $rawData = shift; return 1 if ($rawData =~ /^5F[0-9A-F]{2}88[0-9A-F]{12}/); }, # 5F 01 88 012345678912
         id         => sub {my ($rawData,undef) = @_; return substr($rawData,2,2);}, # long-id in hex
-        distance   => sub {my (undef,$bitData) = @_; return (SD_WS_bin2dec(reverse(substr($bitData,24,4))) * 16 + SD_WS_bin2dec(reverse(substr($bitData,28,4))) * 256 + SD_WS_bin2dec(reverse(substr($bitData,32,4))));},
+        distance   => sub {my (undef,$bitData) = @_; return (SD_WS_bin2dec(scalar(reverse(substr($bitData,24,4)))) * 16 + SD_WS_bin2dec(scalar(reverse(substr($bitData,28,4)))) * 256 + SD_WS_bin2dec(scalar(reverse(substr($bitData,32,4)))));},
         # bat        => sub {my (undef,$bitData) = @_; return substr($bitData,36,4) eq '0001' ? "ok" : "low";},
         # interval   => sub {my (undef,$bitData) = @_; return '180' if substr($bitData,44,4) eq '0000';
                                                      # return '30' if substr($bitData,44,4) eq '1000';
                                                      # return '5' if substr($bitData,44,4) eq '0111';
                                                      # return '0';
                               # },
-        temp       => sub {my (undef,$bitData) = @_; return ((SD_WS_bin2dec(reverse(substr($bitData,48,4))) * 16 + SD_WS_bin2dec(reverse(substr($bitData,52,4))) * 256 + SD_WS_bin2dec(reverse(substr($bitData,40,4))) - 400 ) / 10);},
+        temp       => sub {my (undef,$bitData) = @_; return ((SD_WS_bin2dec(scalar(reverse(substr($bitData,48,4)))) * 16 + SD_WS_bin2dec(scalar(reverse(substr($bitData,52,4)))) * 256 + SD_WS_bin2dec(scalar(reverse(substr($bitData,40,4)))) - 400 ) / 10);},
         crcok          => sub { my (undef,$bitData) = @_;
                                 my $xor = SD_WS_binaryToNumber($bitData, 0, 7);
                                 for (my $n = 8; $n < 72; $n += 8) {
@@ -1487,8 +1487,9 @@ sub SD_WS_Parse($$)
 # Wird nur fuer TFA Drop Protokoll benoetigt
 # TFA Drop Protokoll benoetigt als gen 0x31, als key 0xf4
 
-sub SD_WS_LFSR_digest8_reflect($$$$) {
+sub SD_WS_LFSR_digest8_reflect {
   my ($bytes, $gen, $key, $rawData) = @_;
+  carp "SD_WS_LFSR_digest8_reflect, too few arguments ($bytes, $gen, $key, $rawData)" if @_ < 4;
   my $sum = 0;
   my $k = 0;
   my $i = 0;
@@ -1511,24 +1512,25 @@ sub SD_WS_LFSR_digest8_reflect($$$$) {
 }
 
 #############################
-sub SD_WS_bin2dec($) {
-  my $h = shift;
+sub SD_WS_bin2dec {
+  my $h = shift // return;
   my $int = unpack("N", pack("B32",substr("0" x 32 . $h, -32))); 
   return sprintf("%d", $int); 
 }
 
 #############################
 sub SD_WS_binaryToNumber {
+  carp 'SD_WS_binaryToNumber, too few arguments' if @_ < 2;
   my $binstr=shift;
   my $fbit=shift;
   my $lbit=$fbit;
-  $lbit=shift if @_;
+  $lbit = shift // $lbit;
   return oct("0b".substr($binstr,$fbit,($lbit-$fbit)+1));
 }
 
 #############################
-sub SD_WS_WH2CRCCHECK($) {
-  my $rawData = shift;
+sub SD_WS_WH2CRCCHECK {
+  my $rawData = shift // return;
   my $datacheck1 = pack( 'H*', substr($rawData,2,length($rawData)-2) );
   my $crcmein1 = Digest::CRC->new(width => 8, poly => 0x31);
   my $rr3 = $crcmein1->add($datacheck1)->hexdigest;
@@ -1538,8 +1540,8 @@ sub SD_WS_WH2CRCCHECK($) {
 }
 
 #############################
-sub SD_WS_WH2SHIFT($){
-  my $rawData = shift;
+sub SD_WS_WH2SHIFT {
+  my $rawData = shift // return;
   my $hlen = length($rawData);
   my $blen = $hlen * 4;
   my $bitData = unpack("B$blen", pack("H$hlen", $rawData));
