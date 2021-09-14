@@ -47,6 +47,7 @@ my %codes = (
 	'D' => 'gotofav',
 	'E' => 'request',
 	'x' => 'pct',
+	'y' => 'clearfav',
 );
 
 sub Initialize {
@@ -128,7 +129,7 @@ sub Set {
 	return q(down:noArg stop:noArg up:noArg savefav:noArg gotofav:noArg clearfav:noArg pct:0,10,20,30,40,50,60,70,80,90,100) if ($cmd eq q(?));
 	return qq($name, no set command specified) if ($na < 1);
 	return qq($name, invalid set command) if (not exists $rev_codes{$cmd});
-	return qq($name, invalid parameter for command pct) if ($cmd eq 'pct' && $a[1] !~ m/^\d+$/xms);
+	return qq($name, invalid parameter for command pct, must be 0-100) if ($cmd eq 'pct' && ($na < 2 || $a[1] !~ m/^\d+$/xms || $a[1] > 100));
 	return qq(Dummydevice $name: will not set data) if (IsDummy($name));
 
 	my $state;
@@ -143,13 +144,12 @@ sub Set {
 	my $timeToOpen = AttrVal($name,'timeToOpen',30);
 
 	if ($cmd eq 'pct') {
-		if ($na > 1) { # 0 = open ,100 = closed
-			if ($a[1] > 100) {$a[1] = 100};
+		# if ($na > 1) {  # Anzahl in Array
 			$tpos = $a[1];
 			if (AttrVal($name,'inversePosition',0) eq '1') {$tpos = 100 - $tpos}; # inverse position
+			if ($tpos eq '0') {$cmd = 'up'}; # Fahr hoch
+			if ($tpos eq '100') {$cmd = 'down'}; # Fahr runter
 			if ($tpos != $cpos) {
-				if ($tpos eq '0') {$cmd = 'up'}; # Fahr hoch
-				if ($tpos eq '100') {$cmd = 'down'}; # Fahr runter
 				Log3 $name, 3, "$ioname: SD_Rojaflex set $name pct $tpos";
 				if ($tpos > 0 && $tpos < 100) {
 					my $duration;
@@ -167,22 +167,22 @@ sub Set {
 			} else {
 				$cmd = 'stop';
 			}
-		} else {
-			$cmd = 'stop';
-		}
+		# } else {
+			# $cmd = 'stop';
+		# }
 	}
 
 	# Build msg and send it
 	my ($ident,$channel) = split m/[_]/xms,$hash->{DEF};
 	my $msg = q(P109#08) . $ident . sprintf('%X',$channel);
 	if ($cmd eq 'clearfav') {
-		$msg .= q(D);
+		$msg .= q(D); # gotofav
 	} else {
 		$msg .= $rev_codes{$cmd};
 	}
 	$msg .= q(A01);
 	if ($cmd eq 'clearfav') {
-		$msg .= q(D);
+		$msg .= q(D); # gotofav
 	} else {
 		$msg .= $rev_codes{$cmd};
 	}
@@ -226,26 +226,47 @@ sub Set {
 		# $motor = 'run';
 	# }
 
-	readingsBeginUpdate($hash);
-	# Wenn keine PositionUpdates vom Motor kommen, setze gleich die finale Position
-	if (AttrVal($name,'bidirectional',0) eq '0') {
-		# Jump direct to the final position, because we have no position updates and set motor stop
-		$cpos = $tpos;
-		$motor = 'stop';
-		# Save current position
-		if (AttrVal($name,'inversePosition',0) eq '1') {$cpos = 100 - $cpos}; # inverse position
-		readingsBulkUpdate($hash, 'pct', $cpos, 1);
-		readingsBulkUpdate($hash, 'cpos', $cpos, 1);
-	}
-
 	$state = $cmd;
 	Log3 $name, 3, "$ioname: SD_Rojaflex set $name $state";
 
-	if (AttrVal($name,'inversePosition',0) eq '1') {$tpos = 100 - $tpos}; # inverse position
-	readingsBulkUpdate($hash, 'tpos', $tpos, 1);
-	readingsBulkUpdate($hash, 'motor', $motor, 1);
+	readingsBeginUpdate($hash);
 	readingsBulkUpdate($hash, 'state', $state, 1);
+	if ($state ne 'clearfav' && $state ne 'gotofav' && $state ne 'savefav' && $state ne 'request') {
+		# Wenn keine PositionUpdates vom Motor kommen, setze gleich die finale Position
+		if (AttrVal($name,'bidirectional',0) eq '0') {
+			# Jump direct to the final position, because we have no position updates and set motor stop
+			$cpos = $tpos;
+			$motor = 'stop';
+			# Save current position
+			if (AttrVal($name,'inversePosition',0) eq '1') {$cpos = 100 - $cpos}; # inverse position
+			readingsBulkUpdate($hash, 'pct', $cpos, 1);
+			readingsBulkUpdate($hash, 'cpos', $cpos, 1);
+		}
+		readingsBulkUpdate($hash, 'motor', $motor, 1);
+		if (AttrVal($name,'inversePosition',0) eq '1') {$tpos = 100 - $tpos}; # inverse position
+		readingsBulkUpdate($hash, 'tpos', $tpos, 1);
+	}
 	readingsEndUpdate($hash, 1);
+
+	# channel 0 set all devices, we must update all other devices with the same ident
+	if ($channel eq '0') {
+		foreach my $d (keys %defs) {
+			if (defined($defs{$d}) && $defs{$d}{TYPE} eq 'SD_Rojaflex' && substr($defs{$d}{DEF},0,7) eq $ident && substr($defs{$d}{DEF},-2) ne '_0') {
+				Log3 $name, 3, "$ioname: SD_Rojaflex update $d $state";
+				readingsBeginUpdate($defs{$d});
+				readingsBulkUpdate($defs{$d}, 'state' , $state , 1);
+				readingsBulkUpdate($defs{$d}, 'motor', $motor, 1);
+				if ($state ne 'clearfav' && $state ne 'gotofav' && $state ne 'savefav' && $state ne 'request') {
+					readingsBulkUpdate($defs{$d}, 'tpos', $tpos, 1);
+					if (AttrVal($defs{$d}{NAME},'bidirectional',0) eq '0') {
+						readingsBulkUpdate($defs{$d}, 'pct', $cpos, 1);
+						readingsBulkUpdate($defs{$d}, 'cpos', $cpos, 1);
+					}
+					readingsEndUpdate($defs{$d}, 1);
+				}
+			}
+		}
+	}
 	return;
 }
 
@@ -391,6 +412,27 @@ sub Parse {
 	readingsBulkUpdate($hash, 'pct', $cpos);
 	readingsBulkUpdate($hash, 'cpos', $cpos);
 	readingsEndUpdate($hash, 1);
+
+	# channel 0 set all devices, we must update all other devices with the same ident
+	if ($channel eq '0') {
+		foreach my $d (keys %defs) {
+			if (defined($defs{$d}) && $defs{$d}{TYPE} eq 'SD_Rojaflex' && substr($defs{$d}{DEF},0,7) eq $housecode && substr($defs{$d}{DEF},-2) ne '_0') {
+				Log3 $name, 3, "$ioname: SD_Rojaflex receive $housecode channel 0, update $d $state";
+				readingsBeginUpdate($defs{$d});
+				readingsBulkUpdate($defs{$d}, 'state' , $state , 1);
+				readingsBulkUpdate($defs{$d}, 'motor', $motor, 1);
+				if ($state ne 'gotofav' && $state ne 'savefav' && $state ne 'request') {
+					readingsBulkUpdate($defs{$d}, 'tpos', $tpos, 1);
+					if (AttrVal($defs{$d}{NAME},'bidirectional',0) eq '0') {
+						Log3 $name, 3, "$ioname: SD_Rojaflex receive $housecode channel 0, update $d $state";
+						readingsBulkUpdate($defs{$d}, 'pct', $cpos, 1);
+						readingsBulkUpdate($defs{$d}, 'cpos', $cpos, 1);
+					}
+				}
+				readingsEndUpdate($defs{$d}, 1);
+			}
+		}
+	}
 	return $name;
 }
 
