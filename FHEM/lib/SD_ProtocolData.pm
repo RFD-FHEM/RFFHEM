@@ -2863,12 +2863,12 @@ package lib::SD_ProtocolData;
         length_min      => '52',
         method          => \&lib::SD_Protocols::ConvBresser_5in1,
       },
-    "109" =>  ## Rojaflex HSR-1, HSR-5, HSR-15, HSTR-5, HSTR-15, RHSM1
+    "109" =>  ## Rojaflex HSR-15, HSTR-15,
               # only tested remote control HSR-15
               # https://github.com/RFD-FHEM/RFFHEM/issues/955 - Hofyyy 2021-04-18
-              # SD_Rojaflex_3122FD_9 down   MN;D=083122FD298A018A8E;R=0;
-              # SD_Rojaflex_3122FD_9 stop   MN;D=083122FD290A010A8E;R=244;
-              # SD_Rojaflex_3122FD_9 up     MN;D=083122FD291A011AAE;R=249;
+              # SD_Rojaflex_3122FD2_9 down   MN;D=083122FD298A018A8E;R=0;
+              # SD_Rojaflex_3122FD2_9 stop   MN;D=083122FD290A010A8E;R=244;
+              # SD_Rojaflex_3122FD2_9 up     MN;D=083122FD291A011AAE;R=249;
       {
         name            => 'Rojaflex',
         comment         => 'Rojaflex shutter',
@@ -2879,7 +2879,13 @@ package lib::SD_ProtocolData;
         modulation      => 'GFSK',
         rfmode          => 'Rojaflex',
         regexMatch      => qr/^08/,
-        register        => ['0007','0246','0302','04D3','0591','06FF','0788','0805','0D10','0EB0','0F71','10C8','1193','1213','1322','14F8','1535','1916','1B43','1C40','2156','2211'],
+        # neu: Reg. 0x02 - GDO0 output pin configuration = 0x2E = High impedance (3-state) - unused in FSK-modes
+        register        => ['0007','022E','0302','04D3','0591','060C','0788','0805','0D10','0EB0','0F71','10C8','1193','1213','1322','14F8','1535','170F','1916','1B43','1C40','2156','2211'],
+        # neu: Reg. 0x06: PKTLEN – Packet Length, If variable packet length mode is used, this value indicates the maximum packet length allowed. = 12 Byte
+        # register        => ['0007','0246','0302','04D3','0591','060C','0788','0805','0D10','0EB0','0F71','10C8','1193','1213','1322','14F8','1535','170F','1916','1B43','1C40','2156','2211'],
+        # neu: Reg. 0x17: MCSM1– Main Radio Control State Machine Configuration, RXOFF_MODE[1:0] = Stay in RX, TXOFF_MODE[1:0] = RX
+        # register        => ['0007','0246','0302','04D3','0591','06FF','0788','0805','0D10','0EB0','0F71','10C8','1193','1213','1322','14F8','1535','170F','1916','1B43','1C40','2156','2211'],
+        # register        => ['0007','0246','0302','04D3','0591','06FF','0788','0805','0D10','0EB0','0F71','10C8','1193','1213','1322','14F8','1535','1916','1B43','1C40','2156','2211'],
         preamble        => 'P109#',
         clientmodule    => 'SD_Rojaflex',
         length_min      => '18',
