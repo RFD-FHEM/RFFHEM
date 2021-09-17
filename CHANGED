@@ -1,3 +1,8 @@
+2021-09-17 - Update SD_ProtocolData.pm - remove register entry (#1017)
+
+* Update SD_ProtocolData.pm
+* Update 01_verifyFSK.t
+* Update 01_SIGNALduino_Attr_rfmode.t
 2021-09-08 - Fixes perlcritic prototypes in 14_SD_WS part 2 (#1013)
 
 * Fixes perlcritic prototypes in 14_SD_WS
