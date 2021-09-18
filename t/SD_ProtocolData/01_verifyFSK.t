@@ -54,7 +54,6 @@ my $check_hash = hash
             item '23EC';
             item '2517';
             item '2611';
-            item '2B3E';
 			end();
 		};
 		etc();
@@ -88,7 +87,6 @@ my $check_hash = hash
           item '23ED';
           item '2517';
           item '2611';
-          item '2B3E';
 		  end();
 		};
 		etc();
@@ -169,8 +167,6 @@ my $check_hash = hash
             item '23EC';
             item '2516';
             item '2611';
-            item '2B3E';
-
  		    end();
 		};
 		etc();
