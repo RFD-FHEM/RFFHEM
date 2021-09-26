@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 10_SD_Rojaflex.pm 5 2021-09-05 16:00:00Z elektron-bbs $
+# $Id: 10_SD_Rojaflex.pm 5 2021-09-26 17:00:00Z elektron-bbs $
 #
 
 package SD_Rojaflex;
@@ -8,7 +8,7 @@ use strict;
 use warnings;
 use GPUtils qw(GP_Import GP_Export);
 
-our $VERSION = '0.9';
+our $VERSION = '0.10';
 
 GP_Export(qw(
 	Initialize
@@ -173,8 +173,8 @@ sub Set {
 	}
 
 	# Build msg and send it
-	my ($ident,$channel) = split m/[_]/xms,$hash->{DEF};
-	my $msg = q(P109#08) . $ident . sprintf('%X',$channel);
+	my ($housecode,$channel) = split m/[_]/xms,$hash->{DEF};
+	my $msg = q(P109#08) . $housecode . sprintf('%X',$channel);
 	if ($cmd eq 'clearfav') {
 		$msg .= q(D); # gotofav
 	} else {
@@ -248,10 +248,10 @@ sub Set {
 	}
 	readingsEndUpdate($hash, 1);
 
-	# channel 0 set all devices, we must update all other devices with the same ident
+	# channel 0 set all devices, we must update all other devices with the same housecode
 	if ($channel eq '0') {
 		foreach my $d (keys %defs) {
-			if (defined($defs{$d}) && $defs{$d}{TYPE} eq 'SD_Rojaflex' && substr($defs{$d}{DEF},0,7) eq $ident && substr($defs{$d}{DEF},-2) ne '_0') {
+			if (defined($defs{$d}) && $defs{$d}{TYPE} eq 'SD_Rojaflex' && substr($defs{$d}{DEF},0,7) eq $housecode && substr($defs{$d}{DEF},-2) ne '_0') {
 				Log3 $name, 3, "$ioname: SD_Rojaflex update $d $state";
 				readingsBeginUpdate($defs{$d});
 				readingsBulkUpdate($defs{$d}, 'state' , $state , 1);
@@ -413,7 +413,7 @@ sub Parse {
 	readingsBulkUpdate($hash, 'cpos', $cpos);
 	readingsEndUpdate($hash, 1);
 
-	# channel 0 set all devices, we must update all other devices with the same ident
+	# channel 0 set all devices, we must update all other devices with the same housecode
 	if ($channel eq '0') {
 		foreach my $d (keys %defs) {
 			if (defined($defs{$d}) && $defs{$d}{TYPE} eq 'SD_Rojaflex' && substr($defs{$d}{DEF},0,7) eq $housecode && substr($defs{$d}{DEF},-2) ne '_0') {
@@ -424,7 +424,6 @@ sub Parse {
 				if ($state ne 'gotofav' && $state ne 'savefav' && $state ne 'request') {
 					readingsBulkUpdate($defs{$d}, 'tpos', $tpos, 1);
 					if (AttrVal($defs{$d}{NAME},'bidirectional',0) eq '0') {
-						Log3 $name, 3, "$ioname: SD_Rojaflex receive $housecode channel 0, update $d $state";
 						readingsBulkUpdate($defs{$d}, 'pct', $cpos, 1);
 						readingsBulkUpdate($defs{$d}, 'cpos', $cpos, 1);
 					}
