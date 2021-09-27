@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 10_SD_Rojaflex.pm 5 2021-09-26 17:00:00Z elektron-bbs $
+# $Id: 10_SD_Rojaflex.pm 5 2021-09-27 18:00:00Z elektron-bbs $
 #
 
 package SD_Rojaflex;
@@ -8,7 +8,7 @@ use strict;
 use warnings;
 use GPUtils qw(GP_Import GP_Export);
 
-our $VERSION = '0.10';
+our $VERSION = '0.11';
 
 GP_Export(qw(
 	Initialize
@@ -405,23 +405,29 @@ sub Parse {
 		$tpos = 100 - $tpos; # inverse position
 	}
 
-	readingsBeginUpdate($hash);
-	readingsBulkUpdate($hash, 'state', $state);
-	readingsBulkUpdate($hash, 'motor', $motor);
-	readingsBulkUpdate($hash, 'tpos', $tpos);
-	readingsBulkUpdate($hash, 'pct', $cpos);
-	readingsBulkUpdate($hash, 'cpos', $cpos);
-	readingsEndUpdate($hash, 1);
+	if ($channel ne '0' || $state ne 'request') {
+		readingsBeginUpdate($hash);
+		readingsBulkUpdate($hash, 'state', $state);
+		readingsBulkUpdate($hash, 'motor', $motor);
+		if ($state ne 'gotofav' && $state ne 'savefav') {
+			readingsBulkUpdate($hash, 'tpos', $tpos);
+			if (AttrVal($name,'bidirectional',0) eq '0') {
+				readingsBulkUpdate($hash, 'pct', $cpos);
+				readingsBulkUpdate($hash, 'cpos', $cpos);
+			}
+		}
+		readingsEndUpdate($hash, 1);
+	}
 
 	# channel 0 set all devices, we must update all other devices with the same housecode
-	if ($channel eq '0') {
+	if ($channel eq '0' && $state ne 'request') {
 		foreach my $d (keys %defs) {
 			if (defined($defs{$d}) && $defs{$d}{TYPE} eq 'SD_Rojaflex' && substr($defs{$d}{DEF},0,7) eq $housecode && substr($defs{$d}{DEF},-2) ne '_0') {
 				Log3 $name, 3, "$ioname: SD_Rojaflex receive $housecode channel 0, update $d $state";
 				readingsBeginUpdate($defs{$d});
 				readingsBulkUpdate($defs{$d}, 'state' , $state , 1);
 				readingsBulkUpdate($defs{$d}, 'motor', $motor, 1);
-				if ($state ne 'gotofav' && $state ne 'savefav' && $state ne 'request') {
+				if ($state ne 'gotofav' && $state ne 'savefav') {
 					readingsBulkUpdate($defs{$d}, 'tpos', $tpos, 1);
 					if (AttrVal($defs{$d}{NAME},'bidirectional',0) eq '0') {
 						readingsBulkUpdate($defs{$d}, 'pct', $cpos, 1);
