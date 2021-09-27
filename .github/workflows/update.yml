@@ -19,7 +19,7 @@ jobs:
     - name: Check if Branch is in PR
       if: github.event_name == 'push'
       id: checkbranch
-      uses: actions/github-script@v4
+      uses: actions/github-script@v5
       with:
         script: |
           console.log(process.env.BRANCH_NAME)
