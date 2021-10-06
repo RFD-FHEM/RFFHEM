@@ -1,5 +1,5 @@
 ###########################################################################################################################################
-# $Id: SD_ProtocolData.pm 3.4.4 2021-09-16 18:27:10Z HomeAutoUser $
+# $Id: SD_ProtocolData.pm 3.4.4 2021-10-04 19:20:09Z elektron-bbs $
 # The file is part of the SIGNALduino project.
 # All protocol definitions are contained in this file.
 #
@@ -50,7 +50,7 @@
 #                               # SIGNALduino_filterMC --> SIGNALduino internal filter function, it will decode MU data via Manchester encoding
 # dispatchBin      => 1         # If set to 1, data will be dispatched in binary representation to other logcial modules.
 #                                 If not set (default) or set to 0, data will be dispatched in hex mode to other logical modules.
-# dispatchequals   => 'true'    # ???
+# dispatchequals   => 'true'    # Dispatch if dispatchequals is provided in protocol definition or only if $dmsg is different from last $dmsg, or if 2 seconds are between transmits
 # postDemodulation => \&        # only MU - SIGNALduino internal sub for processing before dispatching to a logical module
 # method           => \&        # call to process this message
 #                                 system method: lib::SD_Protocols::MCRAW -> returns bits without editing and length check included
@@ -74,7 +74,7 @@
 # ID´s are currently unused: 116 - 
 # ID´s need to be revised (preamble u): 5|19|21|22|23|25|28|31|36|40|52|59|63
 ###########################################################################################################################################
-# Please provide at least three messages for each new MU/MC/MS protocol and a URL of issue in GitHub or discussion in FHEM Forum
+# Please provide at least three messages for each new MU/MC/MS/MN protocol and a URL of issue in GitHub or discussion in FHEM Forum
 # https://forum.fhem.de/index.php/topic,58396.975.html | https://github.com/RFD-FHEM/RFFHEM
 ###########################################################################################################################################
 
@@ -86,7 +86,7 @@ package lib::SD_ProtocolData;
   use strict;
   use warnings;
 
-  our $VERSION = '1.35';
+  our $VERSION = '1.37';
 
   our %protocols = (
     "0" =>  ## various weather sensors (500 | 9100)
@@ -2708,10 +2708,11 @@ package lib::SD_ProtocolData;
         datarate        => '17257.69',
         sync            => '2DD4',
         modulation      => '2-FSK',
-        regexMatch      => qr/^9/,   # ToDo, check! fuer eine regexp Pruefung am Anfang vor dem method Aufruf
-        register        => ['0001','0246','0301','042D','05D4','06FF','0700','0802','0D21','0E65','0F6A','1089','115C','1206','1322','14F8','1556','1700','1818','1916','1B43','1C68','1D91','23EC','2517','2611'],
+        regexMatch      => qr/^9/,
+        register        => ['0001','022E','0341','042D','05D4','0605','0780','0800','0D21','0E65','0F6A','1089','115C','1202','1322','14F8','1556','1916','1B43','1C68','2611'],
         rfmode          => 'Lacrosse_mode1',
         clientmodule    => 'LaCrosse',
+        length_min      => '5',
         method          => \&lib::SD_Protocols::ConvLaCrosse,
       },
     "101" =>  # ELV PCA 301
@@ -2857,7 +2858,7 @@ package lib::SD_ProtocolData;
         sync            => '2DD4',
         modulation      => '2-FSK',
         rfmode          => 'Bresser_5in1',
-        register        => ['0001','0246','0346','042D','05D4','06FF','07C0','0802','0D21','0E65','0FE8','1088','114C','1202','1322','14F8','1551','1916','1B43','1C68'],
+        register        => ['0001','022E','0346','042D','05D4','061A','07C0','0800','0D21','0E65','0FE8','1088','114C','1202','1322','14F8','1551','1916','1B43','1C68'],
         preamble        => 'W108#',
         clientmodule    => 'SD_WS',
         length_min      => '52',
