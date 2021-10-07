@@ -4826,6 +4826,14 @@ USB-connected devices (SIGNALduino):<br>
       <li>2: CRC = 49 (x031) WH1080, set OK</li>
     </ul>
   </li><br>
+  <a name="myMatchList"></a>
+  <li>myMatchList<br>
+  This attribute adds additional items to the module matchlist. Items has to be described in a PERL Hash format:
+  <ul>
+    <li>Format: { 'number:module' => 'protocol-pattern' , 'nextNumber:nextModule' => 'protocol-pattern' , ... }</li>
+    <li>Example: { '34:MyModule' => '^u98#.{8}' , '35:MyModule2' => '^u99#.{10}' }</li>
+  </ul>
+  </li><br>
 </ul>
 
 
@@ -5373,6 +5381,14 @@ USB-connected devices (SIGNALduino):<br>
     <ul>
       <li>0: CRC-Check WH1080 CRC = 0 on, Standard</li>
       <li>2: CRC = 49 (x031) WH1080, set OK</li>
+    </ul>
+  </li><br>
+   <a name="myMatchList"></a>
+  <li>myMatchList<br>
+    Dieses Attribut erm&oumlglicht es die Modul Match Tabelle um weitere Eintr&aumlge zu erweitern. Dazu m&uumlssen die weiteren Eintr&aumlge im PERL Hash format angegeben werden:</li>
+    <ul>
+      <li>Format: { 'Nummer:Modul' => 'Protokoll-Pattern' , 'N&aumlchsteNummer:N&aumlchstesModul' => 'Protokoll-Pattern' , ... }</li>
+      <li>Beispiel: { '34:MyModule' => '^u98#.{8}' , '35:MyModule2' => '^u99#.{10}' }</li>
     </ul>
   </li><br>
 </ul>
