@@ -317,6 +317,7 @@ sub SIGNALduino_Initialize {
             .' suppressDeviceRawmsg:1,0'
             .' updateChannelFW:stable,testing'
             .' whitelist_IDs'
+            .' myMatchList'
             ." $readingFnAttributes";
 
   $hash->{ShutdownFn}         = 'SIGNALduino_Shutdown';
@@ -3088,6 +3089,24 @@ sub SIGNALduino_Attr(@) {
 
     if( ref($match_list) eq 'HASH' ) {
       $hash->{MatchList} = $match_list;
+    } else {
+      $hash->{MatchList} = \%matchListSIGNALduino;                      ## Set defaults
+      $hash->{logMethod}->($name, 2, $name .": Attr, $aVal: not a HASH using defaults") if( $aVal );
+    }
+  }
+  ## Change myMatchList
+  elsif( $aName eq 'myMatchList' ) {
+    my $match_list;
+    if( $cmd eq 'set' ) {
+      $match_list = eval $aVal; ## Allow evaluation of hash object from "attr" string f.e. { '34:MYMODULE' => '^u99#.{9}' } 
+      if( $@ ) {
+        $hash->{logMethod}->($name, 2, $name .": Attr, $aVal: ". $@);
+      }
+    }
+
+    if( ref($match_list) eq 'HASH' ) {
+      $hash->{myMatchList} = %$match_list; ## Allow incremental addition of an entry to existing hash list
+      $hash->{MatchList} = { %matchListSIGNALduino , %$match_list };
     } else {
       $hash->{MatchList} = \%matchListSIGNALduino;                      ## Set defaults
       $hash->{logMethod}->($name, 2, $name .": Attr, $aVal: not a HASH using defaults") if( $aVal );
