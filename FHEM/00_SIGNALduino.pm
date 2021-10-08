@@ -317,7 +317,6 @@ sub SIGNALduino_Initialize {
             .' suppressDeviceRawmsg:1,0'
             .' updateChannelFW:stable,testing'
             .' whitelist_IDs'
-            .' myMatchList'
             ." $readingFnAttributes";
 
   $hash->{ShutdownFn}         = 'SIGNALduino_Shutdown';
@@ -3081,23 +3080,6 @@ sub SIGNALduino_Attr(@) {
   elsif( $aName eq 'MatchList' ) {
     my $match_list;
     if( $cmd eq 'set' ) {
-      $match_list = eval {$aVal};
-      if( $@ ) {
-        $hash->{logMethod}->($name, 2, $name .": Attr, $aVal: ". $@);
-      }
-    }
-
-    if( ref($match_list) eq 'HASH' ) {
-      $hash->{MatchList} = $match_list;
-    } else {
-      $hash->{MatchList} = \%matchListSIGNALduino;                      ## Set defaults
-      $hash->{logMethod}->($name, 2, $name .": Attr, $aVal: not a HASH using defaults") if( $aVal );
-    }
-  }
-  ## Change myMatchList
-  elsif( $aName eq 'myMatchList' ) {
-    my $match_list;
-    if( $cmd eq 'set' ) {
       $match_list = eval $aVal; ## Allow evaluation of hash object from "attr" string f.e. { '34:MYMODULE' => '^u99#.{9}' } 
       if( $@ ) {
         $hash->{logMethod}->($name, 2, $name .": Attr, $aVal: ". $@);
@@ -3105,8 +3087,7 @@ sub SIGNALduino_Attr(@) {
     }
 
     if( ref($match_list) eq 'HASH' ) {
-      $hash->{myMatchList} = %$match_list; ## Allow incremental addition of an entry to existing hash list
-      $hash->{MatchList} = { %matchListSIGNALduino , %$match_list };
+      $hash->{MatchList} = { %matchListSIGNALduino , %$match_list };          ## Allow incremental addition of an entry to existing hash list
     } else {
       $hash->{MatchList} = \%matchListSIGNALduino;                      ## Set defaults
       $hash->{logMethod}->($name, 2, $name .": Attr, $aVal: not a HASH using defaults") if( $aVal );
@@ -4826,8 +4807,8 @@ USB-connected devices (SIGNALduino):<br>
       <li>2: CRC = 49 (x031) WH1080, set OK</li>
     </ul>
   </li><br>
-  <a name="myMatchList"></a>
-  <li>myMatchList<br>
+  <a name="MatchList"></a>
+  <li>MatchList<br>
   This attribute adds additional items to the module matchlist. Items has to be described in a PERL Hash format:
   <ul>
     <li>Format: { 'number:module' => 'protocol-pattern' , 'nextNumber:nextModule' => 'protocol-pattern' , ... }</li>
@@ -5383,8 +5364,8 @@ USB-connected devices (SIGNALduino):<br>
       <li>2: CRC = 49 (x031) WH1080, set OK</li>
     </ul>
   </li><br>
-   <a name="myMatchList"></a>
-  <li>myMatchList<br>
+   <a name="MatchList"></a>
+  <li>MatchList<br>
     Dieses Attribut erm&oumlglicht es die Modul Match Tabelle um weitere Eintr&aumlge zu erweitern. Dazu m&uumlssen die weiteren Eintr&aumlge im PERL Hash format angegeben werden:</li>
     <ul>
       <li>Format: { 'Nummer:Modul' => 'Protokoll-Pattern' , 'N&aumlchsteNummer:N&aumlchstesModul' => 'Protokoll-Pattern' , ... }</li>
