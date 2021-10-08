@@ -23,7 +23,7 @@ jobs:
       with:
         script: |
           console.log(process.env.BRANCH_NAME)
-          const resp = await github.pulls.list({
+          const resp = await github.rest.pulls.list({
             owner: context.repo.owner,
             repo: context.repo.repo,
           });
