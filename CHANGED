@@ -1,3 +1,18 @@
+2021-10-16 - LaCrosse mode 2 optimization register settings (#1027)
+
+* LaCrosse mode 2 optimization register settings
+SD_ProtocolData.pm
+  Reg. 0x02 - IOCFG0 0x2E, GDO0 output pin configuration High impedance (3-state) - unused in FSK-modes
+  Reg. 0x03 - FIFOTHR 0x41, Design Note DN009, FIFOTHR.ADC_RETENTION - CC1101 will wake up with optimal ADC settings for low data rate (≤ 100 kbps)
+  Reg. 0x06 - PKTLEN 0x05 (5 Byte)
+  Reg. 0x07 - PKTCTRL1 0x80, Preamble quality estimator threshold (2 Byte)
+  Reg. 0x08 - PKTCTRL0 0x00, Fixed packet length mode. Length configured in PKTLEN register
+  Reg. 0x10 - MDMCFG4 0xC8, CHANBW 101 kHz
+  Reg. 0x12 - MDMCFG2 0x02, SYNC_MODE 16/16 sync word bits detected
+  Reg. 0x15 - MDMCFG2 0x42, DEVIATN 31.74 kHz
+01_verifyFSK.t
+  change field register array
+
 2021-10-04 - LaCrosse mode 1 optimization register settings (#1022)
 
 SD_ProtocolData.pm
