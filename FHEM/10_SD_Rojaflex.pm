@@ -8,7 +8,7 @@ use strict;
 use warnings;
 use GPUtils qw(GP_Import GP_Export);
 
-our $VERSION = '0.11';
+our $VERSION = '0.12';
 
 GP_Export(qw(
 	Initialize
@@ -62,7 +62,7 @@ sub Initialize {
 	$hash->{ParseFn}    = \&Parse;
 	$hash->{AttrFn}     = \&Attr;
 	$hash->{AttrList}   = 'IODev '.
-	                      'bidirectional:0,1 '.
+	                      'bidirectional:1,0 '.
 	                      'do_not_notify:0,1 '.
 	                      'inversePosition:0,1 '.
 	                      'repetition:1,2,3,4,5,6,7,8,9 '.
@@ -134,8 +134,9 @@ sub Set {
 
 	my $state;
 	my $motor = ReadingsVal($name, 'motor', 'stop');
-	my $cpos = ReadingsVal($name, 'cpos', 50);
+	my $cpos = ReadingsVal($name, 'cpos', undef);
 	my $tpos = ReadingsVal($name, 'tpos', 50);
+	if (!defined $cpos) {$cpos = $tpos};
 	if (AttrVal($name,'inversePosition',0) eq '1') {
 		$cpos = 100 - $cpos; # inverse position
 		$tpos = 100 - $tpos; # inverse position
@@ -144,32 +145,28 @@ sub Set {
 	my $timeToOpen = AttrVal($name,'timeToOpen',30);
 
 	if ($cmd eq 'pct') {
-		# if ($na > 1) {  # Anzahl in Array
-			$tpos = $a[1];
-			if (AttrVal($name,'inversePosition',0) eq '1') {$tpos = 100 - $tpos}; # inverse position
-			if ($tpos eq '0') {$cmd = 'up'}; # Fahr hoch
-			if ($tpos eq '100') {$cmd = 'down'}; # Fahr runter
-			if ($tpos != $cpos) {
-				Log3 $name, 3, "$ioname: SD_Rojaflex set $name pct $tpos";
-				if ($tpos > 0 && $tpos < 100) {
-					my $duration;
-					if ($tpos > $cpos) { # Rolladen steht höher soll position
-						$cmd = 'down'; # Fahr runter
-						$duration = ($tpos - $cpos) * $timeToClose / 100;
-					}
-					if ($tpos < $cpos) { # Rolladen steht niedriger soll position
-						$cmd = 'up';# Fahr hoch
-						$duration = ($cpos - $tpos) * $timeToOpen / 100;
-					}
-					Log3 $name, 4, "$ioname: SD_Rojaflex set $name duration running time $duration s";
-					InternalTimer( (gettimeofday() + $duration), \&SD_Rojaflex_pctStop, $name );
+		$tpos = $a[1];
+		if (AttrVal($name,'inversePosition',0) eq '1') {$tpos = 100 - $tpos}; # inverse position
+		if ($tpos eq '0') {$cmd = 'up'}; # Fahr hoch
+		if ($tpos eq '100') {$cmd = 'down'}; # Fahr runter
+		if ($tpos != $cpos) {
+			Log3 $name, 3, "$ioname: SD_Rojaflex set $name pct $tpos";
+			if ($tpos > 0 && $tpos < 100) {
+				my $duration;
+				if ($tpos > $cpos) { # Rolladen steht höher soll position
+					$cmd = 'down'; # Fahr runter
+					$duration = ($tpos - $cpos) * $timeToClose / 100;
 				}
-			} else {
-				$cmd = 'stop';
+				if ($tpos < $cpos) { # Rolladen steht niedriger soll position
+					$cmd = 'up';# Fahr hoch
+					$duration = ($cpos - $tpos) * $timeToOpen / 100;
+				}
+				Log3 $name, 4, "$ioname: SD_Rojaflex set $name duration running time $duration s";
+				InternalTimer( (gettimeofday() + $duration), \&SD_Rojaflex_pctStop, $name );
 			}
-		# } else {
-			# $cmd = 'stop';
-		# }
+		} else {
+			$cmd = 'stop';
+		}
 	}
 
 	# Build msg and send it
@@ -216,24 +213,18 @@ sub Set {
 		if ($cpos ne $tpos) {$motor = 'up'}; # Wenn nicht schon oben.
 		if ($cpos eq $tpos) {$motor = 'stop'}; # Wenn oben.
 	}
-	if ($cmd eq 'stop') {
+	if ($cmd eq 'stop' || $cmd eq 'savefav') {
 		$motor = 'stop';
 	}
-	if ($cmd eq 'savefav') {
-		$motor = 'stop';
-	}
-	# if ($cmd eq 'gotofav') {
-		# $motor = 'run';
-	# }
-
+	
 	$state = $cmd;
 	Log3 $name, 3, "$ioname: SD_Rojaflex set $name $state";
 
 	readingsBeginUpdate($hash);
 	readingsBulkUpdate($hash, 'state', $state, 1);
-	if ($state ne 'clearfav' && $state ne 'gotofav' && $state ne 'savefav' && $state ne 'request') {
+	if ($state ne 'clearfav' && $state ne 'gotofav') {
 		# Wenn keine PositionUpdates vom Motor kommen, setze gleich die finale Position
-		if (AttrVal($name,'bidirectional',0) eq '0') {
+		if (AttrVal($name,'bidirectional',1) eq '0') {
 			# Jump direct to the final position, because we have no position updates and set motor stop
 			$cpos = $tpos;
 			$motor = 'stop';
@@ -255,15 +246,15 @@ sub Set {
 				Log3 $name, 3, "$ioname: SD_Rojaflex update $d $state";
 				readingsBeginUpdate($defs{$d});
 				readingsBulkUpdate($defs{$d}, 'state' , $state , 1);
-				readingsBulkUpdate($defs{$d}, 'motor', $motor, 1);
-				if ($state ne 'clearfav' && $state ne 'gotofav' && $state ne 'savefav' && $state ne 'request') {
+				if ($state ne 'clearfav' && $state ne 'gotofav') {
+					readingsBulkUpdate($defs{$d}, 'motor', $motor, 1);
 					readingsBulkUpdate($defs{$d}, 'tpos', $tpos, 1);
-					if (AttrVal($defs{$d}{NAME},'bidirectional',0) eq '0') {
+					if (AttrVal($defs{$d}{NAME},'bidirectional',1) eq '0') {
 						readingsBulkUpdate($defs{$d}, 'pct', $cpos, 1);
 						readingsBulkUpdate($defs{$d}, 'cpos', $cpos, 1);
 					}
-					readingsEndUpdate($defs{$d}, 1);
 				}
+				readingsEndUpdate($defs{$d}, 1);
 			}
 		}
 	}
@@ -308,7 +299,7 @@ sub Define {
 	my ($housecode, $channel) = split /[_]/xms , $a[2], 2;
 	return 'Define SD_Rojaflex wrong syntax, must be: housecode_channel' if (!defined $housecode || !defined $channel);
 	return 'Define SD_Rojaflex wrong housecode format: specify a 7 digit hex value [a-fA-F0-9]' if ($housecode !~ m/^[a-fA-F0-9]{7}$/xms );
-	return 'Define SD_Rojaflex wrong channel format: specify a decimal value [0-15] or "a" for all' if ($channel !~ m/^[0-9]{1,2}|[aA]$/xms );
+	return 'Define SD_Rojaflex wrong channel format: specify a decimal value [0-15]' if ($channel !~ m/^[0-9]{1,2}$/xms || $channel > 15);
 	if (scalar @a == 4) { $iodevice = $a[3] };
 
 	$hash->{DEF} = $a[2];
@@ -375,17 +366,17 @@ sub Parse {
 		# Calculate target position and motor state
 		if ($cmd eq '8') { # down
 			$tpos = '100';
-			if (AttrVal($name,'bidirectional',0) eq '0') {$cpos = $tpos};
+			if (AttrVal($name,'bidirectional',1) eq '0') {$cpos = $tpos};
 			if ($cpos ne $tpos) {$motor = 'down'}; # Wenn nicht schon unten
 			if ($cpos eq $tpos) {$motor = 'stop'}; # Wenn unten
 		}
 		if ($cmd eq '1') { # up
 			$tpos = '0';
-			if (AttrVal($name,'bidirectional',0) eq '0') {$cpos = $tpos};
+			if (AttrVal($name,'bidirectional',1) eq '0') {$cpos = $tpos};
 			if ($cpos ne $tpos) {$motor = 'up'}; # Wenn nicht schon oben
 			if ($cpos eq $tpos) {$motor = 'stop'}; # Wenn oben
 		}
-		if ($cmd eq '0') { # stop
+		if ($cmd eq '0' || $cmd eq '9') { # stop || savefav
 			$motor = 'stop';
 		}
 	}
@@ -405,13 +396,13 @@ sub Parse {
 		$tpos = 100 - $tpos; # inverse position
 	}
 
-	if ($channel ne '0' || $state ne 'request') {
+	if ($channel ne '0') {
 		readingsBeginUpdate($hash);
 		readingsBulkUpdate($hash, 'state', $state);
-		readingsBulkUpdate($hash, 'motor', $motor);
-		if ($state ne 'gotofav' && $state ne 'savefav') {
+		if ($state ne 'clearfav' && $state ne 'gotofav' && $state ne 'request') {
+			readingsBulkUpdate($hash, 'motor', $motor);
 			readingsBulkUpdate($hash, 'tpos', $tpos);
-			if (AttrVal($name,'bidirectional',0) eq '0') {
+			if (AttrVal($name,'bidirectional',1) eq '0' || $dev eq '5') {
 				readingsBulkUpdate($hash, 'pct', $cpos);
 				readingsBulkUpdate($hash, 'cpos', $cpos);
 			}
@@ -426,10 +417,10 @@ sub Parse {
 				Log3 $name, 3, "$ioname: SD_Rojaflex receive $housecode channel 0, update $d $state";
 				readingsBeginUpdate($defs{$d});
 				readingsBulkUpdate($defs{$d}, 'state' , $state , 1);
-				readingsBulkUpdate($defs{$d}, 'motor', $motor, 1);
-				if ($state ne 'gotofav' && $state ne 'savefav') {
+				if ($state ne 'clearfav' && $state ne 'gotofav') {
+					readingsBulkUpdate($defs{$d}, 'motor', $motor, 1);
 					readingsBulkUpdate($defs{$d}, 'tpos', $tpos, 1);
-					if (AttrVal($defs{$d}{NAME},'bidirectional',0) eq '0') {
+					if (AttrVal($defs{$d}{NAME},'bidirectional',1) eq '0') {
 						readingsBulkUpdate($defs{$d}, 'pct', $cpos, 1);
 						readingsBulkUpdate($defs{$d}, 'cpos', $cpos, 1);
 					}
@@ -455,14 +446,14 @@ sub Parse {
 <h3>SD_Rojaflex</h3>
 <ul>
 	The SD_Rojaflex module decrypts and sends messages that are processed by the SIGNALduino.<br>
-	Currently supported are the following types: Rojaflex HSR-15.
+	Currently supported are the following types: Rojaflex HSR-15 (only modus bidirectional).
 	<br><br>
 
 	<a id="SD_Rojaflex-define"></a>
 	<b>Define</b>
 	<ul>
 		Newly received devices are usually automatically created in FHEM via autocreate in the following form:<br>
-		<code>SD_Rojaflex_3122FD_9</code><br><br>
+		<code>SD_Rojaflex_3122FD2_9</code><br><br>
 		But it is also possible to define the devices yourself:<br>
 		<code>define &lt;name&gt; SD_Rojaflex &lt;housecode&gt;_&lt;channel&gt;</code>
 		<br><br>
@@ -510,7 +501,7 @@ sub Parse {
 		<a id="SD_Rojaflex-attr-IODev"></a>
 		<li><a href="#IODev">IODev</a> - Sets the device that is to be used to send the signals.</li>
 		<a id="SD_Rojaflex-attr-bidirectional"></a>
-		<li>bidirectional - If there is no feedback from the drive, the readings pct, cpos and tpos are calculated.</li>
+		<li>bidirectional - If there is no feedback from the drive, the readings pct and cpos are calculated.</li>
 		<a id="SD_Rojaflex-attr-do_not_notify"></a>
 		<li><a href="#do_not_notify">do_not_notify</a> - Disable FileLog/notify/inform notification for a device. This affects the received signal, the set and trigger commands.</li>
 		<a id="SD_Rojaflex-attr-inversePosition"></a>
@@ -550,7 +541,7 @@ sub Parse {
 <h3>SD_Rojaflex</h3>
 <ul>
 	Das SD_Rojaflex-Modul entschl&uuml;sselt und sendet Nachrichten, die vom SIGNALduino verarbeitet werden.<br>
-	Unterst&uuml;tzt werden z.Z. folgende Typen: Rojaflex HSR-15.
+	Unterst&uuml;tzt werden z.Z. folgende Typen: Rojaflex HSR-15 (nur Modus bidirektional).
 	<br><br>
 
 	<a id="SD_Rojaflex-define"></a>
@@ -605,7 +596,7 @@ sub Parse {
 		<a id="SD_Rojaflex-attr-IODev"></a>
 		<li><a href="#IODev">IODev</a> - Setzt das Gerät, welches zum Senden der Signale verwendet werden soll.</li>
 		<a id="SD_Rojaflex-attr-bidirectional"></a>
-		<li>bidirectional - Falls vom Antrieb keine Rückmeldungen erfolgen, werden die Readings pct, cpos und tpos errechnet.</li>
+		<li>bidirectional - Falls vom Antrieb keine Rückmeldungen erfolgen, werden die Readings pct und cpos errechnet.</li>
 		<a id="SD_Rojaflex-attr-do_not_notify"></a>
 		<li><a href="#do_not_notify">do_not_notify</a> - Deaktiviert die Benachrichtigungen FileLog/notify/inform für das Gerät. Dies betrifft das empfangene Signal, die Set- und Triggerbefehle.</li>
 		<a id="SD_Rojaflex-attr-inversePosition"></a>
