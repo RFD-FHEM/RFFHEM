@@ -1,5 +1,5 @@
 ###########################################################################################################################################
-# $Id: SD_ProtocolData.pm 3.4.4 2021-08-29 21:54:48Z elektron-bbs $
+# $Id: SD_ProtocolData.pm 3.4.4 2021-10-15 15:42:20Z elektron-bbs $
 # The file is part of the SIGNALduino project.
 # All protocol definitions are contained in this file.
 #
@@ -28,8 +28,8 @@
 # msgIntro         => ' '       # only MC - make combined message msgIntro.MC for sending ('SR;P0=-2560;P1=2560;P3=-640;D=10101010101010113;',)
 # msgOutro         => ' '       # only MC - make combined message MC.msgOutro for sending ('SR;P0=-8500;D=0;',)
 #
-# length_min       => ' '       # minimum number of bits of message length (If reconstructBit is set, then set length_min=length_min-1)
-# length_max       => ' '       # maximum number of bits of message length
+# length_min       => ' '       # minimum number of bits (MC, MS, MU) or nibbles (MN) of message length (MU, MS: If reconstructBit is set, then set length_min=length_min-1)
+# length_max       => ' '       # maximum number of bits (MC, MS, MU) or nibbles (MN) of message length
 # paddingbits      => ' '       # pad up to x bits before call module, default is 4. | --> option is active if paddingbits not defined in message definition !
 # paddingbits      => '1'       # will disable padding, use this setting when using dispatchBin
 # paddingbits      => '2'       # is padded to an even number, that is a maximum of 1 bit
@@ -50,7 +50,7 @@
 #                               # SIGNALduino_filterMC --> SIGNALduino internal filter function, it will decode MU data via Manchester encoding
 # dispatchBin      => 1         # If set to 1, data will be dispatched in binary representation to other logcial modules.
 #                                 If not set (default) or set to 0, data will be dispatched in hex mode to other logical modules.
-# dispatchequals   => 'true'    # ???
+# dispatchequals   => 'true'    # Dispatch if dispatchequals is provided in protocol definition or only if $dmsg is different from last $dmsg, or if 2 seconds are between transmits
 # postDemodulation => \&        # only MU - SIGNALduino internal sub for processing before dispatching to a logical module
 # method           => \&        # call to process this message
 #                                 system method: lib::SD_Protocols::MCRAW -> returns bits without editing and length check included
@@ -74,7 +74,7 @@
 # ID´s are currently unused: 116 - 
 # ID´s need to be revised (preamble u): 5|19|21|22|23|25|28|31|36|40|52|59|63
 ###########################################################################################################################################
-# Please provide at least three messages for each new MU/MC/MS protocol and a URL of issue in GitHub or discussion in FHEM Forum
+# Please provide at least three messages for each new MU/MC/MS/MN protocol and a URL of issue in GitHub or discussion in FHEM Forum
 # https://forum.fhem.de/index.php/topic,58396.975.html | https://github.com/RFD-FHEM/RFFHEM
 ###########################################################################################################################################
 
@@ -86,7 +86,7 @@ package lib::SD_ProtocolData;
   use strict;
   use warnings;
 
-  our $VERSION = '1.35';
+  our $VERSION = '1.38';
 
   our %protocols = (
     "0" =>  ## various weather sensors (500 | 9100)
@@ -2708,10 +2708,11 @@ package lib::SD_ProtocolData;
         datarate        => '17257.69',
         sync            => '2DD4',
         modulation      => '2-FSK',
-        regexMatch      => qr/^9/,   # ToDo, check! fuer eine regexp Pruefung am Anfang vor dem method Aufruf
-        register        => ['0001','0246','0301','042D','05D4','06FF','0700','0802','0D21','0E65','0F6A','1089','115C','1206','1322','14F8','1556','1700','1818','1916','1B43','1C68','1D91','23EC','2517','2611','2B3E'],
+        regexMatch      => qr/^9/,
+        register        => ['0001','022E','0341','042D','05D4','0605','0780','0800','0D21','0E65','0F6A','1089','115C','1202','1322','14F8','1556','1916','1B43','1C68','2611'],
         rfmode          => 'Lacrosse_mode1',
         clientmodule    => 'LaCrosse',
+        length_min      => '10',
         method          => \&lib::SD_Protocols::ConvLaCrosse,
       },
     "101" =>  # ELV PCA 301
@@ -2726,7 +2727,7 @@ package lib::SD_ProtocolData;
         datarate        => '6620.41',
         sync            => '2DD4',
         modulation      => '2-FSK',
-        register        => ['0001','0246','0307','042D','05D4','06FF','0700','0802','0D21','0E6B','0FD0','1088','110B','1206','1322','14F8','1553','1700','1818','1916','1B43','1C68','1D91','23ED','2517','2611','2B3E'],
+        register        => ['0001','0246','0307','042D','05D4','06FF','0700','0802','0D21','0E6B','0FD0','1088','110B','1206','1322','14F8','1553','1700','1818','1916','1B43','1C68','1D91','23ED','2517','2611'],
         rfmode          => 'PCA301',
         clientmodule    => 'PCA301',
         dispatchequals  => 'true',
@@ -2764,10 +2765,11 @@ package lib::SD_ProtocolData;
         datarate        => '9579',
         sync            => '2DD4',
         modulation      => '2-FSK',
-        regexMatch      => qr/^9/,   # ToDo, check! fuer eine regexp Pruefung am Anfang vor dem method Aufruf
-        register        => ['0001','0246','0301','042D','05D4','06FF','0700','0802','0D21','0E65','0F6A','1088','1182','1206','1322','14F8','1556','1700','1818','1916','1B43','1C68','1D91','23EC','2516','2611','2B3E'],
+        regexMatch      => qr/^9/,
+        register        => ['0001','022E','0341','042D','05D4','0605','0780','0800','0D21','0E65','0F6A','10C8','1182','1202','1322','14F8','1542','1916','1B43','1C68','2611'],
         rfmode          => 'Lacrosse_mode2',
         clientmodule    => 'LaCrosse',
+        length_min      => '10',
         method          => \&lib::SD_Protocols::ConvLaCrosse,
       },
     "104" =>  # Remote control TR60C-1 with touch screen from Satellite Electronic (Zhongshan) Ltd., Importer Westinghouse Lighting for ceiling fan Bendan
@@ -2857,7 +2859,7 @@ package lib::SD_ProtocolData;
         sync            => '2DD4',
         modulation      => '2-FSK',
         rfmode          => 'Bresser_5in1',
-        register        => ['0001','0246','0346','042D','05D4','06FF','07C0','0802','0D21','0E65','0FE8','1088','114C','1202','1322','14F8','1551','1916','1B43','1C68'],
+        register        => ['0001','022E','0346','042D','05D4','061A','07C0','0800','0D21','0E65','0FE8','1088','114C','1202','1322','14F8','1551','1916','1B43','1C68'],
         preamble        => 'W108#',
         clientmodule    => 'SD_WS',
         length_min      => '52',

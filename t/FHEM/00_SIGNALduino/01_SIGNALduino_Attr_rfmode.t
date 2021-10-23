@@ -83,7 +83,7 @@ InternalTimer(time()+1, sub() {
       is($ret,U(),q[verify return undef ]);
       is(FhemTestUtils_gotLog(".*rfmode found on.*"), 1, 'Verify rfmode is found');
       is(FhemTestUtils_gotLog(".*register settings exist.*"), 1, 'Verify registers settinx exist');
-      is(FhemTestUtils_gotLog(".*write value.*"), 27, 'Verify write value');
+      is(FhemTestUtils_gotLog(".*write value.*"), 21, 'Verify write value');
     }; 
 
     subtest 'rfmode set to Lacrosse_mode1 without protocol id enabled' => sub {
