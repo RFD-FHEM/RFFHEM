@@ -71,7 +71,7 @@
 ##### notice #### or #### info ############################################################################################################
 # !!! Between the keys and values ​​no tabs, please use spaces !!!
 # !!! Please use first unused id for new protocols !!!
-# ID´s are currently unused: 116 - 
+# ID´s are currently unused: 117 - 
 # ID´s need to be revised (preamble u): 5|19|21|22|23|25|28|31|36|40|52|59|63
 ###########################################################################################################################################
 # Please provide at least three messages for each new MU/MC/MS/MN protocol and a URL of issue in GitHub or discussion in FHEM Forum
@@ -86,7 +86,7 @@ package lib::SD_ProtocolData;
   use strict;
   use warnings;
 
-  our $VERSION = '1.38';
+  our $VERSION = '1.39';
 
   our %protocols = (
     "0" =>  ## various weather sensors (500 | 9100)
@@ -2840,7 +2840,7 @@ package lib::SD_ProtocolData;
         length_max      => '22',
       },
 
-    # "107" => reserved @elektron-bbs
+    # "107" => reserved @elektron-bbs for Fine Offset WH51, ECOWITT WH51, MISOL/1, Froggit DP100 Soil Moisture Sensor
 
     "108" =>  ## BRESSER 5-in-1 Weather Center, Bresser Professional Rain Gauge - elektron-bbs 2021-05-02
               # https://github.com/RFD-FHEM/RFFHEM/issues/607
@@ -2876,7 +2876,7 @@ package lib::SD_ProtocolData;
         comment         => 'Rojaflex shutter',
         id              => '109',
         knownFreqs      => '433.92',
-        datarate        => '9992.60',
+        datarate        => '9.9926',
         sync            => 'D391D391',
         modulation      => 'GFSK',
         rfmode          => 'Rojaflex',
@@ -3025,6 +3025,9 @@ package lib::SD_ProtocolData;
         length_min      => '36',
         method          => \&lib::SD_Protocols::ConvBresser_6in1,
       },
+
+    # "116" => reserved @elektron-bbs for Fine Offset WH57, Froggit DP60 Thunder and Lightning sensor
+
     ########################################################################
     #### ###  register informations from other hardware protocols  #### ####
 
