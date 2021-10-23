@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 10_SD_Rojaflex.pm 5 2021-09-27 18:00:00Z elektron-bbs $
+# $Id: 10_SD_Rojaflex.pm 100 2021-10-19 18:00:00Z elektron-bbs $
 #
 
 package SD_Rojaflex;
@@ -8,7 +8,7 @@ use strict;
 use warnings;
 use GPUtils qw(GP_Import GP_Export);
 
-our $VERSION = '0.12';
+our $VERSION = '1.00';
 
 GP_Export(qw(
 	Initialize
@@ -23,6 +23,7 @@ BEGIN {
 		attr
 		CommandSet
 		defs
+		DoTrigger
 		gettimeofday
 		InternalTimer
 		IOWrite
@@ -194,6 +195,7 @@ sub Set {
 	for my $i (1 .. AttrVal($name, 'repetition', 1)) {
 		IOWrite($hash, 'sendMsg', $msg);
 	}
+
 	if ($cmd eq 'clearfav') {
 		my $timelongest = $timeToOpen;
 		if ($timeToClose > $timeToOpen) {$timelongest = $timeToClose};
@@ -201,7 +203,6 @@ sub Set {
 		InternalTimer( (gettimeofday() + $timelongest), \&SD_Rojaflex_clearfav, $name );
 		$hash->{clearfavcount} = 0;
 	}
-
 	# Calculate target position and motor state
 	if ($cmd eq 'down') {
 		if ($na == 1) {$tpos = '100'}; # nicht bei "set pct xx"
@@ -216,7 +217,7 @@ sub Set {
 	if ($cmd eq 'stop' || $cmd eq 'savefav') {
 		$motor = 'stop';
 	}
-	
+
 	$state = $cmd;
 	Log3 $name, 3, "$ioname: SD_Rojaflex set $name $state";
 
@@ -289,6 +290,7 @@ sub Define {
 	# define SD_Rojaflex_Test_11 SD_Rojaflex 7AE3121_11
 	# define <name> SD_Rojaflex <hauscode>_<channel> <iodevice>
 	# define SD_Rojaflex_Test_11 SD_Rojaflex 7AE3121_11 sduino434
+
 	my ($hash, $def) = @_;
 	my @a = split m{\s+}xms , $def;
 	my $name = $hash->{NAME};
@@ -396,19 +398,17 @@ sub Parse {
 		$tpos = 100 - $tpos; # inverse position
 	}
 
-	if ($channel ne '0') {
-		readingsBeginUpdate($hash);
-		readingsBulkUpdate($hash, 'state', $state);
-		if ($state ne 'clearfav' && $state ne 'gotofav' && $state ne 'request') {
-			readingsBulkUpdate($hash, 'motor', $motor);
-			readingsBulkUpdate($hash, 'tpos', $tpos);
-			if (AttrVal($name,'bidirectional',1) eq '0' || $dev eq '5') {
-				readingsBulkUpdate($hash, 'pct', $cpos);
-				readingsBulkUpdate($hash, 'cpos', $cpos);
-			}
+	readingsBeginUpdate($hash);
+	readingsBulkUpdate($hash, 'state', $state);
+	if ($state ne 'clearfav' && $state ne 'gotofav' && $state ne 'request') {
+		readingsBulkUpdate($hash, 'motor', $motor);
+		readingsBulkUpdate($hash, 'tpos', $tpos);
+		if (AttrVal($name,'bidirectional',1) eq '0' || $dev eq '5') {
+			readingsBulkUpdate($hash, 'pct', $cpos);
+			readingsBulkUpdate($hash, 'cpos', $cpos);
 		}
-		readingsEndUpdate($hash, 1);
 	}
+	readingsEndUpdate($hash, 1);
 
 	# channel 0 set all devices, we must update all other devices with the same housecode
 	if ($channel eq '0' && $state ne 'request') {
@@ -426,6 +426,7 @@ sub Parse {
 					}
 				}
 				readingsEndUpdate($defs{$d}, 1);
+				DoTrigger($defs{$d}{NAME},undef);
 			}
 		}
 	}
