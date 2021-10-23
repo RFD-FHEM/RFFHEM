@@ -274,7 +274,7 @@ my %matchListSIGNALduino = (
 my %symbol_map = (one => 1 , zero =>0 ,sync => '', float=> 'F', 'start' => '');
 
 ## rfmode for attrib & supported rfmodes
-my @rfmode = ('Avantek','Bresser_5in1','KOPP_FC','Lacrosse_mode1','Lacrosse_mode2','Lacrosse_mode4','PCA301','Rojaflex','SlowRF');
+my @rfmode = ('Avantek','Bresser_5in1','Bresser_6in1','KOPP_FC','Lacrosse_mode1','Lacrosse_mode2','Lacrosse_mode4','PCA301','Rojaflex','SlowRF');
 
 ############################# package main
 sub SIGNALduino_Initialize {
@@ -4776,7 +4776,10 @@ USB-connected devices (SIGNALduino):<br>
         <ul><small>example: TX35TH-IT, TX35DTH-IT, TX38-IT, 30.3155WD, 30.3156WD</small></ul>
       </li>
       <li>PCA301<br>
-        modulation 2-FSK, Datarate=6.62041 kbps, Sync Word=2DD4, frequency 868.950MHz
+        modulation 2-FSK, Datarate=6.62041 kbps, Sync Word=2DD4, frequency 868.950 MHz
+      </li>
+      <li>Rojaflex<br>
+        modulation GFSK, Datarate=9.99 kbps, Sync Word=D391D391, frequency 433.920 MHz
       </li>
       <li>SlowRF<br>
         modulation ASK/OOK, <b>loads the standard setting from the uC</b>
@@ -5323,7 +5326,10 @@ USB-connected devices (SIGNALduino):<br>
         <ul><small>Beispiel: TX35TH-IT, TX35DTH-IT, TX38-IT, 30.3155WD, 30.3156WD</small></ul>
       </li>
       <li>PCA301<br>
-        Modulation 2-FSK, Datenrate=6.62041 kbps, Sync Word=2DD4, Frequenz 868.950MHz
+        Modulation 2-FSK, Datenrate=6.62041 kbps, Sync Word=2DD4, Frequenz 868.950 MHz
+      </li>
+      <li>Rojaflex<br>
+        Modulation GFSK, Datenrate=9.99 kbps, Sync Word=D391D391, Frequenz 433.920 MHz
       </li>
       <li>SlowRF<br>
         Modulation ASK/OOK, <b>l&auml;d die Standard Einstellung vom uC</b>
