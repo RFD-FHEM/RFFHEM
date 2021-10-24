@@ -15,16 +15,16 @@ InternalTimer(time()+1, sub {
 	};
 
 	subtest 'Protocol 109 - autocreate via DMSG' => sub {
-		plan(3);
+		plan(5);
 		my $sensorname=q[SD_Rojaflex_3122FD2_9];
-		for my $i (1..2) {
-			Dispatch($ioHash,q[MN;D=083122FD290A010A8E;R=244;]);
-			is(IsDevice($sensorname), 0, "check sensor not created with dispatch $i/3");
+		for my $i (1..4) {
+			Dispatch($ioHash,q[P109#083122FD298A018A8E]);
+			is(IsDevice($sensorname), 0, "check sensor not created with dispatch $i/4");
 			$ioHash->{TIME} -=3;
 		}
-		Dispatch($ioHash,q[MN;D=083122FD290A010A8E;R=244;]);
-		is(IsDevice($sensorname), 1, "check sensor created with dispatch 3");
-		Dispatch($ioHash,q[MN;D=083122FD290A010A8E;R=244;]);
+		Dispatch($ioHash,q[P109#083122FD298A018A8E]);
+		is(IsDevice($sensorname), 1, "check sensor created with dispatch 5");
+		Dispatch($ioHash,q[P109#083122FD298A018A8E]);
 	};
 	
 	
