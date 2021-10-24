@@ -265,7 +265,7 @@ sub Set {
 sub SD_Rojaflex_pctStop {
 	my ($name) = @_;
 	my $hash = $defs{$name};
-	RemoveInternalTimer(\&SD_Rojaflex_pctStop, $name);
+	RemoveInternalTimer($name);
 	CommandSet($hash, "$name stop");
 	return;
 }
@@ -273,7 +273,7 @@ sub SD_Rojaflex_pctStop {
 sub SD_Rojaflex_clearfav {
 	my ($name) = @_;
 	my $hash = $defs{$name};
-	RemoveInternalTimer(\&SD_Rojaflex_clearfav, $name);
+	RemoveInternalTimer($name);
 	$hash->{clearfavcount} += 1;
 	if ($hash->{clearfavcount} < 4) { # 3 mal stop senden
 		CommandSet($hash, "$name stop");
@@ -321,7 +321,7 @@ sub Define {
 sub Undef {
 	my ($hash, $name) = @_;
 	if (defined($hash->{CODE}) && defined($modules{SD_Rojaflex}{defptr}{$hash->{CODE}})) { delete($modules{SD_Rojaflex}{defptr}{$hash->{CODE}}) };
-	RemoveInternalTimer($hash);
+	RemoveInternalTimer($name);
 	return;
 }
 
