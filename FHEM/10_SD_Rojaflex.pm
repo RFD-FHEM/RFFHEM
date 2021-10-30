@@ -174,15 +174,9 @@ sub Set {
 	my ($housecode,$channel) = split m/[_]/xms,$hash->{DEF};
 	my $msg = q(P109#08) . $housecode . sprintf('%X',$channel);
 	if ($cmd eq 'clearfav') {
-		$msg .= q(D); # gotofav
+		$msg .= q(D) . q(A01) . q(D); # gotofav
 	} else {
-		$msg .= $rev_codes{$cmd};
-	}
-	$msg .= q(A01);
-	if ($cmd eq 'clearfav') {
-		$msg .= q(D); # gotofav
-	} else {
-		$msg .= $rev_codes{$cmd};
+		$msg .= $rev_codes{$cmd} . q(A01) . $rev_codes{$cmd};
 	}
 	$msg .= q(A);
   my $sum = 0;
