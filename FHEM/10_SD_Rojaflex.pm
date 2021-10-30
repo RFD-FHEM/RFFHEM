@@ -334,7 +334,7 @@ sub Parse {
 
 	if (length ($rawData) < 18 ) { # 083122FD2C1A011AB1
 		Log3 $ioname, 1, "$ioname: SD_Rojaflex_Parse, rawData $rawData, message is to short";
-		return $EMPTY;
+		return;
 	}
 
 	Log3 $ioname, 4, "$ioname: SD_Rojaflex_Parse, Protocol $protocol, rawData $rawData";
