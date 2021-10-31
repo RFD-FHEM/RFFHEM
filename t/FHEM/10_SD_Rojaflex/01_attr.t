@@ -59,7 +59,74 @@ InternalTimer(time()+1, sub {
         is(ReadingsVal($sensorname, q[pct], undef), q[90],'reading pct is reversed');
         is(ReadingsVal($sensorname, q[cpos], undef), q[90],'reading cpos is reversed');
         is(ReadingsVal($sensorname, q[tpos], undef), q[90],'reading tpos is reversed');        
+	};
 
+    my $cmd = q[bidirectional 1];
+	subtest "Protocol 109 - set $sensorname $cmd" => sub {
+		plan(1);
+		
+        CommandAttr(undef,qq[$sensorname $cmd]); 
+        is($attr{$sensorname}{bidirectional}, 1, q[check attribute bidirectional is 1]);
+	};
+
+    $cmd = q[bidirectional 0];
+	subtest "Protocol 109 - set $sensorname $cmd" => sub {
+		plan(1);
+		
+        CommandAttr(undef,qq[$sensorname $cmd]); 
+        is($attr{$sensorname}{bidirectional}, 0, q[check attribute bidirectional is 0]);
+	};
+
+    $cmd = q[bidirectional a];
+	subtest "Protocol 109 - set $sensorname $cmd" => sub {
+		plan(2);
+		
+        my $ret= CommandAttr(undef,qq[$sensorname $cmd]); 
+        isnt($attr{$sensorname}{bidirectional}, 'a', q[check attribute bidirectional is not a]);
+        like($ret, qr/Unallowed value/, q[return message containts error]);
+	};
+
+    $cmd = q[timeToClose a];
+	subtest "Protocol 109 - set $sensorname $cmd" => sub {
+		plan(2);
+		
+        my $ret= CommandAttr(undef,qq[$sensorname $cmd]); 
+        isnt($attr{$sensorname}{timeToClose}, 'a', q[check attribute timeToClose is not a]);
+        like($ret, qr/Unallowed value/, q[return message containts error]);
+	};
+
+    $cmd = q[timeToOpen 2000];
+	subtest "Protocol 109 - set $sensorname $cmd" => sub {
+		plan(2);
+		
+        my $ret= CommandAttr(undef,qq[$sensorname $cmd]); 
+        isnt($attr{$sensorname}{timeToOpen}, 2000, q[check attribute timeToOpen is not 2000]);
+        like($ret, qr/Unallowed value/, q[return message containts error]);
+	};
+
+    $cmd = q[timeToClose -10];
+	subtest "Protocol 109 - set $sensorname $cmd" => sub {
+		plan(2);
+		
+        my $ret= CommandAttr(undef,qq[$sensorname $cmd]); 
+        isnt($attr{$sensorname}{timeToOpen}, -10, q[check attribute timeToOpen is not -10]);
+        like($ret, qr/Unallowed value/, q[return message containts error]);
+	};
+
+    $cmd = q[timeToOpen 10];
+	subtest "Protocol 109 - set $sensorname $cmd" => sub {
+		plan(1);
+		
+        CommandAttr(undef,qq[$sensorname $cmd]); 
+        is($attr{$sensorname}{timeToOpen}, 10, q[check attribute timeToOpen is 10]);
+	};
+    
+    $cmd = q[timeToClose 10];
+	subtest "Protocol 109 - set $sensorname $cmd" => sub {
+		plan(1);
+		
+        CommandAttr(undef,qq[$sensorname $cmd]); 
+        is($attr{$sensorname}{timeToClose}, 10, q[check attribute timeToClose is 10]);
 	};
 
 	done_testing();
