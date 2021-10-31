@@ -23,6 +23,7 @@ BEGIN {
 		attr
 		CommandSet
 		defs
+		devspec2array
 		DoTrigger
 		gettimeofday
 		InternalTimer
@@ -236,21 +237,19 @@ sub Set {
 
 	# channel 0 set all devices, we must update all other devices with the same housecode
 	if ($channel eq '0') {
-		foreach my $d (keys %defs) {
-			if (defined($defs{$d}) && $defs{$d}{TYPE} eq 'SD_Rojaflex' && substr($defs{$d}{DEF},0,7) eq $housecode && substr($defs{$d}{DEF},-2) ne '_0') {
-				Log3 $name, 3, "$ioname: SD_Rojaflex update $d $state";
-				readingsBeginUpdate($defs{$d});
-				readingsBulkUpdate($defs{$d}, 'state' , $state , 1);
-				if ($state ne 'clearfav' && $state ne 'gotofav') {
-					readingsBulkUpdate($defs{$d}, 'motor', $motor, 1);
-					readingsBulkUpdate($defs{$d}, 'tpos', $tpos, 1);
-					if (AttrVal($defs{$d}{NAME},'bidirectional',1) eq '0') {
-						readingsBulkUpdate($defs{$d}, 'pct', $cpos, 1);
-						readingsBulkUpdate($defs{$d}, 'cpos', $cpos, 1);
-					}
+		foreach my $d (devspec2array("TYPE=SD_Rojaflex:FILTER=DEF=$housecode.*:FILTER=DEF!=.*_0")) {
+			Log3 $name, 3, "$ioname: SD_Rojaflex update $d $state";
+			readingsBeginUpdate($defs{$d});
+			readingsBulkUpdate($defs{$d}, 'state' , $state , 1);
+			if ($state ne 'clearfav' && $state ne 'gotofav') {
+				readingsBulkUpdate($defs{$d}, 'motor', $motor, 1);
+				readingsBulkUpdate($defs{$d}, 'tpos', $tpos, 1);
+				if (AttrVal($defs{$d}{NAME},'bidirectional',1) eq '0') {
+					readingsBulkUpdate($defs{$d}, 'pct', $cpos, 1);
+					readingsBulkUpdate($defs{$d}, 'cpos', $cpos, 1);
 				}
-				readingsEndUpdate($defs{$d}, 1);
 			}
+			readingsEndUpdate($defs{$d}, 1);
 		}
 	}
 	return;
@@ -412,22 +411,20 @@ sub Parse {
 
 	# channel 0 set all devices, we must update all other devices with the same housecode
 	if ($channel eq '0' && $state ne 'request') {
-		foreach my $d (keys %defs) {
-			if (defined($defs{$d}) && $defs{$d}{TYPE} eq 'SD_Rojaflex' && substr($defs{$d}{DEF},0,7) eq $housecode && substr($defs{$d}{DEF},-2) ne '_0') {
-				Log3 $name, 3, "$ioname: SD_Rojaflex receive $housecode channel 0, update $d $state";
-				readingsBeginUpdate($defs{$d});
-				readingsBulkUpdate($defs{$d}, 'state' , $state , 1);
-				if ($state ne 'clearfav' && $state ne 'gotofav') {
-					readingsBulkUpdate($defs{$d}, 'motor', $motor, 1);
-					readingsBulkUpdate($defs{$d}, 'tpos', $tpos, 1);
-					if (AttrVal($defs{$d}{NAME},'bidirectional',1) eq '0') {
-						readingsBulkUpdate($defs{$d}, 'pct', $cpos, 1);
-						readingsBulkUpdate($defs{$d}, 'cpos', $cpos, 1);
-					}
+		foreach my $d (devspec2array("TYPE=SD_Rojaflex:FILTER=DEF=$housecode.*:FILTER=DEF!=.*_0")) {
+			Log3 $name, 3, "$ioname: SD_Rojaflex receive $housecode channel 0, update $d $state";
+			readingsBeginUpdate($defs{$d});
+			readingsBulkUpdate($defs{$d}, 'state' , $state , 1);
+			if ($state ne 'clearfav' && $state ne 'gotofav') {
+				readingsBulkUpdate($defs{$d}, 'motor', $motor, 1);
+				readingsBulkUpdate($defs{$d}, 'tpos', $tpos, 1);
+				if (AttrVal($defs{$d}{NAME},'bidirectional',1) eq '0') {
+					readingsBulkUpdate($defs{$d}, 'pct', $cpos, 1);
+					readingsBulkUpdate($defs{$d}, 'cpos', $cpos, 1);
 				}
-				readingsEndUpdate($defs{$d}, 1);
-				DoTrigger($defs{$d}{NAME},undef);
 			}
+			readingsEndUpdate($defs{$d}, 1);
+			DoTrigger($defs{$d}{NAME},undef);
 		}
 	}
 	return $name;
