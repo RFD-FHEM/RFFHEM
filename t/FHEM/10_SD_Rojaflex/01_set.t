@@ -75,6 +75,28 @@ InternalTimer(time()+1, sub {
         is($ret, U(), q[check return is undef]);
 	};
 
+    $cmd=q[pct 25 - tpos > cpos];
+	subtest "Protocol 109 - set $sensorname $cmd" => sub {
+		plan(1);
+
+        setReadingsVal($defs{$sensorname}, q[cpos], q[10], TimeNow()); 
+        setReadingsVal($defs{$sensorname}, q[tpos], q[90], TimeNow()); 
+		
+        my $ret = SD_Rojaflex::Set($hash,$sensorname,split(/ /,$cmd)); 
+        is($ret, U(), q[check return is undef]);
+	};
+
+    $cmd=q[pct 25 - tpos < cpos];
+	subtest "Protocol 109 - set $sensorname $cmd" => sub {
+		plan(1);
+
+        setReadingsVal($defs{$sensorname}, q[cpos], q[90], TimeNow()); 
+        setReadingsVal($defs{$sensorname}, q[tpos], q[10], TimeNow()); 
+		
+        my $ret = SD_Rojaflex::Set($hash,$sensorname,split(/ /,$cmd)); 
+        is($ret, U(), q[check return is undef]);
+	};
+
     $cmd=q[down];
 	subtest "Protocol 109 - set $sensorname $cmd" => sub {
 		plan(1);
