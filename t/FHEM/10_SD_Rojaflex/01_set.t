@@ -99,6 +99,15 @@ InternalTimer(time()+1, sub {
         my $ret = SD_Rojaflex::Set($hash,$sensorname,split(/ /,$cmd)); 
         is($ret, U(), q[check return is undef]);
 	};
+
+    $cmd=q[clearfav];
+	subtest "Protocol 109 - set $sensorname $cmd" => sub {
+		plan(1);
+		
+        my $ret = SD_Rojaflex::Set($hash,$sensorname,split(/ /,$cmd)); 
+        is($ret, U(), q[check return is undef]);
+	};
+
 	done_testing();
 	exit(0);
 }, 'SD_Rojaflex_Test_11');
