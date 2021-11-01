@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 10_SD_Rojaflex.pm 100 2021-10-19 18:00:00Z elektron-bbs $
+# $Id: 10_SD_Rojaflex.pm 100 2021-11-01 18:00:00Z elektron-bbs $
 #
 
 package SD_Rojaflex;
@@ -88,8 +88,7 @@ sub Attr {
 	if ($cmd eq 'set') {
 		if ($attrName eq 'repetition') {
 			if ($attrValue !~ m/^[1-9]$/xms) { return "$name: Unallowed value $attrValue for the attribute repetition (must be 1 - 9)!" };
-		}
-		if ($attrName eq 'inversePosition') {
+		} elsif ($attrName eq 'inversePosition') {
 			my $oldinvers = AttrVal($name, 'inversePosition', 0);
 			if ($attrValue ne $oldinvers) {
 				my $pct = ReadingsVal($name, 'pct', 0);
@@ -111,11 +110,9 @@ sub Attr {
 				readingsBulkUpdate($hash, 'state', $state, 1);
 				readingsEndUpdate($hash, 1);
 			}
-		}
-		if ($attrName eq 'bidirectional') {
+		} elsif ($attrName eq 'bidirectional') {
 			if ($attrValue !~ m/^[0-1]$/xms) { return "$name: Unallowed value $attrValue for the attribute bidirectional (must be 0 - 1)!" };
-		}
-		if ($attrName eq 'timeToClose' || $attrName eq 'timeToOpen') {
+		} elsif ($attrName eq 'timeToClose' || $attrName eq 'timeToOpen') {
 			if ($attrValue !~ m/^\d{1,3}$/xms || $attrValue < 1) { return "$name: Unallowed value $attrValue for the attribute $attrName (must be 1 - 999)!" };
 		}
 	}
@@ -197,19 +194,15 @@ sub Set {
 		Log3 $name, 4, "$ioname: SD_Rojaflex set $name clearFav running time $timelongest s";
 		InternalTimer( (gettimeofday() + $timelongest), \&SD_Rojaflex_clearfav, $name );
 		$hash->{clearfavcount} = 0;
-	}
-	# Calculate target position and motor state
-	if ($cmd eq 'down') {
+	} elsif ($cmd eq 'down') { # Calculate target position and motor state
 		if ($na == 1) {$tpos = '100'}; # nicht bei "set pct xx"
 		if ($cpos ne $tpos) {$motor = 'down'}; # Wenn nicht schon unten.
 		if ($cpos eq $tpos) {$motor = 'stop'}; # Wenn unten.
-	}
-	if ($cmd eq 'up') {
+	}	elsif ($cmd eq 'up') {
 		if ($na == 1) {$tpos = '0'}; # nicht bei "set pct xx"
 		if ($cpos ne $tpos) {$motor = 'up'}; # Wenn nicht schon oben.
 		if ($cpos eq $tpos) {$motor = 'stop'}; # Wenn oben.
-	}
-	if ($cmd eq 'stop' || $cmd eq 'savefav') {
+	} elsif ($cmd eq 'stop' || $cmd eq 'savefav') {
 		$motor = 'stop';
 	}
 
@@ -237,7 +230,7 @@ sub Set {
 
 	# channel 0 set all devices, we must update all other devices with the same housecode
 	if ($channel eq '0') {
-		foreach my $d (devspec2array("TYPE=SD_Rojaflex:FILTER=DEF=$housecode.*:FILTER=DEF!=.*_0")) {
+		foreach my $d (devspec2array("TYPE=SD_Rojaflex:FILTER=DEF=^$housecode(?!(_0\$)).*\$")) {
 			Log3 $name, 3, "$ioname: SD_Rojaflex update $d $state";
 			readingsBeginUpdate($defs{$d});
 			readingsBulkUpdate($defs{$d}, 'state' , $state , 1);
@@ -370,19 +363,15 @@ sub Parse {
 			if (AttrVal($name,'bidirectional',1) eq '0') {$cpos = $tpos};
 			if ($cpos ne $tpos) {$motor = 'down'}; # Wenn nicht schon unten
 			if ($cpos eq $tpos) {$motor = 'stop'}; # Wenn unten
-		}
-		if ($cmd eq '1') { # up
+		} elsif ($cmd eq '1') { # up
 			$tpos = '0';
 			if (AttrVal($name,'bidirectional',1) eq '0') {$cpos = $tpos};
 			if ($cpos ne $tpos) {$motor = 'up'}; # Wenn nicht schon oben
 			if ($cpos eq $tpos) {$motor = 'stop'}; # Wenn oben
-		}
-		if ($cmd eq '0' || $cmd eq '9') { # stop || savefav
+		} elsif ($cmd eq '0' || $cmd eq '9') { # stop || savefav
 			$motor = 'stop';
 		}
-	}
-
-	if ($dev eq '5') { # tubular motor
+	} elsif ($dev eq '5') { # tubular motor
 		$cpos = hex substr $rawData,12,2;
 		if ($cpos > 0 && $cpos < 100) {$state = $cpos};
 		if ($cpos == 100) {$state = 'closed'};
@@ -411,7 +400,7 @@ sub Parse {
 
 	# channel 0 set all devices, we must update all other devices with the same housecode
 	if ($channel eq '0' && $state ne 'request') {
-		foreach my $d (devspec2array("TYPE=SD_Rojaflex:FILTER=DEF=$housecode.*:FILTER=DEF!=.*_0")) {
+		foreach my $d (devspec2array("TYPE=SD_Rojaflex:FILTER=DEF=^$housecode(?!(_0\$)).*\$")) {
 			Log3 $name, 3, "$ioname: SD_Rojaflex receive $housecode channel 0, update $d $state";
 			readingsBeginUpdate($defs{$d});
 			readingsBulkUpdate($defs{$d}, 'state' , $state , 1);
