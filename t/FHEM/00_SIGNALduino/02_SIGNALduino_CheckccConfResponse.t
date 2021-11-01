@@ -7,7 +7,7 @@ use Test2::Tools::Compare qw{ is };
 our %defs;
 
 InternalTimer(time(), sub {
-  plan(2);
+  plan(3);
 
   subtest 'Test cconf response ASK/OOK (C0Dn11=10B07157C43023B900070018146C070091)' => sub {
     plan(3);
@@ -29,6 +29,15 @@ InternalTimer(time(), sub {
     is($ret,"Freq: 433.300 MHz, Bandwidth: 203 kHz, rAmpl: 33 dB, sens: 8 dB, DataRate: 49.99 kBaud, Modulation: 2-FSK, Syncmod: 16/16 sync word bits detected, Deviation: 57.13 kHz","check return message");
     is(ReadingsVal($target,"cc1101_config",undef),"Freq: 433.300 MHz, Bandwidth: 203 kHz, rAmpl: 33 dB, sens: 8 dB, DataRate: 49.99 kBaud","check reading cc1101_config value");
     is(ReadingsVal($target,"cc1101_config_ext",undef),"Modulation: 2-FSK, Syncmod: 16/16 sync word bits detected, Deviation: 57.13 kHz");
+  };
+
+  subtest 'Test cconf response wrong value (C0Dn11=216%E857C43023B900070018146C040091)' => sub {
+    plan(1);
+    my $target='dummyDuino';
+    my $targetHash = $defs{$target};
+
+    my ($ret)=SIGNALduino_CheckccConfResponse($targetHash,"C0Dn11=10AA568AF80222F851070018166C434091");
+    is($ret,'invalid value from uC. Only hexadecimal values are allowed. Please query again.','check return message');
   };
 
   exit(0);
