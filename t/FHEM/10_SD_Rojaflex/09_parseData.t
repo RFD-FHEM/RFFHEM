@@ -70,7 +70,7 @@ InternalTimer(time()+1, sub {
 	my $ioName = shift;
 	my $ioHash = $defs{$ioName};
 
-	plan (scalar @TestList);
+	plan (scalar @TestList +1);
 
 	for my $maintest  (@TestList)
 	{
@@ -133,6 +133,16 @@ InternalTimer(time()+1, sub {
 			} # while filt_testDataArray
 		}; #subtest maintest
 	} # for TestList
+
+
+	subtest 'parse with to short data' => sub {
+		my $dmsg = '109#083122FD2C1A011AB';
+		my $ret = SD_Rojaflex::Parse($ioHash, $dmsg);
+		
+		plan(1);
+		is($ret,U(),q[check return value for error])
+	};
+
 	exit(0);
 },'dummyDuino');
 
