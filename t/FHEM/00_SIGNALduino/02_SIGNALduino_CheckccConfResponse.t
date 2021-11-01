@@ -36,7 +36,7 @@ InternalTimer(time(), sub {
     my $target='dummyDuino';
     my $targetHash = $defs{$target};
 
-    my ($ret)=SIGNALduino_CheckccConfResponse($targetHash,"C0Dn11=10AA568AF80222F851070018166C434091");
+    my ($ret)=SIGNALduino_CheckccConfResponse($targetHash,"C0Dn11=216%E857C43023B900070018146C040091");
     is($ret,'invalid value from uC. Only hexadecimal values are allowed. Please query again.','check return message');
   };
 
