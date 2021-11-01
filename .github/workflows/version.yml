@@ -68,7 +68,7 @@ jobs:
         run: |
           JSON="{\"include\":["
           # Loop by lines
-          IFS=, read -ra values <<< "${{ steps.file_changes.outputs.files_modified}}"
+          IFS=, read -ra values <<< "${{ steps.file_changes.outputs.files_modified}},${{ steps.file_changes.outputs.files_added}}"
           for v in "${values[@]}"
           do
             # Exclude non pm files
