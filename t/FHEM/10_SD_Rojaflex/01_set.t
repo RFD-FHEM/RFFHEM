@@ -97,41 +97,41 @@ InternalTimer(time()+1, sub {
         is($ret, U(), q[check return is undef]);
 	};
 
-    $cmd=q[down];
-	subtest "Protocol 109 - set $sensorname $cmd" => sub {
-		plan(1);
-		
-        my $ret = SD_Rojaflex::Set($hash,$sensorname,split(/ /,$cmd)); 
-        is($ret, U(), q[check return is undef]);
-	};
+    for my $cmd (qw (up down stop clearfav gotofav))
+    {
+        subtest "Protocol 109 - set $sensorname $cmd" => sub {
+            plan(1);
+            
+            my $ret = SD_Rojaflex::Set($hash,$sensorname,split(/ /,$cmd)); 
+            is($ret, U(), q[check return is undef]);
+        };
+    };
 
 
-    $cmd=q[up];
-	subtest "Protocol 109 - set $sensorname $cmd" => sub {
-		plan(1);
-		
-        my $ret = SD_Rojaflex::Set($hash,$sensorname,split(/ /,$cmd)); 
-        is($ret, U(), q[check return is undef]);
-	};
 
-    $cmd=q[stop];
-	subtest "Protocol 109 - set $sensorname $cmd" => sub {
-		plan(1);
-		
-        my $ret = SD_Rojaflex::Set($hash,$sensorname,split(/ /,$cmd)); 
-        is($ret, U(), q[check return is undef]);
-	};
+}, 'SD_Rojaflex_Test_11');
 
-    $cmd=q[clearfav];
-	subtest "Protocol 109 - set $sensorname $cmd" => sub {
-		plan(1);
-		
-        my $ret = SD_Rojaflex::Set($hash,$sensorname,split(/ /,$cmd)); 
-        is($ret, U(), q[check return is undef]);
-	};
+InternalTimer(time()+1.01, sub {
+	my $sensorname = shift; 
+	my $hash = $defs{$sensorname};
+
+
+    for my $cmd (qw (up down stop clearfav gotofav))
+    {
+        subtest "Protocol 109 - set $sensorname $cmd (channel 0)" => sub {
+            plan(3);
+            
+            my $ret = SD_Rojaflex::Set($hash,$sensorname,split(/ /,$cmd)); 
+            is($ret, U(), q[check return is undef]);
+
+            is(ReadingsVal('SD_Rojaflex_Test_11','state','na'),$cmd,'check reading for devices');
+            is(ReadingsVal('SD_Rojaflex_Test_0','state','na'),$cmd,'check reading for devices');
+        };
+    };
 
 	done_testing();
 	exit(0);
-}, 'SD_Rojaflex_Test_11');
+}, 'SD_Rojaflex_Test_0');
+
 
 1;
