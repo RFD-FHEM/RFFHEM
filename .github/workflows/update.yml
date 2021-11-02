@@ -19,11 +19,11 @@ jobs:
     - name: Check if Branch is in PR
       if: github.event_name == 'push'
       id: checkbranch
-      uses: actions/github-script@v4
+      uses: actions/github-script@v5
       with:
         script: |
           console.log(process.env.BRANCH_NAME)
-          const resp = await github.pulls.list({
+          const resp = await github.rest.pulls.list({
             owner: context.repo.owner,
             repo: context.repo.repo,
           });
@@ -57,18 +57,18 @@ jobs:
       id: extract_branch
     - name: Checkout Repostory
       if: needs.pr_check.outputs.result != 'true'
-      uses: actions/checkout@v2.3.4
+      uses: actions/checkout@v2.3.5
       with:
         fetch-depth: 0
         persist-credentials: false
     - name: update controls file (FHEM)
       if: needs.pr_check.outputs.result != 'true'
-      uses: fhem/fhem-controls-actions@v2.0.1
+      uses: fhem/fhem-controls-actions@v2.0.2
       with:
         filename: controls_signalduino.txt 
     - name: update controls file (lib)
       if: needs.pr_check.outputs.result != 'true'
-      uses: fhem/fhem-controls-actions@v2.0.1
+      uses: fhem/fhem-controls-actions@v2.0.2
       with:
         filename: controls_signalduino.txt 
         directory: FHEM/lib
