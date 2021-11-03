@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 10_SD_Rojaflex.pm 100 2021-11-03 13:12:18Z elektron-bbs $
+# $Id: 10_SD_Rojaflex.pm 100 2021-11-01 18:00:00Z elektron-bbs $
 #
 
 package SD_Rojaflex;
@@ -87,7 +87,7 @@ sub Attr {
 
 	if ($cmd eq 'set') {
 		if ($attrName eq 'repetition') {
-			if ($attrValue !~ m/^[1-9]$/xms) { return "$name: Unallowed value $attrValue for the attribute repetition (must be 1 - 9)!" };
+			return "$name: Unallowed value $attrValue for the attribute repetition (must be 1 - 9)!" if ($attrValue !~ m/^[1-9]$/xms);
 		} elsif ($attrName eq 'inversePosition') {
 			my $oldinvers = AttrVal($name, 'inversePosition', 0);
 			if ($attrValue ne $oldinvers) {
@@ -99,21 +99,23 @@ sub Attr {
 				$tpos = 100 - $tpos;
 				my $state;
 				if ($pct > 0 && $pct < 100) {$state = $pct};
-				if (ReadingsVal($name, 'state', 0) eq 'up') {$state = 'down'};
-				if (ReadingsVal($name, 'state', 0) eq 'down') {$state = 'up'};
-				if (ReadingsVal($name, 'state', 0) eq 'open') {$state = 'closed'};
-				if (ReadingsVal($name, 'state', 0) eq 'closed') {$state = 'open'};
+				if (ReadingsVal($name, 'state', 0) eq 'up') {$state = 'down'}
+				elsif (ReadingsVal($name, 'state', 0) eq 'down') {$state = 'up'}
+				elsif (ReadingsVal($name, 'state', 0) eq 'open') {$state = 'closed'}
+				elsif (ReadingsVal($name, 'state', 0) eq 'closed') {$state = 'open'};
 				readingsBeginUpdate($hash);
-				readingsBulkUpdate($hash, 'pct', $pct, 1);
-				readingsBulkUpdate($hash, 'cpos', $cpos, 1);
-				readingsBulkUpdate($hash, 'tpos', $tpos, 1);
 				readingsBulkUpdate($hash, 'state', $state, 1);
+				if (AttrVal($name,'bidirectional',1) eq '0') {
+					readingsBulkUpdate($hash, 'pct', $pct, 1);
+					readingsBulkUpdate($hash, 'cpos', $cpos, 1);
+				}
+				readingsBulkUpdate($hash, 'tpos', $tpos, 1);
 				readingsEndUpdate($hash, 1);
 			}
 		} elsif ($attrName eq 'bidirectional') {
-			if ($attrValue !~ m/^[0-1]$/xms) { return "$name: Unallowed value $attrValue for the attribute bidirectional (must be 0 - 1)!" };
+			return "$name: Unallowed value $attrValue for the attribute bidirectional (must be 0 - 1)!" if ($attrValue !~ m/^[0-1]$/xms);
 		} elsif ($attrName eq 'timeToClose' || $attrName eq 'timeToOpen') {
-			if ($attrValue !~ m/^\d{1,3}$/xms || $attrValue < 1) { return "$name: Unallowed value $attrValue for the attribute $attrName (must be 1 - 999)!" };
+			return "$name: Unallowed value $attrValue for the attribute $attrName (must be 1 - 999)!" if ($attrValue !~ m/^\d{1,3}$/xms || $attrValue < 1);
 		}
 	}
 	return;
@@ -146,8 +148,8 @@ sub Set {
 	if ($cmd eq 'pct') {
 		$tpos = $a[1];
 		if (AttrVal($name,'inversePosition',0) eq '1') {$tpos = 100 - $tpos}; # inverse position
-		if ($tpos eq '0') {$cmd = 'up'}; # Fahr hoch
-		if ($tpos eq '100') {$cmd = 'down'}; # Fahr runter
+		if ($tpos eq '0') {$cmd = 'up'} # Fahr hoch
+		elsif ($tpos eq '100') {$cmd = 'down'}; # Fahr runter
 		if ($tpos != $cpos) {
 			Log3 $name, 3, "$ioname: SD_Rojaflex set $name pct $tpos";
 			if ($tpos > 0 && $tpos < 100) {
@@ -155,8 +157,7 @@ sub Set {
 				if ($tpos > $cpos) { # Rolladen steht höher soll position
 					$cmd = 'down'; # Fahr runter
 					$duration = ($tpos - $cpos) * $timeToClose / 100;
-				}
-				if ($tpos < $cpos) { # Rolladen steht niedriger soll position
+				} elsif ($tpos < $cpos) { # Rolladen steht niedriger soll position
 					$cmd = 'up';# Fahr hoch
 					$duration = ($cpos - $tpos) * $timeToOpen / 100;
 				}
@@ -196,12 +197,10 @@ sub Set {
 		$hash->{clearfavcount} = 0;
 	} elsif ($cmd eq 'down') { # Calculate target position and motor state
 		if ($na == 1) {$tpos = '100'}; # nicht bei "set pct xx"
-		if ($cpos ne $tpos) {$motor = 'down'}; # Wenn nicht schon unten.
-		if ($cpos eq $tpos) {$motor = 'stop'}; # Wenn unten.
-	}	elsif ($cmd eq 'up') {
+		$motor = ($cpos ne $tpos) ? 'down' : 'stop'; # Wenn nicht schon unten, sonst wenn unten.
+	} elsif ($cmd eq 'up') {
 		if ($na == 1) {$tpos = '0'}; # nicht bei "set pct xx"
-		if ($cpos ne $tpos) {$motor = 'up'}; # Wenn nicht schon oben.
-		if ($cpos eq $tpos) {$motor = 'stop'}; # Wenn oben.
+		$motor = ($cpos ne $tpos) ? 'up' : 'stop'; # Wenn nicht schon oben, sonst wenn oben
 	} elsif ($cmd eq 'stop' || $cmd eq 'savefav') {
 		$motor = 'stop';
 	}
@@ -373,12 +372,12 @@ sub Parse {
 		}
 	} elsif ($dev eq '5') { # tubular motor
 		$cpos = hex substr $rawData,12,2;
-		if ($cpos > 0 && $cpos < 100) {$state = $cpos};
-		if ($cpos == 100) {$state = 'closed'};
-		if ($cpos == 0) {$state = 'open'};
+		if ($cpos == 100) {$state = 'closed'}
+		elsif ($cpos == 0) {$state = 'open'}
+		else {$state = $cpos};
 		# Calculate target position and motor state
-		if ($cpos eq '0' && $motor eq 'up') {$motor = 'stop'}; # open
-		if ($cpos eq '100' && $motor eq 'down') {$motor = 'stop'}; # closed
+		if ($cpos eq '0' && $motor eq 'up') {$motor = 'stop'} # open
+		elsif ($cpos eq '100' && $motor eq 'down') {$motor = 'stop'}; # closed
 	}
 
 	if (AttrVal($name,'inversePosition',0) eq '1') {
