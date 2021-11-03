@@ -57,7 +57,7 @@ jobs:
       id: extract_branch
     - name: Checkout Repostory
       if: needs.pr_check.outputs.result != 'true'
-      uses: actions/checkout@v2.3.5
+      uses: actions/checkout@v2.4.0
       with:
         fetch-depth: 0
         persist-credentials: false
