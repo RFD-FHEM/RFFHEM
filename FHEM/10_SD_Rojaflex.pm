@@ -99,10 +99,10 @@ sub Attr {
 				$tpos = 100 - $tpos;
 				my $state;
 				if ($pct > 0 && $pct < 100) {$state = $pct};
-				if (ReadingsVal($name, 'state', 0) eq 'up') {$state = 'down'}
-				elsif (ReadingsVal($name, 'state', 0) eq 'down') {$state = 'up'}
-				elsif (ReadingsVal($name, 'state', 0) eq 'open') {$state = 'closed'}
-				elsif (ReadingsVal($name, 'state', 0) eq 'closed') {$state = 'open'};
+				my %mapping= (
+					up => 'down',  down => 'up', open => 'closed', closed => 'open', 0 => 'na',
+				);
+				$state = $mapping{ReadingsVal($name, 'state', 0)};
 				readingsBeginUpdate($hash);
 				readingsBulkUpdate($hash, 'state', $state, 1);
 				if (AttrVal($name,'bidirectional',1) eq '0') {
