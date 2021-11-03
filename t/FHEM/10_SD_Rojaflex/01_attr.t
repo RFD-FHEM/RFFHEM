@@ -8,10 +8,7 @@ our %defs;
 our %attr;
 
 InternalTimer(time()+1, sub {
-	my $ioName = shift; 
-	my $ioHash = $defs{$ioName};
-
-    my $sensorname=q[SD_Rojaflex_Test_11];
+    my $sensorname=shift;
 
 	subtest "Protocol 109 - set $sensorname repetition 5" => sub {
 		plan(1);
@@ -29,33 +26,41 @@ InternalTimer(time()+1, sub {
 
 
 	subtest "Protocol 109 - set $sensorname inversePosition 1" => sub {
-		plan(5);
+		plan(7);
+        CommandAttr(undef,qq[$sensorname bidirectional 0]); 
+        my $timestamp=TimeNow();
 
-        CommandSetstate(undef,qq[$sensorname up]);
-        setReadingsVal($defs{$sensorname}, q[state], q[up], TimeNow()); 
+        is($attr{$sensorname}{inversePosition}, U(), q[check attribute inversePosition is 0]);
+        CommandSetstate(undef,qq[$sensorname $timestamp state down]);
         setReadingsVal($defs{$sensorname}, q[pct], q[90], TimeNow()); 
         setReadingsVal($defs{$sensorname}, q[cpos], q[90], TimeNow()); 
         setReadingsVal($defs{$sensorname}, q[tpos], q[90], TimeNow()); 
-
+  
+        is(ReadingsVal($sensorname, q[state], undef), q[down],'reading state has correct start value');
 
         CommandAttr(undef,qq[$sensorname inversePosition 1]); 
         
         is($attr{$sensorname}{inversePosition}, 1, q[check attribute inversePosition is 1]);
-        is(ReadingsVal($sensorname, q[state], undef), q[down],'reading state is reversed');
+        is(ReadingsVal($sensorname, q[state], undef), q[up],'reading state is reversed');
         is(ReadingsVal($sensorname, q[pct], undef), q[10],'reading pct is reversed');
         is(ReadingsVal($sensorname, q[cpos], undef), q[10],'reading cpos is reversed');
         is(ReadingsVal($sensorname, q[tpos], undef), q[10],'reading tpos is reversed');        
+        
 	};
 
-
-
 	subtest "Protocol 109 - set $sensorname inversePosition 0" => sub {
-		plan(5);
-		
+		plan(7);
+        my $timestamp=TimeNow();
+
+        #my $ret = CommandSetstate(undef,qq[$sensorname state closed]);
+        my $ret = CommandSetReading(undef,qq[$sensorname $timestamp state closed]);
+        is ($ret,'','verify return value setState is empty');
+        is(ReadingsVal($sensorname, q[state], undef), q[closed],'reading state has correct start value');
+
         CommandAttr(undef,qq[$sensorname inversePosition 0]); 
         is($attr{$sensorname}{inversePosition}, 0, q[check attribute inversePosition is 0]);
 
-        is(ReadingsVal($sensorname, q[state], undef), q[up],'reading state is reversed');
+        is(ReadingsVal($sensorname, q[state], undef), q[open],'reading state is reversed');
         is(ReadingsVal($sensorname, q[pct], undef), q[90],'reading pct is reversed');
         is(ReadingsVal($sensorname, q[cpos], undef), q[90],'reading cpos is reversed');
         is(ReadingsVal($sensorname, q[tpos], undef), q[90],'reading tpos is reversed');        
@@ -132,6 +137,6 @@ InternalTimer(time()+1, sub {
 	done_testing();
 	exit(0);
 
-}, 'dummyDuino');
+}, 'SD_Rojaflex_Test_11');
 
 1;
