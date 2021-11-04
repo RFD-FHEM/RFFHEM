@@ -129,9 +129,28 @@ InternalTimer(time()+1.01, sub {
         };
     };
 
-	done_testing();
-	exit(0);
 }, 'SD_Rojaflex_Test_0');
 
+
+InternalTimer(time()+1.02, sub {
+	my $sensorname = shift; 
+	my $hash = $defs{$sensorname};
+
+
+    for my $cmd (qw (up down stop clearfav gotofav))
+    {
+        subtest "Protocol 109 - set $sensorname $cmd (channel 0)" => sub {
+            plan(1);
+            
+            my $ret = SD_Rojaflex::Set($hash,$sensorname,split(/ /,$cmd)); 
+            is($ret, U(), q[check return is undef]);
+
+            is(ReadingsVal('SD_Rojaflex_Test_09','state','na'),$cmd,'check reading for device');
+        };
+    };
+
+	done_testing();
+	exit(0);
+}, 'SD_Rojaflex_Test_09');
 
 1;
