@@ -1,4 +1,4 @@
-# $Id: 00_SIGNALduino.pm v3.5.2 2021-08-29 21:54:48Z elektron-bbs $
+# $Id: 00_SIGNALduino.pm v3.5.2 2021-11-03 13:02:40Z HomeAutoUser $
 #
 # v3.5.2 - https://github.com/RFD-FHEM/RFFHEM/tree/master
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incoming messages
@@ -39,7 +39,7 @@ use List::Util qw(first);
 
 
 use constant {
-  SDUINO_VERSION                  => '3.5.2+20210829',  # Datum wird automatisch bei jedem pull request aktualisiert
+  SDUINO_VERSION                  => '3.5.2+20211103',  # Datum wird automatisch bei jedem pull request aktualisiert
   SDUINO_INIT_WAIT_XQ             => 1.5,     # wait disable device
   SDUINO_INIT_WAIT                => 2,
   SDUINO_INIT_MAXRETRY            => 3,
@@ -1174,6 +1174,11 @@ sub SIGNALduino_CheckCmdsResponse {
 sub SIGNALduino_CheckccConfResponse {
   my (undef,$str) = split('=', $_[1]);
   my $var;
+
+  # https://github.com/RFD-FHEM/RFFHEM/issues/1015 | value can arise due to an incorrect transmission from serial
+  # $str = "216%E857C43023B900070018146C040091";
+  return ('invalid value from uC. Only hexadecimal values are allowed. Please query again.',undef) if($str !~ /^[A-F0-9a-f]+$/);
+
   my %r = ( '0D'=>1,'0E'=>1,'0F'=>1,'10'=>1,'11'=>1,'12'=>1,'1B'=>1,'1D'=>1, '15'=>1);
   foreach my $a (sort keys %r) {
     $var = substr($str,(hex($a)-13)*2, 2);
