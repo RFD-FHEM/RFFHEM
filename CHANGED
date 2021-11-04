@@ -1,3 +1,10 @@
+2021-11-04 - sub SIGNALduino_CheckccConfResponse - is more robust #1015 (#1031)
+
+* Update 00_SIGNALduino.pm
+  https://github.com/RFD-FHEM/RFFHEM/issues/1015
+
+* Update 02_SIGNALduino_CheckccConfResponse.t
+  test added with wrong value
 2021-10-16 - LaCrosse mode 2 optimization register settings (#1027)
 
 * LaCrosse mode 2 optimization register settings
