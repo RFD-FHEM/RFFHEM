@@ -143,6 +143,30 @@ InternalTimer(time()+1, sub {
 		is($ret,U(),q[check return value for error])
 	};
 
+	my $todo = Test2::Todo->new(reason => 'Needs a channel 0 (remote) message to finish this');
+	subtest 'parse channel 0 message' => sub {
+		my $dmsg = 'P109#083122FD29C55A0A8E';
+		my $ret = SD_Rojaflex::Parse($ioHash, $dmsg);
+		
+		plan(1);
+		is($ret,U(),q[check return value for error])
+	};
+	$todo->end;
+
+	$todo = Test2::Todo->new(reason => 'Needs to be finished');
+	subtest 'parse tabular message' => sub {
+		my $dmsg = 'P109#083122FD29C55A0A8E';
+		my $ret = SD_Rojaflex::Parse($ioHash, $dmsg);
+		my $sensorname = 'SD_Rojaflex_3122FD2_9';
+		my $hash=$defs{$sensorname}; 
+		plan(2);
+
+		is($ret,$sensorname,q[check return value has sensorname]);
+		is($defs{$sensorname}->{READINGS},hash { etc(); },'check reading cpos');
+
+	};
+	$todo->end;
+
 	exit(0);
 },'dummyDuino');
 
