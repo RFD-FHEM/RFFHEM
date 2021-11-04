@@ -2528,7 +2528,7 @@ sub SIGNALduino_Parse_MU {
   my $hash = shift // return;    #return if no hash  is provided
   my $rmsg = shift // return;    #return if no rmsg is provided
   
-  if ($rmsg !~ /^MU;(?:P[0-7]=-?[0-9]+;){3,8}?((?:D=[0-7]+;)|(?:CP=[0-7];)|(?:R=\d+;)|(?:O;)?|(?:[A-Za-z0-9=]+;)*)*$/){   
+  if ($rmsg !~ /^MU;(?:P[0-7]=-?[0-9]+;){3,8}?(?:D=[0-7]{2,};)(?:CP=[0-7])((?:;R=\d+)*|(?:O))*;$/){
     $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: Parse_MU, faulty msg: $rmsg]);
     return ; # Abort here if not successfull
   }
