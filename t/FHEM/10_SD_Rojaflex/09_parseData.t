@@ -70,7 +70,7 @@ InternalTimer(time()+1, sub {
 	my $ioName = shift;
 	my $ioHash = $defs{$ioName};
 
-	plan (scalar @TestList +1);
+	plan (scalar @TestList +3);
 
 	for my $maintest  (@TestList)
 	{
@@ -143,31 +143,86 @@ InternalTimer(time()+1, sub {
 		is($ret,U(),q[check return value for error])
 	};
 
-	my $todo = Test2::Todo->new(reason => 'Needs a channel 0 (remote) message to finish this');
 	subtest 'parse channel 0 message' => sub {
-		my $dmsg = 'P109#083122FD29C55A0A8E';
+		my $dmsg = 'P109#083122FD208A018A85';
 		my $ret = SD_Rojaflex::Parse($ioHash, $dmsg);
+		my $sensorname = 'SD_Rojaflex_3122FD2_0';
 		
-		plan(1);
-		is($ret,U(),q[check return value for error])
-	};
-	$todo->end;
+		plan(3);
+		is($ret,$sensorname,q[check return value has sensorname]);
+		is($defs{$sensorname}->{READINGS},
+		hash { 
+			field motor => 
+			hash {
+				field VAL => 'down'; 
+				etc();
+			};
+			field state => 
+			hash {
+				field VAL => 'down'; 
+				etc();
+			};
+			field tpos => 
+			hash {
+				field VAL => '100'; 
+				etc();
+			};
+			etc(); 
+		},'check some device readings channel 0');
+		is($defs{'SD_Rojaflex_3122FD2_5'}->{READINGS},
+		hash { 
+			field motor => 
+			hash {
+				field VAL => 'down'; 
+				etc();
+			};
+			field state => 
+			hash {
+				field VAL => 'down'; 
+				etc();
+			};
+			field tpos => 
+			hash {
+				field VAL => '100'; 
+				etc();
+			};
+			etc(); 
+		},'check some device readings channel 5');
 
-	$todo = Test2::Todo->new(reason => 'Needs to be finished');
-	subtest 'parse tabular message' => sub {
-		my $dmsg = 'P109#083122FD29C55A0A8E';
+	};
+
+	subtest 'parse tubular message channel 5' => sub {
+		my $dmsg = 'P109#083122FD251A011AAA';
 		my $ret = SD_Rojaflex::Parse($ioHash, $dmsg);
-		my $sensorname = 'SD_Rojaflex_3122FD2_9';
+		my $sensorname = 'SD_Rojaflex_3122FD2_5';
 		my $hash=$defs{$sensorname}; 
 		plan(2);
 
 		is($ret,$sensorname,q[check return value has sensorname]);
-		is($defs{$sensorname}->{READINGS},hash { etc(); },'check reading cpos');
+		is($defs{$sensorname}->{READINGS},
+		hash { 
+			field motor => 
+			hash {
+				field VAL => 'up'; 
+				etc();
+			};
+			field state => 
+			hash {
+				field VAL => 'up'; 
+				etc();
+			};
+			field tpos => 
+			hash {
+				field VAL => '0'; 
+				etc();
+			};
+			etc(); 
+		},'check some device readings channel 5');
 
 	};
-	$todo->end;
 
 	exit(0);
+	doneTesting();
 },'dummyDuino');
 
 1;
