@@ -140,7 +140,7 @@ InternalTimer(time()+1.02, sub {
     for my $cmd (qw (up down stop clearfav gotofav))
     {
         subtest "Protocol 109 - set $sensorname $cmd (channel 0)" => sub {
-            plan(1);
+            plan(2);
             
             my $ret = SD_Rojaflex::Set($hash,$sensorname,split(/ /,$cmd)); 
             is($ret, U(), q[check return is undef]);
