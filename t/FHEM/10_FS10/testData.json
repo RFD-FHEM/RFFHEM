@@ -1,0 +1,29 @@
+[
+    {"name":"FS10", "id":"61", "module":"FS10", "data": [
+        {
+          "dmsg":"P61#0011DC711A0", "comment":"Remote control", "user":"elektron-bbs",
+          "internals": {"DEF":"2_13", "NAME":"FS10_2_13"},
+          "readings": {"state":"on"},
+          "minProtocolVersion":"1.27", "revision_entry":"2021-04-22 22:08:51",
+          "revision_modul":"10_FS10.pm    11 2020-06-06 21:30:00Z elektron-bbs",
+          "rmsg":"MU;P0=1776;P1=-410;P2=383;P3=-820;D=01212121212121212121212123212121232323212323232121212323232121212321212123232123212120;CP=2;R=74;"
+        },
+        {
+          "dmsg":"P61#00096E388EC", "comment":"Remote control", "user":"elektron-bbs",
+          "internals": {"DEF":"2_13", "NAME":"FS10_2_13"},
+          "readings": {"state":"off"},
+          "minProtocolVersion":"1.27", "revision_entry":"2021-04-22 22:09:16",
+          "revision_modul":"10_FS10.pm    11 2020-06-06 21:30:00Z elektron-bbs",
+          "rmsg":"MU;P0=-27584;P1=446;P2=-349;P3=-755;D=01212121212121212121212121312121312131312131313121212131313121212131212121313131213131;CP=1;"
+        },
+        {
+          "dmsg":"P61#5A4EE12254", "comment":"sum != rsum", "user":"unknown",
+          "internals": {"NAME": null},
+          "readings": {},
+          "minProtocolVersion":"1.27", "revision_entry":"2021-04-22 22:09:16",
+          "revision_modul":"10_FS10.pm    11 2020-06-06 21:30:00Z elektron-bbs",
+          "rmsg":"MU;P0=-1440;P1=432;P2=-357;P3=635;P4=-559;D=012121212123412343412123434121234343412123412343434341234343412123434121212121212341231212343412341212121;CP=1;"
+        }
+      ]
+    }    
+]
