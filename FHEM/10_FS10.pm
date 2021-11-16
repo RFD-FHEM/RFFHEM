@@ -300,13 +300,13 @@ sub Parse {
 
 	if ($datastart == $blen || $datastart > 12) { # all bits are 0 || more then 12 bit preamble
 		Log3 $ioname, 4, "$ioname: FS10_Parse $msg - ERROR message contains too many zeros";
-		return $EMPTY;
+		return ;
 	}
 	$bitData = substr $bitData , $datastart;
 	$blen = length $bitData;
 	if ($blen < 30 || $blen > 40) {
 		Log3 $ioname, 4, "$ioname: FS10_Parse $msg - ERROR message too short or too long ($blen bit) ";
-		return $EMPTY;
+		return ;
 	}
 
 	Log3 $ioname, 5, "$ioname: FS10_Parse preamble $datastart bit, bitData=$bitData ($blen bit)";
@@ -334,11 +334,11 @@ sub Parse {
 	$sum = (10 - $sum) & 7;
 	if ($sum != $rsum) {
 		Log3 $ioname, 4, "$ioname: FS10_Parse $msg - ERROR sum=$sum != rsum=$rsum";
-		return $EMPTY;
+		return ;
 	}
 	if ($gesErr > 0) {
 		Log3 $ioname, 4, "$ioname: FS10_Parse $msg - ERROR parity/bit5 $gesErr errors";
-		return $EMPTY;
+		return ;
 	}
 
 	$dev++;
