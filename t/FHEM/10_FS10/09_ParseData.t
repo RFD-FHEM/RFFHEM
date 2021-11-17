@@ -17,10 +17,10 @@ sub runTest {
 	my $ioHash = $defs{$ioName};
     #use Data::Dumper;
     #print Dumper(@Test::RDmsg::JSONTestList);
-
+	my $filepath = dirname(__FILE__);
 	push @Test2::RDmsg::JSONTestList, {
-		testname	=> 'Testdata with corrupt FS10 data',
-		url		=> './t/FHEM/10_FS10/testData.json',
+		testname	=> q[Testdata with corrupt FS10 data],
+		url			=> qq[$filepath/testData.json],
 	};
 
 	plan( scalar @Test2::RDmsg::JSONTestList);
