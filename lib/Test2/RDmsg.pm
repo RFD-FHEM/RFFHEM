@@ -1,4 +1,4 @@
-package Test::RDmsg;
+package Test2::RDmsg;
 
 use strict;
 use warnings;
