@@ -135,7 +135,7 @@ my @mockData = (
       CommandAttr(undef, qq[cc1101dummyDuino MatchList {'garbage' => 'garbage'} ]);
     },
     attrCheck =>  hash  {
-        field MatchList => DNE();
+        field MatchList => D();
         etc();
         },
     hashCheck =>  hash  {
@@ -197,25 +197,6 @@ my @mockData = (
         },
     hashCheck =>  hash  {
         field MatchList => hash { field '34:MyModule' => '^u98#.{8}';  field '35:MyModule2' => '^u99#.{10}'; etc() ; all_keys match qr/.+:.+/; };
-        etc();
-        },
-      rValue => U(),
-  },  
-  {
-    cmd => q[deleteattr],
-    deviceName => q[cc1101dummyDuino],
-    plan => 3,
-    testname =>  q[del MatchList],
-    input =>  qq[MatchList],
-    pre_code => sub {
-      CommandAttr(undef, qq[cc1101dummyDuino MatchList { 'garbage' => 'garbage'} ]);
-    },
-    attrCheck =>  hash  {
-        field MatchList => DNE();
-        etc();
-        },
-    hashCheck =>  hash  {
-        field MatchList => hash { field 'garbage' => DNE(); etc() ; all_keys match qr/.+:.+/; };
         etc();
         },
       rValue => U(),
