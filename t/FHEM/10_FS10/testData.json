@@ -18,7 +18,7 @@
         },
         {
           "dmsg":"P61#0004771C468", "comment":"ERROR message contains too many zeros", "user":"unknown",
-          "internals": {"NAME": null},
+          "internals": {"NAME": "" },
           "readings": {},
           "minProtocolVersion":"1.27", "revision_entry":"2021-04-22 22:09:16",
           "revision_modul":"10_FS10.pm 11 2021-11-17 21:48:53Z sidey79",
@@ -26,7 +26,7 @@
         },
         {
           "dmsg":"P61#0011DC711A", "comment":"ERROR message too short or too long ", "user":"unknown",
-          "internals": {"NAME": null},
+          "internals": {"NAME": "" },
           "readings": {},
           "minProtocolVersion":"1.27", "revision_entry":"2021-04-22 22:09:16",
           "revision_modul":"10_FS10.pm 11 2021-11-17 21:48:53Z sidey79",
