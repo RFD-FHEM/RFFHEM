@@ -89,7 +89,7 @@ sub Initialize {
 	                      "$main::readingFnAttributes " .
 	                      'model:'.join q{,} , sort keys %models;
 	$hash->{AutoCreate} = {'FS10.*' => {FILTER => '%NAME', autocreateThreshold => '5:180', GPLOT => q{}}};
-	return
+	return;
 }
 
 sub Attr {
@@ -300,13 +300,13 @@ sub Parse {
 
 	if ($datastart == $blen || $datastart > 12) { # all bits are 0 || more then 12 bit preamble
 		Log3 $ioname, 4, "$ioname: FS10_Parse $msg - ERROR message contains too many zeros";
-		return ;
+		return $EMPTY;
 	}
 	$bitData = substr $bitData , $datastart;
 	$blen = length $bitData;
 	if ($blen < 30 || $blen > 40) {
 		Log3 $ioname, 4, "$ioname: FS10_Parse $msg - ERROR message too short or too long ($blen bit) ";
-		return ;
+		return $EMPTY;
 	}
 
 	Log3 $ioname, 5, "$ioname: FS10_Parse preamble $datastart bit, bitData=$bitData ($blen bit)";
