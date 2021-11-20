@@ -25,7 +25,7 @@ our @JSONTestList = (
 		#todo  => 'Checking with master Version of SD_Device_ProtocolList which can fail',
 	}
 );
-
+my $EMPTY = q{};
 
 
 sub loadJson {
@@ -79,7 +79,7 @@ sub checkParseFn  {
     my $ioHash = shift;
     use Data::Dumper;
 
-    my $tplan=1; # one for readings and one for internals and one for defmod
+    my $tplan=3; # one for readings and one for internals and one for defmod
 
     if (defined $tData->{internals}{DEF} && defined $tData->{internals}{NAME}) {
         $tplan++;
@@ -99,10 +99,12 @@ sub checkParseFn  {
     no strict "refs"; 
     my $ret=&{$main::modules{$module}{ParseFn}}($ioHash,$tData->{dmsg});
     use strict "refs"; 
-
+    
     is($ret,$tData->{internals}{NAME},'verify parseFn return equal internal NAME');
-    if ( scalar keys %{$tData->{readings}} > 0 ) {
-        $tplan++;
+
+    SKIP: {
+        skip 'readings' if ( !defined $ret || $ret eq $EMPTY || $ret eq q[NEXT] || scalar keys %{$tData->{readings}} < 1);
+         
         subtest "Verify readings" => sub {
             plan(scalar keys %{$tData->{readings}} );
             while ( (my $rName, my $rValue) = each (%{$tData->{readings}}) )
@@ -110,10 +112,10 @@ sub checkParseFn  {
                 is(::ReadingsVal($tData->{internals}{NAME} ,$rName,undef),$rValue,"check reading $rName");
             }
         };
-    };
-
-    if ( scalar keys %{$tData->{internals}} > 0 ) {
-        $tplan++;
+    } #skip
+    
+    SKIP : {
+        skip 'internals' if ( !defined $ret || $ret eq $EMPTY || $ret eq q[NEXT] || scalar keys %{$tData->{internals}} < 1);
         subtest "Verify internals" => sub {
             plan(scalar keys %{$tData->{internals}} );
             while ( (my $iName, my $iValue) = each (%{$tData->{internals}}) )
@@ -121,8 +123,9 @@ sub checkParseFn  {
                 is(::InternalVal($tData->{internals}{NAME} ,$iName, undef),$iValue,"check internal $iName");						
             }
         };
-    };
-    ::CommandDelete(undef,$tData->{internals}{NAME});
+    
+        ::CommandDelete(undef,$tData->{internals}{NAME});
+    } #skip
 
     plan($tplan);
 }; # subtest
@@ -158,7 +161,7 @@ sub dmsgCheck {
             # skip 'Protocol is under development' if ( defined $ioHash->{protocolObject}->checkProperty($testSet->{id},'developId',undef) );
             while ( (my $tID, my $tData) = each (@{$testSet->{data}}) ) 
             {
-                my $bool = run_subtest("Checking parseFN for module: $testSet->{module} device: $testSet->{name} TestNo: $tID", \&checkParseFn, {buffered => 1, inherit_trace => 1},$testSet->{module},$tData, $ioHash);
+                my $bool = run_subtest(qq[Checking parseFN for module: $testSet->{module} device: $testSet->{name} TestNo: $tID ($tData->{comment})], \&checkParseFn, {buffered => 1, inherit_trace => 1},$testSet->{module},$tData, $ioHash);
             } # while testSet
         } # SKIP
     } # while filt_testDataArray
