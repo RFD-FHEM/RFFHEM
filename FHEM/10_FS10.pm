@@ -334,11 +334,11 @@ sub Parse {
 	$sum = (10 - $sum) & 7;
 	if ($sum != $rsum) {
 		Log3 $ioname, 4, "$ioname: FS10_Parse $msg - ERROR sum=$sum != rsum=$rsum";
-		return ;
+		return $EMPTY;
 	}
 	if ($gesErr > 0) {
 		Log3 $ioname, 4, "$ioname: FS10_Parse $msg - ERROR parity/bit5 $gesErr errors";
-		return ;
+		return $EMPTY;
 	}
 
 	$dev++;

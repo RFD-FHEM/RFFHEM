@@ -2,7 +2,7 @@
     {"name":"FS10", "id":"61", "module":"FS10", "data": [
         {
           "dmsg":"P61#5A4EE12254", "comment":"sum != rsum", "user":"unknown",
-          "internals": {"NAME": null},
+          "internals": {"NAME": "" },
           "readings": {},
           "minProtocolVersion":"1.27", "revision_entry":"2021-04-22 22:09:16",
           "revision_modul":"10_FS10.pm 11 2021-11-17 21:48:53Z sidey79",
@@ -10,7 +10,7 @@
         },
         {
           "dmsg":"P61#0011DC71120", "comment":"parity/bit5 error", "user":"unknown",
-          "internals": {"NAME": null},
+          "internals": {"NAME": "" },
           "readings": {},
           "minProtocolVersion":"1.27", "revision_entry":"2021-04-22 22:09:16",
           "revision_modul":"10_FS10.pm 11 2021-11-17 21:48:53Z sidey79",
