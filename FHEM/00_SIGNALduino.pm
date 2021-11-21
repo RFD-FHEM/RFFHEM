@@ -1,4 +1,4 @@
-# $Id: 00_SIGNALduino.pm v3.5.2 2021-11-03 13:02:40Z HomeAutoUser $
+# $Id: 00_SIGNALduino.pm v3.5.2 2021-11-20 23:22:43Z Devirex $
 #
 # v3.5.2 - https://github.com/RFD-FHEM/RFFHEM/tree/master
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incoming messages
@@ -39,7 +39,7 @@ use List::Util qw(first);
 
 
 use constant {
-  SDUINO_VERSION                  => '3.5.2+20211103',  # Datum wird automatisch bei jedem pull request aktualisiert
+  SDUINO_VERSION                  => '3.5.2+20211120',  # Datum wird automatisch bei jedem pull request aktualisiert
   SDUINO_INIT_WAIT_XQ             => 1.5,     # wait disable device
   SDUINO_INIT_WAIT                => 2,
   SDUINO_INIT_MAXRETRY            => 3,
@@ -3085,14 +3085,14 @@ sub SIGNALduino_Attr(@) {
   elsif( $aName eq 'MatchList' ) {
     my $match_list;
     if( $cmd eq 'set' ) {
-      $match_list = eval {$aVal};
+      $match_list = eval $aVal; ## Allow evaluation of hash object from "attr" string f.e. { '34:MYMODULE' => '^u99#.{9}' } 
       if( $@ ) {
         $hash->{logMethod}->($name, 2, $name .": Attr, $aVal: ". $@);
       }
     }
 
     if( ref($match_list) eq 'HASH' ) {
-      $hash->{MatchList} = $match_list;
+      $hash->{MatchList} = { %matchListSIGNALduino , %$match_list };          ## Allow incremental addition of an entry to existing hash list
     } else {
       $hash->{MatchList} = \%matchListSIGNALduino;                      ## Set defaults
       $hash->{logMethod}->($name, 2, $name .": Attr, $aVal: not a HASH using defaults") if( $aVal );
@@ -4812,6 +4812,14 @@ USB-connected devices (SIGNALduino):<br>
       <li>2: CRC = 49 (x031) WH1080, set OK</li>
     </ul>
   </li><br>
+  <a name="MatchList"></a>
+  <li>MatchList<br>
+  This attribute adds additional items to the module matchlist. Items has to be described in a PERL Hash format:
+  <ul>
+    <li>Format: { 'number:module' => 'protocol-pattern' , 'nextNumber:nextModule' => 'protocol-pattern' , ... }</li>
+    <li>Example: { '34:MyModule' => '^u98#.{8}' , '35:MyModule2' => '^u99#.{10}' }</li>
+  </ul>
+  </li><br>
 </ul>
 
 
@@ -5359,6 +5367,14 @@ USB-connected devices (SIGNALduino):<br>
     <ul>
       <li>0: CRC-Check WH1080 CRC = 0 on, Standard</li>
       <li>2: CRC = 49 (x031) WH1080, set OK</li>
+    </ul>
+  </li><br>
+   <a name="MatchList"></a>
+  <li>MatchList<br>
+    Dieses Attribut erm&oumlglicht es die Modul Match Tabelle um weitere Eintr&aumlge zu erweitern. Dazu m&uumlssen die weiteren Eintr&aumlge im PERL Hash format angegeben werden:</li>
+    <ul>
+      <li>Format: { 'Nummer:Modul' => 'Protokoll-Pattern' , 'N&aumlchsteNummer:N&aumlchstesModul' => 'Protokoll-Pattern' , ... }</li>
+      <li>Beispiel: { '34:MyModule' => '^u98#.{8}' , '35:MyModule2' => '^u99#.{10}' }</li>
     </ul>
   </li><br>
 </ul>
