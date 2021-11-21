@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 10_FS10.pm 11 2020-06-06 21:30:00Z elektron-bbs $
+# $Id: 10_FS10.pm 11 2021-11-21 17:54:21Z sidey79 $
 #
 # FS10 basierend auf dem FS20 Modul angepasst fuer SIGNALduino, elektron-bbs
 #
@@ -89,7 +89,7 @@ sub Initialize {
 	                      "$main::readingFnAttributes " .
 	                      'model:'.join q{,} , sort keys %models;
 	$hash->{AutoCreate} = {'FS10.*' => {FILTER => '%NAME', autocreateThreshold => '5:180', GPLOT => q{}}};
-	return
+	return;
 }
 
 sub Attr {
