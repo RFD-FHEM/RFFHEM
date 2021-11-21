@@ -1,3 +1,20 @@
+2021-11-21 - Allow incremental addition of match list entries (#1026)
+
+00_Signalduino
+
+- Added commandrefs for MatchList Attribute
+
+- Changed  MatchList attribute
+
+01_SIGNALduino_Attr.t
+
+- Added some tests to verify add and remove MatchList attribute
+
+- remove test for deleted attribute
+
+
+
+Co-authored-by: sidey79 <7968127+sidey79@users.noreply.github.com>
 2021-11-04 - sub SIGNALduino_CheckccConfResponse - is more robust #1015 (#1031)
 
 * Update 00_SIGNALduino.pm
