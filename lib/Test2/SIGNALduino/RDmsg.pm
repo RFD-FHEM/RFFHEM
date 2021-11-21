@@ -1,4 +1,4 @@
-package Test2::RDmsg;
+package Test2::SIGNALduino::RDmsg;
 
 use strict;
 use warnings;

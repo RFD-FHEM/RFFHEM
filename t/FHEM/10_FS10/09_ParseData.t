@@ -4,7 +4,7 @@ use Test2::V0;
 use File::Basename;
 
 # Testtool which supports DMSG Tests from SIGNALDuino_tool
-use Test2::RDmsg;
+use Test2::SIGNALduino::RDmsg;
 
 our %defs;
 our $init_done;
@@ -18,16 +18,16 @@ sub runTest {
     #use Data::Dumper;
     #print Dumper(@Test::RDmsg::JSONTestList);
 	my $filepath = dirname(__FILE__);
-	push @Test2::RDmsg::JSONTestList, {
+	push @Test2::SIGNALduino::RDmsg::JSONTestList, {
 		testname	=> q[Testdata with corrupt FS10 data],
 		url			=> qq[$filepath/testData.json],
 	};
 
-	plan( scalar @Test2::RDmsg::JSONTestList);
-	for my $maintest  (@Test2::RDmsg::JSONTestList)
+	plan( scalar @Test2::SIGNALduino::RDmsg::JSONTestList);
+	for my $maintest  (@Test2::SIGNALduino::RDmsg::JSONTestList)
 	{
 		subtest $maintest->{testname} => sub {
-			Test2::RDmsg::dmsgCheck($maintest,$module,$ioHash);
+			Test2::SIGNALduino::RDmsg::dmsgCheck($maintest,$module,$ioHash);
 		};
 	}
 	exit(0);
