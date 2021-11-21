@@ -87,9 +87,12 @@ sub checkParseFn  {
         is(::CommandDefMod(undef,"-temporary $tData->{internals}{NAME} $module $tData->{internals}{DEF}"),U(),"Verify device return from defmod ",$tData);
     }
 
-    if (defined $tData->{attributes}{model} ) {
-        note("device attribute model $tData->{attributes}{model} set for right result");
-        ::CommandAttr(undef,"$tData->{internals}{NAME} model $tData->{attributes}{model}"); # set attribute
+    if (defined $tData->{attributes} && defined $tData->{internals}{NAME} ) {
+        while ( (my $aName, my $aValue) = each (%{$tData->{attributes}}) )
+        { 
+            note("device attribute $aName set for right result: $aValue");
+            ::CommandAttr(undef,"$tData->{internals}{NAME} $aName  $aValue"); # set attribute
+        }
     }
     
     
