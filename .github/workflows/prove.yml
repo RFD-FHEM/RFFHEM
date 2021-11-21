@@ -34,7 +34,7 @@ jobs:
 #      uses: mxschmitt/action-tmate@v1
     - name: run prove on perl modules (testscripts)
       run: |
-        prove --exec 'perl -MDevel::Cover=-silent,1 -I FHEM ' -I FHEM -r -v t/SD_Protoco* 
+        prove -j2 --exec 'perl -MDevel::Cover=-silent,1 -I FHEM '  -I FHEM -r -v t/SD_Protoco* 
     - name: Create clover report  
       run: cover -report clover
     - uses: codecov/codecov-action@v2.1.0
@@ -46,9 +46,9 @@ jobs:
     - name: run prove fhem testsuite ${{ matrix.perl }}
       run: |
         cp -R ${GITHUB_WORKSPACE}/FHEM/* ${FHEM_DIR}/FHEM/
-        # cp -R ${GITHUB_WORKSPACE}/lib/* ${FHEM_DIR}/lib/
+        cp -R ${GITHUB_WORKSPACE}/lib/* ${FHEM_DIR}/lib/
         #find ${GITHUB_WORKSPACE}/t/FHEM -maxdepth 1  -regex '.*/t/FHEM/[0-9][0-9]_.*' -print0 | xargs -0 -I'{}' prove --exec 'perl -MDevel::Cover=-silent,1 fhem.pl -t' -I FHEM -r -vv -r "{}"
-        prove --exec 'perl -MDevel::Cover=-silent,1 fhem.pl -t' -I FHEM -r -vv -r ${GITHUB_WORKSPACE}/t/FHEM/
+        prove -j2 --exec 'perl -MDevel::Cover=-silent,1 fhem.pl -t' -I FHEM -vv -r ${GITHUB_WORKSPACE}/t/FHEM/
       working-directory: /opt/fhem/
       env:
         FHEM_DIR: /opt/fhem

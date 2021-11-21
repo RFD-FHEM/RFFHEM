@@ -125,6 +125,82 @@ my @mockData = (
         },
       rValue => U(),
   },
+  {
+    cmd => q[set],
+    deviceName => q[cc1101dummyDuino],
+    plan => 3,
+    testname =>  q[set MatchList empty (reset default)],
+    input =>  q[MatchList],
+    pre_code => sub {
+      CommandAttr(undef, qq[cc1101dummyDuino MatchList {'garbage' => 'garbage'} ]);
+    },
+    attrCheck =>  hash  {
+        field MatchList => D();
+        etc();
+        },
+    hashCheck =>  hash  {
+        field MatchList => hash {  etc() ; all_keys match qr/.+:.+/; };
+        etc();
+        },
+      rValue => U(),
+  },
+  {
+    cmd => q[set],
+    deviceName => q[cc1101dummyDuino],
+    plan => 3,
+    testname =>  q[set MatchList additional entry],
+    input =>  qq[MatchList { '34:MyModule' => '^u98#.{8}' } ],
+    pre_code => sub {
+      CommandDeleteAttr(undef, qq[cc1101dummyDuino MatchList]);
+    },
+    attrCheck =>  hash  {
+        field MatchList => D();
+        etc();
+        },
+    hashCheck =>  hash  {
+        field MatchList => hash { field '34:MyModule' => '^u98#.{8}';  field '35:MyModule2' => DNE(); etc() ; all_keys match qr/.+:.+/; };
+        etc();
+        },
+      rValue => U(),
+  },
+  {
+    cmd => q[set],
+    deviceName => q[cc1101dummyDuino],
+    plan => 3,
+    testname =>  q[set MatchList multiple additional entry],
+    input =>  qq[MatchList { '34:MyModule' => '^u98#.{8}' , '35:MyModule2' => '^u99#.{10}' } ],
+    pre_code => sub {
+      CommandDeleteAttr(undef, qq[cc1101dummyDuino MatchList]);
+    },
+    attrCheck =>  hash  {
+        field MatchList => D();
+        etc();
+        },
+    hashCheck =>  hash  {
+        field MatchList => hash { field '34:MyModule' => '^u98#.{8}';  field '35:MyModule2' => '^u99#.{10}'; etc() ; all_keys match qr/.+:.+/; };
+        etc();
+        },
+      rValue => U(),
+  },
+  {
+    cmd => q[set],
+    deviceName => q[cc1101dummyDuino],
+    plan => 3,
+    testname =>  q[set MatchList multiple additional entry],
+    input =>  qq[MatchList { '34:MyModule' => '^u98#.{8}' , '35:MyModule2' => '^u99#.{10}' } ],
+    pre_code => sub {
+      CommandDeleteAttr(undef, qq[cc1101dummyDuino MatchList]);
+    },
+    attrCheck =>  hash  {
+        field MatchList => D();
+        etc();
+        },
+    hashCheck =>  hash  {
+        field MatchList => hash { field '34:MyModule' => '^u98#.{8}';  field '35:MyModule2' => '^u99#.{10}'; etc() ; all_keys match qr/.+:.+/; };
+        etc();
+        },
+      rValue => U(),
+  },  
 );
 plan (scalar @mockData + 2);  
 
