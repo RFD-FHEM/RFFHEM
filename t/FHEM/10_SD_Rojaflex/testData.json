@@ -1,0 +1,38 @@
+[
+    {"name":"SD_Rojaflex", "id":"109", "module":"SD_Rojaflex", "data": [
+        {
+          "dmsg":"P109#083122FD251A011AAA", "comment":"tubular message channel 5", "user":"Hofyyy",
+          "internals": {"NAME": "SD_Rojaflex_3122FD2_5", "DEF": "3122FD2_5" },
+          "readings": {"motor": "up", "state": "up", "tpos": "0" },
+          "minProtocolVersion":"1.39", "revision_entry":"2021-11-21 20:33:59Z",
+          "revision_modul":"10_SD_Rojaflex.pm 100 2021-11-21 20:33:59Z elektron-bbs",
+          "rmsg":"MR;D=083122FD251A011AAA;R=198"
+        },
+        {
+          "dmsg":"P109#083122FD208A018A85", "comment":"parse channel 0 message", "user":"Hofyyy",
+          "internals": {"NAME": "SD_Rojaflex_3122FD2_0", "DEF": "3122FD2_0" },
+          "readings": {"motor": "down", "state": "down", "tpos": "100" },
+          "minProtocolVersion":"1.39", "revision_entry":"2021-11-21 20:33:59Z",
+          "revision_modul":"10_SD_Rojaflex.pm 100 2021-11-21 20:33:59Z elektron-bbs",
+          "rmsg":""
+        },
+        {
+          "dmsg":"109#083122FD2C1A011AB", "comment":"to short", "user":"Hofyyy",
+          "internals": {"NAME": null },
+          "readings": {},
+          "minProtocolVersion":"1.39", "revision_entry":"2021-11-21 20:33:59Z",
+          "revision_modul":"10_SD_Rojaflex.pm 100 2021-11-21 20:33:59Z elektron-bbs",
+          "rmsg":""
+        },
+        {
+          "dmsg":"P109#083122FD251A011AAA", "comment":"tubular message channel 5 inverted", "user":"Hofyyy",
+          "internals": {"NAME": "SD_Rojaflex_3122FD2_5", "DEF": "3122FD2_5" },
+          "readings": {"motor": "up", "state": "up", "tpos": "100" },
+          "attributes": {"inversePosition": "1"},
+          "minProtocolVersion":"1.39", "revision_entry":"2021-11-21 20:33:59Z",
+          "revision_modul":"10_SD_Rojaflex.pm 100 2021-11-21 20:33:59Z elektron-bbs",
+          "rmsg":"MR;D=083122FD251A011AAA;R=198"
+        }
+     ]
+    }    
+]
