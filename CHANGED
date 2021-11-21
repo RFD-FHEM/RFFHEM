@@ -1,3 +1,19 @@
+2021-11-21 - Introduce dmsg Tests fs10 with corrupt data (#1034)
+
+* lib/Test2/SIGNALduino/RDmsg.pm
+
+- Testtool to easily verify parseFN with dmsg Data.
+
+
+* t/FS10/09_parseData.t
+
+- Uses RDmsg to verify FS10 Module parseFN
+
+
+* 10_FS10/testData.json
+
+- added some data to cover errors
+
 2021-11-21 - Allow incremental addition of match list entries (#1026)
 
 00_Signalduino
