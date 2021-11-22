@@ -1,3 +1,13 @@
+2021-11-22 - Parse_MU check expanded - ToDo eliminated (#1033)
+
+* Update 00_SIGNALduino.pm
+ - more exact check for faulty MU message
+ - Parse_MU capture groups entfernt
+
+* Update 01_SIGNALduino_Parse_MU.t
+
+* 10_FS10/09_parseData.t
+ - compensate removed test due to stricter regex
 2021-11-21 - Introduce dmsg Tests fs10 with corrupt data (#1034)
 
 * lib/Test2/SIGNALduino/RDmsg.pm
