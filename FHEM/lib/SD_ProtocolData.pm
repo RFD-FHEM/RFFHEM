@@ -1,5 +1,5 @@
 ###########################################################################################################################################
-# $Id: SD_ProtocolData.pm 3.4.4 2021-11-22 21:41:43Z elektron-bbs $
+# $Id: SD_ProtocolData.pm 3.4.4 2021-11-23 22:17:52Z elektron-bbs $
 # The file is part of the SIGNALduino project.
 # All protocol definitions are contained in this file.
 #
