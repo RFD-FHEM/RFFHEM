@@ -1,6 +1,7 @@
 #!/bin/perl
 use strict;
 use warnings;
+
 use Test::Device::SerialPort;
 use Test2::V0;
 use Test2::Tools::Compare;

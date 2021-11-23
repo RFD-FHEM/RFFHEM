@@ -1,5 +1,7 @@
+#!/usr/bin/env perl
 use strict;
 use warnings;
+
 use Test2::V0;
 use Test2::Tools::Compare qw{ is unlike like U check item array DNE};
 use Test2::Mock;
