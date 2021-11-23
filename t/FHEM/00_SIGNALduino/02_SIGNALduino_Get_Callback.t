@@ -1,5 +1,7 @@
+#!/usr/bin/env perl
 use strict;
 use warnings;
+
 use Test2::V0;
 use Test2::Tools::Compare qw{ is like unlike check array U};
 use Test2::Tools::Ref;
