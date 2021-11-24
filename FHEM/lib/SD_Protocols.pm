@@ -1973,7 +1973,7 @@ sub ConvLaCrosse {
 
   my $ctx = Digest::CRC->new( width => 8, poly => 0x31 );
   my $calcCrc = $ctx->add( pack 'H*', substr( $hexData, 0, 8 ) )->digest;
-  my $checksum = sprintf( "%d", hex( substr( $hexData, 8, 2 ) ) );  # Todo: Needs some check to be hexadzimal conform
+  my $checksum = sprintf( "%d", hex( substr( $hexData, 8, 2 ) ) );
   return ( 1, qq[ConvLaCrosse, checksumCalc:$calcCrc != checksum:$checksum] )
     if ( $calcCrc != $checksum );
 
