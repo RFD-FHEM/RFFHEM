@@ -87,6 +87,16 @@ sub checkParseFn  {
         is(::CommandDefMod(undef,"-temporary $tData->{internals}{NAME} $module $tData->{internals}{DEF}"),U(),"Verify device return from defmod ",$tData);
     }
 
+    if (defined $tData->{setreadings} && defined $tData->{internals}{NAME} && scalar keys %{$tData->{setreadings}} > 0) {
+        note("readings will be set to defaults");
+        
+        while ( (my $rName, my $rValue) = each (%{$tData->{setreadings}}) )
+        {   
+            ::CommandSetReading(undef,qq[$tData->{internals}{NAME} $rName $rValue] );
+        }
+    
+    }
+
     if (defined $tData->{attributes} && defined $tData->{internals}{NAME} ) {
         while ( (my $aName, my $aValue) = each (%{$tData->{attributes}}) )
         { 
