@@ -44,12 +44,12 @@
         {
           "dmsg":"P109#083122FD29D5648A8E", "comment":"Kanal 9 (CPOS 100)", "user":"Hofyyy",
           "internals": {"NAME": "SD_Rojaflex_3122FD2_9", "DEF": "3122FD2_9" },
-          "readings": {"motor": "stop", "state": "closed"  },
+          "readings": {"motor": "stop", "state": "closed", "tpos": "0", "cpos": "100" },
           "minProtocolVersion":"1.39", "revision_entry":"2021-11-21 20:33:59Z",
           "revision_modul":"10_SD_Rojaflex.pm 100 2021-11-21 20:33:59Z elektron-bbs",
-          "rmsg":"MN;D=083122FD29D5648A8E;R=196;"
+          "rmsg":"MN;D=083122FD29D5648A8E;R=196;",
+          "setreadings": {"motor": "up", "cpos": "100", "tpos": "0"  }
         }
-
       ]
     }    
 ]
