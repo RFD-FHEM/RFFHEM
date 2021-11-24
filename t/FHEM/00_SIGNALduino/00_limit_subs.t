@@ -1,3 +1,4 @@
+#!/usr/bin/env perl
 use strict;
 use warnings;
 use File::Basename;
@@ -11,7 +12,7 @@ my $module = basename (dirname(__FILE__));
 
 plan(2);
 subtest 'limit_to_number tests' => sub {
-    
+
     plan(5);
 
     is(_limit_to_number(1),1,'limit 1 ok');
@@ -23,7 +24,7 @@ subtest 'limit_to_number tests' => sub {
 };
 
 subtest '_limit_to_hex tests' => sub {
-    
+
     plan(7);
 
     is(_limit_to_hex('AF'),'AF','limit AF ok'); 
@@ -33,7 +34,7 @@ subtest '_limit_to_hex tests' => sub {
     is(_limit_to_hex('PA0'),U(),'limit PA0 ok');
     is(_limit_to_hex('0xA0'),U(),'limit 0xA0 ok');
     is(_limit_to_hex(qw/DF SP/),'DF','limit (SL,SP) ok');
-    
+
 };
 
 exit(0);  # necessary
