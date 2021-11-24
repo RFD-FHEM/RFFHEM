@@ -67,5 +67,5 @@ subtest 'test ConvLaCrosse, not hexadezimal' => sub 	{
 	my $hexMsg='010503B7PA1041AAAAAAAAPF';
 	my @ret=$Protocols->ConvLaCrosse($hexMsg) ;
 	is($#ret,1, "ConvLaCrosse reported some error");
-	like($ret[1],qr/!= checksum/,'check error message');
+	like($ret[1],qr/is not valid HEX/,'check error message');
 };
