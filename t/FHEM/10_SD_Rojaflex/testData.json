@@ -17,7 +17,7 @@
           "rmsg":""
         },
         {
-          "dmsg":"109#083122FD2C1A011AB", "comment":"to short", "user":"Hofyyy",
+          "dmsg":"P109#083122FD2C1A011AB", "comment":"to short", "user":"Hofyyy",
           "internals": {"NAME": null },
           "readings": {},
           "minProtocolVersion":"1.39", "revision_entry":"2021-11-21 20:33:59Z",
