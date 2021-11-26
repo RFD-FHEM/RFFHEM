@@ -1965,7 +1965,7 @@ sub ConvLaCrosse {
   my $self    = shift // carp 'Not called within an object';
   my $hexData = shift // croak 'Error: called without $hexdata as input';
 
-  return ( 1,"ConvLaCrosse, Usage: Input #1, $hexData is not valid HEX"  )
+  croak qq[ConvLaCrosse, Usage: Input #1, $hexData is not valid HEX]
     if (not $hexData =~ /^[0-9a-fA-F]+$/xms)  ;    # check valid hexData
 
   return ( 1,'ConvLaCrosse, Usage: Input #1, $hexData needs to be at least 8 chars long'  )
