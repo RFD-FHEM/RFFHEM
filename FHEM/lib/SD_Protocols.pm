@@ -13,7 +13,7 @@ use strict;
 use warnings;
 use Carp qw(croak carp);
 use Digest::CRC;
-our $VERSION = '2.04';
+our $VERSION = '2.05';
 use Storable qw(dclone);
 use Scalar::Util qw(blessed);
 
