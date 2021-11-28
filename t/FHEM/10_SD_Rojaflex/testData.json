@@ -1,0 +1,137 @@
+[
+    {"name":"SD_Rojaflex", "id":"109", "module":"SD_Rojaflex", "data": [
+        {
+          "dmsg":"P109#083122FD251A011AAA", "comment":"tubular message channel 5", "user":"Hofyyy",
+          "internals": {"NAME": "SD_Rojaflex_3122FD2_5", "DEF": "3122FD2_5" },
+          "readings": {"motor": "up", "state": "up", "tpos": "0" },
+          "minProtocolVersion":"1.39", "revision_entry":"2021-11-21 20:33:59Z",
+          "revision_modul":"10_SD_Rojaflex.pm 100 2021-11-21 20:33:59Z elektron-bbs",
+          "rmsg":"MN;D=083122FD251A011AAA;R=198"
+        },
+        {
+          "dmsg":"P109#083122FD208A018A85", "comment":"parse channel 0 message", "user":"Hofyyy",
+          "internals": {"NAME": "SD_Rojaflex_3122FD2_0", "DEF": "3122FD2_0" },
+          "readings": {"motor": "down", "state": "down", "tpos": "100" },
+          "minProtocolVersion":"1.39", "revision_entry":"2021-11-21 20:33:59Z",
+          "revision_modul":"10_SD_Rojaflex.pm 100 2021-11-21 20:33:59Z elektron-bbs",
+          "rmsg":""
+        },
+        {
+          "dmsg":"P109#083122FD2C1A011AB", "comment":"to short", "user":"Hofyyy",
+          "internals": {"NAME": null },
+          "readings": {},
+          "minProtocolVersion":"1.39", "revision_entry":"2021-11-21 20:33:59Z",
+          "revision_modul":"10_SD_Rojaflex.pm 100 2021-11-21 20:33:59Z elektron-bbs",
+          "rmsg":""
+        },
+        {
+          "dmsg":"P109#083122FD251A011AAA", "comment":"tubular message channel 5 inverted", "user":"Hofyyy",
+          "internals": {"NAME": "SD_Rojaflex_3122FD2_5", "DEF": "3122FD2_5" },
+          "readings": {"motor": "up", "state": "up", "tpos": "100" },
+          "attributes": {"inversePosition": "1"},
+          "minProtocolVersion":"1.39", "revision_entry":"2021-11-21 20:33:59Z",
+          "revision_modul":"10_SD_Rojaflex.pm 100 2021-11-21 20:33:59Z elektron-bbs",
+          "rmsg":"MN;D=083122FD251A011AAA;R=198"
+        },
+        {
+          "dmsg":"P109#083122FD291A011AAE", "comment":"P109# Kanal 9 - remote - drive up", "user":"Hofyyy",
+          "internals": {"NAME": "SD_Rojaflex_3122FD2_9", "DEF": "3122FD2_9" },
+          "readings": {"motor": "up", "state": "up", "tpos": "0", "cpos": "100" },
+          "minProtocolVersion":"1.39", "revision_entry":"2021-11-21 20:33:59Z",
+          "revision_modul":"10_SD_Rojaflex.pm 100 2021-11-21 20:33:59Z elektron-bbs",
+          "rmsg":"P109#083122FD291A011AAE;R=196;",
+          "setreadings": {"motor": "stop", "cpos": "100", "tpos": "100"  }
+        },
+        {
+          "dmsg":"P109#083122FD298A018A8E", "comment":"P109# Kanal 9 - remote - drive down", "user":"Hofyyy",
+          "internals": {"NAME": "SD_Rojaflex_3122FD2_9", "DEF": "3122FD2_9" },
+          "readings": {"motor": "down", "state": "down", "tpos": "100", "cpos": "0" },
+          "minProtocolVersion":"1.39", "revision_entry":"2021-11-21 20:33:59Z",
+          "revision_modul":"10_SD_Rojaflex.pm 100 2021-11-21 20:33:59Z elektron-bbs",
+          "rmsg":"P109#083122FD291A011AAE;R=196;",
+          "setreadings": {"motor": "stop", "cpos": "0", "tpos": "0"  }
+        },
+        {
+          "dmsg":"P109#083122FD29A5220A8E", "comment":"P109# Kanal 9 - status 34%", "user":"Hofyyy",
+          "internals": {"NAME": "SD_Rojaflex_3122FD2_9", "DEF": "3122FD2_9" },
+          "readings": {"motor": "stop", "state": "34", "cpos": "34" },
+          "minProtocolVersion":"1.39", "revision_entry":"2021-11-21 20:33:59Z",
+          "revision_modul":"10_SD_Rojaflex.pm 100 2021-11-21 20:33:59Z elektron-bbs",
+          "rmsg":"P109#083122FD29A5220A8E;R=196;",
+          "setreadings": {"motor": "stop", "cpos": "0", "tpos": "0"  }
+        },
+        {
+          "dmsg":"P109#083122FD2985001AAE", "comment":"P109# Kanal 9 - status 0%", "user":"Hofyyy",
+          "internals": { "NAME": "SD_Rojaflex_3122FD2_9", "DEF": "3122FD2_9" },
+          "readings": { "motor": "stop", "state": "open", "cpos": "0" },
+          "minProtocolVersion":"1.39", "revision_entry":"2021-11-21 20:33:59Z",
+          "revision_modul":"10_SD_Rojaflex.pm 100 2021-11-21 20:33:59Z elektron-bbs",
+          "rmsg":"P109#083122FD2985001AAE;R=196;",
+          "setreadings": { "motor": "stop", "cpos": "100", "tpos": "100"  }
+        },
+        {
+          "dmsg":"P109#083122FD29D5648A8E", "comment":"P109# Kanal 9 - status 100%", "user":"Hofyyy",
+          "internals": { "NAME": "SD_Rojaflex_3122FD2_9", "DEF": "3122FD2_9" },
+          "readings": { "motor": "stop", "state": "closed", "cpos": "100" },
+          "minProtocolVersion":"1.39", "revision_entry":"2021-11-21 20:33:59Z",
+          "revision_modul":"10_SD_Rojaflex.pm 100 2021-11-21 20:33:59Z elektron-bbs",
+          "rmsg":"P109#083122FD29D5648A8E;R=196;",
+          "setreadings": { "motor": "stop", "cpos": "0", "tpos": "0"  }
+        },
+
+        {
+          "dmsg":"P109#083122FD291A011AAE", "comment":"P109# Kanal 9 - remote - drive up (inversePosition)", "user":"Hofyyy",
+          "internals": {"NAME": "SD_Rojaflex_3122FD2_9", "DEF": "3122FD2_9" },
+          "readings": {"motor": "up", "state": "up", "tpos": "100", "cpos": "0" },
+          "attributes": {"inversePosition": "1"},
+          "minProtocolVersion":"1.39", "revision_entry":"2021-11-21 20:33:59Z",
+          "revision_modul":"10_SD_Rojaflex.pm 100 2021-11-21 20:33:59Z elektron-bbs",
+          "rmsg":"P109#083122FD291A011AAE;R=196;",
+          "setreadings": {"motor": "stop", "cpos": "0", "tpos": "100"  }
+        },
+        {
+          "dmsg":"P109#083122FD298A018A8E", "comment":"P109# Kanal 9 - remote - drive down (inversePosition)", "user":"Hofyyy",
+          "internals": {"NAME": "SD_Rojaflex_3122FD2_9", "DEF": "3122FD2_9" },
+          "readings": {"motor": "down", "state": "down", "tpos": "0", "cpos": "100" },
+          "attributes": {"inversePosition": "1"},
+          "minProtocolVersion":"1.39", "revision_entry":"2021-11-21 20:33:59Z",
+          "revision_modul":"10_SD_Rojaflex.pm 100 2021-11-21 20:33:59Z elektron-bbs",
+          "rmsg":"P109#083122FD291A011AAE;R=196;",
+          "setreadings": {"motor": "stop", "cpos": "100", "tpos": "0"  }
+        },
+        {
+          "dmsg":"P109#083122FD29A5220A8E", "comment":"P109# Kanal 9 - status 34% (inversePosition)", "user":"Hofyyy",
+          "internals": {"NAME": "SD_Rojaflex_3122FD2_9", "DEF": "3122FD2_9" },
+          "readings": {"motor": "stop", "state": "34", "cpos": "66" },
+          "attributes": {"inversePosition": "1"},
+          "minProtocolVersion":"1.39", "revision_entry":"2021-11-21 20:33:59Z",
+          "revision_modul":"10_SD_Rojaflex.pm 100 2021-11-21 20:33:59Z elektron-bbs",
+          "rmsg":"P109#083122FD29A5220A8E;R=196;",
+          "setreadings": {"motor": "stop", "cpos": "0", "tpos": "0"  }
+        },
+        {
+          "dmsg":"P109#083122FD2985001AAE", "comment":"P109# Kanal 9 - status 0% (inversePosition)", "user":"Hofyyy",
+          "internals": { "NAME": "SD_Rojaflex_3122FD2_9", "DEF": "3122FD2_9" },
+          "readings": { "motor": "stop", "state": "open", "cpos": "100" },
+          "attributes": {"inversePosition": "1"},
+          "minProtocolVersion":"1.39", "revision_entry":"2021-11-21 20:33:59Z",
+          "revision_modul":"10_SD_Rojaflex.pm 100 2021-11-21 20:33:59Z elektron-bbs",
+          "rmsg":"P109#083122FD2985001AAE;R=196;",
+          "setreadings": { "motor": "stop", "cpos": "0", "tpos": "100"  }
+        },
+        {
+          "dmsg":"P109#083122FD29D5648A8E", "comment":"P109# Kanal 9 - status 100% (inversePosition)", "user":"Hofyyy",
+          "internals": { "NAME": "SD_Rojaflex_3122FD2_9", "DEF": "3122FD2_9" },
+          "readings": { "motor": "stop", "state": "closed", "cpos": "0" },
+          "attributes": {"inversePosition": "1"},
+          "minProtocolVersion":"1.39", "revision_entry":"2021-11-21 20:33:59Z",
+          "revision_modul":"10_SD_Rojaflex.pm 100 2021-11-21 20:33:59Z elektron-bbs",
+          "rmsg":"P109#083122FD29D5648A8E;R=196;",
+          "setreadings": { "motor": "stop", "cpos": "100", "tpos": "0"  }
+        }
+
+
+
+      ]
+    }    
+]

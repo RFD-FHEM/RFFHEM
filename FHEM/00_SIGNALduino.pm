@@ -1,5 +1,4 @@
-# $Id: 00_SIGNALduino.pm v3.5.2 2021-11-21 20:25:24Z HomeAutoUser $
-#
+# $Id: 00_SIGNALduino.pm v3.5.2 2021-11-26 23:35:40Z elektron-bbs $
 # v3.5.2 - https://github.com/RFD-FHEM/RFFHEM/tree/master
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incoming messages
 # see http://www.fhemwiki.de/wiki/SIGNALDuino
@@ -39,7 +38,7 @@ use List::Util qw(first);
 
 
 use constant {
-  SDUINO_VERSION                  => '3.5.2+20211121',  # Datum wird automatisch bei jedem pull request aktualisiert
+  SDUINO_VERSION                  => '3.5.2+20211126',  # Datum wird automatisch bei jedem pull request aktualisiert
   SDUINO_INIT_WAIT_XQ             => 1.5,     # wait disable device
   SDUINO_INIT_WAIT                => 2,
   SDUINO_INIT_MAXRETRY            => 3,
@@ -217,6 +216,7 @@ my $clientsSIGNALduino = ':CUL_EM:'
             .'RFXX10REC:'
             .'Revolt:'
             .'SD_AS:'
+            .'SD_Rojaflex:'
             .' :'         # Zeilenumbruch
             .'SD_BELL:'
             .'SD_GT:'
@@ -266,13 +266,14 @@ my %matchListSIGNALduino = (
       '30:LaCrosse'         => '^(\\S+\\s+9 |OK\\sWS\\s)',
       '31:KOPP_FC'          => '^kr\w{18,}',
       '32:PCA301'           => '^\\S+\\s+24',
+      '33:SD_Rojaflex'      => '^P109#[A-Fa-f0-9]+',
       'X:SIGNALduino_un'    => '^[u]\d+#.*',
 );
 
 my %symbol_map = (one => 1 , zero =>0 ,sync => '', float=> 'F', 'start' => '');
 
 ## rfmode for attrib & supported rfmodes
-my @rfmode = ('Avantek','Bresser_5in1','Bresser_6in1','KOPP_FC','Lacrosse_mode1','Lacrosse_mode2','Lacrosse_mode4','PCA301','SlowRF');
+my @rfmode = ('Avantek','Bresser_5in1','Bresser_6in1','KOPP_FC','Lacrosse_mode1','Lacrosse_mode2','Lacrosse_mode4','PCA301','Rojaflex','SlowRF');
 
 ############################# package main
 sub SIGNALduino_Initialize {
@@ -4779,7 +4780,10 @@ USB-connected devices (SIGNALduino):<br>
         <ul><small>example: TX35TH-IT, TX35DTH-IT, TX38-IT, 30.3155WD, 30.3156WD</small></ul>
       </li>
       <li>PCA301<br>
-        modulation 2-FSK, Datarate=6.62041 kbps, Sync Word=2DD4, frequency 868.950MHz
+        modulation 2-FSK, Datarate=6.62041 kbps, Sync Word=2DD4, frequency 868.950 MHz
+      </li>
+      <li>Rojaflex<br>
+        modulation GFSK, Datarate=9.99 kbps, Sync Word=D391D391, frequency 433.920 MHz
       </li>
       <li>SlowRF<br>
         modulation ASK/OOK, <b>loads the standard setting from the uC</b>
@@ -5334,7 +5338,10 @@ USB-connected devices (SIGNALduino):<br>
         <ul><small>Beispiel: TX35TH-IT, TX35DTH-IT, TX38-IT, 30.3155WD, 30.3156WD</small></ul>
       </li>
       <li>PCA301<br>
-        Modulation 2-FSK, Datenrate=6.62041 kbps, Sync Word=2DD4, Frequenz 868.950MHz
+        Modulation 2-FSK, Datenrate=6.62041 kbps, Sync Word=2DD4, Frequenz 868.950 MHz
+      </li>
+      <li>Rojaflex<br>
+        Modulation GFSK, Datenrate=9.99 kbps, Sync Word=D391D391, Frequenz 433.920 MHz
       </li>
       <li>SlowRF<br>
         Modulation ASK/OOK, <b>l&auml;d die Standard Einstellung vom uC</b>
