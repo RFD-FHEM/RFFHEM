@@ -80,6 +80,7 @@ Supported Devices / Protocols
 |RH787T, HT12E based | Remote control |
 |RIO, enjoy motors HS |  Remote control |
 |revolt | Energy sensors |
+|Rojaflex HSR-15, HSTR-15 | Remote control |
 |s014/TCM/Conrad | Weather sensor |
 |Somfy RTS | Shutters from Somfy|
 |technoline Weatherstation WS 6750/TX70DTH| Weather sensor and station |

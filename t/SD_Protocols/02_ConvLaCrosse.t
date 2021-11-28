@@ -5,6 +5,7 @@ use warnings;
 use Test2::V0;
 use lib::SD_Protocols qw(:ALL);
 use Test2::Tools::Compare qw{is like};
+use Test2::Tools::Exception qw/dies lives/;
 
 plan(4);
 
@@ -22,7 +23,8 @@ subtest 'test ConvLaCrosse, checksum ok' => sub 	{
 		is($#ret,0, 'ConvLaCrosse reported no error');
 		is($ret[0],'OK 9 42 129 4 212 44','check result for right Lacrosse transmission');
 	};
-	
+
+
 	subtest 'msg 9A05922F8180046818480800 (ID 103)' => sub {		
 		plan(2);
 		my $hexMsg='9A05922F8180046818480800';
@@ -63,9 +65,7 @@ subtest 'test ConvLaCrosse, length to short ' => sub 	{
 
 
 subtest 'test ConvLaCrosse, not hexadezimal' => sub 	{
-	plan(2);
+	plan(1);
 	my $hexMsg='010503B7PA1041AAAAAAAAPF';
-	my @ret=$Protocols->ConvLaCrosse($hexMsg) ;
-	is($#ret,1, "ConvLaCrosse reported some error");
-	like($ret[1],qr/!= checksum/,'check error message');
+	like(dies { lib::SD_Protocols::ConvLaCrosse('TEST',$hexMsg) } ,qr/ConvLaCrosse, Usage: Input #1, 010503B7PA1041AAAAAAAAPF is not valid HEX/,'check not hexadezimal');
 };

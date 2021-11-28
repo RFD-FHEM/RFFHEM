@@ -13,7 +13,7 @@ use strict;
 use warnings;
 use Carp qw(croak carp);
 use Digest::CRC;
-our $VERSION = '2.04';
+our $VERSION = '2.05';
 use Storable qw(dclone);
 use Scalar::Util qw(blessed);
 
@@ -1965,12 +1965,15 @@ sub ConvLaCrosse {
   my $self    = shift // carp 'Not called within an object';
   my $hexData = shift // croak 'Error: called without $hexdata as input';
 
+  croak qq[ConvLaCrosse, Usage: Input #1, $hexData is not valid HEX]
+    if (not $hexData =~ /^[0-9a-fA-F]+$/xms)  ;    # check valid hexData
+
   return ( 1,'ConvLaCrosse, Usage: Input #1, $hexData needs to be at least 8 chars long'  )
     if ( length($hexData) < 8 )  ;    # check number of length for this sub to not throw an error
 
   my $ctx = Digest::CRC->new( width => 8, poly => 0x31 );
   my $calcCrc = $ctx->add( pack 'H*', substr( $hexData, 0, 8 ) )->digest;
-  my $checksum = sprintf( "%d", hex( substr( $hexData, 8, 2 ) ) );  # Todo: Needs some check to be hexadzimal conform
+  my $checksum = sprintf( "%d", hex( substr( $hexData, 8, 2 ) ) );
   return ( 1, qq[ConvLaCrosse, checksumCalc:$calcCrc != checksum:$checksum] )
     if ( $calcCrc != $checksum );
 

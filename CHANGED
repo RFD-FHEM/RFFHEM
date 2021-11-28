@@ -1,3 +1,21 @@
+2021-11-28 - new protocol 109 for rojaflex remote controls (#1030)
+
+* New protocol 109 for Rojaflex remote controls
+* New module 10_SD_Rojaflex.pm for protocol 109
+* Update SD_ProtocolData.pm
+* Update README.md
+* Update 00_SIGNALduino.pm
+
+2021-11-27 - PERL WARNING - sub ConvLaCrosse robust (#1038)
+
+* ConvLaCrosse revised
+ - hex check added (eliminates PERL WARNINGS)
+
+* Update SD_Protocols.pm
+
+* Update Versiondate
+
+* Update 02_ConvLaCrosse.t
 2021-11-22 - Parse_MU check expanded - ToDo eliminated (#1033)
 
 * Update 00_SIGNALduino.pm

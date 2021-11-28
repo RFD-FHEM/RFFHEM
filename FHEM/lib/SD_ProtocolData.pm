@@ -1,5 +1,5 @@
 ###########################################################################################################################################
-# $Id: SD_ProtocolData.pm 3.4.4 2021-10-15 15:42:20Z elektron-bbs $
+# $Id: SD_ProtocolData.pm 3.4.4 2021-11-26 23:35:40Z elektron-bbs $
 # The file is part of the SIGNALduino project.
 # All protocol definitions are contained in this file.
 #
@@ -71,7 +71,7 @@
 ##### notice #### or #### info ############################################################################################################
 # !!! Between the keys and values ​​no tabs, please use spaces !!!
 # !!! Please use first unused id for new protocols !!!
-# ID´s are currently unused: 116 - 
+# ID´s are currently unused: 117 - 
 # ID´s need to be revised (preamble u): 5|19|21|22|23|25|28|31|36|40|52|59|63
 ###########################################################################################################################################
 # Please provide at least three messages for each new MU/MC/MS/MN protocol and a URL of issue in GitHub or discussion in FHEM Forum
@@ -86,7 +86,7 @@ package lib::SD_ProtocolData;
   use strict;
   use warnings;
 
-  our $VERSION = '1.38';
+  our $VERSION = '1.39';
 
   our %protocols = (
     "0" =>  ## various weather sensors (500 | 9100)
@@ -2840,7 +2840,7 @@ package lib::SD_ProtocolData;
         length_max      => '22',
       },
 
-    # "107" => reserved @elektron-bbs
+    # "107" => reserved @elektron-bbs for Fine Offset WH51, ECOWITT WH51, MISOL/1, Froggit DP100 Soil Moisture Sensor
 
     "108" =>  ## BRESSER 5-in-1 Weather Center, Bresser Professional Rain Gauge - elektron-bbs 2021-05-02
               # https://github.com/RFD-FHEM/RFFHEM/issues/607
@@ -2865,8 +2865,28 @@ package lib::SD_ProtocolData;
         length_min      => '52',
         method          => \&lib::SD_Protocols::ConvBresser_5in1,
       },
-
-    # "109" => reserved @elektron-bbs
+    "109" =>  ## Rojaflex HSR-15, HSTR-15,
+              # only tested remote control HSR-15 in mode bidirectional
+              # https://github.com/RFD-FHEM/RFFHEM/issues/955 - Hofyyy 2021-04-18
+              # SD_Rojaflex_3122FD2_9 down   MN;D=083122FD298A018A8E;R=0;
+              # SD_Rojaflex_3122FD2_9 stop   MN;D=083122FD290A010A8E;R=244;
+              # SD_Rojaflex_3122FD2_9 up     MN;D=083122FD291A011AAE;R=249;
+      {
+        name            => 'Rojaflex',
+        comment         => 'Rojaflex shutter',
+        id              => '109',
+        knownFreqs      => '433.92',
+        datarate        => '9.9926',
+        sync            => 'D391D391',
+        modulation      => 'GFSK',
+        rfmode          => 'Rojaflex',
+        regexMatch      => qr/^08/,
+        register        => ['0007','022E','0302','04D3','0591','060C','0788','0805','0D10','0EB0','0F71','10C8','1193','1213','1322','14F8','1535','170F','1916','1B43','1C40','2156','2211'],
+        preamble        => 'P109#',
+        clientmodule    => 'SD_Rojaflex',
+        length_min      => '18',
+        length_max      => '18',
+      },
     "110" =>  # ADE WS1907 Wetterstation mit Funk-Regenmesser 
               # https://github.com/RFD-FHEM/RFFHEM/issues/965 docolli 2021-05-14
               # T: 16.3 R: 26.6   MU;P0=970;P1=-112;P2=516;P3=-984;P4=2577;P5=-2692;P6=7350;D=01234343450503450503434343434505034343434343434343434343434343434505050503450345034343434343450345050345034505034503456503434505050343434343450503450503434343434505034343434343434343434343434343434505050503450345034343434343450345050345034505034503456503;CP=0;R=12;O;
@@ -3005,6 +3025,9 @@ package lib::SD_ProtocolData;
         length_min      => '36',
         method          => \&lib::SD_Protocols::ConvBresser_6in1,
       },
+
+    # "116" => reserved @elektron-bbs for Fine Offset WH57, Froggit DP60 Thunder and Lightning sensor
+
     ########################################################################
     #### ###  register informations from other hardware protocols  #### ####
 

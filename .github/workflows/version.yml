@@ -68,7 +68,7 @@ jobs:
         run: |
           JSON="{\"include\":["
           # Loop by lines
-          IFS=, read -ra values <<< "${{ steps.file_changes.outputs.files_modified}}"
+          IFS=, read -ra values <<< "${{ steps.file_changes.outputs.files_modified}},${{ steps.file_changes.outputs.files_added}}"
           for v in "${values[@]}"
           do
             # Exclude non pm files
@@ -140,11 +140,11 @@ jobs:
               find ./FHEM -name "$FILE" -exec cp $FPATH "{}" \;
           done
       - name: update controls file (FHEM)
-        uses: fhem/fhem-controls-actions@v2.0.2
+        uses: fhem/fhem-controls-actions@v2.0.3
         with:
           filename: controls_signalduino.txt 
       - name: update controls file (lib)
-        uses: fhem/fhem-controls-actions@v2.0.2
+        uses: fhem/fhem-controls-actions@v2.0.3
         with:
           filename: controls_signalduino.txt 
           directory: FHEM/lib
