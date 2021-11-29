@@ -2886,11 +2886,11 @@ sub SIGNALduino_Parse_MN {
   my %msg_parts = SIGNALduino_Split_Message($rmsg, $hash->{NAME});
 
   # Verify if extracted hash has the correct values:
-  my $rawData  = _limit_to_hex($msg_parts{rawData})     // $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: Parse_MN, faulty rawData D=: $msg_parts{rawData}]) &&  return ; 
+  my $rawData  = _limit_to_hex($msg_parts{rawData})     // $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: Parse_MN, faulty rawData D=: $msg_parts{rawData}]) //  return ;
   my $rssi;
   my $rssiStr= '';
   if ( defined $msg_parts{rssi} ){
-     $rssi = _limit_to_hex($msg_parts{rssi}) // $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: Parse_MN, faulty rssi R=: $msg_parts{rssi}]) &&  return ; 
+     $rssi = _limit_to_number($msg_parts{rssi}) // $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: Parse_MN, faulty rssi R=: $msg_parts{rssi}]) //  return ;
     ($rssi,$rssiStr) = SIGNALduino_calcRSSI($rssi);
   };
   my $messagetype=$msg_parts{messagetype};
