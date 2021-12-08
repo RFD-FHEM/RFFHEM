@@ -1,3 +1,6 @@
+2021-12-05 - wrong syntax in SIGNALduino_Parse_MN (#1040)
+
+* Update 00_SIGNALduino.pm
 2021-11-28 - new protocol 109 for rojaflex remote controls (#1030)
 
 * New protocol 109 for Rojaflex remote controls
