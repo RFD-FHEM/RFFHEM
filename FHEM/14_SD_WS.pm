@@ -1,4 +1,4 @@
-# $Id: 14_SD_WS.pm 21666 2021-09-08 15:09:03Z elektron-bbs $
+# $Id: 14_SD_WS.pm 21666 2021-12-08 16:39:29Z elektron-bbs $
 #
 # The purpose of this module is to support serval
 # weather sensors which use various protocol
@@ -36,6 +36,7 @@
 # 16.07.2021 neues Protokoll 113: Wireless Grill Thermometer, Model name: GFGT 433 B1
 # 31.07.2021 neues Protokoll 115: Bresser 6-in-1 Comfort Wetter Center
 # 30.08.2021 PerlCritic - fixes for severity level 5 and 4
+# 07.12.2021 Protokoll 33: Conrad S522 kein Batteriebit, dafuer Trend Temperatur
 
 package main;
 
@@ -252,27 +253,34 @@ sub SD_WS_Parse {
       } ,
      33 =>
        {
-      # Protokollbeschreibung: Conrad Temperatursensor S522 fuer Funk-Thermometer S521B
+      # Protokollbeschreibung
       # ------------------------------------------------------------------------
       # 0    4    | 8    12   | 16   20   | 24   28   | 32   36   40
       # 1111 1100 | 0001 0110 | 0001 0000 | 0011 0111 | 0100 1001 01
-      # iiii iiii | iiuu cctt | tttt tttt | tthh hhhh | hhuu bgxx xx
+      # iiii iiii | iiuu cctt | tttt tttt | tthh hhhh | hhbu uuxx xx
       # i: 10 bit random id (changes on power-loss) - Bit 0 + 1 every 0 ???
       # b: battery indicator (0=>OK, 1=>LOW)
-      # g: battery changed (1=>changed) - muss noch genauer getestet werden! ????
       # c: Channel (MSB-first, valid channels are 0x00-0x02 -> 1-3)
       # t: Temperature (MSB-first, BCD, 12 bit unsigned fahrenheit offset by 90 and scaled by 10)
-      # h: always 0
+      # h: Humidity (MSB-first, BCD, 8 bit relative humidity percentage)
       # u: unknown
       # x: check
+
+      # Protokollbeschreibung: Conrad Temperatursensor S522 fuer Funk-Thermometer S521B
+      # ------------------------------------------------------------------------
+      # 0    4    | 8    12   | 16   20   | 24   28   | 32   36   | 40
+      # 0010 0111 | 0100 0100 | 1100 0100 | 1100 0000 | 0000 1011 | 10
+      # iiii iiii | iiuu cctt | tttt tttt | ttuu uuuu | uuuu TTxx | xx
+      # T: Temperature trend, 00 = consistent, 01 = rising, 10 = falling
+      # u: unknown (always 0)
+      # i: | c: | t: | x: same like default
 
       # Protokollbeschreibung: renkforce Temperatursensor E0001PA fuer Funk-Wetterstation E0303H2TPR (Conrad)
       # ------------------------------------------------------------------------
       # 0    4    | 8    12   | 16   20   | 24   28   | 32   36   40
       # iiii iiii | iiuu cctt | tttt tttt | tthh hhhh | hhsb uuxx xx
-      # h: Humidity (MSB-first, BCD, 8 bit relative humidity percentage)
       # s: sendmode (1=>Test push, send manual 0=>automatic send)
-      # i: | c: | t: | h: | b: | u: | x: same like S522
+      # i: | c: | t: | h: | b: | u: | x: same like default
 
       # Protokollbeschreibung: Temperatur-/Fechtesensor TX-EZ6 fuer Wetterstation TZS First Austria
       # ------------------------------------------------------------------------
@@ -1440,7 +1448,8 @@ sub SD_WS_Parse {
   ### protocol 33 has different bits per sensor type
   if ($protocol eq "33") {
     if (AttrVal($name,'model',0) eq "S522") {                 # Conrad S522
-      $bat = substr($bitData,36,1) eq "0" ? "ok" : "low";
+      $bat = undef;
+      $trendTemp = ('consistent', 'rising', 'falling', 'unknown')[SD_WS_binaryToNumber($bitData,36,37)];
     } elsif (AttrVal($name,'model',0) eq "E0001PA") {         # renkforce E0001PA
       $bat = substr($bitData,35,1) eq "0" ? "ok" : "low"; 
       $sendmode = substr($bitData,34,1) eq "1" ? "manual" : "auto";
@@ -1559,6 +1568,7 @@ sub SD_WS_WH2SHIFT {
 1;
 
 =pod
+=encoding utf8
 =item summary    Supports various weather stations
 =item summary_DE Unterst&uumltzt verschiedene Funk Wetterstationen
 =begin html
