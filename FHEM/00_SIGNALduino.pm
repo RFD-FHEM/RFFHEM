@@ -273,7 +273,7 @@ my %matchListSIGNALduino = (
 my %symbol_map = (one => 1 , zero =>0 ,sync => '', float=> 'F', 'start' => '');
 
 ## rfmode for attrib & supported rfmodes
-my @rfmode = ('Avantek','Bresser_5in1','Bresser_6in1','KOPP_FC','Lacrosse_mode1','Lacrosse_mode2','Lacrosse_mode4','PCA301','Rojaflex','SlowRF');
+my @rfmode = ('SlowRF');
 
 ############################# package main
 sub SIGNALduino_Initialize {
@@ -281,6 +281,23 @@ sub SIGNALduino_Initialize {
 
   my $dev = '';
   $dev = ',1' if (index(SDUINO_VERSION, 'dev') >= 0);
+
+  my $Protocols = new lib::SD_Protocols();
+  $Protocols->registerLogCallback(SIGNALduino_createLogCallback($hash));
+  my $error = $Protocols->LoadHash(qq[$attr{global}{modpath}/FHEM/lib/SD_ProtocolData.pm]); 
+  if (defined($error)) {
+    Log3 'SIGNALduino', 1, qq[Error loading Protocol Hash. Module is in inoperable mode error message:($error)];
+  } else {
+    $hash->{protocolObject} = $Protocols;
+    foreach my $key (keys %{$hash->{protocolObject}{_protocols}}) {
+      if ($hash->{protocolObject}{_protocols}{$key}{rfmode}) {
+        Log3 'SIGNALduino', 5, qq[SIGNALduino_Initialize: rfmode search in protocols and found on ID $key -> $hash->{protocolObject}{_protocols}{$key}{rfmode}];
+        push (@rfmode,$hash->{protocolObject}{_protocols}{$key}{rfmode});
+      }
+    }
+    @rfmode = sort @rfmode;
+    Log3 'SIGNALduino', 4, qq[SIGNALduino_Initialize: rfmode list: @rfmode];
+  }
 
 # Provider
   $hash->{ReadFn}  = \&SIGNALduino_Read;
