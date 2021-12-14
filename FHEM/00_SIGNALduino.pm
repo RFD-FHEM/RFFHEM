@@ -274,6 +274,7 @@ my %symbol_map = (one => 1 , zero =>0 ,sync => '', float=> 'F', 'start' => '');
 
 ## rfmode for attrib & supported rfmodes
 my @rfmode = ('SlowRF');
+my $Protocols = new lib::SD_Protocols();
 
 ############################# package main
 sub SIGNALduino_Initialize {
@@ -282,17 +283,17 @@ sub SIGNALduino_Initialize {
   my $dev = '';
   $dev = ',1' if (index(SDUINO_VERSION, 'dev') >= 0);
 
-  my $Protocols = new lib::SD_Protocols();
   $Protocols->registerLogCallback(SIGNALduino_createLogCallback($hash));
   my $error = $Protocols->LoadHash(qq[$attr{global}{modpath}/FHEM/lib/SD_ProtocolData.pm]); 
   if (defined($error)) {
     Log3 'SIGNALduino', 1, qq[Error loading Protocol Hash. Module is in inoperable mode error message:($error)];
   } else {
     $hash->{protocolObject} = $Protocols;
-    foreach my $key (keys %{$hash->{protocolObject}{_protocols}}) {
-      if ($hash->{protocolObject}{_protocols}{$key}{rfmode}) {
-        Log3 'SIGNALduino', 5, qq[SIGNALduino_Initialize: rfmode search in protocols and found on ID $key -> $hash->{protocolObject}{_protocols}{$key}{rfmode}];
-        push (@rfmode,$hash->{protocolObject}{_protocols}{$key}{rfmode});
+    foreach my $id (keys %{$hash->{protocolObject}{_protocols}}) {
+      my $rfm = $hash->{protocolObject}->checkProperty($id,'rfmode');
+      if (defined $rfm) {
+        Log3 'SIGNALduino', 5, qq[SIGNALduino_Initialize: search rfmode in protocols, found ID $id -> $rfm];
+        push (@rfmode,$rfm);
       }
     }
     @rfmode = sort @rfmode;
@@ -424,9 +425,7 @@ sub SIGNALduino_Define {
   $hash->{logMethod}  = \&main::Log3;
 
   my $ret=undef;
-  my $Protocols = new lib::SD_Protocols();
   $Protocols->registerLogCallback(SIGNALduino_createLogCallback($hash));
-  my $error = $Protocols->LoadHash(qq[$attr{global}{modpath}/FHEM/lib/SD_ProtocolData.pm]);
   $hash->{protocolObject} = $Protocols;
 
   InternalTimer(gettimeofday(), \&SIGNALduino_IdList,"sduino_IdList:$name",0);        # verzoegern bis alle Attribute eingelesen sind
@@ -445,8 +444,8 @@ sub SIGNALduino_Define {
   $hash->{versionmodul}     = SDUINO_VERSION;
   $hash->{versionProtocols} = $hash->{protocolObject}->getProtocolVersion();
 
-  if (defined($error)  ) {
-    Log3 'SIGNALduino', 1, qq[Error loading Protocol Hash. Module is in inoperable mode error message:($error)];
+  if (!defined($hash->{versionProtocols})) {
+    Log3 $name, 1, qq[$name: Error loading Protocol Hash! SIGNALduino is in inoperable mode!];
     return ;
   }
 
