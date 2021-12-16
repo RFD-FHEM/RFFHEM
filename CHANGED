@@ -1,3 +1,6 @@
+2021-12-16 - wrong syntax in SIGNALduino_Parse_MU (#1043)
+
+* Update 00_SIGNALduino.pm
 2021-12-09 - Conrad S522 no reading batteryState (#1042)
 
 * Conrad S522 no reading batteryState, but temperatureTrend
