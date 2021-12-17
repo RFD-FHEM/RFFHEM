@@ -289,14 +289,7 @@ sub SIGNALduino_Initialize {
     Log3 'SIGNALduino', 1, qq[Error loading Protocol Hash. Module is in inoperable mode error message:($error)];
   } else {
     $hash->{protocolObject} = $Protocols;
-    foreach my $id (keys %{$hash->{protocolObject}{_protocols}}) {
-      my $rfm = $hash->{protocolObject}->checkProperty($id,'rfmode');
-      if (defined $rfm) {
-        Log3 'SIGNALduino', 5, qq[SIGNALduino_Initialize: search rfmode in protocols, found ID $id -> $rfm];
-        push (@rfmode,$rfm);
-      }
-    }
-    @rfmode = sort @rfmode;
+    push @rfmode, map { $Protocols->checkProperty($_,'rfmode') } $Protocols->getKeys('rfmode');    
     Log3 'SIGNALduino', 4, qq[SIGNALduino_Initialize: rfmode list: @rfmode];
   }
 
