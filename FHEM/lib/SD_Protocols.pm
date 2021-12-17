@@ -225,6 +225,14 @@ This function, will return all keys from the protocol hash
 
 sub getKeys {
   my $self = shift // carp 'Not called within an object';
+
+   my $filter = shift // undef;
+   if (defined $filter)
+   {
+     my (@keys) = grep { exists $self->{_protocols}->{$_}->{$filter} } keys %{$self->{_protocols}};
+     return @keys;
+   }
+
   my (@ret) = keys %{ $self->{_protocols} };
   return @ret;
 }

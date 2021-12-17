@@ -97,7 +97,6 @@ subtest 'lib SD_Prococols getProtocolList()' => sub {
 
 subtest 'lib SD_Prococols getKeys()' => sub {
 	plan(2);
-	my $todo = todo 'here is a bug in getkeys i think';
 	my $Protocols =
 	new $className( filetype => 'json', filename => './t/SD_Protocols/test_protocolData.json' );
 
@@ -110,7 +109,22 @@ subtest 'lib SD_Prococols getKeys()' => sub {
 	    etc();
 	  },
 	  "Verify we have got a array with items 9999, 9987");
+};
 
+subtest 'lib SD_Prococols getKeys() with filter' => sub {
+	plan(2);
+	my $Protocols =
+	new $className( filetype => 'json', filename => './t/SD_Protocols/test_protocolData.json' );
+    
+	my $filter = 'rfmode'; 
+
+	my (@key_list) = $Protocols->getKeys($filter);
+	ref_ok(\@key_list , 'ARRAY', 'verify we got an array' );
+	is(\@key_list ,bag { 
+	    item '9987' => T();
+	    end();
+	  },
+	  "Verify we have got a array with items 9987");
 };
 
 
