@@ -10,18 +10,32 @@ our %defs;
 InternalTimer(time(), sub {
 	my $target = shift;
 	my $targetHash = $defs{$target};
-    plan(8);
+    plan(3);
     my %validationHash;
     SIGNALduino_Initialize(\%validationHash);
 
     is(FhemTestUtils_gotLog("Error"), 0, q[No errors in logfile]);
     like($validationHash{AttrList},qr/rfmode:/,q[search RF Mode] );
     
-    for ( "SlowRF", "KOPP_FC", "Bresser_5in1" , "Bresser_6in1", "Lacrosse_mode1", "PCA301" )
-    {
-        like($validationHash{AttrList},qr/rfmode:.*$_/,qq[RF Mode $_ found] );
-    }
+    my ($attrRFmodes) = grep {$_ =~ /^rfmode:/ } split (" ", $validationHash{AttrList}) ; 
+    my @rfmodes = split (",",$attrRFmodes);
     
+    # Itmes must be in sorted order
+    is(\@rfmodes,array {
+            item 'rfmode:Avantek';
+            item 'Bresser_5in1';
+            item 'Bresser_6in1';
+            item 'KOPP_FC';
+            item 'Lacrosse_mode1';
+            item 'Lacrosse_mode2';
+            item 'PCA301';
+            item 'Rojaflex';
+            item 'SlowRF';
+            
+            etc();
+        }    
+     ,q[Test rfmodes and order]);
+   
 	exit(0);
 },'dummyDuino');
 
