@@ -273,7 +273,7 @@ my %matchListSIGNALduino = (
 my %symbol_map = (one => 1 , zero =>0 ,sync => '', float=> 'F', 'start' => '');
 
 ## rfmode for attrib & supported rfmodes
-my @rfmode = ('SlowRF');
+my @rfmode;
 my $Protocols = new lib::SD_Protocols();
 
 ############################# package main
@@ -289,7 +289,9 @@ sub SIGNALduino_Initialize {
     Log3 'SIGNALduino', 1, qq[Error loading Protocol Hash. Module is in inoperable mode error message:($error)];
   } else {
     $hash->{protocolObject} = $Protocols;
-    push @rfmode, map { $Protocols->checkProperty($_,'rfmode') } $Protocols->getKeys('rfmode');    
+    @rfmode = ('SlowRF');
+    push @rfmode, map { $Protocols->checkProperty($_, 'rfmode') } $Protocols->getKeys('rfmode');    
+    @rfmode = sort @rfmode;
     Log3 'SIGNALduino', 4, qq[SIGNALduino_Initialize: rfmode list: @rfmode];
   }
 
