@@ -24,7 +24,8 @@
       "modulation": "2-FSK",
       "name": "Unittest MN Protocol",
       "knownFreqs": "868.3",
-      "clientmodule": "LaCrosse"
+      "clientmodule": "LaCrosse",
+      "rfmode" : "value"
     },
     "9988": {
       "knownFreqs": "868.3",

@@ -1,4 +1,4 @@
-# $Id: 00_SIGNALduino.pm v3.5.2 2021-12-16 18:40:07Z HomeAutoUser $
+# $Id: 00_SIGNALduino.pm v3.5.2 2021-12-19 18:11:16Z elektron-bbs $
 # v3.5.2 - https://github.com/RFD-FHEM/RFFHEM/tree/master
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incoming messages
 # see http://www.fhemwiki.de/wiki/SIGNALDuino
@@ -38,7 +38,7 @@ use List::Util qw(first);
 
 
 use constant {
-  SDUINO_VERSION                  => '3.5.2+20211216',  # Datum wird automatisch bei jedem pull request aktualisiert
+  SDUINO_VERSION                  => '3.5.2+20211219',  # Datum wird automatisch bei jedem pull request aktualisiert
   SDUINO_INIT_WAIT_XQ             => 1.5,     # wait disable device
   SDUINO_INIT_WAIT                => 2,
   SDUINO_INIT_MAXRETRY            => 3,
@@ -273,7 +273,8 @@ my %matchListSIGNALduino = (
 my %symbol_map = (one => 1 , zero =>0 ,sync => '', float=> 'F', 'start' => '');
 
 ## rfmode for attrib & supported rfmodes
-my @rfmode = ('Avantek','Bresser_5in1','Bresser_6in1','KOPP_FC','Lacrosse_mode1','Lacrosse_mode2','Lacrosse_mode4','PCA301','Rojaflex','SlowRF');
+my @rfmode;
+my $Protocols = new lib::SD_Protocols();
 
 ############################# package main
 sub SIGNALduino_Initialize {
@@ -281,6 +282,18 @@ sub SIGNALduino_Initialize {
 
   my $dev = '';
   $dev = ',1' if (index(SDUINO_VERSION, 'dev') >= 0);
+
+  $Protocols->registerLogCallback(SIGNALduino_createLogCallback($hash));
+  my $error = $Protocols->LoadHash(qq[$attr{global}{modpath}/FHEM/lib/SD_ProtocolData.pm]); 
+  if (defined($error)) {
+    Log3 'SIGNALduino', 1, qq[Error loading Protocol Hash. Module is in inoperable mode error message:($error)];
+  } else {
+    $hash->{protocolObject} = $Protocols;
+    @rfmode = ('SlowRF');
+    push @rfmode, map { $Protocols->checkProperty($_, 'rfmode') } $Protocols->getKeys('rfmode');    
+    @rfmode = sort @rfmode;
+    Log3 'SIGNALduino', 4, qq[SIGNALduino_Initialize: rfmode list: @rfmode];
+  }
 
 # Provider
   $hash->{ReadFn}  = \&SIGNALduino_Read;
@@ -407,9 +420,7 @@ sub SIGNALduino_Define {
   $hash->{logMethod}  = \&main::Log3;
 
   my $ret=undef;
-  my $Protocols = new lib::SD_Protocols();
   $Protocols->registerLogCallback(SIGNALduino_createLogCallback($hash));
-  my $error = $Protocols->LoadHash(qq[$attr{global}{modpath}/FHEM/lib/SD_ProtocolData.pm]);
   $hash->{protocolObject} = $Protocols;
 
   InternalTimer(gettimeofday(), \&SIGNALduino_IdList,"sduino_IdList:$name",0);        # verzoegern bis alle Attribute eingelesen sind
@@ -428,8 +439,8 @@ sub SIGNALduino_Define {
   $hash->{versionmodul}     = SDUINO_VERSION;
   $hash->{versionProtocols} = $hash->{protocolObject}->getProtocolVersion();
 
-  if (defined($error)  ) {
-    Log3 'SIGNALduino', 1, qq[Error loading Protocol Hash. Module is in inoperable mode error message:($error)];
+  if (!defined($hash->{versionProtocols})) {
+    Log3 $name, 1, qq[$name: Error loading Protocol Hash! SIGNALduino is in inoperable mode!];
     return ;
   }
 
