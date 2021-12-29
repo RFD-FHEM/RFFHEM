@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 14_SD_WS07.pm 21666 2020-04-13 21:14:53Z Sidey $
+# $Id: 14_SD_WS07.pm 21666 2021-12-29 16:12:11Z elektron-bbs $
 # 
 # The purpose of this module is to support serval eurochron
 # weather sensors like eas8007 which use the same protocol
