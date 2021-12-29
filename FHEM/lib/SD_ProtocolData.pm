@@ -400,8 +400,10 @@ package lib::SD_ProtocolData;
         length_max       => '40',
       },
     "7.1" => ## Mebus Modell Number HQ7312-2
-             # https://github.com/RFD-FHEM/RFFHEM/issues/1024
+             # https://github.com/RFD-FHEM/RFFHEM/issues/1024 @ rpsVerni 2021-10-06
+             # Ch:3 T: 23.8 H: 11 Bat:ok    MS;P0=332;P1=-1114;P2=-2106;P3=-4055;D=03010201010202010202010201010101010202020102020201020202020101010102010202;CP=0;SP=3;R=56;m0;
              # Ch:3 T: 24.5 H: 10 Bat:ok    MS;P0=-2128;P1=320;P5=-1159;P6=-4084;D=16151015151010151010151015151515151010101015101510101010101515151510151015;CP=1;SP=6;R=66;O;m2;
+             # Ch:3 T: 25.3 H: 11 Bat:ok    MS;P1=303;P4=-1153;P5=-2138;P6=-4102;D=16141514141515141515141514141414141515151515151415151515151414141415141515;CP=1;SP=6;R=50;O;m2;
       {
         name             => 'Weather',
         comment          => 'Mebus HQ7312-2',

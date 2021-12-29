@@ -301,7 +301,10 @@ SD_WS07_Parse($$)
   <ul>
     <li>Auriol AFW 2 A1, IAN: 297514</li>
     <li>Eurochon EAS800z</li>
+    <li>FreeTec outdoor module for weather station NC-7344</li>
+    <li>Mebus HQ7312-2</li>
     <li>Technoline WS6750/TX70DTH</li>
+    <li>TFA 30320902</li>
   </ul>
   <br>
   New received devices are added in FHEM with autocreate.
@@ -383,9 +386,10 @@ SD_WS07_Parse($$)
   <ul>
     <li>Auriol AFW 2 A1, IAN: 297514</li>
     <li>Eurochon EAS800z</li>
+    <li>FreeTec Aussenmodul fuer Wetterstation NC-7344</li>
+    <li>Mebus HQ7312-2</li>
     <li>Technoline WS6750/TX70DTH</li>
     <li>TFA 30320902</li>
-    <li>FreeTec Aussenmodul fuer Wetterstation NC-7344</li>
   </ul>
   <br>
   Neu empfangene Sensoren werden in FHEM per autocreate angelegt.
