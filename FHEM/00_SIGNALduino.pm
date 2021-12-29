@@ -1,4 +1,4 @@
-# $Id: 00_SIGNALduino.pm v3.5.2 2021-11-26 23:35:40Z elektron-bbs $
+# $Id: 00_SIGNALduino.pm v3.5.2 2021-12-19 18:11:16Z elektron-bbs $
 # v3.5.2 - https://github.com/RFD-FHEM/RFFHEM/tree/master
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incoming messages
 # see http://www.fhemwiki.de/wiki/SIGNALDuino
@@ -38,7 +38,7 @@ use List::Util qw(first);
 
 
 use constant {
-  SDUINO_VERSION                  => '3.5.2+20211126',  # Datum wird automatisch bei jedem pull request aktualisiert
+  SDUINO_VERSION                  => '3.5.2+20211219',  # Datum wird automatisch bei jedem pull request aktualisiert
   SDUINO_INIT_WAIT_XQ             => 1.5,     # wait disable device
   SDUINO_INIT_WAIT                => 2,
   SDUINO_INIT_MAXRETRY            => 3,
@@ -273,7 +273,8 @@ my %matchListSIGNALduino = (
 my %symbol_map = (one => 1 , zero =>0 ,sync => '', float=> 'F', 'start' => '');
 
 ## rfmode for attrib & supported rfmodes
-my @rfmode = ('Avantek','Bresser_5in1','Bresser_6in1','KOPP_FC','Lacrosse_mode1','Lacrosse_mode2','Lacrosse_mode4','PCA301','Rojaflex','SlowRF');
+my @rfmode;
+my $Protocols = new lib::SD_Protocols();
 
 ############################# package main
 sub SIGNALduino_Initialize {
@@ -281,6 +282,18 @@ sub SIGNALduino_Initialize {
 
   my $dev = '';
   $dev = ',1' if (index(SDUINO_VERSION, 'dev') >= 0);
+
+  $Protocols->registerLogCallback(SIGNALduino_createLogCallback($hash));
+  my $error = $Protocols->LoadHash(qq[$attr{global}{modpath}/FHEM/lib/SD_ProtocolData.pm]); 
+  if (defined($error)) {
+    Log3 'SIGNALduino', 1, qq[Error loading Protocol Hash. Module is in inoperable mode error message:($error)];
+  } else {
+    $hash->{protocolObject} = $Protocols;
+    @rfmode = ('SlowRF');
+    push @rfmode, map { $Protocols->checkProperty($_, 'rfmode') } $Protocols->getKeys('rfmode');    
+    @rfmode = sort @rfmode;
+    Log3 'SIGNALduino', 4, qq[SIGNALduino_Initialize: rfmode list: @rfmode];
+  }
 
 # Provider
   $hash->{ReadFn}  = \&SIGNALduino_Read;
@@ -407,9 +420,7 @@ sub SIGNALduino_Define {
   $hash->{logMethod}  = \&main::Log3;
 
   my $ret=undef;
-  my $Protocols = new lib::SD_Protocols();
   $Protocols->registerLogCallback(SIGNALduino_createLogCallback($hash));
-  my $error = $Protocols->LoadHash(qq[$attr{global}{modpath}/FHEM/lib/SD_ProtocolData.pm]);
   $hash->{protocolObject} = $Protocols;
 
   InternalTimer(gettimeofday(), \&SIGNALduino_IdList,"sduino_IdList:$name",0);        # verzoegern bis alle Attribute eingelesen sind
@@ -428,8 +439,8 @@ sub SIGNALduino_Define {
   $hash->{versionmodul}     = SDUINO_VERSION;
   $hash->{versionProtocols} = $hash->{protocolObject}->getProtocolVersion();
 
-  if (defined($error)  ) {
-    Log3 'SIGNALduino', 1, qq[Error loading Protocol Hash. Module is in inoperable mode error message:($error)];
+  if (!defined($hash->{versionProtocols})) {
+    Log3 $name, 1, qq[$name: Error loading Protocol Hash! SIGNALduino is in inoperable mode!];
     return ;
   }
 
@@ -2332,14 +2343,13 @@ sub SIGNALduino_Parse_MS {
   my %msg_parts = SIGNALduino_Split_Message($rmsg, $hash->{NAME});
 
   # Verify if extracted hash has the correct values:
-  
-  my $clockidx = _limit_to_number($msg_parts{clockidx}) // $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: Parse_MS, faulty clock: $msg_parts{clockidx}])     &&  return ;      
-  my $syncidx  = _limit_to_number($msg_parts{syncidx})  // $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: Parse_MS, faulty sync: $msg_parts{syncidx}])       &&  return ;      
-  my $rawData  = _limit_to_number($msg_parts{rawData})  // $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: Parse_MS, faulty rawData D=: $msg_parts{rawData}]) &&  return ; 
+  my $clockidx = _limit_to_number($msg_parts{clockidx}) // $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: Parse_MS, faulty clock: $msg_parts{clockidx}]) // return ;
+  my $syncidx  = _limit_to_number($msg_parts{syncidx})  // $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: Parse_MS, faulty sync: $msg_parts{syncidx}]) // return ;
+  my $rawData  = _limit_to_number($msg_parts{rawData})  // $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: Parse_MS, faulty rawData D=: $msg_parts{rawData}]) // return ;
   my $rssi;
   my $rssiStr= '';
   if ( defined $msg_parts{rssi} ){
-     $rssi = _limit_to_hex($msg_parts{rssi}) // $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: Parse_MS, faulty rssi R=: $msg_parts{rssi}]) &&  return ; 
+     $rssi = _limit_to_number($msg_parts{rssi}) // $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: Parse_MS, faulty rssi R=: $msg_parts{rssi}]) // return ;
     ($rssi,$rssiStr) = SIGNALduino_calcRSSI($rssi);
   };
   my $messagetype=$msg_parts{messagetype};
@@ -2538,12 +2548,12 @@ sub SIGNALduino_Parse_MU {
   my %msg_parts = SIGNALduino_Split_Message($rmsg, $hash->{NAME});
 
   # Verify if extracted hash has the correct values:
-  my $clockidx = _limit_to_number($msg_parts{clockidx}) // $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: Parse_MU, faulty clock: $rmsg])     &&  return ;      
-  my $rawData  = _limit_to_number($msg_parts{rawData})  // $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: Parse_MU, faulty rawData D=: $msg_parts{rawData}]) &&  return ; 
+  my $clockidx = _limit_to_number($msg_parts{clockidx}) // $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: Parse_MU, faulty clock: $rmsg]) // return ;
+  my $rawData  = _limit_to_number($msg_parts{rawData})  // $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: Parse_MU, faulty rawData D=: $msg_parts{rawData}]) // return ;
   my $rssi;
   my $rssiStr= '';
   if ( defined $msg_parts{rssi} ){
-     $rssi = _limit_to_hex($msg_parts{rssi}) // $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: Parse_MU, faulty rssi R=: $msg_parts{rssi}]) &&  return ; 
+     $rssi = _limit_to_number($msg_parts{rssi}) // $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: Parse_MU, faulty rssi R=: $msg_parts{rssi}]) // return ;
     ($rssi,$rssiStr) = SIGNALduino_calcRSSI($rssi);
   };
   my $messagetype=$msg_parts{messagetype};
@@ -2770,13 +2780,13 @@ sub SIGNALduino_Parse_MC {
   my %msg_parts = SIGNALduino_Split_Message($rmsg, $hash->{NAME});
 
   # Verify if extracted hash has the correct values:
-  my $clock    = _limit_to_number($msg_parts{clockabs}) // $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: Parse_MC, faulty clock: $msg_parts{clockabs}])     &&  return ;      
-  my $mcbitnum = _limit_to_number($msg_parts{mcbitnum}) // $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: Parse_MC, faulty mcbitnum: $msg_parts{mcbitnum}])  &&  return ;      
-  my $rawData  = _limit_to_hex($msg_parts{rawData})     // $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: Parse_MC, faulty rawData D=: $msg_parts{rawData}]) &&  return ; 
+  my $clock    = _limit_to_number($msg_parts{clockabs}) // $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: Parse_MC, faulty clock: $msg_parts{clockabs}]) // return ;
+  my $mcbitnum = _limit_to_number($msg_parts{mcbitnum}) // $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: Parse_MC, faulty mcbitnum: $msg_parts{mcbitnum}]) // return ;
+  my $rawData  = _limit_to_hex($msg_parts{rawData})     // $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: Parse_MC, faulty rawData D=: $msg_parts{rawData}]) // return ;
   my $rssi;
   my $rssiStr= '';
   if ( defined $msg_parts{rssi} ){
-     $rssi = _limit_to_hex($msg_parts{rssi}) // $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: Parse_MC, faulty rssi R=: $msg_parts{rssi}]) &&  return ; 
+     $rssi = _limit_to_number($msg_parts{rssi}) // $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: Parse_MC, faulty rssi R=: $msg_parts{rssi}]) // return ;
     ($rssi,$rssiStr) = SIGNALduino_calcRSSI($rssi);
   };
   my $messagetype=$msg_parts{messagetype};
@@ -2886,11 +2896,11 @@ sub SIGNALduino_Parse_MN {
   my %msg_parts = SIGNALduino_Split_Message($rmsg, $hash->{NAME});
 
   # Verify if extracted hash has the correct values:
-  my $rawData  = _limit_to_hex($msg_parts{rawData})     // $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: Parse_MN, faulty rawData D=: $msg_parts{rawData}]) &&  return ; 
+  my $rawData  = _limit_to_hex($msg_parts{rawData})     // $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: Parse_MN, faulty rawData D=: $msg_parts{rawData}]) //  return ;
   my $rssi;
   my $rssiStr= '';
   if ( defined $msg_parts{rssi} ){
-     $rssi = _limit_to_hex($msg_parts{rssi}) // $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: Parse_MN, faulty rssi R=: $msg_parts{rssi}]) &&  return ; 
+     $rssi = _limit_to_number($msg_parts{rssi}) // $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: Parse_MN, faulty rssi R=: $msg_parts{rssi}]) //  return ;
     ($rssi,$rssiStr) = SIGNALduino_calcRSSI($rssi);
   };
   my $messagetype=$msg_parts{messagetype};
