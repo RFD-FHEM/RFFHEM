@@ -1,3 +1,11 @@
+2021-12-30 - new protocol definition 7.1 for Mebus HQ7312-2 (#1050)
+
+* various updates
+  SD_ProtocolData.pm -   new definitiion protocol 7.1 for sensor Mebus HQ7312-2 decoded in modul SD_WS07
+  14_SD_WS07.pm - update commandref
+  README.md - add sensor
+
+
 2021-12-20 - Filling the rfmode array for the attribute list. (#1047)
 
   Update 00_SIGNALduino.pm
