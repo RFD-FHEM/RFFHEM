@@ -62,6 +62,7 @@ Supported Devices / Protocols
 |MANAX MX-RCS250 | Remote control |
 |m-e VTX and BASIC | wireless bell |
 |Maverick | Wireless BBQ thermometer |
+|Mebus HQ7312-2 | Weather station |
 |Medion OR28V | Remote control |
 |Momento | Remote control for wireless digital picture frame |
 |Mumbi m-FS300 | Remote control |

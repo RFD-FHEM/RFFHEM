@@ -1,5 +1,5 @@
 ###########################################################################################################################################
-# $Id: SD_ProtocolData.pm 3.4.4 2021-11-26 23:35:40Z elektron-bbs $
+# $Id: SD_ProtocolData.pm 3.4.4 2021-12-29 16:12:11Z elektron-bbs $
 # The file is part of the SIGNALduino project.
 # All protocol definitions are contained in this file.
 #
@@ -86,7 +86,7 @@ package lib::SD_ProtocolData;
   use strict;
   use warnings;
 
-  our $VERSION = '1.39';
+  our $VERSION = '1.40';
 
   our %protocols = (
     "0" =>  ## various weather sensors (500 | 9100)
@@ -398,6 +398,27 @@ package lib::SD_ProtocolData;
         modulematch      => '^P7#.{6}[AFaf].{2}',
         length_min       => '35',
         length_max       => '40',
+      },
+    "7.1" => ## Mebus Modell Number HQ7312-2
+             # https://github.com/RFD-FHEM/RFFHEM/issues/1024 @ rpsVerni 2021-10-06
+             # Ch:3 T: 23.8 H: 11 Bat:ok    MS;P0=332;P1=-1114;P2=-2106;P3=-4055;D=03010201010202010202010201010101010202020102020201020202020101010102010202;CP=0;SP=3;R=56;m0;
+             # Ch:3 T: 24.5 H: 10 Bat:ok    MS;P0=-2128;P1=320;P5=-1159;P6=-4084;D=16151015151010151010151015151515151010101015101510101010101515151510151015;CP=1;SP=6;R=66;O;m2;
+             # Ch:3 T: 25.3 H: 11 Bat:ok    MS;P1=303;P4=-1153;P5=-2138;P6=-4102;D=16141514141515141515141514141414141515151515151415151515151414141415141515;CP=1;SP=6;R=50;O;m2;
+      {
+        name             => 'Weather',
+        comment          => 'Mebus HQ7312-2',
+        id               => '7.1',
+        knownFreqs       => '433.92',
+        one              => [1,-7],  # 300,-2100
+        zero             => [1,-4],  # 300,-1200
+        sync             => [1,-14], # 300,-4200
+        clockabs         => 300,
+        format           => 'twostate',
+        preamble         => 'P7#',
+        clientmodule     => 'SD_WS07',
+        modulematch      => '^P7#.{6}[AFaf].{2}',
+        length_min       => '36',
+        length_max       => '36',
       },
     "8"  => ## TX3 (ITTX) Protocol
             # Id:97 T: 24.4   MU;P0=-1046;P1=1339;P2=524;P3=-28696;D=010201010101010202010101010202010202020102010101020101010202020102010101010202310101010201020101010101020201010101020201020202010201010102010101020202010201010101020;CP=2;R=4;
