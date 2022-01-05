@@ -36,10 +36,10 @@ Supported Devices / Protocols
 |ESTO Lighting GmbH KL-RF01 | Remote control |
 |EuroChron EFTH-800, EFS-3110A | Weather station (temperature and humidity) |
 |FA21RF | Smoke detector | 
-|Fody E42 | Temperature/humidity sensor (protocol BRESSER 5-in-1) | 
 |FHT80 | Roomthermostat (only receive) |
 |FHT80TF | door/window switch |
 |FLAMINGO | Flamingo smoke detector |
+|Fody E42 | Temperature/humidity sensor (protocol BRESSER 5-in-1) |
 |FS10 | Remote control |
 |FS20 | Remote control |
 |FT0073 | Weather sensors|
@@ -122,7 +122,8 @@ Example: ```define SDuino SIGNALduino /dev/serial/by-id/usb-1a86_USB2.0-Serial-i
 You have to adapt this to your environment.
 
 If you made your setup with an Arduino Nano, you can use this command to load the firmware on your device:
-set SDuino flash
+
+```set SDuino flash```
 
 If this fails, you may need to install avrdude on your system.
 On a raspberry pi it is done via
