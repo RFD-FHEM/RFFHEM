@@ -1,3 +1,7 @@
+2022-01-06 - new sensor Fody E42 (#1052)
+
+  The temperature / humidity sensor Fody E42 uses the protocol 108.
+
 2021-12-30 - new protocol definition 7.1 for Mebus HQ7312-2 (#1050)
 
 * various updates
