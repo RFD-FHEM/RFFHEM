@@ -5,6 +5,7 @@ Base Branch:
 [![codecov](https://codecov.io/gh/RFD-FHEM/RFFHEM/branch/master/graph/badge.svg?token=szkoYvQwNV)](https://codecov.io/gh/RFD-FHEM/RFFHEM)
 ![Perl Modules&FHEM Unittests](https://github.com/RFD-FHEM/RFFHEM/workflows/Perl%20Modules&FHEM%20Unittests/badge.svg)
 ![controlsFile](https://github.com/RFD-FHEM/RFFHEM/workflows/controlsFile/badge.svg)
+
 Counterpart of SIGNALDuino uC, it's the code for FHEM to work with the data received from the uC
 
 Supported Devices / Protocols
@@ -38,6 +39,7 @@ Supported Devices / Protocols
 |FHT80 | Roomthermostat (only receive) |
 |FHT80TF | door/window switch |
 |FLAMINGO | Flamingo smoke detector |
+|Fody E42 | Temperature/humidity sensor (protocol BRESSER 5-in-1) |
 |FS10 | Remote control |
 |FS20 | Remote control |
 |FT0073 | Weather sensors|
@@ -114,17 +116,23 @@ for hardware setup.
 
 
 Connect the Arduino via USB to your FHEM Server and define the device with it's new port:
+
 Example: ```define SDuino SIGNALduino /dev/serial/by-id/usb-1a86_USB2.0-Serial-if00-port0@57600```
+
 You have to adapt this to your environment.
 
 If you made your setup with an Arduino Nano, you can use this command to load the firmware on your device:
-set SDuino flash
+
+```set SDuino flash```
 
 If this fails, you may need to install avrdude on your system.
-On a raspberry pi it is done via ```sudo apt-get install avrdude```
+On a raspberry pi it is done via
+
+```sudo apt-get install avrdude```
 
 More Information
 =====
 Look at the FHEM Wiki, for more Information: http://www.fhemwiki.de/wiki/SIGNALDuino
+
 Forum thread is at: http://forum.fhem.de/index.php/topic,38831.0.html
 

@@ -1,5 +1,5 @@
 ###########################################################################################################################################
-# $Id: SD_ProtocolData.pm 3.4.4 2021-12-29 16:12:11Z elektron-bbs $
+# $Id: SD_ProtocolData.pm 3.4.4 2022-01-05 20:44:16Z elektron-bbs $
 # The file is part of the SIGNALduino project.
 # All protocol definitions are contained in this file.
 #
@@ -71,7 +71,7 @@
 ##### notice #### or #### info ############################################################################################################
 # !!! Between the keys and values ​​no tabs, please use spaces !!!
 # !!! Please use first unused id for new protocols !!!
-# ID´s are currently unused: 117 - 
+# ID´s are currently unused: 118 - 
 # ID´s need to be revised (preamble u): 5|19|21|22|23|25|28|31|36|40|52|59|63
 ###########################################################################################################################################
 # Please provide at least three messages for each new MU/MC/MS/MN protocol and a URL of issue in GitHub or discussion in FHEM Forum
@@ -2863,7 +2863,7 @@ package lib::SD_ProtocolData;
 
     # "107" => reserved @elektron-bbs for Fine Offset WH51, ECOWITT WH51, MISOL/1, Froggit DP100 Soil Moisture Sensor
 
-    "108" =>  ## BRESSER 5-in-1 Weather Center, Bresser Professional Rain Gauge - elektron-bbs 2021-05-02
+    "108" =>  ## BRESSER 5-in-1 Weather Center, Bresser Professional Rain Gauge, Fody E42, Fody E43 - elektron-bbs 2021-05-02
               # https://github.com/RFD-FHEM/RFFHEM/issues/607
               # https://forum.fhem.de/index.php/topic,106594.msg1151467.html#msg1151467
               # T: 11 H: 43 W: 1.7 R: 7.6     MN;D=E6837FD73FE8EFEFFEBC89FFFF197C8028C017101001437600000001;R=230;
@@ -2873,10 +2873,10 @@ package lib::SD_ProtocolData;
               # T: 8 H: 88 W: 1.3 R: 364.8     MN;D=E6527FEB0FECEF7FFF77B7C9FF19AD8014F013108000884836000003;R=211;
       {
         name            => 'Bresser 5in1',
-        comment         => 'BRESSER 5-in-1 weather center, rain gauge',
+        comment         => 'BRESSER 5-in-1 weather center, rain gauge, Fody E42, Fody E43',
         id              => '108',
         knownFreqs      => '868.35',
-        datarate        => '8.207',
+        datarate        => '8.232',
         sync            => '2DD4',
         modulation      => '2-FSK',
         rfmode          => 'Bresser_5in1',
@@ -3048,6 +3048,7 @@ package lib::SD_ProtocolData;
       },
 
     # "116" => reserved @elektron-bbs for Fine Offset WH57, Froggit DP60 Thunder and Lightning sensor
+    # "117" => reserved @elektron-bbs for BRESSER 7-in-1 Weather Center
 
     ########################################################################
     #### ###  register informations from other hardware protocols  #### ####

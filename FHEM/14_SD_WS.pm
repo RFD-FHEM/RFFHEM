@@ -1,4 +1,4 @@
-# $Id: 14_SD_WS.pm 21666 2021-12-08 16:39:29Z elektron-bbs $
+# $Id: 14_SD_WS.pm 21666 2022-01-05 20:44:16Z elektron-bbs $
 #
 # The purpose of this module is to support serval
 # weather sensors which use various protocol
@@ -37,6 +37,7 @@
 # 31.07.2021 neues Protokoll 115: Bresser 6-in-1 Comfort Wetter Center
 # 30.08.2021 PerlCritic - fixes for severity level 5 and 4
 # 07.12.2021 Protokoll 33: Conrad S522 kein Batteriebit, dafuer Trend Temperatur
+# 05.01.2022 Protokoll 108: neuer Sensor Fody E42
 
 package main;
 
@@ -717,14 +718,20 @@ sub SD_WS_Parse {
         #                                           G-MSB ^     ^ W-MSB  (strange but consistent order)
         #
         #           1         2         3         4         5     
-        # 01234567890123456789012345678901234567890123456789012345
+        # 0123456789012345678901234567890123456789012345678901
         # --------------------------------------------------------
-        # EC837FF7FFFBEFDEFF7A89FFFF137C80080004102100857600000001   56 Nibble from SIGNALduino
-        # CCCCCCCCCCCCCCCCCCCCCCCCCCuuIISSGGDGWW WTT THHRR RBt       52 Nibble
+        # EC837FF7FFFBEFDEFF7A89FFFF137C8008000410210085760000   52 Nibble from SIGNALduino
+        # CCCCCCCCCCCCCCCCCCCCCCCCCCuuIISSGGDGWW WTT THHRR RBt   52 Nibble
         # C = check, inverted data of 13 byte further
         # u = checksum (number/count of set bits within bytes 14-25)
         # I = station ID
-        # S = sensor type, only low nibble used, 0x9 for Bresser Professional Rain Gauge
+        # S = sensor type, device reset, channel - ???
+        #     Bit:    0    4   
+        #             1000 0000
+        #             r?ss cccc
+        #             r:  1 bit device reset, 0 after inserting battery or pressing reset, 1 after 1 hour (checked with Fody E42)
+        #             s:  2 bit sensor type, 00 = Bresser_5in1, 01 = Fody_E42, 11 = Bresser_rain_gauge
+        #             c:  4 bit channel, 0000 = Bresser_5in1, 0001/0010/0011 = Fody_E42 (changes after reset), 1001 = Bresser_rain_gauge
         # G = wind gust in 1/10 m/s, normal binary coded, GGxG = 0x76D1 => 0x0176 = 256 + 118 = 374 => 37.4 m/s.  MSB is out of sequence.
         # D = wind direction 0..F = N..NNE..E..S..W..NNW
         # W = wind speed in 1/10 m/s, BCD coded, WWxW = 0x7512 => 0x0275 = 275 => 27.5 m/s. MSB is out of sequence.
@@ -741,21 +748,21 @@ sub SD_WS_Parse {
         # 7C8008000410210085760000
         # IISSGGDGWW WTT THHRRRRBt
 
-        sensortype => 'Bresser_5in1, Bresser_rain_gauge',
+        sensortype => 'Bresser_5in1, Bresser_rain_gauge, Fody_E42, Fody_E43',
         model      => 'SD_WS_108',
         prematch   => sub {my $rawData = shift; return 1 if ($rawData =~ /^[0-9A-F]{8}[0-9]{2}[0-9A-F]{1}[0-9]{3}[0-9A-F]{1}[0-9]{5}[0-9A-F]{1}[0-9]{1}/); },
         id         => sub {my ($rawData,undef) = @_; return substr($rawData,0,2); },
-        winddir    => sub {my ($rawData,undef) = @_;
-                            return if (substr($rawData,3,1) eq '9'); # Bresser Professional Rain Gauge
+        winddir    => sub {my ($rawData,$bitData) = @_;
+                            return if (substr($bitData,10,2) eq '01' || substr($bitData,10,2) eq '11'); # Bresser rain gauge, Fody E42
                             my $winddirraw = hex(substr($rawData,6,1));
                             return ($winddirraw * 22.5, $winddirtxtar[$winddirraw]);
                           },
-        windgust   => sub {my ($rawData,undef) = @_;
-                            return if (substr($rawData,3,1) eq '9'); # Bresser Professional Rain Gauge
+        windgust   => sub {my ($rawData,$bitData) = @_;
+                            return if (substr($bitData,10,2) eq '01' || substr($bitData,10,2) eq '11'); # Bresser rain rauge, Fody E42
                             return (hex(substr($rawData,7,1)) * 256 + hex(substr($rawData,4,2))) / 10;
                           },
-        windspeed  => sub {my ($rawData,undef) = @_;
-                            return if (substr($rawData,3,1) eq '9'); # Bresser Professional Rain Gauge
+        windspeed  => sub {my ($rawData,$bitData) = @_;
+                            return if (substr($bitData,10,2) eq '01' || substr($bitData,10,2) eq '11'); # Bresser rain gauge, Fody E42
                             return (substr($rawData,11,1) . substr($rawData,8,2)) / 10;
                           },
         temp       => sub {my ($rawData,undef) = @_;
@@ -763,16 +770,18 @@ sub SD_WS_Parse {
                             $rawTemp =  $sgn * (substr($rawData,15,1) . substr($rawData,12,1) . '.' .substr($rawData,13,1));
                             return $rawTemp;
                           },
-        hum        => sub {my ($rawData,undef) = @_;
-                            return if (substr($rawData,3,1) eq '9'); # Bresser Professional Rain Gauge
+        hum        => sub {my ($rawData,$bitData) = @_;
+                            return if (substr($bitData,10,2) eq '11'); # Bresser rain gauge
                             return substr($rawData,16,2) + 0;
                           },
-        rain       => sub {my ($rawData,undef) = @_;
+        rain       => sub {my ($rawData,$bitData) = @_;
+                            return if (substr($bitData,10,2) eq '01'); # Fody E42
                             $rain = (substr($rawData,20,2) . substr($rawData,18,2)) / 10;
-                            $rain *= 2.5 if (substr($rawData,3,1) eq '9'); # Bresser Professional Rain Gauge
+                            $rain *= 2.5 if (substr($bitData,10,2) eq '11'); # Bresser rain gauge
                             return $rain;
                           },
         bat        => sub {my ($rawData,undef) = @_; return substr($rawData,22,1) eq '0' ? 'ok' : 'low';},
+        batChange  => sub {my (undef,$bitData) = @_; return substr($bitData,8,1);},
         crcok      => sub {return 1;}, # checks are in SD_Protocols.pm sub ConvBresser_5in1
     } ,
     110 => {
@@ -1471,7 +1480,7 @@ sub SD_WS_Parse {
   readingsBulkUpdate($hash, 'windDirectionText', $winddirtxt)  if (defined($winddirtxt)) ;
   readingsBulkUpdate($hash, 'windGust', $windgust)  if (defined($windgust)) ;
   readingsBulkUpdate($hash, "batteryState", $bat) if (defined($bat) && length($bat) > 0) ;
-  readingsBulkUpdate($hash, "batteryChanged", $batChange) if (defined($batChange) && length($batChange) > 0 && $batChange eq "1") ;
+  readingsBulkUpdateIfChanged($hash, "batteryChanged", $batChange) if (defined($batChange));
   readingsBulkUpdate($hash, "channel", $channel, 0) if (defined($channel)&& length($channel) > 0);
   readingsBulkUpdate($hash, "trend", $trend) if (defined($trend) && length($trend) > 0);
   readingsBulkUpdate($hash, "temperatureTrend", $trendTemp) if (defined($trendTemp) && length($trendTemp) > 0);
@@ -1585,6 +1594,7 @@ sub SD_WS_WH2SHIFT {
     <li>Bresser 5-in-1 and 6-in-1 Comfort Weather Center, 7009994, Professional rain gauge, Temeo</li>
     <li>Conrad S522</li>
     <li>EuroChron EFTH-800, EFS-3110A (temperature and humidity sensor)</li>
+    <li>Fody E42 (temperature and humidity sensor)</li>
     <li>NC-3911, NC-3912 refrigerator thermometer</li>
     <li>Opus XT300</li>
     <li>PV-8644 infactory Poolthermometer</li>
@@ -1672,7 +1682,7 @@ sub SD_WS_WH2SHIFT {
       <a name="end_max-deviation-temp"></a>
     </li><br>
     <li>model<br>
-      (Default: other, currently supported sensors: E0001PA, S522)<br>
+      (Default: other, currently supported sensors: E0001PA, S522 and TX-EZ6)<br>
       <a name="model"></a>
       The sensors of the "SD_WS_33 series" use different positions for the battery bit and different readings. 
       If the battery bit is detected incorrectly (low instead of ok), then you can possibly adjust with the model selection of the sensor.<br>
@@ -1704,6 +1714,7 @@ sub SD_WS_WH2SHIFT {
     <li>Bresser 5-in-1 und 6-in-1 Comfort Wetter Center, 7009994, Profi Regenmesser, Temeo</li>
     <li>Conrad S522</li>
     <li>EuroChron EFTH-800, EFS-3110A (Temperatur- und Feuchtigkeitssensor)</li>
+    <li>Fody E42 (Temperatur- und Feuchtigkeitssensor)</li>
     <li>Kabelloses Grillthermometer, Modellname: GFGT 433 B1</li>
     <li>NC-3911, NC-3912 digitales Kuehl- und Gefrierschrank-Thermometer</li>
     <li>Opus XT300</li>
@@ -1729,7 +1740,7 @@ sub SD_WS_WH2SHIFT {
     Sensoren, die eine Kanalnummer unterstützen, werden z.B. in folgender Form angelegt:<br>
     <code>SD_WS_33_1</code><br>
     Dabei kennzeichnet die 1 das der Sensor mit Kanal 1 angelegt wurde.
-    Sensoren, die keine Kanalauswahl bieten, werden ohne Kanalnuummer angelegt, wie z.B.:<br>
+    Sensoren, die keine Kanalauswahl bieten, werden ohne Kanalnummer angelegt, wie z.B.:<br>
     <code>SD_WS_108</code><br>
     Sollten mehrere Sensoren ohne oder mit gleicher Kanalnummer empfangen werden,
     so kann man beim SIGNALduino das Attribut "longids" setzen.
