@@ -16,7 +16,7 @@ jobs:
       with:
         perl-version: 5.32
         install-modules-with: cpanm
-        install-modules: Perl::Critic Task::PerlCriticAllPolicies 
+        install-modules: Perl::Critic 
         install-modules-args: --notest
     - uses: reviewdog/action-setup@v1
       with:
