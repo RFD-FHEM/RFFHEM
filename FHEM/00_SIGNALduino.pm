@@ -356,13 +356,6 @@ our $FW_detail;
 
 
 
-sub cause_pc_waring($)
-{
-  my $a = "init";
-
-  return undef;
-}
-
 ############################# package main, test exists
 sub SIGNALduino_FingerprintFn {
   my ($name, $msg) = @_;
