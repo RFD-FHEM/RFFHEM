@@ -29,6 +29,6 @@ jobs:
           reviewdog -efm '%f:%l:%c:%m' \
             -name="perlcritic" \
             -reporter="github-pr-check" \
-            -filter-mode="added" \
+            -filter-mode="file" \
             -fail-on-error="false" \
             -level="warning" \
