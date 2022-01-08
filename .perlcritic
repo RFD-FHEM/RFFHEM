@@ -1,3 +1,3 @@
 severity        = 5
 color           = 0
-theme           = !maintenance && !bangs
+verbose         = '%f:%l:%c:%m (%e)\n'
