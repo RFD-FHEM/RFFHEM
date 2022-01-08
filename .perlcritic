@@ -1,3 +1,2 @@
 severity        = 5
 color           = 0
-theme           = pbp && bugs && security
