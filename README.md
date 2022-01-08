@@ -1,4 +1,4 @@
-SIGNALduino - FHEM Modules Version 3.5.1+
+SIGNALduino - FHEM Modules Version 3.5.2
 
 Base Branch:
 
@@ -115,13 +115,15 @@ Prepare your Arduino nano. Look at http://www.fhemwiki.de/wiki/Datei:Fhemduino_s
 for hardware setup.
 
 
-Connect the Arduino via USB to your FHEM Server and define the device with it's new port:
+Connect the uC via USB to your FHEM Server and define the device with it's new port:
 
 Example: ```define SDuino SIGNALduino /dev/serial/by-id/usb-1a86_USB2.0-Serial-if00-port0@57600```
 
-You have to adapt this to your environment.
 
-If you made your setup with an Arduino Nano, you can use this command to load the firmware on your device:
+You have to adapt this to your environment.
+Connection via network is also possible.
+
+If you made your setup with an Arduino, you can use this command to load the firmware on your device:
 
 ```set SDuino flash```
 
@@ -134,5 +136,5 @@ More Information
 =====
 Look at the FHEM Wiki, for more Information: http://www.fhemwiki.de/wiki/SIGNALDuino
 
-Forum thread is at: http://forum.fhem.de/index.php/topic,38831.0.html
+Forum Support is at: https://forum.fhem.de/index.php/board,29.0.html
 
