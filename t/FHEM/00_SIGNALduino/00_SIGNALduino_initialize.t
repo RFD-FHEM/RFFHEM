@@ -25,6 +25,8 @@ InternalTimer(time(), sub {
             item 'rfmode:Avantek';
             item 'Bresser_5in1';
             item 'Bresser_6in1';
+            item 'Fine_Offset_WH51_434';
+            item 'Fine_Offset_WH51_868';
             item 'KOPP_FC';
             item 'Lacrosse_mode1';
             item 'Lacrosse_mode2';
