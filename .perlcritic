@@ -1,3 +1,3 @@
 severity        = 5
 color           = 0
-theme           = !maintenance 
+theme           = !maintenance && !bangs
