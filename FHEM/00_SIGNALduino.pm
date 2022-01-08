@@ -4772,11 +4772,24 @@ USB-connected devices (SIGNALduino):<br>
   <li>rfmode<br>
     Configures the RF transceiver of the SIGNALduino (CC1101). The available arguments:
     <ul>
+      <li>Avantek<br>
+        Modulation 2-FSK, Datarate=50.087 kbps, Sync Word=0869, FIFO-THR=8 Byte, Frequency 433.3 MHz
+        <ul><small>Example: AVANTEK Wireless Digital Door Bell</small></ul>
+      </li>
       <li>Bresser_5in1<br>
-        modulation 2-FSK, Datarate=8.23 kbps, Sync Word=2DD4, FIFO-THR=28 Byte, frequency 868.35 MHz
+        Modulation 2-FSK, Datarate=8.23 kbps, Sync Word=2DD4, Packet Length=26 Byte, Frequency 868.35 MHz
+        <ul><small>Example: BRESSER 5-in-1 weather center, BRESSER rain gauge, Fody E42, Fody E43</small></ul>
       </li>
       <li>Bresser_6in1<br>
         modulation 2-FSK, Datarate=8.23 kbps, Sync Word=2DD4, FIFO-THR=20 Byte, frequency 868.35 MHz
+      </li>
+      <li>Fine_Offset_WH51_434<br>
+        Modulation 2-FSK, Datenrate=17.26 kbps, Sync Word=2DD4, Packet Length=14 Byte, Frequency 433.92 MHz
+        <ul><small>Example: Soil moisture sensor Fine Offset WH51, ECOWITT WH51, MISOL/1, Froggit DP100</small></ul>
+      </li>
+      <li>Fine_Offset_WH51_868<br>
+        Modulation 2-FSK, Datenrate=17.26 kbps, Sync Word=2DD4, Packet Length=14 Byte, Frequency 868.35 MHz
+        <ul><small>Example: Soil moisture sensor Fine Offset WH51, ECOWITT WH51, MISOL/1, Froggit DP100</small></ul>
       </li>
       <li>KOPP_FC<br>
         modulation GFSK, Datarate=4.7855 kbps, Sync Word=AA54, frequency 868.3MHz
@@ -5330,11 +5343,24 @@ USB-connected devices (SIGNALduino):<br>
   <li>rfmode<br>
     Konfiguriert den RF Transceiver des SIGNALduino (CC1101). Verf&uuml;gbare Argumente sind:
     <ul>
+      <li>Avantek<br>
+        Modulation 2-FSK, Datarate=50.087 kbps, Sync Word=0869, FIFO-THR=8 Byte, Frequenz 433.3 MHz
+        <ul><small>Example: AVANTEK Funk-Türklingel</small></ul>
+      </li>
       <li>Bresser_5in1<br>
-        Modulation 2-FSK, Datenrate=8.23 kbps, Sync Word=2DD4, FIFO-THR=28 Byte, Frequenz 868.35 MHz
+        Modulation 2-FSK, Datenrate=8.23 kbps, Sync Word=2DD4, Packet Length=26 Byte, Frequenz 868.35 MHz
+        <ul><small>Beispiel: BRESSER 5-in-1 Wetter Center, BRESSER Profi Regenmesser, Fody E42, Fody E43</small></ul>
       </li>
       <li>Bresser_6in1<br>
         Modulation 2-FSK, Datenrate=8.23 kbps, Sync Word=2DD4, FIFO-THR=20 Byte, Frequenz 868.35 MHz
+      </li>
+      <li>Fine_Offset_WH51_434<br>
+        Modulation 2-FSK, Datenrate=17.26 kbps, Sync Word=2DD4, Packet Length=14 Byte, Frequenz 433.92 MHz
+        <ul><small>Beispiel: Bodenfeuchtesensor Fine Offset WH51, ECOWITT WH51, MISOL/1, Froggit DP100</small></ul>
+      </li>
+      <li>Fine_Offset_WH51_868<br>
+        Modulation 2-FSK, Datenrate=17.26 kbps, Sync Word=2DD4, Packet Length=14 Byte, Frequenz 868.35 MHz
+        <ul><small>Beispiel: Bodenfeuchtesensor Fine Offset WH51, ECOWITT WH51, MISOL/1, Froggit DP100</small></ul>
       </li>
       <li>KOPP_FC<br>
         Modulation GFSK, Datenrate=4.7855 kbps, Sync Word=AA54, Frequenz 868.3MHz

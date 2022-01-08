@@ -1,17 +1,13 @@
 2022-01-06 - new sensor Fody E42 (#1052)
-
   The temperature / humidity sensor Fody E42 uses the protocol 108.
 
 2021-12-30 - new protocol definition 7.1 for Mebus HQ7312-2 (#1050)
-
 * various updates
   SD_ProtocolData.pm -   new definitiion protocol 7.1 for sensor Mebus HQ7312-2 decoded in modul SD_WS07
   14_SD_WS07.pm - update commandref
   README.md - add sensor
 
-
 2021-12-20 - Filling the rfmode array for the attribute list. (#1047)
-
   Update 00_SIGNALduino.pm
 * SD_Protocols.pm
   getKeys um eine Filterfunktion erweitert
@@ -20,22 +16,21 @@
 * 00_SIGNALduino.t
   array rfmode wird in SIGNALduino_Initialize und nicht mehr global mit Wert initialisiert.
 Co-authored-by: sidey79 <7968127+sidey79@users.noreply.github.com>
+
 2021-12-17 - wrong syntax in SIGNALduino_Parse_MS & SIGNALduino_Parse_MC  (#1049)
-
 * Update 00_SIGNALduino.pm
+
 2021-12-16 - wrong syntax in SIGNALduino_Parse_MU (#1043)
-
 * Update 00_SIGNALduino.pm
-2021-12-09 - Conrad S522 no reading batteryState (#1042)
 
+2021-12-09 - Conrad S522 no reading batteryState (#1042)
 * Conrad S522 no reading batteryState, but temperatureTrend
   update 14_SD_WS.pm protocol 33
 
 2021-12-05 - wrong syntax in SIGNALduino_Parse_MN (#1040)
-
 * Update 00_SIGNALduino.pm
-2021-11-28 - new protocol 109 for rojaflex remote controls (#1030)
 
+2021-11-28 - new protocol 109 for rojaflex remote controls (#1030)
 * New protocol 109 for Rojaflex remote controls
 * New module 10_SD_Rojaflex.pm for protocol 109
 * Update SD_ProtocolData.pm
@@ -43,67 +38,43 @@ Co-authored-by: sidey79 <7968127+sidey79@users.noreply.github.com>
 * Update 00_SIGNALduino.pm
 
 2021-11-27 - PERL WARNING - sub ConvLaCrosse robust (#1038)
-
 * ConvLaCrosse revised
  - hex check added (eliminates PERL WARNINGS)
-
 * Update SD_Protocols.pm
-
-* Update Versiondate
-
 * Update 02_ConvLaCrosse.t
-2021-11-22 - Parse_MU check expanded - ToDo eliminated (#1033)
 
+2021-11-22 - Parse_MU check expanded - ToDo eliminated (#1033)
 * Update 00_SIGNALduino.pm
  - more exact check for faulty MU message
  - Parse_MU capture groups entfernt
-
 * Update 01_SIGNALduino_Parse_MU.t
-
 * 10_FS10/09_parseData.t
  - compensate removed test due to stricter regex
+
 2021-11-21 - Introduce dmsg Tests fs10 with corrupt data (#1034)
-
 * lib/Test2/SIGNALduino/RDmsg.pm
-
 - Testtool to easily verify parseFN with dmsg Data.
-
-
 * t/FS10/09_parseData.t
-
 - Uses RDmsg to verify FS10 Module parseFN
-
-
 * 10_FS10/testData.json
-
 - added some data to cover errors
 
 2021-11-21 - Allow incremental addition of match list entries (#1026)
-
 00_Signalduino
-
 - Added commandrefs for MatchList Attribute
-
 - Changed  MatchList attribute
-
 01_SIGNALduino_Attr.t
-
 - Added some tests to verify add and remove MatchList attribute
-
 - remove test for deleted attribute
-
-
-
 Co-authored-by: sidey79 <7968127+sidey79@users.noreply.github.com>
-2021-11-04 - sub SIGNALduino_CheckccConfResponse - is more robust #1015 (#1031)
 
+2021-11-04 - sub SIGNALduino_CheckccConfResponse - is more robust #1015 (#1031)
 * Update 00_SIGNALduino.pm
   https://github.com/RFD-FHEM/RFFHEM/issues/1015
-
 * Update 02_SIGNALduino_CheckccConfResponse.t
   test added with wrong value
-2021-10-16 - LaCrosse mode 2 optimization register settings (#1027)
 
+2021-10-16 - LaCrosse mode 2 optimization register settings (#1027)
 * LaCrosse mode 2 optimization register settings
 SD_ProtocolData.pm
   Reg. 0x02 - IOCFG0 0x2E, GDO0 output pin configuration High impedance (3-state) - unused in FSK-modes
@@ -118,7 +89,6 @@ SD_ProtocolData.pm
   change field register array
 
 2021-10-04 - LaCrosse mode 1 optimization register settings (#1022)
-
 SD_ProtocolData.pm
   Reg. 0x02 - IOCFG0 0x2E, GDO0 output pin configuration High impedance (3-state) - unused in FSK-modes
   Reg. 0x03 - FIFOTHR 0x41, Design Note DN009, FIFOTHR.ADC_RETENTION - CC1101 will wake up with optimal ADC settings for low data rate (≤ 100 kbps)
@@ -128,20 +98,19 @@ SD_ProtocolData.pm
   Reg. 0x12 - MDMCFG2 0x02, SYNC_MODE 16/16 sync word bits detected
 
 2021-10-04 - Bresser 5in1 optimize register settings CC110x (#1020)
-
   Reg. 0x02 - 0x2E GDO0 output pin configuration, High impedance (3-state) - unused in FSK-modes
   Reg. 0x06 - 0x1A (26 Byte) PKTLEN
   Reg. 0x08 - 0x00 Fixed packet length mode. Length configured in PKTLEN register.
-2021-09-17 - Update SD_ProtocolData.pm - remove register entry (#1017)
 
+2021-09-17 - Update SD_ProtocolData.pm - remove register entry (#1017)
 * Update SD_ProtocolData.pm
 * Update 01_verifyFSK.t
 * Update 01_SIGNALduino_Attr_rfmode.t
+
 2021-09-08 - Fixes perlcritic prototypes in 14_SD_WS part 2 (#1013)
-
 * Fixes perlcritic prototypes in 14_SD_WS
-2021-08-30 - new protocol 115 for Bresser 6-in-1 and new 5-in-1 Comfort Wetter Center (#1010)
 
+2021-08-30 - new protocol 115 for Bresser 6-in-1 and new 5-in-1 Comfort Wetter Center (#1010)
 * 00_SIGNALduino.pm - add rfmode Bresser_6in1
 * 14_SD_WS.pm - add protocol 115
 * SD_ProtocolData.pm - add definition for protocol 115
