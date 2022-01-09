@@ -1,5 +1,5 @@
 ###########################################################################################################################################
-# $Id: SD_ProtocolData.pm 3.4.4 2022-01-05 20:44:16Z elektron-bbs $
+# $Id: SD_ProtocolData.pm 3.4.4 2022-01-08 20:06:52Z elektron-bbs $
 # The file is part of the SIGNALduino project.
 # All protocol definitions are contained in this file.
 #
@@ -86,7 +86,7 @@ package lib::SD_ProtocolData;
   use strict;
   use warnings;
 
-  our $VERSION = '1.40';
+  our $VERSION = '1.41';
 
   our %protocols = (
     "0" =>  ## various weather sensors (500 | 9100)
@@ -2860,9 +2860,42 @@ package lib::SD_ProtocolData;
         length_min      => '22',
         length_max      => '22',
       },
-
-    # "107" => reserved @elektron-bbs for Fine Offset WH51, ECOWITT WH51, MISOL/1, Froggit DP100 Soil Moisture Sensor
-
+    "107"	=>	## Fine Offset WH51, ECOWITT WH51, MISOL/1, Froggit DP100 Soil Moisture Sensor use with FSK 433.92 MHz
+              # https://forum.fhem.de/index.php/topic,109056.0.html
+              # SD_WS_107_H_00C6BF H: 31  MN;D=5100C6BF107F1FF8BBFFFFFFEE22;R=14;
+              # SD_WS_107_H_00C6BF H: 34  MN;D=5100C6BF107F22F8C3FFFFFF0443;R=14;
+              # SD_WS_107_H_00C6BF H: 35  MN;D=5100C6BF107F23F8C7FFFFFF5DA1;R=14;
+      {
+        name            => 'WH51 433.92 MHz',
+        comment         => 'Fine Offset WH51, ECOWITT WH51, MISOL/1, Froggit DP100 Soil moisture sensor',
+        id              => '107',
+        knownFreqs      => '433.92',
+        datarate        => '17257.69',
+        sync            => '2DD4',
+        modulation      => '2-FSK',
+        regexMatch      => qr/^51/, # Family code 0x51 (ECOWITT/FineOffset WH51)
+        preamble        => 'W107#',
+        register        => ['0001','022E','0343','042D','05D4','060E','0780','0800','0D10','0EB0','0F71','10A9','115C','1202','1322','14F8','1543','1916','1B43','1C68'],
+        rfmode          => 'Fine_Offset_WH51_434',
+        clientmodule    => 'SD_WS',
+        length_min      => '28',
+      },
+    "107.1"	=>	# Fine Offset WH51, ECOWITT WH51, MISOL/1, Froggit DP100 Soil Moisture Sensor use with FSK 868.35 MHz
+      {
+        name            => 'WH51 868.35 MHz',
+        comment         => 'Fine Offset WH51, ECOWITT WH51, MISOL/1, Froggit DP100 Soil moisture sensor',
+        id              => '107.1',
+        knownFreqs      => '868.35',
+        datarate        => '17257.69',
+        sync            => '2DD4',
+        modulation      => '2-FSK',
+        regexMatch      => qr/^51/, # Family code 0x51 (ECOWITT/FineOffset WH51)
+        preamble        => 'W107#',
+        register        => ['0001','022E','0343','042D','05D4','060E','0780','0800','0D21','0E65','0FE8','10A9','115C','1202','1322','14F8','1543','1916','1B43','1C68'],
+        rfmode          => 'Fine_Offset_WH51_868',
+        clientmodule    => 'SD_WS',
+        length_min      => '28',
+      },
     "108" =>  ## BRESSER 5-in-1 Weather Center, Bresser Professional Rain Gauge, Fody E42, Fody E43 - elektron-bbs 2021-05-02
               # https://github.com/RFD-FHEM/RFFHEM/issues/607
               # https://forum.fhem.de/index.php/topic,106594.msg1151467.html#msg1151467

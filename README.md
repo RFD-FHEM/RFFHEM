@@ -38,6 +38,7 @@ Supported Devices / Protocols
 |FA21RF | Smoke detector | 
 |FHT80 | Roomthermostat (only receive) |
 |FHT80TF | door/window switch |
+|Fine Offset WH51, aka ECOWITT WH51, aka Froggit DP100, aka MISOL/1 | Soil moisture sensor |
 |FLAMINGO | Flamingo smoke detector |
 |Fody E42 | Temperature/humidity sensor (protocol BRESSER 5-in-1) |
 |FS10 | Remote control |

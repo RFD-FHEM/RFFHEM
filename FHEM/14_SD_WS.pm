@@ -1,4 +1,4 @@
-# $Id: 14_SD_WS.pm 21666 2022-01-05 20:44:16Z elektron-bbs $
+# $Id: 14_SD_WS.pm 21666 2022-01-08 20:06:52Z elektron-bbs $
 #
 # The purpose of this module is to support serval
 # weather sensors which use various protocol
@@ -38,6 +38,7 @@
 # 30.08.2021 PerlCritic - fixes for severity level 5 and 4
 # 07.12.2021 Protokoll 33: Conrad S522 kein Batteriebit, dafuer Trend Temperatur
 # 05.01.2022 Protokoll 108: neuer Sensor Fody E42
+# 08.01.2022 neues Protokoll 107: Soil Moisture Sensor Fine Offset WH51, ECOWITT WH51, MISOL/1, Froggit DP100
 
 package main;
 
@@ -86,6 +87,7 @@ sub SD_WS_Initialize {
     "SD_WS_85_THW_.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "4:120"},
     "SD_WS_89_TH.*"   => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "3:180"},
     "SD_WS_94_T.*"    => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4:Temp,", autocreateThreshold => "3:180"},
+    'SD_WS_107_H.*'   => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => q{}, autocreateThreshold => '2:180'},
     'SD_WS_108.*'     => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4:Temp,', autocreateThreshold => '5:120'},
     'SD_WS_110_TR.*'  => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4:Temp,', autocreateThreshold => '3:180'},
     'SD_WS_111_TL.*'   => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4:Temp,', autocreateThreshold => '3:600'},
@@ -140,6 +142,7 @@ sub SD_WS_Parse {
   my $id;
   my $bat;
   my $batChange;
+  my $batVoltage;
   my $sendmode;
   my $channel;
   my $rawTemp;
@@ -161,6 +164,7 @@ sub SD_WS_Parse {
   my $beep;
   my $distance;
   my $uv;
+  my $adc;
 
   my %decodingSubs  = (
     50 => # Protocol 50
@@ -698,6 +702,62 @@ sub SD_WS_Parse {
                             return (round((($tempFh - 32) * 5 / 9) , 1)); # Grad Celsius
                           },
         crcok      => sub {return 1;}, # CRC test method does not exist
+    } ,
+    107 => {
+        # Fine Offset WH51, ECOWITT WH51, MISOL/1, Froggit DP100 Soil Moisture Sensor
+        # ---------------------------------------------------------------------------
+        #          Byte: 00 01 02 03 04 05 06 07 08 09 10 11 12 13
+        #        Nibble: 01 23 45 67 89 01 23 45 67 89 01 23 45 67
+        # aa aa aa 2d d4 51 00 6b 58 6e 7f 24 f8 d2 ff ff ff 3c 28
+        #           MN;D=51 00 C6 BF 10 7F 23 F8 C7 FF FF FF 5D A1 ;R=14; H: 35
+        #                FF II II II TB YY MM ZA AA XX XX XX CC SS
+        # FF:       Family code 0x51 (ECOWITT/FineOffset WH51)
+        # IIIIII:   ID (3 bytes)
+        # T:        Transmission period boost: highest 3 bits set to 111 on moisture change and decremented each transmission, if T = 0 period is 70 sec, if T > 0 period is 10 sec
+        # B:        Battery voltage: lowest 5 bits are battery voltage * 10 (e.g. 0x0c = 12 = 1.2V). Transmitter works down to 0.7V (0x07)
+        # YY:       ? Fixed: 0x7f
+        # MM:       Moisture percentage 0%-100% (0x00-0x64) MM = (AD - 70) / (450 - 70)
+        # Z:        ? Fixed: leftmost 7 bit 1111 100
+        # AAA:      9 bit AD value MSB byte[07] & 0x01, LSB byte[08] ??? 10 bit ??? WH51 Manual.pdf says: 100%AD setting range:0%AD+10~1000
+        # XXXXXX:   ? Fixed: 0xff 0xff 0xff
+        # CC:       CRC of the preceding 12 bytes (Polynomial 0x31, Initial value 0x00, Input not reflected, Result not reflected)
+        # SS:       Sum of the preceding 13 bytes % 256
+        sensortype => 'WH51, DP100, MISOL/1',
+        model      => 'SD_WS_107_H',
+        prematch   => sub { ($rawData,undef) = @_; return 1 if ($rawData =~ /^51[0-9A-F]{16}[F]{6}/); },
+        id         => sub { my ($rawData,undef) = @_; return substr($rawData,2,6); },
+        batVoltage => sub { my (undef,$bitData) = @_; return round(SD_WS_binaryToNumber($bitData,35,39) / 10 , 1); },
+        adc        => sub { my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,62,71); },
+        hum        => sub { my ($rawData,undef) = @_; return hex(substr($rawData,12,2)); },
+        crcok      => sub { my $rawData = shift;
+                            my $rc = eval {
+                              require Digest::CRC;
+                              Digest::CRC->import();
+                              1;
+                            };
+                            if ($rc) {
+                              my $datacheck1 = pack( 'H*', substr($rawData,0,24) );
+                              my $crcmein1 = Digest::CRC->new(width => 8, poly => 0x31);
+                              my $rr3 = $crcmein1->add($datacheck1)->hexdigest;
+                              if (hex($rr3) != hex(substr($rawData,24,2))) {
+                                Log3 $name, 3, "$name: SD_WS_107 Parse msg $rawData - ERROR CRC8";
+                                return 0;
+                              }
+                            } else {
+                              Log3 $name, 1, "$name: SD_WS_107 Parse msg $rawData - ERROR CRC not load, please install modul Digest::CRC";
+                              return 0;
+                            }  
+                            my $checksum = 0;
+                            for (my $i=0; $i < 26; $i += 2) {
+                              $checksum += hex(substr($rawData,$i,2));
+                            }
+                            $checksum &= 255;
+                            if ($checksum != hex(substr($rawData,26,2))) {
+                              Log3 $name, 3, "$name: SD_WS_107 Parse msg $rawData - ERROR checksum";
+                              return 0;
+                            }
+                            return 1;
+                          }
     } ,
     108 => {
         # https://github.com/merbanan/rtl_433/blob/master/src/devices/bresser_5in1.c
@@ -1305,12 +1365,14 @@ sub SD_WS_Parse {
     $channel = $decodingSubs{$protocol}{channel}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{channel}));
     $model = $decodingSubs{$protocol}{model};
     $bat = $decodingSubs{$protocol}{bat}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{bat}));
+    $batVoltage = $decodingSubs{$protocol}{batVoltage}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{batVoltage}));
     $batChange = $decodingSubs{$protocol}{batChange}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{batChange}));
     $rawRainCounter = $decodingSubs{$protocol}{rawRainCounter}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{rawRainCounter}));
     $rain = $decodingSubs{$protocol}{rain}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{rain}));
     $rain_total = $decodingSubs{$protocol}{rain_total}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{rain_total}));
     $sendCounter = $decodingSubs{$protocol}{sendCounter}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{sendCounter}));
     $beep = $decodingSubs{$protocol}{beep}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{beep}));
+    $adc = $decodingSubs{$protocol}{adc}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{adc}));
     if ($model eq "SD_WS_33_T" || $model eq "SD_WS_58_T") {      # for SD_WS_33 or SD_WS_58 discrimination T - TH
       $model = $decodingSubs{$protocol}{model}."H" if $hum != 0; # for models with Humidity
     }
@@ -1480,6 +1542,7 @@ sub SD_WS_Parse {
   readingsBulkUpdate($hash, 'windDirectionText', $winddirtxt)  if (defined($winddirtxt)) ;
   readingsBulkUpdate($hash, 'windGust', $windgust)  if (defined($windgust)) ;
   readingsBulkUpdate($hash, "batteryState", $bat) if (defined($bat) && length($bat) > 0) ;
+  readingsBulkUpdate($hash, "batteryVoltage", $batVoltage)  if (defined($batVoltage));
   readingsBulkUpdateIfChanged($hash, "batteryChanged", $batChange) if (defined($batChange));
   readingsBulkUpdate($hash, "channel", $channel, 0) if (defined($channel)&& length($channel) > 0);
   readingsBulkUpdate($hash, "trend", $trend) if (defined($trend) && length($trend) > 0);
@@ -1488,6 +1551,7 @@ sub SD_WS_Parse {
   readingsBulkUpdate($hash, "sendmode", $sendmode) if (defined($sendmode) && length($sendmode) > 0);
   readingsBulkUpdate($hash, "type", $SensorTyp, 0)  if (defined($SensorTyp));
   readingsBulkUpdate($hash, "beep", $beep)  if (defined($beep));
+  readingsBulkUpdate($hash, "adc", $adc)  if (defined($adc));
   readingsBulkUpdate($hash, 'rain', $rain)  if (defined($rain));
   readingsBulkUpdate($hash, "rawRainCounter", $rawRainCounter)  if (defined($rawRainCounter));
   readingsBulkUpdate($hash, "rain_total", $rain_total)  if (defined($rain_total));
@@ -1594,6 +1658,7 @@ sub SD_WS_WH2SHIFT {
     <li>Bresser 5-in-1 and 6-in-1 Comfort Weather Center, 7009994, Professional rain gauge, Temeo</li>
     <li>Conrad S522</li>
     <li>EuroChron EFTH-800, EFS-3110A (temperature and humidity sensor)</li>
+    <li>Fine Offset WH51, aka ECOWITT WH51, aka Froggit DP100, aka MISOL/1 (soil moisture sensor)</li>
     <li>Fody E42 (temperature and humidity sensor)</li>
     <li>NC-3911, NC-3912 refrigerator thermometer</li>
     <li>Opus XT300</li>
@@ -1634,8 +1699,10 @@ sub SD_WS_WH2SHIFT {
     Some devices may not support all readings, so they will not be presented<br>
   </ul>
   <ul>
+    <li>adc (raw value from analog to digital converter)</li>
     <li>batteryChanged (1)</li>
     <li>batteryState (low or ok)</li>
+    <li>batteryVoltage (battery voltage in volts)</li>
     <li>channel (number of channel</li>
     <li>distance (distance in cm)</li>
     <li>humidity (humidity (1-100 % only if available)</li>
@@ -1714,6 +1781,7 @@ sub SD_WS_WH2SHIFT {
     <li>Bresser 5-in-1 und 6-in-1 Comfort Wetter Center, 7009994, Profi Regenmesser, Temeo</li>
     <li>Conrad S522</li>
     <li>EuroChron EFTH-800, EFS-3110A (Temperatur- und Feuchtigkeitssensor)</li>
+    <li>Fine Offset WH51, aka ECOWITT WH51, aka Froggit DP100, aka MISOL/1 (Bodenfeuchtesensor)</li>
     <li>Fody E42 (Temperatur- und Feuchtigkeitssensor)</li>
     <li>Kabelloses Grillthermometer, Modellname: GFGT 433 B1</li>
     <li>NC-3911, NC-3912 digitales Kuehl- und Gefrierschrank-Thermometer</li>
@@ -1755,11 +1823,13 @@ sub SD_WS_WH2SHIFT {
   <b>Generierte Readings:</b><br><br>
   <ul>(verschieden, je nach Typ des Sensors)</ul>
   <ul>
+    <li>adc (Roh-Wert vom Analog-Digital-Wandler)</li>
     <li>batteryChanged (1)</li>
     <li>batteryState (low oder ok)</li>
+    <li>batteryVoltage (Batteriespannung in Volt)</li>
     <li>channel (Sensor-Kanal)</li>
     <li>distance (Entfernung in cm)</li>
-    <li>humidity (Luftfeuchte, 1-100 %)</li>
+    <li>humidity (Luft-/Bodenfeuchte, 1-100 %)</li>
     <li>humidityTrend (Trend Luftfeuchte, gleichbleibend, steigend, fallend)</li>
     <li>rain (Regenmenge l/m&sup2;))</li>
     <li>rain_total (Regenmenge l/m&sup2;))</li>
