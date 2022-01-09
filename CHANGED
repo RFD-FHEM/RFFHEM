@@ -1,3 +1,17 @@
+2022-01-09 - new protocol 107 for Fine Offset WH51 (#1055)
+
+Soil moisture sensor Fine Offset WH51, aka ECOWITT WH51, aka Froggit DP100, aka MISOL/1
+* Update 00_SIGNALduino_initialize.t
+  add new rfmodes in array
+* Update 00_SIGNALduino.pm
+  add documentation
+* Update 14_SD_WS.pm
+  add protocol 107
+* Update SD_ProtocolData.pm
+  add definition 107 and 107.1
+* Update README.md
+  add sensors Fine Offset WH51, aka ECOWITT WH51, aka Froggit DP100, aka MISOL/1
+
 2022-01-06 - new sensor Fody E42 (#1052)
   The temperature / humidity sensor Fody E42 uses the protocol 108.
 
