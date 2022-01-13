@@ -1,5 +1,5 @@
 #########################################################################################
-# $Id: 14_SD_UT.pm 0 2021-08-08 16:56:40Z HomeAutoUser $
+# $Id: 14_SD_UT.pm 0 2022-01-13 21:56:40Z HomeAutoUser $
 #
 # The file is part of the SIGNALduino project.
 # The purpose of this module is universal support for devices.
@@ -382,7 +382,7 @@ use strict;
 use warnings;
 no warnings 'portable';  # Support for 64-bit ints required
 
-our $VERSION = '2021-08-05';
+our $VERSION = '2022-01-13';
 
 sub SD_UT_bin2tristate;
 sub SD_UT_tristate2bin;
@@ -1526,10 +1526,11 @@ sub SD_UT_Parse {
 
     ### Manax MX-RCS250 | mumbi [P90] ###
     if (!$def && $protocol == 90) {
+      my $button = $models{RC_10}{buttons}{substr($bitData,20,3)};
+      if (!defined $button) {return ''}
       $deviceCode = substr($rawData,0,4);
-            my $button = $models{RC_10}{buttons}{substr($bitData,20,3)};
-            $devicedef = 'RC_10 '.$deviceCode.'_'.$button;
-      $def       = $modules{SD_UT}{defptr}{$devicedef};
+      $devicedef = 'RC_10 '.$deviceCode.'_'.$button;
+      $def = $modules{SD_UT}{defptr}{$devicedef};
 
       if ($button ne 'all') {
         $state = substr($bitData,23,1) eq '1' ? 'on' : 'off'
@@ -1544,7 +1545,7 @@ sub SD_UT_Parse {
           $def = undef;
         }
 
-        ### if received data from device _all, set cannels A | B | C | D to state and trigger event ###
+        ### if received data from device _all, set channels A | B | C | D to state and trigger event ###
         for ( 'A' .. 'D' ) {
           my $defPtr = $modules{SD_UT}{defptr}{'RC_10 '.$deviceCode."_$_"};
           if (defined $defPtr) {
