@@ -1,5 +1,4 @@
 2022-01-09 - new protocol 107 for Fine Offset WH51 (#1055)
-
 Soil moisture sensor Fine Offset WH51, aka ECOWITT WH51, aka Froggit DP100, aka MISOL/1
 * Update 00_SIGNALduino_initialize.t
   add new rfmodes in array
