@@ -1,4 +1,4 @@
-# $Id: 14_SD_WS.pm 21666 2022-01-08 20:06:52Z elektron-bbs $
+# $Id: 14_SD_WS.pm 21666 2022-01-14 16:08:24Z elektron-bbs $
 #
 # The purpose of this module is to support serval
 # weather sensors which use various protocol
