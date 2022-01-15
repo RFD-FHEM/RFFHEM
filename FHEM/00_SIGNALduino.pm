@@ -1,4 +1,4 @@
-# $Id: 00_SIGNALduino.pm v3.5.2 2022-01-08 20:06:52Z elektron-bbs $
+# $Id: 00_SIGNALduino.pm v3.5.2 2022-01-14 21:06:09Z sidey79 $
 # v3.5.2 - https://github.com/RFD-FHEM/RFFHEM/tree/master
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incoming messages
 # see http://www.fhemwiki.de/wiki/SIGNALDuino
@@ -19,7 +19,7 @@ use warnings;
 my $missingModulSIGNALduino = '';
 
 use DevIo;
-require "99_Utils.pm" if (!defined $modules{"Utils"} || !exists $modules{"Utils"}{"LOADED"} );
+require "99_Utils.pm" if (!defined $modules{"Utils"} || !exists $modules{"Utils"}{"LOADED"} ); ## no critic
 use Carp;
 no warnings 'portable';
 
@@ -38,7 +38,7 @@ use List::Util qw(first);
 
 
 use constant {
-  SDUINO_VERSION                  => '3.5.2+20220108',  # Datum wird automatisch bei jedem pull request aktualisiert
+  SDUINO_VERSION                  => '3.5.2+20220114',  # Datum wird automatisch bei jedem pull request aktualisiert
   SDUINO_INIT_WAIT_XQ             => 1.5,     # wait disable device
   SDUINO_INIT_WAIT                => 2,
   SDUINO_INIT_MAXRETRY            => 3,
@@ -2038,7 +2038,7 @@ sub SIGNALduino_PatternExists {
     $i++;
   }
 
-  sub cartesian_product {
+  sub cartesian_product { ## no critic
     use List::Util qw(reduce);
     reduce {
       [ map {
@@ -2592,7 +2592,7 @@ sub SIGNALduino_Parse_MU {
         } else {
           $hash->{logMethod}->($name, 5, "$name: Parse_MU, for MU protocol id $id, applying filterfunc $method");
 
-          no strict "refs";
+          no strict "refs"; 
           (my $count_changes,$rawData,my %patternListRaw_tmp) = $method->($name,$id,$rawData,%patternListRaw);
           use strict "refs";
 
