@@ -1,3 +1,86 @@
+2022-01-16 - Version 3.5.2 erzeugen (#1063)
+
+Release 3.5.2 
+     10_SD_Rojaflex.pm 
+          new: Module for rojaflex remote controls
+
+     90_SIGNALduino_un.pm
+          changed: fix some PerlCritic hints (#914)
+          changed: revised commandref
+
+     00_SIGNALduino.pm:
+          feature: xFSK processing
+          feature: Added support for directio and none.
+          feature: Extension for "get sduino ccreg" (#918)
+          feature: parse subs optimized (#926)
+          feature: update reading  config when change settings (#948)
+          feature: Allow incremental addition of match list entries (#1026)
+          change: added N to send SN  xFSK sendCommand
+          change: added new sub SIGNALduino_calcRSSI to simplification code
+          change: revised Parse_MN and loglevel
+          change: revised logoutput text SIGNALduino_Get_Command
+          change: rename "get raw" to "get rawmsg" (#925)
+          feature: added commandref rfmode & cc1101_reg_user
+          feature: added hardware ESP32cc1101, MAPLEMINI_F103CB on attribute
+          feature: added new attrib rfmode to changed to xFSK & revised commandref
+          feature: added separat sub SIGNALduino_Attr_rfmode
+          feature: added set cmd LaCrossePairForSec (for LaCrosse
+          bugfix: SIGNALduino_CheckccConfResponse is more robust #1015 (#1031)
+          bugfix: fix PERL WARNING (#895) (#972)
+          bugfix: get ccreg command caused stacktrace #898
+          bugfix: Bugfix define with hostname 901 (#904)
+          bugfix: Wrong version assignment fixed
+          Bugfix, module runs now without fhemweb instance 
+          bugfix: display protocol list (#947)
+          bugfix: require 99_Utils only if really needed (#950)
+          bugfix: corrected incorrect logoutput (#951)
+          bugfix: Fix Multiple send delay (#941)
+          bugfix: Fixes high CPU and MEM usage in patternExists (#988)
+
+  SD_Protocols.pm:
+          change: moved subs for converting in own package
+                  ConvLaCrosse, ConvKoppFreeControl and ConvPCA301
+          bugfix: Hideki fix inverted message (#974)
+
+  SD_ProtocolData.pm
+          feature: added rfmode, register rubric & comments
+          change: fix perlcritic Severity 3 - hard tabs
+          feature: Added crc checksum verification Revolt (#956)
+
+  14_SD_WS.pm: 
+         feature: protocol 27 for sensor EFS-3110A (#890)
+         feature: protocol 106 for GT-TMBBQ-0   
+         feature: protocol 110 for ADE WS1907 Weather station (#970)
+         feature: protocol 111 for TS-FT002 water tank level (#1000)
+         feature: protocol 113 for GFGT 433 B1 Wireless Grill sensor (#1003)
+         feature: new protocol 108 for BRESSER 5-in-1 Weather Center
+                  and BRESSER Professional Rain Gauge (#973)
+         feature: protocol 115 for Bresser 6-in-1 and 
+                  5-in-1 Comfort Wetter Center (#1010)
+         feature: new protocol 107 for Fine Offset WH51 (#1055)
+         feature: new protocol 116 for Fine Offset WH57 (#1061)
+         bugfix: Update protocol 64 for sensor WH2A (#1009)
+         bugfix: Conrad S522 protocol 33 no reading batteryState (#1042)
+
+  14_SD_WS07.pm: 
+         feature: protocol definition 7.1 for Mebus HQ7312-2 (#1050)
+
+  14_FLAMINGO.pm: 
+         change: Perlcritic (#887)
+
+  14_SD_UT.pm:
+         change: PerlCritic (#877)
+         feature: new protocol 105 for remote control BF-301
+         feature: decode and send protocol 56 remote control AC114-01B (#910)
+         feature: decode and send protocol for Visivo remote control
+         feature: Remote control SEAV BeSmart S4 (#933)
+         feature: new protocol 114 for TR401 (#1002)
+
+ 14_SD_BELL.pm:
+         change: PerlCritic (#877)
+         change: Adjusted little things (#937)
+         feature: added AVANTEK Wireless doorbell & LED night light (#981)
+         
 07.05.2020  - version 3.4.4
   00_SIGNALduino.pm:
           bugfix: Fix some perlcritic 5 warnings
