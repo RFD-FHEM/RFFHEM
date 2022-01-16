@@ -1,600 +1,99 @@
-2022-01-16 - new protocol 116 for Fine Offset WH57 (#1061)
+2022-01-16 - Version 3.5.2 erzeugen (#1063)
+
+Release 3.5.2 
+     10_SD_Rojaflex.pm 
+          new: Module for rojaflex remote controls
+
+     90_SIGNALduino_un.pm
+          changed: fix some PerlCritic hints (#914)
+          changed: revised commandref
+
+     00_SIGNALduino.pm:
+          feature: xFSK processing
+          feature: Added support for directio and none.
+          feature: Extension for "get sduino ccreg" (#918)
+          feature: parse subs optimized (#926)
+          feature: update reading  config when change settings (#948)
+          feature: Allow incremental addition of match list entries (#1026)
+          change: added N to send SN  xFSK sendCommand
+          change: added new sub SIGNALduino_calcRSSI to simplification code
+          change: revised Parse_MN and loglevel
+          change: revised logoutput text SIGNALduino_Get_Command
+          change: rename "get raw" to "get rawmsg" (#925)
+          feature: added commandref rfmode & cc1101_reg_user
+          feature: added hardware ESP32cc1101, MAPLEMINI_F103CB on attribute
+          feature: added new attrib rfmode to changed to xFSK & revised commandref
+          feature: added separat sub SIGNALduino_Attr_rfmode
+          feature: added set cmd LaCrossePairForSec (for LaCrosse
+          bugfix: SIGNALduino_CheckccConfResponse is more robust #1015 (#1031)
+          bugfix: fix PERL WARNING (#895) (#972)
+          bugfix: get ccreg command caused stacktrace #898
+          bugfix: Bugfix define with hostname 901 (#904)
+          bugfix: Wrong version assignment fixed
+          Bugfix, module runs now without fhemweb instance 
+          bugfix: display protocol list (#947)
+          bugfix: require 99_Utils only if really needed (#950)
+          bugfix: corrected incorrect logoutput (#951)
+          bugfix: Fix Multiple send delay (#941)
+          bugfix: Fixes high CPU and MEM usage in patternExists (#988)
 
-Thunder and lightning sensor Fine Offset WH57, aka Froggit DP60, aka Ambient Weather WH31L
-* Update 00_SIGNALduino.pm
-  add documentation
-* Update 14_SD_WS.pm
-  add protocol 116
-* Update SD_ProtocolData.pm
-  add definition 116 and 116.1
-* Update README.md
-  add sensors Fine Offset WH57, aka Ambient Weather WH31L, aka Froggit DP60
-
-2022-01-15 - Perlcritic Ergebnis bei jedem PR anzeigen (#1054)
-
-* .perlcritic created
-
-Report perlcritic in checks for pull request
-2022-01-09 - new protocol 107 for Fine Offset WH51 (#1055)
-Soil moisture sensor Fine Offset WH51, aka ECOWITT WH51, aka Froggit DP100, aka MISOL/1
-* Update 00_SIGNALduino_initialize.t
-  add new rfmodes in array
-* Update 00_SIGNALduino.pm
-  add documentation
-* Update 14_SD_WS.pm
-  add protocol 107
-* Update SD_ProtocolData.pm
-  add definition 107 and 107.1
-* Update README.md
-  add sensors Fine Offset WH51, aka ECOWITT WH51, aka Froggit DP100, aka MISOL/1
-
-2022-01-06 - new sensor Fody E42 (#1052)
-  The temperature / humidity sensor Fody E42 uses the protocol 108.
-
-2021-12-30 - new protocol definition 7.1 for Mebus HQ7312-2 (#1050)
-* various updates
-  SD_ProtocolData.pm -   new definitiion protocol 7.1 for sensor Mebus HQ7312-2 decoded in modul SD_WS07
-  14_SD_WS07.pm - update commandref
-  README.md - add sensor
-
-2021-12-20 - Filling the rfmode array for the attribute list. (#1047)
-  Update 00_SIGNALduino.pm
-* SD_Protocols.pm
-  getKeys um eine Filterfunktion erweitert
-* 00_SIGNALduino_initialize.t
-  Added check for correct sorted order of elements in rfmode
-* 00_SIGNALduino.t
-  array rfmode wird in SIGNALduino_Initialize und nicht mehr global mit Wert initialisiert.
-Co-authored-by: sidey79 <7968127+sidey79@users.noreply.github.com>
-
-2021-12-17 - wrong syntax in SIGNALduino_Parse_MS & SIGNALduino_Parse_MC  (#1049)
-* Update 00_SIGNALduino.pm
-
-2021-12-16 - wrong syntax in SIGNALduino_Parse_MU (#1043)
-* Update 00_SIGNALduino.pm
-
-2021-12-09 - Conrad S522 no reading batteryState (#1042)
-* Conrad S522 no reading batteryState, but temperatureTrend
-  update 14_SD_WS.pm protocol 33
-
-2021-12-05 - wrong syntax in SIGNALduino_Parse_MN (#1040)
-* Update 00_SIGNALduino.pm
-
-2021-11-28 - new protocol 109 for rojaflex remote controls (#1030)
-* New protocol 109 for Rojaflex remote controls
-* New module 10_SD_Rojaflex.pm for protocol 109
-* Update SD_ProtocolData.pm
-* Update README.md
-* Update 00_SIGNALduino.pm
-
-2021-11-27 - PERL WARNING - sub ConvLaCrosse robust (#1038)
-* ConvLaCrosse revised
- - hex check added (eliminates PERL WARNINGS)
-* Update SD_Protocols.pm
-* Update 02_ConvLaCrosse.t
-
-2021-11-22 - Parse_MU check expanded - ToDo eliminated (#1033)
-* Update 00_SIGNALduino.pm
- - more exact check for faulty MU message
- - Parse_MU capture groups entfernt
-* Update 01_SIGNALduino_Parse_MU.t
-* 10_FS10/09_parseData.t
- - compensate removed test due to stricter regex
-
-2021-11-21 - Introduce dmsg Tests fs10 with corrupt data (#1034)
-* lib/Test2/SIGNALduino/RDmsg.pm
-- Testtool to easily verify parseFN with dmsg Data.
-* t/FS10/09_parseData.t
-- Uses RDmsg to verify FS10 Module parseFN
-* 10_FS10/testData.json
-- added some data to cover errors
-
-2021-11-21 - Allow incremental addition of match list entries (#1026)
-00_Signalduino
-- Added commandrefs for MatchList Attribute
-- Changed  MatchList attribute
-01_SIGNALduino_Attr.t
-- Added some tests to verify add and remove MatchList attribute
-- remove test for deleted attribute
-Co-authored-by: sidey79 <7968127+sidey79@users.noreply.github.com>
-
-2021-11-04 - sub SIGNALduino_CheckccConfResponse - is more robust #1015 (#1031)
-* Update 00_SIGNALduino.pm
-  https://github.com/RFD-FHEM/RFFHEM/issues/1015
-* Update 02_SIGNALduino_CheckccConfResponse.t
-  test added with wrong value
-
-2021-10-16 - LaCrosse mode 2 optimization register settings (#1027)
-* LaCrosse mode 2 optimization register settings
-SD_ProtocolData.pm
-  Reg. 0x02 - IOCFG0 0x2E, GDO0 output pin configuration High impedance (3-state) - unused in FSK-modes
-  Reg. 0x03 - FIFOTHR 0x41, Design Note DN009, FIFOTHR.ADC_RETENTION - CC1101 will wake up with optimal ADC settings for low data rate (≤ 100 kbps)
-  Reg. 0x06 - PKTLEN 0x05 (5 Byte)
-  Reg. 0x07 - PKTCTRL1 0x80, Preamble quality estimator threshold (2 Byte)
-  Reg. 0x08 - PKTCTRL0 0x00, Fixed packet length mode. Length configured in PKTLEN register
-  Reg. 0x10 - MDMCFG4 0xC8, CHANBW 101 kHz
-  Reg. 0x12 - MDMCFG2 0x02, SYNC_MODE 16/16 sync word bits detected
-  Reg. 0x15 - MDMCFG2 0x42, DEVIATN 31.74 kHz
-01_verifyFSK.t
-  change field register array
-
-2021-10-04 - LaCrosse mode 1 optimization register settings (#1022)
-SD_ProtocolData.pm
-  Reg. 0x02 - IOCFG0 0x2E, GDO0 output pin configuration High impedance (3-state) - unused in FSK-modes
-  Reg. 0x03 - FIFOTHR 0x41, Design Note DN009, FIFOTHR.ADC_RETENTION - CC1101 will wake up with optimal ADC settings for low data rate (≤ 100 kbps)
-  Reg. 0x06 - PKTLEN 0x05 (5 Byte)
-  Reg. 0x07 - PKTCTRL1 0x80, Preamble quality estimator threshold (2 Byte)
-  Reg. 0x08 - PKTCTRL0 0x00, Fixed packet length mode. Length configured in PKTLEN register
-  Reg. 0x12 - MDMCFG2 0x02, SYNC_MODE 16/16 sync word bits detected
-
-2021-10-04 - Bresser 5in1 optimize register settings CC110x (#1020)
-  Reg. 0x02 - 0x2E GDO0 output pin configuration, High impedance (3-state) - unused in FSK-modes
-  Reg. 0x06 - 0x1A (26 Byte) PKTLEN
-  Reg. 0x08 - 0x00 Fixed packet length mode. Length configured in PKTLEN register.
-
-2021-09-17 - Update SD_ProtocolData.pm - remove register entry (#1017)
-* Update SD_ProtocolData.pm
-* Update 01_verifyFSK.t
-* Update 01_SIGNALduino_Attr_rfmode.t
-
-2021-09-08 - Fixes perlcritic prototypes in 14_SD_WS part 2 (#1013)
-* Fixes perlcritic prototypes in 14_SD_WS
-
-2021-08-30 - new protocol 115 for Bresser 6-in-1 and new 5-in-1 Comfort Wetter Center (#1010)
-* 00_SIGNALduino.pm - add rfmode Bresser_6in1
-* 14_SD_WS.pm - add protocol 115
-* SD_ProtocolData.pm - add definition for protocol 115
-* SD_Protocols.pm - add check for Bresser 6-in-1
-* README.md - add entry for Bresser 6-in-1 Comfort Wetter Center 
-Co-authored-by: sidey79 <7968127+sidey79@users.noreply.github.com>
-* 02_ConvBresser_6in1.t - Added test for new sub
-* SD_Protocols.pm - Error messaage adapted like other subs
-* SD_Protocolst - Testdata corrected
-
-2021-08-18 - Update protocol 64 for sensor WH2A (#1009)
-  SD_ProtocolData.pm - correction length_max
-  14_SD_WS.pm - fix sub SD_WS_Parse, changes due to perlcritic
-  README.md - change of entry WH2
-
-2021-08-14 - SIGNALduino_calcRSSI check input parameter (#1007)
-* 02_SIGNALduino_calcRSSI.t:
-- Test extended
-- Bug reproduced
-* 00_SIGNALduino.pm
-- SIGNALduino_calcRSSI Check input parameters
-
-2021-08-13 - Fixes perlcritic return undef in 14_SD_WS (#1006)
-
-2021-08-11 - Fixes perlcritic return undef; (#979)
-14_BresserTemeo.pm:
-   Fixes perlcritic return undef;
-14_SD_RSL.pm:
-   Fixes perlcritic return undef;
-14_SD_WS.pm:
-   Fixes perlcritic return undef;
-14_SD_WS09.pm:
-   Fixes perlcritic return undef;
-41_OREGON.pm:
-   Fixes perlcritic return undef;
-
-2021-08-08 - new protocol 114 for TR401 (#1002)
- * 00_SIGNALduino.pm:   added protocol 114 to SD_UT match
- * SD_ProtocolData.pm:   added protocol 114
- * 14_SD_UT.pm:  added model TR401
- * README.md: Updated
-
-2021-08-08 - new protocol 113 for GFGT 433 B1 Wireless Grill Thermometer (#1003)
- * SD_ProtocolData.pm - Definition for protocol 113 added
- * 14_SD_WS.pm - Demodulation for protocol 113 added
- * README.md - Entry for GFGT 433 B1 added 
-
-2021-08-05 - new protocol 111 for TS-FT002 water tank level monitor with temperature (#1000)
-* SD_ProtocolData.pm - new definition protocol 111
-* 14_SD_WS.pm - new decoder for protocol 111
-* README.md - TS-FT002 added
-
-2021-08-04 - AVANTEK - Fix (#999)
-* Update 00_SIGNALduino.pm
- * fix matchListSIGNALduino for AVANTEK (protocol 112 forget)
-
-2021-08-02 - xFSK - cc110x commands & commandref (#990)
-* Update 00_SIGNALduino.pm
- * sort cc1101 sets alphabetical
- * revised hardtabs for Perl::Critic
- * added cc1101_dataRate to setlist
- * added cc1101_deviatn to setlist
- * revised output DataRate to kBaud
- * revised spelling mistake Bandwidth kHz
- * revised commandref
-* Update 02_SIGNALduino_CheckccConfResponse.t
- * revised test with new data
-* t/FHEM/cc1101/01_func.t
- * Basis Testgerüst für package cc1101 erstellt
-* Unittest auf cc1101 erweitert
-* Update 01_func.t
- * revised PERL::Critic
- * added CalcDataRate notes
-* Corrected unittest
-* 00_SIGNALduino.pm
- * removed unneeded codepath
-* 01_func.t
- * tried to add test CalcbWidthReg
-* Update 01_func.t
- * correction tests for comparison of all contents
-* Update 01_func.t
- * revised test https://github.com/RFD-FHEM/RFFHEM/pull/990/files/436ca626de1bcd8c76e1111f97235c7dfa259fe9#r681258066
-* Update 01_func.t
- * revised test https://github.com/RFD-FHEM/RFFHEM/pull/990#pullrequestreview-720601023
-
-2021-08-02 - Merge branch 'master' into master_cc110x_commands
-
-2021-08-02 - Repair check results (#997)
-* Update update.yml
-- skip steps instead of complete job
-- add job dependency
-* PULL_REQUEST_TEMPLATE.md
-- spell fix
-
-2021-08-01 - Bresser 5in1 2 - Rename readings windDirection, windDirectionText, windGust and windSpeed (#995)
-  14_SD_WS.pm - Rename readings windDirection, windDirectionText, windGust and windSpeed
-  SD_ProtocolData.pm - change register 0x03, Design Note DN009 - FIFOTHR.ADC_RETENTION - CC1101 will wake up with optimal ADC settings for low data rate (≤ 100 kbps)
-
-2021-07-29 - Update update.yml
-- Use Admin pat, to allow passing branch protection rules
-
-2021-07-13 - AVANTEK - small fix send data (#991)
-* Update 14_SD_BELL.pm
- * fix AVANTEK (RX FIFO)
-
-2021-07-10 - Fixes CPU and MEM usage patternExists (#988)
-* 00_SIGNALduino.pm
-SIGNALduino_PatternExists überarbeitet um hohe CPU Last und Speicherverbrauch zu umgehen
-Fixes High memory and CPU usage  in SIGNALduino_PatternExists  #986
-
-2021-07-09 - Merge branch 'master' into sidey79/issue986
-
-2021-07-09 - added AVANTEK Wireless doorbell & LED night light (#981)
-* Update SD_ProtocolData.pm
- * added AVANTEK DB-LE
- * Register optimized
- * revised comments
- * optimized parameters
-* Update README.md
-* Update 00_SIGNALduino.pm
- * added AVANTEK rfmode
-* Update 14_SD_BELL.pm
- * https://github.com/RFD-FHEM/RFFHEM/pull/981#discussion_r658270036 changed line
- * added AVANTEK
- * revised send cmd AVANTEK protocol
- * added commandref
-* Update 00_SIGNALduino.pm
- * revised cmd sendMsg for xFSK
-* Update 01_SIGNALduino_Set_sendMsg.t
- * revised test sendMsg & added data to test
-
-2021-06-30 - added AVANTEK protocol
-* 14_SD_BELL.pm
-  * revised send cmd AVANTEK protocol
-  * https://github.com/RFD-FHEM/RFFHEM/pull/981#discussion_r658270036 changed line
-* 00_SIGNALduino.pm
-  * revised cmd sendMsg for xFSK
-
-2021-06-30 - little fix - SD_WS - Log3 output (#987)
-* Update 14_SD_WS.pm
- * fix Log3 output
-
-2021-06-20 - little fix - attr whitelist_IDs (#983)
-* SD_ProtocolData.pm
- * added AVANTEK DB-LE & register optimized
-* 14_SD_BELL.pm
- * added AVANTEK & commandref
-* Update 00_SIGNALduino.pm
- - added AVANTEK rfmode
-
-2021-06-20 - Update 00_SIGNALduino.pm
- * revised save option whitelist_IDs (user see now ? on Save config)
-
-2021-06-07 - Fix Multiple Send delay (#941)
-* Multiple set commands are not processed
-Fixes #823  for firmware 3.4.0 without delay
-
-2021-06-07 - 00_SIGNALduino.pm
-Version updated to current date
-
-2021-06-07 - Update doc - SD_ProtocolData.pm (#975)
-* Update SD_ProtocolData.pm
- * added doc Normstahl Garage DOORS
-
-2021-06-04 - Update SD_ProtocolData.pm
-
-2021-06-04 - some PerlCritic points - Update 14_SD_WS.pm (#976)
-* Update 14_SD_WS.pm
- - revised hardTabs PerlCritic points & indentations
-
-2021-06-03 - Update 14_SD_WS.pm
- - revised hardTabs PerlCritic points & indentations
-
-2021-06-02 - Hideki fix inverted message (#974)
-* Update SD_Protocols.pm
- * added doc Normstahl Garage DOORS
-
-2021-06-02 - Hideki fix inverted message (#974)
- * Update SD_Protocols.pm
- - fix https://github.com/RFD-FHEM/RFFHEM/issues/944
-* 02_mcBit2Hideki.t
- - added test with inverted bitmessage
- - test für spezielle Bitlänge 89 erstellt
- - provide number of bits for test
-
-2021-05-31 - Update SD_Protocols.pm
-  * fix https://github.com/RFD-FHEM/RFFHEM/issues/944
-
-2021-05-28 - new protocol 108 for BRESSER 5-in-1 Weather Center, Bresser Professional Rain Gauge (#973)
-* Update 14_SD_WS.pm
-* Update README.md
-* Update SD_ProtocolData.pm
-created test for sub
-not all tests are finished, need some more testdata
-* SD_Protocols.pm
-- Fehlermeldung von bitsum auf checksum geändert
-- Prüfung auf Mindestlänge um Perl Warnings zu vermeiden
-- Berechnung der checksumme vereinfacht
-
-2021-05-27 - SD_Protocols.pm
-- Fehlermeldung von bitsum auf checksum geändert
-- Prüfung auf Mindestlänge um Perl Warnings zu vermeiden
-- Berechnung der checksumme vereinfacht
-
-2021-05-27 - new protocol 108 for BRESSER 5-in-1 Weather Center and BRESSER Professional Rain Gauge
-
-2021-05-26 - PERL WARNING - Kopp Fix - https://github.com/RFD-FHEM/RFFHEM/issues/968 (#972)
-* Update SD_Protocols.pm
-  * fix https://github.com/RFD-FHEM/RFFHEM/issues/968
-* 02_ConvKoppFreeControl.t
-  * added test with to short data
-  * Anzahl geplanter tests korrigiert
-
-2021-05-23 - new protocol 110 for ADE WS1907 Weather station (#970)
-* new protocol 110 for ADE WS1907 Weather station
-* Update 14_SD_WS.pm
-* Update SD_ProtocolData.pm
-* Update README.md
-
-2021-05-15 - FSK check msg length (#959)
- * before: check only min message length
- * after: chek min and max message lenght
-
-2021-04-30 - enable delete attribute rfmode
- * Added tests for delete and partial rfmode attr
- * Added exact match of rfmode instead of pattern matching
-
-2021-04-26 - delete attribute rfmode
- * 00_SIGNALduinio.pm: Bugfix: "Rfmode" attribute could not be deleted.
-
-2021-04-25 - Revolt enhacement (#956)
- * SD_ProtocolData.pm: Feature: Added crc checksum verification to avoid autocrate on broken transmissions
- * SD_Protocols.pm: changed length 
-
-2021-04-10 - FSK optimization (#953)
- * More than one FSK protocol can also be received.
- * Method lib::SD_Protocols::... not strictly necessary.
- * Modified tests, to adapt new dispatch behaviour, which is independent from attribute rfmode
-
-2021-03-22 - 14_SD_BELL.pm - Adjusted little things (#937)
- * Update 14_SD_BELL.pm
- * revised code for PerlCritic
- * revised comments
- * remove fixed room allocation
- * added useful informations
- * added internal FVERSION for version from modul via
-   FHEM::Meta
-
-2021-03-18 - 00_SIGNALduino.pm - incorrect logoutput (#951)
-  * incorrect hash value corrected
-
-2021-03-18 - bugfix 00_SIGNALduino.pm
-  * require 99_Utils only if really needed (#950)
-  * incorrect varible ref corrected
-
-2021-03-01 -  update reading  config when change settings (#948)
- * Added Test for raw command CDR and CDE
-
-2021-02-28 - Automatic update of the reading config
-  00_SIGNALDuino: Automatic update of the reading config with set 
-                  enable/disable MessageType or set raw CER/CDR.
-                  Update  Commandref, removed unsupported raw commands
-
-2021-02-27 - Master bugfix protocol list (#947)
-  * Display protocol list
-    Msg type MC is not displayed in the protocol list
-  * Added test for SIGNALduino_FW_getProtocolList to check if MS, MC, MU, MN Tag is included
-
-  Feature: 
-    00_SIGNALduino.pm: Feature parse optimize (#926)
-      Modified parse_Mx subs to two arguments, and improved input validation to avoid 
-      perl warnigs if corrupt data is processed.
-      Addd tests for input validation subs: _limit_to_number and _limit_to_hex
-      Reworked existing tests to be compatible with new sub format
-
-2021-02-19 
-  00_SIGNALduino:
-  Addd test for _limit_to_number and _limit_to_hex
-  Removed sub _limit_to_MC_pattern
-
-2021-02-13 
-  - Migrated 98 Unittest Tests to FHEM compatible prove test (#940)
-  * Migrate tests based on 98_unittest to fhem prove compatible test mode
-  * Migrated more tests and testdat
-  * Fixed return from prepare_fash
-  * Move Lib Tests to t Folder,to avoid running these tests under fhem testevn
-
-2021-02-12 
-  00_SIGNALDuino: Bugfix, module runs now without fhemweb instance 
-
-2021-01-28 
-  - Feature: Remote control SEAV BeSmart S4 (#933)
-
-2021-01-22 - Set commands changed
-2020-12-30 - rename "get raw" to "get rawmsg" (#925)
-  * rename "get raw" to "get rawmsg"
-2020-12-30 - Display number of messages passed to modules.
-2020-12-28 - Extension for "get sduino ccreg" (#918)
-  * Update 00_SIGNALduino.pm
-    Extension of the CC1101 configuration register with standard values
-    Query CC1101 status register incorporated
-    Integrated table for CC11xx chip versions
-  * Update test_02_sub_SIGNALduino_CheckCcregResponse-definition.txt
-
-2020-12-28 - Fix unittest error in actions and failing SIGNALduino_CheckVersionResp test (#923)
-  * prove.yml
-    - try to catch error in classic tests
-      (cherry picked from commit 657680e0b8cf71a9a364df4d525e3aded590d337)
-
-2020-12-28 - 00_SIGNALduino.pm
-  -Wrong version assignment in SIGNALduino_CheckVersionResp fixed and tests corrected
-
-2020-12-20 - Decoding and sending protocol 24 (#915)
-  SD_ProtocolData.pm: change protocol u24 to P24
-  14_SD_UT.pm: decode and send protocol for Visivo remote control
-
-2020-12-17 - 90_SIGNALduino_un.pm - PerlCritic / commandref (#914)
-  * Update 90_SIGNALduino_un.pm
-  * remove prototypes on subroutine (PerlCritic)
-  * replaced " with ' in strings without a variable (PerlCritic)
-  * replaced hard tabs (PerlCritic)
-  * replaced return undef with return and added return (PerlCritic)
-  * revised commandref
-  * revised code to coderef
-
-2020-12-14 - Update 00_SIGNALduino.pm - commandref (#912)
-  * Update 00_SIGNALduino.pm
-  * documentation  revised
-
-2020-12-09 - decode and send protocol 56 remote control AC114-01B (#910)
-  Alphavision Slender Line Plus motor canvas, remote control AC114-01B
-  see https://github.com/RFD-FHEM/RFFHEM/issues/906
-  change: change protocol 56 from u56 to P56 
-
-2020-12-07 - change version from 3.5.0 to 3.5.1
-
-2020-12-04 - fix length_min & clean CHANGED (#908)
-    * fix length_min & clean
-  CHANGED
-    * clean old comments
-  SD_ProtocolData.pm
-    * revised length_min ID 46
-
-2020-12-02 - Update SD_ProtocolData.pm
-
-2020-12-02 - Master fix - PERL WARNING (#907)
-  * Update 00_SIGNALduino.pm
-    * fix PERL WARNING
-
-2020-12-01 - Update 00_SIGNALduino.pm - simplification (#905)
-  * Update 00_SIGNALduino.pm
-    * simplification when a new xFSK protocol is added
-    * direct notice for users added
-  * Update 01_SIGNALduino_Attr_rfmode.t
-    * revision tests for output
-  * UnitTest\tests\test_02_sub_SIGNALduino_SendFromQueue-definition.txt
-    * fixed unitest
-
-2020-11-24 - Update 00_SIGNALduino.pm
-  * simplification when a new xFSK protocol is added
-  * direct notice for users added
-
-2020-10-31 - Bugfix define with hostname 901 (#904)
-  FHEM\00_SIGNALduino.pm  Bugfix: valid definitions
-  Extended regex to match all RFC valid hostnames and ipv4 addresses
-
-2020-10-29 - bugfix-901
-  update FHEM\00_SIGNALduino.pm
-    Extended regex to match all RFC valid hostnames and ipv4 addresses
-    Added support for directio and none. Optimized code a little bit
-
-2020-10-28 - SD_UT - new command for Novy_840039 (#902)
-  Update 14_SD_UT.pm
-    extension command for Novy_840039 (reset_clean_led)
-    sorted order
-
-2020-10-11 - bugfix cc1101_reg_user (#900)
-
-2020-10-08 - Bugfix 898 (#899)
-  00_SIGNALduino.pm:
-    bugfix: get ccreg command caused stacktrace #898
-
-2020-10-03 - feature update 14_SD_AS (#896)
-  update 14_SD_AS
-    new sensor type "raw"
-    new CRC8 check (optional)
-    Adjustment of log outputs
-    new reading "batteryState"
-    new reading "batteryVoltage"
-
-2020-09-30 - new protocol for BBQ temperature sensor GT-TMBBQ-01 (#894)
-
-2020-09-28 
-    14_SD_WS.pm:
-          feature: new protocol 106 for GT-TMBBQ-0   
-    SD_ProtocolData.pm:
-          new: protocol 106 for BBQ temperature sensor GT-TMBBQ-01
-    00_SIGNALduino.pm:
-          bugfix: fix PERL WARNING (#895)
-
-2020-09-26 
-    00_SIGNALduino.pm:
-          Feature: xFSK processing
-          Change: added N to send SN  xFSK sendCommand
-          Change: added new sub SIGNALduino_calcRSSI to simplification code
-          Change: fix some perlcritic warnings
-          Change: revised Parse_MN and loglevel
-          Change: revised logoutput text SIGNALduino_Get_Command
-          Change: revisions indented ( no tabs, only spaces ) and checked
-                  syntax with perl ./contrib/commandref_join.pl
-          New: added commandref rfmode & cc1101_reg_user
-          New: added hardware ESP32cc1101, MAPLEMINI_F103CB on attribute
-          New: added new attrib rfmode to changed to xFSK & revised commandref
-          New: added separat sub SIGNALduino_Attr_rfmode
-          New: added set cmd LaCrossePairForSec (for LaCrosse
   SD_Protocols.pm:
-          Change: moved subs for converting in own package
+          change: moved subs for converting in own package
                   ConvLaCrosse, ConvKoppFreeControl and ConvPCA301
-          New: added function PreparingSend_KOPP_FC
+          bugfix: Hideki fix inverted message (#974)
+
   SD_ProtocolData.pm
-          New: added rfmode, register rubric & comments
-          Change: fix perlcritic Severity 3 - hard tabs
+          feature: added rfmode, register rubric & comments
+          change: fix perlcritic Severity 3 - hard tabs
+          feature: Added crc checksum verification Revolt (#956)
 
-2020-09-15
-  14_SD_WS,pm: 
-         feature: protocol 27 new sensor EFS-3110A (#890)
+  14_SD_WS.pm: 
+         feature: protocol 27 for sensor EFS-3110A (#890)
+         feature: protocol 106 for GT-TMBBQ-0   
+         feature: protocol 110 for ADE WS1907 Weather station (#970)
+         feature: protocol 111 for TS-FT002 water tank level (#1000)
+         feature: protocol 113 for GFGT 433 B1 Wireless Grill sensor (#1003)
+         feature: new protocol 108 for BRESSER 5-in-1 Weather Center
+                  and BRESSER Professional Rain Gauge (#973)
+         feature: protocol 115 for Bresser 6-in-1 and 
+                  5-in-1 Comfort Wetter Center (#1010)
+         feature: new protocol 107 for Fine Offset WH51 (#1055)
+         feature: new protocol 116 for Fine Offset WH57 (#1061)
+         bugfix: Update protocol 64 for sensor WH2A (#1009)
+         bugfix: Conrad S522 protocol 33 no reading batteryState (#1042)
 
-2020-08-17
+  14_SD_WS07.pm: 
+         feature: protocol definition 7.1 for Mebus HQ7312-2 (#1050)
+
   14_FLAMINGO.pm: 
-         Change: Perlcritic (#887)
+         change: Perlcritic (#887)
 
-2020-07-23 
   14_SD_UT.pm:
-         Change: PerlCritic (#877)
+         change: PerlCritic (#877)
+         feature: new protocol 105 for remote control BF-301
+         feature: decode and send protocol 56 remote control AC114-01B (#910)
+         feature: decode and send protocol for Visivo remote control
+         feature: Remote control SEAV BeSmart S4 (#933)
+         feature: new protocol 114 for TR401 (#1002)
 
  14_SD_BELL.pm:
-         Change: PerlCritic (#877)
-
-2020-07-20 
-  14_SD_UT.pm:
-      feature: new protocol 105 for remote control BF-301
-
-07.05.2020  
+         change: PerlCritic (#877)
+         change: Adjusted little things (#937)
+         feature: added AVANTEK Wireless doorbell & LED night light (#981)
+         
+07.05.2020  - version 3.4.4
   00_SIGNALduino.pm:
-          Bugfix: Fix some perlcritic 5 warnings
-          Bugfix: some operator fixes #835
-          Bugfix: Changed stingrefs to coderefs
+          bugfix: Fix some perlcritic 5 warnings
+          bugfix: some operator fixes #835
+          bugfix: Changed stingrefs to coderefs
   10_FS10
-          Bugfix: revised for perlcritic
+          bugfix: revised for perlcritic
   10_SD_GT
-          Bugfix: revised for perlcritic (#847)
+          bugfix: revised for perlcritic (#847)
 
   14_SD_UT.pm
           feature: add attribute UTfrequency in (#845)
+          feature: new command for Novy_840039 (#902)
           change: delete "$attr{$name}{room} = "SD_UT" if( not defined( $attr{$name}{room} ) );"
 
   SD_ProtocolData.pm
