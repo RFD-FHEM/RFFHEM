@@ -1,5 +1,5 @@
-# $Id: 00_SIGNALduino.pm v3.5.2 2022-01-15 12:25:06Z elektron-bbs $
-# v3.5.2 - https://github.com/RFD-FHEM/RFFHEM/tree/master
+# $Id: 00_SIGNALduino.pm v3.5.3 2022-01-15 12:25:06Z elektron-bbs $
+# v3.5.3 - https://github.com/RFD-FHEM/RFFHEM/tree/master
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incoming messages
 # see http://www.fhemwiki.de/wiki/SIGNALDuino
 # It was modified also to provide support for raw message handling which can be send from the SIGNALduino
@@ -8,13 +8,13 @@
 #
 # 2014-2015  S.Butzek, N.Butzek
 # 2016-2019  S.Butzek, Ralf9
-# 2019-2021  S.Butzek, HomeAutoUser, elektron-bbs
+# 2019-2022  S.Butzek, HomeAutoUser, elektron-bbs
 
 
 package main;
 use strict;
 use warnings;
-#use version 0.77; our $VERSION = version->declare('v3.5.2');
+#use version 0.77; our $VERSION = version->declare('v3.5.3+20220116');
 
 my $missingModulSIGNALduino = '';
 
@@ -38,7 +38,7 @@ use List::Util qw(first);
 
 
 use constant {
-  SDUINO_VERSION                  => '3.5.2+20220115',  # Datum wird automatisch bei jedem pull request aktualisiert
+  SDUINO_VERSION                  => '3.5.3+20220116',  # Datum wird automatisch bei jedem pull request aktualisiert
   SDUINO_INIT_WAIT_XQ             => 1.5,     # wait disable device
   SDUINO_INIT_WAIT                => 2,
   SDUINO_INIT_MAXRETRY            => 3,
