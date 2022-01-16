@@ -1,5 +1,5 @@
 ###########################################################################################################################################
-# $Id: SD_ProtocolData.pm 3.4.4 2022-01-08 20:06:52Z elektron-bbs $
+# $Id: SD_ProtocolData.pm 3.4.4 2022-01-15 12:25:06Z elektron-bbs $
 # The file is part of the SIGNALduino project.
 # All protocol definitions are contained in this file.
 #
@@ -86,7 +86,7 @@ package lib::SD_ProtocolData;
   use strict;
   use warnings;
 
-  our $VERSION = '1.41';
+  our $VERSION = '1.42';
 
   our %protocols = (
     "0" =>  ## various weather sensors (500 | 9100)
@@ -3079,8 +3079,43 @@ package lib::SD_ProtocolData;
         length_min      => '36',
         method          => \&lib::SD_Protocols::ConvBresser_6in1,
       },
+    "116"	=>  ## Thunder and lightning sensor Fine Offset WH57, aka Froggit DP60, aka Ambient Weather WH31L use with FSK 433.92 MHz
+              # https://forum.fhem.de/index.php/topic,122527.0.html
+              # I: lightning   D:  6  MN;D=5780C65505060F6C78;R=39;
+              # I: lightning   D: 20  MN;D=5780C655051401C4D0;R=37;
+              # I: disturbance D: 63  MN;D=5740C655053F0A7272;R=39;
+      {
+        name            => 'WH57',
+        comment         => 'Fine Offset WH57, Ambient Weather WH31L, Froggit DP60 Thunder and Lightning sensor',
+        id              => '116',
+        knownFreqs      => '433.92',
+        datarate        => '17.257',
+        sync            => '2DD4',
+        modulation      => '2-FSK',
+        regexMatch      => qr/^57/, # Family code 0x57 (FineOffset WH57)
+        preamble        => 'W116#',
+        register        => ['0001','022E','0343','042D','05D4','0609','0780','0800','0D10','0EB0','0F71','10A9','115C','1202','1322','14F8','1543','1916','1B43','1C68'],
+        rfmode          => 'Fine_Offset_WH57_434',
+        clientmodule    => 'SD_WS',
+        length_min      => '18',
+      },
+    "116.1"	=>  ## Thunder and lightning sensor Fine Offset WH57, aka Froggit DP60, aka Ambient Weather WH31L use with FSK 868.35 MHz
+      {
+        name            => 'WH57',
+        comment         => 'Fine Offset WH57, Ambient Weather WH31L, Froggit DP60 Thunder and Lightning sensor',
+        id              => '116.1',
+        knownFreqs      => '868.35',
+        datarate        => '17.257',
+        sync            => '2DD4',
+        modulation      => '2-FSK',
+        regexMatch      => qr/^57/, # Family code 0x57 (FineOffset WH57)
+        preamble        => 'W116#',
+        register        => ['0001','022E','0343','042D','05D4','0609','0780','0800','0D21','0E65','0FE8','10A9','115C','1202','1322','14F8','1543','1916','1B43','1C68'],
+        rfmode          => 'Fine_Offset_WH57_868',
+        clientmodule    => 'SD_WS',
+        length_min      => '18',
+      },
 
-    # "116" => reserved @elektron-bbs for Fine Offset WH57, Froggit DP60 Thunder and Lightning sensor
     # "117" => reserved @elektron-bbs for BRESSER 7-in-1 Weather Center
 
     ########################################################################

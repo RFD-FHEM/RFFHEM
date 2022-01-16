@@ -1,4 +1,4 @@
-# $Id: 14_SD_WS.pm 21666 2022-01-08 20:06:52Z elektron-bbs $
+# $Id: 14_SD_WS.pm 21666 2022-01-15 12:25:06Z elektron-bbs $
 #
 # The purpose of this module is to support serval
 # weather sensors which use various protocol
@@ -39,6 +39,7 @@
 # 07.12.2021 Protokoll 33: Conrad S522 kein Batteriebit, dafuer Trend Temperatur
 # 05.01.2022 Protokoll 108: neuer Sensor Fody E42
 # 08.01.2022 neues Protokoll 107: Soil Moisture Sensor Fine Offset WH51, ECOWITT WH51, MISOL/1, Froggit DP100
+# 14.01.2022 neues Protokoll 116: Thunder and lightning sensor Fine Offset WH57, aka Froggit DP60, aka Ambient Weather WH31L
 
 package main;
 
@@ -93,6 +94,7 @@ sub SD_WS_Initialize {
     'SD_WS_111_TL.*'   => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4:Temp,', autocreateThreshold => '3:600'},
     'SD_WS_113_T.*'   => { ATTR => 'event-min-interval:.*:60 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4:Temp,', autocreateThreshold => '10:180'},
     'SD_WS_115.*'     => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4hum4:Temp/Hum,', autocreateThreshold => '5:120'},
+    'SD_WS_116.*'     => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => q{}, autocreateThreshold => '2:180'},
   };
   return;
 }
@@ -143,6 +145,7 @@ sub SD_WS_Parse {
   my $bat;
   my $batChange;
   my $batVoltage;
+  my $batteryPercent;
   my $sendmode;
   my $channel;
   my $rawTemp;
@@ -165,6 +168,8 @@ sub SD_WS_Parse {
   my $distance;
   my $uv;
   my $adc;
+  my $count;
+  my $identified;
 
   my %decodingSubs  = (
     50 => # Protocol 50
@@ -1044,6 +1049,73 @@ sub SD_WS_Parse {
                           },
         crcok      => sub {return 1;}, # checks are in SD_Protocols.pm sub ConvBresser_6in1
     },
+    116 => {
+        # Thunder and lightning sensor Fine Offset WH57, aka Froggit DP60, aka Ambient Weather WH31L
+        # ------------------------------------------------------------------------------------------
+        #          Byte: 00 01 02 03 04 05 06 07 08 09 10 11
+        #        Nibble: 01 23 45 67 89 01 23 45 67 89 01 23
+        # aa aa aa 2d d4 57 00 C6 55 01 3F 00 F6 A8 20 01 C0
+        #          MN;D= 57 00 C6 55 01 3F 00 F6 A8 20 01 C0 ;R=61;   batteryPercent=20, count=0, distance=63, identified=nothing
+        #                FF S? II II ?B DD LL CC SS 
+        # FF:   Family code 0x57 (FineOffset WH57)
+        # S:    State indicator, 4 bit, 0: start-up, 1: interference, 4: noise, 8: strike
+        # IIII: ID (2 bytes)
+        # B:    Battery percent: 0 - 5, 5 = 100 %
+        # DD:   Distance (km, 63 => Out of range)
+        # LL:   Lightning strike count
+        # CC:   CRC8 of the preceding 7 bytes (Polynomial 0x31, Initial value 0x00, Input not reflected, Result not reflected)
+        # SS:   Sum of the preceding 8 bytes % 256
+        sensortype     => 'WH57, DP60, WH31L',
+        model          => 'SD_WS_116',
+        prematch       => sub { ($rawData,undef) = @_; return 1 if ($rawData =~ /^57/); },
+        identified     => sub { my ($rawData,undef) = @_;
+                                $identified = substr($rawData,2,1);
+                                if ($identified eq '0') {
+                                  $identified = 'nothing';
+                                } elsif ($identified eq '1') {
+                                  $identified = 'noise';
+                                } elsif ($identified eq '4') {
+                                  $identified = 'disturbance';
+                                } elsif ($identified eq '8') {
+                                  $identified = 'lightning';
+                                }
+                                return $identified;
+                              },
+        id             => sub { my ($rawData,undef) = @_; return substr($rawData,4,4); },
+        batteryPercent => sub { my ($rawData,undef) = @_; return hex(substr($rawData,9,1)) * 20; },
+        distance       => sub { my ($rawData,undef) = @_; return hex(substr($rawData,10,2)); },
+        count          => sub { my ($rawData,undef) = @_; return hex(substr($rawData,12,2)); },
+        crcok          => sub { my $rawData = shift;
+                                my $rc = eval {
+                                  require Digest::CRC;
+                                  Digest::CRC->import();
+                                  1;
+                                };
+                                if ($rc) {
+                                  my $datacheck1 = pack( 'H*', substr($rawData,0,14) );
+                                  my $crcmein1 = Digest::CRC->new(width => 8, poly => 0x31);
+                                  my $rr3 = $crcmein1->add($datacheck1)->hexdigest;
+                                  Log3 $name, 5, "$name: SD_WS_107 Parse msg $rawData, CRC $rr3";
+                                  if (hex($rr3) != hex(substr($rawData,14,2))) {
+                                    Log3 $name, 3, "$name: SD_WS_116 Parse msg $rawData - ERROR CRC8";
+                                    return 0;
+                                  }
+                                } else {
+                                  Log3 $name, 1, "$name: SD_WS_116 Parse msg $rawData - ERROR CRC not load, please install modul Digest::CRC";
+                                  return 0;
+                                }  
+                                my $checksum = 0;
+                                for (my $i=0; $i < 16; $i += 2) {
+                                  $checksum += hex(substr($rawData,$i,2));
+                                }
+                                $checksum &= 255;
+                                if ($checksum != hex(substr($rawData,16,2))) {
+                                  Log3 $name, 3, "$name: SD_WS_116 Parse msg $rawData - ERROR checksum";
+                                  return 0;
+                                }
+                                return 1;
+                              }
+    } ,
   );
 
   Log3 $name, 4, "$name: SD_WS_Parse protocol $protocol, rawData $rawData";
@@ -1367,6 +1439,7 @@ sub SD_WS_Parse {
     $bat = $decodingSubs{$protocol}{bat}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{bat}));
     $batVoltage = $decodingSubs{$protocol}{batVoltage}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{batVoltage}));
     $batChange = $decodingSubs{$protocol}{batChange}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{batChange}));
+    $batteryPercent = $decodingSubs{$protocol}{batteryPercent}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{batteryPercent}));
     $rawRainCounter = $decodingSubs{$protocol}{rawRainCounter}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{rawRainCounter}));
     $rain = $decodingSubs{$protocol}{rain}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{rain}));
     $rain_total = $decodingSubs{$protocol}{rain_total}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{rain_total}));
@@ -1379,6 +1452,8 @@ sub SD_WS_Parse {
     $sendmode = $decodingSubs{$protocol}{sendmode}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{sendmode}));
     $trend = $decodingSubs{$protocol}{trend}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{trend}));
     $distance = $decodingSubs{$protocol}{distance}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{distance}));
+    $count = $decodingSubs{$protocol}{count}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{count}));
+    $identified = $decodingSubs{$protocol}{identified}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{identified}));
     $uv = $decodingSubs{$protocol}{uv}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{uv}));
     Log3 $iohash, 4, "$name: SD_WS_Parse decoded protocol-id $protocol ($SensorTyp), sensor-id $id";
   }
@@ -1501,20 +1576,24 @@ sub SD_WS_Parse {
     $state .= " H: $hum"
   }
   if (defined($windspeed)) {
-    $state .= " " if (length($state) > 0);
+    $state .= ' ' if (length($state) > 0);
     $state .= "W: $windspeed"
   }
   if (defined($rain_total)) {
-    $state .= " " if (length($state) > 0);
+    $state .= ' ' if (length($state) > 0);
     $state .= "R: $rain_total"
   }
   if (defined($rain)) {
-    $state .= " " if (length($state) > 0);
+    $state .= ' ' if (length($state) > 0);
     $state .= "R: $rain"
   }
+  if (defined($identified)) {
+    $state .= ' ' if (length($state) > 0);
+    $state .= "I: $identified";
+  }
   if (defined($distance)) {
-    $state .= " " if (length($state) > 0);
-    $state .= "D: $distance"
+    $state .= ' ' if (length($state) > 0);
+    $state .= "D: $distance";
   }
   ### protocol 33 has different bits per sensor type
   if ($protocol eq "33") {
@@ -1543,6 +1622,7 @@ sub SD_WS_Parse {
   readingsBulkUpdate($hash, 'windGust', $windgust)  if (defined($windgust)) ;
   readingsBulkUpdate($hash, "batteryState", $bat) if (defined($bat) && length($bat) > 0) ;
   readingsBulkUpdate($hash, "batteryVoltage", $batVoltage)  if (defined($batVoltage));
+  readingsBulkUpdate($hash, 'batteryPercent', $batteryPercent)  if (defined($batteryPercent));
   readingsBulkUpdateIfChanged($hash, "batteryChanged", $batChange) if (defined($batChange));
   readingsBulkUpdate($hash, "channel", $channel, 0) if (defined($channel)&& length($channel) > 0);
   readingsBulkUpdate($hash, "trend", $trend) if (defined($trend) && length($trend) > 0);
@@ -1557,6 +1637,8 @@ sub SD_WS_Parse {
   readingsBulkUpdate($hash, "rain_total", $rain_total)  if (defined($rain_total));
   readingsBulkUpdate($hash, "sendCounter", $sendCounter)  if (defined($sendCounter));
   readingsBulkUpdate($hash, "distance", $distance)  if (defined($distance));
+  readingsBulkUpdate($hash, 'count', $count)  if (defined($count));
+  readingsBulkUpdate($hash, 'identified', $identified)  if (defined($identified));
   readingsBulkUpdate($hash, "uv", $uv)  if (defined($uv));
   readingsEndUpdate($hash, 1); # Notify is done by Dispatch
 
@@ -1659,6 +1741,7 @@ sub SD_WS_WH2SHIFT {
     <li>Conrad S522</li>
     <li>EuroChron EFTH-800, EFS-3110A (temperature and humidity sensor)</li>
     <li>Fine Offset WH51, aka ECOWITT WH51, aka Froggit DP100, aka MISOL/1 (soil moisture sensor)</li>
+    <li>Fine Offset WH57, aka Froggit DP60, aka Ambient Weather WH31L (thunder and lightning sensor)</li>
     <li>Fody E42 (temperature and humidity sensor)</li>
     <li>NC-3911, NC-3912 refrigerator thermometer</li>
     <li>Opus XT300</li>
@@ -1703,8 +1786,9 @@ sub SD_WS_WH2SHIFT {
     <li>batteryChanged (1)</li>
     <li>batteryState (low or ok)</li>
     <li>batteryVoltage (battery voltage in volts)</li>
+    <li>batteryPercent (battery level in %)</li>
     <li>channel (number of channel</li>
-    <li>distance (distance in cm)</li>
+    <li>distance (distance in cm (protocol 111) or km (protocol 116)</li>
     <li>humidity (humidity (1-100 % only if available)</li>
     <li>humidityTrend (consistent, rising, falling)</li>
     <li>sendmode (automatic or manual)</li>
@@ -1782,6 +1866,7 @@ sub SD_WS_WH2SHIFT {
     <li>Conrad S522</li>
     <li>EuroChron EFTH-800, EFS-3110A (Temperatur- und Feuchtigkeitssensor)</li>
     <li>Fine Offset WH51, aka ECOWITT WH51, aka Froggit DP100, aka MISOL/1 (Bodenfeuchtesensor)</li>
+    <li>Fine Offset WH57, aka Froggit DP60, aka Ambient Weather WH31L (Gewittersensor)</li>
     <li>Fody E42 (Temperatur- und Feuchtigkeitssensor)</li>
     <li>Kabelloses Grillthermometer, Modellname: GFGT 433 B1</li>
     <li>NC-3911, NC-3912 digitales Kuehl- und Gefrierschrank-Thermometer</li>
@@ -1827,8 +1912,9 @@ sub SD_WS_WH2SHIFT {
     <li>batteryChanged (1)</li>
     <li>batteryState (low oder ok)</li>
     <li>batteryVoltage (Batteriespannung in Volt)</li>
+    <li>batteryPercent (Batteriestand in %)</li>
     <li>channel (Sensor-Kanal)</li>
-    <li>distance (Entfernung in cm)</li>
+    <li>distance (Entfernung in cm (Protokoll 111) oder km (Protokoll 116)</li>
     <li>humidity (Luft-/Bodenfeuchte, 1-100 %)</li>
     <li>humidityTrend (Trend Luftfeuchte, gleichbleibend, steigend, fallend)</li>
     <li>rain (Regenmenge l/m&sup2;))</li>
