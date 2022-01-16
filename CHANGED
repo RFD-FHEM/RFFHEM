@@ -1,3 +1,15 @@
+2022-01-16 - new protocol 116 for Fine Offset WH57 (#1061)
+
+Thunder and lightning sensor Fine Offset WH57, aka Froggit DP60, aka Ambient Weather WH31L
+* Update 00_SIGNALduino.pm
+  add documentation
+* Update 14_SD_WS.pm
+  add protocol 116
+* Update SD_ProtocolData.pm
+  add definition 116 and 116.1
+* Update README.md
+  add sensors Fine Offset WH57, aka Ambient Weather WH31L, aka Froggit DP60
+
 2022-01-15 - Perlcritic Ergebnis bei jedem PR anzeigen (#1054)
 
 * .perlcritic created
