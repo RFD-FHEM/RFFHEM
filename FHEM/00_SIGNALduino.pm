@@ -1,4 +1,4 @@
-# $Id: 00_SIGNALduino.pm v3.5.2 2022-01-15 12:25:06Z elektron-bbs $
+# $Id: 00_SIGNALduino.pm v3.5.2 2022-01-16 15:40:06Z sidey79 $
 # v3.5.2 - https://github.com/RFD-FHEM/RFFHEM/tree/master
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incoming messages
 # see http://www.fhemwiki.de/wiki/SIGNALDuino
