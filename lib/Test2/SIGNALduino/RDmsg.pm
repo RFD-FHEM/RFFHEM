@@ -175,6 +175,13 @@ sub dmsgCheck {
             while ( (my $tID, my $tData) = each (@{$testSet->{data}}) ) 
             {
                 my $bool = run_subtest(qq[Checking parseFN for module: $testSet->{module} device: $testSet->{name} TestNo: $tID ($tData->{comment})], \&checkParseFn, {buffered => 1, inherit_trace => 1},$testSet->{module},$tData, $ioHash);
+                
+                if ( $tData->{fail} )
+                {
+                   unlike($tData->{dmsg},qr/$main::modules{$testSet->{module}}{Match}/,q[Verify Module Match]);
+                } else {
+                   like($tData->{dmsg},qr/$main::modules{$testSet->{module}}{Match}/,q[Verify Module Match]);
+                }
             } # while testSet
         } # SKIP
     } # while filt_testDataArray
