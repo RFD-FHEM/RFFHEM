@@ -1,5 +1,5 @@
 #########################################################################################
-# $Id: 14_SD_UT.pm 0 2022-01-17 20:40:59Z HomeAutoUser $
+# $Id: 14_SD_UT.pm 0 2022-01-17 21:50:34Z HomeAutoUser $
 #
 # The file is part of the SIGNALduino project.
 # The purpose of this module is universal support for devices.
