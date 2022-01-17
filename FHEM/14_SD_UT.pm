@@ -818,11 +818,11 @@ my %models = (
 sub SD_UT_Initialize {
   my ($hash) = @_;
   $hash->{Match}      = '^P(?:14|20|24|26|29|30|34|46|68|69|76|78|81|83|86|90|91|91.1|92|93|95|97|99|104|105|114)#.*';
-  $hash->{DefFn}      = 'SD_UT_Define';
-  $hash->{UndefFn}    = 'SD_UT_Undef';
-  $hash->{ParseFn}    = 'SD_UT_Parse';
-  $hash->{SetFn}      = 'SD_UT_Set';
-  $hash->{AttrFn}     = 'SD_UT_Attr';
+  $hash->{DefFn}      = \&SD_UT_Define;
+  $hash->{UndefFn}    = \&SD_UT_Undef;
+  $hash->{ParseFn}    = \&SD_UT_Parse;
+  $hash->{SetFn}      = \&SD_UT_Set;
+  $hash->{AttrFn}     = \&SD_UT_Attr;
   $hash->{AttrList}   = 'repeats:1,2,3,4,5,6,7,8,9,12,15 IODev do_not_notify:1,0 '.
                         'ignore:0,1 showtime:1,0 model:'.join(',', sort keys %models).
                         " $readingFnAttributes UTclock UTfrequency";
