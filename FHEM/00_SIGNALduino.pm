@@ -25,7 +25,7 @@ no warnings 'portable';
 
 eval {use Data::Dumper qw(Dumper);1};
 
-#use constant HAS_JSON      => defined  eval { require JSON; JSON->import; };
+use constant HAS_JSON      => defined  eval { require JSON; JSON->import; };
 
 eval {use Scalar::Util qw(looks_like_number);1};
 eval {use Time::HiRes qw(gettimeofday);1} ;
