@@ -25,8 +25,7 @@ no warnings 'portable';
 
 eval {use Data::Dumper qw(Dumper);1};
 
-use constant HAS_DigestCRC => defined  eval { require Digest::CRC;   q[Digest::CRC ]; };
-use constant HAS_JSON      => defined  eval { require JSON;          q[JSON ];        };
+#use constant HAS_JSON      => defined  eval { require JSON; JSON->import; };
 
 eval {use Scalar::Util qw(looks_like_number);1};
 eval {use Time::HiRes qw(gettimeofday);1} ;
@@ -299,11 +298,6 @@ sub SIGNALduino_Initialize {
   $hash->{DefFn}          = \&SIGNALduino_Define;
   $hash->{UndefFn}        = \&SIGNALduino_Undef;
 
-  if (!HAS_DigestCRC)
-  {
-    Log3 'SIGNALduino', 1, qq[SIGNALduino_Initialize Error: Module is in inoperable mode Missing Module Digest::CRC];
-    return q[SIGNALduino_Initialize error: Missing Module Digest::CRC];
-  }
 
 # Provider
   $hash->{ReadFn}  = \&SIGNALduino_Read;
@@ -3966,6 +3960,7 @@ sub SIGNALduino_githubParseHttpResponse {
   }
   elsif($data ne '' && defined($hardware))                                                                              # wenn die Abfrage erfolgreich war ($data enthaelt die Ergebnisdaten des HTTP Aufrufes)
   {
+
     my $json_array = decode_json($data);
     #print  Dumper($json_array);
     if ($param->{command} eq 'queryReleases') {
