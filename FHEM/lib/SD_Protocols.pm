@@ -13,8 +13,8 @@ package lib::SD_Protocols;
 use strict;
 use warnings;
 use Carp qw(croak carp);
-use constant HAS_DigestCRC => defined eval { require Digest::CRC;};
-use constant HAS_JSON => defined eval { require JSON;};
+use constant HAS_DigestCRC => defined eval { require Digest::CRC; };
+use constant HAS_JSON => defined eval { require JSON; };
 
 our $VERSION = '2.05';
 use Storable qw(dclone);
