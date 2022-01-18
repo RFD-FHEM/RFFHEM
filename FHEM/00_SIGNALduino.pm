@@ -16,7 +16,7 @@ use strict;
 use warnings;
 #use version 0.77; our $VERSION = version->declare('v3.5.3+20220116');
 
-my $missingModulSIGNALduino = '';
+my $missingModulSIGNALduino = ' ';
 
 use DevIo;
 require "99_Utils.pm" if (!defined $modules{"Utils"} || !exists $modules{"Utils"}{"LOADED"} ); ## no critic
@@ -24,8 +24,9 @@ use Carp;
 no warnings 'portable';
 
 eval {use Data::Dumper qw(Dumper);1};
-eval {use Digest::CRC;1 or $missingModulSIGNALduino .= 'Digest::CRC '};
-eval {use JSON;1 or $missingModulSIGNALduino .= 'JSON '};
+
+use constant HAS_DigestCRC => defined  eval { require Digest::CRC;   q[Digest::CRC ]; };
+use constant HAS_JSON      => defined  eval { require JSON;          q[JSON ];        };
 
 eval {use Scalar::Util qw(looks_like_number);1};
 eval {use Time::HiRes qw(gettimeofday);1} ;
@@ -295,15 +296,22 @@ sub SIGNALduino_Initialize {
     Log3 'SIGNALduino', 4, qq[SIGNALduino_Initialize: rfmode list: @rfmode];
   }
 
+  $hash->{DefFn}          = \&SIGNALduino_Define;
+  $hash->{UndefFn}        = \&SIGNALduino_Undef;
+
+  if (!HAS_DigestCRC)
+  {
+    Log3 'SIGNALduino', 1, qq[SIGNALduino_Initialize Error: Module is in inoperable mode Missing Module Digest::CRC];
+    return q[SIGNALduino_Initialize error: Missing Module Digest::CRC];
+  }
+
 # Provider
   $hash->{ReadFn}  = \&SIGNALduino_Read;
   $hash->{WriteFn} = \&SIGNALduino_Write;
   $hash->{ReadyFn} = \&SIGNALduino_Ready;
 
 # Normal devices
-  $hash->{DefFn}          = \&SIGNALduino_Define;
   $hash->{FingerprintFn}  = \&SIGNALduino_FingerprintFn;
-  $hash->{UndefFn}        = \&SIGNALduino_Undef;
   $hash->{GetFn}          = \&SIGNALduino_Get;
   $hash->{SetFn}          = \&SIGNALduino_Set;
   $hash->{AttrFn}         = \&SIGNALduino_Attr;
@@ -1065,7 +1073,7 @@ sub SIGNALduino_Get_FhemWebList {
 sub SIGNALduino_Get_availableFirmware {
   my ($hash, @a) = @_;
 
-  if ($missingModulSIGNALduino =~ m/JSON/ )
+  if ( !HAS_JSON )
   {
     $hash->{logMethod}->($hash->{NAME}, 1, "$hash->{NAME}: get $a[0] failed. Please install Perl module JSON. Example: sudo apt-get install libjson-perl");
     return "$a[0]: \n\nFetching from github is not possible. Please install JSON. Example:<br><code>sudo apt-get install libjson-perl</code>";
