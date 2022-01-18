@@ -13,7 +13,9 @@ package lib::SD_Protocols;
 use strict;
 use warnings;
 use Carp qw(croak carp);
-use Digest::CRC;
+use constant HAS_DigestCRC => defined eval { require Digest::CRC;};
+use constant HAS_JSON => defined eval { require JSON;};
+
 our $VERSION = '2.05';
 use Storable qw(dclone);
 use Scalar::Util qw(blessed);
@@ -142,7 +144,11 @@ sub LoadHashFromJson {
   my $json_text = do { local $/ = undef; <$json_fh> };
   close $json_fh or croak "Can't close '$filename' after reading";
 
-  use JSON;
+  if (!HAS_JSON)
+  {
+    croak("Perl Module JSON not availble. Needs to be installed.");
+  }
+
   my $json = JSON->new;
   $json = $json->relaxed(1);
   my $ver  = $json->incr_parse($json_text);
