@@ -1,5 +1,5 @@
 ################################################################################
-# $Id: SD_ProtocolData.pm 3.5.x 2022-01-18 22:10:46Z sidey79 $
+# $Id: SD_ProtocolData.pm 3.5.x 2022-01-18 22:52:12Z sidey79 $
 #
 # The file is part of the SIGNALduino project
 # v3.5.x - https://github.com/RFD-FHEM/RFFHEM
