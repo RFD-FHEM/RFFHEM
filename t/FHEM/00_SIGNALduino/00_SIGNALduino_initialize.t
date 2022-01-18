@@ -39,29 +39,10 @@ InternalTimer(time(), sub {
 },'dummyDuino');
 
 
-InternalTimer(time()+0.10, sub {
-	my $target = shift;
-	my $targetHash = $defs{$target};
-    my %validationHash;
-    use Test::Without::Module qw( Digest::CRC );
-    no warnings qw(redefine);
-    CommandReload(undef,"00_SIGNALduino.pm");
-    use warnings qw(redefine);
-    SIGNALduino_Initialize(\%validationHash);
-
-    is(FhemTestUtils_gotLog(q[SIGNALduino_Initialize Error: Module is in inoperable mode Missing Module Digest::CRC]), 2 , q[Digest::CRC Error in logfile]);
-    
-    FhemTestUtils_resetLogs();
-    eval q[ no Test::Without::Module qw( Digest::CRC ) ];
-
-},'dummyDuino');
-
-
 InternalTimer(time()+0.11, sub {
 	my $target = shift;
 	my $targetHash = $defs{$target};
     my %validationHash;
-    use Test::Without::Module qw( JSON );
     no warnings qw(redefine);
     CommandReload(undef,"00_SIGNALduino.pm");
     use warnings qw(redefine);
