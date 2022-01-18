@@ -176,7 +176,7 @@ sub dmsgCheck {
             {
                 my $bool = run_subtest(qq[Checking parseFN for module: $testSet->{module} device: $testSet->{name} TestNo: $tID ($tData->{comment})], \&checkParseFn, {buffered => 1, inherit_trace => 1},$testSet->{module},$tData, $ioHash);
                 
-                if ( $tData->{fail} )
+                if ( $tData->{MatchCheckFail} )
                 {
                    unlike($tData->{dmsg},$mmRe,qq[Verify Module unmatch for module: $testSet->{module} device: $testSet->{name} TestNo: $tID ($tData->{comment})]);
                 } else {
