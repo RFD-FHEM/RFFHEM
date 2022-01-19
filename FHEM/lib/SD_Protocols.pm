@@ -1825,7 +1825,10 @@ sub ConvBresser_6in1 {
   my $hexLength = length ($hexData);
 
   return ( 1, 'ConvBresser_6in1, hexData is to short' ) if ( $hexLength < 36 ); # check double, in def length_min set
-		
+
+  return ( 1,'ConvBresser_6in1, Modul CRC not loaded, please install modul Digest::CRC' )
+    if (!HAS_DigestCRC);
+
   my $crc = substr( $hexData, 0, 4 );
   my $ctx = Digest::CRC->new(width => 16, poly => 0x1021);
   my $calcCrc = sprintf( "%04X", $ctx->add( pack 'H*', substr( $hexData, 4, 30 ) )->digest );
@@ -1863,6 +1866,9 @@ sub ConvPCA301 {
   return ( 1,
 'ConvPCA301, Usage: Input #1, $hexData needs to be at least 24 chars long'
   ) if ( length($hexData) < 24 );    # check double, in def length_min set
+
+  return ( 1,'ConvPCA301, Modul CRC not loaded, please install modul Digest::CRC' )
+    if (!HAS_DigestCRC);
 
   my $checksum = substr( $hexData, 20, 4 );
   my $ctx = Digest::CRC->new(
@@ -1985,6 +1991,9 @@ sub ConvLaCrosse {
 
   return ( 1,'ConvLaCrosse, Usage: Input #1, $hexData needs to be at least 8 chars long'  )
     if ( length($hexData) < 8 )  ;    # check number of length for this sub to not throw an error
+
+  return ( 1,'ConvLaCrosse, Modul CRC not loaded, please install modul Digest::CRC' )
+    if (!HAS_DigestCRC);
 
   my $ctx = Digest::CRC->new( width => 8, poly => 0x31 );
   my $calcCrc = $ctx->add( pack 'H*', substr( $hexData, 0, 8 ) )->digest;

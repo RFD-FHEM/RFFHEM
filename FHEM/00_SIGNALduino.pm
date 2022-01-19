@@ -2942,7 +2942,8 @@ sub SIGNALduino_Parse_MN {
     my $method = $hash->{protocolObject}->getProperty($id,'method',undef);
     my @methodReturn = defined $method ? $method->($hash->{protocolObject},$rawData) : ($rawData);
     if ($#methodReturn != 0) {
-      $hash->{logMethod}->($name, 4, qq{$name: Parse_MN, Error! method $methodReturn[1]});
+      my $vb = $methodReturn[0];
+      $hash->{logMethod}->($name, $vb, qq{$name: Parse_MN, Error! method $methodReturn[1]});
       next mnIDLoop;
     }
     $dmsg = sprintf('%s%s',$hash->{protocolObject}->checkProperty($id,'preamble',''),$methodReturn[0]);
