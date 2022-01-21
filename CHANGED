@@ -1,3 +1,11 @@
+2022-01-20 - Update 14_SD_UT.pm - fix buttons P90 (#1060)
+
+* 14_SD_UT.pm
+  Functions refs saved as coderefs
+
+* 09_parseData.t
+  Umgestellt auf Nutzung Test2::SIGNALduino::RDmsg
+  Fehlerhafte Testdaten eingebunden
 2022-01-17 - Version 3.5.3+ erzeugen (#1064)
 
 * 00_SIGNALduino.pm
