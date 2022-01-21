@@ -1826,7 +1826,7 @@ sub ConvBresser_6in1 {
 
   return ( 1, 'ConvBresser_6in1, hexData is to short' ) if ( $hexLength < 36 ); # check double, in def length_min set
 
-  return ( 1,'ConvBresser_6in1, Modul CRC not loaded, please install modul Digest::CRC' )
+  return ( 1,'ConvBresser_6in1, Module CRC not loaded, please install modul Digest::CRC' )
     if (!HAS_DigestCRC);
 
   my $crc = substr( $hexData, 0, 4 );
