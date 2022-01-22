@@ -7,7 +7,9 @@ use Test2::Tools::Compare qw{is item U D match hash array bag};
 use Test2::Todo;
 
 
+
 our %defs;
+our %modules;
 
 my @mockData = (
     {
@@ -119,18 +121,15 @@ my @mockData = (
         plan        => 2,
         testname    => q[message ok],
         input       => q[MN;D=3BF120B00C1618FF77FF0458152293FFF06B0000;R=242;],
-        rValue      => 0,
-        rfmode      => 'Bresser 6-in-1' 
+        rValue      => 1,
+        rfmode      => 'Bresser_6in1' 
     },
-    
-
 );
-plan (scalar @mockData );  
 
-BEGIN {
-};
 
-InternalTimer(time()+1, sub() {
+plan (scalar @mockData);  
+
+InternalTimer(time()+0.9, sub() {
   while (@mockData)
   {
     my $element = pop(@mockData);
@@ -167,9 +166,8 @@ InternalTimer(time()+1, sub() {
   done_testing();
   exit(0);
 
+
 }, 0);
-
-
 
 
 1;
