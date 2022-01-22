@@ -14,7 +14,7 @@
 package main;
 use strict;
 use warnings;
-#use version 0.77; our $VERSION = version->declare('v3.5.3+20220116');
+#use version 0.77; our $VERSION = version->declare('v3.5.3');
 
 my $missingModulSIGNALduino = ' ';
 
