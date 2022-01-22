@@ -114,6 +114,15 @@ my @mockData = (
         rValue      => 0,
         rfmode      => 'Lacrosse_mode2' 
     },
+    {
+        deviceName  => q[dummyDuino],
+        plan        => 2,
+        testname    => q[message ok],
+        input       => q[MN;D=3BF120B00C1618FF77FF0458152293FFF06B0000;R=242;],
+        rValue      => 0,
+        rfmode      => 'Bresser 6-in-1' 
+    },
+    
 
 );
 plan (scalar @mockData );  
@@ -159,5 +168,8 @@ InternalTimer(time()+1, sub() {
   exit(0);
 
 }, 0);
+
+
+
 
 1;
