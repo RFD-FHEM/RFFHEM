@@ -1,30 +1,3 @@
-2022-01-22 - Graceful load JSON and Digest:CRC Modules (#1066)
-
-* 00_SIGNALduino.pm
-
-Handling of missing modules changed
-
-* lib/SD_Protocols.pm
-
-Handling of missing modules changed
-2022-01-20 - Update 14_SD_UT.pm - fix buttons P90 (#1060)
-
-* 14_SD_UT.pm
-  Functions refs saved as coderefs
-
-* 09_parseData.t
-  Umgestellt auf Nutzung Test2::SIGNALduino::RDmsg
-  Fehlerhafte Testdaten eingebunden
-2022-01-17 - Version 3.5.3+ erzeugen (#1064)
-
-* 00_SIGNALduino.pm
-  Version auf 3.5.3+ geändert
-
-2022-01-17 - SD_Protocols.pm
-
-ID Zeile hinterlegt
-2022-01-16 - Version 3.5.2 erzeugen (#1063)
-
 Release 3.5.2 
      10_SD_Rojaflex.pm 
           new: Module for rojaflex remote controls
