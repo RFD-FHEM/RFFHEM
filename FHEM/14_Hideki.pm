@@ -5,6 +5,7 @@
 # and was modified by a few additions
 # to support Hideki Sensors
 # S. Butzek, HJGode, Ralf9 2015-2017
+# S. Butzek 2018-2022
 #
 # changed the way crc and decrypt is used hjgode 20171129
 
@@ -24,7 +25,7 @@ Hideki_Initialize($)
   my ($hash) = @_;
 
 
-  $hash->{Match}     = "^P12#75[A-F0-9]{14,30}";   # Laenge (Anhahl nibbles nach 0x75 )noch genauer spezifizieren
+  $hash->{Match}     = qr/^P12#75[A-F0-9]{14,30}/;   # Laenge (Anhahl nibbles nach 0x75 )noch genauer spezifizieren
   $hash->{DefFn}     = \&Hideki_Define;
   $hash->{UndefFn}   = \&Hideki_Undef;
   $hash->{ParseFn}   = \&Hideki_Parse;
