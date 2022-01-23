@@ -1,0 +1,22 @@
+[
+    {"name":"Hideki", "id":"12", "module":"Hideki", "data": [
+      {
+        "dmsg":"P12#75A3", "comment":"to short, causes error", "user":"unknown",
+        "internals": { "NAME": "" }, 
+        "readings": {},
+        "minProtocolVersion":"1.42", "revision_entry":"SD_ProtocolData.pm 3.4.4 2022-01-15 12:25:06Z elektron-bbs $",
+        "revision_modul":"",
+        "rmsg":"",
+        "fail": true
+      },
+      {
+        "dmsg":"P12#75EC4675F0406F6D", "comment":"to short", "user":"unknown",
+        "internals": {"NAME": "Hideki_31_1", "DEF": "Hideki_31_1 Hideki Hideki_31_1" }, 
+        "readings": {"temperature": "1"},
+        "minProtocolVersion":"1.42", "revision_entry":"SD_ProtocolData.pm 3.4.4 2022-01-15 12:25:06Z elektron-bbs $",
+        "revision_modul":"",
+        "rmsg":"MC;LL=-952;LH=1003;SL=-452;SH=526;D=51E4676A3F0FEC2693;C=488;L=72;R=247;"
+      }     
+    ]
+    }    
+]
