@@ -29,6 +29,8 @@ use constant HAS_JSON      => defined  eval { require JSON; JSON->import; };
 
 eval {use Scalar::Util qw(looks_like_number);1};
 eval {use Time::HiRes qw(gettimeofday);1} ;
+eval {use FHEM::Timer::Helper;1 } ;
+
 use lib::SD_Protocols;
 use List::Util qw(first);
 
@@ -424,9 +426,9 @@ sub SIGNALduino_Define {
   my $ret=undef;
   $Protocols->registerLogCallback(SIGNALduino_createLogCallback($hash));
   $hash->{protocolObject} = $Protocols;
-
-  InternalTimer(gettimeofday(), \&SIGNALduino_IdList,"sduino_IdList:$name",0);        # verzoegern bis alle Attribute eingelesen sind
-
+  FHEM::timer::helper::addTimer($name, time(), \&SIGNALduino_IdList,"sduino_IdList:$name",0 );
+  #InternalTimer(gettimeofday(), \&SIGNALduino_IdList,"sduino_IdList:$name",0);       # verzoegern bis alle Attribute eingelesen sind
+  
   if($dev ne 'none') {
     $ret = DevIo_OpenDev($hash, 0, \&SIGNALduino_DoInit, \&SIGNALduino_Connect);
   } else {
@@ -480,6 +482,7 @@ sub SIGNALduino_Undef {
 
   DevIo_CloseDev($hash);
   RemoveInternalTimer($hash);
+  FHEM::timer::helper::removeTimer($name); 
   return ;
 }
 
