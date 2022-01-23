@@ -1,4 +1,4 @@
-SIGNALduino - FHEM Modules Version 3.5.3
+SIGNALduino - FHEM Modules Version 3.5.4
 
 Base Branch:
 
