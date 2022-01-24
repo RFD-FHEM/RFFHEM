@@ -22,7 +22,8 @@
           "readings": {},
           "minProtocolVersion":"1.39", "revision_entry":"2021-11-21 20:33:59Z",
           "revision_modul":"10_SD_Rojaflex.pm 100 2021-11-21 20:33:59Z elektron-bbs",
-          "rmsg":""
+          "rmsg":"",
+          "MatchCheckFail": true
         },
         {
           "dmsg":"P109#083122FD251A011AAA", "comment":"tubular message channel 5 inverted", "user":"Hofyyy",
