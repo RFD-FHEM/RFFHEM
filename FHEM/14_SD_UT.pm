@@ -1,5 +1,5 @@
 #########################################################################################
-# $Id: 14_SD_UT.pm 0 2022-01-17 21:50:34Z HomeAutoUser $
+# $Id: 14_SD_UT.pm 0 2022-01-23 16:28:56Z sidey79 $
 #
 # The file is part of the SIGNALduino project.
 # The purpose of this module is universal support for devices.
@@ -817,7 +817,7 @@ my %models = (
 #############################
 sub SD_UT_Initialize {
   my ($hash) = @_;
-  $hash->{Match}      = '^P(?:14|20|24|26|29|30|34|46|68|69|76|78|81|83|86|90|91|91.1|92|93|95|97|99|104|105|114)#.*';
+  $hash->{Match}      = '^P(?:14|20|24|26|29|30|34|46|56|68|69|76|78|81|83|86|90|91|91\.1|92|93|95|97|99|104|105|114)#.*';
   $hash->{DefFn}      = \&SD_UT_Define;
   $hash->{UndefFn}    = \&SD_UT_Undef;
   $hash->{ParseFn}    = \&SD_UT_Parse;

@@ -165,22 +165,22 @@ sub dmsgCheck {
         $todo = Test2::Todo->new(reason => $testDef->{todo} ); 
     }
 
-
     while ( ($pID, $testSet) = each @filt_testDataArray )
     {
         SKIP: {
             #skip 'Testset id not in scope' if (!defined $testSet->{id} || $testSet->{id} ne '61');
             skip 'Protocol does not exsists in ProtocolObject' if ( !$ioHash->{protocolObject}->protocolExists($testSet->{id}) );
-            # skip 'Protocol is under development' if ( defined $ioHash->{protocolObject}->checkProperty($testSet->{id},'developId',undef) );
+            # skip 'Protocol is under development' if ( defined $ioHash->{protocolObject}->checkProperty($testSet->{id},'developId',undef) ); 
+            my $mmRe = qr/$main::modules{$testSet->{module}}{Match}/;
             while ( (my $tID, my $tData) = each (@{$testSet->{data}}) ) 
             {
                 my $bool = run_subtest(qq[Checking parseFN for module: $testSet->{module} device: $testSet->{name} TestNo: $tID ($tData->{comment})], \&checkParseFn, {buffered => 1, inherit_trace => 1},$testSet->{module},$tData, $ioHash);
                 
-                if ( $tData->{fail} )
+                if ( $tData->{MatchCheckFail} )
                 {
-                   unlike($tData->{dmsg},qr/$main::modules{$testSet->{module}}{Match}/,q[Verify Module Match]);
+                   unlike($tData->{dmsg},$mmRe,qq[Verify Module unmatch for module: $testSet->{module} device: $testSet->{name} TestNo: $tID ($tData->{comment})]);
                 } else {
-                   like($tData->{dmsg},qr/$main::modules{$testSet->{module}}{Match}/,q[Verify Module Match]);
+                   like($tData->{dmsg},$mmRe,qq[Verify Module match for module: $testSet->{module} device: $testSet->{name} TestNo: $tID ($tData->{comment})]);
                 }
             } # while testSet
         } # SKIP
