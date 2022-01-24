@@ -9,6 +9,9 @@ use Test2::Tools::Exception qw/dies lives/;
 
 our %defs;
 
+
+plan(2);
+
 subtest 'Delete $defs{name} and check if internal timers causes crash' => sub {
 	CommandDefine(undef,"raceDuino SIGNALduino none");
 	is(IsDevice('raceDuino'),T(),'check definition is created');
@@ -34,18 +37,6 @@ subtest 'CommandDelete and check if internal timers causes crash' => sub {
 		T(),
 	    'Got no exception'
 	);
-};
-
-CommandDefine(undef,"raceDuino SIGNALduino none");
-
-subtest ' check if sub SIGNALduino_IdList causes crash if name does not exists' => sub {
-	#my $todo = Test2::Todo->new(reason => 'This crash needs a fix');
-
-	ok(
-	    lives   { SIGNALduino_IdList('sduino_IdList:DeviceDoesNotExists'); },
-	    'Got no exception'
-	);
-	
 };
 
 done_testing();
