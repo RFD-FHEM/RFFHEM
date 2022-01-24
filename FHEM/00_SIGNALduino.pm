@@ -482,7 +482,7 @@ sub SIGNALduino_Undef {
 
   DevIo_CloseDev($hash);
   RemoveInternalTimer($hash);
-  FHEM::timer::helper::removeTimer($name); 
+  FHEM::Core::Timer::Helper::removeTimer($name); 
   return ;
 }
 
@@ -3338,6 +3338,8 @@ sub SIGNALduino_FW_saveWhitelist {
 sub SIGNALduino_IdList($@) {
   my ($param, $aVal, $blacklist, $develop0) = @_;
   my (undef,$name) = split(':', $param);
+
+  return if (!defined $name || !IsDevice($name));
   my $hash = $defs{$name};
 
   my @msIdList = ();
