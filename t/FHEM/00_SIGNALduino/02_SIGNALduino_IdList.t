@@ -10,9 +10,9 @@ use Test2::Tools::Exception qw/lives/;
 subtest ' check if sub SIGNALduino_IdList causes crash if name does not exists' => sub {
 	#my $todo = Test2::Todo->new(reason => 'This crash needs a fix');
 
-	like(
+	is(
 	    lives   { SIGNALduino_IdList('sduino_IdList:DeviceDoesNotExists'); },
-	    F(),
+	    T(),
 	    'No exception'
 	);
 	
