@@ -1,3 +1,18 @@
+2022-01-24 - Prüfung ergänzt, welche dmsg gegen den Match Eintrag verifiziert (#1065)
+
+* lib/Test2/SIGNALduino/RDmsg.pm
+
+- Prüfung ergänzt, welche dmsg gegen den Match eintrag verifiziert
+
+* t/FHEM/10_SD_Rojaflex
+
+- marked to short testdata as failable for match check
+
+* 14_SD_UT.pm
+
+Match Regex angepast
+56 fehlte
+91.1 Syntax korrigiert
 2022-01-23 - Version 3.5.4+ hinterlegt (#1069)
 
 * Version 3.5.4+ hinterlegt
