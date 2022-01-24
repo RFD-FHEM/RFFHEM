@@ -7,7 +7,7 @@
         "minProtocolVersion":"1.42", "revision_entry":"SD_ProtocolData.pm 3.4.4 2022-01-15 12:25:06Z elektron-bbs $",
         "revision_modul":"",
         "rmsg":"",
-        "fail": true
+        "MatchCheckFail": true
       },
       {
         "dmsg":"P12#75EC4675F0406F6D", "comment":"to short", "user":"unknown",
@@ -35,10 +35,7 @@
         "revision_modul":"",
         "rmsg":"MC;LL=-1043;LH=919;SL=-503;SH=428;D=51F467EA3E0FECEEEE;C=482;L=71;s1;b1;"
       }
-
-      
-      
-      
+ 
       
       
     ]
