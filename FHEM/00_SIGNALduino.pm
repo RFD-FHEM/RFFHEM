@@ -14,7 +14,7 @@
 package main;
 use strict;
 use warnings;
-#use version 0.77; our $VERSION = version->declare('v3.5.3');
+#use version 0.77; our $VERSION = version->declare('v3.5.4');
 
 my $missingModulSIGNALduino = ' ';
 
@@ -38,7 +38,7 @@ use List::Util qw(first);
 
 
 use constant {
-  SDUINO_VERSION                  => '3.5.2+20220123',  # Datum wird automatisch bei jedem pull request aktualisiert
+  SDUINO_VERSION                  => '3.5.4+20220125',  # Datum wird automatisch bei jedem pull request aktualisiert
   SDUINO_INIT_WAIT_XQ             => 1.5,     # wait disable device
   SDUINO_INIT_WAIT                => 2,
   SDUINO_INIT_MAXRETRY            => 3,
