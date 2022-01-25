@@ -1,3 +1,13 @@
+2022-01-25 - Update {Match} regex for Hideki Module (#1071)
+
+* 14_Hideki.pm
+
+- Match Regex angepasst
+- Subs als Coderef hinterlegt
+
+* 09_ParseData.t
+
+- ParseData Test mit Testdaten hinterlegt
 2022-01-24 - Prüfung ergänzt, welche dmsg gegen den Match Eintrag verifiziert (#1065)
 
 * lib/Test2/SIGNALduino/RDmsg.pm
