@@ -86,7 +86,7 @@ package lib::SD_ProtocolData;
   use strict;
   use warnings;
 
-  our $VERSION = '1.42';
+  our $VERSION = '1.43';
 
   our %protocols = (
     "0" =>  ## various weather sensors (500 | 9100)
@@ -3115,9 +3115,26 @@ package lib::SD_ProtocolData;
         clientmodule    => 'SD_WS',
         length_min      => '18',
       },
-
-    # "117" => reserved @elektron-bbs for BRESSER 7-in-1 Weather Center
-
+    "117" =>  ## BRESSER 7-in-1 Weather Center
+              # https://forum.fhem.de/index.php/topic,78809.msg1196941.html#msg1196941 @ JensS 2021-12-30
+              # T: 12.7 H: 87 W: 0 R: 8.4 B: 6.676   MN;D=FC28A6F58DCA18AAAAAAAAAA2EAAB8DA2DAACCDCAAAAAAAAAA000000;R=29;
+              # T: 13.1 H: 88 W: 0 R: 0   B: 0.36    MN;D=4DC4A6F5B38A10AAAAAAAAAAAAAAB9BA22AAA9CAAAAAAAAAAA000000;R=15;
+              # T: 10.1 H: 94 W: 0 R: 0   B: 1.156   MN;D=0CF0A6F5B98A10AAAAAAAAAAAAAABABC3EAABBFCAAAAAAAAAA000000;R=28;
+      {
+        name            => 'Bresser 7in1',
+        comment         => 'BRESSER 7-in-1 weather center',
+        id              => '117',
+        knownFreqs      => '868.35',
+        datarate        => '8.232',
+        sync            => '2DD4',
+        modulation      => '2-FSK',
+        rfmode          => 'Bresser_7in1',
+        register        => ['0001','022E','0345','042D','05D4','0616','07C0','0800','0D21','0E65','0FE8','1088','114C','1202','1322','14F8','1551','1916','1B43','1C68'],
+        preamble        => 'W117#',
+        clientmodule    => 'SD_WS',
+        length_min      => '44',
+        method          => \&lib::SD_Protocols::ConvBresser_7in1,
+      },
     ########################################################################
     #### ###  register informations from other hardware protocols  #### ####
 
