@@ -105,7 +105,7 @@ jobs:
         id: version
         uses: nguyenvanuyn96/str-find-action@master
         with:
-          find: \w+\s+=>\s\'(\d.\d.\d)\+\d+\'
+          find: '\d\.\d\.\d' 
           include: "${{ matrix.file }}"
       - name: Update SDUINO_VERSION date
         if: endsWith(matrix.file, '00_SIGNALduino.pm')
