@@ -1,4 +1,4 @@
-# $Id: 00_SIGNALduino.pm v3.5.4 2022-01-31 21:29:55Z sidey79 $
+# $Id: 00_SIGNALduino.pm v3.5.4 2022-01-23 10:53:46Z sidey79 $
 # v3.5.4 - https://github.com/RFD-FHEM/RFFHEM/tree/master
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incoming messages
 # see http://www.fhemwiki.de/wiki/SIGNALDuino
@@ -38,7 +38,7 @@ use List::Util qw(first);
 
 
 use constant {
-  SDUINO_VERSION                  => '3.5.4+20220131',  # Datum wird automatisch bei jedem pull request aktualisiert
+  SDUINO_VERSION                  => '3.5.4+20220125',  # Datum wird automatisch bei jedem pull request aktualisiert
   SDUINO_INIT_WAIT_XQ             => 1.5,     # wait disable device
   SDUINO_INIT_WAIT                => 2,
   SDUINO_INIT_MAXRETRY            => 3,
@@ -975,7 +975,7 @@ sub SIGNALduino_Set_bWidth {
     return ("Setting MDMCFG4 (10) to $ob = $bw KHz" ,undef);
   } else {
     $hash->{logMethod}->($hash->{NAME}, 3, "$hash->{NAME}: Set_bWidth, Request register 10");
-10+00
+    # Get Register 10
     cc1101::GetRegister($hash,10);
 
     $hash->{ucCmd}->{cmd}         = 'set_bWidth';
@@ -1293,7 +1293,7 @@ sub SIGNALduino_CheckSendRawResponse {
   if ($msg =~ /^S[RCMN];/ )
   {
     my $name=$hash->{NAME};
-5+00
+    # zu testen der sendeQueue, kann wenn es funktioniert auf verbose 5
     $hash->{logMethod}->($name, 4, "$name: CheckSendrawResponse, sendraw answer: $msg");
     delete($hash->{ucCmd});
     if ($msg =~ /D=[A-Za-z0-9]+;/ )
@@ -2034,7 +2034,7 @@ sub SIGNALduino_PatternExists {
       push @indexer, $searchpattern; 
       push @sumlist, [@closestidx];  
     } else {
-1+00
+      # search is not found, return -1
       return -1;
     }
     $i++;
@@ -2091,7 +2091,7 @@ sub SIGNALduino_PatternExists {
 }
 
 ############################# package main
-3.1.31.+00
+#SIGNALduino_MatchSignalPattern{$hash,@array, %hash, @array, $scalar}; not used >v3.1.3
 sub SIGNALduino_MatchSignalPattern($\@\%\@$){
   my ( $hash, $signalpattern,  $patternList,  $data_array, $idx) = @_;
     my $name = $hash->{NAME};
@@ -4074,7 +4074,7 @@ our %cc1101_version = ( # Status register 0x31 (0xF1): VERSION – Chip ID
   '15' => 'CC115L',
 );
 
-1101+00
+############################# package cc1101
 #### for set function to change the patable for 433 or 868 Mhz supported
 #### 433.05–434.79 MHz, 863–870 MHz
 sub SetPatable {
@@ -4094,7 +4094,7 @@ sub SetPatable {
   }
 }
 
-1101+00
+############################# package cc1101
 sub SetRegisters  {
   my ($hash, @a) = @_;
 
@@ -4116,7 +4116,7 @@ sub SetRegisters  {
   return ;
 }
 
-1101+00
+############################# package cc1101
 sub SetRegistersUser  {
   my ($hash) = @_;
 
@@ -4131,7 +4131,7 @@ sub SetRegistersUser  {
   return ;
 }
 
-1101+00
+############################# package cc1101
 sub SetDataRate  {
   my ($hash, @a) = @_;
   my $arg = $a[1];
@@ -4158,7 +4158,7 @@ sub SetDataRate  {
   return ;
 }
 
-1101+00
+############################# package cc1101
 sub CalcDataRate {
   # register 0x10 3:0 & register 0x11 7:0
   my ($hash, $ob10, $dr) = @_;
@@ -4197,7 +4197,7 @@ sub CalcDataRate {
   return ($ob10,$ob11);
 }
 
-1101+00
+############################# package cc1101
 sub SetDeviatn {
   my ($hash, @a) = @_;
   my $arg = $a[1];
@@ -4239,7 +4239,7 @@ sub SetDeviatn {
   return;
 }
 
-1101+00
+############################# package cc1101
 sub SetFreq  {
   my ($hash, @a) = @_;
 
@@ -4260,7 +4260,7 @@ sub SetFreq  {
   return ;
 }
 
-1101+00
+############################# package cc1101
 sub setrAmpl  {
   my ($hash, @a) = @_;
   return "$hash->{NAME}: A numerical value between 24 and 42 is expected." if($a[1] !~ m/^\d+$/ || $a[1] < 24 ||$a[1] > 42);
@@ -4276,14 +4276,14 @@ sub setrAmpl  {
   return ;
 }
 
-1101+00
+############################# package cc1101
 sub GetRegister {
   my ($hash, $reg) = @_;
   main::SIGNALduino_AddSendQueue($hash,'C'.$reg);
   return ;
 }
 
-1101+00
+############################# package cc1101
 sub CalcbWidthReg {
   my ($hash, $reg10, $bWith) = @_;
   # Beispiel Rückmeldung, mit Ergebnis von Register 10: C10 = 57
@@ -4302,7 +4302,7 @@ sub CalcbWidthReg {
   return ($ob,$bw);
 }
 
-1101+00
+############################# package cc1101
 sub SetSens {
   my ($hash, @a) = @_;
 
@@ -4320,7 +4320,7 @@ sub SetSens {
 1;
 
 =pod
-8+00
+=encoding utf8
 =item summary    supports the same low-cost receiver for digital signals
 =item summary_DE Unterstuetzt den gleichnamigen Low-Cost Empfaenger fuer digitale Signale
 =begin html
@@ -4746,9 +4746,9 @@ USB-connected devices (SIGNALduino):<br>
     <br><br>
     Examples:<PRE>
       # Do not use any long IDs for any devices:
-0+00
+      attr sduino longids 0
       # Use any long IDs for all devices (this is default):
-1+00
+      attr sduino longids 1
       # Use longids for BTHR918N devices.
       # Will generate devices names like BTHR918N_f3.
       attr sduino longids BTHR918N
@@ -5327,12 +5327,12 @@ USB-connected devices (SIGNALduino):<br>
     Folgende Module verwenden diese Funktionalit&auml;t: 14_Hideki, 41_OREGON, 14_CUL_TCM97001, 14_SD_WS07.<br>
     Beispiele:<PRE>
       # Keine langen IDs verwenden (Default Einstellung):
-0+00
+      attr sduino longids 0
       # Immer lange IDs verwenden:
-1+00
+      attr sduino longids 1
       # Verwende lange IDs f&uuml;r SD_WS07 Devices.
       # Device Namen sehen z.B. so aus: SD_WS07_TH_3.
-07+00
+      attr sduino longids SD_WS07
     </PRE>
   </li>
   <a name="maxMuMsgRepeat"></a>
@@ -5495,7 +5495,7 @@ USB-connected devices (SIGNALduino):<br>
   ],
   "meta-spec": {
     "url": "https://metacpan.org/pod/CPAN::Meta::Spec",
-2+00
+    "version": 2
   },
   "name": "FHEM::SIGNALduino",
   "prereqs": {
