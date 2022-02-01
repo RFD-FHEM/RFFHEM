@@ -100,12 +100,24 @@ jobs:
       matrix: ${{ fromJson(needs.metadata.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v2.4.0
+      - name: Find Version String
+        if: endsWith(matrix.file, '00_SIGNALduino.pm')
+        id: versionList
+        uses: nguyenvanuyn96/str-find-action@master
+        with:
+          find: '\d\.\d\.\d' 
+          include: "${{ matrix.file }}"
+      - uses: jungwinter/split@v2
+        id: versions
+        with:
+          msg: '${{ steps.versionList.outputs.resultArray }}'
+          separator: ' '
       - name: Update SDUINO_VERSION date
         if: endsWith(matrix.file, '00_SIGNALduino.pm')
         uses: jacobtomlinson/gha-find-replace@2.0.0
         with:
           find: \w+\s+=>\s\'\d.\d.\d\+\d+\'
-          replace: "SDUINO_VERSION                  => '3.5.2+${{ needs.metadata.outputs.date }}'"
+          replace: "SDUINO_VERSION                  => '${{ steps.versions.outputs._1 }}+${{ needs.metadata.outputs.date }}'"
           include: "${{ matrix.file }}"
       - name: Update Date in ID line
         uses: jacobtomlinson/gha-find-replace@2.0.0
