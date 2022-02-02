@@ -1,4 +1,4 @@
-# $Id: 00_SIGNALduino.pm v3.5.4 2022-01-23 10:53:46Z sidey79 $
+# $Id: 00_SIGNALduino.pm v3.5.4 2022-02-01 20:02:34Z elektron-bbs $
 # v3.5.4 - https://github.com/RFD-FHEM/RFFHEM/tree/master
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incoming messages
 # see http://www.fhemwiki.de/wiki/SIGNALDuino
@@ -38,7 +38,7 @@ use List::Util qw(first);
 
 
 use constant {
-  SDUINO_VERSION                  => '3.5.4+20220125',  # Datum wird automatisch bei jedem pull request aktualisiert
+  SDUINO_VERSION                  => '3.5.4+20220201',  # Datum wird automatisch bei jedem pull request aktualisiert
   SDUINO_INIT_WAIT_XQ             => 1.5,     # wait disable device
   SDUINO_INIT_WAIT                => 2,
   SDUINO_INIT_MAXRETRY            => 3,
@@ -4787,6 +4787,9 @@ USB-connected devices (SIGNALduino):<br>
       <li>Bresser_6in1<br>
         modulation 2-FSK, Datarate=8.23 kbps, Sync Word=2DD4, FIFO-THR=20 Byte, frequency 868.35 MHz
       </li>
+      <li>Bresser_7in1<br>
+        modulation 2-FSK, Datarate=8.23 kbps, Sync Word=2DD4, Packet Length=22 Byte, frequency 868.35 MHz
+      </li>
       <li>Fine_Offset_WH51_434<br>
         Modulation 2-FSK, Datarate=17.26 kbps, Sync Word=2DD4, Packet Length=14 Byte, Frequency 433.92 MHz
         <ul><small>Example: Soil moisture sensor Fine Offset WH51, ECOWITT WH51, MISOL/1, Froggit DP100</small></ul>
@@ -5356,7 +5359,7 @@ USB-connected devices (SIGNALduino):<br>
     Konfiguriert den RF Transceiver des SIGNALduino (CC1101). Verf&uuml;gbare Argumente sind:
     <ul>
       <li>Avantek<br>
-        Modulation 2-FSK, Datarate=50.087 kbps, Sync Word=0869, FIFO-THR=8 Byte, Frequenz 433.3 MHz
+        Modulation 2-FSK, Datenrate=50.087 kbps, Sync Word=0869, FIFO-THR=8 Byte, Frequenz 433.3 MHz
         <ul><small>Example: AVANTEK Funk-Türklingel</small></ul>
       </li>
       <li>Bresser_5in1<br>
@@ -5365,6 +5368,9 @@ USB-connected devices (SIGNALduino):<br>
       </li>
       <li>Bresser_6in1<br>
         Modulation 2-FSK, Datenrate=8.23 kbps, Sync Word=2DD4, FIFO-THR=20 Byte, Frequenz 868.35 MHz
+      </li>
+      <li>Bresser_7in1<br>
+        Modulation 2-FSK, Datenrate=8.23 kbps, Sync Word=2DD4, Packet Length=22 Byte, Frequenz 868.35 MHz
       </li>
       <li>Fine_Offset_WH51_434<br>
         Modulation 2-FSK, Datenrate=17.26 kbps, Sync Word=2DD4, Packet Length=14 Byte, Frequenz 433.92 MHz
