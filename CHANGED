@@ -1,3 +1,17 @@
+2022-02-02 - new protocol 117 for BRESSER 7-in-1 Weather Center (#1072)
+
+  14_SD_WS.pm
+    add 117 for decoding of messages
+  00_SIGNALduino.pm
+    update commandref
+  SD_ProtocolData.pm
+    add definition protocol 117
+  SD_Protocols.pm
+    add sub ConvBresser_7in1 for XOR over all nibbles and check
+    add sub LFSR_digest16 linear-feedback shift register
+  README.md
+    add BRESSER 7-in-1
+
 2022-01-25 - 00_SIGNALduino.pm
 - Correct Versionnumber
 
