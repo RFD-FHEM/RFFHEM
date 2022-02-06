@@ -61,10 +61,10 @@ sub SD_WS_WH2SHIFT;
 sub SD_WS_Initialize {
   my $hash = shift // return;
   $hash->{Match}    = '^W\d+x{0,1}#.*';
-  $hash->{DefFn}    = "SD_WS_Define";
-  $hash->{UndefFn}  = "SD_WS_Undef";
-  $hash->{SetFn}    = 'SD_WS_Set';
-  $hash->{ParseFn}  = "SD_WS_Parse";
+  $hash->{DefFn}    = \&SD_WS_Define;
+  $hash->{UndefFn}  = \&SD_WS_Undef;
+  $hash->{SetFn}    = \&SD_WS_Set;
+  $hash->{ParseFn}  = \&SD_WS_Parse;
   $hash->{AttrList} = "do_not_notify:1,0 ignore:0,1 showtime:1,0 " .
                       "model:E0001PA,S522,TX-EZ6,other " .
                       "max-deviation-temp:1,2,3,4,5,6,7,8,9,10,15,20,25,30,35,40,45,50 ".
@@ -127,33 +127,33 @@ sub SD_WS_Undef {
   my ($hash, $name) = @_;
   carp "SD_WS_Undef, too few arguments ($hash, $name)" if @_ < 2;
   delete($modules{SD_WS}{defptr}{$hash->{CODE}}) if(defined($hash->{CODE}) && defined($modules{SD_WS}{defptr}{$hash->{CODE}}));
-	RemoveInternalTimer($hash);
+  RemoveInternalTimer($hash);
   return;
 }
 
 #############################
 sub SD_WS_Set {
   my ($hash, $name, $cmd, @args) = @_;
+  carp "SD_WS_Set, too few arguments ($hash, $name, $cmd)" if @_ < 3;
   my $ret = undef;
-	my $LastInputDev = $hash->{LASTInputDev};
+  my $LastInputDev = $hash->{LASTInputDev};
   return $ret if (!defined $LastInputDev);
-	
+
   my $rhash = $defs{$LastInputDev};
   my $rlongids = AttrVal($rhash->{NAME},'longids',0);
-	my $def = $hash->{DEF};
-	my @array=split(/_/,$def);
-	my $model = $array[0] . '_' . $array[1] . '_' . $array[2];
-
+  my $def = $hash->{DEF};
+  my @array = split(/_/,$def);
+  my $model = $array[0] . '_' . $array[1] . '_' . $array[2];
   if (($rlongids ne "0") && ($rlongids eq "1" || $rlongids eq "ALL" || ($rlongids =~ m/$model/))) {
     if ($cmd eq '?') {
       $ret = 'replaceBatteryForSec'; # return setList
     } elsif ($cmd eq 'replaceBatteryForSec') {
-      return "$name: No or too small value specified for the replaceBatteryForSec command" if (int @args < 1 || $args[0] < 1);
-      my @found = devspec2array("TYPE=SD_WS:FILTER=replaceBattery>0");
+      return "$name: No or too small value specified for the replaceBatteryForSec command" if (scalar(@args) < 1 || $args[0] < 1);
+      my @found = devspec2array("TYPE=SD_WS:FILTER=i:replaceBattery>0");
       return "$name: Only one sensor at a time, replaceBatteryForSec is already activated at @found" if (scalar(@found) > 0);
       my $repBatForSec = $args[0];
       $hash->{replaceBattery} = $repBatForSec;
-      InternalTimer(gettimeofday() + $repBatForSec, 'SD_WS_TimerRemoveReplaceBattery', $hash, 0);
+      InternalTimer(gettimeofday() + $repBatForSec, \&SD_WS_TimerRemoveReplaceBattery, $hash, 0);
       Log3 $name, 3, "$name: SD_WS_Set, wait $repBatForSec seconds for a new identity of the sensor"; 
     } else {
       $ret = "$name: Unknown argument $cmd, choose replaceBatteryForSec";
@@ -1591,20 +1591,19 @@ sub SD_WS_Parse {
   $def = $modules{SD_WS}{defptr}{$deviceCode} if(!$def);
 
   if(!$def) {
-    my @found = devspec2array("TYPE=SD_WS:FILTER=replaceBattery>0");
-    if (@found) {
+    my @found = devspec2array("TYPE=SD_WS:FILTER=i:replaceBattery>0");
+    if (scalar(@found) > 0) {
       if (($longids ne "0") && ($longids eq "1" || $longids eq "ALL" || (",$longids," =~ m/,$model,/))) {
         my $rname = $found[0];
         my $rhash = $defs{$rname};
         my $rdef = $rhash->{DEF};
         my $rproto = $rhash->{$ioname . '_Protocol_ID'};
         if (defined $rproto && $rproto eq $protocol) {
-          Log3 $name, 3, "$ioname: SD_WS_Parse, $rname change DEF from $rdef in $deviceCode";
+          Log3 $name, 3, "$rname: SD_WS_Parse, change DEF from $rdef in $deviceCode";
           CommandModify(undef, "$rname $deviceCode");
-          CommandSave(undef,undef);
           delete($rhash->{replaceBattery});
           RemoveInternalTimer($rhash);
-          return '';
+          return $rname;
         }
       }
     }
