@@ -1,6 +1,40 @@
-2022-01-23 - Version 3.5.4+ hinterlegt (#1069)
+2022-02-02 - new protocol 117 for BRESSER 7-in-1 Weather Center (#1072)
 
+  14_SD_WS.pm
+    add 117 for decoding of messages
+  00_SIGNALduino.pm
+    update commandref
+  SD_ProtocolData.pm
+    add definition protocol 117
+  SD_Protocols.pm
+    add sub ConvBresser_7in1 for XOR over all nibbles and check
+    add sub LFSR_digest16 linear-feedback shift register
+  README.md
+    add BRESSER 7-in-1
+
+2022-01-25 - 00_SIGNALduino.pm
+- Correct Versionnumber
+
+2022-01-25 - Update {Match} regex for Hideki Module (#1071)
+* 14_Hideki.pm
+- Match Regex angepasst
+- Subs als Coderef hinterlegt
+* 09_ParseData.t
+- ParseData Test mit Testdaten hinterlegt
+
+2022-01-24 - Prüfung ergänzt, welche dmsg gegen den Match Eintrag verifiziert (#1065)
+* lib/Test2/SIGNALduino/RDmsg.pm
+- Prüfung ergänzt, welche dmsg gegen den Match eintrag verifiziert
+* t/FHEM/10_SD_Rojaflex
+- marked to short testdata as failable for match check
+* 14_SD_UT.pm
+Match Regex angepast
+56 fehlte
+91.1 Syntax korrigiert
+
+2022-01-23 - Version 3.5.4+ hinterlegt (#1069)
 * Version 3.5.4+ hinterlegt
+
 2022-01-23 - Master 3.5.3 (#1068)
 
 Release 3.5.3 

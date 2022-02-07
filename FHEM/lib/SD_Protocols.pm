@@ -1,5 +1,5 @@
 ################################################################################
-# $Id: SD_ProtocolData.pm 3.5.x 2022-01-22 16:38:42Z sidey79 $
+# $Id: SD_ProtocolData.pm 3.5.x 2022-01-30 10:19:30Z elektron-bbs $
 #
 # The file is part of the SIGNALduino project
 # v3.5.x - https://github.com/RFD-FHEM/RFFHEM
@@ -16,7 +16,7 @@ use Carp qw(croak carp);
 use constant HAS_DigestCRC => defined eval { require Digest::CRC; };
 use constant HAS_JSON => defined eval { require JSON; };
 
-our $VERSION = '2.05';
+our $VERSION = '2.06';
 use Storable qw(dclone);
 use Scalar::Util qw(blessed);
 
@@ -1847,6 +1847,72 @@ sub ConvBresser_6in1 {
   return ( 1, qq[ConvBresser_6in1, sum $sum != 255] ) if ($sum != 255);
 
   return $hexData;
+}
+
+=item ConvBresser_7in1()
+
+This function makes xor 0xa over all bytes and checks LFSR_digest16
+
+Input:  $hexData
+Output: $hexDataXorA
+        scalar converted message on success 
+        or array (1,"Error message")
+
+=cut
+
+sub ConvBresser_7in1 {
+  my $self    = shift // carp 'Not called within an object';
+  my $hexData = shift // croak 'Error: called without $hexdata as input';
+  my $hexLength = length($hexData);
+
+  return (1, 'ConvBresser_7in1, hexData is to short') if ($hexLength < 44); # check double, in def length_min set
+  return (1, 'ConvBresser_7in1, byte 21 is 0x00') if (substr($hexData,42,2) eq '00'); # check byte 21
+
+  my $hexDataXorA ='';
+  for (my $i = 0; $i < $hexLength; $i++) {
+    my $xor = hex(substr($hexData,$i,1)) ^ 0xA;
+    $hexDataXorA .= sprintf('%X',$xor);
+  }
+  $self->_logging(qq[ConvBresser_7in1, msg=$hexData],5);
+  $self->_logging(qq[ConvBresser_7in1, xor=$hexDataXorA],5);
+
+  my $checksum = lib::SD_Protocols::LFSR_digest16(20, 0x8810, 0xba95, substr($hexDataXorA,4,40));
+  my $checksumcalc = sprintf('%04X',$checksum ^ hex(substr($hexDataXorA,0,4)));
+  $self->_logging(qq[ConvBresser_7in1, checksumCalc:0x$checksumcalc, must be 0x6DF1],5);
+  return ( 1, qq[ConvBresser_7in1, checksumCalc:0x$checksumcalc != checksum:0x6DF1] ) if ($checksumcalc ne '6DF1');
+
+  return $hexDataXorA;
+}
+
+=item LFSR_digest16()
+
+This function checks 16 bit LFSR
+
+Input:  $bytes, $gen, $key, $rawData
+Output: $lfsr
+
+=cut
+
+sub LFSR_digest16 {
+  my ($bytes, $gen, $key, $rawData) = @_;
+  carp "LFSR_digest16, too few arguments ($bytes, $gen, $key, $rawData)" if @_ < 4;
+  return (1, 'LFSR_digest16, rawData is to short') if (length($rawData) < $bytes * 2);
+	
+  my $lfsr = 0;
+  for (my $k = 0; $k < $bytes; $k++) {
+    my $data = hex(substr($rawData, $k * 2, 2));
+    for (my $i = 7; $i >= 0; $i--) {
+      if (($data >> $i) & 0x01) {
+        $lfsr ^= $key;
+      }
+      if ($key & 0x01) {
+        $key = ($key >> 1) ^ $gen;
+      } else {
+        $key = ($key >> 1);
+      }
+		}
+	}
+  return $lfsr;
 }
 
 ############################# package lib::SD_Protocols, test exists
