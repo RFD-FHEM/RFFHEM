@@ -5,7 +5,7 @@ use warnings;
 use Test2::V0;
 use Test2::Tools::Compare qw{is field U D match hash bag };
 use Test2::Todo;
-
+use FHEM::Core::Timer::Helper;
 our %defs;
 
 
@@ -17,20 +17,27 @@ InternalTimer(time()+1, sub() {
     'SM;',
     'SN;',
   );
-  my $mock;
-
-  $mock = Test2::Mock->new(
+  
+  my $mock = Test2::Mock->new(
     track => 1,
     class => 'main'
   );	 
-  $mock->override( 'InternalTimer' => sub {  } ) ;
-  $mock->override('RemoveInternalTimer' => sub {  } ) ;
+  my $timer_mock = Test2::Mock->new(
+    track => 1,
+    class => 'FHEM::Core::Timer::Helper'
+  );	 
+
+  #$mock->override( 'InternalTimer' => sub {  } ) ;
+  # $mock->override('RemoveInternalTimer' => sub {  } ) ;
+  $timer_mock->override('addTimer' => sub {  } ) ;
+  $timer_mock->override('removeTimer' => sub {  } ) ;
   $mock->override('SIGNALduino_HandleWriteQueue' => sub {  } ) ;
 
   my $tracking = $mock->sub_tracking();
-  
+  my $timer_tracking = $timer_mock->sub_tracking();
+
   for my $respMsg (@respMsgs) {
-    $mock->clear_sub_tracking();
+    $timer_mock->clear_sub_tracking();
 
     $targetHash->{ucCmd} = "something";
     subtest qq[verify accept "$respMsg"] => sub {
@@ -42,7 +49,7 @@ InternalTimer(time()+1, sub() {
         SIGNALduino_CheckSendRawResponse($targetHash,$respMsg);
 
         is($targetHash->{ucCmd},U,'Verify ucCmd deleted');
-        is(scalar @{$tracking->{InternalTimer}},0,'Verify InternalTimer is not called');
+        is(scalar @{$timer_tracking ->{addTimer}},0,'Verify addTimer is not called');
       };
 
       subtest qq[sendworking=0, QUEUE = 1] => sub {
@@ -51,7 +58,7 @@ InternalTimer(time()+1, sub() {
         SIGNALduino_CheckSendRawResponse($targetHash,$respMsg);
 
         is($targetHash->{ucCmd},U,'Verify ucCmd deleted');
-        is(scalar @{$tracking->{InternalTimer}},1,'Verify InternalTimer is called');
+        is(scalar @{$timer_tracking ->{addTimer}},1,'Verify addTimer is called');
       };
 
       subtest qq[sendworking=1, QUEUE = 1] => sub {
@@ -60,7 +67,7 @@ InternalTimer(time()+1, sub() {
         SIGNALduino_CheckSendRawResponse($targetHash,$respMsg);
 
         is($targetHash->{ucCmd},U,'Verify ucCmd deleted');
-        is(scalar @{$tracking->{InternalTimer}},1,'Verify InternalTimer is not called');
+        is(scalar @{$timer_tracking->{addTimer}},1,'Verify addTimer is not called');
 
       };
     };
@@ -70,7 +77,7 @@ InternalTimer(time()+1, sub() {
   for my $respMsg (qw /SR;D=AD0; /) {
 
     subtest qq[verify accept "$respMsg" sendworking=0, QUEUE = 0] => sub {
-      $mock->clear_sub_tracking();
+      $timer_mock->clear_sub_tracking();
       plan (4);
 
 
@@ -79,13 +86,13 @@ InternalTimer(time()+1, sub() {
       SIGNALduino_CheckSendRawResponse($targetHash,'SR;D=AD0;');
 
       is($targetHash->{ucCmd},U,'Verify ucCmd deleted'); 
-      is(scalar @{$tracking->{RemoveInternalTimer}},1,'Verify RemoveInternalTimer called');
+      is(scalar @{$timer_tracking->{removeTimer}},1,'Verify RemoveInternalTimer called');
       is(scalar @{$tracking->{SIGNALduino_HandleWriteQueue}},1,'Verify SIGNALduino_HandleWriteQueue called');
-      is(scalar @{$tracking->{InternalTimer}},0,'Verify InternalTimer is not called');
+      is(scalar @{$timer_tracking->{aDDTimer}},0,'Verify InternalTimer is not called');
 
-      $mock->restore('RemoveInternalTimer');
+      $timer_mock->restore('removeTimer');
       $mock->restore('SIGNALduino_HandleWriteQueue');
-      $mock->restore('InternalTimer');
+      $timer_mock->restore('addTimer');
     };  }
 
   $mock->reset_all;
