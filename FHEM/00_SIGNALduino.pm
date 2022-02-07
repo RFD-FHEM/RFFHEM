@@ -1000,7 +1000,7 @@ sub SIGNALduino_Set_LaCrossePairForSec {
   $hash->{LaCrossePair} = 2;  # LaCrosse autoCreateState: 0 = autoreate not defined | 1 = autocreate defined | 2 = autocreate active
   $hash->{logMethod}->($hash->{NAME}, 4, "$hash->{NAME}: Set_LaCrossePairForSec, LaCrosse autocreate active for $a[1] seconds");
   
-  FHEM::Core::Timer::Helper::addTimer($hash{NAME},gettimeofday()+$a[1], 'SIGNALduino_RemoveLaCrossePair', $hash, 0);
+  FHEM::Core::Timer::Helper::addTimer($hash->{NAME},gettimeofday()+$a[1], 'SIGNALduino_RemoveLaCrossePair', $hash, 0);
 
   return ;
 }
@@ -1301,7 +1301,7 @@ sub SIGNALduino_CheckSendRawResponse {
     delete($hash->{ucCmd});
     if ($msg =~ /D=[A-Za-z0-9]+;/ )
     {
-      FHEM::Core::Timer::Helper::removeTimer($name,\&SIGNALduino_HandleWriteQueue,"HandleWriteQueue:$name")
+      FHEM::Core::Timer::Helper::removeTimer($name,\&SIGNALduino_HandleWriteQueue,"HandleWriteQueue:$name");
       SIGNALduino_HandleWriteQueue("x:$name"); # Todo #823 on github
     } else {
       FHEM::Core::Timer::Helper::addTimer($name,gettimeofday() , \&SIGNALduino_HandleWriteQueue, "HandleWriteQueue:$name") if (scalar @{$hash->{QUEUE}} > 0 && InternalVal($name,'sendworking',0) == 0);
@@ -1386,8 +1386,8 @@ sub SIGNALduino_DoInit {
 
     #SIGNALduino_SimpleWrite($hash, 'XQ'); # Disable receiver
     
-    FHEM::Core::Timer::Helper::addTimer($namegettimeofday() + SDUINO_INIT_WAIT_XQ, \&SIGNALduino_SimpleWrite_XQ, $hash, 0);
-    FHEM::Core::Timer::Helper::addTimer($namegettimeofday() + SDUINO_INIT_WAIT, \&SIGNALduino_StartInit, $hash, 0);
+    FHEM::Core::Timer::Helper::addTimer($name,gettimeofday() + SDUINO_INIT_WAIT_XQ, \&SIGNALduino_SimpleWrite_XQ, $hash, 0);
+    FHEM::Core::Timer::Helper::addTimer($name,gettimeofday() + SDUINO_INIT_WAIT, \&SIGNALduino_StartInit, $hash, 0);
   }
   # Reset the counter
   delete($hash->{XMIT_TIME});
