@@ -1436,7 +1436,7 @@ sub SIGNALduino_StartInit {
     #DevIo_SimpleWrite($hash, "V\n",2);
     $hash->{DevState} = 'waitInit';
     FHEM::Core::Timer::Helper::removeTimer($name);
-    FHEM::Core::Timer::Helper::addlTimer($name, gettimeofday() + SDUINO_CMD_TIMEOUT, \&SIGNALduino_CheckVersionResp, $hash, 0);
+    FHEM::Core::Timer::Helper::addTimer($name, gettimeofday() + SDUINO_CMD_TIMEOUT, \&SIGNALduino_CheckVersionResp, $hash, 0);
   }
 }
 
