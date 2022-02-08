@@ -133,8 +133,11 @@ sub SD_WS_Undef {
 
 #############################
 sub SD_WS_Set {
-  my ($hash, $name, $cmd, @args) = @_;
-  carp "SD_WS_Set, too few arguments ($hash, $name, $cmd)" if @_ < 3;
+  my $hash = shift // carp 'device hash needs to be first parameter';
+  my $name = shift // carp 'name of the device must be second parameter';
+  my $cmd = shift // carp 'Specify the command as third prarameter';
+  my @args = @_ // carp 'A minimum of one argument needs to be specified';	
+
   my $ret = undef;
   my $LastInputDev = $hash->{LASTInputDev};
   return $ret if (!defined $LastInputDev);
