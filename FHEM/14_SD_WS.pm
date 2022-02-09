@@ -42,7 +42,7 @@
 # 14.01.2022 neues Protokoll 116: Thunder and lightning sensor Fine Offset WH57, aka Froggit DP60, aka Ambient Weather WH31L
 # 29.01.2022 neues Protokoll 117: Bresser 7-in-1 Comfort Wetter Center
 # 04.02.2022 neu: set replaceBatteryForSec (Ident ersetzen bei Batteriewechsel Sensor)
-	
+
 package main;
 
 #use version 0.77; our $VERSION = version->declare('v3.4.3');
