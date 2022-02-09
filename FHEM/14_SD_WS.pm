@@ -42,7 +42,7 @@
 # 14.01.2022 neues Protokoll 116: Thunder and lightning sensor Fine Offset WH57, aka Froggit DP60, aka Ambient Weather WH31L
 # 29.01.2022 neues Protokoll 117: Bresser 7-in-1 Comfort Wetter Center
 # 04.02.2022 neu: set replaceBatteryForSec (Ident ersetzen bei Batteriewechsel Sensor)
-
+	
 package main;
 
 #use version 0.77; our $VERSION = version->declare('v3.4.3');
@@ -136,7 +136,7 @@ sub SD_WS_Set {
   my $hash = shift // carp 'device hash needs to be first parameter';
   my $name = shift // carp 'name of the device must be second parameter';
   my $cmd = shift // carp 'Specify the command as third prarameter';
-  my @args = @_ // carp 'A minimum of one argument needs to be specified';	
+  my @args = @_ // carp 'A minimum of one argument needs to be specified';
 
   my $ret = undef;
   my $LastInputDev = $hash->{LASTInputDev};
