@@ -136,7 +136,7 @@ sub SD_WS_Set {
   my $hash = shift // carp 'device hash needs to be first parameter';
   my $name = shift // carp 'name of the device must be second parameter';
   my $cmd = shift // carp 'Specify the command as third prarameter';
-  my @args = @_ // carp 'A minimum of one argument needs to be specified';
+  my @args = @_;
 
   my $ret = undef;
   my $LastInputDev = $hash->{LASTInputDev};
