@@ -1594,7 +1594,7 @@ sub SD_WS_Parse {
   $def = $modules{SD_WS}{defptr}{$deviceCode} if(!$def);
 
   if(!$def) {
-    my @found = devspec2array("TYPE=SD_WS:FILTER=i:replaceBattery>0");
+    my @found = devspec2array(q[TYPE=SD_WS:FILTER=i:replaceBattery>0]);
     if (scalar(@found) > 0) {
       if (($longids ne "0") && ($longids eq "1" || $longids eq "ALL" || (",$longids," =~ m/,$model,/))) {
         my $rname = $found[0];
