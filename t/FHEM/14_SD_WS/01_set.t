@@ -20,37 +20,66 @@ InternalTimer(time()+0.6, sub {
         #like($ret, qr/replaceBatteryForSec/, q[check replaceBatteryForSec help]);
 	};
 
-     ok($defs{dummyDuino},"check dummyduino exists");
-     $hash->{LASTInputDev} = 'dummyDuino';
+    ok($defs{dummyDuino},"check dummyduino exists");
+    $hash->{LASTInputDev} = 'dummyDuino';
 
-	subtest "set $sensorname $cmd with LastInputDev" => sub {
+	subtest "set $sensorname $cmd with LastInputDev but without longids" => sub {
 		plan(1);
         my $ret = SD_WS_Set($hash,$sensorname, $cmd); 
-        like($ret, qr/replaceBatteryForSec/, q[check replaceBatteryForSec help]);
+           is($ret,U(),q[verify return]);
+	};
+
+    CommandAttr(undef,'dummyDuino longids 1');
+    subtest "set $sensorname $cmd with LastInputDev and longids" => sub {
+		plan(1);
+        my $ret = SD_WS_Set($hash,$sensorname, $cmd); 
+        like($ret,qr/replaceBatteryForSec/,q[check replaceBatteryForSec help]);
 	};
 
     $cmd=q[];
-	subtest "set $sensorname $cmd" => sub {
-		plan(1);
-		
-        my $ret = SD_WS_Set($hash,$sensorname,split(/ /,$cmd)); 
-        is($ret, qq[$sensorname, no set command specified], q[check error message ]);
-	};
+  	subtest "set $sensorname $cmd" => sub {     
+        plan(2);
+        my $ret = SD_WS_Set($hash,$sensorname, $cmd); 
+        like($ret,qr/Unknown/,q[verify string part unknown]);
+        like($ret,qr/replaceBatteryForSec/,q[verify string part replaceBatteryForSec]);
+    };
 
     $cmd=q[badCmd];
-	subtest "set $sensorname $cmd" => sub {
-		plan(1);
-		
-        my $ret = SD_WS_Set($hash,$sensorname,split(/ /,$cmd)); 
-        is($ret, qq[$sensorname, invalid set command], q[check error message ]);
+    subtest "set $sensorname $cmd with LastInputDev and longids" => sub {
+		plan(2);
+        my $ret = SD_WS_Set($hash,$sensorname, $cmd); 
+        like($ret,qr/Unknown/,q[verify string part unknown]);
+        like($ret,qr/replaceBatteryForSec/,q[verify string part replaceBatteryForSec]);
 	};
+
 
     $cmd=q[replaceBatteryForSec];
 	subtest "set $sensorname $cmd" => sub {
-		plan(1);
+		plan(2);
 		
         my $ret = SD_WS_Set($hash,$sensorname,split(/ /,$cmd)); 
-        is($ret, U(), q[check return is undef]);
+        like($ret,qr/no/i,q[verify string part no]);
+        like($ret,qr/too small/,q[verify string part small]);
+	};
+
+    $cmd=q[replaceBatteryForSec -1];
+	subtest "set $sensorname $cmd" => sub {
+		plan(2);
+		
+        my $ret = SD_WS_Set($hash,$sensorname,split(/ /,$cmd)); 
+        like($ret,qr/no/i,q[verify string part no]);
+        like($ret,qr/too small/,q[verify string part small]);
+	};
+
+    $cmd=q[replaceBatteryForSec 10];
+	subtest "set $sensorname $cmd" => sub {
+		plan(2);
+		FhemTestUtils_resetLogs();
+
+        my $ret = SD_WS_Set($hash,$sensorname,split(/ /,$cmd)); 
+        is($ret,U(),q[verify return undef]);
+        is(FhemTestUtils_gotLog($sensorname),L(),q[check log exists])
+
 	};
 
     done_testing;
