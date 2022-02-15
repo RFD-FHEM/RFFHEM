@@ -371,6 +371,14 @@
 #     TR401_0_2 on   MU;P0=-14148;P1=-23738;P2=607;P3=-737;P4=1298;P5=-1419;P6=340;P7=134;CP=2;R=236;D=12343452523434345252525252161712343452523434345252525252160;p;
 #}
 ###############################################################################################################################################################################
+# - Remote control Meikee [Protocol 118]
+#{    elektron-bbs 2022-02-13
+#     https://forum.fhem.de/index.php/topic,126110.0.html @ Sepp 2022-02-09
+#     Meikee_20D3 on     MU;P0=506;P1=-1015;P2=1008;P3=-523;P4=-12696;D=01012301040101230101010101232301230101232301010101010123010;CP=0;R=49;
+#     Meikee_20D3 off    MU;P0=-516;P1=518;P2=-1015;P3=1000;P4=-12712;D=01230121230301212121212121230141212301212121212303012301212303012121212121212301;CP=1;R=35;
+#     Meikee_20D3 learn  MU;P0=-509;P1=513;P2=-999;P3=1027;P4=-12704;D=01230121230301212121212121212141212301212121212303012301212303012121212121212121;CP=1;R=77;
+#}
+###############################################################################################################################################################################
 # !!! ToDo´s !!!
 #     - LED lights, counter battery-h reading --> commandref hour_counter module
 #     -
@@ -382,7 +390,7 @@ use strict;
 use warnings;
 no warnings 'portable';  # Support for 64-bit ints required
 
-our $VERSION = '2022-01-13';
+our $VERSION = '2022-02-13';
 
 sub SD_UT_bin2tristate;
 sub SD_UT_tristate2bin;
@@ -808,6 +816,32 @@ my %models = (
                 Protocol   => 'P114',
                 Typ        => 'remote'
               },
+  'Meikee' => { '00000000' => 'learn',
+                '00000001' => 'off',
+                '00000010' => 'on',
+                '00000011' => 'mode_flash',
+                '00000100' => 'brightness/speed_up',
+                '00000101' => 'brightness/speed_down',
+                '00000110' => 'mode_strobe',
+                '00000111' => 'static_2000K',
+                '00001000' => 'static_4500K',
+                '00001001' => 'mode_fade',
+                '00001010' => 'time_4h',
+                '00001011' => 'time_6h',
+                '00001100' => 'time_12h',
+                '00010000' => 'static_red',
+                '00010001' => 'static_green',
+                '00010010' => 'static_blue',
+                '00010011' => 'mixed_red',
+                '00010100' => 'mixed_cyan',
+                '00010101' => 'mixed_orange',
+                '00010110' => 'mixed_yellow',
+                '00010111' => 'mixed_green',
+                '00011000' => 'mixed_purple',
+                hex_length => [6,7],
+                Protocol   => 'P118',
+                Typ        => 'remote'
+              },
   'unknown' =>  { Protocol   => 'any',
                   hex_length => [],
                   Typ        => 'not_exist'
@@ -817,7 +851,7 @@ my %models = (
 #############################
 sub SD_UT_Initialize {
   my ($hash) = @_;
-  $hash->{Match}      = '^P(?:14|20|24|26|29|30|34|46|56|68|69|76|78|81|83|86|90|91|91\.1|92|93|95|97|99|104|105|114)#.*';
+  $hash->{Match}      = '^P(?:14|20|24|26|29|30|34|46|56|68|69|76|78|81|83|86|90|91|91\.1|92|93|95|97|99|104|105|114|118)#.*';
   $hash->{DefFn}      = \&SD_UT_Define;
   $hash->{UndefFn}    = \&SD_UT_Undef;
   $hash->{ParseFn}    = \&SD_UT_Parse;
@@ -886,8 +920,8 @@ sub SD_UT_Define {
   if (($a[2] eq 'SA_434_1_mini' || $a[2] eq 'QUIGG_DMV' || $a[2] eq 'TR_502MSV' || $a[2] eq 'BeSmart_S4') && not $a[3] =~ /^[0-9a-fA-F]{3}/xms) {
     return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short or long (must be 3 chars) or not HEX (0-9 | a-f | A-F){3}";
   }
-  ### [4 nibble] checks Neff SF01_01319004 & BOSCH SF01_01319004_Typ2 & Chilitec_22640 & ESTO KL_RF01 & RCnoName20 & xavax & BF_301###
-  if (($a[2] eq 'SF01_01319004' || $a[2] eq 'SF01_01319004_Typ2' || $a[2] eq 'Chilitec_22640' || $a[2] eq 'KL_RF01' || $a[2] eq 'RCnoName20' || $a[2] eq 'xavax' || $a[2] eq 'BF_301') && not $a[3] =~ /^[0-9a-fA-F]{4}/xms) {
+  ### [4 nibble] checks Neff SF01_01319004 & BOSCH SF01_01319004_Typ2 & Chilitec_22640 & ESTO KL_RF01 & RCnoName20 & xavax & BF_301 & Meikee###
+  if (($a[2] eq 'SF01_01319004' || $a[2] eq 'SF01_01319004_Typ2' || $a[2] eq 'Chilitec_22640' || $a[2] eq 'KL_RF01' || $a[2] eq 'RCnoName20' || $a[2] eq 'xavax' || $a[2] eq 'BF_301' || $a[2] eq 'Meikee') && not $a[3] =~ /^[0-9a-fA-F]{4}/xms) {
     return "Wrong HEX-Value! ($a[3]) $a[2] Hex-value to short or long (must be 4 chars) or not hex (0-9 | a-f | A-F) {4}";
   }
   ### [6] checks Manax | mumbi ###
@@ -1143,6 +1177,11 @@ sub SD_UT_Set {
     ############ TR401 (Well-Light) ############
     } elsif ($model eq 'TR401') {
       $msg = $models{$model}{Protocol} . q{#};
+      $msgEnd = '#R' . $repeats;
+    ############ Meikee ############
+    } elsif ($model eq 'Meikee') {
+      my $adr = sprintf '%016b' , hex $definition[1]; # argument 1 - adress to binary with 16 bits
+      $msg = $models{$model}{Protocol} . q{#} . $adr;
       $msgEnd = '#R' . $repeats;
     }
   }
@@ -1465,6 +1504,15 @@ sub SD_UT_Parse {
     if (!$def && $protocol == 99) {
       $deviceCode = substr($rawData,0,6);
       $devicedef = 'Navaris ' . $deviceCode;
+      $def = $modules{SD_UT}{defptr}{$devicedef};
+    }
+  }
+
+  if ($hlen == 6 || $hlen == 7) {
+    ### Remote control Meikee [P118] ###
+    if (!$def && $protocol == 118) {
+      $deviceCode = substr($rawData,0,4);
+      $devicedef = 'Meikee ' . $deviceCode;
       $def = $modules{SD_UT}{defptr}{$devicedef};
     }
   }
@@ -1945,6 +1993,10 @@ sub SD_UT_Parse {
   } elsif ($model eq 'TR401') {
     $state = substr($bitData,0,1);
     $deviceCode = substr($rawData,1,1) >> 1;
+  ############ Meikee [P118] ############
+  } elsif ($model eq 'Meikee' && $protocol == 118) {
+    $state = substr $bitData,16,8;
+    $deviceCode = substr $rawData,0,4;
 
   ############ unknown ############
   } else {
@@ -2153,6 +2205,11 @@ sub SD_UT_Attr {
         } elsif ($attrValue eq 'Visivo') {
           $deviceCode = substr $bitData,8,24;
           $deviceCode = sprintf("%06X", oct( "0b$bitData" ) );
+          $devicename = $devicemodel.'_'.$deviceCode;
+        ############ Meikee ############
+        } elsif ($attrValue eq 'Meikee') {
+          $deviceCode = substr($bitData,0,16);
+          $deviceCode = sprintf("%04X", oct( "0b$deviceCode" ) );
           $devicename = $devicemodel.'_'.$deviceCode;
         ############ unknown ############
         } else {
