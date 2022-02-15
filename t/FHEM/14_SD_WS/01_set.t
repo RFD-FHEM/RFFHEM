@@ -92,14 +92,25 @@ InternalTimer(time()+0.6, sub {
     };
 
     subtest "parse with removeReplaceBattery (modify)" => sub {
-		plan(4);
+		plan(5);
 		FhemTestUtils_resetLogs();
+
         my $ret = SD_WS_Set($hash,$sensorname,split(/ /,$cmd)); 
-        my $oldDEF= $hash->{DEF};
         is($ret,U(),q[verify return undef]);
 
-        my $ret = SD_WS_Parse($defs{dummyDuino},q[W33#26C6F570804]);
-        is($ret,$sensorname,q[check sensorname returned]);
+        my $oldDEF= $hash->{DEF};
+        my @found = devspec2array(q[TYPE=SD_WS:FILTER=i:replaceBattery>0]);
+        #is(@found,U(),q[verify decspec2array result], Dumper $hash );
+        #diag Dumper @found;
+
+        $ret = SD_WS_Parse($defs{dummyDuino},q[W33#26C6F570804]);
+        like($ret,qr/UNDEFINED/,q[check sensorname not returned]);
+
+        # Mock sensor hash
+        $hash->{dummyDuino_Protocol_ID} = q[33];
+        $ret = SD_WS_Parse($defs{dummyDuino},q[W33#26C6F570804]);
+
+        is($ret,$sensorname,q[check sensorname is returned]);
         is($hash->{replaceBattery},U(),q[check internal value deleted]);
         isnt($hash->{DEF},$oldDEF,q[check DEF is changed]);
     };
