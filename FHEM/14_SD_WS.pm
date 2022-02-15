@@ -1598,12 +1598,12 @@ sub SD_WS_Parse {
     if (scalar(@found) > 0) {
       if (($longids ne "0") && ($longids eq "1" || $longids eq "ALL" || (",$longids," =~ m/,$model,/))) {
         my $rname = $found[0];
-        my $rhash = $defs{$rname};
-        my $rdef = $rhash->{DEF};
-        my $rproto = $rhash->{$ioname . '_Protocol_ID'};
+        my $rproto = InternalVal($rname, $ioname. q[_Protocol_ID], undef);
         if (defined $rproto && $rproto eq $protocol) {
-          Log3 $name, 3, "$rname: SD_WS_Parse, change DEF from $rdef in $deviceCode";
-          CommandModify(undef, "$rname $deviceCode");
+          my $rhash = $defs{$rname};
+          my $rdef = $rhash->{DEF};
+          Log3 $name, 3, qq[$rname: SD_WS_Parse, change DEF from $rdef in $deviceCode];
+          CommandModify(undef, qq[$rname $deviceCode]);
           delete($rhash->{replaceBattery});
           RemoveInternalTimer($rhash);
           return $rname;
