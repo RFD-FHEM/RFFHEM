@@ -1,3 +1,10 @@
+2022-02-18 - 14_SD_WS.pm new set command replaceBatteryForSec (#1074)
+
+* 14_SD_WS.pm
+  new set command replaceBatteryForSec
+* 14_SD_WS/01_set.t
+  added some basic test for set command
+  Co-authored-by: sidey79 <7968127+sidey79@users.noreply.github.com>
 2022-02-02 - new protocol 117 for BRESSER 7-in-1 Weather Center (#1072)
 
   14_SD_WS.pm
