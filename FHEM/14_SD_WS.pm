@@ -41,6 +41,7 @@
 # 08.01.2022 neues Protokoll 107: Soil Moisture Sensor Fine Offset WH51, ECOWITT WH51, MISOL/1, Froggit DP100
 # 14.01.2022 neues Protokoll 116: Thunder and lightning sensor Fine Offset WH57, aka Froggit DP60, aka Ambient Weather WH31L
 # 29.01.2022 neues Protokoll 117: Bresser 7-in-1 Comfort Wetter Center
+# 04.02.2022 neu: set replaceBatteryForSec (Ident ersetzen bei Batteriewechsel Sensor)
 
 package main;
 
@@ -60,9 +61,10 @@ sub SD_WS_WH2SHIFT;
 sub SD_WS_Initialize {
   my $hash = shift // return;
   $hash->{Match}    = '^W\d+x{0,1}#.*';
-  $hash->{DefFn}    = "SD_WS_Define";
-  $hash->{UndefFn}  = "SD_WS_Undef";
-  $hash->{ParseFn}  = "SD_WS_Parse";
+  $hash->{DefFn}    = \&SD_WS_Define;
+  $hash->{UndefFn}  = \&SD_WS_Undef;
+  $hash->{SetFn}    = \&SD_WS_Set;
+  $hash->{ParseFn}  = \&SD_WS_Parse;
   $hash->{AttrList} = "do_not_notify:1,0 ignore:0,1 showtime:1,0 " .
                       "model:E0001PA,S522,TX-EZ6,other " .
                       "max-deviation-temp:1,2,3,4,5,6,7,8,9,10,15,20,25,30,35,40,45,50 ".
@@ -125,6 +127,52 @@ sub SD_WS_Undef {
   my ($hash, $name) = @_;
   carp "SD_WS_Undef, too few arguments ($hash, $name)" if @_ < 2;
   delete($modules{SD_WS}{defptr}{$hash->{CODE}}) if(defined($hash->{CODE}) && defined($modules{SD_WS}{defptr}{$hash->{CODE}}));
+  RemoveInternalTimer($hash);
+  return;
+}
+
+#############################
+sub SD_WS_Set {
+  my $hash = shift // carp 'device hash needs to be first parameter';
+  my $name = shift // carp 'name of the device must be second parameter';
+  my $cmd = shift // carp 'Specify the command as third prarameter';
+  my @args = @_;
+
+  my $ret = undef;
+  my $LastInputDev = $hash->{LASTInputDev};
+  return $ret if (!defined $LastInputDev);
+
+  my $rhash = $defs{$LastInputDev};
+  my $rlongids = AttrVal($rhash->{NAME},'longids',0);
+  my $def = $hash->{DEF};
+  my @array = split(/_/,$def);
+  my $model = $array[0] . '_' . $array[1] . '_' . $array[2];
+  if (($rlongids ne "0") && ($rlongids eq "1" || $rlongids eq "ALL" || ($rlongids =~ m/$model/))) {
+    if ($cmd eq '?') {
+      $ret = 'replaceBatteryForSec'; # return setList
+    } elsif ($cmd eq 'replaceBatteryForSec') {
+      return "$name: No or too small value specified for the replaceBatteryForSec command" if (scalar(@args) < 1 || $args[0] < 1);
+      my @found = devspec2array("TYPE=SD_WS:FILTER=i:replaceBattery>0");
+      return "$name: Only one sensor at a time, replaceBatteryForSec is already activated at @found" if (scalar(@found) > 0);
+      my $repBatForSec = $args[0];
+      $hash->{replaceBattery} = $repBatForSec;
+      InternalTimer(gettimeofday() + $repBatForSec, \&SD_WS_TimerRemoveReplaceBattery, $hash, 0);
+      Log3 $name, 3, "$name: SD_WS_Set, wait $repBatForSec seconds for a new identity of the sensor"; 
+    } else {
+      $ret = "$name: Unknown argument $cmd, choose replaceBatteryForSec";
+    }
+
+  }
+  return $ret;
+}
+
+#############################
+sub SD_WS_TimerRemoveReplaceBattery {
+  my $hash = shift;
+  my $name = $hash->{NAME};
+  delete($hash->{replaceBattery});
+  RemoveInternalTimer($hash);
+  Log3 $name, 3, "$name: SD_WS_TimerRemoveReplaceBattery, no sensor with unknown identity received"; 
   return;
 }
 
@@ -1546,6 +1594,22 @@ sub SD_WS_Parse {
   $def = $modules{SD_WS}{defptr}{$deviceCode} if(!$def);
 
   if(!$def) {
+    if (($longids ne "0") && ($longids eq "1" || $longids eq "ALL" || (",$longids," =~ m/,$model,/))) {
+      my @found = devspec2array(q[TYPE=SD_WS:FILTER=i:replaceBattery>0]);
+      if (scalar(@found) > 0) {
+        my $rname = $found[0];
+        my $rproto = InternalVal($rname, $ioname. q[_Protocol_ID], undef);
+        if (defined $rproto && $rproto eq $protocol) {
+          my $rhash = $defs{$rname};
+          my $rdef = $rhash->{DEF};
+          Log3 $name, 3, qq[$rname: SD_WS_Parse, change DEF from $rdef in $deviceCode];
+          CommandModify(undef, qq[$rname $deviceCode]);
+          delete($rhash->{replaceBattery});
+          RemoveInternalTimer($rhash);
+          return $rname;
+        }
+      }
+    }
     Log3 $iohash, 1, "$name: SD_WS_Parse UNDEFINED sensor $model detected, code $deviceCode";
     return "UNDEFINED $deviceCode SD_WS $deviceCode";
   }
@@ -1910,8 +1974,18 @@ sub SD_WS_WH2SHIFT {
     <li><a href="#readingFnAttributes">readingFnAttributes</a></li><br>
     <li><a href="#showtime">showtime</a></li><br>
   </ul><br>
-  <b>Set</b>
-  <ul>N/A</ul><br>
+  <a name="SD_WS Set"></a>
+  <b>Set</b><br><br>
+  <ul>
+    <li>replaceBatteryForSec<br>
+      (Only available for devices whose SIGNALduinos have the "longids" attribute activated.)
+      <br><br>
+      <code>replaceBatteryForSec &lt;seconds&gt;</code>
+      <br><br>
+      Puts the device into battery change mode for <code>&lt;secondes&gt;</code>.
+      The first unknown address with the same protocol that is received replaces the current device address.
+    </li>
+  </ul><br>
 </ul>
 
 =end html
@@ -2041,7 +2115,18 @@ sub SD_WS_WH2SHIFT {
   </ul>
   <br>
 
-  <b>Set</b> <ul>N/A</ul><br>
+  <a name="SD_WS Set"></a>
+  <b>Set</b><br><br>
+  <ul>
+    <li>replaceBatteryForSec<br>
+      (Nur verfügbar bei Geräten, bei deren SIGNALduinos das Attribut "longids" aktiviert ist.)
+      <br><br>
+      <code>replaceBatteryForSec &lt;Sekunden&gt;</code>
+      <br><br>
+      Versetzt das Gerät für <code>&lt;Sekunden&gt;</code> Sekunden in den Batteriewechselmodus. 
+      Die erste unbekannte Adresse mit gleichem Protokoll, die empfangen wird, ersetzt die aktuelle Geräteadresse.
+    </li>
+  </ul><br>
 </ul>
 
 =end html_DE
