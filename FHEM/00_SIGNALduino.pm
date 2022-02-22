@@ -1000,7 +1000,7 @@ sub SIGNALduino_Set_LaCrossePairForSec {
   $hash->{LaCrossePair} = 2;  # LaCrosse autoCreateState: 0 = autoreate not defined | 1 = autocreate defined | 2 = autocreate active
   $hash->{logMethod}->($hash->{NAME}, 4, "$hash->{NAME}: Set_LaCrossePairForSec, LaCrosse autocreate active for $a[1] seconds");
   
-  FHEM::Core::Timer::Helper::addTimer($hash->{NAME},gettimeofday()+$a[1], 'SIGNALduino_RemoveLaCrossePair', $hash, 0);
+  FHEM::Core::Timer::Helper::addTimer($hash->{NAME},gettimeofday()+$a[1], \&SIGNALduino_RemoveLaCrossePair, $hash, 0);
 
   return ;
 }
@@ -1164,6 +1164,9 @@ sub SIGNALduino_Get_delayed {
     delete($hash->{ucCmd}); 
     $hash->{logMethod}->($hash->{NAME}, 5, "$name: Get_delayed, ".join(' ',@cmds).' executed');
     FHEM::Core::Timer::Helper::removeTimer($name,\&SIGNALduino_Get_delayed,"SIGNALduino_Get_delayed:$name:".join(' ',@cmds));
+    
+
+        
     SIGNALduino_Get($hash,$name,$cmds[0]);
   }
 }
