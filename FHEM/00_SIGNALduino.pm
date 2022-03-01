@@ -1385,7 +1385,7 @@ sub SIGNALduino_DoInit {
   {
     $hash->{logMethod}->($hash, 1, "$name: DoInit, ".$hash->{DEF});
     $hash->{initretry} = 0;
-    FHEM::Core::Timer::Helper::removeTimer($name);
+    FHEM::Core::Timer::Helper::removeTimer($name,undef,$hash); # What timer should be removed here is not clear
 
     #SIGNALduino_SimpleWrite($hash, 'XQ'); # Disable receiver
     
