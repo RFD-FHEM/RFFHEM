@@ -68,6 +68,7 @@ Supported Devices / Protocols
 |Maverick | Wireless BBQ thermometer |
 |Mebus HQ7312-2 | Weather station |
 |Medion OR28V | Remote control |
+|Meikee | Remote controls for Meikee LED lights e.g. RGB LED Wallwasher Light and Solar Flood Light |
 |Momento | Remote control for wireless digital picture frame |
 |Mumbi m-FS300 | Remote control |
 |Navaris 44344.04 | Touch light switch |
