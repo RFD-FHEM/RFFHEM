@@ -1433,6 +1433,11 @@ sub postDemo_WS2000 {
         return (0, undef);
       }
       $dataindex = $index + $datastart + 1;
+      my $rest = $protolength - $dataindex;
+      if ($rest < 4) {
+        $self->_logging(qq[lib/postDemo_WS2000, Sensortyp $typ - ERROR rest of message < 4 ($rest)],4);
+      return (0, undef);
+      }
       $data = oct( '0b'.(join '', reverse @bit_msg[$dataindex .. $dataindex + 3]));
       if ($index == 5) {$adr = ($data & 0x07)}                 # Sensoradresse
       if ($datalength == 45 || $datalength == 46) {            # Typ 1 ohne Summe
