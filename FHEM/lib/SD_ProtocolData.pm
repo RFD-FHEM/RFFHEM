@@ -1739,6 +1739,7 @@ package lib::SD_ProtocolData;
         one              => [3,-7],
         zero             => [7,-3],
         clockabs         => 122,
+        reconstructBit   => '1',
         preamble         => 'K',
         postamble        => '',
         clientmodule     => 'CUL_WS',
