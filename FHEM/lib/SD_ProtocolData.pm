@@ -86,7 +86,7 @@ package lib::SD_ProtocolData;
   use strict;
   use warnings;
 
-  our $VERSION = '1.43';
+  our $VERSION = '1.44';
 
   our %protocols = (
     "0" =>  ## various weather sensors (500 | 9100)
@@ -1739,6 +1739,7 @@ package lib::SD_ProtocolData;
         one              => [3,-7],
         zero             => [7,-3],
         clockabs         => 122,
+        reconstructBit   => '1',
         preamble         => 'K',
         postamble        => '',
         clientmodule     => 'CUL_WS',
@@ -3134,6 +3135,44 @@ package lib::SD_ProtocolData;
         clientmodule    => 'SD_WS',
         length_min      => '44',
         method          => \&lib::SD_Protocols::ConvBresser_7in1,
+      },
+    "118" => ## Remote controls for Meikee LED lights e.g. RGB LED Wallwasher Light and Solar Flood Light
+             # https://forum.fhem.de/index.php/topic,126110.0.html @ Sepp 2022-02-09
+             # Meikee_24_20D3 on     MU;P0=506;P1=-1015;P2=1008;P3=-523;P4=-12696;D=01012301040101230101010101232301230101232301010101010123010;CP=0;R=49;
+             # Meikee_24_20D3 off    MU;P0=-516;P1=518;P2=-1015;P3=1000;P4=-12712;D=01230121230301212121212121230141212301212121212303012301212303012121212121212301;CP=1;R=35;
+             # Meikee_24_20D3 learn  MU;P0=-509;P1=513;P2=-999;P3=1027;P4=-12704;D=01230121230301212121212121212141212301212121212303012301212303012121212121212121;CP=1;R=77;
+      {
+        name            => 'Meikee',
+        comment         => 'Remote controls for Meikee LED lights',
+        id              => '118',
+        one             => [2,-1], # 1016,-508
+        zero            => [1,-2], # 508,-1016
+        start           => [-25],  # -12700, message provided as MU
+        end             => [1],    # 508
+        clockabs        => 508,
+        format          => 'twostate',
+        clientmodule    => 'SD_UT',
+        modulematch     => '^P118#',
+        preamble        => 'P118#',
+        length_min      => '24',
+        length_max      => '25',
+      },
+    "118.1" => ## Remote controls for Meikee LED lights e.g. RGB LED Wallwasher Light and Solar Flood Light
+      {
+        name            => 'Meikee',
+        comment         => 'Remote controls for Meikee LED lights',
+        id              => '118.1',
+        one             => [2,-1], # 1016,-508
+        zero            => [1,-2], # 508,-1016
+        sync            => [-25],  # -12700, message provided as MS
+        end             => [1],    # 508
+        clockabs        => 508,
+        format          => 'twostate',
+        clientmodule    => 'SD_UT',
+        modulematch     => '^P118#',
+        preamble        => 'P118#',
+        length_min      => '24',
+        length_max      => '25',
       },
     ########################################################################
     #### ###  register informations from other hardware protocols  #### ####

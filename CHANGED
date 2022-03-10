@@ -1,3 +1,13 @@
+2022-03-07 - prevents Perl warning WS2000 (#1083)
+
+* SD_Protocols.pm - prevents perl warning WS2000
+
+2022-03-06 - new protocol 118 for Meikee remote controls (#1082)
+
+* SD_UT - new protocol 118 for remote controls Meikee RGB LED lights
+  Please refer: https://forum.fhem.de/index.php/topic,126110.0.html
+* SD_ProtocolData.pm - new definition protocol 118
+
 2022-02-23 - 14_FLAMINGO.pm - fix attribute room #1079 (#1080)
 
 * Update 14_FLAMINGO.pm
