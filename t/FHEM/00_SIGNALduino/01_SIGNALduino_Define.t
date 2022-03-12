@@ -3,7 +3,7 @@ use strict;
 use warnings;
 
 use Test2::V0;
-use Test2::Tools::Compare qw{is field U D match hash bag };
+use Test2::Tools::Compare qw{is field U D match hash bag object};
 use Mock::Sub;
 use Test2::Todo;
 
@@ -13,12 +13,13 @@ BEGIN {
   $mock = Mock::Sub->new;
 };
 
-InternalTimer(time()+1, sub() {
+InternalTimer(time()+0.8, sub {
 
   my %hash;
+  
+  my $name=shift;
   $hash{CL}    = undef;
   $hash{TEMPORARY} = 1;
-  $hash{NAME}  = q{defTest};
   $hash{TYPE}  = q{00_SIGNALduino};
   $hash{STTAE} = q{???};
   #$hash{FUUID} = genUUID();
@@ -208,33 +209,69 @@ InternalTimer(time()+1, sub() {
       },
       rValue => U(), 
   },    
-    
-    
   { 
+  	plan => 3,
   	DEF => q{none},
     testname =>  q[none|Valid:],
     check =>  hash {
          field STTAE => q{???}; 
          field DeviceName => q{none};
          field DEF => q{none};
+         field protocolObject => object { 
+            prop isa => 'lib::SD_Protocols';
+            prop reftype => 'HASH';
+            call [qw(_logging testmessage 1)] => validator(sub {
+              return is(FhemTestUtils_gotLog(qr/\sdefTest:.*testmessage/),1,q[verify logging message]);
+            });
+         };
+         etc();
+      },
+      rValue => U(), 
+  },     
+  { 
+  	plan => 3,
+    DEF => q{/dev/some@directio},
+    testname =>  q[DirectIO|Linux|Valid:],
+    check =>  hash {
+         field STTAE => q{???}; 
+         field DeviceName => q{/dev/some@directio};
+         field DEF => q{/dev/some@directio};
+         field protocolObject => object { 
+            prop isa => 'lib::SD_Protocols';
+            prop reftype => 'HASH';
+            call [qw(_logging testmessage 1)] => validator(sub {
+              return is(FhemTestUtils_gotLog(qr/\sdefTest:.*testmessage/),1,q[verify logging message]);
+            });
+         };
+         
          etc();
       },
       rValue => U(), 
   },     
 
   { 
-  	DEF => q{/dev/some@directio},
-    testname =>  q[DirectIO|Linux|Valid:],
+    NAME => q{logTest},
+  	plan => 3,
+    DEF => q{/dev/some@directio},
+    testname =>  q[logtest DirectIO|Linux|Valid:],
     check =>  hash {
          field STTAE => q{???}; 
          field DeviceName => q{/dev/some@directio};
          field DEF => q{/dev/some@directio};
+         field protocolObject => object { 
+            prop isa => 'lib::SD_Protocols';
+            prop reftype => 'HASH';
+            call [qw(_logging testmessage 1)] => validator(sub {
+              return is(FhemTestUtils_gotLog(qr/\slogTest:.*testmessage/),1,q[verify logging message]);
+            });
+         };
+         
          etc();
       },
       rValue => U(), 
   },     
-  
-  );
+
+);
   
   
 
@@ -245,25 +282,22 @@ InternalTimer(time()+1, sub() {
     delete $hash{DeviceName};
 
     subtest "$element->{testname} checking define $element->{DEF}" => sub {
+      $hash{NAME}  = $element->{NAME} // $name;
+      FhemTestUtils_resetLogs();
       $hash{DEF}   = $element->{DEF};
- 	  plan(2);
+ 	    plan( $element->{plan} // 2 );
 
       my $ret = SIGNALduino_Define(\%hash,qq{$hash{NAME} $hash{TYPE} $hash{DEF} });
       is ($ret, $element->{rValue}, 'check returnvalue SIGNALduino_Define');
       is(\%hash, $element->{check}, 'check hash fields after SIGNALduino_Define');
-     	  
+
     };
   
   }
   done_testing();
   exit(0);
-  
 
 
-    
-  done_testing();
-  exit(0);
-
-}, 0);
+}, q{defTest});
 
 1;
