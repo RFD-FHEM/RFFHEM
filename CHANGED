@@ -1,3 +1,15 @@
+2022-03-12 - Use FHEM::Core::Timer::Helper (#1075)
+
+* 00_SIGNALduino.pm
+
+- make SIGNALduino_IdList more robust
+- changed timer creation and deletion to use FHEM::Core::Timer::Helper
+
+* 01_SIGNALduino_Undef.t
+
+- verifys the undef function and if timers are removed
+
+
 2022-03-07 - prevents Perl warning WS2000 (#1083)
 
 * SD_Protocols.pm - prevents perl warning WS2000
