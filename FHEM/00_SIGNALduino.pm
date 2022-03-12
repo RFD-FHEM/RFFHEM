@@ -14,6 +14,7 @@
 package main;
 use strict;
 use warnings;
+use Storable qw(dclone); 
 #use version 0.77; our $VERSION = version->declare('v3.5.4');
 
 my $missingModulSIGNALduino = ' ';
@@ -285,7 +286,7 @@ sub SIGNALduino_Initialize {
   my $dev = '';
   $dev = ',1' if (index(SDUINO_VERSION, 'dev') >= 0);
 
-  $Protocols->registerLogCallback(SIGNALduino_createLogCallback($hash));
+  #$Protocols->registerLogCallback(SIGNALduino_createLogCallback($hash));
   my $error = $Protocols->LoadHash(qq[$attr{global}{modpath}/FHEM/lib/SD_ProtocolData.pm]); 
   if (defined($error)) {
     Log3 'SIGNALduino', 1, qq[Error loading Protocol Hash. Module is in inoperable mode error message:($error)];
@@ -424,8 +425,10 @@ sub SIGNALduino_Define {
   $hash->{logMethod}  = \&main::Log3;
 
   my $ret=undef;
-  $Protocols->registerLogCallback(SIGNALduino_createLogCallback($hash));
-  $hash->{protocolObject} = $Protocols;
+  #$Protocols->registerLogCallback(SIGNALduino_createLogCallback($hash));
+  $hash->{protocolObject} = dclone($Protocols);
+  $hash->{protocolObject}->registerLogCallback(SIGNALduino_createLogCallback($hash));
+    
   FHEM::Core::Timer::Helper::addTimer($name, time(), \&SIGNALduino_IdList,"sduino_IdList:$name",0 );
   #InternalTimer(gettimeofday(), \&SIGNALduino_IdList,"sduino_IdList:$name",0);       # verzoegern bis alle Attribute eingelesen sind
   
