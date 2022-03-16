@@ -1,3 +1,15 @@
+2022-03-16 - clone Protocol Object for every definition (#1084)
+
+* 00_SIGNALduino.pm
+
+clone Protocol Object for every definition
+
+* Automatic updated controls and CHANGED
+
+* 01_SIGNALduino_Define.t
+
+test extended to verify correct logging of protocolObject
+extended test to verify correct callback logging
 2022-03-12 - Use FHEM::Core::Timer::Helper (#1075)
 
 * 00_SIGNALduino.pm

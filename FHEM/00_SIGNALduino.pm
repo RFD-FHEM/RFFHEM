@@ -1,4 +1,4 @@
-# $Id: 00_SIGNALduino.pm v3.5.4 2022-03-10 20:42:28Z sidey79 $
+# $Id: 00_SIGNALduino.pm v3.5.4 2022-03-12 17:55:30Z sidey79 $
 # v3.5.4 - https://github.com/RFD-FHEM/RFFHEM/tree/master
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incoming messages
 # see http://www.fhemwiki.de/wiki/SIGNALDuino
@@ -14,6 +14,7 @@
 package main;
 use strict;
 use warnings;
+use Storable qw(dclone); 
 #use version 0.77; our $VERSION = version->declare('v3.5.4');
 
 my $missingModulSIGNALduino = ' ';
@@ -40,7 +41,7 @@ use List::Util qw(first);
 
 
 use constant {
-  SDUINO_VERSION                  => '3.5.4+20220310',  # Datum wird automatisch bei jedem pull request aktualisiert
+  SDUINO_VERSION                  => '3.5.4+20220312',  # Datum wird automatisch bei jedem pull request aktualisiert
   SDUINO_INIT_WAIT_XQ             => 1.5,     # wait disable device
   SDUINO_INIT_WAIT                => 2,
   SDUINO_INIT_MAXRETRY            => 3,
@@ -285,7 +286,6 @@ sub SIGNALduino_Initialize {
   my $dev = '';
   $dev = ',1' if (index(SDUINO_VERSION, 'dev') >= 0);
 
-  $Protocols->registerLogCallback(SIGNALduino_createLogCallback($hash));
   my $error = $Protocols->LoadHash(qq[$attr{global}{modpath}/FHEM/lib/SD_ProtocolData.pm]); 
   if (defined($error)) {
     Log3 'SIGNALduino', 1, qq[Error loading Protocol Hash. Module is in inoperable mode error message:($error)];
@@ -424,8 +424,9 @@ sub SIGNALduino_Define {
   $hash->{logMethod}  = \&main::Log3;
 
   my $ret=undef;
-  $Protocols->registerLogCallback(SIGNALduino_createLogCallback($hash));
-  $hash->{protocolObject} = $Protocols;
+  $hash->{protocolObject} = dclone($Protocols);
+  $hash->{protocolObject}->registerLogCallback(SIGNALduino_createLogCallback($hash));
+    
   FHEM::Core::Timer::Helper::addTimer($name, time(), \&SIGNALduino_IdList,"sduino_IdList:$name",0 );
   #InternalTimer(gettimeofday(), \&SIGNALduino_IdList,"sduino_IdList:$name",0);       # verzoegern bis alle Attribute eingelesen sind
   
