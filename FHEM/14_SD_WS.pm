@@ -1,4 +1,4 @@
-# $Id: 14_SD_WS.pm 21666 2022-01-30 10:19:30Z elektron-bbs $
+# $Id: 14_SD_WS.pm v3.5.4 2022-01-30 10:19:30Z elektron-bbs $
 #
 # The purpose of this module is to support serval
 # weather sensors which use various protocol
@@ -46,7 +46,7 @@
 
 package main;
 
-#use version 0.77; our $VERSION = version->declare('v3.4.3');
+#use version 0.77; our $VERSION = version->declare('v3.5.4');
 
 use strict;
 use warnings;
