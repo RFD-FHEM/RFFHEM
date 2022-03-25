@@ -1,5 +1,5 @@
 ###########################################################################################################################################
-# $Id: SD_ProtocolData.pm 3.4.4 2021-11-26 23:35:40Z elektron-bbs $
+# $Id: SD_ProtocolData.pm 3.5.x 2022-01-30 10:19:30Z elektron-bbs $
 # The file is part of the SIGNALduino project.
 # All protocol definitions are contained in this file.
 #
@@ -71,7 +71,7 @@
 ##### notice #### or #### info ############################################################################################################
 # !!! Between the keys and values ​​no tabs, please use spaces !!!
 # !!! Please use first unused id for new protocols !!!
-# ID´s are currently unused: 117 - 
+# ID´s are currently unused: 118 - 
 # ID´s need to be revised (preamble u): 5|19|21|22|23|25|28|31|36|40|52|59|63
 ###########################################################################################################################################
 # Please provide at least three messages for each new MU/MC/MS/MN protocol and a URL of issue in GitHub or discussion in FHEM Forum
@@ -86,7 +86,7 @@ package lib::SD_ProtocolData;
   use strict;
   use warnings;
 
-  our $VERSION = '1.39';
+  our $VERSION = '1.44';
 
   our %protocols = (
     "0" =>  ## various weather sensors (500 | 9100)
@@ -398,6 +398,27 @@ package lib::SD_ProtocolData;
         modulematch      => '^P7#.{6}[AFaf].{2}',
         length_min       => '35',
         length_max       => '40',
+      },
+    "7.1" => ## Mebus Modell Number HQ7312-2
+             # https://github.com/RFD-FHEM/RFFHEM/issues/1024 @ rpsVerni 2021-10-06
+             # Ch:3 T: 23.8 H: 11 Bat:ok    MS;P0=332;P1=-1114;P2=-2106;P3=-4055;D=03010201010202010202010201010101010202020102020201020202020101010102010202;CP=0;SP=3;R=56;m0;
+             # Ch:3 T: 24.5 H: 10 Bat:ok    MS;P0=-2128;P1=320;P5=-1159;P6=-4084;D=16151015151010151010151015151515151010101015101510101010101515151510151015;CP=1;SP=6;R=66;O;m2;
+             # Ch:3 T: 25.3 H: 11 Bat:ok    MS;P1=303;P4=-1153;P5=-2138;P6=-4102;D=16141514141515141515141514141414141515151515151415151515151414141415141515;CP=1;SP=6;R=50;O;m2;
+      {
+        name             => 'Weather',
+        comment          => 'Mebus HQ7312-2',
+        id               => '7.1',
+        knownFreqs       => '433.92',
+        one              => [1,-7],  # 300,-2100
+        zero             => [1,-4],  # 300,-1200
+        sync             => [1,-14], # 300,-4200
+        clockabs         => 300,
+        format           => 'twostate',
+        preamble         => 'P7#',
+        clientmodule     => 'SD_WS07',
+        modulematch      => '^P7#.{6}[AFaf].{2}',
+        length_min       => '36',
+        length_max       => '36',
       },
     "8"  => ## TX3 (ITTX) Protocol
             # Id:97 T: 24.4   MU;P0=-1046;P1=1339;P2=524;P3=-28696;D=010201010101010202010101010202010202020102010101020101010202020102010101010202310101010201020101010101020201010101020201020202010201010102010101020202010201010101020;CP=2;R=4;
@@ -1718,6 +1739,7 @@ package lib::SD_ProtocolData;
         one              => [3,-7],
         zero             => [7,-3],
         clockabs         => 122,
+        reconstructBit   => '1',
         preamble         => 'K',
         postamble        => '',
         clientmodule     => 'CUL_WS',
@@ -2839,10 +2861,43 @@ package lib::SD_ProtocolData;
         length_min      => '22',
         length_max      => '22',
       },
-
-    # "107" => reserved @elektron-bbs for Fine Offset WH51, ECOWITT WH51, MISOL/1, Froggit DP100 Soil Moisture Sensor
-
-    "108" =>  ## BRESSER 5-in-1 Weather Center, Bresser Professional Rain Gauge - elektron-bbs 2021-05-02
+    "107"	=>	## Fine Offset WH51, ECOWITT WH51, MISOL/1, Froggit DP100 Soil Moisture Sensor use with FSK 433.92 MHz
+              # https://forum.fhem.de/index.php/topic,109056.0.html
+              # SD_WS_107_H_00C6BF H: 31  MN;D=5100C6BF107F1FF8BBFFFFFFEE22;R=14;
+              # SD_WS_107_H_00C6BF H: 34  MN;D=5100C6BF107F22F8C3FFFFFF0443;R=14;
+              # SD_WS_107_H_00C6BF H: 35  MN;D=5100C6BF107F23F8C7FFFFFF5DA1;R=14;
+      {
+        name            => 'WH51 433.92 MHz',
+        comment         => 'Fine Offset WH51, ECOWITT WH51, MISOL/1, Froggit DP100 Soil moisture sensor',
+        id              => '107',
+        knownFreqs      => '433.92',
+        datarate        => '17257.69',
+        sync            => '2DD4',
+        modulation      => '2-FSK',
+        regexMatch      => qr/^51/, # Family code 0x51 (ECOWITT/FineOffset WH51)
+        preamble        => 'W107#',
+        register        => ['0001','022E','0343','042D','05D4','060E','0780','0800','0D10','0EB0','0F71','10A9','115C','1202','1322','14F8','1543','1916','1B43','1C68'],
+        rfmode          => 'Fine_Offset_WH51_434',
+        clientmodule    => 'SD_WS',
+        length_min      => '28',
+      },
+    "107.1"	=>	# Fine Offset WH51, ECOWITT WH51, MISOL/1, Froggit DP100 Soil Moisture Sensor use with FSK 868.35 MHz
+      {
+        name            => 'WH51 868.35 MHz',
+        comment         => 'Fine Offset WH51, ECOWITT WH51, MISOL/1, Froggit DP100 Soil moisture sensor',
+        id              => '107.1',
+        knownFreqs      => '868.35',
+        datarate        => '17257.69',
+        sync            => '2DD4',
+        modulation      => '2-FSK',
+        regexMatch      => qr/^51/, # Family code 0x51 (ECOWITT/FineOffset WH51)
+        preamble        => 'W107#',
+        register        => ['0001','022E','0343','042D','05D4','060E','0780','0800','0D21','0E65','0FE8','10A9','115C','1202','1322','14F8','1543','1916','1B43','1C68'],
+        rfmode          => 'Fine_Offset_WH51_868',
+        clientmodule    => 'SD_WS',
+        length_min      => '28',
+      },
+    "108" =>  ## BRESSER 5-in-1 Weather Center, Bresser Professional Rain Gauge, Fody E42, Fody E43 - elektron-bbs 2021-05-02
               # https://github.com/RFD-FHEM/RFFHEM/issues/607
               # https://forum.fhem.de/index.php/topic,106594.msg1151467.html#msg1151467
               # T: 11 H: 43 W: 1.7 R: 7.6     MN;D=E6837FD73FE8EFEFFEBC89FFFF197C8028C017101001437600000001;R=230;
@@ -2852,10 +2907,10 @@ package lib::SD_ProtocolData;
               # T: 8 H: 88 W: 1.3 R: 364.8     MN;D=E6527FEB0FECEF7FFF77B7C9FF19AD8014F013108000884836000003;R=211;
       {
         name            => 'Bresser 5in1',
-        comment         => 'BRESSER 5-in-1 weather center, rain gauge',
+        comment         => 'BRESSER 5-in-1 weather center, rain gauge, Fody E42, Fody E43',
         id              => '108',
         knownFreqs      => '868.35',
-        datarate        => '8.207',
+        datarate        => '8.232',
         sync            => '2DD4',
         modulation      => '2-FSK',
         rfmode          => 'Bresser_5in1',
@@ -3025,9 +3080,100 @@ package lib::SD_ProtocolData;
         length_min      => '36',
         method          => \&lib::SD_Protocols::ConvBresser_6in1,
       },
-
-    # "116" => reserved @elektron-bbs for Fine Offset WH57, Froggit DP60 Thunder and Lightning sensor
-
+    "116"	=>  ## Thunder and lightning sensor Fine Offset WH57, aka Froggit DP60, aka Ambient Weather WH31L use with FSK 433.92 MHz
+              # https://forum.fhem.de/index.php/topic,122527.0.html
+              # I: lightning   D:  6  MN;D=5780C65505060F6C78;R=39;
+              # I: lightning   D: 20  MN;D=5780C655051401C4D0;R=37;
+              # I: disturbance D: 63  MN;D=5740C655053F0A7272;R=39;
+      {
+        name            => 'WH57',
+        comment         => 'Fine Offset WH57, Ambient Weather WH31L, Froggit DP60 Thunder and Lightning sensor',
+        id              => '116',
+        knownFreqs      => '433.92',
+        datarate        => '17.257',
+        sync            => '2DD4',
+        modulation      => '2-FSK',
+        regexMatch      => qr/^57/, # Family code 0x57 (FineOffset WH57)
+        preamble        => 'W116#',
+        register        => ['0001','022E','0343','042D','05D4','0609','0780','0800','0D10','0EB0','0F71','10A9','115C','1202','1322','14F8','1543','1916','1B43','1C68'],
+        rfmode          => 'Fine_Offset_WH57_434',
+        clientmodule    => 'SD_WS',
+        length_min      => '18',
+      },
+    "116.1"	=>  ## Thunder and lightning sensor Fine Offset WH57, aka Froggit DP60, aka Ambient Weather WH31L use with FSK 868.35 MHz
+      {
+        name            => 'WH57',
+        comment         => 'Fine Offset WH57, Ambient Weather WH31L, Froggit DP60 Thunder and Lightning sensor',
+        id              => '116.1',
+        knownFreqs      => '868.35',
+        datarate        => '17.257',
+        sync            => '2DD4',
+        modulation      => '2-FSK',
+        regexMatch      => qr/^57/, # Family code 0x57 (FineOffset WH57)
+        preamble        => 'W116#',
+        register        => ['0001','022E','0343','042D','05D4','0609','0780','0800','0D21','0E65','0FE8','10A9','115C','1202','1322','14F8','1543','1916','1B43','1C68'],
+        rfmode          => 'Fine_Offset_WH57_868',
+        clientmodule    => 'SD_WS',
+        length_min      => '18',
+      },
+    "117" =>  ## BRESSER 7-in-1 Weather Center
+              # https://forum.fhem.de/index.php/topic,78809.msg1196941.html#msg1196941 @ JensS 2021-12-30
+              # T: 12.7 H: 87 W: 0 R: 8.4 B: 6.676   MN;D=FC28A6F58DCA18AAAAAAAAAA2EAAB8DA2DAACCDCAAAAAAAAAA000000;R=29;
+              # T: 13.1 H: 88 W: 0 R: 0   B: 0.36    MN;D=4DC4A6F5B38A10AAAAAAAAAAAAAAB9BA22AAA9CAAAAAAAAAAA000000;R=15;
+              # T: 10.1 H: 94 W: 0 R: 0   B: 1.156   MN;D=0CF0A6F5B98A10AAAAAAAAAAAAAABABC3EAABBFCAAAAAAAAAA000000;R=28;
+      {
+        name            => 'Bresser 7in1',
+        comment         => 'BRESSER 7-in-1 weather center',
+        id              => '117',
+        knownFreqs      => '868.35',
+        datarate        => '8.232',
+        sync            => '2DD4',
+        modulation      => '2-FSK',
+        rfmode          => 'Bresser_7in1',
+        register        => ['0001','022E','0345','042D','05D4','0616','07C0','0800','0D21','0E65','0FE8','1088','114C','1202','1322','14F8','1551','1916','1B43','1C68'],
+        preamble        => 'W117#',
+        clientmodule    => 'SD_WS',
+        length_min      => '44',
+        method          => \&lib::SD_Protocols::ConvBresser_7in1,
+      },
+    "118" => ## Remote controls for Meikee LED lights e.g. RGB LED Wallwasher Light and Solar Flood Light
+             # https://forum.fhem.de/index.php/topic,126110.0.html @ Sepp 2022-02-09
+             # Meikee_24_20D3 on     MU;P0=506;P1=-1015;P2=1008;P3=-523;P4=-12696;D=01012301040101230101010101232301230101232301010101010123010;CP=0;R=49;
+             # Meikee_24_20D3 off    MU;P0=-516;P1=518;P2=-1015;P3=1000;P4=-12712;D=01230121230301212121212121230141212301212121212303012301212303012121212121212301;CP=1;R=35;
+             # Meikee_24_20D3 learn  MU;P0=-509;P1=513;P2=-999;P3=1027;P4=-12704;D=01230121230301212121212121212141212301212121212303012301212303012121212121212121;CP=1;R=77;
+      {
+        name            => 'Meikee',
+        comment         => 'Remote controls for Meikee LED lights',
+        id              => '118',
+        one             => [2,-1], # 1016,-508
+        zero            => [1,-2], # 508,-1016
+        start           => [-25],  # -12700, message provided as MU
+        end             => [1],    # 508
+        clockabs        => 508,
+        format          => 'twostate',
+        clientmodule    => 'SD_UT',
+        modulematch     => '^P118#',
+        preamble        => 'P118#',
+        length_min      => '24',
+        length_max      => '25',
+      },
+    "118.1" => ## Remote controls for Meikee LED lights e.g. RGB LED Wallwasher Light and Solar Flood Light
+      {
+        name            => 'Meikee',
+        comment         => 'Remote controls for Meikee LED lights',
+        id              => '118.1',
+        one             => [2,-1], # 1016,-508
+        zero            => [1,-2], # 508,-1016
+        sync            => [-25],  # -12700, message provided as MS
+        end             => [1],    # 508
+        clockabs        => 508,
+        format          => 'twostate',
+        clientmodule    => 'SD_UT',
+        modulematch     => '^P118#',
+        preamble        => 'P118#',
+        length_min      => '24',
+        length_max      => '25',
+      },
     ########################################################################
     #### ###  register informations from other hardware protocols  #### ####
 

@@ -19,7 +19,7 @@ jobs:
     - name: Check if Branch is in PR
       if: github.event_name == 'push'
       id: checkbranch
-      uses: actions/github-script@v5
+      uses: actions/github-script@v6
       with:
         script: |
           console.log(process.env.BRANCH_NAME)
@@ -57,7 +57,7 @@ jobs:
       id: extract_branch
     - name: Checkout Repostory
       if: needs.pr_check.outputs.result != 'true'
-      uses: actions/checkout@v2.4.0
+      uses: actions/checkout@v3
       with:
         fetch-depth: 0
         persist-credentials: false

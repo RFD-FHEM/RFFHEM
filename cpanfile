@@ -12,3 +12,4 @@ requires 'Net::SSLeay';
 requires 'Digest::CRC';
 requires 'Math::Trig';
 requires 'Storable'; 
+requires 'Test::Without::Module';

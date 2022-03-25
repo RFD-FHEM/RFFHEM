@@ -1,0 +1,43 @@
+[
+    {"name":"Hideki", "id":"12", "module":"Hideki", "data": [
+      {
+        "dmsg":"P12#75A3", "comment":"to short, causes error", "user":"unknown",
+        "internals": { "NAME": "" }, 
+        "readings": {},
+        "minProtocolVersion":"1.42", "revision_entry":"SD_ProtocolData.pm 3.4.4 2022-01-15 12:25:06Z elektron-bbs $",
+        "revision_modul":"",
+        "rmsg":"",
+        "MatchCheckFail": true
+      },
+      {
+        "dmsg":"P12#75EC4675F0406F6D", "comment":"to short", "user":"unknown",
+        "internals": {"NAME": "Hideki_31_1", "DEF": "Hideki_31_1 Hideki Hideki_31_1" }, 
+        "readings": {"temperature": "1"},
+        "minProtocolVersion":"1.42", "revision_entry":"SD_ProtocolData.pm 3.4.4 2022-01-15 12:25:06Z elektron-bbs $",
+        "revision_modul":"",
+        "rmsg":"MC;LL=-952;LH=1003;SL=-452;SH=526;D=51E4676A3F0FEC2693;C=488;L=72;R=247;"
+      }, 
+      {
+        
+        "dmsg":"P12#75E806350F40942103", "comment":"temperature only", "user":"ralf9",
+        "internals": {"NAME": "Hideki_31_1", "DEF": "Hideki_31_1 Hideki Hideki_31_1" }, 
+        "readings": {"temperature": "1.1"},
+        "minProtocolVersion":"1.42", "revision_entry":"SD_ProtocolData.pm 3.4.4 2022-01-15 12:25:06Z elektron-bbs $",
+        "revision_modul":"",
+        "rmsg":"MC;LL=-1038;LH=918;SL=-562;SH=412;D=547D19FA9C3FFBD6BD8;C=488;L=73"
+      },
+      {
+        
+        "dmsg":"P12#75E80675F8402311", "comment":"temperature only short", "user":"ralf9",
+        "internals": {"NAME": "Hideki_31_1", "DEF": "Hideki_31_1 Hideki Hideki_31_1" }, 
+        "readings": {"temperature": "0.8"},
+        "minProtocolVersion":"1.42", "revision_entry":"SD_ProtocolData.pm 3.4.4 2022-01-15 12:25:06Z elektron-bbs $",
+        "revision_modul":"",
+        "rmsg":"MC;LL=-1043;LH=919;SL=-503;SH=428;D=51F467EA3E0FECEEEE;C=482;L=71;s1;b1;"
+      }
+ 
+      
+      
+    ]
+    }    
+]

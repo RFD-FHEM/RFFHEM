@@ -1,4 +1,5 @@
 ################################################################################
+# $Id: SD_ProtocolData.pm 3.5.x 2022-01-30 10:19:30Z elektron-bbs $
 #
 # The file is part of the SIGNALduino project
 # v3.5.x - https://github.com/RFD-FHEM/RFFHEM
@@ -12,8 +13,10 @@ package lib::SD_Protocols;
 use strict;
 use warnings;
 use Carp qw(croak carp);
-use Digest::CRC;
-our $VERSION = '2.05';
+use constant HAS_DigestCRC => defined eval { require Digest::CRC; };
+use constant HAS_JSON => defined eval { require JSON; };
+
+our $VERSION = '2.06';
 use Storable qw(dclone);
 use Scalar::Util qw(blessed);
 
@@ -141,7 +144,11 @@ sub LoadHashFromJson {
   my $json_text = do { local $/ = undef; <$json_fh> };
   close $json_fh or croak "Can't close '$filename' after reading";
 
-  use JSON;
+  if (!HAS_JSON)
+  {
+    croak("Perl Module JSON not availble. Needs to be installed.");
+  }
+
   my $json = JSON->new;
   $json = $json->relaxed(1);
   my $ver  = $json->incr_parse($json_text);
@@ -1426,6 +1433,11 @@ sub postDemo_WS2000 {
         return (0, undef);
       }
       $dataindex = $index + $datastart + 1;
+      my $rest = $protolength - $dataindex;
+      if ($rest < 4) {
+        $self->_logging(qq[lib/postDemo_WS2000, Sensortyp $typ - ERROR rest of message < 4 ($rest)],4);
+      return (0, undef);
+      }
       $data = oct( '0b'.(join '', reverse @bit_msg[$dataindex .. $dataindex + 3]));
       if ($index == 5) {$adr = ($data & 0x07)}                 # Sensoradresse
       if ($datalength == 45 || $datalength == 46) {            # Typ 1 ohne Summe
@@ -1818,7 +1830,13 @@ sub ConvBresser_6in1 {
   my $hexLength = length ($hexData);
 
   return ( 1, 'ConvBresser_6in1, hexData is to short' ) if ( $hexLength < 36 ); # check double, in def length_min set
-		
+
+  
+  return ( 1,'ConvBresser_6in1, missing module , please install modul Digest::CRC' ) 
+    if (!HAS_DigestCRC);
+  
+    
+
   my $crc = substr( $hexData, 0, 4 );
   my $ctx = Digest::CRC->new(width => 16, poly => 0x1021);
   my $calcCrc = sprintf( "%04X", $ctx->add( pack 'H*', substr( $hexData, 4, 30 ) )->digest );
@@ -1834,6 +1852,72 @@ sub ConvBresser_6in1 {
   return ( 1, qq[ConvBresser_6in1, sum $sum != 255] ) if ($sum != 255);
 
   return $hexData;
+}
+
+=item ConvBresser_7in1()
+
+This function makes xor 0xa over all bytes and checks LFSR_digest16
+
+Input:  $hexData
+Output: $hexDataXorA
+        scalar converted message on success 
+        or array (1,"Error message")
+
+=cut
+
+sub ConvBresser_7in1 {
+  my $self    = shift // carp 'Not called within an object';
+  my $hexData = shift // croak 'Error: called without $hexdata as input';
+  my $hexLength = length($hexData);
+
+  return (1, 'ConvBresser_7in1, hexData is to short') if ($hexLength < 44); # check double, in def length_min set
+  return (1, 'ConvBresser_7in1, byte 21 is 0x00') if (substr($hexData,42,2) eq '00'); # check byte 21
+
+  my $hexDataXorA ='';
+  for (my $i = 0; $i < $hexLength; $i++) {
+    my $xor = hex(substr($hexData,$i,1)) ^ 0xA;
+    $hexDataXorA .= sprintf('%X',$xor);
+  }
+  $self->_logging(qq[ConvBresser_7in1, msg=$hexData],5);
+  $self->_logging(qq[ConvBresser_7in1, xor=$hexDataXorA],5);
+
+  my $checksum = lib::SD_Protocols::LFSR_digest16(20, 0x8810, 0xba95, substr($hexDataXorA,4,40));
+  my $checksumcalc = sprintf('%04X',$checksum ^ hex(substr($hexDataXorA,0,4)));
+  $self->_logging(qq[ConvBresser_7in1, checksumCalc:0x$checksumcalc, must be 0x6DF1],5);
+  return ( 1, qq[ConvBresser_7in1, checksumCalc:0x$checksumcalc != checksum:0x6DF1] ) if ($checksumcalc ne '6DF1');
+
+  return $hexDataXorA;
+}
+
+=item LFSR_digest16()
+
+This function checks 16 bit LFSR
+
+Input:  $bytes, $gen, $key, $rawData
+Output: $lfsr
+
+=cut
+
+sub LFSR_digest16 {
+  my ($bytes, $gen, $key, $rawData) = @_;
+  carp "LFSR_digest16, too few arguments ($bytes, $gen, $key, $rawData)" if @_ < 4;
+  return (1, 'LFSR_digest16, rawData is to short') if (length($rawData) < $bytes * 2);
+	
+  my $lfsr = 0;
+  for (my $k = 0; $k < $bytes; $k++) {
+    my $data = hex(substr($rawData, $k * 2, 2));
+    for (my $i = 7; $i >= 0; $i--) {
+      if (($data >> $i) & 0x01) {
+        $lfsr ^= $key;
+      }
+      if ($key & 0x01) {
+        $key = ($key >> 1) ^ $gen;
+      } else {
+        $key = ($key >> 1);
+      }
+		}
+	}
+  return $lfsr;
 }
 
 ############################# package lib::SD_Protocols, test exists
@@ -1856,6 +1940,9 @@ sub ConvPCA301 {
   return ( 1,
 'ConvPCA301, Usage: Input #1, $hexData needs to be at least 24 chars long'
   ) if ( length($hexData) < 24 );    # check double, in def length_min set
+
+  return ( 1,'ConvPCA301, missing module , please install modul Digest::CRC' ) 
+    if (!HAS_DigestCRC);
 
   my $checksum = substr( $hexData, 20, 4 );
   my $ctx = Digest::CRC->new(
@@ -1978,6 +2065,9 @@ sub ConvLaCrosse {
 
   return ( 1,'ConvLaCrosse, Usage: Input #1, $hexData needs to be at least 8 chars long'  )
     if ( length($hexData) < 8 )  ;    # check number of length for this sub to not throw an error
+
+  return ( 1,'ConvLaCrosse, missing module , please install modul Digest::CRC' ) 
+    if (!HAS_DigestCRC);
 
   my $ctx = Digest::CRC->new( width => 8, poly => 0x31 );
   my $calcCrc = $ctx->add( pack 'H*', substr( $hexData, 0, 8 ) )->digest;

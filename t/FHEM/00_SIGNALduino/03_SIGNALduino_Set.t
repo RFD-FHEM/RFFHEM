@@ -6,6 +6,7 @@ use Test2::V0;
 use Test2::Tools::Compare qw{is bag check array like unlike};
 use Test2::Mock;
 
+use FHEM::Core::Timer::Helper;
 our %defs;
 our %attr;
 
@@ -18,6 +19,10 @@ InternalTimer(time()+1, sub {
 	my $mock = Test2::Mock->new(
 		track => 1,
 		class => 'main'
+	);	 	
+	my $timer_mock = Test2::Mock->new(
+		track => 1,
+		class => 'FHEM::Core::Timer::Helper'
 	);	 	
 	my $tracking = $mock->sub_tracking;
 
@@ -683,7 +688,7 @@ InternalTimer(time()+1, sub {
 	subtest "checking set close " => sub {
 			plan (3);	
 			$mock->override('DevIo_CloseDev' => sub { pass('DevIo_CloseDev is called') } );
-			$mock->override('RemoveInternalTimer' => sub { pass('RemoveInternalTimer is called') } );
+			$timer_mock->override('removeTimer' => sub { pass('removeTimer is called') } );
 
 			
 			SIGNALduino_Set($targetHash,$target,"close");
@@ -693,7 +698,7 @@ InternalTimer(time()+1, sub {
 			#ok($RemoveInternalTimer->called, "RemoveInternalTimer is called");
 			
 			$mock->restore('DevIo_CloseDev');
-			$mock->restore('RemoveInternalTimer');
+			$timer_mock->restore('removeTimer');
 	};
 	
 	subtest 'Test SIGNALduino without dummy attrib or value 0 / devio open' => sub {

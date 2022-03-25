@@ -1,5 +1,5 @@
-# $Id: 00_SIGNALduino.pm v3.5.2 2021-12-19 18:11:16Z elektron-bbs $
-# v3.5.2 - https://github.com/RFD-FHEM/RFFHEM/tree/master
+# $Id: 00_SIGNALduino.pm v3.5.4 2022-03-12 17:55:30Z sidey79 $
+# v3.5.4 - https://github.com/RFD-FHEM/RFFHEM/tree/master
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incoming messages
 # see http://www.fhemwiki.de/wiki/SIGNALDuino
 # It was modified also to provide support for raw message handling which can be send from the SIGNALduino
@@ -8,27 +8,30 @@
 #
 # 2014-2015  S.Butzek, N.Butzek
 # 2016-2019  S.Butzek, Ralf9
-# 2019-2021  S.Butzek, HomeAutoUser, elektron-bbs
+# 2019-2022  S.Butzek, HomeAutoUser, elektron-bbs
 
 
 package main;
 use strict;
 use warnings;
-#use version 0.77; our $VERSION = version->declare('v3.5.2');
+use Storable qw(dclone); 
+#use version 0.77; our $VERSION = version->declare('v3.5.4');
 
-my $missingModulSIGNALduino = '';
+my $missingModulSIGNALduino = ' ';
 
 use DevIo;
-require "99_Utils.pm" if (!defined $modules{"Utils"} || !exists $modules{"Utils"}{"LOADED"} );
+require "99_Utils.pm" if (!defined $modules{"Utils"} || !exists $modules{"Utils"}{"LOADED"} ); ## no critic
 use Carp;
 no warnings 'portable';
 
 eval {use Data::Dumper qw(Dumper);1};
-eval {use Digest::CRC;1 or $missingModulSIGNALduino .= 'Digest::CRC '};
-eval {use JSON;1 or $missingModulSIGNALduino .= 'JSON '};
+
+use constant HAS_JSON      => defined  eval { require JSON; JSON->import; };
 
 eval {use Scalar::Util qw(looks_like_number);1};
 eval {use Time::HiRes qw(gettimeofday);1} ;
+eval {use FHEM::Core::Timer::Helper;1 } ;
+
 use lib::SD_Protocols;
 use List::Util qw(first);
 
@@ -38,7 +41,7 @@ use List::Util qw(first);
 
 
 use constant {
-  SDUINO_VERSION                  => '3.5.2+20211219',  # Datum wird automatisch bei jedem pull request aktualisiert
+  SDUINO_VERSION                  => '3.5.4+20220312',  # Datum wird automatisch bei jedem pull request aktualisiert
   SDUINO_INIT_WAIT_XQ             => 1.5,     # wait disable device
   SDUINO_INIT_WAIT                => 2,
   SDUINO_INIT_MAXRETRY            => 3,
@@ -250,7 +253,7 @@ my %matchListSIGNALduino = (
       '14:Dooya'            => '^P16#[A-Fa-f0-9]+',
       '15:SOMFY'            => '^Ys[0-9A-F]+',
       '16:SD_WS_Maverick'   => '^P47#[A-Fa-f0-9]+',
-      '17:SD_UT'            => '^P(?:14|20|24|26|29|30|34|46|56|68|69|76|78|81|83|86|90|91|91.1|92|93|95|97|99|104|105|114)#.*', # universal - more devices with different protocols
+      '17:SD_UT'            => '^P(?:14|20|24|26|29|30|34|46|56|68|69|76|78|81|83|86|90|91|91.1|92|93|95|97|99|104|105|114|118)#.*', # universal - more devices with different protocols
       '18:FLAMINGO'         => '^P13\.?1?#[A-Fa-f0-9]+',              # Flamingo Smoke
       '19:CUL_WS'           => '^K[A-Fa-f0-9]{5,}',
       '20:Revolt'           => '^r[A-Fa-f0-9]{22}',
@@ -283,7 +286,6 @@ sub SIGNALduino_Initialize {
   my $dev = '';
   $dev = ',1' if (index(SDUINO_VERSION, 'dev') >= 0);
 
-  $Protocols->registerLogCallback(SIGNALduino_createLogCallback($hash));
   my $error = $Protocols->LoadHash(qq[$attr{global}{modpath}/FHEM/lib/SD_ProtocolData.pm]); 
   if (defined($error)) {
     Log3 'SIGNALduino', 1, qq[Error loading Protocol Hash. Module is in inoperable mode error message:($error)];
@@ -295,15 +297,17 @@ sub SIGNALduino_Initialize {
     Log3 'SIGNALduino', 4, qq[SIGNALduino_Initialize: rfmode list: @rfmode];
   }
 
+  $hash->{DefFn}          = \&SIGNALduino_Define;
+  $hash->{UndefFn}        = \&SIGNALduino_Undef;
+
+
 # Provider
   $hash->{ReadFn}  = \&SIGNALduino_Read;
   $hash->{WriteFn} = \&SIGNALduino_Write;
   $hash->{ReadyFn} = \&SIGNALduino_Ready;
 
 # Normal devices
-  $hash->{DefFn}          = \&SIGNALduino_Define;
   $hash->{FingerprintFn}  = \&SIGNALduino_FingerprintFn;
-  $hash->{UndefFn}        = \&SIGNALduino_Undef;
   $hash->{GetFn}          = \&SIGNALduino_Get;
   $hash->{SetFn}          = \&SIGNALduino_Set;
   $hash->{AttrFn}         = \&SIGNALduino_Attr;
@@ -420,11 +424,12 @@ sub SIGNALduino_Define {
   $hash->{logMethod}  = \&main::Log3;
 
   my $ret=undef;
-  $Protocols->registerLogCallback(SIGNALduino_createLogCallback($hash));
-  $hash->{protocolObject} = $Protocols;
-
-  InternalTimer(gettimeofday(), \&SIGNALduino_IdList,"sduino_IdList:$name",0);        # verzoegern bis alle Attribute eingelesen sind
-
+  $hash->{protocolObject} = dclone($Protocols);
+  $hash->{protocolObject}->registerLogCallback(SIGNALduino_createLogCallback($hash));
+    
+  FHEM::Core::Timer::Helper::addTimer($name, time(), \&SIGNALduino_IdList,"sduino_IdList:$name",0 );
+  #InternalTimer(gettimeofday(), \&SIGNALduino_IdList,"sduino_IdList:$name",0);       # verzoegern bis alle Attribute eingelesen sind
+  
   if($dev ne 'none') {
     $ret = DevIo_OpenDev($hash, 0, \&SIGNALduino_DoInit, \&SIGNALduino_Connect);
   } else {
@@ -477,7 +482,7 @@ sub SIGNALduino_Undef {
   SIGNALduino_Shutdown($hash);
 
   DevIo_CloseDev($hash);
-  RemoveInternalTimer($hash);
+  FHEM::Core::Timer::Helper::removeTimer($name); 
   return ;
 }
 
@@ -625,7 +630,7 @@ sub SIGNALduino_PrepareFlash {
   }
   $hash->{helper}{avrdudecmd} =~ s/\Q[BAUDRATE]\E/$baudrate/;
   $log .= "command: $hash->{helper}{avrdudecmd}\n\n";
-  InternalTimer(gettimeofday() + 1,\&SIGNALduino_avrdude,$name);
+  FHEM::Core::Timer::Helper::addTimer($name,gettimeofday() + 1,\&SIGNALduino_avrdude,$name);
   $hash->{helper}{avrdudelogs} = $log;
   return ;
 }
@@ -995,7 +1000,8 @@ sub SIGNALduino_Set_LaCrossePairForSec {
   return "Usage: set $hash->{NAME} $a[0] <seconds_active> [ignore_battery]" if(!$a[0] || $a[1] !~ m/^\d+$/xms || (defined $a[2] && $a[2] ne 'ignore_battery') );
   $hash->{LaCrossePair} = 2;  # LaCrosse autoCreateState: 0 = autoreate not defined | 1 = autocreate defined | 2 = autocreate active
   $hash->{logMethod}->($hash->{NAME}, 4, "$hash->{NAME}: Set_LaCrossePairForSec, LaCrosse autocreate active for $a[1] seconds");
-  InternalTimer(gettimeofday()+$a[1], 'SIGNALduino_RemoveLaCrossePair', $hash, 0);
+  
+  FHEM::Core::Timer::Helper::addTimer($hash->{NAME},gettimeofday()+$a[1], \&SIGNALduino_RemoveLaCrossePair, $hash, 0);
 
   return ;
 }
@@ -1065,7 +1071,7 @@ sub SIGNALduino_Get_FhemWebList {
 sub SIGNALduino_Get_availableFirmware {
   my ($hash, @a) = @_;
 
-  if ($missingModulSIGNALduino =~ m/JSON/ )
+  if ( !HAS_JSON )
   {
     $hash->{logMethod}->($hash->{NAME}, 1, "$hash->{NAME}: get $a[0] failed. Please install Perl module JSON. Example: sudo apt-get install libjson-perl");
     return "$a[0]: \n\nFetching from github is not possible. Please install JSON. Example:<br><code>sudo apt-get install libjson-perl</code>";
@@ -1154,11 +1160,14 @@ sub SIGNALduino_Get_delayed {
     
   if (exists($hash->{ucCmd})  && $hash->{ucCmd}->{timenow}+10 > time() ) {
     $hash->{logMethod}->($hash->{NAME}, 5, "$name: Get_delayed, ".join(' ',@cmds).' delayed');
-    main::InternalTimer(main::gettimeofday() + main::SDUINO_GET_CONFIGQUERY_DELAY, \&SIGNALduino_Get_delayed, "SIGNALduino_Get_delayed:$name:".join(' ',@cmds), 0);
+    FHEM::Core::Timer::Helper::addTimer($name,main::gettimeofday() + main::SDUINO_GET_CONFIGQUERY_DELAY, \&SIGNALduino_Get_delayed, "SIGNALduino_Get_delayed:$name:".join(' ',@cmds), 0);
   } else {
     delete($hash->{ucCmd}); 
     $hash->{logMethod}->($hash->{NAME}, 5, "$name: Get_delayed, ".join(' ',@cmds).' executed');
-    RemoveInternalTimer("SIGNALduino_Get_delayed:$name:".join(' ',@cmds));
+    FHEM::Core::Timer::Helper::removeTimer($name,\&SIGNALduino_Get_delayed,"SIGNALduino_Get_delayed:$name:".join(' ',@cmds));
+    
+
+        
     SIGNALduino_Get($hash,$name,$cmds[0]);
   }
 }
@@ -1296,10 +1305,11 @@ sub SIGNALduino_CheckSendRawResponse {
     delete($hash->{ucCmd});
     if ($msg =~ /D=[A-Za-z0-9]+;/ )
     {
-      RemoveInternalTimer("HandleWriteQueue:$name");
+      FHEM::Core::Timer::Helper::removeTimer($name,\&SIGNALduino_HandleWriteQueue,"HandleWriteQueue:$name");
       SIGNALduino_HandleWriteQueue("x:$name"); # Todo #823 on github
     } else {
-      InternalTimer(gettimeofday() , \&SIGNALduino_HandleWriteQueue, "HandleWriteQueue:$name") if (scalar @{$hash->{QUEUE}} > 0 && InternalVal($name,'sendworking',0) == 0);
+      FHEM::Core::Timer::Helper::addTimer($name,scalar gettimeofday() , \&SIGNALduino_HandleWriteQueue, "HandleWriteQueue:$name") if (scalar @{$hash->{QUEUE}} > 0 && InternalVal($name,'sendworking',0) == 0);
+      
     }
   }
   return (undef);
@@ -1332,7 +1342,8 @@ sub SIGNALduino_ResetDevice {
       # Mit dem Linux-Kommando 'stty' die Port-Einstellungen setzen
       system("stty -F $dev ospeed 1200 ispeed 1200");
       $hash->{helper}{resetInProgress}=1;
-      InternalTimer(gettimeofday()+10,\&SIGNALduino_ResetDevice,$hash);
+      FHEM::Core::Timer::Helper::addTimer($name,gettimeofday()+10,\&SIGNALduino_ResetDevice,$hash);
+      
       $hash->{logMethod}->($name, 3, "$name: ResetDevice, reopen delayed for 10 second");
       return ;
     }
@@ -1348,7 +1359,7 @@ sub SIGNALduino_CloseDevice {
   my ($hash) = @_;
 
   $hash->{logMethod}->($hash->{NAME}, 2, "$hash->{NAME}: CloseDevice, closed");
-  RemoveInternalTimer($hash);
+  FHEM::Core::Timer::Helper::removeTimer($hash->{NAME});
   DevIo_CloseDev($hash);
   readingsSingleUpdate($hash, 'state', 'closed', 1);
 
@@ -1367,7 +1378,7 @@ sub SIGNALduino_DoInit {
 
   delete($hash->{disConnFlag}) if defined($hash->{disConnFlag});
 
-  RemoveInternalTimer("HandleWriteQueue:$name");
+  FHEM::Core::Timer::Helper::removeTimer($name,\&SIGNALduino_HandleWriteQueue,"HandleWriteQueue:$name");
   @{$hash->{QUEUE}} = ();
   $hash->{sendworking} = 0;
 
@@ -1375,11 +1386,12 @@ sub SIGNALduino_DoInit {
   {
     $hash->{logMethod}->($hash, 1, "$name: DoInit, ".$hash->{DEF});
     $hash->{initretry} = 0;
-    RemoveInternalTimer($hash);
+    FHEM::Core::Timer::Helper::removeTimer($name,undef,$hash); # What timer should be removed here is not clear
 
     #SIGNALduino_SimpleWrite($hash, 'XQ'); # Disable receiver
-    InternalTimer(gettimeofday() + SDUINO_INIT_WAIT_XQ, \&SIGNALduino_SimpleWrite_XQ, $hash, 0);
-    InternalTimer(gettimeofday() + SDUINO_INIT_WAIT, \&SIGNALduino_StartInit, $hash, 0);
+    
+    FHEM::Core::Timer::Helper::addTimer($name,gettimeofday() + SDUINO_INIT_WAIT_XQ, \&SIGNALduino_SimpleWrite_XQ, $hash, 0);
+    FHEM::Core::Timer::Helper::addTimer($name,gettimeofday() + SDUINO_INIT_WAIT, \&SIGNALduino_StartInit, $hash, 0);
   }
   # Reset the counter
   delete($hash->{XMIT_TIME});
@@ -1427,8 +1439,8 @@ sub SIGNALduino_StartInit {
     SIGNALduino_SimpleWrite($hash, 'V');
     #DevIo_SimpleWrite($hash, "V\n",2);
     $hash->{DevState} = 'waitInit';
-    RemoveInternalTimer($hash);
-    InternalTimer(gettimeofday() + SDUINO_CMD_TIMEOUT, \&SIGNALduino_CheckVersionResp, $hash, 0);
+    FHEM::Core::Timer::Helper::removeTimer($name);
+    FHEM::Core::Timer::Helper::addTimer($name, gettimeofday() + SDUINO_CMD_TIMEOUT, \&SIGNALduino_CheckVersionResp, $hash, 0);
   }
 }
 
@@ -1466,7 +1478,7 @@ sub SIGNALduino_CheckVersionResp {
     SIGNALduino_CloseDevice($hash);
   } else {
     if (exists($hash->{DevState}) && $hash->{DevState} eq 'waitInit') {
-      RemoveInternalTimer($hash);
+      FHEM::Core::Timer::Helper::removeTimer($name);
     }
 
     readingsSingleUpdate($hash, 'state', 'opened', 1);
@@ -1478,7 +1490,7 @@ sub SIGNALduino_CheckVersionResp {
     # initialize keepalive
     $hash->{keepalive}{ok}    = 0;
     $hash->{keepalive}{retry} = 0;
-    InternalTimer(gettimeofday() + SDUINO_KEEPALIVE_TIMEOUT, \&SIGNALduino_KeepAlive, $hash, 0);
+    FHEM::Core::Timer::Helper::addTimer($name, gettimeofday() + SDUINO_KEEPALIVE_TIMEOUT, \&SIGNALduino_KeepAlive, $hash, 0);
     if ($hash->{version} =~ m/cc1101/) {
       $hash->{cc1101_available} = 1;
       $hash->{logMethod}->($name, 5, "$name: CheckVersionResp, cc1101 available");
@@ -1537,7 +1549,7 @@ sub SIGNALduino_CheckCmdResp {
       # initialize keepalive
       $hash->{keepalive}{ok}    = 0;
       $hash->{keepalive}{retry} = 0;
-      InternalTimer(gettimeofday() + SDUINO_KEEPALIVE_TIMEOUT, \&SIGNALduino_KeepAlive, $hash, 0);
+      FHEM::Core::Timer::Helper::addTimer($name,gettimeofday() + SDUINO_KEEPALIVE_TIMEOUT, \&SIGNALduino_KeepAlive, $hash, 0);
       $hash->{cc1101_available} = 1  if ($ver =~ m/cc1101/);
     }
   }
@@ -1653,7 +1665,7 @@ sub SIGNALduino_AddSendQueue {
   #SIGNALduino_Log3 $hash , 5, Dumper($hash->{QUEUE});
 
   $hash->{logMethod}->($hash, 5,"$name: AddSendQueue, " . $hash->{NAME} . ": $msg (" . @{$hash->{QUEUE}} . ')');
-  InternalTimer(gettimeofday(), \&SIGNALduino_HandleWriteQueue, "HandleWriteQueue:$name") if (scalar @{$hash->{QUEUE}} == 1 && InternalVal($name,'sendworking',0) == 0);
+  FHEM::Core::Timer::Helper::addTimer($name,scalar gettimeofday(), \&SIGNALduino_HandleWriteQueue, "HandleWriteQueue:$name") if (scalar @{$hash->{QUEUE}} == 1 && InternalVal($name,'sendworking',0) == 0);
 }
 
 ############################# package main, test exists
@@ -1697,9 +1709,9 @@ sub SIGNALduino_SendFromQueue {
   # else it will be sent too early by the SIGNALduino, resulting in a collision, or may the last command is not finished
 
   if (defined($hash->{ucCmd}->{cmd}) && $hash->{ucCmd}->{cmd} eq 'sendraw') {
-     InternalTimer(gettimeofday() + SDUINO_WRITEQUEUE_TIMEOUT, \&SIGNALduino_HandleWriteQueue, "HandleWriteQueue:$name");
+     FHEM::Core::Timer::Helper::addTimer($name, gettimeofday() + SDUINO_WRITEQUEUE_TIMEOUT, \&SIGNALduino_HandleWriteQueue, "HandleWriteQueue:$name");
   } else {
-     InternalTimer(gettimeofday() + SDUINO_WRITEQUEUE_NEXT, \&SIGNALduino_HandleWriteQueue, "HandleWriteQueue:$name");
+     FHEM::Core::Timer::Helper::addTimer($name, gettimeofday() + SDUINO_WRITEQUEUE_NEXT, \&SIGNALduino_HandleWriteQueue, "HandleWriteQueue:$name");
   }
 }
 
@@ -1729,7 +1741,7 @@ sub SIGNALduino_HandleWriteQueue {
     }
   } else {
      $hash->{logMethod}->($name, 4, "$name: HandleWriteQueue, nothing to send, stopping timer");
-     RemoveInternalTimer("HandleWriteQueue:$name");
+     FHEM::Core::Timer::Helper::removeTimer($name, \&SIGNALduino_HandleWriteQueue , "HandleWriteQueue:$name");
   }
 }
 
@@ -1896,7 +1908,7 @@ sub SIGNALduino_KeepAlive{
   }
   $hash->{keepalive}{ok} = 0;
 
-  InternalTimer(gettimeofday() + SDUINO_KEEPALIVE_TIMEOUT, \&SIGNALduino_KeepAlive, $hash);
+  FHEM::Core::Timer::Helper::addTimer($name, gettimeofday() + SDUINO_KEEPALIVE_TIMEOUT, \&SIGNALduino_KeepAlive, $hash);
 }
 
 
@@ -2038,7 +2050,7 @@ sub SIGNALduino_PatternExists {
     $i++;
   }
 
-  sub cartesian_product {
+  sub cartesian_product { ## no critic
     use List::Util qw(reduce);
     reduce {
       [ map {
@@ -2592,7 +2604,7 @@ sub SIGNALduino_Parse_MU {
         } else {
           $hash->{logMethod}->($name, 5, "$name: Parse_MU, for MU protocol id $id, applying filterfunc $method");
 
-          no strict "refs";
+          no strict "refs"; 
           (my $count_changes,$rawData,my %patternListRaw_tmp) = $method->($name,$id,$rawData,%patternListRaw);
           use strict "refs";
 
@@ -2940,7 +2952,8 @@ sub SIGNALduino_Parse_MN {
     my $method = $hash->{protocolObject}->getProperty($id,'method',undef);
     my @methodReturn = defined $method ? $method->($hash->{protocolObject},$rawData) : ($rawData);
     if ($#methodReturn != 0) {
-      $hash->{logMethod}->($name, 4, qq{$name: Parse_MN, Error! method $methodReturn[1]});
+      my $vl = $methodReturn[1] =~ /missing\smodule/xms ? 1 : 4;
+      $hash->{logMethod}->($name, $vl, qq{$name: Parse_MN, Error! method $methodReturn[1]});
       next mnIDLoop;
     }
     $dmsg = sprintf('%s%s',$hash->{protocolObject}->checkProperty($id,'preamble',''),$methodReturn[0]);
@@ -3332,6 +3345,8 @@ sub SIGNALduino_FW_saveWhitelist {
 sub SIGNALduino_IdList($@) {
   my ($param, $aVal, $blacklist, $develop0) = @_;
   my (undef,$name) = split(':', $param);
+
+  return if (!defined $name || !IsDevice($name));
   my $hash = $defs{$name};
 
   my @msIdList = ();
@@ -3958,6 +3973,7 @@ sub SIGNALduino_githubParseHttpResponse {
   }
   elsif($data ne '' && defined($hardware))                                                                              # wenn die Abfrage erfolgreich war ($data enthaelt die Ergebnisdaten des HTTP Aufrufes)
   {
+
     my $json_array = decode_json($data);
     #print  Dumper($json_array);
     if ($param->{command} eq 'queryReleases') {
@@ -4772,11 +4788,35 @@ USB-connected devices (SIGNALduino):<br>
   <li>rfmode<br>
     Configures the RF transceiver of the SIGNALduino (CC1101). The available arguments:
     <ul>
+      <li>Avantek<br>
+        Modulation 2-FSK, Datarate=50.087 kbps, Sync Word=0869, FIFO-THR=8 Byte, Frequency 433.3 MHz
+        <ul><small>Example: AVANTEK Wireless Digital Door Bell</small></ul>
+      </li>
       <li>Bresser_5in1<br>
-        modulation 2-FSK, Datarate=8.23 kbps, Sync Word=2DD4, FIFO-THR=28 Byte, frequency 868.35 MHz
+        Modulation 2-FSK, Datarate=8.23 kbps, Sync Word=2DD4, Packet Length=26 Byte, Frequency 868.35 MHz
+        <ul><small>Example: BRESSER 5-in-1 weather center, BRESSER rain gauge, Fody E42, Fody E43</small></ul>
       </li>
       <li>Bresser_6in1<br>
         modulation 2-FSK, Datarate=8.23 kbps, Sync Word=2DD4, FIFO-THR=20 Byte, frequency 868.35 MHz
+      </li>
+      <li>Bresser_7in1<br>
+        modulation 2-FSK, Datarate=8.23 kbps, Sync Word=2DD4, Packet Length=22 Byte, frequency 868.35 MHz
+      </li>
+      <li>Fine_Offset_WH51_434<br>
+        Modulation 2-FSK, Datarate=17.26 kbps, Sync Word=2DD4, Packet Length=14 Byte, Frequency 433.92 MHz
+        <ul><small>Example: Soil moisture sensor Fine Offset WH51, ECOWITT WH51, MISOL/1, Froggit DP100</small></ul>
+      </li>
+      <li>Fine_Offset_WH51_868<br>
+        Modulation 2-FSK, Datarate=17.26 kbps, Sync Word=2DD4, Packet Length=14 Byte, Frequency 868.35 MHz
+        <ul><small>Example: Soil moisture sensor Fine Offset WH51, ECOWITT WH51, MISOL/1, Froggit DP100</small></ul>
+      </li>
+      <li>Fine_Offset_WH57_434<br>
+        Modulation 2-FSK, Datarate=17.26 kbps, Sync Word=2DD4, Packet Length=9 Byte, Frequency 433.92 MHz
+        <ul><small>Example: Thunder and lightning sensor Fine Offset WH57, Froggit DP60, Ambient Weather WH31L</small></ul>
+      </li>
+      <li>Fine_Offset_WH57_868<br>
+        Modulation 2-FSK, Datarate=17.26 kbps, Sync Word=2DD4, Packet Length= Byte, Frequency 868.35 MHz
+        <ul><small>Example: Thunder and lightning sensor Fine Offset WH57, Froggit DP60, Ambient Weather WH31L</small></ul>
       </li>
       <li>KOPP_FC<br>
         modulation GFSK, Datarate=4.7855 kbps, Sync Word=AA54, frequency 868.3MHz
@@ -5330,11 +5370,35 @@ USB-connected devices (SIGNALduino):<br>
   <li>rfmode<br>
     Konfiguriert den RF Transceiver des SIGNALduino (CC1101). Verf&uuml;gbare Argumente sind:
     <ul>
+      <li>Avantek<br>
+        Modulation 2-FSK, Datenrate=50.087 kbps, Sync Word=0869, FIFO-THR=8 Byte, Frequenz 433.3 MHz
+        <ul><small>Example: AVANTEK Funk-Türklingel</small></ul>
+      </li>
       <li>Bresser_5in1<br>
-        Modulation 2-FSK, Datenrate=8.23 kbps, Sync Word=2DD4, FIFO-THR=28 Byte, Frequenz 868.35 MHz
+        Modulation 2-FSK, Datenrate=8.23 kbps, Sync Word=2DD4, Packet Length=26 Byte, Frequenz 868.35 MHz
+        <ul><small>Beispiel: BRESSER 5-in-1 Wetter Center, BRESSER Profi Regenmesser, Fody E42, Fody E43</small></ul>
       </li>
       <li>Bresser_6in1<br>
         Modulation 2-FSK, Datenrate=8.23 kbps, Sync Word=2DD4, FIFO-THR=20 Byte, Frequenz 868.35 MHz
+      </li>
+      <li>Bresser_7in1<br>
+        Modulation 2-FSK, Datenrate=8.23 kbps, Sync Word=2DD4, Packet Length=22 Byte, Frequenz 868.35 MHz
+      </li>
+      <li>Fine_Offset_WH51_434<br>
+        Modulation 2-FSK, Datenrate=17.26 kbps, Sync Word=2DD4, Packet Length=14 Byte, Frequenz 433.92 MHz
+        <ul><small>Beispiel: Bodenfeuchtesensor Fine Offset WH51, ECOWITT WH51, MISOL/1, Froggit DP100</small></ul>
+      </li>
+      <li>Fine_Offset_WH51_868<br>
+        Modulation 2-FSK, Datenrate=17.26 kbps, Sync Word=2DD4, Packet Length=14 Byte, Frequenz 868.35 MHz
+        <ul><small>Beispiel: Bodenfeuchtesensor Fine Offset WH51, ECOWITT WH51, MISOL/1, Froggit DP100</small></ul>
+      </li>
+      <li>Fine_Offset_WH57_434<br>
+        Modulation 2-FSK, Datenrate=17.26 kbps, Sync Word=2DD4, Packet Length=9 Byte, Frequenz 433.92 MHz
+        <ul><small>Beispiel: Gewittersensor Fine Offset WH57, Froggit DP60, Ambient Weather WH31L</small></ul>
+      </li>
+      <li>Fine_Offset_WH57_868<br>
+        Modulation 2-FSK, Datenrate=17.26 kbps, Sync Word=2DD4, Packet Length=9 Byte, Frequenz 868.35 MHz
+        <ul><small>Beispiel: Gewittersensor Fine Offset WH57, Froggit DP60, Ambient Weather WH31L</small></ul>
       </li>
       <li>KOPP_FC<br>
         Modulation GFSK, Datenrate=4.7855 kbps, Sync Word=AA54, Frequenz 868.3MHz
@@ -5388,7 +5452,7 @@ USB-connected devices (SIGNALduino):<br>
   </li><br>
    <a name="MatchList"></a>
   <li>MatchList<br>
-    Dieses Attribut erm&oumlglicht es die Modul Match Tabelle um weitere Eintr&aumlge zu erweitern. Dazu m&uumlssen die weiteren Eintr&aumlge im PERL Hash format angegeben werden:</li>
+    Dieses Attribut erm&oumlglicht es die Modul Match Tabelle um weitere Eintr&aumlge zu erweitern. Dazu m&uumlssen die weiteren Eintr&aumlge im PERL Hash format angegeben werden:
     <ul>
       <li>Format: { 'Nummer:Modul' => 'Protokoll-Pattern' , 'N&aumlchsteNummer:N&aumlchstesModul' => 'Protokoll-Pattern' , ... }</li>
       <li>Beispiel: { '34:MyModule' => '^u98#.{8}' , '35:MyModule2' => '^u99#.{10}' }</li>

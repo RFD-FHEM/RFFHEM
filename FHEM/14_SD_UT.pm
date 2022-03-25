@@ -1,5 +1,5 @@
 #########################################################################################
-# $Id: 14_SD_UT.pm 0 2021-08-08 16:56:40Z HomeAutoUser $
+# $Id: 14_SD_UT.pm 0 2022-01-23 16:28:56Z sidey79 $
 #
 # The file is part of the SIGNALduino project.
 # The purpose of this module is universal support for devices.
@@ -371,6 +371,17 @@
 #     TR401_0_2 on   MU;P0=-14148;P1=-23738;P2=607;P3=-737;P4=1298;P5=-1419;P6=340;P7=134;CP=2;R=236;D=12343452523434345252525252161712343452523434345252525252160;p;
 #}
 ###############################################################################################################################################################################
+# - Remote controls Meikee [Protocol 118]
+#{    elektron-bbs 2022-02-13
+#     https://forum.fhem.de/index.php/topic,126110.0.html @ Sepp 2022-02-09
+#     Meikee_24 - remote control with 24 buttons
+#     Meikee_24_20D3 on     MU;P0=506;P1=-1015;P2=1008;P3=-523;P4=-12696;D=01012301040101230101010101232301230101232301010101010123010;CP=0;R=49;
+#     Meikee_24_20D3 off    MU;P0=-516;P1=518;P2=-1015;P3=1000;P4=-12712;D=01230121230301212121212121230141212301212121212303012301212303012121212121212301;CP=1;R=35;
+#     Meikee_24_20D3 learn  MU;P0=-509;P1=513;P2=-999;P3=1027;P4=-12704;D=01230121230301212121212121212141212301212121212303012301212303012121212121212121;CP=1;R=77;
+#     Meikee_21 - remote control with 21 buttons
+#     Same codes as Meikee_24, but different key assignments.
+#}
+###############################################################################################################################################################################
 # !!! ToDo´s !!!
 #     - LED lights, counter battery-h reading --> commandref hour_counter module
 #     -
@@ -382,7 +393,7 @@ use strict;
 use warnings;
 no warnings 'portable';  # Support for 64-bit ints required
 
-our $VERSION = '2021-08-05';
+our $VERSION = '2022-03-02';
 
 sub SD_UT_bin2tristate;
 sub SD_UT_tristate2bin;
@@ -808,6 +819,61 @@ my %models = (
                 Protocol   => 'P114',
                 Typ        => 'remote'
               },
+  'Meikee_24' => { '00000000' => 'learn',                 # 0x00
+                   '00000001' => 'off',                   # 0x01
+                   '00000010' => 'on',                    # 0x02
+                   '00000011' => 'mode_flash',            # 0x03
+                   '00000100' => 'brightness/speed_up',   # 0x04
+                   '00000101' => 'brightness/speed_down', # 0x05
+                   '00000110' => 'mode_strobe',           # 0x06
+                   '00000111' => 'static_2000K',          # 0x07
+                   '00001000' => 'static_4500K',          # 0x08
+                   '00001001' => 'mode_fade',             # 0x09
+                   '00001010' => 'switch_4500K/2000K',    # 0x0A
+                   '00001011' => 'static_mixed_white',    # 0x0B
+                   '00001100' => 'mode_smooth',           # 0x0C
+                   '00001101' => 'time_4h',               # 0x0D
+                   '00001110' => 'time_6h',               # 0x0E
+                   '00001111' => 'time_12h',              # 0x0F
+                   '00010000' => 'static_red',            # 0x10
+                   '00010001' => 'static_green',          # 0x11
+                   '00010010' => 'static_blue',           # 0x12
+                   '00010011' => 'mixed_red',             # 0x13
+                   '00010100' => 'mixed_cyan',            # 0x14
+                   '00010101' => 'mixed_orange',          # 0x15
+                   '00010110' => 'mixed_yellow',          # 0x16
+                   '00010111' => 'mixed_green',           # 0x17
+                   '00011000' => 'mixed_purple',          # 0x18
+                   hex_length => [6,7],
+                   Protocol   => 'P118',
+                   Typ        => 'remote'
+                 },
+  'Meikee_21' => { '00000000' => 'learn',                 # 0x00
+                   '00000001' => 'on',                    # 0x01
+                   '00000010' => 'brightness_down',       # 0x02
+                   '00000011' => 'brightness_up',         # 0x03
+                   '00000100' => 'off',                   # 0x04
+                   '00000101' => 'mode_flash',            # 0x05
+                   '00000110' => 'mode_smooth',           # 0x06
+                   '00000111' => 'time_2h',               # 0x07
+                   '00001000' => 'time_4h',               # 0x08
+                   '00001001' => 'time_6h',               # 0x09
+                   '00001010' => 'static_red',            # 0x0A
+                   '00001011' => 'static_green',          # 0x0B
+                   '00001100' => 'static_blue',           # 0x0C
+                   '00001101' => 'mixed_red',             # 0x0D
+                   '00001110' => 'static_mixed_white',    # 0x0E
+                   '00001111' => 'mixed_blue',            # 0x0F
+                   '00010000' => 'mixed_orange',          # 0x10
+                   '00010001' => 'mixed_light_blue',      # 0x11
+                   '00010010' => 'mixed_dark_blue',       # 0x12
+                   '00010011' => 'mixed_yellow',          # 0x13
+                   '00010100' => 'mixed_turquoise',       # 0x14
+                   '00010101' => 'mixed_purple',          # 0x15
+                   hex_length => [6,7],
+                   Protocol   => 'P118',
+                   Typ        => 'remote'
+                 },
   'unknown' =>  { Protocol   => 'any',
                   hex_length => [],
                   Typ        => 'not_exist'
@@ -817,12 +883,12 @@ my %models = (
 #############################
 sub SD_UT_Initialize {
   my ($hash) = @_;
-  $hash->{Match}      = '^P(?:14|20|24|26|29|30|34|46|68|69|76|78|81|83|86|90|91|91.1|92|93|95|97|99|104|105|114)#.*';
-  $hash->{DefFn}      = 'SD_UT_Define';
-  $hash->{UndefFn}    = 'SD_UT_Undef';
-  $hash->{ParseFn}    = 'SD_UT_Parse';
-  $hash->{SetFn}      = 'SD_UT_Set';
-  $hash->{AttrFn}     = 'SD_UT_Attr';
+  $hash->{Match}      = '^P(?:14|20|24|26|29|30|34|46|56|68|69|76|78|81|83|86|90|91|91\.1|92|93|95|97|99|104|105|114|118)#.*';
+  $hash->{DefFn}      = \&SD_UT_Define;
+  $hash->{UndefFn}    = \&SD_UT_Undef;
+  $hash->{ParseFn}    = \&SD_UT_Parse;
+  $hash->{SetFn}      = \&SD_UT_Set;
+  $hash->{AttrFn}     = \&SD_UT_Attr;
   $hash->{AttrList}   = 'repeats:1,2,3,4,5,6,7,8,9,12,15 IODev do_not_notify:1,0 '.
                         'ignore:0,1 showtime:1,0 model:'.join(',', sort keys %models).
                         " $readingFnAttributes UTclock UTfrequency";
@@ -886,8 +952,8 @@ sub SD_UT_Define {
   if (($a[2] eq 'SA_434_1_mini' || $a[2] eq 'QUIGG_DMV' || $a[2] eq 'TR_502MSV' || $a[2] eq 'BeSmart_S4') && not $a[3] =~ /^[0-9a-fA-F]{3}/xms) {
     return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short or long (must be 3 chars) or not HEX (0-9 | a-f | A-F){3}";
   }
-  ### [4 nibble] checks Neff SF01_01319004 & BOSCH SF01_01319004_Typ2 & Chilitec_22640 & ESTO KL_RF01 & RCnoName20 & xavax & BF_301###
-  if (($a[2] eq 'SF01_01319004' || $a[2] eq 'SF01_01319004_Typ2' || $a[2] eq 'Chilitec_22640' || $a[2] eq 'KL_RF01' || $a[2] eq 'RCnoName20' || $a[2] eq 'xavax' || $a[2] eq 'BF_301') && not $a[3] =~ /^[0-9a-fA-F]{4}/xms) {
+  ### [4 nibble] checks Neff SF01_01319004 & BOSCH SF01_01319004_Typ2 & Chilitec_22640 & ESTO KL_RF01 & RCnoName20 & xavax & BF_301 & Meikee_xx ###
+  if (($a[2] eq 'SF01_01319004' || $a[2] eq 'SF01_01319004_Typ2' || $a[2] eq 'Chilitec_22640' || $a[2] eq 'KL_RF01' || $a[2] eq 'RCnoName20' || $a[2] eq 'xavax' || $a[2] eq 'BF_301' || $a[2] eq 'Meikee_21' || $a[2] eq 'Meikee_24') && not $a[3] =~ /^[0-9a-fA-F]{4}/xms) {
     return "Wrong HEX-Value! ($a[3]) $a[2] Hex-value to short or long (must be 4 chars) or not hex (0-9 | a-f | A-F) {4}";
   }
   ### [6] checks Manax | mumbi ###
@@ -1143,6 +1209,11 @@ sub SD_UT_Set {
     ############ TR401 (Well-Light) ############
     } elsif ($model eq 'TR401') {
       $msg = $models{$model}{Protocol} . q{#};
+      $msgEnd = '#R' . $repeats;
+    ############ Meikee ############
+    } elsif ($model eq 'Meikee_21' || $model eq 'Meikee_24') {
+      my $adr = sprintf '%016b' , hex $definition[1]; # argument 1 - adress to binary with 16 bits
+      $msg = $models{$model}{Protocol} . q{#} . $adr;
       $msgEnd = '#R' . $repeats;
     }
   }
@@ -1469,6 +1540,17 @@ sub SD_UT_Parse {
     }
   }
 
+  if ($hlen == 6 || $hlen == 7) {
+    ### Remote control Meikee [P118] ###
+    if (!$def && $protocol == 118) {
+      $deviceCode = substr($rawData,0,4);
+      $devicedef = 'Meikee_21 ' . $deviceCode if (!$def);
+      $def = $modules{SD_UT}{defptr}{$devicedef} if (!$def);
+      $devicedef = 'Meikee_24 ' . $deviceCode if (!$def);
+      $def = $modules{SD_UT}{defptr}{$devicedef} if (!$def);
+    }
+  }
+
   if ($hlen == 8) {
     if (!$def && $protocol == 20) {
       ### Remote control RCnoName20 [P20] ###
@@ -1526,10 +1608,11 @@ sub SD_UT_Parse {
 
     ### Manax MX-RCS250 | mumbi [P90] ###
     if (!$def && $protocol == 90) {
+      my $button = $models{RC_10}{buttons}{substr($bitData,20,3)};
+      if (!defined $button) {return ''}
       $deviceCode = substr($rawData,0,4);
-            my $button = $models{RC_10}{buttons}{substr($bitData,20,3)};
-            $devicedef = 'RC_10 '.$deviceCode.'_'.$button;
-      $def       = $modules{SD_UT}{defptr}{$devicedef};
+      $devicedef = 'RC_10 '.$deviceCode.'_'.$button;
+      $def = $modules{SD_UT}{defptr}{$devicedef};
 
       if ($button ne 'all') {
         $state = substr($bitData,23,1) eq '1' ? 'on' : 'off'
@@ -1544,7 +1627,7 @@ sub SD_UT_Parse {
           $def = undef;
         }
 
-        ### if received data from device _all, set cannels A | B | C | D to state and trigger event ###
+        ### if received data from device _all, set channels A | B | C | D to state and trigger event ###
         for ( 'A' .. 'D' ) {
           my $defPtr = $modules{SD_UT}{defptr}{'RC_10 '.$deviceCode."_$_"};
           if (defined $defPtr) {
@@ -1944,6 +2027,10 @@ sub SD_UT_Parse {
   } elsif ($model eq 'TR401') {
     $state = substr($bitData,0,1);
     $deviceCode = substr($rawData,1,1) >> 1;
+  ############ Meikee [P118] ############
+  } elsif (($model eq 'Meikee_21' || $model eq 'Meikee_24') && $protocol == 118) {
+    $state = substr $bitData,16,8;
+    $deviceCode = substr $rawData,0,4;
 
   ############ unknown ############
   } else {
@@ -2153,6 +2240,11 @@ sub SD_UT_Attr {
           $deviceCode = substr $bitData,8,24;
           $deviceCode = sprintf("%06X", oct( "0b$bitData" ) );
           $devicename = $devicemodel.'_'.$deviceCode;
+        ############ Meikee ############
+        } elsif ($attrValue eq 'Meikee_21' || $attrValue eq 'Meikee_24') {
+          $deviceCode = substr($bitData,0,16);
+          $deviceCode = sprintf("%04X", oct( "0b$deviceCode" ) );
+          $devicename = $devicemodel.'_'.$deviceCode;
         ############ unknown ############
         } else {
           $devicename = 'unknown_please_select_model';
@@ -2262,6 +2354,11 @@ sub SD_UT_tristate2bin {
     <li>TR-502MSV (LIDL, LIBRA, MANDOLYN, QUIGG), compatible GT-7008BS, GT-FSI-04, DMV-7008S, Powerfix RCB-I 3600&nbsp;&nbsp;&nbsp;<small>(module model: TR_502MSV, protocol 34)</small></li>
     <li>Manax RCS250&nbsp;&nbsp;&nbsp;<small>(module model: RC_10, protocol 90)</small></li>
     <li>Medion OR28V&nbsp;&nbsp;&nbsp;<small>(module model: OR28V, protocol 68)</small></li>
+    <li>Meikee remote controls <small>(Protokoll 118)</small>
+      <ul><small>
+        <li>Meikee, 21 buttons, e.g. for Solar Flood Lights - module model: Meikee_21</li>
+        <li>Meikee, 24 buttons, e.g. for RGB LED Wallwasher Light - module model: Meikee_24</li>
+    </small></ul></li>
     <li>mumbi AFS300-s (remote control RC-10, wireless socket RCS-22GS)&nbsp;&nbsp;&nbsp;<small>(module model: RC_10, protocol 90)</small></li>
     <li>Momento (remote control for wireless digital picture frame)&nbsp;&nbsp;&nbsp;<small>(module model: Momento, protocol 97)</small></li>
     <li>NAVARIS touch light switch Model No.: 44344.04&nbsp;&nbsp;&nbsp;<small>(module model: Navaris, protocol 99)</small></li>
@@ -2279,7 +2376,7 @@ sub SD_UT_tristate2bin {
       <li>SKX6xx, 6 button (GEIGER_GF0x03) - module model: Tedsen_SKX6xx</li>
     </small></ul></li>
     <li>unitec magnetic contact 47031 (for alarm systems Unitec 47121, Unitec 47125, Friedland)&nbsp;&nbsp;&nbsp;<small>(module model: Unitec_47031, protocol 30)</small></li>
-    <li>Visivo remote control for motorized screen&nbsp;&nbsp;&nbsp;<small>(module model: Visivo, Protokoll 24)</small></li>
+    <li>Visivo remote control for motorized screen&nbsp;&nbsp;&nbsp;<small>(module model: Visivo, protocol 24)</small></li>
     <li>Westinghouse ceiling fan (remote control, 5 buttons without SET)&nbsp;&nbsp;&nbsp;<small>(module model: Buttons_five, protocol 29)</small></li>
     <li>Westinghouse Delancey ceiling fan (remote control, 9 buttons with SET)&nbsp;&nbsp;&nbsp;<small>(module model: RH787T, protocol 83)</small></li>
     <li>Westinghouse ceiling fan Bendan (remote control TR60C-1, touch screen)&nbsp;&nbsp;&nbsp;<small>(module model: TR60C1, protocol 104)</small></li>
@@ -2396,7 +2493,7 @@ sub SD_UT_tristate2bin {
     <li><a href="#ignore">ignore</a></li>
     <li><a href="#IODev">IODev</a></li>
     <li><a name="model"></a>model<br>
-      The attribute indicates the model type of your device (AC114_01B, BeSmart_S4, Buttons_five, CAME_TOP_432EV, Chilitec_22640, KL_RF01, HS1-868-BS, HSM4, QUIGG_DMV, LED_XM21_0, Momento, Navaris, Novy_840029, Novy_840039, OR28V, RC_10, RH787T, SA_434_1_mini, SF01_01319004, TR60C1, Tedsen_SKX1xx, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx, TR_502MSV, Unitec_47031, unknown).
+      The attribute indicates the model type of your device (AC114_01B, BeSmart_S4, Buttons_five, CAME_TOP_432EV, Chilitec_22640, KL_RF01, HS1-868-BS, HSM4, QUIGG_DMV, LED_XM21_0, Meikee_21, Meikee_24, Momento, Navaris, Novy_840029, Novy_840039, OR28V, RC_10, RH787T, SA_434_1_mini, SF01_01319004, TR60C1, Tedsen_SKX1xx, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx, TR_502MSV, Unitec_47031, unknown).
       If the attribute is changed, a new device is created using <a href="#autocreate">autocreate</a>. Autocreate must be activated for this.
     </li>
     <li><a name="repeats"></a>repeats<br>
@@ -2414,7 +2511,7 @@ sub SD_UT_tristate2bin {
 
   <b>Generated readings of the models</b><br>
   <ul>
-    <u>AC114-01, Buttons_five, CAME_TOP_432EV, Chilitec_22640, HSM4, KL_RF01, LED_XM21_0, Momento, Novy_840029, Novy_840039, OR28V, QUIGG_DMV, RC_10, RH787T, SF01_01319004, SF01_01319004_Typ2, TR401, TR_502MSV, Visivo</u>
+    <u>AC114-01, Buttons_five, CAME_TOP_432EV, Chilitec_22640, HSM4, KL_RF01, LED_XM21_0, Meikee_xx, Momento, Novy_840029, Novy_840039, OR28V, QUIGG_DMV, RC_10, RH787T, SF01_01319004, SF01_01319004_Typ2, TR401, TR_502MSV, Visivo</u>
     <ul>
       <li>deviceCode: Device code of the system</li>
       <li>LastAction: Last executed action of the device (<code>receive</code> for command received | <code>send</code> for command send).</li>
@@ -2479,6 +2576,11 @@ sub SD_UT_tristate2bin {
     <li>TR401 (Well-Light, Fernbedienung 4 Tasten)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: TR401, Protokoll 114)</small></li>
     <li>Manax RCS250&nbsp;&nbsp;&nbsp;<small>(Modulmodel: RC_10, Protokoll 90)</small></li>
     <li>Medion OR28V&nbsp;&nbsp;&nbsp;<small>(Modulmodel: OR28V, Protokoll 68)</small></li>
+    <li>Meikee Fernbedienungen <small>(Protokoll 118)</small>
+      <ul><small>
+        <li>Meikee, 21 Tasten, z.B. für Solar Flood Lights - Modulmodel: Meikee_21</li>
+        <li>Meikee, 24 Tasten, z.B. für RGB LED Wallwasher Light - Modulmodel: Meikee_24</li>
+    </small></ul></li>
     <li>mumbi AFS300-s (Fernbedienung RC-10, Funksteckdose RCS-22GS)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: RC_10, Protokoll 90)</small></li>
     <li>Momento (Fernbedienung f&uuml;r digitalen Bilderrahmen)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Momento, Protokoll 97)</small></li>
     <li>NAVARIS Funk-Licht-Schalter Model No.: 44344.04&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Navaris, Protokoll 99)</small></li>
@@ -2613,7 +2715,7 @@ sub SD_UT_tristate2bin {
     <li><a href="#ignore">ignore</a></li>
     <li><a href="#IODev">IODev</a></li>
     <li><a name="model"></a>model<br>
-      Diese Attribut bezeichnet den Modelltyp Ihres Ger&auml;tes (AC114_01B, BeSmart_S4, Buttons_five, CAME_TOP_432EV, Chilitec_22640, KL_RF01, HS1-868-BS, HSM4, QUIGG_DMV, LED_XM21_0, Momento, Navaris, Novy_840029, Novy_840039, OR28V, RC_10, RH787T, SA_434_1_mini, SF01_01319004, TR60C1, Tedsen_SKX1xx, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx, TR_502MSV, Unitec_47031, unknown).
+      Diese Attribut bezeichnet den Modelltyp Ihres Ger&auml;tes (AC114_01B, BeSmart_S4, Buttons_five, CAME_TOP_432EV, Chilitec_22640, KL_RF01, HS1-868-BS, HSM4, QUIGG_DMV, LED_XM21_0, Meikee_21, Meikee_24, Momento, Navaris, Novy_840029, Novy_840039, OR28V, RC_10, RH787T, SA_434_1_mini, SF01_01319004, TR60C1, Tedsen_SKX1xx, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx, TR_502MSV, Unitec_47031, unknown).
       Bei &Auml;nderung des Attributes wird ein neues Gerät mittels <a href="#autocreate">autocreate</a> erzeugt. Autocreate muss dazu aktiviert sein.
     </li>
     <li><a name="repeats"></a>repeats<br>
@@ -2631,7 +2733,7 @@ sub SD_UT_tristate2bin {
 
   <b>Generierte Readings der Modelle</b><br>
   <ul>
-    <u>AC114-01, BeSmart_S4, Buttons_five, CAME_TOP_432EV, Chilitec_22640, HSM4, KL_RF01, LED_XM21_0, Momento, Novy_840029, Novy_840039, OR28V, QUIGG_DMV, RC_10, RH787T, SF01_01319004, SF01_01319004_Typ2, TR401, TR_502MSV, Visivo</u>
+    <u>AC114-01, BeSmart_S4, Buttons_five, CAME_TOP_432EV, Chilitec_22640, HSM4, KL_RF01, LED_XM21_0, Meikee_xx, Momento, Novy_840029, Novy_840039, OR28V, QUIGG_DMV, RC_10, RH787T, SF01_01319004, SF01_01319004_Typ2, TR401, TR_502MSV, Visivo</u>
     <ul>
       <li>deviceCode: Ger&auml;teCode des Systemes</li>
       <li>LastAction: Zuletzt ausgef&uuml;hrte Aktion des Ger&auml;tes (<code>receive</code> f&uuml;r Kommando empfangen, <code>send</code> f&uuml;r Kommando gesendet).</li>

@@ -1,0 +1,35 @@
+name: Perlcritic check
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+
+jobs:
+  critic:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+    - uses: shogo82148/actions-setup-perl@v1.14.2
+      with:
+        perl-version: 5.32
+        install-modules-with: cpanm
+        install-modules: Perl::Critic 
+        install-modules-args: --notest
+    - uses: reviewdog/action-setup@v1
+      with:
+        reviewdog_version: latest # Optional. [latest,nightly,v.X.Y.Z]
+    - name: run perlcritic and send report via reviewdog
+      env:
+        REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        perlcritic --list
+        (perlcritic --profile .perlcritic ./FHEM; perlcritic --profile .perlcritic ./lib; ) | \
+          reviewdog -efm '%f:%l:%c:%m' \
+            -name="perlcritic" \
+            -reporter="github-pr-check" \
+            -filter-mode="file" \
+            -fail-on-error="false" \
+            -level="warning" \
