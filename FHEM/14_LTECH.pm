@@ -24,15 +24,15 @@ sub LTECH_Initialize($) {
     my ($hash) = @_;
     $hash->{SetFn}      = "FHEM::LTECH::Set";
     #$hash->{NotifyFn}   = "FHEM::LTECH::Notify";
-    $hash->{ShutdownFn} = "FHEM::LTECH::Shutdown";
+    #$hash->{ShutdownFn} = "FHEM::LTECH::Shutdown";
 	$hash->{FW_deviceOverview} = 1;
 	#$hash->{FW_detailFn} = "FHEM::Siro::fhemwebFn";
     $hash->{DefFn}    = "FHEM::LTECH::Define";
     $hash->{UndefFn}  = "FHEM::LTECH::Undef";
     $hash->{DeleteFn} = "FHEM::LTECH::Delete";
     $hash->{ParseFn}  = "FHEM::LTECH::Parse";
-    #$hash->{AttrFn}   = "FHEM::Siro::Attr";
-    $hash->{Match}    = "^u31#.{26}";
+    #$hash->{AttrFn}   = "FHEM::LTECH::Attr";
+    $hash->{Match}    = "^P31#[A-Fa-f0-9]+";
     $hash->{AttrList} =
         " IODev"
       . " disable:0,1"
@@ -45,11 +45,9 @@ sub LTECH_Initialize($) {
         "LTECH.*" => {
             ATTR   => "event-min-interval:.*:300 event-on-change-reading:.*",
             FILTER => "%NAME",
-            autocreateThreshold => "2:10"
+            autocreateThreshold => "1:10"
         }
     };
-
-	$hash->{helper}{progmode} = "off";   #exexcmd    on
 }
 
 
@@ -122,6 +120,7 @@ sub Define($$) {
     my $code  = uc( $a[2] );
 
     $hash->{CODE} = $code;
+    Log3( $name, 4, "LTECH_define: trying");
 	my $devpointer = $hash->{CODE};
     $hash->{MODEL} = "M4-A5";
     $modules{LTECH}{defptr}{$devpointer} = $hash;
@@ -142,29 +141,15 @@ sub Define($$) {
 }
 
 #############################
-=pod
 sub Attr(@) {
 	my ( $cmd, $name, $aName, $aVal ) = @_;
     my $hash = $defs{$name};
-    return "\"Siro Attr: \" $name does not exist" if ( !defined($hash) );
+    return "\"LTECH Attr: \" $name does not exist" if ( !defined($hash) );
 
 	if ( $cmd eq "set" and $init_done == 1) 
 	{
 	
 	
-		if ( $aName eq "SIRO_inversPosition" ) 
-		{
-		my $oldinvers = AttrVal($name,'SIRO_inversPosition','undef');
-		Log3( $name,5 , "Siro_attr_oldinvers: $oldinvers ");
-		Log3( $name,5 , "Siro_attr_newinvers: $aVal ");
-		if ( $aVal ne $oldinvers) 
-				{
-				my $aktstate = ReadingsVal( $name, 'state', 'undef' );
-				$aktstate = 100 - $aktstate;
-				readingsSingleUpdate( $hash, "state", $aktstate , 1 );
-				readingsSingleUpdate( $hash, "pct", $aktstate , 1 );
-				}
-	}
 	
 	Log3( $name,5 , "Siro_attr: $cmd, $name, $aName, $aVal ");
 	
@@ -173,7 +158,6 @@ sub Attr(@) {
 	Log3( $name,5 , "Siro_attr init done : $init_done");
 return;
 }
-=cut
 
 #############################
 sub Undef($$) {
@@ -216,15 +200,14 @@ sub Parse($$) {
     my ( $hash, $msg ) = @_;
 	my $name = $hash->{NAME};
     return "" if ( IsDisabled($name) );	
-	my ( undef, $string ) = split( "#", $msg );
-	my $rawData = Invert($string);
+	my ( undef, $rawData ) = split( "#", $msg );
+    Log3 $hash, 2, "LTECH: $rawData";
 	my $crc = substr($rawData,22,4);
 	my $checkCrc = CRC16(substr($rawData,0,-4));
 	if( $crc ne $checkCrc){
 		Log3 $hash, 2, "LTECH: CRC Error -> $crc is not like calculated $checkCrc";
         return;
 	}
-	
 	
 	my $hlen    = length($rawData);
 	my $blen    = $hlen * 4;
@@ -233,10 +216,11 @@ sub Parse($$) {
 	Log3( $name, 3, "LTECH_Parse: msg = $msg length: ". length($msg));
 	Log3( $name, 3, "LTECH_Parse: rawData = $rawData length: $hlen" );
 	Log3( $name, 3, "LTECH_Parse: converted to bits: $bitData" );
+    
 
 	my $deviceCode=substr($rawData,0,8);
 	my $mode=substr($rawData,8,2);
-	my $color= unpack'h*', pack 'H*', substr($rawData,10,6);
+	my $color= substr($rawData,10,6);
 	my $function=substr($rawData,16,2); #80 on ; 82 dim; 83 dim color; 00 off
 	my $dim=substr($rawData,18,2);
 	my $speed=substr($rawData,20,2);	
@@ -265,7 +249,7 @@ sub Parse($$) {
 	readingsBulkUpdate($hash, "function", $function);  
 	readingsBulkUpdate($hash, "mode", $mode);
 	readingsBulkUpdate($hash, "speed", $speed);
-	readingsBulkUpdate($hash, "color", $color);
+	readingsBulkUpdate($hash, "color", Color2hex($color) );
 	readingsBulkUpdate($hash, "color_sel", undef);
 	readingsBulkUpdate($hash, "brightness", Hex2dec($dim) );
 	readingsBulkUpdate($hash, "brightness_sel", undef);
@@ -320,7 +304,7 @@ sub Set($@)
 			return
 		}
 		case "off" {
-			my $msg = $hash->{CODE} . "7F00000000FF00"; 
+			my $msg = $hash->{CODE} . "1F00000000FF00"; 
 			my $sendstring =  "u31#0x" . $msg . CRC16($msg) . "#R5" ;
 			IOWrite( $hash, 'sendMsg', $sendstring );
 			return
@@ -389,18 +373,28 @@ sub Invert {
 #############################
 sub Dec2hex {
    my ($val) = @_;
-   return  unpack "H*" ,pack "B*" ,unpack "b*", pack "C" , $val;
+   return   unpack 'H*', pack 'b*', unpack 'B*' , pack 'C*' , $val;
 }
 #############################
 sub Hex2dec {
    my ($val) = @_;
-   return  unpack "C" ,pack "b*" ,unpack "B*", pack "H*" , $val;
+   return  unpack 'C*', pack 'B*', unpack 'b*' , pack 'H*' , $val;
+}
+#####################################
+sub Hex2color {
+   my ($val) = @_;
+   return  unpack 'h*', pack 'B*', unpack 'b*' , pack 'h*', $val;
+}
+#####################################
+sub Color2hex {
+   my ($val) = @_;
+   return  unpack 'h*', pack 'b*', unpack 'B*' , pack 'h*', $val;
 }
 #####################################
 sub Send {
    my ($hash, $name , $msg) = @_;
    $msg = ($hash->{CODE} . $msg);	
-   my $sendstring = "u31#0x" . Invert($msg . CRC16($msg)) . "#R5" ;
+   my $sendstring = "P31#0x" . $msg . CRC16($msg) . "#R5" ;
    IOWrite( $hash, 'sendMsg', $sendstring );
    Log3( $name, 3, "LTECH Send: $sendstring");
 }
