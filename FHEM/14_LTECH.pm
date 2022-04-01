@@ -234,6 +234,7 @@ sub Parse($$) {
 	}
 	$def->{STATE}= "Defined";
 	$def->{bitMSG} =  $bitData;
+    delete($def{sesp_RAWMSG});
   	$def->{lastMSG} = substr($rawData,8,18); 
     Log3 $hash, 4, "$name LTECH_Parse: msg = $rawData length: $msg";
     Log3 $hash, 4, "$name LTECH_Parse: ID $deviceCode";
