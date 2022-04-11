@@ -108,6 +108,8 @@ jobs:
           find: '\d\.\d\.\d' 
           include: "${{ matrix.file }}"
       - uses: jungwinter/split@v2
+        name: Split array result
+        if: ${{ steps.versionList.outputs.fileFoundCount > 0 }}
         id: versions
         with:
           msg: '${{ steps.versionList.outputs.resultArray }}'
