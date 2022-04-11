@@ -126,7 +126,7 @@ jobs:
           replace: "${{ needs.metadata.outputs.datetime }}Z ${{ github.event.pull_request.user.login }} "
           include: "${{ matrix.file }}"
       - name: Save updated Files in artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: updated-files
           retention-days: 1
