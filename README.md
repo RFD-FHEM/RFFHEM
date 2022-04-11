@@ -24,7 +24,7 @@ Supported Devices / Protocols
 |BF-301 | Remote control|
 |benon (Semexo OHG) | Remote control (BH-P)|
 |BOSCH / Neff / Refsta Topdraft | Remote control (SF01 01319004, SF01 01319004 v2)|
-|BRESSER 5-in-1, 6-in-1, 7-in-1, Professional Rain Gauge, TemeoTrend | Weather Station, Rain Gauge, Thermo-/Hygro Sensor |
+|BRESSER 5-in-1, 6-in-1, 7-in-1, Professional Rain Gauge, TemeoTrend, SM60020 Soil moisture sensor | Weather Station, Rain Gauge, Thermo-/Hygro Sensor |
 |CAME TOP 432EV | Remote control |
 |CTW600, WH1080, WH2315 | Weather station |
 |Clarus | remote power socket|
