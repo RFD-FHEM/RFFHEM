@@ -1,3 +1,8 @@
+2022-04-11 - additional sensors protocol 115 for Bresser 6-in-1 Comfort Wetter Center (#1085)
+
+SD_ProtocolData.pm - fixed packet length 18 byte
+14_SD_WS.pm - new ground/earth sensor for humidity and temperature, indoor sensor for humidity and temperature
+
 2022-03-16 - clone Protocol Object for every definition (#1084)
 
 * 00_SIGNALduino.pm
