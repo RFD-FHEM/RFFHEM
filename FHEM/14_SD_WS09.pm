@@ -544,7 +544,7 @@ sub SD_WS09_WindDirAverage($$$){
 	$minspeed = 0 if (!(defined $minspeed));
 
 	$wd = deg2rad($wd);
-	my $ctime = time;
+	my $ctime = CORE::time;
 	my $time = FmtDateTime($ctime);
 	my @new = ($ws,$wd,$time);
 
