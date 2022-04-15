@@ -488,7 +488,7 @@ sub SD_WS09_Attr(@) {
 }
 
 ###################################
-sub SD_WS09_WindDirAverage($$$){
+sub SD_WS09_WindDirAverage {
  ###############################################################################
  #  übernommen von SabineT https://forum.fhem.de/index.php/topic,75225.msg669950.html#msg669950
  #  WindDirAverage
@@ -513,6 +513,11 @@ sub SD_WS09_WindDirAverage($$$){
  ###############################################################################
 
 	my ($hash, $ws, $wd) = @_;
+
+	return undef if ref($hash) ne 'HASH';
+	return undef if !defined $ws;
+	return undef if !defined $wd;
+
 	my $name = $hash->{NAME};
 	Log3 $hash, 4, "SD_WS09_WindDirAverage --- OK ----" ;
 
@@ -617,8 +622,8 @@ sub SD_WS09_WindDirAverage($$$){
   	Log3 $hash,4,"SD_WS09_WindDirAverage_09 $name Mittelwert über $anz Werte ist $average, avspeed=".round($sumSpeed/$num,1) if ($num > 0);
   
 	#-- undef zurückliefern, wenn die durchschnittliche Geschwindigkeit zu gering oder gar keine Werte verfügbar
-  	return undef if (($anz == 0) || ($sanz == 0));
-  	return undef if (($sumSpeed / $sanz) < $minspeed);
+  	return if (($anz == 0) || ($sanz == 0));
+  	return if (($sumSpeed / $sanz) < $minspeed);
 
   	Log3 $hash,4,"SD_WS09_WindDirAverage_END $name Mittelwert=$average";
   	return $average;
