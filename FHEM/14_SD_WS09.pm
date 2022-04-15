@@ -514,9 +514,9 @@ sub SD_WS09_WindDirAverage {
 
 	my ($hash, $ws, $wd) = @_;
 
-	return undef if ref($hash) ne 'HASH';
-	return undef if !defined $ws;
-	return undef if !defined $wd;
+	return if ref($hash) ne 'HASH';
+	return if !defined $ws;
+	return if !defined $wd;
 
 	my $name = $hash->{NAME};
 	Log3 $hash, 4, "SD_WS09_WindDirAverage --- OK ----" ;
