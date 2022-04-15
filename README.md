@@ -92,7 +92,7 @@ Supported Devices / Protocols
 |technoline Weatherstation WS 6750/TX70DTH| Weather sensor and station |
 |TCM 234759 Tchibo | wireless bell |
 |TCM97001,Logilink, Pearl NC, and similar,Lifetec LT3594 | Weather sensor |
-|TFA 30.3200, 30.3208.02, 30.3209.02, 30.3221.02, 30.3222.02, 30.3228.02, 30.3229.02, 35.1140.01 | Weather sensors and stations |
+|TFA 30.3157, 30.3200, 30.3208.02, 30.3209.02, 30.3221.02, 30.3222.02, 30.3228.02, 30.3229.02, 30.3233.01, 30.3251.10, 35.1140.01 | Weather sensors and stations |
 |TS-K108W11 | wireless bell |
 |Techmar Garden Lights | Remote control |
 |Technoline TX3  | Weather sensor |
