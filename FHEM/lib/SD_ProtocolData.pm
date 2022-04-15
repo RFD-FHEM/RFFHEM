@@ -1,5 +1,5 @@
 ###########################################################################################################################################
-# $Id: SD_ProtocolData.pm 3.5.x 2022-01-30 10:19:30Z elektron-bbs $
+# $Id: SD_ProtocolData.pm 3.5.4 2022-03-20 10:05:23Z elektron-bbs $
 # The file is part of the SIGNALduino project.
 # All protocol definitions are contained in this file.
 #
@@ -3070,11 +3070,11 @@ package lib::SD_ProtocolData;
         comment         => 'BRESSER 6-in-1 weather center',
         id              => '115',
         knownFreqs      => '868.35',
-        datarate        => '8.207',
+        datarate        => '8.232',
         sync            => '2DD4',
         modulation      => '2-FSK',
         rfmode          => 'Bresser_6in1',
-        register        => ['0001','0246','0344','042D','05D4','06FF','07C0','0802','0D21','0E65','0FE8','1088','114C','1202','1322','14F8','1551','1916','1B43','1C68'],
+        register        => ['0001','022E','0344','042D','05D4','0612','07C0','0800','0D21','0E65','0FE8','1088','114C','1202','1322','14F8','1551','1916','1B43','1C68'],
         preamble        => 'W115#',
         clientmodule    => 'SD_WS',
         length_min      => '36',
