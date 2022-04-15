@@ -108,6 +108,8 @@ jobs:
           find: '\d\.\d\.\d' 
           include: "${{ matrix.file }}"
       - uses: jungwinter/split@v2
+        name: Split array result
+        if: ${{ steps.versionList.outputs.fileFoundCount > 0 }}
         id: versions
         with:
           msg: '${{ steps.versionList.outputs.resultArray }}'
@@ -126,7 +128,7 @@ jobs:
           replace: "${{ needs.metadata.outputs.datetime }}Z ${{ github.event.pull_request.user.login }} "
           include: "${{ matrix.file }}"
       - name: Save updated Files in artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: updated-files
           retention-days: 1
