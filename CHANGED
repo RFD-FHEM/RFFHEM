@@ -1,3 +1,10 @@
+2022-04-15 - Fix wrong calculation of averagewindDirection (#1095)
+
+* Update 14_SD_WS09.pm
+
+- usw CORE Time instead of global from hires
+- optimzed code a little bit, removed useless checks
+- few perlcritic fixes
 2022-04-11 - additional sensors protocol 115 for Bresser 6-in-1 Comfort Wetter Center (#1085)
 
 SD_ProtocolData.pm - fixed packet length 18 byte
