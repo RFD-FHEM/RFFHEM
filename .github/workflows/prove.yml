@@ -11,7 +11,7 @@ jobs:
     name: Perl ${{ matrix.perl }} on ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v3
-    - uses: shogo82148/actions-setup-perl@v1.14.2
+    - uses: shogo82148/actions-setup-perl@v1.15.1
       with:
         perl-version: ${{ matrix.perl }}
         install-modules-with: cpanm
@@ -37,7 +37,7 @@ jobs:
         prove -j2 --exec 'perl -MDevel::Cover=-silent,1 -I FHEM '  -I FHEM -r -v t/SD_Protoco* 
     - name: Create clover report  
       run: cover -report clover
-    - uses: codecov/codecov-action@v2.1.0
+    - uses: codecov/codecov-action@v3.0.0
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         file: ./cover_db/clover.xml
@@ -55,7 +55,7 @@ jobs:
     - name: Create clover report
       working-directory: /opt/fhem/
       run: cover -report clover
-    - uses: codecov/codecov-action@v2.1.0
+    - uses: codecov/codecov-action@v3.0.0
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         file: /opt/fhem/cover_db/clover.xml
