@@ -1,4 +1,4 @@
-# $Id: 14_SD_WS.pm v3.5.4 2022-03-20 10:05:23Z elektron-bbs $
+# $Id: 14_SD_WS.pm v3.5.4 2022-04-16 09:19:56Z elektron-bbs $
 #
 # The purpose of this module is to support serval
 # weather sensors which use various protocol
@@ -43,6 +43,7 @@
 # 29.01.2022 neues Protokoll 117: Bresser 7-in-1 Comfort Wetter Center
 # 04.02.2022 neu: set replaceBatteryForSec (Ident ersetzen bei Batteriewechsel Sensor)
 # 12.03.2022 Protokoll 115: neue Sensoren SM60020 Boden-/Erd-Sensor für Feuchte- und Temperatur, Innensensor für Feuchte- und Temperatur
+# 11.04.2022 Protokoll 85: neuer Sensor Windmesser TFA 30.3251.10 mit Windrichtung, Pruefung CRC8 eingearbeitet
 
 package main;
 
@@ -67,7 +68,7 @@ sub SD_WS_Initialize {
   $hash->{SetFn}    = \&SD_WS_Set;
   $hash->{ParseFn}  = \&SD_WS_Parse;
   $hash->{AttrList} = "do_not_notify:1,0 ignore:0,1 showtime:1,0 " .
-                      "model:E0001PA,S522,TX-EZ6,other " .
+                      "model:E0001PA,S522,TFA_30.3251.10,TX-EZ6,other " .
                       "max-deviation-temp:1,2,3,4,5,6,7,8,9,10,15,20,25,30,35,40,45,50 ".
                       "max-deviation-hum:1,2,3,4,5,6,7,8,9,10,15,20,25,30,35,40,45,50 ".
                       "$readingFnAttributes ";
@@ -637,12 +638,13 @@ sub SD_WS_Parse {
       } ,
     85 =>
       {
-        # Protokollbeschreibung: Kombisensor TFA 30.3222.02 fuer Wetterstation TFA 35.1140.01
-        # -----------------------------------------------------------------------------------
+        # Protokollbeschreibung: Kombisensor TFA 30.3222.02 fuer Wetterstation TFA 35.1140.01, Windmesser TFA 30.3251.10
+        # --------------------------------------------------------------------------------------------------------------
         # 0    4    | 8    12   | 16   20   | 24   28   | 32   36   | 40   44   | 48   52   | 56   60   | 64
         # 0000 1001 | 0001 0110 | 0001 0000 | 0000 0111 | 0100 1001 | 0100 0000 | 0100 1001 | 0100 1001 | 1
-        # ???? iiii | iiii iiii | iiii iiii | b??? ??yy | tttt tttt | tttt ???? | hhhh hhhh | ???? ???? | ?   message 1
-        # ???? iiii | iiii iiii | iiii iiii | b?cc ??yy | wwww wwww | wwww ???? | 0000 0000 | ???? ???? | ?   message 2
+        # 0000 iiii | iiii iiii | iiii iiii | b??? ??yy | tttt tttt | tttt 0000 | hhhh hhhh | CCCC CCCC | ?   message 1 TFA 30.3222.02
+        # 0000 iiii | iiii iiii | iiii iiii | b?cc ??yy | wwww wwww | wwww 0000 | 0000 0000 | CCCC CCCC | ?   message 2 TFA 30.3222.02
+        # 0000 iiii | iiii iiii | iiii iiii | b?cc ??yy | wwww wwww | wwww dddd | dddd dddd | CCCC CCCC | ?   message 2 TFA 30.3251.10
         # i: 20 bit random id (changes on power-loss)
         # b:  1 bit battery indicator (0=>OK, 1=>LOW)
         # c:  2 bit channel valid channels are (always 00 stands for channel 1)
@@ -650,14 +652,14 @@ sub SD_WS_Parse {
         # t: 12 bit unsigned temperature, offset 500, scaled by 10 - if message 1
         # h:  8 bit relative humidity percentage - if message 1
         # w: 12 bit unsigned windspeed, scaled by 10 - if message 2
+        # d: 12 bit unsigned winddirection - only TFA 30.3251.10
+        # C:  8 bit CRC of the preceding 7 bytes (Polynomial 0x31, Initial value 0x00, Input not reflected, Result not reflected)
         # ?: unknown
         # The sensor sends at intervals of about 30 seconds
-
-        sensortype => 'TFA 30.3222.02',
+        sensortype => 'TFA 30.3222.02, TFA 30.3251.10, LaCrosse TX141W',
         model      => 'SD_WS_85_THW',
         prematch   => sub {my $msg = shift; return 1 if ($msg =~ /^[0-9A-F]{16}/); },   # min 16 nibbles
-        crcok      => sub {return 1;},    # crc test method is so far unknown
-        id         => sub {my (undef,$bitData) = @_; return substr($rawData,1,5); },    # 0952CF012B1021DF0
+        id         => sub {my ($rawData,undef) = @_; return substr($rawData,1,5); },    # 0952CF012B1021DF0
         bat        => sub {my (undef,$bitData) = @_; return substr($bitData,24,1) eq "0" ? "ok" : "low";},
         channel    => sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,26,27) + 1 ); },   # unknown
         temp       => sub {my (undef,$bitData) = @_;
@@ -681,6 +683,34 @@ sub SD_WS_Parse {
                               return;
                             }
                           },
+        winddir    => sub {my (undef,$bitData) = @_;
+                            if (substr($bitData,30,2) eq "10") {    # message 2 winddirection
+                              $winddir = SD_WS_binaryToNumber($bitData,44,55);
+                              return ($winddir * 1, $winddirtxtar[round(($winddir / 22.5),0)]);
+                            } else {
+                              return;
+                            }
+                          },
+        crcok      => sub {my ($rawData,undef) = @_;
+                            my $rc = eval {
+                              require Digest::CRC;
+                              Digest::CRC->import();
+                              1;
+                            };
+                            if ($rc) {
+                              my $datacheck1 = pack( 'H*', substr($rawData,0,14) );
+                              my $crcmein1 = Digest::CRC->new(width => 8, poly => 0x31);
+                              my $rr3 = $crcmein1->add($datacheck1)->hexdigest;
+                              if (hex($rr3) != hex(substr($rawData,14,2))) {
+                                Log3 $name, 3, "$name: SD_WS_85 Parse msg $rawData - ERROR CRC8";
+                                return 0;
+                              }
+                            } else {
+                              Log3 $name, 1, "$name: SD_WS_85 Parse msg $rawData - ERROR CRC not load, please install modul Digest::CRC";
+                              return 0;
+                            }  
+                            return 1;
+                          }
       } ,
     89 =>
       {
@@ -1753,6 +1783,14 @@ sub SD_WS_Parse {
     }
   }
 
+  ### Protocol 85 without wind direction
+  if ($protocol eq "85") {
+    if (AttrVal($name,'model',0) ne "TFA_30.3251.10") {
+      $winddir = undef;
+      $winddirtxt = undef;
+    }
+  }
+
   readingsBeginUpdate($hash);
   readingsBulkUpdate($hash, "state", $state);
   readingsBulkUpdate($hash, "temperature", $temp)  if (defined($temp) && (($temp > -60 && $temp < 70 ) || $protocol eq '106' || $protocol eq '113'));
@@ -1891,14 +1929,14 @@ sub SD_WS_WH2SHIFT {
     <li>Renkforce E0001PA</li>
     <li>Rain gauge DROP TFA 47.3005.01 with rain sensor TFA 30.3233.01</li>
     <li>TECVANCE TV-4848</li>
-    <li>Thermometer TFA 30.3228.02, TFA 30.3229.02, FT007T, FT007TP, F007T, F007TP</li>
-    <li>Thermo-Hygrometer TFA 30.3208.02, FT007TH, F007TH</li>
+    <li>Thermometer FT007T, FT007TP, F007T, F007TP</li>
+    <li>Thermo-Hygrometer FT007TH, F007TH</li>
     <li>TS-FT002 Water tank level monitor with temperature</li>
     <li>TX-EZ6 for Weatherstation TZS First Austria</li>
     <li>WH2, WH2A (TFA Dostmann/Wertheim 30.3157 (sold in Germany), Agimex Rosenborg 66796 (sold in Denmark),ClimeMET CM9088 (Sold in UK)</li>
     <li>Weatherstation Auriol IAN 283582 Version 06/2017 (Lidl), Modell-Nr.: HG02832D</li>
     <li>Weatherstation Auriol AHFL 433 B2, IAN 314695 (Lidl)</li>
-    <li>Weatherstation TFA 35.1140.01 with temperature / humidity sensor TFA 30.3221.02 and temperature / humidity / windspeed sensor TFA 30.3222.02</li>
+    <li>Weatherstations and sensors TFA 30.3157, 30.3200, 30.3208.02, 30.3221.02, 30.3222.02, 30.3228.02, 30.3229.02, 30.3233.01, 30.3251.10, 35.1140.01</li>
     <li>Wireless Grill Thermometer, Model name: GFGT 433 B1</li>
   </ul><br><br>
 
@@ -1977,12 +2015,15 @@ sub SD_WS_WH2SHIFT {
       <a name="end_max-deviation-temp"></a>
     </li><br>
     <li>model<br>
-      (Default: other, currently supported sensors: E0001PA, S522 and TX-EZ6)<br>
+      (Default: other, currently supported sensors: E0001PA, S522, TFA_30.3251.10 and TX-EZ6)<br>
       <a name="model"></a>
       The sensors of the "SD_WS_33 series" use different positions for the battery bit and different readings. 
       If the battery bit is detected incorrectly (low instead of ok), then you can possibly adjust with the model selection of the sensor.<br>
       So far, 3 variants are known. All sensors are created by Autocreate as model "other". 
       If you receive a Conrad S522, Renkforce E0001PA or TX-EZ6, then set the appropriate model for the proper processing of readings.
+      <br>
+      Protocol 85 (SD_WS_85_THW) decodes two different sensor types: TFA 30.3222.02 (thermo-hygro-wind) and 30.3251.10 (wind).
+      The attribute must be set to this value "TFA_30.3251.10" so that the wind direction is also displayed for the sensor TFA 30.3251.10.
       <a name="end_model"></a>
     </li><br>
     <li><a href="#readingFnAttributes">readingFnAttributes</a></li><br>
@@ -2029,14 +2070,14 @@ sub SD_WS_WH2SHIFT {
     <li>Regenmesser DROP TFA 47.3005.01 mit Regensensor TFA 30.3233.01</li>
     <li>Renkforce E0001PA</li>
     <li>TECVANCE TV-4848</li>
-    <li>Temperatur-Sensor TFA 30.3228.02, TFA 30.3229.02, FT007T, FT007TP, F007T, F007TP</li>
-    <li>Temperatur/Feuchte-Sensor TFA 30.3208.02, FT007TH, F007TH</li>
+    <li>Temperatur-Sensor FT007T, FT007TP, F007T, F007TP</li>
+    <li>Temperatur/Feuchte-Sensor FT007TH, F007TH</li>
     <li>TS-FT002 Wassertank Füllstandswächter mit Temperatur</li>
     <li>TX-EZ6 fuer Wetterstation TZS First Austria</li>
     <li>WH2, WH2A (TFA Dostmann/Wertheim 30.3157 (Deutschland), Agimex Rosenborg 66796 (Denmark), ClimeMET CM9088 (UK)</li>
     <li>Wetterstation Auriol IAN 283582 Version 06/2017 (Lidl), Modell-Nr.: HG02832D</li>
     <li>Wetterstation Auriol AHFL 433 B2, IAN 314695 (Lidl)</li>
-    <li>Wetterstation TFA 35.1140.01 mit Temperatur-/Feuchtesensor TFA 30.3221.02 und Temperatur-/Feuchte- und Windsensor TFA 30.3222.02</li>
+    <li>Wetterstationen und Sensoren TFA 30.3157, 30.3200, 30.3208.02, 30.3221.02, 30.3222.02, 30.3228.02, 30.3229.02, 30.3233.01, 30.3251.10, 35.1140.01</li>
     </ul>
   <br><br>
 
@@ -2117,11 +2158,14 @@ sub SD_WS_WH2SHIFT {
     </li><br>
     <li>model<br>
       <a name="model"></a>
-      (Standard: other, zur Zeit unterst&uuml;tzte Sensoren: E0001PA, S522, TX-EZ6)<br>
+      (Standard: other, zur Zeit unterst&uuml;tzte Sensoren: E0001PA, S522, TFA_30.3251.10, TX-EZ6)<br>
       Die Sensoren der "SD_WS_33 - Reihe" verwenden unterschiedliche Positionen f&uuml;r das Batterie-Bit und unterst&uuml;tzen verschiedene Readings. 
       Sollte das Batterie-Bit falsch erkannt werden (low statt ok), so kann man mit der Modelauswahl des Sensors das evtl. anpassen.<br>
       Bisher sind 3 Varianten bekannt. Alle Sensoren werden durch Autocreate als Model "other" angelegt. 
       Empfangen Sie einen Sensor vom Typ Conrad S522, Renkforce E0001PA oder TX-EZ6, so stellen Sie das jeweilige Modell f&uuml;r die richtige Verarbeitung der Readings ein.
+      <br>
+      Protokoll 85 (SD_WS_85_THW) dekodiert zwei verschiedene Sensortypen: TFA 30.3222.02 (Thermo-Hygro-Wind) und 30.3251.10 (Wind).
+      Damit auch die Windrichtung bei dem Sensor TFA 30.3251.10 angezeigt wird, muss das Attribut auf diesen Wert "TFA_30.3251.10" gesetzt werden.
       <a name="end_model"></a>
     </li><br>
     <li><a href="#readingFnAttributes">readingFnAttributes</a></li><br>
