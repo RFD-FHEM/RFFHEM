@@ -1,3 +1,7 @@
+2022-04-17 - Protocol 85 new sensor TFA 30.3251.10 (#1096)
+
+14_SD_WS.pm - new sensor TFA 30.3251.10, added CRC8 check for protocol 85
+
 2022-04-15 - Fix wrong calculation of averagewindDirection (#1095)
 
 * Update 14_SD_WS09.pm
