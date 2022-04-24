@@ -1,12 +1,8 @@
-# $Id: 98_Siro.pm 20772 2019-12-17 16:52:51Z Byte09 $
+# $Id: 14_LTECH.pm 1.0 2022-04-24 16:52:51Z Byte09 $
 #
-# Siro module for FHEM
-# Thanks for templates/coding from SIGNALduino team and Jarnsen_darkmission_ralf9
-# Thanks to Dr. Smag for decoding the protocol, which made this module possible
-# Needs SIGNALduino.
-# Published under GNU GPL License, v2
+# LTECH LED ControllerModule for FHEM
 # History:
-# 30.05.19 Version 1.0 innitial comit
+# 24.04.22 Version 1.0 innitial comit
 ################################################################################################################
 # Todo's:
 # -
