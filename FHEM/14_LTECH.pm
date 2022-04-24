@@ -22,12 +22,12 @@ my $version = "1.0";
 
 sub LTECH_Initialize($) {
     my ($hash) = @_;
-    $hash->{SetFn}      = "FHEM::LTECH::Set";
-    $hash->{DefFn}    = "FHEM::LTECH::Define";
-    $hash->{UndefFn}  = "FHEM::LTECH::Undef";
-    $hash->{DeleteFn} = "FHEM::LTECH::Delete";
-    $hash->{ParseFn}  = "FHEM::LTECH::Parse";
-    $hash->{Match}    = "^P31#[A-Fa-f0-9]{26}";
+    $hash->{SetFn}    = \&FHEM::LTECH::Set;
+    $hash->{DefFn}    = \&FHEM::LTECH::Define;
+    $hash->{UndefFn}  = \&FHEM::LTECH::Undef;
+    $hash->{DeleteFn} = \&FHEM::LTECH::Delete;
+    $hash->{ParseFn}  = \&FHEM::LTECH::Parse;
+    $hash->{Match}    = qr/^P31#[A-Fa-f0-9]{26}/;
     $hash->{AttrList} =
         " IODev"
       . " disable:0,1"
