@@ -1,0 +1,8 @@
+runner:
+  perl-test2-tap:
+    cmd: cat errorformat
+    errorformat: # (optional if you use `format`)
+      - "%E# Failed test %m"
+      - "%C# at %f line %l%."
+      - "%C# %m"
+      - "%-G%.%#"
