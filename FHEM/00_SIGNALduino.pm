@@ -17,6 +17,8 @@ use warnings;
 use Storable qw(dclone); 
 #use version 0.77; our $VERSION = version->declare('v3.5.4');
 
+use failNow;
+
 my $missingModulSIGNALduino = ' ';
 
 use DevIo;
