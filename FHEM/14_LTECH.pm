@@ -1,12 +1,8 @@
-# $Id: 98_Siro.pm 20772 2019-12-17 16:52:51Z Byte09 $
+# $Id: 14_LTECH.pm 1.0 2022-04-24 16:52:51Z Byte09 $
 #
-# Siro module for FHEM
-# Thanks for templates/coding from SIGNALduino team and Jarnsen_darkmission_ralf9
-# Thanks to Dr. Smag for decoding the protocol, which made this module possible
-# Needs SIGNALduino.
-# Published under GNU GPL License, v2
+# LTECH LED ControllerModule for FHEM
 # History:
-# 30.05.19 Version 1.0 innitial comit
+# 24.04.22 Version 1.0 innitial comit
 ################################################################################################################
 # Todo's:
 # -
@@ -54,7 +50,6 @@ package FHEM::LTECH;
 
 use strict;
 use warnings;
-use Switch;
 use Color;
 use Digest::CRC;
 
@@ -245,27 +240,23 @@ sub Parse($$) {
 	Log3 $hash, 4, "$name LTECH_Parse: Speed $speed";
     
     readingsBeginUpdate($hash);
-    switch($mode){
-        case "FE" {
+    if($mode eq "FE"){
             my @rgb = Color::hex2rgb($rgbcolor);
             my ($h ,$s ,$v ) = Color::rgb2hsv( $rgb[0] / 255, $rgb[1] / 255, $rgb[2] / 255 );
             $v = hex($dim) / 255;
             $rgbcolor = Color::hsv2hex($h,$s,$v);
-            switch($function){
-                case "00" {
-                    $rgbcolor = "000000";
-                }
-            }
             readingsBulkUpdate($hash, "rgbcolor", $rgbcolor );
             readingsBulkUpdate($hash, "rgbcolor_sel", $rgbcolor);
-        }
-        case "80" {
+    }elsif($mode eq "80"){
             if($function == "18"){
                 $dim = "00";
             }
             readingsBulkUpdate($hash, "white", Hex2dec($dim));
             readingsBulkUpdate($hash, "white_sel", Hex2dec($dim));
-        }
+    }
+    if($function eq "00") {
+            $rgbcolor = "000000";
+            readingsBulkUpdate($hash, "rgbcolor", $rgbcolor );
     }
 	readingsBulkUpdate($hash, "function", $function);  
 	readingsBulkUpdate($hash, "mode", $mode);
@@ -286,36 +277,35 @@ sub Set($@)
 	Log3( $name, 4, "LTECH: eingehende Werte $cmd , $value");
 
 
-	switch($cmd) {
-		case "rgbcolor" { readingsSingleUpdate($hash, 'rgbcolor_sel', uc $value, 1); return};
-		case "white" { readingsSingleUpdate($hash, 'white_sel', $value , 1); return};
-		case "on" {
-            my $rgbcolor = ReadingsVal( $name, 'rgbcolor', '000000' );
-			my $rgbcolor_sel = ReadingsVal( $name, 'rgbcolor_sel', '000000' );
-            my $white = ReadingsVal( $name, 'white', '00' );
-			my $white_sel = ReadingsVal( $name, 'white_sel', '00' );
-            if( hex($rgbcolor) != hex($rgbcolor_sel) ){
-                Send ($hash, $name, "FE" . $rgbcolor_sel . "01FF00" ); 
-                readingsSingleUpdate($hash, 'rgbcolor', $rgbcolor_sel,1);
-            }
-            if( $white != 0 && $white_sel == 0 ){
-                Log3 $hash, 4, "$name LTECH_Set: White off";
-                Send ($hash, $name, "80" . $rgbcolor_sel . "18" . Dec2hex($white_sel) . "00" ); 
-                readingsSingleUpdate($hash, 'white', $white_sel,1);
-            }elsif( hex($white) != hex($white_sel) ){
-                Log3 $hash, 4, "$name LTECH_Set: Change White";
-                Send ($hash, $name, "80" . $rgbcolor_sel . "19" . Dec2hex($white_sel) . "00" ); 
-                readingsSingleUpdate($hash, 'white', $white_sel,1);
-            }
-			return
-		}
-		case "off" {
+	if($cmd eq "rgbcolor" ) { readingsSingleUpdate($hash, 'rgbcolor_sel', uc $value, 1); return}
+    elsif($cmd eq "white" ) { readingsSingleUpdate($hash, 'white_sel', $value , 1); return}
+	elsif($cmd eq "on" ) {
+        my $rgbcolor = ReadingsVal( $name, 'rgbcolor', '000000' );
+        my $rgbcolor_sel = ReadingsVal( $name, 'rgbcolor_sel', '000000' );
+        my $white = ReadingsVal( $name, 'white', '00' );
+        my $white_sel = ReadingsVal( $name, 'white_sel', '00' );
+        if( hex($rgbcolor) != hex($rgbcolor_sel) ){
+            Send ($hash, $name, "FE" . $rgbcolor_sel . "01FF00" ); 
+            readingsSingleUpdate($hash, 'rgbcolor', $rgbcolor_sel,1);
+        }
+        if( $white != 0 && $white_sel == 0 ){
+            Log3 $hash, 4, "$name LTECH_Set: White off";
+            Send ($hash, $name, "80" . $rgbcolor_sel . "18" . Dec2hex($white_sel) . "00" ); 
+            readingsSingleUpdate($hash, 'white', $white_sel,1);
+        }elsif( hex($white) != hex($white_sel) ){
+            Log3 $hash, 4, "$name LTECH_Set: Change White";
+            Send ($hash, $name, "80" . $rgbcolor_sel . "19" . Dec2hex($white_sel) . "00" ); 
+            readingsSingleUpdate($hash, 'white', $white_sel,1);
+        }
+        return
+	}
+    elsif($cmd eq "off") {
             #my $rgbcolor_sel = ReadingsVal( $name, 'rgbcolor_sel', '000000' );
 			Send ($hash, $name, "FE00000000FF00" );
             readingsSingleUpdate($hash, 'rgbcolor', '000000', 1);
-			return
-		}
-        case "h"{
+            return
+	}
+    elsif($cmd eq "h") {
             my $rgbcolor = ReadingsVal( $name, 'rgbcolor', '000000' );
             my @rgb = Color::hex2rgb($rgbcolor);
             my ($h ,$s ,$v ) = Color::rgb2hsv( $rgb[0] / 255, $rgb[1] / 255, $rgb[2] / 255 );
@@ -324,9 +314,9 @@ sub Set($@)
             readingsSingleUpdate($hash, 'rgbcolor_sel', $rgbcolor_sel, 1);
             $args[0] = "on"; 
             Set($hash, $name, @args);
-			return
-		}
-        case "brightness"{
+            return
+	}
+    elsif($cmd eq "brightness") {
             my $rgbcolor = ReadingsVal( $name, 'rgbcolor', '000000' );
             my @rgb = Color::hex2rgb($rgbcolor);
             my ($h ,$s ,$v ) = Color::rgb2hsv( $rgb[0] / 255, $rgb[1] / 255, $rgb[2] / 255 );
@@ -335,15 +325,8 @@ sub Set($@)
             readingsSingleUpdate($hash, 'rgbcolor_sel', $rgbcolor_sel, 1);
             $args[0] = "on"; 
             Set($hash, $name, @args);
-			return
-		}
-		case "test"{
-			if(length($value) == 14){
-				Send ($hash, $name, $value ); 
-			}
-			return
-		}
- 	}
+            return
+    }
 
 	my @cList;
 	my $atts = AttrVal( $name, 'setList', "" );
