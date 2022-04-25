@@ -36,7 +36,7 @@ sub LTECH_Initialize($) {
         "LTECH.*" => {
             ATTR   => "event-min-interval:.*:300 event-on-change-reading:.*",
             FILTER => "%NAME",
-            autocreateThreshold => "2:10"
+            autocreateThreshold => "2:180"
         }
     };
 }
