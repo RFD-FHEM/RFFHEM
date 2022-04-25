@@ -313,7 +313,7 @@ sub Set($@)
             my $rgbcolor_sel = Color::hsv2hex($h,$s,$v);
             readingsSingleUpdate($hash, 'rgbcolor_sel', $rgbcolor_sel, 1);
             $args[0] = "on"; 
-            Set($hash, $name, @args);
+            &Set($hash, $name, @args);
             return
 	}
     elsif($cmd eq "brightness") {
@@ -324,7 +324,7 @@ sub Set($@)
             my $rgbcolor_sel = Color::hsv2hex($h,$s,$v);
             readingsSingleUpdate($hash, 'rgbcolor_sel', $rgbcolor_sel, 1);
             $args[0] = "on"; 
-            Set($hash, $name, @args);
+            &Set($hash, $name, @args);
             return
     }
 
