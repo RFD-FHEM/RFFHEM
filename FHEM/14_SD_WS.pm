@@ -49,6 +49,7 @@ package main;
 
 #use version 0.77; our $VERSION = version->declare('v3.5.4');
 
+use failNow;
 use strict;
 use warnings;
 use Carp qw(carp);
