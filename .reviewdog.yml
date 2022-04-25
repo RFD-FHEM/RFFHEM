@@ -6,3 +6,11 @@ runner:
       - "%C# at %f line %l%."
       - "%C# %m"
       - "%-G%.%#"
+  perl-errors:
+    cmd: cat errorformat
+    errorformat:
+      #- "%+E%.%#Error:%r"
+      - "%+E%.%# at %f line %l%.%r"
+      - "%+ZBEGIN failed%r"
+     
+
