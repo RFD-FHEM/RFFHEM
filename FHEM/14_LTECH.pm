@@ -52,6 +52,7 @@ use strict;
 use warnings;
 use Color;
 use Digest::CRC;
+use Scalar::Util qw(looks_like_number);
 
 use GPUtils qw(GP_Import)
   ;    # wird fuer den Import der FHEM Funktionen aus der fhem.pl ben?tigt
@@ -94,9 +95,8 @@ my %sets = (
   "white" => "slider,0,1,255",
   "rgbcolor" => "colorpicker,HSV",
   "h" => "colorpicker,HUE,0,1,359",
-  "sat" => "colorpicker,BRI,0,1,100",
-  "brightness" => "colorpicker,BRI,0,1,100",
-  "pct" => "colorpicker,BRI,0,1,100"
+  "saturation" => "colorpicker,BRI,0,1,100",
+  "brightness" => "colorpicker,BRI,0,1,100"
 );
 
 my $ctx = Digest::CRC->new(width=>16, init=>0x0000, xorout=>0x0000, refout=>0, poly=>0x1021, refin=>0, cont=>1);
@@ -268,8 +268,20 @@ sub Set {
 	Log3( $name, 4, "LTECH: eingehende Werte $cmd , $value");
 
 
-	if($cmd eq "rgbcolor" ) { readingsSingleUpdate($hash, 'rgbcolor_sel', uc $value, 1); return}
-    elsif($cmd eq "white" ) { readingsSingleUpdate($hash, 'white_sel', $value , 1); return}
+	if($cmd eq "rgbcolor" ) { 
+        if($value =~ m/[[:xdigit:]]{6}/){
+            readingsSingleUpdate($hash, 'rgbcolor_sel', uc $value, 1);
+            return
+        }
+        return "Please provide a valid RGB-HexColor"
+    }
+    elsif($cmd eq "white" ) { 
+        if( looks_like_number($value) && 0 <= $value  && $value <= 255 ){
+            readingsSingleUpdate($hash, 'white_sel', $value , 1); 
+            return
+        }
+        return "Please provide valid number between 0 and 255"
+    }
 	elsif($cmd eq "on" ) {
         my $rgbcolor = ReadingsVal( $name, 'rgbcolor', '000000' );
         my $rgbcolor_sel = ReadingsVal( $name, 'rgbcolor_sel', '000000' );
@@ -291,12 +303,12 @@ sub Set {
         return
 	}
     elsif($cmd eq "off") {
-            #my $rgbcolor_sel = ReadingsVal( $name, 'rgbcolor_sel', '000000' );
 			Send ($hash, $name, "FE00000000FF00" );
             readingsSingleUpdate($hash, 'rgbcolor', '000000', 1);
             return
 	}
     elsif($cmd eq "h") {
+        if( looks_like_number($value) && 0 <= $value  && $value <= 360 ){
             my $rgbcolor = ReadingsVal( $name, 'rgbcolor', '000000' );
             my @rgb = Color::hex2rgb($rgbcolor);
             my ($h ,$s ,$v ) = Color::rgb2hsv( $rgb[0] / 255, $rgb[1] / 255, $rgb[2] / 255 );
@@ -306,8 +318,11 @@ sub Set {
             $args[0] = "on"; 
             Set($hash, $name, @args);
             return
+        }
+        return "Please provide valid number between 0 and 360"  
 	}
     elsif($cmd eq "brightness") {
+        if( looks_like_number($value) && 0 <= $value  && $value <= 100 ){
             my $rgbcolor = ReadingsVal( $name, 'rgbcolor', '000000' );
             my @rgb = Color::hex2rgb($rgbcolor);
             my ($h ,$s ,$v ) = Color::rgb2hsv( $rgb[0] / 255, $rgb[1] / 255, $rgb[2] / 255 );
@@ -317,7 +332,24 @@ sub Set {
             $args[0] = "on"; 
             Set($hash, $name, @args);
             return
+        }
+        return "Please provide valid number between 0 and 100"
     }
+    elsif($cmd eq "saturation") {
+        if( looks_like_number($value) && 0 <= $value  && $value <= 100 ){
+            my $rgbcolor = ReadingsVal( $name, 'rgbcolor', '000000' );
+            my @rgb = Color::hex2rgb($rgbcolor);
+            my ($h ,$s ,$v ) = Color::rgb2hsv( $rgb[0] / 255, $rgb[1] / 255, $rgb[2] / 255 );
+            $s = $value / 100;
+            my $rgbcolor_sel = Color::hsv2hex($h,$s,$v);
+            readingsSingleUpdate($hash, 'rgbcolor_sel', $rgbcolor_sel, 1);
+            $args[0] = "on"; 
+            Set($hash, $name, @args);
+            return
+        }
+        return "Please provide valid number between 0 and 100"
+    }
+
 
 	my @cList;
 	my $atts = AttrVal( $name, 'setList', "" );
@@ -412,7 +444,14 @@ sub Send {
   <br>
 
   <a name="LTECHset"></a>
-  <b>Set</b> <ul> Set brightness (pct),hue (h), rgbcolor, saturation, white by choosing the values whith sliders</ul><br>
+  <b>Set</b> <ul> Set brightness (pct),hue (h), rgbcolor, saturation, white by choosing the values whith sliders
+  <br>rgbcolor and white will not be set directly. Instead "rgbcolor_sel" and "white_sel" readings are updated and applied whith antorher "on" command
+  <br><br>
+      Example: <br>
+    <code>set WohnzimmerLED rgbcolor FF0000;set WohnzimmerLED on</code>
+      <br>
+  </ul>
+   <ul> </ul><br>
 
   <a name="LTECHget"></a>
   <b>Get</b> <ul>N/A</ul><br>
@@ -444,14 +483,20 @@ sub Send {
     &lt;code&gt; ist die Adresse einer LTECH Fernbedienung.
 
     <br><br>
-      Example: <br>
+      Beispiel: <br>
     <code>define WohnzimmerLED LTECH 040EABFF</code>
       <br>
   </ul>
   <br>
 
   <a name="LTECHset"></a>
-  <b>Set</b> <ul> Setzten der Helligkeit (brightness, pct), Farbton (h), RGBFarbe (rgbcolor), Sättigung (saturation), Weißlichtanteil (white) mit Hilfe der Schieberegler</ul><br>
+  <b>Set</b> <ul> Setzten der Helligkeit (brightness, pct), Farbton (h), RGBFarbe (rgbcolor), Sättigung (saturation), Weißlichtanteil (white) mit Hilfe der Schieberegler
+  <br>rgbcolor und white werden nich direkt gesetzt. Es werden die Readings "rgbcolor_sel" und "white_sel" aktualisiert und mit einem weiteren "on" übernommen
+  <br><br>
+      Beispiel: <br>
+    <code>set WohnzimmerLED rgbcolor FF0000;set WohnzimmerLED on</code>
+      <br>
+  </ul><br>
 
   <a name="LTECHget"></a>
   <b>Get</b> <ul>N/A</ul><br>
