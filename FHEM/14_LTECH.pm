@@ -102,7 +102,7 @@ my %sets = (
 my $ctx = Digest::CRC->new(width=>16, init=>0x0000, xorout=>0x0000, refout=>0, poly=>0x1021, refin=>0, cont=>1);
 
 #############################
-sub Define($$) {
+sub Define {
     my ( $hash, $def ) = @_;
     my @a = split( "[ \t][ \t]*", $def );
 
@@ -136,7 +136,7 @@ sub Define($$) {
 }
 
 #############################
-sub Attr(@) {
+sub Attr {
 	my ( $cmd, $name, $aName, $aVal ) = @_;
     my $hash = $defs{$name};
     return "\"LTECH Attr: \" $name does not exist" if ( !defined($hash) );
@@ -155,21 +155,14 @@ return;
 }
 
 #############################
-sub Undef($$) {
+sub Undef {
     my ( $hash, $name ) = @_;
     delete( $modules{LTECH}{defptr}{$hash->{CODE}} );
     return undef;
 }
 
 #############################
-sub Shutdown($) {
-    my ($hash) = @_;
-    my $name = $hash->{NAME};
-    return;
-}
-
-#############################
-sub LoadHelper($) {
+sub Shutdown {
     my ($hash) = @_;
     my $name = $hash->{NAME};
     return;
@@ -177,19 +170,19 @@ sub LoadHelper($) {
 
 #############################
 
-sub Notify($$) {
+sub Notify {
 
     return;
 }
 #############################
 
-sub Delete($$) {
+sub Delete {
     my ( $hash, $name ) = @_;
     return undef;
 }
 
 #############################
-sub Parse($$) {
+sub Parse {
     my @args;
     my ( $hash, $msg ) = @_;
 	my $name = $hash->{NAME};
@@ -269,8 +262,7 @@ sub Parse($$) {
 #############################
 
 # Call with hash, name, virtual/send, set-args
-sub Set($@) 
-{
+sub Set {
 	my ( $hash, $name, @args ) = @_;
 	my $cmd    = $args[0]; 
 	my $value  = $args[1];
@@ -313,7 +305,7 @@ sub Set($@)
             my $rgbcolor_sel = Color::hsv2hex($h,$s,$v);
             readingsSingleUpdate($hash, 'rgbcolor_sel', $rgbcolor_sel, 1);
             $args[0] = "on"; 
-            &Set($hash, $name, @args);
+            Set($hash, $name, @args);
             return
 	}
     elsif($cmd eq "brightness") {
@@ -324,7 +316,7 @@ sub Set($@)
             my $rgbcolor_sel = Color::hsv2hex($h,$s,$v);
             readingsSingleUpdate($hash, 'rgbcolor_sel', $rgbcolor_sel, 1);
             $args[0] = "on"; 
-            &Set($hash, $name, @args);
+            Set($hash, $name, @args);
             return
     }
 
@@ -345,7 +337,7 @@ sub Set($@)
 	return "Unknown argument $cmd, choose one of " . join( " ", @cList );
 }
 #############################
-sub Icon(@) {
+sub Icon {
    my ($name,$icon) = @_;
    my $hash = $defs{$name};
    my $state = ReadingsVal( $name, 'brightness', 'undef' );
