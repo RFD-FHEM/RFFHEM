@@ -7,7 +7,7 @@ runner:
       - "%C# %m"
       - "%-G%.%#"
   perl-errors:
-    cmd: cat errorformat
+    cmd: perl -ne 'print if ! $a{substr $_,22}++' errorformat 
     errorformat:
       - "%-G%m redefined at %f line %l%.%r"
       - "%+E%.%# at %f line %l%.%r"
