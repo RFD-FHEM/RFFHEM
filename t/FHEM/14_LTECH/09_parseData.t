@@ -19,11 +19,11 @@ sub runTest {
 	my $ioHash = $defs{$ioName};
     #use Data::Dumper;
     #print Dumper(@Test::RDmsg::JSONTestList);
-	#my $filepath = dirname(__FILE__);
-	#push @Test2::SIGNALduino::RDmsg::JSONTestList, {
-	#	testname	=> q[Testdata with corrupt SD_UT data],
-	#	url			=> qq[$filepath/testData.json],
-	#};
+	my $filepath = dirname(__FILE__);
+    push @Test2::SIGNALduino::RDmsg::JSONTestList, {
+		testname	=> q[Testdata with corrupt SD_UT data],
+		url			=> qq[$filepath/testData.json],
+	};
 
 	plan( scalar @Test2::SIGNALduino::RDmsg::JSONTestList);
 	for my $maintest  (@Test2::SIGNALduino::RDmsg::JSONTestList)
