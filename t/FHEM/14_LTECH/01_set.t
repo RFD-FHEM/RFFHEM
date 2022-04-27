@@ -9,13 +9,6 @@ our %attr;
 
 InternalTimer(time()+1, sub {
 	my $devicename = shift; 
-
-    subtest 'Protocol 31 - define LTECH_Test_11' => sub {
-		plan(1);
-        CommandDefine(undef,qq[$devicename LTECH 04444EFF]); 
-        is(IsDevice($devicename), 1, "check sensor created with define");
-	};
-
     my $hash = $defs{$devicename};
     
     my $cmd=q[];
