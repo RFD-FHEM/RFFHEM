@@ -86,7 +86,7 @@ package lib::SD_ProtocolData;
   use strict;
   use warnings;
 
-  our $VERSION = '1.44';
+  our $VERSION = '1.45';
 
   our %protocols = (
     "0" =>  ## various weather sensors (500 | 9100)
@@ -573,7 +573,7 @@ package lib::SD_ProtocolData;
         format           => 'twostate',
         preamble         => 'P13#',
         clientmodule     => 'FLAMINGO',
-        #modulematch      => '',
+        #      => '',
         length_min       => '24',
         length_max       => '24',
       },
@@ -3177,6 +3177,39 @@ package lib::SD_ProtocolData;
         length_min      => '24',
         length_max      => '25',
       },
+
+		"119"	=>	## Funkbus
+			#
+			{
+				name            => 'Funkbus',
+				comment         => 'only Typ 43',
+				id              => '119',
+				clockrange      => [490,520],			  # min , max
+				format          => 'manchester',	    
+				clientmodule    => 'IFB',
+				#modulematch     => '',
+				preamble        => 'J',
+				length_min      => '47',
+				length_max      => '52',
+				method          => \&lib::SD_Protocols::MCRAW,
+			},
+		"119.1"	=>	## Funkbus
+			#
+			{
+				name            => 'Funkbus',
+				comment         => '',
+				id              => '213.1',
+				developId       => 'y',
+				clockrange      => [490,520],			    # min , max
+				format          => 'manchester',	    
+				clientmodule    => 'IFB',
+				#modulematch     => '',
+				preamble        => 'J',
+				length_min      => '49',
+				length_max      => '52',
+				method          => \&lib::SD_Protocols::MCRAW,
+			}
+
     ########################################################################
     #### ###  register informations from other hardware protocols  #### ####
 
