@@ -3191,7 +3191,7 @@ package lib::SD_ProtocolData;
 				preamble        => 'J',
 				length_min      => '47',
 				length_max      => '52',
-				method          => \&lib::SD_Protocols::MCRAW,
+				method          => \&lib::SD_Protocols::mcBit2Funkbus,
 			},
 		"119.1"	=>	## Funkbus
 			#
@@ -3207,7 +3207,7 @@ package lib::SD_ProtocolData;
 				preamble        => 'J',
 				length_min      => '49',
 				length_max      => '52',
-				method          => \&lib::SD_Protocols::MCRAW,
+				method          => \&lib::SD_Protocols::mcBit2Funkbus,
 			}
 
     ########################################################################
