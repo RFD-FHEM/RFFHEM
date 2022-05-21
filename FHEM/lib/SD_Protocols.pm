@@ -436,36 +436,31 @@ sub mcBit2Funkbus
 
   $self->_logging( qq[lib/mcBitFunkbus, $name Funkbus: raw=$bitData], 5 );
 	$bitData = substr($bitData,0,$mcbitnum);
-	$bitData =~ s/1/zo/g; # 0 durch zo (01) ersetzen
-	$bitData =~ s/0/oz/g; # 1 durch oz (10) ersetzen
+	$bitData =~ s/1/lh/g; # 0 ersetzen mit low high
+	$bitData =~ s/0/hl/g; # 1 ersdetzen durch high low ersetzen
   $self->_logging( qq[lib/mcBitFunkbus, $name Funkbus: cut raw=$bitData], 5 );
 
 	my @bitmsg = ($id ne '119') ? (0) : ();
 		
-	my $i = 1;
+	my $i;
 	my $len = $mcbitnum * 2;
-	while ($i < $len) {  # nach Differential Manchester wandeln
-		if (substr($bitData,$i,1) eq substr($bitData,$i+1,1)) {
-			push (@bitmsg,0);
-		}
-		else {
-			push (@bitmsg,1);
-		}
-		$i += 2;
-	}
-	my $s_bitmsg = join "", @bitmsg;
+	for ($i=1;$i<$len;$i+=2) 
+  {
+    push (@bitmsg, (substr($bitData,$i,1) eq substr($bitData,$i+1,1)) ? 0 : 1);
+  }
+  
+  my $s_bitmsg = join "", @bitmsg;
+  
+  if ($id eq '119') {
+    my $pos = index($s_bitmsg,'01100');
+    if ($pos >= 0 && $pos < 5) {
+      $s_bitmsg = '001' . substr($s_bitmsg,$pos);
+      return (-1,'wrong bits at begin') if (length($s_bitmsg) < 48);
+    }  else {
+      return (-1,'wrong bits at begin');
+    }
+  }
 
-	if ($id eq '119') {
-		my $pos = index($s_bitmsg,'01100');
-		if ($pos >= 0 && $pos < 5) {
-			$s_bitmsg = '001' . substr($s_bitmsg,$pos);
-			return (-1,'wrong bits at begin') if (length($s_bitmsg) < 48);
-		}
-		else {
-			return (-1,'wrong bits at begin');
-		}
-	}
-	
 	my $data;
 	my $xor = 0;
 	my $chk = 0;
@@ -477,9 +472,9 @@ sub mcBit2Funkbus
 		if ($i<5) {
 			$xor ^= $data;
 		}	else {
-			$chk = $data & 0x0f;
-			$xor ^= $data & 0xe0;
-			$data &= 0xf0;
+			$chk = $data & 0x0F;
+			$xor ^= $data & 0xE0;
+			$data &= 0xF0;
 		}
 		while ($data) {       # parity
 			$p^=($data & 1);
@@ -488,20 +483,13 @@ sub mcBit2Funkbus
 	}
   return (-1,'parity error')	if ($p == 1);
 
-	my $xor_nibble = (($xor&0xf0) >> 4) ^ ($xor&0x0F);
+	my $xor_nibble = (($xor & 0xF0) >> 4) ^ ($xor & 0x0F);
 	my $result = 0;
-	if ($xor_nibble & 0x8) {
-		$result ^= 0xC;
-	}
-	if ($xor_nibble & 0x4) {
-		$result ^= 0x2;
-	}
-	if ($xor_nibble & 0x2) {
-		$result ^= 0x8;
-	}
-	if ($xor_nibble & 0x01) {
-		$result ^= 0x3;
-	}
+	($xor_nibble & 0x8) ? $result ^= 0xC : '';
+	($xor_nibble & 0x4) ? $result ^= 0x2 : '';
+  ($xor_nibble & 0x2) ? $result ^= 0x8 : '';
+  ($xor_nibble & 0x1) ? $result ^= 0x3 : '';
+
   return (-1,'checksum error')	if ($result != $chk);
 
 	$self->_logging( qq[lib/mcBitFunkbus, $name Funkbus: len=]. length($s_bitmsg).q[ bit49=].substr($s_bitmsg,48,1).qq[ parity=$p res=$result chk=$chk msg=$s_bitmsg hex=$hex], 4 );
