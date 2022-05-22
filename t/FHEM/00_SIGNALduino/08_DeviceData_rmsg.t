@@ -81,11 +81,6 @@ InternalTimer(time()+1, sub {
       testname	=> 'Test with patched SD_Device_ProtocolList',
       url		    => 'https://raw.githubusercontent.com/RFD-FHEM/SIGNALduino_TOOL/patch-fixTests/FHEM/lib/SD_Device_ProtocolList.json',
     },
-    {
-      testname  => 'funkbus temporary test',
-      url       => 'https://raw.githubusercontent.com/RFD-FHEM/SIGNALduino_TOOL/funkbus/FHEM/lib/SD_Device_ProtocolList.json',
-    }
-
  );
 
 
