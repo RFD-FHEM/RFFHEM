@@ -485,11 +485,11 @@ sub mcBit2Funkbus
 
 	my $xor_nibble = (($xor & 0xF0) >> 4) ^ ($xor & 0x0F);
 	my $result = 0;
-	($xor_nibble & 0x8) ? $result ^= 0xC : '';
-	($xor_nibble & 0x4) ? $result ^= 0x2 : '';
-  ($xor_nibble & 0x2) ? $result ^= 0x8 : '';
-  ($xor_nibble & 0x1) ? $result ^= 0x3 : '';
-
+	$result = ($xor_nibble & 0x8) ? $result ^ 0xC : $result;
+  $result = ($xor_nibble & 0x4) ? $result ^ 0x2 : $result;
+  $result = ($xor_nibble & 0x2) ? $result ^ 0x8 : $result;
+  $result = ($xor_nibble & 0x1) ? $result ^ 0x3 : $result;
+  
   return (-1,'checksum error')	if ($result != $chk);
 
 	$self->_logging( qq[lib/mcBitFunkbus, $name Funkbus: len=]. length($s_bitmsg).q[ bit49=].substr($s_bitmsg,48,1).qq[ parity=$p res=$result chk=$chk msg=$s_bitmsg hex=$hex], 4 );
