@@ -86,7 +86,7 @@ package lib::SD_ProtocolData;
   use strict;
   use warnings;
 
-  our $VERSION = '1.44';
+  our $VERSION = '1.46';
 
   our %protocols = (
     "0" =>  ## various weather sensors (500 | 9100)
@@ -558,7 +558,7 @@ package lib::SD_ProtocolData;
         length_min       => '24',
         length_max       => '24',
       },
-    "13.2"  =>  ## LM-101LD Rauchm
+    "13.2"  =>  ## LM-101LD Rauchmelder
                 # https://github.com/RFD-FHEM/RFFHEM/issues/233 @Ralf9
                 # B0FFAF | Alarm   MS;P1=-2708;P2=796;P3=-1387;P4=-8477;P5=8136;P6=-904;D=2456212321212323232321212121212121212123212321212121;CP=2;SP=4;
       {
@@ -3176,6 +3176,43 @@ package lib::SD_ProtocolData;
         preamble        => 'P118#',
         length_min      => '24',
         length_max      => '25',
+      },
+    "120" =>  ## Weather station TFA 35.1077.54.S2 with 30.3151 (T/H-transmitter), 30.3152 (rain gauge), 30.3153 (anemometer)
+              # https://forum.fhem.de/index.php/topic,119335.msg1221926.html#msg1221926 2022-05-17 @ Ronny2510
+              # SD_WS_120 T: 27.4 H: 42 W: 1.0 R: 429   MU;P0=-8768;P1=487;P2=-975;P3=1472;P4=-30992;P5=336;P6=-22080;P7=1000;D=012321232323212323232123212321232323232323232121232323232321232323232323232123212123232123212123232123232323212145672121232323232321232123212323232123232321232123212323232323232321212323232323212323232323232321232121232321232121232321232323232121;CP=3;R=25;
+              # SD_WS_120 T: 27.3 H: 43 W: 0.3 R: 429   MU;P0=480;P1=1461;P2=-981;P4=-30992;P5=304;P6=-22040;P7=1072;D=1202120212121212021212021202120202121212121212120212121212121202021212121212021202021212021202021202121212020212045672020212121212120212021202121212120212120212021202021212121212121202121212121212020212121212120212020212120212020212021212120202120;CP=0;R=0;
+      {
+        name            => 'TFA 35.1077.54.S2',
+        comment         => 'Weatherstation with sensors 30.3151, 30.3152, 30.3153',
+        id              => '120',
+        one             => [1,-2], # -480,960
+        zero            => [3,-2], # 1440,-960
+        start           => [-46,2,-2, 1,-2], # -22080,960,-960,480,-960 (first unused Bit is 1)
+        clockabs        => 480,
+        reconstructBit  => '1',
+        format          => 'twostate',
+        preamble        => 'W120#',
+        clientmodule    => 'SD_WS',
+        modulematch     => '^W120#',
+        length_min      => '63',
+        length_max      => '68',
+      },
+    "120.1" =>
+      {
+        name            => 'TFA 35.1077.54.S2',
+        comment         => 'Weatherstation with sensors 30.3151, 30.3152, 30.3153',
+        id              => '120.1',
+        one             => [1,-2],
+        zero            => [3,-2],
+        start           => [-46,2,-2, 3,-2], # -22080,960,-960,960,-480 (first unused Bit is 0)
+        clockabs        => 480,
+        reconstructBit  => '1',
+        format          => 'twostate',
+        preamble        => 'W120#',
+        clientmodule    => 'SD_WS',
+        modulematch     => '^W119#',
+        length_min      => '63',
+        length_max      => '68',
       },
     ########################################################################
     #### ###  register informations from other hardware protocols  #### ####

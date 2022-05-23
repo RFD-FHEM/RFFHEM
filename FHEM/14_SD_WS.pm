@@ -44,6 +44,7 @@
 # 04.02.2022 neu: set replaceBatteryForSec (Ident ersetzen bei Batteriewechsel Sensor)
 # 12.03.2022 Protokoll 115: neue Sensoren SM60020 Boden-/Erd-Sensor für Feuchte- und Temperatur, Innensensor für Feuchte- und Temperatur
 # 11.04.2022 Protokoll 85: neuer Sensor Windmesser TFA 30.3251.10 mit Windrichtung, Pruefung CRC8 eingearbeitet
+# 23.05.2022 neues Protokoll 120: Wetterstation TFA 35.1077.54.S2 mit 30.3151 (Thermo/Hygro-Sender), 30.3152 (Regenmesser), 30.3153 (Windmesser)
 
 package main;
 
@@ -101,6 +102,7 @@ sub SD_WS_Initialize {
     'SD_WS_115.*'     => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4hum4:Temp/Hum,', autocreateThreshold => '5:120'},
     'SD_WS_116.*'     => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => q{}, autocreateThreshold => '2:180'},
     'SD_WS_117.*'     => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4hum4:Temp/Hum,', autocreateThreshold => '5:120'},
+    'SD_WS_120.*'     => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4hum4:Temp/Hum,', autocreateThreshold => '2:180'},
   };
   return;
 }
@@ -1265,6 +1267,52 @@ sub SD_WS_Parse {
         brightness => sub {my ($rawData,undef) = @_; return substr($rawData,34,6) * 0.001;},
         uv         => sub {my ($rawData,undef) = @_; return substr($rawData,40,3) * 0.1;},
         crcok      => sub {return 1;}, # checks are in SD_Protocols.pm sub ConvBresser_7in1
+    },
+    120 => {
+        # Weather station TFA 35.1077.54.S2 with 30.3151 (T/H-transmitter), 30.3152 (rain gauge), 30.3153 (anemometer)
+        # ------------------------------------------------------------------------------------------------------------
+        # https://forum.fhem.de/index.php/topic,119335.msg1221926.html#msg1221926
+        # 1 2 3 4 5 6 7 8 
+        # ----------------
+        # 82564A030405982C   original message: T: 19.8 H: 74 W: 1.0 R: 429.6
+        # ?TTTHHWWGGRRRRCC
+        # ? -  4 bit unknown
+        # T - 12 bit temperature in 1/10 °C, offset 40
+        # H -  8 bit humidity in percent
+        # W -  8 bit windspeed in 1/10 m/s, resolution 0.33333
+        # G -  8 bit windgust in 1/10 m/s, resolution 0.33333
+        # R - 16 bit rain counter, resolution 0.3 mm
+        # C -  8 bit CRC8 of the all 8 bytes, result must be 33 (Polynomial 0x31)
+        sensortype     => 'TFA_35.1077',
+        model          => 'SD_WS_120',
+        prematch       => sub {return 1;}, # no precheck known
+        id             => sub {my ($rawData,undef) = @_; return substr($rawData,0,1);},
+        temp           => sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,4,15) * 0.1 - 40;},
+        hum            => sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,16,23);},
+        windspeed      => sub {my (undef,$bitData) = @_; return round((SD_WS_binaryToNumber($bitData,24,31) / 3.0),1);},
+        windgust       => sub {my (undef,$bitData) = @_; return round((SD_WS_binaryToNumber($bitData,32,39) / 3.0),1);},
+        rawRainCounter => sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,40,55);},
+        rain           => sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,40,55) * 0.3;},
+        crcok          => sub {my $rawData = shift;
+                                my $rc = eval {
+                                  require Digest::CRC;
+                                  Digest::CRC->import();
+                                  1;
+                                };
+                                if ($rc) {
+                                  my $datacheck1 = pack( 'H*', substr($rawData,0,16) );
+                                  my $crcmein1 = Digest::CRC->new(width => 8, poly => 0x31);
+                                  my $rr3 = $crcmein1->add($datacheck1)->hexdigest;
+                                  if ($rr3 != 33) {
+                                    Log3 $name, 3, "$name: SD_WS_120 Parse msg $rawData - ERROR CRC8";
+                                    return 0;
+                                  }
+                                } else {
+                                  Log3 $name, 1, "$name: SD_WS_120 Parse msg $rawData - ERROR CRC not load, please install modul Digest::CRC";
+                                  return 0;
+                                }  
+                                return 1;
+                              }
     },
   );
 
