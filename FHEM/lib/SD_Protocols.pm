@@ -439,7 +439,7 @@ sub mc2dmc
   {
     push (@bitmsg, (substr($bitData,$i,1) eq substr($bitData,$i+1,1)) ? 0 : 1);  # demodulated differential manchester
   }
-  return join //, @bitmsg ; # demodulated differential manchester as string
+  return join "", @bitmsg ; # demodulated differential manchester as string
 }
 
 
@@ -471,17 +471,6 @@ sub mcBit2Funkbus
 	$bitData =~ s/1/lh/g; # 0 ersetzen mit low high
 	$bitData =~ s/0/hl/g; # 1 ersdetzen durch high low ersetzen
  
-  #my @bitmsg = ($id ne '119') ? (0) : ();
-		
-	#my $i;
-	#my $len = $mcbitnum * 2;
-	#for ($i=1;$i<$len;$i+=2) 
-  #{
-  #  push (@bitmsg, (substr($bitData,$i,1) eq substr($bitData,$i+1,1)) ? 0 : 1);  # demodulated differential manchester
-  #}
-  
-  #my $s_bitmsg = join "", @bitmsg;
-
   my $s_bitmsg = $self->mc2dmc($bitData); # Convert to differential manchester
   
   if ($id == 119) {
