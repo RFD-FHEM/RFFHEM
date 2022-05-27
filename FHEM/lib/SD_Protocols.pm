@@ -411,6 +411,38 @@ sub LengthInRange {
   return (1,q{});
 }
 
+
+############################# package lib::SD_Protocols, test exists
+=item mc2dmc()
+
+This function is a helper for remudlation of a manchester signal to a differental manchester signal afterwards
+
+Input:  $object,$bitData (string)
+Output:
+        string of converted bits
+        or array (-1,"Error message")
+   
+=cut
+
+sub mc2dmc
+{
+  my $self      = shift // carp 'Not called within an object' && return (0,'no object provided');
+  my $bitData   = shift // carp 'bitData must be perovided' && return (0,'no bitData provided');
+
+  my @bitmsg;
+  my $i;
+
+	$bitData =~ s/1/lh/g; # 0 ersetzen mit low high
+	$bitData =~ s/0/hl/g; # 1 ersetzen durch high low ersetzen
+
+	for ($i=1;$i<length($bitData)-1;$i+=2) 
+  {
+    push (@bitmsg, (substr($bitData,$i,1) eq substr($bitData,$i+1,1)) ? 0 : 1);  # demodulated differential manchester
+  }
+  return join //, @bitmsg ; # demodulated differential manchester as string
+}
+
+
 ############################# package lib::SD_Protocols, test exists
 =item mcBit2Funkbus()
 
@@ -435,22 +467,24 @@ sub mcBit2Funkbus
   return (-1,' message is to long') if (defined $self->getProperty($id,'length_max' ) && $mcbitnum > $self->getProperty($id,'length_max') );
 
   $self->_logging( qq[lib/mcBitFunkbus, $name Funkbus: raw=$bitData], 5 );
-	$bitData = substr($bitData,0,$mcbitnum);
+
 	$bitData =~ s/1/lh/g; # 0 ersetzen mit low high
 	$bitData =~ s/0/hl/g; # 1 ersdetzen durch high low ersetzen
-
-	my @bitmsg = ($id ne '119') ? (0) : ();
+ 
+  #my @bitmsg = ($id ne '119') ? (0) : ();
 		
-	my $i;
-	my $len = $mcbitnum * 2;
-	for ($i=1;$i<$len;$i+=2) 
-  {
-    push (@bitmsg, (substr($bitData,$i,1) eq substr($bitData,$i+1,1)) ? 0 : 1);  # demodulated differential manchester
-  }
+	#my $i;
+	#my $len = $mcbitnum * 2;
+	#for ($i=1;$i<$len;$i+=2) 
+  #{
+  #  push (@bitmsg, (substr($bitData,$i,1) eq substr($bitData,$i+1,1)) ? 0 : 1);  # demodulated differential manchester
+  #}
   
-  my $s_bitmsg = join "", @bitmsg;
+  #my $s_bitmsg = join "", @bitmsg;
+
+  my $s_bitmsg = $self->mc2dmc($bitData); # Convert to differential manchester
   
-  if ($id eq '119') {
+  if ($id == 119) {
     my $pos = index($s_bitmsg,'01100');
     if ($pos >= 0 && $pos < 5) {
       $s_bitmsg = '001' . substr($s_bitmsg,$pos);
@@ -458,6 +492,8 @@ sub mcBit2Funkbus
     }  else {
       return (-1,'wrong bits at begin');
     }
+  } else {
+    $s_bitmsg = q[0] . $s_bitmsg;
   }
 
 	my $data;
