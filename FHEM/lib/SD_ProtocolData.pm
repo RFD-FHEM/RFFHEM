@@ -1,5 +1,5 @@
 ###########################################################################################################################################
-# $Id: SD_ProtocolData.pm 3.5.4 2022-05-30 19:34:38Z sidey79 $
+# $Id: SD_ProtocolData.pm 3.5.4 2022-05-27 12:35:26Z sidey79 $
 # The file is part of the SIGNALduino project.
 # All protocol definitions are contained in this file.
 #
@@ -3193,22 +3193,6 @@ package lib::SD_ProtocolData;
 				length_max      => '52',
 				method          => \&lib::SD_Protocols::mcBit2Funkbus,
 			},
-		"119.1"	=>	## Funkbus
-			#
-			{
-				name            => 'Funkbus',
-				comment         => '',
-				id              => '213.1',
-				developId       => 'y',
-				clockrange      => [490,520],			    # min , max
-				format          => 'manchester',	    
-				clientmodule    => 'IFB',
-				#modulematch     => '',
-				preamble        => 'J',
-				length_min      => '49',
-				length_max      => '52',
-				method          => \&lib::SD_Protocols::mcBit2Funkbus,
-			}
 
     ########################################################################
     #### ###  register informations from other hardware protocols  #### ####
