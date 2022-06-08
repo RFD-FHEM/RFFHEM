@@ -154,11 +154,11 @@ jobs:
               find ./FHEM -name "$FILE" -exec cp $FPATH "{}" \;
           done
       - name: update controls file (FHEM)
-        uses: fhem/fhem-controls-actions@v2.0.3
+        uses: fhem/fhem-controls-actions@v2.1.0
         with:
           filename: controls_signalduino.txt 
       - name: update controls file (lib)
-        uses: fhem/fhem-controls-actions@v2.0.3
+        uses: fhem/fhem-controls-actions@v2.1.0
         with:
           filename: controls_signalduino.txt 
           directory: FHEM/lib
