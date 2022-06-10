@@ -3203,7 +3203,7 @@ package lib::SD_ProtocolData;
         clockabs        => 523,
         zero            => [1,-3],
         one             => [1,-1],
-        start          => [-9, 6],        
+        start           => [9,-6],        
         #reconstructBit  => '1',
         format          => 'twostate',
         preamble        => 'U120#',
