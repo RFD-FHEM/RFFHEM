@@ -3193,6 +3193,25 @@ package lib::SD_ProtocolData;
 				length_max      => '52',
 				method          => \&lib::SD_Protocols::mcBit2Funkbus,
 			},
+    "120"  =>  ## Temola TM40 BBQ thermometer
+                # https://forum.fhem.de/index.php?topic=127938
+      {
+        name            => 'Temola_TM40',
+        comment         => 'Barbeque thermometer',
+        id              => '120',
+        knownFreqs      => '433.92',
+        clockabs        => 523,
+        zero            => [1,-3],
+        one             => [1,-1],
+        start          => [-9, 6],        
+        #reconstructBit  => '1',
+        format          => 'twostate',
+        preamble        => 'U120#',
+        #clientmodule    => '',
+        #modulematch     => '^U120#.*',
+        length_min      => '105',
+        length_max      => '107',
+      },
 
     ########################################################################
     #### ###  register informations from other hardware protocols  #### ####
