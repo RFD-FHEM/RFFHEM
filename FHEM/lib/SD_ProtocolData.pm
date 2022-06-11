@@ -3193,24 +3193,31 @@ package lib::SD_ProtocolData;
 				length_max      => '52',
 				method          => \&lib::SD_Protocols::mcBit2Funkbus,
 			},
-    "120"  =>  ## Temola TM40 BBQ thermometer
-                # https://forum.fhem.de/index.php?topic=127938
+
+    # In Progress:
+    # "120" =>  ## Weather station TFA 35.1077.54.S2 with 30.3151 (T/H-transmitter), 30.3152 (rain gauge), 30.3153 (anemometer)
+              # https://forum.fhem.de/index.php/topic,119335.msg1221926.html#msg1221926 2022-05-17 @ Ronny2510
+    # "121" => ## Remote control Busch-Transcontrol HF - Handsender 6861
+
+    "122" =>  ## TM40, Wireless Grill-, Meat-, Roasting-Thermometer with 4 Temperature Sensors
+              # https://forum.fhem.de/index.php?topic=127938.msg1224516#msg1224516 2022-06-09 @ Prof. Dr. Peter Henning
+              # 
+              # 
       {
-        name            => 'Temola_TM40',
-        comment         => 'Barbeque thermometer',
-        id              => '120',
+        name            => 'TM40',
+        comment         => 'Roasting Thermometer with 4 Temperature Sensors',
+        id              => '122',
         knownFreqs      => '433.92',
-        clockabs        => 523,
-        zero            => [1,-3],
-        one             => [1,-1],
-        start           => [9,-6],        
-        #reconstructBit  => '1',
+        one             => [1,-3],           # 520,-1560
+        zero            => [1,-1],           # 520,-520
+        start           => [2,-1,2,-1,9,-6], # 1040,-520,1040,-520,4680,-3120
+        clockabs        => 520,
         format          => 'twostate',
-        preamble        => 'U120#',
-        #clientmodule    => '',
-        #modulematch     => '^U120#.*',
-        length_min      => '105',
-        length_max      => '107',
+        preamble        => 'u122#',
+        # clientmodule    => 'SD_WS',
+        modulematch     => '^u122#',
+        length_min      => '104',
+        length_max      => '108',
       },
 
     ########################################################################
