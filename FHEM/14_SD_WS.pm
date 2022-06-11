@@ -44,6 +44,7 @@
 # 04.02.2022 neu: set replaceBatteryForSec (Ident ersetzen bei Batteriewechsel Sensor)
 # 12.03.2022 Protokoll 115: neue Sensoren SM60020 Boden-/Erd-Sensor für Feuchte- und Temperatur, Innensensor für Feuchte- und Temperatur
 # 11.04.2022 Protokoll 85: neuer Sensor Windmesser TFA 30.3251.10 mit Windrichtung, Pruefung CRC8 eingearbeitet
+# 11.06.2022 neues Protokoll 122: TM40, Wireless Grill-, Meat-, Roasting-Thermometer with 4 Temperature Sensors
 
 package main;
 
@@ -101,6 +102,7 @@ sub SD_WS_Initialize {
     'SD_WS_115.*'     => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4hum4:Temp/Hum,', autocreateThreshold => '5:120'},
     'SD_WS_116.*'     => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => q{}, autocreateThreshold => '2:180'},
     'SD_WS_117.*'     => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4hum4:Temp/Hum,', autocreateThreshold => '5:120'},
+    'SD_WS_122_T.*'   => { ATTR => 'event-min-interval:.*:60 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4:Temp,', autocreateThreshold => '10:180'},
   };
   return;
 }
@@ -203,6 +205,8 @@ sub SD_WS_Parse {
   my $rawTemp;
   my $temp;
   my $temp2;
+  my $temp3;
+  my $temp4;
   my $hum;
   my $windspeed;
   my $winddir;
@@ -1266,6 +1270,41 @@ sub SD_WS_Parse {
         uv         => sub {my ($rawData,undef) = @_; return substr($rawData,40,3) * 0.1;},
         crcok      => sub {return 1;}, # checks are in SD_Protocols.pm sub ConvBresser_7in1
     },
+    122 => {
+        # TM40, Wireless Grill-, Meat-, Roasting-Thermometer with 4 Temperature Sensors
+        # -----------------------------------------------------------------------------
+        # 0    4    | 8    12   | 16   20   | 24   28   | 32   36   | 40   44   | 48   52   | 56   60   | 64   68   | 72   76   | 80   84   | 88   92   | 96   100  | 104
+				# 1001 0010 | 0110 0011 | 0000 0001 | 0011 0110 | 0000 0001 | 0011 0110 | 0000 0001 | 0100 0000 | 0000 0001 | 0110 1000 | 0000 0000 | 0000 0000 | 1011 1000 | 1000
+        # iiii iiii | iiii iiii | 4444 4444 | 4444 4444 | 3333 3333 | 3333 3333 | 2222 2222 | 2222 2222 | tttt tttt | tttt tttt | ???? ???? | ???? ???? | CCCC CCCC | 1 
+        # i: 16 bit id
+        # 4: 16 bit unsigned temperature 4
+        # 3: 16 bit unsigned temperature 3
+        # 2: 16 bit unsigned temperature 2
+        # t: 16 bit unsigned temperature 1
+        # ?: 16 bit unknown flags
+        # C:  8 bit check???, always changes
+        sensortype => 'TM40',
+        model      => 'SD_WS_122_T',
+        prematch   => sub { return 1; }, # no precheck known
+        id         => sub { my ($rawData,undef) = @_; return substr($rawData,0,4); },
+        temp4      => sub { my (undef,$bitData) = @_;
+                            return if (substr($bitData,80,4) ne '0000');
+                            return SD_WS_binaryToNumber($bitData,16,31) / 10;
+                          },
+        temp3      => sub { my (undef,$bitData) = @_;
+                            return if (substr($bitData,84,4) ne '0000');
+                            return SD_WS_binaryToNumber($bitData,32,47) / 10;
+                          },
+        temp2      => sub { my (undef,$bitData) = @_;
+                            return if (substr($bitData,88,4) ne '0000');
+                            return SD_WS_binaryToNumber($bitData,48,63) / 10;
+                          },
+        temp       => sub { my (undef,$bitData) = @_;
+                            return if (substr($bitData,92,4) ne '0000');
+                            return SD_WS_binaryToNumber($bitData,64,79) / 10;
+                          },
+        crcok      => sub {return 1;}, # Check could not be determined yet.
+    },
   );
 
   Log3 $name, 4, "$name: SD_WS_Parse protocol $protocol, rawData $rawData";
@@ -1580,6 +1619,8 @@ sub SD_WS_Parse {
     $id = $decodingSubs{$protocol}{id}->( $rawData,$bitData );
     $temp = $decodingSubs{$protocol}{temp}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{temp}));
     $temp2 = $decodingSubs{$protocol}{temp2}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{temp2}));
+    $temp3 = $decodingSubs{$protocol}{temp3}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{temp3}));
+    $temp4 = $decodingSubs{$protocol}{temp4}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{temp4}));
     $hum = $decodingSubs{$protocol}{hum}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{hum}));
     $windspeed = $decodingSubs{$protocol}{windspeed}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{windspeed}));
     ($winddir,$winddirtxt) = $decodingSubs{$protocol}{winddir}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{winddir}));
@@ -1663,7 +1704,7 @@ sub SD_WS_Parse {
   return "" if(IsIgnored($name));
 
   if (defined $temp) {
-    if (($temp < -30 || $temp > 70) && $protocol ne '106' && $protocol ne '113') { # not forBBQ temperature sensor GT-TMBBQ-01s and Wireless Grill Thermometer GFGT 433 B1
+    if (($temp < -30 || $temp > 70) && $protocol ne '106' && $protocol ne '113' && $protocol ne '122') { # not forBBQ temperature sensor GT-TMBBQ-01s, Wireless Grill Thermometer GFGT 433 B1 and TM40
       Log3 $name, 3, "$ioname: SD_WS_Parse $deviceCode - ERROR temperature $temp";
       return "";  
     }
@@ -1676,7 +1717,7 @@ sub SD_WS_Parse {
   }
 
   # Sanity checks
-  if($def && $protocol ne '106' && $protocol ne '113') { # not forBBQ temperature sensor GT-TMBBQ-01s and Wireless Grill Thermometer GFGT 433 B1
+  if($def && $protocol ne '106' && $protocol ne '113' && $protocol ne '122') { # not forBBQ temperature sensor GT-TMBBQ-01s, Wireless Grill Thermometer GFGT 433 B1 and TM40
     my $timeSinceLastUpdate = abs(ReadingsAge($name, "state", 0));
     # temperature
     if (defined($temp) && defined(ReadingsVal($name, "temperature", undef))) {
@@ -1739,6 +1780,14 @@ sub SD_WS_Parse {
     $state .= ' ' if (length($state) > 0);
     $state .= "T2: $temp2";
   }
+  if (defined($temp3)) {
+    $state .= ' ' if (length($state) > 0);
+    $state .= "T3: $temp3";
+  }
+  if (defined($temp4)) {
+    $state .= ' ' if (length($state) > 0);
+    $state .= "T4: $temp4";
+  }
   if (defined($hum) && ($hum > 0 && $hum < 100)) {
     $state .= " H: $hum"
   }
@@ -1793,8 +1842,10 @@ sub SD_WS_Parse {
 
   readingsBeginUpdate($hash);
   readingsBulkUpdate($hash, "state", $state);
-  readingsBulkUpdate($hash, "temperature", $temp)  if (defined($temp) && (($temp > -60 && $temp < 70 ) || $protocol eq '106' || $protocol eq '113'));
-  readingsBulkUpdate($hash, "temperature2", $temp2)  if (defined($temp2) && (($temp2 > -60 && $temp < 70 ) || $protocol eq '113'));
+  readingsBulkUpdate($hash, "temperature", $temp)  if (defined($temp) && (($temp > -60 && $temp < 70 ) || $protocol eq '106' || $protocol eq '113' || $protocol eq '122'));
+  readingsBulkUpdate($hash, "temperature2", $temp2)  if (defined($temp2) && (($temp2 > -60 && $temp < 70 ) || $protocol eq '113' || $protocol eq '122'));
+  readingsBulkUpdate($hash, "temperature3", $temp3)  if (defined($temp3) && (($temp3 > -60 && $temp < 70 ) || $protocol eq '122'));
+  readingsBulkUpdate($hash, "temperature4", $temp3)  if (defined($temp4) && (($temp3 > -60 && $temp < 70 ) || $protocol eq '122'));
   readingsBulkUpdate($hash, "humidity", $hum)  if (defined($hum) && ($hum > 0 && $hum < 100 )) ;
   readingsBulkUpdate($hash, 'windSpeed', $windspeed)  if (defined($windspeed)) ;
   readingsBulkUpdate($hash, 'windDirectionDegree', $winddir)  if (defined($winddir)) ;
