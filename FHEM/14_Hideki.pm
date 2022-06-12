@@ -417,7 +417,7 @@ sub wind {
 	$windchill = $windchill / 10;
 	$windspeed = ($Hidekibytes[9] & 0x0f ) * 100 + ($Hidekibytes[8] >> 4) * 10 + ($Hidekibytes[8] & 0x0f);
 	$windgust = ($Hidekibytes[10] >> 4) * 100 + ($Hidekibytes[10] & 0x0f) * 10 + ($Hidekibytes[9] >> 4);
-	my $windSpeedCorr = AttrVal($name,'windSpeedCorr',0); ### -> hierher verschoben
+	my $windSpeedCorr = AttrVal($name,'windSpeedCorr',1); ### -> hierher verschoben
 	if ($windSpeedCorr > 0) {
 		$windspeed = sprintf("%.2f", $windspeed * $windSpeedCorr);
 		$windgust  = sprintf("%.2f", $windgust * $windSpeedCorr);
