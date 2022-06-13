@@ -199,7 +199,7 @@ Hideki_Parse($$)
 		Log3 $name, 4, "$ioname $name Parse: model=12(wind), T: $temp, Wc=$windchill, Ws=$windspeed, Wg=$windgust, Wd=$winddir, WdDeg=$winddirdeg, Wdtxt=$winddirtext";
 	}
 	
-	if (!defined(AttrVal($ioname,"event-min-interval",undef)))
+	if (!defined(AttrVal($name,"event-min-interval",undef)))
 	{
 		my $minsecs = AttrVal($ioname,'minsecs',0);
 		if($hash->{lastReceive} && (time() - $hash->{lastReceive} < $minsecs)) {
