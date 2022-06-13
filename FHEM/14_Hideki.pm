@@ -482,7 +482,7 @@ sub wind {
 	<li>battery & batteryState (ok or low)</li>
 	<li>channel (The Channelnumber (number if)</li>
 	<li>humidity (0-100)</li>
-	<li>state (T:x H:y B:z)</li>
+	<li>state (T:x.xx H:y B:z)</li>
 	<li>temperature (&deg;C)</li>
 	<br><i>- Hideki only -</i>
 	<li>comfort_level (Status: Humidity OK... , Wet. More than 69% RH, Dry. Less than 40% RH, Temperature and humidity comfortable)</li>
@@ -504,8 +504,16 @@ sub wind {
     <li><a href="#ignore">ignore</a></li>
     <li><a href="#readingFnAttributes">readingFnAttributes</a></li>
     <li><a href="#showtime">showtime</a></li>
-    <li><a name="windSpeedCorr"></a>windSpeedCorr<br>
-	correction value of your displayed windSpeed </li>
+	<li><a name="windDirCorr"></a>windDirCorr<br>
+	correction value of your displayed wind direction deztimal degree value. The correction value is added to the measured direction in dgrees.<br>
+	Example value: 5<br>
+	Default value: 0<br>
+	</li>
+	<li><a name="windSpeedCorr"></a>windSpeedCorr<br>
+	correction value of your displayed wind speed as floatingpoint value. The measured speed is multiplied with the specified value. The value 0 disables the feature.<br>
+	Example value: 1.25<br>
+	Default value: 1<br>
+	</li>
   </ul>
   <br>
 </ul>
@@ -553,7 +561,7 @@ sub wind {
 	<li>battery & batteryState (ok oder low)</li>
 	<li>channel (Der Sensor Kanal)</li>
 	<li>humidity (0-100)</li>
-	<li>state (T:x H:y B:z)</li>
+	<li>state (T:x.xx H:y B:z)</li>
 	<li>temperature (&deg;C)</li>
 
 	<br><i>- Hideki spezifisch -</i>
@@ -574,10 +582,16 @@ sub wind {
     <li><a href="#ignore">ignore</a></li>
     <li><a href="#readingFnAttributes">readingFnAttributes</a></li>
     <li><a href="#showtime">showtime</a></li>
-    <li><a name="windSpeedCorr"></a>windSpeedCorr<br>
-	Korrekturwert Ihrer angezeigten Windgeschwindigkeit</li>
- 	</ul>
-  <br>
+	<li><a name="windDirCorr"></a>windDirCorr<br>
+	Korrekturwert Ihrer angezeigten Windrichtung in Grad. Der Korrekturwert wird zu dem gemessenen Grad Wert Addiert.<br>
+	Beispielwert: 5<br>
+	Standardwert: 0<br>
+	</li>
+	<li><a name="windSpeedCorr"></a>windSpeedCorr<br>
+	Korrekturwert Ihrer angezeigten Windgeschwindigkeit als Fließkommezahk. Die gemessene Geschwindigkeit wird mit dem angegeben Wert multiplizuert. Der Wert 0 deaktiviert die Funktion.<br>
+	Beispielwert: 1.25<br>
+	Standardwert: 1<br>
+	</li>  <br>
 </ul>
 
 =end html_DE
