@@ -203,7 +203,7 @@ Hideki_Parse($$)
 	{
 		my $minsecs = AttrVal($ioname,'minsecs',0);
 		if($hash->{lastReceive} && (time() - $hash->{lastReceive} < $minsecs)) {
-			Log3 $iohash, 4, "$name Hideki_Parse: $deviceCode Dropped ($decodedString) due to short time. minsecs=$minsecs";
+			Log3 $name, 4, "$name Hideki_Parse: $deviceCode Dropped ($decodedString) due to short time. minsecs=$minsecs";
 		  	return "";
 		}
 	}
