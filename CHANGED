@@ -1,3 +1,8 @@
+2022-06-14 - Protocol 121 remote control Busch-Transcontrol HF
+           - 14_Hideki.pm - fix (#1099)
+
+2022-05-31 - Protocol 119 Basic funkbus support (#1102)
+
 2022-04-17 - Protocol 85 new sensor TFA 30.3251.10 (#1096)
 
 14_SD_WS.pm - new sensor TFA 30.3251.10, added CRC8 check for protocol 85

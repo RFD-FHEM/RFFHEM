@@ -1,5 +1,5 @@
 #########################################################################################
-# $Id: 14_SD_UT.pm 0 2022-01-23 16:28:56Z sidey79 $
+# $Id: 14_SD_UT.pm 0 2022-06-14 07:33:24Z HomeAutoUser $
 #
 # The file is part of the SIGNALduino project.
 # The purpose of this module is universal support for devices.
@@ -380,6 +380,12 @@
 #     Meikee_24_20D3 learn  MU;P0=-509;P1=513;P2=-999;P3=1027;P4=-12704;D=01230121230301212121212121212141212301212121212303012301212303012121212121212121;CP=1;R=77;
 #     Meikee_21 - remote control with 21 buttons
 #     Same codes as Meikee_24, but different key assignments.
+#}
+###############################################################################################################################################################################
+# - Remote control Busch-Transcontrol HF - Handsender 6861 [Protocol 121]
+#{    elektron-bbs 2022-05-25
+#     TC6861_3DC_1 OFF   MU;P0=28479;P1=-692;P2=260;P3=574;P4=-371;D=0121212121212134343434213434342121213434343434342;CP=2;R=41; 
+#     TC6861_3DC_1 ON    MU;P0=4372;P1=-689;P2=254;P3=575;P4=-368;D=0121213434212134343434213434342121213434343434342;CP=2;R=59;
 #}
 ###############################################################################################################################################################################
 # !!! ToDo´s !!!
@@ -819,6 +825,20 @@ my %models = (
                 Protocol   => 'P114',
                 Typ        => 'remote'
               },
+  'TC6861' => { '0000' => 'off',
+                '0011' => 'on',
+                'ch'   => {
+                            '01111110' => '1',
+                            '01111111' => '2',
+                            '10000000' => '3',
+                            '1' => '01111110',
+                            '2' => '01111111',
+                            '3' => '10000000',
+                          },
+                hex_length => [6],
+                Protocol   => 'P121',
+                Typ        => 'remote'
+              },
   'Meikee_24' => { '00000000' => 'learn',                 # 0x00
                    '00000001' => 'off',                   # 0x01
                    '00000010' => 'on',                    # 0x02
@@ -883,7 +903,7 @@ my %models = (
 #############################
 sub SD_UT_Initialize {
   my ($hash) = @_;
-  $hash->{Match}      = '^P(?:14|20|24|26|29|30|34|46|56|68|69|76|78|81|83|86|90|91|91\.1|92|93|95|97|99|104|105|114|118)#.*';
+  $hash->{Match}      = '^P(?:14|20|24|26|29|30|34|46|56|68|69|76|78|81|83|86|90|91|91\.1|92|93|95|97|99|104|105|114|118|121)#.*';
   $hash->{DefFn}      = \&SD_UT_Define;
   $hash->{UndefFn}    = \&SD_UT_Undef;
   $hash->{ParseFn}    = \&SD_UT_Parse;
@@ -902,6 +922,7 @@ sub SD_UT_Initialize {
     'Momento.*'    => {ATTR => 'model:Momento', FILTER => '%NAME', autocreateThreshold => '3:180', GPLOT => q{}},
     'OR28V.*'      => {ATTR => 'model:OR28V', FILTER => '%NAME', autocreateThreshold => '3:180', GPLOT => q{}},
     'RCnoName20.*' => {ATTR => 'model:RCnoName20', FILTER => '%NAME', autocreateThreshold => '3:180', GPLOT => q{}},
+    'TC6861.*'     => {ATTR => 'model:TR401', FILTER => '%NAME', autocreateThreshold => '3:180', GPLOT => q{}},
     'TR401.*'      => {ATTR => 'model:TR401', FILTER => '%NAME', autocreateThreshold => '3:180', GPLOT => q{}},
     'Techmar.*'    => {ATTR => 'model:Techmar', FILTER => '%NAME', autocreateThreshold => '3:180', GPLOT => q{}},
     'Visivo.*'     => {ATTR => 'model:Visivo', FILTER => '%NAME', autocreateThreshold => '3:180', GPLOT => q{}},
@@ -985,6 +1006,11 @@ sub SD_UT_Define {
   ### [3] checks TR401 (Well-Light) ###
   if ($a[2] eq 'TR401' && not $a[3] =~ /^[0-9]_[1-4]/xms) {
     return "wrong devicecode! ($a[3]) $a[2] must be [0-9]_[1-4]";
+  }
+
+  ### [3] checks TC6861 (Busch-Transcontrol HF) [P121] ###
+  if ($a[2] eq 'TC6861' && not $a[3] =~ /^[0-9A-F]{3}_[1-3]$/xms) {
+    return "SD_UT model $a[2] wrong devicecode: ($a[3]) - must be 3 digit house code (hex 0-9 A-F) _ 1 digit channel (dec 1-3) - e.g. 3DC_1";
   }
 
   $hash->{versionModule} = $VERSION;
@@ -1210,6 +1236,10 @@ sub SD_UT_Set {
     } elsif ($model eq 'TR401') {
       $msg = $models{$model}{Protocol} . q{#};
       $msgEnd = '#R' . $repeats;
+    ############ TC6861 (Busch-Transcontrol HF) [P121] ############
+    } elsif ($model eq 'TC6861') {
+      $msg = $models{$model}{Protocol} . q{#P};
+      $msgEnd = '#R' . $repeats;
     ############ Meikee ############
     } elsif ($model eq 'Meikee_21' || $model eq 'Meikee_24') {
       my $adr = sprintf '%016b' , hex $definition[1]; # argument 1 - adress to binary with 16 bits
@@ -1315,6 +1345,13 @@ sub SD_UT_Set {
         $msg .= $save . $models{$model}{ch}{$ch};
         $msg .= sprintf('%03b', $housecode);
         $msg .= '11111' . $msgEnd;
+      ############ TC6861 (Busch-Transcontrol HF) [P121] ############
+      } elsif ($model eq 'TC6861') {
+        my ($housecode, $ch) = split('_', $definition[1]);
+        $msg .= $save; # on/off
+        $msg .= sprintf('%012b', hex $housecode);
+        $msg .= $models{$model}{ch}{$ch} . $msgEnd;
+        # $msg .= $models{$model}{ch}{$ch} . 'P' . $msgEnd;
       } else {
         $msg .= $save.$msgEnd;
       }
@@ -1537,6 +1574,22 @@ sub SD_UT_Parse {
       $deviceCode = substr($rawData,0,6);
       $devicedef = 'Navaris ' . $deviceCode;
       $def = $modules{SD_UT}{defptr}{$devicedef};
+    }
+    ### TC6861 (Busch-Transcontrol HF) [P121] ###
+    if (!$def && $protocol == 121) {
+      $model = 'TC6861';
+      my $housecode = substr($rawData,1,3);
+      my $ch = substr($bitData,16,8);
+      if ( exists $models{$model}{ch}{$ch} ) {
+        $ch = $models{$model}{ch}{$ch};
+        $deviceCode = $housecode .'_'. $ch;
+        $devicedef = $model .' '. $deviceCode;
+        $def = $modules{SD_UT}{defptr}{$devicedef};
+        $name = $model .'_'. $deviceCode;
+        Log3 $iohash, 5, "$ioname: SD_UT_Parse device TC6861 - housecode=$housecode ch=$ch";
+      } else {
+        return '';
+      }
     }
   }
 
@@ -2027,6 +2080,10 @@ sub SD_UT_Parse {
   } elsif ($model eq 'TR401') {
     $state = substr($bitData,0,1);
     $deviceCode = substr($rawData,1,1) >> 1;
+  ############ TC6861 (Busch-Transcontrol HF) [P121] ############
+  } elsif ($model eq 'TC6861') {
+    $state = substr($bitData,0,4);
+    $deviceCode = substr($rawData,1,3);
   ############ Meikee [P118] ############
   } elsif (($model eq 'Meikee_21' || $model eq 'Meikee_24') && $protocol == 118) {
     $state = substr $bitData,16,8;
@@ -2036,7 +2093,7 @@ sub SD_UT_Parse {
   } else {
     readingsBulkUpdate($hash, 'state', '???');
     readingsBulkUpdate($hash, 'unknownMSG', $bitData.'  (protocol: '.$protocol.')') if (AttrVal($name, 'model', 'unknown') eq 'unknown');
-    Log3 $name, 3, "$ioname: SD_UT Please define your model of Device $name in Attributes!" if (AttrVal($name, 'model', 'unknown') eq 'unknown');
+    Log3 $name, 5, "$ioname: SD_UT Please define your model of Device $name in Attributes!" if (AttrVal($name, 'model', 'unknown') eq 'unknown');
     Log3 $name, 5, "$ioname: SD_UT_Parse devicedef=$devicedef attr_model=$model protocol=$protocol rawData=$rawData, bitData=$bitData";
   }
 
@@ -2337,11 +2394,12 @@ sub SD_UT_tristate2bin {
   <u>The following devices are supported:</u><br>
   <ul>
     <li>AC114-01 remote control&nbsp;&nbsp;&nbsp;<small>(module model: AC114_01, protocol 56)</small></li>
-    <li>BeSmart S4 remote control&nbsp;&nbsp;&nbsp;<small>(module model: BeSmart_S4, protocol 78)</small></li>
     <li>Atlantic Security sensors&nbsp;&nbsp;&nbsp;<small>(module model: MD-2003R, MD-2018R,MD-210R, protocol 91|91.1)</small><br>
     <code>&nbsp;&nbsp;&nbsp;Note: The model MD_230R (water) is recognized as MD-2018R due to the same hardware ID!</code></li>
+    <li>BeSmart S4 remote control&nbsp;&nbsp;&nbsp;<small>(module model: BeSmart_S4, protocol 78)</small></li>
     <li>BF-301 remote control&nbsp;&nbsp;&nbsp;<small>(module model: BF_301, protocol 105)</small></li>
     <li>BOSCH ceiling fan&nbsp;&nbsp;&nbsp;<small>(module model: SF01_01319004_Typ2, protocol 86)</small></li>
+    <li>Busch-Transcontrol HF - remote control 6861&nbsp;&nbsp;&nbsp;<small>(module model: TC6861, protocol 121)</small></li>
     <li>CAME swing gate drive&nbsp;&nbsp;&nbsp;<small>(module model: CAME_TOP_432EV, protocol 86)</small></li>
     <li>ChiliTec LED X-Mas light&nbsp;&nbsp;&nbsp;<small>(module model: Chilitec_22640, protocol 14)</small></li>
     <li>ESTO ceiling lamp&nbsp;&nbsp;&nbsp;<small>(module model: KL_RF01, protocol 93)</small></li>
@@ -2493,7 +2551,7 @@ sub SD_UT_tristate2bin {
     <li><a href="#ignore">ignore</a></li>
     <li><a href="#IODev">IODev</a></li>
     <li><a name="model"></a>model<br>
-      The attribute indicates the model type of your device (AC114_01B, BeSmart_S4, Buttons_five, CAME_TOP_432EV, Chilitec_22640, KL_RF01, HS1-868-BS, HSM4, QUIGG_DMV, LED_XM21_0, Meikee_21, Meikee_24, Momento, Navaris, Novy_840029, Novy_840039, OR28V, RC_10, RH787T, SA_434_1_mini, SF01_01319004, TR60C1, Tedsen_SKX1xx, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx, TR_502MSV, Unitec_47031, unknown).
+      The attribute indicates the model type of your device (AC114_01B, BeSmart_S4, Buttons_five, CAME_TOP_432EV, Chilitec_22640, KL_RF01, HS1-868-BS, HSM4, QUIGG_DMV, LED_XM21_0, Meikee_21, Meikee_24, Momento, Navaris, Novy_840029, Novy_840039, OR28V, RC_10, RH787T, SA_434_1_mini, SF01_01319004, TC6861, TR60C1, Tedsen_SKX1xx, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx, TR_502MSV, Unitec_47031, unknown).
       If the attribute is changed, a new device is created using <a href="#autocreate">autocreate</a>. Autocreate must be activated for this.
     </li>
     <li><a name="repeats"></a>repeats<br>
@@ -2559,11 +2617,12 @@ sub SD_UT_tristate2bin {
   <u>Es werden bisher folgende Ger&auml;te unterst&uuml;tzt:</u><br>
   <ul>
     <li>AC114-01 Fernbedienung&nbsp;&nbsp;&nbsp;<small>(Modulmodel: AC114_01, Protokoll 56)</small></li>
-    <li>BeSmart S4 Fernbedienung&nbsp;&nbsp;&nbsp;<small>(Modulmodel: BeSmart_S4, Protokoll 78)</small></li>
     <li>Atlantic Security Sensoren&nbsp;&nbsp;&nbsp;<small>(Modulmodel: MD-2003R, MD-2018R,MD-210R, Protokoll 91|91.1)</small><br>
     <code>&nbsp;&nbsp;&nbsp;Hinweis: Das Model MD_230R (water) wird aufgrund gleicher Hardwarekennung als MD-2018R erkannt!</code></li>
+    <li>BeSmart S4 Fernbedienung&nbsp;&nbsp;&nbsp;<small>(Modulmodel: BeSmart_S4, Protokoll 78)</small></li>
     <li>BF-301 Fernbedienung&nbsp;&nbsp;&nbsp;<small>(Modulmodel: BF_301, Protokoll 105)</small></li>
     <li>BOSCH Deckenl&uuml;fter&nbsp;&nbsp;&nbsp;<small>(Modulmodel: SF01_01319004_Typ2, Protokoll 86)</small></li>
+    <li>Busch-Transcontrol HF - Handsender 6861&nbsp;&nbsp;&nbsp;<small>(Modulmodel: TC6861, Protokoll 121)</small></li>
     <li>CAME Drehtor Antrieb&nbsp;&nbsp;&nbsp;<small>(Modulmodel: CAME_TOP_432EV, Protokoll 86)</small></li>
     <li>ChiliTec LED Christbaumkerzen&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Chilitec_22640, Protokoll 14)</small></li>
     <li>ESTO Deckenlampe&nbsp;&nbsp;&nbsp;<small>(Modulmodel: KL_RF01, Protokoll 93)</small></li>
@@ -2715,7 +2774,7 @@ sub SD_UT_tristate2bin {
     <li><a href="#ignore">ignore</a></li>
     <li><a href="#IODev">IODev</a></li>
     <li><a name="model"></a>model<br>
-      Diese Attribut bezeichnet den Modelltyp Ihres Ger&auml;tes (AC114_01B, BeSmart_S4, Buttons_five, CAME_TOP_432EV, Chilitec_22640, KL_RF01, HS1-868-BS, HSM4, QUIGG_DMV, LED_XM21_0, Meikee_21, Meikee_24, Momento, Navaris, Novy_840029, Novy_840039, OR28V, RC_10, RH787T, SA_434_1_mini, SF01_01319004, TR60C1, Tedsen_SKX1xx, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx, TR_502MSV, Unitec_47031, unknown).
+      Diese Attribut bezeichnet den Modelltyp Ihres Ger&auml;tes (AC114_01B, BeSmart_S4, Buttons_five, CAME_TOP_432EV, Chilitec_22640, KL_RF01, HS1-868-BS, HSM4, QUIGG_DMV, LED_XM21_0, Meikee_21, Meikee_24, Momento, Navaris, Novy_840029, Novy_840039, OR28V, RC_10, RH787T, SA_434_1_mini, SF01_01319004, TC6861, TR60C1, Tedsen_SKX1xx, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx, TR_502MSV, Unitec_47031, unknown).
       Bei &Auml;nderung des Attributes wird ein neues Gerät mittels <a href="#autocreate">autocreate</a> erzeugt. Autocreate muss dazu aktiviert sein.
     </li>
     <li><a name="repeats"></a>repeats<br>
