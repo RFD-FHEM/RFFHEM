@@ -3192,6 +3192,26 @@ package lib::SD_ProtocolData;
         length_max      => '52',
         method          => \&lib::SD_Protocols::mcBit2Funkbus,
       },
+    "120" =>  ## Weather station TFA 35.1077.54.S2 with 30.3151 (T/H-transmitter), 30.3152 (rain gauge), 30.3153 (anemometer)
+              # https://forum.fhem.de/index.php/topic,119335.msg1221926.html#msg1221926 2022-05-17 @ Ronny2510
+              # SD_WS_120 
+              # SD_WS_120 
+      {
+        name            => 'TFA 35.1077.54.S2',
+        comment         => 'Weatherstation with sensors 30.3151, 30.3152, 30.3153',
+        id              => '120',
+        one             => [1,-2], #  480,-960
+        zero            => [3,-2], # 1440,-960
+        # start           => [-46],  # -22080
+        clockabs        => 480,
+        reconstructBit  => '1',
+        format          => 'twostate',
+        preamble        => 'W120#',
+        clientmodule    => 'SD_WS',
+        modulematch     => '^W120#',
+        length_min      => '78',
+        length_max      => '80',
+      },
     "121" => ## Remote control Busch-Transcontrol HF - Handsender 6861
              # 1 OFF   MU;P0=28479;P1=-692;P2=260;P3=574;P4=-371;D=0121212121212134343434213434342121213434343434342;CP=2;R=41;
              # 1 ON    MU;P0=4372;P1=-689;P2=254;P3=575;P4=-368;D=0121213434212134343434213434342121213434343434342;CP=2;R=59;
