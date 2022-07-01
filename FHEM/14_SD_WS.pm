@@ -1328,10 +1328,10 @@ sub SD_WS_Parse {
                                   1;
                                 };
                                 if ($rc) {
-                                  my $datacheck1 = pack( 'H*', substr($rawData,0,16) );
+                                  my $datacheck1 = pack( 'H*', substr($rawData,2,length($rawData)-2) );
                                   my $crcmein1 = Digest::CRC->new(width => 8, poly => 0x31);
                                   my $rr3 = $crcmein1->add($datacheck1)->hexdigest;
-                                  if ($rr3 != 33) {
+                                  if ($rr3 ne '0') {
                                     Log3 $name, 3, "$name: SD_WS_120 Parse msg $rawData - ERROR CRC8";
                                     return 0;
                                   }
