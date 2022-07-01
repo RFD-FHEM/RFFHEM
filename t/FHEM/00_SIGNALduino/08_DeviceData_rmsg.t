@@ -69,21 +69,18 @@ InternalTimer(time()+1, sub {
   my @TestList = (
      {
        testname	=> 'Test with pre-release SD_Device_ProtocolList',
-       url		=> 'https://raw.githubusercontent.com/RFD-FHEM/SIGNALduino_TOOL/pre-release/FHEM/lib/SD_Device_ProtocolList.json',
-       todo  => 'Checking with pre-release Version of SD_Device_ProtocolList which can fail',
+       url		  => 'https://raw.githubusercontent.com/RFD-FHEM/SIGNALduino_TOOL/pre-release/FHEM/lib/SD_Device_ProtocolList.json',
+       todo     => 'Checking with pre-release Version of SD_Device_ProtocolList which can fail',
      },
      {
        testname	=> 'Test with master SD_Device_ProtocolList',
-       url		=> 'https://raw.githubusercontent.com/RFD-FHEM/SIGNALduino_TOOL/master/FHEM/lib/SD_Device_ProtocolList.json',
-       todo  => 'Checking with master Version of SD_Device_ProtocolList which can fail',
+       url	  	=> 'https://raw.githubusercontent.com/RFD-FHEM/SIGNALduino_TOOL/master/FHEM/lib/SD_Device_ProtocolList.json',
+       todo     => 'Checking with master Version of SD_Device_ProtocolList which can fail',
      },
     {
       testname	=> 'Test with patched SD_Device_ProtocolList',
-      url		=> 'https://raw.githubusercontent.com/RFD-FHEM/SIGNALduino_TOOL/patch-fixTests/FHEM/lib/SD_Device_ProtocolList.json',
+      url		    => 'https://raw.githubusercontent.com/RFD-FHEM/SIGNALduino_TOOL/patch-fixTests/FHEM/lib/SD_Device_ProtocolList.json',
     },
-
-
-
  );
 
 

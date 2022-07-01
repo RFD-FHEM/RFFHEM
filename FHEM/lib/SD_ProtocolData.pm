@@ -1,5 +1,5 @@
 ###########################################################################################################################################
-# $Id: SD_ProtocolData.pm 3.5.4 2022-04-16 09:19:56Z elektron-bbs $
+# $Id: SD_ProtocolData.pm 3.5.4 2022-06-14 07:33:24Z HomeAutoUser $
 # The file is part of the SIGNALduino project.
 # All protocol definitions are contained in this file.
 #
@@ -573,7 +573,7 @@ package lib::SD_ProtocolData;
         format           => 'twostate',
         preamble         => 'P13#',
         clientmodule     => 'FLAMINGO',
-        #modulematch      => '',
+        #      => '',
         length_min       => '24',
         length_max       => '24',
       },
@@ -2864,7 +2864,7 @@ package lib::SD_ProtocolData;
         length_min      => '22',
         length_max      => '22',
       },
-    "107"	=>	## Fine Offset WH51, ECOWITT WH51, MISOL/1, Froggit DP100 Soil Moisture Sensor use with FSK 433.92 MHz
+    "107" =>  ## Fine Offset WH51, ECOWITT WH51, MISOL/1, Froggit DP100 Soil Moisture Sensor use with FSK 433.92 MHz
               # https://forum.fhem.de/index.php/topic,109056.0.html
               # SD_WS_107_H_00C6BF H: 31  MN;D=5100C6BF107F1FF8BBFFFFFFEE22;R=14;
               # SD_WS_107_H_00C6BF H: 34  MN;D=5100C6BF107F22F8C3FFFFFF0443;R=14;
@@ -2884,7 +2884,7 @@ package lib::SD_ProtocolData;
         clientmodule    => 'SD_WS',
         length_min      => '28',
       },
-    "107.1"	=>	# Fine Offset WH51, ECOWITT WH51, MISOL/1, Froggit DP100 Soil Moisture Sensor use with FSK 868.35 MHz
+    "107.1" =>  # Fine Offset WH51, ECOWITT WH51, MISOL/1, Froggit DP100 Soil Moisture Sensor use with FSK 868.35 MHz
       {
         name            => 'WH51 868.35 MHz',
         comment         => 'Fine Offset WH51, ECOWITT WH51, MISOL/1, Froggit DP100 Soil moisture sensor',
@@ -2981,7 +2981,7 @@ package lib::SD_ProtocolData;
         knownFreqs      => '433.92',
         one             => [1,-2], # 480,-960
         zero            => [1,-1], # 480,-480
-        start	          => [1,-2, 1,-1, 1,-2, 1,-2, 1,-2, 1,-2, 1,-2], # Sync 101.1111
+        start           => [1,-2, 1,-1, 1,-2, 1,-2, 1,-2, 1,-2, 1,-2], # Sync 101.1111
         clockabs        => 480,
         format          => 'twostate',
         clientmodule    => 'SD_WS',
@@ -3083,7 +3083,7 @@ package lib::SD_ProtocolData;
         length_min      => '36',
         method          => \&lib::SD_Protocols::ConvBresser_6in1,
       },
-    "116"	=>  ## Thunder and lightning sensor Fine Offset WH57, aka Froggit DP60, aka Ambient Weather WH31L use with FSK 433.92 MHz
+    "116" =>  ## Thunder and lightning sensor Fine Offset WH57, aka Froggit DP60, aka Ambient Weather WH31L use with FSK 433.92 MHz
               # https://forum.fhem.de/index.php/topic,122527.0.html
               # I: lightning   D:  6  MN;D=5780C65505060F6C78;R=39;
               # I: lightning   D: 20  MN;D=5780C655051401C4D0;R=37;
@@ -3103,7 +3103,7 @@ package lib::SD_ProtocolData;
         clientmodule    => 'SD_WS',
         length_min      => '18',
       },
-    "116.1"	=>  ## Thunder and lightning sensor Fine Offset WH57, aka Froggit DP60, aka Ambient Weather WH31L use with FSK 868.35 MHz
+    "116.1" =>  ## Thunder and lightning sensor Fine Offset WH57, aka Froggit DP60, aka Ambient Weather WH31L use with FSK 868.35 MHz
       {
         name            => 'WH57',
         comment         => 'Fine Offset WH57, Ambient Weather WH31L, Froggit DP60 Thunder and Lightning sensor',
@@ -3177,43 +3177,43 @@ package lib::SD_ProtocolData;
         length_min      => '24',
         length_max      => '25',
       },
-    "120" =>  ## Weather station TFA 35.1077.54.S2 with 30.3151 (T/H-transmitter), 30.3152 (rain gauge), 30.3153 (anemometer)
-              # https://forum.fhem.de/index.php/topic,119335.msg1221926.html#msg1221926 2022-05-17 @ Ronny2510
-              # SD_WS_120 T: 27.4 H: 42 W: 1.0 R: 429   MU;P0=-8768;P1=487;P2=-975;P3=1472;P4=-30992;P5=336;P6=-22080;P7=1000;D=012321232323212323232123212321232323232323232121232323232321232323232323232123212123232123212123232123232323212145672121232323232321232123212323232123232321232123212323232323232321212323232323212323232323232321232121232321232121232321232323232121;CP=3;R=25;
-              # SD_WS_120 T: 27.3 H: 43 W: 0.3 R: 429   MU;P0=480;P1=1461;P2=-981;P4=-30992;P5=304;P6=-22040;P7=1072;D=1202120212121212021212021202120202121212121212120212121212121202021212121212021202021212021202021202121212020212045672020212121212120212021202121212120212120212021202021212121212121202121212121212020212121212120212020212120212020212021212120202120;CP=0;R=0;
+    "119" =>  ## Funkbus
+              #
       {
-        name            => 'TFA 35.1077.54.S2',
-        comment         => 'Weatherstation with sensors 30.3151, 30.3152, 30.3153',
-        id              => '120',
-        one             => [1,-2], # -480,960
-        zero            => [3,-2], # 1440,-960
-        start           => [-46,2,-2, 1,-2], # -22080,960,-960,480,-960 (first unused Bit is 1)
-        clockabs        => 480,
+        name            => 'Funkbus',
+        comment         => 'only Typ 43',
+        id              => '119',
+        clockrange      => [490,520],       # min , max
+        format          => 'manchester',
+        clientmodule    => 'IFB',
+        #modulematch     => '',
+        preamble        => 'J',
+        length_min      => '47',
+        length_max      => '52',
+        method          => \&lib::SD_Protocols::mcBit2Funkbus,
+      },
+    "121" => ## Remote control Busch-Transcontrol HF - Handsender 6861
+             # 1 OFF   MU;P0=28479;P1=-692;P2=260;P3=574;P4=-371;D=0121212121212134343434213434342121213434343434342;CP=2;R=41;
+             # 1 ON    MU;P0=4372;P1=-689;P2=254;P3=575;P4=-368;D=0121213434212134343434213434342121213434343434342;CP=2;R=59;
+             # 2 OFF   MU;P0=7136;P1=-688;P2=259;P3=585;P4=-363;D=0121212121212134343434213434342121213434343434343;CP=2;R=59;
+      {
+        name            => 'Busch-Transcontrol',
+        comment         => 'Remote control 6861',
+        id              => '121',
+        one             => [2.2,-1.4], #   572,-364
+        zero            => [1,-2.6],   #   260,-676
+        start           => [-2.6],     #  -675
+        pause           => [120,-2.6], # 31200,-676
+        clockabs        => 260,
         reconstructBit  => '1',
         format          => 'twostate',
-        preamble        => 'W120#',
-        clientmodule    => 'SD_WS',
-        modulematch     => '^W120#',
-        length_min      => '63',
-        length_max      => '68',
+        clientmodule    => 'SD_UT',
+        modulematch     => '^P121#',
+        preamble        => 'P121#',
+        length_min      => '23',
+        length_max      => '24',
       },
-    "120.1" =>
-      {
-        name            => 'TFA 35.1077.54.S2',
-        comment         => 'Weatherstation with sensors 30.3151, 30.3152, 30.3153',
-        id              => '120.1',
-        one             => [1,-2],
-        zero            => [3,-2],
-        start           => [-46,2,-2, 3,-2], # -22080,960,-960,960,-480 (first unused Bit is 0)
-        clockabs        => 480,
-        reconstructBit  => '1',
-        format          => 'twostate',
-        preamble        => 'W120#',
-        clientmodule    => 'SD_WS',
-        modulematch     => '^W119#',
-        length_min      => '63',
-        length_max      => '68',
-      },
+
     ########################################################################
     #### ###  register informations from other hardware protocols  #### ####
 

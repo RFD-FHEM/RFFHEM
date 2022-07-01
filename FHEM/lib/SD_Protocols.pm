@@ -1,5 +1,5 @@
 ################################################################################
-# $Id: SD_ProtocolData.pm 3.5.x 2022-01-30 10:19:30Z elektron-bbs $
+# $Id: SD_ProtocolData.pm 3.5.x 2022-05-30 20:10:51Z sidey79 $
 #
 # The file is part of the SIGNALduino project
 # v3.5.x - https://github.com/RFD-FHEM/RFFHEM
@@ -411,7 +411,118 @@ sub LengthInRange {
   return (1,q{});
 }
 
+
 ############################# package lib::SD_Protocols, test exists
+=item mc2dmc()
+
+This function is a helper for remudlation of a manchester signal to a differental manchester signal afterwards
+
+Input:  $object,$bitData (string)
+Output:
+        string of converted bits
+        or array (-1,"Error message")
+   
+=cut
+
+sub mc2dmc
+{
+  my $self      = shift // carp 'Not called within an object' && return (0,'no object provided');
+  my $bitData   = shift // carp 'bitData must be perovided' && return (0,'no bitData provided');
+
+  my @bitmsg;
+  my $i;
+
+	$bitData =~ s/1/lh/g; # 0 ersetzen mit low high
+	$bitData =~ s/0/hl/g; # 1 ersetzen durch high low ersetzen
+
+	for ($i=1;$i<length($bitData)-1;$i+=2) 
+  {
+    push (@bitmsg, (substr($bitData,$i,1) eq substr($bitData,$i+1,1)) ? 0 : 1);  # demodulated differential manchester
+  }
+  return join "", @bitmsg ; # demodulated differential manchester as string
+}
+
+
+############################# package lib::SD_Protocols, test exists
+=item mcBit2Funkbus()
+
+This function is a output helper for funkbus manchester signals.
+
+Input:  $object,$name,$bitData,$id,$mcbitnum
+Output:
+        hex string
+    or array (-1,"Error message")
+    
+=cut
+
+sub mcBit2Funkbus
+{
+  my $self      = shift // carp 'Not called within an object' && return (0,'no object provided');
+  my $name      = shift // 'anonymous';
+  my $bitData   = shift // carp 'bitData must be perovided' && return (0,'no bitData provided');
+  my $id        = shift // carp 'protocol ID must be provided' && return (0,'no protocolId provided');
+  my $mcbitnum  = shift // length $bitData;
+
+  return (-1,' message is to short') if ($mcbitnum < $self->checkProperty($id,'length_min',-1) );
+  return (-1,' message is to long') if (defined $self->getProperty($id,'length_max' ) && $mcbitnum > $self->getProperty($id,'length_max') );
+
+  $self->_logging( qq[lib/mcBitFunkbus, $name Funkbus: raw=$bitData], 5 );
+
+	$bitData =~ s/1/lh/g; # 0 ersetzen mit low high
+	$bitData =~ s/0/hl/g; # 1 ersdetzen durch high low ersetzen
+ 
+  my $s_bitmsg = $self->mc2dmc($bitData); # Convert to differential manchester
+  
+  if ($id == 119) {
+    my $pos = index($s_bitmsg,'01100');
+    if ($pos >= 0 && $pos < 5) {
+      $s_bitmsg = '001' . substr($s_bitmsg,$pos);
+      return (-1,'wrong bits at begin') if (length($s_bitmsg) < 48);
+    }  else {
+      return (-1,'wrong bits at begin');
+    }
+  } else {
+    $s_bitmsg = q[0] . $s_bitmsg;
+  }
+
+	my $data;
+	my $xor = 0;
+	my $chk = 0;
+	my $p   = 0;  # parity
+	my $hex = q[];
+	for (my $i=0; $i<6;$i++) {  # checksum
+		$data = oct(q[b].substr($s_bitmsg, $i*8,8));
+		$hex .= sprintf('%02X', $data);
+		if ($i<5) {
+			$xor ^= $data;
+		}	else {
+			$chk = $data & 0x0F;
+			$xor ^= $data & 0xE0;
+			$data &= 0xF0;
+		}
+		while ($data) {       # parity
+			$p^=($data & 1);
+			$data>>=1;
+		}
+	}
+  return (-1,'parity error')	if ($p == 1);
+
+	my $xor_nibble = (($xor & 0xF0) >> 4) ^ ($xor & 0x0F);
+	my $result = 0;
+	$result = ($xor_nibble & 0x8) ? $result ^ 0xC : $result;
+  $result = ($xor_nibble & 0x4) ? $result ^ 0x2 : $result;
+  $result = ($xor_nibble & 0x2) ? $result ^ 0x8 : $result;
+  $result = ($xor_nibble & 0x1) ? $result ^ 0x3 : $result;
+  
+  return (-1,'checksum error')	if ($result != $chk);
+
+	$self->_logging( qq[lib/mcBitFunkbus, $name Funkbus: len=]. length($s_bitmsg).q[ bit49=].substr($s_bitmsg,48,1).qq[ parity=$p res=$result chk=$chk msg=$s_bitmsg hex=$hex], 4 );
+  
+	return  (1,$hex);
+}
+
+
+
 =item MCRAW()
 
 This function is desired to be used as a default output helper for manchester signals.
