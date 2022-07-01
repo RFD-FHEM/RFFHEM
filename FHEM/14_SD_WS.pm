@@ -226,6 +226,7 @@ sub SD_WS_Parse {
   my @moisture_map=(0, 7, 13, 20, 27, 33, 40, 47, 53, 60, 67, 73, 80, 87, 93, 99); # ID 115
   my $count;
   my $identified;
+  my $dcf;
 
   my %decodingSubs = (
     50 => # Protocol 50
@@ -1286,13 +1287,40 @@ sub SD_WS_Parse {
         sensortype     => 'TFA_35.1077',
         model          => 'SD_WS_120',
         prematch       => sub {return 1;}, # no precheck known
-        id             => sub {my ($rawData,undef) = @_; return substr($rawData,0,1);},
-        temp           => sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,4,15) * 0.1 - 40;},
-        hum            => sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,16,23);},
-        windspeed      => sub {my (undef,$bitData) = @_; return round((SD_WS_binaryToNumber($bitData,24,31) / 3.0),1);},
-        windgust       => sub {my (undef,$bitData) = @_; return round((SD_WS_binaryToNumber($bitData,32,39) / 3.0),1);},
-        rawRainCounter => sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,40,55);},
-        rain           => sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,40,55) * 0.3;},
+        id             => sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,11,18);},
+        temp           => sub {my (undef,$bitData) = @_;
+                                return if (substr($bitData,19,1) eq '1');
+                                return SD_WS_binaryToNumber($bitData,20,30) * 0.1 - 40;
+                               },
+        hum            => sub {my (undef,$bitData) = @_;
+                                return if (substr($bitData,19,1) eq '1');
+                                return SD_WS_binaryToNumber($bitData,31,38);
+                              },
+        windspeed      => sub {my (undef,$bitData) = @_;
+                                return if (substr($bitData,19,1) eq '1');
+                                return round((SD_WS_binaryToNumber($bitData,39,46) / 3.0),1);
+                              },
+        windgust       => sub {my (undef,$bitData) = @_;
+                                return if (substr($bitData,19,1) eq '1');
+                                return round((SD_WS_binaryToNumber($bitData,47,54) / 3.0),1);
+                              },
+        rawRainCounter => sub {my (undef,$bitData) = @_;
+                                return if (substr($bitData,19,1) eq '1');
+                                return SD_WS_binaryToNumber($bitData,55,70);
+                              },
+        rain           => sub {my (undef,$bitData) = @_;
+                                return if (substr($bitData,19,1) eq '1');
+                                return SD_WS_binaryToNumber($bitData,55,70) * 0.3;
+                              },
+        dcf            => sub {my (undef,$bitData) = @_;
+                                return if (substr($bitData,19,1) eq '0');
+                                return '20' . SD_WS_binaryToNumber($bitData,47,50) . SD_WS_binaryToNumber($bitData,51,54) . '-' # year
+                                       . substr($bitData,58,1) . SD_WS_binaryToNumber($bitData,59,62) . '-' # month
+                                       . SD_WS_binaryToNumber($bitData,65,66) . SD_WS_binaryToNumber($bitData,67,70) . ' ' # day
+                                       . SD_WS_binaryToNumber($bitData,25,26) . SD_WS_binaryToNumber($bitData,27,30) . ':' # hour 
+                                       . SD_WS_binaryToNumber($bitData,32,34) . SD_WS_binaryToNumber($bitData,35,38) . ':' # minute
+                                       . SD_WS_binaryToNumber($bitData,40,42) . SD_WS_binaryToNumber($bitData,43,46) . ' ' # second
+                              },
         crcok          => sub {my $rawData = shift;
                                 my $rc = eval {
                                   require Digest::CRC;
@@ -1654,6 +1682,7 @@ sub SD_WS_Parse {
     $identified = $decodingSubs{$protocol}{identified}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{identified}));
     $uv = $decodingSubs{$protocol}{uv}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{uv}));
     $brightness = $decodingSubs{$protocol}{brightness}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{brightness}));
+    $dcf = $decodingSubs{$protocol}{dcf}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{dcf}));
     Log3 $iohash, 4, "$name: SD_WS_Parse decoded protocol-id $protocol ($SensorTyp), sensor-id $id";
   }
   else {
@@ -1869,6 +1898,7 @@ sub SD_WS_Parse {
   readingsBulkUpdate($hash, 'identified', $identified)  if (defined($identified));
   readingsBulkUpdate($hash, "uv", $uv)  if (defined($uv));
   readingsBulkUpdate($hash, 'brightness', $brightness)  if (defined($brightness));
+  readingsBulkUpdate($hash, 'dcf', $dcf)  if (defined($dcf));
   readingsEndUpdate($hash, 1); # Notify is done by Dispatch
 
   return $name;
