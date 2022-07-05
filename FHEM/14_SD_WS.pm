@@ -1245,7 +1245,7 @@ sub SD_WS_Parse {
         # t = trailer
         sensortype => 'Bresser_7in1',
         model      => 'SD_WS_117',
-        prematch   => sub { return 1; }, # no precheck known
+        prematch   => sub {my $rawData = shift; return 1 if ($rawData =~ /^[0-9A-F]{8}[0-9]{3}[0-9A-F]{3}[0-9]{12}[0-9A-F]{2}[0-9]{15}/); },
         id         => sub {my ($rawData,undef) = @_; return substr($rawData,4,4); },
         winddir    => sub {my ($rawData,undef) = @_;
                             $winddir = substr($rawData,8,3);
