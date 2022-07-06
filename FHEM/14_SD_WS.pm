@@ -1273,17 +1273,28 @@ sub SD_WS_Parse {
         # Weather station TFA 35.1077.54.S2 with 30.3151 (T/H-transmitter), 30.3152 (rain gauge), 30.3153 (anemometer)
         # ------------------------------------------------------------------------------------------------------------
         # https://forum.fhem.de/index.php/topic,119335.msg1221926.html#msg1221926
-        # 1 2 3 4 5 6 7 8 
-        # ----------------
-        # 82564A030405982C   original message: T: 19.8 H: 74 W: 1.0 R: 429.6
-        # ?TTTHHWWGGRRRRCC
-        # ? -  4 bit unknown
-        # T - 12 bit temperature in 1/10 °C, offset 40
+        # 0    4    | 8    12   | 16   20   | 24   28   | 32   36   | 40   44   | 48   52   | 56   60   | 64   68   | 72   76
+        # 1111 1110 | 1010 1011 | 0000 0100 | 1001 1110 | 1010 1010 | 0000 1000 | 0000 1100 | 0000 1100 | 0101 0011 | 0000 0000 - T: 19.1 H: 85 W: 1.3 R: 473.1
+        # PPPP PPPW | WWWI IIII | IIIF TTTT | TTTT TTTH | HHHH HHHS | SSSS SSSG | GGGG GGGR | RRRR RRRR | RRRR RRR? | CCCC CCCC
+        # 1111 1110 | 1100 1011 | 0001 0101 | 0011 0000 | 0000 0110 | 0000 1100 | 0100 0100 | 1000 1100 | 0100 1111 | 1011 1000 - 2022-06-27 18:03:06
+        # PPPP PPPW | WWWI IIII | IIIF ???? | ?hhh hhh? | mmmm mmm? | ssss sssY | YYYY YYY? | ??MM MMM? | ?DDD DDD? | CCCC CCCC
+        # P -  7 bit preamble
+        # W -  4 bit whid, 0101=weather, 0110=time
+        # I -  8 bit ident
+        # F -  1 bit flag, 0=weather, 1=time
+        # T - 11 bit temperature in 1/10 °C, offset 40
         # H -  8 bit humidity in percent
-        # W -  8 bit windspeed in 1/10 m/s, resolution 0.33333
+        # S -  8 bit windspeed in 1/10 m/s, resolution 0.33333
         # G -  8 bit windgust in 1/10 m/s, resolution 0.33333
         # R - 16 bit rain counter, resolution 0.3 mm
         # C -  8 bit CRC8 of the all 8 bytes, result must be 33 (Polynomial 0x31)
+        # h -  6 bit hour, BCD coded
+        # m -  7 bit minute, BCD coded
+        # s -  7 bit second, BCD coded
+        # Y -  8 bit year, BCD coded
+        # M -  5 bit month, BCD coded
+        # D -  6 bit day, BCD coded
+        # ? -  x bit unknown
         sensortype     => 'TFA_35.1077',
         model          => 'SD_WS_120',
         prematch       => sub {return 1;}, # no precheck known
