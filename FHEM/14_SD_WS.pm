@@ -1342,7 +1342,7 @@ sub SD_WS_Parse {
                                   my $datacheck1 = pack( 'H*', substr($rawData,2,length($rawData)-2) );
                                   my $crcmein1 = Digest::CRC->new(width => 8, poly => 0x31);
                                   my $rr3 = $crcmein1->add($datacheck1)->hexdigest;
-                                  if ($rr3 ne '0') {
+                                  if (hex($rr3) != 0) {
                                     Log3 $name, 3, "$name: SD_WS_120 Parse msg $rawData - ERROR CRC8";
                                     return 0;
                                   }
