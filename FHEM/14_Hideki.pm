@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 14_Hideki.pm 21666 2022-01-24 20:29:33Z sidey79 $
+# $Id: 14_Hideki.pm 21666 2022-06-13 21:18:14Z HomeAutoUser $
 # The file is taken from the SIGNALduino project
 # see http://www.fhemwiki.de/wiki/SIGNALduino
 # and was modified by a few additions
@@ -79,9 +79,9 @@ Hideki_Parse($$)
 	my ($iohash,$msg) = @_;
 	my (undef ,$rawData) = split("#",$msg);
 
-	my $name = $iohash->{NAME};
+	my $ioname = $iohash->{NAME};
 	my @a = split("", $msg);
-	Log3 $iohash, 4, "$name Hideki_Parse: incomming $msg";
+	Log3 $iohash, 4, "$ioname Hideki_Parse: incomming $msg";
 
 	my @decodedData;
 	my $crc1crc2OK = 0;
@@ -93,16 +93,16 @@ Hideki_Parse($$)
 
 	# decrypt and decodedBytes are now done with decryptAndCheck
 	my $decodedString = join '', unpack('H*', pack('C*',@decodedData)); # get hex string
-	Log3 $iohash, 4, "$name Hideki_Parse: raw=$rawData, decoded=$decodedString";
+	Log3 $iohash, 4, "$ioname Hideki_Parse: raw=$rawData, decoded=$decodedString";
 	 
 	if (!@decodedData) {
-		Log3 $iohash, 4, "$name Hideki_Parse: decrypt failed";
+		Log3 $iohash, 4, "$ioname Hideki_Parse: decrypt failed";
 		return '';
 	}
 	
-	Log3 $iohash, 5, "$name Hideki_Parse: getSensorType for ".$decodedData[3];
+	Log3 $iohash, 5, "$ioname Hideki_Parse: getSensorType for ".$decodedData[3];
 	my $sensorTyp=($decodedData[3] & 0x1F);
-	Log3 $iohash, 4, "$name Hideki_Parse: SensorTyp = $sensorTyp decodedString = $decodedString";
+	Log3 $iohash, 4, "$ioname Hideki_Parse: SensorTyp = $sensorTyp decodedString = $decodedString";
 
 	my $id=substr($decodedString,2,2);      # get the random id from the data
 	my $channel=0;
@@ -136,75 +136,74 @@ Hideki_Parse($$)
 		elsif ($comfort == 2) { $comfort = 'Dry. Less than 40% RH' }
 		elsif ($comfort == 3) { $comfort = 'Temp. and Hum. comfortable' }
 		$val = "T: $temp H: $hum";
-		Log3 $iohash, 4, "$name decoded Hideki protocol model=$model, sensor id=$id, channel=$channel, cnt=$count, bat=$bat, temp=$temp, humidity=$hum, comfort=$comfort";
+		Log3 $iohash, 4, "$ioname decoded Hideki protocol model=$model, sensor id=$id, channel=$channel, cnt=$count, bat=$bat, temp=$temp, humidity=$hum, comfort=$comfort";
 	}elsif($sensorTyp==31){
 		($channel, $temp) = decodeThermo(\@decodedData);
 		$bat = ($decodedData[2] >> 6 == 3) ? 'ok' : 'low';			 # decode battery
 		$count = $decodedData[3] >> 6;		# verifiziert, MSG_Counter
 		$val = "T: $temp";
-		Log3 $iohash, 4, "$name decoded Hideki protocol model=$model, sensor id=$id, channel=$channel, cnt=$count, bat=$bat, temp=$temp";
+		Log3 $iohash, 4, "$ioname decoded Hideki protocol model=$model, sensor id=$id, channel=$channel, cnt=$count, bat=$bat, temp=$temp";
 	}elsif($sensorTyp==14){
 		($channel, $rain) = decodeRain(\@decodedData); # decodeThermoHygro($decodedString);
 		$bat = ($decodedData[2] >> 6 == 3) ? 'ok' : 'low';			 # decode battery
 		$count = $decodedData[3] >> 6;		# UNVERIFIZIERT, MSG_Counter
 		$val = "R: $rain";
-		Log3 $iohash, 4, "$name decoded Hideki protocol model=$model, sensor id=$id, channel=$channel, cnt=$count, bat=$bat, rain=$rain, unknown=$unknown";
+		Log3 $iohash, 4, "$ioname decoded Hideki protocol model=$model, sensor id=$id, channel=$channel, cnt=$count, bat=$bat, rain=$rain, unknown=$unknown";
 	}elsif($sensorTyp==12){
 		($channel, $temp) = decodeThermo(\@decodedData); # decodeThermoHygro($decodedString);
-		($windchill,$windspeed,$windgust,$winddir,$winddirdeg,$winddirtext) = wind(\@decodedData);
+		#($windchill,$windspeed,$windgust,$winddir,$winddirdeg,$winddirtext) = wind(\@decodedData);  ## nach unten verschoben
 		$bat = ($decodedData[2] >> 6 == 3) ? 'ok' : 'low';			 # decode battery
 		$count = $decodedData[3] >> 6;		# UNVERIFIZIERT, MSG_Counter
-		$val = "T: $temp  Ws: $windspeed  Wg: $windgust  Wd: $winddirtext";
-		Log3 $iohash, 4, "$name decoded Hideki protocol model=$model, sensor id=$id, channel=$channel, cnt=$count, bat=$bat, temp=$temp, Wc=$windchill, Ws=$windspeed, Wg=$windgust, Wd=$winddir, WdDeg=$winddirdeg, Wdtxt=$winddirtext";
+		#$val = "T: $temp  Ws: $windspeed  Wg: $windgust  Wd: $winddirtext";  ## nach unten verschoben
+		Log3 $iohash, 4, "$ioname decoded Hideki protocol model=$model, sensor id=$id, channel=$channel, cnt=$count, bat=$bat, temp=$temp";
 	}elsif($sensorTyp==13){
 		($channel, $temp) = decodeThermo(\@decodedData); # decodeThermoHygro($decodedString);
 		$bat = ($decodedData[2] >> 6 == 3) ? 'ok' : 'low';			 # decode battery
 		$count = $decodedData[3] >> 6;		# UNVERIFIZIERT, MSG_Counter
 		$val = "T: $temp";
-		Log3 $iohash, 4, "$name decoded Hideki protocol model=$model, sensor id=$id, channel=$channel, cnt=$count, bat=$bat, temp=$temp";
-		Log3 $iohash, 4, "$name Sensor Typ $sensorTyp currently not full supported, please report sensor information!";
+		Log3 $iohash, 4, "$ioname decoded Hideki protocol model=$model, sensor id=$id, channel=$channel, cnt=$count, bat=$bat, temp=$temp";
+		Log3 $iohash, 4, "$ioname Sensor Typ $sensorTyp currently not full supported, please report sensor information!";
 	}
 	else{
-		Log3 $iohash, 4, "$name Sensor Typ $sensorTyp not supported, please report sensor information!";
+		Log3 $iohash, 4, "$ioname Sensor Typ $sensorTyp not supported, please report sensor information!";
 		return "";
 	}
 	my $longids = AttrVal($iohash->{NAME},'longids',0);
 	if ( ($longids ne "0") && ($longids eq "1" || $longids eq "ALL" || (",$longids," =~ m/,$model,/)))
 	{
 		$deviceCode=$model . "_" . $id . "." . $channel;
-		Log3 $iohash,4, "$name Hideki_Parse: using longid: $longids model: $model";
+		Log3 $iohash,4, "$ioname Hideki_Parse: using longid: $longids model: $model";
 	} else {
 		$deviceCode = $model . "_" . $channel;
 	}
 
-	Log3 $iohash, 5, "$name Hideki_Parse deviceCode: $deviceCode";
+	Log3 $iohash, 5, "$ioname Hideki_Parse deviceCode: $deviceCode";
 
 	my $def = $modules{Hideki}{defptr}{$iohash->{NAME} . "." . $deviceCode};
 	$def = $modules{Hideki}{defptr}{$deviceCode} if(!$def);
 
 	if(!$def) {
-		Log3 $iohash, 1, "$name Hideki: UNDEFINED sensor $deviceCode detected, code $msg";
+		Log3 $iohash, 1, "$ioname Hideki: UNDEFINED sensor $deviceCode detected, code $msg";
 		return "UNDEFINED $deviceCode Hideki $deviceCode";
 	}
 
 	my $hash = $def;
-	$name = $hash->{NAME};
+	my $name = $hash->{NAME};
 	return "" if(IsIgnored($name));
 
 	#Log3 $name, 4, "Hideki: $name ($msg)";
 	
-	my $WindSpeedCorr = AttrVal($name,"windSpeedCorr",0);
-	if ($WindSpeedCorr > 0 && $sensorTyp == 12) {
-		$windspeed = sprintf("%.2f", $windspeed * $WindSpeedCorr);
-		$windgust  = sprintf("%.2f", $windgust * $WindSpeedCorr);
-		Log3 $name, 4, "$name Hideki_Parse: WindSpeedCorr=$WindSpeedCorr, WindSpeed=$windspeed, WindGust=$windgust";
+	if ($sensorTyp == 12) {	# Wind
+		($windchill,$windspeed,$windgust,$winddir,$winddirdeg,$winddirtext) = wind($name, \@decodedData);
+		$val = "T: $temp  Ws: $windspeed  Wg: $windgust  Wd: $winddirtext";
+		Log3 $name, 4, "$ioname $name Parse: model=12(wind), T: $temp, Wc=$windchill, Ws=$windspeed, Wg=$windgust, Wd=$winddir, WdDeg=$winddirdeg, Wdtxt=$winddirtext";
 	}
 	
-	if (!defined(AttrVal($hash->{NAME},"event-min-interval",undef)))
+	if (!defined(AttrVal($name,"event-min-interval",undef)))
 	{
-		my $minsecs = AttrVal($iohash->{NAME},'minsecs',0);
+		my $minsecs = AttrVal($ioname,'minsecs',0);
 		if($hash->{lastReceive} && (time() - $hash->{lastReceive} < $minsecs)) {
-			Log3 $iohash, 4, "$name Hideki_Parse: $deviceCode Dropped ($decodedString) due to short time. minsecs=$minsecs";
+			Log3 $name, 4, "$name Hideki_Parse: $deviceCode Dropped ($decodedString) due to short time. minsecs=$minsecs";
 		  	return "";
 		}
 	}
@@ -399,7 +398,9 @@ sub decodeRain {
 
 # P12#758BB244074007400F00001C6E7A01
 sub wind {
+	my $name = shift;
 	my @Hidekibytes = @{$_[0]};
+	my @wd=(0, 15, 13, 14, 9, 10, 12, 11, 1, 2, 4, 3, 8, 7, 5, 6);
 	my @winddir_name=("N","NNE","NE","ENE","E","ESE","SE","SSE","S","SSW","SW","WSW","W","WNW","NW","NNW");
 	my $windspeed;
 	my $windchill;
@@ -416,7 +417,19 @@ sub wind {
 	$windchill = $windchill / 10;
 	$windspeed = ($Hidekibytes[9] & 0x0f ) * 100 + ($Hidekibytes[8] >> 4) * 10 + ($Hidekibytes[8] & 0x0f);
 	$windgust = ($Hidekibytes[10] >> 4) * 100 + ($Hidekibytes[10] & 0x0f) * 10 + ($Hidekibytes[9] >> 4);
-	$winddir = ($Hidekibytes[11] >> 4); 
+	my $windSpeedCorr = AttrVal($name,'windSpeedCorr',1); ### -> hierher verschoben
+	if ($windSpeedCorr > 0) {
+		$windspeed = sprintf("%.2f", $windspeed * $windSpeedCorr);
+		$windgust  = sprintf("%.2f", $windgust * $windSpeedCorr);
+		Log3 $name, 5, "$name Hideki_Parse: WindSpeedCorr factor=$windSpeedCorr";
+	}
+	$winddir = $wd[$Hidekibytes[11] >> 4];
+	my $windDirCorr = AttrVal($name,'windDirCorr',0);
+	if ($windDirCorr > 0) {
+		$winddir += $windDirCorr;
+		$winddir &= 15;
+		Log3 $name, 5, "$name Hideki_Parse: windDirCorr=$windDirCorr";
+	}
 	$winddirtext = $winddir_name[$winddir]; 
 	$winddirdeg = $winddir * 22.5;
   	
@@ -469,7 +482,7 @@ sub wind {
 	<li>battery & batteryState (ok or low)</li>
 	<li>channel (The Channelnumber (number if)</li>
 	<li>humidity (0-100)</li>
-	<li>state (T:x H:y B:z)</li>
+	<li>state (T:x.xx H:y B:z)</li>
 	<li>temperature (&deg;C)</li>
 	<br><i>- Hideki only -</i>
 	<li>comfort_level (Status: Humidity OK... , Wet. More than 69% RH, Dry. Less than 40% RH, Temperature and humidity comfortable)</li>
@@ -491,8 +504,16 @@ sub wind {
     <li><a href="#ignore">ignore</a></li>
     <li><a href="#readingFnAttributes">readingFnAttributes</a></li>
     <li><a href="#showtime">showtime</a></li>
-    <li><a name="windSpeedCorr"></a>windSpeedCorr<br>
-	correction value of your displayed windSpeed </li>
+	<li><a name="windDirCorr"></a>windDirCorr<br>
+	correction value of your displayed wind direction deztimal degree value. The correction value is added to the measured direction in dgrees.<br>
+	Example value: 5<br>
+	Default value: 0<br>
+	</li>
+	<li><a name="windSpeedCorr"></a>windSpeedCorr<br>
+	correction value of your displayed wind speed as floatingpoint value. The measured speed is multiplied with the specified value. The value 0 disables the feature.<br>
+	Example value: 1.25<br>
+	Default value: 1<br>
+	</li>
   </ul>
   <br>
 </ul>
@@ -540,7 +561,7 @@ sub wind {
 	<li>battery & batteryState (ok oder low)</li>
 	<li>channel (Der Sensor Kanal)</li>
 	<li>humidity (0-100)</li>
-	<li>state (T:x H:y B:z)</li>
+	<li>state (T:x.xx H:y B:z)</li>
 	<li>temperature (&deg;C)</li>
 
 	<br><i>- Hideki spezifisch -</i>
@@ -561,10 +582,16 @@ sub wind {
     <li><a href="#ignore">ignore</a></li>
     <li><a href="#readingFnAttributes">readingFnAttributes</a></li>
     <li><a href="#showtime">showtime</a></li>
-    <li><a name="windSpeedCorr"></a>windSpeedCorr<br>
-	Korrekturwert Ihrer angezeigten Windgeschwindigkeit</li>
- 	</ul>
-  <br>
+	<li><a name="windDirCorr"></a>windDirCorr<br>
+	Korrekturwert Ihrer angezeigten Windrichtung in Grad. Der Korrekturwert wird zu dem gemessenen Grad Wert Addiert.<br>
+	Beispielwert: 5<br>
+	Standardwert: 0<br>
+	</li>
+	<li><a name="windSpeedCorr"></a>windSpeedCorr<br>
+	Korrekturwert Ihrer angezeigten Windgeschwindigkeit als Fließkommezahk. Die gemessene Geschwindigkeit wird mit dem angegeben Wert multiplizuert. Der Wert 0 deaktiviert die Funktion.<br>
+	Beispielwert: 1.25<br>
+	Standardwert: 1<br>
+	</li>  <br>
 </ul>
 
 =end html_DE
