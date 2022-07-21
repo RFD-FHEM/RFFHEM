@@ -283,8 +283,8 @@ sub Set {
         return "Please provide valid number between 0 and 255"
     }
 	elsif($cmd eq "on" ) {
-        my $rgbcolor = ReadingsVal( $name, 'rgbcolor', '000000' );
-        my $rgbcolor_sel = ReadingsVal( $name, 'rgbcolor_sel', '000000' );
+        my $rgbcolor = ReadingsVal( $name, 'rgbcolor', 'FFFFFF' );
+        my $rgbcolor_sel = ReadingsVal( $name, 'rgbcolor_sel', 'FFFFFF' );
         my $white = ReadingsVal( $name, 'white', '00' );
         my $white_sel = ReadingsVal( $name, 'white_sel', '00' );
         if( hex($rgbcolor) != hex($rgbcolor_sel) ){
@@ -309,7 +309,7 @@ sub Set {
 	}
     elsif($cmd eq "h") {
         if( looks_like_number($value) && 0 <= $value  && $value <= 360 ){
-            my $rgbcolor = ReadingsVal( $name, 'rgbcolor', '000000' );
+            my $rgbcolor = ReadingsVal( $name, 'rgbcolor', 'FFFFFF' );
             my @rgb = Color::hex2rgb($rgbcolor);
             my ($h ,$s ,$v ) = Color::rgb2hsv( $rgb[0] / 255, $rgb[1] / 255, $rgb[2] / 255 );
             $h = $value / 360;
@@ -323,7 +323,7 @@ sub Set {
 	}
     elsif($cmd eq "brightness") {
         if( looks_like_number($value) && 0 <= $value  && $value <= 100 ){
-            my $rgbcolor = ReadingsVal( $name, 'rgbcolor', '000000' );
+            my $rgbcolor = ReadingsVal( $name, 'rgbcolor', 'FFFFFF' );
             my @rgb = Color::hex2rgb($rgbcolor);
             my ($h ,$s ,$v ) = Color::rgb2hsv( $rgb[0] / 255, $rgb[1] / 255, $rgb[2] / 255 );
             $v = $value / 100;
@@ -337,7 +337,7 @@ sub Set {
     }
     elsif($cmd eq "saturation") {
         if( looks_like_number($value) && 0 <= $value  && $value <= 100 ){
-            my $rgbcolor = ReadingsVal( $name, 'rgbcolor', '000000' );
+            my $rgbcolor = ReadingsVal( $name, 'rgbcolor', 'FFFFFF' );
             my @rgb = Color::hex2rgb($rgbcolor);
             my ($h ,$s ,$v ) = Color::rgb2hsv( $rgb[0] / 255, $rgb[1] / 255, $rgb[2] / 255 );
             $s = $value / 100;
