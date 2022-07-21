@@ -158,7 +158,7 @@ return;
 sub Undef {
     my ( $hash, $name ) = @_;
     delete( $modules{LTECH}{defptr}{$hash->{CODE}} );
-    return undef;
+    return;
 }
 
 #############################
@@ -178,7 +178,7 @@ sub Notify {
 
 sub Delete {
     my ( $hash, $name ) = @_;
-    return undef;
+    return;
 }
 
 #############################
