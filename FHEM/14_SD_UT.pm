@@ -2169,7 +2169,7 @@ sub SD_UT_Attr {
 
   if ($cmd eq 'set') {
     if ($attrName eq 'repeats' && $attrValue !~ m/^[1-9]{1,2}$/xms) {
-      return "$name: Unallowed value $attrValue for the attribute repetition (must be 1 - 9)!";
+      return "$name: Unallowed value $attrValue for the attribute repetition (must be 1 - 99)!";
     }
     if ($attrName eq 'UTfrequency' && ($attrValue !~ m/^[1-9]{1}[0-9]{0,2}\.?[0-9]*$/xms || $attrValue >= 1000.0)) {
       return "$name: Invalid value $attrValue for the UTfrequency attribute. Values ​​such as: 433.92 are permitted.";
