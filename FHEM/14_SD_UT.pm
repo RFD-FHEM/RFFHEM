@@ -2168,7 +2168,7 @@ sub SD_UT_Attr {
   my $hex_length = length(InternalVal($name, 'lastMSG', '0'));
 
   if ($cmd eq 'set') {
-    if ($attrName eq 'repeats' && $attrValue !~ m/^[1-9]$/xms) {
+    if ($attrName eq 'repeats' && $attrValue !~ m/^[1-9]{1,2}$/xms) {
       return "$name: Unallowed value $attrValue for the attribute repetition (must be 1 - 9)!";
     }
     if ($attrName eq 'UTfrequency' && ($attrValue !~ m/^[1-9]{1}[0-9]{0,2}\.?[0-9]*$/xms || $attrValue >= 1000.0)) {
