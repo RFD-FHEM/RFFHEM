@@ -207,7 +207,7 @@ sub SD_WS_Parse {
   my $windspeed;
   my $winddir;
   my $winddirtxt;
-  my @winddirtxtar=('N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW');
+  my @winddirtxtar=('N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW','N');
   my $windgust;
   my $trend;
   my $trendTemp;
