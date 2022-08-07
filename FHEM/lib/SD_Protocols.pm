@@ -6,7 +6,11 @@
 #
 # 2016-2019  S.Butzek, Ralf9
 # 2019-2021  S.Butzek, HomeAutoUser, elektron-bbs
+# 2022       S.Butzek, HomeAutoUser, elektron-bbs, uwekaditz
 #
+################################################################################
+# 2.07 2022-08-07 uwekaditz
+# - CHG: mcBit2SomfyRTS() remove leading '0' in any Somfy telegram if it is not expected
 ################################################################################
 package lib::SD_Protocols;
 
@@ -16,7 +20,7 @@ use Carp qw(croak carp);
 use constant HAS_DigestCRC => defined eval { require Digest::CRC; };
 use constant HAS_JSON => defined eval { require JSON; };
 
-our $VERSION = '2.06';
+our $VERSION = '2.07';
 use Storable qw(dclone);
 use Scalar::Util qw(blessed);
 
@@ -1085,9 +1089,15 @@ sub mcBit2SomfyRTS {
 
   $self->_logging( qq[lib/mcBit2SomfyRTS, bitdata: $bitData ($mcbitnum)], 4 );
 
-  if ($mcbitnum == 57) {
-    $bitData = substr($bitData, 1, 56);
+  # remove leading '0' in any Somfy telegram if it is not expected
+  if ($mcbitnum == 57 || ($mcbitnum == 81 && substr($bitData,0,1) eq '0'))  {
+    $bitData = substr($bitData, 1, $mcbitnum - 1);
     $self->_logging( qq[lib/mcBit2SomfyRTS, bitdata: $bitData, truncated to length: ]. length($bitData), 4 );
+  }
+  elsif ($mcbitnum == 80 && substr($bitData, 0, 4) eq '0101') {
+    $bitData = substr($bitData, 1, $mcbitnum - 1);
+    $bitData = $bitData . '0';
+    $self->_logging( qq[lib/mcBit2SomfyRTS, bitdata: $bitData, start from Bit1: ]. length($bitData), 4 );
   }
   my $encData = lib::SD_Protocols::binStr2hexStr($bitData);
 
