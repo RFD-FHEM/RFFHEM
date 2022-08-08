@@ -1091,10 +1091,12 @@ sub mcBit2SomfyRTS {
 
   # remove leading '0' in any Somfy telegram if it is not expected
   if ($mcbitnum == 57 || ($mcbitnum == 81 && substr($bitData,0,1) eq '0'))  {
+    # length not correct, byt leading '0' -> remove leading '0'
     $bitData = substr($bitData, 1, $mcbitnum - 1);
     $self->_logging( qq[lib/mcBit2SomfyRTS, bitdata: $bitData, truncated to length: ]. length($bitData), 4 );
   }
   elsif ($mcbitnum == 80 && substr($bitData, 0, 4) eq '0101') {
+  # length correct but telegram does not start with character 'A' , remove leading '0' and add a '0' at the end, see https://forum.fhem.de/index.php/topic,72173.msg1075881.html#msg1075881
     $bitData = substr($bitData, 1, $mcbitnum - 1);
     $bitData = $bitData . '0';
     $self->_logging( qq[lib/mcBit2SomfyRTS, bitdata: $bitData, start from Bit1: ]. length($bitData), 4 );
