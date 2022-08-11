@@ -1843,9 +1843,9 @@ sub SD_WS_Parse {
   readingsBeginUpdate($hash);
   readingsBulkUpdate($hash, "state", $state);
   readingsBulkUpdate($hash, "temperature", $temp)  if (defined($temp) && (($temp > -60 && $temp < 70 ) || $protocol eq '106' || $protocol eq '113' || $protocol eq '122'));
-  readingsBulkUpdate($hash, "temperature2", $temp2)  if (defined($temp2) && (($temp2 > -60 && $temp < 70 ) || $protocol eq '113' || $protocol eq '122'));
-  readingsBulkUpdate($hash, "temperature3", $temp3)  if (defined($temp3) && (($temp3 > -60 && $temp < 70 ) || $protocol eq '122'));
-  readingsBulkUpdate($hash, "temperature4", $temp3)  if (defined($temp4) && (($temp3 > -60 && $temp < 70 ) || $protocol eq '122'));
+  readingsBulkUpdate($hash, "temperature2", $temp2)  if (defined($temp2) && (($temp2 > -60 && $temp2 < 70 ) || $protocol eq '113' || $protocol eq '122'));
+  readingsBulkUpdate($hash, "temperature3", $temp3)  if (defined($temp3) && (($temp3 > -60 && $temp3 < 70 ) || $protocol eq '122'));
+  readingsBulkUpdate($hash, "temperature4", $temp4)  if (defined($temp4) && (($temp4 > -60 && $temp4 < 70 ) || $protocol eq '122'));
   readingsBulkUpdate($hash, "humidity", $hum)  if (defined($hum) && ($hum > 0 && $hum < 100 )) ;
   readingsBulkUpdate($hash, 'windSpeed', $windspeed)  if (defined($windspeed)) ;
   readingsBulkUpdate($hash, 'windDirectionDegree', $winddir)  if (defined($winddir)) ;
