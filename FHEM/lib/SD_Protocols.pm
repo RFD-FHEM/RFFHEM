@@ -9,8 +9,10 @@
 # 2022       S.Butzek, HomeAutoUser, elektron-bbs, uwekaditz
 #
 ################################################################################
+# 2.07 2022-08-14 uwekaditz
+# - CHG: mcBit2SomfyRTS() remove leading '0' in Somfy telegram that should start with '8' or 'F' if it is not expected
 # 2.07 2022-08-07 uwekaditz
-# - CHG: mcBit2SomfyRTS() remove leading '0' in any Somfy telegram if it is not expected
+# - CHG: mcBit2SomfyRTS() remove leading '0' in Somfy telegram that should start with 'A' if it is not expected
 ################################################################################
 package lib::SD_Protocols;
 
@@ -1095,8 +1097,8 @@ sub mcBit2SomfyRTS {
     $bitData = substr($bitData, 1, $mcbitnum - 1);
     $self->_logging( qq[lib/mcBit2SomfyRTS, bitdata: $bitData, truncated to length: ]. length($bitData), 4 );
   }
-  elsif ($mcbitnum == 80 && substr($bitData, 0, 4) eq '0101') {
-  # length correct but telegram does not start with character 'A' , remove leading '0' and add a '0' at the end, see https://forum.fhem.de/index.php/topic,72173.msg1075881.html#msg1075881
+  elsif ($mcbitnum == 80 && ((substr($bitData, 0, 5) eq '01010') || (substr($bitData, 0, 5) eq '01000') || (substr($bitData, 0, 5) eq '01111')) {
+  # length correct but telegram does not start with character 'A', '8' or 'F' , remove leading '0' and add a '0' at the end, see https://forum.fhem.de/index.php/topic,72173.msg1075881.html#msg1075881
     $bitData = substr($bitData, 1, $mcbitnum - 1);
     $bitData = $bitData . '0';
     $self->_logging( qq[lib/mcBit2SomfyRTS, bitdata: $bitData, start from Bit1: ]. length($bitData), 4 );
