@@ -228,6 +228,7 @@ sub SD_WS_Parse {
   my @moisture_map=(0, 7, 13, 20, 27, 33, 40, 47, 53, 60, 67, 73, 80, 87, 93, 99); # ID 115
   my $count;
   my $identified;
+  my $transmitter;
 
   my %decodingSubs = (
     50 => # Protocol 50
@@ -1275,34 +1276,39 @@ sub SD_WS_Parse {
         # -----------------------------------------------------------------------------
         # 0    4    | 8    12   | 16   20   | 24   28   | 32   36   | 40   44   | 48   52   | 56   60   | 64   68   | 72   76   | 80   84   | 88   92   | 96   100  | 104
         # 1001 0010 | 0110 0011 | 0000 0001 | 0011 0110 | 0000 0001 | 0011 0110 | 0000 0001 | 0100 0000 | 0000 0001 | 0110 1000 | 0000 0000 | 0000 0000 | 1011 1000 | 1000
-        # iiii iiii | iiii iiii | 4444 4444 | 4444 4444 | 3333 3333 | 3333 3333 | 2222 2222 | 2222 2222 | tttt tttt | tttt tttt | ???? ???? | ???? ???? | CCCC CCCC | 1 
-        # i: 16 bit id
-        # 4: 16 bit unsigned temperature 4
-        # 3: 16 bit unsigned temperature 3
-        # 2: 16 bit unsigned temperature 2
-        # t: 16 bit unsigned temperature 1
-        # ?: 16 bit unknown flags
-        # C:  8 bit check???, always changes
+        # iiii iiii | iiii iiii | 4444 4444 | 4444 4444 | 3333 3333 | 3333 3333 | 2222 2222 | 2222 2222 | tttt tttt | tttt tttt | ???? ???? | b??? p??? | CCCC CCCC | 1 
+        # i: 16 bit id, changes when the batteries are inserted
+        # 4: 16 bit unsigned temperature 4, 65235 = sensor not connected
+        # 3: 16 bit unsigned temperature 3, 65235 = sensor not connected
+        # 2: 16 bit unsigned temperature 2, 65235 = sensor not connected
+        # t: 16 bit unsigned temperature 1, 65235 = sensor not connected
+        # b:  1 bit battery. 0 = Ok, 1 = Low
+        # p:  1 bit transmitter power. 0 = On, 1 = off
+        # ?: 16 bit flags, 4 bits per sensor, meaning of the lower 3 bits 101 = not connected, 000 = connected
+        # C:  8 bit check???, always changes bit 1-7, bit 0 always 0
+        # Sensor transmits at intervals of about 3 to 4 seconds
         sensortype => 'TM40',
         model      => 'SD_WS_122_T',
         prematch   => sub { return 1; }, # no precheck known
         id         => sub { my ($rawData,undef) = @_; return substr($rawData,0,4); },
         temp4      => sub { my (undef,$bitData) = @_;
-                            return if (substr($bitData,80,4) ne '0000');
+                             return if (substr($bitData,81,3) ne '000');
                             return SD_WS_binaryToNumber($bitData,16,31) / 10;
                           },
         temp3      => sub { my (undef,$bitData) = @_;
-                            return if (substr($bitData,84,4) ne '0000');
+                             return if (substr($bitData,85,3) ne '000');
                             return SD_WS_binaryToNumber($bitData,32,47) / 10;
                           },
         temp2      => sub { my (undef,$bitData) = @_;
-                            return if (substr($bitData,88,4) ne '0000');
+                             return if (substr($bitData,89,3) ne '000');
                             return SD_WS_binaryToNumber($bitData,48,63) / 10;
                           },
         temp       => sub { my (undef,$bitData) = @_;
-                            return if (substr($bitData,92,4) ne '0000');
+                             return if (substr($bitData,93,3) ne '000');
                             return SD_WS_binaryToNumber($bitData,64,79) / 10;
                           },
+        bat         => sub { my (undef,$bitData) = @_; return substr($bitData,88,1) eq "0" ? "ok" : "low"; },
+        transmitter => sub { my (undef,$bitData) = @_; return substr($bitData,92,1) eq "0" ? "on" : "off"; },
         crcok      => sub {return 1;}, # Check could not be determined yet.
     },
   );
@@ -1647,6 +1653,7 @@ sub SD_WS_Parse {
     $identified = $decodingSubs{$protocol}{identified}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{identified}));
     $uv = $decodingSubs{$protocol}{uv}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{uv}));
     $brightness = $decodingSubs{$protocol}{brightness}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{brightness}));
+    $transmitter = $decodingSubs{$protocol}{transmitter}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{transmitter}));
     Log3 $iohash, 4, "$name: SD_WS_Parse decoded protocol-id $protocol ($SensorTyp), sensor-id $id";
   }
   else {
@@ -1872,6 +1879,7 @@ sub SD_WS_Parse {
   readingsBulkUpdate($hash, 'identified', $identified)  if (defined($identified));
   readingsBulkUpdate($hash, "uv", $uv)  if (defined($uv));
   readingsBulkUpdate($hash, 'brightness', $brightness)  if (defined($brightness));
+  readingsBulkUpdateIfChanged($hash, 'transmitter', $transmitter)  if (defined($transmitter));
   readingsEndUpdate($hash, 1); # Notify is done by Dispatch
 
   return $name;
