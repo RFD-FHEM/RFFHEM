@@ -16,7 +16,7 @@ use warnings;
 my $version = "1.0";
 
 
-sub LTECH_Initialize($) {
+sub LTECH_Initialize {
     my ($hash) = @_;
     $hash->{SetFn}    = \&FHEM::LTECH::Set;
     $hash->{DefFn}    = \&FHEM::LTECH::Define;
@@ -186,7 +186,6 @@ sub Parse {
     my @args;
     my ( $hash, $msg ) = @_;
 	my $name = $hash->{NAME};
-    return "" if ( IsDisabled($name) );	
 	my ( undef, $rawData ) = split( "#", $msg );
     $rawData = uc unpack 'H*',pack 'B*', unpack 'b*', pack 'H*' , $rawData; 
     Log3 $hash, 2, "LTECH: $rawData";
@@ -219,7 +218,6 @@ sub Parse {
 		Log3 $hash, 2, "LTECH: unknown device $deviceCode, please define it";
         return "UNDEFINED LTECH_$deviceCode LTECH $deviceCode";
 	}
-	$def->{STATE}= "Defined";
 	$def->{bitMSG} =  $bitData;
   	$def->{lastMSG} = substr($rawData,8,18); 
     
@@ -265,11 +263,11 @@ sub Set {
 	my ( $hash, $name, @args ) = @_;
 	my $cmd    = $args[0]; 
 	my $value  = $args[1];
-	Log3( $name, 4, "LTECH: eingehende Werte $cmd , $value");
+	Log3( $name, 4, "LTECH_Set: eingehende Werte $cmd , $value");
 
 
 	if($cmd eq "rgbcolor" ) { 
-        if($value =~ m/[[:xdigit:]]{6}/){
+        if($value =~ m/^[[:xdigit:]]{6}$/){
             readingsSingleUpdate($hash, 'rgbcolor_sel', uc $value, 1);
             return
         }
@@ -371,8 +369,8 @@ sub Set {
 sub Icon {
    my ($name,$icon) = @_;
    my $hash = $defs{$name};
-   my $state = ReadingsVal( $name, 'brightness', 'undef' );
-   my $rgbcolor = ReadingsVal( $name, 'rgbcolor', 'undef' );
+   my $state = ReadingsVal( $name, 'brightness', '0' );
+   my $rgbcolor = ReadingsVal( $name, 'rgbcolor', '000000' );
    $hash->{STATE} = $state / 2.55 ;
    my $sticon = ".*:light_light_dim_". ($state / 2.55)."0\@".$rgbcolor;
    return $sticon ;

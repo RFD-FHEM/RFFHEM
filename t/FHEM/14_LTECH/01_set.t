@@ -102,7 +102,7 @@ InternalTimer(time()+1, sub {
 		
         my $ret = FHEM::LTECH::Set($hash,$devicename,split(/ /,$cmd)); 
         is($ret, U(), q[check return is undef]);
-        is(ReadingsVal($devicename,'rgbcolor','000000'),'7F7F7F','check reading for devices');
+        is(ReadingsVal($devicename,'rgbcolor','000000'),'7F1900','check reading for devices');
 	};
 
     $cmd=q[saturation ];
@@ -136,7 +136,7 @@ InternalTimer(time()+1, sub {
 		
         my $ret = FHEM::LTECH::Set($hash,$devicename,split(/ /,$cmd)); 
         is($ret, U(), q[check return is undef]);
-        is(ReadingsVal($devicename,'rgbcolor','0000000'),'7F0000','check reading for devices');
+        is(ReadingsVal($devicename,'rgbcolor','0000000'),'7F1700','check reading for devices');
 	};
     
     $cmd=q[h ];
