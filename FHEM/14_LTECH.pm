@@ -366,17 +366,6 @@ sub Set {
 	return "Unknown argument $cmd, choose one of " . join( " ", @cList );
 }
 #############################
-sub Icon {
-   my ($name,$icon) = @_;
-   my $hash = $defs{$name};
-   my $state = ReadingsVal( $name, 'brightness', '0' );
-   my $rgbcolor = ReadingsVal( $name, 'rgbcolor', '000000' );
-   $hash->{STATE} = $state / 2.55 ;
-   my $sticon = ".*:light_light_dim_". ($state / 2.55)."0\@".$rgbcolor;
-   return $sticon ;
-
-}
-#############################
 sub CRC16 {
    my ($string) = @_;
    $ctx->add( (pack 'H*' ,$string) );
