@@ -1275,19 +1275,20 @@ sub SD_WS_Parse {
         # https://forum.fhem.de/index.php/topic,119335.msg1221926.html#msg1221926
         # 0    4    | 8    12   | 16   20   | 24   28   | 32   36   | 40   44   | 48   52   | 56   60   | 64   68   | 72   76
         # 1111 1110 | 1010 1011 | 0000 0100 | 1001 1110 | 1010 1010 | 0000 1000 | 0000 1100 | 0000 1100 | 0101 0011 | 0000 0000 - T: 19.1 H: 85 W: 1.3 R: 473.1
-        # PPPP PPPW | WWWI IIII | IIIF TTTT | TTTT TTTH | HHHH HHHS | SSSS SSSG | GGGG GGGR | RRRR RRRR | RRRR RRR? | CCCC CCCC
+        # PPPP PPPW | WWWI IIII | IIIF BTTT | TTTT TTTH | HHHH HHHS | SSSS SSSG | GGGG GGGR | RRRR RRRR | RRRR RRR? | CCCC CCCC
         # 1111 1110 | 1100 1011 | 0001 0101 | 0011 0000 | 0000 0110 | 0000 1100 | 0100 0100 | 1000 1100 | 0100 1111 | 1011 1000 - 2022-06-27 18:03:06
         # PPPP PPPW | WWWI IIII | IIIF ???? | ?hhh hhh? | mmmm mmm? | ssss sssY | YYYY YYY? | ??MM MMM? | ?DDD DDD? | CCCC CCCC
         # P -  7 bit preamble
         # W -  4 bit whid, 0101=weather, 0110=time
         # I -  8 bit ident
         # F -  1 bit flag, 0=weather, 1=time
-        # T - 11 bit temperature in 1/10 °C, offset 40
+        # B -  1 bit battery
+        # T - 10 bit temperature in 1/10 °C, offset 40
         # H -  8 bit humidity in percent
         # S -  8 bit windspeed in 1/10 m/s, resolution 0.33333
         # G -  8 bit windgust in 1/10 m/s, resolution 0.33333
         # R - 16 bit rain counter, resolution 0.3 mm
-        # C -  8 bit CRC8 of the all 8 bytes, result must be 33 (Polynomial 0x31)
+        # C -  8 bit CRC8 of byte 1-10 bytes, result must be 0 (Polynomial 0x31)
         # h -  6 bit hour, BCD coded
         # m -  7 bit minute, BCD coded
         # s -  7 bit second, BCD coded
@@ -1299,9 +1300,10 @@ sub SD_WS_Parse {
         model          => 'SD_WS_120',
         prematch       => sub {return 1;}, # no precheck known
         id             => sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,11,18);},
+        bat            => sub {my (undef,$bitData) = @_; return substr($bitData,20,1) eq '0' ? 'ok' : 'low';},
         temp           => sub {my (undef,$bitData) = @_;
                                 return if (substr($bitData,19,1) eq '1');
-                                return SD_WS_binaryToNumber($bitData,20,30) * 0.1 - 40;
+                                return SD_WS_binaryToNumber($bitData,21,30) * 0.1 - 40;
                                },
         hum            => sub {my (undef,$bitData) = @_;
                                 return if (substr($bitData,19,1) eq '1');
