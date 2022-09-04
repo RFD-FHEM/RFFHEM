@@ -1,4 +1,4 @@
-# $Id: 14_SD_WS.pm v3.5.4 2022-07-05 18:47:28Z elektron-bbs $
+# $Id: 14_SD_WS.pm v3.5.4 2022-08-21 12:09:21Z elektron-bbs $
 #
 # The purpose of this module is to support serval
 # weather sensors which use various protocol
@@ -207,7 +207,7 @@ sub SD_WS_Parse {
   my $windspeed;
   my $winddir;
   my $winddirtxt;
-  my @winddirtxtar=('N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW');
+  my @winddirtxtar=('N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW','N');
   my $windgust;
   my $trend;
   my $trendTemp;
