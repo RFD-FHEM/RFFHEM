@@ -2168,12 +2168,9 @@ sub SD_UT_Attr {
   my $hex_length = length(InternalVal($name, 'lastMSG', '0'));
 
   if ($cmd eq 'set') {
-    if ($attrName eq 'repeats' && $attrValue !~ m/^[1-9]{1,2}$/xms) {
-      return "$name: Unallowed value $attrValue for the attribute repetition (must be 1 - 99)!";
-    }
-    if ($attrName eq 'UTfrequency' && ($attrValue !~ m/^[1-9]{1}[0-9]{0,2}\.?[0-9]*$/xms || $attrValue >= 1000.0)) {
-      return "$name: Invalid value $attrValue for the UTfrequency attribute. Values ​​such as: 433.92 are permitted.";
-    }
+    
+    return qq[$name: Unallowed value $attrValue for the attribute repetition (must be 1 - 99)!] if ($attrName eq q[repeats] && $attrValue !~ m/^[1-9]{1,2}$/xms);
+    return qq[$name: Invalid value $attrValue for the UTfrequency attribute. Values ​​such as: 433.92 are permitted.] if ($attrName eq q[UTfrequency] && ($attrValue !~ m/^[1-9]{1}[0-9]{0,2}\.?[0-9]*$/xms || $attrValue >= 1000.0));
 
     ############ change device models ############
     if ($attrName eq 'model' && $attrValue ne $oldmodel) {
