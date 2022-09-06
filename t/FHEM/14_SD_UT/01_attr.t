@@ -52,11 +52,12 @@ InternalTimer(time()+0.4, sub {
     my $v = q[Buttons_five];
     subtest qq[Change module attribute to buttons_five] => sub { 
         plan(2);
-
+        $defs{$sensorname}{lastMSG} = q[010];
         CommandAttr(undef,qq[$sensorname $attr $v]); 
         isnt($attr{$sensorname}{$attr}, $v, qq[check attribute $attr isnt $v]);
         
-        $defs{$sensorname}{bitMSG} = q[011111111110];
+        $defs{$sensorname}{bitMSG} = q[010];
+        CommandAttr(undef,qq[$sensorname $attr $v]);     
         is($attr{$sensorname}{$attr}, $v, qq[check attribute $attr is $v]);
     };
 
@@ -64,11 +65,12 @@ InternalTimer(time()+0.4, sub {
     my $v = q[Buttons_six];
     subtest qq[Change module attribute to buttons_six] => sub { 
         plan(2);
-
+        $defs{$sensorname}{bitMSG} = undef;
         CommandAttr(undef,qq[$sensorname $attr $v]); 
         isnt($attr{$sensorname}{$attr}, $v, qq[check attribute $attr is not $v]);
         
-        $defs{$sensorname}{bitMSG} = q[011111111110];
+        $defs{$sensorname}{bitMSG} = q[010];
+        CommandAttr(undef,qq[$sensorname $attr $v]); 
         is($attr{$sensorname}{$attr}, $v, qq[check attribute $attr is $v]);
     };
 
