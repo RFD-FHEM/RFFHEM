@@ -33,7 +33,7 @@ InternalTimer(time()+0.4, sub {
     my $attr = q[UTfrequency];
     subtest qq[set $sensorname $attr 0.00] => sub {
         plan(4);
-        for my $v (qw(1.00 433.92 933 999.99)) {
+        for my $v (qw(300.00 433.92 933 999.99)) {
             CommandAttr(undef,qq[$sensorname $attr $v]); 
             is($attr{$sensorname}{$attr}, $v, qq[check attribute $attr is $v]);
         }

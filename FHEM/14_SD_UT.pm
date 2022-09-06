@@ -2169,8 +2169,8 @@ sub SD_UT_Attr {
 
   if ($cmd eq 'set') {
     
-    return qq[$name: Unallowed value $attrValue for the attribute repetition (must be 1 - 99)!] if ($attrName eq q[repeats] && $attrValue !~ m/^[1-9]{1,2}$/xms);
-    return qq[$name: Invalid value $attrValue for the UTfrequency attribute. Values ​​such as: 433.92 are permitted.] if ($attrName eq q[UTfrequency] && ($attrValue !~ m/^[1-9]{1}[0-9]{0,2}\.?[0-9]*$/xms || $attrValue >= 1000.0));
+    return qq[$name: Unallowed value $attrValue for the attribute repetition (must be 1 - 99)!] if ($attrName eq q[repeats] && $attrValue !~ m/^[1-9]{1}[0-9]{0,1}$/xms);
+    return qq[$name: Invalid value $attrValue for the UTfrequency attribute. Values ​​such as: 433.92 (300.00-999.99 MHz) are permitted.] if ($attrName eq q[UTfrequency] && ($attrValue !~ m/^[3-9]{1}[\d]{2}$|^[3-9]{1}[\d]{2}\.{1}[\d]*$/xms));
 
     ############ change device models ############
     if ($attrName eq 'model' && $attrValue ne $oldmodel) {
