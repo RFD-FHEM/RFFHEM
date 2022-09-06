@@ -2577,14 +2577,14 @@ sub SD_UT_tristate2bin {
       If the attribute is changed, a new device is created using <a href="#autocreate">autocreate</a>. Autocreate must be activated for this.
     </li>
     <li><a name="repeats"></a>repeats<br>
-      This attribute can be used to adjust how many repetitions are sent. Default is 5.
+      This attribute can be used to adjust how many repetitions are sent. Default is 5. Valid values are 1-99.
     </li>
     <li><a name="UTclock"></a>UTclock<br>
       This attribute set the base clock when sending. There is no standard value.<br>
       Exception: The model Novy_840039 has a preset base clock of 375. You can manually adjust this individually with this attribute.
     </li>
     <li><a name="UTfrequency"></a>UTfrequency<br>
-      An individual transmission frequency can be set with this attribute. If this attribute is not set, the transmission frequency of the IO device (e.g. Signalduino) is used.
+      An individual transmission frequency can be set with this attribute. If this attribute is not set, the transmission frequency of the IO device (e.g. Signalduino) is used. Valid values 300.00-999.99 Mhz.
     </li>
   </ul>
   <br><br>
@@ -2802,14 +2802,14 @@ sub SD_UT_tristate2bin {
       Bei &Auml;nderung des Attributes wird ein neues Gerät mittels <a href="#autocreate">autocreate</a> erzeugt. Autocreate muss dazu aktiviert sein.
     </li>
     <li><a name="repeats"></a>repeats<br>
-      Mit diesem Attribut kann angepasst werden, wie viele Wiederholungen gesendet werden. Standard ist 5.
+      Mit diesem Attribut kann angepasst werden, wie viele Wiederholungen gesendet werden. Standard ist 5. Erlaubte Werte 1-99.
     </li>
     <li><a name="UTclock"></a>UTclock<br>
       Mit diesem Attribut kann der Basistakt beim Senden eingestellt werden. Einen Standardwert gibt es nicht.<br>
       Ausnahme: Das Model Novy_840039 hat einen voreingestellten Basistakt von 375. Auch diesen kann man mit dem Attribut individuell anpassen.
     </li>
     <li><a name="UTfrequency"></a>UTfrequency<br>
-      Mit diesem Attribut kann eine individuelle Sendefrequenz eingestellt werden. Ist dieses Attribut nicht gesetzt, wird die Sendefrequenz des IO Devices (z.B. Signalduino) verwendet.
+      Mit diesem Attribut kann eine individuelle Sendefrequenz eingestellt werden. Ist dieses Attribut nicht gesetzt, wird die Sendefrequenz des IO Devices (z.B. Signalduino) verwendet. Erlaubte Werte 300.00-999.99 Mhz.
     </li>
   </ul>
   <br><br>
