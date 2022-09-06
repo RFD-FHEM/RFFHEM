@@ -1,4 +1,4 @@
-# $Id: 14_SD_WS.pm v3.5.4 2022-04-16 09:19:56Z elektron-bbs $
+# $Id: 14_SD_WS.pm v3.5.4 2022-08-21 12:09:21Z elektron-bbs $
 #
 # The purpose of this module is to support serval
 # weather sensors which use various protocol
@@ -209,7 +209,7 @@ sub SD_WS_Parse {
   my $windspeed;
   my $winddir;
   my $winddirtxt;
-  my @winddirtxtar=('N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW');
+  my @winddirtxtar=('N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW','N');
   my $windgust;
   my $trend;
   my $trendTemp;
@@ -1248,7 +1248,7 @@ sub SD_WS_Parse {
         # t = trailer
         sensortype => 'Bresser_7in1',
         model      => 'SD_WS_117',
-        prematch   => sub { return 1; }, # no precheck known
+        prematch   => sub {my $rawData = shift; return 1 if ($rawData =~ /^[0-9A-F]{8}[0-9]{3}[0-9A-F]{3}[0-9]{12}[0-9A-F]{2}[0-9]{15}/); },
         id         => sub {my ($rawData,undef) = @_; return substr($rawData,4,4); },
         winddir    => sub {my ($rawData,undef) = @_;
                             $winddir = substr($rawData,8,3);
