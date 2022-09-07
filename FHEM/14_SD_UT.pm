@@ -1,5 +1,5 @@
 #########################################################################################
-# $Id: 14_SD_UT.pm 0 2022-06-14 07:33:24Z HomeAutoUser $
+# $Id: 14_SD_UT.pm 0 2022-09-06 20:56:47Z elektron-bbs $
 #
 # The file is part of the SIGNALduino project.
 # The purpose of this module is universal support for devices.
@@ -21,6 +21,9 @@
 #{    FORUM: https://forum.fhem.de/index.php/topic,58397.960.html | https://forum.fhem.de/index.php/topic,53282.30.html
 #     Adresse e | 1110 (off|off|off|on): fan_off         |  get sduino_dummy raw MU;;P0=250;;P1=-492;;P2=166;;P3=-255;;P4=491;;P5=-8588;;D=052121212121234121212121234521212121212341212121212345212121212123412121212123452121212121234121212121234;;CP=0;;
 #}    Adresse e | 1110 (off|off|off|on): fan low speed   |  get sduino_dummy raw MU;;P0=-32001;;P1=224;;P2=-255;;P3=478;;P4=-508;;P6=152;;P7=-8598;;D=01234141414641414141414123712341414141414141414141237123414141414141414141412371234141414141414141414123712341414141414141414141237123414141414141414141412371234141414141414141414123712341414141414141414141237123414141414141414141412371234141414141414141;;CP=1;;R=108;;O;;
+# - Westinghouse Deckenventilator (Typ HT12E | remote with 6 buttons, with light dimmer | Buttons_six - 7787800) [Protocol 29] (start -35) (1 = off | 0 = on)
+#{    FORUM: https://forum.fhem.de/index.php/topic,53282.msg1229192.html#msg1229192
+#}    Adresse E | 1110 (off|off|off|on): light_dimm | get sduino_dummy rawmsg MU;P0=24164;P1=-495;P2=191;P3=-271;P4=415;P5=-8052;D=01212341212121212121212345212123412121212121212123452121234121212121212121234521212341212121212121212345212123412121212121212123452121234121212121212121234521212341212121212121212345212123412121212121212123452121234121212121212121234521212341212121212121;CP=2;R=52;O;
 ####################################################################################################################################
 # - Westinghouse Deckenventilator (Typ [M1EN compatible HT12E] example Delancey | remote RH787T with 9 buttons + SET) [Protocol 83] and [additionally Protocol 30] (sync -36) (1 = off | 0 = on)
 #{    Adresse 0 | 0000 (on|on|on|on): I - fan minimum speed  |  get sduino_dummy raw MU;;P0=388;;P1=-112;;P2=267;;P3=-378;;P5=585;;P6=-693;;P7=-11234;;D=0123035353535356262623562626272353535353562626235626262723535353535626262356262627235353535356262623562626272353535353562626235626262723535353535626262356262627235353535356262623562626272353535353562626235626262723535353535626262356262627235353535356262;;CP=2;;R=43;;O;;
@@ -399,7 +402,7 @@ use strict;
 use warnings;
 no warnings 'portable';  # Support for 64-bit ints required
 
-our $VERSION = '2022-03-02';
+our $VERSION = '2022-07-27';
 
 sub SD_UT_bin2tristate;
 sub SD_UT_tristate2bin;
@@ -412,6 +415,16 @@ my %models = (
                       '111101'   => '3_fan_high_speed',
                       '101111'   => 'light_on_off',
                       '111110'   => 'fan_off',
+                      hex_length => [3],
+                      Protocol   => 'P29',
+                      Typ        => 'remote'
+                    },
+  'Buttons_six' => { '011111'   => '1_fan_low_speed',
+                     '111011'   => '2_fan_medium_speed',
+                     '111101'   => '3_fan_high_speed',
+                     '111110'   => 'fan_off',
+                     '101111'   => 'light_on_off',
+                     '110111'   => 'light_dimm',
                       hex_length => [3],
                       Protocol   => 'P29',
                       Typ        => 'remote'
@@ -945,8 +958,8 @@ sub SD_UT_Define {
   ### checks unknown ###
   return "wrong define: <model> $a[2] need no HEX-Value to define!" if($a[2] eq 'unknown' && $a[3] && length($a[3]) >= 1);
 
-  ### checks Westinghouse_Delancey RH787T & WestinghouseButtons_five & TR60C-1 ###
-  if ($a[2] eq 'RH787T' || $a[2] eq 'Buttons_five' || $a[2] eq 'TR60C1') {
+  ### checks Westinghouse_Delancey RH787T & Westinghouse Buttons_five & Buttons_six & TR60C-1 ###
+  if ($a[2] eq 'RH787T' || $a[2] eq 'Buttons_five' || $a[2] eq 'Buttons_six' || $a[2] eq 'TR60C1') {
     if (length($a[3]) > 1) {
       return "wrong HEX-Value! $a[2] must have one HEX-Value";
     }
@@ -1077,8 +1090,8 @@ sub SD_UT_Set {
         }
       }
       $msgEnd = '#R' . $repeats;
-    ############ Westinghouse Buttons_five ############
-    } elsif ($model eq 'Buttons_five') {
+    ############ Westinghouse Buttons_five / Buttons_six ############
+    } elsif ($model eq 'Buttons_five' || $model eq 'Buttons_six') {
       my $adr = sprintf( "%04b", hex($definition[1]));  # argument 1 - adress to binary with 4 digits
       $msg = $models{$model}{Protocol} . '#';
       $msgEnd .= '11'.$adr.'#R' . $repeats;
@@ -1436,6 +1449,12 @@ sub SD_UT_Parse {
     if (!$def && ($protocol == 29 || $protocol == 30)) {
       $deviceCode = substr($rawData,2,1);
       $devicedef = 'Buttons_five ' . $deviceCode;
+      $def = $modules{SD_UT}{defptr}{$devicedef};
+    }
+    ### Westinghouse Buttons_six [P29] ###
+    if (!$def && ($protocol == 29 || $protocol == 30)) {
+      $deviceCode = substr($rawData,2,1);
+      $devicedef = 'Buttons_six ' . $deviceCode;
       $def = $modules{SD_UT}{defptr}{$devicedef};
     }
     ### Unitec_47031 [P30] ###
@@ -1862,8 +1881,8 @@ sub SD_UT_Parse {
     $deviceCodeUser = substr($deviceCodeUser, 0 , length($deviceCodeUser)-1);
     $deviceCode = $deviceCode." ($deviceCodeUser)";
 
-  ############ Westinghouse Buttons_five ############ Protocol 29 or 30 ############
-  } elsif ($model eq 'Buttons_five' && ($protocol == 29 || $protocol == 30)) {
+  ############ Westinghouse Buttons_five / Buttons_six############ Protocol 29 or 30 ############
+  } elsif (($model eq 'Buttons_five' || $model eq 'Buttons_six') && ($protocol == 29 || $protocol == 30)) {
     $state = substr($bitData,0,6);
     $deviceCode = substr($bitData,8,4);
 
@@ -2149,12 +2168,9 @@ sub SD_UT_Attr {
   my $hex_length = length(InternalVal($name, 'lastMSG', '0'));
 
   if ($cmd eq 'set') {
-    if ($attrName eq 'repeats' && $attrValue !~ m/^[1-9]$/xms) {
-      return "$name: Unallowed value $attrValue for the attribute repetition (must be 1 - 9)!";
-    }
-    if ($attrName eq 'UTfrequency' && ($attrValue !~ m/^[1-9]{1}[0-9]{0,2}\.?[0-9]*$/xms || $attrValue >= 1000.0)) {
-      return "$name: Invalid value $attrValue for the UTfrequency attribute. Values ​​such as: 433.92 are permitted.";
-    }
+    
+    return qq[$name: Unallowed value $attrValue for the attribute repetition (must be 1 - 99)!] if ($attrName eq q[repeats] && $attrValue !~ m/^[1-9]{1}[0-9]{0,1}$/xms);
+    return qq[$name: Invalid value $attrValue for the UTfrequency attribute. Values ​​such as: 433.92 (300.00-999.99 MHz) are permitted.] if ($attrName eq q[UTfrequency] && ($attrValue !~ m/^[3-9]{1}[\d]{2}$|^[3-9]{1}[\d]{2}\.{1}[\d]*$/xms));
 
     ############ change device models ############
     if ($attrName eq 'model' && $attrValue ne $oldmodel) {
@@ -2194,6 +2210,11 @@ sub SD_UT_Attr {
           $devicename = $devicemodel.'_'.$deviceCode;
         ############ Westinghouse Buttons_five ############
         } elsif ($attrValue eq 'Buttons_five') {
+          $deviceCode = substr($bitData,8,4);
+          $deviceCode = sprintf("%X", oct( "0b$deviceCode" ) );
+          $devicename = $devicemodel.'_'.$deviceCode;
+        ############ Westinghouse Buttons_six ############
+        } elsif ($attrValue eq 'Buttons_six') {
           $deviceCode = substr($bitData,8,4);
           $deviceCode = sprintf("%X", oct( "0b$deviceCode" ) );
           $devicename = $devicemodel.'_'.$deviceCode;
@@ -2326,8 +2347,7 @@ sub SD_UT_Attr {
       }
     }
   }
-
-  if ($cmd eq 'del' && $attrName eq 'model') {      ### delete readings
+  elsif ($cmd eq 'del' && $attrName eq 'model') {      ### delete readings
     for my $readingname (qw/Button deviceCode LastAction state unknownMSG/) {
       readingsDelete($hash,$readingname);
     }
@@ -2436,6 +2456,7 @@ sub SD_UT_tristate2bin {
     <li>unitec magnetic contact 47031 (for alarm systems Unitec 47121, Unitec 47125, Friedland)&nbsp;&nbsp;&nbsp;<small>(module model: Unitec_47031, protocol 30)</small></li>
     <li>Visivo remote control for motorized screen&nbsp;&nbsp;&nbsp;<small>(module model: Visivo, protocol 24)</small></li>
     <li>Westinghouse ceiling fan (remote control, 5 buttons without SET)&nbsp;&nbsp;&nbsp;<small>(module model: Buttons_five, protocol 29)</small></li>
+    <li>Westinghouse ceiling fan (remote control, 6 buttons with light dimmer)&nbsp;&nbsp;&nbsp;<small>(module model: Buttons_six, protocol 29)</small></li>
     <li>Westinghouse Delancey ceiling fan (remote control, 9 buttons with SET)&nbsp;&nbsp;&nbsp;<small>(module model: RH787T, protocol 83)</small></li>
     <li>Westinghouse ceiling fan Bendan (remote control TR60C-1, touch screen)&nbsp;&nbsp;&nbsp;<small>(module model: TR60C1, protocol 104)</small></li>
     <li>xavax 00111939 (remote control, 10 button)&nbsp;&nbsp;&nbsp;<small>(module model: xavax, protocol 26)</small></li>
@@ -2518,11 +2539,12 @@ sub SD_UT_tristate2bin {
 
     <u>Westinghouse ceiling fan (Remote control with 5 button)</u>
     <ul>
-      <a name="1_fan_low_speed"></a><li>1_fan_low_speed: button LOW on the remote</li>
-      <a name="2_fan_medium_speed"></a><li>2_fan_medium_speed: button MED on the remote</li>
-      <a name="3_fan_high_speed"></a><li>3_fan_high_speed: button HI on the remote</li>
-      <a name="light_on_off"></a><li>light_on_off: switch light on or off</li>
+      <a name="1_fan_low_speed"></a><li>1_fan_low_speed: button 1/LOW on the remote</li>
+      <a name="2_fan_medium_speed"></a><li>2_fan_medium_speed: button 2/MED on the remote</li>
+      <a name="3_fan_high_speed"></a><li>3_fan_high_speed: button 3/HI on the remote</li>
       <a name="fan_off"></a><li>fan_off: turns off the fan</li>
+      <a name="light_on_off"></a><li>light_on_off: switch light on or off</li>
+      <a name="light_dimm"></a><li>light_dimm: light dimm</li>
     </ul><br>
 
     <u>Westinghouse Delancey ceiling fan (Remote control RH787T with 9 button + SET)</u>
@@ -2551,25 +2573,25 @@ sub SD_UT_tristate2bin {
     <li><a href="#ignore">ignore</a></li>
     <li><a href="#IODev">IODev</a></li>
     <li><a name="model"></a>model<br>
-      The attribute indicates the model type of your device (AC114_01B, BeSmart_S4, Buttons_five, CAME_TOP_432EV, Chilitec_22640, KL_RF01, HS1-868-BS, HSM4, QUIGG_DMV, LED_XM21_0, Meikee_21, Meikee_24, Momento, Navaris, Novy_840029, Novy_840039, OR28V, RC_10, RH787T, SA_434_1_mini, SF01_01319004, TC6861, TR60C1, Tedsen_SKX1xx, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx, TR_502MSV, Unitec_47031, unknown).
+      The attribute indicates the model type of your device (AC114_01B, BeSmart_S4, Buttons_five, Buttons_six, CAME_TOP_432EV, Chilitec_22640, KL_RF01, HS1-868-BS, HSM4, QUIGG_DMV, LED_XM21_0, Meikee_21, Meikee_24, Momento, Navaris, Novy_840029, Novy_840039, OR28V, RC_10, RH787T, SA_434_1_mini, SF01_01319004, TC6861, TR60C1, Tedsen_SKX1xx, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx, TR_502MSV, Unitec_47031, unknown).
       If the attribute is changed, a new device is created using <a href="#autocreate">autocreate</a>. Autocreate must be activated for this.
     </li>
     <li><a name="repeats"></a>repeats<br>
-      This attribute can be used to adjust how many repetitions are sent. Default is 5.
+      This attribute can be used to adjust how many repetitions are sent. Default is 5. Valid values are 1-99.
     </li>
     <li><a name="UTclock"></a>UTclock<br>
       This attribute set the base clock when sending. There is no standard value.<br>
       Exception: The model Novy_840039 has a preset base clock of 375. You can manually adjust this individually with this attribute.
     </li>
     <li><a name="UTfrequency"></a>UTfrequency<br>
-      An individual transmission frequency can be set with this attribute. If this attribute is not set, the transmission frequency of the IO device (e.g. Signalduino) is used.
+      An individual transmission frequency can be set with this attribute. If this attribute is not set, the transmission frequency of the IO device (e.g. Signalduino) is used. Valid values 300.00-999.99 Mhz.
     </li>
   </ul>
   <br><br>
 
   <b>Generated readings of the models</b><br>
   <ul>
-    <u>AC114-01, Buttons_five, CAME_TOP_432EV, Chilitec_22640, HSM4, KL_RF01, LED_XM21_0, Meikee_xx, Momento, Novy_840029, Novy_840039, OR28V, QUIGG_DMV, RC_10, RH787T, SF01_01319004, SF01_01319004_Typ2, TR401, TR_502MSV, Visivo</u>
+    <u>AC114-01, Buttons_five, Buttons_six, CAME_TOP_432EV, Chilitec_22640, HSM4, KL_RF01, LED_XM21_0, Meikee_xx, Momento, Novy_840029, Novy_840039, OR28V, QUIGG_DMV, RC_10, RH787T, SF01_01319004, SF01_01319004_Typ2, TR401, TR_502MSV, Visivo</u>
     <ul>
       <li>deviceCode: Device code of the system</li>
       <li>LastAction: Last executed action of the device (<code>receive</code> for command received | <code>send</code> for command send).</li>
@@ -2659,6 +2681,7 @@ sub SD_UT_tristate2bin {
     <li>unitec Magnetkontakt 47031 (f&uuml;r Alarmanlagen Unitec 47121, Unitec 47125, Friedland)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Unitec_47031, Protokoll 30)</small></li>
     <li>Visivo Fernbedienung f&uuml;r Motorleinwand&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Visivo, Protokoll 24)</small></li>
     <li>Westinghouse Deckenventilator (Fernbedienung, 5 Tasten ohne SET)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Buttons_five, Protokoll 29)</small></li>
+    <li>Westinghouse Deckenventilator (Fernbedienung, 6 Tasten mit Dimmer)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Buttons_six, Protokoll 29)</small></li>
     <li>Westinghouse Delancey Deckenventilator (Fernbedienung, 9 Tasten mit SET)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: RH787T, Protokoll 83)</small></li>
     <li>Westinghouse Deckenventilator Bendan (Fernbedienung TR60C-1, Touch screen)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: TR60C1, Protokoll 104)</small></li>
     <li>xavax 00111939 (Fernbedienung, 10 Tasten)&nbsp;&nbsp;&nbsp;<small>(Modulmodel: xavax, Protokoll 26)</small></li>
@@ -2739,13 +2762,14 @@ sub SD_UT_tristate2bin {
       <li>All_on / All_off: Alle Gruppen ein / aus</li>
     </ul><br>
 
-    <u>Westinghouse Deckenventilator (Fernbedienung mit 5 Tasten)</u>
+    <u>Westinghouse Deckenventilator (Fernbedienung mit 5 oder 6 Tasten)</u>
     <ul>
-      <a name="1_fan_low_speed"></a><li>1_fan_low_speed: Taste LOW auf der Fernbedienung</li>
-      <a name="2_fan_medium_speed"></a><li>2_fan_medium_speed: Taste MED auf der Fernbedienung</li>
-      <a name="3_fan_high_speed"></a><li>3_fan_high_speed: Taste HI auf der Fernbedienung</li>
-      <a name="light_on_off"></a><li>light_on_off: Licht ein-/ausschalten</li>
+      <a name="1_fan_low_speed"></a><li>1_fan_low_speed: Taste 1/LOW auf der Fernbedienung</li>
+      <a name="2_fan_medium_speed"></a><li>2_fan_medium_speed: Taste 2/MED auf der Fernbedienung</li>
+      <a name="3_fan_high_speed"></a><li>3_fan_high_speed: Taste 3/HI auf der Fernbedienung</li>
       <a name="fan_off"></a><li>fan_off: Ventilator ausschalten</li>
+      <a name="light_on_off"></a><li>light_on_off: Licht ein-/ausschalten</li>
+      <a name="light_dimm"></a><li>light_dimm: Licht dimmen</li>
     </ul><br>
 
     <u>Westinghouse Delancey Deckenventilator (Fernbedienung RH787T mit 9 Tasten + SET)</u>
@@ -2774,25 +2798,25 @@ sub SD_UT_tristate2bin {
     <li><a href="#ignore">ignore</a></li>
     <li><a href="#IODev">IODev</a></li>
     <li><a name="model"></a>model<br>
-      Diese Attribut bezeichnet den Modelltyp Ihres Ger&auml;tes (AC114_01B, BeSmart_S4, Buttons_five, CAME_TOP_432EV, Chilitec_22640, KL_RF01, HS1-868-BS, HSM4, QUIGG_DMV, LED_XM21_0, Meikee_21, Meikee_24, Momento, Navaris, Novy_840029, Novy_840039, OR28V, RC_10, RH787T, SA_434_1_mini, SF01_01319004, TC6861, TR60C1, Tedsen_SKX1xx, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx, TR_502MSV, Unitec_47031, unknown).
+      Diese Attribut bezeichnet den Modelltyp Ihres Ger&auml;tes (AC114_01B, BeSmart_S4, Buttons_five, Buttons_six, CAME_TOP_432EV, Chilitec_22640, KL_RF01, HS1-868-BS, HSM4, QUIGG_DMV, LED_XM21_0, Meikee_21, Meikee_24, Momento, Navaris, Novy_840029, Novy_840039, OR28V, RC_10, RH787T, SA_434_1_mini, SF01_01319004, TC6861, TR60C1, Tedsen_SKX1xx, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx, TR_502MSV, Unitec_47031, unknown).
       Bei &Auml;nderung des Attributes wird ein neues Gerät mittels <a href="#autocreate">autocreate</a> erzeugt. Autocreate muss dazu aktiviert sein.
     </li>
     <li><a name="repeats"></a>repeats<br>
-      Mit diesem Attribut kann angepasst werden, wie viele Wiederholungen gesendet werden. Standard ist 5.
+      Mit diesem Attribut kann angepasst werden, wie viele Wiederholungen gesendet werden. Standard ist 5. Erlaubte Werte 1-99.
     </li>
     <li><a name="UTclock"></a>UTclock<br>
       Mit diesem Attribut kann der Basistakt beim Senden eingestellt werden. Einen Standardwert gibt es nicht.<br>
       Ausnahme: Das Model Novy_840039 hat einen voreingestellten Basistakt von 375. Auch diesen kann man mit dem Attribut individuell anpassen.
     </li>
     <li><a name="UTfrequency"></a>UTfrequency<br>
-      Mit diesem Attribut kann eine individuelle Sendefrequenz eingestellt werden. Ist dieses Attribut nicht gesetzt, wird die Sendefrequenz des IO Devices (z.B. Signalduino) verwendet.
+      Mit diesem Attribut kann eine individuelle Sendefrequenz eingestellt werden. Ist dieses Attribut nicht gesetzt, wird die Sendefrequenz des IO Devices (z.B. Signalduino) verwendet. Erlaubte Werte 300.00-999.99 Mhz.
     </li>
   </ul>
   <br><br>
 
   <b>Generierte Readings der Modelle</b><br>
   <ul>
-    <u>AC114-01, BeSmart_S4, Buttons_five, CAME_TOP_432EV, Chilitec_22640, HSM4, KL_RF01, LED_XM21_0, Meikee_xx, Momento, Novy_840029, Novy_840039, OR28V, QUIGG_DMV, RC_10, RH787T, SF01_01319004, SF01_01319004_Typ2, TR401, TR_502MSV, Visivo</u>
+    <u>AC114-01, BeSmart_S4, Buttons_five, Buttons_six, CAME_TOP_432EV, Chilitec_22640, HSM4, KL_RF01, LED_XM21_0, Meikee_xx, Momento, Novy_840029, Novy_840039, OR28V, QUIGG_DMV, RC_10, RH787T, SF01_01319004, SF01_01319004_Typ2, TR401, TR_502MSV, Visivo</u>
     <ul>
       <li>deviceCode: Ger&auml;teCode des Systemes</li>
       <li>LastAction: Zuletzt ausgef&uuml;hrte Aktion des Ger&auml;tes (<code>receive</code> f&uuml;r Kommando empfangen, <code>send</code> f&uuml;r Kommando gesendet).</li>
