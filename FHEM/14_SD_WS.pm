@@ -1884,7 +1884,7 @@ sub SD_WS_Parse {
   readingsBeginUpdate($hash);
   readingsBulkUpdate($hash, "state", $state);
   readingsBulkUpdate($hash, "temperature", $temp)  if (defined($temp) && (($temp > -60 && $temp < 70 ) || $protocol eq '106' || $protocol eq '113'));
-  readingsBulkUpdate($hash, "temperature2", $temp2)  if (defined($temp2) && (($temp2 > -60 && $temp < 70 ) || $protocol eq '113'));
+  readingsBulkUpdate($hash, "temperature2", $temp2)  if (defined($temp2) && (($temp2 > -60 && $temp2 < 70 ) || $protocol eq '113'));
   readingsBulkUpdate($hash, "humidity", $hum)  if (defined($hum) && ($hum > 0 && $hum < 100 )) ;
   readingsBulkUpdate($hash, 'windSpeed', $windspeed)  if (defined($windspeed)) ;
   readingsBulkUpdate($hash, 'windDirectionDegree', $winddir)  if (defined($winddir)) ;
@@ -2027,7 +2027,7 @@ sub SD_WS_WH2SHIFT {
     <li>WH2, WH2A (TFA Dostmann/Wertheim 30.3157 (sold in Germany), Agimex Rosenborg 66796 (sold in Denmark),ClimeMET CM9088 (Sold in UK)</li>
     <li>Weatherstation Auriol IAN 283582 Version 06/2017 (Lidl), Modell-Nr.: HG02832D</li>
     <li>Weatherstation Auriol AHFL 433 B2, IAN 314695 (Lidl)</li>
-    <li>Weatherstations and sensors TFA 30.3157, 30.3200, 30.3208.02, 30.3221.02, 30.3222.02, 30.3228.02, 30.3229.02, 30.3233.01, 30.3251.10, 35.1140.01</li>
+    <li>Weatherstations and sensors TFA 30.3151, 30.3152, 30.3153, 30.3157, 30.3200, 30.3208.02, 30.3221.02, 30.3222.02, 30.3228.02, 30.3229.02, 30.3233.01, 30.3251.10, 35.1077.54.S2, 35.1140.01</li>
     <li>Wireless Grill Thermometer, Model name: GFGT 433 B1</li>
   </ul><br><br>
 
@@ -2168,7 +2168,7 @@ sub SD_WS_WH2SHIFT {
     <li>WH2, WH2A (TFA Dostmann/Wertheim 30.3157 (Deutschland), Agimex Rosenborg 66796 (Denmark), ClimeMET CM9088 (UK)</li>
     <li>Wetterstation Auriol IAN 283582 Version 06/2017 (Lidl), Modell-Nr.: HG02832D</li>
     <li>Wetterstation Auriol AHFL 433 B2, IAN 314695 (Lidl)</li>
-    <li>Wetterstationen und Sensoren TFA 30.3157, 30.3200, 30.3208.02, 30.3221.02, 30.3222.02, 30.3228.02, 30.3229.02, 30.3233.01, 30.3251.10, 35.1140.01</li>
+    <li>Wetterstationen und Sensoren TFA 30.3151, 30.3152, 30.3153, 30.3157, 30.3200, 30.3208.02, 30.3221.02, 30.3222.02, 30.3228.02, 30.3229.02, 30.3233.01, 30.3251.10, 35.1077.54.S2, 35.1140.01</li>
     </ul>
   <br><br>
 
