@@ -28,9 +28,9 @@ jobs:
             repo: context.repo.repo,
           });
           if (resp.data) {
-            const pullRequestsWithBranch = resp.data.filter(it => it.head.ref == process.env.BRANCH_NAME)
+            const pullRequestsWithBranch = resp.data.filter(it => it.head.ref == process.env.BRANCH_NAME && it.head.ref.label.startsWith(context.repo.owner) )
             console.log(pullRequestsWithBranch)
-            return pullRequestsWithBranch.length >= 1
+            return pullRequestsWithBranch.length >= 1 &&
           }
           return false
       env:
