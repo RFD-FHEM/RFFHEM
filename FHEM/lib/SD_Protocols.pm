@@ -1096,9 +1096,8 @@ sub mcBit2SomfyRTS {
     # length not correct, byt leading '0' -> remove leading '0'
     $bitData = substr($bitData, 1, $mcbitnum - 1);
     $self->_logging( qq[lib/mcBit2SomfyRTS, bitdata: $bitData, truncated to length: ]. length($bitData), 4 );
-  }
-  elsif ($mcbitnum == 80 && ((substr($bitData, 0, 5) eq '01010') || (substr($bitData, 0, 5) eq '01000') || (substr($bitData, 0, 5) eq '01111')) {
-  # length correct but telegram does not start with character 'A', '8' or 'F' , remove leading '0' and add a '0' at the end, see https://forum.fhem.de/index.php/topic,72173.msg1075881.html#msg1075881
+  } elsif ($mcbitnum == 80 && ((substr($bitData, 0, 5) eq '01010') || (substr($bitData, 0, 5) eq '01000') || (substr($bitData, 0, 5) eq '01111'))) {
+    # length correct but telegram does not start with character 'A', '8' or 'F' , remove leading '0' and add a '0' at the end, see https://forum.fhem.de/index.php/topic,72173.msg1075881.html#msg1075881
     $bitData = substr($bitData, 1, $mcbitnum - 1);
     $bitData = $bitData . '0';
     $self->_logging( qq[lib/mcBit2SomfyRTS, bitdata: $bitData, start from Bit1: ]. length($bitData), 4 );
