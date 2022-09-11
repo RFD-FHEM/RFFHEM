@@ -21,6 +21,7 @@ use warnings;
 use Carp qw(croak carp);
 use constant HAS_DigestCRC => defined eval { require Digest::CRC; };
 use constant HAS_JSON => defined eval { require JSON; };
+use List::Util qw/any/;
 
 our $VERSION = '2.07';
 use Storable qw(dclone);
@@ -1090,17 +1091,18 @@ sub mcBit2SomfyRTS {
   my $mcbitnum  = shift // length $bitData;
 
   $self->_logging( qq[lib/mcBit2SomfyRTS, bitdata: $bitData ($mcbitnum)], 4 );
-
+ 
+  #$self->_logging( qq[lib/mcBit2SomfyRTS, first bit: ]. substr($bitData,0,1), 4 );
+  
   # remove leading '0' in any Somfy telegram if it is not expected
   if ($mcbitnum == 57 || ($mcbitnum == 81 && substr($bitData,0,1) eq '0'))  {
     # length not correct, byt leading '0' -> remove leading '0'
     $bitData = substr($bitData, 1, $mcbitnum - 1);
     $self->_logging( qq[lib/mcBit2SomfyRTS, bitdata: $bitData, truncated to length: ]. length($bitData), 4 );
-  } elsif ($mcbitnum == 80 && ((substr($bitData, 0, 5) eq '01010') || (substr($bitData, 0, 5) eq '01000') || (substr($bitData, 0, 5) eq '01111'))) {
-    # length correct but telegram does not start with character 'A', '8' or 'F' , remove leading '0' and add a '0' at the end, see https://forum.fhem.de/index.php/topic,72173.msg1075881.html#msg1075881
-    $bitData = substr($bitData, 1, $mcbitnum - 1);
-    $bitData = $bitData . '0';
-    $self->_logging( qq[lib/mcBit2SomfyRTS, bitdata: $bitData, start from Bit1: ]. length($bitData), 4 );
+  } elsif ($mcbitnum == 80 && any { substr($bitData, 0, 5) eq $_ } qw(01010 01000 01111) ) {
+  # length correct but telegram does not start with character 'A', '8' or 'F' , remove leading '0' and add a '0' at the end, see https://forum.fhem.de/index.php/topic,72173.msg1075881.html#msg1075881
+    $bitData = substr($bitData, 1, $mcbitnum - 1) . q[0];
+    $self->_logging( qq[lib/mcBit2SomfyRTS, bitdata: $bitData, remove leading nibble, added last nibble - length: ]. length($bitData), 4 );
   }
   my $encData = lib::SD_Protocols::binStr2hexStr($bitData);
 
