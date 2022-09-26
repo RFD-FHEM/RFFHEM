@@ -1393,17 +1393,17 @@ sub SD_UT_Set {
       ############ RCnoName20_10 [P20] ############
       } elsif ($model eq 'RCnoName20_10') {
         $msg .= $save; # button
-				my $rollingCode = ReadingsVal($name, 'rollingCode', 0);
-				$rollingCode += 1;
-				if ($rollingCode > 15) {
-					$rollingCode = 0;
-				}
+        my $rollingCode = ReadingsVal($name, 'rollingCode', 0);
+        $rollingCode += 1;
+        if ($rollingCode > 15) {
+          $rollingCode = 0;
+        }
         readingsSingleUpdate($hash, 'rollingCode' , $rollingCode, 0);
         $msg .= sprintf('%04b', $rollingCode); # rolling code
         my $xor = 10;
         for (my $n = 4; $n < 32; $n += 4) { # without P20#
           $xor ^= oct('0b' . substr($msg, $n, 4));
-				}
+        }
         $msg .= sprintf('%04b', $xor); # check
         $msg .= $msgEnd;
       } else {
@@ -1684,7 +1684,7 @@ sub SD_UT_Parse {
         $def = $modules{SD_UT}{defptr}{$devicedef} if (!$def);
         $model = 'RCnoName20_10';
         $name = 'RCnoName20_10_' . $deviceCode;
-			}
+      }
     }
     if (!$def && $protocol == 92) {
       ### Remote control Krinner_LUMIX [P92] ###
@@ -2118,7 +2118,7 @@ sub SD_UT_Parse {
   } elsif ($model eq 'RCnoName20_10' && $protocol == 20) {
     $state = substr($bitData,16,8);
     $deviceCode = substr($rawData,0,4);
-		my $rollingCode = hex(substr($rawData,6,1));
+    my $rollingCode = hex(substr($rawData,6,1));
     readingsBulkUpdate($hash, 'rollingCode', $rollingCode, 0);
   ### Remote control xavax [P26] ###
   } elsif ($model eq 'xavax' && $protocol == 26) {
