@@ -1,5 +1,5 @@
 #########################################################################################
-# $Id: 14_SD_UT.pm 0 2022-09-26 19:02:01Z elektron-bbs $
+# $Id: 14_SD_UT.pm 0 2022-09-26 19:11:45Z elektron-bbs $
 #
 # The file is part of the SIGNALduino project.
 # The purpose of this module is universal support for devices.
