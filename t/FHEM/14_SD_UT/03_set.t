@@ -25,17 +25,9 @@ my $module = basename (dirname(__FILE__));
         },
     },
     {	
-        targetName 		=> 	q[SD_UT_Test_6],
-		testname        =>  q[set command fan_off],                 # Name of our setcommand
-        cmd   	        =>	q[set fan_off],      # Command to execute for test
-        prep_hash       => {                                # All Items listed here will be added to the devicehash bevore the test starts
-            cc1101_available  =>  1,
-            DIODev   =>  'open',
-        },
-        prep_commands   => [                                # Any FHEM custom command can be placed in here
-			'set $targetName ?', 
-        ],
-
+        targetName 		=> 	q[SD_UT_Test_6],				# Name of the definition which is tested
+		testname        =>  q[set command fan_off],         # Name of our setcommand
+        cmd   	        =>	q[set fan_off],      			# Command to execute for test
         # Check for arguments given to mocked sub
         subCheck        => hash { field 'IOWrite' => array { item 0 => hash { field 'args' => array { item hash { etc(); } ; item 'sendMsg'; item 'P29#111110111110#R5' }; etc() } } } ,  
         returnCheck     => F(),    # Check for false return from command
@@ -46,9 +38,12 @@ my $module = basename (dirname(__FILE__));
         targetName 		=> 	q[SD_UT_Test_6],
 		testname        =>  q[set command 1_fan_low_speed],
         cmd	            =>	q[set 1_fan_low_speed],
+        prep_commands   => [                               # Any FHEM custom command can be placed in here, which will be called before the test is run
+			'attr $targetName repeats 4', 
+        ],
         
         returnCheck     => F(),    
-        subCheck        => hash { field 'IOWrite' => array { item 0 => hash { field 'args' => array { item hash { etc(); } ; item 'sendMsg'; item 'P29#011111111110#R5' }; etc() } } } ,
+        subCheck        => hash { field 'IOWrite' => array { item 0 => hash { field 'args' => array { item hash { etc(); } ; item 'sendMsg'; item 'P29#011111111110#R4' }; etc() } } } ,
     },
     {	
         targetName 		=> 	q[SD_UT_Test_1],

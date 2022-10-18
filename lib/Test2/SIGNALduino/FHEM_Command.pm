@@ -1,5 +1,38 @@
 package Test2::SIGNALduino::FHEM_Command;
 
+#  tests are defined via array of hashes @mock, which is injectd from the calling scope
+#   First Element in array can be a element which holds defaults
+#   currently only mocking is suppored as a defauld
+#    {
+#        # Default mocking for every testrun in our loop
+#        defaults    => {
+#            mocking =>  sub { $mock->override ( IOWrite => sub { return @_ } );  } 
+#        },
+#    },
+
+#    Defining a Test needs some*, but not all elements. More hints on Test2::SIGNALduino::FHEM_Command
+#    {	
+#      * targetName 	=> 	q[SD_UT_Test_6],			    # Name of the definition which is tested, must be defined before test starts
+#	   * testname       =>  q[set command fan_off],         # Name of our setcommand
+#      * cmd   	        =>	q[set fan_off],      			# Command to execute for test
+#        # Check for arguments given to mocked sub
+         # Anything from test2:compare can be used: https://metacpan.org/pod/Test2::Tools::Compare to verify called arguments for mocked sub
+#      * subCheck        => hash { field 'IOWrite' => array { item 0 => hash { field 'args' => array { item hash { etc(); } ; item 'sendMsg'; item 'P29#111110111110#R5' }; etc() } } } ,  
+#      * returnCheck     => F(),                            # Check for false return from command
+#        prep_hash       => {                               # All Items listed here will be added to the devicehash bevore the test starts
+#            cc1101_available  =>  1,
+#            DIODev   =>  'open',
+#        },
+#        prep_commands   => [                               # Any FHEM custom command can be placed in here, which will be called before the test is run
+#			'set $targetName ?', 
+#        ],
+#        todo => 1, # Enable Todo block if item exists
+#    },
+
+#
+#
+#
+
 use strict;
 use warnings;
 use Test2::V0;
@@ -85,8 +118,8 @@ sub commandCheck {
     
     # Diable prototype mismatch warnings for redefined subs
     local $SIG{__WARN__} = sub { warn $_[0] unless $_[0] =~ /redefined|Prototype mismatch:/ };
-
-	foreach my $element (@filt_testDataArray)
+    
+    foreach my $element (@filt_testDataArray)
 	{
 		next if (!exists($element->{testname}));
     	$mock->clear_sub_tracking();
