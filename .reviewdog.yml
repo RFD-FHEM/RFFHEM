@@ -1,11 +1,20 @@
 runner:
   perl-test2-tap:
-    cmd: cat errorformat
+    cmd: cat errorformat.small
     errorformat: # (optional if you use `format`)
-      - "%E# Failed test %m"
-      - "%C# at %f line %l%."
-      - "%C# %m"
-      - "%-G%.%#"
+     - '%C# at %f line %l%.'
+     - '%E# Failed test %m'
+     - '%C# | %.%#'
+     - '%C# +-%.%#'
+     - '%-G%.%#'
+  perl-test2-tap-gha:
+    cmd: cat errorformat.small
+    errorformat: # (optional if you use `format`)
+     - '%C##[%t%.%#]# at %f line %l%.'
+     - '%E# Failed test %m'
+     - '%C# | %.%#'
+     - '%C# +-%.%#'
+     - '%-G%.%#'
   perl-errors:
     cmd: perl -ne 'print if ! $a{substr $_,22}++' errorformat 
     errorformat:
@@ -13,5 +22,3 @@ runner:
       - "%+E%.%# at %f line %l%.%r"
       - "%+ZBEGIN failed%r"
       - "%-Gok%.%#"
-     
-
