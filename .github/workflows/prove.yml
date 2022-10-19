@@ -74,7 +74,8 @@ jobs:
       env:
         REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-          reviewdog -name="prove-tests" \
+          cat ${{ github.workspace }}/errorformat | reviewdog -name="prove-tests" \
             -reporter="github-pr-check" \
             -filter-mode="file" \
             --diff="git diff ${{ github.base_ref }}"
+            -tee 
