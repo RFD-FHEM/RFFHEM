@@ -77,4 +77,4 @@ jobs:
           reviewdog -name="prove-tests" \
             -reporter="github-pr-check" \
             -filter-mode="file" \
-            --diff="git diff {{ github.base_ref	}}r"
+            --diff="git diff ${{ github.base_ref }}"
