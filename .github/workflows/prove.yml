@@ -75,7 +75,9 @@ jobs:
         REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
           reviewdog -name="prove-tests" \
+            -name perl-test2-tap-${{ matrix.perl }}\
+            -runners perl-test2-tap \
             -reporter="github-pr-check" \
             -filter-mode="file" \
-            --diff="git diff ${{ github.base_ref }}"
+            --diff="git diff ${{ github.base_ref }}" \
             -tee 
