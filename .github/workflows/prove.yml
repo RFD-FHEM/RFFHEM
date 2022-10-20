@@ -73,5 +73,4 @@ jobs:
             -reporter="github-pr-check" \
             -filter-mode="file" \
             --diff="git diff ${{ github.base_ref }}" \
-            -tee
             
