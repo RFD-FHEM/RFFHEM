@@ -43,7 +43,7 @@ jobs:
       run: |
         cp -R ${GITHUB_WORKSPACE}/FHEM/* ${FHEM_DIR}/FHEM/
         cp -R ${GITHUB_WORKSPACE}/lib/* ${FHEM_DIR}/lib/
-        prove -j2 -m --exec 'perl -MDevel::Cover=-silent,1 fhem.pl -t' -I FHEM -v -r t/FHEM/  | tee ${GITHUB_WORKSPACE}/testOutput.2
+        prove -j2 -m --exec 'perl -MDevel::Cover=-silent,1 fhem.pl -t' -I FHEM -v -r ${GITHUB_WORKSPACE}/t/FHEM/  | tee ${GITHUB_WORKSPACE}/testOutput.2
       working-directory: /opt/fhem/
       env:
         FHEM_DIR: /opt/fhem
