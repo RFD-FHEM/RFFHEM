@@ -59,12 +59,12 @@ jobs:
         name: fhem (testscripts) ${{ matrix.perl }} 
 
     - uses: reviewdog/action-setup@v1
-      if: always()
+      if: always() && github.event_name == 'pull_request'
       with:
         reviewdog_version: latest 
     
     - name: Run reviewdog
-      if: always()
+      if: always() && github.event_name == 'pull_request'
       env:
         REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
