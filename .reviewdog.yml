@@ -9,9 +9,11 @@ runner:
      - '%-G%.%#'
     level: error    
   perl-errors:
-    cmd: perl -ne 'print if ! $a{substr $_,22}++' } testOutput.stdout
+    cmd: cat testOutput.stdout
     errorformat:
      - '%-G%m redefined at %f line %l%.%r'
+     - '%+Esyntax error at %f line %l%. "%m'
+     - '%+Z%p%m"'
      - '%+E %m %.%# at %f line %l%.%#'
      - '%+ZBEGIN failed%r'
      - '%-Gok%.%#'
