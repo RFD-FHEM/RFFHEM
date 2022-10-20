@@ -10,7 +10,7 @@ runner:
   perl-errors:
     cmd: perl -ne 'print if ! $a{substr $_,22}++' testOutput 
     errorformat:
-      - "%-G%m redefined at %f line %l%.%r"
-      - "%+E%.%# at %f line %l%.%r"
-      - "%+ZBEGIN failed%r"
-      - "%-Gok%.%#"
+      - '%-G%m redefined at %f line %l%.%r'
+      - '%+E %m %.%# at %f line %l%.%#'
+      - '%+ZBEGIN failed%r'
+      - '%-Gok%.%#'
