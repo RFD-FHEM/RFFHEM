@@ -30,8 +30,16 @@ jobs:
     - name: run prove on perl modules (testscripts)
       run: |
         echo "::remove-matcher owner=perl::"
-        prove -j2 -m --exec 'perl -MDevel::Cover=-silent,1 -I FHEM '  -I FHEM -r -v t/SD_Protoco*  | tee ${GITHUB_WORKSPACE}/testOutput.1
-    - name: Create clover report  
+        prove -j3 --exec 'perl -MDevel::Cover=-silent,1 -I FHEM '  -I FHEM -r -v t/SD_Protoco*  > >(tee -a ${GITHUB_WORKSPACE}/testOutput.stdout) 2> >(tee -a ${GITHUB_WORKSPACE}/testOutput.stderr >&2)
+    - name: run prove fhem testsuite ${{ matrix.perl }}
+      run: |
+        cp -R ${GITHUB_WORKSPACE}/FHEM/* ${FHEM_DIR}/FHEM/
+        cp -R ${GITHUB_WORKSPACE}/lib/* ${FHEM_DIR}/lib/
+        prove -j3 --exec 'perl -MDevel::Cover=-silent,1 fhem.pl -t' -I FHEM -v -r ${GITHUB_WORKSPACE}/t/FHEM/  > >(tee -a ${GITHUB_WORKSPACE}/testOutput.stdout) 2> >(tee -a ${GITHUB_WORKSPACE}/testOutput.stderr >&2)
+      working-directory: /opt/fhem/
+      env:
+        FHEM_DIR: /opt/fhem
+    - name: Create clover report for perl Modules
       run: cover -report clover
     - uses: codecov/codecov-action@v3.1.1
       with:
@@ -39,15 +47,8 @@ jobs:
         file: ./cover_db/clover.xml
         flags: unittests,perl,modules
         name: perl modules (testscripts) ${{ matrix.perl }}
-    - name: run prove fhem testsuite ${{ matrix.perl }}
-      run: |
-        cp -R ${GITHUB_WORKSPACE}/FHEM/* ${FHEM_DIR}/FHEM/
-        cp -R ${GITHUB_WORKSPACE}/lib/* ${FHEM_DIR}/lib/
-        prove -j2 -m --exec 'perl -MDevel::Cover=-silent,1 fhem.pl -t' -I FHEM -v -r ${GITHUB_WORKSPACE}/t/FHEM/  | tee ${GITHUB_WORKSPACE}/testOutput.2
-      working-directory: /opt/fhem/
-      env:
-        FHEM_DIR: /opt/fhem
-    - name: Create clover report
+
+    - name: Create clover report for fhem tests
       working-directory: /opt/fhem/
       run: cover -report clover
     - uses: codecov/codecov-action@v3.1.1
@@ -56,18 +57,21 @@ jobs:
         file: /opt/fhem/cover_db/clover.xml
         flags: unittests,fhem,modules
         name: fhem (testscripts) ${{ matrix.perl }} 
+
     - uses: reviewdog/action-setup@v1
       if: always()
       with:
-        reviewdog_version: latest # Optional. [latest,nightly,v.X.Y.Z]
+        reviewdog_version: latest 
+    
     - name: Run reviewdog
       if: always()
       env:
         REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
           reviewdog  \
-            -name perl-${{ matrix.perl }} \
+            -name=perl-${{ matrix.perl }} \
             -reporter="github-pr-check" \
             -filter-mode="file" \
             --diff="git diff ${{ github.base_ref }}" \
-            -tee 
+            -tee
+            
