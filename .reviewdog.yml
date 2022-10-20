@@ -7,14 +7,6 @@ runner:
      - '%C# | %.%#'
      - '%C# +-%.%#'
      - '%-G%.%#'
-  perl-test2-tap-gha:
-    cmd: cat errorformat.small
-    errorformat: # (optional if you use `format`)
-     - '%C##[%t%.%#]# at %f line %l%.'
-     - '%E# Failed test %m'
-     - '%C# | %.%#'
-     - '%C# +-%.%#'
-     - '%-G%.%#'
   perl-errors:
     cmd: perl -ne 'print if ! $a{substr $_,22}++' errorformat 
     errorformat:
