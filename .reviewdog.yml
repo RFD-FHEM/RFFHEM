@@ -1,6 +1,6 @@
 runner:
   perl-test2-tap:
-    cmd: cat errorformat.small
+    cmd: cat testOutput
     errorformat: # (optional if you use `format`)
      - '%C# at %f line %l%.'
      - '%E# Failed test %m'
@@ -8,7 +8,7 @@ runner:
      - '%C# +-%.%#'
      - '%-G%.%#'
   perl-errors:
-    cmd: perl -ne 'print if ! $a{substr $_,22}++' errorformat 
+    cmd: perl -ne 'print if ! $a{substr $_,22}++' testOutput 
     errorformat:
       - "%-G%m redefined at %f line %l%.%r"
       - "%+E%.%# at %f line %l%.%r"
