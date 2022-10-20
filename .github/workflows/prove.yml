@@ -30,7 +30,7 @@ jobs:
     - name: run prove on perl modules (testscripts)
       run: |
         echo "::remove-matcher owner=perl::"
-        prove -j2 -m --exec 'perl -MDevel::Cover=-silent,1 -I FHEM '  -I FHEM -r -v t/SD_Protoco*  | tee /testOutput.1
+        prove -j2 -m --exec 'perl -MDevel::Cover=-silent,1 -I FHEM '  -I FHEM -r -v t/SD_Protoco*  | tee testOutput.1
     - name: Create clover report  
       run: cover -report clover
     - uses: codecov/codecov-action@v3.1.1
