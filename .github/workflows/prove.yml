@@ -30,7 +30,7 @@ jobs:
     - name: run prove on perl modules (testscripts)
       run: |
         echo "::remove-matcher owner=perl::"
-        prove -j2 --exec 'perl -MDevel::Cover=-silent,1 -I FHEM '  -I FHEM -r -v t/SD_Protoco*  > >(tee testOutput.stdout) 2> >(tee testOutput.stderr)
+        prove -j2 --exec 'perl -MDevel::Cover=-silent,1 -I FHEM '  -I FHEM -r -v t/SD_Protoco*  > >(tee -a testOutput.stdout) 2> >(tee -a testOutput.stderr)
     - name: Create clover report  
       run: cover -report clover
     - uses: codecov/codecov-action@v3.1.1
@@ -43,7 +43,7 @@ jobs:
       run: |
         cp -R ${GITHUB_WORKSPACE}/FHEM/* ${FHEM_DIR}/FHEM/
         cp -R ${GITHUB_WORKSPACE}/lib/* ${FHEM_DIR}/lib/
-        prove -j2 --exec 'perl -MDevel::Cover=-silent,1 fhem.pl -t' -I FHEM -vv -r ${GITHUB_WORKSPACE}/t/FHEM/  > >(tee testOutput.stdout) 2> >(tee testOutput.stderr)
+        prove -j2 --exec 'perl -MDevel::Cover=-silent,1 fhem.pl -t' -I FHEM -vv -r ${GITHUB_WORKSPACE}/t/FHEM/  > >(tee -a testOutput.stdout) 2> >(tee -a testOutput.stderr)
       working-directory: /opt/fhem/
       env:
         FHEM_DIR: /opt/fhem
@@ -67,7 +67,6 @@ jobs:
       run: |
           reviewdog  \
             -name perl-test2-tap-${{ matrix.perl }} \
-            -runners perl-test2-tap \
             -reporter="github-pr-check" \
             -filter-mode="file" \
             --diff="git diff ${{ github.base_ref }}" \
