@@ -145,7 +145,7 @@ SD_WS07_Parse($$)
 	}
     
 	$model = $model."_".$models{$modelkey};
-  my $deviceCode
+  my $deviceCode;
   my $longids = AttrVal($iohash->{NAME},'longids',0);
   if ( ($longids ne "0") && ($longids eq "1" || $longids eq "ALL" || (",$longids," =~ m/,$model,/)))	{
 		$deviceCode = $id.$channel;
