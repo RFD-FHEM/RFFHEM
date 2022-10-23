@@ -1677,14 +1677,14 @@ sub SD_UT_Parse {
       for (my $n = 0; $n < 8; $n++) {
         $xor ^= hex(substr($rawData,$n,1));
       }
-      if ($xor != 10) {
-        Log3 $iohash, 3, "$ioname: SD_UT_Parse device RCnoName20_10 - ERROR XOR != 10";
-        return q{};
+      # Log3 $iohash, 3, "$ioname: SD_UT_Parse device RCnoName20_10 xor=$xor";
+      if ($xor == 10) {
+        # Log3 $iohash, 3, "$ioname: SD_UT_Parse device RCnoName20_10 xor ok";
+        $devicedef = 'RCnoName20_10 ' . $deviceCode if (!$def);
+        $def = $modules{SD_UT}{defptr}{$devicedef} if (!$def);
+        $model = 'RCnoName20_10';
+        $name = 'RCnoName20_10_' . $deviceCode;
       }
-      $devicedef = 'RCnoName20_10 ' . $deviceCode if (!$def);
-      $def = $modules{SD_UT}{defptr}{$devicedef} if (!$def);
-      $model = 'RCnoName20_10';
-      $name = 'RCnoName20_10_' . $deviceCode;
     }
     if (!$def && $protocol == 92) {
       ### Remote control Krinner_LUMIX [P92] ###
