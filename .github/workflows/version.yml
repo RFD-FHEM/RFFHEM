@@ -181,7 +181,7 @@ jobs:
           ref: ${{ github.head_ref }}
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           wait-interval: 20
-          allowed-conclusions: success,skipped,cancelled
+          allowed-conclusions: success,skipped,cancelled,neutral
 
       - name: git push
         if: ${{ steps.commit.outputs.status }}
