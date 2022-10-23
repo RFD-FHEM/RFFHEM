@@ -1668,8 +1668,8 @@ sub SD_UT_Parse {
     if (!$def && $protocol == 20) {
       ### Remote control RCnoName20 [P20] ###
       $deviceCode = substr($rawData,0,4);
-      $devicedef = 'RCnoName20 ' . $deviceCode if (!$def);
-      $def = $modules{SD_UT}{defptr}{$devicedef} if (!$def);
+      $devicedef = 'RCnoName20 ' . $deviceCode;
+      $def = $modules{SD_UT}{defptr}{$devicedef};
       $model = 'RCnoName20';
       $name = 'RCnoName20_' . $deviceCode;
       ### Remote control RCnoName20_10 [P20] ###
@@ -1677,9 +1677,7 @@ sub SD_UT_Parse {
       for (my $n = 0; $n < 8; $n++) {
         $xor ^= hex(substr($rawData,$n,1));
       }
-      # Log3 $iohash, 3, "$ioname: SD_UT_Parse device RCnoName20_10 xor=$xor";
       if ($xor == 10) {
-        # Log3 $iohash, 3, "$ioname: SD_UT_Parse device RCnoName20_10 xor ok";
         $devicedef = 'RCnoName20_10 ' . $deviceCode if (!$def);
         $def = $modules{SD_UT}{defptr}{$devicedef} if (!$def);
         $model = 'RCnoName20_10';
