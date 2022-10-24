@@ -1,3 +1,11 @@
+2022-10-24 - reviewdog for perl tests & errors - report unittest failure inline (#1100)
+
+add config for reviewdog
+
+add reviewdog reporter
+
+pause push of commits until tests are successfull
+
 2022-09-11 - new protocol 120 for Weather station TFA 35.1077.54.S2 (#1116)
 
 add Weather station TFA 35.1077.54.S2 with 30.3151 (T/H-transmitter), 30.3152 (rain gauge), 30.3153 (anemometer)
