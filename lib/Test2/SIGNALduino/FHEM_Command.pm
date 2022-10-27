@@ -27,6 +27,7 @@ package Test2::SIGNALduino::FHEM_Command;
 #			'set $targetName ?', 
 #        ],
 #        todo => 1, # Enable Todo block if item exists
+#        hashCheck => hash { etc(); };                      # check againt hash values from the target device, skipped if key does not exists
 #    },
 
 #
@@ -71,6 +72,10 @@ sub checkGet  {
 
     my $result  = is($mock->sub_tracking,$element->{subCheck},q[verify subroutine tracking]);
     $result    &= is($ret,$element->{returnCheck},q[verify return value from command]);
+    SKIP: {
+        skip q[no reference value provided], ! exists $element->{hashCheck};
+        $result    &= is($targetHash,$element->{hashCheck},q[verify hash values from targetdevice]);
+    }
     
     return $result;
  }
@@ -84,6 +89,10 @@ sub checkAttr  {
 
     my $result  = is($mock->sub_tracking,$element->{subCheck},q[verify subroutine tracking]);
     $result    &= is($ret,$element->{returnCheck},q[verify return value from command]);
+    SKIP: {
+        skip q[no reference value provided], ! exists $element->{hashCheck};
+        $result    &= is($targetHash,$element->{hashCheck},q[verify hash values from targetdevice]);
+    }
     
     return $result;
  }
@@ -99,7 +108,11 @@ sub checkSet  {
 
     my $result  = is($mock->sub_tracking,$element->{subCheck},q[verify subroutine tracking]);
     $result    &= is($ret,$element->{returnCheck},q[verify return value from command]);
-    
+    SKIP: {
+        skip (q[no reference value provided]) unless (exists $element->{hashCheck}) ;
+        $result    &= is($targetHash,$element->{hashCheck},q[verify hash values from targetdevice]);
+    }
+
     return $result;
 }; # subtest
 
