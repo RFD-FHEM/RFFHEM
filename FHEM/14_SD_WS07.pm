@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 14_SD_WS07.pm 21666 2021-12-29 16:12:11Z elektron-bbs $
+# $Id: 14_SD_WS07.pm 21666 2022-10-23 12:40:10Z sidey79 $
 # 
 # The purpose of this module is to support serval eurochron
 # weather sensors like eas8007 which use the same protocol
@@ -145,9 +145,9 @@ SD_WS07_Parse($$)
 	}
     
 	$model = $model."_".$models{$modelkey};
-    my $deviceCode;
-	my $longids = AttrVal($iohash->{NAME},'longids',0);
-	if ( ($longids ne "0") && ($longids eq "1" || $longids eq "ALL" || (",$longids," =~ m/,$model,/)))	{
+  my $deviceCode;
+  my $longids = AttrVal($iohash->{NAME},'longids',0);
+  if ( ($longids ne "0") && ($longids eq "1" || $longids eq "ALL" || (",$longids," =~ m/,$model,/)))	{
 		$deviceCode = $id.$channel;
 		Log3 $iohash,4, "$iohash->{NAME}: using longid $longids model $model";
 	} else {

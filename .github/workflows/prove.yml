@@ -11,17 +11,12 @@ jobs:
     name: Perl ${{ matrix.perl }} on ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v3
-    - uses: shogo82148/actions-setup-perl@v1.17.0
+    - uses: shogo82148/actions-setup-perl@v1.18.0
       with:
         perl-version: ${{ matrix.perl }}
         install-modules-with: cpanm
         install-modules-args: --no-interactive -v --installdeps
 
-    #- name: Install deps via cpanm
-      #run: |
-        #cpanm --notest --no-interactive -v --installdeps .
-        #cpanm --notest --no-interactive -v Devel::Cover::Report::Clover
-        #cpanm --no-interactive -v Storable
     - name: install fhem via deb package
       run: |
         wget -qO - http://debian.fhem.de/archive.key | sudo apt-key add -
@@ -34,32 +29,48 @@ jobs:
 #      uses: mxschmitt/action-tmate@v1
     - name: run prove on perl modules (testscripts)
       run: |
-        prove -j2 --exec 'perl -MDevel::Cover=-silent,1 -I FHEM '  -I FHEM -r -v t/SD_Protoco* 
-    - name: Create clover report  
+        echo "::remove-matcher owner=perl::"
+        prove -j3 --exec 'perl -MDevel::Cover=-silent,1 -I FHEM '  -I FHEM -r -v t/SD_Protoco*  > >(tee -a ${GITHUB_WORKSPACE}/testOutput.stdout) 2> >(tee -a ${GITHUB_WORKSPACE}/testOutput.stderr >&2)
+    - name: run prove fhem testsuite ${{ matrix.perl }}
+      run: |
+        cp -R ${GITHUB_WORKSPACE}/FHEM/* ${FHEM_DIR}/FHEM/
+        cp -R ${GITHUB_WORKSPACE}/lib/* ${FHEM_DIR}/lib/
+        prove -j3 --exec 'perl -MDevel::Cover=-silent,1 fhem.pl -t' -I FHEM -v -r ${GITHUB_WORKSPACE}/t/FHEM/  > >(tee -a ${GITHUB_WORKSPACE}/testOutput.stdout) 2> >(tee -a ${GITHUB_WORKSPACE}/testOutput.stderr >&2)
+      working-directory: /opt/fhem/
+      env:
+        FHEM_DIR: /opt/fhem
+    - name: Create clover report for perl Modules
       run: cover -report clover
-    - uses: codecov/codecov-action@v3.1.0
+    - uses: codecov/codecov-action@v3.1.1
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         file: ./cover_db/clover.xml
         flags: unittests,perl,modules
         name: perl modules (testscripts) ${{ matrix.perl }}
-    - name: run prove fhem testsuite ${{ matrix.perl }}
-      run: |
-        cp -R ${GITHUB_WORKSPACE}/FHEM/* ${FHEM_DIR}/FHEM/
-        cp -R ${GITHUB_WORKSPACE}/lib/* ${FHEM_DIR}/lib/
-        #find ${GITHUB_WORKSPACE}/t/FHEM -maxdepth 1  -regex '.*/t/FHEM/[0-9][0-9]_.*' -print0 | xargs -0 -I'{}' prove --exec 'perl -MDevel::Cover=-silent,1 fhem.pl -t' -I FHEM -r -vv -r "{}"
-        prove -j2 --exec 'perl -MDevel::Cover=-silent,1 fhem.pl -t' -I FHEM -vv -r ${GITHUB_WORKSPACE}/t/FHEM/
-      working-directory: /opt/fhem/
-      env:
-        FHEM_DIR: /opt/fhem
-    - name: Create clover report
+
+    - name: Create clover report for fhem tests
       working-directory: /opt/fhem/
       run: cover -report clover
-    - uses: codecov/codecov-action@v3.1.0
+    - uses: codecov/codecov-action@v3.1.1
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         file: /opt/fhem/cover_db/clover.xml
         flags: unittests,fhem,modules
         name: fhem (testscripts) ${{ matrix.perl }} 
 
-   
+    - uses: reviewdog/action-setup@v1
+      if: always() && github.event_name == 'pull_request'
+      with:
+        reviewdog_version: latest 
+    
+    - name: Run reviewdog
+      if: always() && github.event_name == 'pull_request' && !cancelled()
+      env:
+        REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+          reviewdog  \
+            -name=perl-${{ matrix.perl }} \
+            -reporter="github-pr-check" \
+            -filter-mode="file" \
+            --diff="git diff ${{ github.base_ref }}" \
+            
