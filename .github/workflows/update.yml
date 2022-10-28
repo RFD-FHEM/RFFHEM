@@ -28,7 +28,7 @@ jobs:
             repo: context.repo.repo,
           });
           if (resp.data) {
-            const pullRequestsWithBranch = resp.data.filter(it => it.head.ref == process.env.BRANCH_NAME)
+            const pullRequestsWithBranch = resp.data.filter(it => it.head.ref == process.env.BRANCH_NAME && it.head.label.startsWith(context.repo.owner) )
             console.log(pullRequestsWithBranch)
             return pullRequestsWithBranch.length >= 1
           }
@@ -37,6 +37,7 @@ jobs:
           BRANCH_NAME: ${{ steps.extract_branch.outputs.BRANCH_NAME }}
   update:
     needs: pr_check
+    if: needs.pr_check.outputs.result != 'true'
     env:
       CONTROLS_FILENAME: controls_signalduino.txt 
     runs-on: ubuntu-latest
@@ -87,9 +88,14 @@ jobs:
         git ls-files --error-unmatch controls_signalduino.txt || git add controls_signalduino.txt 
         git ls-files --error-unmatch CHANGED || git add CHANGED
         git diff --name-only --exit-code controls_signalduino.txt || git commit CHANGED controls_signalduino.txt -m "Automatic updated controls and CHANGED" || true
-    - name: git push
-      if: needs.pr_check.outputs.result != 'true'
-      uses: ad-m/github-push-action@v0.6.0
+    #- name: git push
+    #  if: needs.pr_check.outputs.result != 'true'
+    #  uses: ad-m/github-push-action@v0.6.0
+    #  with:
+    #    github_token: ${{ secrets.GH_TOKEN }}
+    #    branch: ${{ steps.extract_branch.outputs.branch }}
+    - name: Push  to branch 
+      uses: CasperWA/push-protected@v2
       with:
-        github_token: ${{ secrets.GH_TOKEN }}
+        token: ${{ secrets.GH_TOKEN }}
         branch: ${{ steps.extract_branch.outputs.branch }}

@@ -1,3 +1,36 @@
+2022-10-28 - SD_UT, new remote control RCnoName20_10 (#1119)
+
+* new remote control protocol 20
+change 14_SD_UT.pm - new RCnoName20_10
+change SD_ProtocolData.pm - new definition 20.1, messages mostly recognized as MS, sometimes MU
+
+* Tool for testing FHEM commands against devices (#1121)
+- commands like set, get, attr
+* 03_set.t
+added test to verify rollingCode overflow
+added test to verify unsupported command filtering
+added check for set ? on SD_UT_Test_RCnoName20_10
+
+2022-10-24 - reviewdog for perl tests & errors - report unittest failure inline (#1100)
+
+add config for reviewdog
+
+add reviewdog reporter
+
+pause push of commits until tests are successfull
+
+2022-09-11 - new protocol 120 for Weather station TFA 35.1077.54.S2 (#1116)
+
+add Weather station TFA 35.1077.54.S2 with 30.3151 (T/H-transmitter), 30.3152 (rain gauge), 30.3153 (anemometer)
+ * new protocol SD_WS_120 for TFA 35.1077.54.S2
+ * Update SD_ProtocolData.pm
+ * Update 14_SD_WS.pm
+ * Update README.md
+2022-09-10 - Fix changed generation (#1115)
+
+* Update update.yml
+
+Extend Filter for pull requests to not accept master branches from other repositorys (forks)
 2022-06-14 - Protocol 121 remote control Busch-Transcontrol HF
            - 14_Hideki.pm - fix (#1099)
 
