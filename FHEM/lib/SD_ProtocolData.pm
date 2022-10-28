@@ -1,5 +1,5 @@
 ###########################################################################################################################################
-# $Id: SD_ProtocolData.pm 3.5.4 2022-09-11 12:03:38Z elektron-bbs $
+# $Id: SD_ProtocolData.pm 3.5.4 2022-10-27 17:06:50Z elektron-bbs $
 # The file is part of the SIGNALduino project.
 # All protocol definitions are contained in this file.
 #
@@ -86,7 +86,7 @@ package lib::SD_ProtocolData;
   use strict;
   use warnings;
 
-  our $VERSION = '1.47';
+  our $VERSION = '1.48';
 
   our %protocols = (
     "0" =>  ## various weather sensors (500 | 9100)
@@ -724,7 +724,7 @@ package lib::SD_ProtocolData;
               # RCnoName20_17E9 minus  MS;P0=233;P1=-7903;P3=-278;P5=-738;P6=679;D=0105050563056363636363630563050563050505050505630563050505630505;CP=0;SP=1;R=71;O;m1;
       {
         name            => 'RCnoName20',
-        comment         => 'Remote control with 4 buttons for diesel heating',
+        comment         => 'Remote control with 4 or 10 buttons',
         id              => '20',
         knownFreqs      => '433.92',
         one             => [3,-1],  # 720,-240
@@ -737,6 +737,27 @@ package lib::SD_ProtocolData;
         modulematch     => '^P20#.{8}',
         length_min      => '31',
         length_max      => '32',
+      },
+    "20.1" => ## Remote control with 10 buttons for fan (messages mostly recognized as MS, sometimes MU)
+              # https://forum.fhem.de/index.php/topic,53282.msg1233431.html#msg1233431 @ steffen83 2022-09-01
+              # RCnoName20_10_3E00 light_on   MU;P0=-8774;P1=282;P2=-775;P3=815;P4=-253;P5=-32001;D=10121234343434341212121212121212121212123434343412121234343412343415;CP=1;
+              # RCnoName20_10_3E00 light_off  MU;P0=-238;P1=831;P3=300;P4=-762;P5=-363;P6=192;P7=-8668;D=01010101010343434343434343434343434103415156464156464641564646734341010101010343434343434343434343434103410103434103434341034343734341010101010343434343434343434343434103410103434103434341034343734341010101010343434343434343434343434103410103434103434341;CP=3;O;
+              # RCnoName20_10_3E00 fan_stop   MU;P0=184;P1=-380;P2=128;P3=-9090;P4=-768;P5=828;P6=-238;P7=298;D=45656565656747474747474747474747474567474560404515124040451040374745656565656747474747474747474747474567474567474565674747456747374745656565656747474747474747474747474567474567474565674747456747374745656565656747474747474747474747474567474567474565674747;CP=7;O;
+      {
+        name         => 'RCnoName20',
+        comment      => 'Remote control with 4 or 10 buttons',
+        id           => '20.1',
+        knownFreqs   => '433.92',
+        one          => [3,-1],  # 720,-240
+        zero         => [1,-3],  # 240,-720
+        start        => [1,-33], # 240,-7920
+        clockabs     => 240,
+        format       => 'twostate',
+        preamble     => 'P20#',
+        clientmodule => 'SD_UT',
+        modulematch  => '^P20#.{8}',
+        length_min   => '31',
+        length_max   => '32',
       },
     "21"  =>  ## Einhell Garagentor
               # https://forum.fhem.de/index.php?topic=42373.0 @Ellert | user have no RAWMSG
