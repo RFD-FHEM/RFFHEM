@@ -1,0 +1,20 @@
+runner:
+  perl-test2-tap:
+    cmd: cat testOutput.stderr
+    errorformat: # (optional if you use `format`)
+     - '%C# at %f line %l%.'
+     - '%E# Failed test %m'
+     - '%C# | %.%#'
+     - '%C# +-%.%#'
+     - '%-G%.%#'
+    level: error    
+  perl-errors:
+    cmd: cat testOutput.stdout
+    errorformat:
+     - '%-G%m redefined at %f line %l%.%r'
+     - '%+Esyntax error at %f line %l%. "%m'
+     - '%+Z%p%m"'
+     - '%+E %m %.%# at %f line %l%.%#'
+     - '%+ZBEGIN failed%r'
+     - '%-Gok%.%#'
+    level: error

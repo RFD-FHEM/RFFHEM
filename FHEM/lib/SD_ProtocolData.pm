@@ -1,5 +1,5 @@
 ###########################################################################################################################################
-# $Id: SD_ProtocolData.pm 3.5.4 2022-06-14 07:33:24Z HomeAutoUser $
+# $Id: SD_ProtocolData.pm 3.5.4 2022-10-27 17:06:50Z elektron-bbs $
 # The file is part of the SIGNALduino project.
 # All protocol definitions are contained in this file.
 #
@@ -71,7 +71,7 @@
 ##### notice #### or #### info ############################################################################################################
 # !!! Between the keys and values ​​no tabs, please use spaces !!!
 # !!! Please use first unused id for new protocols !!!
-# ID´s are currently unused: 118 - 
+# ID´s are currently unused: 124 - 
 # ID´s need to be revised (preamble u): 5|19|21|22|23|25|28|31|36|40|52|59|63
 ###########################################################################################################################################
 # Please provide at least three messages for each new MU/MC/MS/MN protocol and a URL of issue in GitHub or discussion in FHEM Forum
@@ -86,7 +86,7 @@ package lib::SD_ProtocolData;
   use strict;
   use warnings;
 
-  our $VERSION = '1.46';
+  our $VERSION = '1.48';
 
   our %protocols = (
     "0" =>  ## various weather sensors (500 | 9100)
@@ -573,7 +573,6 @@ package lib::SD_ProtocolData;
         format           => 'twostate',
         preamble         => 'P13#',
         clientmodule     => 'FLAMINGO',
-        #      => '',
         length_min       => '24',
         length_max       => '24',
       },
@@ -725,7 +724,7 @@ package lib::SD_ProtocolData;
               # RCnoName20_17E9 minus  MS;P0=233;P1=-7903;P3=-278;P5=-738;P6=679;D=0105050563056363636363630563050563050505050505630563050505630505;CP=0;SP=1;R=71;O;m1;
       {
         name            => 'RCnoName20',
-        comment         => 'Remote control with 4 buttons for diesel heating',
+        comment         => 'Remote control with 4 or 10 buttons',
         id              => '20',
         knownFreqs      => '433.92',
         one             => [3,-1],  # 720,-240
@@ -738,6 +737,27 @@ package lib::SD_ProtocolData;
         modulematch     => '^P20#.{8}',
         length_min      => '31',
         length_max      => '32',
+      },
+    "20.1" => ## Remote control with 10 buttons for fan (messages mostly recognized as MS, sometimes MU)
+              # https://forum.fhem.de/index.php/topic,53282.msg1233431.html#msg1233431 @ steffen83 2022-09-01
+              # RCnoName20_10_3E00 light_on   MU;P0=-8774;P1=282;P2=-775;P3=815;P4=-253;P5=-32001;D=10121234343434341212121212121212121212123434343412121234343412343415;CP=1;
+              # RCnoName20_10_3E00 light_off  MU;P0=-238;P1=831;P3=300;P4=-762;P5=-363;P6=192;P7=-8668;D=01010101010343434343434343434343434103415156464156464641564646734341010101010343434343434343434343434103410103434103434341034343734341010101010343434343434343434343434103410103434103434341034343734341010101010343434343434343434343434103410103434103434341;CP=3;O;
+              # RCnoName20_10_3E00 fan_stop   MU;P0=184;P1=-380;P2=128;P3=-9090;P4=-768;P5=828;P6=-238;P7=298;D=45656565656747474747474747474747474567474560404515124040451040374745656565656747474747474747474747474567474567474565674747456747374745656565656747474747474747474747474567474567474565674747456747374745656565656747474747474747474747474567474567474565674747;CP=7;O;
+      {
+        name         => 'RCnoName20',
+        comment      => 'Remote control with 4 or 10 buttons',
+        id           => '20.1',
+        knownFreqs   => '433.92',
+        one          => [3,-1],  # 720,-240
+        zero         => [1,-3],  # 240,-720
+        start        => [1,-33], # 240,-7920
+        clockabs     => 240,
+        format       => 'twostate',
+        preamble     => 'P20#',
+        clientmodule => 'SD_UT',
+        modulematch  => '^P20#.{8}',
+        length_min   => '31',
+        length_max   => '32',
       },
     "21"  =>  ## Einhell Garagentor
               # https://forum.fhem.de/index.php?topic=42373.0 @Ellert | user have no RAWMSG
@@ -3191,6 +3211,27 @@ package lib::SD_ProtocolData;
         length_min      => '47',
         length_max      => '52',
         method          => \&lib::SD_Protocols::mcBit2Funkbus,
+      },
+    "120" =>  ## Weather station TFA 35.1077.54.S2 with 30.3151 (T/H-transmitter), 30.3152 (rain gauge), 30.3153 (anemometer)
+              # https://forum.fhem.de/index.php/topic,119335.msg1221926.html#msg1221926 2022-05-17 @ Ronny2510
+              # SD_WS_120 T: 19.1 H: 84 W: 0.7 R: 473.1  MU;P0=-6544;P1=486;P2=-987;P3=1451;D=01212121212121232123212321232121232323232321232321232321212121232123212321232323232323232321232323232323212323232323232321212323232123212323212121232123212123;CP=1;R=51;
+              # SD_WS_120 T: 18.7 H: 60 W: 2.0 R: 491.1  MU;P0=-4848;P1=984;P2=-981;P3=1452;P4=-17544;P5=480;P6=-31000;P7=320;D=01234525252525252523252325232523252523232323232523232523232523252523232525252523232323232323252523232323232523232323232323232525232325252323252325252323232523232565272525252525232523252325232525232323232325232325232325232525232325252525232323232323232525;CP=5;R=51;O;
+              # SD_WS_120 T: 22   H: 43 W: 0.3 R: 530.4  MU;P0=-15856;P1=480;P2=-981;P3=1460;D=01212121212121232123212321232121232323232321232321212321212323232321232123212123232323232323212323232323232123232323232321212321212123212323232321212121232121;CP=1;R=47; 
+      {
+        name            => 'TFA 35.1077.54.S2',
+        comment         => 'Weatherstation with sensors 30.3151, 30.3152, 30.3153',
+        id              => '120',
+        knownFreqs      => '868.35',
+        one             => [1,-2], #  480,-960
+        zero            => [3,-2], # 1440,-960
+        clockabs        => 480,
+        reconstructBit  => '1',
+        format          => 'twostate',
+        preamble        => 'W120#',
+        clientmodule    => 'SD_WS',
+        modulematch     => '^W120#',
+        length_min      => '78',
+        length_max      => '80',
       },
     "121" => ## Remote control Busch-Transcontrol HF - Handsender 6861
              # 1 OFF   MU;P0=28479;P1=-692;P2=260;P3=574;P4=-371;D=0121212121212134343434213434342121213434343434342;CP=2;R=41;

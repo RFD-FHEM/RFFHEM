@@ -135,8 +135,11 @@ jobs:
           path: |
             ${{ matrix.file }}
   commit:
+    permissions:
+      contents: write    
     runs-on: ubuntu-latest
     needs: modify
+    name: Commit and Push back
     steps: 
       - uses: actions/checkout@v3
         with:
@@ -169,8 +172,28 @@ jobs:
           git config --global user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git commit -m "Update Versiondate" -a && echo "::set-output name=status::true" || true
+
+      - name: Wait for tests to succeed
+        if: ${{ steps.commit.outputs.status }}
+        uses: lewagon/wait-on-check-action@v1.2.0
+        with:
+          running-workflow-name: 'Commit and Push back'
+          ref: ${{ github.head_ref }}
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          wait-interval: 20
+          allowed-conclusions: success,skipped,cancelled,neutral
+
       - name: git push
+        if: ${{ steps.commit.outputs.status }}
         uses: ad-m/github-push-action@v0.6.0
         with:
           github_token: ${{ secrets.GH_TOKEN }}
           branch: ${{ github.head_ref }}
+
+      #- name: Push  to branch 
+      #  uses: CasperWA/push-protected@v2
+      #  with:
+      #    token: ${{ secrets.GH_TOKEN }}
+      #    branch: ${{ github.head_ref }}
+      #    #unprotect_reviews: true      
+

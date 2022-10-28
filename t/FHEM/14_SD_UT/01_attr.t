@@ -77,6 +77,6 @@ InternalTimer(time()+0.4, sub {
 	done_testing();
 	exit(0);
 
-}, 'SD_UT_Test_6');
+}, 'SD_UT_Test_Buttons_six');
 
 1;
