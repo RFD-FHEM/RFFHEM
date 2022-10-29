@@ -1,8 +1,0 @@
-#!/bin/bash
-
-# Return 0 when command exists without error
-
-CMD="$*"
-echo "${BASH_SOURCE[0]} $CMD"
-exit 0
-
