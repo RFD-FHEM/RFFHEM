@@ -1,5 +1,10 @@
 name: Perl Modules&FHEM Unittests
-on: [push, pull_request]
+on: 
+  push:
+    branches:
+      - '*'
+      - '!push-action/**/**'
+  pull_request:
 
 jobs:
   libModTests:
@@ -17,16 +22,13 @@ jobs:
         install-modules-with: cpanm
         install-modules-args: --no-interactive -v --installdeps
 
-    - name: install fhem via deb package
+    - name: Install FHEM via debian nightly 
+      uses: fhem/setup-fhem@v1.0.1
+
+    - name: change ownership of /opt/fhem
       run: |
-        wget -qO - http://debian.fhem.de/archive.key | sudo apt-key add -
-        echo "deb http://debian.fhem.de/nightly/ /" | sudo tee -a /etc/apt/sources.list
-        sudo apt-get update -qq
-        sudo apt-get install fhem -y
-        sudo chown -R --reference=Makefile /opt/fhem
-        sudo systemctl stop fhem
-#    - name: Setup tmate session
-#      uses: mxschmitt/action-tmate@v1
+        sudo chown -R --reference=cpanfile /opt/fhem
+
     - name: run prove on perl modules (testscripts)
       run: |
         echo "::remove-matcher owner=perl::"
