@@ -1,4 +1,4 @@
-# $Id: SD_ProtocolData.pm 3.5.4 2022-10-27 17:06:50Z elektron-bbs $
+# $Id: SD_ProtocolData.pm 3.5.4 2022-10-31 15:58:36Z sidey79 $
 # The file is part of the SIGNALduino project.
 # All protocol definitions are contained in this file.
 #
