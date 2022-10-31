@@ -90,17 +90,18 @@ Supported Devices / Protocols
 |Rojaflex HSR-15, HSTR-15 | Remote control |
 |s014/TCM/Conrad | Weather sensor |
 |Somfy RTS | Shutters from Somfy|
-|technoline Weatherstation WS 6750/TX70DTH| Weather sensor and station |
 |TCM 234759 Tchibo | wireless bell |
 |TCM97001,Logilink, Pearl NC, and similar,Lifetec LT3594 | Weather sensor |
-|TFA 30.3151, 30.3152, 30.3153, 30.3157, 30.3200, 30.3208.02, 30.3209.02, 30.3221.02, 30.3222.02, 30.3228.02, 30.3229.02, 30.3233.01, 30.3251.10, 35.1077.54.S2, 35.1140.01 | Weather sensors and stations |
-|TS-K108W11 | wireless bell |
+|technoline Weatherstation WS 6750/TX70DTH | Weather sensor and station |
 |Techmar Garden Lights | Remote control |
-|Technoline TX3  | Weather sensor |
+|Technoline TX3 | Weather sensor |
 |Tedsen SKX1xx, SKX2xx, SKX4xx, SKX6xx | Remote control |
+|Temola TM40 | Wireless grill, meat, roast thermometer with 4 temperature sensors |
+|TFA 30.3151, 30.3152, 30.3153, 30.3157, 30.3200, 30.3208.02, 30.3209.02, 30.3221.02, 30.3222.02, 30.3228.02, 30.3229.02, 30.3233.01, 30.3251.10, 35.1077.54.S2, 35.1140.01 | Weather sensors and stations |
 |TR401 | Remote control |
 |TR60C-1 | Remote control with touch screen |
 |TS-FT002 | Water tank level monitor with temperature |
+|TS-K108W11 | wireless bell |
 |Visivo | Remote control for motorized screen |
 |VLOXO | wireless bell |
 |WH2, WH2A | Temperature/humidity sensor (TFA 30.3157 only temp)|
