@@ -1,3 +1,13 @@
+2022-11-15 - Temola TM 40 Demodulation (#1106)
+
+* SD_ProtocolData.pm
+
+Protocol 122 for Temola TM 40 thermometer added
+
+
+Co-authored-by: GitHub Action <action@github.com>
+Co-authored-by: Udo <info@elektron-bbs.de>
+Co-authored-by: HomeAutoUser <abfall-container@gmx.de>
 2022-10-28 - SD_UT, new remote control RCnoName20_10 (#1119)
 
 * new remote control protocol 20
