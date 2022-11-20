@@ -4793,14 +4793,14 @@ USB-connected devices (SIGNALduino):<br>
         <ul><small>Example: AVANTEK Wireless Digital Door Bell</small></ul>
       </li>
       <li>Bresser_5in1<br>
-        Modulation 2-FSK, Datarate=8.23 kbps, Sync Word=2DD4, Packet Length=26 Byte, Frequency 868.35 MHz
+        Modulation 2-FSK, Datarate=8.23 kbps, Sync Word=2DD4, Packet Length=26 Byte, Frequency 868.3 MHz
         <ul><small>Example: BRESSER 5-in-1 weather center, BRESSER rain gauge, Fody E42, Fody E43</small></ul>
       </li>
       <li>Bresser_6in1<br>
-        modulation 2-FSK, Datarate=8.23 kbps, Sync Word=2DD4, FIFO-THR=20 Byte, frequency 868.35 MHz
+        modulation 2-FSK, Datarate=8.23 kbps, Sync Word=2DD4, FIFO-THR=20 Byte, frequency 868.3 MHz
       </li>
       <li>Bresser_7in1<br>
-        modulation 2-FSK, Datarate=8.23 kbps, Sync Word=2DD4, Packet Length=22 Byte, frequency 868.35 MHz
+        modulation 2-FSK, Datarate=8.23 kbps, Sync Word=2DD4, Packet Length=22 Byte, frequency 868.3 MHz
       </li>
       <li>Fine_Offset_WH51_434<br>
         Modulation 2-FSK, Datarate=17.26 kbps, Sync Word=2DD4, Packet Length=14 Byte, Frequency 433.92 MHz
@@ -5375,14 +5375,14 @@ USB-connected devices (SIGNALduino):<br>
         <ul><small>Example: AVANTEK Funk-Türklingel</small></ul>
       </li>
       <li>Bresser_5in1<br>
-        Modulation 2-FSK, Datenrate=8.23 kbps, Sync Word=2DD4, Packet Length=26 Byte, Frequenz 868.35 MHz
+        Modulation 2-FSK, Datenrate=8.23 kbps, Sync Word=2DD4, Packet Length=26 Byte, Frequenz 868.3 MHz
         <ul><small>Beispiel: BRESSER 5-in-1 Wetter Center, BRESSER Profi Regenmesser, Fody E42, Fody E43</small></ul>
       </li>
       <li>Bresser_6in1<br>
-        Modulation 2-FSK, Datenrate=8.23 kbps, Sync Word=2DD4, FIFO-THR=20 Byte, Frequenz 868.35 MHz
+        Modulation 2-FSK, Datenrate=8.23 kbps, Sync Word=2DD4, FIFO-THR=20 Byte, Frequenz 868.3 MHz
       </li>
       <li>Bresser_7in1<br>
-        Modulation 2-FSK, Datenrate=8.23 kbps, Sync Word=2DD4, Packet Length=22 Byte, Frequenz 868.35 MHz
+        Modulation 2-FSK, Datenrate=8.23 kbps, Sync Word=2DD4, Packet Length=22 Byte, Frequenz 868.3 MHz
       </li>
       <li>Fine_Offset_WH51_434<br>
         Modulation 2-FSK, Datenrate=17.26 kbps, Sync Word=2DD4, Packet Length=14 Byte, Frequenz 433.92 MHz

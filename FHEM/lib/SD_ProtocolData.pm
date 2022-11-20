@@ -2931,12 +2931,12 @@ package lib::SD_ProtocolData;
         name            => 'Bresser 5in1',
         comment         => 'BRESSER 5-in-1 weather center, rain gauge, Fody E42, Fody E43',
         id              => '108',
-        knownFreqs      => '868.35',
+        knownFreqs      => '868.300',
         datarate        => '8.232',
         sync            => '2DD4',
         modulation      => '2-FSK',
         rfmode          => 'Bresser_5in1',
-        register        => ['0001','022E','0346','042D','05D4','061A','07C0','0800','0D21','0E65','0FE8','1088','114C','1202','1322','14F8','1551','1916','1B43','1C68'],
+        register        => ['0001','022E','0346','042D','05D4','061A','07C0','0800','0D21','0E65','0F6A','1088','114C','1202','1322','14F8','1551','1916','1B43','1C68'],
         preamble        => 'W108#',
         clientmodule    => 'SD_WS',
         length_min      => '52',
@@ -3091,12 +3091,12 @@ package lib::SD_ProtocolData;
         name            => 'Bresser 6in1',
         comment         => 'BRESSER 6-in-1 weather center',
         id              => '115',
-        knownFreqs      => '868.35',
+        knownFreqs      => '868.300',
         datarate        => '8.232',
         sync            => '2DD4',
         modulation      => '2-FSK',
         rfmode          => 'Bresser_6in1',
-        register        => ['0001','022E','0344','042D','05D4','0612','07C0','0800','0D21','0E65','0FE8','1088','114C','1202','1322','14F8','1551','1916','1B43','1C68'],
+        register        => ['0001','022E','0344','042D','05D4','0612','07C0','0800','0D21','0E65','0F6A','1088','114C','1202','1322','14F8','1551','1916','1B43','1C68'],
         preamble        => 'W115#',
         clientmodule    => 'SD_WS',
         length_min      => '36',
@@ -3147,12 +3147,12 @@ package lib::SD_ProtocolData;
         name            => 'Bresser 7in1',
         comment         => 'BRESSER 7-in-1 weather center',
         id              => '117',
-        knownFreqs      => '868.35',
+        knownFreqs      => '868.300',
         datarate        => '8.232',
         sync            => '2DD4',
         modulation      => '2-FSK',
         rfmode          => 'Bresser_7in1',
-        register        => ['0001','022E','0345','042D','05D4','0616','07C0','0800','0D21','0E65','0FE8','1088','114C','1202','1322','14F8','1551','1916','1B43','1C68'],
+        register        => ['0001','022E','0345','042D','05D4','0616','07C0','0800','0D21','0E65','0F6A','1088','114C','1202','1322','14F8','1551','1916','1B43','1C68'],
         preamble        => 'W117#',
         clientmodule    => 'SD_WS',
         length_min      => '44',
@@ -3253,12 +3253,6 @@ package lib::SD_ProtocolData;
         length_min      => '23',
         length_max      => '24',
       },
-
-    # In Progress:
-    # "120" =>  ## Weather station TFA 35.1077.54.S2 with 30.3151 (T/H-transmitter), 30.3152 (rain gauge), 30.3153 (anemometer)
-              # https://forum.fhem.de/index.php/topic,119335.msg1221926.html#msg1221926 2022-05-17 @ Ronny2510
-    # "121" => ## Remote control Busch-Transcontrol HF - Handsender 6861
-
     "122" =>  ## TM40, Wireless Grill-, Meat-, Roasting-Thermometer with 4 Temperature Sensors
               # https://forum.fhem.de/index.php?topic=127938.msg1224516#msg1224516 2022-06-09 @ Prof. Dr. Peter Henning
               # SD_WS_122_T  T: 36 T2: 32 T3: 31 T4: 31  MU;P0=3412;P1=-1029;P2=1043;P3=4706;P4=-2986;P5=549;P6=-1510;P7=-562;D=01212121212121213456575756575756575756565757575656575757575757575657575656575656575757575757575756575756565756565757575757575757565756575757575757575757575757575657565657565757575757575757575757575757575757575756575656565757575621212121212121213456575756;CP=5;R=2;O;
