@@ -1111,6 +1111,7 @@ sub SD_WS_Parse {
                             return if (substr($rawData,12,1) ne '1'); # only weather station
                             $windgust = substr($rawData,14,3);
                             $windgust =~ tr/0123456789ABCDEF/FEDCBA9876543210/;
+                            # uncoverable branch true
                             return if ($windgust !~ m/^\d+$/xms);
                             return $windgust * 0.1;
                           },
@@ -1118,6 +1119,7 @@ sub SD_WS_Parse {
                             return if (substr($rawData,12,1) ne '1'); # only weather station
                             $windspeed = substr($rawData,18,2) . substr($rawData,17,1);
                             $windspeed =~ tr/0123456789ABCDEF/FEDCBA9876543210/;
+                            # uncoverable branch true
                             return if ($windspeed !~ m/^\d+$/xms);
                             return $windspeed * 0.1;
                           },
@@ -1127,6 +1129,7 @@ sub SD_WS_Parse {
                             return ($winddir * 1, $winddirtxtar[round(($winddir / 22.5),0)]);
                           },
         temp       => sub {my ($rawData,$bitData) = @_;
+                            # uncoverable condition right
                             return if ((substr($rawData,12,1) eq '1' && substr($rawData,33,1) eq '1') || substr($rawData,24,3) !~ m/^\d+$/xms); # not by weather station & rain
                             $rawTemp = substr($rawData,24,3) * 0.1;
                             if (substr($bitData,108,1) eq '1') {
@@ -1139,6 +1142,7 @@ sub SD_WS_Parse {
                             return round($rawTemp,1);
                           },
         hum        => sub {my ($rawData,undef) = @_;
+                            # uncoverable condition right
                             return if ((substr($rawData,12,1) eq '1' && substr($rawData,33,1) eq '1') || substr($rawData,28,2) !~ m/^\d+$/xms); # not by weather station & rain
                             $hum = substr($rawData,28,2) * 1;
                             if (substr($rawData,12,1) eq '4' && $hum >= 1 && $hum <= 16) {  # Soil Moisture
@@ -1150,6 +1154,7 @@ sub SD_WS_Parse {
                             return if (substr($rawData,33,1) ne '1' || substr($rawData,12,1) ne '1'); # message type || weather station
                             $rain = substr($rawData,24,6);
                             $rain =~ tr/0123456789ABCDEF/FEDCBA9876543210/;
+                            # uncoverable branch true
                             return if ($rain !~ m/^\d+$/xms);
                             return $rain * 0.1;
                           },
@@ -1157,6 +1162,7 @@ sub SD_WS_Parse {
                             return if (substr($rawData,33,1) ne '0' || substr($rawData,12,1) ne '1'); # message type || weather station
                             $uv = substr($rawData,30,3);
                             $uv =~ tr/0123456789ABCDEF/FEDCBA9876543210/;
+                            # uncoverable branch true
                             return if ($uv !~ m/^\d+$/xms);
                             return $uv * 0.1;
                           },
