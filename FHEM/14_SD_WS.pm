@@ -1828,14 +1828,9 @@ sub SD_WS_Parse {
     my $timeSinceLastUpdate = abs(ReadingsAge($name, "state", 0));
     # temperature
     if (defined($temp) && defined(ReadingsVal($name, "temperature", undef))) {
-      my $diffTemp = 0;
       my $oldTemp = ReadingsVal($name, "temperature", undef);
       my $maxdeviation = AttrVal($name, "max-deviation-temp", 1);       # default 1 K
-      if ($temp > $oldTemp) {
-        $diffTemp = ($temp - $oldTemp);
-      } else {
-        $diffTemp = ($oldTemp - $temp);
-      }
+      my $diffTemp = abs($temp - $oldTemp);
       $diffTemp = sprintf("%.1f", $diffTemp);       
       Log3 $name, 4, "$ioname: $name old temp $oldTemp, age $timeSinceLastUpdate, new temp $temp, diff temp $diffTemp";
       my $maxDiffTemp = $timeSinceLastUpdate / 60 + $maxdeviation;      # maxdeviation + 1.0 Kelvin/Minute
@@ -1848,14 +1843,9 @@ sub SD_WS_Parse {
     }
     # humidity
     if (defined($hum) && defined(ReadingsVal($name, "humidity", undef))) {
-      my $diffHum = 0;
       my $oldHum = ReadingsVal($name, "humidity", undef);
       my $maxdeviation = AttrVal($name, "max-deviation-hum", 1);        # default 1 %
-      if ($hum > $oldHum) {
-        $diffHum = ($hum - $oldHum);
-      } else {
-        $diffHum = ($oldHum - $hum);
-      }
+      my $diffHum = abs($hum - $oldHum);
       $diffHum = sprintf("%.1f", $diffHum);       
       Log3 $name, 4, "$ioname: $name old hum $oldHum, age $timeSinceLastUpdate, new hum $hum, diff hum $diffHum";
       my $maxDiffHum = $timeSinceLastUpdate / 60 + $maxdeviation;       # $maxdeviation + 1.0 %/Minute
