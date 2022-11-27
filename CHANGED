@@ -1,3 +1,21 @@
+2022-11-27 - bugfix Bresser protocols (#1125)
+
+* Bugfix Bresser protocols
+
+00_SIGNALduino.pm - Frequency changed to 868.3 MHz for all Bresser protocols in documentation.
+14_SD_WS.pm - Corrected protocol 115 battery bit, added batChange bit and corrected calculation for negative temperatures.
+SD_ProtocolData.pm - Changed frequency and register settings for all Bresser protocols to 868.3 MHz.
+
+* 09_parseData.t
+
+renamed file
+changed test to use RDmsg.
+provided testdata json
+improved RDmsg
+corrected RDmsg delete device condition
+
+Co-authored-by: GitHub Action <action@github.com>
+Co-authored-by: sidey79 <7968127+sidey79@users.noreply.github.com>
 2022-11-15 - Temola TM 40 Demodulation (#1106)
 
 * SD_ProtocolData.pm
