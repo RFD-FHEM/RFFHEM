@@ -15,7 +15,7 @@ our $VERSION = 1.00;
 our $testDataArray; 
 our @JSONTestList = (
 	{
-		testname	=> 'Test with pre-release SD_Device_ProtocolList',
+ 		testname	=> 'Test with pre-release SD_Device_ProtocolList',
 		url		=> 'https://raw.githubusercontent.com/RFD-FHEM/SIGNALduino_TOOL/pre-release/FHEM/lib/SD_Device_ProtocolList.json',
 		todo  => 'Checking with pre-release Version of SD_Device_ProtocolList which can fail',
 	},
@@ -84,7 +84,13 @@ sub checkParseFn  {
     if (defined $tData->{internals}{DEF} && defined $tData->{internals}{NAME}) {
         $tplan++;
         note("device will be defined temporary");
-        is(::CommandDefMod(undef,"-temporary $tData->{internals}{NAME} $module $tData->{internals}{DEF}"),U(),"Verify device return from defmod ",$tData);
+        is(::CommandDefMod(undef,qq[ -temporary $tData->{internals}{NAME} $module $tData->{internals}{DEF}]),U(),"Verify device return from defmod ",$tData);
+    }
+
+    ## execute custom commands
+    foreach my $cmd ( @{$tData->{prep_commands}} )
+    {
+        main::AnalyzeCommand(undef,$cmd);
     }
 
     if (defined $tData->{setreadings} && defined $tData->{internals}{NAME} && scalar keys %{$tData->{setreadings}} > 0) {
@@ -113,7 +119,7 @@ sub checkParseFn  {
     my $ret=&{$main::modules{$module}{ParseFn}}($ioHash,$tData->{dmsg});
     use strict "refs"; 
     
-    is($ret,$tData->{internals}{NAME},'verify parseFn return equal internal NAME');
+    is($ret,exists $tData->{returns}{ParseFn} ? $tData->{returns}{ParseFn} : $tData->{internals}{NAME}  ,'verify parseFn return equal internal NAME');
 
     SKIP: {
         skip 'readings' if ( !defined $ret || $ret eq $EMPTY || $ret eq q[NEXT] || scalar keys %{$tData->{readings}} < 1);
@@ -137,8 +143,8 @@ sub checkParseFn  {
             }
         };
     
-        ::CommandDelete(undef,$tData->{internals}{NAME});
     } #skip
+    ::CommandDelete(undef,$tData->{internals}{NAME}) if (defined $tData->{internals}{NAME});
 
     plan($tplan);
 }; # subtest
