@@ -3,7 +3,7 @@
 #
 # The file is part of the SIGNALduino project.
 #
-# 2019 - HomeAuto_User & elektron-bbs
+# 2019 - ... HomeAuto_User & elektron-bbs
 # for remote controls using protocol QUIGG Gt-9000
 # based on code quigg_gt9000.c from pilight
 #################################################################
