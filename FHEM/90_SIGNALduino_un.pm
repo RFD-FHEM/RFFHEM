@@ -5,8 +5,8 @@
 # see http://www.fhemwiki.de/wiki/SIGNALduino to support debugging of unknown signal data
 # The purpos is to use it as addition to the SIGNALduino
 #
-# 2015-2018  S.Butzek
-# 2018-...   S.Butzek, HomeAutoUser, elektron-bbs
+# 2015 - 2018  S.Butzek
+# 2018 - ...   S.Butzek, HomeAutoUser, elektron-bbs
 
 package main;
 
