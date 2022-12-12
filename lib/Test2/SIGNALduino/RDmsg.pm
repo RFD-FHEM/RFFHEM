@@ -14,11 +14,11 @@ our @EXPORT = qw/dmsgCheck/;
 our $VERSION = 1.00;
 our $testDataArray; 
 our @JSONTestList = (
-	{
- 		testname	=> 'Test with pre-release SD_Device_ProtocolList',
-		url		=> 'https://raw.githubusercontent.com/RFD-FHEM/SIGNALduino_TOOL/pre-release/FHEM/lib/SD_Device_ProtocolList.json',
-		todo  => 'Checking with pre-release Version of SD_Device_ProtocolList which can fail',
-	},
+#	{
+# 		testname	=> 'Test with pre-release SD_Device_ProtocolList',
+#		url		=> 'https://raw.githubusercontent.com/RFD-FHEM/SIGNALduino_TOOL/pre-release/FHEM/lib/SD_Device_ProtocolList.json',
+#		todo  => 'Checking with pre-release Version of SD_Device_ProtocolList which can fail',
+#	},
 	{
 		testname	=> 'Test with master SD_Device_ProtocolList',
 		url		=> 'https://raw.githubusercontent.com/RFD-FHEM/SIGNALduino_TOOL/master/FHEM/lib/SD_Device_ProtocolList.json',
@@ -47,11 +47,9 @@ sub loadJson {
         };
     }
 
-
 	$testDataArray = eval { decode_json($json_text) };
 	if($@){
 		fail("open json file SD_Device_ProtocolList was not possible $?"); 
-		#use Data::Dumper;
 		diag $json_text;
 	}
 }
@@ -61,10 +59,10 @@ sub filterTestDataArray {
 
   $modulename =~ s/^[0-9][0-9]_//; # Remove leading digtis
   my @results;
-
+  return  if (ref $testDataArray ne 'ARRAY');
   while ( (my $pID, my $testSet) = each  (@{$testDataArray}) )
   {
-	  if (defined $testSet->{module} && $testSet->{module} eq $modulename)
+      if (defined $testSet->{module} && $testSet->{module} eq $modulename)
 	  {
 		  push @results, $testSet
 	  }
@@ -77,77 +75,89 @@ sub checkParseFn  {
     my $module = shift;
     my $tData = shift;
     my $ioHash = shift;
-    use Data::Dumper;
 
-    my $tplan=3; # one for readings and one for internals and one for defmod
+    my $tplan=0; 
 
-    if (defined $tData->{internals}{DEF} && defined $tData->{internals}{NAME}) {
-        $tplan++;
-        note("device will be defined temporary");
-        is(::CommandDefMod(undef,qq[ -temporary $tData->{internals}{NAME} $module $tData->{internals}{DEF}]),U(),"Verify device return from defmod ",$tData);
-    }
-
-    ## execute custom commands
-    foreach my $cmd ( @{$tData->{prep_commands}} )
+    foreach my $testMocks ( @{$tData->{tests}} )
     {
-        main::AnalyzeCommand(undef,$cmd);
-    }
-
-    if (defined $tData->{setreadings} && defined $tData->{internals}{NAME} && scalar keys %{$tData->{setreadings}} > 0) {
-        note("readings will be set to defaults");
-        
-        while ( (my $rName, my $rValue) = each (%{$tData->{setreadings}}) )
-        {   
-            ::CommandSetReading(undef,qq[$tData->{internals}{NAME} $rName $rValue] );
-        }
-    
-    }
-
-    if (defined $tData->{attributes} && defined $tData->{internals}{NAME} ) {
-        while ( (my $aName, my $aValue) = each (%{$tData->{attributes}}) )
+        for my $element ( qw/internals readings/ )
         { 
-            note("device attribute $aName set for right result: $aValue");
-            ::CommandAttr(undef,"$tData->{internals}{NAME} $aName  $aValue"); # set attribute
+            for my $name ( %{$tData->{$element} })
+            {
+                if (!exists $testMocks->{$element}{$name} && exists $tData->{$element}{$name}) {
+                    $testMocks->{$element}{$name} = $tData->{$element}{$name};
+                }
+            }
         }
-    }
-    
-    
-    #print Dumper(%main::modules);
-    #my $ret=$main::modules{$module}{ParseFn}->($ioHash,$tData->{dmsg});
+        if (!exists $testMocks->{returns}->{ParseFn} ) {
+            $testMocks->{returns}->{ParseFn} = $testMocks->{internals}{NAME};
+        }
 
-    no strict "refs"; 
-    my $ret=&{$main::modules{$module}{ParseFn}}($ioHash,$tData->{dmsg});
-    use strict "refs"; 
-    
-    is($ret,exists $tData->{returns}{ParseFn} ? $tData->{returns}{ParseFn} : $tData->{internals}{NAME}  ,'verify parseFn return equal internal NAME');
+        subtest qq[Starting Test $testMocks->{comment}] => sub {
+            # Set some defaults from global element for each test
 
-    SKIP: {
-        skip 'readings' if ( !defined $ret || $ret eq $EMPTY || $ret eq q[NEXT] || scalar keys %{$tData->{readings}} < 1);
-         
-        subtest "Verify readings" => sub {
-            plan(scalar keys %{$tData->{readings}} );
-            while ( (my $rName, my $rValue) = each (%{$tData->{readings}}) )
-            {
-                is(::ReadingsVal($tData->{internals}{NAME} ,$rName,undef),$rValue,"check reading $rName");
+            $tplan=3; 
+            if (defined $testMocks->{internals}{DEF} && defined $testMocks->{internals}{NAME}) {
+                $tplan++;
+                note('device will be defined temporary');
+                is(::CommandDefMod(undef,qq[ -temporary $testMocks->{internals}{NAME} $module $testMocks->{internals}{DEF}]),U(),"Verify device return from defmod ",$tData);
             }
-        };
-    } #skip
-    
-    SKIP : {
-        skip 'internals' if ( !defined $ret || $ret eq $EMPTY || $ret eq q[NEXT] || scalar keys %{$tData->{internals}} < 1);
-        subtest "Verify internals" => sub {
-            plan(scalar keys %{$tData->{internals}} );
-            while ( (my $iName, my $iValue) = each (%{$tData->{internals}}) )
-            {
-                is(::InternalVal($tData->{internals}{NAME} ,$iName, undef),$iValue,"check internal $iName");						
-            }
-        };
-    
-    } #skip
-    ::CommandDelete(undef,$tData->{internals}{NAME}) if (defined $tData->{internals}{NAME});
 
-    plan($tplan);
-}; # subtest
+            ## execute custom commands
+            foreach my $cmd ( @{$testMocks->{prep_commands}} )
+            {
+                main::AnalyzeCommand(undef,$cmd);
+            }
+
+            if (defined $testMocks->{setreadings} && defined $testMocks->{internals}{NAME} ) {
+                
+                while ( (my $rName, my $rValue) = each (%{$testMocks->{setreadings}}) )
+                {   
+                    note(qq[reading $rName be set to $rValue]);
+                    ::CommandSetReading(undef,qq[$testMocks->{internals}{NAME} $rName $rValue] );
+                }
+            }
+
+            if (defined $testMocks->{attributes} && defined $testMocks->{internals}{NAME} ) {
+                while ( (my $aName, my $aValue) = each (%{$testMocks->{attributes}}) )
+                { 
+                    note("device attribute $aName set for right result: $aValue");
+                    ::CommandAttr(undef,"$testMocks->{internals}{NAME} $aName  $aValue"); # set attribute
+                }
+            }
+            
+            my $ret = $main::modules{$module}{ParseFn}->($ioHash,$tData->{dmsg});
+            
+            is($ret,$testMocks->{returns}->{ParseFn} ,'verify parseFn return expected result');
+
+            SKIP: {
+                skip 'readings' if ( !defined $ret || $ret eq $EMPTY || $ret eq q[NEXT] || scalar keys %{$testMocks->{readings}} < 1);
+                
+                subtest "Verify readings" => sub {
+                    plan(scalar keys %{$testMocks->{readings}} );
+                    while ( (my $rName, my $rValue) = each (%{$testMocks->{readings}}) )
+                    {
+                        is(::ReadingsVal($testMocks->{internals}{NAME} ,$rName,undef),$rValue,"check reading $rName");
+                    }
+                };
+            } #skip
+            
+            SKIP : {
+                skip 'internals' if ( !defined $ret || $ret eq $EMPTY || $ret eq q[NEXT] || scalar keys %{$testMocks->{internals}} < 1);
+                subtest "Verify internals" => sub {
+                    plan(scalar keys %{$testMocks->{internals}} );
+                    while ( (my $iName, my $iValue) = each (%{$testMocks->{internals}}) )
+                    {
+                        is(::InternalVal($testMocks->{internals}{NAME} ,$iName, undef),$iValue,"check internal $iName");						
+                    }
+                };
+            } #skip
+            ::CommandDelete(undef,$testMocks->{internals}{NAME}) if (defined $testMocks->{internals}{NAME});
+            plan($tplan);
+        };  #subtest
+    }; # loop
+
+}; # checkParseFn
 
 sub dmsgCheck {
     my $testDef = shift;
@@ -157,8 +167,6 @@ sub dmsgCheck {
     my $pID;
     my $tID;       
     my $testSet;          
-  #  use Data::Dumper;
-  #  print Dumper($main::modules{FS10});
 
     my $ctx = context();
     loadJson($testDef->{url});
@@ -170,7 +178,9 @@ sub dmsgCheck {
     if ( exists $testDef->{todo}) {
         $todo = Test2::Todo->new(reason => $testDef->{todo} ); 
     }
-
+    
+    my $loaded=main::CommandReload(undef,$modulename);
+    note(qq[LoadMoCommandReloaddule($modulename) = $loaded]);
     while ( ($pID, $testSet) = each @filt_testDataArray )
     {
         SKIP: {
@@ -178,15 +188,22 @@ sub dmsgCheck {
             skip 'Protocol does not exsists in ProtocolObject' if ( !$ioHash->{protocolObject}->protocolExists($testSet->{id}) );
             # skip 'Protocol is under development' if ( defined $ioHash->{protocolObject}->checkProperty($testSet->{id},'developId',undef) ); 
             my $mmRe = qr/$main::modules{$testSet->{module}}{Match}/;
+
             while ( (my $tID, my $tData) = each (@{$testSet->{data}}) ) 
             {
-                my $bool = run_subtest(qq[Checking parseFN for module: $testSet->{module} device: $testSet->{name} TestNo: $tID ($tData->{comment})], \&checkParseFn, {buffered => 1, inherit_trace => 1},$testSet->{module},$tData, $ioHash);
-                
+                SKIP: {
+
+                    if ( !exists $tData->{tests} || scalar @{$tData->{tests}} == 0 ) { 
+                        skip qq[no referencedata for test $tData->{comment}]; 
+                    }
+                    my $bool = run_subtest(qq[Checking parseFN for module: $testSet->{module} device: $testSet->{name} DataNr: $tID ($tData->{comment})], \&checkParseFn, {buffered => 1, inherit_trace => 1},$testSet->{module},$tData, $ioHash);
+                }
+
                 if ( $tData->{MatchCheckFail} )
                 {
-                   unlike($tData->{dmsg},$mmRe,qq[Verify Module unmatch for module: $testSet->{module} device: $testSet->{name} TestNo: $tID ($tData->{comment})]);
+                   unlike($tData->{dmsg},$mmRe,qq[Verify Module unmatch for module: $testSet->{module} device: $testSet->{name} DataNr: $tID ($tData->{comment})]);
                 } else {
-                   like($tData->{dmsg},$mmRe,qq[Verify Module match for module: $testSet->{module} device: $testSet->{name} TestNo: $tID ($tData->{comment})]);
+                   like($tData->{dmsg},$mmRe,qq[Verify Module match for module: $testSet->{module} device: $testSet->{name} DataNr: $tID ($tData->{comment})]);
                 }
             } # while testSet
         } # SKIP
