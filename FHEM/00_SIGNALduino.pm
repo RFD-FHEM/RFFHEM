@@ -8,7 +8,7 @@
 #
 # 2014-2015  S.Butzek, N.Butzek
 # 2016-2019  S.Butzek, Ralf9
-# 2019-2022  S.Butzek, HomeAutoUser, elektron-bbs
+# 2019- ...  S.Butzek, HomeAutoUser, elektron-bbs
 
 
 package main;
