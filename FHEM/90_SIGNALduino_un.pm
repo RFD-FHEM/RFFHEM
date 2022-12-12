@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 90_SIGNALduino_un.pm 20749 2019-12-14 22:35:00Z Sidey $
+# $Id: 90_SIGNALduino_un.pm 20749 2022-12-12 21:07:51Z HomeAutoUser $
 #
 # The file is part of the SIGNALduino project
 # see http://www.fhemwiki.de/wiki/SIGNALduino to support debugging of unknown signal data
