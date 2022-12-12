@@ -1,5 +1,5 @@
 #################################################################
-# $Id: 10_SD_GT.pm 1 2022-12-12 22:04:18Z HomeAutoUser $
+# $Id: 10_SD_GT.pm 1 2022-12-12 22:25:25Z HomeAutoUser $
 #
 # The file is part of the SIGNALduino project.
 #
