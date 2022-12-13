@@ -1,4 +1,4 @@
-# $Id: 14_SD_WS.pm v3.5.4 2022-12-13 08:34:41Z HomeAutoUser $
+# $Id: 14_SD_WS.pm v3.5.4 2022-12-13 22:44:26Z HomeAutoUser $
 #
 # The purpose of this module is to support serval
 # weather sensors which use various protocol
