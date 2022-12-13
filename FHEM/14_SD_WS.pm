@@ -5,7 +5,7 @@
 #
 # Sidey79 & Ralf9   2016 - 2017
 # Joerg             2017
-# elektron-bbs      2018 -
+# elektron-bbs      2018 - ...
 #
 # 17.04.2017 WH2 (TFA 30.3157 nur Temp, Hum = 255),es wird das Perlmodul Digest:CRC benoetigt fuer CRC-Pruefung benoetigt
 # 29.05.2017 Test ob Digest::CRC installiert
