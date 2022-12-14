@@ -21,19 +21,16 @@ sub runTest {
     #print Dumper(@Test::RDmsg::JSONTestList);
 	my $filepath = dirname(__FILE__);
 	push @Test2::SIGNALduino::RDmsg::JSONTestList, {
-		testname	=> q[Testdata with corrupt Hideki data],
+		testname	=> qq[Testdata with $module data],
 		url			=> qq[$filepath/testData.json],
 	};
-	if ( scalar @Test2::SIGNALduino::RDmsg::JSONTestList > 0 ) {
 
-	
-		plan( scalar @Test2::SIGNALduino::RDmsg::JSONTestList);
-		for my $maintest  (@Test2::SIGNALduino::RDmsg::JSONTestList)
-		{
-			subtest $maintest->{testname} => sub {
-				Test2::SIGNALduino::RDmsg::dmsgCheck($maintest,$module,$ioHash);
-			};
-		}
+	plan( scalar @Test2::SIGNALduino::RDmsg::JSONTestList);
+	for my $maintest  (@Test2::SIGNALduino::RDmsg::JSONTestList)
+	{
+		subtest $maintest->{testname} => sub {
+			Test2::SIGNALduino::RDmsg::dmsgCheck($maintest,$module,$ioHash);
+		};
 	}
 	exit(0);
 }
@@ -44,7 +41,7 @@ sub waitDone {
 	{
 		runTest(@_);
 	} else {
-		InternalTimer(time()+0.5, &waitDone,@_);			
+		InternalTimer(time()+0.2, &waitDone,@_);			
 	}
 
 }
