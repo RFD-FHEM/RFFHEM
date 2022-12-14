@@ -30,10 +30,10 @@ sub SD_WS09_Initialize($) {
 	my ($hash) = @_;
 
 	$hash->{Match}     = "^P9#F[A-Fa-f0-9]+";    ## pos 7 ist aktuell immer 0xF
-	$hash->{DefFn}     = "SD_WS09_Define";
-	$hash->{UndefFn}   = "SD_WS09_Undef";
-	$hash->{ParseFn}   = "SD_WS09_Parse";
-	$hash->{AttrFn}	   = "SD_WS09_Attr";
+	$hash->{DefFn}     = \&SD_WS09_Define;
+	$hash->{UndefFn}   = \&SD_WS09_Undef;
+	$hash->{ParseFn}   = \&SD_WS09_Parse;
+	$hash->{AttrFn}	   = \&SD_WS09_Attr;
 	$hash->{AttrList}  = "IODev do_not_notify:1,0 ignore:0,1 showtime:1,0 "
                        ."model:CTW600,WH1080 ignore:0,1 "
                        ."windKorrektur:-3,-2,-1,0,1,2,3 "

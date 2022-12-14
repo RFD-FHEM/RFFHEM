@@ -54,9 +54,9 @@ OREGON_Initialize($)
   my ($hash) = @_;
 
   $hash->{Match}     = "^(3[8-9A-F]|[4-6][0-9A-F]|7[0-8]).*", #38-78
-  $hash->{DefFn}     = "OREGON_Define";
-  $hash->{UndefFn}   = "OREGON_Undef";
-  $hash->{ParseFn}   = "OREGON_Parse";
+  $hash->{DefFn}     = \&OREGON_Define;
+  $hash->{UndefFn}   = \&OREGON_Undef;
+  $hash->{ParseFn}   = \&OREGON_Parse;
   $hash->{AttrList}  = "IODev ignore:0,1 do_not_notify:1,0 showtime:1,0"
                       ." $readingFnAttributes";
 }

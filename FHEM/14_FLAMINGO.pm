@@ -48,10 +48,10 @@ sub FLAMINGO_Initialize {
   my ($hash) = @_;
 
   $hash->{Match}     = '^P13\.?1?#[A-Fa-f0-9]+';
-  $hash->{SetFn}     = 'FLAMINGO_Set';
-  $hash->{DefFn}     = 'FLAMINGO_Define';
-  $hash->{UndefFn}   = 'FLAMINGO_Undef';
-  $hash->{ParseFn}   = 'FLAMINGO_Parse';
+  $hash->{SetFn}     = \&FLAMINGO_Set;
+  $hash->{DefFn}     = \&FLAMINGO_Define;
+  $hash->{UndefFn}   = \&FLAMINGO_Undef;
+  $hash->{ParseFn}   = \&FLAMINGO_Parse;
   $hash->{AttrList}  =  'IODev do_not_notify:0,1 showtime:0,1 ignore:0,1 '.
                         'model:'.join(q{,}, sort %models).q{ } .
                         $readingFnAttributes;

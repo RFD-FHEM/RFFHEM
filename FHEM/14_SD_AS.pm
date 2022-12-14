@@ -45,9 +45,9 @@ SD_AS_Initialize($)
   # ..31 
 
   $hash->{Match}     = "^P2#[A-Fa-f0-9]{7,8}";
-  $hash->{DefFn}     = "SD_AS_Define";
-  $hash->{UndefFn}   = "SD_AS_Undef";
-  $hash->{ParseFn}   = "SD_AS_Parse";
+  $hash->{DefFn}     = \&SD_AS_Define;
+  $hash->{UndefFn}   = \&SD_AS_Undef;
+  $hash->{ParseFn}   = \&SD_AS_Parse;
   $hash->{AttrList}  = "do_not_notify:0,1 showtime:0,1 ignore:0,1 ".$readingFnAttributes;
   $hash->{AutoCreate}=
         { 

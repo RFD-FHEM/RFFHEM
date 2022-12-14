@@ -38,10 +38,10 @@ SD_WS_Maverick_Initialize($)
   my ($hash) = @_;
 
   $hash->{Match}     = "^P47#[A-Fa-f0-9]+";
-  $hash->{DefFn}     = "SD_WS_Maverick_Define";
-  $hash->{UndefFn}   = "SD_WS_Maverick_Undef";
-  $hash->{ParseFn}   = "SD_WS_Maverick_Parse";
-  $hash->{AttrFn}	   = "SD_WS_Maverick_Attr";
+  $hash->{DefFn}     = \&SD_WS_Maverick_Define;
+  $hash->{UndefFn}   = \&SD_WS_Maverick_Undef;
+  $hash->{ParseFn}   = \&SD_WS_Maverick_Parse;
+  $hash->{AttrFn}	   = \&SD_WS_Maverick_Attr;
   $hash->{AttrList}  = "do_not_notify:1,0 ignore:0,1 showtime:1,0 inactivityinterval " .
                         "$readingFnAttributes ";
   $hash->{AutoCreate} =

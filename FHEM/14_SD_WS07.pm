@@ -39,9 +39,9 @@ SD_WS07_Initialize($)
 {
   my ($hash) = @_;
   $hash->{Match}     = "^P7#[A-Fa-f0-9]{6}[AFaf][A-Fa-f0-9]{2,3}";    ## pos 7 ist aktuell immer 0xF oder 0xA
-  $hash->{DefFn}     = "SD_WS07_Define";
-  $hash->{UndefFn}   = "SD_WS07_Undef";
-  $hash->{ParseFn}   = "SD_WS07_Parse";
+  $hash->{DefFn}     = \&SD_WS07_Define;
+  $hash->{UndefFn}   = \&SD_WS07_Undef;
+  $hash->{ParseFn}   = \&SD_WS07_Parse;
   $hash->{AttrList}  = "do_not_notify:1,0 ignore:0,1 showtime:1,0 " .
                        "negation-batt:no,yes ".
                        "max-deviation-temp:1,2,3,4,5,6,7,8,9,10,15,20,25,30,35,40,45,50 ".
