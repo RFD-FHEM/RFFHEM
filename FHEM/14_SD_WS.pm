@@ -1,4 +1,4 @@
-# $Id: 14_SD_WS.pm v3.5.4 2022-11-14 20:37:55Z sidey79 $
+# $Id: 14_SD_WS.pm v3.5.4 2022-11-26 22:39:42Z elektron-bbs $
 #
 # The purpose of this module is to support serval
 # weather sensors which use various protocol
@@ -1111,6 +1111,7 @@ sub SD_WS_Parse {
                             return if (substr($rawData,12,1) ne '1'); # only weather station
                             $windgust = substr($rawData,14,3);
                             $windgust =~ tr/0123456789ABCDEF/FEDCBA9876543210/;
+                            # uncoverable branch true
                             return if ($windgust !~ m/^\d+$/xms);
                             return $windgust * 0.1;
                           },
@@ -1118,6 +1119,7 @@ sub SD_WS_Parse {
                             return if (substr($rawData,12,1) ne '1'); # only weather station
                             $windspeed = substr($rawData,18,2) . substr($rawData,17,1);
                             $windspeed =~ tr/0123456789ABCDEF/FEDCBA9876543210/;
+                            # uncoverable branch true
                             return if ($windspeed !~ m/^\d+$/xms);
                             return $windspeed * 0.1;
                           },
@@ -1127,6 +1129,7 @@ sub SD_WS_Parse {
                             return ($winddir * 1, $winddirtxtar[round(($winddir / 22.5),0)]);
                           },
         temp       => sub {my ($rawData,$bitData) = @_;
+                            # uncoverable condition right
                             return if ((substr($rawData,12,1) eq '1' && substr($rawData,33,1) eq '1') || substr($rawData,24,3) !~ m/^\d+$/xms); # not by weather station & rain
                             $rawTemp = substr($rawData,24,3) * 0.1;
                             if (substr($bitData,108,1) eq '1') {
@@ -1139,6 +1142,7 @@ sub SD_WS_Parse {
                             return round($rawTemp,1);
                           },
         hum        => sub {my ($rawData,undef) = @_;
+                            # uncoverable condition right
                             return if ((substr($rawData,12,1) eq '1' && substr($rawData,33,1) eq '1') || substr($rawData,28,2) !~ m/^\d+$/xms); # not by weather station & rain
                             $hum = substr($rawData,28,2) * 1;
                             if (substr($rawData,12,1) eq '4' && $hum >= 1 && $hum <= 16) {  # Soil Moisture
@@ -1150,6 +1154,7 @@ sub SD_WS_Parse {
                             return if (substr($rawData,33,1) ne '1' || substr($rawData,12,1) ne '1'); # message type || weather station
                             $rain = substr($rawData,24,6);
                             $rain =~ tr/0123456789ABCDEF/FEDCBA9876543210/;
+                            # uncoverable branch true
                             return if ($rain !~ m/^\d+$/xms);
                             return $rain * 0.1;
                           },
@@ -1157,6 +1162,7 @@ sub SD_WS_Parse {
                             return if (substr($rawData,33,1) ne '0' || substr($rawData,12,1) ne '1'); # message type || weather station
                             $uv = substr($rawData,30,3);
                             $uv =~ tr/0123456789ABCDEF/FEDCBA9876543210/;
+                            # uncoverable branch true
                             return if ($uv !~ m/^\d+$/xms);
                             return $uv * 0.1;
                           },
@@ -1825,17 +1831,13 @@ sub SD_WS_Parse {
 
   # Sanity checks
   if($def && $protocol ne '106' && $protocol ne '113' && $protocol ne '122') { # not forBBQ temperature sensor GT-TMBBQ-01s, Wireless Grill Thermometer GFGT 433 B1 and TM40
-    my $timeSinceLastUpdate = abs(ReadingsAge($name, "state", 0));
+    my $timeSinceLastUpdate = abs(ReadingsAge($name, 'state', 0));
     # temperature
-    if (defined($temp) && defined(ReadingsVal($name, "temperature", undef))) {
-      my $diffTemp = 0;
-      my $oldTemp = ReadingsVal($name, "temperature", undef);
+    my $oldTemp = ReadingsVal($name, 'temperature', undef);
+    if (defined $oldTemp && defined $temp) {
+      #my $oldTemp = ReadingsVal($name, "temperature", undef);
       my $maxdeviation = AttrVal($name, "max-deviation-temp", 1);       # default 1 K
-      if ($temp > $oldTemp) {
-        $diffTemp = ($temp - $oldTemp);
-      } else {
-        $diffTemp = ($oldTemp - $temp);
-      }
+      my $diffTemp = abs($temp - $oldTemp);
       $diffTemp = sprintf("%.1f", $diffTemp);       
       Log3 $name, 4, "$ioname: $name old temp $oldTemp, age $timeSinceLastUpdate, new temp $temp, diff temp $diffTemp";
       my $maxDiffTemp = $timeSinceLastUpdate / 60 + $maxdeviation;      # maxdeviation + 1.0 Kelvin/Minute
@@ -1847,15 +1849,11 @@ sub SD_WS_Parse {
       }
     }
     # humidity
-    if (defined($hum) && defined(ReadingsVal($name, "humidity", undef))) {
-      my $diffHum = 0;
-      my $oldHum = ReadingsVal($name, "humidity", undef);
+    my $oldHum = ReadingsVal($name, 'humidity', undef);
+    if (defined $oldHum && defined $hum) {
+      #my $oldHum = ReadingsVal($name, "humidity", undef);
       my $maxdeviation = AttrVal($name, "max-deviation-hum", 1);        # default 1 %
-      if ($hum > $oldHum) {
-        $diffHum = ($hum - $oldHum);
-      } else {
-        $diffHum = ($oldHum - $hum);
-      }
+      my $diffHum = abs($hum - $oldHum);
       $diffHum = sprintf("%.1f", $diffHum);       
       Log3 $name, 4, "$ioname: $name old hum $oldHum, age $timeSinceLastUpdate, new hum $hum, diff hum $diffHum";
       my $maxDiffHum = $timeSinceLastUpdate / 60 + $maxdeviation;       # $maxdeviation + 1.0 %/Minute

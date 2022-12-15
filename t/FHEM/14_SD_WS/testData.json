@@ -1,0 +1,45 @@
+[
+    {"name":"BRESSER 6-in-1", "id":"115", "module":"SD_WS", "data": [
+        {
+          "setreadings":{"temperature":"-1.5", "humidity":"92"},
+          "returns":{"ParseFn":""},
+          "dmsg":"W115#9104143025BE18FFFFFF2928925A97FFF0000000000000000003", "comment":"BRESSER 6-in-1 temp diff not ok with attr", "user":"elektron-bbs",
+          "internals": {"DEF":"SD_WS_115_0","NAME":"SD_WS_115_0"},
+          "readings": {"state":"T: -7.5 H: 97 W: 0", "batteryChanged":"1", "batteryState":"ok", "channel":"0", "humidity":"97", "temperature":"-7.5", "type":"Bresser_6in1, new Bresser_5in1", "uv":"0", "windDirectionDegree":"292", "windDirectionText":"WNW", "windGust":"0", "windSpeed":"0"},
+          "minProtocolVersion":"1.48", "revision_entry":"2022-11-20 20:27:05",
+          "revision_modul":"14_SD_WS.pm v3.5.4 2022-11-14 20:37:55Z sidey79",
+          "rmsg":"MN;D=9104143025BE18FFFFFF2928925A97FFF0000000000000000003;R=189;"
+        },
+        {
+          "setreadings":{"temperature":"-1.5", "humidity":"92"},
+          "attributes": {"max-deviation-temp":"50"},
+          "returns":{"ParseFn":""},
+          "dmsg":"W115#9104143025BE18FFFFFF2928925A97FFF0000000000000000003", "comment":"BRESSER 6-in-1 temp diff ok with attr", "user":"elektron-bbs",
+          "internals": {"DEF":"SD_WS_115_0","NAME":"SD_WS_115_0"},
+          "readings": {"state":"T: -7.5 H: 97 W: 0", "batteryChanged":"1", "batteryState":"ok", "channel":"0", "humidity":"97", "temperature":"-7.5", "type":"Bresser_6in1, new Bresser_5in1", "uv":"0", "windDirectionDegree":"292", "windDirectionText":"WNW", "windGust":"0", "windSpeed":"0"},
+          "minProtocolVersion":"1.48", "revision_entry":"2022-11-20 20:27:05",
+          "revision_modul":"14_SD_WS.pm v3.5.4 2022-11-14 20:37:55Z sidey79",
+          "rmsg":"MN;D=9104143025BE18FFFFFF2928925A97FFF0000000000000000003;R=189;"
+        },
+        {
+          "setreadings":{"temperature":"-7.4", "humidity":"32"},
+          "attributes": {"max-deviation-hum":"65"},
+          "dmsg":"W115#9104143025BE18FFFFFF2928925A97FFF0000000000000000003", "comment":"BRESSER 6-in-1 hum diff ok with attr", "user":"elektron-bbs",
+          "internals": {"DEF":"SD_WS_115_0","NAME":"SD_WS_115_0"},
+          "readings": {"state":"T: -7.5 H: 97 W: 0", "batteryChanged":"1", "batteryState":"ok", "channel":"0", "humidity":"97", "temperature":"-7.5", "type":"Bresser_6in1, new Bresser_5in1", "uv":"0", "windDirectionDegree":"292", "windDirectionText":"WNW", "windGust":"0", "windSpeed":"0"},
+          "minProtocolVersion":"1.48", "revision_entry":"2022-11-20 20:27:05",
+          "revision_modul":"14_SD_WS.pm v3.5.4 2022-11-14 20:37:55Z sidey79",
+          "rmsg":"MN;D=9104143025BE18FFFFFF2928925A97FFF0000000000000000003;R=189;"
+        },
+        {
+          "setreadings":{"temperature":"-7.6", "humidity":"96"},
+          "dmsg":"W115#9104143025BE18FFFFFF2928925A97FFF0000000000000000003", "comment":"BRESSER 6-in-1 temp diff ok without attr", "user":"elektron-bbs",
+          "internals": {"DEF":"SD_WS_115_0", "NAME":"SD_WS_115_0"},
+          "readings": {"state":"T: -7.5 H: 97 W: 0", "batteryChanged":"1", "batteryState":"ok", "channel":"0", "humidity":"97", "temperature":"-7.5", "type":"Bresser_6in1, new Bresser_5in1", "uv":"0", "windDirectionDegree":"292", "windDirectionText":"WNW", "windGust":"0", "windSpeed":"0"},
+          "minProtocolVersion":"1.48", "revision_entry":"2022-11-20 20:27:05",
+          "revision_modul":"14_SD_WS.pm v3.5.4 2022-11-14 20:37:55Z sidey79",
+          "rmsg":"MN;D=9104143025BE18FFFFFF2928925A97FFF0000000000000000003;R=189;"
+        }  
+      ]
+    }
+]
