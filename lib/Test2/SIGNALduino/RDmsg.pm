@@ -10,7 +10,7 @@ use File::Basename;
 use Test2::API qw/context run_subtest/;
 use base 'Exporter';
 
-our @EXPORT = qw/dmsgCheck/;
+our @EXPORT = qw/dmsgCheck rmsgCheck/;
 our $VERSION = 1.00;
 our $testDataArray; 
 our @JSONTestList = (
@@ -19,11 +19,11 @@ our @JSONTestList = (
 #		url		=> 'https://raw.githubusercontent.com/RFD-FHEM/SIGNALduino_TOOL/pre-release/FHEM/lib/SD_Device_ProtocolList.json',
 #		todo  => 'Checking with pre-release Version of SD_Device_ProtocolList which can fail',
 #	},
-	{
-		testname	=> 'Test with master SD_Device_ProtocolList',
-		url		=> 'https://raw.githubusercontent.com/RFD-FHEM/SIGNALduino_TOOL/master/FHEM/lib/SD_Device_ProtocolList.json',
-		#todo  => 'Checking with master Version of SD_Device_ProtocolList which can fail',
-	}
+#	{
+#		testname	=> 'Test with master SD_Device_ProtocolList',
+#		url		=> 'https://raw.githubusercontent.com/RFD-FHEM/SIGNALduino_TOOL/master/FHEM/lib/SD_Device_ProtocolList.json',
+#		#todo  => 'Checking with master Version of SD_Device_ProtocolList which can fail',
+#	}
 );
 my $EMPTY = q{};
 
@@ -71,7 +71,7 @@ sub filterTestDataArray {
   return @results;
 }
 
-sub checkParseFn  {
+sub checkDmsgParseFn  {
     my $module = shift;
     my $tData = shift;
     my $ioHash = shift;
@@ -157,7 +157,7 @@ sub checkParseFn  {
         };  #subtest
     }; # loop
 
-}; # checkParseFn
+}; # checkDmsgParseFn
 
 sub dmsgCheck {
     my $testDef = shift;
@@ -196,7 +196,7 @@ sub dmsgCheck {
                     if ( !exists $tData->{tests} || scalar @{$tData->{tests}} == 0 ) { 
                         skip qq[no referencedata for test $tData->{comment}]; 
                     }
-                    my $bool = run_subtest(qq[Checking parseFN for module: $testSet->{module} device: $testSet->{name} DataNr: $tID ($tData->{comment})], \&checkParseFn, {buffered => 1, inherit_trace => 1},$testSet->{module},$tData, $ioHash);
+                    my $bool = run_subtest(qq[Checking parseFN for module: $testSet->{module} device: $testSet->{name} DataNr: $tID ($tData->{comment})], \&checkDmsgParseFn, {buffered => 1, inherit_trace => 1},$testSet->{module},$tData, $ioHash);
                 }
 
                 if ( $tData->{MatchCheckFail} )
@@ -211,5 +211,11 @@ sub dmsgCheck {
 
     $ctx->release;
 }
- 
+
+
+sub rmsgCheck {
+
+}
+
+
 1;
