@@ -40,5 +40,39 @@
           "rmsg":"MC;LL=-1043;LH=919;SL=-503;SH=428;D=51F467EA3E0FECEEEE;C=482;L=71;"
         }
     ]
-    }    
+    },
+    {
+      "data" : [
+         {
+            "readings" : {
+               "package_number" : "3",
+               "humidity" : "54",
+               "comfort_level" : "Hum. OK. Temp. uncomfortable (>24.9 or <20)",
+               "channel" : "1",
+               "batteryState" : "ok",
+               "state" : "T: 29.6 H: 54",
+               "temperature" : "29.6",
+               "battery" : "ok"
+            },
+            "dmsg" : "P12#75EFBA4A72BECC504F1801",
+            "rmsg" : "MC;LL=-1010;LH=938;SL=-519;SH=457;D=A8C2345ADD8E0B99F586F9C;C=487;L=90;R=57;",
+            "internals" : {
+               "DEF" : "Hideki_30_1",
+               "NAME" : "Hideki_30_1"
+            },
+            "revision_entry" : "2021-03-24 10:11:26",
+            "tests" : [
+               {
+                  "comment" : "Test #0"
+               }
+            ],
+            "user" : "HomeAuto_User",
+            "minProtocolVersion" : "1.27",
+            "revision_modul" : "14_Hideki.pm 21666 2020-04-13 21:14:53Z Sidey"
+         }
+      ],
+      "module" : "Hideki",
+      "name" : "BRESSER 70-09993",
+      "id" : "12"
+   }        
 ]

@@ -1,0 +1,87 @@
+[
+   {
+      "id" : "7",
+      "name" : "Auriol AFW 2 A1",
+      "module" : "SD_WS07",
+      "data" : [
+         {
+            "revision_modul" : "14_SD_WS07.pm 21666 2020-04-13 21:14:53Z Sidey",
+            "tests" : [
+               {
+                  "comment" : "Test #0"
+               }
+            ],
+            "readings" : {
+               "temperature" : "28.2",
+               "state" : "T: 28.2 H: 44",
+               "batteryState" : "ok",
+               "sendmode" : "auto",
+               "channel" : "1",
+               "humidity" : "44"
+            },
+            "revision_entry" : "2021-03-23 14:27:35",
+            "internals" : {
+               "NAME" : "SD_WS07_TH_1",
+               "DEF" : "SD_WS07_TH_1"
+            },
+            "minProtocolVersion" : "1.27",
+            "user" : "elektron-bbs",
+            "comment" : "from https://forum.fhem.de/index.php/topic,101682.0.html",
+            "rmsg" : "MS;P0=494;P1=-1949;P2=-967;P3=-3901;D=03010201010202020101020202020202010202020101020102010201020202010201010202;CP=0;SP=3;R=37;m0;",
+            "dmsg" : "P7#B1811AA2C"
+         },
+         {
+            "dmsg" : "P7#B180F4A38",
+            "rmsg" : "MS;P1=-1940;P2=495;P3=-957;P4=-3878;D=24212321212323232121232323232323232121212123212323212321232323212121232323;CP=2;SP=4;R=20;O;m1;",
+            "comment" : "from https://forum.fhem.de/index.php/topic,101682.0.html",
+            "user" : "elektron-bbs",
+            "revision_entry" : "2021-03-23 14:28:43",
+            "internals" : {
+               "DEF" : "SD_WS07_TH_1",
+               "NAME" : "SD_WS07_TH_1"
+            },
+            "minProtocolVersion" : "1.27",
+            "readings" : {
+               "batteryState" : "ok",
+               "channel" : "1",
+               "humidity" : "56",
+               "sendmode" : "auto",
+               "temperature" : "24.4",
+               "state" : "T: 24.4 H: 56"
+            },
+            "tests" : [
+               {
+                  "comment" : "Test #1"
+               }
+            ],
+            "revision_modul" : "14_SD_WS07.pm 21666 2020-04-13 21:14:53Z Sidey"
+         },
+         {
+            "rmsg" : "MS;P1=-1952;P2=495;P3=-966;P4=-3917;D=24212321212323232121212323232323232121212121232123212321232321232321232321;CP=2;SP=4;R=39;O;m2;",
+            "dmsg" : "P7#B1C0FAA49",
+            "revision_modul" : "14_SD_WS07.pm 21666 2020-04-13 21:14:53Z Sidey",
+            "tests" : [
+               {
+                  "comment" : "Test #2"
+               }
+            ],
+            "readings" : {
+               "batteryState" : "ok",
+               "sendmode" : "manual",
+               "humidity" : "73",
+               "channel" : "1",
+               "temperature" : "25",
+               "state" : "T: 25 H: 73"
+            },
+            "revision_entry" : "2021-03-23 14:30:04",
+            "internals" : {
+               "NAME" : "SD_WS07_TH_1",
+               "DEF" : "SD_WS07_TH_1"
+            },
+            "minProtocolVersion" : "1.27",
+            "comment" : "from https://forum.fhem.de/index.php/topic,101682.0.html",
+            "user" : "elektron-bbs"
+         }
+      ]
+   }
+]

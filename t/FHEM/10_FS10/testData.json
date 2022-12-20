@@ -1,4 +1,53 @@
 [
+      {
+        "name" : "FS10",
+        "data" : [
+          {
+              "comment" : "Remote control",
+              "minProtocolVersion" : "1.27",
+              "rmsg" : "MU;P0=1776;P1=-410;P2=383;P3=-820;D=01212121212121212121212123212121232323212323232121212323232121212321212123232123212120;CP=2;R=74;",
+              "user" : "elektron-bbs",
+              "revision_entry" : "2021-04-22 22:08:51",
+              "readings" : {
+                "state" : "on"
+              },
+              "tests" : [
+                {
+                    "comment" : "Test #0"
+                }
+              ],
+              "revision_modul" : "10_FS10.pm    11 2020-06-06 21:30:00Z elektron-bbs",
+              "dmsg" : "P61#0011DC711A0",
+              "internals" : {
+                "DEF" : "2_13",
+                "NAME" : "FS10_2_13"
+              }
+          },
+          {
+              "rmsg" : "MU;P0=-27584;P1=446;P2=-349;P3=-755;D=01212121212121212121212121312121312131312131313121212131313121212131212121313131213131;CP=1;",
+              "user" : "elektron-bbs",
+              "revision_entry" : "2021-04-22 22:09:16",
+              "readings" : {
+                "state" : "off"
+              },
+              "tests" : [
+                {
+                    "comment" : "Test #1"
+                }
+              ],
+              "comment" : "Remote control",
+              "minProtocolVersion" : "1.27",
+              "dmsg" : "P61#00096E388EC",
+              "internals" : {
+                "NAME" : "FS10_2_13",
+                "DEF" : "2_13"
+              },
+              "revision_modul" : "10_FS10.pm    11 2020-06-06 21:30:00Z elektron-bbs"
+          }
+        ],
+        "module" : "FS10",
+        "id" : "61"
+    },
     {"name":"FS10", "id":"61", "module":"FS10", "data": [
           {
             "comment" : "Remote control",

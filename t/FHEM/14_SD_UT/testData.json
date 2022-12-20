@@ -13,5 +13,90 @@
           ]
         }
      ]
-    }    
+    },
+    {
+      "name" : "Chilitec_22640",
+      "data" : [
+         {
+            "readings" : {
+               "state" : "power_on",
+               "LastAction" : "receive",
+               "deviceCode" : "1010101010000000"
+            },
+            "attributes" : {
+               "model" : "Chilitec_22640"
+            },
+            "rmsg" : "MS;P0=988;P1=-384;P2=346;P3=-1026;P4=-4923;D=240123012301230123012323232323232301232323;CP=2;SP=4;R=0;O;m=1;",
+            "revision_modul" : "14_SD_UT.pm     0 2020-12-03 22:15:57Z HomeAuto_User",
+            "user" : "privat58",
+            "comment" : "Remote control X-MAS LED, Button power_on",
+            "internals" : {
+               "DEF" : "Chilitec_22640 AA80",
+               "NAME" : "Chilitec_22640_AA80"
+            },
+            "tests" : [
+               {
+                  "comment" : "Test #0"
+               }
+            ],
+            "revision_entry" : "2021-03-24 10:28:42",
+            "dmsg" : "P14#AA808",
+            "minProtocolVersion" : "1.27"
+         },
+         {
+            "dmsg" : "P14#AA80C",
+            "minProtocolVersion" : "1.27",
+            "internals" : {
+               "NAME" : "Chilitec_22640_AA80",
+               "DEF" : "Chilitec_22640 AA80"
+            },
+            "tests" : [
+               {
+                  "comment" : "Test #1"
+               }
+            ],
+            "revision_entry" : "2021-03-24 10:30:58",
+            "user" : "privat58",
+            "comment" : "Remote control X-MAS LED, Button brightness_plus",
+            "readings" : {
+               "deviceCode" : "1010101010000000",
+               "LastAction" : "receive",
+               "state" : "brightness_plus"
+            },
+            "attributes" : {
+               "model" : "Chilitec_22640"
+            },
+            "rmsg" : "MS;P0=-398;P1=974;P3=338;P4=-1034;P6=-4939;D=361034103410341034103434343434343410103434;CP=3;SP=6;R=0;",
+            "revision_modul" : "14_SD_UT.pm     0 2020-12-03 22:15:57Z HomeAuto_User"
+         },
+         {
+            "revision_entry" : "2021-03-24 10:33:19",
+            "tests" : [
+               {
+                  "comment" : "Test #2"
+               }
+            ],
+            "internals" : {
+               "NAME" : "Chilitec_22640_AA80",
+               "DEF" : "Chilitec_22640 AA80"
+            },
+            "minProtocolVersion" : "1.27",
+            "dmsg" : "P14#AA80A",
+            "rmsg" : "MS;P1=976;P2=-397;P3=341;P4=-1029;P5=-4940;D=351234123412341234123434343434343412341234;CP=3;SP=5;R=0;",
+            "attributes" : {
+               "model" : "Chilitec_22640"
+            },
+            "revision_modul" : "14_SD_UT.pm     0 2020-12-03 22:15:57Z HomeAuto_User",
+            "readings" : {
+               "state" : "flickering_slowly",
+               "LastAction" : "receive",
+               "deviceCode" : "1010101010000000"
+            },
+            "comment" : "Remote control X-MAS LED, Button flickering_slowly",
+            "user" : "privat58"
+         }
+      ],
+      "module" : "SD_UT",
+      "id" : "14"
+   }        
 ]

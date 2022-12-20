@@ -1,0 +1,35 @@
+[
+   {
+      "id" : "13",
+      "name" : "KD-101LA",
+      "module" : "FLAMINGO",
+      "data" : [
+         {
+            "readings" : {
+               "lastReceive_ID" : "13",
+               "state" : "Alarm",
+               "alarmcounter" : "1"
+            },
+            "user" : "Wahrschauer",
+            "attributes" : {
+               "model" : "KD-101LA"
+            },
+            "tests" : [
+               {
+                  "comment" : "Test #0"
+               }
+            ],
+            "revision_entry" : "2021-03-24 10:20:53",
+            "comment" : "Smoke alarm device / decode as MS",
+            "internals" : {
+               "NAME" : "FLAMINGO_32E44F",
+               "DEF" : "32E44F"
+            },
+            "revision_modul" : "14_FLAMINGO.pm 22619 2020-08-17 17:29:09Z HomeAuto_User",
+            "minProtocolVersion" : "1.27",
+            "rmsg" : "MS;P0=-1413;P1=757;P2=-2779;P3=-16079;P4=8093;P5=-954;D=1345121210101212101210101012121012121210121210101010;CP=1;SP=3;R=33;O;",
+            "dmsg" : "P13#32E44F"
+         }
+      ]
+   }
+]

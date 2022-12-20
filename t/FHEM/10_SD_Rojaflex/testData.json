@@ -1,4 +1,74 @@
 [
+      {
+        "module" : "SD_Rojaflex",
+        "name" : "Rojaflex HSR-15, HSTR-15",
+        "id" : "109",
+        "data" : [
+          {
+              "revision_modul" : "10_SD_Rojaflex.pm   100 2021-10-19 18:00:00Z elektron-bbs",
+              "tests" : [
+                {
+                    "comment" : "Test #0"
+                }
+              ],
+              "rmsg" : "MN;D=083122FD298A018A8E;R=0;",
+              "readings" : {
+                "state" : "down"
+              },
+              "user" : "elektron-bbs",
+              "revision_entry" : "2021-10-23 17:07:42",
+              "dmsg" : "P109#083122FD298A018A8E",
+              "internals" : {
+                "DEF" : "3122FD2_9",
+                "NAME" : "SD_Rojaflex_3122FD2_9"
+              },
+              "minProtocolVersion" : "1.39",
+              "comment" : "Button down, https://github.com/RFD-FHEM/RFFHEM/issues/955"
+          },
+          {
+              "revision_modul" : "10_SD_Rojaflex.pm   100 2021-10-19 18:00:00Z elektron-bbs",
+              "rmsg" : "MN;D=083122FD290A010A8E;R=244;",
+              "tests" : [
+                {
+                    "comment" : "Test #1"
+                }
+              ],
+              "user" : "elektron-bbs",
+              "readings" : {
+                "state" : "stop"
+              },
+              "revision_entry" : "2021-10-23 17:09:33",
+              "dmsg" : "P109#083122FD290A010A8E",
+              "internals" : {
+                "NAME" : "SD_Rojaflex_3122FD2_9",
+                "DEF" : "3122FD2_9"
+              },
+              "comment" : "Button stop, https://github.com/RFD-FHEM/RFFHEM/issues/955",
+              "minProtocolVersion" : "1.39"
+          },
+          {
+              "internals" : {
+                "NAME" : "SD_Rojaflex_3122FD2_9",
+                "DEF" : "3122FD2_9"
+              },
+              "comment" : "Button up, https://github.com/RFD-FHEM/RFFHEM/issues/955",
+              "minProtocolVersion" : "1.39",
+              "revision_entry" : "2021-10-23 17:10:36",
+              "dmsg" : "P109#083122FD291A011AAE",
+              "user" : "elektron-bbs",
+              "readings" : {
+                "state" : "up"
+              },
+              "revision_modul" : "10_SD_Rojaflex.pm   100 2021-10-19 18:00:00Z elektron-bbs",
+              "rmsg" : "MN;D=083122FD291A011AAE;R=249;",
+              "tests" : [
+                {
+                    "comment" : "Test #2"
+                }
+              ]
+          }
+        ]
+    },
     {"name":"SD_Rojaflex", "id":"109", "module":"SD_Rojaflex", "data": [
         {
           "dmsg":"P109#083122FD251A011AAA", "comment":"tubular message channel 5", "user":"Hofyyy",
