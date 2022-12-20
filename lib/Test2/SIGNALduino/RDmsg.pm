@@ -179,8 +179,8 @@ sub dmsgCheck {
         $todo = Test2::Todo->new(reason => $testDef->{todo} ); 
     }
     
-    my $loaded=main::CommandReload(undef,$modulename);
-    note(qq[LoadMoCommandReloaddule($modulename) = $loaded]);
+    my $loaded = main::CommandReload(undef,$modulename);
+    note(qq[CommandReload(undef,$modulename) = $loaded]);
     while ( ($pID, $testSet) = each @filt_testDataArray )
     {
         SKIP: {
