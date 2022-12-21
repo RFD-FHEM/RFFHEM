@@ -2,29 +2,29 @@
    {
       "data" : [
          {
-            "user" : "Wetterhexe",
             "comment" : "OSV2",
+            "dmsg" : "501A2D203C801720833E9E",
+            "internals" : {
+               "DEF" : "THGR228N_3c_2",
+               "NAME" : "THGR228N_3c_2"
+            },
+            "minProtocolVersion" : "1.27",
+            "readings" : {
+               "battery" : "ok",
+               "batteryState" : "ok",
+               "humidity" : "32",
+               "state" : "T: 17.8 H: 32 BAT: ok",
+               "temperature" : "17.8"
+            },
+            "revision_entry" : "2021-03-24 10:03:49",
+            "revision_modul" : "41_OREGON.pm 34476 2017-12-26 13:23:00Z dev",
+            "rmsg" : "MC;LL=-997;LH=967;SL=-506;SH=460;D=AAAAAAAA66959A6555655AA55556A9955565A5566AA56A96;C=488;L=192;",
             "tests" : [
                {
                   "comment" : "Test #0"
                }
             ],
-            "dmsg" : "501A2D203C801720833E9E",
-            "internals" : {
-               "NAME" : "THGR228N_3c_2",
-               "DEF" : "THGR228N_3c_2"
-            },
-            "rmsg" : "MC;LL=-997;LH=967;SL=-506;SH=460;D=AAAAAAAA66959A6555655AA55556A9955565A5566AA56A96;C=488;L=192;",
-            "readings" : {
-               "state" : "T: 17.8 H: 32 BAT: ok",
-               "temperature" : "17.8",
-               "batteryState" : "ok",
-               "humidity" : "32",
-               "battery" : "ok"
-            },
-            "revision_modul" : "41_OREGON.pm 34476 2017-12-26 13:23:00Z dev",
-            "revision_entry" : "2021-03-24 10:03:49",
-            "minProtocolVersion" : "1.27"
+            "user" : "Wetterhexe"
          }
       ],
       "id" : "10",
