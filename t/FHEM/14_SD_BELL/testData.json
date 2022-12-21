@@ -1,34 +1,34 @@
 [
    {
-      "module" : "SD_BELL",
-      "name" : "FreeTec PE-6946",
-      "id" : "32",
       "data" : [
          {
-            "tests" : [
-               {
-                  "comment" : "Test #0"
-               }
-            ],
-            "comment" : "wireless doorbell (ID 40,62,63 additionally)",
             "attributes" : {
                "model" : "FreeTec_PE-6946"
             },
+            "comment" : "wireless doorbell (ID 40,62,63 additionally)",
+            "dispatch_repeats" : "3",
             "dmsg" : "P32#154FFF",
             "internals" : {
                "DEF" : "32 154FFF",
                "NAME" : "SD_BELL_154FFF"
             },
-            "user" : "SD_Protocol",
-            "revision_entry" : "2021-03-24 11:26:13",
             "minProtocolVersion" : "1.27",
-            "revision_modul" : "14_SD_BELL.pm     0 2021-03-22 22:30:35Z HomeAuto_User",
-            "rmsg" : "MU;P0=146;P1=245;P3=571;P4=-708;P5=-284;P7=-6689;D=14351435143514143535353535353535353535350704040435043504350435040435353535353535353535353507040404350435043504350404353535353535353535353535070404043504350435043504043535353535353535353535350704040435043504350435040435353535353535353535353507040404350435;CP=3;R=0;O;",
             "readings" : {
                "state" : "ring"
             },
-            "dispatch_repeats" : "3"
+            "revision_entry" : "2021-03-24 11:26:13",
+            "revision_modul" : "14_SD_BELL.pm     0 2021-03-22 22:30:35Z HomeAuto_User",
+            "rmsg" : "MU;P0=146;P1=245;P3=571;P4=-708;P5=-284;P7=-6689;D=14351435143514143535353535353535353535350704040435043504350435040435353535353535353535353507040404350435043504350404353535353535353535353535070404043504350435043504043535353535353535353535350704040435043504350435040435353535353535353535353507040404350435;CP=3;R=0;O;",
+            "tests" : [
+               {
+                  "comment" : "Test #0"
+               }
+            ],
+            "user" : "SD_Protocol"
          }
-      ]
+      ],
+      "id" : "32",
+      "module" : "SD_BELL",
+      "name" : "FreeTec PE-6946"
    }
 ]

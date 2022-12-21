@@ -1,52 +1,52 @@
 [
    {
-      "module" : "SD_WS09",
-      "id" : "9",
-      "name" : "WH1080",
       "data" : [
          {
-            "revision_entry" : "2021-03-24 09:57:33",
-            "minProtocolVersion" : "1.27",
-            "revision_modul" : "14_SD_WS09.pm 22415 2020-07-16 20:22:23Z Sidey",
             "comment" : "(ID 42,75 additionally)",
-            "rmsg" : "MU;P0=-31072;P1=486;P2=-986;P3=1454;D=01212121212121212321232321232123232121232323212121212123232123232123212321232123232323232321232323232323212323232323232323232123212121212321232323232323232323212321212321232301212121212121212321232321232123232121232323212121212123232123232123212321232123;CP=1;R=29;O;",
+            "dmsg" : "P9#FF4A63E4AA040802F40168",
             "internals" : {
-               "NAME" : "WH1080",
-               "DEF" : "WH1080"
+               "DEF" : "WH1080",
+               "NAME" : "WH1080"
             },
+            "minProtocolVersion" : "1.27",
+            "readings" : {
+               ".rainOffset" : "0",
+               "battery" : "ok",
+               "batteryState" : "ok",
+               "humidity" : "85",
+               "id" : "83",
+               "rain" : "113.4",
+               "rain_total" : "113.4",
+               "state" : "T: 9.8  H: 85  Ws:0.7  Wg:1.4 m/s Wd: N  R: 113.4",
+               "temperature" : "9.8",
+               "windDirection" : "0",
+               "windDirectionAverage" : "0",
+               "windDirectionDegree" : "0",
+               "windDirectionText" : "N",
+               "windGust" : "1.4",
+               "windGust_fts" : "4.6",
+               "windGust_kmh" : "5.0",
+               "windGust_kn" : "2.7",
+               "windGust_mph" : "3.1",
+               "windSpeed" : "0.7",
+               "windSpeed_fts" : "2.3",
+               "windSpeed_kmh" : "2.5",
+               "windSpeed_kn" : "1.4",
+               "windSpeed_mph" : "1.6"
+            },
+            "revision_entry" : "2021-03-24 09:57:33",
+            "revision_modul" : "14_SD_WS09.pm 22415 2020-07-16 20:22:23Z Sidey",
+            "rmsg" : "MU;P0=-31072;P1=486;P2=-986;P3=1454;D=01212121212121212321232321232123232121232323212121212123232123232123212321232123232323232321232323232323212323232323232323232123212121212321232323232323232323212321212321232301212121212121212321232321232123232121232323212121212123232123232123212321232123;CP=1;R=29;O;",
             "tests" : [
                {
                   "comment" : "Test #0"
                }
             ],
-            "dmsg" : "P9#FF4A63E4AA040802F40168",
-            "readings" : {
-               ".rainOffset" : "0",
-               "battery" : "ok",
-               "id" : "83",
-               "rain" : "113.4",
-               "windDirectionText" : "N",
-               "batteryState" : "ok",
-               "temperature" : "9.8",
-               "state" : "T: 9.8  H: 85  Ws:0.7  Wg:1.4 m/s Wd: N  R: 113.4",
-               "windDirectionDegree" : "0",
-               "windDirection" : "0",
-               "windGust_mph" : "3.1",
-               "windSpeed_fts" : "2.3",
-               "windGust" : "1.4",
-               "windDirectionAverage" : "0",
-               "windSpeed" : "0.7",
-               "windGust_fts" : "4.6",
-               "windGust_kmh" : "5.0",
-               "windSpeed_kmh" : "2.5",
-               "rain_total" : "113.4",
-               "windSpeed_kn" : "1.4",
-               "windSpeed_mph" : "1.6",
-               "windGust_kn" : "2.7",
-               "humidity" : "85"
-            },
             "user" : "maddinthebrain"
          }
-      ]
+      ],
+      "id" : "9",
+      "module" : "SD_WS09",
+      "name" : "WH1080"
    }
 ]

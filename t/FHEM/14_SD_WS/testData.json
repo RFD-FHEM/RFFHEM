@@ -1,130 +1,230 @@
 [
-    {
-      "module" : "SD_WS",
-      "id" : "27",
-      "name" : "EFTH-800",
+   {
       "data" : [
-        {
-            "tests" : [
-              {
-                  "comment" : "Test #0"
-              }
-            ],
-            "revision_entry" : "2021-03-24 11:04:05",
-            "dmsg" : "W27#113C49B04806",
-            "rmsg" : "MU;P0=-224;P1=258;P2=-487;P3=505;P4=-4884;P5=743;P6=-718;D=0121212301212303030301212123012123012123030123030121212121230121230121212121212121230301214565656561212123012121230121230303030121212301212301212303012303012121212123012123012121212121212123030121;CP=1;R=53;",
-            "readings" : {
-              "humidity" : "48",
-              "type" : "EFTH-800, EFS-3110A",
-              "channel" : "2",
-              "temperature" : "15.5",
-              "state" : "T: 15.5 H: 48",
-              "batteryState" : "ok"
-            },
-            "revision_modul" : "14_SD_WS.pm 21666 2020-04-13 21:14:53Z Sidey",
+         {
             "comment" : "EuroChron weatherstation EFTH-800 / Channel 2 (ID 61 additionally)",
+            "dmsg" : "W27#113C49B04806",
             "internals" : {
-              "NAME" : "SD_WS_27_TH_2",
-              "DEF" : "SD_WS_27_TH_2"
+               "DEF" : "SD_WS_27_TH_2",
+               "NAME" : "SD_WS_27_TH_2"
             },
-            "user" : "elektron-bbs",
-            "minProtocolVersion" : "1.27"
-        },
-        {
-            "dmsg" : "W27#21D442607679",
-            "revision_entry" : "2021-03-24 11:05:38",
+            "minProtocolVersion" : "1.27",
             "readings" : {
-              "temperature" : "3.8",
-              "humidity" : "76",
-              "type" : "EFTH-800, EFS-3110A",
-              "channel" : "3",
-              "state" : "T: 3.8 H: 76",
-              "batteryState" : "ok"
+               "batteryState" : "ok",
+               "channel" : "2",
+               "humidity" : "48",
+               "state" : "T: 15.5 H: 48",
+               "temperature" : "15.5",
+               "type" : "EFTH-800, EFS-3110A"
             },
+            "revision_entry" : "2021-03-24 11:04:05",
+            "revision_modul" : "14_SD_WS.pm 21666 2020-04-13 21:14:53Z Sidey",
+            "rmsg" : "MU;P0=-224;P1=258;P2=-487;P3=505;P4=-4884;P5=743;P6=-718;D=0121212301212303030301212123012123012123030123030121212121230121230121212121212121230301214565656561212123012121230121230303030121212301212301212303012303012121212123012123012121212121212123030121;CP=1;R=53;",
+            "tests" : [
+               {
+                  "comment" : "Test #0"
+               }
+            ],
+            "user" : "elektron-bbs"
+         },
+         {
+            "comment" : "EuroChron weatherstation EFTH-800 / Channel 3 (ID 61 additionally)",
+            "dmsg" : "W27#21D442607679",
+            "internals" : {
+               "DEF" : "SD_WS_27_TH_3",
+               "NAME" : "SD_WS_27_TH_3"
+            },
+            "minProtocolVersion" : "1.27",
+            "readings" : {
+               "batteryState" : "ok",
+               "channel" : "3",
+               "humidity" : "76",
+               "state" : "T: 3.8 H: 76",
+               "temperature" : "3.8",
+               "type" : "EFTH-800, EFS-3110A"
+            },
+            "revision_entry" : "2021-03-24 11:05:38",
+            "revision_modul" : "14_SD_WS.pm 21666 2020-04-13 21:14:53Z Sidey",
             "rmsg" : "MU;P0=-241;P1=251;P2=-470;P3=500;P4=-4868;P5=743;P6=-718;D=012121212303030123012301212123012121212301212303012121212121230303012303012123030303012123014565656561212301212121230303012301230121212301212121230121230301212121212123030301230301212303030301212301;CP=1;R=23;",
             "tests" : [
-              {
+               {
                   "comment" : "Test #1"
-              }
+               }
             ],
-            "minProtocolVersion" : "1.27",
-            "user" : "elektron-bbs",
-            "internals" : {
-              "NAME" : "SD_WS_27_TH_3",
-              "DEF" : "SD_WS_27_TH_3"
-            },
-            "revision_modul" : "14_SD_WS.pm 21666 2020-04-13 21:14:53Z Sidey",
-            "comment" : "EuroChron weatherstation EFTH-800 / Channel 3 (ID 61 additionally)"
-        },
-        {
+            "user" : "elektron-bbs"
+         },
+         {
+            "comment" : "EuroChron weatherstation EFTH-800 / Channel 3 (ID 61 additionally)",
             "dmsg" : "W27#21D4435075DE",
-            "revision_entry" : "2021-03-24 11:09:24",
-            "readings" : {
-              "temperature" : "5.3",
-              "channel" : "3",
-              "humidity" : "75",
-              "type" : "EFTH-800, EFS-3110A",
-              "batteryState" : "ok",
-              "state" : "T: 5.3 H: 75"
+            "internals" : {
+               "DEF" : "SD_WS_27_TH_3",
+               "NAME" : "SD_WS_27_TH_3"
             },
+            "minProtocolVersion" : "1.27",
+            "readings" : {
+               "batteryState" : "ok",
+               "channel" : "3",
+               "humidity" : "75",
+               "state" : "T: 5.3 H: 75",
+               "temperature" : "5.3",
+               "type" : "EFTH-800, EFS-3110A"
+            },
+            "revision_entry" : "2021-03-24 11:09:24",
+            "revision_modul" : "14_SD_WS.pm 21666 2020-04-13 21:14:53Z Sidey",
             "rmsg" : "MU;P0=-240;P1=253;P2=-487;P3=489;P4=-4860;P5=746;P6=-725;D=012121212303030123012301212123012121212303012301230121212121230303012301230303012303030301214565656561212301212121230303012301230121212301212121230301230123012121212123030301230123030301230303030121;CP=1;R=19;",
             "tests" : [
-              {
+               {
                   "comment" : "Test #2"
-              }
+               }
             ],
-            "minProtocolVersion" : "1.27",
-            "user" : "elektron-bbs",
+            "user" : "elektron-bbs"
+         }
+      ],
+      "id" : "27",
+      "module" : "SD_WS",
+      "name" : "EFTH-800"
+   },
+   {
+      "data" : [
+         {
+            "comment" : "BRESSER 6-in-1 temp diff not ok with attr",
+            "dmsg" : "W115#9104143025BE18FFFFFF2928925A97FFF0000000000000000003",
             "internals" : {
-              "DEF" : "SD_WS_27_TH_3",
-              "NAME" : "SD_WS_27_TH_3"
+               "DEF" : "SD_WS_115_0",
+               "NAME" : "SD_WS_115_0"
             },
-            "comment" : "EuroChron weatherstation EFTH-800 / Channel 3 (ID 61 additionally)",
-            "revision_modul" : "14_SD_WS.pm 21666 2020-04-13 21:14:53Z Sidey"
-        }
-      ]
-  },
-  {"name":"BRESSER 6-in-1", "id":"115", "module":"SD_WS", "data": [
-      {
-        "setreadings":{"temperature":"-1.5", "humidity":"92"},
-        "returns":{"ParseFn":""},
-        "dmsg":"W115#9104143025BE18FFFFFF2928925A97FFF0000000000000000003", "comment":"BRESSER 6-in-1 temp diff not ok with attr", "user":"elektron-bbs",
-        "internals": {"DEF":"SD_WS_115_0","NAME":"SD_WS_115_0"},
-        "readings": {"state":"T: -7.5 H: 97 W: 0", "batteryChanged":"1", "batteryState":"ok", "channel":"0", "humidity":"97", "temperature":"-7.5", "type":"Bresser_6in1, new Bresser_5in1", "uv":"0", "windDirectionDegree":"292", "windDirectionText":"WNW", "windGust":"0", "windSpeed":"0"},
-        "minProtocolVersion":"1.48", "revision_entry":"2022-11-20 20:27:05",
-        "revision_modul":"14_SD_WS.pm v3.5.4 2022-11-14 20:37:55Z sidey79",
-        "rmsg":"MN;D=9104143025BE18FFFFFF2928925A97FFF0000000000000000003;R=189;"
-      },
-      {
-        "setreadings":{"temperature":"-1.5", "humidity":"92"},
-        "attributes": {"max-deviation-temp":"50"},
-        "returns":{"ParseFn":""},
-        "dmsg":"W115#9104143025BE18FFFFFF2928925A97FFF0000000000000000003", "comment":"BRESSER 6-in-1 temp diff ok with attr", "user":"elektron-bbs",
-        "internals": {"DEF":"SD_WS_115_0","NAME":"SD_WS_115_0"},
-        "readings": {"state":"T: -7.5 H: 97 W: 0", "batteryChanged":"1", "batteryState":"ok", "channel":"0", "humidity":"97", "temperature":"-7.5", "type":"Bresser_6in1, new Bresser_5in1", "uv":"0", "windDirectionDegree":"292", "windDirectionText":"WNW", "windGust":"0", "windSpeed":"0"},
-        "minProtocolVersion":"1.48", "revision_entry":"2022-11-20 20:27:05",
-        "revision_modul":"14_SD_WS.pm v3.5.4 2022-11-14 20:37:55Z sidey79",
-        "rmsg":"MN;D=9104143025BE18FFFFFF2928925A97FFF0000000000000000003;R=189;"
-      },
-      {
-        "setreadings":{"temperature":"-7.4", "humidity":"32"},
-        "attributes": {"max-deviation-hum":"65"},
-        "dmsg":"W115#9104143025BE18FFFFFF2928925A97FFF0000000000000000003", "comment":"BRESSER 6-in-1 hum diff ok with attr", "user":"elektron-bbs",
-        "internals": {"DEF":"SD_WS_115_0","NAME":"SD_WS_115_0"},
-        "readings": {"state":"T: -7.5 H: 97 W: 0", "batteryChanged":"1", "batteryState":"ok", "channel":"0", "humidity":"97", "temperature":"-7.5", "type":"Bresser_6in1, new Bresser_5in1", "uv":"0", "windDirectionDegree":"292", "windDirectionText":"WNW", "windGust":"0", "windSpeed":"0"},
-        "minProtocolVersion":"1.48", "revision_entry":"2022-11-20 20:27:05",
-        "revision_modul":"14_SD_WS.pm v3.5.4 2022-11-14 20:37:55Z sidey79",
-        "rmsg":"MN;D=9104143025BE18FFFFFF2928925A97FFF0000000000000000003;R=189;"
-      },
-      {
-        "setreadings":{"temperature":"-7.6", "humidity":"96"},
-        "dmsg":"W115#9104143025BE18FFFFFF2928925A97FFF0000000000000000003", "comment":"BRESSER 6-in-1 temp diff ok without attr", "user":"elektron-bbs",
-        "internals": {"DEF":"SD_WS_115_0", "NAME":"SD_WS_115_0"},
-        "readings": {"state":"T: -7.5 H: 97 W: 0", "batteryChanged":"1", "batteryState":"ok", "channel":"0", "humidity":"97", "temperature":"-7.5", "type":"Bresser_6in1, new Bresser_5in1", "uv":"0", "windDirectionDegree":"292", "windDirectionText":"WNW", "windGust":"0", "windSpeed":"0"},
-        "minProtocolVersion":"1.48", "revision_entry":"2022-11-20 20:27:05",
-        "revision_modul":"14_SD_WS.pm v3.5.4 2022-11-14 20:37:55Z sidey79",
-        "rmsg":"MN;D=9104143025BE18FFFFFF2928925A97FFF0000000000000000003;R=189;"
-      }  
-    ]
-  }
+            "minProtocolVersion" : "1.48",
+            "readings" : {
+               "batteryChanged" : "1",
+               "batteryState" : "ok",
+               "channel" : "0",
+               "humidity" : "97",
+               "state" : "T: -7.5 H: 97 W: 0",
+               "temperature" : "-7.5",
+               "type" : "Bresser_6in1, new Bresser_5in1",
+               "uv" : "0",
+               "windDirectionDegree" : "292",
+               "windDirectionText" : "WNW",
+               "windGust" : "0",
+               "windSpeed" : "0"
+            },
+            "returns" : {
+               "ParseFn" : ""
+            },
+            "revision_entry" : "2022-11-20 20:27:05",
+            "revision_modul" : "14_SD_WS.pm v3.5.4 2022-11-14 20:37:55Z sidey79",
+            "rmsg" : "MN;D=9104143025BE18FFFFFF2928925A97FFF0000000000000000003;R=189;",
+            "setreadings" : {
+               "humidity" : "92",
+               "temperature" : "-1.5"
+            },
+            "user" : "elektron-bbs"
+         },
+         {
+            "attributes" : {
+               "max-deviation-temp" : "50"
+            },
+            "comment" : "BRESSER 6-in-1 temp diff ok with attr",
+            "dmsg" : "W115#9104143025BE18FFFFFF2928925A97FFF0000000000000000003",
+            "internals" : {
+               "DEF" : "SD_WS_115_0",
+               "NAME" : "SD_WS_115_0"
+            },
+            "minProtocolVersion" : "1.48",
+            "readings" : {
+               "batteryChanged" : "1",
+               "batteryState" : "ok",
+               "channel" : "0",
+               "humidity" : "97",
+               "state" : "T: -7.5 H: 97 W: 0",
+               "temperature" : "-7.5",
+               "type" : "Bresser_6in1, new Bresser_5in1",
+               "uv" : "0",
+               "windDirectionDegree" : "292",
+               "windDirectionText" : "WNW",
+               "windGust" : "0",
+               "windSpeed" : "0"
+            },
+            "returns" : {
+               "ParseFn" : ""
+            },
+            "revision_entry" : "2022-11-20 20:27:05",
+            "revision_modul" : "14_SD_WS.pm v3.5.4 2022-11-14 20:37:55Z sidey79",
+            "rmsg" : "MN;D=9104143025BE18FFFFFF2928925A97FFF0000000000000000003;R=189;",
+            "setreadings" : {
+               "humidity" : "92",
+               "temperature" : "-1.5"
+            },
+            "user" : "elektron-bbs"
+         },
+         {
+            "attributes" : {
+               "max-deviation-hum" : "65"
+            },
+            "comment" : "BRESSER 6-in-1 hum diff ok with attr",
+            "dmsg" : "W115#9104143025BE18FFFFFF2928925A97FFF0000000000000000003",
+            "internals" : {
+               "DEF" : "SD_WS_115_0",
+               "NAME" : "SD_WS_115_0"
+            },
+            "minProtocolVersion" : "1.48",
+            "readings" : {
+               "batteryChanged" : "1",
+               "batteryState" : "ok",
+               "channel" : "0",
+               "humidity" : "97",
+               "state" : "T: -7.5 H: 97 W: 0",
+               "temperature" : "-7.5",
+               "type" : "Bresser_6in1, new Bresser_5in1",
+               "uv" : "0",
+               "windDirectionDegree" : "292",
+               "windDirectionText" : "WNW",
+               "windGust" : "0",
+               "windSpeed" : "0"
+            },
+            "revision_entry" : "2022-11-20 20:27:05",
+            "revision_modul" : "14_SD_WS.pm v3.5.4 2022-11-14 20:37:55Z sidey79",
+            "rmsg" : "MN;D=9104143025BE18FFFFFF2928925A97FFF0000000000000000003;R=189;",
+            "setreadings" : {
+               "humidity" : "32",
+               "temperature" : "-7.4"
+            },
+            "user" : "elektron-bbs"
+         },
+         {
+            "comment" : "BRESSER 6-in-1 temp diff ok without attr",
+            "dmsg" : "W115#9104143025BE18FFFFFF2928925A97FFF0000000000000000003",
+            "internals" : {
+               "DEF" : "SD_WS_115_0",
+               "NAME" : "SD_WS_115_0"
+            },
+            "minProtocolVersion" : "1.48",
+            "readings" : {
+               "batteryChanged" : "1",
+               "batteryState" : "ok",
+               "channel" : "0",
+               "humidity" : "97",
+               "state" : "T: -7.5 H: 97 W: 0",
+               "temperature" : "-7.5",
+               "type" : "Bresser_6in1, new Bresser_5in1",
+               "uv" : "0",
+               "windDirectionDegree" : "292",
+               "windDirectionText" : "WNW",
+               "windGust" : "0",
+               "windSpeed" : "0"
+            },
+            "revision_entry" : "2022-11-20 20:27:05",
+            "revision_modul" : "14_SD_WS.pm v3.5.4 2022-11-14 20:37:55Z sidey79",
+            "rmsg" : "MN;D=9104143025BE18FFFFFF2928925A97FFF0000000000000000003;R=189;",
+            "setreadings" : {
+               "humidity" : "96",
+               "temperature" : "-7.6"
+            },
+            "user" : "elektron-bbs"
+         }
+      ],
+      "id" : "115",
+      "module" : "SD_WS",
+      "name" : "BRESSER 6-in-1"
+   }
 ]
