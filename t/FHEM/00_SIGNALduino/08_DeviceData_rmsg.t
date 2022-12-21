@@ -69,7 +69,7 @@ sub runTest {
 
          	push @Test2::SIGNALduino::RDmsg::JSONTestList, {
         		testname	=> qq[Testdata with $modulename data],
-		        url			=> qq[$File::Find::name],
+		        url		  	=> qq[$File::Find::name],
 	        };
       }
   }
@@ -80,10 +80,9 @@ sub runTest {
   {
     Test2::SIGNALduino::RDmsg::loadJson( $maintest->{url} );
     
-    
     SKIP: {
        if (!UNIVERSAL::isa($Test2::SIGNALduino::RDmsg::testDataArray, 'ARRAY') || scalar @{$Test2::SIGNALduino::RDmsg::testDataArray} == 0) { 
-        skip q[No testdata provided, guessing ok]; 
+        skip qq[No testdata for $maintest->{testname} provided, guessing ok]; 
       }
 
       subtest $maintest->{testname} => sub {
