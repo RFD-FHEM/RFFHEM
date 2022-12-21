@@ -87,7 +87,7 @@
    {
       "data" : [
          {
-            "comment" : "BRESSER 6-in-1 temp diff not ok with attr",
+            "comment" : "BRESSER 6-in-1 temp diff not ok, without attr",
             "dmsg" : "W115#9104143025BE18FFFFFF2928925A97FFF0000000000000000003",
             "internals" : {
                "DEF" : "SD_WS_115_0",
@@ -124,7 +124,7 @@
             "attributes" : {
                "max-deviation-temp" : "50"
             },
-            "comment" : "BRESSER 6-in-1 temp diff ok with attr",
+            "comment" : "BRESSER 6-in-1 temp diff ok, but hum diff not ok, with attr max-deviation-temp",
             "dmsg" : "W115#9104143025BE18FFFFFF2928925A97FFF0000000000000000003",
             "internals" : {
                "DEF" : "SD_WS_115_0",
@@ -161,7 +161,7 @@
             "attributes" : {
                "max-deviation-hum" : "65"
             },
-            "comment" : "BRESSER 6-in-1 hum diff ok with attr",
+            "comment" : "BRESSER 6-in-1 hum diff ok, with attr max-deviation-hum",
             "dmsg" : "W115#9104143025BE18FFFFFF2928925A97FFF0000000000000000003",
             "internals" : {
                "DEF" : "SD_WS_115_0",
@@ -192,7 +192,7 @@
             "user" : "elektron-bbs"
          },
          {
-            "comment" : "BRESSER 6-in-1 temp diff ok without attr",
+            "comment" : "BRESSER 6-in-1 temp diff ok, hum diff ok, without attr",
             "dmsg" : "W115#9104143025BE18FFFFFF2928925A97FFF0000000000000000003",
             "internals" : {
                "DEF" : "SD_WS_115_0",
