@@ -14,6 +14,7 @@ package main;
 use strict;
 use warnings;
 use POSIX;
+use FHEM::Meta;
 
 #####################################
 sub
@@ -58,6 +59,8 @@ SD_AS_Initialize($)
           "ArduinoSensor_voltage.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", autocreateThreshold => "3:600"},
           "ArduinoSensor_raw.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", autocreateThreshold => "3:600"},
         };
+
+	return FHEM::Meta::InitMod( __FILE__, $hash );
 }
 
 #####################################
@@ -371,4 +374,81 @@ sub SD_AS_crc($$)
 </ul>
 
 =end html_DE
+=for :application/json;q=META.json 14_SD_AS.pm
+{
+  "abstract": "Logical Module for arduino sensors with AS Protocol",
+  "author": [
+    "Sidey <>",
+    "elektron-bbs <>"
+  ],
+  "x_fhem_maintainer": [
+    "Sidey"
+  ],
+  "x_fhem_maintainer_github": [
+    "Sidey",
+    "elektron-bbs <>"
+  ],
+  "description": "This module interprets digitals signals send from an Arduinosensordevice provided from the signalduino hardware",
+  "dynamic_config": 1,
+  "keywords": [
+    "fhem-sonstige-systeme",
+    "fhem-hausautomations-systeme",
+    "fhem-mod",
+    "signalduino",
+    "Arduino Sensor"
+  ],
+  "license": [
+    "GPL_2"
+  ],
+  "meta-spec": {
+    "url": "https://metacpan.org/pod/CPAN::Meta::Spec",
+    "version": 2
+  },
+  "name": "FHEM::SD_AS",
+  "prereqs": {
+    "runtime": {
+      "requires": {
+        "Digest::CRC;": "0"
+      }
+    },
+    "develop": {
+      "requires": {
+        "Digest::CRC;": "0"
+      }
+    }
+  },
+  "release_status": "stable",
+  "resources": {
+    "bugtracker": {
+      "web": "https://github.com/RFD-FHEM/RFFHEM/issues/"
+    },
+    "x_testData": [
+      {
+        "url": "https://raw.githubusercontent.com/RFD-FHEM/RFFHEM/master_fix_tests_JSON/t/FHEM/14_SD_AS/testData.json",
+        "testname": "Testdata with SD_AS sensors"
+      }
+    ],
+    "repository": {
+      "x_master": {
+        "type": "git",
+        "url": "https://github.com/RFD-FHEM/RFFHEM.git",
+        "web": "https://github.com/RFD-FHEM/RFFHEM/tree/master"
+      }
+    },
+    "x_support_community": {
+      "board": "Sonstige Systeme",
+      "boardId": "29",
+      "cat": "FHEM - Hausautomations-Systeme",
+      "description": "Sonstige Hausautomations-Systeme",
+      "forum": "FHEM Forum",
+      "rss": "https://forum.fhem.de/index.php?action=.xml;type=rss;board=29",
+      "title": "FHEM Forum: Sonstige Systeme",
+      "web": "https://forum.fhem.de/index.php/board,29.0.html"
+    },
+    "x_wiki": {
+      "web": "https://wiki.fhem.de/wiki/SIGNALduino"
+    }
+  }
+}
+=end :application/json;q=META.json
 =cut
