@@ -577,5 +577,86 @@ sub getSystemCodes {
 </ul>
 
 =end html_DE
-
+=for :application/json;q=META.json 10_SD_GT.pm
+{
+  "abstract": "devices communicating using the ELV FS10 protocol",
+  "author": [
+    "Sidey <>",
+	"elektron-bss <>"
+  ],
+  "x_fhem_maintainer": [
+  	"elektron-bss <>",
+    "Sidey"
+  ],
+  "x_fhem_maintainer_github": [
+    "Sidey79",
+	"HomeAutoUser",
+	"elektron-bbs"
+  ],
+  "description": "The FS10 module decrypts and sends FS10 messages, which are processed by the SIGNALduino",
+  "dynamic_config": 1,
+  "keywords": [
+    "fhem-sonstige-systeme",
+    "fhem-hausautomations-systeme",
+    "fhem-mod",
+    "signalduino",
+    "FS10"
+  ],
+  "license": [
+    "GPL_2"
+  ],
+  "meta-spec": {
+    "url": "https://metacpan.org/pod/CPAN::Meta::Spec",
+    "version": 2
+  },
+  "name": "FHEM::SD_GT",
+  "prereqs": {
+    "runtime": {
+      "requires": {
+		"GPUtils",
+      }
+    },
+    "develop": {
+      "requires": {
+		"GPUtils",
+	  }
+    }
+  },
+  "release_status": "stable",
+  "resources": {
+    "bugtracker": {
+      "web": "https://github.com/RFD-FHEM/RFFHEM/issues/"
+    },
+    "x_testData": [
+      {
+        "url": "https://raw.githubusercontent.com/RFD-FHEM/RFFHEM/master_fix_tests_JSON/t/FHEM/10_SD_GT/testData.json",
+        "testname": "Testdata with SD_GT sensors"
+      }
+    ],
+    "repository": {
+      "x_master": {
+        "type": "git",
+        "url": "https://github.com/RFD-FHEM/RFFHEM.git",
+        "web": "https://github.com/RFD-FHEM/RFFHEM/tree/master"
+      }
+      "type": "svn",
+      "url": "https://svn.fhem.de/fhem",
+      "web": "https://svn.fhem.de/trac/browser/trunk/fhem/FHEM/10_SD_GT.pm",
+      "x_branch": "trunk",
+      "x_filepath": "fhem/FHEM/",
+      "x_raw": "https://svn.fhem.de/trac/export/latest/trunk/fhem/FHEM/10_SD_GT.pm",
+    },
+    "x_support_community": {
+      "board": "SlowRF",
+      "boardId": "21",
+      "cat": "FHEM - Hausautomations-Systeme",
+      "description": Themen zu FS20, FHT, EM, WS, HMS.",
+      "forum": "FHEM Forum",
+      "rss": "https://forum.fhem.de/index.php?action=.xml;type=rss;board=21",
+      "title": "FHEM Forum: SlowRF",
+      "web": "https://forum.fhem.de/index.php/board,21.0.html"
+    }
+  }
+}
+=end :application/json;q=META.json
 =cut

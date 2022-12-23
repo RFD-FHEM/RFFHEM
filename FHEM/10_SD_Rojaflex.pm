@@ -615,4 +615,82 @@ sub Parse {
 </ul>
 
 =end html_DE
+=for :application/json;q=META.json 10_SD_Rojaflex.pm
+{
+  "abstract": "devices communicating using the Rojaflex protocol",
+  "author": [
+    "Sidey <>",
+    "elektron-bbs <>"
+  ],
+  "x_fhem_maintainer": [
+    "Sidey"
+  ],
+  "x_fhem_maintainer_github": [
+    "Sidey79",
+    "elektron-bbs",
+	"HomeAutoUser"
+  ],
+  "description": "The SD_Rojaflex module decrypts and sends messages that are processed by the SIGNALduino.",
+  "dynamic_config": 1,
+  "keywords": [
+    "fhem-sonstige-systeme",
+    "fhem-hausautomations-systeme",
+    "fhem-mod",
+    "signalduino",
+	"Rojaflex"    
+  ],
+  "license": [
+    "GPL_2"
+  ],
+  "meta-spec": {
+    "url": "https://metacpan.org/pod/CPAN::Meta::Spec",
+    "version": 2
+  },
+  "name": "FHEM::SD_Rojaflex",
+  "prereqs": {
+    "runtime": {
+      "requires": {
+        "GPUtils": "0"
+      }
+    },
+    "develop": {
+      "requires": {
+        "GPUtils": "0"
+      }
+    }
+  },
+  "release_status": "stable",
+  "resources": {
+    "bugtracker": {
+      "web": "https://github.com/RFD-FHEM/RFFHEM/issues/"
+    },
+    "x_testData": [
+      {
+        "url": "https://raw.githubusercontent.com/RFD-FHEM/RFFHEM/master_fix_tests_JSON/t/FHEM/10_SD_Rojaflex/testData.json",
+        "testname": "Testdata with SD_Rojaflex sensors"
+      }
+    ],
+    "repository": {
+      "x_master": {
+        "type": "git",
+        "url": "https://github.com/RFD-FHEM/RFFHEM.git",
+        "web": "https://github.com/RFD-FHEM/RFFHEM/tree/master"
+      }
+    },
+    "x_support_community": {
+      "board": "Sonstige Systeme",
+      "boardId": "29",
+      "cat": "FHEM - Hausautomations-Systeme",
+      "description": "Sonstige Hausautomations-Systeme",
+      "forum": "FHEM Forum",
+      "rss": "https://forum.fhem.de/index.php?action=.xml;type=rss;board=29",
+      "title": "FHEM Forum: Sonstige Systeme",
+      "web": "https://forum.fhem.de/index.php/board,29.0.html"
+    },
+    "x_wiki": {
+      "web": "https://wiki.fhem.de/wiki/SIGNALduino"
+    }
+  }
+}
+=end :application/json;q=META.json
 =cut

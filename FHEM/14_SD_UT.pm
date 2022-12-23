@@ -2908,4 +2908,100 @@ sub SD_UT_tristate2bin {
 </ul>
 
 =end html_DE
+=for :application/json;q=META.json 14_SD_UT.pm
+{
+  "author": [
+    "HomeAuto_User <>",
+    "elektron-bbs"
+  ],
+  "description": "module for some SIGNALduino devices",
+  "dynamic_config": 1,
+  "keywords": [
+    "fhem-sonstige-systeme",
+    "fhem-hausautomations-systeme",
+    "fhem-mod",
+    "signalduino"
+  ],
+  "license": [
+    "GPL_2"
+  ],
+  "meta-spec": {
+    "url": "https://metacpan.org/pod/CPAN::Meta::Spec",
+    "version": 2
+  },
+  "name": "FHEM::SD_UT",
+  "prereqs": {
+    "runtime": {
+      "requires": {
+        "FHEM": 5.00918623,
+        "lib::SD_Protocols": "0",
+        "perl": 5.018,
+        "strict": "0",
+        "warnings": "0"
+      }
+    },
+    "develop": {
+      "requires": {
+        "lib::SD_Protocols": "0",
+        "strict": "0",
+        "warnings": "0"
+      }
+    }
+  },
+  "release_status": "stable",
+  "resources": {
+    "bugtracker": {
+      "web": "https://github.com/RFD-FHEM/RFFHEM/issues"
+    },
+    "x_testData": [
+      {
+        "url": "https://raw.githubusercontent.com/RFD-FHEM/RFFHEM/master_fix_tests_JSON/t/FHEM/14_SD_UT/testData.json",
+        "testname": "Testdata with SD_UT sensors"
+      }
+    ],
+    "repository": {
+      "x_master": {
+        "type": "git",
+        "url": "https://github.com/RFD-FHEM/RFFHEM.git",
+        "web": "https://github.com/RFD-FHEM/RFFHEM/blob/master/FHEM/14_SD_UT.pm"
+      },
+      "type": "svn",
+      "url": "https://svn.fhem.de/fhem",
+      "web": "https://svn.fhem.de/trac/browser/trunk/fhem/FHEM/14_SD_UT.pm",
+      "x_branch": "trunk",
+      "x_filepath": "fhem/FHEM/",
+      "x_raw": "https://svn.fhem.de/trac/export/latest/trunk/fhem/FHEM/14_SD_UT.pm",
+      "x_dev": {
+        "type": "git",
+        "url": "https://github.com/RFD-FHEM/RFFHEM.git",
+        "web": "https://raw.githubusercontent.com/RFD-FHEM/RFFHEM/master/FHEM/14_SD_UT.pm",
+        "x_branch": "master",
+        "x_filepath": "FHEM/",
+        "x_raw": "https://github.com/RFD-FHEM/RFFHEM/blob/master/FHEM/14_SD_UT.pm"
+      }
+    },
+    "x_commandref": {
+      "web": "https://commandref.fhem.de/#SD_BELL"
+    },
+    "x_support_community": {
+      "board": "Sonstige Systeme",
+      "boardId": "29",
+      "cat": "FHEM - Hausautomations-Systeme",
+      "title": "FHEM - Hausautomations-Systeme >> Sonstige Systeme",
+      "web": "https://forum.fhem.de/index.php/board,29.0.html"
+    },
+    "x_wiki": {
+      "web": "https://wiki.fhem.de/wiki/SD_BELL"
+    }
+  },
+  "x_fhem_maintainer": [
+    "HomeAuto_User",
+    "elektron-bbs"
+  ],
+  "x_fhem_maintainer_github": [
+    "HomeAutoUser",
+    "elektron-bbs"
+  ]
+}
+=end :application/json;q=META.json
 =cut

@@ -417,4 +417,85 @@ sub FLAMINGO_UpdateState {
 </ul>
 
 =end html_DE
+=for :application/json;q=META.json 14_FLAMINGO.pm
+{
+  "abstract": "Supports flamingo fa20rf/fa21 smoke detectors",
+  "author": [
+    "Homeautouser <>",
+    "elektron-bbs <>"
+  ],
+  "x_fhem_maintainer": [
+    "HomeAuto_User"
+  ],
+  "x_fhem_maintainer_github": [
+    "homeautouser",
+    "Sidey79",
+    "elektron-bbs"
+  ],
+  "description": "The FLAMINGO module interprets FLAMINGO FA20RF/FA21/FA22RF type of messages received by the SIGNALduino",
+  "dynamic_config": 1,
+  "keywords": [
+    "fhem-sonstige-systeme",
+    "fhem-hausautomations-systeme",
+    "fhem-mod",
+    "signalduino",
+    "flamingo",
+    "smoke",
+    "sensor"
+	  ],
+  "license": [
+    "GPL_2"
+  ],
+  "meta-spec": {
+    "url": "https://metacpan.org/pod/CPAN::Meta::Spec",
+    "version": 2
+  },
+  "name": "FHEM::FLAMINGO",
+  "prereqs": {
+    "runtime": {
+      "requires": {
+      }
+    },
+    "develop": {
+      "requires": {
+      }
+    }
+  },
+  "release_status": "stable",
+  "resources": {
+    "bugtracker": {
+      "web": "https://github.com/RFD-FHEM/RFFHEM/issues/"
+    },
+    "x_testData": [
+      {
+        "url": "https://raw.githubusercontent.com/RFD-FHEM/RFFHEM/master_fix_tests_JSON/t/FHEM/14_FLAMINGO/testData.json",
+        "testname": "Testdata with FLAMINGO smoke sensors"
+      }
+    ],
+    "repository": {
+      "x_master": {
+        "type": "git",
+        "url": "https://github.com/RFD-FHEM/RFFHEM.git",
+        "web": "https://github.com/RFD-FHEM/RFFHEM/tree/master"
+      }
+      "type": "svn",
+      "url": "https://svn.fhem.de/fhem",
+      "web": "https://svn.fhem.de/trac/browser/trunk/fhem/FHEM/14_FLAMINGO.pm",
+      "x_branch": "trunk",
+      "x_filepath": "fhem/FHEM/",
+      "x_raw": "https://svn.fhem.de/trac/export/latest/trunk/fhem/FHEM/14_FLAMINGO.pm",
+    },
+    "x_support_community": {
+      "board": "Sonstige Systeme",
+      "boardId": "29",
+      "cat": "FHEM - Hausautomations-Systeme",
+      "description": "Sonstige Hausautomations-Systeme",
+      "forum": "FHEM Forum",
+      "rss": "https://forum.fhem.de/index.php?action=.xml;type=rss;board=29",
+      "title": "FHEM Forum: Sonstige Systeme",
+      "web": "https://forum.fhem.de/index.php/board,29.0.html"
+    }
+  }
+}
+=end :application/json;q=META.json
 =cut

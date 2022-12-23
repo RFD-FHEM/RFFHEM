@@ -622,6 +622,12 @@ sub Attr {
     "bugtracker": {
       "web": "https://github.com/RFD-FHEM/RFFHEM/issues"
     },
+    "x_testData": [
+      {
+        "url": "https://raw.githubusercontent.com/RFD-FHEM/RFFHEM/master_fix_tests_JSON/t/FHEM/14_SD_BELL/testData.json",
+        "testname": "Testdata with SD_BELL sensors"
+      }
+    ],
     "repository": {
       "x_master": {
         "type": "git",

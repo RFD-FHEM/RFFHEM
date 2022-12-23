@@ -385,8 +385,9 @@ sub SD_AS_crc($$)
     "Sidey"
   ],
   "x_fhem_maintainer_github": [
-    "Sidey",
-    "elektron-bbs <>"
+    "Sidey79",
+    "elektron-bbs",
+	  "HomeAutoUser"
   ],
   "description": "This module interprets digitals signals send from an Arduinosensordevice provided from the signalduino hardware",
   "dynamic_config": 1,
