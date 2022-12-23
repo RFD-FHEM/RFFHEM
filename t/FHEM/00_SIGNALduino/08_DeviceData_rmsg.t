@@ -12,10 +12,13 @@ use Test2::SIGNALduino::RDmsg;
 
 use File::Find;
 use File::Basename;
+use JSON; 
+use List::Util qw[min max];
 
 our %defs;
 our %attr;
 our $init_done;
+our %modules;
 
 my $testSet;
 my $id_matched=undef;
@@ -37,9 +40,18 @@ sub runTest {
   note("versionProtocols: ".InternalVal($target, "versionProtocols", "unknown"));
   CommandAttr(undef,"$target maxMuMsgRepeat 99");
   
-  use JSON; 
-  use List::Util qw[min max];
 
+  for my $cl ( split /:/, $targetHash->{Clients})
+  {
+    my $loaded = main::LoadModule($cl);
+    if (exists $modules{$cl}{META}{resources}{x_testData} )
+    {
+      for my $testFile ( @{$modules{$cl}{META}{resources}{x_testData}} ) {
+        push @Test2::SIGNALduino::RDmsg::JSONTestList, $testFile;
+      }
+    }
+  }
+  
 
   sub VerifyDispatch { 
       #diag @_;
@@ -56,7 +68,6 @@ sub runTest {
       $todo->end;
 
       ($tData->{dmsg} eq $dmsg) ? $dmsg_matched=1 : '';  
-
   } 
 
   sub  findTestdata {
