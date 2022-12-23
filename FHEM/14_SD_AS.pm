@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 14_SD_AS.pm 350 2020-10-01 20:16:11Z elektron-bbs $
+# $Id: 14_SD_AS.pm 350 2022-12-23 09:29:50Z sidey79 $
 # The file is part of the SIGNALduino project
 # see http://www.fhemwiki.de/wiki/SIGNALduino
 # and was created to provide support for self build sensors.
