@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 14_SD_WS_Maverick.pm 21666 2020-04-13 21:14:53Z Sidey $
+# $Id: 14_SD_WS_Maverick.pm 21666 2022-12-23 00:34:21Z sidey79 $
 # 
 # The purpose of this module is to support Maverick sensors
 # Sidey79 & Cruizer 2016
