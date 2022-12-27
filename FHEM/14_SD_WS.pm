@@ -54,6 +54,7 @@ package main;
 use strict;
 use warnings;
 use Carp qw(carp);
+use FHEM::Meta;
 
 # Forward declarations
 sub SD_WS_LFSR_digest8_reflect;
@@ -105,7 +106,7 @@ sub SD_WS_Initialize {
     'SD_WS_120.*'     => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4hum4:Temp/Hum,', autocreateThreshold => '2:180'},
     'SD_WS_122_T.*'   => { ATTR => 'event-min-interval:.*:60 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4:Temp,', autocreateThreshold => '10:180'},
   };
-  return;
+  return FHEM::Meta::InitMod( __FILE__, $hash );
 }
 
 #############################
@@ -2356,7 +2357,7 @@ sub SD_WS_WH2SHIFT {
     "Sidey"
   ],
   "x_fhem_maintainer_github": [
-    "Sidey79",
+    "Sidey79"
   ],
   "description": "The SD_WS module processes the messages from various environmental sensors received from an IO device (CUL, CUN, SIGNALDuino, SignalESP etc.)",
   "dynamic_config": 1,
@@ -2367,10 +2368,10 @@ sub SD_WS_WH2SHIFT {
     "signalduino",
     "weather",
     "station",
-    "sensor"
-	"Hama",
-	"TFA",
-	"Bresser"
+    "sensor",
+	  "Hama",
+	  "TFA",
+	  "Bresser"
   ],
   "license": [
     "GPL_2"
@@ -2410,13 +2411,13 @@ sub SD_WS_WH2SHIFT {
         "type": "git",
         "url": "https://github.com/RFD-FHEM/RFFHEM.git",
         "web": "https://github.com/RFD-FHEM/RFFHEM/tree/master"
-      }
+      },
       "type": "svn",
       "url": "https://svn.fhem.de/fhem",
       "web": "https://svn.fhem.de/trac/browser/trunk/fhem/FHEM/14_Hideki.pm",
       "x_branch": "trunk",
       "x_filepath": "fhem/FHEM/",
-      "x_raw": "https://svn.fhem.de/trac/export/latest/trunk/fhem/FHEM/14_SD_WS.pm",
+      "x_raw": "https://svn.fhem.de/trac/export/latest/trunk/fhem/FHEM/14_SD_WS.pm"
     },
     "x_support_community": {
       "board": "Sonstige Systeme",

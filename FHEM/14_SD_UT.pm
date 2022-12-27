@@ -406,6 +406,7 @@ package main;
 
 use strict;
 use warnings;
+use FHEM::Meta;
 no warnings 'portable';  # Support for 64-bit ints required
 
 our $VERSION = '2022-09-13';
@@ -962,7 +963,7 @@ sub SD_UT_Initialize {
     'xavax.*'      => {ATTR => 'model:xavax', FILTER => '%NAME', autocreateThreshold => '3:180', GPLOT => q{}},
     'unknown_please_select_model' => {ATTR => 'model:unknown', FILTER => '%NAME', autocreateThreshold => '5:180', GPLOT => q{}},
   };
-  return;
+  return FHEM::Meta::InitMod( __FILE__, $hash );
 }
 
 #############################

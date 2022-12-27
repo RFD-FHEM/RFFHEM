@@ -13,6 +13,7 @@ package SD_GT;
 use strict;
 use warnings;
 use GPUtils qw(GP_Import GP_Export);
+use FHEM::Meta;
 
 our $VERSION = '1.0';
 
@@ -51,7 +52,7 @@ sub Initialize {
 	$hash->{Match}      = '^P49#[A-Fa-f0-9]+';
 	$hash->{AttrList}   = "IODev do_not_notify:1,0 ignore:0,1 showtime:1,0 $main::readingFnAttributes";
 	$hash->{AutoCreate} = {'SD_GT_LEARN' => {FILTER => '%NAME', autocreateThreshold => '5:180', GPLOT => q{}}};
-	return;
+	return FHEM::Meta::InitMod( __FILE__, $hash );
 }
 
 sub parseSystemcodeHex;
@@ -613,12 +614,12 @@ sub getSystemCodes {
   "prereqs": {
     "runtime": {
       "requires": {
-		"GPUtils",
+		"GPUtils" : "0"
       }
     },
     "develop": {
       "requires": {
-		"GPUtils",
+		"GPUtils" : "0"
 	  }
     }
   },
@@ -638,19 +639,19 @@ sub getSystemCodes {
         "type": "git",
         "url": "https://github.com/RFD-FHEM/RFFHEM.git",
         "web": "https://github.com/RFD-FHEM/RFFHEM/tree/master"
-      }
+      },
       "type": "svn",
       "url": "https://svn.fhem.de/fhem",
       "web": "https://svn.fhem.de/trac/browser/trunk/fhem/FHEM/10_SD_GT.pm",
       "x_branch": "trunk",
       "x_filepath": "fhem/FHEM/",
-      "x_raw": "https://svn.fhem.de/trac/export/latest/trunk/fhem/FHEM/10_SD_GT.pm",
+      "x_raw": "https://svn.fhem.de/trac/export/latest/trunk/fhem/FHEM/10_SD_GT.pm"
     },
     "x_support_community": {
       "board": "SlowRF",
       "boardId": "21",
       "cat": "FHEM - Hausautomations-Systeme",
-      "description": Themen zu FS20, FHT, EM, WS, HMS.",
+      "description": "Themen zu FS20, FHT, EM, WS, HMS.",
       "forum": "FHEM Forum",
       "rss": "https://forum.fhem.de/index.php?action=.xml;type=rss;board=21",
       "title": "FHEM Forum: SlowRF",

@@ -70,8 +70,7 @@ sub runTest {
       ($tData->{dmsg} eq $dmsg) ? $dmsg_matched=1 : '';  
   } 
 
-  sub  findTestdata {
-      
+  sub findTestdata {
       my($filename, $dir, undef) = fileparse($File::Find::name);
       if ($filename =~ /.json$/i && $filename =~ /testData/i )
       {
@@ -85,7 +84,7 @@ sub runTest {
       }
   }
 
-  find(\&findTestdata, dirname(__FILE__).q[/../]);
+  #find(\&findTestdata, dirname(__FILE__).q[/../]);
   plan (scalar @Test2::SIGNALduino::RDmsg::JSONTestList);
 	for my $maintest  (@Test2::SIGNALduino::RDmsg::JSONTestList)
   {
@@ -151,8 +150,8 @@ sub runTest {
         if ( exists $maintest->{todo}) {
           $todo->end;
         }
-      }; #suubtest
-    }; # SKIP# SKIP
+      }; #subtest
+    }; # SKIP#
   }; # end for loop
 
 	

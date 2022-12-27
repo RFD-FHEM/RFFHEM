@@ -21,19 +21,12 @@ package main;
 
 use strict;
 use warnings;
+use FHEM::Meta;
 
 #use Data::Dumper;
-sub SD_WS_Maverick_Initialize($);
-sub SD_WS_Maverick_Define($$);
-sub SD_WS_Maverick_Undef($$);
-sub SD_WS_Maverick_Parse($$);
-sub SD_WS_Maverick_Attr(@);
-sub SD_WS_Maverick_SetSensor1Inactive($);
-sub SD_WS_Maverick_SetSensor2Inactive($);
-sub SD_WS_Maverick_UpdateState($);
 
-sub
-SD_WS_Maverick_Initialize($)
+
+sub SD_WS_Maverick_Initialize
 {
   my ($hash) = @_;
 
@@ -47,6 +40,8 @@ SD_WS_Maverick_Initialize($)
   $hash->{AutoCreate} =
         { "SD_WS_Maverick.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME",  autocreateThreshold => "2:180"} };
 ## Todo: Pruefen der Autocreate Einstellungen
+
+  return FHEM::Meta::InitMod( __FILE__, $hash );
 
 }
 
@@ -71,8 +66,7 @@ SD_WS_Maverick_Define($$)
 }
 
 #####################################
-sub
-SD_WS_Maverick_Undef($$)
+sub SD_WS_Maverick_Undef
 {
   my ($hash, $name) = @_;
   RemoveInternalTimer($hash, 'SD_WS_Maverick_SetSensor1Inactive');
@@ -80,7 +74,7 @@ SD_WS_Maverick_Undef($$)
   delete($modules{SD_WS_Maverick}{defptr}{$hash->{CODE}})
      if(defined($hash->{CODE}) &&
         defined($modules{SD_WS_Maverick}{defptr}{$hash->{CODE}}));
-  return undef;
+  return FHEM::Meta::InitMod( __FILE__, $hash );
 }
 
 
@@ -485,13 +479,13 @@ sub SD_WS_Maverick_UpdateState($) {
         "type": "git",
         "url": "https://github.com/RFD-FHEM/RFFHEM.git",
         "web": "https://github.com/RFD-FHEM/RFFHEM/tree/master"
-      }
+      },
       "type": "svn",
       "url": "https://svn.fhem.de/fhem",
       "web": "https://svn.fhem.de/trac/browser/trunk/fhem/FHEM/14_SD_WS_Maverick.pm",
       "x_branch": "trunk",
       "x_filepath": "fhem/FHEM/",
-      "x_raw": "https://svn.fhem.de/trac/export/latest/trunk/fhem/FHEM/14_SD_WS_Maverick.pm",
+      "x_raw": "https://svn.fhem.de/trac/export/latest/trunk/fhem/FHEM/14_SD_WS_Maverick.pm"
     },
     "x_support_community": {
       "board": "Sonstige Systeme",

@@ -15,6 +15,7 @@ package main;
 use strict;
 use warnings;
 use POSIX;
+use FHEM::Meta;
 
 #use Data::Dumper;
 
@@ -37,6 +38,7 @@ Hideki_Initialize($)
   $hash->{AutoCreate}=
         { "Hideki.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "2:180"} };
 
+  return FHEM::Meta::InitMod( __FILE__, $hash );
 }
 
 
@@ -658,13 +660,13 @@ sub wind {
         "type": "git",
         "url": "https://github.com/RFD-FHEM/RFFHEM.git",
         "web": "https://github.com/RFD-FHEM/RFFHEM/tree/master"
-      }
+      },
       "type": "svn",
       "url": "https://svn.fhem.de/fhem",
       "web": "https://svn.fhem.de/trac/browser/trunk/fhem/FHEM/14_Hideki.pm",
       "x_branch": "trunk",
       "x_filepath": "fhem/FHEM/",
-      "x_raw": "https://svn.fhem.de/trac/export/latest/trunk/fhem/FHEM/14_Hideki.pm",
+      "x_raw": "https://svn.fhem.de/trac/export/latest/trunk/fhem/FHEM/14_Hideki.pm"
     },
     "x_support_community": {
       "board": "Sonstige Systeme",

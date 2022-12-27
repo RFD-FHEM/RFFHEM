@@ -25,8 +25,12 @@ package main;
 
 use strict;
 use warnings;
+use FHEM::Meta;
 
-our $VERSION = '20220223';
+our $VERSION = '20221227';
+our $readingFnAttributes;
+our %modules;
+our $init_done;
 
 my %sets = (
   'Testalarm:noArg',
@@ -60,7 +64,7 @@ sub FLAMINGO_Initialize {
     'FLAMINGO.*' => { ATTR => 'event-on-change-reading:.* event-min-interval:.*:300', FILTER => '%NAME', GPLOT => q{} },
   };
 
-  return
+  return FHEM::Meta::InitMod( __FILE__, $hash );
 }
 
 #####################################
@@ -477,13 +481,13 @@ sub FLAMINGO_UpdateState {
         "type": "git",
         "url": "https://github.com/RFD-FHEM/RFFHEM.git",
         "web": "https://github.com/RFD-FHEM/RFFHEM/tree/master"
-      }
+      },
       "type": "svn",
       "url": "https://svn.fhem.de/fhem",
       "web": "https://svn.fhem.de/trac/browser/trunk/fhem/FHEM/14_FLAMINGO.pm",
       "x_branch": "trunk",
       "x_filepath": "fhem/FHEM/",
-      "x_raw": "https://svn.fhem.de/trac/export/latest/trunk/fhem/FHEM/14_FLAMINGO.pm",
+      "x_raw": "https://svn.fhem.de/trac/export/latest/trunk/fhem/FHEM/14_FLAMINGO.pm"
     },
     "x_support_community": {
       "board": "Sonstige Systeme",

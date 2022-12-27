@@ -30,12 +30,12 @@ package main;
 
 use strict;
 use warnings;
+use FHEM::Meta;
 
 #use Data::Dumper;
 
 
-sub
-SD_WS07_Initialize($)
+sub SD_WS07_Initialize
 {
   my ($hash) = @_;
   $hash->{Match}     = "^P7#[A-Fa-f0-9]{6}[AFaf][A-Fa-f0-9]{2,3}";    ## pos 7 ist aktuell immer 0xF oder 0xA
@@ -52,6 +52,7 @@ SD_WS07_Initialize($)
 			"SD_WS07_TH_.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,",  autocreateThreshold => "2:180"},
 			"SD_WS07_T_.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4:Temp,",  autocreateThreshold => "2:180"}
 			};
+  return FHEM::Meta::InitMod( __FILE__, $hash )
 }
 
 #############################
@@ -517,13 +518,13 @@ SD_WS07_Parse($$)
         "type": "git",
         "url": "https://github.com/RFD-FHEM/RFFHEM.git",
         "web": "https://github.com/RFD-FHEM/RFFHEM/tree/master"
-      }
+      },
       "type": "svn",
       "url": "https://svn.fhem.de/fhem",
       "web": "https://svn.fhem.de/trac/browser/trunk/fhem/FHEM/14_SD_WS07.pm",
       "x_branch": "trunk",
       "x_filepath": "fhem/FHEM/",
-      "x_raw": "https://svn.fhem.de/trac/export/latest/trunk/fhem/FHEM/14_SD_WS07.pm",
+      "x_raw": "https://svn.fhem.de/trac/export/latest/trunk/fhem/FHEM/14_SD_WS07.pm"
     },
     "x_support_community": {
       "board": "Sonstige Systeme",

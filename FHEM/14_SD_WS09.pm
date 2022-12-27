@@ -21,12 +21,13 @@ package main;
 
 use strict;
 use warnings;
+use FHEM::Meta;
 
 # werden benötigt, aber im Programm noch extra abgetestet 
 #use Digest::CRC qw(crc);
 #use Math::Trig;
 
-sub SD_WS09_Initialize($) {
+sub SD_WS09_Initialize {
 	my ($hash) = @_;
 
 	$hash->{Match}     = "^P9#F[A-Fa-f0-9]+";    ## pos 7 ist aktuell immer 0xF
@@ -44,6 +45,8 @@ sub SD_WS09_Initialize($) {
                        ."$readingFnAttributes ";
 	$hash->{AutoCreate} =
 		{ "SD_WS09.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.* windKorrektur:.*:0 verbose:5" , FILTER => "%NAME", GPLOT => "WH1080wind4:windSpeed/windGust,",  autocreateThreshold => "2:180"} };
+
+	return FHEM::Meta::InitMod( __FILE__, $hash );		
 }
 
 #############################
@@ -922,7 +925,7 @@ sub SD_WS09_CRCCHECK($) {
   "abstract": "Supports weather sensors (WH1080/3080/CTW-600) protocl 9 from SIGNALduino",
   "author": [
     "Sidey <>",
-    "ralf9 <>"
+    "ralf9 <>",
 	"pejonp",
 	"homeautouser"
   ],
@@ -957,14 +960,14 @@ sub SD_WS09_CRCCHECK($) {
   "prereqs": {
     "runtime": {
       "requires": {
-		"Math::Trig",
-		"Digest::CRC"
+		"Math::Trig" : "0",
+		"Digest::CRC" : "0"
       }
     },
     "develop": {
       "requires": {
-      	"Math::Trig",
-		"Digest::CRC"
+      	"Math::Trig" : "0",
+		"Digest::CRC" : "0"
 	  }
     }
   },
@@ -984,13 +987,13 @@ sub SD_WS09_CRCCHECK($) {
         "type": "git",
         "url": "https://github.com/RFD-FHEM/RFFHEM.git",
         "web": "https://github.com/RFD-FHEM/RFFHEM/tree/master"
-      }
+      },
       "type": "svn",
       "url": "https://svn.fhem.de/fhem",
       "web": "https://svn.fhem.de/trac/browser/trunk/fhem/FHEM/14_SD_WS09.pm",
       "x_branch": "trunk",
       "x_filepath": "fhem/FHEM/",
-      "x_raw": "https://svn.fhem.de/trac/export/latest/trunk/fhem/FHEM/14_SD_WS09.pm",
+      "x_raw": "https://svn.fhem.de/trac/export/latest/trunk/fhem/FHEM/14_SD_WS09.pm"
     },
     "x_support_community": {
       "board": "Sonstige Systeme",

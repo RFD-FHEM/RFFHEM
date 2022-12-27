@@ -49,7 +49,7 @@ sub loadJson {
 
 	$testDataArray = eval { decode_json($json_text) };
 	if($@){
-		fail("open json file SD_Device_ProtocolList was not possible $?"); 
+		fail("open json file $url was not possible $?"); 
 		diag $json_text;
 	}
 }

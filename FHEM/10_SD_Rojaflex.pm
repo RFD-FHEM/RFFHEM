@@ -7,6 +7,7 @@ package SD_Rojaflex;
 use strict;
 use warnings;
 use GPUtils qw(GP_Import GP_Export);
+use FHEM::Meta;
 
 our $VERSION = '1.00';
 
@@ -73,7 +74,7 @@ sub Initialize {
 	                      'ignore:1,0 dummy:0,1 showtime:0,1 '.
 	                      "$main::readingFnAttributes";
 	$hash->{AutoCreate} = {'SD_Rojaflex.*' => {FILTER => '%NAME', autocreateThreshold => '5:180', GPLOT => q{}}};
-	return;
+	return FHEM::Meta::InitMod( __FILE__, $hash );
 }
 
 sub Attr {
