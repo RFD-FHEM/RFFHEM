@@ -624,7 +624,7 @@ sub Attr {
     },
     "x_testData": [
       {
-        "url": "https://raw.githubusercontent.com/RFD-FHEM/RFFHEM/master_fix_tests_JSON/t/FHEM/14_SD_BELL/testData.json",
+        "url": "https://raw.githubusercontent.com/RFD-FHEM/RFFHEM/master/t/FHEM/14_SD_BELL/testData.json",
         "testname": "Testdata with SD_BELL sensors"
       }
     ],

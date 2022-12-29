@@ -978,7 +978,7 @@ sub SD_WS09_CRCCHECK($) {
     },
     "x_testData": [
       {
-        "url": "https://raw.githubusercontent.com/RFD-FHEM/RFFHEM/master_fix_tests_JSON/t/FHEM/14_SD_WS09/testData.json",
+        "url": "https://raw.githubusercontent.com/RFD-FHEM/RFFHEM/master/t/FHEM/14_SD_WS09/testData.json",
         "testname": "Testdata with SD_WS09 sensors"
       }
     ],

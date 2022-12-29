@@ -425,7 +425,7 @@ sub SD_AS_crc($$)
     },
     "x_testData": [
       {
-        "url": "https://raw.githubusercontent.com/RFD-FHEM/RFFHEM/master_fix_tests_JSON/t/FHEM/14_SD_AS/testData.json",
+        "url": "https://raw.githubusercontent.com/RFD-FHEM/RFFHEM/master/t/FHEM/14_SD_AS/testData.json",
         "testname": "Testdata with SD_AS sensors"
       }
     ],

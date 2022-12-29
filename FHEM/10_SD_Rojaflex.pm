@@ -667,7 +667,7 @@ sub Parse {
     },
     "x_testData": [
       {
-        "url": "https://raw.githubusercontent.com/RFD-FHEM/RFFHEM/master_fix_tests_JSON/t/FHEM/10_SD_Rojaflex/testData.json",
+        "url": "https://raw.githubusercontent.com/RFD-FHEM/RFFHEM/master/t/FHEM/10_SD_Rojaflex/testData.json",
         "testname": "Testdata with SD_Rojaflex sensors"
       }
     ],
