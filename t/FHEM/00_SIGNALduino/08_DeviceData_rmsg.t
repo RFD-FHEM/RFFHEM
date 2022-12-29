@@ -25,27 +25,47 @@ my $id_matched=undef;
 my $dmsg_matched=undef;
 my $SD_Dispatch_calledCounter=undef;
 my $tData;
-my $testDataArray; 
+
+sub findTestdata {
+    my($filename, $dir, undef) = fileparse($File::Find::name);
+    if ($filename =~ /.json$/i && $filename =~ /testData/i )
+    {
+        my $modulename = basename($dir);
+        $modulename =~ s/^[0-9][0-9]_//; # Remove leading digtis
+
+        push @Test2::SIGNALduino::RDmsg::JSONTestList, {
+          testname	=> qq[Testdata with $modulename data],
+          url		  	=> qq[$File::Find::name],
+          module    => $modulename
+        };
+    }
+}
+
 
 sub runTest {
 	my $target = shift;
 	my $targetHash = $defs{$target};
 	my $mock = Test2::Mock->new(
 		track => 1,
-		class => 'main'
+		class => q[main]
 	);	 	
 	my $tracking = $mock->sub_tracking;
 
-  note("versionmodul: ".InternalVal($target, "versionmodul", "unknown"));
-  note("versionProtocols: ".InternalVal($target, "versionProtocols", "unknown"));
+  note(q[versionmodul: ].InternalVal($target, q[versionmodul], q[unknown]));
+  note(q[versionProtocols: ].InternalVal($target, q[versionProtocols], q[unknown]));
   CommandAttr(undef,"$target maxMuMsgRepeat 99");
   
+  note(q[Searching local testdata]);
+  find(\&findTestdata, dirname(__FILE__).q[/../]);
 
   for my $cl ( split /:/, $targetHash->{Clients})
   {
+    next if ( grep { $cl eq $_->{module} } @Test2::SIGNALduino::RDmsg::JSONTestList );
+    
     my $loaded = main::LoadModule($cl);
     if (exists $modules{$cl}{META}{resources}{x_testData} )
     {
+      note(qq[Seatching remote testdata for $cl]);
       for my $testFile ( @{$modules{$cl}{META}{resources}{x_testData}} ) {
         push @Test2::SIGNALduino::RDmsg::JSONTestList, $testFile;
       }
@@ -70,21 +90,7 @@ sub runTest {
       ($tData->{dmsg} eq $dmsg) ? $dmsg_matched=1 : '';  
   } 
 
-  sub findTestdata {
-      my($filename, $dir, undef) = fileparse($File::Find::name);
-      if ($filename =~ /.json$/i && $filename =~ /testData/i )
-      {
-          my $modulename = basename($dir);
-          $modulename =~ s/^[0-9][0-9]_//; # Remove leading digtis
 
-         	push @Test2::SIGNALduino::RDmsg::JSONTestList, {
-        		testname	=> qq[Testdata with $modulename data],
-		        url		  	=> qq[$File::Find::name],
-	        };
-      }
-  }
-
-  #find(\&findTestdata, dirname(__FILE__).q[/../]);
   plan (scalar @Test2::SIGNALduino::RDmsg::JSONTestList);
 	for my $maintest  (@Test2::SIGNALduino::RDmsg::JSONTestList)
   {
@@ -162,8 +168,7 @@ sub waitDone {
 
 	if ($init_done) 
 	{
-		runTest(@_);
-    
+  	runTest(@_);
     done_testing();
     exit(0);
 	} else {
