@@ -51,9 +51,9 @@ sub Hideki_Initialize {
 #####################################
 sub Hideki_Define {
   my ($hash, $def) = @_;
-  carp "Hideki_Define, hash failed" if (!$hash);
-  carp "Hideki_Define, def failed" if (!$def);
-
+  carp qq[Hideki_Define, too few arguments ($hash, $def)] if @_ < 2;
+  (ref $hash ne 'HASH') // return q[no hash provided];
+  
   my @a = split("[ \t][ \t]*", $def);
   return "wrong syntax: define <name> Hideki <code>".int(@a)
     if(int(@a) < 3);
@@ -63,17 +63,15 @@ sub Hideki_Define {
 
   my $name= $hash->{NAME};
   $modules{Hideki}{defptr}{$a[2]} = $hash;
-  #$hash->{STATE} = "Defined";
 
-  #AssignIoPort($hash);
   return;
 }
 
 #####################################
 sub Hideki_Undef {
   my ($hash, $name) = @_;
-  carp "Hideki_Undef, hash failed" if (!$hash);
-  carp "Hideki_Undef, name failed" if (!$name);
+  carp qq[Hideki_Undef, too few arguments ($hash, $name)] if @_ < 2;
+  (ref $hash ne 'HASH') // return q[no hash provided];
 
   delete($modules{Hideki}{defptr}{$hash->{CODE}}) if($hash && $hash->{CODE});
   return;
@@ -83,8 +81,8 @@ sub Hideki_Undef {
 #####################################
 sub Hideki_Parse {
   my ($iohash,$msg) = @_;
-  carp "Hideki_Parse, iohash failed" if (!$iohash);
-  carp "Hideki_Parse, msg failed" if (!$msg);
+  carp qq[Hideki_Parse, too few arguments ($iohash, $msg)] if @_ < 2;
+  (ref $iohash ne 'HASH') // return q[no hash provided];
 
   my (undef ,$rawData) = split("#",$msg);
   my $ioname = $iohash->{NAME};
@@ -255,7 +253,8 @@ sub Hideki_Parse {
 # output is true if check1 and check2 OK
 # data will then hold the decrypted data
 sub decryptAndCheck {
-  carp "decryptAndCheck, too few arguments (iohash, rawData)" if @_ < 2;
+  carp qq[decryptAndCheck, too few arguments (iohash, rawData)] if @_ < 2;
+
   my $iohash = shift;
   my $rawData = shift;
 
@@ -300,7 +299,7 @@ sub decryptAndCheck {
 #####################################
 # /* The second checksum. Input is OldChecksum^NewByte */
 sub Hideki_SecondCheck {
-    carp "Hideki_SecondCheck, too few arguments" if @_ < 1;
+    carp qq[Hideki_SecondCheck, too few arguments] if @_ < 1;
     my $b = shift;
 
     my $c = 0;
@@ -417,7 +416,7 @@ sub decodeRain {
 # P12#758BB244074007400F00001C6E7A01
 sub wind {
   my $name = shift;
-  carp "wind, too few arguments ($name)" if @_ < 1;
+  carp qq[wind, too few arguments ($name)] if @_ < 1;
 
   my @Hidekibytes = @{$_[0]};
   my @wd=(0, 15, 13, 14, 9, 10, 12, 11, 1, 2, 4, 3, 8, 7, 5, 6);
