@@ -1,4 +1,4 @@
-# $Id: 14_SD_WS.pm v3.5.4 2022-11-26 22:39:42Z elektron-bbs $
+# $Id: 14_SD_WS.pm v3.5.4 2022-12-29 23:35:50Z sidey79 $
 #
 # The purpose of this module is to support serval
 # weather sensors which use various protocol
@@ -54,6 +54,7 @@ package main;
 use strict;
 use warnings;
 use Carp qw(carp);
+use FHEM::Meta;
 
 # Forward declarations
 sub SD_WS_LFSR_digest8_reflect;
@@ -66,8 +67,7 @@ sub SD_WS_Initialize {
   my $hash = shift // return;
   $hash->{Match}    = '^W\d+x{0,1}#.*';
   $hash->{DefFn}    = \&SD_WS_Define;
-  $hash->{UndefFn}  = \&SD_WS_Undef;
-  $hash->{SetFn}    = \&SD_WS_Set;
+  $hash->{UndefFn}  = \&SD_WS_Undef;$hash->{SetFn}    = \&SD_WS_Set;
   $hash->{ParseFn}  = \&SD_WS_Parse;
   $hash->{AttrList} = "do_not_notify:1,0 ignore:0,1 showtime:1,0 " .
                       "model:E0001PA,S522,TFA_30.3251.10,TX-EZ6,other " .
@@ -106,7 +106,7 @@ sub SD_WS_Initialize {
     'SD_WS_120.*'     => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4hum4:Temp/Hum,', autocreateThreshold => '2:180'},
     'SD_WS_122_T.*'   => { ATTR => 'event-min-interval:.*:60 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4:Temp,', autocreateThreshold => '10:180'},
   };
-  return;
+  return FHEM::Meta::InitMod( __FILE__, $hash );
 }
 
 #############################
@@ -2346,4 +2346,93 @@ sub SD_WS_WH2SHIFT {
 </ul>
 
 =end html_DE
+=for :application/json;q=META.json 14_SD_WS.pm
+{
+  "abstract": "Supports various weather stations",
+  "author": [
+    "Sidey <>",
+    "ralf9 <>"
+  ],
+  "x_fhem_maintainer": [
+    "Sidey"
+  ],
+  "x_fhem_maintainer_github": [
+    "Sidey79"
+  ],
+  "description": "The SD_WS module processes the messages from various environmental sensors received from an IO device (CUL, CUN, SIGNALDuino, SignalESP etc.)",
+  "dynamic_config": 1,
+  "keywords": [
+    "fhem-sonstige-systeme",
+    "fhem-hausautomations-systeme",
+    "fhem-mod",
+    "signalduino",
+    "weather",
+    "station",
+    "sensor",
+	  "Hama",
+	  "TFA",
+	  "Bresser"
+  ],
+  "license": [
+    "GPL_2"
+  ],
+  "meta-spec": {
+    "url": "https://metacpan.org/pod/CPAN::Meta::Spec",
+    "version": 2
+  },
+  "name": "FHEM::SD_WS",
+  "prereqs": {
+    "runtime": {
+      "requires": {
+        "Carp": "0",
+        "Digest:CRC": "0"
+      }
+    },
+    "develop": {
+      "requires": {
+        "Carp": "0",
+        "Digest:CRC": "0"
+      }
+    }
+  },
+  "release_status": "stable",
+  "resources": {
+    "bugtracker": {
+      "web": "https://github.com/RFD-FHEM/RFFHEM/issues/"
+    },
+    "x_testData": [
+      {
+        "url": "https://raw.githubusercontent.com/RFD-FHEM/RFFHEM/master/t/FHEM/14_SD_WS/testData.json",
+        "testname": "Testdata with SD_WS sensors"
+      }
+    ],
+    "repository": {
+      "x_master": {
+        "type": "git",
+        "url": "https://github.com/RFD-FHEM/RFFHEM.git",
+        "web": "https://github.com/RFD-FHEM/RFFHEM/tree/master"
+      },
+      "type": "svn",
+      "url": "https://svn.fhem.de/fhem",
+      "web": "https://svn.fhem.de/trac/browser/trunk/fhem/FHEM/14_Hideki.pm",
+      "x_branch": "trunk",
+      "x_filepath": "fhem/FHEM/",
+      "x_raw": "https://svn.fhem.de/trac/export/latest/trunk/fhem/FHEM/14_SD_WS.pm"
+    },
+    "x_support_community": {
+      "board": "Sonstige Systeme",
+      "boardId": "29",
+      "cat": "FHEM - Hausautomations-Systeme",
+      "description": "Sonstige Hausautomations-Systeme",
+      "forum": "FHEM Forum",
+      "rss": "https://forum.fhem.de/index.php?action=.xml;type=rss;board=29",
+      "title": "FHEM Forum: Sonstige Systeme",
+      "web": "https://forum.fhem.de/index.php/board,29.0.html"
+    },
+    "x_wiki": {
+      "web": "https://wiki.fhem.de/wiki/SIGNALduino"
+    }
+  }
+}
+=end :application/json;q=META.json
 =cut

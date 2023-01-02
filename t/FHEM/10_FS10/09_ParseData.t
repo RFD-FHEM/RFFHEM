@@ -21,7 +21,7 @@ sub runTest {
     #print Dumper(@Test::RDmsg::JSONTestList);
 	my $filepath = dirname(__FILE__);
 	push @Test2::SIGNALduino::RDmsg::JSONTestList, {
-		testname	=> q[Testdata with corrupt FS10 data],
+		testname	=> q[Testdata with FS10 data],
 		url			=> qq[$filepath/testData.json],
 	};
 

@@ -1,0 +1,241 @@
+[
+   {
+      "data" : [
+         {
+            "comment" : "from https://forum.fhem.de/index.php/topic,101682.0.html",
+            "dmsg" : "P7#B1811AA2C",
+            "internals" : {
+               "DEF" : "SD_WS07_TH_1",
+               "NAME" : "SD_WS07_TH_1"
+            },
+            "minProtocolVersion" : "1.27",
+            "readings" : {
+               "batteryState" : "ok",
+               "channel" : "1",
+               "humidity" : "44",
+               "sendmode" : "auto",
+               "state" : "T: 28.2 H: 44",
+               "temperature" : "28.2"
+            },
+            "revision_entry" : "2021-03-23 14:27:35",
+            "revision_modul" : "14_SD_WS07.pm 21666 2020-04-13 21:14:53Z Sidey",
+            "rmsg" : "MS;P0=494;P1=-1949;P2=-967;P3=-3901;D=03010201010202020101020202020202010202020101020102010201020202010201010202;CP=0;SP=3;R=37;m0;",
+            "tests" : [
+               {
+                  "comment" : "Test #0"
+               }
+            ],
+            "user" : "elektron-bbs"
+         },
+         {
+            "comment" : "from https://forum.fhem.de/index.php/topic,101682.0.html",
+            "dmsg" : "P7#B180F4A38",
+            "internals" : {
+               "DEF" : "SD_WS07_TH_1",
+               "NAME" : "SD_WS07_TH_1"
+            },
+            "minProtocolVersion" : "1.27",
+            "readings" : {
+               "batteryState" : "ok",
+               "channel" : "1",
+               "humidity" : "56",
+               "sendmode" : "auto",
+               "state" : "T: 24.4 H: 56",
+               "temperature" : "24.4"
+            },
+            "revision_entry" : "2021-03-23 14:28:43",
+            "revision_modul" : "14_SD_WS07.pm 21666 2020-04-13 21:14:53Z Sidey",
+            "rmsg" : "MS;P1=-1940;P2=495;P3=-957;P4=-3878;D=24212321212323232121232323232323232121212123212323212321232323212121232323;CP=2;SP=4;R=20;O;m1;",
+            "tests" : [
+               {
+                  "comment" : "Test #1"
+               }
+            ],
+            "user" : "elektron-bbs"
+         },
+         {
+            "comment" : "from https://forum.fhem.de/index.php/topic,101682.0.html",
+            "dmsg" : "P7#B1C0FAA49",
+            "internals" : {
+               "DEF" : "SD_WS07_TH_1",
+               "NAME" : "SD_WS07_TH_1"
+            },
+            "minProtocolVersion" : "1.27",
+            "readings" : {
+               "batteryState" : "ok",
+               "channel" : "1",
+               "humidity" : "73",
+               "sendmode" : "manual",
+               "state" : "T: 25 H: 73",
+               "temperature" : "25"
+            },
+            "revision_entry" : "2021-03-23 14:30:04",
+            "revision_modul" : "14_SD_WS07.pm 21666 2020-04-13 21:14:53Z Sidey",
+            "rmsg" : "MS;P1=-1952;P2=495;P3=-966;P4=-3917;D=24212321212323232121212323232323232121212121232123212321232321232321232321;CP=2;SP=4;R=39;O;m2;",
+            "tests" : [
+               {
+                  "comment" : "Test #2"
+               }
+            ],
+            "user" : "elektron-bbs"
+         }
+      ],
+      "id" : "7",
+      "module" : "SD_WS07",
+      "name" : "Auriol AFW 2 A1"
+   },
+   {
+      "module" : "SD_WS07",
+      "id" : "7",
+      "name" : "EAS800z",
+      "data" : [
+         {
+            "comment" : "Channel 1",
+            "revision_modul" : "14_SD_WS07.pm 21666 2020-04-13 21:14:53Z Sidey",
+            "dmsg" : "P7#6300C6F0B",
+            "internals" : {
+               "NAME" : "SD_WS07_TH_1",
+               "DEF" : "SD_WS07_TH_1"
+            },
+            "minProtocolVersion" : "1.27",
+            "readings" : {
+               "state" : "T: 19.8 H: 11",
+               "batteryState" : "low",
+               "temperature" : "19.8",
+               "humidity" : "11",
+               "channel" : "1"
+            },
+            "revision_entry" : "2021-03-23 14:31:17",
+            "tests" : [
+               {
+                  "comment" : "Test #0"
+               }
+            ],
+            "user" : "SD_Protocol",
+            "rmsg" : "MS;P1=-3882;P2=504;P3=-957;P4=-1949;D=21232424232323242423232323232323232424232323242423242424242323232324232424;CP=2;SP=1;R=249;m=2;"
+         },
+         {
+            "revision_entry" : "2021-03-23 14:32:27",
+            "tests" : [
+               {
+                  "comment" : "Test #1"
+               }
+            ],
+            "revision_modul" : "14_SD_WS07.pm 21666 2020-04-13 21:14:53Z Sidey",
+            "readings" : {
+               "state" : "T: 16.1 H: 36",
+               "humidity" : "36",
+               "temperature" : "16.1",
+               "batteryState" : "low",
+               "channel" : "2"
+            },
+            "internals" : {
+               "DEF" : "SD_WS07_TH_2",
+               "NAME" : "SD_WS07_TH_2"
+            },
+            "minProtocolVersion" : "1.27",
+            "dmsg" : "P7#8210A1F24",
+            "rmsg" : "MS;P2=-1945;P3=486;P4=-976;P5=-3927;D=35323434343434323434343432343434343234323434343432323232323434323434323434;CP=3;SP=5;R=13;O;m1;",
+            "user" : "Ralf9",
+            "comment" : "Channel 2"
+         }
+      ]
+   },
+   {
+      "data" : [
+         {
+            "comment" : "Channel 2 / for some Weatherstation",
+            "internals" : {
+               "DEF" : "SD_WS07_TH_2",
+               "NAME" : "SD_WS07_TH_2"
+            },
+            "dmsg" : "P7#6190D8F3D",
+            "minProtocolVersion" : "1.27",
+            "readings" : {
+               "state" : "T: 21.6 H: 61",
+               "channel" : "2",
+               "batteryState" : "ok",
+               "humidity" : "61",
+               "temperature" : "21.6"
+            },
+            "revision_modul" : "14_SD_WS07.pm 21666 2020-04-13 21:14:53Z Sidey",
+            "tests" : [
+               {
+                  "comment" : "Test #0"
+               }
+            ],
+            "revision_entry" : "2021-03-23 14:33:19",
+            "user" : "HomeAuto_User",
+            "rmsg" : "MS;P2=-2006;P4=-4065;P5=491;P6=-1005;D=54565252565656565252565652565656565252565252565656525252525656525252525652;CP=5;SP=4;R=48;O;m2;e;"
+         }
+      ],
+      "module" : "SD_WS07",
+      "id" : "7",
+      "name" : "Hama TS34A"
+   },
+   {
+      "name" : "Hama TS36E",
+      "id" : "7",
+      "module" : "SD_WS07",
+      "data" : [
+         {
+            "revision_modul" : "14_SD_WS07.pm 21666 2020-04-13 21:14:53Z Sidey",
+            "minProtocolVersion" : "1.27",
+            "internals" : {
+               "NAME" : "SD_WS07_TH_1",
+               "DEF" : "SD_WS07_TH_1"
+            },
+            "dmsg" : "P7#4180E2F3B",
+            "readings" : {
+               "state" : "T: 22.6 H: 59",
+               "humidity" : "59",
+               "temperature" : "22.6",
+               "batteryState" : "ok",
+               "channel" : "1"
+            },
+            "revision_entry" : "2021-03-23 14:34:31",
+            "tests" : [
+               {
+                  "comment" : "Test #0"
+               }
+            ],
+            "user" : "HomeAuto_User",
+            "rmsg" : "MS;P0=498;P1=-965;P2=-1969;P3=-3900;D=03010201010101010202010101010101010202020101010201020202020101020202010202;CP=0;SP=3;R=0;O;m2;",
+            "comment" : "Wetterstationen 1362 22,93,94"
+         }
+      ]
+   },
+   {
+      "data" : [
+         {
+            "tests" : [
+               {
+                  "comment" : "Test #0"
+               }
+            ],
+            "revision_entry" : "2021-12-29 09:57:04",
+            "internals" : {
+               "DEF" : "SD_WS07_TH_3",
+               "NAME" : "SD_WS07_TH_3"
+            },
+            "dmsg" : "P7#4DA0F5F0A",
+            "readings" : {
+               "state" : "T: 24.5 H: 10",
+               "channel" : "3",
+               "batteryState" : "ok",
+               "temperature" : "24.5",
+               "humidity" : "10"
+            },
+            "minProtocolVersion" : "1.40",
+            "revision_modul" : "14_SD_WS07.pm 21666 2020-04-13 21:14:53Z Sidey",
+            "rmsg" : "MS;P0=-2128;P1=320;P5=-1159;P6=-4084;D=16151015151010151010151015151515151010101015101510101010101515151510151015;CP=1;SP=6;R=66;O;m2;",
+            "user" : "rpsVerni",
+            "comment" : "Mebus HQ7312-2"
+         }
+      ],
+      "id" : "7.1",
+      "name" : "Mebus HQ7312-2",
+      "module" : "SD_WS07"
+   }
+
+]

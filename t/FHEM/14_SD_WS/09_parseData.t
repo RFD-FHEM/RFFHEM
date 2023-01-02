@@ -21,7 +21,7 @@ sub runTest {
     #print Dumper(@Test::RDmsg::JSONTestList);
 	my $filepath = dirname(__FILE__);
 	push @Test2::SIGNALduino::RDmsg::JSONTestList, {
-		testname	=> q[Testdata with special SD_WS data],
+		testname	=> qq[Testdata with $module data],
 		url			=> qq[$filepath/testData.json],
 	};
 

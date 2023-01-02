@@ -7,7 +7,7 @@ use Test2::Tools::Compare qw{is};
 
 our %defs;
 
-InternalTimer(time()+1, sub {
+InternalTimer(time()+0.4, sub {
 	my $ioName = shift; 
 	my $ioHash = $defs{$ioName};
 

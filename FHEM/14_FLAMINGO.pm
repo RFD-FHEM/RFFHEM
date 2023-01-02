@@ -1,5 +1,5 @@
 #################################################################
-# $Id: 14_FLAMINGO.pm 22619 2020-08-17 17:29:09Z HomeAuto_User $
+# $Id: 14_FLAMINGO.pm 22619 2022-12-29 23:35:50Z sidey79 $
 #################################################################
 # The module was taken over by an unknown maintainer!
 # It is part of the SIGNALduinos project.
@@ -25,8 +25,12 @@ package main;
 
 use strict;
 use warnings;
+use FHEM::Meta;
 
-our $VERSION = '20220223';
+our $VERSION = '20221227';
+our $readingFnAttributes;
+our %modules;
+our $init_done;
 
 my %sets = (
   'Testalarm:noArg',
@@ -48,10 +52,10 @@ sub FLAMINGO_Initialize {
   my ($hash) = @_;
 
   $hash->{Match}     = '^P13\.?1?#[A-Fa-f0-9]+';
-  $hash->{SetFn}     = 'FLAMINGO_Set';
-  $hash->{DefFn}     = 'FLAMINGO_Define';
-  $hash->{UndefFn}   = 'FLAMINGO_Undef';
-  $hash->{ParseFn}   = 'FLAMINGO_Parse';
+  $hash->{SetFn}     = \&FLAMINGO_Set;
+  $hash->{DefFn}     = \&FLAMINGO_Define;
+  $hash->{UndefFn}   = \&FLAMINGO_Undef;
+  $hash->{ParseFn}   = \&FLAMINGO_Parse;
   $hash->{AttrList}  =  'IODev do_not_notify:0,1 showtime:0,1 ignore:0,1 '.
                         'model:'.join(q{,}, sort %models).q{ } .
                         $readingFnAttributes;
@@ -60,7 +64,7 @@ sub FLAMINGO_Initialize {
     'FLAMINGO.*' => { ATTR => 'event-on-change-reading:.* event-min-interval:.*:300', FILTER => '%NAME', GPLOT => q{} },
   };
 
-  return
+  return FHEM::Meta::InitMod( __FILE__, $hash );
 }
 
 #####################################
@@ -417,4 +421,85 @@ sub FLAMINGO_UpdateState {
 </ul>
 
 =end html_DE
+=for :application/json;q=META.json 14_FLAMINGO.pm
+{
+  "abstract": "Supports flamingo fa20rf/fa21 smoke detectors",
+  "author": [
+    "Homeautouser <>",
+    "elektron-bbs <>"
+  ],
+  "x_fhem_maintainer": [
+    "HomeAuto_User"
+  ],
+  "x_fhem_maintainer_github": [
+    "homeautouser",
+    "Sidey79",
+    "elektron-bbs"
+  ],
+  "description": "The FLAMINGO module interprets FLAMINGO FA20RF/FA21/FA22RF type of messages received by the SIGNALduino",
+  "dynamic_config": 1,
+  "keywords": [
+    "fhem-sonstige-systeme",
+    "fhem-hausautomations-systeme",
+    "fhem-mod",
+    "signalduino",
+    "flamingo",
+    "smoke",
+    "sensor"
+	  ],
+  "license": [
+    "GPL_2"
+  ],
+  "meta-spec": {
+    "url": "https://metacpan.org/pod/CPAN::Meta::Spec",
+    "version": 2
+  },
+  "name": "FHEM::FLAMINGO",
+  "prereqs": {
+    "runtime": {
+      "requires": {
+      }
+    },
+    "develop": {
+      "requires": {
+      }
+    }
+  },
+  "release_status": "stable",
+  "resources": {
+    "bugtracker": {
+      "web": "https://github.com/RFD-FHEM/RFFHEM/issues/"
+    },
+    "x_testData": [
+      {
+        "url": "https://raw.githubusercontent.com/RFD-FHEM/RFFHEM/master/t/FHEM/14_FLAMINGO/testData.json",
+        "testname": "Testdata with FLAMINGO smoke sensors"
+      }
+    ],
+    "repository": {
+      "x_master": {
+        "type": "git",
+        "url": "https://github.com/RFD-FHEM/RFFHEM.git",
+        "web": "https://github.com/RFD-FHEM/RFFHEM/tree/master"
+      },
+      "type": "svn",
+      "url": "https://svn.fhem.de/fhem",
+      "web": "https://svn.fhem.de/trac/browser/trunk/fhem/FHEM/14_FLAMINGO.pm",
+      "x_branch": "trunk",
+      "x_filepath": "fhem/FHEM/",
+      "x_raw": "https://svn.fhem.de/trac/export/latest/trunk/fhem/FHEM/14_FLAMINGO.pm"
+    },
+    "x_support_community": {
+      "board": "Sonstige Systeme",
+      "boardId": "29",
+      "cat": "FHEM - Hausautomations-Systeme",
+      "description": "Sonstige Hausautomations-Systeme",
+      "forum": "FHEM Forum",
+      "rss": "https://forum.fhem.de/index.php?action=.xml;type=rss;board=29",
+      "title": "FHEM Forum: Sonstige Systeme",
+      "web": "https://forum.fhem.de/index.php/board,29.0.html"
+    }
+  }
+}
+=end :application/json;q=META.json
 =cut
