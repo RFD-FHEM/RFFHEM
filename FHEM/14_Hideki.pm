@@ -19,14 +19,17 @@
 package main;
 #use version 0.77; our $VERSION = version->declare('v3.4.3');
 
-eval {use Data::Dumper qw(Dumper);1};
 
 use strict;
 use warnings;
 use POSIX;
 use FHEM::Meta;
 
+
+eval {use Data::Dumper qw(Dumper);1};
 #use Data::Dumper;
+
+
 
 #####################################
 sub Hideki_Initialize {
@@ -48,12 +51,86 @@ sub Hideki_Initialize {
 }
 
 
+my %comfortLevel = (
+      0 => q[Hum. OK. Temp. uncomfortable (>24.9 or <20)],
+      1 => q[Wet. More than 69% RHWet. More than 69% RH],
+      2 => q[Dry. Less than 40% RH],
+      3 => q[Temp. and Hum. comfortable]
+);
+
+my @winddir_name=("N","NNE","NE","ENE","E","ESE","SE","SSE","S","SSW","SW","WSW","W","WNW","NW","NNW");
+
+my %allSensorTypes;
+%allSensorTypes = (
+  30 => {
+    'temperature'      => \&getTemperature,
+    'channel'          => \&getChannel,
+    'battery'          => \&getBattery,
+    'humidity'         => \&getHumidity,
+    'comfort_level'    => \&getComfort,
+    'package_number'   => \&getCount,
+    '_eval'            => {
+                            'batteryState'  => sub { return $_[0]->{battery} },
+                            'state'         => sub { return qq/T: $_[0]->{temperature} H: $_[0]->{humidity}/ }
+                          }
+  },
+  31 => {
+    'temperature'      => \&getTemperature,
+    'channel'          => \&getChannel,
+    'battery'          => \&getBattery,
+    'package_number'   => \&getCount,
+    '_eval'            => {
+                            'batteryState'     => sub { return $_[0]->{battery} },
+                            'state'            => sub { return qq/T: $_[0]->{temperature}/ }
+                          }
+  },
+  14 => {
+    'rain'             => \&getRain,
+    'channel'          => \&getChannel,
+    'battery'          => \&getBattery,
+    'package_number'   => \&getCount,
+    '_eval'            => {
+                            'batteryState'     => sub { return $_[0]->{battery} },
+                            'state'            => sub { return qq/R: $_[0]->{rain}/ }
+                          }
+  },
+  12 => {
+    'temperature'           => \&getTemperature,
+    'channel'               => \&getChannel,
+    'battery'               => \&getBattery,
+    'package_number'        => \&getCount,
+    'windChill'             => \&getWindchill,
+    'windDirection'         => \&getWinddir,
+    'windDirectionDegree'   => \&getWinddirdeg,
+    'windDirectionText'     => \&getWinddirtext,
+    'windGust'              => \&getWindgust,
+    'windSpeed'             => \&getWindspeed,
+    '_eval'                 => {
+                                 'batteryState'     => sub { return $_[0]->{battery} },
+                                 '_corrWindSpeed'   => \&correctWindValues,
+                                 'state'            => sub { return qq/T: $_[0]->{temperature}  Ws: $_[0]->{windSpeed}  Wg: $_[0]->{windGust}  Wd: $_[0]->{windDirectionText}/ }
+                               },
+  },
+  13 => {
+    'temperature'      => \&getTemperature,
+    'channel'          => \&getChannel,
+    'battery'          => \&getBattery,
+    'package_number'   => \&getCount,
+    '_eval'            => {
+                            'batteryState'     => sub { return $_[0]->{battery} },
+                            'state'            => sub { return qq/T: $_[0]->{temperature}/ }
+                          },
+    'debug'           => sub { return q[type currently not full supported, please report sensor information] }
+  }
+);
+
+
 #####################################
 sub Hideki_Define {
   my ($hash, $def) = @_;
   carp qq[Hideki_Define, too few arguments ($hash, $def)] if @_ < 2;
   (ref $hash ne 'HASH') // return q[no hash provided];
-  
+
   my @a = split("[ \t][ \t]*", $def);
   return "wrong syntax: define <name> Hideki <code>".int(@a)
     if(int(@a) < 3);
@@ -84,9 +161,9 @@ sub Hideki_Parse {
   carp qq[Hideki_Parse, too few arguments ($iohash, $msg)] if @_ < 2;
   (ref $iohash ne 'HASH') // return q[no hash provided];
 
-  my (undef ,$rawData) = split("#",$msg);
+  my (undef ,$rawData) = split(/#/,$msg);
   my $ioname = $iohash->{NAME};
-  my @a = split("", $msg);
+  my @a = split(//, $msg);
   Log3 $iohash, 4, "$ioname Hideki_Parse: incomming $msg";
 
   my @decodedData;
@@ -107,103 +184,63 @@ sub Hideki_Parse {
   }
 
   Log3 $iohash, 5, "$ioname Hideki_Parse: getSensorType for ".$decodedData[3];
-  my $sensorTyp=($decodedData[3] & 0x1F);
+  my $sensorTyp=getSensorType(\@decodedData);
   Log3 $iohash, 4, "$ioname Hideki_Parse: SensorTyp = $sensorTyp decodedString = $decodedString";
 
   my $id=substr($decodedString,2,2);      # get the random id from the data
-  my $channel=0;
-  my $temp='';
-  my $hum=0;
-  my $rain=0;
-  my $unknown=0;
-  my $windchill=0;
-  my $windspeed=0;
-  my $windgust=0;
-  my $winddir=0;
-  my $winddirdeg=0;
-  my $winddirtext;
-  my $rc;
-  my $val;
-  my $bat;
   my $deviceCode;
-  my $model= "Hideki_$sensorTyp";
-  my $count=0;
-  my $comfort=0;
-  ## 1. Detect what type of sensor we have, then call specific function to decode
-  if ($sensorTyp==30){
-    ($channel, $temp) = decodeThermo(\@decodedData); # decodeThermoHygro($decodedString);
-    $hum = 10 * ($decodedData[6] >> 4) + ($decodedData[6] & 0x0f);
-    $bat = ($decodedData[2] >> 6 == 3) ? 'ok' : 'low';       # decode battery
-    $count = $decodedData[3] >> 6;    # verifiziert, MSG_Counter
-    $comfort = ($decodedData[7] >> 2 & 0x03);   # comfort level
+  my $model= qq[Hideki_$sensorTyp];
 
-    if ($comfort == 0) { $comfort = 'Hum. OK. Temp. uncomfortable (>24.9 or <20)' }
-    elsif ($comfort == 1) { $comfort = 'Wet. More than 69% RH' }
-    elsif ($comfort == 2) { $comfort = 'Dry. Less than 40% RH' }
-    elsif ($comfort == 3) { $comfort = 'Temp. and Hum. comfortable' }
-    $val = "T: $temp H: $hum";
-    Log3 $iohash, 4, "$ioname decoded Hideki protocol model=$model, sensor id=$id, channel=$channel, cnt=$count, bat=$bat, temp=$temp, humidity=$hum, comfort=$comfort";
-  }elsif($sensorTyp==31){
-    ($channel, $temp) = decodeThermo(\@decodedData);
-    $bat = ($decodedData[2] >> 6 == 3) ? 'ok' : 'low';       # decode battery
-    $count = $decodedData[3] >> 6;    # verifiziert, MSG_Counter
-    $val = "T: $temp";
-    Log3 $iohash, 4, "$ioname decoded Hideki protocol model=$model, sensor id=$id, channel=$channel, cnt=$count, bat=$bat, temp=$temp";
-  }elsif($sensorTyp==14){
-    ($channel, $rain) = decodeRain(\@decodedData); # decodeThermoHygro($decodedString);
-    $bat = ($decodedData[2] >> 6 == 3) ? 'ok' : 'low';       # decode battery
-    $count = $decodedData[3] >> 6;    # UNVERIFIZIERT, MSG_Counter
-    $val = "R: $rain";
-    Log3 $iohash, 4, "$ioname decoded Hideki protocol model=$model, sensor id=$id, channel=$channel, cnt=$count, bat=$bat, rain=$rain, unknown=$unknown";
-  }elsif($sensorTyp==12){
-    ($channel, $temp) = decodeThermo(\@decodedData); # decodeThermoHygro($decodedString);
-    #($windchill,$windspeed,$windgust,$winddir,$winddirdeg,$winddirtext) = wind(\@decodedData);  ## nach unten verschoben
-    $bat = ($decodedData[2] >> 6 == 3) ? 'ok' : 'low';       # decode battery
-    $count = $decodedData[3] >> 6;    # UNVERIFIZIERT, MSG_Counter
-    #$val = "T: $temp  Ws: $windspeed  Wg: $windgust  Wd: $winddirtext";  ## nach unten verschoben
-    Log3 $iohash, 4, "$ioname decoded Hideki protocol model=$model, sensor id=$id, channel=$channel, cnt=$count, bat=$bat, temp=$temp";
-  }elsif($sensorTyp==13){
-    ($channel, $temp) = decodeThermo(\@decodedData); # decodeThermoHygro($decodedString);
-    $bat = ($decodedData[2] >> 6 == 3) ? 'ok' : 'low';       # decode battery
-    $count = $decodedData[3] >> 6;    # UNVERIFIZIERT, MSG_Counter
-    $val = "T: $temp";
-    Log3 $iohash, 4, "$ioname decoded Hideki protocol model=$model, sensor id=$id, channel=$channel, cnt=$count, bat=$bat, temp=$temp";
-    Log3 $iohash, 4, "$ioname Sensor Typ $sensorTyp currently not full supported, please report sensor information!";
-  }
-  else{
-    Log3 $iohash, 4, "$ioname Sensor Typ $sensorTyp not supported, please report sensor information!";
-    return '';
-  }
-  my $longids = AttrVal($iohash->{NAME},'longids',0);
-  if ( ($longids ne "0") && ($longids eq "1" || $longids eq "ALL" || (",$longids," =~ m/,$model,/)))
+  ## 1. Detect what type of sensor we have, then call specific function to decode
+  if ( !exists $allSensorTypes{$sensorTyp} ) {
+    Log3 $iohash, 4, qq[$ioname Sensor type $sensorTyp not supported, please report sensor information!];
+    #return q[];
+  };
+
+  # Build sensordecoder based on type  
+  my $sensorDecoder = $allSensorTypes{$sensorTyp};
+
+  # Get values from decoder
+  my %sensorData;
+  foreach my $key ( keys %{ $sensorDecoder } )
   {
-    $deviceCode=$model . "_" . $id . "." . $channel;
+    next if (ref $sensorDecoder->{$key} ne q[CODE]);
+    $sensorData{$key} = $sensorDecoder->{$key}->(\@decodedData);
+  }
+
+  # Log received values
+  my $logstr = q{};
+  while( my ($key, $value) =  each(%sensorData) ) {
+    next if ($key =~ /^_/x );
+    $logstr .= qq[, $key=$value];
+  }
+  Log3 $iohash, 4, qq[$ioname decoder Hideki protocol model=$model, sensor id=$id].$logstr;
+
+  # Get devicecode
+  my $longids = AttrVal($iohash->{NAME},'longids',0);
+  if ( ($longids ne "0") && ($longids eq "1" || $longids eq "ALL" || (",$longids," =~ m/,$model,/x)))
+  {
+    $deviceCode=$model . "_" . $id . "." . $sensorData{channel};
     Log3 $iohash,4, "$ioname Hideki_Parse: using longid: $longids model: $model";
   } else {
-    $deviceCode = $model . "_" . $channel;
+    $deviceCode = $model . "_" . $sensorData{channel};
   }
 
   Log3 $iohash, 5, "$ioname Hideki_Parse deviceCode: $deviceCode";
 
+  # Check if device is defined
   my $def = $modules{Hideki}{defptr}{$iohash->{NAME} . "." . $deviceCode};
   $def = $modules{Hideki}{defptr}{$deviceCode} if(!$def);
-
   if(!$def) {
     Log3 $iohash, 1, "$ioname Hideki: UNDEFINED sensor $deviceCode detected, code $msg";
     return "UNDEFINED $deviceCode Hideki $deviceCode";
   }
 
+  # Check if device will receive update
   my $hash = $def;
   my $name = $hash->{NAME};
   return "" if(IsIgnored($name));
-
-  #Log3 $name, 4, "Hideki: $name ($msg)";
-
-  if ($sensorTyp == 12) { # Wind
-    ($windchill,$windspeed,$windgust,$winddir,$winddirdeg,$winddirtext) = wind($name, \@decodedData);
-    $val = "T: $temp  Ws: $windspeed  Wg: $windgust  Wd: $winddirtext";
-    Log3 $name, 4, "$ioname $name Parse: model=12(wind), T: $temp, Wc=$windchill, Ws=$windspeed, Wg=$windgust, Wd=$winddir, WdDeg=$winddirdeg, Wdtxt=$winddirtext";
-  }
+  $sensorData{_NAME} = $hash->{NAME};
 
   if (!defined(AttrVal($name,"event-min-interval",undef)))
   {
@@ -213,35 +250,21 @@ sub Hideki_Parse {
         return '';
     }
   }
+  # Update existing device
   $hash->{lastReceive} = time();
-
   $def->{lastMSG} = $decodedString;
 
-  #Log3 $name, 4, "Hideki update $name:". $name;
+
+  # Do some late evaluations bevore update readings
+  foreach my $key (sort keys %{ $sensorDecoder->{_eval} }) {
+    $sensorData{$key} = $sensorDecoder->{_eval}{$key}->(\%sensorData);
+  }
 
   readingsBeginUpdate($hash);
-  readingsBulkUpdate($hash, 'state', $val);
-  readingsBulkUpdate($hash, 'battery', $bat)   if ($bat ne '');
-  readingsBulkUpdate($hash, 'batteryState', $bat)   if ($bat ne '');
-  readingsBulkUpdate($hash, 'channel', $channel) if ($channel ne '');
-  readingsBulkUpdate($hash, 'temperature', $temp) if ($temp ne '');
-  readingsBulkUpdate($hash, 'package_number', $count) if ($count ne '');
-  if ($sensorTyp == 30) { # temperature, humidity
-    readingsBulkUpdate($hash, 'humidity', $hum) if ($hum ne '');
-    readingsBulkUpdate($hash, 'comfort_level', $comfort) if ($comfort ne '');
+  while ( my ($key, $value) =  each(%sensorData) ) {
+    next if ($key =~ /^[_\.]/x );
+    readingsBulkUpdate($hash,$key,$value);
   }
-  elsif ($sensorTyp == 14) {  # rain
-    readingsBulkUpdate($hash, 'rain', $rain);
-  }
-  elsif ($sensorTyp == 12) {  # wind
-    readingsBulkUpdate($hash, 'windChill', $windchill);
-    readingsBulkUpdate($hash, 'windGust', $windgust);
-    readingsBulkUpdate($hash, 'windSpeed', $windspeed);
-    readingsBulkUpdate($hash, 'windDirection', $winddir);
-    readingsBulkUpdate($hash, 'windDirectionDegree', $winddirdeg);
-    readingsBulkUpdate($hash, 'windDirectionText', $winddirtext);
-  }
-
   readingsEndUpdate($hash, 1); # Notify is done by Dispatch
 
   return $name;
@@ -261,9 +284,9 @@ sub decryptAndCheck {
   my $name = $iohash->{NAME};
   my $cs1=0; #will be zero for xor over all (bytes[2]>>1)&0x1F except first byte (always 0x75)
   my $cs2=0;
-  my $i; 
+  my $i;
   my @data;
-  @data=map { hex($_) } ($rawData =~ /(..)/g); #byte array from raw hex data string
+  @data=map { hex($_) } ($rawData =~ /(..)/gx); #byte array from raw hex data string
 
   #/* Decrypt raw received data byte */ BYTE DecryptByte(BYTE b) { return b ^ (b << 1); }
   my $count=( ($data[2] ^ ($data[2]<<1)) >>1 ) & 0x1f;
@@ -274,16 +297,16 @@ sub decryptAndCheck {
   }
 
   if($data[0] != 0x75) {
-    Log3 $iohash, 4, "$name Hideki_Parse: rawData=$rawData is no Hideki";
+    Log3 $iohash, 4, "$name Hideki_Parse: rawData=$rawData is not Hideki";
     return (0,@data);
   }
 
   #iterate over data only, first byte is 0x75 always
   # read bytes 1 to n-2 , just before checksum
-  for ($i=1; $i<($count+2); $i++) {
+  for my $i (1..$count+1) {
     $cs1 ^= $data[$i]; # calc first chksum
-        $cs2 = Hideki_SecondCheck($data[$i] ^ $cs2);
-        $data[$i] ^= (($data[$i] << 1) & 0xFF); # decrypt byte at $i without overflow
+    $cs2 = Hideki_SecondCheck($data[$i] ^ $cs2);
+    $data[$i] ^= (($data[$i] << 1) & 0xFF); # decrypt byte at $i without overflow
   }
 
   $count += 2;
@@ -293,7 +316,7 @@ sub decryptAndCheck {
   } else {
     Log3 $iohash, 4, "$name Hideki crcCheck ok: cs1/cs2 $cs1/$cs2, rawData=$rawData, count+2=$count, length=$L";
   }
-  return (1, @data); 
+  return (1, @data);
 }
 
 #####################################
@@ -329,131 +352,146 @@ sub Hideki_SecondCheck {
 # 0x1E        Thermo/hygro-sensor
 # 0x1F        Thermo sensor
 sub getSensorType {
-  return ($_[0] & 0x1F);
+  my $decodedData= shift // carp q[no bytes specified];
+
+  return $decodedData->[3] & 0x1F;  
 }
 
 
 #####################################
-# decode byte array and return channel, temperature
-# input: decrypted byte array starting with 0x75, passed by reference as in mysub(\@array);
-# output <return code>, <channel>, <temperature>
-# was unable to get this working with an array ref as input, so switched to hex string input
-sub decodeThermo {
-  my @Hidekibytes = @{$_[0]};
+# getters for serval values from the decrypted hexdata
+# input:hashref of hex value of received message
+# output specific value
 
-  #my $Hidekihex = shift;
-  #my @Hidekibytes=();
-  #for (my $i=0; $i<(length($Hidekihex))/2; $i++){
-  # my $hex=hex(substr($Hidekihex, $i*2, 2)); ## Mit split und map geht es auch ... $str =~ /(..?)/g;
-  # push (@Hidekibytes, $hex);
-  #}
-  my $channel=0;
-  my $temp=0;
-
-  $channel = $Hidekibytes[1] >> 5;
-  # //Internally channel 4 is used for the other sensor types (rain, uv, anemo).
-  # //Therefore, if channel is decoded 5 or 6, the real value set on the device itself is 4 resp 5.
-  if ($channel >= 5) {
-    $channel--;
-  }
-  my $sensorId = $Hidekibytes[1] & 0x1f;      # Extract random id from sensor
-  #my $devicetype = $Hidekibytes[3]&0x1f;
-  $temp = 100 * ($Hidekibytes[5] & 0x0f) + 10 * ($Hidekibytes[4] >> 4) + ($Hidekibytes[4] & 0x0f);
+sub getTemperature {
+  my $decodedData= shift // carp q[no bytes specified];
+  my $temp = 100 * ($decodedData->[5] & 0x0f) + 10 * ($decodedData->[4] >> 4) + ($decodedData->[4] & 0x0f);
   ## // temp is negative?
-  if (!($Hidekibytes[5] & 0x80)) {
-    $temp = -$temp;
-  }
+  if (!($decodedData->[5] & 0x80)) {  $temp = -$temp;  }
 
-  $temp = $temp / 10;
-  return ($channel, $temp);
+  return $temp = $temp / 10;
 }
 
+sub getChannel {
+  my $decodedData = shift // carp q[no bytes specified];
+  my $channel = $decodedData->[1] >> 5;
 
-#####################################
-# decode byte array and return channel and total rain in mm
-# input: decrypted byte array starting with 0x75, passed by reference as in mysub(\@array);
-# output <return code>, <channel>, <totalrain>
-# was unable to get this working with an array ref as input, so switched to hex string input
-sub decodeRain {
-  my @Hidekibytes = @{$_[0]};
+  if ( $channel >= 5 ) { $channel--; }
 
-  #my $Hidekihex = shift;
-  #my @Hidekibytes=();
-  #for (my $i=0; $i<(length($Hidekihex))/2; $i++){
-  # my $hex=hex(substr($Hidekihex, $i*2, 2)); ## Mit split und map geht es auch ... $str =~ /(..?)/g;
-  # push (@Hidekibytes, $hex);
-  #}
-  my $channel=0;
-  my $rain=0;
-  my $unknown;
-
-  #my $tests=0;
-  #additional checks?
-  #if($Hidekibytes[2]==0xCC){
-  #  $tests+=1;
-  #}
-  #if($Hidekibytes[6]==0x66){
-  #  $tests+=1;
-  #}
-  # possibly test if $tests==2 for sanity check
-  #printf("SANITY CHECK tests=%i\n", $tests);
-
-  $unknown = $Hidekibytes[6];
-  $channel = $Hidekibytes[1] >> 5;
-  # //Internally channel 4 is used for the other sensor types (rain, uv, anemo).
-  # //Therefore, if channel is decoded 5 or 6, the real value set on the device itself is 4 resp 5.
-  if ($channel >= 5) {
-    $channel--;
-  }
-  my $sensorId = $Hidekibytes[1] & 0x1f;      # Extract random id from sensor
-
-  $rain = ($Hidekibytes[4] + $Hidekibytes[5]*0xff)*0.7;
-
-  return ($channel, $rain, $unknown);
+  return $channel
 }
 
-#####################################
-# P12#758BB244074007400F00001C6E7A01
-sub wind {
-  my $name = shift;
-  carp qq[wind, too few arguments ($name)] if @_ < 1;
+sub getHumidity {
+  my $decodedData = shift // carp q[no bytes specified];
 
-  my @Hidekibytes = @{$_[0]};
-  my @wd=(0, 15, 13, 14, 9, 10, 12, 11, 1, 2, 4, 3, 8, 7, 5, 6);
-  my @winddir_name=("N","NNE","NE","ENE","E","ESE","SE","SSE","S","SSW","SW","WSW","W","WNW","NW","NNW");
-  my $windspeed;
-  my $windchill;
-  my $windgust;
-  my $winddir;
-  my $winddirdeg;
-  my $winddirtext;
+  return  10 * ($decodedData->[6] >> 4) + ($decodedData->[6] & 0x0f);
+}
 
-  $windchill = 100 * ($Hidekibytes[7] & 0x0f) + 10 * ($Hidekibytes[6] >> 4) + ($Hidekibytes[6] & 0x0f);
+sub getBattery {
+  my $decodedData = shift // carp q[no bytes specified];
+
+  return ($decodedData->[2] >> 6 == 3) ? 'ok' : 'low';       # decode battery
+}
+
+sub getCount {
+  my $decodedData = shift // carp q[no bytes specified];
+
+  return $decodedData->[3] >> 6;    # verifiziert, MSG_Counter
+}
+
+sub getComfort {
+  my $decodedData = shift // carp q[no bytes specified];
+  my $comfortVal = ($decodedData->[7] >> 2 & 0x03);   # comfort level
+
+  if ( !exists $comfortLevel{$comfortVal} ) {  return $comfortVal; };
+
+  return $comfortLevel{$comfortVal};
+}
+
+sub getRain {
+  my $decodedData = shift // carp q[no bytes specified];
+
+  return ($decodedData->[4] + $decodedData->[5]*0xff)*0.7;
+}
+
+sub getWindchill {
+  my $decodedData = shift // carp q[no bytes specified];
+
+  my $windchill = 100 * ($decodedData->[7] & 0x0f) + 10 * ($decodedData->[6] >> 4) + ($decodedData->[6] & 0x0f);
   ## windchill is negative?
-  if (!($Hidekibytes[7] & 0x80)) {
+  if (!($decodedData->[7] & 0x80)) {
     $windchill = -$windchill;
   }
-  $windchill = $windchill / 10;
-  $windspeed = ($Hidekibytes[9] & 0x0f ) * 100 + ($Hidekibytes[8] >> 4) * 10 + ($Hidekibytes[8] & 0x0f);
-  $windgust = ($Hidekibytes[10] >> 4) * 100 + ($Hidekibytes[10] & 0x0f) * 10 + ($Hidekibytes[9] >> 4);
-  my $windSpeedCorr = AttrVal($name,'windSpeedCorr',1); ### -> hierher verschoben
-  if ($windSpeedCorr > 0) {
-    $windspeed = sprintf("%.2f", $windspeed * $windSpeedCorr);
-    $windgust  = sprintf("%.2f", $windgust * $windSpeedCorr);
-    Log3 $name, 5, "$name Hideki_Parse: WindSpeedCorr factor=$windSpeedCorr";
-  }
-  $winddir = $wd[$Hidekibytes[11] >> 4];
-  my $windDirCorr = AttrVal($name,'windDirCorr',0);
-  if ($windDirCorr > 0) {
-    $winddir += $windDirCorr;
-    $winddir &= 15;
-    Log3 $name, 5, "$name Hideki_Parse: windDirCorr=$windDirCorr";
-  }
-  $winddirtext = $winddir_name[$winddir]; 
-  $winddirdeg = $winddir * 22.5;
 
-  return ($windchill,$windspeed,$windgust,$winddir,$winddirdeg,$winddirtext);
+  return $windchill / 10;
 }
+
+sub getWindspeed {
+  my $decodedData = shift // carp q[no bytes specified];
+
+  my $windspeed = ($decodedData->[9] & 0x0f ) * 100 + ($decodedData->[8] >> 4) * 10 + ($decodedData->[8] & 0x0f);
+
+  return sprintf("%.2f", $windspeed);
+}
+
+sub getWindgust {
+  my $decodedData = shift // carp q[no bytes specified];
+
+  my $windgust = ($decodedData->[10] >> 4) * 100 + ($decodedData->[10] & 0x0f) * 10 + ($decodedData->[9] >> 4);
+
+  return sprintf("%.2f", $windgust);
+}
+
+
+sub getWinddir {
+  my $decodedData = shift // carp q[no bytes specified];
+  my @wd=(0, 15, 13, 14, 9, 10, 12, 11, 1, 2, 4, 3, 8, 7, 5, 6);
+
+  return $wd[$decodedData->[11] >> 4];
+}
+
+sub getWinddirtext {
+  my $decodedData = shift // carp q[no bytes specified];
+
+  return $winddir_name[getWinddir($decodedData)];
+}
+
+
+sub getWinddirdeg {
+  my $decodedData = shift // carp q[no bytes specified];
+  return getWinddir($decodedData) * 22.5;
+}
+
+#####################################
+# correct wind values if correction attributes are set
+# input: hashref with prepared values from sensors
+# output undef
+
+sub correctWindValues {
+  my $sensorValues = shift // carp q[no values from sensor specified];
+
+  if (! IsDevice($sensorValues->{_NAME}) ) { carp q[no sensorname provided]; }
+  my $windSpeedCorr = AttrVal($sensorValues->{_NAME},'windSpeedCorr',1);
+  my $windDirCorr = AttrVal($sensorValues->{_NAME},'windDirCorr',0);
+
+  if ($windSpeedCorr > 0) {
+    $sensorValues->{windSpeed} = sprintf q[%.2f], $sensorValues->{windSpeed} * $windSpeedCorr ;
+    $sensorValues->{windGust}  = sprintf q[%.2f], $sensorValues->{windGust} * $windSpeedCorr ;
+    Log3 $sensorValues->{_NAME}, 5, qq[$sensorValues->{_NAME} correctWindValues: WindSpeedCorr factor=$windSpeedCorr];
+  }
+
+  if ($windDirCorr > 0) {
+    $sensorValues->{windDirection} += $windDirCorr;
+    $sensorValues->{windDirection} &= 15;
+    $sensorValues->{windDirectionText} = $winddir_name[$sensorValues->{windDirection}];
+    $sensorValues->{windDirectionDegree} = $sensorValues->{windDirection} * 22.5;
+
+    Log3 $sensorValues->{_NAME}, 5, qq[$sensorValues->{_NAME} correctWindValues: windDirCorr=$windDirCorr];
+  }
+
+  return;
+}
+
 
 
 1;
@@ -659,7 +697,8 @@ sub wind {
     },
     "develop": {
       "requires": {
-        "POSIX": "0"
+        "POSIX": "0",
+        "Data::Dumper": 0
       }
     }
   },
