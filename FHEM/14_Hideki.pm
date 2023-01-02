@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 14_Hideki.pm 21666 2022-12-13 22:49:13Z HomeAutoUser $
+# $Id: 14_Hideki.pm 21666 2023-01-01 18:37:52Z HomeAutoUser $
 # The file is taken from the SIGNALduino project
 # see http://www.fhemwiki.de/wiki/SIGNALduino
 # and was modified by a few additions
