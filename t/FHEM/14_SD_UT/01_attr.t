@@ -30,7 +30,7 @@ InternalTimer(time()+0.4, sub {
        }
     };
 
-    my $attr = q[UTfrequency];
+    $attr = q[UTfrequency];
     subtest qq[set $sensorname $attr 0.00] => sub {
         plan(4);
         for my $v (qw(300.00 433.92 933 999.99)) {
@@ -39,7 +39,7 @@ InternalTimer(time()+0.4, sub {
         }
      };
 
-    my $attr = q[UTfrequency];
+    $attr = q[UTfrequency];
     subtest qq[set $sensorname $attr 0.00] => sub {
         plan(5);
         for my $v (qw(0 0.00 1000 1000.00 14333.01)) {
@@ -48,7 +48,7 @@ InternalTimer(time()+0.4, sub {
         }
      };
 
-    my $attr = q[model];
+    $attr = q[model];
     my $v = q[Buttons_five];
     subtest qq[Change module attribute to buttons_five] => sub { 
         plan(2);
@@ -61,7 +61,7 @@ InternalTimer(time()+0.4, sub {
         is($attr{$sensorname}{$attr}, $v, qq[check attribute $attr is $v]);
     };
 
-    my $attr = q[model];
+    $attr = q[model];
     my $v = q[Buttons_six];
     subtest qq[Change module attribute to buttons_six] => sub { 
         plan(2);

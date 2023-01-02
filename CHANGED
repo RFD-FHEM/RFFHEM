@@ -1,3 +1,59 @@
+2023-01-01 - Update json testdata to new schema (#1135)
+
+* RDMSG.pm
+
+- updated code to new schema
+
+* Implement functions as real coderefs
+   for locical modules:
+ - 14_SD_WS07
+ - 14_SD_WS09
+ - 14_SD_AS
+ - 14_BresserTemeo
+ - 14_FLAMINGO
+ - 14_SD_BELL
+ - 14_SD_WS_Maverick
+ - 41_OREGON
+
+* Updated 09_ParseData.t
+
+- Updated to common revision for logical modules
+- Renamed (typo corrected)
+
+* 09_autocreate_devices.t and 08_DeviceDat_rmsg.t
+
+- small improvment
+- updated directory to search for testData
+- updated testdata
+
+* 08_DeviceData_rmsg.t
+
+- Load testdata from local
+- fallback loading from remote if possible
+
+* Added testdata from SD_Device_ProtocolList.json:
+   and corrected dispatch_repeats and added Metadata to modules
+- 10_SD_GT
+- 10_FS10
+- 10_SDRojaflex
+- 14_FLAMINGO
+- 14_SD_UT
+- 14_SD_BELL
+- 14_BresserTemeo
+- 14_SD_AS
+- 14_SD_WS
+- 14_SD_WS07
+- 14_SD_WS09
+- 14_SD_WS_Maverick
+- 14_Hideki
+- 41_OREGON
+- 98_Dooya
+
+
+
+
+Co-authored-by: HomeAutoUser <abfall-container@gmx.de>
+Co-authored-by: GitHub Action <action@github.com>
 2022-11-27 - bugfix Bresser protocols (#1125)
 
 * Bugfix Bresser protocols

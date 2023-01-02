@@ -1,43 +1,306 @@
 [
-    {"name":"Hideki", "id":"12", "module":"Hideki", "data": [
-      {
-        "dmsg":"P12#75A3", "comment":"to short, causes error", "user":"unknown",
-        "internals": { "NAME": "" }, 
-        "readings": {},
-        "minProtocolVersion":"1.42", "revision_entry":"SD_ProtocolData.pm 3.4.4 2022-01-15 12:25:06Z elektron-bbs $",
-        "revision_modul":"",
-        "rmsg":"",
-        "MatchCheckFail": true
-      },
-      {
-        "dmsg":"P12#75EC4675F0406F6D", "comment":"to short", "user":"unknown",
-        "internals": {"NAME": "Hideki_31_1", "DEF": "Hideki_31_1 Hideki Hideki_31_1" }, 
-        "readings": {"temperature": "1"},
-        "minProtocolVersion":"1.42", "revision_entry":"SD_ProtocolData.pm 3.4.4 2022-01-15 12:25:06Z elektron-bbs $",
-        "revision_modul":"",
-        "rmsg":"MC;LL=-952;LH=1003;SL=-452;SH=526;D=51E4676A3F0FEC2693;C=488;L=72;R=247;"
-      }, 
-      {
-        
-        "dmsg":"P12#75E806350F40942103", "comment":"temperature only", "user":"ralf9",
-        "internals": {"NAME": "Hideki_31_1", "DEF": "Hideki_31_1 Hideki Hideki_31_1" }, 
-        "readings": {"temperature": "1.1"},
-        "minProtocolVersion":"1.42", "revision_entry":"SD_ProtocolData.pm 3.4.4 2022-01-15 12:25:06Z elektron-bbs $",
-        "revision_modul":"",
-        "rmsg":"MC;LL=-1038;LH=918;SL=-562;SH=412;D=547D19FA9C3FFBD6BD8;C=488;L=73"
-      },
-      {
-        
-        "dmsg":"P12#75E80675F8402311", "comment":"temperature only short", "user":"ralf9",
-        "internals": {"NAME": "Hideki_31_1", "DEF": "Hideki_31_1 Hideki Hideki_31_1" }, 
-        "readings": {"temperature": "0.8"},
-        "minProtocolVersion":"1.42", "revision_entry":"SD_ProtocolData.pm 3.4.4 2022-01-15 12:25:06Z elektron-bbs $",
-        "revision_modul":"",
-        "rmsg":"MC;LL=-1043;LH=919;SL=-503;SH=428;D=51F467EA3E0FECEEEE;C=482;L=71;s1;b1;"
-      }
- 
-      
-      
-    ]
-    }    
+   {
+      "data" : [
+         {
+            "MatchCheckFail" : true,
+            "comment" : "to short, causes error",
+            "dmsg" : "P12#75A3",
+            "internals" : {
+               "NAME" : ""
+            },
+            "minProtocolVersion" : "1.42",
+            "readings" : {},
+            "revision_entry" : "SD_ProtocolData.pm 3.4.4 2022-01-15 12:25:06Z elektron-bbs $",
+            "revision_modul" : "",
+            "rmsg" : "",
+            "user" : "unknown"
+         },
+         {
+            "comment" : "to short",
+            "dmsg" : "P12#75EC4675F0406F6D",
+            "internals" : {
+               "DEF" : "Hideki_31_1 Hideki Hideki_31_1",
+               "NAME" : "Hideki_31_1"
+            },
+            "minProtocolVersion" : "1.42",
+            "readings" : {
+               "temperature" : "1"
+            },
+            "revision_entry" : "SD_ProtocolData.pm 3.4.4 2022-01-15 12:25:06Z elektron-bbs $",
+            "revision_modul" : "",
+            "rmsg" : "MC;LL=-952;LH=1003;SL=-452;SH=526;D=51E4676A3F0FEC2693;C=488;L=72;R=247;",
+            "user" : "unknown"
+         },
+         {
+            "comment" : "temperature only",
+            "dmsg" : "P12#75E806350F40942103",
+            "internals" : {
+               "DEF" : "Hideki_31_1 Hideki Hideki_31_1",
+               "NAME" : "Hideki_31_1"
+            },
+            "minProtocolVersion" : "1.42",
+            "readings" : {
+               "temperature" : "1.1"
+            },
+            "revision_entry" : "SD_ProtocolData.pm 3.4.4 2022-01-15 12:25:06Z elektron-bbs $",
+            "revision_modul" : "",
+            "rmsg" : "MC;LL=-1038;LH=918;SL=-562;SH=412;D=547D19FA9C3FFBD6BD8;C=488;L=73;",
+            "user" : "ralf9"
+         },
+         {
+            "comment" : "temperature only short",
+            "dmsg" : "P12#75E80675F8402311",
+            "internals" : {
+               "DEF" : "Hideki_31_1 Hideki Hideki_31_1",
+               "NAME" : "Hideki_31_1"
+            },
+            "minProtocolVersion" : "1.42",
+            "readings" : {
+               "temperature" : "0.8"
+            },
+            "revision_entry" : "SD_ProtocolData.pm 3.4.4 2022-01-15 12:25:06Z elektron-bbs $",
+            "revision_modul" : "",
+            "rmsg" : "MC;LL=-1043;LH=919;SL=-503;SH=428;D=51F467EA3E0FECEEEE;C=482;L=71;",
+            "user" : "ralf9"
+         }
+      ],
+      "id" : "12",
+      "module" : "Hideki",
+      "name" : "Hideki"
+   },
+   {
+      "data" : [
+         {
+            "dmsg" : "P12#75EFBA4A72BECC504F1801",
+            "internals" : {
+               "DEF" : "Hideki_30_1",
+               "NAME" : "Hideki_30_1"
+            },
+            "minProtocolVersion" : "1.27",
+            "readings" : {
+               "battery" : "ok",
+               "batteryState" : "ok",
+               "channel" : "1",
+               "comfort_level" : "Hum. OK. Temp. uncomfortable (>24.9 or <20)",
+               "humidity" : "54",
+               "package_number" : "3",
+               "state" : "T: 29.6 H: 54",
+               "temperature" : "29.6"
+            },
+            "revision_entry" : "2021-03-24 10:11:26",
+            "revision_modul" : "14_Hideki.pm 21666 2020-04-13 21:14:53Z Sidey",
+            "rmsg" : "MC;LL=-1010;LH=938;SL=-519;SH=457;D=A8C2345ADD8E0B99F586F9C;C=487;L=90;R=57;",
+            "tests" : [
+               {
+                  "comment" : "Test #0"
+               }
+            ],
+            "user" : "HomeAuto_User"
+         }
+      ],
+      "id" : "12",
+      "module" : "Hideki",
+      "name" : "BRESSER 70-09993"
+   },
+   {
+      "module" : "Hideki",
+      "data" : [
+         {
+            "dmsg" : "P12#7536BA8A82BFC151AB6401",
+            "readings" : {
+               "batteryState" : "ok",
+               "channel" : "2",
+               "state" : "T: 18.6 H: 43"
+            },
+            "minProtocolVersion" : "unknown",
+            "user" : "Ralf9",
+            "revision_entry" : "unknown",
+            "revision_modul" : "unknown",
+            "internals" : {
+               "DEF" : "Hideki_30_2",
+               "NAME" : "Hideki_30_2"
+            },
+            "comment" : "no decode via RAWMSG MC;LL=-1018;LH=914;SL=-539;SH=436;D=A8E4F45AEDF40AF97595766;C=484;L=91;R=7; / only DMSG",
+            "tests" : [
+               {
+                  "comment" : "#0"
+               }
+            ]
+         }
+      ],
+      "id" : "12",
+      "name" : "Hama TS33C"
+   },
+   {
+      "name" : "TFA 30.3176",
+      "data" : [
+         {
+            "revision_modul" : "14_Hideki.pm 21666 2020-04-13 21:14:53Z Sidey",
+            "rmsg" : "MC;LL=-1022;LH=927;SL=-531;SH=442;D=A8EA345AD8BE0A3F6AA3F94;C=486;L=90;R=37;",
+            "revision_entry" : "2021-03-24 10:09:06",
+            "user" : "HomeAuto_User",
+            "minProtocolVersion" : "1.27",
+            "readings" : {
+               "channel" : "1",
+               "temperature" : "23.9",
+               "humidity" : "9",
+               "package_number" : "3",
+               "battery" : "ok",
+               "state" : "T: 23.9 H: 9",
+               "comfort_level" : "Dry. Less than 40% RH",
+               "batteryState" : "ok"
+            },
+            "dmsg" : "P12#75EABA4A17BE07A91D5801",
+            "tests" : [
+               {
+                  "comment" : "#0"
+               }
+            ],
+            "comment" : "Thermo-hygro sensor for base station 35.1101.02",
+            "internals" : {
+               "NAME" : "Hideki_30_1",
+               "DEF" : "Hideki_30_1"
+            }
+         }
+      ],
+      "id" : "12",
+      "module" : "Hideki"
+   },
+   {
+      "name" : "Wireless Weather Station DV928, Wind",
+      "id" : "12",
+      "data" : [
+         {
+            "dmsg" : "P12#7585B2C471BF71BFFDF0029C605C03",
+            "user" : "brezel",
+            "revision_entry" : "2022-06-09 19:59:26",
+            "revision_modul" : "unknown",
+            "readings" : {
+               "temperature" : "19.3",
+               "channel" : "4",
+               "windDirectionDegree" : "90",
+               "state" : "T: 19.3  Ws: 7.00  Wg: 61.00  Wd: E",
+               "windDirectionText" : "E",
+               "package_number" : "1",
+               "battery" : "ok",
+               "windGust" : "61.00",
+               "windSpeed" : "7.00",
+               "windChill" : "19.3",
+               "batteryState" : "ok",
+               "windDirection" : "4"
+            },
+            "minProtocolVersion" : "1.45",
+            "internals" : {
+               "NAME" : "Hideki_12_4",
+               "DEF" : "Hideki_12_4"
+            },
+            "comment" : "no RAWMSG / O und 90 Grad, https://forum.fhem.de/index.php/topic,126712.msg1213152.html#msg1213152",
+            "tests" : [
+               {
+                  "comment" : "#0"
+               }
+            ]
+         },
+         {
+            "revision_modul" : "unknown",
+            "revision_entry" : "2022-06-09 21:24:48",
+            "user" : "brezel",
+            "minProtocolVersion" : "1.45",
+            "readings" : {
+               "package_number" : "3",
+               "battery" : "ok",
+               "windDirection" : "8",
+               "windChill" : "20.7",
+               "batteryState" : "ok",
+               "windSpeed" : "10.00",
+               "windGust" : "20.00",
+               "windDirectionDegree" : "180",
+               "channel" : "4",
+               "temperature" : "20.7",
+               "windDirectionText" : "S",
+               "state" : "T: 20.7  Ws: 10.00  Wg: 20.00  Wd: S"
+            },
+            "dmsg" : "P12#7585B244FDBEFDBEF000FE403D6C01",
+            "tests" : [
+               {
+                  "comment" : "#1"
+               }
+            ],
+            "comment" : "no RAWMSG / S und 180 Grad, https://forum.fhem.de/index.php/topic,126712.msg1213152.html#msg1213152",
+            "internals" : {
+               "NAME" : "Hideki_12_4",
+               "DEF" : "Hideki_12_4"
+            }
+         },
+         {
+            "minProtocolVersion" : "1.45",
+            "readings" : {
+               "windDirectionDegree" : "90",
+               "channel" : "4",
+               "temperature" : "19.3",
+               "state" : "T: 19.3  Ws: 14.00  Wg: 122.00  Wd: E",
+               "windDirectionText" : "E",
+               "battery" : "ok",
+               "package_number" : "1",
+               "windSpeed" : "14.00",
+               "windGust" : "122.00",
+               "windDirection" : "4",
+               "batteryState" : "ok",
+               "windChill" : "19.3"
+            },
+            "revision_modul" : "unknown",
+            "user" : "brezel",
+            "revision_entry" : "2022-06-09 19:59:26",
+            "dmsg" : "P12#7585B2C471BF71BFFDF0029C605C03",
+            "tests" : [
+               {
+                  "attributes" : {
+                     "windSpeedCorr" : "2"
+                  },
+                  "comment" : "#2"
+               }
+            ],
+            "comment" : "with wind correction, no RAWMSG / O und 90 Grad, https://forum.fhem.de/index.php/topic,126712.msg1213152.html#msg1213152",
+            "internals" : {
+               "NAME" : "Hideki_12_4",
+               "DEF" : "Hideki_12_4"
+            }
+         },
+         {
+            "dmsg" : "P12#7585B244FDBEFDBEF000FE403D6C01",
+            "revision_entry" : "2022-06-09 21:24:48",
+            "user" : "brezel",
+            "revision_modul" : "unknown",
+            "readings" : {
+               "package_number" : "3",
+               "battery" : "ok",
+               "windGust" : "20.00",
+               "windSpeed" : "10.00",
+               "windChill" : "20.7",
+               "batteryState" : "ok",
+               "windDirection" : "10",
+               "temperature" : "20.7",
+               "channel" : "4",
+               "windDirectionDegree" : "225",
+               "state" : "T: 20.7  Ws: 10.00  Wg: 20.00  Wd: SW",
+               "windDirectionText" : "SW"
+            },
+            "minProtocolVersion" : "1.45",
+            "internals" : {
+               "NAME" : "Hideki_12_4",
+               "DEF" : "Hideki_12_4"
+            },
+            "comment" : "with wind correction, no RAWMSG / S und 180 Grad, https://forum.fhem.de/index.php/topic,126712.msg1213152.html#msg1213152",
+            "tests" : [
+               {
+                  "comment" : "#3",
+                  "attributes" : {
+                     "windDirCorr" : "2"
+                  }
+               }
+            ]
+         }
+      ],
+      "module" : "Hideki"
+   }
 ]

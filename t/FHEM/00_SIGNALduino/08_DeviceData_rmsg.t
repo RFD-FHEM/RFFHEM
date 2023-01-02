@@ -7,32 +7,71 @@ use Test2::Tools::Compare qw{is U };
 use Test2::Mock;
 use Test2::Todo;
 
+# Testtool which supports DMSG Tests from SIGNALDuino_tool
+use Test2::SIGNALduino::RDmsg;
+
+use File::Find;
+use File::Basename;
+use JSON; 
+use List::Util qw[min max];
+
 our %defs;
 our %attr;
+our $init_done;
+our %modules;
 
 my $testSet;
 my $id_matched=undef;
 my $dmsg_matched=undef;
 my $SD_Dispatch_calledCounter=undef;
 my $tData;
-my $testDataArray; 
 
-InternalTimer(time()+1, sub {
+sub findTestdata {
+    my($filename, $dir, undef) = fileparse($File::Find::name);
+    if ($filename =~ /.json$/i && $filename =~ /testData/i )
+    {
+        my $modulename = basename($dir);
+        $modulename =~ s/^[0-9][0-9]_//; # Remove leading digtis
+
+        push @Test2::SIGNALduino::RDmsg::JSONTestList, {
+          testname	=> qq[Testdata with $modulename data],
+          url		  	=> qq[$File::Find::name],
+          module    => $modulename
+        };
+    }
+}
+
+
+sub runTest {
 	my $target = shift;
 	my $targetHash = $defs{$target};
 	my $mock = Test2::Mock->new(
 		track => 1,
-		class => 'main'
+		class => q[main]
 	);	 	
 	my $tracking = $mock->sub_tracking;
 
-  note("versionmodul: ".InternalVal($target, "versionmodul", "unknown"));
-  note("versionProtocols: ".InternalVal($target, "versionProtocols", "unknown"));
+  note(q[versionmodul: ].InternalVal($target, q[versionmodul], q[unknown]));
+  note(q[versionProtocols: ].InternalVal($target, q[versionProtocols], q[unknown]));
   CommandAttr(undef,"$target maxMuMsgRepeat 99");
   
-  use JSON; 
-  use List::Util qw[min max];
+  note(q[Searching local testdata]);
+  find(\&findTestdata, dirname(__FILE__).q[/../]);
 
+  for my $cl ( split /:/, $targetHash->{Clients})
+  {
+    next if ( grep { $cl eq $_->{module} } @Test2::SIGNALduino::RDmsg::JSONTestList );
+    
+    my $loaded = main::LoadModule($cl);
+    if (exists $modules{$cl}{META}{resources}{x_testData} )
+    {
+      note(qq[Seatching remote testdata for $cl]);
+      for my $testFile ( @{$modules{$cl}{META}{resources}{x_testData}} ) {
+        push @Test2::SIGNALduino::RDmsg::JSONTestList, $testFile;
+      }
+    }
+  }
+  
 
   sub VerifyDispatch { 
       #diag @_;
@@ -49,49 +88,21 @@ InternalTimer(time()+1, sub {
       $todo->end;
 
       ($tData->{dmsg} eq $dmsg) ? $dmsg_matched=1 : '';  
-
   } 
 
-  sub loadJson {
-    my $url     = shift;
-    use HTTP::Tiny;
-    my $response = HTTP::Tiny->new->get($url);
-    fail("Failed!\n") unless $response->{success};
 
-    $testDataArray = eval { decode_json($response->{content}) };
-    if($@){
-      fail("open json file SD_Device_ProtocolList was not possible $?"); 
-      use Data::Dumper;
-      diag Dumper ($response);
-    }
-  }
-
-  my @TestList = (
-     {
-       testname	=> 'Test with pre-release SD_Device_ProtocolList',
-       url		  => 'https://raw.githubusercontent.com/RFD-FHEM/SIGNALduino_TOOL/pre-release/FHEM/lib/SD_Device_ProtocolList.json',
-       todo     => 'Checking with pre-release Version of SD_Device_ProtocolList which can fail',
-     },
-     {
-       testname	=> 'Test with master SD_Device_ProtocolList',
-       url	  	=> 'https://raw.githubusercontent.com/RFD-FHEM/SIGNALduino_TOOL/master/FHEM/lib/SD_Device_ProtocolList.json',
-       todo     => 'Checking with master Version of SD_Device_ProtocolList which can fail',
-     },
-    {
-      testname	=> 'Test with patched SD_Device_ProtocolList',
-      url		    => 'https://raw.githubusercontent.com/RFD-FHEM/SIGNALduino_TOOL/patch-fixTests/FHEM/lib/SD_Device_ProtocolList.json',
-    },
- );
-
-
-  plan (scalar @TestList);
-
-  for my $maintest  (@TestList)
+  plan (scalar @Test2::SIGNALduino::RDmsg::JSONTestList);
+	for my $maintest  (@Test2::SIGNALduino::RDmsg::JSONTestList)
   {
-    subtest $maintest->{testname} => sub {
+    Test2::SIGNALduino::RDmsg::loadJson( $maintest->{url} );
+    
+    SKIP: {
+       if (!UNIVERSAL::isa($Test2::SIGNALduino::RDmsg::testDataArray, 'ARRAY') || scalar @{$Test2::SIGNALduino::RDmsg::testDataArray} == 0) { 
+        skip qq[No testdata for $maintest->{testname} provided, guessing ok]; 
+      }
 
-        loadJson( $maintest->{url} );
-
+      subtest $maintest->{testname} => sub {
+      
         my $todo;
         if ( exists $maintest->{todo}) {
           $todo = Test2::Todo->new(reason => $maintest->{todo} ); 
@@ -100,7 +111,7 @@ InternalTimer(time()+1, sub {
         my $tID;                 
         $mock->override('SIGNALduno_Dispatch' => \&VerifyDispatch);
 
-        while ( ($pID, $testSet) = each  (@{$testDataArray}) )
+        while ( ($pID, $testSet) = each (@{$Test2::SIGNALduino::RDmsg::testDataArray}) )
         {
           SKIP: {
            # skip 'Testset id not in scope' if (!defined $testSet->{id} || $testSet->{id} ne '79');
@@ -113,7 +124,7 @@ InternalTimer(time()+1, sub {
                 $dmsg_matched=undef;
                 SKIP: {
 
-                  skip 'rmsg or dmsg doese not exist' if (!exists $tData->{rmsg} || !exists $tData->{dmsg} );
+                  skip 'rmsg or dmsg doese not exist' if (!exists $tData->{rmsg} || !exists $tData->{dmsg}  || $tData->{rmsg} eq q[] || !defined $tData->{rmsg});
 
                   subtest "$testSet->{name}: [subtest: $tID] " => sub {
                     if ( defined $tData->{dispatch_repeats} ) {
@@ -127,13 +138,13 @@ InternalTimer(time()+1, sub {
                     $id_matched=0;
                     $dmsg_matched=0;
                     $SD_Dispatch_calledCounter=0;
-                    SIGNALduino_Parse($targetHash, $targetHash, $targetHash->{NAME}, "\002".$tData->{rmsg}."\003") if (defined($tData->{rmsg}));
+                    my $return = SIGNALduino_Parse($targetHash, $targetHash, $targetHash->{NAME}, qq[\002$tData->{rmsg}\003]);
                     #my $expected_repeat=min(AttrVal($target,"maxMuMsgRepeat",99),$tData->{dispatch_repeats});
                     SKIP: {
                       skip 'Test repeats' if ( !defined($tData->{dispatch_repeats}) ); 
                       is(scalar @{$tracking->{SIGNALduno_Dispatch}}-1,$tData->{dispatch_repeats}, 'no of SIGNALduno_Dispatch calls vs dispatch_repeats');
                     };
-                    is($dmsg_matched,1,'dmsg matched once');
+                    is($dmsg_matched,1,'dmsg matched once',q{parse returned}, $return);
                     
                   }; # inner subtest
                 }; # inner SKIP
@@ -145,59 +156,27 @@ InternalTimer(time()+1, sub {
         if ( exists $maintest->{todo}) {
           $todo->end;
         }
-    };
+      }; #subtest
+    }; # SKIP#
   }; # end for loop
 
-  # subtest 'Test with master SD_Device_ProtocolList' => sub {
-  #   loadJson("https://raw.githubusercontent.com/RFD-FHEM/SIGNALduino_TOOL/master/FHEM/lib/SD_Device_ProtocolList.json");
-
-  #   my $pID;
-  #   my $tID;
-
-  #   my $SD_Dispatch = $mock->mock("SIGNALduno_Dispatch"); 
-  #   my $noTestRun=1;
-  #   while ( ($pID, $testSet) = each  (@{$testDataArray}) )
-  #   {
-  #     #next if ($testSet->{id} != 45);
-  #     #next if ($testSet->{name} ne "NC-3911-675" );
-  #     next if (!$targetHash->{protocolObject}->protocolExists($testSet->{id}));
-  #     next if ($targetHash->{protocolObject}->checkProperty($testSet->{id},'developId',undef));
-  #     while ( ($tID, $tData) = each (@{$testSet->{data}}) ) 
-  #     {
-  #       next if (!defined($tData->{rmsg}) || !defined($tData->{dmsg}) || !defined($tData->{internals}) );
-
-  #       subtest "[$pID]: $testSet->{name}: [$tID] " => sub {
-  #         CommandAttr(undef,"$target whitelist_IDs $testSet->{id}");
-  #         is(AttrVal($target,"whitelist_IDs",undef), $testSet->{id}, "whitelist_IDs is ".AttrVal($target,"whitelist_IDs",undef));
-  #         $SD_Dispatch->reset();
-  #         $SD_Dispatch->side_effect(\&VerifyDispatch);
-  #         #SIGNALduino_Log3 $target, 5,  Dumper($tData);
-  #         $id_matched=0;
-  #         $dmsg_matched=0;
-  #         $SD_Dispatch_calledCounter=0;
-  #         SIGNALduino_Parse($targetHash, $targetHash, $targetHash->{NAME}, "\002".$tData->{rmsg}."\003") if (defined($tData->{rmsg}));
-  #         if ($SD_Dispatch->called() >0 )  {
-  #           $noTestRun=0;
-
-  #           ok($id_matched,"SIGNALduno_Dispatch check id ") || note explain (($SD_Dispatch->called_with())[4] , " vs ", $testSet->{id});
-  #           ok($dmsg_matched,"SIGNALduno_Dispatch check dmsg ") || note explain (($SD_Dispatch->called_with())[2] , " vs ", $testSet->{dmsg});
-
-  #           my $expected_repeat=min(AttrVal($target,"maxMuMsgRepeat",99),$tData->{dispatch_repeats});
-  #           {
-  #              my $todo = Test2::Todo->new(reason => 'Checking dispatches (all dispatches are counted across all modules');
-  #              is($tData->{dispatch_repeats}, $SD_Dispatch_calledCounter-1, "JSON (master) dispatch_repeats accuracy ".$testSet->{name}) if (defined($tData->{dispatch_repeats}));
-  #              $todo->end;
-  #           };
-  #         } else { diag "SIGNALduno_Dispatch (master ID".$testSet->{id}.") was not called, this must be an error"; }
-  #       };
-  #     }
-  #   };
-  #   is($noTestRun,0,"Verify if a test was performed ");
-  #   $SD_Dispatch->unmock;
-  # };
+	
+};
 
 
-	exit(0);
-},'dummyDuino');
+sub waitDone {
+
+	if ($init_done) 
+	{
+  	runTest(@_);
+    done_testing();
+    exit(0);
+	} else {
+		InternalTimer(time()+0.2, &waitDone,@_);			
+	}
+
+}
+
+waitDone('dummyDuino');
 
 1;
