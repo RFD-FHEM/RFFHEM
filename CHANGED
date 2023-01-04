@@ -1,3 +1,9 @@
+2023-01-04 - SD_UT remote control DC-1961-TG (#1129)
+
+* 14_SD_UT
+new remote control DC-1961-TG
+new  Metadata
+added Testdata from RFD-FHEM/SIGNALduino_TOOL
 2023-01-01 - Update json testdata to new schema (#1135)
 
 * RDMSG.pm
