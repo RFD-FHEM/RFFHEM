@@ -3003,7 +3003,7 @@ sub SD_UT_tristate2bin {
       }
     },
     "x_commandref": {
-      "web": "https://commandref.fhem.de/#SD_BELL"
+      "web": "https://commandref.fhem.de/#SD_UT"
     },
     "x_support_community": {
       "board": "Sonstige Systeme",
@@ -3011,9 +3011,6 @@ sub SD_UT_tristate2bin {
       "cat": "FHEM - Hausautomations-Systeme",
       "title": "FHEM - Hausautomations-Systeme >> Sonstige Systeme",
       "web": "https://forum.fhem.de/index.php/board,29.0.html"
-    },
-    "x_wiki": {
-      "web": "https://wiki.fhem.de/wiki/SD_BELL"
     }
   },
   "x_fhem_maintainer": [
