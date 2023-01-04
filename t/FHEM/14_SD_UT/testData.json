@@ -2533,5 +2533,66 @@
          }
       ],
       "module" : "SD_UT"
+   },
+   {
+     "data" : [
+       {
+          "comment" : "Remote control DC-1961-TG with 12 buttons for ceiling fan with lighting",
+          "dmsg" : "P20#1846A865",
+          "internals" : {
+             "DEF" : "DC_1961_TG 1846",
+             "NAME" : "DC_1961_TG_1846"
+          },
+          "minProtocolVersion" : "1.48",
+          "readings" : {
+             "LastAction" : "receive",
+             "deviceCode" : "1846",
+             "rollingCode" : "6",
+             "state" : "light_on_off"
+          },
+          "tests" : [
+             {
+                "comment" : "#0",
+                "attributes" : {
+                   "model" : "DC_1961_TG"
+                }
+             }
+          ],
+          "revision_entry" : "2022-12-10 11:35:35",
+          "revision_modul" : "14_SD_UT.pm 0 2022-12-14 19:27:19Z elektron-bbs",
+          "rmsg" : "MS;P1=291;P2=-753;P3=762;P4=-249;P5=-8312;D=151212123434121212123412121234341234123412341212121234341212341234;CP=1;SP=5;R=224;O;m2;",
+          "user" : "Skusi"
+       },
+       {
+          "comment" : "Remote control DC-1961-TG with 12 buttons for ceiling fan with lighting",
+          "dmsg" : "P20#1846A77B",
+          "internals" : {
+             "DEF" : "DC_1961_TG 1846",
+             "NAME" : "DC_1961_TG_1846"
+          },
+          "minProtocolVersion" : "1.48",
+          "readings" : {
+             "LastAction" : "receive",
+             "deviceCode" : "1846",
+             "rollingCode" : "7",
+             "state" : "fan_off"
+          },
+          "tests" : [
+             {
+                "comment" : "#1",
+                "attributes" : {
+                   "model" : "DC_1961_TG"
+                }
+             }
+          ],
+          "revision_entry" : "2022-12-10 11:37:49",
+          "revision_modul" : "14_SD_UT.pm 0 2022-12-14 19:27:19Z elektron-bbs",
+          "rmsg" : "MS;P1=-760;P2=747;P3=-282;P4=253;P5=-8335;D=454141412323414141412341414123234123412341412323234123232323412323;CP=4;SP=5;R=27;O;m2;",
+          "user" : "Skusi"
+       }
+      ],
+     "id" : "20",
+     "module" : "SD_UT",
+     "name" : "DC_1961_TG_1846"
    }
 ]

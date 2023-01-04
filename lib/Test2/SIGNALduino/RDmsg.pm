@@ -106,6 +106,7 @@ sub checkDmsgParseFn  {
             ## execute custom commands
             foreach my $cmd ( @{$testMocks->{prep_commands}} )
             {
+                note(qq[execute command: $cmd]);
                 main::AnalyzeCommand(undef,$cmd);
             }
 
