@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 10_FS10.pm 26984 2023-01-06 12:00:23Z Sidey $
+# $Id: 10_FS10.pm 26984 2023-01-06 12:07:45Z sidey79 $
 #
 # FS10 basierend auf dem FS20 Modul angepasst fuer SIGNALduino, elektron-bbs
 #
