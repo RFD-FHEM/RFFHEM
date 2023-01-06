@@ -1,4 +1,4 @@
-# $Id: 00_SIGNALduino.pm v3.5.4 2022-11-26 22:39:42Z elektron-bbs $
+# $Id: 00_SIGNALduino.pm 26977 2023-01-06 11:35:00Z Sidey $
 # v3.5.4 - https://github.com/RFD-FHEM/RFFHEM/tree/master
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incoming messages
 # see http://www.fhemwiki.de/wiki/SIGNALDuino
@@ -5528,7 +5528,8 @@ USB-connected devices (SIGNALduino):<br>
         "strict": "0",
         "warnings": "0",
         "Time::HiRes": "0",
-        "JSON": "0"
+        "JSON": "0",
+        "Storable": "0"
       },
       "recommends": {
         "Data::Dumper": "0"
@@ -5547,6 +5548,7 @@ USB-connected devices (SIGNALduino):<br>
         "warnings": "0",
         "Data::Dumper": "0",
         "Time::HiRes": "0",
+        "FHEM::Core::Timer::Helper": "0",
         "JSON": "0"
       },
       "suggests": {

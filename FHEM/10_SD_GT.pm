@@ -1,5 +1,5 @@
 #################################################################
-# $Id: 10_SD_GT.pm 1 2022-12-29 23:35:50Z sidey79 $
+# $Id: 10_SD_GT.pm 26985 2023-01-06 12:01:11Z Sidey $
 #
 # The file is part of the SIGNALduino project.
 #
