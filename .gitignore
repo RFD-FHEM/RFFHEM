@@ -1,0 +1,13 @@
+cover_db/
+.vscode
+jsonExtract.pl
+errorformat
+errorformat.small
+docker_test.sh
+testOutput.*
+memleak.pl
+t/FHEM/global/*
+lib/Test2/Formatter/gha.pm
+bin/reviewdog
+workspace.code-workspace
+.vstags
