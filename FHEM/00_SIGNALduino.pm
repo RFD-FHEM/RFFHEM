@@ -1,5 +1,5 @@
-# $Id: 00_SIGNALduino.pm v3.5.4 2022-11-26 22:39:42Z elektron-bbs $
-# v3.5.4 - https://github.com/RFD-FHEM/RFFHEM/tree/master
+# $Id: 00_SIGNALduino.pm 3.5.5 2023-01-07 16:05:33Z sidey79 $
+# v3.5.5 - https://github.com/RFD-FHEM/RFFHEM/tree/master
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incoming messages
 # see http://www.fhemwiki.de/wiki/SIGNALDuino
 # It was modified also to provide support for raw message handling which can be send from the SIGNALduino
@@ -8,14 +8,14 @@
 #
 # 2014-2015  S.Butzek, N.Butzek
 # 2016-2019  S.Butzek, Ralf9
-# 2019-2022  S.Butzek, HomeAutoUser, elektron-bbs
+# 2019-2023  S.Butzek, HomeAutoUser, elektron-bbs
 
 
 package main;
 use strict;
 use warnings;
 use Storable qw(dclone); 
-#use version 0.77; our $VERSION = version->declare('v3.5.4');
+#use version 0.77; our $VERSION = version->declare('v3.5.5');
 
 my $missingModulSIGNALduino = ' ';
 
@@ -41,7 +41,7 @@ use List::Util qw(first);
 
 
 use constant {
-  SDUINO_VERSION                  => '3.5.4+20221126',  # Datum wird automatisch bei jedem pull request aktualisiert
+  SDUINO_VERSION                  => '3.5.5+20230107',  # Datum wird automatisch bei jedem pull request aktualisiert
   SDUINO_INIT_WAIT_XQ             => 1.5,     # wait disable device
   SDUINO_INIT_WAIT                => 2,
   SDUINO_INIT_MAXRETRY            => 3,
@@ -5528,7 +5528,8 @@ USB-connected devices (SIGNALduino):<br>
         "strict": "0",
         "warnings": "0",
         "Time::HiRes": "0",
-        "JSON": "0"
+        "JSON": "0",
+        "Storable": "0"
       },
       "recommends": {
         "Data::Dumper": "0"
@@ -5547,6 +5548,7 @@ USB-connected devices (SIGNALduino):<br>
         "warnings": "0",
         "Data::Dumper": "0",
         "Time::HiRes": "0",
+        "FHEM::Core::Timer::Helper": "0",
         "JSON": "0"
       },
       "suggests": {
@@ -5575,7 +5577,7 @@ USB-connected devices (SIGNALduino):<br>
         "type": "git",
         "url": "https://github.com/RFD-FHEM/RFFHEM.git",
         "web": "https://github.com/RFD-FHEM/RFFHEM/tree/master",
-        "x_branch": "dev-r34",
+        "x_branch": "master",
         "x_filepath": "FHEM/",
         "x_raw": "https://raw.githubusercontent.com/RFD-FHEM/RFFHEM/master/FHEM/00_SIGNALduino.pm"
       }
@@ -5597,7 +5599,7 @@ USB-connected devices (SIGNALduino):<br>
       "web": "https://wiki.fhem.de/wiki/SIGNALduino"
     }
   },
-  "version": "v3.5.1"
+  "version": "v3.5.5"
 }
 =end :application/json;q=META.json
 =cut

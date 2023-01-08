@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 14_Hideki.pm 21666 2022-12-29 23:35:50Z sidey79 $
+# $Id: 14_Hideki.pm 26983 2023-01-06 12:07:45Z sidey79 $
 # The file is taken from the SIGNALduino project
 # see http://www.fhemwiki.de/wiki/SIGNALduino
 # and was modified by a few additions
@@ -594,6 +594,7 @@ sub wind {
 	Beispielwert: 1.25<br>
 	Standardwert: 1<br>
 	</li>  <br>
+  </ul>
 </ul>
 
 =end html_DE
