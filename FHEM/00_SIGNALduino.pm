@@ -644,7 +644,7 @@ sub SIGNALduino_RemoveLaCrossePair {
 }
 
 ############################# package main, test exists
-sub SIGNALduino_Set($$@) {
+sub SIGNALduino_Set {
   my ($hash,$name, @a) = @_;
 
   return "\"set SIGNALduino\" needs at least one parameter" if(@a < 1);
@@ -1007,9 +1007,8 @@ sub SIGNALduino_Set_LaCrossePairForSec {
 }
 
 ############################# package main, test exists
-sub SIGNALduino_Get($@) {
+sub SIGNALduino_Get {
   my ($hash,$name, @a) = @_;
-  #my $type = $hash->{TYPE};
 
   return "\"get SIGNALduino\" needs at least one parameter" if(@a < 1);
 
@@ -2102,7 +2101,7 @@ sub SIGNALduino_PatternExists {
 
 ############################# package main
 #SIGNALduino_MatchSignalPattern{$hash,@array, %hash, @array, $scalar}; not used >v3.1.3
-sub SIGNALduino_MatchSignalPattern($\@\%\@$){
+sub SIGNALduino_MatchSignalPattern {
   my ( $hash, $signalpattern,  $patternList,  $data_array, $idx) = @_;
     my $name = $hash->{NAME};
   #print Dumper($patternList);
@@ -2527,7 +2526,7 @@ sub SIGNALduino_Parse_MS {
 ############################# package main
 ## //Todo: check list as reference
 # // Todo: Make this sub robust and use it
-sub SIGNALduino_padbits(\@$) {
+sub SIGNALduino_padbits {
   my $i=@{$_[0]} % $_[1];
   while (@{$_[0]} % $_[1] > 0)  ## will pad up full nibbles per default or full byte if specified in protocol
   {
@@ -2966,7 +2965,7 @@ sub SIGNALduino_Parse_MN {
 }
 
 ############################# package main
-sub SIGNALduino_Parse($$$$@) {
+sub SIGNALduino_Parse {
   my ($hash, $iohash, $name, $rmsg, $initstr) = @_;
 
   #print Dumper(\%ProtocolListSIGNALduino);
@@ -3069,7 +3068,7 @@ sub SIGNALduino_WriteInit {
 }
 
 ############################# package main
-sub SIGNALduino_SimpleWrite(@) {
+sub SIGNALduino_SimpleWrite {
   my ($hash, $msg, $nonl) = @_;
   return if(!$hash);
   if($hash->{TYPE} eq 'SIGNALduino_RFR') {
@@ -3091,7 +3090,7 @@ sub SIGNALduino_SimpleWrite(@) {
 }
 
 ############################# package main
-sub SIGNALduino_Attr(@) {
+sub SIGNALduino_Attr {
   my ($cmd,$name,$aName,$aVal) = @_;
   my $hash = $defs{$name};
   my $debug = AttrVal($name,'debug',0);
@@ -3229,7 +3228,7 @@ sub SIGNALduino_Attr(@) {
 }
 
 ############################# package main
-sub SIGNALduino_FW_Detail($@) {
+sub SIGNALduino_FW_Detail {
   my ($FW_wname, $name, $room, $pageHash) = @_;
 
   my $hash = $defs{$name};
@@ -3342,7 +3341,7 @@ sub SIGNALduino_FW_saveWhitelist {
 }
 
 ############################# package main      - test is missing
-sub SIGNALduino_IdList($@) {
+sub SIGNALduino_IdList {
   my ($param, $aVal, $blacklist, $develop0) = @_;
   my (undef,$name) = split(':', $param);
 
@@ -3545,7 +3544,7 @@ sub SIGNALduino_callsub {
 # Will return  $count of ???,  modified $rawData , modified %patternListRaw,
 # =cut
 ############################# package main
-sub SIGNALduino_filterMC($$$%) {
+sub SIGNALduino_filterMC {
   ## Warema Implementierung : Todo variabel gestalten
   my ($name,$id,$rawData,%patternListRaw) = @_;
   my $hash=$defs{$name};
@@ -3614,7 +3613,7 @@ sub SIGNALduino_filterMC($$$%) {
 # Will return  $count of combined values,  modified $rawData , modified %patternListRaw,
 # =cut
 ############################# package main
-sub SIGNALduino_filterSign($$$%) {
+sub SIGNALduino_filterSign {
   my ($name,$id,$rawData,%patternListRaw) = @_;
   my $debug = AttrVal($name,'debug',0);
 
@@ -3683,7 +3682,7 @@ sub SIGNALduino_filterSign($$$%) {
 # Will return  $count of combined values,  modified $rawData , modified %patternListRaw,
 # =cut
 ############################# package main
-sub SIGNALduino_compPattern($$$%) {
+sub SIGNALduino_compPattern {
   my ($name,$id,$rawData,%patternListRaw) = @_;
   my $debug = AttrVal($name,'debug',0);
 
