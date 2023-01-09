@@ -29,7 +29,7 @@ eval {use Data::Dumper qw(Dumper);1};
 use constant HAS_JSON      => defined  eval { require JSON; JSON->import; };
 
 eval {use Scalar::Util qw(looks_like_number);1};
-eval {use Time::HiRes qw(gettimeofday);1} ;
+eval {use Time::HiRes qw(gettimeofday usleep);1} ;
 eval {use FHEM::Core::Timer::Helper;1 } ;
 
 use lib::SD_Protocols;
@@ -535,11 +535,12 @@ sub SIGNALduino_avrdude {
 
   local $/=undef;
   if (-e $logFile) {
-    open FILE, $logFile;
+    open my $Log_FH, '>', $logFile or croak qq[Can't open $logFile];
+    
     $hash->{helper}{avrdudelogs} .= "--- AVRDUDE ---------------------------------------------------------------------------------\n";
-    $hash->{helper}{avrdudelogs} .= <FILE>;
+    $hash->{helper}{avrdudelogs} .= $Log_FH;
     $hash->{helper}{avrdudelogs} .= "--- AVRDUDE ---------------------------------------------------------------------------------\n\n";
-    close FILE;
+    close $Log_FH;
   } else {
     $hash->{helper}{avrdudelogs} .= "WARNING: avrdude created no log file\n\n";
     readingsSingleUpdate($hash,'state','FIRMWARE UPDATE with error',1);
@@ -3086,7 +3087,7 @@ sub SIGNALduino_SimpleWrite {
   syswrite($hash->{DIODev}, $msg) if($hash->{DIODev});
 
   # Some linux installations are broken with 0.001, T01 returns no answer
-  select(undef, undef, undef, 0.01);
+  usleep 10000;
 }
 
 ############################# package main
