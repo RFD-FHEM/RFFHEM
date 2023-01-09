@@ -2982,14 +2982,14 @@ package lib::SD_ProtocolData;
         knownFreqs      => '433.92',
         one             => [-3,1], # 2700,-900
         zero            => [-1,3], # -900,2700
-        start           => [8],    # 7200
+        # start           => [8],    # 7200
         clockabs        => 900,
         format          => 'twostate',
         clientmodule    => 'SD_WS',
         modulematch     => '^W110#',
         preamble        => 'W110#',
         reconstructBit   => '1',
-        length_min      => '65',
+        length_min      => '64',
         length_max      => '66',
       },
     "111" =>  # Water Tank Level Monitor TS-FT002
