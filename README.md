@@ -1,4 +1,4 @@
-SIGNALduino - FHEM Modules Version 3.5.4
+SIGNALduino - FHEM Modules Version 3.5.5
 
 Base Branch:
 
@@ -30,7 +30,8 @@ Supported Devices / Protocols
 |CTW600, WH1080, WH2315 | Weather station |
 |Clarus | remote power socket|
 |Conrad RSL | shutters |
-|Dooya | Shutters and blinds from various vendors like Rohrmotor24  |
+|DC-1961-TG | Remote control with 12 buttons for ceiling fan with lighting |
+|Dooya | Shutters and blinds from various vendors like Rohrmotor24 |
 |Einhell - HS 434/6 | Garagedoor opener |
 |Elro DB200, KANGTAI, unitec | wireless bell |
 |EM1000WZ | Energy-Monitor |

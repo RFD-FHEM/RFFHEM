@@ -74,9 +74,30 @@ InternalTimer(time()+0.4, sub {
         is($attr{$sensorname}{$attr}, $v, qq[check attribute $attr is $v]);
     };
 
-	done_testing();
-	exit(0);
+
 
 }, 'SD_UT_Test_Buttons_six');
+
+InternalTimer(time()+0.41, sub {
+    my $sensorname=shift;
+
+    my $attr = q[model];
+    my $v = q[DC_1961_TG];
+    subtest qq[Change module attribute to DC_1961_TG] => sub { 
+        plan(2);
+        $defs{$sensorname}{lastMSG} = q[1846A865];
+        CommandAttr(undef,qq[$sensorname $attr $v]); 
+        isnt($attr{$sensorname}{$attr}, $v, qq[check attribute $attr isnt $v]);
+        
+        $defs{$sensorname}{bitMSG} = q[010];
+        CommandAttr(undef,qq[$sensorname $attr $v]);     
+        is($attr{$sensorname}{$attr}, $v, qq[check attribute $attr is $v]);
+    };
+
+ 	done_testing();
+	exit(0);
+
+}, 'SD_UT_Test_TC6861_3DC_1');
+
 
 1;
