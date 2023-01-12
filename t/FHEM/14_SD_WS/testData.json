@@ -2484,7 +2484,6 @@
             "readings" : {
                "batteryChanged" : "0",
                "batteryPercent" : 90,
-               "model" : "SD_WS_123_T",
                "state" : "T: 25",
                "temperature" : 25,
                "type" : "IBS-P01R, ITH-20R"
@@ -2514,7 +2513,6 @@
                "batteryChanged" : "1",
                "batteryPercent" : 32,
                "humidity" : 60,
-               "model" : "SD_WS_123_T",
                "state" : "T: 25.4 H: 60",
                "temperature" : 25.4,
                "type" : "IBS-P01R, ITH-20R"
