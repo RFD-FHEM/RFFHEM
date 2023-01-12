@@ -1,0 +1,158 @@
+[
+   {
+      "data" : [
+         {
+            "comment" : "(ID 42,75 additionally)",
+            "dmsg" : "P9#FF4A63E4AA040802F40168",
+            "internals" : {
+               "DEF" : "WH1080",
+               "NAME" : "WH1080"
+            },
+            "minProtocolVersion" : "1.27",
+            "readings" : {
+               ".rainOffset" : "0",
+               "battery" : "ok",
+               "batteryState" : "ok",
+               "humidity" : "85",
+               "id" : "83",
+               "rain" : "113.4",
+               "rain_total" : "113.4",
+               "state" : "T: 9.8  H: 85  Ws:0.7  Wg:1.4 m/s Wd: N  R: 113.4",
+               "temperature" : "9.8",
+               "windDirection" : "0",
+               "windDirectionAverage" : "0",
+               "windDirectionDegree" : "0",
+               "windDirectionText" : "N",
+               "windGust" : "1.4",
+               "windGust_fts" : "4.6",
+               "windGust_kmh" : "5.0",
+               "windGust_kn" : "2.7",
+               "windGust_mph" : "3.1",
+               "windSpeed" : "0.7",
+               "windSpeed_fts" : "2.3",
+               "windSpeed_kmh" : "2.5",
+               "windSpeed_kn" : "1.4",
+               "windSpeed_mph" : "1.6"
+            },
+            "revision_entry" : "2021-03-24 09:57:33",
+            "revision_modul" : "14_SD_WS09.pm 22415 2020-07-16 20:22:23Z Sidey",
+            "rmsg" : "MU;P0=-31072;P1=486;P2=-986;P3=1454;D=01212121212121212321232321232123232121232323212121212123232123232123212321232123232323232321232323232323212323232323232323232123212121212321232323232323232323212321212321232301212121212121212321232321232123232121232323212121212123232123232123212321232123;CP=1;R=29;O;",
+            "tests" : [
+               {
+                  "comment" : "Test #0"
+               }
+            ],
+            "user" : "maddinthebrain"
+         }
+      ],
+      "id" : "9",
+      "module" : "SD_WS09",
+      "name" : "WH1080"
+   },
+   {
+      "module" : "SD_WS09",
+      "name" : "WH2315",
+      "data" : [
+         {
+            "comment" : "Lux & UV RAWMSG with length 64",
+            "dmsg" : "P9#FEE7E2AA049E81F0",
+            "revision_modul" : "14_SD_WS09.pm 22415 2020-07-16 20:22:23Z Sidey",
+            "rmsg" : "MU;P0=-10108;P1=495;P2=-1050;P3=1496;P4=-27564;P5=372;CP=1;R=245;D=012121212121212321212123232121212121212323232123212321232123212323232323232123232123232121212123212323232323232121212121232323450;e;",
+            "minProtocolVersion" : "1.27",
+            "revision_entry" : "2021-03-24 10:00:52",
+            "tests" : [
+               {
+                  "comment" : "Test #0"
+               }
+            ],
+            "user" : "rob",
+            "readings" : {
+               "UV" : "1",
+               "id" : "63",
+               "state" : "UV: 1 Lux: 15136 ",
+               "Lux" : "15136"
+            },
+            "internals" : {
+               "NAME" : "WH1080",
+               "DEF" : "WH1080"
+            }
+         },
+         {
+            "readings" : {
+               "windGust_kn" : "1.4",
+               "windSpeed_fts" : "1.0",
+               "battery" : "ok",
+               ".rainOffset" : "0",
+               "windSpeed" : "0.3",
+               "state" : "T: 6.2  H: 70  Ws:0.3  Wg:0.7 m/s Wd: E  R: 144.9",
+               "windSpeed_kmh" : "1.1",
+               "temperature" : "6.2",
+               "windDirection" : "4",
+               "windGust_fts" : "2.3",
+               "windGust_kmh" : "2.5",
+               "windSpeed_mph" : "0.7",
+               "rain" : "144.9",
+               "rain_total" : "144.9",
+               "batteryState" : "ok",
+               "windDirectionAverage" : "90",
+               "windDirectionDegree" : "90",
+               "windGust" : "0.7",
+               "id" : "221",
+               "humidity" : "70",
+               "windGust_mph" : "1.6",
+               "windSpeed_kn" : "0.6",
+               "windDirectionText" : "E"
+            },
+            "internals" : {
+               "DEF" : "WH1080",
+               "NAME" : "WH1080"
+            },
+            "user" : "rob",
+            "minProtocolVersion" : "1.27",
+            "revision_entry" : "2021-03-24 09:59:00",
+            "tests" : [
+               {
+                  "comment" : "Test #1"
+               }
+            ],
+            "comment" : "Temp,Hum,Rain,Wind RAWMSG with length 88 (ID 42 additionally)",
+            "dmsg" : "P9#FF5BA39C8C020403C60822",
+            "revision_modul" : "14_SD_WS09.pm 22415 2020-07-16 20:22:23Z Sidey",
+            "rmsg" : "MU;P0=-32001;P1=481;P2=-990;P3=1450;CP=1;R=244;D=012121212121212123212321212321212123212323232121212323212121232321232323212123232323232323232123232323232321232323232323232321212121232323212123232323232123232323232123232321;e;"
+         }
+      ],
+      "id" : "9"
+   },
+   {
+      "module" : "SD_WS09",
+      "data" : [
+         {
+            "readings" : {
+               "UV" : "4",
+               "Lux" : "57970",
+               "state" : "UV: 4 Lux: 57970 ",
+               "id" : "200"
+            },
+            "internals" : {
+               "NAME" : "WH1080",
+               "DEF" : "WH1080"
+            },
+            "user" : "Ralf9",
+            "tests" : [
+               {
+                  "comment" : "Test #0"
+               }
+            ],
+            "revision_entry" : "2021-03-24 10:02:20",
+            "minProtocolVersion" : "1.27",
+            "dmsg" : "P9#FF7C845508D87403",
+            "revision_modul" : "14_SD_WS09.pm 22415 2020-07-16 20:22:23Z Sidey",
+            "rmsg" : "MU;P0=-1424;P1=1417;P2=-1058;P3=453;P4=-24774;P6=288;P7=-788;D=01212121232343232323232323232123232323232121232121212123212121232123212321232121212123212121232321232321212121232323212321212121212121212323467323232323232323212323232323212123212121212321212123212321232123212121212321212123232123232121212123232321232121;CP=3;R=247;O;",
+            "comment" : "reconstructed bit 1"
+         }
+      ],
+      "name" : "WH3080",
+      "id" : "9"
+   }
+
+]

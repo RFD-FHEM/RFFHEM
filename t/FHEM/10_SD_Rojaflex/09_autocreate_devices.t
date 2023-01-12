@@ -5,8 +5,10 @@ use Test2::V0;
 use Test2::Tools::Compare qw{is};
 
 our %defs;
+our $init_done;
 
-InternalTimer(time()+1, sub {
+InternalTimer(time()+0.4, sub {
+
 	my $ioName = shift; 
 	my $ioHash = $defs{$ioName};
 
@@ -26,8 +28,6 @@ InternalTimer(time()+1, sub {
 		is(IsDevice($sensorname), 1, "check sensor created with dispatch 5");
 		Dispatch($ioHash,q[P109#083122FD298A018A8E]);
 	};
-	
-	
 	done_testing();
 	exit(0);
 

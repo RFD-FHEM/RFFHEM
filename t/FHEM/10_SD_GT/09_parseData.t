@@ -21,7 +21,7 @@ sub runTest {
     #print Dumper(@Test::RDmsg::JSONTestList);
 	my $filepath = dirname(__FILE__);
 	push @Test2::SIGNALduino::RDmsg::JSONTestList, {
-		testname	=> q[Testdata with corrupt SD_UT data],
+		testname	=> qq[Testdata with $module data],
 		url			=> qq[$filepath/testData.json],
 	};
 
@@ -41,7 +41,7 @@ sub waitDone {
 	{
 		runTest(@_);
 	} else {
-		InternalTimer(time()+0.5, &waitDone,@_);			
+		InternalTimer(time()+0.2, &waitDone,@_);			
 	}
 
 }

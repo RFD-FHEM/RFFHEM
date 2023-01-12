@@ -1,0 +1,582 @@
+[
+   {
+      "module" : "SD_BELL",
+      "name" : "FreeTec PE-6946",
+      "data" : [
+         {
+            "dmsg" : "P32#154FFF",
+            "minProtocolVersion" : "1.27",
+            "tests" : [
+               {
+                  "comment" : "#0",
+                  "attributes" : {
+                     "model" : "FreeTec_PE-6946"
+                  }
+               }
+            ],
+            "revision_entry" : "2021-03-24 11:26:13",
+            "readings" : {
+               "state" : "ring"
+            },
+            "user" : "SD_Protocol",
+            "revision_modul" : "14_SD_BELL.pm     0 2021-03-22 22:30:35Z HomeAuto_User",
+            "rmsg" : "MU;P0=146;P1=245;P3=571;P4=-708;P5=-284;P7=-6689;D=14351435143514143535353535353535353535350704040435043504350435040435353535353535353535353507040404350435043504350404353535353535353535353535070404043504350435043504043535353535353535353535350704040435043504350435040435353535353535353535353507040404350435;CP=3;R=0;O;",
+            "internals" : {
+               "NAME" : "SD_BELL_154FFF",
+               "DEF" : "32 154FFF"
+            },
+            "comment" : "wireless doorbell (ID 40,62,63 additionally)",
+            "dispatch_repeats" : "3"
+         }
+      ],
+      "id" : "32"
+   },
+   {
+      "name" : "VLOXO",
+      "module" : "SD_BELL",
+      "data" : [
+         {
+            "dmsg" : "P32#7ED403",
+            "tests" : [
+               {
+                  "attributes" : {
+                     "model" : "FreeTec_PE-6946"
+                  },
+                  "comment" : "#0"
+               }
+            ],
+            "minProtocolVersion" : "1.27",
+            "revision_entry" : "2021-03-24 11:28:51",
+            "revision_modul" : "14_SD_BELL.pm     0 2021-03-22 22:30:35Z HomeAuto_User",
+            "user" : "schwatter",
+            "readings" : {
+               "state" : "ring"
+            },
+            "dispatch_repeats" : "3",
+            "internals" : {
+               "NAME" : "SD_BELL_7ED403",
+               "DEF" : "32 7ED403"
+            },
+            "rmsg" : "MU;P0=130;P1=-666;P2=533;P3=-273;P5=-6200;CP=0;R=15;D=01232301230123010101010101010123230501232323232323012323012301230101010101010101232305012323232323230123230123012301010101010101012323050123232323232301232301230123010101010101010123230501232323232323012323012301230101010101010101232305012323232323230123;O;",
+            "comment" : "wireless doorbell (ID 40,62,63 additionally)"
+         }
+      ],
+      "id" : "32"
+   },
+   {
+      "id" : "41",
+      "data" : [
+         {
+            "dmsg" : "P41#F813D593",
+            "comment" : "doubleCode 1, autocreate need doubleCode 1&2, bell sends two codes! https://github.com/RFD-FHEM/RFFHEM/issues/70",
+            "rmsg" : "MS;P0=-526;P1=1450;P2=467;P3=-6949;P4=-1519;D=231010101010242424242424102424101010102410241024101024241024241010;CP=2;SP=3;O;",
+            "internals" : {
+               "NAME" : "SD_BELL_219D85D3_F813D593",
+               "DEF" : "41 219D85D3_F813D593"
+            },
+            "revision_modul" : "14_SD_BELL.pm     0 2021-03-22 22:30:35Z HomeAuto_User",
+            "user" : "beatz0001",
+            "readings" : {
+               "state" : "ring"
+            },
+            "revision_entry" : "2021-03-25 13:16:12",
+            "tests" : [
+               {
+                  "attributes" : {
+                     "model" : "Elro_DB200_/_KANGTAI_/_unitec"
+                  },
+                  "comment" : "#0"
+               }
+            ],
+            "minProtocolVersion" : "1.27"
+         },
+         {
+            "dmsg" : "P41#219D85D3",
+            "rmsg" : "MS;P0=468;P1=-1516;P2=1450;P3=-533;P4=-7291;D=040101230101010123230101232323012323010101012301232323012301012323;CP=0;SP=4;O;",
+            "comment" : "doubleCode 2, autocreate need doubleCode 1&2, bell sends two codes! https://github.com/RFD-FHEM/RFFHEM/issues/70",
+            "internals" : {
+               "DEF" : "41 219D85D3_F813D593",
+               "NAME" : "SD_BELL_219D85D3_F813D593"
+            },
+            "revision_modul" : "14_SD_BELL.pm     0 2021-03-22 22:30:35Z HomeAuto_User",
+            "readings" : {
+               "state" : "ring"
+            },
+            "user" : "beatz0001",
+            "revision_entry" : "2021-03-25 13:17:24",
+            "tests" : [
+               {
+                  "attributes" : {
+                     "model" : "Elro_DB200_/_KANGTAI_/_unitec"
+                  },
+                  "comment" : "#1"
+               }
+            ],
+            "minProtocolVersion" : "1.27"
+         }
+      ],
+      "module" : "SD_BELL",
+      "name" : "Doorbell DB200"
+   },
+   {
+      "data" : [
+         {
+            "internals" : {
+               "NAME" : "SD_BELL_1791D593_BA2885D3",
+               "DEF" : "41 1791D593_BA2885D3"
+            },
+            "rmsg" : "MS;P0=1390;P1=-600;P2=409;P3=-1600;P4=-7083;D=240123010101230123232301230123232301232323230123010101230123230101;CP=2;SP=4;R=248;O;m0;",
+            "comment" : "doubleCode 1, autocreate need doubleCode 1&2, bell sends two codes! https://github.com/RFD-FHEM/RFFHEM/issues/365",
+            "dmsg" : "P41#BA2885D3",
+            "readings" : {
+               "state" : "ring"
+            },
+            "user" : "trosenda",
+            "revision_modul" : "14_SD_BELL.pm     0 2021-03-22 22:30:35Z HomeAuto_User",
+            "revision_entry" : "2021-03-25 13:19:16",
+            "minProtocolVersion" : "1.27",
+            "tests" : [
+               {
+                  "comment" : "#0",
+                  "attributes" : {
+                     "model" : "Elro_DB200_/_KANGTAI_/_unitec"
+                  }
+               }
+            ]
+         },
+         {
+            "readings" : {
+               "state" : "ring"
+            },
+            "user" : "trosenda",
+            "revision_modul" : "14_SD_BELL.pm     0 2021-03-22 22:30:35Z HomeAuto_User",
+            "internals" : {
+               "NAME" : "SD_BELL_1791D593_BA2885D3",
+               "DEF" : "41 1791D593_BA2885D3"
+            },
+            "rmsg" : "MS;P1=403;P2=-7102;P3=-1608;P4=1378;P5=-620;D=121313134513454545451313451313134545451345134513454513134513134545;CP=1;SP=2;R=5;O;m0;",
+            "comment" : "doubleCode 2, autocreate need doubleCode 1&2, bell sends two codes! https://github.com/RFD-FHEM/RFFHEM/issues/365",
+            "dmsg" : "P41#1791D593",
+            "minProtocolVersion" : "1.27",
+            "tests" : [
+               {
+                  "comment" : "#1",
+                  "attributes" : {
+                     "model" : "Elro_DB200_/_KANGTAI_/_unitec"
+                  }
+               }
+            ],
+            "revision_entry" : "2021-03-25 13:20:33"
+         }
+      ],
+      "id" : "41",
+      "module" : "SD_BELL",
+      "name" : "KANGTAI (Pollin 94-550405)"
+   },
+   {
+      "module" : "SD_BELL",
+      "name" : "unitec 98156+98YK",
+      "data" : [
+         {
+            "user" : "HomeAuto_User",
+            "readings" : {
+               "state" : "ring"
+            },
+            "revision_modul" : "14_SD_BELL.pm     0 2021-03-22 22:30:35Z HomeAuto_User",
+            "comment" : "doubleCode 1, autocreate need doubleCode 1&2, bell sends two codes! (ID 1 additionally)",
+            "rmsg" : "MS;P0=1474;P1=-521;P2=495;P3=-1508;P4=-6996;D=242323232301232323010101230123232301012301230123010123230123230101;CP=2;SP=4;R=51;m=0;",
+            "internals" : {
+               "NAME" : "SD_BELL_754485D3_08E8D593",
+               "DEF" : "41 754485D3_08E8D593"
+            },
+            "dmsg" : "P41#08E8D593",
+            "minProtocolVersion" : "1.27",
+            "tests" : [
+               {
+                  "comment" : "#0",
+                  "attributes" : {
+                     "model" : "Elro_DB200_/_KANGTAI_/_unitec"
+                  }
+               }
+            ],
+            "revision_entry" : "2021-03-25 13:22:27"
+         },
+         {
+            "revision_entry" : "2021-03-25 13:24:32",
+            "tests" : [
+               {
+                  "attributes" : {
+                     "model" : "Elro_DB200_/_KANGTAI_/_unitec"
+                  },
+                  "comment" : "#1"
+               }
+            ],
+            "minProtocolVersion" : "1.27",
+            "dmsg" : "P41#754485D3",
+            "comment" : "doubleCode 2, autocreate need doubleCode 1&2, bell sends two codes!",
+            "rmsg" : "MS;P1=-7005;P2=482;P3=-1511;P4=1487;P5=-510;D=212345454523452345234523232345232345232323234523454545234523234545;CP=2;SP=1;R=47;m=2;",
+            "internals" : {
+               "DEF" : "41 754485D3_08E8D593",
+               "NAME" : "SD_BELL_754485D3_08E8D593"
+            },
+            "revision_modul" : "14_SD_BELL.pm     0 2021-03-22 22:30:35Z HomeAuto_User",
+            "user" : "HomeAuto_User",
+            "readings" : {
+               "state" : "ring"
+            }
+         }
+      ],
+      "id" : "41"
+   },
+   {
+      "id" : "42",
+      "data" : [
+         {
+            "revision_modul" : "14_SD_BELL.pm     0 2021-03-22 22:30:35Z HomeAuto_User",
+            "user" : "trosenda",
+            "readings" : {
+               "state" : "ring"
+            },
+            "dmsg" : "P42#FE1FF87FE1FF86",
+            "rmsg" : "MU;P0=-491;P1=471;P2=1445;D=0101010101010101010102020202010101010101010101010202020201010101010101010101020202020101010101010101010102020202010101;CP=1;R=67;",
+            "internals" : {
+               "DEF" : "42 FE1FF87",
+               "NAME" : "SD_BELL_FE1FF87"
+            },
+            "comment" : "https://github.com/RFD-FHEM/RFFHEM/issues/390",
+            "tests" : [
+               {
+                  "comment" : "#0",
+                  "attributes" : {
+                     "model" : "Pollin_551227"
+                  }
+               }
+            ],
+            "minProtocolVersion" : "1.27",
+            "revision_entry" : "2021-03-25 13:26:13"
+         }
+      ],
+      "name" : "Pollin_551227",
+      "module" : "SD_BELL"
+   },
+   {
+      "module" : "SD_BELL",
+      "name" : "m-e doorbell",
+      "id" : "57",
+      "data" : [
+         {
+            "dmsg" : "P57#2AA4A7",
+            "comment" : "radio gong transmitter for FG- and Basic-Serie",
+            "rmsg" : "MC;LL=-653;LH=665;SL=-317;SH=348;D=D55B58;C=330;L=21;",
+            "internals" : {
+               "NAME" : "SD_BELL_2AA4A7",
+               "DEF" : "57 2AA4A7"
+            },
+            "revision_modul" : "14_SD_BELL.pm     0 2021-03-22 22:30:35Z HomeAuto_User",
+            "readings" : {
+               "state" : "ring"
+            },
+            "user" : "rippi46",
+            "revision_entry" : "2021-04-22 22:13:41",
+            "tests" : [
+               {
+                  "attributes" : {
+                     "model" : "FG_/_Basic-Serie"
+                  },
+                  "comment" : "#0"
+               }
+            ],
+            "minProtocolVersion" : "1.27"
+         }
+      ]
+   },
+   {
+      "id" : "79",
+      "data" : [
+         {
+            "revision_entry" : "2021-04-21 21:50:03",
+            "tests" : [
+               {
+                  "comment" : "#0",
+                  "attributes" : {
+                     "model" : "Heidemann_|_Heidemann_HX_|_VTX-BELL"
+                  }
+               }
+            ],
+            "minProtocolVersion" : "1.27",
+            "dmsg" : "P79#A0E",
+            "dispatch_repeats" : "7",
+            "rmsg" : "MU;P0=-7152;P1=872;P2=-593;P3=323;P4=-296;P5=622;P6=-4650;D=0123452323232323454545236345234523232323234545452363452345232323232345454523634523452323232323454545236345234523232323234545452363452345232323232345454523634523452323232323454545236345234523232323234545452363452345232323232345454523634523452323232323454;CP=3;R=26;O;",
+            "internals" : {
+               "NAME" : "SD_BELL_A0E",
+               "DEF" : "79 A0E"
+            },
+            "comment" : "https://forum.fhem.de/index.php/topic,58397.msg828464.html#msg828464",
+            "revision_modul" : "14_SD_BELL.pm     0 2021-03-22 22:30:35Z HomeAuto_User",
+            "readings" : {
+               "state" : "ring"
+            },
+            "user" : "a13xde"
+         }
+      ],
+      "name" : "BELL-201-TX",
+      "module" : "SD_BELL"
+   },
+   {
+      "data" : [
+         {
+            "dmsg" : "P79#611",
+            "revision_entry" : "2021-04-21 21:48:30",
+            "minProtocolVersion" : "1.27",
+            "tests" : [
+               {
+                  "comment" : "#0",
+                  "attributes" : {
+                     "model" : "Heidemann_|_Heidemann_HX_|_VTX-BELL"
+                  }
+               }
+            ],
+            "internals" : {
+               "DEF" : "79 611",
+               "NAME" : "SD_BELL_611"
+            },
+            "dispatch_repeats" : "8",
+            "comment" : "Heidemann Funkklingel Sender, letztes Bit ungerade 611 619 61D",
+            "rmsg" : "MU;P0=-668;P1=365;P2=-325;P3=692;P4=-5209;CP=1;D=01230101012341012323010101012301010123410123230101010123010101234101232301010101230101012341012323010101012301010123410123230101010123010101234101232301010101230101012341012323010101012301010123410123230101010123010101234101232301010101230101012341012323;O;",
+            "readings" : {
+               "state" : "ring"
+            },
+            "user" : "Holger-Arnold",
+            "revision_modul" : "14_SD_BELL.pm     0 2021-03-22 22:30:35Z HomeAuto_User"
+         },
+         {
+            "rmsg" : "MU;P0=-29724;P1=357;P2=-666;P4=-324;P5=698;P6=-5242;CP=1;D=01214545212121214521214521612145452121212145212145216121454521212121452121452161214545212121214521214521612145452121212145212145216121454521212121452121452161214545212121214521214521612145452121212145212145216121454521212121452121452161214545212121214521;O;",
+            "dispatch_repeats" : "7",
+            "comment" : "Heidemann Funkklingel Sender, letztes Bit gerade 612 616 61A 61C 61E (ID 63 additionally)",
+            "internals" : {
+               "DEF" : "79 612",
+               "NAME" : "SD_BELL_612"
+            },
+            "readings" : {
+               "state" : "ring"
+            },
+            "user" : "Holger-Arnold",
+            "revision_modul" : "14_SD_BELL.pm     0 2021-03-22 22:30:35Z HomeAuto_User",
+            "revision_entry" : "2021-04-21 21:47:11",
+            "minProtocolVersion" : "1.27",
+            "tests" : [
+               {
+                  "comment" : "#1",
+                  "attributes" : {
+                     "model" : "Heidemann_|_Heidemann_HX_|_VTX-BELL"
+                  }
+               }
+            ],
+            "dmsg" : "P79#612"
+         },
+         {
+            "dispatch_repeats" : "6",
+            "internals" : {
+               "NAME" : "SD_BELL_3FC",
+               "DEF" : "79 3FC"
+            },
+            "rmsg" : "MU;P0=-421;P1=344;P2=-699;P4=659;P6=-5203;P7=259;D=1612121040404040404040421216121210404040404040404212161212104040404040404042121612121040404040404040421216121210404040404040404272761212104040404040404042121612121040404040404040421216121210404040404040404212167272104040404040404042721612127040404040404;CP=4;R=0;O;",
+            "comment" : "Heidemann Doorbell (ID 63 additionally) https://forum.fhem.de/index.php/topic,58397.msg879878.html#msg879878",
+            "revision_modul" : "14_SD_BELL.pm     0 2021-03-22 22:30:35Z HomeAuto_User",
+            "user" : "rcmcronny",
+            "readings" : {
+               "state" : "ring"
+            },
+            "dmsg" : "P79#3FC",
+            "revision_entry" : "2021-04-21 21:45:40",
+            "tests" : [
+               {
+                  "comment" : "#2",
+                  "attributes" : {
+                     "model" : "Heidemann_|_Heidemann_HX_|_VTX-BELL"
+                  }
+               }
+            ],
+            "minProtocolVersion" : "1.27"
+         }
+      ],
+      "id" : "79",
+      "name" : "HX 70372",
+      "module" : "SD_BELL"
+   },
+   {
+      "name" : "Grothe_Mistral_SE_01",
+      "module" : "SD_BELL",
+      "data" : [
+         {
+            "user" : "coolheizer",
+            "readings" : {
+               "state" : "ring"
+            },
+            "revision_modul" : "14_SD_BELL.pm     0 2021-03-22 22:30:35Z HomeAuto_User",
+            "rmsg" : "MC;LL=-409;LH=448;SL=-172;SH=262;D=238126DAA58;C=215;L=41;R=238;",
+            "internals" : {
+               "DEF" : "96 024DB5",
+               "NAME" : "SD_BELL_024DB5"
+            },
+            "comment" : "message length = 10, https://forum.fhem.de/index.php/topic,64251.msg941331.html#msg941331",
+            "dmsg" : "P96#47024DB54B",
+            "minProtocolVersion" : "1.27",
+            "tests" : [
+               {
+                  "comment" : "#0",
+                  "attributes" : {
+                     "model" : "Grothe_Mistral_SE_01"
+                  }
+               }
+            ],
+            "revision_entry" : "2021-03-25 15:03:07"
+         },
+         {
+            "minProtocolVersion" : "1.27",
+            "tests" : [
+               {
+                  "comment" : "#1",
+                  "attributes" : {
+                     "model" : "Grothe_Mistral_SE_01"
+                  }
+               }
+            ],
+            "revision_entry" : "2021-03-25 15:04:32",
+            "user" : "coolheizer",
+            "readings" : {
+               "state" : "Alarm"
+            },
+            "revision_modul" : "14_SD_BELL.pm     0 2021-03-22 22:30:35Z HomeAuto_User",
+            "internals" : {
+               "DEF" : "96 024DB5",
+               "NAME" : "SD_BELL_024DB5"
+            },
+            "rmsg" : "MC;LL=-415;LH=454;SL=-200;SH=226;D=23C126DAE58;C=215;L=41;R=246;",
+            "comment" : "message length = 10, https://forum.fhem.de/index.php/topic,64251.msg942026.html#msg942026",
+            "dmsg" : "P96#47824DB5CB"
+         }
+      ],
+      "id" : "96"
+   },
+   {
+      "module" : "SD_BELL",
+      "name" : "Grothe_Mistral_SE_03",
+      "id" : "96",
+      "data" : [
+         {
+            "revision_entry" : "2021-03-25 15:01:56",
+            "tests" : [
+               {
+                  "comment" : "#0",
+                  "attributes" : {
+                     "model" : "Grothe_Mistral_SE_03"
+                  }
+               }
+            ],
+            "minProtocolVersion" : "1.27",
+            "dmsg" : "P96#47104762003F",
+            "rmsg" : "MC;LL=-439;LH=419;SL=-221;SH=212;D=238823B1001F8;C=215;L=49;R=69;",
+            "internals" : {
+               "NAME" : "SD_BELL_104762",
+               "DEF" : "96 104762"
+            },
+            "comment" : "message length = 12, https://forum.fhem.de/index.php/topic,64251.msg940593.html#msg940593",
+            "revision_modul" : "14_SD_BELL.pm     0 2021-03-22 22:30:35Z HomeAuto_User",
+            "readings" : {
+               "state" : "ring",
+               "batteryState" : "ok"
+            },
+            "user" : "coolheizer"
+         },
+         {
+            "tests" : [
+               {
+                  "comment" : "#1",
+                  "attributes" : {
+                     "model" : "Grothe_Mistral_SE_03"
+                  }
+               }
+            ],
+            "minProtocolVersion" : "1.27",
+            "revision_entry" : "2021-03-25 15:00:34",
+            "revision_modul" : "14_SD_BELL.pm     0 2021-03-22 22:30:35Z HomeAuto_User",
+            "readings" : {
+               "batteryState" : "ok",
+               "state" : "Alarm"
+            },
+            "user" : "coolheizer",
+            "dmsg" : "P96#47904762803F",
+            "rmsg" : "MC;LL=-430;LH=418;SL=-216;SH=226;D=23C823B1401F8;C=214;L=49;R=53;",
+            "internals" : {
+               "DEF" : "96 104762",
+               "NAME" : "SD_BELL_104762"
+            },
+            "comment" : "message length = 12, https://forum.fhem.de/index.php/topic,64251.msg941904.html#msg941904"
+         }
+      ]
+   },
+   {
+      "data" : [
+         {
+            "internals" : {
+               "DEF" : "98 6A2C",
+               "NAME" : "SD_BELL_6A2C"
+            },
+            "dispatch_repeats" : "5",
+            "comment" : "Radio door chime",
+            "rmsg" : "MU;P0=1488;P1=-585;P2=520;P3=-1509;P4=1949;P5=-5468;CP=2;R=38;D=01232301230123010101230123230101454501232301230123010101230123230101454501232301230123010101230123230101454501232301230123010101230123230101454501232301230123010101230123230101454501232301230123010101230123230101454501232301230123010101230123230101454501;O;",
+            "readings" : {
+               "state" : "ring"
+            },
+            "user" : "nagelreo",
+            "revision_modul" : "14_SD_BELL.pm     0 2021-03-22 22:30:35Z HomeAuto_User",
+            "dmsg" : "P98#6A2C",
+            "revision_entry" : "2021-03-25 14:59:13",
+            "minProtocolVersion" : "1.27",
+            "tests" : [
+               {
+                  "attributes" : {
+                     "model" : "GEA-028DB"
+                  },
+                  "comment" : "#0"
+               }
+            ]
+         }
+      ],
+      "id" : "98",
+      "name" : "GEA-028DB",
+      "module" : "SD_BELL"
+   },
+   {
+      "module" : "SD_BELL",
+      "name" : "AVANTEK DB-LE",
+      "data" : [
+         {
+            "revision_entry" : "2021-08-09 21:27:21",
+            "tests" : [
+               {
+                  "attributes" : {
+                     "model" : "AVANTEK"
+                  },
+                  "comment" : "#0"
+               }
+            ],
+            "minProtocolVersion" : "1.31",
+            "dmsg" : "P112#08C114844FDA5CA2",
+            "internals" : {
+               "NAME" : "SD_BELL_08C114844",
+               "DEF" : "112 08C114844"
+            },
+            "rmsg" : "MN;D=08C114844FDA5CA2;R=48;",
+            "comment" : "wireless doorbell (bell button without battery)",
+            "revision_modul" : "14_SD_BELL.pm     0 2021-07-12 22:30:35Z HomeAuto_User",
+            "user" : "HomeAuto_User",
+            "readings" : {
+               "state" : "ring"
+            }
+         }
+      ],
+      "id" : "112"
+   }
+]

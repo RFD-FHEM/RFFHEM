@@ -1,4 +1,4 @@
-# $Id: 14_SD_WS.pm v3.5.4 2022-11-14 20:37:55Z sidey79 $
+# $Id: 14_SD_WS.pm v3.5.4 2022-12-29 23:35:50Z sidey79 $
 #
 # The purpose of this module is to support serval
 # weather sensors which use various protocol
@@ -54,6 +54,7 @@ package main;
 use strict;
 use warnings;
 use Carp qw(carp);
+use FHEM::Meta;
 
 # Forward declarations
 sub SD_WS_LFSR_digest8_reflect;
@@ -66,8 +67,7 @@ sub SD_WS_Initialize {
   my $hash = shift // return;
   $hash->{Match}    = '^W\d+x{0,1}#.*';
   $hash->{DefFn}    = \&SD_WS_Define;
-  $hash->{UndefFn}  = \&SD_WS_Undef;
-  $hash->{SetFn}    = \&SD_WS_Set;
+  $hash->{UndefFn}  = \&SD_WS_Undef;$hash->{SetFn}    = \&SD_WS_Set;
   $hash->{ParseFn}  = \&SD_WS_Parse;
   $hash->{AttrList} = "do_not_notify:1,0 ignore:0,1 showtime:1,0 " .
                       "model:E0001PA,S522,TFA_30.3251.10,TX-EZ6,other " .
@@ -106,7 +106,7 @@ sub SD_WS_Initialize {
     'SD_WS_120.*'     => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4hum4:Temp/Hum,', autocreateThreshold => '2:180'},
     'SD_WS_122_T.*'   => { ATTR => 'event-min-interval:.*:60 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4:Temp,', autocreateThreshold => '10:180'},
   };
-  return;
+  return FHEM::Meta::InitMod( __FILE__, $hash );
 }
 
 #############################
@@ -1111,6 +1111,7 @@ sub SD_WS_Parse {
                             return if (substr($rawData,12,1) ne '1'); # only weather station
                             $windgust = substr($rawData,14,3);
                             $windgust =~ tr/0123456789ABCDEF/FEDCBA9876543210/;
+                            # uncoverable branch true
                             return if ($windgust !~ m/^\d+$/xms);
                             return $windgust * 0.1;
                           },
@@ -1118,6 +1119,7 @@ sub SD_WS_Parse {
                             return if (substr($rawData,12,1) ne '1'); # only weather station
                             $windspeed = substr($rawData,18,2) . substr($rawData,17,1);
                             $windspeed =~ tr/0123456789ABCDEF/FEDCBA9876543210/;
+                            # uncoverable branch true
                             return if ($windspeed !~ m/^\d+$/xms);
                             return $windspeed * 0.1;
                           },
@@ -1127,6 +1129,7 @@ sub SD_WS_Parse {
                             return ($winddir * 1, $winddirtxtar[round(($winddir / 22.5),0)]);
                           },
         temp       => sub {my ($rawData,$bitData) = @_;
+                            # uncoverable condition right
                             return if ((substr($rawData,12,1) eq '1' && substr($rawData,33,1) eq '1') || substr($rawData,24,3) !~ m/^\d+$/xms); # not by weather station & rain
                             $rawTemp = substr($rawData,24,3) * 0.1;
                             if (substr($bitData,108,1) eq '1') {
@@ -1139,6 +1142,7 @@ sub SD_WS_Parse {
                             return round($rawTemp,1);
                           },
         hum        => sub {my ($rawData,undef) = @_;
+                            # uncoverable condition right
                             return if ((substr($rawData,12,1) eq '1' && substr($rawData,33,1) eq '1') || substr($rawData,28,2) !~ m/^\d+$/xms); # not by weather station & rain
                             $hum = substr($rawData,28,2) * 1;
                             if (substr($rawData,12,1) eq '4' && $hum >= 1 && $hum <= 16) {  # Soil Moisture
@@ -1150,6 +1154,7 @@ sub SD_WS_Parse {
                             return if (substr($rawData,33,1) ne '1' || substr($rawData,12,1) ne '1'); # message type || weather station
                             $rain = substr($rawData,24,6);
                             $rain =~ tr/0123456789ABCDEF/FEDCBA9876543210/;
+                            # uncoverable branch true
                             return if ($rain !~ m/^\d+$/xms);
                             return $rain * 0.1;
                           },
@@ -1157,6 +1162,7 @@ sub SD_WS_Parse {
                             return if (substr($rawData,33,1) ne '0' || substr($rawData,12,1) ne '1'); # message type || weather station
                             $uv = substr($rawData,30,3);
                             $uv =~ tr/0123456789ABCDEF/FEDCBA9876543210/;
+                            # uncoverable branch true
                             return if ($uv !~ m/^\d+$/xms);
                             return $uv * 0.1;
                           },
@@ -1825,17 +1831,13 @@ sub SD_WS_Parse {
 
   # Sanity checks
   if($def && $protocol ne '106' && $protocol ne '113' && $protocol ne '122') { # not forBBQ temperature sensor GT-TMBBQ-01s, Wireless Grill Thermometer GFGT 433 B1 and TM40
-    my $timeSinceLastUpdate = abs(ReadingsAge($name, "state", 0));
+    my $timeSinceLastUpdate = abs(ReadingsAge($name, 'state', 0));
     # temperature
-    if (defined($temp) && defined(ReadingsVal($name, "temperature", undef))) {
-      my $diffTemp = 0;
-      my $oldTemp = ReadingsVal($name, "temperature", undef);
+    my $oldTemp = ReadingsVal($name, 'temperature', undef);
+    if (defined $oldTemp && defined $temp) {
+      #my $oldTemp = ReadingsVal($name, "temperature", undef);
       my $maxdeviation = AttrVal($name, "max-deviation-temp", 1);       # default 1 K
-      if ($temp > $oldTemp) {
-        $diffTemp = ($temp - $oldTemp);
-      } else {
-        $diffTemp = ($oldTemp - $temp);
-      }
+      my $diffTemp = abs($temp - $oldTemp);
       $diffTemp = sprintf("%.1f", $diffTemp);       
       Log3 $name, 4, "$ioname: $name old temp $oldTemp, age $timeSinceLastUpdate, new temp $temp, diff temp $diffTemp";
       my $maxDiffTemp = $timeSinceLastUpdate / 60 + $maxdeviation;      # maxdeviation + 1.0 Kelvin/Minute
@@ -1847,15 +1849,11 @@ sub SD_WS_Parse {
       }
     }
     # humidity
-    if (defined($hum) && defined(ReadingsVal($name, "humidity", undef))) {
-      my $diffHum = 0;
-      my $oldHum = ReadingsVal($name, "humidity", undef);
+    my $oldHum = ReadingsVal($name, 'humidity', undef);
+    if (defined $oldHum && defined $hum) {
+      #my $oldHum = ReadingsVal($name, "humidity", undef);
       my $maxdeviation = AttrVal($name, "max-deviation-hum", 1);        # default 1 %
-      if ($hum > $oldHum) {
-        $diffHum = ($hum - $oldHum);
-      } else {
-        $diffHum = ($oldHum - $hum);
-      }
+      my $diffHum = abs($hum - $oldHum);
       $diffHum = sprintf("%.1f", $diffHum);       
       Log3 $name, 4, "$ioname: $name old hum $oldHum, age $timeSinceLastUpdate, new hum $hum, diff hum $diffHum";
       my $maxDiffHum = $timeSinceLastUpdate / 60 + $maxdeviation;       # $maxdeviation + 1.0 %/Minute
@@ -2348,4 +2346,93 @@ sub SD_WS_WH2SHIFT {
 </ul>
 
 =end html_DE
+=for :application/json;q=META.json 14_SD_WS.pm
+{
+  "abstract": "Supports various weather stations",
+  "author": [
+    "Sidey <>",
+    "ralf9 <>"
+  ],
+  "x_fhem_maintainer": [
+    "Sidey"
+  ],
+  "x_fhem_maintainer_github": [
+    "Sidey79"
+  ],
+  "description": "The SD_WS module processes the messages from various environmental sensors received from an IO device (CUL, CUN, SIGNALDuino, SignalESP etc.)",
+  "dynamic_config": 1,
+  "keywords": [
+    "fhem-sonstige-systeme",
+    "fhem-hausautomations-systeme",
+    "fhem-mod",
+    "signalduino",
+    "weather",
+    "station",
+    "sensor",
+	  "Hama",
+	  "TFA",
+	  "Bresser"
+  ],
+  "license": [
+    "GPL_2"
+  ],
+  "meta-spec": {
+    "url": "https://metacpan.org/pod/CPAN::Meta::Spec",
+    "version": 2
+  },
+  "name": "FHEM::SD_WS",
+  "prereqs": {
+    "runtime": {
+      "requires": {
+        "Carp": "0",
+        "Digest:CRC": "0"
+      }
+    },
+    "develop": {
+      "requires": {
+        "Carp": "0",
+        "Digest:CRC": "0"
+      }
+    }
+  },
+  "release_status": "stable",
+  "resources": {
+    "bugtracker": {
+      "web": "https://github.com/RFD-FHEM/RFFHEM/issues/"
+    },
+    "x_testData": [
+      {
+        "url": "https://raw.githubusercontent.com/RFD-FHEM/RFFHEM/master/t/FHEM/14_SD_WS/testData.json",
+        "testname": "Testdata with SD_WS sensors"
+      }
+    ],
+    "repository": {
+      "x_master": {
+        "type": "git",
+        "url": "https://github.com/RFD-FHEM/RFFHEM.git",
+        "web": "https://github.com/RFD-FHEM/RFFHEM/tree/master"
+      },
+      "type": "svn",
+      "url": "https://svn.fhem.de/fhem",
+      "web": "https://svn.fhem.de/trac/browser/trunk/fhem/FHEM/14_Hideki.pm",
+      "x_branch": "trunk",
+      "x_filepath": "fhem/FHEM/",
+      "x_raw": "https://svn.fhem.de/trac/export/latest/trunk/fhem/FHEM/14_SD_WS.pm"
+    },
+    "x_support_community": {
+      "board": "Sonstige Systeme",
+      "boardId": "29",
+      "cat": "FHEM - Hausautomations-Systeme",
+      "description": "Sonstige Hausautomations-Systeme",
+      "forum": "FHEM Forum",
+      "rss": "https://forum.fhem.de/index.php?action=.xml;type=rss;board=29",
+      "title": "FHEM Forum: Sonstige Systeme",
+      "web": "https://forum.fhem.de/index.php/board,29.0.html"
+    },
+    "x_wiki": {
+      "web": "https://wiki.fhem.de/wiki/SIGNALduino"
+    }
+  }
+}
+=end :application/json;q=META.json
 =cut

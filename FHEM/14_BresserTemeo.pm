@@ -23,10 +23,10 @@ BresserTemeo_Initialize($)
 
 
   $hash->{Match}     = "^P44x{0,1}#[A-F0-9]{18}";   # Laenge (Anzahl nibbles nach 0x75 )noch genauer spezifizieren
-  $hash->{DefFn}     = "BresserTemeo_Define";
-  $hash->{UndefFn}   = "BresserTemeo_Undef";
-  $hash->{AttrFn}    = "BresserTemeo_Attr";
-  $hash->{ParseFn}   = "BresserTemeo_Parse";
+  $hash->{DefFn}     = \&BresserTemeo_Define;
+  $hash->{UndefFn}   = \&BresserTemeo_Undef;
+  $hash->{AttrFn}    = \&BresserTemeo_Attr;
+  $hash->{ParseFn}   = \&BresserTemeo_Parse;
   $hash->{AttrList}  = "IODev do_not_notify:0,1 showtime:0,1 "
                        ."ignore:0,1 "
                       ." $readingFnAttributes";
