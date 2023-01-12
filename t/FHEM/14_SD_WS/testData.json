@@ -2493,7 +2493,7 @@
             "user" : "xeenon"
          }
       ],
-      "id" : 123,
+      "id" : "123",
       "module" : "SD_WS",
       "name" : "Inkbird IBS-P01R"
    },
@@ -2521,7 +2521,7 @@
             "user" : "elektron-bbs"
          }
       ],
-      "id" : 123,
+      "id" : "123",
       "module" : "SD_WS",
       "name" : "Inkbird ITH-20R"
    }
