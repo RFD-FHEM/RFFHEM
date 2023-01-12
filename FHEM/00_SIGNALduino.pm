@@ -4818,6 +4818,10 @@ USB-connected devices (SIGNALduino):<br>
         Modulation 2-FSK, Datarate=17.26 kbps, Sync Word=2DD4, Packet Length= Byte, Frequency 868.35 MHz
         <ul><small>Example: Thunder and lightning sensor Fine Offset WH57, Froggit DP60, Ambient Weather WH31L</small></ul>
       </li>
+      <li>Inkbird_IBS-P01R<br>
+        Modulation 2-FSK, Datarate=10.00 kbps, Sync Word=2DD4, Packet Length=18 Byte, Frequency 433.92 MHz
+        <ul><small>Example: Inkbird IBS-P01R pool thermometer, ITH-20R thermometer/hygrometer</small></ul>
+      </li>
       <li>KOPP_FC<br>
         modulation GFSK, Datarate=4.7855 kbps, Sync Word=AA54, frequency 868.3MHz
       </li>
@@ -5399,6 +5403,10 @@ USB-connected devices (SIGNALduino):<br>
       <li>Fine_Offset_WH57_868<br>
         Modulation 2-FSK, Datenrate=17.26 kbps, Sync Word=2DD4, Packet Length=9 Byte, Frequenz 868.35 MHz
         <ul><small>Beispiel: Gewittersensor Fine Offset WH57, Froggit DP60, Ambient Weather WH31L</small></ul>
+      </li>
+      <li>Inkbird_IBS-P01R<br>
+        Modulation 2-FSK, Datenrate=10.00 kbps, Sync Word=2DD4, Packet Length=18 Byte, Frequenz 433.92 MHz
+        <ul><small>Beispiel: Inkbird IBS-P01R Pool Thermometer, ITH-20R Thermo-/Hygrometer</small></ul>
       </li>
       <li>KOPP_FC<br>
         Modulation GFSK, Datenrate=4.7855 kbps, Sync Word=AA54, Frequenz 868.3MHz
