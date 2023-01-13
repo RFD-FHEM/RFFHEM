@@ -2473,6 +2473,11 @@
    {
       "data" : [
          {
+            "tests" : [
+               {
+                  "comment" : "#0"
+               }
+            ],
             "comment" : "Inkbird IBS-P01R Pool Thermometer, Inkbird ITH-20R",
             "dmsg" : "W123#D3910F800301005A0655FA001405140535F6",
             "internals" : {
@@ -2500,6 +2505,11 @@
    {
       "data" : [
          {
+            "tests" : [
+               {
+                  "comment" : "#1"
+               }
+            ],
             "comment" : "Inkbird IBS-P01R Pool Thermometer, Inkbird ITH-20R",
             "dmsg" : "W123#D3910F00010301207E43FE0014055802772A",
             "internals" : {
