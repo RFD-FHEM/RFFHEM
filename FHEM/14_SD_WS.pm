@@ -1438,10 +1438,10 @@ sub SD_WS_Parse {
         # t: 2 Byte, Temperature for the external sensor, 0x1405 if not connected
         # H: 2 Byte, Relative humidity % * 10, little endian, so 0xC501 is 453 or 45.3%
         # C: 2 Byte, CRC16 over bytes 0-15, poly=0x8005 (0xA001 reflected), init=0x2f61 (0x86F4 reflected)
-        # 0    4    | 8    12   | 16   20   | 24   28   | 32   36   | 40   44   | 48   52   | 56   60   | 64   68   | 72   76   | 80   84   | 88   92   | 96   100  | 104
+        # 0    4    | 8    12   | 16   20   | 24   28   | 32   36   | 40   44   | 48   52   | 56   60   | 64   68   | 72   76   | 80   84   | 88   92   | 96   100  | 104  108  | 112  116  | 120  128  | 132  136  | 140  144
         # 1101 0011 | 1001 0001 | 0000 1111 | 1000 0000 | 0000 0011 | 0000 0001 | 0000 0000 | 0001 1110 | 0000 0110 | 0101 0101 | 0001 0100 | 0000 0001 | 0001 0100 | 0000 0101 | 0001 0100 | 0000 0101 | 0001 1100 | 0111 1011
         # 1101 0011 | 1001 0001 | 0000 1111 | 0000 0000 | 0000 0001 | 0000 0011 | 0000 0011 | 0010 0001 | 0111 1110 | 0100 0011 | 1010 0101 | 0000 0000 | 0001 0100 | 0000 0101 | 0100 0110 | 0000 0010 | 0111 1111 | 0101 0001
-        # SSSS SSSS | SSSS SSSS | LLLL LLLL | 3333 4444 | 5555 6666 | 
+        # SSSS SSSS | SSSS SSSS | LLLL LLLL | 3333 3333 | 4444 4444 | 5555 5555 | 6666 6666 | BBBB BBBB | IIII IIII | IIII IIII | TTTT TTTT | TTTT TTTT | tttt tttt | tttt tttt | HHHH HHHH | HHHH HHHH | CCCC CCCC | CCCC CCCC
         sensortype     => 'IBS-P01R, ITH-20R',
         model          => 'SD_WS_123_T',
         prematch       => sub { return 1; }, # no precheck known
