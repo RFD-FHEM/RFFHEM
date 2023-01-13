@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 14_SD_WS_Maverick.pm 26979 2023-01-06 12:07:45Z sidey79 $
+# $Id: 14_SD_WS_Maverick.pm 26979 2023-01-09 19:54:08Z sidey79 $
 # 
 # The purpose of this module is to support Maverick sensors
 # Sidey79 & Cruizer 2016
@@ -47,7 +47,7 @@ sub SD_WS_Maverick_Initialize
 
 #############################
 sub
-SD_WS_Maverick_Define($$)
+SD_WS_Maverick_Define
 {
   my ($hash, $def) = @_;
   my @a = split("[ \t][ \t]*", $def);
@@ -80,7 +80,7 @@ sub SD_WS_Maverick_Undef
 
 ###################################
 sub
-SD_WS_Maverick_Parse($$)
+SD_WS_Maverick_Parse
 {
   my ($iohash, $msg) = @_;
   #my $rawData = substr($msg, 2);
@@ -244,7 +244,7 @@ SD_WS_Maverick_Parse($$)
   return $name;
 }
 
-sub SD_WS_Maverick_Attr(@)
+sub SD_WS_Maverick_Attr
 {
   my ($cmd,$name,$attr_name,$attr_value) = @_;
   my $hash = $defs{$name};
@@ -259,7 +259,7 @@ sub SD_WS_Maverick_Attr(@)
   return undef;
 }
 
-sub SD_WS_Maverick_SetSensor1Inactive($){
+sub SD_WS_Maverick_SetSensor1Inactive {
   my ($hash) = @_;
   my $name = $hash->{NAME};
   Log3 $hash, 5, "$name SD_WS_Maverick_SetSensor1Inactive";
@@ -267,7 +267,7 @@ sub SD_WS_Maverick_SetSensor1Inactive($){
   SD_WS_Maverick_UpdateState($hash);
 }
 
-sub SD_WS_Maverick_SetSensor2Inactive($){
+sub SD_WS_Maverick_SetSensor2Inactive {
   my ($hash) = @_;
   my $name = $hash->{NAME};
   Log3 $hash, 5, "$name SD_WS_Maverick_SetSensor2Inactive";
@@ -275,7 +275,7 @@ sub SD_WS_Maverick_SetSensor2Inactive($){
   SD_WS_Maverick_UpdateState($hash);
 }
 
-sub SD_WS_Maverick_UpdateState($) {
+sub SD_WS_Maverick_UpdateState {
   my ($hash) = @_;
   my $name = $hash->{NAME};
   Log3 $hash, 5, "$name SD_WS_Maverick_UpdateState";

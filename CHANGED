@@ -1,3 +1,11 @@
+2023-01-09 - Merge pull request #1145 from RFD-FHEM/master-criticPrototypes
+
+Removed prototypes
+2023-01-09 - SD_GT add attributes repeats and disableSetAllFunction (#1146)
+
+* Update 10_SD_GT.pm
+add attributes repeats and disableSetAllFunction
+commandref, change format <a name="SD_GT"> to <a id="SD_GT">
 2023-01-08 - Merge pull request #1143 from RFD-FHEM/master-3.5.5
 
 Prepare version 3.5.5
