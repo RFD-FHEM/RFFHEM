@@ -843,14 +843,14 @@ sub SIGNALduino_Set_sendMsg {
   return "$hash->{NAME}: sendmsg, unknown protocol: $protocol" if (!$hash->{protocolObject}->protocolExists($protocol));
 
   $repeats //= 1 ;
-  if (InternalVal($hash->{NAME},'cc1101_available',0))
+  if ( InternalVal($hash->{NAME},'cc1101_available',0) == 1 )
   {
-    my $f=$hash->{protocolObject}->getProperty($protocol,'frequency');
-    if ( defined $f ) {
-      $frequency = q[F=].$hash->{protocolObject}->getProperty($protocol,'frequency'). q[;]
+    $frequency //= $hash->{protocolObject}->checkProperty($protocol,'frequency',q{});
+    if ( length $frequency > 0 ) {
+      $frequency = q[F=].$frequency.q[;];
     }
-  }
-  $frequency //= q{};
+  } else { $frequency = q{}; }
+  
   my %signalHash;
   my %patternHash;
   my $pattern='';
