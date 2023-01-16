@@ -1,3 +1,13 @@
+2023-01-16 - Fix usage of frequency when sending (#1150)
+
+* 00_SIGNALduino.pm
+
+Fix: Set frequency correctly if one was specified
+Change: Prefer frequency from send command instead of the one from the protocol
+
+* Update Versiondate
+
+Co-authored-by: GitHub Action <action@github.com>
 2023-01-14 - Inkbird IBS-P01R Pool Thermometer (#1149)
 
 * Update 14_SD_WS.pm
