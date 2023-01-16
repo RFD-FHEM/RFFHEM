@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 14_Hideki.pm 21666 2023-01-04 21:53:33Z HomeAutoUser $
+# $Id: 14_Hideki.pm 26983 2023-01-06 12:07:45Z sidey79 $
 # The file is taken from the SIGNALduino project
 # see http://www.fhemwiki.de/wiki/SIGNALduino
 # and was modified by a few additions
@@ -639,18 +639,17 @@ sub correctWindValues {
     <li><a href="#ignore">ignore</a></li>
     <li><a href="#readingFnAttributes">readingFnAttributes</a></li>
     <li><a href="#showtime">showtime</a></li>
-    <li><a name="windDirCorr"></a>windDirCorr<br>
-    Korrekturwert Ihrer angezeigten Windrichtung in Grad. Der Korrekturwert wird zu dem gemessenen Grad Wert Addiert.<br>
-    Beispielwert: 5<br>
-    Standardwert: 0<br>
-    </li>
-    <li><a name="windSpeedCorr"></a>windSpeedCorr<br>
-    Korrekturwert Ihrer angezeigten Windgeschwindigkeit als Fließkommezahk. Die gemessene Geschwindigkeit wird mit dem angegeben Wert multiplizuert. Der Wert 0 deaktiviert die Funktion.<br>
-    Beispielwert: 1.25<br>
-    Standardwert: 1<br>
-    </li>  <br>
+	<li><a name="windDirCorr"></a>windDirCorr<br>
+	Korrekturwert Ihrer angezeigten Windrichtung in Grad. Der Korrekturwert wird zu dem gemessenen Grad Wert Addiert.<br>
+	Beispielwert: 5<br>
+	Standardwert: 0<br>
+	</li>
+	<li><a name="windSpeedCorr"></a>windSpeedCorr<br>
+	Korrekturwert Ihrer angezeigten Windgeschwindigkeit als Fließkommezahk. Die gemessene Geschwindigkeit wird mit dem angegeben Wert multiplizuert. Der Wert 0 deaktiviert die Funktion.<br>
+	Beispielwert: 1.25<br>
+	Standardwert: 1<br>
+	</li>  <br>
   </ul>
-  <br>
 </ul>
 
 =end html_DE

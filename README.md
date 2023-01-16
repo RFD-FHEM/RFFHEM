@@ -1,4 +1,4 @@
-SIGNALduino - FHEM Modules Version 3.5.4
+SIGNALduino - FHEM Modules Version 3.5.5
 
 Base Branch:
 
@@ -58,6 +58,7 @@ Supported Devices / Protocols
 |Hama TS33C, Bresser Thermo/Hygro Sensor  | Weather sensor |
 |Heidemann, Heidemann HX, VTX-BELL | wireless bell |
 |Hoermann HSM2, HSM4, HS1-868-BS | Remote control |
+|Inkbird IBS-P01R, ITH-20R | Pool thermometer, temperature/humidity sensor |
 |JCHENG SECURITY | PIR Detector |
 |KoppFreeControl| Remotes and switches|
 |KRINNER Lumix, XM21-0| Remote control LED XMAS|
