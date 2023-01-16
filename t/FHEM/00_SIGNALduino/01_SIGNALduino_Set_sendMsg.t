@@ -75,6 +75,33 @@ $defs{cc1101dummyDuino}{cc1101_available} = 1;
         },
     },
     {
+      deviceName => q[dummyDuino],
+      testname=>  "set sendMsg ID:43 (P43#0101#R3#C500#F10AB855530) with custom frequency but without cc1101",
+      input =>  "sendMsg P43#0101#R3#C500#F10AB855530",
+      check =>  array  {
+            item D();
+            item 'SC;R=3;SR;P0=-2560;P1=2560;P3=-640;D=10101010101010113;SM;C=895;D=0101;';
+        },
+    },
+    {
+      deviceName => q[cc1101dummyDuino],
+      testname=>  "set sendMsg ID:43 (P43#0101#R3#C500#F10AB855530) with custom frequency",
+      input =>  "sendMsg P43#0101#R3#C500#F10AB855530",
+      check =>  array  {
+            item D();
+            item 'SC;R=3;SR;P0=-2560;P1=2560;P3=-640;D=10101010101010113;SM;C=895;D=0101;F=10AB855530;';
+        },
+    },
+    {
+      deviceName => q[cc1101dummyDuino],
+        testname=>  "set sendMsg ID:3 (P3#is11111F0FF00F#R6) with 433.89 MhZ frequency",
+      input =>  "sendMsg P3#is11111F0FF0F0#R6#F10b025",
+      check =>  array  {
+          item D();
+            item 'SR;R=6;P0=250;P1=-7750;P2=750;P3=-250;P4=-750;D=01232323232323232323230423040404230423040404230404;F=10b025;';
+        },
+    },
+    {
       deviceName => q[cc1101dummyDuino],
         testname =>  "set sendMsg ID:112 (P112#0101#R1) xFSK protocol",
            input =>  "sendMsg P112#08C114844#R1",

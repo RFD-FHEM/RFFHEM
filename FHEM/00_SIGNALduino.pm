@@ -1,4 +1,4 @@
-# $Id: 00_SIGNALduino.pm 3.5.5 2023-01-13 19:55:16Z elektron-bbs $
+# $Id: 00_SIGNALduino.pm 3.5.5 2023-01-15 02:03:31Z sidey79 $
 # v3.5.5 - https://github.com/RFD-FHEM/RFFHEM/tree/master
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incoming messages
 # see http://www.fhemwiki.de/wiki/SIGNALDuino
@@ -41,7 +41,7 @@ use List::Util qw(first);
 
 
 use constant {
-  SDUINO_VERSION                  => '3.5.5+20230113',  # Datum wird automatisch bei jedem pull request aktualisiert
+  SDUINO_VERSION                  => '3.5.5+20230115',  # Datum wird automatisch bei jedem pull request aktualisiert
   SDUINO_INIT_WAIT_XQ             => 1.5,     # wait disable device
   SDUINO_INIT_WAIT                => 2,
   SDUINO_INIT_MAXRETRY            => 3,
@@ -843,14 +843,14 @@ sub SIGNALduino_Set_sendMsg {
   return "$hash->{NAME}: sendmsg, unknown protocol: $protocol" if (!$hash->{protocolObject}->protocolExists($protocol));
 
   $repeats //= 1 ;
-  if (InternalVal($hash->{NAME},'cc1101_available',0))
+  if ( InternalVal($hash->{NAME},'cc1101_available',0) == 1 )
   {
-    my $f=$hash->{protocolObject}->getProperty($protocol,'frequency');
-    if ( defined $f ) {
-      $frequency = q[F=].$hash->{protocolObject}->getProperty($protocol,'frequency'). q[;]
+    $frequency //= $hash->{protocolObject}->checkProperty($protocol,'frequency',q{});
+    if ( length $frequency > 0 ) {
+      $frequency = q[F=].$frequency.q[;];
     }
-  }
-  $frequency //= q{};
+  } else { $frequency = q{}; }
+  
   my %signalHash;
   my %patternHash;
   my $pattern='';
