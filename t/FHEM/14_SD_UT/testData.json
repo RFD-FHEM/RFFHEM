@@ -2594,5 +2594,64 @@
      "id" : "20",
      "module" : "SD_UT",
      "name" : "DC_1961_TG_1846"
+   },
+   {
+      "data" : [
+         {
+            "comment" : "Remote control CasaFan FB-FNK Powerboat with 5 buttons for fan",
+            "dmsg" : "P124#3A976054",
+            "internals" : {
+               "DEF" : "FB_FNK_Powerboat 3A9760",
+               "NAME" : "FB_FNK_Powerboat_3A9760"
+            },
+            "minProtocolVersion" : "1.50",
+            "readings" : {
+               "LastAction" : "receive",
+               "deviceCode" : "3A9760",
+               "state" : "light_dimm"
+            },
+            "revision_entry" : "2023-01-19 14:18:08",
+            "revision_modul" : "14_SD_UT.pm     0 2023-01-04 17:35:33Z elektron-bbs",
+            "rmsg" : "MU;P0=-21800;P1=1716;P2=-444;P3=850;P4=416;P5=-2996;P6=648;D=012323242424232423242323242324242423242423232323232324232423242323512323242424232423242323242324242423242423232323232324232423242323512326;CP=4;R=218;",
+            "tests" : [
+               {
+                  "attributes" : {
+                  "model" : "FB_FNK_Powerboat"
+                  },
+                  "comment" : "#0"
+               }
+            ],
+            "user" : "datwusel"
+         },
+         {
+            "comment" : "Remote control CasaFan FB-FNK Powerboat with 5 buttons for fan",
+            "dmsg" : "P124#3A9760E6",
+            "internals" : {
+               "DEF" : "FB_FNK_Powerboat 3A9760",
+               "NAME" : "FB_FNK_Powerboat_3A9760"
+            },
+            "minProtocolVersion" : "1.50",
+            "readings" : {
+               "LastAction" : "receive",
+               "deviceCode" : "3A9760",
+               "state" : "1_fan_low_speed"
+            },
+            "revision_entry" : "2023-01-19 14:22:45",
+            "revision_modul" : "unknown",
+            "rmsg" : "MS;P1=1717;P2=-439;P3=861;P4=419;P5=-2992;D=451232324242423242324232324232424242324242323232323242424232324242;CP=4;SP=5;R=229;O;m2;",
+            "tests" : [
+               {
+                  "attributes" : {
+                  "model" : "FB_FNK_Powerboat"
+                  },
+                  "comment" : "#1"
+               }
+            ],
+            "user" : "datwusel"
+         }
+      ],
+      "id" : 124.1,
+      "module" : "SD_UT",
+      "name" : "FB_FNK_Powerboat_3A9760"
    }
 ]
