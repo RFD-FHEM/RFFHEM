@@ -70,7 +70,7 @@
 ##### notice #### or #### info ############################################################################################################
 # !!! Between the keys and values ​​no tabs, please use spaces !!!
 # !!! Please use first unused id for new protocols !!!
-# ID´s are currently unused: 124 - 
+# ID´s are currently unused: 125 - 
 # ID´s need to be revised (preamble u): 5|19|21|22|23|25|28|31|36|40|52|59|63
 ###########################################################################################################################################
 # Please provide at least three messages for each new MU/MC/MS/MN protocol and a URL of issue in GitHub or discussion in FHEM Forum
@@ -85,7 +85,7 @@ package lib::SD_ProtocolData;
   use strict;
   use warnings;
 
-  our $VERSION = '1.49';
+  our $VERSION = '1.50';
 
   our %protocols = (
     "0" =>  ## various weather sensors (500 | 9100)
@@ -3296,6 +3296,46 @@ package lib::SD_ProtocolData;
         rfmode          => 'Inkbird_IBS-P01R',
         clientmodule    => 'SD_WS',
         length_min      => '36',
+      },
+    "124" => ## Remote control CasaFan FB-FNK Powerboat with 5 buttons for fan
+             # https://forum.fhem.de/index.php/topic,53282.msg1258346.html#msg1258346 @ datwusel 2023-01-17
+             # FB_FNK_Powerboat_3A9760  1_fan_low_speed   MS;P1=1717;P2=-439;P3=861;P4=419;P5=-2992;D=451232324242423242324232324232424242324242323232323242424232324242;CP=4;SP=5;R=229;O;m2;
+             # FB_FNK_Powerboat_3A9760  fan_off           MS;P1=1730;P2=-430;P3=849;P4=436;P5=-2974;D=451232324242423242324232324232424242324242323232323242423242324242;CP=4;SP=5;R=226;O;m2;
+      {
+        name            => 'FB-Powerboat',
+        comment         => 'Remote control CasaFan FB-FNK Powerboat',
+        id              => '124',
+        knownFreqs      => '433.92',
+        one             => [1,-1],      # 430,-430
+        zero            => [2,-1],      # 860,-430
+        sync            => [1,-7,4,-1], # 430,-3010,1720,-430
+        clockabs        => 430,
+        format          => 'twostate',
+        preamble        => 'P124#',
+        clientmodule    => 'SD_UT',
+        modulematch     => '^P124#.{8}',
+        length_min      => '31',
+        length_max      => '32',
+      },
+    "124.1" => ## Remote control CasaFan FB-FNK Powerboat with 5 buttons for fan
+               # https://forum.fhem.de/index.php/topic,53282.msg1258346.html#msg1258346 @ datwusel 2023-01-17
+               # FB_FNK_Powerboat_3A9760  light_dimm     MU;P0=-21800;P1=1716;P2=-444;P3=850;P4=416;P5=-2996;P6=648;D=012323242424232423242323242324242423242423232323232324232423242323512323242424232423242323242324242423242423232323232324232423242323512326;CP=4;R=218;
+               # FB_FNK_Powerboat_3A9760  light_on_off   MU;P0=-8672;P1=1730;P2=-426;P3=820;P4=432;P5=-2976;D=012323242424232423242323242324242423242423232323232324242323232323512323242424232423242323242324242423242423232323232324242323232323512323242424232423242323242324242423242423;CP=4;R=227;
+      {
+        name            => 'FB-Powerboat',
+        comment         => 'Remote control CasaFan FB-FNK Powerboat',
+        id              => '124.1',
+        knownFreqs      => '433.92',
+        one             => [1,-1],      # 430,-430
+        zero            => [2,-1],      # 860,-430
+        start           => [1,-7,4,-1], # 430,-3010,1720,-430
+        clockabs        => 430,
+        format          => 'twostate',
+        preamble        => 'P124#',
+        clientmodule    => 'SD_UT',
+        modulematch     => '^P124#.{8}',
+        length_min      => '31',
+        length_max      => '32',
       },
     ########################################################################
     #### ###  register informations from other hardware protocols  #### ####
