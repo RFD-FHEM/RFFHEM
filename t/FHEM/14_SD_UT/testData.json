@@ -2623,6 +2623,13 @@
             ],
             "user" : "datwusel"
          },
+      ],
+      "id" : 124,
+      "module" : "SD_UT",
+      "name" : "FB_FNK_Powerboat_3A9760"
+   },
+   {
+      "data" : [
          {
             "comment" : "Remote control CasaFan FB-FNK Powerboat with 5 buttons for fan",
             "dmsg" : "P124#3A9760E6",
