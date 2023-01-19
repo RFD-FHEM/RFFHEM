@@ -403,6 +403,14 @@
 #     TC6861_3DC_1 ON    MU;P0=4372;P1=-689;P2=254;P3=575;P4=-368;D=0121213434212134343434213434342121213434343434342;CP=2;R=59;
 #}
 ###############################################################################################################################################################################
+# - Remote control CasaFan FB-FNK Powerboat [Protocol 124]
+#{    elektron-bbs 2023-01-19
+#     FB_FNK_Powerboat_3A9760  1_fan_low_speed   MS;P1=1717;P2=-439;P3=861;P4=419;P5=-2992;D=451232324242423242324232324232424242324242323232323242424232324242;CP=4;SP=5;R=229;O;m2;
+#     FB_FNK_Powerboat_3A9760  fan_off           MS;P1=1730;P2=-430;P3=849;P4=436;P5=-2974;D=451232324242423242324232324232424242324242323232323242423242324242;CP=4;SP=5;R=226;O;m2;
+#     FB_FNK_Powerboat_3A9760  light_dimm        MU;P0=-21800;P1=1716;P2=-444;P3=850;P4=416;P5=-2996;P6=648;D=012323242424232423242323242324242423242423232323232324232423242323512323242424232423242323242324242423242423232323232324232423242323512326;CP=4;R=218;
+#     FB_FNK_Powerboat_3A9760  light_on_off      MU;P0=-8672;P1=1730;P2=-426;P3=820;P4=432;P5=-2976;D=012323242424232423242323242324242423242423232323232324242323232323512323242424232423242323242324242423242423232323232324242323232323512323242424232423242323242324242423242423;CP=4;R=227;
+#}
+###############################################################################################################################################################################
 # !!! ToDo´s !!!
 #     - LED lights, counter battery-h reading --> commandref hour_counter module
 #     -
@@ -415,7 +423,7 @@ use warnings;
 use FHEM::Meta;
 no warnings 'portable';  # Support for 64-bit ints required
 
-our $VERSION = '2022-09-13';
+our $VERSION = '2023-01-19';
 
 sub SD_UT_bin2tristate;
 sub SD_UT_tristate2bin;
@@ -448,6 +456,16 @@ my %models = (
                         Protocol   => 'P86',
                         Typ        => 'remote'
                       },
+  'FB_FNK_Powerboat' => { '1110'   => '1_fan_low_speed',
+                          '1111'   => '2_fan_medium_speed',
+                          '0111'   => '3_fan_high_speed',
+                          '0110'   => 'light_on_off',
+                          '1101'   => 'fan_off',
+                          '0101'   => 'light_dimm',
+                        hex_length => [8],
+                        Protocol   => 'P124',
+                        Typ        => 'remote'
+                    },
   'Chilitec_22640' => { '0010'     => 'brightness_minus',
                         '0100'     => 'power_off',
                         '0110'     => 'flickering_fast',
@@ -959,7 +977,7 @@ my %models = (
 #############################
 sub SD_UT_Initialize {
   my ($hash) = @_;
-  $hash->{Match}      = '^P(?:14|20|24|26|29|30|34|46|56|68|69|76|78|81|83|86|90|91|91\.1|92|93|95|97|99|104|105|114|118|121)#.*';
+  $hash->{Match}      = '^P(?:14|20|24|26|29|30|34|46|56|68|69|76|78|81|83|86|90|91|91\.1|92|93|95|97|99|104|105|114|118|121|124)#.*';
   $hash->{DefFn}      = \&SD_UT_Define;
   $hash->{UndefFn}    = \&SD_UT_Undef;
   $hash->{ParseFn}    = \&SD_UT_Parse;
@@ -1025,19 +1043,22 @@ sub SD_UT_Define {
   ### [2] checks CAME_TOP_432EV & Novy_840029 & Novy_840039 & Unitec_47031 ###
   # uncoverable condition true 
   return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short | long or not HEX (0-9 | a-f | A-F){2}" if (($a[2] eq 'CAME_TOP_432EV' || $a[2] eq 'Novy_840029' || $a[2] eq 'Novy_840039' || $a[2] eq 'Unitec_47031') && not $a[3] =~ /^[0-9a-fA-F]{2}/xms);
+
   ### [3] checks SA_434_1_mini | QUIGG_DMV | TR_502MSV | BeSmart_S4 ###
   # uncoverable condition true 
   return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short or long (must be 3 chars) or not HEX (0-9 | a-f | A-F){3}" if (($a[2] eq 'SA_434_1_mini' || $a[2] eq 'QUIGG_DMV' || $a[2] eq 'TR_502MSV' || $a[2] eq 'BeSmart_S4') && not $a[3] =~ /^[0-9a-fA-F]{3}/xms);    
+
   ### [4 nibble] checks Neff SF01_01319004 & BOSCH SF01_01319004_Typ2 & Chilitec_22640 & ESTO KL_RF01 & RCnoName20 & RCnoName20_10 & DC-1961-TG & xavax & BF_301 & Meikee_xx ###
   # uncoverable condition true 
   return "Wrong HEX-Value! ($a[3]) $a[2] Hex-value to short or long (must be 4 chars) or not hex (0-9 | a-f | A-F) {4}" if (($a[2] eq 'SF01_01319004' || $a[2] eq 'SF01_01319004_Typ2' || $a[2] eq 'Chilitec_22640' || $a[2] eq 'KL_RF01' || $a[2] eq 'RCnoName20' || $a[2] eq 'RCnoName20_10' || $a[2] eq 'DC_1961_TG' || $a[2] eq 'xavax' || $a[2] eq 'BF_301' || $a[2] eq 'Meikee_21' || $a[2] eq 'Meikee_24') && not $a[3] =~ /^[0-9a-fA-F]{4}/xms);
+
   ### [6] checks Manax | mumbi ###
   # uncoverable condition true 
   return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short | long or not HEX (0-9 | a-f | A-F){4}_[ABCD]|[all]" if ($a[2] eq 'RC_10' && not $a[3] =~ /^[0-9a-fA-F]{4}_([ABCD]|all)$/xms) ;
   
-  ### [6] checks MD_2003R | MD_210R | MD_2018R | Navaris | AC114_01B | Visivo ###
+  ### [6] checks MD_2003R | MD_210R | MD_2018R | Navaris | AC114_01B | Visivo | FB_FNK_Powerboat ###
   # uncoverable condition true 
-  return "wrong HEX-Value! ($a[3]) $a[2] Hex-value to short or long (must be 6 chars) or not hex (0-9 | a-f | A-F){6}" if (($a[2] eq 'MD_2003R' || $a[2] eq 'MD_210R' || $a[2] eq 'MD_2018R' || $a[2] eq 'Navaris' || $a[2] eq 'AC114_01B' || $a[2] eq 'Visivo') && not $a[3] =~ /^[0-9a-fA-F]{6}/xms);
+  return "wrong HEX-Value! ($a[3]) $a[2] Hex-value to short or long (must be 6 chars) or not hex (0-9 | a-f | A-F){6}" if (($a[2] eq 'MD_2003R' || $a[2] eq 'MD_210R' || $a[2] eq 'MD_2018R' || $a[2] eq 'Navaris' || $a[2] eq 'AC114_01B' || $a[2] eq 'Visivo' || $a[2] eq 'FB_FNK_Powerboat') && not $a[3] =~ /^[0-9a-fA-F]{6}/xms);
   
   ### [7] checks Hoermann HSM4 | Krinner_LUMIX | Momento ###
   # uncoverable branch true 
@@ -1046,12 +1067,15 @@ sub SD_UT_Define {
   ### [7] checks Tedsen_SKX1xx, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx (tristate code)###
   # uncoverable branch true 
   return "wrong tristate code! ($a[3]) $a[2] code to short or long (must be 7 chars) or values not 0, 1 or F" if (($a[2] eq 'Tedsen_SKX1xx' || $a[2] eq 'Tedsen_SKX2xx' || $a[2] eq 'Tedsen_SKX4xx' || $a[2] eq 'Tedsen_SKX6xx') && not $a[3] =~ /^[01fF]{7}$/xms);
+
   ### [8 nibble] checks Techmar ###
   # uncoverable branch true 
   return "wrong HEX-Value! ($a[3]) $a[2] Hex-value to short or long (must be 8 chars) or not hex (0-9 | a-f | A-F)" if (($a[2] eq 'Techmar') && not $a[3] =~ /^[0-9a-fA-F]{8}$/xms);
+
   ### [9] checks Hoermann HS1-868-BS ###
   # uncoverable branch true 
   return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short | long or not HEX (0-9 | a-f | A-F){9}" if ($a[2] eq 'HS1_868_BS' && not $a[3] =~ /^[0-9a-fA-F]{9}/xms);
+
   ### [14] checks LED_XM21_0 ###
   # uncoverable branch true 
   return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short | long or not HEX (0-9 | a-f | A-F){14}" if ($a[2] eq 'LED_XM21_0' && not $a[3] =~ /^[0-9a-fA-F]{14}/xms);
@@ -1296,6 +1320,20 @@ sub SD_UT_Set {
       my $adr = sprintf '%016b' , hex $definition[1]; # argument 1 - adress to binary with 16 bits
       $msg = $models{$model}{Protocol} . q{#} . $adr;
       $msgEnd = '#R' . $repeats;
+    ############ FB_FNK_Powerboat ############
+    } elsif ($model eq 'FB_FNK_Powerboat') {
+      my $adr = sprintf '%024b' , hex $definition[1]; # argument 1 - adress to binary with 24 bits
+      $msg = $models{$model}{Protocol} . q{#} . $adr;
+      # $msg = $models{$model}{Protocol} . q{#};
+      # $msg .= $adr;
+      if ($cmd eq 'light_on_off') {
+        $msgEnd = '000';
+      } elsif ($cmd eq 'light_dimm') {
+        $msgEnd = '010';
+      } else {
+        $msgEnd = '011';
+      }
+      $msgEnd .= '#R' . $repeats;
     }
   }
 
@@ -1703,6 +1741,12 @@ sub SD_UT_Parse {
       ### Remote control Krinner_LUMIX [P92] ###
       $deviceCode = substr($rawData,0,7);
       $devicedef = 'Krinner_LUMIX ' . $deviceCode;
+      $def = $modules{SD_UT}{defptr}{$devicedef};
+    }
+    if (!$def && $protocol == 124) {
+      ### Remote control FB_FNK_Powerboat [P127] ###
+      $deviceCode = substr($rawData,0,6);
+      $devicedef = 'FB_FNK_Powerboat ' . $deviceCode;
       $def = $modules{SD_UT}{defptr}{$devicedef};
     }
   }
@@ -2180,6 +2224,10 @@ sub SD_UT_Parse {
   } elsif (($model eq 'Meikee_21' || $model eq 'Meikee_24') && $protocol == 118) {
     $state = substr $bitData,16,8;
     $deviceCode = substr $rawData,0,4;
+  ############ FB_FNK_Powerboat [P124] ############
+  } elsif ($model eq 'FB_FNK_Powerboat') {
+    $state = substr($bitData,24,4);
+    $deviceCode = substr($rawData,0,6);
 
   ############ unknown ############
   } else {
@@ -2401,6 +2449,11 @@ sub SD_UT_Attr {
           $deviceCode = substr($bitData,0,16);
           $deviceCode = sprintf("%04X", oct( "0b$deviceCode" ) );
           $devicename = $devicemodel.'_'.$deviceCode;
+        ############ FB_FNK_Powerboat ############
+        } elsif ($attrValue eq 'FB_FNK_Powerboat') {
+          $deviceCode = substr $bitData,0,24;
+          $deviceCode = sprintf("%06X", oct( "0b$deviceCode" ) );
+          $devicename = $devicemodel.'_'.$deviceCode;
         ############ unknown ############
         } else {
           $devicename = 'unknown_please_select_model';
@@ -2499,6 +2552,7 @@ sub SD_UT_tristate2bin {
     <li>BOSCH ceiling fan&nbsp;&nbsp;&nbsp;<small>(module model: SF01_01319004_Typ2, protocol 86)</small></li>
     <li>Busch-Transcontrol HF - remote control 6861&nbsp;&nbsp;&nbsp;<small>(module model: TC6861, protocol 121)</small></li>
     <li>CAME swing gate drive&nbsp;&nbsp;&nbsp;<small>(module model: CAME_TOP_432EV, protocol 86)</small></li>
+    <li>CasaFan FB-FNK Powerboat&nbsp;&nbsp;&nbsp;<small>(module model: FB_FNK_Powerboat, protocol 124)</small></li>
     <li>ChiliTec LED X-Mas light&nbsp;&nbsp;&nbsp;<small>(module model: Chilitec_22640, protocol 14)</small></li>
     <li>DC-1961-TG - remote control with 12 buttons for ceiling fan with lighting&nbsp;&nbsp;&nbsp;<small>(module model: DC_1961_TG, protocol 20)</small></li>
     <li>ESTO ceiling lamp&nbsp;&nbsp;&nbsp;<small>(module model: KL_RF01, protocol 93)</small></li>
@@ -2653,7 +2707,7 @@ sub SD_UT_tristate2bin {
     <li><a href="#ignore">ignore</a></li>
     <li><a href="#IODev">IODev</a></li>
     <li><a name="model"></a>model<br>
-      The attribute indicates the model type of your device (AC114_01B, BeSmart_S4, Buttons_five, Buttons_six, CAME_TOP_432EV, Chilitec_22640, DC_1961_TG, HS1-868-BS, HSM4, KL_RF01, LED_XM21_0, Meikee_21, Meikee_24, Momento, Navaris, Novy_840029, Novy_840039, OR28V, QUIGG_DMV, RC_10, RH787T, SA_434_1_mini, SF01_01319004, TC6861, TR60C1, Tedsen_SKX1xx, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx, TR_502MSV, Unitec_47031, unknown).<br>
+      The attribute indicates the model type of your device (AC114_01B, BeSmart_S4, Buttons_five, Buttons_six, CAME_TOP_432EV, Chilitec_22640, DC_1961_TG, FB_FNK_Powerboat, HS1-868-BS, HSM4, KL_RF01, LED_XM21_0, Meikee_21, Meikee_24, Momento, Navaris, Novy_840029, Novy_840039, OR28V, QUIGG_DMV, RC_10, RH787T, SA_434_1_mini, SF01_01319004, TC6861, TR60C1, Tedsen_SKX1xx, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx, TR_502MSV, Unitec_47031, unknown).<br>
       If the attribute is changed, a new device is created using <a href="#autocreate">autocreate</a>. Autocreate must be activated for this.
     </li>
     <li><a name="repeats"></a>repeats<br>
@@ -2726,6 +2780,7 @@ sub SD_UT_tristate2bin {
     <li>BOSCH Deckenl&uuml;fter&nbsp;&nbsp;&nbsp;<small>(Modulmodel: SF01_01319004_Typ2, Protokoll 86)</small></li>
     <li>Busch-Transcontrol HF - Handsender 6861&nbsp;&nbsp;&nbsp;<small>(Modulmodel: TC6861, Protokoll 121)</small></li>
     <li>CAME Drehtor Antrieb&nbsp;&nbsp;&nbsp;<small>(Modulmodel: CAME_TOP_432EV, Protokoll 86)</small></li>
+    <li>CasaFan FB-FNK Powerboat&nbsp;&nbsp;&nbsp;<small>(Modulmodel: FB_FNK_Powerboat, Protokoll 124)</small></li>
     <li>ChiliTec LED Christbaumkerzen&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Chilitec_22640, Protokoll 14)</small></li>
     <li>DC-1961-TG - Fernbedienung mit 12 Tasten für Deckenventilator mit Beleuchtung&nbsp;&nbsp;&nbsp;<small>(Modulmodel: DC_1961_TG, Protokoll 20)</small></li>
     <li>ESTO Deckenlampe&nbsp;&nbsp;&nbsp;<small>(Modulmodel: KL_RF01, Protokoll 93)</small></li>
@@ -2880,7 +2935,7 @@ sub SD_UT_tristate2bin {
     <li><a href="#ignore">ignore</a></li>
     <li><a href="#IODev">IODev</a></li>
     <li><a name="model"></a>model<br>
-      Diese Attribut bezeichnet den Modelltyp Ihres Ger&auml;tes (AC114_01B, BeSmart_S4, Buttons_five, Buttons_six, CAME_TOP_432EV, Chilitec_22640, DC_1961_TG, HS1-868-BS, HSM4, KL_RF01, LED_XM21_0, Meikee_21, Meikee_24, Momento, Navaris, Novy_840029, Novy_840039, OR28V, QUIGG_DMV, RC_10, RH787T, SA_434_1_mini, SF01_01319004, TC6861, TR60C1, Tedsen_SKX1xx, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx, TR_502MSV, Unitec_47031, unknown).<br>
+      Diese Attribut bezeichnet den Modelltyp Ihres Ger&auml;tes (AC114_01B, BeSmart_S4, Buttons_five, Buttons_six, CAME_TOP_432EV, Chilitec_22640, DC_1961_TG, FB_FNK_Powerboat, HS1-868-BS, HSM4, KL_RF01, LED_XM21_0, Meikee_21, Meikee_24, Momento, Navaris, Novy_840029, Novy_840039, OR28V, QUIGG_DMV, RC_10, RH787T, SA_434_1_mini, SF01_01319004, TC6861, TR60C1, Tedsen_SKX1xx, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx, TR_502MSV, Unitec_47031, unknown).<br>
       Bei &Auml;nderung des Attributes wird ein neues Gerät mittels <a href="#autocreate">autocreate</a> erzeugt. Autocreate muss dazu aktiviert sein.
     </li>
     <li><a name="repeats"></a>repeats<br>
