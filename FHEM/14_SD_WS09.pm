@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 14_SD_WS09.pm 26980 2023-01-06 12:07:45Z sidey79 $
+# $Id: 14_SD_WS09.pm 26980 2023-01-09 19:54:08Z sidey79 $
 # 
 # The purpose of this module is to support serval 
 # weather sensors like WS-0101  (Sender 868MHz ASK   Epmfänger RX868SH-DV elv)
@@ -50,7 +50,7 @@ sub SD_WS09_Initialize {
 }
 
 #############################
-sub SD_WS09_Define($$) {
+sub SD_WS09_Define {
 	my ($hash, $def) = @_;
 	my @a = split("[ \t][ \t]*", $def);
 
@@ -72,7 +72,7 @@ sub SD_WS09_Define($$) {
 }
 
 #####################################
-sub SD_WS09_Undef($$) {
+sub SD_WS09_Undef {
 	my ($hash, $name) = @_;
 
 	delete($modules{SD_WS09}{defptr}{$hash->{CODE}})
@@ -82,7 +82,7 @@ sub SD_WS09_Undef($$) {
 }
 
 ###################################
-sub SD_WS09_Parse($$) {
+sub SD_WS09_Parse {
 	my ($iohash, $msg) = @_;
 	my $name = $iohash->{NAME};
 	my (undef ,$rawData) = split("#",$msg);
@@ -477,7 +477,7 @@ sub SD_WS09_Parse($$) {
 }
 
 ###################################
-sub SD_WS09_Attr(@) {
+sub SD_WS09_Attr {
 	my @a = @_;
 	# Make possible to use the same code for different logical devices when they
 	# are received through different physical devices.
@@ -633,14 +633,14 @@ sub SD_WS09_WindDirAverage {
 }
 
 ###################################
-sub SD_WS09_bin2dec($) {
+sub SD_WS09_bin2dec {
 	my $h = shift;
 	my $int = unpack("N", pack("B32",substr("0" x 32 . $h, -32))); 
 	return sprintf("%d", $int); 
 }
 
 ###################################
-sub SD_WS09_binflip($) {
+sub SD_WS09_binflip {
 	my $h = shift;
 	my $hlen = length($h);
 	my $i = 0;
@@ -653,7 +653,7 @@ sub SD_WS09_binflip($) {
 }
 
 ###################################
-sub SD_WS09_BCD2bin($) {
+sub SD_WS09_BCD2bin {
 	my $binary = shift;
 	my $int = unpack("N", pack("B32", substr("0" x 32 . $binary, -32)));
 	my $BCD = sprintf("%x", $int );
@@ -661,7 +661,7 @@ sub SD_WS09_BCD2bin($) {
 }
 
 ###################################
-sub SD_WS09_SHIFT($$){
+sub SD_WS09_SHIFT{
 	my ($hash, $rawData) = @_;
 	my $name = $hash->{NAME};
 	my $hlen = length($rawData);
@@ -679,7 +679,7 @@ sub SD_WS09_SHIFT($$){
 }
 
 ###################################
-sub SD_WS09_CRCCHECK($) {
+sub SD_WS09_CRCCHECK {
 	my $rawData = shift;
 	my $datacheck1 = pack( 'H*', substr($rawData,2,length($rawData)-2) );
 	my $crcmein1 = Digest::CRC->new(width => 8, poly => 0x31);

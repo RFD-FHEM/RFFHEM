@@ -1,5 +1,5 @@
 #################################################################################
-# $Id: 41_OREGON.pm 26978 2023-01-06 12:07:45Z sidey79 $
+# $Id: 41_OREGON.pm 26978 2023-01-09 19:54:08Z sidey79 $
 #
 # Module for FHEM to decode Oregon sensor messages
 #
@@ -64,7 +64,7 @@ sub OREGON_Initialize
 
 #####################################
 sub
-OREGON_Define($$)
+OREGON_Define
 {
   my ($hash, $def) = @_;
   my @a = split("[ \t][ \t]*", $def);
@@ -86,7 +86,7 @@ OREGON_Define($$)
 
 #####################################
 sub
-OREGON_Undef($$)
+OREGON_Undef
 {
   my ($hash, $name) = @_;
   delete($modules{OREGON}{defptr}{$name});
@@ -894,8 +894,7 @@ sub OREGON_raw {
 
 
 # -----------------------------
-sub
-OREGON_Parse($$)
+sub OREGON_Parse
 {
   my ($iohash, $msg) = @_;
 
