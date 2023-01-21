@@ -41,7 +41,7 @@ use List::Util qw(first);
 
 
 use constant {
-  SDUINO_VERSION                  => '3.5.5+20230109',  # Datum wird automatisch bei jedem pull request aktualisiert
+  SDUINO_VERSION                  => '3.5.5+20230115',  # Datum wird automatisch bei jedem pull request aktualisiert
   SDUINO_INIT_WAIT_XQ             => 1.5,     # wait disable device
   SDUINO_INIT_WAIT                => 2,
   SDUINO_INIT_MAXRETRY            => 3,
@@ -844,14 +844,14 @@ sub SIGNALduino_Set_sendMsg {
   return "$hash->{NAME}: sendmsg, unknown protocol: $protocol" if (!$hash->{protocolObject}->protocolExists($protocol));
 
   $repeats //= 1 ;
-  if (InternalVal($hash->{NAME},'cc1101_available',0))
+  if ( InternalVal($hash->{NAME},'cc1101_available',0) == 1 )
   {
-    my $f=$hash->{protocolObject}->getProperty($protocol,'frequency');
-    if ( defined $f ) {
-      $frequency = q[F=].$hash->{protocolObject}->getProperty($protocol,'frequency'). q[;]
+    $frequency //= $hash->{protocolObject}->checkProperty($protocol,'frequency',q{});
+    if ( length $frequency > 0 ) {
+      $frequency = q[F=].$frequency.q[;];
     }
-  }
-  $frequency //= q{};
+  } else { $frequency = q{}; }
+  
   my %signalHash;
   my %patternHash;
   my $pattern='';
@@ -4818,6 +4818,10 @@ USB-connected devices (SIGNALduino):<br>
         Modulation 2-FSK, Datarate=17.26 kbps, Sync Word=2DD4, Packet Length= Byte, Frequency 868.35 MHz
         <ul><small>Example: Thunder and lightning sensor Fine Offset WH57, Froggit DP60, Ambient Weather WH31L</small></ul>
       </li>
+      <li>Inkbird_IBS-P01R<br>
+        Modulation 2-FSK, Datarate=10.00 kbps, Sync Word=2DD4, Packet Length=18 Byte, Frequency 433.92 MHz
+        <ul><small>Example: Inkbird IBS-P01R pool thermometer, ITH-20R thermometer/hygrometer</small></ul>
+      </li>
       <li>KOPP_FC<br>
         modulation GFSK, Datarate=4.7855 kbps, Sync Word=AA54, frequency 868.3MHz
       </li>
@@ -5399,6 +5403,10 @@ USB-connected devices (SIGNALduino):<br>
       <li>Fine_Offset_WH57_868<br>
         Modulation 2-FSK, Datenrate=17.26 kbps, Sync Word=2DD4, Packet Length=9 Byte, Frequenz 868.35 MHz
         <ul><small>Beispiel: Gewittersensor Fine Offset WH57, Froggit DP60, Ambient Weather WH31L</small></ul>
+      </li>
+      <li>Inkbird_IBS-P01R<br>
+        Modulation 2-FSK, Datenrate=10.00 kbps, Sync Word=2DD4, Packet Length=18 Byte, Frequenz 433.92 MHz
+        <ul><small>Beispiel: Inkbird IBS-P01R Pool Thermometer, ITH-20R Thermo-/Hygrometer</small></ul>
       </li>
       <li>KOPP_FC<br>
         Modulation GFSK, Datenrate=4.7855 kbps, Sync Word=AA54, Frequenz 868.3MHz

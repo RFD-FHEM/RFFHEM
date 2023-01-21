@@ -1,3 +1,25 @@
+2023-01-16 - Fix usage of frequency when sending (#1150)
+
+* 00_SIGNALduino.pm
+
+Fix: Set frequency correctly if one was specified
+Change: Prefer frequency from send command instead of the one from the protocol
+
+* Update Versiondate
+
+Co-authored-by: GitHub Action <action@github.com>
+2023-01-14 - Inkbird IBS-P01R Pool Thermometer (#1149)
+
+* Update 14_SD_WS.pm
+Inkbird IBS-P01R Pool Thermometer, Inkbird ITH-20R
+* Update testData.json
+add testdata for protocol 123, Inkbird IBS-P01R Pool Thermometer
+* Update SD_ProtocolData.pm
+add definition protocol 123, Inkbird IBS-P01R Pool Thermometer, ITH-20R
+* Update README.md
+add Inkbird IBS-P01R, ITH-20R
+* Update 00_SIGNALduino.pm
+add Inkbird_IBS-P01R to commandref
 2023-01-09 - Merge pull request #1145 from RFD-FHEM/master-criticPrototypes
 
 Removed prototypes
