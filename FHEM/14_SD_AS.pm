@@ -15,6 +15,7 @@ use strict;
 use warnings;
 use POSIX;
 use FHEM::Meta;
+use FHEM::Core::Utils::Math;
 
 #####################################
 sub
@@ -205,7 +206,7 @@ SD_AS_Parse
 		$batteryVoltage = $Sigval;
 	  # $bat = (hex(substr($msg,7,2))>>1)&3; # ???
 		$bat = hex(substr($rawData,2,2))>>6;
-		$Sigval = round($Sigval / 1000, 2);	# Vcc is send in millivolts
+		$Sigval = FHEM::Core::Utils::Math::round($Sigval / 1000, 2);	# Vcc is send in millivolts
 		$val = "V: $Sigval";
 	}
 	elsif ($model eq "raw") { # 10
