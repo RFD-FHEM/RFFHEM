@@ -1327,11 +1327,11 @@ sub SD_UT_Set {
       # $msg = $models{$model}{Protocol} . q{#};
       # $msg .= $adr;
       if ($cmd eq 'light_on_off') {
-        $msgEnd = '000';
+        $msgEnd = '0000';
       } elsif ($cmd eq 'light_dimm') {
-        $msgEnd = '010';
+        $msgEnd = '0100';
       } else {
-        $msgEnd = '011';
+        $msgEnd = '0110';
       }
       $msgEnd .= '#R' . $repeats;
     }
