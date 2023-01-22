@@ -3299,16 +3299,17 @@ package lib::SD_ProtocolData;
       },
     "124" => ## Remote control CasaFan FB-FNK Powerboat with 5 buttons for fan
              # https://forum.fhem.de/index.php/topic,53282.msg1258346.html#msg1258346 @ datwusel 2023-01-17
-             # FB_FNK_Powerboat_3A9760  1_fan_low_speed   MS;P1=1717;P2=-439;P3=861;P4=419;P5=-2992;D=451232324242423242324232324232424242324242323232323242424232324242;CP=4;SP=5;R=229;O;m2;
-             # FB_FNK_Powerboat_3A9760  fan_off           MS;P1=1730;P2=-430;P3=849;P4=436;P5=-2974;D=451232324242423242324232324232424242324242323232323242423242324242;CP=4;SP=5;R=226;O;m2;
+               # FB_FNK_Powerboat_3A9760  light_dimm     MU;P0=-21800;P1=1716;P2=-444;P3=850;P4=416;P5=-2996;P6=648;D=012323242424232423242323242324242423242423232323232324232423242323512323242424232423242323242324242423242423232323232324232423242323512326;CP=4;R=218;
+               # FB_FNK_Powerboat_3A9760  light_on_off   MU;P0=-8672;P1=1730;P2=-426;P3=820;P4=432;P5=-2976;D=012323242424232423242323242324242423242423232323232324242323232323512323242424232423242323242324242423242423232323232324242323232323512323242424232423242323242324242423242423;CP=4;R=227;
       {
         name            => 'FB-Powerboat',
         comment         => 'Remote control CasaFan FB-FNK Powerboat',
         id              => '124',
         knownFreqs      => '433.92',
-        one             => [1,-1],      # 430,-430
-        zero            => [2,-1],      # 860,-430
-        sync            => [1,-7,4,-1], # 430,-3010,1720,-430
+        one             => [-1,1], # -430,430
+        zero            => [-1,2], # -430,860
+        start           => [4],    #  1720
+        end             => [-7],   # -3010
         clockabs        => 430,
         format          => 'twostate',
         preamble        => 'P124#',
@@ -3318,9 +3319,9 @@ package lib::SD_ProtocolData;
         length_max      => '32',
       },
     "124.1" => ## Remote control CasaFan FB-FNK Powerboat with 5 buttons for fan
-               # https://forum.fhem.de/index.php/topic,53282.msg1258346.html#msg1258346 @ datwusel 2023-01-17
-               # FB_FNK_Powerboat_3A9760  light_dimm     MU;P0=-21800;P1=1716;P2=-444;P3=850;P4=416;P5=-2996;P6=648;D=012323242424232423242323242324242423242423232323232324232423242323512323242424232423242323242324242423242423232323232324232423242323512326;CP=4;R=218;
-               # FB_FNK_Powerboat_3A9760  light_on_off   MU;P0=-8672;P1=1730;P2=-426;P3=820;P4=432;P5=-2976;D=012323242424232423242323242324242423242423232323232324242323232323512323242424232423242323242324242423242423232323232324242323232323512323242424232423242323242324242423242423;CP=4;R=227;
+             # https://forum.fhem.de/index.php/topic,53282.msg1258346.html#msg1258346 @ datwusel 2023-01-17
+             # FB_FNK_Powerboat_3A9760  1_fan_low_speed   MS;P1=1717;P2=-439;P3=861;P4=419;P5=-2992;D=451232324242423242324232324232424242324242323232323242424232324242;CP=4;SP=5;R=229;O;m2;
+             # FB_FNK_Powerboat_3A9760  fan_off           MS;P1=1730;P2=-430;P3=849;P4=436;P5=-2974;D=451232324242423242324232324232424242324242323232323242423242324242;CP=4;SP=5;R=226;O;m2;
       {
         name            => 'FB-Powerboat',
         comment         => 'Remote control CasaFan FB-FNK Powerboat',
@@ -3328,7 +3329,7 @@ package lib::SD_ProtocolData;
         knownFreqs      => '433.92',
         one             => [1,-1],      # 430,-430
         zero            => [2,-1],      # 860,-430
-        start           => [1,-7,4,-1], # 430,-3010,1720,-430
+        sync            => [1,-7,4,-1], # 430,-3010,1720,-430
         clockabs        => 430,
         format          => 'twostate',
         preamble        => 'P124#',
