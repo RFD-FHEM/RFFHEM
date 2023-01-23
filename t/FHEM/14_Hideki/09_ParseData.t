@@ -32,7 +32,6 @@ sub runTest {
 			Test2::SIGNALduino::RDmsg::dmsgCheck($maintest,$module,$ioHash);
 		};
 	}
-	exit(0);
 }
 
 sub waitDone {
@@ -40,6 +39,7 @@ sub waitDone {
 	if ($init_done) 
 	{
 		runTest(@_);
+		exit(0);
 	} else {
 		InternalTimer(time()+0.2, &waitDone,@_);			
 	}

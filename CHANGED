@@ -1,3 +1,15 @@
+2023-01-23 - 14_Hideki.pm - perlcritic (#1086)
+
+* Update 14_Hideki.pm
+
+- added checks parameter
+- fix, correction of spelling mistakes
+- fix: output warning
+- expenses improved
+- eleminated serval perl critic issues
+- created separate getters to reduce code duplication
+- use hash table instead of multiple if-elsif-else statements
+- some typos corrected
 2023-01-16 - Fix usage of frequency when sending (#1150)
 
 * 00_SIGNALduino.pm
