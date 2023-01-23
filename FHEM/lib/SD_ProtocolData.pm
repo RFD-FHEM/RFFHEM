@@ -1,4 +1,4 @@
-# $Id: SD_ProtocolData.pm 3.5.4 2022-11-26 22:39:42Z elektron-bbs $
+# $Id: SD_ProtocolData.pm 26975 2023-01-13 19:55:16Z elektron-bbs $
 # The file is part of the SIGNALduino project.
 # All protocol definitions are contained in this file.
 #
@@ -85,7 +85,7 @@ package lib::SD_ProtocolData;
   use strict;
   use warnings;
 
-  our $VERSION = '1.48';
+  our $VERSION = '1.49';
 
   our %protocols = (
     "0" =>  ## various weather sensors (500 | 9100)
@@ -721,9 +721,14 @@ package lib::SD_ProtocolData;
               # RCnoName20_17E9 off    MS;P1=-754;P2=213;P4=681;P5=-283;P6=-7869;D=2621212145214545454545452145212145212121212145214521212121452121;CP=2;SP=6;R=69;O;m2;
               # RCnoName20_17E9 plus   MS;P1=-744;P2=221;P3=679;P4=-278;P5=-7860;D=2521212134213434343434342134212134212121213421212134343434212121;CP=2;SP=5;R=66;O;m2;
               # RCnoName20_17E9 minus  MS;P0=233;P1=-7903;P3=-278;P5=-738;P6=679;D=0105050563056363636363630563050563050505050505630563050505630505;CP=0;SP=1;R=71;O;m1;
+              ## Remote control DC-1961-TG with 12 buttons for ceiling fan with lighting
+              # https://forum.fhem.de/index.php/topic,53282.msg1240911.html#msg1240911 @ Skusi  2022-10-23
+              # DC_1961_TG_1846 light_on_off   MS;P1=291;P2=-753;P3=762;P4=-249;P5=-8312;D=151212123434121212123412121234341234123412341212121234341212341234;CP=1;SP=5;R=224;O;m2;
+              # DC_1961_TG_1846 fan_off        MS;P1=-760;P2=747;P3=-282;P4=253;P5=-8335;D=454141412323414141412341414123234123412341412323234123232323412323;CP=4;SP=5;R=27;O;m2;
+              # DC_1961_TG_1846 fan_direction  MS;P0=-8384;P1=255;P2=-766;P3=754;P4=-263;D=101212123434121212123412121234341234123412341212341234341212341212;CP=1;SP=0;R=27;O;m2;
       {
         name            => 'RCnoName20',
-        comment         => 'Remote control with 4 or 10 buttons',
+        comment         => 'Remote control with 4, 10 or 12 buttons',
         id              => '20',
         knownFreqs      => '433.92',
         one             => [3,-1],  # 720,-240
@@ -744,7 +749,7 @@ package lib::SD_ProtocolData;
               # RCnoName20_10_3E00 fan_stop   MU;P0=184;P1=-380;P2=128;P3=-9090;P4=-768;P5=828;P6=-238;P7=298;D=45656565656747474747474747474747474567474560404515124040451040374745656565656747474747474747474747474567474567474565674747456747374745656565656747474747474747474747474567474567474565674747456747374745656565656747474747474747474747474567474567474565674747;CP=7;O;
       {
         name         => 'RCnoName20',
-        comment      => 'Remote control with 4 or 10 buttons',
+        comment         => 'Remote control with 4, 10 or 12 buttons',
         id           => '20.1',
         knownFreqs   => '433.92',
         one          => [3,-1],  # 720,-240
@@ -3273,7 +3278,25 @@ package lib::SD_ProtocolData;
         length_min      => '104',
         length_max      => '108',
       },
-
+    "123" =>  ## Inkbird IBS-P01R Pool Thermometer, Inkbird ITH-20R (not tested)
+              # https://forum.fhem.de/index.php/topic,128945.0.html 2022-08-28 @ xeenon
+              # SD_WS_123_T_0655  T: 25           MN;D=D3910F800301005A0655FA001405140535F6;R=10;
+              # SD_WS_123_T_7E43  T: 25.4 H: 60   MN;D=D3910F00010301207E43FE0014055802772A;R=232;
+      {
+        name            => 'IBS-P01R',
+        comment         => 'Inkbird IBS-P01R pool phermometer, ITH-20R',
+        id              => '123',
+        knownFreqs      => '433.92',
+        datarate        => '10.000',
+        sync            => '2DD4',
+        modulation      => '2-FSK',
+        regexMatch      => qr/^D391/,
+        preamble        => 'W123#',
+        register        => ['0001','022E','0344','042D','05D4','0612','07C0','0800','0D10','0EB0','0F71','10C8','1193','1202','1322','14F8','1534','1916','1B43','1C48'],
+        rfmode          => 'Inkbird_IBS-P01R',
+        clientmodule    => 'SD_WS',
+        length_min      => '36',
+      },
     ########################################################################
     #### ###  register informations from other hardware protocols  #### ####
 

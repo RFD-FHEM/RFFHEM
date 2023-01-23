@@ -1,4 +1,4 @@
-# $Id: 14_SD_WS.pm v3.5.4 2022-12-29 23:35:50Z sidey79 $
+# $Id: 14_SD_WS.pm 26982 2023-01-13 19:55:16Z elektron-bbs $
 #
 # The purpose of this module is to support serval
 # weather sensors which use various protocol
@@ -46,6 +46,7 @@
 # 11.04.2022 Protokoll 85: neuer Sensor Windmesser TFA 30.3251.10 mit Windrichtung, Pruefung CRC8 eingearbeitet
 # 23.05.2022 neues Protokoll 120: Wetterstation TFA 35.1077.54.S2 mit 30.3151 (Thermo/Hygro-Sender), 30.3152 (Regenmesser), 30.3153 (Windmesser)
 # 11.06.2022 neues Protokoll 122: TM40, Wireless Grill-, Meat-, Roasting-Thermometer with 4 Temperature Sensors
+# 06.01.2023 neues Protokoll 123: Inkbird IBS-P01R Pool Thermometer, Inkbird ITH-20R (not tested)
 
 package main;
 
@@ -67,7 +68,8 @@ sub SD_WS_Initialize {
   my $hash = shift // return;
   $hash->{Match}    = '^W\d+x{0,1}#.*';
   $hash->{DefFn}    = \&SD_WS_Define;
-  $hash->{UndefFn}  = \&SD_WS_Undef;$hash->{SetFn}    = \&SD_WS_Set;
+  $hash->{UndefFn}  = \&SD_WS_Undef;
+  $hash->{SetFn}    = \&SD_WS_Set;
   $hash->{ParseFn}  = \&SD_WS_Parse;
   $hash->{AttrList} = "do_not_notify:1,0 ignore:0,1 showtime:1,0 " .
                       "model:E0001PA,S522,TFA_30.3251.10,TX-EZ6,other " .
@@ -105,6 +107,7 @@ sub SD_WS_Initialize {
     'SD_WS_117.*'     => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4hum4:Temp/Hum,', autocreateThreshold => '5:120'},
     'SD_WS_120.*'     => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4hum4:Temp/Hum,', autocreateThreshold => '2:180'},
     'SD_WS_122_T.*'   => { ATTR => 'event-min-interval:.*:60 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4:Temp,', autocreateThreshold => '10:180'},
+    'SD_WS_123_T.*'   => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4:Temp,', autocreateThreshold => '2:180'},
   };
   return FHEM::Meta::InitMod( __FILE__, $hash );
 }
@@ -1416,6 +1419,55 @@ sub SD_WS_Parse {
         transmitter => sub { my (undef,$bitData) = @_; return substr($bitData,92,1) eq "0" ? "on" : "off"; },
         crcok      => sub {return 1;}, # Check could not be determined yet.
     },
+    123 => {
+        # Inkbird IBS-P01R Pool Thermometer, Inkbird ITH-20R (not tested)
+        # ---------------------------------------------------------------
+        # Nibble   0    4    | 8    12   | 16   20   | 24   28   | 32  
+        #          D391 0F80 | 0301 005A | 0655 FA00 | 1405 1405 | 35F6 - IBS-P01R
+        #          D391 0F00 | 0103 0120 | 7E43 FF00 | 1405 3F02 | 5CCB - unknown sensor with humidity
+        #          SSSS LL33 | 4455 66BB | IIII TTTT | tttt HHHH | CCCC   
+        # S: 2 Byte, Sync 2 ???
+        # L: 1 Byte, Number of bytes from byte 3 to the end ???
+        # 3: 1 Byte, Flags, IBS-P01R always 0x80, in inkbird_ith20r.c - 00 - normal work , 40 - unlink sensor (button pressed 5s), 80 - battery replaced
+        # 4: 1 Byte, Flags, IBS-P01R always 0x03, in inkbird_ith20r.c - changes from 1 to 2 if external sensor present
+        # 5: 1 Byte, Flags, IBS-P01R always 0x01, in inkbird_ith20r.c - unknown (also seen 0201), sw version? Seen 0x0001 on IBS-P01R
+        # 6: 1 Byte, Flags, IBS-P01R always 0x00, in inkbird_ith20r.c - unknown (also seen 0201), sw version? Seen 0x0001 on IBS-P01R
+        # B: 1 Byte, Battery Percent, IBS-P01R (0, 30, 60, 90), in inkbird_ith20r.c - Battery % 0-100
+        # I: 2 Byte, Ident, always the same for a sensor but each sensor is different
+        # T: 2 Byte, Temperature in C * 10, little endian, so 0xD200 is 210, 21.0C
+        # t: 2 Byte, Temperature for the external sensor, 0x1405 if not connected
+        # H: 2 Byte, Relative humidity % * 10, little endian, so 0xC501 is 453 or 45.3%
+        # C: 2 Byte, CRC16 over bytes 0-15, poly=0x8005 (0xA001 reflected), init=0x2f61 (0x86F4 reflected)
+        # 0    4    | 8    12   | 16   20   | 24   28   | 32   36   | 40   44   | 48   52   | 56   60   | 64   68   | 72   76   | 80   84   | 88   92   | 96   100  | 104  108  | 112  116  | 120  128  | 132  136  | 140  144
+        # 1101 0011 | 1001 0001 | 0000 1111 | 1000 0000 | 0000 0011 | 0000 0001 | 0000 0000 | 0001 1110 | 0000 0110 | 0101 0101 | 0001 0100 | 0000 0001 | 0001 0100 | 0000 0101 | 0001 0100 | 0000 0101 | 0001 1100 | 0111 1011
+        # 1101 0011 | 1001 0001 | 0000 1111 | 0000 0000 | 0000 0001 | 0000 0011 | 0000 0011 | 0010 0001 | 0111 1110 | 0100 0011 | 1010 0101 | 0000 0000 | 0001 0100 | 0000 0101 | 0100 0110 | 0000 0010 | 0111 1111 | 0101 0001
+        # SSSS SSSS | SSSS SSSS | LLLL LLLL | 3333 3333 | 4444 4444 | 5555 5555 | 6666 6666 | BBBB BBBB | IIII IIII | IIII IIII | TTTT TTTT | TTTT TTTT | tttt tttt | tttt tttt | HHHH HHHH | HHHH HHHH | CCCC CCCC | CCCC CCCC
+        sensortype     => 'IBS-P01R, ITH-20R',
+        model          => 'SD_WS_123_T',
+        prematch       => sub { return 1; }, # no precheck known
+        batChange      => sub { my (undef,$bitData) = @_; return substr($bitData,24,1) eq '0' ? '1' : '0'; },
+        batteryPercent => sub { my ($rawData,undef) = @_; return hex(substr($rawData,14,2)); },
+        id             => sub { my ($rawData,undef) = @_; return substr($rawData,16,4); },
+        temp           => sub { my ($rawData,undef) = @_; return ((((hex(substr($rawData,20,2)) + hex(substr($rawData,22,2)) * 256) ^ 0x8000) - 0x8000) / 10); },
+        temp2          => sub { my ($rawData,undef) = @_;
+                                return if (substr($rawData,24,4) eq '1405');
+                                return ((((hex(substr($rawData,24,2)) + hex(substr($rawData,26,2)) * 256) ^ 0x8000) - 0x8000) / 10);
+                              },
+        hum            => sub { my ($rawData,undef) = @_;
+                                return if (substr($rawData,28,4) eq '1405');
+                                return ( (hex(substr($rawData,28,2)) + hex(substr($rawData,30,2)) * 256) / 10 );
+                              },
+        crcok          => sub { my ($rawData,undef) = @_;
+                                my $calcsum = SD_WS_crc16lsb(16, 0xA001, 0x86F4, $rawData);
+                                my $checksum = hex(substr($rawData,32,2)) + hex(substr($rawData,34,2)) * 256;
+                                if ($checksum == $calcsum) {
+                                  return 1;
+                                } else {
+                                  Log3 $name, 3, "$name: SD_WS_123 Parse msg $msg - ERROR CRC16 $checksum != $calcsum";
+                                  return 0;
+                                }
+                              },
+    },
   );
 
   Log3 $name, 4, "$name: SD_WS_Parse protocol $protocol, rawData $rawData";
@@ -1835,7 +1887,6 @@ sub SD_WS_Parse {
     # temperature
     my $oldTemp = ReadingsVal($name, 'temperature', undef);
     if (defined $oldTemp && defined $temp) {
-      #my $oldTemp = ReadingsVal($name, "temperature", undef);
       my $maxdeviation = AttrVal($name, "max-deviation-temp", 1);       # default 1 K
       my $diffTemp = abs($temp - $oldTemp);
       $diffTemp = sprintf("%.1f", $diffTemp);       
@@ -1851,7 +1902,6 @@ sub SD_WS_Parse {
     # humidity
     my $oldHum = ReadingsVal($name, 'humidity', undef);
     if (defined $oldHum && defined $hum) {
-      #my $oldHum = ReadingsVal($name, "humidity", undef);
       my $maxdeviation = AttrVal($name, "max-deviation-hum", 1);        # default 1 %
       my $diffHum = abs($hum - $oldHum);
       $diffHum = sprintf("%.1f", $diffHum);       
@@ -1965,7 +2015,7 @@ sub SD_WS_Parse {
   readingsBulkUpdate($hash, "temperatureTrend", $trendTemp) if (defined($trendTemp) && length($trendTemp) > 0);
   readingsBulkUpdate($hash, "humidityTrend", $trendHum) if (defined($trendHum) && length($trendHum) > 0);
   readingsBulkUpdate($hash, "sendmode", $sendmode) if (defined($sendmode) && length($sendmode) > 0);
-  readingsBulkUpdate($hash, "type", $SensorTyp, 0)  if (defined($SensorTyp));
+  readingsBulkUpdateIfChanged($hash, "type", $SensorTyp, 0)  if (defined($SensorTyp));
   readingsBulkUpdate($hash, "beep", $beep)  if (defined($beep));
   readingsBulkUpdate($hash, "adc", $adc)  if (defined($adc));
   readingsBulkUpdate($hash, 'rain', $rain)  if (defined($rain));
@@ -2011,6 +2061,27 @@ sub SD_WS_LFSR_digest8_reflect {
   }
   $sum = $sum & 0xff;
   return $sum;
+}
+
+sub SD_WS_crc16lsb {
+  my ($nBytes, $polynomial, $init, $rawData) = @_;
+  carp "SD_WS_crc16lsb, too few arguments ($nBytes, $polynomial, $init, $rawData)" if @_ < 4;
+  my $remainder = $init;
+  my $byte;
+  my $bit;
+  my $data;
+    for ($byte = 0; $byte < $nBytes; ++$byte) {
+      $data = hex(substr($rawData, $byte * 2, 2));
+      $remainder ^= $data;
+      for ($bit = 0; $bit < 8; ++$bit) {
+        if ($remainder & 1) {
+          $remainder = ($remainder >> 1) ^ $polynomial;
+        } else {
+          $remainder = ($remainder >> 1);
+        }
+      }
+    }
+    return $remainder;
 }
 
 #############################
@@ -2081,6 +2152,7 @@ sub SD_WS_WH2SHIFT {
     <li>Fine Offset WH51, aka ECOWITT WH51, aka Froggit DP100, aka MISOL/1 (soil moisture sensor)</li>
     <li>Fine Offset WH57, aka Froggit DP60, aka Ambient Weather WH31L (thunder and lightning sensor)</li>
     <li>Fody E42 (temperature and humidity sensor)</li>
+    <li>Inkbird IBS-P01R pool thermometer, ITH-20R</li>
     <li>NC-3911, NC-3912 refrigerator thermometer</li>
     <li>Opus XT300</li>
     <li>PV-8644 infactory Poolthermometer</li>
@@ -2221,6 +2293,7 @@ sub SD_WS_WH2SHIFT {
     <li>Fine Offset WH51, aka ECOWITT WH51, aka Froggit DP100, aka MISOL/1 (Bodenfeuchtesensor)</li>
     <li>Fine Offset WH57, aka Froggit DP60, aka Ambient Weather WH31L (Gewittersensor)</li>
     <li>Fody E42 (Temperatur- und Feuchtigkeitssensor)</li>
+    <li>Inkbird IBS-P01R Pool Thermometer, ITH-20R</li>
     <li>Kabelloses Grillthermometer, Modellname: GFGT 433 B1</li>
     <li>NC-3911, NC-3912 digitales Kuehl- und Gefrierschrank-Thermometer</li>
     <li>Opus XT300</li>

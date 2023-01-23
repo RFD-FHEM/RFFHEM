@@ -81,6 +81,22 @@ my $module = basename (dirname(__FILE__));
         returnCheck     => q[SD_UT_Test_RCnoName20_10 Unkown set command!],
         subCheck        => hash { end(); } ,
     },	
+    {
+        targetName      => 	q[SD_UT_Test_OR28V_1],
+        testname        =>  q[set command volume_minus],
+        cmd             =>	q[set volume_minus],
+
+        returnCheck    => F(),    
+        subCheck        => hash { field 'IOWrite' => array { item 0 => hash { field 'args' => array { item hash { etc(); } ; item 'sendMsg'; item 'P68#01011101100010000000#R5' }; etc() } } } ,
+    },	
+    {
+        targetName      => 	q[SD_UT_Test_TC6861_3DC_1],
+        testname        =>  q[set command on],
+        cmd             =>	q[set on],
+
+        returnCheck    => F(),    
+        subCheck        => hash { field 'IOWrite' => array { item 0 => hash { field 'args' => array { item hash { etc(); } ; item 'sendMsg'; item 'P121#P001100111101110001111110#R5' }; etc() } } } ,
+    },	
 );
         
 sub runTest {
