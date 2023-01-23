@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 14_SD_AS.pm 350 2023-01-09 19:54:08Z sidey79 $
+# $Id: 14_SD_AS.pm 350 2023-01-23 17:24:05Z sidey79 $
 # The file is part of the SIGNALduino project
 # see http://www.fhemwiki.de/wiki/SIGNALduino
 # and was created to provide support for self build sensors.
@@ -15,6 +15,7 @@ use strict;
 use warnings;
 use POSIX;
 use FHEM::Meta;
+use FHEM::Core::Utils::Math;
 
 #####################################
 sub
@@ -205,7 +206,7 @@ SD_AS_Parse
 		$batteryVoltage = $Sigval;
 	  # $bat = (hex(substr($msg,7,2))>>1)&3; # ???
 		$bat = hex(substr($rawData,2,2))>>6;
-		$Sigval = round($Sigval / 1000, 2);	# Vcc is send in millivolts
+		$Sigval = FHEM::Core::Utils::Math::round($Sigval / 1000, 2);	# Vcc is send in millivolts
 		$val = "V: $Sigval";
 	}
 	elsif ($model eq "raw") { # 10
