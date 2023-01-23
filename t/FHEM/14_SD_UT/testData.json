@@ -2608,7 +2608,7 @@
             "readings" : {
                "LastAction" : "receive",
                "deviceCode" : "3A9760",
-               "state" : "light_dimm"
+               "state" : "light_dimm_on_off"
             },
             "revision_entry" : "2023-01-19 14:18:08",
             "revision_modul" : "14_SD_UT.pm     0 2023-01-04 17:35:33Z elektron-bbs",
@@ -2624,7 +2624,7 @@
             "user" : "datwusel"
          }
       ],
-      "id" : 124.1,
+      "id" : 124,
       "module" : "SD_UT",
       "name" : "FB_FNK_Powerboat_3A9760"
    },
@@ -2657,7 +2657,7 @@
             "user" : "datwusel"
          }
       ],
-      "id" : 124,
+      "id" : 124.1,
       "module" : "SD_UT",
       "name" : "FB_FNK_Powerboat_3A9760"
    }
