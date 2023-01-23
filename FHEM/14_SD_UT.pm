@@ -456,12 +456,13 @@ my %models = (
                         Protocol   => 'P86',
                         Typ        => 'remote'
                       },
-  'FB_FNK_Powerboat' => { '1110'   => '1_fan_low_speed',
+  'FB_FNK_Powerboat' => { '1101'   => '0_fan_off',
+                          '1110'   => '1_fan_low_speed',
                           '1111'   => '2_fan_medium_speed',
                           '0111'   => '3_fan_high_speed',
                           '0110'   => 'light_on_off',
-                          '1101'   => 'fan_off',
-                          '0101'   => 'light_dimm',
+                          '0101'   => 'light_dimm_on_off',
+                          '1000'   => 'light_dimm',
                         hex_length => [8],
                         Protocol   => 'P124',
                         Typ        => 'remote'
@@ -1324,14 +1325,14 @@ sub SD_UT_Set {
     } elsif ($model eq 'FB_FNK_Powerboat') {
       my $adr = sprintf '%024b' , hex $definition[1]; # argument 1 - adress to binary with 24 bits
       $msg = $models{$model}{Protocol} . q{#} . $adr;
-      # $msg = $models{$model}{Protocol} . q{#};
-      # $msg .= $adr;
       if ($cmd eq 'light_on_off') {
         $msgEnd = '0000';
       } elsif ($cmd eq 'light_dimm') {
+        $msgEnd = '0010';
+      } elsif ($cmd eq 'light_dimm_on_off') {
         $msgEnd = '0100';
       } else {
-        $msgEnd = '0110';
+        $msgEnd = '0111';
       }
       $msgEnd .= '#R' . $repeats;
     }
