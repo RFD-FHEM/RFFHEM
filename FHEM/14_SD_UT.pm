@@ -461,8 +461,10 @@ my %models = (
                           '1111'   => '2_fan_medium_speed',
                           '0111'   => '3_fan_high_speed',
                           '0110'   => 'light_on_off',
+                          # '1000'   => 'light_dimm',
+                          '1000'   => 'light_dimm:slider,1,1,100', # 100 dauert ca. 5 Sekunden
+                          # '1000'   => 'light_dimm:1,2,3,4,5,6,7,8,9,10',
                           '0101'   => 'light_dimm_on_off',
-                          '1000'   => 'light_dimm',
                         hex_length => [8],
                         Protocol   => 'P124',
                         Typ        => 'remote'
@@ -1332,7 +1334,7 @@ sub SD_UT_Set {
       } elsif ($cmd eq 'light_dimm_on_off') {
         $msgEnd = '0100';
       } else {
-        $msgEnd = '0111';
+        $msgEnd = '0111'; # fan
       }
       $msgEnd .= '#R' . $repeats;
     }
@@ -1344,7 +1346,10 @@ sub SD_UT_Set {
     ### create setlist ###
     foreach my $keys (keys %{ $models{$model}}) {
       if ( $keys =~ /^[0-1]{1,}/xms ) {
-        $ret.= $models{$model}{$keys}.':noArg ';
+        # $ret.= $models{$model}{$keys}.':noArg ';
+        my $setCommand = $models{$model}{$keys};
+        $ret .= $setCommand . ' ' if ($setCommand =~ m/:/);
+        $ret .= $setCommand . ':noArg ' if ($setCommand !~ m/:/);;
       }
     }
   } else {
@@ -1354,6 +1359,7 @@ sub SD_UT_Set {
         if ( $keys =~ /^[0-1]{1,}/xms ) {
           $save = $keys;
           $value = $models{$model}{$keys};
+          $value = substr($value,0,index($value,':')) if (index($value,':') > 0); # entfernt alles hinter ':' aus 'light_dimm:slider,1,1,100'
           last if ($value eq $cmd);
         }
       }
@@ -1480,6 +1486,17 @@ sub SD_UT_Set {
     readingsSingleUpdate($hash, 'LastAction', 'send', 0) if ($models{$model}{Typ} eq 'remote');
     readingsSingleUpdate($hash, 'state' , $cmd, 1);
 
+    if ($msg =~ /^P124#/ && $cmd eq 'light_dimm') { # FB_FNK_Powerboat sends first light_dimm_on_off before light_dimm
+      my $firstmsg = $msg =~ s/10000010#R/01010100#R/r;
+      IOWrite($hash, 'sendMsg', $firstmsg);
+      Log3 $name, 4, "$ioname: $name SD_UT_Set sendMsg $firstmsg";
+      if (defined $a[1]) {
+        $msg = substr($msg,0,39);
+        $msg .= $a[1]; # add repeats for light_dimm
+      }
+      Log3 $name, 4, "$ioname: $name SD_UT_Set sendMsg $msg";
+    }
+    
     IOWrite($hash, 'sendMsg', $msg);
     Log3 $name, 3, "$ioname: $name set $cmd";
     Log3 $name, 4, "$ioname: $name SD_UT_Set sendMsg $msg";
@@ -2256,6 +2273,8 @@ sub SD_UT_Parse {
       $state = $state =~ /^[01]+$/x ? "Please check your model. The code $deviceCode is not supported." : $state;
     }
   }
+
+  $state = substr($state,0,index($state,':')) if (index($state,':') > 0); # entfernt alles hinter ':' aus 'light_dimm:slider,1,1,100'
 
   readingsBulkUpdate($hash, 'deviceCode', $deviceCode, 0) if (defined($deviceCode) && $models{$model}{Typ} eq 'remote');
   readingsBulkUpdate($hash, 'unknown_bits', $unknown_bits, 0) if (defined($unknown_bits) && $models{$model}{Typ} eq 'remote');
