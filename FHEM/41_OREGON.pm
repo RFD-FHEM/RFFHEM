@@ -408,7 +408,7 @@ sub OREGON_use_longid {
 
   return 1 if(",$longids," =~ m/,$dev_type,/);
 
-  return 1;
+  return 0;
 }
 
 # --------------------------------------------------------
