@@ -4752,9 +4752,9 @@ USB-connected devices (SIGNALduino):<br>
     Default is to not to use long IDs for all devices.
     <br><br>
     Examples:<PRE>
-      # Do not use any long IDs for any devices:
+      # Do not use any long IDs for any devices (this is default, except OREGON):
       attr sduino longids 0
-      # Use any long IDs for all devices (this is default):
+      # Use any long IDs for all devices:
       attr sduino longids 1
       # Use longids for BTHR918N devices.
       # Will generate devices names like BTHR918N_f3.
@@ -5340,13 +5340,13 @@ USB-connected devices (SIGNALduino):<br>
     Durch Komma getrennte Liste von Device-Typen f&uuml;r Empfang von langen IDs mit dem SIGNALduino. Diese zus&auml;tzliche ID erlaubt es Wettersensoren, welche auf dem gleichen Kanal senden zu unterscheiden. Hierzu wird eine zuf&auml;llig generierte ID hinzugef&uuml;gt. Wenn Sie longids verwenden, dann wird in den meisten F&auml;llen nach einem Batteriewechsel ein neuer Sensor angelegt. Standardm&auml;ßig werden keine langen IDs verwendet.<br>
     Folgende Module verwenden diese Funktionalit&auml;t: 14_Hideki, 41_OREGON, 14_CUL_TCM97001, 14_SD_WS07.<br>
     Beispiele:<PRE>
-      # Keine langen IDs verwenden (Default Einstellung):
+      # Keine langen IDs verwenden (Voreinstellung, außer OREGON):
       attr sduino longids 0
       # Immer lange IDs verwenden:
       attr sduino longids 1
       # Verwende lange IDs f&uuml;r SD_WS07 Devices.
       # Device Namen sehen z.B. so aus: SD_WS07_TH_3.
-      attr sduino longids SD_WS07
+      attr sduino longids SD_WS07_TH
     </PRE>
   </li>
   <a name="maxMuMsgRepeat"></a>
