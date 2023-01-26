@@ -1,4 +1,4 @@
-# $Id: 14_SD_WS.pm 26982 2023-01-13 19:55:16Z elektron-bbs $
+# $Id: 14_SD_WS.pm 26982 2023-01-23 17:24:05Z sidey79 $
 #
 # The purpose of this module is to support serval
 # weather sensors which use various protocol
@@ -47,6 +47,8 @@
 # 23.05.2022 neues Protokoll 120: Wetterstation TFA 35.1077.54.S2 mit 30.3151 (Thermo/Hygro-Sender), 30.3152 (Regenmesser), 30.3153 (Windmesser)
 # 11.06.2022 neues Protokoll 122: TM40, Wireless Grill-, Meat-, Roasting-Thermometer with 4 Temperature Sensors
 # 06.01.2023 neues Protokoll 123: Inkbird IBS-P01R Pool Thermometer, Inkbird ITH-20R (not tested)
+# 21.01.2023 use round from package FHEM::Core::Utils::Math;
+
 
 package main;
 
@@ -56,6 +58,7 @@ use strict;
 use warnings;
 use Carp qw(carp);
 use FHEM::Meta;
+use FHEM::Core::Utils::Math;
 
 # Forward declarations
 sub SD_WS_LFSR_digest8_reflect;
@@ -386,7 +389,7 @@ sub SD_WS_Parse {
                       }
                     },
       id      => sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,0,9); },           # id
-      temp    => sub {my (undef,$bitData) = @_; return round(((SD_WS_binaryToNumber($bitData,22,25)*256 +  SD_WS_binaryToNumber($bitData,18,21)*16 + SD_WS_binaryToNumber($bitData,14,17)) - 1220) * 5 / 90.0 , 1); }, #temp
+      temp    => sub {my (undef,$bitData) = @_; return FHEM::Core::Utils::Math::round(((SD_WS_binaryToNumber($bitData,22,25)*256 +  SD_WS_binaryToNumber($bitData,18,21)*16 + SD_WS_binaryToNumber($bitData,14,17)) - 1220) * 5 / 90.0 , 1); }, #temp
       hum     => sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,30,33)*16 + SD_WS_binaryToNumber($bitData,26,29));  },           #hum
       channel => sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,12,13)+1 );  },   # channel
       bat     => sub {my (undef,$bitData) = @_; return substr($bitData,34,1) eq "0" ? "ok" : "low";},   # other or modul orginal
@@ -452,7 +455,7 @@ sub SD_WS_Parse {
         sendmode   => sub {my (undef,$bitData) = @_; return substr($bitData,12,1) eq "1" ? "manual" : "auto";},
         bat        => sub {my (undef,$bitData) = @_; return substr($bitData,13,1) eq "1" ? "low" : "ok";},
         trend      => sub {my (undef,$bitData) = @_; return ('consistent', 'rising', 'falling', 'unknown')[SD_WS_binaryToNumber($bitData,14,15)];},
-        temp       => sub {my (undef,$bitData) = @_; return round(((SD_WS_binaryToNumber($bitData,16,27)) - 1220) * 5 / 90.0 , 1); },
+        temp       => sub {my (undef,$bitData) = @_; return FHEM::Core::Utils::Math::round(((SD_WS_binaryToNumber($bitData,16,27)) - 1220) * 5 / 90.0 , 1); },
         hum        => sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,28,31) * 10) + (SD_WS_binaryToNumber($bitData,32,35));},
         channel    => sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,38,39) );},
       },
@@ -612,7 +615,7 @@ sub SD_WS_Parse {
         id         => sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,8,15); },                         # random id
         bat        => sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,16) eq "1" ? "low" : "ok";},      # bat?
         channel    => sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,17,19) + 1 ); },                 # channel
-        temp       => sub {my (undef,$bitData) = @_; return round((SD_WS_binaryToNumber($bitData,20,31)-720)*0.0556,1); },  # temp
+        temp       => sub {my (undef,$bitData) = @_; return FHEM::Core::Utils::Math::round((SD_WS_binaryToNumber($bitData,20,31)-720)*0.0556,1); },  # temp
         hum        => sub {my ($rawData,$bitData) = @_; return substr($rawData,1,1) eq "5" ? (SD_WS_binaryToNumber($bitData,32,39)) : 0;},  # hum
       } ,
     84 =>
@@ -697,7 +700,7 @@ sub SD_WS_Parse {
         winddir    => sub {my (undef,$bitData) = @_;
                             if (substr($bitData,30,2) eq "10") {    # message 2 winddirection
                               $winddir = SD_WS_binaryToNumber($bitData,44,55);
-                              return ($winddir * 1, $winddirtxtar[round(($winddir / 22.5),0)]);
+                              return ($winddir * 1, $winddirtxtar[FHEM::Core::Utils::Math::round(($winddir / 22.5),0)]);
                             } else {
                               return;
                             }
@@ -798,7 +801,7 @@ sub SD_WS_Parse {
                             $rawTemp =  SD_WS_binaryToNumber($bitData,8,21);
                             my $tempFh = $rawTemp / 20 - 90; # Grad Fahrenheit
                             Log3 $name, 4, "$name: SD_WS_106_T tempraw = $rawTemp, temp = $tempFh Fahrenheit";
-                            return (round((($tempFh - 32) * 5 / 9) , 1)); # Grad Celsius
+                            return (FHEM::Core::Utils::Math::round((($tempFh - 32) * 5 / 9) , 1)); # Grad Celsius
                           },
         crcok      => sub {return 1;}, # CRC test method does not exist
     } ,
@@ -825,7 +828,7 @@ sub SD_WS_Parse {
         model      => 'SD_WS_107_H',
         prematch   => sub { ($rawData,undef) = @_; return 1 if ($rawData =~ /^51[0-9A-F]{16}[F]{6}/); },
         id         => sub { my ($rawData,undef) = @_; return substr($rawData,2,6); },
-        batVoltage => sub { my (undef,$bitData) = @_; return round(SD_WS_binaryToNumber($bitData,35,39) / 10 , 1); },
+        batVoltage => sub { my (undef,$bitData) = @_; return FHEM::Core::Utils::Math::round(SD_WS_binaryToNumber($bitData,35,39) / 10 , 1); },
         adc        => sub { my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,62,71); },
         hum        => sub { my ($rawData,undef) = @_; return hex(substr($rawData,12,2)); },
         crcok      => sub { my $rawData = shift;
@@ -981,7 +984,7 @@ sub SD_WS_Parse {
                                   return ($rawRainCounterMessage + 10) * 0.1;
                                 }
                               },
-        temp           => sub { my (undef,$bitData) = @_; return round(((SD_WS_binaryToNumber($bitData,48,55) * 256 + SD_WS_binaryToNumber($bitData,40,47)) - 1220) * 5 / 90.0 , 1); },
+        temp           => sub { my (undef,$bitData) = @_; return FHEM::Core::Utils::Math::round(((SD_WS_binaryToNumber($bitData,48,55) * 256 + SD_WS_binaryToNumber($bitData,40,47)) - 1220) * 5 / 90.0 , 1); },
         crcok          => sub { my (undef,$bitData) = @_;
                                 my $sum = 0;
                                 for (my $n = 0; $n < 56; $n += 8) {
@@ -1056,13 +1059,13 @@ sub SD_WS_Parse {
                             $rawTemp =  SD_WS_binaryToNumber($bitData,12,13) * 256 + SD_WS_binaryToNumber($bitData,16,23);
                             my $tempFh = $rawTemp - 90; # Grad Fahrenheit
                             Log3 $name, 4, "$name: SD_WS_113_T tempraw1 = $rawTemp, temp1 = $tempFh Grad Fahrenheit";
-                            return (round((($tempFh - 32) * 5 / 9) , 0)); # Grad Celsius
+                            return (FHEM::Core::Utils::Math::round((($tempFh - 32) * 5 / 9) , 0)); # Grad Celsius
                           },
         temp2      => sub { my (undef,$bitData) = @_;
                             $rawTemp =  SD_WS_binaryToNumber($bitData,14,15) * 256 + SD_WS_binaryToNumber($bitData,24,31);
                             my $tempFh = $rawTemp - 90; # Grad Fahrenheit
                             Log3 $name, 4, "$name: SD_WS_113_T tempraw2 = $rawTemp, temp2 = $tempFh Grad Fahrenheit";
-                            return (round((($tempFh - 32) * 5 / 9) , 0)); # Grad Celsius
+                            return (FHEM::Core::Utils::Math::round((($tempFh - 32) * 5 / 9) , 0)); # Grad Celsius
                           },
         crcok      => sub {return 1;}, # Check could not be determined yet.
     } ,
@@ -1129,7 +1132,7 @@ sub SD_WS_Parse {
         winddir    => sub {my ($rawData,undef) = @_;
                             return if (substr($rawData,12,1) ne '1' || substr($rawData,20,3) !~ m/^\d+$/xms); # only weather station
                             $winddir = substr($rawData,20,3);
-                            return ($winddir * 1, $winddirtxtar[round(($winddir / 22.5),0)]);
+                            return ($winddir * 1, $winddirtxtar[FHEM::Core::Utils::Math::round(($winddir / 22.5),0)]);
                           },
         temp       => sub {my ($rawData,$bitData) = @_;
                             # uncoverable condition right
@@ -1142,7 +1145,7 @@ sub SD_WS_Parse {
                                 $rawTemp *= -1;  # Bresser 3in1
                               }
                             }
-                            return round($rawTemp,1);
+                            return FHEM::Core::Utils::Math::round($rawTemp,1);
                           },
         hum        => sub {my ($rawData,undef) = @_;
                             # uncoverable condition right
@@ -1276,7 +1279,7 @@ sub SD_WS_Parse {
         id         => sub {my ($rawData,undef) = @_; return substr($rawData,4,4); },
         winddir    => sub {my ($rawData,undef) = @_;
                             $winddir = substr($rawData,8,3);
-                            return ($winddir * 1, $winddirtxtar[round(($winddir / 22.5),0)]);
+                            return ($winddir * 1, $winddirtxtar[FHEM::Core::Utils::Math::round(($winddir / 22.5),0)]);
                           },
         batChange  => sub {my (undef,$bitData) = @_; return substr($bitData,52,1) eq '0' ? '1' : '0';},
         windgust   => sub {my ($rawData,undef) = @_; return substr($rawData,14,3) * 0.1;},
@@ -1335,11 +1338,11 @@ sub SD_WS_Parse {
                               },
         windspeed      => sub {my (undef,$bitData) = @_;
                                 return if (substr($bitData,19,1) eq '1');
-                                return round((SD_WS_binaryToNumber($bitData,39,46) / 3.0),1);
+                                return FHEM::Core::Utils::Math::round((SD_WS_binaryToNumber($bitData,39,46) / 3.0),1);
                               },
         windgust       => sub {my (undef,$bitData) = @_;
                                 return if (substr($bitData,19,1) eq '1');
-                                return round((SD_WS_binaryToNumber($bitData,47,54) / 3.0),1);
+                                return FHEM::Core::Utils::Math::round((SD_WS_binaryToNumber($bitData,47,54) / 3.0),1);
                               },
         rawRainCounter => sub {my (undef,$bitData) = @_;
                                 return if (substr($bitData,19,1) eq '1');
