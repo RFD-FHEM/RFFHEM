@@ -1,5 +1,5 @@
 #################################################################################
-# $Id: 41_OREGON.pm 26978 2023-01-26 19:49:08Z elektron-bbs $
+# $Id: 41_OREGON.pm 26978 2023-01-28 15:26:11Z elektron-bbs $
 #
 # Module for FHEM to decode Oregon sensor messages
 #
