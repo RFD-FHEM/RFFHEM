@@ -1,3 +1,22 @@
+2023-01-28 - correction commandref longids (#1151)
+
+* Update 00_SIGNALduino.pm
+Correction commandref
+2023-01-23 - Replace round main with round in FHEM::Core::Utils::Math (#1154)
+
+* 00_SIGNALduino
+14_SD_AS
+14_SD_WS
+14_SD_WS09
+
+changed round to FHEM::Core::Utils::Math
+
+* Update Versiondate
+
+* Update Versiondate
+
+Co-authored-by: GitHub Action <action@github.com>
+Co-authored-by: HomeAutoUser <abfall-container@gmx.de>
 2023-01-23 - 14_Hideki.pm - perlcritic (#1086)
 
 * Update 14_Hideki.pm
