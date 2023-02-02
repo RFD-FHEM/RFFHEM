@@ -1,4 +1,4 @@
-# $Id: 00_SIGNALduino.pm 3.5.5 2023-01-09 19:54:08Z sidey79 $
+# $Id: 00_SIGNALduino.pm 3.5.5 2023-01-28 15:26:11Z elektron-bbs $
 # v3.5.5 - https://github.com/RFD-FHEM/RFFHEM/tree/master
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incoming messages
 # see http://www.fhemwiki.de/wiki/SIGNALDuino
@@ -15,6 +15,7 @@ package main;
 use strict;
 use warnings;
 use Storable qw(dclone); 
+use FHEM::Core::Utils::Math;
 #use version 0.77; our $VERSION = version->declare('v3.5.5');
 
 my $missingModulSIGNALduino = ' ';
@@ -37,11 +38,11 @@ use List::Util qw(first);
 
 #$| = 1;    #Puffern abschalten, Hilfreich fuer PEARL WARNINGS Search
 
-#use Math::Round qw();
+
 
 
 use constant {
-  SDUINO_VERSION                  => '3.5.5+20230109',  # Datum wird automatisch bei jedem pull request aktualisiert
+  SDUINO_VERSION                  => '3.5.5+20230128',  # Datum wird automatisch bei jedem pull request aktualisiert
   SDUINO_INIT_WAIT_XQ             => 1.5,     # wait disable device
   SDUINO_INIT_WAIT                => 2,
   SDUINO_INIT_MAXRETRY            => 3,
@@ -389,11 +390,6 @@ sub SIGNALduino_Define {
   DevIo_CloseDev($hash);
   my $name = $a[0];
 
-  if (!exists &round)
-  {
-    Log3 $name, 1, "$name: Define, Signalduino can't be activated (sub round not found). Please update Fhem via update command";
-    return ;
-  }
 
   my $dev = $a[2];
   #Debug "dev: $dev" if ($debug);
@@ -843,14 +839,14 @@ sub SIGNALduino_Set_sendMsg {
   return "$hash->{NAME}: sendmsg, unknown protocol: $protocol" if (!$hash->{protocolObject}->protocolExists($protocol));
 
   $repeats //= 1 ;
-  if (InternalVal($hash->{NAME},'cc1101_available',0))
+  if ( InternalVal($hash->{NAME},'cc1101_available',0) == 1 )
   {
-    my $f=$hash->{protocolObject}->getProperty($protocol,'frequency');
-    if ( defined $f ) {
-      $frequency = q[F=].$hash->{protocolObject}->getProperty($protocol,'frequency'). q[;]
+    $frequency //= $hash->{protocolObject}->checkProperty($protocol,'frequency',q{});
+    if ( length $frequency > 0 ) {
+      $frequency = q[F=].$frequency.q[;];
     }
-  }
-  $frequency //= q{};
+  } else { $frequency = q{}; }
+  
   my %signalHash;
   my %patternHash;
   my $pattern='';
@@ -861,7 +857,7 @@ sub SIGNALduino_Set_sendMsg {
   if (defined($hash->{protocolObject}->getProperty($protocol,'format')) && $hash->{protocolObject}->getProperty($protocol,'format') eq 'manchester')
   {
     $clock += $_ for( @{$hash->{protocolObject}->getProperty($protocol,'clockrange')} );
-    $clock = round($clock/2,0);
+    $clock = FHEM::Core::Utils::Math::round($clock/2,0);
 
     my $intro;
     my $outro;
@@ -1218,7 +1214,7 @@ sub SIGNALduino_CheckccConfResponse {
 
   if ($msg2 !~ /Modulation:\sASK\/OOK/) {
     $msg2 .= ", Syncmod: ".$syncmod[($r{"12"})&7];                                                    #Syncmod    | Register 0x12
-    $msg2 .= ", Deviation: ".round((8+($r{"15"}&7))*(2**(($r{"15"}>>4)&7)) *26000/(2**17),2) .' kHz'; #Deviation  | Register 0x15
+    $msg2 .= ", Deviation: ".FHEM::Core::Utils::Math::round((8+($r{"15"}&7))*(2**(($r{"15"}>>4)&7)) *26000/(2**17),2) .' kHz'; #Deviation  | Register 0x15
   }
 
   readingsBeginUpdate($_[0]);
@@ -2379,7 +2375,7 @@ sub SIGNALduino_Parse_MS {
     #Debug 'List of pattern:';
     my $clockabs= $msg_parts{pattern}{$msg_parts{clockidx}};
     return if ($clockabs == 0);
-    $patternList{$_} = round($msg_parts{pattern}{$_}/$clockabs,1) for keys %{$msg_parts{pattern}};
+    $patternList{$_} = FHEM::Core::Utils::Math::round($msg_parts{pattern}{$_}/$clockabs,1) for keys %{$msg_parts{pattern}};
 
     #Debug Dumper(\%patternList);
 
@@ -2607,10 +2603,10 @@ sub SIGNALduino_Parse_MU {
           (my $count_changes,$rawData,my %patternListRaw_tmp) = $method->($name,$id,$rawData,%patternListRaw);
           use strict "refs";
 
-          %patternList = map { $_ => round($patternListRaw_tmp{$_}/$clockabs,1) } keys %patternListRaw_tmp;
+          %patternList = map { $_ => FHEM::Core::Utils::Math::round($patternListRaw_tmp{$_}/$clockabs,1) } keys %patternListRaw_tmp;
         }
       } else {
-        %patternList = map { $_ => round($patternListRaw{$_}/$clockabs,1) } keys %patternListRaw;
+        %patternList = map { $_ => FHEM::Core::Utils::Math::round($patternListRaw{$_}/$clockabs,1) } keys %patternListRaw;
       }
 
       Debug qq[Testing against protocol id $id -> ]. $hash->{protocolObject}->getProperty($id,'name')  if ($debug);
@@ -4180,7 +4176,7 @@ sub CalcDataRate {
   $DRATE_E = int($DRATE_E);
 
   my $DRATE_M = (($dr*1000) * (2**28) / (26000000 * (2**$DRATE_E))) - 256;
-  my $DRATE_Mr = main::round($DRATE_M,0);
+  my $DRATE_Mr = FHEM::Core::Utils::Math::round($DRATE_M,0);
   $DRATE_M = int($DRATE_M);
 
   my $datarate0 = ( ((256+$DRATE_M)*(2**($DRATE_E & 15 )))*26000000/(2**28) / 1000);
@@ -4753,12 +4749,13 @@ USB-connected devices (SIGNALduino):<br>
   <a name="longids"></a>
   <li>longids<br>
     Comma separated list of device-types for SIGNALduino that should be handled using long IDs. This additional ID allows it to differentiate some weather sensors, if they are sending on the same channel. Therfor a random generated id is added. If you choose to use longids, then you'll have to define a different device after battery change.<br>
-    Default is to not to use long IDs for all devices.
     <br><br>
     Examples:<PRE>
+      # Default, use of long IDs is defined by logical modules. Mostly disabled except for OREGON:
+      deleteattr sduino longids 
       # Do not use any long IDs for any devices:
       attr sduino longids 0
-      # Use any long IDs for all devices (this is default):
+      # Use any long IDs for all devices:
       attr sduino longids 1
       # Use longids for BTHR918N devices.
       # Will generate devices names like BTHR918N_f3.
@@ -4816,6 +4813,10 @@ USB-connected devices (SIGNALduino):<br>
       <li>Fine_Offset_WH57_868<br>
         Modulation 2-FSK, Datarate=17.26 kbps, Sync Word=2DD4, Packet Length= Byte, Frequency 868.35 MHz
         <ul><small>Example: Thunder and lightning sensor Fine Offset WH57, Froggit DP60, Ambient Weather WH31L</small></ul>
+      </li>
+      <li>Inkbird_IBS-P01R<br>
+        Modulation 2-FSK, Datarate=10.00 kbps, Sync Word=2DD4, Packet Length=18 Byte, Frequency 433.92 MHz
+        <ul><small>Example: Inkbird IBS-P01R pool thermometer, ITH-20R thermometer/hygrometer</small></ul>
       </li>
       <li>KOPP_FC<br>
         modulation GFSK, Datarate=4.7855 kbps, Sync Word=AA54, frequency 868.3MHz
@@ -5337,16 +5338,18 @@ USB-connected devices (SIGNALduino):<br>
   </li><br>
   <a name="longids"></a>
   <li>longids<br>
-    Durch Komma getrennte Liste von Device-Typen f&uuml;r Empfang von langen IDs mit dem SIGNALduino. Diese zus&auml;tzliche ID erlaubt es Wettersensoren, welche auf dem gleichen Kanal senden zu unterscheiden. Hierzu wird eine zuf&auml;llig generierte ID hinzugef&uuml;gt. Wenn Sie longids verwenden, dann wird in den meisten F&auml;llen nach einem Batteriewechsel ein neuer Sensor angelegt. Standardm&auml;ßig werden keine langen IDs verwendet.<br>
+    Durch Komma getrennte Liste von Device-Typen f&uuml;r Empfang von langen IDs mit dem SIGNALduino. Diese zus&auml;tzliche ID erlaubt es Wettersensoren, welche auf dem gleichen Kanal senden zu unterscheiden. Hierzu wird eine zuf&auml;llig generierte ID hinzugef&uuml;gt. Wenn Sie longids verwenden, dann wird in den meisten F&auml;llen nach einem Batteriewechsel ein neuer Sensor angelegt.<br>
     Folgende Module verwenden diese Funktionalit&auml;t: 14_Hideki, 41_OREGON, 14_CUL_TCM97001, 14_SD_WS07.<br>
     Beispiele:<PRE>
-      # Keine langen IDs verwenden (Default Einstellung):
+      # Voreinstellung, Nutzung von langen IDs wird durch logische Module definiert. Meist deaktiviert, außer bei OREGON:
+      deleteattr sduino longids 
+      # Keine langen IDs verwenden:
       attr sduino longids 0
       # Immer lange IDs verwenden:
       attr sduino longids 1
       # Verwende lange IDs f&uuml;r SD_WS07 Devices.
-      # Device Namen sehen z.B. so aus: SD_WS07_TH_3.
-      attr sduino longids SD_WS07
+      # Device Namen sehen z.B. so aus: SD_WS07_TH_3
+      attr sduino longids SD_WS07_TH
     </PRE>
   </li>
   <a name="maxMuMsgRepeat"></a>
@@ -5398,6 +5401,10 @@ USB-connected devices (SIGNALduino):<br>
       <li>Fine_Offset_WH57_868<br>
         Modulation 2-FSK, Datenrate=17.26 kbps, Sync Word=2DD4, Packet Length=9 Byte, Frequenz 868.35 MHz
         <ul><small>Beispiel: Gewittersensor Fine Offset WH57, Froggit DP60, Ambient Weather WH31L</small></ul>
+      </li>
+      <li>Inkbird_IBS-P01R<br>
+        Modulation 2-FSK, Datenrate=10.00 kbps, Sync Word=2DD4, Packet Length=18 Byte, Frequenz 433.92 MHz
+        <ul><small>Beispiel: Inkbird IBS-P01R Pool Thermometer, ITH-20R Thermo-/Hygrometer</small></ul>
       </li>
       <li>KOPP_FC<br>
         Modulation GFSK, Datenrate=4.7855 kbps, Sync Word=AA54, Frequenz 868.3MHz
