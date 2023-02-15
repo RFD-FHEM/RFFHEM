@@ -14,7 +14,7 @@
             "rmsg" : "MN;D=083122FD298A018A8E;R=0;",
             "tests" : [
                {
-                  "comment" : "Test #0"
+                  "comment" : "#0"
                }
             ]
          },
@@ -31,7 +31,7 @@
             "rmsg" : "MN;D=083122FD290A010A8E;R=244;",
             "tests" : [
                {
-                  "comment" : "Test #1"
+                  "comment" : "#1"
                }
             ]
          },
@@ -48,7 +48,7 @@
             "rmsg" : "MN;D=083122FD291A011AAE;R=249;",
             "tests" : [
                {
-                  "comment" : "Test #2"
+                  "comment" : "#2"
                }
             ]
          }
