@@ -8,7 +8,6 @@
                "DEF" : "voltage_0",
                "NAME" : "ArduinoSensor_voltage_0"
             },
-            "minProtocolVersion" : "1.29",
             "readings" : {
                "battery" : "2",
                "batteryState" : "ok",
@@ -17,15 +16,12 @@
                "trigger" : "auto",
                "voltage" : "3.64"
             },
-            "revision_entry" : "2021-05-26 23:11:19",
-            "revision_modul" : "14_SD_AS.pm   350 2020-10-01 20:16:11Z elektron-bbs",
             "rmsg" : "MS;P0=-503;P1=460;P3=-1024;P6=-9946;D=16101010101310101013101010101010101010131310131313101010101313131015;CP=1;SP=6;O;m2;",
             "tests" : [
                {
-                  "comment" : "Test #0"
+                  "comment" : "#0"
                }
-            ],
-            "user" : "elektron-bbs"
+            ]
          },
          {
             "comment" : "self build arduino sensor with temp output",
@@ -34,7 +30,6 @@
                "DEF" : "temp_0",
                "NAME" : "ArduinoSensor_temp_0"
             },
-            "minProtocolVersion" : "1.29",
             "readings" : {
                "battery" : "ok",
                "batteryState" : "ok",
@@ -42,15 +37,12 @@
                "temperature" : "22.9",
                "trigger" : "auto"
             },
-            "revision_entry" : "2021-05-26 23:00:22",
-            "revision_modul" : "14_SD_AS.pm   350 2020-10-01 20:16:11Z elektron-bbs",
             "rmsg" : "MS;P1=484;P2=-474;P4=-990;P6=-9960;D=16121212121214141214121212121212121414141212141214141212121212121215;CP=1;SP=6;O;m2;",
             "tests" : [
                {
-                  "comment" : "Test #1"
+                  "comment" : "#1"
                }
-            ],
-            "user" : "elektron-bbs"
+            ]
          },
          {
             "comment" : "self build arduino sensor with raw output",
@@ -59,7 +51,6 @@
                "DEF" : "raw_3",
                "NAME" : "ArduinoSensor_raw_3"
             },
-            "minProtocolVersion" : "1.29",
             "readings" : {
                "battery" : "3",
                "batteryState" : "ok",
@@ -67,15 +58,12 @@
                "state" : "S: 270",
                "trigger" : "auto"
             },
-            "revision_entry" : "2021-05-26 23:01:27",
-            "revision_modul" : "14_SD_AS.pm   350 2020-10-01 20:16:11Z elektron-bbs",
             "rmsg" : "MS;P2=-9999;P3=504;P4=-511;P5=-965;D=32323434343435343534353534343434353534343434353535343434343434343435;CP=3;SP=2;m2;",
             "tests" : [
                {
-                  "comment" : "Test #2"
+                  "comment" : "#2"
                }
-            ],
-            "user" : "elektron-bbs"
+            ]
          },
          {
             "comment" : "self build arduino sensor with humidity output",
@@ -84,7 +72,6 @@
                "DEF" : "humidity_0",
                "NAME" : "ArduinoSensor_humidity_0"
             },
-            "minProtocolVersion" : "1.29",
             "readings" : {
                "battery" : "ok",
                "batteryState" : "ok",
@@ -92,15 +79,12 @@
                "state" : "H: 57",
                "trigger" : "auto"
             },
-            "revision_entry" : "2021-05-26 23:03:54",
-            "revision_modul" : "14_SD_AS.pm   350 2020-10-01 20:16:11Z elektron-bbs",
             "rmsg" : "MS;P0=-9561;P1=458;P2=-527;P4=-982;D=10121212121412121414121212121212121212141414121412141212121212141215;CP=1;SP=0;m2;",
             "tests" : [
                {
-                  "comment" : "Test #3"
+                  "comment" : "#3"
                }
-            ],
-            "user" : "elektron-bbs"
+            ]
          }
       ],
       "id" : "2",

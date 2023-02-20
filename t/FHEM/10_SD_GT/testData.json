@@ -9,20 +9,16 @@
                "DEF" : "LEARN",
                "NAME" : "SD_GT_LEARN"
             },
-            "minProtocolVersion" : "1.27",
             "readings" : {
                "LearnCodes" : "C9AFAC",
                "state" : "learned code 1, please press another button"
             },
-            "revision_entry" : "2021-03-22 14:18:20",
-            "revision_modul" : "10_SD_GT.pm     1 2020-05-25 21:00:00Z elektron-bbs",
             "rmsg" : "MU;P0=328;P1=-428;P3=1090;P4=-1190;P5=-2310;D=010131040431310431043131313131043104313104040531310404310404313104310431313131310431043131040405313104043104043131043104313131313104310431310404053131040431040431310431043131313131043104313104042;CP=0;",
             "tests" : [
                {
-                  "comment" : "Test #0"
+                  "comment" : "#0"
                }
-            ],
-            "user" : "Tom71"
+            ]
          },
          {
             "comment" : "Button C off, Rollingcode 2, V2, Penny 2335191R (ID 5,19 additionally)",
@@ -32,20 +28,16 @@
                "DEF" : "LEARN",
                "NAME" : "SD_GT_LEARN"
             },
-            "minProtocolVersion" : "1.27",
             "readings" : {
                "LearnCodes" : "C22B9C",
                "state" : "learned code 1, please press another button"
             },
-            "revision_entry" : "2021-03-22 14:20:44",
-            "revision_modul" : "10_SD_GT.pm     1 2020-05-25 21:00:00Z elektron-bbs",
             "rmsg" : "MU;P0=1090;P1=-430;P2=328;P3=-1192;P4=-2319;P5=2988;D=01012323232301232323012301230101012323010101232324010123232323012323230123012301010123230101012323240101232323230123232301230123010101232301010123232401012323232301232323012301230101012323010101232353;CP=2;",
             "tests" : [
                {
-                  "comment" : "Test #1"
+                  "comment" : "#1"
                }
-            ],
-            "user" : "Tom71"
+            ]
          },
          {
             "comment" : "Button C off, Rollingcode 3, V2, Penny 2335191R (ID 5 additionally)",
@@ -55,20 +47,16 @@
                "DEF" : "LEARN",
                "NAME" : "SD_GT_LEARN"
             },
-            "minProtocolVersion" : "1.27",
             "readings" : {
                "LearnCodes" : "CDD41C",
                "state" : "learned code 1, please press another button"
             },
-            "revision_entry" : "2021-03-22 14:22:44",
-            "revision_modul" : "10_SD_GT.pm     1 2020-05-25 21:00:00Z elektron-bbs",
             "rmsg" : "MU;P0=1086;P1=-433;P2=327;P3=-1194;P4=-2318;P5=2988;D=01012323010123010101230123012323232323010101232324010123230101230101012301230123232323230101012323240101232301012301010123012301232323232301010123232401012323010123010101230123012323232323010101232353;CP=2;",
             "tests" : [
                {
-                  "comment" : "Test #2"
+                  "comment" : "#2"
                }
-            ],
-            "user" : "Tom71"
+            ]
          },
          {
             "comment" : "Button C off, Rollingcode 4, V2, Penny 2335191R (ID 5 additionally)",
@@ -78,20 +66,16 @@
                "DEF" : "LEARN",
                "NAME" : "SD_GT_LEARN"
             },
-            "minProtocolVersion" : "1.27",
             "readings" : {
                "LearnCodes" : "C3802C",
                "state" : "learned code 1, please press another button"
             },
-            "revision_entry" : "2021-03-22 14:24:40",
-            "revision_modul" : "10_SD_GT.pm     1 2020-05-25 21:00:00Z elektron-bbs",
             "rmsg" : "MU;P0=1090;P1=-428;P2=334;P3=-1190;P4=-2317;P5=2988;D=01012323232301010123232323232323232301230101232324010123232323010101232323232323232323012301012323240101232323230101012323232323232323230123010123232401012323232301010123232323232323232301230101232353;CP=2;",
             "tests" : [
                {
-                  "comment" : "Test #3"
+                  "comment" : "#3"
                }
-            ],
-            "user" : "Tom71"
+            ]
          },
          {
             "comment" : "Button C on, Rollingcode 1, V2, Penny 2335191R (ID 5 additionally)",
@@ -101,20 +85,16 @@
                "DEF" : "LEARN",
                "NAME" : "SD_GT_LEARN"
             },
-            "minProtocolVersion" : "1.27",
             "readings" : {
                "LearnCodes" : "CA627C",
                "state" : "learned code 1, please press another button"
             },
-            "revision_entry" : "2021-03-22 14:27:05",
-            "revision_modul" : "10_SD_GT.pm     1 2020-05-25 21:00:00Z elektron-bbs",
             "rmsg" : "MU;P0=1092;P1=-429;P2=335;P3=-1184;P4=-2316;P5=2996;D=010123230123012323010123232301232301010101012323240101232301230123230101232323012323010101010123232401012323012301232301012323230123230101010101232355;CP=2;",
             "tests" : [
                {
-                  "comment" : "Test #4"
+                  "comment" : "#4"
                }
-            ],
-            "user" : "Tom71"
+            ]
          },
          {
             "comment" : "Button C on, Rollingcode 2, V2, Penny 2335191R (ID 5 additionally)",
@@ -124,20 +104,16 @@
                "DEF" : "LEARN",
                "NAME" : "SD_GT_LEARN"
             },
-            "minProtocolVersion" : "1.27",
             "readings" : {
                "LearnCodes" : "C6B54C",
                "state" : "learned code 1, please press another button"
             },
-            "revision_entry" : "2021-03-22 14:28:26",
-            "revision_modul" : "10_SD_GT.pm     1 2020-05-25 21:00:00Z elektron-bbs",
             "rmsg" : "MU;P0=1090;P1=-429;P2=331;P3=-1189;P4=-2316;P5=2992;D=01012323230101230123010123012301230123230101232324010123232301012301230101230123012301232301012323240101232323010123012301012301230123012323010123232401012323230101230123010123012301230123230101232354;CP=2;",
             "tests" : [
                {
-                  "comment" : "Test #5"
+                  "comment" : "#5"
                }
-            ],
-            "user" : "Tom71"
+            ]
          },
          {
             "comment" : "Button D off, Rollingcode 1, V2, Penny 2335191R (ID 5,19 additionally)",
@@ -146,20 +122,16 @@
                "DEF" : "LEARN",
                "NAME" : "SD_GT_LEARN"
             },
-            "minProtocolVersion" : "1.27",
             "readings" : {
                "LearnCodes" : "C6B542",
                "state" : "learned code 1, please press another button"
             },
-            "revision_entry" : "2021-03-22 14:42:14",
-            "revision_modul" : "10_SD_GT.pm     1 2020-05-25 21:00:00Z elektron-bbs",
             "rmsg" : "MU;P0=-800;P1=-422;P2=346;P3=-1176;P4=1103;P5=-2302;D=0123234141234123414123412341234123232323412325414123232341412341234141234123412341232323234123254125;CP=2;",
             "tests" : [
                {
-                  "comment" : "Test #6"
+                  "comment" : "#6"
                }
-            ],
-            "user" : "Tom71"
+            ]
          },
          {
             "comment" : "Button D on, Rollingcode 1, V2, Penny 2335191R (ID 5 additionally)",
@@ -169,20 +141,16 @@
                "DEF" : "LEARN",
                "NAME" : "SD_GT_LEARN"
             },
-            "minProtocolVersion" : "1.27",
             "readings" : {
                "LearnCodes" : "C22B92",
                "state" : "learned code 1, please press another button"
             },
-            "revision_entry" : "2021-03-22 14:32:21",
-            "revision_modul" : "10_SD_GT.pm     1 2020-05-25 21:00:00Z elektron-bbs",
             "rmsg" : "MU;P0=-416;P1=1100;P2=345;P3=-1176;P4=-2298;P5=3008;D=0010232323102310231010102323102323102324101023232323102323231023102310101023231023231023241010232323231023232310231023101010232310232310232410102323232310232323102310231010102323102323102351;CP=2;",
             "tests" : [
                {
-                  "comment" : "Test #7"
+                  "comment" : "#7"
                }
-            ],
-            "user" : "Tom71"
+            ]
          }
       ],
       "id" : "49.2",

@@ -7,7 +7,6 @@
                "DEF" : "SD_WS_Maverick",
                "NAME" : "SD_WS_Maverick"
             },
-            "minProtocolVersion" : "1.27",
             "readings" : {
                "Sensor-1-food_state" : "connected",
                "Sensor-2-bbq_state" : "connected",
@@ -17,15 +16,12 @@
                "temp-bbq" : "21",
                "temp-food" : "25"
             },
-            "revision_entry" : "2021-03-25 13:32:44",
-            "revision_modul" : "14_SD_WS_Maverick.pm 21666 2020-04-13 21:14:53Z Sidey",
             "rmsg" : "MC;LL=-482;LH=511;SL=-230;SH=264;D=AA999559959A695996A65A9566;C=247;L=104;",
             "tests" : [
                {
-                  "comment" : "Test #0"
+                  "comment" : "#0"
                }
-            ],
-            "user" : "Papaloewe"
+            ]
          }
       ],
       "id" : "47",

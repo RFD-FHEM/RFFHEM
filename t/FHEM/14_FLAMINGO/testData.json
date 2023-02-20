@@ -11,21 +11,17 @@
                "DEF" : "32E44F",
                "NAME" : "FLAMINGO_32E44F"
             },
-            "minProtocolVersion" : "1.27",
             "readings" : {
                "alarmcounter" : "1",
                "lastReceive_ID" : "13",
                "state" : "Alarm"
             },
-            "revision_entry" : "2021-03-24 10:20:53",
-            "revision_modul" : "14_FLAMINGO.pm 22619 2020-08-17 17:29:09Z HomeAuto_User",
             "rmsg" : "MS;P0=-1413;P1=757;P2=-2779;P3=-16079;P4=8093;P5=-954;D=1345121210101212101210101012121012121210121210101010;CP=1;SP=3;R=33;O;",
             "tests" : [
                {
-                  "comment" : "Test #0"
+                  "comment" : "#0"
                }
-            ],
-            "user" : "Wahrschauer"
+            ]
          }
       ],
       "id" : "13",
@@ -33,56 +29,50 @@
       "name" : "KD-101LA"
    },
    {
-      "module" : "FLAMINGO",
       "data" : [
          {
-            "revision_modul" : "14_FLAMINGO.pm 22619 2020-08-17 17:29:09Z HomeAuto_User",
-            "readings" : {
-               "lastReceive_ID" : "13.1",
-               "alarmcounter" : "1",
-               "state" : "Alarm"
-            },
+            "comment" : "Smoke alarm device / decode as MU",
             "dispatch_repeats" : "3",
             "dmsg" : "P13.1#CBFAD2",
+            "internals" : {
+               "DEF" : "CBFAD2",
+               "NAME" : "FLAMINGO_CBFAD2"
+            },
+            "readings" : {
+               "alarmcounter" : "1",
+               "lastReceive_ID" : "13.1",
+               "state" : "Alarm"
+            },
             "rmsg" : "MU;P0=-5684;P1=8149;P2=-887;P3=798;P4=-1393;P5=-2746;P6=-19956;D=0123434353534353434343434343435343534343534353534353612343435353435343434343434343534353434353435353435361234343535343534343434343434353435343435343535343536123434353534353434343434343435343534343534353534353612343435353435343434343434343534353434353435;CP=3;R=0;",
-            "minProtocolVersion" : "1.27",
-            "comment" : "Smoke alarm device / decode as MU",
-            "user" : "HomeAuto_User",
             "tests" : [
                {
-                  "comment" : "#0",
                   "attributes" : {
                      "model" : "FA22RF"
-                  }
+                  },
+                  "comment" : "#0"
                }
-            ],
-            "internals" : {
-               "NAME" : "FLAMINGO_CBFAD2",
-               "DEF" : "CBFAD2"
-            },
-            "revision_entry" : "2021-03-24 10:22:35"
+            ]
          }
       ],
       "id" : "13.1",
+      "module" : "FLAMINGO",
       "name" : "FA22RF"
    },
    {
       "data" : [
          {
-            "minProtocolVersion" : "1.27",
-            "rmsg" : "MS;P1=-2708;P2=796;P3=-1387;P4=-8477;P5=8136;P6=-904;D=2456212321212323232321212121212121212123212321212121;CP=2;SP=4;",
-            "dmsg" : "P13#B0FFAF",
             "comment" : "https://github.com/RFD-FHEM/RFFHEM/issues/233#issuecomment-382070720",
-            "readings" : {
-               "alarmcounter" : "1",
-               "state" : "Alarm",
-               "lastReceive_ID" : "13"
-            },
-            "revision_modul" : "14_FLAMINGO.pm 22619 2020-08-17 17:29:09Z HomeAuto_User",
+            "dmsg" : "P13#B0FFAF",
             "internals" : {
                "DEF" : "B0FFAF",
                "NAME" : "FLAMINGO_B0FFAF"
             },
+            "readings" : {
+               "alarmcounter" : "1",
+               "lastReceive_ID" : "13",
+               "state" : "Alarm"
+            },
+            "rmsg" : "MS;P1=-2708;P2=796;P3=-1387;P4=-8477;P5=8136;P6=-904;D=2456212321212323232321212121212121212123212321212121;CP=2;SP=4;",
             "tests" : [
                {
                   "attributes" : {
@@ -90,14 +80,11 @@
                   },
                   "comment" : "#0"
                }
-            ],
-            "revision_entry" : "2021-03-24 10:24:16",
-            "user" : "unknown"
+            ]
          }
       ],
+      "id" : "13.2",
       "module" : "FLAMINGO",
-      "name" : "LM-101LD",
-      "id" : "13.2"
+      "name" : "LM-101LD"
    }
-
 ]
