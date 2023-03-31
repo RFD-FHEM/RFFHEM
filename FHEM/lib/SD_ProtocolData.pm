@@ -3297,6 +3297,22 @@ package lib::SD_ProtocolData;
         clientmodule    => 'SD_WS',
         length_min      => '36',
       },
+    "125" =>  ## Humidity and Temperaturesensor Ecowitt WH31,  MN;D=3002826E3681D96C000200000043;R=56;
+      {
+        name            => 'WH31',
+        comment         => 'Fine Offset | Ambient Weather WH31E Thermo-Hygrometer Sensor',
+        id              => '125',
+        knownFreqs      => '868.35',
+        datarate        => '17.257',
+        sync            => '2DD4',
+        modulation      => '2-FSK',
+        regexMatch      => qr/^(30|37)/, 
+        preamble        => 'W125#',
+        register        => ['0001','022E','0343','042D','05D4','0609','0780','0800','0D21','0E65','0FE8','10A9','115C','1202','1322','14F8','1543','1916','1B43','1C68'],
+        rfmode          => 'Fine_Offset_WH57_868',
+        clientmodule    => 'SD_WS',
+        length_min      => '28',
+      },
     ########################################################################
     #### ###  register informations from other hardware protocols  #### ####
 

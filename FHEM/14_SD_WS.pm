@@ -48,6 +48,7 @@
 # 11.06.2022 neues Protokoll 122: TM40, Wireless Grill-, Meat-, Roasting-Thermometer with 4 Temperature Sensors
 # 06.01.2023 neues Protokoll 123: Inkbird IBS-P01R Pool Thermometer, Inkbird ITH-20R (not tested)
 # 21.01.2023 use round from package FHEM::Core::Utils::Math;
+# 01.04.2023 Added ecowitt wh31 support
 
 
 package main;
@@ -59,6 +60,7 @@ use warnings;
 use Carp qw(carp);
 use FHEM::Meta;
 use FHEM::Core::Utils::Math;
+use constant HAS_DigestCRC => defined eval { require Digest::CRC; };
 
 # Forward declarations
 sub SD_WS_LFSR_digest8_reflect;
@@ -100,7 +102,7 @@ sub SD_WS_Initialize {
     "SD_WS_85_THW_.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "4:120"},
     "SD_WS_89_TH.*"   => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "3:180"},
     "SD_WS_94_T.*"    => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4:Temp,", autocreateThreshold => "3:180"},
-    'SD_WS_107_H.*'   => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => q{}, autocreateThreshold => '2:180'},
+    'SD_WS_107_H.*'   => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => q{}, autocreateThreshold => '2:300'},
     'SD_WS_108.*'     => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4:Temp,', autocreateThreshold => '5:120'},
     'SD_WS_110_TR.*'  => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4:Temp,', autocreateThreshold => '3:180'},
     'SD_WS_111_TL.*'  => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4:Temp,', autocreateThreshold => '3:600'},
@@ -111,6 +113,7 @@ sub SD_WS_Initialize {
     'SD_WS_120.*'     => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4hum4:Temp/Hum,', autocreateThreshold => '2:180'},
     'SD_WS_122_T.*'   => { ATTR => 'event-min-interval:.*:60 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4:Temp,', autocreateThreshold => '10:180'},
     'SD_WS_123_T.*'   => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4:Temp,', autocreateThreshold => '2:180'},
+    'SD_WS_125_.*'    => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4hum4:Temp/Hum,', autocreateThreshold => '2:300'},
   };
   return FHEM::Meta::InitMod( __FILE__, $hash );
 }
@@ -1241,6 +1244,7 @@ sub SD_WS_Parse {
                                 return 1;
                               }
     } ,
+
     117 => {
         # https://github.com/merbanan/rtl_433/blob/master/src/devices/bresser_7in1.c
         # The compact 7-in-1 multifunction outdoor sensor transmits the data on 868.3 MHz.
@@ -1470,6 +1474,45 @@ sub SD_WS_Parse {
                                   return 0;
                                 }
                               },
+    },
+    125 => {
+        # WH31 
+        sensortype => 'WH31',
+        model      => 'SD_WS_125',
+        prematch   => sub { ($rawData,undef) = @_; return 1 if ($rawData =~ /^(30|37)/); },
+        id         => sub {my ($rawData,undef) = @_; return (substr($rawData,2,2));},
+		    channel    => sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,17,19) + 1);},
+        bat        => sub {my (undef,$bitData) = @_; return substr($bitData,20,1) eq '0' ? 'ok' : 'low';}, 
+        temp       => sub {my (undef,$bitData) = @_;
+                            my $temp = SD_WS_binaryToNumber($bitData,22,31);  
+                            return FHEM::Core::Utils::Math::round(($temp - 400) / 10, 1);
+						              },							
+        hum        => sub { my ($rawData,undef) = @_; return hex(substr($rawData,8,2)); },
+        crcok      => sub { my ($rawData,undef) = @_;
+                            if (!HAS_DigestCRC) {
+                              my $calc_crc8 = Digest::CRC->new(width => 8, poly=>0x31);
+                              my $crc_digest = $calc_crc8->add( pack 'H*', substr( $rawData, 0, 12 ) )->digest;
+                              if ($crc_digest)
+                              {
+                                Log3 $name, 3, qq[$name: SD_WS_125 Parse msg $rawData - ERROR CRC8 $crc_digest shoud be 0];
+                                return 0;
+                              }
+                            } else {
+                              Log3 $name, 1, qq[$name: SD_WS_125 Parse msg $rawData - ERROR CRC not load, please install modul Digest::CRC];
+                            }
+                            my $checksum = 0;
+                            for (my $i=0; $i < 11; $i += 2) {
+                              $checksum += hex(substr($rawData,$i,2));
+                            }
+                            $checksum -= hex(substr($rawData,12,2));
+                            $checksum &= 0xFF;
+                            if ($checksum) {
+                              Log3 $name, 3, qq[$name: SD_WS_125 Parse msg $rawData - ERROR checksum $checksum != 0];
+                              return 0;
+                            }
+
+                            return 1;
+                          }, 
     },
   );
 

@@ -2211,5 +2211,62 @@
       "id" : "123",
       "module" : "SD_WS",
       "name" : "Inkbird ITH-20R"
+   },
+   {
+      "data" : [
+         {
+            "comment" : "Ecowitt WH31 Temp Hum sensor",
+            "dmsg" : "W125#300282623704516C000200001B85",
+            "rmsg" : "MN;D=300282623704516C000200001B85;R=63;",
+            "tests" : [
+               {
+                  "internals" : {
+                     "DEF" : "SD_WS_125_1",
+                     "NAME" : "SD_WS_125_1"
+                  },
+                  "readings" : {
+                     "humidity" : 55,
+                     "state" : "T: 21.0 H: 55",
+                     "temperature" : "21.0",
+                     "type" : "WH31"
+                  },
+                  "comment" : "#0"
+               }
+            ]
+         },
+         {
+            "comment" : "Ecowitt WH31 Temp Hum sensor - wrong checksum ",
+            "dmsg" : "W125#300282623704526C000200001B85",
+            "tests" : [
+               {
+                  "returns" : {
+                     "ParseFn" : ""
+                  },
+                  "comment" : "#1"
+               }
+            ]
+
+         },
+         {
+            "comment" : "Ecowitt WH31 Temp Hum sensor - wrong CRC ",
+            "dmsg" : "W125#302282623705616C000200001B85",
+            "tests" : [
+               {
+                  "returns" : {
+                     "ParseFn" : ""
+                  },
+                  "comment" : "#2"
+               }
+            ]
+
+         }
+      ],
+      "id" : "125",
+      "module" : "SD_WS",
+      "name" : "Fine Offset | Ambient Weather WH31E Thermo-Hygrometer Sensor"
    }
+
+
+
+
 ]
