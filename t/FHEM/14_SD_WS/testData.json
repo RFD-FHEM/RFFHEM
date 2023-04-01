@@ -2228,7 +2228,7 @@
                      "humidity" : 55,
                      "state" : "T: 21.0 H: 55",
                      "temperature" : "21.0",
-                     "type" : "WH31"
+                     "type" : "WH31e, WH31b"
                   },
                   "comment" : "#0"
                }
