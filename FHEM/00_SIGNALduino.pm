@@ -5406,6 +5406,11 @@ USB-connected devices (SIGNALduino):<br>
         Modulation 2-FSK, Datenrate=17.26 kbps, Sync Word=2DD4, Packet Length=11 Byte, Frequenz 868.35 MHz
         <ul><small>Beispiel: Temp feuchte Sensor Fine Offset WH31, Froggit DP50, Ambient Weather WH31e/b, Ecowitt wh31</small></ul>
       </li>
+      <li>Fine_Offset_WH40_868<br>
+        Modulation 2-FSK, Datenrate=17.26 kbps, Sync Word=2DD4, Packet Length=14 Byte, Frequenz 868.35 MHz
+        <ul><small>Beispiel: Regensensor Fine Offset WH40, Ambient Weather WH40, Ecowitt WH40</small></ul>
+      </li>
+      
       <li>Inkbird_IBS-P01R<br>
         Modulation 2-FSK, Datenrate=10.00 kbps, Sync Word=2DD4, Packet Length=18 Byte, Frequenz 433.92 MHz
         <ul><small>Beispiel: Inkbird IBS-P01R Pool Thermometer, ITH-20R Thermo-/Hygrometer</small></ul>
