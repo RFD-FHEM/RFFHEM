@@ -85,7 +85,7 @@ package lib::SD_ProtocolData;
   use strict;
   use warnings;
 
-  our $VERSION = '1.49';
+  our $VERSION = '1.50';
 
   our %protocols = (
     "0" =>  ## various weather sensors (500 | 9100)
@@ -3297,7 +3297,10 @@ package lib::SD_ProtocolData;
         clientmodule    => 'SD_WS',
         length_min      => '36',
       },
-    "125" =>  ## Humidity and Temperaturesensor Ecowitt WH31,  MN;D=3002826E3681D96C000200000043;R=56;
+    "125" =>  ## Humidity and Temperaturesensor Ecowitt WH31, froggit DP50 / WH31A
+              # Nordamerika: 915MHz; Europa: 868MHz, andere Regionen: 433MHz
+              # https://github.com/RFD-FHEM/RFFHEM/pull/1161 @ sidey79 2023-04-01
+              # MN;D=300282623704516C000200;R=56;
       {
         name            => 'WH31',
         comment         => 'Fine Offset | Ambient Weather WH31E Thermo-Hygrometer Sensor',
@@ -3308,10 +3311,11 @@ package lib::SD_ProtocolData;
         modulation      => '2-FSK',
         regexMatch      => qr/^(30|37)/, 
         preamble        => 'W125#',
-        register        => ['0001','022E','0343','042D','05D4','0609','0780','0800','0D21','0E65','0FE8','10A9','115C','1202','1322','14F8','1543','1916','1B43','1C68'],
-        rfmode          => 'Fine_Offset_WH57_868',
+        register        => ['0001','022E','0343','042D','05D4','060b','0780','0800','0D21','0E65','0FE8','10A9','115C','1202','1322','14F8','1543','1916','1B43','1C68'],
+        rfmode          => 'Fine_Offset_WH31_868',
         clientmodule    => 'SD_WS',
-        length_min      => '28',
+        length_min      => '22',
+        length_max      => '22',
       },
     ########################################################################
     #### ###  register informations from other hardware protocols  #### ####

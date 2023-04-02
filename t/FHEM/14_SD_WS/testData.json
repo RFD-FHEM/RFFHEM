@@ -2216,19 +2216,19 @@
       "data" : [
          {
             "comment" : "Ecowitt WH31 Temp Hum sensor",
-            "dmsg" : "W125#300282623704516C000200001B85",
-            "rmsg" : "MN;D=300282623704516C000200001B85;R=63;",
+            "dmsg" : "W125#300282623704516C000200",
+            "rmsg" : "MN;D=300282623704516C000200;R=63;",
             "tests" : [
                {
                   "internals" : {
-                     "DEF" : "SD_WS_125_1",
-                     "NAME" : "SD_WS_125_1"
+                     "DEF" : "SD_WS_125_TH_1",
+                     "NAME" : "SD_WS_125_TH_1"
                   },
                   "readings" : {
                      "humidity" : 55,
                      "state" : "T: 21.0 H: 55",
                      "temperature" : "21.0",
-                     "type" : "WH31e, WH31b"
+                     "type" : "WH31e, WH31b, DP50"
                   },
                   "comment" : "#0"
                }
@@ -2236,7 +2236,7 @@
          },
          {
             "comment" : "Ecowitt WH31 Temp Hum sensor - wrong checksum ",
-            "dmsg" : "W125#300282623704526C000200001B85",
+            "dmsg" : "W125#300282623704526C000200",
             "tests" : [
                {
                   "returns" : {
@@ -2249,7 +2249,7 @@
          },
          {
             "comment" : "Ecowitt WH31 Temp Hum sensor - wrong CRC ",
-            "dmsg" : "W125#302282623705616C000200001B85",
+            "dmsg" : "W125#302282623705616C000200",
             "tests" : [
                {
                   "returns" : {

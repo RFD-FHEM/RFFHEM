@@ -1478,11 +1478,11 @@ sub SD_WS_Parse {
     125 => {
         # Temperature and humidiry sensor Fine Offset WH31, aka Ambient Weather, aka ecowitt
         # ------------------------------------------------------------------------------------------
-        #          Byte: 00 01 02 03 04 05 06 07 08 09 10 11 12 13
-        #        Nibble: 01 23 45 67 89 01 23 45 67 89 01 23 45 67
-        # aa aa aa 2d d4 30 02 82 62 37 04 51 6C 00 02 00 00 1B 85
-        #          MN;D= 30 02 82 62 37 04 51 6C 00 02 00 00 1B 85;R=63;   Temp: 21.0 C Hum: 55%, Battery: ok, ID: 0x02
-        #                FF II CT TT HH XX SS ?? ?? ?? ?? ?? ?? ?? 
+        #          Byte: 00 01 02 03 04 05 06 07 08 09 10 
+        #        Nibble: 01 23 45 67 89 01 23 45 67 89 01 
+        # aa aa aa 2d d4 30 02 82 62 37 04 51 6C 00 02 00 
+        #          MN;D= 30 02 82 62 37 04 51 6C 00 02 00 ;R=63;   Temp: 21.0 C Hum: 55%, Battery: ok, ID: 0x02
+        #                FF II CT TT HH XX SS ?? ?? ?? ?? 
         # FF:   Family code 0x31 = WH31e 0x37 = wh31b
         # II:   ID (1 byte)
         # C :   3bit Channel Number Bit 17-19, 1 Bit Battery bit 20
