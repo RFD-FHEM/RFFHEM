@@ -2310,6 +2310,77 @@
       "id" : "125",
       "module" : "SD_WS",
       "name" : "Fine Offset | Ambient Weather WH31E Thermo-Hygrometer Sensor"
+   },
+   {
+      "data" : [
+         {
+            "comment" : "Ecowitt WH40 rain gauge (14 byte)",
+            "dmsg" : "W126#40011CDF8F0000976220A6802801",
+            "rmsg" : "MN;D=40011CDF8F0000976220A6802801;R=61;",
+            "tests" : [
+               {
+                  "internals" : {
+                     "DEF" : "SD_WS_126_R",
+                     "NAME" : "SD_WS_126_R"
+                  },
+                  "readings" : {
+                     "state" : "R: 0",
+                     "rain" : "0",
+                     "type" : "WH40"
+                  },
+                  "comment" : "#0"
+               }
+            ]
+         },
+         {
+            "comment" : "Ecowitt WH40 rain gauge (11 byte)",
+            "dmsg" : "W126#40013E3C900000105BA02A",
+            "rmsg" : "MN;D=40013E3C900000105BA02A;R=61;",
+            "tests" : [
+               {
+                  "internals" : {
+                     "DEF" : "SD_WS_126_R",
+                     "NAME" : "SD_WS_126_R"
+                  },
+                  "readings" : {
+                     "state" : "R: 0",
+                     "rain" : "0",
+                     "type" : "WH40"
+                  },
+                  "comment" : "#0"
+               }
+            ]
+         },
+         {
+            "comment" : "Ecowitt WH40 rain gauge - wrong checksum ",
+            "dmsg" : "W126#",
+            "tests" : [
+               {
+                  "returns" : {
+                     "ParseFn" : ""
+                  },
+                  "comment" : "#1"
+               }
+            ]
+
+         },
+         {
+            "comment" : "Ecowitt WH40 rain gauge - wrong CRC ",
+            "dmsg" : "W126#",
+            "tests" : [
+               {
+                  "returns" : {
+                     "ParseFn" : ""
+                  },
+                  "comment" : "#2"
+               }
+            ]
+
+         }
+      ],
+      "id" : "126",
+      "module" : "SD_WS",
+      "name" : "Fine Offset | Ambient Weather WH40 rain gauge"
    }
 
 
