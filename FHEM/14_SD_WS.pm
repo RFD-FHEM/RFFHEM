@@ -1510,7 +1510,7 @@ sub SD_WS_Parse {
                               my $crc_digest = $calc_crc8->add( pack 'H*', substr( $rawData, 0, 12 ) )->digest;
                               if ($crc_digest)
                               {
-                                Log3 $name, 3, qq[$name: SD_WS_125 Parse msg $rawData - ERROR CRC8 $crc_digest shoud be 0];
+                                Log3 $name, 3, qq[$name: SD_WS_$protocol Parse msg $rawData - ERROR CRC8 $crc_digest shoud be 0];
                                 return 0;
                               }
                             } else {
@@ -1549,7 +1549,7 @@ sub SD_WS_Parse {
         model      => 'SD_WS_126_R',
         prematch   => sub {my ($rawData,undef) = @_; return 1 if ($rawData =~ /^40/); },
         id         => sub {my ($rawData,undef) = @_; return (substr($rawData,2,6));},
-        rain       => sub {my ($rawData,undef) = @_; return 0.1 * substr($rawData,10,4); },
+        rain       => sub {my ($rawData,undef) = @_; return 0.1 * hex(substr($rawData,10,4)); },
         crcok      => sub { my ($rawData,undef) = @_; 
                             if (HAS_DigestCRC) {
                               my $calc_crc8 = Digest::CRC->new(width => 8, poly=>0x31);
@@ -1639,7 +1639,7 @@ sub SD_WS_Parse {
     my $binvalue = $bitData;
 
     if (length($binvalue) != 72) {
-      Log3 $iohash, 4, "$name:125 SD_WS_Parse BresserTemeo length error (72 bits expected)!!!";
+      Log3 $iohash, 4, "$name: SD_WS_Parse BresserTemeo length error (72 bits expected)!!!";
       return "";
     }
 
