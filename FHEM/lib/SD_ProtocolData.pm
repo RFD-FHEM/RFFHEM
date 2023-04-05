@@ -3320,8 +3320,10 @@ package lib::SD_ProtocolData;
         length_min      => '18',
       },
     "126" =>  ## Humidity and Temperaturesensor Ecowitt WH40,  
-              # SD_WS_126  <state>  MN;D=40011CDF8F0000976220A6802801;R=61;   14 byte  ID 11CDF
-              # SD_WS_126  <state>  MN;D=40013E3C900000105BA02A;R=61;         11 byte  ID 13E3c
+              # https://github.com/RFD-FHEM/RFFHEM/pull/1164
+              # SD_WS_126 R: 0 MN;D=40011CDF8F0000976220A6802801;R=61;   14 byte  ID 11CDF
+              # SD_WS_126 R: 0 MN;D=40013E3C900000105BA02A;R=61;         11 byte  ID 13E3c
+              # SD_WS_126 R: 9 MN;D=40013E3C90005AB55AA0A0800408;R=61;   14 Byte  ID 13E3c
       { 
         name            => 'WH40',
         comment         => 'Fine Offset | Ambient Weather WH40 rain gauge',

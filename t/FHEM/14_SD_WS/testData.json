@@ -2325,13 +2325,34 @@
                   },
                   "readings" : {
                      "state" : "R: 0",
-                     "rain" : "0",
+                     "rawRainCounter" : 0,
+                     "rain_total" : 0,
                      "type" : "WH40"
                   },
                   "comment" : "#0"
                }
             ]
          },
+         {
+            "comment" : "Ecowitt WH40 rain gauge (14 byte)",
+            "dmsg" : "W126#40013E3C90005AB55AA0A0800408",
+            "rmsg" : "MN;D=40013E3C90005AB55AA0A0800408;R=61;",
+            "tests" : [
+               {
+                  "internals" : {
+                     "DEF" : "SD_WS_126_R",
+                     "NAME" : "SD_WS_126_R"
+                  },
+                  "readings" : {
+                     "state" : "R: 9",
+                     "rain_total" : 9,
+                     "rawRainCounter" : 90,
+                     "type" : "WH40"
+                  },
+                  "comment" : "#0"
+               }
+            ]
+         },         
          {
             "comment" : "Ecowitt WH40 rain gauge (11 byte)",
             "dmsg" : "W126#40013E3C900000105BA02A",
@@ -2344,7 +2365,8 @@
                   },
                   "readings" : {
                      "state" : "R: 0",
-                     "rain" : "0",
+                     "rain_total" : 0,
+                     "rawRainCounter" : 0,
                      "type" : "WH40"
                   },
                   "comment" : "#0"

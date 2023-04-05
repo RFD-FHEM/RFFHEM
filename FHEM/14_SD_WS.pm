@@ -1549,7 +1549,8 @@ sub SD_WS_Parse {
         model      => 'SD_WS_126_R',
         prematch   => sub {my ($rawData,undef) = @_; return 1 if ($rawData =~ /^40/); },
         id         => sub {my ($rawData,undef) = @_; return (substr($rawData,2,6));},
-        rain       => sub {my ($rawData,undef) = @_; return 0.1 * hex(substr($rawData,10,4)); },
+        rain_total => sub {my ($rawData,undef) = @_; return 0.1 * hex(substr($rawData,10,4)); },
+        rawRainCounter =>  sub {my ($rawData,undef) = @_; return hex(substr($rawData,10,4)); },
         crcok      => sub { my ($rawData,undef) = @_; 
                             if (HAS_DigestCRC) {
                               my $calc_crc8 = Digest::CRC->new(width => 8, poly=>0x31);
