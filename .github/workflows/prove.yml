@@ -43,7 +43,7 @@ jobs:
         FHEM_DIR: /opt/fhem
     - name: Create clover report for perl Modules
       run: cover -report clover
-    - uses: codecov/codecov-action@v3.1.1
+    - uses: codecov/codecov-action@v3.1.2
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         file: ./cover_db/clover.xml
@@ -53,7 +53,7 @@ jobs:
     - name: Create clover report for fhem tests
       working-directory: /opt/fhem/
       run: cover -report clover
-    - uses: codecov/codecov-action@v3.1.1
+    - uses: codecov/codecov-action@v3.1.2
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         file: /opt/fhem/cover_db/clover.xml
