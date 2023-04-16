@@ -2204,6 +2204,9 @@ sub SIGNALduino_Split_Message {
       $rssi = $_ ;
       Debug "$name: extracted RSSI $rssi \n" if ($debug);
       $ret{rssi} = $rssi;
+    } elsif ($_ =~ m/A=([0-9]{0,3})/ ){
+      Debug qq[$name: extracted FREQEST $1 \n] if ($debug);
+      $ret{freqest} =  ($1 >= 128) ? $1 - 256 : $1;
     }  else {
       Debug "$name: unknown Message part $_" if ($debug);;
     }
@@ -2894,7 +2897,7 @@ sub SIGNALduino_Parse_MN {
   my $hash = shift // return;   #return if no hash  is provided
   my $rmsg = shift // return;   #return if no rmsg is provided
  
-  if ($rmsg !~ /^MN;D=[0-9A-F]+;(?:R=[0-9]+;)?$/){
+  if ($rmsg !~ /^MN;D=[0-9A-F]+;(?:R=[0-9]+;)?(?:A=[0-9]{0,3};)?$/){
     $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: Parse_MN, faulty msg: $rmsg]);
     return ; # Abort here if not successfull
   }
@@ -2906,10 +2909,15 @@ sub SIGNALduino_Parse_MN {
   my $rawData  = _limit_to_hex($msg_parts{rawData})     // $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: Parse_MN, faulty rawData D=: $msg_parts{rawData}]) //  return ;
   my $rssi;
   my $rssiStr= '';
+  my $freqest= '';
   if ( defined $msg_parts{rssi} ){
      $rssi = _limit_to_number($msg_parts{rssi}) // $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: Parse_MN, faulty rssi R=: $msg_parts{rssi}]) //  return ;
     ($rssi,$rssiStr) = SIGNALduino_calcRSSI($rssi);
   };
+  if ( defined $msg_parts{freqest} ){
+      $freqest=qq[FREQ_EST=$msg_parts{freqest}];
+  };
+
   my $messagetype=$msg_parts{messagetype};
   my $name = $hash->{NAME};
 
@@ -2952,7 +2960,7 @@ sub SIGNALduino_Parse_MN {
       next mnIDLoop;
     }
     $dmsg = sprintf('%s%s',$hash->{protocolObject}->checkProperty($id,'preamble',''),$methodReturn[0]);
-    $hash->{logMethod}->($name, 5, qq[$name: Parse_MN, Decoded matched MN Protocol id $id dmsg=$dmsg $rssiStr]);
+    $hash->{logMethod}->($name, 5, qq[$name: Parse_MN, Decoded matched MN Protocol id $id dmsg=$dmsg $rssiStr $freqest]);
     SIGNALduno_Dispatch($hash,$rmsg,$dmsg,$rssi,$id);
     $message_dispatched++;
     
