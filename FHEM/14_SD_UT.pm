@@ -423,7 +423,7 @@ use warnings;
 use FHEM::Meta;
 no warnings 'portable';  # Support for 64-bit ints required
 
-our $VERSION = '2023-01-19';
+our $VERSION = '2023-04-18';
 
 sub SD_UT_bin2tristate;
 sub SD_UT_tristate2bin;
@@ -1489,12 +1489,15 @@ sub SD_UT_Set {
     if ($msg =~ /^P124#/ && $cmd eq 'light_dimm') { # FB_FNK_Powerboat sends first light_dimm_on_off before light_dimm
       my $firstmsg = $msg =~ s/10000010#R/01010100#R/r;
       IOWrite($hash, 'sendMsg', $firstmsg);
-      Log3 $name, 4, "$ioname: $name SD_UT_Set sendMsg $firstmsg";
+      Log3 $name, 4, "$ioname: $name SD_UT_Set sendMsg1 $firstmsg"; # sendMsg1 P124#00111010100101110110000001010100#R5
+			my $pausemsg = 'P124#P#R10'; # 430*76=32680*10=326800 - pause between light_dimm_on_off and light_dimm
+      IOWrite($hash, 'sendMsg', $pausemsg);
+      Log3 $name, 4, "$ioname: $name SD_UT_Set sendMsg2 $pausemsg"; # sendMsg2 P124#P#R10
       if (defined $a[1]) {
         $msg = substr($msg,0,39);
         $msg .= $a[1]; # add repeats for light_dimm
       }
-      Log3 $name, 4, "$ioname: $name SD_UT_Set sendMsg $msg";
+      Log3 $name, 4, "$ioname: $name SD_UT_Set sendMsg3 $msg"; # sendMsg3 P124#00111010100101110110000010000010#R20
     }
     
     IOWrite($hash, 'sendMsg', $msg);
