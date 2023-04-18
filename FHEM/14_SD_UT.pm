@@ -1490,7 +1490,7 @@ sub SD_UT_Set {
       my $firstmsg = $msg =~ s/10000010#R/01010100#R/r;
       IOWrite($hash, 'sendMsg', $firstmsg);
       Log3 $name, 4, "$ioname: $name SD_UT_Set sendMsg1 $firstmsg"; # sendMsg1 P124#00111010100101110110000001010100#R5
-			my $pausemsg = 'P124#P#R10'; # 430*76=32680*10=326800 - pause between light_dimm_on_off and light_dimm
+      my $pausemsg = 'P124#P#R10'; # 430*76=32680*10=326800 - pause between light_dimm_on_off and light_dimm
       IOWrite($hash, 'sendMsg', $pausemsg);
       Log3 $name, 4, "$ioname: $name SD_UT_Set sendMsg2 $pausemsg"; # sendMsg2 P124#P#R10
       if (defined $a[1]) {
