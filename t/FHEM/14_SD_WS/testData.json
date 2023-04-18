@@ -8,7 +8,6 @@
                "DEF" : "SD_WS_27_TH_2",
                "NAME" : "SD_WS_27_TH_2"
             },
-            "minProtocolVersion" : "1.27",
             "readings" : {
                "batteryState" : "ok",
                "channel" : "2",
@@ -17,15 +16,12 @@
                "temperature" : "15.5",
                "type" : "EFTH-800, EFS-3110A"
             },
-            "revision_entry" : "2021-03-24 11:04:05",
-            "revision_modul" : "14_SD_WS.pm 21666 2020-04-13 21:14:53Z Sidey",
             "rmsg" : "MU;P0=-224;P1=258;P2=-487;P3=505;P4=-4884;P5=743;P6=-718;D=0121212301212303030301212123012123012123030123030121212121230121230121212121212121230301214565656561212123012121230121230303030121212301212301212303012303012121212123012123012121212121212123030121;CP=1;R=53;",
             "tests" : [
                {
-                  "comment" : "Test #0"
+                  "comment" : "#0"
                }
-            ],
-            "user" : "elektron-bbs"
+            ]
          },
          {
             "comment" : "EuroChron weatherstation EFTH-800 / Channel 3 (ID 61 additionally)",
@@ -34,7 +30,6 @@
                "DEF" : "SD_WS_27_TH_3",
                "NAME" : "SD_WS_27_TH_3"
             },
-            "minProtocolVersion" : "1.27",
             "readings" : {
                "batteryState" : "ok",
                "channel" : "3",
@@ -43,15 +38,12 @@
                "temperature" : "3.8",
                "type" : "EFTH-800, EFS-3110A"
             },
-            "revision_entry" : "2021-03-24 11:05:38",
-            "revision_modul" : "14_SD_WS.pm 21666 2020-04-13 21:14:53Z Sidey",
             "rmsg" : "MU;P0=-241;P1=251;P2=-470;P3=500;P4=-4868;P5=743;P6=-718;D=012121212303030123012301212123012121212301212303012121212121230303012303012123030303012123014565656561212301212121230303012301230121212301212121230121230301212121212123030301230301212303030301212301;CP=1;R=23;",
             "tests" : [
                {
-                  "comment" : "Test #1"
+                  "comment" : "#1"
                }
-            ],
-            "user" : "elektron-bbs"
+            ]
          },
          {
             "comment" : "EuroChron weatherstation EFTH-800 / Channel 3 (ID 61 additionally)",
@@ -60,7 +52,6 @@
                "DEF" : "SD_WS_27_TH_3",
                "NAME" : "SD_WS_27_TH_3"
             },
-            "minProtocolVersion" : "1.27",
             "readings" : {
                "batteryState" : "ok",
                "channel" : "3",
@@ -69,15 +60,12 @@
                "temperature" : "5.3",
                "type" : "EFTH-800, EFS-3110A"
             },
-            "revision_entry" : "2021-03-24 11:09:24",
-            "revision_modul" : "14_SD_WS.pm 21666 2020-04-13 21:14:53Z Sidey",
             "rmsg" : "MU;P0=-240;P1=253;P2=-487;P3=489;P4=-4860;P5=746;P6=-725;D=012121212303030123012301212123012121212303012301230121212121230303012301230303012303030301214565656561212301212121230303012301230121212301212121230301230123012121212123030301230123030301230303030121;CP=1;R=19;",
             "tests" : [
                {
-                  "comment" : "Test #2"
+                  "comment" : "#2"
                }
-            ],
-            "user" : "elektron-bbs"
+            ]
          }
       ],
       "id" : "27",
@@ -93,7 +81,6 @@
                "DEF" : "SD_WS_115_0",
                "NAME" : "SD_WS_115_0"
             },
-            "minProtocolVersion" : "1.48",
             "readings" : {
                "batteryChanged" : "1",
                "batteryState" : "ok",
@@ -108,22 +95,19 @@
                "windGust" : "0",
                "windSpeed" : "0"
             },
+            "rmsg" : "MN;D=9104143025BE18FFFFFF2928925A97FFF0000000000000000003;R=189;",
             "tests" : [
                {
-                  "comment" : "#1",
+                  "comment" : "#0",
+                  "returns" : {
+                     "ParseFn" : ""
+                  },
                   "setreadings" : {
                      "humidity" : "92",
                      "temperature" : "-1.5"
-                  },
-                  "returns" : {
-                     "ParseFn" : ""
-                  }   
+                  }
                }
-            ],
-            "revision_entry" : "2022-11-20 20:27:05",
-            "revision_modul" : "14_SD_WS.pm v3.5.4 2022-11-14 20:37:55Z sidey79",
-            "rmsg" : "MN;D=9104143025BE18FFFFFF2928925A97FFF0000000000000000003;R=189;",
-            "user" : "elektron-bbs"
+            ]
          },
          {
             "comment" : "BRESSER 6-in-1 temp diff ok, but hum diff not ok, with attr max-deviation-temp",
@@ -132,7 +116,6 @@
                "DEF" : "SD_WS_115_0",
                "NAME" : "SD_WS_115_0"
             },
-            "minProtocolVersion" : "1.48",
             "readings" : {
                "batteryChanged" : "1",
                "batteryState" : "ok",
@@ -147,25 +130,22 @@
                "windGust" : "0",
                "windSpeed" : "0"
             },
-            "tests": [
+            "rmsg" : "MN;D=9104143025BE18FFFFFF2928925A97FFF0000000000000000003;R=189;",
+            "tests" : [
                {
-                  "comment" : "#2",
-                  "returns" : {
-                     "ParseFn" : ""
-                  },
                   "attributes" : {
                      "max-deviation-temp" : "50"
+                  },
+                  "comment" : "#1",
+                  "returns" : {
+                     "ParseFn" : ""
                   },
                   "setreadings" : {
                      "humidity" : "92",
                      "temperature" : "-1.5"
                   }
                }
-            ],
-            "revision_entry" : "2022-11-20 20:27:05",
-            "revision_modul" : "14_SD_WS.pm v3.5.4 2022-11-14 20:37:55Z sidey79",
-            "rmsg" : "MN;D=9104143025BE18FFFFFF2928925A97FFF0000000000000000003;R=189;",
-            "user" : "elektron-bbs"
+            ]
          },
          {
             "comment" : "BRESSER 6-in-1 hum diff ok, with attr max-deviation-hum",
@@ -174,7 +154,6 @@
                "DEF" : "SD_WS_115_0",
                "NAME" : "SD_WS_115_0"
             },
-            "minProtocolVersion" : "1.48",
             "readings" : {
                "batteryChanged" : "1",
                "batteryState" : "ok",
@@ -189,22 +168,19 @@
                "windGust" : "0",
                "windSpeed" : "0"
             },
-            "revision_entry" : "2022-11-20 20:27:05",
-            "revision_modul" : "14_SD_WS.pm v3.5.4 2022-11-14 20:37:55Z sidey79",
             "rmsg" : "MN;D=9104143025BE18FFFFFF2928925A97FFF0000000000000000003;R=189;",
             "tests" : [
                {
-                  "comment" : "#3",
                   "attributes" : {
                      "max-deviation-hum" : "65"
                   },
+                  "comment" : "#2",
                   "setreadings" : {
                      "humidity" : "32",
                      "temperature" : "-7.4"
                   }
                }
-            ],
-            "user" : "elektron-bbs"
+            ]
          },
          {
             "comment" : "BRESSER 6-in-1 temp diff ok, hum diff ok, without attr",
@@ -213,7 +189,6 @@
                "DEF" : "SD_WS_115_0",
                "NAME" : "SD_WS_115_0"
             },
-            "minProtocolVersion" : "1.48",
             "readings" : {
                "batteryChanged" : "1",
                "batteryState" : "ok",
@@ -228,19 +203,16 @@
                "windGust" : "0",
                "windSpeed" : "0"
             },
-            "revision_entry" : "2022-11-20 20:27:05",
-            "revision_modul" : "14_SD_WS.pm v3.5.4 2022-11-14 20:37:55Z sidey79",
             "rmsg" : "MN;D=9104143025BE18FFFFFF2928925A97FFF0000000000000000003;R=189;",
-            "test": [
+            "tests" : [
                {
-                  "comment" : "#4",
+                  "comment" : "#3",
                   "setreadings" : {
                      "humidity" : "96",
                      "temperature" : "-7.6"
                   }
                }
-            ],
-            "user" : "elektron-bbs"
+            ]
          }
       ],
       "id" : "115",
@@ -248,50 +220,56 @@
       "name" : "BRESSER 6-in-1"
    },
    {
-      "name" : "Conrad S522",
       "data" : [
          {
             "comment" : "(ID 33.2,51,53 additionally)",
-            "minProtocolVersion" : "1.27",
-            "rmsg" : "MS;P1=-8035;P2=504;P3=-2027;P4=-3945;D=21232323232324232423232323232323242424232424242324242323232323232323232323232324242423;CP=2;SP=1;R=19;O;m0;",
             "dmsg" : "W33#0501DD80038",
             "internals" : {
                "DEF" : "SD_WS_33_T_1",
                "NAME" : "SD_WS_33_T_1"
             },
-            "tests" : [
-               {
-                  "comment" : "#0",
-                  "attributes" : {
-                     "model" : "S522"
-                  }
-               }
-            ],
-            "revision_modul" : "14_SD_WS.pm 21666 2020-04-13 21:14:53Z Sidey",
-            "revision_entry" : "2021-12-07 21:05:00",
             "readings" : {
-               "state" : "T: 24.2",
                "channel" : "1",
+               "state" : "T: 24.2",
                "temperature" : "24.2",
                "type" : "E0001PA, s014, S522, TCM, TFA 30.3200, TX-EZ6"
             },
-            "user" : "HomeAuto_User"
+            "rmsg" : "MS;P1=-8035;P2=504;P3=-2027;P4=-3945;D=21232323232324232423232323232323242424232424242324242323232323232323232323232324242423;CP=2;SP=1;R=19;O;m0;",
+            "tests" : [
+               {
+                  "attributes" : {
+                     "model" : "S522"
+                  },
+                  "comment" : "#0"
+               }
+            ]
          }
       ],
       "id" : "33",
-      "module" : "SD_WS"
+      "module" : "SD_WS",
+      "name" : "Conrad S522"
    },
    {
-      "name" : "TX-EZ6",
-      "module" : "SD_WS",
       "data" : [
          {
+            "comment" : "fuer Wetterstation TZS First Austria",
             "dmsg" : "W33#17412998A4C",
-            "rmsg" : "MS;P0=-3788;P1=-7610;P4=621;P5=-1895;D=41454545404540404045404545454545404545404540454540404545404045454540454045454045454040;CP=4;SP=1;O;",
             "internals" : {
-               "NAME" : "SD_WS_33_TH_1",
-               "DEF" : "SD_WS_33_TH_1"
+               "DEF" : "SD_WS_33_TH_1",
+               "NAME" : "SD_WS_33_TH_1"
             },
+            "readings" : {
+               "batteryState" : "ok",
+               "channel" : "1",
+               "humidity" : "38",
+               "humidityTrend" : "rising",
+               "sendmode" : "manual",
+               "state" : "T: 26.7 H: 38",
+               "temperature" : "26.7",
+               "temperatureTrend" : "consistent",
+               "type" : "E0001PA, s014, S522, TCM, TFA 30.3200, TX-EZ6"
+            },
+            "rmsg" : "MS;P0=-3788;P1=-7610;P4=621;P5=-1895;D=41454545404540404045404545454545404545404540454540404545404045454540454045454045454040;CP=4;SP=1;O;",
             "tests" : [
                {
                   "attributes" : {
@@ -299,89 +277,64 @@
                   },
                   "comment" : "#0"
                }
-            ],
-            "comment" : "fuer Wetterstation TZS First Austria",
-            "minProtocolVersion" : "1.48",
-            "user" : "elektron-bbs",
-            "revision_modul" : "14_SD_WS.pm 21666 2020-04-13 21:14:53Z Sidey",
-            "readings" : {
-               "channel" : "1",
-               "temperature" : "26.7",
-               "type" : "E0001PA, s014, S522, TCM, TFA 30.3200, TX-EZ6",
-               "batteryState" : "ok",
-               "state" : "T: 26.7 H: 38",
-               "humidity" : "38",
-               "temperatureTrend" : "consistent",
-               "sendmode" : "manual",
-               "humidityTrend" : "rising"
-            },
-            "revision_entry" : "2022-11-21 20:35:39"
+            ]
          }
       ],
-      "id" : "33"
+      "id" : "33",
+      "module" : "SD_WS",
+      "name" : "TX-EZ6"
    },
    {
-      "name" : "renkforce E0001PA",
-      "module" : "SD_WS",
       "data" : [
          {
-            "user" : "HomeAuto_User",
+            "comment" : "Conrad (ID 33.2,51,53 additionally)",
+            "dmsg" : "W33#26C6F570804",
+            "internals" : {
+               "DEF" : "SD_WS_33_TH_2",
+               "NAME" : "SD_WS_33_TH_2"
+            },
             "readings" : {
                "batteryState" : "ok",
-               "type" : "E0001PA, s014, S522, TCM, TFA 30.3200, TX-EZ6",
-               "temperature" : "15.5",
                "channel" : "2",
-               "state" : "T: 15.5 H: 44",
                "humidity" : "44",
-               "sendmode" : "auto"
+               "sendmode" : "auto",
+               "state" : "T: 15.5 H: 44",
+               "temperature" : "15.5",
+               "type" : "E0001PA, s014, S522, TCM, TFA 30.3200, TX-EZ6"
             },
-            "revision_entry" : "2021-03-24 12:01:11",
-            "revision_modul" : "14_SD_WS.pm 21666 2020-04-13 21:14:53Z Sidey",
+            "rmsg" : "MS;P0=-7990;P1=485;P3=-2061;P4=-4060;D=10131314131314141314141313131414131414141413141314131414141313131314131313131313131314;CP=1;SP=0;R=4;O;",
             "tests" : [
                {
-                  "comment" : "#0",
                   "attributes" : {
                      "model" : "E0001PA"
-                  }
+                  },
+                  "comment" : "#0"
                }
-            ],
-            "dmsg" : "W33#26C6F570804",
-            "rmsg" : "MS;P0=-7990;P1=485;P3=-2061;P4=-4060;D=10131314131314141314141313131414131414141413141314131414141313131314131313131313131314;CP=1;SP=0;R=4;O;",
-            "internals" : {
-               "NAME" : "SD_WS_33_TH_2",
-               "DEF" : "SD_WS_33_TH_2"
-            },
-            "minProtocolVersion" : "1.27",
-            "comment" : "Conrad (ID 33.2,51,53 additionally)"
+            ]
          }
       ],
-      "id" : "33"
+      "id" : "33",
+      "module" : "SD_WS",
+      "name" : "renkforce E0001PA"
    },
    {
-      "name" : "TFA 30.3200",
-      "module" : "SD_WS",
-      "id" : "33.1",
       "data" : [
          {
-            "revision_modul" : "14_SD_WS.pm 21666 2020-04-13 21:14:53Z Sidey",
-            "readings" : {
-               "batteryState" : "ok",
-               "type" : "E0001PA, s014, S522, TCM, TFA 30.3200, TX-EZ6",
-               "channel" : "1",
-               "temperature" : "18.8",
-               "state" : "T: 18.8 H: 53",
-               "humidity" : "53"
-            },
-            "revision_entry" : "2021-03-24 11:50:47",
-            "user" : "cxxcoder",
             "comment" : "Thermo-hygro sensor for base station 35.1126 (ID 53 additionally)",
-            "minProtocolVersion" : "1.27",
+            "dmsg" : "W33#14C1C594C0C",
             "internals" : {
                "DEF" : "SD_WS_33_TH_1",
                "NAME" : "SD_WS_33_TH_1"
             },
+            "readings" : {
+               "batteryState" : "ok",
+               "channel" : "1",
+               "humidity" : "53",
+               "state" : "T: 18.8 H: 53",
+               "temperature" : "18.8",
+               "type" : "E0001PA, s014, S522, TCM, TFA 30.3200, TX-EZ6"
+            },
             "rmsg" : "MS;P1=-7796;P2=745;P3=-1976;P4=-3929;D=21232323242324232324242323232323242424232323242324242323242324232324242323232323232424;CP=2;SP=1;R=30;O;m2;",
-            "dmsg" : "W33#14C1C594C0C",
             "tests" : [
                {
                   "attributes" : {
@@ -391,14 +344,29 @@
                }
             ]
          }
-      ]
+      ],
+      "id" : "33.1",
+      "module" : "SD_WS",
+      "name" : "TFA 30.3200"
    },
    {
-      "module" : "SD_WS",
       "data" : [
          {
-            "minProtocolVersion" : "1.27",
             "comment" : "(ID 0.3 additionally)",
+            "dmsg" : "W33#3E23C564824",
+            "internals" : {
+               "DEF" : "SD_WS_33_TH_1",
+               "NAME" : "SD_WS_33_TH_1"
+            },
+            "readings" : {
+               "batteryState" : "ok",
+               "channel" : "1",
+               "humidity" : "41",
+               "state" : "T: 5.1 H: 41",
+               "temperature" : "5.1",
+               "type" : "E0001PA, s014, S522, TCM, TFA 30.3200, TX-EZ6"
+            },
+            "rmsg" : "MS;P1=393;P2=-7752;P3=-2047;P4=-3993;D=12131314141414141313131413131314141414131313141314131414131314131314131313131314131314;CP=1;SP=2;R=230;O;m1;",
             "tests" : [
                {
                   "attributes" : {
@@ -406,255 +374,210 @@
                   },
                   "comment" : "#0"
                }
-            ],
-            "internals" : {
-               "DEF" : "SD_WS_33_TH_1",
-               "NAME" : "SD_WS_33_TH_1"
-            },
-            "dmsg" : "W33#3E23C564824",
-            "rmsg" : "MS;P1=393;P2=-7752;P3=-2047;P4=-3993;D=12131314141414141313131413131314141414131313141314131414131314131314131313131314131314;CP=1;SP=2;R=230;O;m1;",
-            "readings" : {
-               "channel" : "1",
-               "temperature" : "5.1",
-               "type" : "E0001PA, s014, S522, TCM, TFA 30.3200, TX-EZ6",
-               "batteryState" : "ok",
-               "state" : "T: 5.1 H: 41",
-               "humidity" : "41"
-            },
-            "revision_entry" : "2021-03-24 11:53:07",
-            "revision_modul" : "14_SD_WS.pm 21666 2020-04-13 21:14:53Z Sidey",
-            "user" : "Doublefant"
+            ]
          }
       ],
       "id" : "33.2",
+      "module" : "SD_WS",
       "name" : "Tchibo Wetterstation"
    },
    {
-      "name" : "Bresser 7009994",
-      "module" : "SD_WS",
-      "id" : "37",
       "data" : [
          {
-            "user" : "SD_Protocol",
+            "comment" : "(ID 61,84,89 additionally)",
+            "dmsg" : "W37#D9165C307B",
             "internals" : {
-               "NAME" : "SD_WS37_TH_1",
-               "DEF" : "SD_WS37_TH_1"
+               "DEF" : "SD_WS37_TH_1",
+               "NAME" : "SD_WS37_TH_1"
+            },
+            "readings" : {
+               "batteryState" : "ok",
+               "channel" : "1",
+               "humidity" : "48",
+               "state" : "T: 22.7 H: 48",
+               "temperature" : "22.7",
+               "type" : "Bresser 7009994"
             },
             "rmsg" : "MU;P0=729;P1=-736;P2=483;P3=-251;P4=238;P5=-491;D=010101012323452323454523454545234523234545234523232345454545232345454545452323232345232340;CP=4;",
-            "dmsg" : "W37#D9165C307B",
             "tests" : [
                {
                   "comment" : "#0"
                }
-            ],
-            "revision_modul" : "14_SD_WS.pm 21666 2020-04-13 21:14:53Z Sidey",
-            "comment" : "(ID 61,84,89 additionally)",
-            "readings" : {
-               "state" : "T: 22.7 H: 48",
-               "batteryState" : "ok",
-               "type" : "Bresser 7009994",
-               "temperature" : "22.7",
-               "channel" : "1",
-               "humidity" : "48"
-            },
-            "minProtocolVersion" : "1.27",
-            "revision_entry" : "2021-03-24 13:42:23"
+            ]
          }
-      ]
+      ],
+      "id" : "37",
+      "module" : "SD_WS",
+      "name" : "Bresser 7009994"
    },
    {
-      "module" : "SD_WS",
-      "id" : "38",
       "data" : [
          {
-            "user" : "Harst",
             "dispatch_repeats" : "4",
-            "internals" : {
-               "NAME" : "SD_WS_38_T_2",
-               "DEF" : "SD_WS_38_T_2"
-            },
             "dmsg" : "W38#12A2C5D0C",
+            "internals" : {
+               "DEF" : "SD_WS_38_T_2",
+               "NAME" : "SD_WS_38_T_2"
+            },
+            "readings" : {
+               "batteryState" : "ok",
+               "beep" : "off",
+               "channel" : "2",
+               "state" : "T: 20.9",
+               "temperature" : "20.9",
+               "type" : "NC-3911"
+            },
             "rmsg" : "MU;P0=-235;P1=496;P2=253;P3=-479;P4=-957;P5=743;P6=-720;CP=2;D=010231023232310231010232323102310101023102323232310102323245656565623232310232310231023102323231023101023232310231010102310232323231010232324565656562323231023231023102310232323102310102323231023101010231023232323101023232456565656232323102323102310231023232310231010232323102310101023102323232310102323245656565623232310232310231023102323231023101023232310231010102310232323231010232324565656562323231023231023102310232323102310102323231023101010231023232323101023232456565656232323102323102;O;",
             "tests" : [
                {
                   "comment" : "#0"
                }
-            ],
-            "revision_modul" : "14_SD_WS.pm 21666 2020-04-13 21:14:53Z Sidey",
-            "minProtocolVersion" : "1.27",
-            "readings" : {
-               "state" : "T: 20.9",
-               "batteryState" : "ok",
-               "type" : "NC-3911",
-               "channel" : "2",
-               "temperature" : "20.9",
-               "beep" : "off"
-            },
-            "revision_entry" : "2021-03-24 13:44:02"
+            ]
          }
       ],
+      "id" : "38",
+      "module" : "SD_WS",
       "name" : "NC-3911-675"
    },
    {
-      "id" : "44",
       "data" : [
          {
-            "user" : "unknown",
+            "dmsg" : "W44#D12160652EDE9F9B10",
             "internals" : {
                "DEF" : "BresserTemeo_1",
                "NAME" : "BresserTemeo_1"
             },
-            "dmsg" : "W44#D12160652EDE9F9B10",
+            "readings" : {
+               "batteryState" : "ok",
+               "channel" : "1",
+               "humidity" : "68",
+               "state" : "T: 3.2 H: 68",
+               "temperature" : "3.2",
+               "type" : "BresserTemeo"
+            },
             "rmsg" : "MU;P0=32001;P1=-1939;P2=1967;P3=3896;P4=-3895;D=01213424242124212121242121242121212124212424212121212121242421212421242121242124242421242421242424242124212124242424242421212424212424212121242121212;CP=2;R=39;",
             "tests" : [
                {
                   "comment" : "#0"
                }
-            ],
-            "revision_modul" : "14_SD_WS.pm 21666 2020-04-13 21:14:53Z Sidey",
-            "minProtocolVersion" : "1.27",
-            "readings" : {
-               "state" : "T: 3.2 H: 68",
-               "temperature" : "3.2",
-               "channel" : "1",
-               "type" : "BresserTemeo",
-               "batteryState" : "ok",
-               "humidity" : "68"
-            },
-            "revision_entry" : "2021-03-25 13:27:38"
+            ]
          }
       ],
+      "id" : "44",
       "module" : "SD_WS",
       "name" : "BRESSER Temeo Trend"
    },
    {
-      "module" : "SD_WS",
-      "id" : "50",
       "data" : [
          {
-            "user" : "sidey79",
+            "comment" : "von 2016 (ID 42 additionally)",
+            "dispatch_repeats" : "1",
             "dmsg" : "W50#FF550541FF9A",
-            "rmsg" : "MU;P0=248;P1=-21400;P2=545;P3=-925;P4=1368;P5=-12308;D=01232323232323232343234323432343234343434343234323432343434343432323232323232323232343432323432345232323232323232343234323432343234343434343234323432343434343432323232323232323232343432323432345232323232323232343234323432343234343434343234323432343434343;CP=2;O;",
             "internals" : {
                "DEF" : "SD_WS_50_SM_1",
                "NAME" : "SD_WS_50_SM_1"
             },
-            "dispatch_repeats" : "1",
+            "readings" : {
+               "channel" : "1",
+               "humidity" : "5",
+               "state" : "T: 25 H: 5",
+               "temperature" : "25",
+               "type" : "XT300"
+            },
+            "rmsg" : "MU;P0=248;P1=-21400;P2=545;P3=-925;P4=1368;P5=-12308;D=01232323232323232343234323432343234343434343234323432343434343432323232323232323232343432323432345232323232323232343234323432343234343434343234323432343434343432323232323232323232343432323432345232323232323232343234323432343234343434343234323432343434343;CP=2;O;",
             "tests" : [
                {
                   "comment" : "#0"
                }
-            ],
-            "revision_modul" : "14_SD_WS.pm 21666 2020-04-13 21:14:53Z Sidey",
-            "comment" : "von 2016 (ID 42 additionally)",
-            "minProtocolVersion" : "1.27",
-            "readings" : {
-               "type" : "XT300",
-               "channel" : "1",
-               "temperature" : "25",
-               "humidity" : "5",
-               "state" : "T: 25 H: 5"
-            },
-            "revision_entry" : "2021-03-25 13:40:05"
+            ]
          }
       ],
+      "id" : "50",
+      "module" : "SD_WS",
       "name" : "Opus_XT300"
    },
    {
-      "id" : "51",
       "data" : [
          {
-            "tests" : [
-               {
-                  "comment" : "#0"
-               }
-            ],
+            "comment" : "Lidl Weatherstation, Channel 1",
             "dmsg" : "W51#11225FB401",
-            "rmsg" : "MS;P0=-1848;P1=577;P2=-4066;P3=-15997;P4=1013;P5=-1001;P6=-7875;D=16101010121010101210101210101012101012101212121212121012121012101010101010101010121345454545;CP=1;SP=6;O;",
             "internals" : {
                "DEF" : "SD_WS_51_TH_1",
                "NAME" : "SD_WS_51_TH_1"
             },
-            "user" : "6040",
-            "revision_entry" : "2021-03-25 13:42:59",
             "readings" : {
-               "sendmode" : "auto",
-               "trend" : "falling",
-               "humidity" : "40",
-               "state" : "T: 17.3 H: 40",
                "batteryState" : "ok",
-               "type" : "Auriol IAN 275901, IAN 114324, IAN 60107",
+               "channel" : "1",
+               "humidity" : "40",
+               "sendmode" : "auto",
+               "state" : "T: 17.3 H: 40",
                "temperature" : "17.3",
-               "channel" : "1"
+               "trend" : "falling",
+               "type" : "Auriol IAN 275901, IAN 114324, IAN 60107"
             },
-            "minProtocolVersion" : "1.27",
-            "comment" : "Lidl Weatherstation, Channel 1",
-            "revision_modul" : "14_SD_WS.pm 21666 2020-04-13 21:14:53Z Sidey"
+            "rmsg" : "MS;P0=-1848;P1=577;P2=-4066;P3=-15997;P4=1013;P5=-1001;P6=-7875;D=16101010121010101210101210101012101012101212121212121012121012101010101010101010121345454545;CP=1;SP=6;O;",
+            "tests" : [
+               {
+                  "comment" : "#0"
+               }
+            ]
          }
       ],
+      "id" : "51",
       "module" : "SD_WS",
       "name" : "IAN 114324"
    },
    {
-      "name" : "IAN 275901",
-      "module" : "SD_WS",
-      "id" : "51",
       "data" : [
          {
-            "revision_modul" : "14_SD_WS.pm 21666 2020-04-13 21:14:53Z Sidey",
             "comment" : "Lidl Weatherstation, Channel 3 (ID 0 additionally, CUL_TCM97001 -> with DEF Auriol_IAN_8)",
-            "minProtocolVersion" : "1.27",
-            "readings" : {
-               "sendmode" : "manual",
-               "trend" : "rising",
-               "humidity" : "95",
-               "state" : "T: 6.3 H: 95",
-               "type" : "Auriol IAN 275901, IAN 114324, IAN 60107",
-               "batteryState" : "ok",
-               "channel" : "3",
-               "temperature" : "6.3"
-            },
-            "revision_entry" : "2021-03-25 13:50:18",
-            "user" : "Stertzi",
-            "rmsg" : "MS;P0=-4074;P1=608;P2=-1825;P3=-15980;P4=1040;P5=-975;P6=-7862;D=16121212121012121212101212101212101210121012121010121010121012121012101210121210101345454545;CP=1;SP=6;",
             "dmsg" : "W51#0849536953",
             "internals" : {
-               "NAME" : "SD_WS_51_TH_3",
-               "DEF" : "SD_WS_51_TH_3"
+               "DEF" : "SD_WS_51_TH_3",
+               "NAME" : "SD_WS_51_TH_3"
             },
+            "readings" : {
+               "batteryState" : "ok",
+               "channel" : "3",
+               "humidity" : "95",
+               "sendmode" : "manual",
+               "state" : "T: 6.3 H: 95",
+               "temperature" : "6.3",
+               "trend" : "rising",
+               "type" : "Auriol IAN 275901, IAN 114324, IAN 60107"
+            },
+            "rmsg" : "MS;P0=-4074;P1=608;P2=-1825;P3=-15980;P4=1040;P5=-975;P6=-7862;D=16121212121012121212101212101212101210121012121010121010121012121012101210121210101345454545;CP=1;SP=6;",
             "tests" : [
                {
                   "comment" : "#0"
                }
             ]
          }
-      ]
+      ],
+      "id" : "51",
+      "module" : "SD_WS",
+      "name" : "IAN 275901"
    },
    {
-      "id" : "51",
       "data" : [
          {
             "comment" : "Lidl Weatherstation, Channel 1  (ID 0 additionally, CUL_TCM97001 -> with DEF Auriol_IAN_240)",
-            "revision_modul" : "14_SD_WS.pm 21666 2020-04-13 21:14:53Z Sidey",
-            "revision_entry" : "2021-03-25 13:56:42",
-            "minProtocolVersion" : "1.27",
-            "readings" : {
-               "state" : "T: -2.9 H: 76",
-               "batteryState" : "ok",
-               "type" : "Auriol IAN 275901, IAN 114324, IAN 60107",
-               "temperature" : "-2.9",
-               "channel" : "1",
-               "sendmode" : "auto",
-               "trend" : "consistent",
-               "humidity" : "76"
-            },
+            "dmsg" : "W51#F03048F761",
             "internals" : {
                "DEF" : "SD_WS_51_TH_1",
                "NAME" : "SD_WS_51_TH_1"
             },
-            "dmsg" : "W51#F03048F761",
+            "readings" : {
+               "batteryState" : "ok",
+               "channel" : "1",
+               "humidity" : "76",
+               "sendmode" : "auto",
+               "state" : "T: -2.9 H: 76",
+               "temperature" : "-2.9",
+               "trend" : "consistent",
+               "type" : "Auriol IAN 275901, IAN 114324, IAN 60107"
+            },
             "rmsg" : "MS;P2=594;P3=-7386;P4=-4081;P5=-1873;D=2324242424252525252525242425252525252425252425252524242424252424242524242525252524;CP=2;SP=3;R=242;",
-            "user" : "dennis82ni",
             "tests" : [
                {
                   "comment" : "#0"
@@ -662,297 +585,258 @@
             ]
          }
       ],
+      "id" : "51",
       "module" : "SD_WS",
       "name" : "IAN 60107"
    },
    {
-      "id" : "53",
       "data" : [
          {
-            "minProtocolVersion" : "1.27",
-            "readings" : {
-               "humidity" : "61",
-               "temperature" : "22.3",
-               "channel" : "1",
-               "type" : "Auriol IAN 314695",
-               "batteryState" : "ok",
-               "state" : "T: 22.3 H: 61"
-            },
-            "revision_entry" : "2021-04-21 22:01:03",
-            "revision_modul" : "14_SD_WS.pm   21666 2020-04-13 21:14:53Z Sidey",
             "comment" : "CH1, Lidl IAN 314695 (ID 33,51 additionally)",
+            "dmsg" : "W53#0700DF7A4E0",
+            "internals" : {
+               "DEF" : "SD_WS_53_TH_1",
+               "NAME" : "SD_WS_53_TH_1"
+            },
+            "readings" : {
+               "batteryState" : "ok",
+               "channel" : "1",
+               "humidity" : "61",
+               "state" : "T: 22.3 H: 61",
+               "temperature" : "22.3",
+               "type" : "Auriol IAN 314695"
+            },
+            "rmsg" : "MS;P1=608;P2=-2074;P3=-4138;P4=-9138;D=14121212121213131312121212121212121313121313131313121313131312131212131212131313121212;CP=1;SP=4;R=0;O;m1;",
             "tests" : [
                {
                   "comment" : "#0"
                }
-            ],
-            "user" : "elektron-bbs",
-            "internals" : {
-               "NAME" : "SD_WS_53_TH_1",
-               "DEF" : "SD_WS_53_TH_1"
-            },
-            "dmsg" : "W53#0700DF7A4E0",
-            "rmsg" : "MS;P1=608;P2=-2074;P3=-4138;P4=-9138;D=14121212121213131312121212121212121313121313131313121313131312131212131212131313121212;CP=1;SP=4;R=0;O;m1;"
+            ]
          },
          {
-            "minProtocolVersion" : "1.27",
+            "comment" : "CH1, Lidl IAN 314695 (ID 33,51 additionally)",
+            "dmsg" : "W53#0700F2764A4",
+            "internals" : {
+               "DEF" : "SD_WS_53_TH_1",
+               "NAME" : "SD_WS_53_TH_1"
+            },
             "readings" : {
+               "batteryState" : "ok",
+               "channel" : "1",
                "humidity" : "59",
                "state" : "T: 24.2 H: 59",
                "temperature" : "24.2",
-               "channel" : "1",
-               "type" : "Auriol IAN 314695",
-               "batteryState" : "ok"
+               "type" : "Auriol IAN 314695"
             },
-            "revision_entry" : "2021-04-21 22:02:48",
-            "revision_modul" : "14_SD_WS.pm   21666 2020-04-13 21:14:53Z Sidey",
-            "comment" : "CH1, Lidl IAN 314695 (ID 33,51 additionally)",
+            "rmsg" : "MS;P1=611;P2=-2075;P3=-4160;P4=-9134;D=14121212121213131312121212121212121313131312121312121313131213131212131212131213121213;CP=1;SP=4;R=0;O;m2;",
             "tests" : [
                {
                   "comment" : "#1"
                }
-            ],
-            "user" : "elektron-bbs",
-            "dmsg" : "W53#0700F2764A4",
-            "rmsg" : "MS;P1=611;P2=-2075;P3=-4160;P4=-9134;D=14121212121213131312121212121212121313131312121312121313131213131212131212131213121213;CP=1;SP=4;R=0;O;m2;",
-            "internals" : {
-               "DEF" : "SD_WS_53_TH_1",
-               "NAME" : "SD_WS_53_TH_1"
-            }
+            ]
          }
       ],
+      "id" : "53",
       "module" : "SD_WS",
       "name" : "AURIOL AHFL 433 B2"
    },
    {
-      "name" : "AURIOL AHFL 433 B2",
-      "module" : "SD_WS",
-      "id" : "53",
       "data" : [
          {
-            "readings" : {
-               "temperature" : "18.4",
-               "channel" : "2",
-               "type" : "Auriol IAN 314695",
-               "batteryState" : "ok",
-               "state" : "T: 18.4 H: 70",
-               "humidity" : "70"
-            },
-            "minProtocolVersion" : "1.27",
-            "revision_entry" : "2021-04-21 22:05:07",
-            "revision_modul" : "14_SD_WS.pm   21666 2020-04-13 21:14:53Z Sidey",
             "comment" : "CH2, Lidl IAN 314695 (ID 33,51 additionally)",
-            "tests" : [
-               {
-                  "comment" : "#0"
-               }
-            ],
-            "user" : "elektron-bbs",
+            "dmsg" : "W53#0710B88C4CC",
             "internals" : {
                "DEF" : "SD_WS_53_TH_2",
                "NAME" : "SD_WS_53_TH_2"
             },
-            "dmsg" : "W53#0710B88C4CC",
-            "rmsg" : "MS;P0=606;P1=-2075;P2=-4136;P3=-9066;D=03010101010102020201010102010101010201020202010101020101010202010101020101020201010202;CP=0;SP=3;R=0;O;m2;"
-         }
-      ]
-   },
-   {
-      "id" : "54",
-      "data" : [
-         {
-            "user" : "sido",
-            "rmsg" : "MU;P1=247;P2=-750;P3=722;P4=-489;P5=491;P6=-236;P7=-2184;D=1232141456565656145656141456565614141456141414145656141414141456561414141456561414145614561456145614141414141414145614145656145614141732321414565656561456561414565656141414561414141456561414141414565614141414565614141456145614561456141414141414141456141;CP=1;R=55;O;",
-            "dmsg" : "W54#3D9C430618AA01340",
-            "internals" : {
-               "NAME" : "SD_WS_54_R",
-               "DEF" : "SD_WS_54_R"
+            "readings" : {
+               "batteryState" : "ok",
+               "channel" : "2",
+               "humidity" : "70",
+               "state" : "T: 18.4 H: 70",
+               "temperature" : "18.4",
+               "type" : "Auriol IAN 314695"
             },
+            "rmsg" : "MS;P0=606;P1=-2075;P2=-4136;P3=-9066;D=03010101010102020201010102010101010201020202010101020101010202010101020101020201010202;CP=0;SP=3;R=0;O;m2;",
             "tests" : [
                {
                   "comment" : "#0"
                }
-            ],
-            "revision_modul" : "14_SD_WS.pm   21666 2020-04-13 21:14:53Z Sidey",
+            ]
+         }
+      ],
+      "id" : "53",
+      "module" : "SD_WS",
+      "name" : "AURIOL AHFL 433 B2"
+   },
+   {
+      "data" : [
+         {
             "comment" : "Rain sensor for base station 47.3005.01 / decode as MU",
-            "minProtocolVersion" : "1.27",
-            "readings" : {
-               "rain_total" : "73.66",
-               "state" : "R: 73.66",
-               "sendCounter" : "3",
-               "type" : "TFA 30.3233.01",
-               "batteryState" : "ok",
-               "rawRainCounter" : "290"
+            "dmsg" : "W54#3D9C430618AA01340",
+            "internals" : {
+               "DEF" : "SD_WS_54_R",
+               "NAME" : "SD_WS_54_R"
             },
-            "revision_entry" : "2021-04-21 22:06:29"
+            "readings" : {
+               "batteryState" : "ok",
+               "rain_total" : "73.66",
+               "rawRainCounter" : "290",
+               "sendCounter" : "3",
+               "state" : "R: 73.66",
+               "type" : "TFA 30.3233.01"
+            },
+            "rmsg" : "MU;P1=247;P2=-750;P3=722;P4=-489;P5=491;P6=-236;P7=-2184;D=1232141456565656145656141456565614141456141414145656141414141456561414141456561414145614561456145614141414141414145614145656145614141732321414565656561456561414565656141414561414141456561414141414565614141414565614141456145614561456141414141414141456141;CP=1;R=55;O;",
+            "tests" : [
+               {
+                  "comment" : "#0"
+               }
+            ]
          },
          {
+            "comment" : "Rain sensor for base station 47.3005.01 / decode as MU",
+            "dmsg" : "W54#3D9C430A1BAA01898",
+            "internals" : {
+               "DEF" : "SD_WS_54_R",
+               "NAME" : "SD_WS_54_R"
+            },
+            "readings" : {
+               "batteryState" : "ok",
+               "rain_total" : "74.422",
+               "rawRainCounter" : "293",
+               "sendCounter" : "5",
+               "state" : "R: 74.422",
+               "type" : "TFA 30.3233.01"
+            },
+            "rmsg" : "MU;P0=-1672;P1=740;P2=-724;P3=260;P4=-468;P5=504;P6=-230;D=012123434565656563456563434565656343434563434343456563434343456345634343434565634565656345634563456343434343434343456563434345634345656;CP=3;R=4;",
             "tests" : [
                {
                   "comment" : "#1"
                }
-            ],
-            "user" : "sido",
-            "rmsg" : "MU;P0=-1672;P1=740;P2=-724;P3=260;P4=-468;P5=504;P6=-230;D=012123434565656563456563434565656343434563434343456563434343456345634343434565634565656345634563456343434343434343456563434345634345656;CP=3;R=4;",
-            "dmsg" : "W54#3D9C430A1BAA01898",
-            "internals" : {
-               "NAME" : "SD_WS_54_R",
-               "DEF" : "SD_WS_54_R"
-            },
-            "minProtocolVersion" : "1.27",
-            "readings" : {
-               "rain_total" : "74.422",
-               "type" : "TFA 30.3233.01",
-               "batteryState" : "ok",
-               "rawRainCounter" : "293",
-               "state" : "R: 74.422",
-               "sendCounter" : "5"
-            },
-            "revision_entry" : "2021-04-21 22:07:44",
-            "revision_modul" : "14_SD_WS.pm   21666 2020-04-13 21:14:53Z Sidey",
-            "comment" : "Rain sensor for base station 47.3005.01 / decode as MU"
+            ]
          }
       ],
+      "id" : "54",
       "module" : "SD_WS",
       "name" : "TFA 30.3233.01"
    },
    {
-      "name" : "TFA 30.3233.01",
-      "module" : "SD_WS",
       "data" : [
          {
-            "user" : "punker",
-            "dmsg" : "W54#3896E10467AA0068",
-            "rmsg" : "MS;P0=-241;P1=486;P2=241;P3=-488;P4=-2098;P5=738;P6=-730;D=24565623231010102323231023231023101023101010232323231023232323231023232310102323101010102310231023102323232323232323232310102310232323;CP=2;SP=4;R=30;O;b=19;s=1;m0;",
-            "internals" : {
-               "NAME" : "SD_WS_54_R",
-               "DEF" : "SD_WS_54_R"
-            },
-            "tests" : [
-               {
-                  "comment" : "#0"
-               }
-            ],
-            "revision_modul" : "14_SD_WS.pm   21666 2020-04-13 21:14:53Z Sidey",
             "comment" : "Rain sensor for base station 47.3005.01 / decode as MS",
+            "dmsg" : "W54#3896E10467AA0068",
+            "internals" : {
+               "DEF" : "SD_WS_54_R",
+               "NAME" : "SD_WS_54_R"
+            },
             "readings" : {
+               "batteryState" : "ok",
+               "rain_total" : "28.702",
+               "rawRainCounter" : "113",
                "sendCounter" : "2",
                "state" : "R: 28.702",
-               "batteryState" : "ok",
-               "type" : "TFA 30.3233.01",
-               "rawRainCounter" : "113",
-               "rain_total" : "28.702"
+               "type" : "TFA 30.3233.01"
             },
-            "minProtocolVersion" : "1.27",
-            "revision_entry" : "2021-04-21 22:09:22"
-         },
-         {
-            "tests" : [
-               {
-                  "comment" : "#1"
-               }
-            ],
-            "internals" : {
-               "NAME" : "SD_WS_54_R",
-               "DEF" : "SD_WS_54_R"
-            },
-            "rmsg" : "MS;P0=-491;P1=242;P2=476;P3=-248;P4=-2096;P5=721;P6=-745;D=14565610102323231010102310102310232310232323101010102310101010102323101023231023102310231023102310231010101010101010101023232310232310;CP=1;SP=4;R=10;O;b=135;s=1;m0;",
-            "dmsg" : "W54#3896E1066AAA0076",
-            "user" : "punker",
-            "revision_entry" : "2021-04-21 22:10:42",
-            "readings" : {
-               "batteryState" : "ok",
-               "rawRainCounter" : "116",
-               "type" : "TFA 30.3233.01",
-               "state" : "R: 29.464",
-               "sendCounter" : "3",
-               "rain_total" : "29.464"
-            },
-            "minProtocolVersion" : "1.27",
-            "comment" : "Rain sensor for base station 47.3005.01 / decode as MS",
-            "revision_modul" : "14_SD_WS.pm   21666 2020-04-13 21:14:53Z Sidey"
-         }
-      ],
-      "id" : "54.1"
-   },
-   {
-      "name" : "Froggit FT007T",
-      "id" : "58",
-      "data" : [
-         {
-            "rmsg" : "MC;LL=-1047;LH=903;SL=-545;SH=449;D=800AE5E3AE7FD44BC00572F1D73FEA25E002B9788;C=494;L=161;",
-            "dmsg" : "W58#468714600AED0",
-            "internals" : {
-               "NAME" : "SD_WS_58_T_2",
-               "DEF" : "SD_WS_58_T_2"
-            },
-            "user" : "Burny4600",
+            "rmsg" : "MS;P0=-241;P1=486;P2=241;P3=-488;P4=-2098;P5=738;P6=-730;D=24565623231010102323231023231023101023101010232323231023232323231023232310102323101010102310231023102323232323232323232310102310232323;CP=2;SP=4;R=30;O;b=19;s=1;m0;",
             "tests" : [
                {
                   "comment" : "#0"
                }
-            ],
-            "comment" : "(ID 12 additionally)",
-            "revision_modul" : "14_SD_WS.pm 21666 2020-04-13 21:14:53Z Sidey",
-            "revision_entry" : "2021-03-25 14:11:59",
-            "minProtocolVersion" : "1.27",
-            "readings" : {
-               "state" : "T: 22.2",
-               "temperature" : "22.2",
-               "channel" : "2",
-               "type" : "TFA 30.3208.02, FT007xx",
-               "batteryState" : "ok"
-            }
+            ]
          },
          {
-            "revision_entry" : "2021-03-25 14:14:38",
-            "minProtocolVersion" : "1.27",
+            "comment" : "Rain sensor for base station 47.3005.01 / decode as MS",
+            "dmsg" : "W54#3896E1066AAA0076",
+            "internals" : {
+               "DEF" : "SD_WS_54_R",
+               "NAME" : "SD_WS_54_R"
+            },
             "readings" : {
                "batteryState" : "ok",
-               "type" : "TFA 30.3208.02, FT007xx",
-               "channel" : "2",
-               "temperature" : "22.3",
-               "state" : "T: 22.3"
+               "rain_total" : "29.464",
+               "rawRainCounter" : "116",
+               "sendCounter" : "3",
+               "state" : "R: 29.464",
+               "type" : "TFA 30.3233.01"
             },
-            "comment" : "(ID 12 additionally)",
-            "revision_modul" : "14_SD_WS.pm 21666 2020-04-13 21:14:53Z Sidey",
+            "rmsg" : "MS;P0=-491;P1=242;P2=476;P3=-248;P4=-2096;P5=721;P6=-745;D=14565610102323231010102310102310232310232323101010102310101010102323101023231023102310231023102310231010101010101010101023232310232310;CP=1;SP=4;R=10;O;b=135;s=1;m0;",
             "tests" : [
                {
                   "comment" : "#1"
                }
-            ],
+            ]
+         }
+      ],
+      "id" : "54.1",
+      "module" : "SD_WS",
+      "name" : "TFA 30.3233.01"
+   },
+   {
+      "data" : [
+         {
+            "comment" : "(ID 12 additionally)",
+            "dmsg" : "W58#468714600AED0",
             "internals" : {
                "DEF" : "SD_WS_58_T_2",
                "NAME" : "SD_WS_58_T_2"
             },
+            "readings" : {
+               "batteryState" : "ok",
+               "channel" : "2",
+               "state" : "T: 22.2",
+               "temperature" : "22.2",
+               "type" : "TFA 30.3208.02, FT007xx"
+            },
+            "rmsg" : "MC;LL=-1047;LH=903;SL=-545;SH=449;D=800AE5E3AE7FD44BC00572F1D73FEA25E002B9788;C=494;L=161;",
+            "tests" : [
+               {
+                  "comment" : "#0"
+               }
+            ]
+         },
+         {
+            "comment" : "(ID 12 additionally)",
             "dmsg" : "W58#468714610AAE0",
+            "internals" : {
+               "DEF" : "SD_WS_58_T_2",
+               "NAME" : "SD_WS_58_T_2"
+            },
+            "readings" : {
+               "batteryState" : "ok",
+               "channel" : "2",
+               "state" : "T: 22.3",
+               "temperature" : "22.3",
+               "type" : "TFA 30.3208.02, FT007xx"
+            },
             "rmsg" : "MC;LL=-1047;LH=902;SL=-546;SH=452;D=0015CBC75CF7AA8F800AE5E3AE7BD547C00572F1D0;C=487;L=165;",
-            "user" : "Burny4600"
+            "tests" : [
+               {
+                  "comment" : "#1"
+               }
+            ]
          }
       ],
-      "module" : "SD_WS"
+      "id" : "58",
+      "module" : "SD_WS",
+      "name" : "Froggit FT007T"
    },
    {
       "data" : [
          {
-            "revision_modul" : "14_SD_WS.pm 21666 2020-04-13 21:14:53Z Sidey",
             "comment" : "Thermo-hygro sensor with 2 Repeats",
-            "minProtocolVersion" : "1.27",
-            "readings" : {
-               "humidity" : "69",
-               "channel" : "2",
-               "temperature" : "18.9",
-               "batteryState" : "ok",
-               "type" : "TFA 30.3208.02, FT007xx",
-               "state" : "T: 18.9 H: 69"
-            },
-            "revision_entry" : "2021-03-25 14:06:43",
-            "user" : "Ralf9",
-            "internals" : {
-               "NAME" : "SD_WS_58_TH_2",
-               "DEF" : "SD_WS_58_TH_2"
-            },
             "dmsg" : "W58#45C8142445DB0",
+            "internals" : {
+               "DEF" : "SD_WS_58_TH_2",
+               "NAME" : "SD_WS_58_TH_2"
+            },
+            "readings" : {
+               "batteryState" : "ok",
+               "channel" : "2",
+               "humidity" : "69",
+               "state" : "T: 18.9 H: 69",
+               "temperature" : "18.9",
+               "type" : "TFA 30.3208.02, FT007xx"
+            },
             "rmsg" : "MC;LL=-981;LH=964;SL=-480;SH=520;D=002BA37EBDBBA24F0015D1BF5EDDD127800AE8DFAF6EE893C;C=486;L=194;R=34;",
             "tests" : [
                {
@@ -966,111 +850,94 @@
       "name" : "TFA 30.3208.02"
    },
    {
-      "module" : "SD_WS",
       "data" : [
          {
-            "tests" : [
-               {
-                  "comment" : "#0"
-               }
-            ],
-            "internals" : {
-               "NAME" : "SD_WS_WH2_0",
-               "DEF" : "SD_WS_WH2_0"
-            },
+            "comment" : "Fine Offset Electronics WH2, WH2A Temperature/Humidity sensor",
             "dmsg" : "W64#FE97615C94381C",
-            "rmsg" : "MU;P0=-28888;P1=461;P2=-1012;P3=1440;D=01212121212121232123232123212121232121232323232123212321212123232123232123212323232321212123232323232321212121;CP=1;R=202;",
-            "user" : "elektron-bbs",
-            "revision_entry" : "2021-08-17 20:37:38",
-            "readings" : {
-               "humidity" : "74",
-               "state" : "T: 17.4 H: 74",
-               "batteryState" : "ok",
-               "type" : "WH2, WH2A",
-               "channel" : "0",
-               "temperature" : "17.4"
-            },
-            "minProtocolVersion" : "1.34",
-            "comment" : "Fine Offset Electronics WH2, WH2A Temperature/Humidity sensor",
-            "revision_modul" : "14_SD_WS.pm 21666 2021-08-12 18:48:36Z elektron-bbs"
-         },
-         {
-            "internals" : {
-               "NAME" : "SD_WS_WH2_0",
-               "DEF" : "SD_WS_WH2_0"
-            },
-            "dmsg" : "W64#FE976236540E90",
-            "rmsg" : "MU;P0=-25696;P1=479;P2=-985;P3=1461;D=01212121212121232123232123212121232121232323212323232121232121232321232123212323232323232121212321232321232323;CP=1;R=215;",
-            "user" : "elektron-bbs",
-            "tests" : [
-               {
-                  "comment" : "#1"
-               }
-            ],
-            "comment" : "Fine Offset Electronics WH2, WH2A Temperature/Humidity sensor",
-            "revision_modul" : "14_SD_WS.pm 21666 2021-08-12 18:48:36Z elektron-bbs",
-            "revision_entry" : "2021-08-17 20:40:09",
-            "minProtocolVersion" : "1.34",
-            "readings" : {
-               "state" : "T: 28.3 H: 42",
-               "type" : "WH2, WH2A",
-               "batteryState" : "ok",
-               "channel" : "0",
-               "temperature" : "28.3",
-               "humidity" : "42"
-            }
-         },
-         {
-            "revision_entry" : "2021-08-17 20:41:55",
-            "minProtocolVersion" : "1.34",
-            "readings" : {
-               "state" : "T: 23 H: 64",
-               "batteryState" : "ok",
-               "type" : "WH2, WH2A",
-               "temperature" : "23",
-               "channel" : "0",
-               "humidity" : "64"
-            },
-            "comment" : "Fine Offset Electronics WH2, WH2A Temperature/Humidity sensor",
-            "revision_modul" : "14_SD_WS.pm 21666 2021-08-12 18:48:36Z elektron-bbs",
-            "tests" : [
-               {
-                  "comment" : "#2"
-               }
-            ],
             "internals" : {
                "DEF" : "SD_WS_WH2_0",
                "NAME" : "SD_WS_WH2_0"
             },
+            "readings" : {
+               "batteryState" : "ok",
+               "channel" : "0",
+               "humidity" : "74",
+               "state" : "T: 17.4 H: 74",
+               "temperature" : "17.4",
+               "type" : "WH2, WH2A"
+            },
+            "rmsg" : "MU;P0=-28888;P1=461;P2=-1012;P3=1440;D=01212121212121232123232123212121232121232323232123212321212123232123232123212323232321212123232323232321212121;CP=1;R=202;",
+            "tests" : [
+               {
+                  "comment" : "#0"
+               }
+            ]
+         },
+         {
+            "comment" : "Fine Offset Electronics WH2, WH2A Temperature/Humidity sensor",
+            "dmsg" : "W64#FE976236540E90",
+            "internals" : {
+               "DEF" : "SD_WS_WH2_0",
+               "NAME" : "SD_WS_WH2_0"
+            },
+            "readings" : {
+               "batteryState" : "ok",
+               "channel" : "0",
+               "humidity" : "42",
+               "state" : "T: 28.3 H: 42",
+               "temperature" : "28.3",
+               "type" : "WH2, WH2A"
+            },
+            "rmsg" : "MU;P0=-25696;P1=479;P2=-985;P3=1461;D=01212121212121232123232123212121232121232323212323232121232121232321232123212323232323232121212321232321232323;CP=1;R=215;",
+            "tests" : [
+               {
+                  "comment" : "#1"
+               }
+            ]
+         },
+         {
+            "comment" : "Fine Offset Electronics WH2, WH2A Temperature/Humidity sensor",
+            "dmsg" : "W64#FE9041CC812844",
+            "internals" : {
+               "DEF" : "SD_WS_WH2_0",
+               "NAME" : "SD_WS_WH2_0"
+            },
+            "readings" : {
+               "batteryState" : "ok",
+               "channel" : "0",
+               "humidity" : "64",
+               "state" : "T: 23 H: 64",
+               "temperature" : "23",
+               "type" : "WH2, WH2A"
+            },
             "rmsg" : "MU;P0=134;P1=-113;P3=412;P4=-1062;P5=1379;D=01010101013434343434343454345454345454545454345454545454343434545434345454345454545454543454543454345454545434545454345;CP=3;",
-            "dmsg" : "W64#FE9041CC812844"
+            "tests" : [
+               {
+                  "comment" : "#2"
+               }
+            ]
          }
       ],
       "id" : "64",
+      "module" : "SD_WS",
       "name" : "WH2"
    },
    {
-      "name" : "PV-8644",
-      "id" : "71",
       "data" : [
          {
             "comment" : "PEARL infactory Poolthermometer (ID 64 additionally)",
-            "revision_modul" : "14_SD_WS.pm   21666 2020-04-13 21:14:53Z Sidey",
-            "revision_entry" : "2021-04-22 22:00:00",
-            "minProtocolVersion" : "1.27",
-            "readings" : {
-               "state" : "T: 24.2",
-               "channel" : "1",
-               "temperature" : "24.2",
-               "type" : "PV-8644"
-            },
+            "dmsg" : "W71#589A829FDFF4",
             "internals" : {
                "DEF" : "SD_WS71_T_1",
                "NAME" : "SD_WS71_T_1"
             },
+            "readings" : {
+               "channel" : "1",
+               "state" : "T: 24.2",
+               "temperature" : "24.2",
+               "type" : "PV-8644"
+            },
             "rmsg" : "MU;P0=1735;P1=-1160;P2=591;P3=-876;D=0123012323010101230101232301230123010101010123012301012323232323232301232323232323232323012301012;CP=2;R=97;",
-            "dmsg" : "W71#589A829FDFF4",
-            "user" : "SD_Protocol",
             "tests" : [
                {
                   "comment" : "#0"
@@ -1078,37 +945,35 @@
             ]
          }
       ],
-      "module" : "SD_WS"
+      "id" : "71",
+      "module" : "SD_WS",
+      "name" : "PV-8644"
    },
    {
       "data" : [
          {
+            "comment" : "Version 06/2017",
+            "dmsg" : "W84#033B1FC328",
+            "internals" : {
+               "DEF" : "SD_WS_84_TH_2",
+               "NAME" : "SD_WS_84_TH_2"
+            },
+            "readings" : {
+               "batteryState" : "ok",
+               "channel" : "2",
+               "humidity" : "59",
+               "sendmode" : "auto",
+               "state" : "T: -6.1 H: 59",
+               "temperature" : "-6.1",
+               "type" : "Auriol IAN 283582, TV-4848"
+            },
+            "rmsg" : "MU;P0=595;P1=344;P2=-862;P3=846;P4=244;P5=-602;P7=-251;D=1232323245454545454507074545070707450707454545070707070707074545454507074545074507454540;CP=4;R=4;",
+            "state" : "T: -6.1 H: 59",
             "tests" : [
                {
                   "comment" : "#0"
                }
-            ],
-            "internals" : {
-               "NAME" : "SD_WS_84_TH_2",
-               "DEF" : "SD_WS_84_TH_2"
-            },
-            "rmsg" : "MU;P0=595;P1=344;P2=-862;P3=846;P4=244;P5=-602;P7=-251;D=1232323245454545454507074545070707450707454545070707070707074545454507074545074507454540;CP=4;R=4;",
-            "state" : "T: -6.1 H: 59",
-            "dmsg" : "W84#033B1FC328",
-            "user" : "roobbb",
-            "revision_entry" : "2021-04-21 21:36:51",
-            "minProtocolVersion" : "1.27",
-            "readings" : {
-               "type" : "Auriol IAN 283582, TV-4848",
-               "batteryState" : "ok",
-               "temperature" : "-6.1",
-               "channel" : "2",
-               "state" : "T: -6.1 H: 59",
-               "humidity" : "59",
-               "sendmode" : "auto"
-            },
-            "comment" : "Version 06/2017",
-            "revision_modul" : "14_SD_WS.pm   21666 2020-04-13 21:14:53Z Sidey"
+            ]
          }
       ],
       "id" : "84",
@@ -1116,133 +981,117 @@
       "name" : "Auriol IAN 283582"
    },
    {
-      "id" : "84",
       "data" : [
          {
-            "tests" : [
-               {
-                  "comment" : "#0"
-               }
-            ],
-            "user" : "w6s8",
+            "comment" : "Aldi (ID 40 additionally)",
+            "dmsg" : "W84#A64D20D570",
             "internals" : {
                "DEF" : "SD_WS_84_TH_3",
                "NAME" : "SD_WS_84_TH_3"
             },
-            "dmsg" : "W84#A64D20D570",
-            "rmsg" : "MU;P0=-30004;P1=815;P2=-910;P3=599;P4=-263;P5=234;P6=-621;D=0121212345634565634345656345656343456345656345656565656343456345634563456343434565656;CP=5;R=5;",
-            "minProtocolVersion" : "1.27",
             "readings" : {
-               "sendmode" : "auto",
-               "humidity" : "77",
-               "state" : "T: 21.3 H: 77",
-               "type" : "Auriol IAN 283582, TV-4848",
                "batteryState" : "ok",
                "channel" : "3",
-               "temperature" : "21.3"
+               "humidity" : "77",
+               "sendmode" : "auto",
+               "state" : "T: 21.3 H: 77",
+               "temperature" : "21.3",
+               "type" : "Auriol IAN 283582, TV-4848"
             },
-            "revision_entry" : "2021-04-21 21:38:48",
-            "revision_modul" : "14_SD_WS.pm   21666 2020-04-13 21:14:53Z Sidey",
-            "comment" : "Aldi (ID 40 additionally)"
+            "rmsg" : "MU;P0=-30004;P1=815;P2=-910;P3=599;P4=-263;P5=234;P6=-621;D=0121212345634565634345656345656343456345656345656565656343456345634563456343434565656;CP=5;R=5;",
+            "tests" : [
+               {
+                  "comment" : "#0"
+               }
+            ]
          }
       ],
+      "id" : "84",
       "module" : "SD_WS",
       "name" : "Sempre 92596/65395"
    },
    {
-      "name" : "Tecvance TV-4848",
       "data" : [
          {
-            "minProtocolVersion" : "1.27",
-            "readings" : {
-               "humidity" : "54",
-               "sendmode" : "auto",
-               "temperature" : "30.1",
-               "channel" : "1",
-               "batteryState" : "ok",
-               "type" : "Auriol IAN 283582, TV-4848",
-               "state" : "T: 30.1 H: 54"
-            },
-            "revision_entry" : "2021-04-21 21:41:06",
-            "revision_modul" : "14_SD_WS.pm   21666 2020-04-13 21:14:53Z Sidey",
             "comment" : "Amazon (ID 37,63 additionally)",
-            "tests" : [
-               {
-                  "comment" : "#0"
-               }
-            ],
-            "user" : "HomeAuto_User",
+            "dispatch_repeats" : "1",
             "dmsg" : "W84#5E36012D24",
-            "rmsg" : "MU;P0=859;P1=-845;P2=-253;P3=240;P4=-598;P5=617;D=45252525234343452523452523434343434343434523434523452523452343452343452345234010101013452345252525234343452523452523434343434343434523434523452523452343452343452345234010101013452345252525234343452523452523434343434343434523434523452523452343452343452345;CP=3;R=63;O;",
             "internals" : {
                "DEF" : "SD_WS_84_TH_1",
                "NAME" : "SD_WS_84_TH_1"
             },
-            "dispatch_repeats" : "1"
-         }
-      ],
-      "id" : "84",
-      "module" : "SD_WS"
-   },
-   {
-      "module" : "SD_WS",
-      "id" : "85",
-      "data" : [
-         {
-            "revision_entry" : "2021-04-21 20:20:40",
-            "minProtocolVersion" : "1.27",
             "readings" : {
-               "humidity" : "85",
                "batteryState" : "ok",
-               "type" : "TFA 30.3222.02, TFA 30.3251.10, LaCrosse TX141W",
-               "temperature" : "8.7",
                "channel" : "1",
-               "state" : "T: 8.7 H: 85"
+               "humidity" : "54",
+               "sendmode" : "auto",
+               "state" : "T: 30.1 H: 54",
+               "temperature" : "30.1",
+               "type" : "Auriol IAN 283582, TV-4848"
             },
-            "comment" : "Thermo-hygro sensor for base station 35.1140.01 (ID 54,61 additionally)",
-            "revision_modul" : "14_SD_WS.pm   21666 2020-04-13 21:14:53Z Sidey",
+            "rmsg" : "MU;P0=859;P1=-845;P2=-253;P3=240;P4=-598;P5=617;D=45252525234343452523452523434343434343434523434523452523452343452343452345234010101013452345252525234343452523452523434343434343434523434523452523452343452343452345234010101013452345252525234343452523452523434343434343434523434523452523452343452343452345;CP=3;R=63;O;",
             "tests" : [
                {
                   "comment" : "#0"
                }
-            ],
+            ]
+         }
+      ],
+      "id" : "84",
+      "module" : "SD_WS",
+      "name" : "Tecvance TV-4848"
+   },
+   {
+      "data" : [
+         {
+            "comment" : "Thermo-hygro sensor for base station 35.1140.01 (ID 54,61 additionally)",
             "dmsg" : "W85#0C45C60124B0554F8",
-            "rmsg" : "MU;P0=-509;P1=474;P2=-260;P3=228;P4=718;P5=-745;D=01212303030303012301230123012301230301212121230454545453030303012123030301230303012301212123030301212303030303030303012303012303012303012301212303030303012301230123012301230301212121212454545453030303012123030301230303012301212123030301212303030303030303;CP=3;R=46;O;",
             "internals" : {
                "DEF" : "SD_WS_85_THW_1",
                "NAME" : "SD_WS_85_THW_1"
             },
-            "user" : "Iron-R1"
+            "readings" : {
+               "batteryState" : "ok",
+               "channel" : "1",
+               "humidity" : "85",
+               "state" : "T: 8.7 H: 85",
+               "temperature" : "8.7",
+               "type" : "TFA 30.3222.02, TFA 30.3251.10, LaCrosse TX141W"
+            },
+            "rmsg" : "MU;P0=-509;P1=474;P2=-260;P3=228;P4=718;P5=-745;D=01212303030303012301230123012301230301212121230454545453030303012123030301230303012301212123030301212303030303030303012303012303012303012301212303030303012301230123012301230301212121212454545453030303012123030301230303012301212123030301212303030303030303;CP=3;R=46;O;",
+            "tests" : [
+               {
+                  "comment" : "#0"
+               }
+            ]
          }
       ],
+      "id" : "85",
+      "module" : "SD_WS",
       "name" : "TFA 30.3222.02, Temp"
    },
    {
       "data" : [
          {
-            "user" : "Iron-R1",
+            "comment" : "Thermo-hygro sensor for base station 35.1140.01 (ID 54,61 additionally)",
             "dmsg" : "W85#0C35A602015000C98",
-            "rmsg" : "MU;P0=242;P1=-506;P2=467;P3=-248;P4=723;P5=-736;D=01012323010123010123014545454501010101232301010101232301230123230123010123230101010101010123010101010101010123012301230101010101010101010101012323010123010123234545454501010101232301010101232301230123230123010123230101010101010123010101010101010123012301;CP=0;R=52;O;",
             "internals" : {
                "DEF" : "SD_WS_85_THW_1",
                "NAME" : "SD_WS_85_THW_1"
             },
+            "readings" : {
+               "batteryState" : "ok",
+               "channel" : "1",
+               "state" : "W: 2.1",
+               "type" : "TFA 30.3222.02, TFA 30.3251.10, LaCrosse TX141W",
+               "windSpeed" : "2.1"
+            },
+            "rmsg" : "MU;P0=242;P1=-506;P2=467;P3=-248;P4=723;P5=-736;D=01012323010123010123014545454501010101232301010101232301230123230123010123230101010101010123010101010101010123012301230101010101010101010101012323010123010123234545454501010101232301010101232301230123230123010123230101010101010123010101010101010123012301;CP=0;R=52;O;",
             "tests" : [
                {
                   "comment" : "#0"
                }
-            ],
-            "revision_modul" : "14_SD_WS.pm   21666 2020-04-13 21:14:53Z Sidey",
-            "comment" : "Thermo-hygro sensor for base station 35.1140.01 (ID 54,61 additionally)",
-            "minProtocolVersion" : "1.27",
-            "readings" : {
-               "type" : "TFA 30.3222.02, TFA 30.3251.10, LaCrosse TX141W",
-               "batteryState" : "ok",
-               "channel" : "1",
-               "state" : "W: 2.1",
-               "windSpeed" : "2.1"
-            },
-            "revision_entry" : "2021-04-21 20:24:18"
+            ]
          }
       ],
       "id" : "85",
@@ -1250,24 +1099,24 @@
       "name" : "TFA 30.3222.02, Wind"
    },
    {
-      "module" : "SD_WS",
-      "id" : "85",
       "data" : [
          {
-            "readings" : {
-               "state" : "W: 5.9",
-               "windSpeed" : "5.9",
-               "windDirectionText" : "ENE",
-               "channel" : "1",
-               "windDirectionDegree" : "58",
-               "type" : "TFA 30.3222.02, TFA 30.3251.10, LaCrosse TX141W",
-               "batteryState" : "ok"
-            },
-            "revision_entry" : "2022-04-17 13:36:34",
-            "revision_modul" : "14_SD_WS.pm v3.5.4 2022-04-15 15:55:23Z elektron-bbs",
-            "user" : "elektron-bbs",
-            "minProtocolVersion" : "1.27",
             "comment" : "additionally windDirectionDegree and windDirectionText",
+            "dmsg" : "W85#0BFF0F0203B03A980",
+            "internals" : {
+               "DEF" : "SD_WS_85_THW_1",
+               "NAME" : "SD_WS_85_THW_1"
+            },
+            "readings" : {
+               "batteryState" : "ok",
+               "channel" : "1",
+               "state" : "W: 5.9",
+               "type" : "TFA 30.3222.02, TFA 30.3251.10, LaCrosse TX141W",
+               "windDirectionDegree" : "58",
+               "windDirectionText" : "ENE",
+               "windSpeed" : "5.9"
+            },
+            "rmsg" : "MU;P0=-28464;P1=493;P2=-238;P3=244;P4=-492;P5=728;P6=-732;D=01212123434343412121212343434343434123434343434343412121234121234343434343412121234123412343412123434343456565656343434341234121212121212121212123434343412121212343434343434123434343434343412121234121234343434343412121234123412343412123434343456565656343;CP=3;R=20;O;",
             "tests" : [
                {
                   "attributes" : {
@@ -1275,76 +1124,64 @@
                   },
                   "comment" : "#0"
                }
-            ],
-            "dmsg" : "W85#0BFF0F0203B03A980",
-            "rmsg" : "MU;P0=-28464;P1=493;P2=-238;P3=244;P4=-492;P5=728;P6=-732;D=01212123434343412121212343434343434123434343434343412121234121234343434343412121234123412343412123434343456565656343434341234121212121212121212123434343412121212343434343434123434343434343412121234121234343434343412121234123412343412123434343456565656343;CP=3;R=20;O;",
+            ]
+         },
+         {
+            "comment" : "windDirectionText N, windDirectionDegree 355",
+            "dmsg" : "W85#0BFF0F02000163C10",
             "internals" : {
                "DEF" : "SD_WS_85_THW_1",
                "NAME" : "SD_WS_85_THW_1"
-            }
-         },
-         {
-            "user" : "elektron-bbs",
-            "revision_modul" : "14_SD_WS.pm v3.5.4 2022-07-05 18:47:28Z elektron-bbs",
-            "revision_entry" : "2022-09-04 12:01:02",
+            },
             "readings" : {
-               "channel" : "1",
                "batteryState" : "ok",
+               "channel" : "1",
+               "state" : "W: 0",
                "type" : "TFA 30.3222.02, TFA 30.3251.10, LaCrosse TX141W",
                "windDirectionDegree" : "355",
                "windDirectionText" : "N",
-               "state" : "W: 0",
                "windSpeed" : "0"
             },
-            "internals" : {
-               "NAME" : "SD_WS_85_THW_1",
-               "DEF" : "SD_WS_85_THW_1"
-            },
             "rmsg" : "MU;P0=-11716;P1=485;P2=-239;P3=251;P4=-490;P5=732;P6=-726;D=01212121234343434121212123434343434341234343434343434343434343434343434123412123434341212121234343434341234565656563434343412341212121212121212121234343434121212123434343434341234343434343434343434343434343434123412123434341212121234343434341234565656563;CP=3;R=23;O;",
-            "dmsg" : "W85#0BFF0F02000163C10",
             "tests" : [
                {
-                  "comment" : "#1",
                   "attributes" : {
                      "model" : "TFA_30.3251.10"
-                  }
+                  },
+                  "comment" : "#1"
                }
-            ],
-            "comment" : "windDirectionText N, windDirectionDegree 355",
-            "minProtocolVersion" : "1.44"
+            ]
          }
       ],
+      "id" : "85",
+      "module" : "SD_WS",
       "name" : "TFA 30.3251.10 Windsensor"
    },
    {
       "data" : [
          {
-            "user" : "Iron-R1",
+            "comment" : "Thermo-hygro sensor for base station 35.1140.01 (ID 37,61 additionally)",
             "dispatch_repeats" : "1",
-            "internals" : {
-               "NAME" : "SD_WS_89_TH_2",
-               "DEF" : "SD_WS_89_TH_2"
-            },
             "dmsg" : "W89#F012333E01",
+            "internals" : {
+               "DEF" : "SD_WS_89_TH_2",
+               "NAME" : "SD_WS_89_TH_2"
+            },
+            "readings" : {
+               "batteryState" : "ok",
+               "channel" : "2",
+               "humidity" : "62",
+               "sendmode" : "auto",
+               "state" : "T: 6.3 H: 62",
+               "temperature" : "6.3",
+               "type" : "TFA 30.3221.02"
+            },
             "rmsg" : "MU;P0=22960;P1=-893;P2=775;P3=409;P4=-296;P5=182;P6=-513;D=01212121343434345656565656565634565634565656343456563434565634343434345656565656565656342121212134343434565656565656563456563456565634345656343456563434343434565656565656565634212121213434343456565656565656345656345656563434565634345656343434343456565656;CP=5;R=22;O;",
             "tests" : [
                {
                   "comment" : "#0"
                }
-            ],
-            "revision_modul" : "14_SD_WS.pm 21666 2020-04-13 21:14:53Z Sidey",
-            "comment" : "Thermo-hygro sensor for base station 35.1140.01 (ID 37,61 additionally)",
-            "minProtocolVersion" : "1.27",
-            "readings" : {
-               "sendmode" : "auto",
-               "humidity" : "62",
-               "state" : "T: 6.3 H: 62",
-               "type" : "TFA 30.3221.02",
-               "batteryState" : "ok",
-               "channel" : "2",
-               "temperature" : "6.3"
-            },
-            "revision_entry" : "2021-03-26 10:43:44"
+            ]
          }
       ],
       "id" : "89",
@@ -1352,72 +1189,58 @@
       "name" : "TFA 30.3221.02"
    },
    {
-      "name" : "Atech",
-      "module" : "SD_WS",
       "data" : [
          {
-            "revision_entry" : "2021-03-26 10:04:23",
-            "minProtocolVersion" : "1.27",
-            "readings" : {
-               "state" : "T: -14.6",
-               "type" : "Atech",
-               "temperature" : "-14.6"
-            },
             "comment" : "Temp sensor Id: 0C (ID 63 additionally)",
-            "revision_modul" : "14_SD_WS.pm 21666 2020-04-13 21:14:53Z Sidey",
-            "tests" : [
-               {
-                  "comment" : "#0"
-               }
-            ],
-            "internals" : {
-               "NAME" : "SD_WS_94_T",
-               "DEF" : "SD_WS_94_T"
-            },
-            "rmsg" : "MU;P0=-32001;P1=1525;P2=-303;P3=-7612;P4=-2008;D=01212121212121213141414141212141212141414141412121414141414121214141212141414141212141212141412121412121414121214121;CP=1;",
             "dmsg" : "W94#0D830661B366C",
-            "user" : "Kreidler1221"
-         },
-         {
-            "tests" : [
-               {
-                  "comment" : "#1"
-               }
-            ],
-            "dmsg" : "W94#0D830018CCC",
-            "rmsg" : "MU;P0=-32001;P1=1533;P2=-297;P3=-7612;P4=-2005;D=0121212121212121314141414121214121214141414141212141414141414141414141412121414141212141412121414121;CP=1;",
             "internals" : {
                "DEF" : "SD_WS_94_T",
                "NAME" : "SD_WS_94_T"
             },
-            "user" : "Kreidler1221",
-            "revision_entry" : "2021-03-26 10:05:29",
             "readings" : {
-               "type" : "Atech",
-               "temperature" : "-0.4",
-               "state" : "T: -0.4"
+               "state" : "T: -14.6",
+               "temperature" : "-14.6",
+               "type" : "Atech"
             },
-            "minProtocolVersion" : "1.27",
-            "comment" : "Temp sensor Id: 0C (ID 63 additionally)",
-            "revision_modul" : "14_SD_WS.pm 21666 2020-04-13 21:14:53Z Sidey"
+            "rmsg" : "MU;P0=-32001;P1=1525;P2=-303;P3=-7612;P4=-2008;D=01212121212121213141414141212141212141414141412121414141414121214141212141414141212141212141412121412121414121214121;CP=1;",
+            "tests" : [
+               {
+                  "comment" : "#0"
+               }
+            ]
          },
          {
             "comment" : "Temp sensor Id: 0C (ID 63 additionally)",
-            "revision_modul" : "14_SD_WS.pm 21666 2020-04-13 21:14:53Z Sidey",
-            "revision_entry" : "2021-03-26 10:06:30",
+            "dmsg" : "W94#0D830018CCC",
+            "internals" : {
+               "DEF" : "SD_WS_94_T",
+               "NAME" : "SD_WS_94_T"
+            },
             "readings" : {
-               "state" : "T: 0.2",
-               "temperature" : "0.2",
+               "state" : "T: -0.4",
+               "temperature" : "-0.4",
                "type" : "Atech"
             },
-            "minProtocolVersion" : "1.27",
-            "rmsg" : "MU;P0=-32001;P1=1532;P2=-299;P3=-7608;P4=-2005;D=0121212121212121314141414121214121214141414141414141414141414141414141212141412121412121412121414121;CP=1;",
+            "rmsg" : "MU;P0=-32001;P1=1533;P2=-297;P3=-7612;P4=-2005;D=0121212121212121314141414121214121214141414141212141414141414141414141412121414141212141412121414121;CP=1;",
+            "tests" : [
+               {
+                  "comment" : "#1"
+               }
+            ]
+         },
+         {
+            "comment" : "Temp sensor Id: 0C (ID 63 additionally)",
             "dmsg" : "W94#0D8000336CC",
             "internals" : {
                "DEF" : "SD_WS_94_T",
                "NAME" : "SD_WS_94_T"
             },
-            "user" : "Kreidler1221",
+            "readings" : {
+               "state" : "T: 0.2",
+               "temperature" : "0.2",
+               "type" : "Atech"
+            },
+            "rmsg" : "MU;P0=-32001;P1=1532;P2=-299;P3=-7608;P4=-2005;D=0121212121212121314141414121214121214141414141414141414141414141414141212141412121412121412121414121;CP=1;",
             "tests" : [
                {
                   "comment" : "#2"
@@ -1426,22 +1249,18 @@
          },
          {
             "comment" : "Temp sensor Id: 0C (ID 63 additionally)",
-            "revision_modul" : "14_SD_WS.pm 21666 2020-04-13 21:14:53Z Sidey",
-            "revision_entry" : "2021-03-26 10:07:18",
+            "dispatch_repeats" : "1",
+            "dmsg" : "W94#0D80180CDB6C",
+            "internals" : {
+               "DEF" : "SD_WS_94_T",
+               "NAME" : "SD_WS_94_T"
+            },
             "readings" : {
                "state" : "T: 10.2",
                "temperature" : "10.2",
                "type" : "Atech"
             },
-            "minProtocolVersion" : "1.27",
             "rmsg" : "MU;P0=-31292;P1=1529;P2=-300;P3=-7610;P4=-2009;D=012121212121212131414141412121412121414141414141414141412121414141414141412121414121214121214121214121214121012121212121212131414141412121412121414141414141414141412121414141414141412121414121214121214121214121214121;CP=1;",
-            "dmsg" : "W94#0D80180CDB6C",
-            "internals" : {
-               "NAME" : "SD_WS_94_T",
-               "DEF" : "SD_WS_94_T"
-            },
-            "dispatch_repeats" : "1",
-            "user" : "Kreidler1221",
             "tests" : [
                {
                   "comment" : "#3"
@@ -1450,22 +1269,18 @@
          },
          {
             "comment" : "Temp sensor Id: 0C (ID 63 additionally)",
-            "revision_modul" : "14_SD_WS.pm 21666 2020-04-13 21:14:53Z Sidey",
-            "revision_entry" : "2021-03-26 10:03:12",
+            "dispatch_repeats" : "1",
+            "dmsg" : "W94#0D8031B60C6C",
+            "internals" : {
+               "DEF" : "SD_WS_94_T",
+               "NAME" : "SD_WS_94_T"
+            },
             "readings" : {
                "state" : "T: 27",
                "temperature" : "27",
                "type" : "Atech"
             },
-            "minProtocolVersion" : "1.27",
             "rmsg" : "MU;P0=-31290;P1=1533;P2=-297;P3=-7608;P4=-2006;D=012121212121212131414141412121412121414141414141414141212141414121214121214121214141414141212141414121214121012121212121212131414141412121412121414141414141414141212141414121214121214121214141414141212141414121214121;CP=1;",
-            "dmsg" : "W94#0D8031B60C6C",
-            "internals" : {
-               "NAME" : "SD_WS_94_T",
-               "DEF" : "SD_WS_94_T"
-            },
-            "dispatch_repeats" : "1",
-            "user" : "Kreidler1221",
             "tests" : [
                {
                   "comment" : "#4"
@@ -1473,28 +1288,25 @@
             ]
          }
       ],
-      "id" : "94"
+      "id" : "94",
+      "module" : "SD_WS",
+      "name" : "Atech"
    },
    {
-      "module" : "SD_WS",
       "data" : [
          {
             "comment" : "BBQ temperature sensor",
-            "revision_modul" : "14_SD_WS.pm 21666 2020-04-13 21:14:53Z Sidey",
-            "revision_entry" : "2021-03-25 14:38:02",
-            "minProtocolVersion" : "1.27",
-            "readings" : {
-               "temperature" : "22.6",
-               "type" : "GT-TMBBQ-01",
-               "state" : "T: 22.6"
-            },
+            "dmsg" : "W106#2632DC",
             "internals" : {
-               "NAME" : "SD_WS_106_T",
-               "DEF" : "SD_WS_106_T"
+               "DEF" : "SD_WS_106_T",
+               "NAME" : "SD_WS_106_T"
+            },
+            "readings" : {
+               "state" : "T: 22.6",
+               "temperature" : "22.6",
+               "type" : "GT-TMBBQ-01"
             },
             "rmsg" : "MS;P0=525;P1=-2051;P3=-8905;P4=-4062;D=0301010401010404010101040401010401040401040404;CP=0;SP=3;R=35;e;b=2;m0;",
-            "dmsg" : "W106#2632DC",
-            "user" : "elektron-bbs",
             "tests" : [
                {
                   "comment" : "#0"
@@ -1502,200 +1314,37 @@
             ]
          },
          {
+            "comment" : "BBQ temperature sensor",
+            "dmsg" : "W106#9A57A8",
+            "internals" : {
+               "DEF" : "SD_WS_106_T",
+               "NAME" : "SD_WS_106_T"
+            },
+            "readings" : {
+               "state" : "T: 88.1",
+               "temperature" : "88.1",
+               "type" : "GT-TMBBQ-01"
+            },
+            "rmsg" : "MS;P1=-8514;P2=488;P3=-4075;P4=-2068;D=2123242423232423242423242324232323232423242324;CP=2;SP=1;R=31;e;b=70;s=4;m0;",
             "tests" : [
                {
                   "comment" : "#1"
                }
-            ],
-            "user" : "elektron-bbs",
-            "internals" : {
-               "DEF" : "SD_WS_106_T",
-               "NAME" : "SD_WS_106_T"
-            },
-            "dmsg" : "W106#9A57A8",
-            "rmsg" : "MS;P1=-8514;P2=488;P3=-4075;P4=-2068;D=2123242423232423242423242324232323232423242324;CP=2;SP=1;R=31;e;b=70;s=4;m0;",
-            "minProtocolVersion" : "1.27",
-            "readings" : {
-               "temperature" : "88.1",
-               "type" : "GT-TMBBQ-01",
-               "state" : "T: 88.1"
-            },
-            "revision_entry" : "2021-03-25 14:36:08",
-            "revision_modul" : "14_SD_WS.pm 21666 2020-04-13 21:14:53Z Sidey",
-            "comment" : "BBQ temperature sensor"
+            ]
          },
          {
-            "user" : "elektron-bbs",
+            "comment" : "BBQ temperature sensor",
+            "dmsg" : "W106#9A5D20",
             "internals" : {
                "DEF" : "SD_WS_106_T",
                "NAME" : "SD_WS_106_T"
             },
-            "dmsg" : "W106#9A5D20",
-            "rmsg" : "MS;P1=-9144;P2=469;P3=-4101;P4=-2099;D=2123242423232423242423242323232423242423242424;CP=2;SP=1;R=58;O;b=70;s=4;m0;",
-            "tests" : [
-               {
-                  "comment" : "#2"
-               }
-            ],
-            "revision_modul" : "14_SD_WS.pm 21666 2020-04-13 21:14:53Z Sidey",
-            "comment" : "BBQ temperature sensor",
             "readings" : {
                "state" : "T: 97.8",
                "temperature" : "97.8",
                "type" : "GT-TMBBQ-01"
             },
-            "minProtocolVersion" : "1.27",
-            "revision_entry" : "2021-03-25 14:34:53"
-         }
-      ],
-      "id" : "106",
-      "name" : "GT-TMBBQ-01s"
-   },
-   {
-      "module" : "SD_WS",
-      "data" : [
-         {
-            "comment" : "Fine Offset WH51, ECOWITT WH51, MISOL/1, Froggit DP100 Soil Moisture Sensor",
-            "revision_modul" : "14_SD_WS.pm 21666 2022-01-05 20:44:16Z elektron-bbs",
-            "revision_entry" : "2022-01-08 20:37:30",
-            "readings" : {
-               "state" : " H: 31",
-               "adc" : "187",
-               "humidity" : "31",
-               "type" : "WH51, DP100, MISOL/1",
-               "batteryVoltage" : "1.6"
-            },
-            "minProtocolVersion" : "1.41",
-            "internals" : {
-               "DEF" : "SD_WS_107_H",
-               "NAME" : "SD_WS_107_H"
-            },
-            "rmsg" : "MN;D=5100C6BF107F1FF8BBFFFFFFEE22;R=14;",
-            "dmsg" : "W107#5100C6BF107F1FF8BBFFFFFFEE22",
-            "user" : "elektron-bbs",
-            "tests" : [
-               {
-                  "comment" : "#0"
-               }
-            ]
-         },
-         {
-            "internals" : {
-               "DEF" : "SD_WS_107_H",
-               "NAME" : "SD_WS_107_H"
-            },
-            "dmsg" : "W107#51006B586E7F24F8D2FFFFFF3C288",
-            "rmsg" : "MN;D=51006B586E7F24F8D2FFFFFF3C288;R=14;",
-            "user" : "elektron-bbs",
-            "tests" : [
-               {
-                  "comment" : "#1"
-               }
-            ],
-            "comment" : "Fine Offset WH51, ECOWITT WH51, MISOL/1, Froggit DP100 Soil Moisture Sensor",
-            "revision_modul" : "14_SD_WS.pm 21666 2022-01-05 20:44:16Z elektron-bbs",
-            "revision_entry" : "2022-01-08 20:46:22",
-            "readings" : {
-               "state" : " H: 36",
-               "adc" : "210",
-               "humidity" : "36",
-               "batteryVoltage" : "1.4",
-               "type" : "WH51, DP100, MISOL/1"
-            },
-            "minProtocolVersion" : "1.41"
-         }
-      ],
-      "id" : "107",
-      "name" : "WH51"
-   },
-   {
-      "name" : "BRESSER 5in1",
-      "module" : "SD_WS",
-      "data" : [
-         {
-            "tests" : [
-               {
-                  "comment" : "#0"
-               }
-            ],
-            "internals" : {
-               "DEF" : "SD_WS_108",
-               "NAME" : "SD_WS_108"
-            },
-            "dmsg" : "W108#AD8008700810070228443500",
-            "rmsg" : "MN;D=E7527FF78FF7EFF8FDD7BBCAFF18AD80087008100702284435000002;R=213;",
-            "user" : "elektron-bbs",
-            "revision_entry" : "2021-07-28 20:23:07",
-            "readings" : {
-               "humidity" : "28",
-               "rain" : "354.4",
-               "windGust" : "0.8",
-               "windDirectionText" : "SSE",
-               "windSpeed" : "0.8",
-               "state" : "T: 20.7 H: 28 W: 0.8 R: 354.4",
-               "temperature" : "20.7",
-               "batteryState" : "ok",
-               "type" : "Bresser_5in1, Bresser_rain_gauge, Fody_E42, Fody_E43",
-               "windDirectionDegree" : "157.5"
-            },
-            "minProtocolVersion" : "1.30",
-            "comment" : "BRESSER 5-in-1 Weather Center, Bresser Professional Rain Gauge",
-            "revision_modul" : "14_SD_WS.pm 21666 2021-06-03 16:00:53Z Sidey"
-         },
-         {
-            "revision_modul" : "14_SD_WS.pm 21666 2021-06-03 16:00:53Z Sidey",
-            "comment" : "BRESSER 5-in-1 Weather Center, Bresser Professional Rain Gauge",
-            "readings" : {
-               "humidity" : "78",
-               "batteryState" : "ok",
-               "type" : "Bresser_5in1, Bresser_rain_gauge, Fody_E42, Fody_E43",
-               "windDirectionDegree" : "292.5",
-               "temperature" : "-2.8",
-               "windGust" : "0",
-               "windDirectionText" : "WNW",
-               "state" : "T: -2.8 H: 78 W: 0 R: 354.4",
-               "windSpeed" : "0",
-               "rain" : "354.4"
-            },
-            "minProtocolVersion" : "1.30",
-            "revision_entry" : "2021-07-28 20:25:17",
-            "user" : "elektron-bbs",
-            "dmsg" : "W108#AD8000D00010280078443508",
-            "rmsg" : "MN;D=E8527FFF2FFFEFD7FF87BBCAF717AD8000D000102800784435080000;R=214;",
-            "internals" : {
-               "DEF" : "SD_WS_108",
-               "NAME" : "SD_WS_108"
-            },
-            "tests" : [
-               {
-                  "comment" : "#1"
-               }
-            ]
-         },
-         {
-            "comment" : "BRESSER 5-in-1 Weather Center, Bresser Professional Rain Gauge",
-            "revision_modul" : "14_SD_WS.pm 21666 2021-06-03 16:00:53Z Sidey",
-            "revision_entry" : "2021-07-28 20:24:58",
-            "readings" : {
-               "humidity" : "88",
-               "windDirectionDegree" : "337.5",
-               "type" : "Bresser_5in1, Bresser_rain_gauge, Fody_E42, Fody_E43",
-               "batteryState" : "ok",
-               "temperature" : "8",
-               "windSpeed" : "1.3",
-               "state" : "T: 8 H: 88 W: 1.3 R: 364.8",
-               "windGust" : "2",
-               "windDirectionText" : "NNW",
-               "rain" : "364.8"
-            },
-            "minProtocolVersion" : "1.30",
-            "rmsg" : "MN;D=E6527FEB0FECEF7FFF77B7C9FF19AD8014F013108000884836000003;R=211;",
-            "dmsg" : "W108#AD8014F01310800088483600",
-            "internals" : {
-               "NAME" : "SD_WS_108",
-               "DEF" : "SD_WS_108"
-            },
-            "user" : "elektron-bbs",
+            "rmsg" : "MS;P1=-9144;P2=469;P3=-4101;P4=-2099;D=2123242423232423242423242323232423242423242424;CP=2;SP=1;R=58;O;b=70;s=4;m0;",
             "tests" : [
                {
                   "comment" : "#2"
@@ -1703,86 +1352,209 @@
             ]
          }
       ],
-      "id" : "108"
+      "id" : "106",
+      "module" : "SD_WS",
+      "name" : "GT-TMBBQ-01s"
    },
    {
-      "name" : "ADE WS 1907",
       "data" : [
          {
-            "revision_entry" : "2021-05-25 10:37:36",
-            "readings" : {
-               "temperature" : "16.3",
-               "type" : "ADE WS1907",
-               "batteryState" : "ok",
-               "rawRainCounter" : "266",
-               "rain" : "26.6",
-               "sendCounter" : "3",
-               "state" : "T: 16.3 R: 26.6"
+            "comment" : "Fine Offset WH51, ECOWITT WH51, MISOL/1, Froggit DP100 Soil Moisture Sensor",
+            "dmsg" : "W107#5100C6BF107F1FF8BBFFFFFFEE22",
+            "internals" : {
+               "DEF" : "SD_WS_107_H",
+               "NAME" : "SD_WS_107_H"
             },
-            "minProtocolVersion" : "1.29",
-            "comment" : "Weather station with rain gauge",
-            "revision_modul" : "14_SD_WS.pm 21666 2020-05-22 21:30:00Z Sidey",
+            "readings" : {
+               "adc" : "187",
+               "batteryVoltage" : "1.6",
+               "humidity" : "31",
+               "state" : " H: 31",
+               "type" : "WH51, DP100, MISOL/1"
+            },
+            "rmsg" : "MN;D=5100C6BF107F1FF8BBFFFFFFEE22;R=14;",
             "tests" : [
                {
                   "comment" : "#0"
                }
-            ],
-            "internals" : {
-               "NAME" : "SD_WS_110_TR",
-               "DEF" : "SD_WS_110_TR"
-            },
-            "rmsg" : "MU;P0=970;P1=-112;P2=516;P3=-984;P4=2577;P5=-2692;P6=7350;D=01234343450503450503434343434505034343434343434343434343434343434505050503450345034343434343450345050345034505034503456503434505050343434343450503450503434343434505034343434343434343434343434343434505050503450345034343434343450345050345034505034503456503;CP=0;R=12;O;",
-            "dmsg" : "W110#9C1B060001EA05AD4",
-            "user" : "docolli"
+            ]
          },
          {
-            "revision_entry" : "2021-05-25 10:39:21",
-            "readings" : {
-               "sendCounter" : "2",
-               "rain" : "80.8",
-               "state" : "T: 12.6 R: 80.8",
-               "temperature" : "12.6",
-               "batteryState" : "ok",
-               "type" : "ADE WS1907",
-               "rawRainCounter" : "808"
+            "comment" : "Fine Offset WH51, ECOWITT WH51, MISOL/1, Froggit DP100 Soil Moisture Sensor",
+            "dmsg" : "W107#51006B586E7F24F8D2FFFFFF3C288",
+            "internals" : {
+               "DEF" : "SD_WS_107_H",
+               "NAME" : "SD_WS_107_H"
             },
-            "minProtocolVersion" : "1.29",
-            "comment" : "Weather station with rain gauge",
-            "revision_modul" : "14_SD_WS.pm 21666 2020-05-22 21:30:00Z Sidey",
+            "readings" : {
+               "adc" : "210",
+               "batteryVoltage" : "1.4",
+               "humidity" : "36",
+               "state" : " H: 36",
+               "type" : "WH51, DP100, MISOL/1"
+            },
+            "rmsg" : "MN;D=51006B586E7F24F8D2FFFFFF3C288;R=14;",
             "tests" : [
                {
                   "comment" : "#1"
                }
-            ],
-            "dmsg" : "W110#9C1B041E03A705884",
-            "rmsg" : "MU;P0=7344;P1=384;P2=-31380;P3=272;P4=-972;P5=2581;P6=-2689;P7=990;D=12345454545676745676745454545456745454545456767676745454545454545676767456745456767674545454545674567674545456745454545606745456767674545454545676745676745454545456745454545456767676745454545454545676767456745456767674545454545674567674545456745454545606;CP=7;R=19;O;",
+            ]
+         }
+      ],
+      "id" : "107",
+      "module" : "SD_WS",
+      "name" : "WH51"
+   },
+   {
+      "data" : [
+         {
+            "comment" : "BRESSER 5-in-1 Weather Center, Bresser Professional Rain Gauge",
+            "dmsg" : "W108#AD8008700810070228443500",
+            "internals" : {
+               "DEF" : "SD_WS_108",
+               "NAME" : "SD_WS_108"
+            },
+            "readings" : {
+               "batteryState" : "ok",
+               "humidity" : "28",
+               "rain" : "354.4",
+               "state" : "T: 20.7 H: 28 W: 0.8 R: 354.4",
+               "temperature" : "20.7",
+               "type" : "Bresser_5in1, Bresser_rain_gauge, Fody_E42, Fody_E43",
+               "windDirectionDegree" : "157.5",
+               "windDirectionText" : "SSE",
+               "windGust" : "0.8",
+               "windSpeed" : "0.8"
+            },
+            "rmsg" : "MN;D=E7527FF78FF7EFF8FDD7BBCAFF18AD80087008100702284435000002;R=213;",
+            "tests" : [
+               {
+                  "comment" : "#0"
+               }
+            ]
+         },
+         {
+            "comment" : "BRESSER 5-in-1 Weather Center, Bresser Professional Rain Gauge",
+            "dmsg" : "W108#AD8000D00010280078443508",
+            "internals" : {
+               "DEF" : "SD_WS_108",
+               "NAME" : "SD_WS_108"
+            },
+            "readings" : {
+               "batteryState" : "ok",
+               "humidity" : "78",
+               "rain" : "354.4",
+               "state" : "T: -2.8 H: 78 W: 0 R: 354.4",
+               "temperature" : "-2.8",
+               "type" : "Bresser_5in1, Bresser_rain_gauge, Fody_E42, Fody_E43",
+               "windDirectionDegree" : "292.5",
+               "windDirectionText" : "WNW",
+               "windGust" : "0",
+               "windSpeed" : "0"
+            },
+            "rmsg" : "MN;D=E8527FFF2FFFEFD7FF87BBCAF717AD8000D000102800784435080000;R=214;",
+            "tests" : [
+               {
+                  "comment" : "#1"
+               }
+            ]
+         },
+         {
+            "comment" : "BRESSER 5-in-1 Weather Center, Bresser Professional Rain Gauge",
+            "dmsg" : "W108#AD8014F01310800088483600",
+            "internals" : {
+               "DEF" : "SD_WS_108",
+               "NAME" : "SD_WS_108"
+            },
+            "readings" : {
+               "batteryState" : "ok",
+               "humidity" : "88",
+               "rain" : "364.8",
+               "state" : "T: 8 H: 88 W: 1.3 R: 364.8",
+               "temperature" : "8",
+               "type" : "Bresser_5in1, Bresser_rain_gauge, Fody_E42, Fody_E43",
+               "windDirectionDegree" : "337.5",
+               "windDirectionText" : "NNW",
+               "windGust" : "2",
+               "windSpeed" : "1.3"
+            },
+            "rmsg" : "MN;D=E6527FEB0FECEF7FFF77B7C9FF19AD8014F013108000884836000003;R=211;",
+            "tests" : [
+               {
+                  "comment" : "#2"
+               }
+            ]
+         }
+      ],
+      "id" : "108",
+      "module" : "SD_WS",
+      "name" : "BRESSER 5in1"
+   },
+   {
+      "data" : [
+         {
+            "comment" : "Weather station with rain gauge",
+            "dmsg" : "W110#9C1B060001EA05AD4",
             "internals" : {
                "DEF" : "SD_WS_110_TR",
                "NAME" : "SD_WS_110_TR"
             },
-            "user" : "docolli"
+            "readings" : {
+               "batteryState" : "ok",
+               "rain" : "26.6",
+               "rawRainCounter" : "266",
+               "sendCounter" : "3",
+               "state" : "T: 16.3 R: 26.6",
+               "temperature" : "16.3",
+               "type" : "ADE WS1907"
+            },
+            "rmsg" : "MU;P0=970;P1=-112;P2=516;P3=-984;P4=2577;P5=-2692;P6=7350;D=01234343450503450503434343434505034343434343434343434343434343434505050503450345034343434343450345050345034505034503456503434505050343434343450503450503434343434505034343434343434343434343434343434505050503450345034343434343450345050345034505034503456503;CP=0;R=12;O;",
+            "tests" : [
+               {
+                  "comment" : "#0"
+               }
+            ]
          },
          {
-            "revision_modul" : "14_SD_WS.pm 21666 2020-05-22 21:30:00Z Sidey",
             "comment" : "Weather station with rain gauge",
-            "readings" : {
-               "type" : "ADE WS1907",
-               "batteryState" : "ok",
-               "rawRainCounter" : "821",
-               "temperature" : "11.8",
-               "state" : "T: 11.8 R: 82.1",
-               "sendCounter" : "2",
-               "rain" : "82.1"
+            "dmsg" : "W110#9C1B041E03A705884",
+            "internals" : {
+               "DEF" : "SD_WS_110_TR",
+               "NAME" : "SD_WS_110_TR"
             },
-            "minProtocolVersion" : "1.29",
-            "revision_entry" : "2021-05-25 10:41:01",
-            "user" : "docolli",
-            "rmsg" : "MU;P0=-5332;P1=6864;P2=-2678;P3=994;P4=-977;P5=2693;D=01234545232323454545454523234523234545454545234545454523452345232345454545454523232345452323454545454545454523452323454545452323454521234545232323454545454523234523234545454545234545454523452345232345454545454523232345452323454545454545454523452323454545;CP=3;R=248;O;",
+            "readings" : {
+               "batteryState" : "ok",
+               "rain" : "80.8",
+               "rawRainCounter" : "808",
+               "sendCounter" : "2",
+               "state" : "T: 12.6 R: 80.8",
+               "temperature" : "12.6",
+               "type" : "ADE WS1907"
+            },
+            "rmsg" : "MU;P0=7344;P1=384;P2=-31380;P3=272;P4=-972;P5=2581;P6=-2689;P7=990;D=12345454545676745676745454545456745454545456767676745454545454545676767456745456767674545454545674567674545456745454545606745456767674545454545676745676745454545456745454545456767676745454545454545676767456745456767674545454545674567674545456745454545606;CP=7;R=19;O;",
+            "tests" : [
+               {
+                  "comment" : "#1"
+               }
+            ]
+         },
+         {
+            "comment" : "Weather station with rain gauge",
             "dmsg" : "W110#9C1B042B039805864",
             "internals" : {
-               "NAME" : "SD_WS_110_TR",
-               "DEF" : "SD_WS_110_TR"
+               "DEF" : "SD_WS_110_TR",
+               "NAME" : "SD_WS_110_TR"
             },
+            "readings" : {
+               "batteryState" : "ok",
+               "rain" : "82.1",
+               "rawRainCounter" : "821",
+               "sendCounter" : "2",
+               "state" : "T: 11.8 R: 82.1",
+               "temperature" : "11.8",
+               "type" : "ADE WS1907"
+            },
+            "rmsg" : "MU;P0=-5332;P1=6864;P2=-2678;P3=994;P4=-977;P5=2693;D=01234545232323454545454523234523234545454545234545454523452345232345454545454523232345452323454545454545454523452323454545452323454521234545232323454545454523234523234545454545234545454523452345232345454545454523232345452323454545454545454523452323454545;CP=3;R=248;O;",
             "tests" : [
                {
                   "comment" : "#2"
@@ -1791,31 +1563,25 @@
          }
       ],
       "id" : "110",
-      "module" : "SD_WS"
+      "module" : "SD_WS",
+      "name" : "ADE WS 1907"
    },
    {
-      "name" : "TS-FT002",
-      "module" : "SD_WS",
-      "id" : "111",
       "data" : [
          {
-            "revision_modul" : "14_SD_WS.pm 21666 2021-08-05 19:43:29Z elektron-bbs",
             "comment" : "Water tank level monitor with temperature",
-            "minProtocolVersion" : "1.32",
-            "readings" : {
-               "type" : "TS-FT002",
-               "distance" : "111",
-               "temperature" : "16.8",
-               "state" : "T: 16.8 D: 111"
-            },
-            "revision_entry" : "2021-08-05 20:33:15",
-            "user" : "docolli",
+            "dmsg" : "W111#5F5B8860F110C400C9",
             "internals" : {
-               "NAME" : "SD_WS_111_TL",
-               "DEF" : "SD_WS_111_TL"
+               "DEF" : "SD_WS_111_TL",
+               "NAME" : "SD_WS_111_TL"
+            },
+            "readings" : {
+               "distance" : "111",
+               "state" : "T: 16.8 D: 111",
+               "temperature" : "16.8",
+               "type" : "TS-FT002"
             },
             "rmsg" : "MU;P0=-21110;P1=484;P2=-971;P3=-488;D=01213121212121213121312121312121213131312131313131212131313131312121212131313121313131213131313121213131312131313131313131313131212131312131312101213121212121213121312121312121213131312131313131212131313131312121212131313121313131213131313121213131312131;CP=1;R=26;O;",
-            "dmsg" : "W111#5F5B8860F110C400C9",
             "tests" : [
                {
                   "comment" : "#0"
@@ -1823,98 +1589,85 @@
             ]
          },
          {
-            "revision_entry" : "2021-08-05 20:33:45",
-            "readings" : {
-               "type" : "TS-FT002",
-               "distance" : "47",
-               "temperature" : "19",
-               "state" : "T: 19 D: 47"
-            },
-            "minProtocolVersion" : "1.32",
             "comment" : "Water tank level monitor with temperature",
-            "revision_modul" : "14_SD_WS.pm 21666 2021-08-05 19:43:29Z elektron-bbs",
+            "dmsg" : "W111#5F5B8840F170240069",
+            "internals" : {
+               "DEF" : "SD_WS_111_TL",
+               "NAME" : "SD_WS_111_TL"
+            },
+            "readings" : {
+               "distance" : "47",
+               "state" : "T: 19 D: 47",
+               "temperature" : "19",
+               "type" : "TS-FT002"
+            },
+            "rmsg" : "MU;P0=-31628;P1=469;P2=-980;P3=-499;P4=-22684;D=01213121212121213121312121312121213131312131313131213131313131312121212131313121312121213131313131312131312131313131313131313131312121312131312141213121212121213121312121312121213131312131313131213131313131312121212131313121312121213131313131312131312131;CP=1;R=38;O;",
             "tests" : [
                {
                   "comment" : "#1"
                }
-            ],
-            "dmsg" : "W111#5F5B8840F170240069",
-            "rmsg" : "MU;P0=-31628;P1=469;P2=-980;P3=-499;P4=-22684;D=01213121212121213121312121312121213131312131313131213131313131312121212131313121312121213131313131312131312131313131313131313131312121312131312141213121212121213121312121312121213131312131313131213131313131312121212131313121312121213131313131312131312131;CP=1;R=38;O;",
-            "internals" : {
-               "NAME" : "SD_WS_111_TL",
-               "DEF" : "SD_WS_111_TL"
-            },
-            "user" : "docolli"
+            ]
          },
          {
+            "comment" : "Water tank level monitor with temperature",
+            "dmsg" : "W111#5F5B8840F110A40089",
+            "internals" : {
+               "DEF" : "SD_WS_111_TL",
+               "NAME" : "SD_WS_111_TL"
+            },
+            "readings" : {
+               "distance" : "47",
+               "state" : "T: 20 D: 47",
+               "temperature" : "20",
+               "type" : "TS-FT002"
+            },
+            "rmsg" : "MU;P0=-5980;P1=464;P2=-988;P3=-511;P4=-22660;D=01213121212121213121312121312121213131312131313131213131313131312121212131313121313131213131313121312131312131313131313131313131213131312131312141213121212121213121312121312121213131312131313131213131313131312121212131313121313131213131313121312131312131;CP=1;R=38;O;",
             "tests" : [
                {
                   "comment" : "#2"
                }
-            ],
-            "dmsg" : "W111#5F5B8840F110A40089",
-            "rmsg" : "MU;P0=-5980;P1=464;P2=-988;P3=-511;P4=-22660;D=01213121212121213121312121312121213131312131313131213131313131312121212131313121313131213131313121312131312131313131313131313131213131312131312141213121212121213121312121312121213131312131313131213131313131312121212131313121313131213131313121312131312131;CP=1;R=38;O;",
-            "internals" : {
-               "NAME" : "SD_WS_111_TL",
-               "DEF" : "SD_WS_111_TL"
-            },
-            "user" : "docolli",
-            "revision_entry" : "2021-08-05 20:34:21",
-            "readings" : {
-               "type" : "TS-FT002",
-               "distance" : "47",
-               "temperature" : "20",
-               "state" : "T: 20 D: 47"
-            },
-            "minProtocolVersion" : "1.32",
-            "comment" : "Water tank level monitor with temperature",
-            "revision_modul" : "14_SD_WS.pm 21666 2021-08-05 19:43:29Z elektron-bbs"
+            ]
          }
-      ]
+      ],
+      "id" : "111",
+      "module" : "SD_WS",
+      "name" : "TS-FT002"
    },
    {
       "data" : [
          {
-            "tests" : [
-               {
-                  "comment" : "#0"
-               }
-            ],
-            "user" : "muede-de",
-            "rmsg" : "MS;P1=-262;P2=237;P3=-760;P6=-2972;P7=721;D=26232371237171717123232323237171237171712371232323712323712371712371712371232323712371232371717123;CP=2;SP=6;R=1;O;m2;",
+            "comment" : "Wireless Grill Thermometer",
             "dmsg" : "W113#2F06E896D14E",
             "internals" : {
                "DEF" : "SD_WS_113_T",
                "NAME" : "SD_WS_113_T"
             },
             "readings" : {
+               "state" : "T: 203 T2: 300",
                "temperature" : "203",
-               "type" : "GFGT_433_B1",
                "temperature2" : "300",
-               "state" : "T: 203 T2: 300"
+               "type" : "GFGT_433_B1"
             },
-            "minProtocolVersion" : "1.33",
-            "revision_entry" : "2021-08-09 21:25:05",
-            "revision_modul" : "14_SD_WS.pm   21666 2021-08-08 12:01:00Z Sidey",
-            "comment" : "Wireless Grill Thermometer"
+            "rmsg" : "MS;P1=-262;P2=237;P3=-760;P6=-2972;P7=721;D=26232371237171717123232323237171237171712371232323712323712371712371712371232323712371232371717123;CP=2;SP=6;R=1;O;m2;",
+            "tests" : [
+               {
+                  "comment" : "#0"
+               }
+            ]
          },
          {
-            "revision_modul" : "14_SD_WS.pm   21666 2021-08-08 12:01:00Z Sidey",
             "comment" : "Wireless Grill Thermometer",
-            "minProtocolVersion" : "1.33",
+            "dmsg" : "W113#2F06E348D102",
+            "internals" : {
+               "DEF" : "SD_WS_113_T",
+               "NAME" : "SD_WS_113_T"
+            },
             "readings" : {
                "state" : "T: 201 T2: 257",
-               "type" : "GFGT_433_B1",
+               "temperature" : "201",
                "temperature2" : "257",
-               "temperature" : "201"
+               "type" : "GFGT_433_B1"
             },
-            "revision_entry" : "2021-08-08 13:28:16",
-            "user" : "muede-de",
-            "internals" : {
-               "NAME" : "SD_WS_113_T",
-               "DEF" : "SD_WS_113_T"
-            },
-            "dmsg" : "W113#2F06E348D102",
             "rmsg" : "MS;P2=-754;P3=247;P5=-2996;P6=718;P7=-272;D=35323267326767676732323232326767326767673232326767326732326732323267673267323232673232323232326732;CP=3;SP=5;R=3;O;m2;",
             "tests" : [
                {
@@ -1923,28 +1676,24 @@
             ]
          },
          {
-            "user" : "muede-de",
+            "comment" : "Wireless Grill Thermometer",
+            "dmsg" : "W113#2F00A5AED106",
             "internals" : {
                "DEF" : "SD_WS_113_T",
                "NAME" : "SD_WS_113_T"
             },
+            "readings" : {
+               "state" : "T: 24 T2: 29",
+               "temperature" : "24",
+               "temperature2" : "29",
+               "type" : "GFGT_433_B1"
+            },
             "rmsg" : "MS;P1=-761;P2=249;P4=-3005;P5=718;P6=-270;D=24212156215656565621212121212121215621562121562156562156215656562156562156212121562121212121565621;CP=2;SP=4;R=34;O;m2;",
-            "dmsg" : "W113#2F00A5AED106",
             "tests" : [
                {
                   "comment" : "#2"
                }
-            ],
-            "revision_modul" : "14_SD_WS.pm   21666 2021-08-08 12:01:00Z Sidey",
-            "comment" : "Wireless Grill Thermometer",
-            "minProtocolVersion" : "1.33",
-            "readings" : {
-               "type" : "GFGT_433_B1",
-               "temperature2" : "29",
-               "temperature" : "24",
-               "state" : "T: 24 T2: 29"
-            },
-            "revision_entry" : "2021-08-08 13:30:11"
+            ]
          }
       ],
       "id" : "113",
@@ -1952,131 +1701,114 @@
       "name" : "GFGT_433_B1"
    },
    {
-      "name" : "BRESSER 3-in-1",
       "data" : [
          {
-            "tests" : [
-               {
-                  "comment" : "#0"
-               }
-            ],
-            "internals" : {
-               "NAME" : "SD_WS_115_0",
-               "DEF" : "SD_WS_115_0"
-            },
-            "rmsg" : "MN;D=C898BE40041218FF88FF0008017E88FFF04F0000000000000000;R=190;",
-            "dmsg" : "W115#C898BE40041218FF88FF0008017E88FFF04F0000000000000000",
-            "user" : "elektron-bbs",
-            "revision_entry" : "2022-11-20 19:58:03",
-            "readings" : {
-               "uv" : "0",
-               "windSpeed" : "0.7",
-               "state" : "T: -1.7 H: 88 W: 0.7",
-               "batteryState" : "ok",
-               "type" : "Bresser_6in1, new Bresser_5in1",
-               "windDirectionDegree" : "0",
-               "temperature" : "-1.7",
-               "channel" : "0",
-               "batteryChanged" : "1",
-               "humidity" : "88",
-               "windDirectionText" : "N",
-               "windGust" : "0.7"
-            },
-            "minProtocolVersion" : "1.48",
             "comment" : "BRESSER 3-in-1",
-            "revision_modul" : "14_SD_WS.pm v3.5.4 2022-11-14 20:37:55Z sidey79"
-         }
-      ],
-      "id" : "115",
-      "module" : "SD_WS"
-   },
-   {
-      "module" : "SD_WS",
-      "data" : [
-         {
-            "tests" : [
-               {
-                  "comment" : "#0"
-               }
-            ],
-            "user" : "elektron-bbs",
-            "internals" : {
-               "NAME" : "SD_WS_115_0",
-               "DEF" : "SD_WS_115_0"
-            },
-            "dmsg" : "W115#3BF120B00C1618FF77FF0458152293FFF06B0000",
-            "rmsg" : "MN;D=3BF120B00C1618FF77FF0458152293FFF06B0000;R=242;",
-            "readings" : {
-               "humidity" : "93",
-               "channel" : "0",
-               "temperature" : "15.2",
-               "windDirectionDegree" : "45",
-               "type" : "Bresser_6in1, new Bresser_5in1",
-               "batteryState" : "ok",
-               "state" : "T: 15.2 H: 93 W: 0.8",
-               "windSpeed" : "0.8",
-               "windDirectionText" : "NE",
-               "windGust" : "0.8"
-            },
-            "minProtocolVersion" : "1.35",
-            "revision_entry" : "2021-08-22 16:51:50",
-            "revision_modul" : "14_SD_WS.pm 21666 2021-08-17 19:14:52Z elektron-bbs",
-            "comment" : "BRESSER 6-in-1 Weather Center, Bresser new 5-in-1 sensors 7002550"
-         },
-         {
-            "dmsg" : "W115#1E6C20B00C1618FF99FF0458FFFFA9FF015B0000",
-            "rmsg" : "MN;D=1E6C20B00C1618FF99FF0458FFFFA9FF015B0000;R=241;",
+            "dmsg" : "W115#C898BE40041218FF88FF0008017E88FFF04F0000000000000000",
             "internals" : {
                "DEF" : "SD_WS_115_0",
                "NAME" : "SD_WS_115_0"
             },
-            "user" : "elektron-bbs",
+            "readings" : {
+               "batteryChanged" : "1",
+               "batteryState" : "ok",
+               "channel" : "0",
+               "humidity" : "88",
+               "state" : "T: -1.7 H: 88 W: 0.7",
+               "temperature" : "-1.7",
+               "type" : "Bresser_6in1, new Bresser_5in1",
+               "uv" : "0",
+               "windDirectionDegree" : "0",
+               "windDirectionText" : "N",
+               "windGust" : "0.7",
+               "windSpeed" : "0.7"
+            },
+            "rmsg" : "MN;D=C898BE40041218FF88FF0008017E88FFF04F0000000000000000;R=190;",
+            "tests" : [
+               {
+                  "comment" : "#0"
+               }
+            ]
+         }
+      ],
+      "id" : "115",
+      "module" : "SD_WS",
+      "name" : "BRESSER 3-in-1"
+   },
+   {
+      "data" : [
+         {
+            "comment" : "BRESSER 6-in-1 Weather Center, Bresser new 5-in-1 sensors 7002550",
+            "dmsg" : "W115#3BF120B00C1618FF77FF0458152293FFF06B0000",
+            "internals" : {
+               "DEF" : "SD_WS_115_0",
+               "NAME" : "SD_WS_115_0"
+            },
+            "readings" : {
+               "batteryState" : "ok",
+               "channel" : "0",
+               "humidity" : "93",
+               "state" : "T: 15.2 H: 93 W: 0.8",
+               "temperature" : "15.2",
+               "type" : "Bresser_6in1, new Bresser_5in1",
+               "windDirectionDegree" : "45",
+               "windDirectionText" : "NE",
+               "windGust" : "0.8",
+               "windSpeed" : "0.8"
+            },
+            "rmsg" : "MN;D=3BF120B00C1618FF77FF0458152293FFF06B0000;R=242;",
+            "tests" : [
+               {
+                  "comment" : "#0"
+               }
+            ]
+         },
+         {
+            "comment" : "BRESSER 6-in-1 Weather Center, Bresser new 5-in-1 sensors 7002550",
+            "dmsg" : "W115#1E6C20B00C1618FF99FF0458FFFFA9FF015B0000",
+            "internals" : {
+               "DEF" : "SD_WS_115_0",
+               "NAME" : "SD_WS_115_0"
+            },
+            "readings" : {
+               "channel" : "0",
+               "rain" : "5.6",
+               "state" : "W: 0.6 R: 5.6",
+               "type" : "Bresser_6in1, new Bresser_5in1",
+               "windDirectionDegree" : "45",
+               "windDirectionText" : "NE",
+               "windGust" : "0.6",
+               "windSpeed" : "0.6"
+            },
+            "rmsg" : "MN;D=1E6C20B00C1618FF99FF0458FFFFA9FF015B0000;R=241;",
             "tests" : [
                {
                   "comment" : "#1"
                }
-            ],
-            "comment" : "BRESSER 6-in-1 Weather Center, Bresser new 5-in-1 sensors 7002550",
-            "revision_modul" : "14_SD_WS.pm 21666 2021-08-17 19:14:52Z elektron-bbs",
-            "revision_entry" : "2021-08-22 16:57:57",
-            "readings" : {
-               "windSpeed" : "0.6",
-               "state" : "W: 0.6 R: 5.6",
-               "windDirectionText" : "NE",
-               "windGust" : "0.6",
-               "rain" : "5.6",
-               "windDirectionDegree" : "45",
-               "type" : "Bresser_6in1, new Bresser_5in1",
-               "channel" : "0"
-            },
-            "minProtocolVersion" : "1.35"
+            ]
          },
          {
             "comment" : "BRESSER 6-in-1",
-            "revision_modul" : "14_SD_WS.pm v3.5.4 2022-11-14 20:37:55Z sidey79",
-            "revision_entry" : "2022-11-20 20:27:05",
-            "readings" : {
-               "humidity" : "97",
-               "batteryChanged" : "1",
-               "windDirectionText" : "WNW",
-               "windGust" : "0",
-               "uv" : "0",
-               "state" : "T: -7.5 H: 97 W: 0",
-               "windSpeed" : "0",
-               "channel" : "0",
-               "temperature" : "-7.5",
-               "windDirectionDegree" : "292",
-               "type" : "Bresser_6in1, new Bresser_5in1",
-               "batteryState" : "ok"
-            },
-            "minProtocolVersion" : "1.48",
             "dmsg" : "W115#9104143025BE18FFFFFF2928925A97FFF0000000000000000003",
-            "rmsg" : "MN;D=9104143025BE18FFFFFF2928925A97FFF0000000000000000003;R=189;",
             "internals" : {
                "DEF" : "SD_WS_115_0",
                "NAME" : "SD_WS_115_0"
             },
-            "user" : "elektron-bbs",
+            "readings" : {
+               "batteryChanged" : "1",
+               "batteryState" : "ok",
+               "channel" : "0",
+               "humidity" : "97",
+               "state" : "T: -7.5 H: 97 W: 0",
+               "temperature" : "-7.5",
+               "type" : "Bresser_6in1, new Bresser_5in1",
+               "uv" : "0",
+               "windDirectionDegree" : "292",
+               "windDirectionText" : "WNW",
+               "windGust" : "0",
+               "windSpeed" : "0"
+            },
+            "rmsg" : "MN;D=9104143025BE18FFFFFF2928925A97FFF0000000000000000003;R=189;",
             "tests" : [
                {
                   "comment" : "#2"
@@ -2085,35 +1817,32 @@
          }
       ],
       "id" : "115",
+      "module" : "SD_WS",
       "name" : "BRESSER 6-in-1"
    },
    {
       "data" : [
          {
-            "revision_entry" : "2022-03-16 21:09:39",
-            "minProtocolVersion" : "1.44",
-            "readings" : {
-               "humidity" : "63",
-               "state" : "T: 21.2 H: 63",
-               "type" : "Bresser_6in1, new Bresser_5in1",
-               "batteryState" : "ok",
-               "temperature" : "21.2",
-               "channel" : "21"
-            },
             "comment" : "Bresser_6in1 Thermo-/hygro sensor",
-            "revision_modul" : "14_SD_WS.pm 21666 2022-01-30 10:19:30Z elektron-bbs",
-            "tests" : [
-               {
-                  "comment" : "#0"
-               }
-            ],
             "dmsg" : "W115#6CD6197005FD2900000000002126630000A1FFFF07000000000000000000",
-            "rmsg" : "MN;D=6CD6197005FD2900000000002126630000A1FFFF07000000000000000000;R=28;",
             "internals" : {
                "DEF" : "SD_WS_115_21",
                "NAME" : "SD_WS_115_21"
             },
-            "user" : "elektron-bbs"
+            "readings" : {
+               "batteryState" : "ok",
+               "channel" : "21",
+               "humidity" : "63",
+               "state" : "T: 21.2 H: 63",
+               "temperature" : "21.2",
+               "type" : "Bresser_6in1, new Bresser_5in1"
+            },
+            "rmsg" : "MN;D=6CD6197005FD2900000000002126630000A1FFFF07000000000000000000;R=28;",
+            "tests" : [
+               {
+                  "comment" : "#0"
+               }
+            ]
          }
       ],
       "id" : "115",
@@ -2121,88 +1850,74 @@
       "name" : "BRESSER 6-in-1"
    },
    {
-      "id" : "115",
       "data" : [
          {
-            "minProtocolVersion" : "1.44",
-            "readings" : {
-               "humidity" : "99",
-               "state" : "T: 25.2 H: 99",
-               "temperature" : "25.2",
-               "channel" : "47",
-               "batteryState" : "ok",
-               "type" : "Bresser_6in1, new Bresser_5in1"
-            },
-            "revision_entry" : "2022-03-16 21:05:07",
-            "revision_modul" : "14_SD_WS.pm 21666 2022-01-30 10:19:30Z elektron-bbs",
             "comment" : "Bresser Explore Scientific SM60020 Soil moisture Sensor",
-            "tests" : [
-               {
-                  "comment" : "#0"
-               }
-            ],
-            "user" : "elektron-bbs",
+            "dmsg" : "W115#F16E187000E347FFFFFF0000252216FFF004000",
             "internals" : {
                "DEF" : "SD_WS_115_47",
                "NAME" : "SD_WS_115_47"
             },
+            "readings" : {
+               "batteryState" : "ok",
+               "channel" : "47",
+               "humidity" : "99",
+               "state" : "T: 25.2 H: 99",
+               "temperature" : "25.2",
+               "type" : "Bresser_6in1, new Bresser_5in1"
+            },
             "rmsg" : "MN;D=F16E187000E347FFFFFF0000252216FFF004000;R=242;",
-            "dmsg" : "W115#F16E187000E347FFFFFF0000252216FFF004000"
+            "tests" : [
+               {
+                  "comment" : "#0"
+               }
+            ]
          }
       ],
+      "id" : "115",
       "module" : "SD_WS",
       "name" : "Bresser Explore Scientific"
    },
    {
-      "name" : "WH57",
-      "id" : "116",
       "data" : [
          {
-            "user" : "elektron-bbs",
+            "comment" : "Thunder and lightning sensor Fine Offset WH57, aka Froggit DP60, aka Ambient Weather WH31L",
             "dmsg" : "W116#5780C655051401C4D0",
-            "rmsg" : "MN;D=5780C655051401C4D0;R=37;",
-            "internals" : {
-               "NAME" : "SD_WS_116",
-               "DEF" : "SD_WS_116"
-            },
-            "tests" : [
-               {
-                  "comment" : "#0"
-               }
-            ],
-            "revision_modul" : "14_SD_WS.pm 21666 2022-01-08 20:06:52Z elektron-bbs",
-            "comment" : "Thunder and lightning sensor Fine Offset WH57, aka Froggit DP60, aka Ambient Weather WH31L",
-            "minProtocolVersion" : "1.42",
-            "readings" : {
-               "distance" : "20",
-               "type" : "WH57, DP60, WH31L",
-               "count" : "1",
-               "state" : "I: lightning D: 20",
-               "batteryPercent" : "100",
-               "identified" : "lightning"
-            },
-            "revision_entry" : "2022-01-14 16:47:22"
-         },
-         {
-            "comment" : "Thunder and lightning sensor Fine Offset WH57, aka Froggit DP60, aka Ambient Weather WH31L",
-            "revision_modul" : "14_SD_WS.pm 21666 2022-01-08 20:06:52Z elektron-bbs",
-            "revision_entry" : "2022-01-14 16:49:34",
-            "minProtocolVersion" : "1.42",
-            "readings" : {
-               "state" : "I: disturbance D: 63",
-               "identified" : "disturbance",
-               "batteryPercent" : "100",
-               "count" : "10",
-               "distance" : "63",
-               "type" : "WH57, DP60, WH31L"
-            },
             "internals" : {
                "DEF" : "SD_WS_116",
                "NAME" : "SD_WS_116"
             },
-            "rmsg" : "MN;D=5740C655053F0A7272;R=39;",
+            "readings" : {
+               "batteryPercent" : "100",
+               "count" : "1",
+               "distance" : "20",
+               "identified" : "lightning",
+               "state" : "I: lightning D: 20",
+               "type" : "WH57, DP60, WH31L"
+            },
+            "rmsg" : "MN;D=5780C655051401C4D0;R=37;",
+            "tests" : [
+               {
+                  "comment" : "#0"
+               }
+            ]
+         },
+         {
+            "comment" : "Thunder and lightning sensor Fine Offset WH57, aka Froggit DP60, aka Ambient Weather WH31L",
             "dmsg" : "W116#5740C655053F0A7272",
-            "user" : "elektron-bbs",
+            "internals" : {
+               "DEF" : "SD_WS_116",
+               "NAME" : "SD_WS_116"
+            },
+            "readings" : {
+               "batteryPercent" : "100",
+               "count" : "10",
+               "distance" : "63",
+               "identified" : "disturbance",
+               "state" : "I: disturbance D: 63",
+               "type" : "WH57, DP60, WH31L"
+            },
+            "rmsg" : "MN;D=5740C655053F0A7272;R=39;",
             "tests" : [
                {
                   "comment" : "#1"
@@ -2210,72 +1925,64 @@
             ]
          }
       ],
-      "module" : "SD_WS"
+      "id" : "116",
+      "module" : "SD_WS",
+      "name" : "WH57"
    },
    {
-      "module" : "SD_WS",
-      "id" : "117",
       "data" : [
          {
-            "user" : "elektron-bbs",
+            "comment" : "BRESSER 7-in-1 Weather Center",
+            "dmsg" : "W117#56820C5F2760B2000000000084001270870066760000000000AAAAAA",
             "internals" : {
-               "NAME" : "SD_WS_117",
-               "DEF" : "SD_WS_117"
+               "DEF" : "SD_WS_117",
+               "NAME" : "SD_WS_117"
+            },
+            "readings" : {
+               "batteryChanged" : "1",
+               "batteryState" : "ok",
+               "brightness" : "6.676",
+               "humidity" : "87",
+               "rain" : "8.4",
+               "state" : "T: 12.7 H: 87 W: 0 R: 8.4 B: 6.676",
+               "temperature" : "12.7",
+               "type" : "Bresser_7in1",
+               "uv" : "0",
+               "windDirectionDegree" : "276",
+               "windDirectionText" : "W",
+               "windGust" : "0",
+               "windSpeed" : "0"
             },
             "rmsg" : "MN;D=FC28A6F58DCA18AAAAAAAAAA2EAAB8DA2DAACCDCAAAAAAAAAA000000;R=29;",
-            "dmsg" : "W117#56820C5F2760B2000000000084001270870066760000000000AAAAAA",
             "tests" : [
                {
                   "comment" : "#0"
                }
-            ],
-            "revision_modul" : "14_SD_WS.pm 21666 2022-01-15 12:25:06Z elektron-bbs",
-            "comment" : "BRESSER 7-in-1 Weather Center",
-            "readings" : {
-               "uv" : "0",
-               "temperature" : "12.7",
-               "batteryState" : "ok",
-               "type" : "Bresser_7in1",
-               "windDirectionDegree" : "276",
-               "rain" : "8.4",
-               "windSpeed" : "0",
-               "state" : "T: 12.7 H: 87 W: 0 R: 8.4 B: 6.676",
-               "humidity" : "87",
-               "batteryChanged" : "1",
-               "brightness" : "6.676",
-               "windDirectionText" : "W",
-               "windGust" : "0"
-            },
-            "minProtocolVersion" : "1.43",
-            "revision_entry" : "2022-01-29 21:00:42"
+            ]
          },
          {
-            "revision_modul" : "14_SD_WS.pm 21666 2022-01-15 12:25:06Z elektron-bbs",
             "comment" : "BRESSER 7-in-1 Weather Center",
-            "minProtocolVersion" : "1.43",
-            "readings" : {
-               "temperature" : "13.1",
-               "type" : "Bresser_7in1",
-               "batteryState" : "ok",
-               "windDirectionDegree" : "192",
-               "rain" : "0",
-               "state" : "T: 13.1 H: 88 W: 0 R: 0 B: 0.36",
-               "windSpeed" : "0",
-               "uv" : "0",
-               "brightness" : "0.36",
-               "windDirectionText" : "SSW",
-               "windGust" : "0",
-               "humidity" : "88",
-               "batteryChanged" : "0"
-            },
-            "revision_entry" : "2022-01-29 21:02:52",
-            "user" : "elektron-bbs",
-            "rmsg" : "MN;D=4DC4A6F5B38A10AAAAAAAAAAAAAAB9BA22AAA9CAAAAAAAAAAA000000;R=15;",
             "dmsg" : "W117#E76E0C5F1920BA000000000000001310880003600000000000AAAAAA",
             "internals" : {
-               "NAME" : "SD_WS_117",
-               "DEF" : "SD_WS_117"
+               "DEF" : "SD_WS_117",
+               "NAME" : "SD_WS_117"
             },
+            "readings" : {
+               "batteryChanged" : "0",
+               "batteryState" : "ok",
+               "brightness" : "0.36",
+               "humidity" : "88",
+               "rain" : "0",
+               "state" : "T: 13.1 H: 88 W: 0 R: 0 B: 0.36",
+               "temperature" : "13.1",
+               "type" : "Bresser_7in1",
+               "uv" : "0",
+               "windDirectionDegree" : "192",
+               "windDirectionText" : "SSW",
+               "windGust" : "0",
+               "windSpeed" : "0"
+            },
+            "rmsg" : "MN;D=4DC4A6F5B38A10AAAAAAAAAAAAAAB9BA22AAA9CAAAAAAAAAAA000000;R=15;",
             "tests" : [
                {
                   "comment" : "#1"
@@ -2283,208 +1990,180 @@
             ]
          },
          {
-            "user" : "elektron-bbs",
+            "comment" : "BRESSER 7-in-1 Weather Center",
+            "dmsg" : "W117#A65A0C5F1320BA000000000000001016940011560000000000AAAAAA",
             "internals" : {
-               "NAME" : "SD_WS_117",
-               "DEF" : "SD_WS_117"
+               "DEF" : "SD_WS_117",
+               "NAME" : "SD_WS_117"
+            },
+            "readings" : {
+               "batteryChanged" : "0",
+               "batteryState" : "low",
+               "brightness" : "1.156",
+               "humidity" : "94",
+               "rain" : "0",
+               "state" : "T: 10.1 H: 94 W: 0 R: 0 B: 1.156",
+               "temperature" : "10.1",
+               "type" : "Bresser_7in1",
+               "uv" : "0",
+               "windDirectionDegree" : "132",
+               "windDirectionText" : "SE",
+               "windGust" : "0",
+               "windSpeed" : "0"
             },
             "rmsg" : "MN;D=0CF0A6F5B98A10AAAAAAAAAAAAAABABC3EAABBFCAAAAAAAAAA000000;R=28;",
-            "dmsg" : "W117#A65A0C5F1320BA000000000000001016940011560000000000AAAAAA",
             "tests" : [
                {
                   "comment" : "#2"
                }
-            ],
-            "revision_modul" : "14_SD_WS.pm 21666 2022-01-15 12:25:06Z elektron-bbs",
-            "comment" : "BRESSER 7-in-1 Weather Center",
-            "readings" : {
-               "batteryChanged" : "0",
-               "humidity" : "94",
-               "brightness" : "1.156",
-               "windDirectionText" : "SE",
-               "windGust" : "0",
-               "uv" : "0",
-               "batteryState" : "low",
-               "type" : "Bresser_7in1",
-               "windDirectionDegree" : "132",
-               "temperature" : "10.1",
-               "state" : "T: 10.1 H: 94 W: 0 R: 0 B: 1.156",
-               "windSpeed" : "0",
-               "rain" : "0"
-            },
-            "minProtocolVersion" : "1.43",
-            "revision_entry" : "2022-01-29 21:04:17"
+            ]
          }
       ],
+      "id" : "117",
+      "module" : "SD_WS",
       "name" : "BRESSER 7-in-1"
    },
    {
-      "name" : "TFA 35.1077.54.S2",
-      "id" : "120",
       "data" : [
          {
-            "revision_entry" : "2022-09-10 13:26:34",
-            "minProtocolVersion" : "1.47",
-            "readings" : {
-               "humidity" : "84",
-               "temperature" : "19.1",
-               "batteryState" : "ok",
-               "type" : "TFA_35.1077",
-               "rawRainCounter" : "1577",
-               "rain" : "473.1",
-               "windGust" : "1.3",
-               "windSpeed" : "0.7",
-               "state" : "T: 19.1 H: 84 W: 0.7 R: 473.1"
-            },
             "comment" : "Weather station with 30.3151 (T/H-transmitter), 30.3152 (rain gauge), 30.3153 (anemometer)",
-            "revision_modul" : "14_SD_WS.pm v3.5.4 2022-08-21 12:09:21Z elektron-bbs",
-            "tests" : [
-               {
-                  "comment" : "#0"
-               }
-            ],
+            "dmsg" : "W120#FEAB049EA804080C53AC",
             "internals" : {
                "DEF" : "SD_WS_120",
                "NAME" : "SD_WS_120"
             },
-            "dmsg" : "W120#FEAB049EA804080C53AC",
-            "rmsg" : "MU;P0=-6544;P1=486;P2=-987;P3=1451;D=01212121212121232123212321232121232323232321232321232321212121232123212321232323232323232321232323232323212323232323232321212323232123212323212121232123212123;CP=1;R=51;",
-            "user" : "Ronny2510"
-         },
-         {
             "readings" : {
-               "humidity" : "43",
-               "temperature" : "22",
-               "rawRainCounter" : "1768",
+               "batteryState" : "ok",
+               "humidity" : "84",
+               "rain" : "473.1",
+               "rawRainCounter" : "1577",
+               "state" : "T: 19.1 H: 84 W: 0.7 R: 473.1",
+               "temperature" : "19.1",
                "type" : "TFA_35.1077",
-               "batteryState" : "ok",
-               "rain" : "530.4",
-               "windGust" : "0.7",
-               "state" : "T: 22 H: 43 W: 0.3 R: 530.4",
-               "windSpeed" : "0.3"
+               "windGust" : "1.3",
+               "windSpeed" : "0.7"
             },
-            "minProtocolVersion" : "1.47",
-            "revision_entry" : "2022-09-10 13:36:21",
-            "revision_modul" : "14_SD_WS.pm v3.5.4 2022-08-21 12:09:21Z elektron-bbs",
-            "comment" : "Weather station with 30.3151 (T/H-transmitter), 30.3152 (rain gauge), 30.3153 (anemometer)",
-            "tests" : [
-               {
-                  "comment" : "#1"
-               }
-            ],
-            "user" : "Ronny2510",
-            "internals" : {
-               "NAME" : "SD_WS_120",
-               "DEF" : "SD_WS_120"
-            },
-            "dmsg" : "W120#FEAB04D85602040DD0F6",
-            "rmsg" : "MU;P0=-15856;P1=480;P2=-981;P3=1460;D=01212121212121232123212321232121232323232321232321212321212323232321232123212123232323232323212323232323232123232323232321212321212123212323232321212121232121;CP=1;R=47;"
-         },
-         {
-            "tests" : [
-               {
-                  "comment" : "#2"
-               }
-            ],
-            "internals" : {
-               "NAME" : "SD_WS_120",
-               "DEF" : "SD_WS_120"
-            },
-            "dmsg" : "W120#FEDFD52C040444920614",
-            "rmsg" : "MU;P0=-13168;P1=469;P2=-1000;P3=1450;D=01212121212121232121232121212121212123212321232123232123212123232323232323212323232323232321232323212323232123232123232123232123232323232321212323232321232123;CP=1;R=79;",
-            "user" : "Ronny2510",
-            "revision_entry" : "2022-09-11 11:43:55",
-            "readings" : {
-               "state" : "",
-               "dcf" : "2022-09-03 16:02:02",
-               "batteryState" : "ok",
-               "type" : "TFA_35.1077"
-            },
-            "minProtocolVersion" : "1.47",
-            "comment" : "Weather station with 30.3151 (T/H-transmitter), 30.3152 (rain gauge), 30.3153 (anemometer)",
-            "revision_modul" : "14_SD_WS.pm v3.5.4 2022-08-21 12:09:21Z elektron-bbs"
-         }
-      ],
-      "module" : "SD_WS"
-   },
-   {
-      "module" : "SD_WS",
-      "id" : "122",
-      "data" : [
-         {
-            "dmsg" : "W122#926301360136014001680000B88",
-            "rmsg" : "MU;P0=3412;P1=-1029;P2=1043;P3=4706;P4=-2986;P5=549;P6=-1510;P7=-562;D=01212121212121213456575756575756575756565757575656575757575757575657575656575656575757575757575756575756565756565757575757575757565756575757575757575757575757575657565657565757575757575757575757575757575757575756575656565757575621212121212121213456575756;CP=5;R=2;O;",
-            "internals" : {
-               "NAME" : "SD_WS_122_T",
-               "DEF" : "SD_WS_122_T"
-            },
-            "user" : "Prof. Dr. Peter Henning",
+            "rmsg" : "MU;P0=-6544;P1=486;P2=-987;P3=1451;D=01212121212121232123212321232121232323232321232321232321212121232123212321232323232323232321232323232323212323232323232321212323232123212323212121232123212123;CP=1;R=51;",
             "tests" : [
                {
                   "comment" : "#0"
                }
-            ],
-            "comment" : "Wireless Grill-, Meat-, Roasting-Thermometer with 4 Temperature Sensors",
-            "revision_modul" : "14_SD_WS.pm v3.5.4 2022-09-11 12:03:38Z elektron-bbs",
-            "revision_entry" : "2022-10-31 15:07:09",
-            "readings" : {
-               "transmitter" : "on",
-               "temperature4" : "31",
-               "temperature" : "36",
-               "type" : "TM40",
-               "batteryState" : "ok",
-               "temperature2" : "32",
-               "temperature3" : "31",
-               "state" : "T: 36 T2: 32 T3: 31 T4: 31"
-            },
-            "minProtocolVersion" : "1.48"
+            ]
          },
          {
-            "rmsg" : "MU;P0=11276;P1=-1039;P2=1034;P3=4704;P4=-2990;P5=543;P6=-1537;P7=-559;D=01212121212121213456575756575756575756565757575656575757575757575756565756565657575757575757575757565657565656575757575757575757575656575656565757575757575757565657575656565656575757575757575757575757575757575756565756565656575621212121212121213456575756;CP=5;R=12;O;",
-            "dmsg" : "W122#926300DC00DC00DC033E0000DE8",
+            "comment" : "Weather station with 30.3151 (T/H-transmitter), 30.3152 (rain gauge), 30.3153 (anemometer)",
+            "dmsg" : "W120#FEAB04D85602040DD0F6",
             "internals" : {
-               "NAME" : "SD_WS_122_T",
-               "DEF" : "SD_WS_122_T"
+               "DEF" : "SD_WS_120",
+               "NAME" : "SD_WS_120"
             },
-            "user" : "Prof. Dr. Peter Henning",
+            "readings" : {
+               "batteryState" : "ok",
+               "humidity" : "43",
+               "rain" : "530.4",
+               "rawRainCounter" : "1768",
+               "state" : "T: 22 H: 43 W: 0.3 R: 530.4",
+               "temperature" : "22",
+               "type" : "TFA_35.1077",
+               "windGust" : "0.7",
+               "windSpeed" : "0.3"
+            },
+            "rmsg" : "MU;P0=-15856;P1=480;P2=-981;P3=1460;D=01212121212121232123212321232121232323232321232321212321212323232321232123212123232323232323212323232323232123232323232321212321212123212323232321212121232121;CP=1;R=47;",
             "tests" : [
                {
                   "comment" : "#1"
                }
-            ],
-            "comment" : "Wireless Grill-, Meat-, Roasting-Thermometer with 4 Temperature Sensors",
-            "revision_modul" : "14_SD_WS.pm v3.5.4 2022-09-11 12:03:38Z elektron-bbs",
-            "revision_entry" : "2022-10-31 15:09:00",
-            "readings" : {
-               "state" : "T: 83 T2: 22 T3: 22 T4: 22",
-               "temperature3" : "22",
-               "type" : "TM40",
-               "batteryState" : "ok",
-               "temperature2" : "22",
-               "temperature" : "83",
-               "temperature4" : "22",
-               "transmitter" : "on"
+            ]
+         },
+         {
+            "comment" : "Weather station with 30.3151 (T/H-transmitter), 30.3152 (rain gauge), 30.3153 (anemometer)",
+            "dmsg" : "W120#FEDFD52C040444920614",
+            "internals" : {
+               "DEF" : "SD_WS_120",
+               "NAME" : "SD_WS_120"
             },
-            "minProtocolVersion" : "1.48"
+            "readings" : {
+               "batteryState" : "ok",
+               "dcf" : "2022-09-03 16:02:02",
+               "state" : "",
+               "type" : "TFA_35.1077"
+            },
+            "rmsg" : "MU;P0=-13168;P1=469;P2=-1000;P3=1450;D=01212121212121232121232121212121212123212321232123232123212123232323232323212323232323232321232323212323232123232123232123232123232323232321212323232321232123;CP=1;R=79;",
+            "tests" : [
+               {
+                  "comment" : "#2"
+               }
+            ]
          }
       ],
+      "id" : "120",
+      "module" : "SD_WS",
+      "name" : "TFA 35.1077.54.S2"
+   },
+   {
+      "data" : [
+         {
+            "comment" : "Wireless Grill-, Meat-, Roasting-Thermometer with 4 Temperature Sensors",
+            "dmsg" : "W122#926301360136014001680000B88",
+            "internals" : {
+               "DEF" : "SD_WS_122_T",
+               "NAME" : "SD_WS_122_T"
+            },
+            "readings" : {
+               "batteryState" : "ok",
+               "state" : "T: 36 T2: 32 T3: 31 T4: 31",
+               "temperature" : "36",
+               "temperature2" : "32",
+               "temperature3" : "31",
+               "temperature4" : "31",
+               "transmitter" : "on",
+               "type" : "TM40"
+            },
+            "rmsg" : "MU;P0=3412;P1=-1029;P2=1043;P3=4706;P4=-2986;P5=549;P6=-1510;P7=-562;D=01212121212121213456575756575756575756565757575656575757575757575657575656575656575757575757575756575756565756565757575757575757565756575757575757575757575757575657565657565757575757575757575757575757575757575756575656565757575621212121212121213456575756;CP=5;R=2;O;",
+            "tests" : [
+               {
+                  "comment" : "#0"
+               }
+            ]
+         },
+         {
+            "comment" : "Wireless Grill-, Meat-, Roasting-Thermometer with 4 Temperature Sensors",
+            "dmsg" : "W122#926300DC00DC00DC033E0000DE8",
+            "internals" : {
+               "DEF" : "SD_WS_122_T",
+               "NAME" : "SD_WS_122_T"
+            },
+            "readings" : {
+               "batteryState" : "ok",
+               "state" : "T: 83 T2: 22 T3: 22 T4: 22",
+               "temperature" : "83",
+               "temperature2" : "22",
+               "temperature3" : "22",
+               "temperature4" : "22",
+               "transmitter" : "on",
+               "type" : "TM40"
+            },
+            "rmsg" : "MU;P0=11276;P1=-1039;P2=1034;P3=4704;P4=-2990;P5=543;P6=-1537;P7=-559;D=01212121212121213456575756575756575756565757575656575757575757575756565756565657575757575757575757565657565656575757575757575757575656575656565757575757575757565657575656565656575757575757575757575757575757575756565756565656575621212121212121213456575756;CP=5;R=12;O;",
+            "tests" : [
+               {
+                  "comment" : "#1"
+               }
+            ]
+         }
+      ],
+      "id" : "122",
+      "module" : "SD_WS",
       "name" : "Temola TM40"
    },
    {
       "data" : [
          {
-            "tests" : [
-               {
-                  "comment" : "#0"
-               }
-            ],
             "comment" : "Inkbird IBS-P01R Pool Thermometer, Inkbird ITH-20R",
             "dmsg" : "W123#D3910F800301005A0655FA001405140535F6",
             "internals" : {
                "DEF" : "SD_WS_123_T",
                "NAME" : "SD_WS_123_T"
             },
-            "minProtocolVersion" : "1.49",
             "readings" : {
                "batteryChanged" : "0",
                "batteryPercent" : 90,
@@ -2492,10 +2171,12 @@
                "temperature" : 25,
                "type" : "IBS-P01R, ITH-20R"
             },
-            "revision_entry" : "2023-01-06 21:36:34",
-            "revision_modul" : "14_SD_WS.pm v3.5.4 2022-11-14 20:37:55Z sidey79",
             "rmsg" : "MN;D=D3910F800301005A0655FA001405140535F6;R=10;",
-            "user" : "xeenon"
+            "tests" : [
+               {
+                  "comment" : "#0"
+               }
+            ]
          }
       ],
       "id" : "123",
@@ -2505,18 +2186,12 @@
    {
       "data" : [
          {
-            "tests" : [
-               {
-                  "comment" : "#1"
-               }
-            ],
             "comment" : "Inkbird IBS-P01R Pool Thermometer, Inkbird ITH-20R",
             "dmsg" : "W123#D3910F00010301207E43FE0014055802772A",
             "internals" : {
                "DEF" : "SD_WS_123_T",
                "NAME" : "SD_WS_123_T"
             },
-            "minProtocolVersion" : "1.49",
             "readings" : {
                "batteryChanged" : "1",
                "batteryPercent" : 32,
@@ -2525,10 +2200,12 @@
                "temperature" : 25.4,
                "type" : "IBS-P01R, ITH-20R"
             },
-            "revision_entry" : "2023-01-06 21:58:00",
-            "revision_modul" : "14_SD_WS.pm v3.5.4 2022-11-14 20:37:55Z sidey79",
             "rmsg" : "MN;D=D3910F00010301207E43FE0014055802772A;R=232;",
-            "user" : "elektron-bbs"
+            "tests" : [
+               {
+                  "comment" : "#0"
+               }
+            ]
          }
       ],
       "id" : "123",

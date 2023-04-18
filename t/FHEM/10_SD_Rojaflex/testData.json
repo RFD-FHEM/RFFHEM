@@ -8,19 +8,15 @@
                "DEF" : "3122FD2_9",
                "NAME" : "SD_Rojaflex_3122FD2_9"
             },
-            "minProtocolVersion" : "1.39",
             "readings" : {
                "state" : "down"
             },
-            "revision_entry" : "2021-10-23 17:07:42",
-            "revision_modul" : "10_SD_Rojaflex.pm   100 2021-10-19 18:00:00Z elektron-bbs",
             "rmsg" : "MN;D=083122FD298A018A8E;R=0;",
             "tests" : [
                {
-                  "comment" : "Test #0"
+                  "comment" : "#0"
                }
-            ],
-            "user" : "elektron-bbs"
+            ]
          },
          {
             "comment" : "Button stop, https://github.com/RFD-FHEM/RFFHEM/issues/955",
@@ -29,19 +25,15 @@
                "DEF" : "3122FD2_9",
                "NAME" : "SD_Rojaflex_3122FD2_9"
             },
-            "minProtocolVersion" : "1.39",
             "readings" : {
                "state" : "stop"
             },
-            "revision_entry" : "2021-10-23 17:09:33",
-            "revision_modul" : "10_SD_Rojaflex.pm   100 2021-10-19 18:00:00Z elektron-bbs",
             "rmsg" : "MN;D=083122FD290A010A8E;R=244;",
             "tests" : [
                {
-                  "comment" : "Test #1"
+                  "comment" : "#1"
                }
-            ],
-            "user" : "elektron-bbs"
+            ]
          },
          {
             "comment" : "Button up, https://github.com/RFD-FHEM/RFFHEM/issues/955",
@@ -50,19 +42,15 @@
                "DEF" : "3122FD2_9",
                "NAME" : "SD_Rojaflex_3122FD2_9"
             },
-            "minProtocolVersion" : "1.39",
             "readings" : {
                "state" : "up"
             },
-            "revision_entry" : "2021-10-23 17:10:36",
-            "revision_modul" : "10_SD_Rojaflex.pm   100 2021-10-19 18:00:00Z elektron-bbs",
             "rmsg" : "MN;D=083122FD291A011AAE;R=249;",
             "tests" : [
                {
-                  "comment" : "Test #2"
+                  "comment" : "#2"
                }
-            ],
-            "user" : "elektron-bbs"
+            ]
          }
       ],
       "id" : "109",
@@ -78,9 +66,6 @@
                "DEF" : "3122FD2_5",
                "NAME" : "SD_Rojaflex_3122FD2_5"
             },
-            "minProtocolVersion" : "1.39",
-            "revision_entry" : "2021-11-21 20:33:59Z",
-            "revision_modul" : "10_SD_Rojaflex.pm 100 2021-11-21 20:33:59Z elektron-bbs",
             "rmsg" : "MN;D=083122FD251A011AAA;R=198;",
             "tests" : [
                {
@@ -102,8 +87,7 @@
                      "tpos" : "100"
                   }
                }
-            ],
-            "user" : "Hofyyy"
+            ]
          },
          {
             "comment" : "parse channel 0 message",
@@ -112,16 +96,17 @@
                "DEF" : "3122FD2_0",
                "NAME" : "SD_Rojaflex_3122FD2_0"
             },
-            "minProtocolVersion" : "1.39",
             "readings" : {
                "motor" : "down",
                "state" : "down",
                "tpos" : "100"
             },
-            "revision_entry" : "2021-11-21 20:33:59Z",
-            "revision_modul" : "10_SD_Rojaflex.pm 100 2021-11-21 20:33:59Z elektron-bbs",
             "rmsg" : "",
-            "user" : "Hofyyy"
+            "tests" : [
+               {
+                  "comment" : "#1"
+               }
+            ]
          },
          {
             "MatchCheckFail" : true,
@@ -130,12 +115,13 @@
             "internals" : {
                "NAME" : null
             },
-            "minProtocolVersion" : "1.39",
             "readings" : {},
-            "revision_entry" : "2021-11-21 20:33:59Z",
-            "revision_modul" : "10_SD_Rojaflex.pm 100 2021-11-21 20:33:59Z elektron-bbs",
             "rmsg" : "",
-            "user" : "Hofyyy"
+            "tests" : [
+               {
+                  "comment" : "#2"
+               }
+            ]
          },
          {
             "comment" : "P109# Kanal 9 - remote - drive up",
@@ -144,9 +130,6 @@
                "DEF" : "3122FD2_9",
                "NAME" : "SD_Rojaflex_3122FD2_9"
             },
-            "minProtocolVersion" : "1.39",
-            "revision_entry" : "2021-11-21 20:33:59Z",
-            "revision_modul" : "10_SD_Rojaflex.pm 100 2021-11-21 20:33:59Z elektron-bbs",
             "rmsg" : "MN;D=083122FD291A011AAE;R=196;",
             "tests" : [
                {
@@ -174,8 +157,7 @@
                      "tpos" : "100"
                   }
                }
-            ],
-            "user" : "Hofyyy"
+            ]
          },
          {
             "comment" : "P109# Kanal 9 - remote - drive down",
@@ -184,9 +166,6 @@
                "DEF" : "3122FD2_9",
                "NAME" : "SD_Rojaflex_3122FD2_9"
             },
-            "minProtocolVersion" : "1.39",
-            "revision_entry" : "2021-11-21 20:33:59Z",
-            "revision_modul" : "10_SD_Rojaflex.pm 100 2021-11-21 20:33:59Z elektron-bbs",
             "rmsg" : "MN;D=083122FD298A018A8E;R=196;",
             "tests" : [
                {
@@ -220,8 +199,7 @@
                      "tpos" : "0"
                   }
                }
-            ],
-            "user" : "Hofyyy"
+            ]
          },
          {
             "comment" : "P109# Kanal 9 - status 34%",
@@ -230,9 +208,6 @@
                "DEF" : "3122FD2_9",
                "NAME" : "SD_Rojaflex_3122FD2_9"
             },
-            "minProtocolVersion" : "1.39",
-            "revision_entry" : "2021-11-21 20:33:59Z",
-            "revision_modul" : "10_SD_Rojaflex.pm 100 2021-11-21 20:33:59Z elektron-bbs",
             "rmsg" : "MN;D=083122FD29A5220A8E;R=196;",
             "tests" : [
                {
@@ -264,8 +239,7 @@
                      "tpos" : "0"
                   }
                }
-            ],
-            "user" : "Hofyyy"
+            ]
          },
          {
             "comment" : "P109# Kanal 9 - status 0%",
@@ -274,14 +248,11 @@
                "DEF" : "3122FD2_9",
                "NAME" : "SD_Rojaflex_3122FD2_9"
             },
-            "minProtocolVersion" : "1.39",
             "readings" : {
                "cpos" : "0",
                "motor" : "stop",
                "state" : "open"
             },
-            "revision_entry" : "2021-11-21 20:33:59Z",
-            "revision_modul" : "10_SD_Rojaflex.pm 100 2021-11-21 20:33:59Z elektron-bbs",
             "rmsg" : "MN;D=083122FD2985001AAE;R=196;",
             "tests" : [
                {
@@ -308,15 +279,11 @@
                      "tpos" : "100"
                   }
                }
-            ],
-            "user" : "Hofyyy"
+            ]
          },
          {
             "comment" : "P109# Kanal 9 - status 100%",
             "dmsg" : "P109#083122FD29D5648A8E",
-            "minProtocolVersion" : "1.39",
-            "revision_entry" : "2021-11-21 20:33:59Z",
-            "revision_modul" : "10_SD_Rojaflex.pm 100 2021-11-21 20:33:59Z elektron-bbs",
             "rmsg" : "MN;D=083122FD29D5648A8E;R=196;",
             "tests" : [
                {
@@ -356,8 +323,7 @@
                      "tpos" : "0"
                   }
                }
-            ],
-            "user" : "Hofyyy"
+            ]
          }
       ],
       "id" : "109",

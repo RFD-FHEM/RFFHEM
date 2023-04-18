@@ -1,34 +1,30 @@
 [
    {
-      "module" : "Dooya",
-      "id" : "16",
       "data" : [
          {
+            "comment" : "(ID 40,72 additionally)",
+            "dispatch_repeats" : "1",
+            "dmsg" : "P16#4805B7B132",
+            "internals" : {
+               "DEF" : "0100100000000101101101111011_1",
+               "NAME" : "Dooya_0100100000000101101101111011_1"
+            },
             "readings" : {
                "position" : "200",
                "parsestate" : "on",
                "exact" : "closed",
                "state" : "closed"
             },
-            "dispatch_repeats" : "1",
-            "dmsg" : "P16#4805B7B132",
-            "comment" : "(ID 40,72 additionally)",
             "rmsg" : "MU;P0=-1562;P1=-411;P2=297;P3=-773;P4=668;P5=4754;D=1232341234141234141234141414123414123232341232341412323414150234123234123232323232323234123414123414123414141412341412323234123234141232341415023412323412323232323232323412341412341412341414141234141232323412323414123234142;CP=2;",
             "tests" : [
                {
-                  "comment" : "Test #0"
+                  "comment" : "#0"
                }
-            ],
-            "minProtocolVersion" : "1.27",
-            "revision_entry" : "2021-03-24 10:26:03",
-            "user" : "SD_Protocol",
-            "internals" : {
-               "DEF" : "0100100000000101101101111011_1",
-               "NAME" : "Dooya_0100100000000101101101111011_1"
-            },
-            "revision_modul" : "98_Dooya.pm 15400 2017-11-05 18:11:51Z Sidey"
+            ]
          }
       ],
+      "id" : "16",
+      "module" : "Dooya",
       "name" : "Dooya"
    }
 ]

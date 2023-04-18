@@ -116,13 +116,13 @@ jobs:
           separator: ' '
       - name: Update SDUINO_VERSION date
         if: endsWith(matrix.file, '00_SIGNALduino.pm')
-        uses: jacobtomlinson/gha-find-replace@2.0.0
+        uses: jacobtomlinson/gha-find-replace@3.0.2
         with:
           find: \w+\s+=>\s\'\d.\d.\d\+\d+\'
           replace: "SDUINO_VERSION                  => '${{ steps.versions.outputs._1 }}+${{ needs.metadata.outputs.date }}'"
           include: "${{ matrix.file }}"
       - name: Update Date in ID line
-        uses: jacobtomlinson/gha-find-replace@2.0.0
+        uses: jacobtomlinson/gha-find-replace@3.0.2
         with:
           find: \d\d\d\d-\d\d-\d\d\s\d\d:\d\d:\d\dZ\s[\w|-]+\s
           replace: "${{ needs.metadata.outputs.datetime }}Z ${{ github.event.pull_request.user.login }} "
@@ -157,11 +157,11 @@ jobs:
               find ./FHEM -name "$FILE" -exec cp $FPATH "{}" \;
           done
       - name: update controls file (FHEM)
-        uses: fhem/fhem-controls-actions@v2.1.1
+        uses: fhem/fhem-controls-actions@v2.2.0
         with:
           filename: controls_signalduino.txt 
       - name: update controls file (lib)
-        uses: fhem/fhem-controls-actions@v2.1.1
+        uses: fhem/fhem-controls-actions@v2.2.0
         with:
           filename: controls_signalduino.txt 
           directory: FHEM/lib
@@ -175,7 +175,7 @@ jobs:
 
       - name: Wait for tests to succeed
         if: ${{ steps.commit.outputs.status }}
-        uses: lewagon/wait-on-check-action@v1.2.0
+        uses: lewagon/wait-on-check-action@v1.3.1
         with:
           running-workflow-name: 'Commit and Push back'
           ref: ${{ github.head_ref }}
