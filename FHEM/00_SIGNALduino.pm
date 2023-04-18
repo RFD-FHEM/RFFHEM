@@ -1,4 +1,4 @@
-# $Id: 00_SIGNALduino.pm 3.5.5 2023-01-28 15:26:11Z elektron-bbs $
+# $Id: 00_SIGNALduino.pm 3.5.6 2023-01-28 15:26:11Z elektron-bbs $
 # v3.5.5 - https://github.com/RFD-FHEM/RFFHEM/tree/master
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incoming messages
 # see http://www.fhemwiki.de/wiki/SIGNALDuino
@@ -42,7 +42,7 @@ use List::Util qw(first);
 
 
 use constant {
-  SDUINO_VERSION                  => '3.5.5+20230128',  # Datum wird automatisch bei jedem pull request aktualisiert
+  SDUINO_VERSION                  => '3.5.6+20230128',  # Datum wird automatisch bei jedem pull request aktualisiert
   SDUINO_INIT_WAIT_XQ             => 1.5,     # wait disable device
   SDUINO_INIT_WAIT                => 2,
   SDUINO_INIT_MAXRETRY            => 3,
@@ -2144,7 +2144,7 @@ sub SIGNALduino_Split_Message {
   my $clockabs;
   my $mcbitnum;
   my $rssi;
-
+  my $freqafc; ## for AFC cc1101 0x32 (0xF2): FREQEST – Frequency Offset Estimate from Demodulator
   my @msg_parts = SIGNALduino_splitMsg($rmsg,';');      ## Split message parts by ';'
   my %ret;
   my $debug = AttrVal($name,'debug',0);
@@ -2204,10 +2204,13 @@ sub SIGNALduino_Split_Message {
       $rssi = $_ ;
       Debug "$name: extracted RSSI $rssi \n" if ($debug);
       $ret{rssi} = $rssi;
-    } elsif ($_ =~ m/A=([0-9]{0,3})/ ){
-      # uncoverable condition true
-      Debug qq[$name: extracted FREQEST $1 \n] if ($debug);
-      $ret{freqest} =  ($1 >= 128) ? $1 - 256 : $1;
+    }
+    elsif($_ =~ m/^A=-?[0-9]+/)                                  #### freqafc
+    {
+      $_ =~ s/A=//;
+      $freqafc = $_ ;
+      Debug "$name: extracted freqafc $freqafc \n" if ($debug);
+      $ret{freqafc} = $freqafc;
     }  else {
       Debug "$name: unknown Message part $_" if ($debug);;
     }
@@ -2220,7 +2223,7 @@ sub SIGNALduino_Split_Message {
 ############################# package main, test exists
 # Function which dispatches a message if needed.
 sub SIGNALduno_Dispatch {
-  my ($hash, $rmsg, $dmsg, $rssi, $id) = @_;
+  my ($hash, $rmsg, $dmsg, $rssi, $id, $freqafc) = @_;
   my $name = $hash->{NAME};
 
   if (!defined($dmsg))
@@ -2278,6 +2281,10 @@ sub SIGNALduno_Dispatch {
       else {
         $rssi = '';
       }
+      if(defined($freqafc)) { # AFC cc1101 0x32 (0xF2): FREQEST – Frequency Offset Estimate from Demodulator
+        $addvals{FREQAFC} = $freqafc;
+      }
+
       $dmsg = lc($dmsg) if ($id eq '74' or $id eq '74.1');    # 10_FS20.pm accepted only lower case hex
       $hash->{logMethod}->($name, SDUINO_DISPATCH_VERBOSE, "$name: Dispatch, $dmsg, $rssi dispatch");
       Dispatch($hash, $dmsg, \%addvals);  ## Dispatch to other Modules
@@ -2898,7 +2905,7 @@ sub SIGNALduino_Parse_MN {
   my $hash = shift // return;   #return if no hash  is provided
   my $rmsg = shift // return;   #return if no rmsg is provided
  
-  if ($rmsg !~ /^MN;D=[0-9A-F]+;(?:R=[0-9]+;)?(?:A=[0-9]{0,3};)?$/){
+  if ($rmsg !~ /^MN;D=[0-9A-F]+;(?:R=[0-9]+;)?(?:A=-?[-0-9]+;)?$/) { # AFC cc1101 0x32 (0xF2): FREQEST – Frequency Offset Estimate from Demodulator
     $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: Parse_MN, faulty msg: $rmsg]);
     return ; # Abort here if not successfull
   }
@@ -2910,16 +2917,15 @@ sub SIGNALduino_Parse_MN {
   my $rawData  = _limit_to_hex($msg_parts{rawData})     // $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: Parse_MN, faulty rawData D=: $msg_parts{rawData}]) //  return ;
   my $rssi;
   my $rssiStr= '';
-  my $freqest= '';
+  my $freqafc;
   if ( exists $msg_parts{rssi} ){
      $rssi = _limit_to_number($msg_parts{rssi}) // $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: Parse_MN, faulty rssi R=: $msg_parts{rssi}]) //  return ;
     ($rssi,$rssiStr) = SIGNALduino_calcRSSI($rssi);
   };
-
-  if ( exists $msg_parts{freqest} ){
-      $freqest=qq[FREQ_EST=$msg_parts{freqest}];
-  };
-
+  if ( exists $msg_parts{freqafc} ){ #AFC cc1101 0x32 (0xF2): FREQEST – Frequency Offset Estimate from Demodulator
+    $freqafc = $msg_parts{freqafc};
+    $freqafc = FHEM::Core::Utils::Math::round((26000000 / 16384 * $freqafc / 1000),0);
+  }
   my $messagetype=$msg_parts{messagetype};
   my $name = $hash->{NAME};
 
@@ -2962,8 +2968,8 @@ sub SIGNALduino_Parse_MN {
       next mnIDLoop;
     }
     $dmsg = sprintf('%s%s',$hash->{protocolObject}->checkProperty($id,'preamble',''),$methodReturn[0]);
-    $hash->{logMethod}->($name, 5, qq[$name: Parse_MN, Decoded matched MN Protocol id $id dmsg=$dmsg $rssiStr $freqest]);
-    SIGNALduno_Dispatch($hash,$rmsg,$dmsg,$rssi,$id);
+    $hash->{logMethod}->($name, 5, qq[$name: Parse_MN, Decoded matched MN Protocol id $id dmsg=$dmsg $rssiStr]);
+    SIGNALduno_Dispatch($hash,$rmsg,$dmsg,$rssi,$id,$freqafc);
     $message_dispatched++;
     
   }
@@ -4536,6 +4542,8 @@ USB-connected devices (SIGNALduino):<br>
     <br>Example 4: <code>set sduino raw SN;R=3;D=9A46036AC8D3923EAEB470AB;</code>  sends a xFSK message of raw and repeated 3 times
     <ul><br>
       <b>note: The wrong use of the upcoming options can lead to malfunctions of the SIGNALduino!</b><br><br>
+      <li>CEA -> Switching on the automatic frequency control for FSK modulation and firmware version >= V 3.5.2 (config: AFC=1)</li>
+      <li>CDA -> Switching off the automatic frequency control for FSK modulation and firmware version >= V 3.5.2 (config: AFC=0)</li>
       <li>CER -> turn on data compression (config: Mred=1)</li>
       <li>CDR -> disable data compression (config: Mred=0)</li><br>
 
@@ -5128,6 +5136,8 @@ USB-connected devices (SIGNALduino):<br>
 
     <ul>
       <b>Hinweis: Die falsche Benutzung der kommenden Optionen kann zu Fehlfunktionen des SIGNALduinos f&uuml;hren!</b><br><br>
+      <li>CEA -> Einschalten der automatischen Frequenzkontrolle bei FSK-Modulation und Firmwareversion >= V 3.5.2 (config: AFC=1)</li>
+      <li>CDA -> Abschalten der automatischen Frequenzkontrolle bei FSK-Modulation und Firmwareversion >= V 3.5.2 (config: AFC=0)</li>
       <li>CER -> Einschalten der Datenkomprimierung (config: Mred=1)</li>
       <li>CDR -> Abschalten der Datenkomprimierung (config: Mred=0)</li><br>
       <u>Register Befehle bei einem CC1101</u>
