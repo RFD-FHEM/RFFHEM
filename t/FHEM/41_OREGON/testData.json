@@ -8,7 +8,6 @@
                "DEF" : "THGR228N_3c_2",
                "NAME" : "THGR228N_3c_2"
             },
-            "minProtocolVersion" : "1.27",
             "readings" : {
                "battery" : "ok",
                "batteryState" : "ok",
@@ -16,15 +15,12 @@
                "state" : "T: 17.8 H: 32 BAT: ok",
                "temperature" : "17.8"
             },
-            "revision_entry" : "2021-03-24 10:03:49",
-            "revision_modul" : "41_OREGON.pm 34476 2017-12-26 13:23:00Z dev",
             "rmsg" : "MC;LL=-997;LH=967;SL=-506;SH=460;D=AAAAAAAA66959A6555655AA55556A9955565A5566AA56A96;C=488;L=192;",
             "tests" : [
                {
-                  "comment" : "Test #0"
+                  "comment" : "#0"
                }
-            ],
-            "user" : "Wetterhexe"
+            ]
          }
       ],
       "id" : "10",
@@ -34,65 +30,139 @@
    {
       "data" : [
          {
-            "revision_modul" : "41_OREGON.pm 34476 2017-12-26 13:23:00Z dev",
-            "revision_entry" : "2021-03-24 10:05:52",
-            "rmsg" : "MC;LL=-1002;LH=952;SL=-489;SH=475;D=000000A0EBDDC4FBFBF13EF5B6;C=486;L=104;",
-            "tests" : [
-               {
-                  "comment" : "Test #0"
-               }
-            ],
-            "readings" : {
-               "humidity" : "37",
-               "temperature" : "20.2",
-               "state" : "T: 20.2 H: 37 BAT: ok",
-               "battery" : "ok",
-               "batteryState" : "ok"
-            },
+            "comment" : "OSV3 (ID 52 additionally)",
             "dmsg" : "50FA2844DC202070835092",
-            "minProtocolVersion" : "1.27",
-            "user" : "Wetterhexe",
             "internals" : {
-               "NAME" : "THGR810_dc_4",
-               "DEF" : "THGR810_dc_4"
+               "DEF" : "THGR810_dc_4",
+               "NAME" : "THGR810_dc_4"
             },
-            "comment" : "OSV3 (ID 52 additionally)"
-         }
-      ],
-      "id" : "10",
-      "name" : "THGR810",
-      "module" : "OREGON"
-   },
-   {
-      "module" : "OREGON",
-      "id" : "18",
-      "name" : "THR128",
-      "data" : [
-         {
-            "user" : "Ralf9",
-            "revision_entry" : "2021-03-24 10:51:46",
-            "revision_modul" : "41_OREGON.pm 34476 2017-12-26 13:23:00Z dev",
-            "rmsg" : "MC;LL=-2486;LH=3348;SL=-1024;SH=1889;D=8FFF7F0F;C=1457;L=32;R=65;",
-            "tests" : [
-               {
-                  "comment" : "Test #0"
-               }
-            ],
             "readings" : {
                "battery" : "ok",
                "batteryState" : "ok",
-               "temperature" : "10",
-               "state" : "T: 10 BAT: ok"
+               "humidity" : "37",
+               "state" : "T: 20.2 H: 37 BAT: ok",
+               "temperature" : "20.2"
             },
-            "minProtocolVersion" : "1.27",
-            "dmsg" : "500A4D100E001000002100",
-            "comment" : "OSV1",
-            "internals" : {
-               "NAME" : "THR128_0e_1",
-               "DEF" : "THR128_0e_1"
-            }
+            "rmsg" : "MC;LL=-1002;LH=952;SL=-489;SH=475;D=000000A0EBDDC4FBFBF13EF5B6;C=486;L=104;",
+            "tests" : [
+               {
+                  "comment" : "#0"
+               }
+            ]
          }
-      ]
+      ],
+      "id" : "10",
+      "module" : "OREGON",
+      "name" : "THGR810"
+   },
+   {
+      "data" : [
+         {
+            "comment" : "OSV1",
+            "dmsg" : "500A4D100E001000002100",
+            "internals" : {
+               "DEF" : "THR128_0e_1",
+               "NAME" : "THR128_0e_1"
+            },
+            "readings" : {
+               "battery" : "ok",
+               "batteryState" : "ok",
+               "state" : "T: 10 BAT: ok",
+               "temperature" : "10"
+            },
+            "rmsg" : "MC;LL=-2486;LH=3348;SL=-1024;SH=1889;D=8FFF7F0F;C=1457;L=32;R=65;",
+            "tests" : [
+               {
+                  "comment" : "#0"
+               }
+            ]
+         }
+      ],
+      "id" : "18",
+      "module" : "OREGON",
+      "name" : "THR128"
+   },
+   {
+      "data" : [
+         {
+            "comment" : "OSV2",
+            "dmsg" : "501A2D203C801720833E9E",
+            "internals" : {
+               "DEF" : "THGR228N_3c_2",
+               "NAME" : "THGR228N_3c_2"
+            },
+            "readings" : {
+               "battery" : "ok",
+               "batteryState" : "ok",
+               "humidity" : "32",
+               "state" : "T: 17.8 H: 32 BAT: ok",
+               "temperature" : "17.8"
+            },
+            "rmsg" : "MC;LL=-997;LH=967;SL=-506;SH=460;D=AAAAAAAA66959A6555655AA55556A9955565A5566AA56A96;C=488;L=192;",
+            "tests" : [
+               {
+                  "comment" : "#0"
+               }
+            ]
+         }
+      ],
+      "id" : "10",
+      "module" : "OREGON",
+      "name" : "THGR228N"
+   },
+   {
+      "data" : [
+         {
+            "comment" : "OSV3 (ID 52 additionally)",
+            "dmsg" : "50FA2844DC202070835092",
+            "internals" : {
+               "DEF" : "THGR810_dc_4",
+               "NAME" : "THGR810_dc_4"
+            },
+            "readings" : {
+               "battery" : "ok",
+               "batteryState" : "ok",
+               "humidity" : "37",
+               "state" : "T: 20.2 H: 37 BAT: ok",
+               "temperature" : "20.2"
+            },
+            "rmsg" : "MC;LL=-1002;LH=952;SL=-489;SH=475;D=000000A0EBDDC4FBFBF13EF5B6;C=486;L=104;",
+            "tests" : [
+               {
+                  "comment" : "#0"
+               }
+            ]
+         }
+      ],
+      "id" : "10",
+      "module" : "OREGON",
+      "name" : "THGR810"
+   },
+   {
+      "data" : [
+         {
+            "comment" : "OSV1",
+            "dmsg" : "500A4D100E001000002100",
+            "internals" : {
+               "DEF" : "THR128_0e_1",
+               "NAME" : "THR128_0e_1"
+            },
+            "readings" : {
+               "battery" : "ok",
+               "batteryState" : "ok",
+               "state" : "T: 10 BAT: ok",
+               "temperature" : "10"
+            },
+            "rmsg" : "MC;LL=-2486;LH=3348;SL=-1024;SH=1889;D=8FFF7F0F;C=1457;L=32;R=65;",
+            "tests" : [
+               {
+                  "comment" : "#0"
+               }
+            ]
+         }
+      ],
+      "id" : "18",
+      "module" : "OREGON",
+      "name" : "THR128"
    }
-
 ]
