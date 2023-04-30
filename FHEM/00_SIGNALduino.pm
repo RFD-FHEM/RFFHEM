@@ -5327,9 +5327,9 @@ USB-connected devices (SIGNALduino):<br>
     Weiterhin existiert der den sogenannten cc1101 (sub 1 GHZ) Chip, welche empfangen und senden kann. Dieser wird über die SPI Verbindung angebunden.
     ESP8266 Hardware Typen, unterstützen derzeit kein flashen aus dem Modul und ben&ouml;tigen mindestens 1 MB Flash Speicher.
     <ul>
-      <li>ESP32d: ESP32 f&uuml;r einfachen eindraht Empf&auml;nger</li>
+      <li>ESP32s: ESP32 f&uuml;r einfachen eindraht Empf&auml;nger</li>
       <li>ESP32cc1101: ESP32 mit einem CC110x-Empf&auml;nger (SPI Verbindung)</li>
-      <li>ESP8266d: ESP8266 f&uuml;r einfachen eindraht Empf&auml;nger</li>
+      <li>ESP8266s: ESP8266 f&uuml;r einfachen eindraht Empf&auml;nger</li>
       <li>ESP8266cc1101: ESP8266 mit einem CC110x-Empf&auml;nger (SPI Verbindung)</li>
       <li>MAPLEMINI_F103CBs: MapleMini F103CB (STM32) f&uuml;r einfachen eindraht Empf&auml;nger</li>
       <li>MAPLEMINI_F103CBcc1101: MapleMini F103CB (STM32) mit einem CC110x-Empf&auml;nger (SPI Verbindung)</li>
