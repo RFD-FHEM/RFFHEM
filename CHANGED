@@ -1,3 +1,8 @@
+2023-05-01 - New elements for attribute hardware (#1172)
+
+* 00_SIGNALduinoi.pm
+
+- updated attribute Hardwarelist
 2023-04-03 - Bump fhem/fhem-controls-actions from 2.1.1 to 2.2.0 (#1165)
 
 Bumps [fhem/fhem-controls-actions](https://github.com/fhem/fhem-controls-actions) from 2.1.1 to 2.2.0.
