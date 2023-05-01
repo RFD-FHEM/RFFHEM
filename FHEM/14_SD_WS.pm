@@ -1,4 +1,4 @@
-# $Id: 14_SD_WS.pm 26982 2023-01-23 17:24:05Z sidey79 $
+# $Id: 14_SD_WS.pm 26982 2023-05-01 10:16:30Z sidey79 $
 #
 # The purpose of this module is to support serval
 # weather sensors which use various protocol
@@ -48,6 +48,7 @@
 # 11.06.2022 neues Protokoll 122: TM40, Wireless Grill-, Meat-, Roasting-Thermometer with 4 Temperature Sensors
 # 06.01.2023 neues Protokoll 123: Inkbird IBS-P01R Pool Thermometer, Inkbird ITH-20R (not tested)
 # 21.01.2023 use round from package FHEM::Core::Utils::Math;
+# 01.04.2023 Added ecowitt wh31 support
 
 
 package main;
@@ -59,6 +60,7 @@ use warnings;
 use Carp qw(carp);
 use FHEM::Meta;
 use FHEM::Core::Utils::Math;
+use constant HAS_DigestCRC => defined eval { require Digest::CRC; };
 
 # Forward declarations
 sub SD_WS_LFSR_digest8_reflect;
@@ -100,7 +102,7 @@ sub SD_WS_Initialize {
     "SD_WS_85_THW_.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "4:120"},
     "SD_WS_89_TH.*"   => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "3:180"},
     "SD_WS_94_T.*"    => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4:Temp,", autocreateThreshold => "3:180"},
-    'SD_WS_107_H.*'   => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => q{}, autocreateThreshold => '2:180'},
+    'SD_WS_107_H.*'   => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => q{}, autocreateThreshold => '2:300'},
     'SD_WS_108.*'     => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4:Temp,', autocreateThreshold => '5:120'},
     'SD_WS_110_TR.*'  => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4:Temp,', autocreateThreshold => '3:180'},
     'SD_WS_111_TL.*'  => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4:Temp,', autocreateThreshold => '3:600'},
@@ -111,6 +113,7 @@ sub SD_WS_Initialize {
     'SD_WS_120.*'     => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4hum4:Temp/Hum,', autocreateThreshold => '2:180'},
     'SD_WS_122_T.*'   => { ATTR => 'event-min-interval:.*:60 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4:Temp,', autocreateThreshold => '10:180'},
     'SD_WS_123_T.*'   => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4:Temp,', autocreateThreshold => '2:180'},
+    'SD_WS_125_.*'    => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4hum4:Temp/Hum,', autocreateThreshold => '2:300'},
   };
   return FHEM::Meta::InitMod( __FILE__, $hash );
 }
@@ -324,7 +327,7 @@ sub SD_WS_Parse {
                                 return 0;
                               }
                             } else {
-                              Log3 $name, 1, "$name: SD_WS_27 Parse msg $rawData - ERROR CRC not load, please install modul Digest::CRC";
+                              Log3 $name, 1, "$name: SD_WS_27 Parse msg $rawData - ERROR CRC not checked, please install module Digest::CRC";
                               return 0;
                             }  
                           }
@@ -720,7 +723,7 @@ sub SD_WS_Parse {
                                 return 0;
                               }
                             } else {
-                              Log3 $name, 1, "$name: SD_WS_85 Parse msg $rawData - ERROR CRC not load, please install modul Digest::CRC";
+                              Log3 $name, 1, "$name: SD_WS_85 Parse msg $rawData - ERROR CRC not loaded, please install module Digest::CRC";
                               return 0;
                             }  
                             return 1;
@@ -1241,6 +1244,7 @@ sub SD_WS_Parse {
                                 return 1;
                               }
     } ,
+
     117 => {
         # https://github.com/merbanan/rtl_433/blob/master/src/devices/bresser_7in1.c
         # The compact 7-in-1 multifunction outdoor sensor transmits the data on 868.3 MHz.
@@ -1470,6 +1474,59 @@ sub SD_WS_Parse {
                                   return 0;
                                 }
                               },
+    },
+    125 => {
+        # Temperature and humidiry sensor Fine Offset WH31, aka Ambient Weather, aka ecowitt
+        # ------------------------------------------------------------------------------------------
+        #          Byte: 00 01 02 03 04 05 06 07 08 09 10 
+        #        Nibble: 01 23 45 67 89 01 23 45 67 89 01 
+        # aa aa aa 2d d4 30 02 82 62 37 04 51 6C 00 02 00 
+        #          MN;D= 30 02 82 62 37 04 51 6C 00 02 00 ;R=63;   Temp: 21.0 C Hum: 55%, Battery: ok, ID: 0x02
+        #                FF II CT TT HH XX SS ?? ?? ?? ?? 
+        # FF:   Family code 0x31 = WH31e 0x37 = wh31b
+        # II:   ID (1 byte)
+        # C :   3bit Channel Number Bit 17-19, 1 Bit Battery bit 20
+        # TT:   10 bits Temperature in C, scaled by 10, offset 400. Start at Bit 22
+        # HH:   Humidity in percent as two diget hex
+        # XX:   CRC8 of the preceding 5 bytes (Polynomial 0x31, Initial value 0x00, Input not reflected, Result not reflected)
+        # SS:   Sum-8 of the preceding 5 bytes 
+        # ??:   Unknown Data
+        sensortype => 'WH31e, WH31b, DP50',
+        model      => 'SD_WS_125_TH',
+        prematch   => sub {my ($rawData,undef) = @_; return 1 if ($rawData =~ /^(30|37)/); },
+        id         => sub {my ($rawData,undef) = @_; return (substr($rawData,2,2));},
+		    channel    => sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,17,19) + 1);},
+        bat        => sub {my (undef,$bitData) = @_; return substr($bitData,20,1) eq '0' ? 'ok' : 'low';}, 
+        temp       => sub {my (undef,$bitData) = @_;
+                            my $temp = SD_WS_binaryToNumber($bitData,22,31);  
+                            return FHEM::Core::Utils::Math::round(($temp - 400) / 10, 1);
+						              },							
+        hum        => sub { my ($rawData,undef) = @_; return hex(substr($rawData,8,2)); },
+        crcok      => sub { my ($rawData,undef) = @_;
+                            if (HAS_DigestCRC) {
+                              my $calc_crc8 = Digest::CRC->new(width => 8, poly=>0x31);
+                              my $crc_digest = $calc_crc8->add( pack 'H*', substr( $rawData, 0, 12 ) )->digest;
+                              if ($crc_digest)
+                              {
+                                Log3 $name, 3, qq[$name: SD_WS_125 Parse msg $rawData - ERROR CRC8 $crc_digest shoud be 0];
+                                return 0;
+                              }
+                            } else {
+                              Log3 $name, 1, qq[$name: SD_WS_125 Parse msg $rawData - ERROR CRC not loaded, please install module Digest::CRC];
+                            }
+                            my $checksum = 0;
+                            for (my $i=0; $i < 11; $i += 2) {
+                              $checksum += hex(substr($rawData,$i,2));
+                            }
+                            $checksum -= hex(substr($rawData,12,2));
+                            $checksum &= 0xFF;
+                            if ($checksum) {
+                              Log3 $name, 3, qq[$name: SD_WS_125 Parse msg $rawData - ERROR checksum $checksum != 0];
+                              return 0;
+                            }
+
+                            return 1;
+                          }, 
     },
   );
 
@@ -2154,6 +2211,7 @@ sub SD_WS_WH2SHIFT {
     <li>EuroChron EFTH-800, EFS-3110A (temperature and humidity sensor)</li>
     <li>Fine Offset WH51, aka ECOWITT WH51, aka Froggit DP100, aka MISOL/1 (soil moisture sensor)</li>
     <li>Fine Offset WH57, aka Froggit DP60, aka Ambient Weather WH31L (thunder and lightning sensor)</li>
+    <li>Fine Offset WH31, aka Ambient Weather WH31E, aka ecowitt WH31 (temperature and humidity sensor)</li>
     <li>Fody E42 (temperature and humidity sensor)</li>
     <li>Inkbird IBS-P01R pool thermometer, ITH-20R</li>
     <li>NC-3911, NC-3912 refrigerator thermometer</li>
@@ -2295,6 +2353,7 @@ sub SD_WS_WH2SHIFT {
     <li>EuroChron EFTH-800, EFS-3110A (Temperatur- und Feuchtigkeitssensor)</li>
     <li>Fine Offset WH51, aka ECOWITT WH51, aka Froggit DP100, aka MISOL/1 (Bodenfeuchtesensor)</li>
     <li>Fine Offset WH57, aka Froggit DP60, aka Ambient Weather WH31L (Gewittersensor)</li>
+    <li>Fine Offset WH31, aka Ambient Weather WH31E Thermo-Hygrometer Sensor (Temperatur- und Feuchtemsser)</li>
     <li>Fody E42 (Temperatur- und Feuchtigkeitssensor)</li>
     <li>Inkbird IBS-P01R Pool Thermometer, ITH-20R</li>
     <li>Kabelloses Grillthermometer, Modellname: GFGT 433 B1</li>
