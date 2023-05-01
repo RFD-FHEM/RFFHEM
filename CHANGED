@@ -1,3 +1,13 @@
+2023-05-01 - Ecowitt WH 31 support (#1161)
+
+* SD_ProtocolData.pm
+
+- Added 124 -> Ecowitt WH 31
+
+14_SD_WS.pm
+
+- Added 124 -> Ecowitt WH 31
+- increased threshhold wait timer for second UNDEFINED event : protocol 107 & 125
 2023-05-01 - New elements for attribute hardware (#1172)
 
 * 00_SIGNALduinoi.pm
