@@ -324,7 +324,7 @@ sub SIGNALduino_Initialize {
             .' doubleMsgCheck_IDs'
             .' eventlogging:0,1'
             .' flashCommand'
-            .' hardware:ESP32s,ESP32cc1101,ESP8266s,ESP8266cc1101,MAPLEMINI_F103CBs,MAPLEMINI_F103CBcc1101,nano328,nanoCC1101,miniculCC1101,promini8CC1101,promini16C1101,promini8s,promini16s,radinoCC1101'
+            .' hardware:esp32s,esp32cc1101,esp8266s,esp8266cc1101,MAPLEMINI_F103CBs,MAPLEMINI_F103CBcc1101,nano328,nanoCC1101,miniculCC1101,promini8cc1101,promini16cc1101,promini8s,promini16s,radinoCC1101'
             .' hexFile'
             .' initCommands'
             .' longids'
@@ -4734,10 +4734,10 @@ USB-connected devices (SIGNALduino):<br>
     The other option consists of the cc1101 (sub 1 GHZ) chip, which can transmit and receiver. It's a transceiver which is connected via spi.
     ESP8266 hardware type, currently doesn't support flashing out of the module and needs at leat 1 MB of flash.
     <ul>
-      <li>ESP32s: ESP32 with simple single wire receiver</li>
-      <li>ESP32cc1101: ESP32 with CC1101 (spi connected) receiver</li>
-      <li>ESP8266s: ESP8266 with simple single wire receiver</li>
-      <li>ESP8266cc1101: ESP8266 with CC1101 (spi connected) receiver</li>
+      <li>esp32s: ESP32 with simple single wire receiver</li>
+      <li>esp32cc1101: ESP32 with CC1101 (spi connected) receiver</li>
+      <li>esp8266s: ESP8266 with simple single wire receiver</li>
+      <li>esp8266cc1101: ESP8266 with CC1101 (spi connected) receiver</li>
       <li>MAPLEMINI_F103CBs: MapleMini F103CB (STM32 family) with simple single wire receiver</li>
       <li>MAPLEMINI_F103CBcc1101: MapleMini F103CB (STM32 family) with CC1101 (spi connected) receiver</li>
       <li>miniculCC1101: Arduino pro Mini with CC110x (spi connected) receiver and cables as a minicul</li>
