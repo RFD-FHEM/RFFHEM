@@ -1,4 +1,4 @@
-# $Id: 00_SIGNALduino.pm 3.5.5 2023-05-01 10:16:30Z sidey79 $
+# $Id: 00_SIGNALduino.pm 3.5.5 2023-05-04 20:05:20Z sidey79 $
 # v3.5.5 - https://github.com/RFD-FHEM/RFFHEM/tree/master
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incoming messages
 # see http://www.fhemwiki.de/wiki/SIGNALDuino
@@ -42,7 +42,7 @@ use List::Util qw(first);
 
 
 use constant {
-  SDUINO_VERSION                  => '3.5.5+20230501',  # Datum wird automatisch bei jedem pull request aktualisiert
+  SDUINO_VERSION                  => '3.5.5+20230504',  # Datum wird automatisch bei jedem pull request aktualisiert
   SDUINO_INIT_WAIT_XQ             => 1.5,     # wait disable device
   SDUINO_INIT_WAIT                => 2,
   SDUINO_INIT_MAXRETRY            => 3,
@@ -324,7 +324,7 @@ sub SIGNALduino_Initialize {
             .' doubleMsgCheck_IDs'
             .' eventlogging:0,1'
             .' flashCommand'
-            .' hardware:ESP32s,ESP32cc1101,ESP8266s,ESP8266cc1101,MAPLEMINI_F103CBs,MAPLEMINI_F103CBcc1101,nano328,nanoCC1101,miniculCC1101,promini8CC1101,promini16C1101,promini8s,promini16s,radinoCC1101'
+            .' hardware:esp32s,esp32cc1101,esp8266s,esp8266cc1101,MAPLEMINI_F103CBs,MAPLEMINI_F103CBcc1101,nano328,nanoCC1101,miniculCC1101,promini8cc1101,promini16cc1101,promini8s,promini16s,radinoCC1101'
             .' hexFile'
             .' initCommands'
             .' longids'
@@ -4734,10 +4734,10 @@ USB-connected devices (SIGNALduino):<br>
     The other option consists of the cc1101 (sub 1 GHZ) chip, which can transmit and receiver. It's a transceiver which is connected via spi.
     ESP8266 hardware type, currently doesn't support flashing out of the module and needs at leat 1 MB of flash.
     <ul>
-      <li>ESP32s: ESP32 with simple single wire receiver</li>
-      <li>ESP32cc1101: ESP32 with CC1101 (spi connected) receiver</li>
-      <li>ESP8266s: ESP8266 with simple single wire receiver</li>
-      <li>ESP8266cc1101: ESP8266 with CC1101 (spi connected) receiver</li>
+      <li>esp32s: ESP32 with simple single wire receiver</li>
+      <li>esp32cc1101: ESP32 with CC1101 (spi connected) receiver</li>
+      <li>esp8266s: ESP8266 with simple single wire receiver</li>
+      <li>esp8266cc1101: ESP8266 with CC1101 (spi connected) receiver</li>
       <li>MAPLEMINI_F103CBs: MapleMini F103CB (STM32 family) with simple single wire receiver</li>
       <li>MAPLEMINI_F103CBcc1101: MapleMini F103CB (STM32 family) with CC1101 (spi connected) receiver</li>
       <li>miniculCC1101: Arduino pro Mini with CC110x (spi connected) receiver and cables as a minicul</li>
