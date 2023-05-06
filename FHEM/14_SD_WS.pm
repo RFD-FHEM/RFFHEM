@@ -1,4 +1,4 @@
-# $Id: 14_SD_WS.pm 26982 2023-05-01 10:16:30Z sidey79 $
+# $Id: 14_SD_WS.pm 26982 2023-05-06 21:34:00Z sidey79 $
 #
 # The purpose of this module is to support serval
 # weather sensors which use various protocol
