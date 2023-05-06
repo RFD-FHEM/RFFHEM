@@ -1,4 +1,4 @@
-# $Id: 14_SD_WS.pm 26982 2023-04-06 06:30:49Z sidey79 $
+# $Id: 14_SD_WS.pm 26982 2023-05-01 10:16:30Z sidey79 $
 #
 # The purpose of this module is to support serval
 # weather sensors which use various protocol
@@ -49,7 +49,8 @@
 # 11.06.2022 neues Protokoll 122: TM40, Wireless Grill-, Meat-, Roasting-Thermometer with 4 Temperature Sensors
 # 06.01.2023 neues Protokoll 123: Inkbird IBS-P01R Pool Thermometer, Inkbird ITH-20R (not tested)
 # 21.01.2023 use round from package FHEM::Core::Utils::Math;
-# 03.04.2023 Added ecowitt wh31 / WH40 support
+# 01.04.2023 Added ecowitt wh31 support
+# 06.05.2023 Added ecowitt WH40 support
 
 
 package main;
@@ -1478,7 +1479,7 @@ sub SD_WS_Parse {
                               },
     },
     125 => {
-        # Temperature and humidity sensor Fine Offset WH31, aka Ambient Weather, aka ecowitt
+        # Temperature and humidiry sensor Fine Offset WH31, aka Ambient Weather, aka ecowitt
         # ------------------------------------------------------------------------------------------
         #          Byte: 00 01 02 03 04 05 06 07 08 09 10 
         #        Nibble: 01 23 45 67 89 01 23 45 67 89 01 
@@ -1510,7 +1511,8 @@ sub SD_WS_Parse {
                               my $crc_digest = $calc_crc8->add( pack 'H*', substr( $rawData, 0, 12 ) )->digest;
                               if ($crc_digest)
                               {
-                                Log3 $name, 3, qq[$name: SD_WS_$protocol Parse msg $rawData - ERROR CRC8 $crc_digest shoud be 0];
+
+                                Log3 $name, 3, qq[$name: SD_WS_125 Parse msg $rawData - ERROR CRC8 $crc_digest shoud be 0];
                                 return 0;
                               }
                             } else {

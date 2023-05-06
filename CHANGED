@@ -1,3 +1,29 @@
+2023-05-05 - fixes Attribut Hardware promini #1174 (#1175)
+
+* 00_SIGNALduino.pm
+
+fixes Attribut Hardware promini #1174
+
+* Update Versiondate
+
+---------
+
+Co-authored-by: GitHub Action <action@github.com>
+2023-05-01 - Ecowitt WH 31 support (#1161)
+
+* SD_ProtocolData.pm
+
+- Added 124 -> Ecowitt WH 31
+
+14_SD_WS.pm
+
+- Added 124 -> Ecowitt WH 31
+- increased threshhold wait timer for second UNDEFINED event : protocol 107 & 125
+2023-05-01 - New elements for attribute hardware (#1172)
+
+* 00_SIGNALduinoi.pm
+
+- updated attribute Hardwarelist
 2023-04-03 - Bump fhem/fhem-controls-actions from 2.1.1 to 2.2.0 (#1165)
 
 Bumps [fhem/fhem-controls-actions](https://github.com/fhem/fhem-controls-actions) from 2.1.1 to 2.2.0.

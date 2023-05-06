@@ -1,4 +1,4 @@
-# $Id: 00_SIGNALduino.pm 3.5.5 2023-04-06 06:30:49Z sidey79 $
+# $Id: 00_SIGNALduino.pm 3.5.5 2023-05-04 20:05:20Z sidey79 $
 # v3.5.5 - https://github.com/RFD-FHEM/RFFHEM/tree/master
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incoming messages
 # see http://www.fhemwiki.de/wiki/SIGNALDuino
@@ -42,7 +42,7 @@ use List::Util qw(first);
 
 
 use constant {
-  SDUINO_VERSION                  => '3.5.5+20230406',  # Datum wird automatisch bei jedem pull request aktualisiert
+  SDUINO_VERSION                  => '3.5.5+20230504',  # Datum wird automatisch bei jedem pull request aktualisiert
   SDUINO_INIT_WAIT_XQ             => 1.5,     # wait disable device
   SDUINO_INIT_WAIT                => 2,
   SDUINO_INIT_MAXRETRY            => 3,
@@ -324,7 +324,7 @@ sub SIGNALduino_Initialize {
             .' doubleMsgCheck_IDs'
             .' eventlogging:0,1'
             .' flashCommand'
-            .' hardware:ESP32,ESP32cc1101,ESP8266,ESP8266cc1101,MAPLEMINI_F103CB,MAPLEMINI_F103CBcc1101,nano328,nanoCC1101,miniculCC1101,promini,radinoCC1101'
+            .' hardware:esp32s,esp32cc1101,esp8266s,esp8266cc1101,MAPLEMINI_F103CBs,MAPLEMINI_F103CBcc1101,nano328,nanoCC1101,miniculCC1101,promini8cc1101,promini16cc1101,promini8s,promini16s,radinoCC1101'
             .' hexFile'
             .' initCommands'
             .' longids'
@@ -4729,20 +4729,24 @@ USB-connected devices (SIGNALduino):<br>
   <a name="SIGNALDuino_hardware"></a>
   <li>hardware<br>
     Currently, there are serval hardware options with different receiver options available.
-    The simple single wire option,  consists of a single wire connected receiver and a single wire connected transmitter which are connected over a single digital port with the microcontroller. The receiver only sends data and the transmitter receives only from the microcontroller.
+    The simple single wire option,  consists of a single wire connected receiver and a single wire connected transmitter which are connected over a single digital port with the microcontroller.
+    The receiver only sends data and the transmitter receives only from the microcontroller.
     The other option consists of the cc1101 (sub 1 GHZ) chip, which can transmit and receiver. It's a transceiver which is connected via spi.
-    ESP8266 hardware type, currently doesn't support flashing out of the modu and needs at leat 1 MB of flash.
+    ESP8266 hardware type, currently doesn't support flashing out of the module and needs at leat 1 MB of flash.
     <ul>
-      <li>ESP32: ESP32 with simple single wire receiver</li>
-      <li>ESP32cc1101: ESP32 with CC1101 (spi connected) receiver</li>
-      <li>ESP8266: ESP8266 with simple single wire receiver</li>
-      <li>ESP8266cc1101: ESP8266 with CC1101 (spi connected) receiver</li>
-      <li>MAPLEMINI_F103CB: MapleMini F103CB (STM32 family) with simple single wire receiver</li>
+      <li>esp32s: ESP32 with simple single wire receiver</li>
+      <li>esp32cc1101: ESP32 with CC1101 (spi connected) receiver</li>
+      <li>esp8266s: ESP8266 with simple single wire receiver</li>
+      <li>esp8266cc1101: ESP8266 with CC1101 (spi connected) receiver</li>
+      <li>MAPLEMINI_F103CBs: MapleMini F103CB (STM32 family) with simple single wire receiver</li>
       <li>MAPLEMINI_F103CBcc1101: MapleMini F103CB (STM32 family) with CC1101 (spi connected) receiver</li>
       <li>miniculCC1101: Arduino pro Mini with CC110x (spi connected) receiver and cables as a minicul</li>
-      <li>nano: Arduino Nano 328 with simple single wired receiver</li>
+      <li>nano328: Arduino Nano 328 with simple single wired receiver</li>
       <li>nanoCC1101: Arduino Nano 328 with CC110x (spi connected) receiver</li>
-      <li>promini: Arduino Pro Mini 328 with simple single receiver </li>
+      <li>promini8s: Arduino Pro Mini 328 8Mhz with simple single wired receiver</li>
+      <li>promini8cc1101: Arduino Pro Mini 328 8Mhz with CC110x (spi connected) receiver</li>
+      <li>promini16s: Arduino Pro Mini 328 16Mhz with simple single wired receiver</li>
+      <li>promini16cc1101: Arduino Pro Mini 328 16Mhz with CC110x (spi connected) receiver</li>
       <li>radinoCC1101: Arduino compatible radino with cc1101 (spi connected) receiver</li>
     </ul>
   </li><br>
@@ -5318,20 +5322,24 @@ USB-connected devices (SIGNALduino):<br>
   <a name="SIGNALDuino_hardware"></a>
   <li>hardware<br>
     Derzeit m&ouml;gliche Hardware Varianten mit verschiedenen Empfänger Optionen.
-    Die einfache Variante besteht aus einem Empf&auml;nger und einen Sender, die über je eine einzige digitale Signalleitung Datem mit dem Microcontroller austauschen. Der Empf&auml;nger sendet dabei und der Sender empf&auml;ngt dabei ausschließlich.
+    Die einfache Variante besteht aus einem Empf&auml;nger und einen Sender, die über je eine einzige digitale Signalleitung Datem mit dem Microcontroller austauschen.
+    Der Empf&auml;nger sendet dabei und der Sender empf&auml;ngt dabei ausschließlich.
     Weiterhin existiert der den sogenannten cc1101 (sub 1 GHZ) Chip, welche empfangen und senden kann. Dieser wird über die SPI Verbindung angebunden.
     ESP8266 Hardware Typen, unterstützen derzeit kein flashen aus dem Modul und ben&ouml;tigen mindestens 1 MB Flash Speicher.
     <ul>
-      <li>ESP32: ESP32 f&uuml;r einfachen eindraht Empf&auml;nger</li>
+      <li>ESP32s: ESP32 f&uuml;r einfachen eindraht Empf&auml;nger</li>
       <li>ESP32cc1101: ESP32 mit einem CC110x-Empf&auml;nger (SPI Verbindung)</li>
-      <li>ESP8266: ESP8266 f&uuml;r einfachen eindraht Empf&auml;nger</li>
+      <li>ESP8266s: ESP8266 f&uuml;r einfachen eindraht Empf&auml;nger</li>
       <li>ESP8266cc1101: ESP8266 mit einem CC110x-Empf&auml;nger (SPI Verbindung)</li>
-      <li>MAPLEMINI_F103CB: MapleMini F103CB (STM32) f&uuml;r einfachen eindraht Empf&auml;nger</li>
+      <li>MAPLEMINI_F103CBs: MapleMini F103CB (STM32) f&uuml;r einfachen eindraht Empf&auml;nger</li>
       <li>MAPLEMINI_F103CBcc1101: MapleMini F103CB (STM32) mit einem CC110x-Empf&auml;nger (SPI Verbindung)</li>
       <li>miniculCC1101: Arduino pro Mini mit einem CC110x-Empf&auml;nger (SPI Verbindung) entsprechend dem minicul verkabelt</li>
-      <li>nano: Arduino Nano 328 f&uuml;r einfachen eindraht Empf&auml;nger</li>
+      <li>nano328: Arduino Nano 328 f&uuml;r einfachen eindraht Empf&auml;nger</li>
       <li>nanoCC1101: Arduino Nano f&uuml;r einen CC110x-Empf&auml;nger (SPI Verbindung)</li>
-      <li>promini: Arduino Pro Mini 328 f&uuml;r einfachen eindraht Empf&auml;nger</li>
+      <li>promini8s: Arduino Pro Mini 328 8Mhz f&uuml;r einfachen eindraht Empf&auml;nger</li>
+      <li>promini8cc1101: Arduino Pro Mini 328 8Mhz f&uuml;r einen CC110x-Empf&auml;nger (SPI Verbindung)</li>
+      <li>promini16s: Arduino Pro Mini 328 16Mhz f&uuml;r einfachen eindraht Empf&auml;nger</li>
+      <li>promini16cc1101: Arduino Pro Mini 328 16Mhz f&uuml;r einen CC110x-Empf&auml;nger (SPI Verbindung)</li>
       <li>radinoCC1101: Ein Arduino kompatibler Radino mit CC110x-Empfänger (SPI Verbindung)</li>
     </ul><br>
     Notwendig f&uuml;r den Befehl <code>flash</code>. Hier sollten Sie angeben, welche Hardware Sie mit dem usbport verbunden haben. Andernfalls kann es zu Fehlfunktionen des Ger&auml;ts kommen. Wichtig ist auch das Attribut <code>updateChannelFW</code><br>
@@ -5410,7 +5418,6 @@ USB-connected devices (SIGNALduino):<br>
         Modulation 2-FSK, Datenrate=17.26 kbps, Sync Word=2DD4, Packet Length=14 Byte, Frequenz 868.35 MHz
         <ul><small>Beispiel: Regensensor Fine Offset WH40, Ambient Weather WH40, Ecowitt WH40</small></ul>
       </li>
-      
       <li>Inkbird_IBS-P01R<br>
         Modulation 2-FSK, Datenrate=10.00 kbps, Sync Word=2DD4, Packet Length=18 Byte, Frequenz 433.92 MHz
         <ul><small>Beispiel: Inkbird IBS-P01R Pool Thermometer, ITH-20R Thermo-/Hygrometer</small></ul>
