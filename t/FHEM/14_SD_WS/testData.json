@@ -2327,6 +2327,8 @@
                      "state" : "R: 0",
                      "rawRainCounter" : 0,
                      "rain_total" : 0,
+                     "batteryVoltage" : 1.5,
+                     "batteryState" : "ok",
                      "type" : "WH40"
                   },
                   "comment" : "#0"
