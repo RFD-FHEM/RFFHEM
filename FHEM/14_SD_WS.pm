@@ -1539,23 +1539,27 @@ sub SD_WS_Parse {
         #        Nibble: 01 23 45 67 89 01 23 45 67 89 01 23 45 67 
         # aa aa aa 2d d4 40 01 1C DF 8F 00 00 97 62 20 A6 80 28 01       -> ID  0x11cdf
         #                40 01 3E 3C 90 00 00 10 5B A0 2A                -> ID: 0x13e3c
-        #                FF II II II ?B RR RR XX AA ?? ?? ?? ?? ?? ?? ??
+        #                FF II II II BB RR RR XX AA ?? ?? ?? ?? ?? ?? ??
         # FF:   Family code always 0x40
         # II:   ID (1 byte)
-        #  B:   Voltage of battery / 10 => F = 15 = 1.5v    Not all models have battery reporting. Firest seen in late 2022
+        # BB:   Voltage of battery is representey by last 5 bits; voltage / 10 => 0F = 15 = 1.5v    Not all models have battery reporting. Firest seen in late 2022
         # RR:   the rain bucket tip count => 0.1mm increments
         # XX:   CRC8 of the preceding 5 bytes (Polynomial 0x31, Initial value 0x00, Input not reflected, Result not reflected)
         # SS:   Sum-8 of the preceding 5 bytes 
         # ??:   Unknown Data
-        sensortype => 'WH40',
-        model      => 'SD_WS_126_R',
-        prematch   => sub {my ($rawData,undef) = @_; return 1 if ($rawData =~ /^40/); },
-        id         => sub {my ($rawData,undef) = @_; return (substr($rawData,2,6));},
-        rain_total => sub {my ($rawData,undef) = @_; return 0.1 * hex(substr($rawData,10,4)); },
-        rawRainCounter =>  sub {my ($rawData,undef) = @_; return hex(substr($rawData,10,4)); },
-        bat => sub {my ($rawData,undef) = @_; return substr($rawData,9,1) ne '0' ? hex(substr($rawData,9,1)) > 11 ? 'ok' : 'low' : undef; },
-        batVoltage => sub {my ($rawData,undef) = @_; return substr($rawData,9,1) ne '0' ? hex(substr($rawData,9,1)) / 10 : undef; },
-        crcok      => sub { my ($rawData,undef) = @_; 
+        sensortype      => 'WH40',
+        model           => 'SD_WS_126_R',
+        prematch        => sub {my ($rawData,undef) = @_; return 1 if ($rawData =~ /^40/); },
+        id              => sub {my ($rawData,undef) = @_; return (substr($rawData,2,6));},
+        rain_total      => sub {my ($rawData,undef) = @_; return 0.1 * hex(substr($rawData,10,4)); },
+        rawRainCounter  =>  sub {my ($rawData,undef) = @_; return hex(substr($rawData,10,4)); },
+        bat             => sub {  my (undef,$bitData) = @_; 
+                                  my $v = oct(q[0b].substr($bitData,35,5)); 
+                                  return $v ne '0' ? $v > 11 ? 'ok' : 'low' : undef; },
+        batVoltage      => sub {  my (undef,$bitData) = @_; 
+                                  my $v = oct(q[0b].substr($bitData,35,5));
+                                  return $v ne '0' ? $v / 10 : undef; },
+        crcok           => sub { my ($rawData,undef) = @_; 
                             if (HAS_DigestCRC) {
                               my $calc_crc8 = Digest::CRC->new(width => 8, poly=>0x31);
                               my $crc_digest = $calc_crc8->add( pack 'H*', substr( $rawData, 0, 16 ) )->digest;

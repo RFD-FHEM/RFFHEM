@@ -2347,6 +2347,8 @@
                   },
                   "readings" : {
                      "state" : "R: 9",
+                     "batteryVoltage" : 1.6,
+                     "batteryState" : "ok",
                      "rain_total" : 9,
                      "rawRainCounter" : 90,
                      "type" : "WH40"
