@@ -1,4 +1,4 @@
-# $Id: 00_SIGNALduino.pm 3.5.5 2023-05-04 20:05:20Z sidey79 $
+# $Id: 00_SIGNALduino.pm 3.5.5 2023-05-16 16:34:07Z sidey79 $
 # v3.5.5 - https://github.com/RFD-FHEM/RFFHEM/tree/master
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incoming messages
 # see http://www.fhemwiki.de/wiki/SIGNALDuino
@@ -42,7 +42,7 @@ use List::Util qw(first);
 
 
 use constant {
-  SDUINO_VERSION                  => '3.5.5+20230504',  # Datum wird automatisch bei jedem pull request aktualisiert
+  SDUINO_VERSION                  => '3.5.5+20230516',  # Datum wird automatisch bei jedem pull request aktualisiert
   SDUINO_INIT_WAIT_XQ             => 1.5,     # wait disable device
   SDUINO_INIT_WAIT                => 2,
   SDUINO_INIT_MAXRETRY            => 3,
@@ -5413,6 +5413,10 @@ USB-connected devices (SIGNALduino):<br>
       <li>Fine_Offset_WH31_868<br>
         Modulation 2-FSK, Datenrate=17.26 kbps, Sync Word=2DD4, Packet Length=11 Byte, Frequenz 868.35 MHz
         <ul><small>Beispiel: Temp feuchte Sensor Fine Offset WH31, Froggit DP50, Ambient Weather WH31e/b, Ecowitt wh31</small></ul>
+      </li>
+      <li>Fine_Offset_WH40_868<br>
+        Modulation 2-FSK, Datenrate=17.26 kbps, Sync Word=2DD4, Packet Length=14 Byte, Frequenz 868.35 MHz
+        <ul><small>Beispiel: Regensensor Fine Offset WH40, Ambient Weather WH40, Ecowitt WH40</small></ul>
       </li>
       <li>Inkbird_IBS-P01R<br>
         Modulation 2-FSK, Datenrate=10.00 kbps, Sync Word=2DD4, Packet Length=18 Byte, Frequenz 433.92 MHz
