@@ -42,6 +42,7 @@ Supported Devices / Protocols
 |FHT80TF | door/window switch |
 |Fine Offset WH51, aka ECOWITT WH51, aka Froggit DP100, aka MISOL/1 | Soil moisture sensor |
 |Fine Offset WH57, aka Ambient Weather WH31L, aka Froggit DP60 | Thunder and lightning sensor |
+|Fine Offset WH31, aka Ambient Weather WH31E, aka ecowitt WH31 | Temperature and humidity sensor |
 |FLAMINGO | Flamingo smoke detector |
 |Fody E42 | Temperature/humidity sensor (protocol BRESSER 5-in-1) |
 |FS10 | Remote control |

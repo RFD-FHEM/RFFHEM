@@ -7,14 +7,10 @@
             "internals" : {
                "NAME" : ""
             },
-            "minProtocolVersion" : "1.27",
             "readings" : {},
-            "revision_entry" : "2022-01-18 22:33:16",
-            "revision_modul" : "14_SD_UT.pm 0 2022-01-17 20:40:59Z HomeAutoUser $",
             "tests" : [
                {}
-            ],
-            "user" : "unknown"
+            ]
          }
       ],
       "id" : "9",
@@ -22,45 +18,42 @@
       "name" : "SD_UT"
    },
    {
-      "module" : "SD_UT",
       "data" : [
          {
-            "rmsg" : "MS;P0=988;P1=-384;P2=346;P3=-1026;P4=-4923;D=240123012301230123012323232323232301232323;CP=2;SP=4;R=0;O;m=1;",
-            "user" : "privat58",
-            "revision_modul" : "14_SD_UT.pm     0 2020-12-03 22:15:57Z HomeAuto_User",
-            "minProtocolVersion" : "1.27",
-            "tests" : [
-               {
-                  "comment" : "#0",
-                  "attributes" : {
-                     "model" : "Chilitec_22640"
-                  }
-               }
-            ],
-            "internals" : {
-               "NAME" : "Chilitec_22640_AA80",
-               "DEF" : "Chilitec_22640 AA80"
-            },
             "comment" : "Remote control X-MAS LED, Button power_on",
-            "readings" : {
-               "deviceCode" : "1010101010000000",
-               "LastAction" : "receive",
-               "state" : "power_on"
-            },
-            "revision_entry" : "2021-03-24 10:28:42",
-            "dmsg" : "P14#AA808"
-         },
-         {
-            "readings" : {
-               "LastAction" : "receive",
-               "state" : "brightness_plus",
-               "deviceCode" : "1010101010000000"
-            },
+            "dmsg" : "P14#AA808",
             "internals" : {
                "DEF" : "Chilitec_22640 AA80",
                "NAME" : "Chilitec_22640_AA80"
             },
+            "readings" : {
+               "LastAction" : "receive",
+               "deviceCode" : "1010101010000000",
+               "state" : "power_on"
+            },
+            "rmsg" : "MS;P0=988;P1=-384;P2=346;P3=-1026;P4=-4923;D=240123012301230123012323232323232301232323;CP=2;SP=4;R=0;O;m=1;",
+            "tests" : [
+               {
+                  "attributes" : {
+                     "model" : "Chilitec_22640"
+                  },
+                  "comment" : "#0"
+               }
+            ]
+         },
+         {
             "comment" : "Remote control X-MAS LED, Button brightness_plus",
+            "dmsg" : "P14#AA80C",
+            "internals" : {
+               "DEF" : "Chilitec_22640 AA80",
+               "NAME" : "Chilitec_22640_AA80"
+            },
+            "readings" : {
+               "LastAction" : "receive",
+               "deviceCode" : "1010101010000000",
+               "state" : "brightness_plus"
+            },
+            "rmsg" : "MS;P0=-398;P1=974;P3=338;P4=-1034;P6=-4939;D=361034103410341034103434343434343410103434;CP=3;SP=6;R=0;",
             "tests" : [
                {
                   "attributes" : {
@@ -68,20 +61,21 @@
                   },
                   "comment" : "#1"
                }
-            ],
-            "revision_entry" : "2021-03-24 10:30:58",
-            "dmsg" : "P14#AA80C",
-            "rmsg" : "MS;P0=-398;P1=974;P3=338;P4=-1034;P6=-4939;D=361034103410341034103434343434343410103434;CP=3;SP=6;R=0;",
-            "minProtocolVersion" : "1.27",
-            "revision_modul" : "14_SD_UT.pm     0 2020-12-03 22:15:57Z HomeAuto_User",
-            "user" : "privat58"
+            ]
          },
          {
+            "comment" : "Remote control X-MAS LED, Button flickering_slowly",
+            "dmsg" : "P14#AA80A",
             "internals" : {
                "DEF" : "Chilitec_22640 AA80",
                "NAME" : "Chilitec_22640_AA80"
             },
-            "comment" : "Remote control X-MAS LED, Button flickering_slowly",
+            "readings" : {
+               "LastAction" : "receive",
+               "deviceCode" : "1010101010000000",
+               "state" : "flickering_slowly"
+            },
+            "rmsg" : "MS;P1=976;P2=-397;P3=341;P4=-1029;P5=-4940;D=351234123412341234123434343434343412341234;CP=3;SP=5;R=0;",
             "tests" : [
                {
                   "attributes" : {
@@ -89,122 +83,101 @@
                   },
                   "comment" : "#2"
                }
-            ],
-            "readings" : {
-               "deviceCode" : "1010101010000000",
-               "state" : "flickering_slowly",
-               "LastAction" : "receive"
-            },
-            "revision_entry" : "2021-03-24 10:33:19",
-            "dmsg" : "P14#AA80A",
-            "rmsg" : "MS;P1=976;P2=-397;P3=341;P4=-1029;P5=-4940;D=351234123412341234123434343434343412341234;CP=3;SP=5;R=0;",
-            "user" : "privat58",
-            "minProtocolVersion" : "1.27",
-            "revision_modul" : "14_SD_UT.pm     0 2020-12-03 22:15:57Z HomeAuto_User"
+            ]
          }
       ],
       "id" : "14",
+      "module" : "SD_UT",
       "name" : "Chilitec_22640"
    },
    {
-      "module" : "SD_UT",
-      "id" : "20",
       "data" : [
          {
-            "dmsg" : "P20#17E911B0",
-            "revision_entry" : "2021-03-24 10:54:11",
-            "readings" : {
-               "deviceCode" : "17E9",
-               "state" : "on",
-               "LastAction" : "receive"
-            },
-            "tests" : [
-               {
-                  "attributes" : {
-                     "model" : "RCnoName20"
-                  },
-                  "comment" : "#0"
-               }
-            ],
             "comment" : "Remote control with 4 buttons for diesel heating, Button on",
-            "internals" : {
-               "NAME" : "RCnoName20_17E9",
-               "DEF" : "RCnoName20 17E9"
-            },
-            "revision_modul" : "14_SD_UT.pm     0 2020-12-03 22:15:57Z HomeAuto_User",
-            "minProtocolVersion" : "1.27",
-            "user" : "elektron-bbs",
-            "rmsg" : "MS;P0=-740;P2=686;P3=-283;P5=229;P6=-7889;D=5650505023502323232323235023505023505050235050502323502323505050;CP=5;SP=6;R=67;O;m2;"
-         },
-         {
-            "user" : "elektron-bbs",
-            "revision_modul" : "14_SD_UT.pm     0 2020-12-03 22:15:57Z HomeAuto_User",
-            "minProtocolVersion" : "1.27",
-            "rmsg" : "MS;P1=-754;P2=213;P4=681;P5=-283;P6=-7869;D=2621212145214545454545452145212145212121212145214521212121452121;CP=2;SP=6;R=69;O;m2;",
-            "revision_entry" : "2021-03-24 10:55:29",
-            "dmsg" : "P20#17E90508",
-            "tests" : [
-               {
-                  "attributes" : {
-                     "model" : "RCnoName20"
-                  },
-                  "comment" : "#1"
-               }
-            ],
-            "comment" : "Remote control with 4 buttons for diesel heating, Button off",
+            "dmsg" : "P20#17E911B0",
             "internals" : {
                "DEF" : "RCnoName20 17E9",
                "NAME" : "RCnoName20_17E9"
             },
             "readings" : {
                "LastAction" : "receive",
-               "state" : "off",
-               "deviceCode" : "17E9"
-            }
+               "deviceCode" : "17E9",
+               "state" : "on"
+            },
+            "rmsg" : "MS;P0=-740;P2=686;P3=-283;P5=229;P6=-7889;D=5650505023502323232323235023505023505050235050502323502323505050;CP=5;SP=6;R=67;O;m2;",
+            "tests" : [
+               {
+                  "attributes" : {
+                     "model" : "RCnoName20"
+                  },
+                  "comment" : "#0"
+               }
+            ]
+         },
+         {
+            "comment" : "Remote control with 4 buttons for diesel heating, Button off",
+            "dmsg" : "P20#17E90508",
+            "internals" : {
+               "DEF" : "RCnoName20 17E9",
+               "NAME" : "RCnoName20_17E9"
+            },
+            "readings" : {
+               "LastAction" : "receive",
+               "deviceCode" : "17E9",
+               "state" : "off"
+            },
+            "rmsg" : "MS;P1=-754;P2=213;P4=681;P5=-283;P6=-7869;D=2621212145214545454545452145212145212121212145214521212121452121;CP=2;SP=6;R=69;O;m2;",
+            "tests" : [
+               {
+                  "attributes" : {
+                     "model" : "RCnoName20"
+                  },
+                  "comment" : "#1"
+               }
+            ]
          }
       ],
+      "id" : "20",
+      "module" : "SD_UT",
       "name" : "RCnoName20"
    },
    {
-      "name" : "RCnoName20_10",
-      "module" : "SD_UT",
       "data" : [
          {
-            "revision_modul" : "14_SD_UT.pm     0 2022-09-06 20:56:47Z elektron-bbs",
-            "minProtocolVersion" : "1.48",
-            "user" : "steffen83",
-            "rmsg" : "MU;P0=-8774;P1=282;P2=-775;P3=815;P4=-253;P5=-32001;D=10121234343434341212121212121212121212123434343412121234343412343415;CP=1;",
-            "revision_entry" : "2022-09-26 13:45:59",
+            "comment" : "Remote control with 10 buttons for fan",
             "dmsg" : "P20#3E001E3B",
+            "internals" : {
+               "DEF" : "RCnoName20_10 3E00",
+               "NAME" : "RCnoName20_10_3E00"
+            },
             "readings" : {
                "deviceCode" : "3E00",
-               "state" : "light_on",
-               "rollingCode" : "3"
+               "rollingCode" : "3",
+               "state" : "light_on"
             },
+            "rmsg" : "MU;P0=-8774;P1=282;P2=-775;P3=815;P4=-253;P5=-32001;D=10121234343434341212121212121212121212123434343412121234343412343415;CP=1;",
             "tests" : [
                {
-                  "comment" : "#0",
                   "attributes" : {
                      "model" : "RCnoName20_10"
-                  }
+                  },
+                  "comment" : "#0"
                }
-            ],
-            "comment" : "Remote control with 10 buttons for fan",
-            "internals" : {
-               "NAME" : "RCnoName20_10_3E00",
-               "DEF" : "RCnoName20_10 3E00"
-            }
+            ]
          },
          {
-            "rmsg" : "MU;P0=-238;P1=831;P3=300;P4=-762;P5=-363;P6=192;P7=-8668;D=01010101010343434343434343434343434103415156464156464641564646734341010101010343434343434343434343434103410103434103434341034343734341010101010343434343434343434343434103410103434103434341034343734341010101010343434343434343434343434103410103434103434341;CP=3;O;",
-            "revision_modul" : "14_SD_UT.pm     0 2022-09-06 20:56:47Z elektron-bbs",
-            "minProtocolVersion" : "1.48",
-            "user" : "steffen83",
+            "comment" : "Remote control with 10 buttons for fan",
+            "dmsg" : "P20#3E001644",
+            "internals" : {
+               "DEF" : "RCnoName20_10 3E00",
+               "NAME" : "RCnoName20_10_3E00"
+            },
             "readings" : {
-               "rollingCode" : "4",
                "deviceCode" : "3E00",
+               "rollingCode" : "4",
                "state" : "light_off"
             },
+            "rmsg" : "MU;P0=-238;P1=831;P3=300;P4=-762;P5=-363;P6=192;P7=-8668;D=01010101010343434343434343434343434103415156464156464641564646734341010101010343434343434343434343434103410103434103434341034343734341010101010343434343434343434343434103410103434103434341034343734341010101010343434343434343434343434103410103434103434341;CP=3;O;",
             "tests" : [
                {
                   "attributes" : {
@@ -212,114 +185,102 @@
                   },
                   "comment" : "#1"
                }
-            ],
-            "internals" : {
-               "DEF" : "RCnoName20_10 3E00",
-               "NAME" : "RCnoName20_10_3E00"
-            },
-            "comment" : "Remote control with 10 buttons for fan",
-            "revision_entry" : "2022-09-26 13:48:11",
-            "dmsg" : "P20#3E001644"
+            ]
          }
       ],
-      "id" : "20.1"
+      "id" : "20.1",
+      "module" : "SD_UT",
+      "name" : "RCnoName20_10"
    },
    {
-      "name" : "Visivo",
-      "module" : "SD_UT",
-      "id" : "24",
       "data" : [
          {
-            "rmsg" : "MU;P0=505;P1=140;P2=-771;P3=-225;P5=4558;D=012031212030303030312030303030312030303030303121212121203121203120312121212121203120312120303031212121212031212121252031212030303030312030303030312030303030303121212121203121203120312121212121203120312120303031212121212031212121252031212030;CP=1;O;",
-            "user" : "MikeRoxx",
-            "revision_modul" : "14_SD_UT.pm     0 2020-12-03 22:15:57Z HomeAuto_User",
-            "minProtocolVersion" : "1.27",
-            "tests" : [
-               {
-                  "attributes" : {
-                     "model" : "Visivo"
-                  },
-                  "comment" : "#0"
-               }
-            ],
             "comment" : "Remote control for motorized screen, Button up",
+            "dmsg" : "P24#9F7DF825029C10",
             "internals" : {
                "DEF" : "Visivo 7DF825",
                "NAME" : "Visivo_7DF825"
             },
             "readings" : {
+               "LastAction" : "receive",
                "deviceCode" : "7DF825",
-               "state" : "up",
-               "LastAction" : "receive"
+               "state" : "up"
             },
-            "revision_entry" : "2021-03-24 10:57:16",
-            "dmsg" : "P24#9F7DF825029C10"
-         },
-         {
-            "revision_entry" : "2021-03-24 10:58:43",
-            "dmsg" : "P24#9F7DF82508A210",
-            "internals" : {
-               "NAME" : "Visivo_7DF825",
-               "DEF" : "Visivo 7DF825"
-            },
-            "comment" : "Remote control for motorized screen, Button stop",
+            "rmsg" : "MU;P0=505;P1=140;P2=-771;P3=-225;P5=4558;D=012031212030303030312030303030312030303030303121212121203121203120312121212121203120312120303031212121212031212121252031212030303030312030303030312030303030303121212121203121203120312121212121203120312120303031212121212031212121252031212030;CP=1;O;",
             "tests" : [
                {
-                  "comment" : "#1",
                   "attributes" : {
                      "model" : "Visivo"
-                  }
-               }
-            ],
-            "readings" : {
-               "deviceCode" : "7DF825",
-               "LastAction" : "receive",
-               "state" : "stop"
-            },
-            "user" : "MikeRoxx",
-            "minProtocolVersion" : "1.27",
-            "revision_modul" : "14_SD_UT.pm     0 2020-12-03 22:15:57Z HomeAuto_User",
-            "rmsg" : "MU;P0=-764;P1=517;P2=-216;P3=148;P5=4550;D=012303012121212123012121212123012121212121230303030301230301230123030303012303030123012303030123030303012303030305012303012121212123012121212123012121212121230303030301230301230123030303012303030123012303030123030303012303030305012303012120;CP=3;O;"
-         }
-      ]
-   },
-   {
-      "name" : "xavax",
-      "id" : "26",
-      "data" : [
-         {
-            "revision_entry" : "2021-03-24 11:00:44",
-            "dmsg" : "P26#DAAB255487",
-            "dispatch_repeats" : "1",
-            "tests" : [
-               {
-                  "attributes" : {
-                     "model" : "xavax"
                   },
                   "comment" : "#0"
                }
-            ],
+            ]
+         },
+         {
+            "comment" : "Remote control for motorized screen, Button stop",
+            "dmsg" : "P24#9F7DF82508A210",
+            "internals" : {
+               "DEF" : "Visivo 7DF825",
+               "NAME" : "Visivo_7DF825"
+            },
+            "readings" : {
+               "LastAction" : "receive",
+               "deviceCode" : "7DF825",
+               "state" : "stop"
+            },
+            "rmsg" : "MU;P0=-764;P1=517;P2=-216;P3=148;P5=4550;D=012303012121212123012121212123012121212121230303030301230301230123030303012303030123012303030123030303012303030305012303012121212123012121212123012121212121230303030301230301230123030303012303030123012303030123030303012303030305012303012120;CP=3;O;",
+            "tests" : [
+               {
+                  "attributes" : {
+                     "model" : "Visivo"
+                  },
+                  "comment" : "#1"
+               }
+            ]
+         }
+      ],
+      "id" : "24",
+      "module" : "SD_UT",
+      "name" : "Visivo"
+   },
+   {
+      "data" : [
+         {
             "comment" : "model 00111939 - Funksteckdosen Set",
+            "dispatch_repeats" : "1",
+            "dmsg" : "P26#DAAB255487",
             "internals" : {
                "DEF" : "xavax DAAB",
                "NAME" : "xavax_DAAB"
             },
             "readings" : {
                "LastAction" : "receive",
-               "state" : "Ch1_on",
-               "deviceCode" : "DAAB"
+               "deviceCode" : "DAAB",
+               "state" : "Ch1_on"
             },
-            "user" : "elektron-bbs",
-            "revision_modul" : "14_SD_UT.pm     0 2020-12-03 22:15:57Z HomeAuto_User",
-            "minProtocolVersion" : "1.27",
-            "rmsg" : "MU;P0=412;P1=-534;P2=-1356;P3=-20601;P4=3360;P5=-3470;D=01020102010201020201010201010201020102010201020101020101010102020203010145020201020201020102010201020102020101020101020102010201020102010102010101010202020301014502020102020102010201020102010202010102010102010201020102010201010201010101020202030101450202;CP=0;R=0;O;"
+            "rmsg" : "MU;P0=412;P1=-534;P2=-1356;P3=-20601;P4=3360;P5=-3470;D=01020102010201020201010201010201020102010201020101020101010102020203010145020201020201020102010201020102020101020101020102010201020102010102010101010202020301014502020102020102010201020102010202010102010102010201020102010201010201010101020202030101450202;CP=0;R=0;O;",
+            "tests" : [
+               {
+                  "attributes" : {
+                     "model" : "xavax"
+                  },
+                  "comment" : "#0"
+               }
+            ]
          },
          {
-            "internals" : {
-               "NAME" : "xavax_DAAB",
-               "DEF" : "xavax DAAB"
-            },
             "comment" : "model 00111939 - Funksteckdosen Set",
+            "dmsg" : "P26#DAAB255478",
+            "internals" : {
+               "DEF" : "xavax DAAB",
+               "NAME" : "xavax_DAAB"
+            },
+            "readings" : {
+               "LastAction" : "receive",
+               "deviceCode" : "DAAB",
+               "state" : "Ch1_off"
+            },
+            "rmsg" : "MU;P0=-3504;P1=416;P2=-1356;P3=-535;P4=-20816;P5=3324;D=01212131212131213121312131213121213131213131213121312131213121313131212121213131314131350121213121213121312131213121312121313121313121312131213121312131313121212121313131413135012121312121312131213121312131212131312131312131213121312131213131312121212131;CP=1;R=50;O;",
             "tests" : [
                {
                   "attributes" : {
@@ -327,83 +288,37 @@
                   },
                   "comment" : "#1"
                }
-            ],
-            "readings" : {
-               "deviceCode" : "DAAB",
-               "state" : "Ch1_off",
-               "LastAction" : "receive"
-            },
-            "revision_entry" : "2021-03-24 11:02:21",
-            "dmsg" : "P26#DAAB255478",
-            "rmsg" : "MU;P0=-3504;P1=416;P2=-1356;P3=-535;P4=-20816;P5=3324;D=01212131212131213121312131213121213131213131213121312131213121313131212121213131314131350121213121213121312131213121312121313121313121312131213121312131313121212121313131413135012121312121312131213121312131212131312131312131213121312131213131312121212131;CP=1;R=50;O;",
-            "user" : "elektron-bbs",
-            "minProtocolVersion" : "1.27",
-            "revision_modul" : "14_SD_UT.pm     0 2020-12-03 22:15:57Z HomeAuto_User"
+            ]
          }
       ],
-      "module" : "SD_UT"
+      "id" : "26",
+      "module" : "SD_UT",
+      "name" : "xavax"
    },
    {
       "data" : [
          {
-            "revision_entry" : "2021-03-24 11:21:15",
-            "dmsg" : "P29#FBE",
+            "comment" : "remote control for example Westinghouse airfan (ID 30 additionally)",
             "dispatch_repeats" : "3",
-            "tests" : [
-               {
-                  "comment" : "#0",
-                  "attributes" : {
-                     "model" : "Buttons_five"
-                  }
-               }
-            ],
+            "dmsg" : "P29#FBE",
             "internals" : {
                "DEF" : "Buttons_five E",
                "NAME" : "Buttons_five_E"
             },
-            "comment" : "remote control for example Westinghouse airfan (ID 30 additionally)",
             "readings" : {
-               "deviceCode" : "1110 (off|off|off|on)",
                "LastAction" : "receive",
+               "deviceCode" : "1110 (off|off|off|on)",
                "state" : "fan_off"
             },
-            "user" : "gadget",
-            "revision_modul" : "14_SD_UT.pm     0 2020-12-03 22:15:57Z HomeAuto_User",
-            "minProtocolVersion" : "1.27",
-            "rmsg" : "MU;P0=250;P1=-492;P2=166;P3=-255;P4=491;P5=-8588;D=052121212121234121212121234521212121212341212121212345212121212123412121212123452121212121234121212121234;CP=0;"
-         }
-      ],
-      "id" : "29",
-      "module" : "SD_UT",
-      "name" : "HT12e"
-   },
-   {
-      "data" : [
-         {
-            "revision_entry" : "2022-08-30 21:14:56",
-            "dmsg" : "P29#DFE",
-            "readings" : {
-               "LastAction" : "receive",
-               "state" : "light_dimm",
-               "deviceCode" : "1110 (off|off|off|on)"
-            },
-            "internals" : {
-               "NAME" : "Buttons_six_E",
-               "DEF" : "Buttons_six E"
-            },
-            "comment" : "remote with 6 buttons, with light dimmer, for example Westinghouse airfan",
+            "rmsg" : "MU;P0=250;P1=-492;P2=166;P3=-255;P4=491;P5=-8588;D=052121212121234121212121234521212121212341212121212345212121212123412121212123452121212121234121212121234;CP=0;",
             "tests" : [
                {
-                  "comment" : "#0",
                   "attributes" : {
-                     "model" : "Buttons_six"
-                  }
+                     "model" : "Buttons_five"
+                  },
+                  "comment" : "#0"
                }
-            ],
-            "minProtocolVersion" : "1.46",
-            "revision_modul" : "14_SD_UT.pm 0 2022-06-14 07:33:24Z HomeAutoUser",
-            "user" : "monosurr0und",
-            "rmsg" : "MU;P0=24164;P1=-495;P2=191;P3=-271;P4=415;P5=-8052;D=01212341212121212121212345212123412121212121212123452121234121212121212121234521212341212121212121212345212123412121212121212123452121234121212121212121234521212341212121212121212345212123412121212121212123452121234121212121212121234521212341212121212121;CP=2;R=52;O;"
+            ]
          }
       ],
       "id" : "29",
@@ -413,15 +328,49 @@
    {
       "data" : [
          {
-            "rmsg" : "MU;P0=309;P1=636;P2=-690;P3=-363;P4=-10027;D=012031203120402031312031203120312031204020313120312031203120312040203131203120312031203120402031312031203120312031204020313120312031203120312040203131203120312031203120402031312031203120312031204020313120312031203120312040203131203120312030;CP=0;O;",
-            "user" : "Dr.E.Witz",
-            "minProtocolVersion" : "1.27",
-            "revision_modul" : "14_SD_UT.pm     0 2020-12-03 22:15:57Z HomeAuto_User",
-            "comment" : "remote door reed switch, model is under development (ID 63,83 additionally)",
+            "comment" : "remote with 6 buttons, with light dimmer, for example Westinghouse airfan",
+            "dmsg" : "P29#DFE",
             "internals" : {
-               "NAME" : "Unitec_47031_95",
-               "DEF" : "Unitec_47031 95"
+               "DEF" : "Buttons_six E",
+               "NAME" : "Buttons_six_E"
             },
+            "readings" : {
+               "LastAction" : "receive",
+               "deviceCode" : "1110 (off|off|off|on)",
+               "state" : "light_dimm"
+            },
+            "rmsg" : "MU;P0=24164;P1=-495;P2=191;P3=-271;P4=415;P5=-8052;D=01212341212121212121212345212123412121212121212123452121234121212121212121234521212341212121212121212345212123412121212121212123452121234121212121212121234521212341212121212121212345212123412121212121212123452121234121212121212121234521212341212121212121;CP=2;R=52;O;",
+            "tests" : [
+               {
+                  "attributes" : {
+                     "model" : "Buttons_six"
+                  },
+                  "comment" : "#0"
+               }
+            ]
+         }
+      ],
+      "id" : "29",
+      "module" : "SD_UT",
+      "name" : "HT12e"
+   },
+   {
+      "data" : [
+         {
+            "comment" : "remote door reed switch, model is under development (ID 63,83 additionally)",
+            "dispatch_repeats" : "7",
+            "dmsg" : "P30#955",
+            "internals" : {
+               "DEF" : "Unitec_47031 95",
+               "NAME" : "Unitec_47031_95"
+            },
+            "readings" : {
+               "System-Housecode" : "10010101 (on|off|off|on|off|on|off|on)",
+               "Usersystem" : "Unitec 47121",
+               "Zone" : "010 (off|on|off) - Zone 3",
+               "state" : "1"
+            },
+            "rmsg" : "MU;P0=309;P1=636;P2=-690;P3=-363;P4=-10027;D=012031203120402031312031203120312031204020313120312031203120312040203131203120312031203120402031312031203120312031204020313120312031203120312040203131203120312031203120402031312031203120312031204020313120312031203120312040203131203120312030;CP=0;O;",
             "tests" : [
                {
                   "attributes" : {
@@ -429,16 +378,7 @@
                   },
                   "comment" : "#0"
                }
-            ],
-            "readings" : {
-               "Usersystem" : "Unitec 47121",
-               "System-Housecode" : "10010101 (on|off|off|on|off|on|off|on)",
-               "state" : "1",
-               "Zone" : "010 (off|on|off) - Zone 3"
-            },
-            "revision_entry" : "2021-03-24 11:23:54",
-            "dmsg" : "P30#955",
-            "dispatch_repeats" : "7"
+            ]
          }
       ],
       "id" : "30",
@@ -446,79 +386,20 @@
       "name" : "Unitec_47031"
    },
    {
-      "module" : "SD_UT",
       "data" : [
          {
-            "revision_entry" : "2021-03-24 13:31:15",
+            "comment" : "https://github.com/RFD-FHEM/RFFHEM/issues/44",
             "dmsg" : "P34#891EE",
+            "internals" : {
+               "DEF" : "QUIGG_DMV 891",
+               "NAME" : "QUIGG_DMV_891"
+            },
             "readings" : {
-               "deviceCode" : "100010010001",
                "LastAction" : "receive",
+               "deviceCode" : "100010010001",
                "state" : "Ch1_on"
             },
-            "tests" : [
-               {
-                  "comment" : "#0",
-                  "attributes" : {
-                     "model" : "QUIGG_DMV"
-                  }
-               }
-            ],
-            "comment" : "https://github.com/RFD-FHEM/RFFHEM/issues/44",
-            "internals" : {
-               "NAME" : "QUIGG_DMV_891",
-               "DEF" : "QUIGG_DMV 891"
-            },
-            "revision_modul" : "14_SD_UT.pm     0 2020-12-03 22:15:57Z HomeAuto_User",
-            "minProtocolVersion" : "1.27",
-            "user" : "kaihs",
-            "rmsg" : "MU;P0=-9584;P1=592;P2=-665;P3=1223;P4=-1311;D=01234141412341412341414123232323412323234;CP=1;R=0;"
-         },
-         {
-            "rmsg" : "MU;P0=-12724;P1=597;P2=-667;P3=1253;P4=-1331;D=01234141412341412341414123232323232323232;CP=1;",
-            "user" : "kaihs",
-            "minProtocolVersion" : "1.27",
-            "revision_modul" : "14_SD_UT.pm     0 2020-12-03 22:15:57Z HomeAuto_User",
-            "internals" : {
-               "NAME" : "QUIGG_DMV_891",
-               "DEF" : "QUIGG_DMV 891"
-            },
-            "comment" : "https://github.com/RFD-FHEM/RFFHEM/issues/44",
-            "tests" : [
-               {
-                  "attributes" : {
-                     "model" : "QUIGG_DMV"
-                  },
-                  "comment" : "#1"
-               }
-            ],
-            "readings" : {
-               "state" : "Ch1_off",
-               "LastAction" : "receive",
-               "deviceCode" : "100010010001"
-            },
-            "dmsg" : "P34#891FF",
-            "revision_entry" : "2021-03-24 13:33:44"
-         }
-      ],
-      "id" : "34",
-      "name" : "Pollin ISOTRONIC"
-   },
-   {
-      "name" : "QUIGG_GT-7000",
-      "id" : "34",
-      "data" : [
-         {
-            "rmsg" : "MU;P0=-9812;P1=589;P2=-671;P3=1261;P4=-1320;D=012341412323232341412341412323232323232323;CP=3;R=19;",
-            "revision_modul" : "14_SD_UT.pm     0 2020-12-03 22:15:57Z HomeAuto_User",
-            "minProtocolVersion" : "1.27",
-            "model" : "QUIGG_DMV",
-            "user" : "SD_Protocol",
-            "readings" : {
-               "state" : "Ch1_off",
-               "LastAction" : "receive",
-               "deviceCode" : "100111100100"
-            },
+            "rmsg" : "MU;P0=-9584;P1=592;P2=-665;P3=1223;P4=-1311;D=01234141412341412341414123232323412323234;CP=1;R=0;",
             "tests" : [
                {
                   "attributes" : {
@@ -526,72 +407,110 @@
                   },
                   "comment" : "#0"
                }
-            ],
+            ]
+         },
+         {
+            "comment" : "https://github.com/RFD-FHEM/RFFHEM/issues/44",
+            "dmsg" : "P34#891FF",
+            "internals" : {
+               "DEF" : "QUIGG_DMV 891",
+               "NAME" : "QUIGG_DMV_891"
+            },
+            "readings" : {
+               "LastAction" : "receive",
+               "deviceCode" : "100010010001",
+               "state" : "Ch1_off"
+            },
+            "rmsg" : "MU;P0=-12724;P1=597;P2=-667;P3=1253;P4=-1331;D=01234141412341412341414123232323232323232;CP=1;",
+            "tests" : [
+               {
+                  "attributes" : {
+                     "model" : "QUIGG_DMV"
+                  },
+                  "comment" : "#1"
+               }
+            ]
+         }
+      ],
+      "id" : "34",
+      "module" : "SD_UT",
+      "name" : "Pollin ISOTRONIC"
+   },
+   {
+      "data" : [
+         {
+            "dmsg" : "P34#9E4FF",
             "internals" : {
                "DEF" : "QUIGG_DMV 9E4",
                "NAME" : "QUIGG_DMV_9E4"
             },
-            "dmsg" : "P34#9E4FF",
-            "revision_entry" : "2021-03-24 13:35:48"
-         }
-      ],
-      "module" : "SD_UT"
-   },
-   {
-      "name" : "TR_502MSV",
-      "module" : "SD_UT",
-      "data" : [
-         {
-            "rmsg" : "MU;P0=4192;P1=-663;P2=1325;P3=-1320;P4=668;P5=-9905;D=01212121212121212121212121212123412121234541212121212121212121212121212123412121234541212121212121212121212121212123412121234541212121212121212121212121212123412121234541212121212121212121212121212123412121234541212121212121212121212121212123412121234541;CP=2;R=71;O;",
-            "minProtocolVersion" : "1.27",
-            "revision_modul" : "14_SD_UT.pm     0 2020-12-03 22:15:57Z HomeAuto_User",
-            "user" : "codeartisan-de",
+            "model" : "QUIGG_DMV",
             "readings" : {
-               "deviceCode" : "111111111111",
-               "state" : "Ch1_on",
-               "LastAction" : "receive"
+               "LastAction" : "receive",
+               "deviceCode" : "100111100100",
+               "state" : "Ch1_off"
             },
-            "comment" : "https://github.com/RFD-FHEM/RFFHEM/issues/716",
-            "internals" : {
-               "NAME" : "TR_502MSV_FFF",
-               "DEF" : "TR_502MSV FFF"
-            },
+            "rmsg" : "MU;P0=-9812;P1=589;P2=-671;P3=1261;P4=-1320;D=012341412323232341412341412323232323232323;CP=3;R=19;",
             "tests" : [
                {
-                  "comment" : "#0",
                   "attributes" : {
-                     "model" : "TR_502MSV"
-                  }
+                     "model" : "QUIGG_DMV"
+                  },
+                  "comment" : "#0"
                }
-            ],
-            "revision_entry" : "2021-03-24 13:38:03",
-            "dmsg" : "P34#FFFEE",
-            "dispatch_repeats" : "4"
+            ]
          }
       ],
-      "id" : "34"
+      "id" : "34",
+      "module" : "SD_UT",
+      "name" : "QUIGG_GT-7000"
    },
    {
-      "module" : "SD_UT",
       "data" : [
          {
-            "minProtocolVersion" : "1.27",
-            "revision_modul" : "14_SD_UT.pm     0 2020-12-03 22:15:57Z HomeAuto_User",
-            "user" : "drhirn",
-            "rmsg" : "MU;P0=-2009;P1=2076;P2=-259;P3=329;P4=-15751;P5=1216;D=012121212303012303034121212301212303012121212303012303034121212301212303012121212303012303034121212305;CP=3;R=37;",
-            "dispatch_repeats" : "1",
-            "revision_entry" : "2021-03-25 13:35:12",
-            "dmsg" : "P46#ECF20",
+            "comment" : "https://github.com/RFD-FHEM/RFFHEM/issues/716",
+            "dispatch_repeats" : "4",
+            "dmsg" : "P34#FFFEE",
+            "internals" : {
+               "DEF" : "TR_502MSV FFF",
+               "NAME" : "TR_502MSV_FFF"
+            },
             "readings" : {
-               "state" : "Button_1",
                "LastAction" : "receive",
+               "deviceCode" : "111111111111",
+               "state" : "Ch1_on"
+            },
+            "rmsg" : "MU;P0=4192;P1=-663;P2=1325;P3=-1320;P4=668;P5=-9905;D=01212121212121212121212121212123412121234541212121212121212121212121212123412121234541212121212121212121212121212123412121234541212121212121212121212121212123412121234541212121212121212121212121212123412121234541212121212121212121212121212123412121234541;CP=2;R=71;O;",
+            "tests" : [
+               {
+                  "attributes" : {
+                     "model" : "TR_502MSV"
+                  },
+                  "comment" : "#0"
+               }
+            ]
+         }
+      ],
+      "id" : "34",
+      "module" : "SD_UT",
+      "name" : "TR_502MSV"
+   },
+   {
+      "data" : [
+         {
+            "comment" : "Geiger Rolladen",
+            "dispatch_repeats" : "1",
+            "dmsg" : "P46#ECF20",
+            "internals" : {
+               "DEF" : "Tedsen_SKX2xx 1F10110",
+               "NAME" : "Tedsen_SKX2xx_1F10110"
+            },
+            "readings" : {
+               "LastAction" : "receive",
+               "state" : "Button_1",
                "tristateCode" : "1F10110F0"
             },
-            "internals" : {
-               "NAME" : "Tedsen_SKX2xx_1F10110",
-               "DEF" : "Tedsen_SKX2xx 1F10110"
-            },
-            "comment" : "Geiger Rolladen",
+            "rmsg" : "MU;P0=-2009;P1=2076;P2=-259;P3=329;P4=-15751;P5=1216;D=012121212303012303034121212301212303012121212303012303034121212301212303012121212303012303034121212305;CP=3;R=37;",
             "tests" : [
                {
                   "attributes" : {
@@ -602,85 +521,48 @@
             ]
          },
          {
-            "user" : "self_build",
-            "minProtocolVersion" : "1.27",
-            "revision_modul" : "14_SD_UT.pm     0 2020-12-03 22:15:57Z HomeAuto_User",
-            "rmsg" : "MU;P0=-32001;P1=2072;P2=-260;P3=326;P4=-2015;P5=-15769;D=01212123412123434123412343434123412151212123412123434123412343434123412151212123412123434123412343434123412151212123412123434123412343434123412151212123412123434123412343434123412151212123412123434123412343434123412151212123412123434123412343434123412151;CP=3;R=37;O;",
-            "dmsg" : "P46#ECA2C",
-            "revision_entry" : "2021-03-25 13:37:16",
-            "dispatch_repeats" : "5",
             "comment" : "reconstructed last bit 1",
+            "dispatch_repeats" : "5",
+            "dmsg" : "P46#ECA2C",
             "internals" : {
-               "NAME" : "Tedsen_SKX6xx_1F10FF0",
-               "DEF" : "Tedsen_SKX6xx 1F10FF0"
+               "DEF" : "Tedsen_SKX6xx 1F10FF0",
+               "NAME" : "Tedsen_SKX6xx_1F10FF0"
             },
-            "tests" : [
-               {
-                  "comment" : "#1",
-                  "attributes" : {
-                     "model" : "Tedsen_SKX6xx"
-                  }
-               }
-            ],
             "readings" : {
                "LastAction" : "receive",
                "state" : "Button_6",
                "tristateCode" : "1F10FF0F1"
-            }
+            },
+            "rmsg" : "MU;P0=-32001;P1=2072;P2=-260;P3=326;P4=-2015;P5=-15769;D=01212123412123434123412343434123412151212123412123434123412343434123412151212123412123434123412343434123412151212123412123434123412343434123412151212123412123434123412343434123412151212123412123434123412343434123412151212123412123434123412343434123412151;CP=3;R=37;O;",
+            "tests" : [
+               {
+                  "attributes" : {
+                     "model" : "Tedsen_SKX6xx"
+                  },
+                  "comment" : "#1"
+               }
+            ]
          }
       ],
       "id" : "46",
+      "module" : "SD_UT",
       "name" : "Tedsen_SKXxxx"
    },
    {
-      "module" : "SD_UT",
       "data" : [
          {
-            "revision_modul" : "14_SD_UT.pm     0 2020-12-03 22:15:57Z HomeAuto_User",
-            "minProtocolVersion" : "1.27",
-            "user" : "Horst12345",
-            "rmsg" : "MU;P0=5036;P1=-624;P2=591;P3=-227;P4=187;P5=-5048;D=0123412341414123234141414141414141412341232341414141232323234123234141414141414123414141414141414141234141414123234141412341232323250123412341414123234141414141414141412341232341414141232323234123234141414141414123414141414141414141234141414123234141412;CP=4;O;",
-            "revision_entry" : "2021-04-22 22:10:53",
-            "dmsg" : "P56#A300587B010043178",
-            "readings" : {
-               "deviceCode" : "00587B",
-               "state" : "down",
-               "LastAction" : "receive"
-            },
-            "tests" : [
-               {
-                  "attributes" : {
-                     "model" : "AC114_01B"
-                  },
-                  "comment" : "#0"
-               }
-            ],
             "comment" : "Celexon Motorleinwand",
+            "dmsg" : "P56#A300587B010043178",
             "internals" : {
                "DEF" : "AC114_01B 00587B",
                "NAME" : "AC114_01B_00587B"
-            }
-         }
-      ],
-      "id" : "56",
-      "name" : "AC114_01B"
-   },
-   {
-      "module" : "SD_UT",
-      "id" : "56",
-      "data" : [
-         {
-            "user" : "TheChatty",
-            "minProtocolVersion" : "1.27",
-            "revision_modul" : "14_SD_UT.pm     0 2020-12-03 22:15:57Z HomeAuto_User",
-            "rmsg" : "MU;P0=-16412;P1=5195;P2=-598;P3=585;P4=-208;P5=192;D=01234523452525234345234525252343434345252345234345234525234523434525252525252525234525252525252525252525252345234345234343434343434341234523452525234345234525252343434345252345234345234525234523434525252525252525234525252525252525252525252345234345234343;CP=5;R=105;O;",
-            "revision_entry" : "2021-04-22 22:11:39",
-            "dmsg" : "P56#A347969601000B7F8",
-            "comment" : "Remote control AC114-01B",
-            "internals" : {
-               "NAME" : "AC114_01B_479696",
-               "DEF" : "AC114_01B 479696"
             },
+            "readings" : {
+               "LastAction" : "receive",
+               "deviceCode" : "00587B",
+               "state" : "down"
+            },
+            "rmsg" : "MU;P0=5036;P1=-624;P2=591;P3=-227;P4=187;P5=-5048;D=0123412341414123234141414141414141412341232341414141232323234123234141414141414123414141414141414141234141414123234141412341232323250123412341414123234141414141414141412341232341414141232323234123234141414141414123414141414141414141234141414123234141412;CP=4;O;",
             "tests" : [
                {
                   "attributes" : {
@@ -688,53 +570,79 @@
                   },
                   "comment" : "#0"
                }
-            ],
-            "readings" : {
-               "deviceCode" : "479696",
-               "LastAction" : "receive",
-               "state" : "up"
-            }
-         },
-         {
-            "revision_entry" : "2021-04-22 22:12:06",
-            "dmsg" : "P56#A3479696010023978",
-            "tests" : [
-               {
-                  "comment" : "#1",
-                  "attributes" : {
-                     "model" : "AC114_01B"
-                  }
-               }
-            ],
-            "comment" : "remote control AC114-01B",
-            "internals" : {
-               "NAME" : "AC114_01B_479696",
-               "DEF" : "AC114_01B 479696"
-            },
-            "readings" : {
-               "deviceCode" : "479696",
-               "LastAction" : "receive",
-               "state" : "stop"
-            },
-            "user" : "TheChatty",
-            "revision_modul" : "14_SD_UT.pm     0 2020-12-03 22:15:57Z HomeAuto_User",
-            "minProtocolVersion" : "1.27",
-            "rmsg" : "MU;P0=-2341;P1=5206;P2=-571;P3=591;P4=-211;P5=207;D=01234523452525234345234525252343434345252345234345234525234523434525252525252525234525252525252525252523452525234343452523452343434341234523452525234345234525252343434345252345234345234525234523434525252525252525234525252525252525252523452525234343452523;CP=5;R=107;O;"
+            ]
          }
       ],
+      "id" : "56",
+      "module" : "SD_UT",
       "name" : "AC114_01B"
    },
    {
-      "module" : "SD_UT",
       "data" : [
          {
-            "revision_entry" : "2021-04-22 22:17:37",
+            "comment" : "Remote control AC114-01B",
+            "dmsg" : "P56#A347969601000B7F8",
+            "internals" : {
+               "DEF" : "AC114_01B 479696",
+               "NAME" : "AC114_01B_479696"
+            },
+            "readings" : {
+               "LastAction" : "receive",
+               "deviceCode" : "479696",
+               "state" : "up"
+            },
+            "rmsg" : "MU;P0=-16412;P1=5195;P2=-598;P3=585;P4=-208;P5=192;D=01234523452525234345234525252343434345252345234345234525234523434525252525252525234525252525252525252525252345234345234343434343434341234523452525234345234525252343434345252345234345234525234523434525252525252525234525252525252525252525252345234345234343;CP=5;R=105;O;",
+            "tests" : [
+               {
+                  "attributes" : {
+                     "model" : "AC114_01B"
+                  },
+                  "comment" : "#0"
+               }
+            ]
+         },
+         {
+            "comment" : "remote control AC114-01B",
+            "dmsg" : "P56#A3479696010023978",
+            "internals" : {
+               "DEF" : "AC114_01B 479696",
+               "NAME" : "AC114_01B_479696"
+            },
+            "readings" : {
+               "LastAction" : "receive",
+               "deviceCode" : "479696",
+               "state" : "stop"
+            },
+            "rmsg" : "MU;P0=-2341;P1=5206;P2=-571;P3=591;P4=-211;P5=207;D=01234523452525234345234525252343434345252345234345234525234523434525252525252525234525252525252525252523452525234343452523452343434341234523452525234345234525252343434345252345234345234525234523434525252525252525234525252525252525252523452525234343452523;CP=5;R=107;O;",
+            "tests" : [
+               {
+                  "attributes" : {
+                     "model" : "AC114_01B"
+                  },
+                  "comment" : "#1"
+               }
+            ]
+         }
+      ],
+      "id" : "56",
+      "module" : "SD_UT",
+      "name" : "AC114_01B"
+   },
+   {
+      "data" : [
+         {
+            "comment" : "Vista Remote Control",
             "dmsg" : "P68#618C0",
             "internals" : {
                "DEF" : "OR28V 1",
                "NAME" : "OR28V_1"
             },
-            "comment" : "Vista Remote Control",
+            "readings" : {
+               "LastAction" : "receive",
+               "deviceCode" : "0",
+               "state" : "channel_minus"
+            },
+            "rmsg" : "MS;P1=545;P2=-552;P4=-1652;P6=-4400;P7=2746;D=16741214141212121214141212121414121212121212;CP=1;SP=6;m2;",
             "tests" : [
                {
                   "attributes" : {
@@ -742,20 +650,21 @@
                   },
                   "comment" : "#0"
                }
-            ],
-            "readings" : {
-               "LastAction" : "receive",
-               "state" : "channel_minus",
-               "deviceCode" : "0"
-            },
-            "user" : "elektron-bbs",
-            "minProtocolVersion" : "1.27",
-            "revision_modul" : "14_SD_UT.pm     0 2020-12-03 22:15:57Z HomeAuto_User",
-            "rmsg" : "MS;P1=545;P2=-552;P4=-1652;P6=-4400;P7=2746;D=16741214141212121214141212121414121212121212;CP=1;SP=6;m2;"
+            ]
          },
          {
-            "revision_entry" : "2021-04-22 22:07:14",
+            "comment" : "Vista Remote Control",
             "dmsg" : "P68#608B0",
+            "internals" : {
+               "DEF" : "OR28V 1",
+               "NAME" : "OR28V_1"
+            },
+            "readings" : {
+               "LastAction" : "receive",
+               "deviceCode" : "0",
+               "state" : "channel_plus"
+            },
+            "rmsg" : "MS;P1=532;P2=-562;P3=-1666;P4=2544;P6=-4412;D=16431213131212121212131212121312131312121212;CP=1;SP=6;",
             "tests" : [
                {
                   "attributes" : {
@@ -763,79 +672,58 @@
                   },
                   "comment" : "#1"
                }
-            ],
-            "comment" : "Vista Remote Control",
-            "internals" : {
-               "NAME" : "OR28V_1",
-               "DEF" : "OR28V 1"
-            },
-            "readings" : {
-               "state" : "channel_plus",
-               "LastAction" : "receive",
-               "deviceCode" : "0"
-            },
-            "user" : "elektron-bbs",
-            "revision_modul" : "14_SD_UT.pm     0 2020-12-03 22:15:57Z HomeAuto_User",
-            "minProtocolVersion" : "1.27",
-            "rmsg" : "MS;P1=532;P2=-562;P3=-1666;P4=2544;P6=-4412;D=16431213131212121212131212121312131312121212;CP=1;SP=6;"
+            ]
          },
          {
             "comment" : "Vista Remote Control",
+            "dmsg" : "P68#57820",
             "internals" : {
                "DEF" : "OR28V 1",
                "NAME" : "OR28V_1"
             },
+            "readings" : {
+               "LastAction" : "receive",
+               "deviceCode" : "0",
+               "state" : "power"
+            },
+            "rmsg" : "MS;P0=-544;P1=556;P2=-1653;P3=-4388;P4=2758;D=13421012101210121212121010101010121010101010;CP=1;SP=3;m2;",
             "tests" : [
                {
-                  "comment" : "#2",
                   "attributes" : {
                      "model" : "OR28V"
-                  }
+                  },
+                  "comment" : "#2"
                }
-            ],
-            "readings" : {
-               "state" : "power",
-               "LastAction" : "receive",
-               "deviceCode" : "0"
-            },
-            "revision_entry" : "2021-04-22 22:07:38",
-            "dmsg" : "P68#57820",
-            "rmsg" : "MS;P0=-544;P1=556;P2=-1653;P3=-4388;P4=2758;D=13421012101210121212121010101010121010101010;CP=1;SP=3;m2;",
-            "user" : "elektron-bbs",
-            "minProtocolVersion" : "1.27",
-            "revision_modul" : "14_SD_UT.pm     0 2020-12-03 22:15:57Z HomeAuto_User"
+            ]
          }
       ],
       "id" : "68",
+      "module" : "SD_UT",
       "name" : "Medion OR28V"
    },
    {
       "data" : [
          {
-            "rmsg" : "MU;P0=-578;P1=1033;P2=506;P3=-1110;P4=13632;D=0101010232323101040101010101010101023232323102323101010231023102310231010232323101010101010101010232323101040101010101010101023232323102323101010231023102310231010232323101010101010101010232323101040101010101010101023232323102323101010231023102310231010;CP=2;R=77;",
-            "minProtocolVersion" : "1.27",
-            "revision_modul" : "14_SD_UT.pm     0 2020-12-03 22:15:57Z HomeAuto_User",
-            "user" : "SD_Protocol",
-            "readings" : {
-               "deviceCode" : "1111011000101010100111000000",
-               "state" : "receive"
-            },
+            "comment" : "(ID 8,63 additionally)",
+            "dispatch_repeats" : "1",
+            "dmsg" : "P69#00F62A9C01C",
             "internals" : {
                "DEF" : "HS1_868_BS F62A9C01C",
                "NAME" : "HS1_868_BS_F62A9C01C"
             },
-            "comment" : "(ID 8,63 additionally)",
+            "readings" : {
+               "deviceCode" : "1111011000101010100111000000",
+               "state" : "receive"
+            },
+            "rmsg" : "MU;P0=-578;P1=1033;P2=506;P3=-1110;P4=13632;D=0101010232323101040101010101010101023232323102323101010231023102310231010232323101010101010101010232323101040101010101010101023232323102323101010231023102310231010232323101010101010101010232323101040101010101010101023232323102323101010231023102310231010;CP=2;R=77;",
             "tests" : [
                {
-                  "comment" : "#0",
                   "attributes" : {
                      "model" : "HS1_868_BS"
-                  }
+                  },
+                  "comment" : "#0"
                }
-            ],
-            "revision_entry" : "2021-04-22 22:05:13",
-            "dmsg" : "P69#00F62A9C01C",
-            "dispatch_repeats" : "1"
+            ]
          }
       ],
       "id" : "69",
@@ -843,48 +731,47 @@
       "name" : "HS1-868-BS"
    },
    {
-      "name" : "HSM4",
-      "module" : "SD_UT",
-      "id" : "69",
       "data" : [
          {
-            "rmsg" : "MU;P0=-508;P1=1029;P2=503;P3=-1023;P4=12388;D=01010232323232310104010101010101010102323231010232310231023232323231023101023101010231010101010232323232310104010101010101010102323231010232310231023232323231023101023101010231010101010232323232310104010101010101010102323231010232310231023232323231023101;CP=2;R=37;O;",
-            "revision_modul" : "14_SD_UT.pm     0 2020-12-03 22:15:57Z HomeAuto_User",
-            "minProtocolVersion" : "1.27",
-            "user" : "SD_Protocol",
-            "readings" : {
-               "deviceCode" : "1110011010111110100100010000",
-               "state" : "button_1"
-            },
-            "tests" : [
-               {
-                  "comment" : "#0",
-                  "attributes" : {
-                     "model" : "HSM4"
-                  }
-               }
-            ],
+            "comment" : "(ID 8,42,63 additionally)",
+            "dispatch_repeats" : "1",
+            "dmsg" : "P69#00E6BE9107C",
             "internals" : {
                "DEF" : "HSM4 E6BE910",
                "NAME" : "HSM4_E6BE910"
             },
-            "comment" : "(ID 8,42,63 additionally)",
-            "revision_entry" : "2021-04-22 22:03:10",
-            "dmsg" : "P69#00E6BE9107C",
-            "dispatch_repeats" : "1"
+            "readings" : {
+               "deviceCode" : "1110011010111110100100010000",
+               "state" : "button_1"
+            },
+            "rmsg" : "MU;P0=-508;P1=1029;P2=503;P3=-1023;P4=12388;D=01010232323232310104010101010101010102323231010232310231023232323231023101023101010231010101010232323232310104010101010101010102323231010232310231023232323231023101023101010231010101010232323232310104010101010101010102323231010232310231023232323231023101;CP=2;R=37;O;",
+            "tests" : [
+               {
+                  "attributes" : {
+                     "model" : "HSM4"
+                  },
+                  "comment" : "#0"
+               }
+            ]
          }
-      ]
+      ],
+      "id" : "69",
+      "module" : "SD_UT",
+      "name" : "HSM4"
    },
    {
-      "name" : "LED XM21",
-      "module" : "SD_UT",
-      "id" : "76",
       "data" : [
          {
+            "dmsg" : "P76#FFFFFFFFFFFFFFFF",
             "internals" : {
                "DEF" : "LED_XM21_0 FFFFFFFFFFFFFF",
                "NAME" : "LED_XM21_0_FFFFFFFFFFFFFF"
             },
+            "readings" : {
+               "deviceCode" : "11111111111111111111111111111111111111111111111111111111",
+               "state" : "on"
+            },
+            "rmsg" : "MU;P0=-205;P1=113;P3=406;D=010101010101010101010101010101010101010101010101010101010101030303030101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010103030303010101010101010101010100;CP=1;R=69;",
             "tests" : [
                {
                   "attributes" : {
@@ -892,23 +779,19 @@
                   },
                   "comment" : "#0"
                }
-            ],
-            "readings" : {
-               "deviceCode" : "11111111111111111111111111111111111111111111111111111111",
-               "state" : "on"
-            },
-            "revision_entry" : "2021-04-22 19:22:13",
-            "dmsg" : "P76#FFFFFFFFFFFFFFFF",
-            "rmsg" : "MU;P0=-205;P1=113;P3=406;D=010101010101010101010101010101010101010101010101010101010101030303030101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010103030303010101010101010101010100;CP=1;R=69;",
-            "user" : "sidey79",
-            "minProtocolVersion" : "1.27",
-            "revision_modul" : "14_SD_UT.pm     0 2020-12-03 22:15:57Z HomeAuto_User"
+            ]
          },
          {
+            "dmsg" : "P76#FFFFFFFFFFFFFFC",
+            "internals" : {
+               "DEF" : "LED_XM21_0 FFFFFFFFFFFFFF",
+               "NAME" : "LED_XM21_0_FFFFFFFFFFFFFF"
+            },
+            "readings" : {
+               "deviceCode" : "11111111111111111111111111111111111111111111111111111111",
+               "state" : "off"
+            },
             "rmsg" : "MU;P0=-203;P1=412;P2=114;D=01010101020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020101010102020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020200;CP=2;R=74;",
-            "user" : "sidey79",
-            "revision_modul" : "14_SD_UT.pm     0 2020-12-03 22:15:57Z HomeAuto_User",
-            "minProtocolVersion" : "1.27",
             "tests" : [
                {
                   "attributes" : {
@@ -916,57 +799,52 @@
                   },
                   "comment" : "#1"
                }
-            ],
-            "internals" : {
-               "NAME" : "LED_XM21_0_FFFFFFFFFFFFFF",
-               "DEF" : "LED_XM21_0 FFFFFFFFFFFFFF"
-            },
-            "readings" : {
-               "deviceCode" : "11111111111111111111111111111111111111111111111111111111",
-               "state" : "off"
-            },
-            "revision_entry" : "2021-04-22 19:21:42",
-            "dmsg" : "P76#FFFFFFFFFFFFFFC"
+            ]
          }
-      ]
+      ],
+      "id" : "76",
+      "module" : "SD_UT",
+      "name" : "LED XM21"
    },
    {
-      "name" : "BeSmart_S4",
-      "id" : "78",
       "data" : [
          {
-            "user" : "TheChatty",
-            "minProtocolVersion" : "1.27",
-            "revision_modul" : "14_SD_UT.pm     0 2020-12-03 22:15:57Z HomeAuto_User",
-            "rmsg" : "MU;P0=-19987;P1=205;P2=-530;P3=501;P4=-253;P6=-4094;D=01234123412123434123412123412123412121216123412341212343412341212341212341212121612341234121234341234121234121234121212161234123412123434123412123412123412121216123412341212343412341212341212341212121;CP=1;R=70;",
-            "revision_entry" : "2021-04-21 21:57:21",
+            "comment" : "Remote control SEAV BeSmart S4 for BEST Cirrus Draw",
             "dispatch_repeats" : "3",
             "dmsg" : "P78#53490",
             "internals" : {
                "DEF" : "BeSmart_S4 534",
                "NAME" : "BeSmart_S4_534"
             },
-            "comment" : "Remote control SEAV BeSmart S4 for BEST Cirrus Draw",
+            "readings" : {
+               "LastAction" : "receive",
+               "deviceCode" : "010100110100",
+               "state" : "light_toggle"
+            },
+            "rmsg" : "MU;P0=-19987;P1=205;P2=-530;P3=501;P4=-253;P6=-4094;D=01234123412123434123412123412123412121216123412341212343412341212341212341212121612341234121234341234121234121234121212161234123412123434123412123412123412121216123412341212343412341212341212341212121;CP=1;R=70;",
             "tests" : [
                {
-                  "comment" : "#0",
                   "attributes" : {
                      "model" : "BeSmart_S4"
-                  }
+                  },
+                  "comment" : "#0"
                }
-            ],
-            "readings" : {
-               "deviceCode" : "010100110100",
-               "LastAction" : "receive",
-               "state" : "light_toggle"
-            }
+            ]
          },
          {
-            "readings" : {
-               "state" : "level_up",
-               "LastAction" : "receive",
-               "deviceCode" : "010100110100"
+            "comment" : "Remote control SEAV BeSmart S4 for BEST Cirrus Draw",
+            "dispatch_repeats" : "3",
+            "dmsg" : "P78#53488",
+            "internals" : {
+               "DEF" : "BeSmart_S4 534",
+               "NAME" : "BeSmart_S4_534"
             },
+            "readings" : {
+               "LastAction" : "receive",
+               "deviceCode" : "010100110100",
+               "state" : "level_up"
+            },
+            "rmsg" : "MU;P0=-8617;P1=204;P2=-544;P3=490;P4=-246;P6=-4106;D=01234123412123434123412123412121234121216123412341212343412341212341212123412121612341234121234341234121234121212341212161234123412123434123412123412121234121216123412341212343412341212341212123412121;CP=1;R=70;",
             "tests" : [
                {
                   "attributes" : {
@@ -974,61 +852,50 @@
                   },
                   "comment" : "#1"
                }
-            ],
-            "comment" : "Remote control SEAV BeSmart S4 for BEST Cirrus Draw",
-            "internals" : {
-               "NAME" : "BeSmart_S4_534",
-               "DEF" : "BeSmart_S4 534"
-            },
-            "dmsg" : "P78#53488",
-            "revision_entry" : "2021-04-21 21:55:12",
-            "dispatch_repeats" : "3",
-            "rmsg" : "MU;P0=-8617;P1=204;P2=-544;P3=490;P4=-246;P6=-4106;D=01234123412123434123412123412121234121216123412341212343412341212341212123412121612341234121234341234121234121212341212161234123412123434123412123412121234121216123412341212343412341212341212123412121;CP=1;R=70;",
-            "revision_modul" : "14_SD_UT.pm     0 2020-12-03 22:15:57Z HomeAuto_User",
-            "minProtocolVersion" : "1.27",
-            "user" : "TheChatty"
+            ]
          },
          {
-            "revision_modul" : "14_SD_UT.pm     0 2020-12-03 22:15:57Z HomeAuto_User",
-            "minProtocolVersion" : "1.27",
-            "user" : "TheChatty",
-            "rmsg" : "MU;P0=-14542;P1=221;P2=-522;P3=492;P4=-240;P5=-4114;D=01234123412123434123412123412121212341215123412341212343412341212341212121234121512341234121234341234121234121212123412151234123412123434123412123412121212341215123412341212343412341212341212121234121;CP=1;R=62;",
-            "revision_entry" : "2021-04-21 21:52:50",
-            "dmsg" : "P78#53484",
+            "comment" : "Remote control SEAV BeSmart S4 for BEST Cirrus Draw",
             "dispatch_repeats" : "3",
+            "dmsg" : "P78#53484",
+            "internals" : {
+               "DEF" : "BeSmart_S4 534",
+               "NAME" : "BeSmart_S4_534"
+            },
             "readings" : {
-               "deviceCode" : "010100110100",
                "LastAction" : "receive",
+               "deviceCode" : "010100110100",
                "state" : "level_down"
             },
+            "rmsg" : "MU;P0=-14542;P1=221;P2=-522;P3=492;P4=-240;P5=-4114;D=01234123412123434123412123412121212341215123412341212343412341212341212121234121512341234121234341234121234121212123412151234123412123434123412123412121212341215123412341212343412341212341212121234121;CP=1;R=62;",
             "tests" : [
                {
-                  "comment" : "#2",
                   "attributes" : {
                      "model" : "BeSmart_S4"
-                  }
+                  },
+                  "comment" : "#2"
                }
-            ],
-            "internals" : {
-               "NAME" : "BeSmart_S4_534",
-               "DEF" : "BeSmart_S4 534"
-            },
-            "comment" : "Remote control SEAV BeSmart S4 for BEST Cirrus Draw"
+            ]
          }
       ],
-      "module" : "SD_UT"
+      "id" : "78",
+      "module" : "SD_UT",
+      "name" : "BeSmart_S4"
    },
    {
-      "module" : "SD_UT",
       "data" : [
          {
-            "user" : "HomeAuto_User",
-            "revision_modul" : "14_SD_UT.pm     0 2020-12-03 22:15:57Z HomeAuto_User",
-            "minProtocolVersion" : "1.27",
-            "rmsg" : "MU;P0=436;P1=-1033;P3=-537;P4=966;P5=-17209;P6=-7015;D=010103434343434341034345034101034343434343410343450341010343434343434103434506;CP=4;R=58;",
-            "revision_entry" : "2021-04-21 21:44:00",
-            "dmsg" : "P81#604",
+            "comment" : "(ID 63,86 additionally)",
             "dispatch_repeats" : "1",
+            "dmsg" : "P81#604",
+            "internals" : {
+               "DEF" : "SA_434_1_mini 604",
+               "NAME" : "SA_434_1_mini_604"
+            },
+            "readings" : {
+               "state" : "receive"
+            },
+            "rmsg" : "MU;P0=436;P1=-1033;P3=-537;P4=966;P5=-17209;P6=-7015;D=010103434343434341034345034101034343434343410343450341010343434343434103434506;CP=4;R=58;",
             "tests" : [
                {
                   "attributes" : {
@@ -1036,37 +903,29 @@
                   },
                   "comment" : "#0"
                }
-            ],
-            "internals" : {
-               "NAME" : "SA_434_1_mini_604",
-               "DEF" : "SA_434_1_mini 604"
-            },
-            "comment" : "(ID 63,86 additionally)",
-            "readings" : {
-               "state" : "receive"
-            }
+            ]
          }
       ],
       "id" : "81",
+      "module" : "SD_UT",
       "name" : "SA-434-1 mini"
    },
    {
-      "module" : "SD_UT",
-      "id" : "83",
       "data" : [
          {
-            "revision_modul" : "14_SD_UT.pm     0 2020-12-03 22:15:57Z HomeAuto_User",
-            "minProtocolVersion" : "1.27",
-            "user" : "zwiebelxxl",
-            "rmsg" : "MU;P0=388;P1=-112;P2=267;P3=-378;P5=585;P6=-693;P7=-11234;D=0123035353535356262623562626272353535353562626235626262723535353535626262356262627235353535356262623562626272353535353562626235626262723535353535626262356262627235353535356262623562626272353535353562626235626262723535353535626262356262627235353535356262;CP=2;R=43;O;",
-            "revision_entry" : "2021-03-25 14:30:35",
-            "dmsg" : "P83#077",
+            "comment" : "example Westinghouse Deckenventilator Delancey (ID 30 additionally)",
             "dispatch_repeats" : "7",
-            "readings" : {
-               "state" : "1_fan_minimum_speed",
-               "LastAction" : "receive",
-               "deviceCode" : "0000 (on|on|on|on)"
+            "dmsg" : "P83#077",
+            "internals" : {
+               "DEF" : "RH787T 0",
+               "NAME" : "RH787T_0"
             },
+            "readings" : {
+               "LastAction" : "receive",
+               "deviceCode" : "0000 (on|on|on|on)",
+               "state" : "1_fan_minimum_speed"
+            },
+            "rmsg" : "MU;P0=388;P1=-112;P2=267;P3=-378;P5=585;P6=-693;P7=-11234;D=0123035353535356262623562626272353535353562626235626262723535353535626262356262627235353535356262623562626272353535353562626235626262723535353535626262356262627235353535356262623562626272353535353562626235626262723535353535626262356262627235353535356262;CP=2;R=43;O;",
             "tests" : [
                {
                   "attributes" : {
@@ -1074,61 +933,52 @@
                   },
                   "comment" : "#0"
                }
-            ],
-            "comment" : "example Westinghouse Deckenventilator Delancey (ID 30 additionally)",
-            "internals" : {
-               "DEF" : "RH787T 0",
-               "NAME" : "RH787T_0"
-            }
+            ]
          }
       ],
+      "id" : "83",
+      "module" : "SD_UT",
       "name" : "RH787T"
    },
    {
-      "name" : "CAME TOP 432EV",
-      "id" : "86",
       "data" : [
          {
-            "rmsg" : "MU;P0=-322;P1=136;P2=-15241;P3=288;P4=-735;P6=723;D=0123434343064343430643434306234343430643434306434343062343434306434343064343430623434343064343430643434306234343430643434306434343062343434306434343064343430623434343064343430643434306234343430643434306434343062343434306434343064343430;CP=3;R=27;",
-            "revision_modul" : "14_SD_UT.pm     0 2020-12-03 22:15:57Z HomeAuto_User",
-            "minProtocolVersion" : "1.27",
-            "user" : "andies, andreasloe",
-            "readings" : {
-               "state" : "left_button",
-               "LastAction" : "receive",
-               "deviceCode" : "11101110"
-            },
-            "tests" : [
-               {
-                  "comment" : "#0",
-                  "attributes" : {
-                     "model" : "CAME_TOP_432EV"
-                  }
-               }
-            ],
-            "internals" : {
-               "NAME" : "CAME_TOP_432EV_EE",
-               "DEF" : "CAME_TOP_432EV EE"
-            },
             "comment" : "Remote control (ID 81 additionally)",
-            "revision_entry" : "2021-03-26 11:45:34",
             "dispatch_repeats" : "7",
-            "dmsg" : "P86#EEE"
-         },
-         {
-            "revision_entry" : "2021-03-26 11:47:05",
-            "dispatch_repeats" : "5",
-            "dmsg" : "P86#EED",
-            "readings" : {
-               "state" : "right_button",
-               "LastAction" : "receive",
-               "deviceCode" : "11101110"
-            },
-            "comment" : "Remote control",
+            "dmsg" : "P86#EEE",
             "internals" : {
                "DEF" : "CAME_TOP_432EV EE",
                "NAME" : "CAME_TOP_432EV_EE"
             },
+            "readings" : {
+               "LastAction" : "receive",
+               "deviceCode" : "11101110",
+               "state" : "left_button"
+            },
+            "rmsg" : "MU;P0=-322;P1=136;P2=-15241;P3=288;P4=-735;P6=723;D=0123434343064343430643434306234343430643434306434343062343434306434343064343430623434343064343430643434306234343430643434306434343062343434306434343064343430623434343064343430643434306234343430643434306434343062343434306434343064343430;CP=3;R=27;",
+            "tests" : [
+               {
+                  "attributes" : {
+                     "model" : "CAME_TOP_432EV"
+                  },
+                  "comment" : "#0"
+               }
+            ]
+         },
+         {
+            "comment" : "Remote control",
+            "dispatch_repeats" : "5",
+            "dmsg" : "P86#EED",
+            "internals" : {
+               "DEF" : "CAME_TOP_432EV EE",
+               "NAME" : "CAME_TOP_432EV_EE"
+            },
+            "readings" : {
+               "LastAction" : "receive",
+               "deviceCode" : "11101110",
+               "state" : "right_button"
+            },
+            "rmsg" : "MU;P0=-15281;P1=293;P2=-745;P3=-319;P4=703;P5=212;P6=152;P7=-428;D=01212121342121213421213421012121213421212134212134210121212134212121342121342101212121342121213421213421012121213421212134212134210121243134212121342121342101252526742121213425213421012121213421212134212134210121212134212;CP=1;R=23;",
             "tests" : [
                {
                   "attributes" : {
@@ -1136,30 +986,29 @@
                   },
                   "comment" : "#1"
                }
-            ],
-            "minProtocolVersion" : "1.27",
-            "revision_modul" : "14_SD_UT.pm     0 2020-12-03 22:15:57Z HomeAuto_User",
-            "user" : "andies, andreasloe",
-            "rmsg" : "MU;P0=-15281;P1=293;P2=-745;P3=-319;P4=703;P5=212;P6=152;P7=-428;D=01212121342121213421213421012121213421212134212134210121212134212121342121342101212121342121213421213421012121213421212134212134210121243134212121342121342101252526742121213425213421012121213421212134212134210121212134212;CP=1;R=23;"
+            ]
          }
       ],
-      "module" : "SD_UT"
+      "id" : "86",
+      "module" : "SD_UT",
+      "name" : "CAME TOP 432EV"
    },
    {
-      "name" : "Novy 840029",
-      "module" : "SD_UT",
-      "id" : "86",
       "data" : [
          {
-            "rmsg" : "MU;P0=22808;P1=-24232;P2=701;P3=-765;P4=357;P5=-15970;P7=-406;D=012345472347234723472347234723454723472347234723472347234547234723472347234723472345472347234723472347234723454723472347234723472347234;CP=4;R=39;",
-            "revision_modul" : "14_SD_UT.pm     0 2020-12-03 22:15:57Z HomeAuto_User",
-            "minProtocolVersion" : "1.27",
-            "user" : "Garfonso",
-            "readings" : {
-               "state" : "speed_plus",
-               "LastAction" : "receive",
-               "deviceCode" : "01010101"
+            "comment" : "Remote control for Novy kitchen hood / hex_lengh 3 (ID 63,81 additionally)",
+            "dispatch_repeats" : "4",
+            "dmsg" : "P86#555",
+            "internals" : {
+               "DEF" : "Novy_840029 55",
+               "NAME" : "Novy_840029_55"
             },
+            "readings" : {
+               "LastAction" : "receive",
+               "deviceCode" : "01010101",
+               "state" : "speed_plus"
+            },
+            "rmsg" : "MU;P0=22808;P1=-24232;P2=701;P3=-765;P4=357;P5=-15970;P7=-406;D=012345472347234723472347234723454723472347234723472347234547234723472347234723472345472347234723472347234723454723472347234723472347234;CP=4;R=39;",
             "tests" : [
                {
                   "attributes" : {
@@ -1167,106 +1016,96 @@
                   },
                   "comment" : "#0"
                }
-            ],
+            ]
+         },
+         {
+            "comment" : "Remote control for Novy kitchen hood / hex_lengh 3 (ID 63,81 additionally)",
+            "dispatch_repeats" : "3",
+            "dmsg" : "P86#556",
             "internals" : {
                "DEF" : "Novy_840029 55",
                "NAME" : "Novy_840029_55"
             },
-            "comment" : "Remote control for Novy kitchen hood / hex_lengh 3 (ID 63,81 additionally)",
-            "revision_entry" : "2021-03-26 12:01:53",
-            "dmsg" : "P86#555",
-            "dispatch_repeats" : "4"
-         },
-         {
-            "tests" : [
-               {
-                  "comment" : "#1",
-                  "attributes" : {
-                     "model" : "Novy_840029"
-                  }
-               }
-            ],
-            "internals" : {
-               "NAME" : "Novy_840029_55",
-               "DEF" : "Novy_840029 55"
-            },
-            "comment" : "Remote control for Novy kitchen hood / hex_lengh 3 (ID 63,81 additionally)",
             "readings" : {
-               "deviceCode" : "01010101",
                "LastAction" : "receive",
+               "deviceCode" : "01010101",
                "state" : "speed_minus"
             },
-            "dispatch_repeats" : "3",
-            "revision_entry" : "2021-03-26 12:03:25",
-            "dmsg" : "P86#556",
             "rmsg" : "MU;P0=-8032;P1=364;P2=-398;P3=700;P4=-760;P5=-15980;D=0123412341234123412341412351234123412341234123414123512341234123412341234141235123412341234123412341412351234123412341234123414123;CP=1;R=40;",
-            "user" : "Garfonso",
-            "revision_modul" : "14_SD_UT.pm     0 2020-12-03 22:15:57Z HomeAuto_User",
-            "minProtocolVersion" : "1.27"
-         },
-         {
-            "dispatch_repeats" : "2",
-            "revision_entry" : "2021-03-26 12:04:59",
-            "dmsg" : "P86#5574C",
             "tests" : [
                {
-                  "comment" : "#2",
                   "attributes" : {
                      "model" : "Novy_840029"
-                  }
-               }
-            ],
-            "internals" : {
-               "NAME" : "Novy_840029_55",
-               "DEF" : "Novy_840029 55"
-            },
-            "comment" : "Remote control for Novy kitchen hood / hex_lengh 5 (ID 63 additionally)",
-            "readings" : {
-               "deviceCode" : "01010101",
-               "state" : "power_on_off",
-               "LastAction" : "receive"
-            },
-            "user" : "Garfonso",
-            "revision_modul" : "14_SD_UT.pm     0 2020-12-03 22:15:57Z HomeAuto_User",
-            "minProtocolVersion" : "1.27",
-            "rmsg" : "MU;P0=-756;P1=718;P2=354;P3=-395;P4=-16056;D=01020202310231310202423102310231023102310202023102313102024231023102310231023102020231023131020242310231023102310231020202310231310202;CP=2;R=41;"
-         }
-      ]
-   },
-   {
-      "data" : [
-         {
-            "minProtocolVersion" : "1.27",
-            "revision_modul" : "14_SD_UT.pm     0 2020-12-03 22:15:57Z HomeAuto_User",
-            "user" : "Devirex",
-            "rmsg" : "MU;P0=-9524;P1=364;P2=-414;P3=669;P4=-755;P5=-16076;CP=1;R=83;D=0123412341234123412341412341414141412351234123412341234123414123414141414123;e;w=0;",
-            "revision_entry" : "2021-03-26 11:54:26",
-            "dmsg" : "P86#556F8",
-            "readings" : {
-               "state" : "ambient_light_on",
-               "LastAction" : "receive",
-               "deviceCode" : "01010101"
-            },
-            "comment" : "Remote control for Novy kitchen hood / hex_lengh 5",
-            "internals" : {
-               "DEF" : "Novy_840039 55",
-               "NAME" : "Novy_840039_55"
-            },
-            "tests" : [
-               {
-                  "comment" : "#0",
-                  "attributes" : {
-                     "model" : "Novy_840039"
-                  }
+                  },
+                  "comment" : "#1"
                }
             ]
          },
          {
+            "comment" : "Remote control for Novy kitchen hood / hex_lengh 5 (ID 63 additionally)",
+            "dispatch_repeats" : "2",
+            "dmsg" : "P86#5574C",
+            "internals" : {
+               "DEF" : "Novy_840029 55",
+               "NAME" : "Novy_840029_55"
+            },
+            "readings" : {
+               "LastAction" : "receive",
+               "deviceCode" : "01010101",
+               "state" : "power_on_off"
+            },
+            "rmsg" : "MU;P0=-756;P1=718;P2=354;P3=-395;P4=-16056;D=01020202310231310202423102310231023102310202023102313102024231023102310231023102020231023131020242310231023102310231020202310231310202;CP=2;R=41;",
+            "tests" : [
+               {
+                  "attributes" : {
+                     "model" : "Novy_840029"
+                  },
+                  "comment" : "#2"
+               }
+            ]
+         }
+      ],
+      "id" : "86",
+      "module" : "SD_UT",
+      "name" : "Novy 840029"
+   },
+   {
+      "data" : [
+         {
+            "comment" : "Remote control for Novy kitchen hood / hex_lengh 5",
+            "dmsg" : "P86#556F8",
             "internals" : {
                "DEF" : "Novy_840039 55",
                "NAME" : "Novy_840039_55"
             },
+            "readings" : {
+               "LastAction" : "receive",
+               "deviceCode" : "01010101",
+               "state" : "ambient_light_on"
+            },
+            "rmsg" : "MU;P0=-9524;P1=364;P2=-414;P3=669;P4=-755;P5=-16076;CP=1;R=83;D=0123412341234123412341412341414141412351234123412341234123414123414141414123;e;w=0;",
+            "tests" : [
+               {
+                  "attributes" : {
+                     "model" : "Novy_840039"
+                  },
+                  "comment" : "#0"
+               }
+            ]
+         },
+         {
             "comment" : "Remote control for Novy kitchen hood / hex_lengh 3 (ID 81 additionally)",
+            "dmsg" : "P86#555",
+            "internals" : {
+               "DEF" : "Novy_840039 55",
+               "NAME" : "Novy_840039_55"
+            },
+            "readings" : {
+               "LastAction" : "receive",
+               "deviceCode" : "01010101",
+               "state" : "fan_plus"
+            },
+            "rmsg" : "MU;P0=388;P1=-756;P2=264;P3=-399;P4=683;P5=-16082;CP=0;R=67;D=0123410341034103410341050341034103410341034103410;e;w=0;",
             "tests" : [
                {
                   "attributes" : {
@@ -1274,45 +1113,30 @@
                   },
                   "comment" : "#1"
                }
-            ],
-            "readings" : {
-               "state" : "fan_plus",
-               "LastAction" : "receive",
-               "deviceCode" : "01010101"
-            },
-            "revision_entry" : "2021-03-26 11:52:35",
-            "dmsg" : "P86#555",
-            "rmsg" : "MU;P0=388;P1=-756;P2=264;P3=-399;P4=683;P5=-16082;CP=0;R=67;D=0123410341034103410341050341034103410341034103410;e;w=0;",
-            "user" : "Devirex",
-            "minProtocolVersion" : "1.27",
-            "revision_modul" : "14_SD_UT.pm     0 2020-12-03 22:15:57Z HomeAuto_User"
+            ]
          },
          {
-            "rmsg" : "MU;P0=-749;P1=378;P2=-456;P3=684;P4=-16081;D=01230101012301232301014123012301230123012301010123012323010141230123012301230123010101230123230101412;CP=1;R=66;",
-            "user" : "Devirex",
-            "revision_modul" : "14_SD_UT.pm     0 2020-12-03 22:15:57Z HomeAuto_User",
-            "minProtocolVersion" : "1.27",
-            "tests" : [
-               {
-                  "comment" : "#2",
-                  "attributes" : {
-                     "model" : "Novy_840039"
-                  }
-               }
-            ],
             "comment" : "Remote control for Novy kitchen hood / hex_lengh 5",
+            "dispatch_repeats" : "1",
+            "dmsg" : "P86#5574C",
             "internals" : {
-               "NAME" : "Novy_840039_55",
-               "DEF" : "Novy_840039 55"
+               "DEF" : "Novy_840039 55",
+               "NAME" : "Novy_840039_55"
             },
             "readings" : {
+               "LastAction" : "receive",
                "deviceCode" : "01010101",
-               "state" : "power_on_off",
-               "LastAction" : "receive"
+               "state" : "power_on_off"
             },
-            "revision_entry" : "2021-03-26 11:51:12",
-            "dispatch_repeats" : "1",
-            "dmsg" : "P86#5574C"
+            "rmsg" : "MU;P0=-749;P1=378;P2=-456;P3=684;P4=-16081;D=01230101012301232301014123012301230123012301010123012323010141230123012301230123010101230123230101412;CP=1;R=66;",
+            "tests" : [
+               {
+                  "attributes" : {
+                     "model" : "Novy_840039"
+                  },
+                  "comment" : "#2"
+               }
+            ]
          }
       ],
       "id" : "86",
@@ -1320,78 +1144,67 @@
       "name" : "Novy 840039"
    },
    {
-      "name" : "SF01_01319004",
-      "module" : "SD_UT",
-      "id" : "86",
       "data" : [
          {
-            "revision_entry" : "2021-03-26 11:41:58",
-            "dmsg" : "P86#A1530",
+            "comment" : "Remote control for Neff Transmitter SF01 01319004 (ID 63 additionally)",
             "dispatch_repeats" : "5",
-            "readings" : {
-               "LastAction" : "receive",
-               "state" : "plus",
-               "deviceCode" : "A150"
-            },
-            "tests" : [
-               {
-                  "comment" : "#0",
-                  "attributes" : {
-                     "model" : "SF01_01319004"
-                  }
-               }
-            ],
-            "comment" : "Remote control for Neff Transmitter SF01 01319004 (ID 63 additionally)",
-            "internals" : {
-               "NAME" : "SF01_01319004_A150",
-               "DEF" : "SF01_01319004 A150"
-            },
-            "revision_modul" : "14_SD_UT.pm     0 2020-12-03 22:15:57Z HomeAuto_User",
-            "minProtocolVersion" : "1.27",
-            "user" : "fhemjcm",
-            "rmsg" : "MU;P0=-220;P1=348;P2=-702;P3=-381;P4=662;P5=-15257;D=01213421342134342121343451213421343434342134213421343421213434512134213434343421342134213434212134345121342134343434213421342134342121343451213421343434342134213421343421213434512134213434343421342134213434212134345121342134343434213421342134342121343451;CP=1;R=6;O;"
-         },
-         {
-            "rmsg" : "MU;P0=-2112;P1=340;P2=-708;P3=-381;P4=660;P5=-15243;D=012134213434343421342134213434213421345121342134343434213421342134342134213451213421343434342134213421343421342134512134213434343421342134213434213421345121342134343434213421342134342134213451213421343434342134213421343421342134512134213434343421342134;CP=1;R=7;",
-            "user" : "fhemjcm",
-            "minProtocolVersion" : "1.27",
-            "revision_modul" : "14_SD_UT.pm     0 2020-12-03 22:15:57Z HomeAuto_User",
+            "dmsg" : "P86#A1530",
             "internals" : {
                "DEF" : "SF01_01319004 A150",
                "NAME" : "SF01_01319004_A150"
             },
-            "comment" : "Remote control for Neff Transmitter SF01 01319004 (ID 63 additionally)",
+            "readings" : {
+               "LastAction" : "receive",
+               "deviceCode" : "A150",
+               "state" : "plus"
+            },
+            "rmsg" : "MU;P0=-220;P1=348;P2=-702;P3=-381;P4=662;P5=-15257;D=01213421342134342121343451213421343434342134213421343421213434512134213434343421342134213434212134345121342134343434213421342134342121343451213421343434342134213421343421213434512134213434343421342134213434212134345121342134343434213421342134342121343451;CP=1;R=6;O;",
             "tests" : [
                {
-                  "comment" : "#1",
                   "attributes" : {
                      "model" : "SF01_01319004"
-                  }
+                  },
+                  "comment" : "#0"
                }
-            ],
-            "readings" : {
-               "state" : "minus",
-               "LastAction" : "receive",
-               "deviceCode" : "A150"
-            },
-            "revision_entry" : "2021-03-26 11:43:24",
-            "dmsg" : "P86#A1528",
-            "dispatch_repeats" : "4"
+            ]
          },
          {
-            "revision_entry" : "2021-03-26 11:38:50",
-            "dmsg" : "P86#A1538",
+            "comment" : "Remote control for Neff Transmitter SF01 01319004 (ID 63 additionally)",
             "dispatch_repeats" : "4",
-            "readings" : {
-               "LastAction" : "receive",
-               "state" : "light_on_off",
-               "deviceCode" : "A150"
-            },
-            "comment" : "Remote control for Neff Transmitter SF01 01319004 (ID 63 additionally)",
+            "dmsg" : "P86#A1528",
             "internals" : {
                "DEF" : "SF01_01319004 A150",
                "NAME" : "SF01_01319004_A150"
             },
+            "readings" : {
+               "LastAction" : "receive",
+               "deviceCode" : "A150",
+               "state" : "minus"
+            },
+            "rmsg" : "MU;P0=-2112;P1=340;P2=-708;P3=-381;P4=660;P5=-15243;D=012134213434343421342134213434213421345121342134343434213421342134342134213451213421343434342134213421343421342134512134213434343421342134213434213421345121342134343434213421342134342134213451213421343434342134213421343421342134512134213434343421342134;CP=1;R=7;",
+            "tests" : [
+               {
+                  "attributes" : {
+                     "model" : "SF01_01319004"
+                  },
+                  "comment" : "#1"
+               }
+            ]
+         },
+         {
+            "comment" : "Remote control for Neff Transmitter SF01 01319004 (ID 63 additionally)",
+            "dispatch_repeats" : "4",
+            "dmsg" : "P86#A1538",
+            "internals" : {
+               "DEF" : "SF01_01319004 A150",
+               "NAME" : "SF01_01319004_A150"
+            },
+            "readings" : {
+               "LastAction" : "receive",
+               "deviceCode" : "A150",
+               "state" : "light_on_off"
+            },
+            "rmsg" : "MU;P0=-707;P1=332;P2=-376;P3=670;P5=-15243;D=010123012323232301230123012323010101235101230123232323012301230123230101012351012301232323230123012301232301010123510123012323232301230123012323010101235101230123232323012301230123230101012351012301232323230123012301232301010123510123012323232301230123;CP=1;R=3;",
             "tests" : [
                {
                   "attributes" : {
@@ -1399,122 +1212,105 @@
                   },
                   "comment" : "#2"
                }
-            ],
-            "minProtocolVersion" : "1.27",
-            "revision_modul" : "14_SD_UT.pm     0 2020-12-03 22:15:57Z HomeAuto_User",
-            "user" : "fhemjcm",
-            "rmsg" : "MU;P0=-707;P1=332;P2=-376;P3=670;P5=-15243;D=010123012323232301230123012323010101235101230123232323012301230123230101012351012301232323230123012301232301010123510123012323232301230123012323010101235101230123232323012301230123230101012351012301232323230123012301232301010123510123012323232301230123;CP=1;R=3;"
+            ]
          },
          {
-            "rmsg" : "MU;P0=-944;P1=341;P2=-695;P3=-375;P4=672;P5=-15261;D=012134213434343421342134213434213434215121342134343434213421342134342134342151213421343434342134213421343421343421512134213434343421342134213434213434215121342134343434213421342134342134342151213421343434342134213421343421343421512134213434343421342134;CP=1;R=2;",
-            "user" : "fhemjcm",
-            "minProtocolVersion" : "1.27",
-            "revision_modul" : "14_SD_UT.pm     0 2020-12-03 22:15:57Z HomeAuto_User",
-            "internals" : {
-               "NAME" : "SF01_01319004_A150",
-               "DEF" : "SF01_01319004 A150"
-            },
             "comment" : "Remote control for Neff Transmitter SF01 01319004 (ID 63 additionally)",
-            "tests" : [
-               {
-                  "comment" : "#3",
-                  "attributes" : {
-                     "model" : "SF01_01319004"
-                  }
-               }
-            ],
-            "readings" : {
-               "state" : "delay",
-               "LastAction" : "receive",
-               "deviceCode" : "A150"
-            },
             "dispatch_repeats" : "4",
-            "revision_entry" : "2021-03-26 11:30:55",
-            "dmsg" : "P86#A1524"
-         },
-         {
-            "rmsg" : "MU;P0=-372;P1=330;P2=684;P3=-699;P4=-14178;D=010231020202023102310231020231310231413102310202020231023102310202313102314;CP=1;R=253;",
-            "minProtocolVersion" : "1.27",
-            "revision_modul" : "14_SD_UT.pm     0 2020-12-03 22:15:57Z HomeAuto_User",
-            "user" : "user",
-            "readings" : {
-               "state" : "interval",
-               "LastAction" : "receive",
-               "deviceCode" : "A150"
-            },
-            "comment" : "Remote control for Neff Transmitter SF01 01319004 (ID 63 additionally)",
+            "dmsg" : "P86#A1524",
             "internals" : {
                "DEF" : "SF01_01319004 A150",
                "NAME" : "SF01_01319004_A150"
             },
+            "readings" : {
+               "LastAction" : "receive",
+               "deviceCode" : "A150",
+               "state" : "delay"
+            },
+            "rmsg" : "MU;P0=-944;P1=341;P2=-695;P3=-375;P4=672;P5=-15261;D=012134213434343421342134213434213434215121342134343434213421342134342134342151213421343434342134213421343421343421512134213434343421342134213434213434215121342134343434213421342134342134342151213421343434342134213421343421343421512134213434343421342134;CP=1;R=2;",
             "tests" : [
                {
-                  "comment" : "#4",
                   "attributes" : {
                      "model" : "SF01_01319004"
-                  }
-               }
-            ],
-            "dmsg" : "P86#A1534",
-            "revision_entry" : "2021-03-26 11:26:00"
-         }
-      ]
-   },
-   {
-      "data" : [
-         {
-            "minProtocolVersion" : "1.27",
-            "revision_modul" : "14_SD_UT.pm     0 2020-12-03 22:15:57Z HomeAuto_User",
-            "user" : "Stuetti",
-            "rmsg" : "MU;P0=706;P1=-160;P2=140;P3=-335;P4=-664;P5=385;P6=-15226;P7=248;D=01210103045303045453030304545453030454530653030453030454530303045454530304747306530304530304545303030454545303045453065303045303045453030304545453030454530653030453030454530303045454530304545306530304530304545303030454545303045453065303045303045453030304;CP=5;O;",
-            "revision_entry" : "2021-03-26 11:07:33",
-            "dispatch_repeats" : "4",
-            "dmsg" : "P86#26398",
-            "readings" : {
-               "deviceCode" : "2638",
-               "LastAction" : "receive",
-               "state" : "light_on_off"
-            },
-            "internals" : {
-               "NAME" : "SF01_01319004_Typ2_2638",
-               "DEF" : "SF01_01319004_Typ2 2638"
-            },
-            "comment" : "Remote control for BOSCH Transmitter SF01 01319004 / Typ2 (ID 63,81 additionally)",
-            "tests" : [
-               {
-                  "comment" : "#0",
-                  "attributes" : {
-                     "model" : "SF01_01319004_Typ2"
-                  }
+                  },
+                  "comment" : "#3"
                }
             ]
          },
          {
-            "user" : "Stuetti",
-            "revision_modul" : "14_SD_UT.pm     0 2020-12-03 22:15:57Z HomeAuto_User",
-            "minProtocolVersion" : "1.27",
-            "rmsg" : "MU;P0=379;P1=-330;P2=713;P3=-660;P4=-15209;D=01212121230401212301212303012121230303012121212304012123012123030121212303030121212123040121230121230301212123030301212121230;CP=0;",
-            "revision_entry" : "2021-03-26 11:23:58",
-            "dmsg" : "P86#26384",
-            "dispatch_repeats" : "2",
-            "tests" : [
-               {
-                  "comment" : "#1",
-                  "attributes" : {
-                     "model" : "SF01_01319004_Typ2"
-                  }
-               }
-            ],
-            "comment" : "Remote control for BOSCH Transmitter SF01 01319004 / Typ2 (ID 63,81 additionally)",
+            "comment" : "Remote control for Neff Transmitter SF01 01319004 (ID 63 additionally)",
+            "dmsg" : "P86#A1534",
             "internals" : {
-               "NAME" : "SF01_01319004_Typ2_2638",
-               "DEF" : "SF01_01319004_Typ2 2638"
+               "DEF" : "SF01_01319004 A150",
+               "NAME" : "SF01_01319004_A150"
             },
             "readings" : {
-               "state" : "delay",
                "LastAction" : "receive",
-               "deviceCode" : "2638"
-            }
+               "deviceCode" : "A150",
+               "state" : "interval"
+            },
+            "rmsg" : "MU;P0=-372;P1=330;P2=684;P3=-699;P4=-14178;D=010231020202023102310231020231310231413102310202020231023102310202313102314;CP=1;R=253;",
+            "tests" : [
+               {
+                  "attributes" : {
+                     "model" : "SF01_01319004"
+                  },
+                  "comment" : "#4"
+               }
+            ]
+         }
+      ],
+      "id" : "86",
+      "module" : "SD_UT",
+      "name" : "SF01_01319004"
+   },
+   {
+      "data" : [
+         {
+            "comment" : "Remote control for BOSCH Transmitter SF01 01319004 / Typ2 (ID 63,81 additionally)",
+            "dispatch_repeats" : "4",
+            "dmsg" : "P86#26398",
+            "internals" : {
+               "DEF" : "SF01_01319004_Typ2 2638",
+               "NAME" : "SF01_01319004_Typ2_2638"
+            },
+            "readings" : {
+               "LastAction" : "receive",
+               "deviceCode" : "2638",
+               "state" : "light_on_off"
+            },
+            "rmsg" : "MU;P0=706;P1=-160;P2=140;P3=-335;P4=-664;P5=385;P6=-15226;P7=248;D=01210103045303045453030304545453030454530653030453030454530303045454530304747306530304530304545303030454545303045453065303045303045453030304545453030454530653030453030454530303045454530304545306530304530304545303030454545303045453065303045303045453030304;CP=5;O;",
+            "tests" : [
+               {
+                  "attributes" : {
+                     "model" : "SF01_01319004_Typ2"
+                  },
+                  "comment" : "#0"
+               }
+            ]
+         },
+         {
+            "comment" : "Remote control for BOSCH Transmitter SF01 01319004 / Typ2 (ID 63,81 additionally)",
+            "dispatch_repeats" : "2",
+            "dmsg" : "P86#26384",
+            "internals" : {
+               "DEF" : "SF01_01319004_Typ2 2638",
+               "NAME" : "SF01_01319004_Typ2_2638"
+            },
+            "readings" : {
+               "LastAction" : "receive",
+               "deviceCode" : "2638",
+               "state" : "delay"
+            },
+            "rmsg" : "MU;P0=379;P1=-330;P2=713;P3=-660;P4=-15209;D=01212121230401212301212303012121230303012121212304012123012123030121212303030121212123040121230121230301212123030301212121230;CP=0;",
+            "tests" : [
+               {
+                  "attributes" : {
+                     "model" : "SF01_01319004_Typ2"
+                  },
+                  "comment" : "#1"
+               }
+            ]
          }
       ],
       "id" : "86",
@@ -1522,17 +1318,22 @@
       "name" : "SF01_01319004_Typ2"
    },
    {
-      "module" : "SD_UT",
-      "id" : "90",
       "data" : [
          {
-            "revision_entry" : "2021-03-26 10:42:10",
-            "dmsg" : "P90#43CB0FA10",
             "comment" : "button A",
+            "dmsg" : "P90#43CB0FA10",
             "internals" : {
                "DEF" : "RC_10 43CB_A",
                "NAME" : "RC_10_43CB_A"
             },
+            "readings" : {
+               "LastAction" : "receive",
+               "deviceCode" : "0100001111001011",
+               "state" : "on",
+               "x_n4" : "0000",
+               "x_n5-8_on" : "1111101000010"
+            },
+            "rmsg" : "MS;P0=-9964;P1=273;P4=-866;P5=792;P6=-343;D=10145614141414565656561414561456561414141456565656561456141414145614;CP=1;SP=0;R=35;O;m2;",
             "tests" : [
                {
                   "attributes" : {
@@ -1540,123 +1341,102 @@
                   },
                   "comment" : "#0"
                }
-            ],
-            "readings" : {
-               "deviceCode" : "0100001111001011",
-               "LastAction" : "receive",
-               "state" : "on",
-               "x_n5-8_on" : "1111101000010",
-               "x_n4" : "0000"
-            },
-            "user" : "my-engel",
-            "minProtocolVersion" : "1.27",
-            "revision_modul" : "14_SD_UT.pm     0 2020-12-03 22:15:57Z HomeAuto_User",
-            "rmsg" : "MS;P0=-9964;P1=273;P4=-866;P5=792;P6=-343;D=10145614141414565656561414561456561414141456565656561456141414145614;CP=1;SP=0;R=35;O;m2;"
+            ]
          }
       ],
+      "id" : "90",
+      "module" : "SD_UT",
       "name" : "MANAX RC-10 (MX-RCS250)"
    },
    {
-      "name" : "mumbi RC-10 (AFS300-s)",
       "data" : [
          {
-            "user" : "peterboeckmann",
-            "revision_modul" : "14_SD_UT.pm     0 2020-12-03 22:15:57Z HomeAuto_User",
-            "minProtocolVersion" : "1.27",
-            "rmsg" : "MS;P1=781;P3=-372;P4=251;P5=-903;P6=-10342;D=46451313131345454545131345134545134545454513131313454513454513451345;CP=4;SP=6;O;m1;E;",
-            "revision_entry" : "2021-03-26 10:21:27",
+            "comment" : "button A",
             "dmsg" : "P90#78690F250",
+            "internals" : {
+               "DEF" : "RC_10 7869_A",
+               "NAME" : "RC_10_7869_A"
+            },
+            "readings" : {
+               "LastAction" : "receive",
+               "deviceCode" : "0111100001101001",
+               "state" : "on",
+               "x_n4" : "0000",
+               "x_n5-8_on" : "1111001001010"
+            },
+            "rmsg" : "MS;P1=781;P3=-372;P4=251;P5=-903;P6=-10342;D=46451313131345454545131345134545134545454513131313454513454513451345;CP=4;SP=6;O;m1;E;",
             "tests" : [
                {
                   "attributes" : {
                      "model" : "RC_10"
                   },
                   "comment" : "#0"
-               }
-            ],
-            "internals" : {
-               "NAME" : "RC_10_7869_A",
-               "DEF" : "RC_10 7869_A"
-            },
-            "comment" : "button A",
-            "readings" : {
-               "x_n4" : "0000",
-               "x_n5-8_on" : "1111001001010",
-               "deviceCode" : "0111100001101001",
-               "state" : "on",
-               "LastAction" : "receive"
-            }
-         },
-         {
-            "rmsg" : "MS;P1=790;P2=-363;P3=257;P4=-896;P5=-10283;D=35341212121234343434121234123434123434343412121234343412343412343434;CP=3;SP=5;O;m2;C;C;",
-            "minProtocolVersion" : "1.27",
-            "revision_modul" : "14_SD_UT.pm     0 2020-12-03 22:15:57Z HomeAuto_User",
-            "user" : "peterboeckmann",
-            "readings" : {
-               "x_n4" : "0000",
-               "x_n5-8_off" : "1110001001000",
-               "deviceCode" : "0111100001101001",
-               "LastAction" : "receive",
-               "state" : "off"
-            },
-            "internals" : {
-               "NAME" : "RC_10_7869_A",
-               "DEF" : "RC_10 7869_A"
-            },
-            "comment" : "button A",
-            "tests" : [
-               {
-                  "comment" : "#1",
-                  "attributes" : {
-                     "model" : "RC_10"
-                  }
-               }
-            ],
-            "revision_entry" : "2021-03-26 10:22:40",
-            "dmsg" : "P90#78690E240"
-         },
-         {
-            "minProtocolVersion" : "1.27",
-            "revision_modul" : "14_SD_UT.pm     0 2020-12-03 22:15:57Z HomeAuto_User",
-            "user" : "peterboeckmann",
-            "rmsg" : "MS;P1=-361;P2=267;P3=-884;P4=792;P5=-10342;D=25234141414123232323414123412323412323232323412323232341234123414123;CP=2;SP=5;O;m2;A;",
-            "revision_entry" : "2021-03-26 10:24:30",
-            "dmsg" : "P90#7869042B0",
-            "readings" : {
-               "state" : "on",
-               "LastAction" : "receive",
-               "deviceCode" : "0111100001101001",
-               "x_n4" : "0000",
-               "x_n5-8_on" : "0100001010110"
-            },
-            "comment" : "button all",
-            "internals" : {
-               "NAME" : "RC_10_7869_all",
-               "DEF" : "RC_10 7869_all"
-            },
-            "tests" : [
-               {
-                  "comment" : "#2",
-                  "attributes" : {
-                     "model" : "RC_10"
-                  }
                }
             ]
          },
          {
-            "revision_modul" : "14_SD_UT.pm     0 2020-12-03 22:15:57Z HomeAuto_User",
-            "minProtocolVersion" : "1.27",
-            "user" : "peterboeckmann",
-            "rmsg" : "MS;P1=-363;P2=789;P3=267;P4=-887;P5=-10332;D=35342121212134343434212134213434213434343421343434343421343434212134;CP=3;SP=5;O;m2;4;",
-            "revision_entry" : "2021-03-26 10:25:58",
-            "dmsg" : "P90#786908230",
+            "comment" : "button A",
+            "dmsg" : "P90#78690E240",
+            "internals" : {
+               "DEF" : "RC_10 7869_A",
+               "NAME" : "RC_10_7869_A"
+            },
             "readings" : {
+               "LastAction" : "receive",
                "deviceCode" : "0111100001101001",
                "state" : "off",
+               "x_n4" : "0000",
+               "x_n5-8_off" : "1110001001000"
+            },
+            "rmsg" : "MS;P1=790;P2=-363;P3=257;P4=-896;P5=-10283;D=35341212121234343434121234123434123434343412121234343412343412343434;CP=3;SP=5;O;m2;C;C;",
+            "tests" : [
+               {
+                  "attributes" : {
+                     "model" : "RC_10"
+                  },
+                  "comment" : "#1"
+               }
+            ]
+         },
+         {
+            "comment" : "button all",
+            "dmsg" : "P90#7869042B0",
+            "internals" : {
+               "DEF" : "RC_10 7869_all",
+               "NAME" : "RC_10_7869_all"
+            },
+            "readings" : {
                "LastAction" : "receive",
+               "deviceCode" : "0111100001101001",
+               "state" : "on",
+               "x_n4" : "0000",
+               "x_n5-8_on" : "0100001010110"
+            },
+            "rmsg" : "MS;P1=-361;P2=267;P3=-884;P4=792;P5=-10342;D=25234141414123232323414123412323412323232323412323232341234123414123;CP=2;SP=5;O;m2;A;",
+            "tests" : [
+               {
+                  "attributes" : {
+                     "model" : "RC_10"
+                  },
+                  "comment" : "#2"
+               }
+            ]
+         },
+         {
+            "comment" : "button all",
+            "dmsg" : "P90#786908230",
+            "internals" : {
+               "DEF" : "RC_10 7869_all",
+               "NAME" : "RC_10_7869_all"
+            },
+            "readings" : {
+               "LastAction" : "receive",
+               "deviceCode" : "0111100001101001",
+               "state" : "off",
                "x_n4" : "0000",
                "x_n5-8_off" : "1000001000110"
             },
+            "rmsg" : "MS;P1=-363;P2=789;P3=267;P4=-887;P5=-10332;D=35342121212134343434212134213434213434343421343434343421343434212134;CP=3;SP=5;O;m2;4;",
             "tests" : [
                {
                   "attributes" : {
@@ -1664,66 +1444,63 @@
                   },
                   "comment" : "#3"
                }
-            ],
-            "comment" : "button all",
-            "internals" : {
-               "DEF" : "RC_10 7869_all",
-               "NAME" : "RC_10_7869_all"
-            }
+            ]
          }
       ],
       "id" : "90",
-      "module" : "SD_UT"
+      "module" : "SD_UT",
+      "name" : "mumbi RC-10 (AFS300-s)"
    },
    {
-      "name" : "MD-2018R",
-      "module" : "SD_UT",
-      "id" : "91",
       "data" : [
          {
-            "revision_entry" : "2021-03-26 10:19:45",
-            "dmsg" : "P91#80306644B",
-            "dispatch_repeats" : "1",
             "comment" : "Atlantic's - Vibration Sensor (ID 63 additionally) / decode as MU",
+            "dispatch_repeats" : "1",
+            "dmsg" : "P91#80306644B",
             "internals" : {
-               "NAME" : "MD_2018R_803066",
-               "DEF" : "MD_2018R 803066"
+               "DEF" : "MD_2018R 803066",
+               "NAME" : "MD_2018R_803066"
             },
+            "readings" : {
+               "batteryState" : "ok",
+               "contact" : "Alarm",
+               "deviceTyp" : "vibration",
+               "keepalive" : "event",
+               "state" : "warning"
+            },
+            "rmsg" : "MU;P0=-817;P1=406;P2=-415;P3=813;P5=-4068;CP=3;D=01232323232323232323010123232323230101232301012323012323230123230123010151012323232323232323230101232323232301012323010123230123232301232301230101510123232323232323232301012323232323010123230101232301232323012323012301015101232323232323232323010123232323;O;",
             "tests" : [
                {
-                  "comment" : "#0",
                   "attributes" : {
                      "model" : "MD_2018R"
-                  }
+                  },
+                  "comment" : "#0"
                }
-            ],
-            "readings" : {
-               "state" : "warning",
-               "contact" : "Alarm",
-               "batteryState" : "ok",
-               "deviceTyp" : "vibration",
-               "keepalive" : "event"
-            },
-            "user" : "Harst",
-            "minProtocolVersion" : "1.27",
-            "revision_modul" : "14_SD_UT.pm     0 2020-12-03 22:15:57Z HomeAuto_User",
-            "rmsg" : "MU;P0=-817;P1=406;P2=-415;P3=813;P5=-4068;CP=3;D=01232323232323232323010123232323230101232301012323012323230123230123010151012323232323232323230101232323232301012323010123230123232301232301230101510123232323232323232301012323232323010123230101232301232323012323012301015101232323232323232323010123232323;O;"
+            ]
          }
-      ]
+      ],
+      "id" : "91",
+      "module" : "SD_UT",
+      "name" : "MD-2018R"
    },
    {
-      "name" : "MD-210R",
-      "module" : "SD_UT",
       "data" : [
          {
+            "comment" : "Atlantic's - Door / Window Sensor / decode as MU",
+            "dmsg" : "P91#91DF4F4EB",
+            "internals" : {
+               "DEF" : "MD_210R 91DF4F",
+               "NAME" : "MD_210R_91DF4F"
+            },
             "readings" : {
-               "sabotage" : "closed",
                "batteryState" : "ok",
+               "contact" : "open",
                "deviceTyp" : "switch",
                "keepalive" : "event",
-               "state" : "warning",
-               "contact" : "open"
+               "sabotage" : "closed",
+               "state" : "warning"
             },
+            "rmsg" : "MU;P1=392;P2=-416;P3=804;P4=-822;P5=-4029;P6=-32001;D=151412323412323234141412341414141412341232341414141234123234141412341234141660;CP=1;R=0;",
             "tests" : [
                {
                   "attributes" : {
@@ -1731,52 +1508,39 @@
                   },
                   "comment" : "#0"
                }
-            ],
-            "internals" : {
-               "DEF" : "MD_210R 91DF4F",
-               "NAME" : "MD_210R_91DF4F"
-            },
-            "comment" : "Atlantic's - Door / Window Sensor / decode as MU",
-            "revision_entry" : "2021-03-26 10:18:46",
-            "dmsg" : "P91#91DF4F4EB",
-            "rmsg" : "MU;P1=392;P2=-416;P3=804;P4=-822;P5=-4029;P6=-32001;D=151412323412323234141412341414141412341232341414141234123234141412341234141660;CP=1;R=0;",
-            "revision_modul" : "14_SD_UT.pm     0 2020-12-03 22:15:57Z HomeAuto_User",
-            "minProtocolVersion" : "1.27",
-            "user" : "Harst"
+            ]
          }
       ],
-      "id" : "91"
+      "id" : "91",
+      "module" : "SD_UT",
+      "name" : "MD-210R"
    },
    {
       "data" : [
          {
-            "dmsg" : "P91#FCC17E1CA",
-            "revision_entry" : "2021-03-26 10:17:39",
-            "dispatch_repeats" : "1",
             "comment" : "Focus/Atlantic's - Gas detektor (ID 63 additionally) / decode as MU",
+            "dispatch_repeats" : "1",
+            "dmsg" : "P91#FCC17E1CA",
             "internals" : {
                "DEF" : "MD_2003R FCC17E",
                "NAME" : "MD_2003R_FCC17E"
             },
+            "readings" : {
+               "batteryState" : "ok",
+               "contact" : "no Alarm",
+               "deviceTyp" : "gas",
+               "keepalive" : "periodically",
+               "state" : "normal"
+            },
+            "rmsg" : "MU;P0=-164;P1=378;P2=-813;P3=-429;P4=764;P5=-3929;D=0121212134342121343434343421342121212121213434343421212134342134213451212121212121343421213434343434213421212121212134343434212121343421342134512121212121213434212134343434342134212121212121343434342121213434213421345121212121212134342121343434343421342;CP=1;R=0;O;",
             "tests" : [
                {
-                  "comment" : "#0",
                   "attributes" : {
                      "model" : "MD_2003R"
-                  }
+                  },
+                  "comment" : "#0"
                }
-            ],
-            "readings" : {
-               "state" : "normal",
-               "contact" : "no Alarm",
-               "keepalive" : "periodically",
-               "deviceTyp" : "gas",
-               "batteryState" : "ok"
-            },
-            "user" : "Harst",
-            "minProtocolVersion" : "1.27",
-            "revision_modul" : "14_SD_UT.pm     0 2020-12-03 22:15:57Z HomeAuto_User",
-            "rmsg" : "MU;P0=-164;P1=378;P2=-813;P3=-429;P4=764;P5=-3929;D=0121212134342121343434343421342121212121213434343421212134342134213451212121212121343421213434343434213421212121212134343434212121343421342134512121212121213434212134343434342134212121212121343434342121213434213421345121212121212134342121343434343421342;CP=1;R=0;O;"
+            ]
          }
       ],
       "id" : "91",
@@ -1784,11 +1548,22 @@
       "name" : "MD_2003R"
    },
    {
-      "name" : "MD-2018R",
       "data" : [
          {
-            "revision_entry" : "2021-03-26 10:15:56",
+            "comment" : "Atlantic's - Vibration Sensor / decode as MS",
             "dmsg" : "P91#80306644B",
+            "internals" : {
+               "DEF" : "MD_2018R 803066",
+               "NAME" : "MD_2018R_803066"
+            },
+            "readings" : {
+               "batteryState" : "ok",
+               "contact" : "Alarm",
+               "deviceTyp" : "vibration",
+               "keepalive" : "event",
+               "state" : "warning"
+            },
+            "rmsg" : "MS;P0=-420;P1=809;P2=-835;P3=399;P4=-4080;D=34323010101010101010101232301010101012323010123230101230101012301012301232;CP=3;SP=4;s=64;e;m0;",
             "tests" : [
                {
                   "attributes" : {
@@ -1796,46 +1571,31 @@
                   },
                   "comment" : "#0"
                }
-            ],
-            "comment" : "Atlantic's - Vibration Sensor / decode as MS",
-            "internals" : {
-               "NAME" : "MD_2018R_803066",
-               "DEF" : "MD_2018R 803066"
-            },
-            "readings" : {
-               "deviceTyp" : "vibration",
-               "batteryState" : "ok",
-               "keepalive" : "event",
-               "contact" : "Alarm",
-               "state" : "warning"
-            },
-            "user" : "Harst",
-            "revision_modul" : "14_SD_UT.pm     0 2020-12-03 22:15:57Z HomeAuto_User",
-            "minProtocolVersion" : "1.27",
-            "rmsg" : "MS;P0=-420;P1=809;P2=-835;P3=399;P4=-4080;D=34323010101010101010101232301010101012323010123230101230101012301012301232;CP=3;SP=4;s=64;e;m0;"
+            ]
          }
       ],
       "id" : "91.1",
-      "module" : "SD_UT"
+      "module" : "SD_UT",
+      "name" : "MD-2018R"
    },
    {
-      "module" : "SD_UT",
       "data" : [
          {
-            "revision_modul" : "14_SD_UT.pm     0 2020-12-03 22:15:57Z HomeAuto_User",
-            "minProtocolVersion" : "1.27",
-            "user" : "Harst",
-            "rmsg" : "MS;P0=-407;P1=402;P2=-4023;P3=-817;P4=806;D=12131040431040404313131043131313131043104043131313104310404313131043104313;CP=1;SP=2;R=0;m1;",
-            "revision_entry" : "2021-03-26 10:15:06",
+            "comment" : "Atlantic's - Door / Window Sensor / decode as MS",
             "dmsg" : "P91#91DF4F4EB",
+            "internals" : {
+               "DEF" : "MD_210R 91DF4F",
+               "NAME" : "MD_210R_91DF4F"
+            },
             "readings" : {
+               "batteryState" : "ok",
+               "contact" : "open",
+               "deviceTyp" : "switch",
                "keepalive" : "event",
                "sabotage" : "closed",
-               "batteryState" : "ok",
-               "deviceTyp" : "switch",
-               "state" : "warning",
-               "contact" : "open"
+               "state" : "warning"
             },
+            "rmsg" : "MS;P0=-407;P1=402;P2=-4023;P3=-817;P4=806;D=12131040431040404313131043131313131043104043131313104310404313131043104313;CP=1;SP=2;R=0;m1;",
             "tests" : [
                {
                   "attributes" : {
@@ -1843,120 +1603,109 @@
                   },
                   "comment" : "#0"
                }
-            ],
-            "internals" : {
-               "NAME" : "MD_210R_91DF4F",
-               "DEF" : "MD_210R 91DF4F"
-            },
-            "comment" : "Atlantic's - Door / Window Sensor / decode as MS"
+            ]
          }
       ],
       "id" : "91.1",
+      "module" : "SD_UT",
       "name" : "MD-210R"
    },
    {
-      "module" : "SD_UT",
-      "id" : "92",
       "data" : [
          {
-            "readings" : {
-               "deviceCode" : "1010000001101100001101100000",
-               "state" : "on",
-               "LastAction" : "receive"
-            },
+            "comment" : "(ID 19,63 additionally)",
+            "dispatch_repeats" : "2",
+            "dmsg" : "P92#A06C3601",
             "internals" : {
                "DEF" : "Krinner_LUMIX A06C360",
                "NAME" : "Krinner_LUMIX_A06C360"
             },
-            "comment" : "(ID 19,63 additionally)",
+            "readings" : {
+               "LastAction" : "receive",
+               "deviceCode" : "1010000001101100001101100000",
+               "state" : "on"
+            },
+            "rmsg" : "MU;P0=24188;P1=-16308;P2=993;P3=-402;P4=416;P5=-967;P6=-10162;D=0123234545454523234523234545454545454545232623452345454545454523234523234545454523234523234545454545454545232623452345454545454523234523234545454523234523234545454545454545232623452345454545454523234523234545454523234523234545454545454545232;CP=4;R=25;",
             "tests" : [
                {
-                  "comment" : "#0",
                   "attributes" : {
                      "model" : "Krinner_LUMIX"
-                  }
+                  },
+                  "comment" : "#0"
                }
-            ],
-            "dmsg" : "P92#A06C3601",
-            "revision_entry" : "2021-03-26 10:11:12",
-            "dispatch_repeats" : "2",
-            "rmsg" : "MU;P0=24188;P1=-16308;P2=993;P3=-402;P4=416;P5=-967;P6=-10162;D=0123234545454523234523234545454545454545232623452345454545454523234523234545454523234523234545454545454545232623452345454545454523234523234545454523234523234545454545454545232623452345454545454523234523234545454523234523234545454545454545232;CP=4;R=25;",
-            "minProtocolVersion" : "1.27",
-            "revision_modul" : "14_SD_UT.pm     0 2020-12-03 22:15:57Z HomeAuto_User",
-            "user" : "gestein"
+            ]
          },
          {
-            "rmsg" : "MU;P0=11076;P1=-20524;P2=281;P3=-980;P4=982;P5=-411;P6=408;P7=-10156;D=0123232345456345456363636363636363634745634563636363636345456345456363636345456345456363636363636363634745634563636363636345456345456363636345456345456363636363636363634745634563636363636345456345456363636345456345456363636363636363634;CP=6;R=38;",
-            "user" : "gestein",
-            "minProtocolVersion" : "1.27",
-            "revision_modul" : "14_SD_UT.pm     0 2020-12-03 22:15:57Z HomeAuto_User",
+            "dispatch_repeats" : "2",
+            "dmsg" : "P92#A06C3600",
             "internals" : {
-               "NAME" : "Krinner_LUMIX_A06C360",
-               "DEF" : "Krinner_LUMIX A06C360"
+               "DEF" : "Krinner_LUMIX A06C360",
+               "NAME" : "Krinner_LUMIX_A06C360"
             },
+            "readings" : {
+               "LastAction" : "receive",
+               "deviceCode" : "1010000001101100001101100000",
+               "state" : "off"
+            },
+            "rmsg" : "MU;P0=11076;P1=-20524;P2=281;P3=-980;P4=982;P5=-411;P6=408;P7=-10156;D=0123232345456345456363636363636363634745634563636363636345456345456363636345456345456363636363636363634745634563636363636345456345456363636345456345456363636363636363634745634563636363636345456345456363636345456345456363636363636363634;CP=6;R=38;",
             "tests" : [
                {
-                  "comment" : "#1",
                   "attributes" : {
                      "model" : "Krinner_LUMIX"
-                  }
+                  },
+                  "comment" : "#1"
                }
-            ],
-            "readings" : {
-               "deviceCode" : "1010000001101100001101100000",
-               "state" : "off",
-               "LastAction" : "receive"
-            },
-            "revision_entry" : "2021-03-26 10:13:39",
-            "dmsg" : "P92#A06C3600",
-            "dispatch_repeats" : "2"
+            ]
          }
       ],
+      "id" : "92",
+      "module" : "SD_UT",
       "name" : "KRINNER Lumix - LED X-MAS"
    },
    {
-      "module" : "SD_UT",
-      "id" : "93",
       "data" : [
          {
-            "user" : "SD_Protocol",
-            "revision_modul" : "14_SD_UT.pm     0 2020-12-03 22:15:57Z HomeAuto_User",
-            "minProtocolVersion" : "1.27",
-            "rmsg" : "MS;P1=376;P4=-1200;P5=1170;P6=-409;P7=-12224;D=17141414561456561456565656145656141414145614141414565656145656565614;CP=1;SP=7;R=231;e;m0;",
-            "revision_entry" : "2021-03-26 10:09:06",
-            "dmsg" : "P93#16F610EF0",
-            "tests" : [
-               {
-                  "comment" : "#0",
-                  "attributes" : {
-                     "model" : "KL_RF01"
-                  }
-               }
-            ],
             "comment" : "ESTO Lighting GmbH, remote control (ID 90 additionally)",
+            "dmsg" : "P93#16F610EF0",
             "internals" : {
-               "NAME" : "KL_RF01_16F6",
-               "DEF" : "KL_RF01 16F6"
+               "DEF" : "KL_RF01 16F6",
+               "NAME" : "KL_RF01_16F6"
             },
             "readings" : {
-               "state" : "light_color_cold_white",
                "LastAction" : "receive",
-               "deviceCode" : "0001011011110110"
-            }
+               "deviceCode" : "0001011011110110",
+               "state" : "light_color_cold_white"
+            },
+            "rmsg" : "MS;P1=376;P4=-1200;P5=1170;P6=-409;P7=-12224;D=17141414561456561456565656145656141414145614141414565656145656565614;CP=1;SP=7;R=231;e;m0;",
+            "tests" : [
+               {
+                  "attributes" : {
+                     "model" : "KL_RF01"
+                  },
+                  "comment" : "#0"
+               }
+            ]
          }
       ],
+      "id" : "93",
+      "module" : "SD_UT",
       "name" : "KL-RF01"
    },
    {
-      "name" : "Techmar",
-      "id" : "95",
       "data" : [
          {
+            "comment" : "Garden Lights remote control (ID 31,63 additionally)",
+            "dmsg" : "P95#7709F5DE09F60",
             "internals" : {
                "DEF" : "Techmar 7709F5DE",
                "NAME" : "Techmar_7709F5DE"
             },
-            "comment" : "Garden Lights remote control (ID 31,63 additionally)",
+            "readings" : {
+               "LastAction" : "receive",
+               "deviceCode" : "7709F5DE",
+               "state" : "Group_1_on"
+            },
+            "rmsg" : "MU;P0=-972;P1=526;P2=-335;P3=-666;D=01213131312131313121212121312121313131313121312131313121313131312121212121312121313131313121313121212101213131312131313121212121312121313131313121312131313121313131312121212121312121313131313121313121212101213131312131313121212121312121313131313121312131;CP=1;R=44;O;",
             "tests" : [
                {
                   "attributes" : {
@@ -1964,20 +1713,22 @@
                   },
                   "comment" : "#0"
                }
-            ],
-            "readings" : {
-               "deviceCode" : "7709F5DE",
-               "LastAction" : "receive",
-               "state" : "Group_1_on"
-            },
-            "revision_entry" : "2021-03-26 10:00:41",
-            "dmsg" : "P95#7709F5DE09F60",
-            "rmsg" : "MU;P0=-972;P1=526;P2=-335;P3=-666;D=01213131312131313121212121312121313131313121312131313121313131312121212121312121313131313121313121212101213131312131313121212121312121313131313121312131313121313131312121212121312121313131313121313121212101213131312131313121212121312121313131313121312131;CP=1;R=44;O;",
-            "user" : "BlackcatSandy",
-            "minProtocolVersion" : "1.27",
-            "revision_modul" : "14_SD_UT.pm     0 2020-12-03 22:15:57Z HomeAuto_User"
+            ]
          },
          {
+            "comment" : "Garden Lights remote control (ID 31,63 additionally)",
+            "dispatch_repeats" : "1",
+            "dmsg" : "P95#7709F5DE11EE0",
+            "internals" : {
+               "DEF" : "Techmar 7709F5DE",
+               "NAME" : "Techmar_7709F5DE"
+            },
+            "readings" : {
+               "LastAction" : "receive",
+               "deviceCode" : "7709F5DE",
+               "state" : "Group_5_on"
+            },
+            "rmsg" : "MU;P0=-651;P1=530;P2=-345;P3=-969;D=01212121312101010121010101212121210121210101010101210121010101210101010121212121012121210101010121010101212101312101010121010101212121210121210101010101210121010101210101010121212121012121210101010121010101212121312101010121010101212121210121210101010101;CP=1;R=24;O;",
             "tests" : [
                {
                   "attributes" : {
@@ -1985,31 +1736,22 @@
                   },
                   "comment" : "#1"
                }
-            ],
+            ]
+         },
+         {
+            "comment" : "Garden Lights remote control (ID 31,63 additionally)",
+            "dispatch_repeats" : "1",
+            "dmsg" : "P95#7709F5DE02FD0",
             "internals" : {
                "DEF" : "Techmar 7709F5DE",
                "NAME" : "Techmar_7709F5DE"
             },
-            "comment" : "Garden Lights remote control (ID 31,63 additionally)",
             "readings" : {
-               "state" : "Group_5_on",
                "LastAction" : "receive",
-               "deviceCode" : "7709F5DE"
-            },
-            "dmsg" : "P95#7709F5DE11EE0",
-            "revision_entry" : "2021-03-26 10:01:49",
-            "dispatch_repeats" : "1",
-            "rmsg" : "MU;P0=-651;P1=530;P2=-345;P3=-969;D=01212121312101010121010101212121210121210101010101210121010101210101010121212121012121210101010121010101212101312101010121010101212121210121210101010101210121010101210101010121212121012121210101010121010101212121312101010121010101212121210121210101010101;CP=1;R=24;O;",
-            "user" : "BlackcatSandy",
-            "revision_modul" : "14_SD_UT.pm     0 2020-12-03 22:15:57Z HomeAuto_User",
-            "minProtocolVersion" : "1.27"
-         },
-         {
-            "readings" : {
                "deviceCode" : "7709F5DE",
-               "LastAction" : "receive",
                "state" : "Group_8_off"
             },
+            "rmsg" : "MU;P0=538;P1=-329;P2=-653;P3=-964;D=01020301020202010202020101010102010102020202020102010202020102020202010101010101010201020202020202010202010301020202010202020101010102010102020202020102010202020102020202010101010101010201020202020202010201010301020202010202020101010102010102020202020102;CP=0;R=19;O;",
             "tests" : [
                {
                   "attributes" : {
@@ -2017,60 +1759,51 @@
                   },
                   "comment" : "#2"
                }
-            ],
-            "comment" : "Garden Lights remote control (ID 31,63 additionally)",
-            "internals" : {
-               "NAME" : "Techmar_7709F5DE",
-               "DEF" : "Techmar 7709F5DE"
-            },
-            "revision_entry" : "2021-03-26 09:59:28",
-            "dmsg" : "P95#7709F5DE02FD0",
-            "dispatch_repeats" : "1",
-            "rmsg" : "MU;P0=538;P1=-329;P2=-653;P3=-964;D=01020301020202010202020101010102010102020202020102010202020102020202010101010101010201020202020202010202010301020202010202020101010102010102020202020102010202020102020202010101010101010201020202020202010201010301020202010202020101010102010102020202020102;CP=0;R=19;O;",
-            "revision_modul" : "14_SD_UT.pm     0 2020-12-03 22:15:57Z HomeAuto_User",
-            "minProtocolVersion" : "1.27",
-            "user" : "BlackcatSandy"
+            ]
          }
       ],
-      "module" : "SD_UT"
+      "id" : "95",
+      "module" : "SD_UT",
+      "name" : "Techmar"
    },
    {
-      "module" : "SD_UT",
-      "id" : "97",
       "data" : [
          {
-            "rmsg" : "MU;P0=-294;P1=237;P2=5829;P3=-3887;P4=1001;P5=-523;P6=504;P7=-995;D=01010101010101010101010234545454545454545454545454545454545454545456767454567454545456745456745456745454523454545454545454545454545454545454545454545676745456745454545674545674545674545452345454545454545454545454545454545454545454567674545674545454567454;CP=4;R=45;O;",
-            "user" : "elektron-bbs",
-            "revision_modul" : "14_SD_UT.pm     0 2020-12-03 22:15:57Z HomeAuto_User",
-            "minProtocolVersion" : "1.27",
-            "tests" : [
-               {
-                  "comment" : "#0",
-                  "attributes" : {
-                     "model" : "Momento"
-                  }
-               }
-            ],
             "comment" : "remote control for wireless digital picture frame",
+            "dispatch_repeats" : "1",
+            "dmsg" : "P97#0000064248",
             "internals" : {
                "DEF" : "Momento 0000064",
                "NAME" : "Momento_0000064"
             },
             "readings" : {
-               "deviceCode" : "0000064",
                "LastAction" : "receive",
+               "deviceCode" : "0000064",
                "state" : "play/pause"
             },
-            "revision_entry" : "2021-03-26 09:57:02",
-            "dmsg" : "P97#0000064248",
-            "dispatch_repeats" : "1"
+            "rmsg" : "MU;P0=-294;P1=237;P2=5829;P3=-3887;P4=1001;P5=-523;P6=504;P7=-995;D=01010101010101010101010234545454545454545454545454545454545454545456767454567454545456745456745456745454523454545454545454545454545454545454545454545676745456745454545674545674545674545452345454545454545454545454545454545454545454567674545674545454567454;CP=4;R=45;O;",
+            "tests" : [
+               {
+                  "attributes" : {
+                     "model" : "Momento"
+                  },
+                  "comment" : "#0"
+               }
+            ]
          },
          {
+            "comment" : "remote control for wireless digital picture frame",
+            "dmsg" : "P97#0000064147",
+            "internals" : {
+               "DEF" : "Momento 0000064",
+               "NAME" : "Momento_0000064"
+            },
             "readings" : {
                "LastAction" : "receive",
-               "state" : "power",
-               "deviceCode" : "0000064"
+               "deviceCode" : "0000064",
+               "state" : "power"
             },
+            "rmsg" : "MU;P0=-998;P1=-273;P2=256;P3=5830;P4=-3906;P5=991;P6=-527;P7=508;D=12121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121345656565656565656565656565656565656565656567070565670565656565670567056565670707034565656565656565656565656565656565656565656707056567;CP=2;R=40;O;",
             "tests" : [
                {
                   "attributes" : {
@@ -2078,64 +1811,50 @@
                   },
                   "comment" : "#1"
                }
-            ],
+            ]
+         },
+         {
+            "comment" : "remote control for wireless digital picture frame",
+            "dmsg" : "P97#000006444A",
             "internals" : {
                "DEF" : "Momento 0000064",
                "NAME" : "Momento_0000064"
             },
-            "comment" : "remote control for wireless digital picture frame",
-            "dmsg" : "P97#0000064147",
-            "revision_entry" : "2021-03-26 09:55:38",
-            "rmsg" : "MU;P0=-998;P1=-273;P2=256;P3=5830;P4=-3906;P5=991;P6=-527;P7=508;D=12121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121345656565656565656565656565656565656565656567070565670565656565670567056565670707034565656565656565656565656565656565656565656707056567;CP=2;R=40;O;",
-            "revision_modul" : "14_SD_UT.pm     0 2020-12-03 22:15:57Z HomeAuto_User",
-            "minProtocolVersion" : "1.27",
-            "user" : "elektron-bbs"
-         },
-         {
-            "dmsg" : "P97#000006444A",
-            "revision_entry" : "2021-03-26 09:54:27",
-            "internals" : {
-               "NAME" : "Momento_0000064",
-               "DEF" : "Momento 0000064"
-            },
-            "comment" : "remote control for wireless digital picture frame",
-            "tests" : [
-               {
-                  "comment" : "#2",
-                  "attributes" : {
-                     "model" : "Momento"
-                  }
-               }
-            ],
             "readings" : {
                "LastAction" : "receive",
-               "state" : "up",
-               "deviceCode" : "0000064"
+               "deviceCode" : "0000064",
+               "state" : "up"
             },
-            "user" : "elektron-bbs",
-            "minProtocolVersion" : "1.27",
-            "revision_modul" : "14_SD_UT.pm     0 2020-12-03 22:15:57Z HomeAuto_User",
-            "rmsg" : "MU;P0=-1005;P1=-272;P2=258;P3=5856;P4=-3902;P5=1001;P6=-520;P7=508;D=0121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121213456565656565656565656565656565656565656565670705656705656567056565670565670567056345656565656565656565656565656565656565656567070565;CP=2;R=63;O;"
+            "rmsg" : "MU;P0=-1005;P1=-272;P2=258;P3=5856;P4=-3902;P5=1001;P6=-520;P7=508;D=0121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121212121213456565656565656565656565656565656565656565670705656705656567056565670565670567056345656565656565656565656565656565656565656567070565;CP=2;R=63;O;",
+            "tests" : [
+               {
+                  "attributes" : {
+                     "model" : "Momento"
+                  },
+                  "comment" : "#2"
+               }
+            ]
          }
       ],
+      "id" : "97",
+      "module" : "SD_UT",
       "name" : "Momento"
    },
    {
-      "name" : "NAVARIS 44344.04",
-      "module" : "SD_UT",
       "data" : [
          {
-            "revision_modul" : "14_SD_UT.pm     0 2020-12-03 22:15:57Z HomeAuto_User",
-            "minProtocolVersion" : "1.27",
-            "user" : "DavidKing123456",
-            "rmsg" : "MU;P0=-302;P1=180;P2=294;P3=-208;P4=419;P5=-423;D=01023101010101023232310102323451010231010101023101010231010101010232323101023234510102310101010231010102310101010102323231010232345101023101010102310101023101010101023232310102323451010231010101023101010231010101010232323101023234510102310101010231010102;CP=1;R=36;O;",
-            "revision_entry" : "2021-03-25 14:57:21",
-            "dmsg" : "P99#211073",
+            "comment" : "NAVARIS touch light switch Model No.: 44344.04",
             "dispatch_repeats" : "3",
-            "readings" : {
-               "state" : "receive",
-               "LastAction" : "receive"
+            "dmsg" : "P99#211073",
+            "internals" : {
+               "DEF" : "Navaris 211073",
+               "NAME" : "Navaris_211073"
             },
+            "readings" : {
+               "LastAction" : "receive",
+               "state" : "receive"
+            },
+            "rmsg" : "MU;P0=-302;P1=180;P2=294;P3=-208;P4=419;P5=-423;D=01023101010101023232310102323451010231010101023101010231010101010232323101023234510102310101010231010102310101010102323231010232345101023101010102310101023101010101023232310102323451010231010101023101010231010101010232323101023234510102310101010231010102;CP=1;R=36;O;",
             "tests" : [
                {
                   "attributes" : {
@@ -2143,37 +1862,29 @@
                   },
                   "comment" : "#0"
                }
-            ],
-            "internals" : {
-               "DEF" : "Navaris 211073",
-               "NAME" : "Navaris_211073"
-            },
-            "comment" : "NAVARIS touch light switch Model No.: 44344.04"
+            ]
          }
       ],
-      "id" : "99"
+      "id" : "99",
+      "module" : "SD_UT",
+      "name" : "NAVARIS 44344.04"
    },
    {
-      "name" : "TR60C-1",
       "data" : [
          {
-            "minProtocolVersion" : "1.27",
-            "revision_modul" : "14_SD_UT.pm     0 2020-12-03 22:15:57Z HomeAuto_User",
-            "user" : "phoenix-anasazi",
-            "rmsg" : "MU;P0=18280;P1=-737;P2=419;P3=-331;P4=799;P5=-9574;P6=-7080;D=012121234343434341212121212121252121212123434343434121212121212125212121212343434343412121212121212521212121234343434341212121212121252121212123434343434121212121212126;CP=2;R=2;",
-            "dmsg" : "P104#0F80",
-            "revision_entry" : "2021-03-25 14:46:28",
-            "dispatch_repeats" : "3",
-            "readings" : {
-               "state" : "light_off_fan_off",
-               "LastAction" : "receive",
-               "deviceCode" : "0"
-            },
-            "internals" : {
-               "NAME" : "TR60C1_0",
-               "DEF" : "TR60C1 0"
-            },
             "comment" : "Remote control 77841 for example Westinghouse Bendan (deviceCode 0)",
+            "dispatch_repeats" : "3",
+            "dmsg" : "P104#0F80",
+            "internals" : {
+               "DEF" : "TR60C1 0",
+               "NAME" : "TR60C1_0"
+            },
+            "readings" : {
+               "LastAction" : "receive",
+               "deviceCode" : "0",
+               "state" : "light_off_fan_off"
+            },
+            "rmsg" : "MU;P0=18280;P1=-737;P2=419;P3=-331;P4=799;P5=-9574;P6=-7080;D=012121234343434341212121212121252121212123434343434121212121212125212121212343434343412121212121212521212121234343434341212121212121252121212123434343434121212121212126;CP=2;R=2;",
             "tests" : [
                {
                   "attributes" : {
@@ -2184,14 +1895,19 @@
             ]
          },
          {
-            "dispatch_repeats" : "4",
-            "revision_entry" : "2021-03-25 14:48:27",
-            "dmsg" : "P104#9780",
             "comment" : "Remote control 77841 for example Westinghouse Bendan (deviceCode 9)",
+            "dispatch_repeats" : "4",
+            "dmsg" : "P104#9780",
             "internals" : {
                "DEF" : "TR60C1 9",
                "NAME" : "TR60C1_9"
             },
+            "readings" : {
+               "LastAction" : "receive",
+               "deviceCode" : "9",
+               "state" : "light_off_fan_4"
+            },
+            "rmsg" : "MU;P0=14896;P1=-751;P2=394;P3=-370;P4=768;P5=-9572;P6=-21472;D=0121234123434343412121212121212523412123412343434341212121212121252341212341234343434121212121212125234121234123434343412121212121212523412123412343434341212121212121252341212341234343434121212121212126;CP=2;R=4;",
             "tests" : [
                {
                   "attributes" : {
@@ -2199,52 +1915,52 @@
                   },
                   "comment" : "#1"
                }
-            ],
-            "readings" : {
-               "deviceCode" : "9",
-               "state" : "light_off_fan_4",
-               "LastAction" : "receive"
-            },
-            "user" : "phoenix-anasazi",
-            "minProtocolVersion" : "1.27",
-            "revision_modul" : "14_SD_UT.pm     0 2020-12-03 22:15:57Z HomeAuto_User",
-            "rmsg" : "MU;P0=14896;P1=-751;P2=394;P3=-370;P4=768;P5=-9572;P6=-21472;D=0121234123434343412121212121212523412123412343434341212121212121252341212341234343434121212121212125234121234123434343412121212121212523412123412343434341212121212121252341212341234343434121212121212126;CP=2;R=4;"
+            ]
          },
          {
-            "readings" : {
-               "deviceCode" : "B",
-               "LastAction" : "receive",
-               "state" : "light_on_fan_2"
-            },
+            "comment" : "Remote control 77841 for example Westinghouse Bendan (deviceCode B)",
+            "dispatch_repeats" : "4",
+            "dmsg" : "P104#B38F",
             "internals" : {
                "DEF" : "TR60C1 B",
                "NAME" : "TR60C1_B"
             },
-            "comment" : "Remote control 77841 for example Westinghouse Bendan (deviceCode B)",
+            "readings" : {
+               "LastAction" : "receive",
+               "deviceCode" : "B",
+               "state" : "light_on_fan_2"
+            },
+            "rmsg" : "MU;P0=-96;P1=152;P2=-753;P3=389;P4=-374;P5=769;P6=-9566;P7=-19920;D=012345454523232345454545634523454523234545452323234545454563452345452323454545232323454545456345234545232345454523232345454545634523454523234545452323234545454563452345452323454545232323454545457;CP=3;R=1;",
             "tests" : [
                {
-                  "comment" : "#2",
                   "attributes" : {
                      "model" : "TR60C1"
-                  }
+                  },
+                  "comment" : "#2"
                }
-            ],
-            "revision_entry" : "2021-03-25 14:50:18",
-            "dmsg" : "P104#B38F",
-            "dispatch_repeats" : "4",
-            "rmsg" : "MU;P0=-96;P1=152;P2=-753;P3=389;P4=-374;P5=769;P6=-9566;P7=-19920;D=012345454523232345454545634523454523234545452323234545454563452345452323454545232323454545456345234545232345454523232345454545634523454523234545452323234545454563452345452323454545232323454545457;CP=3;R=1;",
-            "minProtocolVersion" : "1.27",
-            "revision_modul" : "14_SD_UT.pm     0 2020-12-03 22:15:57Z HomeAuto_User",
-            "user" : "phoenix-anasazi"
+            ]
          }
       ],
       "id" : "104",
-      "module" : "SD_UT"
+      "module" : "SD_UT",
+      "name" : "TR60C-1"
    },
    {
-      "id" : "105",
       "data" : [
          {
+            "comment" : "Remote control from Shenzhen BOFU Mechanic & Electronic Co., Ltd. (ID 40 additionally)",
+            "dispatch_repeats" : "1",
+            "dmsg" : "P105#FAD08883A3",
+            "internals" : {
+               "DEF" : "BF_301 FAD0",
+               "NAME" : "BF_301_FAD0"
+            },
+            "readings" : {
+               "LastAction" : "receive",
+               "deviceCode" : "FAD0",
+               "state" : "down"
+            },
+            "rmsg" : "MU;P0=-697;P1=5629;P2=291;P3=3952;P4=-2459;P5=1644;P6=-298;P7=689;D=34567676767676207620767620762020202076202020762020207620202020207676762076202020767614567676767676207620767620762020202076202020762020207620202020207676762076202020767614567676767676207620767620762020202076202020762020207620202020207676762076202020767614;CP=2;R=41;O;",
             "tests" : [
                {
                   "attributes" : {
@@ -2252,36 +1968,22 @@
                   },
                   "comment" : "#0"
                }
-            ],
-            "comment" : "Remote control from Shenzhen BOFU Mechanic & Electronic Co., Ltd. (ID 40 additionally)",
-            "internals" : {
-               "NAME" : "BF_301_FAD0",
-               "DEF" : "BF_301 FAD0"
-            },
-            "readings" : {
-               "state" : "down",
-               "LastAction" : "receive",
-               "deviceCode" : "FAD0"
-            },
-            "revision_entry" : "2021-03-25 14:43:57",
-            "dispatch_repeats" : "1",
-            "dmsg" : "P105#FAD08883A3",
-            "rmsg" : "MU;P0=-697;P1=5629;P2=291;P3=3952;P4=-2459;P5=1644;P6=-298;P7=689;D=34567676767676207620767620762020202076202020762020207620202020207676762076202020767614567676767676207620767620762020202076202020762020207620202020207676762076202020767614567676767676207620767620762020202076202020762020207620202020207676762076202020767614;CP=2;R=41;O;",
-            "user" : "stsirakidis",
-            "revision_modul" : "14_SD_UT.pm     0 2020-12-03 22:15:57Z HomeAuto_User",
-            "minProtocolVersion" : "1.27"
+            ]
          },
          {
-            "readings" : {
-               "deviceCode" : "FAD0",
-               "state" : "stop",
-               "LastAction" : "receive"
-            },
             "comment" : "Remote control from Shenzhen BOFU Mechanic & Electronic Co., Ltd. (ID 40 additionally)",
+            "dispatch_repeats" : "1",
+            "dmsg" : "P105#FAD08A83A1",
             "internals" : {
                "DEF" : "BF_301 FAD0",
                "NAME" : "BF_301_FAD0"
             },
+            "readings" : {
+               "LastAction" : "receive",
+               "deviceCode" : "FAD0",
+               "state" : "stop"
+            },
+            "rmsg" : "MU;P0=5630;P1=3968;P2=-2458;P3=1642;P4=-285;P5=690;P6=282;P7=-704;D=12345454545454675467545467546767676754676767546754675467676767675454546754676767675402345454545454675467545467546767676754676767546754675467676767675454546754676767675402345454545454675467545467546767676754676767546754675467676767675454546754676767675402;CP=6;R=47;O;",
             "tests" : [
                {
                   "attributes" : {
@@ -2289,33 +1991,22 @@
                   },
                   "comment" : "#1"
                }
-            ],
-            "revision_entry" : "2021-03-25 14:42:03",
-            "dmsg" : "P105#FAD08A83A1",
-            "dispatch_repeats" : "1",
-            "rmsg" : "MU;P0=5630;P1=3968;P2=-2458;P3=1642;P4=-285;P5=690;P6=282;P7=-704;D=12345454545454675467545467546767676754676767546754675467676767675454546754676767675402345454545454675467545467546767676754676767546754675467676767675454546754676767675402345454545454675467545467546767676754676767546754675467676767675454546754676767675402;CP=6;R=47;O;",
-            "minProtocolVersion" : "1.27",
-            "revision_modul" : "14_SD_UT.pm     0 2020-12-03 22:15:57Z HomeAuto_User",
-            "user" : "stsirakidis"
+            ]
          },
          {
-            "minProtocolVersion" : "1.27",
-            "revision_modul" : "14_SD_UT.pm     0 2020-12-03 22:15:57Z HomeAuto_User",
-            "user" : "stsirakidis",
-            "rmsg" : "MU;P0=-500;P1=5553;P2=-2462;P3=1644;P4=-299;P5=679;P6=298;P7=-687;D=01234545454545467546754546754676767675467676767675454546767676767545454675467546767671234545454545467546754546754676767675467676767675454546767676767545454675467546767671234545454545467546754546754676767675467676767675454546767676767545454675467546767671;CP=6;R=48;O;",
-            "revision_entry" : "2021-03-25 14:40:32",
+            "comment" : "Remote control from Shenzhen BOFU Mechanic & Electronic Co., Ltd. (ID 40 additionally)",
             "dispatch_repeats" : "2",
             "dmsg" : "P105#FAD08383A8",
-            "readings" : {
-               "deviceCode" : "FAD0",
-               "LastAction" : "receive",
-               "state" : "up"
-            },
-            "comment" : "Remote control from Shenzhen BOFU Mechanic & Electronic Co., Ltd. (ID 40 additionally)",
             "internals" : {
                "DEF" : "BF_301 FAD0",
                "NAME" : "BF_301_FAD0"
             },
+            "readings" : {
+               "LastAction" : "receive",
+               "deviceCode" : "FAD0",
+               "state" : "up"
+            },
+            "rmsg" : "MU;P0=-500;P1=5553;P2=-2462;P3=1644;P4=-299;P5=679;P6=298;P7=-687;D=01234545454545467546754546754676767675467676767675454546767676767545454675467546767671234545454545467546754546754676767675467676767675454546767676767545454675467546767671234545454545467546754546754676767675467676767675454546767676767545454675467546767671;CP=6;R=48;O;",
             "tests" : [
                {
                   "attributes" : {
@@ -2326,106 +2017,100 @@
             ]
          }
       ],
+      "id" : "105",
       "module" : "SD_UT",
       "name" : "BF-301"
    },
    {
-      "module" : "SD_UT",
-      "id" : "114",
       "data" : [
          {
-            "user" : "Jake",
-            "minProtocolVersion" : "1.32",
-            "revision_modul" : "14_SD_UT.pm     0 2021-08-08 16:56:40Z HomeAutoUser",
-            "rmsg" : "MU;P0=311;P1=585;P2=-779;P3=1255;P4=-1445;P5=-23617;P7=-5646;CP=1;R=230;D=12323234141414141514123414123232341414141415141234141232323414141414151412341412323234141414141514123414123232341414141415141234141232323414141414151412341412323234141414141517141232323414141414150;p;",
-            "revision_entry" : "2021-08-09 21:20:26",
-            "dmsg" : "P114#B1F",
-            "dispatch_repeats" : "5",
-            "internals" : {
-               "NAME" : "TR401_0_2",
-               "DEF" : "TR401 0_2"
-            },
             "comment" : "Remote control, Button off (example Well-Light sales)",
+            "dispatch_repeats" : "5",
+            "dmsg" : "P114#B1F",
+            "internals" : {
+               "DEF" : "TR401 0_2",
+               "NAME" : "TR401_0_2"
+            },
+            "readings" : {
+               "LastAction" : "receive",
+               "deviceCode" : "0",
+               "state" : "off"
+            },
+            "rmsg" : "MU;P0=311;P1=585;P2=-779;P3=1255;P4=-1445;P5=-23617;P7=-5646;CP=1;R=230;D=12323234141414141514123414123232341414141415141234141232323414141414151412341412323234141414141514123414123232341414141415141234141232323414141414151412341412323234141414141517141232323414141414150;p;",
             "tests" : [
                {
-                  "comment" : "#0",
                   "attributes" : {
                      "model" : "TR401"
-                  }
+                  },
+                  "comment" : "#0"
                }
-            ],
-            "readings" : {
-               "deviceCode" : "0",
-               "state" : "off",
-               "LastAction" : "receive"
-            }
+            ]
          },
          {
-            "dispatch_repeats" : "2",
-            "revision_entry" : "2021-08-09 21:22:56",
-            "dmsg" : "P114#31F",
             "comment" : "Remote control, Button on (example Well-Light sales)",
+            "dispatch_repeats" : "2",
+            "dmsg" : "P114#31F",
             "internals" : {
-               "NAME" : "TR401_0_2",
-               "DEF" : "TR401 0_2"
+               "DEF" : "TR401 0_2",
+               "NAME" : "TR401_0_2"
             },
-            "tests" : [
-               {
-                  "comment" : "#1",
-                  "attributes" : {
-                     "model" : "TR401"
-                  }
-               }
-            ],
             "readings" : {
-               "deviceCode" : "0",
                "LastAction" : "receive",
+               "deviceCode" : "0",
                "state" : "on"
             },
-            "user" : "Jake",
-            "minProtocolVersion" : "1.32",
-            "revision_modul" : "14_SD_UT.pm     0 2021-08-08 16:56:40Z HomeAutoUser",
-            "rmsg" : "MU;P0=-1426;P1=599;P2=-23225;P3=-748;P4=1281;P5=372;P6=111;P7=268;CP=1;R=235;D=0121343401013434340101010101252621343401013434340101010101252705012134340101343434010101010125;p;"
+            "rmsg" : "MU;P0=-1426;P1=599;P2=-23225;P3=-748;P4=1281;P5=372;P6=111;P7=268;CP=1;R=235;D=0121343401013434340101010101252621343401013434340101010101252705012134340101343434010101010125;p;",
+            "tests" : [
+               {
+                  "attributes" : {
+                     "model" : "TR401"
+                  },
+                  "comment" : "#1"
+               }
+            ]
          }
       ],
+      "id" : "114",
+      "module" : "SD_UT",
       "name" : "TR401"
    },
    {
-      "name" : "Meikee",
-      "id" : "118",
       "data" : [
          {
-            "readings" : {
-               "state" : "on",
-               "LastAction" : "receive",
-               "deviceCode" : "20D3"
-            },
-            "tests" : [
-               {
-                  "comment" : "#0",
-                  "attributes" : {
-                     "model" : "Meikee_24"
-                  }
-               }
-            ],
+            "comment" : "Remote controls for Meikee LED lights e.g. RGB LED Wallwasher Light and Solar Flood Light",
+            "dmsg" : "P118#20D302",
             "internals" : {
                "DEF" : "Meikee_24 20D3",
                "NAME" : "Meikee_24_20D3"
             },
-            "comment" : "Remote controls for Meikee LED lights e.g. RGB LED Wallwasher Light and Solar Flood Light",
-            "revision_entry" : "2022-03-06 13:10:07",
-            "dmsg" : "P118#20D302",
+            "readings" : {
+               "LastAction" : "receive",
+               "deviceCode" : "20D3",
+               "state" : "on"
+            },
             "rmsg" : "MU;P0=506;P1=-1015;P2=1008;P3=-523;P4=-12696;D=01012301040101230101010101232301230101232301010101010123010;CP=0;R=49;",
-            "revision_modul" : "14_SD_UT.pm     0 2022-01-23 16:28:56Z sidey79",
-            "minProtocolVersion" : "1.44",
-            "user" : "elektron-bbs"
+            "tests" : [
+               {
+                  "attributes" : {
+                     "model" : "Meikee_24"
+                  },
+                  "comment" : "#0"
+               }
+            ]
          },
          {
             "comment" : "Remote controls for Meikee LED lights e.g. RGB LED Wallwasher Light and Solar Flood Light",
+            "dmsg" : "P118#20D301",
             "internals" : {
                "DEF" : "Meikee_24 20D3",
                "NAME" : "Meikee_24_20D3"
             },
+            "readings" : {
+               "LastAction" : "receive",
+               "deviceCode" : "20D3",
+               "state" : "off"
+            },
+            "rmsg" : "MU;P0=-516;P1=518;P2=-1015;P3=1000;P4=-12712;D=01230121230301212121212121230141212301212121212303012301212303012121212121212301;CP=1;R=35;",
             "tests" : [
                {
                   "attributes" : {
@@ -2433,166 +2118,137 @@
                   },
                   "comment" : "#1"
                }
-            ],
-            "readings" : {
-               "state" : "off",
-               "LastAction" : "receive",
-               "deviceCode" : "20D3"
-            },
-            "revision_entry" : "2022-03-06 13:11:19",
-            "dmsg" : "P118#20D301",
-            "rmsg" : "MU;P0=-516;P1=518;P2=-1015;P3=1000;P4=-12712;D=01230121230301212121212121230141212301212121212303012301212303012121212121212301;CP=1;R=35;",
-            "user" : "elektron-bbs",
-            "minProtocolVersion" : "1.44",
-            "revision_modul" : "14_SD_UT.pm     0 2022-01-23 16:28:56Z sidey79"
+            ]
          },
          {
-            "rmsg" : "MU;P0=-509;P1=513;P2=-999;P3=1027;P4=-12704;D=01230121230301212121212121212141212301212121212303012301212303012121212121212121;CP=1;R=77;",
-            "revision_modul" : "14_SD_UT.pm     0 2022-01-23 16:28:56Z sidey79",
-            "minProtocolVersion" : "1.44",
-            "user" : "elektron-bbs",
-            "readings" : {
-               "deviceCode" : "20D3",
-               "state" : "learn",
-               "LastAction" : "receive"
-            },
-            "tests" : [
-               {
-                  "comment" : "#2",
-                  "attributes" : {
-                     "model" : "Meikee_24"
-                  }
-               }
-            ],
+            "comment" : "Remote controls for Meikee LED lights e.g. RGB LED Wallwasher Light and Solar Flood Light",
+            "dmsg" : "P118#20D300",
             "internals" : {
                "DEF" : "Meikee_24 20D3",
                "NAME" : "Meikee_24_20D3"
             },
-            "comment" : "Remote controls for Meikee LED lights e.g. RGB LED Wallwasher Light and Solar Flood Light",
-            "revision_entry" : "2022-03-06 13:12:25",
-            "dmsg" : "P118#20D300"
+            "readings" : {
+               "LastAction" : "receive",
+               "deviceCode" : "20D3",
+               "state" : "learn"
+            },
+            "rmsg" : "MU;P0=-509;P1=513;P2=-999;P3=1027;P4=-12704;D=01230121230301212121212121212141212301212121212303012301212303012121212121212121;CP=1;R=77;",
+            "tests" : [
+               {
+                  "attributes" : {
+                     "model" : "Meikee_24"
+                  },
+                  "comment" : "#2"
+               }
+            ]
          }
       ],
-      "module" : "SD_UT"
+      "id" : "118",
+      "module" : "SD_UT",
+      "name" : "Meikee"
    },
    {
-      "name" : "Busch-Transcontrol HF",
-      "id" : "121",
       "data" : [
          {
-            "readings" : {
-               "deviceCode" : "3DC",
-               "state" : "off",
-               "LastAction" : "receive"
-            },
-            "tests" : [
-               {
-                  "comment" : "#0",
-                  "attributes" : {
-                     "model" : "TC6861"
-                  }
-               }
-            ],
             "comment" : "remote control 6861",
+            "dmsg" : "P121#03DC7E",
             "internals" : {
                "DEF" : "TC6861 3DC_1",
                "NAME" : "TC6861_3DC_1"
             },
-            "revision_entry" : "2022-06-14 09:14:05",
-            "dmsg" : "P121#03DC7E",
+            "readings" : {
+               "LastAction" : "receive",
+               "deviceCode" : "3DC",
+               "state" : "off"
+            },
             "rmsg" : "MU;P0=28479;P1=-692;P2=260;P3=574;P4=-371;D=0121212121212134343434213434342121213434343434342;CP=2;R=41;",
-            "revision_modul" : "unknown",
-            "minProtocolVersion" : "1.46",
-            "user" : "elektron-bbs"
+            "tests" : [
+               {
+                  "attributes" : {
+                     "model" : "TC6861"
+                  },
+                  "comment" : "#0"
+               }
+            ]
          },
          {
-            "dmsg" : "P121#33DC7E",
-            "revision_entry" : "2022-06-14 09:24:03",
-            "readings" : {
-               "deviceCode" : "3DC",
-               "state" : "on",
-               "LastAction" : "receive"
-            },
-            "tests" : [
-               {
-                  "comment" : "#1",
-                  "attributes" : {
-                     "model" : "TC6861"
-                  }
-               }
-            ],
             "comment" : "remote control 6861",
+            "dmsg" : "P121#33DC7E",
             "internals" : {
                "DEF" : "TC6861 3DC_1",
                "NAME" : "TC6861_3DC_1"
             },
-            "revision_modul" : "unknown",
-            "minProtocolVersion" : "1.46",
-            "user" : "elektron-bbs",
-            "rmsg" : "MU;P0=4372;P1=-689;P2=254;P3=575;P4=-368;D=0121213434212134343434213434342121213434343434342;CP=2;R=59;"
+            "readings" : {
+               "LastAction" : "receive",
+               "deviceCode" : "3DC",
+               "state" : "on"
+            },
+            "rmsg" : "MU;P0=4372;P1=-689;P2=254;P3=575;P4=-368;D=0121213434212134343434213434342121213434343434342;CP=2;R=59;",
+            "tests" : [
+               {
+                  "attributes" : {
+                     "model" : "TC6861"
+                  },
+                  "comment" : "#1"
+               }
+            ]
          }
       ],
-      "module" : "SD_UT"
+      "id" : "121",
+      "module" : "SD_UT",
+      "name" : "Busch-Transcontrol HF"
    },
    {
-     "data" : [
-       {
-          "comment" : "Remote control DC-1961-TG with 12 buttons for ceiling fan with lighting",
-          "dmsg" : "P20#1846A865",
-          "internals" : {
-             "DEF" : "DC_1961_TG 1846",
-             "NAME" : "DC_1961_TG_1846"
-          },
-          "minProtocolVersion" : "1.48",
-          "readings" : {
-             "LastAction" : "receive",
-             "deviceCode" : "1846",
-             "rollingCode" : "6",
-             "state" : "light_on_off"
-          },
-          "tests" : [
-             {
-                "comment" : "#0",
-                "attributes" : {
-                   "model" : "DC_1961_TG"
-                }
-             }
-          ],
-          "revision_entry" : "2022-12-10 11:35:35",
-          "revision_modul" : "14_SD_UT.pm 0 2022-12-14 19:27:19Z elektron-bbs",
-          "rmsg" : "MS;P1=291;P2=-753;P3=762;P4=-249;P5=-8312;D=151212123434121212123412121234341234123412341212121234341212341234;CP=1;SP=5;R=224;O;m2;",
-          "user" : "Skusi"
-       },
-       {
-          "comment" : "Remote control DC-1961-TG with 12 buttons for ceiling fan with lighting",
-          "dmsg" : "P20#1846A77B",
-          "internals" : {
-             "DEF" : "DC_1961_TG 1846",
-             "NAME" : "DC_1961_TG_1846"
-          },
-          "minProtocolVersion" : "1.48",
-          "readings" : {
-             "LastAction" : "receive",
-             "deviceCode" : "1846",
-             "rollingCode" : "7",
-             "state" : "fan_off"
-          },
-          "tests" : [
-             {
-                "comment" : "#1",
-                "attributes" : {
-                   "model" : "DC_1961_TG"
-                }
-             }
-          ],
-          "revision_entry" : "2022-12-10 11:37:49",
-          "revision_modul" : "14_SD_UT.pm 0 2022-12-14 19:27:19Z elektron-bbs",
-          "rmsg" : "MS;P1=-760;P2=747;P3=-282;P4=253;P5=-8335;D=454141412323414141412341414123234123412341412323234123232323412323;CP=4;SP=5;R=27;O;m2;",
-          "user" : "Skusi"
-       }
+      "data" : [
+         {
+            "comment" : "Remote control DC-1961-TG with 12 buttons for ceiling fan with lighting",
+            "dmsg" : "P20#1846A865",
+            "internals" : {
+               "DEF" : "DC_1961_TG 1846",
+               "NAME" : "DC_1961_TG_1846"
+            },
+            "readings" : {
+               "LastAction" : "receive",
+               "deviceCode" : "1846",
+               "rollingCode" : "6",
+               "state" : "light_on_off"
+            },
+            "rmsg" : "MS;P1=291;P2=-753;P3=762;P4=-249;P5=-8312;D=151212123434121212123412121234341234123412341212121234341212341234;CP=1;SP=5;R=224;O;m2;",
+            "tests" : [
+               {
+                  "attributes" : {
+                     "model" : "DC_1961_TG"
+                  },
+                  "comment" : "#0"
+               }
+            ]
+         },
+         {
+            "comment" : "Remote control DC-1961-TG with 12 buttons for ceiling fan with lighting",
+            "dmsg" : "P20#1846A77B",
+            "internals" : {
+               "DEF" : "DC_1961_TG 1846",
+               "NAME" : "DC_1961_TG_1846"
+            },
+            "readings" : {
+               "LastAction" : "receive",
+               "deviceCode" : "1846",
+               "rollingCode" : "7",
+               "state" : "fan_off"
+            },
+            "rmsg" : "MS;P1=-760;P2=747;P3=-282;P4=253;P5=-8335;D=454141412323414141412341414123234123412341412323234123232323412323;CP=4;SP=5;R=27;O;m2;",
+            "tests" : [
+               {
+                  "attributes" : {
+                     "model" : "DC_1961_TG"
+                  },
+                  "comment" : "#1"
+               }
+            ]
+         }
       ],
-     "id" : "20",
-     "module" : "SD_UT",
-     "name" : "DC_1961_TG_1846"
+      "id" : "20",
+      "module" : "SD_UT",
+      "name" : "DC_1961_TG_1846"
    }
 ]
