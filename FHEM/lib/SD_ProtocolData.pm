@@ -1,9 +1,9 @@
-# $Id: SD_ProtocolData.pm 26975 2023-01-13 19:55:16Z elektron-bbs $
+# $Id: SD_ProtocolData.pm 26975 2023-05-16 16:34:07Z sidey79 $
 # The file is part of the SIGNALduino project.
 # All protocol definitions are contained in this file.
 #
 # 2016-2019  S.Butzek, Ralf9
-# 2019-2020  S.Butzek, HomeAutoUser, elektron-bbs
+# 2019-2023  S.Butzek, HomeAutoUser, elektron-bbs
 #
 # !!! useful hints !!!
 # --------------------
@@ -85,8 +85,7 @@ package lib::SD_ProtocolData;
   use strict;
   use warnings;
 
-  our $VERSION = '1.49';
-
+  our $VERSION = '1.51';
   our %protocols = (
     "0" =>  ## various weather sensors (500 | 9100)
             # Mebus | Id:237 Ch:1 T: 1.9 Bat:low           MS;P0=-9298;P1=495;P2=-1980;P3=-4239;D=1012121312131313121313121312121212121212131212131312131212;CP=1;SP=0;R=223;O;m2;
@@ -3296,6 +3295,49 @@ package lib::SD_ProtocolData;
         rfmode          => 'Inkbird_IBS-P01R',
         clientmodule    => 'SD_WS',
         length_min      => '36',
+      },
+    "125" =>  ## Humidity and Temperaturesensor Ecowitt WH31, froggit DP50 / WH31A
+              # Nordamerika: 915MHz; Europa: 868MHz, andere Regionen: 433MHz
+              # https://github.com/RFD-FHEM/RFFHEM/pull/1161 @ sidey79 2023-04-01
+              # SD_WS_125_TH_1 T: 21.0 H: 55  Battery: ok channel:1   MN;D=300282623704516C000200;R=56;  
+              # SD_WS_125_TH_1 T: 16.7 H: 60  Battery: ok channel:2   MN;D=300292373CDA116C000200;R=229;  
+              # SD_WS_125_TH_3 T: 5.4 H: 52   Battery: ok channel:3   MN;D=30E0A1C634FEA96C000200;R=197;
+
+      {
+        name            => 'WH31',
+        comment         => 'Fine Offset | Ambient Weather WH31E Thermo-Hygrometer Sensor',
+        id              => '125',
+        knownFreqs      => '868.35',
+        datarate        => '17.257',
+        sync            => '2DD4',
+        modulation      => '2-FSK',
+        regexMatch      => qr/^(30|37)/, 
+        preamble        => 'W125#',
+        register        => ['0001','022E','0343','042D','05D4','060b','0780','0800','0D21','0E65','0FE8','10A9','115C','1202','1322','14F8','1543','1916','1B43','1C68'],
+        rfmode          => 'Fine_Offset_WH31_868',
+        clientmodule    => 'SD_WS',
+        length_min      => '18',
+      },
+    "126" =>  ## Humidity and Temperaturesensor Ecowitt WH40,  
+              # https://github.com/RFD-FHEM/RFFHEM/pull/1164
+              # SD_WS_126 R: 0 MN;D=40011CDF8F0000976220A6802801;R=61;   14 byte  ID 11CDF
+              # SD_WS_126 R: 0 MN;D=40013E3C900000105BA02A;R=61;         11 byte  ID 13E3c
+              # SD_WS_126 R: 9 MN;D=40013E3C90005AB55AA0A0800408;R=61;   14 Byte  ID 13E3c
+      { 
+        name            => 'WH40',
+        comment         => 'Fine Offset | Ambient Weather WH40 rain gauge',
+        id              => '125',
+        knownFreqs      => '868.35',
+        datarate        => '17.257',
+        sync            => '2DD4',
+        modulation      => '2-FSK',
+        regexMatch      => qr/^40/, 
+        preamble        => 'W126#',
+        register        => ['0001','022E','0343','042D','05D4','060e','0780','0800','0D21','0E65','0FE8','10A9','115C','1202','1322','14F8','1543','1916','1B43','1C68'],
+        rfmode          => 'Fine_Offset_WH40_868',
+        clientmodule    => 'SD_WS',
+        length_min      => '22',
+        length_max      => '28',
       },
     ########################################################################
     #### ###  register informations from other hardware protocols  #### ####
