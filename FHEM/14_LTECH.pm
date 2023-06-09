@@ -230,23 +230,26 @@ sub Parse {
 	Log3 $hash, 4, "$name LTECH_Parse: Speed $speed";
     
     readingsBeginUpdate($hash);
-    if($mode eq "FE"){
-            my @rgb = Color::hex2rgb($rgbcolor);
-            my ($h ,$s ,$v ) = Color::rgb2hsv( $rgb[0] / 255, $rgb[1] / 255, $rgb[2] / 255 );
-            $v = hex($dim) / 255;
-            $rgbcolor = Color::hsv2hex($h,$s,$v);
+    if($function eq "00") {
+            $rgbcolor = "000000";
             readingsBulkUpdate($hash, "rgbcolor", $rgbcolor );
-            readingsBulkUpdate($hash, "rgbcolor_sel", $rgbcolor);
-    }elsif($mode eq "80"){
+    }else{
+        if($mode eq "FE"){
+             if($dim ne "FF"){
+                my @rgb = Color::hex2rgb($rgbcolor);
+                my ($h ,$s ,$v ) = Color::rgb2hsv( $rgb[0] / 255, $rgb[1] / 255, $rgb[2] / 255 );
+                $v = hex($dim) / 255;
+                $rgbcolor = Color::hsv2hex($h,$s,$v);
+                }
+                readingsBulkUpdate($hash, "rgbcolor", $rgbcolor );
+                readingsBulkUpdate($hash, "rgbcolor_sel", $rgbcolor);
+        }elsif($mode eq "80"){
             if($function == "18"){
                 $dim = "00";
             }
             readingsBulkUpdate($hash, "white", Hex2dec($dim));
             readingsBulkUpdate($hash, "white_sel", Hex2dec($dim));
-    }
-    if($function eq "00") {
-            $rgbcolor = "000000";
-            readingsBulkUpdate($hash, "rgbcolor", $rgbcolor );
+        }
     }
 	readingsBulkUpdate($hash, "function", $function);  
 	readingsBulkUpdate($hash, "mode", $mode);
