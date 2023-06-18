@@ -2205,7 +2205,7 @@ sub SIGNALduino_Split_Message {
       Debug "$name: extracted RSSI $rssi \n" if ($debug);
       $ret{rssi} = $rssi;
     } elsif ($_ =~ m/A=(-?[0-9]{0,3})/ ){
-      # uncoverable condition true
+      # uncoverable branch true
       Debug qq[$name: extracted FREQEST $1 \n] if ($debug);
       $ret{freqest} =  $1;
     }  else {
@@ -2919,8 +2919,8 @@ sub SIGNALduino_Parse_MN {
      $rssi = _limit_to_number($msg_parts{rssi}) // $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: Parse_MN, faulty rssi R=: $msg_parts{rssi}]) //  return ;
     ($rssi,$rssiStr) = SIGNALduino_calcRSSI($rssi);
   };
-  if ( exists $msg_parts{freqafc} ){ #AFC cc1101 0x32 (0xF2): FREQEST – Frequency Offset Estimate from Demodulator
-    $freqafc = $msg_parts{freqafc};
+  if ( exists $msg_parts{freqest} ){ #AFC cc1101 0x32 (0xF2): FREQEST – Frequency Offset Estimate from Demodulator
+    $freqafc = $msg_parts{freqest};
     $freqafc = FHEM::Core::Utils::Math::round((26000000 / 16384 * $freqafc / 1000),0);
   }
   my $messagetype=$msg_parts{messagetype};
