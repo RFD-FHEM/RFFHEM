@@ -135,9 +135,9 @@ my @mockData = (
     {
         deviceName  => q[dummyDuino],
         plan        => 2,
-        testname    => q[message ok with corrupt FREQEST],
+        testname    => q[message ok with negative FREQEST],
         input       => q[MN;D=3BF120B00C1618FF77FF0458152293FFF06B0000;R=210;A=-35;],
-        rValue      => U(),
+        rValue      => 1,
         rfmode      => 'Bresser_6in1' 
     },
 );

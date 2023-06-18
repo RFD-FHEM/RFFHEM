@@ -33,7 +33,7 @@ InternalTimer(time()+0.1, sub {
     is( $signal_parts{pattern}{LH}, "889", "SIGNALduino_Split_Message check MC pattern LH" );
     is( $signal_parts{pattern}{SL}, "-599", "SIGNALduino_Split_Message check MC pattern SH" );
 
-    $rmsg=q[MN;D=3BF12;R=210;A=235;];
+    $rmsg=q[MN;D=3BF12;R=210;A=-21;];
     %signal_parts=SIGNALduino_Split_Message($rmsg,$targetHash->{NAME});
     is( $signal_parts{messagetype}, q[MN], q[SIGNALduino_Split_Message check MN messagetype] );
     is( $signal_parts{rawData}, q[3BF12], q[SIGNALduino_Split_Message check MN rawData] );

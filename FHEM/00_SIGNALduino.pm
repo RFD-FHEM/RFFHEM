@@ -2204,13 +2204,10 @@ sub SIGNALduino_Split_Message {
       $rssi = $_ ;
       Debug "$name: extracted RSSI $rssi \n" if ($debug);
       $ret{rssi} = $rssi;
-    }
-    elsif($_ =~ m/^A=-?[0-9]+/)                                  #### freqafc
-    {
-      $_ =~ s/A=//;
-      $freqafc = $_ ;
-      Debug "$name: extracted freqafc $freqafc \n" if ($debug);
-      $ret{freqafc} = $freqafc;
+    } elsif ($_ =~ m/A=(-?[0-9]{0,3})/ ){
+      # uncoverable condition true
+      Debug qq[$name: extracted FREQEST $1 \n] if ($debug);
+      $ret{freqest} =  $1;
     }  else {
       Debug "$name: unknown Message part $_" if ($debug);;
     }
