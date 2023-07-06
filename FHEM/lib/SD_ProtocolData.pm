@@ -68,9 +68,9 @@
 # sync             => ' '       # sync parameter of signal in hex (example, 2DD4)
 #
 ##### notice #### or #### info ############################################################################################################
-# !!! Between the keys and values ​​no tabs, please use spaces !!!
+# !!! Between the keys and values no tabs, please use spaces !!!
 # !!! Please use first unused id for new protocols !!!
-# ID´s are currently unused: 124 - 
+# ID´s are currently unused: 128 - 
 # ID´s need to be revised (preamble u): 5|19|21|22|23|25|28|31|36|40|52|59|63
 ###########################################################################################################################################
 # Please provide at least three messages for each new MU/MC/MS/MN protocol and a URL of issue in GitHub or discussion in FHEM Forum
@@ -85,7 +85,7 @@ package lib::SD_ProtocolData;
   use strict;
   use warnings;
 
-  our $VERSION = '1.51';
+  our $VERSION = '1.52';
   our %protocols = (
     "0" =>  ## various weather sensors (500 | 9100)
             # Mebus | Id:237 Ch:1 T: 1.9 Bat:low           MS;P0=-9298;P1=495;P2=-1980;P3=-4239;D=1012121312131313121313121312121212121212131212131312131212;CP=1;SP=0;R=223;O;m2;
@@ -3296,6 +3296,9 @@ package lib::SD_ProtocolData;
         clientmodule    => 'SD_WS',
         length_min      => '36',
       },
+
+    # "124" => reserved for ## Remote control CasaFan FB-FNK Powerboat with 5 buttons for fan
+
     "125" =>  ## Humidity and Temperaturesensor Ecowitt WH31, froggit DP50 / WH31A
               # Nordamerika: 915MHz; Europa: 868MHz, andere Regionen: 433MHz
               # https://github.com/RFD-FHEM/RFFHEM/pull/1161 @ sidey79 2023-04-01
@@ -3339,6 +3342,43 @@ package lib::SD_ProtocolData;
         length_min      => '22',
         length_max      => '28',
       },
+    "127" =>  ## Remote control for ceiling fan
+               # https://forum.fhem.de/index.php?topic=134121.0
+               #
+      {
+        name             => 'RCnoName127',
+        id               => '127',
+        knownFreqs       => '433.92',
+        one              => [1,-3],
+        zero             => [3,-1],
+        sync             => [1,-18],
+        clockabs         => '370',
+        format           => 'twostate',    # not used now
+        preamble         => 'P127#',
+        clientmodule     => 'SD_UT',
+        modulematch      => '^P127#',
+        length_min       => '29',
+        length_max       => '29',
+      },
+    "127.1" =>  ## Remote control for ceiling fan
+                 # https://forum.fhem.de/index.php?topic=134121.0
+                 #
+      {
+        name             => 'RCnoName127',
+        id               => '127',
+        knownFreqs       => '433.92',
+        one              => [1,-3],
+        zero             => [3,-1],
+        start            => [3,-16],
+        clockabs         => '370',
+        format           => 'twostate',    # not used now
+        preamble         => 'P127#',
+        clientmodule     => 'SD_UT',
+        modulematch      => '^P127#',
+        length_min       => '29',
+        length_max       => '29',
+      },
+
     ########################################################################
     #### ###  register informations from other hardware protocols  #### ####
 
