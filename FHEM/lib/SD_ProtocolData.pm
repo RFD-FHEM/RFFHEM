@@ -3342,36 +3342,39 @@ package lib::SD_ProtocolData;
         length_min      => '22',
         length_max      => '28',
       },
-    "127" =>  ## Remote control for ceiling fan
-               # https://forum.fhem.de/index.php?topic=134121.0
-               #
+    "127" =>  ## Remote control with 14 buttons for ceiling fan
+               # https://forum.fhem.de/index.php?topic=134121.0 @ Kai-Alfonso 2023-06-29
+               # RCnoName127_3603A fan_off  MU;P0=5271;P1=-379;P2=1096;P3=368;P4=-1108;P5=-5997;D=01213434213434212121212121213434342134212121343421343434212521213434213434212121212121213434342134212121343421343434212521213434213434212121212121213434342134212121343421343434212521213434213434212121212121213434342134212121343421343434212;CP=3;R=63;
       {
         name             => 'RCnoName127',
+        comment          => 'Remote control with 14 buttons for ceiling fan',
         id               => '127',
         knownFreqs       => '433.92',
-        one              => [1,-3],
-        zero             => [3,-1],
-        sync             => [1,-18],
+        one              => [1,-3],  #  370,-1110
+        zero             => [3,-1],  # 1110, -370
+        start            => [3,-16], # 1110,-5920 (MU)
         clockabs         => '370',
-        format           => 'twostate',    # not used now
+        format           => 'twostate',
         preamble         => 'P127#',
         clientmodule     => 'SD_UT',
         modulematch      => '^P127#',
         length_min       => '29',
         length_max       => '29',
       },
-    "127.1" =>  ## Remote control for ceiling fan
-                 # https://forum.fhem.de/index.php?topic=134121.0
-                 #
+    "127.1" =>  ## Remote control with 14 buttons for ceiling fan
+                 # https://forum.fhem.de/index.php?topic=134121.0 @ Kai-Alfonso 2023-06-29
+                 # RCnoName127_3603A fan_1         MS;P1=-385;P2=1098;P3=372;P4=-1108;P5=-6710;D=352121343421343421212121212121343434213421212121213421343434;CP=3;SP=5;R=79;m2;
+                 # RCnoName127_3603A light_on_off  MS;P1=-372;P2=1098;P3=376;P4=-1096;P5=-6712;D=352121343421343421212121212121343434213421342134212134213421;CP=3;SP=5;R=73;m2;
       {
         name             => 'RCnoName127',
+        comment          => 'Remote control with 14 buttons for ceiling fan',
         id               => '127',
         knownFreqs       => '433.92',
-        one              => [1,-3],
-        zero             => [3,-1],
-        start            => [3,-16],
+        one              => [1,-3],  #  370,-1110
+        zero             => [3,-1],  # 1110, -370
+        sync             => [1,-18], #  370,-6660 (MS)
         clockabs         => '370',
-        format           => 'twostate',    # not used now
+        format           => 'twostate',
         preamble         => 'P127#',
         clientmodule     => 'SD_UT',
         modulematch      => '^P127#',
