@@ -1,5 +1,5 @@
 #########################################################################################
-# $Id: 14_SD_UT.pm 0 2023-01-04 17:35:33Z elektron-bbs $
+# $Id: 14_SD_UT.pm 0 2023-07-08 17:35:33Z elektron-bbs $
 #
 # The file is part of the SIGNALduino project.
 # The purpose of this module is universal support for devices.
@@ -403,6 +403,13 @@
 #     TC6861_3DC_1 ON    MU;P0=4372;P1=-689;P2=254;P3=575;P4=-368;D=0121213434212134343434213434342121213434343434342;CP=2;R=59;
 #}
 ###############################################################################################################################################################################
+# - Remote control with 14 buttons RCnoName127 for ceiling fan [Protocol 127]
+#{    elektron-bbs 2023-07-08
+#     RCnoName127_3603A fan_off       MU;P0=5271;P1=-379;P2=1096;P3=368;P4=-1108;P5=-5997;D=01213434213434212121212121213434342134212121343421343434212521213434213434212121212121213434342134212121343421343434212521213434213434212121212121213434342134212121343421343434212521213434213434212121212121213434342134212121343421343434212;CP=3;R=63;
+#     RCnoName127_3603A fan_1         MS;P1=-385;P2=1098;P3=372;P4=-1108;P5=-6710;D=352121343421343421212121212121343434213421212121213421343434;CP=3;SP=5;R=79;m2;
+#     RCnoName127_3603A light_on_off  MS;P1=-372;P2=1098;P3=376;P4=-1096;P5=-6712;D=352121343421343421212121212121343434213421342134212134213421;CP=3;SP=5;R=73;m2;
+#}
+###############################################################################################################################################################################
 # !!! ToDo´s !!!
 #     - LED lights, counter battery-h reading --> commandref hour_counter module
 #     -
@@ -415,7 +422,7 @@ use warnings;
 use FHEM::Meta;
 no warnings 'portable';  # Support for 64-bit ints required
 
-our $VERSION = '2022-09-13';
+our $VERSION = '2023-07-08';
 
 sub SD_UT_bin2tristate;
 sub SD_UT_tristate2bin;
@@ -793,6 +800,24 @@ my %models = (
                        Protocol   => 'P20',
                        Typ        => 'remote'
                      },
+  'RCnoName127' => { '001101110' => 'fan_off',
+                     '000010111' => 'fan_1',
+                     '000110111' => 'fan_2',
+                     '001010110' => 'fan_3',
+                     '001110110' => 'fan_4',
+                     '010010101' => 'fan_5',
+                     '010110101' => 'fan_6',
+                     '011010100' => 'fan_direction',
+                     '011110100' => 'fan_natural',
+                     '101001010' => 'light_on_off',
+                     '101101010' => 'time_1h',
+                     '111001000' => 'time_2h',
+                     '110001001' => 'time_4h',
+                     '010101101' => 'time_8h',
+                     hex_length => [8],
+                     Protocol   => 'P127',
+                     Typ        => 'remote'
+                   },
   'DC_1961_TG' => { '10100111' => 'fan_off',
                     '10100001' => 'fan_1',
                     '10100010' => 'fan_2',
@@ -959,7 +984,7 @@ my %models = (
 #############################
 sub SD_UT_Initialize {
   my ($hash) = @_;
-  $hash->{Match}      = '^P(?:14|20|24|26|29|30|34|46|56|68|69|76|78|81|83|86|90|91|91\.1|92|93|95|97|99|104|105|114|118|121)#.*';
+  $hash->{Match}      = '^P(?:14|20|24|26|29|30|34|46|56|68|69|76|78|81|83|86|90|91|91\.1|92|93|95|97|99|104|105|114|118|121|127)#.*';
   $hash->{DefFn}      = \&SD_UT_Define;
   $hash->{UndefFn}    = \&SD_UT_Undef;
   $hash->{ParseFn}    = \&SD_UT_Parse;
@@ -1031,6 +1056,11 @@ sub SD_UT_Define {
   ### [4 nibble] checks Neff SF01_01319004 & BOSCH SF01_01319004_Typ2 & Chilitec_22640 & ESTO KL_RF01 & RCnoName20 & RCnoName20_10 & DC-1961-TG & xavax & BF_301 & Meikee_xx ###
   # uncoverable condition true 
   return "Wrong HEX-Value! ($a[3]) $a[2] Hex-value to short or long (must be 4 chars) or not hex (0-9 | a-f | A-F) {4}" if (($a[2] eq 'SF01_01319004' || $a[2] eq 'SF01_01319004_Typ2' || $a[2] eq 'Chilitec_22640' || $a[2] eq 'KL_RF01' || $a[2] eq 'RCnoName20' || $a[2] eq 'RCnoName20_10' || $a[2] eq 'DC_1961_TG' || $a[2] eq 'xavax' || $a[2] eq 'BF_301' || $a[2] eq 'Meikee_21' || $a[2] eq 'Meikee_24') && not $a[3] =~ /^[0-9a-fA-F]{4}/xms);
+
+  ### [5 nibble] checks RCnoName127
+  # uncoverable condition true 
+  return "Wrong HEX-Value! ($a[3]) $a[2] Hex-value to short or long (must be 5 chars) or not hex (0-9 | a-f | A-F) {5}" if ($a[2] eq 'RCnoName127' && not $a[3] =~ /^[0-9a-fA-F]{5}/xms);
+
   ### [6] checks Manax | mumbi ###
   # uncoverable condition true 
   return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short | long or not HEX (0-9 | a-f | A-F){4}_[ABCD]|[all]" if ($a[2] eq 'RC_10' && not $a[3] =~ /^[0-9a-fA-F]{4}_([ABCD]|all)$/xms) ;
@@ -1294,6 +1324,11 @@ sub SD_UT_Set {
     ############ Meikee ############
     } elsif ($model eq 'Meikee_21' || $model eq 'Meikee_24') {
       my $adr = sprintf '%016b' , hex $definition[1]; # argument 1 - adress to binary with 16 bits
+      $msg = $models{$model}{Protocol} . q{#} . $adr;
+      $msgEnd = '#R' . $repeats;
+    ############ RCnoName127 ############
+    } elsif ($model eq 'RCnoName127') {
+      my $adr = sprintf '%020b' , hex $definition[1]; # argument 1 - adress to binary with 20 bits
       $msg = $models{$model}{Protocol} . q{#} . $adr;
       $msgEnd = '#R' . $repeats;
     }
@@ -1703,6 +1738,12 @@ sub SD_UT_Parse {
       ### Remote control Krinner_LUMIX [P92] ###
       $deviceCode = substr($rawData,0,7);
       $devicedef = 'Krinner_LUMIX ' . $deviceCode;
+      $def = $modules{SD_UT}{defptr}{$devicedef};
+    }
+    if (!$def && $protocol == 127) {
+      ### Remote control RCnoName127 [P127] ###
+      $deviceCode = substr($rawData,0,5);
+      $devicedef = 'RCnoName127 ' . $deviceCode;
       $def = $modules{SD_UT}{defptr}{$devicedef};
     }
   }
@@ -2180,6 +2221,10 @@ sub SD_UT_Parse {
   } elsif (($model eq 'Meikee_21' || $model eq 'Meikee_24') && $protocol == 118) {
     $state = substr $bitData,16,8;
     $deviceCode = substr $rawData,0,4;
+  ############ RCnoName127 [P127] ############
+  } elsif ($model eq 'RCnoName127') {
+    $state = substr($bitData,20,9); # 9 bit ?
+    $deviceCode = substr($rawData,0,5);
 
   ############ unknown ############
   } else {
@@ -2401,6 +2446,11 @@ sub SD_UT_Attr {
           $deviceCode = substr($bitData,0,16);
           $deviceCode = sprintf("%04X", oct( "0b$deviceCode" ) );
           $devicename = $devicemodel.'_'.$deviceCode;
+        ############ RCnoName127 ############
+        } elsif ($attrValue eq 'RCnoName127') {
+          $deviceCode = substr $bitData,0,20;
+          $deviceCode = sprintf("%05X", oct( "0b$deviceCode" ) );
+          $devicename = $devicemodel.'_'.$deviceCode;
         ############ unknown ############
         } else {
           $devicename = 'unknown_please_select_model';
@@ -2504,6 +2554,7 @@ sub SD_UT_tristate2bin {
     <li>ESTO ceiling lamp&nbsp;&nbsp;&nbsp;<small>(module model: KL_RF01, protocol 93)</small></li>
     <li>Remote control with 4 buttons for diesel heating&nbsp;&nbsp;&nbsp;<small>(module model: RCnoName20, protocol 20)</small></li>
     <li>Remote control with 10 buttons for Leroy ceiling fan&nbsp;&nbsp;&nbsp;<small>(module model: RCnoName20_10, protocol 20)</small></li>
+    <li>Remote control with 14 buttons for ceiling fan&nbsp;&nbsp;&nbsp;<small>(module model: RCnoName127, protocol 127)</small></li>
     <li>Hoermann HS1-868-BS&nbsp;&nbsp;&nbsp;<small>(module model: HS1_868_BS, protocol 69)</small></li>
     <li>Hoermann HSM4&nbsp;&nbsp;&nbsp;<small>(module model: HSM4, protocol 69)</small></li>
     <li>Krinner LUMIX X-Mas light string&nbsp;&nbsp;&nbsp;<small>(module model: Krinner_LUMIX, protocol 92)</small></li>
@@ -2731,6 +2782,7 @@ sub SD_UT_tristate2bin {
     <li>ESTO Deckenlampe&nbsp;&nbsp;&nbsp;<small>(Modulmodel: KL_RF01, Protokoll 93)</small></li>
     <li>Fernbedienung mit 4 Tasten f&uuml;r Diesel-Heizung &nbsp;&nbsp;&nbsp;<small>(Modulmodel: RCnoName20, Protokoll 20)</small></li>
     <li>Fernbedienung mit 10 Tasten f&uuml;r Leroy Deckenventilator&nbsp;&nbsp;&nbsp;<small>(Modulmodel: RCnoName20_10, Protokoll 20)</small></li>
+    <li>Fernbedienung mit 14 Tasten f&uuml;r Deckenventilator&nbsp;&nbsp;&nbsp;<small>(Modulmodel: RCnoName127, Protokoll 127)</small></li>
     <li>Hoermann HS1-868-BS&nbsp;&nbsp;&nbsp;<small>(Modulmodel: HS1_868_BS, Protokoll 69)</small></li>
     <li>Hoermann HSM4&nbsp;&nbsp;&nbsp;<small>(Modulmodel: HSM4, Protokoll 69)</small></li>
     <li>Krinner LUMIX Christbaumkerzen&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Krinner_LUMIX, Protokol 92)</small></li>
