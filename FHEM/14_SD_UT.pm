@@ -422,7 +422,7 @@ use warnings;
 use FHEM::Meta;
 no warnings 'portable';  # Support for 64-bit ints required
 
-our $VERSION = '2023-07-08';
+our $VERSION = '2023-07-09';
 
 sub SD_UT_bin2tristate;
 sub SD_UT_tristate2bin;
@@ -800,20 +800,20 @@ my %models = (
                        Protocol   => 'P20',
                        Typ        => 'remote'
                      },
-  'RCnoName127' => { '001101110' => 'fan_off',
-                     '000010111' => 'fan_1',
-                     '000110111' => 'fan_2',
-                     '001010110' => 'fan_3',
-                     '001110110' => 'fan_4',
-                     '010010101' => 'fan_5',
-                     '010110101' => 'fan_6',
-                     '011010100' => 'fan_direction',
-                     '011110100' => 'fan_natural',
-                     '101001010' => 'light_on_off',
-                     '101101010' => 'time_1h',
-                     '111001000' => 'time_2h',
-                     '110001001' => 'time_4h',
-                     '010101101' => 'time_8h',
+  'RCnoName127' => { '00110111' => 'fan_off',
+                     '00001011' => 'fan_1',
+                     '00011011' => 'fan_2',
+                     '00101011' => 'fan_3',
+                     '00111011' => 'fan_4',
+                     '01001010' => 'fan_5',
+                     '01011010' => 'fan_6',
+                     '01101010' => 'fan_direction',
+                     '01111010' => 'fan_natural',
+                     '10100101' => 'light_on_off',
+                     '10110101' => 'time_1h',
+                     '11100100' => 'time_2h',
+                     '11000100' => 'time_4h',
+                     '01010110' => 'time_8h',
                      hex_length => [8],
                      Protocol   => 'P127',
                      Typ        => 'remote'
@@ -1453,6 +1453,12 @@ sub SD_UT_Set {
           $xor ^= oct('0b' . substr($msg, $n, 4));
         }
         $msg .= sprintf('%04b', $xor); # check
+        $msg .= $msgEnd;
+      ############ RCnoName127 [P127] ############
+      } elsif ($model eq 'RCnoName127') {
+        $msg .= $save; # button
+        $msg .= substr($save,2,1) eq '0' ? '1' : '0'; # bit 22 inverted
+        $msg .= substr($save,3,1) eq '0' ? '1' : '0'; # bit 23 inverted
         $msg .= $msgEnd;
       } else {
         $msg .= $save.$msgEnd;
@@ -2223,7 +2229,7 @@ sub SD_UT_Parse {
     $deviceCode = substr $rawData,0,4;
   ############ RCnoName127 [P127] ############
   } elsif ($model eq 'RCnoName127') {
-    $state = substr($bitData,20,9); # 9 bit ?
+    $state = substr($bitData,20,8);
     $deviceCode = substr($rawData,0,5);
 
   ############ unknown ############
