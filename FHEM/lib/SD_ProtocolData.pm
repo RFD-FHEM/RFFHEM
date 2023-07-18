@@ -70,7 +70,7 @@
 ##### notice #### or #### info ############################################################################################################
 # !!! Between the keys and values no tabs, please use spaces !!!
 # !!! Please use first unused id for new protocols !!!
-# ID´s are currently unused: 128 - 
+# ID´s are currently unused: 129 - 
 # ID´s need to be revised (preamble u): 5|19|21|22|23|25|28|31|36|40|52|59|63
 ###########################################################################################################################################
 # Please provide at least three messages for each new MU/MC/MS/MN protocol and a URL of issue in GitHub or discussion in FHEM Forum
@@ -3384,7 +3384,49 @@ package lib::SD_ProtocolData;
         length_min       => '29',
         length_max       => '30',
       },
-
+    "128" =>  ## Remote control with 12 buttons for ceiling fan
+               # https://forum.fhem.de/index.php?msg=1281573 @ romakrau 2023-07-14
+               # MU;P0=-420;P1=1207;P2=-1199;P3=424;P4=-10154;D=010101230123010123232323232323232323230123010143230101012301230101232323232323232323232301230101432301010123012301012323232323232323232323012301014323010101230123010123232323232323232323230123010143230101012301230101232323232323232323232301230101;CP=3;R=18;
+               # Message is output by SIGNALduino as MU if the last bit is a 0.
+      {
+        name             => 'RCnoName128',
+        comment          => 'Remote control with 12 buttons for ceiling fan',
+        id               => '128',
+        knownFreqs       => '433.92',
+        one              => [-3,1],  #  -1218,406
+        zero             => [-1,3],  #   -406,1218
+        start            => [-25,1], # -10150,406 (MU)
+        # reconstructBit   => '1',
+        clockabs         => '406',
+        format           => 'twostate',
+        preamble         => 'P128#',
+        clientmodule     => 'SD_UT',
+        modulematch      => '^P128#',
+        length_min       => '23',
+        length_max       => '24',
+      },
+    "128.1" =>  ## Remote control with 12 buttons for ceiling fan
+                 # https://forum.fhem.de/index.php?msg=1281573 @ romakrau 2023-07-14
+                 # MS;P2=-424;P3=432;P4=1201;P5=-1197;P6=-10133;D=36353242424532453242453535353535353535353532453535;CP=3;SP=6;R=36;m1;
+                 # MS;P0=-10144;P4=434;P5=-415;P6=1215;P7=-1181;D=40474565656745674565674747474747474747474745656567;CP=4;SP=0;R=37;m2;
+                 # Message is output by SIGNALduino as MS if the last bit is a 1.
+      {
+        name             => 'RCnoName128',
+        comment          => 'Remote control with 12 buttons for ceiling fan',
+        id               => '128',
+        knownFreqs       => '433.92',
+        one              => [-3,1],  #  -1218,406
+        zero             => [-1,3],  #   -406,1218
+        sync             => [-25,1], # -10150,406 (MS)
+        reconstructBit   => '1',
+        clockabs         => '406',
+        format           => 'twostate',
+        preamble         => 'P128#',
+        clientmodule     => 'SD_UT',
+        modulematch      => '^P128#',
+        length_min       => '23',
+        length_max       => '24',
+      },
     ########################################################################
     #### ###  register informations from other hardware protocols  #### ####
 
