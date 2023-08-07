@@ -1,4 +1,4 @@
-# $Id: SD_ProtocolData.pm 26975 2023-05-16 16:34:07Z sidey79 $
+# $Id: SD_ProtocolData.pm 26975 2023-08-07 18:00:00Z elektron-bbs $
 # The file is part of the SIGNALduino project.
 # All protocol definitions are contained in this file.
 #
@@ -68,9 +68,9 @@
 # sync             => ' '       # sync parameter of signal in hex (example, 2DD4)
 #
 ##### notice #### or #### info ############################################################################################################
-# !!! Between the keys and values ​​no tabs, please use spaces !!!
+# !!! Between the keys and values no tabs, please use spaces !!!
 # !!! Please use first unused id for new protocols !!!
-# ID´s are currently unused: 124 - 
+# ID´s are currently unused: 130 - 
 # ID´s need to be revised (preamble u): 5|19|21|22|23|25|28|31|36|40|52|59|63
 ###########################################################################################################################################
 # Please provide at least three messages for each new MU/MC/MS/MN protocol and a URL of issue in GitHub or discussion in FHEM Forum
@@ -85,7 +85,7 @@ package lib::SD_ProtocolData;
   use strict;
   use warnings;
 
-  our $VERSION = '1.51';
+  our $VERSION = '1.53';
   our %protocols = (
     "0" =>  ## various weather sensors (500 | 9100)
             # Mebus | Id:237 Ch:1 T: 1.9 Bat:low           MS;P0=-9298;P1=495;P2=-1980;P3=-4239;D=1012121312131313121313121312121212121212131212131312131212;CP=1;SP=0;R=223;O;m2;
@@ -3296,6 +3296,9 @@ package lib::SD_ProtocolData;
         clientmodule    => 'SD_WS',
         length_min      => '36',
       },
+
+    # "124" reserved for => ## Remote control CasaFan FB-FNK Powerboat with 5 buttons for fan
+
     "125" =>  ## Humidity and Temperaturesensor Ecowitt WH31, froggit DP50 / WH31A
               # Nordamerika: 915MHz; Europa: 868MHz, andere Regionen: 433MHz
               # https://github.com/RFD-FHEM/RFFHEM/pull/1161 @ sidey79 2023-04-01
@@ -3339,6 +3342,33 @@ package lib::SD_ProtocolData;
         length_min      => '22',
         length_max      => '28',
       },
+
+    # "127" reserved for =>  ## Remote control with 14 buttons for ceiling fan
+    # "128" reserved for =>  ## Remote control with 12 buttons for ceiling fan
+
+    "129"  =>  ## Sainlogic FT-0835
+               # https://forum.fhem.de/index.php?topic=134381.0 @  Tueftler1983 2023-07-23
+               # SD_WS_129_0E  T: 27.6 H: 36 W: 0.2 R: 0   MC;LL=-987;LH=970;SL=-506;SH=473;D=002B3F1FFDFCE4FFFF7B3FDB000404F9;C=489;L=128;R=60;
+               # SD_WS_129_0E  T: 17.7 H: 70 W: 0.4 R: 0   MC;LL=-963;LH=986;SL=-491;SH=491;D=002B3F1BFBF8EDFFFF7BF0B900040413;C=488;L=128;R=92;
+               # https://forum.fhem.de/index.php?msg=1283414 @ Nighthawk 2023-08-05
+               # SD_WS_129_BD  T: 18.4 H: 90 W: 1.3 R: 1536.6 B: 115105   MC;LL=-1036;LH=918;SL=-533;SH=435;D=002B3427F2EE58C3F97BE4A53E5EB79B;C=486;L=128;R=212;
+               # SD_WS_129_BD  T: 17.6 H: 82 W: 1.5 R: 1537.2 B: 591      MC;LL=-983;LH=962;SL=-487;SH=488;D=002B3427F0EB0BC3F3FBF3ADFDB0FA87;C=486;L=128;R=219;
+      {
+        name            => 'FT-0835',
+        comment         => 'Sainlogic weather stations',
+        id              => '129',
+        knownFreqs      => '433.92',
+        clockrange      => [450,550],
+        format          => 'manchester',
+        clientmodule    => 'SD_WS',
+        modulematch     => '^W129#FF.*',
+        preamble        => 'W129#',
+        length_min      => '128',
+        length_max      => '128',
+        polarity        => 'invert',
+        method          => \&lib::SD_Protocols::mcBit2Sainlogic, # Call to process this message
+      },
+
     ########################################################################
     #### ###  register informations from other hardware protocols  #### ####
 

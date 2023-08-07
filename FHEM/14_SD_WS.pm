@@ -1,4 +1,4 @@
-# $Id: 14_SD_WS.pm 26982 2023-05-16 16:34:07Z sidey79 $
+# $Id: 14_SD_WS.pm 26982 2023-08-07 18:00:00Z elektron-bbs $
 #
 # The purpose of this module is to support serval
 # weather sensors which use various protocol
@@ -51,7 +51,6 @@
 # 21.01.2023 use round from package FHEM::Core::Utils::Math;
 # 01.04.2023 Added ecowitt wh31 support
 # 06.05.2023 Added ecowitt WH40 support
-
 
 package main;
 
@@ -116,7 +115,8 @@ sub SD_WS_Initialize {
     'SD_WS_122_T.*'   => { ATTR => 'event-min-interval:.*:60 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4:Temp,', autocreateThreshold => '10:180'},
     'SD_WS_123_T.*'   => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4:Temp,', autocreateThreshold => '2:180'},
     'SD_WS_125_.*'    => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4hum4:Temp/Hum,', autocreateThreshold => '2:300'},
-    "SD_WS_126_R.*"    => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'rain4:Rain,', autocreateThreshold => "2:180"},
+    'SD_WS_126_R.*'    => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'rain4:Rain,', autocreateThreshold => "2:180"},
+    'SD_WS_129.*'     => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4hum4:Temp/Hum,', autocreateThreshold => '3:180'},
   };
   return FHEM::Meta::InitMod( __FILE__, $hash );
 }
@@ -1479,7 +1479,7 @@ sub SD_WS_Parse {
                               },
     },
     125 => {
-        # Temperature and humidiry sensor Fine Offset WH31, aka Ambient Weather, aka ecowitt
+        # Temperature and humidity sensor Fine Offset WH31, aka Ambient Weather, aka ecowitt
         # ------------------------------------------------------------------------------------------
         #          Byte: 00 01 02 03 04 05 06 07 08 09 10 
         #        Nibble: 01 23 45 67 89 01 23 45 67 89 01 
@@ -1511,7 +1511,6 @@ sub SD_WS_Parse {
                               my $crc_digest = $calc_crc8->add( pack 'H*', substr( $rawData, 0, 12 ) )->digest;
                               if ($crc_digest)
                               {
-
                                 Log3 $name, 3, qq[$name: SD_WS_125 Parse msg $rawData - ERROR CRC8 $crc_digest shoud be 0];
                                 return 0;
                               }
@@ -1552,7 +1551,7 @@ sub SD_WS_Parse {
         prematch        => sub {my ($rawData,undef) = @_; return 1 if ($rawData =~ /^40/); },
         id              => sub {my ($rawData,undef) = @_; return (substr($rawData,2,6));},
         rain_total      => sub {my ($rawData,undef) = @_; return 0.1 * hex(substr($rawData,10,4)); },
-        rawRainCounter  =>  sub {my ($rawData,undef) = @_; return hex(substr($rawData,10,4)); },
+        rawRainCounter  => sub {my ($rawData,undef) = @_; return hex(substr($rawData,10,4)); },
         bat             => sub {  my (undef,$bitData) = @_; 
                                   my $v = oct(q[0b].substr($bitData,35,5)); 
                                   return $v ne '0' ? $v > 11 ? 'ok' : 'low' : undef; },
@@ -1582,6 +1581,62 @@ sub SD_WS_Parse {
                               return 0;
                             }
 
+                            return 1;
+                          }, 
+    },
+    129 => {
+        # Sainlogic weather station FT-0835
+        # ---------------------------------------------------------------
+        #          Byte: 00 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 
+        #        Nibble: 01 23 45 67 89 01 23 45 67 89 01 23 45 67 89 01 
+        # aa aa aa 2d d4 FF D4 C0 E4 00 00 5F 00 00 83 FD 51 FF FB FB 6B
+        #                PP PP PI IF SS GG DD RR RR FT TT HH BB BB UU CC
+        # P: 20 bit Preamble always 0xFFD4C
+        # I:  8 bit Ident
+        # F:  4 bit Flags: battery, MSB wind direction, MSB wind gust, MSB wind speed
+        # S:  8 bit LSB wind speed, in 1/10 m/s, resolution 0.1
+        # G:  8 bit LSB wind gust, in 1/10 m/s, resolution 0.1
+        # D:  8 bit LSB wind direction, in degree
+        # R: 16 bit rain counter, in 1/10 l/m², resolution 0.1
+        # F:  4 bit Flags: Sensors with brightness MSB brightness, 3 bit unknown, sensors without brightness always 0x8
+        # I: 12 bit Temperature, unsigned fahrenheit, offset by 400 and scaled by 10
+        # D:  8 bit Humidity, in percent
+        # R: 16 bit Brightness, sensors without brightness always 0xFFFB
+        # U:  8 bit UV, sensors without brightness always 0xFB
+        # C:  8 bit CRC8 over all 16 bytes must be 0
+        sensortype => 'FT-0835, FT0300, FT-0310, FT020T, WS019T',
+        model      => 'SD_WS_129',
+        prematch   => sub {my ($rawData,undef) = @_; return 1 if ($rawData =~ /^FFD4/);},
+        id         => sub {my ($rawData,undef) = @_; return (substr($rawData,5,2));},
+        bat        => sub {my (undef,$bitData) = @_; return substr($bitData,28,1) eq "0" ? "ok" : "low";},
+        windspeed  => sub {my (undef,$bitData) = @_; return FHEM::Core::Utils::Math::round(((substr($bitData,31,1) * 256 + SD_WS_binaryToNumber($bitData,32,39)) / 10.0),1);},
+        windgust   => sub {my (undef,$bitData) = @_; return FHEM::Core::Utils::Math::round(((substr($bitData,30,1) * 256 + SD_WS_binaryToNumber($bitData,40,47)) / 10.0),1);},
+        winddir    => sub {my (undef,$bitData) = @_;
+                            $winddir = substr($bitData,29,1) * 256 + SD_WS_binaryToNumber($bitData,48,55);
+                            return ($winddir * 1, $winddirtxtar[FHEM::Core::Utils::Math::round(($winddir / 22.5),0)]);
+                          },
+        rain       => sub {my ($rawData,undef) = @_; return 0.1 * hex(substr($rawData,14,4));},
+        temp       => sub {my (undef,$bitData) = @_; return FHEM::Core::Utils::Math::round(((SD_WS_binaryToNumber($bitData,76,87)) -320 - 400) * 5 / 90.0 , 1);},
+        hum        => sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,88,95);},
+        brightness => sub {my ($rawData,$bitData) = @_;
+                            return if (substr($rawData,28,2) eq 'FB');
+                            return (substr($bitData,72,1) * 65536 + SD_WS_binaryToNumber($bitData,96,111));
+                          },
+        uv         => sub {my ($rawData,undef) = @_;
+                            return if (substr($rawData,28,2) eq 'FB');
+                            return 0.1 * hex(substr($rawData,28,2));
+                          },
+        crcok      => sub { my ($rawData,undef) = @_; 
+                            if (HAS_DigestCRC) {
+                              my $calc_crc8 = Digest::CRC->new(width => 8, init=>0xC0, poly=>0x31);
+                              my $crc_digest = $calc_crc8->add( pack 'H*', substr( $rawData, 4, 28 ) )->digest;
+                              if ($crc_digest) {
+                                Log3 $name, 3, qq[$name: SD_WS_129 Parse msg $rawData - ERROR CRC8 $crc_digest shoud be 0];
+                                return 0;
+                              }
+                            } else {
+                              Log3 $name, 1, qq[$name: SD_WS_129 Parse msg - ERROR CRC not loaded, please install module Digest::CRC];
+                            }
                             return 1;
                           }, 
     },
@@ -2278,6 +2333,7 @@ sub SD_WS_WH2SHIFT {
     <li>Renkforce E0001PA</li>
     <li>Rain gauge DROP TFA 47.3005.01 with rain sensor TFA 30.3233.01</li>
     <li>TECVANCE TV-4848</li>
+    <li>Sainlogic Weather stations FT-0835, FT0300, FT-0310, FT020T, WS019T</li>
     <li>Thermometer FT007T, FT007TP, F007T, F007TP</li>
     <li>Thermo-Hygrometer FT007TH, F007TH</li>
     <li>TS-FT002 Water tank level monitor with temperature</li>
@@ -2421,6 +2477,7 @@ sub SD_WS_WH2SHIFT {
     <li>PV-8644 infactory Poolthermometer</li>
     <li>Regenmesser DROP TFA 47.3005.01 mit Regensensor TFA 30.3233.01</li>
     <li>Renkforce E0001PA</li>
+    <li>Sainlogic Wetterstationen FT-0835, FT0300, FT-0310, FT020T, WS019T</li>
     <li>TECVANCE TV-4848</li>
     <li>Temperatur-Sensor FT007T, FT007TP, F007T, F007TP</li>
     <li>Temperatur/Feuchte-Sensor FT007TH, F007TH</li>
