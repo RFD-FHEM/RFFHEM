@@ -1280,11 +1280,6 @@ sub SD_UT_Set {
     } elsif ($model eq 'OR28V') {
       $msg = $models{$model}{Protocol} . '#';
       $msgEnd .= '#R' . $repeats; # R1 wird vom SIGNALduino nicht als MS erkannt!
-    ############ RCnoName20 | RCnoName20_10 | DC-1961-TG ############
-    } elsif ($model eq 'RCnoName20' || $model eq 'RCnoName20_10' || $model eq 'DC_1961_TG') {
-      my $adr = sprintf( "%016b", hex($definition[1])); # argument 1 - adress to binary with 16 bits
-      $msg = $models{$model}{Protocol} . '#' . $adr;
-      $msgEnd = '#R' . $repeats;
     ############ Momento ############
     } elsif ($model eq 'Momento') {
       my $adr = sprintf( "%028b", hex($definition[1])); # argument 1 - adress to binary with 28 bits
@@ -1337,8 +1332,8 @@ sub SD_UT_Set {
     } elsif ($model eq 'TC6861') {
       $msg = $models{$model}{Protocol} . q{#P};
       $msgEnd = '#R' . $repeats;
-    ############ Meikee or RCnoName128 ############
-    } elsif ($model eq 'Meikee_21' || $model eq 'Meikee_24' || $model eq 'RCnoName128') {
+    ############ Meikee_21 | Meikee_24 | RCnoName128 | RCnoName20 | RCnoName20_10 | DC-1961-TG ############
+    } elsif ($model eq 'Meikee_21' || $model eq 'Meikee_24' || $model eq 'RCnoName128' || $model eq 'RCnoName20' || $model eq 'RCnoName20_10' || $model eq 'DC_1961_TG') {
       my $adr = sprintf '%016b' , hex $definition[1]; # argument 1 - adress to binary with 16 bits
       $msg = $models{$model}{Protocol} . q{#} . $adr;
       $msgEnd = '#R' . $repeats;
