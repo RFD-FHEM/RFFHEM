@@ -2275,6 +2275,13 @@
                }
             ]
          },
+      ],
+      "id" : 127,
+      "module" : "SD_UT",
+      "name" : "RCnoName127"
+   },
+   {
+      "data" : [
          {
             "comment" : "Remote control with 14 buttons for ceiling fan",
             "dmsg" : "P127#3603AA50",
@@ -2293,12 +2300,12 @@
                   "attributes" : {
                      "model" : "RCnoName127"
                   },
-                  "comment" : "#1"
+                  "comment" : "#0"
                }
             ]
          }
       ],
-      "id" : 127,
+      "id" : 127.1,
       "module" : "SD_UT",
       "name" : "RCnoName127"
    },
@@ -2326,6 +2333,13 @@
                }
             ]
          },
+      ],
+      "id" : 128,
+      "module" : "SD_UT",
+      "name" : "RCnoName128"
+   },
+   {
+      "data" : [
          {
             "comment" : "Remote control with 12 buttons for ceiling fan",
             "dmsg" : "P128#8A7FF7",
@@ -2344,12 +2358,12 @@
                   "attributes" : {
                      "model" : "RCnoName128"
                   },
-                  "comment" : "#1"
+                  "comment" : "#0"
                }
             ]
          }
       ],
-      "id" : 128,
+      "id" : 128.1,
       "module" : "SD_UT",
       "name" : "RCnoName128"
    }
