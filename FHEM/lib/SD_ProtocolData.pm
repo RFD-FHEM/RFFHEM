@@ -3371,7 +3371,7 @@ package lib::SD_ProtocolData;
       {
         name             => 'RCnoName127',
         comment          => 'Remote control with 14 buttons for ceiling fan',
-        id               => '127',
+        id               => '127.1',
         knownFreqs       => '433.92',
         one              => [1,-3],  #  370,-1110
         zero             => [3,-1],  # 1110, -370
@@ -3412,7 +3412,7 @@ package lib::SD_ProtocolData;
       {
         name             => 'RCnoName128',
         comment          => 'Remote control with 12 buttons for ceiling fan',
-        id               => '128',
+        id               => '128.1',
         knownFreqs       => '433.92',
         one              => [-3,1],  #  -1218,406
         zero             => [-1,3],  #   -406,1218
