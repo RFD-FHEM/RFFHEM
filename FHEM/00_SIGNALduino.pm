@@ -2902,7 +2902,7 @@ sub SIGNALduino_Parse_MN {
   my $hash = shift // return;   #return if no hash  is provided
   my $rmsg = shift // return;   #return if no rmsg is provided
  
-  if ($rmsg !~ /^MN;D=[0-9A-F]+;(?:R=[0-9]+;)?(?:A=-?[-0-9]+;)?$/) { # AFC cc1101 0x32 (0xF2): FREQEST – Frequency Offset Estimate from Demodulator
+  if ($rmsg !~ /^MN;D=[0-9A-F]+;(?:R=[0-9]+;)?(?:A=-?[0-9]{1,3};)?$/) { # AFC cc1101 0x32 (0xF2): FREQEST – Frequency Offset Estimate from Demodulator
     $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: Parse_MN, faulty msg: $rmsg]);
     return ; # Abort here if not successfull
   }
