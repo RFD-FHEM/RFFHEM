@@ -4539,8 +4539,8 @@ USB-connected devices (SIGNALduino):<br>
     <br>Example 4: <code>set sduino raw SN;R=3;D=9A46036AC8D3923EAEB470AB;</code>  sends a xFSK message of raw and repeated 3 times
     <ul><br>
       <b>note: The wrong use of the upcoming options can lead to malfunctions of the SIGNALduino!</b><br><br>
-      <li>CEA -> Switching on the automatic frequency control for FSK modulation and firmware version >= V 3.5.2 (config: AFC=1)</li>
-      <li>CDA -> Switching off the automatic frequency control for FSK modulation and firmware version >= V 3.5.2 (config: AFC=0)</li>
+      <li>CEA -> Switching on the automatic frequency control for FSK modulation and firmware version >= V 4.0.0 (config: AFC=1)</li>
+      <li>CDA -> Switching off the automatic frequency control for FSK modulation and firmware version >= V 4.0.0 (config: AFC=0)</li>
       <li>CER -> turn on data compression (config: Mred=1)</li>
       <li>CDR -> disable data compression (config: Mred=0)</li><br>
 
@@ -5137,8 +5137,8 @@ USB-connected devices (SIGNALduino):<br>
 
     <ul>
       <b>Hinweis: Die falsche Benutzung der kommenden Optionen kann zu Fehlfunktionen des SIGNALduinos f&uuml;hren!</b><br><br>
-      <li>CEA -> Einschalten der automatischen Frequenzkontrolle bei FSK-Modulation und Firmwareversion >= V 3.5.2 (config: AFC=1)</li>
-      <li>CDA -> Abschalten der automatischen Frequenzkontrolle bei FSK-Modulation und Firmwareversion >= V 3.5.2 (config: AFC=0)</li>
+      <li>CEA -> Einschalten der automatischen Frequenzkontrolle bei FSK-Modulation und Firmwareversion >= V 4.0.0 (config: AFC=1)</li>
+      <li>CDA -> Abschalten der automatischen Frequenzkontrolle bei FSK-Modulation und Firmwareversion >= V 4.0.0 (config: AFC=0)</li>
       <li>CER -> Einschalten der Datenkomprimierung (config: Mred=1)</li>
       <li>CDR -> Abschalten der Datenkomprimierung (config: Mred=0)</li><br>
       <u>Register Befehle bei einem CC1101</u>
