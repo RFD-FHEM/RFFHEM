@@ -6,7 +6,13 @@
 #
 # 2016-2019  S.Butzek, Ralf9
 # 2019-2021  S.Butzek, HomeAutoUser, elektron-bbs
+# 2022       S.Butzek, HomeAutoUser, elektron-bbs, uwekaditz
 #
+################################################################################
+# 2.07 2022-08-14 uwekaditz
+# - CHG: mcBit2SomfyRTS() remove leading '0' in Somfy telegram that should start with '8' or 'F' if it is not expected
+# 2.07 2022-08-07 uwekaditz
+# - CHG: mcBit2SomfyRTS() remove leading '0' in Somfy telegram that should start with 'A' if it is not expected
 ################################################################################
 package lib::SD_Protocols;
 
@@ -15,8 +21,9 @@ use warnings;
 use Carp qw(croak carp);
 use constant HAS_DigestCRC => defined eval { require Digest::CRC; };
 use constant HAS_JSON => defined eval { require JSON; };
+use List::Util qw/any/;
 
-our $VERSION = '2.06';
+our $VERSION = '2.07';
 use Storable qw(dclone);
 use Scalar::Util qw(blessed);
 
@@ -1084,10 +1091,18 @@ sub mcBit2SomfyRTS {
   my $mcbitnum  = shift // length $bitData;
 
   $self->_logging( qq[lib/mcBit2SomfyRTS, bitdata: $bitData ($mcbitnum)], 4 );
-
-  if ($mcbitnum == 57) {
-    $bitData = substr($bitData, 1, 56);
+ 
+  #$self->_logging( qq[lib/mcBit2SomfyRTS, first bit: ]. substr($bitData,0,1), 4 );
+  
+  # remove leading '0' in any Somfy telegram if it is not expected
+  if ($mcbitnum == 57 || ($mcbitnum == 81 && substr($bitData,0,1) eq '0'))  {
+    # length not correct, byt leading '0' -> remove leading '0'
+    $bitData = substr($bitData, 1, $mcbitnum - 1);
     $self->_logging( qq[lib/mcBit2SomfyRTS, bitdata: $bitData, truncated to length: ]. length($bitData), 4 );
+  } elsif ($mcbitnum == 80 && any { substr($bitData, 0, 5) eq $_ } qw(01010 01000 01111) ) {
+  # length correct but telegram does not start with character 'A', '8' or 'F' , remove leading '0' and add a '0' at the end, see https://forum.fhem.de/index.php/topic,72173.msg1075881.html#msg1075881
+    $bitData = substr($bitData, 1, $mcbitnum - 1) . q[0];
+    $self->_logging( qq[lib/mcBit2SomfyRTS, bitdata: $bitData, remove leading nibble, added last nibble - length: ]. length($bitData), 4 );
   }
   my $encData = lib::SD_Protocols::binStr2hexStr($bitData);
 
