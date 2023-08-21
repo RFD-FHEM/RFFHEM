@@ -124,6 +124,22 @@ my @mockData = (
         rValue      => 1,
         rfmode      => 'Bresser_6in1' 
     },
+    {
+        deviceName  => q[dummyDuino],
+        plan        => 2,
+        testname    => q[message ok with FREQEST],
+        input       => q[MN;D=3BF120B00C1618FF77FF0458152293FFF06B0000;R=210;A=235;],
+        rValue      => 1,
+        rfmode      => 'Bresser_6in1' 
+    },
+    {
+        deviceName  => q[dummyDuino],
+        plan        => 2,
+        testname    => q[message ok with negative FREQEST],
+        input       => q[MN;D=3BF120B00C1618FF77FF0458152293FFF06B0000;R=210;A=-35;],
+        rValue      => 1,
+        rfmode      => 'Bresser_6in1' 
+    },
 );
 
 
