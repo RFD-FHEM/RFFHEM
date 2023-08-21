@@ -45,11 +45,12 @@ Supported Devices / Protocols
 |Fine Offset WH31, aka Ambient Weather WH31E, aka ecowitt WH31 | Temperature and humidity sensor |
 |FLAMINGO | Flamingo smoke detector |
 |Fody E42 | Temperature/humidity sensor (protocol BRESSER 5-in-1) |
+|FreeTec PE-6946 | wireless bell |
+|Froggit FT007T, FT007TP, FT007TH | Thermo-Hygrometer, Thermometer |
 |FS10 | Remote control |
 |FS20 | Remote control |
 |FT0073 | Weather sensors|
-|FreeTec PE-6946 | wireless bell |
-|Froggit FT007T, FT007TP, FT007TH | Thermo-Hygrometer, Thermometer |
+|FT-0835 | Sainlogic weather station|
 |GEA-028DB | Radio door chime |
 |GEIGER GF0x01, GF0x02, GF0x03 | Remote control (compatible to Tedsen) |
 |GFGT 433 B1 | Wireless Grill Thermometer |

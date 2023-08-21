@@ -49,8 +49,9 @@
 # 11.06.2022 neues Protokoll 122: TM40, Wireless Grill-, Meat-, Roasting-Thermometer with 4 Temperature Sensors
 # 06.01.2023 neues Protokoll 123: Inkbird IBS-P01R Pool Thermometer, Inkbird ITH-20R (not tested)
 # 21.01.2023 use round from package FHEM::Core::Utils::Math;
-# 01.04.2023 Added ecowitt wh31 support
-# 06.05.2023 Added ecowitt WH40 support
+# 01.04.2023 Added protocol 125: ecowitt WH31 support
+# 06.05.2023 Added protocol 126: ecowitt WH40 support
+# 21.08.2023 neues Protokoll 129: Sainlogic weather station FT-0835
 
 package main;
 
