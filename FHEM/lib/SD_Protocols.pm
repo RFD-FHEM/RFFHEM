@@ -1,5 +1,5 @@
 ################################################################################
-# $Id: SD_Protocols.pm 26975 2023-08-07 18:00:00Z elektron-bbs $
+# $Id: SD_Protocols.pm 26975 2023-08-21 19:02:34Z elektron-bbs $
 #
 # The file is part of the SIGNALduino project
 # v3.5.x - https://github.com/RFD-FHEM/RFFHEM
