@@ -1,3 +1,18 @@
+2023-08-25 - new protocol 129 for Sainlogic weather station FT-0835 (#1183)
+
+* New protocol 129 for Sainlogic weather station
+2023-08-15 - Support and for FREQEST register value (#1168)
+
+feat[cc1101]:Added support and for FREQEST value
+
+- feature needs firmware >=4.0.0
+- commandref for AFC on/off extended
+- added tests
+
+---------
+
+Co-authored-by: Udo <info@elektron-bbs.de>
+Co-authored-by: GitHub Action <action@github.com>
 2023-05-16 - Support ecowitt wh40 rain gauge (#1164)
 
 * SD_ProtocolData.pm
