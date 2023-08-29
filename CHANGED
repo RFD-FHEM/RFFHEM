@@ -1,3 +1,9 @@
+2023-08-29 - new protocols 127 and 128, remote controls for ceiling fans (#1184)
+
+* new protocol 127
+New protocol 127 for Remote control for ceiling fan, see https://forum.fhem.de/index.php?topic=134121.0
+* add new protocol 128
+add new protocol 128 for Remote control for ceiling fan, see https://forum.fhem.de/index.php?msg=1281573
 2023-08-25 - new protocol 129 for Sainlogic weather station FT-0835 (#1183)
 
 * New protocol 129 for Sainlogic weather station
