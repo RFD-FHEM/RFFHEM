@@ -94,9 +94,25 @@ my $module = basename (dirname(__FILE__));
         testname        =>  q[set command on],
         cmd             =>	q[set on],
 
-        returnCheck    => F(),    
+        returnCheck     => F(),    
         subCheck        => hash { field 'IOWrite' => array { item 0 => hash { field 'args' => array { item hash { etc(); } ; item 'sendMsg'; item 'P121#P001100111101110001111110#R5' }; etc() } } } ,
-    },	
+    },
+    {
+        targetName      =>  q[SD_UT_Test_RCnoName127_3603A],
+        testname        =>  q[set command fan_1],
+        cmd             =>  q[set fan_1],
+
+        returnCheck     => F(),    
+        subCheck        => hash { field 'IOWrite' => array { item 0 => hash { field 'args' => array { item hash { etc(); } ; item 'sendMsg'; item 'P127#001101100000001110100000101111#R5' }; etc() } } } ,
+    },
+    {
+        targetName      =>  q[SD_UT_Test_RCnoName128_8A7F],
+        testname        =>  q[set button_left],
+        cmd             =>  q[set button_left],
+
+        returnCheck     => F(),    
+        subCheck        => hash { field 'IOWrite' => array { item 0 => hash { field 'args' => array { item hash { etc(); } ; item 'sendMsg'; item 'P128#100010100111111111111110#R5' }; etc() } } } ,
+    },
 );
         
 sub runTest {

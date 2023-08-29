@@ -2250,5 +2250,121 @@
       "id" : "20",
       "module" : "SD_UT",
       "name" : "DC_1961_TG_1846"
+   },
+   {
+      "data" : [
+         {
+            "comment" : "Remote control with 14 buttons for ceiling fan",
+            "dmsg" : "P127#3603A370",
+            "internals" : {
+               "DEF" : "RCnoName127 3603A",
+               "NAME" : "RCnoName127_3603A"
+            },
+            "readings" : {
+               "LastAction" : "receive",
+               "deviceCode" : "3603A",
+               "state" : "fan_off"
+            },
+            "rmsg" : "MU;P0=5271;P1=-379;P2=1096;P3=368;P4=-1108;P5=-5997;D=01213434213434212121212121213434342134212121343421343434212521213434213434212121212121213434342134212121343421343434212521213434213434212121212121213434342134212121343421343434212521213434213434212121212121213434342134212121343421343434212;CP=3;R=63;",
+            "tests" : [
+               {
+                  "attributes" : {
+                     "model" : "RCnoName127"
+                  },
+                  "comment" : "#0"
+               }
+            ]
+         }
+      ],
+      "id" : 127,
+      "module" : "SD_UT",
+      "name" : "RCnoName127"
+   },
+   {
+      "data" : [
+         {
+            "comment" : "Remote control with 14 buttons for ceiling fan",
+            "dmsg" : "P127#3603AA50",
+            "internals" : {
+               "DEF" : "RCnoName127 3603A",
+               "NAME" : "RCnoName127_3603A"
+            },
+            "readings" : {
+               "LastAction" : "receive",
+               "deviceCode" : "3603A",
+               "state" : "light_on_off"
+            },
+            "rmsg" : "MS;P1=-372;P2=1098;P3=376;P4=-1096;P5=-6712;D=352121343421343421212121212121343434213421342134212134213421;CP=3;SP=5;R=73;m2;",
+            "tests" : [
+               {
+                  "attributes" : {
+                     "model" : "RCnoName127"
+                  },
+                  "comment" : "#0"
+               }
+            ]
+         }
+      ],
+      "id" : 127.1,
+      "module" : "SD_UT",
+      "name" : "RCnoName127"
+   },
+   {
+      "data" : [
+         {
+            "comment" : "Remote control with 12 buttons for ceiling fan",
+            "dmsg" : "P128#8A7FF4",
+            "internals" : {
+               "DEF" : "RCnoName128 8A7F",
+               "NAME" : "RCnoName128_8A7F"
+            },
+            "readings" : {
+               "LastAction" : "receive",
+               "deviceCode" : "8A7F",
+               "state" : "fan_slower"
+            },
+            "rmsg" : "MU;P0=-420;P1=1207;P2=-1199;P3=424;P4=-10154;D=010101230123010123232323232323232323230123010143230101012301230101232323232323232323232301230101432301010123012301012323232323232323232323012301014323010101230123010123232323232323232323230123010143230101012301230101232323232323232323232301230101;CP=3;R=18;",
+            "tests" : [
+               {
+                  "attributes" : {
+                     "model" : "RCnoName128"
+                  },
+                  "comment" : "#0"
+               }
+            ]
+         }
+      ],
+      "id" : 128,
+      "module" : "SD_UT",
+      "name" : "RCnoName128"
+   },
+   {
+      "data" : [
+         {
+            "comment" : "Remote control with 12 buttons for ceiling fan",
+            "dmsg" : "P128#8A7FF7",
+            "internals" : {
+               "DEF" : "RCnoName128 8A7F",
+               "NAME" : "RCnoName128_8A7F"
+            },
+            "readings" : {
+               "LastAction" : "receive",
+               "deviceCode" : "8A7F",
+               "state" : "fan_on_off"
+            },
+            "rmsg" : "MS;P2=-424;P3=432;P4=1201;P5=-1197;P6=-10133;D=36353242424532453242453535353535353535353532453535;CP=3;SP=6;R=36;m1;",
+            "tests" : [
+               {
+                  "attributes" : {
+                     "model" : "RCnoName128"
+                  },
+                  "comment" : "#0"
+               }
+            ]
+         }
+      ],
+      "id" : 128.1,
+      "module" : "SD_UT",
+      "name" : "RCnoName128"
    }
 ]

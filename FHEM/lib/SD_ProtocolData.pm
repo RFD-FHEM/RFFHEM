@@ -1,4 +1,4 @@
-# $Id: SD_ProtocolData.pm 26975 2023-08-21 19:02:34Z elektron-bbs $
+# $Id: SD_ProtocolData.pm 26975 2023-08-27 19:36:33Z elektron-bbs $
 # The file is part of the SIGNALduino project.
 # All protocol definitions are contained in this file.
 #
@@ -85,7 +85,7 @@ package lib::SD_ProtocolData;
   use strict;
   use warnings;
 
-  our $VERSION = '1.52';
+  our $VERSION = '1.53';
   our %protocols = (
     "0" =>  ## various weather sensors (500 | 9100)
             # Mebus | Id:237 Ch:1 T: 1.9 Bat:low           MS;P0=-9298;P1=495;P2=-1980;P3=-4239;D=1012121312131313121313121312121212121212131212131312131212;CP=1;SP=0;R=223;O;m2;
@@ -3342,10 +3342,90 @@ package lib::SD_ProtocolData;
         length_min      => '22',
         length_max      => '28',
       },
-
-    # "127" reserved for =>  ## Remote control with 14 buttons for ceiling fan
-    # "128" reserved for =>  ## Remote control with 12 buttons for ceiling fan
-
+    "127" =>  ## Remote control with 14 buttons for ceiling fan
+               # https://forum.fhem.de/index.php?topic=134121.0 @ Kai-Alfonso 2023-06-29
+               # RCnoName127_3603A fan_off  MU;P0=5271;P1=-379;P2=1096;P3=368;P4=-1108;P5=-5997;D=01213434213434212121212121213434342134212121343421343434212521213434213434212121212121213434342134212121343421343434212521213434213434212121212121213434342134212121343421343434212521213434213434212121212121213434342134212121343421343434212;CP=3;R=63;
+               # Message is output by SIGNALduino as MU if the last bit is a 0.
+      {
+        name             => 'RCnoName127',
+        comment          => 'Remote control with 14 buttons for ceiling fan',
+        id               => '127',
+        knownFreqs       => '433.92',
+        one              => [1,-3],  #  370,-1110
+        zero             => [3,-1],  # 1110, -370
+        start            => [-15],   # -5550 (MU)
+        reconstructBit   => '1',
+        clockabs         => '370',
+        format           => 'twostate',
+        preamble         => 'P127#',
+        clientmodule     => 'SD_UT',
+        modulematch      => '^P127#',
+        length_min       => '29',
+        length_max       => '30',
+      },
+    "127.1" =>  ## Remote control with 14 buttons for ceiling fan
+                 # https://forum.fhem.de/index.php?topic=134121.0 @ Kai-Alfonso 2023-06-29
+                 # RCnoName127_3603A fan_1         MS;P1=-385;P2=1098;P3=372;P4=-1108;P5=-6710;D=352121343421343421212121212121343434213421212121213421343434;CP=3;SP=5;R=79;m2;
+                 # RCnoName127_3603A light_on_off  MS;P1=-372;P2=1098;P3=376;P4=-1096;P5=-6712;D=352121343421343421212121212121343434213421342134212134213421;CP=3;SP=5;R=73;m2;
+                 # Message is output by SIGNALduino as MS if the last bit is a 1.
+      {
+        name             => 'RCnoName127',
+        comment          => 'Remote control with 14 buttons for ceiling fan',
+        id               => '127.1',
+        knownFreqs       => '433.92',
+        one              => [1,-3],  #  370,-1110
+        zero             => [3,-1],  # 1110, -370
+        sync             => [1,-18], #  370,-6660 (MS)
+        clockabs         => '370',
+        format           => 'twostate',
+        preamble         => 'P127#',
+        clientmodule     => 'SD_UT',
+        modulematch      => '^P127#',
+        length_min       => '29',
+        length_max       => '30',
+      },
+    "128" =>  ## Remote control with 12 buttons for ceiling fan
+               # https://forum.fhem.de/index.php?msg=1281573 @ romakrau 2023-07-14
+               # RCnoName128_8A7F fan_slower   MU;P0=-420;P1=1207;P2=-1199;P3=424;P4=-10154;D=010101230123010123232323232323232323230123010143230101012301230101232323232323232323232301230101432301010123012301012323232323232323232323012301014323010101230123010123232323232323232323230123010143230101012301230101232323232323232323232301230101;CP=3;R=18;
+               # Message is output by SIGNALduino as MU if the last bit is a 0.
+      {
+        name             => 'RCnoName128',
+        comment          => 'Remote control with 12 buttons for ceiling fan',
+        id               => '128',
+        knownFreqs       => '433.92',
+        one              => [-3,1],  #  -1218,406
+        zero             => [-1,3],  #   -406,1218
+        start            => [-25,1], # -10150,406 (MU)
+        clockabs         => '406',
+        format           => 'twostate',
+        preamble         => 'P128#',
+        clientmodule     => 'SD_UT',
+        modulematch      => '^P128#',
+        length_min       => '23',
+        length_max       => '24',
+      },
+    "128.1" =>  ## Remote control with 12 buttons for ceiling fan
+                 # https://forum.fhem.de/index.php?msg=1281573 @ romakrau 2023-07-14
+                 # RCnoName128_8A7F fan_on_off      MS;P2=-424;P3=432;P4=1201;P5=-1197;P6=-10133;D=36353242424532453242453535353535353535353532453535;CP=3;SP=6;R=36;m1;
+                 # RCnoName128_8A7F fan_direction   MS;P0=-10144;P4=434;P5=-415;P6=1215;P7=-1181;D=40474565656745674565674747474747474747474745656567;CP=4;SP=0;R=37;m2;
+                 # Message is output by SIGNALduino as MS if the last bit is a 1.
+      {
+        name             => 'RCnoName128',
+        comment          => 'Remote control with 12 buttons for ceiling fan',
+        id               => '128.1',
+        knownFreqs       => '433.92',
+        one              => [-3,1],  #  -1218,406
+        zero             => [-1,3],  #   -406,1218
+        sync             => [-25,1], # -10150,406 (MS)
+        reconstructBit   => '1',
+        clockabs         => '406',
+        format           => 'twostate',
+        preamble         => 'P128#',
+        clientmodule     => 'SD_UT',
+        modulematch      => '^P128#',
+        length_min       => '23',
+        length_max       => '24',
+      },
     "129"  =>  ## Sainlogic FT-0835
                # https://forum.fhem.de/index.php?topic=134381.0 @  Tueftler1983 2023-07-23
                # SD_WS_129_0E  T: 27.6 H: 36 W: 0.2 R: 0   MC;LL=-987;LH=970;SL=-506;SH=473;D=002B3F1FFDFCE4FFFF7B3FDB000404F9;C=489;L=128;R=60;
