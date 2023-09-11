@@ -1,4 +1,4 @@
-# $Id: 14_SD_WS.pm 26982 2023-08-21 19:02:34Z elektron-bbs $
+# $Id: 14_SD_WS.pm 26982 2023-09-11 16:54:55Z elektron-bbs $
 #
 # The purpose of this module is to support serval
 # weather sensors which use various protocol
@@ -828,12 +828,12 @@ sub SD_WS_Parse {
         # MM:       Moisture percentage 0%-100% (0x00-0x64) MM = (AD - 70) / (450 - 70)
         # Z:        ? Fixed: leftmost 7 bit 1111 100
         # AAA:      9 bit AD value MSB byte[07] & 0x01, LSB byte[08] ??? 10 bit ??? WH51 Manual.pdf says: 100%AD setting range:0%AD+10~1000
-        # XXXXXX:   ? Fixed: 0xff 0xff 0xff
+        # XXXXXX:   ? Fixed: 0xff 0xff 0xff or 0x00 0x00 0x00
         # CC:       CRC of the preceding 12 bytes (Polynomial 0x31, Initial value 0x00, Input not reflected, Result not reflected)
         # SS:       Sum of the preceding 13 bytes % 256
         sensortype => 'WH51, DP100, MISOL/1',
         model      => 'SD_WS_107_H',
-        prematch   => sub { ($rawData,undef) = @_; return 1 if ($rawData =~ /^51[0-9A-F]{16}[F]{6}/); },
+        prematch   => sub { ($rawData,undef) = @_; return 1 if ($rawData =~ /^51[0-9A-F]{26}/); },
         id         => sub { my ($rawData,undef) = @_; return substr($rawData,2,6); },
         batVoltage => sub { my (undef,$bitData) = @_; return FHEM::Core::Utils::Math::round(SD_WS_binaryToNumber($bitData,35,39) / 10 , 1); },
         adc        => sub { my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,62,71); },
