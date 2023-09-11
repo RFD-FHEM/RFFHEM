@@ -22,15 +22,15 @@ jobs:
       - name: "[Push] Get commit message"
         if: github.event_name == 'push'
         id: push_get_commit_message
-        run:
-          echo ::set-output name=push_commit_message::$(git log --format=%B -n 1 HEAD)
+        run: echo "push_commit_message=$(git log --format=%B -n 1 HEAD)" >> $GITHUB_OUTPUT
+
 
         # If this workflow was triggered by a pull request (open or synchronize!) then resolve the commit message from HEAD^2
         # It is stored in output steps, to be referenced with ${{ steps.pr_get_commit_message.outputs.pr_commit_message }}
       - name: "[Pull Request] Get commit message"
         if: github.event_name == 'pull_request'
         id: pr_get_commit_message
-        run: echo ::set-output name=pr_commit_message::$(git log --format=%B -n 1 HEAD^2)
+        run: echo "pr_commit_message=$(git log --format=%B -n 1 HEAD^2)" >> $GITHUB_OUTPUT
 
     # Finally we want to make the commit message available to other jobs. This can be done with job-level outputs
     # However as we do not know whether the commit message was set in Push or Pull Request event we need to do some
@@ -60,8 +60,9 @@ jobs:
       - name: Get current date
         id: date
         run: |
-          echo "::set-output name=date::$(date -u +'%Y%m%d')"
-          echo "::set-output name=datetimestr::$(date -u +'%Y-%m-%d %T')"
+          echo "date=$(date -u +'%Y%m%d')" >> $GITHUB_OUTPUT
+          echo "datetimestr=$(date -u +'%Y-%m-%d %T')" >> $GITHUB_OUTPUT
+
       - name: Set matrix for build
         id: set-matrix
         if: ${{ github.event.sender != 'actions-user' }}
@@ -90,7 +91,8 @@ jobs:
           echo $JSON
 
           # Set output
-          echo "::set-output name=matrix::$( echo "$JSON" )"
+          echo "matrix=$( echo "$JSON" )" >> $GITHUB_OUTPUT
+
   modify:
     if: ${{ fromJSON( needs.metadata.outputs.matrix ).include[0] }}
     continue-on-error: true
@@ -171,7 +173,7 @@ jobs:
         run: |
           git config --global user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git commit -m "Update Versiondate" -a && echo "::set-output name=status::true" || true
+          git commit -m "Update Versiondate" -a && echo "status=true" >> $GITHUB_OUTPUT || true
 
       - name: Wait for tests to succeed
         if: ${{ steps.commit.outputs.status }}
