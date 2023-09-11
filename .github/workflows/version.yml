@@ -22,7 +22,12 @@ jobs:
       - name: "[Push] Get commit message"
         if: github.event_name == 'push'
         id: push_get_commit_message
-        run: echo "push_commit_message=$(git log --format=%B -n 1 HEAD)" >> $GITHUB_OUTPUT
+        run: |
+          {
+            echo 'pr_commit_message<<EOF'
+            git log --format=%B -n 1 HEAD
+            echo EOF
+          } >> $GITHUB_OUTPUT
 
 
         # If this workflow was triggered by a pull request (open or synchronize!) then resolve the commit message from HEAD^2
@@ -30,7 +35,12 @@ jobs:
       - name: "[Pull Request] Get commit message"
         if: github.event_name == 'pull_request'
         id: pr_get_commit_message
-        run: echo "pr_commit_message=$(git log --format=%B -n 1 HEAD^2)" >> $GITHUB_OUTPUT
+        run: |
+          {
+            echo 'pr_commit_message<<EOF'
+            git log --format=%B -n 1 HEAD^2
+            echo EOF
+          } >> $GITHUB_OUTPUT
 
     # Finally we want to make the commit message available to other jobs. This can be done with job-level outputs
     # However as we do not know whether the commit message was set in Push or Pull Request event we need to do some
