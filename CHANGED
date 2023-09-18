@@ -1,3 +1,28 @@
+2023-09-18 - Master to 3.5.5 (#1189)
+
+* chore[Release] Specify Version als final 3.5.5
+
+* Update Versiondate
+
+* build[output]: migrated deprecated echo outputs
+
+* Update Versiondate
+
+* SD_WS protocol 107, WH51 bugfix ERROR prematch (#1190)
+
+* Update 14_SD_WS.pm
+bugfix ERROR prematch protocol 107, see https://forum.fhem.de/index.php?msg=1286136
+
+* build[output]: Corrected multiline output handling
+
+* build[actions]: Changed to maintained action
+
+* Update Versiondate
+
+---------
+
+Co-authored-by: GitHub Action <action@github.com>
+Co-authored-by: Udo <info@elektron-bbs.de>
 Release 3.5.5
 
      14_SD_UT
