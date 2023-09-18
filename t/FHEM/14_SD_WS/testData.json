@@ -1399,6 +1399,27 @@
                   "comment" : "#1"
                }
             ]
+         },
+         {
+            "comment" : "Fine Offset WH51, ECOWITT WH51, MISOL/1, Froggit DP100 Soil Moisture Sensor",
+            "dmsg" : "W107#510D48E6107F1B00AA00000010F0",
+            "internals" : {
+               "DEF" : "SD_WS_107_H",
+               "NAME" : "SD_WS_107_H"
+            },
+            "readings" : {
+               "adc" : "170",
+               "batteryVoltage" : "1.6",
+               "humidity" : "27",
+               "state" : " H: 27",
+               "type" : "WH51, DP100, MISOL/1"
+            },
+            "rmsg" : "MN;D=510D48E6107F1B00AA00000010F0;R=53;",
+            "tests" : [
+               {
+                  "comment" : "#3"
+               }
+            ]
          }
       ],
       "id" : "107",
