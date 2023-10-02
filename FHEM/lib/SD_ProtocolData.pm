@@ -85,7 +85,7 @@ package lib::SD_ProtocolData;
   use strict;
   use warnings;
 
-  our $VERSION = '1.53';
+  our $VERSION = '1.54';
   our %protocols = (
     "0" =>  ## various weather sensors (500 | 9100)
             # Mebus | Id:237 Ch:1 T: 1.9 Bat:low           MS;P0=-9298;P1=495;P2=-1980;P3=-4239;D=1012121312131313121313121312121212121212131212131312131212;CP=1;SP=0;R=223;O;m2;
@@ -3321,8 +3321,8 @@ package lib::SD_ProtocolData;
         clientmodule    => 'SD_WS',
         length_min      => '18',
       },
-    "126" =>  ## Humidity and Temperaturesensor Ecowitt WH40,  
-              # https://github.com/RFD-FHEM/RFFHEM/pull/1164
+    "126" =>  ## Rainfall Sensor Ecowitt WH40
+              # https://github.com/RFD-FHEM/RFFHEM/pull/1164 @ sidey79 2023-04-03
               # SD_WS_126 R: 0 MN;D=40011CDF8F0000976220A6802801;R=61;   14 byte  ID 11CDF
               # SD_WS_126 R: 0 MN;D=40013E3C900000105BA02A;R=61;         11 byte  ID 13E3c
               # SD_WS_126 R: 9 MN;D=40013E3C90005AB55AA0A0800408;R=61;   14 Byte  ID 13E3c
@@ -3447,6 +3447,27 @@ package lib::SD_ProtocolData;
         length_max      => '128',
         polarity        => 'invert',
         method          => \&lib::SD_Protocols::mcBit2Sainlogic, # Call to process this message
+      },
+    "130" =>  ## Remote control CREATE 6601TL for ceiling fan with light
+                 # https://forum.fhem.de/index.php?msg=1288203 @ erdnar 2023-09-29
+                 # CREATE_6601TL_F53A light_on_off     MS;P1=425;P2=-1142;P3=1187;P4=-395;P5=-12314;D=15121212123412341234341212123412341212121212121234;CP=1;SP=5;R=232;O;m2;
+                 # CREATE_6601TL_F53A light_cold_warm  MS;P1=432;P2=-1143;P3=1183;P4=-393;P5=-12300;D=15121212123412341234341212123412341212121212123434;CP=1;SP=5;R=231;O;m2;
+                 # CREATE_6601TL_F53A fan_faster       MS;P0=-11884;P1=392;P2=-1179;P3=1180;P4=-391;D=10121212123412341234341212123412341212121212341234;CP=1;SP=0;R=231;O;m2;
+      {
+        name             => 'CREATE_6601TL',
+        comment          => 'Remote control for ceiling fan with light',
+        id               => '130',
+        knownFreqs       => '433.92',
+        one              => [1,-3],  #
+        zero             => [3,-1],  #
+        sync             => [1,-30], #
+        clockabs         => '400',
+        format           => 'twostate',
+        preamble         => 'P130#',
+        clientmodule     => 'SD_UT',
+        modulematch      => '^P130#',
+        length_min       => '24',
+        length_max       => '24',
       },
 
     ########################################################################
