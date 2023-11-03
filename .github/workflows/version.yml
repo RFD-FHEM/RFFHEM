@@ -151,11 +151,11 @@ jobs:
               find ./FHEM -name "$FILE" -exec cp $FPATH "{}" \;
           done
       - name: update controls file (FHEM)
-        uses: fhem/fhem-controls-actions@v2.2.0
+        uses: fhem/fhem-controls-actions@V2.2.1
         with:
           filename: controls_signalduino.txt 
       - name: update controls file (lib)
-        uses: fhem/fhem-controls-actions@v2.2.0
+        uses: fhem/fhem-controls-actions@V2.2.1
         with:
           filename: controls_signalduino.txt 
           directory: FHEM/lib
@@ -179,7 +179,7 @@ jobs:
 
       - name: git push
         if: ${{ steps.commit.outputs.status }}
-        uses: ad-m/github-push-action@v0.6.0
+        uses: ad-m/github-push-action@v0.8.0
         with:
           github_token: ${{ secrets.GH_TOKEN }}
           branch: ${{ github.head_ref }}
