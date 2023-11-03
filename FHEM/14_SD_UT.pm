@@ -2342,6 +2342,7 @@ sub SD_UT_Attr {
     
     return qq[$name: Unallowed value $attrValue for the attribute repetition (must be 1 - 99)!] if ($attrName eq q[repeats] && $attrValue !~ m/^[1-9]{1}[0-9]{0,1}$/xms);
     return qq[$name: Invalid value $attrValue for the UTfrequency attribute. Values ​​such as: 433.92 (300.00-999.99 MHz) are permitted.] if ($attrName eq q[UTfrequency] && ($attrValue !~ m/^[3-9]{1}[\d]{2}$|^[3-9]{1}[\d]{2}\.{1}[\d]*$/xms));
+    return qq[$name: The model $attrValue is not supported!] if ($attrName eq q[model] && not exists $models{$attrValue}); # Can't use an undefined value as an ARRAY reference at ./FHEM/14_SD_UT.pm line 2423.
 
     ############ change device models ############
     if ($attrName eq 'model' && $attrValue ne $oldmodel) {
