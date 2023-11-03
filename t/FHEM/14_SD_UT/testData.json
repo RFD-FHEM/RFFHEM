@@ -2366,5 +2366,56 @@
       "id" : 128.1,
       "module" : "SD_UT",
       "name" : "RCnoName128"
+   },
+   {
+      "data" : [
+         {
+            "comment" : "Remote control CREATE 6601TL for ceiling fan with light",
+            "dmsg" : "P130#F53AFE",
+            "internals" : {
+               "DEF" : "CREATE_6601TL F53A",
+               "NAME" : "CREATE_6601TL_F53A"
+            },
+            "readings" : {
+               "LastAction" : "receive",
+               "deviceCode" : "F53A",
+               "state" : "light_on_off"
+            },
+            "rmsg" : "MS;P1=425;P2=-1142;P3=1187;P4=-395;P5=-12314;D=15121212123412341234341212123412341212121212121234;CP=1;SP=5;R=232;O;m2;",
+            "tests" : [
+               {
+                  "attributes" : {
+                     "model" : "CREATE_6601TL"
+                  },
+                  "comment" : "#0"
+               }
+            ]
+         },
+         {
+            "comment" : "Remote control CREATE 6601TL for ceiling fan with light",
+            "dmsg" : "P130#F53AFA",
+            "internals" : {
+               "DEF" : "CREATE_6601TL F53A",
+               "NAME" : "CREATE_6601TL_F53A"
+            },
+            "readings" : {
+               "LastAction" : "receive",
+               "deviceCode" : "F53A",
+               "state" : "fan_faster"
+            },
+            "rmsg" : "MS;P0=-11884;P1=392;P2=-1179;P3=1180;P4=-391;D=10121212123412341234341212123412341212121212341234;CP=1;SP=0;R=231;O;m2;",
+            "tests" : [
+               {
+                  "attributes" : {
+                     "model" : "CREATE_6601TL"
+                  },
+                  "comment" : "#1"
+               }
+            ]
+         }
+      ],
+      "id" : 130,
+      "module" : "SD_UT",
+      "name" : "CREATE_6601TL"
    }
 ]
