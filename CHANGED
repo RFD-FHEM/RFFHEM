@@ -1,3 +1,11 @@
+2023-11-04 - New protocol 130 for remote control CREATE 6601TL (#1201)
+
+* new protocol 130 for remote control CREATE 6601TL
+* Update 14_SD_UT.pm
+Bugfix - FHEM restarts with this command:: attr SA_434_1_mini_604 model unbekannt
+* Update testData.json
+add data for Remote control CREATE 6601TL
+---------
 2023-10-14 - Hideki module - carp error (#1197)
 
 * Hideki module - carp error
