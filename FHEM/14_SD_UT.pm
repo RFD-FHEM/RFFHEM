@@ -1,5 +1,5 @@
 #########################################################################################
-# $Id: 14_SD_UT.pm 0 2023-08-27 19:36:33Z elektron-bbs $
+# $Id: 14_SD_UT.pm 0 2023-10-02 18:00:00Z elektron-bbs $
 #
 # The file is part of the SIGNALduino project.
 # The purpose of this module is universal support for devices.
@@ -417,6 +417,14 @@
 #     RCnoName128_8A7F fan_direction   MS;P0=-10144;P4=434;P5=-415;P6=1215;P7=-1181;D=40474565656745674565674747474747474747474745656567;CP=4;SP=0;R=37;m2;
 #}
 ###############################################################################################################################################################################
+# - Remote control CREATE 6601TL [Protocol 130]
+#{    elektron-bbs 2023-09-30
+#     https://forum.fhem.de/index.php/topic,126110.0.html @ erdnar 2023-09-29
+#     CREATE_6601TL_F53A light_on_off     MS;P1=425;P2=-1142;P3=1187;P4=-395;P5=-12314;D=15121212123412341234341212123412341212121212121234;CP=1;SP=5;R=232;O;m2;
+#     CREATE_6601TL_F53A light_cold_warm  MS;P1=432;P2=-1143;P3=1183;P4=-393;P5=-12300;D=15121212123412341234341212123412341212121212123434;CP=1;SP=5;R=231;O;m2;
+#     CREATE_6601TL_F53A fan_faster       MS;P0=-11884;P1=392;P2=-1179;P3=1180;P4=-391;D=10121212123412341234341212123412341212121212341234;CP=1;SP=0;R=231;O;m2;
+#}
+###############################################################################################################################################################################
 # !!! ToDo´s !!!
 #     - LED lights, counter battery-h reading --> commandref hour_counter module
 #     -
@@ -429,7 +437,7 @@ use warnings;
 use FHEM::Meta;
 no warnings 'portable';  # Support for 64-bit ints required
 
-our $VERSION = '2023-07-19';
+our $VERSION = '2023-10-02';
 
 sub SD_UT_bin2tristate;
 sub SD_UT_tristate2bin;
@@ -841,6 +849,22 @@ my %models = (
                      Protocol   => 'P128',
                      Typ        => 'remote'
                    },
+  'CREATE_6601TL' => { '11110111' => 'fan_on_off',
+                       '11110100' => 'fan_slower',
+                       '11111010' => 'fan_faster',
+                       '11111110' => 'light_on_off',
+                       '11111100' => 'light_cold_warm',
+                       '11111000' => 'light_darker',
+                       '11110110' => 'light_brighter',
+                       '11110001' => 'fan_direction',
+                       '11110010' => 'time_1h',
+                       '11110000' => 'time_2h',
+                       '11101111' => 'time_4h',
+                       '11101101' => 'time_8h',
+                       hex_length => [6],
+                       Protocol   => 'P130',
+                       Typ        => 'remote'
+                   },
   'DC_1961_TG' => { '10100111' => 'fan_off',
                     '10100001' => 'fan_1',
                     '10100010' => 'fan_2',
@@ -1007,7 +1031,7 @@ my %models = (
 #############################
 sub SD_UT_Initialize {
   my ($hash) = @_;
-  $hash->{Match}      = '^P(?:14|20|24|26|29|30|34|46|56|68|69|76|78|81|83|86|90|91|91\.1|92|93|95|97|99|104|105|114|118|121|127|128)#.*';
+  $hash->{Match}      = '^P(?:14|20|24|26|29|30|34|46|56|68|69|76|78|81|83|86|90|91|91\.1|92|93|95|97|99|104|105|114|118|121|127|128|130)#.*';
   $hash->{DefFn}      = \&SD_UT_Define;
   $hash->{UndefFn}    = \&SD_UT_Undef;
   $hash->{ParseFn}    = \&SD_UT_Parse;
@@ -1076,9 +1100,9 @@ sub SD_UT_Define {
   ### [3] checks SA_434_1_mini | QUIGG_DMV | TR_502MSV | BeSmart_S4 ###
   # uncoverable branch true 
   return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short or long (must be 3 chars) or not HEX (0-9 | a-f | A-F){3}" if (($a[2] eq 'SA_434_1_mini' || $a[2] eq 'QUIGG_DMV' || $a[2] eq 'TR_502MSV' || $a[2] eq 'BeSmart_S4') && not $a[3] =~ /^[0-9a-fA-F]{3}/xms);    
-  ### [4 nibble] checks Neff SF01_01319004 & BOSCH SF01_01319004_Typ2 & Chilitec_22640 & ESTO KL_RF01 & RCnoName20 & RCnoName20_10 & RCnoName128 & DC-1961-TG & xavax & BF_301 & Meikee_xx ###
+  ### [4 nibble] checks Neff SF01_01319004 & BOSCH SF01_01319004_Typ2 & Chilitec_22640 & ESTO KL_RF01 & RCnoName20 & RCnoName20_10 & RCnoName128 & DC-1961-TG & xavax & BF_301 & Meikee_xx & CREATE_6601TL###
   # uncoverable branch true 
-  return "Wrong HEX-Value! ($a[3]) $a[2] Hex-value to short or long (must be 4 chars) or not hex (0-9 | a-f | A-F) {4}" if (($a[2] eq 'SF01_01319004' || $a[2] eq 'SF01_01319004_Typ2' || $a[2] eq 'Chilitec_22640' || $a[2] eq 'KL_RF01' || $a[2] eq 'RCnoName20' || $a[2] eq 'RCnoName20_10' || $a[2] eq 'RCnoName128'  || $a[2] eq 'DC_1961_TG' || $a[2] eq 'xavax' || $a[2] eq 'BF_301' || $a[2] eq 'Meikee_21' || $a[2] eq 'Meikee_24') && not $a[3] =~ /^[0-9a-fA-F]{4}/xms);
+  return "Wrong HEX-Value! ($a[3]) $a[2] Hex-value to short or long (must be 4 chars) or not hex (0-9 | a-f | A-F) {4}" if (($a[2] eq 'SF01_01319004' || $a[2] eq 'SF01_01319004_Typ2' || $a[2] eq 'Chilitec_22640' || $a[2] eq 'KL_RF01' || $a[2] eq 'RCnoName20' || $a[2] eq 'RCnoName20_10' || $a[2] eq 'RCnoName128' || $a[2] eq 'DC_1961_TG' || $a[2] eq 'xavax' || $a[2] eq 'BF_301' || $a[2] eq 'Meikee_21' || $a[2] eq 'Meikee_24' || $a[2] eq 'CREATE_6601TL') && not $a[3] =~ /^[0-9a-fA-F]{4}/xms);
   ### [5 nibble] checks RCnoName127
   # uncoverable branch true 
   return "Wrong HEX-Value! ($a[3]) $a[2] Hex-value to short or long (must be 5 chars) or not hex (0-9 | a-f | A-F) {5}" if ($a[2] eq 'RCnoName127' && not $a[3] =~ /^[0-9a-fA-F]{5}/xms);
@@ -1332,8 +1356,8 @@ sub SD_UT_Set {
     } elsif ($model eq 'TC6861') {
       $msg = $models{$model}{Protocol} . q{#P};
       $msgEnd = '#R' . $repeats;
-    ############ Meikee_21 | Meikee_24 | RCnoName128 | RCnoName20 | RCnoName20_10 | DC-1961-TG ############
-    } elsif ($model eq 'Meikee_21' || $model eq 'Meikee_24' || $model eq 'RCnoName128' || $model eq 'RCnoName20' || $model eq 'RCnoName20_10' || $model eq 'DC_1961_TG') {
+    ############ Meikee_21 | Meikee_24 | RCnoName128 | RCnoName20 | RCnoName20_10 | DC-1961-TG | CREATE_6601TL ############
+    } elsif ($model eq 'Meikee_21' || $model eq 'Meikee_24' || $model eq 'RCnoName128' || $model eq 'RCnoName20' || $model eq 'RCnoName20_10' || $model eq 'DC_1961_TG' || $model eq 'CREATE_6601TL') {
       my $adr = sprintf '%016b' , hex $definition[1]; # argument 1 - adress to binary with 16 bits
       $msg = $models{$model}{Protocol} . q{#} . $adr;
       $msgEnd = '#R' . $repeats;
@@ -1716,10 +1740,16 @@ sub SD_UT_Parse {
         return '';
       }
     }
+    ### Remote control RCnoName128 [P128] ###
     if (!$def && $protocol == 128) {
-      ### Remote control RCnoName128 [P128] ###
       $deviceCode = substr($rawData,0,4);
       $devicedef = 'RCnoName128 ' . $deviceCode;
+      $def = $modules{SD_UT}{defptr}{$devicedef};
+    }
+    ### Remote control CREATE_6601TL [P130] ###
+    if (!$def && $protocol == 130) {
+      $deviceCode = substr($rawData,0,4);
+      $devicedef = 'CREATE_6601TL ' . $deviceCode;
       $def = $modules{SD_UT}{defptr}{$devicedef};
     }
   }
@@ -2240,18 +2270,14 @@ sub SD_UT_Parse {
   } elsif ($model eq 'TC6861') {
     $state = substr($bitData,0,4);
     $deviceCode = substr($rawData,1,3);
-  ############ Meikee [P118] ############
-  } elsif (($model eq 'Meikee_21' || $model eq 'Meikee_24') && $protocol == 118) {
+  ############ Meikee [P118] or RCnoName128 [P128] or CREATE_6601TL [P130] ############
+  } elsif ($model eq 'Meikee_21' || $model eq 'Meikee_24' || $model eq 'RCnoName128' || $model eq 'CREATE_6601TL') {
     $state = substr $bitData,16,8;
     $deviceCode = substr $rawData,0,4;
   ############ RCnoName127 [P127] ############
   } elsif ($model eq 'RCnoName127') {
     $state = substr($bitData,20,8);
     $deviceCode = substr($rawData,0,5);
-  ############ RCnoName128 [P128] ############
-  } elsif ($model eq 'RCnoName128') {
-    $state = substr($bitData,16,8);
-    $deviceCode = substr($rawData,0,4);
 
   ############ unknown ############
   } else {
@@ -2316,6 +2342,7 @@ sub SD_UT_Attr {
     
     return qq[$name: Unallowed value $attrValue for the attribute repetition (must be 1 - 99)!] if ($attrName eq q[repeats] && $attrValue !~ m/^[1-9]{1}[0-9]{0,1}$/xms);
     return qq[$name: Invalid value $attrValue for the UTfrequency attribute. Values ​​such as: 433.92 (300.00-999.99 MHz) are permitted.] if ($attrName eq q[UTfrequency] && ($attrValue !~ m/^[3-9]{1}[\d]{2}$|^[3-9]{1}[\d]{2}\.{1}[\d]*$/xms));
+    return qq[$name: The model $attrValue is not supported!] if ($attrName eq q[model] && not exists $models{$attrValue}); # Can't use an undefined value as an ARRAY reference at ./FHEM/14_SD_UT.pm line 2423.
 
     ############ change device models ############
     if ($attrName eq 'model' && $attrValue ne $oldmodel) {
@@ -2463,13 +2490,8 @@ sub SD_UT_Attr {
           $deviceCode = substr $bitData,8,24;
           $deviceCode = sprintf("%06X", oct( "0b$bitData" ) );
           $devicename = $devicemodel.'_'.$deviceCode;
-        ############ Meikee ############
-        } elsif ($attrValue eq 'Meikee_21' || $attrValue eq 'Meikee_24') {
-          $deviceCode = substr($bitData,0,16);
-          $deviceCode = sprintf("%04X", oct( "0b$deviceCode" ) );
-          $devicename = $devicemodel.'_'.$deviceCode;
-        ############ RCnoName20 or RCnoName20_10 or RCnoName128 or DC_1961_TG ############
-        } elsif ($attrValue eq 'RCnoName20' || $attrValue eq 'RCnoName20_10' || $attrValue eq 'RCnoName128' || $attrValue eq 'DC_1961_TG') {
+        ############ Meikee_xx or RCnoName20 or RCnoName20_10 or RCnoName128 or DC_1961_TG or CREATE_6601TL ############
+        } elsif ($attrValue eq 'Meikee_21' || $attrValue eq 'Meikee_24' || $attrValue eq 'RCnoName20' || $attrValue eq 'RCnoName20_10' || $attrValue eq 'RCnoName128' || $attrValue eq 'DC_1961_TG' || $attrValue eq 'CREATE_6601TL') {
           $deviceCode = substr($bitData,0,16);
           $deviceCode = sprintf("%04X", oct( "0b$deviceCode" ) );
           $devicename = $devicemodel.'_'.$deviceCode;
@@ -2577,6 +2599,7 @@ sub SD_UT_tristate2bin {
     <li>Busch-Transcontrol HF - remote control 6861&nbsp;&nbsp;&nbsp;<small>(module model: TC6861, protocol 121)</small></li>
     <li>CAME swing gate drive&nbsp;&nbsp;&nbsp;<small>(module model: CAME_TOP_432EV, protocol 86)</small></li>
     <li>ChiliTec LED X-Mas light&nbsp;&nbsp;&nbsp;<small>(module model: Chilitec_22640, protocol 14)</small></li>
+    <li>CREATE 6601TL Remote control for ceiling fan with light&nbsp;&nbsp;&nbsp;<small>(module model: CREATE_6601TL, protocol 130)</small></li>
     <li>DC-1961-TG - remote control with 12 buttons for ceiling fan with lighting&nbsp;&nbsp;&nbsp;<small>(module model: DC_1961_TG, protocol 20)</small></li>
     <li>ESTO ceiling lamp&nbsp;&nbsp;&nbsp;<small>(module model: KL_RF01, protocol 93)</small></li>
     <li>Remote control with 4 buttons for diesel heating&nbsp;&nbsp;&nbsp;<small>(module model: RCnoName20, protocol 20)</small></li>
@@ -2591,7 +2614,7 @@ sub SD_UT_tristate2bin {
     <li>TR-502MSV (LIDL, LIBRA, MANDOLYN, QUIGG), compatible GT-7008BS, GT-FSI-04, DMV-7008S, Powerfix RCB-I 3600&nbsp;&nbsp;&nbsp;<small>(module model: TR_502MSV, protocol 34)</small></li>
     <li>Manax RCS250&nbsp;&nbsp;&nbsp;<small>(module model: RC_10, protocol 90)</small></li>
     <li>Medion OR28V&nbsp;&nbsp;&nbsp;<small>(module model: OR28V, protocol 68)</small></li>
-    <li>Meikee remote controls <small>(Protokoll 118)</small>
+    <li>Meikee remote controls <small>(protocol 118)</small>
       <ul><small>
         <li>Meikee, 21 buttons, e.g. for Solar Flood Lights - module model: Meikee_21</li>
         <li>Meikee, 24 buttons, e.g. for RGB LED Wallwasher Light - module model: Meikee_24</li>
@@ -2732,7 +2755,7 @@ sub SD_UT_tristate2bin {
     <li><a href="#ignore">ignore</a></li>
     <li><a href="#IODev">IODev</a></li>
     <li><a name="model"></a>model<br>
-      The attribute indicates the model type of your device (AC114_01B, BeSmart_S4, Buttons_five, Buttons_six, CAME_TOP_432EV, Chilitec_22640, DC_1961_TG, HS1-868-BS, HSM4, KL_RF01, LED_XM21_0, Meikee_21, Meikee_24, Momento, Navaris, Novy_840029, Novy_840039, OR28V, QUIGG_DMV, RC_10, RH787T, SA_434_1_mini, SF01_01319004, TC6861, TR60C1, Tedsen_SKX1xx, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx, TR_502MSV, Unitec_47031, unknown).<br>
+      The attribute indicates the model type of your device (AC114_01B, BeSmart_S4, Buttons_five, Buttons_six, CAME_TOP_432EV, Chilitec_22640, CREATE_6601TL, DC_1961_TG, HS1-868-BS, HSM4, KL_RF01, LED_XM21_0, Meikee_21, Meikee_24, Momento, Navaris, Novy_840029, Novy_840039, OR28V, QUIGG_DMV, RC_10, RH787T, SA_434_1_mini, SF01_01319004, TC6861, TR60C1, Tedsen_SKX1xx, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx, TR_502MSV, Unitec_47031, unknown).<br>
       If the attribute is changed, a new device is created using <a href="#autocreate">autocreate</a>. Autocreate must be activated for this.
     </li>
     <li><a name="repeats"></a>repeats<br>
@@ -2806,6 +2829,7 @@ sub SD_UT_tristate2bin {
     <li>Busch-Transcontrol HF - Handsender 6861&nbsp;&nbsp;&nbsp;<small>(Modulmodel: TC6861, Protokoll 121)</small></li>
     <li>CAME Drehtor Antrieb&nbsp;&nbsp;&nbsp;<small>(Modulmodel: CAME_TOP_432EV, Protokoll 86)</small></li>
     <li>ChiliTec LED Christbaumkerzen&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Chilitec_22640, Protokoll 14)</small></li>
+    <li>CREATE 6601TL Fernbedienung für Ventilator mit Licht&nbsp;&nbsp;&nbsp;<small>(Modulmodel: CREATE_6601TL, Protokoll 130)</small></li>
     <li>DC-1961-TG - Fernbedienung mit 12 Tasten für Deckenventilator mit Beleuchtung&nbsp;&nbsp;&nbsp;<small>(Modulmodel: DC_1961_TG, Protokoll 20)</small></li>
     <li>ESTO Deckenlampe&nbsp;&nbsp;&nbsp;<small>(Modulmodel: KL_RF01, Protokoll 93)</small></li>
     <li>Fernbedienung mit 4 Tasten f&uuml;r Diesel-Heizung &nbsp;&nbsp;&nbsp;<small>(Modulmodel: RCnoName20, Protokoll 20)</small></li>
@@ -2961,7 +2985,7 @@ sub SD_UT_tristate2bin {
     <li><a href="#ignore">ignore</a></li>
     <li><a href="#IODev">IODev</a></li>
     <li><a name="model"></a>model<br>
-      Diese Attribut bezeichnet den Modelltyp Ihres Ger&auml;tes (AC114_01B, BeSmart_S4, Buttons_five, Buttons_six, CAME_TOP_432EV, Chilitec_22640, DC_1961_TG, HS1-868-BS, HSM4, KL_RF01, LED_XM21_0, Meikee_21, Meikee_24, Momento, Navaris, Novy_840029, Novy_840039, OR28V, QUIGG_DMV, RC_10, RH787T, SA_434_1_mini, SF01_01319004, TC6861, TR60C1, Tedsen_SKX1xx, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx, TR_502MSV, Unitec_47031, unknown).<br>
+      Diese Attribut bezeichnet den Modelltyp Ihres Ger&auml;tes (AC114_01B, BeSmart_S4, Buttons_five, Buttons_six, CAME_TOP_432EV, Chilitec_22640, CREATE_6601TL, DC_1961_TG, HS1-868-BS, HSM4, KL_RF01, LED_XM21_0, Meikee_21, Meikee_24, Momento, Navaris, Novy_840029, Novy_840039, OR28V, QUIGG_DMV, RC_10, RH787T, SA_434_1_mini, SF01_01319004, TC6861, TR60C1, Tedsen_SKX1xx, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx, TR_502MSV, Unitec_47031, unknown).<br>
       Bei &Auml;nderung des Attributes wird ein neues Gerät mittels <a href="#autocreate">autocreate</a> erzeugt. Autocreate muss dazu aktiviert sein.
     </li>
     <li><a name="repeats"></a>repeats<br>
