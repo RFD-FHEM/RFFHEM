@@ -414,6 +414,7 @@ sub SIGNALduino_Define {
   }
   
   #$hash->{CMDS} = '';
+  $hash->{ClientsKeepOrder} = 1;
   $hash->{Clients}    = $clientsSIGNALduino;
   $hash->{MatchList}  = \%matchListSIGNALduino;
   $hash->{DeviceName} = $dev;
