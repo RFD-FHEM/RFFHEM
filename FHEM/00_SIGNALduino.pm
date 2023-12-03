@@ -3417,7 +3417,7 @@ sub SIGNALduino_IdList {
         next;
       }
 	    my $clientmodule = $hash->{protocolObject}->getProperty($id,'clientmodule',undef);
-      $hash->{Clients} .= qq[$clientmodule:] if (defined $clientmodule && $hash->{Clients} !~ /$clientmodule/); # add module only if clientModule is known and don't to it more than once
+      $hash->{Clients} .= qq[$clientmodule:] if (defined $clientmodule && $hash->{Clients} !~ /$clientmodule:/); # add module only if clientModule is known and don't to it more than once
     } else {                                # whitelist not active
       if (exists($BlacklistIDs{$id})) {
         #SIGNALduino_Log3 $name, 3, "$name: IdList, skip Blacklist ID $id";

@@ -13,7 +13,7 @@ sub runTest {
 	my $target = shift;
 	my $targetHash = $defs{$target};
 
-	plan(8);
+	plan(9);
 
 	subtest 'check if sub SIGNALduino_IdList causes crash if name does not exists' => sub {
 		is(
@@ -88,8 +88,15 @@ sub runTest {
 	subtest 'check whitespace breaks in clientlist without whitelist_IDs attribute' => sub {
 		plan(1);
 		CommandDeleteAttr(undef, qq[$target whitelist_IDs]);
-		print Dumper  ($targetHash->{Clients});
+		
 		like($targetHash->{Clients},qr/: :/,'Clientlist has Whitespace');
+	};
+
+	subtest 'check whitespace with two modules and name is included in other modules name also 54,47' => sub {
+		plan(2);
+		CommandAttr(undef, qq[$target whitelist_IDs 54,47]);
+		like($targetHash->{Clients},qr/SD_WS:/,'Clientlist has SD_WS');
+		like($targetHash->{Clients},qr/SD_WS_Maverick:/,'Clientlist has SD_WS_MAVERICK');
 	};
 
 
