@@ -1,5 +1,5 @@
 #########################################################################################
-# $Id: 14_SD_UT.pm 0 2023-10-02 18:00:00Z elektron-bbs $
+# $Id: 14_SD_UT.pm 0 2023-12-10 18:00:00Z elektron-bbs $
 #
 # The file is part of the SIGNALduino project.
 # The purpose of this module is universal support for devices.
@@ -423,6 +423,14 @@
 #     CREATE_6601TL_F53A light_on_off     MS;P1=425;P2=-1142;P3=1187;P4=-395;P5=-12314;D=15121212123412341234341212123412341212121212121234;CP=1;SP=5;R=232;O;m2;
 #     CREATE_6601TL_F53A light_cold_warm  MS;P1=432;P2=-1143;P3=1183;P4=-393;P5=-12300;D=15121212123412341234341212123412341212121212123434;CP=1;SP=5;R=231;O;m2;
 #     CREATE_6601TL_F53A fan_faster       MS;P0=-11884;P1=392;P2=-1179;P3=1180;P4=-391;D=10121212123412341234341212123412341212121212341234;CP=1;SP=0;R=231;O;m2;
+#}
+###############################################################################################################################################################################
+# - Hamulight remote control for ab sets 1-channel [Protocol 22]
+#{    elektron-bbs 2023-12-10
+#     https://github.com/RFD-FHEM/RFFHEM/issues/1206 @ obduser 2023-12-09
+#     Hamulight_AB 
+#     
+#     
 #}
 ###############################################################################################################################################################################
 # !!! ToDo´s !!!
@@ -1022,6 +1030,15 @@ my %models = (
                    Protocol   => 'P118',
                    Typ        => 'remote'
                  },
+  'Hamulight_AB' => { '01011111' => 'on_off',
+                      '01010101' => 'dim_1',
+                      '01010110' => 'dim_2',
+                      '01010000' => 'dim_3',
+                      '01011001' => 'dim_4',
+                      hex_length => [8],
+                      Protocol   => 'P22',
+                      Typ        => 'remote'
+                 },
   'unknown' =>  { Protocol   => 'any',
                   hex_length => [],
                   Typ        => 'not_exist'
@@ -1031,7 +1048,7 @@ my %models = (
 #############################
 sub SD_UT_Initialize {
   my ($hash) = @_;
-  $hash->{Match}      = '^P(?:14|20|24|26|29|30|34|46|56|68|69|76|78|81|83|86|90|91|91\.1|92|93|95|97|99|104|105|114|118|121|127|128|130)#.*';
+  $hash->{Match}      = '^P(?:14|20|22|24|26|29|30|34|46|56|68|69|76|78|81|83|86|90|91|91\.1|92|93|95|97|99|104|105|114|118|121|127|128|130)#.*';
   $hash->{DefFn}      = \&SD_UT_Define;
   $hash->{UndefFn}    = \&SD_UT_Undef;
   $hash->{ParseFn}    = \&SD_UT_Parse;
@@ -1042,20 +1059,21 @@ sub SD_UT_Initialize {
                         " $readingFnAttributes UTclock UTfrequency";
   $hash->{AutoCreate} =
   {
-    'AC114_01B.*'  => {ATTR => 'model:AC114_01B', FILTER => '%NAME', autocreateThreshold => '3:180', GPLOT => q{}},
-    'BF_301.*'     => {ATTR => 'model:BF_301', FILTER => '%NAME', autocreateThreshold => '3:180', GPLOT => q{}},
-    'MD_2003R.*'   => {ATTR => 'model:MD_2003R', FILTER => '%NAME', autocreateThreshold => '3:180', GPLOT => q{}},
-    'MD_2018R.*'   => {ATTR => 'model:MD_2018R', FILTER => '%NAME', autocreateThreshold => '3:180', GPLOT => q{}},
-    'MD_210R.*'    => {ATTR => 'model:MD_210R', FILTER => '%NAME', autocreateThreshold => '3:180', GPLOT => q{}},
-    'Momento.*'    => {ATTR => 'model:Momento', FILTER => '%NAME', autocreateThreshold => '3:180', GPLOT => q{}},
-    'OR28V.*'      => {ATTR => 'model:OR28V', FILTER => '%NAME', autocreateThreshold => '3:180', GPLOT => q{}},
-    'RCnoName20.*' => {ATTR => 'model:RCnoName20', FILTER => '%NAME', autocreateThreshold => '3:180', GPLOT => q{}},
-    'DC_1961_TG.*' => {ATTR => 'model:DC_1961_TG', FILTER => '%NAME', autocreateThreshold => '3:180', GPLOT => q{}},
-    'TC6861.*'     => {ATTR => 'model:TR401', FILTER => '%NAME', autocreateThreshold => '3:180', GPLOT => q{}},
-    'TR401.*'      => {ATTR => 'model:TR401', FILTER => '%NAME', autocreateThreshold => '3:180', GPLOT => q{}},
-    'Techmar.*'    => {ATTR => 'model:Techmar', FILTER => '%NAME', autocreateThreshold => '3:180', GPLOT => q{}},
-    'Visivo.*'     => {ATTR => 'model:Visivo', FILTER => '%NAME', autocreateThreshold => '3:180', GPLOT => q{}},
-    'xavax.*'      => {ATTR => 'model:xavax', FILTER => '%NAME', autocreateThreshold => '3:180', GPLOT => q{}},
+    'AC114_01B.*'    => {ATTR => 'model:AC114_01B', FILTER => '%NAME', autocreateThreshold => '3:180', GPLOT => q{}},
+    'BF_301.*'       => {ATTR => 'model:BF_301', FILTER => '%NAME', autocreateThreshold => '3:180', GPLOT => q{}},
+    'MD_2003R.*'     => {ATTR => 'model:MD_2003R', FILTER => '%NAME', autocreateThreshold => '3:180', GPLOT => q{}},
+    'MD_2018R.*'     => {ATTR => 'model:MD_2018R', FILTER => '%NAME', autocreateThreshold => '3:180', GPLOT => q{}},
+    'MD_210R.*'      => {ATTR => 'model:MD_210R', FILTER => '%NAME', autocreateThreshold => '3:180', GPLOT => q{}},
+    'Momento.*'      => {ATTR => 'model:Momento', FILTER => '%NAME', autocreateThreshold => '3:180', GPLOT => q{}},
+    'OR28V.*'        => {ATTR => 'model:OR28V', FILTER => '%NAME', autocreateThreshold => '3:180', GPLOT => q{}},
+    'RCnoName20.*'   => {ATTR => 'model:RCnoName20', FILTER => '%NAME', autocreateThreshold => '3:180', GPLOT => q{}},
+    'DC_1961_TG.*'   => {ATTR => 'model:DC_1961_TG', FILTER => '%NAME', autocreateThreshold => '3:180', GPLOT => q{}},
+    'TC6861.*'       => {ATTR => 'model:TR401', FILTER => '%NAME', autocreateThreshold => '3:180', GPLOT => q{}},
+    'TR401.*'        => {ATTR => 'model:TR401', FILTER => '%NAME', autocreateThreshold => '3:180', GPLOT => q{}},
+    'Techmar.*'      => {ATTR => 'model:Techmar', FILTER => '%NAME', autocreateThreshold => '3:180', GPLOT => q{}},
+    'Visivo.*'       => {ATTR => 'model:Visivo', FILTER => '%NAME', autocreateThreshold => '3:180', GPLOT => q{}},
+    'xavax.*'        => {ATTR => 'model:xavax', FILTER => '%NAME', autocreateThreshold => '3:180', GPLOT => q{}},
+    'Hamulight_AB.*' => {ATTR => 'model:Hamulight_AB', FILTER => '%NAME', autocreateThreshold => '3:180', GPLOT => q{}},
     'unknown_please_select_model' => {ATTR => 'model:unknown', FILTER => '%NAME', autocreateThreshold => '5:180', GPLOT => q{}},
   };
   return FHEM::Meta::InitMod( __FILE__, $hash );
@@ -1068,6 +1086,9 @@ sub SD_UT_Define {
   my $iodevice;
   my $ioname;
 
+  # Anzeigen der Modulversion (Internal FVERSION) über FHEM::Meta, Variable in META.json Abschnitt erforderlich: "version": "v1.0.0", siehe https://wiki.fhem.de/wiki/Meta
+  return $@ unless ( FHEM::Meta::SetInternals($hash) );
+	
   # Argument                    0     1      2       3           4
   return 'wrong syntax: define <name> SD_UT <model> <HEX-Value> <optional IODEV>' if(int(@a) < 3 || int(@a) > 5);
   return "wrong <model> $a[2]\n\n(allowed modelvalues: " . join(' | ', sort keys %models).')' if $a[2] && ( !grep { $_ eq $a[2] } %models );
@@ -1100,9 +1121,9 @@ sub SD_UT_Define {
   ### [3] checks SA_434_1_mini | QUIGG_DMV | TR_502MSV | BeSmart_S4 ###
   # uncoverable branch true 
   return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short or long (must be 3 chars) or not HEX (0-9 | a-f | A-F){3}" if (($a[2] eq 'SA_434_1_mini' || $a[2] eq 'QUIGG_DMV' || $a[2] eq 'TR_502MSV' || $a[2] eq 'BeSmart_S4') && not $a[3] =~ /^[0-9a-fA-F]{3}/xms);    
-  ### [4 nibble] checks Neff SF01_01319004 & BOSCH SF01_01319004_Typ2 & Chilitec_22640 & ESTO KL_RF01 & RCnoName20 & RCnoName20_10 & RCnoName128 & DC-1961-TG & xavax & BF_301 & Meikee_xx & CREATE_6601TL###
+  ### [4 nibble] checks Neff SF01_01319004 & BOSCH SF01_01319004_Typ2 & Chilitec_22640 & ESTO KL_RF01 & RCnoName20 & RCnoName20_10 & RCnoName128 & DC-1961-TG & xavax & BF_301 & Meikee_xx & CREATE_6601TL & Hamulight_AB ###
   # uncoverable branch true 
-  return "Wrong HEX-Value! ($a[3]) $a[2] Hex-value to short or long (must be 4 chars) or not hex (0-9 | a-f | A-F) {4}" if (($a[2] eq 'SF01_01319004' || $a[2] eq 'SF01_01319004_Typ2' || $a[2] eq 'Chilitec_22640' || $a[2] eq 'KL_RF01' || $a[2] eq 'RCnoName20' || $a[2] eq 'RCnoName20_10' || $a[2] eq 'RCnoName128' || $a[2] eq 'DC_1961_TG' || $a[2] eq 'xavax' || $a[2] eq 'BF_301' || $a[2] eq 'Meikee_21' || $a[2] eq 'Meikee_24' || $a[2] eq 'CREATE_6601TL') && not $a[3] =~ /^[0-9a-fA-F]{4}/xms);
+  return "Wrong HEX-Value! ($a[3]) $a[2] Hex-value to short or long (must be 4 chars) or not hex (0-9 | a-f | A-F) {4}" if (($a[2] eq 'SF01_01319004' || $a[2] eq 'SF01_01319004_Typ2' || $a[2] eq 'Chilitec_22640' || $a[2] eq 'KL_RF01' || $a[2] eq 'RCnoName20' || $a[2] eq 'RCnoName20_10' || $a[2] eq 'RCnoName128' || $a[2] eq 'DC_1961_TG' || $a[2] eq 'xavax' || $a[2] eq 'BF_301' || $a[2] eq 'Meikee_21' || $a[2] eq 'Meikee_24' || $a[2] eq 'CREATE_6601TL' || $a[2] eq 'Hamulight_AB') && not $a[3] =~ /^[0-9a-fA-F]{4}/xms);
   ### [5 nibble] checks RCnoName127
   # uncoverable branch true 
   return "Wrong HEX-Value! ($a[3]) $a[2] Hex-value to short or long (must be 5 chars) or not hex (0-9 | a-f | A-F) {5}" if ($a[2] eq 'RCnoName127' && not $a[3] =~ /^[0-9a-fA-F]{5}/xms);
@@ -1356,8 +1377,8 @@ sub SD_UT_Set {
     } elsif ($model eq 'TC6861') {
       $msg = $models{$model}{Protocol} . q{#P};
       $msgEnd = '#R' . $repeats;
-    ############ Meikee_21 | Meikee_24 | RCnoName128 | RCnoName20 | RCnoName20_10 | DC-1961-TG | CREATE_6601TL ############
-    } elsif ($model eq 'Meikee_21' || $model eq 'Meikee_24' || $model eq 'RCnoName128' || $model eq 'RCnoName20' || $model eq 'RCnoName20_10' || $model eq 'DC_1961_TG' || $model eq 'CREATE_6601TL') {
+    ############ Meikee_21 | Meikee_24 | RCnoName128 | RCnoName20 | RCnoName20_10 | DC-1961-TG | CREATE_6601TL | Hamulight_AB ############
+    } elsif ($model eq 'Meikee_21' || $model eq 'Meikee_24' || $model eq 'RCnoName128' || $model eq 'RCnoName20' || $model eq 'RCnoName20_10' || $model eq 'DC_1961_TG' || $model eq 'CREATE_6601TL' || $model eq 'Hamulight_AB') {
       my $adr = sprintf '%016b' , hex $definition[1]; # argument 1 - adress to binary with 16 bits
       $msg = $models{$model}{Protocol} . q{#} . $adr;
       $msgEnd = '#R' . $repeats;
@@ -1457,6 +1478,15 @@ sub SD_UT_Set {
         my @split = split /[#]/xms , $msg;
         my $sum = oct ('0b'. substr $split[1],0,8) + oct ('0b'. substr $split[1],8,8) + oct ('0b'. substr $split[1],16,8) + oct ('0b'. substr $split[1],24,8) + oct ('0b'. substr $split[1],32,8);
         $sum = (97 + $sum) & 0xFF;
+        Log3 $name, 5, "$ioname: SD_UT_Set $name bits=$split[1] sum=$sum";
+        $msg .= sprintf '%08b' , $sum;
+        $msg .= $msgEnd;
+      ############ Hamulight_AB ############
+      } elsif ($model eq 'Hamulight_AB') {
+        $msg .= $save; # command
+        my @split = split /[#]/xms , $msg;
+        my $sum = oct ('0b'. substr $split[1],0,8) + oct ('0b'. substr $split[1],8,8) + oct ('0b'. substr $split[1],16,8);
+        $sum = ($sum - 83) & 0xFF;
         Log3 $name, 5, "$ioname: SD_UT_Set $name bits=$split[1] sum=$sum";
         $msg .= sprintf '%08b' , $sum;
         $msg .= $msgEnd;
@@ -1786,6 +1816,24 @@ sub SD_UT_Parse {
         $def = $modules{SD_UT}{defptr}{$devicedef} if (!$def);
         $name = $model . '_' . $deviceCode;
       }
+    }
+    if (!$def && $protocol == 22) {
+      ### Remote control Hamulight_AB [P22] ###
+      my $sum = 0;
+      for (my $n = 0; $n < 6; $n += 2) { # sum over 3 bytes
+        $sum += hex(substr($rawData, $n, 2));
+      }
+      $sum = ($sum - 83) & 0xFF;
+      if ($sum != hex(substr($rawData, 6, 2))) { # byte 4
+        Log3 $iohash, 3, "$ioname: SD_UT_Parse device Hamulight_AB - ERROR checksum $sum != " . hex(substr($rawData, 6, 2));
+        return '';
+      }
+      $deviceCode = substr($rawData,0,4);
+      $state = substr($bitData,16,8);
+      $model = 'Hamulight_AB';
+      $devicedef = 'Hamulight_AB ' . $deviceCode;
+      $name = 'Hamulight_AB' . '_' . $deviceCode;
+      $def = $modules{SD_UT}{defptr}{$devicedef};
     }
     if (!$def && $protocol == 92) {
       ### Remote control Krinner_LUMIX [P92] ###
@@ -2573,6 +2621,9 @@ sub SD_UT_tristate2bin {
 1;
 
 =pod
+
+=encoding utf8
+
 =item summary    module for some SIGNALduino devices
 =item summary_DE Universalmodul f&uuml;r einige SIGNALduino Devices
 =begin html
@@ -3035,6 +3086,7 @@ sub SD_UT_tristate2bin {
 </ul>
 
 =end html_DE
+
 =for :application/json;q=META.json 14_SD_UT.pm
 {
   "author": [
@@ -3075,6 +3127,7 @@ sub SD_UT_tristate2bin {
       }
     }
   },
+  "version": "v1.0.0",
   "release_status": "stable",
   "resources": {
     "bugtracker": {
