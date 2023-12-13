@@ -2324,8 +2324,8 @@ sub SD_UT_Parse {
   } elsif ($model eq 'TC6861') {
     $state = substr($bitData,0,4);
     $deviceCode = substr($rawData,1,3);
-  ############ Meikee [P118] or RCnoName128 [P128] or CREATE_6601TL [P130] ############
-  } elsif ($model eq 'Meikee_21' || $model eq 'Meikee_24' || $model eq 'RCnoName128' || $model eq 'CREATE_6601TL') {
+  ############ Meikee [P118] or RCnoName128 [P128] or CREATE_6601TL [P130] or Hamulight_AB [P22] ############
+  } elsif ($model eq 'Meikee_21' || $model eq 'Meikee_24' || $model eq 'RCnoName128' || $model eq 'CREATE_6601TL' || $model eq 'Hamulight_AB') {
     $state = substr $bitData,16,8;
     $deviceCode = substr $rawData,0,4;
   ############ RCnoName127 [P127] ############
