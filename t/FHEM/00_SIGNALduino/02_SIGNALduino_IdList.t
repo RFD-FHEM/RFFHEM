@@ -13,7 +13,7 @@ sub runTest {
 	my $target = shift;
 	my $targetHash = $defs{$target};
 
-	plan(9);
+	plan(11);
 
 	subtest 'check if sub SIGNALduino_IdList causes crash if name does not exists' => sub {
 		is(
@@ -60,8 +60,8 @@ sub runTest {
 		plan(5);
 		CommandAttr(undef, qq[$target whitelist_IDs 0,0.1,49]);
 
-		like($targetHash->{Clients},qr/CUL_TCM97001:/,'Clientlist has CUL_TCM07001');
-		like($targetHash->{Clients},qr/SD_GT:/,'Clientlist has SD_GT');
+		like($targetHash->{Clients},qr/CUL_TCM97001/,'Clientlist has CUL_TCM07001');
+		like($targetHash->{Clients},qr/SD_GT/,'Clientlist has SD_GT');
 		unlike($targetHash->{Clients},qr/CUL_TCM97001:CUL_TCM97001/,'Clientlist has no SD_GT ');
 		unlike($targetHash->{Clients},qr/SD_RSL/,'Clientlist has no SD_RSL');
 		unlike($targetHash->{Clients},qr/SIGNALduino_un/,'Clientlist has no SIGNALduino_un');
@@ -95,8 +95,21 @@ sub runTest {
 	subtest 'check whitespace with two modules and name is included in other modules name also 54,47' => sub {
 		plan(2);
 		CommandAttr(undef, qq[$target whitelist_IDs 54,47]);
-		like($targetHash->{Clients},qr/SD_WS:/,'Clientlist has SD_WS');
-		like($targetHash->{Clients},qr/SD_WS_Maverick:/,'Clientlist has SD_WS_MAVERICK');
+		like($targetHash->{Clients},qr/:SD_WS/,'Clientlist has SD_WS');
+		like($targetHash->{Clients},qr/SD_WS_Maverick/,'Clientlist has SD_WS_MAVERICK');
+	};
+
+	subtest 'check last ":" is removed with attr whitelist_IDs 54,47' => sub {
+		plan(1);
+		CommandAttr(undef, qq[$target whitelist_IDs 54,47]);
+		isnt(substr($targetHash->{Clients}, -1),':','Last ":" is removed');
+	};
+
+	subtest 'check last ":" is removed without attr whitelist_IDs' => sub {
+		plan(1);
+		CommandDeleteAttr(undef, qq[$target whitelist_IDs]);
+		isnt(substr($targetHash->{Clients}, -1),':','Last ":" is removed');
+		#print 'last char is '.substr($targetHash->{Clients}, -1);
 	};
 
 

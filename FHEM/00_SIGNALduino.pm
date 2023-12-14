@@ -3417,7 +3417,7 @@ sub SIGNALduino_IdList {
         next;
       }
 	    my $clientmodule = $hash->{protocolObject}->getProperty($id,'clientmodule',undef);
-      $hash->{Clients} .= qq[$clientmodule:] if (defined $clientmodule && $hash->{Clients} !~ /$clientmodule:/); # add module only if clientModule is known and don't to it more than once
+      $hash->{Clients} .= qq[$clientmodule:] if (defined $clientmodule && $hash->{Clients} !~ /$clientmodule:/); # add module only if clientModule is known and don't do it more than once
     } else {                                # whitelist not active
       if (exists($BlacklistIDs{$id})) {
         #SIGNALduino_Log3 $name, 3, "$name: IdList, skip Blacklist ID $id";
@@ -3467,7 +3467,9 @@ sub SIGNALduino_IdList {
       push (@muIdList, $id);
     }
   }
-  $hash->{Clients} = $hash->{Clients} =~ s/.{30,50}:\K(?=.{30,50})/ :/rg; # Add spaces to create linebreaks in webview
+  $hash->{Clients} = $hash->{Clients} =~ s/.{25,50}:\K(?=.{25,50})/ :/rg; # Add spaces to create linebreaks in webview
+  $hash->{Clients} = substr($hash->{Clients}, 0, -1); # Remove last :
+
   delete $hash->{'.clientArray'}; #force recompute of clientArray after changes
 
   @msIdList = sort {$a <=> $b} @msIdList;
