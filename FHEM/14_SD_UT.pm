@@ -1383,12 +1383,16 @@ sub SD_UT_Set {
     } elsif ($model eq 'TC6861') {
       $msg = $models{$model}{Protocol} . q{#P};
       $msgEnd = '#R' . $repeats;
-    ############ Meikee_21 | Meikee_24 | RCnoName128 | RCnoName20 | RCnoName20_10 | DC-1961-TG | CREATE_6601TL | Hamulight_AB ############
-    } elsif ($model eq 'Meikee_21' || $model eq 'Meikee_24' || $model eq 'RCnoName128' || $model eq 'RCnoName20' || $model eq 'RCnoName20_10' || $model eq 'DC_1961_TG' || $model eq 'CREATE_6601TL' || $model eq 'Hamulight_AB') {
+    ############ Meikee_21 | Meikee_24 | RCnoName128 | RCnoName20 | RCnoName20_10 | DC-1961-TG | CREATE_6601TL############
+    } elsif ($model eq 'Meikee_21' || $model eq 'Meikee_24' || $model eq 'RCnoName128' || $model eq 'RCnoName20' || $model eq 'RCnoName20_10' || $model eq 'DC_1961_TG' || $model eq 'CREATE_6601TL') {
       my $adr = sprintf '%016b' , hex $definition[1]; # argument 1 - adress to binary with 16 bits
       $msg = $models{$model}{Protocol} . q{#} . $adr;
-      $msgEnd = '#R10'; # only for test from Hamulight_AB
-      # $msgEnd = '#R' . $repeats;
+      $msgEnd = '#R' . $repeats;
+    ############ Hamulight_AB ############
+    } elsif ($model eq 'Hamulight_AB') {
+      my $adr = sprintf '%016b' , hex $definition[1]; # argument 1 - adress to binary with 16 bits
+      $msg = $models{$model}{Protocol} . q{#} . $adr;
+      $msgEnd = '#R10';
     ############ RCnoName127 ############
     } elsif ($model eq 'RCnoName127') {
       my $adr = sprintf '%020b' , hex $definition[1]; # argument 1 - adress to binary with 20 bits
