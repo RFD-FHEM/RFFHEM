@@ -1387,7 +1387,8 @@ sub SD_UT_Set {
     } elsif ($model eq 'Meikee_21' || $model eq 'Meikee_24' || $model eq 'RCnoName128' || $model eq 'RCnoName20' || $model eq 'RCnoName20_10' || $model eq 'DC_1961_TG' || $model eq 'CREATE_6601TL' || $model eq 'Hamulight_AB') {
       my $adr = sprintf '%016b' , hex $definition[1]; # argument 1 - adress to binary with 16 bits
       $msg = $models{$model}{Protocol} . q{#} . $adr;
-      $msgEnd = '#R' . $repeats;
+      $msgEnd = '#R10'; # only for test from Hamulight_AB
+      # $msgEnd = '#R' . $repeats;
     ############ RCnoName127 ############
     } elsif ($model eq 'RCnoName127') {
       my $adr = sprintf '%020b' , hex $definition[1]; # argument 1 - adress to binary with 20 bits
