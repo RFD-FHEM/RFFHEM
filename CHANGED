@@ -1,3 +1,8 @@
+2023-12-15 - create client list based on whitelistIDs attribute (#1205)
+
+* perf [clientlist]: Keep order and skip sorting
+
+* feat[clientList]: Compute clientlist based on whitelist_IDs
 2023-11-04 - New protocol 130 for remote control CREATE 6601TL (#1201)
 
 * new protocol 130 for remote control CREATE 6601TL
