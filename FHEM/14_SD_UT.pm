@@ -2359,7 +2359,11 @@ sub SD_UT_Parse {
         last;
       }
     }
-
+    if ($model eq 'Hamulight_AB' && $state =~ /^[0|1]{8}$/xms ) { # unknown button
+      my $dec = oct("0b".$state);
+      Log3 $name, 3, "$ioname: SD_UT_Parse $devicedef state=$state ($dec)";
+      $state = 'dim_' . $dec;
+    }
     if ($model eq 'Novy_840029' || $model eq 'Novy_840039') {
       $state = $state =~ /^[01]+$/x ? "Please check your model. The code $deviceCode is not supported." : $state;
     }
@@ -3138,7 +3142,7 @@ sub SD_UT_tristate2bin {
       }
     }
   },
-  "version": "v1.0.0",
+  "version": "v1.0.7",
   "release_status": "stable",
   "resources": {
     "bugtracker": {
