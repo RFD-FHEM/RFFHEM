@@ -3469,8 +3469,9 @@ package lib::SD_ProtocolData;
         length_min       => '24',
         length_max       => '24',
       },
+    #"131"  =>  ## reserved for elektron-bbs
     "132"  =>  ## Remote control Halemeier HA-HX2 for Actor HA-RX-M2-1
-               # https://github.com/RFD-FHEM/RFFHEM/issues/1207 @ hightower 2023-12-11
+               # https://github.com/RFD-FHEM/RFFHEM/issues/1207 @ HomeAuto_User 2023-12-11
                # https://forum.fhem.de/index.php?topic=38452.0 (probably identical)
                # remote 1 - off | P132#85EFAC
                # MU;P0=304;P1=-351;P2=633;P3=-692;P4=-12757;D=01230303030301230123030121240301212121230123030303012303030303012124030121212123012303030301230303030301230123030121240301212121230123030303012303030303012301230301212403012121212301230303030123030303030123012303012124030121212123012303030301230303030301;CP=0;R=241;O;
