@@ -1,5 +1,5 @@
 #########################################################################################
-# $Id: 14_SD_UT.pm 0 2023-12-18 19:00:00Z HomeAuto_User $
+# $Id: 14_SD_UT.pm 0 2023-12-19 18:00:00Z HomeAuto_User $
 #
 # The file is part of the SIGNALduino project.
 # The purpose of this module is universal support for devices.
@@ -447,7 +447,7 @@ use warnings;
 use FHEM::Meta;
 no warnings 'portable';  # Support for 64-bit ints required
 
-our $VERSION = '2023-12-14';
+our $VERSION_SD_UT = '2023-12-19';
 
 sub SD_UT_bin2tristate;
 sub SD_UT_tristate2bin;
@@ -1121,7 +1121,7 @@ sub SD_UT_Define {
   return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short or long (must be 3 chars) or not HEX (0-9 | a-f | A-F){3}" if (($a[2] eq 'SA_434_1_mini' || $a[2] eq 'QUIGG_DMV' || $a[2] eq 'TR_502MSV' || $a[2] eq 'BeSmart_S4') && not $a[3] =~ /^[0-9a-fA-F]{3}/xms);    
   ### [4 nibble] checks Neff SF01_01319004 & BOSCH SF01_01319004_Typ2 & Chilitec_22640 & ESTO KL_RF01 & RCnoName20 & RCnoName20_10 & RCnoName128 & DC-1961-TG & xavax & BF_301 & Meikee_xx & CREATE_6601TL###
   # uncoverable branch true 
-  return "Wrong HEX-Value! ($a[3]) $a[2] Hex-value to short or long (must be 4 chars) or not hex (0-9 | a-f | A-F) {4}" if (($a[2] eq 'SF01_01319004' || $a[2] eq 'SF01_01319004_Typ2' || $a[2] eq 'Chilitec_22640' || $a[2] eq 'KL_RF01' || $a[2] eq 'RCnoName20' || $a[2] eq 'RCnoName20_10' || $a[2] eq 'RCnoName128' || $a[2] eq 'DC_1961_TG' || $a[2] eq 'xavax' || $a[2] eq 'BF_301' || $a[2] eq 'Meikee_21' || $a[2] eq 'Meikee_24' || $a[2] eq 'CREATE_6601TL') && not $a[3] =~ /^[0-9a-fA-F]{4}/xms);
+  return "Wrong HEX-Value! ($a[3]) $a[2] Hex-value to short or long (must be 4 chars) or not hex (0-9 | a-f | A-F) {4}" if (($a[2] eq 'SF01_01319004' || $a[2] eq 'SF01_01319004_Typ2' || $a[2] eq 'Chilitec_22640' || $a[2] eq 'KL_RF01' || $a[2] eq 'RCnoName20' || $a[2] eq 'RCnoName20_10' || $a[2] eq 'RCnoName128' || $a[2] eq 'DC_1961_TG' || $a[2] eq 'xavax' || $a[2] eq 'BF_301' || $a[2] eq 'Meikee_21' || $a[2] eq 'Meikee_24' || $a[2] eq 'CREATE_6601TL' || $a[2] eq 'HA_HX2') && not $a[3] =~ /^[0-9a-fA-F]{4}/xms);
   ### [5 nibble] checks RCnoName127
   # uncoverable branch true 
   return "Wrong HEX-Value! ($a[3]) $a[2] Hex-value to short or long (must be 5 chars) or not hex (0-9 | a-f | A-F) {5}" if ($a[2] eq 'RCnoName127' && not $a[3] =~ /^[0-9a-fA-F]{5}/xms);
@@ -1153,7 +1153,7 @@ sub SD_UT_Define {
   # uncoverable branch true 
   return "SD_UT model $a[2] wrong devicecode: ($a[3]) - must be 3 digit house code (hex 0-9 A-F) _ 1 digit channel (dec 1-3) - e.g. 3DC_1" if ($a[2] eq 'TC6861' && not $a[3] =~ /^[0-9A-F]{3}_[1-3]$/xms);  
 
-  $hash->{versionModule} = $VERSION;
+  $hash->{versionModule} = $VERSION_SD_UT;
   $hash->{lastMSG} =  'no data';
   $hash->{bitMSG} =  'no data';
   $iodevice = $a[4] if($a[4]);
@@ -1375,19 +1375,14 @@ sub SD_UT_Set {
     } elsif ($model eq 'TC6861') {
       $msg = $models{$model}{Protocol} . q{#P};
       $msgEnd = '#R' . $repeats;
-    ############ Meikee_21 | Meikee_24 | RCnoName128 | RCnoName20 | RCnoName20_10 | DC-1961-TG | CREATE_6601TL ############
-    } elsif ($model eq 'Meikee_21' || $model eq 'Meikee_24' || $model eq 'RCnoName128' || $model eq 'RCnoName20' || $model eq 'RCnoName20_10' || $model eq 'DC_1961_TG' || $model eq 'CREATE_6601TL') {
+    ############ Meikee_21 | Meikee_24 | RCnoName128 | RCnoName20 | RCnoName20_10 | DC-1961-TG | CREATE_6601TL | HA_HX2 ############
+    } elsif ($model eq 'Meikee_21' || $model eq 'Meikee_24' || $model eq 'RCnoName128' || $model eq 'RCnoName20' || $model eq 'RCnoName20_10' || $model eq 'DC_1961_TG' || $model eq 'CREATE_6601TL' || $model eq 'HA_HX2') {
       my $adr = sprintf '%016b' , hex $definition[1]; # argument 1 - adress to binary with 16 bits
       $msg = $models{$model}{Protocol} . q{#} . $adr;
       $msgEnd = '#R' . $repeats;
     ############ RCnoName127 ############
     } elsif ($model eq 'RCnoName127') {
       my $adr = sprintf '%020b' , hex $definition[1]; # argument 1 - adress to binary with 20 bits
-      $msg = $models{$model}{Protocol} . q{#} . $adr;
-      $msgEnd = '#R' . $repeats;
-    ### Remote control HA-HX2 [P132] ###
-    } elsif ($model eq 'HA_HX2') {
-      my $adr = sprintf '%016b' , hex $definition[1]; # argument 1 - adress to binary with 20 bits
       $msg = $models{$model}{Protocol} . q{#} . $adr;
       $msgEnd = '#R' . $repeats;
     }
@@ -1781,8 +1776,6 @@ sub SD_UT_Parse {
       $deviceCode = substr($rawData,0,4);
       $devicedef = 'HA_HX2 ' . $deviceCode;
       $def = $modules{SD_UT}{defptr}{$devicedef};
-      $model = 'HA_HX2';
-      $name = 'HA_HX2_' . $deviceCode;
     }
   }
 
@@ -2302,17 +2295,14 @@ sub SD_UT_Parse {
   } elsif ($model eq 'TC6861') {
     $state = substr($bitData,0,4);
     $deviceCode = substr($rawData,1,3);
-  ############ Meikee [P118] or RCnoName128 [P128] or CREATE_6601TL [P130] ############
-  } elsif ($model eq 'Meikee_21' || $model eq 'Meikee_24' || $model eq 'RCnoName128' || $model eq 'CREATE_6601TL') {
+  ############ Meikee [P118] or RCnoName128 [P128] or CREATE_6601TL [P130] or HA-HX2 [132] ############
+  } elsif ($model eq 'Meikee_21' || $model eq 'Meikee_24' || $model eq 'RCnoName128' || $model eq 'CREATE_6601TL' || $model eq 'HA_HX2') {
     $state = substr $bitData,16,8;
     $deviceCode = substr $rawData,0,4;
   ############ RCnoName127 [P127] ############
   } elsif ($model eq 'RCnoName127') {
     $state = substr($bitData,20,8);
     $deviceCode = substr($rawData,0,5);
-  ############ HA_HX2 [P132] ############
-  } elsif ($model eq 'HA_HX2') {
-    $state = substr($bitData,16,8);
   ############ unknown ############
   } else {
     readingsBulkUpdate($hash, 'state', '???');
@@ -2524,8 +2514,9 @@ sub SD_UT_Attr {
           $deviceCode = substr $bitData,8,24;
           $deviceCode = sprintf("%06X", oct( "0b$bitData" ) );
           $devicename = $devicemodel.'_'.$deviceCode;
-        ############ Meikee_xx or RCnoName20 or RCnoName20_10 or RCnoName128 or DC_1961_TG or CREATE_6601TL ############
-        } elsif ($attrValue eq 'Meikee_21' || $attrValue eq 'Meikee_24' || $attrValue eq 'RCnoName20' || $attrValue eq 'RCnoName20_10' || $attrValue eq 'RCnoName128' || $attrValue eq 'DC_1961_TG' || $attrValue eq 'CREATE_6601TL') {
+        ############ Meikee_xx or RCnoName20 or RCnoName20_10 or RCnoName128 or DC_1961_TG or CREATE_6601TL or HA_HX2 ############
+        } elsif ($attrValue eq 'Meikee_21' || $attrValue eq 'Meikee_24' || $attrValue eq 'RCnoName20' || $attrValue eq 'RCnoName20_10' ||
+                  $attrValue eq 'RCnoName128' || $attrValue eq 'DC_1961_TG' || $attrValue eq 'CREATE_6601TL' || $attrValue eq 'HA_HX2') {
           $deviceCode = substr($bitData,0,16);
           $deviceCode = sprintf("%04X", oct( "0b$deviceCode" ) );
           $devicename = $devicemodel.'_'.$deviceCode;
