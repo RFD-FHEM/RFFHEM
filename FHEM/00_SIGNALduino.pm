@@ -414,6 +414,7 @@ sub SIGNALduino_Define {
   }
   
   #$hash->{CMDS} = '';
+  $hash->{ClientsKeepOrder} = 1;
   $hash->{Clients}    = $clientsSIGNALduino;
   $hash->{MatchList}  = \%matchListSIGNALduino;
   $hash->{DeviceName} = $dev;
@@ -3390,7 +3391,7 @@ sub SIGNALduino_IdList {
   }
   #SIGNALduino_Log3 $name, 3, "$name IdList: attr whitelistIds=$aVal" if ($aVal);
 
-  if ($wflag == 0) {                      # whitelist not aktive
+  if ($wflag == 0) {                      # whitelist not active
     if (!defined($blacklist)) {
       $blacklist = AttrVal($name,'blacklist_IDs','');
     }
@@ -3400,7 +3401,12 @@ sub SIGNALduino_IdList {
       #my $w = join ', ' => map "$_" => keys %BlacklistIDs;
       #SIGNALduino_Log3 $name, 3, "$name IdList, Attr blacklist $w";
     }
+    $hash->{Clients} =  $clientsSIGNALduino; # Set Default in clientlist if whitelist is not active
+  } else {
+    $hash->{Clients} =  q[] # clear Clients if whitelist is active    
   }
+
+
   for my $id ($hash->{protocolObject}->getKeys())
   {
     if ($wflag == 1)                      # whitelist active
@@ -3410,8 +3416,9 @@ sub SIGNALduino_IdList {
         push (@skippedWhiteId, $id);
         next;
       }
-    }
-    else {                                # whitelist not active
+	    my $clientmodule = $hash->{protocolObject}->getProperty($id,'clientmodule',undef);
+      $hash->{Clients} .= qq[$clientmodule:] if (defined $clientmodule && $hash->{Clients} !~ /$clientmodule:/); # add module only if clientModule is known and don't do it more than once
+    } else {                                # whitelist not active
       if (exists($BlacklistIDs{$id})) {
         #SIGNALduino_Log3 $name, 3, "$name: IdList, skip Blacklist ID $id";
         push (@skippedBlackId, $id);
@@ -3460,6 +3467,10 @@ sub SIGNALduino_IdList {
       push (@muIdList, $id);
     }
   }
+  $hash->{Clients} = $hash->{Clients} =~ s/.{25,50}:\K(?=.{25,50})/ :/rg; # Add spaces to create linebreaks in webview
+  $hash->{Clients} = substr($hash->{Clients}, 0, -1); # Remove last :
+
+  delete $hash->{'.clientArray'}; #force recompute of clientArray after changes
 
   @msIdList = sort {$a <=> $b} @msIdList;
   @muIdList = sort {$a <=> $b} @muIdList;
