@@ -2417,5 +2417,54 @@
       "id" : 130,
       "module" : "SD_UT",
       "name" : "CREATE_6601TL"
+   },
+   {
+      "data" : [
+         {
+            "comment" : "Remote control with two buttons for Halemeier LED controllers (typ HA-HX2 for actor HA-RX-M2-1)",
+            "dmsg" : "P132#01EFAC",
+            "internals" : {
+               "DEF" : "HA_HX2 01EF",
+               "NAME" : "HA_HX2_01EF"
+            },
+            "readings" : {
+               "deviceCode" : "01EF",
+               "state" : "off"
+            },
+            "rmsg" : "MU;P0=307;P1=-685;P2=-350;P3=658;P4=-12510;D=01010102310101010102310231010232340232323232323231010101023101010101023102323232323232323101010102310101010102310231010232340232323232323231010101023101010101023102310102323402323232323232310101010231010101010231023101023234023232323232323101010102310101;CP=0;R=232;O;",
+            "tests" : [
+               {
+                  "attributes" : {
+                     "model" : "HA_HX2"
+                  },
+                  "comment" : "#0 state off"
+               }
+            ]
+         },
+         {
+            "comment" : "Remote control with two buttons for Halemeier LED controllers (typ HA-HX2 for actor HA-RX-M2-1)",
+            "dmsg" : "P132#85EFAA",
+            "internals" : {
+               "DEF" : "HA_HX2 85EF",
+               "NAME" : "HA_HX2_85EF"
+            },
+            "readings" : {
+               "deviceCode" : "85EF",
+               "state" : "on"
+            },
+            "rmsg" : "MU;P0=-696;P1=312;P2=-371;P3=637;P4=-12847;D=01012301230123012341012323232301230101010123010101010123012301230123410123232323012301010101230101010101230123012301234101232323230123010101012301010101012301230123012341012323232301230101010123010101010123012301230123410123232323012301010101230101010101;CP=1;R=236;O;",
+            "tests" : [
+               {
+                  "attributes" : {
+                     "model" : "HA_HX2"
+                  },
+                  "comment" : "#1 state on with other DEF"
+               }
+            ]
+         }
+      ],
+      "id" : 132,
+      "module" : "SD_UT",
+      "name" : "HA_HX2_01EF"
    }
 ]
