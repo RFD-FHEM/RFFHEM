@@ -114,7 +114,7 @@ my $module = basename (dirname(__FILE__));
         subCheck        => hash { field 'IOWrite' => array { item 0 => hash { field 'args' => array { item hash { etc(); } ; item 'sendMsg'; item 'P128#100010100111111111111110#R5' }; etc() } } } ,
     },
     {
-        targetName      =>  q[SD_UT_Test_HA_HX2_01EF],
+        targetName      =>  q[SD_UT_Test_HA_HX2_85EF],
         testname        =>  q[set command on],
         cmd             =>  q[set on],
 
