@@ -169,6 +169,14 @@ my $module = basename (dirname(__FILE__));
         returnCheck     => F(),
         subCheck        => hash { field 'IOWrite' => array { item 0 => hash { field 'args' => array { item hash { etc(); } ; item 'sendMsg'; item 'P34#10001001000111101110P#R5' }; etc() } } } ,
     },
+    {
+        targetName      =>  q[SD_UT_Test_TR_502MSV_FFF],
+        testname        =>  q[set command Ch1_on],
+        cmd             =>  q[set Ch1_on],
+
+        returnCheck     => F(),
+        subCheck        => hash { field 'IOWrite' => array { item 0 => hash { field 'args' => array { item hash { etc(); } ; item 'sendMsg'; item 'P34#11111111111111101110P#R5' }; etc() } } } ,
+    },
 );
 
 sub runTest {
