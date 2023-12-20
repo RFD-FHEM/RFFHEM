@@ -1,4 +1,4 @@
-SIGNALduino - FHEM Modules Version 3.5.5
+SIGNALduino - FHEM Modules Version 3.5.6
 
 Base Branch:
 
@@ -45,17 +45,19 @@ Supported Devices / Protocols
 |Fine Offset WH31, aka Ambient Weather WH31E, aka ecowitt WH31 | Temperature and humidity sensor |
 |FLAMINGO | Flamingo smoke detector |
 |Fody E42 | Temperature/humidity sensor (protocol BRESSER 5-in-1) |
+|FreeTec PE-6946 | wireless bell |
+|Froggit FT007T, FT007TP, FT007TH | Thermo-Hygrometer, Thermometer |
 |FS10 | Remote control |
 |FS20 | Remote control |
 |FT0073 | Weather sensors|
-|FreeTec PE-6946 | wireless bell |
-|Froggit FT007T, FT007TP, FT007TH | Thermo-Hygrometer, Thermometer |
+|FT-0835 | Sainlogic weather station|
 |GEA-028DB | Radio door chime |
 |GEIGER GF0x01, GF0x02, GF0x03 | Remote control (compatible to Tedsen) |
 |GFGT 433 B1 | Wireless Grill Thermometer |
 |Grothe Mistral SE 03.1| wireless gong |
 |GT-9000| Remote control based on protocol GT-9000 with encoding (EASY HOME RCT DS1, Tec Star)|
 |GT-TMBBQ-01| BBQ temperature sensor|
+|Halemeier| Remote controls for LED controller |
 |Hama TS33C, Hama TS34A, Hama TS36E, Bresser Thermo/Hygro Sensor  | Weather sensor |
 |Heidemann, Heidemann HX, VTX-BELL | wireless bell |
 |Hoermann HSM2, HSM4, HS1-868-BS | Remote control |

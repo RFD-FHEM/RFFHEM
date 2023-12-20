@@ -15,8 +15,8 @@ jobs:
         perl: [ '5.24', '5.28','5.32' ]
     name: Perl ${{ matrix.perl }} on ${{ matrix.os }}
     steps:
-    - uses: actions/checkout@v3
-    - uses: shogo82148/actions-setup-perl@v1.23.1
+    - uses: actions/checkout@v4
+    - uses: shogo82148/actions-setup-perl@v1.25.0
       with:
         perl-version: ${{ matrix.perl }}
         install-modules-with: cpanm

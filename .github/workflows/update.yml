@@ -15,7 +15,7 @@ jobs:
     - name: Extract branch name
       id: extract_branch
       run: |
-        echo ::set-output name=BRANCH_NAME::${GITHUB_REF#refs/*/}
+        echo "BRANCH_NAME=${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT
     - name: Check if Branch is in PR
       if: github.event_name == 'push'
       id: checkbranch
@@ -58,18 +58,18 @@ jobs:
       id: extract_branch
     - name: Checkout Repostory
       if: needs.pr_check.outputs.result != 'true'
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         fetch-depth: 0
         persist-credentials: false
     - name: update controls file (FHEM)
       if: needs.pr_check.outputs.result != 'true'
-      uses: fhem/fhem-controls-actions@v2.2.0
+      uses: fhem/fhem-controls-actions@V2.2.1
       with:
         filename: controls_signalduino.txt 
     - name: update controls file (lib)
       if: needs.pr_check.outputs.result != 'true'
-      uses: fhem/fhem-controls-actions@v2.2.0
+      uses: fhem/fhem-controls-actions@V2.2.1
       with:
         filename: controls_signalduino.txt 
         directory: FHEM/lib

@@ -1,4 +1,4 @@
-# $Id: SD_ProtocolData.pm 26975 2023-05-16 16:34:07Z sidey79 $
+# $Id: SD_ProtocolData.pm 26975 2023-08-27 19:36:33Z elektron-bbs $
 # The file is part of the SIGNALduino project.
 # All protocol definitions are contained in this file.
 #
@@ -68,9 +68,9 @@
 # sync             => ' '       # sync parameter of signal in hex (example, 2DD4)
 #
 ##### notice #### or #### info ############################################################################################################
-# !!! Between the keys and values ​​no tabs, please use spaces !!!
+# !!! Between the keys and values no tabs, please use spaces !!!
 # !!! Please use first unused id for new protocols !!!
-# ID´s are currently unused: 124 - 
+# ID´s are currently unused: 130 - 
 # ID´s need to be revised (preamble u): 5|19|21|22|23|25|28|31|36|40|52|59|63
 ###########################################################################################################################################
 # Please provide at least three messages for each new MU/MC/MS/MN protocol and a URL of issue in GitHub or discussion in FHEM Forum
@@ -85,7 +85,7 @@ package lib::SD_ProtocolData;
   use strict;
   use warnings;
 
-  our $VERSION = '1.51';
+  our $VERSION = '1.55';
   our %protocols = (
     "0" =>  ## various weather sensors (500 | 9100)
             # Mebus | Id:237 Ch:1 T: 1.9 Bat:low           MS;P0=-9298;P1=495;P2=-1980;P3=-4239;D=1012121312131313121313121312121212121212131212131312131212;CP=1;SP=0;R=223;O;m2;
@@ -3296,6 +3296,9 @@ package lib::SD_ProtocolData;
         clientmodule    => 'SD_WS',
         length_min      => '36',
       },
+
+    # "124" reserved for => ## Remote control CasaFan FB-FNK Powerboat with 5 buttons for fan
+
     "125" =>  ## Humidity and Temperaturesensor Ecowitt WH31, froggit DP50 / WH31A
               # Nordamerika: 915MHz; Europa: 868MHz, andere Regionen: 433MHz
               # https://github.com/RFD-FHEM/RFFHEM/pull/1161 @ sidey79 2023-04-01
@@ -3318,8 +3321,8 @@ package lib::SD_ProtocolData;
         clientmodule    => 'SD_WS',
         length_min      => '18',
       },
-    "126" =>  ## Humidity and Temperaturesensor Ecowitt WH40,  
-              # https://github.com/RFD-FHEM/RFFHEM/pull/1164
+    "126" =>  ## Rainfall Sensor Ecowitt WH40
+              # https://github.com/RFD-FHEM/RFFHEM/pull/1164 @ sidey79 2023-04-03
               # SD_WS_126 R: 0 MN;D=40011CDF8F0000976220A6802801;R=61;   14 byte  ID 11CDF
               # SD_WS_126 R: 0 MN;D=40013E3C900000105BA02A;R=61;         11 byte  ID 13E3c
               # SD_WS_126 R: 9 MN;D=40013E3C90005AB55AA0A0800408;R=61;   14 Byte  ID 13E3c
@@ -3338,6 +3341,165 @@ package lib::SD_ProtocolData;
         clientmodule    => 'SD_WS',
         length_min      => '22',
         length_max      => '28',
+      },
+    "127" =>  ## Remote control with 14 buttons for ceiling fan
+               # https://forum.fhem.de/index.php?topic=134121.0 @ Kai-Alfonso 2023-06-29
+               # RCnoName127_3603A fan_off  MU;P0=5271;P1=-379;P2=1096;P3=368;P4=-1108;P5=-5997;D=01213434213434212121212121213434342134212121343421343434212521213434213434212121212121213434342134212121343421343434212521213434213434212121212121213434342134212121343421343434212521213434213434212121212121213434342134212121343421343434212;CP=3;R=63;
+               # Message is output by SIGNALduino as MU if the last bit is a 0.
+      {
+        name             => 'RCnoName127',
+        comment          => 'Remote control with 14 buttons for ceiling fan',
+        id               => '127',
+        knownFreqs       => '433.92',
+        one              => [1,-3],  #  370,-1110
+        zero             => [3,-1],  # 1110, -370
+        start            => [-15],   # -5550 (MU)
+        reconstructBit   => '1',
+        clockabs         => '370',
+        format           => 'twostate',
+        preamble         => 'P127#',
+        clientmodule     => 'SD_UT',
+        modulematch      => '^P127#',
+        length_min       => '29',
+        length_max       => '30',
+      },
+    "127.1" =>  ## Remote control with 14 buttons for ceiling fan
+                 # https://forum.fhem.de/index.php?topic=134121.0 @ Kai-Alfonso 2023-06-29
+                 # RCnoName127_3603A fan_1         MS;P1=-385;P2=1098;P3=372;P4=-1108;P5=-6710;D=352121343421343421212121212121343434213421212121213421343434;CP=3;SP=5;R=79;m2;
+                 # RCnoName127_3603A light_on_off  MS;P1=-372;P2=1098;P3=376;P4=-1096;P5=-6712;D=352121343421343421212121212121343434213421342134212134213421;CP=3;SP=5;R=73;m2;
+                 # Message is output by SIGNALduino as MS if the last bit is a 1.
+      {
+        name             => 'RCnoName127',
+        comment          => 'Remote control with 14 buttons for ceiling fan',
+        id               => '127.1',
+        knownFreqs       => '433.92',
+        one              => [1,-3],  #  370,-1110
+        zero             => [3,-1],  # 1110, -370
+        sync             => [1,-18], #  370,-6660 (MS)
+        clockabs         => '370',
+        format           => 'twostate',
+        preamble         => 'P127#',
+        clientmodule     => 'SD_UT',
+        modulematch      => '^P127#',
+        length_min       => '29',
+        length_max       => '30',
+      },
+    "128" =>  ## Remote control with 12 buttons for ceiling fan
+               # https://forum.fhem.de/index.php?msg=1281573 @ romakrau 2023-07-14
+               # RCnoName128_8A7F fan_slower   MU;P0=-420;P1=1207;P2=-1199;P3=424;P4=-10154;D=010101230123010123232323232323232323230123010143230101012301230101232323232323232323232301230101432301010123012301012323232323232323232323012301014323010101230123010123232323232323232323230123010143230101012301230101232323232323232323232301230101;CP=3;R=18;
+               # Message is output by SIGNALduino as MU if the last bit is a 0.
+      {
+        name             => 'RCnoName128',
+        comment          => 'Remote control with 12 buttons for ceiling fan',
+        id               => '128',
+        knownFreqs       => '433.92',
+        one              => [-3,1],  #  -1218,406
+        zero             => [-1,3],  #   -406,1218
+        start            => [-25,1], # -10150,406 (MU)
+        clockabs         => '406',
+        format           => 'twostate',
+        preamble         => 'P128#',
+        clientmodule     => 'SD_UT',
+        modulematch      => '^P128#',
+        length_min       => '23',
+        length_max       => '24',
+      },
+    "128.1" =>  ## Remote control with 12 buttons for ceiling fan
+                 # https://forum.fhem.de/index.php?msg=1281573 @ romakrau 2023-07-14
+                 # RCnoName128_8A7F fan_on_off      MS;P2=-424;P3=432;P4=1201;P5=-1197;P6=-10133;D=36353242424532453242453535353535353535353532453535;CP=3;SP=6;R=36;m1;
+                 # RCnoName128_8A7F fan_direction   MS;P0=-10144;P4=434;P5=-415;P6=1215;P7=-1181;D=40474565656745674565674747474747474747474745656567;CP=4;SP=0;R=37;m2;
+                 # Message is output by SIGNALduino as MS if the last bit is a 1.
+      {
+        name             => 'RCnoName128',
+        comment          => 'Remote control with 12 buttons for ceiling fan',
+        id               => '128.1',
+        knownFreqs       => '433.92',
+        one              => [-3,1],  #  -1218,406
+        zero             => [-1,3],  #   -406,1218
+        sync             => [-25,1], # -10150,406 (MS)
+        reconstructBit   => '1',
+        clockabs         => '406',
+        format           => 'twostate',
+        preamble         => 'P128#',
+        clientmodule     => 'SD_UT',
+        modulematch      => '^P128#',
+        length_min       => '23',
+        length_max       => '24',
+      },
+    "129"  =>  ## Sainlogic FT-0835
+               # https://forum.fhem.de/index.php?topic=134381.0 @  Tueftler1983 2023-07-23
+               # SD_WS_129_0E  T: 27.6 H: 36 W: 0.2 R: 0   MC;LL=-987;LH=970;SL=-506;SH=473;D=002B3F1FFDFCE4FFFF7B3FDB000404F9;C=489;L=128;R=60;
+               # SD_WS_129_0E  T: 17.7 H: 70 W: 0.4 R: 0   MC;LL=-963;LH=986;SL=-491;SH=491;D=002B3F1BFBF8EDFFFF7BF0B900040413;C=488;L=128;R=92;
+               # https://forum.fhem.de/index.php?msg=1283414 @ Nighthawk 2023-08-05
+               # SD_WS_129_BD  T: 18.4 H: 90 W: 1.3 R: 1536.6 B: 115105   MC;LL=-1036;LH=918;SL=-533;SH=435;D=002B3427F2EE58C3F97BE4A53E5EB79B;C=486;L=128;R=212;
+               # SD_WS_129_BD  T: 17.6 H: 82 W: 1.5 R: 1537.2 B: 591      MC;LL=-983;LH=962;SL=-487;SH=488;D=002B3427F0EB0BC3F3FBF3ADFDB0FA87;C=486;L=128;R=219;
+      {
+        name            => 'FT-0835',
+        comment         => 'Sainlogic weather stations',
+        id              => '129',
+        knownFreqs      => '433.92',
+        clockrange      => [450,550],
+        format          => 'manchester',
+        clientmodule    => 'SD_WS',
+        modulematch     => '^W129#FF.*',
+        preamble        => 'W129#',
+        length_min      => '128',
+        length_max      => '128',
+        polarity        => 'invert',
+        method          => \&lib::SD_Protocols::mcBit2Sainlogic, # Call to process this message
+      },
+    "130" =>  ## Remote control CREATE 6601TL for ceiling fan with light
+                 # https://forum.fhem.de/index.php?msg=1288203 @ erdnar 2023-09-29
+                 # CREATE_6601TL_F53A light_on_off     MS;P1=425;P2=-1142;P3=1187;P4=-395;P5=-12314;D=15121212123412341234341212123412341212121212121234;CP=1;SP=5;R=232;O;m2;
+                 # CREATE_6601TL_F53A light_cold_warm  MS;P1=432;P2=-1143;P3=1183;P4=-393;P5=-12300;D=15121212123412341234341212123412341212121212123434;CP=1;SP=5;R=231;O;m2;
+                 # CREATE_6601TL_F53A fan_faster       MS;P0=-11884;P1=392;P2=-1179;P3=1180;P4=-391;D=10121212123412341234341212123412341212121212341234;CP=1;SP=0;R=231;O;m2;
+      {
+        name             => 'CREATE_6601TL',
+        comment          => 'Remote control for ceiling fan with light',
+        id               => '130',
+        knownFreqs       => '433.92',
+        one              => [1,-3],  #
+        zero             => [3,-1],  #
+        sync             => [1,-30], #
+        clockabs         => '400',
+        format           => 'twostate',
+        preamble         => 'P130#',
+        clientmodule     => 'SD_UT',
+        modulematch      => '^P130#',
+        length_min       => '24',
+        length_max       => '24',
+      },
+    #"131"  =>  ## reserved for elektron-bbs
+    "132"  =>  ## Remote control Halemeier HA-HX2 for Actor HA-RX-M2-1
+               # https://github.com/RFD-FHEM/RFFHEM/issues/1207 @ HomeAuto_User 2023-12-11
+               # https://forum.fhem.de/index.php?topic=38452.0 (probably identical)
+               # remote 1 - off | P132#85EFAC
+               # MU;P0=304;P1=-351;P2=633;P3=-692;P4=-12757;D=01230303030301230123030121240301212121230123030303012303030303012124030121212123012303030301230303030301230123030121240301212121230123030303012303030303012301230301212403012121212301230303030123030303030123012303012124030121212123012303030301230303030301;CP=0;R=241;O;
+               # MU;P0=-12609;P1=305;P2=-696;P3=-344;P4=653;D=01213434343421342121212134212121212134213421213434012134343434213421212121342121212121342134212134340121343434342134212121213421212121213421342121343401213434343421342121212134212121212134213421213434012134343434213421212121342121212121342134212134340121;CP=1;R=239;O;
+               # remote 1 - on  | P132#85EFAA
+               # MU;P0=-696;P1=312;P2=-371;P3=637;P4=-12847;D=01012301230123012341012323232301230101010123010101010123012301230123410123232323012301010101230101010101230123012301234101232323230123010101012301010101012301230123012341012323232301230101010123010101010123012301230123410123232323012301010101230101010101;CP=1;R=236;O;
+               # MU;P0=-701;P1=304;P2=-366;P3=642;P4=-12781;D=01012301230123012341012323232301230101010123010101010123012301230123410123232323012301010101230101010101230123012301234101232323230123010101012301010101012301230123012341012323232301230101010123010101010123012301230123410123232323012301010101230101010101;CP=1;R=238;O;
+               # remote 2 - on  | P132#01EFAA
+               # MU;P0=-340;P1=639;P2=-686;P3=304;P4=-12480;D=01230123014301010101010101232323232301230123012301430101010101010123232323012323232323012301230123014301010101010101232323230123232323230123012301230143010101010101012323232301232323232301230123012301430101010101010123232323012323232323012301230123014301;CP=3;R=226;O;
+               # MU;P0=-120;P1=642;P2=-343;P3=-684;P4=319;P5=-12492;D=01212121343434342134343434342134213421342154212121212121213434343421343434343421342134213421542121212121212134343434213434343434213421342134215421212121212121343434342134343434342134213421342154212121212121213434343421343434343421342134213421542121212121;CP=4;R=227;O;
+               # remote 2 - off  | P132#01EFAC
+               # MU;P0=622;P1=-367;P2=-690;P3=323;P4=-12531;D=01010101010101023232323102323232323102310232310101010102323232310232323232310231023231010431010101010101023232323102323232323102310232310104310101010101010232323231023232323231023102323101043101010101010102323232310232323232310231023231010431010101010101;CP=3;R=235;O;
+               # MU;P0=307;P1=-685;P2=-350;P3=658;P4=-12510;D=01010102310101010102310231010232340232323232323231010101023101010101023102323232323232323101010102310101010102310231010232340232323232323231010101023101010101023102310102323402323232323232310101010231010101010231023101023234023232323232323101010102310101;CP=0;R=232;O;
+      {
+        name            => 'HA-HX2',
+        comment         => 'Remote control for Halemeier LED actor HA-RX-M2-1',
+        id              => '132',
+        knownFreqs      => '433.92',
+        one             => [-2,1],
+        zero            => [-1,2],
+        start           => [-39,1],
+        clockabs        => 330,
+        format          => 'twostate',
+        preamble        => 'P132#',
+        clientmodule    => 'SD_UT',
+        modulematch     => '^P132#.*',
+        length_min      => '24',
+        length_max      => '24',
       },
     ########################################################################
     #### ###  register informations from other hardware protocols  #### ####
