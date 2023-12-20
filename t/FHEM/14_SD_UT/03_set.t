@@ -137,6 +137,14 @@ my $module = basename (dirname(__FILE__));
         returnCheck     => F(),
         subCheck        => hash { field 'IOWrite' => array { item 0 => hash { field 'args' => array { item hash { etc(); } ; item 'sendMsg'; item 'P20#00011000010001101010100001110100#R5' }; etc() } } } ,
     },
+    {
+        targetName      =>  q[SD_UT_Test_Visivo_7DF825],
+        testname        =>  q[set command up],
+        cmd             =>  q[set up],
+
+        returnCheck     => F(),
+        subCheck        => hash { field 'IOWrite' => array { item 0 => hash { field 'args' => array { item hash { etc(); } ; item 'sendMsg'; item 'P24#10011111011111011111100000100101000000101001110000010000#R5' }; etc() } } } ,
+    },
 );
 
 sub runTest {
