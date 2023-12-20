@@ -177,6 +177,30 @@ my $module = basename (dirname(__FILE__));
         returnCheck     => F(),
         subCheck        => hash { field 'IOWrite' => array { item 0 => hash { field 'args' => array { item hash { etc(); } ; item 'sendMsg'; item 'P34#11111111111111101110P#R5' }; etc() } } } ,
     },
+    {
+        targetName      =>  q[SD_UT_Test_Tedsen_SKX1xx_F1FF11F],
+        testname        =>  q[set command Button_1],
+        cmd             =>  q[set Button_1],
+
+        returnCheck     => F(),
+        subCheck        => hash { field 'IOWrite' => array { item 0 => hash { field 'args' => array { item hash { etc(); } ; item 'sendMsg'; item 'P46#101110101111101100#R5' }; etc() } } } ,
+    },
+    {
+        targetName      =>  q[SD_UT_Test_Tedsen_SKX2xx_1F10110],
+        testname        =>  q[set command Button_1],
+        cmd             =>  q[set Button_1],
+
+        returnCheck     => F(),
+        subCheck        => hash { field 'IOWrite' => array { item 0 => hash { field 'args' => array { item hash { etc(); } ; item 'sendMsg'; item 'P46#111011001111001000#R5' }; etc() } } } ,
+    },
+    {
+        targetName      =>  q[SD_UT_Test_Tedsen_SKX6xx_1F10FF0],
+        testname        =>  q[set command Button_6],
+        cmd             =>  q[set Button_6],
+
+        returnCheck     => F(),
+        subCheck        => hash { field 'IOWrite' => array { item 0 => hash { field 'args' => array { item hash { etc(); } ; item 'sendMsg'; item 'P46#111011001010001011#R5' }; etc() } } } ,
+    },
 );
 
 sub runTest {
