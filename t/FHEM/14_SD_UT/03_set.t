@@ -225,6 +225,14 @@ my $module = basename (dirname(__FILE__));
         returnCheck     => F(),
         subCheck        => hash { field 'IOWrite' => array { item 0 => hash { field 'args' => array { item hash { etc(); } ; item 'sendMsg'; item 'P69#00000000111001101011111010010001000001111100#R5' }; etc() } } } ,
     },
+    {
+        targetName      =>  q[SD_UT_Test_LED_XM21_0_FFFFFFFFFFFFFF],
+        testname        =>  q[set command on],
+        cmd             =>  q[set on],
+
+        returnCheck     => F(),
+        subCheck        => hash { field 'IOWrite' => array { item 0 => hash { field 'args' => array { item hash { etc(); } ; item 'sendMsg'; item 'P76#1111111111111111111111111111111111111111111111111111111111111111#R5' }; etc() } } } ,
+    },
 );
 
 sub runTest {
