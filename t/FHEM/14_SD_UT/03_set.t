@@ -151,6 +151,14 @@ my $module = basename (dirname(__FILE__));
         returnCheck     => F(),
         subCheck        => hash { field 'IOWrite' => array { item 0 => hash { field 'args' => array { item hash { etc(); } ; item 'sendMsg'; item 'P24#10011111011111011111100000100101000000101001110000010000#R5' }; etc() } } } ,
     },
+    {
+        targetName      =>  q[SD_UT_Test_xavax_DAAB],
+        testname        =>  q[set command Ch1_on],
+        cmd             =>  q[set Ch1_on],
+
+        returnCheck     => F(),
+        subCheck        => hash { field 'IOWrite' => array { item 0 => hash { field 'args' => array { item hash { etc(); } ; item 'sendMsg'; item 'P26#11011010101010110010010101010100100001110P#R5' }; etc() } } } ,
+    },
 );
 
 sub runTest {
