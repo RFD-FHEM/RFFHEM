@@ -113,8 +113,16 @@ my $module = basename (dirname(__FILE__));
         returnCheck     => F(),    
         subCheck        => hash { field 'IOWrite' => array { item 0 => hash { field 'args' => array { item hash { etc(); } ; item 'sendMsg'; item 'P128#100010100111111111111110#R5' }; etc() } } } ,
     },
+    {
+        targetName      =>  q[SD_UT_Test_HA_HX2_85EF],
+        testname        =>  q[set command on],
+        cmd             =>  q[set on],
+
+        returnCheck     => F(),
+        subCheck        => hash { field 'IOWrite' => array { item 0 => hash { field 'args' => array { item hash { etc(); } ; item 'sendMsg'; item 'P132#100001011110111110101010#R5' }; etc() } } } ,
+    },
 );
-        
+
 sub runTest {
     Test2::SIGNALduino::FHEM_Command::commandCheck($module);
 
