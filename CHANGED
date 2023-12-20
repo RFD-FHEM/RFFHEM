@@ -1,3 +1,17 @@
+2023-12-20 - new def | remote ha-hx2 (#1212)
+
+* Update SD_ProtocolData.pm
+
+* Update 14_SD_UT.pm
+- new device HA-HX2
+
+* Update testData.json
+
+* Update 03_set.t
+
+* Update fhem.cfg
+
+* Update README.md
 2023-12-15 - create client list based on whitelistIDs attribute (#1205)
 
 * perf [clientlist]: Keep order and skip sorting
