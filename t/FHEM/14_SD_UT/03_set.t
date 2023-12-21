@@ -90,38 +90,6 @@ my $module = basename (dirname(__FILE__));
         subCheck        => hash { field 'IOWrite' => array { item 0 => hash { field 'args' => array { item hash { etc(); } ; item 'sendMsg'; item 'P68#01011101100010000000#R5' }; etc() } } } ,
     },
     {
-        targetName      =>  q[SD_UT_Test_TC6861_3DC_1],
-        testname        =>  q[set command on],
-        cmd             =>  q[set on],
-
-        returnCheck     => F(),
-        subCheck        => hash { field 'IOWrite' => array { item 0 => hash { field 'args' => array { item hash { etc(); } ; item 'sendMsg'; item 'P121#P001100111101110001111110#R5' }; etc() } } } ,
-    },
-    {
-        targetName      =>  q[SD_UT_Test_RCnoName127_3603A],
-        testname        =>  q[set command fan_1],
-        cmd             =>  q[set fan_1],
-
-        returnCheck     => F(),
-        subCheck        => hash { field 'IOWrite' => array { item 0 => hash { field 'args' => array { item hash { etc(); } ; item 'sendMsg'; item 'P127#001101100000001110100000101111#R5' }; etc() } } } ,
-    },
-    {
-        targetName      =>  q[SD_UT_Test_RCnoName128_8A7F],
-        testname        =>  q[set button_left],
-        cmd             =>  q[set button_left],
-
-        returnCheck     => F(),
-        subCheck        => hash { field 'IOWrite' => array { item 0 => hash { field 'args' => array { item hash { etc(); } ; item 'sendMsg'; item 'P128#100010100111111111111110#R5' }; etc() } } } ,
-    },
-    {
-        targetName      =>  q[SD_UT_Test_HA_HX2_85EF],
-        testname        =>  q[set command on],
-        cmd             =>  q[set on],
-
-        returnCheck     => F(),
-        subCheck        => hash { field 'IOWrite' => array { item 0 => hash { field 'args' => array { item hash { etc(); } ; item 'sendMsg'; item 'P132#100001011110111110101010#R5' }; etc() } } } ,
-    },
-    {
         targetName      =>  q[SD_UT_Test_Chilitec_22640_AA80],
         testname        =>  q[set command power_on],
         cmd             =>  q[set power_on],
@@ -377,6 +345,38 @@ my $module = basename (dirname(__FILE__));
 
         returnCheck     => F(),
         subCheck        => hash { field 'IOWrite' => array { item 0 => hash { field 'args' => array { item hash { etc(); } ; item 'sendMsg'; item 'P118#001000001101001100000010#R5' }; etc() } } } ,
+    },
+    {
+        targetName      =>  q[SD_UT_Test_TC6861_3DC_1],
+        testname        =>  q[set command on],
+        cmd             =>  q[set on],
+
+        returnCheck     => F(),
+        subCheck        => hash { field 'IOWrite' => array { item 0 => hash { field 'args' => array { item hash { etc(); } ; item 'sendMsg'; item 'P121#P001100111101110001111110#R5' }; etc() } } } ,
+    },
+    {
+        targetName      =>  q[SD_UT_Test_RCnoName127_3603A],
+        testname        =>  q[set command fan_1],
+        cmd             =>  q[set fan_1],
+
+        returnCheck     => F(),
+        subCheck        => hash { field 'IOWrite' => array { item 0 => hash { field 'args' => array { item hash { etc(); } ; item 'sendMsg'; item 'P127#001101100000001110100000101111#R5' }; etc() } } } ,
+    },
+    {
+        targetName      =>  q[SD_UT_Test_RCnoName128_8A7F],
+        testname        =>  q[set button_left],
+        cmd             =>  q[set button_left],
+
+        returnCheck     => F(),
+        subCheck        => hash { field 'IOWrite' => array { item 0 => hash { field 'args' => array { item hash { etc(); } ; item 'sendMsg'; item 'P128#100010100111111111111110#R5' }; etc() } } } ,
+    },
+    {
+        targetName      =>  q[SD_UT_Test_HA_HX2_85EF],
+        testname        =>  q[set command on],
+        cmd             =>  q[set on],
+
+        returnCheck     => F(),
+        subCheck        => hash { field 'IOWrite' => array { item 0 => hash { field 'args' => array { item hash { etc(); } ; item 'sendMsg'; item 'P132#100001011110111110101010#R5' }; etc() } } } ,
     }
 );
 
