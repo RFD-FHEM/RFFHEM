@@ -268,14 +268,24 @@ my $module = basename (dirname(__FILE__));
     ### RC_10 | Special feature, Reading x_n5-8_on and x_n5-8_off must be present before sending can occur ###
     {
         targetName      =>  q[SD_UT_Test_RC_10_7869_A],
-        testname        =>  q[set command on],
+        testname        =>  q[set command on with all readings],
         cmd             =>  q[set on],
 
-        returnCheck     => q[ERROR! RC_10_7869_A: To send, please push button on and off again on remote.],
-        subCheck        => hash { end(); } ,
+        prep_commands   => [                               # Any FHEM custom command can be placed in here, which will be called before the test is run
+                    'setreading $targetName x_n5-8_off 1110001001000', 
+        ],
 
-        #returnCheck     => F(ERROR! RC_10_7869_A: To send, please push button on and off again on remote.),
-        #subCheck        => hash { field 'IOWrite' => array { item 0 => hash { field 'args' => array { item hash { etc(); } ; item 'sendMsg'; item 'P90#0111100001101001000011110010010101#R5' }; etc() } } } ,
+        returnCheck     => F(),
+        subCheck        => hash { field 'IOWrite' => array { item 0 => hash { field 'args' => array { item hash { etc(); } ; item 'sendMsg'; item 'P90#0111100001101001000011110010010101#R5' }; etc() } } } ,
+    },
+    ### RC_10 | Special feature, Reading x_n5-8_on and x_n5-8_off must be present before sending can occur ###
+    {
+        targetName      =>  q[SD_UT_Test_RC_10_7869_all],
+        testname        =>  q[set command on without reading x_n5-8_off],
+        cmd             =>  q[set on],
+
+        returnCheck     => q[ERROR! SD_UT_Test_RC_10_7869_all: To send, please push button on and off again on remote.],
+        subCheck        => hash { end(); } ,
     },
     {
         targetName      =>  q[SD_UT_Test_Krinner_LUMIX_A06C360],
