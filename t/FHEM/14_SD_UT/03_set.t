@@ -233,6 +233,14 @@ my $module = basename (dirname(__FILE__));
         returnCheck     => F(),
         subCheck        => hash { field 'IOWrite' => array { item 0 => hash { field 'args' => array { item hash { etc(); } ; item 'sendMsg'; item 'P76#1111111111111111111111111111111111111111111111111111111111111111#R5' }; etc() } } } ,
     },
+    {
+        targetName      =>  q[SD_UT_Test_BeSmart_S4_534],
+        testname        =>  q[set command light_toggle],
+        cmd             =>  q[set light_toggle],
+
+        returnCheck     => F(),
+        subCheck        => hash { field 'IOWrite' => array { item 0 => hash { field 'args' => array { item hash { etc(); } ; item 'sendMsg'; item 'P78#01010011010010010000#R5' }; etc() } } } ,
+    },
 );
 
 sub runTest {
