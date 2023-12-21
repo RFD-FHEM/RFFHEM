@@ -305,7 +305,15 @@ my $module = basename (dirname(__FILE__));
 
         # returnCheck     => F(),
         # subCheck        => hash { field 'IOWrite' => array { item 0 => hash { field 'args' => array { item hash { etc(); } ; item 'sendMsg'; item 'P86#001001100011100001#R5' }; etc() } } } ,
-    # }
+    # },
+    {
+        targetName      =>  q[SD_UT_Test_Krinner_LUMIX_A06C360],
+        testname        =>  q[set command on],
+        cmd             =>  q[set on],
+
+        returnCheck     => F(),
+        subCheck        => hash { field 'IOWrite' => array { item 0 => hash { field 'args' => array { item hash { etc(); } ; item 'sendMsg'; item 'P92#10100000011011000011011000000001#R5' }; etc() } } } ,
+    },
 );
 
 sub runTest {
