@@ -271,8 +271,11 @@ my $module = basename (dirname(__FILE__));
         testname        =>  q[set command on],
         cmd             =>  q[set on],
 
-        returnCheck     => F(),
-        subCheck        => hash { field 'IOWrite' => array { item 0 => hash { field 'args' => array { item hash { etc(); } ; item 'sendMsg'; item 'P90#0111100001101001000011110010010101#R5' }; etc() } } } ,
+        returnCheck     => q[ERROR! RC_10_43CB_A: To send, please push button on and off again on remote.],
+        subCheck        => hash { end(); } ,
+
+        #returnCheck     => F(ERROR! RC_10_43CB_A: To send, please push button on and off again on remote.),
+        #subCheck        => hash { field 'IOWrite' => array { item 0 => hash { field 'args' => array { item hash { etc(); } ; item 'sendMsg'; item 'P90#0111100001101001000011110010010101#R5' }; etc() } } } ,
     },
     {
         targetName      =>  q[SD_UT_Test_Krinner_LUMIX_A06C360],
