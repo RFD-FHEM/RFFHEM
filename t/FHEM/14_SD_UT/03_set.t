@@ -280,6 +280,22 @@ my $module = basename (dirname(__FILE__));
 
         returnCheck     => F(),
         subCheck        => hash { field 'IOWrite' => array { item 0 => hash { field 'args' => array { item hash { etc(); } ; item 'sendMsg'; item 'P86#010101010110111110#R5#C375' }; etc() } } } ,
+    },
+    {
+        targetName      =>  q[SD_UT_Test_SF01_01319004_A150],
+        testname        =>  q[set command plus],
+        cmd             =>  q[set plus],
+
+        returnCheck     => F(),
+        subCheck        => hash { field 'IOWrite' => array { item 0 => hash { field 'args' => array { item hash { etc(); } ; item 'sendMsg'; item 'P86#101000010101001100#R5' }; etc() } } } ,
+    },
+    {
+        targetName      =>  q[SD_UT_Test_SF01_01319004_Typ2_2638],
+        testname        =>  q[set command delay],
+        cmd             =>  q[set delay],
+
+        returnCheck     => F(),
+        subCheck        => hash { field 'IOWrite' => array { item 0 => hash { field 'args' => array { item hash { etc(); } ; item 'sendMsg'; item 'P86#001001100011100001#R5' }; etc() } } } ,
     }
 );
 
