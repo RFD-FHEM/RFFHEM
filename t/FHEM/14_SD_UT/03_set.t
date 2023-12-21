@@ -272,7 +272,9 @@ my $module = basename (dirname(__FILE__));
         cmd             =>  q[set on],
 
         prep_commands   => [                               # Any FHEM custom command can be placed in here, which will be called before the test is run
-                    'setreading $targetName x_n5-8_off 1110001001000', 
+                    'setreading $targetName x_n4 0000',
+                    'setreading $targetName x_n5-8_on 1111001001010',
+                    'setreading $targetName x_n5-8_off 1110001001000',
         ],
 
         returnCheck     => F(),
