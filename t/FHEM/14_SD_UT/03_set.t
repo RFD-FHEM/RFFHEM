@@ -297,6 +297,19 @@ my $module = basename (dirname(__FILE__));
         returnCheck     => F(),
         subCheck        => hash { field 'IOWrite' => array { item 0 => hash { field 'args' => array { item hash { etc(); } ; item 'sendMsg'; item 'P92#10100000011011000011011000000001#R5' }; etc() } } } ,
     },
+    ### UTfrequency example ###
+    {
+        targetName      =>  q[SD_UT_Test_Krinner_LUMIX_A06C360_UTfrequency],
+        testname        =>  q[set command on with attr UTfrequency],
+        cmd             =>  q[set on],
+
+        prep_commands   => [                               # Any FHEM custom command can be placed in here, which will be called before the test is run
+                    'attr $targetName UTfrequency 868',
+        ],
+
+        returnCheck     => F(),
+        subCheck        => hash { field 'IOWrite' => array { item 0 => hash { field 'args' => array { item hash { etc(); } ; item 'sendMsg'; item 'P92#10100000011011000011011000000001#R5#F216276' }; etc() } } } ,
+    },
     {
         targetName      =>  q[SD_UT_Test_KL_RF01_16F6],
         testname        =>  q[set command light_color_cold_white],
