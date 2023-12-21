@@ -265,6 +265,22 @@ my $module = basename (dirname(__FILE__));
         returnCheck     => F(),
         subCheck        => hash { field 'IOWrite' => array { item 0 => hash { field 'args' => array { item hash { etc(); } ; item 'sendMsg'; item 'P86#111011101101#R5' }; etc() } } } ,
     },
+    {
+        targetName      =>  q[SD_UT_Test_Novy_840029_55],
+        testname        =>  q[set command speed_plus],
+        cmd             =>  q[set speed_plus],
+
+        returnCheck     => F(),
+        subCheck        => hash { field 'IOWrite' => array { item 0 => hash { field 'args' => array { item hash { etc(); } ; item 'sendMsg'; item 'P86#010101010101#R5' }; etc() } } } ,
+    },
+    {
+        targetName      =>  q[SD_UT_Test_Novy_840039_55],
+        testname        =>  q[set command ambient_light_on],
+        cmd             =>  q[set ambient_light_on],
+
+        returnCheck     => F(),
+        subCheck        => hash { field 'IOWrite' => array { item 0 => hash { field 'args' => array { item hash { etc(); } ; item 'sendMsg'; item 'P86#010101010110111110#R5#C375' }; etc() } } } ,
+    }
 );
 
 sub runTest {
