@@ -361,6 +361,14 @@ my $module = basename (dirname(__FILE__));
 
         returnCheck     => F(),
         subCheck        => hash { field 'IOWrite' => array { item 0 => hash { field 'args' => array { item hash { etc(); } ; item 'sendMsg'; item 'P105#1111101011010000100010001000001110100011#R5' }; etc() } } } ,
+    },
+    {
+        targetName      =>  q[SD_UT_Test_TR401_0_2],
+        testname        =>  q[set command off],
+        cmd             =>  q[set off],
+
+        returnCheck     => F(),
+        subCheck        => hash { field 'IOWrite' => array { item 0 => hash { field 'args' => array { item hash { etc(); } ; item 'sendMsg'; item 'P114#101100011111#R5' }; etc() } } } ,
     }
 );
 
