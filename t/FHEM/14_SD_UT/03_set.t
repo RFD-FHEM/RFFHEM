@@ -249,6 +249,14 @@ my $module = basename (dirname(__FILE__));
         returnCheck     => F(),
         subCheck        => hash { field 'IOWrite' => array { item 0 => hash { field 'args' => array { item hash { etc(); } ; item 'sendMsg'; item 'P81#011000000100#R5' }; etc() } } } ,
     },
+    {
+        targetName      =>  q[SD_UT_Test_RH787T_0],
+        testname        =>  q[set command 1_fan_minimum_speed],
+        cmd             =>  q[set 1_fan_minimum_speed],
+
+        returnCheck     => F(),
+        subCheck        => hash { field 'IOWrite' => array { item 0 => hash { field 'args' => array { item hash { etc(); } ; item 'sendMsg'; item 'P83#000001110111#R5' }; etc() } } } ,
+    },
 );
 
 sub runTest {
