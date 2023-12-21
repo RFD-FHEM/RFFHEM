@@ -265,15 +265,15 @@ my $module = basename (dirname(__FILE__));
         returnCheck     => F(),
         subCheck        => hash { field 'IOWrite' => array { item 0 => hash { field 'args' => array { item hash { etc(); } ; item 'sendMsg'; item 'P86#001001100011100001#R5' }; etc() } } } ,
     },
-    ### TODO - Check send on | ERROR! RC_10_43CB_A: To send, please push button on and off again on remote. 
-    # {
-        # targetName      =>  q[SD_UT_Test_RC_10_43CB_A],
-        # testname        =>  q[set command on],
-        # cmd             =>  q[set on],
+    ### RC_10 | Special feature, Reading x_n5-8_on and x_n5-8_off must be present before sending can occur ###
+    {
+        targetName      =>  q[SD_UT_Test_RC_10_7869_A],
+        testname        =>  q[set command on],
+        cmd             =>  q[set on],
 
-        # returnCheck     => F(),
-        # subCheck        => hash { field 'IOWrite' => array { item 0 => hash { field 'args' => array { item hash { etc(); } ; item 'sendMsg'; item 'P86#001001100011100001#R5' }; etc() } } } ,
-    # },
+        returnCheck     => F(),
+        subCheck        => hash { field 'IOWrite' => array { item 0 => hash { field 'args' => array { item hash { etc(); } ; item 'sendMsg'; item 'P90#0111100001101001000011110010010101#R5' }; etc() } } } ,
+    },
     {
         targetName      =>  q[SD_UT_Test_Krinner_LUMIX_A06C360],
         testname        =>  q[set command on],
