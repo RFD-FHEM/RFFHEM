@@ -1842,6 +1842,18 @@
                   "comment" : "#2"
                }
             ]
+         },
+         {
+            "comment" : "Garden Lights remote control with wrong checksum",
+            "dmsg" : "P95#7709F5DE09160",
+            "tests" : [
+               {
+                  "returns" : {
+                     "ParseFn" : ""
+                  },
+                  "comment" : "#3"
+               }
+            ]
          }
       ],
       "id" : "95",
