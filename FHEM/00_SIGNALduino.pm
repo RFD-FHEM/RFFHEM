@@ -2150,6 +2150,7 @@ sub SIGNALduino_Split_Message {
   my @msg_parts = SIGNALduino_splitMsg($rmsg,';');      ## Split message parts by ';'
   my %ret;
   my $hash = $defs{$name};
+  my $debug = AttrVal($hash->{NAME},'debug',0);
 
   foreach (@msg_parts)
   {
