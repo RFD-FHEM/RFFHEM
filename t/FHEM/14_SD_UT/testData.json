@@ -237,6 +237,18 @@
                   "comment" : "#1"
                }
             ]
+         },
+         {
+            "comment" : "Remote control for motorized screen, wrong checksum",
+            "dmsg" : "P24#9F7DF82508C210",
+            "tests" : [
+               {
+                  "returns" : {
+                     "ParseFn" : ""
+                  },
+                  "comment" : "#2"
+               }
+            ]
          }
       ],
       "id" : "24",
@@ -289,7 +301,31 @@
                   "comment" : "#1"
                }
             ]
-         }
+         },
+         {
+            "comment" : "model 00111939 - check nibble 0-3 and nibble 5-8",
+            "dmsg" : "P26#DABB255478",
+            "tests" : [
+               {
+                  "returns" : {
+                     "ParseFn" : ""
+                  },
+                  "comment" : "#2"
+               }
+            ]
+         }, 
+         {
+            "comment" : "model 00111939 - check nibble 8 and nibble 9",
+            "dmsg" : "P26#DAAB255468",
+            "tests" : [
+               {
+                  "returns" : {
+                     "ParseFn" : ""
+                  },
+                  "comment" : "#3"
+               }
+            ]
+         }  
       ],
       "id" : "26",
       "module" : "SD_UT",
@@ -593,6 +629,18 @@
                   "comment" : "#0"
                }
             ]
+         },
+         {
+            "comment" : "Celexon Motorleinwand with wrong checksum",
+            "dmsg" : "P56#A300587B810043178",
+            "tests" : [
+               {
+                  "returns" : {
+                     "ParseFn" : ""
+                  },
+                  "comment" : "#1"
+               }
+            ]
          }
       ],
       "id" : "56",
@@ -717,7 +765,19 @@
                   "comment" : "#2"
                }
             ]
-         }
+         },
+         {
+            "comment" : "Vista Remote Control wrong checksum",
+            "dmsg" : "P68#57823",
+            "tests" : [
+               {
+                  "returns" : {
+                     "ParseFn" : ""
+                  },
+                  "comment" : "#3"
+               }
+            ]
+         }           
       ],
       "id" : "68",
       "module" : "SD_UT",
@@ -1856,7 +1916,19 @@
                   "comment" : "#2"
                }
             ]
-         }
+         },
+         {
+            "comment" : "remote control for wireless digital picture frame with wrong checksum",
+            "dmsg" : "P97#000006443A",
+            "tests" : [
+               {
+                  "returns" : {
+                     "ParseFn" : ""
+                  },
+                  "comment" : "#3"
+               }
+            ]
+         }         
       ],
       "id" : "97",
       "module" : "SD_UT",
@@ -2035,6 +2107,18 @@
                      "model" : "BF_301"
                   },
                   "comment" : "#2"
+               }
+            ]
+         },
+         {
+            "comment" : "Remote control wrong checksum",
+            "dmsg" : "P105#FAD08384A8",
+            "tests" : [
+               {
+                  "returns" : {
+                     "ParseFn" : ""
+                  },
+                  "comment" : "#3"
                }
             ]
          }
