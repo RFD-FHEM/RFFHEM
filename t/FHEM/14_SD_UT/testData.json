@@ -237,6 +237,18 @@
                   "comment" : "#1"
                }
             ]
+         },
+         {
+            "comment" : "Remote control for motorized screen, wrong checksum",
+            "dmsg" : "P24#9F7DF82508C210",
+            "tests" : [
+               {
+                  "returns" : {
+                     "ParseFn" : ""
+                  },
+                  "comment" : "#2"
+               }
+            ]
          }
       ],
       "id" : "24",
@@ -289,7 +301,31 @@
                   "comment" : "#1"
                }
             ]
-         }
+         },
+         {
+            "comment" : "model 00111939 - check nibble 0-3 and nibble 5-8",
+            "dmsg" : "P26#DABB255478",
+            "tests" : [
+               {
+                  "returns" : {
+                     "ParseFn" : ""
+                  },
+                  "comment" : "#2"
+               }
+            ]
+         }, 
+         {
+            "comment" : "model 00111939 - check nibble 8 and nibble 9",
+            "dmsg" : "P26#DAAB255468",
+            "tests" : [
+               {
+                  "returns" : {
+                     "ParseFn" : ""
+                  },
+                  "comment" : "#3"
+               }
+            ]
+         }  
       ],
       "id" : "26",
       "module" : "SD_UT",
@@ -498,6 +534,28 @@
    {
       "data" : [
          {
+            "comment" : "Tedsen remote with one button, model SKX1MD",
+            "dmsg" : "P46#BAFB0",
+            "internals" : {
+               "DEF" : "Tedsen_SKX1xx F1FF11F",
+               "NAME" : "Tedsen_SKX1xx_F1FF11F"
+            },
+            "readings" : {
+               "LastAction" : "receive",
+               "state" : "Button_1",
+               "tristateCode" : "F1FF11F10"
+            },
+            "rmsg" : "MU;P0=-15829;P1=-3580;P2=1962;P3=-330;P4=245;P5=-2051;D=1234523232345234523232323234523234540023452323234523452323232323452323454023452323234523452323232323452323454023452323234523452323232323452323454023452323234523452323232323452323454023452323234523452323;CP=2;",
+            "tests" : [
+               {
+                  "attributes" : {
+                     "model" : "Tedsen_SKX1xx"
+                  },
+                  "comment" : "#0"
+               }
+            ]
+         },
+         {
             "comment" : "Geiger Rolladen",
             "dispatch_repeats" : "1",
             "dmsg" : "P46#ECF20",
@@ -569,6 +627,18 @@
                      "model" : "AC114_01B"
                   },
                   "comment" : "#0"
+               }
+            ]
+         },
+         {
+            "comment" : "Celexon Motorleinwand with wrong checksum",
+            "dmsg" : "P56#A300587B810043178",
+            "tests" : [
+               {
+                  "returns" : {
+                     "ParseFn" : ""
+                  },
+                  "comment" : "#1"
                }
             ]
          }
@@ -695,7 +765,19 @@
                   "comment" : "#2"
                }
             ]
-         }
+         },
+         {
+            "comment" : "Vista Remote Control wrong checksum",
+            "dmsg" : "P68#57823",
+            "tests" : [
+               {
+                  "returns" : {
+                     "ParseFn" : ""
+                  },
+                  "comment" : "#3"
+               }
+            ]
+         }           
       ],
       "id" : "68",
       "module" : "SD_UT",
@@ -1760,6 +1842,18 @@
                   "comment" : "#2"
                }
             ]
+         },
+         {
+            "comment" : "Garden Lights remote control with wrong checksum",
+            "dmsg" : "P95#7709F5DE09160",
+            "tests" : [
+               {
+                  "returns" : {
+                     "ParseFn" : ""
+                  },
+                  "comment" : "#3"
+               }
+            ]
          }
       ],
       "id" : "95",
@@ -1834,7 +1928,19 @@
                   "comment" : "#2"
                }
             ]
-         }
+         },
+         {
+            "comment" : "remote control for wireless digital picture frame with wrong checksum",
+            "dmsg" : "P97#000006443A",
+            "tests" : [
+               {
+                  "returns" : {
+                     "ParseFn" : ""
+                  },
+                  "comment" : "#3"
+               }
+            ]
+         }         
       ],
       "id" : "97",
       "module" : "SD_UT",
@@ -2013,6 +2119,18 @@
                      "model" : "BF_301"
                   },
                   "comment" : "#2"
+               }
+            ]
+         },
+         {
+            "comment" : "Remote control wrong checksum",
+            "dmsg" : "P105#FAD08384A8",
+            "tests" : [
+               {
+                  "returns" : {
+                     "ParseFn" : ""
+                  },
+                  "comment" : "#3"
                }
             ]
          }
