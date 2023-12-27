@@ -1,5 +1,5 @@
 #########################################################################################
-# $Id: 14_SD_UT.pm 0 2023-12-10 18:00:00Z elektron-bbs $
+# $Id: 14_SD_UT.pm 0 2023-12-27 18:00:00Z elektron-bbs $
 #
 # The file is part of the SIGNALduino project.
 # The purpose of this module is universal support for devices.
@@ -444,8 +444,6 @@ use strict;
 use warnings;
 use FHEM::Meta;
 no warnings 'portable';  # Support for 64-bit ints required
-
-our $VERSION = '2023-10-02';
 
 sub SD_UT_bin2tristate;
 sub SD_UT_tristate2bin;
@@ -1035,12 +1033,6 @@ my %models = (
                       '01010110' => 'dim_2',
                       '01010000' => 'dim_3',
                       '01011001' => 'dim_4',
-                      '10011011' => 'test_dim_155',
-                      '10101111' => 'test_dim_175',
-                      '11000011' => 'test_dim_195',
-                      '11010111' => 'test_dim_215',
-                      '11101011' => 'test_dim_235',
-                      '11111111' => 'test_dim_255',
                       hex_length => [8],
                       Protocol   => 'P22',
                       Typ        => 'remote'
@@ -1161,8 +1153,7 @@ sub SD_UT_Define {
   # uncoverable branch true 
   return "SD_UT model $a[2] wrong devicecode: ($a[3]) - must be 3 digit house code (hex 0-9 A-F) _ 1 digit channel (dec 1-3) - e.g. 3DC_1" if ($a[2] eq 'TC6861' && not $a[3] =~ /^[0-9A-F]{3}_[1-3]$/xms);  
 
-  $hash->{versionModule} = $VERSION;
-  $hash->{lastMSG} =  'no data';
+  $hash->{lastMSG} = 'no data';
   $hash->{bitMSG} =  'no data';
   $iodevice = $a[4] if($a[4]);
   my $name = $hash->{NAME};
@@ -1410,6 +1401,7 @@ sub SD_UT_Set {
         $ret.= $models{$model}{$keys}.':noArg ';
       }
     }
+    $ret .= 'dim:slider,5,1,100 ' if ($model eq 'Hamulight_AB');
   } else {
     if (defined $msgEnd) {
       ### if cmd, set bits ###
@@ -1419,6 +1411,13 @@ sub SD_UT_Set {
           $value = $models{$model}{$keys};
           last if ($value eq $cmd);
         }
+      }
+       if ($model eq 'Hamulight_AB' && $cmd eq 'dim') {
+        $value = 'dim';
+        my $dimVal = FHEM::Core::Utils::Math::round( ($a[1] * 1.28 + 162) , 0);
+        $dimVal -= 127 if ($dimVal > 254);
+        $save = sprintf '%08b' , $dimVal; # dec to bin
+        Log3 $name, 3, "$ioname: SD_UT_Set model=$model dim=$a[1] send=$dimVal bin=$save";
       }
       return "$name Unkown set command!" if ($value ne $cmd);
 
@@ -2361,7 +2360,7 @@ sub SD_UT_Parse {
     }
     if ($model eq 'Hamulight_AB' && $state =~ /^[0|1]{8}$/xms ) { # unknown button
       my $dec = oct("0b".$state);
-      Log3 $name, 3, "$ioname: SD_UT_Parse $devicedef state=$state ($dec)";
+      Log3 $name, 4, "$ioname: SD_UT_Parse $devicedef state=$state ($dec)";
       $state = 'dim_' . $dec;
     }
     if ($model eq 'Novy_840029' || $model eq 'Novy_840039') {
@@ -3142,7 +3141,7 @@ sub SD_UT_tristate2bin {
       }
     }
   },
-  "version": "v1.0.7",
+  "version": "v1.0.8",
   "release_status": "stable",
   "resources": {
     "bugtracker": {
