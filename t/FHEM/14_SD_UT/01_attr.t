@@ -7,6 +7,8 @@ use Test2::Tools::Compare qw{is};
 our %defs;
 our %attr;
 
+my @testdev_hlen3 = ( q[RH787T], q[SA_434_1_mini] );
+
 InternalTimer(time()+0.4, sub {
     my $sensorname=shift;
 
@@ -73,17 +75,19 @@ InternalTimer(time()+0.4, sub {
     };
 
     $attr = q[model];
-    my $v = q[RH787T];
-    subtest qq[Change module attribute to RH787T] => sub { 
+    for my $v (my $i=0;$i<@testdev_hlen3;$i++) {
+      my $v = $testdev_hlen3[$i];
+      subtest qq[Change module attribute to $v] => sub {
         plan(2);
         $defs{$sensorname}{bitMSG} = undef;
         CommandAttr(undef,qq[$sensorname $attr $v]); 
         isnt($attr{$sensorname}{$attr}, $v, qq[check attribute $attr is not $v]);
-        
+
         $defs{$sensorname}{bitMSG} = q[010];
         CommandAttr(undef,qq[$sensorname $attr $v]); 
         is($attr{$sensorname}{$attr}, $v, qq[check attribute $attr is $v]);
-    };
+      };
+    }
 
 }, 'SD_UT_Test_Buttons_six');
 
