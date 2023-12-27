@@ -7,8 +7,6 @@ use Test2::Tools::Compare qw{is};
 our %defs;
 our %attr;
 
-my @testdev_hlen3 = ( q[RH787T], q[SA_434_1_mini] );
-
 InternalTimer(time()+0.4, sub {
     my $sensorname=shift;
 
@@ -74,10 +72,11 @@ InternalTimer(time()+0.4, sub {
         is($attr{$sensorname}{$attr}, $v, qq[check attribute $attr is $v]);
     };
 
+
     $attr = q[model];
-    subtest qq[Change module attribute to $v] => sub {
+    subtest qq[Change module attribute to all hex length variants] => sub {
       plan(4);
-      for my $v (my $i=0;$i<@testdev_hlen3;$i++) {
+      for my $v (qw(RH787T SA_434_1_mini)) {
         my $v = $testdev_hlen3[$i];
 
         $defs{$sensorname}{bitMSG} = undef;
