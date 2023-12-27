@@ -10,8 +10,6 @@ our %attr;
 InternalTimer(time()+0.4, sub {
     my $sensorname=shift;
 
-
-
     my $attr = q[repeats];
     subtest qq[set $sensorname $attr 1..99] => sub {
         plan(99);
@@ -74,7 +72,18 @@ InternalTimer(time()+0.4, sub {
         is($attr{$sensorname}{$attr}, $v, qq[check attribute $attr is $v]);
     };
 
-
+    $attr = q[model];
+    my $v = q[RH787T];
+    subtest qq[Change module attribute to RH787T] => sub { 
+        plan(2);
+        $defs{$sensorname}{bitMSG} = undef;
+        CommandAttr(undef,qq[$sensorname $attr $v]); 
+        isnt($attr{$sensorname}{$attr}, $v, qq[check attribute $attr is not $v]);
+        
+        $defs{$sensorname}{bitMSG} = q[010];
+        CommandAttr(undef,qq[$sensorname $attr $v]); 
+        is($attr{$sensorname}{$attr}, $v, qq[check attribute $attr is $v]);
+    };
 
 }, 'SD_UT_Test_Buttons_six');
 
