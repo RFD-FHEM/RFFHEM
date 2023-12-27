@@ -77,8 +77,7 @@ InternalTimer(time()+0.4, sub {
     subtest qq[Change module attribute to all hex length variants] => sub {
       plan(4);
       for my $v (qw(RH787T SA_434_1_mini)) {
-        my $v = $testdev_hlen3[$i];
-
+        note(qq[test with model $v]);
         $defs{$sensorname}{bitMSG} = undef;
         CommandAttr(undef,qq[$sensorname $attr $v]); 
         isnt($attr{$sensorname}{$attr}, $v, qq[check attribute $attr is not $v]);
