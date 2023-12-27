@@ -75,10 +75,11 @@ InternalTimer(time()+0.4, sub {
     };
 
     $attr = q[model];
-    for my $v (my $i=0;$i<@testdev_hlen3;$i++) {
-      my $v = $testdev_hlen3[$i];
-      subtest qq[Change module attribute to $v] => sub {
-        plan(2);
+    subtest qq[Change module attribute to $v] => sub {
+      plan(4);
+      for my $v (my $i=0;$i<@testdev_hlen3;$i++) {
+        my $v = $testdev_hlen3[$i];
+
         $defs{$sensorname}{bitMSG} = undef;
         CommandAttr(undef,qq[$sensorname $attr $v]); 
         isnt($attr{$sensorname}{$attr}, $v, qq[check attribute $attr is not $v]);
