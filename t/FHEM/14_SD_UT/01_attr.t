@@ -47,36 +47,9 @@ InternalTimer(time()+0.4, sub {
      };
 
     $attr = q[model];
-    my $v = q[Buttons_five];
-    subtest qq[Change module attribute to buttons_five] => sub { 
-        plan(2);
-        $defs{$sensorname}{lastMSG} = q[010];
-        CommandAttr(undef,qq[$sensorname $attr $v]); 
-        isnt($attr{$sensorname}{$attr}, $v, qq[check attribute $attr isnt $v]);
-        
-        $defs{$sensorname}{bitMSG} = q[010];
-        CommandAttr(undef,qq[$sensorname $attr $v]);     
-        is($attr{$sensorname}{$attr}, $v, qq[check attribute $attr is $v]);
-    };
-
-    $attr = q[model];
-    my $v = q[Buttons_six];
-    subtest qq[Change module attribute to buttons_six] => sub { 
-        plan(2);
-        $defs{$sensorname}{bitMSG} = undef;
-        CommandAttr(undef,qq[$sensorname $attr $v]); 
-        isnt($attr{$sensorname}{$attr}, $v, qq[check attribute $attr is not $v]);
-        
-        $defs{$sensorname}{bitMSG} = q[010];
-        CommandAttr(undef,qq[$sensorname $attr $v]); 
-        is($attr{$sensorname}{$attr}, $v, qq[check attribute $attr is $v]);
-    };
-
-
-    $attr = q[model];
-    subtest qq[Change module attribute to all hex length variants] => sub {
-      plan(4);
-      for my $v (qw(RH787T SA_434_1_mini)) {
+    subtest qq[Change module with hexlength 3 with attribute] => sub {
+      plan(8);
+      for my $v (qw(Buttons_five Buttons_six RH787T SA_434_1_mini)) {
         note(qq[test with model $v]);
         $defs{$sensorname}{bitMSG} = undef;
         CommandAttr(undef,qq[$sensorname $attr $v]); 
