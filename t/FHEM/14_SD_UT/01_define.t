@@ -55,12 +55,12 @@ InternalTimer(time()+1, sub {
         is(IsDevice($sensorname), 0, "check device not created with define");
 	};
 
-	subtest 'SD_UT - model OR28V wrong address define OR28V_1 SD_UT OR28V 199' => sub {
+	subtest 'SD_UT - model OR28V wrong address define OR28V_2 SD_UT OR28V 199' => sub {
 		plan(1);
 		
-        my $sensorname=q[OR28V_1];
+        my $sensorname=q[OR28V_2];
         my $model=q[OR28V];
-        CommandDefine(undef,qq[$sensorname SD_UT $model 17]); 
+        CommandDefine(undef,qq[$sensorname SD_UT $model 199]); 
         is(IsDevice($sensorname), 0, "check device not created with define");
 	};
 
