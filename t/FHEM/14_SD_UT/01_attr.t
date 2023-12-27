@@ -87,8 +87,8 @@ InternalTimer(time()+0.4, sub {
         $defs{$sensorname}{bitMSG} = q[010];
         CommandAttr(undef,qq[$sensorname $attr $v]); 
         is($attr{$sensorname}{$attr}, $v, qq[check attribute $attr is $v]);
-      };
-    }
+      }
+    };
 
 }, 'SD_UT_Test_Buttons_six');
 
