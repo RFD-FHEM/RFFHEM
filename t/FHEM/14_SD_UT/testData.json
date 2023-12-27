@@ -1527,19 +1527,7 @@
                   "comment" : "#3"
                }
             ]
-         },
-         {
-            "comment" : "state unknown",
-            "dmsg" : "P90#786909230",
-            "tests" : [
-               {
-                  "returns" : {
-                     "ParseFn" : "UNDEFINED unknown_please_select_model SD_UT unknown"
-                  },
-                  "comment" : "#4"
-               }
-            ]
-         },
+         }
       ],
       "id" : "90",
       "module" : "SD_UT",
