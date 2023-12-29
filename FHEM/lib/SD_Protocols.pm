@@ -2037,7 +2037,8 @@ sub ConvBresser_7in1 {
   $self->_logging(qq[ConvBresser_7in1, checksumCalc:0x$checksumcalc, must be 0x6DF1],5);
   return ( 1, qq[ConvBresser_7in1, checksumCalc:0x$checksumcalc != checksum:0x6DF1] ) if ($checksumcalc ne '6DF1');
 
-  return substr($hexDataXorA, 0, 46);
+  # return substr($hexDataXorA, 0, 46);
+  return $hexDataXorA;
 }
 
 =item LFSR_digest16()
