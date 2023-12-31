@@ -24,7 +24,7 @@ Supported Devices / Protocols
 |BF-301 | Remote control|
 |benon (Semexo OHG) | Remote control (BH-P)|
 |BOSCH / Neff / Refsta Topdraft | Remote control (SF01 01319004, SF01 01319004 v2)|
-|BRESSER 5-in-1, 6-in-1, 7-in-1, Professional Rain Gauge, TemeoTrend, SM60020 Soil moisture sensor | Weather Station, Rain Gauge, Thermo-/Hygro Sensor |
+|BRESSER 5-in-1, 6-in-1, 7-in-1, Professional Rain Gauge, TemeoTrend, SM60020 Soil moisture sensor, PM2.5/10 Air quality sensor | Weather Station, Rain Gauge, Thermo-/Hygro Sensor, Particulate meter |
 |Busch-Transcontrol HF | Remote control (6861)|
 |CAME TOP 432EV | Remote control |
 |CTW600, WH1080, WH2315 | Weather station |
@@ -43,6 +43,7 @@ Supported Devices / Protocols
 |Fine Offset WH51, aka ECOWITT WH51, aka Froggit DP100, aka MISOL/1 | Soil moisture sensor |
 |Fine Offset WH57, aka Ambient Weather WH31L, aka Froggit DP60 | Thunder and lightning sensor |
 |Fine Offset WH31, aka Ambient Weather WH31E, aka ecowitt WH31 | Temperature and humidity sensor |
+|Fine Offset WH40, aka Ambient Weather WH40E, aka ecowitt WH40 | Rain gauge |
 |FLAMINGO | Flamingo smoke detector |
 |Fody E42 | Temperature/humidity sensor (protocol BRESSER 5-in-1) |
 |FreeTec PE-6946 | wireless bell |
