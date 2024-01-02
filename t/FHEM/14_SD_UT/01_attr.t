@@ -86,7 +86,7 @@ InternalTimer(time()+0.41, sub {
  	done_testing();
 	exit(0);
 
-}, 'SD_UT_Test_TC6861_3DC_1');
+}, 'SD_UT_Test_hlen8');
 
 InternalTimer(time()+0.42, sub {
     my $sensorname=shift;
@@ -111,5 +111,29 @@ InternalTimer(time()+0.42, sub {
 	exit(0);
 
 }, 'SD_UT_Test_hlen4');
+
+InternalTimer(time()+0.43, sub {
+    my $sensorname=shift;
+
+    my $attr = q[model];
+    $defs{$sensorname}{lastMSG} = q[18469];
+
+    subtest qq[Change module with hexlength 5 with attribute] => sub {
+      plan(22);
+      for my $v (qw(BeSmart_S4 Chilitec_22640 OR28V QUIGG_DMV SF01_01319004 SF01_01319004_Typ2 Tedsen_SKX1xx Tedsen_SKX2xx Tedsen_SKX4xx Tedsen_SKX6xx TR_502MSV)) {
+        $defs{$sensorname}{bitMSG} = undef;
+        CommandAttr(undef,qq[$sensorname $attr $v]); 
+        isnt($attr{$sensorname}{$attr}, $v, qq[check attribute $attr is not $v]);
+
+        $defs{$sensorname}{bitMSG} = q[010];
+        CommandAttr(undef,qq[$sensorname $attr $v]); 
+        is($attr{$sensorname}{$attr}, $v, qq[check attribute $attr is $v]);
+      }
+    };
+
+ 	done_testing();
+	exit(0);
+
+}, 'SD_UT_Test_hlen5');
 
 1;
