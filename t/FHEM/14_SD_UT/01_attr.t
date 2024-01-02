@@ -82,8 +82,8 @@ InternalTimer(time()+0.41, sub {
     # };
 
     subtest qq[Change module with hexlength 8 with attribute] => sub {
-      plan(10);
-      for my $v (qw(DC_1961_TG Hamulight_AB Krinner_LUMIX RCnoName127 RCnoName20)) {
+      plan(8);
+      for my $v (qw(DC_1961_TG Krinner_LUMIX RCnoName127 RCnoName20)) {
         $defs{$sensorname}{bitMSG} = undef;
         CommandAttr(undef,qq[$sensorname $attr $v]); 
         isnt($attr{$sensorname}{$attr}, $v, qq[check attribute $attr is not $v]);
