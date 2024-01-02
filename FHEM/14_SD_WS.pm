@@ -1,4 +1,4 @@
-# $Id: 14_SD_WS.pm 26982 2023-09-11 16:54:55Z elektron-bbs $
+# $Id: 14_SD_WS.pm 26982 2023-12-29 20:00:00Z elektron-bbs $
 #
 # The purpose of this module is to support serval
 # weather sensors which use various protocol
@@ -52,6 +52,7 @@
 # 01.04.2023 Added protocol 125: ecowitt WH31 support
 # 06.05.2023 Added protocol 126: ecowitt WH40 support
 # 21.08.2023 neues Protokoll 129: Sainlogic weather station FT-0835
+# 25.11.2023 Protokoll 117: neuer Sensor BRESSER Air Quality Sensor Art.No.: 7009970, Hersteller CCL Electronics LTD Model C3123A
 
 package main;
 
@@ -127,6 +128,9 @@ sub SD_WS_Define {
   my ($hash, $def) = @_;
   carp "SD_WS_Define, too few arguments ($hash, $def)" if @_ < 2;
   my @a = split("[ \t][ \t]*", $def);
+
+  # Anzeigen der Modulversion (Internal FVERSION) über FHEM::Meta, Variable in META.json Abschnitt erforderlich: "version": "v1.0.0", siehe https://wiki.fhem.de/wiki/Meta
+  return $@ unless ( FHEM::Meta::SetInternals($hash) );
 
   return "wrong syntax: define <name> SD_WS <code> ".int(@a) if(int(@a) < 3 );
 
@@ -209,6 +213,7 @@ sub SD_WS_Parse {
   my $bitData = unpack("B$blen", pack("H$hlen", $rawData));
   my $bitData2;
   my $model;  # wenn im elsif Abschnitt definiert, dann wird der Sensor per AutoCreate angelegt
+  my $modelStat; # for FHEM statistics https://fhem.de/stats/statistics.html
   my $SensorTyp;
   my $id;
   my $bat;
@@ -245,6 +250,8 @@ sub SD_WS_Parse {
   my $identified;
   my $transmitter;
   my $dcf;
+  my $pm2_5; # particulate matter <= 2.5 µm
+  my $pm10;  # particulate matter <= 10 µm
 
   my %decodingSubs = (
     50 => # Protocol 50
@@ -1248,60 +1255,122 @@ sub SD_WS_Parse {
                                 return 1;
                               }
     } ,
-
     117 => {
         # https://github.com/merbanan/rtl_433/blob/master/src/devices/bresser_7in1.c
         # The compact 7-in-1 multifunction outdoor sensor transmits the data on 868.3 MHz.
         # The device uses FSK-PCM encoding, the device sends a transmission every 12 seconds.
         # A transmission starts with a preamble of 0xAA.
         # Preamble: aa aa aa aa aa 2d d4
-        #
         #           1         2         3         4
         # 01234567890123456789012345678901234567890123456789
         # --------------------------------------------------
-        # 0CF0A6F5B98A10AAAAAAAAAAAAAABABC3EAABBFCAAAAAAAAAA000000   original message
-        # A65A0C5F1320BA000000000000001016940011560000000000AAAAAA   message after all nibbles xor 0xA
-        # CCCCIIIIDDD??FGGGWWWRRRRRR??TTTBHHbbbbbbVVVttttttt
-        # C = LFSR-16 digest, generator 0x8810 key 0xba95 with a final xor 0x6df1, which likely means we got that wrong.
+        # EF0AE6AB8FEA18A89A8BABAACAAAB2CCCFAF3C33AF2AAAAAAA   original message
+        # 45A04C012540B2023021010060001866650596990580000000   message after all nibbles xor 0xA
+        # CCCCIIIIDDD?SFGGGWWWRRRRRR??TTTBHHbbbbbbVVVttttttt
+        # C = LFSR-16 digest, generator 0x8810 key 0xba95 with a final xor 0x6df1
         # I = station ID
-        # D = wind direction in degree, BCD coded, DDD = 158 => 158 °
+        # D = wind direction in degree, BCD coded, DDD = 254 => 254 °
+        # S = sensor type, xor 0xA, 1 = 7-in-1 outdoor sensor, 8 = Air quality sensor
         # F = flags, 4 bit
         #     Bit:    0123
-        #             1010
-        #             r???
+        #             1010 xor 0xA = 0000
+        #             rccc
         #             r:   1 bit device reset, 1 after inserting battery
-        #             ???: always 010
-        # G = wind gust in 1/10 m/s, BCD coded, GGG = 123 => 12.3 m/s.
-        # W = wind speed in 1/10 m/s, BCD coded, WWW = 123 => 12.3 m/s.
-        # R = rain counter, in 0.1 mm, BCD coded RRRRRR = 000084 => 8.4 mm
-        # T = temperature in 1/10 °C, BCD coded, TTT = 312 => 31.2 °C
+        #             c:   3 bit channel always 0 by outdoor sensor, 1-4 by air quality sensor
+        # G = wind gust in 1/10 m/s, BCD coded, GGG = 023 => 2.3 m/s.
+        # W = wind speed in 1/10 m/s, BCD coded, WWW = 021 => 2.1 m/s.
+        # R = rain counter, in 0.1 mm, BCD coded RRRRRR = 010060 => 1006.0 mm
+        # T = temperature in 1/10 °C, BCD coded, TTT = 186 => 18.6 °C
         # B = battery. 0=Ok, 6=Low
-        # H = humidity in percent, BCD coded, HH = 23 => 23 %
-        # b = brightness, BCD coded, BBBBBB = 005584 => 5.584 klx
-        # V = uv, BCD coded, VVV = 012 => 1.2
+        # H = humidity in percent, BCD coded, HH = 65 => 65 %
+        # b = brightness, BCD coded, BBBBBB = 059699 => 59.699 klx
+        # V = uv, BCD coded, VVV = 058 => 5.8
         # ? = unknown
         # t = trailer
+        #
+        # BRESSER Air Quality Sensor Art.No.: 7009970, Manufacturer CCL Electronics LTD Model C3123A
+        # The sensor transmits approximately every 60 seconds.
+        #           1         2         3         4
+        # 01234567890123456789012345678901234567890123456789
+        # --------------------------------------------------
+        # EF596068B83A89B9AA9BDA9EBA9EDA33333333333392DAAAAA   original message
+        # 45F3CAC2129023130031703410347099999999999938700000   message after all nibbles xor 0xA, PM2.5: 341 PM10: 347
+        # CCCCIIII????SF????????222?111?????????????BBBttttt
+        # 2 = PM2.5 particlae matter in µg/m³, BCD coded, 341 => 341 µg/m³
+        # 1 = PM10  particlae matter in µg/m³, BCD coded, 347 => 347 µg/m³
+        # B = battery voltage in 1/100 Volt, BCD coded, 387 => 3,87 Volt
+        # All others as in 7-in-1 multifunction outdoor sensor
         sensortype => 'Bresser_7in1',
         model      => 'SD_WS_117',
-        prematch   => sub {my $rawData = shift; return 1 if ($rawData =~ /^[0-9A-F]{8}[0-9]{3}[0-9A-F]{3}[0-9]{12}[0-9A-F]{2}[0-9]{15}/); },
+        prematch   => sub {my $rawData = shift; return 1 if ($rawData =~ /^[0-9A-F]{8}[0-9]{3}[0-9A-F]{3}[0-9]{12}[0-9A-F]{2}[0-9]{16}/); },
         id         => sub {my ($rawData,undef) = @_; return substr($rawData,4,4); },
         winddir    => sub {my ($rawData,undef) = @_;
+                            return if (substr($rawData,12,1) ne 'B'); # only weather station
                             $winddir = substr($rawData,8,3);
                             return ($winddir * 1, $winddirtxtar[FHEM::Core::Utils::Math::round(($winddir / 22.5),0)]);
                           },
+        modelStat  => sub {my ($rawData,undef) = @_;
+                            my $typ = hex(substr($rawData,12,1)) ^ 0xA; # sensor type
+                            if ($typ eq '1') {
+                              $typ = 'Bresser 7-in-1 outdoor sensor';
+                            } elsif ($typ eq '8') {
+                              $typ = 'Bresser PM2.5/10 air quality meter';
+                            } else {
+                              $typ = 'SD_WS_117';
+                            }
+                            return $typ;
+                          },
         batChange  => sub {my (undef,$bitData) = @_; return substr($bitData,52,1) eq '0' ? '1' : '0';},
-        windgust   => sub {my ($rawData,undef) = @_; return substr($rawData,14,3) * 0.1;},
-        windspeed  => sub {my ($rawData,undef) = @_; return substr($rawData,17,3) * 0.1;},
-        rain       => sub {my ($rawData,undef) = @_; return substr($rawData,20,6) * 0.1;},
+        channel    => sub {my ($rawData,undef) = @_;
+                            return if (substr($rawData,12,1) eq 'B'); # not by weather station
+                            return ((hex(substr($rawData,13,1)) ^ 0xA) & 0x07); # channel
+                          },
+        windgust   => sub {my ($rawData,undef) = @_;
+                            return if (substr($rawData,12,1) ne 'B'); # only Bresser_7in1 outdoor sensor
+                            return substr($rawData,14,3) * 0.1;
+                          },
+        windspeed  => sub {my ($rawData,undef) = @_;
+                            return if (substr($rawData,12,1) ne 'B'); # only Bresser_7in1 outdoor sensor
+                            return substr($rawData,17,3) * 0.1;
+                          },
+        rain       => sub {my ($rawData,undef) = @_;
+                            return if (substr($rawData,12,1) ne 'B'); # only Bresser_7in1 outdoor sensor
+                            return substr($rawData,20,6) * 0.1;
+                          },
+        pm_2_5     => sub {my ($rawData,undef) = @_;                  # particulate matter <= 2.5 µm
+                            return if (substr($rawData,12,1) eq 'B'); # not by Bresser_7in1 outdoor sensor
+                            return substr($rawData,22,3) * 1;
+                          },
+        pm_10      => sub {my ($rawData,undef) = @_;                  # particulate matter <= 10 µm
+                            return if (substr($rawData,12,1) eq 'B'); # not by Bresser_7in1 outdoor sensor
+                            return substr($rawData,26,3) * 1;
+                          },
         temp       => sub {my ($rawData,undef) = @_;
+                            return if (substr($rawData,12,1) ne 'B'); # only Bresser_7in1 outdoor sensor
                             $rawTemp = substr($rawData,28,3) * 0.1;
                             if ($rawTemp > 60) {$rawTemp -= 100};
-                            return $rawTemp;
+                            return FHEM::Core::Utils::Math::round($rawTemp,1);
                           },
-        bat        => sub {my ($rawData,undef) = @_; return substr($rawData,31,1) eq '0' ? 'ok' : 'low';},
-        hum        => sub {my ($rawData,undef) = @_; return substr($rawData,32,2) * 1;},
-        brightness => sub {my ($rawData,undef) = @_; return substr($rawData,34,6) * 0.001;},
-        uv         => sub {my ($rawData,undef) = @_; return substr($rawData,40,3) * 0.1;},
+        bat        => sub {my ($rawData,undef) = @_;
+                            return if (substr($rawData,12,1) ne 'B'); # only Bresser_7in1 outdoor sensor
+                            return substr($rawData,31,1) eq '0' ? 'ok' : 'low';
+                          },
+        hum        => sub {my ($rawData,undef) = @_;
+                            return if (substr($rawData,12,1) ne 'B'); # only Bresser_7in1 outdoor sensor
+                            return substr($rawData,32,2) * 1;
+                          },
+        brightness => sub {my ($rawData,undef) = @_;
+                            return if (substr($rawData,12,1) ne 'B'); # only Bresser_7in1 outdoor sensor
+                            return substr($rawData,34,6) * 0.001;
+                          },
+        uv         => sub {my ($rawData,undef) = @_;
+                            return if (substr($rawData,12,1) ne 'B'); # only Bresser_7in1 outdoor sensor
+                            return substr($rawData,40,3) * 0.1;
+                          },
+        batVoltage => sub { my ($rawData,undef) = @_;
+                            return if (substr($rawData,12,1) eq 'B'); # not by Bresser_7in1 outdoor sensor
+                            return substr($rawData,42,3) * 0.01;
+                          },
         crcok      => sub {return 1;}, # checks are in SD_Protocols.pm sub ConvBresser_7in1
     },
     120 => {
@@ -1963,6 +2032,7 @@ sub SD_WS_Parse {
     $windgust = $decodingSubs{$protocol}{windgust}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{windgust}));
     $channel = $decodingSubs{$protocol}{channel}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{channel}));
     $model = $decodingSubs{$protocol}{model};
+    $modelStat = $decodingSubs{$protocol}{modelStat}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{modelStat}));
     $bat = $decodingSubs{$protocol}{bat}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{bat}));
     $batVoltage = $decodingSubs{$protocol}{batVoltage}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{batVoltage}));
     $batChange = $decodingSubs{$protocol}{batChange}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{batChange}));
@@ -1985,6 +2055,8 @@ sub SD_WS_Parse {
     $brightness = $decodingSubs{$protocol}{brightness}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{brightness}));
     $transmitter = $decodingSubs{$protocol}{transmitter}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{transmitter}));
     $dcf = $decodingSubs{$protocol}{dcf}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{dcf}));
+    $pm2_5 = $decodingSubs{$protocol}{pm_2_5}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{pm_2_5}));
+    $pm10 = $decodingSubs{$protocol}{pm_10}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{pm_10}));
     Log3 $iohash, 4, "$name: SD_WS_Parse decoded protocol-id $protocol ($SensorTyp), sensor-id $id";
   }
   else {
@@ -2143,7 +2215,14 @@ sub SD_WS_Parse {
     $state .= ' ' if (length($state) > 0);
     $state .= "B: $brightness";
   }
-
+  if (defined($pm2_5)) {
+    $state .= ' ' if (length($state) > 0);
+    $state .= "PM2.5: $pm2_5";
+  }
+  if (defined($pm10)) {
+    $state .= ' ' if (length($state) > 0);
+    $state .= "PM10: $pm10";
+  }
   ### protocol 33 has different bits per sensor type
   if ($protocol eq "33") {
     if (AttrVal($name,'model',0) eq "S522") {                 # Conrad S522
@@ -2168,6 +2247,11 @@ sub SD_WS_Parse {
     }
   }
 
+  if (AttrVal($name,'model','0') eq '0' && !defined($modelStat)) {
+    $modelStat = $model;
+    Log3 $name, 4, "$ioname: SD_WS_Parse $name, model=$model, modelStat=$modelStat, SensorTyp=$SensorTyp";
+  }
+
   readingsBeginUpdate($hash);
   readingsBulkUpdate($hash, "state", $state);
   readingsBulkUpdate($hash, "temperature", $temp)  if (defined($temp) && (($temp > -60 && $temp < 70 ) || $protocol eq '106' || $protocol eq '113' || $protocol eq '122'));
@@ -2189,6 +2273,7 @@ sub SD_WS_Parse {
   readingsBulkUpdate($hash, "humidityTrend", $trendHum) if (defined($trendHum) && length($trendHum) > 0);
   readingsBulkUpdate($hash, "sendmode", $sendmode) if (defined($sendmode) && length($sendmode) > 0);
   readingsBulkUpdateIfChanged($hash, "type", $SensorTyp, 0)  if (defined($SensorTyp));
+  readingsBulkUpdate($hash, 'model', $modelStat, 0)  if (defined($modelStat));
   readingsBulkUpdate($hash, "beep", $beep)  if (defined($beep));
   readingsBulkUpdate($hash, "adc", $adc)  if (defined($adc));
   readingsBulkUpdate($hash, 'rain', $rain)  if (defined($rain));
@@ -2202,6 +2287,8 @@ sub SD_WS_Parse {
   readingsBulkUpdate($hash, 'brightness', $brightness)  if (defined($brightness));
   readingsBulkUpdateIfChanged($hash, 'transmitter', $transmitter)  if (defined($transmitter));
   readingsBulkUpdate($hash, 'dcf', $dcf)  if (defined($dcf));
+  readingsBulkUpdate($hash, 'pm_2_5', $pm2_5)  if (defined($pm2_5));
+  readingsBulkUpdate($hash, 'pm_10', $pm10)  if (defined($pm10));
   readingsEndUpdate($hash, 1); # Notify is done by Dispatch
 
   return $name;
@@ -2319,7 +2406,7 @@ sub SD_WS_WH2SHIFT {
     <li>ADE WS1907 Weather station with rain gauge</li>
     <li>Atech wireless weather station</li>
     <li>BBQ temperature sensor GT-TMBBQ-01s (transmitter), GT-TMBBQ-01e (receiver)</li>
-    <li>Bresser 5-in-1, 6-in-1 and 7-in-1 Comfort Weather Center, 7009994, Professional rain gauge, Temeo</li>
+    <li>Bresser 5-in-1, 6-in-1 and 7-in-1 Comfort Weather Center, 7009994, PM2.5/10 air quality meter, Professional rain gauge, Temeo</li>
     <li>Conrad S522</li>
     <li>EuroChron EFTH-800, EFS-3110A (temperature and humidity sensor)</li>
     <li>Fine Offset WH51, aka ECOWITT WH51, aka Froggit DP100, aka MISOL/1 (soil moisture sensor)</li>
@@ -2463,7 +2550,7 @@ sub SD_WS_WH2SHIFT {
     <li>ADE WS1907 Wetterstation mit Regenmesser</li>
     <li>Atech Wetterstation</li>
     <li>BBQ Temperatur Sensor GT-TMBBQ-01s (Sender), GT-TMBBQ-01e (Empfaenger)</li>
-    <li>Bresser 5-in-1, 6-in-1 und 7-in-1 Comfort Wetter Center, 7009994, Profi Regenmesser, Temeo</li>
+    <li>Bresser 5-in-1, 6-in-1 und 7-in-1 Comfort Wetter Center, 7009994, PM2.5/10 Luftqualitätsmesser, Profi Regenmesser, Temeo</li>
     <li>Conrad S522</li>
     <li>EuroChron EFTH-800, EFS-3110A (Temperatur- und Feuchtigkeitssensor)</li>
     <li>Fine Offset WH51, aka ECOWITT WH51, aka Froggit DP100, aka MISOL/1 (Bodenfeuchtesensor)</li>
@@ -2598,6 +2685,7 @@ sub SD_WS_WH2SHIFT {
 </ul>
 
 =end html_DE
+
 =for :application/json;q=META.json 14_SD_WS.pm
 {
   "abstract": "Supports various weather stations",
@@ -2611,6 +2699,7 @@ sub SD_WS_WH2SHIFT {
   "x_fhem_maintainer_github": [
     "Sidey79"
   ],
+  "version": "v1.0.0",
   "description": "The SD_WS module processes the messages from various environmental sensors received from an IO device (CUL, CUN, SIGNALDuino, SignalESP etc.)",
   "dynamic_config": 1,
   "keywords": [

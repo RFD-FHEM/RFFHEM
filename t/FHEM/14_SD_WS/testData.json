@@ -2047,6 +2047,61 @@
    {
       "data" : [
          {
+            "comment" : "BRESSER PM2.5/10 air quality meter",
+            "dmsg" : "W117#49C8CAC2176023178000700080009004400530054039600000AA",
+            "internals" : {
+               "DEF" : "SD_WS_117_1",
+               "NAME" : "SD_WS_117_1"
+            },
+            "readings" : {
+               "batteryChanged" : "1",
+               "batteryVoltage" : 3.96,
+               "channel" : 1,
+               "pm_10" : 9,
+               "pm_2_5" : 8,
+               "state" : "PM2.5: 8 PM10: 9",
+               "type" : "Bresser_7in1"
+            },
+            "rmsg" : "MN;D=E3626068BDCA89BD2AAADAAA2AAA3AAEEAAF9AAFEA93CAAAAA00;R=10;",
+            "tests" : [
+               {
+                  "attributes" : {},
+                  "comment" : "#0"
+               }
+            ]
+         },
+         {
+            "comment" : "BRESSER PM2.5/10 air quality meter",
+            "dmsg" : "W117#065CCAC2176023178058806290636099999999999939600000AA",
+            "internals" : {
+               "DEF" : "SD_WS_117_1",
+               "NAME" : "SD_WS_117_1"
+            },
+            "readings" : {
+               "batteryChanged" : "1",
+               "batteryVoltage" : 3.96,
+               "channel" : 1,
+               "pm_10" : 636,
+               "pm_2_5" : 629,
+               "state" : "PM2.5: 629 PM10: 636",
+               "type" : "Bresser_7in1"
+            },
+            "rmsg" : "MN;D=ACF66068BDCA89BD2AF22AC83AC9CA33333333333393CAAAAA00;R=9;",
+            "tests" : [
+               {
+                  "attributes" : {},
+                  "comment" : "#1"
+               }
+            ]
+         }
+      ],
+      "id" : 117,
+      "module" : "SD_WS",
+      "name" : "BRESSER PM2.5/10"
+   },
+   {
+      "data" : [
+         {
             "comment" : "Weather station with 30.3151 (T/H-transmitter), 30.3152 (rain gauge), 30.3153 (anemometer)",
             "dmsg" : "W120#FEAB049EA804080C53AC",
             "internals" : {

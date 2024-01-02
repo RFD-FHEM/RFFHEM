@@ -1,3 +1,15 @@
+2024-01-02 - Update tests part two | for the functional reliability of the module SD_UT (#1218)
+
+* added some tests for define and attr
+2023-12-31 - new sensor BRESSER PM2.5/10 air quality meter (#1219)
+
+* Bresser PM2.5/10 air quality meter
+ new sensor BRESSER PM2.5/10 air quality meter, protocol 117
+* Update SD_Protocols.pm
+* Update SD_Protocols.pm
+* Update testData.json
+* Update README.md
+* Update SD_ProtocolData.pm
 2023-12-20 - new def | remote ha-hx2 (#1212)
 
 * Update SD_ProtocolData.pm

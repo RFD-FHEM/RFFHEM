@@ -121,13 +121,20 @@ jobs:
           find: \d\d\d\d-\d\d-\d\d\s\d\d:\d\d:\d\dZ\s[\w|-]+\s
           replace: "${{ needs.metadata.outputs.datetime }}Z ${{ github.event.pull_request.user.login }} "
           include: "${{ matrix.files }}"
+      - name: Artifactname
+        env:
+            ARTIFACT_NAME: "${{ matrix.files }}"
+        run: |
+          ARTIFACT_NAME=${{ env.ARTIFACT_NAME }}
+          ARTIFACT_NAME=$(basename $ARTIFACT_NAME) # get only the filename and use this as artifact name
+          echo ARTIFACT_NAME=${ARTIFACT_NAME} >> $GITHUB_ENV # update GitHub ENV vars
       - name: Save updated Files in artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: updated-files
+          name: ${{ env.ARTIFACT_NAME }}
           retention-days: 1
           path: |
-            ${{ matrix.file }}
+            ${{ matrix.files }}
   commit:
     permissions:
       contents: write    
@@ -141,12 +148,13 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
       - name: Download all modified artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
-          path: ${{ github.workspace	}}
+          path: ${{ github.workspace	}}/artifacts
+
       - name: replace files from artifacts
         run: |
-          for FPATH in ./updated-files/*.pm; do 
+          for FPATH in ./artifacts/*/*.pm; do 
               FILE=$(basename $FPATH)
               find ./FHEM -name "$FILE" -exec cp $FPATH "{}" \;
           done
