@@ -136,4 +136,28 @@ InternalTimer(time()+0.43, sub {
 
 }, 'SD_UT_Test_hlen5');
 
+InternalTimer(time()+0.44, sub {
+    my $sensorname=shift;
+
+    my $attr = q[model];
+    $defs{$sensorname}{lastMSG} = q[1846ABCDEF0];
+
+    subtest qq[Change module with hexlength 11 with attribute] => sub {
+      plan(2);
+      for my $v (qw(HS1_868_BS)) {
+        $defs{$sensorname}{bitMSG} = undef;
+        CommandAttr(undef,qq[$sensorname $attr $v]); 
+        isnt($attr{$sensorname}{$attr}, $v, qq[check attribute $attr is not $v]);
+
+        $defs{$sensorname}{bitMSG} = q[010];
+        CommandAttr(undef,qq[$sensorname $attr $v]); 
+        is($attr{$sensorname}{$attr}, $v, qq[check attribute $attr is $v]);
+      }
+    };
+
+ 	done_testing();
+	exit(0);
+
+}, 'SD_UT_Test_hlen11');
+
 1;
