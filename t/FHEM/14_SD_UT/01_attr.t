@@ -56,7 +56,7 @@ InternalTimer(time()+0.4, sub {
         CommandAttr(undef,qq[$sensorname $attr $v]); 
         isnt($attr{$sensorname}{$attr}, $v, qq[check attribute $attr is not $v]);
 
-        $defs{$sensorname}{bitMSG} = q[010];
+        $defs{$sensorname}{bitMSG} = q[111110111110];
         CommandAttr(undef,qq[$sensorname $attr $v]); 
         is($attr{$sensorname}{$attr}, $v, qq[check attribute $attr is $v]);
       }
@@ -77,7 +77,7 @@ InternalTimer(time()+0.41, sub {
         CommandAttr(undef,qq[$sensorname $attr $v]); 
         isnt($attr{$sensorname}{$attr}, $v, qq[check attribute $attr is not $v]);
 
-        $defs{$sensorname}{bitMSG} = q[010];
+        $defs{$sensorname}{bitMSG} = q[00011000010001101010100001100101];
         CommandAttr(undef,qq[$sensorname $attr $v]); 
         is($attr{$sensorname}{$attr}, $v, qq[check attribute $attr is $v]);
       }
@@ -98,7 +98,7 @@ InternalTimer(time()+0.42, sub {
         CommandAttr(undef,qq[$sensorname $attr $v]); 
         isnt($attr{$sensorname}{$attr}, $v, qq[check attribute $attr is not $v]);
 
-        $defs{$sensorname}{bitMSG} = q[010];
+        $defs{$sensorname}{bitMSG} = q[0000111110000000];
         CommandAttr(undef,qq[$sensorname $attr $v]); 
         is($attr{$sensorname}{$attr}, $v, qq[check attribute $attr is $v]);
       }
@@ -119,7 +119,7 @@ InternalTimer(time()+0.43, sub {
         CommandAttr(undef,qq[$sensorname $attr $v]); 
         isnt($attr{$sensorname}{$attr}, $v, qq[check attribute $attr is not $v]);
 
-        $defs{$sensorname}{bitMSG} = q[010];
+        $defs{$sensorname}{bitMSG} = q[10101010100000001000];
         CommandAttr(undef,qq[$sensorname $attr $v]); 
         is($attr{$sensorname}{$attr}, $v, qq[check attribute $attr is $v]);
       }
@@ -140,7 +140,7 @@ InternalTimer(time()+0.44, sub {
         CommandAttr(undef,qq[$sensorname $attr $v]); 
         isnt($attr{$sensorname}{$attr}, $v, qq[check attribute $attr is not $v]);
 
-        $defs{$sensorname}{bitMSG} = q[010];
+        $defs{$sensorname}{bitMSG} = q[100001011110111110101010];
         CommandAttr(undef,qq[$sensorname $attr $v]); 
         is($attr{$sensorname}{$attr}, $v, qq[check attribute $attr is $v]);
       }
@@ -161,7 +161,7 @@ InternalTimer(time()+0.44, sub {
         CommandAttr(undef,qq[$sensorname $attr $v]); 
         isnt($attr{$sensorname}{$attr}, $v, qq[check attribute $attr is not $v]);
 
-        $defs{$sensorname}{bitMSG} = q[010];
+        $defs{$sensorname}{bitMSG} = q[000101101111011000010000111011110000];
         CommandAttr(undef,qq[$sensorname $attr $v]); 
         is($attr{$sensorname}{$attr}, $v, qq[check attribute $attr is $v]);
       }
@@ -182,7 +182,7 @@ InternalTimer(time()+0.45, sub {
         CommandAttr(undef,qq[$sensorname $attr $v]); 
         isnt($attr{$sensorname}{$attr}, $v, qq[check attribute $attr is not $v]);
 
-        $defs{$sensorname}{bitMSG} = q[010];
+        $defs{$sensorname}{bitMSG} = q[1111101011010000100010001000001110100011];
         CommandAttr(undef,qq[$sensorname $attr $v]); 
         is($attr{$sensorname}{$attr}, $v, qq[check attribute $attr is $v]);
       }
@@ -203,7 +203,7 @@ InternalTimer(time()+0.46, sub {
         CommandAttr(undef,qq[$sensorname $attr $v]); 
         isnt($attr{$sensorname}{$attr}, $v, qq[check attribute $attr is not $v]);
 
-        $defs{$sensorname}{bitMSG} = q[010];
+        $defs{$sensorname}{bitMSG} = q[00000000111001101011111010010001000001111100];
         CommandAttr(undef,qq[$sensorname $attr $v]); 
         is($attr{$sensorname}{$attr}, $v, qq[check attribute $attr is $v]);
       }
@@ -224,7 +224,7 @@ InternalTimer(time()+0.47, sub {
         CommandAttr(undef,qq[$sensorname $attr $v]); 
         isnt($attr{$sensorname}{$attr}, $v, qq[check attribute $attr is not $v]);
 
-        $defs{$sensorname}{bitMSG} = q[010];
+        $defs{$sensorname}{bitMSG} = q[0111011100001001111101011101111000001001111101100000];
         CommandAttr(undef,qq[$sensorname $attr $v]); 
         is($attr{$sensorname}{$attr}, $v, qq[check attribute $attr is $v]);
       }
@@ -245,7 +245,7 @@ InternalTimer(time()+0.48, sub {
         CommandAttr(undef,qq[$sensorname $attr $v]); 
         isnt($attr{$sensorname}{$attr}, $v, qq[check attribute $attr is not $v]);
 
-        $defs{$sensorname}{bitMSG} = q[010];
+        $defs{$sensorname}{bitMSG} = q[10011111011111011111100000100101000000101001110000010000];
         CommandAttr(undef,qq[$sensorname $attr $v]); 
         is($attr{$sensorname}{$attr}, $v, qq[check attribute $attr is $v]);
       }
@@ -266,7 +266,7 @@ InternalTimer(time()+0.49, sub {
         CommandAttr(undef,qq[$sensorname $attr $v]); 
         isnt($attr{$sensorname}{$attr}, $v, qq[check attribute $attr is not $v]);
 
-        $defs{$sensorname}{bitMSG} = q[010];
+        $defs{$sensorname}{bitMSG} = q[1111111111111111111111111111111111111111111111111111111111111111];
         CommandAttr(undef,qq[$sensorname $attr $v]); 
         is($attr{$sensorname}{$attr}, $v, qq[check attribute $attr is $v]);
       }
@@ -287,7 +287,7 @@ InternalTimer(time()+0.50, sub {
         CommandAttr(undef,qq[$sensorname $attr $v]); 
         isnt($attr{$sensorname}{$attr}, $v, qq[check attribute $attr is not $v]);
 
-        $defs{$sensorname}{bitMSG} = q[010];
+        $defs{$sensorname}{bitMSG} = q[10100011000000000101100001111011000000010000000001000011000101111000];
         CommandAttr(undef,qq[$sensorname $attr $v]); 
         is($attr{$sensorname}{$attr}, $v, qq[check attribute $attr is $v]);
       }
