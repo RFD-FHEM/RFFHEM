@@ -132,7 +132,7 @@ InternalTimer(time()+0.44, sub {
     my $sensorname=shift;
 
     my $attr = q[model];
-    $defs{$sensorname}{lastMSG} = q[18469];
+    $defs{$sensorname}{lastMSG} = q[DAAB255487];
 
     subtest qq[Change module with hexlength 10 with attribute] => sub {
       plan(4);
