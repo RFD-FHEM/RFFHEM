@@ -1399,6 +1399,27 @@
                   "comment" : "#1"
                }
             ]
+         },
+         {
+            "comment" : "Fine Offset WH51, ECOWITT WH51, MISOL/1, Froggit DP100 Soil Moisture Sensor",
+            "dmsg" : "W107#510D48E6107F1B00AA00000010F0",
+            "internals" : {
+               "DEF" : "SD_WS_107_H",
+               "NAME" : "SD_WS_107_H"
+            },
+            "readings" : {
+               "adc" : "170",
+               "batteryVoltage" : "1.6",
+               "humidity" : "27",
+               "state" : " H: 27",
+               "type" : "WH51, DP100, MISOL/1"
+            },
+            "rmsg" : "MN;D=510D48E6107F1B00AA00000010F0;R=53;",
+            "tests" : [
+               {
+                  "comment" : "#3"
+               }
+            ]
          }
       ],
       "id" : "107",
@@ -2026,6 +2047,61 @@
    {
       "data" : [
          {
+            "comment" : "BRESSER PM2.5/10 air quality meter",
+            "dmsg" : "W117#49C8CAC2176023178000700080009004400530054039600000AA",
+            "internals" : {
+               "DEF" : "SD_WS_117_1",
+               "NAME" : "SD_WS_117_1"
+            },
+            "readings" : {
+               "batteryChanged" : "1",
+               "batteryVoltage" : 3.96,
+               "channel" : 1,
+               "pm_10" : 9,
+               "pm_2_5" : 8,
+               "state" : "PM2.5: 8 PM10: 9",
+               "type" : "Bresser_7in1"
+            },
+            "rmsg" : "MN;D=E3626068BDCA89BD2AAADAAA2AAA3AAEEAAF9AAFEA93CAAAAA00;R=10;",
+            "tests" : [
+               {
+                  "attributes" : {},
+                  "comment" : "#0"
+               }
+            ]
+         },
+         {
+            "comment" : "BRESSER PM2.5/10 air quality meter",
+            "dmsg" : "W117#065CCAC2176023178058806290636099999999999939600000AA",
+            "internals" : {
+               "DEF" : "SD_WS_117_1",
+               "NAME" : "SD_WS_117_1"
+            },
+            "readings" : {
+               "batteryChanged" : "1",
+               "batteryVoltage" : 3.96,
+               "channel" : 1,
+               "pm_10" : 636,
+               "pm_2_5" : 629,
+               "state" : "PM2.5: 629 PM10: 636",
+               "type" : "Bresser_7in1"
+            },
+            "rmsg" : "MN;D=ACF66068BDCA89BD2AF22AC83AC9CA33333333333393CAAAAA00;R=9;",
+            "tests" : [
+               {
+                  "attributes" : {},
+                  "comment" : "#1"
+               }
+            ]
+         }
+      ],
+      "id" : 117,
+      "module" : "SD_WS",
+      "name" : "BRESSER PM2.5/10"
+   },
+   {
+      "data" : [
+         {
             "comment" : "Weather station with 30.3151 (T/H-transmitter), 30.3152 (rain gauge), 30.3153 (anemometer)",
             "dmsg" : "W120#FEAB049EA804080C53AC",
             "internals" : {
@@ -2407,9 +2483,68 @@
       "id" : "126",
       "module" : "SD_WS",
       "name" : "Fine Offset | Ambient Weather WH40 rain gauge"
+   },
+   {
+      "data" : [
+         {
+            "comment" : "Sainlogic weather stations",
+            "dmsg" : "W129#FFD4C0E002031B000084C024FFFBFB06",
+            "internals" : {
+               "DEF" : "SD_WS_129",
+               "NAME" : "SD_WS_129"
+            },
+            "readings" : {
+               "batteryState" : "ok",
+               "humidity" : 36,
+               "rain" : 0,
+               "state" : "T: 27.6 H: 36 W: 0.2 R: 0",
+               "temperature" : 27.6,
+               "type" : "FT-0835, FT0300, FT-0310, FT020T, WS019T",
+               "windDirectionDegree" : 27,
+               "windDirectionText" : "NNE",
+               "windGust" : "0.3",
+               "windSpeed" : "0.2"
+            },
+            "rmsg" : "MC;LL=-987;LH=970;SL=-506;SH=473;D=002B3F1FFDFCE4FFFF7B3FDB000404F9;C=489;L=128;R=60;",
+            "tests" : [
+               {
+                  "attributes" : {},
+                  "comment" : "#0"
+               }
+            ]
+         },
+         {
+            "comment" : "Sainlogic weather stations",
+            "dmsg" : "W129#FFD4CBD80D11A73C06841B5AC1A14864",
+            "internals" : {
+               "DEF" : "SD_WS_129",
+               "NAME" : "SD_WS_129"
+            },
+            "readings" : {
+               "batteryState" : "low",
+               "brightness" : 115105,
+               "humidity" : 90,
+               "rain" : 1536.6,
+               "state" : "T: 18.4 H: 90 W: 1.3 R: 1536.6 B: 115105",
+               "temperature" : 18.4,
+               "type" : "FT-0835, FT0300, FT-0310, FT020T, WS019T",
+               "uv" : 7.2,
+               "windDirectionDegree" : 167,
+               "windDirectionText" : "SSE",
+               "windGust" : "1.7",
+               "windSpeed" : "1.3"
+            },
+            "rmsg" : "MC;LL=-1036;LH=918;SL=-533;SH=435;D=002B3427F2EE58C3F97BE4A53E5EB79B;C=486;L=128;R=212;",
+            "tests" : [
+               {
+                  "attributes" : {},
+                  "comment" : "#1"
+               }
+            ]
+         }
+      ],
+      "id" : 129,
+      "module" : "SD_WS",
+      "name" : "FT-0835"
    }
-
-
-
-
 ]

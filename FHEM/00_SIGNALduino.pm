@@ -254,7 +254,7 @@ my %matchListSIGNALduino = (
       '14:Dooya'            => '^P16#[A-Fa-f0-9]+',
       '15:SOMFY'            => '^Ys[0-9A-F]+',
       '16:SD_WS_Maverick'   => '^P47#[A-Fa-f0-9]+',
-      '17:SD_UT'            => '^P(?:14|20|24|26|29|30|34|46|56|68|69|76|78|81|83|86|90|91|91.1|92|93|95|97|99|104|105|114|118|121)#.*', # universal - more devices with different protocols
+      '17:SD_UT'            => '^P(?:14|20|24|26|29|30|34|46|56|68|69|76|78|81|83|86|90|91|91.1|92|93|95|97|99|104|105|114|118|121|127|128|130|132)#.*', # universal - more devices with different protocols
       '18:FLAMINGO'         => '^P13\.?1?#[A-Fa-f0-9]+',              # Flamingo Smoke
       '19:CUL_WS'           => '^K[A-Fa-f0-9]{5,}',
       '20:Revolt'           => '^r[A-Fa-f0-9]{22}',
@@ -414,6 +414,7 @@ sub SIGNALduino_Define {
   }
   
   #$hash->{CMDS} = '';
+  $hash->{ClientsKeepOrder} = 1;
   $hash->{Clients}    = $clientsSIGNALduino;
   $hash->{MatchList}  = \%matchListSIGNALduino;
   $hash->{DeviceName} = $dev;
@@ -3391,7 +3392,7 @@ sub SIGNALduino_IdList {
   }
   #SIGNALduino_Log3 $name, 3, "$name IdList: attr whitelistIds=$aVal" if ($aVal);
 
-  if ($wflag == 0) {                      # whitelist not aktive
+  if ($wflag == 0) {                      # whitelist not active
     if (!defined($blacklist)) {
       $blacklist = AttrVal($name,'blacklist_IDs','');
     }
@@ -3401,7 +3402,12 @@ sub SIGNALduino_IdList {
       #my $w = join ', ' => map "$_" => keys %BlacklistIDs;
       #SIGNALduino_Log3 $name, 3, "$name IdList, Attr blacklist $w";
     }
+    $hash->{Clients} =  $clientsSIGNALduino; # Set Default in clientlist if whitelist is not active
+  } else {
+    $hash->{Clients} =  q[] # clear Clients if whitelist is active    
   }
+
+
   for my $id ($hash->{protocolObject}->getKeys())
   {
     if ($wflag == 1)                      # whitelist active
@@ -3411,8 +3417,9 @@ sub SIGNALduino_IdList {
         push (@skippedWhiteId, $id);
         next;
       }
-    }
-    else {                                # whitelist not active
+	    my $clientmodule = $hash->{protocolObject}->getProperty($id,'clientmodule',undef);
+      $hash->{Clients} .= qq[$clientmodule:] if (defined $clientmodule && $hash->{Clients} !~ /$clientmodule:/); # add module only if clientModule is known and don't do it more than once
+    } else {                                # whitelist not active
       if (exists($BlacklistIDs{$id})) {
         #SIGNALduino_Log3 $name, 3, "$name: IdList, skip Blacklist ID $id";
         push (@skippedBlackId, $id);
@@ -3461,6 +3468,10 @@ sub SIGNALduino_IdList {
       push (@muIdList, $id);
     }
   }
+  $hash->{Clients} = $hash->{Clients} =~ s/.{25,50}:\K(?=.{25,50})/ :/rg; # Add spaces to create linebreaks in webview
+  $hash->{Clients} = substr($hash->{Clients}, 0, -1); # Remove last :
+
+  delete $hash->{'.clientArray'}; #force recompute of clientArray after changes
 
   @msIdList = sort {$a <=> $b} @msIdList;
   @muIdList = sort {$a <=> $b} @muIdList;
@@ -4813,10 +4824,12 @@ USB-connected devices (SIGNALduino):<br>
         <ul><small>Example: BRESSER 5-in-1 weather center, BRESSER rain gauge, Fody E42, Fody E43</small></ul>
       </li>
       <li>Bresser_6in1<br>
-        modulation 2-FSK, Datarate=8.23 kbps, Sync Word=2DD4, FIFO-THR=20 Byte, frequency 868.3 MHz
+        Modulation 2-FSK, Datarate=8.23 kbps, Sync Word=2DD4, Packet Length=18 Byte, frequency 868.3 MHz
       </li>
       <li>Bresser_7in1<br>
-        modulation 2-FSK, Datarate=8.23 kbps, Sync Word=2DD4, Packet Length=22 Byte, frequency 868.3 MHz
+        Modulation 2-FSK, Datarate=8.23 kbps, Sync Word=2DD4, Packet Length=23 Byte, frequency 868.3 MHz
+        <ul><small>Example: BRESSER 7-in-1 outdoor sensor, BRESSER PM2.5/10 air quality meter</small></ul>
+      </li>
       </li>
       <li>Fine_Offset_WH51_434<br>
         Modulation 2-FSK, Datarate=17.26 kbps, Sync Word=2DD4, Packet Length=14 Byte, Frequency 433.92 MHz
@@ -5407,10 +5420,11 @@ USB-connected devices (SIGNALduino):<br>
         <ul><small>Beispiel: BRESSER 5-in-1 Wetter Center, BRESSER Profi Regenmesser, Fody E42, Fody E43</small></ul>
       </li>
       <li>Bresser_6in1<br>
-        Modulation 2-FSK, Datenrate=8.23 kbps, Sync Word=2DD4, FIFO-THR=20 Byte, Frequenz 868.3 MHz
+        Modulation 2-FSK, Datenrate=8.23 kbps, Sync Word=2DD4, Packet Length=18 Byte, Frequenz 868.3 MHz
       </li>
       <li>Bresser_7in1<br>
-        Modulation 2-FSK, Datenrate=8.23 kbps, Sync Word=2DD4, Packet Length=22 Byte, Frequenz 868.3 MHz
+        Modulation 2-FSK, Datenrate=8.23 kbps, Sync Word=2DD4, Packet Length=23 Byte, Frequenz 868.3 MHz
+        <ul><small>Beispiel: BRESSER 7-in-1 Außensensor, BRESSER PM2.5/10 Luftqualitätssensor</small></ul>
       </li>
       <li>Fine_Offset_WH51_434<br>
         Modulation 2-FSK, Datenrate=17.26 kbps, Sync Word=2DD4, Packet Length=14 Byte, Frequenz 433.92 MHz
@@ -5430,7 +5444,7 @@ USB-connected devices (SIGNALduino):<br>
       </li>
       <li>Fine_Offset_WH31_868<br>
         Modulation 2-FSK, Datenrate=17.26 kbps, Sync Word=2DD4, Packet Length=11 Byte, Frequenz 868.35 MHz
-        <ul><small>Beispiel: Temp feuchte Sensor Fine Offset WH31, Froggit DP50, Ambient Weather WH31e/b, Ecowitt wh31</small></ul>
+        <ul><small>Beispiel: Temperatur-/Feuchtesensor Fine Offset WH31, Froggit DP50, Ambient Weather WH31e/b, Ecowitt wh31</small></ul>
       </li>
       <li>Fine_Offset_WH40_868<br>
         Modulation 2-FSK, Datenrate=17.26 kbps, Sync Word=2DD4, Packet Length=14 Byte, Frequenz 868.35 MHz
@@ -5639,7 +5653,7 @@ USB-connected devices (SIGNALduino):<br>
       "web": "https://wiki.fhem.de/wiki/SIGNALduino"
     }
   },
-  "version": "v3.5.5"
+  "version": "v3.5.6"
 }
 =end :application/json;q=META.json
 =cut
