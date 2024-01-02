@@ -92,11 +92,12 @@ InternalTimer(time()+0.42, sub {
     $defs{$sensorname}{lastMSG} = q[1846];
 
     subtest qq[Change module with hexlength 4 with attribute] => sub {
-      plan(2);
+      plan(1);
       for my $v (qw(TR60C1)) {
-        $defs{$sensorname}{bitMSG} = undef;
-        CommandAttr(undef,qq[$sensorname $attr $v]); 
-        isnt($attr{$sensorname}{$attr}, $v, qq[check attribute $attr is not $v]);
+        # !!! nur bei mehreren Devices mit selbiger Länge
+        # $defs{$sensorname}{bitMSG} = undef;
+        # CommandAttr(undef,qq[$sensorname $attr $v]); 
+        # isnt($attr{$sensorname}{$attr}, $v, qq[check attribute $attr is not $v]);
 
         $defs{$sensorname}{bitMSG} = q[010];
         CommandAttr(undef,qq[$sensorname $attr $v]); 
@@ -131,11 +132,32 @@ InternalTimer(time()+0.44, sub {
     my $sensorname=shift;
 
     my $attr = q[model];
+    $defs{$sensorname}{lastMSG} = q[18469];
+
+    subtest qq[Change module with hexlength 10 with attribute] => sub {
+      plan(4);
+      for my $v (qw(BF_301 xavax)) {
+        $defs{$sensorname}{bitMSG} = undef;
+        CommandAttr(undef,qq[$sensorname $attr $v]); 
+        isnt($attr{$sensorname}{$attr}, $v, qq[check attribute $attr is not $v]);
+
+        $defs{$sensorname}{bitMSG} = q[010];
+        CommandAttr(undef,qq[$sensorname $attr $v]); 
+        is($attr{$sensorname}{$attr}, $v, qq[check attribute $attr is $v]);
+      }
+    };
+
+}, 'SD_UT_Test_hlen10');
+
+InternalTimer(time()+0.45, sub {
+    my $sensorname=shift;
+
+    my $attr = q[model];
     $defs{$sensorname}{lastMSG} = q[1846ABCDEF0];
 
     subtest qq[Change module with hexlength 11 with attribute] => sub {
-      plan(2);
-      for my $v (qw(HS1_868_BS)) {
+      plan(4);
+      for my $v (qw(HS1_868_BS HSM4)) {
         $defs{$sensorname}{bitMSG} = undef;
         CommandAttr(undef,qq[$sensorname $attr $v]); 
         isnt($attr{$sensorname}{$attr}, $v, qq[check attribute $attr is not $v]);
