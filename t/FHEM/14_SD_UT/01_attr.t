@@ -115,7 +115,7 @@ InternalTimer(time()+0.43, sub {
 
     subtest qq[Change module with hexlength 5 with attribute] => sub {
       plan(22);
-      for my $v (qw(BeSmart_S4 Chilitec_22640 OR28V QUIGG_DMV SF01_01319004 SF01_01319004_Typ2 Tedsen_SKX1xx Tedsen_SKX2xx Tedsen_SKX4xx Tedsen_SKX6xx TR_502MSV)) {
+      for my $v (qw(Chilitec_22640 OR28V QUIGG_DMV SF01_01319004 SF01_01319004_Typ2 Tedsen_SKX1xx Tedsen_SKX2xx Tedsen_SKX4xx Tedsen_SKX6xx TR_502MSV BeSmart_S4)) {
         $defs{$sensorname}{bitMSG} = undef;
         CommandAttr(undef,qq[$sensorname $attr $v]); 
         isnt($attr{$sensorname}{$attr}, $v, qq[check attribute $attr is not $v]);
@@ -157,7 +157,7 @@ InternalTimer(time()+0.45, sub {
 
     subtest qq[Change module with hexlength 11 with attribute] => sub {
       plan(4);
-      for my $v (qw(HS1_868_BS HSM4)) {
+      for my $v (qw(HSM4 HS1_868_BS)) {
         $defs{$sensorname}{bitMSG} = undef;
         CommandAttr(undef,qq[$sensorname $attr $v]); 
         isnt($attr{$sensorname}{$attr}, $v, qq[check attribute $attr is not $v]);
