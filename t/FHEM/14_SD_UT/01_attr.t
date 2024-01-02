@@ -131,6 +131,27 @@ InternalTimer(time()+0.44, sub {
     my $sensorname=shift;
 
     my $attr = q[model];
+    $defs{$sensorname}{lastMSG} = q[16F610];
+
+    subtest qq[Change module with hexlength 6 with attribute] => sub {
+      plan(10);
+      for my $v (qw(CREATE_6601TL HA_HX2 Navaris RCnoName128 TC6861)) {
+        $defs{$sensorname}{bitMSG} = undef;
+        CommandAttr(undef,qq[$sensorname $attr $v]); 
+        isnt($attr{$sensorname}{$attr}, $v, qq[check attribute $attr is not $v]);
+
+        $defs{$sensorname}{bitMSG} = q[010];
+        CommandAttr(undef,qq[$sensorname $attr $v]); 
+        is($attr{$sensorname}{$attr}, $v, qq[check attribute $attr is $v]);
+      }
+    };
+
+}, 'SD_UT_Test_hlen6');
+
+InternalTimer(time()+0.44, sub {
+    my $sensorname=shift;
+
+    my $attr = q[model];
     $defs{$sensorname}{lastMSG} = q[16F610EF0];
 
     subtest qq[Change module with hexlength 9 with attribute] => sub {
@@ -191,6 +212,27 @@ InternalTimer(time()+0.46, sub {
 }, 'SD_UT_Test_hlen11');
 
 InternalTimer(time()+0.47, sub {
+    my $sensorname=shift;
+
+    my $attr = q[model];
+    $defs{$sensorname}{lastMSG} = q[1846ABCDEF0AD];
+
+    subtest qq[Change module with hexlength 13 with attribute] => sub {
+      plan(2);
+      for my $v (qw(Techmar)) {
+        $defs{$sensorname}{bitMSG} = undef;
+        CommandAttr(undef,qq[$sensorname $attr $v]); 
+        isnt($attr{$sensorname}{$attr}, $v, qq[check attribute $attr is not $v]);
+
+        $defs{$sensorname}{bitMSG} = q[010];
+        CommandAttr(undef,qq[$sensorname $attr $v]); 
+        is($attr{$sensorname}{$attr}, $v, qq[check attribute $attr is $v]);
+      }
+    };
+
+}, 'SD_UT_Test_hlen13');
+
+InternalTimer(time()+0.48, sub {
     my $sensorname=shift;
 
     my $attr = q[model];
