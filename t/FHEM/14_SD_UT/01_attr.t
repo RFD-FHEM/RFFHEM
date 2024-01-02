@@ -92,12 +92,11 @@ InternalTimer(time()+0.42, sub {
     $defs{$sensorname}{lastMSG} = q[1846];
 
     subtest qq[Change module with hexlength 4 with attribute] => sub {
-      plan(1);
+      plan(2);
       for my $v (qw(TR60C1)) {
-        # !!! nur bei mehreren Devices mit selbiger Länge
-        # $defs{$sensorname}{bitMSG} = undef;
-        # CommandAttr(undef,qq[$sensorname $attr $v]); 
-        # isnt($attr{$sensorname}{$attr}, $v, qq[check attribute $attr is not $v]);
+        $defs{$sensorname}{bitMSG} = undef;
+        CommandAttr(undef,qq[$sensorname $attr $v]); 
+        isnt($attr{$sensorname}{$attr}, $v, qq[check attribute $attr is not $v]);
 
         $defs{$sensorname}{bitMSG} = q[010];
         CommandAttr(undef,qq[$sensorname $attr $v]); 
