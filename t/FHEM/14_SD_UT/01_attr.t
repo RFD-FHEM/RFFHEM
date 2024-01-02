@@ -64,7 +64,7 @@ InternalTimer(time()+0.4, sub {
 
 }, 'SD_UT_Test_Buttons_six');
 
-InternalTimer(time()+0.5, sub {
+InternalTimer(time()+0.41, sub {
     my $sensorname=shift;
 
     my $attr = q[model];
@@ -83,12 +83,9 @@ InternalTimer(time()+0.5, sub {
       }
     };
 
- 	done_testing();
-	exit(0);
-
 }, 'SD_UT_Test_hlen8');
 
-InternalTimer(time()+0.6, sub {
+InternalTimer(time()+0.42, sub {
     my $sensorname=shift;
 
     my $attr = q[model];
@@ -107,12 +104,9 @@ InternalTimer(time()+0.6, sub {
       }
     };
 
- 	done_testing();
-	exit(0);
-
 }, 'SD_UT_Test_hlen4');
 
-InternalTimer(time()+0.7, sub {
+InternalTimer(time()+0.43, sub {
     my $sensorname=shift;
 
     my $attr = q[model];
@@ -131,12 +125,9 @@ InternalTimer(time()+0.7, sub {
       }
     };
 
- 	done_testing();
-	exit(0);
-
 }, 'SD_UT_Test_hlen5');
 
-InternalTimer(time()+0.8, sub {
+InternalTimer(time()+0.44, sub {
     my $sensorname=shift;
 
     my $attr = q[model];
