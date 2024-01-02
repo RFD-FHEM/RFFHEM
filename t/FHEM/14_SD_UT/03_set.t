@@ -90,6 +90,16 @@ my $module = basename (dirname(__FILE__));
         subCheck        => hash { field 'IOWrite' => array { item 0 => hash { field 'args' => array { item hash { etc(); } ; item 'sendMsg'; item 'P68#01011101100010000000#R5' }; etc() } } } ,
     },
     {
+        targetName      =>  q[SD_UT_Test_OR28V_2],
+        testname        =>  q[set command volume_minus],
+        cmd             =>  q[set volume_minus],
+        prep_commands   => [                               # Any FHEM custom command can be placed in here, which will be called before the test is run
+                    'setreading $targetName state volume_minus', 
+        ],
+        returnCheck    => F(),
+        subCheck        => hash { field 'IOWrite' => array { item 0 => hash { field 'args' => array { item hash { etc(); } ; item 'sendMsg'; item 'P68#01101101100010000001#R5' }; etc() } } } ,
+    },    
+    {
         targetName      =>  q[SD_UT_Test_Chilitec_22640_AA80],
         testname        =>  q[set command power_on],
         cmd             =>  q[set power_on],
