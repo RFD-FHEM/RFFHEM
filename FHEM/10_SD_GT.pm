@@ -186,6 +186,9 @@ sub Define {
   my $iodevice;
   my $ioname;
 
+  # Anzeigen der Modulversion (Internal FVERSION) über FHEM::Meta, Variable in META.json Abschnitt erforderlich: "version": "v1.0.0", siehe https://wiki.fhem.de/wiki/Meta
+  return $@ unless ( FHEM::Meta::SetInternals($hash) );
+
   if( @a < 3 ) { return 'SD_GT: wrong syntax for define, must be: define <name> SD_GT <DEF> <IODev>' };
 
   $hash->{DEF} = $a[2];
