@@ -134,7 +134,7 @@ InternalTimer(time()+0.44, sub {
     $defs{$sensorname}{lastMSG} = q[16F610EF0];
 
     subtest qq[Change module with hexlength 9 with attribute] => sub {
-      plan(4);
+      plan(10);
       for my $v (qw(KL_RF01 MD_2003R MD_210R MD_2018R RC_10)) {
         $defs{$sensorname}{bitMSG} = undef;
         CommandAttr(undef,qq[$sensorname $attr $v]); 
