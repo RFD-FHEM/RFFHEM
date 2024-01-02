@@ -1527,6 +1527,29 @@
                   "comment" : "#3"
                }
             ]
+         },
+         {
+            "comment" : "button all / state unknown",
+            "dmsg" : "P90#786909230",
+            "internals" : {
+               "DEF" : "RC_10 7869_all",
+               "NAME" : "RC_10_7869_all"
+            },
+            "readings" : {
+               "LastAction" : "receive",
+               "deviceCode" : "0111100001101001",
+               "state" : "1001",
+               "x_n4" : "0000"
+            },
+            "rmsg" : "MS;P1=-363;P2=789;P3=267;P4=-887;P5=-10332;D=35342121212134343434212134213434213434343421343421343421343434212134;CP=3;SP=5;O;m2;4;",
+            "tests" : [
+               {
+                  "attributes" : {
+                     "model" : "RC_10"
+                  },
+                  "comment" : "#4"
+               }
+            ]
          }
       ],
       "id" : "90",
