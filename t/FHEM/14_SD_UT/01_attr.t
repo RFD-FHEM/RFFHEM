@@ -97,7 +97,8 @@ InternalTimer(time()+0.41, sub {
  	done_testing();
 	exit(0);
 
-}, 'SD_UT_Test_DC_1961_TG_1846');
+# }, 'SD_UT_Test_DC_1961_TG_1846');
+}, 'SD_UT_Test_TC6861_3DC_1');
 
 
 1;
