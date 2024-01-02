@@ -48,7 +48,7 @@ InternalTimer(time()+0.4, sub {
 
     $attr = q[model];
     $defs{$sensorname}{lastMSG} = q[010];
-        
+
     subtest qq[Change module with hexlength 3 with attribute] => sub {
       plan(18);
       for my $v (qw(Buttons_five Buttons_six RH787T SA_434_1_mini Unitec_47031 CAME_TOP_432EV TR401 Novy_840029 Novy_840039)) {
@@ -68,22 +68,36 @@ InternalTimer(time()+0.41, sub {
     my $sensorname=shift;
 
     my $attr = q[model];
-    my $v = q[DC_1961_TG];
-    subtest qq[Change module attribute to DC_1961_TG] => sub { 
-        plan(2);
-        $defs{$sensorname}{lastMSG} = q[1846A865];
-        CommandAttr(undef,qq[$sensorname $attr $v]); 
-        isnt($attr{$sensorname}{$attr}, $v, qq[check attribute $attr isnt $v]);
+    $defs{$sensorname}{lastMSG} = q[1846A865];
+    # my $v = q[DC_1961_TG];
+    # subtest qq[Change module attribute to DC_1961_TG] => sub { 
+        # plan(2);
+        # $defs{$sensorname}{lastMSG} = q[1846A865];
+        # CommandAttr(undef,qq[$sensorname $attr $v]); 
+        # isnt($attr{$sensorname}{$attr}, $v, qq[check attribute $attr isnt $v]);
         
+        # $defs{$sensorname}{bitMSG} = q[010];
+        # CommandAttr(undef,qq[$sensorname $attr $v]);     
+        # is($attr{$sensorname}{$attr}, $v, qq[check attribute $attr is $v]);
+    # };
+
+    subtest qq[Change module with hexlength 8 with attribute] => sub {
+      plan(10);
+      for my $v (qw(DC_1961_TG Hamulight_AB Krinner_LUMIX RCnoName127 RCnoName20)) {
+        $defs{$sensorname}{bitMSG} = undef;
+        CommandAttr(undef,qq[$sensorname $attr $v]); 
+        isnt($attr{$sensorname}{$attr}, $v, qq[check attribute $attr is not $v]);
+
         $defs{$sensorname}{bitMSG} = q[010];
-        CommandAttr(undef,qq[$sensorname $attr $v]);     
+        CommandAttr(undef,qq[$sensorname $attr $v]); 
         is($attr{$sensorname}{$attr}, $v, qq[check attribute $attr is $v]);
+      }
     };
 
  	done_testing();
 	exit(0);
 
-}, 'SD_UT_Test_TC6861_3DC_1');
+}, 'SD_UT_Test_DC_1961_TG_1846');
 
 
 1;
