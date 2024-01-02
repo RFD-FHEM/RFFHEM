@@ -16,7 +16,7 @@ use Carp qw(croak carp);
 use constant HAS_DigestCRC => defined eval { require Digest::CRC; };
 use constant HAS_JSON => defined eval { require JSON; };
 
-our $VERSION = '2.07';
+our $VERSION = '2.08';
 use Storable qw(dclone);
 use Scalar::Util qw(blessed);
 
@@ -2021,7 +2021,7 @@ sub ConvBresser_7in1 {
   my $hexData = shift // croak 'Error: called without $hexdata as input';
   my $hexLength = length($hexData);
 
-  return (1, 'ConvBresser_7in1, hexData is to short') if ($hexLength < 44); # check double, in def length_min set
+  return (1, 'ConvBresser_7in1, hexData is to short') if ($hexLength < 46); # check double, in def length_min set
   return (1, 'ConvBresser_7in1, byte 21 is 0x00') if (substr($hexData,42,2) eq '00'); # check byte 21
 
   my $hexDataXorA ='';
@@ -2032,7 +2032,7 @@ sub ConvBresser_7in1 {
   $self->_logging(qq[ConvBresser_7in1, msg=$hexData],5);
   $self->_logging(qq[ConvBresser_7in1, xor=$hexDataXorA],5);
 
-  my $checksum = lib::SD_Protocols::LFSR_digest16(20, 0x8810, 0xba95, substr($hexDataXorA,4,40));
+  my $checksum = lib::SD_Protocols::LFSR_digest16(21, 0x8810, 0xBA95, substr($hexDataXorA,4,42));
   my $checksumcalc = sprintf('%04X',$checksum ^ hex(substr($hexDataXorA,0,4)));
   $self->_logging(qq[ConvBresser_7in1, checksumCalc:0x$checksumcalc, must be 0x6DF1],5);
   return ( 1, qq[ConvBresser_7in1, checksumCalc:0x$checksumcalc != checksum:0x6DF1] ) if ($checksumcalc ne '6DF1');
