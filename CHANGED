@@ -1,3 +1,6 @@
+2024-01-02 - Update tests part two | for the functional reliability of the module SD_UT (#1218)
+
+* added some tests for define and attr
 2023-12-31 - new sensor BRESSER PM2.5/10 air quality meter (#1219)
 
 * Bresser PM2.5/10 air quality meter
