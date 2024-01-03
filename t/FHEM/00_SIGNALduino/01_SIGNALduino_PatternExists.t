@@ -20,7 +20,7 @@ InternalTimer(time(), sub {
 		plan(1);
 
 		my $rmsg="MU;P0=7944;P1=-724;P2=742;P3=241;P4=-495;P5=483;P6=-248;D=01212121343434345656343434563434345634565656343434565634343434343434345634345634345634343434343434343434345634565634345656345634343456563421212121343434345656343434563434345634565656343434565634343434343434345634345634345634343434343434343434345634565634;CP=3;R=47;";
-	    my %msg_parts = SIGNALduino_Split_Message($rmsg, $targetHash);
+	    my %msg_parts = SIGNALduino_Split_Message($rmsg, $target);
 	    my $clockabs= 480;
 		$patternListRaw{$_} = $msg_parts{pattern}{$_} for keys %{$msg_parts{pattern}};
 
@@ -31,7 +31,7 @@ InternalTimer(time(), sub {
 		plan(1);
 
 		my $rmsg="MU;P0=740;P1=-2076;P2=381;P3=-4022;P4=-604;P5=152;P6=-1280;P7=-8692;D=012123232321245621212121232123232427212323212123232326;CP=2;R=228;";
-	    my %msg_parts = SIGNALduino_Split_Message($rmsg, $targetHash);
+	    my %msg_parts = SIGNALduino_Split_Message($rmsg, $target);
 	    my $clockabs= 480;
 		$patternListRaw{$_} = $msg_parts{pattern}{$_} for keys %{$msg_parts{pattern}};
 
@@ -42,7 +42,7 @@ InternalTimer(time(), sub {
 		plan(1);
 
 		my $rmsg="MU;P0=-2076;P1=479;P2=-963;P3=-492;P4=-22652;D=01213121213121212131313121313131312121313131313121212121313131212131313131313131313121313121313131313131313131312131212121313121412131212121212131213121213121212131313121313131312121313131313121212121313131212131313131313131313121313121313131313131313131;CP=1;R=26;O;";
-	    my %msg_parts = SIGNALduino_Split_Message($rmsg, $targetHash);
+	    my %msg_parts = SIGNALduino_Split_Message($rmsg, $target);
 	    my $clockabs= 480;
 		$patternListRaw{$_} = $msg_parts{pattern}{$_} for keys %{$msg_parts{pattern}};
 
@@ -54,7 +54,7 @@ InternalTimer(time(), sub {
 		plan(3);
 
 		my $rmsg="MU;P0=7944;P1=-724;P2=742;P3=241;P4=-495;P5=483;P6=-248;D=01212121343434345656343434563434345634565656343434565634343434343434345634345634345634343434343434343434345634565634345656345634343456563421212121343434345656343434563434345634565656343434565634343434343434345634345634345634343434343434343434345634565634;CP=3;R=47;";
-	    my %msg_parts = SIGNALduino_Split_Message($rmsg, $targetHash);
+	    my %msg_parts = SIGNALduino_Split_Message($rmsg, $target);
 	    my $clockabs= 250;
 		$patternListRaw{$_} = $msg_parts{pattern}{$_} for keys %{$msg_parts{pattern}};
 
@@ -69,7 +69,7 @@ InternalTimer(time(), sub {
 		plan(3);
 
 		my $rmsg="MU;P0=-9524;P1=364;P2=-414;P3=669;P4=-755;P5=-16076;CP=1;R=83;D=0123412341234123412341412341414141412351234123412341234123414123414141414123;e;w=0;";
-	    my %msg_parts = SIGNALduino_Split_Message($rmsg, $targetHash);
+	    my %msg_parts = SIGNALduino_Split_Message($rmsg, $target);
 	    my $clockabs= 350;
 		$patternListRaw{$_} = $msg_parts{pattern}{$_} for keys %{$msg_parts{pattern}};
 
