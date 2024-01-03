@@ -1,3 +1,13 @@
+2024-01-03 - little fix 10_SD_GT and added tests (#1223)
+
+* Update 10_SD_GT.pm
+- replace tabs with spaces (no module restrictions)
+- fix META versionssupport
+- fix PERL WARNING
+- added tests
+- revised SVN numbre
+- remove old Internals VERSION_SD_GT
+- added Meta version
 2024-01-03 - Call debug via a coderef if enabled, otherwise return (#1169)
 
 * 00_SIGNALduino.pm
