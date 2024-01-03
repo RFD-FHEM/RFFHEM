@@ -1,4 +1,4 @@
-# $Id: 00_SIGNALduino.pm 3.5.6 2023-12-14 17:16:35Z sidey79 $
+# $Id: 00_SIGNALduino.pm 3.5.6 2024-01-02 22:22:14Z sidey79 $
 # v3.5.6 - https://github.com/RFD-FHEM/RFFHEM/tree/master
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incoming messages
 # see http://www.fhemwiki.de/wiki/SIGNALDuino
@@ -392,9 +392,9 @@ sub SIGNALduino_Define {
 
 
   my $dev = $a[2];
-  #Debug "dev: $dev" if ($debug);
+  #$hash->{debugMethod}->(qq[dev: $dev]);
   #my $hardware=AttrVal($name,'hardware','nano');
-  #Debug "hardware: $hardware" if ($debug);
+  #$hash->{debugMethod}->(qq[hardware: $hardware]);
 
   if($dev eq 'none') {
     Log3 $name, 1, "$name: Define, device is none, commands will be echoed only";
@@ -419,7 +419,8 @@ sub SIGNALduino_Define {
   $hash->{MatchList}  = \%matchListSIGNALduino;
   $hash->{DeviceName} = $dev;
   $hash->{logMethod}  = \&main::Log3;
-
+  $hash->{debugMethod}  = sub { return; };
+  
   my $ret=undef;
   $hash->{protocolObject} = dclone($Protocols);
   $hash->{protocolObject}->registerLogCallback(SIGNALduino_createLogCallback($hash));
@@ -2025,14 +2026,14 @@ sub SIGNALduino_PatternExists {
     #my $tol=abs(abs($searchpattern)>=2 ?$searchpattern*0.3:$searchpattern*1.5);
     my $tol=abs(abs($searchpattern)>3 ? abs($searchpattern)>16 ? $searchpattern*0.18 : $searchpattern*0.3 : 1);  #tol is minimum 1 or higer, depending on our searched pulselengh
 
-    Debug "tol: looking for ($searchpattern +- $tol)" if($debug);
+    $hash->{debugMethod}->(qq[tol: looking for ($searchpattern +- $tol)]);
 
     my %pattern_gap ; #= {};
     # Find and store the gap of every pattern, which is in tolerance
     %pattern_gap = map { $_ => abs($patternList->{$_}-$searchpattern) } grep { abs($patternList->{$_}-$searchpattern) <= $tol} (keys %$patternList);
     if (scalar keys %pattern_gap > 0)
     {
-      Debug "index => gap in tol (+- $tol) of pulse ($searchpattern) : ".Dumper(\%pattern_gap) if($debug);
+      $hash->{debugMethod}->(qq[index => gap in tol (+- $tol) of pulse ($searchpattern) : ].Dumper(\%pattern_gap));
       # Extract fist pattern, which is nearst to our searched value
       my @closestidx = (sort {$pattern_gap{$a} <=> $pattern_gap{$b}} keys %pattern_gap);
 
@@ -2056,9 +2057,9 @@ sub SIGNALduino_PatternExists {
     } [[]], @_
   }
   my @res = cartesian_product @sumlist;
-  Debug qq[sumlists is: ].Dumper @sumlist if($debug);
-  Debug qq[res is: ].Dumper $res[0] if($debug);
-  Debug qq[indexer is: ].Dumper \@indexer if($debug);
+  $hash->{debugMethod}->(q[sumlists is: ].Dumper @sumlist);
+  $hash->{debugMethod}->(qq[res is: ].Dumper $res[0]);
+  $hash->{debugMethod}->(qq[indexer is: ].Dumper \@indexer);
 
   OUTERLOOP:
   for my $i (0..$#{$res[0]})
@@ -2077,7 +2078,7 @@ sub SIGNALduino_PatternExists {
     {
       $plist{$indexer[$x]}  = $res[0][$i][$x]; 
     }
-    Debug qq[plist is for this check ].Dumper(\%plist) if($debug);
+    $hash->{debugMethod}->(q[plist is for this check ].Dumper(\%plist));
 
     # Create our searchstring with our mapping table
     my @patternVariant= @{$search};
@@ -2087,7 +2088,7 @@ sub SIGNALduino_PatternExists {
       $v = $plist{$v};
       #Debug qq[after: $v ] if($debug);
     }
-    Debug qq[patternVariant is ].Dumper(\@patternVariant) if($debug);
+    $hash->{debugMethod}->(q[patternVariant is ].Dumper(\@patternVariant));
     my $search_pattern = join '', @patternVariant;
 
     (index ($$data, $search_pattern) > -1) ? return $search_pattern : next;
@@ -2110,14 +2111,14 @@ sub SIGNALduino_MatchSignalPattern {
 
   foreach ( @{$signalpattern} )
   {
-    #Debug " $idx check: ".$patternList->{$data_array->[$idx]}." == ".$_;
-    Debug "$name: idx: $idx check: abs(". $patternList->{$data_array->[$idx]}.' - '.$_.') > '. ceil(abs($patternList->{$data_array->[$idx]}*$tol)) if ($debug);
+    #$hash->{debugMethod}->(qq[ $idx check: ".$patternList->{$data_array->[$idx]}.]);
+    $hash->{debugMethod}->(qq[$name: idx: $idx check: abs( $patternList->{$data_array->[$idx]} - $_) > ]. ceil(abs($patternList->{$data_array->[$idx]}*$tol))) if ($debug);
 
     #print "\n";;
     #if ($patternList->{$data_array->[$idx]} ne $_ )
     ### Nachkommastelle von ceil!!!
     if (!defined( $patternList->{$data_array->[$idx]})){
-      Debug "$name: Error index ($idx) does not exist!!" if ($debug);
+      $hash->{debugMethod}->(qq[$name: Error index ($idx) does not exist!!]);
 
       return -1;
     }
@@ -2148,11 +2149,12 @@ sub SIGNALduino_Split_Message {
   my $freqafc; ## for AFC cc1101 0x32 (0xF2): FREQEST – Frequency Offset Estimate from Demodulator
   my @msg_parts = SIGNALduino_splitMsg($rmsg,';');      ## Split message parts by ';'
   my %ret;
-  my $debug = AttrVal($name,'debug',0);
+  my $hash = $defs{$name};
+  my $debug = AttrVal($hash->{NAME},'debug',0);
 
   foreach (@msg_parts)
   {
-    #Debug "$name: checking msg part:( $_ )" if ($debug);
+    #$hash->{debugMethod}->(qq[$name: checking msg part:( $_ )]);
 
     #if ($_ =~ m/^MS/ or $_ =~ m/^MC/ or $_ =~ m/^Mc/ or $_ =~ m/^MU/)  #### Synced Message start
     if ($_ =~ m/^M./)
@@ -2166,51 +2168,51 @@ sub SIGNALduino_Split_Message {
        my @pattern = split(/=/,$_);
 
        $patternList{$pattern[0]} = $pattern[1];
-       Debug "$name: extracted  pattern @pattern \n" if ($debug);
+       $hash->{debugMethod}->(qq[$name: extracted pattern @pattern \n]);
     }
     elsif($_ =~ m/D=\d+/ or $_ =~ m/^D=[A-F0-9]+/)                #### Message from array
     {
       $_ =~ s/D=//;
       $rawData = $_ ;
-      Debug "$name: extracted  data $rawData\n" if ($debug);
+      $hash->{debugMethod}->(qq[$name: extracted  data $rawData\n]);
       $ret{rawData} = $rawData;
     }
     elsif($_ =~ m/^SP=([0-9])$/)                                     #### Sync Pulse Index
     {
-      Debug "$name: extracted  syncidx $1\n" if ($debug);
+      $hash->{debugMethod}->(qq[$name: extracted  syncidx $1\n]);
       #return undef if (!defined($patternList{$syncidx}));
       $ret{syncidx} = $1;
     }
     elsif($_ =~ m/^CP=([0-9])$/)                                     #### Clock Pulse Index
     {
-      Debug "$name: extracted  clockidx $1\n" if ($debug);;
+      $hash->{debugMethod}->(qq[$name: extracted  clockidx $1\n]);
       $ret{clockidx} = $1;
     }
     elsif($_ =~ m/^L=\d/)                                         #### MC bit length
     {
       (undef, $mcbitnum) = split(/=/,$_);
-      Debug "$name: extracted  number of $mcbitnum bits\n" if ($debug);;
+      $hash->{debugMethod}->(qq[$name: extracted  number of $mcbitnum bits\n]);
       $ret{mcbitnum} = $mcbitnum;
     }
     elsif($_ =~ m/^C=\d+/)                                        #### Message from array
     {
       $_ =~ s/C=//;
       $clockabs = $_ ;
-      Debug "$name: extracted absolute clock $clockabs \n" if ($debug);
+      $hash->{debugMethod}->(qq[$name: extracted absolute clock $clockabs \n]);
       $ret{clockabs} = $clockabs;
     }
     elsif($_ =~ m/^R=\d+/)                                        #### RSSI
     {
       $_ =~ s/R=//;
       $rssi = $_ ;
-      Debug "$name: extracted RSSI $rssi \n" if ($debug);
+      $hash->{debugMethod}->(qq[$name: extracted RSSI $rssi \n]);
       $ret{rssi} = $rssi;
     } elsif ($_ =~ m/A=(-?[0-9]{0,3})/ ){
       # uncoverable branch true
       Debug qq[$name: extracted FREQEST $1 \n] if ($debug);
       $ret{freqest} =  $1;
     }  else {
-      Debug "$name: unknown Message part $_" if ($debug);;
+      $hash->{debugMethod}->(qq[$name: unknown Message part $_]);
     }
     #print "$_\n";
   }
@@ -2310,7 +2312,7 @@ sub SIGNALduino_moduleMatch {
   my $modMatchRegex=$hash->{protocolObject}->checkProperty($id,'modulematch',undef);
 
   if (!defined($modMatchRegex) || $dmsg =~ m/$modMatchRegex/) {
-    Debug "$name: modmatch passed for: $dmsg" if ($debug);
+    $hash->{debugMethod}->(qq[$name: modmatch passed for: $dmsg]);
     my $developID = $hash->{protocolObject}->checkProperty($id,'developId','');
     my $IDsNoDispatch = ',' . InternalVal($name,'IDsNoDispatch','') . ',';
     if ($IDsNoDispatch ne ',,' && index($IDsNoDispatch, ",$id,") >= 0) {  # kein dispatch wenn die Id im Internal IDsNoDispatch steht
@@ -2401,19 +2403,19 @@ sub SIGNALduino_Parse_MS {
     IDLOOP:
     foreach my $id (@{$hash->{msIdList}}) {
 
-      Debug qq[Testing against protocol id $id -> ].$hash->{protocolObject}->getProperty($id,'name')  if ($debug);
+      $hash->{debugMethod}->(qq[Testing against protocol id $id -> ].$hash->{protocolObject}->getProperty($id,'name'));
 
       # Check Clock if is it in range
       if ($hash->{protocolObject}->checkProperty($id,'clockabs',0) > 0) {
         if (!SIGNALduino_inTol($hash->{protocolObject}->getProperty($id,'clockabs'),$clockabs,$clockabs*0.30)) {
-          Debug qq[protocClock=].$hash->{protocolObject}->getProperty($id,'clockabs').qq[, msgClock=$clockabs is not in tol=].$clockabs*0.30 if ($debug);
+          $hash->{debugMethod}->(q[protocClock=].$hash->{protocolObject}->getProperty($id,'clockabs').qq[, msgClock=$clockabs is not in tol=].$clockabs*0.30);
           next;
         } elsif ($debug) {
-          Debug qq[protocClock=].$hash->{protocolObject}->getProperty($id,'clockabs').qq[, msgClock=$clockabs is in tol="] . $clockabs*0.30;
+          $hash->{debugMethod}->(q[protocClock=].$hash->{protocolObject}->getProperty($id,'clockabs').qq[, msgClock=$clockabs is in tol="] . $clockabs*0.30);
         }
       }
 
-      Debug 'Searching in patternList: '.Dumper(\%patternList) if($debug);
+      $hash->{debugMethod}->(q[Searching in patternList: ].Dumper(\%patternList));
 
       my %patternLookupHash=();
       my %endPatternLookupHash=();
@@ -2425,7 +2427,7 @@ sub SIGNALduino_Parse_MS {
 
         if (!SIGNALduino_FillPatternLookupTable($hash,\@{$hash->{protocolObject}->getProperty($id,$key)},\$symbol_map{$key},\%patternList,\$rawData,\%patternLookupHash,\%endPatternLookupHash,\$return_text))
         {
-          Debug sprintf("%s pattern not found",$key) if ($debug);
+          $hash->{debugMethod}->(sprintf("%s pattern not found",$key));
           next IDLOOP if ($key ne 'float') ;
         }
 
@@ -2434,13 +2436,13 @@ sub SIGNALduino_Parse_MS {
           $message_start =index($rawData,$return_text)+length($return_text);
           my $bit_length = ($signal_length-$message_start) / $signal_width;
           if ($hash->{protocolObject}->checkProperty($id,'length_min',-1) > $bit_length) {
-            Debug "bit_length=$bit_length to short" if ($debug);
+            $hash->{debugMethod}->(qq[bit_length=$bit_length to short]);
             next IDLOOP;
           }
-          Debug "expecting $bit_length bits in signal" if ($debug);
+          $hash->{debugMethod}->(qq[expecting $bit_length bits in signal]);
           %endPatternLookupHash=();
         }
-        Debug sprintf("Found matched %s with indexes: (%s)",$key,$return_text) if ($debug);
+        $hash->{debugMethod}->(sprintf("Found matched %s with indexes: (%s)",$key,$return_text));
       }
       next if (scalar keys %patternLookupHash == 0);  # Keine Eingträge im patternLookupHash
 
@@ -2472,13 +2474,13 @@ sub SIGNALduino_Parse_MS {
         }
       }
 
-      Debug "$name: decoded message raw (@bit_msg), ".@bit_msg." bits\n" if ($debug);
+      $hash->{debugMethod}->(qq[$name: decoded message raw (@bit_msg), ".@bit_msg." bits\n]);
 
       #Check converted message against lengths
       my ($rcode, $rtxt) = $hash->{protocolObject}->LengthInRange($id,scalar @bit_msg);
       if (!$rcode)
       {
-        Debug "$name: decoded $rtxt" if ($debug);
+        $hash->{debugMethod}->(qq[$name: decoded $rtxt]);
         next;
       }
       my $padwith = $hash->{protocolObject}->checkProperty($id,'paddingbits',4);
@@ -2489,7 +2491,7 @@ sub SIGNALduino_Parse_MS {
         push(@bit_msg,'0');
         $i++;
       }
-      Debug "$name padded $i bits to bit_msg array" if ($debug);
+      $hash->{debugMethod}->(qq[$name padded $i bits to bit_msg array]);
 
       if ($i == 0) {
         $hash->{logMethod}->($name, 5, "$name: Parse_MS, dispatching bits: @bit_msg");
@@ -2581,7 +2583,7 @@ sub SIGNALduino_Parse_MU {
   my $message_dispatched=0;
   my $debug = AttrVal($hash->{NAME},'debug',0);
 
-  Debug "$name: processing unsynced message\n" if ($debug);
+  $hash->{debugMethod}->(qq[$name: processing unsynced message\n]);
 
   my $clockabs = 1;  #Clock will be fetched from protocol if possible
   $patternListRaw{$_} = $msg_parts{pattern}{$_} for keys %{$msg_parts{pattern}};
@@ -2618,8 +2620,8 @@ sub SIGNALduino_Parse_MU {
         %patternList = map { $_ => FHEM::Core::Utils::Math::round($patternListRaw{$_}/$clockabs,1) } keys %patternListRaw;
       }
 
-      Debug qq[Testing against protocol id $id -> ]. $hash->{protocolObject}->getProperty($id,'name')  if ($debug);
-      Debug qq[Searching in patternList: ].Dumper(\%patternList) if($debug);
+      $hash->{debugMethod}->(qq[Testing against protocol id $id -> ]. $hash->{protocolObject}->getProperty($id,'name'));
+      $hash->{debugMethod}->(qq[Searching in patternList: ].Dumper(\%patternList));
 
       my $startStr=''; # Default match if there is no start pattern available
       my $message_start=0 ;
@@ -2627,24 +2629,24 @@ sub SIGNALduino_Parse_MU {
 
       if (defined($hash->{protocolObject}->getProperty($id,'start'))  && ref($hash->{protocolObject}->getProperty($id,'start')) eq 'ARRAY') # wenn start definiert ist, dann startStr ermitteln und in rawData suchen und in der rawData alles bis zum startStr abschneiden
       {
-        Debug 'msgStartLst: '.Dumper(\@{$hash->{protocolObject}->getProperty($id,'start')}) if ($debug);
+        $hash->{debugMethod}->('msgStartLst: '.Dumper(\@{$hash->{protocolObject}->getProperty($id,'start')}));
 
         if ( ($startStr=SIGNALduino_PatternExists($hash,\@{$hash->{protocolObject}->getProperty($id,'start')},\%patternList,\$rawData)) eq -1)
         {
           $hash->{logMethod}->($name, 5, qq[$name: Parse_MU, start pattern for MU protocol id $id -> ].$hash->{protocolObject}->getProperty($id,'name'). qq[ not found, aborting]);
           next;
         }
-        Debug "startStr is: $startStr" if ($debug);
+        $hash->{debugMethod}->(qq[startStr is: $startStr]);
         $message_start = index($rawData, $startStr);
         if ( $message_start == -1)
         {
-          Debug "startStr $startStr not found." if ($debug);
+          $hash->{debugMethod}->(qq[startStr $startStr not found.]);
           next;
         } else {
           $rawData = substr($rawData, $message_start);
           $startLogStr = "StartStr: $startStr first found at $message_start";
-          Debug "rawData = $rawData" if ($debug);
-          Debug "startStr $startStr found. Message starts at $message_start" if ($debug);
+          $hash->{debugMethod}->(qq[rawData = $rawData]);
+          $hash->{debugMethod}->(qq[startStr $startStr found. Message starts at $message_start]);
           #SIGNALduino_Log3 $name, 5, "$name: Parse_MU, substr: $rawData"; # todo: entfernen
         }
       }
@@ -2662,10 +2664,10 @@ sub SIGNALduino_Parse_MU {
         next if (!defined($hash->{protocolObject}->getProperty($id,$key)));
         if (!SIGNALduino_FillPatternLookupTable($hash,\@{$hash->{protocolObject}->getProperty($id,$key)},\$symbol_map{$key},\%patternList,\$rawData,\%patternLookupHash,\%endPatternLookupHash,\$return_text))
         {
-          Debug sprintf("%s pattern not found",$key) if ($debug);
+          $hash->{debugMethod}->(sprintf("%s pattern not found",$key));
           next IDLOOP if ($key ne "float");
         }
-        Debug sprintf("Found matched %s with indexes: (%s)",$key,$return_text) if ($debug);
+        $hash->{debugMethod}->(sprintf("Found matched %s with indexes: (%s)",$key,$return_text));
         if ($key eq "one")
         {
            $signalRegex .= $return_text;
@@ -2687,7 +2689,7 @@ sub SIGNALduino_Parse_MU {
       if (defined($hash->{protocolObject}->getProperty($id,'reconstructBit'))) {
         $signalRegex .= '(?:' . join('|',keys %endPatternLookupHash) . ')?';
       }
-      Debug "signalRegex is $signalRegex " if ($debug);
+      $hash->{debugMethod}->(qq[signalRegex is $signalRegex ]);
 
       my $nrRestart=0;
       my $nrDispatch=0;
@@ -2725,7 +2727,7 @@ sub SIGNALduino_Parse_MU {
           }
         }
 
-        Debug "$name: demodulated message raw (@bit_msg), ".@bit_msg." bits\n" if ($debug);
+        $hash->{debugMethod}->(qq[$name: demodulated message raw (@bit_msg), ".@bit_msg." bits\n]);
 
         my $evalcheck = ($hash->{protocolObject}->checkProperty($id,'developId','') =~ 'p') ? 1 : undef;
         my ($rcode,@retvalue) = SIGNALduino_callsub($hash->{protocolObject},'postDemodulation',$hash->{protocolObject}->checkProperty($id,'postDemodulation',undef),$evalcheck,$name,@bit_msg);
@@ -2741,7 +2743,7 @@ sub SIGNALduino_Parse_MU {
         while (scalar @bit_msg % $padwith > 0)  ## will pad up full nibbles per default or full byte if specified in protocol
         {
           push(@bit_msg,'0');
-          Debug "$name: padding 0 bit to bit_msg array" if ($debug);
+          $hash->{debugMethod}->(qq[$name: padding 0 bit to bit_msg array]);
         }
         my $dmsg = join ('', @bit_msg);
         my $bit_length=scalar @bit_msg;
@@ -2815,7 +2817,7 @@ sub SIGNALduino_Parse_MC {
   my $debug = AttrVal($hash->{NAME},'debug',0);
 
 
-  Debug "$name: processing manchester messag len:".length($rawData) if ($debug);
+  $hash->{debugMethod}->("$name: processing manchester messag len:".length($rawData));
 
   my $hlen = length($rawData);
   my $blen;
@@ -2835,13 +2837,13 @@ sub SIGNALduino_Parse_MC {
     my @clockrange = @{$hash->{protocolObject}->getProperty($id,'clockrange')};
     if ( $clock > $clockrange[0] && $clock < $clockrange[1] && length($rawData)*4 >= $hash->{protocolObject}->getProperty($id,'length_min') )
     {
-      Debug "clock and min length matched"  if ($debug);
+      $hash->{debugMethod}->(qq[clock and min length matched]);
 
       (defined $rssi ) ?  $hash->{logMethod}->($name, 4, qq[$name: Parse_MC, Found manchester protocol id $id clock $clock $rssiStr -> ].$hash->{protocolObject}->getProperty($id,'name'))
                  :  $hash->{logMethod}->($name, 4, qq[$name: Parse_MC, Found manchester protocol id $id clock $clock -> ].$hash->{protocolObject}->getProperty($id,'name'));
 
       my $polarityInvert = ( $hash->{protocolObject}->checkProperty($id,'polarity','') eq 'invert' ) ? 1 : 0;
-      Debug "$name: polarityInvert=$polarityInvert" if ($debug); 
+      $hash->{debugMethod}->(qq[$name: polarityInvert=$polarityInvert]); 
       if (  $messagetype eq 'Mc' 
           || ( defined $hash->{version}  && substr $hash->{version},0,6 eq 'V 3.2.')   )
       {
@@ -2852,7 +2854,7 @@ sub SIGNALduino_Parse_MC {
                 ? unpack("B$blen", pack("H$hlen", $rawDataInverted))
                 : unpack("B$blen", pack("H$hlen", $rawData));
 
-      Debug "$name: extracted data $bitData (bin)\n" if ($debug); ## Convert Message from hex to bits
+      $hash->{debugMethod}->(qq[$name: extracted data $bitData (bin)\n]); ## Convert Message from hex to bits
         $hash->{logMethod}->($name, 5, "$name: Parse_MC, extracted data $bitData (bin)");
 
         my $method = $hash->{protocolObject}->getProperty($id,'method');
@@ -2993,7 +2995,7 @@ sub SIGNALduino_Parse {
 
   my $debug = AttrVal($iohash->{NAME},'debug',0);
 
-  Debug "$name: incoming message: ($rmsg)\n" if ($debug);
+  $hash->{debugMethod}->(qq[$name: incoming message: ($rmsg)\n]);
 
   if (AttrVal($name, 'rawmsgEvent', 0)) {
     DoTrigger($name, 'RAWMSG ' . $rmsg);
@@ -3024,7 +3026,7 @@ sub SIGNALduino_Parse {
     $dispatched=  SIGNALduino_Parse_MN($hash, $rmsg);
   }
    else {
-    Debug "$name: unknown Messageformat, aborting\n" if ($debug);
+    $hash->{debugMethod}->(qq[$name: unknown Messageformat, aborting\n]);
     return ;
   }
 
@@ -3140,6 +3142,7 @@ sub SIGNALduino_Attr {
   elsif ($aName eq 'debug')
   {
     $debug = $aVal;
+    $hash->{debugMethod} = ($cmd eq 'set' && $aVal == 1) ? \&main::Debug : sub { return; };
     $hash->{logMethod}->($name, 3, "$name: Attr, setting debug to: " . $debug);
   }
   ## Change whitelist_IDs
