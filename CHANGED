@@ -1,3 +1,8 @@
+2024-01-03 - Call debug via a coderef if enabled, otherwise return (#1169)
+
+* 00_SIGNALduino.pm
+
+added coderef for debug output$hash->{debugMethod}
 2024-01-02 - Update tests part two | for the functional reliability of the module SD_UT (#1218)
 
 * added some tests for define and attr
