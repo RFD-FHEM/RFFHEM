@@ -1,10 +1,10 @@
 #################################################################
-# $Id: 10_SD_GT.pm 26985 2024-01-02 12:07:45Z sidey79 $
+# $Id: 10_SD_GT.pm 27957 2024-01-03 12:07:45Z sidey79 $
 #
 # The file is part of the SIGNALduino project.
 # The purpose of this module is to support remote controls with QUIGG Gt-9000 protocol (based on code quigg_gt9000.c from pilight)
 #
-# 2019-     - HomeAuto_User & elektron-bbs
+# 2019-     - HomeAuto_User & elektron-bbs & sidey79
 #
 #################################################################
 
@@ -14,8 +14,6 @@ use strict;
 use warnings;
 use GPUtils qw(GP_Import GP_Export);
 use FHEM::Meta;
-
-our $VERSION_SD_GT = '1.2';
 
 # Export to main context with different name
 GP_Export(qw(
@@ -195,7 +193,6 @@ sub Define {
   if ($a[3]) { $iodevice = $a[3] }
   if ($a[4]) { readingsSingleUpdate($hash,'SystemCode',$a[4],1) }
   if ($a[5]) { readingsSingleUpdate($hash,'Version',$a[5],1) }
-  $hash->{VersionModule} = $VERSION_SD_GT;
 
   $modules{SD_GT}{defptr}{$hash->{DEF}} = $hash;
   if (exists $modules{SD_GT}{defptr}{ioname} && !$iodevice) { $ioname = $modules{SD_GT}{defptr}{ioname} };
@@ -677,7 +674,7 @@ sub getSystemCodes {
       }
     }
   },
-  "version": "v1.2",
+  "version": "v1.2.0",
   "release_status": "stable",
   "resources": {
     "bugtracker": {
