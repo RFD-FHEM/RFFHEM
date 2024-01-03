@@ -25,14 +25,16 @@ my $module = basename (dirname(__FILE__));
         },
     },
     {
-        targetName      =>  q[SD_GT_C07E2_D],
+        targetName      =>  q[SD_GT_Set],
         testname        =>  q[set command on with all readings],
         cmd             =>  q[set on],
 
         prep_commands   => [                               # Any FHEM custom command can be placed in here, which will be called before the test is run
                     'setreading $targetName CodesOff C6B542',
                     'setreading $targetName CodesOn C22B92',
+                    'setreading $targetName SystemCode C07E2',
                     'setreading $targetName SystemCodeDec 788450',
+                    'setreading $targetName Version 2',
         ],
 
         returnCheck     => F(),
