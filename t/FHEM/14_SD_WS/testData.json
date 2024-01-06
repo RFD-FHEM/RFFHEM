@@ -2546,5 +2546,58 @@
       "id" : 129,
       "module" : "SD_WS",
       "name" : "FT-0835"
+   },
+   {
+      "data" : [
+         {
+            "comment" : "BRESSER lightning detector",
+            "dmsg" : "W131#70F082CC00083A000000",
+            "internals" : {
+               "DEF" : "SD_WS_131",
+               "NAME" : "SD_WS_131"
+            },
+            "readings" : {
+               "batteryChanged" : "0",
+               "batteryState" : "ok",
+               "count" : 0,
+               "distance" : 0,
+               "state" : "D: 0",
+               "type" : "Bresser_lightning"
+            },
+            "rmsg" : "MN;D=DA5A2866AAA290AAAAAA;R=23;A=-2;",
+            "tests" : [
+               {
+                  "attributes" : {},
+                  "comment" : "#0"
+               }
+            ]
+         },
+         {
+            "comment" : "BRESSER lightning detector",
+            "dmsg" : "W131#009C82CC148832080000",
+            "internals" : {
+               "DEF" : "SD_WS_131",
+               "NAME" : "SD_WS_131"
+            },
+            "readings" : {
+               "batteryChanged" : "1",
+               "batteryState" : "ok",
+               "count" : 148,
+               "distance" : 8,
+               "state" : "D: 8",
+               "type" : "Bresser_lightning"
+            },
+            "rmsg" : "MN;D=AA362866BE2298A2AAAA;R=24;A=-2;",
+            "tests" : [
+               {
+                  "attributes" : {},
+                  "comment" : "#1"
+               }
+            ]
+         }
+      ],
+      "id" : 131,
+      "module" : "SD_WS",
+      "name" : "Bresser lightning"
    }
 ]
