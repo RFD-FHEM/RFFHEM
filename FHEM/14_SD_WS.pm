@@ -1,4 +1,4 @@
-# $Id: 14_SD_WS.pm 26982 2023-12-29 20:00:00Z elektron-bbs $
+# $Id: 14_SD_WS.pm 26982 2024-01-06 20:00:00Z elektron-bbs $
 #
 # The purpose of this module is to support serval
 # weather sensors which use various protocol
@@ -53,6 +53,7 @@
 # 06.05.2023 Added protocol 126: ecowitt WH40 support
 # 21.08.2023 neues Protokoll 129: Sainlogic weather station FT-0835
 # 25.11.2023 Protokoll 117: neuer Sensor BRESSER Air Quality Sensor Art.No.: 7009970, Hersteller CCL Electronics LTD Model C3123A
+# 06.01.2024 neues Protokoll 131: BRESSER Blitzsensor Art.No.: 7009976, Hersteller CCL Electronics LTD Model C3129A
 
 package main;
 
@@ -119,6 +120,7 @@ sub SD_WS_Initialize {
     'SD_WS_125_.*'    => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4hum4:Temp/Hum,', autocreateThreshold => '2:300'},
     'SD_WS_126_R.*'    => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'rain4:Rain,', autocreateThreshold => "2:180"},
     'SD_WS_129.*'     => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4hum4:Temp/Hum,', autocreateThreshold => '3:180'},
+    'SD_WS_131.*'     => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => q{}, autocreateThreshold => '2:180'},
   };
   return FHEM::Meta::InitMod( __FILE__, $hash );
 }
@@ -1710,6 +1712,53 @@ sub SD_WS_Parse {
                             return 1;
                           }, 
     },
+    131 => {
+        # BRESSER Blitzsensor Art.No.: 7009976, Hersteller CCL Electronics LTD Model C3129A
+        # ---------------------------------------------------------------------------------
+        # The sensor transmits immediately when a flash is detected, otherwise approximately every 60 seconds.
+        # 0         1         
+        # 01234567890123456789
+        # --------------------
+        # 73FB2866AAA298AAAAAA   original message
+        # 8BF082CC138832120000   message after all nibbles xor 0xA
+        # CCCCIIIIcccB?FDD????
+        # C = LFSR-16 digest, generator 0x8810, key 0xABF9, final xor 0x899E
+        # I = station ID
+        # c = 3 nibbles lightning count, BCD
+        # B = flags, 4 bit
+        #     Bit:    0123
+        #             1000
+        #             b???
+        #             b:   1 bit batteryState, 1 = ok, 0 = low
+        #             ?:   3 bit unknown always 000
+        # ? = 1 nibble, unknown, always 0x3 (type?)
+        # F = flags, 4 bit
+        #     Bit:    0123
+        #             1010 xor 0xA = 0000
+        #             r???
+        #             r:   1 bit device reset, 1 after device reset
+        #             ?:   3 bit unknown always 000
+        # D = 2 nibbles last distance, 0 after reset, BCD
+        # ? = 4 nibbles, unknown, always 0x0
+        sensortype => 'Bresser_lightning',
+        model      => 'SD_WS_131',
+        modelStat  => sub {my ($rawData,undef) = @_;
+                            my $typ = hex(substr($rawData,12,1)); # sensor type
+                            if ($typ eq '3') {
+                              $typ = 'Bresser lightning detector';
+                            } else {
+                              $typ = 'SD_WS_131';
+                            }
+                            return $typ;
+                          },
+        prematch   => sub {my $rawData = shift; return 1 if ($rawData =~ /^[0-9A-F]{8}[0-9]{3}[0-9A-F]{3}[0-9]{2}/); },
+        id         => sub {my ($rawData,undef) = @_; return substr($rawData,4,4); },
+        count      => sub { my ($rawData,undef) = @_; return substr($rawData,8,3) * 1; },
+        bat        => sub {my (undef,$bitData) = @_; return substr($bitData,44,1) eq '0' ? 'low' : 'ok';},
+        batChange  => sub {my (undef,$bitData) = @_; return substr($bitData,52,1) eq '0' ? '1' : '0';},
+        distance   => sub { my ($rawData,undef) = @_; return substr($rawData,14,2) * 1; },
+        crcok      => sub {return 1;}, # checks are in SD_Protocols.pm sub ConvBresser_lightning
+    },
   );
 
   Log3 $name, 4, "$name: SD_WS_Parse protocol $protocol, rawData $rawData";
@@ -2223,6 +2272,7 @@ sub SD_WS_Parse {
     $state .= ' ' if (length($state) > 0);
     $state .= "PM10: $pm10";
   }
+
   ### protocol 33 has different bits per sensor type
   if ($protocol eq "33") {
     if (AttrVal($name,'model',0) eq "S522") {                 # Conrad S522
@@ -2273,7 +2323,7 @@ sub SD_WS_Parse {
   readingsBulkUpdate($hash, "humidityTrend", $trendHum) if (defined($trendHum) && length($trendHum) > 0);
   readingsBulkUpdate($hash, "sendmode", $sendmode) if (defined($sendmode) && length($sendmode) > 0);
   readingsBulkUpdateIfChanged($hash, "type", $SensorTyp, 0)  if (defined($SensorTyp));
-  readingsBulkUpdate($hash, 'model', $modelStat, 0)  if (defined($modelStat));
+  readingsBulkUpdateIfChanged($hash, 'model', $modelStat, 0)  if (defined($modelStat));
   readingsBulkUpdate($hash, "beep", $beep)  if (defined($beep));
   readingsBulkUpdate($hash, "adc", $adc)  if (defined($adc));
   readingsBulkUpdate($hash, 'rain', $rain)  if (defined($rain));
@@ -2406,7 +2456,7 @@ sub SD_WS_WH2SHIFT {
     <li>ADE WS1907 Weather station with rain gauge</li>
     <li>Atech wireless weather station</li>
     <li>BBQ temperature sensor GT-TMBBQ-01s (transmitter), GT-TMBBQ-01e (receiver)</li>
-    <li>Bresser 5-in-1, 6-in-1 and 7-in-1 Comfort Weather Center, 7009994, PM2.5/10 air quality meter, Professional rain gauge, Temeo</li>
+    <li>Bresser 5-in-1, 6-in-1 and 7-in-1 Comfort Weather Center, 7009994, Lightning detector, PM2.5/10 air quality meter, Professional rain gauge, Temeo</li>
     <li>Conrad S522</li>
     <li>EuroChron EFTH-800, EFS-3110A (temperature and humidity sensor)</li>
     <li>Fine Offset WH51, aka ECOWITT WH51, aka Froggit DP100, aka MISOL/1 (soil moisture sensor)</li>
@@ -2462,12 +2512,15 @@ sub SD_WS_WH2SHIFT {
     <li>batteryPercent (battery level in %)</li>
     <li>brightness (kLux)</li>
     <li>channel (number of channel</li>
+    <li>count (number of lightnings</li>
     <li>distance (distance in cm (protocol 111) or km (protocol 116)</li>
     <li>humidity (humidity (1-100 % only if available)</li>
     <li>humidityTrend (consistent, rising, falling)</li>
-    <li>sendmode (automatic or manual)</li>
+    <li>pm_2_5 (particulate matter <= 2.5 µm)</li>
+    <li>pm_10 (particulate matter <= 10 µm)</li>
     <li>rain (l/m&sup2;))</li>
     <li>rain_total (l/m&sup2;))</li>
+    <li>sendmode (automatic or manual)</li>
     <li>state (T: H: W: R:)</li>
     <li>temperature (&deg;C)</li>
     <li>temperatureTrend (consistent, rising, falling)</li>
@@ -2550,7 +2603,7 @@ sub SD_WS_WH2SHIFT {
     <li>ADE WS1907 Wetterstation mit Regenmesser</li>
     <li>Atech Wetterstation</li>
     <li>BBQ Temperatur Sensor GT-TMBBQ-01s (Sender), GT-TMBBQ-01e (Empfaenger)</li>
-    <li>Bresser 5-in-1, 6-in-1 und 7-in-1 Comfort Wetter Center, 7009994, PM2.5/10 Luftqualitätsmesser, Profi Regenmesser, Temeo</li>
+    <li>Bresser 5-in-1, 6-in-1 und 7-in-1 Comfort Wetter Center, 7009994, Blitzsensor, PM2.5/10 Luftqualitätsmesser, Profi Regenmesser, Temeo</li>
     <li>Conrad S522</li>
     <li>EuroChron EFTH-800, EFS-3110A (Temperatur- und Feuchtigkeitssensor)</li>
     <li>Fine Offset WH51, aka ECOWITT WH51, aka Froggit DP100, aka MISOL/1 (Bodenfeuchtesensor)</li>
@@ -2607,9 +2660,12 @@ sub SD_WS_WH2SHIFT {
     <li>batteryPercent (Batteriestand in %)</li>
     <li>brightness (Helligkeit in kLux)</li>
     <li>channel (Sensor-Kanal)</li>
+    <li>count (Anzahl)</li>
     <li>distance (Entfernung in cm (Protokoll 111) oder km (Protokoll 116)</li>
     <li>humidity (Luft-/Bodenfeuchte, 1-100 %)</li>
     <li>humidityTrend (Trend Luftfeuchte, gleichbleibend, steigend, fallend)</li>
+    <li>pm_2_5 (Feinstaub <= 2.5 µm)</li>
+    <li>pm_10 (Feinstaub <= 10 µm)</li>
     <li>rain (Regenmenge l/m&sup2;))</li>
     <li>rain_total (Regenmenge l/m&sup2;))</li>
     <li>sendmode (Sendemodus, automatic oder manuell mittels Taster am Sender)</li>
@@ -2699,7 +2755,7 @@ sub SD_WS_WH2SHIFT {
   "x_fhem_maintainer_github": [
     "Sidey79"
   ],
-  "version": "v1.0.0",
+  "version": "v1.1.0",
   "description": "The SD_WS module processes the messages from various environmental sensors received from an IO device (CUL, CUN, SIGNALDuino, SignalESP etc.)",
   "dynamic_config": 1,
   "keywords": [

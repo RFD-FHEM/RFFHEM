@@ -4832,6 +4832,9 @@ USB-connected devices (SIGNALduino):<br>
         Modulation 2-FSK, Datarate=8.23 kbps, Sync Word=2DD4, Packet Length=23 Byte, frequency 868.3 MHz
         <ul><small>Example: BRESSER 7-in-1 outdoor sensor, BRESSER PM2.5/10 air quality meter</small></ul>
       </li>
+      <li>Bresser_lightning<br>
+        Modulation 2-FSK, Datarate=8.23 kbps, Sync Word=2DD4, Packet Length=10 Byte, frequency 868.3 MHz
+        <ul><small>Beispiel: BRESSER lightning sensor</small></ul>
       </li>
       <li>Fine_Offset_WH51_434<br>
         Modulation 2-FSK, Datarate=17.26 kbps, Sync Word=2DD4, Packet Length=14 Byte, Frequency 433.92 MHz
@@ -5427,6 +5430,10 @@ USB-connected devices (SIGNALduino):<br>
       <li>Bresser_7in1<br>
         Modulation 2-FSK, Datenrate=8.23 kbps, Sync Word=2DD4, Packet Length=23 Byte, Frequenz 868.3 MHz
         <ul><small>Beispiel: BRESSER 7-in-1 Außensensor, BRESSER PM2.5/10 Luftqualitätssensor</small></ul>
+      </li>
+      <li>Bresser_lightning<br>
+        Modulation 2-FSK, Datenrate=8.23 kbps, Sync Word=2DD4, Packet Length=10 Byte, Frequenz 868.3 MHz
+        <ul><small>Beispiel: BRESSER Blitzsensor</small></ul>
       </li>
       <li>Fine_Offset_WH51_434<br>
         Modulation 2-FSK, Datenrate=17.26 kbps, Sync Word=2DD4, Packet Length=14 Byte, Frequenz 433.92 MHz
