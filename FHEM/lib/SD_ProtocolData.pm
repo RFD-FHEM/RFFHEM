@@ -1,4 +1,4 @@
-# $Id: SD_ProtocolData.pm 26975 2023-12-29 20:00:00Z elektron-bbs $
+# $Id: SD_ProtocolData.pm 26975 2024-01-06 16:07:53Z elektron-bbs $
 # The file is part of the SIGNALduino project.
 # All protocol definitions are contained in this file.
 #
@@ -3472,7 +3472,25 @@ package lib::SD_ProtocolData;
         length_min       => '24',
         length_max       => '24',
       },
-    #"131"  =>  ## reserved for elektron-bbs
+    "131" =>  ## BRESSER lightning detector @ elektron-bbs 2023-12-26
+              # SD_WS_131 count:   0, distance:  0, batteryState: ok, batteryChanged: 0   MN;D=DA5A2866AAA290AAAAAA;R=23;A=-2;
+              # SD_WS_131 count:   1, distance: 17, batteryState: ok, batteryChanged: 0   MN;D=5B192866AAB290BDAAAA;R=32;A=-3;
+              # SD_WS_131 count: 148, distance:  8, batteryState: ok, batteryChanged: 1   MN;D=AA362866BE2298A2AAAA;R=24;A=-2;
+      {
+        name            => 'Bresser lightning',
+        comment         => 'Bresser lightning detector',
+        id              => '131',
+        knownFreqs      => '868.300',
+        datarate        => '8.232',
+        sync            => '2DD4',
+        modulation      => '2-FSK',
+        rfmode          => 'Bresser_lightning',
+        register        => ['0001','022E','0342','042D','05D4','060A','07C0','0800','0D21','0E65','0F6A','1088','114C','1202','1322','14F8','1551','1916','1B43','1C68'],
+        preamble        => 'W131#',
+        clientmodule    => 'SD_WS',
+        length_min      => '20',
+        method          => \&lib::SD_Protocols::ConvBresser_lightning,
+      },
     "132"  =>  ## Remote control Halemeier HA-HX2 for Actor HA-RX-M2-1
                # https://github.com/RFD-FHEM/RFFHEM/issues/1207 @ HomeAuto_User 2023-12-11
                # https://forum.fhem.de/index.php?topic=38452.0 (probably identical)
