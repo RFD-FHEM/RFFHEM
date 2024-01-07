@@ -930,6 +930,19 @@ sub SD_WS_Parse {
         model      => 'SD_WS_108',
         prematch   => sub {my $rawData = shift; return 1 if ($rawData =~ /^[0-9A-F]{8}[0-9]{2}[0-9A-F]{1}[0-9]{3}[0-9A-F]{1}[0-9]{5}[0-9A-F]{1}[0-9]{1}/); },
         id         => sub {my ($rawData,undef) = @_; return substr($rawData,0,2); },
+        modelStat  => sub {my (undef,$bitData) = @_;
+                            my $typ = substr($bitData,10,2);
+                            if ($typ eq '00') {
+                              $typ = 'Bresser 5in1, Fody E43 outdoor sensor';
+                            } elsif ($typ eq '01') {
+                              $typ = 'Fody E42 thermo-/hygro sensor';
+                            } elsif ($typ eq '11') {
+                              $typ = 'Bresser rain gauge';
+                            } else {
+                              $typ = 'SD_WS_108';
+                            }
+                            return $typ;
+                          },
         winddir    => sub {my ($rawData,$bitData) = @_;
                             return if (substr($bitData,10,2) eq '01' || substr($bitData,10,2) eq '11'); # Bresser rain gauge, Fody E42
                             my $winddirraw = hex(substr($rawData,6,1));
@@ -1119,6 +1132,21 @@ sub SD_WS_Parse {
         model      => 'SD_WS_115',
         prematch   => sub { return 1; }, # no precheck known
         id         => sub {my ($rawData,undef) = @_; return substr($rawData,4,8); },
+        modelStat  => sub {my ($rawData,undef) = @_;
+                            my $typ = substr($rawData,12,1);
+                            if ($typ eq '1') {
+                              $typ = 'Bresser 6-in-1, new 5-in-1, 3-in-1 outdoor sensor';
+                            } elsif ($typ eq '2') {
+                              $typ = 'Bresser Thermo-/hygro sensor';
+                            } elsif ($typ eq '3') {
+                              $typ = 'Bresser Pool thermometer';
+                            } elsif ($typ eq '4') {
+                              $typ = 'Bresser SM60020 Soil moisture/temperature sensor';
+                            } else {
+                              $typ = 'SD_WS_115';
+                            }
+                            return $typ;
+                          },
         bat        => sub {my ($rawData,$bitData) = @_;
                             return if (substr($rawData,12,1) eq '1' && substr($rawData,33,1) eq '1'); # not by weather station & rain
                             return substr($bitData,110,1) eq '1' ? 'ok' : 'low';
@@ -2755,7 +2783,7 @@ sub SD_WS_WH2SHIFT {
   "x_fhem_maintainer_github": [
     "Sidey79"
   ],
-  "version": "v1.1.0",
+  "version": "v1.1.1",
   "description": "The SD_WS module processes the messages from various environmental sensors received from an IO device (CUL, CUN, SIGNALDuino, SignalESP etc.)",
   "dynamic_config": 1,
   "keywords": [
