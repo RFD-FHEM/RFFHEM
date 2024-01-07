@@ -1,3 +1,7 @@
+2024-01-07 - SD_WS add reading model for statistics (#1225)
+
+* add models for FHEM statistics
+see FHEM statistics https://fhem.de/stats/statistics.html
 2024-01-06 - new protocol 131 for BRESSER Lightning detector (#1224)
 
 * Bresser lightning detector
