@@ -318,7 +318,7 @@ sub SD_WS_Parse {
         # prematch   => sub {my $rawData = shift; return 1 if ($rawData =~ /^[0-9A-F]{7}0[0-9]{2}[0-9A-F]{2}$/); }, # prematch 113C49A 0 47 AE (EFTH-800)
         prematch   => sub {my $rawData = shift; return 1 if ($rawData =~ /^[0-9A-F]{7}0|8[0-9]{2}[0-9A-F]{2}$/); }, # prematch 3F94519 8 55 C7 (EFS-3110A)
         channel    => sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,1,3) + 1 ); },
-        id         => sub {my (undef,$bitData) = @_; return substr($rawData,1,3); },
+        id         => sub {my ($rawData,undef) = @_; return substr($rawData,1,3); },
         bat        => sub {my (undef,$bitData) = @_; return substr($bitData,16,1) eq "0" ? "ok" : "low";},
         temp       => sub {my (undef,$bitData) = @_; return substr($bitData,17,1) eq "0" ? ((SD_WS_binaryToNumber($bitData,18,27) - 1024) / 10.0) : (SD_WS_binaryToNumber($bitData,18,27) / 10.0);},
         hum        => sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,32,35) * 10) + (SD_WS_binaryToNumber($bitData,36,39));},
@@ -428,7 +428,7 @@ sub SD_WS_Parse {
         sensortype => 'NC-3911',
         model      => 'SD_WS_38_T',
         prematch   => sub {my $msg = shift; return 1 if ($msg =~ /^[0-9A-F]{9}$/); },
-        id         => sub {my (undef,$bitData) = @_; return substr($rawData,0,2); },
+        id         => sub {my ($rawData,undef) = @_; return substr($rawData,0,2); },
         bat        => sub {my (undef,$bitData) = @_; return substr($bitData,8,1) eq "1" ? "ok" : "low";},
         beep       => sub {my (undef,$bitData) = @_; return substr($bitData,9,1) eq "1" ? "on" : "off"; },
         channel    => sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,10,11); },
@@ -467,7 +467,7 @@ sub SD_WS_Parse {
         prematch   => sub {my $msg = shift; return 1 if ($msg =~ /^[0-9A-F]{9}[1-3]$/);}, # 10 nibbles, 9 hex chars, only channel 1-3
         # prematch   => sub {my $msg = shift; return 1 if ($msg =~ /^[0-9A-F]{10}$/);}, # 10 nibbles, all hex chars
         crcok      => sub {return 1;  },  # crc is unknown
-        id         => sub {my (undef,$bitData) = @_; return substr($rawData,0,2);}, # long-id in hex
+        id         => sub {my ($rawData,undef) = @_; return substr($rawData,0,2);}, # long-id in hex
         sendmode   => sub {my (undef,$bitData) = @_; return substr($bitData,12,1) eq "1" ? "manual" : "auto";},
         bat        => sub {my (undef,$bitData) = @_; return substr($bitData,13,1) eq "1" ? "low" : "ok";},
         trend      => sub {my (undef,$bitData) = @_; return ('consistent', 'rising', 'falling', 'unknown')[SD_WS_binaryToNumber($bitData,14,15)];},
@@ -506,14 +506,14 @@ sub SD_WS_Parse {
                               return 0;
                             }
                           },
-        id         => sub {my (undef,$bitData) = @_; return substr($rawData,0,2);}, # long-id in hex
+        id         => sub {my ($rawData,undef) = @_; return substr($rawData,0,2);}, # long-id in hex
         bat        => sub {my (undef,$bitData) = @_; return substr($bitData,8,1) eq "1" ? "low" : "ok";},
         channel    => sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,10,11) + 1);},
         temp       => sub {my (undef,$bitData) = @_; return substr($bitData,12,1) eq "1" ? ((SD_WS_binaryToNumber($bitData,12,23) - 4096) / 10.0) : (SD_WS_binaryToNumber($bitData,12,23) / 10.0);},
         hum        => sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,24,30) );},
       },
     54 => {
-        # TFA Drop Rainmeter 30.3233.01
+        # TFA Drop Rainmeter 30.3233.01 (Funk-Regenmesser DROP 47.3005, Sender 30.3233.01)
         # ----------------------------------------------------------------------------------
         # 0        8        16       24       32       40       48       56       64   - 01234567890123456
         # 00111101 10011100 01000011 00001010 00011011 10101010 00000001 10001001 1000 - 3D9C430A1BAA01898
@@ -640,14 +640,14 @@ sub SD_WS_Parse {
         # ------------------------------------------------------------------------
         # 0    4    | 8    12   | 16   20   | 24   28   | 32   36  
         # 1111 1100 | 0001 0110 | 0001 0000 | 0011 0111 | 0100 1001
-        # iiii iiii | hhhh hhhh | bscc tttt | tttt tttt | ???? ????
+        # iiii iiii | hhhh hhhh | bscc tttt | tttt tttt | xxxx xxxx
         # i: 8 bit id (?) - no change after battery change, i have seen two IDs: 0x03 and 0xfe
         # h: 8 bit relative humidity percentage
         # b: 1 bit battery indicator (0=>OK, 1=>LOW)
         # s: 1 bit sendmode 1=manual (button pressed) 0=auto
         # c: 2 bit channel valid channels are 0-2 (1-3)
         # t: 12 bit signed temperature scaled by 10
-        # ?: unknown
+        # x: 8 bit check (not for all sensor types)
         # Sensor sends approximately every 30 seconds
 
         sensortype => 'Auriol IAN 283582, TV-4848',
@@ -664,7 +664,7 @@ sub SD_WS_Parse {
                             $tempraw /= 10.0;
                             return $tempraw;
                           },
-        crcok      => sub {return 1;},    # crc test method is so far unknown
+        crcok      => sub {return 1;}, # crc check only takes place when the device is known. The test method is not yet known for all sensor types.
       } ,
     85 =>
       {
@@ -761,7 +761,7 @@ sub SD_WS_Parse {
         sensortype => 'TFA 30.3221.02',
         model      => 'SD_WS_89_TH',
         prematch   => sub {my $msg = shift; return 1 if ($msg =~ /^[0-9A-F]{2}[01245689ACDE]{1}[0-9A-F]{7}$/); },   # valid channel only 0-2
-        id         => sub {my (undef,$bitData) = @_; return substr($rawData,0,2); },
+        id         => sub {my ($rawData,undef) = @_; return substr($rawData,0,2); },
         bat        => sub {my (undef,$bitData) = @_; return substr($bitData,8,1) eq "0" ? "ok" : "low";},
         sendmode   => sub {my (undef,$bitData) = @_; return substr($bitData,9,1) eq "1" ? "manual" : "auto"; },
         channel    => sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,10,11) + 1); },
@@ -796,7 +796,7 @@ sub SD_WS_Parse {
             Log3 $iohash, 3, "$name: SD_WS_Parse $model ERROR - BCD of temperature ($rawtemp100 $rawtemp10 $rawtemp1)";
             return;
           };
-          my $temp = ($rawtemp100 * 10 + $rawtemp10 + $rawtemp1 / 10) * ( substr($_[1],10,1) == 1 ? -1.0 : 1.0);
+          return ($rawtemp100 * 10 + $rawtemp10 + $rawtemp1 / 10) * ( substr($_[1],10,1) == 1 ? -1.0 : 1.0);
         },
         crcok      => sub {return 1;},    # crc test method is so far unknown
     },
@@ -993,7 +993,7 @@ sub SD_WS_Parse {
         sensortype     => 'ADE WS1907',
         model          => 'SD_WS_110_TR',
         prematch       => sub {return 1;}, # no precheck known
-        id             => sub {my (undef,$bitData) = @_; return substr($rawData,0,4);}, # long-id in hex
+        id             => sub {my ($rawData,undef) = @_; return substr($rawData,0,4);}, # long-id in hex
         bat            => sub {my (undef,$bitData) = @_; return substr($bitData,16,1) eq "0" ? "ok" : "low";},
         batChange      => sub {my (undef,$bitData) = @_; return substr($bitData,17,1);},
         sendCounter    => sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,20,22));},
@@ -1116,7 +1116,7 @@ sub SD_WS_Parse {
         # CCCCIIIIIIIIFFGGGWWWDDD?RRRRRR???XSS      Msg 2, 36 Nibble, wind, rain
         # C = CRC16
         # I = station ID
-        # F = flags, 8 bit (nibble 12 1: weather station, 2: indoor, 4: soil probe, nibble 13 1 bit battery change, 3 bit channel)
+        # F = flags, 8 bit (nibble 12 1: weather station, 2: indoor, 3: pool thermometer, 4: soil probe, nibble 13 1 bit battery change, 3 bit channel)
         # G = wind gust in 1/10 m/s, inverted, BCD coded, GGG = FE6 =~ 019 => 1.9 m/s.
         # W = wind speed in 1/10 m/s, inverted, BCD coded, LSB first nibble, MSB last two nibble, WWW = EFE =~ 101 => 1.1 m/s.
         # D = wind direction in grad, BCD coded, DDD = 158 => 158 °
@@ -1920,7 +1920,7 @@ sub SD_WS_Parse {
     {
       if ($sign)
       {
-        $temp = 0 - $temp
+        $temp = 0 - $temp;
       }
     }
 
@@ -2249,7 +2249,7 @@ sub SD_WS_Parse {
   }
 
   #my $state = (($temp > -60 && $temp < 70) ? "T: $temp":"T: xx") . (($hum > 0 && $hum < 100) ? " H: $hum":"");
-  my $state = "";
+  my $state = '';
   if (defined($temp)) {
     $state .= "T: $temp";
   }
@@ -2266,19 +2266,19 @@ sub SD_WS_Parse {
     $state .= "T4: $temp4";
   }
   if (defined($hum) && ($hum > 0 && $hum < 100)) {
-    $state .= " H: $hum"
+    $state .= " H: $hum";
   }
   if (defined($windspeed)) {
     $state .= ' ' if (length($state) > 0);
-    $state .= "W: $windspeed"
+    $state .= "W: $windspeed";
   }
   if (defined($rain_total)) {
     $state .= ' ' if (length($state) > 0);
-    $state .= "R: $rain_total"
+    $state .= "R: $rain_total";
   }
   if (defined($rain)) {
     $state .= ' ' if (length($state) > 0);
-    $state .= "R: $rain"
+    $state .= "R: $rain";
   }
   if (defined($identified)) {
     $state .= ' ' if (length($state) > 0);
@@ -2783,7 +2783,7 @@ sub SD_WS_WH2SHIFT {
   "x_fhem_maintainer_github": [
     "Sidey79"
   ],
-  "version": "v1.1.1",
+  "version": "v1.1.2",
   "description": "The SD_WS module processes the messages from various environmental sensors received from an IO device (CUL, CUN, SIGNALDuino, SignalESP etc.)",
   "dynamic_config": 1,
   "keywords": [
