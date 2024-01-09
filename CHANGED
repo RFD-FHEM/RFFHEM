@@ -1,3 +1,7 @@
+2024-01-09 - 14_SD_WS.pm small corrections (#1226)
+
+* 14_SD_WS.pm small corrections
+Small corrections without changing the function of the module.
 2024-01-07 - SD_WS add reading model for statistics (#1225)
 
 * add models for FHEM statistics
