@@ -69,9 +69,9 @@ jobs:
           json: true
           quotepath: false
           files: |
-              FHEM/*.pm
-              FHEM/lib/*.pm
-              lib/FHEM/*.pm
+              FHEM/**.pm
+              FHEM/lib/**.pm
+              lib/FHEM/**.pm
 
       - name: Get current date
         id: date
