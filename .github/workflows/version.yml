@@ -64,14 +64,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - id: file_changes
-        uses: tj-actions/changed-files@v39
+        uses: tj-actions/changed-files@v42
         with:
           json: true
           quotepath: false
           files: |
-              FHEM/*.pm
-              FHEM/lib/*.pm
-              lib/FHEM/*.pm
+              FHEM/**.pm
+              FHEM/lib/**.pm
+              lib/FHEM/**.pm
 
       - name: Get current date
         id: date
