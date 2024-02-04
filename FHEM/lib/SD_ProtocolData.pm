@@ -983,14 +983,14 @@ package lib::SD_ProtocolData;
         comment         => 'remote control for LED Controller M4-5A',
         id              => '31',
         knownFreqs      => '433.92',
-        one             => [1,-1.8],
-        zero            => [2,-0.9],
+        one             => [2,-0.9],
+        zero            => [1,-1.8],
         start           => [1,-0.9, 1,-0.9, 1,-3.8],
         preSync         => [1,-0.9, 1,-0.9, 1,-0.9, 1,-0.9, 1,-0.9, 1,-0.9, 1,-0.9, 1,-0.9],
         end             => [3.8, -51],
         clockabs        => 315,
         format          => 'twostate',
-        preamble        => 'u31#',
+        preamble        => 'P31#',
       },
     "32"  =>  ## FreeTec PE-6946
               # ! some message are decode as protocol 40 and protocol 62 !
