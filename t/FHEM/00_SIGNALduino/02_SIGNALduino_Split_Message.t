@@ -7,10 +7,10 @@ use Test2::Tools::Compare qw{is};
 
 our %defs;
 
-InternalTimer(time()+1, sub {
+InternalTimer(time()+0.1, sub {
 	my $target = shift;
 	my $targetHash = $defs{$target};
-    plan(12);
+    plan(18);
     my $rmsg="MS;P1=502;P2=-9212;P3=-1939;P4=-3669;D=1234;CP=1;SP=2;";
     my %signal_parts=SIGNALduino_Split_Message($rmsg,$targetHash->{NAME});
 
@@ -32,6 +32,22 @@ InternalTimer(time()+1, sub {
     is( $signal_parts{rawData}, "55AB", "SIGNALduino_Split_Message check MC rawData" );
     is( $signal_parts{pattern}{LH}, "889", "SIGNALduino_Split_Message check MC pattern LH" );
     is( $signal_parts{pattern}{SL}, "-599", "SIGNALduino_Split_Message check MC pattern SH" );
+
+    $rmsg=q[MN;D=3BF12;R=210;A=-21;];
+    %signal_parts=SIGNALduino_Split_Message($rmsg,$targetHash->{NAME});
+    is( $signal_parts{messagetype}, q[MN], q[SIGNALduino_Split_Message check MN messagetype] );
+    is( $signal_parts{rawData}, q[3BF12], q[SIGNALduino_Split_Message check MN rawData] );
+    is( $signal_parts{rssi}, q[210], q[SIGNALduino_Split_Message check MN rssi] );
+    is( $signal_parts{freqest}, q[-21], q[SIGNALduino_Split_Message check negative MN freqest] );
+
+    $rmsg=q[MN;D=3BF12;R=210;A=15;];
+    %signal_parts=SIGNALduino_Split_Message($rmsg,$targetHash->{NAME});
+    is( $signal_parts{freqest}, q[15], q[SIGNALduino_Split_Message check positive MN freqest] );
+
+    $rmsg=q[MN;D=3BF12;R=210;];
+    %signal_parts=SIGNALduino_Split_Message($rmsg,$targetHash->{NAME});
+    is( $signal_parts{freqest}, U(), q[SIGNALduino_Split_Message check MN freqest is undef] );
+
 
 	exit(0);
 },'dummyDuino');

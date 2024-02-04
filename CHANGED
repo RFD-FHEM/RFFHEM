@@ -1,133 +1,111 @@
-2023-05-16 - Support ecowitt wh40 rain gauge (#1164)
+2024-01-09 - 14_SD_WS.pm small corrections (#1226)
 
-* SD_ProtocolData.pm
+* 14_SD_WS.pm small corrections
+Small corrections without changing the function of the module.
+2024-01-07 - SD_WS add reading model for statistics (#1225)
 
-- Added 124 -> Ecowitt WH 31
+* add models for FHEM statistics
+see FHEM statistics https://fhem.de/stats/statistics.html
+2024-01-06 - new protocol 131 for BRESSER Lightning detector (#1224)
 
-14_SD_WS.pm
+* Bresser lightning detector
+new protocol 131 for Bresser lightning detector
+* Update testData.json
+* Update README.md
+* Update Versiondate
+2024-01-03 - little fix 10_SD_GT and added tests (#1223)
 
-- Added 124 -> Ecowitt WH 31
-- increased threshhold wait timer for second UNDEFINED event : protocol 107 & 125
-- Added crc & checksum check
-- updated battery
-- updated temp calc
-
-testData.json
-
-- Added tests for ecowitt WH31
+* Update 10_SD_GT.pm
+- replace tabs with spaces (no module restrictions)
+- fix META versionssupport
+- fix PERL WARNING
+- added tests
+- revised SVN numbre
+- remove old Internals VERSION_SD_GT
+- added Meta version
+2024-01-03 - Call debug via a coderef if enabled, otherwise return (#1169)
 
 * 00_SIGNALduino.pm
 
-added rfmode to commandref
+added coderef for debug output$hash->{debugMethod}
+2024-01-02 - Update tests part two | for the functional reliability of the module SD_UT (#1218)
 
+* added some tests for define and attr
+2023-12-31 - new sensor BRESSER PM2.5/10 air quality meter (#1219)
 
-Co-authored-by: GitHub Action <action@github.com>
-2023-05-05 - fixes Attribut Hardware promini #1174 (#1175)
+* Bresser PM2.5/10 air quality meter
+ new sensor BRESSER PM2.5/10 air quality meter, protocol 117
+* Update SD_Protocols.pm
+* Update SD_Protocols.pm
+* Update testData.json
+* Update README.md
+* Update SD_ProtocolData.pm
+2023-12-20 - new def | remote ha-hx2 (#1212)
 
-* 00_SIGNALduino.pm
+* Update SD_ProtocolData.pm
 
-fixes Attribut Hardware promini #1174
+* Update 14_SD_UT.pm
+- new device HA-HX2
+
+* Update testData.json
+
+* Update 03_set.t
+
+* Update fhem.cfg
+
+* Update README.md
+2023-12-15 - create client list based on whitelistIDs attribute (#1205)
+
+* perf [clientlist]: Keep order and skip sorting
+
+* feat[clientList]: Compute clientlist based on whitelist_IDs
+2023-11-04 - New protocol 130 for remote control CREATE 6601TL (#1201)
+
+* new protocol 130 for remote control CREATE 6601TL
+* Update 14_SD_UT.pm
+Bugfix - FHEM restarts with this command:: attr SA_434_1_mini_604 model unbekannt
+* Update testData.json
+add data for Remote control CREATE 6601TL
+---------
+2023-10-14 - Hideki module - carp error (#1197)
+
+* Hideki module - carp error
+Fixes #1196
 
 * Update Versiondate
 
 ---------
 
 Co-authored-by: GitHub Action <action@github.com>
-2023-05-01 - Ecowitt WH 31 support (#1161)
+2023-09-18 - Version Update to 3.5.6 (#1192)
 
-* SD_ProtocolData.pm
+Version 3.5.6+
+2023-09-18 - Master to 3.5.5 (#1189)
 
-- Added 124 -> Ecowitt WH 31
-
-14_SD_WS.pm
-
-- Added 124 -> Ecowitt WH 31
-- increased threshhold wait timer for second UNDEFINED event : protocol 107 & 125
-2023-05-01 - New elements for attribute hardware (#1172)
-
-* 00_SIGNALduinoi.pm
-
-- updated attribute Hardwarelist
-2023-04-03 - Bump fhem/fhem-controls-actions from 2.1.1 to 2.2.0 (#1165)
-
-Bumps [fhem/fhem-controls-actions](https://github.com/fhem/fhem-controls-actions) from 2.1.1 to 2.2.0.
-- [Release notes](https://github.com/fhem/fhem-controls-actions/releases)
-- [Commits](https://github.com/fhem/fhem-controls-actions/compare/v2.1.1...v2.2.0)
-
----
-updated-dependencies:
-- dependency-name: fhem/fhem-controls-actions
-  dependency-type: direct:production
-  update-type: version-update:semver-minor
-...
-
-Signed-off-by: dependabot[bot] <support@github.com>
-Co-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
-2023-01-28 - correction commandref longids (#1151)
-
-* Update 00_SIGNALduino.pm
-Correction commandref
-2023-01-23 - Replace round main with round in FHEM::Core::Utils::Math (#1154)
-
-* 00_SIGNALduino
-14_SD_AS
-14_SD_WS
-14_SD_WS09
-
-changed round to FHEM::Core::Utils::Math
+* chore[Release] Specify Version als final 3.5.5
 
 * Update Versiondate
 
-* Update Versiondate
-
-Co-authored-by: GitHub Action <action@github.com>
-Co-authored-by: HomeAutoUser <abfall-container@gmx.de>
-2023-01-23 - 14_Hideki.pm - perlcritic (#1086)
-
-* Update 14_Hideki.pm
-
-- added checks parameter
-- fix, correction of spelling mistakes
-- fix: output warning
-- expenses improved
-- eleminated serval perl critic issues
-- created separate getters to reduce code duplication
-- use hash table instead of multiple if-elsif-else statements
-- some typos corrected
-2023-01-16 - Fix usage of frequency when sending (#1150)
-
-* 00_SIGNALduino.pm
-
-Fix: Set frequency correctly if one was specified
-Change: Prefer frequency from send command instead of the one from the protocol
+* build[output]: migrated deprecated echo outputs
 
 * Update Versiondate
 
-Co-authored-by: GitHub Action <action@github.com>
-2023-01-14 - Inkbird IBS-P01R Pool Thermometer (#1149)
+* SD_WS protocol 107, WH51 bugfix ERROR prematch (#1190)
 
 * Update 14_SD_WS.pm
-Inkbird IBS-P01R Pool Thermometer, Inkbird ITH-20R
-* Update testData.json
-add testdata for protocol 123, Inkbird IBS-P01R Pool Thermometer
-* Update SD_ProtocolData.pm
-add definition protocol 123, Inkbird IBS-P01R Pool Thermometer, ITH-20R
-* Update README.md
-add Inkbird IBS-P01R, ITH-20R
-* Update 00_SIGNALduino.pm
-add Inkbird_IBS-P01R to commandref
-2023-01-09 - Merge pull request #1145 from RFD-FHEM/master-criticPrototypes
+bugfix ERROR prematch protocol 107, see https://forum.fhem.de/index.php?msg=1286136
 
-Removed prototypes
-2023-01-09 - SD_GT add attributes repeats and disableSetAllFunction (#1146)
+* build[output]: Corrected multiline output handling
 
-* Update 10_SD_GT.pm
-add attributes repeats and disableSetAllFunction
-commandref, change format <a name="SD_GT"> to <a id="SD_GT">
-2023-01-08 - Merge pull request #1143 from RFD-FHEM/master-3.5.5
+* build[actions]: Changed to maintained action
 
-Prepare version 3.5.5
-Release 3.5.4 
+* Update Versiondate
+
+---------
+
+Co-authored-by: GitHub Action <action@github.com>
+Co-authored-by: Udo <info@elektron-bbs.de>
+Release 3.5.5
 
      14_SD_UT
          feature: new remote control DC-1961-TG (#1129)
