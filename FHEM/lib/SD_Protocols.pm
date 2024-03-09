@@ -1,5 +1,5 @@
 ################################################################################
-# $Id: SD_Protocols.pm 26975 2023-08-21 19:02:34Z elektron-bbs $
+# $Id: SD_Protocols.pm 26975 2024-01-06 16:07:53Z elektron-bbs $
 #
 # The file is part of the SIGNALduino project
 # v3.5.x - https://github.com/RFD-FHEM/RFFHEM
@@ -16,7 +16,7 @@ use Carp qw(croak carp);
 use constant HAS_DigestCRC => defined eval { require Digest::CRC; };
 use constant HAS_JSON => defined eval { require JSON; };
 
-our $VERSION = '2.08';
+our $VERSION = '2.09';
 use Storable qw(dclone);
 use Scalar::Util qw(blessed);
 
@@ -2038,6 +2038,30 @@ sub ConvBresser_7in1 {
   return ( 1, qq[ConvBresser_7in1, checksumCalc:0x$checksumcalc != checksum:0x6DF1] ) if ($checksumcalc ne '6DF1');
 
   return $hexDataXorA;
+}
+
+sub ConvBresser_lightning {
+  my $self    = shift // carp 'Not called within an object';
+  my $hexData = shift // croak 'Error: called without $hexdata as input';
+  my $hexLength = length($hexData);
+
+  return (1, 'ConvBresser_lightning, hexData is to short') if ($hexLength < 20); # check double, in def length_min set
+
+  my $hexDataXorA ='';
+  for (my $i = 0; $i < $hexLength; $i++) {
+    my $xor = hex(substr($hexData,$i,1)) ^ 0xA;
+    $hexDataXorA .= sprintf('%X',$xor);
+  }
+  $self->_logging(qq[ConvBresser_lightning, msg=$hexData],5);
+  $self->_logging(qq[ConvBresser_lightning, xor=$hexDataXorA],5);
+	
+  # LFSR-16 gen 8810 key abf9 final xor 899e
+  my $checksum = lib::SD_Protocols::LFSR_digest16(8, 0x8810, 0xABF9, substr($hexDataXorA,4,16));
+  my $checksumcalc = sprintf('%04X',$checksum ^ hex(substr($hexDataXorA,0,4)));
+  $self->_logging(qq[ConvBresser_lightning, checksumCalc:0x$checksumcalc, must be 0x899E],5);
+  return ( 1, qq[ConvBresser_lightning, checksumCalc:0x$checksumcalc != checksum:0x899E] ) if ($checksumcalc ne '899E');
+
+  return substr($hexDataXorA, 0, 20);
 }
 
 =item LFSR_digest16()
