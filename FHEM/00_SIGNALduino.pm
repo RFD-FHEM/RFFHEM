@@ -1,4 +1,4 @@
-# $Id: 00_SIGNALduino.pm 3.5.6 2024-01-06 16:07:53Z elektron-bbs $
+# $Id: 00_SIGNALduino.pm 3.5.6 2024-03-09 15:51:45Z sidey79 $
 # v3.5.6 - https://github.com/RFD-FHEM/RFFHEM/tree/master
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incoming messages
 # see http://www.fhemwiki.de/wiki/SIGNALDuino
@@ -30,7 +30,7 @@ eval {use Data::Dumper qw(Dumper);1};
 use constant HAS_JSON      => defined  eval { require JSON; JSON->import; };
 
 eval {use Scalar::Util qw(looks_like_number);1};
-eval {use Time::HiRes qw(gettimeofday);1} ;
+eval {use Time::HiRes qw(gettimeofday usleep);1} ;
 eval {use FHEM::Core::Timer::Helper;1 } ;
 
 use lib::SD_Protocols;
@@ -42,7 +42,7 @@ use List::Util qw(first);
 
 
 use constant {
-  SDUINO_VERSION                  => '3.5.6+20231214',  # Datum wird automatisch bei jedem pull request aktualisiert
+  SDUINO_VERSION                  => '3.5.6+20230815',  # Datum wird automatisch bei jedem pull request aktualisiert
   SDUINO_INIT_WAIT_XQ             => 1.5,     # wait disable device
   SDUINO_INIT_WAIT                => 2,
   SDUINO_INIT_MAXRETRY            => 3,
@@ -533,11 +533,12 @@ sub SIGNALduino_avrdude {
 
   local $/=undef;
   if (-e $logFile) {
-    open FILE, $logFile;
+    open my $Log_FH, '>', $logFile or croak qq[Can't open $logFile];
+    
     $hash->{helper}{avrdudelogs} .= "--- AVRDUDE ---------------------------------------------------------------------------------\n";
-    $hash->{helper}{avrdudelogs} .= <FILE>;
+    $hash->{helper}{avrdudelogs} .= $Log_FH;
     $hash->{helper}{avrdudelogs} .= "--- AVRDUDE ---------------------------------------------------------------------------------\n\n";
-    close FILE;
+    close $Log_FH;
   } else {
     $hash->{helper}{avrdudelogs} .= "WARNING: avrdude created no log file\n\n";
     readingsSingleUpdate($hash,'state','FIRMWARE UPDATE with error',1);
@@ -3098,7 +3099,7 @@ sub SIGNALduino_SimpleWrite {
   syswrite($hash->{DIODev}, $msg) if($hash->{DIODev});
 
   # Some linux installations are broken with 0.001, T01 returns no answer
-  select(undef, undef, undef, 0.01);
+  usleep 10000;
 }
 
 ############################# package main
