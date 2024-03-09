@@ -4807,7 +4807,7 @@ USB-connected devices (SIGNALduino):<br>
   <a name="noMsgVerbose"></a>
   <li>noMsgVerbose<br>
     With this attribute you can control the logging of debug messages from the io device.
-    If set to 3, this messages are logged if global verbose is set to 3 or higher.
+    If set to 3, this messages are logged if device attr verbose is set to 3 or higher.
   </li><br>
   <a name="rawmsgEvent"></a>
   <li>rawmsgEvent<br>
@@ -5406,7 +5406,7 @@ USB-connected devices (SIGNALduino):<br>
   </li><br>
   <a name="noMsgVerbose"></a>
   <li>noMsgVerbose<br>
-    Mit diesem Attribut k&ouml;nnen Sie die Protokollierung von Debug-Nachrichten vom io-Ger&auml;t steuern. Wenn dieser Wert auf 3 festgelegt ist, werden diese Nachrichten protokolliert, wenn der globale Verbose auf 3 oder h&ouml;her eingestellt ist.
+    Mit diesem Attribut k&ouml;nnen Sie die Protokollierung von Debug-Nachrichten vom io-Ger&auml;t steuern. Wenn dieser Wert auf 3 festgelegt ist, werden diese Nachrichten protokolliert, wenn das geräte attr Verbose auf 3 oder h&ouml;her eingestellt ist.
   </li><br>
   <a name="rawmsgEvent"></a>
   <li>rawmsgEvent<br>
