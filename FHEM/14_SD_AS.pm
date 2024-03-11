@@ -390,6 +390,10 @@ sub SD_AS_crc
     "elektron-bbs",
 	  "HomeAutoUser"
   ],
+  "meta-spec": {
+    "url": "https://metacpan.org/pod/CPAN::Meta::Spec",
+    "version": 2
+  },
   "description": "This module interprets digitals signals send from an Arduinosensordevice provided from the signalduino hardware",
   "dynamic_config": 1,
   "keywords": [
@@ -410,12 +414,12 @@ sub SD_AS_crc
   "prereqs": {
     "runtime": {
       "requires": {
-        "Digest::CRC;": "0"
+        "Digest::CRC": "0"
       }
     },
     "develop": {
       "requires": {
-        "Digest::CRC;": "0"
+        "Digest::CRC": "0"
       }
     }
   },
