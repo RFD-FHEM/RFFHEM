@@ -1,4 +1,4 @@
-# $Id: 14_SD_WS.pm 26982 2024-01-07 20:20:20Z elektron-bbs $
+# $Id: 14_SD_WS.pm 26982 2024-03-11 20:44:20Z sidey79 $
 #
 # The purpose of this module is to support serval
 # weather sensors which use various protocol
@@ -8,7 +8,7 @@
 # elektron-bbs      2018 -
 # sidey             2017 -
 #
-# 17.04.2017 WH2 (TFA 30.3157 nur Temp, Hum = 255),es wird das Perlmodul Digest:CRC benoetigt fuer CRC-Pruefung benoetigt
+# 17.04.2017 WH2 (TFA 30.3157 nur Temp, Hum = 255),es wird das Perlmodul Digest::CRC benoetigt fuer CRC-Pruefung benoetigt
 # 29.05.2017 Test ob Digest::CRC installiert
 # 22.07.2017 WH2 angepasst
 # 21.08.2017 WH2 Abbruch wenn kein "FF" am Anfang
@@ -2810,13 +2810,13 @@ sub SD_WS_WH2SHIFT {
     "runtime": {
       "requires": {
         "Carp": "0",
-        "Digest:CRC": "0"
+        "Digest::CRC": "0"
       }
     },
     "develop": {
       "requires": {
         "Carp": "0",
-        "Digest:CRC": "0"
+        "Digest::CRC": "0"
       }
     }
   },
