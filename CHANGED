@@ -1,3 +1,6 @@
+2024-03-12 - Merge pull request #1242 from RFD-FHEM/fixMetaSD_WS
+
+fix meta.json syntax errors
 2024-03-09 - Merge pull request #1241 from RFD-FHEM/sidey79/issue1240
 
 Better commandref for noMsgVerbose 
