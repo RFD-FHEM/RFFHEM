@@ -64,7 +64,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - id: file_changes
-        uses: tj-actions/changed-files@v42
+        uses: tj-actions/changed-files@v43
         with:
           json: true
           quotepath: false
