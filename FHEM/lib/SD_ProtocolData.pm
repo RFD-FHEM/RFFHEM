@@ -3528,7 +3528,7 @@ package lib::SD_ProtocolData;
     "134" =>  # WMBus_S
               # https://wiki.fhem.de/wiki/WMBUS
               # note !!! Implementation in the FW still needs to be done, register settings are not sufficient
-              #           - definition is in advance in order to dispatch a DMSG
+              #           - definition is in advance in order to dispatch a DMSG | https://github.com/RFD-FHEM/RFFHEM/issues/1247
       {
         name            => 'WMBus_S',
         comment         => 'WMBus mode S',
@@ -3548,7 +3548,7 @@ package lib::SD_ProtocolData;
     "135" =>  # WMBus_T
               # https://wiki.fhem.de/wiki/WMBUS
               # note !!! Implementation in the FW still needs to be done, register settings are not sufficient
-              #           - definition is in advance in order to dispatch a DMSG
+              #           - definition is in advance in order to dispatch a DMSG | https://github.com/RFD-FHEM/RFFHEM/issues/1247
               # messages with normal identifier
               # RAWMSG: MN;D=3E44FA1213871122011633057A1C002025417CD28E06770269857D8001EF3B8BBE56BA7E06855CBA0334149F51682F2E6E2960E6900F800C0001090086B41E003A6F140131414D7D88810A;R=10;A=16;
               # DMSG: b3E44FA1213871122011633057A1B002025CCC7C1BF453C407A299D8E1F21A3779CC6591EDF5E43BC3B5B0E9175B3DD6ACE29E5DCE00F800C0001090086B41E000726140131414D7D88001B
