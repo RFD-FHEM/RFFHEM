@@ -1,4 +1,4 @@
-# $Id: 00_SIGNALduino.pm 3.5.6 2024-03-09 15:50:25Z sidey79 $
+# $Id: 00_SIGNALduino.pm 3.5.6 2024-04-03 15:50:25Z sidey79 $
 # v3.5.6 - https://github.com/RFD-FHEM/RFFHEM/tree/master
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incoming messages
 # see http://www.fhemwiki.de/wiki/SIGNALDuino
@@ -232,6 +232,7 @@ my $clientsSIGNALduino = ':CUL_EM:'
             .'SD_WS:'
             .'SD_WS_Maverick:'
             .'SOMFY:'
+            .'WMBUS:'
             .' :'         # Zeilenumbruch
             .'Siro:'
             .'SIGNALduino_un:'
@@ -271,6 +272,7 @@ my %matchListSIGNALduino = (
       '31:KOPP_FC'          => '^kr\w{18,}',
       '32:PCA301'           => '^\\S+\\s+24',
       '33:SD_Rojaflex'      => '^P109#[A-Fa-f0-9]+',
+      '34:WMBUS'            => '^b.*',
       'X:SIGNALduino_un'    => '^[u]\d+#.*',
 );
 
@@ -2904,7 +2906,12 @@ sub SIGNALduino_Parse_MN {
 
   my $hash = shift // return;   #return if no hash  is provided
   my $rmsg = shift // return;   #return if no rmsg is provided
- 
+
+  my $mark;
+  if (substr($rmsg,5,1) eq 'Y') { # WMBus
+    $mark = substr($rmsg,5,1);
+    $rmsg =~ s/Y//g;
+  }
   if ($rmsg !~ /^MN;D=[0-9A-F]+;(?:R=[0-9]+;)?(?:A=-?[0-9]{1,3};)?$/) { # AFC cc1101 0x32 (0xF2): FREQEST – Frequency Offset Estimate from Demodulator
     $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: Parse_MN, faulty msg: $rmsg]);
     return ; # Abort here if not successfull
@@ -2915,6 +2922,10 @@ sub SIGNALduino_Parse_MN {
 
   # Verify if extracted hash has the correct values:
   my $rawData  = _limit_to_hex($msg_parts{rawData})     // $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: Parse_MN, faulty rawData D=: $msg_parts{rawData}]) //  return ;
+
+  if ($mark) { # WMBus
+    $rawData  = $mark . $rawData;
+  }
   my $rssi;
   my $rssiStr= '';
   my $freqafc;
