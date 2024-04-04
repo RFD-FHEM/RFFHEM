@@ -1,4 +1,4 @@
-# $Id: 00_SIGNALduino.pm 3.5.6 2024-04-03 15:50:25Z sidey79 $
+# $Id: 00_SIGNALduino.pm 3.5.6 2024-04-04 15:50:25Z sidey79 $
 # v3.5.6 - https://github.com/RFD-FHEM/RFFHEM/tree/master
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incoming messages
 # see http://www.fhemwiki.de/wiki/SIGNALDuino
@@ -42,7 +42,7 @@ use List::Util qw(first);
 
 
 use constant {
-  SDUINO_VERSION                  => '3.5.6+20240403',  # Datum wird automatisch bei jedem pull request aktualisiert
+  SDUINO_VERSION                  => '3.5.6+20240404',  # Datum wird automatisch bei jedem pull request aktualisiert
   SDUINO_INIT_WAIT_XQ             => 1.5,     # wait disable device
   SDUINO_INIT_WAIT                => 2,
   SDUINO_INIT_MAXRETRY            => 3,
@@ -4887,6 +4887,12 @@ USB-connected devices (SIGNALduino):<br>
       <li>SlowRF<br>
         modulation ASK/OOK, <b>loads the standard setting from the uC</b>
       </li>
+      <li>WMBus_S<br>
+        modulation FSK, Datarate=32.7301 kbps, Sync Word=7696, frequency 868.300 MHz (processing needs to be integrated into firmware)
+      </li>
+      <li>WMBus_T<br>
+        modulation FSK, Datarate=99.9756 kbps, Sync Word=543D, frequency 868.950 MHz (processing needs to be integrated into firmware)
+      </li>
     </ul>
   </li><br>
   <a name="suppressDeviceRawmsg"></a>
@@ -5493,6 +5499,12 @@ USB-connected devices (SIGNALduino):<br>
       </li>
       <li>SlowRF<br>
         Modulation ASK/OOK, <b>l&auml;d die Standard Einstellung vom uC</b>
+      </li>
+      <li>WMBus_S<br>
+        Modulation FSK, Datenrate=32.7301 kbps, Sync Word=7696, Frequenz 868.300 MHz (Verarbeitung muss noch in Firmware integriert werden)
+      </li>
+      <li>WMBus_T<br>
+        Modulation FSK, Datenrate=99.9756 kbps, Sync Word=543D, Frequenz 868.950 MHz (Verarbeitung muss noch in Firmware integriert werden)
       </li>
     </ul>
   </li><br>
