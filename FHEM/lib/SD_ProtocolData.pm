@@ -3532,7 +3532,7 @@ package lib::SD_ProtocolData;
         id              => '133',
         #developId       => 'm',
         knownFreqs      => '868.300',
-        datarate        => '32.720',
+        datarate        => '32.768',
         preamble        => 'b',
         modulation      => '2-FSK',
         rfmode          => 'WMBus_S',
