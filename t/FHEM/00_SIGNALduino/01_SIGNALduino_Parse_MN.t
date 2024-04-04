@@ -81,7 +81,7 @@ my @mockData = (
         plan        => 2,
         testname    => q[Good MN data, without RSSI, with set attribute rfmode=PCA301],
         input       => q[MN;D=0405019E8700AAAAAAAA0F13AA16ACC0540AAA49C814473A2774D208AC0B0167;R=6;],
-        rValue      => 1,
+        rValue      => 3,
         rfmode      => 'PCA301' 
     },
     {
