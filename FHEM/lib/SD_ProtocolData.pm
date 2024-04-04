@@ -3522,17 +3522,14 @@ package lib::SD_ProtocolData;
         length_min      => '24',
         length_max      => '24',
       },
-
-    #"133"  =>  ## reserved elektron-bbs
-
-    "134" =>  # WMBus_S
+    "133" =>  # WMBus_S
               # https://wiki.fhem.de/wiki/WMBUS
               # note !!! Implementation in the FW still needs to be done, register settings are not sufficient
               #           - definition is in advance in order to dispatch a DMSG | https://github.com/RFD-FHEM/RFFHEM/issues/1247
       {
         name            => 'WMBus_S',
         comment         => 'WMBus mode S',
-        id              => '134',
+        id              => '133',
         #developId       => 'm',
         knownFreqs      => '868.300',
         datarate        => '32.720',
@@ -3545,7 +3542,7 @@ package lib::SD_ProtocolData;
         clientmodule    => 'WMBUS',
         #regexMatch      => qr/^b/,   # ToDo, check! fuer eine regexp Pruefung am Anfang vor dem method Aufruf
       },
-    "135" =>  # WMBus_T
+    "134" =>  # WMBus_T
               # https://wiki.fhem.de/wiki/WMBUS
               # note !!! Implementation in the FW still needs to be done, register settings are not sufficient
               #           - definition is in advance in order to dispatch a DMSG | https://github.com/RFD-FHEM/RFFHEM/issues/1247
@@ -3558,7 +3555,7 @@ package lib::SD_ProtocolData;
       {
         name            => 'WMBus_T',
         comment         => 'WMBus mode C and T',
-        id              => '135',
+        id              => '134',
         # developId       => 'm',
         knownFreqs      => '868.950',
         datarate        => '100.000',
@@ -3632,21 +3629,6 @@ package lib::SD_ProtocolData;
         # modulation      => 'GFSK',
         # rfmode          => 'RIO',
         # register        => ['000D','012E','022D','0347','04D3','0591','063D','0704','0832','0900','0A00','0B06','0C00','0D21','0E65','0F6F','1086','1190','1218','1323','14B9','1540','1607','1700','1818','1914','1A6C','1B07','1C00','1D91','1E87','1F6B','20F8','21B6','2211','23EF','240D','253E','261F','2741'],
-      # },
-    # "997" =>  # WMBus_C
-              # # https://wiki.fhem.de/wiki/WMBUS
-              # # settings from CUL
-      # {
-        # name            => 'WMBus_C',
-        # comment         => '',
-        # id              => '997',
-        # developId       => 'm',
-        # knownFreqs      => '',
-        # datarate        => '',
-        # modulation      => '2-FSK',
-        # rfmode          => 'WMBus_C',
-        # register        => ['0029','012E','023F','0307','04D3','0591','06FF','0704','0845','0900','0A00','0B0F','0C00','0D1E','0EC4','0FEC','108C','1122','1202','1322','14F8','1547','1607','1730','1804','1976','1A6C','1B03','1C40','1D91','1E87','1F6B','20F8','2156','2210','23A9','240A','2520','260D','2741'],
-        # #regexMatch      => qr/^9/,   # ToDo, check! fuer eine regexp Pruefung am Anfang vor dem method Aufruf
       # },
 
     ########################################################################
