@@ -140,6 +140,22 @@ my @mockData = (
         rValue      => 1,
         rfmode      => 'Bresser_6in1' 
     },
+    {
+        deviceName  => q[dummyDuino],
+        plan        => 2,
+        testname    => q[Good MN data, with RSSI, with set attribute rfmode=WMBus_T, DMSG started with b],
+        input       => q[MN;D=3E44F536892656000108F5D97AA9002025FB7AD4DF8710D69A3867E687B0633B1515F7BA8A6BE0C93649EC5593F476E7DD3E82F0470F800C0001090086B41E0098CE14011E070416C50018;R=24;A=0;],
+        rValue      => 2,
+        rfmode      => 'WMBus_T' 
+    },
+    {
+        deviceName  => q[dummyDuino],
+        plan        => 2,
+        testname    => q[Good MN data, with RSSI, with set attribute rfmode=WMBus_T, DMSG started with bY],
+        input       => q[MN;D=304497264202231800087A5E0020A5D9CF9E719E36DB255C06F2AEC0722FC3853A3031BD85EF085BDAD29194136A02DD7E00FD;R=253;A=0;],
+        rValue      => 3,
+        rfmode      => 'WMBus_T' 
+    },
 );
 
 
