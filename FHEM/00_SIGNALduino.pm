@@ -4889,9 +4889,11 @@ USB-connected devices (SIGNALduino):<br>
       </li>
       <li>WMBus_S<br>
         modulation FSK, Datarate=32.7301 kbps, Sync Word=7696, frequency 868.300 MHz (processing needs to be integrated into firmware)
+        <ul><small>example: water, gas, heat, electric meters and the data collecting devices</small></ul>
       </li>
       <li>WMBus_T<br>
         modulation FSK, Datarate=99.9756 kbps, Sync Word=543D, frequency 868.950 MHz (processing needs to be integrated into firmware)
+        <ul><small>example: water, gas, heat, electric meters and the data collecting devices</small></ul>
       </li>
     </ul>
   </li><br>
@@ -5502,9 +5504,11 @@ USB-connected devices (SIGNALduino):<br>
       </li>
       <li>WMBus_S<br>
         Modulation FSK, Datenrate=32.7301 kbps, Sync Word=7696, Frequenz 868.300 MHz (Verarbeitung muss noch in Firmware integriert werden)
+        <ul><small>Beispiel: diverse Wasser-, Gas-, Wärme- und Stromzähler sowie die Datenerfassungsgeräte</small></ul>
       </li>
       <li>WMBus_T<br>
         Modulation FSK, Datenrate=99.9756 kbps, Sync Word=543D, Frequenz 868.950 MHz (Verarbeitung muss noch in Firmware integriert werden)
+        <ul><small>Beispiel: diverse Wasser-, Gas-, Wärme- und Stromzähler sowie die Datenerfassungsgeräte</small></ul>
       </li>
     </ul>
   </li><br>
