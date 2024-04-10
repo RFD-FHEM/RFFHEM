@@ -2940,6 +2940,7 @@ package lib::SD_ProtocolData;
         sync            => '2DD4',
         modulation      => '2-FSK',
         rfmode          => 'Bresser_5in1',
+        regexMatch      => qr/^[a-fA-F0-9]/,
         register        => ['0001','022E','0346','042D','05D4','061A','07C0','0800','0D21','0E65','0F6A','1088','114C','1202','1322','14F8','1551','1916','1B43','1C68'],
         preamble        => 'W108#',
         clientmodule    => 'SD_WS',
@@ -3100,6 +3101,7 @@ package lib::SD_ProtocolData;
         sync            => '2DD4',
         modulation      => '2-FSK',
         rfmode          => 'Bresser_6in1',
+        regexMatch      => qr/^[a-fA-F0-9]/,
         register        => ['0001','022E','0344','042D','05D4','0612','07C0','0800','0D21','0E65','0F6A','1088','114C','1202','1322','14F8','1551','1916','1B43','1C68'],
         preamble        => 'W115#',
         clientmodule    => 'SD_WS',
@@ -3159,6 +3161,7 @@ package lib::SD_ProtocolData;
         sync            => '2DD4',
         modulation      => '2-FSK',
         rfmode          => 'Bresser_7in1',
+        regexMatch      => qr/^[a-fA-F0-9]/,
         register        => ['0001','022E','0345','042D','05D4','0617','07C0','0800','0D21','0E65','0F6A','1088','114C','1202','1322','14F8','1551','1916','1B43','1C68'],
         preamble        => 'W117#',
         clientmodule    => 'SD_WS',
@@ -3485,6 +3488,7 @@ package lib::SD_ProtocolData;
         sync            => '2DD4',
         modulation      => '2-FSK',
         rfmode          => 'Bresser_lightning',
+        regexMatch      => qr/^[a-fA-F0-9]/,
         register        => ['0001','022E','0342','042D','05D4','060A','07C0','0800','0D21','0E65','0F6A','1088','114C','1202','1322','14F8','1551','1916','1B43','1C68'],
         preamble        => 'W131#',
         clientmodule    => 'SD_WS',
@@ -3530,9 +3534,8 @@ package lib::SD_ProtocolData;
         name            => 'WMBus_S',
         comment         => 'WMBus mode S',
         id              => '133',
-        #developId       => 'm',
         knownFreqs      => '868.300',
-        datarate        => '32.768',
+        datarate        => '32.720',
         preamble        => 'b',
         modulation      => '2-FSK',
         rfmode          => 'WMBus_S',
@@ -3548,15 +3551,14 @@ package lib::SD_ProtocolData;
               #           - definition is in advance in order to dispatch a DMSG | https://github.com/RFD-FHEM/RFFHEM/issues/1247
               # messages with normal identifier
               # RAWMSG: MN;D=3E44FA1213871122011633057A1C002025417CD28E06770269857D8001EF3B8BBE56BA7E06855CBA0334149F51682F2E6E2960E6900F800C0001090086B41E003A6F140131414D7D88810A;R=10;A=16;
-              # DMSG: b3E44FA1213871122011633057A1B002025CCC7C1BF453C407A299D8E1F21A3779CC6591EDF5E43BC3B5B0E9175B3DD6ACE29E5DCE00F800C0001090086B41E000726140131414D7D88001B
+              # DMSG:       b3E44FA1213871122011633057A1C002025417CD28E06770269857D8001EF3B8BBE56BA7E06855CBA0334149F51682F2E6E2960E6900F800C0001090086B41E003A6F140131414D7D88810A
               # messages with Y identifier
-              # RAWMSG: MN;D=304497264202231800087A3E0020A5EE5B2074920E46E4B4A26B99C92C8DD3A55F44FAF6AE0256B354F9C48C717BFAD43400FB;R=251;A=0;
-              # DMSG: bY304497264202231800087A3E0020A5EE5B2074920E46E4B4A26B99C92C8DD3A55F44FAF6AE0256B354F9C48C717BFAD43400FB
+              # RAWMSG: MN;D=Y304497264202231800087A3E0020A5EE5B2074920E46E4B4A26B99C92C8DD3A55F44FAF6AE0256B354F9C48C717BFAD43400FB;R=251;A=0;
+              # DMSG:       bY304497264202231800087A3E0020A5EE5B2074920E46E4B4A26B99C92C8DD3A55F44FAF6AE0256B354F9C48C717BFAD43400FB
       {
         name            => 'WMBus_T',
         comment         => 'WMBus mode C and T',
         id              => '134',
-        # developId       => 'm',
         knownFreqs      => '868.950',
         datarate        => '100.000',
         preamble        => 'b',
