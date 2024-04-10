@@ -1,4 +1,4 @@
-# $Id: 00_SIGNALduino.pm 3.5.6 2024-04-04 15:50:25Z sidey79 $
+# $Id: 00_SIGNALduino.pm 3.5.6 2024-04-10 15:50:25Z sidey79 $
 # v3.5.6 - https://github.com/RFD-FHEM/RFFHEM/tree/master
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incoming messages
 # see http://www.fhemwiki.de/wiki/SIGNALDuino
@@ -42,7 +42,7 @@ use List::Util qw(first);
 
 
 use constant {
-  SDUINO_VERSION                  => '3.5.6+20240404',  # Datum wird automatisch bei jedem pull request aktualisiert
+  SDUINO_VERSION                  => '3.5.6+20240410',  # Datum wird automatisch bei jedem pull request aktualisiert
   SDUINO_INIT_WAIT_XQ             => 1.5,     # wait disable device
   SDUINO_INIT_WAIT                => 2,
   SDUINO_INIT_MAXRETRY            => 3,
@@ -2908,9 +2908,11 @@ sub SIGNALduino_Parse_MN {
   my $rmsg = shift // return;   #return if no rmsg is provided
 
   my $mark;
-  if (substr($rmsg,5,1) eq 'Y') { # WMBus
-    $mark = substr($rmsg,5,1);
-    $rmsg =~ s/Y//g;
+  my $rmsg1;
+  if (substr($rmsg,5,1) eq 'Y') { # WMBus frame type B
+    $rmsg1 = $rmsg;
+    $rmsg =~ s/^MN;D=Y/MN;D=/;
+    $mark = 'Y';
   }
   if ($rmsg !~ /^MN;D=[0-9A-F]+;(?:R=[0-9]+;)?(?:A=-?[0-9]{1,3};)?$/) { # AFC cc1101 0x32 (0xF2): FREQEST – Frequency Offset Estimate from Demodulator
     $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: Parse_MN, faulty msg: $rmsg]);
@@ -2924,7 +2926,8 @@ sub SIGNALduino_Parse_MN {
   my $rawData  = _limit_to_hex($msg_parts{rawData})     // $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: Parse_MN, faulty rawData D=: $msg_parts{rawData}]) //  return ;
 
   if ($mark) { # WMBus
-    $rawData  = $mark . $rawData;
+    $rawData = 'Y' . $rawData;
+    $rmsg = $rmsg1;
   }
   my $rssi;
   my $rssiStr= '';
@@ -3430,7 +3433,7 @@ sub SIGNALduino_IdList {
         push (@skippedWhiteId, $id);
         next;
       }
-	    my $clientmodule = $hash->{protocolObject}->getProperty($id,'clientmodule',undef);
+      my $clientmodule = $hash->{protocolObject}->getProperty($id,'clientmodule',undef);
       $hash->{Clients} .= qq[$clientmodule:] if (defined $clientmodule && $hash->{Clients} !~ /$clientmodule:/); # add module only if clientModule is known and don't do it more than once
     } else {                                # whitelist not active
       if (exists($BlacklistIDs{$id})) {
