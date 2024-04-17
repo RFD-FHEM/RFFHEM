@@ -81,7 +81,7 @@ my @mockData = (
         plan        => 2,
         testname    => q[Good MN data, without RSSI, with set attribute rfmode=PCA301],
         input       => q[MN;D=0405019E8700AAAAAAAA0F13AA16ACC0540AAA49C814473A2774D208AC0B0167;R=6;],
-        rValue      => 1,
+        rValue      => 3,
         rfmode      => 'PCA301' 
     },
     {
@@ -139,6 +139,38 @@ my @mockData = (
         input       => q[MN;D=3BF120B00C1618FF77FF0458152293FFF06B0000;R=210;A=-35;],
         rValue      => 1,
         rfmode      => 'Bresser_6in1' 
+    },
+    {
+        deviceName  => q[dummyDuino],
+        plan        => 2,
+        testname    => q[Good MN data, with RSSI, with set attribute rfmode=WMBus_T, Medium OMS MUC, DMSG started with b],
+        input       => q[MN;D=2547F536721602000231D27C7A000008000F80130001090086B41E00175914011B0806020400000000001945000E;R=14;A=0;],
+        rValue      => 2,
+        rfmode      => 'WMBus_T' 
+    },
+    {
+        deviceName  => q[dummyDuino],
+        plan        => 2,
+        testname    => q[Good MN data, with RSSI, with set attribute rfmode=WMBus_T, Medium Heat Cost Allocator, DMSG started with b],
+        input       => q[MN;D=3E44F53611275600010884B57AA9002025D27FDD54048072F9A9D06C2E2E5249A41E363DE1F27AF3DE4DD325507C67A9E33CDDC4A70F800C0001090086B41E0063B414011E070416C500FC;R=252;A=0;],
+        rValue      => 2,
+        rfmode      => 'WMBus_T' 
+    },
+    {
+        deviceName  => q[dummyDuino],
+        plan        => 2,
+        testname    => q[Good MN data, with RSSI, with set attribute rfmode=WMBus_T, Medium Cold water, DMSG started with bY],
+        input       => q[MN;D=Y25442D2C769390751B168D20955084E7204D4874442AA58272A51FCE1430C0A769C3BEF95A2096D1;R=209;A=-6;],
+        rValue      => 2,
+        rfmode      => 'WMBus_T' 
+    },
+    {
+        deviceName  => q[dummyDuino],
+        plan        => 2,
+        testname    => q[Good MN data, with RSSI, with set attribute rfmode=WMBus_T, Medium Heat Cost Allocator, DMSG started with bY],
+        input       => q[MN;D=Y304497264202231800087A2A0020A53848C8EA9DD3055EA724A2E2AE04E995205589AADC82F6305A620959E6424F406B3B00F6;R=246;A=0;],
+        rValue      => 2,
+        rfmode      => 'WMBus_T' 
     },
 );
 
