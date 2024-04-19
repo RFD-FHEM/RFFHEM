@@ -2907,14 +2907,6 @@ sub SIGNALduino_Parse_MN {
   my $hash = shift // return;   #return if no hash  is provided
   my $rmsg = shift // return;   #return if no rmsg is provided
 
-  my $mark;
-  my $rmsg1;
-
-  #if (substr($rmsg,5,1) eq 'Y') { # WMBus frame type B
-  #  $rmsg1 = $rmsg;
-  #  $rmsg =~ s/^MN;D=Y/MN;D=/;
-  #  $mark = 'Y';
-  #}
 
   # Verify if rmsg has the correct values:
   if ($rmsg !~ /^MN;D=Y?[0-9A-F]+;(?:R=[0-9]+;)?(?:A=-?[0-9]{1,3};)?$/) { # AFC cc1101 0x32 (0xF2): FREQEST – Frequency Offset Estimate from Demodulator
@@ -2926,11 +2918,6 @@ sub SIGNALduino_Parse_MN {
   my %msg_parts = SIGNALduino_Split_Message($rmsg, $hash->{NAME});
   
   my $rawData = (substr %msg_parts{rawData},0,1 eq q[Y]) ? substr(%msg_parts{rawData},1) : $msg_parts{rawData};
-  print $rawData;
-  #if ($mark) { # WMBus
-  #  $rawData = 'Y' . $rawData;
-  #  $rmsg = $rmsg1;
-  #}
   my $rssi;
   my $rssiStr= '';
   my $freqafc;
