@@ -2172,7 +2172,7 @@ sub SIGNALduino_Split_Message {
        $patternList{$pattern[0]} = $pattern[1];
        $hash->{debugMethod}->(qq[$name: extracted pattern @pattern \n]);
     }
-    elsif($_ =~ m/D=\d+/ or $_ =~ m/^D=[A-F0-9]+/)                #### Message from array
+    elsif($_ =~ m/D=\d+/ or $_ =~ m/^D=Y?[A-F0-9]+/)                #### Message from array
     {
       $_ =~ s/D=//;
       $rawData = $_ ;
@@ -2907,28 +2907,17 @@ sub SIGNALduino_Parse_MN {
   my $hash = shift // return;   #return if no hash  is provided
   my $rmsg = shift // return;   #return if no rmsg is provided
 
-  my $mark;
-  my $rmsg1;
-  if (substr($rmsg,5,1) eq 'Y') { # WMBus frame type B
-    $rmsg1 = $rmsg;
-    $rmsg =~ s/^MN;D=Y/MN;D=/;
-    $mark = 'Y';
-  }
-  if ($rmsg !~ /^MN;D=[0-9A-F]+;(?:R=[0-9]+;)?(?:A=-?[0-9]{1,3};)?$/) { # AFC cc1101 0x32 (0xF2): FREQEST – Frequency Offset Estimate from Demodulator
+
+  # Verify if rmsg has the correct values:
+  if ($rmsg !~ /^MN;D=Y?[0-9A-F]+;(?:R=[0-9]+;)?(?:A=-?[0-9]{1,3};)?$/) { # AFC cc1101 0x32 (0xF2): FREQEST – Frequency Offset Estimate from Demodulator
     $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: Parse_MN, faulty msg: $rmsg]);
     return ; # Abort here if not successfull
   }
 
   # Extract Data from rmsg:
   my %msg_parts = SIGNALduino_Split_Message($rmsg, $hash->{NAME});
-
-  # Verify if extracted hash has the correct values:
-  my $rawData  = _limit_to_hex($msg_parts{rawData})     // $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: Parse_MN, faulty rawData D=: $msg_parts{rawData}]) //  return ;
-
-  if ($mark) { # WMBus
-    $rawData = 'Y' . $rawData;
-    $rmsg = $rmsg1;
-  }
+  
+  my $rawData = (substr %msg_parts{rawData},0,1 eq q[Y]) ? substr(%msg_parts{rawData},1) : $msg_parts{rawData};
   my $rssi;
   my $rssiStr= '';
   my $freqafc;
