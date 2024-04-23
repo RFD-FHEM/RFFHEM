@@ -41,22 +41,27 @@ jobs:
       working-directory: /opt/fhem/
       env:
         FHEM_DIR: /opt/fhem
+
     - name: Create clover report for perl Modules
       run: cover -report clover
+
     - uses: codecov/codecov-action@v4.3.0
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
-        file: ./cover_db/clover.xml
+        file: clover.xml
+        directory: ./cover_db
         flags: unittests,perl,modules
         name: perl modules (testscripts) ${{ matrix.perl }}
 
     - name: Create clover report for fhem tests
       working-directory: /opt/fhem/
       run: cover -report clover
+
     - uses: codecov/codecov-action@v4.3.0
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
-        file: /opt/fhem/cover_db/clover.xml
+        file: clover.xml
+        directory: /opt/fhem/cover_db
         flags: unittests,fhem,modules
         name: fhem (testscripts) ${{ matrix.perl }} 
 
