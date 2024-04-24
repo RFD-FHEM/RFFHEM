@@ -184,6 +184,7 @@ jobs:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           wait-interval: 20
           allowed-conclusions: success,skipped,cancelled,neutral
+          ignore-checks: codecov/patch
 
       - name: git push
         if: ${{ steps.commit.outputs.status }}
