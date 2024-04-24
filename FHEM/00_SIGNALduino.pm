@@ -2917,7 +2917,7 @@ sub SIGNALduino_Parse_MN {
   # Extract Data from rmsg:
   my %msg_parts = SIGNALduino_Split_Message($rmsg, $hash->{NAME});
   
-  my $rawData = (substr %msg_parts{rawData},0,1 eq q[Y]) ? substr(%msg_parts{rawData},1) : $msg_parts{rawData};
+  my $rawData = (substr $msg_parts{rawData},0,1 eq q[Y]) ? substr($msg_parts{rawData},1) : $msg_parts{rawData};
   my $rssi;
   my $rssiStr= '';
   my $freqafc;
