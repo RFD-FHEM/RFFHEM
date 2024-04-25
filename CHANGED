@@ -1,3 +1,11 @@
+2024-04-25 - WMBUS extension to dispatch messages (#1252)
+
+* WMBUS proposal - extension to dispatch messages
+* feat[00_SIGNALduino]: Changed input validation for WMBus
+* fix[00_SIGNALduino]: Removed unneded code
+* fix[00_SIGNALduino]: Syntax
+* build[updateversion]: Allow codecov/patch check to be failed
+* Update Versiondate
 2024-03-12 - Merge pull request #1242 from RFD-FHEM/fixMetaSD_WS
 
 fix meta.json syntax errors
