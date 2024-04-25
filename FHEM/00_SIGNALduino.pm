@@ -1,4 +1,4 @@
-# $Id: 00_SIGNALduino.pm 3.5.6 2024-03-09 15:50:25Z sidey79 $
+# $Id: 00_SIGNALduino.pm 3.5.6 2024-04-24 06:21:19Z HomeAutoUser $
 # v3.5.6 - https://github.com/RFD-FHEM/RFFHEM/tree/master
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incoming messages
 # see http://www.fhemwiki.de/wiki/SIGNALDuino
@@ -42,7 +42,7 @@ use List::Util qw(first);
 
 
 use constant {
-  SDUINO_VERSION                  => '3.5.6+20231214',  # Datum wird automatisch bei jedem pull request aktualisiert
+  SDUINO_VERSION                  => '3.5.6+20240410',  # Datum wird automatisch bei jedem pull request aktualisiert
   SDUINO_INIT_WAIT_XQ             => 1.5,     # wait disable device
   SDUINO_INIT_WAIT                => 2,
   SDUINO_INIT_MAXRETRY            => 3,
@@ -232,6 +232,7 @@ my $clientsSIGNALduino = ':CUL_EM:'
             .'SD_WS:'
             .'SD_WS_Maverick:'
             .'SOMFY:'
+            .'WMBUS:'
             .' :'         # Zeilenumbruch
             .'Siro:'
             .'SIGNALduino_un:'
@@ -271,6 +272,7 @@ my %matchListSIGNALduino = (
       '31:KOPP_FC'          => '^kr\w{18,}',
       '32:PCA301'           => '^\\S+\\s+24',
       '33:SD_Rojaflex'      => '^P109#[A-Fa-f0-9]+',
+      '34:WMBUS'            => '^b.*',
       'X:SIGNALduino_un'    => '^[u]\d+#.*',
 );
 
@@ -2170,7 +2172,7 @@ sub SIGNALduino_Split_Message {
        $patternList{$pattern[0]} = $pattern[1];
        $hash->{debugMethod}->(qq[$name: extracted pattern @pattern \n]);
     }
-    elsif($_ =~ m/D=\d+/ or $_ =~ m/^D=[A-F0-9]+/)                #### Message from array
+    elsif($_ =~ m/D=\d+/ or $_ =~ m/^D=Y?[A-F0-9]+/)                #### Message from array
     {
       $_ =~ s/D=//;
       $rawData = $_ ;
@@ -2904,17 +2906,18 @@ sub SIGNALduino_Parse_MN {
 
   my $hash = shift // return;   #return if no hash  is provided
   my $rmsg = shift // return;   #return if no rmsg is provided
- 
-  if ($rmsg !~ /^MN;D=[0-9A-F]+;(?:R=[0-9]+;)?(?:A=-?[0-9]{1,3};)?$/) { # AFC cc1101 0x32 (0xF2): FREQEST – Frequency Offset Estimate from Demodulator
+
+
+  # Verify if rmsg has the correct values:
+  if ($rmsg !~ /^MN;D=Y?[0-9A-F]+;(?:R=[0-9]+;)?(?:A=-?[0-9]{1,3};)?$/) { # AFC cc1101 0x32 (0xF2): FREQEST – Frequency Offset Estimate from Demodulator
     $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: Parse_MN, faulty msg: $rmsg]);
     return ; # Abort here if not successfull
   }
 
   # Extract Data from rmsg:
   my %msg_parts = SIGNALduino_Split_Message($rmsg, $hash->{NAME});
-
-  # Verify if extracted hash has the correct values:
-  my $rawData  = _limit_to_hex($msg_parts{rawData})     // $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: Parse_MN, faulty rawData D=: $msg_parts{rawData}]) //  return ;
+  
+  my $rawData = (substr $msg_parts{rawData},0,1 eq q[Y]) ? substr($msg_parts{rawData},1) : $msg_parts{rawData};
   my $rssi;
   my $rssiStr= '';
   my $freqafc;
@@ -3419,7 +3422,7 @@ sub SIGNALduino_IdList {
         push (@skippedWhiteId, $id);
         next;
       }
-	    my $clientmodule = $hash->{protocolObject}->getProperty($id,'clientmodule',undef);
+      my $clientmodule = $hash->{protocolObject}->getProperty($id,'clientmodule',undef);
       $hash->{Clients} .= qq[$clientmodule:] if (defined $clientmodule && $hash->{Clients} !~ /$clientmodule:/); # add module only if clientModule is known and don't do it more than once
     } else {                                # whitelist not active
       if (exists($BlacklistIDs{$id})) {
@@ -4876,6 +4879,14 @@ USB-connected devices (SIGNALduino):<br>
       <li>SlowRF<br>
         modulation ASK/OOK, <b>loads the standard setting from the uC</b>
       </li>
+      <li>WMBus_S<br>
+        modulation FSK, Datarate=32.768 kbps, Sync Word=7696, frequency 868.300 MHz (processing needs to be integrated into firmware)
+        <ul><small>example: water, gas, heat, electric meters and the data collecting devices</small></ul>
+      </li>
+      <li>WMBus_T<br>
+        modulation FSK, Datarate=100.0 kbps, Sync Word=543D, frequency 868.950 MHz (processing needs to be integrated into firmware)
+        <ul><small>example: water, gas, heat, electric meters and the data collecting devices</small></ul>
+      </li>
     </ul>
   </li><br>
   <a name="suppressDeviceRawmsg"></a>
@@ -5482,6 +5493,14 @@ USB-connected devices (SIGNALduino):<br>
       </li>
       <li>SlowRF<br>
         Modulation ASK/OOK, <b>l&auml;d die Standard Einstellung vom uC</b>
+      </li>
+      <li>WMBus_S<br>
+        Modulation FSK, Datenrate=32.768 kbps, Sync Word=7696, Frequenz 868.300 MHz (Verarbeitung muss noch in Firmware integriert werden)
+        <ul><small>Beispiel: diverse Wasser-, Gas-, Wärme- und Stromzähler sowie die Datenerfassungsgeräte</small></ul>
+      </li>
+      <li>WMBus_T<br>
+        Modulation FSK, Datenrate=100.0 kbps, Sync Word=543D, Frequenz 868.950 MHz (Verarbeitung muss noch in Firmware integriert werden)
+        <ul><small>Beispiel: diverse Wasser-, Gas-, Wärme- und Stromzähler sowie die Datenerfassungsgeräte</small></ul>
       </li>
     </ul>
   </li><br>
