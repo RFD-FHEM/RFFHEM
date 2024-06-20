@@ -1,4 +1,4 @@
-# $Id: 14_SD_WS.pm 26982 2024-03-11 20:44:20Z sidey79 $
+# $Id: 14_SD_WS.pm 26982 2024-06-19 18:49:10Z elektron-bbs $
 #
 # The purpose of this module is to support serval
 # weather sensors which use various protocol
@@ -8,7 +8,7 @@
 # elektron-bbs      2018 -
 # sidey             2017 -
 #
-# 17.04.2017 WH2 (TFA 30.3157 nur Temp, Hum = 255),es wird das Perlmodul Digest::CRC benoetigt fuer CRC-Pruefung benoetigt
+# 17.04.2017 WH2 (TFA 30.3157 nur Temp, Hum = 255),es wird das Perlmodul Digest::CRC fuer CRC-Pruefung benoetigt
 # 29.05.2017 Test ob Digest::CRC installiert
 # 22.07.2017 WH2 angepasst
 # 21.08.2017 WH2 Abbruch wenn kein "FF" am Anfang
@@ -909,7 +909,7 @@ sub SD_WS_Parse {
         #             r?ss cccc
         #             r:  1 bit device reset, 0 after inserting battery or pressing reset, 1 after 1 hour (checked with Fody E42)
         #             s:  2 bit sensor type, 00 = Bresser_5in1, 01 = Fody_E42, 11 = Bresser_rain_gauge
-        #             c:  4 bit channel, 0000 = Bresser_5in1, 0001/0010/0011 = Fody_E42 (changes after reset), 1001 = Bresser_rain_gauge
+        #             c:  4 bit channel, 0000 = Bresser_5in1, 0001/0010/0011 = Fody_E42 (changes after reset), 1001, 1010 or 1011 = Bresser_rain_gauge
         # G = wind gust in 1/10 m/s, normal binary coded, GGxG = 0x76D1 => 0x0176 = 256 + 118 = 374 => 37.4 m/s.  MSB is out of sequence.
         # D = wind direction 0..F = N..NNE..E..S..W..NNW
         # W = wind speed in 1/10 m/s, BCD coded, WWxW = 0x7512 => 0x0275 = 275 => 27.5 m/s. MSB is out of sequence.
@@ -933,7 +933,7 @@ sub SD_WS_Parse {
         modelStat  => sub {my (undef,$bitData) = @_;
                             my $typ = substr($bitData,10,2);
                             if ($typ eq '00') {
-                              $typ = 'Bresser 5in1, Fody E43 outdoor sensor';
+                              $typ = 'Bresser 5-in-1, Fody E43 outdoor sensor';
                             } elsif ($typ eq '01') {
                               $typ = 'Fody E42 thermo-/hygro sensor';
                             } elsif ($typ eq '11') {
@@ -1752,7 +1752,7 @@ sub SD_WS_Parse {
         # CCCCIIIIcccB?FDD????
         # C = LFSR-16 digest, generator 0x8810, key 0xABF9, final xor 0x899E
         # I = station ID
-        # c = 3 nibbles lightning count, BCD
+        # c = 3 nibbles lightning count, 1 digit hex, 2 digit BCD
         # B = flags, 4 bit
         #     Bit:    0123
         #             1000
@@ -1779,9 +1779,9 @@ sub SD_WS_Parse {
                             }
                             return $typ;
                           },
-        prematch   => sub {my $rawData = shift; return 1 if ($rawData =~ /^[0-9A-F]{8}[0-9]{3}[0-9A-F]{3}[0-9]{2}/); },
+        prematch   => sub {my $rawData = shift; return 1 if ($rawData =~ /^[0-9A-F]{9}[0-9]{2}[0-9A-F]{3}[0-9]{2}/); },
         id         => sub {my ($rawData,undef) = @_; return substr($rawData,4,4); },
-        count      => sub { my ($rawData,undef) = @_; return substr($rawData,8,3) * 1; },
+        count      => sub { my ($rawData,$bitData) = @_; return SD_WS_binaryToNumber($bitData,32,35) * 100 + substr($rawData,9,2) * 1; },
         bat        => sub {my (undef,$bitData) = @_; return substr($bitData,44,1) eq '0' ? 'low' : 'ok';},
         batChange  => sub {my (undef,$bitData) = @_; return substr($bitData,52,1) eq '0' ? '1' : '0';},
         distance   => sub { my ($rawData,undef) = @_; return substr($rawData,14,2) * 1; },
@@ -2783,7 +2783,7 @@ sub SD_WS_WH2SHIFT {
   "x_fhem_maintainer_github": [
     "Sidey79"
   ],
-  "version": "v1.1.2",
+  "version": "v1.1.3",
   "description": "The SD_WS module processes the messages from various environmental sensors received from an IO device (CUL, CUN, SIGNALDuino, SignalESP etc.)",
   "dynamic_config": 1,
   "keywords": [
