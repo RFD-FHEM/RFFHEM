@@ -1,3 +1,7 @@
+2024-06-20 - Bugfix Bresser lightning count (#1260)
+
+* Bugfix Bresser lightning count
+Lightning counter overflowed at 999, now at 1599.
 2024-04-25 - WMBUS extension to dispatch messages (#1252)
 
 * WMBUS proposal - extension to dispatch messages
