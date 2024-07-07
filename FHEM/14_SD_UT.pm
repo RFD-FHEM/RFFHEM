@@ -1,5 +1,5 @@
 #########################################################################################
-# $Id: 14_SD_UT.pm 0 2023-12-19 18:00:00Z HomeAuto_User $
+# $Id: 14_SD_UT.pm 0 2024-07-07 12:00:00Z elektron-bbs $
 #
 # The file is part of the SIGNALduino project.
 # The purpose of this module is universal support for devices.
@@ -302,6 +302,11 @@
 #     RCnoName20_17E9 plus   MS;P1=-744;P2=221;P3=679;P4=-278;P5=-7860;D=2521212134213434343434342134212134212121213421212134343434212121;CP=2;SP=5;R=66;O;m2;
 #     RCnoName20_17E9 minus  MS;P0=233;P1=-7903;P3=-278;P5=-738;P6=679;D=0105050563056363636363630563050563050505050505630563050505630505;CP=0;SP=1;R=71;O;m1;
 #}
+# - Remote control with 9 buttons for ceiling fan with lighting (Controller MP 2.5+3UF) [Protocol 20]
+#{    https://forum.fhem.de/index.php?topic=138538.0 @ Butsch 2024-06-17
+#     RCnoName20_09_024F fan_stop  MS;P0=249;P1=-744;P3=770;P4=-228;P5=-8026;D=050101010101013401013401013434343401010101010134010101010101010134;CP=0;SP=5;R=35;O;m2;
+#     RCnoName20_09_024F fan_low   MS;P0=-7940;P1=246;P2=-757;P3=736;P4=-247;D=101212121212123412123412123434343412121212123434121212343412343412;CP=1;SP=0;R=47;O;m2;
+#}
 # - Remote control with 10 buttons for Leroy Deckenventilator [Protocol 20]
 #{    https://forum.fhem.de/index.php/topic,53282.msg1233431.html#msg1233431 @ steffen83 2022-09-01
 #     RCnoName20_10_3E00 light_on   MU;P0=-8774;P1=282;P2=-775;P3=815;P4=-253;P5=-32001;D=10121234343434341212121212121212121212123434343412121234343412343415;CP=1;
@@ -446,8 +451,6 @@ use strict;
 use warnings;
 use FHEM::Meta;
 no warnings 'portable';  # Support for 64-bit ints required
-
-our $VERSION_SD_UT = '2023-12-19';
 
 sub SD_UT_bin2tristate;
 sub SD_UT_tristate2bin;
@@ -811,6 +814,19 @@ my %models = (
                     Protocol          => 'P20',
                     Typ               => 'remote'
                   },
+  'RCnoName20_09' => { '00001000' => 'light_on_off',
+                       '00000010' => 'fan_low',
+                       '00000011' => 'fan_med',
+                       '00001001' => 'fan_high',
+                       '00000110' => 'fan_stop',
+                       '00000001' => 'time_1h',
+                       '00000111' => 'time_2h',
+                       '00000101' => 'time_4h',
+                       '00001010' => 'time_8h',
+                       hex_length => [8],
+                       Protocol   => 'P20',
+                       Typ        => 'remote'
+                     },
   'RCnoName20_10' => { '00011110' => 'light_on',
                        '00010110' => 'light_off',
                        '00010101' => 'fan_low',
@@ -1119,9 +1135,9 @@ sub SD_UT_Define {
   ### [3] checks SA_434_1_mini | QUIGG_DMV | TR_502MSV | BeSmart_S4 ###
   # uncoverable branch true 
   return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short or long (must be 3 chars) or not HEX (0-9 | a-f | A-F){3}" if (($a[2] eq 'SA_434_1_mini' || $a[2] eq 'QUIGG_DMV' || $a[2] eq 'TR_502MSV' || $a[2] eq 'BeSmart_S4') && not $a[3] =~ /^[0-9a-fA-F]{3}/xms);    
-  ### [4 nibble] checks Neff SF01_01319004 & BOSCH SF01_01319004_Typ2 & Chilitec_22640 & ESTO KL_RF01 & RCnoName20 & RCnoName20_10 & RCnoName128 & DC-1961-TG & xavax & BF_301 & Meikee_xx & CREATE_6601TL###
+  ### [4 nibble] checks Neff SF01_01319004 & BOSCH SF01_01319004_Typ2 & Chilitec_22640 & ESTO KL_RF01 & RCnoName20 & RCnoName20_09 & RCnoName20_10 & RCnoName128 & DC-1961-TG & xavax & BF_301 & Meikee_xx & CREATE_6601TL ###
   # uncoverable branch true 
-  return "Wrong HEX-Value! ($a[3]) $a[2] Hex-value to short or long (must be 4 chars) or not hex (0-9 | a-f | A-F) {4}" if (($a[2] eq 'SF01_01319004' || $a[2] eq 'SF01_01319004_Typ2' || $a[2] eq 'Chilitec_22640' || $a[2] eq 'KL_RF01' || $a[2] eq 'RCnoName20' || $a[2] eq 'RCnoName20_10' || $a[2] eq 'RCnoName128' || $a[2] eq 'DC_1961_TG' || $a[2] eq 'xavax' || $a[2] eq 'BF_301' || $a[2] eq 'Meikee_21' || $a[2] eq 'Meikee_24' || $a[2] eq 'CREATE_6601TL' || $a[2] eq 'HA_HX2') && not $a[3] =~ /^[0-9a-fA-F]{4}/xms);
+  return "Wrong HEX-Value! ($a[3]) $a[2] Hex-value to short or long (must be 4 chars) or not hex (0-9 | a-f | A-F) {4}" if (($a[2] eq 'SF01_01319004' || $a[2] eq 'SF01_01319004_Typ2' || $a[2] eq 'Chilitec_22640' || $a[2] eq 'KL_RF01' || $a[2] eq 'RCnoName20' || $a[2] eq 'RCnoName20_09' || $a[2] eq 'RCnoName20_10' || $a[2] eq 'RCnoName128' || $a[2] eq 'DC_1961_TG' || $a[2] eq 'xavax' || $a[2] eq 'BF_301' || $a[2] eq 'Meikee_21' || $a[2] eq 'Meikee_24' || $a[2] eq 'CREATE_6601TL' || $a[2] eq 'HA_HX2') && not $a[3] =~ /^[0-9a-fA-F]{4}/xms);
   ### [5 nibble] checks RCnoName127
   # uncoverable branch true 
   return "Wrong HEX-Value! ($a[3]) $a[2] Hex-value to short or long (must be 5 chars) or not hex (0-9 | a-f | A-F) {5}" if ($a[2] eq 'RCnoName127' && not $a[3] =~ /^[0-9a-fA-F]{5}/xms);
@@ -1153,7 +1169,6 @@ sub SD_UT_Define {
   # uncoverable branch true 
   return "SD_UT model $a[2] wrong devicecode: ($a[3]) - must be 3 digit house code (hex 0-9 A-F) _ 1 digit channel (dec 1-3) - e.g. 3DC_1" if ($a[2] eq 'TC6861' && not $a[3] =~ /^[0-9A-F]{3}_[1-3]$/xms);  
 
-  $hash->{versionModule} = $VERSION_SD_UT;
   $hash->{lastMSG} =  'no data';
   $hash->{bitMSG} =  'no data';
   $iodevice = $a[4] if($a[4]);
@@ -1375,8 +1390,8 @@ sub SD_UT_Set {
     } elsif ($model eq 'TC6861') {
       $msg = $models{$model}{Protocol} . q{#P};
       $msgEnd = '#R' . $repeats;
-    ############ Meikee_21 | Meikee_24 | RCnoName128 | RCnoName20 | RCnoName20_10 | DC-1961-TG | CREATE_6601TL | HA_HX2 ############
-    } elsif ($model eq 'Meikee_21' || $model eq 'Meikee_24' || $model eq 'RCnoName128' || $model eq 'RCnoName20' || $model eq 'RCnoName20_10' || $model eq 'DC_1961_TG' || $model eq 'CREATE_6601TL' || $model eq 'HA_HX2') {
+    ############ Meikee_21 | Meikee_24 | RCnoName128 | RCnoName20 | RCnoName20_09 | RCnoName20_10 | DC-1961-TG | CREATE_6601TL | HA_HX2 ############
+    } elsif ($model eq 'Meikee_21' || $model eq 'Meikee_24' || $model eq 'RCnoName128' || $model eq 'RCnoName20' || $model eq 'RCnoName20_09' || $model eq 'RCnoName20_10' || $model eq 'DC_1961_TG' || $model eq 'CREATE_6601TL' || $model eq 'HA_HX2') {
       my $adr = sprintf '%016b' , hex $definition[1]; # argument 1 - adress to binary with 16 bits
       $msg = $models{$model}{Protocol} . q{#} . $adr;
       $msgEnd = '#R' . $repeats;
@@ -1493,7 +1508,7 @@ sub SD_UT_Set {
         $msg .= $models{$model}{ch}{$ch} . $msgEnd;
         # $msg .= $models{$model}{ch}{$ch} . 'P' . $msgEnd;
       ############ RCnoName20_10 or DC-1961-TG [P20] ############
-      } elsif ($model eq 'RCnoName20_10' || $model eq 'DC_1961_TG') {
+      } elsif ($model eq 'RCnoName20_09' || $model eq 'RCnoName20_10' || $model eq 'DC_1961_TG') {
         $msg .= $save; # button
         my $rollingCode = ReadingsVal($name, 'rollingCode', 0);
         $rollingCode += 1;
@@ -1798,13 +1813,14 @@ sub SD_UT_Parse {
       $def = $modules{SD_UT}{defptr}{$devicedef};
       $model = 'RCnoName20';
       $name = 'RCnoName20_' . $deviceCode;
-      ### Remote control RCnoName20_10 or DC-1961-TG [P20] ###
+      ### Remote control RCnoName20_09 or RCnoName20_10 or DC-1961-TG [P20] ###
       my $xor = 0;
       for (my $n = 0; $n < 8; $n++) {
         $xor ^= hex(substr($rawData,$n,1));
       }
       if ($xor == 10) {
         my $button = substr($bitData,16,8);
+        $model = 'RCnoName20_09' if exists $models{'RCnoName20_09'}{$button};
         $model = 'RCnoName20_10' if exists $models{'RCnoName20_10'}{$button};
         $model = 'DC_1961_TG' if exists $models{'DC_1961_TG'}{$button};
         $devicedef = $model . ' ' . $deviceCode if (!$def);
@@ -2245,8 +2261,8 @@ sub SD_UT_Parse {
   } elsif ($model eq 'RCnoName20' && $protocol == 20) {
     $state = substr($bitData,16,15);  # last bit is filled
     $deviceCode = substr($rawData,0,4);
-  ### Remote control RCnoName20_10 or DC-1961-TG[P20] ###
-  } elsif (($model eq 'RCnoName20_10' || $model eq 'DC_1961_TG') && $protocol == 20) {
+  ### Remote control RCnoName20_09 or RCnoName20_10 or DC-1961-TG[P20] ###
+  } elsif (($model eq 'RCnoName20_09' || $model eq 'RCnoName20_10' || $model eq 'DC_1961_TG') && $protocol == 20) {
     $state = substr($bitData,16,8);
     $deviceCode = substr($rawData,0,4);
     my $rollingCode = hex(substr($rawData,6,1));
@@ -2513,9 +2529,9 @@ sub SD_UT_Attr {
           $deviceCode = substr $bitData,8,24;
           $deviceCode = sprintf("%06X", oct( "0b$bitData" ) );
           $devicename = $devicemodel.'_'.$deviceCode;
-        ############ Meikee_xx or RCnoName20 or RCnoName20_10 or RCnoName128 or DC_1961_TG or CREATE_6601TL or HA_HX2 ############
-        } elsif ($attrValue eq 'Meikee_21' || $attrValue eq 'Meikee_24' || $attrValue eq 'RCnoName20' || $attrValue eq 'RCnoName20_10' ||
-                  $attrValue eq 'RCnoName128' || $attrValue eq 'DC_1961_TG' || $attrValue eq 'CREATE_6601TL' || $attrValue eq 'HA_HX2') {
+        ############ Meikee_xx or RCnoName20 or RCnoName20_09 or RCnoName20_10 or RCnoName128 or DC_1961_TG or CREATE_6601TL or HA_HX2 ############
+        } elsif ($attrValue eq 'Meikee_21' || $attrValue eq 'Meikee_24' || $attrValue eq 'RCnoName20' || $attrValue eq 'RCnoName20_09' || $attrValue eq 'RCnoName20_10' ||
+                 $attrValue eq 'RCnoName128' || $attrValue eq 'DC_1961_TG' || $attrValue eq 'CREATE_6601TL' || $attrValue eq 'HA_HX2') {
           $deviceCode = substr($bitData,0,16);
           $deviceCode = sprintf("%04X", oct( "0b$deviceCode" ) );
           $devicename = $devicemodel.'_'.$deviceCode;
@@ -2628,10 +2644,6 @@ sub SD_UT_tristate2bin {
     <li>CREATE 6601TL Remote control for ceiling fan with light&nbsp;&nbsp;&nbsp;<small>(module model: CREATE_6601TL, protocol 130)</small></li>
     <li>DC-1961-TG - remote control with 12 buttons for ceiling fan with lighting&nbsp;&nbsp;&nbsp;<small>(module model: DC_1961_TG, protocol 20)</small></li>
     <li>ESTO ceiling lamp&nbsp;&nbsp;&nbsp;<small>(module model: KL_RF01, protocol 93)</small></li>
-    <li>Remote control with 4 buttons for diesel heating&nbsp;&nbsp;&nbsp;<small>(module model: RCnoName20, protocol 20)</small></li>
-    <li>Remote control with 10 buttons for Leroy ceiling fan&nbsp;&nbsp;&nbsp;<small>(module model: RCnoName20_10, protocol 20)</small></li>
-    <li>Remote control with 12 buttons for ceiling fan&nbsp;&nbsp;&nbsp;<small>(module model: RCnoName128, protocol 128)</small></li>
-    <li>Remote control with 14 buttons for ceiling fan&nbsp;&nbsp;&nbsp;<small>(module model: RCnoName127, protocol 127)</small></li>
     <li>Halemeier HA-HX2&nbsp;&nbsp;&nbsp;<small>(module model: HA-HX2, protocol 132)</small></li>
     <li>Hoermann HS1-868-BS&nbsp;&nbsp;&nbsp;<small>(module model: HS1_868_BS, protocol 69)</small></li>
     <li>Hoermann HSM4&nbsp;&nbsp;&nbsp;<small>(module model: HSM4, protocol 69)</small></li>
@@ -2653,6 +2665,11 @@ sub SD_UT_tristate2bin {
     <li>Novy Cloud 230 kitchen hood&nbsp;&nbsp;&nbsp;<small>(module model: Novy_840039, protocol 86)</small></li>
     <li>Novy Pureline 6830 kitchen hood&nbsp;&nbsp;&nbsp;<small>(module model: Novy_840029, protocol 86)</small></li>
     <li>QUIGG DMV-7000&nbsp;&nbsp;&nbsp;<small>(module model: QUIGG_DMV, protocol 34)</small></li>
+    <li>Remote control with 4 buttons for diesel heating&nbsp;&nbsp;&nbsp;<small>(module model: RCnoName20, protocol 20)</small></li>
+    <li>Remote control with 9 buttons for ceiling fan&nbsp;&nbsp;&nbsp;<small>(module model: RCnoName20_09, protocol 20)</small></li>
+    <li>Remote control with 10 buttons for Leroy ceiling fan&nbsp;&nbsp;&nbsp;<small>(module model: RCnoName20_10, protocol 20)</small></li>
+    <li>Remote control with 12 buttons for ceiling fan&nbsp;&nbsp;&nbsp;<small>(module model: RCnoName128, protocol 128)</small></li>
+    <li>Remote control with 14 buttons for ceiling fan&nbsp;&nbsp;&nbsp;<small>(module model: RCnoName127, protocol 127)</small></li>
     <li>SA-434-1 mini 923301&nbsp;&nbsp;&nbsp;<small>(module model: SA_434_1_mini, protocol 81)</small></li>
     <li>Techmar Garden Lights &nbsp;&nbsp;&nbsp;<small>(module model: Techmar, protocol 95)</small></li>
     <li>Tedsen Teletaster <small>(protocol 46)</small>:
@@ -2866,6 +2883,7 @@ sub SD_UT_tristate2bin {
     <li>DC-1961-TG - Fernbedienung mit 12 Tasten für Deckenventilator mit Beleuchtung&nbsp;&nbsp;&nbsp;<small>(Modulmodel: DC_1961_TG, Protokoll 20)</small></li>
     <li>ESTO Deckenlampe&nbsp;&nbsp;&nbsp;<small>(Modulmodel: KL_RF01, Protokoll 93)</small></li>
     <li>Fernbedienung mit 4 Tasten f&uuml;r Diesel-Heizung &nbsp;&nbsp;&nbsp;<small>(Modulmodel: RCnoName20, Protokoll 20)</small></li>
+    <li>Fernbedienung mit 9 Tasten f&uuml;r Deckenventilator&nbsp;&nbsp;&nbsp;<small>(Modulmodel: RCnoName20_09, Protokoll 20)</small></li>
     <li>Fernbedienung mit 10 Tasten f&uuml;r Leroy Deckenventilator&nbsp;&nbsp;&nbsp;<small>(Modulmodel: RCnoName20_10, Protokoll 20)</small></li>
     <li>Fernbedienung mit 12 Tasten f&uuml;r Deckenventilator&nbsp;&nbsp;&nbsp;<small>(Modulmodel: RCnoName128, Protokoll 128)</small></li>
     <li>Fernbedienung mit 14 Tasten f&uuml;r Deckenventilator&nbsp;&nbsp;&nbsp;<small>(Modulmodel: RCnoName127, Protokoll 127)</small></li>
@@ -3075,6 +3093,7 @@ sub SD_UT_tristate2bin {
 </ul>
 
 =end html_DE
+
 =for :application/json;q=META.json 14_SD_UT.pm
 {
   "author": [
@@ -3115,7 +3134,7 @@ sub SD_UT_tristate2bin {
       }
     }
   },
-  "version": "v1.0.2",
+  "version": "v1.0.3",
   "release_status": "stable",
   "resources": {
     "bugtracker": {
