@@ -1662,6 +1662,7 @@ sub SD_UT_Parse {
       my $housecode = substr($rawData,1,1) >> 1;
       my $ch = substr($bitData,1,3);
       # uncoverable branch true
+      # uncoverable branch false
       if ( exists $models{$model}{ch}{$ch} ) {
         $ch = $models{$model}{ch}{$ch};
         $deviceCode = $housecode .'_'. $ch;
