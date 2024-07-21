@@ -1600,12 +1600,19 @@ sub SD_UT_Parse {
   my $deletecache = $modules{SD_UT}{defptr}{deletecache};
   Log3 $iohash, 5, "$ioname: SD_UT device in delete cache = $deletecache" if($deletecache && $deletecache ne '-');
 
-  if ($deletecache && $deletecache ne '-') { # uncoverable branch true
+  # uncoverable branch true
+  if ($deletecache && $deletecache ne '-') {
+    # uncoverable statement
     CommandDelete( undef, "$deletecache" );           # delete device
+    # uncoverable statement
     CommandDelete( undef, "FileLog_$deletecache" );   # delete filelog_device
-    Log3 $iohash, 3, "SD_UT_Parse device $deletecache deleted" if($deletecache); # uncoverable branch true
-    $modules{SD_UT}{defptr}{deletecache} = '-'; # uncoverable statement
-    return ''; # uncoverable statement
+    # uncoverable branch true
+    # uncoverable statement
+    Log3 $iohash, 3, "SD_UT_Parse device $deletecache deleted" if($deletecache);
+    # uncoverable statement
+    $modules{SD_UT}{defptr}{deletecache} = '-';
+    # uncoverable statement
+    return '';
   }
 
   if ($hlen == 3) {
