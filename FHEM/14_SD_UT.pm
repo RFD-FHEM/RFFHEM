@@ -1610,8 +1610,10 @@ sub SD_UT_Parse {
     return '';
   }
 
+  # uncoverable branch true
   if ($hlen == 3) {
     ### Westinghouse Buttons_five [P29] ###
+    # uncoverable branch true
     if (!$def && ($protocol == 29 || $protocol == 30)) {
       $deviceCode = substr($rawData,2,1);
       $devicedef = 'Buttons_five ' . $deviceCode;
