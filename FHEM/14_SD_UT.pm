@@ -1130,43 +1130,43 @@ sub SD_UT_Define {
   }
 
   ### [2] checks CAME_TOP_432EV & Novy_840029 & Novy_840039 & Unitec_47031 ###
-  # uncoverable branch true 
+  # uncoverable branch true
   return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short | long or not HEX (0-9 | a-f | A-F){2}" if (($a[2] eq 'CAME_TOP_432EV' || $a[2] eq 'Novy_840029' || $a[2] eq 'Novy_840039' || $a[2] eq 'Unitec_47031') && not $a[3] =~ /^[0-9a-fA-F]{2}/xms);
   ### [3] checks SA_434_1_mini | QUIGG_DMV | TR_502MSV | BeSmart_S4 ###
-  # uncoverable branch true 
+  # uncoverable branch true
   return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short or long (must be 3 chars) or not HEX (0-9 | a-f | A-F){3}" if (($a[2] eq 'SA_434_1_mini' || $a[2] eq 'QUIGG_DMV' || $a[2] eq 'TR_502MSV' || $a[2] eq 'BeSmart_S4') && not $a[3] =~ /^[0-9a-fA-F]{3}/xms);    
   ### [4 nibble] checks Neff SF01_01319004 & BOSCH SF01_01319004_Typ2 & Chilitec_22640 & ESTO KL_RF01 & RCnoName20 & RCnoName20_09 & RCnoName20_10 & RCnoName128 & DC-1961-TG & xavax & BF_301 & Meikee_xx & CREATE_6601TL ###
-  # uncoverable branch true 
+  # uncoverable branch true
   return "Wrong HEX-Value! ($a[3]) $a[2] Hex-value to short or long (must be 4 chars) or not hex (0-9 | a-f | A-F) {4}" if (($a[2] eq 'SF01_01319004' || $a[2] eq 'SF01_01319004_Typ2' || $a[2] eq 'Chilitec_22640' || $a[2] eq 'KL_RF01' || $a[2] eq 'RCnoName20' || $a[2] eq 'RCnoName20_09' || $a[2] eq 'RCnoName20_10' || $a[2] eq 'RCnoName128' || $a[2] eq 'DC_1961_TG' || $a[2] eq 'xavax' || $a[2] eq 'BF_301' || $a[2] eq 'Meikee_21' || $a[2] eq 'Meikee_24' || $a[2] eq 'CREATE_6601TL' || $a[2] eq 'HA_HX2') && not $a[3] =~ /^[0-9a-fA-F]{4}/xms);
   ### [5 nibble] checks RCnoName127
-  # uncoverable branch true 
+  # uncoverable branch true
   return "Wrong HEX-Value! ($a[3]) $a[2] Hex-value to short or long (must be 5 chars) or not hex (0-9 | a-f | A-F) {5}" if ($a[2] eq 'RCnoName127' && not $a[3] =~ /^[0-9a-fA-F]{5}/xms);
   ### [6] checks Manax | mumbi ###
-  # uncoverable branch true 
+  # uncoverable branch true
   return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short | long or not HEX (0-9 | a-f | A-F){4}_[ABCD]|[all]" if ($a[2] eq 'RC_10' && not $a[3] =~ /^[0-9a-fA-F]{4}_([ABCD]|all)$/xms) ;
   ### [6] checks MD_2003R | MD_210R | MD_2018R | Navaris | AC114_01B | Visivo ###
-  # uncoverable branch true 
+  # uncoverable branch true
   return "wrong HEX-Value! ($a[3]) $a[2] Hex-value to short or long (must be 6 chars) or not hex (0-9 | a-f | A-F){6}" if (($a[2] eq 'MD_2003R' || $a[2] eq 'MD_210R' || $a[2] eq 'MD_2018R' || $a[2] eq 'Navaris' || $a[2] eq 'AC114_01B' || $a[2] eq 'Visivo') && not $a[3] =~ /^[0-9a-fA-F]{6}/xms);
   ### [7] checks Hoermann HSM4 | Krinner_LUMIX | Momento ###
-  # uncoverable branch true 
+  # uncoverable branch true
   return "wrong HEX-Value! ($a[3]) $a[2]  Hex-value to short or long (must be 7 chars) or not hex (0-9 | a-f | A-F){7}" if (($a[2] eq 'HSM4' || $a[2] eq 'Krinner_LUMIX' || $a[2] eq 'Momento') && not $a[3] =~ /^[0-9a-fA-F]{7}/xms);
   ### [7] checks Tedsen_SKX1xx, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx (tristate code)###
-  # uncoverable branch true 
+  # uncoverable branch true
   return "wrong tristate code! ($a[3]) $a[2] code to short or long (must be 7 chars) or values not 0, 1 or F" if (($a[2] eq 'Tedsen_SKX1xx' || $a[2] eq 'Tedsen_SKX2xx' || $a[2] eq 'Tedsen_SKX4xx' || $a[2] eq 'Tedsen_SKX6xx') && not $a[3] =~ /^[01fF]{7}$/xms);
   ### [8 nibble] checks Techmar ###
-  # uncoverable branch true 
+  # uncoverable branch true
   return "wrong HEX-Value! ($a[3]) $a[2] Hex-value to short or long (must be 8 chars) or not hex (0-9 | a-f | A-F)" if (($a[2] eq 'Techmar') && not $a[3] =~ /^[0-9a-fA-F]{8}$/xms);
   ### [9] checks Hoermann HS1-868-BS ###
-  # uncoverable branch true 
+  # uncoverable branch true
   return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short | long or not HEX (0-9 | a-f | A-F){9}" if ($a[2] eq 'HS1_868_BS' && not $a[3] =~ /^[0-9a-fA-F]{9}/xms);
   ### [14] checks LED_XM21_0 ###
-  # uncoverable branch true 
+  # uncoverable branch true
   return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short | long or not HEX (0-9 | a-f | A-F){14}" if ($a[2] eq 'LED_XM21_0' && not $a[3] =~ /^[0-9a-fA-F]{14}/xms);
   ### [3] checks TR401 (Well-Light) ###
-  # uncoverable branch true 
+  # uncoverable branch true
   return "wrong devicecode! ($a[3]) $a[2] must be [0-9]_[1-4]" if ($a[2] eq 'TR401' && not $a[3] =~ /^[0-9]_[1-4]/xms);
   ### [3] checks TC6861 (Busch-Transcontrol HF) [P121] ###
-  # uncoverable branch true 
+  # uncoverable branch true
   return "SD_UT model $a[2] wrong devicecode: ($a[3]) - must be 3 digit house code (hex 0-9 A-F) _ 1 digit channel (dec 1-3) - e.g. 3DC_1" if ($a[2] eq 'TC6861' && not $a[3] =~ /^[0-9A-F]{3}_[1-3]$/xms);  
 
   $hash->{lastMSG} =  'no data';
@@ -1600,6 +1600,7 @@ sub SD_UT_Parse {
   my $deletecache = $modules{SD_UT}{defptr}{deletecache};
   Log3 $iohash, 5, "$ioname: SD_UT device in delete cache = $deletecache" if($deletecache && $deletecache ne '-');
 
+  # uncoverable branch true
   if ($deletecache && $deletecache ne '-') {
     CommandDelete( undef, "$deletecache" );           # delete device
     CommandDelete( undef, "FileLog_$deletecache" );   # delete filelog_device
