@@ -1602,16 +1602,16 @@ sub SD_UT_Parse {
 
   # uncoverable branch true
   if ($deletecache && $deletecache ne '-') {
-    # uncoverable statement
+    # uncoverable branch
     CommandDelete( undef, "$deletecache" );           # delete device
-    # uncoverable statement
+    # uncoverable branch
     CommandDelete( undef, "FileLog_$deletecache" );   # delete filelog_device
     # uncoverable branch true
     # uncoverable statement
     Log3 $iohash, 3, "SD_UT_Parse device $deletecache deleted" if($deletecache);
-    # uncoverable statement
+    # uncoverable branch
     $modules{SD_UT}{defptr}{deletecache} = '-';
-    # uncoverable statement
+    # uncoverable branch
     return '';
   }
 
