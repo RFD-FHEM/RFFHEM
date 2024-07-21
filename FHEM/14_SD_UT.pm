@@ -1621,23 +1621,27 @@ sub SD_UT_Parse {
     }
     ### Westinghouse Buttons_six [P29] ###
     if (!$def && ($protocol == 29 || $protocol == 30)) {
+    # uncoverable branch true
       $deviceCode = substr($rawData,2,1);
       $devicedef = 'Buttons_six ' . $deviceCode;
       $def = $modules{SD_UT}{defptr}{$devicedef};
     }
     ### Unitec_47031 [P30] ###
+    # uncoverable branch true
     if (!$def && ($protocol == 30 || $protocol == 83)) {
       $deviceCode = substr($rawData,0,2);
       $devicedef = 'Unitec_47031 ' . $deviceCode;
       $def = $modules{SD_UT}{defptr}{$devicedef};
     }
     ### Remote control SA_434_1_mini 923301 [P81] ###
+    # uncoverable branch true
     if (!$def && ($protocol == 81 || $protocol == 83 || $protocol == 86)) {
       $deviceCode = $rawData;
       $devicedef = 'SA_434_1_mini ' . $deviceCode;
       $def = $modules{SD_UT}{defptr}{$devicedef};
     }
     ### Westinghouse_Delancey RH787T [P83] ### no define
+    # uncoverable branch true
     if (!$def && ($protocol == 83 || $protocol == 30)) {
       $deviceCode = substr($bitData,1,4);
       $deviceCode = sprintf("%X", oct( "0b$deviceCode" ) );
@@ -1645,16 +1649,19 @@ sub SD_UT_Parse {
       $def = $modules{SD_UT}{defptr}{$devicedef};
     }
     ### CAME_TOP_432EV [P86] ###  no define
+    # uncoverable branch true
     if (!$def && ($protocol == 86 || $protocol == 81)) {
       $deviceCode = substr($rawData,0,2);
       $devicedef = 'CAME_TOP_432EV ' . $deviceCode;
       $def = $modules{SD_UT}{defptr}{$devicedef};
     }
     ### TR401 (Well-Light) [P114] ###
+    # uncoverable branch true
     if (!$def && $protocol == 114 && substr($bitData,-5) eq '11111') {
       $model = 'TR401';
       my $housecode = substr($rawData,1,1) >> 1;
       my $ch = substr($bitData,1,3);
+      # uncoverable branch true
       if ( exists $models{$model}{ch}{$ch} ) {
         $ch = $models{$model}{ch}{$ch};
         $deviceCode = $housecode .'_'. $ch;
