@@ -1,4 +1,4 @@
-# $Id: SD_ProtocolData.pm 26975 2024-07-21 12:54:08Z elektron-bbs $
+# $Id: SD_ProtocolData.pm 26975 2024-07-25 14:00:00Z elektron-bbs $
 # The file is part of the SIGNALduino project.
 # All protocol definitions are contained in this file.
 #
@@ -729,9 +729,13 @@ package lib::SD_ProtocolData;
               # https://forum.fhem.de/index.php?topic=138538.0 @ Butsch 2024-06-17
               # RCnoName20_09_024F fan_low   MS;P0=249;P1=-744;P3=770;P4=-228;P5=-8026;D=050101010101013401013401013434343401010101010134010101010101010134;CP=0;SP=5;R=35;O;m2;
               # RCnoName20_09_024F fan_stop  MS;P0=-7940;P1=246;P2=-757;P3=736;P4=-247;D=101212121212123412123412123434343412121212123434121212343412343412;CP=1;SP=0;R=47;O;m2;
+              ## Remote control CREATE 6601L with 14 buttons for ceiling fan with lighting
+              # https://forum.fhem.de/index.php?topic=53282.msg1316246#msg1316246 @ Kent 2024-07-04
+              # CREATE_6601L_1B90 fan_2  MS;P0=-7944;P1=-740;P4=253;P6=732;P7=-256;D=404141416767416767674141674141414141414141674141414141674141416767;CP=4;SP=0;R=67;O;m2;
+              # CREATE_6601L_1B90 fan_5  MS;P0=-264;P2=-743;P3=254;P4=733;P5=-7942;D=353232324040324040403232403232323232323232324032324032323232403240;CP=3;SP=5;R=40;O;m2;
       {
         name            => 'RCnoName20',
-        comment         => 'Remote control with 4, 9, 10 or 12 buttons',
+        comment         => 'Remote control with 4, 9, 10, 12 or 14 buttons',
         id              => '20',
         knownFreqs      => '433.92',
         one             => [3,-1],  # 720,-240
@@ -752,7 +756,7 @@ package lib::SD_ProtocolData;
               # RCnoName20_10_3E00 fan_stop   MU;P0=184;P1=-380;P2=128;P3=-9090;P4=-768;P5=828;P6=-238;P7=298;D=45656565656747474747474747474747474567474560404515124040451040374745656565656747474747474747474747474567474567474565674747456747374745656565656747474747474747474747474567474567474565674747456747374745656565656747474747474747474747474567474567474565674747;CP=7;O;
       {
         name         => 'RCnoName20',
-        comment      => 'Remote control with 4, 9, 10 or 12 buttons',
+        comment      => 'Remote control with 4, 9, 10, 12 or 14 buttons',
         id           => '20.1',
         knownFreqs   => '433.92',
         one          => [3,-1],  # 720,-240
