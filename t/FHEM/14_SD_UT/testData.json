@@ -2607,5 +2607,58 @@
       "id" : 132,
       "module" : "SD_UT",
       "name" : "HA_HX2_01EF"
+   },
+   {
+      "data" : [
+         {
+            "comment" : "Remote control with 9 buttons for ceiling fan with lighting (Controller MP 2.5+3UF)",
+            "dmsg" : "P20#024F0201",
+            "internals" : {
+               "DEF" : "RCnoName20_09 024F",
+               "NAME" : "RCnoName20_09_024F"
+            },
+            "readings" : {
+               "LastAction" : "receive",
+               "deviceCode" : "024F",
+               "rollingCode" : "0",
+               "state" : "fan_low"
+            },
+            "rmsg" : "MS;P0=249;P1=-744;P3=770;P4=-228;P5=-8026;D=050101010101013401013401013434343401010101010134010101010101010134;CP=0;SP=5;R=35;O;m2;",
+            "tests" : [
+               {
+                  "attributes" : {
+                     "model" : "RCnoName20_09"
+                  },
+                  "comment" : "#0"
+               }
+            ]
+         },
+         {
+            "comment" : "Remote control with 9 buttons for ceiling fan with lighting (Controller MP 2.5+3UF)",
+            "dmsg" : "P20#024F0636",
+            "internals" : {
+               "DEF" : "RCnoName20_09 024F",
+               "NAME" : "RCnoName20_09_024F"
+            },
+            "readings" : {
+               "LastAction" : "receive",
+               "deviceCode" : "024F",
+               "rollingCode" : "3",
+               "state" : "fan_stop"
+            },
+            "rmsg" : "MS;P0=-7940;P1=246;P2=-757;P3=736;P4=-247;D=101212121212123412123412123434343412121212123434121212343412343412;CP=1;SP=0;R=47;O;m2;",
+            "tests" : [
+               {
+                  "attributes" : {
+                     "model" : "RCnoName20_09"
+                  },
+                  "comment" : "#1"
+               }
+            ]
+         }
+      ],
+      "id" : "20",
+      "module" : "SD_UT",
+      "name" : "RCnoName20_09_024F"
    }
 ]
