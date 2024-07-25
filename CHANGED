@@ -1,3 +1,12 @@
+2024-07-25 - new remote control RCnoName20_09 (#1261)
+
+* new RC RCnoName20_09
+remote control RCnoName20_09 with 9 buttons for ceiling fan, see https://forum.fhem.de/index.php?topic=138538.0
+* Update SD_ProtocolData.pm
+* Update testData.json
+add data for RCnoName20_09
+* Update 14_SD_UT.pm
+
 2024-06-20 - Bugfix Bresser lightning count (#1260)
 
 * Bugfix Bresser lightning count
