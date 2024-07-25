@@ -1957,8 +1957,7 @@ sub SD_UT_Parse {
         } elsif ($state eq '1000') {
           $state = 'off';
         } else {
-          $state = 'unknown';
-          $def = undef;
+          $state = substr($bitData,20,4);
         }
 
         ### if received data from device _all, set channels A | B | C | D to state and trigger event ###
