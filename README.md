@@ -29,6 +29,7 @@ Supported Devices / Protocols
 |CAME TOP 432EV | Remote control |
 |CTW600, WH1080, WH2315 | Weather station |
 |Clarus | remote power socket|
+|CREATE 6601L, 6601TL | Remote control for ceiling fan with lighting |
 |Conrad RSL | shutters |
 |DC-1961-TG | Remote control with 12 buttons for ceiling fan with lighting |
 |Dooya | Shutters and blinds from various vendors like Rohrmotor24 |
