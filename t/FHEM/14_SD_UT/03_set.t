@@ -86,7 +86,7 @@ my $module = basename (dirname(__FILE__));
         testname        =>  q[set ? ],
         cmd             =>  q[set ?],
 
-        returnCheck     => check_set( !match qr/hex_length/, match qr/fan_4:noArg/, match qr/time_4h:noArg/, match qr/light_color:noArg/, match qr/fan_1:noArg/, match qr/time_1h:noArg/, match qr/light_on_off:noArg/, match qr/time_2h:noArg/, match qr/fan_on_off:noArg/, match qr/fan_6:noArg/, match qr/fan_2:noArg/, match qr/fan_direction:noArg/, match qr/fan_3:noArg/, match qr/fan_5:noArg/, match qr/beeper_on_off:noArg/, match qr/ ),
+        returnCheck     => check_set( !match qr/hex_length/, match qr/fan_4:noArg/, match qr/time_4h:noArg/, match qr/light_color:noArg/, match qr/fan_1:noArg/, match qr/time_1h:noArg/, match qr/light_on_off:noArg/, match qr/time_2h:noArg/, match qr/fan_on_off:noArg/, match qr/fan_6:noArg/, match qr/fan_2:noArg/, match qr/fan_direction:noArg/, match qr/fan_3:noArg/, match qr/fan_5:noArg/, match qr/beeper_on_off:noArg/ ),
         subCheck        => hash { end(); } ,
         prep_commands   => [                               # Any FHEM custom command can be placed in here, which will be called before the test is run
                     'attr $targetName model CREATE_6601L',
