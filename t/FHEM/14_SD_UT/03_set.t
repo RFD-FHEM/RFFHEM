@@ -74,6 +74,18 @@ my $module = basename (dirname(__FILE__));
         hashCheck       => hash { field READINGS => hash {field rollingCode => hash { field VAL => 0; etc(); }; etc(); }; etc(); },
     },
     {
+        targetName      =>  q[SD_UT_Test_CREATE_6601L_1B90],
+        testname        =>  q[set command beeper_on_off],
+        cmd             =>  q[set beeper_on_off],
+
+        returnCheck     => F(),
+        subCheck        => hash { field 'IOWrite' => array { item 0 => hash { field 'args' => array { item hash { etc(); } ; item 'sendMsg'; item 'P20#00011011100100000000010001001001#R5' }; etc() } } } ,
+        prep_commands   => [                               # Any FHEM custom command can be placed in here, which will be called before the test is run
+                    'setreading $targetName rollingCode 3', 
+        ],
+        hashCheck       => hash { field READINGS => hash {field rollingCode => hash { field VAL => 4; etc(); }; etc(); }; etc(); },
+    },
+    {
         targetName      =>  q[SD_UT_Test_RCnoName20_10],
         testname        =>  q[set unsupported command: Protocol ],
         cmd             =>  q[set Protocol],
