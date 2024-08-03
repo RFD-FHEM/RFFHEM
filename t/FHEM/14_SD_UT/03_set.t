@@ -82,6 +82,7 @@ my $module = basename (dirname(__FILE__));
         subCheck        => hash { field 'IOWrite' => array { item 0 => hash { field 'args' => array { item hash { etc(); } ; item 'sendMsg'; item 'P20#00011011100100000000010001001001#R5' }; etc() } } } ,
         prep_commands   => [                               # Any FHEM custom command can be placed in here, which will be called before the test is run
                     'setreading $targetName rollingCode 3', 
+                    'attr $targetName model CREATE_6601L',
         ],
         hashCheck       => hash { field READINGS => hash {field rollingCode => hash { field VAL => 4; etc(); }; etc(); }; etc(); },
     },
