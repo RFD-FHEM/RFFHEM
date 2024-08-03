@@ -75,7 +75,7 @@ my $module = basename (dirname(__FILE__));
     },
     {
         targetName      =>  q[SD_UT_Test_CREATE_6601L_1B90],
-        testname        =>  q[set command beeper_on_off],
+        testname        =>  q[set command beeper_on_off rollingCode 0-7],
         cmd             =>  q[set beeper_on_off],
 
         returnCheck     => F(),
@@ -85,6 +85,19 @@ my $module = basename (dirname(__FILE__));
                     'attr $targetName model CREATE_6601L',
         ],
         hashCheck       => hash { field READINGS => hash {field rollingCode => hash { field VAL => 4; etc(); }; etc(); }; etc(); },
+    },
+    {
+        targetName      =>  q[SD_UT_Test_CREATE_6601L_1B90],
+        testname        =>  q[set command fan_5 rollingCode 8-15],
+        cmd             =>  q[set fan_5],
+
+        returnCheck     => F(),
+        subCheck        => hash { field 'IOWrite' => array { item 0 => hash { field 'args' => array { item hash { etc(); } ; item 'sendMsg'; item 'P20#00011011100100000000010011010000#R5' }; etc() } } } ,
+        prep_commands   => [                               # Any FHEM custom command can be placed in here, which will be called before the test is run
+                    'setreading $targetName rollingCode 4', 
+                    'attr $targetName model CREATE_6601L',
+        ],
+        hashCheck       => hash { field READINGS => hash {field rollingCode => hash { field VAL => 13; etc(); }; etc(); }; etc(); },
     },
     {
         targetName      =>  q[SD_UT_Test_RCnoName20_10],
