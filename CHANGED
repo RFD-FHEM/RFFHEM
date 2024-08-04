@@ -1,3 +1,15 @@
+2024-08-04 - new remote control CREATE 6601L (#1263)
+
+* new remote control  CREATE 6601L
+* Update 14_SD_UT.pm
+* Update 00_SIGNALduino.pm
+* Update README.md
+* Update testData.json
+add data for Remote control CREATE 6601L
+* add test data for set command Remote control CREATE 6601L
+* Update 03_set.t
+* Update fhem.cfg
+
 2024-07-25 - new remote control RCnoName20_09 (#1261)
 
 * new RC RCnoName20_09
