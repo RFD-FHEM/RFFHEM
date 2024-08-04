@@ -110,13 +110,13 @@ jobs:
           separator: ' '
       - name: Update SDUINO_VERSION date
         if: endsWith(matrix.file, '00_SIGNALduino.pm')
-        uses: jacobtomlinson/gha-find-replace@3.0.2
+        uses: jacobtomlinson/gha-find-replace@3.0.3
         with:
           find: \w+\s+=>\s\'\d.\d.\d\+\d+\'
           replace: "SDUINO_VERSION                  => '${{ steps.versions.outputs._1 }}+${{ needs.metadata.outputs.date }}'"
           include: "${{ matrix.files }}"
       - name: Update Date in ID line
-        uses: jacobtomlinson/gha-find-replace@3.0.2
+        uses: jacobtomlinson/gha-find-replace@3.0.3
         with:
           find: \d\d\d\d-\d\d-\d\d\s\d\d:\d\d:\d\dZ\s[\w|-]+\s
           replace: "${{ needs.metadata.outputs.datetime }}Z ${{ github.event.pull_request.user.login }} "
