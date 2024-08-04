@@ -82,6 +82,43 @@ my $module = basename (dirname(__FILE__));
         subCheck        => hash { end(); } ,
     },
     {
+        targetName      =>  q[SD_UT_Test_CREATE_6601L_1B90],
+        testname        =>  q[set ? ],
+        cmd             =>  q[set ?],
+
+        returnCheck     => check_set( !match qr/hex_length/, match qr/fan_4:noArg/, match qr/time_4h:noArg/, match qr/light_color:noArg/, match qr/fan_1:noArg/, match qr/time_1h:noArg/, match qr/light_on_off:noArg/, match qr/time_2h:noArg/, match qr/fan_on_off:noArg/, match qr/fan_6:noArg/, match qr/fan_2:noArg/, match qr/fan_direction:noArg/, match qr/fan_3:noArg/, match qr/fan_5:noArg/, match qr/beeper_on_off:noArg/ ),
+        subCheck        => hash { end(); } ,
+        prep_commands   => [                               # Any FHEM custom command can be placed in here, which will be called before the test is run
+                    'attr $targetName model CREATE_6601L',
+        ],
+    },
+    {
+        targetName      =>  q[SD_UT_Test_CREATE_6601L_1B90],
+        testname        =>  q[set command beeper_on_off rollingCode 0-7],
+        cmd             =>  q[set beeper_on_off],
+
+        returnCheck     => F(),
+        subCheck        => hash { field 'IOWrite' => array { item 0 => hash { field 'args' => array { item hash { etc(); } ; item 'sendMsg'; item 'P20#00011011100100000000010001001001#R5' }; etc() } } } ,
+        prep_commands   => [                               # Any FHEM custom command can be placed in here, which will be called before the test is run
+                    'setreading $targetName rollingCode 3', 
+                    'attr $targetName model CREATE_6601L',
+        ],
+        hashCheck       => hash { field READINGS => hash {field rollingCode => hash { field VAL => 4; etc(); }; etc(); }; etc(); },
+    },
+    {
+        targetName      =>  q[SD_UT_Test_CREATE_6601L_1B90],
+        testname        =>  q[set command fan_5 rollingCode 8-15],
+        cmd             =>  q[set fan_5],
+
+        returnCheck     => F(),
+        subCheck        => hash { field 'IOWrite' => array { item 0 => hash { field 'args' => array { item hash { etc(); } ; item 'sendMsg'; item 'P20#00011011100100000000010011010000#R5' }; etc() } } } ,
+        prep_commands   => [                               # Any FHEM custom command can be placed in here, which will be called before the test is run
+                    'setreading $targetName rollingCode 4', 
+                    'attr $targetName model CREATE_6601L',
+        ],
+        hashCheck       => hash { field READINGS => hash {field rollingCode => hash { field VAL => 13; etc(); }; etc(); }; etc(); },
+    },
+    {
         targetName      =>  q[SD_UT_Test_OR28V_1],
         testname        =>  q[set command volume_minus],
         cmd             =>  q[set volume_minus],

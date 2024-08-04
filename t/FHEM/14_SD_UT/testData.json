@@ -2660,5 +2660,104 @@
       "id" : "20",
       "module" : "SD_UT",
       "name" : "RCnoName20_09_024F"
+   },
+   {
+      "data" : [
+         {
+            "comment" : "Remote control CREATE 6601L with 14 buttons for ceiling fan with lighting",
+            "dmsg" : "P20#1B900823",
+            "internals" : {
+               "DEF" : "CREATE_6601L 1B90",
+               "NAME" : "CREATE_6601L_1B90"
+            },
+            "readings" : {
+               "LastAction" : "receive",
+               "deviceCode" : "1B90",
+               "rollingCode" : "2",
+               "state" : "fan_2"
+            },
+            "rmsg" : "MS;P0=-7944;P1=-740;P4=253;P6=732;P7=-256;D=404141416767416767674141674141414141414141674141414141674141416767;CP=4;SP=0;R=67;O;m2;",
+            "tests" : [
+               {
+                  "attributes" : {
+                     "model" : "CREATE_6601L"
+                  },
+                  "comment" : "#0"
+               }
+            ]
+         },
+         {
+            "comment" : "Remote control CREATE 6601L with 14 buttons for ceiling fan with lighting",
+            "dmsg" : "P20#1B900485",
+            "internals" : {
+               "DEF" : "CREATE_6601L 1B90",
+               "NAME" : "CREATE_6601L_1B90"
+            },
+            "readings" : {
+               "LastAction" : "receive",
+               "deviceCode" : "1B90",
+               "rollingCode" : "8",
+               "state" : "fan_5"
+            },
+            "rmsg" : "MS;P0=-264;P2=-743;P3=254;P4=733;P5=-7942;D=353232324040324040403232403232323232323232324032324032323232403240;CP=3;SP=5;R=40;O;m2;",
+            "tests" : [
+               {
+                  "attributes" : {
+                     "model" : "CREATE_6601L"
+                  },
+                  "comment" : "#1"
+               }
+            ]
+         },
+         {
+            "comment" : "Remote control CREATE 6601L with 14 buttons for ceiling fan with lighting",
+            "dmsg" : "P20#1B9008BA",
+            "internals" : {
+               "DEF" : "CREATE_6601L 1B90",
+               "NAME" : "CREATE_6601L_1B90"
+            },
+            "readings" : {
+               "LastAction" : "receive",
+               "deviceCode" : "1B90",
+               "rollingCode" : "11",
+               "state" : "fan_direction"
+            },
+            "rmsg" : "MS;P1=247;P2=-732;P4=745;P5=-256;P7=-7933;D=171212124545124545451212451212121212121212451212124512454545124512;CP=1;SP=7;R=48;O;m2;",
+            "tests" : [
+               {
+                  "attributes" : {
+                     "model" : "CREATE_6601L"
+                  },
+                  "comment" : "#2"
+               }
+            ]
+         },
+         {
+            "comment" : "Remote control CREATE 6601L with 14 buttons for ceiling fan with lighting",
+            "dmsg" : "P20#1B90047A",
+            "internals" : {
+               "DEF" : "CREATE_6601L 1B90",
+               "NAME" : "CREATE_6601L_1B90"
+            },
+            "readings" : {
+               "LastAction" : "receive",
+               "deviceCode" : "1B90",
+               "rollingCode" : "7",
+               "state" : "beeper_on_off"
+            },
+            "rmsg" : "MS;P2=247;P3=-744;P4=731;P5=-273;P6=-7911;D=262323234545234545452323452323232323232323234523232345454545234523;CP=2;SP=6;R=43;O;m2;",
+            "tests" : [
+               {
+                  "attributes" : {
+                     "model" : "CREATE_6601L"
+                  },
+                  "comment" : "#3"
+               }
+            ]
+         }
+      ],
+      "id" : "20",
+      "module" : "SD_UT",
+      "name" : "CREATE_6601L_1B90"
    }
 ]
