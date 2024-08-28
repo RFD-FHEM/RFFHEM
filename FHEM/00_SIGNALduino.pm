@@ -3410,7 +3410,8 @@ sub SIGNALduino_IdList {
       #my $w = join ', ' => map "$_" => keys %BlacklistIDs;
       #SIGNALduino_Log3 $name, 3, "$name IdList, Attr blacklist $w";
     }
-    $hash->{Clients} =  $clientsSIGNALduino; # Set Default in clientlist if whitelist is not active
+
+    $hash->{Clients} = AttrVal($name,'Clients', $clientsSIGNALduino); # use Attribute Clients or default if whitelist is not active
   } else {
     $hash->{Clients} =  q[] # clear Clients if whitelist is active    
   }

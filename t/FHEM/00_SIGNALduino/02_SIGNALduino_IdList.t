@@ -13,7 +13,7 @@ sub runTest {
 	my $target = shift;
 	my $targetHash = $defs{$target};
 
-	plan(11);
+	plan(13);
 
 	subtest 'check if sub SIGNALduino_IdList causes crash if name does not exists' => sub {
 		is(
@@ -112,6 +112,22 @@ sub runTest {
 		#print 'last char is '.substr($targetHash->{Clients}, -1);
 	};
 
+	subtest 'check with attribute Clients and without attr whitelist_IDs' => sub {
+		plan(1);
+		CommandDeleteAttr(undef, qq[$target whitelist_IDs]);
+		CommandAttr(undef, qq[$target Clients CUL_EM:MY_MODULE:SIGNALduino_un:]);
+		SIGNALduino_IdList("sduino_IdList:$target");
+		is($targetHash->{Clients},'CUL_EM:MY_MODULE:SIGNALduino_un','Clients from Attribute are used');
+	};
+
+	subtest 'check with attribute Clients and with attr whitelist_IDs' => sub {
+		plan(2);
+		CommandAttr(undef, qq[$target whitelist_IDs 54,47]);
+		CommandAttr(undef, qq[$target Clients CUL_EM:MY_MODULE:SIGNALduino_un:]);
+		SIGNALduino_IdList("sduino_IdList:$target");
+		isnt($targetHash->{Clients},'CUL_EM:MY_MODULE:SIGNALduino_un','Clients from Attribute are not used');
+		is($targetHash->{Clients},'SD_WS_Maverick:SD_WS','Clients from whitelist are used');
+	};
 
 }
 
