@@ -3116,7 +3116,10 @@ sub SIGNALduino_Attr {
   ## Change Clients
   if( $aName eq 'Clients' ) {
     $hash->{Clients} = $aVal;
-    $hash->{Clients} = $clientsSIGNALduino if( !$hash->{Clients}) ;     ## Set defaults
+    return  if ($hash->{Clients});
+    
+    ## Set defaults
+    $hash->{Clients} = $clientsSIGNALduino; 
     return 'Setting defaults';
   }
   ## Change MatchList

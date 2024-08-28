@@ -60,7 +60,7 @@ my @mockData = (
         field Clients => 'SD_WS:SD_UT';
         etc();
     },
-    rValue => !match qr/Setting defaults/,  
+    rValue => U(),  
   },
   {
   #   todoReason => "reason",
