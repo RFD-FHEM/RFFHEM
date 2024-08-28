@@ -121,12 +121,14 @@ sub runTest {
 	};
 
 	subtest 'check with attribute Clients and with attr whitelist_IDs' => sub {
-		plan(2);
+		plan(4);
 		CommandAttr(undef, qq[$target whitelist_IDs 54,47]);
 		CommandAttr(undef, qq[$target Clients CUL_EM:MY_MODULE:SIGNALduino_un:]);
 		SIGNALduino_IdList("sduino_IdList:$target");
-		isnt($targetHash->{Clients},'CUL_EM:MY_MODULE:SIGNALduino_un','Clients from Attribute are not used');
-		is($targetHash->{Clients},'SD_WS_Maverick:SD_WS','Clients from whitelist are used');
+		unlike($targetHash->{Clients},qr/CUL_EM/,'Clients from Attribute are not used');
+		unlike($targetHash->{Clients},qr/MY_MODULE/,'Clients from Attribute are not used');
+		unlike($targetHash->{Clients},qr/SIGNALduino_un/,'Clients from Attribute are not used');
+		like($targetHash->{Clients},qr/SD_WS_Maverick:SD_WS|SD_WS:SD_WS_Maverick/,'Clients from whitelist are used');
 	};
 
 }
