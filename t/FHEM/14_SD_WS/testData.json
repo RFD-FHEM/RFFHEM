@@ -2620,7 +2620,7 @@
                   "comment" : "#0"
                }
             ]
-         }
+         },
          {
             "comment" : "Temperature transmitter TFA 30.3212",
             "dmsg" : "W48#FF4D40A3FFE5",
@@ -2639,7 +2639,7 @@
                   "comment" : "#1"
                }
             ]
-         },
+         }
       ],
       "id" : "48",
       "module" : "SD_WS",
