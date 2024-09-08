@@ -1,3 +1,9 @@
+2024-09-08 - Bugfix remote control CREATE 6601L (new identity) (#1269)
+
+* Bugfix CREATE_6601L
+Ident does not consist of 4 nibbles, but 5.
+* Update 14_SD_UT.pm
+
 2024-08-04 - new remote control CREATE 6601L (#1263)
 
 * new remote control  CREATE 6601L
