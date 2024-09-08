@@ -1,4 +1,4 @@
-# $Id: 14_SD_WS.pm 26982 2024-06-19 18:49:10Z elektron-bbs $
+# $Id: 14_SD_WS.pm 26982 2024-09-08 15:09:34Z elektron-bbs $
 #
 # The purpose of this module is to support serval
 # weather sensors which use various protocol
@@ -54,6 +54,7 @@
 # 21.08.2023 neues Protokoll 129: Sainlogic weather station FT-0835
 # 25.11.2023 Protokoll 117: neuer Sensor BRESSER Air Quality Sensor Art.No.: 7009970, Hersteller CCL Electronics LTD Model C3123A
 # 06.01.2024 neues Protokoll 131: BRESSER Blitzsensor Art.No.: 7009976, Hersteller CCL Electronics LTD Model C3129A
+# 03.09.2024 neues Protokoll 48: Funk-Thermometer JOKER TFA 30.3055, Temperatursender 30.3212
 
 package main;
 
@@ -97,6 +98,7 @@ sub SD_WS_Initialize {
     "SD_WS_33_TH_.*"  => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.* model:other", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "2:180"},
     "SD_WS_33_T_.*"   => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.* model:other", FILTER => "%NAME", GPLOT => "temp4:Temp,", autocreateThreshold => "2:180"},
     "SD_WS_38_T_.*"   => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4:Temp,", autocreateThreshold => "3:180"},
+    "SD_WS_48_T.*"    => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4:Temp,", autocreateThreshold => "3:180"},
     "SD_WS_51_TH.*"   => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "3:180"},
     "SD_WS_53_TH.*"   => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "3:180"},
     "SD_WS_54_R.*"    => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "rain4:Rain,", autocreateThreshold => "3:180"},
@@ -118,7 +120,7 @@ sub SD_WS_Initialize {
     'SD_WS_122_T.*'   => { ATTR => 'event-min-interval:.*:60 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4:Temp,', autocreateThreshold => '10:180'},
     'SD_WS_123_T.*'   => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4:Temp,', autocreateThreshold => '2:180'},
     'SD_WS_125_.*'    => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4hum4:Temp/Hum,', autocreateThreshold => '2:300'},
-    'SD_WS_126_R.*'    => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'rain4:Rain,', autocreateThreshold => "2:180"},
+    'SD_WS_126_R.*'   => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'rain4:Rain,', autocreateThreshold => "2:180"},
     'SD_WS_129.*'     => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4hum4:Temp/Hum,', autocreateThreshold => '3:180'},
     'SD_WS_131.*'     => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => q{}, autocreateThreshold => '2:180'},
   };
@@ -256,46 +258,6 @@ sub SD_WS_Parse {
   my $pm10;  # particulate matter <= 10 µm
 
   my %decodingSubs = (
-    50 => # Protocol 50
-     # FF550545FF9E
-     # FF550541FF9A 
-     # AABCDDEEFFGG
-     # A = Preamble, always FF
-     # B = TX type, always 5
-     # C = Address (5/6/7) > low 2 bits = 1/2/3
-     # D = Soil moisture 05% 
-     # E = temperature 
-     # F = security code, always F
-     # G = Checksum 55+05+45+FF=19E CRC value = 9E
-        {   # subs to decode this
-          sensortype => 'XT300',
-          model      => 'SD_WS_50_SM',
-          prematch   => sub {my $msg = shift; return 1 if ($msg =~ /^FF5[0-9A-F]{5}FF[0-9A-F]{2}/); },           # prematch
-          crcok      => sub {my $msg = shift; return 1 if ((hex(substr($msg,2,2))+hex(substr($msg,4,2))+hex(substr($msg,6,2))+hex(substr($msg,8,2))&0xFF) == (hex(substr($msg,10,2))) );  },   # crc
-          id         => sub {my $msg = shift; return (hex(substr($msg,2,2)) &0x03 ); },                          # id
-          temp       => sub {my $msg = shift; return  ((hex(substr($msg,6,2)))-40)  },                           # temp
-          hum        => sub {my $msg = shift; return hex(substr($msg,4,2));  },                                  # hum
-          channel    => sub {my (undef,$bitData) = @_; return ( SD_WS_binaryToNumber($bitData,12,15)&0x03 );  }, # channel
-        },
-     71 =>
-     # 5C2A909F792F
-     # 589A829FDFF4
-     # PiiTTTK?CCCC
-     # P = Preamble (immer 5 ?)
-     # i = ID
-     # T = Temperatur
-     # K = Kanal (B/A/9)
-     # ? = immer F ?
-     # C = Checksum ?
-      {
-        sensortype => 'PV-8644',
-        model      =>  'SD_WS71_T',
-        prematch   => sub {my $msg = shift; return 1 if ($msg =~ /^5[A-F0-9]{6}F[A-F0-9]{2}/); },                     # prematch
-        crcok      => sub {return 1; },                     # crc is unknown
-        id         => sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,4,11); },                   # id
-        temp       => sub {my (undef,$bitData) = @_; return ((SD_WS_binaryToNumber($bitData,12,23) - 2448) / 10); },  # temp
-        channel    => sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,26,27); },                  # channel
-      },
     27 =>
       {
         # Protokollbeschreibung: Temperatur-/Feuchtigkeitssensor EuroChron EFTH-800, EFS-3110A
@@ -445,6 +407,71 @@ sub SD_WS_Parse {
                            }
                           },
       } ,
+    48 => ## Funk-Thermometer JOKER TFA 30.3055, Temperatursender 30.3212
+          # FF489034FF10
+          # PPFIITTTPPCC
+          # P =  8 bit preamble, always 0xFF
+          # F =  4 bit flags, always 0b0100
+          # I =  8 bit ident
+          # T = 12 bit temperature, if first bit=1 then negative
+          # P =  8 bit postamble, always 0xFF
+          # C =  8 bit CRC-8/NRSC-5, see https://crccalc.com/?crc=FF489034FF10&method=CRC-8/NRSC-5&datatype=1&outtype=0
+          #            width=8 poly=0x31 init=0xff refin=false refout=false xorout=0x00 check=0xf7 residue=0x00 name="CRC-8/NRSC-5"
+        {
+          sensortype => 'Temperature transmitter',
+          model      => 'SD_WS_48_T',
+          modelStat  => sub { my (undef,undef) = @_; return 'TFA 30.3212'; },
+          prematch   => sub { my ($rawData,undef) = @_; return 1 if ($rawData =~ /^FF4[0-9A-F]{5}FF[0-9A-F]{2}/); },
+          id         => sub { my ($rawData,undef) = @_; return substr($rawData,3,2); },
+          temp       => sub { my (undef,$bitData) = @_;
+                              my $temp = SD_WS_binaryToNumber($bitData,21,31) / 10;
+                              $temp *= -1 if (substr($bitData,20,1));
+                              return $temp;
+                            },
+          crcok      => sub { my $rawData = shift;
+                              my $rc = eval {
+                                require Digest::CRC;
+                                Digest::CRC->import();
+                                1;
+                              };
+                              if ($rc) {
+                                my $datacheck1 = pack( 'H*', substr($rawData,0,12) );
+                                my $crcmein1 = Digest::CRC->new(width => 8, init => 0xFF, poly => 0x31);
+                                my $rr3 = $crcmein1->add($datacheck1)->hexdigest;
+                                Log3 $name, 4, "$name: SD_WS_48 Parse msg $rawData, CRC $rr3";
+                                if (hex($rr3) == 0) {
+                                  return 1;
+                                } else {
+                                  Log3 $name, 3, "$name: SD_WS_48 Parse msg $rawData - ERROR CRC8 (0x$rr3 must be 0x00)";
+                                  return 0;
+                                }
+                              } else {
+                                Log3 $name, 1, "$name: SD_WS_48 Parse msg $rawData - ERROR CRC not checked, please install module Digest::CRC";
+                                return 0;
+                              }  
+                            }
+        },
+    50 => # Protocol 50
+          # FF550545FF9E
+          # FF550541FF9A 
+          # AABCDDEEFFGG
+          # A = Preamble, always FF
+          # B = TX type, always 5
+          # C = Address (5/6/7) > low 2 bits = 1/2/3
+          # D = Soil moisture 05% 
+          # E = temperature 
+          # F = security code, always F
+          # G = Checksum 55+05+45+FF=19E CRC value = 9E
+        {   # subs to decode this
+          sensortype => 'XT300',
+          model      => 'SD_WS_50_SM',
+          prematch   => sub {my $msg = shift; return 1 if ($msg =~ /^FF5[0-9A-F]{5}FF[0-9A-F]{2}/); },           # prematch
+          crcok      => sub {my $msg = shift; return 1 if ((hex(substr($msg,2,2))+hex(substr($msg,4,2))+hex(substr($msg,6,2))+hex(substr($msg,8,2))&0xFF) == (hex(substr($msg,10,2))) );  },   # crc
+          id         => sub {my $msg = shift; return (hex(substr($msg,2,2)) &0x03 ); },                          # id
+          temp       => sub {my $msg = shift; return  ((hex(substr($msg,6,2)))-40)  },                           # temp
+          hum        => sub {my $msg = shift; return hex(substr($msg,4,2));  },                                  # hum
+          channel    => sub {my (undef,$bitData) = @_; return ( SD_WS_binaryToNumber($bitData,12,15)&0x03 );  }, # channel
+        },
     51 =>
       {
         # Auriol Message Format (rflink/Plugin_044.c):
@@ -634,6 +661,25 @@ sub SD_WS_Parse {
         temp       => sub {my (undef,$bitData) = @_; return FHEM::Core::Utils::Math::round((SD_WS_binaryToNumber($bitData,20,31)-720)*0.0556,1); },  # temp
         hum        => sub {my ($rawData,$bitData) = @_; return substr($rawData,1,1) eq "5" ? (SD_WS_binaryToNumber($bitData,32,39)) : 0;},  # hum
       } ,
+     71 =>
+        # 5C2A909F792F
+        # 589A829FDFF4
+        # PiiTTTK?CCCC
+        # P = Preamble (immer 5 ?)
+        # i = ID
+        # T = Temperatur
+        # K = Kanal (B/A/9)
+        # ? = immer F ?
+        # C = Checksum ?
+      {
+        sensortype => 'PV-8644',
+        model      =>  'SD_WS71_T',
+        prematch   => sub {my $msg = shift; return 1 if ($msg =~ /^5[A-F0-9]{6}F[A-F0-9]{2}/); },                     # prematch
+        crcok      => sub {return 1; },                     # crc is unknown
+        id         => sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,4,11); },                   # id
+        temp       => sub {my (undef,$bitData) = @_; return ((SD_WS_binaryToNumber($bitData,12,23) - 2448) / 10); },  # temp
+        channel    => sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,26,27); },                  # channel
+      },
     84 =>
       {
         # Protokollbeschreibung: Funk Wetterstation Auriol IAN 283582 (Lidl)
@@ -1438,7 +1484,7 @@ sub SD_WS_Parse {
         temp           => sub {my (undef,$bitData) = @_;
                                 return if (substr($bitData,19,1) eq '1');
                                 return SD_WS_binaryToNumber($bitData,21,30) * 0.1 - 40;
-                               },
+                              },
         hum            => sub {my (undef,$bitData) = @_;
                                 return if (substr($bitData,19,1) eq '1');
                                 return SD_WS_binaryToNumber($bitData,31,38);
@@ -1487,7 +1533,7 @@ sub SD_WS_Parse {
                                   return 0;
                                 }  
                                 return 1;
-                              } 
+                              }
     },
     122 => {
         # TM40, Wireless Grill-, Meat-, Roasting-Thermometer with 4 Temperature Sensors
@@ -1527,7 +1573,7 @@ sub SD_WS_Parse {
                           },
         bat         => sub { my (undef,$bitData) = @_; return substr($bitData,88,1) eq "0" ? "ok" : "low"; },
         transmitter => sub { my (undef,$bitData) = @_; return substr($bitData,92,1) eq "0" ? "on" : "off"; },
-        crcok      => sub {return 1;}, # Check could not be determined yet.
+        crcok       => sub {return 1;}, # Check could not be determined yet.
     },
     123 => {
         # Inkbird IBS-P01R Pool Thermometer, Inkbird ITH-20R (not tested)
@@ -1598,14 +1644,14 @@ sub SD_WS_Parse {
         model      => 'SD_WS_125_TH',
         prematch   => sub {my ($rawData,undef) = @_; return 1 if ($rawData =~ /^(30|37)/); },
         id         => sub {my ($rawData,undef) = @_; return (substr($rawData,2,2));},
-		    channel    => sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,17,19) + 1);},
-        bat        => sub {my (undef,$bitData) = @_; return substr($bitData,20,1) eq '0' ? 'ok' : 'low';}, 
+        channel    => sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,17,19) + 1);},
+        bat        => sub {my (undef,$bitData) = @_; return substr($bitData,20,1) eq '0' ? 'ok' : 'low';},
         temp       => sub {my (undef,$bitData) = @_;
-                            my $temp = SD_WS_binaryToNumber($bitData,22,31);  
+                            my $temp = SD_WS_binaryToNumber($bitData,22,31);
                             return FHEM::Core::Utils::Math::round(($temp - 400) / 10, 1);
-						              },							
-        hum        => sub { my ($rawData,undef) = @_; return hex(substr($rawData,8,2)); },
-        crcok      => sub { my ($rawData,undef) = @_;
+                          },
+        hum        => sub {my ($rawData,undef) = @_; return hex(substr($rawData,8,2)); },
+        crcok      => sub {my ($rawData,undef) = @_;
                             if (HAS_DigestCRC) {
                               my $calc_crc8 = Digest::CRC->new(width => 8, poly=>0x31);
                               my $crc_digest = $calc_crc8->add( pack 'H*', substr( $rawData, 0, 12 ) )->digest;
@@ -1658,7 +1704,7 @@ sub SD_WS_Parse {
         batVoltage      => sub {  my (undef,$bitData) = @_; 
                                   my $v = oct(q[0b].substr($bitData,35,5));
                                   return $v ne '0' ? $v / 10 : undef; },
-        crcok           => sub { my ($rawData,undef) = @_; 
+        crcok           => sub { my ($rawData,undef) = @_;
                             if (HAS_DigestCRC) {
                               my $calc_crc8 = Digest::CRC->new(width => 8, poly=>0x31);
                               my $crc_digest = $calc_crc8->add( pack 'H*', substr( $rawData, 0, 16 ) )->digest;
@@ -2507,7 +2553,7 @@ sub SD_WS_WH2SHIFT {
     <li>WH2, WH2A (TFA Dostmann/Wertheim 30.3157 (sold in Germany), Agimex Rosenborg 66796 (sold in Denmark),ClimeMET CM9088 (Sold in UK)</li>
     <li>Weatherstation Auriol IAN 283582 Version 06/2017 (Lidl), Modell-Nr.: HG02832D</li>
     <li>Weatherstation Auriol AHFL 433 B2, IAN 314695 (Lidl)</li>
-    <li>Weatherstations and sensors TFA 30.3151, 30.3152, 30.3153, 30.3157, 30.3200, 30.3208.02, 30.3221.02, 30.3222.02, 30.3228.02, 30.3229.02, 30.3233.01, 30.3251.10, 35.1077.54.S2, 35.1140.01</li>
+    <li>Weatherstations and sensors TFA 30.3151, 30.3152, 30.3153, 30.3157, 30.3200, 30.3208.02, 30.3212, 30.3221.02, 30.3222.02, 30.3228.02, 30.3229.02, 30.3233.01, 30.3251.10, 35.1077.54.S2, 35.1140.01</li>
     <li>Wireless Grill Thermometer, Model name: GFGT 433 B1</li>
   </ul><br><br>
 
@@ -2655,7 +2701,7 @@ sub SD_WS_WH2SHIFT {
     <li>WH2, WH2A (TFA Dostmann/Wertheim 30.3157 (Deutschland), Agimex Rosenborg 66796 (Denmark), ClimeMET CM9088 (UK)</li>
     <li>Wetterstation Auriol IAN 283582 Version 06/2017 (Lidl), Modell-Nr.: HG02832D</li>
     <li>Wetterstation Auriol AHFL 433 B2, IAN 314695 (Lidl)</li>
-    <li>Wetterstationen und Sensoren TFA 30.3151, 30.3152, 30.3153, 30.3157, 30.3200, 30.3208.02, 30.3221.02, 30.3222.02, 30.3228.02, 30.3229.02, 30.3233.01, 30.3251.10, 35.1077.54.S2, 35.1140.01</li>
+    <li>Wetterstationen und Sensoren TFA 30.3151, 30.3152, 30.3153, 30.3157, 30.3200, 30.3208.02, 30.3212, 30.3221.02, 30.3222.02, 30.3228.02, 30.3229.02, 30.3233.01, 30.3251.10, 35.1077.54.S2, 35.1140.01</li>
     </ul>
   <br><br>
 
@@ -2783,7 +2829,7 @@ sub SD_WS_WH2SHIFT {
   "x_fhem_maintainer_github": [
     "Sidey79"
   ],
-  "version": "v1.1.3",
+  "version": "v1.1.4",
   "description": "The SD_WS module processes the messages from various environmental sensors received from an IO device (CUL, CUN, SIGNALDuino, SignalESP etc.)",
   "dynamic_config": 1,
   "keywords": [

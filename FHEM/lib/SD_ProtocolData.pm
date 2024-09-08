@@ -1,4 +1,4 @@
-# $Id: SD_ProtocolData.pm 26975 2024-08-04 15:21:37Z elektron-bbs $
+# $Id: SD_ProtocolData.pm 26975 2024-09-08 15:09:34Z elektron-bbs $
 # The file is part of the SIGNALduino project.
 # All protocol definitions are contained in this file.
 #
@@ -85,7 +85,7 @@ package lib::SD_ProtocolData;
   use strict;
   use warnings;
 
-  our $VERSION = '1.56';
+  our $VERSION = '1.57';
   our %protocols = (
     "0" =>  ## various weather sensors (500 | 9100)
             # Mebus | Id:237 Ch:1 T: 1.9 Bat:low           MS;P0=-9298;P1=495;P2=-1980;P3=-4239;D=1012121312131313121313121312121212121212131212131312131212;CP=1;SP=0;R=223;O;m2;
@@ -1420,25 +1420,25 @@ package lib::SD_ProtocolData;
         method          => \&lib::SD_Protocols::mcBit2Maverick,    # Call to process this message
         #polarity        => 'invert'
       },
-    "48"  =>  ## Joker Dostmann TFA 30.3055.01
-              # ! some message are decode as protocol 42 and protocol 50 !
+    "48"  =>  ## TFA Temperature transmitter 30.3212 for Wireless thermometer JOKER 30.3055
               # https://github.com/RFD-FHEM/RFFHEM/issues/92 @anphiga
-              # U48#016C7E18004C   MU;P0=591;P1=-1488;P2=-3736;P3=1338;P4=-372;P6=-988;D=23406060606063606363606363606060636363636363606060606363606060606060606060606060636060636360106060606060606063606363606363606060636363636363606060606363606060606060606060606060636060636360106060606060606063606363606363606060636363636363606060606363606060;CP=0;O;
-              # U48#01657EB80034   MU;P0=96;P1=-244;P2=510;P3=-1000;P4=1520;P5=-1506;D=01232323232343234343232343234323434343434343234323434343232323232323232323232323234343234325232323232323232343234343232343234323434343434343234323434343232323232323232323232323234343234325232323232323232343234343232343234323434343434343234323434343232323;CP=2;O;
+              # SD_WS_48_T  T: 24.3  W48#FF49C0F3FFD9  MU;P0=591;P1=-1488;P2=-3736;P3=1338;P4=-372;P6=-988;D=23406060606063606363606363606060636363636363606060606363606060606060606060606060636060636360106060606060606063606363606363606060636363636363606060606363606060606060606060606060636060636360106060606060606063606363606363606060636363636363606060606363606060;CP=0;O;
+              # SD_WS_48_T  T: 16.3  W48#FF4D40A3FFE5  MU;P0=96;P1=-244;P2=510;P3=-1000;P4=1520;P5=-1506;D=01232323232343234343232343234323434343434343234323434343232323232323232323232323234343234325232323232323232343234343232343234323434343434343234323434343232323232323232323232323234343234325232323232323232343234343232343234323434343434343234323434343232323;CP=2;O;
       {
-        name            => 'TFA Dostmann',
-        comment         => 'Funk-Thermometer Joker TFA 30.3055.01',
+        name            => 'TFA JOKER',
+        comment         => 'Temperature transmitter TFA 30.3212',
         id              => '48',
         knownFreqs      => '433.92',
-        clockabs        => 250,             # In real it is 500 but this leads to unprceise demodulation
-        one             => [-4,6],
-        zero            => [-4,2],
-        start           => [-6,2],
+        clockabs        => 250,
+        one             => [2,-4], #   500,-1000
+        zero            => [6,-4], #  1500,-1000
+        start           => [-6],   # -1500
+        reconstructBit  => '1',
         format          => 'twostate',
-        preamble        => 'U48#',
-        #clientmodule    => '',
-        modulematch     => '^U48#.*',
-        length_min      => '47',
+        preamble        => 'W48#',
+        clientmodule    => 'SD_WS',
+        modulematch     => '^W48#.*',
+        length_min      => '47', # lenght without reconstructBit
         length_max      => '48',
       },
     "49"  =>  ## QUIGG GT-9000, EASY HOME RCT DS1 CR-A, uniTEC 48110 and other
