@@ -82,7 +82,7 @@ my $module = basename (dirname(__FILE__));
         subCheck        => hash { end(); } ,
     },
     {
-        targetName      =>  q[SD_UT_Test_CREATE_6601L_1B90],
+        targetName      =>  q[SD_UT_Test_CREATE_6601L_1B900],
         testname        =>  q[set ? ],
         cmd             =>  q[set ?],
 
@@ -93,7 +93,7 @@ my $module = basename (dirname(__FILE__));
         ],
     },
     {
-        targetName      =>  q[SD_UT_Test_CREATE_6601L_1B90],
+        targetName      =>  q[SD_UT_Test_CREATE_6601L_1B900],
         testname        =>  q[set command beeper_on_off rollingCode 0-7],
         cmd             =>  q[set beeper_on_off],
 
@@ -106,7 +106,7 @@ my $module = basename (dirname(__FILE__));
         hashCheck       => hash { field READINGS => hash {field rollingCode => hash { field VAL => 4; etc(); }; etc(); }; etc(); },
     },
     {
-        targetName      =>  q[SD_UT_Test_CREATE_6601L_1B90],
+        targetName      =>  q[SD_UT_Test_CREATE_6601L_1B900],
         testname        =>  q[set command fan_5 rollingCode 8-15],
         cmd             =>  q[set fan_5],
 

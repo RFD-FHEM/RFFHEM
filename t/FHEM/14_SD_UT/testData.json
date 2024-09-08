@@ -2667,12 +2667,12 @@
             "comment" : "Remote control CREATE 6601L with 14 buttons for ceiling fan with lighting",
             "dmsg" : "P20#1B900823",
             "internals" : {
-               "DEF" : "CREATE_6601L 1B90",
-               "NAME" : "CREATE_6601L_1B90"
+               "DEF" : "CREATE_6601L 1B900",
+               "NAME" : "CREATE_6601L_1B900"
             },
             "readings" : {
                "LastAction" : "receive",
-               "deviceCode" : "1B90",
+               "deviceCode" : "1B900",
                "rollingCode" : "2",
                "state" : "fan_2"
             },
@@ -2690,12 +2690,12 @@
             "comment" : "Remote control CREATE 6601L with 14 buttons for ceiling fan with lighting",
             "dmsg" : "P20#1B900485",
             "internals" : {
-               "DEF" : "CREATE_6601L 1B90",
-               "NAME" : "CREATE_6601L_1B90"
+               "DEF" : "CREATE_6601L 1B900",
+               "NAME" : "CREATE_6601L_1B900"
             },
             "readings" : {
                "LastAction" : "receive",
-               "deviceCode" : "1B90",
+               "deviceCode" : "1B900",
                "rollingCode" : "8",
                "state" : "fan_5"
             },
@@ -2713,12 +2713,12 @@
             "comment" : "Remote control CREATE 6601L with 14 buttons for ceiling fan with lighting",
             "dmsg" : "P20#1B9008BA",
             "internals" : {
-               "DEF" : "CREATE_6601L 1B90",
-               "NAME" : "CREATE_6601L_1B90"
+               "DEF" : "CREATE_6601L 1B900",
+               "NAME" : "CREATE_6601L_1B900"
             },
             "readings" : {
                "LastAction" : "receive",
-               "deviceCode" : "1B90",
+               "deviceCode" : "1B900",
                "rollingCode" : "11",
                "state" : "fan_direction"
             },
@@ -2736,12 +2736,12 @@
             "comment" : "Remote control CREATE 6601L with 14 buttons for ceiling fan with lighting",
             "dmsg" : "P20#1B90047A",
             "internals" : {
-               "DEF" : "CREATE_6601L 1B90",
-               "NAME" : "CREATE_6601L_1B90"
+               "DEF" : "CREATE_6601L 1B900",
+               "NAME" : "CREATE_6601L_1B900"
             },
             "readings" : {
                "LastAction" : "receive",
-               "deviceCode" : "1B90",
+               "deviceCode" : "1B900",
                "rollingCode" : "7",
                "state" : "beeper_on_off"
             },
@@ -2758,6 +2758,6 @@
       ],
       "id" : "20",
       "module" : "SD_UT",
-      "name" : "CREATE_6601L_1B90"
+      "name" : "CREATE_6601L_1B900"
    }
 ]

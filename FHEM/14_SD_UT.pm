@@ -1,5 +1,5 @@
 #########################################################################################
-# $Id: 14_SD_UT.pm 0 2024-08-04 15:21:37Z elektron-bbs $
+# $Id: 14_SD_UT.pm 0 2024-09-08 08:41:41Z elektron-bbs $
 #
 # The file is part of the SIGNALduino project.
 # The purpose of this module is universal support for devices.
@@ -312,8 +312,8 @@
 #     RCnoName20_10_3E00 fan_stop   MU;P0=184;P1=-380;P2=128;P3=-9090;P4=-768;P5=828;P6=-238;P7=298;D=45656565656747474747474747474747474567474560404515124040451040374745656565656747474747474747474747474567474567474565674747456747374745656565656747474747474747474747474567474567474565674747456747374745656565656747474747474747474747474567474567474565674747;CP=7;O;
 # - Remote control CREATE 6601L with 14 buttons for CREATE Deckenventilator [Protocol 20]
 #     https://forum.fhem.de/index.php?topic=53282.msg1316246#msg1316246 @ Kent 2024-07-04
-#     CREATE_6601L_1B90 fan_2  MS;P0=-7944;P1=-740;P4=253;P6=732;P7=-256;D=404141416767416767674141674141414141414141674141414141674141416767;CP=4;SP=0;R=67;O;m2;
-#     CREATE_6601L_1B90 fan_5  MS;P0=-264;P2=-743;P3=254;P4=733;P5=-7942;D=353232324040324040403232403232323232323232324032324032323232403240;CP=3;SP=5;R=40;O;m2;
+#     CREATE_6601L_1B900 fan_2  MS;P0=-7944;P1=-740;P4=253;P6=732;P7=-256;D=404141416767416767674141674141414141414141674141414141674141416767;CP=4;SP=0;R=67;O;m2;
+#     CREATE_6601L_1B900 fan_5  MS;P0=-264;P2=-743;P3=254;P4=733;P5=-7942;D=353232324040324040403232403232323232323232324032324032323232403240;CP=3;SP=5;R=40;O;m2;
 # - Remote control DC-1961-TG with 12 buttons for ceiling fan with lighting [Protocol 20]
 #    https://forum.fhem.de/index.php/topic,53282.msg1240911.html#msg1240911 @ Skusi  2022-10-23
 #     DC_1961_TG_1846 light_on_off   MS;P1=291;P2=-753;P3=762;P4=-249;P5=-8312;D=151212123434121212123412121234341234123412341212121234341212341234;CP=1;SP=5;R=224;O;m2;
@@ -891,18 +891,18 @@ my %models = (
                        Protocol   => 'P130',
                        Typ        => 'remote'
                    },
-  'CREATE_6601L' => { '00000101' => 'fan_on_off',    # count 0-7
-                      '00000010' => 'fan_1',         # count 0-7
-                      '00001000' => 'fan_2,fan_direction', # same bits, but count 0-7 (fan_2) or 8-15
-                      '00000110' => 'fan_3',         # count 0-7
-                      '00000011' => 'fan_4',         # count 0-7
-                      '00000100' => 'fan_5,beeper_on_off', # same bits, but count 0-7 or 8-15 (fan_5)
-                      '00001010' => 'fan_6',         # count 8-15
-                      '00001001' => 'light_on_off',  # count 0-7
-                      '00001110' => 'light_color',   # count 0-7
-                      '00001011' => 'time_1h',       # count 0-7
-                      '00000111' => 'time_2h',       # count 8-15
-                      '00000001' => 'time_4h',       # count 0-7
+  'CREATE_6601L' => { '0101' => 'fan_on_off',    # count 0-7
+                      '0010' => 'fan_1',         # count 0-7
+                      '1000' => 'fan_2,fan_direction', # same bits, but count 0-7 (fan_2) or 8-15
+                      '0110' => 'fan_3',         # count 0-7
+                      '0011' => 'fan_4',         # count 0-7
+                      '0100' => 'fan_5,beeper_on_off', # same bits, but count 0-7 or 8-15 (fan_5)
+                      '1010' => 'fan_6',         # count 8-15
+                      '1001' => 'light_on_off',  # count 0-7
+                      '1110' => 'light_color',   # count 0-7
+                      '1011' => 'time_1h',       # count 0-7
+                      '0111' => 'time_2h',       # count 8-15
+                      '0001' => 'time_4h',       # count 0-7
                       hex_length => [8],
                       Protocol   => 'P20',
                       Typ        => 'remote'
@@ -1097,7 +1097,6 @@ sub SD_UT_Initialize {
     'MD_210R.*'    => {ATTR => 'model:MD_210R', FILTER => '%NAME', autocreateThreshold => '3:180', GPLOT => q{}},
     'Momento.*'    => {ATTR => 'model:Momento', FILTER => '%NAME', autocreateThreshold => '3:180', GPLOT => q{}},
     'OR28V.*'      => {ATTR => 'model:OR28V', FILTER => '%NAME', autocreateThreshold => '3:180', GPLOT => q{}},
-    'DC_1961_TG.*' => {ATTR => 'model:DC_1961_TG', FILTER => '%NAME', autocreateThreshold => '3:180', GPLOT => q{}},
     'TC6861.*'     => {ATTR => 'model:TC6861', FILTER => '%NAME', autocreateThreshold => '3:180', GPLOT => q{}},
     'TR401.*'      => {ATTR => 'model:TR401', FILTER => '%NAME', autocreateThreshold => '3:180', GPLOT => q{}},
     'Techmar.*'    => {ATTR => 'model:Techmar', FILTER => '%NAME', autocreateThreshold => '3:180', GPLOT => q{}},
@@ -1150,15 +1149,15 @@ sub SD_UT_Define {
   ### [3] checks SA_434_1_mini | QUIGG_DMV | TR_502MSV | BeSmart_S4 ###
   # uncoverable branch true
   return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short or long (must be 3 chars) or not HEX (0-9 | a-f | A-F){3}" if (($a[2] eq 'SA_434_1_mini' || $a[2] eq 'QUIGG_DMV' || $a[2] eq 'TR_502MSV' || $a[2] eq 'BeSmart_S4') && not $a[3] =~ /^[0-9a-fA-F]{3}/xms);    
-  ### [4 nibble] checks Neff SF01_01319004 & BOSCH SF01_01319004_Typ2 & Chilitec_22640 & ESTO KL_RF01 & RCnoName20 & RCnoName20_09 & RCnoName20_10 & RCnoName128 & DC-1961-TG & xavax & BF_301 & Meikee_xx & CREATE_6601TL & CREATE_6601L ###
+  ### [4 nibble] checks Neff SF01_01319004 & BOSCH SF01_01319004_Typ2 & Chilitec_22640 & ESTO KL_RF01 & RCnoName20 & RCnoName20_09 & RCnoName20_10 & RCnoName128 & DC-1961-TG & xavax & BF_301 & Meikee_xx & CREATE_6601TL ###
   # uncoverable branch true
   return "Wrong HEX-Value! ($a[3]) $a[2] Hex-value to short or long (must be 4 chars) or not hex (0-9 | a-f | A-F) {4}"
          if (($a[2] eq 'SF01_01319004' || $a[2] eq 'SF01_01319004_Typ2' || $a[2] eq 'Chilitec_22640' || $a[2] eq 'KL_RF01' || $a[2] eq 'RCnoName20' || $a[2] eq 'RCnoName20_09'
            || $a[2] eq 'RCnoName20_10' || $a[2] eq 'RCnoName128' || $a[2] eq 'DC_1961_TG' || $a[2] eq 'xavax' || $a[2] eq 'BF_301' || $a[2] eq 'Meikee_21' || $a[2] eq 'Meikee_24'
-           || $a[2] eq 'CREATE_6601TL' || $a[2] eq 'CREATE_6601L' || $a[2] eq 'HA_HX2') && not $a[3] =~ /^[0-9a-fA-F]{4}/xms);
-  ### [5 nibble] checks RCnoName127
-  # uncoverable branch true
-  return "Wrong HEX-Value! ($a[3]) $a[2] Hex-value to short or long (must be 5 chars) or not hex (0-9 | a-f | A-F) {5}" if ($a[2] eq 'RCnoName127' && not $a[3] =~ /^[0-9a-fA-F]{5}/xms);
+           || $a[2] eq 'CREATE_6601TL' || $a[2] eq 'HA_HX2') && not $a[3] =~ /^[0-9a-fA-F]{4}/xms);
+  ### [5 nibble] checks CREATE_6601L & RCnoName127
+  # uncoverable branch true 
+  return "Wrong HEX-Value! ($a[3]) $a[2] Hex-value to short or long (must be 5 chars) or not hex (0-9 | a-f | A-F) {5}" if (($a[2] eq 'CREATE_6601L' || $a[2] eq 'RCnoName127') && not $a[3] =~ /^[0-9a-fA-F]{5}/xms);
   ### [6] checks Manax | mumbi ###
   # uncoverable branch true
   return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short | long or not HEX (0-9 | a-f | A-F){4}_[ABCD]|[all]" if ($a[2] eq 'RC_10' && not $a[3] =~ /^[0-9a-fA-F]{4}_([ABCD]|all)$/xms) ;
@@ -1408,14 +1407,14 @@ sub SD_UT_Set {
     } elsif ($model eq 'TC6861') {
       $msg = $models{$model}{Protocol} . q{#P};
       $msgEnd = '#R' . $repeats;
-    ############ Meikee_21 | Meikee_24 | RCnoName128 | RCnoName20 | RCnoName20_09 | RCnoName20_10 | DC-1961-TG | CREATE_6601TL | CREATE_6601L | HA_HX2 ############
+    ############ Meikee_21 | Meikee_24 | RCnoName128 | RCnoName20 | RCnoName20_09 | RCnoName20_10 | DC-1961-TG | CREATE_6601TL | HA_HX2 ############
     } elsif ($model eq 'Meikee_21' || $model eq 'Meikee_24' || $model eq 'RCnoName128' || $model eq 'RCnoName20' || $model eq 'RCnoName20_09' || $model eq 'RCnoName20_10'
-          || $model eq 'DC_1961_TG' || $model eq 'CREATE_6601TL' || $model eq 'CREATE_6601L' || $model eq 'HA_HX2') {
+          || $model eq 'DC_1961_TG' || $model eq 'CREATE_6601TL' || $model eq 'HA_HX2') {
       my $adr = sprintf '%016b' , hex $definition[1]; # argument 1 - adress to binary with 16 bits
       $msg = $models{$model}{Protocol} . q{#} . $adr;
       $msgEnd = '#R' . $repeats;
-    ############ RCnoName127 ############
-    } elsif ($model eq 'RCnoName127') {
+    ############ CREATE_6601L | RCnoName127 ############
+    } elsif ($model eq 'CREATE_6601L' || $model eq 'RCnoName127') {
       my $adr = sprintf '%020b' , hex $definition[1]; # argument 1 - adress to binary with 20 bits
       $msg = $models{$model}{Protocol} . q{#} . $adr;
       $msgEnd = '#R' . $repeats;
@@ -1859,33 +1858,46 @@ sub SD_UT_Parse {
     if (!$def && $protocol == 20) {
       ### Remote control RCnoName20 [P20] ###
       $deviceCode = substr($rawData,0,4);
-      $devicedef = 'RCnoName20 ' . $deviceCode;
-      $def = $modules{SD_UT}{defptr}{$devicedef};
-      $model = 'RCnoName20';
-      $name = 'RCnoName20_' . $deviceCode;
+      my $button = substr($bitData,16,15);
+      if (exists $models{'RCnoName20'}{$button}) {
+        $model = 'RCnoName20';
+        $devicedef = $model . ' ' . $deviceCode;
+        $def = $modules{SD_UT}{defptr}{$devicedef};
+        $name = $model . '_' . $deviceCode;
+      }
       ### Remote control RCnoName20_09 or RCnoName20_10 or DC-1961-TG or CREATE_6601L [P20] ###
       my $xor = 0;
       for (my $n = 0; $n < 8; $n++) {
         $xor ^= hex(substr($rawData,$n,1));
       }
       if ($xor == 10) {
-        my $button = substr($bitData,16,8);
-        $model = 'RCnoName20_09' if exists $models{'RCnoName20_09'}{$button};
-        $devicedef = $model . ' ' . $deviceCode if (!$def);
-        $def = $modules{SD_UT}{defptr}{$devicedef} if (!$def);
-        $name = $model . '_' . $deviceCode if (!$def);
-        $model = 'RCnoName20_10' if exists $models{'RCnoName20_10'}{$button};
-        $devicedef = $model . ' ' . $deviceCode if (!$def);
-        $def = $modules{SD_UT}{defptr}{$devicedef} if (!$def);
-        $name = $model . '_' . $deviceCode if (!$def);
-        $model = 'DC_1961_TG' if exists $models{'DC_1961_TG'}{$button};
-        $devicedef = $model . ' ' . $deviceCode if (!$def);
-        $def = $modules{SD_UT}{defptr}{$devicedef} if (!$def);
-        $name = $model . '_' . $deviceCode if (!$def);
-        $model = 'CREATE_6601L' if exists $models{'CREATE_6601L'}{$button};
-        $devicedef = $model . ' ' . $deviceCode if (!$def);
-        $def = $modules{SD_UT}{defptr}{$devicedef} if (!$def);
-        $name = $model . '_' . $deviceCode if (!$def);
+        $button = substr($bitData,16,8);
+        if (exists $models{'RCnoName20_09'}{$button} && !$def) {
+          $model = 'RCnoName20_09';
+          $devicedef = $model . ' ' . $deviceCode;
+          $def = $modules{SD_UT}{defptr}{$devicedef};
+          $name = $model . '_' . $deviceCode;
+        }
+        if (exists $models{'RCnoName20_10'}{$button} && !$def) {
+          $model = 'RCnoName20_10';
+          $devicedef = $model . ' ' . $deviceCode;
+          $def = $modules{SD_UT}{defptr}{$devicedef};
+          $name = $model . '_' . $deviceCode;
+        }
+        if (exists $models{'DC_1961_TG'}{$button} && !$def) {
+          $model = 'DC_1961_TG';
+          $devicedef = $model . ' ' . $deviceCode;
+          $def = $modules{SD_UT}{defptr}{$devicedef};
+          $name = $model . '_' . $deviceCode;
+        }
+        $button = substr($bitData,20,4) if (!$def);
+        if (exists $models{'CREATE_6601L'}{$button} && !$def) {
+          $deviceCode = substr($rawData,0,5);
+          $model = 'CREATE_6601L';
+          $devicedef = $model . ' ' . $deviceCode;
+          $def = $modules{SD_UT}{defptr}{$devicedef};
+          $name = $model . '_' . $deviceCode;
+        }
       }
     }
     if (!$def && $protocol == 92) {
@@ -2321,10 +2333,16 @@ sub SD_UT_Parse {
   } elsif ($model eq 'RCnoName20' && $protocol == 20) {
     $state = substr($bitData,16,15);  # last bit is filled
     $deviceCode = substr($rawData,0,4);
-  ### Remote control RCnoName20_09 or RCnoName20_10 or DC-1961-TG or CREATE_6601L [P20] ###
-  } elsif (($model eq 'RCnoName20_09' || $model eq 'RCnoName20_10' || $model eq 'DC_1961_TG' || $model eq 'CREATE_6601L') && $protocol == 20) {
+  ### Remote control RCnoName20_09 or RCnoName20_10 or DC-1961-TG [P20] ###
+  } elsif (($model eq 'RCnoName20_09' || $model eq 'RCnoName20_10' || $model eq 'DC_1961_TG') && $protocol == 20) {
     $state = substr($bitData,16,8);
     $deviceCode = substr($rawData,0,4);
+    $rollingCode = hex(substr($rawData,6,1));
+    readingsBulkUpdate($hash, 'rollingCode', $rollingCode, 0);
+  ### Remote control CREATE_6601L [P20] ###
+  } elsif ($model eq 'CREATE_6601L' && $protocol == 20) {
+    $state = substr($bitData,20,4);
+    $deviceCode = substr($rawData,0,5);
     $rollingCode = hex(substr($rawData,6,1));
     readingsBulkUpdate($hash, 'rollingCode', $rollingCode, 0);
   ### Remote control xavax [P26] ###
@@ -2606,14 +2624,14 @@ sub SD_UT_Attr {
           $deviceCode = substr $bitData,8,24;
           $deviceCode = sprintf("%06X", oct( "0b$bitData" ) );
           $devicename = $devicemodel.'_'.$deviceCode;
-        ############ Meikee_xx or RCnoName20 or RCnoName20_09 or RCnoName20_10 or RCnoName128 or DC_1961_TG or CREATE_6601TL or CREATE_6601L or HA_HX2 ############
+        ############ Meikee_xx or RCnoName20 or RCnoName20_09 or RCnoName20_10 or RCnoName128 or DC_1961_TG or CREATE_6601TL or HA_HX2 ############
         } elsif ($attrValue eq 'Meikee_21' || $attrValue eq 'Meikee_24' || $attrValue eq 'RCnoName20' || $attrValue eq 'RCnoName20_09' || $attrValue eq 'RCnoName20_10' ||
-                 $attrValue eq 'RCnoName128' || $attrValue eq 'DC_1961_TG' || $attrValue eq 'CREATE_6601TL' || $attrValue eq 'CREATE_6601L' || $attrValue eq 'HA_HX2') {
+                 $attrValue eq 'RCnoName128' || $attrValue eq 'DC_1961_TG' || $attrValue eq 'CREATE_6601TL' || $attrValue eq 'HA_HX2') {
           $deviceCode = substr($bitData,0,16);
           $deviceCode = sprintf("%04X", oct( "0b$deviceCode" ) );
           $devicename = $devicemodel.'_'.$deviceCode;
-        ############ RCnoName127 ############
-        } elsif ($attrValue eq 'RCnoName127') {
+        ############ CREATE_6601L or RCnoName127 ############
+        } elsif ($attrValue eq 'CREATE_6601L' || $attrValue eq 'RCnoName127') {
           $deviceCode = substr $bitData,0,20;
           $deviceCode = sprintf("%05X", oct( "0b$deviceCode" ) );
           $devicename = $devicemodel.'_'.$deviceCode;
@@ -3213,7 +3231,7 @@ sub SD_UT_tristate2bin {
       }
     }
   },
-  "version": "v1.0.4",
+  "version": "v1.0.5",
   "release_status": "stable",
   "resources": {
     "bugtracker": {
