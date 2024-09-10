@@ -31,6 +31,38 @@ my @mockData = (
       rValue => match qr/only available for a receiver with CC1101/,  
   },
   {
+    cmd => q[set],
+    deviceName => q[dummyDuino],
+    plan => 2,
+    testname =>  q[set default client attribute],
+    input =>  q[Clients],
+    attrCheck =>  hash  {
+        field Clients => U();
+        etc();
+    },
+    hashCheck =>  hash  {
+        field Clients => match qr/:CUL_EM:/;
+        etc();
+    },
+    rValue => match qr/Setting defaults/,  
+  },
+  {
+    cmd => q[set],
+    deviceName => q[dummyDuino],
+    plan => 3,
+    testname =>  q[set custom client attribute],
+    input =>  q[Clients SD_WS:SD_UT],
+    attrCheck =>  hash  {
+        field Clients => 'SD_WS:SD_UT';
+        etc();
+    },
+    hashCheck =>  hash  {
+        field Clients => 'SD_WS:SD_UT';
+        etc();
+    },
+    rValue => U(),  
+  },
+  {
   #   todoReason => "reason",
     cmd => q[set],
     deviceName => q[cc1101dummyDuino],

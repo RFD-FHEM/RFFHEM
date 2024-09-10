@@ -1,4 +1,4 @@
-# $Id: 00_SIGNALduino.pm 3.5.6 2024-08-04 15:21:37Z elektron-bbs $
+# $Id: 00_SIGNALduino.pm 3.5.6 2024-08-28 14:15:02Z sidey79 $
 # v3.5.6 - https://github.com/RFD-FHEM/RFFHEM/tree/master
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incoming messages
 # see http://www.fhemwiki.de/wiki/SIGNALDuino
@@ -3116,7 +3116,10 @@ sub SIGNALduino_Attr {
   ## Change Clients
   if( $aName eq 'Clients' ) {
     $hash->{Clients} = $aVal;
-    $hash->{Clients} = $clientsSIGNALduino if( !$hash->{Clients}) ;     ## Set defaults
+    return  if ($hash->{Clients});
+    
+    ## Set defaults
+    $hash->{Clients} = $clientsSIGNALduino; 
     return 'Setting defaults';
   }
   ## Change MatchList
@@ -3407,7 +3410,8 @@ sub SIGNALduino_IdList {
       #my $w = join ', ' => map "$_" => keys %BlacklistIDs;
       #SIGNALduino_Log3 $name, 3, "$name IdList, Attr blacklist $w";
     }
-    $hash->{Clients} =  $clientsSIGNALduino; # Set Default in clientlist if whitelist is not active
+
+    $hash->{Clients} = AttrVal($name,'Clients', $clientsSIGNALduino); # use Attribute Clients or default if whitelist is not active
   } else {
     $hash->{Clients} =  q[] # clear Clients if whitelist is active    
   }
