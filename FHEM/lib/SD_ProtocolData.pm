@@ -3593,7 +3593,7 @@ package lib::SD_ProtocolData;
         sync             => [1,-8],
         clockabs         => 490,
         format           => 'twostate',  # not used now
-        preamble         => 'u',
+        preamble         => 'u135#',
         #postamble        => '',
         clientmodule     => 'SIGNALduino_un',
         #modulematch      => '^s[A-Fa-f0-9]+',
