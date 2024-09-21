@@ -3,7 +3,7 @@
 # All protocol definitions are contained in this file.
 #
 # 2016-2019  S.Butzek, Ralf9
-# 2019-2023  S.Butzek, HomeAutoUser, elektron-bbs
+# 2019-2024  S.Butzek, HomeAutoUser, elektron-bbs
 #
 # !!! useful hints !!!
 # --------------------
@@ -3578,7 +3578,29 @@ package lib::SD_ProtocolData;
         clientmodule    => 'WMBUS',
         #regexMatch      => qr/^b/,   # ToDo, check! fuer eine regexp Pruefung am Anfang vor dem method Aufruf
       },
-
+    "135" =>  
+            # albe shutter motor
+            # MS;P1=467;P2=-1995;P3=-1024;P4=-4007;D=14121212131213121313131312131313131212131313121313121212121312131312121312;CP=1;SP=4;R=218;
+            # MS;P0=482;P1=-1017;P2=-1990;P3=-4008;D=03020202010201020101010102010101010202010101020101020202020102010102020102;CP=0;SP=3;R=219;
+            # 
+      {
+        name             => 'albe',
+        comment          => 'shutter motor',
+        id               => '135',
+        knownFreqs       => '433.92',
+        one              => [1,-2],
+        zero             => [1,-4],
+        sync             => [1,-8],
+        clockabs         => 490,
+        format           => 'twostate',  # not used now
+        preamble         => 'u',
+        #postamble        => '',
+        clientmodule     => 'SIGNALduino_un',
+        #modulematch      => '^s[A-Fa-f0-9]+',
+        #length_min       => '56',
+        #length_max       => '56',
+        #paddingbits      => '8',         # pad up to 8 bits, default is 4
+      },
     ########################################################################
     #### ###  register informations from other hardware protocols  #### ####
 
