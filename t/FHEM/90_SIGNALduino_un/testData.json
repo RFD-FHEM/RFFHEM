@@ -1,0 +1,23 @@
+[
+   {
+      "data" : [
+         {
+            "comment" : "test for albe motor",
+            "dmsg" : "u135#15EF3B0B2",
+            "internals" : {
+            },
+            "readings" : {
+            },
+            "rmsg" : "MS;P0=482;P1=-1017;P2=-1990;P3=-4008;D=03020202010201020101010102010101010202010101020101020202020102010102020102;CP=0;SP=3;R=219;",
+            "tests" : [
+               {
+                  "comment" : "#0"
+               }
+            ]
+         }  
+      ],
+      "id" : "135",
+      "module" : "SIGNALduino_un",
+      "name" : "SIGNALduino UNKNOWN"
+   }
+]
