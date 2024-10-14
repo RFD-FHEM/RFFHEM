@@ -1707,7 +1707,7 @@ sub SD_UT_Parse {
         $button = substr($bitData,10,2); # BeEasy_TX
         if (exists $models{'BeEasy_TX'}{$button}) {
           $deviceCode = substr($bitData,0,10) . '00';
-          $deviceCode = sprintf("%X", oct( "0b$deviceCode" ) );
+          $deviceCode = sprintf("%03X", oct( "0b$deviceCode" ) );
           $devicedef = 'BeEasy_TX ' . $deviceCode;
           $def = $modules{SD_UT}{defptr}{$devicedef};
         }
@@ -2537,7 +2537,7 @@ sub SD_UT_Attr {
         ############ SEAV BeEasy_TX ############
         } elsif ($attrValue eq 'BeEasy_TX') {
           $deviceCode = substr($bitData,0,10) . '00';
-          $deviceCode = sprintf("%X", oct( "0b$deviceCode" ) );
+          $deviceCode = sprintf("%03X", oct( "0b$deviceCode" ) );
           $devicename = $devicemodel.'_'.$deviceCode;
         ############ Westinghouse TR60C-1 ############
         } elsif ($attrValue eq 'TR60C1') {
