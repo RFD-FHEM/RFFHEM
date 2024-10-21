@@ -460,6 +460,14 @@ my $module = basename (dirname(__FILE__));
 
         returnCheck     => F(),
         subCheck        => hash { field 'IOWrite' => array { item 0 => hash { field 'args' => array { item hash { etc(); } ; item 'sendMsg'; item 'P132#100001011110111110101010#R5' }; etc() } } } ,
+    },
+    {
+        targetName      =>  q[SD_UT_Test_BeSmart_S4_534],
+        testname        =>  q[set command down],
+        cmd             =>  q[set down],
+
+        returnCheck     => F(),
+        subCheck        => hash { field 'IOWrite' => array { item 0 => hash { field 'args' => array { item hash { etc(); } ; item 'sendMsg'; item 'P83#010011010101#R5' }; etc() } } } ,
     }
 );
 
