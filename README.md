@@ -20,7 +20,6 @@ Supported Devices / Protocols
 |Atlantic Security | some sensors (MD-210R / MD_230R / MD-2018R / MD-2003R) |
 |Auriol IAN 60107, 114324, 275901, 283582, 297514, 314695 (Lidl) | Weather station |
 |AVANTEK | Wireless doorbell & LED night light |
-|BeSmart S4 | Remote control |
 |BF-301 | Remote control|
 |benon (Semexo OHG) | Remote control (BH-P)|
 |BOSCH / Neff / Refsta Topdraft | Remote control (SF01 01319004, SF01 01319004 v2)|
@@ -96,6 +95,7 @@ Supported Devices / Protocols
 |revolt | Energy sensors |
 |Rojaflex HSR-15, HSTR-15 | Remote control |
 |s014/TCM/Conrad | Weather sensor |
+|SEAV BeEasy TX, BeSmart S4 | Remote controls |
 |Somfy RTS | Shutters from Somfy|
 |TCM 234759 Tchibo | wireless bell |
 |TCM97001,Logilink, Pearl NC, and similar,Lifetec LT3594 | Weather sensor |
