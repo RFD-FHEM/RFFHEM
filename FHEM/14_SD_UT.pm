@@ -1,5 +1,5 @@
 #########################################################################################
-# $Id: 14_SD_UT.pm 0 2024-09-08 08:41:41Z elektron-bbs $
+# $Id: 14_SD_UT.pm 0 2024-10-28 16:04:54Z elektron-bbs $
 #
 # The file is part of the SIGNALduino project.
 # The purpose of this module is universal support for devices.
@@ -30,6 +30,11 @@
 #     Adresse 8 | 1000 (off|on|on|on): I - fan minimum speed |  get sduino_dummy raw MU;;P0=-11250;;P1=-200;;P2=263;;P3=-116;;P4=-374;;P5=578;;P6=-697;;D=1232456245454562626245626262024562454545626262456262620245624545456262624562626202456245454562626245626262024562454545626262456262620245624545456262624562626202456245454562626245626262024562454545626262456262620245624545456262624562626202456245454562626;;CP=2;;R=49;;O;;
 #     Adresse c | 1100 (off|off|on|on): fan_off              |  get sduino_dummy raw MU;;P0=-720;;P1=235;;P2=-386;;P3=561;;P4=-11254;;D=01230141230101232301010101012301412301012323010101010123014123010123230101010101010141230101232301010101010101412301012323010101010101014123010123230101010101010;;CP=1;;R=242;;
 #}    Adresse c | 1100 (off|off|on|on): fan_off              |  get sduino_dummy raw MU;;P0=-11230;;P1=258;;P2=-390;;P3=571;;P4=-699;;D=0123414123234141414141234101234141232341414141412341012341412323414141414123410123414123234141414141234101234141232341414141412341012341412323414141414123410123414123234141414141234101234141232341414141412341012341412323414141414123410123414123234141414;;CP=1;;R=246;;O;;
+####################################################################################################################################
+# - SEAV BeEasy TX blind controller (HT12E), remote control with 2 buttons [Protocol 83]
+#{    https://github.com/RFD-FHEM/RFFHEM/issues/1276 @ xschmidt2 2024-10-10
+#     Adresse 4D4 down MU;P0=-25312;P1=286;P2=-354;P3=626;P4=-677;P5=-11292;D=01234123234141234123412341512341232341412341234123415123412323414123412341234151234123234141234123412341512341232341412341234123415123412323414123412341234151234123234141234123412341512341232341412341234123415123412323414123412341234151234123234141234123;CP=1;R=37;O;
+#}    Adresse 4D4 up   MU;P0=-24160;P1=277;P2=-363;P3=602;P4=-690;P6=-11311;D=01234123234141234123414123612341232341412341234141236123412323414123412341412361234123234141234123414123612341232341412341234141236123412323414123412341412361234123234141234123414123612341232341412341234141236123412323414123412341412361234123234141234123;CP=1;R=38;O;
 ####################################################################################################################################
 # - Deckenventilator mit Licht Westinghouse Bendan (remote control TR60C-1 with touch screen) [Protocol 104]
 #{    Adresse 0 | DIP 0000 Licht aus/Ventilator aus | get sduino_dummy raw MU;P0=18280;P1=-737;P2=419;P3=-331;P4=799;P5=-9574;P6=-7080;D=012121234343434341212121212121252121212123434343434121212121212125212121212343434343412121212121212521212121234343434341212121212121252121212123434343434121212121212126;CP=2;R=2;
@@ -315,7 +320,7 @@
 #     CREATE_6601L_1B900 fan_2  MS;P0=-7944;P1=-740;P4=253;P6=732;P7=-256;D=404141416767416767674141674141414141414141674141414141674141416767;CP=4;SP=0;R=67;O;m2;
 #     CREATE_6601L_1B900 fan_5  MS;P0=-264;P2=-743;P3=254;P4=733;P5=-7942;D=353232324040324040403232403232323232323232324032324032323232403240;CP=3;SP=5;R=40;O;m2;
 # - Remote control DC-1961-TG with 12 buttons for ceiling fan with lighting [Protocol 20]
-#    https://forum.fhem.de/index.php/topic,53282.msg1240911.html#msg1240911 @ Skusi  2022-10-23
+#     https://forum.fhem.de/index.php/topic,53282.msg1240911.html#msg1240911 @ Skusi  2022-10-23
 #     DC_1961_TG_1846 light_on_off   MS;P1=291;P2=-753;P3=762;P4=-249;P5=-8312;D=151212123434121212123412121234341234123412341212121234341212341234;CP=1;SP=5;R=224;O;m2;
 #     DC_1961_TG_1846 fan_off        MS;P1=-760;P2=747;P3=-282;P4=253;P5=-8335;D=454141412323414141412341414123234123412341412323234123232323412323;CP=4;SP=5;R=27;O;m2;
 #     DC_1961_TG_1846 fan_direction  MS;P0=-8384;P1=255;P2=-766;P3=754;P4=-263;D=101212123434121212123412121234341234123412341212341234341212341212;CP=1;SP=0;R=27;O;m2;
@@ -660,6 +665,12 @@ my %models = (
                 Protocol   => 'P83',
                 Typ        => 'remote'
               },
+  'BeEasy_TX' => { '01'       => 'down',
+                   '10'       => 'up',
+                   hex_length => [3],
+                   Protocol   => 'P83',
+                   Typ        => 'remote'
+                 },
   'TR60C1' => { '111110000000' => 'light_off_fan_off',
                 '110110000000' => 'light_off_fan_1',
                 '001110000000' => 'light_off_fan_2',
@@ -1146,9 +1157,10 @@ sub SD_UT_Define {
   ### [2] checks CAME_TOP_432EV & Novy_840029 & Novy_840039 & Unitec_47031 ###
   # uncoverable branch true
   return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short | long or not HEX (0-9 | a-f | A-F){2}" if (($a[2] eq 'CAME_TOP_432EV' || $a[2] eq 'Novy_840029' || $a[2] eq 'Novy_840039' || $a[2] eq 'Unitec_47031') && not $a[3] =~ /^[0-9a-fA-F]{2}/xms);
-  ### [3] checks SA_434_1_mini | QUIGG_DMV | TR_502MSV | BeSmart_S4 ###
+  ### [3] checks SA_434_1_mini | QUIGG_DMV | TR_502MSV | BeSmart_S4 | BeEasy_TX ###
   # uncoverable branch true
-  return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short or long (must be 3 chars) or not HEX (0-9 | a-f | A-F){3}" if (($a[2] eq 'SA_434_1_mini' || $a[2] eq 'QUIGG_DMV' || $a[2] eq 'TR_502MSV' || $a[2] eq 'BeSmart_S4') && not $a[3] =~ /^[0-9a-fA-F]{3}/xms);    
+  return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short or long (must be 3 chars) or not HEX (0-9 | a-f | A-F){3}"
+         if (($a[2] eq 'SA_434_1_mini' || $a[2] eq 'QUIGG_DMV' || $a[2] eq 'TR_502MSV' || $a[2] eq 'BeSmart_S4' || $a[2] eq 'BeEasy_TX') && not $a[3] =~ /^[0-9a-fA-F]{3}/xms);    
   ### [4 nibble] checks Neff SF01_01319004 & BOSCH SF01_01319004_Typ2 & Chilitec_22640 & ESTO KL_RF01 & RCnoName20 & RCnoName20_09 & RCnoName20_10 & RCnoName128 & DC-1961-TG & xavax & BF_301 & Meikee_xx & CREATE_6601TL ###
   # uncoverable branch true
   return "Wrong HEX-Value! ($a[3]) $a[2] Hex-value to short or long (must be 4 chars) or not hex (0-9 | a-f | A-F) {4}"
@@ -1232,6 +1244,11 @@ sub SD_UT_Set {
     if ($model eq 'RH787T') {
       my $adr = sprintf( "%04b", hex($definition[1]));  # argument 1 - adress to binary with 4 digits
       $msg = $models{$model}{Protocol} . '#0' . $adr .'1';
+      $msgEnd = '#R' . $repeats;
+    ############ SEAV BeEasy_TX ############
+    } elsif ($model eq 'BeEasy_TX') {
+      my $adr = substr(sprintf( "%012b", hex($definition[1])), 0, 10); # argument 1 - adress to binary with 10 digits
+      $msg = $models{$model}{Protocol} . '#' . $adr;
       $msgEnd = '#R' . $repeats;
     ############ Westinghouse TR60C-1 ############
     } elsif ($model eq 'TR60C1') {
@@ -1658,17 +1675,10 @@ sub SD_UT_Parse {
       $def = $modules{SD_UT}{defptr}{$devicedef};
     }
     ### Westinghouse Buttons_six [P29] ###
-    if (!$def && ($protocol == 29 || $protocol == 30)) {
     # uncoverable branch true
+    if (!$def && ($protocol == 29 || $protocol == 30)) {
       $deviceCode = substr($rawData,2,1);
       $devicedef = 'Buttons_six ' . $deviceCode;
-      $def = $modules{SD_UT}{defptr}{$devicedef};
-    }
-    ### Unitec_47031 [P30] ###
-    # uncoverable branch true
-    if (!$def && ($protocol == 30 || $protocol == 83)) {
-      $deviceCode = substr($rawData,0,2);
-      $devicedef = 'Unitec_47031 ' . $deviceCode;
       $def = $modules{SD_UT}{defptr}{$devicedef};
     }
     ### Remote control SA_434_1_mini 923301 [P81] ###
@@ -1678,13 +1688,30 @@ sub SD_UT_Parse {
       $devicedef = 'SA_434_1_mini ' . $deviceCode;
       $def = $modules{SD_UT}{defptr}{$devicedef};
     }
-    ### Westinghouse_Delancey RH787T [P83] ### no define
-    # uncoverable branch true
-    if (!$def && ($protocol == 83 || $protocol == 30)) {
-      $deviceCode = substr($bitData,1,4);
-      $deviceCode = sprintf("%X", oct( "0b$deviceCode" ) );
-      $devicedef = 'RH787T ' . $deviceCode;
-      $def = $modules{SD_UT}{defptr}{$devicedef};
+    if ($protocol == 30 || $protocol == 83) {
+      ### Unitec_47031 [P30] ###
+      if (!$def) {
+        $deviceCode = substr($rawData,0,2);
+        $devicedef = 'Unitec_47031 ' . $deviceCode;
+        $def = $modules{SD_UT}{defptr}{$devicedef};
+      }
+      ### Westinghouse_Delancey RH787T or BeEasy_TX [P83] ###
+      if (!$def) {
+        my $button = substr($bitData,6,6); # RH787T
+        if (exists $models{'RH787T'}{$button}) {
+          $deviceCode = substr($bitData,1,4);
+          $deviceCode = sprintf("%X", oct( "0b$deviceCode" ) );
+          $devicedef = 'RH787T ' . $deviceCode;
+          $def = $modules{SD_UT}{defptr}{$devicedef};
+        }
+        $button = substr($bitData,10,2); # BeEasy_TX
+        if (exists $models{'BeEasy_TX'}{$button}) {
+          $deviceCode = substr($bitData,0,10) . '00';
+          $deviceCode = sprintf("%03X", oct( "0b$deviceCode" ) );
+          $devicedef = 'BeEasy_TX ' . $deviceCode;
+          $def = $modules{SD_UT}{defptr}{$devicedef};
+        }
+      }
     }
     ### CAME_TOP_432EV [P86] ###  no define
     # uncoverable branch true
@@ -2134,31 +2161,63 @@ sub SD_UT_Parse {
 
   readingsBeginUpdate($hash);
 
+  if ($protocol == 30 || $protocol == 83) {
   ############ Westinghouse_Delancey RH787T ############ Protocol 83 or 30 ############
-  if ($model eq 'RH787T' && ($protocol == 83 || $protocol == 30)) {
-    $state = substr($bitData,6,6);
-    $deviceCode = substr($bitData,1,4);
-
-    ## Check fixed bits
-    my $unknown1 = substr($bitData,0,1);  # every 0
-    my $unknown2 = substr($bitData,5,1);  # every 1
-    if ($unknown1 ne '0' || $unknown2 ne '1') {
-      Log3 $name, 3, "$ioname: $model fixed bits wrong! always bit0=0 ($unknown1) and bit5=1 ($unknown2)";
-      return '';
+    if ($model eq 'RH787T') {
+      $state = substr($bitData,6,6);
+      $deviceCode = substr($bitData,1,4);
+      ## Check fixed bits
+      my $unknown1 = substr($bitData,0,1);  # every 0
+      my $unknown2 = substr($bitData,5,1);  # every 1
+      if ($unknown1 ne '0' || $unknown2 ne '1') {
+        Log3 $name, 3, "$ioname: $model fixed bits wrong! always bit0=0 ($unknown1) and bit5=1 ($unknown2)";
+        return '';
+      }
+      ## deviceCode conversion for User in ON or OFF ##
+      my $deviceCodeUser = $deviceCode;
+      $deviceCodeUser =~ s/1/off|/g;
+      $deviceCodeUser =~ s/0/on|/g;
+      $deviceCodeUser = substr($deviceCodeUser, 0 , length($deviceCodeUser)-1);
+      $deviceCode = $deviceCode." ($deviceCodeUser)";
+    ############ BeEasy_TX ############ Protocol 30 or 83 ############
+    } elsif ($model eq 'BeEasy_TX') {
+      $state = substr($bitData,10,2);
+      $deviceCode = substr($bitData,0,10) . '00';
+    ############ Unitec_47031 ############ Protocol 30 or 83 ############
+    } elsif ($model eq 'Unitec_47031') {
+      $state = substr($bitData,11,1);   # muss noch 100% verifiziert werden !!!
+      ## deviceCode conversion for User in ON or OFF ##
+      $deviceCode = substr($bitData,0,8);
+      my $deviceCodeUser = $deviceCode;
+      $deviceCodeUser =~ s/1/on|/g;
+      $deviceCodeUser =~ s/0/off|/g;
+      $deviceCodeUser = substr($deviceCodeUser, 0 , length($deviceCodeUser)-1);
+      $deviceCode = $deviceCode." ($deviceCodeUser)";
+      ## zone conversion for User in ON or OFF ##
+      $zone = substr($bitData,8,3);
+      my $zoneUser = $zone;
+      $zoneUser =~ s/1/on|/g;
+      $zoneUser =~ s/0/off|/g;
+      $zoneUser = substr($zoneUser, 0 , length($zoneUser)-1);
+      $zoneRead = $zone." ($zoneUser) - Zone ";
+      # Anmeldung an Profi-Alarmanzentrale 47121
+      if (oct("0b".$zone) < 6 ) {
+        $zoneRead.= (oct("0b".$zone)+1);
+        $usersystem = 'Unitec 47121';
+      # other variants
+      } else {
+        $zoneRead.= (oct("0b".$zone)-5);
+        # Anmeldung an Basis-Alarmanzentrale 47125 | Sirenen-System (z.B. ein System ohne separate Funk-Zentrale)
+        $usersystem = 'Unitec 47125 or Friedland' if (oct("0b".$zone) == 6);
+        # Anmeldung an Basis-Alarmanzentrale 47125
+        $usersystem = 'Unitec 47125' if (oct("0b".$zone) == 7);
+      }
+      Log3 $name, 5, "$ioname: SD_UT_Parse devicedef=$devicedef attr_model=$model protocol=$protocol deviceCode=$deviceCode state=$state Zone=$zone";
     }
-
-    ## deviceCode conversion for User in ON or OFF ##
-    my $deviceCodeUser = $deviceCode;
-    $deviceCodeUser =~ s/1/off|/g;
-    $deviceCodeUser =~ s/0/on|/g;
-    $deviceCodeUser = substr($deviceCodeUser, 0 , length($deviceCodeUser)-1);
-    $deviceCode = $deviceCode." ($deviceCodeUser)";
-
   ############ Westinghouse Buttons_five / Buttons_six############ Protocol 29 or 30 ############
   } elsif (($model eq 'Buttons_five' || $model eq 'Buttons_six') && ($protocol == 29 || $protocol == 30)) {
     $state = substr($bitData,0,6);
     $deviceCode = substr($bitData,8,4);
-
     ## Check fixed bits
     my $unknown1 = substr($bitData,6,1);  # every 1
     my $unknown2 = substr($bitData,7,1);  # every 1
@@ -2166,46 +2225,12 @@ sub SD_UT_Parse {
       Log3 $name, 3, "$ioname: $model fixed bits wrong! always bit6=1 ($unknown1) and bit7=1 ($unknown2)";
       return '';
     }
-
     ## deviceCode conversion for User in ON or OFF ##
     my $deviceCodeUser = $deviceCode;
     $deviceCodeUser =~ s/1/off|/g;
     $deviceCodeUser =~ s/0/on|/g;
     $deviceCodeUser = substr($deviceCodeUser, 0 , length($deviceCodeUser)-1);
     $deviceCode = $deviceCode." ($deviceCodeUser)";
-  ############ Unitec_47031 ############ Protocol 30 or 83 ############
-  } elsif ($model eq 'Unitec_47031' && ($protocol == 30 || $protocol == 83)) {
-    $state = substr($bitData,11,1);   # muss noch 100% verifiziert werden !!!
-
-    ## deviceCode conversion for User in ON or OFF ##
-    $deviceCode = substr($bitData,0,8);
-    my $deviceCodeUser = $deviceCode;
-    $deviceCodeUser =~ s/1/on|/g;
-    $deviceCodeUser =~ s/0/off|/g;
-    $deviceCodeUser = substr($deviceCodeUser, 0 , length($deviceCodeUser)-1);
-    $deviceCode = $deviceCode." ($deviceCodeUser)";
-
-    ## zone conversion for User in ON or OFF ##
-    $zone = substr($bitData,8,3);
-    my $zoneUser = $zone;
-    $zoneUser =~ s/1/on|/g;
-    $zoneUser =~ s/0/off|/g;
-    $zoneUser = substr($zoneUser, 0 , length($zoneUser)-1);
-    $zoneRead = $zone." ($zoneUser) - Zone ";
-
-    # Anmeldung an Profi-Alarmanzentrale 47121
-    if (oct("0b".$zone) < 6 ) {
-      $zoneRead.= (oct("0b".$zone)+1);
-      $usersystem = 'Unitec 47121';
-    # other variants
-    } else {
-      $zoneRead.= (oct("0b".$zone)-5);
-      # Anmeldung an Basis-Alarmanzentrale 47125 | Sirenen-System (z.B. ein System ohne separate Funk-Zentrale)
-      $usersystem = 'Unitec 47125 or Friedland' if (oct("0b".$zone) == 6);
-      # Anmeldung an Basis-Alarmanzentrale 47125
-      $usersystem = 'Unitec 47125' if (oct("0b".$zone) == 7);
-    }
-    Log3 $name, 5, "$ioname: SD_UT_Parse devicedef=$devicedef attr_model=$model protocol=$protocol deviceCode=$deviceCode state=$state Zone=$zone";
   ############ Tedsen_SKX1xx, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx ############ Protocol 46 ############
   } elsif (($model eq 'Tedsen_SKX1xx' || $model eq 'Tedsen_SKX2xx' || $model eq 'Tedsen_SKX4xx' || $model eq 'Tedsen_SKX6xx') && $protocol == 46) {
     $state = substr($bitData,14,4);
@@ -2509,6 +2534,11 @@ sub SD_UT_Attr {
           $deviceCode = substr($bitData,1,4);
           $deviceCode = sprintf("%X", oct( "0b$deviceCode" ) );
           $devicename = $devicemodel.'_'.$deviceCode;
+        ############ SEAV BeEasy_TX ############
+        } elsif ($attrValue eq 'BeEasy_TX') {
+          $deviceCode = substr($bitData,0,10) . '00';
+          $deviceCode = sprintf("%03X", oct( "0b$deviceCode" ) );
+          $devicename = $devicemodel.'_'.$deviceCode;
         ############ Westinghouse TR60C-1 ############
         } elsif ($attrValue eq 'TR60C1') {
           $deviceCode = substr($bitData,0,4);
@@ -2730,7 +2760,6 @@ sub SD_UT_tristate2bin {
     <li>AC114-01 remote control&nbsp;&nbsp;&nbsp;<small>(module model: AC114_01, protocol 56)</small></li>
     <li>Atlantic Security sensors&nbsp;&nbsp;&nbsp;<small>(module model: MD-2003R, MD-2018R,MD-210R, protocol 91|91.1)</small><br>
     <code>&nbsp;&nbsp;&nbsp;Note: The model MD_230R (water) is recognized as MD-2018R due to the same hardware ID!</code></li>
-    <li>BeSmart S4 remote control&nbsp;&nbsp;&nbsp;<small>(module model: BeSmart_S4, protocol 78)</small></li>
     <li>BF-301 remote control&nbsp;&nbsp;&nbsp;<small>(module model: BF_301, protocol 105)</small></li>
     <li>BOSCH ceiling fan&nbsp;&nbsp;&nbsp;<small>(module model: SF01_01319004_Typ2, protocol 86)</small></li>
     <li>Busch-Transcontrol HF - remote control 6861&nbsp;&nbsp;&nbsp;<small>(module model: TC6861, protocol 121)</small></li>
@@ -2767,6 +2796,8 @@ sub SD_UT_tristate2bin {
     <li>Remote control with 12 buttons for ceiling fan&nbsp;&nbsp;&nbsp;<small>(module model: RCnoName128, protocol 128)</small></li>
     <li>Remote control with 14 buttons for ceiling fan&nbsp;&nbsp;&nbsp;<small>(module model: RCnoName127, protocol 127)</small></li>
     <li>SA-434-1 mini 923301&nbsp;&nbsp;&nbsp;<small>(module model: SA_434_1_mini, protocol 81)</small></li>
+    <li>SEAV BeEasy TX &nbsp;&nbsp;&nbsp;<small>(Modulmodel: BeEasy_TX, protocol 83)</small></li>
+    <li>SEAV BeSmart S4 remote control&nbsp;&nbsp;&nbsp;<small>(module model: BeSmart_S4, protocol 78)</small></li>
     <li>Techmar Garden Lights &nbsp;&nbsp;&nbsp;<small>(module model: Techmar, protocol 95)</small></li>
     <li>Tedsen Teletaster <small>(protocol 46)</small>:
     <ul><small>
@@ -2901,7 +2932,7 @@ sub SD_UT_tristate2bin {
     <li><a href="#ignore">ignore</a></li>
     <li><a href="#IODev">IODev</a></li>
     <li><a name="model"></a>model<br>
-      The attribute indicates the model type of your device (AC114_01B, BeSmart_S4, Buttons_five, Buttons_six, CAME_TOP_432EV, Chilitec_22640, CREATE_6601L, CREATE_6601TL, DC_1961_TG, HA_HX2, HS1-868-BS, HSM4, KL_RF01, LED_XM21_0, Meikee_21, Meikee_24, Momento, Navaris, Novy_840029, Novy_840039, OR28V, QUIGG_DMV, RC_10, RH787T, SA_434_1_mini, SF01_01319004, TC6861, TR60C1, Tedsen_SKX1xx, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx, TR_502MSV, Unitec_47031, unknown).<br>
+      This attribute indicates the model type of your device (AC114_01B, BeEasy_TX, BeSmart_S4, Buttons_five, Buttons_six, CAME_TOP_432EV, Chilitec_22640, CREATE_6601L, CREATE_6601TL, DC_1961_TG, HA_HX2, HS1-868-BS, HSM4, KL_RF01, LED_XM21_0, Meikee_21, Meikee_24, Momento, Navaris, Novy_840029, Novy_840039, OR28V, QUIGG_DMV, RC_10, RH787T, SA_434_1_mini, SF01_01319004, TC6861, TR60C1, Tedsen_SKX1xx, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx, TR_502MSV, Unitec_47031, unknown).<br>
       If the attribute is changed, a new device is created using <a href="#autocreate">autocreate</a>. Autocreate must be activated for this.
     </li>
     <li><a name="repeats"></a>repeats<br>
@@ -2969,7 +3000,6 @@ sub SD_UT_tristate2bin {
     <li>AC114-01 Fernbedienung&nbsp;&nbsp;&nbsp;<small>(Modulmodel: AC114_01, Protokoll 56)</small></li>
     <li>Atlantic Security Sensoren&nbsp;&nbsp;&nbsp;<small>(Modulmodel: MD-2003R, MD-2018R,MD-210R, Protokoll 91|91.1)</small><br>
     <code>&nbsp;&nbsp;&nbsp;Hinweis: Das Model MD_230R (water) wird aufgrund gleicher Hardwarekennung als MD-2018R erkannt!</code></li>
-    <li>BeSmart S4 Fernbedienung&nbsp;&nbsp;&nbsp;<small>(Modulmodel: BeSmart_S4, Protokoll 78)</small></li>
     <li>BF-301 Fernbedienung&nbsp;&nbsp;&nbsp;<small>(Modulmodel: BF_301, Protokoll 105)</small></li>
     <li>BOSCH Deckenl&uuml;fter&nbsp;&nbsp;&nbsp;<small>(Modulmodel: SF01_01319004_Typ2, Protokoll 86)</small></li>
     <li>Busch-Transcontrol HF - Handsender 6861&nbsp;&nbsp;&nbsp;<small>(Modulmodel: TC6861, Protokoll 121)</small></li>
@@ -3006,6 +3036,8 @@ sub SD_UT_tristate2bin {
     <li>Novy Pureline 6830 Dunstabzugshaube&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Novy_840029, Protokoll 86)</small></li>
     <li>QUIGG DMV-7000&nbsp;&nbsp;&nbsp;<small>(Modulmodel: QUIGG_DMV, Protokoll 34)</small></li>
     <li>SA-434-1 mini 923301&nbsp;&nbsp;&nbsp;<small>(Modulmodel: SA_434_1_mini, Protokoll 81)</small></li>
+    <li>SEAV BeEasy TX Fernbedienung&nbsp;&nbsp;&nbsp;<small>(Modulmodel: BeEasy_TX, Protokoll 83)</small></li>
+    <li>SEAV BeSmart S4 Fernbedienung&nbsp;&nbsp;&nbsp;<small>(Modulmodel: BeSmart_S4, Protokoll 78)</small></li>
     <li>Techmar Garden Lights &nbsp;&nbsp;&nbsp;<small>(Modulmodel: Techmar, Protokoll 95)</small></li>
     <li>Tedsen Teletaster <small>(Protokoll 46)</small>:
     <ul><small>
@@ -3140,7 +3172,7 @@ sub SD_UT_tristate2bin {
     <li><a href="#ignore">ignore</a></li>
     <li><a href="#IODev">IODev</a></li>
     <li><a name="model"></a>model<br>
-      Dieses Attribut bezeichnet den Modelltyp Ihres Ger&auml;tes (AC114_01B, BeSmart_S4, Buttons_five, Buttons_six, CAME_TOP_432EV, Chilitec_22640, CREATE_6601L, CREATE_6601TL, DC_1961_TG, HA_HX2, HS1-868-BS, HSM4, KL_RF01, LED_XM21_0, Meikee_21, Meikee_24, Momento, Navaris, Novy_840029, Novy_840039, OR28V, QUIGG_DMV, RC_10, RH787T, SA_434_1_mini, SF01_01319004, TC6861, TR60C1, Tedsen_SKX1xx, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx, TR_502MSV, Unitec_47031, unknown).<br>
+      Dieses Attribut bezeichnet den Modelltyp Ihres Ger&auml;tes (AC114_01B, BeEasy_TX, BeSmart_S4, Buttons_five, Buttons_six, CAME_TOP_432EV, Chilitec_22640, CREATE_6601L, CREATE_6601TL, DC_1961_TG, HA_HX2, HS1-868-BS, HSM4, KL_RF01, LED_XM21_0, Meikee_21, Meikee_24, Momento, Navaris, Novy_840029, Novy_840039, OR28V, QUIGG_DMV, RC_10, RH787T, SA_434_1_mini, SF01_01319004, TC6861, TR60C1, Tedsen_SKX1xx, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx, TR_502MSV, Unitec_47031, unknown).<br>
       Bei &Auml;nderung des Attributes wird ein neues Gerät mittels <a href="#autocreate">autocreate</a> erzeugt. Autocreate muss dazu aktiviert sein.
     </li>
     <li><a name="repeats"></a>repeats<br>
@@ -3231,7 +3263,7 @@ sub SD_UT_tristate2bin {
       }
     }
   },
-  "version": "v1.0.5",
+  "version": "v1.0.6",
   "release_status": "stable",
   "resources": {
     "bugtracker": {
