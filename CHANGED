@@ -1,3 +1,11 @@
+2024-10-28 - new remote control SEAV BeEasy TX (#1279)
+
+* new remote control SEAV BeEasy TX
+* Update 14_SD_UT.pm
+* Update testData.json
+* Update testData.json
+* Update 03_set.t
+* Update README.md
 2024-09-10 - Merge pull request #1266 from RFD-FHEM/sidey79/issue1264
 
 Attribute Clients is used if it is set
