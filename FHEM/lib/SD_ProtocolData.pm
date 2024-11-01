@@ -1,4 +1,4 @@
-# $Id: SD_ProtocolData.pm 26975 2024-09-08 15:09:34Z elektron-bbs $
+# $Id: SD_ProtocolData.pm 26975 2024-11-01 16:00:00Z elektron-bbs $
 # The file is part of the SIGNALduino project.
 # All protocol definitions are contained in this file.
 #
@@ -70,7 +70,7 @@
 ##### notice #### or #### info ############################################################################################################
 # !!! Between the keys and values no tabs, please use spaces !!!
 # !!! Please use first unused id for new protocols !!!
-# ID´s are currently unused: 133 - 
+# ID´s are currently unused: 135 - 
 # ID´s need to be revised (preamble u): 5|19|21|22|23|25|28|31|36|40|52|59|63
 ###########################################################################################################################################
 # Please provide at least three messages for each new MU/MC/MS/MN protocol and a URL of issue in GitHub or discussion in FHEM Forum
@@ -85,7 +85,7 @@ package lib::SD_ProtocolData;
   use strict;
   use warnings;
 
-  our $VERSION = '1.57';
+  our $VERSION = '1.58';
   our %protocols = (
     "0" =>  ## various weather sensors (500 | 9100)
             # Mebus | Id:237 Ch:1 T: 1.9 Bat:low           MS;P0=-9298;P1=495;P2=-1980;P3=-4239;D=1012121312131313121313121312121212121212131212131312131212;CP=1;SP=0;R=223;O;m2;
@@ -2302,11 +2302,15 @@ package lib::SD_ProtocolData;
         length_max      => '3360',    # 3360 bit (336 x 10bit words to decode 168 bytes data) for full timer message
       },
     "83"  =>  ## Remote control RH787T based on MOSDESIGN SEMICONDUCTOR CORP (CMOS ASIC encoder) M1EN compatible HT12E
-              # for example Westinghouse Deckenventilator Delancey, 6 speed buttons, @zwiebelxxl
+              # Westinghouse Deckenventilator Delancey, 6 speed buttons, @zwiebelxxl
               # https://github.com/RFD-FHEM/RFFHEM/issues/250
               # 1_fan_minimum_speed      MU;P0=388;P1=-112;P2=267;P3=-378;P5=585;P6=-693;P7=-11234;D=0123035353535356262623562626272353535353562626235626262723535353535626262356262627235353535356262623562626272353535353562626235626262723535353535626262356262627235353535356262623562626272353535353562626235626262723535353535626262356262627235353535356262;CP=2;R=43;O;
               # 2_fan_low_speed          MU;P0=-176;P1=262;P2=-11240;P3=112;P5=-367;P6=591;P7=-695;D=0123215656565656717171567156712156565656567171715671567121565656565671717156715671215656565656717171567156712156565656567171715671567121565656565671717156715671215656565656717171567156712156565656567171715671567121565656565671717171717171215656565656717;CP=1;R=19;O;
               # 3_fan_medium_low_speed   MU;P0=564;P1=-392;P2=-713;P3=245;P4=-11247;D=0101010101023231023232323431010101010232310232323234310101010102323102323232343101010101023231023232323431010101010232310232323234310101010102323102323232343101010101023231023232323431010101010232310232323234310101010102323102323232343101010101023231023;CP=3;R=40;O;
+              # SEAV BeEasy TX blind controller (HT12E), remote control with 2 buttons [Protocol 83]
+              # https://github.com/RFD-FHEM/RFFHEM/issues/1276 @ xschmidt2 2024-10-10
+              # BeEasy_TX_4D4 down       MU;P0=-25312;P1=286;P2=-354;P3=626;P4=-677;P5=-11292;D=01234123234141234123412341512341232341412341234123415123412323414123412341234151234123234141234123412341512341232341412341234123415123412323414123412341234151234123234141234123412341512341232341412341234123415123412323414123412341234151234123234141234123;CP=1;R=37;O;
+              # BeEasy_TX_4D4 up         MU;P0=-24160;P1=277;P2=-363;P3=602;P4=-690;P6=-11311;D=01234123234141234123414123612341232341412341234141236123412323414123412341412361234123234141234123414123612341232341412341234141236123412323414123412341412361234123234141234123414123612341232341412341234141236123412323414123412341412361234123234141234123;CP=1;R=38;O;
       {
         name            => 'RH787T',
         comment         => 'remote control for example Westinghouse Delancey 7800140',
@@ -3536,8 +3540,6 @@ package lib::SD_ProtocolData;
       },
     "133" =>  # WMBus_S
               # https://wiki.fhem.de/wiki/WMBUS
-              # note !!! Implementation in the FW still needs to be done, register settings are not sufficient
-              #           - definition is in advance in order to dispatch a DMSG | https://github.com/RFD-FHEM/RFFHEM/issues/1247
       {
         name            => 'WMBus_S',
         comment         => 'WMBus mode S',
@@ -3546,21 +3548,18 @@ package lib::SD_ProtocolData;
         datarate        => '32.720',
         preamble        => 'b',
         modulation      => '2-FSK',
+        sync            => '7696',
         rfmode          => 'WMBus_S',
-        # registers need to be adjusted and can be optimized if necessary
-        register        => ['0006','012E','0200','0300','0476','0596','06FF','0704','0802','0900','0A00','0B08','0C00','0D21','0E65','0F6A','106A','114A','1206','1322','14F8','1547','1607','1700','1818','192E','1A6D','1B04','1C09','1DB2','1E87','1F6B','20F8','21B6','2210','23EF','242A','2512','261F','2741'],
+        register        => ['0006','0200','0340','0476','0596','06FF','0704','0802','0B08','0D21','0E65','0F6A','106A','114A','1206','1322','14F8','1547','192E','1A6D','1B04','1C09','1DB2'],
         length_min      => '56',      # to filter messages | must check
         clientmodule    => 'WMBUS',
-        #regexMatch      => qr/^b/,   # ToDo, check! fuer eine regexp Pruefung am Anfang vor dem method Aufruf
       },
     "134" =>  # WMBus_T
               # https://wiki.fhem.de/wiki/WMBUS
-              # note !!! Implementation in the FW still needs to be done, register settings are not sufficient
-              #           - definition is in advance in order to dispatch a DMSG | https://github.com/RFD-FHEM/RFFHEM/issues/1247
               # messages with normal identifier
               # RAWMSG: MN;D=3E44FA1213871122011633057A1C002025417CD28E06770269857D8001EF3B8BBE56BA7E06855CBA0334149F51682F2E6E2960E6900F800C0001090086B41E003A6F140131414D7D88810A;R=10;A=16;
               # DMSG:       b3E44FA1213871122011633057A1C002025417CD28E06770269857D8001EF3B8BBE56BA7E06855CBA0334149F51682F2E6E2960E6900F800C0001090086B41E003A6F140131414D7D88810A
-              # messages with Y identifier
+              # messages with Y identifier for frame type B
               # RAWMSG: MN;D=Y304497264202231800087A3E0020A5EE5B2074920E46E4B4A26B99C92C8DD3A55F44FAF6AE0256B354F9C48C717BFAD43400FB;R=251;A=0;
               # DMSG:       bY304497264202231800087A3E0020A5EE5B2074920E46E4B4A26B99C92C8DD3A55F44FAF6AE0256B354F9C48C717BFAD43400FB
       {
@@ -3571,12 +3570,11 @@ package lib::SD_ProtocolData;
         datarate        => '100.000',
         preamble        => 'b',
         modulation      => '2-FSK',
+        sync            => '543D',
         rfmode          => 'WMBus_T',
-        # registers need to be adjusted and can be optimized if necessary
-        register        => ['0006','012E','0200','0300','0454','053D','06FF','0704','0802','0900','0A00','0B08','0C00','0D21','0E6B','0FD0','105C','1104','1206','1322','14F8','1544','1607','1700','1818','192E','1ABF','1B43','1C09','1DB5','1E87','1F6B','20F8','21B6','2210','23EF','242A','2513','261F','2741'],
+        register        => ['0006','0200','0340','0454','053D','06FF','0704','0802','0B08','0D21','0E6B','0FD0','105C','1104','1206','1322','14F8','1544','192E','1ABF','1BC7','1C09','1DB2'],
         length_min      => '56',      # to filter messages | must check
         clientmodule    => 'WMBUS',
-        #regexMatch      => qr/^b/,   # ToDo, check! fuer eine regexp Pruefung am Anfang vor dem method Aufruf
       },
 
     ########################################################################
