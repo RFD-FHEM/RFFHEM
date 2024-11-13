@@ -121,6 +121,7 @@ InternalTimer(time()+1, sub {
 			    	item match qr/^W1062$/;
 			    	item match qr/^W1176$/;
 			    	item 'WS36';
+			    	item 'WS3A';
 			    	item 'WS34';
 			    	end();
     			};
@@ -147,6 +148,7 @@ InternalTimer(time()+1, sub {
 			    	item match qr/^W10b0$/;
 			    	item match qr/^W1171$/;
 			    	item 'WS36';
+			    	item 'WS3A';
 			    	item 'WS34';
 			    	end();
     			};
@@ -176,6 +178,7 @@ InternalTimer(time()+1, sub {
 			    	item match qr/^W1062$/;
 			    	item match qr/^W1176$/;
 			    	item 'WS36';
+			    	item 'WS3A';
 			    	item 'WS34';
 			    	end();
     			};
@@ -213,6 +216,7 @@ InternalTimer(time()+1, sub {
 			    return array  {
 			    	item match qr/W1D[\dA-Fa-f]{2}/;
 			    	item 'WS36';
+			    	item 'WS3A';
 			    	item 'WS34';
 			    	end();
     			};
@@ -226,6 +230,7 @@ InternalTimer(time()+1, sub {
 			    return array  {
 			    	item match qr/W1F[\dA-Fa-f]{2}/;
 			    	item 'WS36';
+			    	item 'WS3A';
 			    	item 'WS34';
 			    	end();
     			};
@@ -240,6 +245,7 @@ InternalTimer(time()+1, sub {
 			    return array  {
 			    	item 'x84';
 			    	item 'WS36';
+			    	item 'WS3A';
 			    	item 'WS34';
 			    	end();
     			};
@@ -266,6 +272,7 @@ InternalTimer(time()+1, sub {
 			    return array  {
 			    	item 'x81';
 			    	item 'WS36';
+			    	item 'WS3A';
 			    	item 'WS34';
 			    	end();
     			};
@@ -281,6 +288,7 @@ InternalTimer(time()+1, sub {
 			    return array  {
 			    	item 'x84';
 			    	item 'WS36';
+			    	item 'WS3A';
 			    	item 'WS34';
 			    	end();
     			};
@@ -381,6 +389,7 @@ InternalTimer(time()+1, sub {
 			    	item 'W0F23';
 			    	item 'W3022';
 			    	item 'WS36';
+			    	item 'WS3A';
 			    	item 'WS34';
 			    	end();
     			};
@@ -800,6 +809,7 @@ InternalTimer(time()+1, sub {
 				    	item 'C10';
 				    	item 'W1257';
 				    	item 'WS36';
+				    	item 'WS3A';
 				    	item 'WS34';
 					    end();
 					} ,"Verify expected queue element entrys");
