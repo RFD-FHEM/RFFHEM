@@ -51,7 +51,7 @@ jobs:
         files: clover.xml
         directory: ./cover_db
         flags: unittests,perl,modules
-        name: perl modules (testscripts) ${{ matrix.perl }}
+        name: \"perl modules (testscripts) ${{ matrix.perl }}\"
 
     - name: Create clover report for fhem tests
       working-directory: /opt/fhem/
@@ -63,7 +63,7 @@ jobs:
         files: clover.xml
         directory: /opt/fhem/cover_db
         flags: unittests,fhem,modules
-        name: fhem (testscripts) ${{ matrix.perl }} 
+        name: \"fhem (testscripts) ${{ matrix.perl }}\"
 
     - uses: reviewdog/action-setup@v1
       if: always() && github.event_name == 'pull_request'
