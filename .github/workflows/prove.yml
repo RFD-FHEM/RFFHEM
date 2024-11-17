@@ -48,7 +48,7 @@ jobs:
     - uses: codecov/codecov-action@v5.0.0
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
-        file: clover.xml
+        files: clover.xml
         directory: ./cover_db
         flags: unittests,perl,modules
         name: perl modules (testscripts) ${{ matrix.perl }}
@@ -60,7 +60,7 @@ jobs:
     - uses: codecov/codecov-action@v5.0.0
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
-        file: clover.xml
+        files: clover.xml
         directory: /opt/fhem/cover_db
         flags: unittests,fhem,modules
         name: fhem (testscripts) ${{ matrix.perl }} 
