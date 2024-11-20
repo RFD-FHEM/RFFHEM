@@ -45,25 +45,25 @@ jobs:
     - name: Create clover report for perl Modules
       run: cover -report clover
 
-    - uses: codecov/codecov-action@v5.0.0
+    - uses: codecov/codecov-action@v5.0.5
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         files: clover.xml
         directory: ./cover_db
         flags: unittests,perl,modules
-        name: \"perl modules (testscripts) ${{ matrix.perl }}\"
+        name: perl modules (testscripts) ${{ matrix.perl }}
 
     - name: Create clover report for fhem tests
       working-directory: /opt/fhem/
       run: cover -report clover
 
-    - uses: codecov/codecov-action@v5.0.0
+    - uses: codecov/codecov-action@v5.0.5
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         files: clover.xml
         directory: /opt/fhem/cover_db
         flags: unittests,fhem,modules
-        name: \"fhem (testscripts) ${{ matrix.perl }}\"
+        name: fhem (testscripts) ${{ matrix.perl }}
 
     - uses: reviewdog/action-setup@v1
       if: always() && github.event_name == 'pull_request'
