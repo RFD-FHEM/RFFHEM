@@ -20,15 +20,15 @@ Supported Devices / Protocols
 |Atlantic Security | some sensors (MD-210R / MD_230R / MD-2018R / MD-2003R) |
 |Auriol IAN 60107, 114324, 275901, 283582, 297514, 314695 (Lidl) | Weather station |
 |AVANTEK | Wireless doorbell & LED night light |
-|BeSmart S4 | Remote control |
 |BF-301 | Remote control|
 |benon (Semexo OHG) | Remote control (BH-P)|
 |BOSCH / Neff / Refsta Topdraft | Remote control (SF01 01319004, SF01 01319004 v2)|
-|BRESSER 5-in-1, 6-in-1, 7-in-1, Professional Rain Gauge, TemeoTrend, SM60020 Soil moisture sensor | Weather Station, Rain Gauge, Thermo-/Hygro Sensor |
+|BRESSER 5-in-1, 6-in-1, 7-in-1, Professional Rain Gauge, TemeoTrend, SM60020 Soil moisture sensor, PM2.5/10 Air quality sensor, Lightning sensor | Weather Station, Rain Gauge, Thermo-/Hygro Sensor, Particulate meter, Lightning detector |
 |Busch-Transcontrol HF | Remote control (6861)|
 |CAME TOP 432EV | Remote control |
 |CTW600, WH1080, WH2315 | Weather station |
 |Clarus | remote power socket|
+|CREATE 6601L, 6601TL | Remote control for ceiling fan with lighting |
 |Conrad RSL | shutters |
 |DC-1961-TG | Remote control with 12 buttons for ceiling fan with lighting |
 |Dooya | Shutters and blinds from various vendors like Rohrmotor24 |
@@ -43,6 +43,7 @@ Supported Devices / Protocols
 |Fine Offset WH51, aka ECOWITT WH51, aka Froggit DP100, aka MISOL/1 | Soil moisture sensor |
 |Fine Offset WH57, aka Ambient Weather WH31L, aka Froggit DP60 | Thunder and lightning sensor |
 |Fine Offset WH31, aka Ambient Weather WH31E, aka ecowitt WH31 | Temperature and humidity sensor |
+|Fine Offset WH40, aka Ambient Weather WH40E, aka ecowitt WH40 | Rain gauge |
 |FLAMINGO | Flamingo smoke detector |
 |Fody E42 | Temperature/humidity sensor (protocol BRESSER 5-in-1) |
 |FreeTec PE-6946 | wireless bell |
@@ -57,6 +58,7 @@ Supported Devices / Protocols
 |Grothe Mistral SE 03.1| wireless gong |
 |GT-9000| Remote control based on protocol GT-9000 with encoding (EASY HOME RCT DS1, Tec Star)|
 |GT-TMBBQ-01| BBQ temperature sensor|
+|Halemeier| Remote controls for LED controller |
 |Hama TS33C, Hama TS34A, Hama TS36E, Bresser Thermo/Hygro Sensor  | Weather sensor |
 |Heidemann, Heidemann HX, VTX-BELL | wireless bell |
 |Hoermann HSM2, HSM4, HS1-868-BS | Remote control |
@@ -93,6 +95,7 @@ Supported Devices / Protocols
 |revolt | Energy sensors |
 |Rojaflex HSR-15, HSTR-15 | Remote control |
 |s014/TCM/Conrad | Weather sensor |
+|SEAV BeEasy TX, BeSmart S4 | Remote controls |
 |Somfy RTS | Shutters from Somfy|
 |TCM 234759 Tchibo | wireless bell |
 |TCM97001,Logilink, Pearl NC, and similar,Lifetec LT3594 | Weather sensor |
@@ -101,7 +104,7 @@ Supported Devices / Protocols
 |Technoline TX3 | Weather sensor |
 |Tedsen SKX1xx, SKX2xx, SKX4xx, SKX6xx | Remote control |
 |Temola TM40 | Wireless grill, meat, roast thermometer with 4 temperature sensors |
-|TFA 30.3151, 30.3152, 30.3153, 30.3157, 30.3200, 30.3208.02, 30.3209.02, 30.3221.02, 30.3222.02, 30.3228.02, 30.3229.02, 30.3233.01, 30.3251.10, 35.1077.54.S2, 35.1140.01 | Weather sensors and stations |
+|TFA 30.3151, 30.3152, 30.3153, 30.3157, 30.3200, 30.3208.02, 30.3209.02, 30.3212, 30.3221.02, 30.3222.02, 30.3228.02, 30.3229.02, 30.3233.01, 30.3251.10, 35.1077.54.S2, 35.1140.01 | Weather sensors and stations |
 |TR401 | Remote control |
 |TR60C-1 | Remote control with touch screen |
 |TS-FT002 | Water tank level monitor with temperature |

@@ -1,3 +1,126 @@
+2024-10-28 - new remote control SEAV BeEasy TX (#1279)
+
+* new remote control SEAV BeEasy TX
+* Update 14_SD_UT.pm
+* Update testData.json
+* Update testData.json
+* Update 03_set.t
+* Update README.md
+2024-09-10 - Merge pull request #1266 from RFD-FHEM/sidey79/issue1264
+
+Attribute Clients is used if it is set
+2024-09-08 - SD_WS_48 TFA JOKER Temperature transmitter 30.3212 (#1271)
+
+* SD_WS_48 TFA JOKER
+Decoding realized.
+* Update testData.json
+add testdata for temperature transmitter TFA 30.3212
+2024-09-08 - Bugfix remote control CREATE 6601L (new identity) (#1269)
+
+* Bugfix CREATE_6601L
+Ident does not consist of 4 nibbles, but 5.
+* Update 14_SD_UT.pm
+
+2024-08-04 - new remote control CREATE 6601L (#1263)
+
+* new remote control  CREATE 6601L
+* Update 14_SD_UT.pm
+* Update 00_SIGNALduino.pm
+* Update README.md
+* Update testData.json
+add data for Remote control CREATE 6601L
+* add test data for set command Remote control CREATE 6601L
+* Update 03_set.t
+* Update fhem.cfg
+
+2024-07-25 - new remote control RCnoName20_09 (#1261)
+
+* new RC RCnoName20_09
+remote control RCnoName20_09 with 9 buttons for ceiling fan, see https://forum.fhem.de/index.php?topic=138538.0
+* Update SD_ProtocolData.pm
+* Update testData.json
+add data for RCnoName20_09
+* Update 14_SD_UT.pm
+
+2024-06-20 - Bugfix Bresser lightning count (#1260)
+
+* Bugfix Bresser lightning count
+Lightning counter overflowed at 999, now at 1599.
+2024-04-25 - WMBUS extension to dispatch messages (#1252)
+
+* WMBUS proposal - extension to dispatch messages
+* feat[00_SIGNALduino]: Changed input validation for WMBus
+* fix[00_SIGNALduino]: Removed unneded code
+* fix[00_SIGNALduino]: Syntax
+* build[updateversion]: Allow codecov/patch check to be failed
+* Update Versiondate
+2024-03-12 - Merge pull request #1242 from RFD-FHEM/fixMetaSD_WS
+
+fix meta.json syntax errors
+2024-03-09 - Merge pull request #1241 from RFD-FHEM/sidey79/issue1240
+
+Better commandref for noMsgVerbose 
+2024-01-09 - 14_SD_WS.pm small corrections (#1226)
+
+* 14_SD_WS.pm small corrections
+Small corrections without changing the function of the module.
+2024-01-07 - SD_WS add reading model for statistics (#1225)
+
+* add models for FHEM statistics
+see FHEM statistics https://fhem.de/stats/statistics.html
+2024-01-06 - new protocol 131 for BRESSER Lightning detector (#1224)
+
+* Bresser lightning detector
+new protocol 131 for Bresser lightning detector
+* Update testData.json
+* Update README.md
+* Update Versiondate
+2024-01-03 - little fix 10_SD_GT and added tests (#1223)
+
+* Update 10_SD_GT.pm
+- replace tabs with spaces (no module restrictions)
+- fix META versionssupport
+- fix PERL WARNING
+- added tests
+- revised SVN numbre
+- remove old Internals VERSION_SD_GT
+- added Meta version
+2024-01-03 - Call debug via a coderef if enabled, otherwise return (#1169)
+
+* 00_SIGNALduino.pm
+
+added coderef for debug output$hash->{debugMethod}
+2024-01-02 - Update tests part two | for the functional reliability of the module SD_UT (#1218)
+
+* added some tests for define and attr
+2023-12-31 - new sensor BRESSER PM2.5/10 air quality meter (#1219)
+
+* Bresser PM2.5/10 air quality meter
+ new sensor BRESSER PM2.5/10 air quality meter, protocol 117
+* Update SD_Protocols.pm
+* Update SD_Protocols.pm
+* Update testData.json
+* Update README.md
+* Update SD_ProtocolData.pm
+2023-12-20 - new def | remote ha-hx2 (#1212)
+
+* Update SD_ProtocolData.pm
+
+* Update 14_SD_UT.pm
+- new device HA-HX2
+
+* Update testData.json
+
+* Update 03_set.t
+
+* Update fhem.cfg
+
+* Update README.md
+2023-12-15 - create client list based on whitelistIDs attribute (#1205)
+
+* perf [clientlist]: Keep order and skip sorting
+
+* feat[clientList]: Compute clientlist based on whitelist_IDs
 2023-11-04 - New protocol 130 for remote control CREATE 6601TL (#1201)
 
 * new protocol 130 for remote control CREATE 6601TL

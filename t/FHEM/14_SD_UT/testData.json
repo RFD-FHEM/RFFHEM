@@ -237,6 +237,18 @@
                   "comment" : "#1"
                }
             ]
+         },
+         {
+            "comment" : "Remote control for motorized screen, wrong checksum",
+            "dmsg" : "P24#9F7DF82508C210",
+            "tests" : [
+               {
+                  "returns" : {
+                     "ParseFn" : ""
+                  },
+                  "comment" : "#2"
+               }
+            ]
          }
       ],
       "id" : "24",
@@ -289,7 +301,31 @@
                   "comment" : "#1"
                }
             ]
-         }
+         },
+         {
+            "comment" : "model 00111939 - check nibble 0-3 and nibble 5-8",
+            "dmsg" : "P26#DABB255478",
+            "tests" : [
+               {
+                  "returns" : {
+                     "ParseFn" : ""
+                  },
+                  "comment" : "#2"
+               }
+            ]
+         }, 
+         {
+            "comment" : "model 00111939 - check nibble 8 and nibble 9",
+            "dmsg" : "P26#DAAB255468",
+            "tests" : [
+               {
+                  "returns" : {
+                     "ParseFn" : ""
+                  },
+                  "comment" : "#3"
+               }
+            ]
+         }  
       ],
       "id" : "26",
       "module" : "SD_UT",
@@ -498,6 +534,28 @@
    {
       "data" : [
          {
+            "comment" : "Tedsen remote with one button, model SKX1MD",
+            "dmsg" : "P46#BAFB0",
+            "internals" : {
+               "DEF" : "Tedsen_SKX1xx F1FF11F",
+               "NAME" : "Tedsen_SKX1xx_F1FF11F"
+            },
+            "readings" : {
+               "LastAction" : "receive",
+               "state" : "Button_1",
+               "tristateCode" : "F1FF11F10"
+            },
+            "rmsg" : "MU;P0=-15829;P1=-3580;P2=1962;P3=-330;P4=245;P5=-2051;D=1234523232345234523232323234523234540023452323234523452323232323452323454023452323234523452323232323452323454023452323234523452323232323452323454023452323234523452323232323452323454023452323234523452323;CP=2;",
+            "tests" : [
+               {
+                  "attributes" : {
+                     "model" : "Tedsen_SKX1xx"
+                  },
+                  "comment" : "#0"
+               }
+            ]
+         },
+         {
             "comment" : "Geiger Rolladen",
             "dispatch_repeats" : "1",
             "dmsg" : "P46#ECF20",
@@ -569,6 +627,18 @@
                      "model" : "AC114_01B"
                   },
                   "comment" : "#0"
+               }
+            ]
+         },
+         {
+            "comment" : "Celexon Motorleinwand with wrong checksum",
+            "dmsg" : "P56#A300587B810043178",
+            "tests" : [
+               {
+                  "returns" : {
+                     "ParseFn" : ""
+                  },
+                  "comment" : "#1"
                }
             ]
          }
@@ -695,7 +765,19 @@
                   "comment" : "#2"
                }
             ]
-         }
+         },
+         {
+            "comment" : "Vista Remote Control wrong checksum",
+            "dmsg" : "P68#57823",
+            "tests" : [
+               {
+                  "returns" : {
+                     "ParseFn" : ""
+                  },
+                  "comment" : "#3"
+               }
+            ]
+         }           
       ],
       "id" : "68",
       "module" : "SD_UT",
@@ -1445,6 +1527,29 @@
                   "comment" : "#3"
                }
             ]
+         },
+         {
+            "comment" : "button all / state unknown",
+            "dmsg" : "P90#786909230",
+            "internals" : {
+               "DEF" : "RC_10 7869_all",
+               "NAME" : "RC_10_7869_all"
+            },
+            "readings" : {
+               "LastAction" : "receive",
+               "deviceCode" : "0111100001101001",
+               "state" : "1001",
+               "x_n4" : "0000"
+            },
+            "rmsg" : "MS;P1=-363;P2=789;P3=267;P4=-887;P5=-10332;D=35342121212134343434212134213434213434343421343421343421343434212134;CP=3;SP=5;O;m2;4;",
+            "tests" : [
+               {
+                  "attributes" : {
+                     "model" : "RC_10"
+                  },
+                  "comment" : "#4"
+               }
+            ]
          }
       ],
       "id" : "90",
@@ -1760,6 +1865,18 @@
                   "comment" : "#2"
                }
             ]
+         },
+         {
+            "comment" : "Garden Lights remote control with wrong checksum",
+            "dmsg" : "P95#7709F5DE09160",
+            "tests" : [
+               {
+                  "returns" : {
+                     "ParseFn" : ""
+                  },
+                  "comment" : "#3"
+               }
+            ]
          }
       ],
       "id" : "95",
@@ -1834,7 +1951,19 @@
                   "comment" : "#2"
                }
             ]
-         }
+         },
+         {
+            "comment" : "remote control for wireless digital picture frame with wrong checksum",
+            "dmsg" : "P97#000006443A",
+            "tests" : [
+               {
+                  "returns" : {
+                     "ParseFn" : ""
+                  },
+                  "comment" : "#3"
+               }
+            ]
+         }         
       ],
       "id" : "97",
       "module" : "SD_UT",
@@ -2013,6 +2142,18 @@
                      "model" : "BF_301"
                   },
                   "comment" : "#2"
+               }
+            ]
+         },
+         {
+            "comment" : "Remote control wrong checksum",
+            "dmsg" : "P105#FAD08384A8",
+            "tests" : [
+               {
+                  "returns" : {
+                     "ParseFn" : ""
+                  },
+                  "comment" : "#3"
                }
             ]
          }
@@ -2417,5 +2558,257 @@
       "id" : 130,
       "module" : "SD_UT",
       "name" : "CREATE_6601TL"
+   },
+   {
+      "data" : [
+         {
+            "comment" : "Remote control with two buttons for Halemeier LED controllers (typ HA-HX2 for actor HA-RX-M2-1)",
+            "dmsg" : "P132#01EFAC",
+            "internals" : {
+               "DEF" : "HA_HX2 01EF",
+               "NAME" : "HA_HX2_01EF"
+            },
+            "readings" : {
+               "deviceCode" : "01EF",
+               "state" : "off"
+            },
+            "rmsg" : "MU;P0=307;P1=-685;P2=-350;P3=658;P4=-12510;D=01010102310101010102310231010232340232323232323231010101023101010101023102323232323232323101010102310101010102310231010232340232323232323231010101023101010101023102310102323402323232323232310101010231010101010231023101023234023232323232323101010102310101;CP=0;R=232;O;",
+            "tests" : [
+               {
+                  "attributes" : {
+                     "model" : "HA_HX2"
+                  },
+                  "comment" : "#0 state off"
+               }
+            ]
+         },
+         {
+            "comment" : "Remote control with two buttons for Halemeier LED controllers (typ HA-HX2 for actor HA-RX-M2-1)",
+            "dmsg" : "P132#85EFAA",
+            "internals" : {
+               "DEF" : "HA_HX2 85EF",
+               "NAME" : "HA_HX2_85EF"
+            },
+            "readings" : {
+               "deviceCode" : "85EF",
+               "state" : "on"
+            },
+            "rmsg" : "MU;P0=-696;P1=312;P2=-371;P3=637;P4=-12847;D=01012301230123012341012323232301230101010123010101010123012301230123410123232323012301010101230101010101230123012301234101232323230123010101012301010101012301230123012341012323232301230101010123010101010123012301230123410123232323012301010101230101010101;CP=1;R=236;O;",
+            "tests" : [
+               {
+                  "attributes" : {
+                     "model" : "HA_HX2"
+                  },
+                  "comment" : "#1 state on with other DEF"
+               }
+            ]
+         }
+      ],
+      "id" : 132,
+      "module" : "SD_UT",
+      "name" : "HA_HX2_01EF"
+   },
+   {
+      "data" : [
+         {
+            "comment" : "Remote control with 9 buttons for ceiling fan with lighting (Controller MP 2.5+3UF)",
+            "dmsg" : "P20#024F0201",
+            "internals" : {
+               "DEF" : "RCnoName20_09 024F",
+               "NAME" : "RCnoName20_09_024F"
+            },
+            "readings" : {
+               "LastAction" : "receive",
+               "deviceCode" : "024F",
+               "rollingCode" : "0",
+               "state" : "fan_low"
+            },
+            "rmsg" : "MS;P0=249;P1=-744;P3=770;P4=-228;P5=-8026;D=050101010101013401013401013434343401010101010134010101010101010134;CP=0;SP=5;R=35;O;m2;",
+            "tests" : [
+               {
+                  "attributes" : {
+                     "model" : "RCnoName20_09"
+                  },
+                  "comment" : "#0"
+               }
+            ]
+         },
+         {
+            "comment" : "Remote control with 9 buttons for ceiling fan with lighting (Controller MP 2.5+3UF)",
+            "dmsg" : "P20#024F0636",
+            "internals" : {
+               "DEF" : "RCnoName20_09 024F",
+               "NAME" : "RCnoName20_09_024F"
+            },
+            "readings" : {
+               "LastAction" : "receive",
+               "deviceCode" : "024F",
+               "rollingCode" : "3",
+               "state" : "fan_stop"
+            },
+            "rmsg" : "MS;P0=-7940;P1=246;P2=-757;P3=736;P4=-247;D=101212121212123412123412123434343412121212123434121212343412343412;CP=1;SP=0;R=47;O;m2;",
+            "tests" : [
+               {
+                  "attributes" : {
+                     "model" : "RCnoName20_09"
+                  },
+                  "comment" : "#1"
+               }
+            ]
+         }
+      ],
+      "id" : "20",
+      "module" : "SD_UT",
+      "name" : "RCnoName20_09_024F"
+   },
+   {
+      "data" : [
+         {
+            "comment" : "Remote control CREATE 6601L with 14 buttons for ceiling fan with lighting",
+            "dmsg" : "P20#1B900823",
+            "internals" : {
+               "DEF" : "CREATE_6601L 1B900",
+               "NAME" : "CREATE_6601L_1B900"
+            },
+            "readings" : {
+               "LastAction" : "receive",
+               "deviceCode" : "1B900",
+               "rollingCode" : "2",
+               "state" : "fan_2"
+            },
+            "rmsg" : "MS;P0=-7944;P1=-740;P4=253;P6=732;P7=-256;D=404141416767416767674141674141414141414141674141414141674141416767;CP=4;SP=0;R=67;O;m2;",
+            "tests" : [
+               {
+                  "attributes" : {
+                     "model" : "CREATE_6601L"
+                  },
+                  "comment" : "#0"
+               }
+            ]
+         },
+         {
+            "comment" : "Remote control CREATE 6601L with 14 buttons for ceiling fan with lighting",
+            "dmsg" : "P20#1B900485",
+            "internals" : {
+               "DEF" : "CREATE_6601L 1B900",
+               "NAME" : "CREATE_6601L_1B900"
+            },
+            "readings" : {
+               "LastAction" : "receive",
+               "deviceCode" : "1B900",
+               "rollingCode" : "8",
+               "state" : "fan_5"
+            },
+            "rmsg" : "MS;P0=-264;P2=-743;P3=254;P4=733;P5=-7942;D=353232324040324040403232403232323232323232324032324032323232403240;CP=3;SP=5;R=40;O;m2;",
+            "tests" : [
+               {
+                  "attributes" : {
+                     "model" : "CREATE_6601L"
+                  },
+                  "comment" : "#1"
+               }
+            ]
+         },
+         {
+            "comment" : "Remote control CREATE 6601L with 14 buttons for ceiling fan with lighting",
+            "dmsg" : "P20#1B9008BA",
+            "internals" : {
+               "DEF" : "CREATE_6601L 1B900",
+               "NAME" : "CREATE_6601L_1B900"
+            },
+            "readings" : {
+               "LastAction" : "receive",
+               "deviceCode" : "1B900",
+               "rollingCode" : "11",
+               "state" : "fan_direction"
+            },
+            "rmsg" : "MS;P1=247;P2=-732;P4=745;P5=-256;P7=-7933;D=171212124545124545451212451212121212121212451212124512454545124512;CP=1;SP=7;R=48;O;m2;",
+            "tests" : [
+               {
+                  "attributes" : {
+                     "model" : "CREATE_6601L"
+                  },
+                  "comment" : "#2"
+               }
+            ]
+         },
+         {
+            "comment" : "Remote control CREATE 6601L with 14 buttons for ceiling fan with lighting",
+            "dmsg" : "P20#1B90047A",
+            "internals" : {
+               "DEF" : "CREATE_6601L 1B900",
+               "NAME" : "CREATE_6601L_1B900"
+            },
+            "readings" : {
+               "LastAction" : "receive",
+               "deviceCode" : "1B900",
+               "rollingCode" : "7",
+               "state" : "beeper_on_off"
+            },
+            "rmsg" : "MS;P2=247;P3=-744;P4=731;P5=-273;P6=-7911;D=262323234545234545452323452323232323232323234523232345454545234523;CP=2;SP=6;R=43;O;m2;",
+            "tests" : [
+               {
+                  "attributes" : {
+                     "model" : "CREATE_6601L"
+                  },
+                  "comment" : "#3"
+               }
+            ]
+         }
+      ],
+      "id" : "20",
+      "module" : "SD_UT",
+      "name" : "CREATE_6601L_1B900"
+   },
+   {
+      "data" : [
+         {
+            "comment" : "remote control SEAV BeEasy TX",
+            "dmsg" : "P83#4D5",
+            "internals" : {
+               "DEF" : "BeEasy_TX 4D4",
+               "NAME" : "BeEasy_TX_4D4"
+            },
+            "readings" : {
+               "LastAction" : "receive",
+               "deviceCode" : "010011010100",
+               "state" : "down"
+            },
+            "rmsg" : "MU;P0=-25312;P1=286;P2=-354;P3=626;P4=-677;P5=-11292;D=01234123234141234123412341512341232341412341234123415123412323414123412341234151234123234141234123412341512341232341412341234123415123412323414123412341234151234123234141234123412341512341232341412341234123415123412323414123412341234151234123234141234123;CP=1;R=37;O;",
+            "tests" : [
+               {
+                  "attributes" : {
+                     "model" : "BeEasy_TX"
+                  },
+                  "comment" : "#0"
+               }
+            ]
+         },
+         {
+            "comment" : "remote control SEAV BeEasy TX",
+            "dmsg" : "P83#4D6",
+            "internals" : {
+               "DEF" : "BeEasy_TX 4D4",
+               "NAME" : "BeEasy_TX_4D4"
+            },
+            "readings" : {
+               "LastAction" : "receive",
+               "deviceCode" : "010011010100",
+               "state" : "up"
+            },
+            "rmsg" : "MU;P0=-24160;P1=277;P2=-363;P3=602;P4=-690;P6=-11311;D=01234123234141234123414123612341232341412341234141236123412323414123412341412361234123234141234123414123612341232341412341234141236123412323414123412341412361234123234141234123414123612341232341412341234141236123412323414123412341412361234123234141234123;CP=1;R=38;O;",
+            "tests" : [
+               {
+                  "attributes" : {
+                     "model" : "BeEasy_TX"
+                  },
+                  "comment" : "#1"
+               }
+            ]
+         }
+      ],
+      "id" : "83",
+      "module" : "SD_UT",
+      "name" : "BeEasy_TX_4D4"
    }
 ]

@@ -4,6 +4,7 @@ use warnings;
 
 use Test2::V0;
 use Test2::Tools::Compare qw{is field U D match hash bag };
+use Test2::Tools::Ref;
 use Mock::Sub;
 use Test2::Todo;
 
@@ -28,6 +29,38 @@ my @mockData = (
         etc();
       },
       rValue => match qr/only available for a receiver with CC1101/,  
+  },
+  {
+    cmd => q[set],
+    deviceName => q[dummyDuino],
+    plan => 2,
+    testname =>  q[set default client attribute],
+    input =>  q[Clients],
+    attrCheck =>  hash  {
+        field Clients => U();
+        etc();
+    },
+    hashCheck =>  hash  {
+        field Clients => match qr/:CUL_EM:/;
+        etc();
+    },
+    rValue => match qr/Setting defaults/,  
+  },
+  {
+    cmd => q[set],
+    deviceName => q[dummyDuino],
+    plan => 3,
+    testname =>  q[set custom client attribute],
+    input =>  q[Clients SD_WS:SD_UT],
+    attrCheck =>  hash  {
+        field Clients => 'SD_WS:SD_UT';
+        etc();
+    },
+    hashCheck =>  hash  {
+        field Clients => 'SD_WS:SD_UT';
+        etc();
+    },
+    rValue => U(),  
   },
   {
   #   todoReason => "reason",
@@ -197,6 +230,68 @@ my @mockData = (
         },
     hashCheck =>  hash  {
         field MatchList => hash { field '34:MyModule' => '^u98#.{8}';  field '35:MyModule2' => '^u99#.{10}'; etc() ; all_keys match qr/.+:.+/; };
+        etc();
+        },
+      rValue => U(),
+  },  
+  {
+    cmd => q[set],
+    deviceName => q[cc1101dummyDuino],
+    plan => 3,
+    testname =>  q[set debug 1],
+    input =>  qq[debug 1],
+    attrCheck =>  hash  {
+        field debug => T();
+        etc();
+        },
+    hashCheck =>  hash  {
+        field debugMethod => \&main::Debug;
+        etc();
+        },
+      rValue => U(),
+  },  
+  {
+    cmd => q[set],
+    deviceName => q[cc1101dummyDuino],
+    plan => 4,
+    testname =>  q[set debug 0],
+    input =>  qq[debug 0],
+    attrCheck =>  hash  {
+        field debug => F();
+        etc();
+        },
+    hashCheck =>  hash  {
+        field debugMethod => validator(sub {
+                my %params = @_;
+                my $got = $params{got};
+                return 1 if ( $params{exists} && ref_is_not($got,\&main::Debug) );
+                return 1;
+                }
+        );
+        etc();
+        },
+      rValue => U(),
+  },  
+  {
+    cmd => q[del],
+    deviceName => q[cc1101dummyDuino],
+    plan => 4,
+    testname =>  q[del debug ],
+    input =>  qq[debug],
+    pre_code => sub {
+      CommandAttr(undef, qq[cc1101dummyDuino debug 1]);
+    },
+    attrCheck =>  hash  {
+        etc();
+    },
+    hashCheck =>  hash  {
+        field debugMethod => validator(sub {
+                my %params = @_;
+                my $got = $params{got};
+                return 1 if ( $params{exists} && ref_is_not($got,\&main::Debug) );
+                return 0;
+                }
+        );
         etc();
         },
       rValue => U(),

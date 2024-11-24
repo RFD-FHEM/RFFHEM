@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 14_SD_AS.pm 350 2023-01-23 17:24:05Z sidey79 $
+# $Id: 14_SD_AS.pm 350 2024-03-11 20:44:20Z sidey79 $
 # The file is part of the SIGNALduino project
 # see http://www.fhemwiki.de/wiki/SIGNALduino
 # and was created to provide support for self build sensors.
@@ -390,6 +390,10 @@ sub SD_AS_crc
     "elektron-bbs",
 	  "HomeAutoUser"
   ],
+  "meta-spec": {
+    "url": "https://metacpan.org/pod/CPAN::Meta::Spec",
+    "version": 2
+  },
   "description": "This module interprets digitals signals send from an Arduinosensordevice provided from the signalduino hardware",
   "dynamic_config": 1,
   "keywords": [
@@ -410,12 +414,12 @@ sub SD_AS_crc
   "prereqs": {
     "runtime": {
       "requires": {
-        "Digest::CRC;": "0"
+        "Digest::CRC": "0"
       }
     },
     "develop": {
       "requires": {
-        "Digest::CRC;": "0"
+        "Digest::CRC": "0"
       }
     }
   },

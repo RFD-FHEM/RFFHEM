@@ -2047,6 +2047,61 @@
    {
       "data" : [
          {
+            "comment" : "BRESSER PM2.5/10 air quality meter",
+            "dmsg" : "W117#49C8CAC2176023178000700080009004400530054039600000AA",
+            "internals" : {
+               "DEF" : "SD_WS_117_1",
+               "NAME" : "SD_WS_117_1"
+            },
+            "readings" : {
+               "batteryChanged" : "1",
+               "batteryVoltage" : 3.96,
+               "channel" : 1,
+               "pm_10" : 9,
+               "pm_2_5" : 8,
+               "state" : "PM2.5: 8 PM10: 9",
+               "type" : "Bresser_7in1"
+            },
+            "rmsg" : "MN;D=E3626068BDCA89BD2AAADAAA2AAA3AAEEAAF9AAFEA93CAAAAA00;R=10;",
+            "tests" : [
+               {
+                  "attributes" : {},
+                  "comment" : "#0"
+               }
+            ]
+         },
+         {
+            "comment" : "BRESSER PM2.5/10 air quality meter",
+            "dmsg" : "W117#065CCAC2176023178058806290636099999999999939600000AA",
+            "internals" : {
+               "DEF" : "SD_WS_117_1",
+               "NAME" : "SD_WS_117_1"
+            },
+            "readings" : {
+               "batteryChanged" : "1",
+               "batteryVoltage" : 3.96,
+               "channel" : 1,
+               "pm_10" : 636,
+               "pm_2_5" : 629,
+               "state" : "PM2.5: 629 PM10: 636",
+               "type" : "Bresser_7in1"
+            },
+            "rmsg" : "MN;D=ACF66068BDCA89BD2AF22AC83AC9CA33333333333393CAAAAA00;R=9;",
+            "tests" : [
+               {
+                  "attributes" : {},
+                  "comment" : "#1"
+               }
+            ]
+         }
+      ],
+      "id" : 117,
+      "module" : "SD_WS",
+      "name" : "BRESSER PM2.5/10"
+   },
+   {
+      "data" : [
+         {
             "comment" : "Weather station with 30.3151 (T/H-transmitter), 30.3152 (rain gauge), 30.3153 (anemometer)",
             "dmsg" : "W120#FEAB049EA804080C53AC",
             "internals" : {
@@ -2491,5 +2546,103 @@
       "id" : 129,
       "module" : "SD_WS",
       "name" : "FT-0835"
+   },
+   {
+      "data" : [
+         {
+            "comment" : "BRESSER lightning detector",
+            "dmsg" : "W131#70F082CC00083A000000",
+            "internals" : {
+               "DEF" : "SD_WS_131",
+               "NAME" : "SD_WS_131"
+            },
+            "readings" : {
+               "batteryChanged" : "0",
+               "batteryState" : "ok",
+               "count" : 0,
+               "distance" : 0,
+               "state" : "D: 0",
+               "type" : "Bresser_lightning"
+            },
+            "rmsg" : "MN;D=DA5A2866AAA290AAAAAA;R=23;A=-2;",
+            "tests" : [
+               {
+                  "attributes" : {},
+                  "comment" : "#0"
+               }
+            ]
+         },
+         {
+            "comment" : "BRESSER lightning detector",
+            "dmsg" : "W131#009C82CC148832080000",
+            "internals" : {
+               "DEF" : "SD_WS_131",
+               "NAME" : "SD_WS_131"
+            },
+            "readings" : {
+               "batteryChanged" : "1",
+               "batteryState" : "ok",
+               "count" : 148,
+               "distance" : 8,
+               "state" : "D: 8",
+               "type" : "Bresser_lightning"
+            },
+            "rmsg" : "MN;D=AA362866BE2298A2AAAA;R=24;A=-2;",
+            "tests" : [
+               {
+                  "attributes" : {},
+                  "comment" : "#1"
+               }
+            ]
+         }
+      ],
+      "id" : 131,
+      "module" : "SD_WS",
+      "name" : "Bresser lightning"
+   },
+   {
+      "data" : [
+         {
+            "comment" : "Temperature transmitter TFA 30.3212",
+            "dmsg" : "W48#FF49C0F3FFD9",
+            "internals" : {
+               "DEF" : "SD_WS_48_T",
+               "NAME" : "SD_WS_48_T"
+            },
+            "readings" : {
+               "state" : "T: 24.3",
+               "temperature" : "24.3",
+               "type" : "Temperature transmitter"
+            },
+            "rmsg" : "MU;P0=591;P1=-1488;P2=-3736;P3=1338;P4=-372;P6=-988;D=23406060606063606363606363606060636363636363606060606363606060606060606060606060636060636360106060606060606063606363606363606060636363636363606060606363606060606060606060606060636060636360106060606060606063606363606363606060636363636363606060606363606060;CP=0;O;",
+            "tests" : [
+               {
+                  "comment" : "#0"
+               }
+            ]
+         },
+         {
+            "comment" : "Temperature transmitter TFA 30.3212",
+            "dmsg" : "W48#FF4D40A3FFE5",
+            "internals" : {
+               "DEF" : "SD_WS_48_T",
+               "NAME" : "SD_WS_48_T"
+            },
+            "readings" : {
+               "state" : "T: 16.3",
+               "temperature" : "16.3",
+               "type" : "Temperature transmitter"
+            },
+            "rmsg" : "MU;P0=96;P1=-244;P2=510;P3=-1000;P4=1520;P5=-1506;D=01232323232343234343232343234323434343434343234323434343232323232323232323232323234343234325232323232323232343234343232343234323434343434343234323434343232323232323232323232323234343234325232323232323232343234343232343234323434343434343234323434343232323;CP=2;O;",
+            "tests" : [
+               {
+                  "comment" : "#1"
+               }
+            ]
+         }
+      ],
+      "id" : "48",
+      "module" : "SD_WS",
+      "name" : "Temperature transmitter TFA 30.3212"
    }
 ]
