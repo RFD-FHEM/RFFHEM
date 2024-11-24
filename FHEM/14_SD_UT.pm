@@ -1129,6 +1129,7 @@ sub SD_UT_Initialize {
     'Techmar.*'    => {ATTR => 'model:Techmar', FILTER => '%NAME', autocreateThreshold => '3:180', GPLOT => q{}},
     'Visivo.*'     => {ATTR => 'model:Visivo', FILTER => '%NAME', autocreateThreshold => '3:180', GPLOT => q{}},
     'xavax.*'      => {ATTR => 'model:xavax', FILTER => '%NAME', autocreateThreshold => '3:180', GPLOT => q{}},
+    'Hamulight_AB.*' => {ATTR => 'model:Hamulight_AB', FILTER => '%NAME', autocreateThreshold => '3:180', GPLOT => q{}},
     'unknown_please_select_model' => {ATTR => 'model:unknown', FILTER => '%NAME', autocreateThreshold => '5:180', GPLOT => q{}},
   };
   return FHEM::Meta::InitMod( __FILE__, $hash );
@@ -1176,19 +1177,13 @@ sub SD_UT_Define {
   # uncoverable branch true
   return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short or long (must be 3 chars) or not HEX (0-9 | a-f | A-F){3}"
          if (($a[2] eq 'SA_434_1_mini' || $a[2] eq 'QUIGG_DMV' || $a[2] eq 'TR_502MSV' || $a[2] eq 'BeSmart_S4' || $a[2] eq 'BeEasy_TX') && not $a[3] =~ /^[0-9a-fA-F]{3}/xms);    
-  ### [4 nibble] checks Neff SF01_01319004 & BOSCH SF01_01319004_Typ2 & Chilitec_22640 & ESTO KL_RF01 & RCnoName20 & RCnoName20_09 & RCnoName20_10 & RCnoName128 & DC-1961-TG & xavax & BF_301 & Meikee_xx & CREATE_6601TL ###
+  ### [4 nibble] checks Neff SF01_01319004 & BOSCH SF01_01319004_Typ2 & Chilitec_22640 & ESTO KL_RF01 & RCnoName20 & RCnoName20_09 & RCnoName20_10 & RCnoName128 & DC-1961-TG & xavax & BF_301 & Meikee_xx & CREATE_6601TL & Hamulight_AB ###
   # uncoverable branch true
   return "Wrong HEX-Value! ($a[3]) $a[2] Hex-value to short or long (must be 4 chars) or not hex (0-9 | a-f | A-F) {4}"
          if (($a[2] eq 'SF01_01319004' || $a[2] eq 'SF01_01319004_Typ2' || $a[2] eq 'Chilitec_22640' || $a[2] eq 'KL_RF01' || $a[2] eq 'RCnoName20' || $a[2] eq 'RCnoName20_09'
            || $a[2] eq 'RCnoName20_10' || $a[2] eq 'RCnoName128' || $a[2] eq 'DC_1961_TG' || $a[2] eq 'xavax' || $a[2] eq 'BF_301' || $a[2] eq 'Meikee_21' || $a[2] eq 'Meikee_24'
-           || $a[2] eq 'CREATE_6601TL' || $a[2] eq 'HA_HX2') && not $a[3] =~ /^[0-9a-fA-F]{4}/xms);
+           || $a[2] eq 'CREATE_6601TL' || $a[2] eq 'HA_HX2' || $a[2] eq 'Hamulight_AB') && not $a[3] =~ /^[0-9a-fA-F]{4}/xms);
   ### [5 nibble] checks CREATE_6601L & RCnoName127
-  # uncoverable branch true 
-  return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short or long (must be 3 chars) or not HEX (0-9 | a-f | A-F){3}" if (($a[2] eq 'SA_434_1_mini' || $a[2] eq 'QUIGG_DMV' || $a[2] eq 'TR_502MSV' || $a[2] eq 'BeSmart_S4') && not $a[3] =~ /^[0-9a-fA-F]{3}/xms);    
-  ### [4 nibble] checks Neff SF01_01319004 & BOSCH SF01_01319004_Typ2 & Chilitec_22640 & ESTO KL_RF01 & RCnoName20 & RCnoName20_10 & RCnoName128 & DC-1961-TG & xavax & BF_301 & Meikee_xx & CREATE_6601TL & Hamulight_AB ###
-  # uncoverable branch true 
-  return "Wrong HEX-Value! ($a[3]) $a[2] Hex-value to short or long (must be 4 chars) or not hex (0-9 | a-f | A-F) {4}" if (($a[2] eq 'SF01_01319004' || $a[2] eq 'SF01_01319004_Typ2' || $a[2] eq 'Chilitec_22640' || $a[2] eq 'KL_RF01' || $a[2] eq 'RCnoName20' || $a[2] eq 'RCnoName20_10' || $a[2] eq 'RCnoName128' || $a[2] eq 'DC_1961_TG' || $a[2] eq 'xavax' || $a[2] eq 'BF_301' || $a[2] eq 'Meikee_21' || $a[2] eq 'Meikee_24' || $a[2] eq 'CREATE_6601TL' || $a[2] eq 'Hamulight_AB') && not $a[3] =~ /^[0-9a-fA-F]{4}/xms);
-  ### [5 nibble] checks RCnoName127
   # uncoverable branch true 
   return "Wrong HEX-Value! ($a[3]) $a[2] Hex-value to short or long (must be 5 chars) or not hex (0-9 | a-f | A-F) {5}" if (($a[2] eq 'CREATE_6601L' || $a[2] eq 'RCnoName127') && not $a[3] =~ /^[0-9a-fA-F]{5}/xms);
   ### [6] checks Manax | mumbi ###
@@ -1500,7 +1495,7 @@ sub SD_UT_Set {
           last if ($value eq $cmd);
         }
       }
-       if ($model eq 'Hamulight_AB' && $cmd eq 'dim') {
+      if ($model eq 'Hamulight_AB' && $cmd eq 'dim') {
         $value = 'dim';
         my $dimVal = FHEM::Core::Utils::Math::round( ($a[1] * 1.28 + 162) , 0);
         $dimVal -= 127 if ($dimVal > 254);
