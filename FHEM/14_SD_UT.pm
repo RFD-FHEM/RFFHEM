@@ -1497,7 +1497,7 @@ sub SD_UT_Set {
       }
       if ($model eq 'Hamulight_AB' && $cmd eq 'dim') {
         $value = 'dim';
-        my $dimVal = FHEM::Core::Utils::Math::round( ($a[1] * 1.28 + 162) , 0);
+        my $dimVal = FHEM::Core::Utils::Math::round( ($a[1] * 1.17 + 170) , 0);
         $dimVal -= 127 if ($dimVal > 254);
         $save = sprintf '%08b' , $dimVal; # dec to bin
         Log3 $name, 3, "$ioname: SD_UT_Set model=$model dim=$a[1] send=$dimVal bin=$save";
