@@ -470,7 +470,7 @@ my $module = basename (dirname(__FILE__));
         ],
         returnCheck     => F(),
         subCheck        => hash { field 'IOWrite' => array { item 0 => hash { field 'args' => array { item hash { etc(); } ; item 'sendMsg'; item 'P83#010011010101#R5' }; etc() } } } ,
-    }
+    },
     {
         targetName      =>  q[SD_UT_Test_Hamulight_AB_3605],
         testname        =>  q[set command dim],
