@@ -435,11 +435,12 @@
 #     CREATE_6601TL_F53A fan_faster       MS;P0=-11884;P1=392;P2=-1179;P3=1180;P4=-391;D=10121212123412341234341212123412341212121212341234;CP=1;SP=0;R=231;O;m2;
 #}
 ###############################################################################################################################################################################
-# - Hamulight remote control for ab sets 1-channel [Protocol 22]
+# - Hamulight remote control with five buttons and touch control for dim [Protocol 22] 
 #{    elektron-bbs 2023-12-10
 #     https://github.com/RFD-FHEM/RFFHEM/issues/1206 @ obduser 2023-12-09
-#     Hamulight_AB 
-#     
+#     Hamulight_AB_3605 on_off   MU;P0=-16360;P1=144;P2=-191;P3=209;P4=1194;P5=-1203;P6=607;P7=-591;D=01232324562623737623737626262626262376237623762373737373762376262623737373232323245626237376237376262626262623762376237623737373737623762626237373732323232456262373762373762626262626237623762376237373737376237626262373737323232324562623737623737626262626;CP=3;R=5;O;
+#     Hamulight_AB_3605 dim_1    MU;P0=-14008;P1=136;P2=-199;P3=210;P4=1200;P5=-1200;P6=596;P7=-591;D=01232324562623737623737626262626262376237623762376237623762623737373762373232323245626237376237376262626262623762376237623762376237626237373737623732323232456262373762373762626262626237623762376237623762376262373737376237323232324562623737623737626262626;CP=3;R=6;O;
+#     Hamulight_AB_3605 dim_4    MU;P0=-16204;P1=120;P2=-204;P3=204;P4=1192;P5=-1208;P6=593;P7=-592;D=01232324562623737623737626262626262376237623762373762623762376262626262373232323245626237376237376262626262623762376237623737626237623762626262623732323232456262373762373762626262626237623762376237376262376237626262626237323232324562623737623737626262626;CP=3;R=5;O;
 #}
 ###############################################################################################################################################################################
 # - Remote control Halemeier HA-HX2 for Actor HA-RX-M2-1 [Protocol 132]
@@ -1496,11 +1497,12 @@ sub SD_UT_Set {
         }
       }
       if ($model eq 'Hamulight_AB' && $cmd eq 'dim') {
+        return "$name: The value for the dimming command is not in the allowed range of 5 to 100!" if ($a[1] < 5 || $a[1] > 100);
         $value = 'dim';
         my $dimVal = FHEM::Core::Utils::Math::round( ($a[1] * 1.17 + 170) , 0);
         $dimVal -= 127 if ($dimVal > 254);
         $save = sprintf '%08b' , $dimVal; # dec to bin
-        Log3 $name, 3, "$ioname: SD_UT_Set model=$model dim=$a[1] send=$dimVal bin=$save";
+        Log3 $name, 5, "$ioname: SD_UT_Set model=$model dim=$a[1] send=$dimVal bin=$save";
       }
       return "$name Unkown set command!" if ($value ne $cmd);
 
@@ -1980,7 +1982,7 @@ sub SD_UT_Parse {
       $state = substr($bitData,16,8);
       $model = 'Hamulight_AB';
       $devicedef = 'Hamulight_AB ' . $deviceCode;
-      $name = 'Hamulight_AB' . '_' . $deviceCode;
+      $name = 'Hamulight_AB_' . $deviceCode;
       $def = $modules{SD_UT}{defptr}{$devicedef};
     }
     if (!$def && $protocol == 92) {
@@ -2498,10 +2500,10 @@ sub SD_UT_Parse {
         last;
       }
     }
-    if ($model eq 'Hamulight_AB' && $state =~ /^[0|1]{8}$/xms ) { # unknown button
+    if ($model eq 'Hamulight_AB' && $state =~ /^[0|1]{8}$/xms ) { # bei dim slider 5-100
       my $dec = oct("0b".$state);
       Log3 $name, 4, "$ioname: SD_UT_Parse $devicedef state=$state ($dec)";
-      $state = 'dim_' . $dec;
+      $state = 'dim';
     }
     if ($model eq 'Novy_840029' || $model eq 'Novy_840039') {
       $state = $state =~ /^[01]+$/x ? "Please check your model. The code $deviceCode is not supported." : $state;
@@ -2830,6 +2832,7 @@ sub SD_UT_tristate2bin {
     <li>DC-1961-TG - remote control with 12 buttons for ceiling fan with lighting&nbsp;&nbsp;&nbsp;<small>(module model: DC_1961_TG, protocol 20)</small></li>
     <li>ESTO ceiling lamp&nbsp;&nbsp;&nbsp;<small>(module model: KL_RF01, protocol 93)</small></li>
     <li>Halemeier HA-HX2&nbsp;&nbsp;&nbsp;<small>(module model: HA-HX2, protocol 132)</small></li>
+    <li>HAMULiGHT remote control with 5 buttons for LED lighting&nbsp;&nbsp;&nbsp;<small>(module model: Hamulight_AB, protocol 22)</small></li>
     <li>Hoermann HS1-868-BS&nbsp;&nbsp;&nbsp;<small>(module model: HS1_868_BS, protocol 69)</small></li>
     <li>Hoermann HSM4&nbsp;&nbsp;&nbsp;<small>(module model: HSM4, protocol 69)</small></li>
     <li>Krinner LUMIX X-Mas light string&nbsp;&nbsp;&nbsp;<small>(module model: Krinner_LUMIX, protocol 92)</small></li>
@@ -3075,6 +3078,7 @@ sub SD_UT_tristate2bin {
     <li>Fernbedienung mit 12 Tasten f&uuml;r Deckenventilator&nbsp;&nbsp;&nbsp;<small>(Modulmodel: RCnoName128, Protokoll 128)</small></li>
     <li>Fernbedienung mit 14 Tasten f&uuml;r Deckenventilator&nbsp;&nbsp;&nbsp;<small>(Modulmodel: RCnoName127, Protokoll 127)</small></li>
     <li>Halemeier HA-HX2&nbsp;&nbsp;&nbsp;<small>(Modulmodel: HA-HX2, Protokoll 132)</small></li>
+    <li>HAMULiGHT Fernbedienung mit 5 Tasten f&uuml;r LED-Beleuchtung&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Hamulight_AB, Protokoll 22)</small></li>
     <li>Hoermann HS1-868-BS&nbsp;&nbsp;&nbsp;<small>(Modulmodel: HS1_868_BS, Protokoll 69)</small></li>
     <li>Hoermann HSM4&nbsp;&nbsp;&nbsp;<small>(Modulmodel: HSM4, Protokoll 69)</small></li>
     <li>Krinner LUMIX Christbaumkerzen&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Krinner_LUMIX, Protokol 92)</small></li>
