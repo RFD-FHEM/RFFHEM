@@ -480,6 +480,16 @@ my $module = basename (dirname(__FILE__));
         ],
         returnCheck     => F(),
         subCheck        => hash { field 'IOWrite' => array { item 0 => hash { field 'args' => array { item hash { etc(); } ; item 'sendMsg'; item 'P22#00110110000001010101010100111101#R10' }; etc() } } } ,
+    },
+    {
+        targetName      =>  q[SD_UT_Test_Hamulight_AB_3605],
+        testname        =>  q[set command dim 5],
+        cmd             =>  q[set dim 5],
+        prep_commands   => [                               # Any FHEM custom command can be placed in here, which will be called before the test is run
+                    'attr $targetName model Hamulight_AB',
+        ],
+        returnCheck     => F(),
+        subCheck        => hash { field 'IOWrite' => array { item 0 => hash { field 'args' => array { item hash { etc(); } ; item 'sendMsg'; item 'P22#00110110000001011011000010011000#R10' }; etc() } } } ,
     }
 );
 
