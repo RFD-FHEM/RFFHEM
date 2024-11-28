@@ -57,7 +57,7 @@ InternalTimer(time()+1, sub {
 		my $tracking = $mock->sub_tracking;
 
 		SIGNALduino_SendFromQueue($targetHash,"e");
-		is(scalar @{$tracking->{SIGNALduino_Get}},2,"SIGNALduino_Get called twice");
+		is(scalar @{$tracking->{SIGNALduino_Get}},3,"SIGNALduino_Get called twice");
 		is($tracking->{SIGNALduino_Get}[1]{args}[2], "ccpatable", "check get with ccpatable is executed" );
 		$mock->restore('SIGNALduino_Get');
 		is($attr{$target}{rfmode},U,'verify attr rfmode');
@@ -101,7 +101,7 @@ InternalTimer(time()+1, sub {
 			my $tracking = $mock->sub_tracking;
 			
 			SIGNALduino_SendFromQueue($targetHash,"$_");
-			is(scalar @{$tracking->{SIGNALduino_Get}},1,"SIGNALduino_Get called once");
+			is(scalar @{$tracking->{SIGNALduino_Get}},2,"SIGNALduino_Get called once");
 			is($tracking->{SIGNALduino_Get}[0]{args}[2], "ccconf", "check get with ccconf is executed" );
 			$mock->restore('SIGNALduino_Get');
 		};
