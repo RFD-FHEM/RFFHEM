@@ -3585,8 +3585,6 @@ package lib::SD_ProtocolData;
         #regexMatch      => qr/^b/,   # ToDo, check! fuer eine regexp Pruefung am Anfang vor dem method Aufruf
       },
 
-    # "131" reserved for => ## Bresser lightning sensor
-
     ########################################################################
     #### ###  register informations from other hardware protocols  #### ####
 
