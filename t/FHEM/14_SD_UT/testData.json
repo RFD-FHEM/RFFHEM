@@ -2857,6 +2857,28 @@
                   "comment" : "#1"
                }
             ]
+         },
+         {
+            "comment" : "Remote control with five buttons and touch control for dim",
+            "dmsg" : "P22#36058C74",
+            "internals" : {
+               "DEF" : "Hamulight_AB 3605",
+               "NAME" : "Hamulight_AB_3605"
+            },
+            "readings" : {
+               "LastAction" : "receive",
+               "deviceCode" : "3605",
+               "state" : "dim"
+            },
+            "rmsg" : "MU;P0=-14752;P1=144;P2=-199;P3=210;P4=1194;P5=-1202;P6=601;P7=-598;D=01232324562623737623737626262626262376237376262623737626262373737623762623232323245626237376237376262626262623762373762626237376262623737376237626;CP=3;R=6;",
+            "tests" : [
+               {
+                  "attributes" : {
+                     "model" : "Hamulight_AB"
+                  },
+                  "comment" : "#2"
+               }
+            ]
          }
       ],
       "id" : 22,
