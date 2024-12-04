@@ -1,3 +1,12 @@
+2024-12-04 - HAMULiGHT remote control for LED transformer (#1285)
+
+HAMULiGHT LED transformer, see https://github.com/RFD-FHEM/RFFHEM/issues/1206
+* Decoding protocol 22
+* Update 14_SD_UT.pm
+* Update SD_ProtocolData.pm
+* Update testData.json
+* Update 03_set.t
+* Update fhem.cfg
 2024-10-28 - new remote control SEAV BeEasy TX (#1279)
 
 * new remote control SEAV BeEasy TX
