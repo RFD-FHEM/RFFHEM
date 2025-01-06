@@ -1,3 +1,7 @@
+2025-01-06 - Extension for receiving WMBus messages (#1281)
+
+* WMBus enabled
+* adaptation tests
 2024-12-04 - HAMULiGHT remote control for LED transformer (#1285)
 
 HAMULiGHT LED transformer, see https://github.com/RFD-FHEM/RFFHEM/issues/1206
