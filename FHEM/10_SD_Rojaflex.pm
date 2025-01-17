@@ -196,17 +196,22 @@ sub Set {
 		Log3 $name, 4, "$ioname: SD_Rojaflex set $name clearFav running time $timelongest s";
 		InternalTimer( (gettimeofday() + $timelongest), \&SD_Rojaflex_clearfav, $name );
 		$hash->{clearfavcount} = 0;
+		$state = $cmd;
 	} elsif ($cmd eq 'down') { # Calculate target position and motor state
 		if ($na == 1) {$tpos = '100'}; # nicht bei "set pct xx"
 		$motor = ($cpos ne $tpos) ? 'down' : 'stop'; # Wenn nicht schon unten, sonst wenn unten.
+		$state = ($cpos ne $tpos) ? $cmd : 'closed';
 	} elsif ($cmd eq 'up') {
 		if ($na == 1) {$tpos = '0'}; # nicht bei "set pct xx"
 		$motor = ($cpos ne $tpos) ? 'up' : 'stop'; # Wenn nicht schon oben, sonst wenn oben
+		$state = ($cpos ne $tpos) ? $cmd : 'open';
 	} elsif ($cmd eq 'stop' || $cmd eq 'savefav') {
 		$motor = 'stop';
+		if ($cpos == 100) {$state = 'closed'}
+		elsif ($cpos == 0) {$state = 'open'}
+		else {$state = $cmd};		
 	}
-
-	$state = $cmd;
+ 
 	Log3 $name, 3, "$ioname: SD_Rojaflex set $name $state";
 
 	readingsBeginUpdate($hash);
