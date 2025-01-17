@@ -367,14 +367,23 @@ sub Parse {
 			$tpos = '100';
 			if (AttrVal($name,'bidirectional',1) eq '0') {$cpos = $tpos};
 			if ($cpos ne $tpos) {$motor = 'down'}; # Wenn nicht schon unten
-			if ($cpos eq $tpos) {$motor = 'stop'}; # Wenn unten
+			if ($cpos eq $tpos) {
+				$motor = 'stop';
+				$state = 'closed';
+			} # Wenn unten
 		} elsif ($cmd eq '1') { # up
 			$tpos = '0';
 			if (AttrVal($name,'bidirectional',1) eq '0') {$cpos = $tpos};
 			if ($cpos ne $tpos) {$motor = 'up'}; # Wenn nicht schon oben
-			if ($cpos eq $tpos) {$motor = 'stop'}; # Wenn oben
-		} elsif ($cmd eq '0' || $cmd eq '9') { # stop || savefav
+			if ($cpos eq $tpos) {
+				$motor = 'stop';
+				$state = 'open';
+			} # Wenn oben
+  		} elsif ($cmd eq '0' || $cmd eq '9') { # stop || savefav
 			$motor = 'stop';
+   			if ($cpos == 100) {$state = 'closed'}
+			elsif ($cpos == 0) {$state = 'open'}
+			else {$state = $cpos};
 		}
 	} elsif ($dev eq '5') { # tubular motor
 		$cpos = hex substr $rawData,12,2;
