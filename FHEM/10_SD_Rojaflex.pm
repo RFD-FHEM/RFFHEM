@@ -392,7 +392,9 @@ sub Parse {
 	}
 
 	readingsBeginUpdate($hash);
-	readingsBulkUpdate($hash, 'state', $state);
+	if ($state ne 'request') {
+		readingsBulkUpdate($hash, 'state', $state);
+	}
 	if ($state ne 'clearfav' && $state ne 'gotofav' && $state ne 'request') {
 		readingsBulkUpdate($hash, 'motor', $motor);
 		readingsBulkUpdate($hash, 'tpos', $tpos);
