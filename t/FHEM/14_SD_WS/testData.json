@@ -2304,7 +2304,7 @@
                      "humidity" : 55,
                      "state" : "T: 21.0 H: 55",
                      "temperature" : "21.0",
-                     "type" : "WH31e, WH31b, DP50",
+                     "type" : "WH31e, WH31b, DP50, DNT000005",
                      "batteryState" : "ok",
                      "channel" : 1
                   },
@@ -2326,7 +2326,7 @@
                      "humidity" : 60,
                      "state" : "T: 16.7 H: 60",
                      "temperature" : "16.7",
-                     "type" : "WH31e, WH31b, DP50",
+                     "type" : "WH31e, WH31b, DP50, DNT000005",
                      "batteryState" : "ok",
                      "channel" : 2
                   },
@@ -2348,7 +2348,7 @@
                      "humidity" : 52,
                      "state" : "T: 5.4 H: 52",
                      "temperature" : "5.4",
-                     "type" : "WH31e, WH31b, DP50",
+                     "type" : "WH31e, WH31b, DP50, DNT000005",
                      "batteryState" : "ok",
                      "channel" : 3
                   },

@@ -2771,7 +2771,7 @@ package lib::SD_ProtocolData;
         sync            => '2DD4',
         modulation      => '2-FSK',
         regexMatch      => qr/^9/,
-        register        => ['0001','022E','0341','042D','05D4','0605','0780','0800','0D21','0E65','0F6A','1089','115C','1202','1322','14F8','1556','1916','1B43','1C68','2611'],
+        register        => ['0001','022E','0341','042D','05D4','0605','0780','0800','0D21','0E65','0F6A','1089','115C','1202','1322','14F8','1556','1916','1B43','1C68'],
         rfmode          => 'Lacrosse_mode1',
         clientmodule    => 'LaCrosse',
         length_min      => '10',
@@ -2824,11 +2824,11 @@ package lib::SD_ProtocolData;
         comment         => 'example: TX35-IT,TX35DTH-IT,30.3155WD,30.3156WD,EMT7110',
         id              => '103',
         knownFreqs      => '868.3',
-        datarate        => '9579',
+        datarate        => '9596',
         sync            => '2DD4',
         modulation      => '2-FSK',
         regexMatch      => qr/^9/,
-        register        => ['0001','022E','0341','042D','05D4','0605','0780','0800','0D21','0E65','0F6A','10C8','1182','1202','1322','14F8','1542','1916','1B43','1C68','2611'],
+        register        => ['0001','022E','0341','042D','05D4','0605','0780','0800','0D21','0E65','0F6A','10C8','1183','1202','1322','14F8','1542','1916','1B43','1C68'],
         rfmode          => 'Lacrosse_mode2',
         clientmodule    => 'LaCrosse',
         length_min      => '10',
@@ -2920,6 +2920,7 @@ package lib::SD_ProtocolData;
         rfmode          => 'Fine_Offset_WH51_434',
         clientmodule    => 'SD_WS',
         length_min      => '28',
+        length_max      => '38', # WH68 - length_min => '32', length_max => '38',
       },
     "107.1" =>  # Fine Offset WH51, ECOWITT WH51, MISOL/1, Froggit DP100 Soil Moisture Sensor use with FSK 868.35 MHz
       {
@@ -2936,6 +2937,7 @@ package lib::SD_ProtocolData;
         rfmode          => 'Fine_Offset_WH51_868',
         clientmodule    => 'SD_WS',
         length_min      => '28',
+        length_max      => '38', # WH68 - length_min => '32', length_max => '38',
       },
     "108" =>  ## BRESSER 5-in-1 Weather Center, Bresser Professional Rain Gauge, Fody E42, Fody E43 - elektron-bbs 2021-05-02
               # https://github.com/RFD-FHEM/RFFHEM/issues/607
@@ -3141,6 +3143,7 @@ package lib::SD_ProtocolData;
         rfmode          => 'Fine_Offset_WH57_434',
         clientmodule    => 'SD_WS',
         length_min      => '18',
+        length_max      => '38', # WH68 - length_min => '32', length_max => '38',
       },
     "116.1" =>  ## Thunder and lightning sensor Fine Offset WH57, aka Froggit DP60, aka Ambient Weather WH31L use with FSK 868.35 MHz
       {
@@ -3157,6 +3160,7 @@ package lib::SD_ProtocolData;
         rfmode          => 'Fine_Offset_WH57_868',
         clientmodule    => 'SD_WS',
         length_min      => '18',
+        length_max      => '38', # WH68 - length_min => '32', length_max => '38',
       },
     "117" =>  ## BRESSER 7-in-1 Weather Center (outdoor sensor)
               # https://forum.fhem.de/index.php/topic,78809.msg1196941.html#msg1196941 @ JensS 2021-12-30
@@ -3319,13 +3323,13 @@ package lib::SD_ProtocolData;
 
     # "124" reserved for => ## Remote control CasaFan FB-FNK Powerboat with 5 buttons for fan
 
-    "125" =>  ## Humidity and Temperaturesensor Ecowitt WH31, froggit DP50 / WH31A
+    "125" =>  ## Humidity and Temperaturesensor Ecowitt WH31/WH31E, froggit DP50 / WH31A, DNT000005
               # Nordamerika: 915MHz; Europa: 868MHz, andere Regionen: 433MHz
               # https://github.com/RFD-FHEM/RFFHEM/pull/1161 @ sidey79 2023-04-01
-              # SD_WS_125_TH_1 T: 21.0 H: 55  Battery: ok channel:1   MN;D=300282623704516C000200;R=56;  
-              # SD_WS_125_TH_1 T: 16.7 H: 60  Battery: ok channel:2   MN;D=300292373CDA116C000200;R=229;  
+              # SD_WS_125_TH_1 T: 21.0 H: 55  Battery: ok channel:1   MN;D=300282623704516C000200;R=56;
+              # SD_WS_125_TH_1 T: 16.7 H: 60  Battery: ok channel:2   MN;D=300292373CDA116C000200;R=229;
               # SD_WS_125_TH_3 T: 5.4 H: 52   Battery: ok channel:3   MN;D=30E0A1C634FEA96C000200;R=197;
-
+              # SD_WS_125_DCF: 97: 2025-01-09 10:49:29                MN;D=52971025010910492909B3;R=33;A=2;
       {
         name            => 'WH31',
         comment         => 'Fine Offset | Ambient Weather WH31E Thermo-Hygrometer Sensor',
@@ -3334,12 +3338,13 @@ package lib::SD_ProtocolData;
         datarate        => '17.257',
         sync            => '2DD4',
         modulation      => '2-FSK',
-        regexMatch      => qr/^(30|37)/,
+        regexMatch      => qr/^(30|37|52)/,
         preamble        => 'W125#',
-        register        => ['0001','022E','0343','042D','05D4','060b','0780','0800','0D21','0E65','0FE8','10A9','115C','1202','1322','14F8','1543','1916','1B43','1C68'],
+        register        => ['0001','022E','0342','042D','05D4','060b','0780','0800','0D21','0E65','0FE8','10A9','115C','1202','1322','14F8','1543','1916','1B43','1C68'],
         rfmode          => 'Fine_Offset_WH31_868',
         clientmodule    => 'SD_WS',
-        length_min      => '18',
+        length_min      => '22',
+        length_max      => '38', # WH68 - length_min => '32', length_max => '38',
       },
     "126" =>  ## Rainfall Sensor Ecowitt WH40
               # https://github.com/RFD-FHEM/RFFHEM/pull/1164 @ sidey79 2023-04-03
@@ -3360,7 +3365,7 @@ package lib::SD_ProtocolData;
         rfmode          => 'Fine_Offset_WH40_868',
         clientmodule    => 'SD_WS',
         length_min      => '22',
-        length_max      => '28',
+        length_max      => '38', # WH68 - length_min => '32', length_max => '38',
       },
     "127" =>  ## Remote control with 14 buttons for ceiling fan
                # https://forum.fhem.de/index.php?topic=134121.0 @ Kai-Alfonso 2023-06-29
