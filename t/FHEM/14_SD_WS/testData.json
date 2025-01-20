@@ -2335,7 +2335,7 @@
             ]
          },
          {
-            "comment" : "Ecowitt WH31 Temp Hum sensor channel 2",
+            "comment" : "Ecowitt WH31 Temp Hum sensor channel 3",
             "dmsg" : "W125#30E0A1C634FEA96C000200",
             "rmsg" : "MN;D=30E0A1C634FEA96C000200;R=63;",
             "tests" : [
@@ -2351,6 +2351,25 @@
                      "type" : "WH31e, WH31b, DP50, DNT000005",
                      "batteryState" : "ok",
                      "channel" : 3
+                  },
+                  "comment" : "#0"
+               }
+            ]
+         },
+         {
+            "comment" : "DNT000005 Temp Hum sensor DCF message",
+            "dmsg" : "W125#52971025010910492909B3",
+            "rmsg" : "MN;D=52971025010910492909B3;R=33;A=2;",
+            "tests" : [
+               {
+                  "internals" : {
+                     "DEF" : "SD_WS_125_DCF",
+                     "NAME" : "SD_WS_125_DCF"
+                  },
+                  "readings" : {
+                     "dcf" : "2025-01-09 10:49:29",
+                     "state" : "97: 2025-01-09 10:49:29",
+                     "type" : "WH31e, WH31b, DP50, DNT000005"
                   },
                   "comment" : "#0"
                }
