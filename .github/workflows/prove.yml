@@ -45,7 +45,7 @@ jobs:
     - name: Create clover report for perl Modules
       run: cover -report clover
 
-    - uses: codecov/codecov-action@v5.1.2
+    - uses: codecov/codecov-action@v5.2.0
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         files: clover.xml
@@ -57,7 +57,7 @@ jobs:
       working-directory: /opt/fhem/
       run: cover -report clover
 
-    - uses: codecov/codecov-action@v5.1.2
+    - uses: codecov/codecov-action@v5.2.0
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         files: clover.xml
