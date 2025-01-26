@@ -1,3 +1,13 @@
+2025-01-26 - Decoding DCF message from WH31E/DNT000005 (#1290)
+
+* SD_WS_125_DCF
+Protocol 125 supplemented by decoding of the DCF message.
+* Update 01_verifyFSK.t
+* Update 01_SIGNALduino_Attr_rfmode.t
+* Update testData.json
+add testdata for DNT000005 temp tum sensor DCF message
+* Update 14_SD_WS.pm
+commandref has been updated
 2025-01-06 - Extension for receiving WMBus messages (#1281)
 
 * WMBus enabled
