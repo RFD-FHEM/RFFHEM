@@ -48,7 +48,6 @@ my $check_hash = hash
             item '1916';
             item '1B43';
             item '1C68';
-            item '2611';
 			end();
 		};
 		etc();
@@ -148,7 +147,7 @@ my $check_hash = hash
             item '0E65';
             item '0F6A';
             item '10C8';
-            item '1182';
+            item '1183';
             item '1202';
             item '1322';
             item '14F8';
@@ -156,7 +155,6 @@ my $check_hash = hash
             item '1916';
             item '1B43';
             item '1C68';
-            item '2611';
  		    end();
 		};
 		etc();

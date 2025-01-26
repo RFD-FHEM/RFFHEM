@@ -1,4 +1,4 @@
-# $Id: 14_SD_WS.pm 26982 2024-09-08 15:09:34Z elektron-bbs $
+# $Id: 14_SD_WS.pm 26982 2025-01-26 12:43:07Z elektron-bbs $
 #
 # The purpose of this module is to support serval
 # weather sensors which use various protocol
@@ -55,6 +55,7 @@
 # 25.11.2023 Protokoll 117: neuer Sensor BRESSER Air Quality Sensor Art.No.: 7009970, Hersteller CCL Electronics LTD Model C3123A
 # 06.01.2024 neues Protokoll 131: BRESSER Blitzsensor Art.No.: 7009976, Hersteller CCL Electronics LTD Model C3129A
 # 03.09.2024 neues Protokoll 48: Funk-Thermometer JOKER TFA 30.3055, Temperatursender 30.3212
+# 09.01.2025 Protokoll 125: Ergänzung Empfang DCF-Daten WH31E/DNT000005
 
 package main;
 
@@ -119,7 +120,7 @@ sub SD_WS_Initialize {
     'SD_WS_120.*'     => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4hum4:Temp/Hum,', autocreateThreshold => '2:180'},
     'SD_WS_122_T.*'   => { ATTR => 'event-min-interval:.*:60 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4:Temp,', autocreateThreshold => '10:180'},
     'SD_WS_123_T.*'   => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4:Temp,', autocreateThreshold => '2:180'},
-    'SD_WS_125_.*'    => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4hum4:Temp/Hum,', autocreateThreshold => '2:300'},
+    'SD_WS_125_TH.*'  => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4hum4:Temp/Hum,', autocreateThreshold => '2:300'},
     'SD_WS_126_R.*'   => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'rain4:Rain,', autocreateThreshold => "2:180"},
     'SD_WS_129.*'     => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4hum4:Temp/Hum,', autocreateThreshold => '3:180'},
     'SD_WS_131.*'     => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => q{}, autocreateThreshold => '2:180'},
@@ -218,6 +219,7 @@ sub SD_WS_Parse {
   my $bitData2;
   my $model;  # wenn im elsif Abschnitt definiert, dann wird der Sensor per AutoCreate angelegt
   my $modelStat; # for FHEM statistics https://fhem.de/stats/statistics.html
+  my $state = '';
   my $SensorTyp;
   my $id;
   my $bat;
@@ -1625,38 +1627,66 @@ sub SD_WS_Parse {
                               },
     },
     125 => {
-        # Temperature and humidity sensor Fine Offset WH31, aka Ambient Weather, aka ecowitt
-        # ------------------------------------------------------------------------------------------
+        # Temperature and humidity sensor Fine Offset WH31, aka Ambient Weather, aka ecowitt, DNT000005
+        # ---------------------------------------------------------------------------------------------
         #          Byte: 00 01 02 03 04 05 06 07 08 09 10 
         #        Nibble: 01 23 45 67 89 01 23 45 67 89 01 
         # aa aa aa 2d d4 30 02 82 62 37 04 51 6C 00 02 00 
         #          MN;D= 30 02 82 62 37 04 51 6C 00 02 00 ;R=63;   Temp: 21.0 C Hum: 55%, Battery: ok, ID: 0x02
         #                FF II CT TT HH XX SS ?? ?? ?? ?? 
-        # FF:   Family code 0x31 = WH31e 0x37 = wh31b
+        # FF:   Family code 0x30 = WH31e, 0x37 = wh31b, 0x30 = temph/hum DNT000005, 0x52 = time DNT000005
         # II:   ID (1 byte)
-        # C :   3bit Channel Number Bit 17-19, 1 Bit Battery bit 20
-        # TT:   10 bits Temperature in C, scaled by 10, offset 400. Start at Bit 22
+        # C :   3 bit Channel Number Bit 17-19
+        # TT:   10 bits Temperature in C, scaled by 10, offset 400, start at bit 22, 1 bit battery bit 20 (0=ok, 1=low)
         # HH:   Humidity in percent as two diget hex
         # XX:   CRC8 of the preceding 5 bytes (Polynomial 0x31, Initial value 0x00, Input not reflected, Result not reflected)
         # SS:   Sum-8 of the preceding 5 bytes 
         # ??:   Unknown Data
-        sensortype => 'WH31e, WH31b, DP50',
+        # ---------------------------------------------------------------------------------------------
+        #          Byte: 00 01 02 03 04 05 06 07 08 09 10
+        #        Nibble: 01 23 45 67 89 01 23 45 67 89 01
+        # aa aa aa 2d d4 52 97 12 25 01 09 09 55 40 B3 7B
+        #          MN;D= 52 97 12 25 01 09 09 55 40 B3 7B ;R=39;A=1;   Date: 25-01-09, Time: 09:55:40
+        #                FF II ?? YY MM DD hh mm ss XX SS 
+        # YY:   8 bit BCD year
+        # MM:   8 bit BCD month
+        # DD:   8 bit BCD day
+        # hh:   8 bit BCD hour
+        # mm:   8 bit BCD minute
+        # ss:   8 bit BCD second
+        sensortype => 'WH31e, WH31b, DP50, DNT000005',
         model      => 'SD_WS_125_TH',
-        prematch   => sub {my ($rawData,undef) = @_; return 1 if ($rawData =~ /^(30|37)/); },
+        prematch   => sub {my ($rawData,undef) = @_; return 1 if ($rawData =~ /^(30|37|52)/); },
         id         => sub {my ($rawData,undef) = @_; return (substr($rawData,2,2));},
-        channel    => sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,17,19) + 1);},
-        bat        => sub {my (undef,$bitData) = @_; return substr($bitData,20,1) eq '0' ? 'ok' : 'low';},
-        temp       => sub {my (undef,$bitData) = @_;
+        channel    => sub {my ($rawData,$bitData) = @_;
+                            return if ($rawData =~ /^(52)/); # time message
+                            return (SD_WS_binaryToNumber($bitData,17,19) + 1);
+                          },
+        bat        => sub {my ($rawData,$bitData) = @_;
+                            return if ($rawData =~ /^(52)/); # time message
+                            return substr($bitData,20,1) eq '0' ? 'ok' : 'low';
+                          },
+        temp       => sub {my ($rawData,$bitData) = @_;
+                            return if ($rawData =~ /^(52)/); # time message
                             my $temp = SD_WS_binaryToNumber($bitData,22,31);
                             return FHEM::Core::Utils::Math::round(($temp - 400) / 10, 1);
                           },
-        hum        => sub {my ($rawData,undef) = @_; return hex(substr($rawData,8,2)); },
+        hum        => sub {my ($rawData,undef) = @_;
+                            return if ($rawData =~ /^(52)/); # time message
+                            return hex(substr($rawData,8,2)) if ($rawData =~ /^(30|37)/);
+                          },
+        dcf        => sub {my ($rawData,undef) = @_;
+                            return  if ($rawData =~ /^(30|37)/); # temp/hum message
+                            return '20' . substr($rawData,6,2) . '-' . substr($rawData,8,2) . '-' . substr($rawData,10,2) . ' ' # date
+                                        . substr($rawData,12,2) . ':' . substr($rawData,14,2) . ':' . substr($rawData,16,2);    # time
+                          },
         crcok      => sub {my ($rawData,undef) = @_;
+                            my $crcLength = 12; # temp/hum message
+                            $crcLength = 20 if ($rawData =~ /^(52)/); # time message
                             if (HAS_DigestCRC) {
                               my $calc_crc8 = Digest::CRC->new(width => 8, poly=>0x31);
-                              my $crc_digest = $calc_crc8->add( pack 'H*', substr( $rawData, 0, 12 ) )->digest;
-                              if ($crc_digest)
-                              {
+                              my $crc_digest = $calc_crc8->add( pack 'H*', substr( $rawData, 0, $crcLength ) )->digest;
+                              if ($crc_digest) {
                                 Log3 $name, 3, qq[$name: SD_WS_125 Parse msg $rawData - ERROR CRC8 $crc_digest shoud be 0];
                                 return 0;
                               }
@@ -1664,16 +1694,15 @@ sub SD_WS_Parse {
                               Log3 $name, 1, qq[$name: SD_WS_125 Parse msg $rawData - ERROR CRC not loaded, please install module Digest::CRC];
                             }
                             my $checksum = 0;
-                            for (my $i=0; $i < 11; $i += 2) {
+                            for (my $i=0; $i < $crcLength - 1; $i += 2) {
                               $checksum += hex(substr($rawData,$i,2));
                             }
-                            $checksum -= hex(substr($rawData,12,2));
+                            $checksum -= hex(substr($rawData,$crcLength,2));
                             $checksum &= 0xFF;
                             if ($checksum) {
                               Log3 $name, 3, qq[$name: SD_WS_125 Parse msg $rawData - ERROR checksum $checksum != 0];
                               return 0;
                             }
-
                             return 1;
                           }, 
     },
@@ -2208,6 +2237,12 @@ sub SD_WS_Parse {
     $deviceCode .= '_' . $channel if (defined $channel);
   }
 
+  ### Protocol 125 time message
+  if ($protocol eq "125" && defined $dcf) {
+    $deviceCode = 'SD_WS_125_DCF'; # time protocol for sensors without channel
+    $state = substr($rawData,2,2) . ': ' . $dcf; # ID: DATE TIME
+  }
+
   my $def = $modules{SD_WS}{defptr}{$deviceCode};
   $def = $modules{SD_WS}{defptr}{$deviceCode} if(!$def);
 
@@ -2295,7 +2330,6 @@ sub SD_WS_Parse {
   }
 
   #my $state = (($temp > -60 && $temp < 70) ? "T: $temp":"T: xx") . (($hum > 0 && $hum < 100) ? " H: $hum":"");
-  my $state = '';
   if (defined($temp)) {
     $state .= "T: $temp";
   }
@@ -2533,10 +2567,10 @@ sub SD_WS_WH2SHIFT {
     <li>Bresser 5-in-1, 6-in-1 and 7-in-1 Comfort Weather Center, 7009994, Lightning detector, PM2.5/10 air quality meter, Professional rain gauge, Temeo</li>
     <li>Conrad S522</li>
     <li>EuroChron EFTH-800, EFS-3110A (temperature and humidity sensor)</li>
+    <li>Fine Offset WH31, aka Ambient Weather WH31E, aka ecowitt WH31 (temperature and humidity sensor, partly with DCF reception)</li>
+    <li>Fine Offset WH40, aka Ambient Weather WH40, aka ecowitt WH40 (Regen sensor)</li>
     <li>Fine Offset WH51, aka ECOWITT WH51, aka Froggit DP100, aka MISOL/1 (soil moisture sensor)</li>
     <li>Fine Offset WH57, aka Froggit DP60, aka Ambient Weather WH31L (thunder and lightning sensor)</li>
-    <li>Fine Offset WH31, aka Ambient Weather WH31E, aka ecowitt WH31 (temperature and humidity sensor)</li>
-    <li>Fine Offset WH40, aka Ambient Weather WH40, aka ecowitt WH40 (Regen sensor)</li>
     <li>Fody E42 (temperature and humidity sensor)</li>
     <li>Inkbird IBS-P01R pool thermometer, ITH-20R</li>
     <li>NC-3911, NC-3912 refrigerator thermometer</li>
@@ -2587,6 +2621,7 @@ sub SD_WS_WH2SHIFT {
     <li>brightness (kLux)</li>
     <li>channel (number of channel</li>
     <li>count (number of lightnings</li>
+    <li>dcf (DCF time signal, protocol 120 and 125, for protocol 125, an additional device SD_WS_125_DCF is created)</li>
     <li>distance (distance in cm (protocol 111) or km (protocol 116)</li>
     <li>humidity (humidity (1-100 % only if available)</li>
     <li>humidityTrend (consistent, rising, falling)</li>
@@ -2680,10 +2715,10 @@ sub SD_WS_WH2SHIFT {
     <li>Bresser 5-in-1, 6-in-1 und 7-in-1 Comfort Wetter Center, 7009994, Blitzsensor, PM2.5/10 Luftqualitätsmesser, Profi Regenmesser, Temeo</li>
     <li>Conrad S522</li>
     <li>EuroChron EFTH-800, EFS-3110A (Temperatur- und Feuchtigkeitssensor)</li>
+    <li>Fine Offset WH31, aka Ambient Weather WH31E Thermo-Hygrometer Sensor (Temperatur- und Feuchtemsser, teilweise mit DCF-Empfang)</li>
+    <li>Fine Offset WH40, aka Ambient Weather WH40, aka ecowitt WH40 (rain sensor)</li>
     <li>Fine Offset WH51, aka ECOWITT WH51, aka Froggit DP100, aka MISOL/1 (Bodenfeuchtesensor)</li>
     <li>Fine Offset WH57, aka Froggit DP60, aka Ambient Weather WH31L (Gewittersensor)</li>
-    <li>Fine Offset WH31, aka Ambient Weather WH31E Thermo-Hygrometer Sensor (Temperatur- und Feuchtemsser)</li>
-    <li>Fine Offset WH40, aka Ambient Weather WH40, aka ecowitt WH40 (rain sensor)</li>
     <li>Fody E42 (Temperatur- und Feuchtigkeitssensor)</li>
     <li>Inkbird IBS-P01R Pool Thermometer, ITH-20R</li>
     <li>Kabelloses Grillthermometer, Modellname: GFGT 433 B1</li>
@@ -2735,6 +2770,7 @@ sub SD_WS_WH2SHIFT {
     <li>brightness (Helligkeit in kLux)</li>
     <li>channel (Sensor-Kanal)</li>
     <li>count (Anzahl)</li>
+    <li>dcf (DCF-Zeitsignal, Protokoll 120 und 125, bei Protokoll 125 wird ein zusätzliches Gerät SD_WS_125_DCF angelegt)</li>
     <li>distance (Entfernung in cm (Protokoll 111) oder km (Protokoll 116)</li>
     <li>humidity (Luft-/Bodenfeuchte, 1-100 %)</li>
     <li>humidityTrend (Trend Luftfeuchte, gleichbleibend, steigend, fallend)</li>
@@ -2829,7 +2865,7 @@ sub SD_WS_WH2SHIFT {
   "x_fhem_maintainer_github": [
     "Sidey79"
   ],
-  "version": "v1.1.4",
+  "version": "v1.1.5",
   "description": "The SD_WS module processes the messages from various environmental sensors received from an IO device (CUL, CUN, SIGNALDuino, SignalESP etc.)",
   "dynamic_config": 1,
   "keywords": [

@@ -2304,7 +2304,7 @@
                      "humidity" : 55,
                      "state" : "T: 21.0 H: 55",
                      "temperature" : "21.0",
-                     "type" : "WH31e, WH31b, DP50",
+                     "type" : "WH31e, WH31b, DP50, DNT000005",
                      "batteryState" : "ok",
                      "channel" : 1
                   },
@@ -2326,7 +2326,7 @@
                      "humidity" : 60,
                      "state" : "T: 16.7 H: 60",
                      "temperature" : "16.7",
-                     "type" : "WH31e, WH31b, DP50",
+                     "type" : "WH31e, WH31b, DP50, DNT000005",
                      "batteryState" : "ok",
                      "channel" : 2
                   },
@@ -2335,7 +2335,7 @@
             ]
          },
          {
-            "comment" : "Ecowitt WH31 Temp Hum sensor channel 2",
+            "comment" : "Ecowitt WH31 Temp Hum sensor channel 3",
             "dmsg" : "W125#30E0A1C634FEA96C000200",
             "rmsg" : "MN;D=30E0A1C634FEA96C000200;R=63;",
             "tests" : [
@@ -2348,9 +2348,28 @@
                      "humidity" : 52,
                      "state" : "T: 5.4 H: 52",
                      "temperature" : "5.4",
-                     "type" : "WH31e, WH31b, DP50",
+                     "type" : "WH31e, WH31b, DP50, DNT000005",
                      "batteryState" : "ok",
                      "channel" : 3
+                  },
+                  "comment" : "#0"
+               }
+            ]
+         },
+         {
+            "comment" : "DNT000005 Temp Hum sensor DCF message",
+            "dmsg" : "W125#52971025010910492909B3",
+            "rmsg" : "MN;D=52971025010910492909B3;R=33;A=2;",
+            "tests" : [
+               {
+                  "internals" : {
+                     "DEF" : "SD_WS_125_DCF",
+                     "NAME" : "SD_WS_125_DCF"
+                  },
+                  "readings" : {
+                     "dcf" : "2025-01-09 10:49:29",
+                     "state" : "97: 2025-01-09 10:49:29",
+                     "type" : "WH31e, WH31b, DP50, DNT000005"
                   },
                   "comment" : "#0"
                }
