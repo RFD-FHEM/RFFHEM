@@ -2567,10 +2567,10 @@ sub SD_WS_WH2SHIFT {
     <li>Bresser 5-in-1, 6-in-1 and 7-in-1 Comfort Weather Center, 7009994, Lightning detector, PM2.5/10 air quality meter, Professional rain gauge, Temeo</li>
     <li>Conrad S522</li>
     <li>EuroChron EFTH-800, EFS-3110A (temperature and humidity sensor)</li>
+    <li>Fine Offset WH31, aka Ambient Weather WH31E, aka ecowitt WH31 (temperature and humidity sensor, partly with DCF reception)</li>
+    <li>Fine Offset WH40, aka Ambient Weather WH40, aka ecowitt WH40 (Regen sensor)</li>
     <li>Fine Offset WH51, aka ECOWITT WH51, aka Froggit DP100, aka MISOL/1 (soil moisture sensor)</li>
     <li>Fine Offset WH57, aka Froggit DP60, aka Ambient Weather WH31L (thunder and lightning sensor)</li>
-    <li>Fine Offset WH31, aka Ambient Weather WH31E, aka ecowitt WH31 (temperature and humidity sensor)</li>
-    <li>Fine Offset WH40, aka Ambient Weather WH40, aka ecowitt WH40 (Regen sensor)</li>
     <li>Fody E42 (temperature and humidity sensor)</li>
     <li>Inkbird IBS-P01R pool thermometer, ITH-20R</li>
     <li>NC-3911, NC-3912 refrigerator thermometer</li>
@@ -2621,6 +2621,7 @@ sub SD_WS_WH2SHIFT {
     <li>brightness (kLux)</li>
     <li>channel (number of channel</li>
     <li>count (number of lightnings</li>
+    <li>dcf (DCF time signal, protocol 120 and 125, for protocol 125, an additional device SD_WS_125_DCF is created)</li>
     <li>distance (distance in cm (protocol 111) or km (protocol 116)</li>
     <li>humidity (humidity (1-100 % only if available)</li>
     <li>humidityTrend (consistent, rising, falling)</li>
@@ -2714,10 +2715,10 @@ sub SD_WS_WH2SHIFT {
     <li>Bresser 5-in-1, 6-in-1 und 7-in-1 Comfort Wetter Center, 7009994, Blitzsensor, PM2.5/10 Luftqualitätsmesser, Profi Regenmesser, Temeo</li>
     <li>Conrad S522</li>
     <li>EuroChron EFTH-800, EFS-3110A (Temperatur- und Feuchtigkeitssensor)</li>
+    <li>Fine Offset WH31, aka Ambient Weather WH31E Thermo-Hygrometer Sensor (Temperatur- und Feuchtemsser, teilweise mit DCF-Empfang)</li>
+    <li>Fine Offset WH40, aka Ambient Weather WH40, aka ecowitt WH40 (rain sensor)</li>
     <li>Fine Offset WH51, aka ECOWITT WH51, aka Froggit DP100, aka MISOL/1 (Bodenfeuchtesensor)</li>
     <li>Fine Offset WH57, aka Froggit DP60, aka Ambient Weather WH31L (Gewittersensor)</li>
-    <li>Fine Offset WH31, aka Ambient Weather WH31E Thermo-Hygrometer Sensor (Temperatur- und Feuchtemsser)</li>
-    <li>Fine Offset WH40, aka Ambient Weather WH40, aka ecowitt WH40 (rain sensor)</li>
     <li>Fody E42 (Temperatur- und Feuchtigkeitssensor)</li>
     <li>Inkbird IBS-P01R Pool Thermometer, ITH-20R</li>
     <li>Kabelloses Grillthermometer, Modellname: GFGT 433 B1</li>
@@ -2769,6 +2770,7 @@ sub SD_WS_WH2SHIFT {
     <li>brightness (Helligkeit in kLux)</li>
     <li>channel (Sensor-Kanal)</li>
     <li>count (Anzahl)</li>
+    <li>dcf (DCF-Zeitsignal, Protokoll 120 und 125, bei Protokoll 125 wird ein zusätzliches Gerät SD_WS_125_DCF angelegt)</li>
     <li>distance (Entfernung in cm (Protokoll 111) oder km (Protokoll 116)</li>
     <li>humidity (Luft-/Bodenfeuchte, 1-100 %)</li>
     <li>humidityTrend (Trend Luftfeuchte, gleichbleibend, steigend, fallend)</li>
