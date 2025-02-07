@@ -1,5 +1,5 @@
 #########################################################################################
-# $Id: 14_SD_UT.pm 0 2024-12-03 16:26:12Z elektron-bbs $
+# $Id: 14_SD_UT.pm 0 2025-02-07 16:26:12Z elektron-bbs $
 #
 # The file is part of the SIGNALduino project.
 # The purpose of this module is universal support for devices.
@@ -404,6 +404,8 @@
 #     Meikee_24_20D3 off    MU;P0=-516;P1=518;P2=-1015;P3=1000;P4=-12712;D=01230121230301212121212121230141212301212121212303012301212303012121212121212301;CP=1;R=35;
 #     Meikee_24_20D3 learn  MU;P0=-509;P1=513;P2=-999;P3=1027;P4=-12704;D=01230121230301212121212121212141212301212121212303012301212303012121212121212121;CP=1;R=77;
 #     Meikee_21 - remote control with 21 buttons
+#     Same codes as Meikee_24, but different key assignments.
+#     Meikee_10 - remote control with 10 buttons - https://github.com/RFD-FHEM/RFFHEM/issues/1296 @ projectsun2 2025-02-04
 #     Same codes as Meikee_24, but different key assignments.
 #}
 ###############################################################################################################################################################################
@@ -1083,6 +1085,21 @@ my %models = (
                    Protocol   => 'P118',
                    Typ        => 'remote'
                  },
+  'Meikee_10' => {
+                   '00000001' => 'on_off',           # 0x01
+                   '00001010' => 'color_plus',       # 0x0A
+                   '00001101' => 'color_minus',      # 0x0D
+                   '00001111' => 'brightness_minus', # 0x0F
+                   '00001100' => 'brightness_plus',  # 0x0C
+                   '00001000' => 'demo',             # 0x08
+                   '00001011' => 'mode_minus',       # 0x0B
+                   '00000101' => 'mode_plus',        # 0x05
+                   '00001001' => 'speed_plus',       # 0x09
+                   '00000111' => 'speed_minus',      # 0x07
+                   hex_length => [6,7],
+                   Protocol => 'P118',
+                   Typ => 'remote'
+                 },
   'Hamulight_AB' => { '01011111' => 'on_off',
                       '01010101' => 'dim_1',
                       '01010110' => 'dim_2',
@@ -1183,7 +1200,7 @@ sub SD_UT_Define {
   return "Wrong HEX-Value! ($a[3]) $a[2] Hex-value to short or long (must be 4 chars) or not hex (0-9 | a-f | A-F) {4}"
          if (($a[2] eq 'SF01_01319004' || $a[2] eq 'SF01_01319004_Typ2' || $a[2] eq 'Chilitec_22640' || $a[2] eq 'KL_RF01' || $a[2] eq 'RCnoName20' || $a[2] eq 'RCnoName20_09'
            || $a[2] eq 'RCnoName20_10' || $a[2] eq 'RCnoName128' || $a[2] eq 'DC_1961_TG' || $a[2] eq 'xavax' || $a[2] eq 'BF_301' || $a[2] eq 'Meikee_21' || $a[2] eq 'Meikee_24'
-           || $a[2] eq 'CREATE_6601TL' || $a[2] eq 'HA_HX2' || $a[2] eq 'Hamulight_AB') && not $a[3] =~ /^[0-9a-fA-F]{4}/xms);
+           || $a[2] eq 'Meikee_10' || $a[2] eq 'CREATE_6601TL' || $a[2] eq 'HA_HX2' || $a[2] eq 'Hamulight_AB') && not $a[3] =~ /^[0-9a-fA-F]{4}/xms);
   ### [5 nibble] checks CREATE_6601L & RCnoName127
   # uncoverable branch true 
   return "Wrong HEX-Value! ($a[3]) $a[2] Hex-value to short or long (must be 5 chars) or not hex (0-9 | a-f | A-F) {5}" if (($a[2] eq 'CREATE_6601L' || $a[2] eq 'RCnoName127') && not $a[3] =~ /^[0-9a-fA-F]{5}/xms);
@@ -1446,9 +1463,9 @@ sub SD_UT_Set {
       my $adr = sprintf '%016b' , hex $definition[1]; # argument 1 - adress to binary with 16 bits
       $msg = $models{$model}{Protocol} . q{#} . $adr;
       $msgEnd = '#R10';
-    ############ Meikee_21 | Meikee_24 | RCnoName128 | RCnoName20 | RCnoName20_09 | RCnoName20_10 | DC-1961-TG | CREATE_6601TL | HA_HX2 ############
-    } elsif ($model eq 'Meikee_21' || $model eq 'Meikee_24' || $model eq 'RCnoName128' || $model eq 'RCnoName20' || $model eq 'RCnoName20_09' || $model eq 'RCnoName20_10'
-          || $model eq 'DC_1961_TG' || $model eq 'CREATE_6601TL' || $model eq 'HA_HX2') {
+    ############ Meikee_xx| | RCnoName128 | RCnoName20 | RCnoName20_09 | RCnoName20_10 | DC-1961-TG | CREATE_6601TL | HA_HX2 ############
+    } elsif ($model eq 'Meikee_10' || $model eq 'Meikee_21' || $model eq 'Meikee_24' || $model eq 'RCnoName128' || $model eq 'RCnoName20' || $model eq 'RCnoName20_09'
+          || $model eq 'RCnoName20_10'|| $model eq 'DC_1961_TG' || $model eq 'CREATE_6601TL' || $model eq 'HA_HX2') {
       my $adr = sprintf '%016b' , hex $definition[1]; # argument 1 - adress to binary with 16 bits
       $msg = $models{$model}{Protocol} . q{#} . $adr;
       $msgEnd = '#R' . $repeats;
@@ -1914,6 +1931,8 @@ sub SD_UT_Parse {
     ### Remote control Meikee [P118] ###
     if (!$def && $protocol == 118) {
       $deviceCode = substr($rawData,0,4);
+      $devicedef = 'Meikee_10 ' . $deviceCode if (!$def);
+      $def = $modules{SD_UT}{defptr}{$devicedef} if (!$def);
       $devicedef = 'Meikee_21 ' . $deviceCode if (!$def);
       $def = $modules{SD_UT}{defptr}{$devicedef} if (!$def);
       $devicedef = 'Meikee_24 ' . $deviceCode if (!$def);
@@ -2472,7 +2491,7 @@ sub SD_UT_Parse {
     $state = substr($bitData,0,4);
     $deviceCode = substr($rawData,1,3);
   ############ Meikee [P118] or RCnoName128 [P128] or CREATE_6601TL [P130] or HA-HX2 [132] or Hamulight_AB [P22] ############
-  } elsif ($model eq 'Meikee_21' || $model eq 'Meikee_24' || $model eq 'RCnoName128' || $model eq 'CREATE_6601TL' || $model eq 'HA_HX2' || $model eq 'Hamulight_AB') {
+  } elsif ($model eq 'Meikee_10' || $model eq 'Meikee_21' || $model eq 'Meikee_24' || $model eq 'RCnoName128' || $model eq 'CREATE_6601TL' || $model eq 'HA_HX2' || $model eq 'Hamulight_AB') {
     $state = substr $bitData,16,8;
     $deviceCode = substr $rawData,0,4;
   ############ RCnoName127 [P127] ############
@@ -2717,8 +2736,8 @@ sub SD_UT_Attr {
           $deviceCode = sprintf("%06X", oct( "0b$bitData" ) );
           $devicename = $devicemodel.'_'.$deviceCode;
         ############ Meikee_xx or RCnoName20 or RCnoName20_09 or RCnoName20_10 or RCnoName128 or DC_1961_TG or CREATE_6601TL or HA_HX2 ############
-        } elsif ($attrValue eq 'Meikee_21' || $attrValue eq 'Meikee_24' || $attrValue eq 'RCnoName20' || $attrValue eq 'RCnoName20_09' || $attrValue eq 'RCnoName20_10' ||
-                 $attrValue eq 'RCnoName128' || $attrValue eq 'DC_1961_TG' || $attrValue eq 'CREATE_6601TL' || $attrValue eq 'HA_HX2') {
+        } elsif ($attrValue eq 'Meikee_10' || $attrValue eq 'Meikee_21' || $attrValue eq 'Meikee_24' || $attrValue eq 'RCnoName20' || $attrValue eq 'RCnoName20_09'
+              || $attrValue eq 'RCnoName20_10' || $attrValue eq 'RCnoName128' || $attrValue eq 'DC_1961_TG' || $attrValue eq 'CREATE_6601TL' || $attrValue eq 'HA_HX2') {
           $deviceCode = substr($bitData,0,16);
           $deviceCode = sprintf("%04X", oct( "0b$deviceCode" ) );
           $devicename = $devicemodel.'_'.$deviceCode;
@@ -2843,6 +2862,7 @@ sub SD_UT_tristate2bin {
     <li>Medion OR28V&nbsp;&nbsp;&nbsp;<small>(module model: OR28V, protocol 68)</small></li>
     <li>Meikee remote controls <small>(protocol 118)</small>
       <ul><small>
+        <li>Meikee, 10 buttons, e.g. for Solar Flood Lights - module model: Meikee_10</li>
         <li>Meikee, 21 buttons, e.g. for Solar Flood Lights - module model: Meikee_21</li>
         <li>Meikee, 24 buttons, e.g. for RGB LED Wallwasher Light - module model: Meikee_24</li>
     </small></ul></li>
@@ -2995,7 +3015,7 @@ sub SD_UT_tristate2bin {
     <li><a href="#ignore">ignore</a></li>
     <li><a href="#IODev">IODev</a></li>
     <li><a name="model"></a>model<br>
-      This attribute indicates the model type of your device (AC114_01B, BeEasy_TX, BeSmart_S4, Buttons_five, Buttons_six, CAME_TOP_432EV, Chilitec_22640, CREATE_6601L, CREATE_6601TL, DC_1961_TG, HA_HX2, HS1-868-BS, HSM4, KL_RF01, LED_XM21_0, Meikee_21, Meikee_24, Momento, Navaris, Novy_840029, Novy_840039, OR28V, QUIGG_DMV, RC_10, RH787T, SA_434_1_mini, SF01_01319004, TC6861, TR60C1, Tedsen_SKX1xx, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx, TR_502MSV, Unitec_47031, unknown).<br>
+      This attribute indicates the model type of your device (AC114_01B, BeEasy_TX, BeSmart_S4, Buttons_five, Buttons_six, CAME_TOP_432EV, Chilitec_22640, CREATE_6601L, CREATE_6601TL, DC_1961_TG, HA_HX2, HS1-868-BS, HSM4, KL_RF01, LED_XM21_0, Meikee_10, Meikee_21, Meikee_24, Momento, Navaris, Novy_840029, Novy_840039, OR28V, QUIGG_DMV, RC_10, RH787T, SA_434_1_mini, SF01_01319004, TC6861, TR60C1, Tedsen_SKX1xx, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx, TR_502MSV, Unitec_47031, unknown).<br>
       If the attribute is changed, a new device is created using <a href="#autocreate">autocreate</a>. Autocreate must be activated for this.
     </li>
     <li><a name="repeats"></a>repeats<br>
@@ -3089,6 +3109,7 @@ sub SD_UT_tristate2bin {
     <li>Medion OR28V&nbsp;&nbsp;&nbsp;<small>(Modulmodel: OR28V, Protokoll 68)</small></li>
     <li>Meikee Fernbedienungen <small>(Protokoll 118)</small>
       <ul><small>
+        <li>Meikee, 10 Tasten, z.B. für Solar Flood Lights - Modulmodel: Meikee_10</li>
         <li>Meikee, 21 Tasten, z.B. für Solar Flood Lights - Modulmodel: Meikee_21</li>
         <li>Meikee, 24 Tasten, z.B. für RGB LED Wallwasher Light - Modulmodel: Meikee_24</li>
     </small></ul></li>
@@ -3236,7 +3257,7 @@ sub SD_UT_tristate2bin {
     <li><a href="#ignore">ignore</a></li>
     <li><a href="#IODev">IODev</a></li>
     <li><a name="model"></a>model<br>
-      Dieses Attribut bezeichnet den Modelltyp Ihres Ger&auml;tes (AC114_01B, BeEasy_TX, BeSmart_S4, Buttons_five, Buttons_six, CAME_TOP_432EV, Chilitec_22640, CREATE_6601L, CREATE_6601TL, DC_1961_TG, HA_HX2, HS1-868-BS, HSM4, KL_RF01, LED_XM21_0, Meikee_21, Meikee_24, Momento, Navaris, Novy_840029, Novy_840039, OR28V, QUIGG_DMV, RC_10, RH787T, SA_434_1_mini, SF01_01319004, TC6861, TR60C1, Tedsen_SKX1xx, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx, TR_502MSV, Unitec_47031, unknown).<br>
+      Dieses Attribut bezeichnet den Modelltyp Ihres Ger&auml;tes (AC114_01B, BeEasy_TX, BeSmart_S4, Buttons_five, Buttons_six, CAME_TOP_432EV, Chilitec_22640, CREATE_6601L, CREATE_6601TL, DC_1961_TG, HA_HX2, HS1-868-BS, HSM4, KL_RF01, LED_XM21_0, Meikee_10, Meikee_21, Meikee_24, Momento, Navaris, Novy_840029, Novy_840039, OR28V, QUIGG_DMV, RC_10, RH787T, SA_434_1_mini, SF01_01319004, TC6861, TR60C1, Tedsen_SKX1xx, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx, TR_502MSV, Unitec_47031, unknown).<br>
       Bei &Auml;nderung des Attributes wird ein neues Gerät mittels <a href="#autocreate">autocreate</a> erzeugt. Autocreate muss dazu aktiviert sein.
     </li>
     <li><a name="repeats"></a>repeats<br>
