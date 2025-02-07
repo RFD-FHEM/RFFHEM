@@ -3348,7 +3348,7 @@ sub SD_UT_tristate2bin {
       }
     }
   },
-  "version": "v1.0.8",
+  "version": "v1.0.9",
   "release_status": "stable",
   "resources": {
     "bugtracker": {
