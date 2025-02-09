@@ -1,3 +1,6 @@
+2025-02-09 - replace check Digest::CRC in module 14_SD_WS (#1298)
+
+* 14_SD_WS check Digest::CRC replaced
 2025-01-26 - Decoding DCF message from WH31E/DNT000005 (#1290)
 
 * SD_WS_125_DCF
