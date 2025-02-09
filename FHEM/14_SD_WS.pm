@@ -1,4 +1,4 @@
-# $Id: 14_SD_WS.pm 26982 2025-01-26 12:43:07Z elektron-bbs $
+# $Id: 14_SD_WS.pm 26982 2025-02-08 15:57:21Z elektron-bbs $
 #
 # The purpose of this module is to support serval
 # weather sensors which use various protocol
@@ -287,13 +287,7 @@ sub SD_WS_Parse {
         temp       => sub {my (undef,$bitData) = @_; return substr($bitData,17,1) eq "0" ? ((SD_WS_binaryToNumber($bitData,18,27) - 1024) / 10.0) : (SD_WS_binaryToNumber($bitData,18,27) / 10.0);},
         hum        => sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,32,35) * 10) + (SD_WS_binaryToNumber($bitData,36,39));},
         crcok      => sub {my $rawData = shift;
-                            my $rc = eval
-                            {
-                              require Digest::CRC;
-                              Digest::CRC->import();
-                              1;
-                            };
-                            if ($rc) {
+                            if (HAS_DigestCRC) {
                               my $datacheck1 = pack( 'H*', substr($rawData,0,10) );
                               my $crcmein1 = Digest::CRC->new(width => 8, poly => 0x31);
                               my $rr3 = $crcmein1->add($datacheck1)->hexdigest;
@@ -431,12 +425,7 @@ sub SD_WS_Parse {
                               return $temp;
                             },
           crcok      => sub { my $rawData = shift;
-                              my $rc = eval {
-                                require Digest::CRC;
-                                Digest::CRC->import();
-                                1;
-                              };
-                              if ($rc) {
+                              if (HAS_DigestCRC) {
                                 my $datacheck1 = pack( 'H*', substr($rawData,0,12) );
                                 my $crcmein1 = Digest::CRC->new(width => 8, init => 0xFF, poly => 0x31);
                                 my $rr3 = $crcmein1->add($datacheck1)->hexdigest;
@@ -770,12 +759,7 @@ sub SD_WS_Parse {
                             }
                           },
         crcok      => sub {my ($rawData,undef) = @_;
-                            my $rc = eval {
-                              require Digest::CRC;
-                              Digest::CRC->import();
-                              1;
-                            };
-                            if ($rc) {
+                            if (HAS_DigestCRC) {
                               my $datacheck1 = pack( 'H*', substr($rawData,0,14) );
                               my $crcmein1 = Digest::CRC->new(width => 8, poly => 0x31);
                               my $rr3 = $crcmein1->add($datacheck1)->hexdigest;
@@ -896,12 +880,7 @@ sub SD_WS_Parse {
         adc        => sub { my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,62,71); },
         hum        => sub { my ($rawData,undef) = @_; return hex(substr($rawData,12,2)); },
         crcok      => sub { my $rawData = shift;
-                            my $rc = eval {
-                              require Digest::CRC;
-                              Digest::CRC->import();
-                              1;
-                            };
-                            if ($rc) {
+                            if (HAS_DigestCRC) {
                               my $datacheck1 = pack( 'H*', substr($rawData,0,24) );
                               my $crcmein1 = Digest::CRC->new(width => 8, poly => 0x31);
                               my $rr3 = $crcmein1->add($datacheck1)->hexdigest;
@@ -1303,12 +1282,7 @@ sub SD_WS_Parse {
         distance       => sub { my ($rawData,undef) = @_; return hex(substr($rawData,10,2)); },
         count          => sub { my ($rawData,undef) = @_; return hex(substr($rawData,12,2)); },
         crcok          => sub { my $rawData = shift;
-                                my $rc = eval {
-                                  require Digest::CRC;
-                                  Digest::CRC->import();
-                                  1;
-                                };
-                                if ($rc) {
+                                if (HAS_DigestCRC) {
                                   my $datacheck1 = pack( 'H*', substr($rawData,0,14) );
                                   my $crcmein1 = Digest::CRC->new(width => 8, poly => 0x31);
                                   my $rr3 = $crcmein1->add($datacheck1)->hexdigest;
@@ -1517,12 +1491,7 @@ sub SD_WS_Parse {
                                        . SD_WS_binaryToNumber($bitData,40,42) . SD_WS_binaryToNumber($bitData,43,46) # second
                               },
         crcok          => sub {my $rawData = shift;
-                                my $rc = eval {
-                                  require Digest::CRC;
-                                  Digest::CRC->import();
-                                  1;
-                                };
-                                if ($rc) {
+                                if (HAS_DigestCRC) {
                                   my $datacheck1 = pack( 'H*', substr($rawData,2,length($rawData)-2) );
                                   my $crcmein1 = Digest::CRC->new(width => 8, poly => 0x31);
                                   my $rr3 = $crcmein1->add($datacheck1)->hexdigest;
@@ -2112,15 +2081,7 @@ sub SD_WS_Parse {
               return "";
             }
 
-       my $rc = eval
-       {
-        require Digest::CRC;
-        Digest::CRC->import();
-        1;
-       };
-
-      if($rc)
-      {
+      if (HAS_DigestCRC) {
       # Digest::CRC loaded and imported successfully
        Log3 $iohash, 4, "$name: SD_WS_WH2_1 msg: $msg raw: $rawData " ;
       $rr2 = SD_WS_WH2CRCCHECK($rawData);
@@ -2865,7 +2826,7 @@ sub SD_WS_WH2SHIFT {
   "x_fhem_maintainer_github": [
     "Sidey79"
   ],
-  "version": "v1.1.5",
+  "version": "v1.1.6",
   "description": "The SD_WS module processes the messages from various environmental sensors received from an IO device (CUL, CUN, SIGNALDuino, SignalESP etc.)",
   "dynamic_config": 1,
   "keywords": [
