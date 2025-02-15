@@ -1,4 +1,4 @@
-# $Id: 00_SIGNALduino.pm 3.5.6 2024-08-28 14:15:02Z sidey79 $
+# $Id: 00_SIGNALduino.pm 3.5.7 2024-12-23 12:38:38Z elektron-bbs $
 # v3.5.6 - https://github.com/RFD-FHEM/RFFHEM/tree/master
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incoming messages
 # see http://www.fhemwiki.de/wiki/SIGNALDuino
@@ -8,7 +8,7 @@
 #
 # 2014-2015  S.Butzek, N.Butzek
 # 2016-2019  S.Butzek, Ralf9
-# 2019-2023  S.Butzek, HomeAutoUser, elektron-bbs
+# 2019-2024  S.Butzek, HomeAutoUser, elektron-bbs
 
 
 package main;
@@ -42,7 +42,7 @@ use List::Util qw(first);
 
 
 use constant {
-  SDUINO_VERSION                  => '3.5.6+20240410',  # Datum wird automatisch bei jedem pull request aktualisiert
+  SDUINO_VERSION                  => '3.5.7+20241101',  # Datum wird automatisch bei jedem pull request aktualisiert
   SDUINO_INIT_WAIT_XQ             => 1.5,     # wait disable device
   SDUINO_INIT_WAIT                => 2,
   SDUINO_INIT_MAXRETRY            => 3,
@@ -82,7 +82,7 @@ my %gets = (  # NameOFCommand =>  StyleMod for Fhemweb, SubToCall if get is exec
   'uptime'            =>  ['noArg', \&SIGNALduino_Get_Command, "t", \&SIGNALduino_CheckUptimeResponse, '^[0-9]+' ],
   'cmds'              =>  ['noArg', \&SIGNALduino_Get_Command, "?", \&SIGNALduino_CheckCmdsResponse, '.*' ],
   'ping'              =>  ['noArg', \&SIGNALduino_Get_Command, "P", \&SIGNALduino_GetResponseUpdateReading, '^OK$' ],
-  'config'            =>  ['noArg', \&SIGNALduino_Get_Command, "CG", \&SIGNALduino_GetResponseUpdateReading, '^MS.*MU.*MC.*' ],
+  'config'            =>  ['noArg', \&SIGNALduino_Get_Command, "CG", \&SIGNALduino_GetResponseUpdateReading, '^M[S|N]=.*' ],
   'ccconf'            =>  ['noArg', \&SIGNALduino_Get_Command, "C0DnF", \&SIGNALduino_CheckccConfResponse, 'C0Dn11=[A-F0-9a-f]+'],
   'ccreg'             =>  ['textFieldNL', \&SIGNALduino_Get_Command_CCReg,"C", \&SIGNALduino_CheckCcregResponse, '^(?:C[A-Fa-f0-9]{2}\s=\s[0-9A-Fa-f]+$|ccreg 00:)'],
   'ccpatable'         =>  ['noArg', \&SIGNALduino_Get_Command, "C3E", \&SIGNALduino_CheckccPatableResponse, '^C3E\s=\s.*'],
@@ -255,7 +255,7 @@ my %matchListSIGNALduino = (
       '14:Dooya'            => '^P16#[A-Fa-f0-9]+',
       '15:SOMFY'            => '^Ys[0-9A-F]+',
       '16:SD_WS_Maverick'   => '^P47#[A-Fa-f0-9]+',
-      '17:SD_UT'            => '^P(?:14|20|20.1|24|26|29|30|34|46|56|68|69|76|78|81|83|86|90|91|91.1|92|93|95|97|99|104|105|114|118|121|127|128|130|132)#.*', # universal - more devices with different protocols
+      '17:SD_UT'            => '^P(?:14|20|20.1|22|24|26|29|30|34|46|56|68|69|76|78|81|83|86|90|91|91.1|92|93|95|97|99|104|105|114|118|121|127|128|130|132)#.*', # universal - more devices with different protocols
       '18:FLAMINGO'         => '^P13\.?1?#[A-Fa-f0-9]+',              # Flamingo Smoke
       '19:CUL_WS'           => '^K[A-Fa-f0-9]{5,}',
       '20:Revolt'           => '^r[A-Fa-f0-9]{22}',
@@ -691,6 +691,9 @@ sub SIGNALduino_Set_raw {
   my ($hash, @a) = @_;
   $hash->{logMethod}->($hash->{NAME}, 4, "$hash->{NAME}: Set_raw, ".join(' ',@a));
   SIGNALduino_AddSendQueue($hash,$a[1]);
+  if ($a[1] eq 'e') {
+    SIGNALduino_AddSendQueue($hash,'CDW'); # disable WMBus
+  }
   if ($a[1] =~ m/^C[D|E]R/) { # enable/disable data reduction
     SIGNALduino_Get_Command($hash,'config');
   }
@@ -766,11 +769,16 @@ sub SIGNALduino_Attr_rfmode {
   if ( (InternalVal($hash->{NAME},"cc1101_available",0) == 0) && (!IsDummy($hash->{NAME})) ) {
     return 'ERROR: This attribute is only available for a receiver with CC1101.';
   }
-
+  my $hardware = AttrVal($hash->{NAME},'hardware','unknown');
+  if ($aVal =~ /^WMBus_/ && substr($hardware,0,3) ne 'esp') {
+    return 'ERROR: This attribute is only available for a receiver with ESP8266 or ESP32.';
+  }
+  
   ## DevState waitInit is on first start after FHEM restart | initialized is after cc1101 available
   if ( ($hash->{DevState} eq 'initialized') && (InternalVal($hash->{NAME},"cc1101_available",0) == 1) ) {
     $hash->{logMethod}->($hash->{NAME}, 3, "$hash->{NAME}: Set_rfmode, set to $aVal on DevState $hash->{DevState} (please check activated protocols via 'Display protocollist')");
 
+    SIGNALduino_AddSendQueue($hash,'CDW'); # disable WMBus
     my $rfmode;
     if ($aVal ne 'SlowRF') {
       if ( scalar( @{$hash->{mnIdList}} ) >= 1 ) {
@@ -784,13 +792,22 @@ sub SIGNALduino_Attr_rfmode {
 
             if ($register != -1) {
               $hash->{logMethod}->($hash->{NAME}, 5, qq[$hash->{NAME}: Set_rfmode, register settings exist on ID=$id ]);
-
+              SIGNALduino_AddSendQueue($hash,'WS36');   # SIDLE, Exit RX / TX, turn off frequency synthesizer
+              SIGNALduino_AddSendQueue($hash,'WS3A');   # SFRX, Flush the RX FIFO buffer. Only issue SFRX in IDLE or RXFIFO_OVERFLOW states.
               for my $i (0...scalar(@{$register})-1) {
                 $hash->{logMethod}->($hash->{NAME}, 5, "$hash->{NAME}: Set_rfmode, write value " . @{$register}[$i]);
                 my $argcmd = sprintf("W%02X%s",hex(substr(@{$register}[$i],0,2)) + 2,substr(@{$register}[$i],2,2));
                 main::SIGNALduino_AddSendQueue($hash,$argcmd);
               }
-              main::SIGNALduino_WriteInit($hash);
+              main::SIGNALduino_WriteInit($hash); # set cc1101 SIDLE and then SRX
+              if ($rfmode =~ /^WMBus_/) {
+                if ($rfmode eq 'WMBus_S') {
+                  SIGNALduino_AddSendQueue($hash,'CDT'); # WMBus_S
+                } else {
+                  SIGNALduino_AddSendQueue($hash,'CET'); # enable WMBus_T
+                }
+                SIGNALduino_AddSendQueue($hash,'CEW');   # enable WMBus
+              }
               last MNIDLIST;  # found $rfmode, exit loop
             } else {
               $hash->{logMethod}->($hash->{NAME}, 1, "$hash->{NAME}: Set_rfmode, set to $aVal (ID $id, no register entry found in protocols)");
@@ -1686,14 +1703,15 @@ sub SIGNALduino_SendFromQueue {
     } elsif ($msg =~ "^e") {                                                # Werkseinstellungen
       SIGNALduino_Get($hash,$name,'ccconf');
       SIGNALduino_Get($hash,$name,'ccpatable');
-
+      SIGNALduino_Get($hash,$name,'config');
       ## set rfmode to default from uC
       my $rfmode = AttrVal($name, 'rfmode', undef);
       CommandAttr($hash,"$name rfmode SlowRF") if (defined $rfmode && $rfmode ne 'SlowRF');  # option with save question mark
 
-    } elsif ($msg =~ "^W(?:0F|10|11|1D|12|17|1F)") {                        # SetFreq, setrAmpl, Set_bWidth, SetDeviatn, SetSens
+    } elsif ($msg =~ "^W(?:0F|10|11|1D|12|17|1F)") {                        # cc1101_freq, cc1101_rAmpl, cc1101_bWidth, cc1101_deviatn, cc1101_sens
       SIGNALduino_Get($hash,$name,'ccconf');
-    } elsif ($msg =~ "^x") {                                                # patable
+      SIGNALduino_Get($hash,$name,'config');
+    } elsif ($msg =~ "^x") {                                                # cc1101_patable
       SIGNALduino_Get($hash,$name,'ccpatable'); 
     }
 #    elsif ($msg eq 'C99') {
@@ -3079,6 +3097,7 @@ sub SIGNALduino_WriteInit {
 
   # todo: ist dies so ausreichend, damit die Aenderungen uebernommen werden?
   SIGNALduino_AddSendQueue($hash,'WS36');   # SIDLE, Exit RX / TX, turn off frequency synthesizer
+  SIGNALduino_AddSendQueue($hash,'WS3A');   # SFRX, Flush the RX FIFO buffer. Only issue SFRX in IDLE or RXFIFO_OVERFLOW states.
   SIGNALduino_AddSendQueue($hash,'WS34');   # SRX, Enable RX. Perform calibration first if coming from IDLE and MCSM0.FS_AUTOCAL=1.
 }
 
@@ -4884,11 +4903,11 @@ USB-connected devices (SIGNALduino):<br>
         modulation ASK/OOK, <b>loads the standard setting from the uC</b>
       </li>
       <li>WMBus_S<br>
-        modulation FSK, Datarate=32.768 kbps, Sync Word=7696, frequency 868.300 MHz (processing needs to be integrated into firmware)
+        modulation FSK, Datarate=32.768 kbps, Sync Word=7696, frequency 868.300 MHz
         <ul><small>example: water, gas, heat, electric meters and the data collecting devices</small></ul>
       </li>
       <li>WMBus_T<br>
-        modulation FSK, Datarate=100.0 kbps, Sync Word=543D, frequency 868.950 MHz (processing needs to be integrated into firmware)
+        modulation FSK, Datarate=100.0 kbps, Sync Word=543D, frequency 868.950 MHz
         <ul><small>example: water, gas, heat, electric meters and the data collecting devices</small></ul>
       </li>
     </ul>
@@ -5499,11 +5518,11 @@ USB-connected devices (SIGNALduino):<br>
         Modulation ASK/OOK, <b>l&auml;d die Standard Einstellung vom uC</b>
       </li>
       <li>WMBus_S<br>
-        Modulation FSK, Datenrate=32.768 kbps, Sync Word=7696, Frequenz 868.300 MHz (Verarbeitung muss noch in Firmware integriert werden)
+        Modulation FSK, Datenrate=32.768 kbps, Sync Word=7696, Frequenz 868.300 MHz
         <ul><small>Beispiel: diverse Wasser-, Gas-, Wärme- und Stromzähler sowie die Datenerfassungsgeräte</small></ul>
       </li>
       <li>WMBus_T<br>
-        Modulation FSK, Datenrate=100.0 kbps, Sync Word=543D, Frequenz 868.950 MHz (Verarbeitung muss noch in Firmware integriert werden)
+        Modulation FSK, Datenrate=100.0 kbps, Sync Word=543D, Frequenz 868.950 MHz
         <ul><small>Beispiel: diverse Wasser-, Gas-, Wärme- und Stromzähler sowie die Datenerfassungsgeräte</small></ul>
       </li>
     </ul>

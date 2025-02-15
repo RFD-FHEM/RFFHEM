@@ -66,6 +66,18 @@
                   "comment" : "#2"
                }
             ]
+         },
+         {
+            "comment" : "EuroChron weatherstation EFTH-800 / Channel 3  - wrong CRC",
+            "dmsg" : "W27#21D4435075DF",
+            "tests" : [
+               {
+                  "returns" : {
+                     "ParseFn" : ""
+                  },
+                  "comment" : "#3"
+               }
+            ]
          }
       ],
       "id" : "27",
@@ -222,7 +234,7 @@
    {
       "data" : [
          {
-            "comment" : "(ID 33.2,51,53 additionally)",
+            "comment" : "S522 (ID 33.2,51,53 additionally)",
             "dmsg" : "W33#0501DD80038",
             "internals" : {
                "DEF" : "SD_WS_33_T_1",
@@ -241,6 +253,18 @@
                      "model" : "S522"
                   },
                   "comment" : "#0"
+               }
+            ]
+         },
+         {
+            "comment" : "S522 (ID 33.2,51,53 additionally) - wrong CRC",
+            "dmsg" : "W33#0501DD8003F",
+            "tests" : [
+               {
+                  "returns" : {
+                     "ParseFn" : ""
+                  },
+                  "comment" : "#1"
                }
             ]
          }
@@ -384,7 +408,7 @@
    {
       "data" : [
          {
-            "comment" : "(ID 61,84,89 additionally)",
+            "comment" : "SD_WS37_TH (ID 61,84,89 additionally)",
             "dmsg" : "W37#D9165C307B",
             "internals" : {
                "DEF" : "SD_WS37_TH_1",
@@ -404,6 +428,18 @@
                   "comment" : "#0"
                }
             ]
+         },
+         {
+            "comment" : "SD_WS37_TH (ID 61,84,89 additionally) - wrong checksum",
+            "dmsg" : "W37#D9165C307C",
+            "tests" : [
+               {
+                  "returns" : {
+                     "ParseFn" : ""
+                  },
+                  "comment" : "#1"
+               }
+            ]
          }
       ],
       "id" : "37",
@@ -413,6 +449,7 @@
    {
       "data" : [
          {
+            "comment" : "NC-3911",
             "dispatch_repeats" : "4",
             "dmsg" : "W38#12A2C5D0C",
             "internals" : {
@@ -431,6 +468,18 @@
             "tests" : [
                {
                   "comment" : "#0"
+               }
+            ]
+         },
+         {
+            "comment" : "NC-3911 - wrong checksum",
+            "dmsg" : "W38#12A2C5FFC",
+            "tests" : [
+               {
+                  "returns" : {
+                     "ParseFn" : ""
+                  },
+                  "comment" : "#1"
                }
             ]
          }
@@ -663,6 +712,18 @@
                   "comment" : "#0"
                }
             ]
+         },
+         {
+            "comment" : "CH2, Lidl IAN 314695 (ID 33,51 additionally) - wrong checksum",
+            "dmsg" : "W53#0710B88C4FF",
+            "tests" : [
+               {
+                  "returns" : {
+                     "ParseFn" : ""
+                  },
+                  "comment" : "#1"
+               }
+            ]
          }
       ],
       "id" : "53",
@@ -765,6 +826,18 @@
                   "comment" : "#1"
                }
             ]
+         },
+         {
+            "comment" : "Rain sensor for base station 47.3005.01 / decode as MS - wrong CRC",
+            "dmsg" : "W54#3896E1066AAA0077",
+            "tests" : [
+               {
+                  "returns" : {
+                     "ParseFn" : ""
+                  },
+                  "comment" : "#2"
+               }
+            ]
          }
       ],
       "id" : "54.1",
@@ -843,6 +916,18 @@
                   "comment" : "#0"
                }
             ]
+         },
+         {
+            "comment" : "Thermo-hygro sensor with 2 Repeats - wrong CRC",
+            "dmsg" : "W58#45C8142445DC0",
+            "tests" : [
+               {
+                  "returns" : {
+                     "ParseFn" : ""
+                  },
+                  "comment" : "#1"
+               }
+            ]
          }
       ],
       "id" : "58",
@@ -914,6 +999,18 @@
             "tests" : [
                {
                   "comment" : "#2"
+               }
+            ]
+         },
+         {
+            "comment" : "Fine Offset Electronics WH2, WH2A Temperature/Humidity sensor - wrong CRC",
+            "dmsg" : "W64#FE9041CC812C44",
+            "tests" : [
+               {
+                  "returns" : {
+                     "ParseFn" : ""
+                  },
+                  "comment" : "#3"
                }
             ]
          }
@@ -1062,6 +1159,18 @@
             "tests" : [
                {
                   "comment" : "#0"
+               }
+            ]
+         },
+         {
+            "comment" : "Thermo-hygro sensor for base station 35.1140.01 - wrong CRC",
+            "dmsg" : "W85#0C45C60124B0554E8",
+            "tests" : [
+               {
+                  "returns" : {
+                     "ParseFn" : ""
+                  },
+                  "comment" : "#1"
                }
             ]
          }
@@ -1420,6 +1529,30 @@
                   "comment" : "#3"
                }
             ]
+         },
+         {
+            "comment" : "Fine Offset WH51, ECOWITT WH51, MISOL/1, Froggit DP100 Soil Moisture Sensor - wrong checksum",
+            "dmsg" : "W107#510D48E6107F1B00AA00000010F1",
+            "tests" : [
+               {
+                  "returns" : {
+                     "ParseFn" : ""
+                  },
+                  "comment" : "#4"
+               }
+            ]
+         },
+         {
+            "comment" : "Fine Offset WH51, ECOWITT WH51, MISOL/1, Froggit DP100 Soil Moisture Sensor - wrong CRC",
+            "dmsg" : "W107#510D48E6107F1B00AA00000011F0",
+            "tests" : [
+               {
+                  "returns" : {
+                     "ParseFn" : ""
+                  },
+                  "comment" : "#5"
+               }
+            ]
          }
       ],
       "id" : "107",
@@ -1581,6 +1714,18 @@
                   "comment" : "#2"
                }
             ]
+         },
+         {
+            "comment" : "Weather station with rain gauge - wrong checksum",
+            "dmsg" : "W110#9C1B042B039805874",
+            "tests" : [
+               {
+                  "returns" : {
+                     "ParseFn" : ""
+                  },
+                  "comment" : "#3"
+               }
+            ]
          }
       ],
       "id" : "110",
@@ -1646,6 +1791,18 @@
             "tests" : [
                {
                   "comment" : "#2"
+               }
+            ]
+         },
+         {
+            "comment" : "Water tank level monitor with temperature - wrong XOR",
+            "dmsg" : "W111#5F5B8840F110A4008A",
+            "tests" : [
+               {
+                  "returns" : {
+                     "ParseFn" : ""
+                  },
+                  "comment" : "#3"
                }
             ]
          }
@@ -1944,6 +2101,30 @@
                   "comment" : "#1"
                }
             ]
+         },
+         {
+            "comment" : "Thunder and lightning sensor Fine Offset WH57, aka Froggit DP60, aka Ambient Weather WH31L - wrong checksum",
+            "dmsg" : "W116#5740C655053F0A7273",
+            "tests" : [
+               {
+                  "returns" : {
+                     "ParseFn" : ""
+                  },
+                  "comment" : "#1"
+               }
+            ]
+         },
+         {
+            "comment" : "Thunder and lightning sensor Fine Offset WH57, aka Froggit DP60, aka Ambient Weather WH31L - wrong CRC",
+            "dmsg" : "W116#5740C655053F0A7372",
+            "tests" : [
+               {
+                  "returns" : {
+                     "ParseFn" : ""
+                  },
+                  "comment" : "#3"
+               }
+            ]
          }
       ],
       "id" : "116",
@@ -2170,6 +2351,18 @@
                   "comment" : "#2"
                }
             ]
+         },
+         {
+            "comment" : "Weather station with 30.3151 (T/H-transmitter), 30.3152 (rain gauge), 30.3153 (anemometer) - wrong CRC",
+            "dmsg" : "W120#FEDFD52C040444920615",
+            "tests" : [
+               {
+                  "returns" : {
+                     "ParseFn" : ""
+                  },
+                  "comment" : "#2"
+               }
+            ]
          }
       ],
       "id" : "120",
@@ -2253,6 +2446,18 @@
                   "comment" : "#0"
                }
             ]
+         },
+         {
+            "comment" : "Inkbird IBS-P01R Pool Thermometer, Inkbird ITH-20R - wrong CRC",
+            "dmsg" : "W123#D3910F800301005A0655FA001405140535F7",
+            "tests" : [
+               {
+                  "returns" : {
+                     "ParseFn" : ""
+                  },
+                  "comment" : "#1"
+               }
+            ]
          }
       ],
       "id" : "123",
@@ -2304,7 +2509,7 @@
                      "humidity" : 55,
                      "state" : "T: 21.0 H: 55",
                      "temperature" : "21.0",
-                     "type" : "WH31e, WH31b, DP50",
+                     "type" : "WH31e, WH31b, DP50, DNT000005",
                      "batteryState" : "ok",
                      "channel" : 1
                   },
@@ -2326,16 +2531,16 @@
                      "humidity" : 60,
                      "state" : "T: 16.7 H: 60",
                      "temperature" : "16.7",
-                     "type" : "WH31e, WH31b, DP50",
+                     "type" : "WH31e, WH31b, DP50, DNT000005",
                      "batteryState" : "ok",
                      "channel" : 2
                   },
-                  "comment" : "#0"
+                  "comment" : "#1"
                }
             ]
          },
          {
-            "comment" : "Ecowitt WH31 Temp Hum sensor channel 2",
+            "comment" : "Ecowitt WH31 Temp Hum sensor channel 3",
             "dmsg" : "W125#30E0A1C634FEA96C000200",
             "rmsg" : "MN;D=30E0A1C634FEA96C000200;R=63;",
             "tests" : [
@@ -2348,11 +2553,30 @@
                      "humidity" : 52,
                      "state" : "T: 5.4 H: 52",
                      "temperature" : "5.4",
-                     "type" : "WH31e, WH31b, DP50",
+                     "type" : "WH31e, WH31b, DP50, DNT000005",
                      "batteryState" : "ok",
                      "channel" : 3
                   },
-                  "comment" : "#0"
+                  "comment" : "#2"
+               }
+            ]
+         },
+         {
+            "comment" : "DNT000005 Temp Hum sensor DCF message",
+            "dmsg" : "W125#52971025010910492909B3",
+            "rmsg" : "MN;D=52971025010910492909B3;R=33;A=2;",
+            "tests" : [
+               {
+                  "internals" : {
+                     "DEF" : "SD_WS_125_DCF",
+                     "NAME" : "SD_WS_125_DCF"
+                  },
+                  "readings" : {
+                     "dcf" : "2025-01-09 10:49:29",
+                     "state" : "97: 2025-01-09 10:49:29",
+                     "type" : "WH31e, WH31b, DP50, DNT000005"
+                  },
+                  "comment" : "#3"
                }
             ]
          },
@@ -2364,7 +2588,7 @@
                   "returns" : {
                      "ParseFn" : ""
                   },
-                  "comment" : "#1"
+                  "comment" : "#4"
                }
             ]
 
@@ -2377,7 +2601,7 @@
                   "returns" : {
                      "ParseFn" : ""
                   },
-                  "comment" : "#2"
+                  "comment" : "#5"
                }
             ]
 
@@ -2429,7 +2653,7 @@
                      "rawRainCounter" : 90,
                      "type" : "WH40"
                   },
-                  "comment" : "#0"
+                  "comment" : "#1"
                }
             ]
          },         
@@ -2449,32 +2673,32 @@
                      "rawRainCounter" : 0,
                      "type" : "WH40"
                   },
-                  "comment" : "#0"
+                  "comment" : "#2"
                }
             ]
          },
          {
             "comment" : "Ecowitt WH40 rain gauge - wrong checksum ",
-            "dmsg" : "W126#",
+            "dmsg" : "W126#40013E3C900000105CA02A",
             "tests" : [
                {
                   "returns" : {
                      "ParseFn" : ""
                   },
-                  "comment" : "#1"
+                  "comment" : "#3"
                }
             ]
 
          },
          {
             "comment" : "Ecowitt WH40 rain gauge - wrong CRC ",
-            "dmsg" : "W126#",
+            "dmsg" : "W126#40013E3C900000115BA02A",
             "tests" : [
                {
                   "returns" : {
                      "ParseFn" : ""
                   },
-                  "comment" : "#2"
+                  "comment" : "#4"
                }
             ]
 
@@ -2539,6 +2763,18 @@
                {
                   "attributes" : {},
                   "comment" : "#1"
+               }
+            ]
+         },
+         {
+            "comment" : "Sainlogic weather stations - wrong CRC",
+            "dmsg" : "W129#FFD4CBD80D11A73C06841B5AC1A14865",
+            "tests" : [
+               {
+                  "returns" : {
+                     "ParseFn" : ""
+                  },
+                  "comment" : "#2"
                }
             ]
          }
@@ -2637,6 +2873,18 @@
             "tests" : [
                {
                   "comment" : "#1"
+               }
+            ]
+         },
+         {
+            "comment" : "Temperature transmitter TFA 30.3212 - wrong CRC",
+            "dmsg" : "W48#FF4D40A3FFEF",
+            "tests" : [
+               {
+                  "returns" : {
+                     "ParseFn" : ""
+                  },
+                  "comment" : "#2"
                }
             ]
          }

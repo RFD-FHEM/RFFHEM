@@ -1,5 +1,5 @@
 #########################################################################################
-# $Id: 14_SD_UT.pm 0 2024-10-28 16:04:54Z elektron-bbs $
+# $Id: 14_SD_UT.pm 0 2024-12-03 16:26:12Z elektron-bbs $
 #
 # The file is part of the SIGNALduino project.
 # The purpose of this module is universal support for devices.
@@ -433,6 +433,14 @@
 #     CREATE_6601TL_F53A light_on_off     MS;P1=425;P2=-1142;P3=1187;P4=-395;P5=-12314;D=15121212123412341234341212123412341212121212121234;CP=1;SP=5;R=232;O;m2;
 #     CREATE_6601TL_F53A light_cold_warm  MS;P1=432;P2=-1143;P3=1183;P4=-393;P5=-12300;D=15121212123412341234341212123412341212121212123434;CP=1;SP=5;R=231;O;m2;
 #     CREATE_6601TL_F53A fan_faster       MS;P0=-11884;P1=392;P2=-1179;P3=1180;P4=-391;D=10121212123412341234341212123412341212121212341234;CP=1;SP=0;R=231;O;m2;
+#}
+###############################################################################################################################################################################
+# - Hamulight remote control with five buttons and touch control for dim [Protocol 22] 
+#{    elektron-bbs 2023-12-10
+#     https://github.com/RFD-FHEM/RFFHEM/issues/1206 @ obduser 2023-12-09
+#     Hamulight_AB_3605 on_off   MU;P0=-16360;P1=144;P2=-191;P3=209;P4=1194;P5=-1203;P6=607;P7=-591;D=01232324562623737623737626262626262376237623762373737373762376262623737373232323245626237376237376262626262623762376237623737373737623762626237373732323232456262373762373762626262626237623762376237373737376237626262373737323232324562623737623737626262626;CP=3;R=5;O;
+#     Hamulight_AB_3605 dim_1    MU;P0=-14008;P1=136;P2=-199;P3=210;P4=1200;P5=-1200;P6=596;P7=-591;D=01232324562623737623737626262626262376237623762376237623762623737373762373232323245626237376237376262626262623762376237623762376237626237373737623732323232456262373762373762626262626237623762376237623762376262373737376237323232324562623737623737626262626;CP=3;R=6;O;
+#     Hamulight_AB_3605 dim_4    MU;P0=-16204;P1=120;P2=-204;P3=204;P4=1192;P5=-1208;P6=593;P7=-592;D=01232324562623737623737626262626262376237623762373762623762376262626262373232323245626237376237376262626262623762376237623737626237623762626262623732323232456262373762373762626262626237623762376237376262376237626262626237323232324562623737623737626262626;CP=3;R=5;O;
 #}
 ###############################################################################################################################################################################
 # - Remote control Halemeier HA-HX2 for Actor HA-RX-M2-1 [Protocol 132]
@@ -1075,6 +1083,15 @@ my %models = (
                    Protocol   => 'P118',
                    Typ        => 'remote'
                  },
+  'Hamulight_AB' => { '01011111' => 'on_off',
+                      '01010101' => 'dim_1',
+                      '01010110' => 'dim_2',
+                      '01010000' => 'dim_3',
+                      '01011001' => 'dim_4',
+                      hex_length => [8],
+                      Protocol   => 'P22',
+                      Typ        => 'remote'
+                 },
   'HA_HX2' => { '10101100' => 'off',
                 '10101010' => 'on',
                 Protocol   => 'P132',
@@ -1113,6 +1130,7 @@ sub SD_UT_Initialize {
     'Techmar.*'    => {ATTR => 'model:Techmar', FILTER => '%NAME', autocreateThreshold => '3:180', GPLOT => q{}},
     'Visivo.*'     => {ATTR => 'model:Visivo', FILTER => '%NAME', autocreateThreshold => '3:180', GPLOT => q{}},
     'xavax.*'      => {ATTR => 'model:xavax', FILTER => '%NAME', autocreateThreshold => '3:180', GPLOT => q{}},
+    'Hamulight_AB.*' => {ATTR => 'model:Hamulight_AB', FILTER => '%NAME', autocreateThreshold => '3:180', GPLOT => q{}},
     'unknown_please_select_model' => {ATTR => 'model:unknown', FILTER => '%NAME', autocreateThreshold => '5:180', GPLOT => q{}},
   };
   return FHEM::Meta::InitMod( __FILE__, $hash );
@@ -1127,7 +1145,6 @@ sub SD_UT_Define {
 
   # Anzeigen der Modulversion (Internal FVERSION) über FHEM::Meta, Variable in META.json Abschnitt erforderlich: "version": "v1.0.0", siehe https://wiki.fhem.de/wiki/Meta
   return $@ unless ( FHEM::Meta::SetInternals($hash) );
-
   # Argument                    0     1      2       3           4
   return 'wrong syntax: define <name> SD_UT <model> <HEX-Value> <optional IODEV>' if(int(@a) < 3 || int(@a) > 5);
   return "wrong <model> $a[2]\n\n(allowed modelvalues: " . join(' | ', sort keys %models).')' if $a[2] && ( !grep { $_ eq $a[2] } %models );
@@ -1161,12 +1178,12 @@ sub SD_UT_Define {
   # uncoverable branch true
   return "wrong HEX-Value! ($a[3]) $a[2] HEX-Value to short or long (must be 3 chars) or not HEX (0-9 | a-f | A-F){3}"
          if (($a[2] eq 'SA_434_1_mini' || $a[2] eq 'QUIGG_DMV' || $a[2] eq 'TR_502MSV' || $a[2] eq 'BeSmart_S4' || $a[2] eq 'BeEasy_TX') && not $a[3] =~ /^[0-9a-fA-F]{3}/xms);    
-  ### [4 nibble] checks Neff SF01_01319004 & BOSCH SF01_01319004_Typ2 & Chilitec_22640 & ESTO KL_RF01 & RCnoName20 & RCnoName20_09 & RCnoName20_10 & RCnoName128 & DC-1961-TG & xavax & BF_301 & Meikee_xx & CREATE_6601TL ###
+  ### [4 nibble] checks Neff SF01_01319004 & BOSCH SF01_01319004_Typ2 & Chilitec_22640 & ESTO KL_RF01 & RCnoName20 & RCnoName20_09 & RCnoName20_10 & RCnoName128 & DC-1961-TG & xavax & BF_301 & Meikee_xx & CREATE_6601TL & Hamulight_AB ###
   # uncoverable branch true
   return "Wrong HEX-Value! ($a[3]) $a[2] Hex-value to short or long (must be 4 chars) or not hex (0-9 | a-f | A-F) {4}"
          if (($a[2] eq 'SF01_01319004' || $a[2] eq 'SF01_01319004_Typ2' || $a[2] eq 'Chilitec_22640' || $a[2] eq 'KL_RF01' || $a[2] eq 'RCnoName20' || $a[2] eq 'RCnoName20_09'
            || $a[2] eq 'RCnoName20_10' || $a[2] eq 'RCnoName128' || $a[2] eq 'DC_1961_TG' || $a[2] eq 'xavax' || $a[2] eq 'BF_301' || $a[2] eq 'Meikee_21' || $a[2] eq 'Meikee_24'
-           || $a[2] eq 'CREATE_6601TL' || $a[2] eq 'HA_HX2') && not $a[3] =~ /^[0-9a-fA-F]{4}/xms);
+           || $a[2] eq 'CREATE_6601TL' || $a[2] eq 'HA_HX2' || $a[2] eq 'Hamulight_AB') && not $a[3] =~ /^[0-9a-fA-F]{4}/xms);
   ### [5 nibble] checks CREATE_6601L & RCnoName127
   # uncoverable branch true 
   return "Wrong HEX-Value! ($a[3]) $a[2] Hex-value to short or long (must be 5 chars) or not hex (0-9 | a-f | A-F) {5}" if (($a[2] eq 'CREATE_6601L' || $a[2] eq 'RCnoName127') && not $a[3] =~ /^[0-9a-fA-F]{5}/xms);
@@ -1198,7 +1215,7 @@ sub SD_UT_Define {
   # uncoverable branch true
   return "SD_UT model $a[2] wrong devicecode: ($a[3]) - must be 3 digit house code (hex 0-9 A-F) _ 1 digit channel (dec 1-3) - e.g. 3DC_1" if ($a[2] eq 'TC6861' && not $a[3] =~ /^[0-9A-F]{3}_[1-3]$/xms);  
 
-  $hash->{lastMSG} =  'no data';
+  $hash->{lastMSG} = 'no data';
   $hash->{bitMSG} =  'no data';
   $iodevice = $a[4] if($a[4]);
   my $name = $hash->{NAME};
@@ -1424,6 +1441,11 @@ sub SD_UT_Set {
     } elsif ($model eq 'TC6861') {
       $msg = $models{$model}{Protocol} . q{#P};
       $msgEnd = '#R' . $repeats;
+    ############ Hamulight_AB ############
+    } elsif ($model eq 'Hamulight_AB') {
+      my $adr = sprintf '%016b' , hex $definition[1]; # argument 1 - adress to binary with 16 bits
+      $msg = $models{$model}{Protocol} . q{#} . $adr;
+      $msgEnd = '#R10';
     ############ Meikee_21 | Meikee_24 | RCnoName128 | RCnoName20 | RCnoName20_09 | RCnoName20_10 | DC-1961-TG | CREATE_6601TL | HA_HX2 ############
     } elsif ($model eq 'Meikee_21' || $model eq 'Meikee_24' || $model eq 'RCnoName128' || $model eq 'RCnoName20' || $model eq 'RCnoName20_09' || $model eq 'RCnoName20_10'
           || $model eq 'DC_1961_TG' || $model eq 'CREATE_6601TL' || $model eq 'HA_HX2') {
@@ -1454,6 +1476,7 @@ sub SD_UT_Set {
         }
       }
     }
+    $ret .= 'dim:slider,5,1,100 ' if ($model eq 'Hamulight_AB');
   } else {
     if (defined $msgEnd) {
       ### if cmd, set bits ###
@@ -1472,6 +1495,14 @@ sub SD_UT_Set {
           $save = $keys;
           last if ($value eq $cmd);
         }
+      }
+      if ($model eq 'Hamulight_AB' && $cmd eq 'dim') {
+        return "$name: The value for the dimming command is not in the allowed range of 5 to 100!" if ($a[1] < 5 || $a[1] > 100);
+        $value = 'dim';
+        my $dimVal = FHEM::Core::Utils::Math::round( ($a[1] * 1.17 + 170) , 0);
+        $dimVal -= 127 if ($dimVal > 254);
+        $save = sprintf '%08b' , $dimVal; # dec to bin
+        Log3 $name, 5, "$ioname: SD_UT_Set model=$model dim=$a[1] send=$dimVal bin=$save";
       }
       return "$name Unkown set command!" if ($value ne $cmd);
 
@@ -1542,6 +1573,15 @@ sub SD_UT_Set {
         my @split = split /[#]/xms , $msg;
         my $sum = oct ('0b'. substr $split[1],0,8) + oct ('0b'. substr $split[1],8,8) + oct ('0b'. substr $split[1],16,8) + oct ('0b'. substr $split[1],24,8) + oct ('0b'. substr $split[1],32,8);
         $sum = (97 + $sum) & 0xFF;
+        Log3 $name, 5, "$ioname: SD_UT_Set $name bits=$split[1] sum=$sum";
+        $msg .= sprintf '%08b' , $sum;
+        $msg .= $msgEnd;
+      ############ Hamulight_AB ############
+      } elsif ($model eq 'Hamulight_AB') {
+        $msg .= $save; # command
+        my @split = split /[#]/xms , $msg;
+        my $sum = oct ('0b'. substr $split[1],0,8) + oct ('0b'. substr $split[1],8,8) + oct ('0b'. substr $split[1],16,8);
+        $sum = ($sum - 83) & 0xFF;
         Log3 $name, 5, "$ioname: SD_UT_Set $name bits=$split[1] sum=$sum";
         $msg .= sprintf '%08b' , $sum;
         $msg .= $msgEnd;
@@ -1926,6 +1966,24 @@ sub SD_UT_Parse {
           $name = $model . '_' . $deviceCode;
         }
       }
+    }
+    if (!$def && $protocol == 22) {
+      ### Remote control Hamulight_AB [P22] ###
+      my $sum = 0;
+      for (my $n = 0; $n < 6; $n += 2) { # sum over 3 bytes
+        $sum += hex(substr($rawData, $n, 2));
+      }
+      $sum = ($sum - 83) & 0xFF;
+      if ($sum != hex(substr($rawData, 6, 2))) { # byte 4
+        Log3 $iohash, 3, "$ioname: SD_UT_Parse device Hamulight_AB - ERROR checksum $sum != " . hex(substr($rawData, 6, 2));
+        return '';
+      }
+      $deviceCode = substr($rawData,0,4);
+      $state = substr($bitData,16,8);
+      $model = 'Hamulight_AB';
+      $devicedef = 'Hamulight_AB ' . $deviceCode;
+      $name = 'Hamulight_AB_' . $deviceCode;
+      $def = $modules{SD_UT}{defptr}{$devicedef};
     }
     if (!$def && $protocol == 92) {
       ### Remote control Krinner_LUMIX [P92] ###
@@ -2413,8 +2471,8 @@ sub SD_UT_Parse {
   } elsif ($model eq 'TC6861') {
     $state = substr($bitData,0,4);
     $deviceCode = substr($rawData,1,3);
-  ############ Meikee [P118] or RCnoName128 [P128] or CREATE_6601TL [P130] or HA-HX2 [132] ############
-  } elsif ($model eq 'Meikee_21' || $model eq 'Meikee_24' || $model eq 'RCnoName128' || $model eq 'CREATE_6601TL' || $model eq 'HA_HX2') {
+  ############ Meikee [P118] or RCnoName128 [P128] or CREATE_6601TL [P130] or HA-HX2 [132] or Hamulight_AB [P22] ############
+  } elsif ($model eq 'Meikee_21' || $model eq 'Meikee_24' || $model eq 'RCnoName128' || $model eq 'CREATE_6601TL' || $model eq 'HA_HX2' || $model eq 'Hamulight_AB') {
     $state = substr $bitData,16,8;
     $deviceCode = substr $rawData,0,4;
   ############ RCnoName127 [P127] ############
@@ -2442,7 +2500,11 @@ sub SD_UT_Parse {
         last;
       }
     }
-
+    if ($model eq 'Hamulight_AB' && $state =~ /^[0|1]{8}$/xms ) { # bei dim slider 5-100
+      my $dec = oct("0b".$state);
+      Log3 $name, 4, "$ioname: SD_UT_Parse $devicedef state=$state ($dec)";
+      $state = 'dim';
+    }
     if ($model eq 'Novy_840029' || $model eq 'Novy_840039') {
       $state = $state =~ /^[01]+$/x ? "Please check your model. The code $deviceCode is not supported." : $state;
     }
@@ -2770,6 +2832,7 @@ sub SD_UT_tristate2bin {
     <li>DC-1961-TG - remote control with 12 buttons for ceiling fan with lighting&nbsp;&nbsp;&nbsp;<small>(module model: DC_1961_TG, protocol 20)</small></li>
     <li>ESTO ceiling lamp&nbsp;&nbsp;&nbsp;<small>(module model: KL_RF01, protocol 93)</small></li>
     <li>Halemeier HA-HX2&nbsp;&nbsp;&nbsp;<small>(module model: HA-HX2, protocol 132)</small></li>
+    <li>HAMULiGHT remote control with 5 buttons for LED lighting&nbsp;&nbsp;&nbsp;<small>(module model: Hamulight_AB, protocol 22)</small></li>
     <li>Hoermann HS1-868-BS&nbsp;&nbsp;&nbsp;<small>(module model: HS1_868_BS, protocol 69)</small></li>
     <li>Hoermann HSM4&nbsp;&nbsp;&nbsp;<small>(module model: HSM4, protocol 69)</small></li>
     <li>Krinner LUMIX X-Mas light string&nbsp;&nbsp;&nbsp;<small>(module model: Krinner_LUMIX, protocol 92)</small></li>
@@ -3015,6 +3078,7 @@ sub SD_UT_tristate2bin {
     <li>Fernbedienung mit 12 Tasten f&uuml;r Deckenventilator&nbsp;&nbsp;&nbsp;<small>(Modulmodel: RCnoName128, Protokoll 128)</small></li>
     <li>Fernbedienung mit 14 Tasten f&uuml;r Deckenventilator&nbsp;&nbsp;&nbsp;<small>(Modulmodel: RCnoName127, Protokoll 127)</small></li>
     <li>Halemeier HA-HX2&nbsp;&nbsp;&nbsp;<small>(Modulmodel: HA-HX2, Protokoll 132)</small></li>
+    <li>HAMULiGHT Fernbedienung mit 5 Tasten f&uuml;r LED-Beleuchtung&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Hamulight_AB, Protokoll 22)</small></li>
     <li>Hoermann HS1-868-BS&nbsp;&nbsp;&nbsp;<small>(Modulmodel: HS1_868_BS, Protokoll 69)</small></li>
     <li>Hoermann HSM4&nbsp;&nbsp;&nbsp;<small>(Modulmodel: HSM4, Protokoll 69)</small></li>
     <li>Krinner LUMIX Christbaumkerzen&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Krinner_LUMIX, Protokol 92)</small></li>
@@ -3263,7 +3327,7 @@ sub SD_UT_tristate2bin {
       }
     }
   },
-  "version": "v1.0.6",
+  "version": "v1.0.8",
   "release_status": "stable",
   "resources": {
     "bugtracker": {
