@@ -71,7 +71,6 @@ jobs:
         uses: tj-actions/changed-files@v45
         with:
           matrix:  true
-          since_last_remote_commit: true
           files: |
               FHEM/**.pm
               FHEM/lib/**.pm
@@ -114,7 +113,7 @@ jobs:
         # if: endsWith(matrix.files, '00_SIGNALduino.pm')
         id: versionList
         run: |
-          VERSION=$(sed -n 's/.*\([0-9]\+\.[0-9]\+\.[0-9]\+\).*/\1/p' ${{ matrix.files }})
+          VERSION=$(sed -n '/# \$Id:/ s/.*\([0-9]\+\.[0-9]\+\.[0-9]\+\).*/\1/p' ${{ matrix.files }})
           echo "version=${VERSION}" >> $GITHUB_ENV
 
       # - uses: jungwinter/split@v2
@@ -127,12 +126,18 @@ jobs:
       
       - name: Update Id Line with sed
         run: |
-          find . -name "${{ matrix.files }}" -exec sed -i "s/# \$Id: .*$/# \$Id: ${{ matrix.files }} ${version} ${{ needs.metadata.outputs.datetime }}Z $last_committer \$/g" {} +
+          FILE_NAME=$(basename ${{ matrix.files }})
+          sed -i "s/# \$Id: .*$/# \$Id: ${FILE_NAME} ${{env.version}} ${{ needs.metadata.outputs.datetime }}Z ${{ github.event.pull_request.user.login }} \$/g" ${{ matrix.files }}
+
+      - name: Update Version in META yaml
+        run: |
+          sed -i -E 's|("version": "v)[0-9]+\.[0-9]+\.[0-9]+(.*)|\1${{env.version}}\2|g' ${{ matrix.files }}
 
       - name: Update SDUINO_VERSION with sed
         if: endsWith(matrix.files, '00_SIGNALduino.pm')  
         run: |
-          find . -name "${{ matrix.files }}" -exec sed -i "s/# SDUINO_VERSION: .*/SDUINO_VERSION                  => '${version}+${{ needs.metadata.outputs.date }}'/g" {} +
+          # Update SDUINO_VERSION with the new version and date
+          sed -i -E "s/(SDUINO_VERSION\s*=>\s').*('.*)/\1${{ env.version }}+${{ needs.metadata.outputs.date }}\2/g" ${{ matrix.files }}
 
       - name: Artifactname
         env:
