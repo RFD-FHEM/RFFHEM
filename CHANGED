@@ -1,3 +1,6 @@
+2025-02-19 - Merge pull request #1300 from RFD-FHEM/test_VersionReplace
+
+Automatic version and date replace fixed
 2025-02-09 - replace check Digest::CRC in module 14_SD_WS (#1298)
 
 * 14_SD_WS check Digest::CRC replaced
