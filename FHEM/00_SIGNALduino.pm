@@ -1,5 +1,5 @@
-# $Id: 00_SIGNALduino.pm 3.5.7 2024-12-23 12:38:38Z elektron-bbs $
-# v3.5.6 - https://github.com/RFD-FHEM/RFFHEM/tree/master
+# $Id: 00_SIGNALduino.pm 3.5.7 2025-02-19 07:52:43Z sidey79 $
+# https://github.com/RFD-FHEM/RFFHEM/tree/master
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incoming messages
 # see http://www.fhemwiki.de/wiki/SIGNALDuino
 # It was modified also to provide support for raw message handling which can be send from the SIGNALduino
@@ -8,7 +8,7 @@
 #
 # 2014-2015  S.Butzek, N.Butzek
 # 2016-2019  S.Butzek, Ralf9
-# 2019-2024  S.Butzek, HomeAutoUser, elektron-bbs
+# 2019-2025  S.Butzek, HomeAutoUser, elektron-bbs
 
 
 package main;
@@ -42,7 +42,7 @@ use List::Util qw(first);
 
 
 use constant {
-  SDUINO_VERSION                  => '3.5.7+20241101',  # Datum wird automatisch bei jedem pull request aktualisiert
+  SDUINO_VERSION                  => '3.5.7+20250219',  # Datum wird automatisch bei jedem pull request aktualisiert
   SDUINO_INIT_WAIT_XQ             => 1.5,     # wait disable device
   SDUINO_INIT_WAIT                => 2,
   SDUINO_INIT_MAXRETRY            => 3,
@@ -5704,7 +5704,7 @@ USB-connected devices (SIGNALduino):<br>
       "web": "https://wiki.fhem.de/wiki/SIGNALduino"
     }
   },
-  "version": "v3.5.6"
+  "version": "v3.5.7"
 }
 =end :application/json;q=META.json
 =cut
