@@ -1,9 +1,9 @@
-# $Id: SD_ProtocolData.pm 26975 2025-01-26 12:43:07Z elektron-bbs $
+# $Id: SD_ProtocolData.pm 26975 2025-04-22 12:43:07Z elektron-bbs $
 # The file is part of the SIGNALduino project.
 # All protocol definitions are contained in this file.
 #
 # 2016-2019  S.Butzek, Ralf9
-# 2019-2023  S.Butzek, HomeAutoUser, elektron-bbs
+# 2019-2025  S.Butzek, HomeAutoUser, elektron-bbs
 #
 # !!! useful hints !!!
 # --------------------
@@ -70,8 +70,8 @@
 ##### notice #### or #### info ############################################################################################################
 # !!! Between the keys and values no tabs, please use spaces !!!
 # !!! Please use first unused id for new protocols !!!
-# ID´s are currently unused: 135 - 
-# ID´s need to be revised (preamble u): 5|19|21|22|23|25|28|31|36|40|52|59|63
+# ID´s are currently unused: 136 - 
+# ID´s need to be revised (preamble u): 5|19|21|23|25|28|31|36|40|52|59|63
 ###########################################################################################################################################
 # Please provide at least three messages for each new MU/MC/MS/MN protocol and a URL of issue in GitHub or discussion in FHEM Forum
 # https://forum.fhem.de/index.php/topic,58396.975.html | https://github.com/RFD-FHEM/RFFHEM
@@ -85,7 +85,7 @@ package lib::SD_ProtocolData;
   use strict;
   use warnings;
 
-  our $VERSION = '1.58';
+  our $VERSION = '1.59';
   our %protocols = (
     "0" =>  ## various weather sensors (500 | 9100)
             # Mebus | Id:237 Ch:1 T: 1.9 Bat:low           MS;P0=-9298;P1=495;P2=-1980;P3=-4239;D=1012121312131313121313121312121212121212131212131312131212;CP=1;SP=0;R=223;O;m2;
@@ -3583,7 +3583,25 @@ package lib::SD_ProtocolData;
         length_min      => '56',      # to filter messages | must check
         clientmodule    => 'WMBUS',
       },
-
+    "135" =>  ## Temperatursensor TFA Dostmann 30.3255.02
+              # https://forum.fhem.de/index.php?topic=141436.0 @ Johann.S 2025-04-18
+              # Ch: 2  T: 21.4  batteryState: ok  sendmode: manual   MU;P0=-5132;P1=963;P2=-992;P3=467;P4=-273;P5=230;P6=-499;D=01212121234565656343456343434563456563456343434565634563434565634343456565612121212345656563434563434345634565634563434345656345634345656343434565656121212123456565634345634343456345656345634343456563456343456563434345656561212121234565656343456343434563;CP=5;R=51;O;
+              # Ch: 2  T: 21.4  batteryState: ok  sendmode: auto     MU;P0=-10720;P1=965;P2=-994;P3=470;P4=-265;P5=237;P6=-501;D=01212121234565656343456343456563456563456343434565634563456345634343456565612121212345656563434563434565634565634563434345656345634563456343434565656121212123456565634345634345656345656345634343456563456345634563434345656561212121234565656343456343456563;CP=5;R=60;O;
+      {
+        name            => 'TFA 30.3255.02',
+        comment         => 'Temperature sensor TFA 30.3255.02',
+        id              => '135',
+        knownFreqs      => '433.92',
+        one             => [2,-1],           # 488,-244
+        zero            => [1,-2],           # 244,-488
+        start           => [4,-4,4,-4,4,-4], # 976,-976,976,-976,976,-976,976,-976
+        clockabs        => 244,
+        format          => 'twostate',
+        preamble        => 'W135#',
+        clientmodule    => 'SD_WS',
+        length_min      => '32',
+        length_max      => '33',
+      },
     ########################################################################
     #### ###  register informations from other hardware protocols  #### ####
 
