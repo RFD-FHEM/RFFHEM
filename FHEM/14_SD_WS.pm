@@ -1842,10 +1842,10 @@ sub SD_WS_Parse {
         # i:  8 bit random id (changes on power-loss)
         # b:  1 bit battery indicator (1=>OK, 0=>LOW)
         # s:  1 bit sendmode (0=>auto, 1=>manual)
-        # c:  2 bit channel valid channels are 1-3
+        # c:  2 bit channel, valid channels are 1-3
         # t: 12 bit unsigned temperature, offset 500, scaled by 10
-        # x:  8 bit checksum over byte 0-2 +87 +b &0xFF = byte 3
-        # ?:  4 bit filled
+        # x:  8 bit checksum
+        # ?:  4 bit 1 bit end marking, 3 bit filled
         # The sensor sends 4 repetitions at intervals of about 32 seconds
         sensortype => 'TFA 30.3255.02',
         model      => 'SD_WS_135_T',
@@ -1855,19 +1855,17 @@ sub SD_WS_Parse {
         sendmode   => sub {my (undef,$bitData) = @_; return substr($bitData,9,1) eq "1" ? "manual" : "auto"; },
         channel    => sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,10,11); },
         temp       => sub {my (undef,$bitData) = @_; return ((SD_WS_binaryToNumber($bitData,12,23) - 500) / 10.0); },
-        crcok      => sub { my ($rawData,$bitData) = @_;
-                            my $checksum = 87 + substr($bitData,8,1);
-                            for (my $i = 0; $i < 6; $i += 2) {
-                              $checksum += hex(substr($rawData,$i,2));
-                            }
-                            $checksum &= 0xFF;
-                            my $sum = hex(substr($rawData,6,2));
-                            if ($checksum != $sum) {
-                              Log3 $name, 3, qq[$name: SD_WS_135 Parse msg $rawData - ERROR checksum $checksum != $sum];
-                              return 0;
-                            }
-                            return 1;
-                          }, 
+        crcok      => sub {my $msg = shift;
+                           my @n = split //, $msg;
+                           my $sum1 = hex($n[0]) + hex($n[2]) + hex($n[4]) + 6;
+                           my $sum2 = hex($n[1]) + hex($n[3]) + hex($n[5]) + 6 + ($sum1 >> 4);
+                           if (($sum1 & 0x0F) == hex($n[6]) && ($sum2 & 0x0F) == hex($n[7])) {
+                             return 1;
+                           } else {
+                            Log3 $name, 3, "$name: SD_WS_135 Parse msg $msg - ERROR checksum " . ($sum1 & 0x0F) . "=" . hex($n[6]) . " " . ($sum2 & 0x0F) . "=" . hex($n[7]);
+                             return 0;
+                           }
+                          },
     },
   );
 
