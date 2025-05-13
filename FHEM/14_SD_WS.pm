@@ -1,4 +1,4 @@
-# $Id: 14_SD_WS.pm 26982 2025-05-13 06:20:50Z elektron-bbs $
+# $Id: 14_SD_WS.pm  2025-05-13 15:08:04Z elektron-bbs $
 #
 # The purpose of this module is to support serval
 # weather sensors which use various protocol
@@ -136,7 +136,7 @@ sub SD_WS_Define {
   carp "SD_WS_Define, too few arguments ($hash, $def)" if @_ < 2;
   my @a = split("[ \t][ \t]*", $def);
 
-  # Anzeigen der Modulversion (Internal FVERSION) über FHEM::Meta, Variable in META.json Abschnitt erforderlich: "version": "v1.0.0", siehe https://wiki.fhem.de/wiki/Meta
+  # Anzeigen der Modulversion (Internal FVERSION) über FHEM::Meta, Variable in META.json Abschnitt erforderlich: "version": "v", siehe https://wiki.fhem.de/wiki/Meta
   return $@ unless ( FHEM::Meta::SetInternals($hash) );
 
   return "wrong syntax: define <name> SD_WS <code> ".int(@a) if(int(@a) < 3 );
@@ -2862,7 +2862,7 @@ sub SD_WS_WH2SHIFT {
   "x_fhem_maintainer_github": [
     "Sidey79"
   ],
-  "version": "v1.1.7",
+  "version": "v",
   "description": "The SD_WS module processes the messages from various environmental sensors received from an IO device (CUL, CUN, SIGNALDuino, SignalESP etc.)",
   "dynamic_config": 1,
   "keywords": [
