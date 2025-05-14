@@ -136,7 +136,7 @@ sub SD_WS_Define {
   carp "SD_WS_Define, too few arguments ($hash, $def)" if @_ < 2;
   my @a = split("[ \t][ \t]*", $def);
 
-  # Anzeigen der Modulversion (Internal FVERSION) über FHEM::Meta, Variable in META.json Abschnitt erforderlich: "version": "v", siehe https://wiki.fhem.de/wiki/Meta
+  # Anzeigen der Modulversion (Internal FVERSION) über FHEM::Meta, Variable in META.json Abschnitt erforderlich: "version": "v1.0.0", siehe https://wiki.fhem.de/wiki/Meta
   return $@ unless ( FHEM::Meta::SetInternals($hash) );
 
   return "wrong syntax: define <name> SD_WS <code> ".int(@a) if(int(@a) < 3 );
