@@ -1,4 +1,4 @@
-# $Id: 14_SD_WS.pm  2025-05-13 15:08:04Z elektron-bbs $
+# $Id: 14_SD_WS.pm v1.1.7 2025-05-13 15:08:04Z elektron-bbs $
 #
 # The purpose of this module is to support serval
 # weather sensors which use various protocol
@@ -2862,7 +2862,7 @@ sub SD_WS_WH2SHIFT {
   "x_fhem_maintainer_github": [
     "Sidey79"
   ],
-  "version": "v",
+  "version": "v1.1.6",
   "description": "The SD_WS module processes the messages from various environmental sensors received from an IO device (CUL, CUN, SIGNALDuino, SignalESP etc.)",
   "dynamic_config": 1,
   "keywords": [
