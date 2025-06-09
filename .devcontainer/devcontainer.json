@@ -1,0 +1,17 @@
+{
+    "name": "RFFHEM Development environment",
+    "dockerComposeFile": "docker-compose.devcontainer.yml",
+    "service": "RFFHEM-development",
+    "workspaceFolder": "/usr/src/RFFHEM",
+    "postCreateCommand": "/bin/bash -c '. /entry.sh && initialContainerSetup'",
+    "postStartCommand": "/bin/bash -c './.devcontainer/link_recursive.sh'",
+    "features": {
+    },
+    "customizations": {
+        "vscode": {
+        "settings": {},
+        "extensions": ["richterger.perl","rioj7.command-variable"]
+        }
+     },
+     "remoteUser": "fhem"
+}
