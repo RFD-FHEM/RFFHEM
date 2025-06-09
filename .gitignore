@@ -13,3 +13,4 @@ workspace.code-workspace
 .vstags
 .devcontainer/vscode/perl-lang
 .gitconfig
+testOutput.*
