@@ -16,7 +16,7 @@ RUN apt-get update && \
 
 COPY cpanfile /usr/src/app/devcontainer/cpanfile
     
-RUN cpm install --cpanfile /usr/src/app/devcontainer/cpanfile --without-test --with-suggests --with-recommends --show-build-log-on-failure --configure-timeout=360 --workers=$(nproc) --local-lib-contained /usr/src/app/devcontainer
+RUN cpm install --cpanfile /usr/src/app/devcontainer/cpanfile --feature devcontainer --without-test --with-suggests --with-recommends --show-build-log-on-failure --configure-timeout=360 --workers=$(nproc) --local-lib-contained /usr/src/app/devcontainer
 
 ENV PERL5LIB=${PERL5LIB}:/usr/src/app/devcontainer/lib/perl5
 

@@ -14,5 +14,8 @@ requires 'Digest::CRC';
 requires 'Math::Trig';
 requires 'Storable'; 
 requires 'Test::Without::Module';
-requires 'Perl::LanguageServer';
-requires 'Perl::Critic';
+
+feature 'devcontainer' => sub {
+    requires 'Perl::LanguageServer';
+    requires 'Perl::Critic';
+};
