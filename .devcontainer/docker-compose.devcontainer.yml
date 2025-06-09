@@ -8,5 +8,6 @@ services:
     volumes:
       - ../:/usr/src/RFFHEM:delegated
       - ../.devcontainer/vscode:/usr/src/RFFHEM/.vscode:delegated # VSCode config files
-      - ~/.gitconfig:/usr/src/RFFHEM/.gitconfig:ro
+      - ~/.gitconfig:/root/.gitconfig:ro
     entrypoint: /bin/sh -c "while sleep 1000; do :; done"
+    

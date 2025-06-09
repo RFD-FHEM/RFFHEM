@@ -20,11 +20,17 @@ RUN cpm install --cpanfile /usr/src/app/devcontainer/cpanfile --without-test --w
 
 ENV PERL5LIB=${PERL5LIB}:/usr/src/app/devcontainer/lib/perl5
 
+
 # add user
-RUN set -eux \
-    && /bin/bash -c '. /entry.sh && setGlobal_PIDFILE && prepareFhemUser' \
-    && usermod --home /usr/src/RFFHEM --shell /bin/bash fhem \
-    && echo "fhem ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers  
+#ENV FHEM_UID=1000 \
+#    FHEM_GID=1000
+#ARG USERNAME=fhem
+
+#RUN set -eux \
+#    && useradd --home /usr/src/RFFHEM --shell /bin/bash --uid ${FHEM_UID} --no-user-group --non-unique -m $USERNAME \
+#    && echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME \
+#    && chmod 0440 /etc/sudoers.d/$USERNAME
+# && /bin/bash -c '. /entry.sh && setGlobal_PIDFILE && prepareFhemUser' \
 
 EXPOSE 8083
 
