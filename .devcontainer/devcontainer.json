@@ -10,7 +10,11 @@
     "customizations": {
         "vscode": {
         "settings": {},
-        "extensions": ["richterger.perl","rioj7.command-variable"]
+        "extensions": [
+            "richterger.perl",
+            "rioj7.command-variable",
+            "shd101wyy.markdown-preview-enhanced"
+        ]
         }
      },
      //"remoteUser": "fhem",
