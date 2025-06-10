@@ -1,4 +1,4 @@
-# $Id: 14_SD_WS.pm 0 2025-06-09 18:35:21Z elektron-bbs $
+# $Id: 14_SD_WS.pm 0 2025-06-10 10:02:15Z elektron-bbs $
 #
 # The purpose of this module is to support serval
 # weather sensors which use various protocol
@@ -2852,7 +2852,7 @@ sub SD_WS_WH2SHIFT {
   "abstract": "Supports various weather stations",
   "author": [
     "Sidey <>",
-    "ralf9 <>"
+    "ralf9 <>",
     "elektron-bbs <>"
   ],
   "x_fhem_maintainer": [
