@@ -1,3 +1,6 @@
+2025-06-10 - 14_SD_WS.pm Bugfix META.json (#1309)
+
+* SD_WS_14-Bugfix-Meta
 2025-06-10 - new protocol 135 for temperature sensor TFA Dostmann 30.3255.02 (#1305)
 
 * SD_WS_135
