@@ -2852,7 +2852,7 @@ sub SD_WS_WH2SHIFT {
   "abstract": "Supports various weather stations",
   "author": [
     "Sidey <>",
-    "ralf9 <>"
+    "ralf9 <>",
     "elektron-bbs <>"
   ],
   "x_fhem_maintainer": [
