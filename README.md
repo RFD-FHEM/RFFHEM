@@ -104,7 +104,7 @@ Supported Devices / Protocols
 |Technoline TX3 | Weather sensor |
 |Tedsen SKX1xx, SKX2xx, SKX4xx, SKX6xx | Remote control |
 |Temola TM40 | Wireless grill, meat, roast thermometer with 4 temperature sensors |
-|TFA 30.3151, 30.3152, 30.3153, 30.3157, 30.3200, 30.3208.02, 30.3209.02, 30.3212, 30.3221.02, 30.3222.02, 30.3228.02, 30.3229.02, 30.3233.01, 30.3251.10, 35.1077.54.S2, 35.1140.01 | Weather sensors and stations |
+|TFA 30.3151, 30.3152, 30.3153, 30.3157, 30.3200, 30.3208.02, 30.3209.02, 30.3212, 30.3221.02, 30.3222.02, 30.3228.02, 30.3229.02, 30.3233.01, 30.3251.10, 30.3255.02, 35.1077.54.S2, 35.1140.01 | Weather sensors and stations |
 |TR401 | Remote control |
 |TR60C-1 | Remote control with touch screen |
 |TS-FT002 | Water tank level monitor with temperature |
@@ -149,4 +149,3 @@ More Information
 Look at the FHEM Wiki, for more Information: http://www.fhemwiki.de/wiki/SIGNALDuino
 
 Forum Support is at: https://forum.fhem.de/index.php/board,29.0.html
-
