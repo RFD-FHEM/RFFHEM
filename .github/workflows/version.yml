@@ -57,17 +57,20 @@ jobs:
     # Do not run this job again if the last commit was a Update Versondate which comes from this workflow!
     if: "!contains(needs.pre_ci.outputs.commit_message, 'Update Versiondate')"
     needs: pre_ci
+    runs-on: ubuntu-latest
     outputs:
-      matrix: ${{ steps.set-matrix.outputs.matrix }}
+      matrix: ${{ steps.file_changes.outputs.all_changed_files }}
       date: ${{ steps.date.outputs.date }}
       datetime: ${{ steps.date.outputs.datetimestr }}
-    runs-on: ubuntu-latest
+    name: Find changed-files
+    permissions:
+      pull-requests: read
+
     steps:
       - id: file_changes
-        uses: tj-actions/changed-files@v45
+        uses: tj-actions/changed-files@v46
         with:
-          json: true
-          quotepath: false
+          matrix:  true
           files: |
               FHEM/**.pm
               FHEM/lib/**.pm
@@ -79,55 +82,56 @@ jobs:
           echo "date=$(date -u +'%Y%m%d')" >> $GITHUB_OUTPUT
           echo "datetimestr=$(date -u +'%Y-%m-%d %T')" >> $GITHUB_OUTPUT
 
-      - name: Set matrix for build
-        id: set-matrix
-        if: ${{ github.event.sender != 'actions-user' }}
-        run:
-          echo "matrix={\"files\":${{ steps.file_changes.outputs.all_changed_files }}}" >> "$GITHUB_OUTPUT"
+      # - name: Set matrix for build
+      #   id: set-matrix
+      #   if: ${{ github.event.sender != 'actions-user' }}
+      #   run:
+      #     echo "matrix={\"files\":${{ steps.file_changes.outputs.all_changed_files }}}" >> "$GITHUB_OUTPUT"
 
   modify:
-    if: ${{ fromJSON( needs.metadata.outputs.matrix ).files[0] }}
+    # if: ${{ fromJSON( needs.metadata.outputs.matrix ).files[0] }}
     continue-on-error: true
     runs-on: ubuntu-latest
     needs: metadata
     strategy:
-      matrix: ${{ fromJson(needs.metadata.outputs.matrix) }}
+      matrix: 
+        files: ${{ fromJSON(needs.metadata.outputs.matrix) }}
+      max-parallel: 4
+      fail-fast: false
     steps:
       - uses: actions/checkout@v4
-      - name: Find Version String
-        if: endsWith(matrix.files, '00_SIGNALduino.pm')
+    
+      - name: Find Version String with sed
+        # if: endsWith(matrix.files, '00_SIGNALduino.pm')
         id: versionList
-        uses: nguyenvanuyn96/str-find-action@master
-        with:
-          find: '\d\.\d\.\d' 
-          include: "${{ matrix.files }}"
-      - uses: jungwinter/split@v2
-        name: Split array result
-        if: ${{ steps.versionList.outputs.fileFoundCount > 0 }}
-        id: versions
-        with:
-          msg: '${{ steps.versionList.outputs.resultArray }}'
-          separator: ' '
-      - name: Update SDUINO_VERSION date
-        if: endsWith(matrix.file, '00_SIGNALduino.pm')
-        uses: jacobtomlinson/gha-find-replace@3.0.4
-        with:
-          find: \w+\s+=>\s\'\d.\d.\d\+\d+\'
-          replace: "SDUINO_VERSION                  => '${{ steps.versions.outputs._1 }}+${{ needs.metadata.outputs.date }}'"
-          include: "${{ matrix.files }}"
-      - name: Update Date in ID line
-        uses: jacobtomlinson/gha-find-replace@3.0.4
-        with:
-          find: \d\d\d\d-\d\d-\d\d\s\d\d:\d\d:\d\dZ\s[\w|-]+\s
-          replace: "${{ needs.metadata.outputs.datetime }}Z ${{ github.event.pull_request.user.login }} "
-          include: "${{ matrix.files }}"
+        run: |
+          # Extrahiere verfsion aus dem meta json Bereich
+          VERSION=$(awk '/^=for :application\/json;q=META.json/ {flag=1; next} /^=end :application\/json;q=META.json/ {flag=0} flag' ${{ matrix.files }} \
+            | sed -n -E 's/.*"version": "v([0-9]+\.[0-9]+\.?[0-9]*)".*/\1/p')
+          echo "version=${VERSION}" >> $GITHUB_ENV
+     
+      - name: Update Id Line with sed
+        run: |
+          FILE_NAME=$(basename ${{ matrix.files }})
+          sed -i "s/# \$Id: .*$/# \$Id: ${FILE_NAME} 0 ${{ needs.metadata.outputs.datetime }}Z ${{ github.event.pull_request.user.login }} \$/g" ${{ matrix.files }}
+
+      #- name: Update Version in META yaml
+      #  run: |
+      #    sed -i -E 's|("version": "v)[0-9]+\.[0-9]+\.[0-9]+(.*)|\1${{env.version}}\2|g' ${{ matrix.files }}
+
+      - name: Update SDUINO_VERSION with sed
+        if: endsWith(matrix.files, '00_SIGNALduino.pm')  
+        run: |
+          # Update SDUINO_VERSION with the new version and date
+          sed -i -E "s/(SDUINO_VERSION\s*=>\s').*('.*)/\1${{ env.version }}+${{ needs.metadata.outputs.date }}\2/g" ${{ matrix.files }}
+
       - name: Artifactname
         env:
             ARTIFACT_NAME: "${{ matrix.files }}"
         run: |
-          ARTIFACT_NAME=${{ env.ARTIFACT_NAME }}
           ARTIFACT_NAME=$(basename $ARTIFACT_NAME) # get only the filename and use this as artifact name
           echo ARTIFACT_NAME=${ARTIFACT_NAME} >> $GITHUB_ENV # update GitHub ENV vars
+      
       - name: Save updated Files in artifacts
         uses: actions/upload-artifact@v4
         with:

@@ -16,7 +16,7 @@ jobs:
     name: Perl ${{ matrix.perl }} on ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v4
-    - uses: shogo82148/actions-setup-perl@v1.33.0
+    - uses: shogo82148/actions-setup-perl@v1.34.0
       with:
         perl-version: ${{ matrix.perl }}
         install-modules-with: cpanm
@@ -45,7 +45,7 @@ jobs:
     - name: Create clover report for perl Modules
       run: cover -report clover
 
-    - uses: codecov/codecov-action@v5.3.1
+    - uses: codecov/codecov-action@v5.4.3
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         files: clover.xml
@@ -57,7 +57,7 @@ jobs:
       working-directory: /opt/fhem/
       run: cover -report clover
 
-    - uses: codecov/codecov-action@v5.3.1
+    - uses: codecov/codecov-action@v5.4.3
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         files: clover.xml
