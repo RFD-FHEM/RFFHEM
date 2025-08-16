@@ -436,7 +436,7 @@
 # - Remote control with 10 buttons - https://github.com/RFD-FHEM/RFFHEM/issues/1296 @ projectsun2 2025-02-04
 #     RCnoName130_3115   on_off           MS;P0=-11334;P1=1213;P2=-416;P3=411;P4=-1222;D=30121234341212123412121234123412343434343434343412;CP=3;SP=0;R=59;m2; 
 # - Remote control Lumention RFSETCCT - https://github.com/RFD-FHEM/RFFHEM/issues/1312 @ zwiebelxxl 2025-07-26
-#     Lumention_RFSETCCT
+#     Lumention_RFSETCCT_14DF     on      MS;P1=-414;P2=396;P3=-1216;P4=1200;P5=-12111;D=25414141234123414123234123232323232323232323232341;CP=2;SP=5;R=38;O;m2;
 #}
 ###############################################################################################################################################################################
 # - Hamulight remote control with five buttons and touch control for dim [Protocol 22] 
