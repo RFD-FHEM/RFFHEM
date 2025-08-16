@@ -70,6 +70,7 @@ Supported Devices / Protocols
 |Lacrosse Mode 1 / 30.3143.IT, 30.3144.IT, TX25-IT, TX27-IT, TX29-IT, TX29DTH-IT, TX37 | Weather sensors  |
 |Lacrosse Mode 2 / 30.3155WD, 30.3156WD, EMT7110, TX35-IT, TX35DTH-IT | Weather sensors  |
 |Livolo | Remote switches and sockets  |
+|Lumention 927.RFSETCCT | Remote control for LED light |
 |MANAX MX-RCS250 | Remote control |
 |m-e VTX and BASIC | wireless bell |
 |Maverick | Wireless BBQ thermometer |
