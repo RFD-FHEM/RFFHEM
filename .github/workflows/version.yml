@@ -89,7 +89,7 @@ jobs:
       #     echo "matrix={\"files\":${{ steps.file_changes.outputs.all_changed_files }}}" >> "$GITHUB_OUTPUT"
 
   modify:
-    # if: ${{ fromJSON( needs.metadata.outputs.matrix ).files[0] }}
+    if: ${{ fromJSON( needs.metadata.outputs.matrix ).files[0] }}
     continue-on-error: true
     runs-on: ubuntu-latest
     needs: metadata
@@ -152,7 +152,7 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
       - name: Download all modified artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           path: ${{ github.workspace	}}/artifacts
 
@@ -181,7 +181,7 @@ jobs:
 
       - name: Wait for tests to succeed
         if: ${{ steps.commit.outputs.status }}
-        uses: lewagon/wait-on-check-action@v1.3.4
+        uses: lewagon/wait-on-check-action@v1.4.0
         with:
           running-workflow-name: 'Commit and Push back'
           ref: ${{ github.head_ref }}
