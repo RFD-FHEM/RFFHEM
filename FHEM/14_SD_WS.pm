@@ -1,4 +1,4 @@
-# $Id: 14_SD_WS.pm 26982 2025-02-08 15:57:21Z elektron-bbs $
+# $Id: 14_SD_WS.pm 0 2025-06-10 10:02:15Z elektron-bbs $
 #
 # The purpose of this module is to support serval
 # weather sensors which use various protocol
@@ -56,10 +56,9 @@
 # 06.01.2024 neues Protokoll 131: BRESSER Blitzsensor Art.No.: 7009976, Hersteller CCL Electronics LTD Model C3129A
 # 03.09.2024 neues Protokoll 48: Funk-Thermometer JOKER TFA 30.3055, Temperatursender 30.3212
 # 09.01.2025 Protokoll 125: Ergänzung Empfang DCF-Daten WH31E/DNT000005
+# 22.04.2025 neues Protokoll 135: Temperatursensor TFA 30.3255.02
 
 package main;
-
-#use version 0.77; our $VERSION = version->declare('v3.5.4');
 
 use strict;
 use warnings;
@@ -124,6 +123,7 @@ sub SD_WS_Initialize {
     'SD_WS_126_R.*'   => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'rain4:Rain,', autocreateThreshold => "2:180"},
     'SD_WS_129.*'     => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4hum4:Temp/Hum,', autocreateThreshold => '3:180'},
     'SD_WS_131.*'     => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => q{}, autocreateThreshold => '2:180'},
+    'SD_WS_135_T.*'   => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4:Temp,', autocreateThreshold => '3:180'},
   };
   return FHEM::Meta::InitMod( __FILE__, $hash );
 }
@@ -1831,6 +1831,40 @@ sub SD_WS_Parse {
         distance   => sub { my ($rawData,undef) = @_; return substr($rawData,14,2) * 1; },
         crcok      => sub {return 1;}, # checks are in SD_Protocols.pm sub ConvBresser_lightning
     },
+    135 => {
+        # Protokollbeschreibung: Temperatursensor TFA 30.3255.02
+        # ---------------------------------------------------------------
+        # 0    4    | 8    12   | 16   20   | 24   28   | 32
+        # 0000 1001 | 0001 0110 | 0001 0000 | 0000 0111 | 0000
+        # iiii iiii | bscc tttt | tttt tttt | xxxx xxxx | ????
+        # i:  8 bit random id (changes on power-loss)
+        # b:  1 bit battery indicator (1=>OK, 0=>LOW)
+        # s:  1 bit sendmode (0=>auto, 1=>manual)
+        # c:  2 bit channel, valid channels are 1-3
+        # t: 12 bit unsigned temperature, offset 500, scaled by 10
+        # x:  8 bit checksum
+        # ?:  4 bit 1 bit end marking, 3 bit filled
+        # The sensor sends 4 repetitions at intervals of about 32 seconds
+        sensortype => 'TFA 30.3255.02',
+        model      => 'SD_WS_135_T',
+        prematch   => sub {my $msg = shift; return 1 if ($msg =~ /^[0-9A-F]{8,9}$/); },
+        id         => sub {my ($rawData,undef) = @_; return substr($rawData,0,2); },
+        bat        => sub {my (undef,$bitData) = @_; return substr($bitData,8,1) eq "1" ? "ok" : "low";},
+        sendmode   => sub {my (undef,$bitData) = @_; return substr($bitData,9,1) eq "1" ? "manual" : "auto"; },
+        channel    => sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,10,11); },
+        temp       => sub {my (undef,$bitData) = @_; return ((SD_WS_binaryToNumber($bitData,12,23) - 500) / 10.0); },
+        crcok      => sub {my $msg = shift;
+                           my @n = split //, $msg;
+                           my $sum1 = hex($n[0]) + hex($n[2]) + hex($n[4]) + 6;
+                           my $sum2 = hex($n[1]) + hex($n[3]) + hex($n[5]) + 6 + ($sum1 >> 4);
+                           if (($sum1 & 0x0F) == hex($n[6]) && ($sum2 & 0x0F) == hex($n[7])) {
+                             return 1;
+                           } else {
+                            Log3 $name, 3, "$name: SD_WS_135 Parse msg $msg - ERROR checksum " . ($sum1 & 0x0F) . "=" . hex($n[6]) . " " . ($sum2 & 0x0F) . "=" . hex($n[7]);
+                             return 0;
+                           }
+                          },
+    },
   );
 
   Log3 $name, 4, "$name: SD_WS_Parse protocol $protocol, rawData $rawData";
@@ -2548,7 +2582,7 @@ sub SD_WS_WH2SHIFT {
     <li>WH2, WH2A (TFA Dostmann/Wertheim 30.3157 (sold in Germany), Agimex Rosenborg 66796 (sold in Denmark),ClimeMET CM9088 (Sold in UK)</li>
     <li>Weatherstation Auriol IAN 283582 Version 06/2017 (Lidl), Modell-Nr.: HG02832D</li>
     <li>Weatherstation Auriol AHFL 433 B2, IAN 314695 (Lidl)</li>
-    <li>Weatherstations and sensors TFA 30.3151, 30.3152, 30.3153, 30.3157, 30.3200, 30.3208.02, 30.3212, 30.3221.02, 30.3222.02, 30.3228.02, 30.3229.02, 30.3233.01, 30.3251.10, 35.1077.54.S2, 35.1140.01</li>
+    <li>Weatherstations and sensors TFA 30.3151, 30.3152, 30.3153, 30.3157, 30.3200, 30.3208.02, 30.3212, 30.3221.02, 30.3222.02, 30.3228.02, 30.3229.02, 30.3233.01, 30.3251.10, 30.3255.02, 35.1077.54.S2, 35.1140.01</li>
     <li>Wireless Grill Thermometer, Model name: GFGT 433 B1</li>
   </ul><br><br>
 
@@ -2697,7 +2731,7 @@ sub SD_WS_WH2SHIFT {
     <li>WH2, WH2A (TFA Dostmann/Wertheim 30.3157 (Deutschland), Agimex Rosenborg 66796 (Denmark), ClimeMET CM9088 (UK)</li>
     <li>Wetterstation Auriol IAN 283582 Version 06/2017 (Lidl), Modell-Nr.: HG02832D</li>
     <li>Wetterstation Auriol AHFL 433 B2, IAN 314695 (Lidl)</li>
-    <li>Wetterstationen und Sensoren TFA 30.3151, 30.3152, 30.3153, 30.3157, 30.3200, 30.3208.02, 30.3212, 30.3221.02, 30.3222.02, 30.3228.02, 30.3229.02, 30.3233.01, 30.3251.10, 35.1077.54.S2, 35.1140.01</li>
+    <li>Wetterstationen und Sensoren TFA 30.3151, 30.3152, 30.3153, 30.3157, 30.3200, 30.3208.02, 30.3212, 30.3221.02, 30.3222.02, 30.3228.02, 30.3229.02, 30.3233.01, 30.3251.10, 30.3255.02, 35.1077.54.S2, 35.1140.01</li>
     </ul>
   <br><br>
 
@@ -2818,7 +2852,8 @@ sub SD_WS_WH2SHIFT {
   "abstract": "Supports various weather stations",
   "author": [
     "Sidey <>",
-    "ralf9 <>"
+    "ralf9 <>",
+    "elektron-bbs <>"
   ],
   "x_fhem_maintainer": [
     "Sidey"
@@ -2826,7 +2861,7 @@ sub SD_WS_WH2SHIFT {
   "x_fhem_maintainer_github": [
     "Sidey79"
   ],
-  "version": "v1.1.6",
+  "version": "v1.1.7",
   "description": "The SD_WS module processes the messages from various environmental sensors received from an IO device (CUL, CUN, SIGNALDuino, SignalESP etc.)",
   "dynamic_config": 1,
   "keywords": [
