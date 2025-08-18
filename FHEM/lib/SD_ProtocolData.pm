@@ -1,4 +1,4 @@
-# $Id: SD_ProtocolData.pm 0 2025-06-09 18:35:21Z elektron-bbs $
+# $Id: SD_ProtocolData.pm 0 2025-08-17 19:58:13Z elektron-bbs $
 # The file is part of the SIGNALduino project.
 # All protocol definitions are contained in this file.
 #
@@ -3474,10 +3474,14 @@ package lib::SD_ProtocolData;
         method          => \&lib::SD_Protocols::mcBit2Sainlogic, # Call to process this message
       },
     "130" =>  ## Remote control CREATE 6601TL for ceiling fan with light
-                 # https://forum.fhem.de/index.php?msg=1288203 @ erdnar 2023-09-29
-                 # CREATE_6601TL_F53A light_on_off     MS;P1=425;P2=-1142;P3=1187;P4=-395;P5=-12314;D=15121212123412341234341212123412341212121212121234;CP=1;SP=5;R=232;O;m2;
-                 # CREATE_6601TL_F53A light_cold_warm  MS;P1=432;P2=-1143;P3=1183;P4=-393;P5=-12300;D=15121212123412341234341212123412341212121212123434;CP=1;SP=5;R=231;O;m2;
-                 # CREATE_6601TL_F53A fan_faster       MS;P0=-11884;P1=392;P2=-1179;P3=1180;P4=-391;D=10121212123412341234341212123412341212121212341234;CP=1;SP=0;R=231;O;m2;
+              # https://forum.fhem.de/index.php?msg=1288203 @ erdnar 2023-09-29
+              # CREATE_6601TL_F53A light_on_off     MS;P1=425;P2=-1142;P3=1187;P4=-395;P5=-12314;D=15121212123412341234341212123412341212121212121234;CP=1;SP=5;R=232;O;m2;
+              # CREATE_6601TL_F53A light_cold_warm  MS;P1=432;P2=-1143;P3=1183;P4=-393;P5=-12300;D=15121212123412341234341212123412341212121212123434;CP=1;SP=5;R=231;O;m2;
+              # CREATE_6601TL_F53A fan_faster       MS;P0=-11884;P1=392;P2=-1179;P3=1180;P4=-391;D=10121212123412341234341212123412341212121212341234;CP=1;SP=0;R=231;O;m2;
+              # https://github.com/RFD-FHEM/RFFHEM/issues/1296 @ projectsun2 2025-02-04
+              # RCnoName130_3115     on_off         MS;P0=-11334;P1=1213;P2=-416;P3=411;P4=-1222;D=30121234341212123412121234123412343434343434343412;CP=3;SP=0;R=59;m2; 
+              # https://github.com/RFD-FHEM/RFFHEM/issues/1312 @  @ zwiebelxxl 2025-07-26
+              # Lumention_RFSETCCT_14DF     on      MS;P1=-414;P2=396;P3=-1216;P4=1200;P5=-12111;D=25414141234123414123234123232323232323232323232341;CP=2;SP=5;R=38;O;m2;
       {
         name             => 'CREATE_6601TL',
         comment          => 'Remote control for ceiling fan with light',
