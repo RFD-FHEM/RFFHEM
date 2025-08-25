@@ -144,7 +144,7 @@ my %sets = (
 ## Supported config CC1101 ##
 my @modformat = ('2-FSK','GFSK','-','ASK/OOK','4-FSK','-','-','MSK');
 my @syncmod = ( 'No preamble/sync','15/16 sync word bits detected','16/16 sync word bits detected','30/32 sync word bits detected',
-                'No preamble/sync, carrier-sense above threshold, carrier-sense above threshold', '15/16 + carrier-sense above threshold',
+                'No preamble/sync, carrier-sense above threshold', '15/16 + carrier-sense above threshold',
                 '16/16 + carrier-sense above threshold', '30/32 + carrier-sense above threshold'
               );
 
