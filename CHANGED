@@ -1,3 +1,6 @@
+2025-08-25 - correction text syncmode (#1318)
+
+* Update 00_SIGNALduino.pm
 2025-08-18 - New remote control  Lumention_RFSETCCT and RCnoName130 (#1316)
 
 * Update 14_SD_UT.pm
