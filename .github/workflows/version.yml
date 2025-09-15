@@ -192,7 +192,7 @@ jobs:
 
       - name: git push
         if: ${{ steps.commit.outputs.status }}
-        uses: ad-m/github-push-action@v0.8.0
+        uses: ad-m/github-push-action@v1.0.0
         with:
           github_token: ${{ secrets.GH_TOKEN }}
           branch: ${{ github.head_ref }}
