@@ -68,7 +68,7 @@ jobs:
 
     steps:
       - id: file_changes
-        uses: tj-actions/changed-files@v46
+        uses: tj-actions/changed-files@v47
         with:
           matrix:  true
           files: |
