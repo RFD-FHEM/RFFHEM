@@ -490,6 +490,16 @@ my $module = basename (dirname(__FILE__));
         ],
         returnCheck     => F(),
         subCheck        => hash { field 'IOWrite' => array { item 0 => hash { field 'args' => array { item hash { etc(); } ; item 'sendMsg'; item 'P22#00110110000001011011000010011000#R10' }; etc() } } } ,
+    },
+    {
+        targetName      =>  q[RCnoName20_15_41267],
+        testname        =>  q[set command all_off],
+        cmd             =>  q[set all_off],
+        prep_commands   => [                               # Any FHEM custom command can be placed in here, which will be called before the test is run
+                    'attr $targetName model RCnoName20_15',
+        ],
+        returnCheck     => F(),
+        subCheck        => hash { field 'IOWrite' => array { item 0 => hash { field 'args' => array { item hash { etc(); } ; item 'sendMsg'; item 'P20#01000001001001100111001101101001#R5' }; etc() } } } ,
     }
 );
 
