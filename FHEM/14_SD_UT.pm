@@ -1,5 +1,5 @@
 #########################################################################################
-# $Id: 14_SD_UT.pm 0 2025-11-15 19:58:13Z elektron-bbs $
+# $Id: 14_SD_UT.pm 0 2025-11-16 19:58:13Z elektron-bbs $
 #
 # The file is part of the SIGNALduino project.
 # The purpose of this module is universal support for devices.
@@ -315,15 +315,20 @@
 #     RCnoName20_10_3E00 light_on   MU;P0=-8774;P1=282;P2=-775;P3=815;P4=-253;P5=-32001;D=10121234343434341212121212121212121212123434343412121234343412343415;CP=1;
 #     RCnoName20_10_3E00 light_off  MU;P0=-238;P1=831;P3=300;P4=-762;P5=-363;P6=192;P7=-8668;D=01010101010343434343434343434343434103415156464156464641564646734341010101010343434343434343434343434103410103434103434341034343734341010101010343434343434343434343434103410103434103434341034343734341010101010343434343434343434343434103410103434103434341;CP=3;O;
 #     RCnoName20_10_3E00 fan_stop   MU;P0=184;P1=-380;P2=128;P3=-9090;P4=-768;P5=828;P6=-238;P7=298;D=45656565656747474747474747474747474567474560404515124040451040374745656565656747474747474747474747474567474567474565674747456747374745656565656747474747474747474747474567474567474565674747456747374745656565656747474747474747474747474567474567474565674747;CP=7;O;
-# - Remote control CREATE 6601L with 14 buttons for CREATE Deckenventilator [Protocol 20]
-#     https://forum.fhem.de/index.php?topic=53282.msg1316246#msg1316246 @ Kent 2024-07-04
-#     CREATE_6601L_1B900 fan_2  MS;P0=-7944;P1=-740;P4=253;P6=732;P7=-256;D=404141416767416767674141674141414141414141674141414141674141416767;CP=4;SP=0;R=67;O;m2;
-#     CREATE_6601L_1B900 fan_5  MS;P0=-264;P2=-743;P3=254;P4=733;P5=-7942;D=353232324040324040403232403232323232323232324032324032323232403240;CP=3;SP=5;R=40;O;m2;
 # - Remote control DC-1961-TG with 12 buttons for ceiling fan with lighting [Protocol 20]
 #     https://forum.fhem.de/index.php/topic,53282.msg1240911.html#msg1240911 @ Skusi  2022-10-23
 #     DC_1961_TG_1846 light_on_off   MS;P1=291;P2=-753;P3=762;P4=-249;P5=-8312;D=151212123434121212123412121234341234123412341212121234341212341234;CP=1;SP=5;R=224;O;m2;
 #     DC_1961_TG_1846 fan_off        MS;P1=-760;P2=747;P3=-282;P4=253;P5=-8335;D=454141412323414141412341414123234123412341412323234123232323412323;CP=4;SP=5;R=27;O;m2;
 #     DC_1961_TG_1846 fan_direction  MS;P0=-8384;P1=255;P2=-766;P3=754;P4=-263;D=101212123434121212123412121234341234123412341212341234341212341212;CP=1;SP=0;R=27;O;m2;
+# - Remote control CREATE 6601L with 14 buttons for CREATE Deckenventilator [Protocol 20]
+#     https://forum.fhem.de/index.php?topic=53282.msg1316246#msg1316246 @ Kent 2024-07-04
+#     CREATE_6601L_1B900 fan_2  MS;P0=-7944;P1=-740;P4=253;P6=732;P7=-256;D=404141416767416767674141674141414141414141674141414141674141416767;CP=4;SP=0;R=67;O;m2;
+#     CREATE_6601L_1B900 fan_5  MS;P0=-264;P2=-743;P3=254;P4=733;P5=-7942;D=353232324040324040403232403232323232323232324032324032323232403240;CP=3;SP=5;R=40;O;m2;
+# - Remote control RCnoName20_15 with 15 buttons for ceiling fan Forrovenco QX-01-DE1 with lighting [Protocol 20]
+#     https://forum.fhem.de/index.php?topic=143046.0 @ drhirn  2025-11-14
+#     RCnoName20_15_41267 all_off       MS;P2=-258;P3=229;P4=-780;P5=755;P6=-7847;D=363452343434343452343452343452523434525252343452523434525252523434;CP=3;SP=6;R=222;O;m2;
+#     RCnoName20_15_41267 light_on_off  MS;P2=-243;P3=277;P4=-739;P5=773;P6=-7861;D=363452343434343452343452343452523434525252345234343452525252525252;CP=3;SP=6;R=224;O;m2;
+#     RCnoName20_15_41267 fan_natural   MS;P2=-270;P3=240;P4=-779;P5=746;P6=-8025;D=363452343434343452343452343452523434525252523452345252345252345252;CP=3;SP=6;R=220;O;m2;
 ###############################################################################################################################################################################
 # - Remote control Momento for wireless digital picture frame [Protocol 97]
 #{    elektron-bbs 2020-03-21
@@ -1665,9 +1670,9 @@ sub SD_UT_Set {
         }
         readingsSingleUpdate($hash, 'rollingCode' , $rollingCode, 0);
         if ($model eq 'RCnoName20_15') {
-					$msg .= sprintf('%03b', $rollingCode); # rolling code
+          $msg .= sprintf('%03b', $rollingCode); # 3 bit rolling code
         } else {
-					$msg .= sprintf('%04b', $rollingCode); # rolling code
+          $msg .= sprintf('%04b', $rollingCode); # 4 bit rolling code
         }
         my $xor = 10;
         for (my $n = 4; $n < 32; $n += 4) { # without P20#
@@ -2502,7 +2507,7 @@ sub SD_UT_Parse {
   } elsif ($model eq 'RCnoName20_15' && $protocol == 20) {
     $state = substr($bitData,20,5);
     $deviceCode = substr($rawData,0,5);
-    $rollingCode = oct("0b" . substr($bitData,25,3));
+    $rollingCode = oct('0b' . substr($bitData,25,3));
     readingsBulkUpdate($hash, 'rollingCode', $rollingCode, 0);
   ### Remote control xavax [P26] ###
   } elsif ($model eq 'xavax' && $protocol == 26) {
@@ -2936,6 +2941,7 @@ sub SD_UT_tristate2bin {
     <li>Remote control with 10 buttons for LED Stripe Controllers&nbsp;&nbsp;&nbsp;<small>(module model: RCnoName130, protocol 130)</small></li>
     <li>Remote control with 12 buttons for ceiling fan&nbsp;&nbsp;&nbsp;<small>(module model: RCnoName128, protocol 128)</small></li>
     <li>Remote control with 14 buttons for ceiling fan&nbsp;&nbsp;&nbsp;<small>(module model: RCnoName127, protocol 127)</small></li>
+    <li>Remote control with 15 buttons for ceiling fan&nbsp;&nbsp;&nbsp;<small>(module model: RCnoName20_15, protocol 20)</small></li>
     <li>SA-434-1 mini 923301&nbsp;&nbsp;&nbsp;<small>(module model: SA_434_1_mini, protocol 81)</small></li>
     <li>SEAV BeEasy TX &nbsp;&nbsp;&nbsp;<small>(Modulmodel: BeEasy_TX, protocol 83)</small></li>
     <li>SEAV BeSmart S4 remote control&nbsp;&nbsp;&nbsp;<small>(module model: BeSmart_S4, protocol 78)</small></li>
@@ -3091,7 +3097,7 @@ sub SD_UT_tristate2bin {
 
   <b>Generated readings of the models</b><br>
   <ul>
-    <u>AC114-01, Buttons_five, Buttons_six, CAME_TOP_432EV, Chilitec_22640, HA_HX2, HSM4, KL_RF01, LED_XM21_0, Meikee_xx, Momento, Novy_840029, Novy_840039, OR28V, QUIGG_DMV, RC_10, RH787T, SF01_01319004, SF01_01319004_Typ2, TR401, TR_502MSV, Visivo</u>
+    <u>AC114-01, Buttons_five, Buttons_six, CAME_TOP_432EV, Chilitec_22640, HA_HX2, HSM4, KL_RF01, LED_XM21_0, Meikee_xx, Momento, Novy_840029, Novy_840039, OR28V, QUIGG_DMV, RCnoNamexxx, RC_10, RH787T, SF01_01319004, SF01_01319004_Typ2, TR401, TR_502MSV, Visivo</u>
     <ul>
       <li>deviceCode: Device code of the system</li>
       <li>LastAction: Last executed action of the device (<code>receive</code> for command received | <code>send</code> for command send).</li>
@@ -3156,6 +3162,7 @@ sub SD_UT_tristate2bin {
     <li>Fernbedienung mit 10 Tasten f&uuml;r LED Streifen Controller&nbsp;&nbsp;&nbsp;<small>(Modulmodel: RCnoName130, Protokoll 130)</small></li>
     <li>Fernbedienung mit 12 Tasten f&uuml;r Deckenventilator&nbsp;&nbsp;&nbsp;<small>(Modulmodel: RCnoName128, Protokoll 128)</small></li>
     <li>Fernbedienung mit 14 Tasten f&uuml;r Deckenventilator&nbsp;&nbsp;&nbsp;<small>(Modulmodel: RCnoName127, Protokoll 127)</small></li>
+    <li>Fernbedienung mit 15 Tasten f&uuml;r Deckenventilator&nbsp;&nbsp;&nbsp;<small>(Modulmodel: RCnoName20_15, Protokoll 20)</small></li>
     <li>Halemeier HA-HX2&nbsp;&nbsp;&nbsp;<small>(Modulmodel: HA-HX2, Protokoll 132)</small></li>
     <li>HAMULiGHT Fernbedienung mit 5 Tasten f&uuml;r LED-Beleuchtung&nbsp;&nbsp;&nbsp;<small>(Modulmodel: Hamulight_AB, Protokoll 22)</small></li>
     <li>Hoermann HS1-868-BS&nbsp;&nbsp;&nbsp;<small>(Modulmodel: HS1_868_BS, Protokoll 69)</small></li>
@@ -3316,7 +3323,7 @@ sub SD_UT_tristate2bin {
     <li><a href="#ignore">ignore</a></li>
     <li><a href="#IODev">IODev</a></li>
     <li><a name="model"></a>model<br>
-      Dieses Attribut bezeichnet den Modelltyp Ihres Ger&auml;tes (AC114_01B, BeEasy_TX, BeSmart_S4, Buttons_five, Buttons_six, CAME_TOP_432EV, Chilitec_22640, CREATE_6601L, CREATE_6601TL, DC_1961_TG, HA_HX2, HS1-868-BS, HSM4, KL_RF01, LED_XM21_0, Lumention_RFSETCCT, Meikee_21, Meikee_24, Momento, Navaris, Novy_840029, Novy_840039, OR28V, QUIGG_DMV, RC_10, RH787T, SA_434_1_mini, SF01_01319004, TC6861, TR60C1, Tedsen_SKX1xx, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx, TR_502MSV, Unitec_47031, unknown).<br>
+      Dieses Attribut bezeichnet den Modelltyp Ihres Ger&auml;tes (AC114_01B, BeEasy_TX, BeSmart_S4, Buttons_five, Buttons_six, CAME_TOP_432EV, Chilitec_22640, CREATE_6601L, CREATE_6601TL, DC_1961_TG, HA_HX2, HS1-868-BS, HSM4, KL_RF01, LED_XM21_0, Lumention_RFSETCCT, Meikee_21, Meikee_24, Momento, Navaris, Novy_840029, Novy_840039, OR28V, QUIGG_DMV, RC_10, RH787T, RCnoNamexxx, SA_434_1_mini, SF01_01319004, TC6861, TR60C1, Tedsen_SKX1xx, Tedsen_SKX2xx, Tedsen_SKX4xx, Tedsen_SKX6xx, TR_502MSV, Unitec_47031, unknown).<br>
       Bei &Auml;nderung des Attributes wird ein neues Gerät mittels <a href="#autocreate">autocreate</a> erzeugt. Autocreate muss dazu aktiviert sein.
     </li>
     <li><a name="repeats"></a>repeats<br>
