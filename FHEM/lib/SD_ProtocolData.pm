@@ -733,9 +733,13 @@ package lib::SD_ProtocolData;
               # https://forum.fhem.de/index.php?topic=53282.msg1316246#msg1316246 @ Kent 2024-07-04
               # CREATE_6601L_1B90 fan_2  MS;P0=-7944;P1=-740;P4=253;P6=732;P7=-256;D=404141416767416767674141674141414141414141674141414141674141416767;CP=4;SP=0;R=67;O;m2;
               # CREATE_6601L_1B90 fan_5  MS;P0=-264;P2=-743;P3=254;P4=733;P5=-7942;D=353232324040324040403232403232323232323232324032324032323232403240;CP=3;SP=5;R=40;O;m2;
+              ## Remote control RCnoName20_15 with 15 buttons for ceiling fan Forrovenco QX-01-DE1 with lighting
+              # https://forum.fhem.de/index.php?topic=143046.0 @ drhirn  2025-11-14
+              # RCnoName20_15_41267 all_off       MS;P2=-258;P3=229;P4=-780;P5=755;P6=-7847;D=363452343434343452343452343452523434525252343452523434525252523434;CP=3;SP=6;R=222;O;m2;
+              # RCnoName20_15_41267 light_on_off  MS;P2=-243;P3=277;P4=-739;P5=773;P6=-7861;D=363452343434343452343452343452523434525252345234343452525252525252;CP=3;SP=6;R=224;O;m2;
       {
         name            => 'RCnoName20',
-        comment         => 'Remote control with 4, 9, 10, 12 or 14 buttons',
+        comment         => 'Remote control with 4, 9, 10, 12, 14 or 15 buttons',
         id              => '20',
         knownFreqs      => '433.92',
         one             => [3,-1],  # 720,-240
