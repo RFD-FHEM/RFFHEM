@@ -40,7 +40,7 @@ InternalTimer(time()+1, sub() {
 
   subtest 'Call without cc1101 receiver' => sub {
     my $ret = SIGNALduino_Attr_rfmode($defs{someDuino},'SlowRF');
-    like($ret,qr/This attribute is only available for a receiver with CC1101/,q[verify error message if not a cc1101 device]);
+    like($ret,qr/This rfmode is only available for a receiver with CC1101/,q[verify error message if not a cc1101 device]);
   };
 
   subtest 'Call as uninitalized dummy receiver' => sub {
