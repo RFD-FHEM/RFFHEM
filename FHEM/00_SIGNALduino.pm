@@ -144,7 +144,7 @@ my %sets = (
 ## Supported config CC1101 ##
 my @modformat = ('2-FSK','GFSK','-','ASK/OOK','4-FSK','-','-','MSK');
 my @syncmod = ( 'No preamble/sync','15/16 sync word bits detected','16/16 sync word bits detected','30/32 sync word bits detected',
-                'No preamble/sync, carrier-sense above threshold, carrier-sense above threshold', '15/16 + carrier-sense above threshold',
+                'No preamble/sync, carrier-sense above threshold', '15/16 + carrier-sense above threshold',
                 '16/16 + carrier-sense above threshold', '30/32 + carrier-sense above threshold'
               );
 
@@ -767,11 +767,11 @@ sub SIGNALduino_Attr_rfmode {
   my $aVal = shift // return;
 
   if ( (InternalVal($hash->{NAME},"cc1101_available",0) == 0) && (!IsDummy($hash->{NAME})) ) {
-    return 'ERROR: This attribute is only available for a receiver with CC1101.';
+    return 'ERROR: This rfmode is only available for a receiver with CC1101.';
   }
   my $hardware = AttrVal($hash->{NAME},'hardware','unknown');
-  if ($aVal =~ /^WMBus_/ && substr($hardware,0,3) ne 'esp') {
-    return 'ERROR: This attribute is only available for a receiver with ESP8266 or ESP32.';
+  if ($aVal =~ /^WMBus_/ && (substr($hardware,0,3) ne 'esp' && substr($hardware,0,5) ne 'MAPLE')) {
+    return 'ERROR: This rfmode is only available for a receiver with ESP8266, ESP32 or Maple Mini.';
   }
   
   ## DevState waitInit is on first start after FHEM restart | initialized is after cc1101 available
@@ -5017,22 +5017,24 @@ USB-connected devices (SIGNALduino):<br>
 <a name="SIGNALduinodefine"></a>
 <b>Define</b>
 <ul><code>define &lt;name&gt; SIGNALduino &lt;device&gt; </code></ul>
-USB-connected devices (SIGNALduino):<br>
 <ul>
-  <li> &lt;device&gt; spezifiziert den seriellen Port f&uuml;r die Kommunikation mit dem SIGNALduino.
+    <u>USB-connected devices (SIGNALduino):</u><br><br>
+    &lt;device&gt; spezifiziert den seriellen Port f&uuml;r die Kommunikation mit dem SIGNALduino.
     Der Name des seriellen Ger&auml;ts h&auml;ngt von Ihrer  Distribution ab. In Linux ist das <code>cdc_acm</code> Kernel_Modul daf&uuml;r verantwortlich und es wird ein <code>/dev/ttyACM0</code> oder <code>/dev/ttyUSB0</code> Ger&auml;t angelegt. Wenn deine Distribution kein <code>cdc_acm</code> Module besitzt, kannst du usbserial nutzen um den SIGNALduino zu betreiben mit folgenden Kommandos:
     <ul>
       <li>modprobe usbserial</li>
       <li>vendor=0x03eb</li>
       <li>product=0x204b</li>
     </ul>
-    In diesem Fall ist das Ger&auml;t h&ouml;chstwahrscheinlich <code>/dev/ttyUSB0</code>.<br><br>
-
+    In diesem Fall ist das Ger&auml;t h&ouml;chstwahrscheinlich <code>/dev/ttyUSB0</code>.
+    <br><br>
     Sie k&ouml;nnen auch eine Baudrate angeben, wenn der Ger&auml;tename das @ enth&auml;lt, Beispiel: <code>/dev/ttyACM0@57600</code><br>Dies ist auch die Standard-Baudrate.<br><br>
     Es wird empfohlen, das Ger&auml;t &uuml;ber einen Namen anzugeben, der sich nicht &auml;ndert. Beispiel via by-id devicename: <code>/dev/serial/by-id/usb-1a86_USB2.0-Serial-if00-port0@57600</code><br>
-    Wenn die Baudrate "directio" (Bsp: <code>/dev/ttyACM0@directio</code>), dann benutzt das Perl Modul nicht Device::SerialPort und FHEM &ouml;ffnet das Ger&auml;t mit einem file io. Dies kann funktionieren, wenn das Betriebssystem die Standardwerte f&uuml;r die seriellen Parameter verwendet. Bsp: einige Linux Distributionen und
-    OSX.<br><br>
-  </li>
+    Wenn die Baudrate "directio" (Bsp: <code>/dev/ttyACM0@directio</code>), dann benutzt das Perl Modul nicht Device::SerialPort und FHEM &ouml;ffnet das Ger&auml;t mit einem file io. Dies kann funktionieren, wenn das Betriebssystem die Standardwerte f&uuml;r die seriellen Parameter verwendet. Bsp: einige Linux Distributionen und OSX.
+    <br><br>
+    <u>WiFi-connected devices (SIGNALduino):</u><br><br>
+    Bei einem ESP8266 oder ESP32 wird anstelle des seriellen Ports die IP des SIGNALduino in der Form <code>xxx.xxx.xxx.xxx:23</code> angegeben. Dabei stellt die 23 den verwendeten Port dar.
+    <br><br>
 </ul>
 
 
@@ -5394,25 +5396,25 @@ USB-connected devices (SIGNALduino):<br>
     Derzeit m&ouml;gliche Hardware Varianten mit verschiedenen Empfänger Optionen.
     Die einfache Variante besteht aus einem Empf&auml;nger und einen Sender, die über je eine einzige digitale Signalleitung Datem mit dem Microcontroller austauschen.
     Der Empf&auml;nger sendet dabei und der Sender empf&auml;ngt dabei ausschließlich.
-    Weiterhin existiert der den sogenannten cc1101 (sub 1 GHZ) Chip, welche empfangen und senden kann. Dieser wird über die SPI Verbindung angebunden.
-    ESP8266 Hardware Typen, unterstützen derzeit kein flashen aus dem Modul und ben&ouml;tigen mindestens 1 MB Flash Speicher.
+    Weiterhin existiert der sogenannte cc1101 (sub 1 GHZ) Chip, welcher empfangen und senden kann. Dieser wird über die SPI Verbindung angebunden.
+    ESP8266/ESP32 Hardware Typen unterstützen derzeit kein flashen aus dem Modul und ben&ouml;tigen mindestens 1 MB Flash Speicher.
     <ul>
       <li>ESP32s: ESP32 f&uuml;r einfachen eindraht Empf&auml;nger</li>
       <li>ESP32cc1101: ESP32 mit einem CC110x-Empf&auml;nger (SPI Verbindung)</li>
-      <li>ESP8266s: ESP8266 f&uuml;r einfachen eindraht Empf&auml;nger</li>
+      <li>ESP8266s: ESP8266 f&uuml;r einfachen Empf&auml;nger und Sender</li>
       <li>ESP8266cc1101: ESP8266 mit einem CC110x-Empf&auml;nger (SPI Verbindung)</li>
-      <li>MAPLEMINI_F103CBs: MapleMini F103CB (STM32) f&uuml;r einfachen eindraht Empf&auml;nger</li>
+      <li>MAPLEMINI_F103CBs: MapleMini F103CB (STM32) f&uuml;r einfachen Empf&auml;nger und Sender</li>
       <li>MAPLEMINI_F103CBcc1101: MapleMini F103CB (STM32) mit einem CC110x-Empf&auml;nger (SPI Verbindung)</li>
       <li>miniculCC1101: Arduino pro Mini mit einem CC110x-Empf&auml;nger (SPI Verbindung) entsprechend dem minicul verkabelt</li>
-      <li>nano328: Arduino Nano 328 f&uuml;r einfachen eindraht Empf&auml;nger</li>
+      <li>nano328: Arduino Nano 328 f&uuml;r einfachen Empf&auml;nger und Sender</li>
       <li>nanoCC1101: Arduino Nano f&uuml;r einen CC110x-Empf&auml;nger (SPI Verbindung)</li>
-      <li>promini8s: Arduino Pro Mini 328 8Mhz f&uuml;r einfachen eindraht Empf&auml;nger</li>
+      <li>promini8s: Arduino Pro Mini 328 8Mhz f&uuml;r einfachen Empf&auml;nger und Sender</li>
       <li>promini8cc1101: Arduino Pro Mini 328 8Mhz f&uuml;r einen CC110x-Empf&auml;nger (SPI Verbindung)</li>
-      <li>promini16s: Arduino Pro Mini 328 16Mhz f&uuml;r einfachen eindraht Empf&auml;nger</li>
+      <li>promini16s: Arduino Pro Mini 328 16Mhz f&uuml;r einfachen Empf&auml;nger und Sender</li>
       <li>promini16cc1101: Arduino Pro Mini 328 16Mhz f&uuml;r einen CC110x-Empf&auml;nger (SPI Verbindung)</li>
       <li>radinoCC1101: Ein Arduino kompatibler Radino mit CC110x-Empfänger (SPI Verbindung)</li>
     </ul><br>
-    Notwendig f&uuml;r den Befehl <code>flash</code>. Hier sollten Sie angeben, welche Hardware Sie mit dem usbport verbunden haben. Andernfalls kann es zu Fehlfunktionen des Ger&auml;ts kommen. Wichtig ist auch das Attribut <code>updateChannelFW</code><br>
+    Notwendig f&uuml;r den Befehl <code>flash</code>. Hier sollten Sie angeben, welche Hardware Sie mit dem usbport verbunden haben. Andernfalls kann es zu Fehlfunktionen des Ger&auml;ts kommen. Wichtig ist auch das Attribut <code>updateChannelFW</code>.<br>
   </li><br>
   <a name="longids"></a>
   <li>longids<br>

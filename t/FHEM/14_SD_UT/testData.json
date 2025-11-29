@@ -2884,5 +2884,63 @@
       "id" : 22,
       "module" : "SD_UT",
       "name" : "Hamulight_AB_3605"
+   },
+   {
+      "data" : [
+         {
+            "comment" : "Remote control Lumention RFSETCCT",
+            "dmsg" : "P130#14DFFE",
+            "internals" : {
+               "DEF" : "Lumention_RFSETCCT 14DF",
+               "NAME" : "Lumention_RFSETCCT_14DF"
+            },
+            "readings" : {
+               "LastAction" : "receive",
+               "deviceCode" : "14DF",
+               "state" : "on"
+            },
+            "rmsg" : "MS;P1=-414;P2=396;P3=-1216;P4=1200;P5=-12111;D=25414141234123414123234123232323232323232323232341;CP=2;SP=5;R=38;O;m2;",
+            "tests" : [
+               {
+                  "attributes" : {
+                     "model" : "Lumention_RFSETCCT"
+                  },
+                  "comment" : "#0"
+               }
+            ]
+         }
+      ],
+      "id" : 130,
+      "module" : "SD_UT",
+      "name" : "Lumention_RFSETCCT_14DF"
+   },
+   {
+      "data" : [
+         {
+            "comment" : "Remote control with 10 buttons",
+            "dmsg" : "P130#3115FE",
+            "internals" : {
+               "DEF" : "RCnoName130 3115",
+               "NAME" : "RCnoName130_3115"
+            },
+            "readings" : {
+               "LastAction" : "receive",
+               "deviceCode" : "3115",
+               "state" : "on_off"
+            },
+            "rmsg" : "MS;P0=-11334;P1=1213;P2=-416;P3=411;P4=-1222;D=30121234341212123412121234123412343434343434343412;CP=3;SP=0;R=59;m2;",
+            "tests" : [
+               {
+                  "attributes" : {
+                     "model" : "RCnoName130"
+                  },
+                  "comment" : "#0"
+               }
+            ]
+         }
+      ],
+      "id" : 130,
+      "module" : "SD_UT",
+      "name" : "RCnoName130_3115"
    }
 ]

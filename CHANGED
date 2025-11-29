@@ -1,3 +1,19 @@
+2025-11-26 - STM32 Maple Mini enable rfmode WMBus (#1329)
+
+* STM32 Maple Mini enable rfmode WMBus
+STM32 Maple Mini enable rfmode WMBus
+Additions, corrections commandref
+* Update 01_SIGNALduino_Attr_rfmode.t
+2025-08-25 - correction text syncmode (#1318)
+
+* Update 00_SIGNALduino.pm
+2025-08-18 - New remote control  Lumention_RFSETCCT and RCnoName130 (#1316)
+
+* Update 14_SD_UT.pm
+new Remote control Lumention RFSETCCT and RCnoName130
+* Update SD_ProtocolData.pm
+* Update testData.json
+add testdata for Remote control Lumention_RFSETCCT and RCnoName130
 2025-06-10 - 14_SD_WS.pm Bugfix META.json (#1309)
 
 * SD_WS_14-Bugfix-Meta
