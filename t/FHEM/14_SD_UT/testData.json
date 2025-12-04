@@ -2942,5 +2942,36 @@
       "id" : 130,
       "module" : "SD_UT",
       "name" : "RCnoName130_3115"
+   },
+   {
+      "data" : [
+         {
+            "comment" : "Remote control RCnoName20_15 with 15 buttons for ceiling fan Forrovenco QX-01-DE1 with lighting",
+            "dmsg" : "P20#4126733C",
+            "internals" : {
+               "DEF" : "RCnoName20_15 41267",
+               "NAME" : "RCnoName20_15_41267"
+            },
+            "readings" : {
+               "LastAction" : "receive",
+               "deviceCode" : "41267",
+               "rollingCode" : "3",
+               "state" : "all_off"
+            },
+            "rmsg" : "MS;P2=-258;P3=229;P4=-780;P5=755;P6=-7847;D=363452343434343452343452343452523434525252343452523434525252523434;CP=3;SP=6;R=222;O;m2;",
+            "tests" : [
+               {
+                  "attributes" : {
+                     "model" : "RCnoName20_15"
+                  },
+                  "comment" : "#0"
+               }
+            ]
+         }
+      ],
+      "id" : 20,
+      "module" : "SD_UT",
+      "name" : "RCnoName20_15_41267"
    }
+	 
 ]
