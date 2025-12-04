@@ -1,3 +1,11 @@
+2025-12-04 - new remote control  RCnoName20_15 (#1331)
+
+* new remote control RCnoName20_15
+* Update 01_attr.t
+* Update 14_SD_UT.pm
+* Update testData.json
+* add test set RCnoName20_15_41267 all_off
+* Update SD_ProtocolData.pm
 2025-11-26 - STM32 Maple Mini enable rfmode WMBus (#1329)
 
 * STM32 Maple Mini enable rfmode WMBus
