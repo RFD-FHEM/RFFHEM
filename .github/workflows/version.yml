@@ -133,7 +133,7 @@ jobs:
           echo ARTIFACT_NAME=${ARTIFACT_NAME} >> $GITHUB_ENV # update GitHub ENV vars
       
       - name: Save updated Files in artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: ${{ env.ARTIFACT_NAME }}
           retention-days: 1
