@@ -1,3 +1,4 @@
+# cpanfile
 requires 'Test2::Suite';
 requires 'JSON';
 requires 'Device::SerialPort';
@@ -13,3 +14,8 @@ requires 'Digest::CRC';
 requires 'Math::Trig';
 requires 'Storable'; 
 requires 'Test::Without::Module';
+
+feature 'devcontainer' => sub {
+    requires 'Perl::LanguageServer';
+    requires 'Perl::Critic';
+};
