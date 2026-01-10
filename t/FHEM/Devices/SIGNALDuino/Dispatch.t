@@ -77,7 +77,7 @@ subtest 'Test of SIGNALduno_Dispatch in FHEM::Devices::SIGNALDuino::Dispatch' =>
     plan(4);
 
     # SIGNALduno_Dispatch($hash, $rmsg, $dmsg, $rssi, $id, $freqafc)
-    FHEM::Devices::SIGNALDuino::Dispatch::SIGNALduno_Dispatch($targetHash, $rmsg, $dmsg, $rssi, $id);
+    FHEM::Devices::SIGNALDuino::Dispatch::Dispatch($targetHash, $rmsg, $dmsg, $rssi, $id);
 
     # Checks:
     # 1. main::Dispatch wurde einmal aufgerufen

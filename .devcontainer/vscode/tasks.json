@@ -9,7 +9,7 @@
             "options": {
                 "cwd": "/opt/fhem/"
             },
-            "command": "prove ${input:proveOptions} -I FHEMM -r --exec 'perl fhem.pl -t' ${input:dynamicFHEMModuleFilesRemembered}",
+            "command": "prove ${input:proveOptions} -I FHEM -r --exec 'perl fhem.pl -t' ${input:dynamicFHEMModuleFilesRemembered}",
             "problemMatcher" : {
                 "owner": "TAP",
                 "fileLocation" : "relative",
@@ -60,7 +60,7 @@
         {
             "label": "run prove Perl module files",
             "type": "shell",
-            "command": "prove ${input:proveOptions} --exec 'perl -I lib' -I FHEM -r ${input:dynamicPERLModuleFilesRemembered}",
+            "command": "prove ${input:proveOptions} --exec 'perl -I lib -I FHEM'  -r ${input:dynamicPERLModuleFilesRemembered}",
             "problemMatcher" : {
                 "owner": "TAP",
                 "fileLocation" : "relative",
@@ -129,7 +129,7 @@
                 "pickFile": {
                     "FHEMMModuleFile": {
                         "description": "Which Testfiles to run?",
-                        "include": "t/FHEM/[0-9][0-9]*/*.{t}",
+                        "include": "t/FHEM/[0-9][0-9]*/**/*.{t}",
                         "multiPick" : true,
                         "keyRemember": "FHEMMModuleFile"
                     }
