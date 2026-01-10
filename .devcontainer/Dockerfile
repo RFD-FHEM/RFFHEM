@@ -2,7 +2,7 @@
 # 
 # base layer with perl and some general preparations
 #
-FROM ghcr.io/fhem/fhem-docker:5.1.3-bookworm AS main-app
+FROM ghcr.io/fhem/fhem-docker:5-bookworm AS main-app
 
 
 
