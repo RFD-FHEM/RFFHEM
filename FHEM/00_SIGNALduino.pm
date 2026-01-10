@@ -33,9 +33,9 @@ eval {use Time::HiRes qw(gettimeofday);1} ;
 eval {use FHEM::Core::Timer::Helper;1 } ;
 
 use lib::SD_Protocols;
-require FHEM::Devices::SIGNALDuino::Clients;
-require FHEM::Devices::SIGNALDuino::Dispatch;
-require FHEM::Devices::SIGNALDuino::Matchlist;
+use FHEM::Devices::SIGNALDuino::Clients;
+use FHEM::Devices::SIGNALDuino::Dispatch;
+use FHEM::Devices::SIGNALDuino::Matchlist;
 use List::Util qw(first);
 
 #$| = 1;    #Puffern abschalten, Hilfreich fuer PEARL WARNINGS Search
@@ -200,84 +200,6 @@ my %cc1101_register = (   # for get ccreg 99 and set cc1101_reg
   '2E' => 'TEST0    - N/A ',
 );
 
-## Supported Clients per default
-my $clientsSIGNALduino = ':CUL_EM:'
-            .'CUL_FHTTK:'
-            .'CUL_TCM97001:'
-            .'CUL_TX:'
-            .'CUL_WS:'
-            .'Dooya:'
-            .'FHT:'
-            .'FLAMINGO:'
-            .'FS10:'
-            .'FS20:'
-            .' :'         # Zeilenumbruch
-            .'Fernotron:'
-            .'Hideki:'
-            .'IT:'
-            .'KOPP_FC:'
-            .'LaCrosse:'
-            .'OREGON:'
-            .'PCA301:'
-            .'RFXX10REC:'
-            .'Revolt:'
-            .'SD_AS:'
-            .'SD_Rojaflex:'
-            .' :'         # Zeilenumbruch
-            .'SD_BELL:'
-            .'SD_GT:'
-            .'SD_Keeloq:'
-            .'SD_RSL:'
-            .'SD_UT:'
-            .'SD_WS07:'
-            .'SD_WS09:'
-            .'SD_WS:'
-            .'SD_WS_Maverick:'
-            .'SOMFY:'
-            .'WMBUS:'
-            .' :'         # Zeilenumbruch
-            .'Siro:'
-            .'SIGNALduino_un:'
-          ;
-
-## default regex match List for dispatching message to logical modules, can be updated during runtime because it is referenced
-my %matchListSIGNALduino = (
-      '1:IT'                => '^i......',
-      '2:CUL_TCM97001'      => '^s[A-Fa-f0-9]+',
-      '3:SD_RSL'            => '^P1#[A-Fa-f0-9]{8}',
-      '5:CUL_TX'            => '^TX..........',                       # Need TX to avoid FHTTK
-      '6:SD_AS'             => '^P2#[A-Fa-f0-9]{7,8}',                # Arduino based Sensors, should not be default
-      '4:OREGON'            => '^(3[8-9A-F]|[4-6][0-9A-F]|7[0-8]).*',
-      '7:Hideki'            => '^P12#75[A-F0-9]+',
-      '9:CUL_FHTTK'         => '^T[A-F0-9]{8}',
-      '10:SD_WS07'          => '^P7#[A-Fa-f0-9]{6}[AFaf][A-Fa-f0-9]{2,3}',
-      '11:SD_WS09'          => '^P9#F[A-Fa-f0-9]+',
-      '12:SD_WS'            => '^W\d+x{0,1}#.*',
-      '13:RFXX10REC'        => '^(20|29)[A-Fa-f0-9]+',
-      '14:Dooya'            => '^P16#[A-Fa-f0-9]+',
-      '15:SOMFY'            => '^Ys[0-9A-F]+',
-      '16:SD_WS_Maverick'   => '^P47#[A-Fa-f0-9]+',
-      '17:SD_UT'            => '^P(?:14|20|20.1|22|24|26|29|30|34|46|56|68|69|76|78|81|83|86|90|91|91.1|92|93|95|97|99|104|105|114|118|121|127|128|130|132)#.*', # universal - more devices with different protocols
-      '18:FLAMINGO'         => '^P13\.?1?#[A-Fa-f0-9]+',              # Flamingo Smoke
-      '19:CUL_WS'           => '^K[A-Fa-f0-9]{5,}',
-      '20:Revolt'           => '^r[A-Fa-f0-9]{22}',
-      '21:FS10'             => '^P61#[A-F0-9]+',
-      '22:Siro'             => '^P72#[A-Fa-f0-9]+',
-      '23:FHT'              => '^81..(04|09|0d)..(0909a001|83098301|c409c401)..',
-      '24:FS20'             => '^81..(04|0c)..0101a001',
-      '25:CUL_EM'           => '^E0.................',
-      '26:Fernotron'        => '^P82#.*',
-      '27:SD_BELL'          => '^P(?:15|32|41|42|57|79|96|98|112)#.*',
-      '28:SD_Keeloq'        => '^P(?:87|88)#.*',
-      '29:SD_GT'            => '^P49#[A-Fa-f0-9]+',
-      '30:LaCrosse'         => '^(\\S+\\s+9 |OK\\sWS\\s)',
-      '31:KOPP_FC'          => '^kr\w{18,}',
-      '32:PCA301'           => '^\\S+\\s+24',
-      '33:SD_Rojaflex'      => '^P109#[A-Fa-f0-9]+',
-      '34:WMBUS'            => '^b.*',
-      'X:SIGNALduino_un'    => '^[u]\d+#.*',
-);
-
 my %symbol_map = (one => 1 , zero =>0 ,sync => '', float=> 'F', 'start' => '');
 
 ## rfmode for attrib & supported rfmodes
@@ -419,8 +341,8 @@ sub SIGNALduino_Define {
   
   #$hash->{CMDS} = '';
   $hash->{ClientsKeepOrder} = 1;
-  $hash->{Clients}    = $clientsSIGNALduino;
-  $hash->{MatchList}  = \%matchListSIGNALduino;
+  $hash->{Clients}    = FHEM::Devices::SIGNALDuino::Clients::getClientsasStr();
+  $hash->{MatchList}  = FHEM::Devices::SIGNALDuino::Matchlist::getMatchListasRef();
   $hash->{DeviceName} = $dev;
   $hash->{logMethod}  = \&main::Log3;
   $hash->{debugMethod}  = sub { return; };
@@ -2713,7 +2635,7 @@ sub SIGNALduino_Parse_MU {
         {
           $nrDispatch++;
           $hash->{logMethod}->($name, 4, "$name: Parse_MU, Decoded matched MU protocol id $id dmsg $dmsg length $bit_length dispatch($nrDispatch/". AttrVal($name,'maxMuMsgRepeat', 4) . ") $rssiStr");
-          FHEM::Devices::SIGNALduino::Dispatch::Dispatch($hash,$rmsg,$dmsg,$rssi,$id);
+          FHEM::Devices::SIGNALDuino::Dispatch::Dispatch($hash,$rmsg,$dmsg,$rssi,$id);
           if ( $nrDispatch == AttrVal($name,'maxMuMsgRepeat', 4))
           {
             last;
@@ -2838,7 +2760,7 @@ sub SIGNALduino_Parse_MC {
               defined($rssi)  ? $hash->{logMethod}->($name, SDUINO_MC_DISPATCH_VERBOSE, qq[$name: Parse_MC, $id, $rmsg $rssiStr])
                       :  $hash->{logMethod}->($name, SDUINO_MC_DISPATCH_VERBOSE, qq[$name: Parse_MC, $id, $rmsg]);
             }
-            FHEM::Devices::SIGNALduino::Dispatch::Dispatch($hash,$rmsg,$dmsg,$rssi,$id);
+            FHEM::Devices::SIGNALDuino::Dispatch::Dispatch($hash,$rmsg,$dmsg,$rssi,$id);
             $message_dispatched=1;
           }
         } else {
@@ -3071,8 +2993,8 @@ sub SIGNALduino_Attr {
     return  if ($hash->{Clients});
     
     ## Set defaults
-    $hash->{Clients} = $clientsSIGNALduino; 
-    return ${FHEM::Devices::SIGNALDuino::Clients::getClientsasRef()};
+    $hash->{Clients} = FHEM::Devices::SIGNALDuino::Clients::getClientsasStr();
+    return 'Setting defaults';
   }
   ## Change MatchList
   elsif( $aName eq 'MatchList' ) {
@@ -3083,8 +3005,7 @@ sub SIGNALduino_Attr {
         $hash->{logMethod}->($name, 2, $name .": Attr, $aVal: ". $@);
       }
     }
-
-    FHEM::Devices::SIGNALDuino::Matchlist::UpdateMatchListFromClients($hash, (ref($match_list) eq 'HASH' ? $match_list : undef));
+    FHEM::Devices::SIGNALDuino::Matchlist::UpdateMatchList($hash,$match_list);
   }
   ## Change verbose
   elsif ($aName eq 'verbose') {
@@ -3358,7 +3279,7 @@ sub SIGNALduino_IdList {
       #SIGNALduino_Log3 $name, 3, "$name IdList, Attr blacklist $w";
     }
 
-    $hash->{Clients} = AttrVal($name,'Clients', $clientsSIGNALduino); # use Attribute Clients or default if whitelist is not active
+    $hash->{Clients} = AttrVal($name,'Clients', FHEM::Devices::SIGNALDuino::Clients::getClientsasStr()); # use Attribute Clients or default if whitelist is not active
   } else {
     $hash->{Clients} =  q[] # clear Clients if whitelist is active    
   }

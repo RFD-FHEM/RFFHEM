@@ -1,14 +1,16 @@
 # $Id: Logger.pm 0 2026-01-10 15:36:13Z sidey79 $
 # The file is part of the SIGNALduino project.
-# Matchlist  functions for Signalduino device.
+# Matchlist functions for Signalduino device.
 
 package FHEM::Devices::SIGNALDuino::Matchlist;
 
 use strict;
 use warnings;
-use FHEM::Devices::SIGNALDuino::Clients; # Aktualisiert
 
-my %matchListSIGNALduino = (
+require FHEM::Devices::SIGNALDuino::Logger;
+require FHEM::Devices::SIGNALDuino::Clients;
+
+my %matchList = (
       '1:IT'                => '^i......',
       '2:CUL_TCM97001'      => '^s[A-Fa-f0-9]+',
       '3:SD_RSL'            => '^P1#[A-Fa-f0-9]{8}',
@@ -45,10 +47,21 @@ my %matchListSIGNALduino = (
 );
 
 sub getMatchListasRef { 
-    return \%matchListSIGNALduino 
+    return \%matchList; 
 }
 
-sub UpdateMatchListFromClients { 
+sub UpdateMatchList {
+    my ($hash, $user_match_list_ref) = @_;
+
+    if( ref($user_match_list_ref) eq 'HASH' ) {
+     $hash->{MatchList} = { %matchList , %$user_match_list_ref };          ## Allow incremental addition of an entry to existing matchlist
+    } else {
+     $hash->{MatchList} = getMatchListasRef();                                      ## Set defaults
+     FHEM::Devices::SIGNALDuino::Logger::Log($hash, 2, $hash->{NAME} .": Attr, $user_match_list_ref: not a HASH using defaults") if( $user_match_list_ref );   
+    }
+}
+
+sub UpdateFromClients { 
     my ($hash, $user_match_list_ref) = @_;
 
     if (ref($hash) ne 'HASH') {
@@ -56,7 +69,7 @@ sub UpdateMatchListFromClients {
     }
 
     # 1. Sammle alle aktiven Clients (Standard + Attribut)
-    my $all_clients_str = FHEM::Devices::SIGNALDuino::Clients::getClientsasRef(); # Aktualisiert
+    my $all_clients_str = FHEM::Devices::SIGNALDuino::Clients::getClientsasStr(); 
     
     if (defined($hash->{Clients}) && length($hash->{Clients}) > 0) {
         $all_clients_str .= $hash->{Clients} . ':';
@@ -71,7 +84,7 @@ sub UpdateMatchListFromClients {
     }
     
     # 2. Hole die gesamte Protokoll-Matchlist
-    my $all_protocols_ref = FHEM::Devices::SIGNALDuino::Matchlist::getMatchListasRef(); # Aktualisiert
+    my $all_protocols_ref = getMatchListasRef(); 
     my %new_match_list = ();
 
     # 3. Iteriere über alle Protokolle und filtere basierend auf aktiven Clients
@@ -86,5 +99,3 @@ sub UpdateMatchListFromClients {
     # 4. Aktualisiere den Geräte-Hash mit der neu generierten MatchList
     $hash->{MatchList} = \%new_match_list;
 }
-
-1;

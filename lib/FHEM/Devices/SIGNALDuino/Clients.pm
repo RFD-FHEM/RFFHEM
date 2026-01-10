@@ -6,11 +6,9 @@ package FHEM::Devices::SIGNALDuino::Clients;
 use strict;
 use warnings;
 
-our $VERSION = "1.00"; # Annahme für Versionsnummer
 
 # Die Liste der Standard-Clients, die in SIGNALduino aktiv sein sollen (z.B. IT, FS20).
-# Der Inhalt wurde von SD::Matchlist verschoben.
-my $clientsSIGNALduino = 
+my $clientlist = 
             ':CUL_EM:'
             .'CUL_FHTTK:'
             .'CUL_TCM97001:'
@@ -49,9 +47,9 @@ my $clientsSIGNALduino =
             .'SIGNALduino_un:'
           ;
 
-sub getClientsasRef {
+sub getClientsasStr {
     # Diese Funktion gibt die Standard-Clients als Doppelpunkt-getrennte Zeichenkette zurück.
-    return \$clientsSIGNALduino;
+    return $clientlist;
 }
 
 1;
