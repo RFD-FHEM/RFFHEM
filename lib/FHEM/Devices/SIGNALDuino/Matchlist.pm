@@ -1,0 +1,86 @@
+package FHEM::Devices::SIGNALDuino::Matchlist;
+
+use strict;
+use warnings;
+use FHEM::Devices::SIGNALDuino::Clients; # Aktualisiert
+
+my %matchListSIGNALduino = (
+      '1:IT'                => '^i......',
+      '2:CUL_TCM97001'      => '^s[A-Fa-f0-9]+',
+      '3:SD_RSL'            => '^P1#[A-Fa-f0-9]{8}',
+      '5:CUL_TX'            => '^TX..........',                       # Need TX to avoid FHTTK
+      '6:SD_AS'             => '^P2#[A-Fa-f0-9]{7,8}',                # Arduino based Sensors, should not be default
+      '4:OREGON'            => '^(3[8-9A-F]|[4-6][0-9A-F]|7[0-8]).*',
+      '7:Hideki'            => '^P12#75[A-F0-9]+',
+      '9:CUL_FHTTK'         => '^T[A-F0-9]{8}',
+      '10:SD_WS07'          => '^P7#[A-Fa-f0-9]{6}[AFaf][A-Fa-f0-9]{2,3}',
+      '11:SD_WS09'          => '^P9#F[A-Fa-f0-9]+',
+      '12:SD_WS'            => '^W\d+x{0,1}#.*',
+      '13:RFXX10REC'        => '^(20|29)[A-Fa-f0-9]+',
+      '14:Dooya'            => '^P16#[A-Fa-f0-9]+',
+      '15:SOMFY'            => '^Ys[0-9A-F]+',
+      '16:SD_WS_Maverick'   => '^P47#[A-Fa-f0-9]+',
+      '17:SD_UT'            => '^P(?:14|20|24|26|29|30|34|46|56|68|69|76|78|81|83|86|90|91|91.1|92|93|95|97|99|104|105|114|118|121|127|128)#.*', # universal - more devices with different protocols
+      '18:FLAMINGO'         => '^P13\.?1?#[A-Fa-f0-9]+',              # Flamingo Smoke
+      '19:CUL_WS'           => '^K[A-Fa-f0-9]{5,}',
+      '20:Revolt'           => '^r[A-Fa-f0-9]{22}',
+      '21:FS10'             => '^P61#[A-F0-9]+',
+      '22:Siro'             => '^P72#[A-Fa-f0-9]+',
+      '23:FHT'              => '^81..(04|09|0d)..(0909a001|83098301|c409c401)..',
+      '24:FS20'             => '^81..(04|0c)..0101a001',
+      '25:CUL_EM'           => '^E0.................',
+      '26:Fernotron'        => '^P82#.*',
+      '27:SD_BELL'          => '^P(?:15|32|41|42|57|79|96|98|112)#.*',
+      '28:SD_Keeloq'        => '^P(?:87|88)#.*',
+      '29:SD_GT'            => '^P49#[A-Fa-f0-9]+',
+      '30:LaCrosse'         => '^(\\S+\\s+9 |OK\\sWS\\s)',
+      '31:KOPP_FC'          => '^kr\w{18,}',
+      '32:PCA301'           => '^\\S+\\s+24',
+      '33:SD_Rojaflex'      => '^P109#[A-Fa-f0-9]+',
+      'X:SIGNALduino_un'    => '^[u]\d+#.*',
+);
+
+sub getMatchListasRef { 
+    return \%matchListSIGNALduino 
+}
+
+sub UpdateMatchListFromClients { 
+    my ($hash, $user_match_list_ref) = @_;
+
+    if (ref($hash) ne 'HASH') {
+        return;
+    }
+
+    # 1. Sammle alle aktiven Clients (Standard + Attribut)
+    my $all_clients_str = FHEM::Devices::SIGNALDuino::Clients::getClientsasRef(); # Aktualisiert
+    
+    if (defined($hash->{Clients}) && length($hash->{Clients}) > 0) {
+        $all_clients_str .= $hash->{Clients} . ':';
+    }
+    
+    my %active_clients = ();
+    foreach my $client (split(/:/, $all_clients_str)) {
+        $client =~ s/^\s+|\s+$//g;
+        if (length($client) > 0) {
+            $active_clients{$client} = 1;
+        }
+    }
+    
+    # 2. Hole die gesamte Protokoll-Matchlist
+    my $all_protocols_ref = FHEM::Devices::SIGNALDuino::Matchlist::getMatchListasRef(); # Aktualisiert
+    my %new_match_list = ();
+
+    # 3. Iteriere über alle Protokolle und filtere basierend auf aktiven Clients
+    foreach my $protocol_client_key (keys %$all_protocols_ref) {
+        my ($id, $client_name) = split(/:/, $protocol_client_key, 2);
+        
+        if (defined $client_name && exists $active_clients{$client_name}) {
+            $new_match_list{$protocol_client_key} = $all_protocols_ref->{$protocol_client_key};
+        }
+    }
+
+    # 4. Aktualisiere den Geräte-Hash mit der neu generierten MatchList
+    $hash->{MatchList} = \%new_match_list;
+}
+
+1;

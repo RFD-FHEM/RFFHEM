@@ -8,8 +8,7 @@
 #
 # 2014-2015  S.Butzek, N.Butzek
 # 2016-2019  S.Butzek, Ralf9
-# 2019-2025  S.Butzek, HomeAutoUser, elektron-bbs
-
+# 2019-2026  S.Butzek, HomeAutoUser, elektron-bbs
 
 package main;
 use strict;
@@ -33,7 +32,10 @@ eval {use Scalar::Util qw(looks_like_number);1};
 eval {use Time::HiRes qw(gettimeofday);1} ;
 eval {use FHEM::Core::Timer::Helper;1 } ;
 
-use lib::SD_Protocols;
+# Neue Bibliotheken
+require FHEM::Devices::SIGNALDuino::Clients;
+require FHEM::Devices::SIGNALDuino::Dispatch;
+require FHEM::Devices::SIGNALDuino::Matchlist;
 use List::Util qw(first);
 
 #$| = 1;    #Puffern abschalten, Hilfreich fuer PEARL WARNINGS Search
@@ -2242,77 +2244,8 @@ sub SIGNALduino_Split_Message {
 
 ############################# package main, test exists
 # Function which dispatches a message if needed.
-sub SIGNALduno_Dispatch {
-  my ($hash, $rmsg, $dmsg, $rssi, $id, $freqafc) = @_;
-  my $name = $hash->{NAME};
-
-  if (!defined($dmsg))
-  {
-    $hash->{logMethod}->($name, 5, "$name: Dispatch, dmsg is undef. Skipping dispatch call");
-    return;
-  }
-
-  #SIGNALduino_Log3 $name, 5, "$name: Dispatch, DMSG: $dmsg";
-
-  my $DMSGgleich = 1;
-  if ($dmsg eq $hash->{LASTDMSG}) {
-    $hash->{logMethod}->($name, SDUINO_DISPATCH_VERBOSE, "$name: Dispatch, $dmsg, test gleich");
-  } else {
-    if ( defined $hash->{DoubleMsgIDs}{$id} ) {
-      $DMSGgleich = 0;
-      $hash->{logMethod}->($name, SDUINO_DISPATCH_VERBOSE, "$name: Dispatch, $dmsg, test ungleich");
-    } else {
-      $hash->{logMethod}->($name, SDUINO_DISPATCH_VERBOSE, "$name: Dispatch, $dmsg, test ungleich: disabled");
-    }
-    $hash->{LASTDMSG} = $dmsg;
-    $hash->{LASTDMSGID} = $id;
-  }
-
-  if ($DMSGgleich) {
-    #Dispatch if dispatchequals is provided in protocol definition or only if $dmsg is different from last $dmsg, or if 2 seconds are between transmits
-    if (  ( $hash->{protocolObject}->checkProperty($id,'dispatchequals','false') eq 'true') 
-        || ($hash->{DMSG} ne $dmsg) 
-        || ($hash->{TIME}+2 < time() )  )
-    {
-      $hash->{MSGCNT}++;
-      $hash->{TIME} = time();
-      $hash->{DMSG} = $dmsg;
-      #my $event = 0;
-      if (substr(ucfirst($dmsg),0,1) eq 'U') { # u oder U
-        #$event = 1;
-        DoTrigger($name, 'DMSG ' . $dmsg);
-        return if (substr($dmsg,0,1) eq 'U'); # Fuer $dmsg die mit U anfangen ist kein Dispatch notwendig, da es dafuer kein Modul gibt klein u wird dagegen dispatcht
-      }
-      #readingsSingleUpdate($hash, 'state', $hash->{READINGS}{state}{VAL}, $event);
-
-      $hash->{RAWMSG} = $rmsg;
-      my %addvals = (
-        DMSG => $dmsg,
-        Protocol_ID => $id
-      );
-      if (AttrVal($name,'suppressDeviceRawmsg',0) == 0) {
-        $addvals{RAWMSG} = $rmsg
-      }
-      if(defined($rssi)) {
-        $hash->{RSSI} = $rssi;
-        $addvals{RSSI} = $rssi;
-        $rssi .= ' dB,'
-      }
-      else {
-        $rssi = '';
-      }
-      if(defined($freqafc)) { # AFC cc1101 0x32 (0xF2): FREQEST – Frequency Offset Estimate from Demodulator
-        $addvals{FREQAFC} = $freqafc;
-      }
-
-      $dmsg = lc($dmsg) if ($id eq '74' or $id eq '74.1');    # 10_FS20.pm accepted only lower case hex
-      $hash->{logMethod}->($name, SDUINO_DISPATCH_VERBOSE, "$name: Dispatch, $dmsg, $rssi dispatch");
-      Dispatch($hash, $dmsg, \%addvals);  ## Dispatch to other Modules
-
-    } else {
-      $hash->{logMethod}->($name, 4, "$name: Dispatch, $dmsg, Dropped due to short time or equal msg");
-    }
-  }
+sub SIGNALduno_Dispatch { 
+  return FHEM::Devices::SIGNALDuino::Dispatch::SIGNALduno_Dispatch(@_); 
 }
 
 ############################# package main  todo: move to lib::SD_Protocols
@@ -2332,7 +2265,7 @@ sub SIGNALduino_moduleMatch {
   my $modMatchRegex=$hash->{protocolObject}->checkProperty($id,'modulematch',undef);
 
   if (!defined($modMatchRegex) || $dmsg =~ m/$modMatchRegex/) {
-    $hash->{debugMethod}->(qq[$name: modmatch passed for: $dmsg]);
+    Debug "$name: modmatch passed for: $dmsg" if ($debug);
     my $developID = $hash->{protocolObject}->checkProperty($id,'developId','');
     my $IDsNoDispatch = ',' . InternalVal($name,'IDsNoDispatch','') . ',';
     if ($IDsNoDispatch ne ',,' && index($IDsNoDispatch, ",$id,") >= 0) {  # kein dispatch wenn die Id im Internal IDsNoDispatch steht
@@ -2541,7 +2474,7 @@ sub SIGNALduino_Parse_MS {
       {
         $message_dispatched++;
         $hash->{logMethod}->($name, 4, "$name: Parse_MS, Decoded matched MS protocol id $id dmsg $dmsg length " . scalar @bit_msg . " $rssiStr");
-        SIGNALduno_Dispatch($hash,$rmsg,$dmsg,$rssi,$id);
+        FHEM::Devices::SIGNALDuino::Dispatch::SIGNALduno_Dispatch($hash,$rmsg,$dmsg,$rssi,$id);
       }
     }
 
@@ -2990,7 +2923,7 @@ sub SIGNALduino_Parse_MN {
     }
     $dmsg = sprintf('%s%s',$hash->{protocolObject}->checkProperty($id,'preamble',''),$methodReturn[0]);
     $hash->{logMethod}->($name, 5, qq[$name: Parse_MN, Decoded matched MN Protocol id $id dmsg=$dmsg $rssiStr]);
-    SIGNALduno_Dispatch($hash,$rmsg,$dmsg,$rssi,$id,$freqafc);
+    FHEM::Devices::SIGNALDuino::Dispatch::SIGNALduno_Dispatch($hash,$rmsg,$dmsg,$rssi,$id,$freqafc);
     $message_dispatched++;
     
   }
@@ -3139,7 +3072,7 @@ sub SIGNALduino_Attr {
     
     ## Set defaults
     $hash->{Clients} = $clientsSIGNALduino; 
-    return 'Setting defaults';
+    return ${FHEM::Devices::SIGNALDuino::Clients::getClientsasRef()};
   }
   ## Change MatchList
   elsif( $aName eq 'MatchList' ) {
@@ -3151,12 +3084,7 @@ sub SIGNALduino_Attr {
       }
     }
 
-    if( ref($match_list) eq 'HASH' ) {
-      $hash->{MatchList} = { %matchListSIGNALduino , %$match_list };          ## Allow incremental addition of an entry to existing hash list
-    } else {
-      $hash->{MatchList} = \%matchListSIGNALduino;                      ## Set defaults
-      $hash->{logMethod}->($name, 2, $name .": Attr, $aVal: not a HASH using defaults") if( $aVal );
-    }
+    FHEM::Devices::SIGNALDuino::Matchlist::UpdateMatchListFromClients($hash, (ref($match_list) eq 'HASH' ? $match_list : undef));
   }
   ## Change verbose
   elsif ($aName eq 'verbose') {
@@ -3497,7 +3425,7 @@ sub SIGNALduino_IdList {
     }
   }
   $hash->{Clients} = $hash->{Clients} =~ s/.{25,50}:\K(?=.{25,50})/ :/rg; # Add spaces to create linebreaks in webview
-  $hash->{Clients} = substr($hash->{Clients}, 0, -1); # Remove last :
+  $hash->{Clients} =~ s/^://; $hash->{Clients} =~ s/:$//; # Remove leading/trailing :
 
   delete $hash->{'.clientArray'}; #force recompute of clientArray after changes
 
