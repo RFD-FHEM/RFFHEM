@@ -11,3 +11,6 @@ lib/Test2/Formatter/gha.pm
 bin/reviewdog
 workspace.code-workspace
 .vstags
+.devcontainer/vscode/perl-lang
+.gitconfig
+testOutput.*
