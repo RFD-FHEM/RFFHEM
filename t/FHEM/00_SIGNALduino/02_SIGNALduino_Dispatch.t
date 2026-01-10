@@ -19,7 +19,7 @@ InternalTimer(time(), sub {
 		track => 1,
 		class => 'main',
 		around => [
-			SIGNALduno_Dispatch => sub { 
+			SIGNALduino_Dispatch => sub { 
                 my $orig = shift;
                 my $self = shift;
                 return $self->$orig(@_);
@@ -30,9 +30,9 @@ InternalTimer(time(), sub {
 
     my $rmsg="MS;P2=463;P3=-1957;P5=-3906;P6=-9157;D=26232523252525232323232323252323232323232325252523252325252323252325232525;CP=2;SP=6;R=75;";
     my $dmsg="s5C080EB2B000";
-    SIGNALduno_Dispatch($targetHash, $rmsg, $dmsg, "-36.4","0.3");
-    is($tracking->{SIGNALduno_Dispatch}[0]{args}[2], $dmsg, "Dispatch check dmsg" );
-	$mock->restore('SIGNALduno_Dispatch');
+    SIGNALduino_Dispatch($targetHash, $rmsg, $dmsg, "-36.4","0.3");
+    is($tracking->{SIGNALduino_Dispatch}[0]{args}[2], $dmsg, "Dispatch check dmsg" );
+	$mock->restore('SIGNALduino_Dispatch');
     is(InternalVal($targetHash->{NAME},"LASTDMSG",""), $dmsg, "check Internal LASTDMSG" );
     is(InternalVal($targetHash->{NAME},"LASTDMSGID",""), "0.3", "check Internal LASTDMSGID" );
 

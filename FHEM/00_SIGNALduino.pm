@@ -32,6 +32,7 @@ eval {use Scalar::Util qw(looks_like_number);1};
 eval {use Time::HiRes qw(gettimeofday);1} ;
 eval {use FHEM::Core::Timer::Helper;1 } ;
 
+use lib::SD_Protocols;
 require FHEM::Devices::SIGNALDuino::Clients;
 require FHEM::Devices::SIGNALDuino::Dispatch;
 require FHEM::Devices::SIGNALDuino::Matchlist;
@@ -2243,7 +2244,7 @@ sub SIGNALduino_Split_Message {
 
 ############################# package main, test exists
 # Fallback function which dispatches a message if needed.
-sub SIGNALduno_Dispatch { 
+sub SIGNALduino_Dispatch { 
   return FHEM::Devices::SIGNALDuino::Dispatch::Dispatch(@_); 
 }
 
@@ -2264,7 +2265,7 @@ sub SIGNALduino_moduleMatch {
   my $modMatchRegex=$hash->{protocolObject}->checkProperty($id,'modulematch',undef);
 
   if (!defined($modMatchRegex) || $dmsg =~ m/$modMatchRegex/) {
-    Debug "$name: modmatch passed for: $dmsg" if ($debug);
+    $hash->{debugMethod}->(qq[$name: modmatch passed for: $dmsg]);
     my $developID = $hash->{protocolObject}->checkProperty($id,'developId','');
     my $IDsNoDispatch = ',' . InternalVal($name,'IDsNoDispatch','') . ',';
     if ($IDsNoDispatch ne ',,' && index($IDsNoDispatch, ",$id,") >= 0) {  # kein dispatch wenn die Id im Internal IDsNoDispatch steht
@@ -2712,7 +2713,7 @@ sub SIGNALduino_Parse_MU {
         {
           $nrDispatch++;
           $hash->{logMethod}->($name, 4, "$name: Parse_MU, Decoded matched MU protocol id $id dmsg $dmsg length $bit_length dispatch($nrDispatch/". AttrVal($name,'maxMuMsgRepeat', 4) . ") $rssiStr");
-          SIGNALduno_Dispatch($hash,$rmsg,$dmsg,$rssi,$id);
+          FHEM::Devices::SIGNALduino::Dispatch::Dispatch($hash,$rmsg,$dmsg,$rssi,$id);
           if ( $nrDispatch == AttrVal($name,'maxMuMsgRepeat', 4))
           {
             last;
@@ -2837,7 +2838,7 @@ sub SIGNALduino_Parse_MC {
               defined($rssi)  ? $hash->{logMethod}->($name, SDUINO_MC_DISPATCH_VERBOSE, qq[$name: Parse_MC, $id, $rmsg $rssiStr])
                       :  $hash->{logMethod}->($name, SDUINO_MC_DISPATCH_VERBOSE, qq[$name: Parse_MC, $id, $rmsg]);
             }
-            SIGNALduno_Dispatch($hash,$rmsg,$dmsg,$rssi,$id);
+            FHEM::Devices::SIGNALduino::Dispatch::Dispatch($hash,$rmsg,$dmsg,$rssi,$id);
             $message_dispatched=1;
           }
         } else {
@@ -2922,7 +2923,7 @@ sub SIGNALduino_Parse_MN {
     }
     $dmsg = sprintf('%s%s',$hash->{protocolObject}->checkProperty($id,'preamble',''),$methodReturn[0]);
     $hash->{logMethod}->($name, 5, qq[$name: Parse_MN, Decoded matched MN Protocol id $id dmsg=$dmsg $rssiStr]);
-    FHEM::Devices::SIGNALDuino::Dispatch::SIGNALduno_Dispatch($hash,$rmsg,$dmsg,$rssi,$id,$freqafc);
+    FHEM::Devices::SIGNALDuino::Dispatch::Dispatch($hash,$rmsg,$dmsg,$rssi,$id,$freqafc);
     $message_dispatched++;
     
   }

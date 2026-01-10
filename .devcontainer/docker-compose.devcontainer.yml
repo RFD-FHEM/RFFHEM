@@ -1,6 +1,11 @@
 services:
   RFFHEM-development:
     image: fhem-docker
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 4gb
     build:
       context: ../ # Dockerfile cannot access files from parent directories if context is not set.
       dockerfile: ./.devcontainer/Dockerfile

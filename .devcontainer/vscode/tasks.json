@@ -60,7 +60,7 @@
         {
             "label": "run prove Perl module files",
             "type": "shell",
-            "command": "prove ${input:proveOptions} --exec 'perl -I FHEM' -I FHEM -r ${input:dynamicPERLModuleFilesRemembered}",
+            "command": "prove ${input:proveOptions} --exec 'perl -I lib' -I FHEM -r ${input:dynamicPERLModuleFilesRemembered}",
             "problemMatcher" : {
                 "owner": "TAP",
                 "fileLocation" : "relative",
