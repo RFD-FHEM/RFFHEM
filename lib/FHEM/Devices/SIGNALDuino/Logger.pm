@@ -1,7 +1,12 @@
+# $Id: Logger.pm 0 2026-01-10 15:36:13Z sidey79 $
+# The file is part of the SIGNALduino project.
+# Logging helper functions for Packages in FHEM::Devices::SIGNALDuino.
+
 package FHEM::Devices::SIGNALDuino::Logger;
 
 use strict;
 use warnings;
+
 
 sub Log {
     my ($hash, $level, $message) = @_;
@@ -12,15 +17,15 @@ sub Log {
     }
     # Fallback: main::Log3 verwenden
     elsif (ref($hash) eq 'HASH' && defined($hash->{NAME})) {
-        main::Log3 $hash->{NAME}, $level, $message;
+        main::Log3($hash->{NAME}, $level, $message);
     }
     # Fallback fuer Aufrufe, bei denen $hash ein String ($name) ist (z.B. vor $hash-Def.)
     elsif (defined($hash)) {
-        main::Log3 $hash, $level, $message;
+        main::Log3($hash, $level, $message);
     }
     # Generischer Fall
     else {
-        main::Log3 undef, $level, $message;
+        main::Log3 (undef, $level, $message);
     }
 }
 

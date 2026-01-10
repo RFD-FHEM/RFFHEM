@@ -1,4 +1,8 @@
-package FHEM::Devices::SIGNALDuino::Dispatch; # Aktualisiert
+# $Id: Dispatch.pm 0 2026-01-10 15:36:13Z sidey79 $
+# The file is part of the SIGNALduino project.
+# Dispatch functions for SIGNALduino device messages.
+
+package FHEM::Devices::SIGNALDuino::Dispatch;
 
 use strict;
 use warnings;
@@ -13,11 +17,11 @@ use constant {
   SDUINO_DISPATCH_VERBOSE         => 5,
 };
 
-
+our %defs;  # Globale Definitionen für FHEM
 # Todo Add Clients and Matchlist dynamically to DevAttrList 
 # { addToDevAttrList('PySignalDuino', 'Clients');; }
 
-sub SIGNALduno_Dispatch {
+sub Dispatch {
   my ($hash, $rmsg, $dmsg, $rssi, $id, $freqafc) = @_;
   my $name = $hash->{NAME};
 
@@ -95,7 +99,7 @@ sub SIGNALduno_Dispatch {
 }
 
 # Neuer kombinierter Dispatcher für MQTT-JSON-Payloads
-sub MqttSignalduino_DispatchFromJSON {
+sub DispatchFromJson {
   my ($json_str, $name) = @_;
   
   # Logging-Aufruf ersetzt (Aktualisiert)
@@ -138,7 +142,7 @@ sub MqttSignalduino_DispatchFromJSON {
   # Aufruf der zentralen Dispatch-Funktion
   # Logging-Aufruf ersetzt (Aktualisiert)
   FHEM::Devices::SIGNALDuino::Logger::Log($hash, 5, "MqttSignalduino_DispatchFromJSON: Calling SIGNALduno_Dispatch with dmsg=$dmsg, id=$id");
-  SIGNALduno_Dispatch($hash, $rmsg, $dmsg, $rssi, $id, $freqafc);
+  Dispatch($hash, $rmsg, $dmsg, $rssi, $id, $freqafc);
 }
 
 1;

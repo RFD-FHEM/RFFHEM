@@ -32,7 +32,6 @@ eval {use Scalar::Util qw(looks_like_number);1};
 eval {use Time::HiRes qw(gettimeofday);1} ;
 eval {use FHEM::Core::Timer::Helper;1 } ;
 
-# Neue Bibliotheken
 require FHEM::Devices::SIGNALDuino::Clients;
 require FHEM::Devices::SIGNALDuino::Dispatch;
 require FHEM::Devices::SIGNALDuino::Matchlist;
@@ -2243,9 +2242,9 @@ sub SIGNALduino_Split_Message {
 }
 
 ############################# package main, test exists
-# Function which dispatches a message if needed.
+# Fallback function which dispatches a message if needed.
 sub SIGNALduno_Dispatch { 
-  return FHEM::Devices::SIGNALDuino::Dispatch::SIGNALduno_Dispatch(@_); 
+  return FHEM::Devices::SIGNALDuino::Dispatch::Dispatch(@_); 
 }
 
 ############################# package main  todo: move to lib::SD_Protocols
@@ -2474,7 +2473,7 @@ sub SIGNALduino_Parse_MS {
       {
         $message_dispatched++;
         $hash->{logMethod}->($name, 4, "$name: Parse_MS, Decoded matched MS protocol id $id dmsg $dmsg length " . scalar @bit_msg . " $rssiStr");
-        FHEM::Devices::SIGNALDuino::Dispatch::SIGNALduno_Dispatch($hash,$rmsg,$dmsg,$rssi,$id);
+        FHEM::Devices::SIGNALDuino::Dispatch::Dispatch($hash,$rmsg,$dmsg,$rssi,$id);
       }
     }
 
