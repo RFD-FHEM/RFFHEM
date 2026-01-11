@@ -1,4 +1,4 @@
-# $Id: 00_SIGNALduino.pm 0 2026-01-11 15:03:02Z sidey79 $
+# $Id: 00_SIGNALduino.pm 0 2026-01-11 22:35:11Z sidey79 $
 # https://github.com/RFD-FHEM/RFFHEM/tree/master
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incoming messages
 # see http://www.fhemwiki.de/wiki/SIGNALDuino
