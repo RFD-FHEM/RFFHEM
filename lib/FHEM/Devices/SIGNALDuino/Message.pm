@@ -17,9 +17,6 @@ use constant {
   SDUINO_DISPATCH_VERBOSE         => 5,
 };
 
-
-use Data::Dumper;
-
 our main::%defs;  # Globale Definitionen für FHEM
 # Todo Add Clients and Matchlist dynamically to DevAttrList 
 # { addToDevAttrList('PySignalDuino', 'Clients');; }
@@ -109,29 +106,43 @@ sub json2Dispatch {
     return;
   }
   
-  my $data;
+  my $json;
   eval {
     require JSON;
-    $data = JSON::decode_json($json_str);
+    $json = JSON::decode_json($json_str);
   };
   if ($@) {
     FHEM::Devices::SIGNALDuino::Logger::Log($name, 3, "json2Dispatch: JSON decode error: $@");
     return;
   }
 
-  my $rmsg = $data->{rawmsg} // undef;
-  my $dmsg = $data->{payload} // undef; 
-  my $rssi = $data->{metadata}->{rssi} // undef;
-  my $id = $data->{protocol}->{id} // undef;
-  my $freqafc = $data->{metadata}->{freqafc} // undef;
+  my $message = $json->{data} // undef;
+
+  if (!defined($message)) {
+     FHEM::Devices::SIGNALDuino::Logger::Log($name, 4, "json2Dispatch: Missing 'data' in JSON structure");
+     return;
+  }
+  
+  if (!defined($json->{protocol}) || !defined($json->{protocol}->{id})) {
+     FHEM::Devices::SIGNALDuino::Logger::Log($name, 4, q[json2Dispatch: Missing ' "protocol":{id:}" ' in JSON structure]);
+     return;
+  }
+
+  my $rmsg = $json->{raw} // undef;
+  my $dmsg = (defined $json->{protocol}->{preamble} && defined $message)
+             ? $json->{protocol}->{preamble} . $message
+             : $message;
+  my $id = $json->{protocol}->{id} // undef;
+  my $rssi = $json->{metadata}->{rssi} // undef;
+  my $freqafc = $json->{metadata}->{freq_afc} // undef;
 
   if (!defined($dmsg) || !defined($id)) {
-     FHEM::Devices::SIGNALDuino::Logger::Log($name, 4, "json2Dispatch: Missing dmsg or protocol ID in JSON");
+     FHEM::Devices::SIGNALDuino::Logger::Log($name, 4, "json2Dispatch: No dmsg could be created from JSON");
      return;
   }
   
   # Call central dispatch function
-  FHEM::Devices::SIGNALDuino::Logger::Log($hash, 5, "json2Dispatch: Calling SIGNALduno_Dispatch with dmsg=$dmsg, id=$id");
+  FHEM::Devices::SIGNALDuino::Logger::Log($hash, 5, "json2Dispatch: Calling FHEM Dispatch with dmsg=$dmsg, id=$id");
   Dispatch($hash, $rmsg, $dmsg, $rssi, $id, $freqafc);
 }
 

@@ -21,15 +21,16 @@ my $targetHash = {
 # Testdaten
 my $valid_json = <<'EOF';
 {
-  "rawmsg": "r123456",
-  "payload": "DMSG123",
+  "raw": "r123456",
+  "data": "DMSG123",
   "metadata": {
     "rssi": -70,
-    "freqafc": 433.92
+    "freq_afc": 433.92
   },
   "protocol": {
     "id": "1",
-    "name": "DummyProtocol"
+    "name": "DummyProtocol",
+    "preamble": "P1#"
   }
 }
 EOF
@@ -70,11 +71,11 @@ subtest 'Erfolgreicher DispatchFromJson Aufruf' => sub {
                 
                 # Verify Dispatch calles with correct parameters
                 is( $hash_arg,    $targetHash,      "Dispatch: hash-Referenz ist korrekt" );
-                is( $rmsg_arg,    "r123456",   "Dispatch: rawmsg ist korrekt" );
-                is( $dmsg_arg,    "DMSG123",   "Dispatch: dmsg (payload) ist korrekt" );
+                is( $rmsg_arg,    'r123456',   "Dispatch: raw ist korrekt" );
+                is( $dmsg_arg,    'P1#DMSG123',   "Dispatch: dmsg (data) ist korrekt" );
                 is( $rssi_arg,    -70,         "Dispatch: rssi ist korrekt" );
-                is( $id_arg,      "1",         "Dispatch: protocol ID ist korrekt" );
-                is( $freqafc_arg, 433.92,      "Dispatch: freqafc ist korrekt" );
+                is( $id_arg,      '1',         "Dispatch: protocol ID ist korrekt" );
+                is( $freqafc_arg, 433.92,      "Dispatch: freq_afc ist korrekt" );
             },
         },
     );
@@ -85,7 +86,7 @@ subtest 'Erfolgreicher DispatchFromJson Aufruf' => sub {
 
     # Verify Logmessages
     is( scalar @log_calls, 1, "Genau 1 Log-Eintrag für erfolgreichen Aufruf" );
-    like( $log_calls[0]->{msg}, qr/Calling SIGNALduno_Dispatch with dmsg=DMSG123, id=1/, "Korrekte Log-Meldung vor Dispatch-Aufruf" );
+    like( $log_calls[0]->{msg}, qr/Calling .* with dmsg=P1#DMSG123, id=1/, "Korrekte Log-Meldung vor Dispatch-Aufruf" );
     is( $log_calls[0]->{level}, 5, "Korrekter Log-Level 5" );
 
     $defs{$device_name} = $targetHash; # Reset
@@ -150,15 +151,17 @@ subtest 'Ungültiger JSON-String' => sub {
 };
 
 # --- Testfall 6: Fehlendes 'payload' (dmsg) ---
-subtest 'Fehlendes \'payload\' (dmsg)' => sub {
+subtest q[Fehlendes 'data' (dmsg)] => sub {
     reset_log_calls();
     plan(3);
     
     my $missing_dmsg_json = <<'EOF';
 {
-  "rawmsg": "r123456",
+  "raw": "r123456",
+  "protocol_id": "1",
   "metadata": {
-    "rssi": -70
+    "rssi": -70,
+    "freq_afc": 433.92
   },
   "protocol": {
     "id": "1"
@@ -172,23 +175,24 @@ EOF
     FHEM::Devices::SIGNALDuino::Message::json2Dispatch($missing_dmsg_json, $device_name);
 
     is( scalar @log_calls, 1, "Genau 1 Log-Eintrag für fehlende dmsg/ID" );
-    like( $log_calls[0]->{msg}, qr/Missing dmsg or protocol ID in JSON/, "Log: Fehlende dmsg/ID erkannt" );
+    like( $log_calls[0]->{msg}, qr/Missing 'data' in JSON/, "Log: Fehlendes data erkannt" );
     is( $log_calls[0]->{level}, 4, "Korrekter Log-Level 4" );
     
     delete $defs{$device_name}; # Zurücksetzen
 };
 
 # --- Testfall 7: Fehlendes 'protocol->id' ---
-subtest 'Fehlendes \'protocol->id\'' => sub {
+subtest q[Fehlendes 'protocol->id'] => sub {
     reset_log_calls();
     plan(3);
     
     my $missing_id_json = <<'EOF';
 {
-  "rawmsg": "r123456",
-  "payload": "DMSG123",
+  "raw": "r123456",
+  "data": "DMSG123",
   "metadata": {
-    "rssi": -70
+    "rssi": -70,
+    "freq_afc": 433.92
   },
   "protocol": {
     "name": "DummyProtocol"
@@ -202,7 +206,7 @@ EOF
     FHEM::Devices::SIGNALDuino::Message::json2Dispatch($missing_id_json, $device_name);
 
     is( scalar @log_calls, 1, "Genau 1 Log-Eintrag für fehlende protocol ID" );
-    like( $log_calls[0]->{msg}, qr/Missing dmsg or protocol ID in JSON/, "Log: Fehlende dmsg/ID erkannt" );
+    like( $log_calls[0]->{msg}, qr/Missing ' "protocol":{id:}" ' in JSON/, "Log: Fehlende dmsg/ID erkannt" );
     is( $log_calls[0]->{level}, 4, "Korrekter Log-Level 4" );
     
     delete $defs{$device_name}; # Zurücksetzen
