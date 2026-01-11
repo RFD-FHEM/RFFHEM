@@ -4,6 +4,7 @@ on:
   pull_request:
       paths: 
       - 'FHEM/**'
+      - 'lib/FHEM/**'
       - '.github/workflows/version.yml'
 
 jobs:
@@ -70,17 +71,25 @@ jobs:
       - id: file_changes
         uses: tj-actions/changed-files@v47
         with:
-          matrix:  true
+          matrix: true
           files: |
               FHEM/**.pm
-              FHEM/lib/**.pm
-              lib/FHEM/**.pm
+              FHEM/lib/*.pm
+              lib/**/*.pm
 
       - name: Get current date
         id: date
         run: |
           echo "date=$(date -u +'%Y%m%d')" >> $GITHUB_OUTPUT
           echo "datetimestr=$(date -u +'%Y-%m-%d %T')" >> $GITHUB_OUTPUT
+
+      - name: List all changed files
+        env:
+          ALL_CHANGED_FILES: ${{ steps.file_changes.outputs.all_changed_files }}
+        run: |
+          for file in ${ALL_CHANGED_FILES}; do
+            echo "$file was changed"
+          done
 
       # - name: Set matrix for build
       #   id: set-matrix
@@ -89,7 +98,7 @@ jobs:
       #     echo "matrix={\"files\":${{ steps.file_changes.outputs.all_changed_files }}}" >> "$GITHUB_OUTPUT"
 
   modify:
-    if: ${{ fromJSON( needs.metadata.outputs.matrix ).files[0] }}
+    if: ${{ fromJSON( needs.metadata.outputs.matrix )[0] }}
     continue-on-error: true
     runs-on: ubuntu-latest
     needs: metadata
@@ -171,6 +180,13 @@ jobs:
         with:
           filename: controls_signalduino.txt 
           directory: FHEM/lib
+          writemode: a
+      - name: update controls file (perl lib)
+        if: needs.pr_check.outputs.result != 'true'
+        uses: fhem/fhem-controls-actions@v3.0.0
+        with:
+          filename: controls_signalduino.txt 
+          directory: lib/FHEM/Devices/SIGNALDuino
           writemode: a
       - name: git commit back
         id: commit

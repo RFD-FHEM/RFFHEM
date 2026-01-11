@@ -48,7 +48,7 @@ my $clientlist =
           ;
 
 sub getClientsasStr {
-    # Diese Funktion gibt die Standard-Clients als Doppelpunkt-getrennte Zeichenkette zurück.
+    # Function will return the standard client list as string
     return $clientlist;
 }
 

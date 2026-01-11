@@ -6,35 +6,28 @@ use Test2::V0;
 use Test2::Tools::Compare qw{ is };
 use Test2::Mock;
 
-# Globale $defs für FHEM-Kontext (wird in MqttSignalduino_DispatchFromJSON benötigt)
 use vars qw(%defs);             # Mock FHEM device/button definitions
 
-# Mock für FHEM-Core-Funktionen
+# Mock FHEM-Core functions
 my $mock = Test2::Mock->new(
     track => 1,
     class => 'main',
     add => [
-        # InternalVal wird im Originaltest zur Überprüfung verwendet
-        #InternalVal => sub { 
-        #    my ($hashName, $key, $default) = @_;
-        #    # In diesem Mock geben wir die Werte von $defs{$hashName} zurück
-        #    return $defs{$hashName}{_INTERNAL_}{$key} // $default;
-        #},
-        # DoTrigger wird von SIGNALduno_Dispatch aufgerufen
+        # DoTrigger 
         DoTrigger => sub { 
             my ($name, $trigger) = @_;
             note "Mocked main::DoTrigger called: $name, $trigger";
         },
-        # Dispatch wird von SIGNALduno_Dispatch aufgerufen
+        # Dispatch 
         Dispatch => sub { 
             my ($hash, $dmsg, $addvals) = @_;
             note "Mocked main::Dispatch called for: $dmsg";
-            # Hier könnten weitere Checks auf $addvals durchgeführt werden
+            # additional checks possible
         },
-        # AttrVal wird von SIGNALduno_Dispatch aufgerufen
+        # AttrVal 
         AttrVal => sub {
             my ($name, $key, $default) = @_;
-            # Default-Verhalten simulieren: 0 für 'suppressDeviceRawmsg'
+            # Default  simulating: 0 for 'suppressDeviceRawmsg'
             note 'Mocked main::AttrVal called: ' . $key;
             return ($key eq 'suppressDeviceRawmsg') ? 0 : $default;
         },
@@ -58,10 +51,9 @@ subtest 'Test of SIGNALduno_Dispatch in FHEM::Devices::SIGNALDuino::Message' => 
         NAME => $deviceName,
         LASTDMSG => '',
         LASTDMSGID => '',
-        DMSG => '', # Wird in Message::Dispatch gesetzt
-        TIME => 0, # Wird in Message::Dispatch gesetzt
-        MSGCNT => 0, # Wird in Message::Dispatch gesetzt
-        # Für InternalVal Mock:
+        DMSG => '', # Is modified in Message::Dispatch 
+        TIME => 0, # Is modified in Message::Dispatch gesetzt
+        MSGCNT => 0, # Is modified in Message::Dispatch gesetzt
         INTERNAL => {
             LASTDMSG => '',
             LASTDMSGID => '',

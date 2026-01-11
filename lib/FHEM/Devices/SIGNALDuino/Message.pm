@@ -38,31 +38,30 @@ sub Dispatch {
   my $DMSGgleich = 1;
   if ($dmsg eq $hash->{LASTDMSG}) {
     # Logging-Aufruf ersetzt (Aktualisiert)
-    FHEM::Devices::SIGNALDuino::Logger::Log($hash, SDUINO_DISPATCH_VERBOSE, "$name: Dispatch, $dmsg, test gleich");
+    FHEM::Devices::SIGNALDuino::Logger::Log($hash, SDUINO_DISPATCH_VERBOSE, "$name: Dispatch, $dmsg is equal to last DMSG");
   } else {
     if ( defined $hash->{DoubleMsgIDs}{$id} ) {
       $DMSGgleich = 0;
       # Logging-Aufruf ersetzt (Aktualisiert)
-      FHEM::Devices::SIGNALDuino::Logger::Log($hash, SDUINO_DISPATCH_VERBOSE, "$name: Dispatch, $dmsg, test ungleich");
+      FHEM::Devices::SIGNALDuino::Logger::Log($hash, SDUINO_DISPATCH_VERBOSE, "$name: Dispatch, $dmsg is unequal to last DMSG (DoubleMsgID is enabled)");
     } else {
       # Logging-Aufruf ersetzt (Aktualisiert)
-      FHEM::Devices::SIGNALDuino::Logger::Log($hash, SDUINO_DISPATCH_VERBOSE, "$name: Dispatch, $dmsg, test ungleich: disabled");
+      FHEM::Devices::SIGNALDuino::Logger::Log($hash, SDUINO_DISPATCH_VERBOSE, "$name: Dispatch, $dmsg, is unequal to last DMSG (DoubleMsgID is disabled)");
     }
     $hash->{LASTDMSG} = $dmsg;
     $hash->{LASTDMSGID} = $id;
   }
 
   if ($DMSGgleich) {
-    # Dispatch if dispatchequals is provided in protocol definition or only if $dmsg is different from last $dmsg, or if 2 seconds are between transmits
-    # HINWEIS: $hash->{protocolObject}->checkProperty($id,'dispatchequals','false') ist hier nicht verfügbar, wird ignoriert
-    if (  ( $hash->{DMSG} ne $dmsg) 
-        || ($hash->{TIME}+2 < time() )  )
+    # Dispatch only if $dmsg is different from last $dmsg, or if 2 seconds are between transmits AND protocol property dispatchequals is not set to true
+    if ( ( ( $hash->{DMSG} ne $dmsg)
+         || ($hash->{TIME}+2 < time() ) )
+        && ( !defined $hash->{protocolObject} || $hash->{protocolObject}->checkProperty($id,'dispatchequals','false') ne 'true' ) )
     {
       $hash->{MSGCNT}++;
       $hash->{TIME} = time();
       $hash->{DMSG} = $dmsg;
       
-      # HINWEIS: FHEM Funktionen DoTrigger und Dispatch müssen im main:: Paket liegen
       if (substr(ucfirst($dmsg),0,1) eq 'U') { 
         main::DoTrigger($name, 'DMSG ' . $dmsg);
         return if (substr($dmsg,0,1) eq 'U'); 
@@ -74,7 +73,6 @@ sub Dispatch {
         Protocol_ID => $id
       );
       $addvals{RAWMSG} = $rmsg if (!defined &main::AttrVal || main::AttrVal($name,'suppressDeviceRawmsg',0) == 0);
-
 
       if(defined($rssi)) {
         $hash->{RSSI} = $rssi;
@@ -89,13 +87,9 @@ sub Dispatch {
       }
 
       $dmsg = lc($dmsg) if ($id eq '74' or $id eq '74.1');    
-      # Logging-Aufruf ersetzt (Aktualisiert)
       FHEM::Devices::SIGNALDuino::Logger::Log($hash, SDUINO_DISPATCH_VERBOSE, "$name: Dispatch, $dmsg, $rssi dispatch");
-      # Der Aufruf an die FHEM-Kernfunktion Dispatch ist erforderlich
       main::Dispatch($hash, $dmsg, \%addvals); 
-
     } else {
-      # Logging-Aufruf ersetzt (Aktualisiert)
       FHEM::Devices::SIGNALDuino::Logger::Log($hash, 4, "$name: Dispatch, $dmsg, Dropped due to short time or equal msg");
     }
   }
@@ -115,7 +109,6 @@ sub json2Dispatch {
     return;
   }
   
-  # Sicherstellen, dass JSON.pm geladen ist
   my $data;
   eval {
     require JSON;
@@ -137,7 +130,7 @@ sub json2Dispatch {
      return;
   }
   
-  # Aufruf der zentralen Dispatch-Funktion
+  # Call central dispatch function
   FHEM::Devices::SIGNALDuino::Logger::Log($hash, 5, "json2Dispatch: Calling SIGNALduno_Dispatch with dmsg=$dmsg, id=$id");
   Dispatch($hash, $rmsg, $dmsg, $rssi, $id, $freqafc);
 }

@@ -68,7 +68,6 @@ sub UpdateFromClients {
         return;
     }
 
-    # 1. Sammle alle aktiven Clients (Standard + Attribut)
     my $all_clients_str = FHEM::Devices::SIGNALDuino::Clients::getClientsasStr(); 
     
     if (defined($hash->{Clients}) && length($hash->{Clients}) > 0) {
@@ -83,11 +82,9 @@ sub UpdateFromClients {
         }
     }
     
-    # 2. Hole die gesamte Protokoll-Matchlist
     my $all_protocols_ref = getMatchListasRef(); 
     my %new_match_list = ();
 
-    # 3. Iteriere über alle Protokolle und filtere basierend auf aktiven Clients
     foreach my $protocol_client_key (keys %$all_protocols_ref) {
         my ($id, $client_name) = split(/:/, $protocol_client_key, 2);
         
@@ -96,6 +93,5 @@ sub UpdateFromClients {
         }
     }
 
-    # 4. Aktualisiere den Geräte-Hash mit der neu generierten MatchList
     $hash->{MatchList} = \%new_match_list;
 }
