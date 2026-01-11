@@ -7,7 +7,7 @@ use Test2::Tools::Compare qw{ is };
 use Test2::Mock;
 
 # Globale $defs für FHEM-Kontext (wird in MqttSignalduino_DispatchFromJSON benötigt)
-my %defs;
+use vars qw(%defs);             # Mock FHEM device/button definitions
 
 # Mock für FHEM-Core-Funktionen
 my $mock = Test2::Mock->new(

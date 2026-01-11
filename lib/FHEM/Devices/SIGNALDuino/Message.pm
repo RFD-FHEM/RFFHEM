@@ -17,7 +17,10 @@ use constant {
   SDUINO_DISPATCH_VERBOSE         => 5,
 };
 
-our %defs;  # Globale Definitionen für FHEM
+
+use Data::Dumper;
+
+our main::%defs;  # Globale Definitionen für FHEM
 # Todo Add Clients and Matchlist dynamically to DevAttrList 
 # { addToDevAttrList('PySignalDuino', 'Clients');; }
 
@@ -98,20 +101,17 @@ sub Dispatch {
   }
 }
 
-# Neuer kombinierter Dispatcher für MQTT-JSON-Payloads
-sub DispatchFromJson {
+sub json2Dispatch {
   my ($json_str, $name) = @_;
-  
-  # Logging-Aufruf ersetzt (Aktualisiert)
+
   if (!defined($json_str) || !defined($name)) {
-    FHEM::Devices::SIGNALDuino::Logger::Log($name, 3, "MqttSignalduino_DispatchFromJSON: Missing arguments (JSON or Name)");
+    FHEM::Devices::SIGNALDuino::Logger::Log($name, 3, "json2Dispatch: Missing arguments (JSON or Name)");
     return;
   }
 
-  my $hash = $defs{$name}; # $defs muss global in FHEM verfügbar sein
+  my $hash = $main::defs{$name}; 
   if (!defined($hash)) {
-    # Logging-Aufruf ersetzt (Aktualisiert)
-    FHEM::Devices::SIGNALDuino::Logger::Log($name, 3, "MqttSignalduino_DispatchFromJSON: Device $name not found");
+    FHEM::Devices::SIGNALDuino::Logger::Log($name, 3, "json2Dispatch: Device $name not found");
     return;
   }
   
@@ -122,8 +122,7 @@ sub DispatchFromJson {
     $data = JSON::decode_json($json_str);
   };
   if ($@) {
-    # Logging-Aufruf ersetzt (Aktualisiert)
-    FHEM::Devices::SIGNALDuino::Logger::Log($name, 3, "MqttSignalduino_DispatchFromJSON: JSON decode error: $@");
+    FHEM::Devices::SIGNALDuino::Logger::Log($name, 3, "json2Dispatch: JSON decode error: $@");
     return;
   }
 
@@ -134,14 +133,12 @@ sub DispatchFromJson {
   my $freqafc = $data->{metadata}->{freqafc} // undef;
 
   if (!defined($dmsg) || !defined($id)) {
-     # Logging-Aufruf ersetzt (Aktualisiert)
-     FHEM::Devices::SIGNALDuino::Logger::Log($name, 4, "MqttSignalduino_DispatchFromJSON: Missing dmsg or protocol ID in JSON");
+     FHEM::Devices::SIGNALDuino::Logger::Log($name, 4, "json2Dispatch: Missing dmsg or protocol ID in JSON");
      return;
   }
   
   # Aufruf der zentralen Dispatch-Funktion
-  # Logging-Aufruf ersetzt (Aktualisiert)
-  FHEM::Devices::SIGNALDuino::Logger::Log($hash, 5, "MqttSignalduino_DispatchFromJSON: Calling SIGNALduno_Dispatch with dmsg=$dmsg, id=$id");
+  FHEM::Devices::SIGNALDuino::Logger::Log($hash, 5, "json2Dispatch: Calling SIGNALduno_Dispatch with dmsg=$dmsg, id=$id");
   Dispatch($hash, $rmsg, $dmsg, $rssi, $id, $freqafc);
 }
 
