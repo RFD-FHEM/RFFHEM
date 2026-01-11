@@ -1,8 +1,8 @@
-# $Id: Dispatch.pm 0 2026-01-10 15:36:13Z sidey79 $
+# $Id: Message.pm 0 2026-01-10 15:36:13Z sidey79 $
 # The file is part of the SIGNALduino project.
-# Dispatch functions for SIGNALduino device messages.
+# Message functions for SIGNALduino device messages.
 
-package FHEM::Devices::SIGNALDuino::Dispatch;
+package FHEM::Devices::SIGNALDuino::Message;
 
 use strict;
 use warnings;

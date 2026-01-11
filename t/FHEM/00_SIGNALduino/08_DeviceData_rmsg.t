@@ -47,7 +47,7 @@ sub runTest {
 	my $targetHash = $defs{$target};
 	my $mock = Test2::Mock->new(
 		track => 1,
-		class => q[FHEM::Devices::SIGNALDuino::Dispatch],
+		class => q[FHEM::Devices::SIGNALDuino::Message],
 	);	 	
 	my $tracking = $mock->sub_tracking;
 
@@ -142,7 +142,7 @@ sub runTest {
                     #my $expected_repeat=min(AttrVal($target,"maxMuMsgRepeat",99),$tData->{dispatch_repeats});
                     SKIP: {
                       skip 'Test repeats' if ( !defined($tData->{dispatch_repeats}) ); 
-                      is(scalar @{$tracking->{Dispatch}}-1,$tData->{dispatch_repeats}, 'no of FHEM::Devices::SIGNALDuino::Dispatch::Dispatch calls vs dispatch_repeats');
+                      is(scalar @{$tracking->{Dispatch}}-1,$tData->{dispatch_repeats}, 'no of FHEM::Devices::SIGNALDuino::Message::Dispatch calls vs dispatch_repeats');
                     };
                     is($dmsg_matched,1,'dmsg matched once',q{parse returned}, $return);
                     

@@ -15,11 +15,11 @@ my $mock = Test2::Mock->new(
     class => 'main',
     add => [
         # InternalVal wird im Originaltest zur Überprüfung verwendet
-        InternalVal => sub { 
-            my ($hashName, $key, $default) = @_;
-            # In diesem Mock geben wir die Werte von $defs{$hashName} zurück
-            return $defs{$hashName}{_INTERNAL_}{$key} // $default;
-        },
+        #InternalVal => sub { 
+        #    my ($hashName, $key, $default) = @_;
+        #    # In diesem Mock geben wir die Werte von $defs{$hashName} zurück
+        #    return $defs{$hashName}{_INTERNAL_}{$key} // $default;
+        #},
         # DoTrigger wird von SIGNALduno_Dispatch aufgerufen
         DoTrigger => sub { 
             my ($name, $trigger) = @_;
@@ -48,9 +48,9 @@ my $tracking = $mock->sub_tracking;
 
 
 # Modul laden
-require FHEM::Devices::SIGNALDuino::Dispatch;
+require FHEM::Devices::SIGNALDuino::Message;
 
-subtest 'Test of SIGNALduno_Dispatch in FHEM::Devices::SIGNALDuino::Dispatch' => sub {
+subtest 'Test of SIGNALduno_Dispatch in FHEM::Devices::SIGNALDuino::Message' => sub {
 
     # Dummy-Hash für den Test
     my $deviceName = 'dummyDuino';
@@ -58,9 +58,9 @@ subtest 'Test of SIGNALduno_Dispatch in FHEM::Devices::SIGNALDuino::Dispatch' =>
         NAME => $deviceName,
         LASTDMSG => '',
         LASTDMSGID => '',
-        DMSG => '', # Wird in SIGNALduno_Dispatch gesetzt
-        TIME => 0, # Wird in SIGNALduno_Dispatch gesetzt
-        MSGCNT => 0, # Wird in SIGNALduno_Dispatch gesetzt
+        DMSG => '', # Wird in Message::Dispatch gesetzt
+        TIME => 0, # Wird in Message::Dispatch gesetzt
+        MSGCNT => 0, # Wird in Message::Dispatch gesetzt
         # Für InternalVal Mock:
         INTERNAL => {
             LASTDMSG => '',
@@ -76,14 +76,7 @@ subtest 'Test of SIGNALduno_Dispatch in FHEM::Devices::SIGNALDuino::Dispatch' =>
 
     plan(4);
 
-    # SIGNALduno_Dispatch($hash, $rmsg, $dmsg, $rssi, $id, $freqafc)
-    FHEM::Devices::SIGNALDuino::Dispatch::Dispatch($targetHash, $rmsg, $dmsg, $rssi, $id);
-
-    # Checks:
-    # 1. main::Dispatch wurde einmal aufgerufen
-    # 2. $dmsg wurde an main::Dispatch übergeben
-    # 3. $targetHash->{LASTDMSG} wurde gesetzt
-    # 4. $targetHash->{LASTDMSGID} wurde gesetzt
+    FHEM::Devices::SIGNALDuino::Message::Dispatch($targetHash, $rmsg, $dmsg, $rssi, $id);
 
     is(scalar @{$tracking->{Dispatch}}, 1, "main::Dispatch was called once");
     is($tracking->{Dispatch}[0]{args}[1], $dmsg, "check dmsg passed to main::Dispatch" );

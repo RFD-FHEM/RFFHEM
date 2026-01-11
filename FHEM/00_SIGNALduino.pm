@@ -34,7 +34,7 @@ eval {use FHEM::Core::Timer::Helper;1 } ;
 
 use lib::SD_Protocols;
 use FHEM::Devices::SIGNALDuino::Clients;
-use FHEM::Devices::SIGNALDuino::Dispatch;
+use FHEM::Devices::SIGNALDuino::Message;
 use FHEM::Devices::SIGNALDuino::Matchlist;
 use List::Util qw(first);
 
@@ -54,7 +54,6 @@ use constant {
   SDUINO_WRITEQUEUE_NEXT          => 0.3,
   SDUINO_WRITEQUEUE_TIMEOUT       => 2,
 
-  SDUINO_DISPATCH_VERBOSE         => 5,       # default 5
   SDUINO_MC_DISPATCH_VERBOSE      => 5,       # wenn kleiner 5, z.B. 3 dann wird vor dem dispatch mit loglevel 3 die ID und rmsg ausgegeben
   SDUINO_MC_DISPATCH_LOG_ID       => '12.1',  # die o.g. Ausgabe erfolgt nur wenn der Wert mit der ID uebereinstimmt
   SDUINO_PARSE_DEFAULT_LENGHT_MIN => 8,
@@ -2164,12 +2163,6 @@ sub SIGNALduino_Split_Message {
   return %ret;
 }
 
-############################# package main, test exists
-# Fallback function which dispatches a message if needed.
-sub SIGNALduino_Dispatch { 
-  return FHEM::Devices::SIGNALDuino::Dispatch::Dispatch(@_); 
-}
-
 ############################# package main  todo: move to lib::SD_Protocols
 # param #1 is name of definition
 # param #2 is protocol id
@@ -2396,7 +2389,7 @@ sub SIGNALduino_Parse_MS {
       {
         $message_dispatched++;
         $hash->{logMethod}->($name, 4, "$name: Parse_MS, Decoded matched MS protocol id $id dmsg $dmsg length " . scalar @bit_msg . " $rssiStr");
-        FHEM::Devices::SIGNALDuino::Dispatch::Dispatch($hash,$rmsg,$dmsg,$rssi,$id);
+        FHEM::Devices::SIGNALDuino::Message::Dispatch($hash,$rmsg,$dmsg,$rssi,$id);
       }
     }
 
@@ -2635,7 +2628,7 @@ sub SIGNALduino_Parse_MU {
         {
           $nrDispatch++;
           $hash->{logMethod}->($name, 4, "$name: Parse_MU, Decoded matched MU protocol id $id dmsg $dmsg length $bit_length dispatch($nrDispatch/". AttrVal($name,'maxMuMsgRepeat', 4) . ") $rssiStr");
-          FHEM::Devices::SIGNALDuino::Dispatch::Dispatch($hash,$rmsg,$dmsg,$rssi,$id);
+          FHEM::Devices::SIGNALDuino::Message::Dispatch($hash,$rmsg,$dmsg,$rssi,$id);
           if ( $nrDispatch == AttrVal($name,'maxMuMsgRepeat', 4))
           {
             last;
@@ -2760,7 +2753,7 @@ sub SIGNALduino_Parse_MC {
               defined($rssi)  ? $hash->{logMethod}->($name, SDUINO_MC_DISPATCH_VERBOSE, qq[$name: Parse_MC, $id, $rmsg $rssiStr])
                       :  $hash->{logMethod}->($name, SDUINO_MC_DISPATCH_VERBOSE, qq[$name: Parse_MC, $id, $rmsg]);
             }
-            FHEM::Devices::SIGNALDuino::Dispatch::Dispatch($hash,$rmsg,$dmsg,$rssi,$id);
+            FHEM::Devices::SIGNALDuino::Message::Dispatch($hash,$rmsg,$dmsg,$rssi,$id);
             $message_dispatched=1;
           }
         } else {
@@ -2845,7 +2838,7 @@ sub SIGNALduino_Parse_MN {
     }
     $dmsg = sprintf('%s%s',$hash->{protocolObject}->checkProperty($id,'preamble',''),$methodReturn[0]);
     $hash->{logMethod}->($name, 5, qq[$name: Parse_MN, Decoded matched MN Protocol id $id dmsg=$dmsg $rssiStr]);
-    FHEM::Devices::SIGNALDuino::Dispatch::Dispatch($hash,$rmsg,$dmsg,$rssi,$id,$freqafc);
+    FHEM::Devices::SIGNALDuino::Message::Dispatch($hash,$rmsg,$dmsg,$rssi,$id,$freqafc);
     $message_dispatched++;
     
   }
