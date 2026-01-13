@@ -282,13 +282,13 @@ subtest 'Testfall 9: Initialisierung überspringen (matchlist und clients sind d
     my $match_mock = Test2::Mock->new(
         class => 'FHEM::Devices::SIGNALDuino::Matchlist',
         override => {
-            getMatchListasRef => sub { die "Should not be called"; }
+            getMatchListasRef => sub { fail "Should not be called"; }
         }
     );
     my $clients_mock = Test2::Mock->new(
         class => 'FHEM::Devices::SIGNALDuino::Clients',
         override => {
-            getClientsasStr => sub { die "Should not be called"; }
+            getClientsasStr => sub { fail "Should not be called"; }
         }
     );
 
