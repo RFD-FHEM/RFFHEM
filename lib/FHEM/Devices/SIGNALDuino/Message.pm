@@ -144,7 +144,8 @@ sub json2Dispatch {
   
   if (!defined($hash->{matchlist}) || !defined($hash->{clients}) ) {
     FHEM::Devices::SIGNALDuino::Logger::Log($hash, 4, "json2Dispatch: Matchlist/Clientlist initialization");
-    $hash->{matchlist} = FHEM::Devices::SIGNALDuino::Matchlist::getMatchListasRef($hash);
+    
+    FHEM::Devices::SIGNALDuino::Matchlist::UpdateMatchList($hash,{ });
     $hash->{clients} = FHEM::Devices::SIGNALDuino::Clients::getClientsasStr($hash);
   }
 
