@@ -38,6 +38,8 @@ EOF
 # Erforderliche Module vor dem Test laden
 require FHEM::Devices::SIGNALDuino::Logger;
 require FHEM::Devices::SIGNALDuino::Message;
+require FHEM::Devices::SIGNALDuino::Matchlist;
+require FHEM::Devices::SIGNALDuino::Clients;
 require JSON; # explizit laden, da DispatchFromJson es eval't
 
 # Mocken der Log-Funktion, um Log-Ausgaben zu erfassen
@@ -58,7 +60,7 @@ sub reset_log_calls { @log_calls = (); }
 # --- Testfall 1: Erfolgreicher DispatchFromJson Aufruf ---
 subtest 'Erfolgreicher DispatchFromJson Aufruf' => sub {
     reset_log_calls();
-    plan(9); # 6 in Dispatch-Mock + 3 Log-Checks
+    plan(11); # 6 in Dispatch-Mock + 5 Log-Checks
     
     # mock %defs
     $defs{$device_name} = $targetHash;
@@ -85,9 +87,15 @@ subtest 'Erfolgreicher DispatchFromJson Aufruf' => sub {
     $dispatch_mock->reset_all();
 
     # Verify Logmessages
-    is( scalar @log_calls, 1, "Genau 1 Log-Eintrag für erfolgreichen Aufruf" );
-    like( $log_calls[0]->{msg}, qr/Calling .* with dmsg=P1#DMSG123, id=1/, "Korrekte Log-Meldung vor Dispatch-Aufruf" );
-    is( $log_calls[0]->{level}, 5, "Korrekter Log-Level 5" );
+    is( scalar @log_calls, 2, "Genau 2 Log-Einträge für erfolgreichen Aufruf (Init + Calling)" );
+    
+    # Init Log
+    like( $log_calls[0]->{msg}, qr/json2Dispatch: Matchlist\/Clientlist initialization/, "Log: Initialisierung" );
+    is( $log_calls[0]->{level}, 4, "Korrekter Log-Level 4 (Init)" );
+
+    # Calling Log
+    like( $log_calls[1]->{msg}, qr/Calling .* with dmsg=P1#DMSG123, id=1/, "Korrekte Log-Meldung vor Dispatch-Aufruf" );
+    is( $log_calls[1]->{level}, 5, "Korrekter Log-Level 5 (Calling)" );
 
     $defs{$device_name} = $targetHash; # Reset
 };
@@ -210,6 +218,102 @@ EOF
     is( $log_calls[0]->{level}, 4, "Korrekter Log-Level 4" );
     
     delete $defs{$device_name}; # Zurücksetzen
+};
+
+# --- Testfall 8: Initialisierung erzwingen (matchlist und clients sind undefiniert) ---
+subtest 'Testfall 8: Initialisierung erzwingen (matchlist und clients sind undefiniert)' => sub {
+    reset_log_calls();
+    plan(4);
+
+    # Mock Matchlist und Clients
+    my $match_mock = Test2::Mock->new(
+        class => 'FHEM::Devices::SIGNALDuino::Matchlist',
+        override => {
+            getMatchListasRef => sub { return { 'TEST_PATTERN' => 1 }; }
+        }
+    );
+    my $clients_mock = Test2::Mock->new(
+        class => 'FHEM::Devices::SIGNALDuino::Clients',
+        override => {
+            getClientsasStr => sub { return 'ClientA,ClientB'; }
+        }
+    );
+
+    # Mock Dispatch, da es am Ende aufgerufen wird
+    my $dispatch_mock = Test2::Mock->new(
+        class   => 'FHEM::Devices::SIGNALDuino::Message',
+        override => {
+            Dispatch => sub { return; }
+        },
+    );
+
+    # Setup targetHash ohne matchlist/clients
+    delete $targetHash->{matchlist};
+    delete $targetHash->{clients};
+    $defs{$device_name} = $targetHash;
+
+    # Execute
+    FHEM::Devices::SIGNALDuino::Message::json2Dispatch($valid_json, $device_name);
+
+    # Checks
+    my ($init_log) = grep { $_->{msg} =~ /json2Dispatch: Matchlist\/Clientlist initialization/ } @log_calls;
+    ok( $init_log, "Log: 'Matchlist/Clientlist initialization' gefunden" );
+    is( $init_log->{level}, 4, "Log-Level ist 4" );
+
+    is( $targetHash->{matchlist}, { 'TEST_PATTERN' => 1 }, "matchlist korrekt initialisiert" );
+    is( $targetHash->{clients}, 'ClientA,ClientB', "clients korrekt initialisiert" );
+    
+    $match_mock->reset_all();
+    $clients_mock->reset_all();
+    $dispatch_mock->reset_all();
+};
+
+# --- Testfall 9: Initialisierung überspringen (matchlist und clients sind definiert) ---
+subtest 'Testfall 9: Initialisierung überspringen (matchlist und clients sind definiert)' => sub {
+    reset_log_calls();
+    plan(4);
+
+    # Setup targetHash MIT matchlist/clients
+    $targetHash->{matchlist} = { 'EXIST' => 1 };
+    $targetHash->{clients} = 'ExistingClients';
+    $defs{$device_name} = $targetHash;
+
+    # Mocks, die NICHT aufgerufen werden sollen
+    my $match_mock = Test2::Mock->new(
+        class => 'FHEM::Devices::SIGNALDuino::Matchlist',
+        override => {
+            getMatchListasRef => sub { die "Should not be called"; }
+        }
+    );
+    my $clients_mock = Test2::Mock->new(
+        class => 'FHEM::Devices::SIGNALDuino::Clients',
+        override => {
+            getClientsasStr => sub { die "Should not be called"; }
+        }
+    );
+
+    # Mock Dispatch
+    my $dispatch_mock = Test2::Mock->new(
+        class   => 'FHEM::Devices::SIGNALDuino::Message',
+        override => {
+            Dispatch => sub { return; }
+        },
+    );
+
+    # Execute
+    eval { FHEM::Devices::SIGNALDuino::Message::json2Dispatch($valid_json, $device_name); };
+    is( $@, '', "Kein Fehler durch unerwarteten Aufruf der Mocks" );
+
+    # Checks
+    my ($init_log) = grep { $_->{msg} =~ /json2Dispatch: Matchlist\/Clientlist initialization/ } @log_calls;
+    ok( !$init_log, "Log: 'Matchlist/Clientlist initialization' NICHT gefunden" );
+
+    is( $targetHash->{matchlist}, { 'EXIST' => 1 }, "matchlist nicht überschrieben" );
+    is( $targetHash->{clients}, 'ExistingClients', "clients nicht überschrieben" );
+
+    $match_mock->reset_all();
+    $clients_mock->reset_all();
+    $dispatch_mock->reset_all();
 };
 
 # Aufräumen des Log-Mocks

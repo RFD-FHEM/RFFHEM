@@ -11,6 +11,7 @@ eval { require JSON; JSON->import; };
 # Neue Subpackages einbinden (Aktualisiert)
 require FHEM::Devices::SIGNALDuino::Logger;
 require FHEM::Devices::SIGNALDuino::Matchlist; 
+require FHEM::Devices::SIGNALDuino::Clients;
 
 # Konstante beibehalten
 use constant {
@@ -141,6 +142,12 @@ sub json2Dispatch {
      return;
   }
   
+  if (!defined($hash->{matchlist}) || !defined($hash->{clients}) ) {
+    FHEM::Devices::SIGNALDuino::Logger::Log($hash, 4, "json2Dispatch: Matchlist/Clientlist initialization");
+    $hash->{matchlist} = FHEM::Devices::SIGNALDuino::Matchlist::getMatchListasRef($hash);
+    $hash->{clients} = FHEM::Devices::SIGNALDuino::Clients::getClientsasStr($hash);
+  }
+
   # Call central dispatch function
   FHEM::Devices::SIGNALDuino::Logger::Log($hash, 5, "json2Dispatch: Calling FHEM Dispatch with dmsg=$dmsg, id=$id");
   Dispatch($hash, $rmsg, $dmsg, $rssi, $id, $freqafc);
