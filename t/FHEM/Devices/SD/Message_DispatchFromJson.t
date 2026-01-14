@@ -1,0 +1,1 @@
+/usr/src/RFFHEM/t/FHEM/Devices/SD/Message_DispatchFromJson.t

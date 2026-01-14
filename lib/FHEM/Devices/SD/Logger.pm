@@ -2,7 +2,7 @@
 # The file is part of the SIGNALduino project.
 # Logging helper functions for Packages in FHEM::Devices::SIGNALDuino.
 
-package FHEM::Devices::SIGNALDuino::Logger;
+package FHEM::Devices::SD::Logger;
 
 use strict;
 use warnings;
