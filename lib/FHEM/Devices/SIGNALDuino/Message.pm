@@ -142,11 +142,11 @@ sub json2Dispatch {
      return;
   }
   
-  if (!defined($hash->{MatchList}) || !defined($hash->{clients}) ) {
+  if (!defined($hash->{MatchList}) || !defined($hash->{Clients}) ) {
     FHEM::Devices::SIGNALDuino::Logger::Log($hash, 4, "json2Dispatch: Matchlist/Clientlist initialization");
     
     FHEM::Devices::SIGNALDuino::Matchlist::UpdateMatchList($hash,undef);
-    $hash->{clients} = FHEM::Devices::SIGNALDuino::Clients::getClientsasStr($hash);
+    $hash->{Clients} = FHEM::Devices::SIGNALDuino::Clients::getClientsasStr($hash);
   }
 
   # Call central dispatch function

@@ -249,7 +249,7 @@ subtest 'Testfall 8: Initialisierung erzwingen (matchlist und clients sind undef
 
     # Setup targetHash ohne matchlist/clients
     delete $targetHash->{MatchList};
-    delete $targetHash->{clients};
+    delete $targetHash->{Clients};
     $defs{$device_name} = $targetHash;
 
     # Execute
@@ -261,7 +261,7 @@ subtest 'Testfall 8: Initialisierung erzwingen (matchlist und clients sind undef
     is( $init_log->{level}, 4, "Log-Level ist 4" );
 
     is( $targetHash->{MatchList}, { 'TEST_PATTERN' => 1 }, 'matchlist korrekt initialisiert' );
-    is( $targetHash->{clients}, 'ClientA,ClientB', 'clients korrekt initialisiert' );
+    is( $targetHash->{Clients}, 'ClientA,ClientB', 'clients korrekt initialisiert' );
     
     $match_mock->reset_all();
     $clients_mock->reset_all();
@@ -274,8 +274,8 @@ subtest 'Testfall 9: Initialisierung überspringen (matchlist und clients sind d
     plan(4);
 
     # Setup targetHash MIT matchlist/clients
-    $targetHash->{matchlist} = { 'EXIST' => 1 };
-    $targetHash->{clients} = 'ExistingClients';
+    $targetHash->{MatchList} = { 'EXIST' => 1 };
+    $targetHash->{Clients} = 'ExistingClients';
     $defs{$device_name} = $targetHash;
 
     # Mocks, die NICHT aufgerufen werden sollen
@@ -308,8 +308,8 @@ subtest 'Testfall 9: Initialisierung überspringen (matchlist und clients sind d
     my ($init_log) = grep { $_->{msg} =~ /json2Dispatch: Matchlist\/Clientlist initialization/ } @log_calls;
     ok( !$init_log, "Log: 'Matchlist/Clientlist initialization' NICHT gefunden" );
 
-    is( $targetHash->{matchlist}, { 'EXIST' => 1 }, "matchlist nicht überschrieben" );
-    is( $targetHash->{clients}, 'ExistingClients', "clients nicht überschrieben" );
+    is( $targetHash->{MatchList}, { 'EXIST' => 1 }, "matchlist nicht überschrieben" );
+    is( $targetHash->{Clients}, 'ExistingClients', "clients nicht überschrieben" );
 
     $match_mock->reset_all();
     $clients_mock->reset_all();
