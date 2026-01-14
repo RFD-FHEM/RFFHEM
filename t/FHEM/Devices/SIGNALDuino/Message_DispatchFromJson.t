@@ -7,7 +7,7 @@ use Test2::API qw(context);
 use Data::Dumper;
 
 # Globale $defs aus FHEM simulieren
-our %defs;
+our main::%defs;
 
 my $device_name = 'mySignalduino';
 my $targetHash = {
@@ -248,7 +248,7 @@ subtest 'Testfall 8: Initialisierung erzwingen (matchlist und clients sind undef
     );
 
     # Setup targetHash ohne matchlist/clients
-    delete $targetHash->{matchlist};
+    delete $targetHash->{MatchList};
     delete $targetHash->{clients};
     $defs{$device_name} = $targetHash;
 
@@ -260,8 +260,8 @@ subtest 'Testfall 8: Initialisierung erzwingen (matchlist und clients sind undef
     ok( $init_log, "Log: 'Matchlist/Clientlist initialization' gefunden" );
     is( $init_log->{level}, 4, "Log-Level ist 4" );
 
-    is( $targetHash->{matchlist}, { 'TEST_PATTERN' => 1 }, "matchlist korrekt initialisiert" );
-    is( $targetHash->{clients}, 'ClientA,ClientB', "clients korrekt initialisiert" );
+    is( $targetHash->{MatchList}, { 'TEST_PATTERN' => 1 }, 'matchlist korrekt initialisiert' );
+    is( $targetHash->{clients}, 'ClientA,ClientB', 'clients korrekt initialisiert' );
     
     $match_mock->reset_all();
     $clients_mock->reset_all();
