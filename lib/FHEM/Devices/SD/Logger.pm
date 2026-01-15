@@ -1,6 +1,6 @@
 # $Id: Logger.pm 0 2026-01-10 15:36:13Z sidey79 $
 # The file is part of the SIGNALduino project.
-# Logging helper functions for Packages in FHEM::Devices::SIGNALDuino.
+# Logging helper functions for Packages in FHEM::Devices::SD.
 
 package FHEM::Devices::SD::Logger;
 
