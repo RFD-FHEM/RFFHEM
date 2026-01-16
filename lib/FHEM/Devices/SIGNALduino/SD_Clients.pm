@@ -53,3 +53,26 @@ sub getClientsasStr {
 }
 
 1;
+
+=pod
+
+=head1 NAME
+
+FHEM::Devices::SIGNALduino::SD_Clients - Client list management for SIGNALduino
+
+=head1 SYNOPSIS
+
+    use FHEM::Devices::SIGNALduino::SD_Clients;
+    my $clients = FHEM::Devices::SIGNALduino::SD_Clients::getClientsasStr();
+
+=head1 DESCRIPTION
+
+Maintains the list of supported client modules for SIGNALduino.
+
+=head1 FUNCTIONS
+
+=head2 getClientsasStr()
+
+Returns a string containing the list of standard clients separated by colons.
+
+=cut

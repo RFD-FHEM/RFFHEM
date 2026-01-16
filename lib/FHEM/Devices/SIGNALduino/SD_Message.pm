@@ -155,3 +155,33 @@ sub json2Dispatch {
 }
 
 1;
+
+=pod
+
+=head1 NAME
+
+FHEM::Devices::SIGNALduino::SD_Message - Message dispatching for SIGNALduino
+
+=head1 SYNOPSIS
+
+    use FHEM::Devices::SIGNALduino::SD_Message;
+    FHEM::Devices::SIGNALduino::SD_Message::Dispatch($hash, $rmsg, $dmsg, $rssi, $id, $freqafc);
+
+=head1 DESCRIPTION
+
+This module handles the dispatching of messages for the SIGNALduino device in FHEM.
+It processes raw and decoded messages and forwards them to the main FHEM dispatching mechanism.
+
+=head1 FUNCTIONS
+
+=head2 Dispatch($hash, $rmsg, $dmsg, $rssi, $id, $freqafc)
+
+Dispatches a message to FHEM. It checks for duplicates (using C<LASTDMSG> and C<DoubleMsgIDs>)
+and triggers the C<main::Dispatch> function if the message is valid and new.
+
+=head2 json2Dispatch($json_str, $name)
+
+Decodes a JSON string containing message data and calls C<Dispatch>.
+Used for processing messages received in JSON format (e.g. via MQTT or serial).
+
+=cut

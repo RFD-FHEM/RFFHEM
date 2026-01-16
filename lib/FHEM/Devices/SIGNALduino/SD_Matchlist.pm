@@ -95,3 +95,38 @@ sub UpdateFromClients {
 
     $hash->{MatchList} = \%new_match_list;
 }
+
+1;
+
+=pod
+
+=head1 NAME
+
+FHEM::Devices::SIGNALduino::SD_Matchlist - Matchlist management for SIGNALduino
+
+=head1 SYNOPSIS
+
+    use FHEM::Devices::SIGNALduino::SD_Matchlist;
+    my $matchlist = FHEM::Devices::SIGNALduino::SD_Matchlist::getMatchListasRef();
+
+=head1 DESCRIPTION
+
+This module manages the regex matchlist used to identify different protocols supported by SIGNALduino.
+
+=head1 FUNCTIONS
+
+=head2 getMatchListasRef()
+
+Returns a reference to the default matchlist hash.
+
+=head2 UpdateMatchList($hash, $user_match_list_ref)
+
+Updates the device's matchlist. If C<$user_match_list_ref> is provided, it merges it with the default list.
+Otherwise, it sets the default matchlist.
+
+=head2 UpdateFromClients($hash)
+
+Updates the matchlist based on the clients defined in C<$hash->{Clients}>.
+Only protocols for active clients will be included in the matchlist.
+
+=cut
