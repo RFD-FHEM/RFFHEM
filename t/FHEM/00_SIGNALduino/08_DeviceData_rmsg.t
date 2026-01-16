@@ -47,7 +47,7 @@ sub runTest {
 	my $targetHash = $defs{$target};
 	my $mock = Test2::Mock->new(
 		track => 1,
-		class => q[FHEM::Devices::SD::Message],
+		class => q[FHEM::Devices::SIGNALduino::Message],
 	);	 	
 	my $tracking = $mock->sub_tracking;
 

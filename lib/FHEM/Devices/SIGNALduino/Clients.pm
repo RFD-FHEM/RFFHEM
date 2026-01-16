@@ -2,7 +2,7 @@
 # The file is part of the SIGNALduino project.
 # Client functions for SIGNALduino device.
 
-package FHEM::Devices::SD::Clients;
+package FHEM::Devices::SIGNALduino::Clients;
 use strict;
 use warnings;
 

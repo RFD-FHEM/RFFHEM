@@ -2,13 +2,13 @@
 # The file is part of the SIGNALduino project.
 # Matchlist functions for Signalduino device.
 
-package FHEM::Devices::SD::Matchlist;
+package FHEM::Devices::SIGNALduino::Matchlist;
 
 use strict;
 use warnings;
 
-require FHEM::Devices::SD::Logger;
-require FHEM::Devices::SD::Clients;
+require FHEM::Devices::SIGNALduino::Logger;
+require FHEM::Devices::SIGNALduino::Clients;
 
 my %matchList = (
       '1:IT'                => '^i......',
@@ -57,7 +57,7 @@ sub UpdateMatchList {
      $hash->{MatchList} = { %matchList , %$user_match_list_ref };          ## Allow incremental addition of an entry to existing matchlist
     } else {
      $hash->{MatchList} = getMatchListasRef();                                      ## Set defaults
-     FHEM::Devices::SD::Logger::Log($hash, 2, $hash->{NAME} .": Attr, $user_match_list_ref: not a HASH using defaults") if( $user_match_list_ref );   
+     FHEM::Devices::SIGNALduino::Logger::Log($hash, 2, $hash->{NAME} .": Attr, $user_match_list_ref: not a HASH using defaults") if( $user_match_list_ref );   
     }
 }
 
@@ -68,7 +68,7 @@ sub UpdateFromClients {
         return;
     }
 
-    my $all_clients_str = FHEM::Devices::SD::Clients::getClientsasStr(); 
+    my $all_clients_str = FHEM::Devices::SIGNALduino::Clients::getClientsasStr(); 
     
     if (defined($hash->{Clients}) && length($hash->{Clients}) > 0) {
         $all_clients_str .= $hash->{Clients} . ':';

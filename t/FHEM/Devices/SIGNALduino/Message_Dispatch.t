@@ -41,9 +41,9 @@ my $tracking = $mock->sub_tracking;
 
 
 # Modul laden
-require FHEM::Devices::SD::Message;
+require FHEM::Devices::SIGNALduino::Message;
 
-subtest 'Test of SIGNALduno_Dispatch in FHEM::Devices::SD::Message' => sub {
+subtest 'Test of SIGNALduno_Dispatch in FHEM::Devices::SIGNALduino::Message' => sub {
 
     # Dummy-Hash für den Test
     my $deviceName = 'dummyDuino';
@@ -68,7 +68,7 @@ subtest 'Test of SIGNALduno_Dispatch in FHEM::Devices::SD::Message' => sub {
 
     plan(4);
 
-    FHEM::Devices::SD::Message::Dispatch($targetHash, $rmsg, $dmsg, $rssi, $id);
+    FHEM::Devices::SIGNALduino::Message::Dispatch($targetHash, $rmsg, $dmsg, $rssi, $id);
 
     is(scalar @{$tracking->{Dispatch}}, 1, "main::Dispatch was called once");
     is($tracking->{Dispatch}[0]{args}[1], $dmsg, "check dmsg passed to main::Dispatch" );
