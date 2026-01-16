@@ -80,7 +80,7 @@ jobs:
       uses: fhem/fhem-controls-actions@v3.0.0
       with:
         filename: controls_signalduino.txt 
-        directory: lib/FHEM/Devices/SD
+        directory: lib/FHEM/Devices/SIGNALduino
         writemode: a
     - name: update CHANGED
       if: steps.extract_branch.outputs.branch == 'master'

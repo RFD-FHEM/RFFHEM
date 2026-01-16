@@ -4,7 +4,7 @@ use Test2::V0;
 use Test2::Tools::Mock;
 
 # Mocking dependencies before loading the module
-my $mock_logger = mock 'FHEM::Devices::SIGNALduino::Logger' => (
+my $mock_logger = mock 'FHEM::Devices::SIGNALduino::SD_Logger' => (
     add => [
         Log => sub { return 1; }
     ]
@@ -14,18 +14,18 @@ my $mock_logger = mock 'FHEM::Devices::SIGNALduino::Logger' => (
 $INC{'FHEM/Devices/SD/Logger.pm'} = 1;
 $INC{'FHEM/Devices/SD/Clients.pm'} = 1;
 
-my $mock_clients = mock 'FHEM::Devices::SIGNALduino::Clients' => (
+my $mock_clients = mock 'FHEM::Devices::SIGNALduino::SD_Clients' => (
     add => [
         getClientsasStr => sub { return ':IT:OREGON:'; }
     ]
 );
 
 # Load the module
-require FHEM::Devices::SIGNALduino::Matchlist;
+require FHEM::Devices::SIGNALduino::SD_Matchlist;
 
 subtest 'getMatchListasRef' => sub {
     plan(4);
-    my $matchlist = FHEM::Devices::SIGNALduino::Matchlist::getMatchListasRef();
+    my $matchlist = FHEM::Devices::SIGNALduino::SD_Matchlist::getMatchListasRef();
     
     is(ref($matchlist), 'HASH', 'Returns a hash reference');
     ok(exists $matchlist->{'1:IT'}, 'Contains IT entry');
@@ -40,7 +40,7 @@ subtest 'UpdateMatchList' => sub {
     
     # Test with valid hashref
     my $user_list = { '99:Test' => '^test' };
-    FHEM::Devices::SIGNALduino::Matchlist::UpdateMatchList($hash, $user_list);
+    FHEM::Devices::SIGNALduino::SD_Matchlist::UpdateMatchList($hash, $user_list);
     
     ok(exists $hash->{MatchList}->{'99:Test'}, 'User entry added');
     is($hash->{MatchList}->{'99:Test'}, '^test', 'User pattern matches');
@@ -56,7 +56,7 @@ subtest 'UpdateMatchList' => sub {
         }
     );
     
-    FHEM::Devices::SIGNALduino::Matchlist::UpdateMatchList($hash, 'invalid');
+    FHEM::Devices::SIGNALduino::SD_Matchlist::UpdateMatchList($hash, 'invalid');
     
     is(ref($hash->{MatchList}), 'HASH', 'MatchList set to defaults on invalid input');
     ok(exists $hash->{MatchList}->{'1:IT'}, 'Default entries present');
@@ -75,7 +75,7 @@ subtest 'UpdateFromClients' => sub {
         getClientsasStr => sub { return ':IT:OREGON:UnknownClient:'; }
     );
     
-    FHEM::Devices::SIGNALduino::Matchlist::UpdateFromClients($hash);
+    FHEM::Devices::SIGNALduino::SD_Matchlist::UpdateFromClients($hash);
     
     my $ml = $hash->{MatchList};
     ok(exists $ml->{'1:IT'}, 'IT client included');
@@ -84,13 +84,13 @@ subtest 'UpdateFromClients' => sub {
     
     # Test with additional Clients in hash
     $hash->{Clients} = 'CUL_TCM97001';
-    FHEM::Devices::SIGNALduino::Matchlist::UpdateFromClients($hash);
+    FHEM::Devices::SIGNALduino::SD_Matchlist::UpdateFromClients($hash);
     
     $ml = $hash->{MatchList};
     ok(exists $ml->{'2:CUL_TCM97001'}, 'Additional client from hash included');
     
     # Test with non-hash input
-    my $res = FHEM::Devices::SIGNALduino::Matchlist::UpdateFromClients('not a hash');
+    my $res = FHEM::Devices::SIGNALduino::SD_Matchlist::UpdateFromClients('not a hash');
     is($res, undef, 'Returns undef/empty for non-hash input');
 };
 

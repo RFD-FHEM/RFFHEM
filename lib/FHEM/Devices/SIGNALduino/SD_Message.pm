@@ -2,16 +2,16 @@
 # The file is part of the SIGNALduino project.
 # Message functions for SIGNALduino device messages.
 
-package FHEM::Devices::SIGNALduino::Message;
+package FHEM::Devices::SIGNALduino::SD_Message;
 
 use strict;
 use warnings;
 eval { require JSON; JSON->import; };
 
 # Neue Subpackages einbinden (Aktualisiert)
-require FHEM::Devices::SIGNALduino::Logger;
-require FHEM::Devices::SIGNALduino::Matchlist; 
-require FHEM::Devices::SIGNALduino::Clients;
+require FHEM::Devices::SIGNALduino::SD_Logger;
+require FHEM::Devices::SIGNALduino::SD_Matchlist;
+require FHEM::Devices::SIGNALduino::SD_Clients;
 
 # Konstante beibehalten
 use constant {
@@ -29,22 +29,22 @@ sub Dispatch {
   if (!defined($dmsg))
   {
     # Logging-Aufruf ersetzt (Aktualisiert)
-    FHEM::Devices::SIGNALduino::Logger::Log($hash, 5, "$name: Dispatch, dmsg is undef. Skipping dispatch call");
+    FHEM::Devices::SIGNALduino::SD_Logger::Log($hash, 5, "$name: Dispatch, dmsg is undef. Skipping dispatch call");
     return;
   }
 
   my $DMSGgleich = 1;
   if ($dmsg eq $hash->{LASTDMSG}) {
     # Logging-Aufruf ersetzt (Aktualisiert)
-    FHEM::Devices::SIGNALduino::Logger::Log($hash, SDUINO_DISPATCH_VERBOSE, "$name: Dispatch, $dmsg is equal to last DMSG");
+    FHEM::Devices::SIGNALduino::SD_Logger::Log($hash, SDUINO_DISPATCH_VERBOSE, "$name: Dispatch, $dmsg is equal to last DMSG");
   } else {
     if ( defined $hash->{DoubleMsgIDs}{$id} ) {
       $DMSGgleich = 0;
       # Logging-Aufruf ersetzt (Aktualisiert)
-      FHEM::Devices::SIGNALduino::Logger::Log($hash, SDUINO_DISPATCH_VERBOSE, "$name: Dispatch, $dmsg is unequal to last DMSG (DoubleMsgID is enabled)");
+      FHEM::Devices::SIGNALduino::SD_Logger::Log($hash, SDUINO_DISPATCH_VERBOSE, "$name: Dispatch, $dmsg is unequal to last DMSG (DoubleMsgID is enabled)");
     } else {
       # Logging-Aufruf ersetzt (Aktualisiert)
-      FHEM::Devices::SIGNALduino::Logger::Log($hash, SDUINO_DISPATCH_VERBOSE, "$name: Dispatch, $dmsg, is unequal to last DMSG (DoubleMsgID is disabled)");
+      FHEM::Devices::SIGNALduino::SD_Logger::Log($hash, SDUINO_DISPATCH_VERBOSE, "$name: Dispatch, $dmsg, is unequal to last DMSG (DoubleMsgID is disabled)");
     }
     $hash->{LASTDMSG} = $dmsg;
     $hash->{LASTDMSGID} = $id;
@@ -85,10 +85,10 @@ sub Dispatch {
       }
 
       $dmsg = lc($dmsg) if ($id eq '74' or $id eq '74.1');    
-      FHEM::Devices::SIGNALduino::Logger::Log($hash, SDUINO_DISPATCH_VERBOSE, "$name: Dispatch, $dmsg, $rssi dispatch");
+      FHEM::Devices::SIGNALduino::SD_Logger::Log($hash, SDUINO_DISPATCH_VERBOSE, "$name: Dispatch, $dmsg, $rssi dispatch");
       main::Dispatch($hash, $dmsg, \%addvals); 
     } else {
-      FHEM::Devices::SIGNALduino::Logger::Log($hash, 4, "$name: Dispatch, $dmsg, Dropped due to short time or equal msg");
+      FHEM::Devices::SIGNALduino::SD_Logger::Log($hash, 4, "$name: Dispatch, $dmsg, Dropped due to short time or equal msg");
     }
   }
 }
@@ -97,13 +97,13 @@ sub json2Dispatch {
   my ($json_str, $name) = @_;
 
   if (!defined($json_str) || !defined($name)) {
-    FHEM::Devices::SIGNALduino::Logger::Log($name, 3, "json2Dispatch: Missing arguments (JSON or Name)");
+    FHEM::Devices::SIGNALduino::SD_Logger::Log($name, 3, "json2Dispatch: Missing arguments (JSON or Name)");
     return;
   }
 
   my $hash = $main::defs{$name}; 
   if (!defined($hash)) {
-    FHEM::Devices::SIGNALduino::Logger::Log($name, 3, "json2Dispatch: Device $name not found");
+    FHEM::Devices::SIGNALduino::SD_Logger::Log($name, 3, "json2Dispatch: Device $name not found");
     return;
   }
   
@@ -113,19 +113,19 @@ sub json2Dispatch {
     $json = JSON::decode_json($json_str);
   };
   if ($@) {
-    FHEM::Devices::SIGNALduino::Logger::Log($name, 3, "json2Dispatch: JSON decode error: $@");
+    FHEM::Devices::SIGNALduino::SD_Logger::Log($name, 3, "json2Dispatch: JSON decode error: $@");
     return;
   }
 
   my $message = $json->{data} // undef;
 
   if (!defined($message)) {
-     FHEM::Devices::SIGNALduino::Logger::Log($name, 4, "json2Dispatch: Missing 'data' in JSON structure");
+     FHEM::Devices::SIGNALduino::SD_Logger::Log($name, 4, "json2Dispatch: Missing 'data' in JSON structure");
      return;
   }
   
   if (!defined($json->{protocol}) || !defined($json->{protocol}->{id})) {
-     FHEM::Devices::SIGNALduino::Logger::Log($name, 4, q[json2Dispatch: Missing ' "protocol":{id:}" ' in JSON structure]);
+     FHEM::Devices::SIGNALduino::SD_Logger::Log($name, 4, q[json2Dispatch: Missing ' "protocol":{id:}" ' in JSON structure]);
      return;
   }
 
@@ -138,19 +138,19 @@ sub json2Dispatch {
   my $freqafc = $json->{metadata}->{freq_afc} // undef;
 
   if (!defined($dmsg) || !defined($id)) {
-     FHEM::Devices::SIGNALduino::Logger::Log($name, 4, "json2Dispatch: No dmsg could be created from JSON");
+     FHEM::Devices::SIGNALduino::SD_Logger::Log($name, 4, "json2Dispatch: No dmsg could be created from JSON");
      return;
   }
   
   if (!defined($hash->{MatchList}) || !defined($hash->{Clients}) ) {
-    FHEM::Devices::SIGNALduino::Logger::Log($hash, 4, "json2Dispatch: Matchlist/Clientlist initialization");
+    FHEM::Devices::SIGNALduino::SD_Logger::Log($hash, 4, "json2Dispatch: Matchlist/Clientlist initialization");
     
-    FHEM::Devices::SIGNALduino::Matchlist::UpdateMatchList($hash,undef);
-    $hash->{Clients} = FHEM::Devices::SIGNALduino::Clients::getClientsasStr($hash);
+    FHEM::Devices::SIGNALduino::SD_Matchlist::UpdateMatchList($hash,undef);
+    $hash->{Clients} = FHEM::Devices::SIGNALduino::SD_Clients::getClientsasStr($hash);
   }
 
   # Call central dispatch function
-  FHEM::Devices::SIGNALduino::Logger::Log($hash, 5, "json2Dispatch: Calling FHEM Dispatch with dmsg=$dmsg, id=$id");
+  FHEM::Devices::SIGNALduino::SD_Logger::Log($hash, 5, "json2Dispatch: Calling FHEM Dispatch with dmsg=$dmsg, id=$id");
   Dispatch($hash, $rmsg, $dmsg, $rssi, $id, $freqafc);
 }
 

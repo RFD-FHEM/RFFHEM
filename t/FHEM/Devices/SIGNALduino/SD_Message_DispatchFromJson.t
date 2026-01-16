@@ -36,16 +36,16 @@ my $valid_json = <<'EOF';
 EOF
 
 # Erforderliche Module vor dem Test laden
-require FHEM::Devices::SIGNALduino::Logger;
-require FHEM::Devices::SIGNALduino::Message;
-require FHEM::Devices::SIGNALduino::Matchlist;
-require FHEM::Devices::SIGNALduino::Clients;
+require FHEM::Devices::SIGNALduino::SD_Logger;
+require FHEM::Devices::SIGNALduino::SD_Message;
+require FHEM::Devices::SIGNALduino::SD_Matchlist;
+require FHEM::Devices::SIGNALduino::SD_Clients;
 require JSON; # explizit laden, da DispatchFromJson es eval't
 
 # Mocken der Log-Funktion, um Log-Ausgaben zu erfassen
 my @log_calls;
 my $log_mock = Test2::Mock->new(
-    class   => 'FHEM::Devices::SIGNALduino::Logger',
+    class   => 'FHEM::Devices::SIGNALduino::SD_Logger',
     override =>[
         Log => sub {
             my ($dev_or_name, $level, $msg) = @_;
@@ -66,7 +66,7 @@ subtest 'Erfolgreicher DispatchFromJson Aufruf' => sub {
     $defs{$device_name} = $targetHash;
         
     my $dispatch_mock = Test2::Mock->new(
-        class   => 'FHEM::Devices::SIGNALduino::Message',
+        class   => 'FHEM::Devices::SIGNALduino::SD_Message',
         override => {
             Dispatch => sub {
                 my ($hash_arg, $rmsg_arg, $dmsg_arg, $rssi_arg, $id_arg, $freqafc_arg) = @_;
@@ -83,7 +83,7 @@ subtest 'Erfolgreicher DispatchFromJson Aufruf' => sub {
     );
 
     # Execute function under test
-    FHEM::Devices::SIGNALduino::Message::json2Dispatch($valid_json, $device_name);
+    FHEM::Devices::SIGNALduino::SD_Message::json2Dispatch($valid_json, $device_name);
     $dispatch_mock->reset_all();
 
     # Verify Logmessages
@@ -105,7 +105,7 @@ subtest 'Fehlender JSON-String ($json_str undef)' => sub {
     reset_log_calls();
     plan(3);
     
-    FHEM::Devices::SIGNALduino::Message::json2Dispatch(undef, $device_name);
+    FHEM::Devices::SIGNALduino::SD_Message::json2Dispatch(undef, $device_name);
 
     is( scalar @log_calls, 1, "Genau 1 Log-Eintrag für fehlenden JSON-String" );
     like( $log_calls[0]->{msg}, qr/Missing arguments \(JSON or Name\)/, "Log: Fehlende Argumente erkannt" );
@@ -117,7 +117,7 @@ subtest 'Fehlender Device-Name ($name undef)' => sub {
     reset_log_calls();
     plan(3);
     
-    FHEM::Devices::SIGNALduino::Message::json2Dispatch($valid_json, undef);
+    FHEM::Devices::SIGNALduino::SD_Message::json2Dispatch($valid_json, undef);
 
     is( scalar @log_calls, 1, "Genau 1 Log-Eintrag für fehlenden Namen" );
     like( $log_calls[0]->{msg}, qr/Missing arguments \(JSON or Name\)/, "Log: Fehlende Argumente erkannt" );
@@ -131,7 +131,7 @@ subtest 'Device nicht in %defs gefunden' => sub {
     
     delete $defs{$device_name}; # Sicherstellen, dass es nicht existiert
     
-    FHEM::Devices::SIGNALduino::Message::json2Dispatch($valid_json, $device_name);
+    FHEM::Devices::SIGNALduino::SD_Message::json2Dispatch($valid_json, $device_name);
 
     is( scalar @log_calls, 1, "Genau 1 Log-Eintrag für nicht gefundenes Device" );
     like( $log_calls[0]->{msg}, qr/Device $device_name not found/, "Log: Device nicht gefunden" );
@@ -149,7 +149,7 @@ subtest 'Ungültiger JSON-String' => sub {
     # Vorbereitung: %defs setzen
     $defs{$device_name} = $targetHash;
     
-    FHEM::Devices::SIGNALduino::Message::json2Dispatch($invalid_json, $device_name);
+    FHEM::Devices::SIGNALduino::SD_Message::json2Dispatch($invalid_json, $device_name);
 
     is( scalar @log_calls, 1, "Genau 1 Log-Eintrag für JSON-Decodierfehler" );
     like( $log_calls[0]->{msg}, qr/JSON decode error: /, "Log: JSON decode error erkannt" );
@@ -180,7 +180,7 @@ EOF
     # Vorbereitung: %defs setzen
     $defs{$device_name} = $targetHash;
     
-    FHEM::Devices::SIGNALduino::Message::json2Dispatch($missing_dmsg_json, $device_name);
+    FHEM::Devices::SIGNALduino::SD_Message::json2Dispatch($missing_dmsg_json, $device_name);
 
     is( scalar @log_calls, 1, "Genau 1 Log-Eintrag für fehlende dmsg/ID" );
     like( $log_calls[0]->{msg}, qr/Missing 'data' in JSON/, "Log: Fehlendes data erkannt" );
@@ -211,7 +211,7 @@ EOF
     # Vorbereitung: %defs setzen
     $defs{$device_name} = $targetHash;
     
-    FHEM::Devices::SIGNALduino::Message::json2Dispatch($missing_id_json, $device_name);
+    FHEM::Devices::SIGNALduino::SD_Message::json2Dispatch($missing_id_json, $device_name);
 
     is( scalar @log_calls, 1, "Genau 1 Log-Eintrag für fehlende protocol ID" );
     like( $log_calls[0]->{msg}, qr/Missing ' "protocol":{id:}" ' in JSON/, "Log: Fehlende dmsg/ID erkannt" );
@@ -227,13 +227,13 @@ subtest 'Testfall 8: Initialisierung erzwingen (matchlist und clients sind undef
 
     # Mock Matchlist und Clients
     my $match_mock = Test2::Mock->new(
-        class => 'FHEM::Devices::SIGNALduino::Matchlist',
+        class => 'FHEM::Devices::SIGNALduino::SD_Matchlist',
         override => {
             getMatchListasRef => sub { return { 'TEST_PATTERN' => 1 }; }
         }
     );
     my $clients_mock = Test2::Mock->new(
-        class => 'FHEM::Devices::SIGNALduino::Clients',
+        class => 'FHEM::Devices::SIGNALduino::SD_Clients',
         override => {
             getClientsasStr => sub { return 'ClientA,ClientB'; }
         }
@@ -241,7 +241,7 @@ subtest 'Testfall 8: Initialisierung erzwingen (matchlist und clients sind undef
 
     # Mock Dispatch, da es am Ende aufgerufen wird
     my $dispatch_mock = Test2::Mock->new(
-        class   => 'FHEM::Devices::SIGNALduino::Message',
+        class   => 'FHEM::Devices::SIGNALduino::SD_Message',
         override => {
             Dispatch => sub { return; }
         },
@@ -253,7 +253,7 @@ subtest 'Testfall 8: Initialisierung erzwingen (matchlist und clients sind undef
     $defs{$device_name} = $targetHash;
 
     # Execute
-    FHEM::Devices::SIGNALduino::Message::json2Dispatch($valid_json, $device_name);
+    FHEM::Devices::SIGNALduino::SD_Message::json2Dispatch($valid_json, $device_name);
 
     # Checks
     my ($init_log) = grep { $_->{msg} =~ /json2Dispatch: Matchlist\/Clientlist initialization/ } @log_calls;
@@ -280,13 +280,13 @@ subtest 'Testfall 9: Initialisierung überspringen (matchlist und clients sind d
 
     # Mocks, die NICHT aufgerufen werden sollen
     my $match_mock = Test2::Mock->new(
-        class => 'FHEM::Devices::SIGNALduino::Matchlist',
+        class => 'FHEM::Devices::SIGNALduino::SD_Matchlist',
         override => {
             getMatchListasRef => sub { fail "Should not be called"; }
         }
     );
     my $clients_mock = Test2::Mock->new(
-        class => 'FHEM::Devices::SIGNALduino::Clients',
+        class => 'FHEM::Devices::SIGNALduino::SD_Clients',
         override => {
             getClientsasStr => sub { fail "Should not be called"; }
         }
@@ -294,14 +294,14 @@ subtest 'Testfall 9: Initialisierung überspringen (matchlist und clients sind d
 
     # Mock Dispatch
     my $dispatch_mock = Test2::Mock->new(
-        class   => 'FHEM::Devices::SIGNALduino::Message',
+        class   => 'FHEM::Devices::SIGNALduino::SD_Message',
         override => {
             Dispatch => sub { return; }
         },
     );
 
     # Execute
-    eval { FHEM::Devices::SIGNALduino::Message::json2Dispatch($valid_json, $device_name); };
+    eval { FHEM::Devices::SIGNALduino::SD_Message::json2Dispatch($valid_json, $device_name); };
     is( $@, '', "Kein Fehler durch unerwarteten Aufruf der Mocks" );
 
     # Checks

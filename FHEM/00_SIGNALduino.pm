@@ -33,9 +33,9 @@ eval {use Time::HiRes qw(gettimeofday);1} ;
 eval {use FHEM::Core::Timer::Helper;1 } ;
 
 use lib::SD_Protocols;
-use FHEM::Devices::SIGNALduino::Clients;
-use FHEM::Devices::SIGNALduino::Message;
-use FHEM::Devices::SIGNALduino::Matchlist;
+use FHEM::Devices::SIGNALduino::SD_Clients;
+use FHEM::Devices::SIGNALduino::SD_Message;
+use FHEM::Devices::SIGNALduino::SD_Matchlist;
 use List::Util qw(first);
 
 #$| = 1;    #Puffern abschalten, Hilfreich fuer PEARL WARNINGS Search
@@ -340,8 +340,8 @@ sub SIGNALduino_Define {
   
   #$hash->{CMDS} = '';
   $hash->{ClientsKeepOrder} = 1;
-  $hash->{Clients}    = FHEM::Devices::SIGNALduino::Clients::getClientsasStr();
-  $hash->{MatchList}  = FHEM::Devices::SIGNALduino::Matchlist::getMatchListasRef();
+  $hash->{Clients}    = FHEM::Devices::SIGNALduino::SD_Clients::getClientsasStr();
+  $hash->{MatchList}  = FHEM::Devices::SIGNALduino::SD_Matchlist::getMatchListasRef();
   $hash->{DeviceName} = $dev;
   $hash->{logMethod}  = \&main::Log3;
   $hash->{debugMethod}  = sub { return; };
@@ -2389,7 +2389,7 @@ sub SIGNALduino_Parse_MS {
       {
         $message_dispatched++;
         $hash->{logMethod}->($name, 4, "$name: Parse_MS, Decoded matched MS protocol id $id dmsg $dmsg length " . scalar @bit_msg . " $rssiStr");
-        FHEM::Devices::SIGNALduino::Message::Dispatch($hash,$rmsg,$dmsg,$rssi,$id);
+        FHEM::Devices::SIGNALduino::SD_Message::Dispatch($hash,$rmsg,$dmsg,$rssi,$id);
       }
     }
 
@@ -2628,7 +2628,7 @@ sub SIGNALduino_Parse_MU {
         {
           $nrDispatch++;
           $hash->{logMethod}->($name, 4, "$name: Parse_MU, Decoded matched MU protocol id $id dmsg $dmsg length $bit_length dispatch($nrDispatch/". AttrVal($name,'maxMuMsgRepeat', 4) . ") $rssiStr");
-          FHEM::Devices::SIGNALduino::Message::Dispatch($hash,$rmsg,$dmsg,$rssi,$id);
+          FHEM::Devices::SIGNALduino::SD_Message::Dispatch($hash,$rmsg,$dmsg,$rssi,$id);
           if ( $nrDispatch == AttrVal($name,'maxMuMsgRepeat', 4))
           {
             last;
@@ -2753,7 +2753,7 @@ sub SIGNALduino_Parse_MC {
               defined($rssi)  ? $hash->{logMethod}->($name, SDUINO_MC_DISPATCH_VERBOSE, qq[$name: Parse_MC, $id, $rmsg $rssiStr])
                       :  $hash->{logMethod}->($name, SDUINO_MC_DISPATCH_VERBOSE, qq[$name: Parse_MC, $id, $rmsg]);
             }
-            FHEM::Devices::SIGNALduino::Message::Dispatch($hash,$rmsg,$dmsg,$rssi,$id);
+            FHEM::Devices::SIGNALduino::SD_Message::Dispatch($hash,$rmsg,$dmsg,$rssi,$id);
             $message_dispatched=1;
           }
         } else {
@@ -2838,7 +2838,7 @@ sub SIGNALduino_Parse_MN {
     }
     $dmsg = sprintf('%s%s',$hash->{protocolObject}->checkProperty($id,'preamble',''),$methodReturn[0]);
     $hash->{logMethod}->($name, 5, qq[$name: Parse_MN, Decoded matched MN Protocol id $id dmsg=$dmsg $rssiStr]);
-    FHEM::Devices::SIGNALduino::Message::Dispatch($hash,$rmsg,$dmsg,$rssi,$id,$freqafc);
+    FHEM::Devices::SIGNALduino::SD_Message::Dispatch($hash,$rmsg,$dmsg,$rssi,$id,$freqafc);
     $message_dispatched++;
     
   }
@@ -2986,7 +2986,7 @@ sub SIGNALduino_Attr {
     return  if ($hash->{Clients});
     
     ## Set defaults
-    $hash->{Clients} = FHEM::Devices::SIGNALduino::Clients::getClientsasStr();
+    $hash->{Clients} = FHEM::Devices::SIGNALduino::SD_Clients::getClientsasStr();
     return 'Setting defaults';
   }
   ## Change MatchList
@@ -2998,7 +2998,7 @@ sub SIGNALduino_Attr {
         $hash->{logMethod}->($name, 2, $name .": Attr, $aVal: ". $@);
       }
     }
-    FHEM::Devices::SIGNALduino::Matchlist::UpdateMatchList($hash,$match_list);
+    FHEM::Devices::SIGNALduino::SD_Matchlist::UpdateMatchList($hash,$match_list);
   }
   ## Change verbose
   elsif ($aName eq 'verbose') {
@@ -3272,7 +3272,7 @@ sub SIGNALduino_IdList {
       #SIGNALduino_Log3 $name, 3, "$name IdList, Attr blacklist $w";
     }
 
-    $hash->{Clients} = AttrVal($name,'Clients', FHEM::Devices::SIGNALduino::Clients::getClientsasStr()); # use Attribute Clients or default if whitelist is not active
+    $hash->{Clients} = AttrVal($name,'Clients', FHEM::Devices::SIGNALduino::SD_Clients::getClientsasStr()); # use Attribute Clients or default if whitelist is not active
   } else {
     $hash->{Clients} =  q[] # clear Clients if whitelist is active    
   }

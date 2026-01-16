@@ -18,7 +18,7 @@ my $log3_calls = [];
     };
 }
 
-use FHEM::Devices::SIGNALduino::Logger;
+use FHEM::Devices::SIGNALduino::SD_Logger;
 
 # Test Case 1: Custom logMethod in hash
 subtest 'Custom logMethod' => sub {
@@ -34,7 +34,7 @@ subtest 'Custom logMethod' => sub {
     };
     
     $log3_calls = []; # Reset calls
-    FHEM::Devices::SIGNALduino::Logger::Log($device_hash, 3, 'Test Message 1');
+    FHEM::Devices::SIGNALduino::SD_Logger::Log($device_hash, 3, 'Test Message 1');
     
     ok($called, 'Custom logMethod was called');
     is($received_args, ['TestDevice', 3, 'Test Message 1'], 'logMethod received correct arguments');
@@ -50,7 +50,7 @@ subtest 'Hash with NAME' => sub {
     };
     
     $log3_calls = [];
-    FHEM::Devices::SIGNALduino::Logger::Log($device_hash, 4, 'Test Message 2');
+    FHEM::Devices::SIGNALduino::SD_Logger::Log($device_hash, 4, 'Test Message 2');
     
     is(@$log3_calls, 1, 'main::Log3 was called exactly once');
     
@@ -64,7 +64,7 @@ subtest 'Hash with NAME' => sub {
 # Test Case 3: Device Name as String (Fallback to Log3)
 subtest 'Device Name String' => sub {
     $log3_calls = [];
-    FHEM::Devices::SIGNALduino::Logger::Log('StringDevice', 1, 'Test Message 3');
+    FHEM::Devices::SIGNALduino::SD_Logger::Log('StringDevice', 1, 'Test Message 3');
     
     is(@$log3_calls, 1, 'main::Log3 was called exactly once');
     
@@ -78,7 +78,7 @@ subtest 'Device Name String' => sub {
 # Test Case 4: Generic Fallback (undef)
 subtest 'Generic Fallback' => sub {
     $log3_calls = [];
-    FHEM::Devices::SIGNALduino::Logger::Log(undef, 5, 'Test Message 4');
+    FHEM::Devices::SIGNALduino::SD_Logger::Log(undef, 5, 'Test Message 4');
     
     is(@$log3_calls, 1, 'main::Log3 was called exactly once');
     
@@ -93,7 +93,7 @@ subtest 'Generic Fallback' => sub {
 subtest 'Empty Hash Fallback' => sub {
     my $empty_hash = {};
     $log3_calls = [];
-    FHEM::Devices::SIGNALduino::Logger::Log($empty_hash, 2, 'Test Message 5');
+    FHEM::Devices::SIGNALduino::SD_Logger::Log($empty_hash, 2, 'Test Message 5');
     
     is(@$log3_calls, 1, 'main::Log3 was called exactly once');
     
