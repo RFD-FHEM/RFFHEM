@@ -47,7 +47,7 @@ sub runTest {
 	my $targetHash = $defs{$target};
 	my $mock = Test2::Mock->new(
 		track => 1,
-		class => q[main]
+		class => q[FHEM::Devices::SIGNALduino::SD_Message],
 	);	 	
 	my $tracking = $mock->sub_tracking;
 
@@ -109,7 +109,7 @@ sub runTest {
         }
         my $pID;
         my $tID;                 
-        $mock->override('SIGNALduno_Dispatch' => \&VerifyDispatch);
+        $mock->override('Dispatch' => \&VerifyDispatch);
 
         while ( ($pID, $testSet) = each (@{$Test2::SIGNALduino::RDmsg::testDataArray}) )
         {
@@ -142,7 +142,7 @@ sub runTest {
                     #my $expected_repeat=min(AttrVal($target,"maxMuMsgRepeat",99),$tData->{dispatch_repeats});
                     SKIP: {
                       skip 'Test repeats' if ( !defined($tData->{dispatch_repeats}) ); 
-                      is(scalar @{$tracking->{SIGNALduno_Dispatch}}-1,$tData->{dispatch_repeats}, 'no of SIGNALduno_Dispatch calls vs dispatch_repeats');
+                      is(scalar @{$tracking->{Dispatch}}-1,$tData->{dispatch_repeats}, 'no of FHEM::Devices::SIGNALDuino::Message::Dispatch calls vs dispatch_repeats');
                     };
                     is($dmsg_matched,1,'dmsg matched once',q{parse returned}, $return);
                     
@@ -152,7 +152,7 @@ sub runTest {
             };
           }; # end of SKIP:
         };
-        $mock->restore('SIGNALduno_Dispatch');
+        $mock->restore('Dispatch');
         if ( exists $maintest->{todo}) {
           $todo->end;
         }

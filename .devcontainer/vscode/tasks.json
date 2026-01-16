@@ -9,7 +9,7 @@
             "options": {
                 "cwd": "/opt/fhem/"
             },
-            "command": "prove ${input:proveOptions} -I FHEMM -r --exec 'perl fhem.pl -t' ${input:dynamicFHEMModuleFilesRemembered}",
+            "command": "prove ${input:proveOptions} -I FHEM -r --exec 'perl fhem.pl -t' ${input:dynamicFHEMModuleFilesRemembered}",
             "problemMatcher" : {
                 "owner": "TAP",
                 "fileLocation" : "relative",
@@ -36,7 +36,7 @@
             "options": {
                 "cwd": "/opt/fhem/"
             },
-            "command": "prove ${input:proveOptions} -I FHEMM -r --exec 'perl fhem.pl -t' ${workspaceFolder}/t/FHEM/",
+            "command": "prove ${input:proveOptions} -I FHEMM -r --exec 'perl fhem.pl -t' ${workspaceFolder}/t/FHEM/[0-9][0-9]*",
             "problemMatcher" : {
                 "owner": "TAP",
                 "fileLocation" : "relative",
@@ -60,7 +60,7 @@
         {
             "label": "run prove Perl module files",
             "type": "shell",
-            "command": "prove ${input:proveOptions} --exec 'perl -I FHEM' -I FHEM -r ${input:dynamicPERLModuleFilesRemembered}",
+            "command": "prove ${input:proveOptions} --exec 'perl -I lib -I FHEM'  -r ${input:dynamicPERLModuleFilesRemembered}",
             "problemMatcher" : {
                 "owner": "TAP",
                 "fileLocation" : "relative",
@@ -88,7 +88,7 @@
             "type": "command",
             "command": "extension.commandvariable.file.pickFile",
             "args": {
-                "include": "t/FHEM/**/*.{t}",
+                "include": "t/FHEM/[0-9][0-9]*/*.{t}",
                 "multiPick" : true,
                 "keyRemember"  : "pickFHEMModuleFile"
             }
@@ -129,7 +129,7 @@
                 "pickFile": {
                     "FHEMMModuleFile": {
                         "description": "Which Testfiles to run?",
-                        "include": "t/FHEM/**/*.{t}",
+                        "include": "t/FHEM/[0-9][0-9]*/**/*.{t}",
                         "multiPick" : true,
                         "keyRemember": "FHEMMModuleFile"
                     }
@@ -153,7 +153,7 @@
                     "PERLMModuleFile": {
                         "description": "Which Testfiles to run?",
                         "include": "t/**/*.{t}",
-                        "exclude": "t/FHEM",
+                        "exclude": "t/FHEM/[0-9][0-9]*",
                         "multiPick" : true,
                         "keyRemember": "PERLMModuleFile"
                     }
