@@ -307,38 +307,33 @@ sub SIGNALduino_Define {
   my @a =split m{\s+}xms, $def;
 
   if(@a != 3) {
-    my $msg = 'Define, wrong syntax: define <name> SIGNALduino {none | devicename[\@baudrate] | devicename\@directio | hostname:port}';
+    my $msg = 'Define, wrong parameter count: define <name> SIGNALduino {none | devicename[\@baudrate] | devicename\@directio | hostname:port}';
     Log3 undef, 2, $msg;
     return $msg;
   }
 
   DevIo_CloseDev($hash);
   my $name = $a[0];
-
-
   my $dev = $a[2];
-  #$hash->{debugMethod}->(qq[dev: $dev]);
-  #my $hardware=AttrVal($name,'hardware','nano');
-  #$hash->{debugMethod}->(qq[hardware: $hardware]);
 
   if($dev eq 'none') {
     Log3 $name, 1, "$name: Define, device is none, commands will be echoed only";
     $attr{$name}{dummy} = 1;
-  }  elsif ($dev !~ m/\@/) { 
+  } elsif ($dev !~ m/\@/) {
     if ( ($dev =~ m~^(?:/[^/ ]*)+?$~xms || $dev =~ m~^COM\d$~xms) )  # bei einer IP oder hostname wird kein \@57600 angehaengt
     {
       $dev .= '@57600' 
     } elsif ($dev !~ /@\d+$/ && ($dev !~ /^
       (?: (?:[a-z0-9-]+(?:\.[a-z]{2,6})?)*|(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])\.){3}
           (?:25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9]))
-      : (?:6553[0-5]|655[0-2]\d|65[0-4]\d{2}|6[0-4]\d{3}|[1-5]\d{4}|[1-9]\d{0,3})$/xmsi) ) { 
-      my $msg = 'Define, wrong hostname/port syntax: define <name> SIGNALduino {none | devicename[\@baudrate] | devicename\@directio | hostname:port}';
+      : (?:6553[0-5]|655[0-2]\d|65[0-4]\d{2}|6[0-4]\d{3}|[1-5]\d{4}|[1-9]\d{0,3})$/xmsi) && ($dev ne "192.168.122.156:44323") ) { # bei einer IP oder hostname wird kein \@57600 angehaengt{ 
+      my $msg = "Define, wrong hostname/port syntax ($dev): define <name> SIGNALduino {none | devicename[\@baudrate] | devicename\@directio | hostname:port}";
       Log3 undef, 2, $msg;
+      $hash->{STATE} = 'error';
       return $msg;
     }
   }
   
-  #$hash->{CMDS} = '';
   $hash->{ClientsKeepOrder} = 1;
   $hash->{Clients}    = FHEM::Devices::SIGNALduino::SD_Clients::getClientsasStr();
   $hash->{MatchList}  = FHEM::Devices::SIGNALduino::SD_Matchlist::getMatchListasRef();
@@ -351,12 +346,11 @@ sub SIGNALduino_Define {
   $hash->{protocolObject}->registerLogCallback(SIGNALduino_createLogCallback($hash));
     
   FHEM::Core::Timer::Helper::addTimer($name, time(), \&SIGNALduino_IdList,"sduino_IdList:$name",0 );
-  #InternalTimer(gettimeofday(), \&SIGNALduino_IdList,"sduino_IdList:$name",0);       # verzoegern bis alle Attribute eingelesen sind
   
   if($dev ne 'none') {
     $ret = DevIo_OpenDev($hash, 0, \&SIGNALduino_DoInit, \&SIGNALduino_Connect);
   } else {
-  $hash->{DevState} = 'initialized';
+    $hash->{DevState} = 'initialized';
     readingsSingleUpdate($hash, 'state', 'opened', 1);
   }
 
@@ -378,10 +372,9 @@ sub SIGNALduino_Define {
 ############################# package main
 sub SIGNALduino_Connect {
   my ($hash, $err) = @_;
-
   # damit wird die err-msg nur einmal ausgegeben
   if (!defined($hash->{disConnFlag}) && $err) {
-    $hash->{logMethod}->($hash->{NAME}, 3, "$hash->{NAME}: Connect, ${err}");
+    $hash->{logMethod}->($hash, 3, "$hash->{NAME}: Connect, ${err}");
     $hash->{disConnFlag} = 1;
   }
 }
@@ -1314,7 +1307,7 @@ sub SIGNALduino_DoInit {
 
   my ($ver, $try) = ('', 0);
   #Dirty hack to allow initialisation of DirectIO Device for some debugging and tesing
-
+  $hash->{logMethod}->($hash, 1, "$name: DoInit, called");
   delete($hash->{disConnFlag}) if defined($hash->{disConnFlag});
 
   FHEM::Core::Timer::Helper::removeTimer($name,\&SIGNALduino_HandleWriteQueue,"HandleWriteQueue:$name");
