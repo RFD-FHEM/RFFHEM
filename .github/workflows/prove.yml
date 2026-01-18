@@ -16,7 +16,7 @@ jobs:
     name: Perl ${{ matrix.perl }} on ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v6
-    - uses: shogo82148/actions-setup-perl@v1.36.0
+    - uses: shogo82148/actions-setup-perl@v1.37.0
       with:
         perl-version: ${{ matrix.perl }}
         install-modules-with: cpanm
@@ -32,12 +32,14 @@ jobs:
     - name: run prove on perl modules (testscripts)
       run: |
         echo "::remove-matcher owner=perl::"
-        prove -j3 --exec 'perl -MDevel::Cover=-silent,1 -I FHEM '  -I FHEM -r -v t/SD_Protoco*  > >(tee -a ${GITHUB_WORKSPACE}/testOutput.stdout) 2> >(tee -a ${GITHUB_WORKSPACE}/testOutput.stderr >&2)
+        cp -R ${GITHUB_WORKSPACE}/lib/* ${FHEM_DIR}/lib/
+        prove -j3 --exec 'perl -MDevel::Cover=-silent,1 -I lib -I FHEM ' -r -v t/SD_Protoco* t/FHEM/Devices > >(tee -a ${GITHUB_WORKSPACE}/testOutput.stdout) 2> >(tee -a ${GITHUB_WORKSPACE}/testOutput.stderr >&2)
+      env:
+        FHEM_DIR: /opt/fhem
     - name: run prove fhem testsuite ${{ matrix.perl }}
       run: |
         cp -R ${GITHUB_WORKSPACE}/FHEM/* ${FHEM_DIR}/FHEM/
-        cp -R ${GITHUB_WORKSPACE}/lib/* ${FHEM_DIR}/lib/
-        prove -j3 --exec 'perl -MDevel::Cover=-silent,1 fhem.pl -t' -I FHEM -v -r ${GITHUB_WORKSPACE}/t/FHEM/  > >(tee -a ${GITHUB_WORKSPACE}/testOutput.stdout) 2> >(tee -a ${GITHUB_WORKSPACE}/testOutput.stderr >&2)
+        prove -j3 --exec 'perl -MDevel::Cover=-silent,1 fhem.pl -t' -I FHEM -v -r ${GITHUB_WORKSPACE}/t/FHEM/[0-9][0-9]_*  > >(tee -a ${GITHUB_WORKSPACE}/testOutput.stdout) 2> >(tee -a ${GITHUB_WORKSPACE}/testOutput.stderr >&2)
       working-directory: /opt/fhem/
       env:
         FHEM_DIR: /opt/fhem

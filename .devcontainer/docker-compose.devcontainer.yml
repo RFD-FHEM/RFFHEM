@@ -1,0 +1,18 @@
+services:
+  RFFHEM-development:
+    image: fhem-docker
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 4gb
+    build:
+      context: ../ # Dockerfile cannot access files from parent directories if context is not set.
+      dockerfile: ./.devcontainer/Dockerfile
+    restart: unless-stopped
+    volumes:
+      - ../:/usr/src/RFFHEM:delegated
+      - ../.devcontainer/vscode:/usr/src/RFFHEM/.vscode:delegated # VSCode config files
+      - ~/.gitconfig:/root/.gitconfig:ro
+    entrypoint: /bin/sh -c "while sleep 1000; do :; done"
+    

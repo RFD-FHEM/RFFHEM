@@ -1,3 +1,6 @@
+2026-01-16 - Merge pull request #1338 from RFD-FHEM/feat/DispatchLibs
+
+Refactor: dispatch specific code in libs migrated
 2025-12-04 - new remote control  RCnoName20_15 (#1331)
 
 * new remote control RCnoName20_15

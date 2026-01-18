@@ -1,0 +1,164 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "run prove FHEM module tests",
+            "type": "shell",
+            "options": {
+                "cwd": "/opt/fhem/"
+            },
+            "command": "prove ${input:proveOptions} -I FHEM -r --exec 'perl fhem.pl -t' ${input:dynamicFHEMModuleFilesRemembered}",
+            "problemMatcher" : {
+                "owner": "TAP",
+                "fileLocation" : "relative",
+                "pattern" : [
+                    {
+                        "regexp": "^#\\s+(Failed test '.*')",
+                        "message": 1
+                    },
+                    {
+                        "regexp": "^#\\s+at (.*) line (\\d+)",
+                        "line": 2,
+                        "file": 1
+                    }
+                ]
+            },
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "run proove all FHEM tests",
+            "type": "shell",
+            "options": {
+                "cwd": "/opt/fhem/"
+            },
+            "command": "prove ${input:proveOptions} -I FHEMM -r --exec 'perl fhem.pl -t' ${workspaceFolder}/t/FHEM/[0-9][0-9]*",
+            "problemMatcher" : {
+                "owner": "TAP",
+                "fileLocation" : "relative",
+                "pattern" : [
+                    {
+                        "regexp": "^#\\s+(Failed test '.*')",
+                        "message": 1
+                    },
+                    {
+                        "regexp": "^#\\s+at (.*) line (\\d+)",
+                        "line": 2,
+                        "file": 1
+                    }
+                ]
+            },
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "run prove Perl module files",
+            "type": "shell",
+            "command": "prove ${input:proveOptions} --exec 'perl -I lib -I FHEM'  -r ${input:dynamicPERLModuleFilesRemembered}",
+            "problemMatcher" : {
+                "owner": "TAP",
+                "fileLocation" : "relative",
+                "pattern" : [
+                    {
+                        "regexp": "^#\\s+(Failed test '.*')",
+                        "message": 1
+                    },
+                    {
+                        "regexp": "^#\\s+at (.*) line (\\d+)",
+                        "line": 2,
+                        "file": 1
+                    }
+                ]
+            },
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            }
+        },
+    ],
+    "inputs":  [
+        {
+            "id": "dynamicFHEMModuleFiles",
+            "type": "command",
+            "command": "extension.commandvariable.file.pickFile",
+            "args": {
+                "include": "t/FHEM/[0-9][0-9]*/*.{t}",
+                "multiPick" : true,
+                "keyRemember"  : "pickFHEMModuleFile"
+            }
+        },
+        {
+            "id": "proveOptions",
+            "type": "command",
+            "command": "extension.commandvariable.pickStringRemember",
+            "args": {
+                "key": "proveOptions",
+                "multiPick" : true,
+                "options": [
+                        ["verbose", "-v "],
+                        ["merge", "-m "],
+                        ["parse", "-p" ],
+                        ["failures", "-f "],
+                        ["formatter TAP", "--formatter TAP"],
+                        ["4 parallel jobs", "-j4"],
+                        ["8 parallel jobs", "-j8"],
+                        ["12 parallel jobs", "-j12"]
+                    ],
+                "description": "prove Options to activate"
+            }
+        },
+        {
+            "id": "dynamicFHEMModuleFilesRemembered",
+            "type": "command",
+            "command": "extension.commandvariable.pickStringRemember",
+            "args": {
+                "description": "Testfiles",
+                "options": [
+                    ["Use previous selection", "${remember:FHEMTestFiles}"],
+                    ["pick tests", "${pickFile:FHEMMModuleFile}"] 
+                 ],
+                "key": "FHEMTestFiles",
+                "multiPick" : true,
+                "rememberTransformed": true,
+                "pickFile": {
+                    "FHEMMModuleFile": {
+                        "description": "Which Testfiles to run?",
+                        "include": "t/FHEM/[0-9][0-9]*/**/*.{t}",
+                        "multiPick" : true,
+                        "keyRemember": "FHEMMModuleFile"
+                    }
+                }
+            }
+        },
+        {
+            "id": "dynamicPERLModuleFilesRemembered",
+            "type": "command",
+            "command": "extension.commandvariable.pickStringRemember",
+            "args": {
+                "description": "Testfiles",
+                "options": [
+                    ["Use previous selection", "${remember:PERLTestFiles}"],
+                    ["pick tests", "${pickFile:PERLMModuleFile}"] 
+                 ],
+                "key": "PERLTestFiles",
+                "multiPick" : true,
+                "rememberTransformed": true,
+                "pickFile": {
+                    "PERLMModuleFile": {
+                        "description": "Which Testfiles to run?",
+                        "include": "t/**/*.{t}",
+                        "exclude": "t/FHEM/[0-9][0-9]*",
+                        "multiPick" : true,
+                        "keyRemember": "PERLMModuleFile"
+                    }
+                }
+            }
+        }
+    ]
+}
