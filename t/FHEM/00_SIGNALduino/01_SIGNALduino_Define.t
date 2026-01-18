@@ -121,7 +121,6 @@ InternalTimer(time()+0.8, sub {
         },
         rValue => D(), 
     },  
-    
     { 
       DEF => q{192:168:122:56:45476},
       testname =>  q[Hostname|Linux|Invalid:],
@@ -240,7 +239,6 @@ InternalTimer(time()+0.8, sub {
         },
         rValue => U(), 
     },  
-
     { 
       DEF => q{ESP-0CAD2F:23},
       testname =>  q[Hostname|Linux|Valid:],
@@ -291,7 +289,6 @@ InternalTimer(time()+0.8, sub {
         },
         rValue => U(), 
     },     
-
     { 
       NAME => q{logTest},
       plan => 3,
@@ -313,7 +310,6 @@ InternalTimer(time()+0.8, sub {
         },
         rValue => U(), 
     },     
-
   );
   
   while (@testDataset)
@@ -322,14 +318,11 @@ InternalTimer(time()+0.8, sub {
     next if (!exists($element->{testname}));
     my %hash;
     $defs{$name} = \%hash;
-    #SIGNALduino_Initialize(\%hash);
     $hash{CL}    = undef;
     $hash{TEMPORARY} = 1;
     $hash{TYPE}  = q{SIGNALduino};
     $hash{STATE} = q{???};
-    $hash{ReadyFn} = sub { return ;};
-
-
+  
     subtest "$element->{testname} checking define $element->{DEF}" => sub {
       $hash{NAME}  = $element->{NAME} // $name;
       FhemTestUtils_resetLogs();
