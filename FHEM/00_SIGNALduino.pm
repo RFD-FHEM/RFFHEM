@@ -310,8 +310,6 @@ sub SIGNALduino_Define {
 
   my $name = $a[0];
   my $dev = $a[2];
-  my $mqtt_topic;
-
   if ($dev eq 'mqtt') {
     if(@a < 3 || @a > 4) {
       my $msg = 'Define, wrong mqtt syntax: define <name> SIGNALduino mqtt [<basetopic>]';
@@ -319,7 +317,7 @@ sub SIGNALduino_Define {
       return $msg;
     }
     my $basetopic = $a[3] // 'signalduino/v1';
-    $mqtt_topic = "$basetopic/state/messages";
+    $hash->{mqttSubscribe} = "$basetopic/state/messages";
   } elsif(@a != 3) {
     my $msg = 'Define, wrong parameter count: define <name> SIGNALduino {none | devicename[\@baudrate] | devicename\@directio | hostname:port | mqtt [<basetopic>]}';
     Log3 undef, 2, $msg;
@@ -369,12 +367,8 @@ sub SIGNALduino_Define {
   } elsif ($dev eq 'mqtt') {
     $hash->{DevState} = 'initialized';
     readingsSingleUpdate($hash, 'state', 'opened', 1);
-    $hash->{Listener} = on_mqtt($mqtt_topic, sub {
-      FHEM::Devices::SIGNALduino::SD_MQTT::on_message($hash, @_);
-    }) or do {
-      $hash->{logMethod}->($hash, 2, "$hash->{NAME}: Error creating MQTT listener: $@");
-    };
-    $hash->{mqttSubscribe} = $mqtt_topic;
+
+    FHEM::Devices::SIGNALduino::SD_MQTT::Init($name);
   } else {
     $ret = DevIo_OpenDev($hash, 0, \&SIGNALduino_DoInit, \&SIGNALduino_Connect);
   }
@@ -3136,7 +3130,7 @@ sub SIGNALduino_FW_Detail {
 
   my $hash = $defs{$name};
   my @dspec=devspec2array("DEF=.*fakelog");
-  my $lfn = $dspec[0];
+  my $lfn = $dspec[0] // "";
   my $fn=$defs{$name}->{TYPE}."-Flash.log";
 
   my $ret = "<div class='makeTable wide'><span>Information menu</span>
