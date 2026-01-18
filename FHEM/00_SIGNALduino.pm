@@ -15,7 +15,7 @@ use strict;
 use warnings;
 use Storable qw(dclone); 
 use FHEM::Core::Utils::Math;
-#use version 0.77; our $VERSION = version->declare('v3.5.5');
+#use version 0.77; our $VERSION = version->declare('v4.0.0');
 
 my $missingModulSIGNALduino = ' ';
 
@@ -44,7 +44,7 @@ use List::Util qw(first);
 
 
 use constant {
-  SDUINO_VERSION                  => '3.5.7+20260116',  # Datum wird automatisch bei jedem pull request aktualisiert
+  SDUINO_VERSION                  => '4.0.0',  # Datum wird automatisch bei jedem pull request aktualisiert
   SDUINO_INIT_WAIT_XQ             => 1.5,     # wait disable device
   SDUINO_INIT_WAIT                => 2,
   SDUINO_INIT_MAXRETRY            => 3,
@@ -5474,6 +5474,7 @@ USB-connected devices (SIGNALduino):<br>
         "Symbol": "0",
         "constant": "0",
         "lib::SD_Protocols": "0",
+        "FHEM::Core::Timer::Helper": "0",
         "strict": "0",
         "warnings": "0",
         "Time::HiRes": "0",
@@ -5497,7 +5498,6 @@ USB-connected devices (SIGNALduino):<br>
         "warnings": "0",
         "Data::Dumper": "0",
         "Time::HiRes": "0",
-        "FHEM::Core::Timer::Helper": "0",
         "JSON": "0"
       },
       "suggests": {
@@ -5548,7 +5548,7 @@ USB-connected devices (SIGNALduino):<br>
       "web": "https://wiki.fhem.de/wiki/SIGNALduino"
     }
   },
-  "version": "v3.5.7"
+  "version": "v4.0.0"
 }
 =end :application/json;q=META.json
 =cut
