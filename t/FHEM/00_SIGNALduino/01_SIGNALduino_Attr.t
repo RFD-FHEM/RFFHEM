@@ -295,7 +295,7 @@ my @mockData = (
         etc();
         },
       rValue => U(),
-  },  
+  },
 );
 plan (scalar @mockData + 2);  
 
@@ -334,7 +334,7 @@ InternalTimer(time()+1, sub() {
       my $p = $element->{plan} // 4;
       plan ($p);
 
-      my ($attrname,$value) = split(" ",$element->{input});
+      my ($attrname,$value) = split(" ",$element->{input},2);
       if (!exists $element->{pre_code}) {
         delete $attr{$element->{deviceName}}{$attrname}; 
         delete $defs{$element->{deviceName}}{QUEUE}; 
