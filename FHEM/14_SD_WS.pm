@@ -1,4 +1,4 @@
-# $Id: 14_SD_WS.pm 0 2025-06-10 10:02:15Z elektron-bbs $
+# $Id: 14_SD_WS.pm 0 2026-01-24 16:02:15Z elektron-bbs $
 #
 # The purpose of this module is to support serval
 # weather sensors which use various protocol
@@ -1865,6 +1865,64 @@ sub SD_WS_Parse {
                            }
                           },
     },
+    136 => {
+        # Protokollbeschreibung: Wind, temperature, humidity sensor EMOS E6016
+        # --------------------------------------------------------------------
+        #          Byte: 00 01 02 03 04 05 06 07 08 09 10 11 12
+        #        Nibble: 01 23 45 67 89 01 23 45 67 89 01 23 45
+        #     Msg: AA A5 83 A9 9A 1B 3C B6 40 D0 3D 00 90 FF 01
+        #          PP PP MM II DD DD DD DD DT TT HH SS WF CC RR
+        # P: 16 bit preamble always 0xAAA5, is not passed to the module
+        # M:  8 bit model, always 0x83
+        # I:  8 bit ident, changes on restart
+        # D: 36 bit DCF date and time, channel (2 bit unknown always 10, 6 bit year, 4 bit month, 5 bit day, 5 bit hour, 6 bit minute, 6 bit second, 2 bit channel)
+        # T: 12 bit signed temperature, scaled by 10
+        # H:  8 bit humidity
+        # S:  8 bit windspeed (multiplied by 0.295 = m/s)
+        # W:  4 bit winddirection (multiplied by 22.5 = degree)
+        # F:  4 bit flags, ?B??, B is battery good indication (0 = ok)
+        # C:  8 bit checksum
+        # R:  8 bit message repeat counter
+        sensortype => 'EMOS E6016 wind',
+        model      => 'SD_WS_136',
+        prematch   => sub { my $msg = shift; return 1 if ($msg =~ /^[0-9A-F]{26}$/); },
+        id         => sub { my ($rawData,undef) = @_; return substr($rawData,2,2); },
+        dcf        => sub { my (undef,$bitData) = @_;
+                            return '20' . SD_WS_binaryToNumber($bitData,18,23) . '-'                  # year
+                                        . sprintf('%02d', SD_WS_binaryToNumber($bitData,24,27)) . '-' # month
+                                        . sprintf('%02d', SD_WS_binaryToNumber($bitData,28,32)) . ' ' # day
+                                        . sprintf('%02d', SD_WS_binaryToNumber($bitData,33,37)) . ':' # hour 
+                                        . sprintf('%02d', SD_WS_binaryToNumber($bitData,38,43)) . ':' # minute
+                                        . sprintf('%02d', SD_WS_binaryToNumber($bitData,44,49))       # second
+                          },
+        channel    => sub { my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,50,51) + 1; },
+        temp       => sub { my (undef,$bitData) = @_;
+                            my $tempraw = SD_WS_binaryToNumber($bitData,52,63);
+                            $tempraw -= 4096 if ($tempraw > 1023);    # negative
+                            $tempraw /= 10.0;
+                            return $tempraw;
+                          },
+        hum        => sub { my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,65,71); },
+        windspeed  => sub { my (undef,$bitData) = @_; return FHEM::Core::Utils::Math::round((SD_WS_binaryToNumber($bitData,72,79) * 0.295), 1); },
+        winddir    => sub { my (undef,$bitData) = @_;
+                            my $winddirraw = SD_WS_binaryToNumber($bitData,80,83);
+                            return ($winddirraw * 22.5, $winddirtxtar[$winddirraw]);
+                          },
+        bat        => sub { my (undef,$bitData) = @_; return substr($bitData,85,1) eq '0' ? 'ok' : 'low'; },
+        crcok      => sub { my (undef,$bitData) = @_;
+                            my $sum = 170 + 165; # preamble 0xAA + 0xA5
+                            for (my $n = 0; $n < 88; $n += 8) {
+                              $sum += SD_WS_binaryToNumber($bitData, $n, $n + 7)
+                            }
+                            if (($sum &= 0xFF) == SD_WS_binaryToNumber($bitData, 88, 95)) {
+                              return 1;
+                            } else {
+                              Log3 $name, 3, "$name: SD_WS_136 Parse msg $msg - ERROR checksum $sum != " . SD_WS_binaryToNumber($bitData, 88, 95);
+                              return 0;
+                            }
+                          },
+        count      => sub { my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,96,103); },
+    },
   );
 
   Log3 $name, 4, "$name: SD_WS_Parse protocol $protocol, rawData $rawData";
@@ -2861,7 +2919,7 @@ sub SD_WS_WH2SHIFT {
   "x_fhem_maintainer_github": [
     "Sidey79"
   ],
-  "version": "v1.1.7",
+  "version": "v1.1.8",
   "description": "The SD_WS module processes the messages from various environmental sensors received from an IO device (CUL, CUN, SIGNALDuino, SignalESP etc.)",
   "dynamic_config": 1,
   "keywords": [

@@ -70,7 +70,7 @@
 ##### notice #### or #### info ############################################################################################################
 # !!! Between the keys and values no tabs, please use spaces !!!
 # !!! Please use first unused id for new protocols !!!
-# ID´s are currently unused: 136 - 
+# ID´s are currently unused: 137 - 
 # ID´s need to be revised (preamble u): 5|19|21|23|25|28|31|36|40|52|59|63
 ###########################################################################################################################################
 # Please provide at least three messages for each new MU/MC/MS/MN protocol and a URL of issue in GitHub or discussion in FHEM Forum
@@ -85,7 +85,7 @@ package lib::SD_ProtocolData;
   use strict;
   use warnings;
 
-  our $VERSION = '1.59';
+  our $VERSION = '1.60';
   our %protocols = (
     "0" =>  ## various weather sensors (500 | 9100)
             # Mebus | Id:237 Ch:1 T: 1.9 Bat:low           MS;P0=-9298;P1=495;P2=-1980;P3=-4239;D=1012121312131313121313121312121212121212131212131312131212;CP=1;SP=0;R=223;O;m2;
@@ -1860,6 +1860,7 @@ package lib::SD_ProtocolData;
         one             => [1,-2],
         zero            => [3,-2],
         clockabs        => 490,
+        reconstructBit  => '1',
         clientmodule    => 'SD_WS',
         modulematch     => '^W64*',
         preamble        => 'W64#',
@@ -2318,8 +2319,8 @@ package lib::SD_ProtocolData;
               # BeEasy_TX_4D4 down       MU;P0=-25312;P1=286;P2=-354;P3=626;P4=-677;P5=-11292;D=01234123234141234123412341512341232341412341234123415123412323414123412341234151234123234141234123412341512341232341412341234123415123412323414123412341234151234123234141234123412341512341232341412341234123415123412323414123412341234151234123234141234123;CP=1;R=37;O;
               # BeEasy_TX_4D4 up         MU;P0=-24160;P1=277;P2=-363;P3=602;P4=-690;P6=-11311;D=01234123234141234123414123612341232341412341234141236123412323414123412341412361234123234141234123414123612341232341412341234141236123412323414123412341412361234123234141234123414123612341232341412341234141236123412323414123412341412361234123234141234123;CP=1;R=38;O;
       {
-        name            => 'RH787T',
-        comment         => 'remote control for example Westinghouse Delancey 7800140',
+        name            => 'RH787T, BeEasy_TX',
+        comment         => 'remote control for Westinghouse Delancey 7800140 and SEAV BeEasy TX',
         id              => '83',
         knownFreqs      => '433.92',
         one             => [-2,1],
@@ -3610,6 +3611,27 @@ package lib::SD_ProtocolData;
         length_min      => '32',
         length_max      => '33',
       },
+    "136" =>  ## Wind, temperature, humidity sensor EMOS E6016
+              # https://github.com/RFD-FHEM/SIGNALDuino/issues/409 @ jadero 2026-01-22
+              # 
+              # 
+      {
+        name            => 'EMOS E6016 wind',
+        comment         => 'Wind, temperature, humidity sensor EMOS E6016',
+        id              => '136',
+        knownFreqs      => '433.92',
+        one             => [3,-1],           # 801,-267
+        zero            => [1,-3],           # 267,-801
+        # start           => [3,-1,1,-3,3,-1,1,-3], # 0x5
+        start           => [3,-1,1,-3,3,-1,1,-3,1,-3,3,-1,1,-3,3,-1], # 0x5A
+        clockabs        => 267,
+        format          => 'twostate',
+        preamble        => 'W136#',
+        clientmodule    => 'SD_WS',
+        length_min      => '104',
+        length_max      => '104',
+      },
+
     ########################################################################
     #### ###  register informations from other hardware protocols  #### ####
 
