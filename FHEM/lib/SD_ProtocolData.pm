@@ -1860,7 +1860,7 @@ package lib::SD_ProtocolData;
         one             => [1,-2],
         zero            => [3,-2],
         clockabs        => 490,
-        reconstructBit  => '1',
+        # reconstructBit  => '1', # ToDo Tests anpassen
         clientmodule    => 'SD_WS',
         modulematch     => '^W64*',
         preamble        => 'W64#',
