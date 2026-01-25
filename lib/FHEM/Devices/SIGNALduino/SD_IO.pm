@@ -21,6 +21,7 @@ our @EXPORT_OK = qw(
   SIGNALduino_SimpleWrite
   SIGNALduino_WriteInit
   SDUINO_KEEPALIVE_TIMEOUT
+  SDUINO_KEEPALIVE_MAXRETRY
 );
 our %EXPORT_TAGS = (
     'all' => \@EXPORT_OK,
@@ -271,8 +272,7 @@ sub SIGNALduino_KeepAlive{
       $hash->{DevState} = 'INACTIVE';
       SIGNALduino_ResetDevice($hash);
       return;
-    }
-    else {
+    } else {
       my $logLevel = 3;
       $hash->{keepalive}{retry} ++;
       if ($hash->{keepalive}{retry} == 1) {
