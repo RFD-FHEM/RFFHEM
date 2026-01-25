@@ -1,4 +1,4 @@
-# $Id: 00_SIGNALduino.pm 0 2026-01-16 10:03:31Z sidey79 $
+# $Id: 00_SIGNALduino.pm 0 2026-01-23 11:22:16Z sidey79 $
 # https://github.com/RFD-FHEM/RFFHEM/tree/master
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incoming messages
 # see http://www.fhemwiki.de/wiki/SIGNALDuino
@@ -27,7 +27,7 @@ no warnings 'portable';
 eval {use Data::Dumper qw(Dumper);1};
 
 use constant {
-  SDUINO_VERSION                  => '4.0.0',  # Datum wird automatisch bei jedem pull request aktualisiert
+  SDUINO_VERSION                  => '4.0.0+20260123',  # Datum wird automatisch bei jedem pull request aktualisiert
   SDUINO_WRITEQUEUE_NEXT          => 0.3,
   SDUINO_WRITEQUEUE_TIMEOUT       => 2,
 
