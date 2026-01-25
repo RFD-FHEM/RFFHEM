@@ -124,6 +124,7 @@ sub SD_WS_Initialize {
     'SD_WS_129.*'     => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4hum4:Temp/Hum,', autocreateThreshold => '3:180'},
     'SD_WS_131.*'     => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => q{}, autocreateThreshold => '2:180'},
     'SD_WS_135_T.*'   => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4:Temp,', autocreateThreshold => '3:180'},
+    "SD_WS_136_THW_.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "3:180"},
   };
   return FHEM::Meta::InitMod( __FILE__, $hash );
 }
@@ -1866,8 +1867,8 @@ sub SD_WS_Parse {
                           },
     },
     136 => {
-        # Protokollbeschreibung: Wind, temperature, humidity sensor EMOS E6016
-        # --------------------------------------------------------------------
+        # Wind, temperature, humidity sensor EMOS E06016
+        # ----------------------------------------------
         #          Byte: 00 01 02 03 04 05 06 07 08 09 10 11 12
         #        Nibble: 01 23 45 67 89 01 23 45 67 89 01 23 45
         #     Msg: AA A5 83 A9 9A 1B 3C B6 40 D0 3D 00 90 FF 01
@@ -1882,9 +1883,10 @@ sub SD_WS_Parse {
         # W:  4 bit winddirection (multiplied by 22.5 = degree)
         # F:  4 bit flags, ?B??, B is battery good indication (0 = ok)
         # C:  8 bit checksum
-        # R:  8 bit message repeat counter
-        sensortype => 'EMOS E6016 wind',
-        model      => 'SD_WS_136',
+        # R:  8 bit message repeat counter (0-5)
+				# The sensor sends 6 messages at intervals of approximately 60 seconds.
+        sensortype => 'EMOS E06016 wind',
+        model      => 'SD_WS_136_THW',
         prematch   => sub { my $msg = shift; return 1 if ($msg =~ /^[0-9A-F]{26}$/); },
         id         => sub { my ($rawData,undef) = @_; return substr($rawData,2,2); },
         dcf        => sub { my (undef,$bitData) = @_;
