@@ -273,6 +273,7 @@ sub SIGNALduino_KeepAlive{
       SIGNALduino_ResetDevice($hash);
       return;
     } else {
+    } else {
       my $logLevel = 3;
       $hash->{keepalive}{retry} ++;
       if ($hash->{keepalive}{retry} == 1) {
