@@ -257,6 +257,7 @@ sub SD_WS_Parse {
   my $identified;
   my $transmitter;
   my $dcf;
+  my $dcfStatus;
   my $pm2_5; # particulate matter <= 2.5 µm
   my $pm10;  # particulate matter <= 10 µm
 
@@ -1876,7 +1877,7 @@ sub SD_WS_Parse {
         # P: 16 bit preamble always 0xAAA5, is not passed to the module
         # M:  8 bit model, always 0x83
         # I:  8 bit ident, changes on restart
-        # D: 36 bit DCF date and time, channel (2 bit unknown always 10, 6 bit year, 4 bit month, 5 bit day, 5 bit hour, 6 bit minute, 6 bit second, 2 bit channel)
+        # D: 36 bit DCF date and time, channel (1 bit DCF (1 = ok), 1 bit unknown always 0, 6 bit year, 4 bit month, 5 bit day, 5 bit hour, 6 bit minute, 6 bit second, 2 bit channel)
         # T: 12 bit signed temperature, scaled by 10
         # H:  8 bit humidity
         # S:  8 bit windspeed (multiplied by 0.295 = m/s)
@@ -1889,6 +1890,7 @@ sub SD_WS_Parse {
         model      => 'SD_WS_136_THW',
         prematch   => sub { my $msg = shift; return 1 if ($msg =~ /^[0-9A-F]{26}$/); },
         id         => sub { my ($rawData,undef) = @_; return substr($rawData,2,2); },
+        dcfStatus  => sub { my (undef,$bitData) = @_; return substr($bitData,16,1) eq '1' ? 'ok' : 'off'; },
         dcf        => sub { my (undef,$bitData) = @_;
                             return '20' . SD_WS_binaryToNumber($bitData,18,23) . '-'                  # year
                                         . sprintf('%02d', SD_WS_binaryToNumber($bitData,24,27)) . '-' # month
@@ -2262,6 +2264,7 @@ sub SD_WS_Parse {
     $brightness = $decodingSubs{$protocol}{brightness}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{brightness}));
     $transmitter = $decodingSubs{$protocol}{transmitter}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{transmitter}));
     $dcf = $decodingSubs{$protocol}{dcf}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{dcf}));
+    $dcfStatus = $decodingSubs{$protocol}{dcfStatus}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{dcfStatus}));
     $pm2_5 = $decodingSubs{$protocol}{pm_2_5}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{pm_2_5}));
     $pm10 = $decodingSubs{$protocol}{pm_10}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{pm_10}));
     Log3 $iohash, 4, "$name: SD_WS_Parse decoded protocol-id $protocol ($SensorTyp), sensor-id $id";
@@ -2500,6 +2503,7 @@ sub SD_WS_Parse {
   readingsBulkUpdate($hash, 'brightness', $brightness)  if (defined($brightness));
   readingsBulkUpdateIfChanged($hash, 'transmitter', $transmitter)  if (defined($transmitter));
   readingsBulkUpdate($hash, 'dcf', $dcf)  if (defined($dcf));
+  readingsBulkUpdateIfChanged($hash, 'dcfStatus', $dcfStatus)  if (defined($dcfStatus));
   readingsBulkUpdate($hash, 'pm_2_5', $pm2_5)  if (defined($pm2_5));
   readingsBulkUpdate($hash, 'pm_10', $pm10)  if (defined($pm10));
   readingsEndUpdate($hash, 1); # Notify is done by Dispatch
