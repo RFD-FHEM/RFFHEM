@@ -1877,12 +1877,12 @@ sub SD_WS_Parse {
         # P: 16 bit preamble always 0xAAA5, is not passed to the module
         # M:  8 bit model, always 0x83
         # I:  8 bit ident, changes on restart
-        # D: 36 bit DCF date and time, channel (1 bit DCF (1 = ok), 1 bit unknown always 0, 6 bit year, 4 bit month, 5 bit day, 5 bit hour, 6 bit minute, 6 bit second, 2 bit channel)
+        # D: 36 bit DCF date and time, channel (1 bit DCF (1 = ok), 7 bit year, 4 bit month, 5 bit day, 5 bit hour, 6 bit minute, 6 bit second, 2 bit channel)
         # T: 12 bit signed temperature, scaled by 10
         # H:  8 bit humidity
         # S:  8 bit windspeed (multiplied by 0.295 = m/s)
         # W:  4 bit winddirection (multiplied by 22.5 = degree)
-        # F:  4 bit flags, ?B??, B is battery good indication (0 = ok)
+        # F:  4 bit flags, ?BC?, B is battery good indication (0 = ok), C is Central European Summer Time (1 = CEST)
         # C:  8 bit checksum
         # R:  8 bit message repeat counter (0-5)
 				# The sensor sends 6 messages at intervals of approximately 60 seconds.
@@ -1892,12 +1892,13 @@ sub SD_WS_Parse {
         id         => sub { my ($rawData,undef) = @_; return substr($rawData,2,2); },
         dcfStatus  => sub { my (undef,$bitData) = @_; return substr($bitData,16,1) eq '1' ? 'ok' : 'off'; },
         dcf        => sub { my (undef,$bitData) = @_;
-                            return '20' . SD_WS_binaryToNumber($bitData,18,23) . '-'                  # year
-                                        . sprintf('%02d', SD_WS_binaryToNumber($bitData,24,27)) . '-' # month
-                                        . sprintf('%02d', SD_WS_binaryToNumber($bitData,28,32)) . ' ' # day
-                                        . sprintf('%02d', SD_WS_binaryToNumber($bitData,33,37)) . ':' # hour 
-                                        . sprintf('%02d', SD_WS_binaryToNumber($bitData,38,43)) . ':' # minute
-                                        . sprintf('%02d', SD_WS_binaryToNumber($bitData,44,49))       # second
+                            return SD_WS_binaryToNumber($bitData,17,23) + 2000 . '-'             # year
+                                   . sprintf('%02d', SD_WS_binaryToNumber($bitData,24,27)) . '-' # month
+                                   . sprintf('%02d', SD_WS_binaryToNumber($bitData,28,32)) . ' ' # day
+                                   . sprintf('%02d', SD_WS_binaryToNumber($bitData,33,37)) . ':' # hour 
+                                   . sprintf('%02d', SD_WS_binaryToNumber($bitData,38,43)) . ':' # minute
+                                   . sprintf('%02d', SD_WS_binaryToNumber($bitData,44,49)) . ' ' # second
+                                   . (substr($bitData,86,1) eq '0' ? 'CET' : 'CEST');            # dst
                           },
         channel    => sub { my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,50,51) + 1; },
         temp       => sub { my (undef,$bitData) = @_;
