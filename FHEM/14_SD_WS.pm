@@ -57,6 +57,7 @@
 # 03.09.2024 neues Protokoll 48: Funk-Thermometer JOKER TFA 30.3055, Temperatursender 30.3212
 # 09.01.2025 Protokoll 125: Ergänzung Empfang DCF-Daten WH31E/DNT000005
 # 22.04.2025 neues Protokoll 135: Temperatursensor TFA 30.3255.02
+# 09.02.2026 neues Protokoll 136: Wind-, Temperatur- und Feuchtigkeitssensor EMOS E06016 mit DCF77
 
 package main;
 
@@ -2626,6 +2627,7 @@ sub SD_WS_WH2SHIFT {
     <li>BBQ temperature sensor GT-TMBBQ-01s (transmitter), GT-TMBBQ-01e (receiver)</li>
     <li>Bresser 5-in-1, 6-in-1 and 7-in-1 Comfort Weather Center, 7009994, Lightning detector, PM2.5/10 air quality meter, Professional rain gauge, Temeo</li>
     <li>Conrad S522</li>
+    <li>EMOS E06016 (Wind, temperature and humidity sensor with DCF77)</li>
     <li>EuroChron EFTH-800, EFS-3110A (temperature and humidity sensor)</li>
     <li>Fine Offset WH31, aka Ambient Weather WH31E, aka ecowitt WH31 (temperature and humidity sensor, partly with DCF reception)</li>
     <li>Fine Offset WH40, aka Ambient Weather WH40, aka ecowitt WH40 (Regen sensor)</li>
@@ -2774,6 +2776,7 @@ sub SD_WS_WH2SHIFT {
     <li>BBQ Temperatur Sensor GT-TMBBQ-01s (Sender), GT-TMBBQ-01e (Empfaenger)</li>
     <li>Bresser 5-in-1, 6-in-1 und 7-in-1 Comfort Wetter Center, 7009994, Blitzsensor, PM2.5/10 Luftqualitätsmesser, Profi Regenmesser, Temeo</li>
     <li>Conrad S522</li>
+    <li>EMOS E06016 (Wind-, Temperatur- und Feuchtigkeitssensor mit DCF77)</li>
     <li>EuroChron EFTH-800, EFS-3110A (Temperatur- und Feuchtigkeitssensor)</li>
     <li>Fine Offset WH31, aka Ambient Weather WH31E Thermo-Hygrometer Sensor (Temperatur- und Feuchtemsser, teilweise mit DCF-Empfang)</li>
     <li>Fine Offset WH40, aka Ambient Weather WH40, aka ecowitt WH40 (rain sensor)</li>
