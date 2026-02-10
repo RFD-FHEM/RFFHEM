@@ -305,146 +305,7 @@ sub SIGNALduino_Undef {
   return ;
 }
 
-############################# package main
-sub SIGNALduino_avrdude {
-  my $name = shift;
-  my $hash = $defs{$name};
 
-  if (defined($hash->{helper}{stty_pid}))
-  {
-    waitpid( $hash->{helper}{stty_pid}, 0 );
-    delete ( $hash->{helper}{stty_pid});
-  }
-
-  readingsSingleUpdate($hash,'state','FIRMWARE UPDATE running',1);
-  $hash->{helper}{avrdudelogs} .= "$name closed\n";
-  my $logFile = AttrVal('global', 'logdir', './log/') . "$hash->{TYPE}-Flash.log";
-
-  if (-e $logFile) {
-    unlink $logFile;
-  }
-
-  $hash->{helper}{avrdudecmd} =~ s/\Q[LOGFILE]\E/$logFile/g;
-  local $SIG{CHLD} = 'DEFAULT';
-  delete($hash->{FLASH_RESULT}) if (exists($hash->{FLASH_RESULT}));
-
-  qx($hash->{helper}{avrdudecmd});
-
-  if ($? != 0 )
-  {
-    readingsSingleUpdate($hash,'state','FIRMWARE UPDATE with error',1);    # processed in tests
-    $hash->{logMethod}->($name ,3, "$name: avrdude, ERROR: avrdude exited with error $?");
-    if (defined $FW_wname)
-    {
-      FW_directNotify("FILTER=$name", "FHEMWEB:$FW_wname", "FW_okDialog('ERROR: avrdude exited with error, for details see last flashlog.')", '');
-    }
-    $hash->{FLASH_RESULT}='ERROR: avrdude exited with error';              # processed in tests
-  } else {
-    $hash->{logMethod}->($name ,3, "$name: avrdude, Firmware update was successfull");
-    readingsSingleUpdate($hash,'state','FIRMWARE UPDATE successfull',1);   # processed in tests
-  }
-
-  local $/=undef;
-  if (-e $logFile) {
-    open FILE, $logFile;
-    $hash->{helper}{avrdudelogs} .= "--- AVRDUDE ---------------------------------------------------------------------------------\n";
-    $hash->{helper}{avrdudelogs} .= <FILE>;
-    $hash->{helper}{avrdudelogs} .= "--- AVRDUDE ---------------------------------------------------------------------------------\n\n";
-    close FILE;
-  } else {
-    $hash->{helper}{avrdudelogs} .= "WARNING: avrdude created no log file\n\n";
-    readingsSingleUpdate($hash,'state','FIRMWARE UPDATE with error',1);
-    $hash->{FLASH_RESULT}= 'WARNING: avrdude created no log file';         # processed in tests
-  }
-
-  DevIo_OpenDev($hash, 0, \&SIGNALduino_DoInit, \&SIGNALduino_Connect);
-  $hash->{helper}{avrdudelogs} .= "$name reopen started\n";
-  return $hash->{FLASH_RESULT};
-}
-
-############################# package main
-sub SIGNALduino_PrepareFlash {
-  my ($hash,$hexFile) = @_;
-
-  my $name=$hash->{NAME};
-  my $hardware=AttrVal($name,'hardware','');
-  my ($port,undef) = split('@', $hash->{DeviceName});
-  my $baudrate= 57600;
-  my $log = '';
-  my $avrdudefound=0;
-  my $tool_name = 'avrdude';
-  my $path_separator = ':';
-  if ($^O eq 'MSWin32') {
-    $tool_name .= '.exe';
-    $path_separator = ';';
-  }
-  for my $path ( split /$path_separator/, $ENV{PATH} ) {
-    if ( -f "$path/$tool_name" && -x _ ) {
-      $avrdudefound=1;
-      last;
-    }
-  }
-  $hash->{logMethod}->($name, 5, "$name: PrepareFlash, avrdude found = $avrdudefound");
-  return 'avrdude is not installed. Please provide avrdude tool example: sudo apt-get install avrdude' if($avrdudefound == 0);
-
-  $log .= "flashing Arduino $name\n";
-  $log .= "hex file: $hexFile\n";
-  $log .= "port: $port\n";
-
-  # prepare default Flashcommand
-  my $defaultflashCommand = ($hardware eq 'radinoCC1101' 
-    ? 'avrdude -c avr109 -b [BAUDRATE] -P [PORT] -p atmega32u4 -vv -D -U flash:w:[HEXFILE] 2>[LOGFILE]' 
-    : 'avrdude -c arduino -b [BAUDRATE] -P [PORT] -p atmega328p -vv -U flash:w:[HEXFILE] 2>[LOGFILE]');
-
-  # get User defined Flashcommand
-  my $flashCommand = AttrVal($name,'flashCommand',$defaultflashCommand);
-
-  if ($defaultflashCommand eq $flashCommand)  {
-    $hash->{logMethod}->($name, 5, "$name: PrepareFlash, standard flashCommand is used to flash.");
-  } else {
-    $hash->{logMethod}->($name, 3, "$name: PrepareFlash, custom flashCommand is manual defined! $flashCommand");
-  }
-
-  DevIo_CloseDev($hash);
-  if ($hardware eq 'radinoCC1101' && $^O eq 'linux') {
-    $hash->{logMethod}->($name, 3, "$name: PrepareFlash, forcing special reset for $hardware on $port");
-    # Mit dem Linux-Kommando 'stty' die Port-Einstellungen setzen
-    use IPC::Open3;
-
-    my($chld_out, $chld_in, $chld_err);
-    use Symbol 'gensym';
-    $chld_err = gensym;
-    my $pid;
-    eval {
-      $pid = open3($chld_in,$chld_out, $chld_err,  "stty -F $port ospeed 1200 ispeed 1200");
-      close($chld_in);  # give end of file to kid, or feed him
-    };
-    if ($@) {
-      $hash->{helper}{stty_output}=$@;
-    } else {
-      my @outlines = <$chld_out>;              # read till EOF
-      my @errlines = <$chld_err>;              # XXX: block potential if massive
-      $hash->{helper}{stty_pid}=$pid;
-      $hash->{helper}{stty_output} = join(' ',@outlines).join(' ',@errlines);
-    }
-    $port =~ s/usb-Unknown_radino/usb-In-Circuit_radino/g;
-    $hash->{logMethod}->($name ,3, "$name: PrepareFlash, changed usb port to \"$port\" for avrdude flashcommand compatible with radino");
-  }
-  $hash->{helper}{avrdudecmd} = $flashCommand;
-  $hash->{helper}{avrdudecmd}=~ s/\Q[PORT]\E/$port/g;
-  $hash->{helper}{avrdudecmd} =~ s/\Q[HEXFILE]\E/$hexFile/g;
-  if ($hardware =~ '^nano' && $^O eq 'linux') {
-    $hash->{logMethod}->($name ,5, "$name: PrepareFlash, try additional flash with baudrate 115200 for optiboot");
-    $hash->{helper}{avrdudecmd} = $hash->{helper}{avrdudecmd}." || ". $hash->{helper}{avrdudecmd};
-    $hash->{helper}{avrdudecmd} =~ s/\Q[BAUDRATE]\E/$baudrate/;
-    $baudrate=115200;
-  }
-  $hash->{helper}{avrdudecmd} =~ s/\Q[BAUDRATE]\E/$baudrate/;
-  $log .= "command: $hash->{helper}{avrdudecmd}\n\n";
-  FHEM::Core::Timer::Helper::addTimer($name,gettimeofday() + 1,\&SIGNALduino_avrdude,$name);
-  $hash->{helper}{avrdudelogs} = $log;
-  return ;
-}
 
 #$hash,$name,'sendmsg','P17;R6#'.substr($arg,2)
 ############################# package main, test exists
@@ -894,30 +755,6 @@ sub SIGNALduino_Get_FhemWebList {
   return "Unknown argument $a[0], choose one of " . join(' ', @cList);
 }
 
-############################# package main
-sub SIGNALduino_Get_availableFirmware {
-  my ($hash, @a) = @_;
-
-  if ( !HAS_JSON )
-  {
-    $hash->{logMethod}->($hash->{NAME}, 1, "$hash->{NAME}: get $a[0] failed. Please install Perl module JSON. Example: sudo apt-get install libjson-perl");
-    return "$a[0]: \n\nFetching from github is not possible. Please install JSON. Example:<br><code>sudo apt-get install libjson-perl</code>";
-  }
-
-  my $channel=AttrVal($hash->{NAME},'updateChannelFW','stable');
-  my $hardware=AttrVal($hash->{NAME},'hardware',undef);
-
-  my ($validHw) = $modules{$hash->{TYPE}}{AttrList} =~ /.*hardware:(.*?)\s/;
-  $hash->{logMethod}->($hash->{NAME}, 1, "$hash->{NAME}: found availableFirmware for $validHw");
-
-  if (!defined($hardware) || $validHw !~ /$hardware(?:,|$)/ )
-  {
-    $hash->{logMethod}->($hash->{NAME}, 1, "$hash->{NAME}: get $a[0] failed. Please set attribute hardware first");
-    return "$a[0]: \n\n$hash->{NAME}: get $a[0] failed. Please choose one of $validHw attribute hardware";
-  }
-  SIGNALduino_querygithubreleases($hash);
-  return "$a[0]: \n\nFetching $channel firmware versions for $hardware from github\n";
-}
 
 ############################# package main
 sub SIGNALduino_Get_Command {
@@ -1506,53 +1343,6 @@ sub SIGNALduino_Read {
 
 ### Helper Subs >>>
 
-############################# package main
-## Parses a HTTP Response for example for flash via http download
-sub SIGNALduino_ParseHttpResponse {
-  my ($param, $err, $data) = @_;
-  my $hash = $param->{hash};
-  my $name = $hash->{NAME};
-
-  if($err ne '')                                              # wenn ein Fehler bei der HTTP Abfrage aufgetreten ist
-  {
-    $hash->{logMethod}->($name, 3, "$name: ParseHttpResponse, error while requesting ".$param->{url}." - $err");                  # Eintrag fuers Log
-  }
-  elsif($param->{code} eq '200' && $data ne '')               # wenn die Abfrage erfolgreich war ($data enthaelt die Ergebnisdaten des HTTP Aufrufes)
-    {
-      $hash->{logMethod}->($name, 3, "$name: ParseHttpResponse, url ".$param->{url}.' returned: '.length($data).' bytes Data');   # Eintrag fuers Log
-
-      if ($param->{command} eq 'flash')
-      {
-        my $filename;
-
-        if ($param->{httpheader} =~ /Content-Disposition: attachment;.?filename=\"?([-+.\w]+)?\"?/)
-        {
-          $filename = $1;
-        } else {  # Filename via path if not specifyied via Content-Disposition
-          $param->{path} =~ /\/([-+.\w]+)$/;    #(?:[^\/][\d\w\.]+)+$   \/([-+.\w]+)$         
-          $filename = $1;
-        }
-        $hash->{logMethod}->($name, 3, "$name: ParseHttpResponse, Downloaded $filename firmware from ".$param->{host});
-        $hash->{logMethod}->($name, 5, "$name: ParseHttpResponse, Header = ".$param->{httpheader});
-
-        $filename = 'FHEM/firmware/' . $filename;
-        open(my $file, '>', $filename) or die $!;
-        print $file $data;
-        close $file;
-
-        # Den Flash Befehl mit der soebene heruntergeladenen Datei ausfuehren
-        #SIGNALduino_Log3 $name, 3, "$name: ParseHttpResponse, calling set ".$param->{command}." $filename";        # Eintrag fuers Log
-
-        my $set_return = SIGNALduino_Set($hash,$name,$param->{command},$filename); # $hash->{SetFn}
-        if (defined($set_return))
-        {
-          $hash->{logMethod}->($name ,3, "$name: ParseHttpResponse, Error while flashing: $set_return");
-        }
-      }
-    } else {
-      $hash->{logMethod}->($name, 3, "$name: ParseHttpResponse, undefined error while requesting ".$param->{url}." - $err - code=".$param->{code});   # Eintrag fuers Log
-    }
-}
 
 ############################# package main
 sub SIGNALduino_splitMsg {
@@ -3369,98 +3159,295 @@ sub SIGNALduino_FW_getProtocolList {
   return $ret;
 }
 
-############################# package main
-sub SIGNALduino_querygithubreleases {
-  my ($hash) = @_;
-  my $name = $hash->{NAME};
-  my $param = {
-                url        => 'https://api.github.com/repos/RFD-FHEM/SIGNALDuino/releases',
-                timeout    => 5,
-                hash       => $hash,                                                    # Muss gesetzt werden, damit die Callback funktion wieder $hash hat
-                method     => 'GET',                                                    # Lesen von Inhalten
-                header     => "User-Agent: perl_fhem\r\nAccept: application/json",      # Den Header gemaess abzufragender Daten aendern
-                callback   =>  \&SIGNALduino_githubParseHttpResponse,                   # Diese Funktion soll das Ergebnis dieser HTTP Anfrage bearbeiten
-                command    => "queryReleases"
-              };
-
-  HttpUtils_NonblockingGet($param);                                                     # Starten der HTTP Abfrage. Es gibt keinen Return-Code.
+############################# package main, candidate for fhem core utility lib
+sub _limit_to_number {
+  my $number = shift // return;
+  return $number if ($number =~ /^[0-9]+$/);
+  return ;
 }
 
-############################# package main
-#return -10 = hardeware attribute is not set
-sub SIGNALduino_githubParseHttpResponse {
-  my ($param, $err, $data) = @_;
-  my $hash = $param->{hash};
-  my $name = $hash->{NAME};
-  my $hardware=AttrVal($name,'hardware',undef);
 
-  if($err ne '')                                                                                                        # wenn ein Fehler bei der HTTP Abfrage aufgetreten ist
+############################# package main, candidate for fhem core utility lib
+sub _limit_to_hex {
+  my $hex = shift // return;
+  return $hex if ($hex =~ /^[0-9A-F]+$/i);
+  return;
+}
+
+
+################################################
+########## Section & functions cc1101 ##########
+package cc1101;
+
+our %cc1101_status_register = ( # for get ccreg 30-3D status registers
+  '30' => 'PARTNUM       ',
+  '31' => 'VERSION       ',
+  '32' => 'FREQEST       ',
+  '33' => 'LQI           ',
+  '34' => 'RSSI          ',
+  '35' => 'MARCSTATE     ',
+  '36' => 'WORTIME1      ',
+  '37' => 'WORTIME0      ',
+  '38' => 'PKTSTATUS     ',
+  '39' => 'VCO_VC_DAC    ',
+  '3A' => 'TXBYTES       ',
+  '3B' => 'RXBYTES       ',
+  '3C' => 'RCCTRL1_STATUS',
+  '3D' => 'RCCTRL0_STATUS',
+);
+
+our %cc1101_version = ( # Status register 0x31 (0xF1): VERSION – Chip ID
+  '03' => 'CC1100',
+  '04' => 'CC1101',
+  '14' => 'CC1101',
+  '05' => 'CC1100E',
+  '07' => 'CC110L',
+  '17' => 'CC110L',
+  '08' => 'CC113L',
+  '18' => 'CC113L',
+  '15' => 'CC115L',
+);
+
+############################# package cc1101
+#### for set function to change the patable for 433 or 868 Mhz supported
+#### 433.05–434.79 MHz, 863–870 MHz
+sub SetPatable {
+  my ($hash,@a) = @_;
+  my $paFreq = main::AttrVal($hash->{NAME},'cc1101_frequency','433');
+  $paFreq = 433 if ($paFreq >= 433 && $paFreq <= 435);
+  $paFreq = 868 if ($paFreq >= 863 && $paFreq <= 870);
+  if ( exists($patable{$paFreq}) )
   {
-    Log3 $name, 3, "$name: githubParseHttpResponse, error while requesting ".$param->{url}." - $err (command: $param->{command}";   # Eintrag fuers Log
-    #readingsSingleUpdate($hash, 'fullResponse', 'ERROR');                                                              # Readings erzeugen
+    my $pa = "x" . $patable{$paFreq}{$a[1]};
+    $hash->{logMethod}->($hash->{NAME}, 3, "$hash->{NAME}: SetPatable, Setting patable $paFreq $a[1] $pa");
+    main::SIGNALduino_AddSendQueue($hash,$pa);
+    main::SIGNALduino_WriteInit($hash);
+    return ;
+  } else {
+    return "$hash->{NAME}: Frequency $paFreq MHz not supported (supported frequency ranges: 433.05-434.79 MHz, 863.00-870.00 MHz).";
   }
-  elsif($data ne '' && defined($hardware))                                                                              # wenn die Abfrage erfolgreich war ($data enthaelt die Ergebnisdaten des HTTP Aufrufes)
-  {
+}
 
-    my $json_array = decode_json($data);
-    #print  Dumper($json_array);
-    if ($param->{command} eq 'queryReleases') {
-      #Log3 $name, 3, "$name: githubParseHttpResponse, url ".$param->{url}." returned: $data";                          # Eintrag fuers Log
+############################# package cc1101
+sub SetRegisters  {
+  my ($hash, @a) = @_;
 
-      my $releaselist='';
-      if (ref($json_array) eq "ARRAY") {
-        foreach my $item( @$json_array ) {
-          next if (AttrVal($name,'updateChannelFW','stable') eq 'stable' && $item->{prerelease});
+  ## check for four hex digits
+  my @nonHex = grep (!/^[0-9A-Fa-f]{4}$/,@a[1..$#a]) ;
+  return "$hash->{NAME} ERROR: wrong parameter value @nonHex, only hexadecimal ​​four digits allowed" if (@nonHex);
 
-          #Debug ' item = '.Dumper($item);
+  ## check allowed register position
+  my (@wrongRegisters) = grep { !exists($cc1101_register{uc(substr($_,0,2))}) } @a[1..$#a] ;
+  return "$hash->{NAME} ERROR: unknown register position ".substr($wrongRegisters[0],0,2) if (@wrongRegisters);
 
-          foreach my $asset (@{$item->{assets}})
-          {
-            next if ($asset->{name} !~ m/$hardware/i);
-            $releaselist.=$item->{tag_name}.',' ;
-            last;
-          }
+  $hash->{logMethod}->($hash->{NAME}, 4, "$hash->{NAME}: SetRegisters, cc1101_reg @a[1..$#a]");
+  my @tmpSendQueue=();
+  foreach my $argcmd (@a[1..$#a]) {
+    $argcmd = sprintf("W%02X%s",hex(substr($argcmd,0,2)) + 2,substr($argcmd,2,2));
+    main::SIGNALduino_AddSendQueue($hash,$argcmd);
+  }
+  main::SIGNALduino_WriteInit($hash);
+  return ;
+}
+
+############################# package cc1101
+sub SetRegistersUser  {
+  my ($hash) = @_;
+
+  my $cc1101User = main::AttrVal($hash->{NAME}, 'cc1101_reg_user', undef);
+
+  ## look, user defined self default register values via attribute
+  if (defined $cc1101User) {
+    $hash->{logMethod}->($hash->{NAME}, 3, "$hash->{NAME}: SetRegistersUser, write CC1101 defaults from attribute");
+    $cc1101User = '0815,'.$cc1101User; # for SetRegisters, value for register starts on pos 1 in array
+    cc1101::SetRegisters($hash, split(',', $cc1101User) );
+  }
+  return ;
+}
+
+############################# package cc1101
+sub SetDataRate  {
+  my ($hash, @a) = @_;
+  my $arg = $a[1];
+
+  if (exists($hash->{ucCmd}->{cmd}) && $hash->{ucCmd}->{cmd} eq 'set_dataRate' && $a[0] =~ /^C10\s=\s([A-Fa-f0-9]{2})$/) {
+    my ($ob1,$ob2) = cc1101::CalcDataRate($hash,$1,$hash->{ucCmd}->{arg});
+    main::SIGNALduino_AddSendQueue($hash,"W12$ob1");
+    main::SIGNALduino_AddSendQueue($hash,"W13$ob2");
+    main::SIGNALduino_WriteInit($hash);
+    return ("Setting MDMCFG4..MDMCFG3 to $ob1 $ob2 = $hash->{ucCmd}->{arg} kHz" ,undef);
+  } else {
+    if ($arg !~ m/\d/) { return qq[$hash->{NAME}: ERROR, unsupported DataRate value]; }
+    if ($arg > 1621.83) { $arg = 1621.83; }     # max 1621.83      kBaud DataRate
+    if ($arg < 0.0247955) { $arg = 0.0247955; } # min    0.0247955 kBaud DataRate
+
+    cc1101::GetRegister($hash,10);              # Get Register 10
+
+    $hash->{ucCmd}->{cmd}         = 'set_dataRate';
+    $hash->{ucCmd}->{arg}         = $arg;                                   # ZielDataRate
+    $hash->{ucCmd}->{responseSub} = \&cc1101::SetDataRate;                  # Callback auf sich selbst setzen
+    $hash->{ucCmd}->{asyncOut}    = $hash->{CL} if (defined($hash->{CL}));
+    $hash->{ucCmd}->{timenow}     = time();
+  }
+  return ;
+}
+
+############################# package cc1101
+sub CalcDataRate {
+  # register 0x10 3:0 & register 0x11 7:0
+  my ($hash, $ob10, $dr) = @_;
+  $ob10 = hex($ob10) & 0xf0;
+
+  my $DRATE_E = ($dr*1000) * (2**20) / 26000000;
+  $DRATE_E = log($DRATE_E) / log(2);
+  $DRATE_E = int($DRATE_E);
+
+  my $DRATE_M = (($dr*1000) * (2**28) / (26000000 * (2**$DRATE_E))) - 256;
+  my $DRATE_Mr = FHEM::Core::Utils::Math::round($DRATE_M,0);
+  $DRATE_M = int($DRATE_M);
+
+  my $datarate0 = ( ((256+$DRATE_M)*(2**($DRATE_E & 15 )))*26000000/(2**28) / 1000);
+  my $DRATE_M1 = $DRATE_M + 1;
+  my $DRATE_E1 = $DRATE_E;
+
+  if ($DRATE_M1 == 256) {
+    $DRATE_M1 = 0;
+    $DRATE_E1++;
+  }
+
+  my $datarate1 = ( ((256+$DRATE_M1)*(2**($DRATE_E1 & 15 )))*26000000/(2**28) / 1000);
+
+  if ($DRATE_Mr != $DRATE_M) {
+    $DRATE_M = $DRATE_M1;
+    $DRATE_E = $DRATE_E1;
+  }
+
+  my $ob11 = sprintf("%02x",$DRATE_M);
+  $ob10 = sprintf("%02x", $ob10+$DRATE_E);
+
+  $hash->{logMethod}->($hash->{NAME}, 5, qq[$hash->{NAME}: CalcDataRate, DataRate $hash->{ucCmd}->{arg} kHz step from $datarate0 to $datarate1 kHz]);
+  $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: CalcDataRate, DataRate MDMCFG4..MDMCFG3 to $ob10 $ob11 = $hash->{ucCmd}->{arg} kHz]);
+
+  return ($ob10,$ob11);
+}
+
+############################# package cc1101
+sub SetDeviatn {
+  my ($hash, @a) = @_;
+  my $arg = $a[1];
+
+  if ($arg !~ m/\d/) { return qq[$hash->{NAME}: ERROR, unsupported Deviation value]; }
+  if ($arg > 380.859375) { $arg = 380.859375; }   # max 380.859375 kHz Deviation
+  if ($arg < 1.586914) { $arg = 1.586914; }       # min   1.586914 kHz Deviation
+
+  my $deviatn_val;
+  my $bits;
+  my $devlast = 0;
+  my $bitlast = 0;
+
+  CalcDeviatn:
+  for (my $DEVIATION_E=0; $DEVIATION_E<8; $DEVIATION_E++) {
+    for (my $DEVIATION_M=0; $DEVIATION_M<8; $DEVIATION_M++) {
+      $deviatn_val = (8+$DEVIATION_M)*(2**$DEVIATION_E) *26000/(2**17);
+      $bits = $DEVIATION_M + ($DEVIATION_E << 4);
+      if ($arg > $deviatn_val) {
+        $devlast = $deviatn_val;
+        $bitlast = $bits;
+      } else {
+        if (($deviatn_val - $arg) < ($arg - $devlast)) {
+          $devlast = $deviatn_val;
+          $bitlast = $bits;
         }
+        last CalcDeviatn;
       }
-
-      $releaselist =~ s/,$//;
-      $hash->{additionalSets}{flash} = $releaselist;
-    } elsif ($param->{command} eq 'getReleaseByTag' && defined($hardware)) {
-      #Debug ' json response = '.Dumper($json_array);
-
-      my @fwfiles;
-      foreach my $asset (@{$json_array->{assets}})
-      {
-        my %fileinfo;
-        if ( $asset->{name} =~ m/$hardware/i)
-        {
-          $fileinfo{filename} = $asset->{name};
-          $fileinfo{dlurl} = $asset->{browser_download_url};
-          $fileinfo{create_date} = $asset->{created_at};
-          #Debug ' firmwarefiles = '.Dumper(@fwfiles);
-          push @fwfiles, \%fileinfo;
-
-          my $set_return = SIGNALduino_Set($hash,$name,'flash',$asset->{browser_download_url}); # $hash->{SetFn
-          if(defined($set_return))
-          {
-            $hash->{logMethod}->($name, 3, "$name: githubParseHttpResponse, Error while trying to download firmware: $set_return");
-          }
-          last;
-        }
-      }
-
     }
-  } elsif (!defined($hardware))  {
-    $hash->{logMethod}->($name, 5, "$name: githubParseHttpResponse, hardware is not defined");
   }
-  # wenn
-  # Damit ist die Abfrage zuende.
-  # Evtl. einen InternalTimer neu schedulen
-  if (defined $FW_wname)
-  {
-     FW_directNotify("FILTER=$name", "#FHEMWEB:$FW_wname", "location.reload('true')", '');
+
+  my $reg15 = sprintf("%02x",$bitlast);
+  my $deviatn_str =  sprintf("% 5.2f",$devlast);
+  $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: SetDeviatn, Setting DEVIATN (15) to $reg15 = $deviatn_str kHz]);
+
+  main::SIGNALduino_AddSendQueue($hash,"W17$reg15");
+  main::SIGNALduino_WriteInit($hash);
+
+  return;
+}
+
+############################# package cc1101
+sub SetFreq  {
+  my ($hash, @a) = @_;
+
+  my $arg = $a[1];
+  if (!defined($arg)) {
+    $arg = main::AttrVal($hash->{NAME},'cc1101_frequency', 433.92);
   }
-  return 0;
+  my $f = $arg/26*65536;
+  my $f2 = sprintf("%02x", $f / 65536);
+  my $f1 = sprintf("%02x", int($f % 65536) / 256);
+  my $f0 = sprintf("%02x", $f % 256);
+  $arg = sprintf("%.3f", (hex($f2)*65536+hex($f1)*256+hex($f0))/65536*26);
+  $hash->{logMethod}->($hash->{NAME}, 3, "$hash->{NAME}: SetFreq, Setting FREQ2..0 (0D,0E,0F) to $f2 $f1 $f0 = $arg MHz");
+  main::SIGNALduino_AddSendQueue($hash,"W0F$f2");
+  main::SIGNALduino_AddSendQueue($hash,"W10$f1");
+  main::SIGNALduino_AddSendQueue($hash,"W11$f0");
+  main::SIGNALduino_WriteInit($hash);
+  return ;
+}
+
+############################# package cc1101
+sub setrAmpl  {
+  my ($hash, @a) = @_;
+  return "$hash->{NAME}: A numerical value between 24 and 42 is expected." if($a[1] !~ m/^\d+$/ || $a[1] < 24 ||$a[1] > 42);
+  my $v;
+  for($v = 0; $v < @ampllist; $v++) {
+    last if($ampllist[$v] > $a[1]);
+  }
+  $v = sprintf("%02d", $v-1);
+  my $w = $ampllist[$v];
+  $hash->{logMethod}->($hash->{NAME}, 3, "$hash->{NAME}: setrAmpl, Setting AGCCTRL2 (1B) to $v / $w dB");
+  main::SIGNALduino_AddSendQueue($hash,"W1D$v");
+  main::SIGNALduino_WriteInit($hash);
+  return ;
+}
+
+############################# package cc1101
+sub GetRegister {
+  my ($hash, $reg) = @_;
+  main::SIGNALduino_AddSendQueue($hash,'C'.$reg);
+  return ;
+}
+
+############################# package cc1101
+sub CalcbWidthReg {
+  my ($hash, $reg10, $bWith) = @_;
+  # Beispiel Rückmeldung, mit Ergebnis von Register 10: C10 = 57
+  my $ob = hex($reg10) & 0x0f;
+  my ($bits, $bw) = (0,0);
+  OUTERLOOP:
+  for (my $e = 0; $e < 4; $e++) {
+    for (my $m = 0; $m < 4; $m++) {
+      $bits = ($e<<6)+($m<<4);
+      $bw  = int(26000/(8 * (4+$m) * (1 << $e))); # KHz
+      last OUTERLOOP if($bWith >= $bw);
+    }
+  }
+  $ob = sprintf("%02x", $ob+$bits);
+
+  return ($ob,$bw);
+}
+
+############################# package cc1101
+sub SetSens {
+  my ($hash, @a) = @_;
+
+  # Todo: Abfrage in Grep auf Array ändern
+  return 'a numerical value between 4 and 16 is expected' if($a[1] !~ m/^\d+$/ || $a[1] < 4 || $a[1] > 16);
+  my $w = int($a[1]/4)*4;
+  my $v = sprintf("9%d",$a[1]/4-1);
+  $hash->{logMethod}->($hash->{NAME}, 3, "$hash->{NAME}: SetSens, Setting AGCCTRL0 (1D) to $v / $w dB");
+  main::SIGNALduino_AddSendQueue($hash,"W1F$v");
+  main::SIGNALduino_WriteInit($hash);
+  return ;
 }
 
 ################################################################################################
