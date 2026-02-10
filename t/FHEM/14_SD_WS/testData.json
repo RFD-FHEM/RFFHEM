@@ -2923,5 +2923,42 @@
       "id" : 135,
       "module" : "SD_WS",
       "name" : "SD_WS_135_T_1"
+   },
+   {
+      "data" : [
+         {
+            "comment" : "Wind, temperature and humidity sensor EMOS E06016 with DCF77",
+            "dmsg" : "W136#83B59A1BC54A00CD3A0080D200",
+            "internals" : {
+               "DEF" : "SD_WS_136_THW_1",
+               "NAME" : "SD_WS_136_THW_1"
+            },
+            "readings" : {
+               "batteryState" : "ok",
+               "channel" : 1,
+               "count" : 0,
+               "dcf" : "2026-01-23 17:20:40 CET",
+               "dcfStatus" : "ok",
+               "humidity" : 58,
+               "model" : "SD_WS_136_THW",
+               "state" : "T: 20.5 H: 58 W: 0.0",
+               "temperature" : 20.5,
+               "type" : "EMOS E06016 wind",
+               "windDirectionDegree" : 180,
+               "windDirectionText" : "S",
+               "windSpeed" : 0.0
+            },
+            "rmsg" : "MU;P0=-160;P1=773;P2=-299;P3=243;P4=-824;P5=1828;D=01234123412341234123412343412341212343434343412121234121234123412123434121234123434343412123412121212343434123412341234341234123434343434343434341212343412123412343412121234123434343434343434341234343434343434121234123434123434343434343434345212341234123;CP=3;R=48;O;",
+            "tests" : [
+               {
+                  "attributes" : {},
+                  "comment" : "#0"
+               }
+            ]
+         }
+      ],
+      "id" : 136,
+      "module" : "SD_WS",
+      "name" : "SD_WS_136_THW_1"
    }
 ]
