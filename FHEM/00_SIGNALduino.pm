@@ -1,4 +1,4 @@
-# $Id: 00_SIGNALduino.pm 0 2026-01-16 10:03:31Z sidey79 $
+# $Id: 00_SIGNALduino.pm 0 2026-01-18 22:55:34Z sidey79 $
 # https://github.com/RFD-FHEM/RFFHEM/tree/master
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incoming messages
 # see http://www.fhemwiki.de/wiki/SIGNALDuino
@@ -37,6 +37,8 @@ use FHEM::Devices::SIGNALduino::SD_Clients;
 use FHEM::Devices::SIGNALduino::SD_Message;
 use FHEM::Devices::SIGNALduino::SD_Matchlist;
 use List::Util qw(first);
+use FHEM::Utility::MQTT2_Dispatcher qw(:DEFAULT);
+use FHEM::Devices::SIGNALduino::SD_MQTT;
 
 #$| = 1;    #Puffern abschalten, Hilfreich fuer PEARL WARNINGS Search
 
@@ -44,7 +46,7 @@ use List::Util qw(first);
 
 
 use constant {
-  SDUINO_VERSION                  => '4.0.0',  # Datum wird automatisch bei jedem pull request aktualisiert
+  SDUINO_VERSION                  => '4.0.0+20260118',  # Datum wird automatisch bei jedem pull request aktualisiert
   SDUINO_INIT_WAIT_XQ             => 1.5,     # wait disable device
   SDUINO_INIT_WAIT                => 2,
   SDUINO_INIT_MAXRETRY            => 3,
@@ -306,28 +308,40 @@ sub SIGNALduino_Define {
   my ($hash, $def) = @_;
   my @a =split m{\s+}xms, $def;
 
-  if(@a != 3) {
-    my $msg = 'Define, wrong parameter count: define <name> SIGNALduino {none | devicename[\@baudrate] | devicename\@directio | hostname:port}';
+  my $name = $a[0];
+  my $dev = $a[2];
+  if ($dev eq 'mqtt') {
+    if(@a < 3 || @a > 4) {
+      my $msg = 'Define, wrong mqtt syntax: define <name> SIGNALduino mqtt [<basetopic>]';
+      Log3 undef, 2, $msg;
+      return $msg;
+    }
+    my $basetopic = $a[3] // 'signalduino/v1';
+    $hash->{mqttSubscribe} = "$basetopic/state/messages";
+  } elsif(@a != 3) {
+    my $msg = 'Define, wrong parameter count: define <name> SIGNALduino {none | devicename[\@baudrate] | devicename\@directio | hostname:port | mqtt [<basetopic>]}';
     Log3 undef, 2, $msg;
     return $msg;
   }
 
   DevIo_CloseDev($hash);
-  my $name = $a[0];
-  my $dev = $a[2];
+  #$hash->{debugMethod}->(qq[dev: $dev]);
+  #my $hardware=AttrVal($name,'hardware','nano');
+  #$hash->{debugMethod}->(qq[hardware: $hardware]);
 
   if($dev eq 'none') {
     Log3 $name, 1, "$name: Define, device is none, commands will be echoed only";
     $attr{$name}{dummy} = 1;
-  } elsif ($dev !~ m/\@/) {
+  } elsif ($dev !~ m/\@/ && $dev ne 'mqtt') { 
+    Log3 $name, 5, "$name: Define, device is $dev";
     if ( ($dev =~ m~^(?:/[^/ ]*)+?$~xms || $dev =~ m~^COM\d$~xms) )  # bei einer IP oder hostname wird kein \@57600 angehaengt
     {
       $dev .= '@57600' 
     } elsif ($dev !~ /@\d+$/ && ($dev !~ /^
       (?: (?:[a-z0-9-]+(?:\.[a-z]{2,6})?)*|(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])\.){3}
           (?:25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9]))
-      : (?:6553[0-5]|655[0-2]\d|65[0-4]\d{2}|6[0-4]\d{3}|[1-5]\d{4}|[1-9]\d{0,3})$/xmsi) ) { # bei einer IP oder hostname wird kein \@57600 angehaengt{ 
-      my $msg = "Define, wrong hostname/port syntax ($dev): define <name> SIGNALduino {none | devicename[\@baudrate] | devicename\@directio | hostname:port}";
+      : (?:6553[0-5]|655[0-2]\d|65[0-4]\d{2}|6[0-4]\d{3}|[1-5]\d{4}|[1-9]\d{0,3})$/xmsi) ) { 
+      my $msg = qq[Define, wrong hostname/port/mqtt syntax ($dev): define <name> SIGNALduino {none | devicename[\@<baudrate>] | devicename\@directio | hostname:port | mqtt [<basetopic>]}];
       Log3 undef, 2, $msg;
       $hash->{STATE} = 'error';
       return $msg;
@@ -347,11 +361,16 @@ sub SIGNALduino_Define {
     
   FHEM::Core::Timer::Helper::addTimer($name, time(), \&SIGNALduino_IdList,"sduino_IdList:$name",0 );
   
-  if($dev ne 'none') {
-    $ret = DevIo_OpenDev($hash, 0, \&SIGNALduino_DoInit, \&SIGNALduino_Connect);
-  } else {
+  if ($dev eq 'none') {
     $hash->{DevState} = 'initialized';
     readingsSingleUpdate($hash, 'state', 'opened', 1);
+  } elsif ($dev eq 'mqtt') {
+    $hash->{DevState} = 'initialized';
+    readingsSingleUpdate($hash, 'state', 'opened', 1);
+
+    FHEM::Devices::SIGNALduino::SD_MQTT::Init($name);
+  } else {
+    $ret = DevIo_OpenDev($hash, 0, \&SIGNALduino_DoInit, \&SIGNALduino_Connect);
   }
 
   $hash->{DMSG}             = 'nothing';
@@ -383,6 +402,11 @@ sub SIGNALduino_Connect {
 sub SIGNALduino_Undef {
   my ($hash, $arg) = @_;
   my $name = $hash->{NAME};
+
+  if (defined($hash->{Listener})) {
+    del_mqtt($hash->{Listener});
+    delete $hash->{Listener};
+  }
 
   foreach my $d (sort keys %defs) {
     if(defined($defs{$d}) &&
@@ -3106,7 +3130,7 @@ sub SIGNALduino_FW_Detail {
 
   my $hash = $defs{$name};
   my @dspec=devspec2array("DEF=.*fakelog");
-  my $lfn = $dspec[0];
+  my $lfn = $dspec[0] // "";
   my $fn=$defs{$name}->{TYPE}."-Flash.log";
 
   my $ret = "<div class='makeTable wide'><span>Information menu</span>
@@ -4277,6 +4301,13 @@ USB-connected devices (SIGNALduino):<br>
     If the baudrate is "directio" (e.g.: /dev/ttyACM0@directio), then the perl module Device::SerialPort is not needed, and fhem opens the device with simple file io. This might work if the operating system uses sane defaults for the serial parameters, e.g. some Linux distributions and OSX.<br><br>
   </li>
 </ul>
+MQTT-connected devices:<br>
+<ul>
+  <li>
+    <code>mqtt</code> uses MQTT as transport instead of serial or telnet.
+    <br><code><basetopic></code> is optional (default: <code>signalduino/v1</code>).
+  </li>
+</ul>
 
 
 <a name="SIGNALduinointernals"></a>
@@ -4870,6 +4901,9 @@ USB-connected devices (SIGNALduino):<br>
     <u>WiFi-connected devices (SIGNALduino):</u><br><br>
     Bei einem ESP8266 oder ESP32 wird anstelle des seriellen Ports die IP des SIGNALduino in der Form <code>xxx.xxx.xxx.xxx:23</code> angegeben. Dabei stellt die 23 den verwendeten Port dar.
     <br><br>
+    <u>MQTT-connected devices:</u><br><br>
+    <code>mqtt</code> nutzt MQTT als Transportweg anstelle von seriell oder Telnet.
+    <br><code><basetopic></code> ist optional (Standard: <code>signalduino/v1</code>).
 </ul>
 
 

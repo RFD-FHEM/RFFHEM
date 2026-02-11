@@ -112,7 +112,7 @@ InternalTimer(time()+0.8, sub {
     },    
     { 
       DEF => q{Hostname:65536},
-      testname =>  q[Hostname|Linux|Invalid: port out of range],
+      testname =>  q[Hostname|Linux|Invalid:],
       check =>  hash {
           field STATE => q{error}; 
           field DeviceName => U();
@@ -122,19 +122,20 @@ InternalTimer(time()+0.8, sub {
         rValue => D(), 
     },  
     { 
-      DEF => q{192:168:122:57:45476},
-      testname =>  q[IPv4|Linux|Invalid: colon instead of dot],
+      DEF => q{192:168:122:56:45476},
+      testname =>  q[Hostname|Linux|Invalid:],
       check =>  hash {
           field STATE => q{error}; 
           field DeviceName => U();
-          field DEF => q{192:168:122:57:45476};
+          field DEF => q{192:168:122:56:45476};
           etc();
         },
         rValue => D(), 
     },  
+    
     { 
       DEF => q{192.168.122.56:44323},
-      testname =>  q[IPv4|Linux|Valid:],
+      testname =>  q[Hostname|Linux|Valid:IPv4],
       check =>  hash {
           field STATE => q{disconnected}; 
           field DeviceName => q{192.168.122.56:44323};
@@ -142,10 +143,10 @@ InternalTimer(time()+0.8, sub {
           etc();
         },
         rValue => U(), 
-    },     
+    },
     { 
       DEF => q{192.168.122:44323},
-      testname =>  q[IPv4|Linux|Invalid: ip incomplete],
+      testname =>  q[Hostname|Linux|Invalid:IPv4],
       check =>  hash {
           field STATE => q{error}; 
           field DeviceName => U();
@@ -156,7 +157,7 @@ InternalTimer(time()+0.8, sub {
     },     
     { 
       DEF => q{sernetgw:44323},
-      testname =>  q[Hostname|Linux|Valid:],
+      testname =>  q[Hostname|Linux|Valid:hostname],
       check =>  hash {
           field STATE => q{disconnected}; 
           field DeviceName => q{sernetgw:44323};
@@ -167,7 +168,7 @@ InternalTimer(time()+0.8, sub {
     },     
     { 
       DEF => q{sernetgw.local.host:44323},
-      testname =>  q[Hostname|Linux|Valid:],
+      testname =>  q[Hostname|Linux|Valid:hostname with domain],
       check =>  hash {
           field STATE => q{disconnected}; 
           field DeviceName => q{sernetgw.local.host:44323};
@@ -178,22 +179,62 @@ InternalTimer(time()+0.8, sub {
     },    
     { 
       DEF => q{sernetgw.local.host},
-      testname =>  q[Hostname|Linux|inValid: missing port],
+      testname =>  q[Hostname|Linux|inValid:hostname without port],
       check =>  hash {
           field STATE => q{error}; 
           field DeviceName => U();
           field DEF => q{sernetgw.local.host};
           etc();
         },
-        rValue => D(), 
+        rValue => D(),
     },
     { 
       DEF => q{ESP-DB7D13-Testboard:23},
-      testname =>  q[Hostname|Linux|Valid:],
+      testname =>  q[Hostname|Linux|Valid:hostname with dash],
       check =>  hash {
           field STATE => q{disconnected}; 
           field DeviceName => q{ESP-DB7D13-Testboard:23};
           field DEF => q{ESP-DB7D13-Testboard:23};
+          etc();
+        },
+        rValue => U(),
+    },  
+    { 
+      plan => 3,
+      DEF => q{mqtt},
+      testname =>  q[MQTT|Valid: default basetopic],
+      check =>  hash {
+          field STATE => q{opened}; 
+          field DEF => q{mqtt};
+          field mqttSubscribe => q{signalduino/v1/state/messages};
+          field protocolObject => object { 
+              prop isa => 'lib::SD_Protocols';
+              prop reftype => 'HASH';
+              call [qw(_logging testmessage 1)] => validator(sub {
+                return is(FhemTestUtils_gotLog(qr/\sdefTest:.*testmessage/),1,q[verify logging message]);
+              });
+          };
+          etc();
+        },
+        rValue => U(), 
+    },  
+
+    { 
+      plan => 3,
+      DEF => q{mqtt mytopic},
+      testname =>  q[MQTT|Valid: with basetopic],
+      check =>  hash {
+          field STATE => q{opened}; 
+          field DeviceName => q{mqtt};
+          field DEF => q{mqtt mytopic};
+          field mqttSubscribe => q{mytopic/state/messages};
+          field protocolObject => object { 
+              prop isa => 'lib::SD_Protocols';
+              prop reftype => 'HASH';
+              call [qw(_logging testmessage 1)] => validator(sub {
+                return is(FhemTestUtils_gotLog(qr/\sdefTest:.*testmessage/),1,q[verify logging message]);
+              });
+          };
           etc();
         },
         rValue => U(), 
@@ -270,7 +311,7 @@ InternalTimer(time()+0.8, sub {
         rValue => U(), 
     },     
   );
-    
+  
   while (@testDataset)
   {
     my $element = pop(@testDataset);
@@ -286,7 +327,9 @@ InternalTimer(time()+0.8, sub {
       $hash{NAME}  = $element->{NAME} // $name;
       FhemTestUtils_resetLogs();
       $hash{DEF}   = $element->{DEF};
- 	    plan( $element->{plan} // 2 );
+      plan( $element->{plan} // 2 );
+
+      note "Testing with Name=$hash{NAME} TYPE=$hash{TYPE} DEF=$hash{DEF}";
 
       my $ret = SIGNALduino_Define(\%hash,qq{$hash{NAME} $hash{TYPE} $hash{DEF} });
       is ($ret, $element->{rValue}, 'check returnvalue SIGNALduino_Define');
