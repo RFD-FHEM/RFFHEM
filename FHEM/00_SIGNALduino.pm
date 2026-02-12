@@ -25,7 +25,6 @@ use Carp;
 no warnings 'portable';
 
 eval {use Data::Dumper qw(Dumper);1};
-
 use constant {
   SDUINO_VERSION                  => '4.0.1+20260306',  # Datum wird automatisch bei jedem pull request aktualisiert
   SDUINO_INIT_WAIT_XQ             => 1.5,     # wait disable device
@@ -54,6 +53,7 @@ use FHEM::Devices::SIGNALduino::SD_Clients;
 use FHEM::Devices::SIGNALduino::SD_Message;
 use FHEM::Devices::SIGNALduino::SD_Matchlist;
 use FHEM::Devices::SIGNALduino::SD_CC1101;
+use FHEM::Devices::SIGNALduino::SD_Firmware qw( :all );
 use FHEM::Devices::SIGNALduino::SD_Utils qw( :all );
 use FHEM::Devices::SIGNALduino::SD_IO qw( :all );
 use List::Util qw(first);
