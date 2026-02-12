@@ -14,3 +14,4 @@ workspace.code-workspace
 .devcontainer/vscode/perl-lang
 .gitconfig
 testOutput.*
+.roo/mcp.json
