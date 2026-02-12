@@ -4,7 +4,10 @@ use warnings;
 
 use Test2::V0;
 use Test2::Mock qw(mock);
+use FindBin qw($RealBin);
 use Cwd qw(getcwd);
+use JSON ();
+use File::Spec;
 use File::Path qw(make_path);
 use File::Temp qw(tempdir);
 
@@ -74,6 +77,15 @@ sub reset_set_flash_state {
   $mock_hardware = 'nano328';
   delete $targetHash->{additionalSets}{flash};
   delete $targetHash->{FLASH_RESULT};
+}
+
+sub load_release_fixture_json {
+  my $fixture = File::Spec->catfile($RealBin, '..', '..', '..', '00_SIGNALduino', 'test_firmware_releases.json');
+  open my $fh, '<', $fixture or die "cannot open firmware fixture $fixture: $!";
+  local $/ = undef;
+  my $json = <$fh>;
+  close $fh or die "cannot close firmware fixture $fixture: $!";
+  return $json;
 }
 
 subtest 'Get_availableFirmware tests' => sub {
@@ -348,6 +360,132 @@ subtest 'ParseHttpResponse tests' => sub {
     FHEM::Devices::SIGNALduino::SD_Firmware::SIGNALduino_ParseHttpResponse($param, '', '');
 
     like($logs[-1]{msg}, qr/undefined error while requesting .*code=404/, 'undefined error branch is logged');
+  };
+};
+
+subtest 'githubParseHttpResponse tests' => sub {
+  my $fixture_json = load_release_fixture_json();
+
+  subtest 'testing channel with missing hardware keeps existing flash list' => sub {
+    plan(2);
+    reset_state();
+    $mock_channel = 'testing';
+    $mock_hardware = undef;
+    $targetHash->{additionalSets}{flash} = 'seed-version';
+    my $param = {
+      hash    => $targetHash,
+      command => 'queryReleases',
+    };
+
+    FHEM::Devices::SIGNALduino::SD_Firmware::SIGNALduino_githubParseHttpResponse($param, '', $fixture_json);
+
+    is($targetHash->{additionalSets}{flash}, 'seed-version', 'existing flash list remains unchanged');
+    like($logs[-1]{msg}, qr/hardware is not defined/, 'missing hardware is logged');
+  };
+
+  subtest 'testing channel with nano hardware includes prerelease tag' => sub {
+    plan(1);
+    reset_state();
+    $mock_channel = 'testing';
+    $mock_hardware = 'nano328';
+    my $param = {
+      hash    => $targetHash,
+      command => 'queryReleases',
+    };
+
+    FHEM::Devices::SIGNALduino::SD_Firmware::SIGNALduino_githubParseHttpResponse($param, '', $fixture_json);
+
+    like($targetHash->{additionalSets}{flash}, qr/3\.3\.1-RC10/, 'testing prerelease is present');
+  };
+
+  subtest 'testing channel with ESP8266 hardware excludes prerelease tag' => sub {
+    plan(1);
+    reset_state();
+    $mock_channel = 'testing';
+    $mock_hardware = 'ESP8266';
+    my $param = {
+      hash    => $targetHash,
+      command => 'queryReleases',
+    };
+
+    FHEM::Devices::SIGNALduino::SD_Firmware::SIGNALduino_githubParseHttpResponse($param, '', $fixture_json);
+
+    unlike($targetHash->{additionalSets}{flash}, qr/3\.3\.1-RC10/, 'testing prerelease is absent');
+  };
+
+  subtest 'stable channel with nanocc1101 hardware excludes 3.3.0' => sub {
+    plan(1);
+    reset_state();
+    $mock_channel = 'stable';
+    $mock_hardware = 'nanocc1101';
+    my $param = {
+      hash    => $targetHash,
+      command => 'queryReleases',
+    };
+
+    FHEM::Devices::SIGNALduino::SD_Firmware::SIGNALduino_githubParseHttpResponse($param, '', $fixture_json);
+
+    unlike($targetHash->{additionalSets}{flash}, qr/3\.3\.0/, 'stable 3.3.0 is absent');
+  };
+
+  subtest 'stable channel with nano hardware includes 3.3.0' => sub {
+    plan(1);
+    reset_state();
+    $mock_channel = 'stable';
+    $mock_hardware = 'nano328';
+    my $param = {
+      hash    => $targetHash,
+      command => 'queryReleases',
+    };
+
+    FHEM::Devices::SIGNALduino::SD_Firmware::SIGNALduino_githubParseHttpResponse($param, '', $fixture_json);
+
+    like($targetHash->{additionalSets}{flash}, qr/3\.3\.0/, 'stable 3.3.0 is present');
+  };
+
+  subtest 'stable channel with MAPLEMINI_F103CB hardware includes 3.4.0' => sub {
+    plan(1);
+    reset_state();
+    $mock_channel = 'stable';
+    $mock_hardware = 'MAPLEMINI_F103CB';
+    my $param = {
+      hash    => $targetHash,
+      command => 'queryReleases',
+    };
+
+    FHEM::Devices::SIGNALduino::SD_Firmware::SIGNALduino_githubParseHttpResponse($param, '', $fixture_json);
+
+    like($targetHash->{additionalSets}{flash}, qr/3\.4\.0/, 'stable 3.4.0 is present');
+  };
+
+  subtest 'stable channel with MAPLEMINI_F103CBcc1101 hardware includes 3.4.0' => sub {
+    plan(1);
+    reset_state();
+    $mock_channel = 'stable';
+    $mock_hardware = 'MAPLEMINI_F103CBcc1101';
+    my $param = {
+      hash    => $targetHash,
+      command => 'queryReleases',
+    };
+
+    FHEM::Devices::SIGNALduino::SD_Firmware::SIGNALduino_githubParseHttpResponse($param, '', $fixture_json);
+
+    like($targetHash->{additionalSets}{flash}, qr/3\.4\.0/, 'stable 3.4.0 is present');
+  };
+
+  subtest 'stable channel with ESP32 hardware includes 3.4.0' => sub {
+    plan(1);
+    reset_state();
+    $mock_channel = 'stable';
+    $mock_hardware = 'ESP32';
+    my $param = {
+      hash    => $targetHash,
+      command => 'queryReleases',
+    };
+
+    FHEM::Devices::SIGNALduino::SD_Firmware::SIGNALduino_githubParseHttpResponse($param, '', $fixture_json);
+
+    like($targetHash->{additionalSets}{flash}, qr/3\.4\.0/, 'stable 3.4.0 is present');
   };
 };
 
