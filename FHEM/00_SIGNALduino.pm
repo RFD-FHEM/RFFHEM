@@ -36,6 +36,7 @@ use lib::SD_Protocols;
 use FHEM::Devices::SIGNALduino::SD_Clients;
 use FHEM::Devices::SIGNALduino::SD_Message;
 use FHEM::Devices::SIGNALduino::SD_Matchlist;
+use FHEM::Devices::SIGNALduino::SD_Firmware qw(:all);
 use List::Util qw(first);
 
 #$| = 1;    #Puffern abschalten, Hilfreich fuer PEARL WARNINGS Search

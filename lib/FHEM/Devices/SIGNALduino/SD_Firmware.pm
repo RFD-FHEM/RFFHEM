@@ -3,10 +3,22 @@ package FHEM::Devices::SIGNALduino::SD_Firmware;
 use strict;
 use warnings;
 use Carp;
+use Exporter qw(import);
 use Symbol 'gensym';
 use IPC::Open3;
 
 our $VERSION = "0.01";
+our @EXPORT_OK = qw(
+  SIGNALduino_avrdude
+  SIGNALduino_PrepareFlash
+  SIGNALduino_Set_flash
+  SIGNALduino_Get_availableFirmware
+  SIGNALduino_ParseHttpResponse
+  SIGNALduino_querygithubreleases
+  SIGNALduino_githubParseHttpResponse
+);
+our %EXPORT_TAGS = ( all => \@EXPORT_OK );
+
 
 ############################# package main
 sub SIGNALduino_avrdude {
