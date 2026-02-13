@@ -172,18 +172,18 @@ jobs:
               find ./FHEM -name "$FILE" -exec cp $FPATH "{}" \;
           done
       - name: update controls file (FHEM)
-        uses: fhem/fhem-controls-actions@v3.0.0
+        uses: fhem/fhem-controls-actions@v3.0.1
         with:
           filename: controls_signalduino.txt 
       - name: update controls file (lib)
-        uses: fhem/fhem-controls-actions@v3.0.0
+        uses: fhem/fhem-controls-actions@v3.0.1
         with:
           filename: controls_signalduino.txt 
           directory: FHEM/lib
           writemode: a
       - name: update controls file (perl lib)
         if: needs.pr_check.outputs.result != 'true'
-        uses: fhem/fhem-controls-actions@v3.0.0
+        uses: fhem/fhem-controls-actions@v3.0.1
         with:
           filename: controls_signalduino.txt 
           directory: lib/FHEM/Devices/SIGNALduino
@@ -197,14 +197,14 @@ jobs:
 
       - name: Wait for tests to succeed
         if: ${{ steps.commit.outputs.status }}
-        uses: lewagon/wait-on-check-action@v1.4.1
+        uses: lewagon/wait-on-check-action@v1.5.0
         with:
           running-workflow-name: 'Commit and Push back'
           ref: ${{ github.head_ref }}
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           wait-interval: 20
           allowed-conclusions: success,skipped,cancelled,neutral
-          ignore-checks: codecov/patch
+          ignore-checks: codecov/patch,codecov/project
 
       - name: git push
         if: ${{ steps.commit.outputs.status }}

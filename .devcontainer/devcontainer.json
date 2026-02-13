@@ -6,6 +6,7 @@
     "postCreateCommand": "sudo /bin/bash -c '. /entry.sh && initialContainerSetup'",
     "postStartCommand": "sudo /bin/bash -c './.devcontainer/link_recursive.sh'",
     "features": {
+        "ghcr.io/devcontainers/features/docker-in-docker:2": {}
     },
     "customizations": {
         "vscode": {
