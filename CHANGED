@@ -1,3 +1,6 @@
+2026-02-13 - Bugfix FS10 SetExtensions (#1350)
+
+* Bugfix SetExtensions
 2026-01-16 - Merge pull request #1338 from RFD-FHEM/feat/DispatchLibs
 
 Refactor: dispatch specific code in libs migrated
