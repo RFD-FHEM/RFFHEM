@@ -1,4 +1,4 @@
-# $Id: 14_SD_WS.pm 0 2025-06-10 10:02:15Z elektron-bbs $
+# $Id: 14_SD_WS.pm 0 2026-02-13 19:51:49Z elektron-bbs $
 #
 # The purpose of this module is to support serval
 # weather sensors which use various protocol
@@ -57,6 +57,7 @@
 # 03.09.2024 neues Protokoll 48: Funk-Thermometer JOKER TFA 30.3055, Temperatursender 30.3212
 # 09.01.2025 Protokoll 125: Ergänzung Empfang DCF-Daten WH31E/DNT000005
 # 22.04.2025 neues Protokoll 135: Temperatursensor TFA 30.3255.02
+# 09.02.2026 neues Protokoll 136: Wind-, Temperatur- und Feuchtigkeitssensor EMOS E06016 mit DCF77
 
 package main;
 
@@ -124,6 +125,7 @@ sub SD_WS_Initialize {
     'SD_WS_129.*'     => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4hum4:Temp/Hum,', autocreateThreshold => '3:180'},
     'SD_WS_131.*'     => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => q{}, autocreateThreshold => '2:180'},
     'SD_WS_135_T.*'   => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4:Temp,', autocreateThreshold => '3:180'},
+    "SD_WS_136_THW_.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "3:180"},
   };
   return FHEM::Meta::InitMod( __FILE__, $hash );
 }
@@ -256,6 +258,7 @@ sub SD_WS_Parse {
   my $identified;
   my $transmitter;
   my $dcf;
+  my $dcfStatus;
   my $pm2_5; # particulate matter <= 2.5 µm
   my $pm10;  # particulate matter <= 10 µm
 
@@ -1865,6 +1868,67 @@ sub SD_WS_Parse {
                            }
                           },
     },
+    136 => {
+        # Wind, temperature, humidity sensor EMOS E06016
+        # ----------------------------------------------
+        #          Byte: 00 01 02 03 04 05 06 07 08 09 10 11 12
+        #        Nibble: 01 23 45 67 89 01 23 45 67 89 01 23 45
+        #     Msg: AA A5 83 A9 9A 1B 3C B6 40 D0 3D 00 90 FF 01
+        #          PP PP MM II DD DD DD DD DT TT HH SS WF CC RR
+        # P: 16 bit preamble always 0xAAA5, is not passed to the module
+        # M:  8 bit model, always 0x83
+        # I:  8 bit ident, changes on restart
+        # D: 36 bit DCF date and time, channel (1 bit DCF (1 = ok), 7 bit year, 4 bit month, 5 bit day, 5 bit hour, 6 bit minute, 6 bit second, 2 bit channel)
+        # T: 12 bit signed temperature, scaled by 10
+        # H:  8 bit humidity
+        # S:  8 bit windspeed (multiplied by 0.295 = m/s)
+        # W:  4 bit winddirection (multiplied by 22.5 = degree)
+        # F:  4 bit flags, ?BC?, B is battery good indication (0 = ok), C is Central European Summer Time (1 = CEST)
+        # C:  8 bit checksum
+        # R:  8 bit message repeat counter (0-5)
+				# The sensor sends 6 messages at intervals of approximately 60 seconds.
+        sensortype => 'EMOS E06016 wind',
+        model      => 'SD_WS_136_THW',
+        prematch   => sub { my $msg = shift; return 1 if ($msg =~ /^[0-9A-F]{26}$/); },
+        id         => sub { my ($rawData,undef) = @_; return substr($rawData,2,2); },
+        dcfStatus  => sub { my (undef,$bitData) = @_; return substr($bitData,16,1) eq '1' ? 'ok' : 'off'; },
+        dcf        => sub { my (undef,$bitData) = @_;
+                            return SD_WS_binaryToNumber($bitData,17,23) + 2000 . '-'             # year
+                                   . sprintf('%02d', SD_WS_binaryToNumber($bitData,24,27)) . '-' # month
+                                   . sprintf('%02d', SD_WS_binaryToNumber($bitData,28,32)) . ' ' # day
+                                   . sprintf('%02d', SD_WS_binaryToNumber($bitData,33,37)) . ':' # hour 
+                                   . sprintf('%02d', SD_WS_binaryToNumber($bitData,38,43)) . ':' # minute
+                                   . sprintf('%02d', SD_WS_binaryToNumber($bitData,44,49)) . ' ' # second
+                                   . (substr($bitData,86,1) eq '0' ? 'CET' : 'CEST');            # dst
+                          },
+        channel    => sub { my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,50,51) + 1; },
+        temp       => sub { my (undef,$bitData) = @_;
+                            my $tempraw = SD_WS_binaryToNumber($bitData,52,63);
+                            $tempraw -= 4096 if ($tempraw > 1023);    # negative
+                            $tempraw /= 10.0;
+                            return $tempraw;
+                          },
+        hum        => sub { my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,65,71); },
+        windspeed  => sub { my (undef,$bitData) = @_; return FHEM::Core::Utils::Math::round((SD_WS_binaryToNumber($bitData,72,79) * 0.295), 1); },
+        winddir    => sub { my (undef,$bitData) = @_;
+                            my $winddirraw = SD_WS_binaryToNumber($bitData,80,83);
+                            return ($winddirraw * 22.5, $winddirtxtar[$winddirraw]);
+                          },
+        bat        => sub { my (undef,$bitData) = @_; return substr($bitData,85,1) eq '0' ? 'ok' : 'low'; },
+        crcok      => sub { my (undef,$bitData) = @_;
+                            my $sum = 170 + 165; # preamble 0xAA + 0xA5
+                            for (my $n = 0; $n < 88; $n += 8) {
+                              $sum += SD_WS_binaryToNumber($bitData, $n, $n + 7)
+                            }
+                            if (($sum &= 0xFF) == SD_WS_binaryToNumber($bitData, 88, 95)) {
+                              return 1;
+                            } else {
+                              Log3 $name, 3, "$name: SD_WS_136 Parse msg $msg - ERROR checksum $sum != " . SD_WS_binaryToNumber($bitData, 88, 95);
+                              return 0;
+                            }
+                          },
+        count      => sub { my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,96,103); },
+    },
   );
 
   Log3 $name, 4, "$name: SD_WS_Parse protocol $protocol, rawData $rawData";
@@ -2202,6 +2266,7 @@ sub SD_WS_Parse {
     $brightness = $decodingSubs{$protocol}{brightness}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{brightness}));
     $transmitter = $decodingSubs{$protocol}{transmitter}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{transmitter}));
     $dcf = $decodingSubs{$protocol}{dcf}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{dcf}));
+    $dcfStatus = $decodingSubs{$protocol}{dcfStatus}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{dcfStatus}));
     $pm2_5 = $decodingSubs{$protocol}{pm_2_5}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{pm_2_5}));
     $pm10 = $decodingSubs{$protocol}{pm_10}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{pm_10}));
     Log3 $iohash, 4, "$name: SD_WS_Parse decoded protocol-id $protocol ($SensorTyp), sensor-id $id";
@@ -2440,6 +2505,7 @@ sub SD_WS_Parse {
   readingsBulkUpdate($hash, 'brightness', $brightness)  if (defined($brightness));
   readingsBulkUpdateIfChanged($hash, 'transmitter', $transmitter)  if (defined($transmitter));
   readingsBulkUpdate($hash, 'dcf', $dcf)  if (defined($dcf));
+  readingsBulkUpdateIfChanged($hash, 'dcfStatus', $dcfStatus)  if (defined($dcfStatus));
   readingsBulkUpdate($hash, 'pm_2_5', $pm2_5)  if (defined($pm2_5));
   readingsBulkUpdate($hash, 'pm_10', $pm10)  if (defined($pm10));
   readingsEndUpdate($hash, 1); # Notify is done by Dispatch
@@ -2561,6 +2627,7 @@ sub SD_WS_WH2SHIFT {
     <li>BBQ temperature sensor GT-TMBBQ-01s (transmitter), GT-TMBBQ-01e (receiver)</li>
     <li>Bresser 5-in-1, 6-in-1 and 7-in-1 Comfort Weather Center, 7009994, Lightning detector, PM2.5/10 air quality meter, Professional rain gauge, Temeo</li>
     <li>Conrad S522</li>
+    <li>EMOS E06016 (Wind, temperature and humidity sensor with DCF77)</li>
     <li>EuroChron EFTH-800, EFS-3110A (temperature and humidity sensor)</li>
     <li>Fine Offset WH31, aka Ambient Weather WH31E, aka ecowitt WH31 (temperature and humidity sensor, partly with DCF reception)</li>
     <li>Fine Offset WH40, aka Ambient Weather WH40, aka ecowitt WH40 (Regen sensor)</li>
@@ -2709,6 +2776,7 @@ sub SD_WS_WH2SHIFT {
     <li>BBQ Temperatur Sensor GT-TMBBQ-01s (Sender), GT-TMBBQ-01e (Empfaenger)</li>
     <li>Bresser 5-in-1, 6-in-1 und 7-in-1 Comfort Wetter Center, 7009994, Blitzsensor, PM2.5/10 Luftqualitätsmesser, Profi Regenmesser, Temeo</li>
     <li>Conrad S522</li>
+    <li>EMOS E06016 (Wind-, Temperatur- und Feuchtigkeitssensor mit DCF77)</li>
     <li>EuroChron EFTH-800, EFS-3110A (Temperatur- und Feuchtigkeitssensor)</li>
     <li>Fine Offset WH31, aka Ambient Weather WH31E Thermo-Hygrometer Sensor (Temperatur- und Feuchtemsser, teilweise mit DCF-Empfang)</li>
     <li>Fine Offset WH40, aka Ambient Weather WH40, aka ecowitt WH40 (rain sensor)</li>
@@ -2861,7 +2929,7 @@ sub SD_WS_WH2SHIFT {
   "x_fhem_maintainer_github": [
     "Sidey79"
   ],
-  "version": "v1.1.7",
+  "version": "v1.1.8",
   "description": "The SD_WS module processes the messages from various environmental sensors received from an IO device (CUL, CUN, SIGNALDuino, SignalESP etc.)",
   "dynamic_config": 1,
   "keywords": [
