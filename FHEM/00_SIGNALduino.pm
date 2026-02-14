@@ -3105,9 +3105,12 @@ sub SIGNALduino_FW_Detail {
   my ($FW_wname, $name, $room, $pageHash) = @_;
 
   my $hash = $defs{$name};
-  # Todo: We can Filter on any TYPE=FileLog Device.
-  my @dspec=devspec2array("DEF=.*fakelog");
-  my $lfn = $dspec[0];
+  
+
+  my $lfn = do { 
+    my $d = (devspec2array('TYPE=FileLog'))[0]; 
+    IsDevice($d) ? $d : undef 
+  };
   my $fn=$defs{$name}->{TYPE}."-Flash.log";
   my $fw_me = defined($FW_ME) ? $FW_ME : q{};
   my $fw_detail = defined($FW_detail) ? $FW_detail : q{};

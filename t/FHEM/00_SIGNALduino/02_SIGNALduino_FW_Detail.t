@@ -8,7 +8,7 @@ use File::Path qw(make_path remove_tree);
 
 our %defs;
 
-InternalTimer(time()+1, sub {
+InternalTimer(time()+0.2, sub {
   my $target = shift;
   my $targetHash = $defs{$target};
   my $devspec_arg;
@@ -38,7 +38,7 @@ InternalTimer(time()+1, sub {
     local $SIG{__WARN__} = sub { push @warnings, @_ };
     my $ret = SIGNALduino_FW_Detail('', $targetHash->{NAME}, '', {});
 
-    is($devspec_arg, 'DEF=.*fakelog', 'devspec2array called with expected filter');
+    is($devspec_arg, 'TYPE=FileLog', 'devspec2array called with expected filter');
     like($ret, qr/Information menu/, 'html contains information menu');
     like($ret, qr/id='showProtocolList'/, 'html contains protocol list link');
     unlike($ret, qr/Last Flashlog/, 'no flashlog link is shown without filelog device');
