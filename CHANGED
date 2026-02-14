@@ -1,3 +1,13 @@
+2026-02-14 - new protocol 136 for wind, temperature and humidity sensor EMOS E06016 with DCF77 (#1351)
+
+* new sensor EMOS E06016
+* Update SD_ProtocolData.pm
+* Update 14_SD_WS.pm
+add dcfStatus
+add CET/CEST evaluation
+* Update README.md
+* Update testData.json
+add testdata for new protocol 136 EMOS E06016
 2026-02-13 - Bugfix FS10 SetExtensions (#1350)
 
 * Bugfix SetExtensions
