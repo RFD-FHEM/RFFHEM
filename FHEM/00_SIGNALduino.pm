@@ -3119,17 +3119,17 @@ sub SIGNALduino_FW_Detail {
 <table class='block wide' id='SIGNALduinoInfoMenue' nm='$hash->{NAME}' class='block wide'>
 <tr class='even'>";
 
-  if (defined($lfn) && -s AttrVal('global', 'logdir', './log/') .$fn)
-  {
+  if (!defined($lfn)) {
+    $ret .= "<td>No device of TYPE=FileLog found</td>" 
+  } elsif (! -s AttrVal('global', 'logdir', './log/'). $fn) {
+    $ret .= "<td></td>";
+  } else {
     my $flashlogurl="$fw_me/FileLog_logWrapper?dev=$lfn&type=text&file=$fn";
 
     $ret .= "<td>";
     $ret .= "<a href=\"$flashlogurl\">Last Flashlog<\/a>";
     $ret .= "</td>";
-    #return $ret;
-  } else {
-    $ret .= "<td>No device of TYPE=FileLog found</td>" if !defined($lfn);
-  }
+  }   
 
   $ret.="<td><a href='#showProtocolList' id='showProtocolList'>Display protocollist</a></td>";
   $ret .= '</tr></table></div>

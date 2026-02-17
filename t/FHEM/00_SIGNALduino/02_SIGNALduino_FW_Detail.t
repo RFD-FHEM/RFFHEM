@@ -47,8 +47,42 @@ InternalTimer(time()+0.2, sub {
   };
 
   $mock->restore('devspec2array');
-  $mock->restore('AttrVal');
   unlink($logdir.$flashlog);
+  @warnings = ();
+
+  my $mock_log_missing = Test2::Mock->new(
+    class => 'main',
+    override => [
+      devspec2array => sub($;$$) {
+        $devspec_arg = $_[0];
+        return ('dummyFileLog');
+      },
+      IsDevice => sub($) {
+        return 1;
+      },
+      AttrVal => sub($$$) {
+        return $logdir;
+      },
+    ],
+  );
+
+  subtest 'SIGNALduino_FW_Detail handles missing flashlog file' => sub {
+    plan(6);
+    local $SIG{__WARN__} = sub { push @warnings, @_ };
+    my $ret = SIGNALduino_FW_Detail('', $targetHash->{NAME}, '', {});
+
+    is($devspec_arg, 'TYPE=FileLog', 'devspec2array called with expected filter');
+    like($ret, qr/Information menu/, 'html contains information menu');
+    like($ret, qr/id='showProtocolList'/, 'html contains protocol list link');
+    unlike($ret, qr/Last Flashlog/, 'no flashlog link is shown without logfile');
+    unlike($ret, qr/No device of TYPE=FileLog found/, 'html does not contain missing filelog device message');
+    is(scalar @warnings, 0, 'no warning when logfile is missing',@warnings);
+  };
+
+  $mock_log_missing->restore('devspec2array');
+  $mock_log_missing->restore('IsDevice');
+  $mock_log_missing->restore('AttrVal');
+  $mock->restore('AttrVal');
   remove_tree($logdir);
   done_testing();
   exit(0);
