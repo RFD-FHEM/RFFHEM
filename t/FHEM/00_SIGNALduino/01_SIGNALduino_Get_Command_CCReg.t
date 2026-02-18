@@ -33,8 +33,7 @@ InternalTimer(time()+1, sub() {
     SIGNALduino_Get_Command_CCReg($targetHash,'ccreg','99');
     my $tracking = $mock->sub_tracking;
     my $args = $tracking->{SIGNALduino_Get_Command}[0]{args};
-    #print Dumper($args);
-    delete $tracking->{SIGNALduino_Get_Command} ;
+    #note Dumper($args->[1]);
 
     is ($args,array { 
                item 1 => 'ccreg'; 
@@ -42,6 +41,7 @@ InternalTimer(time()+1, sub() {
                end();
             },
             'verify called args SIGNALduino_Get_Command');
+    $mock->clear_sub_tracking();
   };
 
   subtest 'SIGNALduino_Get_Command_CCReg one reg (12)' => sub {
@@ -51,8 +51,7 @@ InternalTimer(time()+1, sub() {
     SIGNALduino_Get_Command_CCReg($targetHash,'ccreg','12');
     my $tracking = $mock->sub_tracking;
     my $args = $tracking->{SIGNALduino_Get_Command}[0]{args};
-    #print Dumper($args);
-    delete $tracking->{SIGNALduino_Get_Command} ;
+    #note Dumper($args->[1]);
 
     is ($args,array { 
                item 1 => 'ccreg'; 
@@ -60,6 +59,8 @@ InternalTimer(time()+1, sub() {
                end();
             },
             'verify called args SIGNALduino_Get_Command');
+    $mock->clear_sub_tracking();
+
   };
 
   subtest 'SIGNALduino_Get_Command_CCReg wrong reg (F1)' => sub {
@@ -70,9 +71,9 @@ InternalTimer(time()+1, sub() {
     my $tracking = $mock->sub_tracking;
     my $args = $tracking->{SIGNALduino_Get_Command}[0]{args};
     #print Dumper($args);
-    delete $tracking->{SIGNALduino_Get_Command} ;
-
     is ($args,U(), 'verify called args SIGNALduino_Get_Command');
+
+    $mock->clear_sub_tracking();
   };
 
   subtest 'SIGNALduino_Get_Command_CCReg wrong reg (C12)' => sub {
@@ -83,9 +84,9 @@ InternalTimer(time()+1, sub() {
     my $tracking = $mock->sub_tracking;
     my $args = $tracking->{SIGNALduino_Get_Command}[0]{args};
     #print Dumper($args);
-    delete $tracking->{SIGNALduino_Get_Command} ;
-
     is ($args,U(), 'verify called args SIGNALduino_Get_Command');
+
+    $mock->clear_sub_tracking();
   };
 
   subtest 'SIGNALduino_Get_Command_CCReg no reg ' => sub {
@@ -96,9 +97,10 @@ InternalTimer(time()+1, sub() {
     my $tracking = $mock->sub_tracking;
     my $args = $tracking->{SIGNALduino_Get_Command}[0]{args};
     #print Dumper($args);
-    delete $tracking->{SIGNALduino_Get_Command} ;
 
     is ($args,U(), 'verify called args SIGNALduino_Get_Command');
+
+    $mock->clear_sub_tracking();
   };
 
   done_testing();

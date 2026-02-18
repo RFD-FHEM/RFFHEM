@@ -778,9 +778,9 @@ InternalTimer(time()+1, sub {
 	subtest 'Test bWidth (325 Khz)' => sub {
 		plan(3);
 		
-		subtest 'Test cc1101::CalcbWidthReg' => sub {
+		subtest 'Test FHEM::Devices::SIGNALduino::SD_CC1101::CalcbWidthReg' => sub {
 			plan(2);
-			my ($ob,$bw) = cc1101::CalcbWidthReg($targetHash,57,325);
+			my ($ob,$bw) = FHEM::Devices::SIGNALduino::SD_CC1101::CalcbWidthReg($targetHash,57,325);
 			is($ob,57,"check new register value");
 			is($bw,325,"check calculated possible bWith value, will never be higher as provided");
 		};

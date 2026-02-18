@@ -10,10 +10,10 @@
                 "cwd": "/opt/fhem/"
             },
             "command": "prove ${input:proveOptions} -I FHEM -r --exec 'perl fhem.pl -t' ${input:dynamicFHEMModuleFilesRemembered}",
-            "problemMatcher" : {
+            "problemMatcher": {
                 "owner": "TAP",
-                "fileLocation" : "relative",
-                "pattern" : [
+                "fileLocation": "relative",
+                "pattern": [
                     {
                         "regexp": "^#\\s+(Failed test '.*')",
                         "message": 1
@@ -37,10 +37,10 @@
                 "cwd": "/opt/fhem/"
             },
             "command": "prove ${input:proveOptions} -I FHEMM -r --exec 'perl fhem.pl -t' ${workspaceFolder}/t/FHEM/[0-9][0-9]*",
-            "problemMatcher" : {
+            "problemMatcher": {
                 "owner": "TAP",
-                "fileLocation" : "relative",
-                "pattern" : [
+                "fileLocation": "relative",
+                "pattern": [
                     {
                         "regexp": "^#\\s+(Failed test '.*')",
                         "message": 1
@@ -61,10 +61,10 @@
             "label": "run prove Perl module files",
             "type": "shell",
             "command": "prove ${input:proveOptions} --exec 'perl -I lib -I FHEM'  -r ${input:dynamicPERLModuleFilesRemembered}",
-            "problemMatcher" : {
+            "problemMatcher": {
                 "owner": "TAP",
-                "fileLocation" : "relative",
-                "pattern" : [
+                "fileLocation": "relative",
+                "pattern": [
                     {
                         "regexp": "^#\\s+(Failed test '.*')",
                         "message": 1
@@ -81,6 +81,57 @@
                 "isDefault": true
             }
         },
+        {
+            "label": "run prove active file FHEM module test",
+            "type": "shell",
+            "options": {
+                "cwd": "/opt/fhem/"
+            },
+            "command": "prove ${input:proveOptions} -I FHEM -r --exec 'perl fhem.pl -t' ${file}",
+            "problemMatcher": {
+                "owner": "TAP",
+                "fileLocation": "relative",
+                "pattern": [
+                    {
+                        "regexp": "^#\\s+(Failed test '.*')",
+                        "message": 1
+                    },
+                    {
+                        "regexp": "^#\\s+at (.*) line (\\d+)",
+                        "line": 2,
+                        "file": 1
+                    }
+                ]
+            },
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "run prove active file Perl module test",
+            "type": "shell",
+            "command": "prove ${input:proveOptions} --exec 'perl -I lib -I FHEM' -r ${file}",
+            "problemMatcher": {
+                "owner": "TAP",
+                "fileLocation": "relative",
+                "pattern": [
+                    {
+                        "regexp": "^#\\s+(Failed test '.*')",
+                        "message": 1
+                    },
+                    {
+                        "regexp": "^#\\s+at (.*) line (\\d+)",
+                        "line": 2,
+                        "file": 1
+                    }
+                ]
+            },
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            }
+        }
     ],
     "inputs":  [
         {
