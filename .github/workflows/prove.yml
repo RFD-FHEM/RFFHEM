@@ -28,7 +28,6 @@ jobs:
     - name: run prove on perl modules (testscripts)
       run: |
         echo "::remove-matcher owner=perl::"
-        cp -R ${GITHUB_WORKSPACE}/lib/* ${FHEM_DIR}/lib/
         prove -j3 --exec 'perl -MDevel::Cover=-silent,1 -I lib -I FHEM ' -r -v t/FHEM/Devices > >(tee -a ${GITHUB_WORKSPACE}/testOutput.stdout) 2> >(tee -a ${GITHUB_WORKSPACE}/testOutput.stderr >&2)
       env:
         FHEM_DIR: /opt/fhem
