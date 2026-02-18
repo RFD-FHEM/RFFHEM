@@ -14,7 +14,7 @@ use strict;
 use warnings;
 use POSIX;
 use List::Util qw(any);         # for any function
-use FHEM::Devices::SIGNALduino::SD_Protocols          # for any function
+use FHEM::Devices::SIGNALduino::SD_Protocols;          # for any function
 
 my @bitcountlength = (0,0,0);   # array min|default|max
 

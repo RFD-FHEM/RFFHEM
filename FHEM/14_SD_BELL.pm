@@ -45,7 +45,7 @@ package main;
 
 use strict;
 use warnings;
-use FHEM::Devices::SIGNALduino::SD_Protocols
+use FHEM::Devices::SIGNALduino::SD_Protocols;
 use FHEM::Meta;         # https://wiki.fhem.de/wiki/Meta for SVN Revision
 
 ### HASH for all modul models ###
