@@ -44,7 +44,13 @@ use List::Util qw(first);
 
 
 use constant {
-  SDUINO_VERSION                  => '4.0.0+20260218',  # Datum wird automatisch bei jedem pull request aktualisiert
+  SDUINO_VERSION                  => '4.0.1',  # Datum wird automatisch bei jedem pull request aktualisiert
+  SDUINO_INIT_WAIT_XQ             => 1.5,     # wait disable device
+  SDUINO_INIT_WAIT                => 2,
+  SDUINO_INIT_MAXRETRY            => 3,
+  SDUINO_CMD_TIMEOUT              => 10,
+  SDUINO_KEEPALIVE_TIMEOUT        => 60,
+  SDUINO_KEEPALIVE_MAXRETRY       => 3,
   SDUINO_WRITEQUEUE_NEXT          => 0.3,
   SDUINO_WRITEQUEUE_TIMEOUT       => 2,
 
@@ -4808,7 +4814,7 @@ USB-connected devices (SIGNALduino):<br>
       "web": "https://wiki.fhem.de/wiki/SIGNALduino"
     }
   },
-  "version": "v4.0.0"
+  "version": "v4.0.1"
 }
 =end :application/json;q=META.json
 =cut
