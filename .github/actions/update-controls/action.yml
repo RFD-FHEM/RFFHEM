@@ -1,6 +1,5 @@
 name: "Update controls_signalduino.txt files"
 description: "Runs fhem-controls-actions for FHEM, FHEM/lib, and lib/FHEM/Devices/SIGNALduino"
-inputs:
 runs:
   using: "composite"
   steps:
