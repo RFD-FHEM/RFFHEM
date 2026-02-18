@@ -5,10 +5,8 @@ use File::Basename;
 
 use Test2::V0;
 use Test2::Tools::Compare qw{ is };
+use FHEM::Devices::SIGNALduino::SD_Utils qw( _limit_to_number _limit_to_hex );
 
-my $module = basename (dirname(__FILE__));
-
-#is(CommandReload(undef,$module), undef, "$module loaded");
 
 plan(2);
 subtest 'limit_to_number tests' => sub {
@@ -37,7 +35,4 @@ subtest '_limit_to_hex tests' => sub {
 
 };
 
-exit(0);  # necessary
-
-1;
-
+done_testing();

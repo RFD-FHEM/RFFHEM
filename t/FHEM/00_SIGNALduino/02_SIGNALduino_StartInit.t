@@ -15,7 +15,7 @@ InternalTimer(time()+1, sub {
 	plan (2);	
 	my $mock = Test2::Mock->new(
 		track => 1,
-		class => 'main'
+		class => 'FHEM::Devices::SIGNALduino::SD_IO'
 	);	 	
 	my $tracking = $mock->sub_tracking;
 
