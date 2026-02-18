@@ -3105,25 +3105,31 @@ sub SIGNALduino_FW_Detail {
   my ($FW_wname, $name, $room, $pageHash) = @_;
 
   my $hash = $defs{$name};
-  my @dspec=devspec2array("DEF=.*fakelog");
-  my $lfn = $dspec[0];
+  
+
+  my $lfn = do { 
+    my $d = (devspec2array('TYPE=FileLog'))[0]; 
+    IsDevice($d) ? $d : undef 
+  };
   my $fn=$defs{$name}->{TYPE}."-Flash.log";
+  my $fw_me = defined($FW_ME) ? $FW_ME : q{};
+  my $fw_detail = defined($FW_detail) ? $FW_detail : q{};
 
   my $ret = "<div class='makeTable wide'><span>Information menu</span>
 <table class='block wide' id='SIGNALduinoInfoMenue' nm='$hash->{NAME}' class='block wide'>
 <tr class='even'>";
 
-  if (-s AttrVal('global', 'logdir', './log/') .$fn)
-  {
-    my $flashlogurl="$FW_ME/FileLog_logWrapper?dev=$lfn&type=text&file=$fn";
+  if (!defined($lfn)) {
+    $ret .= "<td>No device of TYPE=FileLog found</td>" 
+  } elsif (! -s AttrVal('global', 'logdir', './log/'). $fn) {
+    $ret .= "<td></td>";
+  } else {
+    my $flashlogurl="$fw_me/FileLog_logWrapper?dev=$lfn&type=text&file=$fn";
 
     $ret .= "<td>";
     $ret .= "<a href=\"$flashlogurl\">Last Flashlog<\/a>";
     $ret .= "</td>";
-    #return $ret;
-  }
-
-  my $protocolURL="$FW_ME/FileLog_logWrapper?dev=$lfn&type=text&file=$fn";
+  }   
 
   $ret.="<td><a href='#showProtocolList' id='showProtocolList'>Display protocollist</a></td>";
   $ret .= '</tr></table></div>
@@ -3131,7 +3137,7 @@ sub SIGNALduino_FW_Detail {
 <script>
 $( "#showProtocolList" ).click(function(e) {
   e.preventDefault();
-  FW_cmd(FW_root+\'?cmd={SIGNALduino_FW_getProtocolList("'.$FW_detail.'")}&XHR=1\', function(data){SD_plistWindow(data)});
+  FW_cmd(FW_root+\'?cmd={SIGNALduino_FW_getProtocolList("'.$fw_detail.'")}&XHR=1\', function(data){SD_plistWindow(data)});
 
 });
 
