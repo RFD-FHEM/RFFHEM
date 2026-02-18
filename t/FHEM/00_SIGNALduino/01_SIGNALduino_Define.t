@@ -218,7 +218,7 @@ InternalTimer(time()+0.8, sub {
           field DeviceName => q{none};
           field DEF => q{none};
           field protocolObject => object { 
-              prop isa => 'lib::SD_Protocols';
+              prop isa => 'FHEM::Devices::SIGNALduino::SD_Protocols';
               prop reftype => 'HASH';
               call [qw(_logging testmessage 1)] => validator(sub {
                 return is(FhemTestUtils_gotLog(qr/\sdefTest:.*testmessage/),1,q[verify logging message]);
@@ -237,7 +237,7 @@ InternalTimer(time()+0.8, sub {
           field DeviceName => q{/dev/some@directio};
           field DEF => q{/dev/some@directio};
           field protocolObject => object { 
-              prop isa => 'lib::SD_Protocols';
+              prop isa => 'FHEM::Devices::SIGNALduino::SD_Protocols';
               prop reftype => 'HASH';
               call [qw(_logging testmessage 1)] => validator(sub {
                 return is(FhemTestUtils_gotLog(qr/\sdefTest:.*testmessage/),1,q[verify logging message]);
@@ -258,7 +258,7 @@ InternalTimer(time()+0.8, sub {
           field DeviceName => q{/dev/some@directio};
           field DEF => q{/dev/some@directio};
           field protocolObject => object { 
-              prop isa => 'lib::SD_Protocols';
+              prop isa => 'FHEM::Devices::SIGNALduino::SD_Protocols';
               prop reftype => 'HASH';
               call [qw(_logging testmessage 1)] => validator(sub {
                 return is(FhemTestUtils_gotLog(qr/\slogTest:.*testmessage/),1,q[verify logging message]);

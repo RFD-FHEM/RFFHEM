@@ -32,7 +32,7 @@ eval {use Scalar::Util qw(looks_like_number);1};
 eval {use Time::HiRes qw(gettimeofday);1} ;
 eval {use FHEM::Core::Timer::Helper;1 } ;
 
-use lib::SD_Protocols;
+use FHEM::Devices::SIGNALduino::SD_Protocols;
 use FHEM::Devices::SIGNALduino::SD_Clients;
 use FHEM::Devices::SIGNALduino::SD_Message;
 use FHEM::Devices::SIGNALduino::SD_Matchlist;
@@ -126,7 +126,7 @@ my %symbol_map = (one => 1 , zero =>0 ,sync => '', float=> 'F', 'start' => '');
 
 ## rfmode for attrib & supported rfmodes
 my @rfmode;
-my $Protocols = new lib::SD_Protocols();
+my $Protocols = new FHEM::Devices::SIGNALduino::SD_Protocols();
 
 ############################# package main
 sub SIGNALduino_Initialize {
@@ -135,7 +135,9 @@ sub SIGNALduino_Initialize {
   my $dev = '';
   $dev = ',1' if (index(SDUINO_VERSION, 'dev') >= 0);
 
-  my $error = $Protocols->LoadHash(qq[$attr{global}{modpath}/FHEM/lib/SD_ProtocolData.pm]); 
+  my $error = $Protocols->LoadHash(qq[./lib/FHEM/Devices/SIGNALduino/SD_Protocols/Data.pm]); 
+  
+
   if (defined($error)) {
     Log3 'SIGNALduino', 1, qq[Error loading Protocol Hash. Module is in inoperable mode error message:($error)];
   } else {
@@ -1825,7 +1827,7 @@ sub SIGNALduino_Split_Message {
   return %ret;
 }
 
-############################# package main  todo: move to package SD_Protocols
+############################# package main  todo: move to FHEM::Devices::SIGNALduino::SD_Protocols
 # param #1 is name of definition
 # param #2 is protocol id
 # param #3 is dispatched message to check against
@@ -2038,7 +2040,7 @@ sub SIGNALduino_Parse_MS {
       @bit_msg = @retvalue;
       undef(@retvalue); undef($rcode);
 
-      my $dmsg = lib::SD_Protocols::binStr2hexStr(join '', @bit_msg);
+      my $dmsg = FHEM::Devices::SIGNALduino::SD_Protocols::binStr2hexStr(join '', @bit_msg);
       my $postamble = $hash->{protocolObject}->checkProperty($id,'postamble','');
       $dmsg = $hash->{protocolObject}->checkProperty($id,'preamble','').qq[$dmsg$postamble];
       
@@ -2279,7 +2281,7 @@ sub SIGNALduino_Parse_MU {
         my $bit_length=scalar @bit_msg;
         @bit_msg=(); # clear bit_msg array
 
-        $dmsg = lib::SD_Protocols::binStr2hexStr($dmsg) if ($hash->{protocolObject}->checkProperty($id,'dispatchBin',0) == 0 );
+        $dmsg = FHEM::Devices::SIGNALduino::SD_Protocols::binStr2hexStr($dmsg) if ($hash->{protocolObject}->checkProperty($id,'dispatchBin',0) == 0 );
 
         $dmsg =~ s/^0+//   if (  $hash->{protocolObject}->checkProperty($id,'remove_zero',0) );
 
@@ -4728,7 +4730,7 @@ USB-connected devices (SIGNALduino):<br>
         "IPC::Open3": "0",
         "Symbol": "0",
         "constant": "0",
-        "lib::SD_Protocols": "0",
+        "FHEM::Devices::SIGNALduino::SD_Protocols": "0",
         "FHEM::Core::Timer::Helper": "0",
         "FHEM::Devices::SIGNALduino::SD_CC1101": "0",
         "FHEM::Devices::SIGNALduino::SD_IO": "0",
@@ -4751,7 +4753,7 @@ USB-connected devices (SIGNALduino):<br>
         "IPC::Open3": "0",
         "Symbol": "0",
         "constant": "0",
-        "lib::SD_Protocols": "0",
+        "FHEM::Devices::SIGNALduino::SD_Protocols": "0",
         "strict": "0",
         "warnings": "0",
         "Data::Dumper": "0",

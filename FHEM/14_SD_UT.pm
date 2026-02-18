@@ -3400,7 +3400,7 @@ sub SD_UT_tristate2bin {
     "runtime": {
       "requires": {
         "FHEM": 5.00918623,
-        "lib::SD_Protocols": "0",
+        "FHEM::Devices::SIGNALduino::SD_Protocols": "0",
         "perl": 5.018,
         "strict": "0",
         "warnings": "0"
@@ -3408,7 +3408,7 @@ sub SD_UT_tristate2bin {
     },
     "develop": {
       "requires": {
-        "lib::SD_Protocols": "0",
+        "FHEM::Devices::SIGNALduino::SD_Protocols": "0",
         "strict": "0",
         "warnings": "0"
       }

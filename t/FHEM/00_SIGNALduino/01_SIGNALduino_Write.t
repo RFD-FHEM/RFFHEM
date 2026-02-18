@@ -18,7 +18,7 @@ our %defs;
 InternalTimer(time()+1, sub {
   $mock = Test2::Mock->new(
     track => 1, # enable call tracking if desired
-      class => 'lib::SD_Protocols',
+      class => 'FHEM::Devices::SIGNALduino::SD_Protocols',
       override => [
           PreparingSend_FS20_FHT => sub { 0 },
       ],

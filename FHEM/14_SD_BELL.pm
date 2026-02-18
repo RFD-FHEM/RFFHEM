@@ -45,7 +45,7 @@ package main;
 
 use strict;
 use warnings;
-use lib::SD_Protocols;
+use FHEM::Devices::SIGNALduino::SD_Protocols
 use FHEM::Meta;         # https://wiki.fhem.de/wiki/Meta for SVN Revision
 
 ### HASH for all modul models ###
@@ -603,7 +603,7 @@ sub Attr {
         "FHEM": 5.00918623,
         "FHEM::Meta": 0.001006,
         "GPUtils": 0,
-        "lib::SD_Protocols": "0",
+        "FHEM::Devices::SIGNALduino::SD_Protocols": "0",
         "perl": 5.018,
         "strict": "0",
         "warnings": "0"
@@ -611,7 +611,7 @@ sub Attr {
     },
     "develop": {
       "requires": {
-        "lib::SD_Protocols": "0",
+        "FHEM::Devices::SIGNALduino::SD_Protocols": "0",
         "strict": "0",
         "warnings": "0"
       }
