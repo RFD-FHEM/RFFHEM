@@ -26,6 +26,23 @@ no warnings 'portable';
 
 eval {use Data::Dumper qw(Dumper);1};
 
+use constant HAS_JSON      => defined  eval { require JSON; JSON->import; };
+
+eval {use Scalar::Util qw(looks_like_number);1};
+eval {use Time::HiRes qw(gettimeofday);1} ;
+eval {use FHEM::Core::Timer::Helper;1 } ;
+
+use lib::SD_Protocols;
+use FHEM::Devices::SIGNALduino::SD_Clients;
+use FHEM::Devices::SIGNALduino::SD_Message;
+use FHEM::Devices::SIGNALduino::SD_Matchlist;
+use List::Util qw(first);
+
+#$| = 1;    #Puffern abschalten, Hilfreich fuer PEARL WARNINGS Search
+
+
+
+
 use constant {
   SDUINO_VERSION                  => '4.0.0+20260218',  # Datum wird automatisch bei jedem pull request aktualisiert
   SDUINO_WRITEQUEUE_NEXT          => 0.3,
