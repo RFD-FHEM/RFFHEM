@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 90_SIGNALduino_un.pm 20749 2019-12-14 22:35:00Z Sidey $
+# $Id: 90_SIGNALduino_un.pm 0 2026-02-18 22:40:03Z sidey79 $
 #
 # The file is part of the SIGNALduino project
 # see http://www.fhemwiki.de/wiki/SIGNALduino to support debugging of unknown signal data
@@ -14,7 +14,7 @@ use strict;
 use warnings;
 use POSIX;
 use List::Util qw(any);         # for any function
-use lib::SD_Protocols;          # for any function
+use FHEM::Devices::SIGNALduino::SD_Protocols;          # for any function
 
 my @bitcountlength = (0,0,0);   # array min|default|max
 
@@ -170,7 +170,7 @@ sub SIGNALduino_un_Parse {
     my $hexcount = length($rawData);
     my $bitDataInvert = $bitData;
     $bitDataInvert =~ tr/01/10/;  # invert message and check if it is possible to deocde now
-    my $rawDataInvert = lib::SD_Protocols::binStr2hexStr($bitDataInvert);
+    my $rawDataInvert = FHEM::Devices::SIGNALduino::SD_Protocols::binStr2hexStr($bitDataInvert);
     my $seconds = ReadingsAge($name, 'state', 0);
 
     readingsBeginUpdate($hash);

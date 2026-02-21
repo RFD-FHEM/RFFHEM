@@ -239,7 +239,8 @@ InternalTimer(time()+1, sub {
 	subtest 'test normal hash reloaded correctly' => sub {
 		plan(5);
 
-		my $LoadResult =  $targetHash->{protocolObject}->LoadHash("$attr{global}{modpath}/FHEM/lib/SD_ProtocolData.pm");
+		$LoadResult =  $targetHash->{protocolObject}->LoadHash(qq[./lib/FHEM/Devices/SIGNALduino/SD_Protocols/Data.pm]);
+		
 		is($LoadResult,undef,"load test protocol hash ");
 
 		SIGNALduino_IdList("x:$target","","","");  
