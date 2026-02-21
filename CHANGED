@@ -1,3 +1,6 @@
+2026-02-21 - Merge pull request #1355 from RFD-FHEM/feat/refactorProtocolLibs2
+
+Refactor protocol libs to perl standards (2nd try)
 2026-02-18 - Revert "chore: Renames  SIGNALduino SD Protocols into standard perl libs"
 
 This reverts commit 9ab7af5c7670b45c9e3d304ffca1b645db850bc0.
