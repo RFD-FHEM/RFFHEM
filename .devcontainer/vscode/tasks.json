@@ -9,8 +9,8 @@
             "options": {
                 "cwd": "/opt/fhem/"
             },
-            "command": "prove ${input:proveOptions} -I FHEM -r --exec 'perl fhem.pl -t' ${input:dynamicFHEMModuleFilesRemembered}",
-            "problemMatcher": {
+            "command": "clear; prove ${input:proveOptions} -I FHEM -r --exec 'perl fhem.pl -t' ${input:dynamicFHEMModuleFilesRemembered}",
+            "problemMatcher" : {
                 "owner": "TAP",
                 "fileLocation": "relative",
                 "pattern": [
@@ -36,8 +36,8 @@
             "options": {
                 "cwd": "/opt/fhem/"
             },
-            "command": "prove ${input:proveOptions} -I FHEMM -r --exec 'perl fhem.pl -t' ${workspaceFolder}/t/FHEM/[0-9][0-9]*",
-            "problemMatcher": {
+            "command": "clear; prove ${input:proveOptions} -I FHEMM -r --exec 'perl fhem.pl -t' ${workspaceFolder}/t/FHEM/[0-9][0-9]*",
+            "problemMatcher" : {
                 "owner": "TAP",
                 "fileLocation": "relative",
                 "pattern": [
@@ -60,8 +60,8 @@
         {
             "label": "run prove Perl module files",
             "type": "shell",
-            "command": "prove ${input:proveOptions} --exec 'perl -I lib -I FHEM'  -r ${input:dynamicPERLModuleFilesRemembered}",
-            "problemMatcher": {
+            "command": "clear; prove ${input:proveOptions} --exec 'perl -I lib -I FHEM'  -r ${input:dynamicPERLModuleFilesRemembered}",
+            "problemMatcher" : {
                 "owner": "TAP",
                 "fileLocation": "relative",
                 "pattern": [

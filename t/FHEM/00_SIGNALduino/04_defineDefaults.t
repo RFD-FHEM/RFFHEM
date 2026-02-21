@@ -18,7 +18,6 @@ plan (1);
 subtest 'Check internal defaults ' => sub {
 	plan(5);
 
-	#use lib::SD_Protocols;
 
 	is(InternalVal($name,"DeviceName", undef),"none","check DeviceName");
 	is(InternalVal($name,"DMSG", undef),"nothing","check DMSG");
