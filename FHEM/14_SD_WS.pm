@@ -1336,7 +1336,7 @@ sub SD_WS_Parse {
         # W = wind speed in 1/10 m/s, BCD coded, WWW = 021 => 2.1 m/s.
         # R = rain counter, in 0.1 mm, BCD coded RRRRRR = 010060 => 1006.0 mm
         # T = temperature in 1/10 °C, BCD coded, TTT = 186 => 18.6 °C
-        # B = battery. 0=Ok, 6=Low
+        # B = battery, 1 bit temperature negativ (1=negative), 2 bit battery 00=Ok, 11=Low, 1 bit unknown
         # H = humidity in percent, BCD coded, HH = 65 => 65 %
         # b = brightness, BCD coded, BBBBBB = 059699 => 59.699 klx
         # V = uv, BCD coded, VVV = 058 => 5.8
@@ -1357,7 +1357,7 @@ sub SD_WS_Parse {
         # All others as in 7-in-1 multifunction outdoor sensor
         sensortype => 'Bresser_7in1',
         model      => 'SD_WS_117',
-        prematch   => sub {my $rawData = shift; return 1 if ($rawData =~ /^[0-9A-F]{8}[0-9]{3}[0-9A-F]{3}[0-9]{12}[0-9A-F]{2}[0-9]{16}/); },
+        prematch   => sub {my $rawData = shift; return 1 if ($rawData =~ /^[0-9A-F]{8}[0-9]{3}[0-9A-F]{3}[0-9]{12}[0-9A-F]{2}[0-9]{3}[0-9A-F]{1}[0-9]{11}/); },
         id         => sub {my ($rawData,undef) = @_; return substr($rawData,4,4); },
         winddir    => sub {my ($rawData,undef) = @_;
                             return if (substr($rawData,12,1) ne 'B'); # only weather station
@@ -1406,9 +1406,9 @@ sub SD_WS_Parse {
                             if ($rawTemp > 60) {$rawTemp -= 100};
                             return FHEM::Core::Utils::Math::round($rawTemp,1);
                           },
-        bat        => sub {my ($rawData,undef) = @_;
+        bat        => sub {my ($rawData,$bitData) = @_;
                             return if (substr($rawData,12,1) ne 'B'); # only Bresser_7in1 outdoor sensor
-                            return substr($rawData,31,1) eq '0' ? 'ok' : 'low';
+                            return substr($bitData,125,2) eq '00' ? 'ok' : 'low';
                           },
         hum        => sub {my ($rawData,undef) = @_;
                             return if (substr($rawData,12,1) ne 'B'); # only Bresser_7in1 outdoor sensor
