@@ -1,3 +1,6 @@
+2026-02-22 - Bugfix Bresser 7-in-1 (#1356)
+
+* Bugfix Bresser 7-in-1 batteryState
 2026-02-21 - Merge pull request #1355 from RFD-FHEM/feat/refactorProtocolLibs2
 
 Refactor protocol libs to perl standards (2nd try)
