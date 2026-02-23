@@ -2153,7 +2153,7 @@ sub SD_WS_Parse {
         my $bitData = unpack("B$blen", pack("H$hlen", $rawData));
         my $temptyp = substr($bitData,0,8);
 
-			  Log3 $iohash, 4, "$name: SD_WS_WH2 parse msg $rawData, length $hlen"; # FE9762345341BE
+        Log3 $iohash, 4, "$name: SD_WS_WH2 parse msg $rawData, length $hlen"; # FE9762345341BE
 
         if( $temptyp eq '11111110' ) {
             $rawData = SD_WS_WH2SHIFT($rawData);
