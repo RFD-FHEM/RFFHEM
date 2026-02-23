@@ -1849,6 +1849,7 @@ package FHEM::Devices::SIGNALduino::SD_Protocols::Data;
         filterfunc      => 'SIGNALduino_filterMC',
       },
     "64"  =>  ## Fine Offset Electronics WH2, WH2A Temperature/Humidity sensor
+              # WH2A msg length 56, 14 nibble, 7 byte with checksum:
               # T: 17.4 H: 74   MU;P0=-28888;P1=461;P2=-1012;P3=1440;D=01212121212121232123232123212121232121232323232123212321212123232123232123212323232321212123232323232321212121;CP=1;R=202;
               # T: 28.3 H: 42   MU;P0=-25696;P1=479;P2=-985;P3=1461;D=01212121212121232123232123212121232121232323212323232121232121232321232123212323232323232121212321232321232323;CP=1;R=215;
               # T: 23   H: 64   MU;P0=134;P1=-113;P3=412;P4=-1062;P5=1379;D=01010101013434343434343454345454345454545454345454545454343434545434345454345454545454543454543454345454545434545454345;CP=3;
@@ -1860,12 +1861,12 @@ package FHEM::Devices::SIGNALduino::SD_Protocols::Data;
         one             => [1,-2],
         zero            => [3,-2],
         clockabs        => 490,
-        # reconstructBit  => '1', # ToDo Tests anpassen
+        reconstructBit  => '1',
         clientmodule    => 'SD_WS',
         modulematch     => '^W64*',
         preamble        => 'W64#',
         clientmodule    => 'SD_WS',
-        length_min      => '48',
+        length_min      => '47', # min lenght without reconstructBit
         length_max      => '56',
       },
     "65"  =>  ## Homeeasy
