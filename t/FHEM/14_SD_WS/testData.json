@@ -938,7 +938,7 @@
       "data" : [
          {
             "comment" : "Fine Offset Electronics WH2, WH2A Temperature/Humidity sensor",
-            "dmsg" : "W64#FE97615C94381C",
+            "dmsg" : "W64#FE97615C94381E",
             "internals" : {
                "DEF" : "SD_WS_WH2_0",
                "NAME" : "SD_WS_WH2_0"

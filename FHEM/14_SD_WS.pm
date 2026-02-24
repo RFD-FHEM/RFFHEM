@@ -1,4 +1,4 @@
-# $Id: 14_SD_WS.pm 0 2026-02-13 19:51:49Z elektron-bbs $
+# $Id: 14_SD_WS.pm 0 2026-02-23 15:07:34Z elektron-bbs $
 #
 # The purpose of this module is to support serval
 # weather sensors which use various protocol
@@ -2141,7 +2141,7 @@ sub SD_WS_Parse {
          #* `---- START = 9
          #*
          #*/ 
-        $msg =  substr($msg,0,16);
+
         my (undef ,$rawData) = split("#",$msg);
         my $hlen = length($rawData);
         my $blen = $hlen * 4;
@@ -2151,8 +2151,10 @@ sub SD_WS_Parse {
         my $rr2;
         my $vorpre = -1; 
         my $bitData = unpack("B$blen", pack("H$hlen", $rawData));
-
         my $temptyp = substr($bitData,0,8);
+
+        Log3 $iohash, 4, "$name: SD_WS_WH2 parse msg $rawData, length $hlen"; # FE9762345341BE
+
         if( $temptyp eq '11111110' ) {
             $rawData = SD_WS_WH2SHIFT($rawData);
             $msg = $msg_vor.$rawData;
@@ -2173,27 +2175,45 @@ sub SD_WS_Parse {
         }
 
         if( $temptyp eq '11111111' ) {
-              $vorpre = 8;
-            }else{
-              Log3 $iohash, 4, "$name: SD_WS_WH2_4 Error kein WH2: Typ: $temptyp" ;
-              return "";
-            }
+          $vorpre = 8;
+        } else {
+          Log3 $iohash, 4, "$name: SD_WS_WH2 Error kein WH2: Typ: $temptyp" ;
+          return "";
+        }
+
+        Log3 $iohash, 4, "$name: SD_WS_WH2 parse new $rawData, length $hlen"; # FF4BB11A29A0DF
 
       if (HAS_DigestCRC) {
-      # Digest::CRC loaded and imported successfully
-       Log3 $iohash, 4, "$name: SD_WS_WH2_1 msg: $msg raw: $rawData " ;
-      $rr2 = SD_WS_WH2CRCCHECK($rawData);
-       if ($rr2 == 0 ){
-              # 1.CRC OK 
-              Log3 $iohash, 4, "$name: SD_WS_WH2_1 CRC_OK   : CRC=$rr2 msg: $msg check:".$rawData ;
-            }else{
-               Log3 $iohash, 4, "$name: SD_WS_WH2_4 CRC_Error: CRC=$rr2 msg: $msg check:".$rawData ;
-              return "";
-            }
-     }else {
-        Log3 $iohash, 1, "$name: SD_WS_WH2_3 CRC_not_load: Modul Digest::CRC fehlt" ;
+        # Digest::CRC loaded and imported successfully
+        Log3 $iohash, 4, "$name: SD_WS_WH2_1 msg: $msg raw: $rawData " ;
+        $rr2 = SD_WS_WH2CRCCHECK($rawData);
+        if ($rr2 == 0 ){
+          # 1.CRC OK 
+          Log3 $iohash, 4, "$name: SD_WS_WH2 CRC_OK   : CRC=$rr2 msg: $msg check:".$rawData ;
+        } else {
+          Log3 $iohash, 3, "$name: SD_WS_WH2 CRC_Error: CRC=$rr2 msg: $msg check:".$rawData ;
+          return "";
+        }
+      } else {
+        Log3 $iohash, 1, "$name: SD_WS_WH2 CRC_not_load: Modul Digest::CRC fehlt" ;
         return "";
-     }
+      }
+
+      $modelStat = 'WH2';
+
+      if ($hlen == 14) { # WH2A with checksum
+        my $checksum = 1;
+        for (my $i = 0; $i < 12; $i += 2) {
+          $checksum += hex(substr($rawData, $i, 2));
+        }
+        $checksum &= 0xFF;
+        my $checksum1 = hex(substr($rawData, 12, 2));
+        if ($checksum != $checksum1) {
+          Log3 $name, 3, qq[$name: SD_WS_WH2 Parse msg $rawData - ERROR checksum $checksum != $checksum1];
+          return "";
+        }
+        $modelStat .= 'A';
+      }
 
       $bitData = unpack("B$blen", pack("H$hlen", $rawData)); 
       Log3 $iohash, 4, "$name: converted to bits WH2 " . $bitData;    
@@ -2583,7 +2603,7 @@ sub SD_WS_binaryToNumber {
 #############################
 sub SD_WS_WH2CRCCHECK {
   my $rawData = shift // return;
-  my $datacheck1 = pack( 'H*', substr($rawData,2,length($rawData)-2) );
+  my $datacheck1 = pack( 'H*', substr($rawData,2,10) ); # FE 9762345341 BE
   my $crcmein1 = Digest::CRC->new(width => 8, poly => 0x31);
   my $rr3 = $crcmein1->add($datacheck1)->hexdigest;
   $rr3 = sprintf("%d", hex($rr3));
