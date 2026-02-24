@@ -1,3 +1,9 @@
+2026-02-24 - SD_WS protocol 64 model WH2 add reconstructBit (#1357)
+
+* WH2 add reconstructBit
+* Update 14_SD_WS.pm
+add checksum for model WH2A
+add model for statistics
 2026-02-22 - Bugfix Bresser 7-in-1 (#1356)
 
 * Bugfix Bresser 7-in-1 batteryState
