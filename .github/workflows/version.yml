@@ -161,7 +161,7 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
       - name: Download all modified artifacts
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           path: ${{ github.workspace	}}/artifacts
 
