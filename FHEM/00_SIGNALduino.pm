@@ -1,4 +1,4 @@
-# $Id: 00_SIGNALduino.pm 0 2026-02-18 22:40:03Z sidey79 $
+# $Id: 00_SIGNALduino.pm 0 2026-03-06 20:36:18Z sidey79 $
 # https://github.com/RFD-FHEM/RFFHEM/tree/master
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incoming messages
 # see http://www.fhemwiki.de/wiki/SIGNALDuino
@@ -26,25 +26,8 @@ no warnings 'portable';
 
 eval {use Data::Dumper qw(Dumper);1};
 
-use constant HAS_JSON      => defined  eval { require JSON; JSON->import; };
-
-eval {use Scalar::Util qw(looks_like_number);1};
-eval {use Time::HiRes qw(gettimeofday);1} ;
-eval {use FHEM::Core::Timer::Helper;1 } ;
-
-use FHEM::Devices::SIGNALduino::SD_Protocols;
-use FHEM::Devices::SIGNALduino::SD_Clients;
-use FHEM::Devices::SIGNALduino::SD_Message;
-use FHEM::Devices::SIGNALduino::SD_Matchlist;
-use List::Util qw(first);
-
-#$| = 1;    #Puffern abschalten, Hilfreich fuer PEARL WARNINGS Search
-
-
-
-
 use constant {
-  SDUINO_VERSION                  => '4.0.1+20260218',  # Datum wird automatisch bei jedem pull request aktualisiert
+  SDUINO_VERSION                  => '4.0.1+20260306',  # Datum wird automatisch bei jedem pull request aktualisiert
   SDUINO_INIT_WAIT_XQ             => 1.5,     # wait disable device
   SDUINO_INIT_WAIT                => 2,
   SDUINO_INIT_MAXRETRY            => 3,
@@ -66,7 +49,7 @@ eval {use Scalar::Util qw(looks_like_number);1};
 eval {use Time::HiRes qw(gettimeofday);1} ;
 eval {use FHEM::Core::Timer::Helper;1 } ;
 
-use lib::SD_Protocols;
+use FHEM::Devices::SIGNALduino::SD_Protocols;
 use FHEM::Devices::SIGNALduino::SD_Clients;
 use FHEM::Devices::SIGNALduino::SD_Message;
 use FHEM::Devices::SIGNALduino::SD_Matchlist;
@@ -76,7 +59,6 @@ use FHEM::Devices::SIGNALduino::SD_IO qw( :all );
 use List::Util qw(first);
 
 #$| = 1;    #Puffern abschalten, Hilfreich fuer PEARL WARNINGS Search
-
 #my $debug=0;
 
 our %modules;
