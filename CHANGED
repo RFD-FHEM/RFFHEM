@@ -1,3 +1,6 @@
+2026-03-07 - Merge pull request #1360 from RFD-FHEM/feat/restructure_1-clean
+
+Final cleanup: Decompose non pure FHEM Module subs from SIGNALduino into seperate perl packages
 2026-02-24 - SD_WS protocol 64 model WH2 add reconstructBit (#1357)
 
 * WH2 add reconstructBit
