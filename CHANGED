@@ -1,3 +1,7 @@
+2026-03-22 - Bugfix SD_WS  Sanity checks (#1362)
+
+* Bugfix SD_WS Sanity checks
+* test(sd_ws): add regression test for sanity check reading age
 2026-03-07 - Merge pull request #1360 from RFD-FHEM/feat/restructure_1-clean
 
 Final cleanup: Decompose non pure FHEM Module subs from SIGNALduino into seperate perl packages
