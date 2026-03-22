@@ -2366,7 +2366,7 @@ sub SD_WS_Parse {
 
   # Sanity checks
   if($def && $protocol ne '106' && $protocol ne '113' && $protocol ne '122') { # not forBBQ temperature sensor GT-TMBBQ-01s, Wireless Grill Thermometer GFGT 433 B1 and TM40
-    my $timeSinceLastUpdate = abs(ReadingsAge($name, 'state', 0));
+    my $timeSinceLastUpdate = abs(ReadingsAge($name, 'temperature', 0));
     # temperature
     my $oldTemp = ReadingsVal($name, 'temperature', undef);
     if (defined $oldTemp && defined $temp) {
@@ -2383,6 +2383,7 @@ sub SD_WS_Parse {
       }
     }
     # humidity
+    $timeSinceLastUpdate = abs(ReadingsAge($name, 'humidity', 0));
     my $oldHum = ReadingsVal($name, 'humidity', undef);
     if (defined $oldHum && defined $hum) {
       my $maxdeviation = AttrVal($name, "max-deviation-hum", 1);        # default 1 %
