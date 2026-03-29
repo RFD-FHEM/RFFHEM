@@ -4722,7 +4722,7 @@ USB-connected devices (SIGNALduino):<br>
         "FHEM::Core::Timer::Helper": "0",
         "FHEM::Devices::SIGNALduino::SD_CC1101": "0",
         "FHEM::Devices::SIGNALduino::SD_IO": "0",
-        "FHEM::Devices::SIGNALduino::SD_UTILS": "0",
+        "FHEM::Devices::SIGNALduino::SD_Utils": "0",
         "strict": "0",
         "warnings": "0",
         "Time::HiRes": "0",
