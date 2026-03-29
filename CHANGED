@@ -1,3 +1,6 @@
+2026-03-29 - little fix meta in 00_SIGNALduino.pm (#1365)
+
+* little fix in META  (SD_UTILS -> SD_Utils)
 2026-03-22 - Bugfix SD_WS  Sanity checks (#1362)
 
 * Bugfix SD_WS Sanity checks
