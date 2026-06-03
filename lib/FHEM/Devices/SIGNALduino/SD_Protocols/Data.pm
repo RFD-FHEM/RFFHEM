@@ -1,4 +1,4 @@
-# $Id: SD_ProtocolData.pm 0 2026-02-13 19:51:49Z elektron-bbs $
+# $Id: SD_ProtocolData.pm 0 2026-06-03 15:51:49Z elektron-bbs $
 # The file is part of the SIGNALduino project.
 # All protocol definitions are contained in this file.
 #
@@ -85,7 +85,7 @@ package FHEM::Devices::SIGNALduino::SD_Protocols::Data;
   use strict;
   use warnings;
 
-  our $VERSION = '1.60';
+  our $VERSION = '1.61';
   our %protocols = (
     "0" =>  ## various weather sensors (500 | 9100)
             # Mebus | Id:237 Ch:1 T: 1.9 Bat:low           MS;P0=-9298;P1=495;P2=-1980;P3=-4239;D=1012121312131313121313121312121212121212131212131312131212;CP=1;SP=0;R=223;O;m2;
@@ -760,7 +760,7 @@ package FHEM::Devices::SIGNALduino::SD_Protocols::Data;
               # RCnoName20_10_3E00 fan_stop   MU;P0=184;P1=-380;P2=128;P3=-9090;P4=-768;P5=828;P6=-238;P7=298;D=45656565656747474747474747474747474567474560404515124040451040374745656565656747474747474747474747474567474567474565674747456747374745656565656747474747474747474747474567474567474565674747456747374745656565656747474747474747474747474567474567474565674747;CP=7;O;
       {
         name         => 'RCnoName20',
-        comment      => 'Remote control with 4, 9, 10, 12 or 14 buttons',
+        comment      => 'Remote control with 4, 9, 10, 12, 14 or 15 buttons',
         id           => '20.1',
         knownFreqs   => '433.92',
         one          => [3,-1],  # 720,-240
@@ -773,6 +773,26 @@ package FHEM::Devices::SIGNALduino::SD_Protocols::Data;
         modulematch  => '^P20#.{8}',
         length_min   => '31',
         length_max   => '32',
+      },
+    "20.2" => ## Remote control CREATE 6601L with 14 buttons for ceiling fan with lighting
+              # https://forum.fhem.de/index.php?msg=1364536 @ Kai-Alfonso 2026-06-02
+              # CREATE_6601L_FB684 light_on_off   MS;P1=-303;P2=701;P3=298;P4=-713;P5=-7444;D=352121212121342121342121342134343434213434213434213421342121343434252121212121342121342121342134343434213434213434213421342121343434;CP=3;SP=5;R=65;O;m2;
+              # CREATE_6601L_FB684 fan_2          MS;P2=698;P4=310;P5=-690;P6=-304;P7=-7448;D=472626262626452626452626452645454545264545264545454545262626262626272626262626452626452626452645454545264545264545454545262626262626;CP=4;SP=7;R=51;O;m2;
+      {
+        name            => 'RCnoName20',
+        comment         => 'Remote control with 4, 9, 10, 12, 14 or 15 buttons',
+        id              => '20.2',
+        knownFreqs      => '433.92',
+        one             => [2.3,-1], # 690,-300
+        zero            => [1,-2.3], # 300,-690
+        sync            => [1,-25],  # 300,-7500
+        clockabs        => 300,
+        format          => 'twostate',
+        preamble        => 'P20#',
+        clientmodule    => 'SD_UT',
+        modulematch     => '^P20#.{8}',
+        length_min      => '32',
+        length_max      => '32',
       },
     "21"  =>  ## Einhell Garagentor
               # https://forum.fhem.de/index.php?topic=42373.0 @Ellert | user have no RAWMSG
