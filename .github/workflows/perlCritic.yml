@@ -11,7 +11,7 @@ jobs:
     if: github.event_name == 'pull_request'
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
     - uses: shogo82148/actions-setup-perl@v1.41.1
       with:
         perl-version: 5.32
