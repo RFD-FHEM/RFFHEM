@@ -18,7 +18,7 @@ jobs:
         perl: ${{ fromJson(vars.PERL_VERSIONS) }}
     name: Perl ${{ matrix.perl }} on ${{ matrix.os }}
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
     - uses: shogo82148/actions-setup-perl@v1.41.1
       with:
         perl-version: ${{ matrix.perl }}
@@ -69,7 +69,7 @@ jobs:
           - other_modules
     name: FHEM ${{ matrix.perl }} / ${{ matrix.testdir }}
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
     - uses: shogo82148/actions-setup-perl@v1.41.1
       with:
         perl-version: ${{ matrix.perl }}
