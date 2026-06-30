@@ -146,6 +146,75 @@ On a raspberry pi it is done via
 
 ```sudo apt-get install avrdude```
 
+Development container
+======
+
+This repository includes a VS Code Dev Container setup in `.devcontainer/`.
+
+To start it from VS Code:
+
+1. Open this repository folder in VS Code.
+2. Open the command palette.
+3. Run `Dev Containers: Rebuild and Reopen in Container`.
+
+To start the same stack manually with Docker Compose:
+
+```bash
+docker compose \
+  -f .devcontainer/compose.yml \
+  -f .devcontainer/compose.override.yml \
+  -f .devcontainer/compose.local.yml \
+  -f .devcontainer/compose.addon-svn.yml \
+  up -d
+```
+
+To start the main stack without the optional SVN add-on:
+
+```bash
+docker compose \
+  -f .devcontainer/compose.yml \
+  -f .devcontainer/compose.override.yml \
+  -f .devcontainer/compose.local.yml \
+  up -d
+```
+
+To open a Bash shell as the development user in the running container:
+
+```bash
+docker compose \
+  -f .devcontainer/compose.yml \
+  -f .devcontainer/compose.override.yml \
+  -f .devcontainer/compose.local.yml \
+  -f .devcontainer/compose.addon-svn.yml \
+  exec --user dev fhem-dev bash
+```
+
+Before using the SVN workspace, run the checkout task from inside the container:
+
+```bash
+bash .devcontainer/scripts/svn-checkout.sh
+```
+
+This fills `/workspace/fhem-svn/fhem`. The mounted host directory is `../fhem/fhem-svn` next to this repository and must be writable by the container user. If it was created as `root`, fix ownership on the host first, for example:
+
+```bash
+sudo chown -R "$USER:$USER" ../fhem/fhem-svn
+```
+
+FHEMWEB runs in the `fhem-dev` service on container port `8083`. When started
+manually, inspect the assigned host port with:
+
+```bash
+docker compose \
+  -f .devcontainer/compose.yml \
+  -f .devcontainer/compose.override.yml \
+  -f .devcontainer/compose.local.yml \
+  -f .devcontainer/compose.addon-svn.yml \
+  port fhem-dev 8083
+```
+
+More details are documented in `.devcontainer/README.md`.
+
 More Information
 =====
 Look at the FHEM Wiki, for more Information: http://www.fhemwiki.de/wiki/SIGNALDuino
