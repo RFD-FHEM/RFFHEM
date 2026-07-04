@@ -1,9 +1,9 @@
-2026-07-04 - Release 4.0.0
+2026-07-04 - Release 4.0.1
 
-Release 4.0.0 since version 3.5.6
+Release 4.0.1 since version 3.5.6
 
     00_SIGNALduino.pm
-        change: module version set to 4.0.0
+        change: module version set to 4.0.1
         change: SIGNALduino internals moved into separate Perl packages
         change: dispatch, clients, matchlist, message handling, IO, logger, CC1101 and utility code refactored
         feature: WMBus dispatch support extended
