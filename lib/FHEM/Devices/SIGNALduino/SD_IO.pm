@@ -1,3 +1,7 @@
+# $Id: SD_IO.pm 0 2026-01-10 15:36:13Z sidey79 $
+# The file is part of the SIGNALduino project.
+# Client functions for SIGNALduino device.
+
 package FHEM::Devices::SIGNALduino::SD_IO;
 
 use strict;

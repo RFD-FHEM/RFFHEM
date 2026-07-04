@@ -27,7 +27,7 @@ no warnings 'portable';
 eval {use Data::Dumper qw(Dumper);1};
 
 use constant {
-  SDUINO_VERSION                  => '4.0.1+20260306',  # Datum wird automatisch bei jedem pull request aktualisiert
+  SDUINO_VERSION                  => '4.0.0',  # Datum wird automatisch bei jedem pull request aktualisiert
   SDUINO_INIT_WAIT_XQ             => 1.5,     # wait disable device
   SDUINO_INIT_WAIT                => 2,
   SDUINO_INIT_MAXRETRY            => 3,
@@ -4796,7 +4796,7 @@ USB-connected devices (SIGNALduino):<br>
       "web": "https://wiki.fhem.de/wiki/SIGNALduino"
     }
   },
-  "version": "v4.0.1"
+  "version": "v4.0.0"
 }
 =end :application/json;q=META.json
 =cut
