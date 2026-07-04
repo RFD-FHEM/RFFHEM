@@ -15,7 +15,7 @@ use strict;
 use warnings;
 use Storable qw(dclone); 
 use FHEM::Core::Utils::Math;
-#use version 0.77; our $VERSION = version->declare('v4.0.0');
+#use version 0.77; our $VERSION = version->declare('v4.0.1');
 
 my $missingModulSIGNALduino = ' ';
 
