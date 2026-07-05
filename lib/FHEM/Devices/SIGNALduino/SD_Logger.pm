@@ -1,4 +1,4 @@
-# $Id: Logger.pm 0 2026-01-10 15:36:13Z sidey79 $
+# $Id: SD_Logger.pm 0 2026-01-10 15:36:13Z sidey79 $
 # The file is part of the SIGNALduino project.
 # Logging helper functions for Packages in FHEM::Devices::SD.
 

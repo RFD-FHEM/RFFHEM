@@ -1,4 +1,4 @@
-# $Id: 00_SIGNALduino.pm 0 2026-03-06 20:36:18Z sidey79 $
+# $Id: 00_SIGNALduino.pm 0 2026-07-04 21:57:54Z sidey79 $
 # https://github.com/RFD-FHEM/RFFHEM/tree/master
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incoming messages
 # see http://www.fhemwiki.de/wiki/SIGNALDuino
@@ -15,7 +15,7 @@ use strict;
 use warnings;
 use Storable qw(dclone); 
 use FHEM::Core::Utils::Math;
-#use version 0.77; our $VERSION = version->declare('v4.0.0');
+#use version 0.77; our $VERSION = version->declare('v4.0.1');
 
 my $missingModulSIGNALduino = ' ';
 
@@ -27,7 +27,7 @@ no warnings 'portable';
 eval {use Data::Dumper qw(Dumper);1};
 
 use constant {
-  SDUINO_VERSION                  => '4.0.1+20260306',  # Datum wird automatisch bei jedem pull request aktualisiert
+  SDUINO_VERSION                  => '4.0.1+20260704',  # Datum wird automatisch bei jedem pull request aktualisiert
   SDUINO_INIT_WAIT_XQ             => 1.5,     # wait disable device
   SDUINO_INIT_WAIT                => 2,
   SDUINO_INIT_MAXRETRY            => 3,
