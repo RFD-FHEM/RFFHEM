@@ -1,4 +1,4 @@
-# $Id: 14_SD_WS.pm 0 2026-02-23 15:07:34Z elektron-bbs $
+# $Id: 14_SD_WS.pm 0 2026-07-12 09:24:40Z elektron-bbs $
 #
 # The purpose of this module is to support serval
 # weather sensors which use various protocol
@@ -1685,13 +1685,13 @@ sub SD_WS_Parse {
         #        Nibble: 01 23 45 67 89 01 23 45 67 89 01 23 45 67 
         # aa aa aa 2d d4 40 01 1C DF 8F 00 00 97 62 20 A6 80 28 01       -> ID  0x11cdf
         #                40 01 3E 3C 90 00 00 10 5B A0 2A                -> ID: 0x13e3c
-        #                FF II II II BB RR RR XX AA ?? ?? ?? ?? ?? ?? ??
+        #                FF II II II BB RR RR XX SS ?? ?? ?? ?? ?? ?? ??
         # FF:   Family code always 0x40
         # II:   ID (1 byte)
         # BB:   Voltage of battery is representey by last 5 bits; voltage / 10 => 0F = 15 = 1.5v    Not all models have battery reporting. Firest seen in late 2022
         # RR:   the rain bucket tip count => 0.1mm increments
-        # XX:   CRC8 of the preceding 5 bytes (Polynomial 0x31, Initial value 0x00, Input not reflected, Result not reflected)
-        # SS:   Sum-8 of the preceding 5 bytes 
+        # XX:   CRC8 of the preceding 7 bytes (Polynomial 0x31, Initial value 0x00, Input not reflected, Result not reflected)
+        # SS:   Sum-8 of the preceding 8 bytes 
         # ??:   Unknown Data
         sensortype      => 'WH40',
         model           => 'SD_WS_126_R',
