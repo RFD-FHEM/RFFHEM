@@ -1,3 +1,7 @@
+2026-07-16 - Correction of message length – Protocol 126 (#1383)
+
+Correction of message length – Protocol 126
+Minor corrections to the documentation
 2026-07-05 - Merge pull request #1381 from RFD-FHEM/release/4.0.1
 
 Release/4.0.1
