@@ -360,7 +360,7 @@ sub SIGNALduino_githubParseHttpResponse {
           my $set_return = main::SIGNALduino_Set($hash,$name,'flash',$asset->{browser_download_url}); # $hash->{SetFn
           if(defined($set_return))
           {
-            $hash->{logMethod}->(og3 $name, 3, "$name: githubParseHttpResponse, Error while trying to download firmware: $set_return");
+            $hash->{logMethod}->($name, 3, "$name: githubParseHttpResponse, Error while trying to download firmware: $set_return");
           }
           last;
         }

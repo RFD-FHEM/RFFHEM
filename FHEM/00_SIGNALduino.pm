@@ -373,59 +373,6 @@ sub SIGNALduino_Set_raw {
 }
 
 ############################# package main
- sub SIGNALduino_Set_flash {
-  my ($hash, @a) = @_;
-  my $name = $hash->{NAME};
-  return "Please define your hardware! (attr $name hardware <model of your receiver>) " if (AttrVal($name,'hardware','') eq '');
-
-  my @args = @a[1..$#a];
-  return 'ERROR: argument failed! flash [hexFile|url]' if (!$args[0]);
-
-  my %http_param = (
-    timeout    => 5,
-    hash       => $hash,                                                     # Muss gesetzt werden, damit die Callback funktion wieder $hash hat
-    method     => 'GET',                                                     # Lesen von Inhalten
-    header     => "User-Agent: perl_fhem\r\nAccept: application/json",       # Den Header gemaess abzufragender Daten aendern
-  );
-
-  my $hexFile = '';
-  if( ( exists $hash->{additionalSets}{flash} ) && ( grep $args[0] eq $_ , split(',',$hash->{additionalSets}{flash}) ) )
-  {
-    $hash->{logMethod}->($hash, 3, "$name: Set_flash, $args[0] try to fetch github assets for tag $args[0]");
-    my $ghurl = "https://api.github.com/repos/RFD-FHEM/SIGNALDuino/releases/tags/$args[0]";
-    $hash->{logMethod}->($hash, 3, "$name: Set_flash, $args[0] try to fetch release $ghurl");
-
-    $http_param{url}        = $ghurl;
-    $http_param{callback}   = \&SIGNALduino_githubParseHttpResponse;  # Diese Funktion soll das Ergebnis dieser HTTP Anfrage bearbeiten
-    $http_param{command}    = 'getReleaseByTag';
-    HttpUtils_NonblockingGet(\%http_param);                         # Starten der HTTP Abfrage. Es gibt keinen Return-Code.
-    return;
-  } elsif ($args[0] =~ m/^https?:\/\// ) {
-    $http_param{url}        = $args[0];
-    $http_param{callback}   = \&SIGNALduino_ParseHttpResponse;        # Diese Funktion soll das Ergebnis dieser HTTP Anfrage bearbeiten
-    $http_param{command}    = 'flash';
-    HttpUtils_NonblockingGet(\%http_param);
-    return;
-  } else {
-    $hexFile = $args[0];
-  }
-  $hash->{logMethod}->($name, 3, "$name: Set_flash, filename $hexFile provided, trying to flash");
-
-  # Only for Arduino , not for ESP
-  my $hardware = AttrVal($name,'hardware','');
-  if ($hardware =~ m/(?:nano|mini|radino)/)
-  {
-    return SIGNALduino_PrepareFlash($hash,$hexFile);
-  } else {
-    if (defined $FW_wname)
-    {
-      FW_directNotify("FILTER=$name", "#FHEMWEB:$FW_wname", "FW_okDialog('<u>ERROR:</u><br>Sorry, flashing your $hardware is currently not supported.<br>The file is only downloaded in /opt/fhem/FHEM/firmware.')", '');
-    }
-    return "Sorry, Flashing your $hardware via Module is currently not supported.";    # processed in tests
-  }
-}
-
-############################# package main
 sub SIGNALduino_Set_reset
 {
   my $hash = shift;
