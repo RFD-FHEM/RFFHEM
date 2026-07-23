@@ -15,8 +15,13 @@ InternalTimer(time()+1, sub {
 	my $mock = Test2::Mock->new(
 		track => 1,
 		class => 'main'
-	);	 	
+	);
 	my $tracking = $mock->sub_tracking;
+	my $firmwareMock = Test2::Mock->new(
+		track => 1,
+		class => 'FHEM::Devices::SIGNALduino::SD_Firmware'
+	);
+	my $firmwareTracking = $firmwareMock->sub_tracking;
 
     plan(6);
     subtest 'check error returns' => sub {
@@ -51,38 +56,38 @@ InternalTimer(time()+1, sub {
 
     subtest 'verify SIGNALduino_PrepareFlash is called correctly' => sub {
         plan(4);
-        $mock->override('SIGNALduino_PrepareFlash');
+        $firmwareMock->override('SIGNALduino_PrepareFlash');
         for my $hardware (qw/nanocc1101 nano328 promini radinocc1101/)
         {
             subtest $hardware => sub {
                 plan(3);
-                $mock->clear_sub_tracking();
+                $firmwareMock->clear_sub_tracking();
                 CommandAttr(undef,"$target hardware $hardware");
                 my $ret = SIGNALduino_Set_flash($targetHash, 'flash', './fhem/test.hex');
-                is(scalar @{$tracking->{SIGNALduino_PrepareFlash}},1,'SIGNALduino_PrepareFlash called');
-                is( $tracking->{SIGNALduino_PrepareFlash}[0]{args}[1], './fhem/test.hex', "check correct hexfilename" );
+                is(scalar @{$firmwareTracking->{SIGNALduino_PrepareFlash}},1,'SIGNALduino_PrepareFlash called');
+                is( $firmwareTracking->{SIGNALduino_PrepareFlash}[0]{args}[1], './fhem/test.hex', "check correct hexfilename" );
                 is($ret, U(), "check return value for $hardware");
             }
         }
-        $mock->restore('SIGNALduino_PrepareFlash');
+        $firmwareMock->restore('SIGNALduino_PrepareFlash');
     };
 
     subtest 'verify SIGNALduino_PrepareFlash is called for not existing version' => sub {
         plan(3);
         my $hardware = 'nanocc1101';
         $targetHash->{additionalSets}{flash} = '3.4.1,4.2.1';
-        $mock->clear_sub_tracking();
+        $firmwareMock->clear_sub_tracking();
 
-        $mock->override('SIGNALduino_PrepareFlash');
+        $firmwareMock->override('SIGNALduino_PrepareFlash');
         CommandAttr(undef, "$target hardware $hardware");
 
         my $ret = SIGNALduino_Set_flash($targetHash, 'flash', '3.4');
         is($ret, U(), "check return value for $hardware");
 
-        is(scalar @{$tracking->{SIGNALduino_PrepareFlash}},1,'SIGNALduino_PrepareFlash called');
-        is( $tracking->{SIGNALduino_PrepareFlash}[0]{args}[1], '3.4', "check provided hexfilename" );
+        is(scalar @{$firmwareTracking->{SIGNALduino_PrepareFlash}},1,'SIGNALduino_PrepareFlash called');
+        is( $firmwareTracking->{SIGNALduino_PrepareFlash}[0]{args}[1], '3.4', "check provided hexfilename" );
 
-        $mock->restore('SIGNALduino_PrepareFlash');
+        $firmwareMock->restore('SIGNALduino_PrepareFlash');
     };
 
     subtest 'verify HttpUtils_NonblockingGet is called for existing version' => sub {
