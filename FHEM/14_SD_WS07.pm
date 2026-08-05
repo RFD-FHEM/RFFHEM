@@ -66,13 +66,9 @@ SD_WS07_Define
         if(int(@a) < 3 );
 
   $hash->{CODE} = $a[2];
-  $hash->{lastMSG} =  "";
-  $hash->{bitMSG} =  "";
 
   $modules{SD_WS07}{defptr}{$a[2]} = $hash;
-  $hash->{STATE} = "Defined";
   
-  my $name= $hash->{NAME};
   return undef;
 }
 
