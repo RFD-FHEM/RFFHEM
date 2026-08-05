@@ -1,3 +1,7 @@
+2026-08-05 - Internal variable STATE should not be set in Define. (#1386)
+
+* Update 14_SD_WS07.pm
+Removed some settings in "Define".
 2026-07-16 - Correction of message length – Protocol 126 (#1383)
 
 Correction of message length – Protocol 126
