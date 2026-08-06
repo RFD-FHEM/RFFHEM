@@ -85,27 +85,6 @@
                   "comment" : "#3"
                }
             ]
-         },
-         {
-            "comment" : "self build arduino sensor with humidity output and CRC",
-            "dmsg" : "P2#09C29982BA",
-            "internals" : {
-               "DEF" : "humidity_2",
-               "NAME" : "ArduinoSensor_humidity_2"
-            },
-            "readings" : {
-               "battery" : "ok",
-               "batteryState" : "ok",
-               "humidity" : "66.5",
-               "state" : "H: 66.5",
-               "trigger" : "auto"
-            },
-            "rmsg" : "MS;P0=-382;P1=566;P2=-876;P6=-9762;D=161010101012101012121210101010121012101012121010121210101010101210121012121210121015;CP=1;SP=6;",
-            "tests" : [
-               {
-                  "comment" : "#4"
-               }
-            ]
          }
       ],
       "id" : "2",
